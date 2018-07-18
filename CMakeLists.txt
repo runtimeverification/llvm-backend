@@ -25,6 +25,8 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(LLVM_BUILD_TOOLS ON)
 
 find_package(ZLIB REQUIRED)
+find_package(BISON)
+find_package(FLEX)
 
 option(USE_CLANG_WERROR_FLAGS OFF)
 if (USE_CLANG_WERROR_FLAGS)
@@ -50,10 +52,14 @@ macro(add_kllvm_library name)
   )
 endmacro(add_kllvm_library name)
 
-install(DIRECTORY include/kllvm
+# Auto-generated header path
+set(KLLVM_AUTOGEN_INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR}/include)
+include_directories(${KLLVM_AUTOGEN_INCLUDE_DIR})
+
+install(DIRECTORY include/kllvm ${KLLVM_AUTOGEN_INCLUDE_DIR}/kllvm
   DESTINATION include
   COMPONENT kllvm-headers
-  FILES_MATCHING PATTERN "*.h"
+  FILES_MATCHING PATTERN "*.h" PATTERN "*.hh"
 )
 
 add_subdirectory(lib)
