@@ -26,3 +26,9 @@
 *.exe
 *.out
 *.app
+
+# Vim stuff
+*.swp
+
+# Build directory
+build/
