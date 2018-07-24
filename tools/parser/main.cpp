@@ -1,5 +1,7 @@
 #include "kllvm/parser/KOREScanner.h"
+#include "kllvm/parser/KOREParserDriver.h"
 
+using namespace kllvm;
 using namespace kllvm::parser;
 
 int main (int argc, char **argv) {
@@ -9,12 +11,15 @@ int main (int argc, char **argv) {
   }
  
   KOREScanner scanner(argv[1]);
-  KOREParser parser(scanner);
+  KOREParserDriver driver;
+  KOREDefinition *definition;
+  KOREParser parser(scanner, driver, &definition);
 
 #if YYDEBUG
   parser.set_debug_level(1);
 #endif
 
-  return parser.parse();
+  parser.parse();
+  definition->print(std::cout);
   return 0;
 }

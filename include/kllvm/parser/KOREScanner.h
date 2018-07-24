@@ -23,4 +23,4 @@ private:
 } // end namespace parser
 } // end namespace kllvm
 
-#endif
+#endif // KORESCANNER_H

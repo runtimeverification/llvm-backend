@@ -49,6 +49,7 @@ set(LLVM_REQUIRES_EH ON)
 add_kllvm_library(Parser
   KOREScanner.cpp
   KOREParser.cpp
+  KOREParserDriver.cpp
 
   ${BISON_AUTOGEN_INCLUDE_DIR}/KOREParser.hh
   ${BISON_AUTOGEN_INCLUDE_DIR}/location.hh
