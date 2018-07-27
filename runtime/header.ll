@@ -25,8 +25,8 @@
 ; list: %list
 ; set: %set
 ; array: %list
-; integer: %mpz
-; float: %mpfr
+; integer: %mpz *
+; float: %mpfr *
 ; string: %string *
 ; bytes: %string *
 ; string buffer: %string **
@@ -52,12 +52,12 @@
 ; iN: noop, do not follow
 ; %list, %map, %set: noop, follow
 ; %block *: managed heap, follow
-; %mpz: mpz_init/mpz_clear, do not follow
-; %mpfr: mpfr_init2/mpfr_clear, do not follow
+; %mpz *: malloc->mpz_init/free->mpz_clear, do not follow
+; %mpfr *: malloc->mpfr_init2/free->mpfr_clear, do not follow
 ; %string **: malloc->malloc/free->free, do not follow
 
 ; We also automatically generate for each unique layout id a struct type
 ; corresponding to the actual layout of that block. For example, if we have
 ; the symbol symbol foo{Map{}, Int{}, Exp{}} : Exp{}, we would generate the type:
 
-; %layoutN = type { %blockheader, [0 x i64 *], %map, %mpz, %block * }
+; %layoutN = type { %blockheader, [0 x i64 *], %map, %mpz *, %block * }
