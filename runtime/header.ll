@@ -49,7 +49,8 @@
 ; during gc. Roughly speaking, the following rules apply:
 
 ; %string *: malloc/free, do not follow
-; iN, %list, %map, %set: noop, do not follow
+; iN: noop, do not follow
+; %list, %map, %set: noop, follow
 ; %block *: managed heap, follow
 ; %mpz: mpz_init/mpz_clear, do not follow
 ; %mpfr: mpfr_init2/mpfr_clear, do not follow
