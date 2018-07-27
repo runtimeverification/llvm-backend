@@ -20,18 +20,18 @@
 
 ; token: %string *
 ; symbol with 0 arguments: i32
-; symbol with 1 or more arguments: %block A
-; map: %map *
-; list: %list *
-; set: %set *
-; array: %list *
-; integer: %mpz *
-; float: %mpfr *
+; symbol with 1 or more arguments: %block *
+; map: %map
+; list: %list
+; set: %set
+; array: %list
+; integer: %mpz
+; float: %mpfr
 ; string: %string *
 ; bytes: %string *
 ; string buffer: %string **
 ; boolean: i1
-; machine integer of N bits: iN *
+; machine integer of N bits: iN
 
 ; We also define the following LLVM structure types:
 
@@ -41,17 +41,22 @@
 %list = type { i64, i32, i8 *, i8 * } ; immer::flex_vector
 %set = type { i8 *, i64 } ; immer::set
 %map = type { i8 *, i64 } ; immer::map
-%block = type { i8, i16, i32, [0 x i64 *] } ; length, layout, symbol, children
+%blockheader = type { i8, i16, i32 } // length in words, layout, symbol
+%block = type { %blockheader, [0 x i64 *] } ; header, children
 
 ; The layout of a block uniquely identifies the categories of its children as
 ; well as how to allocate/deallocate them and whether to follow their pointers
 ; during gc. Roughly speaking, the following rules apply:
 
 ; %string *: malloc/free, do not follow
-; iN: noop, do not follow
-; %block *, %list *, %set *, %map *: managed heap, follow
-; %mpz *: malloc->mpz_init/mpz_clear->free, do not follow
-; %mpfr *: malloc->mpfr_init2/mpfr_clear->free, do not follow
+; iN, %list, %map, %set: noop, do not follow
+; %block *: managed heap, follow
+; %mpz: mpz_init/mpz_clear, do not follow
+; %mpfr: mpfr_init2/mpfr_clear, do not follow
 ; %string **: malloc->malloc/free->free, do not follow
-; iN *: malloc/free, do not follow
 
+; We also automatically generate for each unique layout id a struct type
+; corresponding to the actual layout of that block. For example, if we have
+; the symbol symbol foo{Map{}, Int{}, Exp{}} : Exp{}, we would generate the type:
+
+; %layoutN = type { %blockheader, [0 x i64 *], %map, %mpz, %block * }
