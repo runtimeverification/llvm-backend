@@ -52,8 +52,8 @@
 ; iN: noop, do not follow
 ; %list, %map, %set: noop, follow
 ; %block *: managed heap, follow
-; %mpz *: malloc->mpz_init/free->mpz_clear, do not follow
-; %mpfr *: malloc->mpfr_init2/free->mpfr_clear, do not follow
+; %mpz *: malloc->mpz_init/mpz_clear->free, do not follow
+; %mpfr *: malloc->mpfr_init2/mpfr_clear->free, do not follow
 ; %string **: malloc->malloc/free->free, do not follow
 
 ; We also automatically generate for each unique layout id a struct type
