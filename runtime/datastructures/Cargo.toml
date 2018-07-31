@@ -1,0 +1,11 @@
+[package]
+name = "datastructures"
+version = "0.1.0"
+authors = ["Dwight Guth <dwight.guth@runtimeverification.com>"]
+
+[dependencies]
+im = { path = "../../../im-rs" }
+
+[lib]
+name = "datastructures"
+crate-type = ["dylib"]
