@@ -5,6 +5,7 @@ authors = ["Dwight Guth <dwight.guth@runtimeverification.com>"]
 
 [dependencies]
 im = { path = "../../../im-rs" }
+libc = "0.2.42"
 
 [lib]
 name = "datastructures"
