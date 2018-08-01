@@ -27,17 +27,13 @@ pub unsafe extern "C" fn hook_MAP_unit(result: *mut Map) -> bool {
 #[no_mangle]
 pub unsafe extern "C" fn hook_MAP_concat(result: *mut Map, m1: *const Map, m2: *const Map) -> bool {
   let mut status = true;
-  let tmp = (*m1).clone().union_with((*m2).clone(), |v1, _| { status = false; v1 });
-  if status {
-    *result = tmp;
-  }
+  *result = (*m1).clone().union_with((*m2).clone(), |v1, _| { status = false; v1 });
   status
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_MAP_lookup(result: *mut K, m: *const Map, key: K) -> bool {
-  let val = (*m).get(&key);
-  match val {
+  match (*m).get(&key) {
     Some(v) => { *result = *v; true }
     None => false
   }
