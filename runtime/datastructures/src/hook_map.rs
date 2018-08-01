@@ -304,9 +304,9 @@ mod tests {
     let mut result = false;
     unsafe {
       assert!(hook_MAP_element(map, DUMMY0, DUMMY0));
-      assert!(hook_MAP_in_keys(&mut result as *mut bool, DUMMY0, map));
+      assert!(hook_MAP_in_keys(&mut result, DUMMY0, map));
       assert!(result);
-      assert!(hook_MAP_in_keys(&mut result as *mut bool, DUMMY1, map));
+      assert!(hook_MAP_in_keys(&mut result, DUMMY1, map));
       assert!(!result);
       free_map(map);
     }
