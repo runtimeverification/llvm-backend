@@ -134,7 +134,7 @@ mod tests {
 
   use decls::testing::*;
   use hook_map::*;
-  use hook_set::{alloc_set,free_set};
+  use hook_set::tests::{alloc_set,free_set};
   use hook_list::tests::{alloc_list,free_list};
 
   pub unsafe fn alloc_map() -> *mut Map {
@@ -388,8 +388,8 @@ mod tests {
       let m1 = alloc_map();
       let m2 = alloc_map();
       let set = alloc_set();
+      ptr::write(set, Set::singleton(DUMMY0));
       assert!(hook_MAP_element(m1, DUMMY0, DUMMY0));
-      (*set).insert(DUMMY0);
       assert!(hook_MAP_removeAll(m2, m1, set));
       let result = alloc_int();
       assert!(hook_MAP_size(result, m2));
