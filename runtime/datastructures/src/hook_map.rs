@@ -42,8 +42,7 @@ pub unsafe extern "C" fn hook_MAP_lookup(result: *mut K, m: *const Map, key: K) 
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_MAP_lookupOrDefault(result: *mut K, m: *const Map, key: K, default: K) -> bool {
-  let val = (*m).get(&key);
-  match val {
+  match (*m).get(&key) {
     Some(v) => *result = *v,
     None => *result = default
   }

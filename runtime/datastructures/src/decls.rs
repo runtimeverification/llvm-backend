@@ -35,12 +35,12 @@ pub mod testing {
   extern "C" {
     pub fn __gmpz_init(rop: *mut Int);
     pub fn __gmpz_clear(rop: *mut Int);
-    pub fn __gmpz_cmp_ui(op1: *const Int, op2: i64) -> i32;
+    pub fn __gmpz_cmp_ui(op1: *const Int, op2: u64) -> i32;
   }
 
   #[repr(C)]
   pub struct DummyBlock {
-    header: i64,
+    header: u64,
   }
 
   pub const DUMMY0: K = &DummyBlock{header: 0} as *const DummyBlock as K;
