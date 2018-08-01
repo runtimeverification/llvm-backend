@@ -1,4 +1,4 @@
-use super::decls::{Set,List,Int,K,__gmpz_set_ui};
+use super::decls::{Set,List,Int,K,__gmpz_init_set_ui};
 use std::iter::FromIterator;
 use std::ptr;
 use std::mem;
@@ -66,7 +66,7 @@ pub unsafe extern "C" fn hook_SET_choice(result: *mut K, s: *const Set) -> bool 
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_SET_size(result: *mut Int, s: *const Set) -> bool {
-  __gmpz_set_ui(result, (*s).len());
+  __gmpz_init_set_ui(result, (*s).len());
   true
 }
 

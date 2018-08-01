@@ -23,7 +23,7 @@ pub type List = Vector<K>;
 
 #[link(name="gmp")]
 extern "C" {
-  pub fn __gmpz_set_ui(rop: *mut Int, op: usize);
+  pub fn __gmpz_init_set_ui(rop: *mut Int, op: usize);
   pub fn __gmpz_fits_ulong_p(op: *const Int) -> i32;
   pub fn __gmpz_get_ui(op: *const Int) -> u64;
 }
@@ -35,7 +35,6 @@ pub mod testing {
 
   #[link(name="gmp")]
   extern "C" {
-    pub fn __gmpz_init(rop: *mut Int);
     pub fn __gmpz_clear(rop: *mut Int);
     pub fn __gmpz_cmp_ui(op1: *const Int, op2: u64) -> i32;
   }
@@ -61,7 +60,6 @@ pub mod testing {
   pub unsafe fn alloc_int() -> *mut Int {
     let b = Box::new(Int(0,0,ptr::null()));
     let res = Box::into_raw(b);
-    __gmpz_init(res);
     res
   }
 

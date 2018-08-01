@@ -1,4 +1,4 @@
-use super::decls::{List,Int,K,__gmpz_fits_ulong_p,__gmpz_get_ui,__gmpz_set_ui};
+use super::decls::{List,Int,K,__gmpz_fits_ulong_p,__gmpz_get_ui,__gmpz_init_set_ui};
 use std::ptr;
 use std::mem;
 
@@ -77,7 +77,7 @@ pub unsafe extern "C" fn hook_LIST_range(result: *mut List, list: *const List, f
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_LIST_size(result: *mut Int, l: *const List) -> bool {
-  __gmpz_set_ui(result, (*l).len());
+  __gmpz_init_set_ui(result, (*l).len());
   true
 }
 

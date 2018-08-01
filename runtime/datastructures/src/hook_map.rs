@@ -1,4 +1,4 @@
-use super::decls::{Map,Set,List,Int,K,__gmpz_set_ui};
+use super::decls::{Map,Set,List,Int,K,__gmpz_init_set_ui};
 use std::iter::FromIterator;
 use std::ptr;
 use std::mem;
@@ -102,7 +102,7 @@ pub unsafe extern "C" fn hook_MAP_choice(result: *mut K, m: *const Map) -> bool 
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_MAP_size(result: *mut Int, m: *const Map) -> bool {
-  __gmpz_set_ui(result, (*m).len());
+  __gmpz_init_set_ui(result, (*m).len());
   true
 }
 
