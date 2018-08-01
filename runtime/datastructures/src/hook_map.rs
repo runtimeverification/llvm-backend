@@ -135,7 +135,7 @@ mod tests {
   use decls::testing::*;
   use hook_map::*;
   use hook_set::{alloc_set,free_set};
-  use hook_list::{alloc_list,free_list};
+  use hook_list::tests::{alloc_list,free_list};
 
   pub unsafe fn alloc_map() -> *mut Map {
     let ptr = libc::malloc(size_map()) as *mut Map;
