@@ -28,7 +28,10 @@ pub unsafe extern "C" fn hook_MAP_unit(result: *mut Map) -> bool {
 #[no_mangle]
 pub unsafe extern "C" fn hook_MAP_concat(result: *mut Map, m1: *const Map, m2: *const Map) -> bool {
   let mut status = true;
-  ptr::write(result, (*m1).clone().union_with((*m2).clone(), |v1, _| { status = false; v1 }));
+  let tmp: Map = (*m1).clone().union_with((*m2).clone(), |v1, _| { status = false; v1 });
+  if status {
+    ptr::write(result, tmp);
+  }
   status
 }
 
@@ -205,6 +208,7 @@ mod tests {
       assert!(!hook_MAP_concat(map, m1, m2));
       free_map(m1);
       free_map(m2);
+      ptr::write(map, Map::new());
       free_map(map);
     }
   }
