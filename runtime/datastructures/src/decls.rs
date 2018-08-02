@@ -37,6 +37,7 @@ pub mod testing {
   extern "C" {
     pub fn __gmpz_clear(rop: *mut Int);
     pub fn __gmpz_cmp_ui(op1: *const Int, op2: u64) -> i32;
+    pub fn __gmpz_init_set_si(rop: *mut Int, op: i64);
   }
 
   #[repr(C)]

@@ -131,6 +131,7 @@ pub unsafe extern "C" fn hook_LIST_updateAll(result: *mut List, l1: *const List,
 pub mod tests {
   extern crate libc;
 
+  use decls::testing::*;
   use hook_list::*;
 
   pub unsafe fn alloc_list() -> *mut List {
@@ -141,5 +142,210 @@ pub mod tests {
   pub unsafe fn free_list(ptr: *mut List) {
     drop_list(ptr);
     libc::free(ptr as *mut libc::c_void);
+  }
+
+  #[test]
+  fn test_element() {
+    unsafe {
+      let list = alloc_list();
+      assert!(hook_LIST_element(list, DUMMY0));
+      let result = alloc_k();
+      let index = alloc_int();
+      __gmpz_init_set_ui(index, 0);
+      assert!(hook_LIST_get(result, list, index));
+      assert_eq!(*result, DUMMY0);
+      free_list(list);
+      free_k(result);
+      free_int(index);
+    }
+  }
+
+  #[test]
+  fn test_unit() {
+    unsafe {
+      let list = alloc_list();
+      assert!(hook_LIST_unit(list));
+      let result = alloc_int();
+      assert!(hook_LIST_size(result, list));
+      assert_eq!(__gmpz_cmp_ui(result, 0), 0);
+      free_list(list);
+      free_int(result);
+    }
+  }
+
+  #[test]
+  fn test_concat() {
+    unsafe {
+      let l1 = alloc_list();
+      let l2 = alloc_list();
+      let list = alloc_list();
+      assert!(hook_LIST_element(l1, DUMMY0));
+      assert!(hook_LIST_element(l2, DUMMY1));
+      assert!(hook_LIST_concat(list, l1, l2));
+      let result = alloc_k();
+      let index = alloc_int();
+      __gmpz_init_set_ui(index, 0);
+      assert!(hook_LIST_get(result, list, index));
+      assert_eq!(*result, DUMMY0);
+      __gmpz_clear(index);
+      __gmpz_init_set_ui(index, 1);
+      assert!(hook_LIST_get(result, list, index));
+      assert_eq!(*result, DUMMY1);
+      __gmpz_clear(index);
+      assert!(hook_LIST_size(index, list));
+      assert_eq!(__gmpz_cmp_ui(index, 2), 0);
+      free_list(l1);
+      free_list(l2);
+      free_list(list);
+      free_k(result);
+      free_int(index);
+    }
+  }
+
+  #[test]
+  fn test_in() {
+    let mut result = false;
+    unsafe {
+      let list = alloc_list();
+      assert!(hook_LIST_element(list, DUMMY0));
+      assert!(hook_LIST_in(&mut result, DUMMY0, list));
+      assert!(result);
+      assert!(hook_LIST_in(&mut result, DUMMY1, list));
+      assert!(!result);
+      free_list(list);
+    }
+  }
+
+  #[test]
+  fn test_get() {
+    unsafe {
+      let index = alloc_int();
+      __gmpz_init_set_si(index, -1);
+      let list = alloc_list();
+      let result = alloc_k();
+      assert!(hook_LIST_element(list, DUMMY0));
+      assert!(!hook_LIST_get(result, list, index));
+      __gmpz_clear(index);
+      __gmpz_init_set_ui(index, 1);
+      assert!(!hook_LIST_get(result, list, index));
+      free_int(index);
+      free_list(list);
+      free_k(result);
+    }
+  }
+
+  #[test]
+  fn test_range() {
+    unsafe {
+      let neg = alloc_int();
+      let zero = alloc_int();
+      let one = alloc_int();
+      __gmpz_init_set_si(neg, -1);
+      __gmpz_init_set_ui(zero, 0);
+      __gmpz_init_set_ui(one, 1);
+      let list = alloc_list();
+      let result = alloc_list();
+      assert!(hook_LIST_element(list, DUMMY0));
+      assert!(!hook_LIST_range(result, list, neg, zero));
+      assert!(!hook_LIST_range(result, list, zero, neg));
+      assert!(!hook_LIST_range(result, list, one, one));
+      assert!(hook_LIST_range(result, list, zero, one));
+      __gmpz_clear(zero);
+      assert!(hook_LIST_size(zero, result));
+      assert_eq!(__gmpz_cmp_ui(zero, 0), 0);
+      free_int(neg);
+      free_int(zero);
+      free_int(one);
+      free_list(list);
+      free_list(result);
+    }
+  }
+
+  #[test]
+  fn test_make() {
+    unsafe {
+      let neg = alloc_int();
+      let zero = alloc_int();
+      let ten = alloc_int();
+      __gmpz_init_set_si(neg, -1);
+      __gmpz_init_set_ui(zero, 0);
+      __gmpz_init_set_ui(ten, 10);
+      let list = alloc_list();
+      assert!(!hook_LIST_make(list, neg, DUMMY0));
+      assert!(hook_LIST_make(list, ten, DUMMY0));
+      __gmpz_clear(ten);
+      let result = alloc_k();
+      assert!(hook_LIST_get(result, list, zero));
+      assert_eq!(*result, DUMMY0);
+      assert!(hook_LIST_size(ten, list));
+      assert_eq!(__gmpz_cmp_ui(ten, 10), 0);
+      free_int(neg);
+      free_int(zero);
+      free_int(ten);
+      free_list(list);
+      free_k(result);
+    }
+  }
+
+  #[test]
+  fn test_update() {
+    unsafe {
+      let list = alloc_list();
+      assert!(hook_LIST_element(list, DUMMY0));
+      let neg = alloc_int();
+      let index = alloc_int();
+      let one = alloc_int();
+      __gmpz_init_set_si(neg, -1);
+      __gmpz_init_set_ui(index, 0);
+      __gmpz_init_set_ui(one, 1);
+      assert!(!hook_LIST_update(list, list, neg, DUMMY1));
+      assert!(!hook_LIST_update(list, list, one, DUMMY1));
+      assert!(hook_LIST_update(list, list, index, DUMMY1));
+      let result = alloc_k();
+      assert!(hook_LIST_get(result, list, index));
+      assert_eq!(*result, DUMMY1);
+      free_k(result);
+      free_int(index);
+      free_int(neg);
+      free_int(one);
+      free_list(list);
+    }
+  }
+
+  #[test]
+  fn test_update_all() {
+    unsafe {
+      let l1 = alloc_list();
+      let l2 = alloc_list();
+      let list = alloc_list();
+      let neg = alloc_int();
+      let zero = alloc_int();
+      let one = alloc_int();
+      __gmpz_init_set_si(neg, -1);
+      __gmpz_init_set_ui(zero, 0);
+      __gmpz_init_set_ui(one, 1);
+      assert!(hook_LIST_element(l1, DUMMY0));
+      assert!(hook_LIST_unit(l2));
+      assert!(!hook_LIST_updateAll(list, l1, neg, l2));
+      assert!(hook_LIST_updateAll(list, l1, one, l2));
+      let result = alloc_k();
+      assert!(hook_LIST_get(result, list, zero));
+      assert_eq!(*result, DUMMY0);
+      assert!(hook_LIST_updateAll(list, l1, zero, l2));
+      assert!(hook_LIST_get(result, list, zero));
+      assert_eq!(*result, DUMMY0);
+      assert!(hook_LIST_element(l2, DUMMY1));
+      assert!(hook_LIST_updateAll(list, l1, zero, l2));
+      assert!(hook_LIST_get(result, list, zero));
+      assert_eq!(*result, DUMMY1);
+      assert!(!hook_LIST_updateAll(list, l1, one, l2));
+      free_list(l1);
+      free_list(l2);
+      free_list(list);
+      free_int(neg);
+      free_int(zero);
+      free_int(one);
+      free_k(result);
+    }
   }
 }
