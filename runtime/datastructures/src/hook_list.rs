@@ -114,8 +114,10 @@ pub unsafe extern "C" fn hook_LIST_updateAll(result: *mut List, l1: *const List,
   if !status {
     return false;
   }
-  if index_long + (*l2).len() - 1 >= (*l1).len() {
-    return false;
+  if index_long != 0 && (*l2).len() != 0 {
+    if index_long + (*l2).len() - 1 >= (*l1).len() {
+      return false;
+    }
   }
   let mut before = (*l1).take(index_long);
   let after = (*l1).skip(index_long + (*l2).len());
