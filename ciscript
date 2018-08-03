@@ -2,7 +2,7 @@
 mkdir -p build
 cd build
 cmake .. -DCMAKE_BUILD_TYPE=Debug
-make -j`nprocs`
+make -j`nproc`
 ./runtime/arithmetic/unittests
 cd ../runtime/datastructures
 cargo test
