@@ -64,4 +64,5 @@ install(DIRECTORY include/kllvm ${KLLVM_AUTOGEN_INCLUDE_DIR}/kllvm
 
 add_subdirectory(lib)
 add_subdirectory(tools)
+add_subdirectory(runtime)
 #add_subdirectory(test)

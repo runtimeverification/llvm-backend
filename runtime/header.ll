@@ -21,10 +21,10 @@
 ; token: %string *
 ; symbol with 0 arguments: i32
 ; symbol with 1 or more arguments: %block *
-; map: i8 *
-; list: i8 *
-; set: i8 *
-; array: i8 *
+; map: %map
+; list: %list
+; set: %set
+; array: %list
 ; integer: %mpz *
 ; float: %mpfr *
 ; string: %string *
@@ -36,9 +36,12 @@
 ; We also define the following LLVM structure types:
 
 %string = type { i64, [0 x i8] } ; length, bytes
+%map = type { i64, i8 *, i8 * } ; im::hashmap::HashMap
+%set = type { i8 *, i8 *, i64 } ; im::hashset::HashSet
+%list = type { i64, i64, i8 *, i8 *, i8 *, i8 *, i8 * } ; im::vector::Vector
 %mpz = type { i32, i32, i64 * } ; mpz_t
 %mpfr = type { i64, i32, i64, i64 * } ; mpfr_t
-%blockheader = type { i8, i16, i32 } // length in words, layout, symbol
+%blockheader = type { i8, i16, i32 } ; length in words, layout, symbol
 %block = type { %blockheader, [0 x i64 *] } ; header, children
 
 ; The layout of a block uniquely identifies the categories of its children as
@@ -47,14 +50,14 @@
 
 ; %string *: malloc/free, do not follow
 ; iN: noop, do not follow
-; i8 *: alloced by rust, follow
+; %map, %set, %list: noop/drop_in_place, follow
 ; %block *: managed heap, follow
-; %mpz *: malloc->mpz_init/mpz_clear->free, do not follow
-; %mpfr *: malloc->mpfr_init2/mpfr_clear->free, do not follow
+; %mpz *: malloc/mpz_clear->free, do not follow
+; %mpfr *: malloc/mpfr_clear->free, do not follow
 ; %string **: malloc->malloc/free->free, do not follow
 
 ; We also automatically generate for each unique layout id a struct type
 ; corresponding to the actual layout of that block. For example, if we have
 ; the symbol symbol foo{Map{}, Int{}, Exp{}} : Exp{}, we would generate the type:
 
-; %layoutN = type { %blockheader, [0 x i64 *], i8 *, %mpz *, %block * }
+; %layoutN = type { %blockheader, [0 x i64 *], %map, %mpz *, %block * }

@@ -1,0 +1,8 @@
+#!/bin/bash -ex
+mkdir -p build
+cd build
+cmake .. -DCMAKE_BUILD_TYPE=Debug
+make -j`nprocs`
+./runtime/arithmetic/unittests
+cd ../runtime/datastructures
+cargo test
