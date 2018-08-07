@@ -94,6 +94,7 @@ yyin = in;
 <STR>[^\"\n\\]* { stringBuffer.push_back(yytext[0]);          }
 <STR>"\n"       { stringBuffer.push_back('\n'); loc->lines(); }
 <STR>"\\\""     { stringBuffer.push_back('\"');               }
+<STR>"\\\\"     { stringBuffer.push_back('\\');               }
 <STR>"\""       { BEGIN(INITIAL);
                   lval->build<std::string>(stringBuffer);
                   return KOREParser::token::STRING;           }
