@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 add_definitions(-Wall)
 
-find_package(LLVM REQUIRED CONFIG)
+find_package(LLVM 5 REQUIRED CONFIG)
 
 message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
 if (${LLVM_PACKAGE_VERSION} VERSION_LESS 5.0)
@@ -64,4 +64,5 @@ install(DIRECTORY include/kllvm ${KLLVM_AUTOGEN_INCLUDE_DIR}/kllvm
 
 add_subdirectory(lib)
 add_subdirectory(tools)
+add_subdirectory(runtime)
 #add_subdirectory(test)
