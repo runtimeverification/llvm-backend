@@ -194,7 +194,11 @@ void KOREMetaCompositePattern::markSymbols(std::unordered_map<std::string, std::
 }
 
 void KOREDeclaration::addAttribute(KOREPattern *Attribute) {
-  attributes.push_back(Attribute);
+  if (auto constructor = dynamic_cast<KOREObjectCompositePattern *>(Attribute)) {
+    attributes.insert({constructor->getConstructor()->getName(), constructor});
+    return;
+  }
+  assert(false && "Invalid attribute found");
 }
 
 void
@@ -229,7 +233,11 @@ void KOREMetaAliasDeclaration::addPattern(KOREMetaPattern *Pattern) {
 }
 
 void KOREModule::addAttribute(KOREPattern *Attribute) {
-  attributes.push_back(Attribute);
+  if (auto constructor = dynamic_cast<KOREObjectCompositePattern *>(Attribute)) {
+    attributes.insert({constructor->getConstructor()->getName(), constructor});
+    return;
+  }
+  assert(false && "Invalid attribute found");
 }
 
 void KOREModule::addDeclaration(KOREDeclaration *Declaration) {
@@ -241,7 +249,11 @@ void KOREDefinition::addModule(KOREModule *Module) {
 }
 
 void KOREDefinition::addAttribute(KOREPattern *Attribute) {
-  attributes.push_back(Attribute);
+  if (auto constructor = dynamic_cast<KOREObjectCompositePattern *>(Attribute)) {
+    attributes.insert({constructor->getConstructor()->getName(), constructor});
+    return;
+  }
+  assert(false && "Invalid attribute found");
 }
 
 // Pretty printer
@@ -398,16 +410,16 @@ void KOREMetaCharPattern::print(std::ostream &Out, unsigned indent) const {
 }
 
 static void printAttributeList(
-  std::ostream &Out, const std::vector<KOREPattern *> attributes,
+  std::ostream &Out, const llvm::StringMap<KOREObjectCompositePattern *> attributes,
   unsigned indent = 0) {
 
   std::string Indent(indent, ' ');
   Out << Indent << "[";
   bool isFirst = true;
-  for (const KOREPattern *Pattern : attributes) {
+  for (auto &Pattern : attributes) {
     if (!isFirst)
       Out << ",";
-    Pattern->print(Out);
+    Pattern.second->print(Out);
     isFirst = false;
   }
   Out << "]";

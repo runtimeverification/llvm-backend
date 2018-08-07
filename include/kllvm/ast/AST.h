@@ -368,7 +368,7 @@ private:
 // KOREDeclaration
 class KOREDeclaration {
 protected:
-  std::vector<KOREPattern *> attributes;
+  llvm::StringMap<KOREObjectCompositePattern *> attributes;
   std::vector<KOREObjectSortVariable *> objectSortVariables;
   std::vector<KOREMetaSortVariable *> metaSortVariables;
 
@@ -377,6 +377,7 @@ public:
   void addObjectSortVariable(KOREObjectSortVariable *SortVariable);
   void addMetaSortVariable(KOREMetaSortVariable *SortVariable);
   virtual void print(std::ostream &Out, unsigned indent = 0) const =0;
+  const llvm::StringMap<KOREObjectCompositePattern *> &getAttributes() const { return attributes; }
 
 protected:
   void printSortVariables(std::ostream &Out) const;
@@ -532,7 +533,7 @@ class KOREModule {
 private:
   std::string name;
   std::vector<KOREDeclaration *> declarations;
-  std::vector<KOREPattern *> attributes;
+  llvm::StringMap<KOREObjectCompositePattern *> attributes;
 
 public:
   static KOREModule *Create(const std::string &Name) {
@@ -587,7 +588,7 @@ private:
   KOREModuleMapType moduleNames;
 
   std::vector<KOREModule *> modules;
-  std::vector<KOREPattern *> attributes;
+  llvm::StringMap<KOREObjectCompositePattern *> attributes;
 
 public:
   static KOREDefinition *Create() { return new KOREDefinition(); }
