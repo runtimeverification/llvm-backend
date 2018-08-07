@@ -7,6 +7,7 @@
 
 #include <string>
 #include <vector>
+#include <list>
 #include <unordered_map>
 
 namespace kllvm {
@@ -581,6 +582,10 @@ public:
 
   using KOREMetaVariableMapType = llvm::StringMap<KOREMetaVariable *>;
 
+  using KOREObjectCompositeSortDeclarationMapType = llvm::StringMap<KOREObjectCompositeSortDeclaration *>;
+
+  using KOREObjectSymbolDeclarationMapType = llvm::StringMap<KOREObjectSymbolDeclaration *>;
+
 private:
   // Symbol tables
   KOREObjectSortConstructorMapType objectSortConstructors;
@@ -592,16 +597,25 @@ private:
   KOREObjectVariableMapType objectVariables;
   KOREMetaVariableMapType metaVariables;
   KOREModuleMapType moduleNames;
+  KOREObjectCompositeSortDeclarationMapType sortDeclarations;
+  KOREObjectSymbolDeclarationMapType symbolDeclarations;
 
   std::vector<KOREModule *> modules;
   llvm::StringMap<KOREObjectCompositePattern *> attributes;
+  std::list<KOREAxiomDeclaration *> axioms;
 
 public:
   static KOREDefinition *Create() { return new KOREDefinition(); }
 
+  void preprocess();
+
   void addModule(KOREModule *Module);
   void addAttribute(KOREPattern *Attribute);
   void print(std::ostream &Out, unsigned indent = 0) const;
+
+  const KOREObjectCompositeSortDeclarationMapType &getSortDeclarations() const { return sortDeclarations; }
+  const KOREObjectSymbolDeclarationMapType &getSymbolDeclarations() const { return symbolDeclarations; }
+  const std::list<KOREAxiomDeclaration *> &getAxioms() const { return axioms; }
 };
 
 } // end namespace kllvm

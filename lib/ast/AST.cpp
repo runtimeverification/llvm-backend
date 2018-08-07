@@ -283,6 +283,15 @@ void KOREModule::addDeclaration(KOREDeclaration *Declaration) {
 
 void KOREDefinition::addModule(KOREModule *Module) {
   modules.push_back(Module);
+  for (auto decl : Module->getDeclarations()) {
+    if (auto sortDecl = dynamic_cast<KOREObjectCompositeSortDeclaration *>(decl)) {
+      sortDeclarations.insert({sortDecl->getName(), sortDecl});
+    } else if (auto symbolDecl = dynamic_cast<KOREObjectSymbolDeclaration *>(decl)) {
+      symbolDeclarations.insert({symbolDecl->getSymbol()->getName(), symbolDecl});
+    } else if (auto axiom = dynamic_cast<KOREAxiomDeclaration *>(decl)) {
+      axioms.push_back(axiom);
+    }
+  }
 }
 
 void KOREDefinition::addAttribute(KOREPattern *Attribute) {
@@ -291,6 +300,66 @@ void KOREDefinition::addAttribute(KOREPattern *Attribute) {
     return;
   }
   assert(false && "Invalid attribute found");
+}
+
+void KOREDefinition::preprocess() {
+  auto symbols = std::unordered_map<std::string, std::vector<KOREObjectSymbol *>>{};
+  for (auto iter = axioms.begin(); iter != axioms.end();) {
+    auto axiom = *iter;
+    if (!axiom->isRequired()) {
+      iter = axioms.erase(iter);
+    } else {
+      axiom->pattern->markSymbols(symbols);
+      iter++;
+    }
+  }
+  for (auto iter = symbols.begin(); iter != symbols.end(); iter++) {
+    auto entry = *iter;
+    for (auto iter = entry.second.begin(); iter != entry.second.end(); iter++) {
+      KOREObjectSymbol *symbol = *iter;
+      auto decl = symbolDeclarations.lookup(symbol->getName());
+      symbol->instantiateSymbol(decl);
+    }
+  }
+  uint32_t nextSymbol = 0;
+  uint16_t nextLayout = 1;
+  auto instantiations = std::unordered_map<KOREObjectSymbol, uint32_t, HashSymbol>{};
+  auto layouts = std::unordered_map<std::string, uint16_t>{};
+  auto variables = std::unordered_map<std::string, std::pair<uint32_t, uint32_t>>{};
+  for (auto iter = symbols.begin(); iter != symbols.end(); iter++) {
+    auto entry = *iter;
+    uint32_t firstTag = nextSymbol;
+    for (auto iter = entry.second.begin(); iter != entry.second.end(); iter++) {
+      KOREObjectSymbol *symbol = *iter;
+      if (symbol->isConcrete()) {
+        if (!instantiations.count(*symbol)) {
+          instantiations.emplace(*symbol, nextSymbol++);
+        }
+        std::string layoutStr = symbol->layoutString();
+        if (!layouts.count(layoutStr)) {
+          layouts.emplace(layoutStr, nextLayout++);
+        }
+        symbol->firstTag = symbol->lastTag = instantiations.at(*symbol);
+        symbol->layout = layouts.at(layoutStr);
+      }
+    }
+    uint32_t lastTag = nextSymbol-1;
+    if (!entry.second.empty()) {
+      variables.emplace(entry.first, std::pair<uint32_t, uint32_t>{firstTag, lastTag});
+    }
+  }
+  for (auto iter = symbols.begin(); iter != symbols.end(); iter++) {
+    auto entry = *iter;
+    auto range = variables.at(entry.first);
+    for (auto iter = entry.second.begin(); iter != entry.second.end(); iter++) {
+      KOREObjectSymbol *symbol = *iter;
+      if (!symbol->isConcrete()) {
+        assert(symbol->isPolymorphic() && "Unsupported polymorphism");
+        symbol->firstTag = range.first;
+        symbol->lastTag = range.second;
+      }
+    }
+  }
 }
 
 // Pretty printer
