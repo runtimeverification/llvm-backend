@@ -6,6 +6,6 @@ add_llvm_tool(parser
   main.cpp
 )
 
-target_link_libraries(parser Parser)
+target_link_libraries(parser Parser AST)
 
 add_definitions(${LLVM_DEFINITIONS})
