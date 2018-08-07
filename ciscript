@@ -1,0 +1,9 @@
+#!/bin/bash -ex
+export PATH=$PATH:~/.cargo/bin
+mkdir -p build
+cd build
+cmake .. -DCMAKE_BUILD_TYPE=Debug
+make -j`nproc`
+./runtime/arithmetic/unittests
+cd ../runtime/datastructures
+cargo test

@@ -4,7 +4,7 @@ version = "0.1.0"
 authors = ["Dwight Guth <dwight.guth@runtimeverification.com>"]
 
 [dependencies]
-im = { path = "../../../im-rs" }
+im = { git = "https://github.com/bodil/im-rs", rev = "9dada473f4323adcb1887ab674533916e3f3ff12" }
 libc = "0.2.42"
 
 [lib]
