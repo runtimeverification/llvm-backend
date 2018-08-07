@@ -378,6 +378,7 @@ public:
   void addMetaSortVariable(KOREMetaSortVariable *SortVariable);
   virtual void print(std::ostream &Out, unsigned indent = 0) const =0;
   const llvm::StringMap<KOREObjectCompositePattern *> &getAttributes() const { return attributes; }
+  const std::vector<KOREObjectSortVariable *> &getObjectSortVariables() const { return objectSortVariables; }
 
 protected:
   void printSortVariables(std::ostream &Out) const;
