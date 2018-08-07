@@ -7,3 +7,5 @@ make -j`nproc`
 ./runtime/arithmetic/unittests
 cd ../runtime/datastructures
 cargo test
+cd ../../build
+./tools/test_rhs/test_rhs ../test/test.kore | diff - ../test/test.ll
