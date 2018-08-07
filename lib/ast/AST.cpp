@@ -171,8 +171,26 @@ void KOREObjectCompositePattern::addArgument(KOREPattern *Argument) {
   arguments.push_back(Argument);
 }
 
+void KOREObjectCompositePattern::markSymbols(std::unordered_map<std::string, std::vector<KOREObjectSymbol *>> &map) {
+  if (!constructor->isBuiltin()) {
+    if (!map.count(constructor->getName())) {
+      map.emplace(constructor->getName(), std::vector<KOREObjectSymbol *>{});
+    }
+    map.at(constructor->getName()).push_back(constructor);
+  }
+  for (KOREPattern *arg : arguments) {
+    arg->markSymbols(map);
+  }
+}
+
 void KOREMetaCompositePattern::addArgument(KOREPattern *Argument) {
   arguments.push_back(Argument);
+}
+
+void KOREMetaCompositePattern::markSymbols(std::unordered_map<std::string, std::vector<KOREObjectSymbol *>> &map) {
+  for (KOREPattern *arg : arguments) {
+    arg->markSymbols(map);
+  }
 }
 
 void KOREDeclaration::addAttribute(KOREPattern *Attribute) {
