@@ -511,6 +511,11 @@ public:
 
   void addPattern(KOREPattern *Pattern);
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
+
+  bool isRequired();
+  KOREPattern *getRightHandSide() const;
+
+  friend KOREDefinition;
 };
 
 class KOREModule;

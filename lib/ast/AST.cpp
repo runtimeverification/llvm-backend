@@ -210,9 +210,46 @@ void KOREDeclaration::addMetaSortVariable(KOREMetaSortVariable *SortVariable) {
   metaSortVariables.push_back(SortVariable);
 }
 
-
 void KOREAxiomDeclaration::addPattern(KOREPattern *Pattern) {
   pattern = Pattern;
+}
+
+static const std::string ASSOC = "assoc";
+static const std::string COMM = "comm";
+static const std::string IDEM = "idem";
+static const std::string UNIT = "unit";
+static const std::string FUNCTIONAL = "functional";
+static const std::string CONSTRUCTOR = "constructor";
+
+bool KOREAxiomDeclaration::isRequired() {
+  return !attributes.count(ASSOC) && !attributes.count(COMM) && !attributes.count(IDEM) && !attributes.count(UNIT) && !attributes.count(FUNCTIONAL) && !attributes.count(CONSTRUCTOR);
+}
+
+KOREPattern *KOREAxiomDeclaration::getRightHandSide() const {
+  if (auto top = dynamic_cast<KOREObjectCompositePattern *>(pattern)) {
+    if (top->getConstructor()->getName() == "\\implies" && top->getArguments().size() == 2) {
+      if (auto andPattern = dynamic_cast<KOREObjectCompositePattern *>(top->getArguments()[1])) {
+        if (andPattern->getConstructor()->getName() == "\\and" && andPattern->getArguments().size() == 2) {
+          if (auto equals = dynamic_cast<KOREObjectCompositePattern *>(andPattern->getArguments()[0])) {
+            if (equals->getConstructor()->getName() == "\\equals" && equals->getArguments().size() == 2) {
+              return equals->getArguments()[1];
+            }
+          }
+        }
+      }
+    } else if (top->getConstructor()->getName() == "\\and" && top->getArguments().size() == 2) {
+      if (auto andPattern = dynamic_cast<KOREObjectCompositePattern *>(top->getArguments()[1])) {
+        if (andPattern->getConstructor()->getName() == "\\and" && andPattern->getArguments().size() == 2) {
+          if (auto rewrites = dynamic_cast<KOREObjectCompositePattern *>(andPattern->getArguments()[1])) {
+            if (rewrites->getConstructor()->getName() == "\\rewrites" && rewrites->getArguments().size() == 2) {
+              return rewrites->getArguments()[1];
+            }
+          }
+        }
+      }
+    }
+  }
+  assert(false && "could not compute right hand side of axiom");
 }
 
 void
