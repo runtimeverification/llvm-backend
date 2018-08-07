@@ -2,8 +2,28 @@
 
 using namespace kllvm;
 
+bool KOREObjectSortVariable::operator==(const KOREObjectSort &other) const {
+  if (auto var = dynamic_cast<const KOREObjectSortVariable *>(&other)) {
+    return var->name == name;
+  }
+  return false;
+}
+
 void KOREObjectCompositeSort::addArgument(KOREObjectSort *Argument) {
   arguments.push_back(Argument);
+}
+
+bool KOREObjectCompositeSort::operator==(const KOREObjectSort &other) const {
+  if (auto sort = dynamic_cast<const KOREObjectCompositeSort *>(&other)) {
+    if (sort->name != name || sort->arguments.size() != arguments.size()) {
+      return false;
+    }
+    for (int i = 0; i < arguments.size(); i++) {
+      if (!(sort->arguments[i] == arguments[i])) return false;
+    }
+    return true;
+  }
+  return false;
 }
 
 void KOREObjectSymbol::addArgument(KOREObjectSort *Argument) {

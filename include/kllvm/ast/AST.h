@@ -15,8 +15,17 @@ public:
   virtual void print(std::ostream &Out, unsigned indent = 0) const =0;
 };
 
-class KOREObjectSort : public KORESort {
+struct HashSort {
+  size_t operator()(const kllvm::KORESort &s) const noexcept {
+    std::ostringstream Out;
+    s.print(Out);
+    return std::hash<std::string>{}(Out.str());
+  }
+};
 
+class KOREObjectSort : public KORESort {
+public:
+  virtual bool operator==(const KOREObjectSort &other) const = 0;
 };
 
 class KOREMetaSort : public KORESort {
@@ -33,6 +42,7 @@ public:
   }
 
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
+  virtual bool operator==(const KOREObjectSort &other) const override;
 
 private:
   KOREObjectSortVariable(const std::string &Name) : name(Name) { }
@@ -65,6 +75,7 @@ public:
 
   void addArgument(KOREObjectSort *Argument);
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
+  virtual bool operator==(const KOREObjectSort &other) const override;
 
 private:
   KOREObjectCompositeSort(const std::string &Name) : name(Name) { }
