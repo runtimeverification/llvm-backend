@@ -75,6 +75,8 @@ public:
     return new KOREObjectCompositeSort(Name);
   }
 
+  const std::string getName() const { return name; }
+
   void addArgument(KOREObjectSort *Argument);
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
   virtual bool operator==(const KOREObjectSort &other) const override;
@@ -205,6 +207,8 @@ public:
     return new KOREObjectVariable(Name);
   }
 
+  std::string getName() const;
+
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
 
 private:
@@ -252,6 +256,8 @@ public:
     return new KOREObjectVariablePattern(Var, sort);
   }
 
+  std::string getName() const;
+
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
 
 private:
@@ -290,6 +296,7 @@ public:
   }
 
   KOREObjectSymbol *getConstructor() const { return constructor; }
+  const std::vector<KOREPattern *> &getArguments() const { return arguments; }
 
   void addArgument(KOREPattern *Argument);
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
@@ -377,6 +384,8 @@ public:
   Create(const std::string &Name, bool isHooked = false) {
     return new KOREObjectCompositeSortDeclaration(Name, isHooked);
   }
+
+  std::string getName() { return sortName; }
 
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
 
@@ -525,6 +534,8 @@ public:
   void addAttribute(KOREPattern *Attribute);
   void addDeclaration(KOREDeclaration *Declaration);
   void print(std::ostream &Out, unsigned indent = 0) const;
+
+  const std::vector<KOREDeclaration *> &getDeclarations() const { return declarations; } 
 
 private:
   KOREModule(const std::string &Name) : name(Name) { }

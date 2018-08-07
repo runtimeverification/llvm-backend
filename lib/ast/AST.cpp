@@ -159,6 +159,14 @@ void KOREMetaSymbol::addSort(KOREMetaSort *Sort) {
   sort = Sort;
 }
 
+std::string KOREObjectVariable::getName() const {
+  return name;
+}
+
+std::string KOREObjectVariablePattern::getName() const {
+  return name->getName();
+}
+
 void KOREObjectCompositePattern::addArgument(KOREPattern *Argument) {
   arguments.push_back(Argument);
 }
