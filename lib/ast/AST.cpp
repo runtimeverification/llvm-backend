@@ -1,5 +1,7 @@
 #include "kllvm/ast/AST.h"
 
+#include <unordered_set>
+
 using namespace kllvm;
 
 bool KOREObjectSortVariable::operator==(const KOREObjectSort &other) const {
@@ -32,6 +34,121 @@ void KOREObjectSymbol::addArgument(KOREObjectSort *Argument) {
 
 void KOREObjectSymbol::addSort(KOREObjectSort *Sort) {
   sort = Sort;
+}
+
+bool KOREObjectSymbol::operator==(KOREObjectSymbol other) const {
+  if (name != other.name || arguments.size() != other.arguments.size()) {
+    return false;
+  }
+  for (int i = 0; i < arguments.size(); i++) {
+    if (!(*arguments[i] == *other.arguments[i])) return false;
+  }
+  return true;
+}
+
+std::string KOREObjectSymbol::layoutString() const {
+  std::string result;
+  for (auto arg : arguments) {
+    auto sort = dynamic_cast<KOREObjectCompositeSort *>(arg);
+    if (sort->getName() == "Map") {
+      result.push_back('1');
+    } else if (sort->getName() == "List") {
+      result.push_back('2');
+    } else if (sort->getName() == "Set") {
+      result.push_back('3');
+    } else if (sort->getName() == "Array") {
+      result.push_back('2');
+    } else if (sort->getName() == "Int") {
+      result.push_back('4');
+    } else if (sort->getName() == "Float") {
+      result.push_back('5');
+    } else if (sort->getName() == "StringBuffer") {
+      result.push_back('6');
+    } else if (sort->getName() == "Bool") {
+      result.push_back('7');
+    } else if (sort->getName() == "MInt") {
+      assert(false && "not implemented yet: MInt");
+    } else {
+      result.push_back('0');
+    }
+  }
+  return result;
+}
+
+uint8_t KOREObjectSymbol::length() const {
+  uint8_t length = 1;
+  for (auto arg : arguments) {
+    auto sort = dynamic_cast<KOREObjectCompositeSort *>(arg);
+    if (sort->getName() == "Map") {
+      length += 3;
+    } else if (sort->getName() == "List") {
+      length += 7;
+    } else if (sort->getName() == "Set") {
+      length += 3;
+    } else if (sort->getName() == "Array") {
+      length += 7;
+    } else if (sort->getName() == "Int") {
+      length += 2;
+    } else if (sort->getName() == "Float") {
+      length += 4;
+    } else if (sort->getName() == "StringBuffer") {
+      length += 1;
+    } else if (sort->getName() == "Bool") {
+      length += 1;
+    } else if (sort->getName() == "MInt") {
+      assert(false && "not implemented yet: MInt");
+    } else {
+      length += 1;
+    }
+  }
+  return length;
+}
+
+
+bool KOREObjectSymbol::isConcrete() const {
+  for (auto sort : arguments) {
+    if (auto var = dynamic_cast<KOREObjectSortVariable *>(sort)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool KOREObjectSymbol::isPolymorphic() const {
+  for (auto sort : arguments) {
+    if (auto var = dynamic_cast<KOREObjectCompositeSort *>(sort)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool KOREObjectSymbol::isBuiltin() const {
+  return name == "\\and" || name == "\\not" || name == "\\or" || name == "\\implies"
+    || name == "\\iff" || name == "\\forall" || name == "\\exists" || name == "\\ceil"
+    || name == "\\floor" || name == "\\equals" || name == "\\in" || name == "\\top"
+    || name == "\\bottom" || name == "\\dv" || name == "\\rewrites" || name == "\\next";
+}
+
+void KOREObjectSymbol::instantiateSymbol(KOREObjectSymbolDeclaration *decl) {
+  std::vector<KOREObjectSort *> instantiated;
+  int i = 0;
+  std::unordered_set<KOREObjectSortVariable, HashSort> vars;
+  for (auto var : decl->getObjectSortVariables()) {
+    vars.emplace(*var);
+  }
+  for (auto sort : decl->getSymbol()->getArguments()) {
+    if (auto var = dynamic_cast<KOREObjectSortVariable *>(sort)) {
+      if (vars.count(*var)) {
+        instantiated.push_back(arguments[i++]);
+      } else {
+        instantiated.push_back(sort);
+      }
+    } else {
+      instantiated.push_back(sort);
+    }
+  }
+  arguments = instantiated;
 }
 
 void KOREMetaSymbol::addArgument(KOREMetaSort *Argument) {

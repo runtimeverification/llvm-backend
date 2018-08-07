@@ -1,6 +1,8 @@
 #ifndef AST_H
 #define AST_H
 
+#include <boost/functional/hash.hpp>
+
 #include "llvm/ADT/StringMap.h"
 
 #include <string>
@@ -102,11 +104,19 @@ public:
   virtual void print(std::ostream &Out, unsigned indent = 0) const =0;
 };
 
+struct HashSymbol;
+
+class KOREDefinition;
+class KOREObjectSymbolDeclaration;
+
 class KOREObjectSymbol : public KORESymbol {
 private:
   std::string name;
   std::vector<KOREObjectSort *> arguments;
   KOREObjectSort *sort;
+  uint32_t firstTag;
+  uint32_t lastTag;
+  uint16_t layout;
 
 public:
   static KOREObjectSymbol *Create(const std::string &Name) {
@@ -121,11 +131,37 @@ public:
     return arguments;
   }
   const KOREObjectSort *getSort() const { return sort; }
+  uint32_t getTag() const { assert(firstTag == lastTag); return firstTag; }
+  uint16_t getLayout() const { return layout; }
 
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
 
+  bool operator==(KOREObjectSymbol other) const;
+
+  std::string layoutString() const;
+  uint8_t length() const;
+
+  bool isConcrete() const;
+  bool isPolymorphic() const;
+  bool isBuiltin() const;
+
+  void instantiateSymbol(KOREObjectSymbolDeclaration *decl);
+
+  friend HashSymbol;
+
+  friend KOREDefinition;
+
 private:
   KOREObjectSymbol(const std::string &Name) : name(Name), sort(nullptr) { }
+};
+
+struct HashSymbol {
+  size_t operator()(const kllvm::KOREObjectSymbol &s) const noexcept {
+    size_t hash = 0;
+    boost::hash_combine(hash, s.name);
+    boost::hash_combine(hash, s.arguments);
+    return hash;
+  }
 };
 
 class KOREMetaSymbol : public KORESymbol {
