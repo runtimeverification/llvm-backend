@@ -32,6 +32,7 @@ public:
   virtual bool isConcrete() const = 0;
 
   virtual bool operator==(const KOREObjectSort &other) const = 0;
+  bool operator!=(const KOREObjectSort &other) const { return !(*this == other); }
 };
 
 class KOREMetaSort : public KORESort {
@@ -147,6 +148,7 @@ public:
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
 
   bool operator==(KOREObjectSymbol other) const;
+  bool operator!=(KOREObjectSymbol other) const { return !(*this == other); }
 
   std::string layoutString() const;
   uint8_t length() const;

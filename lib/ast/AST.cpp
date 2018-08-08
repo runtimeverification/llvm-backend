@@ -21,7 +21,7 @@ bool KOREObjectCompositeSort::operator==(const KOREObjectSort &other) const {
       return false;
     }
     for (int i = 0; i < arguments.size(); i++) {
-      if (!(sort->arguments[i] == arguments[i])) return false;
+      if (sort->arguments[i] != arguments[i]) return false;
     }
     return true;
   }
@@ -41,7 +41,7 @@ bool KOREObjectSymbol::operator==(KOREObjectSymbol other) const {
     return false;
   }
   for (int i = 0; i < arguments.size(); i++) {
-    if (!(*arguments[i] == *other.arguments[i])) return false;
+    if (*arguments[i] != *other.arguments[i]) return false;
   }
   return true;
 }
