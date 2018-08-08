@@ -25,8 +25,10 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(LLVM_BUILD_TOOLS ON)
 
 find_package(ZLIB REQUIRED)
-find_package(BISON)
-find_package(FLEX)
+find_package(BISON REQUIRED)
+find_package(FLEX REQUIRED)
+find_package(GMP REQUIRED)
+find_package(Boost REQUIRED COMPONENTS unit_test_framework)
 
 option(USE_CLANG_WERROR_FLAGS OFF)
 if (USE_CLANG_WERROR_FLAGS)
