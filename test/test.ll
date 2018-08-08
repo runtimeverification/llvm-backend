@@ -11,8 +11,8 @@ entry:
   %malloccall1 = tail call i8* @malloc(i64 ptrtoint ({ %blockheader, [0 x i64], %block* }* getelementptr ({ %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* null, i32 1) to i64))
   %2 = bitcast i8* %malloccall1 to { %blockheader, [0 x i64], %block* }*
   %3 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %2, i64 0, i32 0
-  store %blockheader { i64 65587 }, %blockheader* %3
-  %4 = inttoptr i32 2 to %block*
+  store %blockheader { i64 65586 }, %blockheader* %3
+  %4 = inttoptr i64 8589934593 to %block*
   %5 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %2, i64 0, i32 2
   store %block* %4, %block** %5
   %6 = bitcast { %blockheader, [0 x i64], %block* }* %2 to %block*
