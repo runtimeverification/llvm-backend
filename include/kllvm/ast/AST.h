@@ -182,6 +182,11 @@ public:
   bool isPolymorphic() const;
   bool isBuiltin() const;
 
+  /* instantiates this symbol (which should be parsed from a pattern in an axiom)
+     with the sorts corresponding to its actual sort parameters after instantiating
+     polymorphic parameters. This happens by replacing the variables in the arguments
+     of the specified declaration with their substitution in the arguments to the pattern
+     that were parsed in braces. */
   void instantiateSymbol(KOREObjectSymbolDeclaration *decl);
 
   friend HashSymbol;
@@ -549,6 +554,10 @@ public:
   void addPattern(KOREPattern *Pattern);
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
 
+  /* returns true if the axiom is actually required to be translated to llvm
+     and false if it is an axiom pertaining to symbolic execution which is not
+     required for concrete execution. Axioms that are not required are elided
+     from the definition by KOREDefinition::preprocess. */
   bool isRequired();
   KOREPattern *getRightHandSide() const;
 
@@ -643,6 +652,13 @@ private:
 public:
   static KOREDefinition *Create() { return new KOREDefinition(); }
 
+  /* Preprocesses the definition and prepares it for translation to llvm.
+     This performs the following tasks:
+     * removes axioms for which isRequired() returns false
+     * sets the arguments field for each KOREObjectSymbol to the actual instantiated
+       sort arguments of the symbol (rather than just their polymorphic parameters
+     * sets the tag and layout fields on all the KOREObjectSymbols declared by the user
+       in the definition. */
   void preprocess();
 
   void addModule(KOREModule *Module);
