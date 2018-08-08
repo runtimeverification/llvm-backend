@@ -29,6 +29,8 @@ struct HashSort {
 
 class KOREObjectSort : public KORESort {
 public:
+  virtual bool isConcrete() const = 0;
+
   virtual bool operator==(const KOREObjectSort &other) const = 0;
 };
 
@@ -44,6 +46,8 @@ public:
   static KOREObjectSortVariable *Create(const std::string &Name) {
     return new KOREObjectSortVariable(Name);
   }
+
+  virtual bool isConcrete() const override { return false; }
 
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
   virtual bool operator==(const KOREObjectSort &other) const override;
@@ -78,6 +82,8 @@ public:
   }
 
   const std::string getName() const { return name; }
+
+  virtual bool isConcrete() const override { return true; }
 
   void addArgument(KOREObjectSort *Argument);
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;

@@ -107,7 +107,7 @@ uint8_t KOREObjectSymbol::length() const {
 
 bool KOREObjectSymbol::isConcrete() const {
   for (auto sort : arguments) {
-    if (auto var = dynamic_cast<KOREObjectSortVariable *>(sort)) {
+    if (!sort->isConcrete()) {
       return false;
     }
   }
@@ -116,7 +116,7 @@ bool KOREObjectSymbol::isConcrete() const {
 
 bool KOREObjectSymbol::isPolymorphic() const {
   for (auto sort : arguments) {
-    if (auto var = dynamic_cast<KOREObjectCompositeSort *>(sort)) {
+    if (sort->isConcrete()) {
       return false;
     }
   }
