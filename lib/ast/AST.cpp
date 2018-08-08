@@ -1,6 +1,7 @@
 #include "kllvm/ast/AST.h"
 
 #include <unordered_set>
+#include <unordered_map>
 
 using namespace kllvm;
 
@@ -185,7 +186,7 @@ void KOREObjectCompositePattern::addArgument(KOREPattern *Argument) {
   arguments.push_back(Argument);
 }
 
-void KOREObjectCompositePattern::markSymbols(std::unordered_map<std::string, std::vector<KOREObjectSymbol *>> &map) {
+void KOREObjectCompositePattern::markSymbols(std::map<std::string, std::vector<KOREObjectSymbol *>> &map) {
   if (!constructor->isBuiltin()) {
     if (!map.count(constructor->getName())) {
       map.emplace(constructor->getName(), std::vector<KOREObjectSymbol *>{});
@@ -201,7 +202,7 @@ void KOREMetaCompositePattern::addArgument(KOREPattern *Argument) {
   arguments.push_back(Argument);
 }
 
-void KOREMetaCompositePattern::markSymbols(std::unordered_map<std::string, std::vector<KOREObjectSymbol *>> &map) {
+void KOREMetaCompositePattern::markSymbols(std::map<std::string, std::vector<KOREObjectSymbol *>> &map) {
   for (KOREPattern *arg : arguments) {
     arg->markSymbols(map);
   }
@@ -317,7 +318,7 @@ void KOREDefinition::addAttribute(KOREPattern *Attribute) {
 }
 
 void KOREDefinition::preprocess() {
-  auto symbols = std::unordered_map<std::string, std::vector<KOREObjectSymbol *>>{};
+  auto symbols = std::map<std::string, std::vector<KOREObjectSymbol *>>{};
   for (auto iter = axioms.begin(); iter != axioms.end();) {
     auto axiom = *iter;
     if (!axiom->isRequired()) {

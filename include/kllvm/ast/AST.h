@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 #include <list>
-#include <unordered_map>
+#include <map>
 
 namespace kllvm {
 
@@ -272,7 +272,7 @@ public:
   /* adds all the object level symbols contained recursively in the current pattern
      to the specified map, mapping their symbol name to the list of all instances
      of that symbol. */
-  virtual void markSymbols(std::unordered_map<std::string, std::vector<KOREObjectSymbol *>> &) = 0;
+  virtual void markSymbols(std::map<std::string, std::vector<KOREObjectSymbol *>> &) = 0;
 };
 
 class KOREObjectPattern : public KOREPattern {
@@ -298,7 +298,7 @@ public:
   std::string getName() const;
 
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
-  virtual void markSymbols(std::unordered_map<std::string, std::vector<KOREObjectSymbol *>> &) override {}
+  virtual void markSymbols(std::map<std::string, std::vector<KOREObjectSymbol *>> &) override {}
 
 private:
   KOREObjectVariablePattern(KOREObjectVariable *Name, KOREObjectSort *Sort)
@@ -318,7 +318,7 @@ public:
   }
 
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
-  virtual void markSymbols(std::unordered_map<std::string, std::vector<KOREObjectSymbol *>> &) override {}
+  virtual void markSymbols(std::map<std::string, std::vector<KOREObjectSymbol *>> &) override {}
 
 private:
   KOREMetaVariablePattern(KOREMetaVariable *Name, KOREMetaSort *Sort)
@@ -341,7 +341,7 @@ public:
 
   void addArgument(KOREPattern *Argument);
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
-  virtual void markSymbols(std::unordered_map<std::string, std::vector<KOREObjectSymbol *>> &) override;
+  virtual void markSymbols(std::map<std::string, std::vector<KOREObjectSymbol *>> &) override;
 
 private:
   KOREObjectCompositePattern(KOREObjectSymbol *Constructor)
@@ -363,7 +363,7 @@ public:
 
   void addArgument(KOREPattern *Argument);
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
-  virtual void markSymbols(std::unordered_map<std::string, std::vector<KOREObjectSymbol *>> &) override;
+  virtual void markSymbols(std::map<std::string, std::vector<KOREObjectSymbol *>> &) override;
 
 private:
   KOREMetaCompositePattern(KOREMetaSymbol *Constructor)
@@ -380,7 +380,7 @@ public:
   }
 
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
-  virtual void markSymbols(std::unordered_map<std::string, std::vector<KOREObjectSymbol *>> &) override {}
+  virtual void markSymbols(std::map<std::string, std::vector<KOREObjectSymbol *>> &) override {}
 
 private:
   KOREMetaStringPattern(const std::string &Contents) : contents(Contents) { }
@@ -396,7 +396,7 @@ public:
   }
 
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
-  virtual void markSymbols(std::unordered_map<std::string, std::vector<KOREObjectSymbol *>> &) override {}
+  virtual void markSymbols(std::map<std::string, std::vector<KOREObjectSymbol *>> &) override {}
 
 private:
   KOREMetaCharPattern(char Contents) : contents(Contents) { }
