@@ -142,8 +142,16 @@ private:
   std::string name;
   std::vector<KOREObjectSort *> arguments;
   KOREObjectSort *sort;
+  /* the first integer in a continuous range representing the tags of all the
+     polymorphic instantiations of this symbol. If the symbol has no parameters
+     or its parameters are fully specified, firstTag == lastTag. */
   uint32_t firstTag;
+  /* the last integer in a continuous range representing the tags of all the
+     polymorphic instantiations of this symbol. If the symbol has no parameters
+     or its parameters are fully specified, firstTag == lastTag. */
   uint32_t lastTag;
+  /* A unique integer representing the layout of the symbol in memory.
+     See CreateTerm.cpp for more information about the layout of K terms. */
   uint16_t layout;
 
 public:
@@ -261,6 +269,9 @@ private:
 class KOREPattern {
 public:
   virtual void print(std::ostream &Out, unsigned indent = 0) const =0;
+  /* adds all the object level symbols contained recursively in the current pattern
+     to the specified map, mapping their symbol name to the list of all instances
+     of that symbol. */
   virtual void markSymbols(std::unordered_map<std::string, std::vector<KOREObjectSymbol *>> &) = 0;
 };
 
