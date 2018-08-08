@@ -173,7 +173,7 @@ llvm::Value *createTerm(KOREPattern *pattern, llvm::StringMap<llvm::Value *> &su
       assert(false && "not implemented yet: functions");
     } else if (symbol->getArguments().empty()) {
       llvm::StructType *BlockType = Module->getTypeByName(BLOCK_STRUCT);
-      llvm::IntToPtrInst *Cast = new llvm::IntToPtrInst(llvm::ConstantInt::get(llvm::IntegerType::get(Context, 32), symbol->getTag()), llvm::PointerType::get(BlockType, 0), "", block);
+      llvm::IntToPtrInst *Cast = new llvm::IntToPtrInst(llvm::ConstantInt::get(llvm::IntegerType::get(Context, 64), (((uint64_t)symbol->getTag()) << 32) | 1), llvm::PointerType::get(BlockType, 0), "", block);
       return Cast;
     } else {
       llvm::StructType *BlockType = getBlockType(Module, symbol, symbolDecl);
