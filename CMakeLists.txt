@@ -54,6 +54,16 @@ macro(add_kllvm_library name)
   )
 endmacro(add_kllvm_library name)
 
+macro(add_kllvm_runtime_library name)
+  llvm_add_library(${name} ${ARGN})
+  install(
+    TARGETS ${name}
+    LIBRARY DESTINATION runtime
+    ARCHIVE DESTINATION runtime
+    COMPONENT ${name}
+  )
+endmacro(add_kllvm_runtime_library name)
+
 # Auto-generated header path
 set(KLLVM_AUTOGEN_INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR}/include)
 include_directories(${KLLVM_AUTOGEN_INCLUDE_DIR})
@@ -67,4 +77,5 @@ install(DIRECTORY include/kllvm ${KLLVM_AUTOGEN_INCLUDE_DIR}/kllvm
 add_subdirectory(lib)
 add_subdirectory(tools)
 add_subdirectory(runtime)
+add_subdirectory(unittests)
 #add_subdirectory(test)
