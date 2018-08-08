@@ -72,10 +72,15 @@ private:
   KOREMetaSortVariable(const std::string &Name) : name(Name) { }
 };
 
+enum class SortCategory {
+  Map, List, Set, Int, Float, StringBuffer, Bool, MInt, Symbol
+};
+
 class KOREObjectCompositeSort : public KOREObjectSort {
 private:
   std::string name;
   std::vector<KOREObjectSort *> arguments;
+  SortCategory category;
 
 public:
   static KOREObjectCompositeSort *Create(const std::string &Name) {
@@ -83,6 +88,7 @@ public:
   }
 
   const std::string getName() const { return name; }
+  const SortCategory getCategory() const { return category; }
 
   virtual bool isConcrete() const override { return true; }
 
@@ -91,7 +97,18 @@ public:
   virtual bool operator==(const KOREObjectSort &other) const override;
 
 private:
-  KOREObjectCompositeSort(const std::string &Name) : name(Name) { }
+  KOREObjectCompositeSort(const std::string &Name) : name(Name) {
+    if (name == "Map") category = SortCategory::Map;
+    else if (name == "List") category = SortCategory::List;
+    else if (name == "Set") category = SortCategory::Set;
+    else if (name == "Array") category = SortCategory::List;
+    else if (name == "Int") category = SortCategory::Int;
+    else if (name == "Float") category = SortCategory::Float;
+    else if (name == "StringBuffer") category = SortCategory::StringBuffer;
+    else if (name == "Bool") category = SortCategory::Bool;
+    else if (name == "MInt") category = SortCategory::MInt;
+    else category = SortCategory::Symbol;
+  }
 };
 
 class KOREMetaCompositeSort : public KOREMetaSort {

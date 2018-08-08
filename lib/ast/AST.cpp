@@ -50,26 +50,33 @@ std::string KOREObjectSymbol::layoutString() const {
   std::string result;
   for (auto arg : arguments) {
     auto sort = dynamic_cast<KOREObjectCompositeSort *>(arg);
-    if (sort->getName() == "Map") {
+    switch(sort->getCategory()) {
+    case SortCategory::Map:
       result.push_back('1');
-    } else if (sort->getName() == "List") {
+      break;
+    case SortCategory::List:
       result.push_back('2');
-    } else if (sort->getName() == "Set") {
+      break;
+    case SortCategory::Set:
       result.push_back('3');
-    } else if (sort->getName() == "Array") {
-      result.push_back('2');
-    } else if (sort->getName() == "Int") {
+      break;
+    case SortCategory::Int:
       result.push_back('4');
-    } else if (sort->getName() == "Float") {
+      break;
+    case SortCategory::Float:
       result.push_back('5');
-    } else if (sort->getName() == "StringBuffer") {
+      break;
+    case SortCategory::StringBuffer:
       result.push_back('6');
-    } else if (sort->getName() == "Bool") {
+      break;
+    case SortCategory::Bool:
       result.push_back('7');
-    } else if (sort->getName() == "MInt") {
+      break;
+    case SortCategory::MInt:
       assert(false && "not implemented yet: MInt");
-    } else {
+    case SortCategory::Symbol:
       result.push_back('0');
+      break;
     }
   }
   return result;
@@ -79,26 +86,33 @@ uint8_t KOREObjectSymbol::length() const {
   uint8_t length = 1;
   for (auto arg : arguments) {
     auto sort = dynamic_cast<KOREObjectCompositeSort *>(arg);
-    if (sort->getName() == "Map") {
+    switch(sort->getCategory()) {
+    case SortCategory::Map:
       length += 3;
-    } else if (sort->getName() == "List") {
+      break;
+    case SortCategory::List:
       length += 7;
-    } else if (sort->getName() == "Set") {
+      break;
+    case SortCategory::Set:
       length += 3;
-    } else if (sort->getName() == "Array") {
-      length += 7;
-    } else if (sort->getName() == "Int") {
+      break;
+    case SortCategory::Int:
       length += 2;
-    } else if (sort->getName() == "Float") {
+      break;
+    case SortCategory::Float:
       length += 4;
-    } else if (sort->getName() == "StringBuffer") {
+      break;
+    case SortCategory::StringBuffer:
       length += 1;
-    } else if (sort->getName() == "Bool") {
+      break;
+    case SortCategory::Bool:
       length += 1;
-    } else if (sort->getName() == "MInt") {
+      break;
+    case SortCategory::MInt:
       assert(false && "not implemented yet: MInt");
-    } else {
+    case SortCategory::Symbol:
       length += 1;
+      break;
     }
   }
   return length;

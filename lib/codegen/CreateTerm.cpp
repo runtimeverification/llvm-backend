@@ -81,47 +81,55 @@ std::unique_ptr<llvm::Module> newModule(std::string name, llvm::LLVMContext &Con
   return llvm::parseIR(*llvm::MemoryBuffer::getMemBuffer(LLVM_HEADER), Err, Context);
 }
 
-llvm::Type *getValueType(std::string sort, llvm::Module *Module) {
-  if (sort == "Map") {
-    return Module->getTypeByName("map");
-  } else if (sort == "List") {
-    return Module->getTypeByName("list");
-  } else if (sort == "Set") {
-    return Module->getTypeByName("set");
-  } else if (sort == "Array") {
-    return Module->getTypeByName("list");
-  } else if (sort == "Int") {
-    return llvm::PointerType::get(Module->getTypeByName("mpz"), 0);
-  } else if (sort == "Float") {
-    return llvm::PointerType::get(Module->getTypeByName("mpfr"), 0);
-  } else if (sort == "StringBuffer") {
-    return llvm::PointerType::get(llvm::PointerType::get(Module->getTypeByName("string"), 0), 0);
-  } else if (sort == "Bool") {
+static std::string MAP_STRUCT = "map";
+static std::string LIST_STRUCT = "list";
+static std::string SET_STRUCT = "set";
+static std::string INT_STRUCT = "mpz";
+static std::string FLOAT_STRUCT = "mpfr";
+static std::string STRING_STRUCT = "string";
+static std::string BLOCK_STRUCT = "block";
+static std::string BLOCKHEADER_STRUCT = "blockheader";
+
+llvm::Type *getValueType(SortCategory sort, llvm::Module *Module) {
+  switch(sort) {
+  case SortCategory::Map:
+    return Module->getTypeByName(MAP_STRUCT);
+  case SortCategory::List:
+    return Module->getTypeByName(LIST_STRUCT);
+  case SortCategory::Set:
+    return Module->getTypeByName(SET_STRUCT);
+  case SortCategory::Int:
+    return llvm::PointerType::get(Module->getTypeByName(INT_STRUCT), 0);
+  case SortCategory::Float:
+    return llvm::PointerType::get(Module->getTypeByName(FLOAT_STRUCT), 0);
+  case SortCategory::StringBuffer:
+    return llvm::PointerType::get(llvm::PointerType::get(Module->getTypeByName(STRING_STRUCT), 0), 0);
+  case SortCategory::Bool:
     return llvm::IntegerType::get(Module->getContext(), 1);
-  } else if (sort == "MInt") {
+  case SortCategory::MInt:
     assert(false && "not implemented yet: MInt");
-  } else {
-    return llvm::PointerType::get(Module->getTypeByName("block"), 0);
+  case SortCategory::Symbol:
+    return llvm::PointerType::get(Module->getTypeByName(BLOCK_STRUCT), 0);
   }
 }
 
 
 llvm::StructType *getBlockType(llvm::Module *Module, const KOREObjectSymbol *symbol, KOREObjectSymbolDeclaration *symbolDecl) {
-  llvm::StructType *BlockHeaderType = Module->getTypeByName("blockheader");
+  llvm::StructType *BlockHeaderType = Module->getTypeByName(BLOCKHEADER_STRUCT);
   llvm::ArrayType *EmptyArrayType = llvm::ArrayType::get(llvm::IntegerType::get(Module->getContext(), 64), 0);
   llvm::SmallVector<llvm::Type *, 4> Types;
   Types.push_back(BlockHeaderType);
   Types.push_back(EmptyArrayType);
   for (KOREObjectSort *arg : symbol->getArguments()) {
     auto sort = dynamic_cast<KOREObjectCompositeSort *>(arg);
-    llvm::Type *type = getValueType(sort->getName(), Module);
+    llvm::Type *type = getValueType(sort->getCategory(), Module);
     Types.push_back(type);
   }
   return llvm::StructType::get(Module->getContext(), Types);
 }
 
 llvm::Value *getBlockHeader(llvm::Module *Module, const KOREObjectSymbol *symbol) {
-  llvm::StructType *BlockHeaderType = Module->getTypeByName("blockheader");
+  llvm::StructType *BlockHeaderType = Module->getTypeByName(BLOCKHEADER_STRUCT);
   uint64_t headerVal = symbol->getTag();
   headerVal |= symbol->length() << 32;
   headerVal |= symbol->getLayout() << 48;
@@ -145,7 +153,7 @@ llvm::Type *termType(KOREPattern *pattern, llvm::StringMap<llvm::Value *> &subst
     if (symbolDecl->getAttributes().count("function")) {
       assert(false && "not implemented yet: functions");
     }
-    return llvm::PointerType::get(Module->getTypeByName("block"), 0);
+    return llvm::PointerType::get(Module->getTypeByName(BLOCK_STRUCT), 0);
   } else {
     assert(false && "not supported yet: meta level");
   }
@@ -164,7 +172,7 @@ llvm::Value *createTerm(KOREPattern *pattern, llvm::StringMap<llvm::Value *> &su
     if (symbolDecl->getAttributes().count("function")) {
       assert(false && "not implemented yet: functions");
     } else if (symbol->getArguments().empty()) {
-      llvm::StructType *BlockType = Module->getTypeByName("block");
+      llvm::StructType *BlockType = Module->getTypeByName(BLOCK_STRUCT);
       llvm::IntToPtrInst *Cast = new llvm::IntToPtrInst(llvm::ConstantInt::get(llvm::IntegerType::get(Context, 32), symbol->getTag()), llvm::PointerType::get(BlockType, 0), "", block);
       return Cast;
     } else {
@@ -179,7 +187,7 @@ llvm::Value *createTerm(KOREPattern *pattern, llvm::StringMap<llvm::Value *> &su
         llvm::Value *ChildPtr = llvm::GetElementPtrInst::CreateInBounds(BlockType, Block, {llvm::ConstantInt::get(llvm::IntegerType::get(Context, 64), 0), llvm::ConstantInt::get(llvm::IntegerType::get(Context, 32), idx)}, "", block);
         llvm::StoreInst *StoreChild = new llvm::StoreInst(ChildValue, ChildPtr, block);
       }
-      llvm::BitCastInst *Cast = new llvm::BitCastInst(Block, llvm::PointerType::get(Module->getTypeByName("block"), 0), "", block);
+      llvm::BitCastInst *Cast = new llvm::BitCastInst(Block, llvm::PointerType::get(Module->getTypeByName(BLOCK_STRUCT), 0), "", block);
       return Cast;
     }
   } else {
