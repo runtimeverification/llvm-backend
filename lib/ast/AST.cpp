@@ -138,11 +138,13 @@ bool KOREObjectSymbol::isPolymorphic() const {
   return true;
 }
 
+static std::unordered_set<std::string> BUILTINS{
+  "\\and", "\\not", "\\or", "\\implies", "\\iff", "\\forall", "\\exists",
+  "\\ceil", "\\floor", "\\equals", "\\in", "\\top", "\\bottom", "\\dv",
+  "\\rewrites", "\\next"};
+
 bool KOREObjectSymbol::isBuiltin() const {
-  return name == "\\and" || name == "\\not" || name == "\\or" || name == "\\implies"
-    || name == "\\iff" || name == "\\forall" || name == "\\exists" || name == "\\ceil"
-    || name == "\\floor" || name == "\\equals" || name == "\\in" || name == "\\top"
-    || name == "\\bottom" || name == "\\dv" || name == "\\rewrites" || name == "\\next";
+  return BUILTINS.count(name);
 }
 
 void KOREObjectSymbol::instantiateSymbol(KOREObjectSymbolDeclaration *decl) {
