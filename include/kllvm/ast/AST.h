@@ -148,6 +148,9 @@ private:
       the signature of the symbol. instantiateSymbol is called on all object
       level symbols in axioms when KOREDefinition::preprocess is called. */
   std::vector<KOREObjectSort *> arguments;
+  /** At parse time, when parsed as part of a pattern, this will be null.
+      When parsed as part of a declaration, it contains the return sort of the symbol.
+      See above re: the behavior of KOREObjectSymbol with respect to instantiateSymbol. */
   KOREObjectSort *sort;
   /* the first integer in a continuous range representing the tags of all the
      polymorphic instantiations of this symbol. If the symbol has no parameters
