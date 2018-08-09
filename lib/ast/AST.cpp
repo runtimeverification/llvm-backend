@@ -5,6 +5,10 @@
 
 using namespace kllvm;
 
+size_t kllvm::hash_value(const kllvm::KORESort &s) {
+  return HashSort{}(s);
+}
+
 bool KOREObjectSortVariable::operator==(const KOREObjectSort &other) const {
   if (auto var = dynamic_cast<const KOREObjectSortVariable *>(&other)) {
     return var->name == name;
@@ -22,7 +26,7 @@ bool KOREObjectCompositeSort::operator==(const KOREObjectSort &other) const {
       return false;
     }
     for (int i = 0; i < arguments.size(); ++i) {
-      if (sort->arguments[i] != arguments[i]) return false;
+      if (*sort->arguments[i] != *arguments[i]) return false;
     }
     return true;
   }

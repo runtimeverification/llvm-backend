@@ -28,6 +28,8 @@ struct HashSort {
   }
 };
 
+size_t hash_value(const kllvm::KORESort &s);
+
 class KOREObjectSortVariable;
 
 class KOREObjectSort : public KORESort {
@@ -218,7 +220,9 @@ struct HashSymbol {
   size_t operator()(const kllvm::KOREObjectSymbol &s) const noexcept {
     size_t hash = 0;
     boost::hash_combine(hash, s.name);
-    boost::hash_combine(hash, s.arguments);
+    for (auto arg : s.arguments) {
+      boost::hash_combine(hash, *arg);
+    }
     return hash;
   }
 };
