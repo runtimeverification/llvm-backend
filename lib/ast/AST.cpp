@@ -29,6 +29,24 @@ bool KOREObjectCompositeSort::operator==(const KOREObjectSort &other) const {
   return false;
 }
 
+KOREObjectSort *KOREObjectCompositeSort::substitute(const std::unordered_map<KOREObjectSortVariable, KOREObjectSort *, HashSort> &subst) {
+  bool dirty = false;
+  std::vector<KOREObjectSort *> newArgs;
+  for (auto arg : arguments) {
+    auto newArg = arg->substitute(subst);
+    if (newArg != arg) {
+      dirty = true;
+    }
+    newArgs.push_back(newArg);
+  }
+  if (dirty) {
+    KOREObjectCompositeSort *retval = Create(name);
+    retval->arguments = newArgs;
+    return retval;
+  }
+  return this;
+}
+
 void KOREObjectSymbol::addArgument(KOREObjectSort *Argument) {
   arguments.push_back(Argument);
 }
@@ -150,31 +168,15 @@ bool KOREObjectSymbol::isBuiltin() const {
 void KOREObjectSymbol::instantiateSymbol(KOREObjectSymbolDeclaration *decl) {
   std::vector<KOREObjectSort *> instantiated;
   int i = 0;
-  std::unordered_map<KOREObjectSortVariable, size_t, HashSort> vars;
+  std::unordered_map<KOREObjectSortVariable, KOREObjectSort *, HashSort> vars;
   for (auto var : decl->getObjectSortVariables()) {
-    vars.emplace(*var, i++);
+    vars.emplace(*var, arguments[i++]);
   }
   for (auto sort : decl->getSymbol()->getArguments()) {
-    if (auto var = dynamic_cast<KOREObjectSortVariable *>(sort)) {
-      if (vars.count(*var)) {
-        instantiated.push_back(arguments[vars.at(*var)]);
-      } else {
-        instantiated.push_back(sort);
-      }
-    } else {
-      instantiated.push_back(sort);
-    }
+    instantiated.push_back(sort->substitute(vars));
   }
   auto returnSort = decl->getSymbol()->sort;
-  if (auto var = dynamic_cast<KOREObjectSortVariable *>(returnSort)) {
-    if (vars.count(*var)) {
-      sort = arguments[vars.at(*var)];
-    } else {
-      sort = returnSort;
-    }
-  } else { 
-    sort = returnSort;
-  }
+  sort = returnSort->substitute(vars);
 
   arguments = instantiated;
 }
