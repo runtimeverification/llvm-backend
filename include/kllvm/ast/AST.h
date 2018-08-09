@@ -140,6 +140,13 @@ class KOREObjectSymbolDeclaration;
 class KOREObjectSymbol : public KORESymbol {
 private:
   std::string name;
+  /** At parse time, when parsed as part of a pattern,
+      this will contain the list of actual sort parameters to the
+      symbol. When parsed as part of a declaration, it contains the signature
+      of the symbol. After instantiateSymbol is called on a symbol that is
+      part of a pattern, it changes from being the sort parameters to being
+      the signature of the symbol. instantiateSymbol is called on all object
+      level symbols in axioms when KOREDefinition::preprocess is called. */
   std::vector<KOREObjectSort *> arguments;
   KOREObjectSort *sort;
   /* the first integer in a continuous range representing the tags of all the
@@ -186,7 +193,8 @@ public:
      with the sorts corresponding to its actual sort parameters after instantiating
      polymorphic parameters. This happens by replacing the variables in the arguments
      of the specified declaration with their substitution in the arguments to the pattern
-     that were parsed in braces. */
+     that were parsed in braces. The result is that the arguments and sort fields are replaced
+     with the instantiated signature of the symbol. */
   void instantiateSymbol(KOREObjectSymbolDeclaration *decl);
 
   friend HashSymbol;
