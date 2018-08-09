@@ -150,14 +150,14 @@ bool KOREObjectSymbol::isBuiltin() const {
 void KOREObjectSymbol::instantiateSymbol(KOREObjectSymbolDeclaration *decl) {
   std::vector<KOREObjectSort *> instantiated;
   int i = 0;
-  std::unordered_set<KOREObjectSortVariable, HashSort> vars;
+  std::unordered_map<KOREObjectSortVariable, size_t, HashSort> vars;
   for (auto var : decl->getObjectSortVariables()) {
-    vars.emplace(*var);
+    vars.emplace(*var, i++);
   }
   for (auto sort : decl->getSymbol()->getArguments()) {
     if (auto var = dynamic_cast<KOREObjectSortVariable *>(sort)) {
       if (vars.count(*var)) {
-        instantiated.push_back(arguments[i++]);
+        instantiated.push_back(arguments[vars.at(*var)]);
       } else {
         instantiated.push_back(sort);
       }
@@ -165,6 +165,17 @@ void KOREObjectSymbol::instantiateSymbol(KOREObjectSymbolDeclaration *decl) {
       instantiated.push_back(sort);
     }
   }
+  auto returnSort = decl->getSymbol()->sort;
+  if (auto var = dynamic_cast<KOREObjectSortVariable *>(returnSort)) {
+    if (vars.count(*var)) {
+      sort = arguments[vars.at(*var)];
+    } else {
+      sort = returnSort;
+    }
+  } else { 
+    sort = returnSort;
+  }
+
   arguments = instantiated;
 }
 
