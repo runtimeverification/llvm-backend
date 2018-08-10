@@ -20,6 +20,8 @@ public:
   virtual void print(std::ostream &Out, unsigned indent = 0) const =0;
 };
 
+static inline std::ostream &operator<<(std::ostream &out, const KORESort &s) { s.print(out); return out; }
+
 struct HashSort {
   size_t operator()(const kllvm::KORESort &s) const noexcept {
     std::ostringstream Out;
