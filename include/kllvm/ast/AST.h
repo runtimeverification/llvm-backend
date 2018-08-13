@@ -673,6 +673,7 @@ private:
 
   std::vector<KOREModule *> modules;
   llvm::StringMap<KOREObjectCompositePattern *> attributes;
+  /* an automatically computed list of all the axioms in the definition */
   std::list<KOREAxiomDeclaration *> axioms;
 
 public:
