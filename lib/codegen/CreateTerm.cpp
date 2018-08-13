@@ -142,23 +142,22 @@ llvm::Value *allocateBlock(const KOREObjectSymbol *symbol, llvm::Type *AllocType
   return Malloc;
 }
 
-llvm::Type *termType(KOREPattern *pattern, llvm::StringMap<llvm::Value *> &substitution, KOREDefinition *definition, llvm::LLVMContext &Context, llvm::Module *Module) {
+llvm::Type *termType(KOREPattern *pattern, llvm::StringMap<llvm::Type *> &substitution, KOREDefinition *definition, llvm::Module *Module) {
   if (auto variable = dynamic_cast<KOREObjectVariablePattern *>(pattern)) {
-    return substitution.lookup(variable->getName())->getType();
+    return substitution.lookup(variable->getName());
   } else if (auto constructor = dynamic_cast<KOREObjectCompositePattern *>(pattern)) {
     const KOREObjectSymbol *symbol = constructor->getConstructor();
     assert(symbol->isConcrete() && "not supported yet: sort variables");
-    assert(symbol->getName() != "\\dv" && "not supported yet: \\dv");
-    KOREObjectSymbolDeclaration *symbolDecl = definition->getSymbolDeclarations().lookup(symbol->getName());
-    if (symbolDecl->getAttributes().count("function")) {
-      assert(false && "not implemented yet: functions");
+    if (symbol->getName() == "\\dv") {
+      auto sort = dynamic_cast<KOREObjectCompositeSort *>(symbol->getArguments()[0]);
+      return getValueType(sort->getCategory(definition), Module);
     }
-    return llvm::PointerType::get(Module->getTypeByName(BLOCK_STRUCT), 0);
+    auto sort = dynamic_cast<KOREObjectCompositeSort *>(symbol->getSort());
+    return getValueType(sort->getCategory(definition), Module);
   } else {
     assert(false && "not supported yet: meta level");
   }
 }
-  
 
 llvm::Value *createTerm(KOREPattern *pattern, llvm::StringMap<llvm::Value *> &substitution, KOREDefinition *definition, llvm::BasicBlock *block, llvm::Module *Module) {
   if (auto variable = dynamic_cast<KOREObjectVariablePattern *>(pattern)) {

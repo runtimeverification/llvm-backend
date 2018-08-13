@@ -15,7 +15,7 @@ std::unique_ptr<llvm::Module> newModule(std::string name, llvm::LLVMContext &Con
 
 /* returns the llvm::Type corresponding to the type of the result of calling createTerm
    on the specified pattern. */
-llvm::Type *termType(KOREPattern *pattern, llvm::StringMap<llvm::Value *> &substitution, KOREDefinition *definition, llvm::LLVMContext &Context, llvm::Module *Module);
+llvm::Type *termType(KOREPattern *pattern, llvm::StringMap<llvm::Type *> &substitution, KOREDefinition *definition, llvm::Module *Module);
 
 /* adds code to the specified basic block in the specified module which constructs
    an llvm value corresponding to the specified KORE RHS pattern and substitution in the
