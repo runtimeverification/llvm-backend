@@ -33,11 +33,14 @@ struct HashSort {
 size_t hash_value(const kllvm::KORESort &s);
 
 class KOREObjectSortVariable;
+class KOREObjectSort;
+
+using substitution = std::unordered_map<KOREObjectSortVariable, KOREObjectSort *, HashSort>;
 
 class KOREObjectSort : public KORESort {
 public:
   virtual bool isConcrete() const = 0;
-  virtual KOREObjectSort *substitute(const std::unordered_map<KOREObjectSortVariable, KOREObjectSort *, HashSort> &) = 0;
+  virtual KOREObjectSort *substitute(const substitution &) = 0;
 
   virtual bool operator==(const KOREObjectSort &other) const = 0;
   bool operator!=(const KOREObjectSort &other) const { return !(*this == other); }
@@ -57,7 +60,7 @@ public:
   }
 
   virtual bool isConcrete() const override { return false; }
-  virtual KOREObjectSort *substitute(const std::unordered_map<KOREObjectSortVariable, KOREObjectSort *, HashSort> &subst) override { return subst.at(*this); }
+  virtual KOREObjectSort *substitute(const substitution &subst) override { return subst.at(*this); }
 
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
   virtual bool operator==(const KOREObjectSort &other) const override;
@@ -100,7 +103,7 @@ public:
   const SortCategory getCategory() const { return category; }
 
   virtual bool isConcrete() const override { return true; }
-  virtual KOREObjectSort *substitute(const std::unordered_map<KOREObjectSortVariable, KOREObjectSort *, HashSort> &subst) override;
+  virtual KOREObjectSort *substitute(const substitution &subst) override;
 
   void addArgument(KOREObjectSort *Argument);
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
