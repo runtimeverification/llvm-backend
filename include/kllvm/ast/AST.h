@@ -33,12 +33,11 @@ struct HashSort {
 size_t hash_value(const kllvm::KORESort &s);
 
 class KOREObjectSortVariable;
-class KOREObjectSort;
-
-using substitution = std::unordered_map<KOREObjectSortVariable, KOREObjectSort *, HashSort>;
 
 class KOREObjectSort : public KORESort {
 public:
+  using substitution = std::unordered_map<KOREObjectSortVariable, KOREObjectSort *, HashSort>;
+
   virtual bool isConcrete() const = 0;
   virtual KOREObjectSort *substitute(const substitution &) = 0;
 
