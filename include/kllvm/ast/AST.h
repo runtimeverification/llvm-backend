@@ -320,6 +320,7 @@ public:
   }
 
   std::string getName() const;
+  KOREObjectSort *getSort() const { return sort; }
 
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
   virtual void markSymbols(std::map<std::string, std::vector<KOREObjectSymbol *>> &) override {}
@@ -406,6 +407,8 @@ public:
   static KOREMetaStringPattern *Create(const std::string &Contents) {
     return new KOREMetaStringPattern(Contents);
   }
+
+  std::string getContents() { return contents; }
 
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
   virtual void markSymbols(std::map<std::string, std::vector<KOREObjectSymbol *>> &) override {}
