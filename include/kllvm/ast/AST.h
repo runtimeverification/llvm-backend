@@ -284,6 +284,8 @@ private:
   KOREMetaVariable(const std::string &Name) : name(Name) { }
 };
 
+class KOREObjectVariablePattern;
+
 // KOREPattern
 class KOREPattern {
 public:
@@ -292,6 +294,9 @@ public:
      to the specified map, mapping their symbol name to the list of all instances
      of that symbol. */
   virtual void markSymbols(std::map<std::string, std::vector<KOREObjectSymbol *>> &) = 0;
+  /* adds all the object level variables contained recursively in the current pattern
+     to the specified map, mapping their variable name to the variable itself. */
+  virtual void markVariables(llvm::StringMap<KOREObjectVariablePattern *> &) = 0;
 };
 
 class KOREObjectPattern : public KOREPattern {
@@ -318,6 +323,7 @@ public:
 
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
   virtual void markSymbols(std::map<std::string, std::vector<KOREObjectSymbol *>> &) override {}
+  virtual void markVariables(llvm::StringMap<KOREObjectVariablePattern *> &map) override { map.insert({name->getName(), this}); }
 
 private:
   KOREObjectVariablePattern(KOREObjectVariable *Name, KOREObjectSort *Sort)
@@ -338,6 +344,7 @@ public:
 
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
   virtual void markSymbols(std::map<std::string, std::vector<KOREObjectSymbol *>> &) override {}
+  virtual void markVariables(llvm::StringMap<KOREObjectVariablePattern *> &) override {}
 
 private:
   KOREMetaVariablePattern(KOREMetaVariable *Name, KOREMetaSort *Sort)
@@ -361,6 +368,7 @@ public:
   void addArgument(KOREPattern *Argument);
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
   virtual void markSymbols(std::map<std::string, std::vector<KOREObjectSymbol *>> &) override;
+  virtual void markVariables(llvm::StringMap<KOREObjectVariablePattern *> &) override;
 
 private:
   KOREObjectCompositePattern(KOREObjectSymbol *Constructor)
@@ -383,6 +391,7 @@ public:
   void addArgument(KOREPattern *Argument);
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
   virtual void markSymbols(std::map<std::string, std::vector<KOREObjectSymbol *>> &) override;
+  virtual void markVariables(llvm::StringMap<KOREObjectVariablePattern *> &) override;
 
 private:
   KOREMetaCompositePattern(KOREMetaSymbol *Constructor)
@@ -400,6 +409,7 @@ public:
 
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
   virtual void markSymbols(std::map<std::string, std::vector<KOREObjectSymbol *>> &) override {}
+  virtual void markVariables(llvm::StringMap<KOREObjectVariablePattern *> &) override {}
 
 private:
   KOREMetaStringPattern(const std::string &Contents) : contents(Contents) { }
@@ -416,6 +426,7 @@ public:
 
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
   virtual void markSymbols(std::map<std::string, std::vector<KOREObjectSymbol *>> &) override {}
+  virtual void markVariables(llvm::StringMap<KOREObjectVariablePattern *> &) override {}
 
 private:
   KOREMetaCharPattern(char Contents) : contents(Contents) { }
