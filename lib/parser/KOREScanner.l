@@ -91,7 +91,7 @@ yyin = in;
 }
 
 "\""            { stringBuffer.clear(); BEGIN(STR);           }
-<STR>[^\"\n\\]* { stringBuffer.push_back(yytext[0]);          }
+<STR>[^\"\n\\]* { stringBuffer.append(yytext);                }
 <STR>"\n"       { stringBuffer.push_back('\n'); loc->lines(); }
 <STR>"\\\""     { stringBuffer.push_back('\"');               }
 <STR>"\\\\"     { stringBuffer.push_back('\\');               }
