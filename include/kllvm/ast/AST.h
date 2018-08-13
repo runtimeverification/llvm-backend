@@ -187,7 +187,6 @@ public:
   bool operator==(KOREObjectSymbol other) const;
   bool operator!=(KOREObjectSymbol other) const { return !(*this == other); }
 
-  uint8_t length() const;
   std::string layoutString(KOREDefinition *) const;
 
   bool isConcrete() const;

@@ -130,43 +130,6 @@ std::string KOREObjectSymbol::layoutString(KOREDefinition *definition) const {
   return result;
 }
 
-uint8_t KOREObjectSymbol::length() const {
-  uint8_t length = 1;
-  for (auto arg : arguments) {
-    auto sort = dynamic_cast<KOREObjectCompositeSort *>(arg);
-    switch(sort->getCategory()) {
-    case SortCategory::Map:
-      length += 3;
-      break;
-    case SortCategory::List:
-      length += 7;
-      break;
-    case SortCategory::Set:
-      length += 3;
-      break;
-    case SortCategory::Int:
-      length += 2;
-      break;
-    case SortCategory::Float:
-      length += 4;
-      break;
-    case SortCategory::StringBuffer:
-      length += 1;
-      break;
-    case SortCategory::Bool:
-      length += 1;
-      break;
-    case SortCategory::MInt:
-      assert(false && "not implemented yet: MInt");
-    case SortCategory::Symbol:
-      length += 1;
-      break;
-    }
-  }
-  return length;
-}
-
-
 bool KOREObjectSymbol::isConcrete() const {
   for (auto sort : arguments) {
     if (!sort->isConcrete()) {
