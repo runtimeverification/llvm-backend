@@ -1,9 +1,54 @@
 #include "kllvm/ast/AST.h"
 
+#include <unordered_set>
+#include <unordered_map>
+
 using namespace kllvm;
+
+size_t kllvm::hash_value(const kllvm::KORESort &s) {
+  return HashSort{}(s);
+}
+
+bool KOREObjectSortVariable::operator==(const KOREObjectSort &other) const {
+  if (auto var = dynamic_cast<const KOREObjectSortVariable *>(&other)) {
+    return var->name == name;
+  }
+  return false;
+}
 
 void KOREObjectCompositeSort::addArgument(KOREObjectSort *Argument) {
   arguments.push_back(Argument);
+}
+
+bool KOREObjectCompositeSort::operator==(const KOREObjectSort &other) const {
+  if (auto sort = dynamic_cast<const KOREObjectCompositeSort *>(&other)) {
+    if (sort->name != name || sort->arguments.size() != arguments.size()) {
+      return false;
+    }
+    for (int i = 0; i < arguments.size(); ++i) {
+      if (*sort->arguments[i] != *arguments[i]) return false;
+    }
+    return true;
+  }
+  return false;
+}
+
+KOREObjectSort *KOREObjectCompositeSort::substitute(const std::unordered_map<KOREObjectSortVariable, KOREObjectSort *, HashSort> &subst) {
+  bool dirty = false;
+  std::vector<KOREObjectSort *> newArgs;
+  for (auto arg : arguments) {
+    auto newArg = arg->substitute(subst);
+    if (newArg != arg) {
+      dirty = true;
+    }
+    newArgs.push_back(newArg);
+  }
+  if (dirty) {
+    KOREObjectCompositeSort *retval = Create(name);
+    retval->arguments = newArgs;
+    return retval;
+  }
+  return this;
 }
 
 void KOREObjectSymbol::addArgument(KOREObjectSort *Argument) {
@@ -14,6 +59,132 @@ void KOREObjectSymbol::addSort(KOREObjectSort *Sort) {
   sort = Sort;
 }
 
+bool KOREObjectSymbol::operator==(KOREObjectSymbol other) const {
+  if (name != other.name || arguments.size() != other.arguments.size()) {
+    return false;
+  }
+  for (int i = 0; i < arguments.size(); ++i) {
+    if (*arguments[i] != *other.arguments[i]) return false;
+  }
+  return true;
+}
+
+std::string KOREObjectSymbol::layoutString() const {
+  std::string result;
+  for (auto arg : arguments) {
+    auto sort = dynamic_cast<KOREObjectCompositeSort *>(arg);
+    switch(sort->getCategory()) {
+    case SortCategory::Map:
+      result.push_back('1');
+      break;
+    case SortCategory::List:
+      result.push_back('2');
+      break;
+    case SortCategory::Set:
+      result.push_back('3');
+      break;
+    case SortCategory::Int:
+      result.push_back('4');
+      break;
+    case SortCategory::Float:
+      result.push_back('5');
+      break;
+    case SortCategory::StringBuffer:
+      result.push_back('6');
+      break;
+    case SortCategory::Bool:
+      result.push_back('7');
+      break;
+    case SortCategory::MInt:
+      assert(false && "not implemented yet: MInt");
+    case SortCategory::Symbol:
+      result.push_back('0');
+      break;
+    }
+  }
+  return result;
+}
+
+uint8_t KOREObjectSymbol::length() const {
+  uint8_t length = 1;
+  for (auto arg : arguments) {
+    auto sort = dynamic_cast<KOREObjectCompositeSort *>(arg);
+    switch(sort->getCategory()) {
+    case SortCategory::Map:
+      length += 3;
+      break;
+    case SortCategory::List:
+      length += 7;
+      break;
+    case SortCategory::Set:
+      length += 3;
+      break;
+    case SortCategory::Int:
+      length += 2;
+      break;
+    case SortCategory::Float:
+      length += 4;
+      break;
+    case SortCategory::StringBuffer:
+      length += 1;
+      break;
+    case SortCategory::Bool:
+      length += 1;
+      break;
+    case SortCategory::MInt:
+      assert(false && "not implemented yet: MInt");
+    case SortCategory::Symbol:
+      length += 1;
+      break;
+    }
+  }
+  return length;
+}
+
+
+bool KOREObjectSymbol::isConcrete() const {
+  for (auto sort : arguments) {
+    if (!sort->isConcrete()) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool KOREObjectSymbol::isPolymorphic() const {
+  for (auto sort : arguments) {
+    if (sort->isConcrete()) {
+      return false;
+    }
+  }
+  return true;
+}
+
+static std::unordered_set<std::string> BUILTINS{
+  "\\and", "\\not", "\\or", "\\implies", "\\iff", "\\forall", "\\exists",
+  "\\ceil", "\\floor", "\\equals", "\\in", "\\top", "\\bottom", "\\dv",
+  "\\rewrites", "\\next"};
+
+bool KOREObjectSymbol::isBuiltin() const {
+  return BUILTINS.count(name);
+}
+
+void KOREObjectSymbol::instantiateSymbol(KOREObjectSymbolDeclaration *decl) {
+  std::vector<KOREObjectSort *> instantiated;
+  int i = 0;
+  std::unordered_map<KOREObjectSortVariable, KOREObjectSort *, HashSort> vars;
+  for (auto var : decl->getObjectSortVariables()) {
+    vars.emplace(*var, arguments[i++]);
+  }
+  for (auto sort : decl->getSymbol()->getArguments()) {
+    instantiated.push_back(sort->substitute(vars));
+  }
+  auto returnSort = decl->getSymbol()->sort;
+  sort = returnSort->substitute(vars);
+
+  arguments = instantiated;
+}
+
 void KOREMetaSymbol::addArgument(KOREMetaSort *Argument) {
   arguments.push_back(Argument);
 }
@@ -22,16 +193,46 @@ void KOREMetaSymbol::addSort(KOREMetaSort *Sort) {
   sort = Sort;
 }
 
+std::string KOREObjectVariable::getName() const {
+  return name;
+}
+
+std::string KOREObjectVariablePattern::getName() const {
+  return name->getName();
+}
+
 void KOREObjectCompositePattern::addArgument(KOREPattern *Argument) {
   arguments.push_back(Argument);
+}
+
+void KOREObjectCompositePattern::markSymbols(std::map<std::string, std::vector<KOREObjectSymbol *>> &map) {
+  if (!constructor->isBuiltin()) {
+    if (!map.count(constructor->getName())) {
+      map.emplace(constructor->getName(), std::vector<KOREObjectSymbol *>{});
+    }
+    map.at(constructor->getName()).push_back(constructor);
+  }
+  for (KOREPattern *arg : arguments) {
+    arg->markSymbols(map);
+  }
 }
 
 void KOREMetaCompositePattern::addArgument(KOREPattern *Argument) {
   arguments.push_back(Argument);
 }
 
+void KOREMetaCompositePattern::markSymbols(std::map<std::string, std::vector<KOREObjectSymbol *>> &map) {
+  for (KOREPattern *arg : arguments) {
+    arg->markSymbols(map);
+  }
+}
+
 void KOREDeclaration::addAttribute(KOREPattern *Attribute) {
-  attributes.push_back(Attribute);
+  if (auto constructor = dynamic_cast<KOREObjectCompositePattern *>(Attribute)) {
+    attributes.insert({constructor->getConstructor()->getName(), constructor});
+    return;
+  }
+  assert(false && "Invalid attribute found");
 }
 
 void
@@ -43,9 +244,46 @@ void KOREDeclaration::addMetaSortVariable(KOREMetaSortVariable *SortVariable) {
   metaSortVariables.push_back(SortVariable);
 }
 
-
 void KOREAxiomDeclaration::addPattern(KOREPattern *Pattern) {
   pattern = Pattern;
+}
+
+static const std::string ASSOC = "assoc";
+static const std::string COMM = "comm";
+static const std::string IDEM = "idem";
+static const std::string UNIT = "unit";
+static const std::string FUNCTIONAL = "functional";
+static const std::string CONSTRUCTOR = "constructor";
+
+bool KOREAxiomDeclaration::isRequired() {
+  return !attributes.count(ASSOC) && !attributes.count(COMM) && !attributes.count(IDEM) && !attributes.count(UNIT) && !attributes.count(FUNCTIONAL) && !attributes.count(CONSTRUCTOR);
+}
+
+KOREPattern *KOREAxiomDeclaration::getRightHandSide() const {
+  if (auto top = dynamic_cast<KOREObjectCompositePattern *>(pattern)) {
+    if (top->getConstructor()->getName() == "\\implies" && top->getArguments().size() == 2) {
+      if (auto andPattern = dynamic_cast<KOREObjectCompositePattern *>(top->getArguments()[1])) {
+        if (andPattern->getConstructor()->getName() == "\\and" && andPattern->getArguments().size() == 2) {
+          if (auto equals = dynamic_cast<KOREObjectCompositePattern *>(andPattern->getArguments()[0])) {
+            if (equals->getConstructor()->getName() == "\\equals" && equals->getArguments().size() == 2) {
+              return equals->getArguments()[1];
+            }
+          }
+        }
+      }
+    } else if (top->getConstructor()->getName() == "\\and" && top->getArguments().size() == 2) {
+      if (auto andPattern = dynamic_cast<KOREObjectCompositePattern *>(top->getArguments()[1])) {
+        if (andPattern->getConstructor()->getName() == "\\and" && andPattern->getArguments().size() == 2) {
+          if (auto rewrites = dynamic_cast<KOREObjectCompositePattern *>(andPattern->getArguments()[1])) {
+            if (rewrites->getConstructor()->getName() == "\\rewrites" && rewrites->getArguments().size() == 2) {
+              return rewrites->getArguments()[1];
+            }
+          }
+        }
+      }
+    }
+  }
+  assert(false && "could not compute right hand side of axiom");
 }
 
 void
@@ -66,7 +304,11 @@ void KOREMetaAliasDeclaration::addPattern(KOREMetaPattern *Pattern) {
 }
 
 void KOREModule::addAttribute(KOREPattern *Attribute) {
-  attributes.push_back(Attribute);
+  if (auto constructor = dynamic_cast<KOREObjectCompositePattern *>(Attribute)) {
+    attributes.insert({constructor->getConstructor()->getName(), constructor});
+    return;
+  }
+  assert(false && "Invalid attribute found");
 }
 
 void KOREModule::addDeclaration(KOREDeclaration *Declaration) {
@@ -75,10 +317,83 @@ void KOREModule::addDeclaration(KOREDeclaration *Declaration) {
 
 void KOREDefinition::addModule(KOREModule *Module) {
   modules.push_back(Module);
+  for (auto decl : Module->getDeclarations()) {
+    if (auto sortDecl = dynamic_cast<KOREObjectCompositeSortDeclaration *>(decl)) {
+      sortDeclarations.insert({sortDecl->getName(), sortDecl});
+    } else if (auto symbolDecl = dynamic_cast<KOREObjectSymbolDeclaration *>(decl)) {
+      symbolDeclarations.insert({symbolDecl->getSymbol()->getName(), symbolDecl});
+    } else if (auto axiom = dynamic_cast<KOREAxiomDeclaration *>(decl)) {
+      axioms.push_back(axiom);
+    }
+  }
 }
 
 void KOREDefinition::addAttribute(KOREPattern *Attribute) {
-  attributes.push_back(Attribute);
+  if (auto constructor = dynamic_cast<KOREObjectCompositePattern *>(Attribute)) {
+    attributes.insert({constructor->getConstructor()->getName(), constructor});
+    return;
+  }
+  assert(false && "Invalid attribute found");
+}
+
+void KOREDefinition::preprocess() {
+  auto symbols = std::map<std::string, std::vector<KOREObjectSymbol *>>{};
+  for (auto iter = axioms.begin(); iter != axioms.end();) {
+    auto axiom = *iter;
+    if (!axiom->isRequired()) {
+      iter = axioms.erase(iter);
+    } else {
+      axiom->pattern->markSymbols(symbols);
+      ++iter;
+    }
+  }
+  for (auto iter = symbols.begin(); iter != symbols.end(); ++iter) {
+    auto entry = *iter;
+    for (auto iter = entry.second.begin(); iter != entry.second.end(); ++iter) {
+      KOREObjectSymbol *symbol = *iter;
+      auto decl = symbolDeclarations.lookup(symbol->getName());
+      symbol->instantiateSymbol(decl);
+    }
+  }
+  uint32_t nextSymbol = 0;
+  uint16_t nextLayout = 1;
+  auto instantiations = std::unordered_map<KOREObjectSymbol, uint32_t, HashSymbol>{};
+  auto layouts = std::unordered_map<std::string, uint16_t>{};
+  auto variables = std::unordered_map<std::string, std::pair<uint32_t, uint32_t>>{};
+  for (auto iter = symbols.begin(); iter != symbols.end(); ++iter) {
+    auto entry = *iter;
+    uint32_t firstTag = nextSymbol;
+    for (auto iter = entry.second.begin(); iter != entry.second.end(); ++iter) {
+      KOREObjectSymbol *symbol = *iter;
+      if (symbol->isConcrete()) {
+        if (!instantiations.count(*symbol)) {
+          instantiations.emplace(*symbol, nextSymbol++);
+        }
+        std::string layoutStr = symbol->layoutString();
+        if (!layouts.count(layoutStr)) {
+          layouts.emplace(layoutStr, nextLayout++);
+        }
+        symbol->firstTag = symbol->lastTag = instantiations.at(*symbol);
+        symbol->layout = layouts.at(layoutStr);
+      }
+    }
+    uint32_t lastTag = nextSymbol-1;
+    if (!entry.second.empty()) {
+      variables.emplace(entry.first, std::pair<uint32_t, uint32_t>{firstTag, lastTag});
+    }
+  }
+  for (auto iter = symbols.begin(); iter != symbols.end(); ++iter) {
+    auto entry = *iter;
+    auto range = variables.at(entry.first);
+    for (auto iter = entry.second.begin(); iter != entry.second.end(); ++iter) {
+      KOREObjectSymbol *symbol = *iter;
+      if (!symbol->isConcrete()) {
+        assert(symbol->isPolymorphic() && "Unsupported polymorphism");
+        symbol->firstTag = range.first;
+        symbol->lastTag = range.second;
+      }
+    }
+  }
 }
 
 // Pretty printer
@@ -235,16 +550,16 @@ void KOREMetaCharPattern::print(std::ostream &Out, unsigned indent) const {
 }
 
 static void printAttributeList(
-  std::ostream &Out, const std::vector<KOREPattern *> attributes,
+  std::ostream &Out, const llvm::StringMap<KOREObjectCompositePattern *> attributes,
   unsigned indent = 0) {
 
   std::string Indent(indent, ' ');
   Out << Indent << "[";
   bool isFirst = true;
-  for (const KOREPattern *Pattern : attributes) {
+  for (auto &Pattern : attributes) {
     if (!isFirst)
       Out << ",";
-    Pattern->print(Out);
+    Pattern.second->print(Out);
     isFirst = false;
   }
   Out << "]";

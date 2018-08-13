@@ -1,0 +1,641 @@
+[]
+
+module BASIC-K
+  sort SortK{} []
+  sort SortKItem{} []
+endmodule []
+
+module KSEQ
+  import BASIC-K []
+
+  symbol kseq{}(SortKItem{}, SortK{}) : SortK{} []
+  symbol append{}(SortK{}, SortK{}) : SortK{} []
+  symbol dotk{}() : SortK{} []
+
+  axiom{R}
+    \equals{SortK{},R}(
+      append{}(dotk{}(),K2:SortK{}),
+      K2:SortK{})
+  []
+
+  axiom{R}
+    \equals{SortK{},R}(
+      append{}(kseq{}(K1:SortKItem{},K2:SortK{}),K3:SortK{}),
+      kseq{}(K1:SortKItem{},append{}(K2:SortK{},K3:SortK{})))
+  []
+
+endmodule []
+
+module INJ
+  symbol inj{From,To}(From) : To []
+ 
+  axiom{S1,S2,S3,R} 
+    \equals{S3,R}(
+      inj{S2,S3}(inj{S1,S2}(T:S1)),
+      inj{S1,S3}(T:S1))
+  []
+
+endmodule []
+
+module K
+  import KSEQ []
+  import INJ []
+endmodule []
+
+module TEST
+
+// imports
+  import K []
+
+// sorts
+  sort SortList{} [org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), hook{}("LIST.List"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(197,3,197,31)")]
+  sort SortKConfigVar{} [org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/kast.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(12,3,12,27)"), token{}()]
+  sort SortCell{} []
+  sort SortBool{} []
+  sort SortKCell{} []
+  sort SortMap{} [org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(87,3,87,28)"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), hook{}("MAP.Map")]
+  hooked-sort SortInt{} [org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(320,3,320,28)"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), hook{}("INT.Int")]
+  sort SortFoo{} []
+  sort SortSet{} [org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(153,3,153,28)"), hook{}("SET.Set")]
+
+// symbols
+  symbol LblinitKCell{}(SortMap{}) : SortKCell{} [noThread{}(), functional{}(), function{}(), initializer{}(), originalPrd{}()]
+  symbol Lbl'Stop'Set{}() : SortSet{} [org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), klabel{}(".Set"), hook{}("SET.unit"), symbol'Kywd'{}(), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(161,18,161,110)"), latex{}("\\dotCt{Set}"), functional{}(), function{}(), productionID{}("1753714541"), constructor{}(), originalPrd{}()]
+  hooked-symbol Lblkeys'Unds'list'LParUndsRParUnds'MAP'UndsUnds'Map{}(SortMap{}) : SortList{} [org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), hook{}("MAP.keys_list"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(132,19,132,79)"), functional{}(), function{}(), productionID{}("1595938139"), originalPrd{}()]
+  hooked-symbol Lblsize'LParUndsRParUnds'MAP'UndsUnds'Map{}(SortMap{}) : SortInt{} [org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), klabel{}("sizeMap"), hook{}("MAP.size"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(140,18,140,91)"), functional{}(), function{}(), productionID{}("1070501849"), originalPrd{}()]
+  hooked-symbol LblListItem{}(SortK{}) : SortList{} [org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), klabel{}("ListItem"), hook{}("LIST.element"), smtlib{}("smt_seq_elem"), symbol'Kywd'{}(), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(235,19,235,120)"), functional{}(), function{}(), productionID{}("605420629"), originalPrd{}()]
+  symbol LblisBool{}(SortK{}) : SortBool{} [function{}(), predicate{}("Bool"), originalPrd{}(), functional{}()]
+  hooked-symbol Lbl'UndsLSqBUnds-LT-'-undef'RSqB'{}(SortMap{}, SortK{}) : SortMap{} [org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), klabel{}("_[_<-undef]"), hook{}("MAP.remove"), symbol'Kywd'{}(), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(116,18,116,105)"), functional{}(), function{}(), productionID{}("570794077"), originalPrd{}()]
+  hooked-symbol LblSet'Coln'in{}(SortK{}, SortSet{}) : SortBool{} [org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), klabel{}("Set:in"), hook{}("SET.in"), symbol'Kywd'{}(), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(175,19,175,90)"), functional{}(), function{}(), productionID{}("2059572982"), originalPrd{}()]
+  hooked-symbol Lbl'UndsLSqBUndsRSqB'orDefault'UndsUnds'MAP'UndsUnds'Map'Unds'K'Unds'K{}(SortMap{}, SortK{}, SortK{}) : SortK{} [org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), klabel{}("Map:lookupOrDefault"), hook{}("MAP.lookupOrDefault"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(110,16,110,114)"), functional{}(), function{}(), productionID{}("968113504"), originalPrd{}()]
+  hooked-symbol Lblvalues'LParUndsRParUnds'MAP'UndsUnds'Map{}(SortMap{}) : SortList{} [org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), klabel{}("values"), hook{}("MAP.values"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(137,19,137,76)"), functional{}(), function{}(), productionID{}("596706728"), originalPrd{}()]
+  symbol Lbl'Unds'Map'Unds'{}(SortMap{}, SortMap{}) : SortMap{} [org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), element{}("_|->_"), comm{}(), klabel{}("_Map_"), hook{}("MAP.concat"), left{}(), symbol'Kywd'{}(), format{}("%1%n%2"), unit{}(".Map"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(95,18,95,172)"), assoc{}(), functional{}(), function{}(), productionID{}("1219916644"), index{}("0"), originalPrd{}()]
+  symbol Lbl'Unds'List'Unds'{}(SortList{}, SortList{}) : SortList{} [org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), element{}("ListItem"), klabel{}("_List_"), hook{}("LIST.concat"), smtlib{}("smt_seq_concat"), left{}(), symbol'Kywd'{}(), format{}("%1%n%2"), unit{}(".List"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(230,19,230,180)"), assoc{}(), functional{}(), function{}(), productionID{}("817299424"), originalPrd{}()]
+  hooked-symbol Lblchoice'LParUndsRParUnds'MAP'UndsUnds'Map{}(SortMap{}) : SortK{} [org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), klabel{}("Map:choice"), hook{}("MAP.choice"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(146,16,146,96)"), functional{}(), function{}(), productionID{}("2106900153"), originalPrd{}()]
+  hooked-symbol Lblsize'LParUndsRParUnds'SET'UndsUnds'Set{}(SortSet{}) : SortInt{} [org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), klabel{}("size"), hook{}("SET.size"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(181,18,181,68)"), functional{}(), function{}(), productionID{}("36657658"), originalPrd{}()]
+  symbol LblisK{}(SortK{}) : SortBool{} [function{}(), predicate{}("K"), originalPrd{}(), functional{}()]
+  symbol Lbl'Stop'List{}() : SortList{} [org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), klabel{}(".List"), hook{}("LIST.unit"), smtlib{}("smt_seq_nil"), symbol'Kywd'{}(), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(232,19,232,134)"), latex{}("\\dotCt{List}"), functional{}(), function{}(), productionID{}("2031951755"), constructor{}(), originalPrd{}()]
+  symbol LblisMap{}(SortK{}) : SortBool{} [function{}(), predicate{}("Map"), originalPrd{}(), functional{}()]
+  hooked-symbol Lbl'UndsLSqBUnds-LT-'-'UndsRSqBUnds'MAP'UndsUnds'Map'Unds'K'Unds'K{}(SortMap{}, SortK{}, SortK{}) : SortMap{} [org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), prefer{}(), hook{}("MAP.update"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(113,18,113,84)"), functional{}(), function{}(), productionID{}("1153302647"), originalPrd{}()]
+  symbol Lblbar'Unds'TEST'Unds'{}() : SortFoo{} [org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/test/./test.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(3,24,3,28)"), functional{}(), productionID{}("1616359099"), constructor{}(), originalPrd{}()]
+  symbol LblisSet{}(SortK{}) : SortBool{} [function{}(), predicate{}("Set"), originalPrd{}(), functional{}()]
+  hooked-symbol LblMap'Coln'lookup{}(SortMap{}, SortK{}) : SortK{} [org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), klabel{}("Map:lookup"), hook{}("MAP.lookup"), symbol'Kywd'{}(), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(108,16,108,104)"), functional{}(), function{}(), productionID{}("1122130699"), originalPrd{}()]
+  hooked-symbol Lbl'Unds'-Map'UndsUnds'MAP'UndsUnds'Map'Unds'Map{}(SortMap{}, SortMap{}) : SortMap{} [org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), hook{}("MAP.difference"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(120,18,120,108)"), latex{}("{#1}-_{\\it Map}{#2}"), functional{}(), function{}(), productionID{}("1928301845"), originalPrd{}()]
+  symbol LblisInt{}(SortK{}) : SortBool{} [function{}(), predicate{}("Int"), originalPrd{}(), functional{}()]
+  hooked-symbol LblupdateMap'LParUndsCommUndsRParUnds'MAP'UndsUnds'Map'Unds'Map{}(SortMap{}, SortMap{}) : SortMap{} [org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), klabel{}("updateMap"), hook{}("MAP.updateAll"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(125,18,125,79)"), functional{}(), function{}(), productionID{}("1789452565"), originalPrd{}()]
+  symbol LblisCell{}(SortK{}) : SortBool{} [function{}(), predicate{}("Cell"), originalPrd{}(), functional{}()]
+  hooked-symbol LblList'Coln'get{}(SortList{}, SortInt{}) : SortK{} [org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), klabel{}("List:get"), hook{}("LIST.get"), symbol'Kywd'{}(), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(240,16,240,94)"), functional{}(), function{}(), productionID{}("351417028"), originalPrd{}()]
+  symbol LblisFoo{}(SortK{}) : SortBool{} [function{}(), predicate{}("Foo"), originalPrd{}(), functional{}()]
+  hooked-symbol Lblkeys'LParUndsRParUnds'MAP'UndsUnds'Map{}(SortMap{}) : SortSet{} [org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), klabel{}("keys"), hook{}("MAP.keys"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(131,18,131,74)"), functional{}(), function{}(), productionID{}("1370074462"), originalPrd{}()]
+  hooked-symbol LblList'Coln'range{}(SortList{}, SortInt{}, SortInt{}) : SortList{} [org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), klabel{}("List:range"), hook{}("LIST.range"), symbol'Kywd'{}(), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(243,19,243,98)"), functional{}(), function{}(), productionID{}("331122245"), originalPrd{}()]
+  hooked-symbol Lbl'Unds-LT-Eqls'Map'UndsUnds'MAP'UndsUnds'Map'Unds'Map{}(SortMap{}, SortMap{}) : SortBool{} [org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), hook{}("MAP.inclusion"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(143,19,143,79)"), functional{}(), function{}(), productionID{}("1620823990"), originalPrd{}()]
+  hooked-symbol Lblchoice'LParUndsRParUnds'SET'UndsUnds'Set{}(SortSet{}) : SortK{} [org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), klabel{}("Set:choice"), hook{}("SET.choice"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(184,16,184,90)"), functional{}(), function{}(), productionID{}("2029680286"), originalPrd{}()]
+  hooked-symbol Lblsize'LParUndsRParUnds'LIST'UndsUnds'List{}(SortList{}) : SortInt{} [org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), klabel{}("sizeList"), hook{}("LIST.size"), smtlib{}("smt_seq_len"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(249,18,249,109)"), functional{}(), function{}(), productionID{}("154173878"), originalPrd{}()]
+  symbol Lblfoo'Unds'TEST'Unds'{}() : SortFoo{} [org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/test/./test.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(3,16,3,20)"), functional{}(), productionID{}("53940034"), constructor{}(), originalPrd{}()]
+  hooked-symbol Lbl'UndsPipe'-'-GT-Unds'{}(SortK{}, SortK{}) : SortMap{} [org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), klabel{}("_|->_"), hook{}("MAP.element"), symbol'Kywd'{}(), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(102,18,102,124)"), latex{}("{#1}\\mapsto{#2}"), functional{}(), function{}(), productionID{}("2079565272"), originalPrd{}()]
+  symbol LblisList{}(SortK{}) : SortBool{} [function{}(), predicate{}("List"), originalPrd{}(), functional{}()]
+  hooked-symbol Lbl'Unds'in'UndsUnds'LIST'UndsUnds'K'Unds'List{}(SortK{}, SortList{}) : SortBool{} [org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), klabel{}("_inList_"), hook{}("LIST.in"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(246,19,246,85)"), functional{}(), function{}(), productionID{}("38544126"), originalPrd{}()]
+  hooked-symbol LblSetItem{}(SortK{}) : SortSet{} [org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), klabel{}("SetItem"), hook{}("SET.element"), symbol'Kywd'{}(), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(166,18,166,96)"), functional{}(), function{}(), productionID{}("1095273238"), originalPrd{}()]
+  symbol Lbl'Stop'Map{}() : SortMap{} [org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), klabel{}(".Map"), hook{}("MAP.unit"), symbol'Kywd'{}(), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(97,18,97,116)"), latex{}("\\dotCt{Map}"), functional{}(), function{}(), productionID{}("412925308"), constructor{}(), originalPrd{}()]
+  hooked-symbol LblintersectSet'LParUndsCommUndsRParUnds'SET'UndsUnds'Set'Unds'Set{}(SortSet{}, SortSet{}) : SortSet{} [org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), klabel{}("intersectSet"), hook{}("SET.intersection"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(169,18,169,76)"), functional{}(), function{}(), productionID{}("177140066"), originalPrd{}()]
+  symbol LblisKItem{}(SortK{}) : SortBool{} [function{}(), predicate{}("KItem"), originalPrd{}(), functional{}()]
+  hooked-symbol LblSet'Coln'difference{}(SortSet{}, SortSet{}) : SortSet{} [org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), klabel{}("Set:difference"), hook{}("SET.difference"), symbol'Kywd'{}(), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(172,18,172,134)"), latex{}("{#1}-_{\\it Set}{#2}"), functional{}(), function{}(), productionID{}("787122337"), originalPrd{}()]
+  hooked-symbol Lbl'Unds-LT-Eqls'Set'UndsUnds'SET'UndsUnds'Set'Unds'Set{}(SortSet{}, SortSet{}) : SortBool{} [org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), hook{}("SET.inclusion"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(178,19,178,73)"), functional{}(), function{}(), productionID{}("2144838275"), originalPrd{}()]
+  hooked-symbol LblremoveAll'LParUndsCommUndsRParUnds'MAP'UndsUnds'Map'Unds'Set{}(SortMap{}, SortSet{}) : SortMap{} [org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), klabel{}("removeAll"), hook{}("MAP.removeAll"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(128,18,128,79)"), functional{}(), function{}(), productionID{}("1579280783"), originalPrd{}()]
+  symbol LblisKConfigVar{}(SortK{}) : SortBool{} [function{}(), predicate{}("KConfigVar"), originalPrd{}(), functional{}()]
+  symbol LblisKCell{}(SortK{}) : SortBool{} [function{}(), predicate{}("KCell"), originalPrd{}(), functional{}()]
+  symbol Lbl'-LT-'k'-GT-'{}(SortK{}) : SortKCell{} [cell{}(), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/kast.k)"), topcell{}(), maincell{}(), contentStartColumn{}("17"), contentStartLine{}("204"), format{}("%1%i%n%2%d%n%3"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax RuleContent ::= K"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(204,17,204,32)"), functional{}(), constructor{}(), originalPrd{}()]
+  symbol Lbl'Unds'Set'Unds'{}(SortSet{}, SortSet{}) : SortSet{} [org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), element{}("SetItem"), comm{}(), klabel{}("_Set_"), hook{}("SET.concat"), left{}(), idem{}(), symbol'Kywd'{}(), format{}("%1%n%2"), unit{}(".Set"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(159,18,159,164)"), assoc{}(), functional{}(), function{}(), productionID{}("788625466"), originalPrd{}()]
+  hooked-symbol Lbl'Unds'in'Unds'keys'LParUndsRParUnds'MAP'UndsUnds'K'Unds'Map{}(SortK{}, SortMap{}) : SortBool{} [org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), hook{}("MAP.in_keys"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(134,19,134,77)"), functional{}(), function{}(), productionID{}("1923999715"), originalPrd{}()]
+
+// generated axioms
+  axiom{R} \exists{R} (Val:SortKCell{}, \equals{SortKCell{}, R} (Val:SortKCell{}, LblinitKCell{}(K0:SortMap{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortSet{}, \equals{SortSet{}, R} (Val:SortSet{}, Lbl'Stop'Set{}())) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortList{}, \equals{SortList{}, R} (Val:SortList{}, Lblkeys'Unds'list'LParUndsRParUnds'MAP'UndsUnds'Map{}(K0:SortMap{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortInt{}, \equals{SortInt{}, R} (Val:SortInt{}, Lblsize'LParUndsRParUnds'MAP'UndsUnds'Map{}(K0:SortMap{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortList{}, \equals{SortList{}, R} (Val:SortList{}, LblListItem{}(K0:SortK{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortBool{}, \equals{SortBool{}, R} (Val:SortBool{}, LblisBool{}(K0:SortK{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortMap{}, \equals{SortMap{}, R} (Val:SortMap{}, Lbl'UndsLSqBUnds-LT-'-undef'RSqB'{}(K0:SortMap{}, K1:SortK{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortBool{}, \equals{SortBool{}, R} (Val:SortBool{}, LblSet'Coln'in{}(K0:SortK{}, K1:SortSet{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortK{}, \equals{SortK{}, R} (Val:SortK{}, Lbl'UndsLSqBUndsRSqB'orDefault'UndsUnds'MAP'UndsUnds'Map'Unds'K'Unds'K{}(K0:SortMap{}, K1:SortK{}, K2:SortK{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortList{}, \equals{SortList{}, R} (Val:SortList{}, Lblvalues'LParUndsRParUnds'MAP'UndsUnds'Map{}(K0:SortMap{}))) [functional{}()] // functional
+  axiom{R} \equals{SortMap{}, R} (Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(K1:SortMap{},K2:SortMap{}),K3:SortMap{}),Lbl'Unds'Map'Unds'{}(K1:SortMap{},Lbl'Unds'Map'Unds'{}(K2:SortMap{},K3:SortMap{}))) [assoc{}()] // associativity
+  axiom{R} \equals{SortMap{}, R} (Lbl'Unds'Map'Unds'{}(K1:SortMap{},K2:SortMap{}),Lbl'Unds'Map'Unds'{}(K2:SortMap{},K1:SortMap{})) [comm{}()] // commutativity
+  axiom{R} \exists{R} (Val:SortMap{}, \equals{SortMap{}, R} (Val:SortMap{}, Lbl'Unds'Map'Unds'{}(K0:SortMap{}, K1:SortMap{}))) [functional{}()] // functional
+  axiom{R} \equals{SortList{}, R} (Lbl'Unds'List'Unds'{}(Lbl'Unds'List'Unds'{}(K1:SortList{},K2:SortList{}),K3:SortList{}),Lbl'Unds'List'Unds'{}(K1:SortList{},Lbl'Unds'List'Unds'{}(K2:SortList{},K3:SortList{}))) [assoc{}()] // associativity
+  axiom{R} \exists{R} (Val:SortList{}, \equals{SortList{}, R} (Val:SortList{}, Lbl'Unds'List'Unds'{}(K0:SortList{}, K1:SortList{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortK{}, \equals{SortK{}, R} (Val:SortK{}, Lblchoice'LParUndsRParUnds'MAP'UndsUnds'Map{}(K0:SortMap{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortInt{}, \equals{SortInt{}, R} (Val:SortInt{}, Lblsize'LParUndsRParUnds'SET'UndsUnds'Set{}(K0:SortSet{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortBool{}, \equals{SortBool{}, R} (Val:SortBool{}, LblisK{}(K0:SortK{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortList{}, \equals{SortList{}, R} (Val:SortList{}, Lbl'Stop'List{}())) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortBool{}, \equals{SortBool{}, R} (Val:SortBool{}, LblisMap{}(K0:SortK{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortMap{}, \equals{SortMap{}, R} (Val:SortMap{}, Lbl'UndsLSqBUnds-LT-'-'UndsRSqBUnds'MAP'UndsUnds'Map'Unds'K'Unds'K{}(K0:SortMap{}, K1:SortK{}, K2:SortK{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortFoo{}, \equals{SortFoo{}, R} (Val:SortFoo{}, Lblbar'Unds'TEST'Unds'{}())) [functional{}()] // functional
+  axiom{}\not{SortFoo{}} (\and{SortFoo{}} (Lblbar'Unds'TEST'Unds'{}(), Lblfoo'Unds'TEST'Unds'{}())) [constructor{}()] // no confusion different constructors
+  axiom{R} \exists{R} (Val:SortBool{}, \equals{SortBool{}, R} (Val:SortBool{}, LblisSet{}(K0:SortK{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortK{}, \equals{SortK{}, R} (Val:SortK{}, LblMap'Coln'lookup{}(K0:SortMap{}, K1:SortK{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortMap{}, \equals{SortMap{}, R} (Val:SortMap{}, Lbl'Unds'-Map'UndsUnds'MAP'UndsUnds'Map'Unds'Map{}(K0:SortMap{}, K1:SortMap{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortBool{}, \equals{SortBool{}, R} (Val:SortBool{}, LblisInt{}(K0:SortK{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortMap{}, \equals{SortMap{}, R} (Val:SortMap{}, LblupdateMap'LParUndsCommUndsRParUnds'MAP'UndsUnds'Map'Unds'Map{}(K0:SortMap{}, K1:SortMap{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortBool{}, \equals{SortBool{}, R} (Val:SortBool{}, LblisCell{}(K0:SortK{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortK{}, \equals{SortK{}, R} (Val:SortK{}, LblList'Coln'get{}(K0:SortList{}, K1:SortInt{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortBool{}, \equals{SortBool{}, R} (Val:SortBool{}, LblisFoo{}(K0:SortK{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortSet{}, \equals{SortSet{}, R} (Val:SortSet{}, Lblkeys'LParUndsRParUnds'MAP'UndsUnds'Map{}(K0:SortMap{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortList{}, \equals{SortList{}, R} (Val:SortList{}, LblList'Coln'range{}(K0:SortList{}, K1:SortInt{}, K2:SortInt{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortBool{}, \equals{SortBool{}, R} (Val:SortBool{}, Lbl'Unds-LT-Eqls'Map'UndsUnds'MAP'UndsUnds'Map'Unds'Map{}(K0:SortMap{}, K1:SortMap{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortK{}, \equals{SortK{}, R} (Val:SortK{}, Lblchoice'LParUndsRParUnds'SET'UndsUnds'Set{}(K0:SortSet{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortInt{}, \equals{SortInt{}, R} (Val:SortInt{}, Lblsize'LParUndsRParUnds'LIST'UndsUnds'List{}(K0:SortList{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortFoo{}, \equals{SortFoo{}, R} (Val:SortFoo{}, Lblfoo'Unds'TEST'Unds'{}())) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortMap{}, \equals{SortMap{}, R} (Val:SortMap{}, Lbl'UndsPipe'-'-GT-Unds'{}(K0:SortK{}, K1:SortK{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortBool{}, \equals{SortBool{}, R} (Val:SortBool{}, LblisList{}(K0:SortK{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortBool{}, \equals{SortBool{}, R} (Val:SortBool{}, Lbl'Unds'in'UndsUnds'LIST'UndsUnds'K'Unds'List{}(K0:SortK{}, K1:SortList{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortSet{}, \equals{SortSet{}, R} (Val:SortSet{}, LblSetItem{}(K0:SortK{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortMap{}, \equals{SortMap{}, R} (Val:SortMap{}, Lbl'Stop'Map{}())) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortSet{}, \equals{SortSet{}, R} (Val:SortSet{}, LblintersectSet'LParUndsCommUndsRParUnds'SET'UndsUnds'Set'Unds'Set{}(K0:SortSet{}, K1:SortSet{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortBool{}, \equals{SortBool{}, R} (Val:SortBool{}, LblisKItem{}(K0:SortK{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortSet{}, \equals{SortSet{}, R} (Val:SortSet{}, LblSet'Coln'difference{}(K0:SortSet{}, K1:SortSet{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortBool{}, \equals{SortBool{}, R} (Val:SortBool{}, Lbl'Unds-LT-Eqls'Set'UndsUnds'SET'UndsUnds'Set'Unds'Set{}(K0:SortSet{}, K1:SortSet{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortMap{}, \equals{SortMap{}, R} (Val:SortMap{}, LblremoveAll'LParUndsCommUndsRParUnds'MAP'UndsUnds'Map'Unds'Set{}(K0:SortMap{}, K1:SortSet{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortBool{}, \equals{SortBool{}, R} (Val:SortBool{}, LblisKConfigVar{}(K0:SortK{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortBool{}, \equals{SortBool{}, R} (Val:SortBool{}, LblisKCell{}(K0:SortK{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortKCell{}, \equals{SortKCell{}, R} (Val:SortKCell{}, Lbl'-LT-'k'-GT-'{}(K0:SortK{}))) [functional{}()] // functional
+  axiom{}\implies{SortKCell{}} (\and{SortKCell{}} (Lbl'-LT-'k'-GT-'{}(X0:SortK{}), Lbl'-LT-'k'-GT-'{}(Y0:SortK{})), Lbl'-LT-'k'-GT-'{}(\and{SortK{}} (X0:SortK{}, Y0:SortK{}))) [constructor{}()] // no confusion same constructor
+  axiom{R} \equals{SortSet{}, R} (Lbl'Unds'Set'Unds'{}(Lbl'Unds'Set'Unds'{}(K1:SortSet{},K2:SortSet{}),K3:SortSet{}),Lbl'Unds'Set'Unds'{}(K1:SortSet{},Lbl'Unds'Set'Unds'{}(K2:SortSet{},K3:SortSet{}))) [assoc{}()] // associativity
+  axiom{R} \equals{SortSet{}, R} (Lbl'Unds'Set'Unds'{}(K1:SortSet{},K2:SortSet{}),Lbl'Unds'Set'Unds'{}(K2:SortSet{},K1:SortSet{})) [comm{}()] // commutativity
+  axiom{R} \equals{SortSet{}, R} (Lbl'Unds'Set'Unds'{}(K:SortSet{},K:SortSet{}),K:SortSet{}) [idem{}()] // idempotency
+  axiom{R} \exists{R} (Val:SortSet{}, \equals{SortSet{}, R} (Val:SortSet{}, Lbl'Unds'Set'Unds'{}(K0:SortSet{}, K1:SortSet{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortBool{}, \equals{SortBool{}, R} (Val:SortBool{}, Lbl'Unds'in'Unds'keys'LParUndsRParUnds'MAP'UndsUnds'K'Unds'Map{}(K0:SortK{}, K1:SortMap{}))) [functional{}()] // functional
+  axiom{} \or{SortKItem{}} (\exists{SortKItem{}} (Val:SortInt{}, inj{SortInt{}, SortKItem{}} (Val:SortInt{})), \or{SortKItem{}} (\exists{SortKItem{}} (Val:SortKCell{}, inj{SortKCell{}, SortKItem{}} (Val:SortKCell{})), \or{SortKItem{}} (\exists{SortKItem{}} (Val:SortSet{}, inj{SortSet{}, SortKItem{}} (Val:SortSet{})), \or{SortKItem{}} (\exists{SortKItem{}} (Val:SortMap{}, inj{SortMap{}, SortKItem{}} (Val:SortMap{})), \or{SortKItem{}} (\exists{SortKItem{}} (Val:SortList{}, inj{SortList{}, SortKItem{}} (Val:SortList{})), \or{SortKItem{}} (\exists{SortKItem{}} (Val:SortCell{}, inj{SortCell{}, SortKItem{}} (Val:SortCell{})), \or{SortKItem{}} (\exists{SortKItem{}} (Val:SortBool{}, inj{SortBool{}, SortKItem{}} (Val:SortBool{})), \or{SortKItem{}} (\exists{SortKItem{}} (Val:SortFoo{}, inj{SortFoo{}, SortKItem{}} (Val:SortFoo{})), \bottom{SortKItem{}}())))))))) [constructor{}()] // no junk
+  axiom{} \or{SortList{}} (\exists{SortList{}} (X0:SortList{}, \exists{SortList{}} (X1:SortList{}, Lbl'Unds'List'Unds'{}(X0:SortList{}, X1:SortList{}))), \or{SortList{}} (Lbl'Stop'List{}(), \bottom{SortList{}}())) [constructor{}()] // no junk
+  axiom{} \or{SortKConfigVar{}} (\top{SortKConfigVar{}}(), \bottom{SortKConfigVar{}}()) [constructor{}()] // no junk (TODO: fix bug with \dv)
+  axiom{} \or{SortCell{}} (\exists{SortCell{}} (Val:SortKCell{}, inj{SortKCell{}, SortCell{}} (Val:SortKCell{})), \bottom{SortCell{}}()) [constructor{}()] // no junk
+  axiom{} \bottom{SortBool{}}() [constructor{}()] // no junk
+  axiom{} \or{SortKCell{}} (\exists{SortKCell{}} (X0:SortK{}, Lbl'-LT-'k'-GT-'{}(X0:SortK{})), \bottom{SortKCell{}}()) [constructor{}()] // no junk
+  axiom{} \or{SortK{}} (\exists{SortK{}} (Val:SortKItem{}, inj{SortKItem{}, SortK{}} (Val:SortKItem{})), \bottom{SortK{}}()) [constructor{}()] // no junk
+  axiom{} \or{SortMap{}} (\exists{SortMap{}} (X0:SortMap{}, \exists{SortMap{}} (X1:SortMap{}, Lbl'Unds'Map'Unds'{}(X0:SortMap{}, X1:SortMap{}))), \or{SortMap{}} (Lbl'Stop'Map{}(), \bottom{SortMap{}}())) [constructor{}()] // no junk
+  axiom{} \or{SortInt{}} (\top{SortInt{}}(), \bottom{SortInt{}}()) [constructor{}()] // no junk (TODO: fix bug with \dv)
+  axiom{} \or{SortFoo{}} (Lblbar'Unds'TEST'Unds'{}(), \or{SortFoo{}} (Lblfoo'Unds'TEST'Unds'{}(), \bottom{SortFoo{}}())) [constructor{}()] // no junk
+  axiom{} \or{SortSet{}} (Lbl'Stop'Set{}(), \or{SortSet{}} (\exists{SortSet{}} (X0:SortSet{}, \exists{SortSet{}} (X1:SortSet{}, Lbl'Unds'Set'Unds'{}(X0:SortSet{}, X1:SortSet{}))), \bottom{SortSet{}}())) [constructor{}()] // no junk
+
+// rules
+// rule isKItem(inj{KItem,K}(KItem))=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") []
+  axiom{R} \implies{R} (
+    \top{R}(),
+    \and{R} (
+      \equals{SortBool{},R} (
+        LblisKItem{}(inj{SortKItem{}, SortK{}}(VarKItem:SortKItem{})),
+        \dv{SortBool{}}("true")),
+      \top{R}()))
+  []
+
+// rule isKCell(inj{KCell,K}(KCell))=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") []
+  axiom{R} \implies{R} (
+    \top{R}(),
+    \and{R} (
+      \equals{SortBool{},R} (
+        LblisKCell{}(inj{SortKCell{}, SortK{}}(VarKCell:SortKCell{})),
+        \dv{SortBool{}}("true")),
+      \top{R}()))
+  []
+
+// rule isKItem(inj{List,K}(List))=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") []
+  axiom{R} \implies{R} (
+    \top{R}(),
+    \and{R} (
+      \equals{SortBool{},R} (
+        LblisKItem{}(inj{SortList{}, SortK{}}(VarList:SortList{})),
+        \dv{SortBool{}}("true")),
+      \top{R}()))
+  []
+
+// rule isSet(inj{Set,K}(Set))=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") []
+  axiom{R} \implies{R} (
+    \top{R}(),
+    \and{R} (
+      \equals{SortBool{},R} (
+        LblisSet{}(inj{SortSet{}, SortK{}}(VarSet:SortSet{})),
+        \dv{SortBool{}}("true")),
+      \top{R}()))
+  []
+
+// rule isFoo(inj{Foo,K}(Foo))=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") []
+  axiom{R} \implies{R} (
+    \top{R}(),
+    \and{R} (
+      \equals{SortBool{},R} (
+        LblisFoo{}(inj{SortFoo{}, SortK{}}(VarFoo:SortFoo{})),
+        \dv{SortBool{}}("true")),
+      \top{R}()))
+  []
+
+// rule isKItem(inj{KCell,K}(KCell))=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") []
+  axiom{R} \implies{R} (
+    \top{R}(),
+    \and{R} (
+      \equals{SortBool{},R} (
+        LblisKItem{}(inj{SortKCell{}, SortK{}}(VarKCell:SortKCell{})),
+        \dv{SortBool{}}("true")),
+      \top{R}()))
+  []
+
+// rule isSet(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [owise()]
+  axiom{R} \implies{R} (
+    \and{R} (
+      \not{R} (
+        \or{R} (
+          \ceil{SortBool{},R} (
+            \exists{SortBool{}} (VarSet:SortSet{}, 
+              \and{SortBool{}} (
+                \top{SortBool{}}(),
+                LblisSet{}(inj{SortSet{}, SortK{}}(VarSet:SortSet{}))))),
+        \bottom{R}())),
+      \top{R}()),
+    \and{R} (
+      \equals{SortBool{},R} (
+        LblisSet{}(VarK:SortK{}),
+        \dv{SortBool{}}("false")),
+      \top{R}()))
+  [owise{}()]
+
+// rule isKConfigVar(inj{KConfigVar,K}(KConfigVar))=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") []
+  axiom{R} \implies{R} (
+    \top{R}(),
+    \and{R} (
+      \equals{SortBool{},R} (
+        LblisKConfigVar{}(inj{SortKConfigVar{}, SortK{}}(VarKConfigVar:SortKConfigVar{})),
+        \dv{SortBool{}}("true")),
+      \top{R}()))
+  []
+
+// rule isK(K)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") []
+  axiom{R} \implies{R} (
+    \top{R}(),
+    \and{R} (
+      \equals{SortBool{},R} (
+        LblisK{}(VarK:SortK{}),
+        \dv{SortBool{}}("true")),
+      \top{R}()))
+  []
+
+// rule initKCell(Init)=>`<k>`(`Map:lookup`(Init,inj{KConfigVar,K}(#token("$PGM","KConfigVar")))) requires #token("true","Bool") ensures #token("true","Bool") [initializer()]
+  axiom{R} \implies{R} (
+    \top{R}(),
+    \and{R} (
+      \equals{SortKCell{},R} (
+        LblinitKCell{}(VarInit:SortMap{}),
+        Lbl'-LT-'k'-GT-'{}(LblMap'Coln'lookup{}(VarInit:SortMap{},inj{SortKConfigVar{}, SortK{}}(\dv{SortKConfigVar{}}("$PGM"))))),
+      \top{R}()))
+  [initializer{}()]
+
+// rule isBool(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [owise()]
+  axiom{R} \implies{R} (
+    \and{R} (
+      \not{R} (
+        \or{R} (
+          \ceil{SortBool{},R} (
+            \exists{SortBool{}} (VarBool:SortBool{}, 
+              \and{SortBool{}} (
+                \top{SortBool{}}(),
+                LblisBool{}(inj{SortBool{}, SortK{}}(VarBool:SortBool{}))))),
+        \bottom{R}())),
+      \top{R}()),
+    \and{R} (
+      \equals{SortBool{},R} (
+        LblisBool{}(VarK:SortK{}),
+        \dv{SortBool{}}("false")),
+      \top{R}()))
+  [owise{}()]
+
+// rule isKItem(inj{Cell,K}(Cell))=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") []
+  axiom{R} \implies{R} (
+    \top{R}(),
+    \and{R} (
+      \equals{SortBool{},R} (
+        LblisKItem{}(inj{SortCell{}, SortK{}}(VarCell:SortCell{})),
+        \dv{SortBool{}}("true")),
+      \top{R}()))
+  []
+
+// rule isList(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [owise()]
+  axiom{R} \implies{R} (
+    \and{R} (
+      \not{R} (
+        \or{R} (
+          \ceil{SortBool{},R} (
+            \exists{SortBool{}} (VarList:SortList{}, 
+              \and{SortBool{}} (
+                \top{SortBool{}}(),
+                LblisList{}(inj{SortList{}, SortK{}}(VarList:SortList{}))))),
+        \bottom{R}())),
+      \top{R}()),
+    \and{R} (
+      \equals{SortBool{},R} (
+        LblisList{}(VarK:SortK{}),
+        \dv{SortBool{}}("false")),
+      \top{R}()))
+  [owise{}()]
+
+// rule isKItem(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [owise()]
+  axiom{R} \implies{R} (
+    \and{R} (
+      \not{R} (
+        \or{R} (
+          \ceil{SortBool{},R} (
+            \exists{SortBool{}} (VarKCell:SortKCell{}, 
+              \and{SortBool{}} (
+                \top{SortBool{}}(),
+                LblisKItem{}(inj{SortKCell{}, SortK{}}(VarKCell:SortKCell{}))))),
+        \or{R} (
+          \ceil{SortBool{},R} (
+            \exists{SortBool{}} (VarSet:SortSet{}, 
+              \and{SortBool{}} (
+                \top{SortBool{}}(),
+                LblisKItem{}(inj{SortSet{}, SortK{}}(VarSet:SortSet{}))))),
+        \or{R} (
+          \ceil{SortBool{},R} (
+            \exists{SortBool{}} (VarInt:SortInt{}, 
+              \and{SortBool{}} (
+                \top{SortBool{}}(),
+                LblisKItem{}(inj{SortInt{}, SortK{}}(VarInt:SortInt{}))))),
+        \or{R} (
+          \ceil{SortBool{},R} (
+            \exists{SortBool{}} (VarBool:SortBool{}, 
+              \and{SortBool{}} (
+                \top{SortBool{}}(),
+                LblisKItem{}(inj{SortBool{}, SortK{}}(VarBool:SortBool{}))))),
+        \or{R} (
+          \ceil{SortBool{},R} (
+            \exists{SortBool{}} (VarFoo:SortFoo{}, 
+              \and{SortBool{}} (
+                \top{SortBool{}}(),
+                LblisKItem{}(inj{SortFoo{}, SortK{}}(VarFoo:SortFoo{}))))),
+        \or{R} (
+          \ceil{SortBool{},R} (
+            \exists{SortBool{}} (VarMap:SortMap{}, 
+              \and{SortBool{}} (
+                \top{SortBool{}}(),
+                LblisKItem{}(inj{SortMap{}, SortK{}}(VarMap:SortMap{}))))),
+        \or{R} (
+          \ceil{SortBool{},R} (
+            \exists{SortBool{}} (VarList:SortList{}, 
+              \and{SortBool{}} (
+                \top{SortBool{}}(),
+                LblisKItem{}(inj{SortList{}, SortK{}}(VarList:SortList{}))))),
+        \or{R} (
+          \ceil{SortBool{},R} (
+            \exists{SortBool{}} (VarCell:SortCell{}, 
+              \and{SortBool{}} (
+                \top{SortBool{}}(),
+                LblisKItem{}(inj{SortCell{}, SortK{}}(VarCell:SortCell{}))))),
+        \or{R} (
+          \ceil{SortBool{},R} (
+            \exists{SortBool{}} (VarKItem:SortKItem{}, 
+              \and{SortBool{}} (
+                \top{SortBool{}}(),
+                LblisKItem{}(inj{SortKItem{}, SortK{}}(VarKItem:SortKItem{}))))),
+        \bottom{R}())))))))))),
+      \top{R}()),
+    \and{R} (
+      \equals{SortBool{},R} (
+        LblisKItem{}(VarK:SortK{}),
+        \dv{SortBool{}}("false")),
+      \top{R}()))
+  [owise{}()]
+
+// rule isCell(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [owise()]
+  axiom{R} \implies{R} (
+    \and{R} (
+      \not{R} (
+        \or{R} (
+          \ceil{SortBool{},R} (
+            \exists{SortBool{}} (VarKCell:SortKCell{}, 
+              \and{SortBool{}} (
+                \top{SortBool{}}(),
+                LblisCell{}(inj{SortKCell{}, SortK{}}(VarKCell:SortKCell{}))))),
+        \or{R} (
+          \ceil{SortBool{},R} (
+            \exists{SortBool{}} (VarCell:SortCell{}, 
+              \and{SortBool{}} (
+                \top{SortBool{}}(),
+                LblisCell{}(inj{SortCell{}, SortK{}}(VarCell:SortCell{}))))),
+        \bottom{R}()))),
+      \top{R}()),
+    \and{R} (
+      \equals{SortBool{},R} (
+        LblisCell{}(VarK:SortK{}),
+        \dv{SortBool{}}("false")),
+      \top{R}()))
+  [owise{}()]
+
+// rule isKCell(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [owise()]
+  axiom{R} \implies{R} (
+    \and{R} (
+      \not{R} (
+        \or{R} (
+          \ceil{SortBool{},R} (
+            \exists{SortBool{}} (VarKCell:SortKCell{}, 
+              \and{SortBool{}} (
+                \top{SortBool{}}(),
+                LblisKCell{}(inj{SortKCell{}, SortK{}}(VarKCell:SortKCell{}))))),
+        \bottom{R}())),
+      \top{R}()),
+    \and{R} (
+      \equals{SortBool{},R} (
+        LblisKCell{}(VarK:SortK{}),
+        \dv{SortBool{}}("false")),
+      \top{R}()))
+  [owise{}()]
+
+// rule isKItem(inj{Set,K}(Set))=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") []
+  axiom{R} \implies{R} (
+    \top{R}(),
+    \and{R} (
+      \equals{SortBool{},R} (
+        LblisKItem{}(inj{SortSet{}, SortK{}}(VarSet:SortSet{})),
+        \dv{SortBool{}}("true")),
+      \top{R}()))
+  []
+
+// rule isInt(inj{Int,K}(Int))=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") []
+  axiom{R} \implies{R} (
+    \top{R}(),
+    \and{R} (
+      \equals{SortBool{},R} (
+        LblisInt{}(inj{SortInt{}, SortK{}}(VarInt:SortInt{})),
+        \dv{SortBool{}}("true")),
+      \top{R}()))
+  []
+
+// rule isKItem(inj{Map,K}(Map))=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") []
+  axiom{R} \implies{R} (
+    \top{R}(),
+    \and{R} (
+      \equals{SortBool{},R} (
+        LblisKItem{}(inj{SortMap{}, SortK{}}(VarMap:SortMap{})),
+        \dv{SortBool{}}("true")),
+      \top{R}()))
+  []
+
+// rule isFoo(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [owise()]
+  axiom{R} \implies{R} (
+    \and{R} (
+      \not{R} (
+        \or{R} (
+          \ceil{SortBool{},R} (
+            \exists{SortBool{}} (VarFoo:SortFoo{}, 
+              \and{SortBool{}} (
+                \top{SortBool{}}(),
+                LblisFoo{}(inj{SortFoo{}, SortK{}}(VarFoo:SortFoo{}))))),
+        \bottom{R}())),
+      \top{R}()),
+    \and{R} (
+      \equals{SortBool{},R} (
+        LblisFoo{}(VarK:SortK{}),
+        \dv{SortBool{}}("false")),
+      \top{R}()))
+  [owise{}()]
+
+// rule isKItem(inj{Bool,K}(Bool))=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") []
+  axiom{R} \implies{R} (
+    \top{R}(),
+    \and{R} (
+      \equals{SortBool{},R} (
+        LblisKItem{}(inj{SortBool{}, SortK{}}(VarBool:SortBool{})),
+        \dv{SortBool{}}("true")),
+      \top{R}()))
+  []
+
+// rule isMap(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [owise()]
+  axiom{R} \implies{R} (
+    \and{R} (
+      \not{R} (
+        \or{R} (
+          \ceil{SortBool{},R} (
+            \exists{SortBool{}} (VarMap:SortMap{}, 
+              \and{SortBool{}} (
+                \top{SortBool{}}(),
+                LblisMap{}(inj{SortMap{}, SortK{}}(VarMap:SortMap{}))))),
+        \bottom{R}())),
+      \top{R}()),
+    \and{R} (
+      \equals{SortBool{},R} (
+        LblisMap{}(VarK:SortK{}),
+        \dv{SortBool{}}("false")),
+      \top{R}()))
+  [owise{}()]
+
+// rule isList(inj{List,K}(List))=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") []
+  axiom{R} \implies{R} (
+    \top{R}(),
+    \and{R} (
+      \equals{SortBool{},R} (
+        LblisList{}(inj{SortList{}, SortK{}}(VarList:SortList{})),
+        \dv{SortBool{}}("true")),
+      \top{R}()))
+  []
+
+// rule `<k>`(inj{Foo,K}(`foo_TEST_`(.KList)))=>`<k>`(inj{Foo,K}(`bar_TEST_`(.KList))) requires #token("true","Bool") ensures #token("true","Bool") [contentStartColumn(6) contentStartLine(5) org.kframework.attributes.Location(Location(5,6,5,25)) org.kframework.attributes.Source(Source(/home/dwightguth/test/./test.k)) org.kframework.definition.Production(syntax RuleContent ::= K) theRule()]
+  axiom{} \and{SortKCell{}} (
+    \top{SortKCell{}}(), \and{SortKCell{}} (
+    \top{SortKCell{}}(), \rewrites{SortKCell{}}(Lbl'-LT-'k'-GT-'{}(inj{SortFoo{}, SortK{}}(Lblfoo'Unds'TEST'Unds'{}())),Lbl'-LT-'k'-GT-'{}(inj{SortFoo{}, SortK{}}(Lblbar'Unds'TEST'Unds'{}())))))
+  [org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/test/./test.k)"), contentStartColumn{}("6"), contentStartLine{}("5"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax RuleContent ::= K"), theRule{}(), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(5,6,5,25)")]
+
+// rule isMap(inj{Map,K}(Map))=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") []
+  axiom{R} \implies{R} (
+    \top{R}(),
+    \and{R} (
+      \equals{SortBool{},R} (
+        LblisMap{}(inj{SortMap{}, SortK{}}(VarMap:SortMap{})),
+        \dv{SortBool{}}("true")),
+      \top{R}()))
+  []
+
+// rule isKItem(inj{Int,K}(Int))=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") []
+  axiom{R} \implies{R} (
+    \top{R}(),
+    \and{R} (
+      \equals{SortBool{},R} (
+        LblisKItem{}(inj{SortInt{}, SortK{}}(VarInt:SortInt{})),
+        \dv{SortBool{}}("true")),
+      \top{R}()))
+  []
+
+// rule isKItem(inj{Foo,K}(Foo))=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") []
+  axiom{R} \implies{R} (
+    \top{R}(),
+    \and{R} (
+      \equals{SortBool{},R} (
+        LblisKItem{}(inj{SortFoo{}, SortK{}}(VarFoo:SortFoo{})),
+        \dv{SortBool{}}("true")),
+      \top{R}()))
+  []
+
+// rule isCell(inj{KCell,K}(KCell))=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") []
+  axiom{R} \implies{R} (
+    \top{R}(),
+    \and{R} (
+      \equals{SortBool{},R} (
+        LblisCell{}(inj{SortKCell{}, SortK{}}(VarKCell:SortKCell{})),
+        \dv{SortBool{}}("true")),
+      \top{R}()))
+  []
+
+// rule isBool(inj{Bool,K}(Bool))=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") []
+  axiom{R} \implies{R} (
+    \top{R}(),
+    \and{R} (
+      \equals{SortBool{},R} (
+        LblisBool{}(inj{SortBool{}, SortK{}}(VarBool:SortBool{})),
+        \dv{SortBool{}}("true")),
+      \top{R}()))
+  []
+
+// rule isKConfigVar(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [owise()]
+  axiom{R} \implies{R} (
+    \and{R} (
+      \not{R} (
+        \or{R} (
+          \ceil{SortBool{},R} (
+            \exists{SortBool{}} (VarKConfigVar:SortKConfigVar{}, 
+              \and{SortBool{}} (
+                \top{SortBool{}}(),
+                LblisKConfigVar{}(inj{SortKConfigVar{}, SortK{}}(VarKConfigVar:SortKConfigVar{}))))),
+        \bottom{R}())),
+      \top{R}()),
+    \and{R} (
+      \equals{SortBool{},R} (
+        LblisKConfigVar{}(VarK:SortK{}),
+        \dv{SortBool{}}("false")),
+      \top{R}()))
+  [owise{}()]
+
+// rule isCell(inj{Cell,K}(Cell))=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") []
+  axiom{R} \implies{R} (
+    \top{R}(),
+    \and{R} (
+      \equals{SortBool{},R} (
+        LblisCell{}(inj{SortCell{}, SortK{}}(VarCell:SortCell{})),
+        \dv{SortBool{}}("true")),
+      \top{R}()))
+  []
+
+// rule isInt(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [owise()]
+  axiom{R} \implies{R} (
+    \and{R} (
+      \not{R} (
+        \or{R} (
+          \ceil{SortBool{},R} (
+            \exists{SortBool{}} (VarInt:SortInt{}, 
+              \and{SortBool{}} (
+                \top{SortBool{}}(),
+                LblisInt{}(inj{SortInt{}, SortK{}}(VarInt:SortInt{}))))),
+        \bottom{R}())),
+      \top{R}()),
+    \and{R} (
+      \equals{SortBool{},R} (
+        LblisInt{}(VarK:SortK{}),
+        \dv{SortBool{}}("false")),
+      \top{R}()))
+  [owise{}()]
+
+endmodule [org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(1,1,7,9)"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/test/./test.k)")]
