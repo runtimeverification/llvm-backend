@@ -28,9 +28,7 @@ int main (int argc, char **argv) {
   std::unique_ptr<llvm::Module> mod = newModule("test", Context);
 
   for (auto axiom : definition->getAxioms()) {
-    if (axiom->getAttributes().count("theRule")) {
-      makeApplyRuleFunction(axiom, definition, mod.get());
-    }
+    makeApplyRuleFunction(axiom, definition, mod.get());
   }
   mod->print(llvm::outs(), nullptr);
   return 0;
