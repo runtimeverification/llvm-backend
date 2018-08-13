@@ -122,7 +122,7 @@ llvm::StructType *getBlockType(llvm::Module *Module, const KOREObjectSymbol *sym
   Types.push_back(EmptyArrayType);
   for (KOREObjectSort *arg : symbol->getArguments()) {
     auto sort = dynamic_cast<KOREObjectCompositeSort *>(arg);
-    llvm::Type *type = getValueType(sort->getCategory(), Module);
+    llvm::Type *type = getValueType(sort->getCategory(definition), Module);
     Types.push_back(type);
   }
   return llvm::StructType::get(Module->getContext(), Types);

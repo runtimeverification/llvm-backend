@@ -84,8 +84,10 @@ private:
 };
 
 enum class SortCategory {
-  Map, List, Set, Int, Float, StringBuffer, Bool, MInt, Symbol
+  Uncomputed, Map, List, Set, Int, Float, StringBuffer, Bool, MInt, Symbol
 };
+
+class KOREDefinition;
 
 class KOREObjectCompositeSort : public KOREObjectSort {
 private:
@@ -99,7 +101,7 @@ public:
   }
 
   const std::string getName() const { return name; }
-  const SortCategory getCategory() const { return category; }
+  SortCategory getCategory(KOREDefinition *definition);
 
   virtual bool isConcrete() const override { return true; }
   virtual KOREObjectSort *substitute(const substitution &subst) override;
@@ -109,18 +111,7 @@ public:
   virtual bool operator==(const KOREObjectSort &other) const override;
 
 private:
-  KOREObjectCompositeSort(const std::string &Name) : name(Name) {
-    if (name == "Map") category = SortCategory::Map;
-    else if (name == "List") category = SortCategory::List;
-    else if (name == "Set") category = SortCategory::Set;
-    else if (name == "Array") category = SortCategory::List;
-    else if (name == "Int") category = SortCategory::Int;
-    else if (name == "Float") category = SortCategory::Float;
-    else if (name == "StringBuffer") category = SortCategory::StringBuffer;
-    else if (name == "Bool") category = SortCategory::Bool;
-    else if (name == "MInt") category = SortCategory::MInt;
-    else category = SortCategory::Symbol;
-  }
+  KOREObjectCompositeSort(const std::string &Name) : name(Name), category(SortCategory::Uncomputed) {}
 };
 
 class KOREMetaCompositeSort : public KOREMetaSort {
@@ -146,7 +137,6 @@ public:
 
 struct HashSymbol;
 
-class KOREDefinition;
 class KOREObjectSymbolDeclaration;
 
 class KOREObjectSymbol : public KORESymbol {
@@ -197,8 +187,8 @@ public:
   bool operator==(KOREObjectSymbol other) const;
   bool operator!=(KOREObjectSymbol other) const { return !(*this == other); }
 
-  std::string layoutString() const;
   uint8_t length() const;
+  std::string layoutString(KOREDefinition *) const;
 
   bool isConcrete() const;
   bool isPolymorphic() const;
