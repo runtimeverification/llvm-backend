@@ -114,7 +114,7 @@ llvm::Type *getValueType(SortCategory sort, llvm::Module *Module) {
 }
 
 
-llvm::StructType *getBlockType(llvm::Module *Module, const KOREObjectSymbol *symbol, KOREObjectSymbolDeclaration *symbolDecl) {
+llvm::StructType *getBlockType(llvm::Module *Module, KOREDefinition *definition, const KOREObjectSymbol *symbol, KOREObjectSymbolDeclaration *symbolDecl) {
   llvm::StructType *BlockHeaderType = Module->getTypeByName(BLOCKHEADER_STRUCT);
   llvm::ArrayType *EmptyArrayType = llvm::ArrayType::get(llvm::Type::getInt64Ty(Module->getContext()), 0);
   llvm::SmallVector<llvm::Type *, 4> Types;
@@ -128,7 +128,7 @@ llvm::StructType *getBlockType(llvm::Module *Module, const KOREObjectSymbol *sym
   return llvm::StructType::get(Module->getContext(), Types);
 }
 
-llvm::Value *getBlockHeader(llvm::Module *Module, const KOREObjectSymbol *symbol) {
+llvm::Value *getBlockHeader(llvm::Module *Module, KOREDefinition *definition, const KOREObjectSymbol *symbol, llvm::Type *BlockType) {
   llvm::StructType *BlockHeaderType = Module->getTypeByName(BLOCKHEADER_STRUCT);
   uint64_t headerVal = symbol->getTag();
   headerVal |= (llvm::DataLayout(Module).getTypeAllocSize(BlockType) / 8) << 32;
@@ -136,7 +136,7 @@ llvm::Value *getBlockHeader(llvm::Module *Module, const KOREObjectSymbol *symbol
   return llvm::ConstantStruct::get(BlockHeaderType, llvm::ConstantInt::get(llvm::Type::getInt64Ty(Module->getContext()), headerVal));
 }
 
-llvm::Value *allocateBlock(const KOREObjectSymbol *symbol, llvm::Type *AllocType, llvm::BasicBlock *block) {
+llvm::Value *allocateBlock(llvm::Type *AllocType, llvm::BasicBlock *block) {
   llvm::Instruction *Malloc = llvm::CallInst::CreateMalloc(block, llvm::Type::getInt64Ty(block->getContext()), AllocType, llvm::ConstantExpr::getSizeOf(AllocType), nullptr, nullptr);
   block->getInstList().push_back(Malloc);
   return Malloc;
@@ -161,13 +161,12 @@ llvm::Type *termType(KOREPattern *pattern, llvm::StringMap<llvm::Type *> &substi
 
 llvm::Value *createTerm(KOREPattern *pattern, llvm::StringMap<llvm::Value *> &substitution, KOREDefinition *definition, llvm::BasicBlock *block, llvm::Module *Module) {
   if (auto variable = dynamic_cast<KOREObjectVariablePattern *>(pattern)) {
-    return substitution.lookup(variable->getName());
+    return Substitution.lookup(variable->getName());
   } else if (auto constructor = dynamic_cast<KOREObjectCompositePattern *>(pattern)) {
     const KOREObjectSymbol *symbol = constructor->getConstructor();
     assert(symbol->isConcrete() && "not supported yet: sort variables");
     assert(symbol->getName() != "\\dv" && "not supported yet: \\dv");
-    KOREObjectSymbolDeclaration *symbolDecl = definition->getSymbolDeclarations().lookup(symbol->getName());
-    llvm::LLVMContext &Context = block->getContext();
+    KOREObjectSymbolDeclaration *symbolDecl = Definition->getSymbolDeclarations().lookup(symbol->getName());
     if (symbolDecl->getAttributes().count("function")) {
       assert(false && "not implemented yet: functions");
     } else if (symbol->getArguments().empty()) {
@@ -175,16 +174,16 @@ llvm::Value *createTerm(KOREPattern *pattern, llvm::StringMap<llvm::Value *> &su
       llvm::IntToPtrInst *Cast = new llvm::IntToPtrInst(llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), (((uint64_t)symbol->getTag()) << 32) | 1), llvm::PointerType::getUnqual(BlockType), "", CurrentBlock);
       return Cast;
     } else {
-      llvm::StructType *BlockType = getBlockType(Module, symbol, symbolDecl);
-      llvm::Value *BlockHeader = getBlockHeader(Module, symbol);
-      llvm::Value *Block = allocateBlock(symbol, BlockType, block);
-      llvm::Value *BlockHeaderPtr = llvm::GetElementPtrInst::CreateInBounds(BlockType, Block, {llvm::ConstantInt::get(llvm::IntegerType::get(Context, 64), 0), llvm::ConstantInt::get(llvm::IntegerType::get(Context, 32), 0)}, "", block);
-      llvm::StoreInst *StoreBlockHeader = new llvm::StoreInst(BlockHeader, BlockHeaderPtr, block);
+      llvm::StructType *BlockType = getBlockType(Module, Definition, symbol, symbolDecl);
+      llvm::Value *BlockHeader = getBlockHeader(Module, Definition, symbol, BlockType);
+      llvm::Value *Block = allocateBlock(BlockType, CurrentBlock);
+      llvm::Value *BlockHeaderPtr = llvm::GetElementPtrInst::CreateInBounds(BlockType, Block, {llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0), llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), 0)}, symbol->getName(), CurrentBlock);
+      llvm::StoreInst *StoreBlockHeader = new llvm::StoreInst(BlockHeader, BlockHeaderPtr, CurrentBlock);
       int idx = 2;
       for (auto child : constructor->getArguments()) {
-        llvm::Value *ChildValue = createTerm(child, substitution, definition, block, Module);
-        llvm::Value *ChildPtr = llvm::GetElementPtrInst::CreateInBounds(BlockType, Block, {llvm::ConstantInt::get(llvm::IntegerType::get(Context, 64), 0), llvm::ConstantInt::get(llvm::IntegerType::get(Context, 32), idx)}, "", block);
-        llvm::StoreInst *StoreChild = new llvm::StoreInst(ChildValue, ChildPtr, block);
+        llvm::Value *ChildValue = (*this)(child);
+        llvm::Value *ChildPtr = llvm::GetElementPtrInst::CreateInBounds(BlockType, Block, {llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0), llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), idx++)}, "", CurrentBlock);
+        llvm::StoreInst *StoreChild = new llvm::StoreInst(ChildValue, ChildPtr, CurrentBlock);
       }
       llvm::BitCastInst *Cast = new llvm::BitCastInst(Block, llvm::PointerType::getUnqual(Module->getTypeByName(BLOCK_STRUCT)), "", CurrentBlock);
       return Cast;
@@ -192,6 +191,53 @@ llvm::Value *createTerm(KOREPattern *pattern, llvm::StringMap<llvm::Value *> &su
   } else {
     assert(false && "not supported yet: meta level");
   }
+}
+
+static int nextRuleId = 0;
+
+std::string makeApplyRuleFunction(KOREAxiomDeclaration *axiom, KOREDefinition *definition, llvm::Module *Module) {
+    KOREPattern *pattern = axiom->getRightHandSide();
+    llvm::StringMap<KOREObjectVariablePattern *> vars;
+    pattern->markVariables(vars);
+    llvm::StringMap<llvm::Type *> params;
+    std::vector<llvm::Type *> paramTypes;
+    std::vector<std::string> paramNames;
+    for (auto iter = vars.begin(); iter != vars.end(); ++iter) {
+      auto &entry = *iter;
+      auto sort = dynamic_cast<KOREObjectCompositeSort *>(entry.second->getSort());
+      if (!sort) {
+        // TODO: sort variables
+        return "";
+      }
+      llvm::Type *paramType = getValueType(sort->getCategory(definition), Module);
+      params.insert({entry.first(), paramType});
+      paramTypes.push_back(paramType);
+      paramNames.push_back(entry.first());
+    }
+    llvm::FunctionType *funcType = llvm::FunctionType::get(termType(pattern, params, definition, Module), paramTypes, false);
+    std::string name = "apply_rule_" + std::to_string(nextRuleId++);
+    llvm::Constant *func = Module->getOrInsertFunction(name, funcType);
+    llvm::Function *applyRule = llvm::cast<llvm::Function>(func);
+    llvm::StringMap<llvm::Value *> subst;
+    int i = 0;
+    for (auto val = applyRule->arg_begin(); val != applyRule->arg_end(); ++val, ++i) {
+      val->setName(paramNames[i]);
+      subst.insert({paramNames[i], val});
+    }
+    llvm::BasicBlock *block = llvm::BasicBlock::Create(Module->getContext(), "entry", applyRule);
+    llvm::BasicBlock *stuck = llvm::BasicBlock::Create(Module->getContext(), "stuck");
+    llvm::FunctionType *AbortType = llvm::FunctionType::get(llvm::Type::getVoidTy(Module->getContext()), false);
+    llvm::Function *AbortFunc = llvm::dyn_cast<llvm::Function>(Module->getOrInsertFunction("abort", AbortType));
+    AbortFunc->addFnAttr(llvm::Attribute::NoReturn);
+    llvm::CallInst *Abort = llvm::CallInst::Create(AbortFunc, "", stuck);
+    llvm::UnreachableInst *Unreachable = new llvm::UnreachableInst(Module->getContext(), stuck);
+    CreateTerm creator = CreateTerm(subst, definition, block, stuck, Module);
+    llvm::Value *retval = creator(pattern);
+    llvm::ReturnInst::Create(Module->getContext(), retval, creator.getCurrentBlock());
+    if (creator.hasStuckBlock()) {
+      stuck->insertInto(applyRule);
+    }
+    return name;
 }
 
 }
