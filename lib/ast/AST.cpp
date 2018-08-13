@@ -281,6 +281,8 @@ KOREPattern *KOREAxiomDeclaration::getRightHandSide() const {
           }
         }
       }
+    } else if (top->getConstructor()->getName() == "\\equals" && top->getArguments().size() == 2) {
+      return top->getArguments()[1];
     }
   }
   assert(false && "could not compute right hand side of axiom");
