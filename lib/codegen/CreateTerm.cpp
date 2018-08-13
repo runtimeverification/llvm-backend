@@ -99,24 +99,24 @@ llvm::Type *getValueType(SortCategory sort, llvm::Module *Module) {
   case SortCategory::Set:
     return Module->getTypeByName(SET_STRUCT);
   case SortCategory::Int:
-    return llvm::PointerType::get(Module->getTypeByName(INT_STRUCT), 0);
+    return llvm::PointerType::getUnqual(Module->getTypeByName(INT_STRUCT));
   case SortCategory::Float:
-    return llvm::PointerType::get(Module->getTypeByName(FLOAT_STRUCT), 0);
+    return llvm::PointerType::getUnqual(Module->getTypeByName(FLOAT_STRUCT));
   case SortCategory::StringBuffer:
-    return llvm::PointerType::get(llvm::PointerType::get(Module->getTypeByName(STRING_STRUCT), 0), 0);
+    return llvm::PointerType::getUnqual(llvm::PointerType::getUnqual(Module->getTypeByName(STRING_STRUCT)));
   case SortCategory::Bool:
-    return llvm::IntegerType::get(Module->getContext(), 1);
+    return llvm::Type::getInt1Ty(Module->getContext());
   case SortCategory::MInt:
     assert(false && "not implemented yet: MInt");
   case SortCategory::Symbol:
-    return llvm::PointerType::get(Module->getTypeByName(BLOCK_STRUCT), 0);
+    return llvm::PointerType::getUnqual(Module->getTypeByName(BLOCK_STRUCT));
   }
 }
 
 
 llvm::StructType *getBlockType(llvm::Module *Module, const KOREObjectSymbol *symbol, KOREObjectSymbolDeclaration *symbolDecl) {
   llvm::StructType *BlockHeaderType = Module->getTypeByName(BLOCKHEADER_STRUCT);
-  llvm::ArrayType *EmptyArrayType = llvm::ArrayType::get(llvm::IntegerType::get(Module->getContext(), 64), 0);
+  llvm::ArrayType *EmptyArrayType = llvm::ArrayType::get(llvm::Type::getInt64Ty(Module->getContext()), 0);
   llvm::SmallVector<llvm::Type *, 4> Types;
   Types.push_back(BlockHeaderType);
   Types.push_back(EmptyArrayType);
@@ -133,11 +133,11 @@ llvm::Value *getBlockHeader(llvm::Module *Module, const KOREObjectSymbol *symbol
   uint64_t headerVal = symbol->getTag();
   headerVal |= (llvm::DataLayout(Module).getTypeAllocSize(BlockType) / 8) << 32;
   headerVal |= (uint64_t)symbol->getLayout() << 48;
-  return llvm::ConstantStruct::get(BlockHeaderType, llvm::ConstantInt::get(llvm::IntegerType::get(Module->getContext(), 64), headerVal));
+  return llvm::ConstantStruct::get(BlockHeaderType, llvm::ConstantInt::get(llvm::Type::getInt64Ty(Module->getContext()), headerVal));
 }
 
 llvm::Value *allocateBlock(const KOREObjectSymbol *symbol, llvm::Type *AllocType, llvm::BasicBlock *block) {
-  llvm::Instruction *Malloc = llvm::CallInst::CreateMalloc(block, llvm::IntegerType::get(block->getContext(), 64), AllocType, llvm::ConstantExpr::getSizeOf(AllocType), nullptr, nullptr);
+  llvm::Instruction *Malloc = llvm::CallInst::CreateMalloc(block, llvm::Type::getInt64Ty(block->getContext()), AllocType, llvm::ConstantExpr::getSizeOf(AllocType), nullptr, nullptr);
   block->getInstList().push_back(Malloc);
   return Malloc;
 }
@@ -173,7 +173,7 @@ llvm::Value *createTerm(KOREPattern *pattern, llvm::StringMap<llvm::Value *> &su
       assert(false && "not implemented yet: functions");
     } else if (symbol->getArguments().empty()) {
       llvm::StructType *BlockType = Module->getTypeByName(BLOCK_STRUCT);
-      llvm::IntToPtrInst *Cast = new llvm::IntToPtrInst(llvm::ConstantInt::get(llvm::IntegerType::get(Context, 64), (((uint64_t)symbol->getTag()) << 32) | 1), llvm::PointerType::get(BlockType, 0), "", block);
+      llvm::IntToPtrInst *Cast = new llvm::IntToPtrInst(llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), (((uint64_t)symbol->getTag()) << 32) | 1), llvm::PointerType::getUnqual(BlockType), "", CurrentBlock);
       return Cast;
     } else {
       llvm::StructType *BlockType = getBlockType(Module, symbol, symbolDecl);
@@ -187,7 +187,7 @@ llvm::Value *createTerm(KOREPattern *pattern, llvm::StringMap<llvm::Value *> &su
         llvm::Value *ChildPtr = llvm::GetElementPtrInst::CreateInBounds(BlockType, Block, {llvm::ConstantInt::get(llvm::IntegerType::get(Context, 64), 0), llvm::ConstantInt::get(llvm::IntegerType::get(Context, 32), idx)}, "", block);
         llvm::StoreInst *StoreChild = new llvm::StoreInst(ChildValue, ChildPtr, block);
       }
-      llvm::BitCastInst *Cast = new llvm::BitCastInst(Block, llvm::PointerType::get(Module->getTypeByName(BLOCK_STRUCT), 0), "", block);
+      llvm::BitCastInst *Cast = new llvm::BitCastInst(Block, llvm::PointerType::getUnqual(Module->getTypeByName(BLOCK_STRUCT)), "", CurrentBlock);
       return Cast;
     }
   } else {
