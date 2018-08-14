@@ -15,6 +15,8 @@ target triple = "x86_64-unknown-linux-gnu"
 @int_2_limbs = global [1 x i64] [i64 2]
 @"token_$PGM" = global { %blockheader, [4 x i8] } { %blockheader { i64 4 }, [4 x i8] c"$PGM" }
 
+declare %block* @parseConfiguration(i8*)
+
 define %block* @apply_rule_0(%block* %K2) {
 entry:
   ret %block* %K2

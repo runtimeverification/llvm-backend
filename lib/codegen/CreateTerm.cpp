@@ -81,6 +81,9 @@ target triple = "x86_64-unknown-linux-gnu"
 ; the symbol symbol foo{Map{}, Int{}, Exp{}} : Exp{}, we would generate the type:
 
 ; %layoutN = type { %blockheader, [0 x i64 *], %map, %mpz *, %block * }
+
+; Interface to the configuration parser
+declare %block* @parseConfiguration(i8*)
 )LLVM";
 
 std::unique_ptr<llvm::Module> newModule(std::string name, llvm::LLVMContext &Context) {

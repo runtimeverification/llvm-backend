@@ -55,6 +55,8 @@ llvm::Type *termType(KOREPattern *pattern, llvm::StringMap<llvm::Type *> &substi
 /** creates a function that applies the specified rule once it has matched, and returns the name of the function. */
 std::string makeApplyRuleFunction(KOREAxiomDeclaration *axiom, KOREDefinition *definition, llvm::Module *Module);
 
+/* returns the llvm::Type corresponding to the specified KORE sort category */
+llvm::Type *getValueType(SortCategory sort, llvm::Module *Module);
 }
 
 #endif // CREATE_TERM_H

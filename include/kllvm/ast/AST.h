@@ -699,6 +699,9 @@ public:
   const KOREObjectCompositeSortDeclarationMapType &getSortDeclarations() const { return sortDeclarations; }
   const KOREObjectSymbolDeclarationMapType &getSymbolDeclarations() const { return symbolDeclarations; }
   const std::list<KOREAxiomDeclaration *> &getAxioms() const { return axioms; }
+  const llvm::StringMap<KOREObjectCompositePattern *> &getAttributes() const {
+    return attributes;
+  }
 };
 
 } // end namespace kllvm
