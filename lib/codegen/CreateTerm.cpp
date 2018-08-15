@@ -351,7 +351,6 @@ llvm::Value *CreateTerm::operator()(KOREPattern *pattern) {
       auto strPattern = dynamic_cast<KOREMetaStringPattern *>(constructor->getArguments()[0]);
       return createToken(sort->getCategory(Definition), strPattern->getContents());
     }
-    assert(symbol->getName() != "\\dv" && "not supported yet: \\dv");
     KOREObjectSymbolDeclaration *symbolDecl = Definition->getSymbolDeclarations().lookup(symbol->getName());
     if (symbolDecl->getAttributes().count("function")) {
       if (symbolDecl->getAttributes().count("hook")) {
