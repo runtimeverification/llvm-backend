@@ -178,7 +178,8 @@ public:
   const std::vector<KOREObjectSort *> &getArguments() const {
     return arguments;
   }
-  KOREObjectSort *getSort() const { return sort; }
+  const KOREObjectSort *getSort() const { return sort; }
+  KOREObjectSort *getSort() { return sort; }
   uint32_t getTag() const { assert(firstTag == lastTag); return firstTag; }
   uint16_t getLayout() const { return layout; }
 

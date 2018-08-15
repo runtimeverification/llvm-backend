@@ -148,7 +148,7 @@ llvm::Type *termType(KOREPattern *pattern, llvm::StringMap<llvm::Type *> &substi
   if (auto variable = dynamic_cast<KOREObjectVariablePattern *>(pattern)) {
     return substitution.lookup(variable->getName());
   } else if (auto constructor = dynamic_cast<KOREObjectCompositePattern *>(pattern)) {
-    const KOREObjectSymbol *symbol = constructor->getConstructor();
+    KOREObjectSymbol *symbol = constructor->getConstructor();
     assert(symbol->isConcrete() && "not supported yet: sort variables");
     if (symbol->getName() == "\\dv") {
       auto sort = dynamic_cast<KOREObjectCompositeSort *>(symbol->getArguments()[0]);
