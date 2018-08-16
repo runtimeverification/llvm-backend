@@ -51,6 +51,31 @@ KOREObjectSort *KOREObjectCompositeSort::substitute(const std::unordered_map<KOR
   return this;
 }
 
+SortCategory KOREObjectCompositeSort::getCategory(KOREDefinition *definition) {
+  if (category != SortCategory::Uncomputed)
+    return category;
+  auto &att = definition->getSortDeclarations().lookup(this->getName())->getAttributes();
+  if (!att.count("hook")) {
+    category = SortCategory::Symbol;
+    return category;
+  }
+  KOREObjectCompositePattern *hookAtt = att.lookup("hook");
+  assert(hookAtt->getArguments().size() == 1);
+  auto strPattern = dynamic_cast<KOREMetaStringPattern *>(hookAtt->getArguments()[0]);
+  std::string name = strPattern->getContents();
+  if (name == "MAP.Map") category = SortCategory::Map;
+  else if (name == "LIST.List") category = SortCategory::List;
+  else if (name == "SET.Set") category = SortCategory::Set;
+  else if (name == "ARRAY.Array") category = SortCategory::List;
+  else if (name == "INT.Int") category = SortCategory::Int;
+  else if (name == "FLOAT.Float") category = SortCategory::Float;
+  else if (name == "BUFFER.StringBuffer") category = SortCategory::StringBuffer;
+  else if (name == "BOOL.Bool") category = SortCategory::Bool;
+  else if (name == "MINT.MInt") category = SortCategory::MInt;
+  else category = SortCategory::Symbol;
+  return category;
+}
+
 void KOREObjectSymbol::addArgument(KOREObjectSort *Argument) {
   arguments.push_back(Argument);
 }
@@ -69,11 +94,11 @@ bool KOREObjectSymbol::operator==(KOREObjectSymbol other) const {
   return true;
 }
 
-std::string KOREObjectSymbol::layoutString() const {
+std::string KOREObjectSymbol::layoutString(KOREDefinition *definition) const {
   std::string result;
   for (auto arg : arguments) {
     auto sort = dynamic_cast<KOREObjectCompositeSort *>(arg);
-    switch(sort->getCategory()) {
+    switch(sort->getCategory(definition)) {
     case SortCategory::Map:
       result.push_back('1');
       break;
@@ -104,43 +129,6 @@ std::string KOREObjectSymbol::layoutString() const {
   }
   return result;
 }
-
-uint8_t KOREObjectSymbol::length() const {
-  uint8_t length = 1;
-  for (auto arg : arguments) {
-    auto sort = dynamic_cast<KOREObjectCompositeSort *>(arg);
-    switch(sort->getCategory()) {
-    case SortCategory::Map:
-      length += 3;
-      break;
-    case SortCategory::List:
-      length += 7;
-      break;
-    case SortCategory::Set:
-      length += 3;
-      break;
-    case SortCategory::Int:
-      length += 2;
-      break;
-    case SortCategory::Float:
-      length += 4;
-      break;
-    case SortCategory::StringBuffer:
-      length += 1;
-      break;
-    case SortCategory::Bool:
-      length += 1;
-      break;
-    case SortCategory::MInt:
-      assert(false && "not implemented yet: MInt");
-    case SortCategory::Symbol:
-      length += 1;
-      break;
-    }
-  }
-  return length;
-}
-
 
 bool KOREObjectSymbol::isConcrete() const {
   for (auto sort : arguments) {
@@ -217,6 +205,12 @@ void KOREObjectCompositePattern::markSymbols(std::map<std::string, std::vector<K
   }
 }
 
+void KOREObjectCompositePattern::markVariables(llvm::StringMap<KOREObjectVariablePattern *> &map) {
+  for (KOREPattern *arg : arguments) {
+    arg->markVariables(map);
+  }
+}
+
 void KOREMetaCompositePattern::addArgument(KOREPattern *Argument) {
   arguments.push_back(Argument);
 }
@@ -224,6 +218,12 @@ void KOREMetaCompositePattern::addArgument(KOREPattern *Argument) {
 void KOREMetaCompositePattern::markSymbols(std::map<std::string, std::vector<KOREObjectSymbol *>> &map) {
   for (KOREPattern *arg : arguments) {
     arg->markSymbols(map);
+  }
+}
+
+void KOREMetaCompositePattern::markVariables(llvm::StringMap<KOREObjectVariablePattern *> &map) {
+  for (KOREPattern *arg : arguments) {
+    arg->markVariables(map);
   }
 }
 
@@ -281,6 +281,8 @@ KOREPattern *KOREAxiomDeclaration::getRightHandSide() const {
           }
         }
       }
+    } else if (top->getConstructor()->getName() == "\\equals" && top->getArguments().size() == 2) {
+      return top->getArguments()[1];
     }
   }
   assert(false && "could not compute right hand side of axiom");
@@ -369,7 +371,7 @@ void KOREDefinition::preprocess() {
         if (!instantiations.count(*symbol)) {
           instantiations.emplace(*symbol, nextSymbol++);
         }
-        std::string layoutStr = symbol->layoutString();
+        std::string layoutStr = symbol->layoutString(this);
         if (!layouts.count(layoutStr)) {
           layouts.emplace(layoutStr, nextLayout++);
         }

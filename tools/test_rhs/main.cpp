@@ -27,17 +27,8 @@ int main (int argc, char **argv) {
 
   std::unique_ptr<llvm::Module> mod = newModule("test", Context);
 
-  int idx = 0;
   for (auto axiom : definition->getAxioms()) {
-    if (axiom->getAttributes().count("theRule")) {
-      KOREPattern *pattern = axiom->getRightHandSide();
-      llvm::StringMap<llvm::Value *> subst;
-      llvm::Constant *func = mod->getOrInsertFunction("test_rhs" + std::to_string(idx++), termType(pattern, subst, definition, Context, mod.get()), NULL);
-      llvm::Function *testRhs = llvm::cast<llvm::Function>(func);
-      llvm::BasicBlock *block = llvm::BasicBlock::Create(Context, "entry", testRhs);
-      llvm::Value *retval = createTerm(pattern, subst, definition, block, mod.get());
-      llvm::ReturnInst::Create(Context, retval, block);
-    }
+    makeApplyRuleFunction(axiom, definition, mod.get());
   }
   mod->print(llvm::outs(), nullptr);
   return 0;
