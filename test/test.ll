@@ -1,3 +1,5 @@
+target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
+target triple = "x86_64-unknown-linux-gnu"
 
 %blockheader = type { i64 }
 %mpz = type { i32, i32, i64* }
@@ -124,7 +126,7 @@ entry:
   %malloccall3 = tail call i8* @malloc(i64 ptrtoint ({ %blockheader, [0 x i64], i1 }* getelementptr ({ %blockheader, [0 x i64], i1 }, { %blockheader, [0 x i64], i1 }* null, i32 1) to i64))
   %3 = bitcast i8* %malloccall3 to { %blockheader, [0 x i64], i1 }*
   %"Lblbaz'LParUndsRParUnds'TEST'UndsUnds'Bool" = getelementptr inbounds { %blockheader, [0 x i64], i1 }, { %blockheader, [0 x i64], i1 }* %3, i64 0, i32 0
-  store %blockheader { i64 1688854155231244 }, %blockheader* %"Lblbaz'LParUndsRParUnds'TEST'UndsUnds'Bool"
+  store %blockheader { i64 1688858450198540 }, %blockheader* %"Lblbaz'LParUndsRParUnds'TEST'UndsUnds'Bool"
   br i1 false, label %hook_BOOL_or, label %else
 
 else:                                             ; preds = %entry
@@ -216,7 +218,7 @@ entry:
   %malloccall3 = tail call i8* @malloc(i64 ptrtoint ({ %blockheader, [0 x i64], i1 }* getelementptr ({ %blockheader, [0 x i64], i1 }, { %blockheader, [0 x i64], i1 }* null, i32 1) to i64))
   %3 = bitcast i8* %malloccall3 to { %blockheader, [0 x i64], i1 }*
   %"Lblbaz'LParUndsRParUnds'TEST'UndsUnds'Bool" = getelementptr inbounds { %blockheader, [0 x i64], i1 }, { %blockheader, [0 x i64], i1 }* %3, i64 0, i32 0
-  store %blockheader { i64 1688854155231244 }, %blockheader* %"Lblbaz'LParUndsRParUnds'TEST'UndsUnds'Bool"
+  store %blockheader { i64 1688858450198540 }, %blockheader* %"Lblbaz'LParUndsRParUnds'TEST'UndsUnds'Bool"
   br i1 true, label %then, label %hook_BOOL_and
 
 then:                                             ; preds = %entry
@@ -325,7 +327,7 @@ entry:
   %malloccall3 = tail call i8* @malloc(i64 ptrtoint ({ %blockheader, [0 x i64], i1 }* getelementptr ({ %blockheader, [0 x i64], i1 }, { %blockheader, [0 x i64], i1 }* null, i32 1) to i64))
   %3 = bitcast i8* %malloccall3 to { %blockheader, [0 x i64], i1 }*
   %"Lblnot'LParUndsRParUnds'TEST'UndsUnds'Bool" = getelementptr inbounds { %blockheader, [0 x i64], i1 }, { %blockheader, [0 x i64], i1 }* %3, i64 0, i32 0
-  store %blockheader { i64 1688854155231261 }, %blockheader* %"Lblnot'LParUndsRParUnds'TEST'UndsUnds'Bool"
+  store %blockheader { i64 1688858450198557 }, %blockheader* %"Lblnot'LParUndsRParUnds'TEST'UndsUnds'Bool"
   br i1 true, label %then, label %hook_BOOL_implies
 
 then:                                             ; preds = %entry
@@ -374,7 +376,7 @@ entry:
   %malloccall3 = tail call i8* @malloc(i64 ptrtoint ({ %blockheader, [0 x i64], i1 }* getelementptr ({ %blockheader, [0 x i64], i1 }, { %blockheader, [0 x i64], i1 }* null, i32 1) to i64))
   %3 = bitcast i8* %malloccall3 to { %blockheader, [0 x i64], i1 }*
   %"Lblnot'LParUndsRParUnds'TEST'UndsUnds'Bool" = getelementptr inbounds { %blockheader, [0 x i64], i1 }, { %blockheader, [0 x i64], i1 }* %3, i64 0, i32 0
-  store %blockheader { i64 1688854155231261 }, %blockheader* %"Lblnot'LParUndsRParUnds'TEST'UndsUnds'Bool"
+  store %blockheader { i64 1688858450198557 }, %blockheader* %"Lblnot'LParUndsRParUnds'TEST'UndsUnds'Bool"
   %hook_BOOL_not = xor i1 true, true
   %4 = getelementptr inbounds { %blockheader, [0 x i64], i1 }, { %blockheader, [0 x i64], i1 }* %3, i64 0, i32 2
   store i1 %hook_BOOL_not, i1* %4
@@ -631,7 +633,7 @@ entry:
   %malloccall3 = tail call i8* @malloc(i64 ptrtoint ({ %blockheader, [0 x i64], i1 }* getelementptr ({ %blockheader, [0 x i64], i1 }, { %blockheader, [0 x i64], i1 }* null, i32 1) to i64))
   %3 = bitcast i8* %malloccall3 to { %blockheader, [0 x i64], i1 }*
   %"Lbleq'LParUndsRParUnds'TEST'UndsUnds'Bool" = getelementptr inbounds { %blockheader, [0 x i64], i1 }, { %blockheader, [0 x i64], i1 }* %3, i64 0, i32 0
-  store %blockheader { i64 1688854155231245 }, %blockheader* %"Lbleq'LParUndsRParUnds'TEST'UndsUnds'Bool"
+  store %blockheader { i64 1688858450198541 }, %blockheader* %"Lbleq'LParUndsRParUnds'TEST'UndsUnds'Bool"
   %hook_BOOL_eq = icmp eq i1 true, false
   %4 = getelementptr inbounds { %blockheader, [0 x i64], i1 }, { %blockheader, [0 x i64], i1 }* %3, i64 0, i32 2
   store i1 %hook_BOOL_eq, i1* %4
@@ -738,7 +740,7 @@ entry:
   %malloccall3 = tail call i8* @malloc(i64 ptrtoint ({ %blockheader, [0 x i64], i1 }* getelementptr ({ %blockheader, [0 x i64], i1 }, { %blockheader, [0 x i64], i1 }* null, i32 1) to i64))
   %3 = bitcast i8* %malloccall3 to { %blockheader, [0 x i64], i1 }*
   %"Lbleq'LParUndsRParUnds'TEST'UndsUnds'Bool" = getelementptr inbounds { %blockheader, [0 x i64], i1 }, { %blockheader, [0 x i64], i1 }* %3, i64 0, i32 0
-  store %blockheader { i64 1688854155231245 }, %blockheader* %"Lbleq'LParUndsRParUnds'TEST'UndsUnds'Bool"
+  store %blockheader { i64 1688858450198541 }, %blockheader* %"Lbleq'LParUndsRParUnds'TEST'UndsUnds'Bool"
   %hook_BOOL_ne = xor i1 false, false
   %4 = getelementptr inbounds { %blockheader, [0 x i64], i1 }, { %blockheader, [0 x i64], i1 }* %3, i64 0, i32 2
   store i1 %hook_BOOL_ne, i1* %4
