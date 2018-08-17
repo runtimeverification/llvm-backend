@@ -15,15 +15,6 @@ target triple = "x86_64-unknown-linux-gnu"
 @"token_\22_\22" = global { %blockheader, [3 x i8] } { %blockheader { i64 3 }, [3 x i8] c"\22_\22" }
 @"token_$PGM" = global { %blockheader, [4 x i8] } { %blockheader { i64 4 }, [4 x i8] c"$PGM" }
 
-define %mpz* @move_int(%mpz %val) {
-  %malloccall = tail call i8* @malloc(i64 ptrtoint (%mpz* getelementptr (%mpz, %mpz* null, i32 1) to i64))
-  %ptr = bitcast i8* %malloccall to %mpz*
-  store %mpz %val, %mpz* %ptr
-  ret %mpz* %ptr
-}
-
-declare noalias i8* @malloc(i64)
-
 define %block* @apply_rule_0(%block* %K2) {
 entry:
   ret %block* %K2
@@ -43,6 +34,8 @@ entry:
   %4 = bitcast { %blockheader, [0 x i64], %block*, %block* }* %0 to %block*
   ret %block* %4
 }
+
+declare noalias i8* @malloc(i64)
 
 declare %block* @"eval_append{SortK{},SortK{}}"(%block*, %block*)
 

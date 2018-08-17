@@ -81,16 +81,6 @@ target triple = "x86_64-unknown-linux-gnu"
 ; the symbol symbol foo{Map{}, Int{}, Exp{}} : Exp{}, we would generate the type:
 
 ; %layoutN = type { %blockheader, [0 x i64 *], %map, %mpz *, %block * }
-
-; helper function for int hooks
-define %mpz* @move_int(%mpz %val) {
-  %malloccall = tail call i8* @malloc(i64 ptrtoint (%mpz* getelementptr (%mpz, %mpz* null, i32 1) to i64))
-  %ptr = bitcast i8* %malloccall to %mpz*
-  store %mpz %val, %mpz* %ptr
-  ret %mpz* %ptr
-}
-
-declare noalias i8* @malloc(i64)
 )LLVM";
 
 std::unique_ptr<llvm::Module> newModule(std::string name, llvm::LLVMContext &Context) {
