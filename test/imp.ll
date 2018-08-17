@@ -29,9 +29,6 @@ entry:
   ret %block* %K2
 }
 
-; Function Attrs: noreturn
-declare void @abort() #0
-
 define %block* @apply_rule_1(%block* %K1, %block* %K2, %block* %K3) {
 entry:
   %malloccall = tail call i8* @malloc(i64 ptrtoint ({ %blockheader, [0 x i64], %block*, %block* }* getelementptr ({ %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* null, i32 1) to i64))
@@ -2788,5 +2785,3 @@ define i1 @apply_rule_181() {
 entry:
   ret i1 false
 }
-
-attributes #0 = { noreturn }

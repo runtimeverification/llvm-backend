@@ -411,18 +411,9 @@ std::string makeApplyRuleFunction(KOREAxiomDeclaration *axiom, KOREDefinition *d
       subst.insert({paramNames[i], val});
     }
     llvm::BasicBlock *block = llvm::BasicBlock::Create(Module->getContext(), "entry", applyRule);
-    llvm::BasicBlock *stuck = llvm::BasicBlock::Create(Module->getContext(), "stuck");
-    llvm::FunctionType *AbortType = llvm::FunctionType::get(llvm::Type::getVoidTy(Module->getContext()), false);
-    llvm::Function *AbortFunc = llvm::dyn_cast<llvm::Function>(Module->getOrInsertFunction("abort", AbortType));
-    AbortFunc->addFnAttr(llvm::Attribute::NoReturn);
-    llvm::CallInst *Abort = llvm::CallInst::Create(AbortFunc, "", stuck);
-    llvm::UnreachableInst *Unreachable = new llvm::UnreachableInst(Module->getContext(), stuck);
-    CreateTerm creator = CreateTerm(subst, definition, block, stuck, Module);
+    CreateTerm creator = CreateTerm(subst, definition, block, Module);
     llvm::Value *retval = creator(pattern);
     llvm::ReturnInst::Create(Module->getContext(), retval, creator.getCurrentBlock());
-    if (creator.hasStuckBlock()) {
-      stuck->insertInto(applyRule);
-    }
     return name;
 }
 
