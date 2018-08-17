@@ -373,7 +373,7 @@ static int nextRuleId = 0;
 
 std::string makeApplyRuleFunction(KOREAxiomDeclaration *axiom, KOREDefinition *definition, llvm::Module *Module) {
     KOREPattern *pattern = axiom->getRightHandSide();
-    llvm::StringMap<KOREObjectVariablePattern *> vars;
+    std::map<std::string, KOREObjectVariablePattern *> vars;
     pattern->markVariables(vars);
     llvm::StringMap<llvm::Type *> params;
     std::vector<llvm::Type *> paramTypes;
@@ -386,9 +386,9 @@ std::string makeApplyRuleFunction(KOREAxiomDeclaration *axiom, KOREDefinition *d
         return "";
       }
       llvm::Type *paramType = getValueType(sort->getCategory(definition), Module);
-      params.insert({entry.first(), paramType});
+      params.insert({entry.first, paramType});
       paramTypes.push_back(paramType);
-      paramNames.push_back(entry.first());
+      paramNames.push_back(entry.first);
     }
     llvm::FunctionType *funcType = llvm::FunctionType::get(termType(pattern, params, definition, Module), paramTypes, false);
     std::string name = "apply_rule_" + std::to_string(nextRuleId++);
