@@ -1,4 +1,4 @@
-use super::decls::{List,Int,K,__gmpz_fits_ulong_p,__gmpz_get_ui,__gmpz_init_set_ui};
+use super::decls::{List,Int,K,__gmpz_fits_ulong_p,__gmpz_get_ui,__gmpz_init_set_ui,move_int};
 use std::ptr;
 use std::mem;
 
@@ -13,29 +13,25 @@ pub unsafe extern "C" fn drop_list(ptr: *mut List) {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn hook_LIST_unit(result: *mut List) -> bool {
-  ptr::write(result, List::new());
-  true
+pub unsafe extern "C" fn hook_LIST_unit() -> List {
+  List::new()
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn hook_LIST_element(result: *mut List, value: K) -> bool {
-  ptr::write(result, List::singleton(value));
-  true
+pub unsafe extern "C" fn hook_LIST_element(value: K) -> List {
+  List::singleton(value)
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn hook_LIST_concat(result: *mut List, l1: *const List, l2: *const List) -> bool {
+pub unsafe extern "C" fn hook_LIST_concat(l1: *const List, l2: *const List) -> List {
   let mut tmp = (*l1).clone();
   tmp.append((*l2).clone());
-  ptr::write(result, tmp);
-  true
+  tmp
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn hook_LIST_in(result: *mut bool, value: K, list: *const List) -> bool {
-  ptr::write(result, (*list).contains(&value));
-  true
+pub unsafe extern "C" fn hook_LIST_in(value: K, list: *const List) -> bool {
+  (*list).contains(&value)
 }
 
 unsafe fn get_long(i: *const Int) -> (bool, usize) {
@@ -46,85 +42,82 @@ unsafe fn get_long(i: *const Int) -> (bool, usize) {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn hook_LIST_get(result: *mut K, list: *const List, index: *const Int) -> bool {
+pub unsafe extern "C" fn hook_LIST_get(list: *const List, index: *const Int) -> K {
   let (status, index_long) = get_long(index);
   if !status {
-    return false;
+    panic!("Index out of range")
   }
   match (*list).get(index_long) {
-    Some(elem) => { ptr::write(result, *elem); true }
-    None => false
+    Some(elem) => { *elem }
+    None => panic!("Index out of range")
   }
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn hook_LIST_range(result: *mut List, list: *const List, from_front: *const Int, from_back: *const Int) -> bool {
+pub unsafe extern "C" fn hook_LIST_range(list: *const List, from_front: *const Int, from_back: *const Int) -> List {
   let (status, front_long) = get_long(from_front);
   if !status {
-    return false;
+    panic!("Index out of range")
   }
   let (status, back_long) = get_long(from_back);
   if !status {
-    return false;
+    panic!("Index out of range")
   }
   let old_len = (*list).len();
   if old_len < front_long + back_long {
-    return false;
+    panic!("Index out of range")
   }
-  ptr::write(result, (*list).skip(front_long).take(old_len - front_long - back_long));
-  true
+  (*list).skip(front_long).take(old_len - front_long - back_long)
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn hook_LIST_size(result: *mut Int, l: *const List) -> bool {
-  __gmpz_init_set_ui(result, (*l).len());
-  true
+pub unsafe extern "C" fn hook_LIST_size(l: *const List) -> *mut Int {
+  let mut result = Int(0, 0, ptr::null());
+  __gmpz_init_set_ui(&mut result, (*l).len());
+  move_int(result)
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn hook_LIST_make(result: *mut List, len: *const Int, value: K) -> bool {
+pub unsafe extern "C" fn hook_LIST_make(len: *const Int, value: K) -> List {
   let mut tmp = List::new();
   let (status, len_long) = get_long(len);
   if !status {
-    return false;
+    panic!("Index out of range")
   }
   for _ in 0..len_long {
     tmp.push_back(value);
   }
-  ptr::write(result, tmp);
-  true
+  tmp
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn hook_LIST_update(result: *mut List, list: *const List, index: *const Int, value: K) -> bool {
+pub unsafe extern "C" fn hook_LIST_update(list: *const List, index: *const Int, value: K) -> List {
   let (status, index_long) = get_long(index);
   if !status {
-    return false;
+    panic!("Index out of range")
   }
   if index_long >= (*list).len() {
-    return false;
+    panic!("Index out of range")
   }
-  ptr::write(result, (*list).update(index_long, value));
-  true
+  (*list).update(index_long, value)
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn hook_LIST_updateAll(result: *mut List, l1: *const List, index: *const Int, l2: *const List) -> bool {
+pub unsafe extern "C" fn hook_LIST_updateAll(l1: *const List, index: *const Int, l2: *const List) -> List {
   let (status, index_long) = get_long(index);
   if !status {
-    return false;
+    panic!("Index out of range")
   }
   if index_long != 0 && (*l2).len() != 0 {
     if index_long + (*l2).len() - 1 >= (*l1).len() {
-      return false;
+      panic!("Index out of range")
     }
   }
   let mut before = (*l1).take(index_long);
   let after = (*l1).skip(index_long + (*l2).len());
   before.append((*l2).clone());
   before.append(after);
-  ptr::write(result, before);
-  true
+  before
 }
 
 #[cfg(test)]
@@ -134,28 +127,14 @@ pub mod tests {
   use decls::testing::*;
   use hook_list::*;
 
-  pub unsafe fn alloc_list() -> *mut List {
-    let ptr = libc::malloc(size_list()) as *mut List;
-    ptr
-  }
-
-  pub unsafe fn free_list(ptr: *mut List) {
-    drop_list(ptr);
-    libc::free(ptr as *mut libc::c_void);
-  }
-
   #[test]
   fn test_element() {
     unsafe {
-      let list = alloc_list();
-      assert!(hook_LIST_element(list, DUMMY0));
-      let result = alloc_k();
+      let list = hook_LIST_element(DUMMY0);
       let index = alloc_int();
       __gmpz_init_set_ui(index, 0);
-      assert!(hook_LIST_get(result, list, index));
-      assert_eq!(*result, DUMMY0);
-      free_list(list);
-      free_k(result);
+      let result = hook_LIST_get(&list, index);
+      assert_eq!(result, DUMMY0);
       free_int(index);
     }
   }
@@ -163,12 +142,9 @@ pub mod tests {
   #[test]
   fn test_unit() {
     unsafe {
-      let list = alloc_list();
-      assert!(hook_LIST_unit(list));
-      let result = alloc_int();
-      assert!(hook_LIST_size(result, list));
+      let list = hook_LIST_unit();
+      let result = hook_LIST_size(&list);
       assert_eq!(__gmpz_cmp_ui(result, 0), 0);
-      free_list(list);
       free_int(result);
     }
   }
@@ -176,176 +152,219 @@ pub mod tests {
   #[test]
   fn test_concat() {
     unsafe {
-      let l1 = alloc_list();
-      let l2 = alloc_list();
-      let list = alloc_list();
-      assert!(hook_LIST_element(l1, DUMMY0));
-      assert!(hook_LIST_element(l2, DUMMY1));
-      assert!(hook_LIST_concat(list, l1, l2));
-      let result = alloc_k();
+      let l1 = hook_LIST_element(DUMMY0);
+      let l2 = hook_LIST_element(DUMMY1);
+      let list = hook_LIST_concat(&l1, &l2);
       let index = alloc_int();
       __gmpz_init_set_ui(index, 0);
-      assert!(hook_LIST_get(result, list, index));
-      assert_eq!(*result, DUMMY0);
+      let result = hook_LIST_get(&list, index);
+      assert_eq!(result, DUMMY0);
       __gmpz_clear(index);
       __gmpz_init_set_ui(index, 1);
-      assert!(hook_LIST_get(result, list, index));
-      assert_eq!(*result, DUMMY1);
+      let result = hook_LIST_get(&list, index);
+      assert_eq!(result, DUMMY1);
       __gmpz_clear(index);
-      assert!(hook_LIST_size(index, list));
+      let index = hook_LIST_size(&list);
       assert_eq!(__gmpz_cmp_ui(index, 2), 0);
-      free_list(l1);
-      free_list(l2);
-      free_list(list);
-      free_k(result);
       free_int(index);
     }
   }
 
   #[test]
   fn test_in() {
-    let mut result = false;
     unsafe {
-      let list = alloc_list();
-      assert!(hook_LIST_element(list, DUMMY0));
-      assert!(hook_LIST_in(&mut result, DUMMY0, list));
+      let list = hook_LIST_element(DUMMY0);
+      let result = hook_LIST_in(DUMMY0, &list);
       assert!(result);
-      assert!(hook_LIST_in(&mut result, DUMMY1, list));
+      let result = hook_LIST_in(DUMMY1, &list);
       assert!(!result);
-      free_list(list);
     }
   }
 
   #[test]
-  fn test_get() {
+  #[should_panic(expected = "Index out of range")]
+  fn test_get_negative() {
     unsafe {
       let index = alloc_int();
       __gmpz_init_set_si(index, -1);
-      let list = alloc_list();
-      let result = alloc_k();
-      assert!(hook_LIST_element(list, DUMMY0));
-      assert!(!hook_LIST_get(result, list, index));
-      __gmpz_clear(index);
+      let list = hook_LIST_element(DUMMY0);
+      hook_LIST_get(&list, index);
+    }
+  }
+  
+  #[test]
+  #[should_panic(expected = "Index out of range")]
+  fn test_get_out_of_range() {
+    unsafe {
+      let index = alloc_int();
       __gmpz_init_set_ui(index, 1);
-      assert!(!hook_LIST_get(result, list, index));
-      free_int(index);
-      free_list(list);
-      free_k(result);
+      let list = hook_LIST_element(DUMMY0);
+      hook_LIST_get(&list, index);
+    }
+  }
+
+  #[test]
+  #[should_panic(expected = "Index out of range")]
+  fn test_range_neg_idx() {
+    unsafe {
+      let neg = alloc_int();
+      let zero = alloc_int();
+      __gmpz_init_set_si(neg, -1);
+      __gmpz_init_set_ui(zero, 0);
+      let list = hook_LIST_element(DUMMY0);
+      hook_LIST_range(&list, neg, zero);
+    }
+  }
+
+  #[test]
+  #[should_panic(expected = "Index out of range")]
+  fn test_range_neg_len() {
+    unsafe {
+      let neg = alloc_int();
+      let zero = alloc_int();
+      __gmpz_init_set_si(neg, -1);
+      __gmpz_init_set_ui(zero, 0);
+      let list = hook_LIST_element(DUMMY0);
+      hook_LIST_range(&list, zero, neg);
+    }
+  }
+
+  #[test]
+  #[should_panic(expected = "Index out of range")]
+  fn test_range_out_of_range() {
+    unsafe {
+      let one = alloc_int();
+      __gmpz_init_set_ui(one, 1);
+      let list = hook_LIST_element(DUMMY0);
+      hook_LIST_range(&list, one, one);
     }
   }
 
   #[test]
   fn test_range() {
     unsafe {
-      let neg = alloc_int();
       let zero = alloc_int();
       let one = alloc_int();
-      __gmpz_init_set_si(neg, -1);
       __gmpz_init_set_ui(zero, 0);
       __gmpz_init_set_ui(one, 1);
-      let list = alloc_list();
-      let result = alloc_list();
-      assert!(hook_LIST_element(list, DUMMY0));
-      assert!(!hook_LIST_range(result, list, neg, zero));
-      assert!(!hook_LIST_range(result, list, zero, neg));
-      assert!(!hook_LIST_range(result, list, one, one));
-      assert!(hook_LIST_range(result, list, zero, one));
-      __gmpz_clear(zero);
-      assert!(hook_LIST_size(zero, result));
+      let list = hook_LIST_element(DUMMY0);
+      let result = hook_LIST_range(&list, zero, one);
+      free_int(zero);
+      let zero = hook_LIST_size(&result);
       assert_eq!(__gmpz_cmp_ui(zero, 0), 0);
-      free_int(neg);
       free_int(zero);
       free_int(one);
-      free_list(list);
-      free_list(result);
+    }
+  }
+
+  #[test]
+  #[should_panic(expected = "Index out of range")]
+  fn test_make_out_of_range() {
+    unsafe {
+      let neg = alloc_int();
+      __gmpz_init_set_si(neg, -1);
+      hook_LIST_make(neg, DUMMY0);
     }
   }
 
   #[test]
   fn test_make() {
     unsafe {
-      let neg = alloc_int();
       let zero = alloc_int();
       let ten = alloc_int();
-      __gmpz_init_set_si(neg, -1);
       __gmpz_init_set_ui(zero, 0);
       __gmpz_init_set_ui(ten, 10);
-      let list = alloc_list();
-      assert!(!hook_LIST_make(list, neg, DUMMY0));
-      assert!(hook_LIST_make(list, ten, DUMMY0));
-      __gmpz_clear(ten);
-      let result = alloc_k();
-      assert!(hook_LIST_get(result, list, zero));
-      assert_eq!(*result, DUMMY0);
-      assert!(hook_LIST_size(ten, list));
+      let list = hook_LIST_make(ten, DUMMY0);
+      free_int(ten);
+      let result = hook_LIST_get(&list, zero);
+      assert_eq!(result, DUMMY0);
+      let ten = hook_LIST_size(&list);
       assert_eq!(__gmpz_cmp_ui(ten, 10), 0);
-      free_int(neg);
       free_int(zero);
       free_int(ten);
-      free_list(list);
-      free_k(result);
+    }
+  }
+
+  #[test]
+  #[should_panic(expected = "Index out of range")]
+  fn test_update_neg() {
+    unsafe {
+      let list = hook_LIST_element(DUMMY0);
+      let neg = alloc_int();
+      __gmpz_init_set_si(neg, -1);
+      hook_LIST_update(&list, neg, DUMMY1);
+    }
+  }
+
+  #[test]
+  #[should_panic(expected = "Index out of range")]
+  fn test_update_out_of_range() {
+    unsafe {
+      let list = hook_LIST_element(DUMMY0);
+      let one = alloc_int();
+      __gmpz_init_set_ui(one, 1);
+      hook_LIST_update(&list, one, DUMMY1);
     }
   }
 
   #[test]
   fn test_update() {
     unsafe {
-      let list = alloc_list();
-      assert!(hook_LIST_element(list, DUMMY0));
-      let neg = alloc_int();
+      let list = hook_LIST_element(DUMMY0);
       let index = alloc_int();
-      let one = alloc_int();
-      __gmpz_init_set_si(neg, -1);
       __gmpz_init_set_ui(index, 0);
-      __gmpz_init_set_ui(one, 1);
-      assert!(!hook_LIST_update(list, list, neg, DUMMY1));
-      assert!(!hook_LIST_update(list, list, one, DUMMY1));
-      assert!(hook_LIST_update(list, list, index, DUMMY1));
-      let result = alloc_k();
-      assert!(hook_LIST_get(result, list, index));
-      assert_eq!(*result, DUMMY1);
-      free_k(result);
+      let list = hook_LIST_update(&list, index, DUMMY1);
+      let result = hook_LIST_get(&list, index);
+      assert_eq!(result, DUMMY1);
       free_int(index);
-      free_int(neg);
-      free_int(one);
-      free_list(list);
+    }
+  }
+
+  #[test]
+  #[should_panic(expected = "Index out of range")]
+  fn test_update_all_neg() {
+    unsafe {
+      let neg = alloc_int();
+      __gmpz_init_set_si(neg, -1);
+      let l1 = hook_LIST_element(DUMMY0);
+      let l2 = hook_LIST_unit();
+      hook_LIST_updateAll(&l1, neg, &l2);
     }
   }
 
   #[test]
   fn test_update_all() {
     unsafe {
-      let l1 = alloc_list();
-      let l2 = alloc_list();
-      let list = alloc_list();
-      let neg = alloc_int();
       let zero = alloc_int();
       let one = alloc_int();
-      __gmpz_init_set_si(neg, -1);
       __gmpz_init_set_ui(zero, 0);
       __gmpz_init_set_ui(one, 1);
-      assert!(hook_LIST_element(l1, DUMMY0));
-      assert!(hook_LIST_unit(l2));
-      assert!(!hook_LIST_updateAll(list, l1, neg, l2));
-      assert!(hook_LIST_updateAll(list, l1, one, l2));
-      let result = alloc_k();
-      assert!(hook_LIST_get(result, list, zero));
-      assert_eq!(*result, DUMMY0);
-      assert!(hook_LIST_updateAll(list, l1, zero, l2));
-      assert!(hook_LIST_get(result, list, zero));
-      assert_eq!(*result, DUMMY0);
-      assert!(hook_LIST_element(l2, DUMMY1));
-      assert!(hook_LIST_updateAll(list, l1, zero, l2));
-      assert!(hook_LIST_get(result, list, zero));
-      assert_eq!(*result, DUMMY1);
-      assert!(!hook_LIST_updateAll(list, l1, one, l2));
-      free_list(l1);
-      free_list(l2);
-      free_list(list);
-      free_int(neg);
+      let l1 = hook_LIST_element(DUMMY0);
+      let l2 = hook_LIST_unit();
+      let list = hook_LIST_updateAll(&l1, one, &l2);
+      let result = hook_LIST_get(&list, zero);
+      assert_eq!(result, DUMMY0);
+      let list = hook_LIST_updateAll(&l1, zero, &l2);
+      let result = hook_LIST_get(&list, zero);
+      assert_eq!(result, DUMMY0);
+      let l2 = hook_LIST_element(DUMMY1);
+      let list = hook_LIST_updateAll(&l1, zero, &l2);
+      let result = hook_LIST_get(&list, zero);
+      assert_eq!(result, DUMMY1);
       free_int(zero);
       free_int(one);
-      free_k(result);
+    }
+  }
+
+  #[test]
+  #[should_panic(expected = "Index out of range")]
+  fn test_update_all_out_of_range() {
+    unsafe {
+      let one = alloc_int();
+      __gmpz_init_set_ui(one, 1);
+      let l1 = hook_LIST_element(DUMMY0);
+      let l2 = hook_LIST_element(DUMMY1);
+      hook_LIST_updateAll(&l1, one, &l2);
     }
   }
 }

@@ -10,3 +10,9 @@ libc = "0.2.42"
 [lib]
 name = "datastructures"
 crate-type = ["dylib"]
+
+[profile.dev]
+panic = "abort"
+
+[profile.release]
+panic = "abort"

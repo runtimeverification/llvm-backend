@@ -11,9 +11,9 @@ pub enum mp_limb_t {}
 #[repr(C)]
 #[allow(non_camel_case_types)]
 pub struct Int(
-  i32, // _mp_alloc
-  i32, // _mp_size
-  *const mp_limb_t, // _mp_d
+  pub i32, // _mp_alloc
+  pub i32, // _mp_size
+  pub *const mp_limb_t, // _mp_d
 );
 
 pub type K = *const Block;
@@ -26,6 +26,10 @@ extern "C" {
   pub fn __gmpz_init_set_ui(rop: *mut Int, op: usize);
   pub fn __gmpz_fits_ulong_p(op: *const Int) -> i32;
   pub fn __gmpz_get_ui(op: *const Int) -> u64;
+}
+
+extern "C" {
+  pub fn move_int(result: Int) -> *mut Int;
 }
 
 #[cfg(test)]
@@ -62,6 +66,13 @@ pub mod testing {
     let b = Box::new(Int(0,0,ptr::null()));
     let res = Box::into_raw(b);
     res
+  }
+
+  #[no_mangle]
+  pub unsafe extern "C" fn move_int(result: Int) -> *mut Int {
+    let ptr = alloc_int();
+    *ptr = result;
+    ptr
   }
 
   pub unsafe fn free_int(ptr: *mut Int) {
