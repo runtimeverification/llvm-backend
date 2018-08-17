@@ -9,6 +9,7 @@
 #include "llvm/IR/Instructions.h"
 #include "llvm/Support/MemoryBuffer.h"
 #include "llvm/Support/SourceMgr.h"
+#include "llvm/Support/raw_ostream.h"
 
 namespace kllvm {
 
@@ -84,7 +85,11 @@ target triple = "x86_64-unknown-linux-gnu"
 
 std::unique_ptr<llvm::Module> newModule(std::string name, llvm::LLVMContext &Context) {
   llvm::SMDiagnostic Err;
-  return llvm::parseIR(*llvm::MemoryBuffer::getMemBuffer(LLVM_HEADER), Err, Context);
+  auto mod = llvm::parseIR(*llvm::MemoryBuffer::getMemBuffer(LLVM_HEADER), Err, Context);
+  if (!mod) {
+    Err.print("header.ll", llvm::errs());
+  }
+  return mod;
 }
 
 static std::string MAP_STRUCT = "map";
