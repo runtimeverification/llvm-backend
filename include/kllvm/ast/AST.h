@@ -96,8 +96,8 @@ private:
   SortCategory category;
 
 public:
-  static KOREObjectCompositeSort *Create(const std::string &Name) {
-    return new KOREObjectCompositeSort(Name);
+  static KOREObjectCompositeSort *Create(const std::string &Name, SortCategory Cat = SortCategory::Uncomputed) {
+    return new KOREObjectCompositeSort(Name, Cat);
   }
 
   const std::string getName() const { return name; }
@@ -111,7 +111,7 @@ public:
   virtual bool operator==(const KOREObjectSort &other) const override;
 
 private:
-  KOREObjectCompositeSort(const std::string &Name) : name(Name), category(SortCategory::Uncomputed) {}
+  KOREObjectCompositeSort(const std::string &Name, SortCategory category) : name(Name), category(category) {}
 };
 
 class KOREMetaCompositeSort : public KOREMetaSort {
@@ -181,6 +181,7 @@ public:
   const KOREObjectSort *getSort() const { return sort; }
   KOREObjectSort *getSort() { return sort; }
   uint32_t getTag() const { assert(firstTag == lastTag); return firstTag; }
+  void setTag(uint32_t val) { firstTag = lastTag = val; }
   uint16_t getLayout() const { return layout; }
 
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
