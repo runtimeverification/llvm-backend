@@ -1,9 +1,9 @@
-add_kllvm_unittest(ast-tests
+add_kllvm_unittest(compiler-tests
   asttest.cpp
   main.cpp
 )
 
-target_link_libraries(ast-tests
+target_link_libraries(compiler-tests
   AST
   ${Boost_UNIT_TEST_FRAMEWORK_LIBRARIES}
 )
