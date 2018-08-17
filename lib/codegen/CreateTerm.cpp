@@ -310,23 +310,6 @@ llvm::Value *CreateTerm::createFunctionCall(std::string name, KOREObjectComposit
   std::vector<llvm::Type *> types;
   auto returnSort = dynamic_cast<KOREObjectCompositeSort *>(pattern->getConstructor()->getSort());
   llvm::Type *returnType = getValueType(returnSort->getCategory(Definition), Module);
-  llvm::Value *Retval;
-  bool load = true;
-  switch(returnSort->getCategory(Definition)) {
-  case SortCategory::Int:
-    Retval = allocateBlock(Module->getTypeByName(INT_STRUCT), CurrentBlock);
-    load = false;
-    break;
-  case SortCategory::Float:
-    Retval = allocateBlock(Module->getTypeByName(FLOAT_STRUCT), CurrentBlock);
-    load = false;
-    break;
-  default:
-    Retval = new llvm::AllocaInst(returnType, 0, "", CurrentBlock);
-    break;
-  }
-  args.push_back(Retval);
-  types.push_back(Retval->getType());
   int i = 0;
   for (auto sort : pattern->getConstructor()->getArguments()) {
     auto concreteSort = dynamic_cast<KOREObjectCompositeSort *>(sort);
@@ -347,18 +330,9 @@ llvm::Value *CreateTerm::createFunctionCall(std::string name, KOREObjectComposit
       break;
     }
   }
-  canGetStuck = true;
-  llvm::FunctionType *funcType = llvm::FunctionType::get(llvm::Type::getInt1Ty(Ctx), types, false);
+  llvm::FunctionType *funcType = llvm::FunctionType::get(returnType, types, false);
   llvm::Constant *func = Module->getOrInsertFunction(name, funcType);
-  llvm::CallInst *Call = llvm::CallInst::Create(func, args, "", CurrentBlock);
-  llvm::BasicBlock *MergeBlock = llvm::BasicBlock::Create(Ctx, "notstuck", CurrentBlock->getParent());
-  llvm::BranchInst *Branch = llvm::BranchInst::Create(MergeBlock, StuckBlock, Call, CurrentBlock);
-  CurrentBlock = MergeBlock;
-  if (load) {
-    return new llvm::LoadInst(Retval, "", CurrentBlock);
-  } else {
-    return Retval;
-  }
+  return llvm::CallInst::Create(func, args, "", CurrentBlock);
 }
 
 llvm::Value *CreateTerm::operator()(KOREPattern *pattern) {
