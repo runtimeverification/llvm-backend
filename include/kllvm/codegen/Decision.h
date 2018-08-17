@@ -18,9 +18,15 @@ public:
 
 class DecisionCase {
 private:
+  /* constructor to switch on. if null, this is a wildcard match.
+     if equal to \\dv, we are matching on a bool or mint literal. */
   KOREObjectSymbol *constructor;
+  /* the names to bind the children of this pattern to. */
   std::vector<std::string> bindings;
+  /* the literal int to match on. must have a bit width equal to the
+     size of the sort being matched. */
   llvm::APInt literal;
+  /* the node in the tree to juwp to if this constructor is matched */
   DecisionNode *child;
 
 public:
@@ -38,7 +44,9 @@ public:
   
 class SwitchNode : public DecisionNode {
 private:
+  /* the list of switch cases */
   std::vector<DecisionCase> cases;
+  /* the name of the variable being matched on. */
   std::string name;
 
   SwitchNode(const std::string &name) : name(name) {}
@@ -58,10 +66,15 @@ public:
 
 class FunctionNode : public DecisionNode {
 private:
+  /* the list of arguments to the function. */
   std::vector<std::string> bindings;
+  /* the name of the variable to bind to the result of the function. */
   std::string name;
+  /* the name of the function to call */
   std::string function;
+  /* the successor node in the tree */
   DecisionNode *child;
+  /* the return sort of the function */
   SortCategory cat;
   
   FunctionNode(
@@ -91,7 +104,11 @@ public:
 
 class LeafNode : public DecisionNode {
 private:
+  /* the names in the decision tree of the variables used in the rhs of
+     this rule, in alphabetical order of their names in the rule. */
   std::vector<std::string> bindings;
+  /* the name of the function that constructs the rhs of this rule from
+     the substitution */
   std::string name;
 
   LeafNode(const std::string &name) : name(name) {}
@@ -126,7 +143,8 @@ private:
   llvm::Module *Module;
   llvm::LLVMContext &Ctx;
   SortCategory Cat;
-
+	
+  llvm::Value *getTag(llvm::Value *);
 public:
   Decision(
     KOREDefinition *Definition,
@@ -145,13 +163,14 @@ public:
      the specified decision tree and return the result of taking that step. */
   void operator()(DecisionNode *entry, llvm::StringMap<llvm::Value *> substitution);
 
-  llvm::Value *getTag(llvm::Value *);
-
   friend class SwitchNode;
   friend class FunctionNode;
   friend class LeafNode;
 };
 
+/* construct the function that evaluates the specified function symbol
+   according to the specified decision tree and returns the result of the
+   function. */
 void makeEvalFunction(KOREObjectSymbol *function, KOREDefinition *definition, llvm::Module *module, DecisionNode *dt);
 
 }
