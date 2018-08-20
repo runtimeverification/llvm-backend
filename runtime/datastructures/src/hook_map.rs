@@ -1,4 +1,4 @@
-use super::decls::{Map,Set,List,Int,K,__gmpz_init_set_ui};
+use super::decls::{Map,Set,List,Int,K,__gmpz_init_set_ui,move_int};
 use std::iter::FromIterator;
 use std::ptr;
 use std::mem;
@@ -14,121 +14,103 @@ pub unsafe extern "C" fn drop_map(ptr: *mut Map) {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn hook_MAP_element(result: *mut Map, key: K, value: K) -> bool {
-  ptr::write(result, Map::singleton(key, value));
-  true
+pub unsafe extern "C" fn hook_MAP_element(key: K, value: K) -> Map {
+  Map::singleton(key, value)
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn hook_MAP_unit(result: *mut Map) -> bool {
-  ptr::write(result, Map::new());
-  true
+pub unsafe extern "C" fn hook_MAP_unit() -> Map {
+  Map::new()
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn hook_MAP_concat(result: *mut Map, m1: *const Map, m2: *const Map) -> bool {
-  let mut status = true;
-  let tmp: Map = (*m1).clone().union_with((*m2).clone(), |v1, _| { status = false; v1 });
-  if status {
-    ptr::write(result, tmp);
-  }
-  status
+pub unsafe extern "C" fn hook_MAP_concat(m1: *const Map, m2: *const Map) -> Map {
+  (*m1).clone().union_with((*m2).clone(), |_, _| { panic!("Duplicate keys") })
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn hook_MAP_lookup(result: *mut K, m: *const Map, key: K) -> bool {
+pub unsafe extern "C" fn hook_MAP_lookup(m: *const Map, key: K) -> K {
   match (*m).get(&key) {
-    Some(v) => { ptr::write(result, *v); true }
-    None => false
+    Some(v) => { *v }
+    None => panic!("key not found")
   }
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn hook_MAP_lookupOrDefault(result: *mut K, m: *const Map, key: K, default: K) -> bool {
+pub unsafe extern "C" fn hook_MAP_lookupOrDefault(m: *const Map, key: K, default: K) -> K {
   match (*m).get(&key) {
-    Some(v) => *result = *v,
-    None => *result = default
+    Some(v) => *v,
+    None => default
   }
-  true
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn hook_MAP_update(result: *mut Map, m: *const Map, key: K, value: K) -> bool {
-  ptr::write(result, (*m).update(key, value));
-  true
+pub unsafe extern "C" fn hook_MAP_update(m: *const Map, key: K, value: K) -> Map {
+  (*m).update(key, value)
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn hook_MAP_remove(result: *mut Map, m: *const Map, key: K) -> bool {
-  ptr::write(result, (*m).without(&key));
-  true
+pub unsafe extern "C" fn hook_MAP_remove(m: *const Map, key: K) -> Map {
+  (*m).without(&key)
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn hook_MAP_difference(result: *mut Map, m1: *const Map, m2: *const Map) -> bool {
-  ptr::write(result, (*m1).clone().difference_with((*m2).clone(), |v1, v2| if v1 == v2 { None } else { Some(v1) }));
-  true
+pub unsafe extern "C" fn hook_MAP_difference(m1: *const Map, m2: *const Map) -> Map {
+  (*m1).clone().difference_with((*m2).clone(), |v1, v2| if v1 == v2 { None } else { Some(v1) })
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn hook_MAP_keys(result: *mut Set, m: *const Map) -> bool {
-  ptr::write(result, Set::from_iter((*m).keys().map(|k| *k)));
-  true
+pub unsafe extern "C" fn hook_MAP_keys(m: *const Map) -> Set {
+  Set::from_iter((*m).keys().map(|k| *k))
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn hook_MAP_keys_list(result: *mut List, m: *const Map) -> bool {
-  ptr::write(result, List::from_iter((*m).keys().map(|k| *k)));
-  true
+pub unsafe extern "C" fn hook_MAP_keys_list(m: *const Map) -> List {
+  List::from_iter((*m).keys().map(|k| *k))
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn hook_MAP_in_keys(result: *mut bool, key: K, m: *const Map) -> bool {
-  ptr::write(result, (*m).contains_key(&key));
-  true
+pub unsafe extern "C" fn hook_MAP_in_keys(key: K, m: *const Map) -> bool {
+  (*m).contains_key(&key)
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn hook_MAP_values(result: *mut List, m: *const Map) -> bool {
-  ptr::write(result, List::from_iter((*m).values().map(|k| *k)));
-  true
+pub unsafe extern "C" fn hook_MAP_values(m: *const Map) -> List {
+  List::from_iter((*m).values().map(|k| *k))
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn hook_MAP_choice(result: *mut K, m: *const Map) -> bool {
+pub unsafe extern "C" fn hook_MAP_choice(m: *const Map) -> K {
   if (*m).is_empty() {
-    return false;
+    panic!("Map is empty")
   }
-  ptr::write(result, *(*m).keys().next().unwrap());
-  true
+  *(*m).keys().next().unwrap()
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn hook_MAP_size(result: *mut Int, m: *const Map) -> bool {
-  __gmpz_init_set_ui(result, (*m).len());
-  true
+pub unsafe extern "C" fn hook_MAP_size(m: *const Map) -> *mut Int {
+  let mut result = Int(0, 0, ptr::null());
+  __gmpz_init_set_ui(&mut result, (*m).len());
+  move_int(result)
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn hook_MAP_inclusion(result: *mut bool, m1: *const Map, m2: *const Map) -> bool {
-  ptr::write(result, (*m1).is_submap(&*m2));
-  true
+pub unsafe extern "C" fn hook_MAP_inclusion(m1: *const Map, m2: *const Map) -> bool {
+  (*m1).is_submap(&*m2)
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn hook_MAP_updateAll(result: *mut Map, m1: *const Map, m2: *const Map) -> bool {
-  ptr::write(result, (*m2).clone().union((*m1).clone()));
-  true
+pub unsafe extern "C" fn hook_MAP_updateAll(m1: *const Map, m2: *const Map) -> Map {
+  (*m2).clone().union((*m1).clone())
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn hook_MAP_removeAll(result: *mut Map, map: *const Map, set: *const Set) -> bool {
+pub unsafe extern "C" fn hook_MAP_removeAll(map: *const Map, set: *const Set) -> Map {
   let mut tmp = (*map).clone();
   for key in (*set).iter() {
     tmp.remove(key);
   }
-  ptr::write(result, tmp);
-  true
+  tmp
 }
 
 #[cfg(test)]
@@ -137,43 +119,24 @@ mod tests {
 
   use decls::testing::*;
   use hook_map::*;
-  use hook_set::tests::{alloc_set,free_set};
-  use hook_list::tests::{alloc_list,free_list};
-
-  pub unsafe fn alloc_map() -> *mut Map {
-    let ptr = libc::malloc(size_map()) as *mut Map;
-    ptr
-  }
-
-  pub unsafe fn free_map(ptr: *mut Map) {
-    drop_map(ptr);
-    libc::free(ptr as *mut libc::c_void);
-  }
 
   #[test]
   fn test_element() {
     unsafe {
-      let map = alloc_map();
-      assert!(hook_MAP_element(map, DUMMY0, DUMMY0));
-      let result = alloc_k();
-      assert!(hook_MAP_choice(result, map));
-      assert_eq!(*result, DUMMY0);
-      assert!(hook_MAP_lookup(result, map, DUMMY0));
-      assert_eq!(*result, DUMMY0);
-      free_map(map);
-      free_k(result);
+      let map = hook_MAP_element(DUMMY0, DUMMY0);
+      let result = hook_MAP_choice(&map);
+      assert_eq!(result, DUMMY0);
+      let result = hook_MAP_lookup(&map, DUMMY0);
+      assert_eq!(result, DUMMY0);
     }
   }
 
   #[test]
   fn test_unit() {
     unsafe {
-      let map = alloc_map();
-      assert!(hook_MAP_unit(map));
-      let result = alloc_int();
-      assert!(hook_MAP_size(result, map));
+      let map = hook_MAP_unit();
+      let result = hook_MAP_size(&map);
       assert_eq!(__gmpz_cmp_ui(result, 0), 0);
-      free_map(map);
       free_int(result);
     }
   }
@@ -181,87 +144,59 @@ mod tests {
   #[test]
   fn test_concat_success() {
     unsafe {
-      let m1 = alloc_map();
-      let m2 = alloc_map();
-      let map = alloc_map();
-      assert!(hook_MAP_element(m1, DUMMY0, DUMMY1));
-      assert!(hook_MAP_element(m2, DUMMY1, DUMMY2));
-      assert!(hook_MAP_concat(map, m1, m2));
-      let result = alloc_int();
-      assert!(hook_MAP_size(result, map));
+      let m1 = hook_MAP_element(DUMMY0, DUMMY1);
+      let m2 = hook_MAP_element(DUMMY1, DUMMY2);
+      let map = hook_MAP_concat(&m1, &m2);
+      let result = hook_MAP_size(&map);
       assert_eq!(__gmpz_cmp_ui(result, 2), 0);
-      free_map(m1);
-      free_map(m2);
-      free_map(map);
       free_int(result);
     }
   }
 
   #[test]
+  #[should_panic(expected = "Duplicate keys")]
   fn test_concat_failure() {
     unsafe {
-      let m1 = alloc_map();
-      let m2 = alloc_map();
-      let map = alloc_map();
-      assert!(hook_MAP_element(m1, DUMMY0, DUMMY1));
-      assert!(hook_MAP_element(m2, DUMMY0, DUMMY2));
-      assert!(!hook_MAP_concat(map, m1, m2));
-      free_map(m1);
-      free_map(m2);
-      ptr::write(map, Map::new());
-      free_map(map);
+      let m1 = hook_MAP_element(DUMMY0, DUMMY1);
+      let m2 = hook_MAP_element(DUMMY0, DUMMY2);
+      let _ = hook_MAP_concat(&m1, &m2);
     }
   }
 
   #[test]
   fn test_lookup_or_default() {
     unsafe {
-      let map = alloc_map();
-      assert!(hook_MAP_element(map, DUMMY0, DUMMY0));
-      let result = alloc_k();
-      assert!(hook_MAP_lookupOrDefault(result, map, DUMMY0, DUMMY1));
-      assert_eq!(*result, DUMMY0);
-      assert!(hook_MAP_lookupOrDefault(result, map, DUMMY1, DUMMY1));
-      assert_eq!(*result, DUMMY1);
-      free_map(map);
-      free_k(result);
+      let map = hook_MAP_element(DUMMY0, DUMMY0);
+      let result = hook_MAP_lookupOrDefault(&map, DUMMY0, DUMMY1);
+      assert_eq!(result, DUMMY0);
+      let result = hook_MAP_lookupOrDefault(&map, DUMMY1, DUMMY1);
+      assert_eq!(result, DUMMY1);
     }
   }
 
   #[test]
   fn test_update() {
     unsafe {
-      let map = alloc_map();
-      let map2 = alloc_map();
-      assert!(hook_MAP_element(map, DUMMY0, DUMMY0));
-      let result = alloc_k();
-      assert!(hook_MAP_lookup(result, map, DUMMY0));
-      assert_eq!(*result, DUMMY0);
-      assert!(hook_MAP_update(map2, map, DUMMY0, DUMMY1));
-      assert!(hook_MAP_lookup(result, map, DUMMY0));
-      assert_eq!(*result, DUMMY0);
-      assert!(hook_MAP_lookup(result, map2, DUMMY0));
-      assert_eq!(*result, DUMMY1);
-      free_map(map);
-      free_map(map2);
-      free_k(result);
+      let map = hook_MAP_element(DUMMY0, DUMMY0);
+      let result = hook_MAP_lookup(&map, DUMMY0);
+      assert_eq!(result, DUMMY0);
+      let map2 = hook_MAP_update(&map, DUMMY0, DUMMY1);
+      let result = hook_MAP_lookup(&map, DUMMY0);
+      assert_eq!(result, DUMMY0);
+      let result = hook_MAP_lookup(&map2, DUMMY0);
+      assert_eq!(result, DUMMY1);
     }
   }
 
   #[test]
   fn test_remove() {
     unsafe {
-      let map = alloc_map();
-      let map2 = alloc_map();
-      assert!(hook_MAP_element(map, DUMMY0, DUMMY0));
-      assert!(hook_MAP_remove(map2, map, DUMMY0));
-      let result = alloc_int();
-      assert!(hook_MAP_size(result, map));
+      let map = hook_MAP_element(DUMMY0, DUMMY0);
+      let map2 = hook_MAP_remove(&map, DUMMY0);
+      let result = hook_MAP_size(&map);
       assert_eq!(__gmpz_cmp_ui(result, 1), 0);
-      assert!(hook_MAP_size(result, map2));
+      let result = hook_MAP_size(&map2);
       assert_eq!(__gmpz_cmp_ui(result, 0), 0);
-      free_map(map);
-      free_map(map2);
       free_int(result);
     }
   }
@@ -269,22 +204,15 @@ mod tests {
   #[test]
   fn test_difference() {
     unsafe {
-      let m1 = alloc_map();
-      let m2 = alloc_map();
-      let map = alloc_map();
-      assert!(hook_MAP_element(m1, DUMMY0, DUMMY0));
-      assert!(hook_MAP_element(m2, DUMMY0, DUMMY0));
-      assert!(hook_MAP_difference(map, m1, m2));
-      let result = alloc_int();
-      assert!(hook_MAP_size(result, map));
+      let m1 = hook_MAP_element(DUMMY0, DUMMY0);
+      let m2 = hook_MAP_element(DUMMY0, DUMMY0);
+      let map = hook_MAP_difference(&m1, &m2);
+      let result = hook_MAP_size(&map);
       assert_eq!(__gmpz_cmp_ui(result, 0), 0);
-      assert!(hook_MAP_update(m2, m2, DUMMY0, DUMMY1));
-      assert!(hook_MAP_difference(map, m1, m2));
-      assert!(hook_MAP_size(result, map));
+      let m2 = hook_MAP_update(&m2, DUMMY0, DUMMY1);
+      let map = hook_MAP_difference(&m1, &m2);
+      let result = hook_MAP_size(&map);
       assert_eq!(__gmpz_cmp_ui(result, 1), 0);
-      free_map(map);
-      free_map(m1);
-      free_map(m2);
       free_int(result);
     }
   }
@@ -292,116 +220,80 @@ mod tests {
   #[test]
   fn test_keys() {
     unsafe {
-      let map = alloc_map();
-      let set = alloc_set();
-      assert!(hook_MAP_element(map, DUMMY0, DUMMY0));
-      assert!(hook_MAP_keys(set, map));
-      assert!((*set).contains(&DUMMY0));
-      free_set(set);
-      free_map(map);
+      let map = hook_MAP_element(DUMMY0, DUMMY0);
+      let set = hook_MAP_keys(&map);
+      assert!((set).contains(&DUMMY0));
     }
   }
 
   #[test]
   fn test_keys_list() {
     unsafe {
-      let map = alloc_map();
-      let list = alloc_list();
-      assert!(hook_MAP_element(map, DUMMY0, DUMMY0));
-      assert!(hook_MAP_keys_list(list, map));
-      assert_eq!((*list).get(0).unwrap(), &DUMMY0);
-      free_list(list);
-      free_map(map);
+      let map = hook_MAP_element(DUMMY0, DUMMY0);
+      let list = hook_MAP_keys_list(&map);
+      assert_eq!((list).get(0).unwrap(), &DUMMY0);
     }
   }
 
   #[test]
   fn test_in_keys() {
-    let mut result = false;
     unsafe {
-      let map = alloc_map();
-      assert!(hook_MAP_element(map, DUMMY0, DUMMY0));
-      assert!(hook_MAP_in_keys(&mut result, DUMMY0, map));
+      let map = hook_MAP_element(DUMMY0, DUMMY0);
+      let result = hook_MAP_in_keys(DUMMY0, &map);
       assert!(result);
-      assert!(hook_MAP_in_keys(&mut result, DUMMY1, map));
+      let result = hook_MAP_in_keys(DUMMY1, &map);
       assert!(!result);
-      free_map(map);
     }
   }
 
   #[test]
   fn test_values() {
     unsafe {
-      let map = alloc_map();
-      let list = alloc_list();
-      assert!(hook_MAP_element(map, DUMMY0, DUMMY0));
-      assert!(hook_MAP_values(list, map));
-      assert_eq!((*list).get(0).unwrap(), &DUMMY0);
-      free_list(list);
-      free_map(map);
+      let map = hook_MAP_element(DUMMY0, DUMMY0);
+      let list = hook_MAP_values(&map);
+      assert_eq!((list).get(0).unwrap(), &DUMMY0);
     }
   }
 
   #[test]
   fn test_inclusion() {
-    let mut result = true;
     unsafe {
-      let m1 = alloc_map();
-      let m2 = alloc_map();
-      assert!(hook_MAP_element(m1, DUMMY0, DUMMY0));
-      assert!(hook_MAP_element(m2, DUMMY1, DUMMY1));
-      assert!(hook_MAP_inclusion(&mut result, m1, m2));
+      let m1 = hook_MAP_element(DUMMY0, DUMMY0);
+      let m2 = hook_MAP_element(DUMMY1, DUMMY1);
+      let result = hook_MAP_inclusion(&m1, &m2);
       assert!(!result);
-      assert!(hook_MAP_update(m2, m2, DUMMY0, DUMMY0));
-      assert!(hook_MAP_inclusion(&mut result, m1, m2));
+      let m2 = hook_MAP_update(&m2, DUMMY0, DUMMY0);
+      let result = hook_MAP_inclusion(&m1, &m2);
       assert!(result);
-      assert!(hook_MAP_element(m2, DUMMY0, DUMMY1));
-      result = false;
-      assert!(hook_MAP_inclusion(&mut result, m1, m2));
+      let m2 = hook_MAP_element(DUMMY0, DUMMY1);
+      let result = hook_MAP_inclusion(&m1, &m2);
       assert!(!result);
-      free_map(m1);
-      free_map(m2);
     }
   }
 
   #[test]
   fn test_update_all() {
     unsafe {
-      let m1 = alloc_map();
-      let m2 = alloc_map();
-      let map = alloc_map();
-      assert!(hook_MAP_element(m1, DUMMY0, DUMMY0));
-      assert!(hook_MAP_element(m2, DUMMY1, DUMMY1));
-      assert!(hook_MAP_update(m2, m2, DUMMY0, DUMMY1));
-      assert!(hook_MAP_updateAll(map, m1, m2));
-      let result = alloc_k();
-      assert!(hook_MAP_lookup(result, map, DUMMY0));
-      assert_eq!(*result, DUMMY1);
-      assert!(hook_MAP_lookup(result, map, DUMMY1));
-      assert_eq!(*result, DUMMY1);
-      free_map(m1);
-      free_map(m2);
-      free_map(map);
-      free_k(result);
+      let m1 = hook_MAP_element(DUMMY0, DUMMY0);
+      let m2 = hook_MAP_element(DUMMY1, DUMMY1);
+      let m2 = hook_MAP_update(&m2, DUMMY0, DUMMY1);
+      let map = hook_MAP_updateAll(&m1, &m2);
+      let result = hook_MAP_lookup(&map, DUMMY0);
+      assert_eq!(result, DUMMY1);
+      let result = hook_MAP_lookup(&map, DUMMY1);
+      assert_eq!(result, DUMMY1);
     }
   }
 
   #[test]
   fn test_remove_all() {
     unsafe {
-      let m1 = alloc_map();
-      let m2 = alloc_map();
-      let set = alloc_set();
-      ptr::write(set, Set::singleton(DUMMY0));
-      assert!(hook_MAP_element(m1, DUMMY0, DUMMY0));
-      assert!(hook_MAP_removeAll(m2, m1, set));
-      let result = alloc_int();
-      assert!(hook_MAP_size(result, m2));
+      let set = Set::singleton(DUMMY0);
+      let m1 = hook_MAP_element(DUMMY0, DUMMY0);
+      let m2 = hook_MAP_removeAll(&m1, &set);
+      let result = hook_MAP_size(&m2);
       assert_eq!(__gmpz_cmp_ui(result, 0), 0);
       free_int(result);
-      free_set(set);
-      free_map(m1);
-      free_map(m2);
     }
   }
 }

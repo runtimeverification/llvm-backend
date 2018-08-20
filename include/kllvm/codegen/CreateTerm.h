@@ -14,10 +14,8 @@ private:
   llvm::StringMap<llvm::Value *> &Substitution;
   KOREDefinition *Definition;
   llvm::BasicBlock *CurrentBlock;
-  llvm::BasicBlock *StuckBlock;
   llvm::Module *Module;
   llvm::LLVMContext &Ctx;
-  bool canGetStuck;
 
   llvm::Value *createHook(KOREObjectCompositePattern *hookAtt, KOREObjectCompositePattern *pattern);
   llvm::Value *createFunctionCall(std::string name, KOREObjectCompositePattern *pattern);
@@ -27,15 +25,12 @@ public:
     llvm::StringMap<llvm::Value *> &Substitution,
     KOREDefinition *Definition,
     llvm::BasicBlock *EntryBlock,
-    llvm::BasicBlock *StuckBlock,
     llvm::Module *Module) :
       Substitution(Substitution),
       Definition(Definition),
       CurrentBlock(EntryBlock),
-      StuckBlock(StuckBlock),
       Module(Module),
-      Ctx(Module->getContext()),
-      canGetStuck(false) {}
+      Ctx(Module->getContext()) {}
 
 /* adds code to the specified basic block in the specified module which constructs
    an llvm value corresponding to the specified KORE RHS pattern and substitution in the
@@ -43,8 +38,6 @@ public:
   llvm::Value *operator()(KOREPattern *pattern);
 
   llvm::BasicBlock *getCurrentBlock() const { return CurrentBlock; }
-
-  bool hasStuckBlock() const { return canGetStuck; }
 };
 
 /* Creates a new llvm::Module with the predefined declarations common to all llvm modules

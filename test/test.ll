@@ -20,9 +20,6 @@ entry:
   ret %block* %K2
 }
 
-; Function Attrs: noreturn
-declare void @abort() #0
-
 define %block* @apply_rule_1(%block* %K1, %block* %K2, %block* %K3) {
 entry:
   %malloccall = tail call i8* @malloc(i64 ptrtoint ({ %blockheader, [0 x i64], %block*, %block* }* getelementptr ({ %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* null, i32 1) to i64))
@@ -31,25 +28,16 @@ entry:
   store %blockheader { i64 2251812698587180 }, %blockheader* %kseq
   %1 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %0, i64 0, i32 2
   store %block* %K1, %block** %1
-  %2 = alloca %block*
-  %3 = call i1 @"eval_append{SortK{},SortK{}}"(%block** %2, %block* %K2, %block* %K3)
-  br i1 %3, label %notstuck, label %stuck
-
-notstuck:                                         ; preds = %entry
-  %4 = load %block*, %block** %2
-  %5 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %0, i64 0, i32 3
-  store %block* %4, %block** %5
-  %6 = bitcast { %blockheader, [0 x i64], %block*, %block* }* %0 to %block*
-  ret %block* %6
-
-stuck:                                            ; preds = %entry
-  call void @abort()
-  unreachable
+  %2 = call %block* @"eval_append{SortK{},SortK{}}"(%block* %K2, %block* %K3)
+  %3 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %0, i64 0, i32 3
+  store %block* %2, %block** %3
+  %4 = bitcast { %blockheader, [0 x i64], %block*, %block* }* %0 to %block*
+  ret %block* %4
 }
 
 declare noalias i8* @malloc(i64)
 
-declare i1 @"eval_append{SortK{},SortK{}}"(%block**, %block*, %block*)
+declare %block* @"eval_append{SortK{},SortK{}}"(%block*, %block*)
 
 define i1 @apply_rule_2() {
 entry:
@@ -283,32 +271,23 @@ entry:
   %0 = bitcast i8* %malloccall to { %blockheader, [0 x i64], %block* }*
   %"Lbl'-LT-'k'-GT-'" = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %0, i64 0, i32 0
   store %blockheader { i64 281483566645248 }, %blockheader* %"Lbl'-LT-'k'-GT-'"
-  %1 = alloca %block*
-  %2 = alloca %map
-  store %map %VarM, %map* %2
+  %1 = alloca %map
+  store %map %VarM, %map* %1
   %malloccall1 = tail call i8* @malloc(i64 ptrtoint ({ %blockheader, [0 x i64], %mpz* }* getelementptr ({ %blockheader, [0 x i64], %mpz* }, { %blockheader, [0 x i64], %mpz* }* null, i32 1) to i64))
-  %3 = bitcast i8* %malloccall1 to { %blockheader, [0 x i64], %mpz* }*
-  %inj = getelementptr inbounds { %blockheader, [0 x i64], %mpz* }, { %blockheader, [0 x i64], %mpz* }* %3, i64 0, i32 0
+  %2 = bitcast i8* %malloccall1 to { %blockheader, [0 x i64], %mpz* }*
+  %inj = getelementptr inbounds { %blockheader, [0 x i64], %mpz* }, { %blockheader, [0 x i64], %mpz* }* %2, i64 0, i32 0
   store %blockheader { i64 3096233333751848 }, %blockheader* %inj
-  %4 = getelementptr inbounds { %blockheader, [0 x i64], %mpz* }, { %blockheader, [0 x i64], %mpz* }* %3, i64 0, i32 2
-  store %mpz* @int_0, %mpz** %4
-  %5 = bitcast { %blockheader, [0 x i64], %mpz* }* %3 to %block*
-  %6 = call i1 @hook_MAP_lookup(%block** %1, %map* %2, %block* %5)
-  br i1 %6, label %notstuck, label %stuck
-
-notstuck:                                         ; preds = %entry
-  %7 = load %block*, %block** %1
-  %8 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %0, i64 0, i32 2
-  store %block* %7, %block** %8
-  %9 = bitcast { %blockheader, [0 x i64], %block* }* %0 to %block*
-  ret %block* %9
-
-stuck:                                            ; preds = %entry
-  call void @abort()
-  unreachable
+  %3 = getelementptr inbounds { %blockheader, [0 x i64], %mpz* }, { %blockheader, [0 x i64], %mpz* }* %2, i64 0, i32 2
+  store %mpz* @int_0, %mpz** %3
+  %4 = bitcast { %blockheader, [0 x i64], %mpz* }* %2 to %block*
+  %5 = call %block* @hook_MAP_lookup(%map* %1, %block* %4)
+  %6 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %0, i64 0, i32 2
+  store %block* %5, %block** %6
+  %7 = bitcast { %blockheader, [0 x i64], %block* }* %0 to %block*
+  ret %block* %7
 }
 
-declare i1 @hook_MAP_lookup(%block**, %map*, %block*)
+declare %block* @hook_MAP_lookup(%map*, %block*)
 
 define %block* @apply_rule_23(%block* %VarDotVar0) {
 entry:
@@ -658,29 +637,20 @@ entry:
   %0 = bitcast i8* %malloccall to { %blockheader, [0 x i64], %block* }*
   %"Lbl'-LT-'k'-GT-'" = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %0, i64 0, i32 0
   store %blockheader { i64 281483566645248 }, %blockheader* %"Lbl'-LT-'k'-GT-'"
-  %1 = alloca %block*
-  %2 = alloca %map
-  store %map %VarInit, %map* %2
+  %1 = alloca %map
+  store %map %VarInit, %map* %1
   %malloccall1 = tail call i8* @malloc(i64 ptrtoint ({ %blockheader, [0 x i64], %block* }* getelementptr ({ %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* null, i32 1) to i64))
-  %3 = bitcast i8* %malloccall1 to { %blockheader, [0 x i64], %block* }*
-  %inj = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %3, i64 0, i32 0
+  %2 = bitcast i8* %malloccall1 to { %blockheader, [0 x i64], %block* }*
+  %inj = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %2, i64 0, i32 0
   store %blockheader { i64 281483566645286 }, %blockheader* %inj
-  %4 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %3, i64 0, i32 2
-  store %block* bitcast ({ %blockheader, [4 x i8] }* @"token_$PGM" to %block*), %block** %4
-  %5 = bitcast { %blockheader, [0 x i64], %block* }* %3 to %block*
-  %6 = call i1 @hook_MAP_lookup(%block** %1, %map* %2, %block* %5)
-  br i1 %6, label %notstuck, label %stuck
-
-notstuck:                                         ; preds = %entry
-  %7 = load %block*, %block** %1
-  %8 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %0, i64 0, i32 2
-  store %block* %7, %block** %8
-  %9 = bitcast { %blockheader, [0 x i64], %block* }* %0 to %block*
-  ret %block* %9
-
-stuck:                                            ; preds = %entry
-  call void @abort()
-  unreachable
+  %3 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %2, i64 0, i32 2
+  store %block* bitcast ({ %blockheader, [4 x i8] }* @"token_$PGM" to %block*), %block** %3
+  %4 = bitcast { %blockheader, [0 x i64], %block* }* %2 to %block*
+  %5 = call %block* @hook_MAP_lookup(%map* %1, %block* %4)
+  %6 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %0, i64 0, i32 2
+  store %block* %5, %block** %6
+  %7 = bitcast { %blockheader, [0 x i64], %block* }* %0 to %block*
+  ret %block* %7
 }
 
 define i1 @apply_rule_61() {
@@ -773,5 +743,3 @@ define i1 @apply_rule_72() {
 entry:
   ret i1 false
 }
-
-attributes #0 = { noreturn }

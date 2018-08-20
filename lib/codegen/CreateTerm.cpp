@@ -9,6 +9,7 @@
 #include "llvm/IR/Instructions.h"
 #include "llvm/Support/MemoryBuffer.h"
 #include "llvm/Support/SourceMgr.h"
+#include "llvm/Support/raw_ostream.h"
 
 namespace kllvm {
 
@@ -84,7 +85,11 @@ target triple = "x86_64-unknown-linux-gnu"
 
 std::unique_ptr<llvm::Module> newModule(std::string name, llvm::LLVMContext &Context) {
   llvm::SMDiagnostic Err;
-  return llvm::parseIR(*llvm::MemoryBuffer::getMemBuffer(LLVM_HEADER), Err, Context);
+  auto mod = llvm::parseIR(*llvm::MemoryBuffer::getMemBuffer(LLVM_HEADER), Err, Context);
+  if (!mod) {
+    Err.print("header.ll", llvm::errs());
+  }
+  return mod;
 }
 
 static std::string MAP_STRUCT = "map";
@@ -295,23 +300,6 @@ llvm::Value *CreateTerm::createFunctionCall(std::string name, KOREObjectComposit
   std::vector<llvm::Type *> types;
   auto returnSort = dynamic_cast<KOREObjectCompositeSort *>(pattern->getConstructor()->getSort());
   llvm::Type *returnType = getValueType(returnSort->getCategory(Definition), Module);
-  llvm::Value *Retval;
-  bool load = true;
-  switch(returnSort->getCategory(Definition)) {
-  case SortCategory::Int:
-    Retval = allocateBlock(Module->getTypeByName(INT_STRUCT), CurrentBlock);
-    load = false;
-    break;
-  case SortCategory::Float:
-    Retval = allocateBlock(Module->getTypeByName(FLOAT_STRUCT), CurrentBlock);
-    load = false;
-    break;
-  default:
-    Retval = new llvm::AllocaInst(returnType, 0, "", CurrentBlock);
-    break;
-  }
-  args.push_back(Retval);
-  types.push_back(Retval->getType());
   int i = 0;
   for (auto sort : pattern->getConstructor()->getArguments()) {
     auto concreteSort = dynamic_cast<KOREObjectCompositeSort *>(sort);
@@ -332,18 +320,9 @@ llvm::Value *CreateTerm::createFunctionCall(std::string name, KOREObjectComposit
       break;
     }
   }
-  canGetStuck = true;
-  llvm::FunctionType *funcType = llvm::FunctionType::get(llvm::Type::getInt1Ty(Ctx), types, false);
+  llvm::FunctionType *funcType = llvm::FunctionType::get(returnType, types, false);
   llvm::Constant *func = Module->getOrInsertFunction(name, funcType);
-  llvm::CallInst *Call = llvm::CallInst::Create(func, args, "", CurrentBlock);
-  llvm::BasicBlock *MergeBlock = llvm::BasicBlock::Create(Ctx, "notstuck", CurrentBlock->getParent());
-  llvm::BranchInst *Branch = llvm::BranchInst::Create(MergeBlock, StuckBlock, Call, CurrentBlock);
-  CurrentBlock = MergeBlock;
-  if (load) {
-    return new llvm::LoadInst(Retval, "", CurrentBlock);
-  } else {
-    return Retval;
-  }
+  return llvm::CallInst::Create(func, args, "", CurrentBlock);
 }
 
 llvm::Value *CreateTerm::operator()(KOREPattern *pattern) {
@@ -422,18 +401,9 @@ std::string makeApplyRuleFunction(KOREAxiomDeclaration *axiom, KOREDefinition *d
       subst.insert({paramNames[i], val});
     }
     llvm::BasicBlock *block = llvm::BasicBlock::Create(Module->getContext(), "entry", applyRule);
-    llvm::BasicBlock *stuck = llvm::BasicBlock::Create(Module->getContext(), "stuck");
-    llvm::FunctionType *AbortType = llvm::FunctionType::get(llvm::Type::getVoidTy(Module->getContext()), false);
-    llvm::Function *AbortFunc = llvm::dyn_cast<llvm::Function>(Module->getOrInsertFunction("abort", AbortType));
-    AbortFunc->addFnAttr(llvm::Attribute::NoReturn);
-    llvm::CallInst *Abort = llvm::CallInst::Create(AbortFunc, "", stuck);
-    llvm::UnreachableInst *Unreachable = new llvm::UnreachableInst(Module->getContext(), stuck);
-    CreateTerm creator = CreateTerm(subst, definition, block, stuck, Module);
+    CreateTerm creator = CreateTerm(subst, definition, block, Module);
     llvm::Value *retval = creator(pattern);
     llvm::ReturnInst::Create(Module->getContext(), retval, creator.getCurrentBlock());
-    if (creator.hasStuckBlock()) {
-      stuck->insertInto(applyRule);
-    }
     return name;
 }
 
