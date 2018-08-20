@@ -65,12 +65,12 @@ pub unsafe extern "C" fn hook_SET_size(s: *const Set) -> *mut Int {
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_SET_set2list(s: *const Set) -> List {
-  List::from_iter((*s).iter().map(|k| *k))
+  List::from_iter((*s).iter().cloned())
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_SET_list2set(l: *const List) -> Set {
-  Set::from_iter((*l).iter().map(|k| *k))
+  Set::from_iter((*l).iter().cloned())
 }
 
 #[cfg(test)]

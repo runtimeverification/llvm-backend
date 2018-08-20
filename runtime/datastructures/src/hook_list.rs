@@ -67,7 +67,7 @@ pub unsafe extern "C" fn hook_LIST_range(list: *const List, from_front: *const I
   if old_len < front_long + back_long {
     panic!("Index out of range")
   }
-  (*list).skip(front_long).take(old_len - front_long - back_long)
+  (*list).clone().slice(front_long..old_len - front_long - back_long)
 }
 
 #[no_mangle]
