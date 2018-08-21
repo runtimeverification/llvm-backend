@@ -153,7 +153,11 @@ llvm::Value *getBlockHeader(llvm::Module *Module, KOREDefinition *definition, co
 }
 
 llvm::Value *allocateBlock(llvm::Type *AllocType, llvm::BasicBlock *block) {
-  llvm::Instruction *Malloc = llvm::CallInst::CreateMalloc(block, llvm::Type::getInt64Ty(block->getContext()), AllocType, llvm::ConstantExpr::getSizeOf(AllocType), nullptr, nullptr);
+  return allocateBlock(AllocType, llvm::ConstantExpr::getSizeOf(AllocType), block);
+}
+
+llvm::Value *allocateBlock(llvm::Type *AllocType, llvm::Value *Len, llvm::BasicBlock *block) {
+  llvm::Instruction *Malloc = llvm::CallInst::CreateMalloc(block, llvm::Type::getInt64Ty(block->getContext()), AllocType, Len, nullptr, nullptr);
   block->getInstList().push_back(Malloc);
   return Malloc;
 }

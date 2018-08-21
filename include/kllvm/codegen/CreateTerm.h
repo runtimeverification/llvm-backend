@@ -61,6 +61,7 @@ llvm::Type *getValueType(SortCategory sort, llvm::Module *Module);
 void addAbort(llvm::BasicBlock *block, llvm::Module *Module);
 
 llvm::Value *allocateBlock(llvm::Type *AllocType, llvm::BasicBlock *block);
+llvm::Value *allocateBlock(llvm::Type *AllocType, llvm::Value *Len, llvm::BasicBlock *block);
 }
 
 #endif // CREATE_TERM_H
