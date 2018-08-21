@@ -372,6 +372,14 @@ llvm::Value *CreateTerm::operator()(KOREPattern *pattern) {
   }
 }
 
+void addAbort(llvm::BasicBlock *block, llvm::Module *Module) {
+    llvm::FunctionType *AbortType = llvm::FunctionType::get(llvm::Type::getVoidTy(Module->getContext()), false);
+    llvm::Function *AbortFunc = llvm::dyn_cast<llvm::Function>(Module->getOrInsertFunction("abort", AbortType));
+    AbortFunc->addFnAttr(llvm::Attribute::NoReturn);
+    llvm::CallInst *Abort = llvm::CallInst::Create(AbortFunc, "", block);
+    llvm::UnreachableInst *Unreachable = new llvm::UnreachableInst(Module->getContext(), block);
+}
+
 static int nextRuleId = 0;
 
 std::string makeApplyRuleFunction(KOREAxiomDeclaration *axiom, KOREDefinition *definition, llvm::Module *Module) {

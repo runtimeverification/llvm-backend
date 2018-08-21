@@ -58,6 +58,8 @@ std::string makeApplyRuleFunction(KOREAxiomDeclaration *axiom, KOREDefinition *d
 /* returns the llvm::Type corresponding to the specified KORE sort category */
 llvm::Type *getValueType(SortCategory sort, llvm::Module *Module);
 
+void addAbort(llvm::BasicBlock *block, llvm::Module *Module);
+
 llvm::Value *allocateBlock(llvm::Type *AllocType, llvm::BasicBlock *block);
 }
 
