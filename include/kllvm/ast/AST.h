@@ -142,14 +142,15 @@ class KOREObjectSymbolDeclaration;
 class KOREObjectSymbol : public KORESymbol {
 private:
   std::string name;
-  /** At parse time, when parsed as part of a pattern,
-      this will contain the list of actual sort parameters to the
-      symbol. When parsed as part of a declaration, it contains the signature
+  /* At parse time, when parsed as part of a pattern,
+      this will be empty. When parsed as part of a declaration, it contains the signature
       of the symbol. After instantiateSymbol is called on a symbol that is
-      part of a pattern, it changes from being the sort parameters to being
+      part of a pattern, it changes from being empty to being
       the signature of the symbol. instantiateSymbol is called on all object
       level symbols in axioms when KOREDefinition::preprocess is called. */
   std::vector<KOREObjectSort *> arguments;
+  /* contains the original arguments to the symbol when parsed as parh of a pattern. */
+  std::vector<KOREObjectSort *> formalArguments;
   /** At parse time, when parsed as part of a pattern, this will be null.
       When parsed as part of a declaration, it contains the return sort of the symbol.
       See above re: the behavior of KOREObjectSymbol with respect to instantiateSymbol. */
@@ -172,11 +173,15 @@ public:
   }
 
   void addArgument(KOREObjectSort *Argument);
+  void addFormalArgument(KOREObjectSort *Argument);
   void addSort(KOREObjectSort *Sort);
 
   const std::string &getName() const { return name; }
   const std::vector<KOREObjectSort *> &getArguments() const {
     return arguments;
+  }
+  const std::vector<KOREObjectSort *> &getFormalArguments() const {
+    return formalArguments;
   }
   const KOREObjectSort *getSort() const { return sort; }
   KOREObjectSort *getSort() { return sort; }
@@ -185,6 +190,7 @@ public:
   uint16_t getLayout() const { return layout; }
 
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
+  virtual void print(std::ostream &Out, unsigned indent, bool formal) const;
 
   bool operator==(KOREObjectSymbol other) const;
   bool operator!=(KOREObjectSymbol other) const { return !(*this == other); }

@@ -80,6 +80,10 @@ void KOREObjectSymbol::addArgument(KOREObjectSort *Argument) {
   arguments.push_back(Argument);
 }
 
+void KOREObjectSymbol::addFormalArgument(KOREObjectSort *Argument) {
+  formalArguments.push_back(Argument);
+}
+
 void KOREObjectSymbol::addSort(KOREObjectSort *Sort) {
   sort = Sort;
 }
@@ -162,7 +166,7 @@ void KOREObjectSymbol::instantiateSymbol(KOREObjectSymbolDeclaration *decl) {
   int i = 0;
   std::unordered_map<KOREObjectSortVariable, KOREObjectSort *, HashSort> vars;
   for (auto var : decl->getObjectSortVariables()) {
-    vars.emplace(*var, arguments[i++]);
+    vars.emplace(*var, formalArguments[i++]);
   }
   for (auto sort : decl->getSymbol()->getArguments()) {
     instantiated.push_back(sort->substitute(vars));
@@ -428,10 +432,14 @@ void KOREMetaCompositeSort::print(std::ostream &Out, unsigned indent) const {
 }
 
 void KOREObjectSymbol::print(std::ostream &Out, unsigned indent) const {
+  print(Out, indent, true);
+}
+
+void KOREObjectSymbol::print(std::ostream &Out, unsigned indent, bool formal) const {
   std::string Indent(indent, ' ');
   Out << Indent << name << "{";
   bool isFirst = true;
-  for (const KOREObjectSort *Argument : arguments) {
+  for (const KOREObjectSort *Argument : (formal ? formalArguments : arguments)) {
     if (!isFirst)
       Out << ",";
     Argument->print(Out);

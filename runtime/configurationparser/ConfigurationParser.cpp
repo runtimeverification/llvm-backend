@@ -71,7 +71,7 @@ static void *allocatePatternAsConfiguration(const KOREPattern *Pattern) {
   const KOREObjectSymbol *symbol = constructor->getConstructor();
   assert(symbol->isConcrete() && "found sort variable in initial configuration");
   if (symbol->getName() == "\\dv") {
-    const auto sort = dynamic_cast<KOREObjectCompositeSort *>(symbol->getArguments()[0]);
+    const auto sort = dynamic_cast<KOREObjectCompositeSort *>(symbol->getFormalArguments()[0]);
     const auto strPattern =
       dynamic_cast<KOREMetaStringPattern *>(constructor->getArguments()[0]);
     return getToken(sort->getName().c_str(), strPattern->getContents().c_str());

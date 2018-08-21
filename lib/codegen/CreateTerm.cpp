@@ -165,7 +165,7 @@ llvm::Type *termType(KOREPattern *pattern, llvm::StringMap<llvm::Type *> &substi
     KOREObjectSymbol *symbol = constructor->getConstructor();
     assert(symbol->isConcrete() && "not supported yet: sort variables");
     if (symbol->getName() == "\\dv") {
-      auto sort = dynamic_cast<KOREObjectCompositeSort *>(symbol->getArguments()[0]);
+      auto sort = dynamic_cast<KOREObjectCompositeSort *>(symbol->getFormalArguments()[0]);
       return getValueType(sort->getCategory(definition), Module);
     }
     auto sort = dynamic_cast<KOREObjectCompositeSort *>(symbol->getSort());
@@ -335,7 +335,7 @@ llvm::Value *CreateTerm::operator()(KOREPattern *pattern) {
     const KOREObjectSymbol *symbol = constructor->getConstructor();
     assert(symbol->isConcrete() && "not supported yet: sort variables");
     if (symbol->getName() == "\\dv") {
-      auto sort = dynamic_cast<KOREObjectCompositeSort *>(symbol->getArguments()[0]);
+      auto sort = dynamic_cast<KOREObjectCompositeSort *>(symbol->getFormalArguments()[0]);
       auto strPattern = dynamic_cast<KOREMetaStringPattern *>(constructor->getArguments()[0]);
       return createToken(sort->getCategory(Definition), strPattern->getContents());
     }
@@ -345,7 +345,7 @@ llvm::Value *CreateTerm::operator()(KOREPattern *pattern) {
         return createHook(symbolDecl->getAttributes().lookup("hook"), constructor);
       } else {
         std::ostringstream Out;
-        symbol->print(Out);
+        symbol->print(Out, 0, false);
         return createFunctionCall("eval_" + Out.str(), constructor);
       }
     } else if (symbol->getArguments().empty()) {
