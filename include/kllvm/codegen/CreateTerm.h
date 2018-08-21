@@ -44,9 +44,9 @@ public:
    in the llvm backend. */
 std::unique_ptr<llvm::Module> newModule(std::string name, llvm::LLVMContext &Context);
 
-llvm::Type *getValueType(SortCategory sort, llvm::Module *Module);
-
 llvm::StructType *getBlockType(llvm::Module *Module, KOREDefinition *definition, const KOREObjectSymbol *symbol);
+llvm::Value *getBlockHeader(llvm::Module *Module, KOREDefinition *definition,
+    const KOREObjectSymbol *symbol, llvm::Type *BlockType);
 
 /* returns the llvm::Type corresponding to the type of the result of calling createTerm
    on the specified pattern. */
@@ -57,6 +57,8 @@ std::string makeApplyRuleFunction(KOREAxiomDeclaration *axiom, KOREDefinition *d
 
 /* returns the llvm::Type corresponding to the specified KORE sort category */
 llvm::Type *getValueType(SortCategory sort, llvm::Module *Module);
+
+llvm::Value *allocateBlock(llvm::Type *AllocType, llvm::BasicBlock *block);
 }
 
 #endif // CREATE_TERM_H
