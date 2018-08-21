@@ -381,6 +381,7 @@ void KOREDefinition::preprocess() {
         }
         symbol->firstTag = symbol->lastTag = instantiations.at(*symbol);
         symbol->layout = layouts.at(layoutStr);
+        objectSymbols[symbol->firstTag] = symbol;
       }
     }
     uint32_t lastTag = nextSymbol-1;
