@@ -370,6 +370,9 @@ public:
     KOREObjectSymbol *Sym = KOREObjectSymbol::Create(Name);
     return new KOREObjectCompositePattern(Sym);
   }
+  static KOREObjectCompositePattern *Create(KOREObjectSymbol *Sym) {
+    return new KOREObjectCompositePattern(Sym);
+  }
 
   KOREObjectSymbol *getConstructor() const { return constructor; }
   const std::vector<KOREPattern *> &getArguments() const { return arguments; }
