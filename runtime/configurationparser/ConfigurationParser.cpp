@@ -28,14 +28,14 @@ extern "C" {
   // llvm: map = type { i64, i8 *, i8 * }
   struct map {
     uint64_t a;
-    char *b;
-    char *c;
+    void *b;
+    void *c;
   };
 
   // llvm: set = type { i8 *, i8 *, i64 }
   struct set {
-    char *a;
-    char *b;
+    void *a;
+    void *b;
     uint64_t c;
   };
 
@@ -43,10 +43,10 @@ extern "C" {
   struct list {
     uint64_t a;
     uint64_t b;
-    char *c;
-    char *d;
-    char *e;
-    char *f;
+    void *c;
+    void *d;
+    void *e;
+    void *f;
     char *g;
   };
  
@@ -56,12 +56,11 @@ extern "C" {
   // The following functions have to be generated at kompile time
   // and linked with the interpreter.
   uint32_t getTagForSymbolName(const char *symbolname);
-  uint64_t getBlockSizeForSymbol(uint32_t tag);
-  uint16_t getSymbolLayoutId(uint32_t tag);
+  struct blockheader getBlockHeaderForSymbol(uint32_t tag);
   bool isSymbolAFunction(uint32_t tag);
   void storeSymbolChildren(block *symbol, void *children[]);
   void *evaluateFunctionSymbol(uint32_t tag, void *arguments[]);
-  void *getToken(const char *sortname, const char *tokencontents);
+  void *getToken(const char *sortname, uint64_t len, const char *tokencontents);
 }
 
 static void *allocatePatternAsConfiguration(const KOREPattern *Pattern) {
@@ -74,10 +73,12 @@ static void *allocatePatternAsConfiguration(const KOREPattern *Pattern) {
     const auto sort = dynamic_cast<KOREObjectCompositeSort *>(symbol->getFormalArguments()[0]);
     const auto strPattern =
       dynamic_cast<KOREMetaStringPattern *>(constructor->getArguments()[0]);
-    return getToken(sort->getName().c_str(), strPattern->getContents().c_str());
+    std::string contents = strPattern->getContents();
+    return getToken(sort->getName().c_str(), contents.size(), contents.c_str());
   }
-
-  uint32_t tag = getTagForSymbolName(symbol->getName().c_str());
+  std::ostringstream Out;
+  symbol->print(Out);
+  uint32_t tag = getTagForSymbolName(Out.str().c_str());
 
   if (isSymbolAFunction(tag)) {
     std::vector<void *> arguments;
@@ -87,18 +88,15 @@ static void *allocatePatternAsConfiguration(const KOREPattern *Pattern) {
     return evaluateFunctionSymbol(tag, &arguments[0]);
   }
 
-  if (symbol->getArguments().empty()) {
+  struct blockheader headerVal = getBlockHeaderForSymbol(tag);
+  size_t size = ((headerVal.header & 0xff00000000) >> 32) * 8;
+  
+  if (size == 8) {
     return (block *) ((uint64_t)tag << 32 | 1);
   }
 
-  uint64_t sizeInBytes = getBlockSizeForSymbol(tag);
-  uint64_t headerVal = (uint64_t) tag;
-  assert(sizeInBytes % 8 == 0);
-  headerVal |= (sizeInBytes / 8) << 32;
-  headerVal |= (uint64_t)getSymbolLayoutId(tag) << 48;
-
-  block *Block = (block *) malloc(getBlockSizeForSymbol(tag));
-  Block->header.header = headerVal;
+  block *Block = (block *) malloc(size);
+  Block->header = headerVal;
 
   std::vector<void *> children;
   for (const auto child : constructor->getArguments()) {
