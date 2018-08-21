@@ -294,6 +294,25 @@ llvm::Value *CreateTerm::createHook(KOREObjectCompositePattern *hookAtt, KOREObj
     llvm::Value *secondArg = (*this)(pattern->getArguments()[1]);
     llvm::ICmpInst *Eq = new llvm::ICmpInst(*CurrentBlock, llvm::CmpInst::ICMP_EQ, firstArg, secondArg, "hook_BOOL_eq");
     return Eq;
+  } else if (name == "KEQUAL.ite") {
+    assert(pattern->getArguments().size() == 3);
+    llvm::Value *cond = (*this)(pattern->getArguments()[0]);
+    llvm::BasicBlock *CondBlock = CurrentBlock;
+    llvm::BasicBlock *TrueBlock = llvm::BasicBlock::Create(Ctx, "then", CurrentBlock->getParent());
+    llvm::BasicBlock *FalseBlock = llvm::BasicBlock::Create(Ctx, "else", CurrentBlock->getParent());
+    llvm::BasicBlock *MergeBlock = llvm::BasicBlock::Create(Ctx, "hook_KEQUAL_ite", CurrentBlock->getParent());
+    llvm::BranchInst *Branch = llvm::BranchInst::Create(TrueBlock, FalseBlock, cond, CurrentBlock);
+    CurrentBlock = TrueBlock;
+    llvm::Value *trueArg = (*this)(pattern->getArguments()[1]);
+    Branch = llvm::BranchInst::Create(MergeBlock, CurrentBlock);
+    llvm::PHINode *Phi = llvm::PHINode::Create(trueArg->getType(), 2, "phi", MergeBlock);
+    Phi->addIncoming(trueArg, CurrentBlock);
+    CurrentBlock = FalseBlock;
+    llvm::Value *falseArg = (*this)(pattern->getArguments()[2]);
+    Branch = llvm::BranchInst::Create(MergeBlock, CurrentBlock);
+    Phi->addIncoming(falseArg, CurrentBlock);
+    CurrentBlock = MergeBlock;
+    return Phi;
   } else if (!name.compare(0, 5, "MINT.")) {
     assert(false && "not implemented yet: MInt");
   } else {
