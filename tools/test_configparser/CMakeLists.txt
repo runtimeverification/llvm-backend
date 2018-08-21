@@ -4,7 +4,7 @@ add_llvm_tool(test_configparser
   main.cpp
 )
 
-target_link_libraries(test_configparser Codegen AST gmp)
+target_link_libraries(test_configparser Codegen AST gmp Parser)
 
 llvm_config(test_configparser
   ${LLVM_TARGETS_TO_BUILD}
