@@ -37,15 +37,14 @@ BOOST_AUTO_TEST_CASE(simple) {
   Bar->setTag(0);
   Baz->setTag(1);
 
-  DecisionCase BarCase{Bar, Literal};
-  BarCase.addBinding("b");
+  DecisionCase BarCase{Bar, {"b"}, Literal};
   Inner->addCase(BarCase);
   auto BazLeaf = LeafNode::Create("apply_rule_2");
   BazLeaf->addBinding("r");
   BazLeaf->addBinding("b");
   auto Func = FunctionNode::Create("b", "eval_foo", BazLeaf, SortCategory::Bool);
   Func->addBinding("r");
-  Inner->addCase({Baz, Func});
+  Inner->addCase({Baz, std::vector<std::string>{}, Func});
 
   auto Outer = SwitchNode::Create("subject0");
   auto Foo = KOREObjectSymbol::Create("Foo");
@@ -57,11 +56,9 @@ BOOST_AUTO_TEST_CASE(simple) {
   Foo->addArgument(Int);
   Foo->setTag(2);
 
-  DecisionCase InnerCase{Foo, Inner};
-  InnerCase.addBinding("l");
-  InnerCase.addBinding("r");
+  DecisionCase InnerCase{Foo, {"l", "r"}, Inner};
   Outer->addCase(InnerCase);
-  Outer->addCase(DecisionCase{nullptr, FailNode::get()});
+  Outer->addCase(DecisionCase{nullptr, std::vector<std::string>{}, FailNode::get()});
 
   llvm::LLVMContext Ctx;
   auto mod = newModule("test_decision", Ctx);
