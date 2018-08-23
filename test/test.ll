@@ -223,7 +223,7 @@ entry:
   ret %block* %12
 }
 
-define %mpz* @apply_rule_20(%mpz* %VarI, %mpz* %VarLEN, %mpz* %VarIDX) {
+define %mpz* @apply_rule_20(%mpz* %VarI, %mpz* %VarIDX, %mpz* %VarLEN) {
 entry:
   %0 = call %mpz* @hook_INT_bitRange(%mpz* %VarI, %mpz* %VarIDX, %mpz* %VarLEN)
   %1 = call %mpz* @hook_INT_sub(%mpz* %VarLEN, %mpz* @int_1)
@@ -473,7 +473,7 @@ entry:
   ret i1 false
 }
 
-define %mpz* @apply_rule_47(%mpz* %VarI, %mpz* %VarLEN, %mpz* %VarIDX) {
+define %mpz* @apply_rule_47(%mpz* %VarI, %mpz* %VarIDX, %mpz* %VarLEN) {
 entry:
   %0 = call %mpz* @hook_INT_shr(%mpz* %VarI, %mpz* %VarIDX)
   %1 = call %mpz* @hook_INT_shl(%mpz* @int_1, %mpz* %VarLEN)
