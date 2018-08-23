@@ -11,7 +11,7 @@ cd ../../build
 ./tools/test_rhs/test_rhs ../test/test.kore | diff - ../test/test.ll
 ./tools/test_rhs/test_rhs ../test/imp.kore | diff - ../test/imp.ll
 
-./tools/test_configparser/test_configparser > configparser.ll
+./tools/test_configparser/test_configparser ../test/imp.kore > configparser.ll
 diff configparser.ll ../test/configparser.ll
 #clang++ -o configparser lib/parser/libParser.a runtime/configurationparser/configurationparser.so configparser.ll runtime/arithmetic/libarithmetic.a ../runtime/datastructures/target/debug/libdatastructures.so ../runtime/string_equal.ll ../runtime/move_int.ll -lgmp
 rm -f configparser configparser.ll
