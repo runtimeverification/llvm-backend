@@ -64,6 +64,11 @@ void SwitchNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitutio
     }
     _case.getChild()->codegen(d, substitution);
   }
+  if (defaultCase) {
+    // process default also
+    d->CurrentBlock = _default;
+    defaultCase->getChild()->codegen(d, substitution);
+  }
 }
 
 void FunctionNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution) {
