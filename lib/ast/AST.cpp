@@ -205,7 +205,7 @@ void KOREObjectCompositePattern::markSymbols(std::map<std::string, std::vector<K
   }
 }
 
-void KOREObjectCompositePattern::markVariables(llvm::StringMap<KOREObjectVariablePattern *> &map) {
+void KOREObjectCompositePattern::markVariables(std::map<std::string, KOREObjectVariablePattern *> &map) {
   for (KOREPattern *arg : arguments) {
     arg->markVariables(map);
   }
@@ -221,7 +221,7 @@ void KOREMetaCompositePattern::markSymbols(std::map<std::string, std::vector<KOR
   }
 }
 
-void KOREMetaCompositePattern::markVariables(llvm::StringMap<KOREObjectVariablePattern *> &map) {
+void KOREMetaCompositePattern::markVariables(std::map<std::string, KOREObjectVariablePattern *> &map) {
   for (KOREPattern *arg : arguments) {
     arg->markVariables(map);
   }

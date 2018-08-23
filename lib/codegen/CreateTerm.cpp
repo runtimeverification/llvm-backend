@@ -125,7 +125,7 @@ llvm::Type *getValueType(SortCategory sort, llvm::Module *Module) {
 }
 
 
-llvm::StructType *getBlockType(llvm::Module *Module, KOREDefinition *definition, const KOREObjectSymbol *symbol, KOREObjectSymbolDeclaration *symbolDecl) {
+llvm::StructType *getBlockType(llvm::Module *Module, KOREDefinition *definition, const KOREObjectSymbol *symbol) {
   llvm::StructType *BlockHeaderType = Module->getTypeByName(BLOCKHEADER_STRUCT);
   llvm::ArrayType *EmptyArrayType = llvm::ArrayType::get(llvm::Type::getInt64Ty(Module->getContext()), 0);
   llvm::SmallVector<llvm::Type *, 4> Types;
@@ -350,7 +350,7 @@ llvm::Value *CreateTerm::operator()(KOREPattern *pattern) {
       llvm::IntToPtrInst *Cast = new llvm::IntToPtrInst(llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), (((uint64_t)symbol->getTag()) << 32) | 1), llvm::PointerType::getUnqual(BlockType), "", CurrentBlock);
       return Cast;
     } else {
-      llvm::StructType *BlockType = getBlockType(Module, Definition, symbol, symbolDecl);
+      llvm::StructType *BlockType = getBlockType(Module, Definition, symbol);
       llvm::Value *BlockHeader = getBlockHeader(Module, Definition, symbol, BlockType);
       llvm::Value *Block = allocateBlock(BlockType, CurrentBlock);
       llvm::Value *BlockHeaderPtr = llvm::GetElementPtrInst::CreateInBounds(BlockType, Block, {llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0), llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), 0)}, symbol->getName(), CurrentBlock);
@@ -373,7 +373,7 @@ static int nextRuleId = 0;
 
 std::string makeApplyRuleFunction(KOREAxiomDeclaration *axiom, KOREDefinition *definition, llvm::Module *Module) {
     KOREPattern *pattern = axiom->getRightHandSide();
-    llvm::StringMap<KOREObjectVariablePattern *> vars;
+    std::map<std::string, KOREObjectVariablePattern *> vars;
     pattern->markVariables(vars);
     llvm::StringMap<llvm::Type *> params;
     std::vector<llvm::Type *> paramTypes;
@@ -386,9 +386,9 @@ std::string makeApplyRuleFunction(KOREAxiomDeclaration *axiom, KOREDefinition *d
         return "";
       }
       llvm::Type *paramType = getValueType(sort->getCategory(definition), Module);
-      params.insert({entry.first(), paramType});
+      params.insert({entry.first, paramType});
       paramTypes.push_back(paramType);
-      paramNames.push_back(entry.first());
+      paramNames.push_back(entry.first);
     }
     llvm::FunctionType *funcType = llvm::FunctionType::get(termType(pattern, params, definition, Module), paramTypes, false);
     std::string name = "apply_rule_" + std::to_string(nextRuleId++);

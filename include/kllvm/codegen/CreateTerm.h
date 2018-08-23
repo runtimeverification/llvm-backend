@@ -44,6 +44,10 @@ public:
    in the llvm backend. */
 std::unique_ptr<llvm::Module> newModule(std::string name, llvm::LLVMContext &Context);
 
+llvm::Type *getValueType(SortCategory sort, llvm::Module *Module);
+
+llvm::StructType *getBlockType(llvm::Module *Module, KOREDefinition *definition, const KOREObjectSymbol *symbol);
+
 /* returns the llvm::Type corresponding to the type of the result of calling createTerm
    on the specified pattern. */
 llvm::Type *termType(KOREPattern *pattern, llvm::StringMap<llvm::Type *> &substitution, KOREDefinition *definition, llvm::Module *Module);
