@@ -261,6 +261,43 @@ occurrence:
   BOOST_CHECK_EQUAL(actual, EXPECTED);
 }
 
+BOOST_AUTO_TEST_CASE(stepper) {
+  std::string dt = "fail";
+
+  llvm::StringMap<KOREObjectSymbol *> map;
+  auto compiledDt = parseYamlDecisionTreeFromString(dt, 1, map);
+
+  llvm::LLVMContext Ctx;
+  auto mod = newModule("test_decision", Ctx);
+  
+  makeStepFunction(nullptr, mod.get(), compiledDt);
+  std::string actual;
+  llvm::raw_string_ostream out(actual);
+  mod->print(out, nullptr);
+
+  BOOST_CHECK_EQUAL(actual, R"(target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
+target triple = "x86_64-unknown-linux-gnu"
+
+%block = type { %blockheader, [0 x i64*] }
+%blockheader = type { i64 }
+
+declare %block* @parseConfiguration(i8*)
+
+define %block* @step(%block* %subject0) {
+entry:
+
+stuck:                                            ; No predecessors!
+  call void @finish_rewriting(%block* %subject0)
+  unreachable
+}
+
+; Function Attrs: noreturn
+declare void @finish_rewriting(%block*) #0
+
+attributes #0 = { noreturn }
+)");
+}
+
 BOOST_AUTO_TEST_CASE(deserialization) {
   std::string dt = R"YAML(
 specializations:
