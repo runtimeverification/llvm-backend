@@ -182,10 +182,10 @@ BOOST_AUTO_TEST_CASE(deserialization) {
   std::string dt = R"YAML(
 specializations:
 - - Nil
-  - action: 1
-    variables:
-    - - 0
-      - 0
+  - action: 
+    - 1
+    - - - 0
+        - 0
 - - Cons
   - specializations: []
     default:
@@ -193,17 +193,17 @@ specializations:
       - 1
       - specializations:
         - - Nil
-          - action: 2
-            variables:
-            - - 4
-              - 1
+          - action:
+            - 2
+            - - - 4
+                - 1
         - - Cons
-          - action: 3
-            variables:
-            - - 0
-              - 1
-            - - 0
-              - 2
+          - action:
+            - 3
+            - - - 0
+                - 1
+              - - 0
+                - 2
         default: null
 default: fail
 )YAML";

@@ -81,10 +81,10 @@ public:
       return result;
     }
     case Leaf: {
-      int action = node["action"].as<int>();
+      int action = node["action"][0].as<int>();
       std::string name = "apply_rule_" + std::to_string(action);
       auto result = LeafNode::Create(name);
-      YAML::Node vars = node["variables"];
+      YAML::Node vars = node["action"][1];
       for (auto iter = vars.begin(); iter != vars.end(); ++iter) {
         auto var = *iter;
         int idx1 = var[0].as<int>();
