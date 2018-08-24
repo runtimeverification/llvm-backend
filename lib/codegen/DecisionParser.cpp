@@ -50,8 +50,33 @@ public:
     }
     case Fail:
       return FailNode::get();
-    case Function:
-      assert(false && "not implemented: functions");
+    case Function: {
+      std::string function = node["function"].as<std::string>();
+      std::string hookName = node["sort"].as<std::string>();
+      SortCategory cat = KOREObjectCompositeSort::getCategory(hookName);
+
+      std::string binding = "_" + std::to_string(counter++);
+      constructors.push_back(binding);
+
+      parents.push_back("");
+      auto child = (*this)(node["next"]); 
+      parents.pop_back();
+
+      auto result = FunctionNode::Create(binding, function, child, cat);
+      
+      YAML::Node vars = node["args"];
+      for (auto iter = vars.begin(); iter != vars.end(); ++iter) {
+        auto var = *iter;
+        int idx1 = var[0].as<int>();
+        int idx2 = var[1].as<int>();
+        if (idx1 == 0) {
+          result->addBinding(constructors[constructors.size()-2-idx2]);
+        } else {
+          result->addBinding(parents[parents.size()-idx1]);
+        }
+      }
+      return result;
+    }
     case SwitchLit:
     case Switch: {
       YAML::Node list = node["specializations"];
