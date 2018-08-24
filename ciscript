@@ -16,5 +16,5 @@ cd ../build
 
 ./tools/test_configparser/test_configparser ../test/imp.kore > configparser.ll
 diff configparser.ll ../test/configparser.ll
-#clang++ -o configparser lib/parser/libParser.a runtime/configurationparser/configurationparser.so configparser.ll runtime/arithmetic/libarithmetic.a ../runtime/datastructures/target/debug/libdatastructures.so ../runtime/string_equal.ll ../runtime/move_int.ll -lgmp
+clang++ -o configparser lib/parser/libParser.a runtime/configurationparser/configurationparser.so configparser.ll runtime/arithmetic/libarithmetic.a ../runtime/datastructures/target/debug/libdatastructures.so ../runtime/*.ll  -lgmp
 rm -f configparser configparser.ll
