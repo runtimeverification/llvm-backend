@@ -102,6 +102,7 @@ public:
 
   const std::string getName() const { return name; }
   SortCategory getCategory(KOREDefinition *definition);
+  static SortCategory getCategory(std::string hook);
 
   virtual bool isConcrete() const override { return true; }
   virtual KOREObjectSort *substitute(const substitution &subst) override;

@@ -63,6 +63,12 @@ SortCategory KOREObjectCompositeSort::getCategory(KOREDefinition *definition) {
   assert(hookAtt->getArguments().size() == 1);
   auto strPattern = dynamic_cast<KOREMetaStringPattern *>(hookAtt->getArguments()[0]);
   std::string name = strPattern->getContents();
+  category = getCategory(name);
+  return category;
+}
+
+SortCategory KOREObjectCompositeSort::getCategory(std::string name) {
+  SortCategory category;
   if (name == "MAP.Map") category = SortCategory::Map;
   else if (name == "LIST.List") category = SortCategory::List;
   else if (name == "SET.Set") category = SortCategory::Set;
