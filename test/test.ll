@@ -41,17 +41,17 @@ declare noalias i8* @malloc(i64)
 
 declare %block* @"eval_append{SortK{},SortK{}}"(%block*, %block*)
 
-define %block* @apply_rule_2(%block* %VarB2) {
+define %block* @apply_rule_3(%block* %VarB2) {
 entry:
   ret %block* %VarB2
 }
 
-define i1 @apply_rule_3() {
+define i1 @apply_rule_4() {
 entry:
   ret i1 true
 }
 
-define %mpz* @apply_rule_4(%mpz* %VarI1, %mpz* %VarI2) {
+define %mpz* @apply_rule_5(%mpz* %VarI1, %mpz* %VarI2) {
 entry:
   %0 = call %mpz* @hook_INT_abs(%mpz* %VarI2)
   %1 = call %mpz* @hook_INT_tmod(%mpz* %VarI1, %mpz* %0)
@@ -68,12 +68,12 @@ declare %mpz* @hook_INT_tmod(%mpz*, %mpz*)
 
 declare %mpz* @hook_INT_add(%mpz*, %mpz*)
 
-define i1 @apply_rule_5() {
+define i1 @apply_rule_6() {
 entry:
   ret i1 false
 }
 
-define %block* @apply_rule_6(%block* %VarDotVar0) {
+define %block* @apply_rule_7(%block* %VarDotVar0) {
 entry:
   %malloccall = tail call i8* @malloc(i64 ptrtoint ({ %blockheader, [0 x i64], %block* }* getelementptr ({ %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* null, i32 1) to i64))
   %0 = bitcast i8* %malloccall to { %blockheader, [0 x i64], %block* }*
@@ -112,19 +112,19 @@ hook_KEQUAL_ite:                                  ; preds = %else, %then
   ret %block* %10
 }
 
-define i1 @apply_rule_7(i1 %VarB1, i1 %VarB2) {
+define i1 @apply_rule_8(i1 %VarB1, i1 %VarB2) {
 entry:
   %hook_BOOL_eq = icmp eq i1 %VarB1, %VarB2
   %hook_BOOL_not = xor i1 %hook_BOOL_eq, true
   ret i1 %hook_BOOL_not
 }
 
-define i1 @apply_rule_8() {
+define i1 @apply_rule_9() {
 entry:
   ret i1 true
 }
 
-define %mpz* @apply_rule_9(%mpz* %VarI1, %mpz* %VarI2) {
+define %mpz* @apply_rule_10(%mpz* %VarI1, %mpz* %VarI2) {
 entry:
   %0 = call %mpz* @hook_INT_emod(%mpz* %VarI1, %mpz* %VarI2)
   %1 = call %mpz* @hook_INT_sub(%mpz* %VarI1, %mpz* %0)
@@ -137,11 +137,6 @@ declare %mpz* @hook_INT_emod(%mpz*, %mpz*)
 declare %mpz* @hook_INT_sub(%mpz*, %mpz*)
 
 declare %mpz* @hook_INT_tdiv(%mpz*, %mpz*)
-
-define i1 @apply_rule_10() {
-entry:
-  ret i1 true
-}
 
 define i1 @apply_rule_11() {
 entry:
@@ -163,7 +158,12 @@ entry:
   ret i1 true
 }
 
-define i1 @apply_rule_15(%block* %VarK1, %block* %VarK2) {
+define i1 @apply_rule_15() {
+entry:
+  ret i1 true
+}
+
+define i1 @apply_rule_16(%block* %VarK1, %block* %VarK2) {
 entry:
   %0 = call i1 @hook_KEQUAL_eq(%block* %VarK1, %block* %VarK2)
   %hook_BOOL_not = xor i1 %0, true
@@ -172,22 +172,22 @@ entry:
 
 declare i1 @hook_KEQUAL_eq(%block*, %block*)
 
-define i1 @apply_rule_16() {
-entry:
-  ret i1 false
-}
-
 define i1 @apply_rule_17() {
 entry:
   ret i1 false
 }
 
-define %mpz* @apply_rule_18(%mpz* %VarI1) {
+define i1 @apply_rule_18() {
+entry:
+  ret i1 false
+}
+
+define %mpz* @apply_rule_19(%mpz* %VarI1) {
 entry:
   ret %mpz* %VarI1
 }
 
-define %block* @apply_rule_19(%block* %VarDotVar0) {
+define %block* @apply_rule_20(%block* %VarDotVar0) {
 entry:
   %malloccall = tail call i8* @malloc(i64 ptrtoint ({ %blockheader, [0 x i64], %block* }* getelementptr ({ %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* null, i32 1) to i64))
   %0 = bitcast i8* %malloccall to { %blockheader, [0 x i64], %block* }*
@@ -223,7 +223,7 @@ entry:
   ret %block* %12
 }
 
-define %mpz* @apply_rule_20(%mpz* %VarI, %mpz* %VarIDX, %mpz* %VarLEN) {
+define %mpz* @apply_rule_21(%mpz* %VarI, %mpz* %VarIDX, %mpz* %VarLEN) {
 entry:
   %0 = call %mpz* @hook_INT_bitRange(%mpz* %VarI, %mpz* %VarIDX, %mpz* %VarLEN)
   %1 = call %mpz* @hook_INT_sub(%mpz* %VarLEN, %mpz* @int_1)
@@ -241,12 +241,12 @@ declare %mpz* @hook_INT_bitRange(%mpz*, %mpz*, %mpz*)
 
 declare %mpz* @hook_INT_shl(%mpz*, %mpz*)
 
-define i1 @apply_rule_21() {
+define i1 @apply_rule_22() {
 entry:
   ret i1 true
 }
 
-define i1 @apply_rule_22(%mpz* %VarI1, %mpz* %VarI2) {
+define i1 @apply_rule_23(%mpz* %VarI1, %mpz* %VarI2) {
 entry:
   %0 = call %mpz* @hook_INT_tmod(%mpz* %VarI2, %mpz* %VarI1)
   %1 = call i1 @hook_INT_eq(%mpz* %0, %mpz* @int_0)
@@ -255,17 +255,17 @@ entry:
 
 declare i1 @hook_INT_eq(%mpz*, %mpz*)
 
-define i1 @apply_rule_23() {
+define i1 @apply_rule_24() {
 entry:
   ret i1 false
 }
 
-define i1 @apply_rule_24() {
+define i1 @apply_rule_25() {
 entry:
   ret i1 true
 }
 
-define %block* @apply_rule_25(%block* %VarDotVar0) {
+define %block* @apply_rule_26(%block* %VarDotVar0) {
 entry:
   %malloccall = tail call i8* @malloc(i64 ptrtoint ({ %blockheader, [0 x i64], %block* }* getelementptr ({ %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* null, i32 1) to i64))
   %0 = bitcast i8* %malloccall to { %blockheader, [0 x i64], %block* }*
@@ -301,7 +301,7 @@ entry:
   ret %block* %12
 }
 
-define i1 @apply_rule_26(%mpz* %VarI1, %mpz* %VarI2) {
+define i1 @apply_rule_27(%mpz* %VarI1, %mpz* %VarI2) {
 entry:
   %malloccall = tail call i8* @malloc(i64 ptrtoint ({ %blockheader, [0 x i64], %mpz* }* getelementptr ({ %blockheader, [0 x i64], %mpz* }, { %blockheader, [0 x i64], %mpz* }* null, i32 1) to i64))
   %0 = bitcast i8* %malloccall to { %blockheader, [0 x i64], %mpz* }*
@@ -321,7 +321,7 @@ entry:
   ret i1 %6
 }
 
-define %block* @apply_rule_27(%block* %VarDotVar0) {
+define %block* @apply_rule_28(%block* %VarDotVar0) {
 entry:
   %malloccall = tail call i8* @malloc(i64 ptrtoint ({ %blockheader, [0 x i64], %block* }* getelementptr ({ %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* null, i32 1) to i64))
   %0 = bitcast i8* %malloccall to { %blockheader, [0 x i64], %block* }*
@@ -357,26 +357,21 @@ entry:
   ret %block* %12
 }
 
-define i1 @apply_rule_28(i1 %VarB1, i1 %VarB2) {
+define i1 @apply_rule_29(i1 %VarB1, i1 %VarB2) {
 entry:
   %hook_BOOL_eq = icmp eq i1 %VarB1, %VarB2
   %hook_BOOL_not = xor i1 %hook_BOOL_eq, true
   ret i1 %hook_BOOL_not
 }
 
-define %mpz* @apply_rule_29(%mpz* %VarI) {
+define %mpz* @apply_rule_30(%mpz* %VarI) {
 entry:
   ret %mpz* %VarI
 }
 
-define i1 @apply_rule_30(i1 %VarB) {
+define i1 @apply_rule_31(i1 %VarB) {
 entry:
   ret i1 %VarB
-}
-
-define i1 @apply_rule_31() {
-entry:
-  ret i1 false
 }
 
 define i1 @apply_rule_32() {
@@ -386,17 +381,17 @@ entry:
 
 define i1 @apply_rule_33() {
 entry:
+  ret i1 false
+}
+
+define i1 @apply_rule_34() {
+entry:
   ret i1 true
 }
 
-define i1 @apply_rule_34(i1 %VarK) {
+define i1 @apply_rule_35(i1 %VarK) {
 entry:
   ret i1 %VarK
-}
-
-define i1 @apply_rule_35() {
-entry:
-  ret i1 true
 }
 
 define i1 @apply_rule_36() {
@@ -406,30 +401,35 @@ entry:
 
 define i1 @apply_rule_37() {
 entry:
+  ret i1 true
+}
+
+define i1 @apply_rule_38() {
+entry:
   ret i1 false
 }
 
-define i1 @apply_rule_38(i1 %VarK) {
+define i1 @apply_rule_39(i1 %VarK) {
 entry:
   ret i1 %VarK
 }
 
-define i1 @apply_rule_39() {
+define i1 @apply_rule_40() {
 entry:
   ret i1 true
 }
 
-define i1 @apply_rule_40() {
+define i1 @apply_rule_41() {
 entry:
   ret i1 false
 }
 
-define i1 @apply_rule_41(i1 %VarB) {
+define i1 @apply_rule_42(i1 %VarB) {
 entry:
   ret i1 %VarB
 }
 
-define %block* @apply_rule_42(%map %VarM) {
+define %block* @apply_rule_43(%map %VarM) {
 entry:
   %malloccall = tail call i8* @malloc(i64 ptrtoint ({ %blockheader, [0 x i64], %block* }* getelementptr ({ %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* null, i32 1) to i64))
   %0 = bitcast i8* %malloccall to { %blockheader, [0 x i64], %block* }*
@@ -453,27 +453,27 @@ entry:
 
 declare %block* @hook_MAP_lookup(%map*, %block*)
 
-define i1 @apply_rule_43() {
-entry:
-  ret i1 true
-}
-
 define i1 @apply_rule_44() {
 entry:
-  ret i1 false
+  ret i1 true
 }
 
 define i1 @apply_rule_45() {
 entry:
-  ret i1 true
+  ret i1 false
 }
 
 define i1 @apply_rule_46() {
 entry:
+  ret i1 true
+}
+
+define i1 @apply_rule_47() {
+entry:
   ret i1 false
 }
 
-define %mpz* @apply_rule_47(%mpz* %VarI, %mpz* %VarIDX, %mpz* %VarLEN) {
+define %mpz* @apply_rule_48(%mpz* %VarI, %mpz* %VarIDX, %mpz* %VarLEN) {
 entry:
   %0 = call %mpz* @hook_INT_shr(%mpz* %VarI, %mpz* %VarIDX)
   %1 = call %mpz* @hook_INT_shl(%mpz* @int_1, %mpz* %VarLEN)
@@ -483,22 +483,22 @@ entry:
 
 declare %mpz* @hook_INT_shr(%mpz*, %mpz*)
 
-define i1 @apply_rule_48() {
-entry:
-  ret i1 true
-}
-
 define i1 @apply_rule_49() {
 entry:
   ret i1 true
 }
 
-define i1 @apply_rule_50(i1 %VarK) {
+define i1 @apply_rule_50() {
+entry:
+  ret i1 true
+}
+
+define i1 @apply_rule_51(i1 %VarK) {
 entry:
   ret i1 %VarK
 }
 
-define %block* @apply_rule_51(%map %VarInit) {
+define %block* @apply_rule_52(%map %VarInit) {
 entry:
   %malloccall = tail call i8* @malloc(i64 ptrtoint ({ %blockheader, [0 x i64], %block* }* getelementptr ({ %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* null, i32 1) to i64))
   %0 = bitcast i8* %malloccall to { %blockheader, [0 x i64], %block* }*
@@ -520,44 +520,44 @@ entry:
   ret %block* %7
 }
 
-define i1 @apply_rule_52() {
-entry:
-  ret i1 true
-}
-
 define i1 @apply_rule_53() {
 entry:
   ret i1 true
 }
 
-define i1 @apply_rule_54(i1 %VarB) {
-entry:
-  ret i1 %VarB
-}
-
-define i1 @apply_rule_55() {
-entry:
-  ret i1 false
-}
-
-define i1 @apply_rule_56() {
+define i1 @apply_rule_54() {
 entry:
   ret i1 true
 }
 
-define i1 @apply_rule_57(%mpz* %VarI1, %mpz* %VarI2) {
+define i1 @apply_rule_55(i1 %VarB) {
+entry:
+  ret i1 %VarB
+}
+
+define i1 @apply_rule_56() {
+entry:
+  ret i1 false
+}
+
+define i1 @apply_rule_57() {
+entry:
+  ret i1 true
+}
+
+define i1 @apply_rule_58(%mpz* %VarI1, %mpz* %VarI2) {
 entry:
   %0 = call i1 @hook_INT_eq(%mpz* %VarI1, %mpz* %VarI2)
   %hook_BOOL_not = xor i1 %0, true
   ret i1 %hook_BOOL_not
 }
 
-define i1 @apply_rule_58() {
+define i1 @apply_rule_59() {
 entry:
   ret i1 true
 }
 
-define i1 @apply_rule_59(i1 %VarK1, i1 %VarK2) {
+define i1 @apply_rule_60(i1 %VarK1, i1 %VarK2) {
 entry:
   %malloccall = tail call i8* @malloc(i64 ptrtoint ({ %blockheader, [0 x i64], i1 }* getelementptr ({ %blockheader, [0 x i64], i1 }, { %blockheader, [0 x i64], i1 }* null, i32 1) to i64))
   %0 = bitcast i8* %malloccall to { %blockheader, [0 x i64], i1 }*
@@ -577,12 +577,12 @@ entry:
   ret i1 %6
 }
 
-define i1 @apply_rule_60(i1 %VarB) {
+define i1 @apply_rule_61(i1 %VarB) {
 entry:
   ret i1 %VarB
 }
 
-define %block* @apply_rule_61(%block* %VarDotVar0) {
+define %block* @apply_rule_62(%block* %VarDotVar0) {
 entry:
   %malloccall = tail call i8* @malloc(i64 ptrtoint ({ %blockheader, [0 x i64], %block* }* getelementptr ({ %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* null, i32 1) to i64))
   %0 = bitcast i8* %malloccall to { %blockheader, [0 x i64], %block* }*
@@ -610,20 +610,15 @@ entry:
   ret %block* %9
 }
 
-define i1 @apply_rule_62(i1 %VarB) {
+define i1 @apply_rule_63(i1 %VarB) {
 entry:
   %hook_BOOL_not = xor i1 %VarB, true
   ret i1 %hook_BOOL_not
 }
 
-define %mpz* @apply_rule_63(%mpz* %VarI2) {
+define %mpz* @apply_rule_64(%mpz* %VarI2) {
 entry:
   ret %mpz* %VarI2
-}
-
-define i1 @apply_rule_64() {
-entry:
-  ret i1 false
 }
 
 define i1 @apply_rule_65() {
@@ -633,17 +628,17 @@ entry:
 
 define i1 @apply_rule_66() {
 entry:
+  ret i1 false
+}
+
+define i1 @apply_rule_67() {
+entry:
   ret i1 true
 }
 
-define %block* @apply_rule_67(%block* %VarB1) {
+define %block* @apply_rule_68(%block* %VarB1) {
 entry:
   ret %block* %VarB1
-}
-
-define i1 @apply_rule_68() {
-entry:
-  ret i1 true
 }
 
 define i1 @apply_rule_69() {
@@ -656,7 +651,12 @@ entry:
   ret i1 true
 }
 
-define %block* @apply_rule_71(%block* %VarDotVar0) {
+define i1 @apply_rule_71() {
+entry:
+  ret i1 true
+}
+
+define %block* @apply_rule_72(%block* %VarDotVar0) {
 entry:
   %malloccall = tail call i8* @malloc(i64 ptrtoint ({ %blockheader, [0 x i64], %block* }* getelementptr ({ %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* null, i32 1) to i64))
   %0 = bitcast i8* %malloccall to { %blockheader, [0 x i64], %block* }*
@@ -693,17 +693,17 @@ entry:
   ret %block* %13
 }
 
-define i1 @apply_rule_72() {
+define i1 @apply_rule_73() {
 entry:
   ret i1 false
 }
 
-define i1 @apply_rule_73() {
+define i1 @apply_rule_74() {
 entry:
   ret i1 true
 }
 
-define %block* @apply_rule_74() {
+define %block* @apply_rule_75() {
 entry:
   %malloccall = tail call i8* @malloc(i64 ptrtoint ({ %blockheader, [0 x i64], %block* }* getelementptr ({ %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* null, i32 1) to i64))
   %0 = bitcast i8* %malloccall to { %blockheader, [0 x i64], %block* }*
@@ -723,22 +723,22 @@ entry:
   ret %block* %6
 }
 
-define i1 @apply_rule_75(i1 %VarB) {
+define i1 @apply_rule_76(i1 %VarB) {
 entry:
   ret i1 %VarB
 }
 
-define i1 @apply_rule_76() {
+define i1 @apply_rule_77() {
 entry:
   ret i1 true
 }
 
-define i1 @apply_rule_77() {
+define i1 @apply_rule_78() {
 entry:
   ret i1 false
 }
 
-define %block* @apply_rule_78(%block* %VarDotVar0) {
+define %block* @apply_rule_79(%block* %VarDotVar0) {
 entry:
   %malloccall = tail call i8* @malloc(i64 ptrtoint ({ %blockheader, [0 x i64], %block* }* getelementptr ({ %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* null, i32 1) to i64))
   %0 = bitcast i8* %malloccall to { %blockheader, [0 x i64], %block* }*
@@ -794,27 +794,27 @@ hook_BOOL_and7:                                   ; preds = %then6, %then4
   br label %hook_BOOL_and5
 }
 
-define i1 @apply_rule_79() {
-entry:
-  ret i1 false
-}
-
 define i1 @apply_rule_80() {
 entry:
-  ret i1 true
+  ret i1 false
 }
 
 define i1 @apply_rule_81() {
 entry:
+  ret i1 true
+}
+
+define i1 @apply_rule_82() {
+entry:
   ret i1 false
 }
 
-define i1 @apply_rule_82(i1 %VarK) {
+define i1 @apply_rule_83(i1 %VarK) {
 entry:
   ret i1 %VarK
 }
 
-define %block* @apply_rule_83(%block* %VarDotVar0) {
+define %block* @apply_rule_84(%block* %VarDotVar0) {
 entry:
   %malloccall = tail call i8* @malloc(i64 ptrtoint ({ %blockheader, [0 x i64], %block* }* getelementptr ({ %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* null, i32 1) to i64))
   %0 = bitcast i8* %malloccall to { %blockheader, [0 x i64], %block* }*
@@ -863,17 +863,17 @@ hook_BOOL_implies5:                               ; preds = %then4, %hook_BOOL_i
   ret %block* %12
 }
 
-define i1 @apply_rule_84() {
+define i1 @apply_rule_85() {
 entry:
   ret i1 true
 }
 
-define i1 @apply_rule_85(i1 %VarB) {
+define i1 @apply_rule_86(i1 %VarB) {
 entry:
   ret i1 %VarB
 }
 
-define %block* @apply_rule_86(%block* %VarDotVar0) {
+define %block* @apply_rule_87(%block* %VarDotVar0) {
 entry:
   %malloccall = tail call i8* @malloc(i64 ptrtoint ({ %blockheader, [0 x i64], %block* }* getelementptr ({ %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* null, i32 1) to i64))
   %0 = bitcast i8* %malloccall to { %blockheader, [0 x i64], %block* }*
@@ -929,7 +929,7 @@ hook_BOOL_or7:                                    ; preds = %else6, %else4
   br label %hook_BOOL_or5
 }
 
-define i1 @apply_rule_87(i1 %VarB) {
+define i1 @apply_rule_88(i1 %VarB) {
 entry:
   ret i1 %VarB
 }
