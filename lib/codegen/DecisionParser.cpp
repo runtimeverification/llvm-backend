@@ -12,13 +12,15 @@ private:
   std::vector<std::string> parents;
   const llvm::StringMap<KOREObjectSymbol *> &syms;
   int counter;
+  KOREObjectSymbol *dv;
 
   enum Kind {
-    Switch, Function, Leaf, Fail, Swap
+    Switch, SwitchLit, Function, Leaf, Fail, Swap
   };
 
   static Kind getKind(YAML::Node node) {
     if (node.IsScalar()) return Fail;
+    if (node["bitwidth"]) return SwitchLit;
     if (node["specializations"]) return Switch;
     if (node["action"]) return Leaf;
     if (node["swap"]) return Swap;
@@ -30,6 +32,7 @@ public:
     for (int i = numSubjects - 1; i >= 0; --i) {
       constructors.push_back("subject" + std::to_string(i));
     }
+    dv = KOREObjectSymbol::Create("\\dv");
   }
 
   DecisionNode *operator()(YAML::Node node) {
@@ -49,6 +52,7 @@ public:
       return FailNode::get();
     case Function:
       assert(false && "not implemented: functions");
+    case SwitchLit:
     case Switch: {
       YAML::Node list = node["specializations"];
       std::string name = constructors.back();
@@ -57,18 +61,29 @@ public:
       parents.push_back(name);
       for (auto iter = list.begin(); iter != list.end(); ++iter) {
         auto _case = *iter;
-        KOREObjectSymbol *symbol = syms.lookup(_case[0].as<std::string>());
         std::vector<std::string> copy = constructors;
-	std::vector<std::string> bindings;
-        for (int i = 0; i < symbol->getArguments().size(); ++i) {
-          std::string binding = "_" + std::to_string(counter++);
-          constructors.push_back(binding);
-	  bindings.push_back(binding);
+        std::vector<std::string> bindings;
+        KOREObjectSymbol *symbol;
+        if (kind == SwitchLit) {
+          symbol = dv;
+        } else {
+          std::string symName = _case[0].as<std::string>();
+          symbol = syms.lookup(symName);
+          for (int i = 0; i < symbol->getArguments().size(); ++i) {
+            std::string binding = "_" + std::to_string(counter++);
+            constructors.push_back(binding);
+            bindings.push_back(binding);
+          }
+          std::reverse(constructors.end()-symbol->getArguments().size(), constructors.end());
         }
-	std::reverse(constructors.end()-symbol->getArguments().size(), constructors.end());
         DecisionNode *child = (*this)(_case[1]);
         constructors = copy;
-        result->addCase({symbol, bindings, child});
+        if (kind == SwitchLit) {
+          int bitwidth = node["bitwidth"].as<int>();
+          result->addCase({symbol, {bitwidth, _case[0].as<std::string>(), 10}, child}); 
+        } else {
+          result->addCase({symbol, bindings, child});
+        }
       }
       auto _case = node["default"];
       if (!_case.IsNull()) {
@@ -91,7 +106,7 @@ public:
         int idx2 = var[1].as<int>();
         if (idx1 == 0) {
           result->addBinding(constructors[constructors.size()-1-idx2]);
-	} else {
+        } else {
           result->addBinding(parents[parents.size()-idx1]);
         }
       }
