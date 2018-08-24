@@ -148,7 +148,7 @@ private:
   llvm::Module *Module;
   llvm::LLVMContext &Ctx;
   SortCategory Cat;
-	
+
   llvm::Value *getTag(llvm::Value *);
 public:
   Decision(
