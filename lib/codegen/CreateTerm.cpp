@@ -403,10 +403,7 @@ void addAbort(llvm::BasicBlock *block, llvm::Module *Module) {
     llvm::UnreachableInst *Unreachable = new llvm::UnreachableInst(Module->getContext(), block);
 }
 
-static int nextRuleId = 0;
-
-std::string makeApplyRuleFunction(KOREAxiomDeclaration *axiom, KOREDefinition *definition, llvm::Module *Module) {
-    KOREPattern *pattern = axiom->getRightHandSide();
+bool makeFunction(std::string name, KOREPattern *pattern, KOREDefinition *definition, llvm::Module *Module) {
     std::map<std::string, KOREObjectVariablePattern *> vars;
     pattern->markVariables(vars);
     llvm::StringMap<llvm::Type *> params;
@@ -417,7 +414,7 @@ std::string makeApplyRuleFunction(KOREAxiomDeclaration *axiom, KOREDefinition *d
       auto sort = dynamic_cast<KOREObjectCompositeSort *>(entry.second->getSort());
       if (!sort) {
         // TODO: sort variables
-        return "";
+        return false;
       }
       llvm::Type *paramType = getValueType(sort->getCategory(definition), Module);
       params.insert({entry.first, paramType});
@@ -425,7 +422,6 @@ std::string makeApplyRuleFunction(KOREAxiomDeclaration *axiom, KOREDefinition *d
       paramNames.push_back(entry.first);
     }
     llvm::FunctionType *funcType = llvm::FunctionType::get(termType(pattern, params, definition, Module), paramTypes, false);
-    std::string name = "apply_rule_" + std::to_string(nextRuleId++);
     llvm::Constant *func = Module->getOrInsertFunction(name, funcType);
     llvm::Function *applyRule = llvm::cast<llvm::Function>(func);
     llvm::StringMap<llvm::Value *> subst;
@@ -438,7 +434,33 @@ std::string makeApplyRuleFunction(KOREAxiomDeclaration *axiom, KOREDefinition *d
     CreateTerm creator = CreateTerm(subst, definition, block, Module);
     llvm::Value *retval = creator(pattern);
     llvm::ReturnInst::Create(Module->getContext(), retval, creator.getCurrentBlock());
-    return name;
+    return true;
 }
+
+static int nextRhsId = 0;
+
+std::string makeApplyRuleFunction(KOREAxiomDeclaration *axiom, KOREDefinition *definition, llvm::Module *Module) {
+    KOREPattern *pattern = axiom->getRightHandSide();
+    std::string name = "apply_rule_" + std::to_string(nextRhsId++);
+    if (makeFunction(name, pattern, definition, Module)) {
+      return name;
+    }
+    return "";
+}
+
+static int nextSideId = 0;
+
+std::string makeSideConditionFunction(KOREAxiomDeclaration *axiom, KOREDefinition *definition, llvm::Module *Module) {
+    KOREPattern *pattern = axiom->getRequires();
+    if (!pattern) {
+      return "";
+    }
+    std::string name = "side_condition_" + std::to_string(nextSideId++);
+    if (makeFunction(name, pattern, definition, Module)) {
+      return name;
+    }
+    return "";
+}
+
 
 }
