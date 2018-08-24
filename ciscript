@@ -12,6 +12,7 @@ stack test
 cd ../build
 ./tools/test_rhs/test_rhs ../test/test.kore | diff - ../test/test.ll
 ./tools/test_rhs/test_rhs ../test/imp.kore | diff - ../test/imp.ll
+./tools/test_sideconditions/test_sideconditions ../test/imp.kore | diff - ../test/requires.ll
 
 ./tools/test_configparser/test_configparser ../test/imp.kore > configparser.ll
 diff configparser.ll ../test/configparser.ll
