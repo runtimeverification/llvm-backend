@@ -142,11 +142,7 @@ void makeEvalFunction(KOREObjectSymbol *function, KOREDefinition *definition, ll
   }
   llvm::BasicBlock *block = llvm::BasicBlock::Create(module->getContext(), "entry", matchFunc);
   llvm::BasicBlock *stuck = llvm::BasicBlock::Create(module->getContext(), "stuck", matchFunc);
-  llvm::FunctionType *AbortType = llvm::FunctionType::get(llvm::Type::getVoidTy(module->getContext()), false);
-  llvm::Function *AbortFunc = llvm::dyn_cast<llvm::Function>(module->getOrInsertFunction("abort", AbortType));
-  AbortFunc->addFnAttr(llvm::Attribute::NoReturn);
-  llvm::CallInst *Abort = llvm::CallInst::Create(AbortFunc, "", stuck);
-  llvm::UnreachableInst *Unreachable = new llvm::UnreachableInst(module->getContext(), stuck);
+  addAbort(stuck, module);
 
   Decision codegen(definition, block, stuck, module, returnSort);
   codegen(dt, subst);
