@@ -453,6 +453,7 @@ static int nextSideId = 0;
 std::string makeSideConditionFunction(KOREAxiomDeclaration *axiom, KOREDefinition *definition, llvm::Module *Module) {
     KOREPattern *pattern = axiom->getRequires();
     if (!pattern) {
+      nextSideId++;
       return "";
     }
     std::string name = "side_condition_" + std::to_string(nextSideId++);
