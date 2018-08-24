@@ -1,5 +1,4 @@
 #include <boost/test/unit_test.hpp>
-#include <libgen.h>
 
 #include "kllvm/codegen/Decision.h"
 #include "kllvm/codegen/DecisionParser.h"
@@ -172,13 +171,150 @@ declare i1 @eval_foo(%mpz*)
 declare %mpz* @apply_rule_2(%mpz*, i1)
 
 attributes #0 = { noreturn }
-)");
+)";
+
+BOOST_AUTO_TEST_CASE(simple) {
+/* match subject with 
+   | Foo(l,r) -> match l with
+                 | Bar(b) -> match b with
+                             | true -> apply_rule_0()
+                             | false -> apply_rule_1()
+                 | Baz -> let b = eval_foo(r) in apply_rule_2(r, b)
+   | _ -> fail()
+*/
+  auto Literal = SwitchNode::Create("_2");
+  auto dv = KOREObjectSymbol::Create("\\dv");
+
+  Literal->addCase({dv, llvm::APInt(1, 1), LeafNode::Create("apply_rule_0")});
+  Literal->addCase({dv, llvm::APInt(1, 0), LeafNode::Create("apply_rule_1")});
+
+  auto Inner = SwitchNode::Create("_0");
+  auto Bar = KOREObjectSymbol::Create("Bar");
+  auto Baz = KOREObjectSymbol::Create("Baz");
+  auto InnerSort = KOREObjectCompositeSort::Create("Inner", SortCategory::Symbol);
+  auto Bool = KOREObjectCompositeSort::Create("Bool", SortCategory::Bool);
+
+  Bar->addSort(InnerSort);
+  Bar->addArgument(Bool);
+  Baz->addSort(InnerSort);
+  Bar->setTag(0);
+  Baz->setTag(1);
+
+  DecisionCase BarCase{Bar, {"_2"}, Literal};
+  Inner->addCase(BarCase);
+  auto BazLeaf = LeafNode::Create("apply_rule_2");
+  BazLeaf->addBinding("_1");
+  BazLeaf->addBinding("_3");
+  auto Func = FunctionNode::Create("_3", "eval_foo", BazLeaf, SortCategory::Bool);
+  Func->addBinding("_1");
+  Inner->addCase({Baz, std::vector<std::string>{}, Func});
+
+  auto Outer = SwitchNode::Create("subject0");
+  auto Foo = KOREObjectSymbol::Create("Foo");
+  auto OuterSort = KOREObjectCompositeSort::Create("Outer", SortCategory::Symbol);
+  auto Int = KOREObjectCompositeSort::Create("Int", SortCategory::Int);
+
+  Foo->addSort(OuterSort);
+  Foo->addArgument(InnerSort);
+  Foo->addArgument(Int);
+  Foo->setTag(2);
+
+  DecisionCase InnerCase{Foo, {"_0", "_1"}, Inner};
+  Outer->addCase(InnerCase);
+  Outer->addCase(DecisionCase{nullptr, std::vector<std::string>{}, FailNode::get()});
+
+  llvm::LLVMContext Ctx;
+  auto mod = newModule("test_decision", Ctx);
+
+  auto F = KOREObjectSymbol::Create("func");
+  F->addSort(Int);
+  F->addArgument(OuterSort);
+
+  makeEvalFunction(F, nullptr, mod.get(), Outer);
+
+  std::string actual;
+  llvm::raw_string_ostream out(actual);
+  mod->print(out, nullptr);
+  BOOST_CHECK_EQUAL(actual, EXPECTED);
 
 }
 
+BOOST_AUTO_TEST_CASE(deserialization_complex) {
+  std::string dt = R"YAML(
+specializations:
+- - Foo
+  - specializations:
+    - - Bar
+      - specializations:
+        - - 1
+          - action:
+            - 0
+            - []
+        - - 0
+          - action:
+            - 1
+            - []
+        default: null
+        bitwidth: 1
+    - - Baz
+      - function: eval_foo
+        args:
+        - - 0
+          - 0
+        sort: BOOL.Bool
+        next:
+          action:
+          - 2
+          - - - 0
+              - 1
+            - - 0
+              - 0
+    default: null
+default: fail
+)YAML";
+
+  auto Bar = KOREObjectSymbol::Create("Bar");
+  auto Baz = KOREObjectSymbol::Create("Baz");
+  auto InnerSort = KOREObjectCompositeSort::Create("Inner", SortCategory::Symbol);
+  auto Bool = KOREObjectCompositeSort::Create("Bool", SortCategory::Bool);
+
+  Bar->addSort(InnerSort);
+  Bar->addArgument(Bool);
+  Baz->addSort(InnerSort);
+  Bar->setTag(0);
+  Baz->setTag(1);
+  
+  auto Foo = KOREObjectSymbol::Create("Foo");
+  auto OuterSort = KOREObjectCompositeSort::Create("Outer", SortCategory::Symbol);
+  auto Int = KOREObjectCompositeSort::Create("Int", SortCategory::Int);
+
+  Foo->addSort(OuterSort);
+  Foo->addArgument(InnerSort);
+  Foo->addArgument(Int);
+  Foo->setTag(2);
+  
+  llvm::StringMap<KOREObjectSymbol *> map;
+  map["Foo"] = Foo;
+  map["Bar"] = Bar;
+  map["Baz"] = Baz;
+  auto compiledDt = parseYamlDecisionTreeFromString(dt, 1, map);
+
+  llvm::LLVMContext Ctx;
+  auto mod = newModule("test_decision", Ctx);
+  
+  auto F = KOREObjectSymbol::Create("func");
+  F->addSort(Int);
+  F->addArgument(OuterSort);
+
+  makeEvalFunction(F, nullptr, mod.get(), compiledDt);
+
+  std::string actual;
+  llvm::raw_string_ostream out(actual);
+  mod->print(out, nullptr);
+  BOOST_CHECK_EQUAL(actual, EXPECTED);
+}
+
 BOOST_AUTO_TEST_CASE(deserialization) {
-  auto &argv = boost::unit_test::framework::master_test_suite().argv;
-  char *dir = dirname(argv[0]);
   std::string dt = R"YAML(
 specializations:
 - - Nil
