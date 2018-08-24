@@ -135,15 +135,6 @@ declare %block* @parseConfiguration(i8*)
 
 declare void @printConfiguration(i32, %block*)
 
-define i32 @main(i32 %argc, i8** %argv) {
-entry:
-  %filename_ptr = getelementptr inbounds i8*, i8** %argv, i64 1
-  %filename = load i8*, i8** %filename_ptr
-  %ret = call %block* @parseConfiguration(i8* %filename)
-  %0 = ptrtoint %block* %ret to i32
-  ret i32 %0
-}
-
 define i32 @getTagForSymbolName(i8*) {
 "Lbl'-LT-'T'-GT-'{}":
   %1 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([19 x i8], [19 x i8]* @"sym_name_Lbl'-LT-'T'-GT-'{}", i64 0, i64 0))
