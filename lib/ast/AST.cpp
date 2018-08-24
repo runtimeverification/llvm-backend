@@ -298,6 +298,36 @@ KOREPattern *KOREAxiomDeclaration::getRightHandSide() const {
   assert(false && "could not compute right hand side of axiom");
 }
 
+KOREPattern *KOREAxiomDeclaration::getRequires() const {
+  if (auto top = dynamic_cast<KOREObjectCompositePattern *>(pattern)) {
+    if (top->getConstructor()->getName() == "\\implies" && top->getArguments().size() == 2) {
+      if (auto equals = dynamic_cast<KOREObjectCompositePattern *>(top->getArguments()[0])) {
+        if (equals->getConstructor()->getName() == "\\and" && equals->getArguments().size() == 2) {
+          equals = dynamic_cast<KOREObjectCompositePattern *>(equals->getArguments()[1]);
+          assert(equals);
+        }
+        if (equals->getConstructor()->getName() == "\\equals" && equals->getArguments().size() == 2) {
+          return equals->getArguments()[0];
+        } else if (equals->getConstructor()->getName() == "\\top" && equals->getArguments().empty()) {
+          return nullptr;
+        }
+      }
+    } else if (top->getConstructor()->getName() == "\\and" && top->getArguments().size() == 2) {
+      if (auto equals = dynamic_cast<KOREObjectCompositePattern *>(top->getArguments()[0])) {
+        if (equals->getConstructor()->getName() == "\\equals" && equals->getArguments().size() == 2) {
+          return equals->getArguments()[0];
+        } else if (equals->getConstructor()->getName() == "\\top" && equals->getArguments().empty()) {
+          return nullptr;
+        }
+      }
+    } else if (top->getConstructor()->getName() == "\\equals" && top->getArguments().size() == 2) {
+      return nullptr;
+    }
+  }
+  assert(false && "could not compute side condition of axiom");
+}
+
+
 void
 KOREObjectAliasDeclaration::addVariable(KOREObjectVariablePattern *Variable) {
   boundVariables.push_back(Variable);

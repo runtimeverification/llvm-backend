@@ -600,6 +600,7 @@ public:
      from the definition by KOREDefinition::preprocess. */
   bool isRequired();
   KOREPattern *getRightHandSide() const;
+  KOREPattern *getRequires() const;
 
   friend KOREDefinition;
 };
