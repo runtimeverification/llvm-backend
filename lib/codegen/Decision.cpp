@@ -152,4 +152,27 @@ void makeEvalFunction(KOREObjectSymbol *function, KOREDefinition *definition, ll
   codegen(dt, subst);
 }
 
+void makeStepFunction(KOREDefinition *definition, llvm::Module *module, DecisionNode *dt) {
+  auto blockType = getValueType(SortCategory::Symbol, module);
+  llvm::FunctionType *funcType = llvm::FunctionType::get(blockType, {blockType}, false);
+  std::string name = "step";
+  llvm::Constant *func = module->getOrInsertFunction(name, funcType);
+  llvm::Function *matchFunc = llvm::cast<llvm::Function>(func);
+  llvm::StringMap<llvm::Value *> subst;
+  auto val = matchFunc->arg_begin();
+  val->setName("subject0");
+  subst.insert({val->getName(), val});
+  llvm::BasicBlock *block = llvm::BasicBlock::Create(module->getContext(), "entry", matchFunc);
+  llvm::BasicBlock *stuck = llvm::BasicBlock::Create(module->getContext(), "stuck", matchFunc);
+  llvm::FunctionType *FinishType = llvm::FunctionType::get(llvm::Type::getVoidTy(module->getContext()), {blockType}, false);
+  llvm::Function *FinishFunc = llvm::dyn_cast<llvm::Function>(module->getOrInsertFunction("finish_rewriting", FinishType));
+  FinishFunc->addFnAttr(llvm::Attribute::NoReturn);
+  llvm::CallInst *Finish = llvm::CallInst::Create(FinishFunc, {val}, "", stuck);
+  llvm::UnreachableInst *Unreachable = new llvm::UnreachableInst(module->getContext(), stuck);
+
+  Decision codegen(definition, block, stuck, module, SortCategory::Symbol);
+  codegen(dt, subst);
+}
+
+
 }

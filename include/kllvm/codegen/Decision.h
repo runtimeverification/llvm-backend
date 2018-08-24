@@ -178,5 +178,7 @@ public:
    function. */
 void makeEvalFunction(KOREObjectSymbol *function, KOREDefinition *definition, llvm::Module *module, DecisionNode *dt);
 
+void makeStepFunction(KOREDefinition *definition, llvm::Module *module, DecisionNode *dt);
+
 }
 #endif // DECISION_H
