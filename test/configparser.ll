@@ -133,6 +133,8 @@ target triple = "x86_64-unknown-linux-gnu"
 
 declare %block* @parseConfiguration(i8*)
 
+declare void @printConfiguration(i32, %block*)
+
 define i32 @main(i32 %argc, i8** %argv) {
 entry:
   %filename_ptr = getelementptr inbounds i8*, i8** %argv, i64 1

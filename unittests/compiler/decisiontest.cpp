@@ -20,6 +20,8 @@ target triple = "x86_64-unknown-linux-gnu"
 
 declare %block* @parseConfiguration(i8*)
 
+declare void @printConfiguration(i32, %block*)
+
 define %mpz* @eval_func(%block* %subject0) {
 entry:
   %0 = ptrtoint %block* %subject0 to i64
@@ -283,6 +285,8 @@ target triple = "x86_64-unknown-linux-gnu"
 
 declare %block* @parseConfiguration(i8*)
 
+declare void @printConfiguration(i32, %block*)
+
 define %block* @step(%block* %subject0) {
 entry:
 
@@ -367,6 +371,8 @@ target triple = "x86_64-unknown-linux-gnu"
 %blockheader = type { i64 }
 
 declare %block* @parseConfiguration(i8*)
+
+declare void @printConfiguration(i32, %block*)
 
 define %block* @eval_append(%block* %subject0, %block* %subject1) {
 entry:

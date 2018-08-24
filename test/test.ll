@@ -17,6 +17,8 @@ target triple = "x86_64-unknown-linux-gnu"
 
 declare %block* @parseConfiguration(i8*)
 
+declare void @printConfiguration(i32, %block*)
+
 define %block* @apply_rule_0(%block* %K2) {
 entry:
   ret %block* %K2

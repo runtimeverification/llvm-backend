@@ -12,6 +12,8 @@ target triple = "x86_64-unknown-linux-gnu"
 
 declare %block* @parseConfiguration(i8*)
 
+declare void @printConfiguration(i32, %block*)
+
 define i1 @side_condition_0(i1 %VarC) {
 entry:
   %hook_BOOL_not = xor i1 %VarC, true

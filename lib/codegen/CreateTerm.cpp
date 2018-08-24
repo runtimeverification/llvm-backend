@@ -84,6 +84,7 @@ target triple = "x86_64-unknown-linux-gnu"
 
 ; Interface to the configuration parser
 declare %block* @parseConfiguration(i8*)
+declare void @printConfiguration(i32, %block *)
 )LLVM";
 
 std::unique_ptr<llvm::Module> newModule(std::string name, llvm::LLVMContext &Context) {
