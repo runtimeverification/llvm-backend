@@ -135,6 +135,8 @@ std::string KOREObjectSymbol::layoutString(KOREDefinition *definition) const {
     case SortCategory::Symbol:
       result.push_back('0');
       break;
+    case SortCategory::Uncomputed:
+      abort();
     }
   }
   return result;
@@ -296,6 +298,7 @@ KOREPattern *KOREAxiomDeclaration::getRightHandSide() const {
     }
   }
   assert(false && "could not compute right hand side of axiom");
+  abort();
 }
 
 KOREPattern *KOREAxiomDeclaration::getRequires() const {
@@ -325,6 +328,7 @@ KOREPattern *KOREAxiomDeclaration::getRequires() const {
     }
   }
   assert(false && "could not compute side condition of axiom");
+  abort();
 }
 
 

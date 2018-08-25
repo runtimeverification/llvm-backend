@@ -99,7 +99,6 @@ void LeafNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution)
 llvm::Value *Decision::getTag(llvm::Value *val) {
   auto Int = new llvm::PtrToIntInst(val, llvm::Type::getInt64Ty(Ctx), "", CurrentBlock);
   auto isConstant = new llvm::TruncInst(Int, llvm::Type::getInt1Ty(Ctx), "", CurrentBlock);
-  llvm::BasicBlock *CondBlock = CurrentBlock;
   llvm::BasicBlock *TrueBlock = llvm::BasicBlock::Create(Ctx, "constant", CurrentBlock->getParent());
   llvm::BasicBlock *FalseBlock = llvm::BasicBlock::Create(Ctx, "block", CurrentBlock->getParent());
   llvm::BasicBlock *MergeBlock = llvm::BasicBlock::Create(Ctx, "getTag", CurrentBlock->getParent());
@@ -163,8 +162,8 @@ void makeStepFunction(KOREDefinition *definition, llvm::Module *module, Decision
   llvm::FunctionType *FinishType = llvm::FunctionType::get(llvm::Type::getVoidTy(module->getContext()), {blockType}, false);
   llvm::Function *FinishFunc = llvm::dyn_cast<llvm::Function>(module->getOrInsertFunction("finish_rewriting", FinishType));
   FinishFunc->addFnAttr(llvm::Attribute::NoReturn);
-  llvm::CallInst *Finish = llvm::CallInst::Create(FinishFunc, {val}, "", stuck);
-  llvm::UnreachableInst *Unreachable = new llvm::UnreachableInst(module->getContext(), stuck);
+  llvm::CallInst::Create(FinishFunc, {val}, "", stuck);
+  new llvm::UnreachableInst(module->getContext(), stuck);
 
   Decision codegen(definition, block, stuck, module, SortCategory::Symbol);
   codegen(dt, subst);

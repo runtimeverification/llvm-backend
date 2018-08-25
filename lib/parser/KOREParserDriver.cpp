@@ -222,7 +222,7 @@ void KOREParserDriver::addPattern(KOREPattern *Pattern) {
     currentMetaPattern->addArgument(Pattern);
     break;
   default:
-    assert(false);
+    abort();
     break;
   }
 }
@@ -239,7 +239,7 @@ void KOREParserDriver::addObjectSort(KOREObjectSort *Sort) {
     currentObjectSort->addArgument(Sort);
     break;
   default:
-    assert(false);
+    abort();
     break;
   }
 }
@@ -253,7 +253,7 @@ void KOREParserDriver::addMetaSort(KOREMetaSort *Sort) {
     currentMetaPattern->getConstructor()->addArgument(Sort);
     break;
   default:
-    assert(false);
+    abort();
     break;
   }
 }

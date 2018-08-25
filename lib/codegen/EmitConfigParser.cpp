@@ -38,7 +38,7 @@ static void emitGetTagForSymbolName(KOREDefinition *definition, llvm::Module *mo
     auto icmp = new llvm::ICmpInst(*CurrentBlock, llvm::CmpInst::ICMP_EQ, 
        compare, llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), 0));
     auto FalseBlock = llvm::BasicBlock::Create(Ctx, "");
-    auto Branch = llvm::BranchInst::Create(MergeBlock, FalseBlock, icmp, CurrentBlock);
+    llvm::BranchInst::Create(MergeBlock, FalseBlock, icmp, CurrentBlock);
     Phi->addIncoming(llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), tag), CurrentBlock);
     CurrentBlock = FalseBlock;
   }
@@ -144,6 +144,8 @@ static llvm::Value *getArgValue(llvm::Value *ArgumentsArray, int idx,
   case SortCategory::Symbol:
     arg = new llvm::BitCastInst(arg, getValueType(cat, mod), "", CaseBlock);
     break;
+  case SortCategory::Uncomputed:
+    abort();
   }
   return arg;
 }
@@ -157,7 +159,6 @@ static std::pair<llvm::Value *, llvm::BasicBlock *> getEval(KOREDefinition *def,
   llvm::Value *ArgumentsArray = func->arg_begin() + 1;
   int idx = 0;
   llvm::StringMap<llvm::Value *> subst;
-  llvm::Constant *zero = llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0);
   auto pattern = KOREObjectCompositePattern::Create(symbol);
   for (auto sort : symbol->getArguments()) {
     SortCategory cat = dynamic_cast<KOREObjectCompositeSort *>(sort)->getCategory(def);
@@ -196,6 +197,8 @@ static std::pair<llvm::Value *, llvm::BasicBlock *> getEval(KOREDefinition *def,
     retval = new llvm::BitCastInst(result, llvm::Type::getInt8PtrTy(Ctx), "",
         creator.getCurrentBlock());
     break;
+  case SortCategory::Uncomputed:
+    abort();
   }
   creator.getCurrentBlock()->getInstList().push_back(inst);
   return std::make_pair(retval, creator.getCurrentBlock());
@@ -247,7 +250,7 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
        compare, zero32);
     auto FalseBlock = llvm::BasicBlock::Create(Ctx, "");
     auto CaseBlock = llvm::BasicBlock::Create(Ctx, name, func);
-    auto Branch = llvm::BranchInst::Create(CaseBlock, FalseBlock, icmp, CurrentBlock);
+    llvm::BranchInst::Create(CaseBlock, FalseBlock, icmp, CurrentBlock);
     switch(cat) {
     case SortCategory::Map:
     case SortCategory::List:
@@ -278,7 +281,7 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
       new llvm::StoreInst(compare, Malloc, CaseBlock);
       auto result = new llvm::BitCastInst(Malloc, llvm::Type::getInt8PtrTy(Ctx), "", CaseBlock);
       Phi->addIncoming(result, CaseBlock);
-      llvm::BranchInst *Branch = llvm::BranchInst::Create(MergeBlock, CaseBlock);
+      llvm::BranchInst::Create(MergeBlock, CaseBlock);
       break;
     }
     case SortCategory::Int: {
@@ -295,10 +298,14 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
       addAbort(AbortBlock, module);
       auto cast = new llvm::BitCastInst(Block,
           llvm::Type::getInt8PtrTy(Ctx), "", CaseBlock);
-      llvm::BranchInst *Branch = llvm::BranchInst::Create(MergeBlock, AbortBlock, icmp, CaseBlock);
+      llvm::BranchInst::Create(MergeBlock, AbortBlock, icmp, CaseBlock);
       Phi->addIncoming(cast, CaseBlock);
       break;
     }
+    case SortCategory::Symbol:
+      break;
+    case SortCategory::Uncomputed:
+      abort();
     }
     CurrentBlock = FalseBlock;
   }
@@ -316,11 +323,11 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
       llvm::Type::getInt8PtrTy(Ctx), llvm::Type::getInt64Ty(Ctx));
   auto StrPtr = llvm::GetElementPtrInst::CreateInBounds(Block,
       {zero, llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), 1), zero}, "", CurrentBlock);
-  auto Call = llvm::CallInst::Create(Memcpy, {StrPtr, func->arg_begin()+2, func->arg_begin()+1},
+  llvm::CallInst::Create(Memcpy, {StrPtr, func->arg_begin()+2, func->arg_begin()+1},
       "", CurrentBlock);
   auto cast = new llvm::BitCastInst(Block,
       llvm::Type::getInt8PtrTy(Ctx), "", CurrentBlock);
-  llvm::BranchInst *Branch = llvm::BranchInst::Create(MergeBlock, CurrentBlock);
+  llvm::BranchInst::Create(MergeBlock, CurrentBlock);
   Phi->addIncoming(cast, CurrentBlock);
   llvm::ReturnInst::Create(Ctx, Phi, MergeBlock);
   MergeBlock->insertInto(func);
@@ -361,7 +368,7 @@ static void emitStoreSymbolChildren(KOREDefinition *definition, llvm::Module *mo
           llvm::PointerType::getUnqual(BlockType), "", CaseBlock);
       llvm::Value *ChildPtr = llvm::GetElementPtrInst::CreateInBounds(BlockType, cast,
           {zero, llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), idx++ + 2)}, "", CaseBlock);
-      llvm::StoreInst *StoreChild = new llvm::StoreInst(arg, ChildPtr, CaseBlock);
+      new llvm::StoreInst(arg, ChildPtr, CaseBlock);
     }
     llvm::ReturnInst::Create(Ctx, CaseBlock);
   }

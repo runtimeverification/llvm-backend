@@ -14,7 +14,7 @@ using namespace kllvm::parser;
 /* update location on matching */
 #define YY_USER_ACTION loc->step(); loc->columns(yyleng);
 
-
+#define YY_NO_INPUT
 %}
 
 /* Flex options */
