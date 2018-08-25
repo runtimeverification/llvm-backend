@@ -1,6 +1,6 @@
 set(LLVM_REQUIRES_RTTI ON)
 set(LLVM_REQUIRES_EH ON)
-add_llvm_tool(test_configparser
+kllvm_add_tool(test_configparser
   main.cpp
 )
 

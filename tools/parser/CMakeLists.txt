@@ -2,7 +2,7 @@ set(LLVM_REQUIRES_RTTI ON)
 set(LLVM_REQUIRES_EH ON)
 
 
-add_llvm_tool(parser
+kllvm_add_tool(parser
   main.cpp
 )
 

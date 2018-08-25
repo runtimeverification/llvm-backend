@@ -10,4 +10,5 @@ target_link_libraries(compiler-tests
   gmp
   yaml-cpp
   ${Boost_UNIT_TEST_FRAMEWORK_LIBRARIES}
+  ${llvm_libs}
 )
