@@ -1,3 +1,0 @@
-[submodule "submodules/kore"]
-	path = submodules/kore
-	url = git@github.com:raduom/kore.git
