@@ -1,7 +1,0 @@
-[]
-
-module TEST-ATTRIBUTE-1
-
-  sort Nat{} [hook{}("Nat")]
-
-endmodule []
