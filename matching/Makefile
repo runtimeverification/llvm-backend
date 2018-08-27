@@ -1,4 +1,4 @@
-package = haste
+package = matching
 
 stack_yaml = STACK_YAML="stack.yaml"
 stack = $(stack_yaml) stack
@@ -28,7 +28,7 @@ bench:
 	$(stack) bench $(package)
 
 ghcid:
-	$(stack) exec -- ghcid -c "stack ghci $(package):lib $(package):test:haste-test --test --ghci-options='-fobject-code -fno-warn-unused-do-bind' --main-is $(package):haste-test"
+	$(stack) exec -- ghcid -c "stack ghci $(package):lib $(package):test:$(package)-test --test --ghci-options='-fobject-code -fno-warn-unused-do-bind' --main-is $(package):$(package)-test"
 
 dev-deps:
 	stack install ghcid
