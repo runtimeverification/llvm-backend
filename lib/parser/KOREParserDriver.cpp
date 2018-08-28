@@ -233,7 +233,7 @@ void KOREParserDriver::addObjectSort(KOREObjectSort *Sort) {
     static_cast<KOREObjectSymbolAliasDeclaration *>(currentDeclaration)->getSymbol()->addArgument(Sort);
     break;
   case ParsingObjectPattern:
-    currentObjectPattern->getConstructor()->addArgument(Sort);
+    currentObjectPattern->getConstructor()->addFormalArgument(Sort);
     break;
   case ParsingObjectSort:
     currentObjectSort->addArgument(Sort);

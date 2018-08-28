@@ -4,6 +4,7 @@ set(LLVM_REQUIRES_EH ON)
 add_kllvm_library(Codegen
   CreateTerm.cpp
   Decision.cpp
+  EmitConfigParser.cpp
 )
 
 add_definitions(${LLVM_DEFINITIONS})

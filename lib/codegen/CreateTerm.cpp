@@ -81,6 +81,9 @@ target triple = "x86_64-unknown-linux-gnu"
 ; the symbol symbol foo{Map{}, Int{}, Exp{}} : Exp{}, we would generate the type:
 
 ; %layoutN = type { %blockheader, [0 x i64 *], %map, %mpz *, %block * }
+
+; Interface to the configuration parser
+declare %block* @parseConfiguration(i8*)
 )LLVM";
 
 std::unique_ptr<llvm::Module> newModule(std::string name, llvm::LLVMContext &Context) {
@@ -150,7 +153,11 @@ llvm::Value *getBlockHeader(llvm::Module *Module, KOREDefinition *definition, co
 }
 
 llvm::Value *allocateBlock(llvm::Type *AllocType, llvm::BasicBlock *block) {
-  llvm::Instruction *Malloc = llvm::CallInst::CreateMalloc(block, llvm::Type::getInt64Ty(block->getContext()), AllocType, llvm::ConstantExpr::getSizeOf(AllocType), nullptr, nullptr);
+  return allocateBlock(AllocType, llvm::ConstantExpr::getSizeOf(AllocType), block);
+}
+
+llvm::Value *allocateBlock(llvm::Type *AllocType, llvm::Value *Len, llvm::BasicBlock *block) {
+  llvm::Instruction *Malloc = llvm::CallInst::CreateMalloc(block, llvm::Type::getInt64Ty(block->getContext()), AllocType, Len, nullptr, nullptr);
   block->getInstList().push_back(Malloc);
   return Malloc;
 }
@@ -162,7 +169,7 @@ llvm::Type *termType(KOREPattern *pattern, llvm::StringMap<llvm::Type *> &substi
     KOREObjectSymbol *symbol = constructor->getConstructor();
     assert(symbol->isConcrete() && "not supported yet: sort variables");
     if (symbol->getName() == "\\dv") {
-      auto sort = dynamic_cast<KOREObjectCompositeSort *>(symbol->getArguments()[0]);
+      auto sort = dynamic_cast<KOREObjectCompositeSort *>(symbol->getFormalArguments()[0]);
       return getValueType(sort->getCategory(definition), Module);
     }
     auto sort = dynamic_cast<KOREObjectCompositeSort *>(symbol->getSort());
@@ -287,6 +294,25 @@ llvm::Value *CreateTerm::createHook(KOREObjectCompositePattern *hookAtt, KOREObj
     llvm::Value *secondArg = (*this)(pattern->getArguments()[1]);
     llvm::ICmpInst *Eq = new llvm::ICmpInst(*CurrentBlock, llvm::CmpInst::ICMP_EQ, firstArg, secondArg, "hook_BOOL_eq");
     return Eq;
+  } else if (name == "KEQUAL.ite") {
+    assert(pattern->getArguments().size() == 3);
+    llvm::Value *cond = (*this)(pattern->getArguments()[0]);
+    llvm::BasicBlock *CondBlock = CurrentBlock;
+    llvm::BasicBlock *TrueBlock = llvm::BasicBlock::Create(Ctx, "then", CurrentBlock->getParent());
+    llvm::BasicBlock *FalseBlock = llvm::BasicBlock::Create(Ctx, "else", CurrentBlock->getParent());
+    llvm::BasicBlock *MergeBlock = llvm::BasicBlock::Create(Ctx, "hook_KEQUAL_ite", CurrentBlock->getParent());
+    llvm::BranchInst *Branch = llvm::BranchInst::Create(TrueBlock, FalseBlock, cond, CurrentBlock);
+    CurrentBlock = TrueBlock;
+    llvm::Value *trueArg = (*this)(pattern->getArguments()[1]);
+    Branch = llvm::BranchInst::Create(MergeBlock, CurrentBlock);
+    llvm::PHINode *Phi = llvm::PHINode::Create(trueArg->getType(), 2, "phi", MergeBlock);
+    Phi->addIncoming(trueArg, CurrentBlock);
+    CurrentBlock = FalseBlock;
+    llvm::Value *falseArg = (*this)(pattern->getArguments()[2]);
+    Branch = llvm::BranchInst::Create(MergeBlock, CurrentBlock);
+    Phi->addIncoming(falseArg, CurrentBlock);
+    CurrentBlock = MergeBlock;
+    return Phi;
   } else if (!name.compare(0, 5, "MINT.")) {
     assert(false && "not implemented yet: MInt");
   } else {
@@ -332,7 +358,7 @@ llvm::Value *CreateTerm::operator()(KOREPattern *pattern) {
     const KOREObjectSymbol *symbol = constructor->getConstructor();
     assert(symbol->isConcrete() && "not supported yet: sort variables");
     if (symbol->getName() == "\\dv") {
-      auto sort = dynamic_cast<KOREObjectCompositeSort *>(symbol->getArguments()[0]);
+      auto sort = dynamic_cast<KOREObjectCompositeSort *>(symbol->getFormalArguments()[0]);
       auto strPattern = dynamic_cast<KOREMetaStringPattern *>(constructor->getArguments()[0]);
       return createToken(sort->getCategory(Definition), strPattern->getContents());
     }
@@ -342,7 +368,7 @@ llvm::Value *CreateTerm::operator()(KOREPattern *pattern) {
         return createHook(symbolDecl->getAttributes().lookup("hook"), constructor);
       } else {
         std::ostringstream Out;
-        symbol->print(Out);
+        symbol->print(Out, 0, false);
         return createFunctionCall("eval_" + Out.str(), constructor);
       }
     } else if (symbol->getArguments().empty()) {
@@ -367,6 +393,14 @@ llvm::Value *CreateTerm::operator()(KOREPattern *pattern) {
   } else {
     assert(false && "not supported yet: meta level");
   }
+}
+
+void addAbort(llvm::BasicBlock *block, llvm::Module *Module) {
+    llvm::FunctionType *AbortType = llvm::FunctionType::get(llvm::Type::getVoidTy(Module->getContext()), false);
+    llvm::Function *AbortFunc = llvm::dyn_cast<llvm::Function>(Module->getOrInsertFunction("abort", AbortType));
+    AbortFunc->addFnAttr(llvm::Attribute::NoReturn);
+    llvm::CallInst *Abort = llvm::CallInst::Create(AbortFunc, "", block);
+    llvm::UnreachableInst *Unreachable = new llvm::UnreachableInst(Module->getContext(), block);
 }
 
 static int nextRuleId = 0;
