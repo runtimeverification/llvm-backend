@@ -3,65 +3,10 @@
 
 #include <gmp.h>
 
+#include "header.h"
+
 using namespace kllvm;
 using namespace kllvm::parser;
-
-extern "C" {
-  // llvm: blockheader = type { i64 } 
-  struct blockheader {
-    uint64_t header;
-  };
-
-  // llvm: block = type { %blockheader, [0 x i64 *] }
-  struct block {
-    blockheader header;
-    uint64_t *children[];
-  };
-
-  
-  // llvm: string = type { %blockheader, [0 x i8] }
-  struct string {
-    blockheader header;
-    char bytes[];
-  };
-
-  // llvm: map = type { i64, i8 *, i8 * }
-  struct map {
-    uint64_t a;
-    void *b;
-    void *c;
-  };
-
-  // llvm: set = type { i8 *, i8 *, i64 }
-  struct set {
-    void *a;
-    void *b;
-    uint64_t c;
-  };
-
-  // llvm: list = type { i64, i64, i8 *, i8 *, i8 *, i8 *, i8 * }
-  struct list {
-    uint64_t a;
-    uint64_t b;
-    void *c;
-    void *d;
-    void *e;
-    void *f;
-    char *g;
-  };
- 
-  // This function is exported to be used by the interpreter 
-  block *parseConfiguration(const char *filename);
-
-  // The following functions have to be generated at kompile time
-  // and linked with the interpreter.
-  uint32_t getTagForSymbolName(const char *symbolname);
-  struct blockheader getBlockHeaderForSymbol(uint32_t tag);
-  bool isSymbolAFunction(uint32_t tag);
-  void storeSymbolChildren(block *symbol, void *children[]);
-  void *evaluateFunctionSymbol(uint32_t tag, void *arguments[]);
-  void *getToken(const char *sortname, uint64_t len, const char *tokencontents);
-}
 
 static void *allocatePatternAsConfiguration(const KOREPattern *Pattern) {
   const auto constructor = dynamic_cast<const KOREObjectCompositePattern *>(Pattern);
