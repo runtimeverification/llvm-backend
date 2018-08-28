@@ -6,6 +6,25 @@
 
 namespace kllvm {
 
+static llvm::Constant *getSymbolNamePtr(KOREObjectSymbol *symbol, llvm::BasicBlock *SetBlockName, llvm::Module *module) {
+  llvm::LLVMContext &Ctx = module->getContext();
+  std::ostringstream Out;
+  symbol->print(Out);
+  if (SetBlockName) {
+    SetBlockName->setName(Out.str());
+  }
+  auto Str = llvm::ConstantDataArray::getString(Ctx, Out.str(), true);
+  auto global = module->getOrInsertGlobal("sym_name_" + Out.str(), Str->getType());
+  llvm::GlobalVariable *globalVar = llvm::dyn_cast<llvm::GlobalVariable>(global);
+  if (!globalVar->hasInitializer()) {
+    globalVar->setInitializer(Str);
+  }
+  llvm::Constant *zero = llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0);
+  auto indices = std::vector<llvm::Constant *>{zero, zero};
+  auto Ptr = llvm::ConstantExpr::getInBoundsGetElementPtr(Str->getType(), globalVar, indices);
+  return Ptr;
+}
+
 static void emitGetTagForSymbolName(KOREDefinition *definition, llvm::Module *module) {
   llvm::LLVMContext &Ctx = module->getContext();
   auto func = llvm::dyn_cast<llvm::Function>(module->getOrInsertFunction(
@@ -22,18 +41,7 @@ static void emitGetTagForSymbolName(KOREDefinition *definition, llvm::Module *mo
     uint32_t tag = entry.first;
     auto symbol = entry.second;
     CurrentBlock->insertInto(func);
-    std::ostringstream Out;
-    symbol->print(Out);
-    CurrentBlock->setName(Out.str());
-    auto Str = llvm::ConstantDataArray::getString(Ctx, Out.str(), true);
-    auto global = module->getOrInsertGlobal("sym_name_" + Out.str(), Str->getType());
-    llvm::GlobalVariable *globalVar = llvm::dyn_cast<llvm::GlobalVariable>(global);
-    if (!globalVar->hasInitializer()) {
-      globalVar->setInitializer(Str);
-    }
-    llvm::Constant *zero = llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0);
-    auto indices = std::vector<llvm::Constant *>{zero, zero};
-    auto Ptr = llvm::ConstantExpr::getInBoundsGetElementPtr(Str->getType(), globalVar, indices);
+    auto Ptr = getSymbolNamePtr(symbol, CurrentBlock, module);
     auto compare = llvm::CallInst::Create(Strcmp, {func->arg_begin(), Ptr}, "", CurrentBlock);
     auto icmp = new llvm::ICmpInst(*CurrentBlock, llvm::CmpInst::ICMP_EQ, 
        compare, llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), 0));
