@@ -341,12 +341,41 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
   MergeBlock->insertInto(func);
 }
 
-static void emitStoreSymbolChildren(KOREDefinition *definition, llvm::Module *module) {
+static llvm::PointerType *makeVisitorType(llvm::LLVMContext &Ctx, llvm::Type *file, llvm::Type *item, int numStrs) {
+  std::vector<llvm::Type *> types;
+  types.push_back(file);
+  types.push_back(item);
+  for (int i = 0; i < numStrs; i++) {
+    types.push_back(llvm::Type::getInt8PtrTy(Ctx));
+  }
+  return llvm::PointerType::getUnqual(llvm::FunctionType::get(llvm::Type::getVoidTy(Ctx), types, false));
+}
+
+static void emitTraversal(std::string name, KOREDefinition *definition, llvm::Module *module, 
+    bool isVisitor, void getter(
+      KOREDefinition *, 
+      llvm::Module *, 
+      KOREObjectSymbol *, 
+      llvm::BasicBlock *)) {
   llvm::LLVMContext &Ctx = module->getContext();
+  std::vector<llvm::Type *> argTypes;
+  argTypes.push_back(getValueType(SortCategory::Symbol, module));
+  if (isVisitor) {
+    auto file = llvm::PointerType::getUnqual(llvm::StructType::create(Ctx, "FILE"));
+    argTypes.push_back(file);
+    argTypes.push_back(makeVisitorType(Ctx, file, getValueType(SortCategory::Symbol, module), 1));
+    argTypes.push_back(makeVisitorType(Ctx, file, llvm::PointerType::getUnqual(getValueType(SortCategory::Map, module)), 3));
+    argTypes.push_back(makeVisitorType(Ctx, file, llvm::PointerType::getUnqual(getValueType(SortCategory::List, module)), 3));
+    argTypes.push_back(makeVisitorType(Ctx, file, llvm::PointerType::getUnqual(getValueType(SortCategory::Set, module)), 3));
+    argTypes.push_back(makeVisitorType(Ctx, file, getValueType(SortCategory::Int, module), 1));
+    argTypes.push_back(makeVisitorType(Ctx, file, getValueType(SortCategory::Float, module), 1));
+    argTypes.push_back(makeVisitorType(Ctx, file, getValueType(SortCategory::Bool, module), 1));
+    argTypes.push_back(makeVisitorType(Ctx, file, llvm::Type::getInt8PtrTy(Ctx), 1));
+  } else {
+    argTypes.push_back(llvm::PointerType::getUnqual(llvm::ArrayType::get(llvm::Type::getInt8PtrTy(Ctx), 0)));
+  }
   auto func = llvm::dyn_cast<llvm::Function>(module->getOrInsertFunction(
-      "storeSymbolChildren", llvm::Type::getVoidTy(Ctx),
-      getValueType(SortCategory::Symbol, module),
-      llvm::PointerType::getUnqual(llvm::ArrayType::get(llvm::Type::getInt8PtrTy(Ctx), 0))));
+      name, llvm::FunctionType::get(llvm::Type::getVoidTy(Ctx), argTypes, false)));
   llvm::Constant *zero = llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0);
   llvm::Constant *zero32 = llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), 0);
   auto EntryBlock = llvm::BasicBlock::Create(Ctx, "entry", func);
@@ -366,22 +395,119 @@ static void emitStoreSymbolChildren(KOREDefinition *definition, llvm::Module *mo
     }
     auto CaseBlock = llvm::BasicBlock::Create(Ctx, "tag" + std::to_string(tag), func);
     Switch->addCase(llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), tag), CaseBlock);
-    llvm::Value *ArgumentsArray = func->arg_begin() + 1;
-    int idx = 0;
-    auto BlockType = getBlockType(module, definition, symbol);
-    for (auto sort : symbol->getArguments()) {
-      SortCategory cat = dynamic_cast<KOREObjectCompositeSort *>(sort)->getCategory(definition);
-      llvm::Value *arg = getArgValue(ArgumentsArray, idx, CaseBlock, cat, module);
-      auto cast = new llvm::BitCastInst(func->arg_begin(),
-          llvm::PointerType::getUnqual(BlockType), "", CaseBlock);
-      llvm::Value *ChildPtr = llvm::GetElementPtrInst::CreateInBounds(BlockType, cast,
-          {zero, llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), idx++ + 2)}, "", CaseBlock);
-      new llvm::StoreInst(arg, ChildPtr, CaseBlock);
-    }
+    getter(definition, module, symbol, CaseBlock);
     llvm::ReturnInst::Create(Ctx, CaseBlock);
   }
   addAbort(stuck, module);
   stuck->insertInto(func); 
+}
+
+static void getStore(KOREDefinition *definition, llvm::Module *module, KOREObjectSymbol *symbol, 
+    llvm::BasicBlock *CaseBlock) {
+  llvm::LLVMContext &Ctx = module->getContext();
+  llvm::Constant *zero = llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0);
+  llvm::Function *func = CaseBlock->getParent();
+  llvm::Value *ArgumentsArray = func->arg_begin() + 1;
+  int idx = 0;
+  auto BlockType = getBlockType(module, definition, symbol);
+  auto cast = new llvm::BitCastInst(func->arg_begin(),
+      llvm::PointerType::getUnqual(BlockType), "", CaseBlock);
+  for (auto sort : symbol->getArguments()) {
+    SortCategory cat = dynamic_cast<KOREObjectCompositeSort *>(sort)->getCategory(definition);
+    llvm::Value *arg = getArgValue(ArgumentsArray, idx, CaseBlock, cat, module);
+    llvm::Value *ChildPtr = llvm::GetElementPtrInst::CreateInBounds(BlockType, cast,
+        {zero, llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), idx++ + 2)}, "", CaseBlock);
+    new llvm::StoreInst(arg, ChildPtr, CaseBlock);
+  }
+}
+
+static void emitStoreSymbolChildren(KOREDefinition *definition, llvm::Module *module) {
+  emitTraversal("storeSymbolChildren", definition, module, false, getStore);
+}
+
+static std::pair<llvm::Value *, llvm::BasicBlock *> getSymbolName(KOREDefinition *definition, llvm::Module *module, KOREObjectSymbol *symbol, llvm::Instruction *inst) {
+  return std::make_pair(getSymbolNamePtr(symbol, nullptr, module), inst->getParent());
+}
+
+static void emitGetSymbolNameForTag(KOREDefinition *def, llvm::Module *mod) {
+  emitDataForSymbol("getSymbolNameForTag", llvm::Type::getInt8PtrTy(mod->getContext()), def, mod, false, getSymbolName);
+}
+
+static void visitCollection(KOREDefinition *definition, llvm::Module *module, KOREObjectCompositeSort *compositeSort, llvm::Function *func, llvm::Value *ChildPtr, llvm::BasicBlock *CaseBlock, unsigned offset) {
+  llvm::LLVMContext &Ctx = module->getContext();
+  llvm::Constant *zero = llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0);
+  auto indices = std::vector<llvm::Constant *>{zero, zero};
+  auto sortDecl = definition->getSortDeclarations().lookup(compositeSort->getName());
+  auto concat = (KOREObjectCompositePattern *)sortDecl->getAttributes().lookup("concat")->getArguments()[0];
+  auto unit = (KOREObjectCompositePattern *)sortDecl->getAttributes().lookup("unit")->getArguments()[0];
+  auto element = (KOREObjectCompositePattern *)sortDecl->getAttributes().lookup("element")->getArguments()[0];
+  auto concatPtr = getSymbolNamePtr(concat->getConstructor(), nullptr, module);
+  auto unitPtr = getSymbolNamePtr(unit->getConstructor(), nullptr, module);
+  auto elementPtr = getSymbolNamePtr(element->getConstructor(), nullptr, module);
+  llvm::CallInst::Create(func->arg_begin()+offset, {func->arg_begin()+1, ChildPtr, unitPtr, elementPtr, concatPtr}, "", CaseBlock);
+}
+
+static void getVisitor(KOREDefinition *definition, llvm::Module *module, KOREObjectSymbol *symbol, llvm::BasicBlock *CaseBlock) {
+  llvm::LLVMContext &Ctx = module->getContext();
+  llvm::Constant *zero = llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0);
+  auto indices = std::vector<llvm::Constant *>{zero, zero};
+  llvm::Function *func = CaseBlock->getParent();
+  int idx = 0;
+  auto BlockType = getBlockType(module, definition, symbol);
+  auto cast = new llvm::BitCastInst(func->arg_begin(),
+      llvm::PointerType::getUnqual(BlockType), "", CaseBlock);
+  for (auto sort : symbol->getArguments()) {
+    auto compositeSort = dynamic_cast<KOREObjectCompositeSort *>(sort);
+    SortCategory cat = compositeSort->getCategory(definition);
+    llvm::Value *ChildPtr = llvm::GetElementPtrInst::CreateInBounds(BlockType, cast,
+        {zero, llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), idx++ + 2)}, "", CaseBlock);
+    llvm::Value *Child = new llvm::LoadInst(ChildPtr, "", CaseBlock);
+    std::ostringstream Out;
+    sort->print(Out);
+    auto Str = llvm::ConstantDataArray::getString(Ctx, Out.str(), true);
+    auto global = module->getOrInsertGlobal("sort_name_" + Out.str(), Str->getType());
+    llvm::GlobalVariable *globalVar = llvm::dyn_cast<llvm::GlobalVariable>(global);
+    if (!globalVar->hasInitializer()) {
+      globalVar->setInitializer(Str);
+    }
+    llvm::Constant *CharPtr = llvm::ConstantExpr::getInBoundsGetElementPtr(Str->getType(), global, indices);
+    switch(cat) {
+    case SortCategory::StringBuffer:
+      Child = new llvm::LoadInst(Child, "", CaseBlock);
+      // fall through
+    case SortCategory::Symbol:
+      llvm::CallInst::Create(func->arg_begin()+2, {func->arg_begin()+1, Child, CharPtr}, "", CaseBlock);
+      break;
+    case SortCategory::Int:
+      llvm::CallInst::Create(func->arg_begin()+6, {func->arg_begin()+1, Child, CharPtr}, "", CaseBlock);
+      break;
+    case SortCategory::Float:
+      llvm::CallInst::Create(func->arg_begin()+7, {func->arg_begin()+1, Child, CharPtr}, "", CaseBlock);
+      break;
+    case SortCategory::Bool:
+      llvm::CallInst::Create(func->arg_begin()+8, {func->arg_begin()+1, Child, CharPtr}, "", CaseBlock);
+      break;
+    case SortCategory::MInt:
+      ChildPtr = new llvm::BitCastInst(ChildPtr, llvm::Type::getInt8PtrTy(Ctx), "", CaseBlock);
+      llvm::CallInst::Create(func->arg_begin()+9, {func->arg_begin()+1, ChildPtr, CharPtr}, "", CaseBlock);
+      break;
+    case SortCategory::Map:
+      visitCollection(definition, module, compositeSort, func, ChildPtr, CaseBlock, 3);
+      break;
+    case SortCategory::Set:
+      visitCollection(definition, module, compositeSort, func, ChildPtr, CaseBlock, 5);
+      break;
+    case SortCategory::List: {
+      visitCollection(definition, module, compositeSort, func, ChildPtr, CaseBlock, 4);
+      break;
+    } case SortCategory::Uncomputed:
+      abort();
+    }
+  }
+}
+
+static void emitVisitChildren(KOREDefinition *def, llvm::Module *mod) {
+  emitTraversal("visitChildren", def, mod, true, getVisitor);
 }
 
 void emitConfigParserFunctions(KOREDefinition *definition, llvm::Module *module) {
@@ -391,6 +517,9 @@ void emitConfigParserFunctions(KOREDefinition *definition, llvm::Module *module)
   emitStoreSymbolChildren(definition, module); 
   emitEvaluateFunctionSymbol(definition, module); 
   emitGetToken(definition, module); 
+
+  emitGetSymbolNameForTag(definition, module);
+  emitVisitChildren(definition, module);
 }
 
 }
