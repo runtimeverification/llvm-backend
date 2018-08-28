@@ -1,8 +1,10 @@
 extern crate im;
+extern crate libc;
 
 use decls::im::hashmap::HashMap;
 use decls::im::hashset::HashSet;
 use decls::im::vector::Vector;
+use self::libc::{FILE,c_char};
 
 pub enum Block {}
 #[allow(non_camel_case_types)]
@@ -30,6 +32,7 @@ extern "C" {
 
 extern "C" {
   pub fn move_int(result: Int) -> *mut Int;
+  pub fn printConfiguration(file: *mut FILE, subject: *const Block, sort: *const c_char);
 }
 
 #[cfg(test)]

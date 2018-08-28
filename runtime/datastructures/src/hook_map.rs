@@ -1,7 +1,11 @@
-use super::decls::{Map,Set,List,Int,K,__gmpz_init_set_ui,move_int};
+extern crate libc;
+
+use super::decls::{Map,Set,List,Int,K,__gmpz_init_set_ui,move_int,printConfiguration};
 use std::iter::FromIterator;
 use std::ptr;
 use std::mem;
+use std::ffi::CString;
+use self::libc::{FILE,c_char,fprintf};
 
 #[no_mangle]
 pub extern "C" fn size_map() -> usize {
@@ -111,6 +115,37 @@ pub unsafe extern "C" fn hook_MAP_removeAll(map: *const Map, set: *const Set) ->
     tmp.remove(key);
   }
   tmp
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn printMap(file: *mut FILE, map: *const Map, unit: *const c_char, element: *const c_char, concat: *const c_char) {
+  if (*map).len() == 0 {
+    let fmt = CString::new("%s()").unwrap();
+    fprintf(file, fmt.as_ptr(), unit);
+    return;
+  }
+  let mut i = 1;
+  let parens = CString::new(")").unwrap();
+  for (key, value) in (*map).iter() {
+    let fmt = CString::new("%s(").unwrap();
+    if i < (*map).len() {
+      fprintf(file, fmt.as_ptr(), concat);
+    }
+    fprintf(file, fmt.as_ptr(), element);
+    let sort = CString::new("K").unwrap();
+    printConfiguration(file, *key, sort.as_ptr());
+    let comma = CString::new(",").unwrap();
+    fprintf(file, comma.as_ptr());
+    printConfiguration(file, *value, sort.as_ptr());
+    fprintf(file, parens.as_ptr());
+    if i < (*map).len() {
+      fprintf(file, parens.as_ptr());
+    }
+    i += 1
+  }
+  for _ in 0..(*map).len()-1 {
+    fprintf(file, parens.as_ptr());
+  }
 }
 
 #[cfg(test)]
