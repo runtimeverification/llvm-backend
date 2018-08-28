@@ -6,7 +6,7 @@
 
 namespace kllvm {
 
-void emitGetTagForSymbolName(KOREDefinition *definition, llvm::Module *module) {
+static void emitGetTagForSymbolName(KOREDefinition *definition, llvm::Module *module) {
   llvm::LLVMContext &Ctx = module->getContext();
   auto func = llvm::dyn_cast<llvm::Function>(module->getOrInsertFunction(
       "getTagForSymbolName", llvm::Type::getInt32Ty(Ctx), llvm::Type::getInt8PtrTy(Ctx)));
@@ -53,7 +53,7 @@ static std::string BLOCKHEADER_STRUCT = "blockheader";
 static std::string INT_STRUCT = "mpz";
 static std::string STRING_STRUCT = "string";
 
-void emitDataForSymbol(std::string name, llvm::Type *ty, KOREDefinition *definition, llvm::Module *module, bool isEval,
+static void emitDataForSymbol(std::string name, llvm::Type *ty, KOREDefinition *definition, llvm::Module *module, bool isEval,
     std::pair<llvm::Value *, llvm::BasicBlock *> getter(KOREDefinition *, llvm::Module *,
         KOREObjectSymbol *, llvm::Instruction *)) {
   llvm::LLVMContext &Ctx = module->getContext();
@@ -92,18 +92,18 @@ void emitDataForSymbol(std::string name, llvm::Type *ty, KOREDefinition *definit
   stuck->insertInto(func);
 }
 
-std::pair<llvm::Value *, llvm::BasicBlock *> getHeader(KOREDefinition *definition, llvm::Module *module,
+static std::pair<llvm::Value *, llvm::BasicBlock *> getHeader(KOREDefinition *definition, llvm::Module *module,
     KOREObjectSymbol *symbol, llvm::Instruction *inst) {
   auto BlockType = getBlockType(module, definition, symbol);
   return std::make_pair(getBlockHeader(module, definition, symbol, BlockType), inst->getParent());
 }
 
-void emitGetBlockHeaderForSymbol(KOREDefinition *def, llvm::Module *mod) {
+static void emitGetBlockHeaderForSymbol(KOREDefinition *def, llvm::Module *mod) {
   emitDataForSymbol("getBlockHeaderForSymbol", mod->getTypeByName(BLOCKHEADER_STRUCT),
       def, mod, false, getHeader);
 }
 
-std::pair<llvm::Value *, llvm::BasicBlock *> getFunction(KOREDefinition *def, llvm::Module *mod,
+static std::pair<llvm::Value *, llvm::BasicBlock *> getFunction(KOREDefinition *def, llvm::Module *mod,
     KOREObjectSymbol *symbol, llvm::Instruction *inst) {
   auto decl = def->getSymbolDeclarations().lookup(symbol->getName());
   bool res = decl->getAttributes().count("function");
@@ -111,12 +111,12 @@ std::pair<llvm::Value *, llvm::BasicBlock *> getFunction(KOREDefinition *def, ll
       inst->getParent());
 }
 
-void emitIsSymbolAFunction(KOREDefinition *def, llvm::Module *mod) {
+static void emitIsSymbolAFunction(KOREDefinition *def, llvm::Module *mod) {
   emitDataForSymbol("isSymbolAFunction", llvm::Type::getInt1Ty(mod->getContext()),
       def, mod, false, getFunction);
 }
 
-llvm::Value *getArgValue(llvm::Value *ArgumentsArray, int idx,
+static llvm::Value *getArgValue(llvm::Value *ArgumentsArray, int idx,
     llvm::BasicBlock *CaseBlock, SortCategory cat, llvm::Module *mod) {
   llvm::LLVMContext &Ctx = mod->getContext();
   llvm::Constant *zero = llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0);
@@ -148,7 +148,7 @@ llvm::Value *getArgValue(llvm::Value *ArgumentsArray, int idx,
   return arg;
 }
 
-std::pair<llvm::Value *, llvm::BasicBlock *> getEval(KOREDefinition *def, llvm::Module *mod,
+static std::pair<llvm::Value *, llvm::BasicBlock *> getEval(KOREDefinition *def, llvm::Module *mod,
     KOREObjectSymbol *symbol, llvm::Instruction *inst) {
   llvm::LLVMContext &Ctx = mod->getContext();
   llvm::BasicBlock *CaseBlock = inst->getParent();
@@ -201,12 +201,12 @@ std::pair<llvm::Value *, llvm::BasicBlock *> getEval(KOREDefinition *def, llvm::
   return std::make_pair(retval, creator.getCurrentBlock());
 }
 
-void emitEvaluateFunctionSymbol(KOREDefinition *def, llvm::Module *mod) {
+static void emitEvaluateFunctionSymbol(KOREDefinition *def, llvm::Module *mod) {
   emitDataForSymbol("evaluateFunctionSymbol", llvm::Type::getInt8PtrTy(mod->getContext()),
       def, mod, true, getEval);
 }
 
-void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
+static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
   llvm::LLVMContext &Ctx = module->getContext();
   auto func = llvm::dyn_cast<llvm::Function>(module->getOrInsertFunction(
       "getToken", llvm::Type::getInt8PtrTy(Ctx), llvm::Type::getInt8PtrTy(Ctx),
@@ -326,7 +326,7 @@ void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
   MergeBlock->insertInto(func);
 }
 
-void emitStoreSymbolChildren(KOREDefinition *definition, llvm::Module *module) {
+static void emitStoreSymbolChildren(KOREDefinition *definition, llvm::Module *module) {
   llvm::LLVMContext &Ctx = module->getContext();
   auto func = llvm::dyn_cast<llvm::Function>(module->getOrInsertFunction(
       "storeSymbolChildren", llvm::Type::getVoidTy(Ctx),
