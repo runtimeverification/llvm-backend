@@ -31,7 +31,7 @@ BOOST_AUTO_TEST_CASE(instantiate) {
   decl->getSymbol()->addArgument(composite);
   decl->getSymbol()->addSort(poly);
   auto sym = KOREObjectSymbol::Create("sym");
-  sym->addArgument(composite);
+  sym->addFormalArgument(composite);
   sym->instantiateSymbol(decl);
   auto expected = KOREObjectCompositeSort::Create("baz");
   expected->addArgument(composite);

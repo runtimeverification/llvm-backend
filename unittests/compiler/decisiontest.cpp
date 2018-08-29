@@ -78,9 +78,11 @@ BOOST_AUTO_TEST_CASE(simple) {
   BOOST_CHECK_EQUAL(actual, R"(target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
 target triple = "x86_64-unknown-linux-gnu"
 
-%mpz = type { i32, i32, i64* }
 %block = type { %blockheader, [0 x i64*] }
 %blockheader = type { i64 }
+%mpz = type { i32, i32, i64* }
+
+declare %block* @parseConfiguration(i8*)
 
 define %mpz* @eval_func(%block* %subject0) {
 entry:
