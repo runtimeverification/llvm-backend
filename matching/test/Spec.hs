@@ -1,10 +1,12 @@
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE InstanceSigs      #-}
 
 module Main where
 
 import           Data.Functor.Foldable (Fix (..))
 import           Data.List             (transpose)
+import           Data.Map.Strict       (fromList, (!))
 import           Data.Proxy            (Proxy (..))
 
 import           Test.Tasty            (TestTree, defaultMain, testGroup)
@@ -18,26 +20,22 @@ data Lst  = Cns Lst -- index 1
           | Wld     -- wildcard
           deriving (Show, Eq)
 
-cNil :: Index
-cNil = 0
-
-cCons :: Index
-cCons = 1
-
 instance IsPattern Lst where
   toPattern :: Lst -> Fix Pattern
-  toPattern (Cns l) = Fix (Pattern cCons [Fix Wildcard, toPattern l])
-  toPattern Nil     = Fix (Pattern cNil  [])
+  toPattern (Cns l) = Fix (Pattern "cons" [Fix Wildcard, toPattern l])
+  toPattern Nil     = Fix (Pattern "nil"    [])
   toPattern Wld     = Fix Wildcard
 
 instance HasMetadata Lst where
   getMetadata :: Proxy Lst -> Metadata
-  getMetadata _ = Metadata
-                    [ Metadata [] -- Nil
-                    , Metadata [ Metadata []
+  getMetadata _ =
+    let m = fromList
+                    [ ("nil", []) -- Nil
+                    , ("cons", [ Metadata (0, error "no children")
                                , getMetadata (Proxy :: Proxy Lst)
-                               ] -- Cns Lst (1)
+                               ]) -- Cns Lst (1)
                     ]
+    in Metadata (length m, (!) m)
 
 mkLstPattern :: [[Lst]] -> ClauseMatrix
 mkLstPattern ls =
@@ -67,10 +65,10 @@ appendTests :: TestTree
 appendTests = testGroup "Basic pattern compilation"
   [ testCase "Naive compilation of the append pattern" $
       compilePattern appendPattern @?=
-        switch [ (cNil, leaf 1)
-               , (cCons, simplify (simplify
-                           (switch [ (cNil, leaf 2)
-                                   , (cCons, leaf 3)
+        switch [ ("nil", leaf 1)
+               , ("cons", simplify (simplify
+                           (switch [ ("nil", leaf 2)
+                                   , ("cons", leaf 3)
                                    ] Nothing )))
                ] Nothing
   ]

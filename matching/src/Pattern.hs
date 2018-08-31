@@ -27,7 +27,7 @@ import           Data.Functor.Classes  (Eq1 (..), Show1 (..))
 import           Data.Functor.Foldable (Fix (..), cata)
 import           Data.Maybe            (mapMaybe)
 import           Data.Semigroup        ((<>))
-import           Data.Text             (Text)
+import           Data.Text             (Text, pack)
 import           TextShow              (showt)
 import qualified Data.Yaml.Builder as Y
 import qualified Data.ByteString as B
@@ -35,28 +35,27 @@ import qualified Data.ByteString as B
 data Column = Column
               { getMetadata :: !Metadata
               , getTerms    :: ![Fix Pattern]
-              } deriving (Eq)
+              }
 
 instance Show Column where
   showsPrec _ (Column _ ts) =
     showString "Column " . showList ts
 
-newtype Metadata = Metadata [Metadata]
-                 deriving (Show, Eq)
+newtype Metadata = Metadata (Int, String -> [Metadata])
 
 type Index       = Int
-data Pattern a   = Pattern Index ![a]
+data Pattern a   = Pattern String ![a]
                  | Wildcard
                  | Var String
                  deriving (Show, Eq, Functor)
 
 newtype PatternMatrix = PatternMatrix [Column]
-                        deriving (Show, Eq)
+                        deriving (Show)
 
 type Action       = Int
 
 data ClauseMatrix = ClauseMatrix PatternMatrix ![Action]
-                    deriving (Show, Eq)
+                    deriving (Show)
 
 instance Show1 Pattern where
   liftShowsPrec _     _      _ Wildcard = showString "_"
@@ -94,7 +93,7 @@ failure = Fix Fail
 leaf :: Action -> Fix DecisionTree
 leaf a = Fix (Leaf (a, []))
 
-switch :: [(Index, Fix DecisionTree)]
+switch :: [(Text, Fix DecisionTree)]
        -> Maybe (Fix DecisionTree)
        -> Fix DecisionTree
 switch brs def =
@@ -111,26 +110,26 @@ swap ix tm = Fix (Swap ix tm)
 
 -- [ Matrix ]
 
-sigma :: Column -> [Index]
+sigma :: Column -> [String]
 sigma = mapMaybe ix . getTerms
   where
-    ix :: Fix Pattern -> Maybe Index
+    ix :: Fix Pattern -> Maybe String
     ix (Fix (Pattern ix' _)) = Just ix'
     ix (Fix Wildcard)        = Nothing
     ix (Fix (Var _))         = Nothing
 
-sigma₁ :: PatternMatrix -> [Index]
+sigma₁ :: PatternMatrix -> [String]
 sigma₁ (PatternMatrix (c : _)) = sigma c
 sigma₁ _                       = []
 
-mSpecialize :: Index -> ClauseMatrix -> (Index, ClauseMatrix)
-mSpecialize ix = (ix, ) . expandMatrix ix . filterByIndex ix
+mSpecialize :: String -> ClauseMatrix -> (Text, ClauseMatrix)
+mSpecialize ix = (pack ix, ) . expandMatrix ix . filterByIndex ix
 
 mDefault :: ClauseMatrix -> Maybe ClauseMatrix
 mDefault (ClauseMatrix (PatternMatrix (c : cs)) as) =
-  let (Metadata mtd) = getMetadata c
+  let (Metadata (mtd,_)) = getMetadata c
       s₁ = sigma c
-  in  if null s₁ || length s₁ /= length mtd
+  in  if null s₁ || length s₁ /= mtd
       then Just (ClauseMatrix (PatternMatrix cs) as)
       else Nothing
 mDefault _ = Nothing
@@ -144,7 +143,7 @@ filterByList (True  : bs) (x : xs) = x : filterByList bs xs
 filterByList (False : bs) (_ : xs) = filterByList bs xs
 filterByList _ _                   = []
 
-filterByIndex :: Index -> ClauseMatrix -> ClauseMatrix
+filterByIndex :: String -> ClauseMatrix -> ClauseMatrix
 filterByIndex ix (ClauseMatrix (PatternMatrix cs@(c : _)) as) =
   let filteredRows = map checkPatternIndex (getTerms c)
       newCs = map (filterRows filteredRows) cs
@@ -160,21 +159,19 @@ filterByIndex ix (ClauseMatrix (PatternMatrix cs@(c : _)) as) =
       Column md (filterByList fr rs)
 filterByIndex _ cmx = cmx
 
-expandMatrix :: Index -> ClauseMatrix -> ClauseMatrix
+expandMatrix :: String -> ClauseMatrix -> ClauseMatrix
 expandMatrix ix (ClauseMatrix (PatternMatrix (c : cs)) as) =
   ClauseMatrix (PatternMatrix (expandColumn ix c <> cs)) as
 expandMatrix _ _ = error "Cannot expand empty matrix."
 
-expandColumn :: Index -> Column -> [Column]
+expandColumn :: String -> Column -> [Column]
 expandColumn ix (Column m ps) =
   let metas    = expandMetadata ix m
       patterns = map (expandPattern metas) ps
   in  zipWith Column metas patterns
 
-expandMetadata :: Index -> Metadata -> [Metadata]
-expandMetadata ix (Metadata ms) =
-  let (Metadata ms') = ms !! ix
-  in  ms'
+expandMetadata :: String -> Metadata -> [Metadata]
+expandMetadata ix (Metadata (_,ms)) = ms ix
 
 expandPattern :: [Metadata]
               -> Fix Pattern
@@ -186,7 +183,7 @@ expandPattern ms (Fix (Var _ ))             = replicate (length ms) (Fix Wildcar
 --[ Target language ]
 
 data L a = L
-           { getSpecializations :: [(Int, a)]
+           { getSpecializations :: [(Text, a)]
            , getDefault         :: Maybe a
            } deriving (Show, Eq, Functor)
 
@@ -246,8 +243,8 @@ instance Eq1 DecisionTree where
   liftEq _ _ _ = False
 
 smEq :: (a -> b -> Bool)
-     -> [(Index, a)]
-     -> [(Index, b)]
+     -> [(Text, a)]
+     -> [(Text, b)]
      -> Bool
 smEq eq s₁ s₂ =
   and (zipWith combine s₁ s₂)
