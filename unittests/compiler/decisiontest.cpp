@@ -193,22 +193,31 @@ specializations:
             - 1
             - []
         default: null
+        occurrence:
+        - 0
+        - 0
+        - 1
         bitwidth: 1
     - - Baz
       - function: eval_foo
         args:
-        - - 0
-          - 0
+        - - 1
+          - 1
         sort: BOOL.Bool
         next:
           action:
           - 2
-          - - - 0
+          - - - 1
               - 1
             - - 0
               - 0
     default: null
+    occurrence:
+    - 0
+    - 1
 default: fail
+occurrence:
+- 1
 )YAML";
 
   auto Bar = KOREObjectSymbol::Create("Bar");
@@ -258,8 +267,7 @@ specializations:
 - - Nil
   - action: 
     - 1
-    - - - 0
-        - 0
+    - - - 2
 - - Cons
   - specializations: []
     default:
@@ -269,17 +277,23 @@ specializations:
         - - Nil
           - action:
             - 2
-            - - - 4
-                - 1
+            - - - 1
         - - Cons
           - action:
             - 3
-            - - - 0
-                - 1
-              - - 0
+            - - - 1
                 - 2
+              - - 1
+                - 1
         default: null
+        occurrence:
+        - 2
+    occurrence:
+    - 0
+    - 1
 default: fail
+occurrence:
+- 1
 )YAML";
   auto Nil = KOREObjectSymbol::Create("Nil");
   auto Cons = KOREObjectSymbol::Create("Cons");

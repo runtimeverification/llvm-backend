@@ -9,9 +9,10 @@ namespace kllvm {
 class DTPreprocessor {
 private:
   std::vector<std::string> constructors;
-  std::vector<std::string> parents;
+  std::map<std::vector<int>, std::string> occurrences;
   const llvm::StringMap<KOREObjectSymbol *> &syms;
   int counter;
+  int functionDepth;
   KOREObjectSymbol *dv;
 
   enum Kind {
@@ -28,9 +29,12 @@ private:
   }
 
 public:
-  DTPreprocessor(int numSubjects, const llvm::StringMap<KOREObjectSymbol *> &syms) : syms(syms), counter(0) {
+  DTPreprocessor(int numSubjects, const llvm::StringMap<KOREObjectSymbol *> &syms) 
+      : syms(syms), counter(0), functionDepth(0) {
     for (int i = numSubjects - 1; i >= 0; --i) {
-      constructors.push_back("subject" + std::to_string(i));
+      std::string name = "subject" + std::to_string(i);
+      constructors.push_back(name);
+      occurrences[{i+1}] = name;
     }
     dv = KOREObjectSymbol::Create("\\dv");
   }
@@ -40,9 +44,7 @@ public:
     std::string tmp = constructors[constructors.size() - 1 - idx];
     constructors[constructors.size() - 1 - idx] = constructors[constructors.size() - 1];
     constructors[constructors.size() - 1] = tmp;
-    parents.push_back("");
     auto result = (*this)(node["swap"][1]);
-    parents.pop_back();
     return result;
   }
 
@@ -52,24 +54,20 @@ public:
     SortCategory cat = KOREObjectCompositeSort::getCategory(hookName);
 
     std::string binding = "_" + std::to_string(counter++);
+    occurrences[{functionDepth++, 0}] = binding;
     constructors.push_back(binding);
 
-    parents.push_back("");
     auto child = (*this)(node["next"]); 
-    parents.pop_back();
+
+    functionDepth--;
 
     auto result = FunctionNode::Create(binding, function, child, cat);
     
     YAML::Node vars = node["args"];
     for (auto iter = vars.begin(); iter != vars.end(); ++iter) {
       auto var = *iter;
-      int idx1 = var[0].as<int>();
-      int idx2 = var[1].as<int>();
-      if (idx1 == 0) {
-        result->addBinding(constructors[constructors.size()-2-idx2]);
-      } else {
-        result->addBinding(parents[parents.size()-idx1]);
-      }
+      auto occurrence = var.as<std::vector<int>>();
+      result->addBinding(occurrences[occurrence]);
     }
     return result;
   }
@@ -79,7 +77,7 @@ public:
     std::string name = constructors.back();
     constructors.pop_back();
     auto result = SwitchNode::Create(name);
-    parents.push_back(name);
+    auto occurrence = node["occurrence"].as<std::vector<int>>();
     for (auto iter = list.begin(); iter != list.end(); ++iter) {
       auto _case = *iter;
       std::vector<std::string> copy = constructors;
@@ -94,6 +92,9 @@ public:
           std::string binding = "_" + std::to_string(counter++);
           constructors.push_back(binding);
           bindings.push_back(binding);
+          auto newOccurrence = occurrence;
+          newOccurrence.insert(newOccurrence.begin(), i);
+          occurrences[newOccurrence] = binding;
         }
         std::reverse(constructors.end()-symbol->getArguments().size(), constructors.end());
       }
@@ -113,7 +114,6 @@ public:
       constructors = copy;
       result->addCase({nullptr, std::vector<std::string>{}, child});
     }
-    parents.pop_back();
     return result;
   }
 
@@ -124,13 +124,8 @@ public:
     YAML::Node vars = node["action"][1];
     for (auto iter = vars.begin(); iter != vars.end(); ++iter) {
       auto var = *iter;
-      int idx1 = var[0].as<int>();
-      int idx2 = var[1].as<int>();
-      if (idx1 == 0) {
-        result->addBinding(constructors[constructors.size()-1-idx2]);
-      } else {
-        result->addBinding(parents[parents.size()-idx1]);
-      }
+      auto occurrence = var.as<std::vector<int>>();
+      result->addBinding(occurrences[occurrence]);
     }
     return result;
   }
