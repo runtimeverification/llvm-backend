@@ -48,7 +48,7 @@ newtype Metadata = Metadata (Int, String -> [Metadata])
 type Index       = Int
 data Pattern a   = Pattern String (Maybe Int) ![a]
                  | Wildcard
-                 | Var String
+                 | Variable String
                  deriving (Show, Eq, Functor)
 
 newtype PatternMatrix = PatternMatrix [Column]
@@ -64,7 +64,7 @@ instance Show1 Pattern where
   liftShowsPrec _     showTs _ (Pattern ix _ t) =
     showString "P " . showString (show ix) .
     showString " "  . showTs t
-  liftShowsPrec _     _      _ (Var lbl) = showString ("$" ++ lbl)
+  liftShowsPrec _     _      _ (Variable lbl) = showString ("$" ++ lbl)
 
 instance Eq1 Pattern where
   liftEq _ Wildcard Wildcard = True
@@ -126,7 +126,7 @@ sigma = nub . mapMaybe ix . getTerms
     ix :: Fix Pattern -> Maybe String
     ix (Fix (Pattern ix' _ _)) = Just ix'
     ix (Fix Wildcard)        = Nothing
-    ix (Fix (Var _))         = Nothing
+    ix (Fix (Variable _))         = Nothing
 
 sigma₁ :: PatternMatrix -> [String]
 sigma₁ (PatternMatrix (c : _)) = sigma c
@@ -171,7 +171,7 @@ isNotPattern _ = True
 
 checkPatternIndex :: String -> Fix Pattern -> Bool
 checkPatternIndex _  (Fix Wildcard)        = True
-checkPatternIndex _  (Fix (Var _))         = True
+checkPatternIndex _  (Fix (Variable _))         = True
 checkPatternIndex ix (Fix (Pattern ix' _ _)) = ix == ix'
 
 filterMatrix :: (Fix Pattern -> Bool) -> ClauseMatrix -> ClauseMatrix
@@ -204,8 +204,8 @@ expandPattern :: [Metadata]
               -> Fix Pattern
               -> [Fix Pattern]
 expandPattern _  (Fix (Pattern _ _ fixedPs)) = fixedPs
-expandPattern ms (Fix Wildcard)             = replicate (length ms) (Fix Wildcard)
-expandPattern ms (Fix (Var _ ))             = replicate (length ms) (Fix Wildcard)
+expandPattern ms (Fix Wildcard)              = replicate (length ms) (Fix Wildcard)
+expandPattern ms (Fix (Variable _))          = replicate (length ms) (Fix Wildcard)
 
 --[ Target language ]
 
