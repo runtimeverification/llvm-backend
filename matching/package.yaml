@@ -1,7 +1,7 @@
 name:                matching
 version:             0.1.0.0
 github:              "kframework/llvm-backend"
-license:             "University of Illinois/NCSA Open Source License"
+license:             "UIUC"
 author:              "Radu Ometita"
 maintainer:          "radu.ometita@gmail.com"
 copyright:           "2018 Runtime Verification, Inc."
