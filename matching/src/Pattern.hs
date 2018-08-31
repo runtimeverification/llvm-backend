@@ -26,6 +26,7 @@ module Pattern ( PatternMatrix(..)
 import           Data.Bifunctor        (second)
 import           Data.Functor.Classes  (Eq1 (..), Show1 (..))
 import           Data.Functor.Foldable (Fix (..), cata)
+import           Data.List             (transpose,nub)
 import           Data.Maybe            (mapMaybe)
 import           Data.Semigroup        ((<>))
 import           Data.Text             (Text, pack)
@@ -120,7 +121,7 @@ swap ix tm = Fix (Swap ix tm)
 -- [ Matrix ]
 
 sigma :: Column -> [String]
-sigma = mapMaybe ix . getTerms
+sigma = nub . mapMaybe ix . getTerms
   where
     ix :: Fix Pattern -> Maybe String
     ix (Fix (Pattern ix' _ _)) = Just ix'
@@ -132,14 +133,14 @@ sigma₁ (PatternMatrix (c : _)) = sigma c
 sigma₁ _                       = []
 
 mSpecialize :: String -> ClauseMatrix -> (Text, ClauseMatrix)
-mSpecialize ix = (pack ix, ) . expandMatrix ix . filterByIndex ix
+mSpecialize ix = (pack ix, ) . expandMatrix ix . (filterMatrix (checkPatternIndex ix))
 
 mDefault :: ClauseMatrix -> Maybe ClauseMatrix
-mDefault (ClauseMatrix (PatternMatrix (c : cs)) as) =
+mDefault cm@(ClauseMatrix (PatternMatrix (c : _)) _) =
   let (Metadata (mtd,_)) = getMetadata c
       s₁ = sigma c
   in  if null s₁ || length s₁ /= mtd
-      then Just (ClauseMatrix (PatternMatrix cs) as)
+      then Just (stripFirstColumn (filterMatrix isNotPattern cm))
       else Nothing
 mDefault _ = Nothing
 
@@ -150,6 +151,11 @@ mBitwidth (PatternMatrix (c : _)) =
     _ -> Nothing
 mBitwidth _ = Nothing
 
+stripFirstColumn :: ClauseMatrix -> ClauseMatrix
+stripFirstColumn (ClauseMatrix (PatternMatrix (_ : cs)) as) =
+  ClauseMatrix (PatternMatrix cs) as
+stripFirstColumn _ = error "must have at least one column"
+
 firstRow :: PatternMatrix -> [Fix Pattern]
 firstRow (PatternMatrix cs) =
   map (\(Column _ (p : _)) -> p) cs
@@ -159,21 +165,26 @@ filterByList (True  : bs) (x : xs) = x : filterByList bs xs
 filterByList (False : bs) (_ : xs) = filterByList bs xs
 filterByList _ _                   = []
 
-filterByIndex :: String -> ClauseMatrix -> ClauseMatrix
-filterByIndex ix (ClauseMatrix (PatternMatrix cs@(c : _)) as) =
-  let filteredRows = map checkPatternIndex (getTerms c)
+isNotPattern :: Fix Pattern -> Bool
+isNotPattern (Fix (Pattern _ _ _)) = False
+isNotPattern _ = True
+
+checkPatternIndex :: String -> Fix Pattern -> Bool
+checkPatternIndex _  (Fix Wildcard)        = True
+checkPatternIndex _  (Fix (Var _))         = True
+checkPatternIndex ix (Fix (Pattern ix' _ _)) = ix == ix'
+
+filterMatrix :: (Fix Pattern -> Bool) -> ClauseMatrix -> ClauseMatrix
+filterMatrix checkPattern (ClauseMatrix (PatternMatrix cs@(c : _)) as) =
+  let filteredRows = map checkPattern (getTerms c)
       newCs = map (filterRows filteredRows) cs
       newAs = filterByList filteredRows as
   in ClauseMatrix (PatternMatrix newCs) newAs
   where
-    checkPatternIndex :: Fix Pattern -> Bool
-    checkPatternIndex (Fix Wildcard)        = True
-    checkPatternIndex (Fix (Var _))         = True
-    checkPatternIndex (Fix (Pattern ix' _ _)) = ix == ix'
     filterRows :: [Bool] -> Column -> Column
     filterRows fr (Column md rs) =
       Column md (filterByList fr rs)
-filterByIndex _ cmx = cmx
+filterMatrix _ cmx = cmx
 
 expandMatrix :: String -> ClauseMatrix -> ClauseMatrix
 expandMatrix ix (ClauseMatrix (PatternMatrix (c : cs)) as) =
@@ -184,7 +195,7 @@ expandColumn :: String -> Column -> [Column]
 expandColumn ix (Column m ps) =
   let metas    = expandMetadata ix m
       patterns = map (expandPattern metas) ps
-  in  zipWith Column metas patterns
+  in  zipWith Column metas (transpose patterns)
 
 expandMetadata :: String -> Metadata -> [Metadata]
 expandMetadata ix (Metadata (_,ms)) = ms ix
