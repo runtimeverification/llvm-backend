@@ -10,6 +10,7 @@ module Pattern ( PatternMatrix(..)
                , Column(..)
                , Metadata(..)
                , Pattern(..)
+               , Occurrence
                , Index
                , mkClauseMatrix
                , failure
@@ -24,9 +25,10 @@ module Pattern ( PatternMatrix(..)
                ) where
 
 import           Data.Bifunctor        (second)
+import           Data.Function         (on)
 import           Data.Functor.Classes  (Eq1 (..), Show1 (..))
 import           Data.Functor.Foldable (Fix (..), cata)
-import           Data.List             (transpose,nub)
+import           Data.List             (transpose,nub,sortBy)
 import           Data.Maybe            (mapMaybe)
 import           Data.Semigroup        ((<>))
 import           Data.Text             (Text, pack)
@@ -54,9 +56,10 @@ data Pattern a   = Pattern String (Maybe Int) ![a]
 newtype PatternMatrix = PatternMatrix [Column]
                         deriving (Show)
 
+type Occurrence   = [Int]
 type Action       = Int
 
-data ClauseMatrix = ClauseMatrix PatternMatrix ![Action]
+data ClauseMatrix = ClauseMatrix PatternMatrix ![(Action, [(String, Occurrence)])]
                     deriving (Show)
 
 instance Show1 Pattern where
@@ -76,10 +79,10 @@ instance Eq1 Pattern where
 
 mkClauseMatrix :: [Column]
                -> [Action]
-               -> Either Text ClauseMatrix
+               -> Either Text (ClauseMatrix, [Occurrence])
 mkClauseMatrix cs as = do
   validateColumnLength (length as) cs
-  pure (ClauseMatrix (PatternMatrix cs) as)
+  pure ((ClauseMatrix (PatternMatrix cs) (map (, []) as)),map (\i -> [i]) [0..length cs - 1]) 
   where
     validateColumnLength :: Int -> [Column] -> Either Text ()
     validateColumnLength as' =
@@ -92,8 +95,8 @@ mkClauseMatrix cs as = do
 failure :: Fix DecisionTree
 failure = Fix Fail
 
-leaf :: Action -> Fix DecisionTree
-leaf a = Fix (Leaf (a, []))
+leaf :: Action -> [Occurrence] -> Fix DecisionTree
+leaf a os = Fix (Leaf (a, os))
 
 switch :: [(Text, Fix DecisionTree)]
        -> Maybe (Fix DecisionTree)
@@ -132,15 +135,23 @@ sigma₁ :: PatternMatrix -> [String]
 sigma₁ (PatternMatrix (c : _)) = sigma c
 sigma₁ _                       = []
 
-mSpecialize :: String -> ClauseMatrix -> (Text, ClauseMatrix)
-mSpecialize ix = (pack ix, ) . expandMatrix ix . (filterMatrix (checkPatternIndex ix))
+mSpecialize :: String -> (ClauseMatrix, [Occurrence]) -> (Text, (ClauseMatrix, [Occurrence]))
+mSpecialize ix (cm, o : os) = (pack ix, (expandMatrix ix (filterMatrix (checkPatternIndex ix) (cm,o)), expandOccurrence cm o ix <> os))
+mSpecialize _ _ = error "must have at least one column"
 
-mDefault :: ClauseMatrix -> Maybe ClauseMatrix
-mDefault cm@(ClauseMatrix (PatternMatrix (c : _)) _) =
+expandOccurrence :: ClauseMatrix -> Occurrence -> String -> [Occurrence]
+expandOccurrence (ClauseMatrix (PatternMatrix (c : _)) _) o ix =
+  let (Metadata (_, mtd)) = getMetadata c
+      a = length (mtd ix)
+  in map (\i -> i : o) [0..a-1]
+expandOccurrence _ _ _ = error "must have at least one column"
+
+mDefault :: (ClauseMatrix, [Occurrence]) -> Maybe (ClauseMatrix, [Occurrence])
+mDefault (cm@(ClauseMatrix (PatternMatrix (c : _)) _),o : os) =
   let (Metadata (mtd,_)) = getMetadata c
       s₁ = sigma c
   in  if null s₁ || length s₁ /= mtd
-      then Just (stripFirstColumn (filterMatrix isNotPattern cm))
+      then Just ((stripFirstColumn (filterMatrix isNotPattern (cm,o))),os)
       else Nothing
 mDefault _ = Nothing
 
@@ -174,17 +185,27 @@ checkPatternIndex _  (Fix Wildcard)        = True
 checkPatternIndex _  (Fix (Variable _))         = True
 checkPatternIndex ix (Fix (Pattern ix' _ _)) = ix == ix'
 
-filterMatrix :: (Fix Pattern -> Bool) -> ClauseMatrix -> ClauseMatrix
-filterMatrix checkPattern (ClauseMatrix (PatternMatrix cs@(c : _)) as) =
+addVars :: [(Action, [(String, Occurrence)])] -> [Fix Pattern] -> Occurrence -> [(Action, [(String, Occurrence)])]
+addVars as c o =
+  let row = zip c as
+  in map (\(p, (a, vars)) -> (a, addVarToRow o vars p)) row
+
+addVarToRow :: Occurrence -> [(String, Occurrence)] -> Fix Pattern -> [(String, Occurrence)]
+addVarToRow o vars (Fix (Variable name)) = (name, o) : vars
+addVarToRow _ a _ = a
+
+filterMatrix :: (Fix Pattern -> Bool) -> (ClauseMatrix, Occurrence) -> ClauseMatrix
+filterMatrix checkPattern ((ClauseMatrix (PatternMatrix cs@(c : _)) as), o) =
   let filteredRows = map checkPattern (getTerms c)
       newCs = map (filterRows filteredRows) cs
-      newAs = filterByList filteredRows as
+      varsAs = addVars as (getTerms c) o
+      newAs = filterByList filteredRows varsAs
   in ClauseMatrix (PatternMatrix newCs) newAs
   where
     filterRows :: [Bool] -> Column -> Column
     filterRows fr (Column md rs) =
       Column md (filterByList fr rs)
-filterMatrix _ cmx = cmx
+filterMatrix _ (cmx,_) = cmx
 
 expandMatrix :: String -> ClauseMatrix -> ClauseMatrix
 expandMatrix ix (ClauseMatrix (PatternMatrix (c : cs)) as) =
@@ -214,19 +235,17 @@ data L a = L
            , getDefault         :: Maybe a
            } deriving (Show, Eq, Functor)
 
-type Binding = (Int, Int)
-
-data DecisionTree a = Leaf (Action, [Binding])
+data DecisionTree a = Leaf (Action, [Occurrence])
                     | Fail
                     | Switch (L a)
                     | SwitchLit Int (L a)
                     | Swap Index a
-                    | Function (Text, [Binding], Text, a) 
+                    | Function (Text, [Occurrence], Text, a) 
                     deriving (Show, Eq, Functor)
 
 instance Y.ToYaml a => Y.ToYaml (DecisionTree a) where
     toYaml (Leaf (act, x)) = Y.mapping [
-        "action" Y..= Y.array [Y.toYaml act, Y.array (map (\(i1,i2) -> Y.array [Y.toYaml i1, Y.toYaml i2]) x)]
+        "action" Y..= Y.array [Y.toYaml act, Y.toYaml x]
       ]
     toYaml Fail = Y.string "fail"
     toYaml (Switch x) = Y.mapping
@@ -250,7 +269,7 @@ instance Y.ToYaml a => Y.ToYaml (DecisionTree a) where
     toYaml (Function (name, bindings, sort, x)) = Y.mapping
       ["function" Y..= Y.toYaml name
       , "sort" Y..= Y.toYaml sort
-      , "args" Y..= Y.array (map (\(i1,i2) -> Y.array [Y.toYaml i1, Y.toYaml i2]) bindings)
+      , "args" Y..= Y.toYaml bindings
       , "next" Y..= Y.toYaml x
       ]
 
@@ -309,10 +328,18 @@ instance Show1 L where
         dmString = maybe id (\s -> showString "*:" . (showT (d + 1)) s) dm
     in  smString . dmString
 
-compilePattern :: ClauseMatrix -> (Fix DecisionTree)
-compilePattern cm@(ClauseMatrix pm@(PatternMatrix _) ac)
+getLeaf :: [Occurrence] -> [Fix Pattern] -> (Action, [(String, Occurrence)]) -> (Action, [Occurrence])
+getLeaf os ps (a,matchedVars) =
+  let row = zip os ps
+      vars = foldr (\(o, p) -> \l -> (addVarToRow o l p)) matchedVars row
+      sorted = sortBy (compare `on` fst) vars
+      (_, newVars) = unzip sorted
+  in (a, newVars)
+
+compilePattern :: (ClauseMatrix, [Occurrence]) -> (Fix DecisionTree)
+compilePattern cm@((ClauseMatrix pm@(PatternMatrix _) ac), os)
   | length ac == 0 = Fix Fail
-  | isWildcardRow pm = Fix $ Leaf $ (head ac, [])
+  | isWildcardRow pm = Fix $ Leaf $ (getLeaf os (firstRow pm) (head ac))
   | otherwise =
     let s₁ = sigma₁ pm
         ls = map (`mSpecialize` cm) s₁
@@ -329,4 +356,8 @@ compilePattern cm@(ClauseMatrix pm@(PatternMatrix _) ac)
              }
   where
     isWildcardRow :: PatternMatrix -> Bool
-    isWildcardRow = and . map (Fix Wildcard ==) . firstRow
+    isWildcardRow = and . map isWildcard . firstRow
+    isWildcard :: Fix Pattern -> Bool
+    isWildcard (Fix Wildcard) = True
+    isWildcard (Fix (Variable _)) = True
+    isWildcard _ = False
