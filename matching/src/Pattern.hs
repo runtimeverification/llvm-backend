@@ -58,7 +58,7 @@ newtype PatternMatrix = PatternMatrix [Column]
                         deriving (Show)
 
 type Occurrence   = [Int]
-type Action       = Int
+type Action       = (Int, [String], Maybe [String])
 
 data ClauseMatrix = ClauseMatrix PatternMatrix ![(Action, [(String, Occurrence)])]
                     deriving (Show)
@@ -96,7 +96,7 @@ mkClauseMatrix cs as = do
 failure :: Fix DecisionTree
 failure = Fix Fail
 
-leaf :: Action -> [Occurrence] -> Fix DecisionTree
+leaf :: Int -> [Occurrence] -> Fix DecisionTree
 leaf a os = Fix (Leaf (a, os))
 
 switch :: Occurrence 
@@ -246,7 +246,7 @@ data L a = L
            , getDefault         :: Maybe a
            } deriving (Show, Eq, Functor)
 
-data DecisionTree a = Leaf (Action, [Occurrence])
+data DecisionTree a = Leaf (Int, [Occurrence])
                     | Fail
                     | Switch Occurrence (L a)
                     | SwitchLit Occurrence Int (L a)
@@ -343,18 +343,23 @@ instance Show1 L where
         dmString = maybe id (\s -> showString "*:" . (showT (d + 1)) s) dm
     in  smString . dmString
 
-getLeaf :: [Occurrence] -> [Fix Pattern] -> (Action, [(String, Occurrence)]) -> (Action, [Occurrence])
-getLeaf os ps (a,matchedVars) =
+getLeaf :: [Occurrence] -> [Fix Pattern] -> (Action, [(String, Occurrence)]) -> Fix DecisionTree
+getLeaf os ps ((a,rhsVars,maybeSideCondition),matchedVars) =
   let row = zip os ps
       vars = foldr (\(o, p) -> \l -> (addVarToRow o l p)) matchedVars row
       sorted = sortBy (compare `on` fst) vars
-      (_, newVars) = unzip sorted
-  in (a, newVars)
+      filtered = filter (flip elem rhsVars . fst) sorted
+      (_, newVars) = unzip filtered
+  in case maybeSideCondition of
+    Nothing -> Fix $ Leaf (a, newVars)
+    Just cond -> let condFiltered = filter (flip elem cond . fst) sorted
+                     (_, condVars) = unzip condFiltered
+                 in function (pack $ "side_condition_" ++ (show a)) condVars "BOOL.Bool" (switchLit [0, 0] 1 [("1", (leaf a newVars)), ("0", failure)] Nothing)
 
 compilePattern :: (ClauseMatrix, [Occurrence]) -> (Fix DecisionTree)
 compilePattern cm@((ClauseMatrix pm@(PatternMatrix _) ac), os)
   | length ac == 0 = Fix Fail
-  | isWildcardRow pm = Fix $ Leaf $ (getLeaf os (firstRow pm) (head ac))
+  | isWildcardRow pm = getLeaf os (firstRow pm) (head ac)
   | otherwise =
     let s₁ = sigma₁ pm
         ls = map (`mSpecialize` cm) s₁

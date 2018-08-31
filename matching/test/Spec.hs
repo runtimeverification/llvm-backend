@@ -6,7 +6,7 @@ module Main where
 
 import           Data.Bits             (shiftL)
 import           Data.Functor.Foldable (Fix (..))
-import           Data.List             (transpose)
+import           Data.List             (transpose,concat)
 import           Data.Map.Strict       (fromList, (!))
 import           Data.Proxy            (Proxy (..))
 import           Data.Semigroup        ((<>))
@@ -59,39 +59,62 @@ instance HasMetadata Lst where
                     ]
     in Metadata (length m, (!) m)
 
-mkLstPattern :: [[Lst]] -> (ClauseMatrix, [Occurrence])
-mkLstPattern ls =
+vars :: [Lst] -> [String]
+vars l = concat (map varLst l)
+  where
+    varLst :: Lst -> [String]
+    varLst Nil = []
+    varLst Wld = []
+    varLst (Var s) = [s]
+    varLst (Cns i l') = varInt i <> varLst l'
+    varInt :: IntPat -> [String]
+    varInt (IntLit _) = []
+    varInt IntWld = []
+    varInt (IntVar s) = [s]
+
+mkLstPattern :: [([Lst],Maybe [String])] -> (ClauseMatrix, [Occurrence])
+mkLstPattern pats =
   let as = take (length ls) [1..]
+      (ls, conds) = unzip pats
+      vs = map vars ls
+      as' = zip3 as vs conds 
       md = getMetadata (Proxy :: Proxy Lst)
       cs = fmap (Column md . (toPattern <$>)) (transpose ls)
-  in case mkClauseMatrix cs as of
+  in case mkClauseMatrix cs as' of
        Right matrix -> matrix
        Left  msg    -> error $ "Invalid definition: " ++ show msg
 
 defaultPattern :: (ClauseMatrix, [Occurrence])
 defaultPattern =
-  mkLstPattern [ [Nil, Wld]
-               , [Wld, Nil]
-               , [Wld, Wld] ]
+  mkLstPattern [ ([Nil, Wld], Nothing)
+               , ([Wld, Nil], Nothing)
+               , ([Wld, Wld], Nothing) ]
 
 appendPattern :: (ClauseMatrix, [Occurrence])
 appendPattern =
-  mkLstPattern [ [Nil, Wld]
-               , [Wld, Nil]
-               , [Cns IntWld Wld, Cns IntWld Wld] ]
+  mkLstPattern [ ([Nil, Wld], Nothing)
+               , ([Wld, Nil], Nothing)
+               , ([Cns IntWld Wld, Cns IntWld Wld], Nothing) ]
 
 appendBindPattern :: (ClauseMatrix, [Occurrence])
 appendBindPattern =
-  mkLstPattern [ [Nil, Var "as"]
-               , [Var "bs", Nil]
-               , [Cns (IntVar "b") (Var "bs"), Cns (IntVar "a") (Var "as")] ]
+  mkLstPattern [ ([Nil, Var "as"], Nothing)
+               , ([Var "bs", Nil], Nothing)
+               , ([Cns (IntVar "b") (Var "bs"), Cns (IntVar "a") (Var "as")], Nothing) ]
+
+appendCondPattern :: (ClauseMatrix, [Occurrence])
+appendCondPattern =
+  mkLstPattern [ ([Nil, Var "as"], Nothing)
+               , ([Var "bs", Nil], Nothing)
+               , ([Cns (IntVar "b") (Var "bs"), Cns (IntVar "a") (Var "as")], Just ["as", "b"]) ]
+
 
 matchHeadPattern :: (ClauseMatrix, [Occurrence])
 matchHeadPattern =
-  mkLstPattern [ [Cns (IntLit 0) Wld]
-               , [Cns (IntLit 1) Wld]
-               , [Cns (IntLit (-1)) Wld]
-               , [Cns (IntLit 1000000) Wld] ]
+  mkLstPattern [ ([Cns (IntLit 0) Wld], Nothing)
+               , ([Cns (IntLit 1) Wld], Nothing)
+               , ([Cns (IntLit (-1)) Wld], Nothing)
+               , ([Cns (IntLit 1000000) Wld], Nothing) ]
 
 tests :: TestTree
 tests = testGroup "Tests" [appendTests]
@@ -112,6 +135,14 @@ appendTests = testGroup "Basic pattern compilation"
                , ("cons", simplify [0, 1] (simplify [1, 1]
                            (switch [2] [ ("nil", leaf 2 [[1]])
                                    , ("cons", leaf 3 [[0, 2], [1, 2], [0, 1], [1, 1]])
+                                   ] Nothing )))
+               ] Nothing
+  , testCase "Naive compilation of the append pattern with side condition" $
+      compilePattern appendCondPattern @?=
+        switch [1] [ ("nil", leaf 1 [[2]])
+               , ("cons", simplify [0, 1] (simplify [1, 1]
+                           (switch [2] [ ("nil", leaf 2 [[1]])
+                                   , ("cons", (function "side_condition_3" [[1, 2], [0, 1]] "BOOL.Bool" (switchLit [0, 0] 1 [("1", leaf 3 [[0, 2], [1, 2], [0, 1], [1, 1]]), ("0", failure)] Nothing)))
                                    ] Nothing )))
                ] Nothing
   , testCase "Yaml serialization" $
