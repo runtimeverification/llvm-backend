@@ -17,6 +17,7 @@ module Pattern ( PatternMatrix(..)
                , leaf
                , switch
                , switchLit
+               , function
                , swap
                , simplify
                , DecisionTree(..)
@@ -114,6 +115,14 @@ switchLit :: Occurrence
 switchLit o bw brs def =
   Fix $ SwitchLit o bw L { getSpecializations = brs
                     , getDefault = def }
+
+function :: Text
+         -> [Occurrence]
+         -> Text
+         -> Fix DecisionTree
+         -> Fix DecisionTree
+function name vars sort child =
+  Fix $ Function (name, vars, sort, child)
 
 simplify :: Occurrence -> Fix DecisionTree -> Fix DecisionTree
 simplify o dt = switch o [] (Just dt)
@@ -290,6 +299,8 @@ instance Eq1 DecisionTree where
     o == o' && liftEq eqT l l'
   liftEq eqT (SwitchLit o bw l) (SwitchLit o' bw' l') =
     o == o' && bw == bw' && liftEq eqT l l'
+  liftEq eqT (Function (n, os, s, t)) (Function (n', os', s', t')) =
+    n == n' && os == os' && s == s' && t `eqT` t'
   liftEq eqT (Swap ix t) (Swap ix' t') =
     ix == ix' && t `eqT` t'
   liftEq _ _ _ = False
