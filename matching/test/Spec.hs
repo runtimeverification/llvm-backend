@@ -9,6 +9,7 @@ import           Data.Functor.Foldable (Fix (..))
 import           Data.List             (transpose)
 import           Data.Map.Strict       (fromList, (!))
 import           Data.Proxy            (Proxy (..))
+import           Data.Semigroup        ((<>))
 
 import           Test.Tasty            (TestTree, defaultMain, testGroup)
 import           Test.Tasty.HUnit      (testCase, (@?=))
@@ -113,7 +114,36 @@ appendTests = testGroup "Basic pattern compilation"
                                    , ("cons", leaf 3 [[0, 1], [1, 1], [0, 0], [1, 0]])
                                    ] Nothing )))
                ] Nothing
-
+  , testCase "Yaml serialization" $
+      (serializeToYaml $ compilePattern $ appendBindPattern) @?= 
+        "specializations:\n" <>
+        "- - nil\n" <>
+        "  - action:\n" <>
+        "    - 1\n" <>
+        "    - - - 1\n" <>
+        "- - cons\n" <>
+        "  - specializations: []\n" <>
+        "    default:\n" <>
+        "      specializations: []\n" <>
+        "      default:\n" <>
+        "        specializations:\n" <>
+        "        - - nil\n" <>
+        "          - action:\n" <>
+        "            - 2\n" <>
+        "            - - - 0\n" <>
+        "        - - cons\n" <>
+        "          - action:\n" <>
+        "            - 3\n" <>
+        "            - - - 0\n" <>
+        "                - 1\n" <>
+        "              - - 1\n" <>
+        "                - 1\n" <>
+        "              - - 0\n" <>
+        "                - 0\n" <>
+        "              - - 1\n" <>
+        "                - 0\n" <>
+        "        default: null\n" <>
+        "default: null\n"
   , testCase "Naive compilation of integer literal patterns" $
       compilePattern matchHeadPattern @?=
         switch [ ("cons", (switchLit [ ("0", leaf 1 [])
