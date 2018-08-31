@@ -82,7 +82,7 @@ mkClauseMatrix :: [Column]
                -> Either Text (ClauseMatrix, [Occurrence])
 mkClauseMatrix cs as = do
   validateColumnLength (length as) cs
-  pure ((ClauseMatrix (PatternMatrix cs) (map (, []) as)),map (\i -> [i]) [0..length cs - 1]) 
+  pure ((ClauseMatrix (PatternMatrix cs) (map (, []) as)),map (\i -> [i]) [1..length cs]) 
   where
     validateColumnLength :: Int -> [Column] -> Either Text ()
     validateColumnLength as' =

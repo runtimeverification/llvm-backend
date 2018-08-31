@@ -108,10 +108,10 @@ appendTests = testGroup "Basic pattern compilation"
                ] Nothing
   , testCase "Naive compilation of the append pattern with variable bindings" $
       compilePattern appendBindPattern @?=
-        switch [ ("nil", leaf 1 [[1]])
+        switch [ ("nil", leaf 1 [[2]])
                , ("cons", simplify (simplify
-                           (switch [ ("nil", leaf 2 [[0]])
-                                   , ("cons", leaf 3 [[0, 1], [1, 1], [0, 0], [1, 0]])
+                           (switch [ ("nil", leaf 2 [[1]])
+                                   , ("cons", leaf 3 [[0, 2], [1, 2], [0, 1], [1, 1]])
                                    ] Nothing )))
                ] Nothing
   , testCase "Yaml serialization" $
@@ -120,7 +120,7 @@ appendTests = testGroup "Basic pattern compilation"
         "- - nil\n" <>
         "  - action:\n" <>
         "    - 1\n" <>
-        "    - - - 1\n" <>
+        "    - - - 2\n" <>
         "- - cons\n" <>
         "  - specializations: []\n" <>
         "    default:\n" <>
@@ -130,18 +130,18 @@ appendTests = testGroup "Basic pattern compilation"
         "        - - nil\n" <>
         "          - action:\n" <>
         "            - 2\n" <>
-        "            - - - 0\n" <>
+        "            - - - 1\n" <>
         "        - - cons\n" <>
         "          - action:\n" <>
         "            - 3\n" <>
         "            - - - 0\n" <>
-        "                - 1\n" <>
+        "                - 2\n" <>
         "              - - 1\n" <>
-        "                - 1\n" <>
+        "                - 2\n" <>
         "              - - 0\n" <>
-        "                - 0\n" <>
+        "                - 1\n" <>
         "              - - 1\n" <>
-        "                - 0\n" <>
+        "                - 1\n" <>
         "        default: null\n" <>
         "default: null\n"
   , testCase "Naive compilation of integer literal patterns" $
