@@ -15,6 +15,7 @@ module Pattern ( PatternMatrix(..)
                , failure
                , leaf
                , switch
+               , switchLit
                , swap
                , simplify
                , DecisionTree(..)
@@ -44,7 +45,7 @@ instance Show Column where
 newtype Metadata = Metadata (Int, String -> [Metadata])
 
 type Index       = Int
-data Pattern a   = Pattern String ![a]
+data Pattern a   = Pattern String (Maybe Int) ![a]
                  | Wildcard
                  | Var String
                  deriving (Show, Eq, Functor)
@@ -59,15 +60,15 @@ data ClauseMatrix = ClauseMatrix PatternMatrix ![Action]
 
 instance Show1 Pattern where
   liftShowsPrec _     _      _ Wildcard = showString "_"
-  liftShowsPrec _     showTs _ (Pattern ix t) =
+  liftShowsPrec _     showTs _ (Pattern ix _ t) =
     showString "P " . showString (show ix) .
     showString " "  . showTs t
   liftShowsPrec _     _      _ (Var lbl) = showString ("$" ++ lbl)
 
 instance Eq1 Pattern where
   liftEq _ Wildcard Wildcard = True
-  liftEq eqT (Pattern ix ts) (Pattern ix' ts') =
-    ix == ix' && and (zipWith eqT ts ts')
+  liftEq eqT (Pattern ix bw ts) (Pattern ix' bw' ts') =
+    ix == ix' && bw == bw' && and (zipWith eqT ts ts')
   liftEq _ _ _ = False
 
 -- [ Builders ]
@@ -100,6 +101,14 @@ switch brs def =
   Fix $ Switch L { getSpecializations = brs
                  , getDefault = def }
 
+switchLit :: [(Text, Fix DecisionTree)]
+          -> Int
+          -> Maybe (Fix DecisionTree)
+          -> Fix DecisionTree
+switchLit brs bw def =
+  Fix $ SwitchLit bw L { getSpecializations = brs
+                    , getDefault = def }
+
 simplify :: Fix DecisionTree -> Fix DecisionTree
 simplify dt = switch [] (Just dt)
 
@@ -114,7 +123,7 @@ sigma :: Column -> [String]
 sigma = mapMaybe ix . getTerms
   where
     ix :: Fix Pattern -> Maybe String
-    ix (Fix (Pattern ix' _)) = Just ix'
+    ix (Fix (Pattern ix' _ _)) = Just ix'
     ix (Fix Wildcard)        = Nothing
     ix (Fix (Var _))         = Nothing
 
@@ -133,6 +142,13 @@ mDefault (ClauseMatrix (PatternMatrix (c : cs)) as) =
       then Just (ClauseMatrix (PatternMatrix cs) as)
       else Nothing
 mDefault _ = Nothing
+
+mBitwidth :: PatternMatrix -> Maybe Int
+mBitwidth (PatternMatrix (c : _)) =
+  case (getTerms c) of
+    Fix (Pattern _ bw _) : _ -> bw
+    _ -> Nothing
+mBitwidth _ = Nothing
 
 firstRow :: PatternMatrix -> [Fix Pattern]
 firstRow (PatternMatrix cs) =
@@ -153,7 +169,7 @@ filterByIndex ix (ClauseMatrix (PatternMatrix cs@(c : _)) as) =
     checkPatternIndex :: Fix Pattern -> Bool
     checkPatternIndex (Fix Wildcard)        = True
     checkPatternIndex (Fix (Var _))         = True
-    checkPatternIndex (Fix (Pattern ix' _)) = ix == ix'
+    checkPatternIndex (Fix (Pattern ix' _ _)) = ix == ix'
     filterRows :: [Bool] -> Column -> Column
     filterRows fr (Column md rs) =
       Column md (filterByList fr rs)
@@ -176,7 +192,7 @@ expandMetadata ix (Metadata (_,ms)) = ms ix
 expandPattern :: [Metadata]
               -> Fix Pattern
               -> [Fix Pattern]
-expandPattern _  (Fix (Pattern _ fixedPs)) = fixedPs
+expandPattern _  (Fix (Pattern _ _ fixedPs)) = fixedPs
 expandPattern ms (Fix Wildcard)             = replicate (length ms) (Fix Wildcard)
 expandPattern ms (Fix (Var _ ))             = replicate (length ms) (Fix Wildcard)
 
@@ -238,6 +254,8 @@ instance Eq1 DecisionTree where
   liftEq _ (Leaf a) (Leaf a') = a == a'
   liftEq eqT (Switch l) (Switch l') =
     liftEq eqT l l'
+  liftEq eqT (SwitchLit bw l) (SwitchLit bw' l') =
+    bw == bw' && liftEq eqT l l'
   liftEq eqT (Swap ix t) (Swap ix' t') =
     ix == ix' && t `eqT` t'
   liftEq _ _ _ = False
@@ -288,10 +306,16 @@ compilePattern cm@(ClauseMatrix pm@(PatternMatrix _) ac)
     let s₁ = sigma₁ pm
         ls = map (`mSpecialize` cm) s₁
         d  = mDefault cm
-    in  Fix $ Switch L
-        { getSpecializations = map (second compilePattern) ls
-        , getDefault = compilePattern <$> d
-        }
+        bw = mBitwidth pm
+    in case bw of
+         Nothing -> Fix $ Switch L
+             { getSpecializations = map (second compilePattern) ls
+             , getDefault = compilePattern <$> d
+             }
+         Just bw' -> Fix $ SwitchLit bw' L
+             { getSpecializations = map (second compilePattern) ls
+             , getDefault = compilePattern <$> d
+             }
   where
     isWildcardRow :: PatternMatrix -> Bool
     isWildcardRow = and . map (Fix Wildcard ==) . firstRow

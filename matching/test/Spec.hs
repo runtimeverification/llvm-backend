@@ -4,6 +4,7 @@
 
 module Main where
 
+import           Data.Bits             (shiftL)
 import           Data.Functor.Foldable (Fix (..))
 import           Data.List             (transpose)
 import           Data.Map.Strict       (fromList, (!))
@@ -15,23 +16,39 @@ import           Test.Tasty.HUnit      (testCase, (@?=))
 import           Pattern               hiding (getMetadata)
 import           Pattern.Class
 
-data Lst  = Cns Lst -- index 1
+data IntPat = IntLit Int
+            | IntWld
+            deriving (Show, Eq)
+
+data Lst  = Cns IntPat Lst -- index 1
           | Nil     -- index 0
           | Wld     -- wildcard
           deriving (Show, Eq)
 
 instance IsPattern Lst where
   toPattern :: Lst -> Fix Pattern
-  toPattern (Cns l) = Fix (Pattern "cons" [Fix Wildcard, toPattern l])
-  toPattern Nil     = Fix (Pattern "nil"    [])
+  toPattern (Cns i l) = Fix (Pattern "cons" Nothing [toPattern i, toPattern l])
+  toPattern Nil     = Fix (Pattern "nil" Nothing  [])
   toPattern Wld     = Fix Wildcard
+
+instance IsPattern IntPat where
+  toPattern :: IntPat -> Fix Pattern
+  toPattern (IntLit i) = Fix (Pattern (show i) (Just 32) [])
+  toPattern IntWld     = Fix Wildcard
+
+instance HasMetadata IntPat where
+  getMetadata :: Proxy IntPat -> Metadata
+  getMetadata _ = Metadata (shiftL 1 32, f)
+    where
+      f :: String -> [Metadata]
+      f _ = []
 
 instance HasMetadata Lst where
   getMetadata :: Proxy Lst -> Metadata
   getMetadata _ =
     let m = fromList
                     [ ("nil", []) -- Nil
-                    , ("cons", [ Metadata (0, error "no children")
+                    , ("cons", [ getMetadata (Proxy :: Proxy IntPat)
                                , getMetadata (Proxy :: Proxy Lst)
                                ]) -- Cns Lst (1)
                     ]
@@ -56,7 +73,14 @@ appendPattern :: ClauseMatrix
 appendPattern =
   mkLstPattern [ [Nil, Wld]
                , [Wld, Nil]
-               , [Cns Wld, Cns Wld] ]
+               , [Cns IntWld Wld, Cns IntWld Wld] ]
+
+matchHeadPattern :: ClauseMatrix
+matchHeadPattern =
+  mkLstPattern [ [Cns (IntLit 0) Wld]
+               , [Cns (IntLit 1) Wld]
+               , [Cns (IntLit (-1)) Wld]
+               , [Cns (IntLit 1000000) Wld] ]
 
 tests :: TestTree
 tests = testGroup "Tests" [appendTests]
@@ -71,8 +95,15 @@ appendTests = testGroup "Basic pattern compilation"
                                    , ("cons", leaf 3)
                                    ] Nothing )))
                ] Nothing
+  , testCase "Naive compilation of integer literal patterns" $
+      compilePattern matchHeadPattern @?=
+        switch [ ("cons", (switchLit [ ("0", leaf 1)
+                                     , ("1", leaf 2)
+                                     , ("-1", leaf 3)
+                                     , ("1000000", leaf 4)
+                                     ] 32 (Just failure) ))
+               ] (Just failure)
   ]
-
 {-compileTests :: TestTree
 compileTests = testGroup "Compiling Kore to Patterns"
   [ testCase "Compilation of imp.kore" $
