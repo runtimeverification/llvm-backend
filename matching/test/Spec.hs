@@ -100,17 +100,17 @@ appendTests :: TestTree
 appendTests = testGroup "Basic pattern compilation"
   [ testCase "Naive compilation of the append pattern" $
       compilePattern appendPattern @?=
-        switch [ ("nil", leaf 1 [])
-               , ("cons", simplify (simplify
-                           (switch [ ("nil", leaf 2 [])
+        switch [1] [ ("nil", leaf 1 [])
+               , ("cons", simplify [0, 1] (simplify [1, 1]
+                           (switch [2] [ ("nil", leaf 2 [])
                                    , ("cons", leaf 3 [])
                                    ] Nothing )))
                ] Nothing
   , testCase "Naive compilation of the append pattern with variable bindings" $
       compilePattern appendBindPattern @?=
-        switch [ ("nil", leaf 1 [[2]])
-               , ("cons", simplify (simplify
-                           (switch [ ("nil", leaf 2 [[1]])
+        switch [1] [ ("nil", leaf 1 [[2]])
+               , ("cons", simplify [0, 1] (simplify [1, 1]
+                           (switch [2] [ ("nil", leaf 2 [[1]])
                                    , ("cons", leaf 3 [[0, 2], [1, 2], [0, 1], [1, 1]])
                                    ] Nothing )))
                ] Nothing
@@ -143,14 +143,24 @@ appendTests = testGroup "Basic pattern compilation"
         "              - - 1\n" <>
         "                - 1\n" <>
         "        default: null\n" <>
-        "default: null\n"
+        "        occurrence:\n" <>
+        "        - 2\n" <>
+        "      occurrence:\n" <>
+        "      - 1\n" <>
+        "      - 1\n" <>
+        "    occurrence:\n" <>
+        "    - 0\n" <>
+        "    - 1\n" <>
+        "default: null\n" <>
+        "occurrence:\n" <>
+        "- 1\n"
   , testCase "Naive compilation of integer literal patterns" $
       compilePattern matchHeadPattern @?=
-        switch [ ("cons", (switchLit [ ("0", leaf 1 [])
+        switch [1] [ ("cons", (switchLit [0, 1] 32 [ ("0", leaf 1 [])
                                      , ("1", leaf 2 [])
                                      , ("-1", leaf 3 [])
                                      , ("1000000", leaf 4 [])
-                                     ] 32 (Just failure) ))
+                                     ] (Just failure) ))
                ] (Just failure)
   ]
 {-compileTests :: TestTree

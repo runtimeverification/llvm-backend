@@ -98,23 +98,25 @@ failure = Fix Fail
 leaf :: Action -> [Occurrence] -> Fix DecisionTree
 leaf a os = Fix (Leaf (a, os))
 
-switch :: [(Text, Fix DecisionTree)]
+switch :: Occurrence 
+       -> [(Text, Fix DecisionTree)]
        -> Maybe (Fix DecisionTree)
        -> Fix DecisionTree
-switch brs def =
-  Fix $ Switch L { getSpecializations = brs
+switch o brs def =
+  Fix $ Switch o L { getSpecializations = brs
                  , getDefault = def }
 
-switchLit :: [(Text, Fix DecisionTree)]
+switchLit :: Occurrence
           -> Int
+          -> [(Text, Fix DecisionTree)]
           -> Maybe (Fix DecisionTree)
           -> Fix DecisionTree
-switchLit brs bw def =
-  Fix $ SwitchLit bw L { getSpecializations = brs
+switchLit o bw brs def =
+  Fix $ SwitchLit o bw L { getSpecializations = brs
                     , getDefault = def }
 
-simplify :: Fix DecisionTree -> Fix DecisionTree
-simplify dt = switch [] (Just dt)
+simplify :: Occurrence -> Fix DecisionTree -> Fix DecisionTree
+simplify o dt = switch o [] (Just dt)
 
 swap :: Index
      -> Fix DecisionTree
@@ -237,8 +239,8 @@ data L a = L
 
 data DecisionTree a = Leaf (Action, [Occurrence])
                     | Fail
-                    | Switch (L a)
-                    | SwitchLit Int (L a)
+                    | Switch Occurrence (L a)
+                    | SwitchLit Occurrence Int (L a)
                     | Swap Index a
                     | Function (Text, [Occurrence], Text, a) 
                     deriving (Show, Eq, Functor)
@@ -248,20 +250,22 @@ instance Y.ToYaml a => Y.ToYaml (DecisionTree a) where
         "action" Y..= Y.array [Y.toYaml act, Y.toYaml x]
       ]
     toYaml Fail = Y.string "fail"
-    toYaml (Switch x) = Y.mapping
+    toYaml (Switch o x) = Y.mapping
       ["specializations" Y..= Y.array (map (\(i1, i2) -> Y.array [Y.toYaml i1, Y.toYaml i2]) (getSpecializations x))
       , "default" Y..= Y.toYaml (case (getDefault x) of
                                     Just i -> Y.toYaml i
                                     Nothing -> Y.null
                                 )
+      , "occurrence" Y..= Y.toYaml o
       ]
-    toYaml (SwitchLit i x) = Y.mapping
+    toYaml (SwitchLit o i x) = Y.mapping
       ["specializations" Y..= Y.array (map (\(i1, i2) -> Y.array [Y.toYaml i1, Y.toYaml i2]) (getSpecializations x))
       , "default" Y..= Y.toYaml (case (getDefault x) of
                                     Just d -> Y.toYaml d
                                     Nothing -> Y.null
                                 )
       , "bitwidth" Y..= Y.toYaml i
+      , "occurrence" Y..= Y.toYaml o
       ]
 
     toYaml (Swap i x) = Y.mapping
@@ -282,10 +286,10 @@ instance Y.ToYaml (Fix DecisionTree) where
 instance Eq1 DecisionTree where
   liftEq _ Fail Fail = True
   liftEq _ (Leaf a) (Leaf a') = a == a'
-  liftEq eqT (Switch l) (Switch l') =
-    liftEq eqT l l'
-  liftEq eqT (SwitchLit bw l) (SwitchLit bw' l') =
-    bw == bw' && liftEq eqT l l'
+  liftEq eqT (Switch o l) (Switch o' l') =
+    o == o' && liftEq eqT l l'
+  liftEq eqT (SwitchLit o bw l) (SwitchLit o' bw' l') =
+    o == o' && bw == bw' && liftEq eqT l l'
   liftEq eqT (Swap ix t) (Swap ix' t') =
     ix == ix' && t `eqT` t'
   liftEq _ _ _ = False
@@ -309,11 +313,11 @@ instance Eq1 L where
 instance Show1 DecisionTree where
   liftShowsPrec _ _ _ (Leaf a) = showString $ "Leaf " ++ show a
   liftShowsPrec _ _ _ Fail     = showString "Fail"
-  liftShowsPrec showT showL d (Switch l) =
-    showString "Switch L(" .
+  liftShowsPrec showT showL d (Switch o l) =
+    showString "Switch " . showList o . showString " L(" .
     liftShowsPrec showT showL (d + 1) l . showString ")"
-  liftShowsPrec showT showL d (SwitchLit i l) =
-    showString ("SwitchLit " ++ show i ++ "L(") .
+  liftShowsPrec showT showL d (SwitchLit o i l) =
+    showString ("SwitchLit " ++ show i) . showString " " . showList o . showString " L(" .
     liftShowsPrec showT showL (d + 1) l . showString ")"
   liftShowsPrec showT _ d (Swap ix tm) =
     showString ("Swap " ++ show ix ++ " ") . showT (d + 1) tm
@@ -346,11 +350,11 @@ compilePattern cm@((ClauseMatrix pm@(PatternMatrix _) ac), os)
         d  = mDefault cm
         bw = mBitwidth pm
     in case bw of
-         Nothing -> Fix $ Switch L
+         Nothing -> Fix $ Switch (head os) L
              { getSpecializations = map (second compilePattern) ls
              , getDefault = compilePattern <$> d
              }
-         Just bw' -> Fix $ SwitchLit bw' L
+         Just bw' -> Fix $ SwitchLit (head os) bw' L
              { getSpecializations = map (second compilePattern) ls
              , getDefault = compilePattern <$> d
              }
