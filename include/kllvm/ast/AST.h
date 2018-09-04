@@ -589,6 +589,7 @@ private:
 class KOREAxiomDeclaration : public KOREDeclaration {
 private:
   KOREPattern *pattern;
+  unsigned ordinal;
 
 public:
   static KOREAxiomDeclaration *Create() { return new KOREAxiomDeclaration(); }
@@ -603,6 +604,7 @@ public:
   bool isRequired();
   KOREPattern *getRightHandSide() const;
   KOREPattern *getRequires() const;
+  unsigned getOrdinal() const { return ordinal; }
 
   friend KOREDefinition;
 };

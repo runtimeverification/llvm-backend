@@ -384,8 +384,10 @@ void KOREDefinition::addAttribute(KOREPattern *Attribute) {
 
 void KOREDefinition::preprocess() {
   auto symbols = std::map<std::string, std::vector<KOREObjectSymbol *>>{};
+  unsigned nextOrdinal = 0;
   for (auto iter = axioms.begin(); iter != axioms.end();) {
     auto axiom = *iter;
+    axiom->ordinal = nextOrdinal++;
     if (!axiom->isRequired()) {
       iter = axioms.erase(iter);
     } else {

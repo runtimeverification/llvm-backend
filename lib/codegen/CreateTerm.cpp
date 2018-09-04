@@ -444,26 +444,21 @@ bool makeFunction(std::string name, KOREPattern *pattern, KOREDefinition *defini
     return true;
 }
 
-static int nextRhsId = 0;
-
 std::string makeApplyRuleFunction(KOREAxiomDeclaration *axiom, KOREDefinition *definition, llvm::Module *Module) {
     KOREPattern *pattern = axiom->getRightHandSide();
-    std::string name = "apply_rule_" + std::to_string(nextRhsId++);
+    std::string name = "apply_rule_" + std::to_string(axiom->getOrdinal());
     if (makeFunction(name, pattern, definition, Module)) {
       return name;
     }
     return "";
 }
 
-static int nextSideId = 0;
-
 std::string makeSideConditionFunction(KOREAxiomDeclaration *axiom, KOREDefinition *definition, llvm::Module *Module) {
     KOREPattern *pattern = axiom->getRequires();
     if (!pattern) {
-      nextSideId++;
       return "";
     }
-    std::string name = "side_condition_" + std::to_string(nextSideId++);
+    std::string name = "side_condition_" + std::to_string(axiom->getOrdinal());
     if (makeFunction(name, pattern, definition, Module)) {
       return name;
     }
