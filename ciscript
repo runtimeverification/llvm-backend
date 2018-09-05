@@ -10,6 +10,7 @@ cargo test
 cargo rustc -- --emit=llvm-ir
 cd ../../matching
 stack test
+stack install
 cd ../build
 ./tools/test_rhs/test_rhs ../test/test.kore | diff - ../test/test.ll
 ./tools/test_rhs/test_rhs ../test/imp.kore | diff - ../test/imp.ll
