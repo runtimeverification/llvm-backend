@@ -44,10 +44,14 @@ void SwitchNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitutio
       _switch->addCase(llvm::ConstantInt::get(d->Ctx, _case.second->getLiteral()), _case.first);
     }
   } else { 
-    llvm::Value *tagVal = d->getTag(val);
-    auto _switch = llvm::SwitchInst::Create(tagVal, _default, cases.size(), d->CurrentBlock);
-    for (auto &_case : caseData) {
-      _switch->addCase(llvm::ConstantInt::get(llvm::Type::getInt32Ty(d->Ctx), _case.second->getConstructor()->getTag()), _case.first); 
+    if (caseData.size() == 0) {
+      llvm::BranchInst::Create(_default, d->CurrentBlock);
+    } else {
+      llvm::Value *tagVal = d->getTag(val);
+      auto _switch = llvm::SwitchInst::Create(tagVal, _default, caseData.size(), d->CurrentBlock);
+      for (auto &_case : caseData) {
+        _switch->addCase(llvm::ConstantInt::get(llvm::Type::getInt32Ty(d->Ctx), _case.second->getConstructor()->getTag()), _case.first); 
+      }
     }
   }
   for (auto &entry : caseData) {
