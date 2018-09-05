@@ -27,6 +27,16 @@ dependencies:
 - bytestring
 - kore
 - containers
+- ilist
+
+executables:
+  llvm-kompile-matching:
+    main: Main.hs
+    source-dirs: app
+    ghc-options:
+      - -Wall
+    dependencies:
+      - matching
 
 library:
   source-dirs: src
