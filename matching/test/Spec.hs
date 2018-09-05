@@ -43,7 +43,7 @@ instance IsPattern IntPat where
 
 instance HasMetadata IntPat where
   getMetadata :: Proxy IntPat -> Metadata
-  getMetadata _ = Metadata (shiftL 1 32, f)
+  getMetadata _ = Metadata (shiftL 1 32) f
     where
       f :: String -> [Metadata]
       f _ = []
@@ -57,7 +57,7 @@ instance HasMetadata Lst where
                                , getMetadata (Proxy :: Proxy Lst)
                                ]) -- Cns Lst (1)
                     ]
-    in Metadata (length m, (!) m)
+    in Metadata (toInteger $ length m) ((!) m)
 
 vars :: [Lst] -> [String]
 vars l = concat (map varLst l)
@@ -77,7 +77,7 @@ mkLstPattern pats =
   let as = take (length ls) [1..]
       (ls, conds) = unzip pats
       vs = map vars ls
-      as' = zip3 as vs conds 
+      as' = zipWith3 Action as vs conds 
       md = getMetadata (Proxy :: Proxy Lst)
       cs = fmap (Column md . (toPattern <$>)) (transpose ls)
   in case mkClauseMatrix cs as' of

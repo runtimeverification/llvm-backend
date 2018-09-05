@@ -10,6 +10,8 @@ module Pattern ( PatternMatrix(..)
                , Column(..)
                , Metadata(..)
                , Pattern(..)
+               , Clause(..)
+               , Action(..)
                , Occurrence
                , Index
                , mkClauseMatrix
@@ -46,7 +48,10 @@ instance Show Column where
   showsPrec _ (Column _ ts) =
     showString "Column " . showList ts
 
-newtype Metadata = Metadata (Int, String -> [Metadata])
+data Metadata = Metadata
+                { getLength :: Integer
+                , getChildren :: String -> [Metadata]
+                }
 
 type Index       = Int
 data Pattern a   = Pattern String (Maybe Int) ![a]
@@ -58,9 +63,20 @@ newtype PatternMatrix = PatternMatrix [Column]
                         deriving (Show)
 
 type Occurrence   = [Int]
-type Action       = (Int, [String], Maybe [String])
+data Action       = Action
+                    { getRuleNumber :: Int
+                    , getRhsVars :: [String]
+                    , getSideConditionVars :: Maybe [String]
+                    }
+                    deriving (Show)
 
-data ClauseMatrix = ClauseMatrix PatternMatrix ![(Action, [(String, Occurrence)])]
+data Clause       = Clause
+                    { getAction :: Action
+                    , getVariableBindings :: [(String, Occurrence)]
+                    }
+                    deriving (Show)
+
+data ClauseMatrix = ClauseMatrix PatternMatrix ![Clause]
                     deriving (Show)
 
 instance Show1 Pattern where
@@ -83,7 +99,7 @@ mkClauseMatrix :: [Column]
                -> Either Text (ClauseMatrix, [Occurrence])
 mkClauseMatrix cs as = do
   validateColumnLength (length as) cs
-  pure ((ClauseMatrix (PatternMatrix cs) (map (, []) as)),map (\i -> [i]) [1..length cs]) 
+  pure ((ClauseMatrix (PatternMatrix cs) (map (\a -> Clause a []) as)),map (\i -> [i]) [1..length cs]) 
   where
     validateColumnLength :: Int -> [Column] -> Either Text ()
     validateColumnLength as' =
@@ -147,21 +163,25 @@ sigma₁ (PatternMatrix (c : _)) = sigma c
 sigma₁ _                       = []
 
 mSpecialize :: String -> (ClauseMatrix, [Occurrence]) -> (Text, (ClauseMatrix, [Occurrence]))
-mSpecialize ix (cm, o : os) = (pack ix, (expandMatrix ix (filterMatrix (checkPatternIndex ix) (cm,o)), expandOccurrence cm o ix <> os))
+mSpecialize ix (cm, o : os) = 
+   let newOs = expandOccurrence cm o ix <> os
+       cm' = filterMatrix (checkPatternIndex ix) (cm,o)
+       cm'' = expandMatrix ix cm'
+  in (pack ix, (cm'', newOs))
 mSpecialize _ _ = error "must have at least one column"
 
 expandOccurrence :: ClauseMatrix -> Occurrence -> String -> [Occurrence]
 expandOccurrence (ClauseMatrix (PatternMatrix (c : _)) _) o ix =
-  let (Metadata (_, mtd)) = getMetadata c
+  let (Metadata _ mtd) = getMetadata c
       a = length (mtd ix)
   in map (\i -> i : o) [0..a-1]
 expandOccurrence _ _ _ = error "must have at least one column"
 
 mDefault :: (ClauseMatrix, [Occurrence]) -> Maybe (ClauseMatrix, [Occurrence])
 mDefault (cm@(ClauseMatrix (PatternMatrix (c : _)) _),o : os) =
-  let (Metadata (mtd,_)) = getMetadata c
+  let (Metadata mtd _) = getMetadata c
       s₁ = sigma c
-  in  if null s₁ || length s₁ /= mtd
+  in  if null s₁ || (toInteger $ length s₁) /= mtd
       then Just ((stripFirstColumn (filterMatrix isNotPattern (cm,o))),os)
       else Nothing
 mDefault _ = Nothing
@@ -196,10 +216,10 @@ checkPatternIndex _  (Fix Wildcard)        = True
 checkPatternIndex _  (Fix (Variable _))         = True
 checkPatternIndex ix (Fix (Pattern ix' _ _)) = ix == ix'
 
-addVars :: [(Action, [(String, Occurrence)])] -> [Fix Pattern] -> Occurrence -> [(Action, [(String, Occurrence)])]
+addVars :: [Clause] -> [Fix Pattern] -> Occurrence -> [Clause]
 addVars as c o =
   let row = zip c as
-  in map (\(p, (a, vars)) -> (a, addVarToRow o vars p)) row
+  in map (\(p, (Clause a vars)) -> (Clause a (addVarToRow o vars p))) row
 
 addVarToRow :: Occurrence -> [(String, Occurrence)] -> Fix Pattern -> [(String, Occurrence)]
 addVarToRow o vars (Fix (Variable name)) = (name, o) : vars
@@ -230,7 +250,7 @@ expandColumn ix (Column m ps) =
   in  zipWith Column metas (transpose patterns)
 
 expandMetadata :: String -> Metadata -> [Metadata]
-expandMetadata ix (Metadata (_,ms)) = ms ix
+expandMetadata ix (Metadata _ ms) = ms ix
 
 expandPattern :: [Metadata]
               -> Fix Pattern
@@ -343,8 +363,8 @@ instance Show1 L where
         dmString = maybe id (\s -> showString "*:" . (showT (d + 1)) s) dm
     in  smString . dmString
 
-getLeaf :: [Occurrence] -> [Fix Pattern] -> (Action, [(String, Occurrence)]) -> Fix DecisionTree
-getLeaf os ps ((a,rhsVars,maybeSideCondition),matchedVars) =
+getLeaf :: [Occurrence] -> [Fix Pattern] -> Clause -> Fix DecisionTree
+getLeaf os ps (Clause (Action a rhsVars maybeSideCondition) matchedVars) =
   let row = zip os ps
       vars = foldr (\(o, p) -> \l -> (addVarToRow o l p)) matchedVars row
       sorted = sortBy (compare `on` fst) vars
