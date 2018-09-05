@@ -1,11 +1,14 @@
-cmake_minimum_required (VERSION 3.9)
+cmake_minimum_required (VERSION 3.4)
 
 project (KLLVM CXX C)
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
-add_definitions(-Wall -Werror)
+add_definitions(-Wall -Werror -flto)
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -flto")
+set(CMAKE_AR "llvm-ar")
+set(CMAKE_RANLIB "llvm-ranlib")
 
 find_package(LLVM 5 REQUIRED CONFIG)
 
@@ -31,9 +34,6 @@ include_directories (${PROJECT_SOURCE_DIR}/include)
 
 set(CMAKE_INSTALL_PREFIX "install")
 
-include(CheckIPOSupported)
-check_ipo_supported()
-set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE)
 macro(add_kllvm_library name)
   add_library(${name} ${ARGN})
   install(
