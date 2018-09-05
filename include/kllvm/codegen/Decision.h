@@ -30,8 +30,13 @@ private:
   DecisionNode *child;
 
 public:
-  DecisionCase(KOREObjectSymbol *constructor, DecisionNode *child) :
-    constructor(constructor), child(child) {}
+  DecisionCase(
+    KOREObjectSymbol *constructor, 
+    std::vector<std::string> bindings,
+    DecisionNode *child) :
+      constructor(constructor),
+      bindings(bindings),
+      child(child) {}
   DecisionCase(KOREObjectSymbol *dv, llvm::APInt literal, DecisionNode *child) :
     constructor(dv), literal(literal), child(child) {}
 
@@ -143,7 +148,7 @@ private:
   llvm::Module *Module;
   llvm::LLVMContext &Ctx;
   SortCategory Cat;
-	
+
   llvm::Value *getTag(llvm::Value *);
 public:
   Decision(
