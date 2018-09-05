@@ -661,6 +661,8 @@ public:
 
   using KOREObjectSymbolMapType = std::map<uint32_t, KOREObjectSymbol *>;
 
+  using KOREObjectSymbolStringMapType = llvm::StringMap<KOREObjectSymbol *>;
+
   using KOREMetaSymbolMapType = llvm::StringMap<KOREMetaSymbol *>;
 
   using KOREObjectSortVariableMapType =
@@ -681,6 +683,7 @@ private:
   KOREObjectSortConstructorMapType objectSortConstructors;
   KOREMetaSortConstructorMapType metaSortConstructors;
   KOREObjectSymbolMapType objectSymbols;
+  KOREObjectSymbolStringMapType allObjectSymbols;
   KOREMetaSymbolMapType metaSymbols;
   KOREObjectSortVariableMapType objectSortVariables;
   KOREMetaSortVariableMapType metaSortVariables;
@@ -714,6 +717,7 @@ public:
   const KOREObjectCompositeSortDeclarationMapType &getSortDeclarations() const { return sortDeclarations; }
   const KOREObjectSymbolDeclarationMapType &getSymbolDeclarations() const { return symbolDeclarations; }
   const KOREObjectSymbolMapType &getSymbols() const { return objectSymbols; }
+  const KOREObjectSymbolStringMapType &getAllSymbols() const { return allObjectSymbols; }
   const std::list<KOREAxiomDeclaration *> &getAxioms() const { return axioms; }
   const llvm::StringMap<KOREObjectCompositePattern *> &getAttributes() const {
     return attributes;

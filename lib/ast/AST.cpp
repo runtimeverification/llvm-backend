@@ -424,6 +424,9 @@ void KOREDefinition::preprocess() {
         symbol->firstTag = symbol->lastTag = instantiations.at(*symbol);
         symbol->layout = layouts.at(layoutStr);
         objectSymbols[symbol->firstTag] = symbol;
+        std::ostringstream Out;
+        symbol->print(Out);
+        allObjectSymbols[Out.str()] = symbol;
       }
     }
     uint32_t lastTag = nextSymbol-1;
@@ -484,7 +487,7 @@ void KOREObjectSymbol::print(std::ostream &Out, unsigned indent, bool formal) co
   bool isFirst = true;
   for (const KOREObjectSort *Argument : (formal ? formalArguments : arguments)) {
     if (!isFirst)
-      Out << ",";
+      Out << ", ";
     Argument->print(Out);
     isFirst = false;
   }
