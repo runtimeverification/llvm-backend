@@ -2,7 +2,7 @@
 export PATH=$PATH:~/.cargo/bin
 mkdir -p build
 cd build
-cmake .. -DCMAKE_BUILD_TYPE=Debug
+CC=clang CXX=clang++ cmake .. -DCMAKE_BUILD_TYPE=Debug
 make -j`nproc`
 make run-unittests
 cd ../runtime/datastructures
