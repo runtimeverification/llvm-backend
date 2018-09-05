@@ -48,7 +48,7 @@ module IMP
   import K []
 
 // sorts
-  sort SortList{} [element{}(LblListItem{}()), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), unit{}(Lbl'Stop'List{}()), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(197,3,197,31)"), hook{}("LIST.List"), concat{}(Lbl'Unds'List'Unds'{}())]
+  sort SortList{} [element{}(LblListItem{}()), unit{}(Lbl'Stop'List{}()), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), concat{}(Lbl'Unds'List'Unds'{}()), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(197,3,197,31)"), hook{}("LIST.List")]
   sort SortTCellFragment{} []
   hooked-sort SortString{} [org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(480,3,480,37)"), hook{}("STRING.String")]
   sort SortStateCell{} []
@@ -62,13 +62,13 @@ module IMP
   hooked-sort SortBool{} [org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(263,3,263,31)"), hook{}("BOOL.Bool")]
   sort SortKCell{} []
   sort SortKResult{} []
-  sort SortMap{} [element{}(Lbl'UndsPipe'-'-GT-Unds'{}()), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), unit{}(Lbl'Stop'Map{}()), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(87,3,87,28)"), hook{}("MAP.Map"), concat{}(Lbl'Unds'Map'Unds'{}())]
+  sort SortMap{} [element{}(Lbl'UndsPipe'-'-GT-Unds'{}()), unit{}(Lbl'Stop'Map{}()), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), concat{}(Lbl'Unds'Map'Unds'{}()), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(87,3,87,28)"), hook{}("MAP.Map")]
   sort SortKCellOpt{} []
   sort SortStmt{} []
   hooked-sort SortInt{} [org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), hook{}("INT.Int"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(320,3,320,28)")]
   sort SortPgm{} []
   sort SortBlock{} []
-  sort SortSet{} [element{}(LblSetItem{}()), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), unit{}(Lbl'Stop'Set{}()), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(153,3,153,28)"), hook{}("SET.Set"), concat{}(Lbl'Unds'Set'Unds'{}())]
+  sort SortSet{} [element{}(LblSetItem{}()), unit{}(Lbl'Stop'Set{}()), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), concat{}(Lbl'Unds'Set'Unds'{}()), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(153,3,153,28)"), hook{}("SET.Set")]
   sort SortAExp{} []
 
 // symbols
@@ -433,12 +433,6 @@ module IMP
     \top{SortTCell{}}(), \rewrites{SortTCell{}}(Lbl'-LT-'T'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(inj{SortAExp{}, SortKItem{}}(VarHOLE:SortAExp{}),kseq{}(Lbl'Hash'freezer'UndsPlusUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp0'Unds'{}(inj{SortAExp{}, SortK{}}(VarK0:SortAExp{})),VarDotVar1:SortK{}))),VarDotVar0:SortStateCell{}),Lbl'-LT-'T'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(inj{SortAExp{}, SortKItem{}}(Lbl'UndsPlusUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp{}(VarK0:SortAExp{},VarHOLE:SortAExp{})),VarDotVar1:SortK{})),VarDotVar0:SortStateCell{}))))
   [strict{}(""), left{}(), productionID{}("1810923540"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/tests/regression-new/imp-kore/./imp.k)"), cool{}(), color{}("pink"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(33,20,33,73)")]
 
-// rule `<T>`(`<k>`(inj{Stmt,KItem}(`if(_)_else__IMP-SYNTAX__BExp_Block_Block`(inj{Bool,BExp}(#token("true","Bool")),S,_16))~>DotVar1),DotVar0)=>`<T>`(`<k>`(inj{Block,KItem}(S)~>DotVar1),DotVar0) requires #token("true","Bool") ensures #token("true","Bool") [contentStartColumn(8) contentStartLine(182) org.kframework.attributes.Location(Location(182,8,182,32)) org.kframework.attributes.Source(Source(/home/dwightguth/k/k-distribution/tests/regression-new/imp-kore/./imp.k)) org.kframework.definition.Production(syntax RuleContent ::= K)]
-  axiom{} \and{SortTCell{}} (
-    \top{SortTCell{}}(), \and{SortTCell{}} (
-    \top{SortTCell{}}(), \rewrites{SortTCell{}}(Lbl'-LT-'T'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(inj{SortStmt{}, SortKItem{}}(Lblif'LParUndsRParUnds'else'UndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'Block'Unds'Block{}(inj{SortBool{}, SortBExp{}}(\dv{SortBool{}}("true")),VarS:SortBlock{},Var'Unds'16:SortBlock{})),VarDotVar1:SortK{})),VarDotVar0:SortStateCell{}),Lbl'-LT-'T'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(inj{SortBlock{}, SortKItem{}}(VarS:SortBlock{}),VarDotVar1:SortK{})),VarDotVar0:SortStateCell{}))))
-  [org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/tests/regression-new/imp-kore/./imp.k)"), contentStartLine{}("182"), contentStartColumn{}("8"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax RuleContent ::= K"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(182,8,182,32)")]
-
 // rule isKItem(inj{KItem,K}(KItem))=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") []
   axiom{R} \implies{R} (
     \top{R}(),
@@ -692,14 +686,6 @@ module IMP
       \top{R}()))
   []
 
-// rule `<T>`(`<k>`(inj{Pgm,K}(`int_;__IMP-SYNTAX__Ids_Stmt`(`_,__IMP-SYNTAX__Id_Ids`(X,Xs),_15))),`<state>`(`_Map_`(Rho,`.Map`(.KList))))=>`<T>`(`<k>`(inj{Pgm,K}(`int_;__IMP-SYNTAX__Ids_Stmt`(Xs,_15))),`<state>`(`_Map_`(Rho,`_|->_`(inj{Id,K}(X),inj{Int,K}(#token("0","Int")))))) requires `notBool_`(`Set:in`(inj{Id,K}(X),`keys(_)_MAP__Map`(Rho))) ensures #token("true","Bool") [contentStartColumn(8) contentStartLine(204) org.kframework.attributes.Location(Location(204,8,205,38)) org.kframework.attributes.Source(Source(/home/dwightguth/k/k-distribution/tests/regression-new/imp-kore/./imp.k)) org.kframework.definition.Production(syntax RuleContent ::= K "requires" K)]
-  axiom{} \and{SortTCell{}} (
-    \equals{SortBool{},SortTCell{}}(
-        LblnotBool'Unds'{}(LblSet'Coln'in{}(inj{SortId{}, SortK{}}(VarX:SortId{}),Lblkeys'LParUndsRParUnds'MAP'UndsUnds'Map{}(VarRho:SortMap{}))),
-        \dv{SortBool{}}("true")), \and{SortTCell{}} (
-    \top{SortTCell{}}(), \rewrites{SortTCell{}}(Lbl'-LT-'T'-GT-'{}(Lbl'-LT-'k'-GT-'{}(inj{SortPgm{}, SortK{}}(Lblint'UndsSClnUndsUnds'IMP-SYNTAX'UndsUnds'Ids'Unds'Stmt{}(Lbl'UndsCommUndsUnds'IMP-SYNTAX'UndsUnds'Id'Unds'Ids{}(VarX:SortId{},VarXs:SortIds{}),Var'Unds'15:SortStmt{}))),Lbl'-LT-'state'-GT-'{}(Lbl'Unds'Map'Unds'{}(VarRho:SortMap{},Lbl'Stop'Map{}()))),Lbl'-LT-'T'-GT-'{}(Lbl'-LT-'k'-GT-'{}(inj{SortPgm{}, SortK{}}(Lblint'UndsSClnUndsUnds'IMP-SYNTAX'UndsUnds'Ids'Unds'Stmt{}(VarXs:SortIds{},Var'Unds'15:SortStmt{}))),Lbl'-LT-'state'-GT-'{}(Lbl'Unds'Map'Unds'{}(VarRho:SortMap{},Lbl'UndsPipe'-'-GT-Unds'{}(inj{SortId{}, SortK{}}(VarX:SortId{}),inj{SortInt{}, SortK{}}(\dv{SortInt{}}("0")))))))))
-  [org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/tests/regression-new/imp-kore/./imp.k)"), contentStartLine{}("204"), contentStartColumn{}("8"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax RuleContent ::= K \"requires\" K"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(204,8,205,38)")]
-
 // rule isTCell(inj{TCell,K}(TCell))=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") []
   axiom{R} \implies{R} (
     \top{R}(),
@@ -793,6 +779,14 @@ module IMP
     \top{SortTCell{}}(), \and{SortTCell{}} (
     \top{SortTCell{}}(), \rewrites{SortTCell{}}(Lbl'-LT-'T'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(inj{SortAExp{}, SortKItem{}}(VarHOLE:SortAExp{}),kseq{}(Lbl'Hash'freezer'UndsPlusUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp1'Unds'{}(inj{SortAExp{}, SortK{}}(VarK1:SortAExp{})),VarDotVar1:SortK{}))),VarDotVar0:SortStateCell{}),Lbl'-LT-'T'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(inj{SortAExp{}, SortKItem{}}(Lbl'UndsPlusUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp{}(VarHOLE:SortAExp{},VarK1:SortAExp{})),VarDotVar1:SortK{})),VarDotVar0:SortStateCell{}))))
   [strict{}(""), left{}(), productionID{}("1810923540"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/tests/regression-new/imp-kore/./imp.k)"), cool{}(), color{}("pink"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(33,20,33,73)")]
+
+// rule `<T>`(`<k>`(inj{Id,KItem}(X)~>DotVar1),`<state>`(Rho))=>`<T>`(`<k>`(`Map:lookup`(Rho,inj{Id,K}(X))~>DotVar1),`<state>`(Rho)) requires `_in_keys(_)_MAP__K_Map`(inj{Id,K}(X),Rho) ensures #token("true","Bool") [contentStartColumn(8) contentStartLine(114) org.kframework.attributes.Location(Location(114,8,115,28)) org.kframework.attributes.Source(Source(/home/dwightguth/k/k-distribution/tests/regression-new/imp-kore/./imp.k)) org.kframework.definition.Production(syntax RuleContent ::= K "requires" K)]
+  axiom{} \and{SortTCell{}} (
+    \equals{SortBool{},SortTCell{}}(
+        Lbl'Unds'in'Unds'keys'LParUndsRParUnds'MAP'UndsUnds'K'Unds'Map{}(inj{SortId{}, SortK{}}(VarX:SortId{}),VarRho:SortMap{}),
+        \dv{SortBool{}}("true")), \and{SortTCell{}} (
+    \top{SortTCell{}}(), \rewrites{SortTCell{}}(Lbl'-LT-'T'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(inj{SortId{}, SortKItem{}}(VarX:SortId{}),VarDotVar1:SortK{})),Lbl'-LT-'state'-GT-'{}(VarRho:SortMap{})),Lbl'-LT-'T'-GT-'{}(Lbl'-LT-'k'-GT-'{}(append{}(LblMap'Coln'lookup{}(VarRho:SortMap{},inj{SortId{}, SortK{}}(VarX:SortId{})),VarDotVar1:SortK{})),Lbl'-LT-'state'-GT-'{}(VarRho:SortMap{})))))
+  [org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/tests/regression-new/imp-kore/./imp.k)"), contentStartLine{}("114"), contentStartColumn{}("8"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax RuleContent ::= K \"requires\" K"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(114,8,115,28)")]
 
 // rule isKItem(inj{Id,K}(Id))=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") []
   axiom{R} \implies{R} (
@@ -1229,12 +1223,6 @@ module IMP
       \top{R}()))
   [org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), contentStartLine{}("285"), contentStartColumn{}("8"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax RuleContent ::= K"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(285,8,285,37)")]
 
-// rule `<T>`(`<k>`(inj{Stmt,KItem}(`_=_;_IMP-SYNTAX__Id_AExp`(X,inj{Int,AExp}(I)))~>DotVar1),`<state>`(`_Map_`(`_|->_`(inj{Id,K}(X),_13),DotVar2)))=>`<T>`(`<k>`(DotVar1),`<state>`(`_Map_`(`_|->_`(inj{Id,K}(X),inj{Int,K}(I)),DotVar2))) requires #token("true","Bool") ensures #token("true","Bool") [contentStartColumn(8) contentStartLine(160) org.kframework.attributes.Location(Location(160,8,160,73)) org.kframework.attributes.Source(Source(/home/dwightguth/k/k-distribution/tests/regression-new/imp-kore/./imp.k)) org.kframework.definition.Production(syntax RuleContent ::= K)]
-  axiom{} \and{SortTCell{}} (
-    \top{SortTCell{}}(), \and{SortTCell{}} (
-    \top{SortTCell{}}(), \rewrites{SortTCell{}}(Lbl'-LT-'T'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(inj{SortStmt{}, SortKItem{}}(Lbl'UndsEqlsUndsSClnUnds'IMP-SYNTAX'UndsUnds'Id'Unds'AExp{}(VarX:SortId{},inj{SortInt{}, SortAExp{}}(VarI:SortInt{}))),VarDotVar1:SortK{})),Lbl'-LT-'state'-GT-'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(inj{SortId{}, SortK{}}(VarX:SortId{}),Var'Unds'13:SortK{}),VarDotVar2:SortMap{}))),Lbl'-LT-'T'-GT-'{}(Lbl'-LT-'k'-GT-'{}(VarDotVar1:SortK{}),Lbl'-LT-'state'-GT-'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(inj{SortId{}, SortK{}}(VarX:SortId{}),inj{SortInt{}, SortK{}}(VarI:SortInt{})),VarDotVar2:SortMap{}))))))
-  [org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/tests/regression-new/imp-kore/./imp.k)"), contentStartLine{}("160"), contentStartColumn{}("8"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax RuleContent ::= K"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(160,8,160,73)")]
-
 // rule `_=/=Bool__BOOL__Bool_Bool`(B1,B2)=>`notBool_`(`_==Bool__BOOL__Bool_Bool`(B1,B2)) requires #token("true","Bool") ensures #token("true","Bool") [contentStartColumn(8) contentStartLine(315) org.kframework.attributes.Location(Location(315,8,315,57)) org.kframework.attributes.Source(Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)) org.kframework.definition.Production(syntax RuleContent ::= K)]
   axiom{R} \implies{R} (
     \top{R}(),
@@ -1260,12 +1248,6 @@ module IMP
         VarB:SortBool{}),
       \top{R}()))
   [org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), contentStartLine{}("295"), contentStartColumn{}("8"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax RuleContent ::= K"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(295,8,295,38)")]
-
-// rule `<T>`(`<k>`(inj{Id,KItem}(X)~>DotVar1),`<state>`(`_Map_`(`_|->_`(inj{Id,K}(X),I),DotVar2)))=>`<T>`(`<k>`(I~>DotVar1),`<state>`(`_Map_`(`_|->_`(inj{Id,K}(X),I),DotVar2))) requires #token("true","Bool") ensures #token("true","Bool") [contentStartColumn(8) contentStartLine(114) org.kframework.attributes.Location(Location(114,8,114,60)) org.kframework.attributes.Source(Source(/home/dwightguth/k/k-distribution/tests/regression-new/imp-kore/./imp.k)) org.kframework.definition.Production(syntax RuleContent ::= K)]
-  axiom{} \and{SortTCell{}} (
-    \top{SortTCell{}}(), \and{SortTCell{}} (
-    \top{SortTCell{}}(), \rewrites{SortTCell{}}(Lbl'-LT-'T'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(inj{SortId{}, SortKItem{}}(VarX:SortId{}),VarDotVar1:SortK{})),Lbl'-LT-'state'-GT-'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(inj{SortId{}, SortK{}}(VarX:SortId{}),VarI:SortK{}),VarDotVar2:SortMap{}))),Lbl'-LT-'T'-GT-'{}(Lbl'-LT-'k'-GT-'{}(append{}(VarI:SortK{},VarDotVar1:SortK{})),Lbl'-LT-'state'-GT-'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(inj{SortId{}, SortK{}}(VarX:SortId{}),VarI:SortK{}),VarDotVar2:SortMap{}))))))
-  [org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/tests/regression-new/imp-kore/./imp.k)"), contentStartLine{}("114"), contentStartColumn{}("8"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax RuleContent ::= K"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(114,8,114,60)")]
 
 // rule isStateCellOpt(inj{StateCell,K}(StateCell))=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") []
   axiom{R} \implies{R} (
@@ -1412,6 +1394,12 @@ module IMP
       \top{R}()))
   [org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), contentStartLine{}("306"), contentStartColumn{}("8"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax RuleContent ::= K"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(306,8,306,33)")]
 
+// rule `<T>`(`<k>`(inj{Stmt,KItem}(`if(_)_else__IMP-SYNTAX__BExp_Block_Block`(inj{Bool,BExp}(#token("false","Bool")),_13,S))~>DotVar1),DotVar0)=>`<T>`(`<k>`(inj{Block,KItem}(S)~>DotVar1),DotVar0) requires #token("true","Bool") ensures #token("true","Bool") [contentStartColumn(8) contentStartLine(183) org.kframework.attributes.Location(Location(183,8,183,32)) org.kframework.attributes.Source(Source(/home/dwightguth/k/k-distribution/tests/regression-new/imp-kore/./imp.k)) org.kframework.definition.Production(syntax RuleContent ::= K)]
+  axiom{} \and{SortTCell{}} (
+    \top{SortTCell{}}(), \and{SortTCell{}} (
+    \top{SortTCell{}}(), \rewrites{SortTCell{}}(Lbl'-LT-'T'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(inj{SortStmt{}, SortKItem{}}(Lblif'LParUndsRParUnds'else'UndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'Block'Unds'Block{}(inj{SortBool{}, SortBExp{}}(\dv{SortBool{}}("false")),Var'Unds'13:SortBlock{},VarS:SortBlock{})),VarDotVar1:SortK{})),VarDotVar0:SortStateCell{}),Lbl'-LT-'T'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(inj{SortBlock{}, SortKItem{}}(VarS:SortBlock{}),VarDotVar1:SortK{})),VarDotVar0:SortStateCell{}))))
+  [org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/tests/regression-new/imp-kore/./imp.k)"), contentStartLine{}("183"), contentStartColumn{}("8"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax RuleContent ::= K"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(183,8,183,32)")]
+
 // rule `_andThenBool__BOOL__Bool_Bool`(#token("true","Bool"),K)=>K requires #token("true","Bool") ensures #token("true","Bool") [contentStartColumn(8) contentStartLine(290) org.kframework.attributes.Location(Location(290,8,290,37)) org.kframework.attributes.Source(Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)) org.kframework.definition.Production(syntax RuleContent ::= K)]
   axiom{R} \implies{R} (
     \top{R}(),
@@ -1483,12 +1471,6 @@ module IMP
       \top{R}()))
   []
 
-// rule `<T>`(`<k>`(inj{Stmt,KItem}(`if(_)_else__IMP-SYNTAX__BExp_Block_Block`(inj{Bool,BExp}(#token("false","Bool")),_14,S))~>DotVar1),DotVar0)=>`<T>`(`<k>`(inj{Block,KItem}(S)~>DotVar1),DotVar0) requires #token("true","Bool") ensures #token("true","Bool") [contentStartColumn(8) contentStartLine(183) org.kframework.attributes.Location(Location(183,8,183,32)) org.kframework.attributes.Source(Source(/home/dwightguth/k/k-distribution/tests/regression-new/imp-kore/./imp.k)) org.kframework.definition.Production(syntax RuleContent ::= K)]
-  axiom{} \and{SortTCell{}} (
-    \top{SortTCell{}}(), \and{SortTCell{}} (
-    \top{SortTCell{}}(), \rewrites{SortTCell{}}(Lbl'-LT-'T'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(inj{SortStmt{}, SortKItem{}}(Lblif'LParUndsRParUnds'else'UndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'Block'Unds'Block{}(inj{SortBool{}, SortBExp{}}(\dv{SortBool{}}("false")),Var'Unds'14:SortBlock{},VarS:SortBlock{})),VarDotVar1:SortK{})),VarDotVar0:SortStateCell{}),Lbl'-LT-'T'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(inj{SortBlock{}, SortKItem{}}(VarS:SortBlock{}),VarDotVar1:SortK{})),VarDotVar0:SortStateCell{}))))
-  [org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/tests/regression-new/imp-kore/./imp.k)"), contentStartLine{}("183"), contentStartColumn{}("8"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax RuleContent ::= K"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(183,8,183,32)")]
-
 // rule `_impliesBool__BOOL__Bool_Bool`(#token("true","Bool"),B)=>B requires #token("true","Bool") ensures #token("true","Bool") [contentStartColumn(8) contentStartLine(310) org.kframework.attributes.Location(Location(310,8,310,36)) org.kframework.attributes.Source(Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)) org.kframework.definition.Production(syntax RuleContent ::= K)]
   axiom{R} \implies{R} (
     \top{R}(),
@@ -1509,6 +1491,18 @@ module IMP
       \top{R}()))
   [org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), contentStartLine{}("307"), contentStartColumn{}("8"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax RuleContent ::= K"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(307,8,307,37)")]
 
+// rule `#if_#then_#else_#fi_K-EQUAL__Bool_K_K`(C,_11,B2)=>B2 requires `notBool_`(C) ensures #token("true","Bool") [contentStartColumn(8) contentStartLine(734) org.kframework.attributes.Location(Location(734,8,734,64)) org.kframework.attributes.Source(Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)) org.kframework.definition.Production(syntax RuleContent ::= K "requires" K)]
+  axiom{R} \implies{R} (
+    \equals{SortBool{},R}(
+        LblnotBool'Unds'{}(VarC:SortBool{}),
+        \dv{SortBool{}}("true")),
+    \and{R} (
+      \equals{SortK{},R} (
+        Lbl'Hash'if'UndsHash'then'UndsHash'else'UndsHash'fi'Unds'K-EQUAL'UndsUnds'Bool'Unds'K'Unds'K{SortK{}}(VarC:SortBool{},Var'Unds'11:SortK{},VarB2:SortK{}),
+        VarB2:SortK{}),
+      \top{R}()))
+  [org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), contentStartLine{}("734"), contentStartColumn{}("8"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax RuleContent ::= K \"requires\" K"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(734,8,734,64)")]
+
 // rule isKItem(inj{AExp,K}(AExp))=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") []
   axiom{R} \implies{R} (
     \top{R}(),
@@ -1518,6 +1512,14 @@ module IMP
         \dv{SortBool{}}("true")),
       \top{R}()))
   []
+
+// rule `<T>`(`<k>`(inj{Pgm,K}(`int_;__IMP-SYNTAX__Ids_Stmt`(`_,__IMP-SYNTAX__Id_Ids`(X,Xs),_14))),`<state>`(Rho))=>`<T>`(`<k>`(inj{Pgm,K}(`int_;__IMP-SYNTAX__Ids_Stmt`(Xs,_14))),`<state>`(`_[_<-_]_MAP__Map_K_K`(Rho,inj{Id,K}(X),inj{Int,K}(#token("0","Int"))))) requires `notBool_`(`_in_keys(_)_MAP__K_Map`(inj{Id,K}(X),Rho)) ensures #token("true","Bool") [contentStartColumn(8) contentStartLine(205) org.kframework.attributes.Location(Location(205,8,206,38)) org.kframework.attributes.Source(Source(/home/dwightguth/k/k-distribution/tests/regression-new/imp-kore/./imp.k)) org.kframework.definition.Production(syntax RuleContent ::= K "requires" K)]
+  axiom{} \and{SortTCell{}} (
+    \equals{SortBool{},SortTCell{}}(
+        LblnotBool'Unds'{}(Lbl'Unds'in'Unds'keys'LParUndsRParUnds'MAP'UndsUnds'K'Unds'Map{}(inj{SortId{}, SortK{}}(VarX:SortId{}),VarRho:SortMap{})),
+        \dv{SortBool{}}("true")), \and{SortTCell{}} (
+    \top{SortTCell{}}(), \rewrites{SortTCell{}}(Lbl'-LT-'T'-GT-'{}(Lbl'-LT-'k'-GT-'{}(inj{SortPgm{}, SortK{}}(Lblint'UndsSClnUndsUnds'IMP-SYNTAX'UndsUnds'Ids'Unds'Stmt{}(Lbl'UndsCommUndsUnds'IMP-SYNTAX'UndsUnds'Id'Unds'Ids{}(VarX:SortId{},VarXs:SortIds{}),Var'Unds'14:SortStmt{}))),Lbl'-LT-'state'-GT-'{}(VarRho:SortMap{})),Lbl'-LT-'T'-GT-'{}(Lbl'-LT-'k'-GT-'{}(inj{SortPgm{}, SortK{}}(Lblint'UndsSClnUndsUnds'IMP-SYNTAX'UndsUnds'Ids'Unds'Stmt{}(VarXs:SortIds{},Var'Unds'14:SortStmt{}))),Lbl'-LT-'state'-GT-'{}(Lbl'UndsLSqBUnds-LT-'-'UndsRSqBUnds'MAP'UndsUnds'Map'Unds'K'Unds'K{}(VarRho:SortMap{},inj{SortId{}, SortK{}}(VarX:SortId{}),inj{SortInt{}, SortK{}}(\dv{SortInt{}}("0"))))))))
+  [org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/tests/regression-new/imp-kore/./imp.k)"), contentStartLine{}("205"), contentStartColumn{}("8"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax RuleContent ::= K \"requires\" K"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(205,8,206,38)")]
 
 // rule `minInt(_,_)_INT__Int_Int`(I1,I2)=>I1 requires `_<=Int__INT__Int_Int`(I1,I2) ensures #token("true","Bool") [contentStartColumn(8) contentStartLine(379) org.kframework.attributes.Location(Location(379,8,379,57)) org.kframework.attributes.Source(Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)) org.kframework.definition.Production(syntax RuleContent ::= K "requires" K)]
   axiom{R} \implies{R} (
@@ -1530,6 +1532,12 @@ module IMP
         VarI1:SortInt{}),
       \top{R}()))
   [org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), contentStartLine{}("379"), contentStartColumn{}("8"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax RuleContent ::= K \"requires\" K"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(379,8,379,57)")]
+
+// rule `<T>`(`<k>`(inj{Stmt,KItem}(`_=_;_IMP-SYNTAX__Id_AExp`(X,inj{Int,AExp}(I)))~>DotVar1),`<state>`(Rho))=>`<T>`(`<k>`(DotVar1),`<state>`(`_[_<-_]_MAP__Map_K_K`(Rho,inj{Id,K}(X),inj{Int,K}(I)))) requires #token("true","Bool") ensures #token("true","Bool") [contentStartColumn(8) contentStartLine(161) org.kframework.attributes.Location(Location(161,8,161,71)) org.kframework.attributes.Source(Source(/home/dwightguth/k/k-distribution/tests/regression-new/imp-kore/./imp.k)) org.kframework.definition.Production(syntax RuleContent ::= K)]
+  axiom{} \and{SortTCell{}} (
+    \top{SortTCell{}}(), \and{SortTCell{}} (
+    \top{SortTCell{}}(), \rewrites{SortTCell{}}(Lbl'-LT-'T'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(inj{SortStmt{}, SortKItem{}}(Lbl'UndsEqlsUndsSClnUnds'IMP-SYNTAX'UndsUnds'Id'Unds'AExp{}(VarX:SortId{},inj{SortInt{}, SortAExp{}}(VarI:SortInt{}))),VarDotVar1:SortK{})),Lbl'-LT-'state'-GT-'{}(VarRho:SortMap{})),Lbl'-LT-'T'-GT-'{}(Lbl'-LT-'k'-GT-'{}(VarDotVar1:SortK{}),Lbl'-LT-'state'-GT-'{}(Lbl'UndsLSqBUnds-LT-'-'UndsRSqBUnds'MAP'UndsUnds'Map'Unds'K'Unds'K{}(VarRho:SortMap{},inj{SortId{}, SortK{}}(VarX:SortId{}),inj{SortInt{}, SortK{}}(VarI:SortInt{})))))))
+  [org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/tests/regression-new/imp-kore/./imp.k)"), contentStartLine{}("161"), contentStartColumn{}("8"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax RuleContent ::= K"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(161,8,161,71)")]
 
 // rule isPgm(inj{Pgm,K}(Pgm))=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") []
   axiom{R} \implies{R} (
@@ -2090,6 +2098,18 @@ module IMP
     \top{SortTCell{}}(), \rewrites{SortTCell{}}(Lbl'-LT-'T'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(inj{SortBExp{}, SortKItem{}}(Lbl'Unds-LT-EqlsUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp{}(VarK0:SortAExp{},VarHOLE:SortAExp{})),VarDotVar1:SortK{})),VarDotVar0:SortStateCell{}),Lbl'-LT-'T'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(inj{SortAExp{}, SortKItem{}}(VarHOLE:SortAExp{}),kseq{}(Lbl'Hash'freezer'Unds-LT-EqlsUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp0'Unds'{}(inj{SortAExp{}, SortK{}}(VarK0:SortAExp{})),VarDotVar1:SortK{}))),VarDotVar0:SortStateCell{}))))
   [heat{}(), latex{}("{#1}\\leq{#2}"), seqstrict{}(), productionID{}("33233312"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/tests/regression-new/imp-kore/./imp.k)"), color{}("pink"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(36,20,36,91)")]
 
+// rule `#if_#then_#else_#fi_K-EQUAL__Bool_K_K`(C,B1,_10)=>B1 requires C ensures #token("true","Bool") [contentStartColumn(8) contentStartLine(733) org.kframework.attributes.Location(Location(733,8,733,56)) org.kframework.attributes.Source(Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)) org.kframework.definition.Production(syntax RuleContent ::= K "requires" K)]
+  axiom{R} \implies{R} (
+    \equals{SortBool{},R}(
+        VarC:SortBool{},
+        \dv{SortBool{}}("true")),
+    \and{R} (
+      \equals{SortK{},R} (
+        Lbl'Hash'if'UndsHash'then'UndsHash'else'UndsHash'fi'Unds'K-EQUAL'UndsUnds'Bool'Unds'K'Unds'K{SortK{}}(VarC:SortBool{},VarB1:SortK{},Var'Unds'10:SortK{}),
+        VarB1:SortK{}),
+      \top{R}()))
+  [org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), contentStartLine{}("733"), contentStartColumn{}("8"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax RuleContent ::= K \"requires\" K"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(733,8,733,56)")]
+
 // rule `_orBool__BOOL__Bool_Bool`(#token("true","Bool"),_9)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [contentStartColumn(8) contentStartLine(300) org.kframework.attributes.Location(Location(300,8,300,34)) org.kframework.attributes.Source(Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)) org.kframework.definition.Production(syntax RuleContent ::= K)]
   axiom{R} \implies{R} (
     \top{R}(),
@@ -2109,6 +2129,12 @@ module IMP
         \dv{SortBool{}}("true")),
       \top{R}()))
   []
+
+// rule `<T>`(`<k>`(inj{Stmt,KItem}(`if(_)_else__IMP-SYNTAX__BExp_Block_Block`(inj{Bool,BExp}(#token("true","Bool")),S,_15))~>DotVar1),DotVar0)=>`<T>`(`<k>`(inj{Block,KItem}(S)~>DotVar1),DotVar0) requires #token("true","Bool") ensures #token("true","Bool") [contentStartColumn(8) contentStartLine(182) org.kframework.attributes.Location(Location(182,8,182,32)) org.kframework.attributes.Source(Source(/home/dwightguth/k/k-distribution/tests/regression-new/imp-kore/./imp.k)) org.kframework.definition.Production(syntax RuleContent ::= K)]
+  axiom{} \and{SortTCell{}} (
+    \top{SortTCell{}}(), \and{SortTCell{}} (
+    \top{SortTCell{}}(), \rewrites{SortTCell{}}(Lbl'-LT-'T'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(inj{SortStmt{}, SortKItem{}}(Lblif'LParUndsRParUnds'else'UndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'Block'Unds'Block{}(inj{SortBool{}, SortBExp{}}(\dv{SortBool{}}("true")),VarS:SortBlock{},Var'Unds'15:SortBlock{})),VarDotVar1:SortK{})),VarDotVar0:SortStateCell{}),Lbl'-LT-'T'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(inj{SortBlock{}, SortKItem{}}(VarS:SortBlock{}),VarDotVar1:SortK{})),VarDotVar0:SortStateCell{}))))
+  [org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/tests/regression-new/imp-kore/./imp.k)"), contentStartLine{}("182"), contentStartColumn{}("8"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax RuleContent ::= K"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(182,8,182,32)")]
 
 // rule `_impliesBool__BOOL__Bool_Bool`(#token("false","Bool"),_5)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [contentStartColumn(8) contentStartLine(311) org.kframework.attributes.Location(Location(311,8,311,40)) org.kframework.attributes.Source(Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)) org.kframework.definition.Production(syntax RuleContent ::= K)]
   axiom{R} \implies{R} (
@@ -2232,4 +2258,4 @@ module IMP
       \top{R}()))
   []
 
-endmodule [org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(63,1,207,9)"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/tests/regression-new/imp-kore/./imp.k)")]
+endmodule [org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(63,1,208,9)"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/tests/regression-new/imp-kore/./imp.k)")]
