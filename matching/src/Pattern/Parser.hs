@@ -42,7 +42,7 @@ import           Kore.Step.StepperAttributes
 --[ Metadata ]--
 
 data SymLib = SymLib
-  { symCs :: Map.Map (SymbolOrAlias Object) ([Sort Object], Sort Object)
+  { symCs :: Map.Map (SymbolOrAlias Object) ([Sort Object], Sort Object, Attributes)
   , symSt :: Map.Map (Sort Object) [SymbolOrAlias Object]
   } deriving (Show, Eq)
 
@@ -119,6 +119,16 @@ splitAxiom (Fix (UnifiedPattern topPattern)) =
     UnifiedObject (Rotate31 (AndPattern (And _ (Fix (UnifiedPattern (UnifiedObject (Rotate31 (TopPattern _))))) (Fix (UnifiedPattern (UnifiedObject (Rotate31 (AndPattern (And _ _ (Fix (UnifiedPattern (UnifiedObject (Rotate31 (RewritesPattern (r@(Rewrites _ _ _)))))))))))))))) -> Just (r, Nothing)
     _ -> Nothing
 
+-- Return True if this CommonKorePattern represents a function attribute.
+isFunction :: CommonKorePattern
+           -> Bool
+isFunction = para (unifiedPatternRAlgebra rAlgebra rAlgebra)
+  where
+    rAlgebra :: Pattern lvl Variable (CommonKorePattern, Bool)
+             -> Bool
+    rAlgebra (ApplicationPattern (Application (SymbolOrAlias (Id "function" _) _) _)) = True
+    rAlgebra _ = False
+
 getAxioms :: KoreDefinition -> [SentenceAxiom UnifiedSortVariable UnifiedPattern Variable]
 getAxioms koreDefinition =
   let modules   = definitionModules koreDefinition
@@ -161,3 +171,11 @@ mainVerify definition mainModuleName =
                                   Nothing -> error "Could not find main module"
                                   Just m -> m
 
+-- Return the function symbol and whether or not the symbol is actually a function.
+getPossibleFunction :: (Unified Symbol, ([UnifiedSort], UnifiedSort, Attributes)) -> (Unified Symbol, Bool)
+getPossibleFunction (k, (_,_,attrs)) =  (k, any id $ fmap isFunction $ getAttributes attrs)
+
+-- Return the list of symbols that are actually functions.
+getFunctions :: [(Unified Symbol, ([UnifiedSort], UnifiedSort, Attributes))]
+     -> [Unified Symbol]
+getFunctions ctors = fmap fst $ filter snd $ fmap getPossibleFunction ctors
