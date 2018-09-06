@@ -176,6 +176,7 @@ getPossibleFunction :: (Unified Symbol, ([UnifiedSort], UnifiedSort, Attributes)
 getPossibleFunction (k, (_,_,attrs)) =  (k, any id $ fmap isFunction $ getAttributes attrs)
 
 -- Return the list of symbols that are actually functions.
-getFunctions :: [(Unified Symbol, ([UnifiedSort], UnifiedSort, Attributes))]
-     -> [Unified Symbol]
-getFunctions ctors = fmap fst $ filter snd $ fmap getPossibleFunction ctors
+getFunctions :: Map (Unified Symbol) ([UnifiedSort], UnifiedSort, Attributes)
+    -> [Unified Symbol]
+
+getFunctions = (fmap (\(sym, _) -> sym)) . (filter (\(_, isFun) -> isFun)) . (fmap getPossibleFunction) . assocs
