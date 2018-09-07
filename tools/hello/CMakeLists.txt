@@ -1,4 +1,4 @@
-add_llvm_tool(hello
+kllvm_add_tool(hello
   main.cpp
 )
 

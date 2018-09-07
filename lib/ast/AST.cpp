@@ -135,6 +135,8 @@ std::string KOREObjectSymbol::layoutString(KOREDefinition *definition) const {
     case SortCategory::Symbol:
       result.push_back('0');
       break;
+    case SortCategory::Uncomputed:
+      abort();
     }
   }
   return result;
@@ -296,7 +298,39 @@ KOREPattern *KOREAxiomDeclaration::getRightHandSide() const {
     }
   }
   assert(false && "could not compute right hand side of axiom");
+  abort();
 }
+
+KOREPattern *KOREAxiomDeclaration::getRequires() const {
+  if (auto top = dynamic_cast<KOREObjectCompositePattern *>(pattern)) {
+    if (top->getConstructor()->getName() == "\\implies" && top->getArguments().size() == 2) {
+      if (auto equals = dynamic_cast<KOREObjectCompositePattern *>(top->getArguments()[0])) {
+        if (equals->getConstructor()->getName() == "\\and" && equals->getArguments().size() == 2) {
+          equals = dynamic_cast<KOREObjectCompositePattern *>(equals->getArguments()[1]);
+          assert(equals);
+        }
+        if (equals->getConstructor()->getName() == "\\equals" && equals->getArguments().size() == 2) {
+          return equals->getArguments()[0];
+        } else if (equals->getConstructor()->getName() == "\\top" && equals->getArguments().empty()) {
+          return nullptr;
+        }
+      }
+    } else if (top->getConstructor()->getName() == "\\and" && top->getArguments().size() == 2) {
+      if (auto equals = dynamic_cast<KOREObjectCompositePattern *>(top->getArguments()[0])) {
+        if (equals->getConstructor()->getName() == "\\equals" && equals->getArguments().size() == 2) {
+          return equals->getArguments()[0];
+        } else if (equals->getConstructor()->getName() == "\\top" && equals->getArguments().empty()) {
+          return nullptr;
+        }
+      }
+    } else if (top->getConstructor()->getName() == "\\equals" && top->getArguments().size() == 2) {
+      return nullptr;
+    }
+  }
+  assert(false && "ill-formed axiom");
+  abort();
+}
+
 
 void
 KOREObjectAliasDeclaration::addVariable(KOREObjectVariablePattern *Variable) {
@@ -350,8 +384,10 @@ void KOREDefinition::addAttribute(KOREPattern *Attribute) {
 
 void KOREDefinition::preprocess() {
   auto symbols = std::map<std::string, std::vector<KOREObjectSymbol *>>{};
+  unsigned nextOrdinal = 0;
   for (auto iter = axioms.begin(); iter != axioms.end();) {
     auto axiom = *iter;
+    axiom->ordinal = nextOrdinal++;
     if (!axiom->isRequired()) {
       iter = axioms.erase(iter);
     } else {

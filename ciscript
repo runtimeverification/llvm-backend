@@ -2,18 +2,21 @@
 export PATH=$PATH:~/.cargo/bin
 mkdir -p build
 cd build
-cmake .. -DCMAKE_BUILD_TYPE=Debug
+CC=clang CXX=clang++ cmake .. -DCMAKE_BUILD_TYPE=Debug
 make -j`nproc`
 make run-unittests
 cd ../runtime/datastructures
 cargo test
+cargo rustc -- --emit=llvm-ir
 cd ../../matching
 stack test
 cd ../build
 ./tools/test_rhs/test_rhs ../test/test.kore | diff - ../test/test.ll
 ./tools/test_rhs/test_rhs ../test/imp.kore | diff - ../test/imp.ll
+./tools/test_sideconditions/test_sideconditions ../test/imp.kore | diff - ../test/requires.ll
 
 ./tools/test_configparser/test_configparser ../test/imp.kore > configparser.ll
 diff configparser.ll ../test/configparser.ll
-#clang++ -o configparser lib/parser/libParser.a runtime/configurationparser/configurationparser.so configparser.ll runtime/arithmetic/libarithmetic.a ../runtime/datastructures/target/debug/libdatastructures.so ../runtime/string_equal.ll ../runtime/move_int.ll -lgmp
+RUSTDIR=`rustc --print sysroot`/lib/rustlib/x86_64-unknown-linux-gnu/lib/
+#clang++ -o configparser configparser.ll runtime/arithmetic/libarithmetic.a ../runtime/datastructures/target/debug/deps/*.ll ../runtime/datastructures/target/debug/deps/*.rlib "$RUSTDIR/"libstd-*.so "$RUSTDIR/"libcompiler_builtins-*.rlib ../runtime/*.ll runtime/configurationparser/libconfigurationparser.a lib/parser/libParser.a lib/ast/libAST.a -lgmp `llvm-config --libs core support irreader --link-static --ldflags`
 rm -f configparser configparser.ll

@@ -1,7 +1,11 @@
-use super::decls::{Set,List,Int,K,__gmpz_init_set_ui,move_int};
+extern crate libc;
+
+use super::decls::{Set,List,Int,K,__gmpz_init_set_ui,move_int,printConfiguration};
 use std::iter::FromIterator;
 use std::ptr;
 use std::mem;
+use std::ffi::CString;
+use self::libc::{FILE,c_char,fprintf};
 
 #[no_mangle]
 pub extern "C" fn size_set() -> usize {
@@ -71,6 +75,34 @@ pub unsafe extern "C" fn hook_SET_set2list(s: *const Set) -> List {
 #[no_mangle]
 pub unsafe extern "C" fn hook_SET_list2set(l: *const List) -> Set {
   Set::from_iter((*l).iter().cloned())
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn printSet(file: *mut FILE, set: *const Set, unit: *const c_char, element: *const c_char, concat: *const c_char) {
+  if (*set).len() == 0 {
+    let fmt = CString::new("%s()").unwrap();
+    fprintf(file, fmt.as_ptr(), unit);
+    return;
+  }
+  let mut i = 1;
+  let parens = CString::new(")").unwrap();
+  for value in (*set).iter() {
+    let fmt = CString::new("%s(").unwrap();
+    if i < (*set).len() {
+      fprintf(file, fmt.as_ptr(), concat);
+    }
+    fprintf(file, fmt.as_ptr(), element);
+    let sort = CString::new("K").unwrap();
+    printConfiguration(file, *value, sort.as_ptr());
+    fprintf(file, parens.as_ptr());
+    if i < (*set).len() {
+      fprintf(file, parens.as_ptr());
+    }
+    i += 1
+  }
+  for _ in 0..(*set).len()-1 {
+    fprintf(file, parens.as_ptr());
+  }
 }
 
 #[cfg(test)]

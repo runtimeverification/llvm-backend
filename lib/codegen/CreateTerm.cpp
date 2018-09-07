@@ -84,6 +84,7 @@ target triple = "x86_64-unknown-linux-gnu"
 
 ; Interface to the configuration parser
 declare %block* @parseConfiguration(i8*)
+declare void @printConfiguration(i32, %block *)
 )LLVM";
 
 std::unique_ptr<llvm::Module> newModule(std::string name, llvm::LLVMContext &Context) {
@@ -124,6 +125,8 @@ llvm::Type *getValueType(SortCategory sort, llvm::Module *Module) {
     assert(false && "not implemented yet: MInt");
   case SortCategory::Symbol:
     return llvm::PointerType::getUnqual(Module->getTypeByName(BLOCK_STRUCT));
+  case SortCategory::Uncomputed:
+    abort();
   }
 }
 
@@ -176,6 +179,7 @@ llvm::Type *termType(KOREPattern *pattern, llvm::StringMap<llvm::Type *> &substi
     return getValueType(sort->getCategory(definition), Module);
   } else {
     assert(false && "not supported yet: meta level");
+    abort();
   }
 }
 
@@ -225,6 +229,8 @@ llvm::Value *CreateTerm::createToken(SortCategory sort, std::string contents) {
     }
     return llvm::ConstantExpr::getPointerCast(global, llvm::PointerType::getUnqual(Module->getTypeByName(BLOCK_STRUCT)));
   }
+  case SortCategory::Uncomputed:
+    abort();
   }
 }
 
@@ -297,7 +303,6 @@ llvm::Value *CreateTerm::createHook(KOREObjectCompositePattern *hookAtt, KOREObj
   } else if (name == "KEQUAL.ite") {
     assert(pattern->getArguments().size() == 3);
     llvm::Value *cond = (*this)(pattern->getArguments()[0]);
-    llvm::BasicBlock *CondBlock = CurrentBlock;
     llvm::BasicBlock *TrueBlock = llvm::BasicBlock::Create(Ctx, "then", CurrentBlock->getParent());
     llvm::BasicBlock *FalseBlock = llvm::BasicBlock::Create(Ctx, "else", CurrentBlock->getParent());
     llvm::BasicBlock *MergeBlock = llvm::BasicBlock::Create(Ctx, "hook_KEQUAL_ite", CurrentBlock->getParent());
@@ -315,6 +320,7 @@ llvm::Value *CreateTerm::createHook(KOREObjectCompositePattern *hookAtt, KOREObj
     return Phi;
   } else if (!name.compare(0, 5, "MINT.")) {
     assert(false && "not implemented yet: MInt");
+    abort();
   } else {
     std::string hookName = "hook_" + name.substr(0, name.find('.')) + "_" + name.substr(name.find('.') + 1);
     return createFunctionCall(hookName, pattern);
@@ -335,7 +341,7 @@ llvm::Value *CreateTerm::createFunctionCall(std::string name, KOREObjectComposit
     case SortCategory::List:
     case SortCategory::Set: {
       llvm::AllocaInst *AllocCollection = new llvm::AllocaInst(arg->getType(), 0, "", CurrentBlock);
-      llvm::StoreInst *MoveCollection = new llvm::StoreInst(arg, AllocCollection, CurrentBlock);
+      new llvm::StoreInst(arg, AllocCollection, CurrentBlock);
       args.push_back(AllocCollection);
       types.push_back(AllocCollection->getType());
       break;
@@ -380,18 +386,19 @@ llvm::Value *CreateTerm::operator()(KOREPattern *pattern) {
       llvm::Value *BlockHeader = getBlockHeader(Module, Definition, symbol, BlockType);
       llvm::Value *Block = allocateBlock(BlockType, CurrentBlock);
       llvm::Value *BlockHeaderPtr = llvm::GetElementPtrInst::CreateInBounds(BlockType, Block, {llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0), llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), 0)}, symbol->getName(), CurrentBlock);
-      llvm::StoreInst *StoreBlockHeader = new llvm::StoreInst(BlockHeader, BlockHeaderPtr, CurrentBlock);
+      new llvm::StoreInst(BlockHeader, BlockHeaderPtr, CurrentBlock);
       int idx = 2;
       for (auto child : constructor->getArguments()) {
         llvm::Value *ChildValue = (*this)(child);
         llvm::Value *ChildPtr = llvm::GetElementPtrInst::CreateInBounds(BlockType, Block, {llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0), llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), idx++)}, "", CurrentBlock);
-        llvm::StoreInst *StoreChild = new llvm::StoreInst(ChildValue, ChildPtr, CurrentBlock);
+        new llvm::StoreInst(ChildValue, ChildPtr, CurrentBlock);
       }
       llvm::BitCastInst *Cast = new llvm::BitCastInst(Block, llvm::PointerType::getUnqual(Module->getTypeByName(BLOCK_STRUCT)), "", CurrentBlock);
       return Cast;
     }
   } else {
     assert(false && "not supported yet: meta level");
+    abort();
   }
 }
 
@@ -399,14 +406,11 @@ void addAbort(llvm::BasicBlock *block, llvm::Module *Module) {
     llvm::FunctionType *AbortType = llvm::FunctionType::get(llvm::Type::getVoidTy(Module->getContext()), false);
     llvm::Function *AbortFunc = llvm::dyn_cast<llvm::Function>(Module->getOrInsertFunction("abort", AbortType));
     AbortFunc->addFnAttr(llvm::Attribute::NoReturn);
-    llvm::CallInst *Abort = llvm::CallInst::Create(AbortFunc, "", block);
-    llvm::UnreachableInst *Unreachable = new llvm::UnreachableInst(Module->getContext(), block);
+    llvm::CallInst::Create(AbortFunc, "", block);
+    new llvm::UnreachableInst(Module->getContext(), block);
 }
 
-static int nextRuleId = 0;
-
-std::string makeApplyRuleFunction(KOREAxiomDeclaration *axiom, KOREDefinition *definition, llvm::Module *Module) {
-    KOREPattern *pattern = axiom->getRightHandSide();
+bool makeFunction(std::string name, KOREPattern *pattern, KOREDefinition *definition, llvm::Module *Module) {
     std::map<std::string, KOREObjectVariablePattern *> vars;
     pattern->markVariables(vars);
     llvm::StringMap<llvm::Type *> params;
@@ -417,7 +421,7 @@ std::string makeApplyRuleFunction(KOREAxiomDeclaration *axiom, KOREDefinition *d
       auto sort = dynamic_cast<KOREObjectCompositeSort *>(entry.second->getSort());
       if (!sort) {
         // TODO: sort variables
-        return "";
+        return false;
       }
       llvm::Type *paramType = getValueType(sort->getCategory(definition), Module);
       params.insert({entry.first, paramType});
@@ -425,7 +429,6 @@ std::string makeApplyRuleFunction(KOREAxiomDeclaration *axiom, KOREDefinition *d
       paramNames.push_back(entry.first);
     }
     llvm::FunctionType *funcType = llvm::FunctionType::get(termType(pattern, params, definition, Module), paramTypes, false);
-    std::string name = "apply_rule_" + std::to_string(nextRuleId++);
     llvm::Constant *func = Module->getOrInsertFunction(name, funcType);
     llvm::Function *applyRule = llvm::cast<llvm::Function>(func);
     llvm::StringMap<llvm::Value *> subst;
@@ -438,7 +441,29 @@ std::string makeApplyRuleFunction(KOREAxiomDeclaration *axiom, KOREDefinition *d
     CreateTerm creator = CreateTerm(subst, definition, block, Module);
     llvm::Value *retval = creator(pattern);
     llvm::ReturnInst::Create(Module->getContext(), retval, creator.getCurrentBlock());
-    return name;
+    return true;
 }
+
+std::string makeApplyRuleFunction(KOREAxiomDeclaration *axiom, KOREDefinition *definition, llvm::Module *Module) {
+    KOREPattern *pattern = axiom->getRightHandSide();
+    std::string name = "apply_rule_" + std::to_string(axiom->getOrdinal());
+    if (makeFunction(name, pattern, definition, Module)) {
+      return name;
+    }
+    return "";
+}
+
+std::string makeSideConditionFunction(KOREAxiomDeclaration *axiom, KOREDefinition *definition, llvm::Module *Module) {
+    KOREPattern *pattern = axiom->getRequires();
+    if (!pattern) {
+      return "";
+    }
+    std::string name = "side_condition_" + std::to_string(axiom->getOrdinal());
+    if (makeFunction(name, pattern, definition, Module)) {
+      return name;
+    }
+    return "";
+}
+
 
 }

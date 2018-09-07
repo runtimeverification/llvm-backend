@@ -101,7 +101,7 @@ public:
       DecisionNode *child = (*this)(_case[1]);
       constructors = copy;
       if (kind == SwitchLit) {
-        int bitwidth = node["bitwidth"].as<int>();
+        unsigned bitwidth = node["bitwidth"].as<unsigned>();
         result->addCase({symbol, {bitwidth, _case[0].as<std::string>(), 10}, child}); 
       } else {
         result->addCase({symbol, bindings, child});

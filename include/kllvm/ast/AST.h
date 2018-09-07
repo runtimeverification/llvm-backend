@@ -298,6 +298,8 @@ class KOREObjectVariablePattern;
 // KOREPattern
 class KOREPattern {
 public:
+  virtual ~KOREPattern() = default;
+
   virtual void print(std::ostream &Out, unsigned indent = 0) const =0;
   /* adds all the object level symbols contained recursively in the current pattern
      to the specified map, mapping their symbol name to the list of all instances
@@ -483,7 +485,7 @@ public:
 
 private:
   KOREObjectCompositeSortDeclaration(const std::string &Name, bool _isHooked)
-  : sortName(Name), isHooked(_isHooked) { }
+  : isHooked(_isHooked), sortName(Name) { }
 };
 
 class KORESymbolDeclaration : public KOREDeclaration {
@@ -587,6 +589,7 @@ private:
 class KOREAxiomDeclaration : public KOREDeclaration {
 private:
   KOREPattern *pattern;
+  unsigned ordinal;
 
 public:
   static KOREAxiomDeclaration *Create() { return new KOREAxiomDeclaration(); }
@@ -600,6 +603,8 @@ public:
      from the definition by KOREDefinition::preprocess. */
   bool isRequired();
   KOREPattern *getRightHandSide() const;
+  KOREPattern *getRequires() const;
+  unsigned getOrdinal() const { return ordinal; }
 
   friend KOREDefinition;
 };

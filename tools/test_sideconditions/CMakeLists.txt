@@ -1,12 +1,12 @@
 set(LLVM_REQUIRES_RTTI ON)
 set(LLVM_REQUIRES_EH ON)
-kllvm_add_tool(test_configparser
+kllvm_add_tool(test_sideconditions
   main.cpp
 )
 
-target_link_libraries(test_configparser Codegen AST gmp Parser)
+target_link_libraries(test_sideconditions Codegen Parser AST gmp)
 
-llvm_config(test_configparser
+llvm_config(test_sideconditions
   ${LLVM_TARGETS_TO_BUILD}
 )
 

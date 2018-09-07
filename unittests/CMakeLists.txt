@@ -3,7 +3,7 @@ add_custom_target(run-unittests)
 
 macro(add_kllvm_unittest test_name)
   # add target for building the test
-  add_executable(${test_name} ${ARGN})
+  kllvm_add_tool(${test_name} ${ARGN})
 
   # add a dependency to the global unit test build target
   add_dependencies(unittests ${test_name})

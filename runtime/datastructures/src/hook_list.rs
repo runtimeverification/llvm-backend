@@ -1,6 +1,10 @@
-use super::decls::{List,Int,K,__gmpz_fits_ulong_p,__gmpz_get_ui,__gmpz_init_set_ui,move_int};
+extern crate libc;
+
+use super::decls::{List,Int,K,__gmpz_fits_ulong_p,__gmpz_get_ui,__gmpz_init_set_ui,move_int,printConfiguration};
 use std::ptr;
 use std::mem;
+use std::ffi::CString;
+use self::libc::{FILE,c_char,fprintf};
 
 #[no_mangle]
 pub extern "C" fn size_list() -> usize {
@@ -118,6 +122,34 @@ pub unsafe extern "C" fn hook_LIST_updateAll(l1: *const List, index: *const Int,
   before.append((*l2).clone());
   before.append(after);
   before
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn printList(file: *mut FILE, list: *const List, unit: *const c_char, element: *const c_char, concat: *const c_char) {
+  if (*list).len() == 0 {
+    let fmt = CString::new("%s()").unwrap();
+    fprintf(file, fmt.as_ptr(), unit);
+    return;
+  }
+  let mut i = 1;
+  let parens = CString::new(")").unwrap();
+  for value in (*list).iter() {
+    let fmt = CString::new("%s(").unwrap();
+    if i < (*list).len() {
+      fprintf(file, fmt.as_ptr(), concat);
+    }
+    fprintf(file, fmt.as_ptr(), element);
+    let sort = CString::new("K").unwrap();
+    printConfiguration(file, *value, sort.as_ptr());
+    fprintf(file, parens.as_ptr());
+    if i < (*list).len() {
+      fprintf(file, parens.as_ptr());
+    }
+    i += 1
+  }
+  for _ in 0..(*list).len()-1 {
+    fprintf(file, parens.as_ptr());
+  }
 }
 
 #[cfg(test)]
