@@ -642,7 +642,7 @@ void KOREDeclaration::printSortVariables(std::ostream &Out) const {
 void KOREObjectCompositeSortDeclaration::print(
   std::ostream &Out, unsigned indent) const {
   std::string Indent(indent, ' ');
-  Out << Indent << (isHooked ? "hooked-sort " : "sort ") << sortName;
+  Out << Indent << (_isHooked ? "hooked-sort " : "sort ") << sortName;
   printSortVariables(Out);
   Out << " ";
   printAttributeList(Out, attributes);
@@ -651,7 +651,7 @@ void KOREObjectCompositeSortDeclaration::print(
 void
 KOREObjectSymbolDeclaration::print(std::ostream &Out, unsigned indent) const {
   std::string Indent(indent, ' ');
-  Out << Indent << (isHooked ? "hooked-symbol " : "symbol ")
+  Out << Indent << (_isHooked ? "hooked-symbol " : "symbol ")
       << symbol->getName();
   printSortVariables(Out);
   Out << "(";
