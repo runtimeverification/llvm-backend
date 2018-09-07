@@ -1,11 +1,11 @@
 #!/bin/bash
-dt="$(mktemp tmp.XXXXXXXXXX.yaml)"
+dt_dir="$(mktemp -d)"
 mod="$(mktemp tmp.XXXXXXXXXX.ll)"
-trap "rm -rf $dt mod" INT TERM EXIT
+trap "rm -rf $dt_dir $mod" INT TERM EXIT
 definition="$1"
 moduleName="$2"
 shift; shift
-llvm-kompile-matching "$definition" "$moduleName" > "$dt"
-./tools/llvm-kompile-codegen/llvm-kompile-codegen "$definition" "$dt" > "$mod"
+llvm-kompile-matching "$definition" "$moduleName" "$dt_dir"
+./tools/llvm-kompile-codegen/llvm-kompile-codegen "$definition" "$dt_dir"/dt.yaml "$dt_dir" > "$mod"
 RUSTDIR=`rustc --print sysroot`/lib/rustlib/x86_64-unknown-linux-gnu/lib/
 clang++ -Wno-override-module "$mod" runtime/arithmetic/libarithmetic.a ../runtime/datastructures/target/debug/deps/*.ll ../runtime/datastructures/target/debug/deps/*.rlib "$RUSTDIR/"libstd-*.so "$RUSTDIR/"libcompiler_builtins-*.rlib ../runtime/*.ll runtime/configurationparser/libconfigurationparser.a lib/parser/libParser.a lib/ast/libAST.a -lgmp `llvm-config --libs core support irreader --link-static --ldflags` -flto "$@"

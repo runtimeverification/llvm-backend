@@ -10,12 +10,14 @@
 #include "llvm/IR/Module.h"
 #include "llvm/Support/raw_ostream.h"
 
+#include <libgen.h>
+
 using namespace kllvm;
 using namespace kllvm::parser;
 
 int main (int argc, char **argv) {
-  if (argc < 3) {
-    std::cerr << "Usage: llvm-kompile-codegen <def.kore> <dt.yaml>\n";
+  if (argc < 4) {
+    std::cerr << "Usage: llvm-kompile-codegen <def.kore> <dt.yaml> <dir>\n";
     exit(1);
   }
 
@@ -39,6 +41,15 @@ int main (int argc, char **argv) {
 
   auto dt = parseYamlDecisionTree(argv[2], 1, definition->getAllSymbols());
   makeStepFunction(definition, mod.get(), dt);
+
+  for (auto &entry : definition->getSymbolDeclarations()) {
+    auto decl = entry.second;
+    if (decl->getAttributes().count("function") && !decl->isHooked()) {
+      std::string filename = argv[3] + std::string("/") + decl->getSymbol()->getName() + ".yaml";
+      auto funcDt = parseYamlDecisionTree(filename, decl->getSymbol()->getArguments().size(), definition->getAllSymbols());
+      makeEvalFunction(decl->getSymbol(), definition, mod.get(), funcDt);
+    }
+  }
 
   mod->print(llvm::outs(), nullptr);
   return 0;
