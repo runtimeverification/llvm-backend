@@ -32,7 +32,7 @@ import           Data.Function         (on)
 import           Data.Functor.Classes  (Eq1 (..), Show1 (..))
 import           Data.Functor.Foldable (Fix (..), cata)
 import           Data.List             (transpose,nub,sortBy)
-import           Data.Maybe            (mapMaybe)
+import           Data.Maybe            (mapMaybe,catMaybes)
 import           Data.Semigroup        ((<>))
 import           Data.Text             (Text, pack)
 import           TextShow              (showt)
@@ -150,17 +150,21 @@ swap ix tm = Fix (Swap ix tm)
 
 -- [ Matrix ]
 
-sigma :: Column -> [String]
+sigma :: Column -> [(String,Maybe Int)]
 sigma = nub . mapMaybe ix . getTerms
   where
-    ix :: Fix Pattern -> Maybe String
-    ix (Fix (Pattern ix' _ _)) = Just ix'
+    ix :: Fix Pattern -> Maybe (String,Maybe Int)
+    ix (Fix (Pattern ix' bw _)) = Just (ix',bw)
     ix (Fix Wildcard)        = Nothing
     ix (Fix (Variable _))         = Nothing
 
-sigma₁ :: PatternMatrix -> [String]
-sigma₁ (PatternMatrix (c : _)) = sigma c
-sigma₁ _                       = []
+sigma₁ :: PatternMatrix -> ([String],Maybe Int)
+sigma₁ (PatternMatrix (c : _)) = 
+  let s = sigma c
+  in (map fst s, case catMaybes $ map snd s of
+                      bw:_ -> Just bw
+                      [] -> Nothing)
+sigma₁ _                       = ([],Nothing)
 
 mSpecialize :: String -> (ClauseMatrix, [Occurrence]) -> (Text, (ClauseMatrix, [Occurrence]))
 mSpecialize ix (cm, o : os) = 
@@ -185,13 +189,6 @@ mDefault (cm@(ClauseMatrix (PatternMatrix (c : _)) _),o : os) =
       then Just ((stripFirstColumn (filterMatrix isNotPattern (cm,o))),os)
       else Nothing
 mDefault _ = Nothing
-
-mBitwidth :: PatternMatrix -> Maybe Int
-mBitwidth (PatternMatrix (c : _)) =
-  case (getTerms c) of
-    Fix (Pattern _ bw _) : _ -> bw
-    _ -> Nothing
-mBitwidth _ = Nothing
 
 stripFirstColumn :: ClauseMatrix -> ClauseMatrix
 stripFirstColumn (ClauseMatrix (PatternMatrix (_ : cs)) as) =
@@ -381,10 +378,9 @@ compilePattern cm@((ClauseMatrix pm@(PatternMatrix _) ac), os)
   | length ac == 0 = Fix Fail
   | isWildcardRow pm = getLeaf os (firstRow pm) (head ac)
   | otherwise =
-    let s₁ = sigma₁ pm
+    let (s₁,bw) = sigma₁ pm
         ls = map (`mSpecialize` cm) s₁
         d  = mDefault cm
-        bw = mBitwidth pm
     in case bw of
          Nothing -> Fix $ Switch (head os) L
              { getSpecializations = map (second compilePattern) ls

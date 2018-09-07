@@ -1,36 +1,43 @@
 module Main where
 
 import qualified Data.ByteString.Char8 as B
-import           Data.Map           ((!))
-import           Data.Text          (unpack)
-import           Kore.AST.Common    (Rewrites (..))
-import           Pattern            (Action (..), Column (..), 
-                                     mkClauseMatrix, compilePattern,
-                                     serializeToYaml, failure)
-import           Pattern.Parser     (parseDefinition, parseAxioms, mainVerify, parseSymbols)
-import           Pattern.Gen        (bitwidth, genPattern, genVars, genMetadatas)
-import           System.Environment (getArgs)
+import           Data.Functor.Foldable (Fix (..))
+import           Data.Map              ((!))
+import           Data.Tuple.Select     (sel1)
+import           Kore.AST.Common       (Rewrites (..), SymbolOrAlias (..), Id (..))
+import           Pattern               (serializeToYaml, failure, DecisionTree)
+import           Pattern.Parser        (parseDefinition, parseTopAxioms, mainVerify,
+                                        parseSymbols, getFunctions, SymLib (..),
+                                        parseFunctionAxioms)
+import           Pattern.Gen           (mkDecisionTree)
+import           System.Directory      (createDirectoryIfMissing)
+import           System.Environment    (getArgs)
+import           System.FilePath       (joinPath)
+
+writeFiles :: FilePath -> [(String,Fix DecisionTree)] -> IO ()
+writeFiles _ [] = return ()
+writeFiles folder ((name, dt):files) = do
+  let path = joinPath [folder, name ++ ".yaml"]
+  B.writeFile path $ serializeToYaml dt;
+  writeFiles folder files
 
 main :: IO ()
 main = do
-  (filename:moduleName:_) <- getArgs
+  (filename:moduleName:outputFolder:_) <- getArgs
   def <- parseDefinition filename
+  createDirectoryIfMissing True outputFolder;
   let indexedMod = mainVerify def moduleName
-  let axioms = parseAxioms def
-  let (indices,rewrites,sideConditions) = unzip3 axioms
-  let bw = bitwidth indexedMod
-  let patterns = map (genPattern bw) rewrites
-  let rhsVars = map (genVars . rewritesSecond) rewrites
-  let scVars = map (maybe Nothing (Just . genVars)) sideConditions
-  let actions = zipWith3 Action indices rhsVars scVars
+  let axioms = parseTopAxioms def
   let symlib = parseSymbols def indexedMod
-  let metas = genMetadatas symlib indexedMod
-  let dt = case rewrites of
+  let dt = case axioms of
              [] -> failure
-             r:_ -> let meta = metas ! rewritesSort r
-                        col = Column  meta patterns
-                        matrix = mkClauseMatrix [col] actions
-                    in case matrix of 
-                      Left err -> error (unpack err)
-                      Right cm -> compilePattern cm
-  B.putStrLn $ serializeToYaml dt
+             (_,r,_):_ -> mkDecisionTree symlib indexedMod axioms [rewritesSort r]
+  let functions = getFunctions $ symCs symlib
+  let funcAxioms = fmap (parseFunctionAxioms def) functions
+  let sorts = fmap (sel1 . (symCs symlib !)) functions
+  let dts = zipWith (mkDecisionTree symlib indexedMod) funcAxioms sorts
+  let path = joinPath [outputFolder, "dt.yaml"]
+  B.writeFile path $ serializeToYaml dt;
+  let names = fmap (\(SymbolOrAlias (Id name _) _) -> name) functions
+  let files = zip names dts
+  writeFiles outputFolder files

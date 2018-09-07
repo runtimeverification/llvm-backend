@@ -3,10 +3,13 @@
 module Pattern.Parser where
 
 import           Data.Functor.Foldable      (Fix (..), para)
+import           Data.List                  (sortBy)
 import           Data.List.Index            (indexed)
 import qualified Data.Map                   as Map
 import           Data.Functor.Impredicative (Rotate31 (..))
+import           Data.Ord                   (comparing)
 import           Data.Proxy                 (Proxy (..))
+import           Data.Tuple.Select          (sel1)
 import           Kore.AST.Common            (And (..), Equals (..),
                                              Pattern (..),
                                              Rewrites (..), 
@@ -14,7 +17,7 @@ import           Kore.AST.Common            (And (..), Equals (..),
                                              Application (..), Sort (..),
                                              And (..), Ceil (..), Equals (..), Exists (..),
                                              Floor (..), Forall (..), Implies (..), Iff (..),
-                                             In (..), Next (..), Not (..), Or (..))
+                                             In (..), Next (..), Not (..), Or (..), Id (..))
 import           Kore.AST.Kore              (CommonKorePattern,
                                              UnifiedPattern (..), 
                                              UnifiedSortVariable)
@@ -24,7 +27,8 @@ import           Kore.AST.Sentence          (KoreDefinition,
                                              Definition (..), Module (..),
                                              SentenceAxiom (..),
                                              applyUnifiedSentence,
-                                             ModuleName (..), Sentence (..))
+                                             ModuleName (..), Sentence (..),
+                                             Attributes (..))
 import           Kore.ASTHelpers            (ApplicationSorts (..))
 import           Kore.ASTVerifier.DefinitionVerifier
                                             (defaultAttributesVerification, verifyAndIndexDefinition)
@@ -33,7 +37,7 @@ import           Kore.Error                 (printError)
 import           Kore.IndexedModule.IndexedModule
                                             (KoreIndexedModule)
 import           Kore.IndexedModule.MetadataTools
-                                            (SortTools, extractMetadataTools,
+                                            (extractMetadataTools,
                                              MetadataTools (..))
 import           Kore.Parser.Parser         (fromKore)
 import           Kore.Step.StepperAttributes
@@ -42,9 +46,16 @@ import           Kore.Step.StepperAttributes
 --[ Metadata ]--
 
 data SymLib = SymLib
-  { symCs :: Map.Map (SymbolOrAlias Object) ([Sort Object], Sort Object, Attributes)
+  { symCs :: Map.Map (SymbolOrAlias Object) ([Sort Object], Sort Object, StepperAttributes)
   , symSt :: Map.Map (Sort Object) [SymbolOrAlias Object]
   } deriving (Show, Eq)
+
+isConcrete :: SymbolOrAlias Object -> Bool
+isConcrete (SymbolOrAlias _ params) = all isConcreteSort params
+  where
+    isConcreteSort :: Sort Object -> Bool
+    isConcreteSort (SortActualSort _) = True
+    isConcreteSort (SortVariableSort _) = False
 
 parseAxiomForSymbols :: SentenceAxiom UnifiedSortVariable UnifiedPattern Variable
                      -> [SymbolOrAlias Object]
@@ -56,7 +67,7 @@ parseAxiomForSymbols = parsePatternForSymbols . sentenceAxiomPattern
                                      [SymbolOrAlias Object])
              -> [SymbolOrAlias Object]
     rAlgebra (AndPattern (And _ (_, p₀) (_, p₁)))         = p₀ ++ p₁
-    rAlgebra (ApplicationPattern (Application s ps))      = s : (mconcat $ map snd ps)
+    rAlgebra (ApplicationPattern (Application s ps))      = (if isConcrete s then [s] else []) ++ (mconcat $ map snd ps)
     rAlgebra (CeilPattern (Ceil _ _ (_, p)))              = p
     rAlgebra (EqualsPattern (Equals _ _ (_, p₀) (_, p₁))) = p₀ ++ p₁
     rAlgebra (ExistsPattern (Exists _ _ (_, p)))          = p
@@ -71,15 +82,16 @@ parseAxiomForSymbols = parsePatternForSymbols . sentenceAxiomPattern
     rAlgebra _                                            = []
 
 mkSymLib :: [SymbolOrAlias Object] 
-         -> SortTools Object
+         -> MetadataTools Object StepperAttributes
          -> SymLib
-mkSymLib symbols decls = foldl go (SymLib Map.empty Map.empty) symbols
+mkSymLib symbols metaTools = foldl go (SymLib Map.empty Map.empty) symbols
   where
     go (SymLib dIx rIx) symbol =
-      let as = decls symbol
+      let as = (sortTools metaTools) symbol
+          att = (symAttributes metaTools) symbol
           args = applicationSortsOperands as
           result = applicationSortsResult as
-      in SymLib { symCs = Map.insert symbol (args, result) dIx
+      in SymLib { symCs = Map.insert symbol (args, result, att) dIx
              , symSt = Map.insert result (symbol : (Map.findWithDefault [] result rIx)) rIx
              }
 
@@ -88,19 +100,28 @@ parseSymbols def indexedMod =
   let axioms = getAxioms def
       symbols = mconcat (parseAxiomForSymbols <$> axioms)
       metaTools = extractMetadataTools indexedMod
-      symbolDecls = sortTools metaTools
-  in mkSymLib symbols symbolDecls
+  in mkSymLib symbols metaTools
 
 --[ Patterns ]--
-
-parseAxiomSentence :: (Int, SentenceAxiom UnifiedSortVariable UnifiedPattern Variable)
-                   -> [(Int, Rewrites Object (Fix (UnifiedPattern Variable)), Maybe CommonKorePattern)]
-parseAxiomSentence (i,sentence) = metaT sentence
+hasAtt :: SentenceAxiom UnifiedSortVariable UnifiedPattern Variable
+       -> String
+       -> Bool
+hasAtt sentence att = 
+  let Attributes attr = sentenceAxiomAttributes sentence
+  in any isAtt attr
   where
-    metaT :: SentenceAxiom UnifiedSortVariable UnifiedPattern Variable
-          -> [(Int,Rewrites Object (Fix (UnifiedPattern Variable)), Maybe CommonKorePattern)]
-    metaT s = case splitAxiom (sentenceAxiomPattern s) of
-      Just (r,sc) -> [(i,r,sc)]
+    isAtt :: CommonKorePattern -> Bool
+    isAtt (Fix (UnifiedPattern (UnifiedObject object))) =
+      case unRotate31 object of
+        ApplicationPattern (Application (SymbolOrAlias (Id x _) _) _) -> x == att
+        _ -> False
+    isAtt _ = False
+
+parseAxiomSentence :: (CommonKorePattern -> Maybe (pattern Object CommonKorePattern, Maybe CommonKorePattern))
+                   -> (Int, SentenceAxiom UnifiedSortVariable UnifiedPattern Variable)
+                   -> [(Bool,Int, pattern Object CommonKorePattern, Maybe CommonKorePattern)]
+parseAxiomSentence split (i,s) = case split (sentenceAxiomPattern s) of
+      Just (r,sc) -> if hasAtt s "comm" || hasAtt s "assoc" || hasAtt s "idem" then [] else [(hasAtt s "owise",i,r,sc)]
       Nothing -> []
 
 unifiedPatternRAlgebra :: (Pattern Meta variable (CommonKorePattern, b) -> b)
@@ -111,23 +132,26 @@ unifiedPatternRAlgebra metaT _ (UnifiedPattern (UnifiedMeta meta)) =
 unifiedPatternRAlgebra _ objectT (UnifiedPattern (UnifiedObject object)) =
   objectT (unRotate31 object)
 
-splitAxiom :: CommonKorePattern
+splitFunction :: SymbolOrAlias Object
+              -> CommonKorePattern
+              -> Maybe (Equals Object CommonKorePattern, Maybe CommonKorePattern)
+splitFunction symbol (Fix (UnifiedPattern topPattern)) =
+  case topPattern of
+    UnifiedObject (Rotate31 (ImpliesPattern (Implies _ (Fix (UnifiedPattern (UnifiedObject (Rotate31 (EqualsPattern (Equals _ _ pat _)))))) (Fix (UnifiedPattern (UnifiedObject (Rotate31 (AndPattern (And _ (Fix (UnifiedPattern (UnifiedObject (Rotate31 (EqualsPattern eq@(Equals _ _ (Fix (UnifiedPattern (UnifiedObject (Rotate31 (ApplicationPattern (Application s _)))))) _)))))) _))))))))) -> if s == symbol then Just (eq, Just pat) else Nothing
+    UnifiedObject (Rotate31 (ImpliesPattern (Implies _ (Fix (UnifiedPattern (UnifiedObject (Rotate31 (TopPattern _))))) (Fix (UnifiedPattern (UnifiedObject (Rotate31 (AndPattern (And _ (Fix (UnifiedPattern (UnifiedObject (Rotate31 (EqualsPattern eq@(Equals _ _ (Fix (UnifiedPattern (UnifiedObject (Rotate31 (ApplicationPattern (Application s _)))))) _)))))) _))))))))) -> if s == symbol then Just (eq, Nothing) else Nothing
+    UnifiedObject (Rotate31 (ImpliesPattern (Implies _ (Fix (UnifiedPattern (UnifiedObject (Rotate31 (AndPattern (And _ _ (Fix (UnifiedPattern (UnifiedObject (Rotate31 (EqualsPattern (Equals _ _ pat _)))))))))))) (Fix (UnifiedPattern (UnifiedObject (Rotate31 (AndPattern (And _ (Fix (UnifiedPattern (UnifiedObject (Rotate31 (EqualsPattern eq@(Equals _ _ (Fix (UnifiedPattern (UnifiedObject (Rotate31 (ApplicationPattern (Application s _)))))) _)))))) _))))))))) -> if s == symbol then Just (eq, Just pat) else Nothing
+    UnifiedObject (Rotate31 (ImpliesPattern (Implies _ (Fix (UnifiedPattern (UnifiedObject (Rotate31 (AndPattern (And _ _ (Fix (UnifiedPattern (UnifiedObject (Rotate31 (TopPattern _))))))))))) (Fix (UnifiedPattern (UnifiedObject (Rotate31 (AndPattern (And _ (Fix (UnifiedPattern (UnifiedObject (Rotate31 (EqualsPattern eq@(Equals _ _ (Fix (UnifiedPattern (UnifiedObject (Rotate31 (ApplicationPattern (Application s _)))))) _)))))) _))))))))) -> if s == symbol then Just (eq, Nothing) else Nothing
+    UnifiedObject (Rotate31 (EqualsPattern eq@(Equals _ _ (Fix (UnifiedPattern (UnifiedObject (Rotate31 (ApplicationPattern (Application s _)))))) _))) -> if s == symbol then Just (eq, Nothing) else Nothing
+    _ -> Nothing
+        
+
+splitTop :: CommonKorePattern
            -> Maybe (Rewrites Object CommonKorePattern, Maybe CommonKorePattern)
-splitAxiom (Fix (UnifiedPattern topPattern)) =
+splitTop (Fix (UnifiedPattern topPattern)) =
   case topPattern of
     UnifiedObject (Rotate31 (AndPattern (And _ (Fix (UnifiedPattern (UnifiedObject (Rotate31 (EqualsPattern (Equals _ _ pat _)))))) (Fix (UnifiedPattern (UnifiedObject (Rotate31 (AndPattern ((And _ _ (Fix (UnifiedPattern (UnifiedObject (Rotate31 (RewritesPattern (r@(Rewrites _ _ _))))))))))))))))) -> Just (r, Just pat)
     UnifiedObject (Rotate31 (AndPattern (And _ (Fix (UnifiedPattern (UnifiedObject (Rotate31 (TopPattern _))))) (Fix (UnifiedPattern (UnifiedObject (Rotate31 (AndPattern (And _ _ (Fix (UnifiedPattern (UnifiedObject (Rotate31 (RewritesPattern (r@(Rewrites _ _ _)))))))))))))))) -> Just (r, Nothing)
     _ -> Nothing
-
--- Return True if this CommonKorePattern represents a function attribute.
-isFunction :: CommonKorePattern
-           -> Bool
-isFunction = para (unifiedPatternRAlgebra rAlgebra rAlgebra)
-  where
-    rAlgebra :: Pattern lvl Variable (CommonKorePattern, Bool)
-             -> Bool
-    rAlgebra (ApplicationPattern (Application (SymbolOrAlias (Id "function" _) _) _)) = True
-    rAlgebra _ = False
 
 getAxioms :: KoreDefinition -> [SentenceAxiom UnifiedSortVariable UnifiedPattern Variable]
 getAxioms koreDefinition =
@@ -141,11 +165,19 @@ getAxioms koreDefinition =
       SentenceAxiomSentence s -> [s]
       _ -> []
 
-parseAxioms :: KoreDefinition -> [(Int,Rewrites Object CommonKorePattern,Maybe CommonKorePattern)]
-parseAxioms koreDefinition =
+parseTopAxioms :: KoreDefinition -> [(Int,Rewrites Object CommonKorePattern,Maybe CommonKorePattern)]
+parseTopAxioms koreDefinition =
   let axioms = getAxioms koreDefinition
       withIndex = indexed axioms
-  in mconcat (parseAxiomSentence <$> withIndex)
+  in map (\(_,a,b,c) -> (a,b,c)) $ mconcat ((parseAxiomSentence splitTop) <$> withIndex)
+
+parseFunctionAxioms :: KoreDefinition -> SymbolOrAlias Object -> [(Int,Equals Object CommonKorePattern,Maybe CommonKorePattern)]
+parseFunctionAxioms koreDefinition symbol =
+  let axioms = getAxioms koreDefinition
+      withIndex = indexed axioms
+      withOwise = mconcat ((parseAxiomSentence (splitFunction symbol)) <$> withIndex)
+      sorted = sortBy (comparing sel1) withOwise
+  in map (\(_,a,b,c) -> (a,b,c)) sorted
 
 parseDefinition :: FilePath -> IO KoreDefinition
 parseDefinition fileName = do
@@ -172,11 +204,17 @@ mainVerify definition mainModuleName =
                                   Just m -> m
 
 -- Return the function symbol and whether or not the symbol is actually a function.
-getPossibleFunction :: (Unified Symbol, ([UnifiedSort], UnifiedSort, Attributes)) -> (Unified Symbol, Bool)
-getPossibleFunction (k, (_,_,attrs)) =  (k, any id $ fmap isFunction $ getAttributes attrs)
+getPossibleFunction :: (SymbolOrAlias Object, ([Sort Object], Sort Object, StepperAttributes)) -> (SymbolOrAlias Object, Bool)
+getPossibleFunction (k, (_,_,attrs)) =  (k, isFunction attrs)
 
 -- Return the list of symbols that are actually functions.
-getFunctions :: Map (Unified Symbol) ([UnifiedSort], UnifiedSort, Attributes)
-    -> [Unified Symbol]
+getFunctions :: Map.Map (SymbolOrAlias Object) ([Sort Object], Sort Object, StepperAttributes)
+    -> [SymbolOrAlias Object]
 
-getFunctions = (fmap (\(sym, _) -> sym)) . (filter (\(_, isFun) -> isFun)) . (fmap getPossibleFunction) . assocs
+getFunctions = (fmap fst) . (filter snd) . (fmap getPossibleFunction) . Map.assocs
+
+getTopChildren :: CommonKorePattern -> [CommonKorePattern]
+getTopChildren (Fix (UnifiedPattern (UnifiedObject (Rotate31 (ApplicationPattern (Application _ ps)))))) = ps
+getTopChildren (Fix (UnifiedPattern (UnifiedMeta (Rotate31 (ApplicationPattern (Application _ ps)))))) = ps
+getTopChildren _ = error "Unexpected pattern on lhs of function"
+

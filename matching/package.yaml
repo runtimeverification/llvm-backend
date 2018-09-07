@@ -28,6 +28,9 @@ dependencies:
 - kore
 - containers
 - ilist
+- tuple
+- filepath
+- directory
 
 executables:
   llvm-kompile-matching:

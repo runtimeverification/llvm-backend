@@ -1,11 +1,16 @@
 {-# LANGUAGE GADTs      #-}
+{-# LANGUAGE FlexibleInstances #-}
 module Pattern.Gen where
 
-import qualified Pattern               as P (Pattern (..),Metadata (..))
-import           Pattern.Parser        (unifiedPatternRAlgebra,SymLib(..))
+import qualified Pattern               as P (Pattern (..),Metadata (..), DecisionTree, Action (..), Column(..),
+                                             mkClauseMatrix, compilePattern)
+import           Pattern.Parser        (unifiedPatternRAlgebra,SymLib(..), getTopChildren)
 import           Data.Bits             (shiftL)
 import           Data.Functor.Foldable (Fix (..), para)
+import           Data.List             (transpose)
 import qualified Data.Map              as Map
+import           Data.Text             (unpack)
+import           Data.Tuple.Select     (sel1)
 import           Kore.AST.Common       (Rewrites (..), Sort (..),
                                         Variable (..), Application (..),
                                         DomainValue (..), StringLiteral (..),
@@ -33,10 +38,22 @@ bitwidth mainModule sort =
       Just "BOOL.Bool" -> 1
       _ -> error "Unsupported pattern type"
 
-genPattern :: (Sort Object -> Int) -> Rewrites Object CommonKorePattern -> Fix P.Pattern
+class KoreRewrite a where
+  getLeftHandSide :: a -> [CommonKorePattern]
+  getRightHandSide :: a -> CommonKorePattern
+
+instance KoreRewrite (Equals lvl CommonKorePattern) where
+  getLeftHandSide = getTopChildren . equalsFirst
+  getRightHandSide = equalsSecond
+
+instance KoreRewrite (Rewrites lvl CommonKorePattern) where
+  getLeftHandSide = (: []) . rewritesFirst
+  getRightHandSide = rewritesSecond
+
+genPattern :: KoreRewrite pattern => (Sort Object -> Int) -> pattern -> [Fix P.Pattern]
 genPattern getBitwidth rewrite =
-  let lhs = rewritesFirst rewrite
-  in para (unifiedPatternRAlgebra rAlgebra rAlgebra) lhs
+  let lhs = getLeftHandSide rewrite
+  in map (para (unifiedPatternRAlgebra rAlgebra rAlgebra)) lhs
   where
     rAlgebra :: Pattern lvl Variable (CommonKorePattern,
                                      Fix P.Pattern)
@@ -73,6 +90,9 @@ genVars = para (unifiedPatternRAlgebra rAlgebra rAlgebra)
     rAlgebra (OrPattern (Or _ (_, p₀) (_, p₁)))           = p₀ ++ p₁
     rAlgebra _                                            = []
 
+defaultMetadata :: P.Metadata
+defaultMetadata = P.Metadata 1 (const [])
+
 genMetadatas :: SymLib -> KoreIndexedModule StepperAttributes -> Map.Map (Sort Object) P.Metadata
 genMetadatas syms@(SymLib symbols sorts) indexedMod =
   Map.mapMaybeWithKey genMetadata sorts
@@ -91,10 +111,33 @@ genMetadatas syms@(SymLib symbols sorts) indexedMod =
       else
         let metadatas = genMetadatas syms indexedMod
             args = map getArgs constructors
-            children = map (map $ (Map.!) metadatas) args
+            children = map (map $ (\s -> Map.findWithDefault defaultMetadata s metadatas)) args
             names = map unparseToString constructors
             metaMap = Map.fromList (zip names children)
         in Just $ P.Metadata (toInteger $ length constructors) ((Map.!) metaMap)
     genMetadata _ _ = Nothing
     getArgs :: SymbolOrAlias Object -> [Sort Object]
-    getArgs sym = fst $ symbols Map.! sym
+    getArgs sym = sel1 $ symbols Map.! sym
+
+mkDecisionTree :: KoreRewrite pattern 
+               => SymLib
+               -> KoreIndexedModule StepperAttributes
+               -> [(Int, pattern, Maybe CommonKorePattern)]
+               -> [Sort Object]
+               -> Fix P.DecisionTree
+mkDecisionTree symlib indexedMod axioms sorts =
+  let (indices,rewrites,sideConditions) = unzip3 axioms
+      bw = bitwidth indexedMod
+      patterns = map (genPattern bw) rewrites
+      rhsVars = map (genVars . getRightHandSide) rewrites
+      scVars = map (maybe Nothing (Just . genVars)) sideConditions
+      actions = zipWith3 P.Action indices rhsVars scVars
+      metas = genMetadatas symlib indexedMod
+      meta = map (metas Map.!) sorts
+      col = zipWith P.Column meta (transpose patterns)
+      matrix = P.mkClauseMatrix col actions
+  in case matrix of 
+       Left err -> error (unpack err)
+       Right cm -> P.compilePattern cm
+
+
