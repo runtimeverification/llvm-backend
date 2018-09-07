@@ -135,10 +135,21 @@ void makeEvalFunction(KOREObjectSymbol *function, KOREDefinition *definition, ll
   std::vector<llvm::Type *> args;
   for (auto sort : function->getArguments()) {
     auto cat = dynamic_cast<KOREObjectCompositeSort *>(sort)->getCategory(definition);
-    args.push_back(getValueType(cat, module));
+    switch (cat) {
+    case SortCategory::Map:
+    case SortCategory::List:
+    case SortCategory::Set:
+      args.push_back(llvm::PointerType::getUnqual(getValueType(cat, module)));
+      break;
+    default:
+      args.push_back(getValueType(cat, module));
+      break;
+    }
   }
   llvm::FunctionType *funcType = llvm::FunctionType::get(returnType, args, false);
-  std::string name = "eval_" + function->getName();
+  std::ostringstream Out;
+  function->print(Out, 0, false);
+  std::string name = "eval_" + Out.str();
   llvm::Constant *func = module->getOrInsertFunction(name, funcType);
   llvm::Function *matchFunc = llvm::cast<llvm::Function>(func);
   llvm::StringMap<llvm::Value *> subst;
