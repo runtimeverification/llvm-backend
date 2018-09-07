@@ -1,5 +1,6 @@
 {-# LANGUAGE GADTs      #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE PatternSynonyms #-}
 module Pattern.Parser where
 
 import           Data.Functor.Foldable      (Fix (..), para)
@@ -20,7 +21,8 @@ import           Kore.AST.Common            (And (..), Equals (..),
                                              In (..), Next (..), Not (..), Or (..), Id (..))
 import           Kore.AST.Kore              (CommonKorePattern,
                                              UnifiedPattern (..), 
-                                             UnifiedSortVariable)
+                                             UnifiedSortVariable,
+                                             pattern KoreObjectPattern)
 import           Kore.AST.MetaOrObject      (Meta (..), Object (..),
                                              Unified (..))
 import           Kore.AST.Sentence          (KoreDefinition,
@@ -117,9 +119,9 @@ hasAtt sentence att =
         _ -> False
     isAtt _ = False
 
-parseAxiomSentence :: (CommonKorePattern -> Maybe (pattern Object CommonKorePattern, Maybe CommonKorePattern))
+parseAxiomSentence :: (CommonKorePattern -> Maybe (pat Object CommonKorePattern, Maybe CommonKorePattern))
                    -> (Int, SentenceAxiom UnifiedSortVariable UnifiedPattern Variable)
-                   -> [(Bool,Int, pattern Object CommonKorePattern, Maybe CommonKorePattern)]
+                   -> [(Bool,Int, pat Object CommonKorePattern, Maybe CommonKorePattern)]
 parseAxiomSentence split (i,s) = case split (sentenceAxiomPattern s) of
       Just (r,sc) -> if hasAtt s "comm" || hasAtt s "assoc" || hasAtt s "idem" then [] else [(hasAtt s "owise",i,r,sc)]
       Nothing -> []
@@ -135,22 +137,22 @@ unifiedPatternRAlgebra _ objectT (UnifiedPattern (UnifiedObject object)) =
 splitFunction :: SymbolOrAlias Object
               -> CommonKorePattern
               -> Maybe (Equals Object CommonKorePattern, Maybe CommonKorePattern)
-splitFunction symbol (Fix (UnifiedPattern topPattern)) =
+splitFunction symbol topPattern =
   case topPattern of
-    UnifiedObject (Rotate31 (ImpliesPattern (Implies _ (Fix (UnifiedPattern (UnifiedObject (Rotate31 (EqualsPattern (Equals _ _ pat _)))))) (Fix (UnifiedPattern (UnifiedObject (Rotate31 (AndPattern (And _ (Fix (UnifiedPattern (UnifiedObject (Rotate31 (EqualsPattern eq@(Equals _ _ (Fix (UnifiedPattern (UnifiedObject (Rotate31 (ApplicationPattern (Application s _)))))) _)))))) _))))))))) -> if s == symbol then Just (eq, Just pat) else Nothing
-    UnifiedObject (Rotate31 (ImpliesPattern (Implies _ (Fix (UnifiedPattern (UnifiedObject (Rotate31 (TopPattern _))))) (Fix (UnifiedPattern (UnifiedObject (Rotate31 (AndPattern (And _ (Fix (UnifiedPattern (UnifiedObject (Rotate31 (EqualsPattern eq@(Equals _ _ (Fix (UnifiedPattern (UnifiedObject (Rotate31 (ApplicationPattern (Application s _)))))) _)))))) _))))))))) -> if s == symbol then Just (eq, Nothing) else Nothing
-    UnifiedObject (Rotate31 (ImpliesPattern (Implies _ (Fix (UnifiedPattern (UnifiedObject (Rotate31 (AndPattern (And _ _ (Fix (UnifiedPattern (UnifiedObject (Rotate31 (EqualsPattern (Equals _ _ pat _)))))))))))) (Fix (UnifiedPattern (UnifiedObject (Rotate31 (AndPattern (And _ (Fix (UnifiedPattern (UnifiedObject (Rotate31 (EqualsPattern eq@(Equals _ _ (Fix (UnifiedPattern (UnifiedObject (Rotate31 (ApplicationPattern (Application s _)))))) _)))))) _))))))))) -> if s == symbol then Just (eq, Just pat) else Nothing
-    UnifiedObject (Rotate31 (ImpliesPattern (Implies _ (Fix (UnifiedPattern (UnifiedObject (Rotate31 (AndPattern (And _ _ (Fix (UnifiedPattern (UnifiedObject (Rotate31 (TopPattern _))))))))))) (Fix (UnifiedPattern (UnifiedObject (Rotate31 (AndPattern (And _ (Fix (UnifiedPattern (UnifiedObject (Rotate31 (EqualsPattern eq@(Equals _ _ (Fix (UnifiedPattern (UnifiedObject (Rotate31 (ApplicationPattern (Application s _)))))) _)))))) _))))))))) -> if s == symbol then Just (eq, Nothing) else Nothing
-    UnifiedObject (Rotate31 (EqualsPattern eq@(Equals _ _ (Fix (UnifiedPattern (UnifiedObject (Rotate31 (ApplicationPattern (Application s _)))))) _))) -> if s == symbol then Just (eq, Nothing) else Nothing
+    KoreObjectPattern (ImpliesPattern (Implies _ (KoreObjectPattern (EqualsPattern (Equals _ _ pat _))) (KoreObjectPattern (AndPattern (And _ (KoreObjectPattern (EqualsPattern eq@(Equals _ _ (KoreObjectPattern (ApplicationPattern (Application s _))) _))) _))))) -> if s == symbol then Just (eq, Just pat) else Nothing
+    KoreObjectPattern (ImpliesPattern (Implies _ (KoreObjectPattern (TopPattern _)) (KoreObjectPattern (AndPattern (And _ (KoreObjectPattern (EqualsPattern eq@(Equals _ _ (KoreObjectPattern (ApplicationPattern (Application s _))) _))) _))))) -> if s == symbol then Just (eq, Nothing) else Nothing
+    KoreObjectPattern (ImpliesPattern (Implies _ (KoreObjectPattern (AndPattern (And _ _ (KoreObjectPattern (EqualsPattern (Equals _ _ pat _)))))) (KoreObjectPattern (AndPattern (And _ (KoreObjectPattern (EqualsPattern eq@(Equals _ _ (KoreObjectPattern (ApplicationPattern (Application s _))) _))) _))))) -> if s == symbol then Just (eq, Just pat) else Nothing
+    KoreObjectPattern (ImpliesPattern (Implies _ (KoreObjectPattern (AndPattern (And _ _ (KoreObjectPattern (TopPattern _))))) (KoreObjectPattern (AndPattern (And _ (KoreObjectPattern (EqualsPattern eq@(Equals _ _ (KoreObjectPattern (ApplicationPattern (Application s _))) _))) _))))) -> if s == symbol then Just (eq, Nothing) else Nothing
+    KoreObjectPattern (EqualsPattern eq@(Equals _ _ (KoreObjectPattern (ApplicationPattern (Application s _))) _)) -> if s == symbol then Just (eq, Nothing) else Nothing
     _ -> Nothing
         
 
 splitTop :: CommonKorePattern
            -> Maybe (Rewrites Object CommonKorePattern, Maybe CommonKorePattern)
-splitTop (Fix (UnifiedPattern topPattern)) =
+splitTop topPattern =
   case topPattern of
-    UnifiedObject (Rotate31 (AndPattern (And _ (Fix (UnifiedPattern (UnifiedObject (Rotate31 (EqualsPattern (Equals _ _ pat _)))))) (Fix (UnifiedPattern (UnifiedObject (Rotate31 (AndPattern ((And _ _ (Fix (UnifiedPattern (UnifiedObject (Rotate31 (RewritesPattern (r@(Rewrites _ _ _))))))))))))))))) -> Just (r, Just pat)
-    UnifiedObject (Rotate31 (AndPattern (And _ (Fix (UnifiedPattern (UnifiedObject (Rotate31 (TopPattern _))))) (Fix (UnifiedPattern (UnifiedObject (Rotate31 (AndPattern (And _ _ (Fix (UnifiedPattern (UnifiedObject (Rotate31 (RewritesPattern (r@(Rewrites _ _ _)))))))))))))))) -> Just (r, Nothing)
+    KoreObjectPattern (AndPattern (And _ (KoreObjectPattern (EqualsPattern (Equals _ _ pat _))) (KoreObjectPattern (AndPattern ((And _ _ (KoreObjectPattern (RewritesPattern (r@(Rewrites _ _ _)))))))))) -> Just (r, Just pat)
+    KoreObjectPattern (AndPattern (And _ (KoreObjectPattern (TopPattern _)) (KoreObjectPattern (AndPattern ((And _ _ (KoreObjectPattern (RewritesPattern (r@(Rewrites _ _ _)))))))))) -> Just (r, Nothing)
     _ -> Nothing
 
 getAxioms :: KoreDefinition -> [SentenceAxiom UnifiedSortVariable UnifiedPattern Variable]
@@ -214,7 +216,7 @@ getFunctions :: Map.Map (SymbolOrAlias Object) ([Sort Object], Sort Object, Step
 getFunctions = (fmap fst) . (filter snd) . (fmap getPossibleFunction) . Map.assocs
 
 getTopChildren :: CommonKorePattern -> [CommonKorePattern]
-getTopChildren (Fix (UnifiedPattern (UnifiedObject (Rotate31 (ApplicationPattern (Application _ ps)))))) = ps
-getTopChildren (Fix (UnifiedPattern (UnifiedMeta (Rotate31 (ApplicationPattern (Application _ ps)))))) = ps
+getTopChildren (KoreObjectPattern (ApplicationPattern (Application _ ps))) = ps
+getTopChildren (KoreObjectPattern (ApplicationPattern (Application _ ps))) = ps
 getTopChildren _ = error "Unexpected pattern on lhs of function"
 
