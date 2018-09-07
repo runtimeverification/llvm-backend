@@ -11,7 +11,11 @@ static std::string BLOCK_STRUCT = "block";
 FailNode FailNode::instance;
 
 void Decision::operator()(DecisionNode *entry, llvm::StringMap<llvm::Value *> substitution) {
-  entry->codegen(this, substitution);
+  if (entry == FailNode::get()) {
+    llvm::BranchInst::Create(this->StuckBlock, this->CurrentBlock);
+  } else {
+    entry->codegen(this, substitution);
+  }
 }
 
 void SwitchNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution) {
