@@ -327,7 +327,7 @@ KOREPattern *KOREAxiomDeclaration::getRequires() const {
       return nullptr;
     }
   }
-  assert(false && "could not compute side condition of axiom");
+  assert(false && "ill-formed axiom");
   abort();
 }
 
