@@ -323,15 +323,32 @@ llvm::Value *CreateTerm::createHook(KOREObjectCompositePattern *hookAtt, KOREObj
     abort();
   } else {
     std::string hookName = "hook_" + name.substr(0, name.find('.')) + "_" + name.substr(name.find('.') + 1);
-    return createFunctionCall(hookName, pattern);
+    return createFunctionCall(hookName, pattern, true);
   }
 }
 
-llvm::Value *CreateTerm::createFunctionCall(std::string name, KOREObjectCompositePattern *pattern) {
+llvm::Value *CreateTerm::createFunctionCall(std::string name, KOREObjectCompositePattern *pattern, bool sret) {
   std::vector<llvm::Value *> args;
   std::vector<llvm::Type *> types;
   auto returnSort = dynamic_cast<KOREObjectCompositeSort *>(pattern->getConstructor()->getSort());
-  llvm::Type *returnType = getValueType(returnSort->getCategory(Definition), Module);
+  auto returnCat = returnSort->getCategory(Definition);
+  llvm::Type *returnType = getValueType(returnCat, Module);
+  switch (returnCat) {
+  case SortCategory::Map:
+  case SortCategory::List:
+  case SortCategory::Set:
+    break;
+  default:
+    sret = false; 
+    break;
+  }
+  llvm::Value *AllocSret;
+  if (sret) {
+    AllocSret = new llvm::AllocaInst(returnType, 0, "", CurrentBlock);
+    args.push_back(AllocSret);
+    types.push_back(AllocSret->getType());
+    returnType = llvm::Type::getVoidTy(Ctx);
+  }
   int i = 0;
   for (auto sort : pattern->getConstructor()->getArguments()) {
     auto concreteSort = dynamic_cast<KOREObjectCompositeSort *>(sort);
@@ -353,7 +370,12 @@ llvm::Value *CreateTerm::createFunctionCall(std::string name, KOREObjectComposit
     }
   }
   llvm::FunctionType *funcType = llvm::FunctionType::get(returnType, types, false);
-  llvm::Constant *func = Module->getOrInsertFunction(name, funcType);
+  llvm::Function *func = llvm::dyn_cast<llvm::Function>(Module->getOrInsertFunction(name, funcType));
+  if (sret) {
+    func->arg_begin()->addAttr(llvm::Attribute::StructRet);
+    llvm::CallInst::Create(func, args, "", CurrentBlock);
+    return new llvm::LoadInst(AllocSret, "", CurrentBlock);
+  }
   return llvm::CallInst::Create(func, args, "", CurrentBlock);
 }
 
@@ -375,7 +397,7 @@ llvm::Value *CreateTerm::operator()(KOREPattern *pattern) {
       } else {
         std::ostringstream Out;
         symbol->print(Out, 0, false);
-        return createFunctionCall("eval_" + Out.str(), constructor);
+        return createFunctionCall("eval_" + Out.str(), constructor, false);
       }
     } else if (symbol->getArguments().empty()) {
       llvm::StructType *BlockType = Module->getTypeByName(BLOCK_STRUCT);
