@@ -68,14 +68,14 @@ extern "C" {
   void printSet(FILE *, set *, const char *, const char *, const char *);
   void printList(FILE *, list *, const char *, const char *, const char *);
   void visitChildren(block *subject, FILE *file,
-      void visitConfig(FILE *, block *, const char *), 
-      void visitMap(FILE *, map *, const char *, const char *, const char *), 
-      void visitList(FILE *, list *, const char *, const char *, const char *), 
-      void visitSet(FILE *, set *, const char *, const char *, const char *), 
-      void visitInt(FILE *, mpz_t, const char *),
-      void visitFloat(FILE *, mpfr_t, const char *),
-      void visitBool(FILE *, bool, const char *),
-      void visitMInt(FILE *, void *, const char *));
+  void visitConfig(FILE *, block *, const char *), 
+  void visitMap(FILE *, map *, const char *, const char *, const char *), 
+  void visitList(FILE *, list *, const char *, const char *, const char *), 
+  void visitSet(FILE *, set *, const char *, const char *, const char *), 
+  void visitInt(FILE *, mpz_t, const char *),
+  void visitFloat(FILE *, mpfr_t, const char *),
+  void visitBool(FILE *, bool, const char *),
+  void visitMInt(FILE *, void *, const char *));
 }
 
 #endif // RUNTIME_HEADER_H
