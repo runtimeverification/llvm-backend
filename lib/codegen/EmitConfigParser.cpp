@@ -373,6 +373,7 @@ static void emitTraversal(std::string name, KOREDefinition *definition, llvm::Mo
     argTypes.push_back(makeVisitorType(Ctx, file, getValueType(SortCategory::Float, module), 1));
     argTypes.push_back(makeVisitorType(Ctx, file, getValueType(SortCategory::Bool, module), 1));
     argTypes.push_back(makeVisitorType(Ctx, file, llvm::Type::getInt8PtrTy(Ctx), 1));
+    argTypes.push_back(llvm::PointerType::getUnqual(llvm::FunctionType::get(llvm::Type::getVoidTy(Ctx), {file}, false)));
   } else {
     argTypes.push_back(llvm::PointerType::getUnqual(llvm::ArrayType::get(llvm::Type::getInt8PtrTy(Ctx), 0)));
   }
@@ -458,6 +459,7 @@ static void getVisitor(KOREDefinition *definition, llvm::Module *module, KOREObj
   auto BlockType = getBlockType(module, definition, symbol);
   auto cast = new llvm::BitCastInst(func->arg_begin(),
       llvm::PointerType::getUnqual(BlockType), "", CaseBlock);
+  int i = 0;
   for (auto sort : symbol->getArguments()) {
     auto compositeSort = dynamic_cast<KOREObjectCompositeSort *>(sort);
     SortCategory cat = compositeSort->getCategory(definition);
@@ -505,6 +507,10 @@ static void getVisitor(KOREDefinition *definition, llvm::Module *module, KOREObj
     } case SortCategory::Uncomputed:
       abort();
     }
+    if (i != symbol->getArguments().size() - 1) {
+      llvm::CallInst::Create(func->arg_begin()+10, {func->arg_begin()+1}, "", CaseBlock);
+    }
+    i++;
   }
 }
 

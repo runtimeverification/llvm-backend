@@ -32,7 +32,7 @@ extern "C" {
 
 extern "C" {
   pub fn move_int(result: Int) -> *mut Int;
-  pub fn printConfiguration(file: *mut FILE, subject: *const Block, sort: *const c_char);
+  pub fn printConfigurationInternal(file: *mut FILE, subject: *const Block, sort: *const c_char);
 }
 
 #[cfg(test)]

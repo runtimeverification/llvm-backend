@@ -1,6 +1,6 @@
 extern crate libc;
 
-use super::decls::{List,Int,K,__gmpz_fits_ulong_p,__gmpz_get_ui,__gmpz_init_set_ui,move_int,printConfiguration};
+use super::decls::{List,Int,K,__gmpz_fits_ulong_p,__gmpz_get_ui,__gmpz_init_set_ui,move_int,printConfigurationInternal};
 use std::ptr;
 use std::mem;
 use std::ffi::CString;
@@ -140,7 +140,7 @@ pub unsafe extern "C" fn printList(file: *mut FILE, list: *const List, unit: *co
     }
     fprintf(file, fmt.as_ptr(), element);
     let sort = CString::new("K").unwrap();
-    printConfiguration(file, *value, sort.as_ptr());
+    printConfigurationInternal(file, *value, sort.as_ptr());
     fprintf(file, parens.as_ptr());
     if i < (*list).len() {
       fprintf(file, parens.as_ptr());

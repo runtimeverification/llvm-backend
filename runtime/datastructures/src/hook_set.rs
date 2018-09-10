@@ -1,6 +1,6 @@
 extern crate libc;
 
-use super::decls::{Set,List,Int,K,__gmpz_init_set_ui,move_int,printConfiguration};
+use super::decls::{Set,List,Int,K,__gmpz_init_set_ui,move_int,printConfigurationInternal};
 use std::iter::FromIterator;
 use std::ptr;
 use std::mem;
@@ -93,7 +93,7 @@ pub unsafe extern "C" fn printSet(file: *mut FILE, set: *const Set, unit: *const
     }
     fprintf(file, fmt.as_ptr(), element);
     let sort = CString::new("K").unwrap();
-    printConfiguration(file, *value, sort.as_ptr());
+    printConfigurationInternal(file, *value, sort.as_ptr());
     fprintf(file, parens.as_ptr());
     if i < (*set).len() {
       fprintf(file, parens.as_ptr());
