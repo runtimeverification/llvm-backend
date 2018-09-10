@@ -133,6 +133,7 @@ void makeEvalFunction(KOREObjectSymbol *function, KOREDefinition *definition, ll
   auto returnSort = dynamic_cast<KOREObjectCompositeSort *>(function->getSort())->getCategory(definition);
   auto returnType = getValueType(returnSort, module);
   std::vector<llvm::Type *> args;
+  std::vector<SortCategory> cats;
   for (auto sort : function->getArguments()) {
     auto cat = dynamic_cast<KOREObjectCompositeSort *>(sort)->getCategory(definition);
     switch (cat) {
@@ -140,9 +141,11 @@ void makeEvalFunction(KOREObjectSymbol *function, KOREDefinition *definition, ll
     case SortCategory::List:
     case SortCategory::Set:
       args.push_back(llvm::PointerType::getUnqual(getValueType(cat, module)));
+      cats.push_back(cat);
       break;
     default:
       args.push_back(getValueType(cat, module));
+      cats.push_back(cat);
       break;
     }
   }
@@ -153,12 +156,22 @@ void makeEvalFunction(KOREObjectSymbol *function, KOREDefinition *definition, ll
   llvm::Constant *func = module->getOrInsertFunction(name, funcType);
   llvm::Function *matchFunc = llvm::cast<llvm::Function>(func);
   llvm::StringMap<llvm::Value *> subst;
+  llvm::BasicBlock *block = llvm::BasicBlock::Create(module->getContext(), "entry", matchFunc);
   int i = 0;
   for (auto val = matchFunc->arg_begin(); val != matchFunc->arg_end(); ++val, ++i) {
-    val->setName("subject" + std::to_string(i));
-    subst.insert({val->getName(), val});
+    switch(cats[i]) {
+    case SortCategory::Map:
+    case SortCategory::Set:
+    case SortCategory::List: {
+      auto load = new llvm::LoadInst(val, "subject" + std::to_string(i), block);
+      subst.insert({load->getName(), load});
+      break;
+    } default:
+      val->setName("subject" + std::to_string(i));
+      subst.insert({val->getName(), val});
+      break;
+    }
   }
-  llvm::BasicBlock *block = llvm::BasicBlock::Create(module->getContext(), "entry", matchFunc);
   llvm::BasicBlock *stuck = llvm::BasicBlock::Create(module->getContext(), "stuck", matchFunc);
   addAbort(stuck, module);
 
