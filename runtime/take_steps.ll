@@ -26,7 +26,7 @@ loop:
   %atEnd = icmp eq i32 %currDepth, 0
   br i1 %atEnd, label %finished, label %nextStep
 finished:
-  call void @finish_rewriting(%block* %subject)
+  call void @finish_rewriting(%block* %currSubject)
   unreachable
 nextStep:
   %nextSubject = call %block* @step(%block* %currSubject)
