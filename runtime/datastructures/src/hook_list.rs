@@ -1,10 +1,12 @@
 extern crate libc;
 
-use super::decls::{List,Int,K,__gmpz_fits_ulong_p,__gmpz_get_ui,__gmpz_init_set_ui,move_int,printConfigurationInternal};
+use super::decls::{List,Int,K,KElem,__gmpz_fits_ulong_p,__gmpz_get_ui,__gmpz_init_set_ui,move_int,printConfigurationInternal};
 use std::ptr;
 use std::mem;
+use std::hash::Hash;
+use std::collections::hash_map::DefaultHasher;
 use std::ffi::CString;
-use self::libc::{FILE,c_char,fprintf};
+use self::libc::{FILE,c_char,c_void,fprintf};
 
 #[no_mangle]
 pub extern "C" fn size_list() -> usize {
@@ -23,7 +25,7 @@ pub unsafe extern "C" fn hook_LIST_unit() -> List {
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_LIST_element(value: K) -> List {
-  List::singleton(value)
+  List::singleton(KElem(value))
 }
 
 #[no_mangle]
@@ -35,7 +37,7 @@ pub unsafe extern "C" fn hook_LIST_concat(l1: *const List, l2: *const List) -> L
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_LIST_in(value: K, list: *const List) -> bool {
-  (*list).contains(&value)
+  (*list).contains(&KElem(value))
 }
 
 unsafe fn get_long(i: *const Int) -> (bool, usize) {
@@ -52,7 +54,7 @@ pub unsafe extern "C" fn hook_LIST_get(list: *const List, index: *const Int) -> 
     panic!("Index out of range")
   }
   match (*list).get(index_long) {
-    Some(elem) => { *elem }
+    Some(KElem(elem)) => { *elem }
     None => panic!("Index out of range")
   }
 }
@@ -89,7 +91,7 @@ pub unsafe extern "C" fn hook_LIST_make(len: *const Int, value: K) -> List {
     panic!("Index out of range")
   }
   for _ in 0..len_long {
-    tmp.push_back(value);
+    tmp.push_back(KElem(value));
   }
   tmp
 }
@@ -103,7 +105,7 @@ pub unsafe extern "C" fn hook_LIST_update(list: *const List, index: *const Int, 
   if index_long >= (*list).len() {
     panic!("Index out of range")
   }
-  (*list).update(index_long, value)
+  (*list).update(index_long, KElem(value))
 }
 
 #[no_mangle]
@@ -125,6 +127,17 @@ pub unsafe extern "C" fn hook_LIST_updateAll(l1: *const List, index: *const Int,
 }
 
 #[no_mangle]
+pub unsafe extern "C" fn hook_LIST_eq(l1: *const List, l2: *const List) -> bool {
+  *l1 == *l2
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn list_hash(l: *const List, h: *mut c_void) {
+  let hasher = h as *mut &mut DefaultHasher;
+  l.hash(*hasher)
+}
+
+#[no_mangle]
 pub unsafe extern "C" fn printList(file: *mut FILE, list: *const List, unit: *const c_char, element: *const c_char, concat: *const c_char) {
   if (*list).len() == 0 {
     let fmt = CString::new("%s()").unwrap();
@@ -133,7 +146,7 @@ pub unsafe extern "C" fn printList(file: *mut FILE, list: *const List, unit: *co
   }
   let mut i = 1;
   let parens = CString::new(")").unwrap();
-  for value in (*list).iter() {
+  for KElem(value) in (*list).iter() {
     let fmt = CString::new("%s(").unwrap();
     if i < (*list).len() {
       fprintf(file, fmt.as_ptr(), concat);
@@ -397,6 +410,19 @@ pub mod tests {
       let l1 = hook_LIST_element(DUMMY0);
       let l2 = hook_LIST_element(DUMMY1);
       hook_LIST_updateAll(&l1, one, &l2);
+    }
+  }
+
+  #[test]
+  fn test_eq() {
+    unsafe {
+      let l1 = hook_LIST_element(DUMMY0);
+      let l2 = hook_LIST_unit();
+      let result = hook_LIST_eq(&l1, &l2);
+      assert!(!result);
+      let l2 = hook_LIST_element(DUMMY0);
+      let result = hook_LIST_eq(&l1, &l2);
+      assert!(result);
     }
   }
 }

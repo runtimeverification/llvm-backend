@@ -1,10 +1,11 @@
 extern crate im;
 extern crate libc;
 
+use std::hash::{Hash,Hasher};
 use decls::im::hashmap::HashMap;
 use decls::im::hashset::HashSet;
 use decls::im::vector::Vector;
-use self::libc::{FILE,c_char};
+use self::libc::{FILE,c_char,c_void};
 
 pub enum Block {}
 #[allow(non_camel_case_types)]
@@ -19,9 +20,46 @@ pub struct Int(
 );
 
 pub type K = *const Block;
-pub type Map = HashMap<K, K>;
-pub type Set = HashSet<K>;
-pub type List = Vector<K>;
+
+#[derive(Clone)]
+#[derive(Debug)]
+pub struct KElem(
+  pub K
+);
+
+impl PartialEq for KElem {
+  fn eq(&self, other: &KElem) -> bool {
+    unsafe { hook_KEQUAL_eq(self.0, other.0) }
+  }
+}
+
+impl Eq for KElem {}
+
+impl Hash for KElem {
+  fn hash<H: Hasher>(&self, state: &mut H) {
+    unsafe {
+      if hash_enter() {
+        k_hash(self.0, &mut (state as &mut Hasher) as *mut &mut Hasher as *mut c_void);
+      }
+      hash_exit();
+    }
+  }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn add_hash8(h: *mut c_void, data: u8) {
+  let hasher = h as *mut &mut Hasher;
+  (*hasher).write_u8(data)
+}
+#[no_mangle]
+pub unsafe extern "C" fn add_hash64(h: *mut c_void, data: u64) {
+  let hasher = h as *mut &mut Hasher;
+  (*hasher).write_u64(data)
+}
+
+pub type Map = HashMap<KElem, KElem>;
+pub type Set = HashSet<KElem>;
+pub type List = Vector<KElem>;
 
 #[link(name="gmp")]
 extern "C" {
@@ -33,12 +71,18 @@ extern "C" {
 extern "C" {
   pub fn move_int(result: Int) -> *mut Int;
   pub fn printConfigurationInternal(file: *mut FILE, subject: *const Block, sort: *const c_char);
+  pub fn hook_KEQUAL_eq(k1: K, k2: K) -> bool;
+  pub fn k_hash<'a>(k1: K, h: *mut c_void) -> u64;
+  pub fn hash_enter() -> bool;
+  pub fn hash_exit();
 }
 
 #[cfg(test)]
 pub mod testing {
   use super::{K,Int};
   use std::ptr;
+  use std::collections::hash_map::DefaultHasher;
+  use std::hash::{Hash,Hasher};
 
   #[link(name="gmp")]
   extern "C" {
@@ -77,6 +121,26 @@ pub mod testing {
     *ptr = result;
     ptr
   }
+
+  #[no_mangle]
+  pub unsafe extern "C" fn hook_KEQUAL_eq(k1: K, k2: K) -> bool {
+    k1 == k2
+  }
+
+  #[no_mangle]
+  pub unsafe extern "C" fn k_hash(k: K) -> u64 {
+    let mut hasher = DefaultHasher::new();
+    k.hash(&mut hasher);
+    hasher.finish()
+  }
+
+  #[no_mangle]
+  pub unsafe extern "C" fn hash_enter() -> bool {
+    true
+  }
+
+  #[no_mangle]
+  pub unsafe extern "C" fn hash_exit() {}
 
   pub unsafe fn free_int(ptr: *mut Int) {
     __gmpz_clear(ptr);

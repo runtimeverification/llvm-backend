@@ -1,11 +1,13 @@
 extern crate libc;
 
-use super::decls::{Map,Set,List,Int,K,__gmpz_init_set_ui,move_int,printConfigurationInternal};
+use super::decls::{Map,Set,List,Int,K,KElem,__gmpz_init_set_ui,move_int,printConfigurationInternal};
 use std::iter::FromIterator;
+use std::hash::Hash;
+use std::collections::hash_map::DefaultHasher;
 use std::ptr;
 use std::mem;
 use std::ffi::CString;
-use self::libc::{FILE,c_char,fprintf};
+use self::libc::{FILE,c_char,c_void,fprintf};
 
 #[no_mangle]
 pub extern "C" fn size_map() -> usize {
@@ -19,7 +21,7 @@ pub unsafe extern "C" fn drop_map(ptr: *mut Map) {
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_MAP_element(key: K, value: K) -> Map {
-  Map::singleton(key, value)
+  Map::singleton(KElem(key), KElem(value))
 }
 
 #[no_mangle]
@@ -34,28 +36,28 @@ pub unsafe extern "C" fn hook_MAP_concat(m1: *const Map, m2: *const Map) -> Map 
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_MAP_lookup(m: *const Map, key: K) -> K {
-  match (*m).get(&key) {
-    Some(v) => { *v }
+  match (*m).get(&KElem(key)) {
+    Some(KElem(v)) => { *v }
     None => panic!("key not found")
   }
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_MAP_lookupOrDefault(m: *const Map, key: K, default: K) -> K {
-  match (*m).get(&key) {
-    Some(v) => *v,
+  match (*m).get(&KElem(key)) {
+    Some(KElem(v)) => *v,
     None => default
   }
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_MAP_update(m: *const Map, key: K, value: K) -> Map {
-  (*m).update(key, value)
+  (*m).update(KElem(key), KElem(value))
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_MAP_remove(m: *const Map, key: K) -> Map {
-  (*m).without(&key)
+  (*m).without(&KElem(key))
 }
 
 #[no_mangle]
@@ -65,22 +67,22 @@ pub unsafe extern "C" fn hook_MAP_difference(m1: *const Map, m2: *const Map) -> 
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_MAP_keys(m: *const Map) -> Set {
-  Set::from_iter((*m).keys().map(|k| *k))
+  Set::from_iter((*m).keys().cloned())
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_MAP_keys_list(m: *const Map) -> List {
-  List::from_iter((*m).keys().map(|k| *k))
+  List::from_iter((*m).keys().cloned())
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_MAP_in_keys(key: K, m: *const Map) -> bool {
-  (*m).contains_key(&key)
+  (*m).contains_key(&KElem(key))
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_MAP_values(m: *const Map) -> List {
-  List::from_iter((*m).values().map(|k| *k))
+  List::from_iter((*m).values().cloned())
 }
 
 #[no_mangle]
@@ -88,7 +90,7 @@ pub unsafe extern "C" fn hook_MAP_choice(m: *const Map) -> K {
   if (*m).is_empty() {
     panic!("Map is empty")
   }
-  *(*m).keys().next().unwrap()
+  (*m).keys().next().unwrap().0
 }
 
 #[no_mangle]
@@ -118,6 +120,17 @@ pub unsafe extern "C" fn hook_MAP_removeAll(map: *const Map, set: *const Set) ->
 }
 
 #[no_mangle]
+pub unsafe extern "C" fn hook_MAP_eq(m1: *const Map, m2: *const Map) -> bool {
+  *m1 == *m2
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn map_hash(m: *const Map, h: *mut c_void) {
+  let hasher = h as *mut &mut DefaultHasher;
+  m.hash(*hasher)
+}
+
+#[no_mangle]
 pub unsafe extern "C" fn printMap(file: *mut FILE, map: *const Map, unit: *const c_char, element: *const c_char, concat: *const c_char) {
   if (*map).len() == 0 {
     let fmt = CString::new("%s()").unwrap();
@@ -126,7 +139,7 @@ pub unsafe extern "C" fn printMap(file: *mut FILE, map: *const Map, unit: *const
   }
   let mut i = 1;
   let parens = CString::new(")").unwrap();
-  for (key, value) in (*map).iter() {
+  for (KElem(key), KElem(value)) in (*map).iter() {
     let fmt = CString::new("%s(").unwrap();
     if i < (*map).len() {
       fprintf(file, fmt.as_ptr(), concat);
@@ -257,7 +270,7 @@ mod tests {
     unsafe {
       let map = hook_MAP_element(DUMMY0, DUMMY0);
       let set = hook_MAP_keys(&map);
-      assert!((set).contains(&DUMMY0));
+      assert!((set).contains(&KElem(DUMMY0)));
     }
   }
 
@@ -266,7 +279,7 @@ mod tests {
     unsafe {
       let map = hook_MAP_element(DUMMY0, DUMMY0);
       let list = hook_MAP_keys_list(&map);
-      assert_eq!((list).get(0).unwrap(), &DUMMY0);
+      assert_eq!((list).get(0).unwrap(), &KElem(DUMMY0));
     }
   }
 
@@ -286,7 +299,7 @@ mod tests {
     unsafe {
       let map = hook_MAP_element(DUMMY0, DUMMY0);
       let list = hook_MAP_values(&map);
-      assert_eq!((list).get(0).unwrap(), &DUMMY0);
+      assert_eq!((list).get(0).unwrap(), &KElem(DUMMY0));
     }
   }
 
@@ -323,12 +336,25 @@ mod tests {
   #[test]
   fn test_remove_all() {
     unsafe {
-      let set = Set::singleton(DUMMY0);
+      let set = Set::singleton(KElem(DUMMY0));
       let m1 = hook_MAP_element(DUMMY0, DUMMY0);
       let m2 = hook_MAP_removeAll(&m1, &set);
       let result = hook_MAP_size(&m2);
       assert_eq!(__gmpz_cmp_ui(result, 0), 0);
       free_int(result);
+    }
+  }
+
+  #[test]
+  fn test_eq() {
+    unsafe {
+      let m1 = hook_MAP_element(DUMMY0, DUMMY0);
+      let m2 = hook_MAP_element(DUMMY1, DUMMY1);
+      let result = hook_MAP_eq(&m1, &m2);
+      assert!(!result);
+      let m2 = hook_MAP_element(DUMMY0, DUMMY0);
+      let result = hook_MAP_eq(&m1, &m2);
+      assert!(result);
     }
   }
 }

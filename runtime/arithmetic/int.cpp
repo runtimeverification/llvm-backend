@@ -5,6 +5,7 @@
 extern "C" {
 
 mpz_ptr move_int(__mpz_struct);
+void add_hash64(void *, uint64_t);
 
 mpz_ptr hook_INT_tmod(mpz_t a, mpz_t b) {
   mpz_t result;
@@ -328,6 +329,13 @@ mpz_ptr hook_INT_signExtendBitRange(mpz_t i, mpz_t off, mpz_t len) {
   unsigned long lenlong = mpz_get_ui(len);
   signed_extract(result, i, offlong, lenlong);
   return move_int(*result);
+}
+
+void int_hash(mpz_t i, void *hasher) {
+  int nlimbs = mpz_size(i);
+  for (int j = 0; j < nlimbs; j++) {
+    add_hash64(hasher, i[0]._mp_d[j]);
+  }
 }
 
 }
