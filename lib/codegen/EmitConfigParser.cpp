@@ -32,13 +32,13 @@ static void emitGetTagForSymbolName(KOREDefinition *definition, llvm::Module *mo
   auto CurrentBlock = llvm::BasicBlock::Create(Ctx, "");
   auto MergeBlock = llvm::BasicBlock::Create(Ctx, "exit");
   auto Phi = llvm::PHINode::Create(llvm::Type::getInt32Ty(Ctx), definition->getSymbols().size(), "phi", MergeBlock);
-  auto &syms = definition->getSymbols();
+  auto &syms = definition->getAllSymbols();
   llvm::Constant *Strcmp = module->getOrInsertFunction("strcmp", 
       llvm::Type::getInt32Ty(Ctx), llvm::Type::getInt8PtrTy(Ctx),
       llvm::Type::getInt8PtrTy(Ctx));
   for (auto iter = syms.begin(); iter != syms.end(); ++iter) {
-    auto entry = *iter;
-    uint32_t tag = entry.first;
+    auto &entry = *iter;
+    uint32_t tag = entry.second->getTag();
     auto symbol = entry.second;
     CurrentBlock->insertInto(func);
     auto Ptr = getSymbolNamePtr(symbol, CurrentBlock, module);
