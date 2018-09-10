@@ -60,6 +60,8 @@ static void emitGetTagForSymbolName(KOREDefinition *definition, llvm::Module *mo
 static std::string BLOCKHEADER_STRUCT = "blockheader";
 static std::string INT_STRUCT = "mpz";
 static std::string STRING_STRUCT = "string";
+static std::string LAYOUT_STRUCT = "layout";
+static std::string LAYOUTITEM_STRUCT = "layoutitem";
 
 static void emitDataForSymbol(std::string name, llvm::Type *ty, KOREDefinition *definition, llvm::Module *module, bool isEval,
     std::pair<llvm::Value *, llvm::BasicBlock *> getter(KOREDefinition *, llvm::Module *,
@@ -506,6 +508,60 @@ static void getVisitor(KOREDefinition *definition, llvm::Module *module, KOREObj
   }
 }
 
+static llvm::Constant *getLayoutData(uint16_t layout, KOREObjectSymbol *symbol, llvm::Module *module, KOREDefinition *def) {
+  uint8_t len = symbol->getArguments().size();
+  std::vector<llvm::Constant *> elements;
+  llvm::LLVMContext &Ctx = module->getContext();
+  auto BlockType = getBlockType(module, def, symbol);
+  int i = 2;
+  for (auto sort : symbol->getArguments()) {
+    SortCategory cat = dynamic_cast<KOREObjectCompositeSort *>(sort)->getCategory(def);
+    auto offset = llvm::ConstantExpr::getOffsetOf(BlockType, i++);
+    elements.push_back(llvm::ConstantStruct::get(module->getTypeByName(LAYOUTITEM_STRUCT), offset, llvm::ConstantInt::get(llvm::Type::getInt16Ty(Ctx), (int)cat)));
+  }
+  auto Arr = llvm::ConstantArray::get(llvm::ArrayType::get(module->getTypeByName(LAYOUTITEM_STRUCT), len), elements);
+  auto global = module->getOrInsertGlobal("layout_" + std::to_string(layout), Arr->getType());
+  llvm::GlobalVariable *globalVar = llvm::dyn_cast<llvm::GlobalVariable>(global);
+  if (!globalVar->hasInitializer()) {
+    globalVar->setInitializer(Arr);
+  }
+  llvm::Constant *zero = llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0);
+  auto indices = std::vector<llvm::Constant *>{zero, zero};
+  auto Ptr = llvm::ConstantExpr::getInBoundsGetElementPtr(Arr->getType(), globalVar, indices);
+  return llvm::ConstantStruct::get(module->getTypeByName(LAYOUT_STRUCT), llvm::ConstantInt::get(llvm::Type::getInt8Ty(Ctx), len), Ptr);
+}
+
+static void emitLayouts(KOREDefinition *definition, llvm::Module *module) {
+  std::map<uint16_t, KOREObjectSymbol *> layouts;
+  for (auto entry : definition->getSymbols()) {
+    layouts[entry.second->getLayout()] = entry.second;
+  }
+  llvm::LLVMContext &Ctx = module->getContext();
+  std::vector<llvm::Type *> argTypes;
+  argTypes.push_back(llvm::Type::getInt16Ty(Ctx));
+  auto func = llvm::dyn_cast<llvm::Function>(module->getOrInsertFunction(
+      "getLayoutData", llvm::FunctionType::get(module->getTypeByName(LAYOUT_STRUCT), argTypes, false)));
+  auto EntryBlock = llvm::BasicBlock::Create(Ctx, "entry", func);
+  auto MergeBlock = llvm::BasicBlock::Create(Ctx, "exit");
+  auto stuck = llvm::BasicBlock::Create(Ctx, "stuck");
+  auto Switch = llvm::SwitchInst::Create(func->arg_begin(), stuck, layouts.size(), EntryBlock);
+  auto Phi = llvm::PHINode::Create(module->getTypeByName(LAYOUT_STRUCT), layouts.size(), "phi", MergeBlock);
+  for (auto iter = layouts.begin(); iter != layouts.end(); ++iter) {
+    auto entry = *iter;
+    uint16_t layout = entry.first;
+    auto symbol = entry.second;
+    auto CaseBlock = llvm::BasicBlock::Create(Ctx, "layout" + std::to_string(layout), func);
+    llvm::BranchInst::Create(MergeBlock, CaseBlock);
+    auto data = getLayoutData(layout, symbol, module, definition);
+    Phi->addIncoming(data, CaseBlock);
+    Switch->addCase(llvm::ConstantInt::get(llvm::Type::getInt16Ty(Ctx), layout), CaseBlock);
+  }
+  llvm::ReturnInst::Create(Ctx, Phi, MergeBlock);
+  MergeBlock->insertInto(func);
+  addAbort(stuck, module);
+  stuck->insertInto(func);
+}
+
 static void emitVisitChildren(KOREDefinition *def, llvm::Module *mod) {
   emitTraversal("visitChildren", def, mod, true, getVisitor);
 }
@@ -520,6 +576,8 @@ void emitConfigParserFunctions(KOREDefinition *definition, llvm::Module *module)
 
   emitGetSymbolNameForTag(definition, module);
   emitVisitChildren(definition, module);
+
+  emitLayouts(definition, module);
 }
 
 }

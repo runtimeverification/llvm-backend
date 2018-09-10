@@ -64,6 +64,9 @@ target triple = "x86_64-unknown-linux-gnu"
 %blockheader = type { i64 } 
 %block = type { %blockheader, [0 x i64 *] } ; 16-bit layout, 8-bit length, 32-bit tag, children
 
+%layout = type { i8, %layoutitem* }
+%layoutitem = type { i64, i16 }
+
 ; The layout of a block uniquely identifies the categories of its children as
 ; well as how to allocate/deallocate them and whether to follow their pointers
 ; during gc. Roughly speaking, the following rules apply:
