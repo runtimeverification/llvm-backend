@@ -388,10 +388,10 @@ void KOREDefinition::preprocess() {
   for (auto iter = axioms.begin(); iter != axioms.end();) {
     auto axiom = *iter;
     axiom->ordinal = nextOrdinal++;
+    axiom->pattern->markSymbols(symbols);
     if (!axiom->isRequired()) {
       iter = axioms.erase(iter);
     } else {
-      axiom->pattern->markSymbols(symbols);
       ++iter;
     }
   }
@@ -440,9 +440,10 @@ void KOREDefinition::preprocess() {
     for (auto iter = entry.second.begin(); iter != entry.second.end(); ++iter) {
       KOREObjectSymbol *symbol = *iter;
       if (!symbol->isConcrete()) {
-        assert(symbol->isPolymorphic() && "Unsupported polymorphism");
-        symbol->firstTag = range.first;
-        symbol->lastTag = range.second;
+        if (symbol->isPolymorphic()) {
+          symbol->firstTag = range.first;
+          symbol->lastTag = range.second;
+        }
       }
     }
   }
