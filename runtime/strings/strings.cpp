@@ -1,5 +1,6 @@
-#include<iostream>
 #include<assert.h>
+#include<stdlib.h>
+#include<iostream>
 
 extern "C" {
 
@@ -155,5 +156,7 @@ int main() {
     assert(!hook_STRINGS_ne(a,a));
     assert(!hook_STRINGS_ne(b,b));
     assert(!hook_STRINGS_ne(c,c));
+	
+    std::cout << "all tests passed" << std::endl;
     return 0;
 }
