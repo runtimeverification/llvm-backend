@@ -19,5 +19,6 @@ cd ../build
 ./tools/test_configparser/test_configparser ../test/imp.kore > configparser.ll
 diff configparser.ll ../test/configparser.ll
 RUSTDIR=`rustc --print sysroot`/lib/rustlib/x86_64-unknown-linux-gnu/lib/
+export PATH=$PATH:~/.local/bin
 ../bin/llvm-kompile ../test/imp.kore IMP -o interpreter
 rm -f configparser configparser.ll interpreter
