@@ -1,78 +1,69 @@
 #include<assert.h>
 #include<stdlib.h>
 #include<iostream>
+#include<cstdint>
 
 extern "C" {
 
-// Assume assume length is passed before char *
+struct blockheader {
+	int64_t len;
+};
 
-inline int get_len(const char * a) {
-    const int * head = reinterpret_cast<const int *>(a);
-    return *(head - 1);
-}
+struct string {
+	blockheader b;
+	char data[0];
+};
 
-bool hook_STRINGS_gt(const char * a, const char * b) {
-    int len_a = get_len(a);
-    int len_b = get_len(b);
-    for (int i = 0; i < len_a; ++i) {
-        if (a[i] < b[i]) return false;
-        if (a[i] > b[i]) return true;
-        if (i >= len_b)  return true;
+bool hook_STRINGS_gt(const string * a, const string * b) {
+    for (int i = 0; i < a->b.len; ++i) {
+        if (a->data[i] < b->data[i]) return false;
+        if (a->data[i] > b->data[i]) return true;
+        if (i >= b->b.len)  return true;
     }
     return false;
 }
 
-bool hook_STRINGS_gte(const char * a, const char * b) {
-    int len_a = get_len(a);
-    int len_b = get_len(b);
-    for (int i = 0; i < len_a; ++i) {
-        if (a[i] < b[i]) return false;
-        if (a[i] > b[i]) return true;
-        if (i >= len_b)  return true;
+bool hook_STRINGS_gte(const string * a, const string * b) {
+    for (int i = 0; i < a->b.len; ++i) {
+        if (a->data[i] < b->data[i]) return false;
+        if (a->data[i] > b->data[i]) return true;
+        if (i >= b->b.len)  return true;
     }
-    return len_a == len_b;
+    return a->b.len == b->b.len;
 }
 
-bool hook_STRINGS_lt(const char * a, const char * b) {
-    int len_a = get_len(a);
-    int len_b = get_len(b);
-    for (int i = 0; i < len_a; ++i) {
-        if (a[i] > b[i]) return false;
-        if (a[i] < b[i]) return true;
-        if (i >= len_b)  return false;
+bool hook_STRINGS_lt(const string * a, const string * b) {
+    for (int i = 0; i < a->b.len; ++i) {
+        if (a->data[i] > b->data[i]) return false;
+        if (a->data[i] < b->data[i]) return true;
+        if (i >= b->b.len)  return false;
     }
-    return len_a < len_b;
+    return a->b.len < b->b.len;
 }
 
-bool hook_STRINGS_lte(const char * a, const char * b) {
-    int len_a = get_len(a);
-    int len_b = get_len(b);
-    for (int i = 0; i < len_a; ++i) {
-        if (a[i] > b[i]) return false;
-        if (a[i] < b[i]) return true;
-        if (i >= len_b)  return false;
+bool hook_STRINGS_lte(const string * a, const string * b) {
+    for (int i = 0; i < a->b.len; ++i) {
+        if (a->data[i] > b->data[i]) return false;
+        if (a->data[i] < b->data[i]) return true;
+        if (i >= b->b.len)  return false;
     }
-    return len_a <= len_b;
+    return a->b.len <= b->b.len;
 }
 
-bool hook_STRINGS_eq(const char * a, const char * b) {
-    int len_a = get_len(a);
-    int len_b = get_len(b);
-    for (int i = 0; i < len_a; ++i) {
-        if (a[i] != b[i]) return false;
-        if (i >= len_b)   return false;
+bool hook_STRINGS_eq(const string * a, const string * b) {
+    for (int i = 0; i < a->b.len; ++i) {
+        if (a->data[i] != b->data[i]) return false;
+        if (i >= b->b.len)   return false;
     }
-    return len_a == len_b;
+    return a->b.len == b->b.len;
 }
 
-bool hook_STRINGS_ne(const char * a, const char * b) {
-    int len_a = get_len(a);
-    int len_b = get_len(b);
-    for (int i = 0; i < len_a; ++i) {
-        if (a[i] != b[i]) return true;
-        if (i >= len_b)   return true;
+bool hook_STRINGS_ne(const string * a, const string * b) {
+    for (int i = 0; i < a->b.len; ++i) {
+        if (a->data[i] != b->data[i]) return true;
+        if (i >= b->b.len)   return true;
     }
-    return len_a != len_b;
+    return a->b.len != b->b.len;
 }
 
 }
@@ -81,27 +72,21 @@ int main() {
     // a = "hello"
     // b = "he"
     // c = "hf"
-    char * a_base = static_cast<char *>(malloc(sizeof(char) * 5 + sizeof(int)));
-    char * b_base = static_cast<char *>(malloc(sizeof(char) * 2 + sizeof(int)));
-    char * c_base = static_cast<char *>(malloc(sizeof(char) * 2 + sizeof(int)));
-    int * a_len = reinterpret_cast<int *>(a_base);
-    int * b_len = reinterpret_cast<int *>(b_base);
-    int * c_len = reinterpret_cast<int *>(c_base);
-    *a_len = 5;
-    *b_len = 2;
-    *c_len = 2;
-    a_base[4] = 'h';
-    a_base[5] = 'e';
-    a_base[6] = 'l';
-    a_base[7] = 'l';
-    a_base[8] = 'o';
-    b_base[4] = 'h';
-    b_base[5] = 'e';
-    c_base[4] = 'h';
-    c_base[5] = 'f';
-    const char * a = &a_base[4];
-    const char * b = &b_base[4];
-    const char * c = &c_base[4];
+    string * a = static_cast<string *>(malloc(sizeof(char) * 5 + sizeof(blockheader)));
+    string * b = static_cast<string *>(malloc(sizeof(char) * 2 + sizeof(blockheader)));
+    string * c = static_cast<string *>(malloc(sizeof(char) * 2 + sizeof(blockheader)));
+    a->b.len = 5;
+    b->b.len = 2;
+    c->b.len = 2;
+    a->data[0] = 'h';
+    a->data[1] = 'e';
+    a->data[2] = 'l';
+    a->data[3] = 'l';
+    a->data[4] = 'o';
+    b->data[0] = 'h';
+    b->data[1] = 'e';
+    c->data[0] = 'h';
+    c->data[1] = 'f';
 
     assert(hook_STRINGS_gt(a,b));
     assert(!hook_STRINGS_gt(b,a));
@@ -156,7 +141,7 @@ int main() {
     assert(!hook_STRINGS_ne(a,a));
     assert(!hook_STRINGS_ne(b,b));
     assert(!hook_STRINGS_ne(c,c));
-	
+
     std::cout << "all tests passed" << std::endl;
     return 0;
 }
