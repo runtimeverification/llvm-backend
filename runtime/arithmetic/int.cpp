@@ -4,7 +4,7 @@
 
 extern "C" {
 
-mpz_ptr move_int(__mpz_struct);
+mpz_ptr move_int(mpz_t);
 void add_hash64(void *, uint64_t);
 
 mpz_ptr hook_INT_tmod(mpz_t a, mpz_t b) {
@@ -14,7 +14,7 @@ mpz_ptr hook_INT_tmod(mpz_t a, mpz_t b) {
   }
   mpz_init(result);
   mpz_tdiv_r(result, a, b);
-  return move_int(*result);
+  return move_int(result);
 }
 
 mpz_ptr hook_INT_emod(mpz_t a, mpz_t b) {
@@ -25,21 +25,21 @@ mpz_ptr hook_INT_emod(mpz_t a, mpz_t b) {
   mpz_init(result);
   mpz_tdiv_r(result, a, b);
   if (mpz_sgn(result) >= 0) {
-    return move_int(*result);
+    return move_int(result);
   }
   mpz_t absb;
   mpz_init(absb);
   mpz_abs(absb, b);
   mpz_add(result, result, absb);
   mpz_clear(absb);
-  return move_int(*result);
+  return move_int(result);
 }
 
 mpz_ptr hook_INT_add(mpz_t a, mpz_t b) {
   mpz_t result;
   mpz_init(result);
   mpz_add(result, a, b);
-  return move_int(*result);
+  return move_int(result);
 }
 
 bool hook_INT_le(mpz_t a, mpz_t b) {
@@ -58,21 +58,21 @@ mpz_ptr hook_INT_and(mpz_t a, mpz_t b) {
   mpz_t result;
   mpz_init(result);
   mpz_and(result, a, b);
-  return move_int(*result);
+  return move_int(result);
 }
 
 mpz_ptr hook_INT_mul(mpz_t a, mpz_t b) {
   mpz_t result;
   mpz_init(result);
   mpz_mul(result, a, b);
-  return move_int(*result);
+  return move_int(result);
 }
 
 mpz_ptr hook_INT_sub(mpz_t a, mpz_t b) {
   mpz_t result;
   mpz_init(result);
   mpz_sub(result, a, b);
-  return move_int(*result);
+  return move_int(result);
 }
 
 mpz_ptr hook_INT_tdiv(mpz_t a, mpz_t b) {
@@ -82,7 +82,7 @@ mpz_ptr hook_INT_tdiv(mpz_t a, mpz_t b) {
   }
   mpz_init(result);
   mpz_tdiv_q(result, a, b);
-  return move_int(*result);
+  return move_int(result);
 }
 
 mpz_ptr hook_INT_ediv(mpz_t a, mpz_t b) {
@@ -96,7 +96,7 @@ mpz_ptr hook_INT_ediv(mpz_t a, mpz_t b) {
   } else {
     mpz_cdiv_q(result, a, b);
   }
-  return move_int(*result);
+  return move_int(result);
 }
 
 mpz_ptr hook_INT_shl(mpz_t a, mpz_t b) {
@@ -107,7 +107,7 @@ mpz_ptr hook_INT_shl(mpz_t a, mpz_t b) {
   mpz_init(result);
   unsigned long blong = mpz_get_ui(b);
   mpz_mul_2exp(result, a, blong);
-  return move_int(*result);
+  return move_int(result);
 }
 
 bool hook_INT_lt(mpz_t a, mpz_t b) {
@@ -128,11 +128,11 @@ mpz_ptr hook_INT_shr(mpz_t a, mpz_t b) {
     if (mpz_sgn(a) < 0) {
       mpz_set_si(result, -1);
     }
-    return move_int(*result);
+    return move_int(result);
   }
   unsigned long blong = mpz_get_ui(b);
   mpz_fdiv_q_2exp(result, a, blong);
-  return move_int(*result);
+  return move_int(result);
 }
 
 bool hook_INT_gt(mpz_t a, mpz_t b) {
@@ -147,7 +147,7 @@ mpz_ptr hook_INT_pow(mpz_t a, mpz_t b) {
   mpz_init(result);
   unsigned long blong = mpz_get_ui(b);
   mpz_pow_ui(result, a, blong);
-  return move_int(*result);
+  return move_int(result);
 }
 
 mpz_ptr hook_INT_powmod(mpz_t a, mpz_t b, mpz_t mod) {
@@ -161,35 +161,35 @@ mpz_ptr hook_INT_powmod(mpz_t a, mpz_t b, mpz_t mod) {
     }
   }
   mpz_powm(result, a, b, mod);
-  return move_int(*result);
+  return move_int(result);
 }
 
 mpz_ptr hook_INT_xor(mpz_t a, mpz_t b) {
   mpz_t result;
   mpz_init(result);
   mpz_xor(result, a, b);
-  return move_int(*result);
+  return move_int(result);
 }
 
 mpz_ptr hook_INT_or(mpz_t a, mpz_t b) {
   mpz_t result;
   mpz_init(result);
   mpz_ior(result, a, b);
-  return move_int(*result);
+  return move_int(result);
 }
 
 mpz_ptr hook_INT_not(mpz_t a) {
   mpz_t result;
   mpz_init(result);
   mpz_com(result, a);
-  return move_int(*result);
+  return move_int(result);
 }
 
 mpz_ptr hook_INT_abs(mpz_t a) {
   mpz_t result;
   mpz_init(result);
   mpz_abs(result, a);
-  return move_int(*result);
+  return move_int(result);
 }
 
 mpz_ptr hook_INT_max(mpz_t a, mpz_t b) {
@@ -200,7 +200,7 @@ mpz_ptr hook_INT_max(mpz_t a, mpz_t b) {
   } else {
     mpz_set(result, b);
   }
-  return move_int(*result);
+  return move_int(result);
 }
 
 mpz_ptr hook_INT_min(mpz_t a, mpz_t b) {
@@ -211,7 +211,7 @@ mpz_ptr hook_INT_min(mpz_t a, mpz_t b) {
   } else {
     mpz_set(result, b);
   }
-  return move_int(*result);
+  return move_int(result);
 }
 
 mpz_ptr hook_INT_log(mpz_t a) {
@@ -222,7 +222,7 @@ mpz_ptr hook_INT_log(mpz_t a) {
   mpz_init(result);
   size_t log = mpz_sizeinbase(a, 2) - 1;
   mpz_set_ui(result, log);
-  return move_int(*result);
+  return move_int(result);
 }
 
 #define LIMB_BITS (sizeof(mp_limb_t) * 8)
@@ -265,7 +265,7 @@ mpz_ptr hook_INT_bitRange(mpz_t i, mpz_t off, mpz_t len) {
   mpz_t result;
   if (mpz_sgn(len) == 0) {
     mpz_init(result);
-    return move_int(*result);
+    return move_int(result);
   }
   if (!mpz_fits_ulong_p(len)) {
     throw std::invalid_argument("Length out of range");
@@ -281,11 +281,11 @@ mpz_ptr hook_INT_bitRange(mpz_t i, mpz_t off, mpz_t len) {
       mpz_mul_2exp(result, result, lenlong);
       mpz_sub_ui(result, result, 1);
     }
-    return move_int(*result);
+    return move_int(result);
   }
   unsigned long offlong = mpz_get_ui(off);
   extract(result, i, offlong, lenlong);
-  return move_int(*result);
+  return move_int(result);
 }
 
 void signed_extract(mpz_t result, mpz_t i, size_t off, size_t len) {
@@ -320,7 +320,7 @@ mpz_ptr hook_INT_signExtendBitRange(mpz_t i, mpz_t off, mpz_t len) {
     if (mpz_sgn(i) < 0) {
       mpz_set_si(result, -1);
     }
-    return move_int(*result);
+    return move_int(result);
   }
   if (!mpz_fits_ulong_p(len)) {
     throw std::invalid_argument("Length out of range");
@@ -328,7 +328,7 @@ mpz_ptr hook_INT_signExtendBitRange(mpz_t i, mpz_t off, mpz_t len) {
   unsigned long offlong = mpz_get_ui(off);
   unsigned long lenlong = mpz_get_ui(len);
   signed_extract(result, i, offlong, lenlong);
-  return move_int(*result);
+  return move_int(result);
 }
 
 void int_hash(mpz_t i, void *hasher) {

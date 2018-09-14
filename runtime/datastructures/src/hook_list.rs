@@ -80,7 +80,7 @@ pub unsafe extern "C" fn hook_LIST_range(list: *const List, from_front: *const I
 pub unsafe extern "C" fn hook_LIST_size(l: *const List) -> *mut Int {
   let mut result = Int(0, 0, ptr::null());
   __gmpz_init_set_ui(&mut result, (*l).len());
-  move_int(result)
+  move_int(&result)
 }
 
 #[no_mangle]

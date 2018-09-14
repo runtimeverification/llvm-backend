@@ -30,9 +30,9 @@ extern "C" {
   bool hook_INT_ge(mpz_t, mpz_t);
   bool hook_INT_gt(mpz_t, mpz_t);
 
-  mpz_ptr move_int(__mpz_struct i) {
+  mpz_ptr move_int(mpz_t i) {
     mpz_ptr result = (mpz_ptr)malloc(sizeof(__mpz_struct));
-    *result = i;
+    *result = *i;
     return result;
   }
 }
