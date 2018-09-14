@@ -66,7 +66,7 @@ pub unsafe extern "C" fn hook_SET_choice(s: *const Set) -> K {
 pub unsafe extern "C" fn hook_SET_size(s: *const Set) -> *mut Int {
   let mut result = Int(0, 0, ptr::null());
   __gmpz_init_set_ui(&mut result, (*s).len());
-  move_int(&result)
+  move_int(&mut result)
 }
 
 #[no_mangle]

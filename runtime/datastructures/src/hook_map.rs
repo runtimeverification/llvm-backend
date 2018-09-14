@@ -97,7 +97,7 @@ pub unsafe extern "C" fn hook_MAP_choice(m: *const Map) -> K {
 pub unsafe extern "C" fn hook_MAP_size(m: *const Map) -> *mut Int {
   let mut result = Int(0, 0, ptr::null());
   __gmpz_init_set_ui(&mut result, (*m).len());
-  move_int(&result)
+  move_int(&mut result)
 }
 
 #[no_mangle]

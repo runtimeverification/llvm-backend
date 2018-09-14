@@ -69,7 +69,7 @@ extern "C" {
 }
 
 extern "C" {
-  pub fn move_int(result: *const Int) -> *mut Int;
+  pub fn move_int(result: *mut Int) -> *mut Int;
   pub fn printConfigurationInternal(file: *mut FILE, subject: *const Block, sort: *const c_char);
   pub fn hook_KEQUAL_eq(k1: K, k2: K) -> bool;
   pub fn k_hash<'a>(k1: K, h: *mut c_void) -> u64;
@@ -116,9 +116,10 @@ pub mod testing {
   }
 
   #[no_mangle]
-  pub unsafe extern "C" fn move_int(result: *const Int) -> *mut Int {
+  pub unsafe extern "C" fn move_int(result: *mut Int) -> *mut Int {
     let ptr = alloc_int();
-    *ptr = *result;
+    let int = ptr::replace(result, Int(0, 0, ptr::null()));
+    *ptr = int;
     ptr
   }
 
