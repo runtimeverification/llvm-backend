@@ -4,6 +4,7 @@
 {-# LANGUAGE TupleSections     #-}
 {-# LANGUAGE TypeSynonymInstances #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE TemplateHaskell   #-}
 
 module Pattern ( PatternMatrix(..)
@@ -25,22 +26,28 @@ module Pattern ( PatternMatrix(..)
                , swap
                , simplify
                , DecisionTree(..)
+               , Anchor(..)
+               , Alias(..)
                , compilePattern
+               , shareDt
                , serializeToYaml
                ) where
 
+import           Control.Monad.Free    (Free (..))
 import           Data.Bifunctor        (second)
 import           Data.Deriving         (deriveOrd1, deriveShow1, deriveEq1)
 import           Data.Function         (on)
-import           Data.Functor.Foldable (Fix (..), cata)
+import           Data.Functor.Foldable (Fix (..))
 import           Data.List             (transpose,nub,sortBy)
 import           Data.Maybe            (mapMaybe,catMaybes,isJust,fromJust,listToMaybe)
 import           Data.Semigroup        ((<>))
 import           Data.Text             (Text, pack)
+import           Data.Traversable      (mapAccumL)
 import           Kore.AST.Common       (SymbolOrAlias (..), Id (..), Sort(..))
 import           Kore.AST.MetaOrObject (Object (..))
 import           Kore.Unparser.Unparse (unparseToString)
 import           TextShow              (showt)
+import qualified Data.Map.Strict as Map
 import qualified Data.Yaml.Builder as Y
 import qualified Data.ByteString as B
 
@@ -324,19 +331,25 @@ data DecisionTree a = Leaf (Int, [Occurrence])
                     | Function Text [Occurrence] Text !a  
                     deriving (Show, Eq, Functor, Ord)
 
+data Alias = Alias String
+           deriving (Show)
+data Anchor a = Anchor (Maybe String) (DecisionTree a)
+              deriving (Show, Eq, Functor, Ord)
+
 $(deriveEq1 ''L)
 $(deriveEq1 ''DecisionTree)
 $(deriveShow1 ''L)
 $(deriveShow1 ''DecisionTree)
+$(deriveShow1 ''Anchor)
 $(deriveOrd1 ''L)
 $(deriveOrd1 ''DecisionTree)
 
-instance Y.ToYaml a => Y.ToYaml (DecisionTree a) where
-    toYaml (Leaf (act, x)) = Y.mapping [
+instance Y.ToYaml a => Y.ToYaml (Anchor a) where
+    toYaml (Anchor a (Leaf (act, x))) = Y.namedMapping a [
         "action" Y..= Y.array [Y.toYaml act, Y.toYaml x]
       ]
-    toYaml Fail = Y.string "fail"
-    toYaml (Switch o x) = Y.mapping
+    toYaml (Anchor a Fail) = Y.namedString a "fail"
+    toYaml (Anchor a (Switch o x)) = Y.namedMapping a
       ["specializations" Y..= Y.array (map (\(i1, i2) -> Y.array [Y.toYaml i1, Y.toYaml i2]) (getSpecializations x))
       , "default" Y..= Y.toYaml (case (getDefault x) of
                                     Just i -> Y.toYaml i
@@ -344,7 +357,7 @@ instance Y.ToYaml a => Y.ToYaml (DecisionTree a) where
                                 )
       , "occurrence" Y..= Y.toYaml o
       ]
-    toYaml (SwitchLit o i x) = Y.mapping
+    toYaml (Anchor a (SwitchLit o i x)) = Y.namedMapping a
       ["specializations" Y..= Y.array (map (\(i1, i2) -> Y.array [Y.toYaml i1, Y.toYaml i2]) (getSpecializations x))
       , "default" Y..= Y.toYaml (case (getDefault x) of
                                     Just d -> Y.toYaml d
@@ -354,20 +367,20 @@ instance Y.ToYaml a => Y.ToYaml (DecisionTree a) where
       , "occurrence" Y..= Y.toYaml o
       ]
 
-    toYaml (Swap i x) = Y.mapping
+    toYaml (Anchor a (Swap i x)) = Y.namedMapping a
       ["swap" Y..= Y.array [Y.toYaml i, Y.toYaml x]]
-    toYaml (Function (name, bindings, sort, x)) = Y.mapping
+    toYaml (Anchor a (Function name bindings sort x)) = Y.namedMapping a
       ["function" Y..= Y.toYaml name
       , "sort" Y..= Y.toYaml sort
       , "args" Y..= Y.toYaml bindings
       , "next" Y..= Y.toYaml x
       ]
 
-serializeToYaml :: (Fix DecisionTree) -> B.ByteString
-serializeToYaml = Y.toByteString . Y.toYaml
+instance Y.ToYaml Alias where
+    toYaml (Alias name) = Y.alias name
 
-instance Y.ToYaml (Fix DecisionTree) where
-    toYaml = cata Y.toYaml
+serializeToYaml :: (Free Anchor Alias) -> B.ByteString
+serializeToYaml = Y.toByteString . Y.toYaml
 
 instance Y.ToYaml (Anchor (Free Anchor Alias)) => Y.ToYaml (Free Anchor Alias) where
     toYaml (Pure a) = Y.toYaml a
@@ -411,3 +424,30 @@ compilePattern cm@((ClauseMatrix pm@(PatternMatrix _) ac), os)
     isWildcard (Fix Wildcard) = True
     isWildcard (Fix (Variable _)) = True
     isWildcard _ = False
+
+
+shareDt :: Fix DecisionTree -> Free Anchor Alias
+shareDt =
+  snd . computeSharing (Map.empty)
+  where
+    computeSharing :: Map.Map (Fix DecisionTree) Alias -> Fix DecisionTree -> (Map.Map (Fix DecisionTree) Alias, Free Anchor Alias)
+    computeSharing m dt = 
+      let name = show . length
+          mapDefault = mapAccumL computeSharing
+          addName m' = Map.insert dt (Alias $ name m') m'
+          mapChild = computeSharing m
+      in case Map.lookup dt m of
+           Just alias -> (m, Pure alias)
+           Nothing -> case dt of
+                        Fix (Leaf a) -> (addName m, Free (Anchor (Just $ name m) (Leaf a)))
+                        Fix Fail -> (m, Free (Anchor Nothing Fail))
+                        Fix (Swap i a) -> let (m',child) = mapChild a in (addName m',Free (Anchor (Just $ name m') (Swap i child)))
+                        Fix (Function n os s a) -> let (m',child) = mapChild a in (addName m', Free (Anchor (Just $ name m') (Function n os s child)))
+                        Fix (Switch o (L s d)) -> let (m',s') = mapSpec m s in let (m'',d') = mapDefault m' d in (addName m'', Free (Anchor (Just $ name m'') (Switch o (L s' d'))))
+                        Fix (SwitchLit o bw (L s d)) -> let (m',s') = mapSpec m s in let (m'',d') = mapDefault m' d in (addName m'', Free (Anchor (Just $ name m'') (SwitchLit o bw (L s' d'))))
+                        
+    mapSpec :: Map.Map (Fix DecisionTree) Alias -> [(Text,Fix DecisionTree)] -> (Map.Map (Fix DecisionTree) Alias,[(Text,Free Anchor Alias)])
+    mapSpec m s =
+      let (ts,as) = unzip s
+          (m',as') = mapAccumL computeSharing m as
+      in (m',zip ts as')

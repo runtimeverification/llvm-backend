@@ -4,6 +4,7 @@ module Pattern.Gen where
 
 import qualified Pattern               as P
 import           Pattern.Parser        (unifiedPatternRAlgebra,SymLib(..), getTopChildren)
+import           Control.Monad.Free    (Free (..))
 import           Data.Bits             (shiftL)
 import           Data.Functor.Foldable (Fix (..), para)
 import           Data.List             (transpose)
@@ -147,7 +148,8 @@ mkDecisionTree :: KoreRewrite pattern
                -> KoreIndexedModule StepperAttributes
                -> [(Int, pattern, Maybe CommonKorePattern)]
                -> [Sort Object]
-               -> Fix P.DecisionTree
+               -> Free P.Anchor P.Alias
 mkDecisionTree symlib indexedMod axioms sorts =
   let matrix = genClauseMatrix symlib indexedMod axioms sorts
-  in P.compilePattern matrix
+      dt = P.compilePattern matrix
+  in P.shareDt dt
