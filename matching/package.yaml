@@ -40,6 +40,10 @@ executables:
     source-dirs: app
     ghc-options:
       - -Wall
+      - -threaded
+      - -rtsopts
+      - -with-rtsopts=-N
+      - -O3
     dependencies:
       - matching
 
@@ -47,6 +51,7 @@ library:
   source-dirs: src
   ghc-options:
     - -Wall
+    - -O3
 
 tests:
   matching-test:
