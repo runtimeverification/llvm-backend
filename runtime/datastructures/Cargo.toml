@@ -11,6 +11,7 @@ libc = "0.2.42"
 name = "datastructures"
 
 [profile.dev]
+lto = "true"
 panic = "abort"
 
 [profile.release]

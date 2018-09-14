@@ -7,8 +7,10 @@ make -j`nproc`
 make run-unittests
 cd ../runtime/datastructures
 cargo test
+cargo rustc --release -- --emit=llvm-ir
 cd ../../matching
 stack test
+stack install --ghc-options -O2
 cd ../build
 ./tools/test_rhs/test_rhs ../test/test.kore | diff - ../test/test.ll
 ./tools/test_rhs/test_rhs ../test/imp.kore | diff - ../test/imp.ll
