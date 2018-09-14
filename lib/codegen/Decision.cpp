@@ -60,6 +60,9 @@ void SwitchNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitutio
   }
   for (auto &entry : caseData) {
     auto &_case = *entry.second;
+    if (entry.first == d->StuckBlock) {
+      continue;
+    }
     d->CurrentBlock = entry.first;
     if (!isInt) {
       int offset = 2;
