@@ -119,11 +119,19 @@ hasAtt sentence att =
         _ -> False
     isAtt _ = False
 
+rulePriority :: SentenceAxiom UnifiedSortVariable UnifiedPattern Variable
+             -> Int
+rulePriority s =
+  if hasAtt s "owise" then 3 else
+  if hasAtt s "cool" then 2 else
+  if hasAtt s "heat" then 1 else
+  0
+
 parseAxiomSentence :: (CommonKorePattern -> Maybe (pat Object CommonKorePattern, Maybe CommonKorePattern))
                    -> (Int, SentenceAxiom UnifiedSortVariable UnifiedPattern Variable)
-                   -> [(Bool,Int, pat Object CommonKorePattern, Maybe CommonKorePattern)]
+                   -> [(Int,Int, pat Object CommonKorePattern, Maybe CommonKorePattern)]
 parseAxiomSentence split (i,s) = case split (sentenceAxiomPattern s) of
-      Just (r,sc) -> if hasAtt s "comm" || hasAtt s "assoc" || hasAtt s "idem" then [] else [(hasAtt s "owise",i,r,sc)]
+      Just (r,sc) -> if hasAtt s "comm" || hasAtt s "assoc" || hasAtt s "idem" then [] else [(rulePriority s,i,r,sc)]
       Nothing -> []
 
 unifiedPatternRAlgebra :: (Pattern Meta variable (CommonKorePattern, b) -> b)
@@ -171,7 +179,9 @@ parseTopAxioms :: KoreDefinition -> [(Int,Rewrites Object CommonKorePattern,Mayb
 parseTopAxioms koreDefinition =
   let axioms = getAxioms koreDefinition
       withIndex = indexed axioms
-  in map (\(_,a,b,c) -> (a,b,c)) $ mconcat ((parseAxiomSentence splitTop) <$> withIndex)
+      withOwise = mconcat ((parseAxiomSentence splitTop) <$> withIndex)
+      sorted = sortBy (comparing sel1) withOwise
+  in map (\(_,a,b,c) -> (a,b,c)) sorted
 
 parseFunctionAxioms :: KoreDefinition -> SymbolOrAlias Object -> [(Int,Equals Object CommonKorePattern,Maybe CommonKorePattern)]
 parseFunctionAxioms koreDefinition symbol =
