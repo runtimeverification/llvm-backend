@@ -18,7 +18,7 @@ private:
   llvm::LLVMContext &Ctx;
 
   llvm::Value *createHook(KOREObjectCompositePattern *hookAtt, KOREObjectCompositePattern *pattern);
-  llvm::Value *createFunctionCall(std::string name, KOREObjectCompositePattern *pattern);
+  llvm::Value *createFunctionCall(std::string name, KOREObjectCompositePattern *pattern, bool sret);
   llvm::Value *createToken(SortCategory sort, std::string contents);
 public:
   CreateTerm(

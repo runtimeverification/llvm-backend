@@ -470,7 +470,7 @@ protected:
 
 class KOREObjectCompositeSortDeclaration : public KOREDeclaration {
 private:
-  bool isHooked;
+  bool _isHooked;
   std::string sortName;
 
 public:
@@ -479,13 +479,14 @@ public:
     return new KOREObjectCompositeSortDeclaration(Name, isHooked);
   }
 
-  std::string getName() { return sortName; }
+  std::string getName() const { return sortName; }
+  bool isHooked() const { return _isHooked; }
 
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
 
 private:
   KOREObjectCompositeSortDeclaration(const std::string &Name, bool _isHooked)
-  : isHooked(_isHooked), sortName(Name) { }
+  : _isHooked(_isHooked), sortName(Name) { }
 };
 
 class KORESymbolDeclaration : public KOREDeclaration {
@@ -516,7 +517,7 @@ public:
 
 class KOREObjectSymbolDeclaration : public KOREObjectSymbolAliasDeclaration {
 private:
-  bool isHooked;
+  bool _isHooked;
 
 public:
   static KOREObjectSymbolDeclaration *
@@ -525,11 +526,13 @@ public:
     return new KOREObjectSymbolDeclaration(Sym, isHooked);
   }
 
+  bool isHooked() const { return _isHooked; }
+
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
 
 private:
   KOREObjectSymbolDeclaration(KOREObjectSymbol *Symbol, bool _isHooked)
-  : KOREObjectSymbolAliasDeclaration(Symbol), isHooked(_isHooked) { }
+  : KOREObjectSymbolAliasDeclaration(Symbol), _isHooked(_isHooked) { }
 };
 
 class KOREMetaSymbolDeclaration : public KOREMetaSymbolAliasDeclaration {
@@ -661,6 +664,8 @@ public:
 
   using KOREObjectSymbolMapType = std::map<uint32_t, KOREObjectSymbol *>;
 
+  using KOREObjectSymbolStringMapType = llvm::StringMap<KOREObjectSymbol *>;
+
   using KOREMetaSymbolMapType = llvm::StringMap<KOREMetaSymbol *>;
 
   using KOREObjectSortVariableMapType =
@@ -681,6 +686,7 @@ private:
   KOREObjectSortConstructorMapType objectSortConstructors;
   KOREMetaSortConstructorMapType metaSortConstructors;
   KOREObjectSymbolMapType objectSymbols;
+  KOREObjectSymbolStringMapType allObjectSymbols;
   KOREMetaSymbolMapType metaSymbols;
   KOREObjectSortVariableMapType objectSortVariables;
   KOREMetaSortVariableMapType metaSortVariables;
@@ -714,6 +720,7 @@ public:
   const KOREObjectCompositeSortDeclarationMapType &getSortDeclarations() const { return sortDeclarations; }
   const KOREObjectSymbolDeclarationMapType &getSymbolDeclarations() const { return symbolDeclarations; }
   const KOREObjectSymbolMapType &getSymbols() const { return objectSymbols; }
+  const KOREObjectSymbolStringMapType &getAllSymbols() const { return allObjectSymbols; }
   const std::list<KOREAxiomDeclaration *> &getAxioms() const { return axioms; }
   const llvm::StringMap<KOREObjectCompositePattern *> &getAttributes() const {
     return attributes;

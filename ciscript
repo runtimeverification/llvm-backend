@@ -10,6 +10,7 @@ cargo test
 cargo rustc -- --emit=llvm-ir
 cd ../../matching
 stack test
+stack install
 cd ../build
 ./tools/test_rhs/test_rhs ../test/test.kore | diff - ../test/test.ll
 ./tools/test_rhs/test_rhs ../test/imp.kore | diff - ../test/imp.ll
@@ -18,5 +19,6 @@ cd ../build
 ./tools/test_configparser/test_configparser ../test/imp.kore > configparser.ll
 diff configparser.ll ../test/configparser.ll
 RUSTDIR=`rustc --print sysroot`/lib/rustlib/x86_64-unknown-linux-gnu/lib/
-#clang++ -o configparser configparser.ll runtime/arithmetic/libarithmetic.a ../runtime/datastructures/target/debug/deps/*.ll ../runtime/datastructures/target/debug/deps/*.rlib "$RUSTDIR/"libstd-*.so "$RUSTDIR/"libcompiler_builtins-*.rlib ../runtime/*.ll runtime/configurationparser/libconfigurationparser.a lib/parser/libParser.a lib/ast/libAST.a -lgmp `llvm-config --libs core support irreader --link-static --ldflags`
-rm -f configparser configparser.ll
+export PATH=$PATH:~/.local/bin
+../bin/llvm-kompile ../test/imp.kore IMP -o interpreter
+rm -f configparser configparser.ll interpreter

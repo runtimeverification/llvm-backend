@@ -32,7 +32,7 @@ entry:
   store %blockheader { i64 1688862745165890 }, %blockheader* %kseq
   %1 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %0, i64 0, i32 2
   store %block* %K1, %block** %1
-  %2 = call %block* @"eval_append{SortK{},SortK{}}"(%block* %K2, %block* %K3)
+  %2 = call %block* @"eval_append{SortK{}, SortK{}}"(%block* %K2, %block* %K3)
   %3 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %0, i64 0, i32 3
   store %block* %2, %block** %3
   %4 = bitcast { %blockheader, [0 x i64], %block*, %block* }* %0 to %block*
@@ -41,7 +41,7 @@ entry:
 
 declare noalias i8* @malloc(i64)
 
-declare %block* @"eval_append{SortK{},SortK{}}"(%block*, %block*)
+declare %block* @"eval_append{SortK{}, SortK{}}"(%block*, %block*)
 
 define %block* @apply_rule_145(%block* %VarB2) {
 entry:

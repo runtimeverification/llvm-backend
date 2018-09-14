@@ -9,7 +9,6 @@ libc = "0.2.42"
 
 [lib]
 name = "datastructures"
-crate-type = ["staticlib"]
 
 [profile.dev]
 panic = "abort"
