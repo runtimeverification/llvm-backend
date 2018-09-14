@@ -11,7 +11,7 @@ set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} -flto")
 set(CMAKE_AR "llvm-ar-5.0")
 set(CMAKE_RANLIB "llvm-ranlib-5.0")
 
-find_package(LLVM 5 REQUIRED CONFIG)
+find_package(LLVM 6 REQUIRED CONFIG)
 
 message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
 if (${LLVM_PACKAGE_VERSION} VERSION_LESS 5.0)
@@ -43,7 +43,8 @@ macro(kllvm_add_tool name)
   add_executable(${name} ${ARGN})
 
   # Link against LLVM libraries
-  target_link_libraries(${name} ${llvm_libs})
+  llvm_config(${name})
+  # target_link_libraries(${name} ${llvm_libs})
 endmacro(kllvm_add_tool)
 
 install(
