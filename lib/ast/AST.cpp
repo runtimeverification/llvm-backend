@@ -443,6 +443,10 @@ void KOREDefinition::preprocess() {
         if (symbol->isPolymorphic()) {
           symbol->firstTag = range.first;
           symbol->lastTag = range.second;
+          auto decl = symbolDeclarations.lookup(symbol->getName());
+          if (decl->getAttributes().count("sortInjection")) {
+            injSymbol = symbol;
+          }
         }
       }
     }

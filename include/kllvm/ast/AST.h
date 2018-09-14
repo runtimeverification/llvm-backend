@@ -187,6 +187,8 @@ public:
   const KOREObjectSort *getSort() const { return sort; }
   KOREObjectSort *getSort() { return sort; }
   uint32_t getTag() const { assert(firstTag == lastTag); return firstTag; }
+  uint32_t getFirstTag() const { return firstTag; }
+  uint32_t getLastTag() const { return lastTag; }
   void setTag(uint32_t val) { firstTag = lastTag = val; }
   uint16_t getLayout() const { return layout; }
 
@@ -701,6 +703,8 @@ private:
   /* an automatically computed list of all the axioms in the definition */
   std::list<KOREAxiomDeclaration *> axioms;
 
+  KOREObjectSymbol *injSymbol;
+
 public:
   static KOREDefinition *Create() { return new KOREDefinition(); }
 
@@ -725,6 +729,7 @@ public:
   const llvm::StringMap<KOREObjectCompositePattern *> &getAttributes() const {
     return attributes;
   }
+  KOREObjectSymbol *getInjSymbol() { return injSymbol; }
 };
 
 } // end namespace kllvm
