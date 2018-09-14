@@ -51,7 +51,7 @@ void SwitchNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitutio
     if (caseData.size() == 0) {
       llvm::BranchInst::Create(_default, d->CurrentBlock);
     } else {
-      llvm::Value *tagVal = d->getTag(val);
+      llvm::Value *tagVal = llvm::CallInst::Create(d->Module->getOrInsertFunction("getTag", llvm::Type::getInt32Ty(d->Ctx), getValueType(SortCategory::Symbol, d->Module)), val, "tag", d->CurrentBlock);
       auto _switch = llvm::SwitchInst::Create(tagVal, _default, caseData.size(), d->CurrentBlock);
       for (auto &_case : caseData) {
         _switch->addCase(llvm::ConstantInt::get(llvm::Type::getInt32Ty(d->Ctx), _case.second->getConstructor()->getTag()), _case.first); 
@@ -102,31 +102,6 @@ void LeafNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution)
   }
   auto Call = llvm::CallInst::Create(d->Module->getOrInsertFunction(name, llvm::FunctionType::get(getValueType(d->Cat, d->Module), types, false)), args, "", d->CurrentBlock);
   llvm::ReturnInst::Create(d->Ctx, Call, d->CurrentBlock);
-}
-
-llvm::Value *Decision::getTag(llvm::Value *val) {
-  auto Int = new llvm::PtrToIntInst(val, llvm::Type::getInt64Ty(Ctx), "", CurrentBlock);
-  auto isConstant = new llvm::TruncInst(Int, llvm::Type::getInt1Ty(Ctx), "", CurrentBlock);
-  llvm::BasicBlock *TrueBlock = llvm::BasicBlock::Create(Ctx, "constant", CurrentBlock->getParent());
-  llvm::BasicBlock *FalseBlock = llvm::BasicBlock::Create(Ctx, "block", CurrentBlock->getParent());
-  llvm::BasicBlock *MergeBlock = llvm::BasicBlock::Create(Ctx, "getTag", CurrentBlock->getParent());
-  llvm::BranchInst *Branch = llvm::BranchInst::Create(TrueBlock, FalseBlock, isConstant, CurrentBlock);
-  CurrentBlock = TrueBlock;
-  auto shifted = llvm::BinaryOperator::Create(llvm::Instruction::LShr, Int, llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 32), "", CurrentBlock);
-  Branch = llvm::BranchInst::Create(MergeBlock, CurrentBlock);
-  CurrentBlock = FalseBlock;
-  auto zero = llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), 0);
-  llvm::Value *BlockHeaderPtr = llvm::GetElementPtrInst::CreateInBounds(Module->getTypeByName(BLOCK_STRUCT), val, {llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0), zero, zero}, "", CurrentBlock);
-  llvm::Value *BlockHeader = new llvm::LoadInst(BlockHeaderPtr, "", CurrentBlock);
-  Branch = llvm::BranchInst::Create(MergeBlock, CurrentBlock);
-  llvm::PHINode *Phi = llvm::PHINode::Create(llvm::Type::getInt64Ty(Ctx), 2, "phi", MergeBlock);
-  Phi->addIncoming(BlockHeader, FalseBlock);
-  Phi->addIncoming(shifted, TrueBlock);
-  CurrentBlock = MergeBlock;
-  llvm::Value *Tag = new llvm::TruncInst(Phi, llvm::Type::getInt32Ty(Ctx), "", CurrentBlock);
-  return Tag;
-
-
 }
 
 void makeEvalFunction(KOREObjectSymbol *function, KOREDefinition *definition, llvm::Module *module, DecisionNode *dt) {

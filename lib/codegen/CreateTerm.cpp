@@ -382,6 +382,27 @@ llvm::Value *CreateTerm::createFunctionCall(std::string name, KOREObjectComposit
   return llvm::CallInst::Create(func, args, "", CurrentBlock);
 }
 
+llvm::Value *CreateTerm::notInjectionCase(KOREObjectCompositePattern *constructor, llvm::Value *val) {
+  const KOREObjectSymbol *symbol = constructor->getConstructor();
+  llvm::StructType *BlockType = getBlockType(Module, Definition, symbol);
+  llvm::Value *BlockHeader = getBlockHeader(Module, Definition, symbol, BlockType);
+  llvm::Value *Block = allocateBlock(BlockType, CurrentBlock);
+  llvm::Value *BlockHeaderPtr = llvm::GetElementPtrInst::CreateInBounds(BlockType, Block, {llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0), llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), 0)}, symbol->getName(), CurrentBlock);
+  new llvm::StoreInst(BlockHeader, BlockHeaderPtr, CurrentBlock);
+  int idx = 2;
+  for (auto child : constructor->getArguments()) {
+    llvm::Value *ChildValue;
+    if (idx == 2 && val != nullptr) {
+      ChildValue = val;
+    } else {
+      ChildValue = (*this)(child);
+    }
+    llvm::Value *ChildPtr = llvm::GetElementPtrInst::CreateInBounds(BlockType, Block, {llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0), llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), idx++)}, "", CurrentBlock);
+    new llvm::StoreInst(ChildValue, ChildPtr, CurrentBlock);
+  }
+  return new llvm::BitCastInst(Block, llvm::PointerType::getUnqual(Module->getTypeByName(BLOCK_STRUCT)), "", CurrentBlock);
+}
+
 llvm::Value *CreateTerm::operator()(KOREPattern *pattern) {
   if (auto variable = dynamic_cast<KOREObjectVariablePattern *>(pattern)) {
     return Substitution.lookup(variable->getName());
@@ -406,20 +427,38 @@ llvm::Value *CreateTerm::operator()(KOREPattern *pattern) {
       llvm::StructType *BlockType = Module->getTypeByName(BLOCK_STRUCT);
       llvm::IntToPtrInst *Cast = new llvm::IntToPtrInst(llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), (((uint64_t)symbol->getTag()) << 32) | 1), llvm::PointerType::getUnqual(BlockType), "", CurrentBlock);
       return Cast;
-    } else {
-      llvm::StructType *BlockType = getBlockType(Module, Definition, symbol);
-      llvm::Value *BlockHeader = getBlockHeader(Module, Definition, symbol, BlockType);
-      llvm::Value *Block = allocateBlock(BlockType, CurrentBlock);
-      llvm::Value *BlockHeaderPtr = llvm::GetElementPtrInst::CreateInBounds(BlockType, Block, {llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0), llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), 0)}, symbol->getName(), CurrentBlock);
-      new llvm::StoreInst(BlockHeader, BlockHeaderPtr, CurrentBlock);
-      int idx = 2;
-      for (auto child : constructor->getArguments()) {
-        llvm::Value *ChildValue = (*this)(child);
-        llvm::Value *ChildPtr = llvm::GetElementPtrInst::CreateInBounds(BlockType, Block, {llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0), llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), idx++)}, "", CurrentBlock);
-        new llvm::StoreInst(ChildValue, ChildPtr, CurrentBlock);
+    } else if (symbolDecl->getAttributes().count("sortInjection")
+        && dynamic_cast<KOREObjectCompositeSort *>(symbol->getArguments()[0])->getCategory(Definition) == SortCategory::Symbol) {
+      llvm::Value *val = (*this)(constructor->getArguments()[0]);
+      if (llvm::isa<llvm::Argument>(val)) {
+        llvm::Value *Tag = llvm::CallInst::Create(Module->getOrInsertFunction("getTag", llvm::Type::getInt32Ty(Ctx), getValueType(SortCategory::Symbol, Module)), val, "tag", CurrentBlock);
+        auto inj = Definition->getInjSymbol();
+        auto GeBlock = llvm::BasicBlock::Create(Ctx, "geFirst", CurrentBlock->getParent());
+        auto FalseBlock = llvm::BasicBlock::Create(Ctx, "notInjection", CurrentBlock->getParent());
+        auto TrueBlock = llvm::BasicBlock::Create(Ctx, "merge", CurrentBlock->getParent());
+        auto cmp = new llvm::ICmpInst(*CurrentBlock, llvm::CmpInst::ICMP_UGE, Tag,
+            llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), inj->getFirstTag()));
+        llvm::BranchInst::Create(GeBlock, FalseBlock, cmp, CurrentBlock);
+  
+        CurrentBlock = GeBlock;
+        cmp = new llvm::ICmpInst(*CurrentBlock, llvm::CmpInst::ICMP_ULE, Tag,
+            llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), inj->getLastTag()));
+        llvm::BranchInst::Create(TrueBlock, FalseBlock, cmp, CurrentBlock);
+   
+        CurrentBlock = FalseBlock;
+        auto Cast = notInjectionCase(constructor, val);
+        llvm::BranchInst::Create(TrueBlock, CurrentBlock);
+  
+        CurrentBlock = TrueBlock;
+        llvm::PHINode *Phi = llvm::PHINode::Create(Cast->getType(), 2, "phi", CurrentBlock);
+        Phi->addIncoming(Cast, FalseBlock);
+        Phi->addIncoming(val, GeBlock);
+        return Phi;
+      } else {
+        return notInjectionCase(constructor, val);
       }
-      llvm::BitCastInst *Cast = new llvm::BitCastInst(Block, llvm::PointerType::getUnqual(Module->getTypeByName(BLOCK_STRUCT)), "", CurrentBlock);
-      return Cast;
+    } else {
+     return notInjectionCase(constructor, nullptr);
     }
   } else {
     assert(false && "not supported yet: meta level");
