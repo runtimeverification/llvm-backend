@@ -9,65 +9,45 @@
 
 extern "C" {
 
+#define KCHAR char
+
 struct blockheader {
 	int64_t len;
 };
 
 struct string {
 	blockheader b;
-	char data[0];
+	KCHAR data[0];
 };
 
 bool hook_STRING_gt(const string * a, const string * b) {
-    for (unsigned i = 0; i < a->b.len; ++i) {
-        if (a->data[i] < b->data[i]) return false;
-        if (a->data[i] > b->data[i]) return true;
-        if (i >= b->b.len)  return true;
-    }
-    return false;
+	auto res = memcmp(a->data, b->data, std::min(a->b.len, b->b.len));
+	return res > 0 || (res == 0 && a->b.len > b->b.len);
 }
 
 bool hook_STRING_gte(const string * a, const string * b) {
-    for (unsigned i = 0; i < a->b.len; ++i) {
-        if (a->data[i] < b->data[i]) return false;
-        if (a->data[i] > b->data[i]) return true;
-        if (i >= b->b.len)  return true;
-    }
-    return a->b.len == b->b.len;
+	auto res = memcmp(a->data, b->data, std::min(a->b.len, b->b.len));
+	return (res > 0 || (res == 0 && a->b.len >= b->b.len));
 }
 
 bool hook_STRING_lt(const string * a, const string * b) {
-    for (unsigned i = 0; i < a->b.len; ++i) {
-        if (a->data[i] > b->data[i]) return false;
-        if (a->data[i] < b->data[i]) return true;
-        if (i >= b->b.len)  return false;
-    }
-    return a->b.len < b->b.len;
+	auto res = memcmp(a->data, b->data, std::min(a->b.len, b->b.len));
+	return res < 0 || (res == 0 && a->b.len < b->b.len);
 }
 
 bool hook_STRING_lte(const string * a, const string * b) {
-    for (unsigned i = 0; i < a->b.len; ++i) {
-        if (a->data[i] > b->data[i]) return false;
-        if (a->data[i] < b->data[i]) return true;
-        if (i >= b->b.len)  return false;
-    }
-    return a->b.len <= b->b.len;
+	auto res = memcmp(a->data, b->data, std::min(a->b.len, b->b.len));
+	return (res < 0 || (res == 0 && a->b.len <= b->b.len));
 }
 
 bool hook_STRING_eq(const string * a, const string * b) {
-    for (unsigned i = 0; i < a->b.len; ++i) {
-        if (a->data[i] != b->data[i]) return false;
-        if (i >= b->b.len)   return false;
-    }
-    return a->b.len == b->b.len;
+	auto res = memcmp(a->data, b->data, std::min(a->b.len, b->b.len));
+	return (res == 0 && a->b.len == b->b.len);
 }
 
 bool hook_STRING_ne(const string * a, const string * b) {
-    for (unsigned i = 0; i < a->b.len; ++i) {
-        if (a->data[i] != b->data[i]) return true;
-        if (i >= b->b.len)   return true;
-    }
-    return a->b.len != b->b.len;
+	auto res = memcmp(a->data, b->data, std::min(a->b.len, b->b.len));
+	return (res != 0 || a->b.len != b->b.len);
 }
 
 string * hook_STRING_concat(const string * a, const string * b) {
@@ -76,8 +56,8 @@ string * hook_STRING_concat(const string * a, const string * b) {
 	auto newlen = len_a  + len_b;
 	auto ret = static_cast<string *>(malloc(sizeof(string) + newlen));
 	ret->b.len = newlen;
-	for (unsigned i = 0; i < a->b.len; ++i) ret->data[i] = a->data[i];
-	for (unsigned i = 0; i < b->b.len; ++i) ret->data[i+len_a] = b->data[i];
+	memcpy(&(ret->data), &(a->data), a->b.len * sizeof(KCHAR));
+	memcpy(&(ret->data[a->b.len]), &(b->data), b->b.len * sizeof(KCHAR));
 	return ret;
 }
 
@@ -86,9 +66,9 @@ int64_t hook_STRING_length(const string * a) {
 }
 
 string * hook_STRING_chr(const int64_t ord) {
-	auto ret = static_cast<string *>(malloc(sizeof(string) + sizeof(char)));
+	auto ret = static_cast<string *>(malloc(sizeof(string) + sizeof(KCHAR)));
 	ret->b.len = 1;
-	ret->data[0] = static_cast<char>(ord);
+	ret->data[0] = static_cast<KCHAR>(ord);
 	return ret;
 }
 
@@ -103,9 +83,9 @@ int64_t hook_STRING_ord(const string * input) {
 string * hook_STRING_substr(const string * input, const int64_t start, int64_t len) {
 	if (len == -1) len = input->b.len;
 	auto minLen = std::max(std::min(len, input->b.len - start), 0L);
-	auto ret = static_cast<string *>(malloc(sizeof(string) + sizeof(char) * minLen));
+	auto ret = static_cast<string *>(malloc(sizeof(string) + sizeof(KCHAR) * minLen));
 	ret->b.len = minLen;
-	for (unsigned i = 0; i < minLen; ++i) ret->data[i] = input->data[i + start];
+	memcpy(&(ret->data), &(input->data[start]), minLen * sizeof(KCHAR));
 	return ret;
 }
 
@@ -169,7 +149,7 @@ int64_t hook_STRING_rfindChar(const string * haystack, const string * needle, in
 	return hs.rfind(ns, pos);
 }
 
-string * makeString(const char * input) {
+string * makeString(const KCHAR * input) {
 	auto len = strlen(input);
 	auto ret = static_cast<string *>(malloc(sizeof(string) + len));
 	for (unsigned i = 0; i < len; ++i) {
@@ -192,7 +172,7 @@ double hook_STRING_string2float(const string * input) {
 
 // uses std::string for memory allocation, double copy here is not the best, but at least the
 // first copy is released at the end of the function.
-string * hook_STRING_replaceAll(const string * input, const string * matcher, string * replacer) {
+string * hook_STRING_replaceAll(const string * input, const string * matcher, const string * replacer) {
 	std::string ret;
 	auto rs = std::string(replacer->data, replacer->b.len);
 	for (auto i = 0; i < input->b.len;) {
@@ -226,7 +206,7 @@ string * hook_STRING_replaceAll(const string * input, const string * matcher, st
 
 // uses std::string for memory allocation, double copy here is not the best, but at least the
 // first copy is released at the end of the function.
-string * hook_STRING_replace(const string * input, const string * matcher, string * replacer, int64_t occurences) {
+string * hook_STRING_replace(const string * input, const string * matcher, const string * replacer, int64_t occurences) {
 	std::string ret;
 	auto rs = std::string(replacer->data, replacer->b.len);
 	for (auto i = 0; i < input->b.len;) {
@@ -266,7 +246,7 @@ string * hook_STRING_replace(const string * input, const string * matcher, strin
 
 // uses std::string for memory allocation, double copy here is not the best, but at least the
 // first copy is released at the end of the function.
-string * hook_STRING_replaceFirst(const string * input, const string * matcher, string * replacer) {
+string * hook_STRING_replaceFirst(const string * input, const string * matcher, const string * replacer) {
 	std::string ret;
 	auto rs = std::string(replacer->data, replacer->b.len);
 	auto replaced = false;
