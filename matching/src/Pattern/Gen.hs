@@ -91,7 +91,7 @@ genVars = para (unifiedPatternRAlgebra rAlgebra rAlgebra)
     rAlgebra _                                            = []
 
 defaultMetadata :: Sort Object -> P.Metadata
-defaultMetadata sort = P.Metadata 1 [] sort (const $ Just [])
+defaultMetadata sort = P.Metadata 1 [] sort (const $ Nothing)
 
 genMetadatas :: SymLib -> KoreIndexedModule StepperAttributes -> Map.Map (Sort Object) P.Metadata
 genMetadatas syms@(SymLib symbols sorts) indexedMod =
