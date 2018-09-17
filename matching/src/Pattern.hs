@@ -70,7 +70,7 @@ data Metadata = Metadata
 type Constructor = Either (SymbolOrAlias Object) String
 
 type Index       = Int
-data Pattern a   = Pattern Constructor (Maybe Int) ![a]
+data Pattern a   = Pattern Constructor (Maybe String) ![a]
                  | Wildcard
                  | Variable String
                  deriving (Show, Eq, Functor)
@@ -188,14 +188,14 @@ sigma₁ :: PatternMatrix -> [Constructor]
 sigma₁ (PatternMatrix (c : _)) = sigma c
 sigma₁ _                       = []
 
-bitwidth :: PatternMatrix -> Maybe Int
+bitwidth :: PatternMatrix -> Maybe String
 bitwidth (PatternMatrix (c : _)) = 
   let s = bw c
   in listToMaybe $ catMaybes $ s
   where
-    bw :: Column -> [Maybe Int]
+    bw :: Column -> [Maybe String]
     bw = map ix . getTerms
-    ix :: Fix Pattern -> Maybe Int
+    ix :: Fix Pattern -> Maybe String
     ix (Fix (Pattern _ bw' _)) = bw'
     ix _ = Nothing
 bitwidth _                       = Nothing

@@ -49,8 +49,8 @@ instance KoreRewrite (Rewrites lvl CommonKorePattern) where
   getLeftHandSide = (: []) . rewritesFirst
   getRightHandSide = rewritesSecond
 
-genPattern :: KoreRewrite pattern => (Sort Object -> Int) -> pattern -> [Fix P.Pattern]
-genPattern getBitwidth rewrite =
+genPattern :: KoreRewrite pattern => MetadataTools Object StepperAttributes -> pattern -> [Fix P.Pattern]
+genPattern tools rewrite =
   let lhs = getLeftHandSide rewrite
   in map (para (unifiedPatternRAlgebra (error "unsupported: meta level") rAlgebra)) lhs
   where
@@ -59,11 +59,12 @@ genPattern getBitwidth rewrite =
              -> Fix P.Pattern
     rAlgebra (ApplicationPattern (Application sym ps)) = Fix $ P.Pattern (Left sym) Nothing (map snd ps)
     rAlgebra (DomainValuePattern (DomainValue sort (Fix (StringLiteralPattern (StringLiteral str))))) =
-      Fix $ P.Pattern (case str of
-                         "true" -> Right "1"
-                         "false" -> Right "0"
-                         _ -> Right str)
-        (Just $ getBitwidth sort) []
+      let att = getHook $ hook $ sortAttributes tools sort
+      in Fix $ P.Pattern (if att == Just "BOOL.Bool" then case str of
+                           "true" -> Right "1"
+                           "false" -> Right "0"
+                           _ -> Right str else Right str)
+          (if att == Nothing then Just "STRING.String" else att) []
     rAlgebra (VariablePattern (Variable (Id name _) _)) = Fix $ P.Variable name
     rAlgebra _ = error "Unsupported pattern type"
 
@@ -100,14 +101,25 @@ genMetadatas syms@(SymLib symbols sorts) indexedMod =
     genMetadata sort@(SortActualSort _) constructors =
       let att = sortAttributes (extractMetadataTools indexedMod) sort
           hookAtt = getHook $ hook att
-          isToken = case hookAtt of
+          isInt = case hookAtt of
             Just "BOOL.Bool" -> True
             Just "MINT.MInt" -> True
             _                -> False
-      in if isToken then
+          isToken = case hookAtt of
+            Just "STRING.String" -> True
+            Just "INT.Int" -> True
+            Just "FLOAT.Float" -> True
+            Just "BUFFER.StringBuffer" -> True
+            Just "BYTES.Bytes" -> True
+            Just "MINT.MInt" -> True
+            Just _ -> False
+            Nothing -> False
+      in if isInt then
         let tools = extractMetadataTools indexedMod
             bw = bitwidth tools sort
         in Just $ P.Metadata (shiftL 1 bw) [] sort (const $ Just [])
+      else if isToken then
+        Just $ defaultMetadata sort
       else
         let metadatas = genMetadatas syms indexedMod
             keys = map Left constructors
@@ -134,8 +146,7 @@ genClauseMatrix symlib indexedMod axioms sorts =
       rewrites = map getRewrite axioms
       sideConditions = map getSideCondition axioms
       tools = extractMetadataTools indexedMod
-      bw = bitwidth tools
-      patterns = map (genPattern bw) rewrites
+      patterns = map (genPattern tools) rewrites
       rhsVars = map (genVars . getRightHandSide) rewrites
       scVars = map (maybe Nothing (Just . genVars)) sideConditions
       actions = zipWith3 P.Action indices rhsVars scVars
