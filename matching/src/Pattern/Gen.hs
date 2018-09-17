@@ -165,5 +165,5 @@ mkDecisionTree :: KoreRewrite pattern
                -> Free P.Anchor P.Alias
 mkDecisionTree symlib indexedMod axioms sorts =
   let matrix = genClauseMatrix symlib indexedMod axioms sorts
-      dt = P.compilePattern matrix
+      dt = P.compilePattern 0 matrix
   in P.shareDt dt

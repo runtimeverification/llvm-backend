@@ -327,6 +327,7 @@ data DecisionTree a = Leaf (Int, [Occurrence])
                     | Fail
                     | Switch Occurrence !(L a)
                     | SwitchLit Occurrence Int !(L a)
+                    | EqualLiteral Text Text !a
                     | Swap Index !a
                     | Function Text [Occurrence] Text !a  
                     deriving (Show, Eq, Functor, Ord)
@@ -366,7 +367,11 @@ instance Y.ToYaml a => Y.ToYaml (Anchor a) where
       , "bitwidth" Y..= Y.toYaml i
       , "occurrence" Y..= Y.toYaml o
       ]
-
+    toYaml (Anchor a (EqualLiteral h l x)) = Y.namedMapping a
+      ["hook" Y..= Y.toYaml h
+      , "literal" Y..= Y.toYaml l
+      , "next" Y..= Y.toYaml x
+      ]
     toYaml (Anchor a (Swap i x)) = Y.namedMapping a
       ["swap" Y..= Y.array [Y.toYaml i, Y.toYaml x]]
     toYaml (Anchor a (Function name bindings sort x)) = Y.namedMapping a
@@ -386,8 +391,8 @@ instance Y.ToYaml (Anchor (Free Anchor Alias)) => Y.ToYaml (Free Anchor Alias) w
     toYaml (Pure a) = Y.toYaml a
     toYaml (Free f) = Y.toYaml f
 
-getLeaf :: [Occurrence] -> [Fix Pattern] -> Clause -> Fix DecisionTree -> Fix DecisionTree
-getLeaf os ps (Clause (Action a rhsVars maybeSideCondition) matchedVars) next =
+getLeaf :: Int -> [Occurrence] -> [Fix Pattern] -> Clause -> Fix DecisionTree -> Fix DecisionTree
+getLeaf ix os ps (Clause (Action a rhsVars maybeSideCondition) matchedVars) next =
   let row = zip os ps
       vars = foldr (\(o, p) -> \l -> (addVarToRow Nothing o l p)) matchedVars row
       sorted = sortBy (compare `on` fst) vars
@@ -397,26 +402,33 @@ getLeaf os ps (Clause (Action a rhsVars maybeSideCondition) matchedVars) next =
     Nothing -> Fix $ Leaf (a, newVars)
     Just cond -> let condFiltered = filter (flip elem cond . fst) sorted
                      (_, condVars) = unzip condFiltered
-                 in function (pack $ "side_condition_" ++ (show a)) condVars "BOOL.Bool" (switchLit [0, 0] 1 [("1", (leaf a newVars)), ("0", next)] Nothing)
+                 in function (pack $ "side_condition_" ++ (show a)) condVars "BOOL.Bool" (switchLit [ix, 0] 1 [("1", (leaf a newVars)), ("0", next)] Nothing)
 
-compilePattern :: (ClauseMatrix, [Occurrence]) -> (Fix DecisionTree)
-compilePattern cm@((ClauseMatrix pm@(PatternMatrix _) ac), os)
-  | length ac == 0 = Fix Fail
-  | isWildcardRow pm = if length ac == 1 then getLeaf os (firstRow pm) (head ac) failure else getLeaf os (firstRow pm) (head ac) (compilePattern ((ClauseMatrix (notFirstRow pm) (tail ac)), os))
-  | otherwise =
-    let bw = bitwidth pm
-        s₁ = sigma₁ pm
-        ls = map (`mSpecialize` cm) s₁
-        d  = mDefault cm
-    in case bw of
-         Nothing -> Fix $ Switch (head os) L
-             { getSpecializations = map (second compilePattern) ls
-             , getDefault = compilePattern <$> d
-             }
-         Just bw' -> Fix $ SwitchLit (head os) bw' L
-             { getSpecializations = map (second compilePattern) ls
-             , getDefault = compilePattern <$> d
-             }
+compilePattern :: Int -> (ClauseMatrix, [Occurrence]) -> (Fix DecisionTree)
+compilePattern ix cm@((ClauseMatrix pm@(PatternMatrix _) ac), os) =
+  case ac of
+    [] -> Fix Fail
+    hd:tl -> 
+      if isWildcardRow pm then
+      let (Clause (Action _ _ maybeSideCondition) _) = hd
+          ix' = if isJust maybeSideCondition then ix+1 else ix
+      in if length ac == 1 then getLeaf ix os (firstRow pm) hd failure else getLeaf ix os (firstRow pm) hd (compilePattern ix' ((ClauseMatrix (notFirstRow pm) tl), os))
+      else 
+      let bw = bitwidth pm
+          s₁ = sigma₁ pm
+          ls = map (`mSpecialize` cm) s₁
+          d  = mDefault cm
+      in case bw of
+           Nothing -> Fix $ Switch (head os) L
+               { getSpecializations = map (second (compilePattern ix)) ls
+               , getDefault = compilePattern ix <$> d
+               }
+           Just "BOOL.Bool" -> Fix $ SwitchLit (head os) 1 L
+               { getSpecializations = map (second (compilePattern ix)) ls
+               , getDefault = compilePattern ix <$> d
+               }
+           Just "MINT.MInt" -> error "not supported yet: mint"
+           Just hook -> equalLiteral ix hook ls d
   where
     isWildcardRow :: PatternMatrix -> Bool
     isWildcardRow = and . map isWildcard . firstRow
@@ -424,6 +436,10 @@ compilePattern cm@((ClauseMatrix pm@(PatternMatrix _) ac), os)
     isWildcard (Fix Wildcard) = True
     isWildcard (Fix (Variable _)) = True
     isWildcard _ = False
+    equalLiteral :: Int -> String -> [(Text, (ClauseMatrix, [Occurrence]))] -> Maybe (ClauseMatrix, [Occurrence]) -> Fix DecisionTree
+    equalLiteral o _ [] (Just d) = compilePattern o d
+    equalLiteral _ _ [] (Nothing) = Fix Fail
+    equalLiteral o hook ((name,spec):tl) d = Fix $ EqualLiteral (pack hook) name $ Fix $ SwitchLit [ix, 0] 1 $ L [("1", compilePattern (o+1) spec),("0", equalLiteral (o+1) hook tl d)] Nothing
 
 
 shareDt :: Fix DecisionTree -> Free Anchor Alias
@@ -442,6 +458,7 @@ shareDt =
                         Fix (Leaf a) -> (addName m, Free (Anchor (Just $ name m) (Leaf a)))
                         Fix Fail -> (m, Free (Anchor Nothing Fail))
                         Fix (Swap i a) -> let (m',child) = mapChild a in (addName m',Free (Anchor (Just $ name m') (Swap i child)))
+                        Fix (EqualLiteral h l a) -> let (m',child) = mapChild a in (addName m',Free (Anchor (Just $ name m') (EqualLiteral h l child)))
                         Fix (Function n os s a) -> let (m',child) = mapChild a in (addName m', Free (Anchor (Just $ name m') (Function n os s child)))
                         Fix (Switch o (L s d)) -> let (m',s') = mapSpec m s in let (m'',d') = mapDefault m' d in (addName m'', Free (Anchor (Just $ name m'') (Switch o (L s' d'))))
                         Fix (SwitchLit o bw (L s d)) -> let (m',s') = mapSpec m s in let (m'',d') = mapDefault m' d in (addName m'', Free (Anchor (Just $ name m'') (SwitchLit o bw (L s' d'))))
