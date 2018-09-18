@@ -331,9 +331,9 @@ data DecisionTree a = Leaf (Int, [Occurrence])
                     | Function Text [Occurrence] Text !a  
                     deriving (Show, Eq, Functor, Ord)
 
-data Alias = Alias String
-           deriving (Show)
-data Anchor a = Anchor (Maybe String) (DecisionTree a)
+newtype Alias = Alias Text
+              deriving (Show)
+data Anchor a = Anchor (Maybe Text) (DecisionTree a)
               deriving (Show, Eq, Functor, Ord)
 
 $(deriveEq1 ''L)
@@ -432,7 +432,7 @@ shareDt =
   where
     computeSharing :: Map.Map (Fix DecisionTree) Alias -> Fix DecisionTree -> (Map.Map (Fix DecisionTree) Alias, Free Anchor Alias)
     computeSharing m dt = 
-      let name = show . length
+      let name = pack . show . length
           mapDefault = mapAccumL computeSharing
           addName m' = Map.insert dt (Alias $ name m') m'
           mapChild = computeSharing m
