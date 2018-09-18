@@ -188,8 +188,8 @@ sigma₁ :: PatternMatrix -> [Constructor]
 sigma₁ (PatternMatrix (c : _)) = sigma c
 sigma₁ _                       = []
 
-bitwidth :: PatternMatrix -> Maybe String
-bitwidth (PatternMatrix (c : _)) = 
+hook :: PatternMatrix -> Maybe String
+hook (PatternMatrix (c : _)) = 
   let s = bw c
   in listToMaybe $ catMaybes $ s
   where
@@ -198,7 +198,7 @@ bitwidth (PatternMatrix (c : _)) =
     ix :: Fix Pattern -> Maybe String
     ix (Fix (Pattern _ bw' _)) = bw'
     ix _ = Nothing
-bitwidth _                       = Nothing
+hook _                       = Nothing
 
 mSpecialize :: Constructor -> (ClauseMatrix, [Occurrence]) -> (Text, (ClauseMatrix, [Occurrence]))
 mSpecialize ix (cm@(ClauseMatrix (PatternMatrix (c : _)) _), o : os) = 
@@ -404,42 +404,48 @@ getLeaf ix os ps (Clause (Action a rhsVars maybeSideCondition) matchedVars) next
                      (_, condVars) = unzip condFiltered
                  in function (pack $ "side_condition_" ++ (show a)) condVars "BOOL.Bool" (switchLit [ix, 0] 1 [("1", (leaf a newVars)), ("0", next)] Nothing)
 
-compilePattern :: Int -> (ClauseMatrix, [Occurrence]) -> (Fix DecisionTree)
-compilePattern ix cm@((ClauseMatrix pm@(PatternMatrix _) ac), os) =
-  case ac of
-    [] -> Fix Fail
-    hd:tl -> 
-      if isWildcardRow pm then
-      let (Clause (Action _ _ maybeSideCondition) _) = hd
-          ix' = if isJust maybeSideCondition then ix+1 else ix
-      in if length ac == 1 then getLeaf ix os (firstRow pm) hd failure else getLeaf ix os (firstRow pm) hd (compilePattern ix' ((ClauseMatrix (notFirstRow pm) tl), os))
-      else 
-      let bw = bitwidth pm
-          s₁ = sigma₁ pm
-          ls = map (`mSpecialize` cm) s₁
-          d  = mDefault cm
-      in case bw of
-           Nothing -> Fix $ Switch (head os) L
-               { getSpecializations = map (second (compilePattern ix)) ls
-               , getDefault = compilePattern ix <$> d
-               }
-           Just "BOOL.Bool" -> Fix $ SwitchLit (head os) 1 L
-               { getSpecializations = map (second (compilePattern ix)) ls
-               , getDefault = compilePattern ix <$> d
-               }
-           Just "MINT.MInt" -> error "not supported yet: mint"
-           Just hook -> equalLiteral ix hook ls d
+compilePattern :: (ClauseMatrix, [Occurrence]) -> (Fix DecisionTree)
+compilePattern cm' =
+  compilePattern' 0 cm'
   where
+    compilePattern' :: Int -> (ClauseMatrix, [Occurrence]) -> (Fix DecisionTree)
+    compilePattern' ix cm@((ClauseMatrix pm@(PatternMatrix _) ac), os) = 
+      case ac of
+        [] -> Fix Fail
+        hd:tl -> 
+          if isWildcardRow pm then
+          let (Clause (Action _ _ maybeSideCondition) _) = hd
+              ix' = if isJust maybeSideCondition then ix+1 else ix
+          in if length ac == 1 then getLeaf ix os (firstRow pm) hd failure else getLeaf ix os (firstRow pm) hd (compilePattern' ix' ((ClauseMatrix (notFirstRow pm) tl), os))
+          else 
+          let hookAtt = hook pm
+              s₁ = sigma₁ pm
+              ls = map (`mSpecialize` cm) s₁
+              d  = mDefault cm
+          in case hookAtt of
+               Nothing -> Fix $ Switch (head os) L
+                   { getSpecializations = map (second (compilePattern' ix)) ls
+                   , getDefault = compilePattern' ix <$> d
+                   }
+               Just "BOOL.Bool" -> Fix $ SwitchLit (head os) 1 L
+                   { getSpecializations = map (second (compilePattern' ix)) ls
+                   , getDefault = compilePattern' ix <$> d
+                   }
+               Just ('M':'I':'N':'T':'.':'M':'I':'n':'t':' ':bw) -> Fix $ SwitchLit (head os) (read bw) L
+                   { getSpecializations = map (second (compilePattern' ix)) ls
+                   , getDefault = compilePattern' ix <$> d
+                   }
+               Just hookName -> equalLiteral ix os hookName ls d
     isWildcardRow :: PatternMatrix -> Bool
     isWildcardRow = and . map isWildcard . firstRow
     isWildcard :: Fix Pattern -> Bool
     isWildcard (Fix Wildcard) = True
     isWildcard (Fix (Variable _)) = True
     isWildcard _ = False
-    equalLiteral :: Int -> String -> [(Text, (ClauseMatrix, [Occurrence]))] -> Maybe (ClauseMatrix, [Occurrence]) -> Fix DecisionTree
-    equalLiteral o _ [] (Just d) = compilePattern o d
-    equalLiteral _ _ [] (Nothing) = Fix Fail
-    equalLiteral o hook ((name,spec):tl) d = Fix $ EqualLiteral (pack hook) name $ Fix $ SwitchLit [ix, 0] 1 $ L [("1", compilePattern (o+1) spec),("0", equalLiteral (o+1) hook tl d)] Nothing
+    equalLiteral :: Int -> [Occurrence] -> String -> [(Text, (ClauseMatrix, [Occurrence]))] -> Maybe (ClauseMatrix, [Occurrence]) -> Fix DecisionTree
+    equalLiteral o os _ [] (Just d) = Fix $ Switch (head os) L { getSpecializations = [], getDefault = Just $ compilePattern' o d }
+    equalLiteral _ _ _ [] (Nothing) = Fix Fail
+    equalLiteral o os hookName ((name,spec):tl) d = Fix $ EqualLiteral (pack hookName) name $ Fix $ SwitchLit [o, 0] 1 $ L [("1", compilePattern' (o+1) spec),("0", equalLiteral (o+1) os hookName tl d)] Nothing
 
 
 shareDt :: Fix DecisionTree -> Free Anchor Alias

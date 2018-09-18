@@ -7,6 +7,7 @@ import           Pattern.Parser        (unifiedPatternRAlgebra,SymLib(..), getTo
                                         AxiomInfo(..))
 import           Control.Monad.Free    (Free (..))
 import           Data.Bits             (shiftL)
+import           Data.Either           (isLeft)
 import           Data.Functor.Foldable (Fix (..), para)
 import           Data.List             (transpose)
 import qualified Data.Map              as Map
@@ -91,7 +92,7 @@ genVars = para (unifiedPatternRAlgebra rAlgebra rAlgebra)
     rAlgebra _                                            = []
 
 defaultMetadata :: Sort Object -> P.Metadata
-defaultMetadata sort = P.Metadata 1 [] sort (const $ Nothing)
+defaultMetadata sort = P.Metadata 1 [] sort (\c -> if isLeft c then Nothing else Just [])
 
 genMetadatas :: SymLib -> KoreIndexedModule StepperAttributes -> Map.Map (Sort Object) P.Metadata
 genMetadatas syms@(SymLib symbols sorts) indexedMod =
@@ -165,5 +166,5 @@ mkDecisionTree :: KoreRewrite pattern
                -> Free P.Anchor P.Alias
 mkDecisionTree symlib indexedMod axioms sorts =
   let matrix = genClauseMatrix symlib indexedMod axioms sorts
-      dt = P.compilePattern 0 matrix
+      dt = P.compilePattern matrix
   in P.shareDt dt

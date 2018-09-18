@@ -38,7 +38,7 @@ instance IsPattern Lst where
 
 instance IsPattern IntPat where
   toPattern :: IntPat -> Fix Pattern
-  toPattern (IntLit i) = Fix (Pattern (Right $ show i) (Just 32) [])
+  toPattern (IntLit i) = Fix (Pattern (Right $ show i) (Just "MINT.MInt 32") [])
   toPattern IntWld     = Fix Wildcard
   toPattern (IntVar v) = Fix (Variable v)
 
