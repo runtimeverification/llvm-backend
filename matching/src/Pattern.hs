@@ -71,6 +71,7 @@ type Constructor = Either (SymbolOrAlias Object) String
 
 type Index       = Int
 data Pattern a   = Pattern Constructor (Maybe String) ![a]
+                 | As String a
                  | Wildcard
                  | Variable String
                  deriving (Show, Eq, Functor)
@@ -171,8 +172,9 @@ sigma c =
   where
     ix :: Fix Pattern -> Maybe Constructor
     ix (Fix (Pattern ix' _ _)) = Just ix'
-    ix (Fix Wildcard)             = Nothing
-    ix (Fix (Variable _))         = Nothing
+    ix (Fix (As _ pat))        = ix pat
+    ix (Fix Wildcard)          = Nothing
+    ix (Fix (Variable _))      = Nothing
     isInj :: Constructor -> Bool
     isInj (Left (SymbolOrAlias (Id "inj" _) _)) = True
     isInj _ = False
@@ -197,7 +199,9 @@ hook (PatternMatrix (c : _)) =
     bw = map ix . getTerms
     ix :: Fix Pattern -> Maybe String
     ix (Fix (Pattern _ bw' _)) = bw'
-    ix _ = Nothing
+    ix (Fix (As _ pat))        = ix pat
+    ix (Fix Wildcard)          = Nothing
+    ix (Fix (Variable _))      = Nothing
 hook _                       = Nothing
 
 mSpecialize :: Constructor -> (ClauseMatrix, [Occurrence]) -> (Text, (ClauseMatrix, [Occurrence]))
@@ -248,10 +252,13 @@ filterByList _ _                   = []
 
 isNotPattern :: Fix Pattern -> Bool
 isNotPattern (Fix (Pattern _ _ _)) = False
-isNotPattern _ = True
+isNotPattern (Fix (As _ pat)) = isNotPattern pat
+isNotPattern (Fix Wildcard) = True
+isNotPattern (Fix (Variable _)) = True
 
 checkPatternIndex :: Constructor -> Metadata -> Fix Pattern -> Bool
 checkPatternIndex _ _ (Fix Wildcard) = True
+checkPatternIndex ix m (Fix (As _ pat)) = checkPatternIndex ix m pat
 checkPatternIndex _ _ (Fix (Variable _)) = True
 checkPatternIndex (Left (SymbolOrAlias (Id "inj" _) [a,c])) (Metadata _ _ _ meta) (Fix (Pattern ix@(Left (SymbolOrAlias name@(Id "inj" _) [b,c'])) _ [p])) =
   let m@(Metadata _ _ _ childMeta) = (fromJust $ meta ix) !! 0
@@ -266,8 +273,10 @@ addVars ix as c o =
 
 addVarToRow :: Maybe Constructor -> Occurrence -> [(String, Occurrence)] -> Fix Pattern -> [(String, Occurrence)]
 addVarToRow _ o vars (Fix (Variable name)) = (name, o) : vars
+addVarToRow _ o vars (Fix (As name _)) = (name, o) : vars
+addVarToRow _ _ vars (Fix Wildcard) = vars
 addVarToRow (Just (Left (SymbolOrAlias (Id "inj" _) [a,_]))) o vars (Fix (Pattern (Left (SymbolOrAlias (Id "inj" _) [b,_])) _ [Fix (Variable name)])) = if a == b then vars else (name, o) : vars
-addVarToRow _ _ a _ = a
+addVarToRow _ _ vars (Fix (Pattern _ _ _)) = vars
 
 filterMatrix :: Maybe Constructor -> (Fix Pattern -> Bool) -> (ClauseMatrix, Occurrence) -> ClauseMatrix
 filterMatrix ix checkPattern ((ClauseMatrix (PatternMatrix cs@(c : _)) as), o) =
@@ -314,7 +323,8 @@ expandPattern :: Constructor
               -> Fix Pattern
               -> ([Fix Pattern],Maybe Constructor)
 expandPattern (Left (SymbolOrAlias name [a, _])) _ (Fix (Pattern (Left (SymbolOrAlias (Id "inj" _) [b, _])) _ [fixedP])) = ([fixedP], if a == b then Nothing else Just (Left (SymbolOrAlias name [a,b])))
-expandPattern _ _ (Fix (Pattern _ _ fixedPs)) = (fixedPs,Nothing)
+expandPattern _ _ (Fix (Pattern _ _ fixedPs))  = (fixedPs,Nothing)
+expandPattern ix ms (Fix (As _ pat))           = expandPattern ix ms pat
 expandPattern _ ms (Fix Wildcard)              = (replicate (length ms) (Fix Wildcard), Nothing)
 expandPattern _ ms (Fix (Variable _))          = (replicate (length ms) (Fix Wildcard), Nothing)
 
@@ -441,7 +451,8 @@ compilePattern cm' =
     isWildcard :: Fix Pattern -> Bool
     isWildcard (Fix Wildcard) = True
     isWildcard (Fix (Variable _)) = True
-    isWildcard _ = False
+    isWildcard (Fix (As _ pat)) = isWildcard pat
+    isWildcard (Fix (Pattern _ _ _)) = False
     equalLiteral :: Int -> [Occurrence] -> String -> [(Text, (ClauseMatrix, [Occurrence]))] -> Maybe (ClauseMatrix, [Occurrence]) -> Fix DecisionTree
     equalLiteral o os _ [] (Just d) = Fix $ Switch (head os) L { getSpecializations = [], getDefault = Just $ compilePattern' o d }
     equalLiteral _ _ _ [] (Nothing) = Fix Fail

@@ -67,7 +67,8 @@ genPattern tools rewrite =
                            _ -> Right str else Right str)
           (if att == Nothing then Just "STRING.String" else att) []
     rAlgebra (VariablePattern (Variable (Id name _) _)) = Fix $ P.Variable name
-    rAlgebra _ = error "Unsupported pattern type"
+    rAlgebra (AndPattern (And _ p (_,Fix (P.Variable name)))) = Fix $ P.As name $ snd p
+    rAlgebra pat = error $ show pat
 
 genVars :: CommonKorePattern -> [String]
 genVars = para (unifiedPatternRAlgebra rAlgebra rAlgebra)
