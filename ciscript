@@ -24,4 +24,6 @@ export PATH=$PATH:~/.local/bin
 ./interpreter ../test/collatz.kore -1 | grep -q "Lbl'-LT-'T'-GT-'{}(Lbl'-LT-'k'-GT-'{}(dotk{}())"
 ../bin/llvm-kompile ../test/test2.kore TEST -o interpreter
 ./interpreter ../test/test2.kore -1 | grep -q "Lbl'-LT-'k'-GT-'{}(kseq{}(inj{SortDone{}, SortKItem{}}(Lbldone'Unds'TEST'Unds'{}()),dotk{}()))"
+../bin/llvm-kompile ../test/test3.kore TEST -o interpreter
+./interpreter ../test/test3.kore -1 | grep -q "Lbl'-LT-'k'-GT-'{}(kseq{}(inj{SortDone{}, SortKItem{}}(Lbldone'Unds'TEST'Unds'{}()),dotk{}()))"
 rm -f configparser configparser.ll interpreter
