@@ -16,11 +16,12 @@ private:
   KOREObjectSymbol *dv;
 
   enum Kind {
-    Switch, SwitchLit, Function, Leaf, Fail, Swap
+    Switch, SwitchLit, EqualsLiteral, Function, Leaf, Fail, Swap
   };
 
   static Kind getKind(YAML::Node node) {
     if (node.IsScalar()) return Fail;
+    if (node["hook"]) return EqualsLiteral;
     if (node["bitwidth"]) return SwitchLit;
     if (node["specializations"]) return Switch;
     if (node["action"]) return Leaf;
@@ -70,6 +71,23 @@ public:
       result->addBinding(occurrences[occurrence]);
     }
     return result;
+  }
+
+  DecisionNode *equalsLiteral(YAML::Node node) {
+    std::string binding = constructors.back();
+    std::string hookName = node["hook"].as<std::string>();
+    std::string literal = node["literal"].as<std::string>();
+    SortCategory cat = KOREObjectCompositeSort::getCategory(hookName);
+
+    std::string name = "_" + std::to_string(counter++);
+    occurrences[{functionDepth++, 0}] = name;
+    constructors.push_back(name);
+
+    auto child = (*this)(node["next"]); 
+
+    functionDepth--;
+
+    return EqualsLiteralNode::Create(name, binding, cat, literal, child);
   }
 
   DecisionNode *switchCase(Kind kind, YAML::Node node) {
@@ -139,6 +157,8 @@ public:
       return FailNode::get();
     case Function:
       return function(node);
+    case EqualsLiteral:
+      return equalsLiteral(node);
     case SwitchLit:
     case Switch:
       return switchCase(kind, node);
