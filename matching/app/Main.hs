@@ -9,7 +9,7 @@ import           Pattern               (serializeToYaml, failure, Anchor, Alias,
                                         shareDt)
 import           Pattern.Parser        (parseDefinition, parseTopAxioms, mainVerify,
                                         parseSymbols, getFunctions, SymLib (..),
-                                        parseFunctionAxioms)
+                                        parseFunctionAxioms, AxiomInfo(..))
 import           Pattern.Gen           (mkDecisionTree)
 import           System.Directory      (createDirectoryIfMissing)
 import           System.Environment    (getArgs)
@@ -32,7 +32,7 @@ main = do
   let symlib = parseSymbols def indexedMod
   let !dt = case axioms of
              [] -> shareDt failure
-             (_,r,_):_ -> mkDecisionTree symlib indexedMod axioms [rewritesSort r]
+             (AxiomInfo _ _ r _):_ -> mkDecisionTree symlib indexedMod axioms [rewritesSort r]
   let functions = getFunctions $ symCs symlib
   let funcAxioms = fmap (parseFunctionAxioms def) functions
   let sorts = fmap (sel1 . (symCs symlib !)) functions

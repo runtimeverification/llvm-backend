@@ -3,7 +3,8 @@
 module Pattern.Gen where
 
 import qualified Pattern               as P
-import           Pattern.Parser        (unifiedPatternRAlgebra,SymLib(..), getTopChildren)
+import           Pattern.Parser        (unifiedPatternRAlgebra,SymLib(..), getTopChildren,
+                                        AxiomInfo(..))
 import           Control.Monad.Free    (Free (..))
 import           Data.Bits             (shiftL)
 import           Data.Functor.Foldable (Fix (..), para)
@@ -125,11 +126,13 @@ genMetadatas syms@(SymLib symbols sorts) indexedMod =
 genClauseMatrix :: KoreRewrite pattern 
                => SymLib
                -> KoreIndexedModule StepperAttributes
-               -> [(Int, pattern, Maybe CommonKorePattern)]
+               -> [AxiomInfo pattern]
                -> [Sort Object]
                -> (P.ClauseMatrix, [P.Occurrence])
 genClauseMatrix symlib indexedMod axioms sorts =
-  let (indices,rewrites,sideConditions) = unzip3 axioms
+  let indices = map getOrdinal axioms
+      rewrites = map getRewrite axioms
+      sideConditions = map getSideCondition axioms
       tools = extractMetadataTools indexedMod
       bw = bitwidth tools
       patterns = map (genPattern bw) rewrites
@@ -146,7 +149,7 @@ genClauseMatrix symlib indexedMod axioms sorts =
 mkDecisionTree :: KoreRewrite pattern 
                => SymLib
                -> KoreIndexedModule StepperAttributes
-               -> [(Int, pattern, Maybe CommonKorePattern)]
+               -> [AxiomInfo pattern]
                -> [Sort Object]
                -> Free P.Anchor P.Alias
 mkDecisionTree symlib indexedMod axioms sorts =
