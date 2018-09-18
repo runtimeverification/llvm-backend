@@ -44,6 +44,7 @@ macro(kllvm_add_tool name)
 
   # Link against LLVM libraries
   llvm_config(${name})
+  target_link_libraries(${name} PUBLIC "-ljemalloc" "-Wl,-rpath=/usr/local/lib")
   # target_link_libraries(${name} ${llvm_libs})
 endmacro(kllvm_add_tool)
 
