@@ -8,4 +8,6 @@ add_library(Codegen
   EmitConfigParser.cpp
 )
 
+target_link_libraries(Codegen PUBLIC Alloc AST)
+
 add_definitions(${LLVM_DEFINITIONS})

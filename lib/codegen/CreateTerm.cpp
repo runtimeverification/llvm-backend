@@ -1,4 +1,5 @@
 #include "kllvm/codegen/CreateTerm.h"
+#include "kllvm/Alloc.h"
 
 #include <gmp.h>
 
@@ -165,7 +166,7 @@ llvm::Value *allocateBlock(llvm::Type *AllocType, llvm::BasicBlock *block) {
 }
 
 llvm::Value *allocateBlock(llvm::Type *AllocType, llvm::Value *Len, llvm::BasicBlock *block) {
-  llvm::Instruction *Malloc = llvm::CallInst::CreateMalloc(block, llvm::Type::getInt64Ty(block->getContext()), AllocType, Len, nullptr, nullptr);
+  llvm::Instruction *Malloc = llvm::CallInst::CreateMalloc(block, llvm::Type::getInt64Ty(block->getContext()), AllocType, Len, nullptr, koreHeapAlloc(block->getModule()));
   block->getInstList().push_back(Malloc);
   return Malloc;
 }
