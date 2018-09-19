@@ -90,32 +90,20 @@ string * hook_STRING_substr(const string * input, const int64_t start, int64_t l
 }
 
 int64_t hook_STRING_find(const string * haystack, const string * needle, int64_t pos) {
-	pos = std::max(pos, 0L);
-	for (auto i = pos; i < haystack->b.len; ++i) {
-		if (haystack->data[i] == needle->data[0]) {
-			auto found = false;
-			for (auto j = 0; j < needle->b.len; ++j) {
-				if (i+j >= haystack->b.len) {
-					found = false;
-					break;
-				}
-				if  (haystack->data[i+j] != needle->data[j]) {
-					found = false;
-					break;
-				}
-				found = true;
-			}
-			if (found) return i;
-		}
+	if (pos >= haystack->b.len) {
+		return -1;
 	}
-	return -1L;
+	auto out = std::search(haystack->data + pos * sizeof(KCHAR), haystack->data + haystack->b.len * sizeof(KCHAR),
+			               needle->data,   needle->data   + needle->b.len * sizeof(KCHAR));
+	auto ret = (out - haystack->data) / sizeof(KCHAR);
+	// search returns the end of the range if it is not found, but we want -1 in such a case.
+	return (ret < haystack->b.len)?ret:-1;
 }
 
-// rfind will be used much less than find; it is ok to be a little less efficient and create std::strings.
 int64_t hook_STRING_rfind(const string * haystack, const string * needle, int64_t pos) {
-	auto hs = std::string(haystack->data, haystack->b.len);
-	auto ns = std::string(needle->data, needle->b.len);
-	return hs.rfind(ns, pos);
+    auto hs = std::string(haystack->data, haystack->b.len);
+    auto ns = std::string(needle->data, needle->b.len);
+    return hs.rfind(ns, pos);
 }
 
 int64_t hook_STRING_findChar(const string * haystack, const string * needle, int64_t pos) {
