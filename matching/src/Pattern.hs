@@ -19,6 +19,9 @@ module Pattern ( PatternMatrix(..)
                , Index
                , Constructor
                , mkClauseMatrix
+               , sigma
+               , mSpecialize
+               , mDefault
                , failure
                , leaf
                , switch
