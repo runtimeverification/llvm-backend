@@ -10,6 +10,7 @@
 module Pattern ( PatternMatrix(..)
                , ClauseMatrix(..)
                , Column(..)
+               , mkColumn
                , Metadata(..)
                , Pattern(..)
                , Clause(..)
@@ -53,11 +54,12 @@ import qualified Data.ByteString as B
 
 data Column = Column
               { getMetadata :: !Metadata
+              , getScore    :: !Int
               , getTerms    :: ![Fix Pattern]
               }
 
 instance Show Column where
-  showsPrec _ (Column _ ts) =
+  showsPrec _ (Column _ _ ts) =
     showString "Column " . showList ts
 
 data Metadata = Metadata
@@ -240,10 +242,10 @@ stripFirstColumn _ = error "must have at least one column"
 
 firstRow :: PatternMatrix -> [Fix Pattern]
 firstRow (PatternMatrix cs) =
-  map (\(Column _ (p : _)) -> p) cs
+  map (\(Column _ _ (p : _)) -> p) cs
 notFirstRow :: PatternMatrix -> PatternMatrix
 notFirstRow (PatternMatrix cs) =
-  PatternMatrix (map (\(Column m (_ : ps)) -> Column m ps) cs)
+  PatternMatrix (map (\(Column m _ (_ : ps)) -> mkColumn m ps) cs)
 
 filterByList :: [Bool] -> [a] -> [a]
 filterByList (True  : bs) (x : xs) = x : filterByList bs xs
@@ -287,8 +289,8 @@ filterMatrix ix checkPattern ((ClauseMatrix (PatternMatrix cs@(c : _)) as), o) =
   in ClauseMatrix (PatternMatrix newCs) newAs
   where
     filterRows :: [Bool] -> Column -> Column
-    filterRows fr (Column md rs) =
-      Column md (filterByList fr rs)
+    filterRows fr (Column md _ rs) =
+      mkColumn md (filterByList fr rs)
 filterMatrix _ _ (cmx,_) = cmx
 
 expandMatrix :: Constructor -> ClauseMatrix -> ClauseMatrix
@@ -296,12 +298,23 @@ expandMatrix ix (ClauseMatrix (PatternMatrix (c : cs)) as) =
   ClauseMatrix (PatternMatrix (expandColumn ix c <> cs)) as
 expandMatrix _ _ = error "Cannot expand empty matrix."
 
+-- TODO: improve
+computeScore :: [Fix Pattern] -> Int
+computeScore [] = 0
+computeScore (Fix (Pattern _ _ _):tl) = 1 + computeScore tl
+computeScore (Fix (As _ pat):tl) = computeScore (pat:tl)
+computeScore (Fix Wildcard:_) = 0
+computeScore (Fix (Variable _):_) = 0
+
+mkColumn :: Metadata -> [Fix Pattern] -> Column
+mkColumn m ps = Column m (computeScore ps) ps
+
 expandColumn :: Constructor -> Column -> [Column]
-expandColumn ix (Column m ps) =
+expandColumn ix (Column m _ ps) =
   let metas    = expandMetadata ix m
       expanded = map (expandPattern ix metas) ps
       ps'' = map (expandIfJust ix metas) expanded
-  in  zipWith Column metas (transpose ps'')
+  in  zipWith mkColumn metas (transpose ps'')
 
 expandMetadata :: Constructor -> Metadata -> [Metadata]
 expandMetadata ix (Metadata _ _ _ ms) =

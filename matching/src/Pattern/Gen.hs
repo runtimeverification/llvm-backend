@@ -154,7 +154,7 @@ genClauseMatrix symlib indexedMod axioms sorts =
       actions = zipWith3 P.Action indices rhsVars scVars
       metas = genMetadatas symlib indexedMod
       meta = map (metas Map.!) sorts
-      col = zipWith P.Column meta (transpose patterns)
+      col = zipWith P.mkColumn meta (transpose patterns)
   in case P.mkClauseMatrix col actions of
        Left err -> error (unpack err)
        Right m -> m
