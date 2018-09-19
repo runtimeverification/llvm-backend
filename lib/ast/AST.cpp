@@ -265,10 +265,11 @@ static const std::string COMM = "comm";
 static const std::string IDEM = "idem";
 static const std::string UNIT = "unit";
 static const std::string FUNCTIONAL = "functional";
+static const std::string SUBSORT = "subsort";
 static const std::string CONSTRUCTOR = "constructor";
 
 bool KOREAxiomDeclaration::isRequired() {
-  return !attributes.count(ASSOC) && !attributes.count(COMM) && !attributes.count(IDEM) && !attributes.count(UNIT) && !attributes.count(FUNCTIONAL) && !attributes.count(CONSTRUCTOR);
+  return !attributes.count(ASSOC) && !attributes.count(COMM) && !attributes.count(IDEM) && !attributes.count(UNIT) && !attributes.count(FUNCTIONAL) && !attributes.count(CONSTRUCTOR) && !attributes.count(SUBSORT);
 }
 
 KOREPattern *KOREAxiomDeclaration::getRightHandSide() const {
@@ -388,10 +389,10 @@ void KOREDefinition::preprocess() {
   for (auto iter = axioms.begin(); iter != axioms.end();) {
     auto axiom = *iter;
     axiom->ordinal = nextOrdinal++;
+    axiom->pattern->markSymbols(symbols);
     if (!axiom->isRequired()) {
       iter = axioms.erase(iter);
     } else {
-      axiom->pattern->markSymbols(symbols);
       ++iter;
     }
   }
@@ -440,9 +441,14 @@ void KOREDefinition::preprocess() {
     for (auto iter = entry.second.begin(); iter != entry.second.end(); ++iter) {
       KOREObjectSymbol *symbol = *iter;
       if (!symbol->isConcrete()) {
-        assert(symbol->isPolymorphic() && "Unsupported polymorphism");
-        symbol->firstTag = range.first;
-        symbol->lastTag = range.second;
+        if (symbol->isPolymorphic()) {
+          symbol->firstTag = range.first;
+          symbol->lastTag = range.second;
+          auto decl = symbolDeclarations.lookup(symbol->getName());
+          if (decl->getAttributes().count("sortInjection")) {
+            injSymbol = symbol;
+          }
+        }
       }
     }
   }

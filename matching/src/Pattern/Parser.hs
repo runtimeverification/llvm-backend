@@ -10,7 +10,6 @@ import qualified Data.Map                   as Map
 import           Data.Functor.Impredicative (Rotate31 (..))
 import           Data.Ord                   (comparing)
 import           Data.Proxy                 (Proxy (..))
-import           Data.Tuple.Select          (sel1)
 import           Kore.AST.Common            (And (..), Equals (..),
                                              Pattern (..),
                                              Rewrites (..), 
@@ -119,11 +118,26 @@ hasAtt sentence att =
         _ -> False
     isAtt _ = False
 
-parseAxiomSentence :: (CommonKorePattern -> Maybe (pat Object CommonKorePattern, Maybe CommonKorePattern))
+rulePriority :: SentenceAxiom UnifiedSortVariable UnifiedPattern Variable
+             -> Int
+rulePriority s =
+  if hasAtt s "owise" then 3 else
+  if hasAtt s "cool" then 2 else
+  if hasAtt s "heat" then 1 else
+  0
+
+data AxiomInfo pat = AxiomInfo
+                   { getPriority :: Int
+                   , getOrdinal :: Int
+                   , getRewrite :: pat
+                   , getSideCondition :: Maybe CommonKorePattern
+                   }
+
+parseAxiomSentence :: (CommonKorePattern -> Maybe (pat, Maybe CommonKorePattern))
                    -> (Int, SentenceAxiom UnifiedSortVariable UnifiedPattern Variable)
-                   -> [(Bool,Int, pat Object CommonKorePattern, Maybe CommonKorePattern)]
+                   -> [AxiomInfo pat]
 parseAxiomSentence split (i,s) = case split (sentenceAxiomPattern s) of
-      Just (r,sc) -> if hasAtt s "comm" || hasAtt s "assoc" || hasAtt s "idem" then [] else [(hasAtt s "owise",i,r,sc)]
+      Just (r,sc) -> if hasAtt s "comm" || hasAtt s "assoc" || hasAtt s "idem" then [] else [AxiomInfo (rulePriority s) i r sc]
       Nothing -> []
 
 unifiedPatternRAlgebra :: (Pattern Meta variable (CommonKorePattern, b) -> b)
@@ -167,19 +181,19 @@ getAxioms koreDefinition =
       SentenceAxiomSentence s -> [s]
       _ -> []
 
-parseTopAxioms :: KoreDefinition -> [(Int,Rewrites Object CommonKorePattern,Maybe CommonKorePattern)]
+parseTopAxioms :: KoreDefinition -> [AxiomInfo (Rewrites Object CommonKorePattern)]
 parseTopAxioms koreDefinition =
   let axioms = getAxioms koreDefinition
       withIndex = indexed axioms
-  in map (\(_,a,b,c) -> (a,b,c)) $ mconcat ((parseAxiomSentence splitTop) <$> withIndex)
+      withOwise = mconcat ((parseAxiomSentence splitTop) <$> withIndex)
+  in sortBy (comparing getPriority) withOwise
 
-parseFunctionAxioms :: KoreDefinition -> SymbolOrAlias Object -> [(Int,Equals Object CommonKorePattern,Maybe CommonKorePattern)]
+parseFunctionAxioms :: KoreDefinition -> SymbolOrAlias Object -> [AxiomInfo (Equals Object CommonKorePattern)]
 parseFunctionAxioms koreDefinition symbol =
   let axioms = getAxioms koreDefinition
       withIndex = indexed axioms
       withOwise = mconcat ((parseAxiomSentence (splitFunction symbol)) <$> withIndex)
-      sorted = sortBy (comparing sel1) withOwise
-  in map (\(_,a,b,c) -> (a,b,c)) sorted
+  in sortBy (comparing getPriority) withOwise
 
 parseDefinition :: FilePath -> IO KoreDefinition
 parseDefinition fileName = do

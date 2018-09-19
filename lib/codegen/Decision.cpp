@@ -60,6 +60,9 @@ void SwitchNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitutio
   }
   for (auto &entry : caseData) {
     auto &_case = *entry.second;
+    if (entry.first == d->StuckBlock) {
+      continue;
+    }
     d->CurrentBlock = entry.first;
     if (!isInt) {
       int offset = 2;
@@ -105,34 +108,14 @@ void LeafNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution)
 }
 
 llvm::Value *Decision::getTag(llvm::Value *val) {
-  auto Int = new llvm::PtrToIntInst(val, llvm::Type::getInt64Ty(Ctx), "", CurrentBlock);
-  auto isConstant = new llvm::TruncInst(Int, llvm::Type::getInt1Ty(Ctx), "", CurrentBlock);
-  llvm::BasicBlock *TrueBlock = llvm::BasicBlock::Create(Ctx, "constant", CurrentBlock->getParent());
-  llvm::BasicBlock *FalseBlock = llvm::BasicBlock::Create(Ctx, "block", CurrentBlock->getParent());
-  llvm::BasicBlock *MergeBlock = llvm::BasicBlock::Create(Ctx, "getTag", CurrentBlock->getParent());
-  llvm::BranchInst *Branch = llvm::BranchInst::Create(TrueBlock, FalseBlock, isConstant, CurrentBlock);
-  CurrentBlock = TrueBlock;
-  auto shifted = llvm::BinaryOperator::Create(llvm::Instruction::LShr, Int, llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 32), "", CurrentBlock);
-  Branch = llvm::BranchInst::Create(MergeBlock, CurrentBlock);
-  CurrentBlock = FalseBlock;
-  auto zero = llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), 0);
-  llvm::Value *BlockHeaderPtr = llvm::GetElementPtrInst::CreateInBounds(Module->getTypeByName(BLOCK_STRUCT), val, {llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0), zero, zero}, "", CurrentBlock);
-  llvm::Value *BlockHeader = new llvm::LoadInst(BlockHeaderPtr, "", CurrentBlock);
-  Branch = llvm::BranchInst::Create(MergeBlock, CurrentBlock);
-  llvm::PHINode *Phi = llvm::PHINode::Create(llvm::Type::getInt64Ty(Ctx), 2, "phi", MergeBlock);
-  Phi->addIncoming(BlockHeader, FalseBlock);
-  Phi->addIncoming(shifted, TrueBlock);
-  CurrentBlock = MergeBlock;
-  llvm::Value *Tag = new llvm::TruncInst(Phi, llvm::Type::getInt32Ty(Ctx), "", CurrentBlock);
-  return Tag;
-
-
+  return llvm::CallInst::Create(Module->getOrInsertFunction("getTag", llvm::Type::getInt32Ty(Ctx), getValueType(SortCategory::Symbol, Module)), val, "tag", CurrentBlock);
 }
 
 void makeEvalFunction(KOREObjectSymbol *function, KOREDefinition *definition, llvm::Module *module, DecisionNode *dt) {
   auto returnSort = dynamic_cast<KOREObjectCompositeSort *>(function->getSort())->getCategory(definition);
   auto returnType = getValueType(returnSort, module);
   std::vector<llvm::Type *> args;
+  std::vector<SortCategory> cats;
   for (auto sort : function->getArguments()) {
     auto cat = dynamic_cast<KOREObjectCompositeSort *>(sort)->getCategory(definition);
     switch (cat) {
@@ -140,9 +123,11 @@ void makeEvalFunction(KOREObjectSymbol *function, KOREDefinition *definition, ll
     case SortCategory::List:
     case SortCategory::Set:
       args.push_back(llvm::PointerType::getUnqual(getValueType(cat, module)));
+      cats.push_back(cat);
       break;
     default:
       args.push_back(getValueType(cat, module));
+      cats.push_back(cat);
       break;
     }
   }
@@ -153,12 +138,22 @@ void makeEvalFunction(KOREObjectSymbol *function, KOREDefinition *definition, ll
   llvm::Constant *func = module->getOrInsertFunction(name, funcType);
   llvm::Function *matchFunc = llvm::cast<llvm::Function>(func);
   llvm::StringMap<llvm::Value *> subst;
+  llvm::BasicBlock *block = llvm::BasicBlock::Create(module->getContext(), "entry", matchFunc);
   int i = 0;
   for (auto val = matchFunc->arg_begin(); val != matchFunc->arg_end(); ++val, ++i) {
-    val->setName("subject" + std::to_string(i));
-    subst.insert({val->getName(), val});
+    switch(cats[i]) {
+    case SortCategory::Map:
+    case SortCategory::Set:
+    case SortCategory::List: {
+      auto load = new llvm::LoadInst(val, "subject" + std::to_string(i), block);
+      subst.insert({load->getName(), load});
+      break;
+    } default:
+      val->setName("subject" + std::to_string(i));
+      subst.insert({val->getName(), val});
+      break;
+    }
   }
-  llvm::BasicBlock *block = llvm::BasicBlock::Create(module->getContext(), "entry", matchFunc);
   llvm::BasicBlock *stuck = llvm::BasicBlock::Create(module->getContext(), "stuck", matchFunc);
   addAbort(stuck, module);
 

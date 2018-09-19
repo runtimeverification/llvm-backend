@@ -20,6 +20,7 @@ private:
   llvm::Value *createHook(KOREObjectCompositePattern *hookAtt, KOREObjectCompositePattern *pattern);
   llvm::Value *createFunctionCall(std::string name, KOREObjectCompositePattern *pattern, bool sret);
   llvm::Value *createToken(SortCategory sort, std::string contents);
+  llvm::Value *notInjectionCase(KOREObjectCompositePattern *constructor, llvm::Value *val);
 public:
   CreateTerm(
     llvm::StringMap<llvm::Value *> &Substitution,

@@ -4,6 +4,8 @@
 {-# LANGUAGE TupleSections     #-}
 {-# LANGUAGE TypeSynonymInstances #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE TemplateHaskell   #-}
 
 module Pattern ( PatternMatrix(..)
                , ClauseMatrix(..)
@@ -14,6 +16,7 @@ module Pattern ( PatternMatrix(..)
                , Action(..)
                , Occurrence
                , Index
+               , Constructor
                , mkClauseMatrix
                , failure
                , leaf
@@ -23,19 +26,28 @@ module Pattern ( PatternMatrix(..)
                , swap
                , simplify
                , DecisionTree(..)
+               , Anchor(..)
+               , Alias(..)
                , compilePattern
+               , shareDt
                , serializeToYaml
                ) where
 
+import           Control.Monad.Free    (Free (..))
 import           Data.Bifunctor        (second)
+import           Data.Deriving         (deriveOrd1, deriveShow1, deriveEq1)
 import           Data.Function         (on)
-import           Data.Functor.Classes  (Eq1 (..), Show1 (..))
-import           Data.Functor.Foldable (Fix (..), cata)
+import           Data.Functor.Foldable (Fix (..))
 import           Data.List             (transpose,nub,sortBy)
-import           Data.Maybe            (mapMaybe,catMaybes)
+import           Data.Maybe            (mapMaybe,catMaybes,isJust,fromJust,listToMaybe)
 import           Data.Semigroup        ((<>))
 import           Data.Text             (Text, pack)
+import           Data.Traversable      (mapAccumL)
+import           Kore.AST.Common       (SymbolOrAlias (..), Id (..), Sort(..))
+import           Kore.AST.MetaOrObject (Object (..))
+import           Kore.Unparser.Unparse (unparseToString)
 import           TextShow              (showt)
+import qualified Data.Map.Strict as Map
 import qualified Data.Yaml.Builder as Y
 import qualified Data.ByteString as B
 
@@ -49,12 +61,16 @@ instance Show Column where
     showString "Column " . showList ts
 
 data Metadata = Metadata
-                { getLength :: Integer
-                , getChildren :: String -> [Metadata]
+                { getLength :: !Integer
+                , getInjections :: ![Constructor]
+                , getSort :: Sort Object
+                , getChildren :: Constructor -> Maybe [Metadata]
                 }
 
+type Constructor = Either (SymbolOrAlias Object) String
+
 type Index       = Int
-data Pattern a   = Pattern String (Maybe Int) ![a]
+data Pattern a   = Pattern Constructor (Maybe Int) ![a]
                  | Wildcard
                  | Variable String
                  deriving (Show, Eq, Functor)
@@ -79,18 +95,11 @@ data Clause       = Clause
 data ClauseMatrix = ClauseMatrix PatternMatrix ![Clause]
                     deriving (Show)
 
-instance Show1 Pattern where
-  liftShowsPrec _     _      _ Wildcard = showString "_"
-  liftShowsPrec _     showTs _ (Pattern ix _ t) =
-    showString "P " . showString (show ix) .
-    showString " "  . showTs t
-  liftShowsPrec _     _      _ (Variable lbl) = showString ("$" ++ lbl)
+instance (Show Metadata) where
+  show (Metadata _ _ sort _) = show sort
 
-instance Eq1 Pattern where
-  liftEq _ Wildcard Wildcard = True
-  liftEq eqT (Pattern ix bw ts) (Pattern ix' bw' ts') =
-    ix == ix' && bw == bw' && and (zipWith eqT ts ts')
-  liftEq _ _ _ = False
+$(deriveEq1 ''Pattern)
+$(deriveShow1 ''Pattern)
 
 -- [ Builders ]
 
@@ -138,7 +147,7 @@ function :: Text
          -> Fix DecisionTree
          -> Fix DecisionTree
 function name vars sort child =
-  Fix $ Function (name, vars, sort, child)
+  Fix $ Function name vars sort child
 
 simplify :: Occurrence -> Fix DecisionTree -> Fix DecisionTree
 simplify o dt = switch o [] (Just dt)
@@ -150,43 +159,73 @@ swap ix tm = Fix (Swap ix tm)
 
 -- [ Matrix ]
 
-sigma :: Column -> [(String,Maybe Int)]
-sigma = nub . mapMaybe ix . getTerms
+sigma :: Column -> [Constructor]
+sigma c =
+  let used = mapMaybe ix $ getTerms c
+      inj = nub $ filter isInj used
+      metaC = getMetadata c
+      allInjs = getInjections $ getMetadata c
+      usedInjs = nub $ filter (\ix' -> or $ map (isSubsort metaC ix') inj) allInjs
+      dups = used ++ usedInjs
+  in nub dups
   where
-    ix :: Fix Pattern -> Maybe (String,Maybe Int)
-    ix (Fix (Pattern ix' bw _)) = Just (ix',bw)
-    ix (Fix Wildcard)        = Nothing
+    ix :: Fix Pattern -> Maybe Constructor
+    ix (Fix (Pattern ix' _ _)) = Just ix'
+    ix (Fix Wildcard)             = Nothing
     ix (Fix (Variable _))         = Nothing
+    isInj :: Constructor -> Bool
+    isInj (Left (SymbolOrAlias (Id "inj" _) _)) = True
+    isInj _ = False
+    isSubsort :: Metadata -> Constructor -> Constructor -> Bool
+    isSubsort (Metadata _ _ _ meta) (Left (SymbolOrAlias name [a,_])) ix'@(Left (SymbolOrAlias _ [b,_])) =
+      let (Metadata _ _ _ childMeta) = (fromJust $ meta ix') !! 0
+          child = Left (SymbolOrAlias name [a,b])
+      in isJust $ childMeta $ child
+    isSubsort _ _ _ = error "invalid injection"
+    
 
-sigma₁ :: PatternMatrix -> ([String],Maybe Int)
-sigma₁ (PatternMatrix (c : _)) = 
-  let s = sigma c
-  in (map fst s, case catMaybes $ map snd s of
-                      bw:_ -> Just bw
-                      [] -> Nothing)
-sigma₁ _                       = ([],Nothing)
+sigma₁ :: PatternMatrix -> [Constructor]
+sigma₁ (PatternMatrix (c : _)) = sigma c
+sigma₁ _                       = []
 
-mSpecialize :: String -> (ClauseMatrix, [Occurrence]) -> (Text, (ClauseMatrix, [Occurrence]))
-mSpecialize ix (cm, o : os) = 
+bitwidth :: PatternMatrix -> Maybe Int
+bitwidth (PatternMatrix (c : _)) = 
+  let s = bw c
+  in listToMaybe $ catMaybes $ s
+  where
+    bw :: Column -> [Maybe Int]
+    bw = map ix . getTerms
+    ix :: Fix Pattern -> Maybe Int
+    ix (Fix (Pattern _ bw' _)) = bw'
+    ix _ = Nothing
+bitwidth _                       = Nothing
+
+mSpecialize :: Constructor -> (ClauseMatrix, [Occurrence]) -> (Text, (ClauseMatrix, [Occurrence]))
+mSpecialize ix (cm@(ClauseMatrix (PatternMatrix (c : _)) _), o : os) = 
    let newOs = expandOccurrence cm o ix <> os
-       cm' = filterMatrix (checkPatternIndex ix) (cm,o)
+       cm' = filterMatrix (Just ix) (checkPatternIndex ix (getMetadata c)) (cm,o)
        cm'' = expandMatrix ix cm'
-  in (pack ix, (cm'', newOs))
+   in (getConstructor ix, (cm'', newOs))
+   where
+     getConstructor :: Constructor -> Text
+     getConstructor (Left sym) = pack $ unparseToString sym
+     getConstructor (Right str) = pack str
+
 mSpecialize _ _ = error "must have at least one column"
 
-expandOccurrence :: ClauseMatrix -> Occurrence -> String -> [Occurrence]
+expandOccurrence :: ClauseMatrix -> Occurrence -> Constructor -> [Occurrence]
 expandOccurrence (ClauseMatrix (PatternMatrix (c : _)) _) o ix =
-  let (Metadata _ mtd) = getMetadata c
-      a = length (mtd ix)
+  let (Metadata _ _ _ mtd) = getMetadata c
+      a = length $ fromJust $ mtd ix
   in map (\i -> i : o) [0..a-1]
 expandOccurrence _ _ _ = error "must have at least one column"
 
 mDefault :: (ClauseMatrix, [Occurrence]) -> Maybe (ClauseMatrix, [Occurrence])
 mDefault (cm@(ClauseMatrix (PatternMatrix (c : _)) _),o : os) =
-  let (Metadata mtd _) = getMetadata c
+  let (Metadata mtd _ _ _) = getMetadata c
       s₁ = sigma c
   in  if null s₁ || (toInteger $ length s₁) /= mtd
-      then Just ((stripFirstColumn (filterMatrix isNotPattern (cm,o))),os)
+      then Just ((stripFirstColumn (filterMatrix Nothing isNotPattern (cm,o))),os)
       else Nothing
 mDefault _ = Nothing
 
@@ -198,6 +237,9 @@ stripFirstColumn _ = error "must have at least one column"
 firstRow :: PatternMatrix -> [Fix Pattern]
 firstRow (PatternMatrix cs) =
   map (\(Column _ (p : _)) -> p) cs
+notFirstRow :: PatternMatrix -> PatternMatrix
+notFirstRow (PatternMatrix cs) =
+  PatternMatrix (map (\(Column m (_ : ps)) -> Column m ps) cs)
 
 filterByList :: [Bool] -> [a] -> [a]
 filterByList (True  : bs) (x : xs) = x : filterByList bs xs
@@ -208,75 +250,106 @@ isNotPattern :: Fix Pattern -> Bool
 isNotPattern (Fix (Pattern _ _ _)) = False
 isNotPattern _ = True
 
-checkPatternIndex :: String -> Fix Pattern -> Bool
-checkPatternIndex _  (Fix Wildcard)        = True
-checkPatternIndex _  (Fix (Variable _))         = True
-checkPatternIndex ix (Fix (Pattern ix' _ _)) = ix == ix'
+checkPatternIndex :: Constructor -> Metadata -> Fix Pattern -> Bool
+checkPatternIndex _ _ (Fix Wildcard) = True
+checkPatternIndex _ _ (Fix (Variable _)) = True
+checkPatternIndex (Left (SymbolOrAlias (Id "inj" _) [a,c])) (Metadata _ _ _ meta) (Fix (Pattern ix@(Left (SymbolOrAlias name@(Id "inj" _) [b,c'])) _ [p])) =
+  let m@(Metadata _ _ _ childMeta) = (fromJust $ meta ix) !! 0
+      child = Left (SymbolOrAlias name [a,b])
+  in c == c' && (a == b || ((isJust $ childMeta $ child) && checkPatternIndex child m p))
+checkPatternIndex ix _ (Fix (Pattern ix' _ _)) = ix == ix'
 
-addVars :: [Clause] -> [Fix Pattern] -> Occurrence -> [Clause]
-addVars as c o =
-  let row = zip c as
-  in map (\(p, (Clause a vars)) -> (Clause a (addVarToRow o vars p))) row
+addVars :: Maybe Constructor -> [Clause] -> [Fix Pattern] -> Occurrence -> [Clause]
+addVars ix as c o =
+  let rows = zip c as
+  in map (\(p, (Clause a vars)) -> (Clause a (addVarToRow ix o vars p))) rows
 
-addVarToRow :: Occurrence -> [(String, Occurrence)] -> Fix Pattern -> [(String, Occurrence)]
-addVarToRow o vars (Fix (Variable name)) = (name, o) : vars
-addVarToRow _ a _ = a
+addVarToRow :: Maybe Constructor -> Occurrence -> [(String, Occurrence)] -> Fix Pattern -> [(String, Occurrence)]
+addVarToRow _ o vars (Fix (Variable name)) = (name, o) : vars
+addVarToRow (Just (Left (SymbolOrAlias (Id "inj" _) [a,_]))) o vars (Fix (Pattern (Left (SymbolOrAlias (Id "inj" _) [b,_])) _ [Fix (Variable name)])) = if a == b then vars else (name, o) : vars
+addVarToRow _ _ a _ = a
 
-filterMatrix :: (Fix Pattern -> Bool) -> (ClauseMatrix, Occurrence) -> ClauseMatrix
-filterMatrix checkPattern ((ClauseMatrix (PatternMatrix cs@(c : _)) as), o) =
+filterMatrix :: Maybe Constructor -> (Fix Pattern -> Bool) -> (ClauseMatrix, Occurrence) -> ClauseMatrix
+filterMatrix ix checkPattern ((ClauseMatrix (PatternMatrix cs@(c : _)) as), o) =
   let filteredRows = map checkPattern (getTerms c)
       newCs = map (filterRows filteredRows) cs
-      varsAs = addVars as (getTerms c) o
+      varsAs = addVars ix as (getTerms c) o
       newAs = filterByList filteredRows varsAs
   in ClauseMatrix (PatternMatrix newCs) newAs
   where
     filterRows :: [Bool] -> Column -> Column
     filterRows fr (Column md rs) =
       Column md (filterByList fr rs)
-filterMatrix _ (cmx,_) = cmx
+filterMatrix _ _ (cmx,_) = cmx
 
-expandMatrix :: String -> ClauseMatrix -> ClauseMatrix
+expandMatrix :: Constructor -> ClauseMatrix -> ClauseMatrix
 expandMatrix ix (ClauseMatrix (PatternMatrix (c : cs)) as) =
   ClauseMatrix (PatternMatrix (expandColumn ix c <> cs)) as
 expandMatrix _ _ = error "Cannot expand empty matrix."
 
-expandColumn :: String -> Column -> [Column]
+expandColumn :: Constructor -> Column -> [Column]
 expandColumn ix (Column m ps) =
   let metas    = expandMetadata ix m
-      patterns = map (expandPattern metas) ps
-  in  zipWith Column metas (transpose patterns)
+      expanded = map (expandPattern ix metas) ps
+      ps'' = map (expandIfJust ix metas) expanded
+  in  zipWith Column metas (transpose ps'')
 
-expandMetadata :: String -> Metadata -> [Metadata]
-expandMetadata ix (Metadata _ ms) = ms ix
+expandMetadata :: Constructor -> Metadata -> [Metadata]
+expandMetadata ix (Metadata _ _ _ ms) =
+  case ms ix of
+    Just m -> m
+    Nothing -> error $ show ix
 
-expandPattern :: [Metadata]
+expandIfJust :: Constructor
+             -> [Metadata]
+             -> ([Fix Pattern],Maybe Constructor)
+             -> [Fix Pattern]
+expandIfJust _ _ (p,Nothing) = p
+expandIfJust _ ms ([p],Just ix) =
+  fst $ expandPattern ix ms p
+expandIfJust _ _ (_,Just _) = error "invalid injection"
+
+expandPattern :: Constructor
+              -> [Metadata]
               -> Fix Pattern
-              -> [Fix Pattern]
-expandPattern _  (Fix (Pattern _ _ fixedPs)) = fixedPs
-expandPattern ms (Fix Wildcard)              = replicate (length ms) (Fix Wildcard)
-expandPattern ms (Fix (Variable _))          = replicate (length ms) (Fix Wildcard)
-
---[ Target language ]
+              -> ([Fix Pattern],Maybe Constructor)
+expandPattern (Left (SymbolOrAlias name [a, _])) _ (Fix (Pattern (Left (SymbolOrAlias (Id "inj" _) [b, _])) _ [fixedP])) = ([fixedP], if a == b then Nothing else Just (Left (SymbolOrAlias name [a,b])))
+expandPattern _ _ (Fix (Pattern _ _ fixedPs)) = (fixedPs,Nothing)
+expandPattern _ ms (Fix Wildcard)              = (replicate (length ms) (Fix Wildcard), Nothing)
+expandPattern _ ms (Fix (Variable _))          = (replicate (length ms) (Fix Wildcard), Nothing)
 
 data L a = L
-           { getSpecializations :: [(Text, a)]
-           , getDefault         :: Maybe a
-           } deriving (Show, Eq, Functor)
+           { getSpecializations :: ![(Text, a)]
+           , getDefault         :: !(Maybe a)
+           } deriving (Show, Eq, Functor, Ord)
 
 data DecisionTree a = Leaf (Int, [Occurrence])
                     | Fail
-                    | Switch Occurrence (L a)
-                    | SwitchLit Occurrence Int (L a)
-                    | Swap Index a
-                    | Function (Text, [Occurrence], Text, a) 
-                    deriving (Show, Eq, Functor)
+                    | Switch Occurrence !(L a)
+                    | SwitchLit Occurrence Int !(L a)
+                    | Swap Index !a
+                    | Function Text [Occurrence] Text !a  
+                    deriving (Show, Eq, Functor, Ord)
 
-instance Y.ToYaml a => Y.ToYaml (DecisionTree a) where
-    toYaml (Leaf (act, x)) = Y.mapping [
+newtype Alias = Alias Text
+              deriving (Show)
+data Anchor a = Anchor (Maybe Text) (DecisionTree a)
+              deriving (Show, Eq, Functor, Ord)
+
+$(deriveEq1 ''L)
+$(deriveEq1 ''DecisionTree)
+$(deriveShow1 ''L)
+$(deriveShow1 ''DecisionTree)
+$(deriveShow1 ''Anchor)
+$(deriveOrd1 ''L)
+$(deriveOrd1 ''DecisionTree)
+
+instance Y.ToYaml a => Y.ToYaml (Anchor a) where
+    toYaml (Anchor a (Leaf (act, x))) = Y.namedMapping a [
         "action" Y..= Y.array [Y.toYaml act, Y.toYaml x]
       ]
-    toYaml Fail = Y.string "fail"
-    toYaml (Switch o x) = Y.mapping
+    toYaml (Anchor a Fail) = Y.namedString a "fail"
+    toYaml (Anchor a (Switch o x)) = Y.namedMapping a
       ["specializations" Y..= Y.array (map (\(i1, i2) -> Y.array [Y.toYaml i1, Y.toYaml i2]) (getSpecializations x))
       , "default" Y..= Y.toYaml (case (getDefault x) of
                                     Just i -> Y.toYaml i
@@ -284,7 +357,7 @@ instance Y.ToYaml a => Y.ToYaml (DecisionTree a) where
                                 )
       , "occurrence" Y..= Y.toYaml o
       ]
-    toYaml (SwitchLit o i x) = Y.mapping
+    toYaml (Anchor a (SwitchLit o i x)) = Y.namedMapping a
       ["specializations" Y..= Y.array (map (\(i1, i2) -> Y.array [Y.toYaml i1, Y.toYaml i2]) (getSpecializations x))
       , "default" Y..= Y.toYaml (case (getDefault x) of
                                     Just d -> Y.toYaml d
@@ -294,76 +367,29 @@ instance Y.ToYaml a => Y.ToYaml (DecisionTree a) where
       , "occurrence" Y..= Y.toYaml o
       ]
 
-    toYaml (Swap i x) = Y.mapping
+    toYaml (Anchor a (Swap i x)) = Y.namedMapping a
       ["swap" Y..= Y.array [Y.toYaml i, Y.toYaml x]]
-    toYaml (Function (name, bindings, sort, x)) = Y.mapping
+    toYaml (Anchor a (Function name bindings sort x)) = Y.namedMapping a
       ["function" Y..= Y.toYaml name
       , "sort" Y..= Y.toYaml sort
       , "args" Y..= Y.toYaml bindings
       , "next" Y..= Y.toYaml x
       ]
 
-serializeToYaml :: (Fix DecisionTree) -> B.ByteString
+instance Y.ToYaml Alias where
+    toYaml (Alias name) = Y.alias name
+
+serializeToYaml :: (Free Anchor Alias) -> B.ByteString
 serializeToYaml = Y.toByteString . Y.toYaml
 
-instance Y.ToYaml (Fix DecisionTree) where
-    toYaml = cata Y.toYaml
+instance Y.ToYaml (Anchor (Free Anchor Alias)) => Y.ToYaml (Free Anchor Alias) where
+    toYaml (Pure a) = Y.toYaml a
+    toYaml (Free f) = Y.toYaml f
 
-instance Eq1 DecisionTree where
-  liftEq _ Fail Fail = True
-  liftEq _ (Leaf a) (Leaf a') = a == a'
-  liftEq eqT (Switch o l) (Switch o' l') =
-    o == o' && liftEq eqT l l'
-  liftEq eqT (SwitchLit o bw l) (SwitchLit o' bw' l') =
-    o == o' && bw == bw' && liftEq eqT l l'
-  liftEq eqT (Function (n, os, s, t)) (Function (n', os', s', t')) =
-    n == n' && os == os' && s == s' && t `eqT` t'
-  liftEq eqT (Swap ix t) (Swap ix' t') =
-    ix == ix' && t `eqT` t'
-  liftEq _ _ _ = False
-
-smEq :: (a -> b -> Bool)
-     -> [(Text, a)]
-     -> [(Text, b)]
-     -> Bool
-smEq eq s₁ s₂ =
-  and (zipWith combine s₁ s₂)
-  where
-    combine (ix, a) (ix', a') = ix == ix' && a `eq` a'
-
-instance Eq1 L where
-  liftEq eqT (L s (Just d)) (L s' (Just d')) =
-    smEq eqT s s' && d `eqT` d'
-  liftEq eqT (L s Nothing) (L s' Nothing) =
-    smEq eqT s s'
-  liftEq _ _ _ = False
-
-instance Show1 DecisionTree where
-  liftShowsPrec _ _ _ (Leaf a) = showString $ "Leaf " ++ show a
-  liftShowsPrec _ _ _ Fail     = showString "Fail"
-  liftShowsPrec showT showL d (Switch o l) =
-    showString "Switch " . showList o . showString " L(" .
-    liftShowsPrec showT showL (d + 1) l . showString ")"
-  liftShowsPrec showT showL d (SwitchLit o i l) =
-    showString ("SwitchLit " ++ show i) . showString " " . showList o . showString " L(" .
-    liftShowsPrec showT showL (d + 1) l . showString ")"
-  liftShowsPrec showT _ d (Swap ix tm) =
-    showString ("Swap " ++ show ix ++ " ") . showT (d + 1) tm
-  liftShowsPrec showT _ d (Function (name,args,sort,tm)) =
-    showString ("Function " ++ show name ++ "(" ++ show args ++ "):" ++ show sort) . showT (d + 1) tm
-
-instance Show1 L where
-  liftShowsPrec showT _ d (L sm dm) =
-    let showSpec (index, tm) = showString (show index ++ ":")
-                               . showT (d + 1) tm . showString ";"
-        smString = foldl (.) id $ map showSpec sm
-        dmString = maybe id (\s -> showString "*:" . (showT (d + 1)) s) dm
-    in  smString . dmString
-
-getLeaf :: [Occurrence] -> [Fix Pattern] -> Clause -> Fix DecisionTree
-getLeaf os ps (Clause (Action a rhsVars maybeSideCondition) matchedVars) =
+getLeaf :: [Occurrence] -> [Fix Pattern] -> Clause -> Fix DecisionTree -> Fix DecisionTree
+getLeaf os ps (Clause (Action a rhsVars maybeSideCondition) matchedVars) next =
   let row = zip os ps
-      vars = foldr (\(o, p) -> \l -> (addVarToRow o l p)) matchedVars row
+      vars = foldr (\(o, p) -> \l -> (addVarToRow Nothing o l p)) matchedVars row
       sorted = sortBy (compare `on` fst) vars
       filtered = filter (flip elem rhsVars . fst) sorted
       (_, newVars) = unzip filtered
@@ -371,14 +397,15 @@ getLeaf os ps (Clause (Action a rhsVars maybeSideCondition) matchedVars) =
     Nothing -> Fix $ Leaf (a, newVars)
     Just cond -> let condFiltered = filter (flip elem cond . fst) sorted
                      (_, condVars) = unzip condFiltered
-                 in function (pack $ "side_condition_" ++ (show a)) condVars "BOOL.Bool" (switchLit [0, 0] 1 [("1", (leaf a newVars)), ("0", failure)] Nothing)
+                 in function (pack $ "side_condition_" ++ (show a)) condVars "BOOL.Bool" (switchLit [0, 0] 1 [("1", (leaf a newVars)), ("0", next)] Nothing)
 
 compilePattern :: (ClauseMatrix, [Occurrence]) -> (Fix DecisionTree)
 compilePattern cm@((ClauseMatrix pm@(PatternMatrix _) ac), os)
   | length ac == 0 = Fix Fail
-  | isWildcardRow pm = getLeaf os (firstRow pm) (head ac)
+  | isWildcardRow pm = if length ac == 1 then getLeaf os (firstRow pm) (head ac) failure else getLeaf os (firstRow pm) (head ac) (compilePattern ((ClauseMatrix (notFirstRow pm) (tail ac)), os))
   | otherwise =
-    let (s₁,bw) = sigma₁ pm
+    let bw = bitwidth pm
+        s₁ = sigma₁ pm
         ls = map (`mSpecialize` cm) s₁
         d  = mDefault cm
     in case bw of
@@ -397,3 +424,30 @@ compilePattern cm@((ClauseMatrix pm@(PatternMatrix _) ac), os)
     isWildcard (Fix Wildcard) = True
     isWildcard (Fix (Variable _)) = True
     isWildcard _ = False
+
+
+shareDt :: Fix DecisionTree -> Free Anchor Alias
+shareDt =
+  snd . computeSharing (Map.empty)
+  where
+    computeSharing :: Map.Map (Fix DecisionTree) Alias -> Fix DecisionTree -> (Map.Map (Fix DecisionTree) Alias, Free Anchor Alias)
+    computeSharing m dt = 
+      let name = pack . show . length
+          mapDefault = mapAccumL computeSharing
+          addName m' = Map.insert dt (Alias $ name m') m'
+          mapChild = computeSharing m
+      in case Map.lookup dt m of
+           Just alias -> (m, Pure alias)
+           Nothing -> case dt of
+                        Fix (Leaf a) -> (addName m, Free (Anchor (Just $ name m) (Leaf a)))
+                        Fix Fail -> (m, Free (Anchor Nothing Fail))
+                        Fix (Swap i a) -> let (m',child) = mapChild a in (addName m',Free (Anchor (Just $ name m') (Swap i child)))
+                        Fix (Function n os s a) -> let (m',child) = mapChild a in (addName m', Free (Anchor (Just $ name m') (Function n os s child)))
+                        Fix (Switch o (L s d)) -> let (m',s') = mapSpec m s in let (m'',d') = mapDefault m' d in (addName m'', Free (Anchor (Just $ name m'') (Switch o (L s' d'))))
+                        Fix (SwitchLit o bw (L s d)) -> let (m',s') = mapSpec m s in let (m'',d') = mapDefault m' d in (addName m'', Free (Anchor (Just $ name m'') (SwitchLit o bw (L s' d'))))
+                        
+    mapSpec :: Map.Map (Fix DecisionTree) Alias -> [(Text,Fix DecisionTree)] -> (Map.Map (Fix DecisionTree) Alias,[(Text,Free Anchor Alias)])
+    mapSpec m s =
+      let (ts,as) = unzip s
+          (m',as') = mapAccumL computeSharing m as
+      in (m',zip ts as')

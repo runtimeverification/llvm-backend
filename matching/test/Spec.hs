@@ -7,9 +7,10 @@ module Main where
 import           Data.Bits             (shiftL)
 import           Data.Functor.Foldable (Fix (..))
 import           Data.List             (transpose,concat)
-import           Data.Map.Strict       (fromList, (!))
+import qualified Data.Map.Strict       as M
 import           Data.Proxy            (Proxy (..))
 import           Data.Semigroup        ((<>))
+import           Kore.AST.Common       (Id (..), Sort(..), SortActual(..), AstLocation(..))
 
 import           Test.Tasty            (TestTree, defaultMain, testGroup)
 import           Test.Tasty.HUnit      (testCase, (@?=))
@@ -30,34 +31,34 @@ data Lst  = Cns IntPat Lst -- index 1
 
 instance IsPattern Lst where
   toPattern :: Lst -> Fix Pattern
-  toPattern (Cns i l) = Fix (Pattern "cons" Nothing [toPattern i, toPattern l])
-  toPattern Nil     = Fix (Pattern "nil" Nothing  [])
+  toPattern (Cns i l) = Fix (Pattern (Right "cons") Nothing [toPattern i, toPattern l])
+  toPattern Nil     = Fix (Pattern (Right "nil") Nothing  [])
   toPattern Wld     = Fix Wildcard
   toPattern (Var v) = Fix (Variable v)
 
 instance IsPattern IntPat where
   toPattern :: IntPat -> Fix Pattern
-  toPattern (IntLit i) = Fix (Pattern (show i) (Just 32) [])
+  toPattern (IntLit i) = Fix (Pattern (Right $ show i) (Just 32) [])
   toPattern IntWld     = Fix Wildcard
   toPattern (IntVar v) = Fix (Variable v)
 
 instance HasMetadata IntPat where
   getMetadata :: Proxy IntPat -> Metadata
-  getMetadata _ = Metadata (shiftL 1 32) f
+  getMetadata _ = Metadata (shiftL 1 32) [] (SortActualSort (SortActual (Id "Int" AstLocationNone) [])) f
     where
-      f :: String -> [Metadata]
-      f _ = []
+      f :: Constructor -> Maybe [Metadata]
+      f _ = Just []
 
 instance HasMetadata Lst where
   getMetadata :: Proxy Lst -> Metadata
   getMetadata _ =
-    let m = fromList
-                    [ ("nil", []) -- Nil
-                    , ("cons", [ getMetadata (Proxy :: Proxy IntPat)
+    let m = M.fromList
+                    [ (Right "nil", []) -- Nil
+                    , (Right "cons", [ getMetadata (Proxy :: Proxy IntPat)
                                , getMetadata (Proxy :: Proxy Lst)
                                ]) -- Cns Lst (1)
                     ]
-    in Metadata (toInteger $ length m) ((!) m)
+    in Metadata (toInteger $ length m) [] (SortActualSort (SortActual (Id "Lst" AstLocationNone) [])) (flip M.lookup m)
 
 vars :: [Lst] -> [String]
 vars l = concat (map varLst l)
@@ -146,24 +147,29 @@ appendTests = testGroup "Basic pattern compilation"
                                    ] Nothing )))
                ] Nothing
   , testCase "Yaml serialization" $
-      (serializeToYaml $ compilePattern $ appendBindPattern) @?= 
+      (serializeToYaml $ shareDt $ compilePattern $ appendBindPattern) @?= 
+        "&6\n" <>
         "specializations:\n" <>
         "- - nil\n" <>
-        "  - action:\n" <>
+        "  - &0\n" <>
+        "    action:\n" <>
         "    - 1\n" <>
         "    - - - 2\n" <>
         "- - cons\n" <>
-        "  - specializations: []\n" <>
-        "    default:\n" <>
+        "  - &5\n" <>
+        "    specializations: []\n" <>
+        "    default: &4\n" <>
         "      specializations: []\n" <>
-        "      default:\n" <>
+        "      default: &3\n" <>
         "        specializations:\n" <>
         "        - - nil\n" <>
-        "          - action:\n" <>
+        "          - &1\n" <>
+        "            action:\n" <>
         "            - 2\n" <>
         "            - - - 1\n" <>
         "        - - cons\n" <>
-        "          - action:\n" <>
+        "          - &2\n" <>
+        "            action:\n" <>
         "            - 3\n" <>
         "            - - - 0\n" <>
         "                - 2\n" <>
