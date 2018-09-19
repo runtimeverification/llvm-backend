@@ -51,7 +51,7 @@ void SwitchNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitutio
     if (caseData.size() == 0) {
       llvm::BranchInst::Create(_default, d->CurrentBlock);
     } else {
-      llvm::Value *tagVal = llvm::CallInst::Create(d->Module->getOrInsertFunction("getTag", llvm::Type::getInt32Ty(d->Ctx), getValueType(SortCategory::Symbol, d->Module)), val, "tag", d->CurrentBlock);
+      llvm::Value *tagVal = d->getTag(val);
       auto _switch = llvm::SwitchInst::Create(tagVal, _default, caseData.size(), d->CurrentBlock);
       for (auto &_case : caseData) {
         _switch->addCase(llvm::ConstantInt::get(llvm::Type::getInt32Ty(d->Ctx), _case.second->getConstructor()->getTag()), _case.first); 
@@ -105,6 +105,10 @@ void LeafNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution)
   }
   auto Call = llvm::CallInst::Create(d->Module->getOrInsertFunction(name, llvm::FunctionType::get(getValueType(d->Cat, d->Module), types, false)), args, "", d->CurrentBlock);
   llvm::ReturnInst::Create(d->Ctx, Call, d->CurrentBlock);
+}
+
+llvm::Value *Decision::getTag(llvm::Value *val) {
+  return llvm::CallInst::Create(Module->getOrInsertFunction("getTag", llvm::Type::getInt32Ty(Ctx), getValueType(SortCategory::Symbol, Module)), val, "tag", CurrentBlock);
 }
 
 void makeEvalFunction(KOREObjectSymbol *function, KOREDefinition *definition, llvm::Module *module, DecisionNode *dt) {

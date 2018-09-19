@@ -382,6 +382,7 @@ llvm::Value *CreateTerm::createFunctionCall(std::string name, KOREObjectComposit
   return llvm::CallInst::Create(func, args, "", CurrentBlock);
 }
 
+/* create a term, given the assumption that the created term will not be a triangle injection pair */
 llvm::Value *CreateTerm::notInjectionCase(KOREObjectCompositePattern *constructor, llvm::Value *val) {
   const KOREObjectSymbol *symbol = constructor->getConstructor();
   llvm::StructType *BlockType = getBlockType(Module, Definition, symbol);
