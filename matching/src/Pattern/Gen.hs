@@ -11,6 +11,7 @@ import           Data.Either           (isLeft)
 import           Data.Functor.Foldable (Fix (..), para)
 import           Data.List             (transpose)
 import qualified Data.Map              as Map
+import           Data.Maybe            (isJust)
 import           Data.Text             (unpack)
 import           Data.Tuple.Select     (sel1)
 import           Kore.AST.Common       (Rewrites (..), Sort (..),
@@ -93,7 +94,7 @@ genVars = para (unifiedPatternRAlgebra rAlgebra rAlgebra)
     rAlgebra _                                            = []
 
 defaultMetadata :: Sort Object -> P.Metadata
-defaultMetadata sort = P.Metadata 1 [] sort (\c -> if isLeft c then Nothing else Just [])
+defaultMetadata sort = P.Metadata 1 (const []) sort (\c -> if isLeft c then Nothing else Just [])
 
 genMetadatas :: SymLib -> KoreIndexedModule StepperAttributes -> Map.Map (Sort Object) P.Metadata
 genMetadatas syms@(SymLib symbols sorts) indexedMod =
@@ -119,7 +120,7 @@ genMetadatas syms@(SymLib symbols sorts) indexedMod =
       in if isInt then
         let tools = extractMetadataTools indexedMod
             bw = bitwidth tools sort
-        in Just $ P.Metadata (shiftL 1 bw) [] sort (const $ Just [])
+        in Just $ P.Metadata (shiftL 1 bw) (const []) sort (const $ Just [])
       else if isToken then
         Just $ defaultMetadata sort
       else
@@ -127,15 +128,24 @@ genMetadatas syms@(SymLib symbols sorts) indexedMod =
             keys = map Left constructors
             args = map getArgs constructors
             injections = filter isInjection keys
-            children = map (map $ (\s -> Map.findWithDefault (defaultMetadata sort) s metadatas)) args
+            usedInjs = map (\c -> filter (isSubsort metadatas c) injections) injections
+            children = map (map $ (\s -> Map.findWithDefault (defaultMetadata s) s metadatas)) args
             metaMap = Map.fromList (zip keys children)
-        in Just $ P.Metadata (toInteger $ length constructors) injections sort (flip Map.lookup metaMap)
+            injMap = Map.fromList (zip injections usedInjs)
+        in Just $ P.Metadata (toInteger $ length constructors) (injMap Map.!) sort (\c -> if isLeft c then Map.lookup c metaMap else Just [])
     genMetadata _ _ = Nothing
     getArgs :: SymbolOrAlias Object -> [Sort Object]
     getArgs sym = sel1 $ symbols Map.! sym
     isInjection :: P.Constructor -> Bool
     isInjection (Left (SymbolOrAlias (Id "inj" _) _)) = True
     isInjection _ = False
+    isSubsort :: Map.Map (Sort Object) P.Metadata -> P.Constructor -> P.Constructor -> Bool
+    isSubsort metas (Left (SymbolOrAlias name [b,_])) (Left (SymbolOrAlias _ [a,_])) =
+      let (P.Metadata _ _ _ childMeta) = Map.findWithDefault (defaultMetadata b) b metas
+          child = Left (SymbolOrAlias name [a,b])
+      in isJust $ childMeta $ child
+    isSubsort _ _ _ = error "invalid injection"
+
 
 genClauseMatrix :: KoreRewrite pattern 
                => SymLib

@@ -69,7 +69,7 @@ instance Show Column where
 
 data Metadata = Metadata
                 { getLength :: !Integer
-                , getInjections :: ![Constructor]
+                , getInjections :: Constructor -> [Constructor]
                 , getSort :: Sort Object
                 , getChildren :: Constructor -> Maybe [Metadata]
                 }
@@ -171,9 +171,7 @@ sigma :: Column -> [Constructor]
 sigma c =
   let used = mapMaybe ix $ getTerms c
       inj = nub $ filter isInj used
-      metaC = getMetadata c
-      allInjs = getInjections $ getMetadata c
-      usedInjs = nub $ filter (\ix' -> or $ map (isSubsort metaC ix') inj) allInjs
+      usedInjs = nub $ concatMap (getInjections $ getMetadata c) inj
       dups = used ++ usedInjs
   in nub dups
   where
@@ -185,13 +183,7 @@ sigma c =
     isInj :: Constructor -> Bool
     isInj (Left (SymbolOrAlias (Id "inj" _) _)) = True
     isInj _ = False
-    isSubsort :: Metadata -> Constructor -> Constructor -> Bool
-    isSubsort (Metadata _ _ _ meta) (Left (SymbolOrAlias name [a,_])) ix'@(Left (SymbolOrAlias _ [b,_])) =
-      let (Metadata _ _ _ childMeta) = (fromJust $ meta ix') !! 0
-          child = Left (SymbolOrAlias name [a,b])
-      in isJust $ childMeta $ child
-    isSubsort _ _ _ = error "invalid injection"
-    
+   
 
 sigma₁ :: PatternMatrix -> [Constructor]
 sigma₁ (PatternMatrix (c : _)) = sigma c
