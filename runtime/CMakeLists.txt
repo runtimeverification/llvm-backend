@@ -1,2 +1,3 @@
 add_subdirectory(arithmetic)
 add_subdirectory(configurationparser)
+add_subdirectory(strings)
