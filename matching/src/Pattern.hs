@@ -39,8 +39,10 @@ import           Data.Bifunctor        (second)
 import           Data.Deriving         (deriveOrd1, deriveShow1, deriveEq1)
 import           Data.Function         (on)
 import           Data.Functor.Foldable (Fix (..))
-import           Data.List             (transpose,nub,sortBy)
+import           Data.List             (transpose,nub,sortBy,maximumBy)
+import           Data.List.Index       (indexed)
 import           Data.Maybe            (mapMaybe,catMaybes,isJust,fromJust,listToMaybe)
+import           Data.Ord              (comparing)
 import           Data.Semigroup        ((<>))
 import           Data.Text             (Text, pack)
 import           Data.Traversable      (mapAccumL)
@@ -427,12 +429,23 @@ getLeaf ix os ps (Clause (Action a rhsVars maybeSideCondition) matchedVars) next
                      (_, condVars) = unzip condFiltered
                  in function (pack $ "side_condition_" ++ (show a)) condVars "BOOL.Bool" (switchLit [ix, 0] 1 [("1", (leaf a newVars)), ("0", next)] Nothing)
 
+swapAt :: Int -> Int -> [a] -> [a]
+swapAt i j xs = 
+  if i == j then xs else
+  if i > j then swapAt j i xs else
+  let elemI = xs !! i
+      elemJ = xs !! j
+      left = take i xs
+      middle = take (j - i - 1) (drop (i + 1) xs)
+      right = drop (j + 1) xs
+  in left ++ (elemJ:middle) ++ (elemI:right)
+
 compilePattern :: (ClauseMatrix, [Occurrence]) -> (Fix DecisionTree)
-compilePattern cm' =
-  compilePattern' 0 cm'
+compilePattern cm =
+  compilePattern' 0 cm
   where
     compilePattern' :: Int -> (ClauseMatrix, [Occurrence]) -> (Fix DecisionTree)
-    compilePattern' ix cm@((ClauseMatrix pm@(PatternMatrix _) ac), os) = 
+    compilePattern' ix ((ClauseMatrix pm@(PatternMatrix cs) ac), os) = 
       case ac of
         [] -> Fix Fail
         hd:tl -> 
@@ -441,24 +454,30 @@ compilePattern cm' =
               ix' = if isJust maybeSideCondition then ix+1 else ix
           in if length ac == 1 then getLeaf ix os (firstRow pm) hd failure else getLeaf ix os (firstRow pm) hd (compilePattern' ix' ((ClauseMatrix (notFirstRow pm) tl), os))
           else 
-          let hookAtt = hook pm
-              s₁ = sigma₁ pm
-              ls = map (`mSpecialize` cm) s₁
-              d  = mDefault cm
-          in case hookAtt of
-               Nothing -> Fix $ Switch (head os) L
-                   { getSpecializations = map (second (compilePattern' ix)) ls
-                   , getDefault = compilePattern' ix <$> d
-                   }
-               Just "BOOL.Bool" -> Fix $ SwitchLit (head os) 1 L
-                   { getSpecializations = map (second (compilePattern' ix)) ls
-                   , getDefault = compilePattern' ix <$> d
-                   }
-               Just ('M':'I':'N':'T':'.':'M':'I':'n':'t':' ':bw) -> Fix $ SwitchLit (head os) (read bw) L
-                   { getSpecializations = map (second (compilePattern' ix)) ls
-                   , getDefault = compilePattern' ix <$> d
-                   }
-               Just hookName -> equalLiteral ix os hookName ls d
+          let bestColIx = fst $ maximumBy (comparing (getScore . snd)) (indexed cs)
+              cs' = swapAt 0 bestColIx cs
+              os' = swapAt 0 bestColIx os
+              pm' = PatternMatrix cs'
+              cm' = (ClauseMatrix pm' ac,os')
+              hookAtt = hook pm'
+              s₁ = sigma₁ pm'
+              ls = map (`mSpecialize` cm') s₁
+              d  = mDefault cm'
+              dt = case hookAtt of
+                Nothing -> Fix $ Switch (head os') L
+                    { getSpecializations = map (second (compilePattern' ix)) ls
+                    , getDefault = compilePattern' ix <$> d
+                    }
+                Just "BOOL.Bool" -> Fix $ SwitchLit (head os') 1 L
+                    { getSpecializations = map (second (compilePattern' ix)) ls
+                    , getDefault = compilePattern' ix <$> d
+                    }
+                Just ('M':'I':'N':'T':'.':'M':'I':'n':'t':' ':bw) -> Fix $ SwitchLit (head os') (read bw) L
+                    { getSpecializations = map (second (compilePattern' ix)) ls
+                    , getDefault = compilePattern' ix <$> d
+                    }
+                Just hookName -> equalLiteral ix os' hookName ls d
+          in if bestColIx == 0 then dt else Fix $ Swap bestColIx dt
     isWildcardRow :: PatternMatrix -> Bool
     isWildcardRow = and . map isWildcard . firstRow
     isWildcard :: Fix Pattern -> Bool

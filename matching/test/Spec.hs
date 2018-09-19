@@ -125,30 +125,30 @@ appendTests = testGroup "Basic pattern compilation"
   [ testCase "Naive compilation of the append pattern" $
       compilePattern appendPattern @?=
         switch [1] [ ("nil", leaf 1 [])
-               , ("cons", simplify [0, 1] (simplify [1, 1]
+               , ("cons", swap 2
                            (switch [2] [ ("nil", leaf 2 [])
                                    , ("cons", leaf 3 [])
-                                   ] Nothing )))
+                                   ] Nothing ))
                ] Nothing
   , testCase "Naive compilation of the append pattern with variable bindings" $
       compilePattern appendBindPattern @?=
         switch [1] [ ("nil", leaf 1 [[2]])
-               , ("cons", simplify [0, 1] (simplify [1, 1]
+               , ("cons", swap 2
                            (switch [2] [ ("nil", leaf 2 [[1]])
                                    , ("cons", leaf 3 [[0, 2], [1, 2], [0, 1], [1, 1]])
-                                   ] Nothing )))
+                                   ] Nothing ))
                ] Nothing
   , testCase "Naive compilation of the append pattern with side condition" $
       compilePattern appendCondPattern @?=
         switch [1] [ ("nil", leaf 1 [[2]])
-               , ("cons", simplify [0, 1] (simplify [1, 1]
+               , ("cons", swap 2
                            (switch [2] [ ("nil", leaf 2 [[1]])
                                    , ("cons", (function "side_condition_3" [[1, 2], [0, 1]] "BOOL.Bool" (switchLit [0, 0] 1 [("1", leaf 3 [[0, 2], [1, 2], [0, 1], [1, 1]]), ("0", failure)] Nothing)))
-                                   ] Nothing )))
+                                   ] Nothing ))
                ] Nothing
   , testCase "Yaml serialization" $
       (serializeToYaml $ shareDt $ compilePattern $ appendBindPattern) @?= 
-        "&6\n" <>
+        "&5\n" <>
         "specializations:\n" <>
         "- - nil\n" <>
         "  - &0\n" <>
@@ -156,38 +156,31 @@ appendTests = testGroup "Basic pattern compilation"
         "    - 1\n" <>
         "    - - - 2\n" <>
         "- - cons\n" <>
-        "  - &5\n" <>
-        "    specializations: []\n" <>
-        "    default: &4\n" <>
-        "      specializations: []\n" <>
-        "      default: &3\n" <>
-        "        specializations:\n" <>
-        "        - - nil\n" <>
-        "          - &1\n" <>
-        "            action:\n" <>
-        "            - 2\n" <>
-        "            - - - 1\n" <>
-        "        - - cons\n" <>
-        "          - &2\n" <>
-        "            action:\n" <>
-        "            - 3\n" <>
-        "            - - - 0\n" <>
-        "                - 2\n" <>
-        "              - - 1\n" <>
-        "                - 2\n" <>
-        "              - - 0\n" <>
-        "                - 1\n" <>
-        "              - - 1\n" <>
-        "                - 1\n" <>
-        "        default: null\n" <>
-        "        occurrence:\n" <>
-        "        - 2\n" <>
+        "  - &4\n" <>
+        "    swap:\n" <>
+        "    - 2\n" <>
+        "    - &3\n" <>
+        "      specializations:\n" <>
+        "      - - nil\n" <>
+        "        - &1\n" <>
+        "          action:\n" <>
+        "          - 2\n" <>
+        "          - - - 1\n" <>
+        "      - - cons\n" <>
+        "        - &2\n" <>
+        "          action:\n" <>
+        "          - 3\n" <>
+        "          - - - 0\n" <>
+        "              - 2\n" <>
+        "            - - 1\n" <>
+        "              - 2\n" <>
+        "            - - 0\n" <>
+        "              - 1\n" <>
+        "            - - 1\n" <>
+        "              - 1\n" <>
+        "      default: null\n" <>
         "      occurrence:\n" <>
-        "      - 1\n" <>
-        "      - 1\n" <>
-        "    occurrence:\n" <>
-        "    - 0\n" <>
-        "    - 1\n" <>
+        "      - 2\n" <>
         "default: null\n" <>
         "occurrence:\n" <>
         "- 1\n"
