@@ -465,7 +465,7 @@ static void getVisitor(KOREDefinition *definition, llvm::Module *module, KOREObj
   auto BlockType = getBlockType(module, definition, symbol);
   auto cast = new llvm::BitCastInst(func->arg_begin(),
       llvm::PointerType::getUnqual(BlockType), "", CaseBlock);
-  int i = 0;
+  unsigned i = 0;
   for (auto sort : symbol->getArguments()) {
     auto compositeSort = dynamic_cast<KOREObjectCompositeSort *>(sort);
     SortCategory cat = compositeSort->getCategory(definition);
