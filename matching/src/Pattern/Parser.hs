@@ -80,6 +80,7 @@ parseAxiomForSymbols = parsePatternForSymbols . sentenceAxiomPattern
     rAlgebra (NextPattern (Next _ (_, p)))                = p
     rAlgebra (NotPattern (Not _ (_, p)))                  = p
     rAlgebra (OrPattern (Or _ (_, p₀) (_, p₁)))           = p₀ ++ p₁
+    rAlgebra (RewritesPattern (Rewrites _ (_, p₀) (_, p₁))) = p₀ ++ p₁
     rAlgebra _                                            = []
 
 mkSymLib :: [SymbolOrAlias Object] 
