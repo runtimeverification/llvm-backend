@@ -315,10 +315,10 @@ expandColumn ix (Column m _ ps) =
   in  zipWith mkColumn metas (transpose ps'')
 
 expandMetadata :: Constructor -> Metadata -> [Metadata]
-expandMetadata ix (Metadata _ _ _ ms) =
+expandMetadata ix (Metadata _ _ sort ms) =
   case ms ix of
     Just m -> m
-    Nothing -> error $ show ix
+    Nothing -> error $ show (ix,sort)
 
 expandIfJust :: Constructor
              -> [Metadata]
