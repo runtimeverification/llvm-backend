@@ -484,7 +484,7 @@ compilePattern cm =
     equalLiteral :: Int -> [Occurrence] -> String -> [(Text, (ClauseMatrix, [Occurrence]))] -> Maybe (ClauseMatrix, [Occurrence]) -> Fix DecisionTree
     equalLiteral o os _ [] (Just d) = Fix $ Switch (head os) L { getSpecializations = [], getDefault = Just $ compilePattern' o d }
     equalLiteral _ _ _ [] (Nothing) = Fix Fail
-    equalLiteral o os hookName ((name,spec):tl) d = Fix $ EqualLiteral (pack hookName) name $ Fix $ SwitchLit [o, 0] 1 $ L [("1", compilePattern' (o+1) spec),("0", equalLiteral (o+1) os hookName tl d)] Nothing
+    equalLiteral o os hookName ((name,spec):tl) d = Fix $ EqualLiteral (pack hookName) name $ Fix $ SwitchLit [o, 0] 1 $ L [("1", Fix $ Switch (head os) L { getSpecializations = [], getDefault = Just $ compilePattern' (o+1) spec }),("0", equalLiteral (o+1) os hookName tl d)] Nothing
 
 
 shareDt :: Fix DecisionTree -> Free Anchor Alias
