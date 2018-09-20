@@ -484,6 +484,7 @@ static void getVisitor(KOREDefinition *definition, llvm::Module *module, KOREObj
     switch(cat) {
     case SortCategory::StringBuffer:
       Child = new llvm::LoadInst(Child, "", CaseBlock);
+      Child = new llvm::BitCastInst(Child, getValueType(SortCategory::Symbol, module), "", CaseBlock);
       // fall through
     case SortCategory::Symbol:
       llvm::CallInst::Create(func->arg_begin()+2, {func->arg_begin()+1, Child, CharPtr}, "", CaseBlock);
