@@ -325,7 +325,11 @@ llvm::Value *CreateTerm::createHook(KOREObjectCompositePattern *hookAtt, KOREObj
     assert(false && "not implemented yet: MInt");
     abort();
   } else {
-    std::string hookName = "hook_" + name.substr(0, name.find('.')) + "_" + name.substr(name.find('.') + 1);
+    std::string domain = name.substr(0, name.find('.'));
+    if (domain == "ARRAY") {
+      domain = "LIST";
+    }
+    std::string hookName = "hook_" + domain + "_" + name.substr(name.find('.') + 1);
     return createFunctionCall(hookName, pattern, true);
   }
 }
