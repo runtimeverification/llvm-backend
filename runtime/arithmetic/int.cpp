@@ -214,7 +214,7 @@ mpz_ptr hook_INT_min(mpz_t a, mpz_t b) {
   return move_int(result);
 }
 
-mpz_ptr hook_INT_log(mpz_t a) {
+mpz_ptr hook_INT_log2(mpz_t a) {
   mpz_t result;
   if (mpz_sgn(a) <= 0) {
     throw std::invalid_argument("Logarithm of nonpositive integer");

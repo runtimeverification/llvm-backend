@@ -22,7 +22,7 @@ extern "C" {
   mpz_ptr hook_INT_signExtendBitRange(mpz_t, mpz_t, mpz_t);
   mpz_ptr hook_INT_not(mpz_t);
   mpz_ptr hook_INT_abs(mpz_t);
-  mpz_ptr hook_INT_log(mpz_t);
+  mpz_ptr hook_INT_log2(mpz_t);
   bool hook_INT_le(mpz_t, mpz_t);
   bool hook_INT_lt(mpz_t, mpz_t);
   bool hook_INT_eq(mpz_t, mpz_t);
@@ -425,18 +425,18 @@ BOOST_AUTO_TEST_CASE(min) {
   mpz_clear(b);
 }
 
-BOOST_AUTO_TEST_CASE(log) {
+BOOST_AUTO_TEST_CASE(log2) {
   mpz_t a;
   mpz_ptr result;
   mpz_init_set_ui(a, 0);
-  BOOST_CHECK_THROW(hook_INT_log(a), std::invalid_argument);
+  BOOST_CHECK_THROW(hook_INT_log2(a), std::invalid_argument);
   mpz_set_ui(a, 256);
-  result = hook_INT_log(a);
+  result = hook_INT_log2(a);
   BOOST_CHECK_EQUAL(mpz_cmp_ui(result, 8), 0);
   mpz_set_ui(a, 255);
   mpz_clear(result);
   free(result);
-  result = hook_INT_log(a);
+  result = hook_INT_log2(a);
   BOOST_CHECK_EQUAL(mpz_cmp_ui(result, 7), 0);
   mpz_clear(result);
   free(result);
