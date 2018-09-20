@@ -59,7 +59,7 @@ import qualified Data.ByteString as B
 
 data Column = Column
               { getMetadata :: !Metadata
-              , getScore    :: !Int
+              , getScore    :: !Double
               , getTerms    :: ![Fix Pattern]
               }
 
@@ -296,15 +296,16 @@ expandMatrix ix (ClauseMatrix (PatternMatrix (c : cs)) as) =
 expandMatrix _ _ = error "Cannot expand empty matrix."
 
 -- TODO: improve
-computeScore :: [Fix Pattern] -> Int
-computeScore [] = 0
-computeScore (Fix (Pattern _ _ _):tl) = 1 + computeScore tl
-computeScore (Fix (As _ pat):tl) = computeScore (pat:tl)
-computeScore (Fix Wildcard:_) = 0
-computeScore (Fix (Variable _):_) = 0
+computeScore :: Metadata -> [Fix Pattern] -> Double
+computeScore _ [] = 0.0
+computeScore m (Fix (Pattern ix@(Left (SymbolOrAlias (Id "inj" _) _)) _ _):tl) = (1.0 / (fromIntegral $ length $ getInjections m ix)) + computeScore m tl
+computeScore m (Fix (Pattern _ _ _):tl) = 1.0 + computeScore m tl
+computeScore m (Fix (As _ pat):tl) = computeScore m (pat:tl)
+computeScore _ (Fix Wildcard:_) = 0.0
+computeScore _ (Fix (Variable _):_) = 0.0
 
 mkColumn :: Metadata -> [Fix Pattern] -> Column
-mkColumn m ps = Column m (computeScore ps) ps
+mkColumn m ps = Column m (computeScore m ps) ps
 
 expandColumn :: Constructor -> Column -> [Column]
 expandColumn ix (Column m _ ps) =
