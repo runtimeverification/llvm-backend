@@ -1,6 +1,7 @@
 #include <boost/test/unit_test.hpp>
 #include <cstdint>
 #include <string.h>
+#include<iostream>
 
 #define KCHAR char
 extern "C" {

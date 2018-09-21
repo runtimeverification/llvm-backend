@@ -95,15 +95,24 @@ int64_t hook_STRING_find(const string * haystack, const string * needle, int64_t
 	}
 	auto out = std::search(haystack->data + pos * sizeof(KCHAR), haystack->data + haystack->b.len * sizeof(KCHAR),
 			               needle->data,   needle->data   + needle->b.len * sizeof(KCHAR));
-	auto ret = (out - haystack->data) / sizeof(KCHAR);
+	int64_t ret = (out - haystack->data) / sizeof(KCHAR);
 	// search returns the end of the range if it is not found, but we want -1 in such a case.
 	return (ret < haystack->b.len)?ret:-1;
 }
 
 int64_t hook_STRING_rfind(const string * haystack, const string * needle, int64_t pos) {
-    auto hs = std::string(haystack->data, haystack->b.len);
-    auto ns = std::string(needle->data, needle->b.len);
-    return hs.rfind(ns, pos);
+	// The semantics of rfind position are strange, it is the last position at which
+	// the match can _start_, which means the end of the haystack needs to be pos + len(needle),
+	// or the end of the haystack, if that's less.
+	pos += needle->b.len;
+	if (pos <= needle->b.len) {
+		return -1;
+	}
+	auto end = (pos < haystack->b.len)?pos:haystack->b.len;
+	auto out = std::find_end(&haystack->data[0], &haystack->data[end],
+                  &needle->data[0], &needle->data[needle->b.len]);
+	auto ret = &*out - &haystack->data[0];
+	return (ret < end)?ret:-1;
 }
 
 int64_t hook_STRING_findChar(const string * haystack, const string * needle, int64_t pos) {
