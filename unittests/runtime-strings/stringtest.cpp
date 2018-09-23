@@ -1,7 +1,7 @@
 #include <boost/test/unit_test.hpp>
 #include <cstdint>
 #include <string.h>
-#include<iostream>
+#include <iostream>
 
 #define KCHAR char
 extern "C" {
@@ -228,7 +228,6 @@ BOOST_AUTO_TEST_CASE(ord) {
 BOOST_AUTO_TEST_CASE(substr) {
     auto catAll = makeString("hellohehf");
 
-	printf("%s\n", hook_STRING_substr(catAll, 2, -1)->data);
     BOOST_CHECK_EQUAL(memcmp(hook_STRING_substr(catAll, 2, -1)->data, "llohehf", 7), 0);
     BOOST_CHECK_EQUAL(memcmp(hook_STRING_substr(catAll, 2, 4)->data, "lloh", 4), 0);
     BOOST_CHECK_EQUAL(memcmp(hook_STRING_substr(catAll, 0, 4)->data, "hell", 4), 0);

@@ -2,7 +2,6 @@
 #include<string.h>
 #include<algorithm>
 #include<cstdint>
-#include<iostream>
 #include<iomanip>
 #include<string>
 #include<sstream>
@@ -117,33 +116,12 @@ int64_t hook_STRING_rfind(const string * haystack, const string * needle, int64_
 
 int64_t hook_STRING_findChar(const string * haystack, const string * needle, int64_t pos) {
 	if (needle->b.len > 1) return -1;
-	pos = std::max(pos, 0L);
-	for (auto i = pos; i < haystack->b.len; ++i) {
-		if (haystack->data[i] == needle->data[0]) {
-			auto found = false;
-			for (auto j = 0; j < needle->b.len; ++j) {
-				if (i+j >= haystack->b.len) {
-					found = false;
-					break;
-				}
-				if  (haystack->data[i+j] != needle->data[j]) {
-					found = false;
-					break;
-				}
-				found = true;
-			}
-			if (found) return i;
-		}
-	}
-	return -1L;
+	return hook_STRING_find(haystack, needle, pos);
 }
 
-// rfind will be used much less than find; it is ok to be a little less efficient and create std::strings.
 int64_t hook_STRING_rfindChar(const string * haystack, const string * needle, int64_t pos) {
 	if (needle->b.len > 1) return -1;
-	auto hs = std::string(haystack->data, haystack->b.len);
-	auto ns = std::string(needle->data, needle->b.len);
-	return hs.rfind(ns, pos);
+	return hook_STRING_rfind(haystack, needle, pos);
 }
 
 string * makeString(const KCHAR * input) {
