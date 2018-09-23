@@ -40,58 +40,60 @@ declare noalias i8* @malloc(i64)
 
 declare %block* @"eval_append{SortK{}, SortK{}}"(%block*, %block*)
 
-define %block* @apply_rule_205(%map %VarInit) {
+define %block* @apply_rule_205(%map*) {
 entry:
+  %VarInit = load %map, %map* %0
   %malloccall = tail call i8* @malloc(i64 ptrtoint ({ %blockheader, [0 x i64], %block*, %block* }* getelementptr ({ %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* null, i32 1) to i64))
-  %0 = bitcast i8* %malloccall to { %blockheader, [0 x i64], %block*, %block* }*
-  %"Lbl'-LT-'T'-GT-'" = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %0, i64 0, i32 0
+  %1 = bitcast i8* %malloccall to { %blockheader, [0 x i64], %block*, %block* }*
+  %"Lbl'-LT-'T'-GT-'" = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %1, i64 0, i32 0
   store %blockheader { i64 281487861612544 }, %blockheader* %"Lbl'-LT-'T'-GT-'"
-  %1 = alloca %map
-  store %map %VarInit, %map* %1
-  %2 = call %block* @"eval_LblinitKCell{SortMap{}}"(%map* %1)
-  %3 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %0, i64 0, i32 2
-  store %block* %2, %block** %3
-  %4 = call %block* @"eval_LblinitStateCell{}"()
-  %5 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %0, i64 0, i32 3
-  store %block* %4, %block** %5
-  %6 = bitcast { %blockheader, [0 x i64], %block*, %block* }* %0 to %block*
-  ret %block* %6
+  %2 = alloca %map
+  store %map %VarInit, %map* %2
+  %3 = call %block* @"eval_LblinitKCell{SortMap{}}"(%map* %2)
+  %4 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %1, i64 0, i32 2
+  store %block* %3, %block** %4
+  %5 = call %block* @"eval_LblinitStateCell{}"()
+  %6 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %1, i64 0, i32 3
+  store %block* %5, %block** %6
+  %7 = bitcast { %blockheader, [0 x i64], %block*, %block* }* %1 to %block*
+  ret %block* %7
 }
 
 declare %block* @"eval_LblinitKCell{SortMap{}}"(%map*)
 
 declare %block* @"eval_LblinitStateCell{}"()
 
-define %block* @apply_rule_206(%map %VarInit) {
+define %block* @apply_rule_206(%map*) {
 entry:
+  %VarInit = load %map, %map* %0
   %malloccall = tail call i8* @malloc(i64 ptrtoint ({ %blockheader, [0 x i64], %block* }* getelementptr ({ %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* null, i32 1) to i64))
-  %0 = bitcast i8* %malloccall to { %blockheader, [0 x i64], %block* }*
-  %"Lbl'-LT-'k'-GT-'" = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %0, i64 0, i32 0
+  %1 = bitcast i8* %malloccall to { %blockheader, [0 x i64], %block* }*
+  %"Lbl'-LT-'k'-GT-'" = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %1, i64 0, i32 0
   store %blockheader { i64 562958543355906 }, %blockheader* %"Lbl'-LT-'k'-GT-'"
-  %1 = alloca %map
-  store %map %VarInit, %map* %1
+  %2 = alloca %map
+  store %map %VarInit, %map* %2
   %malloccall1 = tail call i8* @malloc(i64 ptrtoint ({ %blockheader, [0 x i64], %block*, %block* }* getelementptr ({ %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* null, i32 1) to i64))
-  %2 = bitcast i8* %malloccall1 to { %blockheader, [0 x i64], %block*, %block* }*
-  %kseq = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %2, i64 0, i32 0
+  %3 = bitcast i8* %malloccall1 to { %blockheader, [0 x i64], %block*, %block* }*
+  %kseq = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %3, i64 0, i32 0
   store %blockheader { i64 281487861612693 }, %blockheader* %kseq
   %malloccall2 = tail call i8* @malloc(i64 ptrtoint ({ %blockheader, [0 x i64], %block* }* getelementptr ({ %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* null, i32 1) to i64))
-  %3 = bitcast i8* %malloccall2 to { %blockheader, [0 x i64], %block* }*
-  %inj = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %3, i64 0, i32 0
+  %4 = bitcast i8* %malloccall2 to { %blockheader, [0 x i64], %block* }*
+  %inj = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %4, i64 0, i32 0
   store %blockheader { i64 562958543356052 }, %blockheader* %inj
-  %4 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %3, i64 0, i32 2
-  store %block* bitcast ({ %blockheader, [4 x i8] }* @"token_$PGM" to %block*), %block** %4
-  %5 = bitcast { %blockheader, [0 x i64], %block* }* %3 to %block*
-  %6 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %2, i64 0, i32 2
-  store %block* %5, %block** %6
-  %7 = inttoptr i64 536870912001 to %block*
-  %8 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %2, i64 0, i32 3
-  store %block* %7, %block** %8
-  %9 = bitcast { %blockheader, [0 x i64], %block*, %block* }* %2 to %block*
-  %10 = call %block* @hook_MAP_lookup(%map* %1, %block* %9)
-  %11 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %0, i64 0, i32 2
-  store %block* %10, %block** %11
-  %12 = bitcast { %blockheader, [0 x i64], %block* }* %0 to %block*
-  ret %block* %12
+  %5 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %4, i64 0, i32 2
+  store %block* bitcast ({ %blockheader, [4 x i8] }* @"token_$PGM" to %block*), %block** %5
+  %6 = bitcast { %blockheader, [0 x i64], %block* }* %4 to %block*
+  %7 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %3, i64 0, i32 2
+  store %block* %6, %block** %7
+  %8 = inttoptr i64 536870912001 to %block*
+  %9 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %3, i64 0, i32 3
+  store %block* %8, %block** %9
+  %10 = bitcast { %blockheader, [0 x i64], %block*, %block* }* %3 to %block*
+  %11 = call %block* @hook_MAP_lookup(%map* %2, %block* %10)
+  %12 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %1, i64 0, i32 2
+  store %block* %11, %block** %12
+  %13 = bitcast { %blockheader, [0 x i64], %block* }* %1 to %block*
+  ret %block* %13
 }
 
 declare %block* @hook_MAP_lookup(%map*, %block*)
@@ -779,52 +781,52 @@ entry:
   ret i1 false
 }
 
-define %block* @apply_rule_234(%block* %"Var'Unds'15", %map %VarRho, %block* %VarX, %block* %VarXs) {
+define %block* @apply_rule_234(%block* %"Var'Unds'15", %map*, %block* %VarX, %block* %VarXs) {
 entry:
+  %VarRho = load %map, %map* %0
   %malloccall = tail call i8* @malloc(i64 ptrtoint ({ %blockheader, [0 x i64], %block*, %block* }* getelementptr ({ %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* null, i32 1) to i64))
-  %0 = bitcast i8* %malloccall to { %blockheader, [0 x i64], %block*, %block* }*
-  %"Lbl'-LT-'T'-GT-'" = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %0, i64 0, i32 0
+  %1 = bitcast i8* %malloccall to { %blockheader, [0 x i64], %block*, %block* }*
+  %"Lbl'-LT-'T'-GT-'" = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %1, i64 0, i32 0
   store %blockheader { i64 281487861612544 }, %blockheader* %"Lbl'-LT-'T'-GT-'"
   %malloccall1 = tail call i8* @malloc(i64 ptrtoint ({ %blockheader, [0 x i64], %block* }* getelementptr ({ %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* null, i32 1) to i64))
-  %1 = bitcast i8* %malloccall1 to { %blockheader, [0 x i64], %block* }*
-  %"Lbl'-LT-'k'-GT-'" = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %1, i64 0, i32 0
+  %2 = bitcast i8* %malloccall1 to { %blockheader, [0 x i64], %block* }*
+  %"Lbl'-LT-'k'-GT-'" = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %2, i64 0, i32 0
   store %blockheader { i64 562958543355906 }, %blockheader* %"Lbl'-LT-'k'-GT-'"
   %malloccall2 = tail call i8* @malloc(i64 ptrtoint ({ %blockheader, [0 x i64], %block*, %block* }* getelementptr ({ %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* null, i32 1) to i64))
-  %2 = bitcast i8* %malloccall2 to { %blockheader, [0 x i64], %block*, %block* }*
-  %kseq = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %2, i64 0, i32 0
+  %3 = bitcast i8* %malloccall2 to { %blockheader, [0 x i64], %block*, %block* }*
+  %kseq = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %3, i64 0, i32 0
   store %blockheader { i64 281487861612693 }, %blockheader* %kseq
   %malloccall3 = tail call i8* @malloc(i64 ptrtoint ({ %blockheader, [0 x i64], %block*, %block* }* getelementptr ({ %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* null, i32 1) to i64))
-  %3 = bitcast i8* %malloccall3 to { %blockheader, [0 x i64], %block*, %block* }*
-  %"Lblint'UndsSClnUndsUnds'IMP-SYNTAX'UndsUnds'Ids'Unds'Stmt" = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %3, i64 0, i32 0
+  %4 = bitcast i8* %malloccall3 to { %blockheader, [0 x i64], %block*, %block* }*
+  %"Lblint'UndsSClnUndsUnds'IMP-SYNTAX'UndsUnds'Ids'Unds'Stmt" = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %4, i64 0, i32 0
   store %blockheader { i64 281487861612629 }, %blockheader* %"Lblint'UndsSClnUndsUnds'IMP-SYNTAX'UndsUnds'Ids'Unds'Stmt"
-  %4 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %3, i64 0, i32 2
-  store %block* %VarXs, %block** %4
-  %5 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %3, i64 0, i32 3
-  store %block* %"Var'Unds'15", %block** %5
-  %6 = bitcast { %blockheader, [0 x i64], %block*, %block* }* %3 to %block*
+  %5 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %4, i64 0, i32 2
+  store %block* %VarXs, %block** %5
+  %6 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %4, i64 0, i32 3
+  store %block* %"Var'Unds'15", %block** %6
+  %7 = bitcast { %blockheader, [0 x i64], %block*, %block* }* %4 to %block*
   %malloccall4 = tail call i8* @malloc(i64 ptrtoint ({ %blockheader, [0 x i64], %block* }* getelementptr ({ %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* null, i32 1) to i64))
-  %7 = bitcast i8* %malloccall4 to { %blockheader, [0 x i64], %block* }*
-  %inj = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %7, i64 0, i32 0
+  %8 = bitcast i8* %malloccall4 to { %blockheader, [0 x i64], %block* }*
+  %inj = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %8, i64 0, i32 0
   store %blockheader { i64 562958543356031 }, %blockheader* %inj
-  %8 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %7, i64 0, i32 2
-  store %block* %6, %block** %8
-  %9 = bitcast { %blockheader, [0 x i64], %block* }* %7 to %block*
-  %10 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %2, i64 0, i32 2
-  store %block* %9, %block** %10
-  %11 = inttoptr i64 536870912001 to %block*
-  %12 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %2, i64 0, i32 3
-  store %block* %11, %block** %12
-  %13 = bitcast { %blockheader, [0 x i64], %block*, %block* }* %2 to %block*
-  %14 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %1, i64 0, i32 2
-  store %block* %13, %block** %14
-  %15 = bitcast { %blockheader, [0 x i64], %block* }* %1 to %block*
-  %16 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %0, i64 0, i32 2
-  store %block* %15, %block** %16
+  %9 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %8, i64 0, i32 2
+  store %block* %7, %block** %9
+  %10 = bitcast { %blockheader, [0 x i64], %block* }* %8 to %block*
+  %11 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %3, i64 0, i32 2
+  store %block* %10, %block** %11
+  %12 = inttoptr i64 536870912001 to %block*
+  %13 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %3, i64 0, i32 3
+  store %block* %12, %block** %13
+  %14 = bitcast { %blockheader, [0 x i64], %block*, %block* }* %3 to %block*
+  %15 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %2, i64 0, i32 2
+  store %block* %14, %block** %15
+  %16 = bitcast { %blockheader, [0 x i64], %block* }* %2 to %block*
+  %17 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %1, i64 0, i32 2
+  store %block* %16, %block** %17
   %malloccall5 = tail call i8* @malloc(i64 ptrtoint ({ %blockheader, [0 x i64], %map }* getelementptr ({ %blockheader, [0 x i64], %map }, { %blockheader, [0 x i64], %map }* null, i32 1) to i64))
-  %17 = bitcast i8* %malloccall5 to { %blockheader, [0 x i64], %map }*
-  %"Lbl'-LT-'state'-GT-'" = getelementptr inbounds { %blockheader, [0 x i64], %map }, { %blockheader, [0 x i64], %map }* %17, i64 0, i32 0
+  %18 = bitcast i8* %malloccall5 to { %blockheader, [0 x i64], %map }*
+  %"Lbl'-LT-'state'-GT-'" = getelementptr inbounds { %blockheader, [0 x i64], %map }, { %blockheader, [0 x i64], %map }* %18, i64 0, i32 0
   store %blockheader { i64 844442110001155 }, %blockheader* %"Lbl'-LT-'state'-GT-'"
-  %18 = alloca %map
   %19 = alloca %map
   store %map %VarRho, %map* %19
   %malloccall6 = tail call i8* @malloc(i64 ptrtoint ({ %blockheader, [0 x i64], %block*, %block* }* getelementptr ({ %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* null, i32 1) to i64))
@@ -874,15 +876,16 @@ merge:                                            ; preds = %notInjection, %geFi
   %36 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %30, i64 0, i32 3
   store %block* %35, %block** %36
   %37 = bitcast { %blockheader, [0 x i64], %block*, %block* }* %30 to %block*
-  call void @hook_MAP_update(%map* %18, %map* %19, %block* %29, %block* %37)
-  %38 = load %map, %map* %18
-  %39 = getelementptr inbounds { %blockheader, [0 x i64], %map }, { %blockheader, [0 x i64], %map }* %17, i64 0, i32 2
-  store %map %38, %map* %39
-  %40 = bitcast { %blockheader, [0 x i64], %map }* %17 to %block*
-  %41 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %0, i64 0, i32 3
-  store %block* %40, %block** %41
-  %42 = bitcast { %blockheader, [0 x i64], %block*, %block* }* %0 to %block*
-  ret %block* %42
+  %38 = alloca %map
+  call void @hook_MAP_update(%map* %38, %map* %19, %block* %29, %block* %37)
+  %39 = load %map, %map* %38
+  %40 = getelementptr inbounds { %blockheader, [0 x i64], %map }, { %blockheader, [0 x i64], %map }* %18, i64 0, i32 2
+  store %map %39, %map* %40
+  %41 = bitcast { %blockheader, [0 x i64], %map }* %18 to %block*
+  %42 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %1, i64 0, i32 3
+  store %block* %41, %block** %42
+  %43 = bitcast { %blockheader, [0 x i64], %block*, %block* }* %1 to %block*
+  ret %block* %43
 }
 
 declare void @hook_MAP_update(%map* sret, %map*, %block*, %block*)
@@ -1709,26 +1712,26 @@ entry:
   ret i1 true
 }
 
-define %block* @apply_rule_279(%block* %VarDotVar1, %mpz* %VarI, %map %VarRho, %block* %VarX) {
+define %block* @apply_rule_279(%block* %VarDotVar1, %mpz* %VarI, %map*, %block* %VarX) {
 entry:
+  %VarRho = load %map, %map* %0
   %malloccall = tail call i8* @malloc(i64 ptrtoint ({ %blockheader, [0 x i64], %block*, %block* }* getelementptr ({ %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* null, i32 1) to i64))
-  %0 = bitcast i8* %malloccall to { %blockheader, [0 x i64], %block*, %block* }*
-  %"Lbl'-LT-'T'-GT-'" = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %0, i64 0, i32 0
+  %1 = bitcast i8* %malloccall to { %blockheader, [0 x i64], %block*, %block* }*
+  %"Lbl'-LT-'T'-GT-'" = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %1, i64 0, i32 0
   store %blockheader { i64 281487861612544 }, %blockheader* %"Lbl'-LT-'T'-GT-'"
   %malloccall1 = tail call i8* @malloc(i64 ptrtoint ({ %blockheader, [0 x i64], %block* }* getelementptr ({ %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* null, i32 1) to i64))
-  %1 = bitcast i8* %malloccall1 to { %blockheader, [0 x i64], %block* }*
-  %"Lbl'-LT-'k'-GT-'" = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %1, i64 0, i32 0
+  %2 = bitcast i8* %malloccall1 to { %blockheader, [0 x i64], %block* }*
+  %"Lbl'-LT-'k'-GT-'" = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %2, i64 0, i32 0
   store %blockheader { i64 562958543355906 }, %blockheader* %"Lbl'-LT-'k'-GT-'"
-  %2 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %1, i64 0, i32 2
-  store %block* %VarDotVar1, %block** %2
-  %3 = bitcast { %blockheader, [0 x i64], %block* }* %1 to %block*
-  %4 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %0, i64 0, i32 2
-  store %block* %3, %block** %4
+  %3 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %2, i64 0, i32 2
+  store %block* %VarDotVar1, %block** %3
+  %4 = bitcast { %blockheader, [0 x i64], %block* }* %2 to %block*
+  %5 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %1, i64 0, i32 2
+  store %block* %4, %block** %5
   %malloccall2 = tail call i8* @malloc(i64 ptrtoint ({ %blockheader, [0 x i64], %map }* getelementptr ({ %blockheader, [0 x i64], %map }, { %blockheader, [0 x i64], %map }* null, i32 1) to i64))
-  %5 = bitcast i8* %malloccall2 to { %blockheader, [0 x i64], %map }*
-  %"Lbl'-LT-'state'-GT-'" = getelementptr inbounds { %blockheader, [0 x i64], %map }, { %blockheader, [0 x i64], %map }* %5, i64 0, i32 0
+  %6 = bitcast i8* %malloccall2 to { %blockheader, [0 x i64], %map }*
+  %"Lbl'-LT-'state'-GT-'" = getelementptr inbounds { %blockheader, [0 x i64], %map }, { %blockheader, [0 x i64], %map }* %6, i64 0, i32 0
   store %blockheader { i64 844442110001155 }, %blockheader* %"Lbl'-LT-'state'-GT-'"
-  %6 = alloca %map
   %7 = alloca %map
   store %map %VarRho, %map* %7
   %malloccall3 = tail call i8* @malloc(i64 ptrtoint ({ %blockheader, [0 x i64], %block*, %block* }* getelementptr ({ %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* null, i32 1) to i64))
@@ -1778,15 +1781,16 @@ merge:                                            ; preds = %notInjection, %geFi
   %24 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %18, i64 0, i32 3
   store %block* %23, %block** %24
   %25 = bitcast { %blockheader, [0 x i64], %block*, %block* }* %18 to %block*
-  call void @hook_MAP_update(%map* %6, %map* %7, %block* %17, %block* %25)
-  %26 = load %map, %map* %6
-  %27 = getelementptr inbounds { %blockheader, [0 x i64], %map }, { %blockheader, [0 x i64], %map }* %5, i64 0, i32 2
-  store %map %26, %map* %27
-  %28 = bitcast { %blockheader, [0 x i64], %map }* %5 to %block*
-  %29 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %0, i64 0, i32 3
-  store %block* %28, %block** %29
-  %30 = bitcast { %blockheader, [0 x i64], %block*, %block* }* %0 to %block*
-  ret %block* %30
+  %26 = alloca %map
+  call void @hook_MAP_update(%map* %26, %map* %7, %block* %17, %block* %25)
+  %27 = load %map, %map* %26
+  %28 = getelementptr inbounds { %blockheader, [0 x i64], %map }, { %blockheader, [0 x i64], %map }* %6, i64 0, i32 2
+  store %map %27, %map* %28
+  %29 = bitcast { %blockheader, [0 x i64], %map }* %6 to %block*
+  %30 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %1, i64 0, i32 3
+  store %block* %29, %block** %30
+  %31 = bitcast { %blockheader, [0 x i64], %block*, %block* }* %1 to %block*
+  ret %block* %31
 }
 
 define i1 @apply_rule_280() {
@@ -2633,66 +2637,67 @@ entry:
   ret i1 true
 }
 
-define %block* @apply_rule_325(%block* %VarDotVar1, %map %VarRho, %block* %VarX) {
+define %block* @apply_rule_325(%block* %VarDotVar1, %map*, %block* %VarX) {
 entry:
+  %VarRho = load %map, %map* %0
   %malloccall = tail call i8* @malloc(i64 ptrtoint ({ %blockheader, [0 x i64], %block*, %block* }* getelementptr ({ %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* null, i32 1) to i64))
-  %0 = bitcast i8* %malloccall to { %blockheader, [0 x i64], %block*, %block* }*
-  %"Lbl'-LT-'T'-GT-'" = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %0, i64 0, i32 0
+  %1 = bitcast i8* %malloccall to { %blockheader, [0 x i64], %block*, %block* }*
+  %"Lbl'-LT-'T'-GT-'" = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %1, i64 0, i32 0
   store %blockheader { i64 281487861612544 }, %blockheader* %"Lbl'-LT-'T'-GT-'"
   %malloccall1 = tail call i8* @malloc(i64 ptrtoint ({ %blockheader, [0 x i64], %block* }* getelementptr ({ %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* null, i32 1) to i64))
-  %1 = bitcast i8* %malloccall1 to { %blockheader, [0 x i64], %block* }*
-  %"Lbl'-LT-'k'-GT-'" = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %1, i64 0, i32 0
+  %2 = bitcast i8* %malloccall1 to { %blockheader, [0 x i64], %block* }*
+  %"Lbl'-LT-'k'-GT-'" = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %2, i64 0, i32 0
   store %blockheader { i64 562958543355906 }, %blockheader* %"Lbl'-LT-'k'-GT-'"
-  %2 = alloca %map
-  store %map %VarRho, %map* %2
+  %3 = alloca %map
+  store %map %VarRho, %map* %3
   %malloccall2 = tail call i8* @malloc(i64 ptrtoint ({ %blockheader, [0 x i64], %block*, %block* }* getelementptr ({ %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* null, i32 1) to i64))
-  %3 = bitcast i8* %malloccall2 to { %blockheader, [0 x i64], %block*, %block* }*
-  %kseq = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %3, i64 0, i32 0
+  %4 = bitcast i8* %malloccall2 to { %blockheader, [0 x i64], %block*, %block* }*
+  %kseq = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %4, i64 0, i32 0
   store %blockheader { i64 281487861612693 }, %blockheader* %kseq
   %tag = call i32 @getTag(%block* %VarX)
-  %4 = icmp uge i32 %tag, 126
-  br i1 %4, label %geFirst, label %notInjection
+  %5 = icmp uge i32 %tag, 126
+  br i1 %5, label %geFirst, label %notInjection
 
 geFirst:                                          ; preds = %entry
-  %5 = icmp ule i32 %tag, 148
-  br i1 %5, label %merge, label %notInjection
+  %6 = icmp ule i32 %tag, 148
+  br i1 %6, label %merge, label %notInjection
 
 notInjection:                                     ; preds = %geFirst, %entry
   %malloccall3 = tail call i8* @malloc(i64 ptrtoint ({ %blockheader, [0 x i64], %block* }* getelementptr ({ %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* null, i32 1) to i64))
-  %6 = bitcast i8* %malloccall3 to { %blockheader, [0 x i64], %block* }*
-  %inj = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %6, i64 0, i32 0
+  %7 = bitcast i8* %malloccall3 to { %blockheader, [0 x i64], %block* }*
+  %inj = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %7, i64 0, i32 0
   store %blockheader { i64 562958543356044 }, %blockheader* %inj
-  %7 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %6, i64 0, i32 2
-  store %block* %VarX, %block** %7
-  %8 = bitcast { %blockheader, [0 x i64], %block* }* %6 to %block*
+  %8 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %7, i64 0, i32 2
+  store %block* %VarX, %block** %8
+  %9 = bitcast { %blockheader, [0 x i64], %block* }* %7 to %block*
   br label %merge
 
 merge:                                            ; preds = %notInjection, %geFirst
-  %phi = phi %block* [ %8, %notInjection ], [ %VarX, %geFirst ]
-  %9 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %3, i64 0, i32 2
-  store %block* %phi, %block** %9
-  %10 = inttoptr i64 536870912001 to %block*
-  %11 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %3, i64 0, i32 3
-  store %block* %10, %block** %11
-  %12 = bitcast { %blockheader, [0 x i64], %block*, %block* }* %3 to %block*
-  %13 = call %block* @hook_MAP_lookup(%map* %2, %block* %12)
-  %14 = call %block* @"eval_append{SortK{}, SortK{}}"(%block* %13, %block* %VarDotVar1)
-  %15 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %1, i64 0, i32 2
-  store %block* %14, %block** %15
-  %16 = bitcast { %blockheader, [0 x i64], %block* }* %1 to %block*
-  %17 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %0, i64 0, i32 2
-  store %block* %16, %block** %17
+  %phi = phi %block* [ %9, %notInjection ], [ %VarX, %geFirst ]
+  %10 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %4, i64 0, i32 2
+  store %block* %phi, %block** %10
+  %11 = inttoptr i64 536870912001 to %block*
+  %12 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %4, i64 0, i32 3
+  store %block* %11, %block** %12
+  %13 = bitcast { %blockheader, [0 x i64], %block*, %block* }* %4 to %block*
+  %14 = call %block* @hook_MAP_lookup(%map* %3, %block* %13)
+  %15 = call %block* @"eval_append{SortK{}, SortK{}}"(%block* %14, %block* %VarDotVar1)
+  %16 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %2, i64 0, i32 2
+  store %block* %15, %block** %16
+  %17 = bitcast { %blockheader, [0 x i64], %block* }* %2 to %block*
+  %18 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %1, i64 0, i32 2
+  store %block* %17, %block** %18
   %malloccall4 = tail call i8* @malloc(i64 ptrtoint ({ %blockheader, [0 x i64], %map }* getelementptr ({ %blockheader, [0 x i64], %map }, { %blockheader, [0 x i64], %map }* null, i32 1) to i64))
-  %18 = bitcast i8* %malloccall4 to { %blockheader, [0 x i64], %map }*
-  %"Lbl'-LT-'state'-GT-'" = getelementptr inbounds { %blockheader, [0 x i64], %map }, { %blockheader, [0 x i64], %map }* %18, i64 0, i32 0
+  %19 = bitcast i8* %malloccall4 to { %blockheader, [0 x i64], %map }*
+  %"Lbl'-LT-'state'-GT-'" = getelementptr inbounds { %blockheader, [0 x i64], %map }, { %blockheader, [0 x i64], %map }* %19, i64 0, i32 0
   store %blockheader { i64 844442110001155 }, %blockheader* %"Lbl'-LT-'state'-GT-'"
-  %19 = getelementptr inbounds { %blockheader, [0 x i64], %map }, { %blockheader, [0 x i64], %map }* %18, i64 0, i32 2
-  store %map %VarRho, %map* %19
-  %20 = bitcast { %blockheader, [0 x i64], %map }* %18 to %block*
-  %21 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %0, i64 0, i32 3
-  store %block* %20, %block** %21
-  %22 = bitcast { %blockheader, [0 x i64], %block*, %block* }* %0 to %block*
-  ret %block* %22
+  %20 = getelementptr inbounds { %blockheader, [0 x i64], %map }, { %blockheader, [0 x i64], %map }* %19, i64 0, i32 2
+  store %map %VarRho, %map* %20
+  %21 = bitcast { %blockheader, [0 x i64], %map }* %19 to %block*
+  %22 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %1, i64 0, i32 3
+  store %block* %21, %block** %22
+  %23 = bitcast { %blockheader, [0 x i64], %block*, %block* }* %1 to %block*
+  ret %block* %23
 }
 
 define i1 @apply_rule_326(i1 %VarB) {
