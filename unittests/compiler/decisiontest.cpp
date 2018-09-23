@@ -178,6 +178,9 @@ specializations:
         - - 1
           - 1
         sort: BOOL.Bool
+        occurrence:
+        - 0
+        - 0
         next:
           action:
           - 2

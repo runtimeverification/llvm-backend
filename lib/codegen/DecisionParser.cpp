@@ -12,7 +12,6 @@ private:
   std::map<std::vector<int>, std::string> occurrences;
   const llvm::StringMap<KOREObjectSymbol *> &syms;
   int counter;
-  int functionDepth;
   KOREObjectSymbol *dv;
 
   enum Kind {
@@ -31,7 +30,7 @@ private:
 
 public:
   DTPreprocessor(int numSubjects, const llvm::StringMap<KOREObjectSymbol *> &syms) 
-      : syms(syms), counter(0), functionDepth(0) {
+      : syms(syms), counter(0) {
     for (int i = numSubjects - 1; i >= 0; --i) {
       std::string name = "subject" + std::to_string(i);
       constructors.push_back(name);
@@ -55,12 +54,10 @@ public:
     ValueType cat = KOREObjectCompositeSort::getCategory(hookName);
 
     std::string binding = "_" + std::to_string(counter++);
-    occurrences[{functionDepth++, 0}] = binding;
+    occurrences[node["occurrence"].as<std::vector<int>>()] = binding;
     constructors.push_back(binding);
 
     auto child = (*this)(node["next"]); 
-
-    functionDepth--;
 
     auto result = FunctionNode::Create(binding, function, child, cat);
     
@@ -68,7 +65,11 @@ public:
     for (auto iter = vars.begin(); iter != vars.end(); ++iter) {
       auto var = *iter;
       auto occurrence = var.as<std::vector<int>>();
-      result->addBinding(occurrences[occurrence]);
+      if (occurrence.size() == 2 && occurrence[1] == -1) {
+        result->addBinding(std::to_string(occurrence[0]));
+      } else {
+        result->addBinding(occurrences[occurrence]);
+      }
     }
     return result;
   }
@@ -80,12 +81,10 @@ public:
     ValueType cat = KOREObjectCompositeSort::getCategory(hookName);
 
     std::string name = "_" + std::to_string(counter++);
-    occurrences[{functionDepth++, 0}] = name;
+    occurrences[node["occurrence"].as<std::vector<int>>()] = name;
     constructors.push_back(name);
 
     auto child = (*this)(node["next"]); 
-
-    functionDepth--;
 
     return EqualsLiteralNode::Create(name, binding, cat, literal, child);
   }
