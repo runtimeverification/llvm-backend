@@ -145,6 +145,10 @@ double hook_STRING_string2float(const string * input) {
 	return std::stod(si);
 }
 
+const string * hook_STRING_string2token(const string * input) {
+	return input;
+}
+
 // uses std::string for memory allocation, double copy here is not the best, but at least the
 // first copy is released at the end of the function.
 string * hook_STRING_replaceAll(const string * input, const string * matcher, const string * replacer) {
