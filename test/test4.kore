@@ -1,0 +1,1110 @@
+[topCellInitializer{}(LblinitKCell{}()),
+ initial-configuration{}(
+LblinitKCell{}(Lbl'UndsLSqBUnds-LT-'-'UndsRSqBUnds'MAP'UndsUnds'Map'Unds'K'Unds'K{}(Lbl'Stop'Map{}(), kseq{}(inj{SortKConfigVar{}, SortKItem{}}(\dv{SortKConfigVar{}}("$PGM")), dotk{}()), kseq{}(
+Lblfoo'LParUndsRParUnds'TEST'UndsUnds'List{}(Lbl'Stop'List{}()), kseq{}(
+Lblfoo'LParUndsRParUnds'TEST'UndsUnds'List{}(LblListItem{}(kseq{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("0")), dotk{}()))), kseq{}(
+Lblfoo'LParUndsRParUnds'TEST'UndsUnds'List{}(LblListItem{}(kseq{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("1")), dotk{}()))), kseq{}(
+Lblfoo'LParUndsRParUnds'TEST'UndsUnds'List{}(Lbl'Unds'List'Unds'{}(LblListItem{}(kseq{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("0")), dotk{}())), LblListItem{}(kseq{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("1")), dotk{}())))), kseq{}(
+Lblfoo'LParUndsRParUnds'TEST'UndsUnds'List{}(Lbl'Unds'List'Unds'{}(LblListItem{}(kseq{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("0")), dotk{}())), LblListItem{}(kseq{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("2")), dotk{}())))), kseq{}(
+Lblfoo'LParUndsRParUnds'TEST'UndsUnds'List{}(Lbl'Unds'List'Unds'{}(LblListItem{}(kseq{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("1")), dotk{}())), LblListItem{}(kseq{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("2")), dotk{}())))), kseq{}(
+Lblfoo'LParUndsRParUnds'TEST'UndsUnds'List{}(Lbl'Unds'List'Unds'{}(Lbl'Unds'List'Unds'{}(LblListItem{}(kseq{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("0")), dotk{}())), LblListItem{}(kseq{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("1")), dotk{}()))), LblListItem{}(kseq{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("2")), dotk{}())))), kseq{}(
+Lblfoo'LParUndsRParUnds'TEST'UndsUnds'List{}(Lbl'Unds'List'Unds'{}(Lbl'Unds'List'Unds'{}(LblListItem{}(kseq{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("1")), dotk{}())), LblListItem{}(kseq{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("2")), dotk{}()))), LblListItem{}(kseq{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("3")), dotk{}())))), kseq{}(
+Lblfoo'LParUndsRParUnds'TEST'UndsUnds'List{}(Lbl'Unds'List'Unds'{}(Lbl'Unds'List'Unds'{}(LblListItem{}(kseq{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("2")), dotk{}())), LblListItem{}(kseq{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("3")), dotk{}()))), LblListItem{}(kseq{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("4")), dotk{}()))), kseq{}(
+Lblfoo'LParUndsRParUnds'TEST'UndsUnds'List{}(Lbl'Unds'List'Unds'{}(Lbl'Unds'List'Unds'{}(LblListItem{}(kseq{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("0")), dotk{}())), LblListItem{}(kseq{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("0")), dotk{}()))), Lbl'Unds'List'Unds'{}(LblListItem{}(kseq{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("1")), dotk{}())), LblListItem{}(kseq{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("2")), dotk{}()))))), kseq{}(
+Lblfoo'LParUndsRParUnds'TEST'UndsUnds'List{}(Lbl'Unds'List'Unds'{}(Lbl'Unds'List'Unds'{}(LblListItem{}(kseq{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("1")), dotk{}())), LblListItem{}(kseq{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("1")), dotk{}()))), Lbl'Unds'List'Unds'{}(LblListItem{}(kseq{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("2")), dotk{}())), LblListItem{}(kseq{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("3")), dotk{}()))))), kseq{}(
+Lblfoo'LParUndsRParUnds'TEST'UndsUnds'List{}(Lbl'Unds'List'Unds'{}(Lbl'Unds'List'Unds'{}(LblListItem{}(kseq{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("2")), dotk{}())), LblListItem{}(kseq{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("2")), dotk{}()))), Lbl'Unds'List'Unds'{}(LblListItem{}(kseq{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("3")), dotk{}())), LblListItem{}(kseq{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("4")), dotk{}())))))
+
+, dotk{}())))))))))))))))
+)]
+
+
+module BASIC-K
+  sort SortK{} []
+  sort SortKItem{} []
+endmodule []
+
+module KSEQ
+  import BASIC-K []
+
+  symbol kseq{}(SortKItem{}, SortK{}) : SortK{} []
+  symbol append{}(SortK{}, SortK{}) : SortK{} [function{}()]
+  symbol dotk{}() : SortK{} []
+
+  axiom{R}
+    \equals{SortK{},R}(
+      append{}(dotk{}(),K2:SortK{}),
+      K2:SortK{})
+  []
+
+  axiom{R}
+    \equals{SortK{},R}(
+      append{}(kseq{}(K1:SortKItem{},K2:SortK{}),K3:SortK{}),
+      kseq{}(K1:SortKItem{},append{}(K2:SortK{},K3:SortK{})))
+  []
+
+endmodule []
+
+module INJ
+  symbol inj{From,To}(From) : To [sortInjection{}()]
+ 
+  axiom{S1,S2,S3,R} 
+    \equals{S3,R}(
+      inj{S2,S3}(inj{S1,S2}(T:S1)),
+      inj{S1,S3}(T:S1))
+  []
+
+endmodule []
+
+module K
+  import KSEQ []
+  import INJ []
+endmodule []
+
+module TEST
+
+// imports
+  import K []
+
+// sorts
+  sort SortList{} [hook{}("LIST.List"), concat{}(Lbl'Unds'List'Unds'{}()), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(197,3,197,31)"), element{}(LblListItem{}()), unit{}(Lbl'Stop'List{}())]
+  sort SortKConfigVar{} [org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(12,3,12,27)"), token{}(), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/kast.k)")]
+  sort SortCell{} []
+  hooked-sort SortBool{} [org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(263,3,263,31)"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), hook{}("BOOL.Bool")]
+  sort SortKCell{} []
+  sort SortMap{} [hook{}("MAP.Map"), concat{}(Lbl'Unds'Map'Unds'{}()), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(87,3,87,28)"), element{}(Lbl'UndsPipe'-'-GT-Unds'{}()), unit{}(Lbl'Stop'Map{}())]
+  hooked-sort SortInt{} [hook{}("INT.Int"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(320,3,320,28)")]
+  sort SortSet{} [hook{}("SET.Set"), concat{}(Lbl'Unds'Set'Unds'{}()), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(153,3,153,28)"), element{}(LblSetItem{}()), unit{}(Lbl'Stop'Set{}())]
+
+// symbols
+  symbol LblinitKCell{}(SortMap{}) : SortKCell{} [initializer{}(), function{}(), noThread{}(), originalPrd{}()]
+  symbol Lbl'Stop'Set{}() : SortSet{} [function{}(), hook{}("SET.unit"), productionID{}("164332069"), symbol'Kywd'{}(), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(161,18,161,122)"), klabel{}(".Set"), originalPrd{}(), functional{}(), latex{}("\\dotCt{Set}"), constructor{}()]
+  hooked-symbol LblbitRangeInt'LParUndsCommUndsCommUndsRParUnds'INT'UndsUnds'Int'Unds'Int'Unds'Int{}(SortInt{}, SortInt{}, SortInt{}) : SortInt{} [function{}(), hook{}("INT.bitRange"), productionID{}("573958827"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(364,18,364,108)"), klabel{}("bitRangeInt"), originalPrd{}()]
+  hooked-symbol Lblkeys'Unds'list'LParUndsRParUnds'MAP'UndsUnds'Map{}(SortMap{}) : SortList{} [function{}(), hook{}("MAP.keys_list"), productionID{}("502838712"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(132,19,132,79)"), originalPrd{}()]
+  symbol Lblbar'LParUndsCommUndsRParUnds'TEST'UndsUnds'K'Unds'List{}(SortK{}, SortList{}) : SortKItem{} [productionID{}("1499840045"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/test/./test.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(6,43,6,54)"), klabel{}("bar"), originalPrd{}(), functional{}(), constructor{}()]
+  hooked-symbol Lbl'Unds-GT-Eqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}(SortInt{}, SortInt{}) : SortBool{} [function{}(), hook{}("INT.ge"), smtlib{}(">="), productionID{}("914374969"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), left{}(), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(384,19,384,149)"), originalPrd{}(), functional{}(), latex{}("{#1}\\mathrel{\\geq_{\\scriptstyle\\it Int}}{#2}")]
+  hooked-symbol Lbl'Unds'xorInt'UndsUnds'INT'UndsUnds'Int'Unds'Int{}(SortInt{}, SortInt{}) : SortInt{} [function{}(), hook{}("INT.xor"), productionID{}("1150058854"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), left{}(), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(356,18,356,146)"), originalPrd{}(), functional{}(), latex{}("{#1}\\mathrel{\\oplus_{\\scriptstyle\\it Int}}{#2}")]
+  hooked-symbol Lbl'UndsPlus'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}(SortInt{}, SortInt{}) : SortInt{} [function{}(), hook{}("INT.add"), smtlib{}("+"), productionID{}("2100440237"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), left{}(), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(348,18,348,152)"), originalPrd{}(), functional{}(), latex{}("{#1}\\mathrel{+_{\\scriptstyle\\it Int}}{#2}")]
+  symbol Lbl'Unds'dividesInt'UndsUnds'INT'UndsUnds'Int'Unds'Int{}(SortInt{}, SortInt{}) : SortBool{} [function{}(), productionID{}("271095942"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(388,19,388,52)"), originalPrd{}()]
+  hooked-symbol Lblsize'LParUndsRParUnds'MAP'UndsUnds'Map{}(SortMap{}) : SortInt{} [function{}(), hook{}("MAP.size"), productionID{}("932257672"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(140,18,140,103)"), klabel{}("sizeMap"), originalPrd{}(), functional{}()]
+  hooked-symbol Lbl'UndsEqlsSlshEqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}(SortInt{}, SortInt{}) : SortBool{} [function{}(), hook{}("INT.ne"), smtlib{}("distinct"), productionID{}("613784740"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), left{}(), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(387,19,387,160)"), originalPrd{}(), functional{}(), latex{}("{#1}\\mathrel{{=}{/}{=}_{\\scriptstyle\\it Int}}{#2}")]
+  symbol Lblfoo'LParUndsRParUnds'TEST'UndsUnds'List{}(SortList{}) : SortKItem{} [function{}(), productionID{}("392918519"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/test/./test.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(6,20,6,39)"), klabel{}("foo"), originalPrd{}()]
+  hooked-symbol LblrandInt'LParUndsRParUnds'INT'UndsUnds'Int{}(SortInt{}) : SortInt{} [function{}(), hook{}("INT.rand"), productionID{}("1176164144"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(397,18,397,56)"), klabel{}("randInt"), originalPrd{}()]
+  hooked-symbol Lbl'Unds-LT-Eqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}(SortInt{}, SortInt{}) : SortBool{} [function{}(), hook{}("INT.le"), smtlib{}("<="), productionID{}("1003292107"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), left{}(), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(382,19,382,149)"), originalPrd{}(), functional{}(), latex{}("{#1}\\mathrel{\\leq_{\\scriptstyle\\it Int}}{#2}")]
+  hooked-symbol Lbl'UndsEqlsEqls'K'Unds'{}(SortK{}, SortK{}) : SortBool{} [function{}(), hook{}("KEQUAL.eq"), smtlib{}("="), productionID{}("839998248"), symbol'Kywd'{}(), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), equalEqualK{}(), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(723,21,723,156)"), klabel{}("_==K_"), originalPrd{}(), functional{}(), latex{}("{#1}\\mathrel{=_K}{#2}")]
+  hooked-symbol Lbllog2Int'LParUndsRParUnds'INT'UndsUnds'Int{}(SortInt{}) : SortInt{} [function{}(), hook{}("INT.log2"), productionID{}("324169305"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(362,18,362,74)"), klabel{}("log2Int"), originalPrd{}()]
+  hooked-symbol LblListItem{}(SortK{}) : SortList{} [function{}(), hook{}("LIST.element"), smtlib{}("smt_seq_elem"), productionID{}("1865516976"), symbol'Kywd'{}(), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(235,19,235,132)"), klabel{}("ListItem"), originalPrd{}(), functional{}()]
+  symbol LblisBool{}(SortK{}) : SortBool{} [function{}(), predicate{}("Bool"), originalPrd{}()]
+  hooked-symbol Lbl'UndsLSqBUnds-LT-'-undef'RSqB'{}(SortMap{}, SortK{}) : SortMap{} [function{}(), hook{}("MAP.remove"), productionID{}("596706728"), symbol'Kywd'{}(), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(116,18,116,117)"), klabel{}("_[_<-undef]"), originalPrd{}(), functional{}()]
+  hooked-symbol Lbl'UndsAnd'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}(SortInt{}, SortInt{}) : SortInt{} [function{}(), hook{}("INT.and"), productionID{}("343812839"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), left{}(), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(354,18,354,142)"), originalPrd{}(), functional{}(), latex{}("{#1}\\mathrel{\\&_{\\scriptstyle\\it Int}}{#2}")]
+  hooked-symbol LblSet'Coln'in{}(SortK{}, SortSet{}) : SortBool{} [function{}(), hook{}("SET.in"), productionID{}("1650813924"), symbol'Kywd'{}(), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(175,19,175,102)"), klabel{}("Set:in"), originalPrd{}(), functional{}()]
+  hooked-symbol LblsrandInt'LParUndsRParUnds'INT'UndsUnds'Int{}(SortInt{}) : SortK{} [function{}(), hook{}("INT.srand"), productionID{}("1323434987"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(398,16,398,56)"), klabel{}("srandInt"), originalPrd{}()]
+  hooked-symbol Lbl'UndsLSqBUndsRSqB'orDefault'UndsUnds'MAP'UndsUnds'Map'Unds'K'Unds'K{}(SortMap{}, SortK{}, SortK{}) : SortK{} [function{}(), hook{}("MAP.lookupOrDefault"), productionID{}("1595938139"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(110,16,110,126)"), klabel{}("Map:lookupOrDefault"), originalPrd{}(), functional{}()]
+  hooked-symbol Lbl'Unds'orBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}(SortBool{}, SortBool{}) : SortBool{} [function{}(), hook{}("BOOL.or"), smtlib{}("or"), productionID{}("105579928"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), left{}(), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(275,19,275,156)"), originalPrd{}(), boolOperation{}(), functional{}(), latex{}("{#1}\\vee_{\\scriptstyle\\it Bool}{#2}")]
+  hooked-symbol Lblvalues'LParUndsRParUnds'MAP'UndsUnds'Map{}(SortMap{}) : SortList{} [function{}(), hook{}("MAP.values"), productionID{}("2073640037"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(137,19,137,76)"), klabel{}("values"), originalPrd{}()]
+  hooked-symbol Lbl'Unds'andThenBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}(SortBool{}, SortBool{}) : SortBool{} [function{}(), hook{}("BOOL.andThen"), smtlib{}("and"), productionID{}("605052357"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), left{}(), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(273,19,273,118)"), originalPrd{}(), boolOperation{}(), functional{}()]
+  symbol Lbl'Unds'Map'Unds'{}(SortMap{}, SortMap{}) : SortMap{} [function{}(), hook{}("MAP.concat"), comm{}(), productionID{}("1928301845"), format{}("%1%n%2"), symbol'Kywd'{}(), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), left{}(), unit{}(".Map"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(95,18,95,172)"), klabel{}("_Map_"), originalPrd{}(), functional{}(), assoc{}(), element{}("_|->_"), index{}("0")]
+  symbol Lbl'Unds'List'Unds'{}(SortList{}, SortList{}) : SortList{} [function{}(), hook{}("LIST.concat"), smtlib{}("smt_seq_concat"), productionID{}("1766911337"), format{}("%1%n%2"), symbol'Kywd'{}(), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), left{}(), unit{}(".List"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(230,19,230,192)"), klabel{}("_List_"), originalPrd{}(), functional{}(), assoc{}(), element{}("ListItem")]
+  hooked-symbol Lbl'Unds'divInt'UndsUnds'INT'UndsUnds'Int'Unds'Int{}(SortInt{}, SortInt{}) : SortInt{} [function{}(), hook{}("INT.ediv"), smtlib{}("div"), productionID{}("823914581"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), left{}(), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(345,18,345,93)"), originalPrd{}()]
+  hooked-symbol Lbl'UndsXor-Perc'Int'UndsUndsUnds'INT'UndsUnds'Int'Unds'Int'Unds'Int{}(SortInt{}, SortInt{}, SortInt{}) : SortInt{} [function{}(), hook{}("INT.powmod"), smtlib{}("(mod (^ #1 #2) #3)"), productionID{}("1236444285"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), left{}(), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(337,18,337,110)"), originalPrd{}()]
+  hooked-symbol Lbl'UndsEqlsEqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}(SortInt{}, SortInt{}) : SortBool{} [function{}(), hook{}("INT.eq"), smtlib{}("="), productionID{}("1930240356"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), left{}(), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(386,19,386,167)"), klabel{}("_==Int_"), originalPrd{}(), functional{}(), latex{}("{#1}\\mathrel{{=}{=}_{\\scriptstyle\\it Int}}{#2}")]
+  hooked-symbol Lbl'UndsPerc'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}(SortInt{}, SortInt{}) : SortInt{} [function{}(), hook{}("INT.tmod"), smtlib{}("mod"), productionID{}("1834361038"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), left{}(), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(343,18,343,144)"), originalPrd{}(), latex{}("{#1}\\mathrel{\\%_{\\scriptstyle\\it Int}}{#2}")]
+  hooked-symbol Lblchoice'LParUndsRParUnds'MAP'UndsUnds'Map{}(SortMap{}) : SortK{} [function{}(), hook{}("MAP.choice"), productionID{}("1298146757"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(146,16,146,96)"), klabel{}("Map:choice"), originalPrd{}()]
+  hooked-symbol Lblsize'LParUndsRParUnds'SET'UndsUnds'Set{}(SortSet{}) : SortInt{} [function{}(), hook{}("SET.size"), productionID{}("1408482749"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(181,18,181,80)"), klabel{}("size"), originalPrd{}(), functional{}()]
+  hooked-symbol LblabsInt'LParUndsRParUnds'INT'UndsUnds'Int{}(SortInt{}) : SortInt{} [function{}(), hook{}("INT.abs"), smtlib{}("int_abs"), productionID{}("1346343363"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(361,18,361,102)"), klabel{}("absInt"), originalPrd{}(), functional{}()]
+  symbol LblisK{}(SortK{}) : SortBool{} [function{}(), predicate{}("K"), originalPrd{}()]
+  symbol Lbl'Stop'List{}() : SortList{} [function{}(), hook{}("LIST.unit"), smtlib{}("smt_seq_nil"), productionID{}("1842853283"), symbol'Kywd'{}(), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(232,19,232,146)"), klabel{}(".List"), originalPrd{}(), functional{}(), latex{}("\\dotCt{List}"), constructor{}()]
+  symbol LblisMap{}(SortK{}) : SortBool{} [function{}(), predicate{}("Map"), originalPrd{}()]
+  symbol LblfreshInt'LParUndsRParUnds'INT'UndsUnds'Int{}(SortInt{}) : SortInt{} [function{}(), productionID{}("1552341957"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), freshGenerator{}(), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(394,18,394,72)"), klabel{}("freshInt"), originalPrd{}(), functional{}()]
+  hooked-symbol Lbl'Tild'Int'UndsUnds'INT'UndsUnds'Int{}(SortInt{}) : SortInt{} [function{}(), hook{}("INT.not"), productionID{}("98826337"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(334,18,334,133)"), originalPrd{}(), functional{}(), latex{}("\\mathop{\\sim_{\\scriptstyle\\it Int}}{#1}")]
+  hooked-symbol Lbl'Hash'if'UndsHash'then'UndsHash'else'UndsHash'fi'Unds'K-EQUAL'UndsUnds'Bool'Unds'K'Unds'K{SortS0}(SortBool{}, SortS0, SortS0) : SortS0 [function{}(), hook{}("KEQUAL.ite"), smtlib{}("ite"), productionID{}("1267149311"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(731,16,731,122)"), poly{}("0, 2, 3"), originalPrd{}(), functional{}()]
+  hooked-symbol Lbl'UndsLSqBUnds-LT-'-'UndsRSqBUnds'MAP'UndsUnds'Map'Unds'K'Unds'K{}(SortMap{}, SortK{}, SortK{}) : SortMap{} [function{}(), hook{}("MAP.update"), productionID{}("1923999715"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(113,18,113,96)"), originalPrd{}(), functional{}(), prefer{}()]
+  hooked-symbol Lbl'Unds-LT--LT-'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}(SortInt{}, SortInt{}) : SortInt{} [function{}(), hook{}("INT.shl"), productionID{}("2017797638"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), left{}(), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(352,18,352,131)"), originalPrd{}(), latex{}("{#1}\\mathrel{\\ll_{\\scriptstyle\\it Int}}{#2}")]
+  hooked-symbol Lbl'UndsEqlsSlshEqls'Bool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}(SortBool{}, SortBool{}) : SortBool{} [function{}(), hook{}("BOOL.ne"), smtlib{}("distinct"), productionID{}("238762799"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), left{}(), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(280,19,280,103)"), originalPrd{}(), functional{}()]
+  hooked-symbol LblsignExtendBitRangeInt'LParUndsCommUndsCommUndsRParUnds'INT'UndsUnds'Int'Unds'Int'Unds'Int{}(SortInt{}, SortInt{}, SortInt{}) : SortInt{} [function{}(), hook{}("INT.signExtendBitRange"), productionID{}("391135083"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(365,18,365,118)"), klabel{}("signExtendBitRangeInt"), originalPrd{}()]
+  symbol LblisSet{}(SortK{}) : SortBool{} [function{}(), predicate{}("Set"), originalPrd{}()]
+  hooked-symbol LblMap'Coln'lookup{}(SortMap{}, SortK{}) : SortK{} [function{}(), hook{}("MAP.lookup"), productionID{}("1370074462"), symbol'Kywd'{}(), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(108,16,108,104)"), klabel{}("Map:lookup"), originalPrd{}()]
+  hooked-symbol Lbl'Unds'xorBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}(SortBool{}, SortBool{}) : SortBool{} [function{}(), hook{}("BOOL.xor"), smtlib{}("xor"), productionID{}("1365767549"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), left{}(), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(274,19,274,114)"), originalPrd{}(), boolOperation{}(), functional{}()]
+  hooked-symbol Lbl'Unds'modInt'UndsUnds'INT'UndsUnds'Int'Unds'Int{}(SortInt{}, SortInt{}) : SortInt{} [function{}(), hook{}("INT.emod"), smtlib{}("mod"), productionID{}("1680503330"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), left{}(), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(346,18,346,93)"), originalPrd{}()]
+  hooked-symbol Lbl'Unds'-Map'UndsUnds'MAP'UndsUnds'Map'Unds'Map{}(SortMap{}, SortMap{}) : SortMap{} [function{}(), hook{}("MAP.difference"), productionID{}("1070501849"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(120,18,120,120)"), originalPrd{}(), functional{}(), latex{}("{#1}-_{\\it Map}{#2}")]
+  symbol LblisInt{}(SortK{}) : SortBool{} [function{}(), predicate{}("Int"), originalPrd{}()]
+  hooked-symbol Lbl'UndsPipe'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}(SortInt{}, SortInt{}) : SortInt{} [function{}(), hook{}("INT.or"), productionID{}("1148255190"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), left{}(), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(358,18,358,140)"), originalPrd{}(), functional{}(), latex{}("{#1}\\mathrel{|_{\\scriptstyle\\it Int}}{#2}")]
+  hooked-symbol LblupdateMap'LParUndsCommUndsRParUnds'MAP'UndsUnds'Map'Unds'Map{}(SortMap{}, SortMap{}) : SortMap{} [function{}(), hook{}("MAP.updateAll"), productionID{}("1620823990"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(125,18,125,91)"), klabel{}("updateMap"), originalPrd{}(), functional{}()]
+  symbol LblisCell{}(SortK{}) : SortBool{} [function{}(), predicate{}("Cell"), originalPrd{}()]
+  hooked-symbol Lbl'Unds'orElseBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}(SortBool{}, SortBool{}) : SortBool{} [function{}(), hook{}("BOOL.orElse"), smtlib{}("or"), productionID{}("418958713"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), left{}(), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(276,19,276,116)"), originalPrd{}(), boolOperation{}(), functional{}()]
+  hooked-symbol LblList'Coln'get{}(SortList{}, SortInt{}) : SortK{} [function{}(), hook{}("LIST.get"), productionID{}("644082020"), symbol'Kywd'{}(), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(240,16,240,94)"), klabel{}("List:get"), originalPrd{}()]
+  hooked-symbol LblnotBool'Unds'{}(SortBool{}) : SortBool{} [function{}(), hook{}("BOOL.not"), smtlib{}("not"), productionID{}("2037764568"), symbol'Kywd'{}(), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(271,19,271,174)"), klabel{}("notBool_"), originalPrd{}(), boolOperation{}(), functional{}(), latex{}("\\neg_{\\scriptstyle\\it Bool}{#1}")]
+  hooked-symbol Lblkeys'LParUndsRParUnds'MAP'UndsUnds'Map{}(SortMap{}) : SortSet{} [function{}(), hook{}("MAP.keys"), productionID{}("1443055846"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(131,18,131,86)"), klabel{}("keys"), originalPrd{}(), functional{}()]
+  hooked-symbol LblList'Coln'range{}(SortList{}, SortInt{}, SortInt{}) : SortList{} [function{}(), hook{}("LIST.range"), productionID{}("1219916644"), symbol'Kywd'{}(), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(243,19,243,98)"), klabel{}("List:range"), originalPrd{}()]
+  hooked-symbol Lbl'Unds'impliesBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}(SortBool{}, SortBool{}) : SortBool{} [function{}(), hook{}("BOOL.implies"), smtlib{}("=>"), productionID{}("1042306518"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), left{}(), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(277,19,277,117)"), originalPrd{}(), boolOperation{}(), functional{}()]
+  hooked-symbol Lbl'Unds-LT-Eqls'Map'UndsUnds'MAP'UndsUnds'Map'Unds'Map{}(SortMap{}, SortMap{}) : SortBool{} [function{}(), hook{}("MAP.inclusion"), productionID{}("1864116663"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(143,19,143,91)"), originalPrd{}(), functional{}()]
+  hooked-symbol Lblchoice'LParUndsRParUnds'SET'UndsUnds'Set{}(SortSet{}) : SortK{} [function{}(), hook{}("SET.choice"), productionID{}("873634936"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(184,16,184,90)"), klabel{}("Set:choice"), originalPrd{}()]
+  hooked-symbol Lblsize'LParUndsRParUnds'LIST'UndsUnds'List{}(SortList{}) : SortInt{} [function{}(), hook{}("LIST.size"), smtlib{}("smt_seq_len"), productionID{}("2079565272"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(249,18,249,121)"), klabel{}("sizeList"), originalPrd{}(), functional{}()]
+  hooked-symbol Lbl'Unds-GT--GT-'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}(SortInt{}, SortInt{}) : SortInt{} [function{}(), hook{}("INT.shr"), productionID{}("1330247343"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), left{}(), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(351,18,351,131)"), originalPrd{}(), latex{}("{#1}\\mathrel{\\gg_{\\scriptstyle\\it Int}}{#2}")]
+  hooked-symbol Lbl'UndsPipe'-'-GT-Unds'{}(SortK{}, SortK{}) : SortMap{} [function{}(), hook{}("MAP.element"), productionID{}("1579280783"), symbol'Kywd'{}(), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(102,18,102,136)"), klabel{}("_|->_"), originalPrd{}(), functional{}(), latex{}("{#1}\\mapsto{#2}")]
+  symbol LblisList{}(SortK{}) : SortBool{} [function{}(), predicate{}("List"), originalPrd{}()]
+  hooked-symbol Lbl'Unds'in'UndsUnds'LIST'UndsUnds'K'Unds'List{}(SortK{}, SortList{}) : SortBool{} [function{}(), hook{}("LIST.in"), productionID{}("412925308"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(246,19,246,97)"), klabel{}("_inList_"), originalPrd{}(), functional{}()]
+  hooked-symbol Lbl'UndsStar'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}(SortInt{}, SortInt{}) : SortInt{} [function{}(), hook{}("INT.mul"), smtlib{}("*"), productionID{}("1541525668"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), left{}(), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(339,18,339,155)"), originalPrd{}(), functional{}(), latex{}("{#1}\\mathrel{\\ast_{\\scriptstyle\\it Int}}{#2}")]
+  hooked-symbol Lbl'Unds-GT-'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}(SortInt{}, SortInt{}) : SortBool{} [function{}(), hook{}("INT.gt"), smtlib{}(">"), productionID{}("549293029"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), left{}(), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(385,19,385,145)"), originalPrd{}(), functional{}(), latex{}("{#1}\\mathrel{>_{\\scriptstyle\\it Int}}{#2}")]
+  hooked-symbol Lbl'UndsSlsh'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}(SortInt{}, SortInt{}) : SortInt{} [function{}(), hook{}("INT.tdiv"), smtlib{}("div"), productionID{}("1096485705"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), left{}(), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(342,18,342,146)"), originalPrd{}(), latex{}("{#1}\\mathrel{\\div_{\\scriptstyle\\it Int}}{#2}")]
+  hooked-symbol LblSetItem{}(SortK{}) : SortSet{} [function{}(), hook{}("SET.element"), productionID{}("1991278377"), symbol'Kywd'{}(), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(166,18,166,108)"), klabel{}("SetItem"), originalPrd{}(), functional{}()]
+  symbol Lbl'Stop'Map{}() : SortMap{} [function{}(), hook{}("MAP.unit"), productionID{}("1789452565"), symbol'Kywd'{}(), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(97,18,97,128)"), klabel{}(".Map"), originalPrd{}(), functional{}(), latex{}("\\dotCt{Map}"), constructor{}()]
+  hooked-symbol LblminInt'LParUndsCommUndsRParUnds'INT'UndsUnds'Int'Unds'Int{}(SortInt{}, SortInt{}) : SortInt{} [function{}(), hook{}("INT.min"), smtlib{}("int_min"), productionID{}("366252104"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(359,18,359,102)"), originalPrd{}(), functional{}()]
+  hooked-symbol LblintersectSet'LParUndsCommUndsRParUnds'SET'UndsUnds'Set'Unds'Set{}(SortSet{}, SortSet{}) : SortSet{} [function{}(), hook{}("SET.intersection"), productionID{}("951031848"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(169,18,169,88)"), klabel{}("intersectSet"), originalPrd{}(), functional{}()]
+  hooked-symbol Lbl'Unds-LT-'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}(SortInt{}, SortInt{}) : SortBool{} [function{}(), hook{}("INT.lt"), smtlib{}("<"), productionID{}("997033037"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), left{}(), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(383,19,383,145)"), originalPrd{}(), functional{}(), latex{}("{#1}\\mathrel{<_{\\scriptstyle\\it Int}}{#2}")]
+  symbol LblisKItem{}(SortK{}) : SortBool{} [function{}(), predicate{}("KItem"), originalPrd{}()]
+  hooked-symbol LblSet'Coln'difference{}(SortSet{}, SortSet{}) : SortSet{} [function{}(), hook{}("SET.difference"), productionID{}("929697158"), symbol'Kywd'{}(), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(172,18,172,146)"), klabel{}("Set:difference"), originalPrd{}(), functional{}(), latex{}("{#1}-_{\\it Set}{#2}")]
+  hooked-symbol Lbl'Unds-LT-Eqls'Set'UndsUnds'SET'UndsUnds'Set'Unds'Set{}(SortSet{}, SortSet{}) : SortBool{} [function{}(), hook{}("SET.inclusion"), productionID{}("400103862"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(178,19,178,85)"), originalPrd{}(), functional{}()]
+  hooked-symbol LblremoveAll'LParUndsCommUndsRParUnds'MAP'UndsUnds'Map'Unds'Set{}(SortMap{}, SortSet{}) : SortMap{} [function{}(), hook{}("MAP.removeAll"), productionID{}("2106900153"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(128,18,128,91)"), klabel{}("removeAll"), originalPrd{}(), functional{}()]
+  symbol LblisKConfigVar{}(SortK{}) : SortBool{} [function{}(), predicate{}("KConfigVar"), originalPrd{}()]
+  hooked-symbol Lbl'UndsEqlsEqls'Bool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}(SortBool{}, SortBool{}) : SortBool{} [function{}(), hook{}("BOOL.eq"), smtlib{}("="), productionID{}("1342346098"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), left{}(), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(279,19,279,96)"), originalPrd{}(), functional{}()]
+  hooked-symbol Lbl'Unds'-Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}(SortInt{}, SortInt{}) : SortInt{} [function{}(), hook{}("INT.sub"), smtlib{}("-"), productionID{}("566113173"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), left{}(), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(349,18,349,152)"), originalPrd{}(), functional{}(), latex{}("{#1}\\mathrel{-_{\\scriptstyle\\it Int}}{#2}")]
+  symbol LblisKCell{}(SortK{}) : SortBool{} [function{}(), predicate{}("KCell"), originalPrd{}()]
+  hooked-symbol LblmaxInt'LParUndsCommUndsRParUnds'INT'UndsUnds'Int'Unds'Int{}(SortInt{}, SortInt{}) : SortInt{} [function{}(), hook{}("INT.max"), smtlib{}("int_max"), productionID{}("1889057031"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(360,18,360,102)"), originalPrd{}(), functional{}()]
+  symbol Lbl'-LT-'k'-GT-'{}(SortK{}) : SortKCell{} [topcell{}(), contentStartColumn{}("17"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax RuleContent ::= K"), format{}("%1%i%n%2%d%n%3"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/kast.k)"), maincell{}(), cell{}(), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(204,17,204,32)"), originalPrd{}(), contentStartLine{}("204"), functional{}(), constructor{}()]
+  hooked-symbol Lbl'Unds'andBool'Unds'{}(SortBool{}, SortBool{}) : SortBool{} [function{}(), hook{}("BOOL.and"), smtlib{}("and"), productionID{}("37981645"), symbol'Kywd'{}(), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), left{}(), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(272,19,272,187)"), klabel{}("_andBool_"), originalPrd{}(), boolOperation{}(), functional{}(), latex{}("{#1}\\wedge_{\\scriptstyle\\it Bool}{#2}")]
+  symbol Lbl'Unds'Set'Unds'{}(SortSet{}, SortSet{}) : SortSet{} [function{}(), hook{}("SET.concat"), comm{}(), productionID{}("1095352419"), format{}("%1%n%2"), symbol'Kywd'{}(), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), left{}(), unit{}(".Set"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(159,18,159,176)"), klabel{}("_Set_"), originalPrd{}(), functional{}(), assoc{}(), element{}("SetItem"), idem{}()]
+  hooked-symbol Lbl'UndsXor-'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}(SortInt{}, SortInt{}) : SortInt{} [function{}(), hook{}("INT.pow"), smtlib{}("^"), productionID{}("800088638"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), left{}(), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(336,18,336,151)"), originalPrd{}(), latex{}("{#1}\\mathrel{{\\char`\\^}_{\\!\\scriptstyle\\it Int}}{#2}")]
+  hooked-symbol Lbl'UndsEqlsSlshEqls'K'UndsUnds'K-EQUAL'UndsUnds'K'Unds'K{}(SortK{}, SortK{}) : SortBool{} [function{}(), hook{}("KEQUAL.ne"), smtlib{}("distinct"), productionID{}("718571091"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(724,19,724,144)"), originalPrd{}(), functional{}(), latex{}("{#1}\\mathrel{\\neq_K}{#2}"), notEqualEqualK{}()]
+  hooked-symbol Lbl'Unds'in'Unds'keys'LParUndsRParUnds'MAP'UndsUnds'K'Unds'Map{}(SortK{}, SortMap{}) : SortBool{} [function{}(), hook{}("MAP.in_keys"), productionID{}("589311950"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(134,19,134,89)"), originalPrd{}(), functional{}()]
+
+// generated axioms
+  axiom{R} \exists{R} (Val:SortSet{}, \equals{SortSet{}, R} (Val:SortSet{}, Lbl'Stop'Set{}())) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortKItem{}, \equals{SortKItem{}, R} (Val:SortKItem{}, Lblbar'LParUndsCommUndsRParUnds'TEST'UndsUnds'K'Unds'List{}(K0:SortK{}, K1:SortList{}))) [functional{}()] // functional
+  axiom{}\implies{SortKItem{}} (\and{SortKItem{}} (Lblbar'LParUndsCommUndsRParUnds'TEST'UndsUnds'K'Unds'List{}(X0:SortK{}, X1:SortList{}), Lblbar'LParUndsCommUndsRParUnds'TEST'UndsUnds'K'Unds'List{}(Y0:SortK{}, Y1:SortList{})), Lblbar'LParUndsCommUndsRParUnds'TEST'UndsUnds'K'Unds'List{}(\and{SortK{}} (X0:SortK{}, Y0:SortK{}), \and{SortList{}} (X1:SortList{}, Y1:SortList{}))) [constructor{}()] // no confusion same constructor
+  axiom{R} \exists{R} (Val:SortBool{}, \equals{SortBool{}, R} (Val:SortBool{}, Lbl'Unds-GT-Eqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}(K0:SortInt{}, K1:SortInt{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortInt{}, \equals{SortInt{}, R} (Val:SortInt{}, Lbl'Unds'xorInt'UndsUnds'INT'UndsUnds'Int'Unds'Int{}(K0:SortInt{}, K1:SortInt{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortInt{}, \equals{SortInt{}, R} (Val:SortInt{}, Lbl'UndsPlus'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}(K0:SortInt{}, K1:SortInt{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortInt{}, \equals{SortInt{}, R} (Val:SortInt{}, Lblsize'LParUndsRParUnds'MAP'UndsUnds'Map{}(K0:SortMap{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortBool{}, \equals{SortBool{}, R} (Val:SortBool{}, Lbl'UndsEqlsSlshEqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}(K0:SortInt{}, K1:SortInt{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortKItem{}, \equals{SortKItem{}, R} (Val:SortKItem{}, inj{SortInt{}, SortKItem{}} (From:SortInt{}))) [subsort{SortInt{}, SortKItem{}}()] // subsort
+  axiom{R} \exists{R} (Val:SortBool{}, \equals{SortBool{}, R} (Val:SortBool{}, Lbl'Unds-LT-Eqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}(K0:SortInt{}, K1:SortInt{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortBool{}, \equals{SortBool{}, R} (Val:SortBool{}, Lbl'UndsEqlsEqls'K'Unds'{}(K0:SortK{}, K1:SortK{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortList{}, \equals{SortList{}, R} (Val:SortList{}, LblListItem{}(K0:SortK{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortKItem{}, \equals{SortKItem{}, R} (Val:SortKItem{}, inj{SortKCell{}, SortKItem{}} (From:SortKCell{}))) [subsort{SortKCell{}, SortKItem{}}()] // subsort
+  axiom{R} \exists{R} (Val:SortCell{}, \equals{SortCell{}, R} (Val:SortCell{}, inj{SortKCell{}, SortCell{}} (From:SortKCell{}))) [subsort{SortKCell{}, SortCell{}}()] // subsort
+  axiom{R} \exists{R} (Val:SortMap{}, \equals{SortMap{}, R} (Val:SortMap{}, Lbl'UndsLSqBUnds-LT-'-undef'RSqB'{}(K0:SortMap{}, K1:SortK{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortInt{}, \equals{SortInt{}, R} (Val:SortInt{}, Lbl'UndsAnd'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}(K0:SortInt{}, K1:SortInt{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortKItem{}, \equals{SortKItem{}, R} (Val:SortKItem{}, inj{SortSet{}, SortKItem{}} (From:SortSet{}))) [subsort{SortSet{}, SortKItem{}}()] // subsort
+  axiom{R} \exists{R} (Val:SortBool{}, \equals{SortBool{}, R} (Val:SortBool{}, LblSet'Coln'in{}(K0:SortK{}, K1:SortSet{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortK{}, \equals{SortK{}, R} (Val:SortK{}, Lbl'UndsLSqBUndsRSqB'orDefault'UndsUnds'MAP'UndsUnds'Map'Unds'K'Unds'K{}(K0:SortMap{}, K1:SortK{}, K2:SortK{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortBool{}, \equals{SortBool{}, R} (Val:SortBool{}, Lbl'Unds'orBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}(K0:SortBool{}, K1:SortBool{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortBool{}, \equals{SortBool{}, R} (Val:SortBool{}, Lbl'Unds'andThenBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}(K0:SortBool{}, K1:SortBool{}))) [functional{}()] // functional
+  axiom{R} \equals{SortMap{}, R} (Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(K1:SortMap{},K2:SortMap{}),K3:SortMap{}),Lbl'Unds'Map'Unds'{}(K1:SortMap{},Lbl'Unds'Map'Unds'{}(K2:SortMap{},K3:SortMap{}))) [assoc{}()] // associativity
+  axiom{R} \equals{SortMap{}, R} (Lbl'Unds'Map'Unds'{}(K1:SortMap{},K2:SortMap{}),Lbl'Unds'Map'Unds'{}(K2:SortMap{},K1:SortMap{})) [comm{}()] // commutativity
+  axiom{R} \exists{R} (Val:SortMap{}, \equals{SortMap{}, R} (Val:SortMap{}, Lbl'Unds'Map'Unds'{}(K0:SortMap{}, K1:SortMap{}))) [functional{}()] // functional
+  axiom{R} \equals{SortList{}, R} (Lbl'Unds'List'Unds'{}(Lbl'Unds'List'Unds'{}(K1:SortList{},K2:SortList{}),K3:SortList{}),Lbl'Unds'List'Unds'{}(K1:SortList{},Lbl'Unds'List'Unds'{}(K2:SortList{},K3:SortList{}))) [assoc{}()] // associativity
+  axiom{R} \exists{R} (Val:SortList{}, \equals{SortList{}, R} (Val:SortList{}, Lbl'Unds'List'Unds'{}(K0:SortList{}, K1:SortList{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortBool{}, \equals{SortBool{}, R} (Val:SortBool{}, Lbl'UndsEqlsEqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}(K0:SortInt{}, K1:SortInt{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortInt{}, \equals{SortInt{}, R} (Val:SortInt{}, Lblsize'LParUndsRParUnds'SET'UndsUnds'Set{}(K0:SortSet{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortKItem{}, \equals{SortKItem{}, R} (Val:SortKItem{}, inj{SortMap{}, SortKItem{}} (From:SortMap{}))) [subsort{SortMap{}, SortKItem{}}()] // subsort
+  axiom{R} \exists{R} (Val:SortInt{}, \equals{SortInt{}, R} (Val:SortInt{}, LblabsInt'LParUndsRParUnds'INT'UndsUnds'Int{}(K0:SortInt{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortList{}, \equals{SortList{}, R} (Val:SortList{}, Lbl'Stop'List{}())) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortInt{}, \equals{SortInt{}, R} (Val:SortInt{}, LblfreshInt'LParUndsRParUnds'INT'UndsUnds'Int{}(K0:SortInt{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortKItem{}, \equals{SortKItem{}, R} (Val:SortKItem{}, inj{SortList{}, SortKItem{}} (From:SortList{}))) [subsort{SortList{}, SortKItem{}}()] // subsort
+  axiom{R} \exists{R} (Val:SortInt{}, \equals{SortInt{}, R} (Val:SortInt{}, Lbl'Tild'Int'UndsUnds'INT'UndsUnds'Int{}(K0:SortInt{}))) [functional{}()] // functional
+  axiom{R, SortS0} \exists{R} (Val:SortS0, \equals{SortS0, R} (Val:SortS0, Lbl'Hash'if'UndsHash'then'UndsHash'else'UndsHash'fi'Unds'K-EQUAL'UndsUnds'Bool'Unds'K'Unds'K{SortS0}(K0:SortBool{}, K1:SortS0, K2:SortS0))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortMap{}, \equals{SortMap{}, R} (Val:SortMap{}, Lbl'UndsLSqBUnds-LT-'-'UndsRSqBUnds'MAP'UndsUnds'Map'Unds'K'Unds'K{}(K0:SortMap{}, K1:SortK{}, K2:SortK{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortBool{}, \equals{SortBool{}, R} (Val:SortBool{}, Lbl'UndsEqlsSlshEqls'Bool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}(K0:SortBool{}, K1:SortBool{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortK{}, \equals{SortK{}, R} (Val:SortK{}, inj{SortKItem{}, SortK{}} (From:SortKItem{}))) [subsort{SortKItem{}, SortK{}}()] // subsort
+  axiom{R} \exists{R} (Val:SortBool{}, \equals{SortBool{}, R} (Val:SortBool{}, Lbl'Unds'xorBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}(K0:SortBool{}, K1:SortBool{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortMap{}, \equals{SortMap{}, R} (Val:SortMap{}, Lbl'Unds'-Map'UndsUnds'MAP'UndsUnds'Map'Unds'Map{}(K0:SortMap{}, K1:SortMap{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortInt{}, \equals{SortInt{}, R} (Val:SortInt{}, Lbl'UndsPipe'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}(K0:SortInt{}, K1:SortInt{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortMap{}, \equals{SortMap{}, R} (Val:SortMap{}, LblupdateMap'LParUndsCommUndsRParUnds'MAP'UndsUnds'Map'Unds'Map{}(K0:SortMap{}, K1:SortMap{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortBool{}, \equals{SortBool{}, R} (Val:SortBool{}, Lbl'Unds'orElseBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}(K0:SortBool{}, K1:SortBool{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortBool{}, \equals{SortBool{}, R} (Val:SortBool{}, LblnotBool'Unds'{}(K0:SortBool{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortSet{}, \equals{SortSet{}, R} (Val:SortSet{}, Lblkeys'LParUndsRParUnds'MAP'UndsUnds'Map{}(K0:SortMap{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortBool{}, \equals{SortBool{}, R} (Val:SortBool{}, Lbl'Unds'impliesBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}(K0:SortBool{}, K1:SortBool{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortBool{}, \equals{SortBool{}, R} (Val:SortBool{}, Lbl'Unds-LT-Eqls'Map'UndsUnds'MAP'UndsUnds'Map'Unds'Map{}(K0:SortMap{}, K1:SortMap{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortKItem{}, \equals{SortKItem{}, R} (Val:SortKItem{}, inj{SortCell{}, SortKItem{}} (From:SortCell{}))) [subsort{SortCell{}, SortKItem{}}()] // subsort
+  axiom{R} \exists{R} (Val:SortKItem{}, \equals{SortKItem{}, R} (Val:SortKItem{}, inj{SortBool{}, SortKItem{}} (From:SortBool{}))) [subsort{SortBool{}, SortKItem{}}()] // subsort
+  axiom{R} \exists{R} (Val:SortInt{}, \equals{SortInt{}, R} (Val:SortInt{}, Lblsize'LParUndsRParUnds'LIST'UndsUnds'List{}(K0:SortList{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortMap{}, \equals{SortMap{}, R} (Val:SortMap{}, Lbl'UndsPipe'-'-GT-Unds'{}(K0:SortK{}, K1:SortK{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortBool{}, \equals{SortBool{}, R} (Val:SortBool{}, Lbl'Unds'in'UndsUnds'LIST'UndsUnds'K'Unds'List{}(K0:SortK{}, K1:SortList{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortInt{}, \equals{SortInt{}, R} (Val:SortInt{}, Lbl'UndsStar'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}(K0:SortInt{}, K1:SortInt{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortBool{}, \equals{SortBool{}, R} (Val:SortBool{}, Lbl'Unds-GT-'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}(K0:SortInt{}, K1:SortInt{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortSet{}, \equals{SortSet{}, R} (Val:SortSet{}, LblSetItem{}(K0:SortK{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortMap{}, \equals{SortMap{}, R} (Val:SortMap{}, Lbl'Stop'Map{}())) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortInt{}, \equals{SortInt{}, R} (Val:SortInt{}, LblminInt'LParUndsCommUndsRParUnds'INT'UndsUnds'Int'Unds'Int{}(K0:SortInt{}, K1:SortInt{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortSet{}, \equals{SortSet{}, R} (Val:SortSet{}, LblintersectSet'LParUndsCommUndsRParUnds'SET'UndsUnds'Set'Unds'Set{}(K0:SortSet{}, K1:SortSet{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortBool{}, \equals{SortBool{}, R} (Val:SortBool{}, Lbl'Unds-LT-'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}(K0:SortInt{}, K1:SortInt{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortSet{}, \equals{SortSet{}, R} (Val:SortSet{}, LblSet'Coln'difference{}(K0:SortSet{}, K1:SortSet{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortBool{}, \equals{SortBool{}, R} (Val:SortBool{}, Lbl'Unds-LT-Eqls'Set'UndsUnds'SET'UndsUnds'Set'Unds'Set{}(K0:SortSet{}, K1:SortSet{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortMap{}, \equals{SortMap{}, R} (Val:SortMap{}, LblremoveAll'LParUndsCommUndsRParUnds'MAP'UndsUnds'Map'Unds'Set{}(K0:SortMap{}, K1:SortSet{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortBool{}, \equals{SortBool{}, R} (Val:SortBool{}, Lbl'UndsEqlsEqls'Bool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}(K0:SortBool{}, K1:SortBool{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortInt{}, \equals{SortInt{}, R} (Val:SortInt{}, Lbl'Unds'-Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}(K0:SortInt{}, K1:SortInt{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortInt{}, \equals{SortInt{}, R} (Val:SortInt{}, LblmaxInt'LParUndsCommUndsRParUnds'INT'UndsUnds'Int'Unds'Int{}(K0:SortInt{}, K1:SortInt{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortKCell{}, \equals{SortKCell{}, R} (Val:SortKCell{}, Lbl'-LT-'k'-GT-'{}(K0:SortK{}))) [functional{}()] // functional
+  axiom{}\implies{SortKCell{}} (\and{SortKCell{}} (Lbl'-LT-'k'-GT-'{}(X0:SortK{}), Lbl'-LT-'k'-GT-'{}(Y0:SortK{})), Lbl'-LT-'k'-GT-'{}(\and{SortK{}} (X0:SortK{}, Y0:SortK{}))) [constructor{}()] // no confusion same constructor
+  axiom{R} \exists{R} (Val:SortBool{}, \equals{SortBool{}, R} (Val:SortBool{}, Lbl'Unds'andBool'Unds'{}(K0:SortBool{}, K1:SortBool{}))) [functional{}()] // functional
+  axiom{R} \equals{SortSet{}, R} (Lbl'Unds'Set'Unds'{}(Lbl'Unds'Set'Unds'{}(K1:SortSet{},K2:SortSet{}),K3:SortSet{}),Lbl'Unds'Set'Unds'{}(K1:SortSet{},Lbl'Unds'Set'Unds'{}(K2:SortSet{},K3:SortSet{}))) [assoc{}()] // associativity
+  axiom{R} \equals{SortSet{}, R} (Lbl'Unds'Set'Unds'{}(K1:SortSet{},K2:SortSet{}),Lbl'Unds'Set'Unds'{}(K2:SortSet{},K1:SortSet{})) [comm{}()] // commutativity
+  axiom{R} \equals{SortSet{}, R} (Lbl'Unds'Set'Unds'{}(K:SortSet{},K:SortSet{}),K:SortSet{}) [idem{}()] // idempotency
+  axiom{R} \exists{R} (Val:SortSet{}, \equals{SortSet{}, R} (Val:SortSet{}, Lbl'Unds'Set'Unds'{}(K0:SortSet{}, K1:SortSet{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortBool{}, \equals{SortBool{}, R} (Val:SortBool{}, Lbl'UndsEqlsSlshEqls'K'UndsUnds'K-EQUAL'UndsUnds'K'Unds'K{}(K0:SortK{}, K1:SortK{}))) [functional{}()] // functional
+  axiom{R} \exists{R} (Val:SortBool{}, \equals{SortBool{}, R} (Val:SortBool{}, Lbl'Unds'in'Unds'keys'LParUndsRParUnds'MAP'UndsUnds'K'Unds'Map{}(K0:SortK{}, K1:SortMap{}))) [functional{}()] // functional
+  axiom{} \or{SortKItem{}} (\exists{SortKItem{}} (X0:SortK{}, \exists{SortKItem{}} (X1:SortList{}, Lblbar'LParUndsCommUndsRParUnds'TEST'UndsUnds'K'Unds'List{}(X0:SortK{}, X1:SortList{}))), \or{SortKItem{}} (\exists{SortKItem{}} (Val:SortList{}, inj{SortList{}, SortKItem{}} (Val:SortList{})), \or{SortKItem{}} (\exists{SortKItem{}} (Val:SortCell{}, inj{SortCell{}, SortKItem{}} (Val:SortCell{})), \or{SortKItem{}} (\exists{SortKItem{}} (Val:SortBool{}, inj{SortBool{}, SortKItem{}} (Val:SortBool{})), \or{SortKItem{}} (\exists{SortKItem{}} (Val:SortKCell{}, inj{SortKCell{}, SortKItem{}} (Val:SortKCell{})), \or{SortKItem{}} (\exists{SortKItem{}} (Val:SortMap{}, inj{SortMap{}, SortKItem{}} (Val:SortMap{})), \or{SortKItem{}} (\exists{SortKItem{}} (Val:SortInt{}, inj{SortInt{}, SortKItem{}} (Val:SortInt{})), \or{SortKItem{}} (\exists{SortKItem{}} (Val:SortSet{}, inj{SortSet{}, SortKItem{}} (Val:SortSet{})), \bottom{SortKItem{}}())))))))) [constructor{}()] // no junk
+  axiom{} \or{SortList{}} (\exists{SortList{}} (X0:SortList{}, \exists{SortList{}} (X1:SortList{}, Lbl'Unds'List'Unds'{}(X0:SortList{}, X1:SortList{}))), \or{SortList{}} (Lbl'Stop'List{}(), \bottom{SortList{}}())) [constructor{}()] // no junk
+  axiom{} \or{SortKConfigVar{}} (\top{SortKConfigVar{}}(), \bottom{SortKConfigVar{}}()) [constructor{}()] // no junk (TODO: fix bug with \dv)
+  axiom{} \or{SortCell{}} (\exists{SortCell{}} (Val:SortKCell{}, inj{SortKCell{}, SortCell{}} (Val:SortKCell{})), \bottom{SortCell{}}()) [constructor{}()] // no junk
+  axiom{} \or{SortBool{}} (\top{SortBool{}}(), \bottom{SortBool{}}()) [constructor{}()] // no junk (TODO: fix bug with \dv)
+  axiom{} \or{SortKCell{}} (\exists{SortKCell{}} (X0:SortK{}, Lbl'-LT-'k'-GT-'{}(X0:SortK{})), \bottom{SortKCell{}}()) [constructor{}()] // no junk
+  axiom{} \or{SortK{}} (\exists{SortK{}} (Val:SortKItem{}, inj{SortKItem{}, SortK{}} (Val:SortKItem{})), \or{SortK{}} (\exists{SortK{}} (Val:SortList{}, inj{SortList{}, SortK{}} (Val:SortList{})), \or{SortK{}} (\exists{SortK{}} (Val:SortCell{}, inj{SortCell{}, SortK{}} (Val:SortCell{})), \or{SortK{}} (\exists{SortK{}} (Val:SortBool{}, inj{SortBool{}, SortK{}} (Val:SortBool{})), \or{SortK{}} (\exists{SortK{}} (Val:SortKCell{}, inj{SortKCell{}, SortK{}} (Val:SortKCell{})), \or{SortK{}} (\exists{SortK{}} (Val:SortMap{}, inj{SortMap{}, SortK{}} (Val:SortMap{})), \or{SortK{}} (\exists{SortK{}} (Val:SortInt{}, inj{SortInt{}, SortK{}} (Val:SortInt{})), \or{SortK{}} (\exists{SortK{}} (Val:SortSet{}, inj{SortSet{}, SortK{}} (Val:SortSet{})), \bottom{SortK{}}())))))))) [constructor{}()] // no junk
+  axiom{} \or{SortMap{}} (\exists{SortMap{}} (X0:SortMap{}, \exists{SortMap{}} (X1:SortMap{}, Lbl'Unds'Map'Unds'{}(X0:SortMap{}, X1:SortMap{}))), \or{SortMap{}} (Lbl'Stop'Map{}(), \bottom{SortMap{}}())) [constructor{}()] // no junk
+  axiom{} \or{SortInt{}} (\top{SortInt{}}(), \bottom{SortInt{}}()) [constructor{}()] // no junk (TODO: fix bug with \dv)
+  axiom{} \or{SortSet{}} (Lbl'Stop'Set{}(), \or{SortSet{}} (\exists{SortSet{}} (X0:SortSet{}, \exists{SortSet{}} (X1:SortSet{}, Lbl'Unds'Set'Unds'{}(X0:SortSet{}, X1:SortSet{}))), \bottom{SortSet{}}())) [constructor{}()] // no junk
+
+// rules
+// rule `_xorBool__BOOL__Bool_Bool`(#token("false","Bool"),B)=>B requires #token("true","Bool") ensures #token("true","Bool") [contentStartColumn(8) contentStartLine(295) org.kframework.attributes.Location(Location(295,8,295,38)) org.kframework.attributes.Source(Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)) org.kframework.definition.Production(syntax RuleContent ::= K)]
+  axiom{R} \implies{R} (
+    \top{R}(),
+    \and{R} (
+      \equals{SortBool{},R} (
+        Lbl'Unds'xorBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}(\dv{SortBool{}}("false"),VarB:SortBool{}),
+        VarB:SortBool{}),
+      \top{R}()))
+  [contentStartColumn{}("8"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax RuleContent ::= K"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(295,8,295,38)"), contentStartLine{}("295")]
+
+// rule `_=/=K__K-EQUAL__K_K`(K1,K2)=>`notBool_`(`_==K_`(K1,K2)) requires #token("true","Bool") ensures #token("true","Bool") [contentStartColumn(8) contentStartLine(727) org.kframework.attributes.Location(Location(727,8,727,45)) org.kframework.attributes.Source(Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)) org.kframework.definition.Production(syntax RuleContent ::= K)]
+  axiom{R} \implies{R} (
+    \top{R}(),
+    \and{R} (
+      \equals{SortBool{},R} (
+        Lbl'UndsEqlsSlshEqls'K'UndsUnds'K-EQUAL'UndsUnds'K'Unds'K{}(VarK1:SortK{},VarK2:SortK{}),
+        LblnotBool'Unds'{}(Lbl'UndsEqlsEqls'K'Unds'{}(VarK1:SortK{},VarK2:SortK{}))),
+      \top{R}()))
+  [contentStartColumn{}("8"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax RuleContent ::= K"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(727,8,727,45)"), contentStartLine{}("727")]
+
+// rule `_orElseBool__BOOL__Bool_Bool`(K,#token("false","Bool"))=>K requires #token("true","Bool") ensures #token("true","Bool") [contentStartColumn(8) contentStartLine(308) org.kframework.attributes.Location(Location(308,8,308,37)) org.kframework.attributes.Source(Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)) org.kframework.definition.Production(syntax RuleContent ::= K)]
+  axiom{R} \implies{R} (
+    \top{R}(),
+    \and{R} (
+      \equals{SortBool{},R} (
+        Lbl'Unds'orElseBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}(VarK:SortBool{},\dv{SortBool{}}("false")),
+        VarK:SortBool{}),
+      \top{R}()))
+  [contentStartColumn{}("8"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax RuleContent ::= K"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(308,8,308,37)"), contentStartLine{}("308")]
+
+// rule isSet(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [owise()]
+  axiom{R} \implies{R} (
+    \and{R} (
+      \not{R} (
+        \or{R} (
+          \exists{R} (VarSet:SortSet{},
+            \and{R} (
+              \top{R}(),
+              \and{R} (
+                \ceil{SortK{}, R} (
+                  \and{SortK{}} (
+                    VarK:SortK{},
+                    kseq{}(inj{SortSet{}, SortKItem{}}(VarSet:SortSet{}),dotk{}())
+                )),
+                \top{R} ()
+              )
+          )),
+          \bottom{R}()
+        )
+      ),
+      \top{R}()
+    ),
+    \and{R} (
+      \equals{SortBool{},R} (
+        LblisSet{}(VarK:SortK{}),
+        \dv{SortBool{}}("false")),
+      \top{R}()))
+  [owise{}()]
+
+// rule `minInt(_,_)_INT__Int_Int`(I1,I2)=>I1 requires `_<=Int__INT__Int_Int`(I1,I2) ensures #token("true","Bool") [contentStartColumn(8) contentStartLine(379) org.kframework.attributes.Location(Location(379,8,379,57)) org.kframework.attributes.Source(Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)) org.kframework.definition.Production(syntax RuleContent ::= K "requires" K)]
+  axiom{R} \implies{R} (
+    \equals{SortBool{},R}(
+        Lbl'Unds-LT-Eqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}(VarI1:SortInt{},VarI2:SortInt{}),
+        \dv{SortBool{}}("true")),
+    \and{R} (
+      \equals{SortInt{},R} (
+        LblminInt'LParUndsCommUndsRParUnds'INT'UndsUnds'Int'Unds'Int{}(VarI1:SortInt{},VarI2:SortInt{}),
+        VarI1:SortInt{}),
+      \top{R}()))
+  [contentStartColumn{}("8"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax RuleContent ::= K \"requires\" K"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(379,8,379,57)"), contentStartLine{}("379")]
+
+// rule `_impliesBool__BOOL__Bool_Bool`(B,#token("false","Bool"))=>`notBool_`(B) requires #token("true","Bool") ensures #token("true","Bool") [contentStartColumn(8) contentStartLine(313) org.kframework.attributes.Location(Location(313,8,313,45)) org.kframework.attributes.Source(Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)) org.kframework.definition.Production(syntax RuleContent ::= K)]
+  axiom{R} \implies{R} (
+    \top{R}(),
+    \and{R} (
+      \equals{SortBool{},R} (
+        Lbl'Unds'impliesBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}(VarB:SortBool{},\dv{SortBool{}}("false")),
+        LblnotBool'Unds'{}(VarB:SortBool{})),
+      \top{R}()))
+  [contentStartColumn{}("8"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax RuleContent ::= K"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(313,8,313,45)"), contentStartLine{}("313")]
+
+// rule `_andBool_`(_0,#token("false","Bool"))=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [contentStartColumn(8) contentStartLine(288) org.kframework.attributes.Location(Location(288,8,288,37)) org.kframework.attributes.Source(Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)) org.kframework.definition.Production(syntax RuleContent ::= K)]
+  axiom{R} \implies{R} (
+    \top{R}(),
+    \and{R} (
+      \equals{SortBool{},R} (
+        Lbl'Unds'andBool'Unds'{}(Var'Unds'0:SortBool{},\dv{SortBool{}}("false")),
+        \dv{SortBool{}}("false")),
+      \top{R}()))
+  [contentStartColumn{}("8"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax RuleContent ::= K"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(288,8,288,37)"), contentStartLine{}("288")]
+
+// rule isSet(inj{Set,KItem}(Set))=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") []
+  axiom{R} \implies{R} (
+    \top{R}(),
+    \and{R} (
+      \equals{SortBool{},R} (
+        LblisSet{}(kseq{}(inj{SortSet{}, SortKItem{}}(VarSet:SortSet{}),dotk{}())),
+        \dv{SortBool{}}("true")),
+      \top{R}()))
+  []
+
+// rule isMap(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [owise()]
+  axiom{R} \implies{R} (
+    \and{R} (
+      \not{R} (
+        \or{R} (
+          \exists{R} (VarMap:SortMap{},
+            \and{R} (
+              \top{R}(),
+              \and{R} (
+                \ceil{SortK{}, R} (
+                  \and{SortK{}} (
+                    VarK:SortK{},
+                    kseq{}(inj{SortMap{}, SortKItem{}}(VarMap:SortMap{}),dotk{}())
+                )),
+                \top{R} ()
+              )
+          )),
+          \bottom{R}()
+        )
+      ),
+      \top{R}()
+    ),
+    \and{R} (
+      \equals{SortBool{},R} (
+        LblisMap{}(VarK:SortK{}),
+        \dv{SortBool{}}("false")),
+      \top{R}()))
+  [owise{}()]
+
+// rule isKConfigVar(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [owise()]
+  axiom{R} \implies{R} (
+    \and{R} (
+      \not{R} (
+        \or{R} (
+          \exists{R} (VarKConfigVar:SortKConfigVar{},
+            \and{R} (
+              \top{R}(),
+              \and{R} (
+                \ceil{SortK{}, R} (
+                  \and{SortK{}} (
+                    VarK:SortK{},
+                    kseq{}(inj{SortKConfigVar{}, SortKItem{}}(VarKConfigVar:SortKConfigVar{}),dotk{}())
+                )),
+                \top{R} ()
+              )
+          )),
+          \bottom{R}()
+        )
+      ),
+      \top{R}()
+    ),
+    \and{R} (
+      \equals{SortBool{},R} (
+        LblisKConfigVar{}(VarK:SortK{}),
+        \dv{SortBool{}}("false")),
+      \top{R}()))
+  [owise{}()]
+
+// rule `signExtendBitRangeInt(_,_,_)_INT__Int_Int_Int`(I,IDX,LEN)=>`_-Int__INT__Int_Int`(`_modInt__INT__Int_Int`(`_+Int__INT__Int_Int`(`bitRangeInt(_,_,_)_INT__Int_Int_Int`(I,IDX,LEN),`_<<Int__INT__Int_Int`(#token("1","Int"),`_-Int__INT__Int_Int`(LEN,#token("1","Int")))),`_<<Int__INT__Int_Int`(#token("1","Int"),LEN)),`_<<Int__INT__Int_Int`(#token("1","Int"),`_-Int__INT__Int_Int`(LEN,#token("1","Int")))) requires #token("true","Bool") ensures #token("true","Bool") [contentStartColumn(8) contentStartLine(369) org.kframework.attributes.Location(Location(369,8,369,149)) org.kframework.attributes.Source(Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)) org.kframework.definition.Production(syntax RuleContent ::= K)]
+  axiom{R} \implies{R} (
+    \top{R}(),
+    \and{R} (
+      \equals{SortInt{},R} (
+        LblsignExtendBitRangeInt'LParUndsCommUndsCommUndsRParUnds'INT'UndsUnds'Int'Unds'Int'Unds'Int{}(VarI:SortInt{},VarIDX:SortInt{},VarLEN:SortInt{}),
+        Lbl'Unds'-Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}(Lbl'Unds'modInt'UndsUnds'INT'UndsUnds'Int'Unds'Int{}(Lbl'UndsPlus'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}(LblbitRangeInt'LParUndsCommUndsCommUndsRParUnds'INT'UndsUnds'Int'Unds'Int'Unds'Int{}(VarI:SortInt{},VarIDX:SortInt{},VarLEN:SortInt{}),Lbl'Unds-LT--LT-'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}(\dv{SortInt{}}("1"),Lbl'Unds'-Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}(VarLEN:SortInt{},\dv{SortInt{}}("1")))),Lbl'Unds-LT--LT-'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}(\dv{SortInt{}}("1"),VarLEN:SortInt{})),Lbl'Unds-LT--LT-'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}(\dv{SortInt{}}("1"),Lbl'Unds'-Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}(VarLEN:SortInt{},\dv{SortInt{}}("1"))))),
+      \top{R}()))
+  [contentStartColumn{}("8"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax RuleContent ::= K"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(369,8,369,149)"), contentStartLine{}("369")]
+
+// rule isList(inj{List,KItem}(List))=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") []
+  axiom{R} \implies{R} (
+    \top{R}(),
+    \and{R} (
+      \equals{SortBool{},R} (
+        LblisList{}(kseq{}(inj{SortList{}, SortKItem{}}(VarList:SortList{}),dotk{}())),
+        \dv{SortBool{}}("true")),
+      \top{R}()))
+  []
+
+// rule `_orBool__BOOL__Bool_Bool`(_7,#token("true","Bool"))=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [contentStartColumn(8) contentStartLine(301) org.kframework.attributes.Location(Location(301,8,301,34)) org.kframework.attributes.Source(Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)) org.kframework.definition.Production(syntax RuleContent ::= K)]
+  axiom{R} \implies{R} (
+    \top{R}(),
+    \and{R} (
+      \equals{SortBool{},R} (
+        Lbl'Unds'orBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}(Var'Unds'7:SortBool{},\dv{SortBool{}}("true")),
+        \dv{SortBool{}}("true")),
+      \top{R}()))
+  [contentStartColumn{}("8"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax RuleContent ::= K"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(301,8,301,34)"), contentStartLine{}("301")]
+
+// rule `foo(_)_TEST__List`(`_List_`(`ListItem`(inj{Int,KItem}(#token("0","Int"))),`ListItem`(inj{Int,KItem}(#token("1","Int")) #as X)))=>`bar(_,_)_TEST__K_List`(X,`.List`(.KList)) requires #token("true","Bool") ensures #token("true","Bool") [contentStartColumn(8) contentStartLine(9) org.kframework.attributes.Location(Location(9,8,9,59)) org.kframework.attributes.Source(Source(/home/dwightguth/test/./test.k)) org.kframework.definition.Production(syntax RuleContent ::= K)]
+  axiom{R} \implies{R} (
+    \top{R}(),
+    \and{R} (
+      \equals{SortKItem{},R} (
+        Lblfoo'LParUndsRParUnds'TEST'UndsUnds'List{}(Lbl'Unds'List'Unds'{}(LblListItem{}(kseq{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("0")),dotk{}())),LblListItem{}(\and{SortK{}}(kseq{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("1")),dotk{}()),VarX:SortK{})))),
+        Lblbar'LParUndsCommUndsRParUnds'TEST'UndsUnds'K'Unds'List{}(VarX:SortK{},Lbl'Stop'List{}())),
+      \top{R}()))
+  [contentStartColumn{}("8"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax RuleContent ::= K"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/test/./test.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(9,8,9,59)"), contentStartLine{}("9")]
+
+// rule `_orBool__BOOL__Bool_Bool`(#token("false","Bool"),B)=>B requires #token("true","Bool") ensures #token("true","Bool") [contentStartColumn(8) contentStartLine(302) org.kframework.attributes.Location(Location(302,8,302,32)) org.kframework.attributes.Source(Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)) org.kframework.definition.Production(syntax RuleContent ::= K)]
+  axiom{R} \implies{R} (
+    \top{R}(),
+    \and{R} (
+      \equals{SortBool{},R} (
+        Lbl'Unds'orBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}(\dv{SortBool{}}("false"),VarB:SortBool{}),
+        VarB:SortBool{}),
+      \top{R}()))
+  [contentStartColumn{}("8"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax RuleContent ::= K"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(302,8,302,32)"), contentStartLine{}("302")]
+
+// rule `foo(_)_TEST__List`(`ListItem`(inj{Int,KItem}(#token("0","Int")) #as X))=>`bar(_,_)_TEST__K_List`(X,`.List`(.KList)) requires #token("true","Bool") ensures #token("true","Bool") [contentStartColumn(8) contentStartLine(8) org.kframework.attributes.Location(Location(8,8,8,47)) org.kframework.attributes.Source(Source(/home/dwightguth/test/./test.k)) org.kframework.definition.Production(syntax RuleContent ::= K)]
+  axiom{R} \implies{R} (
+    \top{R}(),
+    \and{R} (
+      \equals{SortKItem{},R} (
+        Lblfoo'LParUndsRParUnds'TEST'UndsUnds'List{}(LblListItem{}(\and{SortK{}}(kseq{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("0")),dotk{}()),VarX:SortK{}))),
+        Lblbar'LParUndsCommUndsRParUnds'TEST'UndsUnds'K'Unds'List{}(VarX:SortK{},Lbl'Stop'List{}())),
+      \top{R}()))
+  [contentStartColumn{}("8"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax RuleContent ::= K"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/test/./test.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(8,8,8,47)"), contentStartLine{}("8")]
+
+// rule `foo(_)_TEST__List`(`_List_`(`_List_`(`_List_`(L,`ListItem`(inj{Int,KItem}(#token("2","Int")))),`ListItem`(inj{Int,KItem}(#token("3","Int")))),`ListItem`(inj{Int,KItem}(#token("4","Int")) #as X)))=>`bar(_,_)_TEST__K_List`(X,L) requires #token("true","Bool") ensures #token("true","Bool") [contentStartColumn(8) contentStartLine(12) org.kframework.attributes.Location(Location(12,8,12,74)) org.kframework.attributes.Source(Source(/home/dwightguth/test/./test.k)) org.kframework.definition.Production(syntax RuleContent ::= K)]
+  axiom{R} \implies{R} (
+    \top{R}(),
+    \and{R} (
+      \equals{SortKItem{},R} (
+        Lblfoo'LParUndsRParUnds'TEST'UndsUnds'List{}(Lbl'Unds'List'Unds'{}(Lbl'Unds'List'Unds'{}(Lbl'Unds'List'Unds'{}(VarL:SortList{},LblListItem{}(kseq{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("2")),dotk{}()))),LblListItem{}(kseq{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("3")),dotk{}()))),LblListItem{}(\and{SortK{}}(kseq{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("4")),dotk{}()),VarX:SortK{})))),
+        Lblbar'LParUndsCommUndsRParUnds'TEST'UndsUnds'K'Unds'List{}(VarX:SortK{},VarL:SortList{})),
+      \top{R}()))
+  [contentStartColumn{}("8"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax RuleContent ::= K"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/test/./test.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(12,8,12,74)"), contentStartLine{}("12")]
+
+// rule isCell(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [owise()]
+  axiom{R} \implies{R} (
+    \and{R} (
+      \not{R} (
+        \or{R} (
+          \exists{R} (VarCell:SortCell{},
+            \and{R} (
+              \top{R}(),
+              \and{R} (
+                \ceil{SortK{}, R} (
+                  \and{SortK{}} (
+                    VarK:SortK{},
+                    kseq{}(inj{SortCell{}, SortKItem{}}(VarCell:SortCell{}),dotk{}())
+                )),
+                \top{R} ()
+              )
+          )),
+          \bottom{R}()
+        )
+      ),
+      \top{R}()
+    ),
+    \and{R} (
+      \equals{SortBool{},R} (
+        LblisCell{}(VarK:SortK{}),
+        \dv{SortBool{}}("false")),
+      \top{R}()))
+  [owise{}()]
+
+// rule isKCell(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [owise()]
+  axiom{R} \implies{R} (
+    \and{R} (
+      \not{R} (
+        \or{R} (
+          \exists{R} (VarKCell:SortKCell{},
+            \and{R} (
+              \top{R}(),
+              \and{R} (
+                \ceil{SortK{}, R} (
+                  \and{SortK{}} (
+                    VarK:SortK{},
+                    kseq{}(inj{SortKCell{}, SortKItem{}}(VarKCell:SortKCell{}),dotk{}())
+                )),
+                \top{R} ()
+              )
+          )),
+          \bottom{R}()
+        )
+      ),
+      \top{R}()
+    ),
+    \and{R} (
+      \equals{SortBool{},R} (
+        LblisKCell{}(VarK:SortK{}),
+        \dv{SortBool{}}("false")),
+      \top{R}()))
+  [owise{}()]
+
+// rule isKItem(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [owise()]
+  axiom{R} \implies{R} (
+    \and{R} (
+      \not{R} (
+        \or{R} (
+          \exists{R} (VarKItem:SortKItem{},
+            \and{R} (
+              \top{R}(),
+              \and{R} (
+                \ceil{SortK{}, R} (
+                  \and{SortK{}} (
+                    VarK:SortK{},
+                    kseq{}(VarKItem:SortKItem{},dotk{}())
+                )),
+                \top{R} ()
+              )
+          )),
+          \bottom{R}()
+        )
+      ),
+      \top{R}()
+    ),
+    \and{R} (
+      \equals{SortBool{},R} (
+        LblisKItem{}(VarK:SortK{}),
+        \dv{SortBool{}}("false")),
+      \top{R}()))
+  [owise{}()]
+
+// rule isK(K)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") []
+  axiom{R} \implies{R} (
+    \top{R}(),
+    \and{R} (
+      \equals{SortBool{},R} (
+        LblisK{}(VarK:SortK{}),
+        \dv{SortBool{}}("true")),
+      \top{R}()))
+  []
+
+// rule `_modInt__INT__Int_Int`(I1,I2)=>`_%Int__INT__Int_Int`(`_+Int__INT__Int_Int`(`_%Int__INT__Int_Int`(I1,`absInt(_)_INT__Int`(I2)),`absInt(_)_INT__Int`(I2)),`absInt(_)_INT__Int`(I2)) requires `_=/=Int__INT__Int_Int`(I2,#token("0","Int")) ensures #token("true","Bool") [concrete() contentStartColumn(5) contentStartLine(374) org.kframework.attributes.Location(Location(374,5,377,23)) org.kframework.attributes.Source(Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)) org.kframework.definition.Production(syntax RuleContent ::= K "requires" K)]
+  axiom{R} \implies{R} (
+    \equals{SortBool{},R}(
+        Lbl'UndsEqlsSlshEqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}(VarI2:SortInt{},\dv{SortInt{}}("0")),
+        \dv{SortBool{}}("true")),
+    \and{R} (
+      \equals{SortInt{},R} (
+        Lbl'Unds'modInt'UndsUnds'INT'UndsUnds'Int'Unds'Int{}(VarI1:SortInt{},VarI2:SortInt{}),
+        Lbl'UndsPerc'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}(Lbl'UndsPlus'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}(Lbl'UndsPerc'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}(VarI1:SortInt{},LblabsInt'LParUndsRParUnds'INT'UndsUnds'Int{}(VarI2:SortInt{})),LblabsInt'LParUndsRParUnds'INT'UndsUnds'Int{}(VarI2:SortInt{})),LblabsInt'LParUndsRParUnds'INT'UndsUnds'Int{}(VarI2:SortInt{}))),
+      \top{R}()))
+  [contentStartColumn{}("5"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax RuleContent ::= K \"requires\" K"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), concrete{}(), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(374,5,377,23)"), contentStartLine{}("374")]
+
+// rule isKConfigVar(inj{KConfigVar,KItem}(KConfigVar))=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") []
+  axiom{R} \implies{R} (
+    \top{R}(),
+    \and{R} (
+      \equals{SortBool{},R} (
+        LblisKConfigVar{}(kseq{}(inj{SortKConfigVar{}, SortKItem{}}(VarKConfigVar:SortKConfigVar{}),dotk{}())),
+        \dv{SortBool{}}("true")),
+      \top{R}()))
+  []
+
+// rule `#if_#then_#else_#fi_K-EQUAL__Bool_K_K`(C,_11,B2)=>B2 requires `notBool_`(C) ensures #token("true","Bool") [contentStartColumn(8) contentStartLine(734) org.kframework.attributes.Location(Location(734,8,734,64)) org.kframework.attributes.Source(Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)) org.kframework.definition.Production(syntax RuleContent ::= K "requires" K)]
+  axiom{R} \implies{R} (
+    \equals{SortBool{},R}(
+        LblnotBool'Unds'{}(VarC:SortBool{}),
+        \dv{SortBool{}}("true")),
+    \and{R} (
+      \equals{SortK{},R} (
+        Lbl'Hash'if'UndsHash'then'UndsHash'else'UndsHash'fi'Unds'K-EQUAL'UndsUnds'Bool'Unds'K'Unds'K{SortK{}}(VarC:SortBool{},Var'Unds'11:SortK{},VarB2:SortK{}),
+        VarB2:SortK{}),
+      \top{R}()))
+  [contentStartColumn{}("8"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax RuleContent ::= K \"requires\" K"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(734,8,734,64)"), contentStartLine{}("734")]
+
+// rule `_==Bool__BOOL__Bool_Bool`(K1,K2)=>`_==K_`(inj{Bool,KItem}(K1),inj{Bool,KItem}(K2)) requires #token("true","Bool") ensures #token("true","Bool") [contentStartColumn(8) contentStartLine(729) org.kframework.attributes.Location(Location(729,8,729,43)) org.kframework.attributes.Source(Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)) org.kframework.definition.Production(syntax RuleContent ::= K)]
+  axiom{R} \implies{R} (
+    \top{R}(),
+    \and{R} (
+      \equals{SortBool{},R} (
+        Lbl'UndsEqlsEqls'Bool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}(VarK1:SortBool{},VarK2:SortBool{}),
+        Lbl'UndsEqlsEqls'K'Unds'{}(kseq{}(inj{SortBool{}, SortKItem{}}(VarK1:SortBool{}),dotk{}()),kseq{}(inj{SortBool{}, SortKItem{}}(VarK2:SortBool{}),dotk{}()))),
+      \top{R}()))
+  [contentStartColumn{}("8"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax RuleContent ::= K"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(729,8,729,43)"), contentStartLine{}("729")]
+
+// rule isInt(inj{Int,KItem}(Int))=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") []
+  axiom{R} \implies{R} (
+    \top{R}(),
+    \and{R} (
+      \equals{SortBool{},R} (
+        LblisInt{}(kseq{}(inj{SortInt{}, SortKItem{}}(VarInt:SortInt{}),dotk{}())),
+        \dv{SortBool{}}("true")),
+      \top{R}()))
+  []
+
+// rule `_andThenBool__BOOL__Bool_Bool`(_3,#token("false","Bool"))=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [contentStartColumn(8) contentStartLine(293) org.kframework.attributes.Location(Location(293,8,293,36)) org.kframework.attributes.Source(Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)) org.kframework.definition.Production(syntax RuleContent ::= K)]
+  axiom{R} \implies{R} (
+    \top{R}(),
+    \and{R} (
+      \equals{SortBool{},R} (
+        Lbl'Unds'andThenBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}(Var'Unds'3:SortBool{},\dv{SortBool{}}("false")),
+        \dv{SortBool{}}("false")),
+      \top{R}()))
+  [contentStartColumn{}("8"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax RuleContent ::= K"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(293,8,293,36)"), contentStartLine{}("293")]
+
+// rule `_xorBool__BOOL__Bool_Bool`(B1,B2)=>`notBool_`(`_==Bool__BOOL__Bool_Bool`(B1,B2)) requires #token("true","Bool") ensures #token("true","Bool") [contentStartColumn(8) contentStartLine(298) org.kframework.attributes.Location(Location(298,8,298,57)) org.kframework.attributes.Source(Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)) org.kframework.definition.Production(syntax RuleContent ::= K)]
+  axiom{R} \implies{R} (
+    \top{R}(),
+    \and{R} (
+      \equals{SortBool{},R} (
+        Lbl'Unds'xorBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}(VarB1:SortBool{},VarB2:SortBool{}),
+        LblnotBool'Unds'{}(Lbl'UndsEqlsEqls'Bool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}(VarB1:SortBool{},VarB2:SortBool{}))),
+      \top{R}()))
+  [contentStartColumn{}("8"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax RuleContent ::= K"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(298,8,298,57)"), contentStartLine{}("298")]
+
+// rule `_xorBool__BOOL__Bool_Bool`(B,#token("false","Bool"))=>B requires #token("true","Bool") ensures #token("true","Bool") [contentStartColumn(8) contentStartLine(296) org.kframework.attributes.Location(Location(296,8,296,38)) org.kframework.attributes.Source(Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)) org.kframework.definition.Production(syntax RuleContent ::= K)]
+  axiom{R} \implies{R} (
+    \top{R}(),
+    \and{R} (
+      \equals{SortBool{},R} (
+        Lbl'Unds'xorBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}(VarB:SortBool{},\dv{SortBool{}}("false")),
+        VarB:SortBool{}),
+      \top{R}()))
+  [contentStartColumn{}("8"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax RuleContent ::= K"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(296,8,296,38)"), contentStartLine{}("296")]
+
+// rule `_orBool__BOOL__Bool_Bool`(#token("true","Bool"),_9)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [contentStartColumn(8) contentStartLine(300) org.kframework.attributes.Location(Location(300,8,300,34)) org.kframework.attributes.Source(Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)) org.kframework.definition.Production(syntax RuleContent ::= K)]
+  axiom{R} \implies{R} (
+    \top{R}(),
+    \and{R} (
+      \equals{SortBool{},R} (
+        Lbl'Unds'orBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}(\dv{SortBool{}}("true"),Var'Unds'9:SortBool{}),
+        \dv{SortBool{}}("true")),
+      \top{R}()))
+  [contentStartColumn{}("8"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax RuleContent ::= K"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(300,8,300,34)"), contentStartLine{}("300")]
+
+// rule `_impliesBool__BOOL__Bool_Bool`(#token("true","Bool"),B)=>B requires #token("true","Bool") ensures #token("true","Bool") [contentStartColumn(8) contentStartLine(310) org.kframework.attributes.Location(Location(310,8,310,36)) org.kframework.attributes.Source(Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)) org.kframework.definition.Production(syntax RuleContent ::= K)]
+  axiom{R} \implies{R} (
+    \top{R}(),
+    \and{R} (
+      \equals{SortBool{},R} (
+        Lbl'Unds'impliesBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}(\dv{SortBool{}}("true"),VarB:SortBool{}),
+        VarB:SortBool{}),
+      \top{R}()))
+  [contentStartColumn{}("8"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax RuleContent ::= K"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(310,8,310,36)"), contentStartLine{}("310")]
+
+// rule `notBool_`(#token("true","Bool"))=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [contentStartColumn(8) contentStartLine(282) org.kframework.attributes.Location(Location(282,8,282,29)) org.kframework.attributes.Source(Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)) org.kframework.definition.Production(syntax RuleContent ::= K)]
+  axiom{R} \implies{R} (
+    \top{R}(),
+    \and{R} (
+      \equals{SortBool{},R} (
+        LblnotBool'Unds'{}(\dv{SortBool{}}("true")),
+        \dv{SortBool{}}("false")),
+      \top{R}()))
+  [contentStartColumn{}("8"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax RuleContent ::= K"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(282,8,282,29)"), contentStartLine{}("282")]
+
+// rule isBool(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [owise()]
+  axiom{R} \implies{R} (
+    \and{R} (
+      \not{R} (
+        \or{R} (
+          \exists{R} (VarBool:SortBool{},
+            \and{R} (
+              \top{R}(),
+              \and{R} (
+                \ceil{SortK{}, R} (
+                  \and{SortK{}} (
+                    VarK:SortK{},
+                    kseq{}(inj{SortBool{}, SortKItem{}}(VarBool:SortBool{}),dotk{}())
+                )),
+                \top{R} ()
+              )
+          )),
+          \bottom{R}()
+        )
+      ),
+      \top{R}()
+    ),
+    \and{R} (
+      \equals{SortBool{},R} (
+        LblisBool{}(VarK:SortK{}),
+        \dv{SortBool{}}("false")),
+      \top{R}()))
+  [owise{}()]
+
+// rule `_=/=Int__INT__Int_Int`(I1,I2)=>`notBool_`(`_==Int__INT__Int_Int`(I1,I2)) requires #token("true","Bool") ensures #token("true","Bool") [contentStartColumn(8) contentStartLine(391) org.kframework.attributes.Location(Location(391,8,391,53)) org.kframework.attributes.Source(Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)) org.kframework.definition.Production(syntax RuleContent ::= K)]
+  axiom{R} \implies{R} (
+    \top{R}(),
+    \and{R} (
+      \equals{SortBool{},R} (
+        Lbl'UndsEqlsSlshEqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}(VarI1:SortInt{},VarI2:SortInt{}),
+        LblnotBool'Unds'{}(Lbl'UndsEqlsEqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}(VarI1:SortInt{},VarI2:SortInt{}))),
+      \top{R}()))
+  [contentStartColumn{}("8"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax RuleContent ::= K"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(391,8,391,53)"), contentStartLine{}("391")]
+
+// rule `_andThenBool__BOOL__Bool_Bool`(#token("true","Bool"),K)=>K requires #token("true","Bool") ensures #token("true","Bool") [contentStartColumn(8) contentStartLine(290) org.kframework.attributes.Location(Location(290,8,290,37)) org.kframework.attributes.Source(Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)) org.kframework.definition.Production(syntax RuleContent ::= K)]
+  axiom{R} \implies{R} (
+    \top{R}(),
+    \and{R} (
+      \equals{SortBool{},R} (
+        Lbl'Unds'andThenBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}(\dv{SortBool{}}("true"),VarK:SortBool{}),
+        VarK:SortBool{}),
+      \top{R}()))
+  [contentStartColumn{}("8"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax RuleContent ::= K"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(290,8,290,37)"), contentStartLine{}("290")]
+
+// rule `_andBool_`(B,#token("true","Bool"))=>B requires #token("true","Bool") ensures #token("true","Bool") [contentStartColumn(8) contentStartLine(286) org.kframework.attributes.Location(Location(286,8,286,37)) org.kframework.attributes.Source(Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)) org.kframework.definition.Production(syntax RuleContent ::= K)]
+  axiom{R} \implies{R} (
+    \top{R}(),
+    \and{R} (
+      \equals{SortBool{},R} (
+        Lbl'Unds'andBool'Unds'{}(VarB:SortBool{},\dv{SortBool{}}("true")),
+        VarB:SortBool{}),
+      \top{R}()))
+  [contentStartColumn{}("8"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax RuleContent ::= K"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(286,8,286,37)"), contentStartLine{}("286")]
+
+// rule `_impliesBool__BOOL__Bool_Bool`(_5,#token("true","Bool"))=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [contentStartColumn(8) contentStartLine(312) org.kframework.attributes.Location(Location(312,8,312,39)) org.kframework.attributes.Source(Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)) org.kframework.definition.Production(syntax RuleContent ::= K)]
+  axiom{R} \implies{R} (
+    \top{R}(),
+    \and{R} (
+      \equals{SortBool{},R} (
+        Lbl'Unds'impliesBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}(Var'Unds'5:SortBool{},\dv{SortBool{}}("true")),
+        \dv{SortBool{}}("true")),
+      \top{R}()))
+  [contentStartColumn{}("8"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax RuleContent ::= K"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(312,8,312,39)"), contentStartLine{}("312")]
+
+// rule isKItem(KItem)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") []
+  axiom{R} \implies{R} (
+    \top{R}(),
+    \and{R} (
+      \equals{SortBool{},R} (
+        LblisKItem{}(kseq{}(VarKItem:SortKItem{},dotk{}())),
+        \dv{SortBool{}}("true")),
+      \top{R}()))
+  []
+
+// rule `notBool_`(#token("false","Bool"))=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [contentStartColumn(8) contentStartLine(283) org.kframework.attributes.Location(Location(283,8,283,29)) org.kframework.attributes.Source(Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)) org.kframework.definition.Production(syntax RuleContent ::= K)]
+  axiom{R} \implies{R} (
+    \top{R}(),
+    \and{R} (
+      \equals{SortBool{},R} (
+        LblnotBool'Unds'{}(\dv{SortBool{}}("false")),
+        \dv{SortBool{}}("true")),
+      \top{R}()))
+  [contentStartColumn{}("8"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax RuleContent ::= K"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(283,8,283,29)"), contentStartLine{}("283")]
+
+// rule `_xorBool__BOOL__Bool_Bool`(B,B)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [contentStartColumn(8) contentStartLine(297) org.kframework.attributes.Location(Location(297,8,297,38)) org.kframework.attributes.Source(Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)) org.kframework.definition.Production(syntax RuleContent ::= K)]
+  axiom{R} \implies{R} (
+    \top{R}(),
+    \and{R} (
+      \equals{SortBool{},R} (
+        Lbl'Unds'xorBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}(VarB:SortBool{},VarB:SortBool{}),
+        \dv{SortBool{}}("false")),
+      \top{R}()))
+  [contentStartColumn{}("8"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax RuleContent ::= K"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(297,8,297,38)"), contentStartLine{}("297")]
+
+// rule `_dividesInt__INT__Int_Int`(I1,I2)=>`_==Int__INT__Int_Int`(`_%Int__INT__Int_Int`(I2,I1),#token("0","Int")) requires #token("true","Bool") ensures #token("true","Bool") [contentStartColumn(8) contentStartLine(392) org.kframework.attributes.Location(Location(392,8,392,58)) org.kframework.attributes.Source(Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)) org.kframework.definition.Production(syntax RuleContent ::= K)]
+  axiom{R} \implies{R} (
+    \top{R}(),
+    \and{R} (
+      \equals{SortBool{},R} (
+        Lbl'Unds'dividesInt'UndsUnds'INT'UndsUnds'Int'Unds'Int{}(VarI1:SortInt{},VarI2:SortInt{}),
+        Lbl'UndsEqlsEqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}(Lbl'UndsPerc'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}(VarI2:SortInt{},VarI1:SortInt{}),\dv{SortInt{}}("0"))),
+      \top{R}()))
+  [contentStartColumn{}("8"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax RuleContent ::= K"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(392,8,392,58)"), contentStartLine{}("392")]
+
+// rule `foo(_)_TEST__List`(`_List_`(`_List_`(`ListItem`(inj{Int,KItem}(#token("0","Int"))),L),`ListItem`(inj{Int,KItem}(#token("2","Int")) #as X)))=>`bar(_,_)_TEST__K_List`(X,L) requires #token("true","Bool") ensures #token("true","Bool") [contentStartColumn(8) contentStartLine(10) org.kframework.attributes.Location(Location(10,8,10,62)) org.kframework.attributes.Source(Source(/home/dwightguth/test/./test.k)) org.kframework.definition.Production(syntax RuleContent ::= K)]
+  axiom{R} \implies{R} (
+    \top{R}(),
+    \and{R} (
+      \equals{SortKItem{},R} (
+        Lblfoo'LParUndsRParUnds'TEST'UndsUnds'List{}(Lbl'Unds'List'Unds'{}(Lbl'Unds'List'Unds'{}(LblListItem{}(kseq{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("0")),dotk{}())),VarL:SortList{}),LblListItem{}(\and{SortK{}}(kseq{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("2")),dotk{}()),VarX:SortK{})))),
+        Lblbar'LParUndsCommUndsRParUnds'TEST'UndsUnds'K'Unds'List{}(VarX:SortK{},VarL:SortList{})),
+      \top{R}()))
+  [contentStartColumn{}("8"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax RuleContent ::= K"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/test/./test.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(10,8,10,62)"), contentStartLine{}("10")]
+
+// rule isList(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [owise()]
+  axiom{R} \implies{R} (
+    \and{R} (
+      \not{R} (
+        \or{R} (
+          \exists{R} (VarList:SortList{},
+            \and{R} (
+              \top{R}(),
+              \and{R} (
+                \ceil{SortK{}, R} (
+                  \and{SortK{}} (
+                    VarK:SortK{},
+                    kseq{}(inj{SortList{}, SortKItem{}}(VarList:SortList{}),dotk{}())
+                )),
+                \top{R} ()
+              )
+          )),
+          \bottom{R}()
+        )
+      ),
+      \top{R}()
+    ),
+    \and{R} (
+      \equals{SortBool{},R} (
+        LblisList{}(VarK:SortK{}),
+        \dv{SortBool{}}("false")),
+      \top{R}()))
+  [owise{}()]
+
+// rule `_andThenBool__BOOL__Bool_Bool`(#token("false","Bool"),_4)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [contentStartColumn(8) contentStartLine(292) org.kframework.attributes.Location(Location(292,8,292,36)) org.kframework.attributes.Source(Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)) org.kframework.definition.Production(syntax RuleContent ::= K)]
+  axiom{R} \implies{R} (
+    \top{R}(),
+    \and{R} (
+      \equals{SortBool{},R} (
+        Lbl'Unds'andThenBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}(\dv{SortBool{}}("false"),Var'Unds'4:SortBool{}),
+        \dv{SortBool{}}("false")),
+      \top{R}()))
+  [contentStartColumn{}("8"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax RuleContent ::= K"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(292,8,292,36)"), contentStartLine{}("292")]
+
+// rule `_orBool__BOOL__Bool_Bool`(B,#token("false","Bool"))=>B requires #token("true","Bool") ensures #token("true","Bool") [contentStartColumn(8) contentStartLine(303) org.kframework.attributes.Location(Location(303,8,303,32)) org.kframework.attributes.Source(Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)) org.kframework.definition.Production(syntax RuleContent ::= K)]
+  axiom{R} \implies{R} (
+    \top{R}(),
+    \and{R} (
+      \equals{SortBool{},R} (
+        Lbl'Unds'orBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}(VarB:SortBool{},\dv{SortBool{}}("false")),
+        VarB:SortBool{}),
+      \top{R}()))
+  [contentStartColumn{}("8"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax RuleContent ::= K"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(303,8,303,32)"), contentStartLine{}("303")]
+
+// rule `minInt(_,_)_INT__Int_Int`(I1,I2)=>I2 requires `_>=Int__INT__Int_Int`(I1,I2) ensures #token("true","Bool") [contentStartColumn(8) contentStartLine(380) org.kframework.attributes.Location(Location(380,8,380,57)) org.kframework.attributes.Source(Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)) org.kframework.definition.Production(syntax RuleContent ::= K "requires" K)]
+  axiom{R} \implies{R} (
+    \equals{SortBool{},R}(
+        Lbl'Unds-GT-Eqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}(VarI1:SortInt{},VarI2:SortInt{}),
+        \dv{SortBool{}}("true")),
+    \and{R} (
+      \equals{SortInt{},R} (
+        LblminInt'LParUndsCommUndsRParUnds'INT'UndsUnds'Int'Unds'Int{}(VarI1:SortInt{},VarI2:SortInt{}),
+        VarI2:SortInt{}),
+      \top{R}()))
+  [contentStartColumn{}("8"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax RuleContent ::= K \"requires\" K"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(380,8,380,57)"), contentStartLine{}("380")]
+
+// rule isKCell(inj{KCell,KItem}(KCell))=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") []
+  axiom{R} \implies{R} (
+    \top{R}(),
+    \and{R} (
+      \equals{SortBool{},R} (
+        LblisKCell{}(kseq{}(inj{SortKCell{}, SortKItem{}}(VarKCell:SortKCell{}),dotk{}())),
+        \dv{SortBool{}}("true")),
+      \top{R}()))
+  []
+
+// rule `foo(_)_TEST__List`(`.List`(.KList))=>`bar(_,_)_TEST__K_List`(.K,`.List`(.KList)) requires #token("true","Bool") ensures #token("true","Bool") [contentStartColumn(8) contentStartLine(7) org.kframework.attributes.Location(Location(7,8,7,36)) org.kframework.attributes.Source(Source(/home/dwightguth/test/./test.k)) org.kframework.definition.Production(syntax RuleContent ::= K)]
+  axiom{R} \implies{R} (
+    \top{R}(),
+    \and{R} (
+      \equals{SortKItem{},R} (
+        Lblfoo'LParUndsRParUnds'TEST'UndsUnds'List{}(Lbl'Stop'List{}()),
+        Lblbar'LParUndsCommUndsRParUnds'TEST'UndsUnds'K'Unds'List{}(dotk{}(),Lbl'Stop'List{}())),
+      \top{R}()))
+  [contentStartColumn{}("8"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax RuleContent ::= K"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/test/./test.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(7,8,7,36)"), contentStartLine{}("7")]
+
+// rule `_=/=Bool__BOOL__Bool_Bool`(B1,B2)=>`notBool_`(`_==Bool__BOOL__Bool_Bool`(B1,B2)) requires #token("true","Bool") ensures #token("true","Bool") [contentStartColumn(8) contentStartLine(315) org.kframework.attributes.Location(Location(315,8,315,57)) org.kframework.attributes.Source(Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)) org.kframework.definition.Production(syntax RuleContent ::= K)]
+  axiom{R} \implies{R} (
+    \top{R}(),
+    \and{R} (
+      \equals{SortBool{},R} (
+        Lbl'UndsEqlsSlshEqls'Bool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}(VarB1:SortBool{},VarB2:SortBool{}),
+        LblnotBool'Unds'{}(Lbl'UndsEqlsEqls'Bool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}(VarB1:SortBool{},VarB2:SortBool{}))),
+      \top{R}()))
+  [contentStartColumn{}("8"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax RuleContent ::= K"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(315,8,315,57)"), contentStartLine{}("315")]
+
+// rule `_orElseBool__BOOL__Bool_Bool`(#token("true","Bool"),_2)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [contentStartColumn(8) contentStartLine(305) org.kframework.attributes.Location(Location(305,8,305,33)) org.kframework.attributes.Source(Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)) org.kframework.definition.Production(syntax RuleContent ::= K)]
+  axiom{R} \implies{R} (
+    \top{R}(),
+    \and{R} (
+      \equals{SortBool{},R} (
+        Lbl'Unds'orElseBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}(\dv{SortBool{}}("true"),Var'Unds'2:SortBool{}),
+        \dv{SortBool{}}("true")),
+      \top{R}()))
+  [contentStartColumn{}("8"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax RuleContent ::= K"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(305,8,305,33)"), contentStartLine{}("305")]
+
+// rule isInt(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [owise()]
+  axiom{R} \implies{R} (
+    \and{R} (
+      \not{R} (
+        \or{R} (
+          \exists{R} (VarInt:SortInt{},
+            \and{R} (
+              \top{R}(),
+              \and{R} (
+                \ceil{SortK{}, R} (
+                  \and{SortK{}} (
+                    VarK:SortK{},
+                    kseq{}(inj{SortInt{}, SortKItem{}}(VarInt:SortInt{}),dotk{}())
+                )),
+                \top{R} ()
+              )
+          )),
+          \bottom{R}()
+        )
+      ),
+      \top{R}()
+    ),
+    \and{R} (
+      \equals{SortBool{},R} (
+        LblisInt{}(VarK:SortK{}),
+        \dv{SortBool{}}("false")),
+      \top{R}()))
+  [owise{}()]
+
+// rule isBool(inj{Bool,KItem}(Bool))=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") []
+  axiom{R} \implies{R} (
+    \top{R}(),
+    \and{R} (
+      \equals{SortBool{},R} (
+        LblisBool{}(kseq{}(inj{SortBool{}, SortKItem{}}(VarBool:SortBool{}),dotk{}())),
+        \dv{SortBool{}}("true")),
+      \top{R}()))
+  []
+
+// rule `_divInt__INT__Int_Int`(I1,I2)=>`_/Int__INT__Int_Int`(`_-Int__INT__Int_Int`(I1,`_modInt__INT__Int_Int`(I1,I2)),I2) requires `_=/=Int__INT__Int_Int`(I2,#token("0","Int")) ensures #token("true","Bool") [contentStartColumn(8) contentStartLine(371) org.kframework.attributes.Location(Location(371,8,372,23)) org.kframework.attributes.Source(Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)) org.kframework.definition.Production(syntax RuleContent ::= K "requires" K)]
+  axiom{R} \implies{R} (
+    \equals{SortBool{},R}(
+        Lbl'UndsEqlsSlshEqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}(VarI2:SortInt{},\dv{SortInt{}}("0")),
+        \dv{SortBool{}}("true")),
+    \and{R} (
+      \equals{SortInt{},R} (
+        Lbl'Unds'divInt'UndsUnds'INT'UndsUnds'Int'Unds'Int{}(VarI1:SortInt{},VarI2:SortInt{}),
+        Lbl'UndsSlsh'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}(Lbl'Unds'-Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}(VarI1:SortInt{},Lbl'Unds'modInt'UndsUnds'INT'UndsUnds'Int'Unds'Int{}(VarI1:SortInt{},VarI2:SortInt{})),VarI2:SortInt{})),
+      \top{R}()))
+  [contentStartColumn{}("8"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax RuleContent ::= K \"requires\" K"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(371,8,372,23)"), contentStartLine{}("371")]
+
+// rule `_orElseBool__BOOL__Bool_Bool`(_6,#token("true","Bool"))=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [contentStartColumn(8) contentStartLine(306) org.kframework.attributes.Location(Location(306,8,306,33)) org.kframework.attributes.Source(Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)) org.kframework.definition.Production(syntax RuleContent ::= K)]
+  axiom{R} \implies{R} (
+    \top{R}(),
+    \and{R} (
+      \equals{SortBool{},R} (
+        Lbl'Unds'orElseBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}(Var'Unds'6:SortBool{},\dv{SortBool{}}("true")),
+        \dv{SortBool{}}("true")),
+      \top{R}()))
+  [contentStartColumn{}("8"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax RuleContent ::= K"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(306,8,306,33)"), contentStartLine{}("306")]
+
+// rule `_andThenBool__BOOL__Bool_Bool`(K,#token("true","Bool"))=>K requires #token("true","Bool") ensures #token("true","Bool") [contentStartColumn(8) contentStartLine(291) org.kframework.attributes.Location(Location(291,8,291,37)) org.kframework.attributes.Source(Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)) org.kframework.definition.Production(syntax RuleContent ::= K)]
+  axiom{R} \implies{R} (
+    \top{R}(),
+    \and{R} (
+      \equals{SortBool{},R} (
+        Lbl'Unds'andThenBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}(VarK:SortBool{},\dv{SortBool{}}("true")),
+        VarK:SortBool{}),
+      \top{R}()))
+  [contentStartColumn{}("8"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax RuleContent ::= K"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(291,8,291,37)"), contentStartLine{}("291")]
+
+// rule `_==Int__INT__Int_Int`(I1,I2)=>`_==K_`(inj{Int,KItem}(I1),inj{Int,KItem}(I2)) requires #token("true","Bool") ensures #token("true","Bool") [contentStartColumn(8) contentStartLine(390) org.kframework.attributes.Location(Location(390,8,390,40)) org.kframework.attributes.Source(Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)) org.kframework.definition.Production(syntax RuleContent ::= K)]
+  axiom{R} \implies{R} (
+    \top{R}(),
+    \and{R} (
+      \equals{SortBool{},R} (
+        Lbl'UndsEqlsEqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}(VarI1:SortInt{},VarI2:SortInt{}),
+        Lbl'UndsEqlsEqls'K'Unds'{}(kseq{}(inj{SortInt{}, SortKItem{}}(VarI1:SortInt{}),dotk{}()),kseq{}(inj{SortInt{}, SortKItem{}}(VarI2:SortInt{}),dotk{}()))),
+      \top{R}()))
+  [contentStartColumn{}("8"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax RuleContent ::= K"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(390,8,390,40)"), contentStartLine{}("390")]
+
+// rule isCell(inj{Cell,KItem}(Cell))=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") []
+  axiom{R} \implies{R} (
+    \top{R}(),
+    \and{R} (
+      \equals{SortBool{},R} (
+        LblisCell{}(kseq{}(inj{SortCell{}, SortKItem{}}(VarCell:SortCell{}),dotk{}())),
+        \dv{SortBool{}}("true")),
+      \top{R}()))
+  []
+
+// rule `_andBool_`(#token("true","Bool"),B)=>B requires #token("true","Bool") ensures #token("true","Bool") [contentStartColumn(8) contentStartLine(285) org.kframework.attributes.Location(Location(285,8,285,37)) org.kframework.attributes.Source(Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)) org.kframework.definition.Production(syntax RuleContent ::= K)]
+  axiom{R} \implies{R} (
+    \top{R}(),
+    \and{R} (
+      \equals{SortBool{},R} (
+        Lbl'Unds'andBool'Unds'{}(\dv{SortBool{}}("true"),VarB:SortBool{}),
+        VarB:SortBool{}),
+      \top{R}()))
+  [contentStartColumn{}("8"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax RuleContent ::= K"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(285,8,285,37)"), contentStartLine{}("285")]
+
+// rule `foo(_)_TEST__List`(`_List_`(`ListItem`(inj{Int,KItem}(#token("1","Int") #as X)),L))=>`bar(_,_)_TEST__K_List`(inj{Int,KItem}(`_+Int__INT__Int_Int`(X,#token("2","Int"))),L) requires #token("true","Bool") ensures #token("true","Bool") [contentStartColumn(8) contentStartLine(11) org.kframework.attributes.Location(Location(11,8,11,57)) org.kframework.attributes.Source(Source(/home/dwightguth/test/./test.k)) org.kframework.definition.Production(syntax RuleContent ::= K)]
+  axiom{R} \implies{R} (
+    \top{R}(),
+    \and{R} (
+      \equals{SortKItem{},R} (
+        Lblfoo'LParUndsRParUnds'TEST'UndsUnds'List{}(Lbl'Unds'List'Unds'{}(LblListItem{}(kseq{}(inj{SortInt{}, SortKItem{}}(\and{SortInt{}}(\dv{SortInt{}}("1"),VarX:SortInt{})),dotk{}())),VarL:SortList{})),
+        Lblbar'LParUndsCommUndsRParUnds'TEST'UndsUnds'K'Unds'List{}(kseq{}(inj{SortInt{}, SortKItem{}}(Lbl'UndsPlus'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}(VarX:SortInt{},\dv{SortInt{}}("2"))),dotk{}()),VarL:SortList{})),
+      \top{R}()))
+  [contentStartColumn{}("8"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax RuleContent ::= K"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/test/./test.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(11,8,11,57)"), contentStartLine{}("11")]
+
+// rule `bitRangeInt(_,_,_)_INT__Int_Int_Int`(I,IDX,LEN)=>`_modInt__INT__Int_Int`(`_>>Int__INT__Int_Int`(I,IDX),`_<<Int__INT__Int_Int`(#token("1","Int"),LEN)) requires #token("true","Bool") ensures #token("true","Bool") [contentStartColumn(8) contentStartLine(367) org.kframework.attributes.Location(Location(367,8,367,70)) org.kframework.attributes.Source(Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)) org.kframework.definition.Production(syntax RuleContent ::= K)]
+  axiom{R} \implies{R} (
+    \top{R}(),
+    \and{R} (
+      \equals{SortInt{},R} (
+        LblbitRangeInt'LParUndsCommUndsCommUndsRParUnds'INT'UndsUnds'Int'Unds'Int'Unds'Int{}(VarI:SortInt{},VarIDX:SortInt{},VarLEN:SortInt{}),
+        Lbl'Unds'modInt'UndsUnds'INT'UndsUnds'Int'Unds'Int{}(Lbl'Unds-GT--GT-'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}(VarI:SortInt{},VarIDX:SortInt{}),Lbl'Unds-LT--LT-'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}(\dv{SortInt{}}("1"),VarLEN:SortInt{}))),
+      \top{R}()))
+  [contentStartColumn{}("8"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax RuleContent ::= K"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(367,8,367,70)"), contentStartLine{}("367")]
+
+// rule `#if_#then_#else_#fi_K-EQUAL__Bool_K_K`(C,B1,_10)=>B1 requires C ensures #token("true","Bool") [contentStartColumn(8) contentStartLine(733) org.kframework.attributes.Location(Location(733,8,733,56)) org.kframework.attributes.Source(Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)) org.kframework.definition.Production(syntax RuleContent ::= K "requires" K)]
+  axiom{R} \implies{R} (
+    \equals{SortBool{},R}(
+        VarC:SortBool{},
+        \dv{SortBool{}}("true")),
+    \and{R} (
+      \equals{SortK{},R} (
+        Lbl'Hash'if'UndsHash'then'UndsHash'else'UndsHash'fi'Unds'K-EQUAL'UndsUnds'Bool'Unds'K'Unds'K{SortK{}}(VarC:SortBool{},VarB1:SortK{},Var'Unds'10:SortK{}),
+        VarB1:SortK{}),
+      \top{R}()))
+  [contentStartColumn{}("8"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax RuleContent ::= K \"requires\" K"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(733,8,733,56)"), contentStartLine{}("733")]
+
+// rule initKCell(Init)=>`<k>`(`Map:lookup`(Init,inj{KConfigVar,KItem}(#token("$PGM","KConfigVar")))) requires #token("true","Bool") ensures #token("true","Bool") [initializer()]
+  axiom{R} \implies{R} (
+    \top{R}(),
+    \and{R} (
+      \equals{SortKCell{},R} (
+        LblinitKCell{}(VarInit:SortMap{}),
+        Lbl'-LT-'k'-GT-'{}(LblMap'Coln'lookup{}(VarInit:SortMap{},kseq{}(inj{SortKConfigVar{}, SortKItem{}}(\dv{SortKConfigVar{}}("$PGM")),dotk{}())))),
+      \top{R}()))
+  [initializer{}()]
+
+// rule `_impliesBool__BOOL__Bool_Bool`(#token("false","Bool"),_1)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [contentStartColumn(8) contentStartLine(311) org.kframework.attributes.Location(Location(311,8,311,40)) org.kframework.attributes.Source(Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)) org.kframework.definition.Production(syntax RuleContent ::= K)]
+  axiom{R} \implies{R} (
+    \top{R}(),
+    \and{R} (
+      \equals{SortBool{},R} (
+        Lbl'Unds'impliesBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}(\dv{SortBool{}}("false"),Var'Unds'1:SortBool{}),
+        \dv{SortBool{}}("true")),
+      \top{R}()))
+  [contentStartColumn{}("8"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax RuleContent ::= K"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(311,8,311,40)"), contentStartLine{}("311")]
+
+// rule `freshInt(_)_INT__Int`(I)=>I requires #token("true","Bool") ensures #token("true","Bool") [contentStartColumn(8) contentStartLine(395) org.kframework.attributes.Location(Location(395,8,395,28)) org.kframework.attributes.Source(Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)) org.kframework.definition.Production(syntax RuleContent ::= K)]
+  axiom{R} \implies{R} (
+    \top{R}(),
+    \and{R} (
+      \equals{SortInt{},R} (
+        LblfreshInt'LParUndsRParUnds'INT'UndsUnds'Int{}(VarI:SortInt{}),
+        VarI:SortInt{}),
+      \top{R}()))
+  [contentStartColumn{}("8"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax RuleContent ::= K"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(395,8,395,28)"), contentStartLine{}("395")]
+
+// rule `_orElseBool__BOOL__Bool_Bool`(#token("false","Bool"),K)=>K requires #token("true","Bool") ensures #token("true","Bool") [contentStartColumn(8) contentStartLine(307) org.kframework.attributes.Location(Location(307,8,307,37)) org.kframework.attributes.Source(Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)) org.kframework.definition.Production(syntax RuleContent ::= K)]
+  axiom{R} \implies{R} (
+    \top{R}(),
+    \and{R} (
+      \equals{SortBool{},R} (
+        Lbl'Unds'orElseBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}(\dv{SortBool{}}("false"),VarK:SortBool{}),
+        VarK:SortBool{}),
+      \top{R}()))
+  [contentStartColumn{}("8"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax RuleContent ::= K"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(307,8,307,37)"), contentStartLine{}("307")]
+
+// rule isMap(inj{Map,KItem}(Map))=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") []
+  axiom{R} \implies{R} (
+    \top{R}(),
+    \and{R} (
+      \equals{SortBool{},R} (
+        LblisMap{}(kseq{}(inj{SortMap{}, SortKItem{}}(VarMap:SortMap{}),dotk{}())),
+        \dv{SortBool{}}("true")),
+      \top{R}()))
+  []
+
+// rule `_andBool_`(#token("false","Bool"),_8)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [contentStartColumn(8) contentStartLine(287) org.kframework.attributes.Location(Location(287,8,287,37)) org.kframework.attributes.Source(Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)) org.kframework.definition.Production(syntax RuleContent ::= K)]
+  axiom{R} \implies{R} (
+    \top{R}(),
+    \and{R} (
+      \equals{SortBool{},R} (
+        Lbl'Unds'andBool'Unds'{}(\dv{SortBool{}}("false"),Var'Unds'8:SortBool{}),
+        \dv{SortBool{}}("false")),
+      \top{R}()))
+  [contentStartColumn{}("8"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax RuleContent ::= K"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k/k-distribution/target/release/k/include/builtin/domains.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(287,8,287,37)"), contentStartLine{}("287")]
+
+endmodule [org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(1,1,14,9)"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/test/./test.k)")]
