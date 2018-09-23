@@ -160,12 +160,13 @@ switchLiteral o bw brs def =
                     , getDefault = def }
 
 function :: Text
+         -> Occurrence
          -> [Occurrence]
          -> Text
          -> Fix DecisionTree
          -> Fix DecisionTree
-function name vars sort child =
-  Fix $ Function name vars sort child
+function name o vars sort child =
+  Fix $ Function name o vars sort child
 
 simplify :: Occurrence -> Fix DecisionTree -> Fix DecisionTree
 simplify o dt = switch o [] (Just dt)
@@ -422,9 +423,9 @@ data DecisionTree a = Leaf (Int, [Occurrence])
                     | Fail
                     | Switch Occurrence !(L a)
                     | SwitchLiteral Occurrence Int !(L a)
-                    | EqualLiteral Text Text !a
+                    | EqualLiteral Text Occurrence Text !a
                     | Swap Index !a
-                    | Function Text [Occurrence] Text !a  
+                    | Function Text Occurrence [Occurrence] Text !a  
                     deriving (Show, Eq, Functor, Ord)
 
 newtype Alias = Alias Text
@@ -462,16 +463,18 @@ instance Y.ToYaml a => Y.ToYaml (Anchor a) where
       , "bitwidth" Y..= Y.toYaml i
       , "occurrence" Y..= Y.toYaml o
       ]
-    toYaml (Anchor a (EqualLiteral h l x)) = Y.namedMapping a
+    toYaml (Anchor a (EqualLiteral h o l x)) = Y.namedMapping a
       ["hook" Y..= Y.toYaml h
+      , "occurrence" Y..= Y.toYaml o
       , "literal" Y..= Y.toYaml l
       , "next" Y..= Y.toYaml x
       ]
     toYaml (Anchor a (Swap i x)) = Y.namedMapping a
       ["swap" Y..= Y.array [Y.toYaml i, Y.toYaml x]]
-    toYaml (Anchor a (Function name bindings sort x)) = Y.namedMapping a
+    toYaml (Anchor a (Function name o bindings sort x)) = Y.namedMapping a
       ["function" Y..= Y.toYaml name
       , "sort" Y..= Y.toYaml sort
+      , "occurrence" Y..= Y.toYaml o
       , "args" Y..= Y.toYaml bindings
       , "next" Y..= Y.toYaml x
       ]
@@ -604,8 +607,8 @@ shareDt =
                         Fix (Leaf a) -> (addName m, Free (Anchor (Just $ name m) (Leaf a)))
                         Fix Fail -> (m, Free (Anchor Nothing Fail))
                         Fix (Swap i a) -> let (m',child) = mapChild a in (addName m',Free (Anchor (Just $ name m') (Swap i child)))
-                        Fix (EqualLiteral h l a) -> let (m',child) = mapChild a in (addName m',Free (Anchor (Just $ name m') (EqualLiteral h l child)))
-                        Fix (Function n os s a) -> let (m',child) = mapChild a in (addName m', Free (Anchor (Just $ name m') (Function n os s child)))
+                        Fix (EqualLiteral h o l a) -> let (m',child) = mapChild a in (addName m',Free (Anchor (Just $ name m') (EqualLiteral h o l child)))
+                        Fix (Function n o os s a) -> let (m',child) = mapChild a in (addName m', Free (Anchor (Just $ name m') (Function n o os s child)))
                         Fix (Switch o (L s d)) -> let (m',s') = mapSpec m s in let (m'',d') = mapDefault m' d in (addName m'', Free (Anchor (Just $ name m'') (Switch o (L s' d'))))
                         Fix (SwitchLiteral o bw (L s d)) -> let (m',s') = mapSpec m s in let (m'',d') = mapDefault m' d in (addName m'', Free (Anchor (Just $ name m'') (SwitchLiteral o bw (L s' d'))))
                         
