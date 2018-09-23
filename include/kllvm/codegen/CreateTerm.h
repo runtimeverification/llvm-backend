@@ -37,6 +37,7 @@ public:
    specified definition, and returns the value itself. */
   llvm::Value *operator()(KOREPattern *pattern);
   llvm::Value *createToken(ValueType sort, std::string contents);
+  llvm::Value *createFunctionCall(std::string name, ValueType returnCat, std::vector<llvm::Value *> &args, bool sret, bool load);
 
   llvm::BasicBlock *getCurrentBlock() const { return CurrentBlock; }
 };
