@@ -52,7 +52,7 @@ public:
   DecisionNode *function(YAML::Node node) {
     std::string function = node["function"].as<std::string>();
     std::string hookName = node["sort"].as<std::string>();
-    SortCategory cat = KOREObjectCompositeSort::getCategory(hookName);
+    ValueType cat = KOREObjectCompositeSort::getCategory(hookName);
 
     std::string binding = "_" + std::to_string(counter++);
     occurrences[{functionDepth++, 0}] = binding;
@@ -77,7 +77,7 @@ public:
     std::string binding = constructors.back();
     std::string hookName = node["hook"].as<std::string>();
     std::string literal = node["literal"].as<std::string>();
-    SortCategory cat = KOREObjectCompositeSort::getCategory(hookName);
+    ValueType cat = KOREObjectCompositeSort::getCategory(hookName);
 
     std::string name = "_" + std::to_string(counter++);
     occurrences[{functionDepth++, 0}] = name;

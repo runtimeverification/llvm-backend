@@ -36,7 +36,7 @@ public:
    an llvm value corresponding to the specified KORE RHS pattern and substitution in the
    specified definition, and returns the value itself. */
   llvm::Value *operator()(KOREPattern *pattern);
-  llvm::Value *createToken(SortCategory sort, std::string contents);
+  llvm::Value *createToken(ValueType sort, std::string contents);
 
   llvm::BasicBlock *getCurrentBlock() const { return CurrentBlock; }
 };
@@ -59,7 +59,7 @@ std::string makeApplyRuleFunction(KOREAxiomDeclaration *axiom, KOREDefinition *d
 std::string makeSideConditionFunction(KOREAxiomDeclaration *axiom, KOREDefinition *definition, llvm::Module *Module);
 
 /* returns the llvm::Type corresponding to the specified KORE sort category */
-llvm::Type *getValueType(SortCategory sort, llvm::Module *Module);
+llvm::Type *getValueType(ValueType sort, llvm::Module *Module);
 
 void addAbort(llvm::BasicBlock *block, llvm::Module *Module);
 

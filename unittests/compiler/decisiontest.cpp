@@ -103,8 +103,8 @@ BOOST_AUTO_TEST_CASE(simple) {
   auto Inner = SwitchNode::Create("_0");
   auto Bar = KOREObjectSymbol::Create("Bar");
   auto Baz = KOREObjectSymbol::Create("Baz");
-  auto InnerSort = KOREObjectCompositeSort::Create("Inner", SortCategory::Symbol);
-  auto Bool = KOREObjectCompositeSort::Create("Bool", SortCategory::Bool);
+  auto InnerSort = KOREObjectCompositeSort::Create("Inner", {SortCategory::Symbol, 0});
+  auto Bool = KOREObjectCompositeSort::Create("Bool", {SortCategory::Bool, 0});
 
   Bar->addSort(InnerSort);
   Bar->addArgument(Bool);
@@ -117,14 +117,14 @@ BOOST_AUTO_TEST_CASE(simple) {
   auto BazLeaf = LeafNode::Create("apply_rule_2");
   BazLeaf->addBinding("_1");
   BazLeaf->addBinding("_3");
-  auto Func = FunctionNode::Create("_3", "eval_foo", BazLeaf, SortCategory::Bool);
+  auto Func = FunctionNode::Create("_3", "eval_foo", BazLeaf, {SortCategory::Bool, 0});
   Func->addBinding("_1");
   Inner->addCase({Baz, std::vector<std::string>{}, Func});
 
   auto Outer = SwitchNode::Create("subject0");
   auto Foo = KOREObjectSymbol::Create("Foo");
-  auto OuterSort = KOREObjectCompositeSort::Create("Outer", SortCategory::Symbol);
-  auto Int = KOREObjectCompositeSort::Create("Int", SortCategory::Int);
+  auto OuterSort = KOREObjectCompositeSort::Create("Outer", {SortCategory::Symbol, 0});
+  auto Int = KOREObjectCompositeSort::Create("Int", {SortCategory::Int, 0});
 
   Foo->addSort(OuterSort);
   Foo->addArgument(InnerSort);
@@ -196,8 +196,8 @@ occurrence:
 
   auto Bar = KOREObjectSymbol::Create("Bar");
   auto Baz = KOREObjectSymbol::Create("Baz");
-  auto InnerSort = KOREObjectCompositeSort::Create("Inner", SortCategory::Symbol);
-  auto Bool = KOREObjectCompositeSort::Create("Bool", SortCategory::Bool);
+  auto InnerSort = KOREObjectCompositeSort::Create("Inner", {SortCategory::Symbol, 0});
+  auto Bool = KOREObjectCompositeSort::Create("Bool", {SortCategory::Bool, 0});
 
   Bar->addSort(InnerSort);
   Bar->addArgument(Bool);
@@ -206,8 +206,8 @@ occurrence:
   Baz->setTag(1);
   
   auto Foo = KOREObjectSymbol::Create("Foo");
-  auto OuterSort = KOREObjectCompositeSort::Create("Outer", SortCategory::Symbol);
-  auto Int = KOREObjectCompositeSort::Create("Int", SortCategory::Int);
+  auto OuterSort = KOREObjectCompositeSort::Create("Outer", {SortCategory::Symbol, 0});
+  auto Int = KOREObjectCompositeSort::Create("Int", {SortCategory::Int, 0});
 
   Foo->addSort(OuterSort);
   Foo->addArgument(InnerSort);
@@ -311,7 +311,7 @@ occurrence:
 )YAML";
   auto Nil = KOREObjectSymbol::Create("Nil");
   auto Cons = KOREObjectSymbol::Create("Cons");
-  auto List = KOREObjectCompositeSort::Create("List", SortCategory::Symbol);
+  auto List = KOREObjectCompositeSort::Create("List", {SortCategory::Symbol, 0});
   Nil->addSort(List);
   Nil->setTag(0);
   Cons->addArgument(List);

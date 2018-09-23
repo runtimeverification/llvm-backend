@@ -84,7 +84,7 @@ void SwitchNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitutio
 
 void EqualsLiteralNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution) {
   std::string funcName;
-  switch (cat) {
+  switch (cat.cat) {
   case SortCategory::Uncomputed:
   case SortCategory::Map:
   case SortCategory::List:
@@ -139,17 +139,17 @@ void LeafNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution)
 }
 
 llvm::Value *Decision::getTag(llvm::Value *val) {
-  return llvm::CallInst::Create(Module->getOrInsertFunction("getTag", llvm::Type::getInt32Ty(Ctx), getValueType(SortCategory::Symbol, Module)), val, "tag", CurrentBlock);
+  return llvm::CallInst::Create(Module->getOrInsertFunction("getTag", llvm::Type::getInt32Ty(Ctx), getValueType({SortCategory::Symbol, 0}, Module)), val, "tag", CurrentBlock);
 }
 
 void makeEvalFunction(KOREObjectSymbol *function, KOREDefinition *definition, llvm::Module *module, DecisionNode *dt) {
   auto returnSort = dynamic_cast<KOREObjectCompositeSort *>(function->getSort())->getCategory(definition);
   auto returnType = getValueType(returnSort, module);
   std::vector<llvm::Type *> args;
-  std::vector<SortCategory> cats;
+  std::vector<ValueType> cats;
   for (auto sort : function->getArguments()) {
     auto cat = dynamic_cast<KOREObjectCompositeSort *>(sort)->getCategory(definition);
-    switch (cat) {
+    switch (cat.cat) {
     case SortCategory::Map:
     case SortCategory::List:
     case SortCategory::Set:
@@ -193,7 +193,7 @@ void makeEvalFunction(KOREObjectSymbol *function, KOREDefinition *definition, ll
 }
 
 void makeStepFunction(KOREDefinition *definition, llvm::Module *module, DecisionNode *dt) {
-  auto blockType = getValueType(SortCategory::Symbol, module);
+  auto blockType = getValueType({SortCategory::Symbol, 0}, module);
   llvm::FunctionType *funcType = llvm::FunctionType::get(blockType, {blockType}, false);
   std::string name = "step";
   llvm::Constant *func = module->getOrInsertFunction(name, funcType);
@@ -210,7 +210,7 @@ void makeStepFunction(KOREDefinition *definition, llvm::Module *module, Decision
   llvm::CallInst::Create(FinishFunc, {val}, "", stuck);
   new llvm::UnreachableInst(module->getContext(), stuck);
 
-  Decision codegen(definition, block, stuck, module, SortCategory::Symbol);
+  Decision codegen(definition, block, stuck, module, {SortCategory::Symbol, 0});
   codegen(dt, subst);
 }
 

@@ -79,8 +79,8 @@ compareChild:
 				   i16 5, label %stuck
 				   i16 6, label %stuck
 				   i16 7, label %compareBool
-				   i16 8, label %stuck
-				   i16 9, label %compareSymbol ]
+				   i16 8, label %compareSymbol
+				   i16 9, label %stuck ]
 compareMap:
   %map1ptr = inttoptr i64 %child1intptr to %map*
   %map2ptr = inttoptr i64 %child2intptr to %map*

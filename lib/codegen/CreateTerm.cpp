@@ -108,8 +108,8 @@ static std::string STRING_STRUCT = "string";
 static std::string BLOCK_STRUCT = "block";
 static std::string BLOCKHEADER_STRUCT = "blockheader";
 
-llvm::Type *getValueType(SortCategory sort, llvm::Module *Module) {
-  switch(sort) {
+llvm::Type *getValueType(ValueType sort, llvm::Module *Module) {
+  switch(sort.cat) {
   case SortCategory::Map:
     return Module->getTypeByName(MAP_STRUCT);
   case SortCategory::List:
@@ -125,7 +125,7 @@ llvm::Type *getValueType(SortCategory sort, llvm::Module *Module) {
   case SortCategory::Bool:
     return llvm::Type::getInt1Ty(Module->getContext());
   case SortCategory::MInt:
-    assert(false && "not implemented yet: MInt");
+    return llvm::IntegerType::get(Module->getContext(), sort.bits);
   case SortCategory::Symbol:
     return llvm::PointerType::getUnqual(Module->getTypeByName(BLOCK_STRUCT));
   case SortCategory::Uncomputed:
@@ -186,8 +186,8 @@ llvm::Type *termType(KOREPattern *pattern, llvm::StringMap<llvm::Type *> &substi
   }
 }
 
-llvm::Value *CreateTerm::createToken(SortCategory sort, std::string contents) {
-  switch(sort) {
+llvm::Value *CreateTerm::createToken(ValueType sort, std::string contents) {
+  switch(sort.cat) {
   case SortCategory::Map:
   case SortCategory::List:
   case SortCategory::Set:
@@ -361,7 +361,7 @@ llvm::Value *CreateTerm::createFunctionCall(std::string name, KOREObjectComposit
   for (auto sort : pattern->getConstructor()->getArguments()) {
     auto concreteSort = dynamic_cast<KOREObjectCompositeSort *>(sort);
     llvm::Value *arg = (*this)(pattern->getArguments()[i++]);
-    switch(concreteSort->getCategory(Definition)) {
+    switch(concreteSort->getCategory(Definition).cat) {
     case SortCategory::Map:
     case SortCategory::List:
     case SortCategory::Set: {
@@ -434,10 +434,10 @@ llvm::Value *CreateTerm::operator()(KOREPattern *pattern) {
       llvm::IntToPtrInst *Cast = new llvm::IntToPtrInst(llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), (((uint64_t)symbol->getTag()) << 32) | 1), llvm::PointerType::getUnqual(BlockType), "", CurrentBlock);
       return Cast;
     } else if (symbolDecl->getAttributes().count("sortInjection")
-        && dynamic_cast<KOREObjectCompositeSort *>(symbol->getArguments()[0])->getCategory(Definition) == SortCategory::Symbol) {
+        && dynamic_cast<KOREObjectCompositeSort *>(symbol->getArguments()[0])->getCategory(Definition).cat == SortCategory::Symbol) {
       llvm::Value *val = (*this)(constructor->getArguments()[0]);
       if (llvm::isa<llvm::Argument>(val)) {
-        llvm::Value *Tag = llvm::CallInst::Create(Module->getOrInsertFunction("getTag", llvm::Type::getInt32Ty(Ctx), getValueType(SortCategory::Symbol, Module)), val, "tag", CurrentBlock);
+        llvm::Value *Tag = llvm::CallInst::Create(Module->getOrInsertFunction("getTag", llvm::Type::getInt32Ty(Ctx), getValueType({SortCategory::Symbol, 0}, Module)), val, "tag", CurrentBlock);
         auto inj = Definition->getInjSymbol();
         auto GeBlock = llvm::BasicBlock::Create(Ctx, "geFirst", CurrentBlock->getParent());
         auto FalseBlock = llvm::BasicBlock::Create(Ctx, "notInjection", CurrentBlock->getParent());
