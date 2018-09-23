@@ -24,7 +24,7 @@
 
 # Executables
 *.exe
-*.out
+a.out
 *.app
 
 # Vim stuff
