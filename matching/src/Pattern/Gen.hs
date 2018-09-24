@@ -10,7 +10,7 @@ import           Data.Bits             (shiftL)
 import           Data.Functor.Foldable (Fix (..), para)
 import           Data.List             (transpose)
 import qualified Data.Map              as Map
-import           Data.Maybe            (isJust, fromJust)
+import           Data.Maybe            (maybe, isJust, fromJust)
 import           Data.Text             (unpack)
 import           Data.Tuple.Select     (sel1)
 import           Kore.AST.Common       (Rewrites (..), Sort (..),
@@ -77,8 +77,10 @@ genPattern tools (SymLib _ sorts) rewrite =
                            "false" -> P.Literal "0"
                            _ -> P.Literal str else P.Literal str)
           (if att == Nothing then Just "STRING.String" else att) []
-    rAlgebra (VariablePattern (Variable (Id name _) _)) = Fix $ P.Variable name
-    rAlgebra (AndPattern (And _ p (_,Fix (P.Variable name)))) = Fix $ P.As name $ snd p
+    rAlgebra (VariablePattern (Variable (Id name _) sort)) =
+      let att = getHook $ hook $ sortAttributes tools sort
+      in Fix $ P.Variable name $ maybe "STRING.String" id att
+    rAlgebra (AndPattern (And _ p (_,Fix (P.Variable name hookAtt)))) = Fix $ P.As name hookAtt $ snd p
     rAlgebra pat = error $ show pat
     listPattern :: ListCons
                 -> [Fix P.Pattern]
@@ -88,22 +90,22 @@ genPattern tools (SymLib _ sorts) rewrite =
       Fix (P.ListPattern (hd ++ tl ++ hd') frame tl' c)
     listPattern Concat [Fix (P.ListPattern hd frame tl _), Fix (P.ListPattern hd' Nothing tl' _)] c =
       Fix (P.ListPattern hd frame (tl ++ hd' ++ tl') c)
-    listPattern Concat [Fix (P.ListPattern hd Nothing tl _), p@(Fix (P.Variable _))] c =
+    listPattern Concat [Fix (P.ListPattern hd Nothing tl _), p@(Fix (P.Variable _ _))] c =
       Fix (P.ListPattern (hd ++ tl) (Just p) [] c)
     listPattern Concat [Fix (P.ListPattern hd Nothing tl _), p@(Fix P.Wildcard)] c =
       Fix (P.ListPattern (hd ++ tl) (Just p) [] c)
-    listPattern Concat [p@(Fix (P.Variable _)), Fix (P.ListPattern hd Nothing tl _)] c =
+    listPattern Concat [p@(Fix (P.Variable _ _)), Fix (P.ListPattern hd Nothing tl _)] c =
       Fix (P.ListPattern [] (Just p) (hd ++ tl) c)
     listPattern Concat [p@(Fix P.Wildcard), Fix (P.ListPattern hd Nothing tl _)] c =
       Fix (P.ListPattern [] (Just p) (hd ++ tl) c)
     listPattern Concat [_, Fix (P.ListPattern _ (Just _) _ _)] _ = error "unsupported list pattern"
     listPattern Concat [Fix (P.ListPattern _ (Just _) _ _), _] _ = error "unsupported list pattern"
-    listPattern Concat [Fix (P.As _ _), _] _ = error "unsupported list pattern"
-    listPattern Concat [_, Fix (P.As _ _)] _ = error "unsupported list pattern"
+    listPattern Concat [Fix (P.As _ _ _), _] _ = error "unsupported list pattern"
+    listPattern Concat [_, Fix (P.As _ _ _)] _ = error "unsupported list pattern"
     listPattern Concat [Fix (P.Pattern _ _ _), _] _ = error "unsupported list pattern"
     listPattern Concat [_, Fix (P.Pattern _ _ _)] _ = error "unsupported list pattern"
     listPattern Concat [Fix P.Wildcard, _] _ = error "unsupported list pattern"
-    listPattern Concat [Fix (P.Variable _), _] _ = error "unsupported list pattern"
+    listPattern Concat [Fix (P.Variable _ _), _] _ = error "unsupported list pattern"
     listPattern Concat [] _ = error "unsupported list pattern"
     listPattern Concat (_:[]) _ = error "unsupported list pattern"
     listPattern Concat (_:_:_:_) _ = error "unsupported list pattern"

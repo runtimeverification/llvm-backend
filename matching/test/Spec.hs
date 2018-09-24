@@ -34,13 +34,13 @@ instance IsPattern Lst where
   toPattern (Cns i l) = Fix (Pattern (Literal "cons") Nothing [toPattern i, toPattern l])
   toPattern Nil     = Fix (Pattern (Literal "nil") Nothing  [])
   toPattern Wld     = Fix Wildcard
-  toPattern (Var v) = Fix (Variable v)
+  toPattern (Var v) = Fix (Variable v "STRING.String")
 
 instance IsPattern IntPat where
   toPattern :: IntPat -> Fix Pattern
   toPattern (IntLit i) = Fix (Pattern (Literal $ show i) (Just "MINT.MInt 32") [])
   toPattern IntWld     = Fix Wildcard
-  toPattern (IntVar v) = Fix (Variable v)
+  toPattern (IntVar v) = Fix (Variable v "INT.Int")
 
 instance HasMetadata IntPat where
   getMetadata :: Proxy IntPat -> Metadata
