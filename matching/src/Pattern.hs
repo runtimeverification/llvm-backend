@@ -541,9 +541,8 @@ compilePattern cm =
           if isWildcardRow pm then
             if length ac == 1 then getLeaf ix os (firstRow pm) hd (const failure) else getLeaf ix os (firstRow pm) hd (flip compilePattern' ((ClauseMatrix (notFirstRow pm) tl), os))
           else 
-          let bestCol = maximumBy (comparing (getScore . snd)) (indexed cs)
+          let bestColIx = fst $ maximumBy (comparing (getScore . snd)) $ reverse $ indexed cs
               --if the first column is equal to bestCol then choose it instead so we don't generate a swap
-              bestColIx = if (getScore $ snd bestCol) == (getScore $ head cs) then 0 else fst bestCol
               cs' = swapAt 0 bestColIx cs
               os' = swapAt 0 bestColIx os
               pm' = PatternMatrix cs'
