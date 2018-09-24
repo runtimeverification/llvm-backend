@@ -506,7 +506,8 @@ bool makeFunction(std::string name, KOREPattern *pattern, KOREDefinition *defini
         return false;
       }
       auto cat = sort->getCategory(definition);
-      llvm::Type *paramType = getValueType(cat, Module);
+      llvm::Type *varType = getValueType(cat, Module);
+      llvm::Type *paramType = varType;
       bool load = false;
       switch(cat.cat) {
       case SortCategory::Map:
@@ -519,7 +520,7 @@ bool makeFunction(std::string name, KOREPattern *pattern, KOREDefinition *defini
         break;
       }
       
-      params.insert({entry.first, paramType});
+      params.insert({entry.first, varType});
       paramTypes.push_back(paramType);
       paramNames.push_back(entry.first);
       needsLoad.push_back(load);
