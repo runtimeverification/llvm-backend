@@ -423,7 +423,7 @@ data DecisionTree a = Leaf (Int, [Occurrence])
                     | Fail
                     | Switch Occurrence !(L a)
                     | SwitchLiteral Occurrence Int !(L a)
-                    | EqualLiteral Text Occurrence Text !a
+                    | EqualLiteral Text Occurrence Occurrence Text !a
                     | Swap Index !a
                     | Function Text Occurrence [Occurrence] Text !a  
                     deriving (Show, Eq, Functor, Ord)
@@ -463,9 +463,10 @@ instance Y.ToYaml a => Y.ToYaml (Anchor a) where
       , "bitwidth" Y..= Y.toYaml i
       , "occurrence" Y..= Y.toYaml o
       ]
-    toYaml (Anchor a (EqualLiteral h o l x)) = Y.namedMapping a
+    toYaml (Anchor a (EqualLiteral h o1 o2 l x)) = Y.namedMapping a
       ["hook" Y..= Y.toYaml h
-      , "occurrence" Y..= Y.toYaml o
+      , "occurrence" Y..= Y.toYaml o1
+      , "arg" Y..= Y.toYaml o2
       , "literal" Y..= Y.toYaml l
       , "next" Y..= Y.toYaml x
       ]
@@ -566,7 +567,7 @@ compilePattern cm =
     equalLiteral :: Int -> [Occurrence] -> String -> [(Text, (ClauseMatrix, [Occurrence]))] -> Maybe (ClauseMatrix, [Occurrence]) -> Fix DecisionTree
     equalLiteral o os _ [] (Just d) = Fix $ Switch (head os) L { getSpecializations = [], getDefault = Just $ compilePattern' o d }
     equalLiteral _ _ _ [] (Nothing) = Fix Fail
-    equalLiteral o os hookName ((name,spec):tl) d = Fix $ EqualLiteral (pack hookName) [o, 0] name $ Fix $ SwitchLiteral [o, 0] 1 $ L [("1", Fix $ Switch (head os) L { getSpecializations = [], getDefault = Just $ compilePattern' (o+1) spec }),("0", equalLiteral (o+1) os hookName tl d)] Nothing
+    equalLiteral o os hookName ((name,spec):tl) d = Fix $ EqualLiteral (pack hookName) [o, 0] (head os) name $ Fix $ SwitchLiteral [o, 0] 1 $ L [("1", Fix $ Switch (head os) L { getSpecializations = [], getDefault = Just $ compilePattern' (o+1) spec }),("0", equalLiteral (o+1) os hookName tl d)] Nothing
     listPattern :: Int -> [Occurrence] -> [(Text, (ClauseMatrix, [Occurrence]))] -> Maybe (ClauseMatrix, [Occurrence]) -> [Constructor] -> Column -> Fix DecisionTree
     listPattern o os ls d s c =
       let (cons,matrices) = unzip ls
@@ -609,7 +610,7 @@ shareDt =
                         Fix (Leaf a) -> (addName m, Free (Anchor (Just $ name m) (Leaf a)))
                         Fix Fail -> (m, Free (Anchor Nothing Fail))
                         Fix (Swap i a) -> let (m',child) = mapChild a in (addName m',Free (Anchor (Just $ name m') (Swap i child)))
-                        Fix (EqualLiteral h o l a) -> let (m',child) = mapChild a in (addName m',Free (Anchor (Just $ name m') (EqualLiteral h o l child)))
+                        Fix (EqualLiteral h o1 o2 l a) -> let (m',child) = mapChild a in (addName m',Free (Anchor (Just $ name m') (EqualLiteral h o1 o2 l child)))
                         Fix (Function n o os s a) -> let (m',child) = mapChild a in (addName m', Free (Anchor (Just $ name m') (Function n o os s child)))
                         Fix (Switch o (L s d)) -> let (m',s') = mapSpec m s in let (m'',d') = mapDefault m' d in (addName m'', Free (Anchor (Just $ name m'') (Switch o (L s' d'))))
                         Fix (SwitchLiteral o bw (L s d)) -> let (m',s') = mapSpec m s in let (m'',d') = mapDefault m' d in (addName m'', Free (Anchor (Just $ name m'') (SwitchLiteral o bw (L s' d'))))

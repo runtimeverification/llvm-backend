@@ -8,7 +8,6 @@ namespace kllvm {
 
 class DTPreprocessor {
 private:
-  std::vector<std::string> constructors;
   std::map<std::vector<int>, std::string> occurrences;
   const llvm::StringMap<KOREObjectSymbol *> &syms;
   int counter;
@@ -33,7 +32,6 @@ public:
       : syms(syms), counter(0) {
     for (int i = numSubjects - 1; i >= 0; --i) {
       std::string name = "subject" + std::to_string(i);
-      constructors.push_back(name);
       occurrences[{i+1}] = name;
     }
     dv = KOREObjectSymbol::Create("\\dv");
@@ -41,9 +39,6 @@ public:
 
   DecisionNode *swap(YAML::Node node) {
     int idx = node["swap"][0].as<int>();
-    std::string tmp = constructors[constructors.size() - 1 - idx];
-    constructors[constructors.size() - 1 - idx] = constructors[constructors.size() - 1];
-    constructors[constructors.size() - 1] = tmp;
     auto result = (*this)(node["swap"][1]);
     return result;
   }
@@ -55,7 +50,6 @@ public:
 
     std::string binding = "_" + std::to_string(counter++);
     occurrences[node["occurrence"].as<std::vector<int>>()] = binding;
-    constructors.push_back(binding);
 
     auto child = (*this)(node["next"]); 
 
@@ -75,29 +69,27 @@ public:
   }
 
   DecisionNode *equalsLiteral(YAML::Node node) {
-    std::string binding = constructors.back();
+    std::string binding = occurrences[node["arg"].as<std::vector<int>>()];
     std::string hookName = node["hook"].as<std::string>();
     std::string literal = node["literal"].as<std::string>();
     ValueType cat = KOREObjectCompositeSort::getCategory(hookName);
 
     std::string name = "_" + std::to_string(counter++);
     occurrences[node["occurrence"].as<std::vector<int>>()] = name;
-    constructors.push_back(name);
 
     auto child = (*this)(node["next"]); 
-
+    
     return EqualsLiteralNode::Create(name, binding, cat, literal, child);
   }
 
   DecisionNode *switchCase(Kind kind, YAML::Node node) {
     YAML::Node list = node["specializations"];
-    std::string name = constructors.back();
-    constructors.pop_back();
-    auto result = SwitchNode::Create(name);
     auto occurrence = node["occurrence"].as<std::vector<int>>();
+    std::string name = occurrences[occurrence];
+    auto result = SwitchNode::Create(name);
     for (auto iter = list.begin(); iter != list.end(); ++iter) {
       auto _case = *iter;
-      std::vector<std::string> copy = constructors;
+      auto copy = occurrences;
       std::vector<std::string> bindings;
       KOREObjectSymbol *symbol;
       if (kind == SwitchLiteral) {
@@ -107,16 +99,14 @@ public:
         symbol = syms.lookup(symName);
         for (int i = 0; i < symbol->getArguments().size(); ++i) {
           std::string binding = "_" + std::to_string(counter++);
-          constructors.push_back(binding);
           bindings.push_back(binding);
           auto newOccurrence = occurrence;
           newOccurrence.insert(newOccurrence.begin(), i);
           occurrences[newOccurrence] = binding;
         }
-        std::reverse(constructors.end()-symbol->getArguments().size(), constructors.end());
       }
       DecisionNode *child = (*this)(_case[1]);
-      constructors = copy;
+      occurrences = copy;
       if (kind == SwitchLiteral) {
         unsigned bitwidth = node["bitwidth"].as<unsigned>();
         result->addCase({symbol, {bitwidth, _case[0].as<std::string>(), 10}, child}); 
@@ -126,9 +116,9 @@ public:
     }
     auto _case = node["default"];
     if (!_case.IsNull()) {
-      std::vector<std::string> copy = constructors;
+      auto copy = occurrences;
       DecisionNode *child = (*this)(_case);
-      constructors = copy;
+      occurrences = copy;
       result->addCase({nullptr, std::vector<std::string>{}, child});
     }
     return result;
