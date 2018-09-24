@@ -38,7 +38,6 @@ public:
   }
 
   DecisionNode *swap(YAML::Node node) {
-    int idx = node["swap"][0].as<int>();
     auto result = (*this)(node["swap"][1]);
     return result;
   }
