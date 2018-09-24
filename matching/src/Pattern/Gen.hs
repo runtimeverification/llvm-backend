@@ -163,21 +163,10 @@ genMetadatas syms@(SymLib symbols sorts) indexedMod =
             Just "BOOL.Bool" -> True
             Just "MINT.MInt" -> True
             _                -> False
-          isToken = case hookAtt of
-            Just "STRING.String" -> True
-            Just "INT.Int" -> True
-            Just "FLOAT.Float" -> True
-            Just "BUFFER.StringBuffer" -> True
-            Just "BYTES.Bytes" -> True
-            Just "MINT.MInt" -> True
-            Just _ -> False
-            Nothing -> False
       in if isInt then
         let tools = extractMetadataTools indexedMod
             bw = bitwidth tools sort
-        in Just $ P.Metadata (shiftL 1 bw) (const []) sort (const $ Just [])
-      else if isToken then
-        Just $ defaultMetadata sort
+        in Just $ P.Metadata (shiftL 1 bw) (const []) sort (metaLookup $ const Nothing)
       else
         let metadatas = genMetadatas syms indexedMod
             keys = map P.Symbol constructors
