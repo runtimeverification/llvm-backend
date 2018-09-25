@@ -164,8 +164,10 @@ extern "C" {
     return hook_STRING_rfind(haystack, needle, pos);
   }
 
-  string * makeString(const KCHAR * input) {
-    auto len = strlen(input);
+  string * makeString(const KCHAR * input, ssize_t len = -1) {
+    if (len == -1) {
+      len = strlen(input);
+    }
     auto ret = static_cast<string *>(malloc(sizeof(string) + len));
     for (unsigned i = 0; i < len; ++i) {
       ret->data[i] = input[i];

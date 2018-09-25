@@ -1,5 +1,6 @@
 add_kllvm_unittest(runtime-strings-tests
   stringtest.cpp
+  bytestest.cpp
   main.cpp
 )
 

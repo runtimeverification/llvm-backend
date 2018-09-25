@@ -37,7 +37,7 @@ extern "C" {
   const string * hook_STRING_replace(const string *, const string *, const string *, mpz_t);
   const string * hook_STRING_replaceFirst(const string *, const string *, const string *);
   mpz_ptr hook_STRING_countAllOccurrences(const string *, const string *);
-  string * makeString(const KCHAR *);
+  string * makeString(const KCHAR *, int64_t len = -1);
 
   mpz_ptr move_int(mpz_t i) {
     mpz_ptr result = (mpz_ptr)malloc(sizeof(__mpz_struct));
