@@ -178,15 +178,19 @@ const string * makeString(const KCHAR * input) {
     return ret;
 }
 
-const string * hook_STRING_float2string(const double input) {
-    std::stringstream out;
-    out << std::setprecision(14) << input;
-    return makeString(out.str().c_str());
+const string * hook_STRING_float2string(const mpf_t input) {
+	auto ret = static_cast<string *>(malloc(sizeof(string) + 40 * sizeof(KCHAR)));
+	auto size = gmp_sprintf(&ret->data[0], "%.20Ff", input);
+	ret->b.len = size;
+	return static_cast<string *>(realloc(ret, size * sizeof(KCHAR) + sizeof(string)));
 }
 
-double hook_STRING_string2float(const string * input) {
-    auto si = std::string(input->data, input->b.len);
-    return std::stod(si);
+mpf_ptr hook_STRING_string2float(const string * input) {
+    mpf_t ret;
+	mpf_init_set_str(ret, std::string(input->data, 0, input->b.len).c_str(), 10);
+    mpf_ptr result = static_cast<mpf_ptr>(malloc(sizeof(__mpf_struct)));
+	memcpy(result, ret, sizeof(ret));
+	return result;
 }
 
 const string * hook_STRING_string2token(const string * input) {

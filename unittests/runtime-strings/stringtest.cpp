@@ -2,7 +2,6 @@
 #include<gmp.h>
 #include<cstdint>
 #include<string.h>
-#include<iostream>
 
 #define KCHAR char
 extern "C" {
@@ -31,8 +30,8 @@ extern "C" {
 	mpz_ptr hook_STRING_findChar(const string *, const string *, mpz_ptr);
 	mpz_ptr hook_STRING_rfindChar(const string *, const string *, mpz_ptr);
     const string * makeString(const KCHAR *);
-    const string * hook_STRING_float2string(const double);
-    double hook_STRING_string2float(const string *);
+    const string * hook_STRING_float2string(const mpf_t);
+    mpf_ptr hook_STRING_string2float(const string *);
     const string * hook_STRING_replaceAll(const string *, const string *, const string *);
     const string * hook_STRING_replace(const string *, const string *, const string *, mpz_t);
     const string * hook_STRING_replaceFirst(const string *, const string *, const string *);
@@ -300,11 +299,21 @@ BOOST_AUTO_TEST_CASE(rfind) {
 }
 
 BOOST_AUTO_TEST_CASE(float2string) {
-	BOOST_CHECK_EQUAL(true, hook_STRING_eq(hook_STRING_float2string(3.1415926535898), makeString("3.1415926535898")));
+	mpf_t a;
+	mpf_init_set_d(a, 3.14159265358980022143);
+	BOOST_CHECK_EQUAL(true, hook_STRING_eq(hook_STRING_float2string(a), makeString("3.14159265358980022143")));
 }
 
 BOOST_AUTO_TEST_CASE(string2float) {
-	 BOOST_CHECK_EQUAL(hook_STRING_string2float(makeString("3.14159265")), 3.14159265);
+	mpf_t a;
+	mpf_init_set_d(a, 3.14159265358980022143);
+	mpf_t diff;
+	mpf_init_set_d(diff, 0.00001);
+
+	mpf_t res;
+	mpf_init(res);
+	mpf_sub(res, hook_STRING_string2float(makeString("3.14159265358980022143")), a);
+	BOOST_CHECK_EQUAL(mpf_cmp(res, diff), -1);
 }
 
 BOOST_AUTO_TEST_CASE(replace) {
