@@ -1,4 +1,5 @@
 #include<gmp.h>
+#include<mpfr.h>
 #include<stdlib.h>
 #include<string.h>
 #include<algorithm>
@@ -178,19 +179,12 @@ const string * makeString(const KCHAR * input) {
     return ret;
 }
 
-const string * hook_STRING_float2string(const mpf_t input) {
-	auto ret = static_cast<string *>(malloc(sizeof(string) + 40 * sizeof(KCHAR)));
-	auto size = gmp_sprintf(&ret->data[0], "%.20Ff", input);
-	ret->b.len = size;
-	return static_cast<string *>(realloc(ret, size * sizeof(KCHAR) + sizeof(string)));
+const string * hook_STRING_float2string(const mpfr_t input) {
+  throw std::logic_error("TODO: floats");
 }
 
-mpf_ptr hook_STRING_string2float(const string * input) {
-    mpf_t ret;
-	mpf_init_set_str(ret, std::string(input->data, 0, input->b.len).c_str(), 10);
-    mpf_ptr result = static_cast<mpf_ptr>(malloc(sizeof(__mpf_struct)));
-	memcpy(result, ret, sizeof(ret));
-	return result;
+mpfr_ptr hook_STRING_string2float(const string * input) {
+  throw std::logic_error("TODO: floats");
 }
 
 const string * hook_STRING_string2token(const string * input) {
