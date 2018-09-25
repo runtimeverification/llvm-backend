@@ -5,7 +5,6 @@
 #include<iomanip>
 #include<string>
 #include<sstream>
-#include<iostream>
 
 extern "C" {
 
@@ -150,15 +149,14 @@ const string * hook_STRING_string2token(const string * input) {
 	return input;
 }
 
-// uses std::string for memory allocation, double copy here is not the best, but at least the
-// first copy is released at the end of the function.
-const string * hook_STRING_replaceAll(const string * haystack, const string * needle, const string * replacer) {
+
+inline const string * hook_STRING_replace(const string * haystack, const string * needle, const string * replacer, int64_t occurences) {
 	auto start = &haystack->data[0];
 	auto pos = start;
 	auto end = &haystack->data[haystack->b.len];
 	size_t matches[haystack->b.len];
 	int i = 0;
-	while (true) {
+	while (i < occurences) {
         pos = std::search(pos, end, &needle->data[0], &needle->data[needle->b.len]);
 		if (pos == end) {
 			break;
@@ -187,109 +185,27 @@ const string * hook_STRING_replaceAll(const string * haystack, const string * ne
 	return ret;
 }
 
-// uses std::string for memory allocation, double copy here is not the best, but at least the
-// first copy is released at the end of the function.
-string * hook_STRING_replace(const string * input, const string * matcher, const string * replacer, int64_t occurences) {
-	std::string ret;
-	auto rs = std::string(replacer->data, replacer->b.len);
-	for (auto i = 0; i < input->b.len;) {
-		if (occurences == 0) {
-			ret.push_back(input->data[i]);
-			++i;
-			continue;
-		}
-		if (input->data[i] == matcher->data[0]) {
-			auto found = false;
-			for (auto j = 0; j < matcher->b.len; ++j) {
-				if (i+j >= input->b.len) {
-					found = false;
-					break;
-				}
-				if  (input->data[i+j] != matcher->data[j]) {
-					found = false;
-					break;
-				}
-				found = true;
-			}
-			if (found) {
-				ret += rs;
-				i += matcher->b.len;
-				--occurences;
-			} else {
-				ret.push_back(input->data[i]);
-				++i;
-			}
-		} else {
-			ret.push_back(input->data[i]);
-			++i;
-		}
-	}
-	return makeString(ret.c_str());
+const string * hook_STRING_replaceAll(const string * haystack, const string * needle, const string * replacer) {
+	// It's guaranteed that there can be no more replacements than the length of the haystack, so this
+	// gives us the functionality of replaceAll.
+	return hook_STRING_replace(haystack, needle, replacer, haystack->b.len);
 }
 
-// uses std::string for memory allocation, double copy here is not the best, but at least the
-// first copy is released at the end of the function.
-string * hook_STRING_replaceFirst(const string * input, const string * matcher, const string * replacer) {
-	std::string ret;
-	auto rs = std::string(replacer->data, replacer->b.len);
-	auto replaced = false;
-	for (auto i = 0; i < input->b.len;) {
-		if (replaced) {
-			ret.push_back(input->data[i]);
-			++i;
-			continue;
-		}
-		if (input->data[i] == matcher->data[0]) {
-			auto found = false;
-			for (auto j = 0; j < matcher->b.len; ++j) {
-				if (i+j >= input->b.len) {
-					found = false;
-					break;
-				}
-				if  (input->data[i+j] != matcher->data[j]) {
-					found = false;
-					break;
-				}
-				found = true;
-			}
-			if (found) {
-				ret += rs;
-				i += matcher->b.len;
-				replaced = true;
-			} else {
-				ret.push_back(input->data[i]);
-				++i;
-			}
-		} else {
-			ret.push_back(input->data[i]);
-			++i;
-		}
-	}
-	return makeString(ret.c_str());
+const string * hook_STRING_replaceFirst(const string * haystack, const string * needle, const string * replacer) {
+	return hook_STRING_replace(haystack, needle, replacer, 1);
 }
 
-int64_t hook_STRING_countAllOccurences(const string * input, const string * matcher) {
-	int64_t ret = 0;
-	for (auto i = 0; i < input->b.len; ++i) {
-		if (input->data[i] == matcher->data[0]) {
-			auto found = false;
-			for (auto j = 0; j < matcher->b.len; ++j) {
-				if (i+j >= input->b.len) {
-					found = false;
-					break;
-				}
-				if  (input->data[i+j] != matcher->data[j]) {
-					found = false;
-					break;
-				}
-				found = true;
-			}
-			if (found) {
-				++ret;
-			}
+int64_t hook_STRING_countAllOccurences(const string * haystack, const string * needle) {
+	auto pos = &haystack->data[0];
+	auto end = &haystack->data[haystack->b.len];
+	int i = 0;
+	while (true) {
+        pos = std::search(pos, end, &needle->data[0], &needle->data[needle->b.len]);
+		if (pos == end) {
+			break;
 		}
+		++pos; ++i;
 	}
-	return ret;
+	return i;
 }
-
 }
