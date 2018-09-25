@@ -228,7 +228,7 @@ mDefault (cm@(ClauseMatrix (PatternMatrix (c : _)) _),o : os) =
   let (Metadata mtd _ _ _) = getMetadata c
       s₁ = sigma c
   in  if null s₁ || (toInteger $ length s₁) /= mtd
-      then Just ((stripFirstColumn (filterMatrix Nothing isNotPattern (cm,o))),os)
+      then Just ((stripFirstColumn (filterMatrix Nothing isDefault (cm,o))),os)
       else Nothing
 mDefault _ = Nothing
 
@@ -249,11 +249,11 @@ filterByList (True  : bs) (x : xs) = x : filterByList bs xs
 filterByList (False : bs) (_ : xs) = filterByList bs xs
 filterByList _ _                   = []
 
-isNotPattern :: Fix Pattern -> Bool
-isNotPattern (Fix (Pattern _ _ _)) = False
-isNotPattern (Fix (As _ pat)) = isNotPattern pat
-isNotPattern (Fix Wildcard) = True
-isNotPattern (Fix (Variable _)) = True
+isDefault :: Fix Pattern -> Bool
+isDefault (Fix (Pattern _ _ _)) = False
+isDefault (Fix (As _ pat)) = isDefault pat
+isDefault (Fix Wildcard) = True
+isDefault (Fix (Variable _)) = True
 
 checkPatternIndex :: Constructor -> Metadata -> Fix Pattern -> Bool
 checkPatternIndex _ _ (Fix Wildcard) = True
