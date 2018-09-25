@@ -54,7 +54,7 @@ extern "C" {
     return (res != 0 || a->b.len != b->b.len);
   }
 
-  const string * hook_STRING_concat(const string * a, const string * b) {
+  string * hook_STRING_concat(string * a, string * b) {
     auto len_a = a->b.len;
     auto len_b = b->b.len;
     auto newlen = len_a  + len_b;
@@ -65,7 +65,7 @@ extern "C" {
     return ret;
   }
 
-  mpz_ptr hook_STRING_length(const string * a) {
+  mpz_ptr hook_STRING_length(string * a) {
     mpz_t result;
     mpz_init_set_ui(result, a->b.len);
     return move_int(result);
@@ -165,7 +165,7 @@ extern "C" {
     return hook_STRING_rfind(haystack, needle, pos);
   }
 
-  const string * makeString(const KCHAR * input) {
+  string * makeString(const KCHAR * input) {
     auto len = strlen(input);
     auto ret = static_cast<string *>(malloc(sizeof(string) + len));
     for (unsigned i = 0; i < len; ++i) {

@@ -25,17 +25,16 @@ extern "C" {
   mpz_ptr hook_STRING_length(const string *);
   const string * hook_STRING_chr(const mpz_t);
   mpz_ptr hook_STRING_ord(const string *);
-  const string * hook_STRING_substr(const string *, const int64_t, int64_t);
+  string * hook_STRING_substr(string *, mpz_t, mpz_t);
   mpz_ptr hook_STRING_find(const string *, const string *, mpz_ptr);
   mpz_ptr hook_STRING_rfind(const string *, const string *, mpz_ptr);
   mpz_ptr hook_STRING_findChar(const string *, const string *, mpz_ptr);
   mpz_ptr hook_STRING_rfindChar(const string *, const string *, mpz_ptr);
-  const string * makeString(const KCHAR *);
   const string * hook_STRING_replaceAll(const string *, const string *, const string *);
   const string * hook_STRING_replace(const string *, const string *, const string *, mpz_t);
   const string * hook_STRING_replaceFirst(const string *, const string *, const string *);
   mpz_ptr hook_STRING_countAllOccurences(const string *, const string *);
-  const string * makeString(const KCHAR *);
+  string * makeString(const KCHAR *);
 
   mpz_ptr move_int(mpz_t i) {
     mpz_ptr result = (mpz_ptr)malloc(sizeof(__mpz_struct));
