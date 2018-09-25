@@ -233,12 +233,11 @@ BOOST_AUTO_TEST_CASE(length) {
 
 BOOST_AUTO_TEST_CASE(ord) {
 	mpz_ptr result = hook_STRING_ord(makeString("A"));
-    BOOST_CHECK_EQUAL(mpz_cmp_ui(result, 65), 0);
+  BOOST_CHECK_EQUAL(mpz_cmp_ui(result, 65), 0);
 	result = hook_STRING_ord(makeString(" "));
-    BOOST_CHECK_EQUAL(mpz_cmp_ui(result, 32), 0);
+  BOOST_CHECK_EQUAL(mpz_cmp_ui(result, 32), 0);
 	BOOST_CHECK_THROW(hook_STRING_ord(makeString("")), std::invalid_argument);
-	result = hook_STRING_ord(makeString("AA"));
-    BOOST_CHECK_EQUAL(mpz_cmp_ui(result, 65), 0);
+	BOOST_CHECK_THROW(hook_STRING_ord(makeString("AA")), std::invalid_argument);
 }
 
 BOOST_AUTO_TEST_CASE(substr) {

@@ -87,7 +87,7 @@ const string * hook_STRING_chr(mpz_t ord) {
 
 const mpz_ptr hook_STRING_ord(const string * input) {
     mpz_t result;
-    if (input->b.len < 1) {
+    if (input->b.len != 1) {
         throw std::invalid_argument("Input must not be an empty string");
     }
     mpz_init_set_ui(result, static_cast<uint64_t>(input->data[0]));
