@@ -5,6 +5,7 @@
 #include<iomanip>
 #include<string>
 #include<sstream>
+#include<iostream>
 
 extern "C" {
 
@@ -151,36 +152,39 @@ const string * hook_STRING_string2token(const string * input) {
 
 // uses std::string for memory allocation, double copy here is not the best, but at least the
 // first copy is released at the end of the function.
-string * hook_STRING_replaceAll(const string * input, const string * matcher, const string * replacer) {
-	std::string ret;
-	auto rs = std::string(replacer->data, replacer->b.len);
-	for (auto i = 0; i < input->b.len;) {
-		if (input->data[i] == matcher->data[0]) {
-			auto found = false;
-			for (auto j = 0; j < matcher->b.len; ++j) {
-				if (i+j >= input->b.len) {
-					found = false;
-					break;
-				}
-				if  (input->data[i+j] != matcher->data[j]) {
-					found = false;
-					break;
-				}
-				found = true;
-			}
-			if (found) {
-				ret += rs;
-				i += matcher->b.len;
-			} else {
-				ret.push_back(input->data[i]);
-				++i;
-			}
+const string * hook_STRING_replaceAll(const string * haystack, const string * needle, const string * replacer) {
+	auto start = &haystack->data[0];
+	auto pos = start;
+	auto end = &haystack->data[haystack->b.len];
+	size_t matches[haystack->b.len];
+	int i = 0;
+	while (true) {
+        pos = std::search(pos, end, &needle->data[0], &needle->data[needle->b.len]);
+		if (pos == end) {
+			break;
+		}
+		matches[i] = (pos - start);
+		++pos; ++i;
+	}
+	if ( i == 0 ) {
+		return haystack;
+	}
+	auto diff = needle->b.len - replacer->b.len;
+	size_t new_len = haystack->b.len - i * diff;
+	auto ret = static_cast<string *>(malloc(sizeof(string) + new_len * sizeof(KCHAR)));
+	ret->b.len = new_len;
+	int m = 0;
+	for (size_t r = 0, h = 0; r < new_len;) {
+		if (r < matches[m] - (diff * m) || m >= i) {
+			ret->data[r++] = haystack->data[h++];
 		} else {
-			ret.push_back(input->data[i]);
-			++i;
+			++m;
+			memcpy(&ret->data[r], replacer->data, replacer->b.len);
+			r+=replacer->b.len;
+			h+=needle->b.len;
 		}
 	}
-	return makeString(ret.c_str());
+	return ret;
 }
 
 // uses std::string for memory allocation, double copy here is not the best, but at least the
