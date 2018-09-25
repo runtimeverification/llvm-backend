@@ -29,7 +29,7 @@ extern "C" {
     return res > 0 || (res == 0 && a->b.len > b->b.len);
   }
 
-  bool hook_STRING_gte(const string * a, const string * b) {
+  bool hook_STRING_ge(const string * a, const string * b) {
     auto res = memcmp(a->data, b->data, std::min(a->b.len, b->b.len));
     return (res > 0 || (res == 0 && a->b.len >= b->b.len));
   }
@@ -39,7 +39,7 @@ extern "C" {
     return res < 0 || (res == 0 && a->b.len < b->b.len);
   }
 
-  bool hook_STRING_lte(const string * a, const string * b) {
+  bool hook_STRING_le(const string * a, const string * b) {
     auto res = memcmp(a->data, b->data, std::min(a->b.len, b->b.len));
     return (res < 0 || (res == 0 && a->b.len <= b->b.len));
   }
@@ -182,6 +182,36 @@ extern "C" {
     return ret;
   }
 
+  const string * hook_STRING_int2string(const mpz_t input) {
+    size_t len = mpz_sizeinbase(input, 10) + 2;
+    // +1 for null terminator needed by mpz_get_str
+    auto result = static_cast<string *>(malloc(sizeof(string) + len));
+    mpz_get_str(result->data, 10, input);
+    result->b.len = strlen(result->data);
+    return result;
+  }
+
+  const mpz_ptr hook_STRING_string2base_long(const string *input, uint64_t base) {
+    mpz_t result;
+    auto copy = static_cast<char *>(malloc(input->b.len + 1));
+    memcpy(copy, input->data, input->b.len);
+    copy[input->b.len] = 0;
+    if (mpz_init_set_str(result, copy, base)) {
+      throw std::invalid_argument("Not a valid integer");
+    }
+    free(copy);
+    return move_int(result);
+  }
+
+  const mpz_ptr hook_STRING_string2int(const string *input) {
+    return hook_STRING_string2base_long(input, 10);
+  }
+
+  const mpz_ptr hook_STRING_string2base(const string *input, mpz_t base) {
+    uint64_t ubase = gs(base);
+    return hook_STRING_string2base_long(input, ubase);
+  }
+
   const string * hook_STRING_float2string(const mpfr_t input) {
     throw std::logic_error("TODO: floats");
   }
@@ -191,6 +221,10 @@ extern "C" {
   }
 
   const string * hook_STRING_string2token(const string * input) {
+    return input;
+  }
+
+  const string * hook_STRING_token2string(const string * input) {
     return input;
   }
 
@@ -244,7 +278,7 @@ extern "C" {
     return hook_STRING_replace(haystack, needle, replacer, arg);
   }
 
-  mpz_ptr hook_STRING_countAllOccurences(const string * haystack, const string * needle) {
+  mpz_ptr hook_STRING_countAllOccurrences(const string * haystack, const string * needle) {
     auto pos = &haystack->data[0];
     auto end = &haystack->data[haystack->b.len];
     int i = 0;
