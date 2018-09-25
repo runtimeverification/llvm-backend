@@ -1,7 +1,8 @@
-#include <boost/test/unit_test.hpp>
-#include <cstdint>
-#include <string.h>
-#include <iostream>
+#include<boost/test/unit_test.hpp>
+#include<gmp.h>
+#include<cstdint>
+#include<string.h>
+#include<iostream>
 
 #define KCHAR char
 extern "C" {
@@ -20,23 +21,23 @@ extern "C" {
 	bool hook_STRING_lte(const string *, const string *);
 	bool hook_STRING_eq(const string *, const string *);
 	bool hook_STRING_ne(const string *, const string *);
-	string * hook_STRING_concat(const string *, const string *);
-	int64_t hook_STRING_length(const string *);
-	string * hook_STRING_chr(const int64_t);
-	int64_t hook_STRING_ord(const string *);
-	string * hook_STRING_substr(const string *, const int64_t, int64_t);
-	int64_t hook_STRING_find(const string *, const string *, int64_t);
-	int64_t hook_STRING_rfind(const string *, const string *, int64_t);
-	int64_t hook_STRING_findChar(const string *, const string *, int64_t);
-	int64_t hook_STRING_rfindChar(const string *, const string *, int64_t);
-	string * makeString(const KCHAR *);
-    string * hook_STRING_float2string(const double);
+    const string * hook_STRING_concat(const string *, const string *);
+	mpz_ptr hook_STRING_length(const string *);
+    const string * hook_STRING_chr(const mpz_t);
+	mpz_ptr hook_STRING_ord(const string *);
+    const string * hook_STRING_substr(const string *, const int64_t, int64_t);
+	mpz_ptr hook_STRING_find(const string *, const string *, mpz_ptr);
+	mpz_ptr hook_STRING_rfind(const string *, const string *, mpz_ptr);
+	mpz_ptr hook_STRING_findChar(const string *, const string *, mpz_ptr);
+	mpz_ptr hook_STRING_rfindChar(const string *, const string *, mpz_ptr);
+    const string * makeString(const KCHAR *);
+    const string * hook_STRING_float2string(const double);
     double hook_STRING_string2float(const string *);
-	string * hook_STRING_replaceAll(const string *, const string *, const string *);
-	string * hook_STRING_replace(const string *, const string *, const string *, int64_t);
-	string * hook_STRING_replaceFirst(const string *, const string *, const string *);
-	int64_t hook_STRING_countAllOccurences(const string *, const string *);
-	string * makeString(const KCHAR *);
+    const string * hook_STRING_replaceAll(const string *, const string *, const string *);
+    const string * hook_STRING_replace(const string *, const string *, const string *, int64_t);
+    const string * hook_STRING_replaceFirst(const string *, const string *, const string *);
+	mpz_ptr hook_STRING_countAllOccurences(const string *, const string *);
+    const string * makeString(const KCHAR *);
 }
 
 BOOST_AUTO_TEST_SUITE(StringTest)
@@ -205,9 +206,14 @@ BOOST_AUTO_TEST_CASE(concat) {
     BOOST_CHECK_EQUAL(catAll->b.len, expected->b.len);
 }
 
+
 BOOST_AUTO_TEST_CASE(chr) {
-    string * A = hook_STRING_chr(65);
-    string * space = hook_STRING_chr(32);
+	mpz_t a, b;
+	mpz_init_set_ui(a, 65);
+	mpz_init_set_ui(b, 32);
+
+    const string * A = hook_STRING_chr(a);
+    const string * space = hook_STRING_chr(b);
 
     BOOST_CHECK_EQUAL(A->data[0], 'A');
     BOOST_CHECK_EQUAL(A->b.len, 1);
@@ -215,14 +221,20 @@ BOOST_AUTO_TEST_CASE(chr) {
     BOOST_CHECK_EQUAL(space->b.len, 1);
 }
 
-BOOST_AUTO_TEST_CASE(ord) {
-    string * A = hook_STRING_chr(65);
-    string * space = hook_STRING_chr(32);
+BOOST_AUTO_TEST_CASE(length) {
+	BOOST_CHECK_EQUAL(mpz_cmp_ui(hook_STRING_length(makeString("hello")), 5), 0);
+	BOOST_CHECK_EQUAL(mpz_cmp_ui(hook_STRING_length(makeString("")), 0), 0);
+	BOOST_CHECK_EQUAL(mpz_cmp_ui(hook_STRING_length(makeString("worl")), 4), 0);
+}
 
-    BOOST_CHECK_EQUAL(hook_STRING_ord(A), 65);
-    BOOST_CHECK_EQUAL(hook_STRING_ord(space), 32);
-    BOOST_CHECK_EQUAL(hook_STRING_ord(makeString("")), -1);
-    BOOST_CHECK_EQUAL(hook_STRING_ord(makeString("AA")), 65);
+BOOST_AUTO_TEST_CASE(ord) {
+	mpz_ptr result = hook_STRING_ord(makeString("A"));
+    BOOST_CHECK_EQUAL(mpz_cmp_ui(result, 65), 0);
+	result = hook_STRING_ord(makeString(" "));
+    BOOST_CHECK_EQUAL(mpz_cmp_ui(result, 32), 0);
+	BOOST_CHECK_THROW(hook_STRING_ord(makeString("")), std::invalid_argument);
+	result = hook_STRING_ord(makeString("AA"));
+    BOOST_CHECK_EQUAL(mpz_cmp_ui(result, 65), 0);
 }
 
 BOOST_AUTO_TEST_CASE(substr) {
@@ -242,31 +254,49 @@ BOOST_AUTO_TEST_CASE(substr) {
 BOOST_AUTO_TEST_CASE(find) {
     auto haystack = makeString("hellollo");
     auto needle = makeString("llo");
-	auto c = makeString("hf");
+	auto needle2 = makeString("hf");
 
-    BOOST_CHECK_EQUAL(hook_STRING_find(haystack, needle, 0), 2);
-    BOOST_CHECK_EQUAL(hook_STRING_find(haystack, needle, 1), 2);
-    BOOST_CHECK_EQUAL(hook_STRING_find(haystack, needle, 2), 2);
-    BOOST_CHECK_EQUAL(hook_STRING_find(haystack, needle, 3), 5);
-    BOOST_CHECK_EQUAL(hook_STRING_find(haystack, needle, 4), 5);
-    BOOST_CHECK_EQUAL(hook_STRING_find(haystack, needle, 5), 5);
-    BOOST_CHECK_EQUAL(hook_STRING_find(haystack, needle, 6), -1);
-    BOOST_CHECK_EQUAL(hook_STRING_find(haystack, c, 3), -1);
+	mpz_t a, b, c, d, e, f, g;
+	mpz_init_set_si(a, 0);
+	mpz_init_set_si(b, 1);
+	mpz_init_set_si(c, 2);
+	mpz_init_set_si(d, 3);
+	mpz_init_set_si(e, 4);
+	mpz_init_set_si(f, 5);
+	mpz_init_set_si(g, 6);
+
+    BOOST_CHECK_EQUAL(mpz_cmp_si(hook_STRING_find(haystack, needle, a), 2), 0);
+    BOOST_CHECK_EQUAL(mpz_cmp_si(hook_STRING_find(haystack, needle, b), 2), 0);
+    BOOST_CHECK_EQUAL(mpz_cmp_si(hook_STRING_find(haystack, needle, c), 2), 0);
+    BOOST_CHECK_EQUAL(mpz_cmp_si(hook_STRING_find(haystack, needle, d), 5), 0);
+    BOOST_CHECK_EQUAL(mpz_cmp_si(hook_STRING_find(haystack, needle, e), 5), 0);
+    BOOST_CHECK_EQUAL(mpz_cmp_si(hook_STRING_find(haystack, needle, f), 5), 0);
+    BOOST_CHECK_EQUAL(mpz_cmp_si(hook_STRING_find(haystack, needle, g), -1), 0);
+    BOOST_CHECK_EQUAL(mpz_cmp_si(hook_STRING_find(haystack, needle2, d), -1), 0);
 }
 
 BOOST_AUTO_TEST_CASE(rfind) {
     auto haystack = makeString("hellollo");
     auto needle = makeString("llo");
-	auto c = makeString("hf");
+	auto needle2 = makeString("hf");
 
-	BOOST_CHECK_EQUAL(hook_STRING_rfind(haystack, needle, 0), -1);
-    BOOST_CHECK_EQUAL(hook_STRING_rfind(haystack, needle, 1), -1);
-    BOOST_CHECK_EQUAL(hook_STRING_rfind(haystack, needle, 2), 2);
-    BOOST_CHECK_EQUAL(hook_STRING_rfind(haystack, needle, 3), 2);
-    BOOST_CHECK_EQUAL(hook_STRING_rfind(haystack, needle, 4), 2);
-    BOOST_CHECK_EQUAL(hook_STRING_rfind(haystack, needle, 5), 5);
-    BOOST_CHECK_EQUAL(hook_STRING_rfind(haystack, needle, 6), 5);
-    BOOST_CHECK_EQUAL(hook_STRING_rfind(haystack, c, 6), -1);
+	mpz_t a, b, c, d, e, f, g;
+	mpz_init_set_si(a, 0);
+	mpz_init_set_si(b, 1);
+	mpz_init_set_si(c, 2);
+	mpz_init_set_si(d, 3);
+	mpz_init_set_si(e, 4);
+	mpz_init_set_si(f, 5);
+	mpz_init_set_si(g, 6);
+
+	BOOST_CHECK_EQUAL(mpz_cmp_si(hook_STRING_rfind(haystack, needle, a), -1), 0);
+    BOOST_CHECK_EQUAL(mpz_cmp_si(hook_STRING_rfind(haystack, needle, b), -1), 0);
+    BOOST_CHECK_EQUAL(mpz_cmp_si(hook_STRING_rfind(haystack, needle, c), 2), 0);
+    BOOST_CHECK_EQUAL(mpz_cmp_si(hook_STRING_rfind(haystack, needle, d), 2), 0);
+    BOOST_CHECK_EQUAL(mpz_cmp_si(hook_STRING_rfind(haystack, needle, e), 2), 0);
+    BOOST_CHECK_EQUAL(mpz_cmp_si(hook_STRING_rfind(haystack, needle, f), 5), 0);
+    BOOST_CHECK_EQUAL(mpz_cmp_si(hook_STRING_rfind(haystack, needle, g), 5), 0);
+    BOOST_CHECK_EQUAL(mpz_cmp_si(hook_STRING_rfind(haystack, needle2, d), -1), 0);
 }
 
 BOOST_AUTO_TEST_CASE(float2string) {
@@ -308,8 +338,15 @@ BOOST_AUTO_TEST_CASE(replace) {
 BOOST_AUTO_TEST_CASE(countAllOccurences) {
     auto replacee = makeString("hello world hello world hello world he worl");
     auto matcher = makeString("hello");
+    BOOST_CHECK_EQUAL(mpz_cmp_ui(hook_STRING_countAllOccurences(replacee, matcher), 3), 0);
 
-    BOOST_CHECK_EQUAL(hook_STRING_countAllOccurences(replacee, matcher), 3);
+    replacee = makeString("hel world hel world heo world he worl");
+    matcher = makeString("hello");
+    BOOST_CHECK_EQUAL(mpz_cmp_ui(hook_STRING_countAllOccurences(replacee, matcher), 0), 0);
+
+    replacee = makeString("hel world hel world hello world he worl");
+    matcher = makeString("hello");
+    BOOST_CHECK_EQUAL(mpz_cmp_ui(hook_STRING_countAllOccurences(replacee, matcher), 1), 0);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
