@@ -2,7 +2,7 @@
 #include<gmp.h>
 #include<mpfr.h>
 #include<cstdint>
-#include<string.h>
+#include<cstring>
 
 #define KCHAR char
 extern "C" {

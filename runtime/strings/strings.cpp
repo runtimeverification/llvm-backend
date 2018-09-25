@@ -1,7 +1,7 @@
 #include<gmp.h>
 #include<mpfr.h>
-#include<stdlib.h>
-#include<string.h>
+#include<cstdlib>
+#include<cstring>
 #include<algorithm>
 #include<cstdint>
 #include<iomanip>
