@@ -13,12 +13,6 @@ extern "C" {
 
 #define KCHAR char
 
-static inline mpz_ptr move_int(__mpz_struct i) {
-    mpz_ptr result = static_cast<mpz_ptr>(malloc(sizeof(__mpz_struct)));
-    *result = i;
-    return result;
-}
-
 struct blockheader {
     int64_t len;
 };
@@ -27,6 +21,8 @@ struct string {
     blockheader b;
     KCHAR data[0];
 };
+
+mpz_ptr move_int(mpz_t);
 
 bool hook_STRING_gt(const string * a, const string * b) {
     auto res = memcmp(a->data, b->data, std::min(a->b.len, b->b.len));
@@ -72,7 +68,7 @@ const string * hook_STRING_concat(const string * a, const string * b) {
 mpz_ptr hook_STRING_length(const string * a) {
     mpz_t result;
     mpz_init_set_ui(result, a->b.len);
-    return move_int(*result);
+    return move_int(result);
 }
 
 const string * hook_STRING_chr(mpz_t ord) {
@@ -95,7 +91,7 @@ const mpz_ptr hook_STRING_ord(const string * input) {
         throw std::invalid_argument("Input must not be an empty string");
     }
     mpz_init_set_ui(result, static_cast<uint64_t>(input->data[0]));
-    return move_int(*result);
+    return move_int(result);
 }
 
 // -1 means take the entire rest of the string.
@@ -120,7 +116,7 @@ mpz_ptr hook_STRING_find(const string * haystack, const string * needle, mpz_t p
     int64_t upos = gs(pos);
     if (upos >= haystack->b.len) {
         mpz_init_set_si(result, -1);
-        return move_int(*result);
+        return move_int(result);
     }
     auto out = std::search(haystack->data + upos * sizeof(KCHAR), haystack->data + haystack->b.len * sizeof(KCHAR),
                            needle->data,   needle->data   + needle->b.len * sizeof(KCHAR));
@@ -128,7 +124,7 @@ mpz_ptr hook_STRING_find(const string * haystack, const string * needle, mpz_t p
     // search returns the end of the range if it is not found, but we want -1 in such a case.
     auto res = (ret < haystack->b.len)?ret:-1;
     mpz_init_set_si(result, res);
-    return move_int(*result);
+    return move_int(result);
 }
 
 mpz_ptr hook_STRING_rfind(const string * haystack, const string * needle, mpz_t pos) {
@@ -140,7 +136,7 @@ mpz_ptr hook_STRING_rfind(const string * haystack, const string * needle, mpz_t 
     upos += needle->b.len;
     if (upos <= needle->b.len) {
         mpz_init_set_si(result, -1);
-        return move_int(*result);
+        return move_int(result);
     }
     auto end = (upos < haystack->b.len)?upos:haystack->b.len;
     auto out = std::find_end(&haystack->data[0], &haystack->data[end],
@@ -148,14 +144,14 @@ mpz_ptr hook_STRING_rfind(const string * haystack, const string * needle, mpz_t 
     auto ret = &*out - &haystack->data[0];
     auto res = (ret < end)?ret:-1;
 	mpz_init_set_si(result, res);
-	return move_int(*result);
+	return move_int(result);
 }
 
 mpz_ptr hook_STRING_findChar(const string * haystack, const string * needle, mpz_t pos) {
     if (needle->b.len > 1) {
 		mpz_t result;
         mpz_init_set_si(result, -1);
-        return move_int(*result);
+        return move_int(result);
     }
     return hook_STRING_find(haystack, needle, pos);
 }
@@ -164,7 +160,7 @@ mpz_ptr hook_STRING_rfindChar(const string * haystack, const string * needle, mp
     if (needle->b.len > 1) {
 		mpz_t result;
         mpz_init_set_si(result, -1);
-        return move_int(*result);
+        return move_int(result);
     }
     return hook_STRING_rfind(haystack, needle, pos);
 }
@@ -254,6 +250,6 @@ mpz_ptr hook_STRING_countAllOccurences(const string * haystack, const string * n
     }
     mpz_t result;
     mpz_init_set_ui(result, i);
-    return move_int(*result);
+    return move_int(result);
 }
 }

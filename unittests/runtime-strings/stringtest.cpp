@@ -36,6 +36,12 @@ extern "C" {
     const string * hook_STRING_replaceFirst(const string *, const string *, const string *);
 	mpz_ptr hook_STRING_countAllOccurences(const string *, const string *);
     const string * makeString(const KCHAR *);
+
+  mpz_ptr move_int(mpz_t i) {
+    mpz_ptr result = (mpz_ptr)malloc(sizeof(__mpz_struct));
+    *result = *i;
+    return result;
+  }
 }
 
 BOOST_AUTO_TEST_SUITE(StringTest)
