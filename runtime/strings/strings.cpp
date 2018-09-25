@@ -104,16 +104,16 @@ extern "C" {
     return ret;
   }
 
-  static inline int64_t gs(mpz_t i) {
+  static inline uint64_t gs(mpz_t i) {
     if (!mpz_fits_ulong_p(i)) {
       throw std::invalid_argument("Arg too large for int64_t");
     }
-    return mpz_get_si(i);
+    return mpz_get_ui(i);
   }
 
   mpz_ptr hook_STRING_find(const string * haystack, const string * needle, mpz_t pos) {
     mpz_t result;
-    int64_t upos = gs(pos);
+    uint64_t upos = gs(pos);
     if (upos >= haystack->b.len) {
       mpz_init_set_si(result, -1);
       return move_int(result);
@@ -132,7 +132,7 @@ extern "C" {
     // the match can _start_, which means the end of the haystack needs to be upos + len(needle),
     // or the end of the haystack, if that's less.
     mpz_t result;
-    int64_t upos = gs(pos);
+    uint64_t upos = gs(pos);
     upos += needle->b.len;
     if (upos <= needle->b.len) {
       mpz_init_set_si(result, -1);
@@ -188,7 +188,7 @@ extern "C" {
   }
 
   inline const string * hook_STRING_replace(const string * haystack, const string * needle, const string * replacer, mpz_t occurences) {
-    int64_t uoccurences = gs(occurences);
+    uint64_t uoccurences = gs(occurences);
     auto start = &haystack->data[0];
     auto pos = start;
     auto end = &haystack->data[haystack->b.len];
