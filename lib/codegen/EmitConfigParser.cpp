@@ -60,6 +60,7 @@ static void emitGetTagForSymbolName(KOREDefinition *definition, llvm::Module *mo
 static std::string BLOCKHEADER_STRUCT = "blockheader";
 static std::string INT_STRUCT = "mpz";
 static std::string STRING_STRUCT = "string";
+static std::string BUFFER_STRUCT = "stringbuffer";
 static std::string LAYOUT_STRUCT = "layout";
 static std::string LAYOUTITEM_STRUCT = "layoutitem";
 
@@ -483,6 +484,10 @@ static void getVisitor(KOREDefinition *definition, llvm::Module *module, KOREObj
     llvm::Constant *CharPtr = llvm::ConstantExpr::getInBoundsGetElementPtr(Str->getType(), global, indices);
     switch(cat) {
     case SortCategory::StringBuffer:
+      Child = llvm::GetElementPtrInst::Create(
+          module->getTypeByName(BUFFER_STRUCT),
+          Child, {zero, llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), 1)},
+          "", CaseBlock);
       Child = new llvm::LoadInst(Child, "", CaseBlock);
       Child = new llvm::BitCastInst(Child, getValueType(SortCategory::Symbol, module), "", CaseBlock);
       // fall through
