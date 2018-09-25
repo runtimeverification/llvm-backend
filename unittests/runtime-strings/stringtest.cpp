@@ -7,7 +7,7 @@
 #define KCHAR char
 extern "C" {
   struct blockheader {
-    int64_t len;
+    uint64_t len;
   };
 
   struct string {
