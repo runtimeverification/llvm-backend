@@ -34,7 +34,7 @@ extern "C" {
     const string * hook_STRING_float2string(const double);
     double hook_STRING_string2float(const string *);
     const string * hook_STRING_replaceAll(const string *, const string *, const string *);
-    const string * hook_STRING_replace(const string *, const string *, const string *, int64_t);
+    const string * hook_STRING_replace(const string *, const string *, const string *, mpz_t);
     const string * hook_STRING_replaceFirst(const string *, const string *, const string *);
 	mpz_ptr hook_STRING_countAllOccurences(const string *, const string *);
     const string * makeString(const KCHAR *);
@@ -312,23 +312,30 @@ BOOST_AUTO_TEST_CASE(replace) {
     auto matcher = makeString("hello");
     auto replacer = makeString("goodbye");
 
+	mpz_t a, b, c, d, e;
+	mpz_init_set_si(a, 0);
+	mpz_init_set_si(b, 1);
+	mpz_init_set_si(c, 2);
+	mpz_init_set_si(d, 3);
+	mpz_init_set_si(e, 4);
+
 	BOOST_CHECK_EQUAL(true,
 			    hook_STRING_eq(hook_STRING_replaceAll(replacee, matcher, replacer),
                 makeString("goodbye world goodbye world goodbye world he worl")));
     BOOST_CHECK_EQUAL(true,
-			    hook_STRING_eq(hook_STRING_replace(replacee, matcher, replacer, 0),
+			    hook_STRING_eq(hook_STRING_replace(replacee, matcher, replacer, a),
                 makeString("hello world hello world hello world he worl")));
     BOOST_CHECK_EQUAL(true,
-			    hook_STRING_eq(hook_STRING_replace(replacee, matcher, replacer, 1),
+			    hook_STRING_eq(hook_STRING_replace(replacee, matcher, replacer, b),
                 makeString("goodbye world hello world hello world he worl")));
     BOOST_CHECK_EQUAL(true,
-			    hook_STRING_eq(hook_STRING_replace(replacee, matcher, replacer, 2),
+			    hook_STRING_eq(hook_STRING_replace(replacee, matcher, replacer, c),
                 makeString("goodbye world goodbye world hello world he worl")));
     BOOST_CHECK_EQUAL(true,
-			    hook_STRING_eq(hook_STRING_replace(replacee, matcher, replacer, 3),
+			    hook_STRING_eq(hook_STRING_replace(replacee, matcher, replacer, d),
                 makeString("goodbye world goodbye world goodbye world he worl")));
     BOOST_CHECK_EQUAL(true,
-			    hook_STRING_eq(hook_STRING_replace(replacee, matcher, replacer, 4),
+			    hook_STRING_eq(hook_STRING_replace(replacee, matcher, replacer, e),
                 makeString("goodbye world goodbye world goodbye world he worl")));
     BOOST_CHECK_EQUAL(true,
 			    hook_STRING_eq(hook_STRING_replaceFirst(replacee, matcher, replacer),

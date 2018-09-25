@@ -193,13 +193,14 @@ const string * hook_STRING_string2token(const string * input) {
     return input;
 }
 
-inline const string * hook_STRING_replace(const string * haystack, const string * needle, const string * replacer, int64_t occurences) {
+inline const string * hook_STRING_replace(const string * haystack, const string * needle, const string * replacer, mpz_t occurences) {
+    int64_t uoccurences = gs(occurences);
     auto start = &haystack->data[0];
     auto pos = start;
     auto end = &haystack->data[haystack->b.len];
     size_t matches[haystack->b.len];
     int i = 0;
-    while (i < occurences) {
+    while (i < uoccurences) {
         pos = std::search(pos, end, &needle->data[0], &needle->data[needle->b.len]);
         if (pos == end) {
             break;
@@ -231,11 +232,15 @@ inline const string * hook_STRING_replace(const string * haystack, const string 
 const string * hook_STRING_replaceAll(const string * haystack, const string * needle, const string * replacer) {
     // It's guaranteed that there can be no more replacements than the length of the haystack, so this
     // gives us the functionality of replaceAll.
-    return hook_STRING_replace(haystack, needle, replacer, haystack->b.len);
+	mpz_t arg;
+	mpz_init_set_si(arg, haystack->b.len);
+    return hook_STRING_replace(haystack, needle, replacer, arg);
 }
 
 const string * hook_STRING_replaceFirst(const string * haystack, const string * needle, const string * replacer) {
-    return hook_STRING_replace(haystack, needle, replacer, 1);
+	mpz_t arg;
+	mpz_init_set_si(arg, 1);
+    return hook_STRING_replace(haystack, needle, replacer, arg);
 }
 
 mpz_ptr hook_STRING_countAllOccurences(const string * haystack, const string * needle) {
