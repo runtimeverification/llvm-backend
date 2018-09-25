@@ -22,85 +22,57 @@ declare %block* @parseConfiguration(i8*)
 
 declare void @printConfiguration(i32, %block*)
 
-define %mpz* @eval_func(%block* %subject0) {
+define %mpz* @"eval_func{Outer{}}"(%block* %subject0) {
 entry:
-  %0 = ptrtoint %block* %subject0 to i64
-  %1 = trunc i64 %0 to i1
-  br i1 %1, label %constant, label %block
-
-stuck:                                            ; preds = %_0_case_0, %getTag3, %getTag
-  call void @abort()
-  unreachable
-
-subject0_case_0:                                  ; preds = %getTag
-  %2 = bitcast %block* %subject0 to { %blockheader, [0 x i64], %block*, %mpz* }*
-  %3 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %mpz* }, { %blockheader, [0 x i64], %block*, %mpz* }* %2, i64 0, i32 2
-  %_0 = load %block*, %block** %3
-  %4 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %mpz* }, { %blockheader, [0 x i64], %block*, %mpz* }* %2, i64 0, i32 3
-  %_1 = load %mpz*, %mpz** %4
-  %5 = ptrtoint %block* %_0 to i64
-  %6 = trunc i64 %5 to i1
-  br i1 %6, label %constant1, label %block2
-
-constant:                                         ; preds = %entry
-  %7 = lshr i64 %0, 32
-  br label %getTag
-
-block:                                            ; preds = %entry
-  %8 = getelementptr inbounds %block, %block* %subject0, i64 0, i32 0, i32 0
-  %9 = load i64, i64* %8
-  br label %getTag
-
-getTag:                                           ; preds = %block, %constant
-  %phi = phi i64 [ %9, %block ], [ %7, %constant ]
-  %10 = trunc i64 %phi to i32
-  switch i32 %10, label %stuck [
+  %tag = call i32 @getTag(%block* %subject0)
+  switch i32 %tag, label %stuck [
     i32 2, label %subject0_case_0
   ]
 
-_0_case_0:                                        ; preds = %getTag3
-  %11 = bitcast %block* %_0 to { %blockheader, [0 x i64], i1 }*
-  %12 = getelementptr inbounds { %blockheader, [0 x i64], i1 }, { %blockheader, [0 x i64], i1 }* %11, i64 0, i32 2
-  %_2 = load i1, i1* %12
+stuck:                                            ; preds = %_0_case_0, %subject0_case_0, %entry
+  call void @abort()
+  unreachable
+
+subject0_case_0:                                  ; preds = %entry
+  %0 = bitcast %block* %subject0 to { %blockheader, [0 x i64], %block*, %mpz* }*
+  %1 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %mpz* }, { %blockheader, [0 x i64], %block*, %mpz* }* %0, i64 0, i32 2
+  %_0 = load %block*, %block** %1
+  %2 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %mpz* }, { %blockheader, [0 x i64], %block*, %mpz* }* %0, i64 0, i32 3
+  %_1 = load %mpz*, %mpz** %2
+  %tag1 = call i32 @getTag(%block* %_0)
+  switch i32 %tag1, label %stuck [
+    i32 0, label %_0_case_0
+    i32 1, label %_0_case_1
+  ]
+
+_0_case_0:                                        ; preds = %subject0_case_0
+  %3 = bitcast %block* %_0 to { %blockheader, [0 x i64], i1 }*
+  %4 = getelementptr inbounds { %blockheader, [0 x i64], i1 }, { %blockheader, [0 x i64], i1 }* %3, i64 0, i32 2
+  %_2 = load i1, i1* %4
   switch i1 %_2, label %stuck [
     i1 true, label %_2_case_0
     i1 false, label %_2_case_1
   ]
 
-_0_case_1:                                        ; preds = %getTag3
-  %13 = bitcast %block* %_0 to { %blockheader, [0 x i64] }*
+_0_case_1:                                        ; preds = %subject0_case_0
+  %5 = bitcast %block* %_0 to { %blockheader, [0 x i64] }*
   %_3 = call i1 @eval_foo(%mpz* %_1)
-  %14 = call %mpz* @apply_rule_2(%mpz* %_1, i1 %_3)
-  ret %mpz* %14
-
-constant1:                                        ; preds = %subject0_case_0
-  %15 = lshr i64 %5, 32
-  br label %getTag3
-
-block2:                                           ; preds = %subject0_case_0
-  %16 = getelementptr inbounds %block, %block* %_0, i64 0, i32 0, i32 0
-  %17 = load i64, i64* %16
-  br label %getTag3
-
-getTag3:                                          ; preds = %block2, %constant1
-  %phi4 = phi i64 [ %17, %block2 ], [ %15, %constant1 ]
-  %18 = trunc i64 %phi4 to i32
-  switch i32 %18, label %stuck [
-    i32 0, label %_0_case_0
-    i32 1, label %_0_case_1
-  ]
+  %6 = call %mpz* @apply_rule_2(%mpz* %_1, i1 %_3)
+  ret %mpz* %6
 
 _2_case_0:                                        ; preds = %_0_case_0
-  %19 = call %mpz* @apply_rule_0()
-  ret %mpz* %19
+  %7 = call %mpz* @apply_rule_0()
+  ret %mpz* %7
 
 _2_case_1:                                        ; preds = %_0_case_0
-  %20 = call %mpz* @apply_rule_1()
-  ret %mpz* %20
+  %8 = call %mpz* @apply_rule_1()
+  ret %mpz* %8
 }
 
 ; Function Attrs: noreturn
 declare void @abort() #0
+
+declare i32 @getTag(%block*)
 
 declare %mpz* @apply_rule_0()
 
@@ -289,8 +261,9 @@ declare void @printConfiguration(i32, %block*)
 
 define %block* @step(%block* %subject0) {
 entry:
+  br label %stuck
 
-stuck:                                            ; No predecessors!
+stuck:                                            ; preds = %entry
   call void @finish_rewriting(%block* %subject0)
   unreachable
 }
@@ -374,102 +347,57 @@ declare %block* @parseConfiguration(i8*)
 
 declare void @printConfiguration(i32, %block*)
 
-define %block* @eval_append(%block* %subject0, %block* %subject1) {
+define %block* @"eval_append{List{}, List{}}"(%block* %subject0, %block* %subject1) {
 entry:
-  %0 = ptrtoint %block* %subject0 to i64
-  %1 = trunc i64 %0 to i1
-  br i1 %1, label %constant, label %block
-
-stuck:                                            ; preds = %getTag7, %getTag
-  call void @abort()
-  unreachable
-
-subject0_case_0:                                  ; preds = %getTag
-  %2 = bitcast %block* %subject0 to { %blockheader, [0 x i64] }*
-  %3 = call %block* @apply_rule_1(%block* %subject1)
-  ret %block* %3
-
-subject0_case_1:                                  ; preds = %getTag
-  %4 = bitcast %block* %subject0 to { %blockheader, [0 x i64], %block*, %block* }*
-  %5 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %4, i64 0, i32 2
-  %_0 = load %block*, %block** %5
-  %6 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %4, i64 0, i32 3
-  %_1 = load %block*, %block** %6
-  %7 = ptrtoint %block* %_0 to i64
-  %8 = trunc i64 %7 to i1
-  br i1 %8, label %constant1, label %block2
-
-constant:                                         ; preds = %entry
-  %9 = lshr i64 %0, 32
-  br label %getTag
-
-block:                                            ; preds = %entry
-  %10 = getelementptr inbounds %block, %block* %subject0, i64 0, i32 0, i32 0
-  %11 = load i64, i64* %10
-  br label %getTag
-
-getTag:                                           ; preds = %block, %constant
-  %phi = phi i64 [ %11, %block ], [ %9, %constant ]
-  %12 = trunc i64 %phi to i32
-  switch i32 %12, label %stuck [
+  %tag = call i32 @getTag(%block* %subject0)
+  switch i32 %tag, label %stuck [
     i32 0, label %subject0_case_0
     i32 1, label %subject0_case_1
   ]
 
-_0_case_0:                                        ; preds = %getTag3
-  %13 = ptrtoint %block* %subject1 to i64
-  %14 = trunc i64 %13 to i1
-  br i1 %14, label %constant5, label %block6
+stuck:                                            ; preds = %_0_case_0, %entry
+  call void @abort()
+  unreachable
 
-constant1:                                        ; preds = %subject0_case_1
-  %15 = lshr i64 %7, 32
-  br label %getTag3
+subject0_case_0:                                  ; preds = %entry
+  %0 = bitcast %block* %subject0 to { %blockheader, [0 x i64] }*
+  %1 = call %block* @apply_rule_1(%block* %subject1)
+  ret %block* %1
 
-block2:                                           ; preds = %subject0_case_1
-  %16 = getelementptr inbounds %block, %block* %_0, i64 0, i32 0, i32 0
-  %17 = load i64, i64* %16
-  br label %getTag3
+subject0_case_1:                                  ; preds = %entry
+  %2 = bitcast %block* %subject0 to { %blockheader, [0 x i64], %block*, %block* }*
+  %3 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %2, i64 0, i32 2
+  %_0 = load %block*, %block** %3
+  %4 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %2, i64 0, i32 3
+  %_1 = load %block*, %block** %4
+  br label %_0_case_0
 
-getTag3:                                          ; preds = %block2, %constant1
-  %phi4 = phi i64 [ %17, %block2 ], [ %15, %constant1 ]
-  %18 = trunc i64 %phi4 to i32
-  switch i32 %18, label %_0_case_0 [
-  ]
-
-subject1_case_0:                                  ; preds = %getTag7
-  %19 = bitcast %block* %subject1 to { %blockheader, [0 x i64] }*
-  %20 = call %block* @apply_rule_2(%block* %subject0)
-  ret %block* %20
-
-subject1_case_1:                                  ; preds = %getTag7
-  %21 = bitcast %block* %subject1 to { %blockheader, [0 x i64], %block*, %block* }*
-  %22 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %21, i64 0, i32 2
-  %_2 = load %block*, %block** %22
-  %23 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %21, i64 0, i32 3
-  %_3 = load %block*, %block** %23
-  %24 = call %block* @apply_rule_3(%block* %_3, %block* %_1)
-  ret %block* %24
-
-constant5:                                        ; preds = %_0_case_0
-  %25 = lshr i64 %13, 32
-  br label %getTag7
-
-block6:                                           ; preds = %_0_case_0
-  %26 = getelementptr inbounds %block, %block* %subject1, i64 0, i32 0, i32 0
-  %27 = load i64, i64* %26
-  br label %getTag7
-
-getTag7:                                          ; preds = %block6, %constant5
-  %phi8 = phi i64 [ %27, %block6 ], [ %25, %constant5 ]
-  %28 = trunc i64 %phi8 to i32
-  switch i32 %28, label %stuck [
+_0_case_0:                                        ; preds = %subject0_case_1
+  %tag1 = call i32 @getTag(%block* %subject1)
+  switch i32 %tag1, label %stuck [
     i32 0, label %subject1_case_0
     i32 1, label %subject1_case_1
   ]
+
+subject1_case_0:                                  ; preds = %_0_case_0
+  %5 = bitcast %block* %subject1 to { %blockheader, [0 x i64] }*
+  %6 = call %block* @apply_rule_2(%block* %subject0)
+  ret %block* %6
+
+subject1_case_1:                                  ; preds = %_0_case_0
+  %7 = bitcast %block* %subject1 to { %blockheader, [0 x i64], %block*, %block* }*
+  %8 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %7, i64 0, i32 2
+  %_2 = load %block*, %block** %8
+  %9 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %7, i64 0, i32 3
+  %_3 = load %block*, %block** %9
+  %10 = call %block* @apply_rule_3(%block* %_3, %block* %_1)
+  ret %block* %10
 }
 
 ; Function Attrs: noreturn
 declare void @abort() #0
+
+declare i32 @getTag(%block*)
 
 declare %block* @apply_rule_1(%block*)
 

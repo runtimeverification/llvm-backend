@@ -1,11 +1,13 @@
 extern crate libc;
 
-use super::decls::{Set,List,Int,K,__gmpz_init_set_ui,move_int,printConfiguration};
+use super::decls::{Set,List,Int,K,KElem,__gmpz_init_set_ui,move_int,printConfigurationInternal};
 use std::iter::FromIterator;
+use std::hash::Hash;
+use std::collections::hash_map::DefaultHasher;
 use std::ptr;
 use std::mem;
 use std::ffi::CString;
-use self::libc::{FILE,c_char,fprintf};
+use self::libc::{FILE,c_char,c_void,fprintf};
 
 #[no_mangle]
 pub extern "C" fn size_set() -> usize {
@@ -19,7 +21,7 @@ pub unsafe extern "C" fn drop_set(ptr: *mut Set) {
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_SET_in(value: K, set: *const Set) -> bool {
-  (*set).contains(&value)
+  (*set).contains(&KElem(value))
 }
 
 #[no_mangle]
@@ -29,7 +31,7 @@ pub unsafe extern "C" fn hook_SET_unit() -> Set {
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_SET_element(value: K) -> Set {
-  Set::singleton(value)
+  Set::singleton(KElem(value))
 }
 
 #[no_mangle]
@@ -57,14 +59,14 @@ pub unsafe extern "C" fn hook_SET_choice(s: *const Set) -> K {
   if (*s).is_empty() {
     panic!("Set is empty")
   }
-  *(*s).iter().next().unwrap()
+  (*s).iter().next().unwrap().0
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_SET_size(s: *const Set) -> *mut Int {
   let mut result = Int(0, 0, ptr::null());
   __gmpz_init_set_ui(&mut result, (*s).len());
-  move_int(result)
+  move_int(&mut result)
 }
 
 #[no_mangle]
@@ -78,6 +80,17 @@ pub unsafe extern "C" fn hook_SET_list2set(l: *const List) -> Set {
 }
 
 #[no_mangle]
+pub unsafe extern "C" fn hook_SET_eq(s1: *const Set, s2: *const Set) -> bool {
+  *s1 == *s2
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn set_hash(s: *const Set, h: *mut c_void) {
+  let hasher = h as *mut &mut DefaultHasher;
+  s.hash(*hasher)
+}
+
+#[no_mangle]
 pub unsafe extern "C" fn printSet(file: *mut FILE, set: *const Set, unit: *const c_char, element: *const c_char, concat: *const c_char) {
   if (*set).len() == 0 {
     let fmt = CString::new("%s()").unwrap();
@@ -86,14 +99,14 @@ pub unsafe extern "C" fn printSet(file: *mut FILE, set: *const Set, unit: *const
   }
   let mut i = 1;
   let parens = CString::new(")").unwrap();
-  for value in (*set).iter() {
+  for KElem(value) in (*set).iter() {
     let fmt = CString::new("%s(").unwrap();
     if i < (*set).len() {
       fprintf(file, fmt.as_ptr(), concat);
     }
     fprintf(file, fmt.as_ptr(), element);
     let sort = CString::new("K").unwrap();
-    printConfiguration(file, *value, sort.as_ptr());
+    printConfigurationInternal(file, *value, sort.as_ptr());
     fprintf(file, parens.as_ptr());
     if i < (*set).len() {
       fprintf(file, parens.as_ptr());
@@ -216,9 +229,9 @@ pub mod tests {
   fn test_list2set() {
     unsafe {
       let mut list = List::new();
-      (list).push_back(DUMMY0);
-      (list).push_back(DUMMY1);
-      (list).push_back(DUMMY2);
+      (list).push_back(KElem(DUMMY0));
+      (list).push_back(KElem(DUMMY1));
+      (list).push_back(KElem(DUMMY2));
       let set = hook_SET_list2set(&list);
       let result = hook_SET_size(&set);
       assert_eq!(__gmpz_cmp_ui(result, 3), 0);
@@ -228,6 +241,19 @@ pub mod tests {
       assert!(contains);
       let contains = hook_SET_in(DUMMY2, &set);
       assert!(contains);
+    }
+  }
+
+  #[test]
+  fn test_eq() {
+    unsafe {
+      let set = hook_SET_element(DUMMY0);
+      let set2 = hook_SET_element(DUMMY1);
+      let result = hook_SET_eq(&set, &set2);
+      assert!(!result);
+      let set2 = hook_SET_element(DUMMY0);
+      let result = hook_SET_eq(&set, &set2);
+      assert!(result);
     }
   }
 }

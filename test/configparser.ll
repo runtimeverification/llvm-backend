@@ -1,130 +1,179 @@
 target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
 target triple = "x86_64-unknown-linux-gnu"
 
+%layoutitem = type { i64, i16 }
 %block = type { %blockheader, [0 x i64*] }
 %blockheader = type { i64 }
 %map = type { i64, i8*, i8* }
 %mpz = type { i32, i32, i64* }
-%set = type { i8*, i8*, i64 }
 %list = type { i64, i64, i8*, i8*, i8*, i8*, i8* }
+%set = type { i8*, i8*, i64 }
 %string = type { %blockheader, [0 x i8] }
 %FILE = type opaque
 %mpfr = type { i64, i32, i64, i64* }
+%layout = type { i8, %layoutitem* }
 
-@"sym_name_Lbl'-LT-'T'-GT-'{}" = global [19 x i8] c"Lbl'-LT-'T'-GT-'{}\00"
-@"sym_name_Lbl'-LT-'k'-GT-'{}" = global [19 x i8] c"Lbl'-LT-'k'-GT-'{}\00"
-@"sym_name_Lbl'-LT-'state'-GT-'{}" = global [23 x i8] c"Lbl'-LT-'state'-GT-'{}\00"
-@"sym_name_Lbl'BangUndsUnds'IMP-SYNTAX'UndsUnds'BExp{}" = global [44 x i8] c"Lbl'BangUndsUnds'IMP-SYNTAX'UndsUnds'BExp{}\00"
-@"sym_name_Lbl'Hash'freezer'BangUndsUnds'IMP-SYNTAX'UndsUnds'BExp0'Unds'{}" = global [64 x i8] c"Lbl'Hash'freezer'BangUndsUnds'IMP-SYNTAX'UndsUnds'BExp0'Unds'{}\00"
-@"sym_name_Lbl'Hash'freezer'Unds-LT-EqlsUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp0'Unds'{}" = global [82 x i8] c"Lbl'Hash'freezer'Unds-LT-EqlsUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp0'Unds'{}\00"
-@"sym_name_Lbl'Hash'freezer'Unds-LT-EqlsUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp1'Unds'{}" = global [82 x i8] c"Lbl'Hash'freezer'Unds-LT-EqlsUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp1'Unds'{}\00"
-@"sym_name_Lbl'Hash'freezer'UndsAndAndUndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'BExp1'Unds'{}" = global [80 x i8] c"Lbl'Hash'freezer'UndsAndAndUndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'BExp1'Unds'{}\00"
-@"sym_name_Lbl'Hash'freezer'UndsEqlsUndsSClnUnds'IMP-SYNTAX'UndsUnds'Id'Unds'AExp0'Unds'{}" = global [80 x i8] c"Lbl'Hash'freezer'UndsEqlsUndsSClnUnds'IMP-SYNTAX'UndsUnds'Id'Unds'AExp0'Unds'{}\00"
+@"sym_name_Lbl'Hash'freezerif'LParUndsRParUnds'else'UndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'Block'Unds'Block1'Unds'{}" = global [106 x i8] c"Lbl'Hash'freezerif'LParUndsRParUnds'else'UndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'Block'Unds'Block1'Unds'{}\00"
+@"sym_name_Lbl'UndsUndsUnds'IMP-SYNTAX'UndsUnds'Stmt'Unds'Stmt{}" = global [54 x i8] c"Lbl'UndsUndsUnds'IMP-SYNTAX'UndsUnds'Stmt'Unds'Stmt{}\00"
+@"sym_name_inj{SortPgm{}, SortKItem{}}" = global [28 x i8] c"inj{SortPgm{}, SortKItem{}}\00"
+@"sym_name_Lbl'Stop'Map{}" = global [15 x i8] c"Lbl'Stop'Map{}\00"
+@"sym_name_LblisString{}" = global [14 x i8] c"LblisString{}\00"
+@"sym_name_LblisCell{}" = global [12 x i8] c"LblisCell{}\00"
 @"sym_name_Lbl'Hash'freezer'UndsPlusUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp0'Unds'{}" = global [78 x i8] c"Lbl'Hash'freezer'UndsPlusUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp0'Unds'{}\00"
 @"sym_name_Lbl'Hash'freezer'UndsPlusUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp1'Unds'{}" = global [78 x i8] c"Lbl'Hash'freezer'UndsPlusUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp1'Unds'{}\00"
+@"sym_name_inj{SortKCell{}, SortCell{}}" = global [29 x i8] c"inj{SortKCell{}, SortCell{}}\00"
+@"sym_name_Lbl'UndsPlusUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp{}" = global [58 x i8] c"Lbl'UndsPlusUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp{}\00"
+@"sym_name_Lbl'Hash'freezer'BangUndsUnds'IMP-SYNTAX'UndsUnds'BExp0'Unds'{}" = global [64 x i8] c"Lbl'Hash'freezer'BangUndsUnds'IMP-SYNTAX'UndsUnds'BExp0'Unds'{}\00"
+@"sym_name_LblisStmt{}" = global [12 x i8] c"LblisStmt{}\00"
+@"sym_name_LblisTCellFragment{}" = global [21 x i8] c"LblisTCellFragment{}\00"
+@"sym_name_LblisKResult{}" = global [15 x i8] c"LblisKResult{}\00"
+@"sym_name_LblminInt'LParUndsCommUndsRParUnds'INT'UndsUnds'Int'Unds'Int{}" = global [63 x i8] c"LblminInt'LParUndsCommUndsRParUnds'INT'UndsUnds'Int'Unds'Int{}\00"
+@"sym_name_LblmaxInt'LParUndsCommUndsRParUnds'INT'UndsUnds'Int'Unds'Int{}" = global [63 x i8] c"LblmaxInt'LParUndsCommUndsRParUnds'INT'UndsUnds'Int'Unds'Int{}\00"
+@"sym_name_Lbl'Stop'List'LBraQuotUndsCommUndsUnds'IMP-SYNTAX'UndsUnds'Id'Unds'Ids'QuotRBraUnds'Ids{}" = global [90 x i8] c"Lbl'Stop'List'LBraQuotUndsCommUndsUnds'IMP-SYNTAX'UndsUnds'Id'Unds'Ids'QuotRBraUnds'Ids{}\00"
+@"sym_name_Lbl'Unds'-Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}" = global [51 x i8] c"Lbl'Unds'-Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}\00"
+@"sym_name_Lbl'Unds-LT-Eqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}" = global [58 x i8] c"Lbl'Unds-LT-Eqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}\00"
+@"sym_name_LblisTCell{}" = global [13 x i8] c"LblisTCell{}\00"
+@"sym_name_LblupdateMap'LParUndsCommUndsRParUnds'MAP'UndsUnds'Map'Unds'Map{}" = global [66 x i8] c"LblupdateMap'LParUndsCommUndsRParUnds'MAP'UndsUnds'Map'Unds'Map{}\00"
+@"sym_name_Lbl'LBraRBraUnds'IMP-SYNTAX'Unds'{}" = global [36 x i8] c"Lbl'LBraRBraUnds'IMP-SYNTAX'Unds'{}\00"
+@"sym_name_LblMap'Coln'lookup{}" = global [21 x i8] c"LblMap'Coln'lookup{}\00"
+@"sym_name_Lbl'UndsLSqBUndsRSqB'orDefault'UndsUnds'MAP'UndsUnds'Map'Unds'K'Unds'K{}" = global [73 x i8] c"Lbl'UndsLSqBUndsRSqB'orDefault'UndsUnds'MAP'UndsUnds'Map'Unds'K'Unds'K{}\00"
+@"sym_name_Lbl'Unds'-Map'UndsUnds'MAP'UndsUnds'Map'Unds'Map{}" = global [51 x i8] c"Lbl'Unds'-Map'UndsUnds'MAP'UndsUnds'Map'Unds'Map{}\00"
+@"sym_name_Lbl'Unds-LT-Eqls'Map'UndsUnds'MAP'UndsUnds'Map'Unds'Map{}" = global [58 x i8] c"Lbl'Unds-LT-Eqls'Map'UndsUnds'MAP'UndsUnds'Map'Unds'Map{}\00"
+@"sym_name_Lbl'Hash'freezer'UndsEqlsUndsSClnUnds'IMP-SYNTAX'UndsUnds'Id'Unds'AExp0'Unds'{}" = global [80 x i8] c"Lbl'Hash'freezer'UndsEqlsUndsSClnUnds'IMP-SYNTAX'UndsUnds'Id'Unds'AExp0'Unds'{}\00"
+@"sym_name_inj{SortInt{}, SortKItem{}}" = global [28 x i8] c"inj{SortInt{}, SortKItem{}}\00"
+@"sym_name_Lbl'-LT-'T'-GT-'{}" = global [19 x i8] c"Lbl'-LT-'T'-GT-'{}\00"
+@"sym_name_LblabsInt'LParUndsRParUnds'INT'UndsUnds'Int{}" = global [46 x i8] c"LblabsInt'LParUndsRParUnds'INT'UndsUnds'Int{}\00"
+@"sym_name_LblfreshInt'LParUndsRParUnds'INT'UndsUnds'Int{}" = global [48 x i8] c"LblfreshInt'LParUndsRParUnds'INT'UndsUnds'Int{}\00"
+@"sym_name_inj{SortKCell{}, SortKItem{}}" = global [30 x i8] c"inj{SortKCell{}, SortKItem{}}\00"
+@"sym_name_Lbl'UndsEqlsSlshEqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}" = global [62 x i8] c"Lbl'UndsEqlsSlshEqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}\00"
+@"sym_name_Lbl'Unds'andThenBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}" = global [61 x i8] c"Lbl'Unds'andThenBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}\00"
+@"sym_name_LblbitRangeInt'LParUndsCommUndsCommUndsRParUnds'INT'UndsUnds'Int'Unds'Int'Unds'Int{}" = global [85 x i8] c"LblbitRangeInt'LParUndsCommUndsCommUndsRParUnds'INT'UndsUnds'Int'Unds'Int'Unds'Int{}\00"
+@"sym_name_inj{SortInt{}, SortKResult{}}" = global [30 x i8] c"inj{SortInt{}, SortKResult{}}\00"
+@"sym_name_LblisId{}" = global [10 x i8] c"LblisId{}\00"
+@"sym_name_LblisAExp{}" = global [12 x i8] c"LblisAExp{}\00"
+@"sym_name_LblListItem{}" = global [14 x i8] c"LblListItem{}\00"
+@"sym_name_inj{SortList{}, SortKItem{}}" = global [29 x i8] c"inj{SortList{}, SortKItem{}}\00"
+@"sym_name_Lbl'Unds'Map'Unds'{}" = global [21 x i8] c"Lbl'Unds'Map'Unds'{}\00"
+@"sym_name_Lbl'UndsEqlsEqls'Bool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}" = global [62 x i8] c"Lbl'UndsEqlsEqls'Bool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}\00"
+@"sym_name_Lbl'UndsAnd'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}" = global [53 x i8] c"Lbl'UndsAnd'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}\00"
+@"sym_name_Lbl'UndsLSqBUnds-LT-'-undef'RSqB'{}" = global [36 x i8] c"Lbl'UndsLSqBUnds-LT-'-undef'RSqB'{}\00"
+@"sym_name_Lbl'-LT-'k'-GT-'{}" = global [19 x i8] c"Lbl'-LT-'k'-GT-'{}\00"
+@"sym_name_LblisKItem{}" = global [13 x i8] c"LblisKItem{}\00"
+@"sym_name_dotk{}" = global [7 x i8] c"dotk{}\00"
+@"sym_name_LblfreshId'LParUndsRParUnds'ID-SYNTAX'UndsUnds'Int{}" = global [53 x i8] c"LblfreshId'LParUndsRParUnds'ID-SYNTAX'UndsUnds'Int{}\00"
+@"sym_name_Lbl'Unds'in'Unds'keys'LParUndsRParUnds'MAP'UndsUnds'K'Unds'Map{}" = global [65 x i8] c"Lbl'Unds'in'Unds'keys'LParUndsRParUnds'MAP'UndsUnds'K'Unds'Map{}\00"
+@"sym_name_Lbl'UndsStar'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}" = global [54 x i8] c"Lbl'UndsStar'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}\00"
+@"sym_name_Lbl'Unds'Set'Unds'{}" = global [21 x i8] c"Lbl'Unds'Set'Unds'{}\00"
+@"sym_name_LblSet'Coln'in{}" = global [17 x i8] c"LblSet'Coln'in{}\00"
+@"sym_name_LblisStateCell{}" = global [17 x i8] c"LblisStateCell{}\00"
+@"sym_name_LblnoStateCell{}" = global [17 x i8] c"LblnoStateCell{}\00"
+@"sym_name_Lblkeys'LParUndsRParUnds'MAP'UndsUnds'Map{}" = global [44 x i8] c"Lblkeys'LParUndsRParUnds'MAP'UndsUnds'Map{}\00"
+@"sym_name_Lbl'Hash'freezer'UndsAndAndUndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'BExp1'Unds'{}" = global [80 x i8] c"Lbl'Hash'freezer'UndsAndAndUndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'BExp1'Unds'{}\00"
+@"sym_name_inj{SortId{}, SortKItem{}}" = global [27 x i8] c"inj{SortId{}, SortKItem{}}\00"
+@"sym_name_LblisKCell{}" = global [13 x i8] c"LblisKCell{}\00"
+@"sym_name_LblinitTCell{}" = global [15 x i8] c"LblinitTCell{}\00"
+@"sym_name_Lbl'Unds'andBool'Unds'{}" = global [25 x i8] c"Lbl'Unds'andBool'Unds'{}\00"
+@"sym_name_LblisList{}" = global [12 x i8] c"LblisList{}\00"
+@"sym_name_inj{SortBool{}, SortKItem{}}" = global [29 x i8] c"inj{SortBool{}, SortKItem{}}\00"
+@"sym_name_LblisKCellOpt{}" = global [16 x i8] c"LblisKCellOpt{}\00"
+@"sym_name_append{}" = global [9 x i8] c"append{}\00"
+@"sym_name_LblsignExtendBitRangeInt'LParUndsCommUndsCommUndsRParUnds'INT'UndsUnds'Int'Unds'Int'Unds'Int{}" = global [95 x i8] c"LblsignExtendBitRangeInt'LParUndsCommUndsCommUndsRParUnds'INT'UndsUnds'Int'Unds'Int'Unds'Int{}\00"
+@"sym_name_inj{SortStateCellOpt{}, SortKItem{}}" = global [37 x i8] c"inj{SortStateCellOpt{}, SortKItem{}}\00"
+@"sym_name_Lblint'UndsSClnUndsUnds'IMP-SYNTAX'UndsUnds'Ids'Unds'Stmt{}" = global [60 x i8] c"Lblint'UndsSClnUndsUnds'IMP-SYNTAX'UndsUnds'Ids'Unds'Stmt{}\00"
+@"sym_name_Lbl'BangUndsUnds'IMP-SYNTAX'UndsUnds'BExp{}" = global [44 x i8] c"Lbl'BangUndsUnds'IMP-SYNTAX'UndsUnds'BExp{}\00"
+@"sym_name_inj{SortBlock{}, SortStmt{}}" = global [29 x i8] c"inj{SortBlock{}, SortStmt{}}\00"
+@"sym_name_LblisK{}" = global [9 x i8] c"LblisK{}\00"
+@"sym_name_LblisSet{}" = global [11 x i8] c"LblisSet{}\00"
+@"sym_name_Lbl'UndsPerc'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}" = global [54 x i8] c"Lbl'UndsPerc'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}\00"
+@"sym_name_inj{SortMap{}, SortKItem{}}" = global [28 x i8] c"inj{SortMap{}, SortKItem{}}\00"
+@"sym_name_inj{SortTCell{}, SortCell{}}" = global [29 x i8] c"inj{SortTCell{}, SortCell{}}\00"
+@"sym_name_Lbl'LBraUndsRBraUnds'IMP-SYNTAX'UndsUnds'Stmt{}" = global [48 x i8] c"Lbl'LBraUndsRBraUnds'IMP-SYNTAX'UndsUnds'Stmt{}\00"
+@"sym_name_Lbl'Stop'List{}" = global [16 x i8] c"Lbl'Stop'List{}\00"
+@"sym_name_LblSet'Coln'difference{}" = global [25 x i8] c"LblSet'Coln'difference{}\00"
+@"sym_name_LblinitStateCell{}" = global [19 x i8] c"LblinitStateCell{}\00"
+@"sym_name_Lbl'Unds'impliesBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}" = global [61 x i8] c"Lbl'Unds'impliesBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}\00"
+@"sym_name_inj{SortBlock{}, SortKItem{}}" = global [30 x i8] c"inj{SortBlock{}, SortKItem{}}\00"
+@"sym_name_Lbl'UndsCommUndsUnds'IMP-SYNTAX'UndsUnds'Id'Unds'Ids{}" = global [55 x i8] c"Lbl'UndsCommUndsUnds'IMP-SYNTAX'UndsUnds'Id'Unds'Ids{}\00"
+@"sym_name_Lbl'UndsSlsh'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}" = global [54 x i8] c"Lbl'UndsSlsh'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}\00"
+@"sym_name_Lblsize'LParUndsRParUnds'LIST'UndsUnds'List{}" = global [46 x i8] c"Lblsize'LParUndsRParUnds'LIST'UndsUnds'List{}\00"
+@"sym_name_inj{SortSet{}, SortKItem{}}" = global [28 x i8] c"inj{SortSet{}, SortKItem{}}\00"
+@"sym_name_Lbl'Unds'xorBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}" = global [57 x i8] c"Lbl'Unds'xorBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}\00"
+@"sym_name_inj{SortAExp{}, SortKItem{}}" = global [29 x i8] c"inj{SortAExp{}, SortKItem{}}\00"
+@"sym_name_LblinitKCell{}" = global [15 x i8] c"LblinitKCell{}\00"
+@"sym_name_Lbl'Stop'Set{}" = global [15 x i8] c"Lbl'Stop'Set{}\00"
+@"sym_name_Lbl'UndsAndAndUndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'BExp{}" = global [60 x i8] c"Lbl'UndsAndAndUndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'BExp{}\00"
+@"sym_name_inj{SortString{}, SortKItem{}}" = global [31 x i8] c"inj{SortString{}, SortKItem{}}\00"
+@"sym_name_Lbl'UndsEqlsSlshEqls'Bool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}" = global [66 x i8] c"Lbl'UndsEqlsSlshEqls'Bool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}\00"
+@"sym_name_LblisBool{}" = global [12 x i8] c"LblisBool{}\00"
+@"sym_name_Lbl'Unds-GT--GT-'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}" = global [58 x i8] c"Lbl'Unds-GT--GT-'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}\00"
+@"sym_name_Lbl'Unds'orElseBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}" = global [60 x i8] c"Lbl'Unds'orElseBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}\00"
+@"sym_name_inj{SortStateCell{}, SortKItem{}}" = global [34 x i8] c"inj{SortStateCell{}, SortKItem{}}\00"
+@"sym_name_LblisStateCellOpt{}" = global [20 x i8] c"LblisStateCellOpt{}\00"
+@"sym_name_Lblif'LParUndsRParUnds'else'UndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'Block'Unds'Block{}" = global [86 x i8] c"Lblif'LParUndsRParUnds'else'UndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'Block'Unds'Block{}\00"
+@"sym_name_inj{SortTCellFragment{}, SortKItem{}}" = global [38 x i8] c"inj{SortTCellFragment{}, SortKItem{}}\00"
+@"sym_name_Lbl'UndsSlshUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp{}" = global [58 x i8] c"Lbl'UndsSlshUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp{}\00"
+@"sym_name_LblintersectSet'LParUndsCommUndsRParUnds'SET'UndsUnds'Set'Unds'Set{}" = global [69 x i8] c"LblintersectSet'LParUndsCommUndsRParUnds'SET'UndsUnds'Set'Unds'Set{}\00"
+@"sym_name_inj{SortKResult{}, SortKItem{}}" = global [32 x i8] c"inj{SortKResult{}, SortKItem{}}\00"
+@"sym_name_Lbl'Unds'xorInt'UndsUnds'INT'UndsUnds'Int'Unds'Int{}" = global [53 x i8] c"Lbl'Unds'xorInt'UndsUnds'INT'UndsUnds'Int'Unds'Int{}\00"
+@"sym_name_inj{SortKItem{}, SortK{}}" = global [26 x i8] c"inj{SortKItem{}, SortK{}}\00"
+@"sym_name_inj{SortKCell{}, SortKCellOpt{}}" = global [33 x i8] c"inj{SortKCell{}, SortKCellOpt{}}\00"
+@"sym_name_kseq{}" = global [7 x i8] c"kseq{}\00"
+@"sym_name_Lbl'UndsPipe'-'-GT-Unds'{}" = global [27 x i8] c"Lbl'UndsPipe'-'-GT-Unds'{}\00"
+@"sym_name_inj{SortTCell{}, SortKItem{}}" = global [30 x i8] c"inj{SortTCell{}, SortKItem{}}\00"
+@"sym_name_LblremoveAll'LParUndsCommUndsRParUnds'MAP'UndsUnds'Map'Unds'Set{}" = global [66 x i8] c"LblremoveAll'LParUndsCommUndsRParUnds'MAP'UndsUnds'Map'Unds'Set{}\00"
+@"sym_name_LblisBlock{}" = global [13 x i8] c"LblisBlock{}\00"
+@"sym_name_inj{SortBool{}, SortKResult{}}" = global [31 x i8] c"inj{SortBool{}, SortKResult{}}\00"
+@"sym_name_Lbl'Unds-GT-Eqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}" = global [58 x i8] c"Lbl'Unds-GT-Eqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}\00"
+@"sym_name_Lbl'Unds-LT-EqlsUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp{}" = global [62 x i8] c"Lbl'Unds-LT-EqlsUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp{}\00"
+@"sym_name_Lbl'-LT-'state'-GT-'{}" = global [23 x i8] c"Lbl'-LT-'state'-GT-'{}\00"
+@"sym_name_Lbl'Unds'List'Unds'{}" = global [22 x i8] c"Lbl'Unds'List'Unds'{}\00"
+@"sym_name_Lbl'Unds'in'UndsUnds'LIST'UndsUnds'K'Unds'List{}" = global [49 x i8] c"Lbl'Unds'in'UndsUnds'LIST'UndsUnds'K'Unds'List{}\00"
+@"sym_name_Lbl'UndsPipe'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}" = global [54 x i8] c"Lbl'UndsPipe'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}\00"
+@"sym_name_inj{SortKCellOpt{}, SortKItem{}}" = global [33 x i8] c"inj{SortKCellOpt{}, SortKItem{}}\00"
+@"sym_name_inj{SortStateCell{}, SortCell{}}" = global [33 x i8] c"inj{SortStateCell{}, SortCell{}}\00"
+@"sym_name_Lbl-'UndsUnds'IMP-SYNTAX'UndsUnds'Int{}" = global [40 x i8] c"Lbl-'UndsUnds'IMP-SYNTAX'UndsUnds'Int{}\00"
+@"sym_name_inj{SortKConfigVar{}, SortKItem{}}" = global [35 x i8] c"inj{SortKConfigVar{}, SortKItem{}}\00"
+@"sym_name_Lbl'UndsLSqBUnds-LT-'-'UndsRSqBUnds'MAP'UndsUnds'Map'Unds'K'Unds'K{}" = global [69 x i8] c"Lbl'UndsLSqBUnds-LT-'-'UndsRSqBUnds'MAP'UndsUnds'Map'Unds'K'Unds'K{}\00"
+@"sym_name_Lbl'Unds-LT-'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}" = global [54 x i8] c"Lbl'Unds-LT-'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}\00"
+@"sym_name_LblSetItem{}" = global [13 x i8] c"LblSetItem{}\00"
+@"sym_name_LblisIds{}" = global [11 x i8] c"LblisIds{}\00"
+@"sym_name_Lblsize'LParUndsRParUnds'SET'UndsUnds'Set{}" = global [44 x i8] c"Lblsize'LParUndsRParUnds'SET'UndsUnds'Set{}\00"
+@"sym_name_Lbl'-LT-'T'-GT-'-fragment{}" = global [28 x i8] c"Lbl'-LT-'T'-GT-'-fragment{}\00"
+@"sym_name_Lbl'Tild'Int'UndsUnds'INT'UndsUnds'Int{}" = global [41 x i8] c"Lbl'Tild'Int'UndsUnds'INT'UndsUnds'Int{}\00"
+@"sym_name_Lbl'Hash'if'UndsHash'then'UndsHash'else'UndsHash'fi'Unds'K-EQUAL'UndsUnds'Bool'Unds'K'Unds'K{SortK{}}" = global [102 x i8] c"Lbl'Hash'if'UndsHash'then'UndsHash'else'UndsHash'fi'Unds'K-EQUAL'UndsUnds'Bool'Unds'K'Unds'K{SortK{}}\00"
+@"sym_name_Lbl'Unds'divInt'UndsUnds'INT'UndsUnds'Int'Unds'Int{}" = global [53 x i8] c"Lbl'Unds'divInt'UndsUnds'INT'UndsUnds'Int'Unds'Int{}\00"
+@"sym_name_Lbl'Unds'orBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}" = global [56 x i8] c"Lbl'Unds'orBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}\00"
+@"sym_name_Lbl'Unds'modInt'UndsUnds'INT'UndsUnds'Int'Unds'Int{}" = global [53 x i8] c"Lbl'Unds'modInt'UndsUnds'INT'UndsUnds'Int'Unds'Int{}\00"
+@"sym_name_LblisInt{}" = global [11 x i8] c"LblisInt{}\00"
+@"sym_name_Lbl'Hash'freezer'Unds-LT-EqlsUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp0'Unds'{}" = global [82 x i8] c"Lbl'Hash'freezer'Unds-LT-EqlsUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp0'Unds'{}\00"
+@"sym_name_Lbl'Hash'freezer'Unds-LT-EqlsUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp1'Unds'{}" = global [82 x i8] c"Lbl'Hash'freezer'Unds-LT-EqlsUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp1'Unds'{}\00"
+@"sym_name_Lbl'UndsEqlsEqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}" = global [58 x i8] c"Lbl'UndsEqlsEqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}\00"
+@"sym_name_LblisBExp{}" = global [12 x i8] c"LblisBExp{}\00"
+@"sym_name_inj{SortCell{}, SortKItem{}}" = global [29 x i8] c"inj{SortCell{}, SortKItem{}}\00"
+@"sym_name_LblnoKCell{}" = global [13 x i8] c"LblnoKCell{}\00"
+@"sym_name_inj{SortBool{}, SortBExp{}}" = global [28 x i8] c"inj{SortBool{}, SortBExp{}}\00"
+@"sym_name_inj{SortIds{}, SortKItem{}}" = global [28 x i8] c"inj{SortIds{}, SortKItem{}}\00"
+@"sym_name_inj{SortId{}, SortAExp{}}" = global [26 x i8] c"inj{SortId{}, SortAExp{}}\00"
+@"sym_name_inj{SortStateCell{}, SortStateCellOpt{}}" = global [41 x i8] c"inj{SortStateCell{}, SortStateCellOpt{}}\00"
 @"sym_name_Lbl'Hash'freezer'UndsSlshUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp0'Unds'{}" = global [78 x i8] c"Lbl'Hash'freezer'UndsSlshUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp0'Unds'{}\00"
 @"sym_name_Lbl'Hash'freezer'UndsSlshUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp1'Unds'{}" = global [78 x i8] c"Lbl'Hash'freezer'UndsSlshUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp1'Unds'{}\00"
-@"sym_name_Lbl'Hash'freezerif'LParUndsRParUnds'else'UndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'Block'Unds'Block1'Unds'{}" = global [106 x i8] c"Lbl'Hash'freezerif'LParUndsRParUnds'else'UndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'Block'Unds'Block1'Unds'{}\00"
-@"sym_name_Lbl'LBraRBraUnds'IMP-SYNTAX'Unds'{}" = global [36 x i8] c"Lbl'LBraRBraUnds'IMP-SYNTAX'Unds'{}\00"
-@"sym_name_Lbl'LBraUndsRBraUnds'IMP-SYNTAX'UndsUnds'Stmt{}" = global [48 x i8] c"Lbl'LBraUndsRBraUnds'IMP-SYNTAX'UndsUnds'Stmt{}\00"
-@"sym_name_Lbl'Stop'List'LBraQuotUndsCommUndsUnds'IMP-SYNTAX'UndsUnds'Id'Unds'Ids'QuotRBraUnds'Ids{}" = global [90 x i8] c"Lbl'Stop'List'LBraQuotUndsCommUndsUnds'IMP-SYNTAX'UndsUnds'Id'Unds'Ids'QuotRBraUnds'Ids{}\00"
-@"sym_name_Lbl'Stop'Map{}" = global [15 x i8] c"Lbl'Stop'Map{}\00"
-@"sym_name_Lbl'Unds'-Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}" = global [51 x i8] c"Lbl'Unds'-Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}\00"
-@"sym_name_Lbl'Unds'Map'Unds'{}" = global [21 x i8] c"Lbl'Unds'Map'Unds'{}\00"
-@"sym_name_Lbl'Unds'andBool'Unds'{}" = global [25 x i8] c"Lbl'Unds'andBool'Unds'{}\00"
-@"sym_name_Lbl'Unds'andThenBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}" = global [61 x i8] c"Lbl'Unds'andThenBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}\00"
-@"sym_name_Lbl'Unds'divInt'UndsUnds'INT'UndsUnds'Int'Unds'Int{}" = global [53 x i8] c"Lbl'Unds'divInt'UndsUnds'INT'UndsUnds'Int'Unds'Int{}\00"
-@"sym_name_Lbl'Unds'dividesInt'UndsUnds'INT'UndsUnds'Int'Unds'Int{}" = global [57 x i8] c"Lbl'Unds'dividesInt'UndsUnds'INT'UndsUnds'Int'Unds'Int{}\00"
-@"sym_name_Lbl'Unds'impliesBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}" = global [61 x i8] c"Lbl'Unds'impliesBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}\00"
-@"sym_name_Lbl'Unds'modInt'UndsUnds'INT'UndsUnds'Int'Unds'Int{}" = global [53 x i8] c"Lbl'Unds'modInt'UndsUnds'INT'UndsUnds'Int'Unds'Int{}\00"
-@"sym_name_Lbl'Unds'orBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}" = global [56 x i8] c"Lbl'Unds'orBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}\00"
-@"sym_name_Lbl'Unds'orElseBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}" = global [60 x i8] c"Lbl'Unds'orElseBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}\00"
-@"sym_name_Lbl'Unds'xorBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}" = global [57 x i8] c"Lbl'Unds'xorBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}\00"
-@"sym_name_Lbl'Unds-GT--GT-'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}" = global [58 x i8] c"Lbl'Unds-GT--GT-'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}\00"
-@"sym_name_Lbl'Unds-GT-Eqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}" = global [58 x i8] c"Lbl'Unds-GT-Eqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}\00"
+@"sym_name_Lbl'Unds-GT-'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}" = global [54 x i8] c"Lbl'Unds-GT-'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}\00"
+@"sym_name_Lbl'Unds-LT-Eqls'Set'UndsUnds'SET'UndsUnds'Set'Unds'Set{}" = global [58 x i8] c"Lbl'Unds-LT-Eqls'Set'UndsUnds'SET'UndsUnds'Set'Unds'Set{}\00"
 @"sym_name_Lbl'Unds-LT--LT-'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}" = global [58 x i8] c"Lbl'Unds-LT--LT-'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}\00"
-@"sym_name_Lbl'Unds-LT-Eqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}" = global [58 x i8] c"Lbl'Unds-LT-Eqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}\00"
-@"sym_name_Lbl'Unds-LT-EqlsUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp{}" = global [62 x i8] c"Lbl'Unds-LT-EqlsUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp{}\00"
-@"sym_name_Lbl'UndsAndAndUndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'BExp{}" = global [60 x i8] c"Lbl'UndsAndAndUndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'BExp{}\00"
-@"sym_name_Lbl'UndsCommUndsUnds'IMP-SYNTAX'UndsUnds'Id'Unds'Ids{}" = global [55 x i8] c"Lbl'UndsCommUndsUnds'IMP-SYNTAX'UndsUnds'Id'Unds'Ids{}\00"
-@"sym_name_Lbl'UndsEqlsEqls'Bool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}" = global [62 x i8] c"Lbl'UndsEqlsEqls'Bool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}\00"
-@"sym_name_Lbl'UndsEqlsEqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}" = global [58 x i8] c"Lbl'UndsEqlsEqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}\00"
-@"sym_name_Lbl'UndsEqlsSlshEqls'Bool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}" = global [66 x i8] c"Lbl'UndsEqlsSlshEqls'Bool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}\00"
-@"sym_name_Lbl'UndsEqlsSlshEqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}" = global [62 x i8] c"Lbl'UndsEqlsSlshEqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}\00"
-@"sym_name_Lbl'UndsEqlsUndsSClnUnds'IMP-SYNTAX'UndsUnds'Id'Unds'AExp{}" = global [60 x i8] c"Lbl'UndsEqlsUndsSClnUnds'IMP-SYNTAX'UndsUnds'Id'Unds'AExp{}\00"
-@"sym_name_Lbl'UndsPerc'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}" = global [54 x i8] c"Lbl'UndsPerc'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}\00"
-@"sym_name_Lbl'UndsPipe'-'-GT-Unds'{}" = global [27 x i8] c"Lbl'UndsPipe'-'-GT-Unds'{}\00"
-@"sym_name_Lbl'UndsPlus'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}" = global [54 x i8] c"Lbl'UndsPlus'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}\00"
-@"sym_name_Lbl'UndsPlusUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp{}" = global [58 x i8] c"Lbl'UndsPlusUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp{}\00"
-@"sym_name_Lbl'UndsSlsh'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}" = global [54 x i8] c"Lbl'UndsSlsh'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}\00"
-@"sym_name_Lbl'UndsSlshUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp{}" = global [58 x i8] c"Lbl'UndsSlshUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp{}\00"
-@"sym_name_Lbl'UndsUndsUnds'IMP-SYNTAX'UndsUnds'Stmt'Unds'Stmt{}" = global [54 x i8] c"Lbl'UndsUndsUnds'IMP-SYNTAX'UndsUnds'Stmt'Unds'Stmt{}\00"
-@"sym_name_Lbl-'UndsUnds'IMP-SYNTAX'UndsUnds'Int{}" = global [40 x i8] c"Lbl-'UndsUnds'IMP-SYNTAX'UndsUnds'Int{}\00"
-@"sym_name_LblMap'Coln'lookup{}" = global [21 x i8] c"LblMap'Coln'lookup{}\00"
-@"sym_name_LblSet'Coln'in{}" = global [17 x i8] c"LblSet'Coln'in{}\00"
-@"sym_name_LblabsInt'LParUndsRParUnds'INT'UndsUnds'Int{}" = global [46 x i8] c"LblabsInt'LParUndsRParUnds'INT'UndsUnds'Int{}\00"
-@"sym_name_LblbitRangeInt'LParUndsCommUndsCommUndsRParUnds'INT'UndsUnds'Int'Unds'Int'Unds'Int{}" = global [85 x i8] c"LblbitRangeInt'LParUndsCommUndsCommUndsRParUnds'INT'UndsUnds'Int'Unds'Int'Unds'Int{}\00"
-@"sym_name_LblfreshInt'LParUndsRParUnds'INT'UndsUnds'Int{}" = global [48 x i8] c"LblfreshInt'LParUndsRParUnds'INT'UndsUnds'Int{}\00"
-@"sym_name_Lblif'LParUndsRParUnds'else'UndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'Block'Unds'Block{}" = global [86 x i8] c"Lblif'LParUndsRParUnds'else'UndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'Block'Unds'Block{}\00"
-@"sym_name_LblinitKCell{}" = global [15 x i8] c"LblinitKCell{}\00"
-@"sym_name_LblinitStateCell{}" = global [19 x i8] c"LblinitStateCell{}\00"
-@"sym_name_LblinitTCell{}" = global [15 x i8] c"LblinitTCell{}\00"
-@"sym_name_Lblint'UndsSClnUndsUnds'IMP-SYNTAX'UndsUnds'Ids'Unds'Stmt{}" = global [60 x i8] c"Lblint'UndsSClnUndsUnds'IMP-SYNTAX'UndsUnds'Ids'Unds'Stmt{}\00"
-@"sym_name_LblisAExp{}" = global [12 x i8] c"LblisAExp{}\00"
-@"sym_name_LblisBExp{}" = global [12 x i8] c"LblisBExp{}\00"
-@"sym_name_LblisBlock{}" = global [13 x i8] c"LblisBlock{}\00"
-@"sym_name_LblisBool{}" = global [12 x i8] c"LblisBool{}\00"
-@"sym_name_LblisCell{}" = global [12 x i8] c"LblisCell{}\00"
-@"sym_name_LblisId{}" = global [10 x i8] c"LblisId{}\00"
-@"sym_name_LblisIds{}" = global [11 x i8] c"LblisIds{}\00"
-@"sym_name_LblisInt{}" = global [11 x i8] c"LblisInt{}\00"
-@"sym_name_LblisK{}" = global [9 x i8] c"LblisK{}\00"
-@"sym_name_LblisKCell{}" = global [13 x i8] c"LblisKCell{}\00"
-@"sym_name_LblisKCellOpt{}" = global [16 x i8] c"LblisKCellOpt{}\00"
-@"sym_name_LblisKConfigVar{}" = global [18 x i8] c"LblisKConfigVar{}\00"
-@"sym_name_LblisKItem{}" = global [13 x i8] c"LblisKItem{}\00"
-@"sym_name_LblisKResult{}" = global [15 x i8] c"LblisKResult{}\00"
-@"sym_name_LblisList{}" = global [12 x i8] c"LblisList{}\00"
-@"sym_name_LblisMap{}" = global [11 x i8] c"LblisMap{}\00"
-@"sym_name_LblisPgm{}" = global [11 x i8] c"LblisPgm{}\00"
-@"sym_name_LblisSet{}" = global [11 x i8] c"LblisSet{}\00"
-@"sym_name_LblisStateCell{}" = global [17 x i8] c"LblisStateCell{}\00"
-@"sym_name_LblisStateCellOpt{}" = global [20 x i8] c"LblisStateCellOpt{}\00"
-@"sym_name_LblisStmt{}" = global [12 x i8] c"LblisStmt{}\00"
-@"sym_name_LblisString{}" = global [14 x i8] c"LblisString{}\00"
-@"sym_name_LblisTCell{}" = global [13 x i8] c"LblisTCell{}\00"
-@"sym_name_LblisTCellFragment{}" = global [21 x i8] c"LblisTCellFragment{}\00"
-@"sym_name_Lblkeys'LParUndsRParUnds'MAP'UndsUnds'Map{}" = global [44 x i8] c"Lblkeys'LParUndsRParUnds'MAP'UndsUnds'Map{}\00"
-@"sym_name_LblminInt'LParUndsCommUndsRParUnds'INT'UndsUnds'Int'Unds'Int{}" = global [63 x i8] c"LblminInt'LParUndsCommUndsRParUnds'INT'UndsUnds'Int'Unds'Int{}\00"
-@"sym_name_LblnotBool'Unds'{}" = global [19 x i8] c"LblnotBool'Unds'{}\00"
-@"sym_name_LblsignExtendBitRangeInt'LParUndsCommUndsCommUndsRParUnds'INT'UndsUnds'Int'Unds'Int'Unds'Int{}" = global [95 x i8] c"LblsignExtendBitRangeInt'LParUndsCommUndsCommUndsRParUnds'INT'UndsUnds'Int'Unds'Int'Unds'Int{}\00"
 @"sym_name_Lblwhile'LParUndsRParUndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'Block{}" = global [68 x i8] c"Lblwhile'LParUndsRParUndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'Block{}\00"
-@"sym_name_append{}" = global [9 x i8] c"append{}\00"
-@"sym_name_dotk{}" = global [7 x i8] c"dotk{}\00"
-@"sym_name_inj{SortIds{},SortK{}}" = global [23 x i8] c"inj{SortIds{},SortK{}}\00"
-@"sym_name_inj{SortAExp{},SortK{}}" = global [24 x i8] c"inj{SortAExp{},SortK{}}\00"
-@"sym_name_inj{SortStmt{},SortKItem{}}" = global [28 x i8] c"inj{SortStmt{},SortKItem{}}\00"
-@"sym_name_inj{SortBool{},SortK{}}" = global [24 x i8] c"inj{SortBool{},SortK{}}\00"
-@"sym_name_inj{SortBlock{},SortKItem{}}" = global [29 x i8] c"inj{SortBlock{},SortKItem{}}\00"
-@"sym_name_inj{SortKItem{},SortK{}}" = global [25 x i8] c"inj{SortKItem{},SortK{}}\00"
-@"sym_name_inj{SortSet{},SortK{}}" = global [23 x i8] c"inj{SortSet{},SortK{}}\00"
-@"sym_name_inj{SortBExp{},SortKItem{}}" = global [28 x i8] c"inj{SortBExp{},SortKItem{}}\00"
-@"sym_name_inj{SortInt{},SortK{}}" = global [23 x i8] c"inj{SortInt{},SortK{}}\00"
-@"sym_name_inj{SortKCell{},SortK{}}" = global [25 x i8] c"inj{SortKCell{},SortK{}}\00"
-@"sym_name_inj{SortTCell{},SortK{}}" = global [25 x i8] c"inj{SortTCell{},SortK{}}\00"
-@"sym_name_inj{SortList{},SortK{}}" = global [24 x i8] c"inj{SortList{},SortK{}}\00"
-@"sym_name_inj{SortId{},SortK{}}" = global [22 x i8] c"inj{SortId{},SortK{}}\00"
-@"sym_name_inj{SortTCellFragment{},SortK{}}" = global [33 x i8] c"inj{SortTCellFragment{},SortK{}}\00"
-@"sym_name_inj{SortStateCell{},SortK{}}" = global [29 x i8] c"inj{SortStateCell{},SortK{}}\00"
-@"sym_name_inj{SortKConfigVar{},SortK{}}" = global [30 x i8] c"inj{SortKConfigVar{},SortK{}}\00"
-@"sym_name_inj{SortStateCellOpt{},SortK{}}" = global [32 x i8] c"inj{SortStateCellOpt{},SortK{}}\00"
-@"sym_name_inj{SortKCellOpt{},SortK{}}" = global [28 x i8] c"inj{SortKCellOpt{},SortK{}}\00"
-@"sym_name_inj{SortPgm{},SortK{}}" = global [23 x i8] c"inj{SortPgm{},SortK{}}\00"
-@"sym_name_inj{SortKResult{},SortK{}}" = global [27 x i8] c"inj{SortKResult{},SortK{}}\00"
-@"sym_name_inj{SortMap{},SortK{}}" = global [23 x i8] c"inj{SortMap{},SortK{}}\00"
-@"sym_name_inj{SortCell{},SortK{}}" = global [24 x i8] c"inj{SortCell{},SortK{}}\00"
-@"sym_name_inj{SortString{},SortK{}}" = global [26 x i8] c"inj{SortString{},SortK{}}\00"
-@"sym_name_kseq{}" = global [7 x i8] c"kseq{}\00"
+@"sym_name_LblisMap{}" = global [11 x i8] c"LblisMap{}\00"
+@"sym_name_inj{SortStmt{}, SortKItem{}}" = global [29 x i8] c"inj{SortStmt{}, SortKItem{}}\00"
+@"sym_name_inj{SortBExp{}, SortKItem{}}" = global [29 x i8] c"inj{SortBExp{}, SortKItem{}}\00"
+@"sym_name_Lblsize'LParUndsRParUnds'MAP'UndsUnds'Map{}" = global [44 x i8] c"Lblsize'LParUndsRParUnds'MAP'UndsUnds'Map{}\00"
+@"sym_name_Lbl'UndsEqlsUndsSClnUnds'IMP-SYNTAX'UndsUnds'Id'Unds'AExp{}" = global [60 x i8] c"Lbl'UndsEqlsUndsSClnUnds'IMP-SYNTAX'UndsUnds'Id'Unds'AExp{}\00"
+@"sym_name_LblisPgm{}" = global [11 x i8] c"LblisPgm{}\00"
+@"sym_name_Lbl'UndsPlus'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}" = global [54 x i8] c"Lbl'UndsPlus'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}\00"
+@"sym_name_Lbl'UndsEqlsEqls'K'Unds'{}" = global [27 x i8] c"Lbl'UndsEqlsEqls'K'Unds'{}\00"
+@"sym_name_LblisKConfigVar{}" = global [18 x i8] c"LblisKConfigVar{}\00"
+@"sym_name_Lbl'Unds'dividesInt'UndsUnds'INT'UndsUnds'Int'Unds'Int{}" = global [57 x i8] c"Lbl'Unds'dividesInt'UndsUnds'INT'UndsUnds'Int'Unds'Int{}\00"
+@"sym_name_Lbl'UndsEqlsSlshEqls'K'UndsUnds'K-EQUAL'UndsUnds'K'Unds'K{}" = global [60 x i8] c"Lbl'UndsEqlsSlshEqls'K'UndsUnds'K-EQUAL'UndsUnds'K'Unds'K{}\00"
+@"sym_name_LblnotBool'Unds'{}" = global [19 x i8] c"LblnotBool'Unds'{}\00"
+@"sym_name_inj{SortInt{}, SortAExp{}}" = global [27 x i8] c"inj{SortInt{}, SortAExp{}}\00"
 @sort_name_SortList = global [9 x i8] c"SortList\00"
 @sort_name_SortMap = global [8 x i8] c"SortMap\00"
 @sort_name_SortBool = global [9 x i8] c"SortBool\00"
@@ -133,615 +182,866 @@ target triple = "x86_64-unknown-linux-gnu"
 @sort_name_SortSet = global [8 x i8] c"SortSet\00"
 @"sort_name_SortKCell{}" = global [12 x i8] c"SortKCell{}\00"
 @"sort_name_SortStateCell{}" = global [16 x i8] c"SortStateCell{}\00"
+@"sort_name_SortKCellOpt{}" = global [15 x i8] c"SortKCellOpt{}\00"
+@"sort_name_SortStateCellOpt{}" = global [19 x i8] c"SortStateCellOpt{}\00"
 @"sort_name_SortK{}" = global [8 x i8] c"SortK{}\00"
 @"sort_name_SortMap{}" = global [10 x i8] c"SortMap{}\00"
 @"sort_name_SortBExp{}" = global [11 x i8] c"SortBExp{}\00"
+@"sort_name_SortBool{}" = global [11 x i8] c"SortBool{}\00"
 @"sort_name_SortStmt{}" = global [11 x i8] c"SortStmt{}\00"
 @"sort_name_SortInt{}" = global [10 x i8] c"SortInt{}\00"
-@"sort_name_SortBool{}" = global [11 x i8] c"SortBool{}\00"
+@"sort_name_SortList{}" = global [11 x i8] c"SortList{}\00"
+@"sort_name_SortSet{}" = global [10 x i8] c"SortSet{}\00"
 @"sort_name_SortAExp{}" = global [11 x i8] c"SortAExp{}\00"
 @"sort_name_SortId{}" = global [9 x i8] c"SortId{}\00"
 @"sort_name_SortIds{}" = global [10 x i8] c"SortIds{}\00"
-@"sort_name_SortSet{}" = global [10 x i8] c"SortSet{}\00"
-@"sym_name_Lbl'Unds'Set'Unds'{}" = global [21 x i8] c"Lbl'Unds'Set'Unds'{}\00"
-@"sym_name_Lbl'Stop'Set{}" = global [15 x i8] c"Lbl'Stop'Set{}\00"
-@"sym_name_LblSetItem{}" = global [13 x i8] c"LblSetItem{}\00"
 @"sort_name_SortBlock{}" = global [12 x i8] c"SortBlock{}\00"
-@"sort_name_SortKItem{}" = global [12 x i8] c"SortKItem{}\00"
-@"sort_name_SortTCell{}" = global [12 x i8] c"SortTCell{}\00"
-@"sort_name_SortList{}" = global [11 x i8] c"SortList{}\00"
-@"sym_name_Lbl'Unds'List'Unds'{}" = global [22 x i8] c"Lbl'Unds'List'Unds'{}\00"
-@"sym_name_Lbl'Stop'List{}" = global [16 x i8] c"Lbl'Stop'List{}\00"
-@"sym_name_LblListItem{}" = global [14 x i8] c"LblListItem{}\00"
-@"sort_name_SortTCellFragment{}" = global [20 x i8] c"SortTCellFragment{}\00"
-@"sort_name_SortKConfigVar{}" = global [17 x i8] c"SortKConfigVar{}\00"
-@"sort_name_SortStateCellOpt{}" = global [19 x i8] c"SortStateCellOpt{}\00"
-@"sort_name_SortKCellOpt{}" = global [15 x i8] c"SortKCellOpt{}\00"
 @"sort_name_SortPgm{}" = global [10 x i8] c"SortPgm{}\00"
-@"sort_name_SortKResult{}" = global [14 x i8] c"SortKResult{}\00"
+@"sort_name_SortTCell{}" = global [12 x i8] c"SortTCell{}\00"
+@"sort_name_SortTCellFragment{}" = global [20 x i8] c"SortTCellFragment{}\00"
 @"sort_name_SortCell{}" = global [11 x i8] c"SortCell{}\00"
 @"sort_name_SortString{}" = global [13 x i8] c"SortString{}\00"
+@"sort_name_SortKResult{}" = global [14 x i8] c"SortKResult{}\00"
+@"sort_name_SortKItem{}" = global [12 x i8] c"SortKItem{}\00"
+@"sort_name_SortKConfigVar{}" = global [17 x i8] c"SortKConfigVar{}\00"
+@layout_1 = global [2 x %layoutitem] [%layoutitem { i64 ptrtoint (%block** getelementptr ({ %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* null, i64 0, i32 2) to i64), i16 9 }, %layoutitem { i64 ptrtoint (%block** getelementptr ({ %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* null, i64 0, i32 3) to i64), i16 9 }]
+@layout_2 = global [1 x %layoutitem] [%layoutitem { i64 ptrtoint (%block** getelementptr ({ %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* null, i64 0, i32 2) to i64), i16 9 }]
+@layout_3 = global [1 x %layoutitem] [%layoutitem { i64 ptrtoint (%map* getelementptr ({ %blockheader, [0 x i64], %map }, { %blockheader, [0 x i64], %map }* null, i64 0, i32 2) to i64), i16 1 }]
+@layout_4 = global [0 x %layoutitem] zeroinitializer
+@layout_5 = global [3 x %layoutitem] [%layoutitem { i64 ptrtoint (i1* getelementptr ({ %blockheader, [0 x i64], i1, %block*, %block* }, { %blockheader, [0 x i64], i1, %block*, %block* }* null, i64 0, i32 2) to i64), i16 7 }, %layoutitem { i64 ptrtoint (%block** getelementptr ({ %blockheader, [0 x i64], i1, %block*, %block* }, { %blockheader, [0 x i64], i1, %block*, %block* }* null, i64 0, i32 3) to i64), i16 9 }, %layoutitem { i64 ptrtoint (%block** getelementptr ({ %blockheader, [0 x i64], i1, %block*, %block* }, { %blockheader, [0 x i64], i1, %block*, %block* }* null, i64 0, i32 4) to i64), i16 9 }]
+@layout_6 = global [1 x %layoutitem] [%layoutitem { i64 ptrtoint (%mpz** getelementptr ({ %blockheader, [0 x i64], %mpz* }, { %blockheader, [0 x i64], %mpz* }* null, i64 0, i32 2) to i64), i16 4 }]
+@layout_7 = global [2 x %layoutitem] [%layoutitem { i64 ptrtoint (%mpz** getelementptr ({ %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* null, i64 0, i32 2) to i64), i16 4 }, %layoutitem { i64 ptrtoint (%mpz** getelementptr ({ %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* null, i64 0, i32 3) to i64), i16 4 }]
+@layout_8 = global [2 x %layoutitem] [%layoutitem { i64 ptrtoint (%map* getelementptr ({ %blockheader, [0 x i64], %map, %map }, { %blockheader, [0 x i64], %map, %map }* null, i64 0, i32 2) to i64), i16 1 }, %layoutitem { i64 ptrtoint (%map* getelementptr ({ %blockheader, [0 x i64], %map, %map }, { %blockheader, [0 x i64], %map, %map }* null, i64 0, i32 3) to i64), i16 1 }]
+@layout_9 = global [2 x %layoutitem] [%layoutitem { i64 ptrtoint (%list* getelementptr ({ %blockheader, [0 x i64], %list, %list }, { %blockheader, [0 x i64], %list, %list }* null, i64 0, i32 2) to i64), i16 2 }, %layoutitem { i64 ptrtoint (%list* getelementptr ({ %blockheader, [0 x i64], %list, %list }, { %blockheader, [0 x i64], %list, %list }* null, i64 0, i32 3) to i64), i16 2 }]
+@layout_10 = global [2 x %layoutitem] [%layoutitem { i64 ptrtoint (%set* getelementptr ({ %blockheader, [0 x i64], %set, %set }, { %blockheader, [0 x i64], %set, %set }* null, i64 0, i32 2) to i64), i16 3 }, %layoutitem { i64 ptrtoint (%set* getelementptr ({ %blockheader, [0 x i64], %set, %set }, { %blockheader, [0 x i64], %set, %set }* null, i64 0, i32 3) to i64), i16 3 }]
+@layout_11 = global [2 x %layoutitem] [%layoutitem { i64 ptrtoint (i1* getelementptr ({ %blockheader, [0 x i64], i1, i1 }, { %blockheader, [0 x i64], i1, i1 }* null, i64 0, i32 2) to i64), i16 7 }, %layoutitem { i64 ptrtoint (i1* getelementptr ({ %blockheader, [0 x i64], i1, i1 }, { %blockheader, [0 x i64], i1, i1 }* null, i64 0, i32 3) to i64), i16 7 }]
+@layout_12 = global [2 x %layoutitem] [%layoutitem { i64 ptrtoint (%block** getelementptr ({ %blockheader, [0 x i64], %block*, %map }, { %blockheader, [0 x i64], %block*, %map }* null, i64 0, i32 2) to i64), i16 9 }, %layoutitem { i64 ptrtoint (%map* getelementptr ({ %blockheader, [0 x i64], %block*, %map }, { %blockheader, [0 x i64], %block*, %map }* null, i64 0, i32 3) to i64), i16 1 }]
+@layout_13 = global [2 x %layoutitem] [%layoutitem { i64 ptrtoint (%block** getelementptr ({ %blockheader, [0 x i64], %block*, %list }, { %blockheader, [0 x i64], %block*, %list }* null, i64 0, i32 2) to i64), i16 9 }, %layoutitem { i64 ptrtoint (%list* getelementptr ({ %blockheader, [0 x i64], %block*, %list }, { %blockheader, [0 x i64], %block*, %list }* null, i64 0, i32 3) to i64), i16 2 }]
+@layout_14 = global [3 x %layoutitem] [%layoutitem { i64 ptrtoint (%map* getelementptr ({ %blockheader, [0 x i64], %map, %block*, %block* }, { %blockheader, [0 x i64], %map, %block*, %block* }* null, i64 0, i32 2) to i64), i16 1 }, %layoutitem { i64 ptrtoint (%block** getelementptr ({ %blockheader, [0 x i64], %map, %block*, %block* }, { %blockheader, [0 x i64], %map, %block*, %block* }* null, i64 0, i32 3) to i64), i16 9 }, %layoutitem { i64 ptrtoint (%block** getelementptr ({ %blockheader, [0 x i64], %map, %block*, %block* }, { %blockheader, [0 x i64], %map, %block*, %block* }* null, i64 0, i32 4) to i64), i16 9 }]
+@layout_15 = global [2 x %layoutitem] [%layoutitem { i64 ptrtoint (%map* getelementptr ({ %blockheader, [0 x i64], %map, %block* }, { %blockheader, [0 x i64], %map, %block* }* null, i64 0, i32 2) to i64), i16 1 }, %layoutitem { i64 ptrtoint (%block** getelementptr ({ %blockheader, [0 x i64], %map, %block* }, { %blockheader, [0 x i64], %map, %block* }* null, i64 0, i32 3) to i64), i16 9 }]
+@layout_16 = global [2 x %layoutitem] [%layoutitem { i64 ptrtoint (%block** getelementptr ({ %blockheader, [0 x i64], %block*, %set }, { %blockheader, [0 x i64], %block*, %set }* null, i64 0, i32 2) to i64), i16 9 }, %layoutitem { i64 ptrtoint (%set* getelementptr ({ %blockheader, [0 x i64], %block*, %set }, { %blockheader, [0 x i64], %block*, %set }* null, i64 0, i32 3) to i64), i16 3 }]
+@layout_17 = global [3 x %layoutitem] [%layoutitem { i64 ptrtoint (%mpz** getelementptr ({ %blockheader, [0 x i64], %mpz*, %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz*, %mpz* }* null, i64 0, i32 2) to i64), i16 4 }, %layoutitem { i64 ptrtoint (%mpz** getelementptr ({ %blockheader, [0 x i64], %mpz*, %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz*, %mpz* }* null, i64 0, i32 3) to i64), i16 4 }, %layoutitem { i64 ptrtoint (%mpz** getelementptr ({ %blockheader, [0 x i64], %mpz*, %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz*, %mpz* }* null, i64 0, i32 4) to i64), i16 4 }]
+@layout_18 = global [3 x %layoutitem] [%layoutitem { i64 ptrtoint (%block** getelementptr ({ %blockheader, [0 x i64], %block*, %block*, %block* }, { %blockheader, [0 x i64], %block*, %block*, %block* }* null, i64 0, i32 2) to i64), i16 9 }, %layoutitem { i64 ptrtoint (%block** getelementptr ({ %blockheader, [0 x i64], %block*, %block*, %block* }, { %blockheader, [0 x i64], %block*, %block*, %block* }* null, i64 0, i32 3) to i64), i16 9 }, %layoutitem { i64 ptrtoint (%block** getelementptr ({ %blockheader, [0 x i64], %block*, %block*, %block* }, { %blockheader, [0 x i64], %block*, %block*, %block* }* null, i64 0, i32 4) to i64), i16 9 }]
+@layout_19 = global [1 x %layoutitem] [%layoutitem { i64 ptrtoint (i1* getelementptr ({ %blockheader, [0 x i64], i1 }, { %blockheader, [0 x i64], i1 }* null, i64 0, i32 2) to i64), i16 7 }]
+@layout_20 = global [2 x %layoutitem] [%layoutitem { i64 ptrtoint (%map* getelementptr ({ %blockheader, [0 x i64], %map, %set }, { %blockheader, [0 x i64], %map, %set }* null, i64 0, i32 2) to i64), i16 1 }, %layoutitem { i64 ptrtoint (%set* getelementptr ({ %blockheader, [0 x i64], %map, %set }, { %blockheader, [0 x i64], %map, %set }* null, i64 0, i32 3) to i64), i16 3 }]
+@layout_21 = global [1 x %layoutitem] [%layoutitem { i64 ptrtoint (%list* getelementptr ({ %blockheader, [0 x i64], %list }, { %blockheader, [0 x i64], %list }* null, i64 0, i32 2) to i64), i16 2 }]
+@layout_22 = global [1 x %layoutitem] [%layoutitem { i64 ptrtoint (%set* getelementptr ({ %blockheader, [0 x i64], %set }, { %blockheader, [0 x i64], %set }* null, i64 0, i32 2) to i64), i16 3 }]
 
 declare %block* @parseConfiguration(i8*)
 
 declare void @printConfiguration(i32, %block*)
 
 define i32 @getTagForSymbolName(i8*) {
-"Lbl'-LT-'T'-GT-'{}":
-  %1 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([19 x i8], [19 x i8]* @"sym_name_Lbl'-LT-'T'-GT-'{}", i64 0, i64 0))
+"Lbl'Hash'freezerif'LParUndsRParUnds'else'UndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'Block'Unds'Block1'Unds'{}":
+  %1 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([106 x i8], [106 x i8]* @"sym_name_Lbl'Hash'freezerif'LParUndsRParUnds'else'UndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'Block'Unds'Block1'Unds'{}", i64 0, i64 0))
   %2 = icmp eq i32 %1, 0
-  br i1 %2, label %exit, label %"Lbl'-LT-'k'-GT-'{}"
+  br i1 %2, label %exit, label %"Lbl'UndsUndsUnds'IMP-SYNTAX'UndsUnds'Stmt'Unds'Stmt{}"
 
-"Lbl'-LT-'k'-GT-'{}":                             ; preds = %"Lbl'-LT-'T'-GT-'{}"
-  %3 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([19 x i8], [19 x i8]* @"sym_name_Lbl'-LT-'k'-GT-'{}", i64 0, i64 0))
+"Lbl'UndsUndsUnds'IMP-SYNTAX'UndsUnds'Stmt'Unds'Stmt{}": ; preds = %"Lbl'Hash'freezerif'LParUndsRParUnds'else'UndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'Block'Unds'Block1'Unds'{}"
+  %3 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([54 x i8], [54 x i8]* @"sym_name_Lbl'UndsUndsUnds'IMP-SYNTAX'UndsUnds'Stmt'Unds'Stmt{}", i64 0, i64 0))
   %4 = icmp eq i32 %3, 0
-  br i1 %4, label %exit, label %"Lbl'-LT-'state'-GT-'{}"
+  br i1 %4, label %exit, label %"inj{SortPgm{}, SortKItem{}}"
 
-"Lbl'-LT-'state'-GT-'{}":                         ; preds = %"Lbl'-LT-'k'-GT-'{}"
-  %5 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([23 x i8], [23 x i8]* @"sym_name_Lbl'-LT-'state'-GT-'{}", i64 0, i64 0))
+"inj{SortPgm{}, SortKItem{}}":                    ; preds = %"Lbl'UndsUndsUnds'IMP-SYNTAX'UndsUnds'Stmt'Unds'Stmt{}"
+  %5 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([28 x i8], [28 x i8]* @"sym_name_inj{SortPgm{}, SortKItem{}}", i64 0, i64 0))
   %6 = icmp eq i32 %5, 0
-  br i1 %6, label %exit, label %"Lbl'BangUndsUnds'IMP-SYNTAX'UndsUnds'BExp{}"
+  br i1 %6, label %exit, label %"Lbl'Stop'Map{}"
 
-"Lbl'BangUndsUnds'IMP-SYNTAX'UndsUnds'BExp{}":    ; preds = %"Lbl'-LT-'state'-GT-'{}"
-  %7 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([44 x i8], [44 x i8]* @"sym_name_Lbl'BangUndsUnds'IMP-SYNTAX'UndsUnds'BExp{}", i64 0, i64 0))
+"Lbl'Stop'Map{}":                                 ; preds = %"inj{SortPgm{}, SortKItem{}}"
+  %7 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([15 x i8], [15 x i8]* @"sym_name_Lbl'Stop'Map{}", i64 0, i64 0))
   %8 = icmp eq i32 %7, 0
-  br i1 %8, label %exit, label %"Lbl'Hash'freezer'BangUndsUnds'IMP-SYNTAX'UndsUnds'BExp0'Unds'{}"
+  br i1 %8, label %exit, label %"LblisString{}"
 
-"Lbl'Hash'freezer'BangUndsUnds'IMP-SYNTAX'UndsUnds'BExp0'Unds'{}": ; preds = %"Lbl'BangUndsUnds'IMP-SYNTAX'UndsUnds'BExp{}"
-  %9 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([64 x i8], [64 x i8]* @"sym_name_Lbl'Hash'freezer'BangUndsUnds'IMP-SYNTAX'UndsUnds'BExp0'Unds'{}", i64 0, i64 0))
+"LblisString{}":                                  ; preds = %"Lbl'Stop'Map{}"
+  %9 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([14 x i8], [14 x i8]* @"sym_name_LblisString{}", i64 0, i64 0))
   %10 = icmp eq i32 %9, 0
-  br i1 %10, label %exit, label %"Lbl'Hash'freezer'Unds-LT-EqlsUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp0'Unds'{}"
+  br i1 %10, label %exit, label %"LblisCell{}"
 
-"Lbl'Hash'freezer'Unds-LT-EqlsUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp0'Unds'{}": ; preds = %"Lbl'Hash'freezer'BangUndsUnds'IMP-SYNTAX'UndsUnds'BExp0'Unds'{}"
-  %11 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([82 x i8], [82 x i8]* @"sym_name_Lbl'Hash'freezer'Unds-LT-EqlsUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp0'Unds'{}", i64 0, i64 0))
+"LblisCell{}":                                    ; preds = %"LblisString{}"
+  %11 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([12 x i8], [12 x i8]* @"sym_name_LblisCell{}", i64 0, i64 0))
   %12 = icmp eq i32 %11, 0
-  br i1 %12, label %exit, label %"Lbl'Hash'freezer'Unds-LT-EqlsUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp1'Unds'{}"
+  br i1 %12, label %exit, label %"Lbl'Hash'freezer'UndsPlusUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp0'Unds'{}"
 
-"Lbl'Hash'freezer'Unds-LT-EqlsUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp1'Unds'{}": ; preds = %"Lbl'Hash'freezer'Unds-LT-EqlsUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp0'Unds'{}"
-  %13 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([82 x i8], [82 x i8]* @"sym_name_Lbl'Hash'freezer'Unds-LT-EqlsUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp1'Unds'{}", i64 0, i64 0))
+"Lbl'Hash'freezer'UndsPlusUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp0'Unds'{}": ; preds = %"LblisCell{}"
+  %13 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([78 x i8], [78 x i8]* @"sym_name_Lbl'Hash'freezer'UndsPlusUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp0'Unds'{}", i64 0, i64 0))
   %14 = icmp eq i32 %13, 0
-  br i1 %14, label %exit, label %"Lbl'Hash'freezer'UndsAndAndUndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'BExp1'Unds'{}"
-
-"Lbl'Hash'freezer'UndsAndAndUndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'BExp1'Unds'{}": ; preds = %"Lbl'Hash'freezer'Unds-LT-EqlsUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp1'Unds'{}"
-  %15 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([80 x i8], [80 x i8]* @"sym_name_Lbl'Hash'freezer'UndsAndAndUndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'BExp1'Unds'{}", i64 0, i64 0))
-  %16 = icmp eq i32 %15, 0
-  br i1 %16, label %exit, label %"Lbl'Hash'freezer'UndsEqlsUndsSClnUnds'IMP-SYNTAX'UndsUnds'Id'Unds'AExp0'Unds'{}"
-
-"Lbl'Hash'freezer'UndsEqlsUndsSClnUnds'IMP-SYNTAX'UndsUnds'Id'Unds'AExp0'Unds'{}": ; preds = %"Lbl'Hash'freezer'UndsAndAndUndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'BExp1'Unds'{}"
-  %17 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([80 x i8], [80 x i8]* @"sym_name_Lbl'Hash'freezer'UndsEqlsUndsSClnUnds'IMP-SYNTAX'UndsUnds'Id'Unds'AExp0'Unds'{}", i64 0, i64 0))
-  %18 = icmp eq i32 %17, 0
-  br i1 %18, label %exit, label %"Lbl'Hash'freezer'UndsPlusUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp0'Unds'{}"
-
-"Lbl'Hash'freezer'UndsPlusUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp0'Unds'{}": ; preds = %"Lbl'Hash'freezer'UndsEqlsUndsSClnUnds'IMP-SYNTAX'UndsUnds'Id'Unds'AExp0'Unds'{}"
-  %19 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([78 x i8], [78 x i8]* @"sym_name_Lbl'Hash'freezer'UndsPlusUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp0'Unds'{}", i64 0, i64 0))
-  %20 = icmp eq i32 %19, 0
-  br i1 %20, label %exit, label %"Lbl'Hash'freezer'UndsPlusUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp1'Unds'{}"
+  br i1 %14, label %exit, label %"Lbl'Hash'freezer'UndsPlusUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp1'Unds'{}"
 
 "Lbl'Hash'freezer'UndsPlusUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp1'Unds'{}": ; preds = %"Lbl'Hash'freezer'UndsPlusUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp0'Unds'{}"
-  %21 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([78 x i8], [78 x i8]* @"sym_name_Lbl'Hash'freezer'UndsPlusUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp1'Unds'{}", i64 0, i64 0))
+  %15 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([78 x i8], [78 x i8]* @"sym_name_Lbl'Hash'freezer'UndsPlusUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp1'Unds'{}", i64 0, i64 0))
+  %16 = icmp eq i32 %15, 0
+  br i1 %16, label %exit, label %"inj{SortKCell{}, SortCell{}}"
+
+"inj{SortKCell{}, SortCell{}}":                   ; preds = %"Lbl'Hash'freezer'UndsPlusUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp1'Unds'{}"
+  %17 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([29 x i8], [29 x i8]* @"sym_name_inj{SortKCell{}, SortCell{}}", i64 0, i64 0))
+  %18 = icmp eq i32 %17, 0
+  br i1 %18, label %exit, label %"Lbl'UndsPlusUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp{}"
+
+"Lbl'UndsPlusUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp{}": ; preds = %"inj{SortKCell{}, SortCell{}}"
+  %19 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([58 x i8], [58 x i8]* @"sym_name_Lbl'UndsPlusUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp{}", i64 0, i64 0))
+  %20 = icmp eq i32 %19, 0
+  br i1 %20, label %exit, label %"Lbl'Hash'freezer'BangUndsUnds'IMP-SYNTAX'UndsUnds'BExp0'Unds'{}"
+
+"Lbl'Hash'freezer'BangUndsUnds'IMP-SYNTAX'UndsUnds'BExp0'Unds'{}": ; preds = %"Lbl'UndsPlusUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp{}"
+  %21 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([64 x i8], [64 x i8]* @"sym_name_Lbl'Hash'freezer'BangUndsUnds'IMP-SYNTAX'UndsUnds'BExp0'Unds'{}", i64 0, i64 0))
   %22 = icmp eq i32 %21, 0
-  br i1 %22, label %exit, label %"Lbl'Hash'freezer'UndsSlshUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp0'Unds'{}"
+  br i1 %22, label %exit, label %"LblisStmt{}"
 
-"Lbl'Hash'freezer'UndsSlshUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp0'Unds'{}": ; preds = %"Lbl'Hash'freezer'UndsPlusUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp1'Unds'{}"
-  %23 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([78 x i8], [78 x i8]* @"sym_name_Lbl'Hash'freezer'UndsSlshUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp0'Unds'{}", i64 0, i64 0))
+"LblisStmt{}":                                    ; preds = %"Lbl'Hash'freezer'BangUndsUnds'IMP-SYNTAX'UndsUnds'BExp0'Unds'{}"
+  %23 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([12 x i8], [12 x i8]* @"sym_name_LblisStmt{}", i64 0, i64 0))
   %24 = icmp eq i32 %23, 0
-  br i1 %24, label %exit, label %"Lbl'Hash'freezer'UndsSlshUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp1'Unds'{}"
+  br i1 %24, label %exit, label %"LblisTCellFragment{}"
 
-"Lbl'Hash'freezer'UndsSlshUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp1'Unds'{}": ; preds = %"Lbl'Hash'freezer'UndsSlshUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp0'Unds'{}"
-  %25 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([78 x i8], [78 x i8]* @"sym_name_Lbl'Hash'freezer'UndsSlshUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp1'Unds'{}", i64 0, i64 0))
+"LblisTCellFragment{}":                           ; preds = %"LblisStmt{}"
+  %25 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([21 x i8], [21 x i8]* @"sym_name_LblisTCellFragment{}", i64 0, i64 0))
   %26 = icmp eq i32 %25, 0
-  br i1 %26, label %exit, label %"Lbl'Hash'freezerif'LParUndsRParUnds'else'UndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'Block'Unds'Block1'Unds'{}"
+  br i1 %26, label %exit, label %"LblisKResult{}"
 
-"Lbl'Hash'freezerif'LParUndsRParUnds'else'UndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'Block'Unds'Block1'Unds'{}": ; preds = %"Lbl'Hash'freezer'UndsSlshUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp1'Unds'{}"
-  %27 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([106 x i8], [106 x i8]* @"sym_name_Lbl'Hash'freezerif'LParUndsRParUnds'else'UndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'Block'Unds'Block1'Unds'{}", i64 0, i64 0))
+"LblisKResult{}":                                 ; preds = %"LblisTCellFragment{}"
+  %27 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([15 x i8], [15 x i8]* @"sym_name_LblisKResult{}", i64 0, i64 0))
   %28 = icmp eq i32 %27, 0
-  br i1 %28, label %exit, label %"Lbl'LBraRBraUnds'IMP-SYNTAX'Unds'{}"
+  br i1 %28, label %exit, label %"LblminInt'LParUndsCommUndsRParUnds'INT'UndsUnds'Int'Unds'Int{}"
 
-"Lbl'LBraRBraUnds'IMP-SYNTAX'Unds'{}":            ; preds = %"Lbl'Hash'freezerif'LParUndsRParUnds'else'UndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'Block'Unds'Block1'Unds'{}"
-  %29 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([36 x i8], [36 x i8]* @"sym_name_Lbl'LBraRBraUnds'IMP-SYNTAX'Unds'{}", i64 0, i64 0))
+"LblminInt'LParUndsCommUndsRParUnds'INT'UndsUnds'Int'Unds'Int{}": ; preds = %"LblisKResult{}"
+  %29 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([63 x i8], [63 x i8]* @"sym_name_LblminInt'LParUndsCommUndsRParUnds'INT'UndsUnds'Int'Unds'Int{}", i64 0, i64 0))
   %30 = icmp eq i32 %29, 0
-  br i1 %30, label %exit, label %"Lbl'LBraUndsRBraUnds'IMP-SYNTAX'UndsUnds'Stmt{}"
+  br i1 %30, label %exit, label %"LblmaxInt'LParUndsCommUndsRParUnds'INT'UndsUnds'Int'Unds'Int{}"
 
-"Lbl'LBraUndsRBraUnds'IMP-SYNTAX'UndsUnds'Stmt{}": ; preds = %"Lbl'LBraRBraUnds'IMP-SYNTAX'Unds'{}"
-  %31 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([48 x i8], [48 x i8]* @"sym_name_Lbl'LBraUndsRBraUnds'IMP-SYNTAX'UndsUnds'Stmt{}", i64 0, i64 0))
+"LblmaxInt'LParUndsCommUndsRParUnds'INT'UndsUnds'Int'Unds'Int{}": ; preds = %"LblminInt'LParUndsCommUndsRParUnds'INT'UndsUnds'Int'Unds'Int{}"
+  %31 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([63 x i8], [63 x i8]* @"sym_name_LblmaxInt'LParUndsCommUndsRParUnds'INT'UndsUnds'Int'Unds'Int{}", i64 0, i64 0))
   %32 = icmp eq i32 %31, 0
   br i1 %32, label %exit, label %"Lbl'Stop'List'LBraQuotUndsCommUndsUnds'IMP-SYNTAX'UndsUnds'Id'Unds'Ids'QuotRBraUnds'Ids{}"
 
-"Lbl'Stop'List'LBraQuotUndsCommUndsUnds'IMP-SYNTAX'UndsUnds'Id'Unds'Ids'QuotRBraUnds'Ids{}": ; preds = %"Lbl'LBraUndsRBraUnds'IMP-SYNTAX'UndsUnds'Stmt{}"
+"Lbl'Stop'List'LBraQuotUndsCommUndsUnds'IMP-SYNTAX'UndsUnds'Id'Unds'Ids'QuotRBraUnds'Ids{}": ; preds = %"LblmaxInt'LParUndsCommUndsRParUnds'INT'UndsUnds'Int'Unds'Int{}"
   %33 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([90 x i8], [90 x i8]* @"sym_name_Lbl'Stop'List'LBraQuotUndsCommUndsUnds'IMP-SYNTAX'UndsUnds'Id'Unds'Ids'QuotRBraUnds'Ids{}", i64 0, i64 0))
   %34 = icmp eq i32 %33, 0
-  br i1 %34, label %exit, label %"Lbl'Stop'Map{}"
+  br i1 %34, label %exit, label %"Lbl'Unds'-Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}"
 
-"Lbl'Stop'Map{}":                                 ; preds = %"Lbl'Stop'List'LBraQuotUndsCommUndsUnds'IMP-SYNTAX'UndsUnds'Id'Unds'Ids'QuotRBraUnds'Ids{}"
-  %35 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([15 x i8], [15 x i8]* @"sym_name_Lbl'Stop'Map{}", i64 0, i64 0))
+"Lbl'Unds'-Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}": ; preds = %"Lbl'Stop'List'LBraQuotUndsCommUndsUnds'IMP-SYNTAX'UndsUnds'Id'Unds'Ids'QuotRBraUnds'Ids{}"
+  %35 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([51 x i8], [51 x i8]* @"sym_name_Lbl'Unds'-Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", i64 0, i64 0))
   %36 = icmp eq i32 %35, 0
-  br i1 %36, label %exit, label %"Lbl'Unds'-Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}"
+  br i1 %36, label %exit, label %"Lbl'Unds-LT-Eqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}"
 
-"Lbl'Unds'-Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}": ; preds = %"Lbl'Stop'Map{}"
-  %37 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([51 x i8], [51 x i8]* @"sym_name_Lbl'Unds'-Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", i64 0, i64 0))
+"Lbl'Unds-LT-Eqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}": ; preds = %"Lbl'Unds'-Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}"
+  %37 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([58 x i8], [58 x i8]* @"sym_name_Lbl'Unds-LT-Eqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", i64 0, i64 0))
   %38 = icmp eq i32 %37, 0
-  br i1 %38, label %exit, label %"Lbl'Unds'Map'Unds'{}"
+  br i1 %38, label %exit, label %"LblisTCell{}"
 
-"Lbl'Unds'Map'Unds'{}":                           ; preds = %"Lbl'Unds'-Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}"
-  %39 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([21 x i8], [21 x i8]* @"sym_name_Lbl'Unds'Map'Unds'{}", i64 0, i64 0))
+"LblisTCell{}":                                   ; preds = %"Lbl'Unds-LT-Eqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}"
+  %39 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([13 x i8], [13 x i8]* @"sym_name_LblisTCell{}", i64 0, i64 0))
   %40 = icmp eq i32 %39, 0
-  br i1 %40, label %exit, label %"Lbl'Unds'andBool'Unds'{}"
+  br i1 %40, label %exit, label %"LblupdateMap'LParUndsCommUndsRParUnds'MAP'UndsUnds'Map'Unds'Map{}"
 
-"Lbl'Unds'andBool'Unds'{}":                       ; preds = %"Lbl'Unds'Map'Unds'{}"
-  %41 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([25 x i8], [25 x i8]* @"sym_name_Lbl'Unds'andBool'Unds'{}", i64 0, i64 0))
+"LblupdateMap'LParUndsCommUndsRParUnds'MAP'UndsUnds'Map'Unds'Map{}": ; preds = %"LblisTCell{}"
+  %41 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([66 x i8], [66 x i8]* @"sym_name_LblupdateMap'LParUndsCommUndsRParUnds'MAP'UndsUnds'Map'Unds'Map{}", i64 0, i64 0))
   %42 = icmp eq i32 %41, 0
-  br i1 %42, label %exit, label %"Lbl'Unds'andThenBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}"
+  br i1 %42, label %exit, label %"Lbl'LBraRBraUnds'IMP-SYNTAX'Unds'{}"
 
-"Lbl'Unds'andThenBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}": ; preds = %"Lbl'Unds'andBool'Unds'{}"
-  %43 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([61 x i8], [61 x i8]* @"sym_name_Lbl'Unds'andThenBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}", i64 0, i64 0))
+"Lbl'LBraRBraUnds'IMP-SYNTAX'Unds'{}":            ; preds = %"LblupdateMap'LParUndsCommUndsRParUnds'MAP'UndsUnds'Map'Unds'Map{}"
+  %43 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([36 x i8], [36 x i8]* @"sym_name_Lbl'LBraRBraUnds'IMP-SYNTAX'Unds'{}", i64 0, i64 0))
   %44 = icmp eq i32 %43, 0
-  br i1 %44, label %exit, label %"Lbl'Unds'divInt'UndsUnds'INT'UndsUnds'Int'Unds'Int{}"
+  br i1 %44, label %exit, label %"LblMap'Coln'lookup{}"
 
-"Lbl'Unds'divInt'UndsUnds'INT'UndsUnds'Int'Unds'Int{}": ; preds = %"Lbl'Unds'andThenBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}"
-  %45 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([53 x i8], [53 x i8]* @"sym_name_Lbl'Unds'divInt'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", i64 0, i64 0))
+"LblMap'Coln'lookup{}":                           ; preds = %"Lbl'LBraRBraUnds'IMP-SYNTAX'Unds'{}"
+  %45 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([21 x i8], [21 x i8]* @"sym_name_LblMap'Coln'lookup{}", i64 0, i64 0))
   %46 = icmp eq i32 %45, 0
-  br i1 %46, label %exit, label %"Lbl'Unds'dividesInt'UndsUnds'INT'UndsUnds'Int'Unds'Int{}"
+  br i1 %46, label %exit, label %"Lbl'UndsLSqBUndsRSqB'orDefault'UndsUnds'MAP'UndsUnds'Map'Unds'K'Unds'K{}"
 
-"Lbl'Unds'dividesInt'UndsUnds'INT'UndsUnds'Int'Unds'Int{}": ; preds = %"Lbl'Unds'divInt'UndsUnds'INT'UndsUnds'Int'Unds'Int{}"
-  %47 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([57 x i8], [57 x i8]* @"sym_name_Lbl'Unds'dividesInt'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", i64 0, i64 0))
+"Lbl'UndsLSqBUndsRSqB'orDefault'UndsUnds'MAP'UndsUnds'Map'Unds'K'Unds'K{}": ; preds = %"LblMap'Coln'lookup{}"
+  %47 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([73 x i8], [73 x i8]* @"sym_name_Lbl'UndsLSqBUndsRSqB'orDefault'UndsUnds'MAP'UndsUnds'Map'Unds'K'Unds'K{}", i64 0, i64 0))
   %48 = icmp eq i32 %47, 0
-  br i1 %48, label %exit, label %"Lbl'Unds'impliesBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}"
+  br i1 %48, label %exit, label %"Lbl'Unds'-Map'UndsUnds'MAP'UndsUnds'Map'Unds'Map{}"
 
-"Lbl'Unds'impliesBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}": ; preds = %"Lbl'Unds'dividesInt'UndsUnds'INT'UndsUnds'Int'Unds'Int{}"
-  %49 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([61 x i8], [61 x i8]* @"sym_name_Lbl'Unds'impliesBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}", i64 0, i64 0))
+"Lbl'Unds'-Map'UndsUnds'MAP'UndsUnds'Map'Unds'Map{}": ; preds = %"Lbl'UndsLSqBUndsRSqB'orDefault'UndsUnds'MAP'UndsUnds'Map'Unds'K'Unds'K{}"
+  %49 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([51 x i8], [51 x i8]* @"sym_name_Lbl'Unds'-Map'UndsUnds'MAP'UndsUnds'Map'Unds'Map{}", i64 0, i64 0))
   %50 = icmp eq i32 %49, 0
-  br i1 %50, label %exit, label %"Lbl'Unds'modInt'UndsUnds'INT'UndsUnds'Int'Unds'Int{}"
+  br i1 %50, label %exit, label %"Lbl'Unds-LT-Eqls'Map'UndsUnds'MAP'UndsUnds'Map'Unds'Map{}"
 
-"Lbl'Unds'modInt'UndsUnds'INT'UndsUnds'Int'Unds'Int{}": ; preds = %"Lbl'Unds'impliesBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}"
-  %51 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([53 x i8], [53 x i8]* @"sym_name_Lbl'Unds'modInt'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", i64 0, i64 0))
+"Lbl'Unds-LT-Eqls'Map'UndsUnds'MAP'UndsUnds'Map'Unds'Map{}": ; preds = %"Lbl'Unds'-Map'UndsUnds'MAP'UndsUnds'Map'Unds'Map{}"
+  %51 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([58 x i8], [58 x i8]* @"sym_name_Lbl'Unds-LT-Eqls'Map'UndsUnds'MAP'UndsUnds'Map'Unds'Map{}", i64 0, i64 0))
   %52 = icmp eq i32 %51, 0
-  br i1 %52, label %exit, label %"Lbl'Unds'orBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}"
+  br i1 %52, label %exit, label %"Lbl'Hash'freezer'UndsEqlsUndsSClnUnds'IMP-SYNTAX'UndsUnds'Id'Unds'AExp0'Unds'{}"
 
-"Lbl'Unds'orBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}": ; preds = %"Lbl'Unds'modInt'UndsUnds'INT'UndsUnds'Int'Unds'Int{}"
-  %53 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([56 x i8], [56 x i8]* @"sym_name_Lbl'Unds'orBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}", i64 0, i64 0))
+"Lbl'Hash'freezer'UndsEqlsUndsSClnUnds'IMP-SYNTAX'UndsUnds'Id'Unds'AExp0'Unds'{}": ; preds = %"Lbl'Unds-LT-Eqls'Map'UndsUnds'MAP'UndsUnds'Map'Unds'Map{}"
+  %53 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([80 x i8], [80 x i8]* @"sym_name_Lbl'Hash'freezer'UndsEqlsUndsSClnUnds'IMP-SYNTAX'UndsUnds'Id'Unds'AExp0'Unds'{}", i64 0, i64 0))
   %54 = icmp eq i32 %53, 0
-  br i1 %54, label %exit, label %"Lbl'Unds'orElseBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}"
+  br i1 %54, label %exit, label %"inj{SortInt{}, SortKItem{}}"
 
-"Lbl'Unds'orElseBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}": ; preds = %"Lbl'Unds'orBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}"
-  %55 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([60 x i8], [60 x i8]* @"sym_name_Lbl'Unds'orElseBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}", i64 0, i64 0))
+"inj{SortInt{}, SortKItem{}}":                    ; preds = %"Lbl'Hash'freezer'UndsEqlsUndsSClnUnds'IMP-SYNTAX'UndsUnds'Id'Unds'AExp0'Unds'{}"
+  %55 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([28 x i8], [28 x i8]* @"sym_name_inj{SortInt{}, SortKItem{}}", i64 0, i64 0))
   %56 = icmp eq i32 %55, 0
-  br i1 %56, label %exit, label %"Lbl'Unds'xorBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}"
+  br i1 %56, label %exit, label %"Lbl'-LT-'T'-GT-'{}"
 
-"Lbl'Unds'xorBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}": ; preds = %"Lbl'Unds'orElseBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}"
-  %57 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([57 x i8], [57 x i8]* @"sym_name_Lbl'Unds'xorBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}", i64 0, i64 0))
+"Lbl'-LT-'T'-GT-'{}":                             ; preds = %"inj{SortInt{}, SortKItem{}}"
+  %57 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([19 x i8], [19 x i8]* @"sym_name_Lbl'-LT-'T'-GT-'{}", i64 0, i64 0))
   %58 = icmp eq i32 %57, 0
-  br i1 %58, label %exit, label %"Lbl'Unds-GT--GT-'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}"
+  br i1 %58, label %exit, label %"LblabsInt'LParUndsRParUnds'INT'UndsUnds'Int{}"
 
-"Lbl'Unds-GT--GT-'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}": ; preds = %"Lbl'Unds'xorBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}"
-  %59 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([58 x i8], [58 x i8]* @"sym_name_Lbl'Unds-GT--GT-'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", i64 0, i64 0))
+"LblabsInt'LParUndsRParUnds'INT'UndsUnds'Int{}":  ; preds = %"Lbl'-LT-'T'-GT-'{}"
+  %59 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([46 x i8], [46 x i8]* @"sym_name_LblabsInt'LParUndsRParUnds'INT'UndsUnds'Int{}", i64 0, i64 0))
   %60 = icmp eq i32 %59, 0
-  br i1 %60, label %exit, label %"Lbl'Unds-GT-Eqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}"
+  br i1 %60, label %exit, label %"LblfreshInt'LParUndsRParUnds'INT'UndsUnds'Int{}"
 
-"Lbl'Unds-GT-Eqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}": ; preds = %"Lbl'Unds-GT--GT-'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}"
-  %61 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([58 x i8], [58 x i8]* @"sym_name_Lbl'Unds-GT-Eqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", i64 0, i64 0))
+"LblfreshInt'LParUndsRParUnds'INT'UndsUnds'Int{}": ; preds = %"LblabsInt'LParUndsRParUnds'INT'UndsUnds'Int{}"
+  %61 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([48 x i8], [48 x i8]* @"sym_name_LblfreshInt'LParUndsRParUnds'INT'UndsUnds'Int{}", i64 0, i64 0))
   %62 = icmp eq i32 %61, 0
-  br i1 %62, label %exit, label %"Lbl'Unds-LT--LT-'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}"
+  br i1 %62, label %exit, label %"inj{SortKCell{}, SortKItem{}}"
 
-"Lbl'Unds-LT--LT-'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}": ; preds = %"Lbl'Unds-GT-Eqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}"
-  %63 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([58 x i8], [58 x i8]* @"sym_name_Lbl'Unds-LT--LT-'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", i64 0, i64 0))
+"inj{SortKCell{}, SortKItem{}}":                  ; preds = %"LblfreshInt'LParUndsRParUnds'INT'UndsUnds'Int{}"
+  %63 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([30 x i8], [30 x i8]* @"sym_name_inj{SortKCell{}, SortKItem{}}", i64 0, i64 0))
   %64 = icmp eq i32 %63, 0
-  br i1 %64, label %exit, label %"Lbl'Unds-LT-Eqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}"
+  br i1 %64, label %exit, label %"Lbl'UndsEqlsSlshEqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}"
 
-"Lbl'Unds-LT-Eqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}": ; preds = %"Lbl'Unds-LT--LT-'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}"
-  %65 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([58 x i8], [58 x i8]* @"sym_name_Lbl'Unds-LT-Eqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", i64 0, i64 0))
+"Lbl'UndsEqlsSlshEqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}": ; preds = %"inj{SortKCell{}, SortKItem{}}"
+  %65 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([62 x i8], [62 x i8]* @"sym_name_Lbl'UndsEqlsSlshEqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", i64 0, i64 0))
   %66 = icmp eq i32 %65, 0
-  br i1 %66, label %exit, label %"Lbl'Unds-LT-EqlsUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp{}"
+  br i1 %66, label %exit, label %"Lbl'Unds'andThenBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}"
 
-"Lbl'Unds-LT-EqlsUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp{}": ; preds = %"Lbl'Unds-LT-Eqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}"
-  %67 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([62 x i8], [62 x i8]* @"sym_name_Lbl'Unds-LT-EqlsUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp{}", i64 0, i64 0))
+"Lbl'Unds'andThenBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}": ; preds = %"Lbl'UndsEqlsSlshEqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}"
+  %67 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([61 x i8], [61 x i8]* @"sym_name_Lbl'Unds'andThenBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}", i64 0, i64 0))
   %68 = icmp eq i32 %67, 0
-  br i1 %68, label %exit, label %"Lbl'UndsAndAndUndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'BExp{}"
+  br i1 %68, label %exit, label %"LblbitRangeInt'LParUndsCommUndsCommUndsRParUnds'INT'UndsUnds'Int'Unds'Int'Unds'Int{}"
 
-"Lbl'UndsAndAndUndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'BExp{}": ; preds = %"Lbl'Unds-LT-EqlsUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp{}"
-  %69 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([60 x i8], [60 x i8]* @"sym_name_Lbl'UndsAndAndUndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'BExp{}", i64 0, i64 0))
+"LblbitRangeInt'LParUndsCommUndsCommUndsRParUnds'INT'UndsUnds'Int'Unds'Int'Unds'Int{}": ; preds = %"Lbl'Unds'andThenBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}"
+  %69 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([85 x i8], [85 x i8]* @"sym_name_LblbitRangeInt'LParUndsCommUndsCommUndsRParUnds'INT'UndsUnds'Int'Unds'Int'Unds'Int{}", i64 0, i64 0))
   %70 = icmp eq i32 %69, 0
-  br i1 %70, label %exit, label %"Lbl'UndsCommUndsUnds'IMP-SYNTAX'UndsUnds'Id'Unds'Ids{}"
+  br i1 %70, label %exit, label %"inj{SortInt{}, SortKResult{}}"
 
-"Lbl'UndsCommUndsUnds'IMP-SYNTAX'UndsUnds'Id'Unds'Ids{}": ; preds = %"Lbl'UndsAndAndUndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'BExp{}"
-  %71 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([55 x i8], [55 x i8]* @"sym_name_Lbl'UndsCommUndsUnds'IMP-SYNTAX'UndsUnds'Id'Unds'Ids{}", i64 0, i64 0))
+"inj{SortInt{}, SortKResult{}}":                  ; preds = %"LblbitRangeInt'LParUndsCommUndsCommUndsRParUnds'INT'UndsUnds'Int'Unds'Int'Unds'Int{}"
+  %71 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([30 x i8], [30 x i8]* @"sym_name_inj{SortInt{}, SortKResult{}}", i64 0, i64 0))
   %72 = icmp eq i32 %71, 0
-  br i1 %72, label %exit, label %"Lbl'UndsEqlsEqls'Bool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}"
+  br i1 %72, label %exit, label %"LblisId{}"
 
-"Lbl'UndsEqlsEqls'Bool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}": ; preds = %"Lbl'UndsCommUndsUnds'IMP-SYNTAX'UndsUnds'Id'Unds'Ids{}"
-  %73 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([62 x i8], [62 x i8]* @"sym_name_Lbl'UndsEqlsEqls'Bool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}", i64 0, i64 0))
+"LblisId{}":                                      ; preds = %"inj{SortInt{}, SortKResult{}}"
+  %73 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sym_name_LblisId{}", i64 0, i64 0))
   %74 = icmp eq i32 %73, 0
-  br i1 %74, label %exit, label %"Lbl'UndsEqlsEqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}"
+  br i1 %74, label %exit, label %"LblisAExp{}"
 
-"Lbl'UndsEqlsEqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}": ; preds = %"Lbl'UndsEqlsEqls'Bool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}"
-  %75 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([58 x i8], [58 x i8]* @"sym_name_Lbl'UndsEqlsEqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", i64 0, i64 0))
+"LblisAExp{}":                                    ; preds = %"LblisId{}"
+  %75 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([12 x i8], [12 x i8]* @"sym_name_LblisAExp{}", i64 0, i64 0))
   %76 = icmp eq i32 %75, 0
-  br i1 %76, label %exit, label %"Lbl'UndsEqlsSlshEqls'Bool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}"
+  br i1 %76, label %exit, label %"LblListItem{}"
 
-"Lbl'UndsEqlsSlshEqls'Bool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}": ; preds = %"Lbl'UndsEqlsEqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}"
-  %77 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([66 x i8], [66 x i8]* @"sym_name_Lbl'UndsEqlsSlshEqls'Bool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}", i64 0, i64 0))
+"LblListItem{}":                                  ; preds = %"LblisAExp{}"
+  %77 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([14 x i8], [14 x i8]* @"sym_name_LblListItem{}", i64 0, i64 0))
   %78 = icmp eq i32 %77, 0
-  br i1 %78, label %exit, label %"Lbl'UndsEqlsSlshEqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}"
+  br i1 %78, label %exit, label %"inj{SortList{}, SortKItem{}}"
 
-"Lbl'UndsEqlsSlshEqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}": ; preds = %"Lbl'UndsEqlsSlshEqls'Bool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}"
-  %79 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([62 x i8], [62 x i8]* @"sym_name_Lbl'UndsEqlsSlshEqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", i64 0, i64 0))
+"inj{SortList{}, SortKItem{}}":                   ; preds = %"LblListItem{}"
+  %79 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([29 x i8], [29 x i8]* @"sym_name_inj{SortList{}, SortKItem{}}", i64 0, i64 0))
   %80 = icmp eq i32 %79, 0
-  br i1 %80, label %exit, label %"Lbl'UndsEqlsUndsSClnUnds'IMP-SYNTAX'UndsUnds'Id'Unds'AExp{}"
+  br i1 %80, label %exit, label %"Lbl'Unds'Map'Unds'{}"
 
-"Lbl'UndsEqlsUndsSClnUnds'IMP-SYNTAX'UndsUnds'Id'Unds'AExp{}": ; preds = %"Lbl'UndsEqlsSlshEqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}"
-  %81 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([60 x i8], [60 x i8]* @"sym_name_Lbl'UndsEqlsUndsSClnUnds'IMP-SYNTAX'UndsUnds'Id'Unds'AExp{}", i64 0, i64 0))
+"Lbl'Unds'Map'Unds'{}":                           ; preds = %"inj{SortList{}, SortKItem{}}"
+  %81 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([21 x i8], [21 x i8]* @"sym_name_Lbl'Unds'Map'Unds'{}", i64 0, i64 0))
   %82 = icmp eq i32 %81, 0
-  br i1 %82, label %exit, label %"Lbl'UndsPerc'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}"
+  br i1 %82, label %exit, label %"Lbl'UndsEqlsEqls'Bool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}"
 
-"Lbl'UndsPerc'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}": ; preds = %"Lbl'UndsEqlsUndsSClnUnds'IMP-SYNTAX'UndsUnds'Id'Unds'AExp{}"
-  %83 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([54 x i8], [54 x i8]* @"sym_name_Lbl'UndsPerc'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", i64 0, i64 0))
+"Lbl'UndsEqlsEqls'Bool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}": ; preds = %"Lbl'Unds'Map'Unds'{}"
+  %83 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([62 x i8], [62 x i8]* @"sym_name_Lbl'UndsEqlsEqls'Bool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}", i64 0, i64 0))
   %84 = icmp eq i32 %83, 0
-  br i1 %84, label %exit, label %"Lbl'UndsPipe'-'-GT-Unds'{}"
+  br i1 %84, label %exit, label %"Lbl'UndsAnd'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}"
 
-"Lbl'UndsPipe'-'-GT-Unds'{}":                     ; preds = %"Lbl'UndsPerc'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}"
-  %85 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([27 x i8], [27 x i8]* @"sym_name_Lbl'UndsPipe'-'-GT-Unds'{}", i64 0, i64 0))
+"Lbl'UndsAnd'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}": ; preds = %"Lbl'UndsEqlsEqls'Bool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}"
+  %85 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([53 x i8], [53 x i8]* @"sym_name_Lbl'UndsAnd'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", i64 0, i64 0))
   %86 = icmp eq i32 %85, 0
-  br i1 %86, label %exit, label %"Lbl'UndsPlus'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}"
+  br i1 %86, label %exit, label %"Lbl'UndsLSqBUnds-LT-'-undef'RSqB'{}"
 
-"Lbl'UndsPlus'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}": ; preds = %"Lbl'UndsPipe'-'-GT-Unds'{}"
-  %87 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([54 x i8], [54 x i8]* @"sym_name_Lbl'UndsPlus'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", i64 0, i64 0))
+"Lbl'UndsLSqBUnds-LT-'-undef'RSqB'{}":            ; preds = %"Lbl'UndsAnd'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}"
+  %87 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([36 x i8], [36 x i8]* @"sym_name_Lbl'UndsLSqBUnds-LT-'-undef'RSqB'{}", i64 0, i64 0))
   %88 = icmp eq i32 %87, 0
-  br i1 %88, label %exit, label %"Lbl'UndsPlusUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp{}"
+  br i1 %88, label %exit, label %"Lbl'-LT-'k'-GT-'{}"
 
-"Lbl'UndsPlusUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp{}": ; preds = %"Lbl'UndsPlus'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}"
-  %89 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([58 x i8], [58 x i8]* @"sym_name_Lbl'UndsPlusUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp{}", i64 0, i64 0))
+"Lbl'-LT-'k'-GT-'{}":                             ; preds = %"Lbl'UndsLSqBUnds-LT-'-undef'RSqB'{}"
+  %89 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([19 x i8], [19 x i8]* @"sym_name_Lbl'-LT-'k'-GT-'{}", i64 0, i64 0))
   %90 = icmp eq i32 %89, 0
-  br i1 %90, label %exit, label %"Lbl'UndsSlsh'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}"
+  br i1 %90, label %exit, label %"LblisKItem{}"
 
-"Lbl'UndsSlsh'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}": ; preds = %"Lbl'UndsPlusUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp{}"
-  %91 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([54 x i8], [54 x i8]* @"sym_name_Lbl'UndsSlsh'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", i64 0, i64 0))
+"LblisKItem{}":                                   ; preds = %"Lbl'-LT-'k'-GT-'{}"
+  %91 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([13 x i8], [13 x i8]* @"sym_name_LblisKItem{}", i64 0, i64 0))
   %92 = icmp eq i32 %91, 0
-  br i1 %92, label %exit, label %"Lbl'UndsSlshUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp{}"
+  br i1 %92, label %exit, label %"dotk{}"
 
-"Lbl'UndsSlshUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp{}": ; preds = %"Lbl'UndsSlsh'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}"
-  %93 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([58 x i8], [58 x i8]* @"sym_name_Lbl'UndsSlshUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp{}", i64 0, i64 0))
+"dotk{}":                                         ; preds = %"LblisKItem{}"
+  %93 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([7 x i8], [7 x i8]* @"sym_name_dotk{}", i64 0, i64 0))
   %94 = icmp eq i32 %93, 0
-  br i1 %94, label %exit, label %"Lbl'UndsUndsUnds'IMP-SYNTAX'UndsUnds'Stmt'Unds'Stmt{}"
+  br i1 %94, label %exit, label %"LblfreshId'LParUndsRParUnds'ID-SYNTAX'UndsUnds'Int{}"
 
-"Lbl'UndsUndsUnds'IMP-SYNTAX'UndsUnds'Stmt'Unds'Stmt{}": ; preds = %"Lbl'UndsSlshUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp{}"
-  %95 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([54 x i8], [54 x i8]* @"sym_name_Lbl'UndsUndsUnds'IMP-SYNTAX'UndsUnds'Stmt'Unds'Stmt{}", i64 0, i64 0))
+"LblfreshId'LParUndsRParUnds'ID-SYNTAX'UndsUnds'Int{}": ; preds = %"dotk{}"
+  %95 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([53 x i8], [53 x i8]* @"sym_name_LblfreshId'LParUndsRParUnds'ID-SYNTAX'UndsUnds'Int{}", i64 0, i64 0))
   %96 = icmp eq i32 %95, 0
-  br i1 %96, label %exit, label %"Lbl-'UndsUnds'IMP-SYNTAX'UndsUnds'Int{}"
+  br i1 %96, label %exit, label %"Lbl'Unds'in'Unds'keys'LParUndsRParUnds'MAP'UndsUnds'K'Unds'Map{}"
 
-"Lbl-'UndsUnds'IMP-SYNTAX'UndsUnds'Int{}":        ; preds = %"Lbl'UndsUndsUnds'IMP-SYNTAX'UndsUnds'Stmt'Unds'Stmt{}"
-  %97 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([40 x i8], [40 x i8]* @"sym_name_Lbl-'UndsUnds'IMP-SYNTAX'UndsUnds'Int{}", i64 0, i64 0))
+"Lbl'Unds'in'Unds'keys'LParUndsRParUnds'MAP'UndsUnds'K'Unds'Map{}": ; preds = %"LblfreshId'LParUndsRParUnds'ID-SYNTAX'UndsUnds'Int{}"
+  %97 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([65 x i8], [65 x i8]* @"sym_name_Lbl'Unds'in'Unds'keys'LParUndsRParUnds'MAP'UndsUnds'K'Unds'Map{}", i64 0, i64 0))
   %98 = icmp eq i32 %97, 0
-  br i1 %98, label %exit, label %"LblMap'Coln'lookup{}"
+  br i1 %98, label %exit, label %"Lbl'UndsStar'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}"
 
-"LblMap'Coln'lookup{}":                           ; preds = %"Lbl-'UndsUnds'IMP-SYNTAX'UndsUnds'Int{}"
-  %99 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([21 x i8], [21 x i8]* @"sym_name_LblMap'Coln'lookup{}", i64 0, i64 0))
+"Lbl'UndsStar'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}": ; preds = %"Lbl'Unds'in'Unds'keys'LParUndsRParUnds'MAP'UndsUnds'K'Unds'Map{}"
+  %99 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([54 x i8], [54 x i8]* @"sym_name_Lbl'UndsStar'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", i64 0, i64 0))
   %100 = icmp eq i32 %99, 0
-  br i1 %100, label %exit, label %"LblSet'Coln'in{}"
+  br i1 %100, label %exit, label %"Lbl'Unds'Set'Unds'{}"
 
-"LblSet'Coln'in{}":                               ; preds = %"LblMap'Coln'lookup{}"
-  %101 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([17 x i8], [17 x i8]* @"sym_name_LblSet'Coln'in{}", i64 0, i64 0))
+"Lbl'Unds'Set'Unds'{}":                           ; preds = %"Lbl'UndsStar'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}"
+  %101 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([21 x i8], [21 x i8]* @"sym_name_Lbl'Unds'Set'Unds'{}", i64 0, i64 0))
   %102 = icmp eq i32 %101, 0
-  br i1 %102, label %exit, label %"LblabsInt'LParUndsRParUnds'INT'UndsUnds'Int{}"
+  br i1 %102, label %exit, label %"LblSet'Coln'in{}"
 
-"LblabsInt'LParUndsRParUnds'INT'UndsUnds'Int{}":  ; preds = %"LblSet'Coln'in{}"
-  %103 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([46 x i8], [46 x i8]* @"sym_name_LblabsInt'LParUndsRParUnds'INT'UndsUnds'Int{}", i64 0, i64 0))
+"LblSet'Coln'in{}":                               ; preds = %"Lbl'Unds'Set'Unds'{}"
+  %103 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([17 x i8], [17 x i8]* @"sym_name_LblSet'Coln'in{}", i64 0, i64 0))
   %104 = icmp eq i32 %103, 0
-  br i1 %104, label %exit, label %"LblbitRangeInt'LParUndsCommUndsCommUndsRParUnds'INT'UndsUnds'Int'Unds'Int'Unds'Int{}"
+  br i1 %104, label %exit, label %"LblisStateCell{}"
 
-"LblbitRangeInt'LParUndsCommUndsCommUndsRParUnds'INT'UndsUnds'Int'Unds'Int'Unds'Int{}": ; preds = %"LblabsInt'LParUndsRParUnds'INT'UndsUnds'Int{}"
-  %105 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([85 x i8], [85 x i8]* @"sym_name_LblbitRangeInt'LParUndsCommUndsCommUndsRParUnds'INT'UndsUnds'Int'Unds'Int'Unds'Int{}", i64 0, i64 0))
+"LblisStateCell{}":                               ; preds = %"LblSet'Coln'in{}"
+  %105 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([17 x i8], [17 x i8]* @"sym_name_LblisStateCell{}", i64 0, i64 0))
   %106 = icmp eq i32 %105, 0
-  br i1 %106, label %exit, label %"LblfreshInt'LParUndsRParUnds'INT'UndsUnds'Int{}"
+  br i1 %106, label %exit, label %"LblnoStateCell{}"
 
-"LblfreshInt'LParUndsRParUnds'INT'UndsUnds'Int{}": ; preds = %"LblbitRangeInt'LParUndsCommUndsCommUndsRParUnds'INT'UndsUnds'Int'Unds'Int'Unds'Int{}"
-  %107 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([48 x i8], [48 x i8]* @"sym_name_LblfreshInt'LParUndsRParUnds'INT'UndsUnds'Int{}", i64 0, i64 0))
+"LblnoStateCell{}":                               ; preds = %"LblisStateCell{}"
+  %107 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([17 x i8], [17 x i8]* @"sym_name_LblnoStateCell{}", i64 0, i64 0))
   %108 = icmp eq i32 %107, 0
-  br i1 %108, label %exit, label %"Lblif'LParUndsRParUnds'else'UndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'Block'Unds'Block{}"
+  br i1 %108, label %exit, label %"Lblkeys'LParUndsRParUnds'MAP'UndsUnds'Map{}"
 
-"Lblif'LParUndsRParUnds'else'UndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'Block'Unds'Block{}": ; preds = %"LblfreshInt'LParUndsRParUnds'INT'UndsUnds'Int{}"
-  %109 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([86 x i8], [86 x i8]* @"sym_name_Lblif'LParUndsRParUnds'else'UndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'Block'Unds'Block{}", i64 0, i64 0))
+"Lblkeys'LParUndsRParUnds'MAP'UndsUnds'Map{}":    ; preds = %"LblnoStateCell{}"
+  %109 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([44 x i8], [44 x i8]* @"sym_name_Lblkeys'LParUndsRParUnds'MAP'UndsUnds'Map{}", i64 0, i64 0))
   %110 = icmp eq i32 %109, 0
-  br i1 %110, label %exit, label %"LblinitKCell{}"
+  br i1 %110, label %exit, label %"Lbl'Hash'freezer'UndsAndAndUndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'BExp1'Unds'{}"
 
-"LblinitKCell{}":                                 ; preds = %"Lblif'LParUndsRParUnds'else'UndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'Block'Unds'Block{}"
-  %111 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([15 x i8], [15 x i8]* @"sym_name_LblinitKCell{}", i64 0, i64 0))
+"Lbl'Hash'freezer'UndsAndAndUndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'BExp1'Unds'{}": ; preds = %"Lblkeys'LParUndsRParUnds'MAP'UndsUnds'Map{}"
+  %111 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([80 x i8], [80 x i8]* @"sym_name_Lbl'Hash'freezer'UndsAndAndUndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'BExp1'Unds'{}", i64 0, i64 0))
   %112 = icmp eq i32 %111, 0
-  br i1 %112, label %exit, label %"LblinitStateCell{}"
+  br i1 %112, label %exit, label %"inj{SortId{}, SortKItem{}}"
 
-"LblinitStateCell{}":                             ; preds = %"LblinitKCell{}"
-  %113 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([19 x i8], [19 x i8]* @"sym_name_LblinitStateCell{}", i64 0, i64 0))
+"inj{SortId{}, SortKItem{}}":                     ; preds = %"Lbl'Hash'freezer'UndsAndAndUndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'BExp1'Unds'{}"
+  %113 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([27 x i8], [27 x i8]* @"sym_name_inj{SortId{}, SortKItem{}}", i64 0, i64 0))
   %114 = icmp eq i32 %113, 0
-  br i1 %114, label %exit, label %"LblinitTCell{}"
+  br i1 %114, label %exit, label %"LblisKCell{}"
 
-"LblinitTCell{}":                                 ; preds = %"LblinitStateCell{}"
-  %115 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([15 x i8], [15 x i8]* @"sym_name_LblinitTCell{}", i64 0, i64 0))
+"LblisKCell{}":                                   ; preds = %"inj{SortId{}, SortKItem{}}"
+  %115 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([13 x i8], [13 x i8]* @"sym_name_LblisKCell{}", i64 0, i64 0))
   %116 = icmp eq i32 %115, 0
-  br i1 %116, label %exit, label %"Lblint'UndsSClnUndsUnds'IMP-SYNTAX'UndsUnds'Ids'Unds'Stmt{}"
+  br i1 %116, label %exit, label %"LblinitTCell{}"
 
-"Lblint'UndsSClnUndsUnds'IMP-SYNTAX'UndsUnds'Ids'Unds'Stmt{}": ; preds = %"LblinitTCell{}"
-  %117 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([60 x i8], [60 x i8]* @"sym_name_Lblint'UndsSClnUndsUnds'IMP-SYNTAX'UndsUnds'Ids'Unds'Stmt{}", i64 0, i64 0))
+"LblinitTCell{}":                                 ; preds = %"LblisKCell{}"
+  %117 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([15 x i8], [15 x i8]* @"sym_name_LblinitTCell{}", i64 0, i64 0))
   %118 = icmp eq i32 %117, 0
-  br i1 %118, label %exit, label %"LblisAExp{}"
+  br i1 %118, label %exit, label %"Lbl'Unds'andBool'Unds'{}"
 
-"LblisAExp{}":                                    ; preds = %"Lblint'UndsSClnUndsUnds'IMP-SYNTAX'UndsUnds'Ids'Unds'Stmt{}"
-  %119 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([12 x i8], [12 x i8]* @"sym_name_LblisAExp{}", i64 0, i64 0))
+"Lbl'Unds'andBool'Unds'{}":                       ; preds = %"LblinitTCell{}"
+  %119 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([25 x i8], [25 x i8]* @"sym_name_Lbl'Unds'andBool'Unds'{}", i64 0, i64 0))
   %120 = icmp eq i32 %119, 0
-  br i1 %120, label %exit, label %"LblisBExp{}"
+  br i1 %120, label %exit, label %"LblisList{}"
 
-"LblisBExp{}":                                    ; preds = %"LblisAExp{}"
-  %121 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([12 x i8], [12 x i8]* @"sym_name_LblisBExp{}", i64 0, i64 0))
+"LblisList{}":                                    ; preds = %"Lbl'Unds'andBool'Unds'{}"
+  %121 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([12 x i8], [12 x i8]* @"sym_name_LblisList{}", i64 0, i64 0))
   %122 = icmp eq i32 %121, 0
-  br i1 %122, label %exit, label %"LblisBlock{}"
+  br i1 %122, label %exit, label %"inj{SortBool{}, SortKItem{}}"
 
-"LblisBlock{}":                                   ; preds = %"LblisBExp{}"
-  %123 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([13 x i8], [13 x i8]* @"sym_name_LblisBlock{}", i64 0, i64 0))
+"inj{SortBool{}, SortKItem{}}":                   ; preds = %"LblisList{}"
+  %123 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([29 x i8], [29 x i8]* @"sym_name_inj{SortBool{}, SortKItem{}}", i64 0, i64 0))
   %124 = icmp eq i32 %123, 0
-  br i1 %124, label %exit, label %"LblisBool{}"
+  br i1 %124, label %exit, label %"LblisKCellOpt{}"
 
-"LblisBool{}":                                    ; preds = %"LblisBlock{}"
-  %125 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([12 x i8], [12 x i8]* @"sym_name_LblisBool{}", i64 0, i64 0))
+"LblisKCellOpt{}":                                ; preds = %"inj{SortBool{}, SortKItem{}}"
+  %125 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([16 x i8], [16 x i8]* @"sym_name_LblisKCellOpt{}", i64 0, i64 0))
   %126 = icmp eq i32 %125, 0
-  br i1 %126, label %exit, label %"LblisCell{}"
+  br i1 %126, label %exit, label %"append{}"
 
-"LblisCell{}":                                    ; preds = %"LblisBool{}"
-  %127 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([12 x i8], [12 x i8]* @"sym_name_LblisCell{}", i64 0, i64 0))
+"append{}":                                       ; preds = %"LblisKCellOpt{}"
+  %127 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([9 x i8], [9 x i8]* @"sym_name_append{}", i64 0, i64 0))
   %128 = icmp eq i32 %127, 0
-  br i1 %128, label %exit, label %"LblisId{}"
+  br i1 %128, label %exit, label %"LblsignExtendBitRangeInt'LParUndsCommUndsCommUndsRParUnds'INT'UndsUnds'Int'Unds'Int'Unds'Int{}"
 
-"LblisId{}":                                      ; preds = %"LblisCell{}"
-  %129 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sym_name_LblisId{}", i64 0, i64 0))
+"LblsignExtendBitRangeInt'LParUndsCommUndsCommUndsRParUnds'INT'UndsUnds'Int'Unds'Int'Unds'Int{}": ; preds = %"append{}"
+  %129 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([95 x i8], [95 x i8]* @"sym_name_LblsignExtendBitRangeInt'LParUndsCommUndsCommUndsRParUnds'INT'UndsUnds'Int'Unds'Int'Unds'Int{}", i64 0, i64 0))
   %130 = icmp eq i32 %129, 0
-  br i1 %130, label %exit, label %"LblisIds{}"
+  br i1 %130, label %exit, label %"inj{SortStateCellOpt{}, SortKItem{}}"
 
-"LblisIds{}":                                     ; preds = %"LblisId{}"
-  %131 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sym_name_LblisIds{}", i64 0, i64 0))
+"inj{SortStateCellOpt{}, SortKItem{}}":           ; preds = %"LblsignExtendBitRangeInt'LParUndsCommUndsCommUndsRParUnds'INT'UndsUnds'Int'Unds'Int'Unds'Int{}"
+  %131 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([37 x i8], [37 x i8]* @"sym_name_inj{SortStateCellOpt{}, SortKItem{}}", i64 0, i64 0))
   %132 = icmp eq i32 %131, 0
-  br i1 %132, label %exit, label %"LblisInt{}"
+  br i1 %132, label %exit, label %"Lblint'UndsSClnUndsUnds'IMP-SYNTAX'UndsUnds'Ids'Unds'Stmt{}"
 
-"LblisInt{}":                                     ; preds = %"LblisIds{}"
-  %133 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sym_name_LblisInt{}", i64 0, i64 0))
+"Lblint'UndsSClnUndsUnds'IMP-SYNTAX'UndsUnds'Ids'Unds'Stmt{}": ; preds = %"inj{SortStateCellOpt{}, SortKItem{}}"
+  %133 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([60 x i8], [60 x i8]* @"sym_name_Lblint'UndsSClnUndsUnds'IMP-SYNTAX'UndsUnds'Ids'Unds'Stmt{}", i64 0, i64 0))
   %134 = icmp eq i32 %133, 0
-  br i1 %134, label %exit, label %"LblisK{}"
+  br i1 %134, label %exit, label %"Lbl'BangUndsUnds'IMP-SYNTAX'UndsUnds'BExp{}"
 
-"LblisK{}":                                       ; preds = %"LblisInt{}"
-  %135 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([9 x i8], [9 x i8]* @"sym_name_LblisK{}", i64 0, i64 0))
+"Lbl'BangUndsUnds'IMP-SYNTAX'UndsUnds'BExp{}":    ; preds = %"Lblint'UndsSClnUndsUnds'IMP-SYNTAX'UndsUnds'Ids'Unds'Stmt{}"
+  %135 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([44 x i8], [44 x i8]* @"sym_name_Lbl'BangUndsUnds'IMP-SYNTAX'UndsUnds'BExp{}", i64 0, i64 0))
   %136 = icmp eq i32 %135, 0
-  br i1 %136, label %exit, label %"LblisKCell{}"
+  br i1 %136, label %exit, label %"inj{SortBlock{}, SortStmt{}}"
 
-"LblisKCell{}":                                   ; preds = %"LblisK{}"
-  %137 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([13 x i8], [13 x i8]* @"sym_name_LblisKCell{}", i64 0, i64 0))
+"inj{SortBlock{}, SortStmt{}}":                   ; preds = %"Lbl'BangUndsUnds'IMP-SYNTAX'UndsUnds'BExp{}"
+  %137 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([29 x i8], [29 x i8]* @"sym_name_inj{SortBlock{}, SortStmt{}}", i64 0, i64 0))
   %138 = icmp eq i32 %137, 0
-  br i1 %138, label %exit, label %"LblisKCellOpt{}"
+  br i1 %138, label %exit, label %"LblisK{}"
 
-"LblisKCellOpt{}":                                ; preds = %"LblisKCell{}"
-  %139 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([16 x i8], [16 x i8]* @"sym_name_LblisKCellOpt{}", i64 0, i64 0))
+"LblisK{}":                                       ; preds = %"inj{SortBlock{}, SortStmt{}}"
+  %139 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([9 x i8], [9 x i8]* @"sym_name_LblisK{}", i64 0, i64 0))
   %140 = icmp eq i32 %139, 0
-  br i1 %140, label %exit, label %"LblisKConfigVar{}"
+  br i1 %140, label %exit, label %"LblisSet{}"
 
-"LblisKConfigVar{}":                              ; preds = %"LblisKCellOpt{}"
-  %141 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([18 x i8], [18 x i8]* @"sym_name_LblisKConfigVar{}", i64 0, i64 0))
+"LblisSet{}":                                     ; preds = %"LblisK{}"
+  %141 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sym_name_LblisSet{}", i64 0, i64 0))
   %142 = icmp eq i32 %141, 0
-  br i1 %142, label %exit, label %"LblisKItem{}"
+  br i1 %142, label %exit, label %"Lbl'UndsPerc'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}"
 
-"LblisKItem{}":                                   ; preds = %"LblisKConfigVar{}"
-  %143 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([13 x i8], [13 x i8]* @"sym_name_LblisKItem{}", i64 0, i64 0))
+"Lbl'UndsPerc'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}": ; preds = %"LblisSet{}"
+  %143 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([54 x i8], [54 x i8]* @"sym_name_Lbl'UndsPerc'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", i64 0, i64 0))
   %144 = icmp eq i32 %143, 0
-  br i1 %144, label %exit, label %"LblisKResult{}"
+  br i1 %144, label %exit, label %"inj{SortMap{}, SortKItem{}}"
 
-"LblisKResult{}":                                 ; preds = %"LblisKItem{}"
-  %145 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([15 x i8], [15 x i8]* @"sym_name_LblisKResult{}", i64 0, i64 0))
+"inj{SortMap{}, SortKItem{}}":                    ; preds = %"Lbl'UndsPerc'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}"
+  %145 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([28 x i8], [28 x i8]* @"sym_name_inj{SortMap{}, SortKItem{}}", i64 0, i64 0))
   %146 = icmp eq i32 %145, 0
-  br i1 %146, label %exit, label %"LblisList{}"
+  br i1 %146, label %exit, label %"inj{SortTCell{}, SortCell{}}"
 
-"LblisList{}":                                    ; preds = %"LblisKResult{}"
-  %147 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([12 x i8], [12 x i8]* @"sym_name_LblisList{}", i64 0, i64 0))
+"inj{SortTCell{}, SortCell{}}":                   ; preds = %"inj{SortMap{}, SortKItem{}}"
+  %147 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([29 x i8], [29 x i8]* @"sym_name_inj{SortTCell{}, SortCell{}}", i64 0, i64 0))
   %148 = icmp eq i32 %147, 0
-  br i1 %148, label %exit, label %"LblisMap{}"
+  br i1 %148, label %exit, label %"Lbl'LBraUndsRBraUnds'IMP-SYNTAX'UndsUnds'Stmt{}"
 
-"LblisMap{}":                                     ; preds = %"LblisList{}"
-  %149 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sym_name_LblisMap{}", i64 0, i64 0))
+"Lbl'LBraUndsRBraUnds'IMP-SYNTAX'UndsUnds'Stmt{}": ; preds = %"inj{SortTCell{}, SortCell{}}"
+  %149 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([48 x i8], [48 x i8]* @"sym_name_Lbl'LBraUndsRBraUnds'IMP-SYNTAX'UndsUnds'Stmt{}", i64 0, i64 0))
   %150 = icmp eq i32 %149, 0
-  br i1 %150, label %exit, label %"LblisPgm{}"
+  br i1 %150, label %exit, label %"Lbl'Stop'List{}"
 
-"LblisPgm{}":                                     ; preds = %"LblisMap{}"
-  %151 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sym_name_LblisPgm{}", i64 0, i64 0))
+"Lbl'Stop'List{}":                                ; preds = %"Lbl'LBraUndsRBraUnds'IMP-SYNTAX'UndsUnds'Stmt{}"
+  %151 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([16 x i8], [16 x i8]* @"sym_name_Lbl'Stop'List{}", i64 0, i64 0))
   %152 = icmp eq i32 %151, 0
-  br i1 %152, label %exit, label %"LblisSet{}"
+  br i1 %152, label %exit, label %"LblSet'Coln'difference{}"
 
-"LblisSet{}":                                     ; preds = %"LblisPgm{}"
-  %153 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sym_name_LblisSet{}", i64 0, i64 0))
+"LblSet'Coln'difference{}":                       ; preds = %"Lbl'Stop'List{}"
+  %153 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([25 x i8], [25 x i8]* @"sym_name_LblSet'Coln'difference{}", i64 0, i64 0))
   %154 = icmp eq i32 %153, 0
-  br i1 %154, label %exit, label %"LblisStateCell{}"
+  br i1 %154, label %exit, label %"LblinitStateCell{}"
 
-"LblisStateCell{}":                               ; preds = %"LblisSet{}"
-  %155 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([17 x i8], [17 x i8]* @"sym_name_LblisStateCell{}", i64 0, i64 0))
+"LblinitStateCell{}":                             ; preds = %"LblSet'Coln'difference{}"
+  %155 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([19 x i8], [19 x i8]* @"sym_name_LblinitStateCell{}", i64 0, i64 0))
   %156 = icmp eq i32 %155, 0
-  br i1 %156, label %exit, label %"LblisStateCellOpt{}"
+  br i1 %156, label %exit, label %"Lbl'Unds'impliesBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}"
 
-"LblisStateCellOpt{}":                            ; preds = %"LblisStateCell{}"
-  %157 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([20 x i8], [20 x i8]* @"sym_name_LblisStateCellOpt{}", i64 0, i64 0))
+"Lbl'Unds'impliesBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}": ; preds = %"LblinitStateCell{}"
+  %157 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([61 x i8], [61 x i8]* @"sym_name_Lbl'Unds'impliesBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}", i64 0, i64 0))
   %158 = icmp eq i32 %157, 0
-  br i1 %158, label %exit, label %"LblisStmt{}"
+  br i1 %158, label %exit, label %"inj{SortBlock{}, SortKItem{}}"
 
-"LblisStmt{}":                                    ; preds = %"LblisStateCellOpt{}"
-  %159 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([12 x i8], [12 x i8]* @"sym_name_LblisStmt{}", i64 0, i64 0))
+"inj{SortBlock{}, SortKItem{}}":                  ; preds = %"Lbl'Unds'impliesBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}"
+  %159 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([30 x i8], [30 x i8]* @"sym_name_inj{SortBlock{}, SortKItem{}}", i64 0, i64 0))
   %160 = icmp eq i32 %159, 0
-  br i1 %160, label %exit, label %"LblisString{}"
+  br i1 %160, label %exit, label %"Lbl'UndsCommUndsUnds'IMP-SYNTAX'UndsUnds'Id'Unds'Ids{}"
 
-"LblisString{}":                                  ; preds = %"LblisStmt{}"
-  %161 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([14 x i8], [14 x i8]* @"sym_name_LblisString{}", i64 0, i64 0))
+"Lbl'UndsCommUndsUnds'IMP-SYNTAX'UndsUnds'Id'Unds'Ids{}": ; preds = %"inj{SortBlock{}, SortKItem{}}"
+  %161 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([55 x i8], [55 x i8]* @"sym_name_Lbl'UndsCommUndsUnds'IMP-SYNTAX'UndsUnds'Id'Unds'Ids{}", i64 0, i64 0))
   %162 = icmp eq i32 %161, 0
-  br i1 %162, label %exit, label %"LblisTCell{}"
+  br i1 %162, label %exit, label %"Lbl'UndsSlsh'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}"
 
-"LblisTCell{}":                                   ; preds = %"LblisString{}"
-  %163 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([13 x i8], [13 x i8]* @"sym_name_LblisTCell{}", i64 0, i64 0))
+"Lbl'UndsSlsh'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}": ; preds = %"Lbl'UndsCommUndsUnds'IMP-SYNTAX'UndsUnds'Id'Unds'Ids{}"
+  %163 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([54 x i8], [54 x i8]* @"sym_name_Lbl'UndsSlsh'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", i64 0, i64 0))
   %164 = icmp eq i32 %163, 0
-  br i1 %164, label %exit, label %"LblisTCellFragment{}"
+  br i1 %164, label %exit, label %"Lblsize'LParUndsRParUnds'LIST'UndsUnds'List{}"
 
-"LblisTCellFragment{}":                           ; preds = %"LblisTCell{}"
-  %165 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([21 x i8], [21 x i8]* @"sym_name_LblisTCellFragment{}", i64 0, i64 0))
+"Lblsize'LParUndsRParUnds'LIST'UndsUnds'List{}":  ; preds = %"Lbl'UndsSlsh'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}"
+  %165 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([46 x i8], [46 x i8]* @"sym_name_Lblsize'LParUndsRParUnds'LIST'UndsUnds'List{}", i64 0, i64 0))
   %166 = icmp eq i32 %165, 0
-  br i1 %166, label %exit, label %"Lblkeys'LParUndsRParUnds'MAP'UndsUnds'Map{}"
+  br i1 %166, label %exit, label %"inj{SortSet{}, SortKItem{}}"
 
-"Lblkeys'LParUndsRParUnds'MAP'UndsUnds'Map{}":    ; preds = %"LblisTCellFragment{}"
-  %167 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([44 x i8], [44 x i8]* @"sym_name_Lblkeys'LParUndsRParUnds'MAP'UndsUnds'Map{}", i64 0, i64 0))
+"inj{SortSet{}, SortKItem{}}":                    ; preds = %"Lblsize'LParUndsRParUnds'LIST'UndsUnds'List{}"
+  %167 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([28 x i8], [28 x i8]* @"sym_name_inj{SortSet{}, SortKItem{}}", i64 0, i64 0))
   %168 = icmp eq i32 %167, 0
-  br i1 %168, label %exit, label %"LblminInt'LParUndsCommUndsRParUnds'INT'UndsUnds'Int'Unds'Int{}"
+  br i1 %168, label %exit, label %"Lbl'Unds'xorBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}"
 
-"LblminInt'LParUndsCommUndsRParUnds'INT'UndsUnds'Int'Unds'Int{}": ; preds = %"Lblkeys'LParUndsRParUnds'MAP'UndsUnds'Map{}"
-  %169 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([63 x i8], [63 x i8]* @"sym_name_LblminInt'LParUndsCommUndsRParUnds'INT'UndsUnds'Int'Unds'Int{}", i64 0, i64 0))
+"Lbl'Unds'xorBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}": ; preds = %"inj{SortSet{}, SortKItem{}}"
+  %169 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([57 x i8], [57 x i8]* @"sym_name_Lbl'Unds'xorBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}", i64 0, i64 0))
   %170 = icmp eq i32 %169, 0
-  br i1 %170, label %exit, label %"LblnotBool'Unds'{}"
+  br i1 %170, label %exit, label %"inj{SortAExp{}, SortKItem{}}"
 
-"LblnotBool'Unds'{}":                             ; preds = %"LblminInt'LParUndsCommUndsRParUnds'INT'UndsUnds'Int'Unds'Int{}"
-  %171 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([19 x i8], [19 x i8]* @"sym_name_LblnotBool'Unds'{}", i64 0, i64 0))
+"inj{SortAExp{}, SortKItem{}}":                   ; preds = %"Lbl'Unds'xorBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}"
+  %171 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([29 x i8], [29 x i8]* @"sym_name_inj{SortAExp{}, SortKItem{}}", i64 0, i64 0))
   %172 = icmp eq i32 %171, 0
-  br i1 %172, label %exit, label %"LblsignExtendBitRangeInt'LParUndsCommUndsCommUndsRParUnds'INT'UndsUnds'Int'Unds'Int'Unds'Int{}"
+  br i1 %172, label %exit, label %"LblinitKCell{}"
 
-"LblsignExtendBitRangeInt'LParUndsCommUndsCommUndsRParUnds'INT'UndsUnds'Int'Unds'Int'Unds'Int{}": ; preds = %"LblnotBool'Unds'{}"
-  %173 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([95 x i8], [95 x i8]* @"sym_name_LblsignExtendBitRangeInt'LParUndsCommUndsCommUndsRParUnds'INT'UndsUnds'Int'Unds'Int'Unds'Int{}", i64 0, i64 0))
+"LblinitKCell{}":                                 ; preds = %"inj{SortAExp{}, SortKItem{}}"
+  %173 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([15 x i8], [15 x i8]* @"sym_name_LblinitKCell{}", i64 0, i64 0))
   %174 = icmp eq i32 %173, 0
-  br i1 %174, label %exit, label %"Lblwhile'LParUndsRParUndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'Block{}"
+  br i1 %174, label %exit, label %"Lbl'Stop'Set{}"
 
-"Lblwhile'LParUndsRParUndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'Block{}": ; preds = %"LblsignExtendBitRangeInt'LParUndsCommUndsCommUndsRParUnds'INT'UndsUnds'Int'Unds'Int'Unds'Int{}"
-  %175 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([68 x i8], [68 x i8]* @"sym_name_Lblwhile'LParUndsRParUndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'Block{}", i64 0, i64 0))
+"Lbl'Stop'Set{}":                                 ; preds = %"LblinitKCell{}"
+  %175 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([15 x i8], [15 x i8]* @"sym_name_Lbl'Stop'Set{}", i64 0, i64 0))
   %176 = icmp eq i32 %175, 0
-  br i1 %176, label %exit, label %"append{}"
+  br i1 %176, label %exit, label %"Lbl'UndsAndAndUndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'BExp{}"
 
-"append{}":                                       ; preds = %"Lblwhile'LParUndsRParUndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'Block{}"
-  %177 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([9 x i8], [9 x i8]* @"sym_name_append{}", i64 0, i64 0))
+"Lbl'UndsAndAndUndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'BExp{}": ; preds = %"Lbl'Stop'Set{}"
+  %177 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([60 x i8], [60 x i8]* @"sym_name_Lbl'UndsAndAndUndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'BExp{}", i64 0, i64 0))
   %178 = icmp eq i32 %177, 0
-  br i1 %178, label %exit, label %"dotk{}"
+  br i1 %178, label %exit, label %"inj{SortString{}, SortKItem{}}"
 
-"dotk{}":                                         ; preds = %"append{}"
-  %179 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([7 x i8], [7 x i8]* @"sym_name_dotk{}", i64 0, i64 0))
+"inj{SortString{}, SortKItem{}}":                 ; preds = %"Lbl'UndsAndAndUndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'BExp{}"
+  %179 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([31 x i8], [31 x i8]* @"sym_name_inj{SortString{}, SortKItem{}}", i64 0, i64 0))
   %180 = icmp eq i32 %179, 0
-  br i1 %180, label %exit, label %"inj{SortIds{},SortK{}}"
+  br i1 %180, label %exit, label %"Lbl'UndsEqlsSlshEqls'Bool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}"
 
-"inj{SortIds{},SortK{}}":                         ; preds = %"dotk{}"
-  %181 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([23 x i8], [23 x i8]* @"sym_name_inj{SortIds{},SortK{}}", i64 0, i64 0))
+"Lbl'UndsEqlsSlshEqls'Bool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}": ; preds = %"inj{SortString{}, SortKItem{}}"
+  %181 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([66 x i8], [66 x i8]* @"sym_name_Lbl'UndsEqlsSlshEqls'Bool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}", i64 0, i64 0))
   %182 = icmp eq i32 %181, 0
-  br i1 %182, label %exit, label %"inj{SortAExp{},SortK{}}"
+  br i1 %182, label %exit, label %"LblisBool{}"
 
-"inj{SortAExp{},SortK{}}":                        ; preds = %"inj{SortIds{},SortK{}}"
-  %183 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([24 x i8], [24 x i8]* @"sym_name_inj{SortAExp{},SortK{}}", i64 0, i64 0))
+"LblisBool{}":                                    ; preds = %"Lbl'UndsEqlsSlshEqls'Bool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}"
+  %183 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([12 x i8], [12 x i8]* @"sym_name_LblisBool{}", i64 0, i64 0))
   %184 = icmp eq i32 %183, 0
-  br i1 %184, label %exit, label %"inj{SortStmt{},SortKItem{}}"
+  br i1 %184, label %exit, label %"Lbl'Unds-GT--GT-'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}"
 
-"inj{SortStmt{},SortKItem{}}":                    ; preds = %"inj{SortAExp{},SortK{}}"
-  %185 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([28 x i8], [28 x i8]* @"sym_name_inj{SortStmt{},SortKItem{}}", i64 0, i64 0))
+"Lbl'Unds-GT--GT-'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}": ; preds = %"LblisBool{}"
+  %185 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([58 x i8], [58 x i8]* @"sym_name_Lbl'Unds-GT--GT-'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", i64 0, i64 0))
   %186 = icmp eq i32 %185, 0
-  br i1 %186, label %exit, label %"inj{SortBool{},SortK{}}"
+  br i1 %186, label %exit, label %"Lbl'Unds'orElseBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}"
 
-"inj{SortBool{},SortK{}}":                        ; preds = %"inj{SortStmt{},SortKItem{}}"
-  %187 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([24 x i8], [24 x i8]* @"sym_name_inj{SortBool{},SortK{}}", i64 0, i64 0))
+"Lbl'Unds'orElseBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}": ; preds = %"Lbl'Unds-GT--GT-'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}"
+  %187 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([60 x i8], [60 x i8]* @"sym_name_Lbl'Unds'orElseBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}", i64 0, i64 0))
   %188 = icmp eq i32 %187, 0
-  br i1 %188, label %exit, label %"inj{SortBlock{},SortKItem{}}"
+  br i1 %188, label %exit, label %"inj{SortStateCell{}, SortKItem{}}"
 
-"inj{SortBlock{},SortKItem{}}":                   ; preds = %"inj{SortBool{},SortK{}}"
-  %189 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([29 x i8], [29 x i8]* @"sym_name_inj{SortBlock{},SortKItem{}}", i64 0, i64 0))
+"inj{SortStateCell{}, SortKItem{}}":              ; preds = %"Lbl'Unds'orElseBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}"
+  %189 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([34 x i8], [34 x i8]* @"sym_name_inj{SortStateCell{}, SortKItem{}}", i64 0, i64 0))
   %190 = icmp eq i32 %189, 0
-  br i1 %190, label %exit, label %"inj{SortKItem{},SortK{}}"
+  br i1 %190, label %exit, label %"LblisStateCellOpt{}"
 
-"inj{SortKItem{},SortK{}}":                       ; preds = %"inj{SortBlock{},SortKItem{}}"
-  %191 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([25 x i8], [25 x i8]* @"sym_name_inj{SortKItem{},SortK{}}", i64 0, i64 0))
+"LblisStateCellOpt{}":                            ; preds = %"inj{SortStateCell{}, SortKItem{}}"
+  %191 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([20 x i8], [20 x i8]* @"sym_name_LblisStateCellOpt{}", i64 0, i64 0))
   %192 = icmp eq i32 %191, 0
-  br i1 %192, label %exit, label %"inj{SortSet{},SortK{}}"
+  br i1 %192, label %exit, label %"Lblif'LParUndsRParUnds'else'UndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'Block'Unds'Block{}"
 
-"inj{SortSet{},SortK{}}":                         ; preds = %"inj{SortKItem{},SortK{}}"
-  %193 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([23 x i8], [23 x i8]* @"sym_name_inj{SortSet{},SortK{}}", i64 0, i64 0))
+"Lblif'LParUndsRParUnds'else'UndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'Block'Unds'Block{}": ; preds = %"LblisStateCellOpt{}"
+  %193 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([86 x i8], [86 x i8]* @"sym_name_Lblif'LParUndsRParUnds'else'UndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'Block'Unds'Block{}", i64 0, i64 0))
   %194 = icmp eq i32 %193, 0
-  br i1 %194, label %exit, label %"inj{SortBExp{},SortKItem{}}"
+  br i1 %194, label %exit, label %"inj{SortTCellFragment{}, SortKItem{}}"
 
-"inj{SortBExp{},SortKItem{}}":                    ; preds = %"inj{SortSet{},SortK{}}"
-  %195 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([28 x i8], [28 x i8]* @"sym_name_inj{SortBExp{},SortKItem{}}", i64 0, i64 0))
+"inj{SortTCellFragment{}, SortKItem{}}":          ; preds = %"Lblif'LParUndsRParUnds'else'UndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'Block'Unds'Block{}"
+  %195 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([38 x i8], [38 x i8]* @"sym_name_inj{SortTCellFragment{}, SortKItem{}}", i64 0, i64 0))
   %196 = icmp eq i32 %195, 0
-  br i1 %196, label %exit, label %"inj{SortInt{},SortK{}}"
+  br i1 %196, label %exit, label %"Lbl'UndsSlshUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp{}"
 
-"inj{SortInt{},SortK{}}":                         ; preds = %"inj{SortBExp{},SortKItem{}}"
-  %197 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([23 x i8], [23 x i8]* @"sym_name_inj{SortInt{},SortK{}}", i64 0, i64 0))
+"Lbl'UndsSlshUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp{}": ; preds = %"inj{SortTCellFragment{}, SortKItem{}}"
+  %197 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([58 x i8], [58 x i8]* @"sym_name_Lbl'UndsSlshUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp{}", i64 0, i64 0))
   %198 = icmp eq i32 %197, 0
-  br i1 %198, label %exit, label %"inj{SortKCell{},SortK{}}"
+  br i1 %198, label %exit, label %"LblintersectSet'LParUndsCommUndsRParUnds'SET'UndsUnds'Set'Unds'Set{}"
 
-"inj{SortKCell{},SortK{}}":                       ; preds = %"inj{SortInt{},SortK{}}"
-  %199 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([25 x i8], [25 x i8]* @"sym_name_inj{SortKCell{},SortK{}}", i64 0, i64 0))
+"LblintersectSet'LParUndsCommUndsRParUnds'SET'UndsUnds'Set'Unds'Set{}": ; preds = %"Lbl'UndsSlshUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp{}"
+  %199 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([69 x i8], [69 x i8]* @"sym_name_LblintersectSet'LParUndsCommUndsRParUnds'SET'UndsUnds'Set'Unds'Set{}", i64 0, i64 0))
   %200 = icmp eq i32 %199, 0
-  br i1 %200, label %exit, label %"inj{SortTCell{},SortK{}}"
+  br i1 %200, label %exit, label %"inj{SortKResult{}, SortKItem{}}"
 
-"inj{SortTCell{},SortK{}}":                       ; preds = %"inj{SortKCell{},SortK{}}"
-  %201 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([25 x i8], [25 x i8]* @"sym_name_inj{SortTCell{},SortK{}}", i64 0, i64 0))
+"inj{SortKResult{}, SortKItem{}}":                ; preds = %"LblintersectSet'LParUndsCommUndsRParUnds'SET'UndsUnds'Set'Unds'Set{}"
+  %201 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([32 x i8], [32 x i8]* @"sym_name_inj{SortKResult{}, SortKItem{}}", i64 0, i64 0))
   %202 = icmp eq i32 %201, 0
-  br i1 %202, label %exit, label %"inj{SortList{},SortK{}}"
+  br i1 %202, label %exit, label %"Lbl'Unds'xorInt'UndsUnds'INT'UndsUnds'Int'Unds'Int{}"
 
-"inj{SortList{},SortK{}}":                        ; preds = %"inj{SortTCell{},SortK{}}"
-  %203 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([24 x i8], [24 x i8]* @"sym_name_inj{SortList{},SortK{}}", i64 0, i64 0))
+"Lbl'Unds'xorInt'UndsUnds'INT'UndsUnds'Int'Unds'Int{}": ; preds = %"inj{SortKResult{}, SortKItem{}}"
+  %203 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([53 x i8], [53 x i8]* @"sym_name_Lbl'Unds'xorInt'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", i64 0, i64 0))
   %204 = icmp eq i32 %203, 0
-  br i1 %204, label %exit, label %"inj{SortId{},SortK{}}"
+  br i1 %204, label %exit, label %"inj{SortKItem{}, SortK{}}"
 
-"inj{SortId{},SortK{}}":                          ; preds = %"inj{SortList{},SortK{}}"
-  %205 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([22 x i8], [22 x i8]* @"sym_name_inj{SortId{},SortK{}}", i64 0, i64 0))
+"inj{SortKItem{}, SortK{}}":                      ; preds = %"Lbl'Unds'xorInt'UndsUnds'INT'UndsUnds'Int'Unds'Int{}"
+  %205 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([26 x i8], [26 x i8]* @"sym_name_inj{SortKItem{}, SortK{}}", i64 0, i64 0))
   %206 = icmp eq i32 %205, 0
-  br i1 %206, label %exit, label %"inj{SortTCellFragment{},SortK{}}"
+  br i1 %206, label %exit, label %"inj{SortKCell{}, SortKCellOpt{}}"
 
-"inj{SortTCellFragment{},SortK{}}":               ; preds = %"inj{SortId{},SortK{}}"
-  %207 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([33 x i8], [33 x i8]* @"sym_name_inj{SortTCellFragment{},SortK{}}", i64 0, i64 0))
+"inj{SortKCell{}, SortKCellOpt{}}":               ; preds = %"inj{SortKItem{}, SortK{}}"
+  %207 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([33 x i8], [33 x i8]* @"sym_name_inj{SortKCell{}, SortKCellOpt{}}", i64 0, i64 0))
   %208 = icmp eq i32 %207, 0
-  br i1 %208, label %exit, label %"inj{SortStateCell{},SortK{}}"
+  br i1 %208, label %exit, label %"kseq{}"
 
-"inj{SortStateCell{},SortK{}}":                   ; preds = %"inj{SortTCellFragment{},SortK{}}"
-  %209 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([29 x i8], [29 x i8]* @"sym_name_inj{SortStateCell{},SortK{}}", i64 0, i64 0))
+"kseq{}":                                         ; preds = %"inj{SortKCell{}, SortKCellOpt{}}"
+  %209 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([7 x i8], [7 x i8]* @"sym_name_kseq{}", i64 0, i64 0))
   %210 = icmp eq i32 %209, 0
-  br i1 %210, label %exit, label %"inj{SortKConfigVar{},SortK{}}"
+  br i1 %210, label %exit, label %"Lbl'UndsPipe'-'-GT-Unds'{}"
 
-"inj{SortKConfigVar{},SortK{}}":                  ; preds = %"inj{SortStateCell{},SortK{}}"
-  %211 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([30 x i8], [30 x i8]* @"sym_name_inj{SortKConfigVar{},SortK{}}", i64 0, i64 0))
+"Lbl'UndsPipe'-'-GT-Unds'{}":                     ; preds = %"kseq{}"
+  %211 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([27 x i8], [27 x i8]* @"sym_name_Lbl'UndsPipe'-'-GT-Unds'{}", i64 0, i64 0))
   %212 = icmp eq i32 %211, 0
-  br i1 %212, label %exit, label %"inj{SortStateCellOpt{},SortK{}}"
+  br i1 %212, label %exit, label %"inj{SortTCell{}, SortKItem{}}"
 
-"inj{SortStateCellOpt{},SortK{}}":                ; preds = %"inj{SortKConfigVar{},SortK{}}"
-  %213 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([32 x i8], [32 x i8]* @"sym_name_inj{SortStateCellOpt{},SortK{}}", i64 0, i64 0))
+"inj{SortTCell{}, SortKItem{}}":                  ; preds = %"Lbl'UndsPipe'-'-GT-Unds'{}"
+  %213 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([30 x i8], [30 x i8]* @"sym_name_inj{SortTCell{}, SortKItem{}}", i64 0, i64 0))
   %214 = icmp eq i32 %213, 0
-  br i1 %214, label %exit, label %"inj{SortKCellOpt{},SortK{}}"
+  br i1 %214, label %exit, label %"LblremoveAll'LParUndsCommUndsRParUnds'MAP'UndsUnds'Map'Unds'Set{}"
 
-"inj{SortKCellOpt{},SortK{}}":                    ; preds = %"inj{SortStateCellOpt{},SortK{}}"
-  %215 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([28 x i8], [28 x i8]* @"sym_name_inj{SortKCellOpt{},SortK{}}", i64 0, i64 0))
+"LblremoveAll'LParUndsCommUndsRParUnds'MAP'UndsUnds'Map'Unds'Set{}": ; preds = %"inj{SortTCell{}, SortKItem{}}"
+  %215 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([66 x i8], [66 x i8]* @"sym_name_LblremoveAll'LParUndsCommUndsRParUnds'MAP'UndsUnds'Map'Unds'Set{}", i64 0, i64 0))
   %216 = icmp eq i32 %215, 0
-  br i1 %216, label %exit, label %"inj{SortPgm{},SortK{}}"
+  br i1 %216, label %exit, label %"LblisBlock{}"
 
-"inj{SortPgm{},SortK{}}":                         ; preds = %"inj{SortKCellOpt{},SortK{}}"
-  %217 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([23 x i8], [23 x i8]* @"sym_name_inj{SortPgm{},SortK{}}", i64 0, i64 0))
+"LblisBlock{}":                                   ; preds = %"LblremoveAll'LParUndsCommUndsRParUnds'MAP'UndsUnds'Map'Unds'Set{}"
+  %217 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([13 x i8], [13 x i8]* @"sym_name_LblisBlock{}", i64 0, i64 0))
   %218 = icmp eq i32 %217, 0
-  br i1 %218, label %exit, label %"inj{SortKResult{},SortK{}}"
+  br i1 %218, label %exit, label %"inj{SortBool{}, SortKResult{}}"
 
-"inj{SortKResult{},SortK{}}":                     ; preds = %"inj{SortPgm{},SortK{}}"
-  %219 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([27 x i8], [27 x i8]* @"sym_name_inj{SortKResult{},SortK{}}", i64 0, i64 0))
+"inj{SortBool{}, SortKResult{}}":                 ; preds = %"LblisBlock{}"
+  %219 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([31 x i8], [31 x i8]* @"sym_name_inj{SortBool{}, SortKResult{}}", i64 0, i64 0))
   %220 = icmp eq i32 %219, 0
-  br i1 %220, label %exit, label %"inj{SortMap{},SortK{}}"
+  br i1 %220, label %exit, label %"Lbl'Unds-GT-Eqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}"
 
-"inj{SortMap{},SortK{}}":                         ; preds = %"inj{SortKResult{},SortK{}}"
-  %221 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([23 x i8], [23 x i8]* @"sym_name_inj{SortMap{},SortK{}}", i64 0, i64 0))
+"Lbl'Unds-GT-Eqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}": ; preds = %"inj{SortBool{}, SortKResult{}}"
+  %221 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([58 x i8], [58 x i8]* @"sym_name_Lbl'Unds-GT-Eqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", i64 0, i64 0))
   %222 = icmp eq i32 %221, 0
-  br i1 %222, label %exit, label %"inj{SortCell{},SortK{}}"
+  br i1 %222, label %exit, label %"Lbl'Unds-LT-EqlsUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp{}"
 
-"inj{SortCell{},SortK{}}":                        ; preds = %"inj{SortMap{},SortK{}}"
-  %223 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([24 x i8], [24 x i8]* @"sym_name_inj{SortCell{},SortK{}}", i64 0, i64 0))
+"Lbl'Unds-LT-EqlsUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp{}": ; preds = %"Lbl'Unds-GT-Eqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}"
+  %223 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([62 x i8], [62 x i8]* @"sym_name_Lbl'Unds-LT-EqlsUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp{}", i64 0, i64 0))
   %224 = icmp eq i32 %223, 0
-  br i1 %224, label %exit, label %"inj{SortString{},SortK{}}"
+  br i1 %224, label %exit, label %"Lbl'-LT-'state'-GT-'{}"
 
-"inj{SortString{},SortK{}}":                      ; preds = %"inj{SortCell{},SortK{}}"
-  %225 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([26 x i8], [26 x i8]* @"sym_name_inj{SortString{},SortK{}}", i64 0, i64 0))
+"Lbl'-LT-'state'-GT-'{}":                         ; preds = %"Lbl'Unds-LT-EqlsUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp{}"
+  %225 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([23 x i8], [23 x i8]* @"sym_name_Lbl'-LT-'state'-GT-'{}", i64 0, i64 0))
   %226 = icmp eq i32 %225, 0
-  br i1 %226, label %exit, label %"kseq{}"
+  br i1 %226, label %exit, label %"Lbl'Unds'List'Unds'{}"
 
-"kseq{}":                                         ; preds = %"inj{SortString{},SortK{}}"
-  %227 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([7 x i8], [7 x i8]* @"sym_name_kseq{}", i64 0, i64 0))
+"Lbl'Unds'List'Unds'{}":                          ; preds = %"Lbl'-LT-'state'-GT-'{}"
+  %227 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([22 x i8], [22 x i8]* @"sym_name_Lbl'Unds'List'Unds'{}", i64 0, i64 0))
   %228 = icmp eq i32 %227, 0
-  br i1 %228, label %exit, label %stuck
+  br i1 %228, label %exit, label %"Lbl'Unds'in'UndsUnds'LIST'UndsUnds'K'Unds'List{}"
 
-exit:                                             ; preds = %"kseq{}", %"inj{SortString{},SortK{}}", %"inj{SortCell{},SortK{}}", %"inj{SortMap{},SortK{}}", %"inj{SortKResult{},SortK{}}", %"inj{SortPgm{},SortK{}}", %"inj{SortKCellOpt{},SortK{}}", %"inj{SortStateCellOpt{},SortK{}}", %"inj{SortKConfigVar{},SortK{}}", %"inj{SortStateCell{},SortK{}}", %"inj{SortTCellFragment{},SortK{}}", %"inj{SortId{},SortK{}}", %"inj{SortList{},SortK{}}", %"inj{SortTCell{},SortK{}}", %"inj{SortKCell{},SortK{}}", %"inj{SortInt{},SortK{}}", %"inj{SortBExp{},SortKItem{}}", %"inj{SortSet{},SortK{}}", %"inj{SortKItem{},SortK{}}", %"inj{SortBlock{},SortKItem{}}", %"inj{SortBool{},SortK{}}", %"inj{SortStmt{},SortKItem{}}", %"inj{SortAExp{},SortK{}}", %"inj{SortIds{},SortK{}}", %"dotk{}", %"append{}", %"Lblwhile'LParUndsRParUndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'Block{}", %"LblsignExtendBitRangeInt'LParUndsCommUndsCommUndsRParUnds'INT'UndsUnds'Int'Unds'Int'Unds'Int{}", %"LblnotBool'Unds'{}", %"LblminInt'LParUndsCommUndsRParUnds'INT'UndsUnds'Int'Unds'Int{}", %"Lblkeys'LParUndsRParUnds'MAP'UndsUnds'Map{}", %"LblisTCellFragment{}", %"LblisTCell{}", %"LblisString{}", %"LblisStmt{}", %"LblisStateCellOpt{}", %"LblisStateCell{}", %"LblisSet{}", %"LblisPgm{}", %"LblisMap{}", %"LblisList{}", %"LblisKResult{}", %"LblisKItem{}", %"LblisKConfigVar{}", %"LblisKCellOpt{}", %"LblisKCell{}", %"LblisK{}", %"LblisInt{}", %"LblisIds{}", %"LblisId{}", %"LblisCell{}", %"LblisBool{}", %"LblisBlock{}", %"LblisBExp{}", %"LblisAExp{}", %"Lblint'UndsSClnUndsUnds'IMP-SYNTAX'UndsUnds'Ids'Unds'Stmt{}", %"LblinitTCell{}", %"LblinitStateCell{}", %"LblinitKCell{}", %"Lblif'LParUndsRParUnds'else'UndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'Block'Unds'Block{}", %"LblfreshInt'LParUndsRParUnds'INT'UndsUnds'Int{}", %"LblbitRangeInt'LParUndsCommUndsCommUndsRParUnds'INT'UndsUnds'Int'Unds'Int'Unds'Int{}", %"LblabsInt'LParUndsRParUnds'INT'UndsUnds'Int{}", %"LblSet'Coln'in{}", %"LblMap'Coln'lookup{}", %"Lbl-'UndsUnds'IMP-SYNTAX'UndsUnds'Int{}", %"Lbl'UndsUndsUnds'IMP-SYNTAX'UndsUnds'Stmt'Unds'Stmt{}", %"Lbl'UndsSlshUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp{}", %"Lbl'UndsSlsh'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", %"Lbl'UndsPlusUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp{}", %"Lbl'UndsPlus'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", %"Lbl'UndsPipe'-'-GT-Unds'{}", %"Lbl'UndsPerc'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", %"Lbl'UndsEqlsUndsSClnUnds'IMP-SYNTAX'UndsUnds'Id'Unds'AExp{}", %"Lbl'UndsEqlsSlshEqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", %"Lbl'UndsEqlsSlshEqls'Bool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}", %"Lbl'UndsEqlsEqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", %"Lbl'UndsEqlsEqls'Bool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}", %"Lbl'UndsCommUndsUnds'IMP-SYNTAX'UndsUnds'Id'Unds'Ids{}", %"Lbl'UndsAndAndUndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'BExp{}", %"Lbl'Unds-LT-EqlsUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp{}", %"Lbl'Unds-LT-Eqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", %"Lbl'Unds-LT--LT-'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", %"Lbl'Unds-GT-Eqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", %"Lbl'Unds-GT--GT-'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", %"Lbl'Unds'xorBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}", %"Lbl'Unds'orElseBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}", %"Lbl'Unds'orBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}", %"Lbl'Unds'modInt'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", %"Lbl'Unds'impliesBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}", %"Lbl'Unds'dividesInt'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", %"Lbl'Unds'divInt'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", %"Lbl'Unds'andThenBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}", %"Lbl'Unds'andBool'Unds'{}", %"Lbl'Unds'Map'Unds'{}", %"Lbl'Unds'-Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", %"Lbl'Stop'Map{}", %"Lbl'Stop'List'LBraQuotUndsCommUndsUnds'IMP-SYNTAX'UndsUnds'Id'Unds'Ids'QuotRBraUnds'Ids{}", %"Lbl'LBraUndsRBraUnds'IMP-SYNTAX'UndsUnds'Stmt{}", %"Lbl'LBraRBraUnds'IMP-SYNTAX'Unds'{}", %"Lbl'Hash'freezerif'LParUndsRParUnds'else'UndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'Block'Unds'Block1'Unds'{}", %"Lbl'Hash'freezer'UndsSlshUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp1'Unds'{}", %"Lbl'Hash'freezer'UndsSlshUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp0'Unds'{}", %"Lbl'Hash'freezer'UndsPlusUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp1'Unds'{}", %"Lbl'Hash'freezer'UndsPlusUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp0'Unds'{}", %"Lbl'Hash'freezer'UndsEqlsUndsSClnUnds'IMP-SYNTAX'UndsUnds'Id'Unds'AExp0'Unds'{}", %"Lbl'Hash'freezer'UndsAndAndUndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'BExp1'Unds'{}", %"Lbl'Hash'freezer'Unds-LT-EqlsUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp1'Unds'{}", %"Lbl'Hash'freezer'Unds-LT-EqlsUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp0'Unds'{}", %"Lbl'Hash'freezer'BangUndsUnds'IMP-SYNTAX'UndsUnds'BExp0'Unds'{}", %"Lbl'BangUndsUnds'IMP-SYNTAX'UndsUnds'BExp{}", %"Lbl'-LT-'state'-GT-'{}", %"Lbl'-LT-'k'-GT-'{}", %"Lbl'-LT-'T'-GT-'{}"
-  %phi = phi i32 [ 0, %"Lbl'-LT-'T'-GT-'{}" ], [ 1, %"Lbl'-LT-'k'-GT-'{}" ], [ 2, %"Lbl'-LT-'state'-GT-'{}" ], [ 3, %"Lbl'BangUndsUnds'IMP-SYNTAX'UndsUnds'BExp{}" ], [ 4, %"Lbl'Hash'freezer'BangUndsUnds'IMP-SYNTAX'UndsUnds'BExp0'Unds'{}" ], [ 5, %"Lbl'Hash'freezer'Unds-LT-EqlsUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp0'Unds'{}" ], [ 6, %"Lbl'Hash'freezer'Unds-LT-EqlsUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp1'Unds'{}" ], [ 7, %"Lbl'Hash'freezer'UndsAndAndUndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'BExp1'Unds'{}" ], [ 8, %"Lbl'Hash'freezer'UndsEqlsUndsSClnUnds'IMP-SYNTAX'UndsUnds'Id'Unds'AExp0'Unds'{}" ], [ 9, %"Lbl'Hash'freezer'UndsPlusUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp0'Unds'{}" ], [ 10, %"Lbl'Hash'freezer'UndsPlusUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp1'Unds'{}" ], [ 11, %"Lbl'Hash'freezer'UndsSlshUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp0'Unds'{}" ], [ 12, %"Lbl'Hash'freezer'UndsSlshUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp1'Unds'{}" ], [ 13, %"Lbl'Hash'freezerif'LParUndsRParUnds'else'UndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'Block'Unds'Block1'Unds'{}" ], [ 14, %"Lbl'LBraRBraUnds'IMP-SYNTAX'Unds'{}" ], [ 15, %"Lbl'LBraUndsRBraUnds'IMP-SYNTAX'UndsUnds'Stmt{}" ], [ 16, %"Lbl'Stop'List'LBraQuotUndsCommUndsUnds'IMP-SYNTAX'UndsUnds'Id'Unds'Ids'QuotRBraUnds'Ids{}" ], [ 17, %"Lbl'Stop'Map{}" ], [ 18, %"Lbl'Unds'-Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}" ], [ 19, %"Lbl'Unds'Map'Unds'{}" ], [ 20, %"Lbl'Unds'andBool'Unds'{}" ], [ 21, %"Lbl'Unds'andThenBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}" ], [ 22, %"Lbl'Unds'divInt'UndsUnds'INT'UndsUnds'Int'Unds'Int{}" ], [ 23, %"Lbl'Unds'dividesInt'UndsUnds'INT'UndsUnds'Int'Unds'Int{}" ], [ 24, %"Lbl'Unds'impliesBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}" ], [ 25, %"Lbl'Unds'modInt'UndsUnds'INT'UndsUnds'Int'Unds'Int{}" ], [ 26, %"Lbl'Unds'orBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}" ], [ 27, %"Lbl'Unds'orElseBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}" ], [ 28, %"Lbl'Unds'xorBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}" ], [ 29, %"Lbl'Unds-GT--GT-'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}" ], [ 30, %"Lbl'Unds-GT-Eqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}" ], [ 31, %"Lbl'Unds-LT--LT-'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}" ], [ 32, %"Lbl'Unds-LT-Eqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}" ], [ 33, %"Lbl'Unds-LT-EqlsUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp{}" ], [ 34, %"Lbl'UndsAndAndUndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'BExp{}" ], [ 35, %"Lbl'UndsCommUndsUnds'IMP-SYNTAX'UndsUnds'Id'Unds'Ids{}" ], [ 36, %"Lbl'UndsEqlsEqls'Bool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}" ], [ 37, %"Lbl'UndsEqlsEqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}" ], [ 38, %"Lbl'UndsEqlsSlshEqls'Bool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}" ], [ 39, %"Lbl'UndsEqlsSlshEqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}" ], [ 40, %"Lbl'UndsEqlsUndsSClnUnds'IMP-SYNTAX'UndsUnds'Id'Unds'AExp{}" ], [ 41, %"Lbl'UndsPerc'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}" ], [ 42, %"Lbl'UndsPipe'-'-GT-Unds'{}" ], [ 43, %"Lbl'UndsPlus'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}" ], [ 44, %"Lbl'UndsPlusUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp{}" ], [ 45, %"Lbl'UndsSlsh'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}" ], [ 46, %"Lbl'UndsSlshUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp{}" ], [ 47, %"Lbl'UndsUndsUnds'IMP-SYNTAX'UndsUnds'Stmt'Unds'Stmt{}" ], [ 48, %"Lbl-'UndsUnds'IMP-SYNTAX'UndsUnds'Int{}" ], [ 49, %"LblMap'Coln'lookup{}" ], [ 50, %"LblSet'Coln'in{}" ], [ 51, %"LblabsInt'LParUndsRParUnds'INT'UndsUnds'Int{}" ], [ 52, %"LblbitRangeInt'LParUndsCommUndsCommUndsRParUnds'INT'UndsUnds'Int'Unds'Int'Unds'Int{}" ], [ 53, %"LblfreshInt'LParUndsRParUnds'INT'UndsUnds'Int{}" ], [ 54, %"Lblif'LParUndsRParUnds'else'UndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'Block'Unds'Block{}" ], [ 55, %"LblinitKCell{}" ], [ 56, %"LblinitStateCell{}" ], [ 57, %"LblinitTCell{}" ], [ 58, %"Lblint'UndsSClnUndsUnds'IMP-SYNTAX'UndsUnds'Ids'Unds'Stmt{}" ], [ 59, %"LblisAExp{}" ], [ 60, %"LblisBExp{}" ], [ 61, %"LblisBlock{}" ], [ 62, %"LblisBool{}" ], [ 63, %"LblisCell{}" ], [ 64, %"LblisId{}" ], [ 65, %"LblisIds{}" ], [ 66, %"LblisInt{}" ], [ 67, %"LblisK{}" ], [ 68, %"LblisKCell{}" ], [ 69, %"LblisKCellOpt{}" ], [ 70, %"LblisKConfigVar{}" ], [ 71, %"LblisKItem{}" ], [ 72, %"LblisKResult{}" ], [ 73, %"LblisList{}" ], [ 74, %"LblisMap{}" ], [ 75, %"LblisPgm{}" ], [ 76, %"LblisSet{}" ], [ 77, %"LblisStateCell{}" ], [ 78, %"LblisStateCellOpt{}" ], [ 79, %"LblisStmt{}" ], [ 80, %"LblisString{}" ], [ 81, %"LblisTCell{}" ], [ 82, %"LblisTCellFragment{}" ], [ 83, %"Lblkeys'LParUndsRParUnds'MAP'UndsUnds'Map{}" ], [ 84, %"LblminInt'LParUndsCommUndsRParUnds'INT'UndsUnds'Int'Unds'Int{}" ], [ 85, %"LblnotBool'Unds'{}" ], [ 86, %"LblsignExtendBitRangeInt'LParUndsCommUndsCommUndsRParUnds'INT'UndsUnds'Int'Unds'Int'Unds'Int{}" ], [ 87, %"Lblwhile'LParUndsRParUndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'Block{}" ], [ 88, %"append{}" ], [ 89, %"dotk{}" ], [ 90, %"inj{SortIds{},SortK{}}" ], [ 91, %"inj{SortAExp{},SortK{}}" ], [ 92, %"inj{SortStmt{},SortKItem{}}" ], [ 93, %"inj{SortBool{},SortK{}}" ], [ 94, %"inj{SortBlock{},SortKItem{}}" ], [ 95, %"inj{SortKItem{},SortK{}}" ], [ 96, %"inj{SortSet{},SortK{}}" ], [ 97, %"inj{SortBExp{},SortKItem{}}" ], [ 98, %"inj{SortInt{},SortK{}}" ], [ 99, %"inj{SortKCell{},SortK{}}" ], [ 100, %"inj{SortTCell{},SortK{}}" ], [ 101, %"inj{SortList{},SortK{}}" ], [ 102, %"inj{SortId{},SortK{}}" ], [ 103, %"inj{SortTCellFragment{},SortK{}}" ], [ 104, %"inj{SortStateCell{},SortK{}}" ], [ 105, %"inj{SortKConfigVar{},SortK{}}" ], [ 106, %"inj{SortStateCellOpt{},SortK{}}" ], [ 107, %"inj{SortKCellOpt{},SortK{}}" ], [ 108, %"inj{SortPgm{},SortK{}}" ], [ 109, %"inj{SortKResult{},SortK{}}" ], [ 110, %"inj{SortMap{},SortK{}}" ], [ 111, %"inj{SortCell{},SortK{}}" ], [ 112, %"inj{SortString{},SortK{}}" ], [ 113, %"kseq{}" ]
+"Lbl'Unds'in'UndsUnds'LIST'UndsUnds'K'Unds'List{}": ; preds = %"Lbl'Unds'List'Unds'{}"
+  %229 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([49 x i8], [49 x i8]* @"sym_name_Lbl'Unds'in'UndsUnds'LIST'UndsUnds'K'Unds'List{}", i64 0, i64 0))
+  %230 = icmp eq i32 %229, 0
+  br i1 %230, label %exit, label %"Lbl'UndsPipe'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}"
+
+"Lbl'UndsPipe'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}": ; preds = %"Lbl'Unds'in'UndsUnds'LIST'UndsUnds'K'Unds'List{}"
+  %231 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([54 x i8], [54 x i8]* @"sym_name_Lbl'UndsPipe'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", i64 0, i64 0))
+  %232 = icmp eq i32 %231, 0
+  br i1 %232, label %exit, label %"inj{SortKCellOpt{}, SortKItem{}}"
+
+"inj{SortKCellOpt{}, SortKItem{}}":               ; preds = %"Lbl'UndsPipe'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}"
+  %233 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([33 x i8], [33 x i8]* @"sym_name_inj{SortKCellOpt{}, SortKItem{}}", i64 0, i64 0))
+  %234 = icmp eq i32 %233, 0
+  br i1 %234, label %exit, label %"inj{SortStateCell{}, SortCell{}}"
+
+"inj{SortStateCell{}, SortCell{}}":               ; preds = %"inj{SortKCellOpt{}, SortKItem{}}"
+  %235 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([33 x i8], [33 x i8]* @"sym_name_inj{SortStateCell{}, SortCell{}}", i64 0, i64 0))
+  %236 = icmp eq i32 %235, 0
+  br i1 %236, label %exit, label %"Lbl-'UndsUnds'IMP-SYNTAX'UndsUnds'Int{}"
+
+"Lbl-'UndsUnds'IMP-SYNTAX'UndsUnds'Int{}":        ; preds = %"inj{SortStateCell{}, SortCell{}}"
+  %237 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([40 x i8], [40 x i8]* @"sym_name_Lbl-'UndsUnds'IMP-SYNTAX'UndsUnds'Int{}", i64 0, i64 0))
+  %238 = icmp eq i32 %237, 0
+  br i1 %238, label %exit, label %"inj{SortKConfigVar{}, SortKItem{}}"
+
+"inj{SortKConfigVar{}, SortKItem{}}":             ; preds = %"Lbl-'UndsUnds'IMP-SYNTAX'UndsUnds'Int{}"
+  %239 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([35 x i8], [35 x i8]* @"sym_name_inj{SortKConfigVar{}, SortKItem{}}", i64 0, i64 0))
+  %240 = icmp eq i32 %239, 0
+  br i1 %240, label %exit, label %"Lbl'UndsLSqBUnds-LT-'-'UndsRSqBUnds'MAP'UndsUnds'Map'Unds'K'Unds'K{}"
+
+"Lbl'UndsLSqBUnds-LT-'-'UndsRSqBUnds'MAP'UndsUnds'Map'Unds'K'Unds'K{}": ; preds = %"inj{SortKConfigVar{}, SortKItem{}}"
+  %241 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([69 x i8], [69 x i8]* @"sym_name_Lbl'UndsLSqBUnds-LT-'-'UndsRSqBUnds'MAP'UndsUnds'Map'Unds'K'Unds'K{}", i64 0, i64 0))
+  %242 = icmp eq i32 %241, 0
+  br i1 %242, label %exit, label %"Lbl'Unds-LT-'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}"
+
+"Lbl'Unds-LT-'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}": ; preds = %"Lbl'UndsLSqBUnds-LT-'-'UndsRSqBUnds'MAP'UndsUnds'Map'Unds'K'Unds'K{}"
+  %243 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([54 x i8], [54 x i8]* @"sym_name_Lbl'Unds-LT-'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", i64 0, i64 0))
+  %244 = icmp eq i32 %243, 0
+  br i1 %244, label %exit, label %"LblSetItem{}"
+
+"LblSetItem{}":                                   ; preds = %"Lbl'Unds-LT-'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}"
+  %245 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([13 x i8], [13 x i8]* @"sym_name_LblSetItem{}", i64 0, i64 0))
+  %246 = icmp eq i32 %245, 0
+  br i1 %246, label %exit, label %"LblisIds{}"
+
+"LblisIds{}":                                     ; preds = %"LblSetItem{}"
+  %247 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sym_name_LblisIds{}", i64 0, i64 0))
+  %248 = icmp eq i32 %247, 0
+  br i1 %248, label %exit, label %"Lblsize'LParUndsRParUnds'SET'UndsUnds'Set{}"
+
+"Lblsize'LParUndsRParUnds'SET'UndsUnds'Set{}":    ; preds = %"LblisIds{}"
+  %249 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([44 x i8], [44 x i8]* @"sym_name_Lblsize'LParUndsRParUnds'SET'UndsUnds'Set{}", i64 0, i64 0))
+  %250 = icmp eq i32 %249, 0
+  br i1 %250, label %exit, label %"Lbl'-LT-'T'-GT-'-fragment{}"
+
+"Lbl'-LT-'T'-GT-'-fragment{}":                    ; preds = %"Lblsize'LParUndsRParUnds'SET'UndsUnds'Set{}"
+  %251 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([28 x i8], [28 x i8]* @"sym_name_Lbl'-LT-'T'-GT-'-fragment{}", i64 0, i64 0))
+  %252 = icmp eq i32 %251, 0
+  br i1 %252, label %exit, label %"Lbl'Tild'Int'UndsUnds'INT'UndsUnds'Int{}"
+
+"Lbl'Tild'Int'UndsUnds'INT'UndsUnds'Int{}":       ; preds = %"Lbl'-LT-'T'-GT-'-fragment{}"
+  %253 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([41 x i8], [41 x i8]* @"sym_name_Lbl'Tild'Int'UndsUnds'INT'UndsUnds'Int{}", i64 0, i64 0))
+  %254 = icmp eq i32 %253, 0
+  br i1 %254, label %exit, label %"Lbl'Hash'if'UndsHash'then'UndsHash'else'UndsHash'fi'Unds'K-EQUAL'UndsUnds'Bool'Unds'K'Unds'K{SortK{}}"
+
+"Lbl'Hash'if'UndsHash'then'UndsHash'else'UndsHash'fi'Unds'K-EQUAL'UndsUnds'Bool'Unds'K'Unds'K{SortK{}}": ; preds = %"Lbl'Tild'Int'UndsUnds'INT'UndsUnds'Int{}"
+  %255 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([102 x i8], [102 x i8]* @"sym_name_Lbl'Hash'if'UndsHash'then'UndsHash'else'UndsHash'fi'Unds'K-EQUAL'UndsUnds'Bool'Unds'K'Unds'K{SortK{}}", i64 0, i64 0))
+  %256 = icmp eq i32 %255, 0
+  br i1 %256, label %exit, label %"Lbl'Unds'divInt'UndsUnds'INT'UndsUnds'Int'Unds'Int{}"
+
+"Lbl'Unds'divInt'UndsUnds'INT'UndsUnds'Int'Unds'Int{}": ; preds = %"Lbl'Hash'if'UndsHash'then'UndsHash'else'UndsHash'fi'Unds'K-EQUAL'UndsUnds'Bool'Unds'K'Unds'K{SortK{}}"
+  %257 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([53 x i8], [53 x i8]* @"sym_name_Lbl'Unds'divInt'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", i64 0, i64 0))
+  %258 = icmp eq i32 %257, 0
+  br i1 %258, label %exit, label %"Lbl'Unds'orBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}"
+
+"Lbl'Unds'orBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}": ; preds = %"Lbl'Unds'divInt'UndsUnds'INT'UndsUnds'Int'Unds'Int{}"
+  %259 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([56 x i8], [56 x i8]* @"sym_name_Lbl'Unds'orBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}", i64 0, i64 0))
+  %260 = icmp eq i32 %259, 0
+  br i1 %260, label %exit, label %"Lbl'Unds'modInt'UndsUnds'INT'UndsUnds'Int'Unds'Int{}"
+
+"Lbl'Unds'modInt'UndsUnds'INT'UndsUnds'Int'Unds'Int{}": ; preds = %"Lbl'Unds'orBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}"
+  %261 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([53 x i8], [53 x i8]* @"sym_name_Lbl'Unds'modInt'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", i64 0, i64 0))
+  %262 = icmp eq i32 %261, 0
+  br i1 %262, label %exit, label %"LblisInt{}"
+
+"LblisInt{}":                                     ; preds = %"Lbl'Unds'modInt'UndsUnds'INT'UndsUnds'Int'Unds'Int{}"
+  %263 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sym_name_LblisInt{}", i64 0, i64 0))
+  %264 = icmp eq i32 %263, 0
+  br i1 %264, label %exit, label %"Lbl'Hash'freezer'Unds-LT-EqlsUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp0'Unds'{}"
+
+"Lbl'Hash'freezer'Unds-LT-EqlsUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp0'Unds'{}": ; preds = %"LblisInt{}"
+  %265 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([82 x i8], [82 x i8]* @"sym_name_Lbl'Hash'freezer'Unds-LT-EqlsUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp0'Unds'{}", i64 0, i64 0))
+  %266 = icmp eq i32 %265, 0
+  br i1 %266, label %exit, label %"Lbl'Hash'freezer'Unds-LT-EqlsUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp1'Unds'{}"
+
+"Lbl'Hash'freezer'Unds-LT-EqlsUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp1'Unds'{}": ; preds = %"Lbl'Hash'freezer'Unds-LT-EqlsUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp0'Unds'{}"
+  %267 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([82 x i8], [82 x i8]* @"sym_name_Lbl'Hash'freezer'Unds-LT-EqlsUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp1'Unds'{}", i64 0, i64 0))
+  %268 = icmp eq i32 %267, 0
+  br i1 %268, label %exit, label %"Lbl'UndsEqlsEqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}"
+
+"Lbl'UndsEqlsEqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}": ; preds = %"Lbl'Hash'freezer'Unds-LT-EqlsUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp1'Unds'{}"
+  %269 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([58 x i8], [58 x i8]* @"sym_name_Lbl'UndsEqlsEqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", i64 0, i64 0))
+  %270 = icmp eq i32 %269, 0
+  br i1 %270, label %exit, label %"LblisBExp{}"
+
+"LblisBExp{}":                                    ; preds = %"Lbl'UndsEqlsEqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}"
+  %271 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([12 x i8], [12 x i8]* @"sym_name_LblisBExp{}", i64 0, i64 0))
+  %272 = icmp eq i32 %271, 0
+  br i1 %272, label %exit, label %"inj{SortCell{}, SortKItem{}}"
+
+"inj{SortCell{}, SortKItem{}}":                   ; preds = %"LblisBExp{}"
+  %273 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([29 x i8], [29 x i8]* @"sym_name_inj{SortCell{}, SortKItem{}}", i64 0, i64 0))
+  %274 = icmp eq i32 %273, 0
+  br i1 %274, label %exit, label %"LblnoKCell{}"
+
+"LblnoKCell{}":                                   ; preds = %"inj{SortCell{}, SortKItem{}}"
+  %275 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([13 x i8], [13 x i8]* @"sym_name_LblnoKCell{}", i64 0, i64 0))
+  %276 = icmp eq i32 %275, 0
+  br i1 %276, label %exit, label %"inj{SortBool{}, SortBExp{}}"
+
+"inj{SortBool{}, SortBExp{}}":                    ; preds = %"LblnoKCell{}"
+  %277 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([28 x i8], [28 x i8]* @"sym_name_inj{SortBool{}, SortBExp{}}", i64 0, i64 0))
+  %278 = icmp eq i32 %277, 0
+  br i1 %278, label %exit, label %"inj{SortIds{}, SortKItem{}}"
+
+"inj{SortIds{}, SortKItem{}}":                    ; preds = %"inj{SortBool{}, SortBExp{}}"
+  %279 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([28 x i8], [28 x i8]* @"sym_name_inj{SortIds{}, SortKItem{}}", i64 0, i64 0))
+  %280 = icmp eq i32 %279, 0
+  br i1 %280, label %exit, label %"inj{SortId{}, SortAExp{}}"
+
+"inj{SortId{}, SortAExp{}}":                      ; preds = %"inj{SortIds{}, SortKItem{}}"
+  %281 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([26 x i8], [26 x i8]* @"sym_name_inj{SortId{}, SortAExp{}}", i64 0, i64 0))
+  %282 = icmp eq i32 %281, 0
+  br i1 %282, label %exit, label %"inj{SortStateCell{}, SortStateCellOpt{}}"
+
+"inj{SortStateCell{}, SortStateCellOpt{}}":       ; preds = %"inj{SortId{}, SortAExp{}}"
+  %283 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([41 x i8], [41 x i8]* @"sym_name_inj{SortStateCell{}, SortStateCellOpt{}}", i64 0, i64 0))
+  %284 = icmp eq i32 %283, 0
+  br i1 %284, label %exit, label %"Lbl'Hash'freezer'UndsSlshUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp0'Unds'{}"
+
+"Lbl'Hash'freezer'UndsSlshUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp0'Unds'{}": ; preds = %"inj{SortStateCell{}, SortStateCellOpt{}}"
+  %285 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([78 x i8], [78 x i8]* @"sym_name_Lbl'Hash'freezer'UndsSlshUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp0'Unds'{}", i64 0, i64 0))
+  %286 = icmp eq i32 %285, 0
+  br i1 %286, label %exit, label %"Lbl'Hash'freezer'UndsSlshUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp1'Unds'{}"
+
+"Lbl'Hash'freezer'UndsSlshUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp1'Unds'{}": ; preds = %"Lbl'Hash'freezer'UndsSlshUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp0'Unds'{}"
+  %287 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([78 x i8], [78 x i8]* @"sym_name_Lbl'Hash'freezer'UndsSlshUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp1'Unds'{}", i64 0, i64 0))
+  %288 = icmp eq i32 %287, 0
+  br i1 %288, label %exit, label %"Lbl'Unds-GT-'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}"
+
+"Lbl'Unds-GT-'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}": ; preds = %"Lbl'Hash'freezer'UndsSlshUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp1'Unds'{}"
+  %289 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([54 x i8], [54 x i8]* @"sym_name_Lbl'Unds-GT-'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", i64 0, i64 0))
+  %290 = icmp eq i32 %289, 0
+  br i1 %290, label %exit, label %"Lbl'Unds-LT-Eqls'Set'UndsUnds'SET'UndsUnds'Set'Unds'Set{}"
+
+"Lbl'Unds-LT-Eqls'Set'UndsUnds'SET'UndsUnds'Set'Unds'Set{}": ; preds = %"Lbl'Unds-GT-'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}"
+  %291 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([58 x i8], [58 x i8]* @"sym_name_Lbl'Unds-LT-Eqls'Set'UndsUnds'SET'UndsUnds'Set'Unds'Set{}", i64 0, i64 0))
+  %292 = icmp eq i32 %291, 0
+  br i1 %292, label %exit, label %"Lbl'Unds-LT--LT-'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}"
+
+"Lbl'Unds-LT--LT-'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}": ; preds = %"Lbl'Unds-LT-Eqls'Set'UndsUnds'SET'UndsUnds'Set'Unds'Set{}"
+  %293 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([58 x i8], [58 x i8]* @"sym_name_Lbl'Unds-LT--LT-'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", i64 0, i64 0))
+  %294 = icmp eq i32 %293, 0
+  br i1 %294, label %exit, label %"Lblwhile'LParUndsRParUndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'Block{}"
+
+"Lblwhile'LParUndsRParUndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'Block{}": ; preds = %"Lbl'Unds-LT--LT-'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}"
+  %295 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([68 x i8], [68 x i8]* @"sym_name_Lblwhile'LParUndsRParUndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'Block{}", i64 0, i64 0))
+  %296 = icmp eq i32 %295, 0
+  br i1 %296, label %exit, label %"LblisMap{}"
+
+"LblisMap{}":                                     ; preds = %"Lblwhile'LParUndsRParUndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'Block{}"
+  %297 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sym_name_LblisMap{}", i64 0, i64 0))
+  %298 = icmp eq i32 %297, 0
+  br i1 %298, label %exit, label %"inj{SortStmt{}, SortKItem{}}"
+
+"inj{SortStmt{}, SortKItem{}}":                   ; preds = %"LblisMap{}"
+  %299 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([29 x i8], [29 x i8]* @"sym_name_inj{SortStmt{}, SortKItem{}}", i64 0, i64 0))
+  %300 = icmp eq i32 %299, 0
+  br i1 %300, label %exit, label %"inj{SortBExp{}, SortKItem{}}"
+
+"inj{SortBExp{}, SortKItem{}}":                   ; preds = %"inj{SortStmt{}, SortKItem{}}"
+  %301 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([29 x i8], [29 x i8]* @"sym_name_inj{SortBExp{}, SortKItem{}}", i64 0, i64 0))
+  %302 = icmp eq i32 %301, 0
+  br i1 %302, label %exit, label %"Lblsize'LParUndsRParUnds'MAP'UndsUnds'Map{}"
+
+"Lblsize'LParUndsRParUnds'MAP'UndsUnds'Map{}":    ; preds = %"inj{SortBExp{}, SortKItem{}}"
+  %303 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([44 x i8], [44 x i8]* @"sym_name_Lblsize'LParUndsRParUnds'MAP'UndsUnds'Map{}", i64 0, i64 0))
+  %304 = icmp eq i32 %303, 0
+  br i1 %304, label %exit, label %"Lbl'UndsEqlsUndsSClnUnds'IMP-SYNTAX'UndsUnds'Id'Unds'AExp{}"
+
+"Lbl'UndsEqlsUndsSClnUnds'IMP-SYNTAX'UndsUnds'Id'Unds'AExp{}": ; preds = %"Lblsize'LParUndsRParUnds'MAP'UndsUnds'Map{}"
+  %305 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([60 x i8], [60 x i8]* @"sym_name_Lbl'UndsEqlsUndsSClnUnds'IMP-SYNTAX'UndsUnds'Id'Unds'AExp{}", i64 0, i64 0))
+  %306 = icmp eq i32 %305, 0
+  br i1 %306, label %exit, label %"LblisPgm{}"
+
+"LblisPgm{}":                                     ; preds = %"Lbl'UndsEqlsUndsSClnUnds'IMP-SYNTAX'UndsUnds'Id'Unds'AExp{}"
+  %307 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sym_name_LblisPgm{}", i64 0, i64 0))
+  %308 = icmp eq i32 %307, 0
+  br i1 %308, label %exit, label %"Lbl'UndsPlus'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}"
+
+"Lbl'UndsPlus'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}": ; preds = %"LblisPgm{}"
+  %309 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([54 x i8], [54 x i8]* @"sym_name_Lbl'UndsPlus'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", i64 0, i64 0))
+  %310 = icmp eq i32 %309, 0
+  br i1 %310, label %exit, label %"Lbl'UndsEqlsEqls'K'Unds'{}"
+
+"Lbl'UndsEqlsEqls'K'Unds'{}":                     ; preds = %"Lbl'UndsPlus'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}"
+  %311 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([27 x i8], [27 x i8]* @"sym_name_Lbl'UndsEqlsEqls'K'Unds'{}", i64 0, i64 0))
+  %312 = icmp eq i32 %311, 0
+  br i1 %312, label %exit, label %"LblisKConfigVar{}"
+
+"LblisKConfigVar{}":                              ; preds = %"Lbl'UndsEqlsEqls'K'Unds'{}"
+  %313 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([18 x i8], [18 x i8]* @"sym_name_LblisKConfigVar{}", i64 0, i64 0))
+  %314 = icmp eq i32 %313, 0
+  br i1 %314, label %exit, label %"Lbl'Unds'dividesInt'UndsUnds'INT'UndsUnds'Int'Unds'Int{}"
+
+"Lbl'Unds'dividesInt'UndsUnds'INT'UndsUnds'Int'Unds'Int{}": ; preds = %"LblisKConfigVar{}"
+  %315 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([57 x i8], [57 x i8]* @"sym_name_Lbl'Unds'dividesInt'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", i64 0, i64 0))
+  %316 = icmp eq i32 %315, 0
+  br i1 %316, label %exit, label %"Lbl'UndsEqlsSlshEqls'K'UndsUnds'K-EQUAL'UndsUnds'K'Unds'K{}"
+
+"Lbl'UndsEqlsSlshEqls'K'UndsUnds'K-EQUAL'UndsUnds'K'Unds'K{}": ; preds = %"Lbl'Unds'dividesInt'UndsUnds'INT'UndsUnds'Int'Unds'Int{}"
+  %317 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([60 x i8], [60 x i8]* @"sym_name_Lbl'UndsEqlsSlshEqls'K'UndsUnds'K-EQUAL'UndsUnds'K'Unds'K{}", i64 0, i64 0))
+  %318 = icmp eq i32 %317, 0
+  br i1 %318, label %exit, label %"LblnotBool'Unds'{}"
+
+"LblnotBool'Unds'{}":                             ; preds = %"Lbl'UndsEqlsSlshEqls'K'UndsUnds'K-EQUAL'UndsUnds'K'Unds'K{}"
+  %319 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([19 x i8], [19 x i8]* @"sym_name_LblnotBool'Unds'{}", i64 0, i64 0))
+  %320 = icmp eq i32 %319, 0
+  br i1 %320, label %exit, label %"inj{SortInt{}, SortAExp{}}"
+
+"inj{SortInt{}, SortAExp{}}":                     ; preds = %"LblnotBool'Unds'{}"
+  %321 = call i32 @strcmp(i8* %0, i8* getelementptr inbounds ([27 x i8], [27 x i8]* @"sym_name_inj{SortInt{}, SortAExp{}}", i64 0, i64 0))
+  %322 = icmp eq i32 %321, 0
+  br i1 %322, label %exit, label %stuck
+
+exit:                                             ; preds = %"inj{SortInt{}, SortAExp{}}", %"LblnotBool'Unds'{}", %"Lbl'UndsEqlsSlshEqls'K'UndsUnds'K-EQUAL'UndsUnds'K'Unds'K{}", %"Lbl'Unds'dividesInt'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", %"LblisKConfigVar{}", %"Lbl'UndsEqlsEqls'K'Unds'{}", %"Lbl'UndsPlus'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", %"LblisPgm{}", %"Lbl'UndsEqlsUndsSClnUnds'IMP-SYNTAX'UndsUnds'Id'Unds'AExp{}", %"Lblsize'LParUndsRParUnds'MAP'UndsUnds'Map{}", %"inj{SortBExp{}, SortKItem{}}", %"inj{SortStmt{}, SortKItem{}}", %"LblisMap{}", %"Lblwhile'LParUndsRParUndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'Block{}", %"Lbl'Unds-LT--LT-'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", %"Lbl'Unds-LT-Eqls'Set'UndsUnds'SET'UndsUnds'Set'Unds'Set{}", %"Lbl'Unds-GT-'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", %"Lbl'Hash'freezer'UndsSlshUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp1'Unds'{}", %"Lbl'Hash'freezer'UndsSlshUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp0'Unds'{}", %"inj{SortStateCell{}, SortStateCellOpt{}}", %"inj{SortId{}, SortAExp{}}", %"inj{SortIds{}, SortKItem{}}", %"inj{SortBool{}, SortBExp{}}", %"LblnoKCell{}", %"inj{SortCell{}, SortKItem{}}", %"LblisBExp{}", %"Lbl'UndsEqlsEqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", %"Lbl'Hash'freezer'Unds-LT-EqlsUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp1'Unds'{}", %"Lbl'Hash'freezer'Unds-LT-EqlsUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp0'Unds'{}", %"LblisInt{}", %"Lbl'Unds'modInt'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", %"Lbl'Unds'orBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}", %"Lbl'Unds'divInt'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", %"Lbl'Hash'if'UndsHash'then'UndsHash'else'UndsHash'fi'Unds'K-EQUAL'UndsUnds'Bool'Unds'K'Unds'K{SortK{}}", %"Lbl'Tild'Int'UndsUnds'INT'UndsUnds'Int{}", %"Lbl'-LT-'T'-GT-'-fragment{}", %"Lblsize'LParUndsRParUnds'SET'UndsUnds'Set{}", %"LblisIds{}", %"LblSetItem{}", %"Lbl'Unds-LT-'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", %"Lbl'UndsLSqBUnds-LT-'-'UndsRSqBUnds'MAP'UndsUnds'Map'Unds'K'Unds'K{}", %"inj{SortKConfigVar{}, SortKItem{}}", %"Lbl-'UndsUnds'IMP-SYNTAX'UndsUnds'Int{}", %"inj{SortStateCell{}, SortCell{}}", %"inj{SortKCellOpt{}, SortKItem{}}", %"Lbl'UndsPipe'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", %"Lbl'Unds'in'UndsUnds'LIST'UndsUnds'K'Unds'List{}", %"Lbl'Unds'List'Unds'{}", %"Lbl'-LT-'state'-GT-'{}", %"Lbl'Unds-LT-EqlsUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp{}", %"Lbl'Unds-GT-Eqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", %"inj{SortBool{}, SortKResult{}}", %"LblisBlock{}", %"LblremoveAll'LParUndsCommUndsRParUnds'MAP'UndsUnds'Map'Unds'Set{}", %"inj{SortTCell{}, SortKItem{}}", %"Lbl'UndsPipe'-'-GT-Unds'{}", %"kseq{}", %"inj{SortKCell{}, SortKCellOpt{}}", %"inj{SortKItem{}, SortK{}}", %"Lbl'Unds'xorInt'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", %"inj{SortKResult{}, SortKItem{}}", %"LblintersectSet'LParUndsCommUndsRParUnds'SET'UndsUnds'Set'Unds'Set{}", %"Lbl'UndsSlshUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp{}", %"inj{SortTCellFragment{}, SortKItem{}}", %"Lblif'LParUndsRParUnds'else'UndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'Block'Unds'Block{}", %"LblisStateCellOpt{}", %"inj{SortStateCell{}, SortKItem{}}", %"Lbl'Unds'orElseBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}", %"Lbl'Unds-GT--GT-'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", %"LblisBool{}", %"Lbl'UndsEqlsSlshEqls'Bool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}", %"inj{SortString{}, SortKItem{}}", %"Lbl'UndsAndAndUndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'BExp{}", %"Lbl'Stop'Set{}", %"LblinitKCell{}", %"inj{SortAExp{}, SortKItem{}}", %"Lbl'Unds'xorBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}", %"inj{SortSet{}, SortKItem{}}", %"Lblsize'LParUndsRParUnds'LIST'UndsUnds'List{}", %"Lbl'UndsSlsh'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", %"Lbl'UndsCommUndsUnds'IMP-SYNTAX'UndsUnds'Id'Unds'Ids{}", %"inj{SortBlock{}, SortKItem{}}", %"Lbl'Unds'impliesBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}", %"LblinitStateCell{}", %"LblSet'Coln'difference{}", %"Lbl'Stop'List{}", %"Lbl'LBraUndsRBraUnds'IMP-SYNTAX'UndsUnds'Stmt{}", %"inj{SortTCell{}, SortCell{}}", %"inj{SortMap{}, SortKItem{}}", %"Lbl'UndsPerc'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", %"LblisSet{}", %"LblisK{}", %"inj{SortBlock{}, SortStmt{}}", %"Lbl'BangUndsUnds'IMP-SYNTAX'UndsUnds'BExp{}", %"Lblint'UndsSClnUndsUnds'IMP-SYNTAX'UndsUnds'Ids'Unds'Stmt{}", %"inj{SortStateCellOpt{}, SortKItem{}}", %"LblsignExtendBitRangeInt'LParUndsCommUndsCommUndsRParUnds'INT'UndsUnds'Int'Unds'Int'Unds'Int{}", %"append{}", %"LblisKCellOpt{}", %"inj{SortBool{}, SortKItem{}}", %"LblisList{}", %"Lbl'Unds'andBool'Unds'{}", %"LblinitTCell{}", %"LblisKCell{}", %"inj{SortId{}, SortKItem{}}", %"Lbl'Hash'freezer'UndsAndAndUndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'BExp1'Unds'{}", %"Lblkeys'LParUndsRParUnds'MAP'UndsUnds'Map{}", %"LblnoStateCell{}", %"LblisStateCell{}", %"LblSet'Coln'in{}", %"Lbl'Unds'Set'Unds'{}", %"Lbl'UndsStar'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", %"Lbl'Unds'in'Unds'keys'LParUndsRParUnds'MAP'UndsUnds'K'Unds'Map{}", %"LblfreshId'LParUndsRParUnds'ID-SYNTAX'UndsUnds'Int{}", %"dotk{}", %"LblisKItem{}", %"Lbl'-LT-'k'-GT-'{}", %"Lbl'UndsLSqBUnds-LT-'-undef'RSqB'{}", %"Lbl'UndsAnd'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", %"Lbl'UndsEqlsEqls'Bool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}", %"Lbl'Unds'Map'Unds'{}", %"inj{SortList{}, SortKItem{}}", %"LblListItem{}", %"LblisAExp{}", %"LblisId{}", %"inj{SortInt{}, SortKResult{}}", %"LblbitRangeInt'LParUndsCommUndsCommUndsRParUnds'INT'UndsUnds'Int'Unds'Int'Unds'Int{}", %"Lbl'Unds'andThenBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}", %"Lbl'UndsEqlsSlshEqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", %"inj{SortKCell{}, SortKItem{}}", %"LblfreshInt'LParUndsRParUnds'INT'UndsUnds'Int{}", %"LblabsInt'LParUndsRParUnds'INT'UndsUnds'Int{}", %"Lbl'-LT-'T'-GT-'{}", %"inj{SortInt{}, SortKItem{}}", %"Lbl'Hash'freezer'UndsEqlsUndsSClnUnds'IMP-SYNTAX'UndsUnds'Id'Unds'AExp0'Unds'{}", %"Lbl'Unds-LT-Eqls'Map'UndsUnds'MAP'UndsUnds'Map'Unds'Map{}", %"Lbl'Unds'-Map'UndsUnds'MAP'UndsUnds'Map'Unds'Map{}", %"Lbl'UndsLSqBUndsRSqB'orDefault'UndsUnds'MAP'UndsUnds'Map'Unds'K'Unds'K{}", %"LblMap'Coln'lookup{}", %"Lbl'LBraRBraUnds'IMP-SYNTAX'Unds'{}", %"LblupdateMap'LParUndsCommUndsRParUnds'MAP'UndsUnds'Map'Unds'Map{}", %"LblisTCell{}", %"Lbl'Unds-LT-Eqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", %"Lbl'Unds'-Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", %"Lbl'Stop'List'LBraQuotUndsCommUndsUnds'IMP-SYNTAX'UndsUnds'Id'Unds'Ids'QuotRBraUnds'Ids{}", %"LblmaxInt'LParUndsCommUndsRParUnds'INT'UndsUnds'Int'Unds'Int{}", %"LblminInt'LParUndsCommUndsRParUnds'INT'UndsUnds'Int'Unds'Int{}", %"LblisKResult{}", %"LblisTCellFragment{}", %"LblisStmt{}", %"Lbl'Hash'freezer'BangUndsUnds'IMP-SYNTAX'UndsUnds'BExp0'Unds'{}", %"Lbl'UndsPlusUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp{}", %"inj{SortKCell{}, SortCell{}}", %"Lbl'Hash'freezer'UndsPlusUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp1'Unds'{}", %"Lbl'Hash'freezer'UndsPlusUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp0'Unds'{}", %"LblisCell{}", %"LblisString{}", %"Lbl'Stop'Map{}", %"inj{SortPgm{}, SortKItem{}}", %"Lbl'UndsUndsUnds'IMP-SYNTAX'UndsUnds'Stmt'Unds'Stmt{}", %"Lbl'Hash'freezerif'LParUndsRParUnds'else'UndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'Block'Unds'Block1'Unds'{}"
+  %phi = phi i32 [ 14, %"Lbl'Hash'freezerif'LParUndsRParUnds'else'UndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'Block'Unds'Block1'Unds'{}" ], [ 70, %"Lbl'UndsUndsUnds'IMP-SYNTAX'UndsUnds'Stmt'Unds'Stmt{}" ], [ 127, %"inj{SortPgm{}, SortKItem{}}" ], [ 20, %"Lbl'Stop'Map{}" ], [ 108, %"LblisString{}" ], [ 91, %"LblisCell{}" ], [ 10, %"Lbl'Hash'freezer'UndsPlusUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp0'Unds'{}" ], [ 11, %"Lbl'Hash'freezer'UndsPlusUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp1'Unds'{}" ], [ 128, %"inj{SortKCell{}, SortCell{}}" ], [ 66, %"Lbl'UndsPlusUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp{}" ], [ 5, %"Lbl'Hash'freezer'BangUndsUnds'IMP-SYNTAX'UndsUnds'BExp0'Unds'{}" ], [ 107, %"LblisStmt{}" ], [ 110, %"LblisTCellFragment{}" ], [ 100, %"LblisKResult{}" ], [ 113, %"LblminInt'LParUndsCommUndsRParUnds'INT'UndsUnds'Int'Unds'Int{}" ], [ 112, %"LblmaxInt'LParUndsCommUndsRParUnds'INT'UndsUnds'Int'Unds'Int{}" ], [ 19, %"Lbl'Stop'List'LBraQuotUndsCommUndsUnds'IMP-SYNTAX'UndsUnds'Id'Unds'Ids'QuotRBraUnds'Ids{}" ], [ 23, %"Lbl'Unds'-Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}" ], [ 45, %"Lbl'Unds-LT-Eqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}" ], [ 109, %"LblisTCell{}" ], [ 122, %"LblupdateMap'LParUndsCommUndsRParUnds'MAP'UndsUnds'Map'Unds'Map{}" ], [ 16, %"Lbl'LBraRBraUnds'IMP-SYNTAX'Unds'{}" ], [ 73, %"LblMap'Coln'lookup{}" ], [ 61, %"Lbl'UndsLSqBUndsRSqB'orDefault'UndsUnds'MAP'UndsUnds'Map'Unds'K'Unds'K{}" ], [ 24, %"Lbl'Unds'-Map'UndsUnds'MAP'UndsUnds'Map'Unds'Map{}" ], [ 46, %"Lbl'Unds-LT-Eqls'Map'UndsUnds'MAP'UndsUnds'Map'Unds'Map{}" ], [ 9, %"Lbl'Hash'freezer'UndsEqlsUndsSClnUnds'IMP-SYNTAX'UndsUnds'Id'Unds'AExp0'Unds'{}" ], [ 126, %"inj{SortInt{}, SortKItem{}}" ], [ 0, %"Lbl'-LT-'T'-GT-'{}" ], [ 77, %"LblabsInt'LParUndsRParUnds'INT'UndsUnds'Int{}" ], [ 80, %"LblfreshInt'LParUndsRParUnds'INT'UndsUnds'Int{}" ], [ 128, %"inj{SortKCell{}, SortKItem{}}" ], [ 56, %"Lbl'UndsEqlsSlshEqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}" ], [ 29, %"Lbl'Unds'andThenBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}" ], [ 78, %"LblbitRangeInt'LParUndsCommUndsCommUndsRParUnds'INT'UndsUnds'Int'Unds'Int'Unds'Int{}" ], [ 126, %"inj{SortInt{}, SortKResult{}}" ], [ 92, %"LblisId{}" ], [ 87, %"LblisAExp{}" ], [ 72, %"LblListItem{}" ], [ 134, %"inj{SortList{}, SortKItem{}}" ], [ 26, %"Lbl'Unds'Map'Unds'{}" ], [ 52, %"Lbl'UndsEqlsEqls'Bool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}" ], [ 49, %"Lbl'UndsAnd'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}" ], [ 60, %"Lbl'UndsLSqBUnds-LT-'-undef'RSqB'{}" ], [ 2, %"Lbl'-LT-'k'-GT-'{}" ], [ 99, %"LblisKItem{}" ], [ 125, %"dotk{}" ], [ 79, %"LblfreshId'LParUndsRParUnds'ID-SYNTAX'UndsUnds'Int{}" ], [ 33, %"Lbl'Unds'in'Unds'keys'LParUndsRParUnds'MAP'UndsUnds'K'Unds'Map{}" ], [ 69, %"Lbl'UndsStar'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}" ], [ 27, %"Lbl'Unds'Set'Unds'{}" ], [ 75, %"LblSet'Coln'in{}" ], [ 105, %"LblisStateCell{}" ], [ 115, %"LblnoStateCell{}" ], [ 111, %"Lblkeys'LParUndsRParUnds'MAP'UndsUnds'Map{}" ], [ 8, %"Lbl'Hash'freezer'UndsAndAndUndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'BExp1'Unds'{}" ], [ 140, %"inj{SortId{}, SortKItem{}}" ], [ 96, %"LblisKCell{}" ], [ 84, %"LblinitTCell{}" ], [ 28, %"Lbl'Unds'andBool'Unds'{}" ], [ 101, %"LblisList{}" ], [ 138, %"inj{SortBool{}, SortKItem{}}" ], [ 97, %"LblisKCellOpt{}" ], [ 124, %"append{}" ], [ 118, %"LblsignExtendBitRangeInt'LParUndsCommUndsCommUndsRParUnds'INT'UndsUnds'Int'Unds'Int'Unds'Int{}" ], [ 129, %"inj{SortStateCellOpt{}, SortKItem{}}" ], [ 85, %"Lblint'UndsSClnUndsUnds'IMP-SYNTAX'UndsUnds'Ids'Unds'Stmt{}" ], [ 4, %"Lbl'BangUndsUnds'IMP-SYNTAX'UndsUnds'BExp{}" ], [ 146, %"inj{SortBlock{}, SortStmt{}}" ], [ 95, %"LblisK{}" ], [ 104, %"LblisSet{}" ], [ 62, %"Lbl'UndsPerc'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}" ], [ 132, %"inj{SortMap{}, SortKItem{}}" ], [ 133, %"inj{SortTCell{}, SortCell{}}" ], [ 17, %"Lbl'LBraUndsRBraUnds'IMP-SYNTAX'UndsUnds'Stmt{}" ], [ 18, %"Lbl'Stop'List{}" ], [ 74, %"LblSet'Coln'difference{}" ], [ 83, %"LblinitStateCell{}" ], [ 32, %"Lbl'Unds'impliesBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}" ], [ 146, %"inj{SortBlock{}, SortKItem{}}" ], [ 51, %"Lbl'UndsCommUndsUnds'IMP-SYNTAX'UndsUnds'Id'Unds'Ids{}" ], [ 67, %"Lbl'UndsSlsh'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}" ], [ 119, %"Lblsize'LParUndsRParUnds'LIST'UndsUnds'List{}" ], [ 130, %"inj{SortSet{}, SortKItem{}}" ], [ 38, %"Lbl'Unds'xorBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}" ], [ 131, %"inj{SortAExp{}, SortKItem{}}" ], [ 82, %"LblinitKCell{}" ], [ 21, %"Lbl'Stop'Set{}" ], [ 50, %"Lbl'UndsAndAndUndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'BExp{}" ], [ 144, %"inj{SortString{}, SortKItem{}}" ], [ 55, %"Lbl'UndsEqlsSlshEqls'Bool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}" ], [ 90, %"LblisBool{}" ], [ 41, %"Lbl'Unds-GT--GT-'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}" ], [ 37, %"Lbl'Unds'orElseBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}" ], [ 136, %"inj{SortStateCell{}, SortKItem{}}" ], [ 106, %"LblisStateCellOpt{}" ], [ 81, %"Lblif'LParUndsRParUnds'else'UndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'Block'Unds'Block{}" ], [ 135, %"inj{SortTCellFragment{}, SortKItem{}}" ], [ 68, %"Lbl'UndsSlshUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp{}" ], [ 86, %"LblintersectSet'LParUndsCommUndsRParUnds'SET'UndsUnds'Set'Unds'Set{}" ], [ 145, %"inj{SortKResult{}, SortKItem{}}" ], [ 39, %"Lbl'Unds'xorInt'UndsUnds'INT'UndsUnds'Int'Unds'Int{}" ], [ 147, %"inj{SortKItem{}, SortK{}}" ], [ 128, %"inj{SortKCell{}, SortKCellOpt{}}" ], [ 149, %"kseq{}" ], [ 63, %"Lbl'UndsPipe'-'-GT-Unds'{}" ], [ 133, %"inj{SortTCell{}, SortKItem{}}" ], [ 117, %"LblremoveAll'LParUndsCommUndsRParUnds'MAP'UndsUnds'Map'Unds'Set{}" ], [ 89, %"LblisBlock{}" ], [ 138, %"inj{SortBool{}, SortKResult{}}" ], [ 42, %"Lbl'Unds-GT-Eqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}" ], [ 48, %"Lbl'Unds-LT-EqlsUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp{}" ], [ 3, %"Lbl'-LT-'state'-GT-'{}" ], [ 25, %"Lbl'Unds'List'Unds'{}" ], [ 34, %"Lbl'Unds'in'UndsUnds'LIST'UndsUnds'K'Unds'List{}" ], [ 64, %"Lbl'UndsPipe'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}" ], [ 143, %"inj{SortKCellOpt{}, SortKItem{}}" ], [ 136, %"inj{SortStateCell{}, SortCell{}}" ], [ 71, %"Lbl-'UndsUnds'IMP-SYNTAX'UndsUnds'Int{}" ], [ 148, %"inj{SortKConfigVar{}, SortKItem{}}" ], [ 59, %"Lbl'UndsLSqBUnds-LT-'-'UndsRSqBUnds'MAP'UndsUnds'Map'Unds'K'Unds'K{}" ], [ 43, %"Lbl'Unds-LT-'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}" ], [ 76, %"LblSetItem{}" ], [ 93, %"LblisIds{}" ], [ 121, %"Lblsize'LParUndsRParUnds'SET'UndsUnds'Set{}" ], [ 1, %"Lbl'-LT-'T'-GT-'-fragment{}" ], [ 22, %"Lbl'Tild'Int'UndsUnds'INT'UndsUnds'Int{}" ], [ 15, %"Lbl'Hash'if'UndsHash'then'UndsHash'else'UndsHash'fi'Unds'K-EQUAL'UndsUnds'Bool'Unds'K'Unds'K{SortK{}}" ], [ 30, %"Lbl'Unds'divInt'UndsUnds'INT'UndsUnds'Int'Unds'Int{}" ], [ 36, %"Lbl'Unds'orBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}" ], [ 35, %"Lbl'Unds'modInt'UndsUnds'INT'UndsUnds'Int'Unds'Int{}" ], [ 94, %"LblisInt{}" ], [ 6, %"Lbl'Hash'freezer'Unds-LT-EqlsUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp0'Unds'{}" ], [ 7, %"Lbl'Hash'freezer'Unds-LT-EqlsUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp1'Unds'{}" ], [ 53, %"Lbl'UndsEqlsEqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}" ], [ 88, %"LblisBExp{}" ], [ 137, %"inj{SortCell{}, SortKItem{}}" ], [ 114, %"LblnoKCell{}" ], [ 138, %"inj{SortBool{}, SortBExp{}}" ], [ 139, %"inj{SortIds{}, SortKItem{}}" ], [ 140, %"inj{SortId{}, SortAExp{}}" ], [ 136, %"inj{SortStateCell{}, SortStateCellOpt{}}" ], [ 12, %"Lbl'Hash'freezer'UndsSlshUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp0'Unds'{}" ], [ 13, %"Lbl'Hash'freezer'UndsSlshUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp1'Unds'{}" ], [ 40, %"Lbl'Unds-GT-'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}" ], [ 47, %"Lbl'Unds-LT-Eqls'Set'UndsUnds'SET'UndsUnds'Set'Unds'Set{}" ], [ 44, %"Lbl'Unds-LT--LT-'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}" ], [ 123, %"Lblwhile'LParUndsRParUndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'Block{}" ], [ 102, %"LblisMap{}" ], [ 141, %"inj{SortStmt{}, SortKItem{}}" ], [ 142, %"inj{SortBExp{}, SortKItem{}}" ], [ 120, %"Lblsize'LParUndsRParUnds'MAP'UndsUnds'Map{}" ], [ 58, %"Lbl'UndsEqlsUndsSClnUnds'IMP-SYNTAX'UndsUnds'Id'Unds'AExp{}" ], [ 103, %"LblisPgm{}" ], [ 65, %"Lbl'UndsPlus'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}" ], [ 54, %"Lbl'UndsEqlsEqls'K'Unds'{}" ], [ 98, %"LblisKConfigVar{}" ], [ 31, %"Lbl'Unds'dividesInt'UndsUnds'INT'UndsUnds'Int'Unds'Int{}" ], [ 57, %"Lbl'UndsEqlsSlshEqls'K'UndsUnds'K-EQUAL'UndsUnds'K'Unds'K{}" ], [ 116, %"LblnotBool'Unds'{}" ], [ 126, %"inj{SortInt{}, SortAExp{}}" ]
   ret i32 %phi
 
-stuck:                                            ; preds = %"kseq{}"
+stuck:                                            ; preds = %"inj{SortInt{}, SortAExp{}}"
   call void @abort()
   unreachable
 }
@@ -868,6 +1168,42 @@ entry:
     i32 111, label %tag111
     i32 112, label %tag112
     i32 113, label %tag113
+    i32 114, label %tag114
+    i32 115, label %tag115
+    i32 116, label %tag116
+    i32 117, label %tag117
+    i32 118, label %tag118
+    i32 119, label %tag119
+    i32 120, label %tag120
+    i32 121, label %tag121
+    i32 122, label %tag122
+    i32 123, label %tag123
+    i32 124, label %tag124
+    i32 125, label %tag125
+    i32 126, label %tag126
+    i32 127, label %tag127
+    i32 128, label %tag128
+    i32 129, label %tag129
+    i32 130, label %tag130
+    i32 131, label %tag131
+    i32 132, label %tag132
+    i32 133, label %tag133
+    i32 134, label %tag134
+    i32 135, label %tag135
+    i32 136, label %tag136
+    i32 137, label %tag137
+    i32 138, label %tag138
+    i32 139, label %tag139
+    i32 140, label %tag140
+    i32 141, label %tag141
+    i32 142, label %tag142
+    i32 143, label %tag143
+    i32 144, label %tag144
+    i32 145, label %tag145
+    i32 146, label %tag146
+    i32 147, label %tag147
+    i32 148, label %tag148
+    i32 149, label %tag149
   ]
 
 tag0:                                             ; preds = %entry
@@ -1212,8 +1548,116 @@ tag112:                                           ; preds = %entry
 tag113:                                           ; preds = %entry
   br label %exit
 
-exit:                                             ; preds = %tag113, %tag112, %tag111, %tag110, %tag109, %tag108, %tag107, %tag106, %tag105, %tag104, %tag103, %tag102, %tag101, %tag100, %tag99, %tag98, %tag97, %tag96, %tag95, %tag94, %tag93, %tag92, %tag91, %tag90, %tag89, %tag88, %tag87, %tag86, %tag85, %tag84, %tag83, %tag82, %tag81, %tag80, %tag79, %tag78, %tag77, %tag76, %tag75, %tag74, %tag73, %tag72, %tag71, %tag70, %tag69, %tag68, %tag67, %tag66, %tag65, %tag64, %tag63, %tag62, %tag61, %tag60, %tag59, %tag58, %tag57, %tag56, %tag55, %tag54, %tag53, %tag52, %tag51, %tag50, %tag49, %tag48, %tag47, %tag46, %tag45, %tag44, %tag43, %tag42, %tag41, %tag40, %tag39, %tag38, %tag37, %tag36, %tag35, %tag34, %tag33, %tag32, %tag31, %tag30, %tag29, %tag28, %tag27, %tag26, %tag25, %tag24, %tag23, %tag22, %tag21, %tag20, %tag19, %tag18, %tag17, %tag16, %tag15, %tag14, %tag13, %tag12, %tag11, %tag10, %tag9, %tag8, %tag7, %tag6, %tag5, %tag4, %tag3, %tag2, %tag1, %tag0
-  %phi = phi %blockheader [ { i64 281487861612544 }, %tag0 ], [ { i64 562958543355905 }, %tag1 ], [ { i64 844442110001154 }, %tag2 ], [ { i64 562958543355907 }, %tag3 ], [ { i64 1125904201809924 }, %tag4 ], [ { i64 562958543355909 }, %tag5 ], [ { i64 562958543355910 }, %tag6 ], [ { i64 562958543355911 }, %tag7 ], [ { i64 562958543355912 }, %tag8 ], [ { i64 562958543355913 }, %tag9 ], [ { i64 562958543355914 }, %tag10 ], [ { i64 562958543355915 }, %tag11 ], [ { i64 562958543355916 }, %tag12 ], [ { i64 281487861612557 }, %tag13 ], [ { i64 1125904201809934 }, %tag14 ], [ { i64 562958543355919 }, %tag15 ], [ { i64 1125904201809936 }, %tag16 ], [ { i64 1125904201809937 }, %tag17 ], [ { i64 1407387768455186 }, %tag18 ], [ { i64 1688879925035027 }, %tag19 ], [ { i64 1970333426909204 }, %tag20 ], [ { i64 1970333426909205 }, %tag21 ], [ { i64 1407387768455190 }, %tag22 ], [ { i64 1407387768455191 }, %tag23 ], [ { i64 1970333426909208 }, %tag24 ], [ { i64 1407387768455193 }, %tag25 ], [ { i64 1970333426909210 }, %tag26 ], [ { i64 1970333426909211 }, %tag27 ], [ { i64 1970333426909212 }, %tag28 ], [ { i64 1407387768455197 }, %tag29 ], [ { i64 1407387768455198 }, %tag30 ], [ { i64 1407387768455199 }, %tag31 ], [ { i64 1407387768455200 }, %tag32 ], [ { i64 281487861612577 }, %tag33 ], [ { i64 281487861612578 }, %tag34 ], [ { i64 281487861612579 }, %tag35 ], [ { i64 1970333426909220 }, %tag36 ], [ { i64 1407387768455205 }, %tag37 ], [ { i64 1970333426909222 }, %tag38 ], [ { i64 1407387768455207 }, %tag39 ], [ { i64 281487861612584 }, %tag40 ], [ { i64 1407387768455209 }, %tag41 ], [ { i64 281487861612586 }, %tag42 ], [ { i64 1407387768455211 }, %tag43 ], [ { i64 281487861612588 }, %tag44 ], [ { i64 1407387768455213 }, %tag45 ], [ { i64 281487861612590 }, %tag46 ], [ { i64 281487861612591 }, %tag47 ], [ { i64 2251808403619888 }, %tag48 ], [ { i64 2533296265232433 }, %tag49 ], [ { i64 2814771241943090 }, %tag50 ], [ { i64 2251808403619891 }, %tag51 ], [ { i64 3096241923686452 }, %tag52 ], [ { i64 2251808403619893 }, %tag53 ], [ { i64 3377716900397110 }, %tag54 ], [ { i64 844442110001207 }, %tag55 ], [ { i64 1125904201809976 }, %tag56 ], [ { i64 844442110001209 }, %tag57 ], [ { i64 281487861612602 }, %tag58 ], [ { i64 562958543355963 }, %tag59 ], [ { i64 562958543355964 }, %tag60 ], [ { i64 562958543355965 }, %tag61 ], [ { i64 562958543355966 }, %tag62 ], [ { i64 562958543355967 }, %tag63 ], [ { i64 562958543355968 }, %tag64 ], [ { i64 562958543355969 }, %tag65 ], [ { i64 562958543355970 }, %tag66 ], [ { i64 562958543355971 }, %tag67 ], [ { i64 562958543355972 }, %tag68 ], [ { i64 562958543355973 }, %tag69 ], [ { i64 562958543355974 }, %tag70 ], [ { i64 562958543355975 }, %tag71 ], [ { i64 562958543355976 }, %tag72 ], [ { i64 562958543355977 }, %tag73 ], [ { i64 562958543355978 }, %tag74 ], [ { i64 562958543355979 }, %tag75 ], [ { i64 562958543355980 }, %tag76 ], [ { i64 562958543355981 }, %tag77 ], [ { i64 562958543355982 }, %tag78 ], [ { i64 562958543355983 }, %tag79 ], [ { i64 562958543355984 }, %tag80 ], [ { i64 562958543355985 }, %tag81 ], [ { i64 562958543355986 }, %tag82 ], [ { i64 844442110001235 }, %tag83 ], [ { i64 1407387768455252 }, %tag84 ], [ { i64 3659183287173205 }, %tag85 ], [ { i64 3096241923686486 }, %tag86 ], [ { i64 281487861612631 }, %tag87 ], [ { i64 281487861612632 }, %tag88 ], [ { i64 1125904201810009 }, %tag89 ], [ { i64 562958543355994 }, %tag90 ], [ { i64 562958543355995 }, %tag91 ], [ { i64 562958543355996 }, %tag92 ], [ { i64 3659183287173213 }, %tag93 ], [ { i64 562958543355998 }, %tag94 ], [ { i64 562958543355999 }, %tag95 ], [ { i64 3940666853818464 }, %tag96 ], [ { i64 562958543356001 }, %tag97 ], [ { i64 2251808403619938 }, %tag98 ], [ { i64 562958543356003 }, %tag99 ], [ { i64 562958543356004 }, %tag100 ], [ { i64 4222159010398309 }, %tag101 ], [ { i64 562958543356006 }, %tag102 ], [ { i64 562958543356007 }, %tag103 ], [ { i64 562958543356008 }, %tag104 ], [ { i64 562958543356009 }, %tag105 ], [ { i64 562958543356010 }, %tag106 ], [ { i64 562958543356011 }, %tag107 ], [ { i64 562958543356012 }, %tag108 ], [ { i64 562958543356013 }, %tag109 ], [ { i64 844442110001262 }, %tag110 ], [ { i64 562958543356015 }, %tag111 ], [ { i64 562958543356016 }, %tag112 ], [ { i64 281487861612657 }, %tag113 ]
+tag114:                                           ; preds = %entry
+  br label %exit
+
+tag115:                                           ; preds = %entry
+  br label %exit
+
+tag116:                                           ; preds = %entry
+  br label %exit
+
+tag117:                                           ; preds = %entry
+  br label %exit
+
+tag118:                                           ; preds = %entry
+  br label %exit
+
+tag119:                                           ; preds = %entry
+  br label %exit
+
+tag120:                                           ; preds = %entry
+  br label %exit
+
+tag121:                                           ; preds = %entry
+  br label %exit
+
+tag122:                                           ; preds = %entry
+  br label %exit
+
+tag123:                                           ; preds = %entry
+  br label %exit
+
+tag124:                                           ; preds = %entry
+  br label %exit
+
+tag125:                                           ; preds = %entry
+  br label %exit
+
+tag126:                                           ; preds = %entry
+  br label %exit
+
+tag127:                                           ; preds = %entry
+  br label %exit
+
+tag128:                                           ; preds = %entry
+  br label %exit
+
+tag129:                                           ; preds = %entry
+  br label %exit
+
+tag130:                                           ; preds = %entry
+  br label %exit
+
+tag131:                                           ; preds = %entry
+  br label %exit
+
+tag132:                                           ; preds = %entry
+  br label %exit
+
+tag133:                                           ; preds = %entry
+  br label %exit
+
+tag134:                                           ; preds = %entry
+  br label %exit
+
+tag135:                                           ; preds = %entry
+  br label %exit
+
+tag136:                                           ; preds = %entry
+  br label %exit
+
+tag137:                                           ; preds = %entry
+  br label %exit
+
+tag138:                                           ; preds = %entry
+  br label %exit
+
+tag139:                                           ; preds = %entry
+  br label %exit
+
+tag140:                                           ; preds = %entry
+  br label %exit
+
+tag141:                                           ; preds = %entry
+  br label %exit
+
+tag142:                                           ; preds = %entry
+  br label %exit
+
+tag143:                                           ; preds = %entry
+  br label %exit
+
+tag144:                                           ; preds = %entry
+  br label %exit
+
+tag145:                                           ; preds = %entry
+  br label %exit
+
+tag146:                                           ; preds = %entry
+  br label %exit
+
+tag147:                                           ; preds = %entry
+  br label %exit
+
+tag148:                                           ; preds = %entry
+  br label %exit
+
+tag149:                                           ; preds = %entry
+  br label %exit
+
+exit:                                             ; preds = %tag149, %tag148, %tag147, %tag146, %tag145, %tag144, %tag143, %tag142, %tag141, %tag140, %tag139, %tag138, %tag137, %tag136, %tag135, %tag134, %tag133, %tag132, %tag131, %tag130, %tag129, %tag128, %tag127, %tag126, %tag125, %tag124, %tag123, %tag122, %tag121, %tag120, %tag119, %tag118, %tag117, %tag116, %tag115, %tag114, %tag113, %tag112, %tag111, %tag110, %tag109, %tag108, %tag107, %tag106, %tag105, %tag104, %tag103, %tag102, %tag101, %tag100, %tag99, %tag98, %tag97, %tag96, %tag95, %tag94, %tag93, %tag92, %tag91, %tag90, %tag89, %tag88, %tag87, %tag86, %tag85, %tag84, %tag83, %tag82, %tag81, %tag80, %tag79, %tag78, %tag77, %tag76, %tag75, %tag74, %tag73, %tag72, %tag71, %tag70, %tag69, %tag68, %tag67, %tag66, %tag65, %tag64, %tag63, %tag62, %tag61, %tag60, %tag59, %tag58, %tag57, %tag56, %tag55, %tag54, %tag53, %tag52, %tag51, %tag50, %tag49, %tag48, %tag47, %tag46, %tag45, %tag44, %tag43, %tag42, %tag41, %tag40, %tag39, %tag38, %tag37, %tag36, %tag35, %tag34, %tag33, %tag32, %tag31, %tag30, %tag29, %tag28, %tag27, %tag26, %tag25, %tag24, %tag23, %tag22, %tag21, %tag20, %tag19, %tag18, %tag17, %tag16, %tag15, %tag14, %tag13, %tag12, %tag11, %tag10, %tag9, %tag8, %tag7, %tag6, %tag5, %tag4, %tag3, %tag2, %tag1, %tag0
+  %phi = phi %blockheader [ { i64 281487861612544 }, %tag0 ], [ { i64 281487861612545 }, %tag1 ], [ { i64 562958543355906 }, %tag2 ], [ { i64 844442110001155 }, %tag3 ], [ { i64 562958543355908 }, %tag4 ], [ { i64 1125904201809925 }, %tag5 ], [ { i64 562958543355910 }, %tag6 ], [ { i64 562958543355911 }, %tag7 ], [ { i64 562958543355912 }, %tag8 ], [ { i64 562958543355913 }, %tag9 ], [ { i64 562958543355914 }, %tag10 ], [ { i64 562958543355915 }, %tag11 ], [ { i64 562958543355916 }, %tag12 ], [ { i64 562958543355917 }, %tag13 ], [ { i64 281487861612558 }, %tag14 ], [ { i64 1407392063422479 }, %tag15 ], [ { i64 1125904201809936 }, %tag16 ], [ { i64 562958543355921 }, %tag17 ], [ { i64 1125904201809938 }, %tag18 ], [ { i64 1125904201809939 }, %tag19 ], [ { i64 1125904201809940 }, %tag20 ], [ { i64 1125904201809941 }, %tag21 ], [ { i64 1688858450198550 }, %tag22 ], [ { i64 1970337721876503 }, %tag23 ], [ { i64 2251829878456344 }, %tag24 ], [ { i64 2533339214905369 }, %tag25 ], [ { i64 2251829878456346 }, %tag26 ], [ { i64 2814779831877659 }, %tag27 ], [ { i64 3096233333751836 }, %tag28 ], [ { i64 3096233333751837 }, %tag29 ], [ { i64 1970337721876510 }, %tag30 ], [ { i64 1970337721876511 }, %tag31 ], [ { i64 3096233333751840 }, %tag32 ], [ { i64 3377721195364385 }, %tag33 ], [ { i64 3659213351944226 }, %tag34 ], [ { i64 1970337721876515 }, %tag35 ], [ { i64 3096233333751844 }, %tag36 ], [ { i64 3096233333751845 }, %tag37 ], [ { i64 3096233333751846 }, %tag38 ], [ { i64 1970337721876519 }, %tag39 ], [ { i64 1970337721876520 }, %tag40 ], [ { i64 1970337721876521 }, %tag41 ], [ { i64 1970337721876522 }, %tag42 ], [ { i64 1970337721876523 }, %tag43 ], [ { i64 1970337721876524 }, %tag44 ], [ { i64 1970337721876525 }, %tag45 ], [ { i64 2251829878456366 }, %tag46 ], [ { i64 2814779831877679 }, %tag47 ], [ { i64 281487861612592 }, %tag48 ], [ { i64 1970337721876529 }, %tag49 ], [ { i64 281487861612594 }, %tag50 ], [ { i64 281487861612595 }, %tag51 ], [ { i64 3096233333751860 }, %tag52 ], [ { i64 1970337721876533 }, %tag53 ], [ { i64 281487861612598 }, %tag54 ], [ { i64 3096233333751863 }, %tag55 ], [ { i64 1970337721876536 }, %tag56 ], [ { i64 281487861612601 }, %tag57 ], [ { i64 281487861612602 }, %tag58 ], [ { i64 3940675443753019 }, %tag59 ], [ { i64 4222146125496380 }, %tag60 ], [ { i64 3940675443753021 }, %tag61 ], [ { i64 1970337721876542 }, %tag62 ], [ { i64 281487861612607 }, %tag63 ], [ { i64 1970337721876544 }, %tag64 ], [ { i64 1970337721876545 }, %tag65 ], [ { i64 281487861612610 }, %tag66 ], [ { i64 1970337721876547 }, %tag67 ], [ { i64 281487861612612 }, %tag68 ], [ { i64 1970337721876549 }, %tag69 ], [ { i64 281487861612614 }, %tag70 ], [ { i64 1688858450198599 }, %tag71 ], [ { i64 562958543355976 }, %tag72 ], [ { i64 4222146125496393 }, %tag73 ], [ { i64 2814779831877706 }, %tag74 ], [ { i64 4503621102207051 }, %tag75 ], [ { i64 562958543355980 }, %tag76 ], [ { i64 1688858450198605 }, %tag77 ], [ { i64 4785091783950414 }, %tag78 ], [ { i64 1688858450198607 }, %tag79 ], [ { i64 1688858450198608 }, %tag80 ], [ { i64 5066566760661073 }, %tag81 ], [ { i64 844442110001234 }, %tag82 ], [ { i64 1125904201810003 }, %tag83 ], [ { i64 844442110001236 }, %tag84 ], [ { i64 281487861612629 }, %tag85 ], [ { i64 2814779831877718 }, %tag86 ], [ { i64 562958543355991 }, %tag87 ], [ { i64 562958543355992 }, %tag88 ], [ { i64 562958543355993 }, %tag89 ], [ { i64 562958543355994 }, %tag90 ], [ { i64 562958543355995 }, %tag91 ], [ { i64 562958543355996 }, %tag92 ], [ { i64 562958543355997 }, %tag93 ], [ { i64 562958543355998 }, %tag94 ], [ { i64 562958543355999 }, %tag95 ], [ { i64 562958543356000 }, %tag96 ], [ { i64 562958543356001 }, %tag97 ], [ { i64 562958543356002 }, %tag98 ], [ { i64 562958543356003 }, %tag99 ], [ { i64 562958543356004 }, %tag100 ], [ { i64 562958543356005 }, %tag101 ], [ { i64 562958543356006 }, %tag102 ], [ { i64 562958543356007 }, %tag103 ], [ { i64 562958543356008 }, %tag104 ], [ { i64 562958543356009 }, %tag105 ], [ { i64 562958543356010 }, %tag106 ], [ { i64 562958543356011 }, %tag107 ], [ { i64 562958543356012 }, %tag108 ], [ { i64 562958543356013 }, %tag109 ], [ { i64 562958543356014 }, %tag110 ], [ { i64 844442110001263 }, %tag111 ], [ { i64 1970337721876592 }, %tag112 ], [ { i64 1970337721876593 }, %tag113 ], [ { i64 1125904201810034 }, %tag114 ], [ { i64 1125904201810035 }, %tag115 ], [ { i64 5348033147437172 }, %tag116 ], [ { i64 5629529598984309 }, %tag117 ], [ { i64 4785091783950454 }, %tag118 ], [ { i64 5911008870662263 }, %tag119 ], [ { i64 844442110001272 }, %tag120 ], [ { i64 6192466667503737 }, %tag121 ], [ { i64 2251829878456442 }, %tag122 ], [ { i64 281487861612667 }, %tag123 ], [ { i64 281487861612668 }, %tag124 ], [ { i64 1125904201810045 }, %tag125 ], [ { i64 1688858450198654 }, %tag126 ], [ { i64 562958543356031 }, %tag127 ], [ { i64 562958543356032 }, %tag128 ], [ { i64 562958543356033 }, %tag129 ], [ { i64 6192466667503746 }, %tag130 ], [ { i64 562958543356035 }, %tag131 ], [ { i64 844442110001284 }, %tag132 ], [ { i64 562958543356037 }, %tag133 ], [ { i64 5911008870662278 }, %tag134 ], [ { i64 562958543356039 }, %tag135 ], [ { i64 562958543356040 }, %tag136 ], [ { i64 562958543356041 }, %tag137 ], [ { i64 5348033147437194 }, %tag138 ], [ { i64 562958543356043 }, %tag139 ], [ { i64 562958543356044 }, %tag140 ], [ { i64 562958543356045 }, %tag141 ], [ { i64 562958543356046 }, %tag142 ], [ { i64 562958543356047 }, %tag143 ], [ { i64 562958543356048 }, %tag144 ], [ { i64 562958543356049 }, %tag145 ], [ { i64 562958543356050 }, %tag146 ], [ { i64 562958543356051 }, %tag147 ], [ { i64 562958543356052 }, %tag148 ], [ { i64 281487861612693 }, %tag149 ]
   ret %blockheader %phi
 
 stuck:                                            ; preds = %entry
@@ -1338,6 +1782,42 @@ entry:
     i32 111, label %tag111
     i32 112, label %tag112
     i32 113, label %tag113
+    i32 114, label %tag114
+    i32 115, label %tag115
+    i32 116, label %tag116
+    i32 117, label %tag117
+    i32 118, label %tag118
+    i32 119, label %tag119
+    i32 120, label %tag120
+    i32 121, label %tag121
+    i32 122, label %tag122
+    i32 123, label %tag123
+    i32 124, label %tag124
+    i32 125, label %tag125
+    i32 126, label %tag126
+    i32 127, label %tag127
+    i32 128, label %tag128
+    i32 129, label %tag129
+    i32 130, label %tag130
+    i32 131, label %tag131
+    i32 132, label %tag132
+    i32 133, label %tag133
+    i32 134, label %tag134
+    i32 135, label %tag135
+    i32 136, label %tag136
+    i32 137, label %tag137
+    i32 138, label %tag138
+    i32 139, label %tag139
+    i32 140, label %tag140
+    i32 141, label %tag141
+    i32 142, label %tag142
+    i32 143, label %tag143
+    i32 144, label %tag144
+    i32 145, label %tag145
+    i32 146, label %tag146
+    i32 147, label %tag147
+    i32 148, label %tag148
+    i32 149, label %tag149
   ]
 
 tag0:                                             ; preds = %entry
@@ -1682,8 +2162,116 @@ tag112:                                           ; preds = %entry
 tag113:                                           ; preds = %entry
   br label %exit
 
-exit:                                             ; preds = %tag113, %tag112, %tag111, %tag110, %tag109, %tag108, %tag107, %tag106, %tag105, %tag104, %tag103, %tag102, %tag101, %tag100, %tag99, %tag98, %tag97, %tag96, %tag95, %tag94, %tag93, %tag92, %tag91, %tag90, %tag89, %tag88, %tag87, %tag86, %tag85, %tag84, %tag83, %tag82, %tag81, %tag80, %tag79, %tag78, %tag77, %tag76, %tag75, %tag74, %tag73, %tag72, %tag71, %tag70, %tag69, %tag68, %tag67, %tag66, %tag65, %tag64, %tag63, %tag62, %tag61, %tag60, %tag59, %tag58, %tag57, %tag56, %tag55, %tag54, %tag53, %tag52, %tag51, %tag50, %tag49, %tag48, %tag47, %tag46, %tag45, %tag44, %tag43, %tag42, %tag41, %tag40, %tag39, %tag38, %tag37, %tag36, %tag35, %tag34, %tag33, %tag32, %tag31, %tag30, %tag29, %tag28, %tag27, %tag26, %tag25, %tag24, %tag23, %tag22, %tag21, %tag20, %tag19, %tag18, %tag17, %tag16, %tag15, %tag14, %tag13, %tag12, %tag11, %tag10, %tag9, %tag8, %tag7, %tag6, %tag5, %tag4, %tag3, %tag2, %tag1, %tag0
-  %phi = phi i1 [ false, %tag0 ], [ false, %tag1 ], [ false, %tag2 ], [ false, %tag3 ], [ false, %tag4 ], [ false, %tag5 ], [ false, %tag6 ], [ false, %tag7 ], [ false, %tag8 ], [ false, %tag9 ], [ false, %tag10 ], [ false, %tag11 ], [ false, %tag12 ], [ false, %tag13 ], [ false, %tag14 ], [ false, %tag15 ], [ false, %tag16 ], [ true, %tag17 ], [ true, %tag18 ], [ true, %tag19 ], [ true, %tag20 ], [ true, %tag21 ], [ true, %tag22 ], [ true, %tag23 ], [ true, %tag24 ], [ true, %tag25 ], [ true, %tag26 ], [ true, %tag27 ], [ true, %tag28 ], [ true, %tag29 ], [ true, %tag30 ], [ true, %tag31 ], [ true, %tag32 ], [ false, %tag33 ], [ false, %tag34 ], [ false, %tag35 ], [ true, %tag36 ], [ true, %tag37 ], [ true, %tag38 ], [ true, %tag39 ], [ false, %tag40 ], [ true, %tag41 ], [ true, %tag42 ], [ true, %tag43 ], [ false, %tag44 ], [ true, %tag45 ], [ false, %tag46 ], [ false, %tag47 ], [ false, %tag48 ], [ true, %tag49 ], [ true, %tag50 ], [ true, %tag51 ], [ true, %tag52 ], [ true, %tag53 ], [ false, %tag54 ], [ true, %tag55 ], [ true, %tag56 ], [ true, %tag57 ], [ false, %tag58 ], [ true, %tag59 ], [ true, %tag60 ], [ true, %tag61 ], [ true, %tag62 ], [ true, %tag63 ], [ true, %tag64 ], [ true, %tag65 ], [ true, %tag66 ], [ true, %tag67 ], [ true, %tag68 ], [ true, %tag69 ], [ true, %tag70 ], [ true, %tag71 ], [ true, %tag72 ], [ true, %tag73 ], [ true, %tag74 ], [ true, %tag75 ], [ true, %tag76 ], [ true, %tag77 ], [ true, %tag78 ], [ true, %tag79 ], [ true, %tag80 ], [ true, %tag81 ], [ true, %tag82 ], [ true, %tag83 ], [ true, %tag84 ], [ true, %tag85 ], [ true, %tag86 ], [ false, %tag87 ], [ true, %tag88 ], [ false, %tag89 ], [ false, %tag90 ], [ false, %tag91 ], [ false, %tag92 ], [ false, %tag93 ], [ false, %tag94 ], [ false, %tag95 ], [ false, %tag96 ], [ false, %tag97 ], [ false, %tag98 ], [ false, %tag99 ], [ false, %tag100 ], [ false, %tag101 ], [ false, %tag102 ], [ false, %tag103 ], [ false, %tag104 ], [ false, %tag105 ], [ false, %tag106 ], [ false, %tag107 ], [ false, %tag108 ], [ false, %tag109 ], [ false, %tag110 ], [ false, %tag111 ], [ false, %tag112 ], [ false, %tag113 ]
+tag114:                                           ; preds = %entry
+  br label %exit
+
+tag115:                                           ; preds = %entry
+  br label %exit
+
+tag116:                                           ; preds = %entry
+  br label %exit
+
+tag117:                                           ; preds = %entry
+  br label %exit
+
+tag118:                                           ; preds = %entry
+  br label %exit
+
+tag119:                                           ; preds = %entry
+  br label %exit
+
+tag120:                                           ; preds = %entry
+  br label %exit
+
+tag121:                                           ; preds = %entry
+  br label %exit
+
+tag122:                                           ; preds = %entry
+  br label %exit
+
+tag123:                                           ; preds = %entry
+  br label %exit
+
+tag124:                                           ; preds = %entry
+  br label %exit
+
+tag125:                                           ; preds = %entry
+  br label %exit
+
+tag126:                                           ; preds = %entry
+  br label %exit
+
+tag127:                                           ; preds = %entry
+  br label %exit
+
+tag128:                                           ; preds = %entry
+  br label %exit
+
+tag129:                                           ; preds = %entry
+  br label %exit
+
+tag130:                                           ; preds = %entry
+  br label %exit
+
+tag131:                                           ; preds = %entry
+  br label %exit
+
+tag132:                                           ; preds = %entry
+  br label %exit
+
+tag133:                                           ; preds = %entry
+  br label %exit
+
+tag134:                                           ; preds = %entry
+  br label %exit
+
+tag135:                                           ; preds = %entry
+  br label %exit
+
+tag136:                                           ; preds = %entry
+  br label %exit
+
+tag137:                                           ; preds = %entry
+  br label %exit
+
+tag138:                                           ; preds = %entry
+  br label %exit
+
+tag139:                                           ; preds = %entry
+  br label %exit
+
+tag140:                                           ; preds = %entry
+  br label %exit
+
+tag141:                                           ; preds = %entry
+  br label %exit
+
+tag142:                                           ; preds = %entry
+  br label %exit
+
+tag143:                                           ; preds = %entry
+  br label %exit
+
+tag144:                                           ; preds = %entry
+  br label %exit
+
+tag145:                                           ; preds = %entry
+  br label %exit
+
+tag146:                                           ; preds = %entry
+  br label %exit
+
+tag147:                                           ; preds = %entry
+  br label %exit
+
+tag148:                                           ; preds = %entry
+  br label %exit
+
+tag149:                                           ; preds = %entry
+  br label %exit
+
+exit:                                             ; preds = %tag149, %tag148, %tag147, %tag146, %tag145, %tag144, %tag143, %tag142, %tag141, %tag140, %tag139, %tag138, %tag137, %tag136, %tag135, %tag134, %tag133, %tag132, %tag131, %tag130, %tag129, %tag128, %tag127, %tag126, %tag125, %tag124, %tag123, %tag122, %tag121, %tag120, %tag119, %tag118, %tag117, %tag116, %tag115, %tag114, %tag113, %tag112, %tag111, %tag110, %tag109, %tag108, %tag107, %tag106, %tag105, %tag104, %tag103, %tag102, %tag101, %tag100, %tag99, %tag98, %tag97, %tag96, %tag95, %tag94, %tag93, %tag92, %tag91, %tag90, %tag89, %tag88, %tag87, %tag86, %tag85, %tag84, %tag83, %tag82, %tag81, %tag80, %tag79, %tag78, %tag77, %tag76, %tag75, %tag74, %tag73, %tag72, %tag71, %tag70, %tag69, %tag68, %tag67, %tag66, %tag65, %tag64, %tag63, %tag62, %tag61, %tag60, %tag59, %tag58, %tag57, %tag56, %tag55, %tag54, %tag53, %tag52, %tag51, %tag50, %tag49, %tag48, %tag47, %tag46, %tag45, %tag44, %tag43, %tag42, %tag41, %tag40, %tag39, %tag38, %tag37, %tag36, %tag35, %tag34, %tag33, %tag32, %tag31, %tag30, %tag29, %tag28, %tag27, %tag26, %tag25, %tag24, %tag23, %tag22, %tag21, %tag20, %tag19, %tag18, %tag17, %tag16, %tag15, %tag14, %tag13, %tag12, %tag11, %tag10, %tag9, %tag8, %tag7, %tag6, %tag5, %tag4, %tag3, %tag2, %tag1, %tag0
+  %phi = phi i1 [ false, %tag0 ], [ false, %tag1 ], [ false, %tag2 ], [ false, %tag3 ], [ false, %tag4 ], [ false, %tag5 ], [ false, %tag6 ], [ false, %tag7 ], [ false, %tag8 ], [ false, %tag9 ], [ false, %tag10 ], [ false, %tag11 ], [ false, %tag12 ], [ false, %tag13 ], [ false, %tag14 ], [ true, %tag15 ], [ false, %tag16 ], [ false, %tag17 ], [ true, %tag18 ], [ false, %tag19 ], [ true, %tag20 ], [ true, %tag21 ], [ true, %tag22 ], [ true, %tag23 ], [ true, %tag24 ], [ true, %tag25 ], [ true, %tag26 ], [ true, %tag27 ], [ true, %tag28 ], [ true, %tag29 ], [ true, %tag30 ], [ true, %tag31 ], [ true, %tag32 ], [ true, %tag33 ], [ true, %tag34 ], [ true, %tag35 ], [ true, %tag36 ], [ true, %tag37 ], [ true, %tag38 ], [ true, %tag39 ], [ true, %tag40 ], [ true, %tag41 ], [ true, %tag42 ], [ true, %tag43 ], [ true, %tag44 ], [ true, %tag45 ], [ true, %tag46 ], [ true, %tag47 ], [ false, %tag48 ], [ true, %tag49 ], [ false, %tag50 ], [ false, %tag51 ], [ true, %tag52 ], [ true, %tag53 ], [ true, %tag54 ], [ true, %tag55 ], [ true, %tag56 ], [ true, %tag57 ], [ false, %tag58 ], [ true, %tag59 ], [ true, %tag60 ], [ true, %tag61 ], [ true, %tag62 ], [ true, %tag63 ], [ true, %tag64 ], [ true, %tag65 ], [ false, %tag66 ], [ true, %tag67 ], [ false, %tag68 ], [ true, %tag69 ], [ false, %tag70 ], [ false, %tag71 ], [ true, %tag72 ], [ true, %tag73 ], [ true, %tag74 ], [ true, %tag75 ], [ true, %tag76 ], [ true, %tag77 ], [ true, %tag78 ], [ true, %tag79 ], [ true, %tag80 ], [ false, %tag81 ], [ true, %tag82 ], [ true, %tag83 ], [ true, %tag84 ], [ false, %tag85 ], [ true, %tag86 ], [ true, %tag87 ], [ true, %tag88 ], [ true, %tag89 ], [ true, %tag90 ], [ true, %tag91 ], [ true, %tag92 ], [ true, %tag93 ], [ true, %tag94 ], [ true, %tag95 ], [ true, %tag96 ], [ true, %tag97 ], [ true, %tag98 ], [ true, %tag99 ], [ true, %tag100 ], [ true, %tag101 ], [ true, %tag102 ], [ true, %tag103 ], [ true, %tag104 ], [ true, %tag105 ], [ true, %tag106 ], [ true, %tag107 ], [ true, %tag108 ], [ true, %tag109 ], [ true, %tag110 ], [ true, %tag111 ], [ true, %tag112 ], [ true, %tag113 ], [ false, %tag114 ], [ false, %tag115 ], [ true, %tag116 ], [ true, %tag117 ], [ true, %tag118 ], [ true, %tag119 ], [ true, %tag120 ], [ true, %tag121 ], [ true, %tag122 ], [ false, %tag123 ], [ true, %tag124 ], [ false, %tag125 ], [ false, %tag126 ], [ false, %tag127 ], [ false, %tag128 ], [ false, %tag129 ], [ false, %tag130 ], [ false, %tag131 ], [ false, %tag132 ], [ false, %tag133 ], [ false, %tag134 ], [ false, %tag135 ], [ false, %tag136 ], [ false, %tag137 ], [ false, %tag138 ], [ false, %tag139 ], [ false, %tag140 ], [ false, %tag141 ], [ false, %tag142 ], [ false, %tag143 ], [ false, %tag144 ], [ false, %tag145 ], [ false, %tag146 ], [ false, %tag147 ], [ false, %tag148 ], [ false, %tag149 ]
   ret i1 %phi
 
 stuck:                                            ; preds = %entry
@@ -1701,7 +2289,7 @@ entry:
     i32 1, label %tag1
     i32 2, label %tag2
     i32 3, label %tag3
-    i32 5, label %tag5
+    i32 4, label %tag4
     i32 6, label %tag6
     i32 7, label %tag7
     i32 8, label %tag8
@@ -1710,11 +2298,9 @@ entry:
     i32 11, label %tag11
     i32 12, label %tag12
     i32 13, label %tag13
+    i32 14, label %tag14
     i32 15, label %tag15
-    i32 18, label %tag18
-    i32 19, label %tag19
-    i32 20, label %tag20
-    i32 21, label %tag21
+    i32 17, label %tag17
     i32 22, label %tag22
     i32 23, label %tag23
     i32 24, label %tag24
@@ -1749,6 +2335,7 @@ entry:
     i32 53, label %tag53
     i32 54, label %tag54
     i32 55, label %tag55
+    i32 56, label %tag56
     i32 57, label %tag57
     i32 58, label %tag58
     i32 59, label %tag59
@@ -1775,12 +2362,12 @@ entry:
     i32 80, label %tag80
     i32 81, label %tag81
     i32 82, label %tag82
-    i32 83, label %tag83
     i32 84, label %tag84
     i32 85, label %tag85
     i32 86, label %tag86
     i32 87, label %tag87
     i32 88, label %tag88
+    i32 89, label %tag89
     i32 90, label %tag90
     i32 91, label %tag91
     i32 92, label %tag92
@@ -1805,6 +2392,39 @@ entry:
     i32 111, label %tag111
     i32 112, label %tag112
     i32 113, label %tag113
+    i32 116, label %tag116
+    i32 117, label %tag117
+    i32 118, label %tag118
+    i32 119, label %tag119
+    i32 120, label %tag120
+    i32 121, label %tag121
+    i32 122, label %tag122
+    i32 123, label %tag123
+    i32 124, label %tag124
+    i32 126, label %tag126
+    i32 127, label %tag127
+    i32 128, label %tag128
+    i32 129, label %tag129
+    i32 130, label %tag130
+    i32 131, label %tag131
+    i32 132, label %tag132
+    i32 133, label %tag133
+    i32 134, label %tag134
+    i32 135, label %tag135
+    i32 136, label %tag136
+    i32 137, label %tag137
+    i32 138, label %tag138
+    i32 139, label %tag139
+    i32 140, label %tag140
+    i32 141, label %tag141
+    i32 142, label %tag142
+    i32 143, label %tag143
+    i32 144, label %tag144
+    i32 145, label %tag145
+    i32 146, label %tag146
+    i32 147, label %tag147
+    i32 148, label %tag148
+    i32 149, label %tag149
   ]
 
 tag0:                                             ; preds = %entry
@@ -1822,572 +2442,576 @@ tag0:                                             ; preds = %entry
   ret void
 
 tag1:                                             ; preds = %entry
-  %14 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %14 = bitcast %block* %0 to { %blockheader, [0 x i64], %block*, %block* }*
   %15 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
   %16 = load i8*, i8** %15
   %17 = bitcast i8* %16 to %block*
-  %18 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %14, i64 0, i32 2
+  %18 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %14, i64 0, i32 2
   store %block* %17, %block** %18
+  %19 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %20 = load i8*, i8** %19
+  %21 = bitcast i8* %20 to %block*
+  %22 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %14, i64 0, i32 3
+  store %block* %21, %block** %22
   ret void
 
 tag2:                                             ; preds = %entry
-  %19 = bitcast %block* %0 to { %blockheader, [0 x i64], %map }*
-  %20 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %21 = load i8*, i8** %20
-  %22 = bitcast i8* %21 to %map*
-  %23 = load %map, %map* %22
-  tail call void @free(i8* %21)
-  %24 = getelementptr inbounds { %blockheader, [0 x i64], %map }, { %blockheader, [0 x i64], %map }* %19, i64 0, i32 2
-  store %map %23, %map* %24
+  %23 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %24 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %25 = load i8*, i8** %24
+  %26 = bitcast i8* %25 to %block*
+  %27 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %23, i64 0, i32 2
+  store %block* %26, %block** %27
   ret void
 
 tag3:                                             ; preds = %entry
-  %25 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %26 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %27 = load i8*, i8** %26
-  %28 = bitcast i8* %27 to %block*
-  %29 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %25, i64 0, i32 2
-  store %block* %28, %block** %29
+  %28 = bitcast %block* %0 to { %blockheader, [0 x i64], %map }*
+  %29 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %30 = load i8*, i8** %29
+  %31 = bitcast i8* %30 to %map*
+  %32 = load %map, %map* %31
+  tail call void @free(i8* %30)
+  %33 = getelementptr inbounds { %blockheader, [0 x i64], %map }, { %blockheader, [0 x i64], %map }* %28, i64 0, i32 2
+  store %map %32, %map* %33
   ret void
 
-tag5:                                             ; preds = %entry
-  %30 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %31 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %32 = load i8*, i8** %31
-  %33 = bitcast i8* %32 to %block*
-  %34 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %30, i64 0, i32 2
-  store %block* %33, %block** %34
+tag4:                                             ; preds = %entry
+  %34 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %35 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %36 = load i8*, i8** %35
+  %37 = bitcast i8* %36 to %block*
+  %38 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %34, i64 0, i32 2
+  store %block* %37, %block** %38
   ret void
 
 tag6:                                             ; preds = %entry
-  %35 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %36 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %37 = load i8*, i8** %36
-  %38 = bitcast i8* %37 to %block*
-  %39 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %35, i64 0, i32 2
-  store %block* %38, %block** %39
+  %39 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %40 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %41 = load i8*, i8** %40
+  %42 = bitcast i8* %41 to %block*
+  %43 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %39, i64 0, i32 2
+  store %block* %42, %block** %43
   ret void
 
 tag7:                                             ; preds = %entry
-  %40 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %41 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %42 = load i8*, i8** %41
-  %43 = bitcast i8* %42 to %block*
-  %44 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %40, i64 0, i32 2
-  store %block* %43, %block** %44
+  %44 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %45 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %46 = load i8*, i8** %45
+  %47 = bitcast i8* %46 to %block*
+  %48 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %44, i64 0, i32 2
+  store %block* %47, %block** %48
   ret void
 
 tag8:                                             ; preds = %entry
-  %45 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %46 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %47 = load i8*, i8** %46
-  %48 = bitcast i8* %47 to %block*
-  %49 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %45, i64 0, i32 2
-  store %block* %48, %block** %49
+  %49 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %50 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %51 = load i8*, i8** %50
+  %52 = bitcast i8* %51 to %block*
+  %53 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %49, i64 0, i32 2
+  store %block* %52, %block** %53
   ret void
 
 tag9:                                             ; preds = %entry
-  %50 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %51 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %52 = load i8*, i8** %51
-  %53 = bitcast i8* %52 to %block*
-  %54 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %50, i64 0, i32 2
-  store %block* %53, %block** %54
+  %54 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %55 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %56 = load i8*, i8** %55
+  %57 = bitcast i8* %56 to %block*
+  %58 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %54, i64 0, i32 2
+  store %block* %57, %block** %58
   ret void
 
 tag10:                                            ; preds = %entry
-  %55 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %56 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %57 = load i8*, i8** %56
-  %58 = bitcast i8* %57 to %block*
-  %59 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %55, i64 0, i32 2
-  store %block* %58, %block** %59
+  %59 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %60 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %61 = load i8*, i8** %60
+  %62 = bitcast i8* %61 to %block*
+  %63 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %59, i64 0, i32 2
+  store %block* %62, %block** %63
   ret void
 
 tag11:                                            ; preds = %entry
-  %60 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %61 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %62 = load i8*, i8** %61
-  %63 = bitcast i8* %62 to %block*
-  %64 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %60, i64 0, i32 2
-  store %block* %63, %block** %64
+  %64 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %65 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %66 = load i8*, i8** %65
+  %67 = bitcast i8* %66 to %block*
+  %68 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %64, i64 0, i32 2
+  store %block* %67, %block** %68
   ret void
 
 tag12:                                            ; preds = %entry
-  %65 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %66 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %67 = load i8*, i8** %66
-  %68 = bitcast i8* %67 to %block*
-  %69 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %65, i64 0, i32 2
-  store %block* %68, %block** %69
+  %69 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %70 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %71 = load i8*, i8** %70
+  %72 = bitcast i8* %71 to %block*
+  %73 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %69, i64 0, i32 2
+  store %block* %72, %block** %73
   ret void
 
 tag13:                                            ; preds = %entry
-  %70 = bitcast %block* %0 to { %blockheader, [0 x i64], %block*, %block* }*
-  %71 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %72 = load i8*, i8** %71
-  %73 = bitcast i8* %72 to %block*
-  %74 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %70, i64 0, i32 2
-  store %block* %73, %block** %74
-  %75 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %74 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %75 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
   %76 = load i8*, i8** %75
   %77 = bitcast i8* %76 to %block*
-  %78 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %70, i64 0, i32 3
+  %78 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %74, i64 0, i32 2
   store %block* %77, %block** %78
   ret void
 
-tag15:                                            ; preds = %entry
-  %79 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+tag14:                                            ; preds = %entry
+  %79 = bitcast %block* %0 to { %blockheader, [0 x i64], %block*, %block* }*
   %80 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
   %81 = load i8*, i8** %80
   %82 = bitcast i8* %81 to %block*
-  %83 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %79, i64 0, i32 2
+  %83 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %79, i64 0, i32 2
   store %block* %82, %block** %83
+  %84 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %85 = load i8*, i8** %84
+  %86 = bitcast i8* %85 to %block*
+  %87 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %79, i64 0, i32 3
+  store %block* %86, %block** %87
   ret void
 
-tag18:                                            ; preds = %entry
-  %84 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz*, %mpz* }*
-  %85 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %86 = load i8*, i8** %85
-  %87 = bitcast i8* %86 to %mpz*
-  %88 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %84, i64 0, i32 2
-  store %mpz* %87, %mpz** %88
-  %89 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+tag15:                                            ; preds = %entry
+  %88 = bitcast %block* %0 to { %blockheader, [0 x i64], i1, %block*, %block* }*
+  %89 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
   %90 = load i8*, i8** %89
-  %91 = bitcast i8* %90 to %mpz*
-  %92 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %84, i64 0, i32 3
-  store %mpz* %91, %mpz** %92
-  ret void
-
-tag19:                                            ; preds = %entry
-  %93 = bitcast %block* %0 to { %blockheader, [0 x i64], %map, %map }*
-  %94 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %91 = bitcast i8* %90 to i1*
+  %92 = load i1, i1* %91
+  tail call void @free(i8* %90)
+  %93 = getelementptr inbounds { %blockheader, [0 x i64], i1, %block*, %block* }, { %blockheader, [0 x i64], i1, %block*, %block* }* %88, i64 0, i32 2
+  store i1 %92, i1* %93
+  %94 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
   %95 = load i8*, i8** %94
-  %96 = bitcast i8* %95 to %map*
-  %97 = load %map, %map* %96
-  tail call void @free(i8* %95)
-  %98 = getelementptr inbounds { %blockheader, [0 x i64], %map, %map }, { %blockheader, [0 x i64], %map, %map }* %93, i64 0, i32 2
-  store %map %97, %map* %98
-  %99 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
-  %100 = load i8*, i8** %99
-  %101 = bitcast i8* %100 to %map*
-  %102 = load %map, %map* %101
-  tail call void @free(i8* %100)
-  %103 = getelementptr inbounds { %blockheader, [0 x i64], %map, %map }, { %blockheader, [0 x i64], %map, %map }* %93, i64 0, i32 3
-  store %map %102, %map* %103
+  %96 = bitcast i8* %95 to %block*
+  %97 = getelementptr inbounds { %blockheader, [0 x i64], i1, %block*, %block* }, { %blockheader, [0 x i64], i1, %block*, %block* }* %88, i64 0, i32 3
+  store %block* %96, %block** %97
+  %98 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 2
+  %99 = load i8*, i8** %98
+  %100 = bitcast i8* %99 to %block*
+  %101 = getelementptr inbounds { %blockheader, [0 x i64], i1, %block*, %block* }, { %blockheader, [0 x i64], i1, %block*, %block* }* %88, i64 0, i32 4
+  store %block* %100, %block** %101
   ret void
 
-tag20:                                            ; preds = %entry
-  %104 = bitcast %block* %0 to { %blockheader, [0 x i64], i1, i1 }*
-  %105 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %106 = load i8*, i8** %105
-  %107 = bitcast i8* %106 to i1*
-  %108 = load i1, i1* %107
-  tail call void @free(i8* %106)
-  %109 = getelementptr inbounds { %blockheader, [0 x i64], i1, i1 }, { %blockheader, [0 x i64], i1, i1 }* %104, i64 0, i32 2
-  store i1 %108, i1* %109
-  %110 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
-  %111 = load i8*, i8** %110
-  %112 = bitcast i8* %111 to i1*
-  %113 = load i1, i1* %112
-  tail call void @free(i8* %111)
-  %114 = getelementptr inbounds { %blockheader, [0 x i64], i1, i1 }, { %blockheader, [0 x i64], i1, i1 }* %104, i64 0, i32 3
-  store i1 %113, i1* %114
-  ret void
-
-tag21:                                            ; preds = %entry
-  %115 = bitcast %block* %0 to { %blockheader, [0 x i64], i1, i1 }*
-  %116 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %117 = load i8*, i8** %116
-  %118 = bitcast i8* %117 to i1*
-  %119 = load i1, i1* %118
-  tail call void @free(i8* %117)
-  %120 = getelementptr inbounds { %blockheader, [0 x i64], i1, i1 }, { %blockheader, [0 x i64], i1, i1 }* %115, i64 0, i32 2
-  store i1 %119, i1* %120
-  %121 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
-  %122 = load i8*, i8** %121
-  %123 = bitcast i8* %122 to i1*
-  %124 = load i1, i1* %123
-  tail call void @free(i8* %122)
-  %125 = getelementptr inbounds { %blockheader, [0 x i64], i1, i1 }, { %blockheader, [0 x i64], i1, i1 }* %115, i64 0, i32 3
-  store i1 %124, i1* %125
+tag17:                                            ; preds = %entry
+  %102 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %103 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %104 = load i8*, i8** %103
+  %105 = bitcast i8* %104 to %block*
+  %106 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %102, i64 0, i32 2
+  store %block* %105, %block** %106
   ret void
 
 tag22:                                            ; preds = %entry
-  %126 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz*, %mpz* }*
-  %127 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %128 = load i8*, i8** %127
-  %129 = bitcast i8* %128 to %mpz*
-  %130 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %126, i64 0, i32 2
-  store %mpz* %129, %mpz** %130
-  %131 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
-  %132 = load i8*, i8** %131
-  %133 = bitcast i8* %132 to %mpz*
-  %134 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %126, i64 0, i32 3
-  store %mpz* %133, %mpz** %134
+  %107 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz* }*
+  %108 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %109 = load i8*, i8** %108
+  %110 = bitcast i8* %109 to %mpz*
+  %111 = getelementptr inbounds { %blockheader, [0 x i64], %mpz* }, { %blockheader, [0 x i64], %mpz* }* %107, i64 0, i32 2
+  store %mpz* %110, %mpz** %111
   ret void
 
 tag23:                                            ; preds = %entry
-  %135 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz*, %mpz* }*
-  %136 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %137 = load i8*, i8** %136
-  %138 = bitcast i8* %137 to %mpz*
-  %139 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %135, i64 0, i32 2
-  store %mpz* %138, %mpz** %139
-  %140 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
-  %141 = load i8*, i8** %140
-  %142 = bitcast i8* %141 to %mpz*
-  %143 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %135, i64 0, i32 3
-  store %mpz* %142, %mpz** %143
+  %112 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz*, %mpz* }*
+  %113 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %114 = load i8*, i8** %113
+  %115 = bitcast i8* %114 to %mpz*
+  %116 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %112, i64 0, i32 2
+  store %mpz* %115, %mpz** %116
+  %117 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %118 = load i8*, i8** %117
+  %119 = bitcast i8* %118 to %mpz*
+  %120 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %112, i64 0, i32 3
+  store %mpz* %119, %mpz** %120
   ret void
 
 tag24:                                            ; preds = %entry
-  %144 = bitcast %block* %0 to { %blockheader, [0 x i64], i1, i1 }*
-  %145 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %146 = load i8*, i8** %145
-  %147 = bitcast i8* %146 to i1*
-  %148 = load i1, i1* %147
-  tail call void @free(i8* %146)
-  %149 = getelementptr inbounds { %blockheader, [0 x i64], i1, i1 }, { %blockheader, [0 x i64], i1, i1 }* %144, i64 0, i32 2
-  store i1 %148, i1* %149
-  %150 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
-  %151 = load i8*, i8** %150
-  %152 = bitcast i8* %151 to i1*
-  %153 = load i1, i1* %152
-  tail call void @free(i8* %151)
-  %154 = getelementptr inbounds { %blockheader, [0 x i64], i1, i1 }, { %blockheader, [0 x i64], i1, i1 }* %144, i64 0, i32 3
-  store i1 %153, i1* %154
+  %121 = bitcast %block* %0 to { %blockheader, [0 x i64], %map, %map }*
+  %122 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %123 = load i8*, i8** %122
+  %124 = bitcast i8* %123 to %map*
+  %125 = load %map, %map* %124
+  tail call void @free(i8* %123)
+  %126 = getelementptr inbounds { %blockheader, [0 x i64], %map, %map }, { %blockheader, [0 x i64], %map, %map }* %121, i64 0, i32 2
+  store %map %125, %map* %126
+  %127 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %128 = load i8*, i8** %127
+  %129 = bitcast i8* %128 to %map*
+  %130 = load %map, %map* %129
+  tail call void @free(i8* %128)
+  %131 = getelementptr inbounds { %blockheader, [0 x i64], %map, %map }, { %blockheader, [0 x i64], %map, %map }* %121, i64 0, i32 3
+  store %map %130, %map* %131
   ret void
 
 tag25:                                            ; preds = %entry
-  %155 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz*, %mpz* }*
-  %156 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %157 = load i8*, i8** %156
-  %158 = bitcast i8* %157 to %mpz*
-  %159 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %155, i64 0, i32 2
-  store %mpz* %158, %mpz** %159
-  %160 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
-  %161 = load i8*, i8** %160
-  %162 = bitcast i8* %161 to %mpz*
-  %163 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %155, i64 0, i32 3
-  store %mpz* %162, %mpz** %163
+  %132 = bitcast %block* %0 to { %blockheader, [0 x i64], %list, %list }*
+  %133 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %134 = load i8*, i8** %133
+  %135 = bitcast i8* %134 to %list*
+  %136 = load %list, %list* %135
+  tail call void @free(i8* %134)
+  %137 = getelementptr inbounds { %blockheader, [0 x i64], %list, %list }, { %blockheader, [0 x i64], %list, %list }* %132, i64 0, i32 2
+  store %list %136, %list* %137
+  %138 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %139 = load i8*, i8** %138
+  %140 = bitcast i8* %139 to %list*
+  %141 = load %list, %list* %140
+  tail call void @free(i8* %139)
+  %142 = getelementptr inbounds { %blockheader, [0 x i64], %list, %list }, { %blockheader, [0 x i64], %list, %list }* %132, i64 0, i32 3
+  store %list %141, %list* %142
   ret void
 
 tag26:                                            ; preds = %entry
-  %164 = bitcast %block* %0 to { %blockheader, [0 x i64], i1, i1 }*
-  %165 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %166 = load i8*, i8** %165
-  %167 = bitcast i8* %166 to i1*
-  %168 = load i1, i1* %167
-  tail call void @free(i8* %166)
-  %169 = getelementptr inbounds { %blockheader, [0 x i64], i1, i1 }, { %blockheader, [0 x i64], i1, i1 }* %164, i64 0, i32 2
-  store i1 %168, i1* %169
-  %170 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
-  %171 = load i8*, i8** %170
-  %172 = bitcast i8* %171 to i1*
-  %173 = load i1, i1* %172
-  tail call void @free(i8* %171)
-  %174 = getelementptr inbounds { %blockheader, [0 x i64], i1, i1 }, { %blockheader, [0 x i64], i1, i1 }* %164, i64 0, i32 3
-  store i1 %173, i1* %174
+  %143 = bitcast %block* %0 to { %blockheader, [0 x i64], %map, %map }*
+  %144 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %145 = load i8*, i8** %144
+  %146 = bitcast i8* %145 to %map*
+  %147 = load %map, %map* %146
+  tail call void @free(i8* %145)
+  %148 = getelementptr inbounds { %blockheader, [0 x i64], %map, %map }, { %blockheader, [0 x i64], %map, %map }* %143, i64 0, i32 2
+  store %map %147, %map* %148
+  %149 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %150 = load i8*, i8** %149
+  %151 = bitcast i8* %150 to %map*
+  %152 = load %map, %map* %151
+  tail call void @free(i8* %150)
+  %153 = getelementptr inbounds { %blockheader, [0 x i64], %map, %map }, { %blockheader, [0 x i64], %map, %map }* %143, i64 0, i32 3
+  store %map %152, %map* %153
   ret void
 
 tag27:                                            ; preds = %entry
-  %175 = bitcast %block* %0 to { %blockheader, [0 x i64], i1, i1 }*
-  %176 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %177 = load i8*, i8** %176
-  %178 = bitcast i8* %177 to i1*
-  %179 = load i1, i1* %178
-  tail call void @free(i8* %177)
-  %180 = getelementptr inbounds { %blockheader, [0 x i64], i1, i1 }, { %blockheader, [0 x i64], i1, i1 }* %175, i64 0, i32 2
-  store i1 %179, i1* %180
-  %181 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
-  %182 = load i8*, i8** %181
-  %183 = bitcast i8* %182 to i1*
-  %184 = load i1, i1* %183
-  tail call void @free(i8* %182)
-  %185 = getelementptr inbounds { %blockheader, [0 x i64], i1, i1 }, { %blockheader, [0 x i64], i1, i1 }* %175, i64 0, i32 3
-  store i1 %184, i1* %185
+  %154 = bitcast %block* %0 to { %blockheader, [0 x i64], %set, %set }*
+  %155 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %156 = load i8*, i8** %155
+  %157 = bitcast i8* %156 to %set*
+  %158 = load %set, %set* %157
+  tail call void @free(i8* %156)
+  %159 = getelementptr inbounds { %blockheader, [0 x i64], %set, %set }, { %blockheader, [0 x i64], %set, %set }* %154, i64 0, i32 2
+  store %set %158, %set* %159
+  %160 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %161 = load i8*, i8** %160
+  %162 = bitcast i8* %161 to %set*
+  %163 = load %set, %set* %162
+  tail call void @free(i8* %161)
+  %164 = getelementptr inbounds { %blockheader, [0 x i64], %set, %set }, { %blockheader, [0 x i64], %set, %set }* %154, i64 0, i32 3
+  store %set %163, %set* %164
   ret void
 
 tag28:                                            ; preds = %entry
-  %186 = bitcast %block* %0 to { %blockheader, [0 x i64], i1, i1 }*
-  %187 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %188 = load i8*, i8** %187
-  %189 = bitcast i8* %188 to i1*
-  %190 = load i1, i1* %189
-  tail call void @free(i8* %188)
-  %191 = getelementptr inbounds { %blockheader, [0 x i64], i1, i1 }, { %blockheader, [0 x i64], i1, i1 }* %186, i64 0, i32 2
-  store i1 %190, i1* %191
-  %192 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
-  %193 = load i8*, i8** %192
-  %194 = bitcast i8* %193 to i1*
-  %195 = load i1, i1* %194
-  tail call void @free(i8* %193)
-  %196 = getelementptr inbounds { %blockheader, [0 x i64], i1, i1 }, { %blockheader, [0 x i64], i1, i1 }* %186, i64 0, i32 3
-  store i1 %195, i1* %196
+  %165 = bitcast %block* %0 to { %blockheader, [0 x i64], i1, i1 }*
+  %166 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %167 = load i8*, i8** %166
+  %168 = bitcast i8* %167 to i1*
+  %169 = load i1, i1* %168
+  tail call void @free(i8* %167)
+  %170 = getelementptr inbounds { %blockheader, [0 x i64], i1, i1 }, { %blockheader, [0 x i64], i1, i1 }* %165, i64 0, i32 2
+  store i1 %169, i1* %170
+  %171 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %172 = load i8*, i8** %171
+  %173 = bitcast i8* %172 to i1*
+  %174 = load i1, i1* %173
+  tail call void @free(i8* %172)
+  %175 = getelementptr inbounds { %blockheader, [0 x i64], i1, i1 }, { %blockheader, [0 x i64], i1, i1 }* %165, i64 0, i32 3
+  store i1 %174, i1* %175
   ret void
 
 tag29:                                            ; preds = %entry
-  %197 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz*, %mpz* }*
-  %198 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %199 = load i8*, i8** %198
-  %200 = bitcast i8* %199 to %mpz*
-  %201 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %197, i64 0, i32 2
-  store %mpz* %200, %mpz** %201
-  %202 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
-  %203 = load i8*, i8** %202
-  %204 = bitcast i8* %203 to %mpz*
-  %205 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %197, i64 0, i32 3
-  store %mpz* %204, %mpz** %205
+  %176 = bitcast %block* %0 to { %blockheader, [0 x i64], i1, i1 }*
+  %177 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %178 = load i8*, i8** %177
+  %179 = bitcast i8* %178 to i1*
+  %180 = load i1, i1* %179
+  tail call void @free(i8* %178)
+  %181 = getelementptr inbounds { %blockheader, [0 x i64], i1, i1 }, { %blockheader, [0 x i64], i1, i1 }* %176, i64 0, i32 2
+  store i1 %180, i1* %181
+  %182 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %183 = load i8*, i8** %182
+  %184 = bitcast i8* %183 to i1*
+  %185 = load i1, i1* %184
+  tail call void @free(i8* %183)
+  %186 = getelementptr inbounds { %blockheader, [0 x i64], i1, i1 }, { %blockheader, [0 x i64], i1, i1 }* %176, i64 0, i32 3
+  store i1 %185, i1* %186
   ret void
 
 tag30:                                            ; preds = %entry
-  %206 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz*, %mpz* }*
-  %207 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %208 = load i8*, i8** %207
-  %209 = bitcast i8* %208 to %mpz*
-  %210 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %206, i64 0, i32 2
-  store %mpz* %209, %mpz** %210
-  %211 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
-  %212 = load i8*, i8** %211
-  %213 = bitcast i8* %212 to %mpz*
-  %214 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %206, i64 0, i32 3
-  store %mpz* %213, %mpz** %214
+  %187 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz*, %mpz* }*
+  %188 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %189 = load i8*, i8** %188
+  %190 = bitcast i8* %189 to %mpz*
+  %191 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %187, i64 0, i32 2
+  store %mpz* %190, %mpz** %191
+  %192 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %193 = load i8*, i8** %192
+  %194 = bitcast i8* %193 to %mpz*
+  %195 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %187, i64 0, i32 3
+  store %mpz* %194, %mpz** %195
   ret void
 
 tag31:                                            ; preds = %entry
-  %215 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz*, %mpz* }*
-  %216 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %217 = load i8*, i8** %216
-  %218 = bitcast i8* %217 to %mpz*
-  %219 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %215, i64 0, i32 2
-  store %mpz* %218, %mpz** %219
-  %220 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
-  %221 = load i8*, i8** %220
-  %222 = bitcast i8* %221 to %mpz*
-  %223 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %215, i64 0, i32 3
-  store %mpz* %222, %mpz** %223
+  %196 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz*, %mpz* }*
+  %197 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %198 = load i8*, i8** %197
+  %199 = bitcast i8* %198 to %mpz*
+  %200 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %196, i64 0, i32 2
+  store %mpz* %199, %mpz** %200
+  %201 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %202 = load i8*, i8** %201
+  %203 = bitcast i8* %202 to %mpz*
+  %204 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %196, i64 0, i32 3
+  store %mpz* %203, %mpz** %204
   ret void
 
 tag32:                                            ; preds = %entry
-  %224 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz*, %mpz* }*
-  %225 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %226 = load i8*, i8** %225
-  %227 = bitcast i8* %226 to %mpz*
-  %228 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %224, i64 0, i32 2
-  store %mpz* %227, %mpz** %228
-  %229 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
-  %230 = load i8*, i8** %229
-  %231 = bitcast i8* %230 to %mpz*
-  %232 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %224, i64 0, i32 3
-  store %mpz* %231, %mpz** %232
+  %205 = bitcast %block* %0 to { %blockheader, [0 x i64], i1, i1 }*
+  %206 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %207 = load i8*, i8** %206
+  %208 = bitcast i8* %207 to i1*
+  %209 = load i1, i1* %208
+  tail call void @free(i8* %207)
+  %210 = getelementptr inbounds { %blockheader, [0 x i64], i1, i1 }, { %blockheader, [0 x i64], i1, i1 }* %205, i64 0, i32 2
+  store i1 %209, i1* %210
+  %211 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %212 = load i8*, i8** %211
+  %213 = bitcast i8* %212 to i1*
+  %214 = load i1, i1* %213
+  tail call void @free(i8* %212)
+  %215 = getelementptr inbounds { %blockheader, [0 x i64], i1, i1 }, { %blockheader, [0 x i64], i1, i1 }* %205, i64 0, i32 3
+  store i1 %214, i1* %215
   ret void
 
 tag33:                                            ; preds = %entry
-  %233 = bitcast %block* %0 to { %blockheader, [0 x i64], %block*, %block* }*
-  %234 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %235 = load i8*, i8** %234
-  %236 = bitcast i8* %235 to %block*
-  %237 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %233, i64 0, i32 2
-  store %block* %236, %block** %237
-  %238 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
-  %239 = load i8*, i8** %238
-  %240 = bitcast i8* %239 to %block*
-  %241 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %233, i64 0, i32 3
-  store %block* %240, %block** %241
+  %216 = bitcast %block* %0 to { %blockheader, [0 x i64], %block*, %map }*
+  %217 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %218 = load i8*, i8** %217
+  %219 = bitcast i8* %218 to %block*
+  %220 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %map }, { %blockheader, [0 x i64], %block*, %map }* %216, i64 0, i32 2
+  store %block* %219, %block** %220
+  %221 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %222 = load i8*, i8** %221
+  %223 = bitcast i8* %222 to %map*
+  %224 = load %map, %map* %223
+  tail call void @free(i8* %222)
+  %225 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %map }, { %blockheader, [0 x i64], %block*, %map }* %216, i64 0, i32 3
+  store %map %224, %map* %225
   ret void
 
 tag34:                                            ; preds = %entry
-  %242 = bitcast %block* %0 to { %blockheader, [0 x i64], %block*, %block* }*
-  %243 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %244 = load i8*, i8** %243
-  %245 = bitcast i8* %244 to %block*
-  %246 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %242, i64 0, i32 2
-  store %block* %245, %block** %246
-  %247 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
-  %248 = load i8*, i8** %247
-  %249 = bitcast i8* %248 to %block*
-  %250 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %242, i64 0, i32 3
-  store %block* %249, %block** %250
+  %226 = bitcast %block* %0 to { %blockheader, [0 x i64], %block*, %list }*
+  %227 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %228 = load i8*, i8** %227
+  %229 = bitcast i8* %228 to %block*
+  %230 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %list }, { %blockheader, [0 x i64], %block*, %list }* %226, i64 0, i32 2
+  store %block* %229, %block** %230
+  %231 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %232 = load i8*, i8** %231
+  %233 = bitcast i8* %232 to %list*
+  %234 = load %list, %list* %233
+  tail call void @free(i8* %232)
+  %235 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %list }, { %blockheader, [0 x i64], %block*, %list }* %226, i64 0, i32 3
+  store %list %234, %list* %235
   ret void
 
 tag35:                                            ; preds = %entry
-  %251 = bitcast %block* %0 to { %blockheader, [0 x i64], %block*, %block* }*
-  %252 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %253 = load i8*, i8** %252
-  %254 = bitcast i8* %253 to %block*
-  %255 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %251, i64 0, i32 2
-  store %block* %254, %block** %255
-  %256 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
-  %257 = load i8*, i8** %256
-  %258 = bitcast i8* %257 to %block*
-  %259 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %251, i64 0, i32 3
-  store %block* %258, %block** %259
+  %236 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz*, %mpz* }*
+  %237 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %238 = load i8*, i8** %237
+  %239 = bitcast i8* %238 to %mpz*
+  %240 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %236, i64 0, i32 2
+  store %mpz* %239, %mpz** %240
+  %241 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %242 = load i8*, i8** %241
+  %243 = bitcast i8* %242 to %mpz*
+  %244 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %236, i64 0, i32 3
+  store %mpz* %243, %mpz** %244
   ret void
 
 tag36:                                            ; preds = %entry
-  %260 = bitcast %block* %0 to { %blockheader, [0 x i64], i1, i1 }*
-  %261 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %262 = load i8*, i8** %261
-  %263 = bitcast i8* %262 to i1*
-  %264 = load i1, i1* %263
-  tail call void @free(i8* %262)
-  %265 = getelementptr inbounds { %blockheader, [0 x i64], i1, i1 }, { %blockheader, [0 x i64], i1, i1 }* %260, i64 0, i32 2
-  store i1 %264, i1* %265
-  %266 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
-  %267 = load i8*, i8** %266
-  %268 = bitcast i8* %267 to i1*
-  %269 = load i1, i1* %268
-  tail call void @free(i8* %267)
-  %270 = getelementptr inbounds { %blockheader, [0 x i64], i1, i1 }, { %blockheader, [0 x i64], i1, i1 }* %260, i64 0, i32 3
-  store i1 %269, i1* %270
+  %245 = bitcast %block* %0 to { %blockheader, [0 x i64], i1, i1 }*
+  %246 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %247 = load i8*, i8** %246
+  %248 = bitcast i8* %247 to i1*
+  %249 = load i1, i1* %248
+  tail call void @free(i8* %247)
+  %250 = getelementptr inbounds { %blockheader, [0 x i64], i1, i1 }, { %blockheader, [0 x i64], i1, i1 }* %245, i64 0, i32 2
+  store i1 %249, i1* %250
+  %251 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %252 = load i8*, i8** %251
+  %253 = bitcast i8* %252 to i1*
+  %254 = load i1, i1* %253
+  tail call void @free(i8* %252)
+  %255 = getelementptr inbounds { %blockheader, [0 x i64], i1, i1 }, { %blockheader, [0 x i64], i1, i1 }* %245, i64 0, i32 3
+  store i1 %254, i1* %255
   ret void
 
 tag37:                                            ; preds = %entry
-  %271 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz*, %mpz* }*
-  %272 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %273 = load i8*, i8** %272
-  %274 = bitcast i8* %273 to %mpz*
-  %275 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %271, i64 0, i32 2
-  store %mpz* %274, %mpz** %275
-  %276 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
-  %277 = load i8*, i8** %276
-  %278 = bitcast i8* %277 to %mpz*
-  %279 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %271, i64 0, i32 3
-  store %mpz* %278, %mpz** %279
+  %256 = bitcast %block* %0 to { %blockheader, [0 x i64], i1, i1 }*
+  %257 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %258 = load i8*, i8** %257
+  %259 = bitcast i8* %258 to i1*
+  %260 = load i1, i1* %259
+  tail call void @free(i8* %258)
+  %261 = getelementptr inbounds { %blockheader, [0 x i64], i1, i1 }, { %blockheader, [0 x i64], i1, i1 }* %256, i64 0, i32 2
+  store i1 %260, i1* %261
+  %262 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %263 = load i8*, i8** %262
+  %264 = bitcast i8* %263 to i1*
+  %265 = load i1, i1* %264
+  tail call void @free(i8* %263)
+  %266 = getelementptr inbounds { %blockheader, [0 x i64], i1, i1 }, { %blockheader, [0 x i64], i1, i1 }* %256, i64 0, i32 3
+  store i1 %265, i1* %266
   ret void
 
 tag38:                                            ; preds = %entry
-  %280 = bitcast %block* %0 to { %blockheader, [0 x i64], i1, i1 }*
-  %281 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %282 = load i8*, i8** %281
-  %283 = bitcast i8* %282 to i1*
-  %284 = load i1, i1* %283
-  tail call void @free(i8* %282)
-  %285 = getelementptr inbounds { %blockheader, [0 x i64], i1, i1 }, { %blockheader, [0 x i64], i1, i1 }* %280, i64 0, i32 2
-  store i1 %284, i1* %285
-  %286 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
-  %287 = load i8*, i8** %286
-  %288 = bitcast i8* %287 to i1*
-  %289 = load i1, i1* %288
-  tail call void @free(i8* %287)
-  %290 = getelementptr inbounds { %blockheader, [0 x i64], i1, i1 }, { %blockheader, [0 x i64], i1, i1 }* %280, i64 0, i32 3
-  store i1 %289, i1* %290
+  %267 = bitcast %block* %0 to { %blockheader, [0 x i64], i1, i1 }*
+  %268 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %269 = load i8*, i8** %268
+  %270 = bitcast i8* %269 to i1*
+  %271 = load i1, i1* %270
+  tail call void @free(i8* %269)
+  %272 = getelementptr inbounds { %blockheader, [0 x i64], i1, i1 }, { %blockheader, [0 x i64], i1, i1 }* %267, i64 0, i32 2
+  store i1 %271, i1* %272
+  %273 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %274 = load i8*, i8** %273
+  %275 = bitcast i8* %274 to i1*
+  %276 = load i1, i1* %275
+  tail call void @free(i8* %274)
+  %277 = getelementptr inbounds { %blockheader, [0 x i64], i1, i1 }, { %blockheader, [0 x i64], i1, i1 }* %267, i64 0, i32 3
+  store i1 %276, i1* %277
   ret void
 
 tag39:                                            ; preds = %entry
-  %291 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz*, %mpz* }*
-  %292 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %293 = load i8*, i8** %292
-  %294 = bitcast i8* %293 to %mpz*
-  %295 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %291, i64 0, i32 2
-  store %mpz* %294, %mpz** %295
-  %296 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
-  %297 = load i8*, i8** %296
-  %298 = bitcast i8* %297 to %mpz*
-  %299 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %291, i64 0, i32 3
-  store %mpz* %298, %mpz** %299
+  %278 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz*, %mpz* }*
+  %279 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %280 = load i8*, i8** %279
+  %281 = bitcast i8* %280 to %mpz*
+  %282 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %278, i64 0, i32 2
+  store %mpz* %281, %mpz** %282
+  %283 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %284 = load i8*, i8** %283
+  %285 = bitcast i8* %284 to %mpz*
+  %286 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %278, i64 0, i32 3
+  store %mpz* %285, %mpz** %286
   ret void
 
 tag40:                                            ; preds = %entry
-  %300 = bitcast %block* %0 to { %blockheader, [0 x i64], %block*, %block* }*
-  %301 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %302 = load i8*, i8** %301
-  %303 = bitcast i8* %302 to %block*
-  %304 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %300, i64 0, i32 2
-  store %block* %303, %block** %304
-  %305 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
-  %306 = load i8*, i8** %305
-  %307 = bitcast i8* %306 to %block*
-  %308 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %300, i64 0, i32 3
-  store %block* %307, %block** %308
+  %287 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz*, %mpz* }*
+  %288 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %289 = load i8*, i8** %288
+  %290 = bitcast i8* %289 to %mpz*
+  %291 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %287, i64 0, i32 2
+  store %mpz* %290, %mpz** %291
+  %292 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %293 = load i8*, i8** %292
+  %294 = bitcast i8* %293 to %mpz*
+  %295 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %287, i64 0, i32 3
+  store %mpz* %294, %mpz** %295
   ret void
 
 tag41:                                            ; preds = %entry
-  %309 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz*, %mpz* }*
-  %310 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %311 = load i8*, i8** %310
-  %312 = bitcast i8* %311 to %mpz*
-  %313 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %309, i64 0, i32 2
-  store %mpz* %312, %mpz** %313
-  %314 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
-  %315 = load i8*, i8** %314
-  %316 = bitcast i8* %315 to %mpz*
-  %317 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %309, i64 0, i32 3
-  store %mpz* %316, %mpz** %317
+  %296 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz*, %mpz* }*
+  %297 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %298 = load i8*, i8** %297
+  %299 = bitcast i8* %298 to %mpz*
+  %300 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %296, i64 0, i32 2
+  store %mpz* %299, %mpz** %300
+  %301 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %302 = load i8*, i8** %301
+  %303 = bitcast i8* %302 to %mpz*
+  %304 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %296, i64 0, i32 3
+  store %mpz* %303, %mpz** %304
   ret void
 
 tag42:                                            ; preds = %entry
-  %318 = bitcast %block* %0 to { %blockheader, [0 x i64], %block*, %block* }*
-  %319 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %320 = load i8*, i8** %319
-  %321 = bitcast i8* %320 to %block*
-  %322 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %318, i64 0, i32 2
-  store %block* %321, %block** %322
-  %323 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
-  %324 = load i8*, i8** %323
-  %325 = bitcast i8* %324 to %block*
-  %326 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %318, i64 0, i32 3
-  store %block* %325, %block** %326
+  %305 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz*, %mpz* }*
+  %306 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %307 = load i8*, i8** %306
+  %308 = bitcast i8* %307 to %mpz*
+  %309 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %305, i64 0, i32 2
+  store %mpz* %308, %mpz** %309
+  %310 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %311 = load i8*, i8** %310
+  %312 = bitcast i8* %311 to %mpz*
+  %313 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %305, i64 0, i32 3
+  store %mpz* %312, %mpz** %313
   ret void
 
 tag43:                                            ; preds = %entry
-  %327 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz*, %mpz* }*
-  %328 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %329 = load i8*, i8** %328
-  %330 = bitcast i8* %329 to %mpz*
-  %331 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %327, i64 0, i32 2
-  store %mpz* %330, %mpz** %331
-  %332 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
-  %333 = load i8*, i8** %332
-  %334 = bitcast i8* %333 to %mpz*
-  %335 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %327, i64 0, i32 3
-  store %mpz* %334, %mpz** %335
+  %314 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz*, %mpz* }*
+  %315 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %316 = load i8*, i8** %315
+  %317 = bitcast i8* %316 to %mpz*
+  %318 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %314, i64 0, i32 2
+  store %mpz* %317, %mpz** %318
+  %319 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %320 = load i8*, i8** %319
+  %321 = bitcast i8* %320 to %mpz*
+  %322 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %314, i64 0, i32 3
+  store %mpz* %321, %mpz** %322
   ret void
 
 tag44:                                            ; preds = %entry
-  %336 = bitcast %block* %0 to { %blockheader, [0 x i64], %block*, %block* }*
-  %337 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %338 = load i8*, i8** %337
-  %339 = bitcast i8* %338 to %block*
-  %340 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %336, i64 0, i32 2
-  store %block* %339, %block** %340
-  %341 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
-  %342 = load i8*, i8** %341
-  %343 = bitcast i8* %342 to %block*
-  %344 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %336, i64 0, i32 3
-  store %block* %343, %block** %344
+  %323 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz*, %mpz* }*
+  %324 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %325 = load i8*, i8** %324
+  %326 = bitcast i8* %325 to %mpz*
+  %327 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %323, i64 0, i32 2
+  store %mpz* %326, %mpz** %327
+  %328 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %329 = load i8*, i8** %328
+  %330 = bitcast i8* %329 to %mpz*
+  %331 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %323, i64 0, i32 3
+  store %mpz* %330, %mpz** %331
   ret void
 
 tag45:                                            ; preds = %entry
-  %345 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz*, %mpz* }*
-  %346 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %347 = load i8*, i8** %346
-  %348 = bitcast i8* %347 to %mpz*
-  %349 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %345, i64 0, i32 2
-  store %mpz* %348, %mpz** %349
-  %350 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
-  %351 = load i8*, i8** %350
-  %352 = bitcast i8* %351 to %mpz*
-  %353 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %345, i64 0, i32 3
-  store %mpz* %352, %mpz** %353
+  %332 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz*, %mpz* }*
+  %333 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %334 = load i8*, i8** %333
+  %335 = bitcast i8* %334 to %mpz*
+  %336 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %332, i64 0, i32 2
+  store %mpz* %335, %mpz** %336
+  %337 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %338 = load i8*, i8** %337
+  %339 = bitcast i8* %338 to %mpz*
+  %340 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %332, i64 0, i32 3
+  store %mpz* %339, %mpz** %340
   ret void
 
 tag46:                                            ; preds = %entry
-  %354 = bitcast %block* %0 to { %blockheader, [0 x i64], %block*, %block* }*
-  %355 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %356 = load i8*, i8** %355
-  %357 = bitcast i8* %356 to %block*
-  %358 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %354, i64 0, i32 2
-  store %block* %357, %block** %358
-  %359 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
-  %360 = load i8*, i8** %359
-  %361 = bitcast i8* %360 to %block*
-  %362 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %354, i64 0, i32 3
-  store %block* %361, %block** %362
+  %341 = bitcast %block* %0 to { %blockheader, [0 x i64], %map, %map }*
+  %342 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %343 = load i8*, i8** %342
+  %344 = bitcast i8* %343 to %map*
+  %345 = load %map, %map* %344
+  tail call void @free(i8* %343)
+  %346 = getelementptr inbounds { %blockheader, [0 x i64], %map, %map }, { %blockheader, [0 x i64], %map, %map }* %341, i64 0, i32 2
+  store %map %345, %map* %346
+  %347 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %348 = load i8*, i8** %347
+  %349 = bitcast i8* %348 to %map*
+  %350 = load %map, %map* %349
+  tail call void @free(i8* %348)
+  %351 = getelementptr inbounds { %blockheader, [0 x i64], %map, %map }, { %blockheader, [0 x i64], %map, %map }* %341, i64 0, i32 3
+  store %map %350, %map* %351
   ret void
 
 tag47:                                            ; preds = %entry
+  %352 = bitcast %block* %0 to { %blockheader, [0 x i64], %set, %set }*
+  %353 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %354 = load i8*, i8** %353
+  %355 = bitcast i8* %354 to %set*
+  %356 = load %set, %set* %355
+  tail call void @free(i8* %354)
+  %357 = getelementptr inbounds { %blockheader, [0 x i64], %set, %set }, { %blockheader, [0 x i64], %set, %set }* %352, i64 0, i32 2
+  store %set %356, %set* %357
+  %358 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %359 = load i8*, i8** %358
+  %360 = bitcast i8* %359 to %set*
+  %361 = load %set, %set* %360
+  tail call void @free(i8* %359)
+  %362 = getelementptr inbounds { %blockheader, [0 x i64], %set, %set }, { %blockheader, [0 x i64], %set, %set }* %352, i64 0, i32 3
+  store %set %361, %set* %362
+  ret void
+
+tag48:                                            ; preds = %entry
   %363 = bitcast %block* %0 to { %blockheader, [0 x i64], %block*, %block* }*
   %364 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
   %365 = load i8*, i8** %364
@@ -2401,439 +3025,407 @@ tag47:                                            ; preds = %entry
   store %block* %370, %block** %371
   ret void
 
-tag48:                                            ; preds = %entry
-  %372 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz* }*
+tag49:                                            ; preds = %entry
+  %372 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz*, %mpz* }*
   %373 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
   %374 = load i8*, i8** %373
   %375 = bitcast i8* %374 to %mpz*
-  %376 = getelementptr inbounds { %blockheader, [0 x i64], %mpz* }, { %blockheader, [0 x i64], %mpz* }* %372, i64 0, i32 2
+  %376 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %372, i64 0, i32 2
   store %mpz* %375, %mpz** %376
-  ret void
-
-tag49:                                            ; preds = %entry
-  %377 = bitcast %block* %0 to { %blockheader, [0 x i64], %map, %block* }*
-  %378 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %379 = load i8*, i8** %378
-  %380 = bitcast i8* %379 to %map*
-  %381 = load %map, %map* %380
-  tail call void @free(i8* %379)
-  %382 = getelementptr inbounds { %blockheader, [0 x i64], %map, %block* }, { %blockheader, [0 x i64], %map, %block* }* %377, i64 0, i32 2
-  store %map %381, %map* %382
-  %383 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
-  %384 = load i8*, i8** %383
-  %385 = bitcast i8* %384 to %block*
-  %386 = getelementptr inbounds { %blockheader, [0 x i64], %map, %block* }, { %blockheader, [0 x i64], %map, %block* }* %377, i64 0, i32 3
-  store %block* %385, %block** %386
+  %377 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %378 = load i8*, i8** %377
+  %379 = bitcast i8* %378 to %mpz*
+  %380 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %372, i64 0, i32 3
+  store %mpz* %379, %mpz** %380
   ret void
 
 tag50:                                            ; preds = %entry
-  %387 = bitcast %block* %0 to { %blockheader, [0 x i64], %block*, %set }*
-  %388 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %389 = load i8*, i8** %388
-  %390 = bitcast i8* %389 to %block*
-  %391 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %set }, { %blockheader, [0 x i64], %block*, %set }* %387, i64 0, i32 2
-  store %block* %390, %block** %391
-  %392 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
-  %393 = load i8*, i8** %392
-  %394 = bitcast i8* %393 to %set*
-  %395 = load %set, %set* %394
-  tail call void @free(i8* %393)
-  %396 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %set }, { %blockheader, [0 x i64], %block*, %set }* %387, i64 0, i32 3
-  store %set %395, %set* %396
+  %381 = bitcast %block* %0 to { %blockheader, [0 x i64], %block*, %block* }*
+  %382 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %383 = load i8*, i8** %382
+  %384 = bitcast i8* %383 to %block*
+  %385 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %381, i64 0, i32 2
+  store %block* %384, %block** %385
+  %386 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %387 = load i8*, i8** %386
+  %388 = bitcast i8* %387 to %block*
+  %389 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %381, i64 0, i32 3
+  store %block* %388, %block** %389
   ret void
 
 tag51:                                            ; preds = %entry
-  %397 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz* }*
-  %398 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %399 = load i8*, i8** %398
-  %400 = bitcast i8* %399 to %mpz*
-  %401 = getelementptr inbounds { %blockheader, [0 x i64], %mpz* }, { %blockheader, [0 x i64], %mpz* }* %397, i64 0, i32 2
-  store %mpz* %400, %mpz** %401
+  %390 = bitcast %block* %0 to { %blockheader, [0 x i64], %block*, %block* }*
+  %391 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %392 = load i8*, i8** %391
+  %393 = bitcast i8* %392 to %block*
+  %394 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %390, i64 0, i32 2
+  store %block* %393, %block** %394
+  %395 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %396 = load i8*, i8** %395
+  %397 = bitcast i8* %396 to %block*
+  %398 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %390, i64 0, i32 3
+  store %block* %397, %block** %398
   ret void
 
 tag52:                                            ; preds = %entry
-  %402 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz*, %mpz*, %mpz* }*
-  %403 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %404 = load i8*, i8** %403
-  %405 = bitcast i8* %404 to %mpz*
-  %406 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz*, %mpz* }* %402, i64 0, i32 2
-  store %mpz* %405, %mpz** %406
-  %407 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
-  %408 = load i8*, i8** %407
-  %409 = bitcast i8* %408 to %mpz*
-  %410 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz*, %mpz* }* %402, i64 0, i32 3
-  store %mpz* %409, %mpz** %410
-  %411 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 2
-  %412 = load i8*, i8** %411
-  %413 = bitcast i8* %412 to %mpz*
-  %414 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz*, %mpz* }* %402, i64 0, i32 4
-  store %mpz* %413, %mpz** %414
+  %399 = bitcast %block* %0 to { %blockheader, [0 x i64], i1, i1 }*
+  %400 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %401 = load i8*, i8** %400
+  %402 = bitcast i8* %401 to i1*
+  %403 = load i1, i1* %402
+  tail call void @free(i8* %401)
+  %404 = getelementptr inbounds { %blockheader, [0 x i64], i1, i1 }, { %blockheader, [0 x i64], i1, i1 }* %399, i64 0, i32 2
+  store i1 %403, i1* %404
+  %405 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %406 = load i8*, i8** %405
+  %407 = bitcast i8* %406 to i1*
+  %408 = load i1, i1* %407
+  tail call void @free(i8* %406)
+  %409 = getelementptr inbounds { %blockheader, [0 x i64], i1, i1 }, { %blockheader, [0 x i64], i1, i1 }* %399, i64 0, i32 3
+  store i1 %408, i1* %409
   ret void
 
 tag53:                                            ; preds = %entry
-  %415 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz* }*
-  %416 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %417 = load i8*, i8** %416
-  %418 = bitcast i8* %417 to %mpz*
-  %419 = getelementptr inbounds { %blockheader, [0 x i64], %mpz* }, { %blockheader, [0 x i64], %mpz* }* %415, i64 0, i32 2
-  store %mpz* %418, %mpz** %419
+  %410 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz*, %mpz* }*
+  %411 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %412 = load i8*, i8** %411
+  %413 = bitcast i8* %412 to %mpz*
+  %414 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %410, i64 0, i32 2
+  store %mpz* %413, %mpz** %414
+  %415 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %416 = load i8*, i8** %415
+  %417 = bitcast i8* %416 to %mpz*
+  %418 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %410, i64 0, i32 3
+  store %mpz* %417, %mpz** %418
   ret void
 
 tag54:                                            ; preds = %entry
-  %420 = bitcast %block* %0 to { %blockheader, [0 x i64], %block*, %block*, %block* }*
-  %421 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %422 = load i8*, i8** %421
-  %423 = bitcast i8* %422 to %block*
-  %424 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block*, %block* }, { %blockheader, [0 x i64], %block*, %block*, %block* }* %420, i64 0, i32 2
-  store %block* %423, %block** %424
-  %425 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
-  %426 = load i8*, i8** %425
-  %427 = bitcast i8* %426 to %block*
-  %428 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block*, %block* }, { %blockheader, [0 x i64], %block*, %block*, %block* }* %420, i64 0, i32 3
-  store %block* %427, %block** %428
-  %429 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 2
-  %430 = load i8*, i8** %429
-  %431 = bitcast i8* %430 to %block*
-  %432 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block*, %block* }, { %blockheader, [0 x i64], %block*, %block*, %block* }* %420, i64 0, i32 4
-  store %block* %431, %block** %432
+  %419 = bitcast %block* %0 to { %blockheader, [0 x i64], %block*, %block* }*
+  %420 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %421 = load i8*, i8** %420
+  %422 = bitcast i8* %421 to %block*
+  %423 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %419, i64 0, i32 2
+  store %block* %422, %block** %423
+  %424 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %425 = load i8*, i8** %424
+  %426 = bitcast i8* %425 to %block*
+  %427 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %419, i64 0, i32 3
+  store %block* %426, %block** %427
   ret void
 
 tag55:                                            ; preds = %entry
-  %433 = bitcast %block* %0 to { %blockheader, [0 x i64], %map }*
-  %434 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %428 = bitcast %block* %0 to { %blockheader, [0 x i64], i1, i1 }*
+  %429 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %430 = load i8*, i8** %429
+  %431 = bitcast i8* %430 to i1*
+  %432 = load i1, i1* %431
+  tail call void @free(i8* %430)
+  %433 = getelementptr inbounds { %blockheader, [0 x i64], i1, i1 }, { %blockheader, [0 x i64], i1, i1 }* %428, i64 0, i32 2
+  store i1 %432, i1* %433
+  %434 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
   %435 = load i8*, i8** %434
-  %436 = bitcast i8* %435 to %map*
-  %437 = load %map, %map* %436
+  %436 = bitcast i8* %435 to i1*
+  %437 = load i1, i1* %436
   tail call void @free(i8* %435)
-  %438 = getelementptr inbounds { %blockheader, [0 x i64], %map }, { %blockheader, [0 x i64], %map }* %433, i64 0, i32 2
-  store %map %437, %map* %438
+  %438 = getelementptr inbounds { %blockheader, [0 x i64], i1, i1 }, { %blockheader, [0 x i64], i1, i1 }* %428, i64 0, i32 3
+  store i1 %437, i1* %438
+  ret void
+
+tag56:                                            ; preds = %entry
+  %439 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz*, %mpz* }*
+  %440 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %441 = load i8*, i8** %440
+  %442 = bitcast i8* %441 to %mpz*
+  %443 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %439, i64 0, i32 2
+  store %mpz* %442, %mpz** %443
+  %444 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %445 = load i8*, i8** %444
+  %446 = bitcast i8* %445 to %mpz*
+  %447 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %439, i64 0, i32 3
+  store %mpz* %446, %mpz** %447
   ret void
 
 tag57:                                            ; preds = %entry
-  %439 = bitcast %block* %0 to { %blockheader, [0 x i64], %map }*
-  %440 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %441 = load i8*, i8** %440
-  %442 = bitcast i8* %441 to %map*
-  %443 = load %map, %map* %442
-  tail call void @free(i8* %441)
-  %444 = getelementptr inbounds { %blockheader, [0 x i64], %map }, { %blockheader, [0 x i64], %map }* %439, i64 0, i32 2
-  store %map %443, %map* %444
+  %448 = bitcast %block* %0 to { %blockheader, [0 x i64], %block*, %block* }*
+  %449 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %450 = load i8*, i8** %449
+  %451 = bitcast i8* %450 to %block*
+  %452 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %448, i64 0, i32 2
+  store %block* %451, %block** %452
+  %453 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %454 = load i8*, i8** %453
+  %455 = bitcast i8* %454 to %block*
+  %456 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %448, i64 0, i32 3
+  store %block* %455, %block** %456
   ret void
 
 tag58:                                            ; preds = %entry
-  %445 = bitcast %block* %0 to { %blockheader, [0 x i64], %block*, %block* }*
-  %446 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %447 = load i8*, i8** %446
-  %448 = bitcast i8* %447 to %block*
-  %449 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %445, i64 0, i32 2
-  store %block* %448, %block** %449
-  %450 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
-  %451 = load i8*, i8** %450
-  %452 = bitcast i8* %451 to %block*
-  %453 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %445, i64 0, i32 3
-  store %block* %452, %block** %453
+  %457 = bitcast %block* %0 to { %blockheader, [0 x i64], %block*, %block* }*
+  %458 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %459 = load i8*, i8** %458
+  %460 = bitcast i8* %459 to %block*
+  %461 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %457, i64 0, i32 2
+  store %block* %460, %block** %461
+  %462 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %463 = load i8*, i8** %462
+  %464 = bitcast i8* %463 to %block*
+  %465 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %457, i64 0, i32 3
+  store %block* %464, %block** %465
   ret void
 
 tag59:                                            ; preds = %entry
-  %454 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %455 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %456 = load i8*, i8** %455
-  %457 = bitcast i8* %456 to %block*
-  %458 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %454, i64 0, i32 2
-  store %block* %457, %block** %458
+  %466 = bitcast %block* %0 to { %blockheader, [0 x i64], %map, %block*, %block* }*
+  %467 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %468 = load i8*, i8** %467
+  %469 = bitcast i8* %468 to %map*
+  %470 = load %map, %map* %469
+  tail call void @free(i8* %468)
+  %471 = getelementptr inbounds { %blockheader, [0 x i64], %map, %block*, %block* }, { %blockheader, [0 x i64], %map, %block*, %block* }* %466, i64 0, i32 2
+  store %map %470, %map* %471
+  %472 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %473 = load i8*, i8** %472
+  %474 = bitcast i8* %473 to %block*
+  %475 = getelementptr inbounds { %blockheader, [0 x i64], %map, %block*, %block* }, { %blockheader, [0 x i64], %map, %block*, %block* }* %466, i64 0, i32 3
+  store %block* %474, %block** %475
+  %476 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 2
+  %477 = load i8*, i8** %476
+  %478 = bitcast i8* %477 to %block*
+  %479 = getelementptr inbounds { %blockheader, [0 x i64], %map, %block*, %block* }, { %blockheader, [0 x i64], %map, %block*, %block* }* %466, i64 0, i32 4
+  store %block* %478, %block** %479
   ret void
 
 tag60:                                            ; preds = %entry
-  %459 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %460 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %461 = load i8*, i8** %460
-  %462 = bitcast i8* %461 to %block*
-  %463 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %459, i64 0, i32 2
-  store %block* %462, %block** %463
+  %480 = bitcast %block* %0 to { %blockheader, [0 x i64], %map, %block* }*
+  %481 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %482 = load i8*, i8** %481
+  %483 = bitcast i8* %482 to %map*
+  %484 = load %map, %map* %483
+  tail call void @free(i8* %482)
+  %485 = getelementptr inbounds { %blockheader, [0 x i64], %map, %block* }, { %blockheader, [0 x i64], %map, %block* }* %480, i64 0, i32 2
+  store %map %484, %map* %485
+  %486 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %487 = load i8*, i8** %486
+  %488 = bitcast i8* %487 to %block*
+  %489 = getelementptr inbounds { %blockheader, [0 x i64], %map, %block* }, { %blockheader, [0 x i64], %map, %block* }* %480, i64 0, i32 3
+  store %block* %488, %block** %489
   ret void
 
 tag61:                                            ; preds = %entry
-  %464 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %465 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %466 = load i8*, i8** %465
-  %467 = bitcast i8* %466 to %block*
-  %468 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %464, i64 0, i32 2
-  store %block* %467, %block** %468
-  ret void
-
-tag62:                                            ; preds = %entry
-  %469 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %470 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %471 = load i8*, i8** %470
-  %472 = bitcast i8* %471 to %block*
-  %473 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %469, i64 0, i32 2
-  store %block* %472, %block** %473
-  ret void
-
-tag63:                                            ; preds = %entry
-  %474 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %475 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %476 = load i8*, i8** %475
-  %477 = bitcast i8* %476 to %block*
-  %478 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %474, i64 0, i32 2
-  store %block* %477, %block** %478
-  ret void
-
-tag64:                                            ; preds = %entry
-  %479 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %480 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %481 = load i8*, i8** %480
-  %482 = bitcast i8* %481 to %block*
-  %483 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %479, i64 0, i32 2
-  store %block* %482, %block** %483
-  ret void
-
-tag65:                                            ; preds = %entry
-  %484 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %485 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %486 = load i8*, i8** %485
-  %487 = bitcast i8* %486 to %block*
-  %488 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %484, i64 0, i32 2
-  store %block* %487, %block** %488
-  ret void
-
-tag66:                                            ; preds = %entry
-  %489 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %490 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %491 = load i8*, i8** %490
-  %492 = bitcast i8* %491 to %block*
-  %493 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %489, i64 0, i32 2
-  store %block* %492, %block** %493
-  ret void
-
-tag67:                                            ; preds = %entry
-  %494 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %495 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %496 = load i8*, i8** %495
-  %497 = bitcast i8* %496 to %block*
-  %498 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %494, i64 0, i32 2
-  store %block* %497, %block** %498
-  ret void
-
-tag68:                                            ; preds = %entry
-  %499 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %500 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %490 = bitcast %block* %0 to { %blockheader, [0 x i64], %map, %block*, %block* }*
+  %491 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %492 = load i8*, i8** %491
+  %493 = bitcast i8* %492 to %map*
+  %494 = load %map, %map* %493
+  tail call void @free(i8* %492)
+  %495 = getelementptr inbounds { %blockheader, [0 x i64], %map, %block*, %block* }, { %blockheader, [0 x i64], %map, %block*, %block* }* %490, i64 0, i32 2
+  store %map %494, %map* %495
+  %496 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %497 = load i8*, i8** %496
+  %498 = bitcast i8* %497 to %block*
+  %499 = getelementptr inbounds { %blockheader, [0 x i64], %map, %block*, %block* }, { %blockheader, [0 x i64], %map, %block*, %block* }* %490, i64 0, i32 3
+  store %block* %498, %block** %499
+  %500 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 2
   %501 = load i8*, i8** %500
   %502 = bitcast i8* %501 to %block*
-  %503 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %499, i64 0, i32 2
+  %503 = getelementptr inbounds { %blockheader, [0 x i64], %map, %block*, %block* }, { %blockheader, [0 x i64], %map, %block*, %block* }* %490, i64 0, i32 4
   store %block* %502, %block** %503
   ret void
 
-tag69:                                            ; preds = %entry
-  %504 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+tag62:                                            ; preds = %entry
+  %504 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz*, %mpz* }*
   %505 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
   %506 = load i8*, i8** %505
-  %507 = bitcast i8* %506 to %block*
-  %508 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %504, i64 0, i32 2
-  store %block* %507, %block** %508
+  %507 = bitcast i8* %506 to %mpz*
+  %508 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %504, i64 0, i32 2
+  store %mpz* %507, %mpz** %508
+  %509 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %510 = load i8*, i8** %509
+  %511 = bitcast i8* %510 to %mpz*
+  %512 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %504, i64 0, i32 3
+  store %mpz* %511, %mpz** %512
   ret void
 
-tag70:                                            ; preds = %entry
-  %509 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %510 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %511 = load i8*, i8** %510
-  %512 = bitcast i8* %511 to %block*
-  %513 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %509, i64 0, i32 2
-  store %block* %512, %block** %513
+tag63:                                            ; preds = %entry
+  %513 = bitcast %block* %0 to { %blockheader, [0 x i64], %block*, %block* }*
+  %514 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %515 = load i8*, i8** %514
+  %516 = bitcast i8* %515 to %block*
+  %517 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %513, i64 0, i32 2
+  store %block* %516, %block** %517
+  %518 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %519 = load i8*, i8** %518
+  %520 = bitcast i8* %519 to %block*
+  %521 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %513, i64 0, i32 3
+  store %block* %520, %block** %521
   ret void
 
-tag71:                                            ; preds = %entry
-  %514 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %515 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %516 = load i8*, i8** %515
-  %517 = bitcast i8* %516 to %block*
-  %518 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %514, i64 0, i32 2
-  store %block* %517, %block** %518
+tag64:                                            ; preds = %entry
+  %522 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz*, %mpz* }*
+  %523 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %524 = load i8*, i8** %523
+  %525 = bitcast i8* %524 to %mpz*
+  %526 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %522, i64 0, i32 2
+  store %mpz* %525, %mpz** %526
+  %527 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %528 = load i8*, i8** %527
+  %529 = bitcast i8* %528 to %mpz*
+  %530 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %522, i64 0, i32 3
+  store %mpz* %529, %mpz** %530
   ret void
 
-tag72:                                            ; preds = %entry
-  %519 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %520 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %521 = load i8*, i8** %520
-  %522 = bitcast i8* %521 to %block*
-  %523 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %519, i64 0, i32 2
-  store %block* %522, %block** %523
+tag65:                                            ; preds = %entry
+  %531 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz*, %mpz* }*
+  %532 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %533 = load i8*, i8** %532
+  %534 = bitcast i8* %533 to %mpz*
+  %535 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %531, i64 0, i32 2
+  store %mpz* %534, %mpz** %535
+  %536 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %537 = load i8*, i8** %536
+  %538 = bitcast i8* %537 to %mpz*
+  %539 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %531, i64 0, i32 3
+  store %mpz* %538, %mpz** %539
   ret void
 
-tag73:                                            ; preds = %entry
-  %524 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %525 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %526 = load i8*, i8** %525
-  %527 = bitcast i8* %526 to %block*
-  %528 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %524, i64 0, i32 2
-  store %block* %527, %block** %528
-  ret void
-
-tag74:                                            ; preds = %entry
-  %529 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %530 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %531 = load i8*, i8** %530
-  %532 = bitcast i8* %531 to %block*
-  %533 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %529, i64 0, i32 2
-  store %block* %532, %block** %533
-  ret void
-
-tag75:                                            ; preds = %entry
-  %534 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %535 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %536 = load i8*, i8** %535
-  %537 = bitcast i8* %536 to %block*
-  %538 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %534, i64 0, i32 2
-  store %block* %537, %block** %538
-  ret void
-
-tag76:                                            ; preds = %entry
-  %539 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %540 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %541 = load i8*, i8** %540
-  %542 = bitcast i8* %541 to %block*
-  %543 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %539, i64 0, i32 2
-  store %block* %542, %block** %543
-  ret void
-
-tag77:                                            ; preds = %entry
-  %544 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %545 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+tag66:                                            ; preds = %entry
+  %540 = bitcast %block* %0 to { %blockheader, [0 x i64], %block*, %block* }*
+  %541 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %542 = load i8*, i8** %541
+  %543 = bitcast i8* %542 to %block*
+  %544 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %540, i64 0, i32 2
+  store %block* %543, %block** %544
+  %545 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
   %546 = load i8*, i8** %545
   %547 = bitcast i8* %546 to %block*
-  %548 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %544, i64 0, i32 2
+  %548 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %540, i64 0, i32 3
   store %block* %547, %block** %548
   ret void
 
-tag78:                                            ; preds = %entry
-  %549 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+tag67:                                            ; preds = %entry
+  %549 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz*, %mpz* }*
   %550 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
   %551 = load i8*, i8** %550
-  %552 = bitcast i8* %551 to %block*
-  %553 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %549, i64 0, i32 2
-  store %block* %552, %block** %553
+  %552 = bitcast i8* %551 to %mpz*
+  %553 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %549, i64 0, i32 2
+  store %mpz* %552, %mpz** %553
+  %554 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %555 = load i8*, i8** %554
+  %556 = bitcast i8* %555 to %mpz*
+  %557 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %549, i64 0, i32 3
+  store %mpz* %556, %mpz** %557
   ret void
 
-tag79:                                            ; preds = %entry
-  %554 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %555 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %556 = load i8*, i8** %555
-  %557 = bitcast i8* %556 to %block*
-  %558 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %554, i64 0, i32 2
-  store %block* %557, %block** %558
+tag68:                                            ; preds = %entry
+  %558 = bitcast %block* %0 to { %blockheader, [0 x i64], %block*, %block* }*
+  %559 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %560 = load i8*, i8** %559
+  %561 = bitcast i8* %560 to %block*
+  %562 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %558, i64 0, i32 2
+  store %block* %561, %block** %562
+  %563 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %564 = load i8*, i8** %563
+  %565 = bitcast i8* %564 to %block*
+  %566 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %558, i64 0, i32 3
+  store %block* %565, %block** %566
   ret void
 
-tag80:                                            ; preds = %entry
-  %559 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %560 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %561 = load i8*, i8** %560
-  %562 = bitcast i8* %561 to %block*
-  %563 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %559, i64 0, i32 2
-  store %block* %562, %block** %563
+tag69:                                            ; preds = %entry
+  %567 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz*, %mpz* }*
+  %568 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %569 = load i8*, i8** %568
+  %570 = bitcast i8* %569 to %mpz*
+  %571 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %567, i64 0, i32 2
+  store %mpz* %570, %mpz** %571
+  %572 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %573 = load i8*, i8** %572
+  %574 = bitcast i8* %573 to %mpz*
+  %575 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %567, i64 0, i32 3
+  store %mpz* %574, %mpz** %575
   ret void
 
-tag81:                                            ; preds = %entry
-  %564 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %565 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %566 = load i8*, i8** %565
-  %567 = bitcast i8* %566 to %block*
-  %568 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %564, i64 0, i32 2
-  store %block* %567, %block** %568
-  ret void
-
-tag82:                                            ; preds = %entry
-  %569 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %570 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %571 = load i8*, i8** %570
-  %572 = bitcast i8* %571 to %block*
-  %573 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %569, i64 0, i32 2
-  store %block* %572, %block** %573
-  ret void
-
-tag83:                                            ; preds = %entry
-  %574 = bitcast %block* %0 to { %blockheader, [0 x i64], %map }*
-  %575 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %576 = load i8*, i8** %575
-  %577 = bitcast i8* %576 to %map*
-  %578 = load %map, %map* %577
-  tail call void @free(i8* %576)
-  %579 = getelementptr inbounds { %blockheader, [0 x i64], %map }, { %blockheader, [0 x i64], %map }* %574, i64 0, i32 2
-  store %map %578, %map* %579
-  ret void
-
-tag84:                                            ; preds = %entry
-  %580 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz*, %mpz* }*
-  %581 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+tag70:                                            ; preds = %entry
+  %576 = bitcast %block* %0 to { %blockheader, [0 x i64], %block*, %block* }*
+  %577 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %578 = load i8*, i8** %577
+  %579 = bitcast i8* %578 to %block*
+  %580 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %576, i64 0, i32 2
+  store %block* %579, %block** %580
+  %581 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
   %582 = load i8*, i8** %581
-  %583 = bitcast i8* %582 to %mpz*
-  %584 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %580, i64 0, i32 2
-  store %mpz* %583, %mpz** %584
-  %585 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
-  %586 = load i8*, i8** %585
-  %587 = bitcast i8* %586 to %mpz*
-  %588 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %580, i64 0, i32 3
-  store %mpz* %587, %mpz** %588
+  %583 = bitcast i8* %582 to %block*
+  %584 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %576, i64 0, i32 3
+  store %block* %583, %block** %584
   ret void
 
-tag85:                                            ; preds = %entry
-  %589 = bitcast %block* %0 to { %blockheader, [0 x i64], i1 }*
-  %590 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %591 = load i8*, i8** %590
-  %592 = bitcast i8* %591 to i1*
-  %593 = load i1, i1* %592
-  tail call void @free(i8* %591)
-  %594 = getelementptr inbounds { %blockheader, [0 x i64], i1 }, { %blockheader, [0 x i64], i1 }* %589, i64 0, i32 2
-  store i1 %593, i1* %594
+tag71:                                            ; preds = %entry
+  %585 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz* }*
+  %586 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %587 = load i8*, i8** %586
+  %588 = bitcast i8* %587 to %mpz*
+  %589 = getelementptr inbounds { %blockheader, [0 x i64], %mpz* }, { %blockheader, [0 x i64], %mpz* }* %585, i64 0, i32 2
+  store %mpz* %588, %mpz** %589
   ret void
 
-tag86:                                            ; preds = %entry
-  %595 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz*, %mpz*, %mpz* }*
+tag72:                                            ; preds = %entry
+  %590 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %591 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %592 = load i8*, i8** %591
+  %593 = bitcast i8* %592 to %block*
+  %594 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %590, i64 0, i32 2
+  store %block* %593, %block** %594
+  ret void
+
+tag73:                                            ; preds = %entry
+  %595 = bitcast %block* %0 to { %blockheader, [0 x i64], %map, %block* }*
   %596 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
   %597 = load i8*, i8** %596
-  %598 = bitcast i8* %597 to %mpz*
-  %599 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz*, %mpz* }* %595, i64 0, i32 2
-  store %mpz* %598, %mpz** %599
-  %600 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
-  %601 = load i8*, i8** %600
-  %602 = bitcast i8* %601 to %mpz*
-  %603 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz*, %mpz* }* %595, i64 0, i32 3
-  store %mpz* %602, %mpz** %603
-  %604 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 2
-  %605 = load i8*, i8** %604
-  %606 = bitcast i8* %605 to %mpz*
-  %607 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz*, %mpz* }* %595, i64 0, i32 4
-  store %mpz* %606, %mpz** %607
+  %598 = bitcast i8* %597 to %map*
+  %599 = load %map, %map* %598
+  tail call void @free(i8* %597)
+  %600 = getelementptr inbounds { %blockheader, [0 x i64], %map, %block* }, { %blockheader, [0 x i64], %map, %block* }* %595, i64 0, i32 2
+  store %map %599, %map* %600
+  %601 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %602 = load i8*, i8** %601
+  %603 = bitcast i8* %602 to %block*
+  %604 = getelementptr inbounds { %blockheader, [0 x i64], %map, %block* }, { %blockheader, [0 x i64], %map, %block* }* %595, i64 0, i32 3
+  store %block* %603, %block** %604
   ret void
 
-tag87:                                            ; preds = %entry
-  %608 = bitcast %block* %0 to { %blockheader, [0 x i64], %block*, %block* }*
-  %609 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %610 = load i8*, i8** %609
-  %611 = bitcast i8* %610 to %block*
-  %612 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %608, i64 0, i32 2
-  store %block* %611, %block** %612
-  %613 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
-  %614 = load i8*, i8** %613
-  %615 = bitcast i8* %614 to %block*
-  %616 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %608, i64 0, i32 3
-  store %block* %615, %block** %616
+tag74:                                            ; preds = %entry
+  %605 = bitcast %block* %0 to { %blockheader, [0 x i64], %set, %set }*
+  %606 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %607 = load i8*, i8** %606
+  %608 = bitcast i8* %607 to %set*
+  %609 = load %set, %set* %608
+  tail call void @free(i8* %607)
+  %610 = getelementptr inbounds { %blockheader, [0 x i64], %set, %set }, { %blockheader, [0 x i64], %set, %set }* %605, i64 0, i32 2
+  store %set %609, %set* %610
+  %611 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %612 = load i8*, i8** %611
+  %613 = bitcast i8* %612 to %set*
+  %614 = load %set, %set* %613
+  tail call void @free(i8* %612)
+  %615 = getelementptr inbounds { %blockheader, [0 x i64], %set, %set }, { %blockheader, [0 x i64], %set, %set }* %605, i64 0, i32 3
+  store %set %614, %set* %615
   ret void
 
-tag88:                                            ; preds = %entry
-  %617 = bitcast %block* %0 to { %blockheader, [0 x i64], %block*, %block* }*
-  %618 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %619 = load i8*, i8** %618
-  %620 = bitcast i8* %619 to %block*
-  %621 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %617, i64 0, i32 2
-  store %block* %620, %block** %621
-  %622 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
-  %623 = load i8*, i8** %622
-  %624 = bitcast i8* %623 to %block*
-  %625 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %617, i64 0, i32 3
-  store %block* %624, %block** %625
+tag75:                                            ; preds = %entry
+  %616 = bitcast %block* %0 to { %blockheader, [0 x i64], %block*, %set }*
+  %617 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %618 = load i8*, i8** %617
+  %619 = bitcast i8* %618 to %block*
+  %620 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %set }, { %blockheader, [0 x i64], %block*, %set }* %616, i64 0, i32 2
+  store %block* %619, %block** %620
+  %621 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %622 = load i8*, i8** %621
+  %623 = bitcast i8* %622 to %set*
+  %624 = load %set, %set* %623
+  tail call void @free(i8* %622)
+  %625 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %set }, { %blockheader, [0 x i64], %block*, %set }* %616, i64 0, i32 3
+  store %set %624, %set* %625
   ret void
 
-tag90:                                            ; preds = %entry
+tag76:                                            ; preds = %entry
   %626 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
   %627 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
   %628 = load i8*, i8** %627
@@ -2842,139 +3434,126 @@ tag90:                                            ; preds = %entry
   store %block* %629, %block** %630
   ret void
 
-tag91:                                            ; preds = %entry
-  %631 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+tag77:                                            ; preds = %entry
+  %631 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz* }*
   %632 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
   %633 = load i8*, i8** %632
-  %634 = bitcast i8* %633 to %block*
-  %635 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %631, i64 0, i32 2
-  store %block* %634, %block** %635
+  %634 = bitcast i8* %633 to %mpz*
+  %635 = getelementptr inbounds { %blockheader, [0 x i64], %mpz* }, { %blockheader, [0 x i64], %mpz* }* %631, i64 0, i32 2
+  store %mpz* %634, %mpz** %635
   ret void
 
-tag92:                                            ; preds = %entry
-  %636 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+tag78:                                            ; preds = %entry
+  %636 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz*, %mpz*, %mpz* }*
   %637 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
   %638 = load i8*, i8** %637
-  %639 = bitcast i8* %638 to %block*
-  %640 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %636, i64 0, i32 2
-  store %block* %639, %block** %640
+  %639 = bitcast i8* %638 to %mpz*
+  %640 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz*, %mpz* }* %636, i64 0, i32 2
+  store %mpz* %639, %mpz** %640
+  %641 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %642 = load i8*, i8** %641
+  %643 = bitcast i8* %642 to %mpz*
+  %644 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz*, %mpz* }* %636, i64 0, i32 3
+  store %mpz* %643, %mpz** %644
+  %645 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 2
+  %646 = load i8*, i8** %645
+  %647 = bitcast i8* %646 to %mpz*
+  %648 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz*, %mpz* }* %636, i64 0, i32 4
+  store %mpz* %647, %mpz** %648
   ret void
 
-tag93:                                            ; preds = %entry
-  %641 = bitcast %block* %0 to { %blockheader, [0 x i64], i1 }*
-  %642 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %643 = load i8*, i8** %642
-  %644 = bitcast i8* %643 to i1*
-  %645 = load i1, i1* %644
-  tail call void @free(i8* %643)
-  %646 = getelementptr inbounds { %blockheader, [0 x i64], i1 }, { %blockheader, [0 x i64], i1 }* %641, i64 0, i32 2
-  store i1 %645, i1* %646
+tag79:                                            ; preds = %entry
+  %649 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz* }*
+  %650 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %651 = load i8*, i8** %650
+  %652 = bitcast i8* %651 to %mpz*
+  %653 = getelementptr inbounds { %blockheader, [0 x i64], %mpz* }, { %blockheader, [0 x i64], %mpz* }* %649, i64 0, i32 2
+  store %mpz* %652, %mpz** %653
   ret void
 
-tag94:                                            ; preds = %entry
-  %647 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %648 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %649 = load i8*, i8** %648
-  %650 = bitcast i8* %649 to %block*
-  %651 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %647, i64 0, i32 2
-  store %block* %650, %block** %651
+tag80:                                            ; preds = %entry
+  %654 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz* }*
+  %655 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %656 = load i8*, i8** %655
+  %657 = bitcast i8* %656 to %mpz*
+  %658 = getelementptr inbounds { %blockheader, [0 x i64], %mpz* }, { %blockheader, [0 x i64], %mpz* }* %654, i64 0, i32 2
+  store %mpz* %657, %mpz** %658
   ret void
 
-tag95:                                            ; preds = %entry
-  %652 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %653 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %654 = load i8*, i8** %653
-  %655 = bitcast i8* %654 to %block*
-  %656 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %652, i64 0, i32 2
-  store %block* %655, %block** %656
-  ret void
-
-tag96:                                            ; preds = %entry
-  %657 = bitcast %block* %0 to { %blockheader, [0 x i64], %set }*
-  %658 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %659 = load i8*, i8** %658
-  %660 = bitcast i8* %659 to %set*
-  %661 = load %set, %set* %660
-  tail call void @free(i8* %659)
-  %662 = getelementptr inbounds { %blockheader, [0 x i64], %set }, { %blockheader, [0 x i64], %set }* %657, i64 0, i32 2
-  store %set %661, %set* %662
-  ret void
-
-tag97:                                            ; preds = %entry
-  %663 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %664 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+tag81:                                            ; preds = %entry
+  %659 = bitcast %block* %0 to { %blockheader, [0 x i64], %block*, %block*, %block* }*
+  %660 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %661 = load i8*, i8** %660
+  %662 = bitcast i8* %661 to %block*
+  %663 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block*, %block* }, { %blockheader, [0 x i64], %block*, %block*, %block* }* %659, i64 0, i32 2
+  store %block* %662, %block** %663
+  %664 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
   %665 = load i8*, i8** %664
   %666 = bitcast i8* %665 to %block*
-  %667 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %663, i64 0, i32 2
+  %667 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block*, %block* }, { %blockheader, [0 x i64], %block*, %block*, %block* }* %659, i64 0, i32 3
   store %block* %666, %block** %667
+  %668 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 2
+  %669 = load i8*, i8** %668
+  %670 = bitcast i8* %669 to %block*
+  %671 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block*, %block* }, { %blockheader, [0 x i64], %block*, %block*, %block* }* %659, i64 0, i32 4
+  store %block* %670, %block** %671
   ret void
 
-tag98:                                            ; preds = %entry
-  %668 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz* }*
-  %669 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %670 = load i8*, i8** %669
-  %671 = bitcast i8* %670 to %mpz*
-  %672 = getelementptr inbounds { %blockheader, [0 x i64], %mpz* }, { %blockheader, [0 x i64], %mpz* }* %668, i64 0, i32 2
-  store %mpz* %671, %mpz** %672
+tag82:                                            ; preds = %entry
+  %672 = bitcast %block* %0 to { %blockheader, [0 x i64], %map }*
+  %673 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %674 = load i8*, i8** %673
+  %675 = bitcast i8* %674 to %map*
+  %676 = load %map, %map* %675
+  tail call void @free(i8* %674)
+  %677 = getelementptr inbounds { %blockheader, [0 x i64], %map }, { %blockheader, [0 x i64], %map }* %672, i64 0, i32 2
+  store %map %676, %map* %677
   ret void
 
-tag99:                                            ; preds = %entry
-  %673 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %674 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %675 = load i8*, i8** %674
-  %676 = bitcast i8* %675 to %block*
-  %677 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %673, i64 0, i32 2
-  store %block* %676, %block** %677
-  ret void
-
-tag100:                                           ; preds = %entry
-  %678 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+tag84:                                            ; preds = %entry
+  %678 = bitcast %block* %0 to { %blockheader, [0 x i64], %map }*
   %679 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
   %680 = load i8*, i8** %679
-  %681 = bitcast i8* %680 to %block*
-  %682 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %678, i64 0, i32 2
-  store %block* %681, %block** %682
+  %681 = bitcast i8* %680 to %map*
+  %682 = load %map, %map* %681
+  tail call void @free(i8* %680)
+  %683 = getelementptr inbounds { %blockheader, [0 x i64], %map }, { %blockheader, [0 x i64], %map }* %678, i64 0, i32 2
+  store %map %682, %map* %683
   ret void
 
-tag101:                                           ; preds = %entry
-  %683 = bitcast %block* %0 to { %blockheader, [0 x i64], %list }*
-  %684 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %685 = load i8*, i8** %684
-  %686 = bitcast i8* %685 to %list*
-  %687 = load %list, %list* %686
-  tail call void @free(i8* %685)
-  %688 = getelementptr inbounds { %blockheader, [0 x i64], %list }, { %blockheader, [0 x i64], %list }* %683, i64 0, i32 2
-  store %list %687, %list* %688
+tag85:                                            ; preds = %entry
+  %684 = bitcast %block* %0 to { %blockheader, [0 x i64], %block*, %block* }*
+  %685 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %686 = load i8*, i8** %685
+  %687 = bitcast i8* %686 to %block*
+  %688 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %684, i64 0, i32 2
+  store %block* %687, %block** %688
+  %689 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %690 = load i8*, i8** %689
+  %691 = bitcast i8* %690 to %block*
+  %692 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %684, i64 0, i32 3
+  store %block* %691, %block** %692
   ret void
 
-tag102:                                           ; preds = %entry
-  %689 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %690 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %691 = load i8*, i8** %690
-  %692 = bitcast i8* %691 to %block*
-  %693 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %689, i64 0, i32 2
-  store %block* %692, %block** %693
+tag86:                                            ; preds = %entry
+  %693 = bitcast %block* %0 to { %blockheader, [0 x i64], %set, %set }*
+  %694 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %695 = load i8*, i8** %694
+  %696 = bitcast i8* %695 to %set*
+  %697 = load %set, %set* %696
+  tail call void @free(i8* %695)
+  %698 = getelementptr inbounds { %blockheader, [0 x i64], %set, %set }, { %blockheader, [0 x i64], %set, %set }* %693, i64 0, i32 2
+  store %set %697, %set* %698
+  %699 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %700 = load i8*, i8** %699
+  %701 = bitcast i8* %700 to %set*
+  %702 = load %set, %set* %701
+  tail call void @free(i8* %700)
+  %703 = getelementptr inbounds { %blockheader, [0 x i64], %set, %set }, { %blockheader, [0 x i64], %set, %set }* %693, i64 0, i32 3
+  store %set %702, %set* %703
   ret void
 
-tag103:                                           ; preds = %entry
-  %694 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %695 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %696 = load i8*, i8** %695
-  %697 = bitcast i8* %696 to %block*
-  %698 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %694, i64 0, i32 2
-  store %block* %697, %block** %698
-  ret void
-
-tag104:                                           ; preds = %entry
-  %699 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %700 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %701 = load i8*, i8** %700
-  %702 = bitcast i8* %701 to %block*
-  %703 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %699, i64 0, i32 2
-  store %block* %702, %block** %703
-  ret void
-
-tag105:                                           ; preds = %entry
+tag87:                                            ; preds = %entry
   %704 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
   %705 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
   %706 = load i8*, i8** %705
@@ -2983,7 +3562,7 @@ tag105:                                           ; preds = %entry
   store %block* %707, %block** %708
   ret void
 
-tag106:                                           ; preds = %entry
+tag88:                                            ; preds = %entry
   %709 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
   %710 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
   %711 = load i8*, i8** %710
@@ -2992,7 +3571,7 @@ tag106:                                           ; preds = %entry
   store %block* %712, %block** %713
   ret void
 
-tag107:                                           ; preds = %entry
+tag89:                                            ; preds = %entry
   %714 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
   %715 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
   %716 = load i8*, i8** %715
@@ -3001,7 +3580,7 @@ tag107:                                           ; preds = %entry
   store %block* %717, %block** %718
   ret void
 
-tag108:                                           ; preds = %entry
+tag90:                                            ; preds = %entry
   %719 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
   %720 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
   %721 = load i8*, i8** %720
@@ -3010,7 +3589,7 @@ tag108:                                           ; preds = %entry
   store %block* %722, %block** %723
   ret void
 
-tag109:                                           ; preds = %entry
+tag91:                                            ; preds = %entry
   %724 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
   %725 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
   %726 = load i8*, i8** %725
@@ -3019,47 +3598,570 @@ tag109:                                           ; preds = %entry
   store %block* %727, %block** %728
   ret void
 
-tag110:                                           ; preds = %entry
-  %729 = bitcast %block* %0 to { %blockheader, [0 x i64], %map }*
+tag92:                                            ; preds = %entry
+  %729 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
   %730 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
   %731 = load i8*, i8** %730
-  %732 = bitcast i8* %731 to %map*
-  %733 = load %map, %map* %732
-  tail call void @free(i8* %731)
-  %734 = getelementptr inbounds { %blockheader, [0 x i64], %map }, { %blockheader, [0 x i64], %map }* %729, i64 0, i32 2
-  store %map %733, %map* %734
+  %732 = bitcast i8* %731 to %block*
+  %733 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %729, i64 0, i32 2
+  store %block* %732, %block** %733
+  ret void
+
+tag93:                                            ; preds = %entry
+  %734 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %735 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %736 = load i8*, i8** %735
+  %737 = bitcast i8* %736 to %block*
+  %738 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %734, i64 0, i32 2
+  store %block* %737, %block** %738
+  ret void
+
+tag94:                                            ; preds = %entry
+  %739 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %740 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %741 = load i8*, i8** %740
+  %742 = bitcast i8* %741 to %block*
+  %743 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %739, i64 0, i32 2
+  store %block* %742, %block** %743
+  ret void
+
+tag95:                                            ; preds = %entry
+  %744 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %745 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %746 = load i8*, i8** %745
+  %747 = bitcast i8* %746 to %block*
+  %748 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %744, i64 0, i32 2
+  store %block* %747, %block** %748
+  ret void
+
+tag96:                                            ; preds = %entry
+  %749 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %750 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %751 = load i8*, i8** %750
+  %752 = bitcast i8* %751 to %block*
+  %753 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %749, i64 0, i32 2
+  store %block* %752, %block** %753
+  ret void
+
+tag97:                                            ; preds = %entry
+  %754 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %755 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %756 = load i8*, i8** %755
+  %757 = bitcast i8* %756 to %block*
+  %758 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %754, i64 0, i32 2
+  store %block* %757, %block** %758
+  ret void
+
+tag98:                                            ; preds = %entry
+  %759 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %760 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %761 = load i8*, i8** %760
+  %762 = bitcast i8* %761 to %block*
+  %763 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %759, i64 0, i32 2
+  store %block* %762, %block** %763
+  ret void
+
+tag99:                                            ; preds = %entry
+  %764 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %765 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %766 = load i8*, i8** %765
+  %767 = bitcast i8* %766 to %block*
+  %768 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %764, i64 0, i32 2
+  store %block* %767, %block** %768
+  ret void
+
+tag100:                                           ; preds = %entry
+  %769 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %770 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %771 = load i8*, i8** %770
+  %772 = bitcast i8* %771 to %block*
+  %773 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %769, i64 0, i32 2
+  store %block* %772, %block** %773
+  ret void
+
+tag101:                                           ; preds = %entry
+  %774 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %775 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %776 = load i8*, i8** %775
+  %777 = bitcast i8* %776 to %block*
+  %778 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %774, i64 0, i32 2
+  store %block* %777, %block** %778
+  ret void
+
+tag102:                                           ; preds = %entry
+  %779 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %780 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %781 = load i8*, i8** %780
+  %782 = bitcast i8* %781 to %block*
+  %783 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %779, i64 0, i32 2
+  store %block* %782, %block** %783
+  ret void
+
+tag103:                                           ; preds = %entry
+  %784 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %785 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %786 = load i8*, i8** %785
+  %787 = bitcast i8* %786 to %block*
+  %788 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %784, i64 0, i32 2
+  store %block* %787, %block** %788
+  ret void
+
+tag104:                                           ; preds = %entry
+  %789 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %790 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %791 = load i8*, i8** %790
+  %792 = bitcast i8* %791 to %block*
+  %793 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %789, i64 0, i32 2
+  store %block* %792, %block** %793
+  ret void
+
+tag105:                                           ; preds = %entry
+  %794 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %795 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %796 = load i8*, i8** %795
+  %797 = bitcast i8* %796 to %block*
+  %798 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %794, i64 0, i32 2
+  store %block* %797, %block** %798
+  ret void
+
+tag106:                                           ; preds = %entry
+  %799 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %800 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %801 = load i8*, i8** %800
+  %802 = bitcast i8* %801 to %block*
+  %803 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %799, i64 0, i32 2
+  store %block* %802, %block** %803
+  ret void
+
+tag107:                                           ; preds = %entry
+  %804 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %805 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %806 = load i8*, i8** %805
+  %807 = bitcast i8* %806 to %block*
+  %808 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %804, i64 0, i32 2
+  store %block* %807, %block** %808
+  ret void
+
+tag108:                                           ; preds = %entry
+  %809 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %810 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %811 = load i8*, i8** %810
+  %812 = bitcast i8* %811 to %block*
+  %813 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %809, i64 0, i32 2
+  store %block* %812, %block** %813
+  ret void
+
+tag109:                                           ; preds = %entry
+  %814 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %815 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %816 = load i8*, i8** %815
+  %817 = bitcast i8* %816 to %block*
+  %818 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %814, i64 0, i32 2
+  store %block* %817, %block** %818
+  ret void
+
+tag110:                                           ; preds = %entry
+  %819 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %820 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %821 = load i8*, i8** %820
+  %822 = bitcast i8* %821 to %block*
+  %823 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %819, i64 0, i32 2
+  store %block* %822, %block** %823
   ret void
 
 tag111:                                           ; preds = %entry
-  %735 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %736 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %737 = load i8*, i8** %736
-  %738 = bitcast i8* %737 to %block*
-  %739 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %735, i64 0, i32 2
-  store %block* %738, %block** %739
+  %824 = bitcast %block* %0 to { %blockheader, [0 x i64], %map }*
+  %825 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %826 = load i8*, i8** %825
+  %827 = bitcast i8* %826 to %map*
+  %828 = load %map, %map* %827
+  tail call void @free(i8* %826)
+  %829 = getelementptr inbounds { %blockheader, [0 x i64], %map }, { %blockheader, [0 x i64], %map }* %824, i64 0, i32 2
+  store %map %828, %map* %829
   ret void
 
 tag112:                                           ; preds = %entry
-  %740 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %741 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %742 = load i8*, i8** %741
-  %743 = bitcast i8* %742 to %block*
-  %744 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %740, i64 0, i32 2
-  store %block* %743, %block** %744
+  %830 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz*, %mpz* }*
+  %831 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %832 = load i8*, i8** %831
+  %833 = bitcast i8* %832 to %mpz*
+  %834 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %830, i64 0, i32 2
+  store %mpz* %833, %mpz** %834
+  %835 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %836 = load i8*, i8** %835
+  %837 = bitcast i8* %836 to %mpz*
+  %838 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %830, i64 0, i32 3
+  store %mpz* %837, %mpz** %838
   ret void
 
 tag113:                                           ; preds = %entry
-  %745 = bitcast %block* %0 to { %blockheader, [0 x i64], %block*, %block* }*
-  %746 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %747 = load i8*, i8** %746
-  %748 = bitcast i8* %747 to %block*
-  %749 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %745, i64 0, i32 2
-  store %block* %748, %block** %749
-  %750 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
-  %751 = load i8*, i8** %750
-  %752 = bitcast i8* %751 to %block*
-  %753 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %745, i64 0, i32 3
-  store %block* %752, %block** %753
+  %839 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz*, %mpz* }*
+  %840 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %841 = load i8*, i8** %840
+  %842 = bitcast i8* %841 to %mpz*
+  %843 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %839, i64 0, i32 2
+  store %mpz* %842, %mpz** %843
+  %844 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %845 = load i8*, i8** %844
+  %846 = bitcast i8* %845 to %mpz*
+  %847 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %839, i64 0, i32 3
+  store %mpz* %846, %mpz** %847
+  ret void
+
+tag116:                                           ; preds = %entry
+  %848 = bitcast %block* %0 to { %blockheader, [0 x i64], i1 }*
+  %849 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %850 = load i8*, i8** %849
+  %851 = bitcast i8* %850 to i1*
+  %852 = load i1, i1* %851
+  tail call void @free(i8* %850)
+  %853 = getelementptr inbounds { %blockheader, [0 x i64], i1 }, { %blockheader, [0 x i64], i1 }* %848, i64 0, i32 2
+  store i1 %852, i1* %853
+  ret void
+
+tag117:                                           ; preds = %entry
+  %854 = bitcast %block* %0 to { %blockheader, [0 x i64], %map, %set }*
+  %855 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %856 = load i8*, i8** %855
+  %857 = bitcast i8* %856 to %map*
+  %858 = load %map, %map* %857
+  tail call void @free(i8* %856)
+  %859 = getelementptr inbounds { %blockheader, [0 x i64], %map, %set }, { %blockheader, [0 x i64], %map, %set }* %854, i64 0, i32 2
+  store %map %858, %map* %859
+  %860 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %861 = load i8*, i8** %860
+  %862 = bitcast i8* %861 to %set*
+  %863 = load %set, %set* %862
+  tail call void @free(i8* %861)
+  %864 = getelementptr inbounds { %blockheader, [0 x i64], %map, %set }, { %blockheader, [0 x i64], %map, %set }* %854, i64 0, i32 3
+  store %set %863, %set* %864
+  ret void
+
+tag118:                                           ; preds = %entry
+  %865 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz*, %mpz*, %mpz* }*
+  %866 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %867 = load i8*, i8** %866
+  %868 = bitcast i8* %867 to %mpz*
+  %869 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz*, %mpz* }* %865, i64 0, i32 2
+  store %mpz* %868, %mpz** %869
+  %870 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %871 = load i8*, i8** %870
+  %872 = bitcast i8* %871 to %mpz*
+  %873 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz*, %mpz* }* %865, i64 0, i32 3
+  store %mpz* %872, %mpz** %873
+  %874 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 2
+  %875 = load i8*, i8** %874
+  %876 = bitcast i8* %875 to %mpz*
+  %877 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz*, %mpz* }* %865, i64 0, i32 4
+  store %mpz* %876, %mpz** %877
+  ret void
+
+tag119:                                           ; preds = %entry
+  %878 = bitcast %block* %0 to { %blockheader, [0 x i64], %list }*
+  %879 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %880 = load i8*, i8** %879
+  %881 = bitcast i8* %880 to %list*
+  %882 = load %list, %list* %881
+  tail call void @free(i8* %880)
+  %883 = getelementptr inbounds { %blockheader, [0 x i64], %list }, { %blockheader, [0 x i64], %list }* %878, i64 0, i32 2
+  store %list %882, %list* %883
+  ret void
+
+tag120:                                           ; preds = %entry
+  %884 = bitcast %block* %0 to { %blockheader, [0 x i64], %map }*
+  %885 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %886 = load i8*, i8** %885
+  %887 = bitcast i8* %886 to %map*
+  %888 = load %map, %map* %887
+  tail call void @free(i8* %886)
+  %889 = getelementptr inbounds { %blockheader, [0 x i64], %map }, { %blockheader, [0 x i64], %map }* %884, i64 0, i32 2
+  store %map %888, %map* %889
+  ret void
+
+tag121:                                           ; preds = %entry
+  %890 = bitcast %block* %0 to { %blockheader, [0 x i64], %set }*
+  %891 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %892 = load i8*, i8** %891
+  %893 = bitcast i8* %892 to %set*
+  %894 = load %set, %set* %893
+  tail call void @free(i8* %892)
+  %895 = getelementptr inbounds { %blockheader, [0 x i64], %set }, { %blockheader, [0 x i64], %set }* %890, i64 0, i32 2
+  store %set %894, %set* %895
+  ret void
+
+tag122:                                           ; preds = %entry
+  %896 = bitcast %block* %0 to { %blockheader, [0 x i64], %map, %map }*
+  %897 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %898 = load i8*, i8** %897
+  %899 = bitcast i8* %898 to %map*
+  %900 = load %map, %map* %899
+  tail call void @free(i8* %898)
+  %901 = getelementptr inbounds { %blockheader, [0 x i64], %map, %map }, { %blockheader, [0 x i64], %map, %map }* %896, i64 0, i32 2
+  store %map %900, %map* %901
+  %902 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %903 = load i8*, i8** %902
+  %904 = bitcast i8* %903 to %map*
+  %905 = load %map, %map* %904
+  tail call void @free(i8* %903)
+  %906 = getelementptr inbounds { %blockheader, [0 x i64], %map, %map }, { %blockheader, [0 x i64], %map, %map }* %896, i64 0, i32 3
+  store %map %905, %map* %906
+  ret void
+
+tag123:                                           ; preds = %entry
+  %907 = bitcast %block* %0 to { %blockheader, [0 x i64], %block*, %block* }*
+  %908 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %909 = load i8*, i8** %908
+  %910 = bitcast i8* %909 to %block*
+  %911 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %907, i64 0, i32 2
+  store %block* %910, %block** %911
+  %912 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %913 = load i8*, i8** %912
+  %914 = bitcast i8* %913 to %block*
+  %915 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %907, i64 0, i32 3
+  store %block* %914, %block** %915
+  ret void
+
+tag124:                                           ; preds = %entry
+  %916 = bitcast %block* %0 to { %blockheader, [0 x i64], %block*, %block* }*
+  %917 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %918 = load i8*, i8** %917
+  %919 = bitcast i8* %918 to %block*
+  %920 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %916, i64 0, i32 2
+  store %block* %919, %block** %920
+  %921 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %922 = load i8*, i8** %921
+  %923 = bitcast i8* %922 to %block*
+  %924 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %916, i64 0, i32 3
+  store %block* %923, %block** %924
+  ret void
+
+tag126:                                           ; preds = %entry
+  %925 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz* }*
+  %926 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %927 = load i8*, i8** %926
+  %928 = bitcast i8* %927 to %mpz*
+  %929 = getelementptr inbounds { %blockheader, [0 x i64], %mpz* }, { %blockheader, [0 x i64], %mpz* }* %925, i64 0, i32 2
+  store %mpz* %928, %mpz** %929
+  ret void
+
+tag127:                                           ; preds = %entry
+  %930 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %931 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %932 = load i8*, i8** %931
+  %933 = bitcast i8* %932 to %block*
+  %934 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %930, i64 0, i32 2
+  store %block* %933, %block** %934
+  ret void
+
+tag128:                                           ; preds = %entry
+  %935 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %936 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %937 = load i8*, i8** %936
+  %938 = bitcast i8* %937 to %block*
+  %939 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %935, i64 0, i32 2
+  store %block* %938, %block** %939
+  ret void
+
+tag129:                                           ; preds = %entry
+  %940 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %941 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %942 = load i8*, i8** %941
+  %943 = bitcast i8* %942 to %block*
+  %944 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %940, i64 0, i32 2
+  store %block* %943, %block** %944
+  ret void
+
+tag130:                                           ; preds = %entry
+  %945 = bitcast %block* %0 to { %blockheader, [0 x i64], %set }*
+  %946 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %947 = load i8*, i8** %946
+  %948 = bitcast i8* %947 to %set*
+  %949 = load %set, %set* %948
+  tail call void @free(i8* %947)
+  %950 = getelementptr inbounds { %blockheader, [0 x i64], %set }, { %blockheader, [0 x i64], %set }* %945, i64 0, i32 2
+  store %set %949, %set* %950
+  ret void
+
+tag131:                                           ; preds = %entry
+  %951 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %952 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %953 = load i8*, i8** %952
+  %954 = bitcast i8* %953 to %block*
+  %955 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %951, i64 0, i32 2
+  store %block* %954, %block** %955
+  ret void
+
+tag132:                                           ; preds = %entry
+  %956 = bitcast %block* %0 to { %blockheader, [0 x i64], %map }*
+  %957 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %958 = load i8*, i8** %957
+  %959 = bitcast i8* %958 to %map*
+  %960 = load %map, %map* %959
+  tail call void @free(i8* %958)
+  %961 = getelementptr inbounds { %blockheader, [0 x i64], %map }, { %blockheader, [0 x i64], %map }* %956, i64 0, i32 2
+  store %map %960, %map* %961
+  ret void
+
+tag133:                                           ; preds = %entry
+  %962 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %963 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %964 = load i8*, i8** %963
+  %965 = bitcast i8* %964 to %block*
+  %966 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %962, i64 0, i32 2
+  store %block* %965, %block** %966
+  ret void
+
+tag134:                                           ; preds = %entry
+  %967 = bitcast %block* %0 to { %blockheader, [0 x i64], %list }*
+  %968 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %969 = load i8*, i8** %968
+  %970 = bitcast i8* %969 to %list*
+  %971 = load %list, %list* %970
+  tail call void @free(i8* %969)
+  %972 = getelementptr inbounds { %blockheader, [0 x i64], %list }, { %blockheader, [0 x i64], %list }* %967, i64 0, i32 2
+  store %list %971, %list* %972
+  ret void
+
+tag135:                                           ; preds = %entry
+  %973 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %974 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %975 = load i8*, i8** %974
+  %976 = bitcast i8* %975 to %block*
+  %977 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %973, i64 0, i32 2
+  store %block* %976, %block** %977
+  ret void
+
+tag136:                                           ; preds = %entry
+  %978 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %979 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %980 = load i8*, i8** %979
+  %981 = bitcast i8* %980 to %block*
+  %982 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %978, i64 0, i32 2
+  store %block* %981, %block** %982
+  ret void
+
+tag137:                                           ; preds = %entry
+  %983 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %984 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %985 = load i8*, i8** %984
+  %986 = bitcast i8* %985 to %block*
+  %987 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %983, i64 0, i32 2
+  store %block* %986, %block** %987
+  ret void
+
+tag138:                                           ; preds = %entry
+  %988 = bitcast %block* %0 to { %blockheader, [0 x i64], i1 }*
+  %989 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %990 = load i8*, i8** %989
+  %991 = bitcast i8* %990 to i1*
+  %992 = load i1, i1* %991
+  tail call void @free(i8* %990)
+  %993 = getelementptr inbounds { %blockheader, [0 x i64], i1 }, { %blockheader, [0 x i64], i1 }* %988, i64 0, i32 2
+  store i1 %992, i1* %993
+  ret void
+
+tag139:                                           ; preds = %entry
+  %994 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %995 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %996 = load i8*, i8** %995
+  %997 = bitcast i8* %996 to %block*
+  %998 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %994, i64 0, i32 2
+  store %block* %997, %block** %998
+  ret void
+
+tag140:                                           ; preds = %entry
+  %999 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %1000 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %1001 = load i8*, i8** %1000
+  %1002 = bitcast i8* %1001 to %block*
+  %1003 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %999, i64 0, i32 2
+  store %block* %1002, %block** %1003
+  ret void
+
+tag141:                                           ; preds = %entry
+  %1004 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %1005 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %1006 = load i8*, i8** %1005
+  %1007 = bitcast i8* %1006 to %block*
+  %1008 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %1004, i64 0, i32 2
+  store %block* %1007, %block** %1008
+  ret void
+
+tag142:                                           ; preds = %entry
+  %1009 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %1010 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %1011 = load i8*, i8** %1010
+  %1012 = bitcast i8* %1011 to %block*
+  %1013 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %1009, i64 0, i32 2
+  store %block* %1012, %block** %1013
+  ret void
+
+tag143:                                           ; preds = %entry
+  %1014 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %1015 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %1016 = load i8*, i8** %1015
+  %1017 = bitcast i8* %1016 to %block*
+  %1018 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %1014, i64 0, i32 2
+  store %block* %1017, %block** %1018
+  ret void
+
+tag144:                                           ; preds = %entry
+  %1019 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %1020 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %1021 = load i8*, i8** %1020
+  %1022 = bitcast i8* %1021 to %block*
+  %1023 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %1019, i64 0, i32 2
+  store %block* %1022, %block** %1023
+  ret void
+
+tag145:                                           ; preds = %entry
+  %1024 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %1025 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %1026 = load i8*, i8** %1025
+  %1027 = bitcast i8* %1026 to %block*
+  %1028 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %1024, i64 0, i32 2
+  store %block* %1027, %block** %1028
+  ret void
+
+tag146:                                           ; preds = %entry
+  %1029 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %1030 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %1031 = load i8*, i8** %1030
+  %1032 = bitcast i8* %1031 to %block*
+  %1033 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %1029, i64 0, i32 2
+  store %block* %1032, %block** %1033
+  ret void
+
+tag147:                                           ; preds = %entry
+  %1034 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %1035 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %1036 = load i8*, i8** %1035
+  %1037 = bitcast i8* %1036 to %block*
+  %1038 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %1034, i64 0, i32 2
+  store %block* %1037, %block** %1038
+  ret void
+
+tag148:                                           ; preds = %entry
+  %1039 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %1040 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %1041 = load i8*, i8** %1040
+  %1042 = bitcast i8* %1041 to %block*
+  %1043 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %1039, i64 0, i32 2
+  store %block* %1042, %block** %1043
+  ret void
+
+tag149:                                           ; preds = %entry
+  %1044 = bitcast %block* %0 to { %blockheader, [0 x i64], %block*, %block* }*
+  %1045 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %1046 = load i8*, i8** %1045
+  %1047 = bitcast i8* %1046 to %block*
+  %1048 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %1044, i64 0, i32 2
+  store %block* %1047, %block** %1048
+  %1049 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %1050 = load i8*, i8** %1049
+  %1051 = bitcast i8* %1050 to %block*
+  %1052 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %1044, i64 0, i32 3
+  store %block* %1051, %block** %1052
   ret void
 
 stuck:                                            ; preds = %entry
@@ -3072,9 +4174,8 @@ declare void @free(i8*)
 define i8* @evaluateFunctionSymbol(i32, [0 x i8*]*) {
 entry:
   switch i32 %0, label %stuck [
-    i32 17, label %tag17
+    i32 15, label %tag15
     i32 18, label %tag18
-    i32 19, label %tag19
     i32 20, label %tag20
     i32 21, label %tag21
     i32 22, label %tag22
@@ -3088,19 +4189,25 @@ entry:
     i32 30, label %tag30
     i32 31, label %tag31
     i32 32, label %tag32
+    i32 33, label %tag33
+    i32 34, label %tag34
+    i32 35, label %tag35
     i32 36, label %tag36
     i32 37, label %tag37
     i32 38, label %tag38
     i32 39, label %tag39
+    i32 40, label %tag40
     i32 41, label %tag41
     i32 42, label %tag42
     i32 43, label %tag43
+    i32 44, label %tag44
     i32 45, label %tag45
+    i32 46, label %tag46
+    i32 47, label %tag47
     i32 49, label %tag49
-    i32 50, label %tag50
-    i32 51, label %tag51
     i32 52, label %tag52
     i32 53, label %tag53
+    i32 54, label %tag54
     i32 55, label %tag55
     i32 56, label %tag56
     i32 57, label %tag57
@@ -3111,12 +4218,8 @@ entry:
     i32 63, label %tag63
     i32 64, label %tag64
     i32 65, label %tag65
-    i32 66, label %tag66
     i32 67, label %tag67
-    i32 68, label %tag68
     i32 69, label %tag69
-    i32 70, label %tag70
-    i32 71, label %tag71
     i32 72, label %tag72
     i32 73, label %tag73
     i32 74, label %tag74
@@ -3126,861 +4229,1494 @@ entry:
     i32 78, label %tag78
     i32 79, label %tag79
     i32 80, label %tag80
-    i32 81, label %tag81
     i32 82, label %tag82
     i32 83, label %tag83
     i32 84, label %tag84
-    i32 85, label %tag85
     i32 86, label %tag86
+    i32 87, label %tag87
     i32 88, label %tag88
+    i32 89, label %tag89
+    i32 90, label %tag90
+    i32 91, label %tag91
+    i32 92, label %tag92
+    i32 93, label %tag93
+    i32 94, label %tag94
+    i32 95, label %tag95
+    i32 96, label %tag96
+    i32 97, label %tag97
+    i32 98, label %tag98
+    i32 99, label %tag99
+    i32 100, label %tag100
+    i32 101, label %tag101
+    i32 102, label %tag102
+    i32 103, label %tag103
+    i32 104, label %tag104
+    i32 105, label %tag105
+    i32 106, label %tag106
+    i32 107, label %tag107
+    i32 108, label %tag108
+    i32 109, label %tag109
+    i32 110, label %tag110
+    i32 111, label %tag111
+    i32 112, label %tag112
+    i32 113, label %tag113
+    i32 116, label %tag116
+    i32 117, label %tag117
+    i32 118, label %tag118
+    i32 119, label %tag119
+    i32 120, label %tag120
+    i32 121, label %tag121
+    i32 122, label %tag122
+    i32 124, label %tag124
   ]
 
-tag17:                                            ; preds = %entry
-  %2 = call %map @hook_MAP_unit()
-  %malloccall = tail call i8* @malloc(i64 ptrtoint (%map* getelementptr (%map, %map* null, i32 1) to i64))
-  %3 = bitcast i8* %malloccall to %map*
-  store %map %2, %map* %3
-  %4 = bitcast %map* %3 to i8*
+tag15:                                            ; preds = %entry
+  %2 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %3 = load i8*, i8** %2
+  %4 = bitcast i8* %3 to i1*
+  %5 = load i1, i1* %4
+  tail call void @free(i8* %3)
+  %6 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %7 = load i8*, i8** %6
+  %8 = bitcast i8* %7 to %block*
+  %9 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 2
+  %10 = load i8*, i8** %9
+  %11 = bitcast i8* %10 to %block*
+  br i1 %5, label %then, label %else
+
+then:                                             ; preds = %tag15
+  br label %hook_KEQUAL_ite
+
+else:                                             ; preds = %tag15
+  br label %hook_KEQUAL_ite
+
+hook_KEQUAL_ite:                                  ; preds = %else, %then
+  %phi = phi %block* [ %8, %then ], [ %11, %else ]
+  %12 = bitcast %block* %phi to i8*
   br label %exit
 
 tag18:                                            ; preds = %entry
-  %5 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %6 = load i8*, i8** %5
-  %7 = bitcast i8* %6 to %mpz*
-  %8 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
-  %9 = load i8*, i8** %8
-  %10 = bitcast i8* %9 to %mpz*
-  %11 = call %mpz* @hook_INT_sub(%mpz* %7, %mpz* %10)
-  %12 = bitcast %mpz* %11 to i8*
-  br label %exit
-
-tag19:                                            ; preds = %entry
-  %13 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %14 = load i8*, i8** %13
-  %15 = bitcast i8* %14 to %map*
-  %16 = load %map, %map* %15
-  tail call void @free(i8* %14)
-  %17 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
-  %18 = load i8*, i8** %17
-  %19 = bitcast i8* %18 to %map*
-  %20 = load %map, %map* %19
-  tail call void @free(i8* %18)
-  %21 = alloca %map
-  store %map %16, %map* %21
-  %22 = alloca %map
-  store %map %20, %map* %22
-  %23 = call %map @hook_MAP_concat(%map* %21, %map* %22)
-  %malloccall1 = tail call i8* @malloc(i64 ptrtoint (%map* getelementptr (%map, %map* null, i32 1) to i64))
-  %24 = bitcast i8* %malloccall1 to %map*
-  store %map %23, %map* %24
-  %25 = bitcast %map* %24 to i8*
+  %13 = alloca %list
+  call void @hook_LIST_unit(%list* %13)
+  %14 = load %list, %list* %13
+  %malloccall = tail call i8* @malloc(i64 ptrtoint (%list* getelementptr (%list, %list* null, i32 1) to i64))
+  %15 = bitcast i8* %malloccall to %list*
+  store %list %14, %list* %15
+  %16 = bitcast %list* %15 to i8*
   br label %exit
 
 tag20:                                            ; preds = %entry
-  %26 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %27 = load i8*, i8** %26
-  %28 = bitcast i8* %27 to i1*
-  %29 = load i1, i1* %28
-  tail call void @free(i8* %27)
-  %30 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
-  %31 = load i8*, i8** %30
-  %32 = bitcast i8* %31 to i1*
-  %33 = load i1, i1* %32
-  tail call void @free(i8* %31)
-  br i1 %29, label %then, label %hook_BOOL_and
-
-then:                                             ; preds = %tag20
-  br label %hook_BOOL_and
-
-hook_BOOL_and:                                    ; preds = %then, %tag20
-  %phi = phi i1 [ %33, %then ], [ %29, %tag20 ]
-  %malloccall2 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
-  %34 = bitcast i8* %malloccall2 to i1*
-  store i1 %phi, i1* %34
-  %35 = bitcast i1* %34 to i8*
+  %17 = alloca %map
+  call void @hook_MAP_unit(%map* %17)
+  %18 = load %map, %map* %17
+  %malloccall1 = tail call i8* @malloc(i64 ptrtoint (%map* getelementptr (%map, %map* null, i32 1) to i64))
+  %19 = bitcast i8* %malloccall1 to %map*
+  store %map %18, %map* %19
+  %20 = bitcast %map* %19 to i8*
   br label %exit
 
 tag21:                                            ; preds = %entry
-  %36 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %37 = load i8*, i8** %36
-  %38 = bitcast i8* %37 to i1*
-  %39 = load i1, i1* %38
-  tail call void @free(i8* %37)
-  %40 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
-  %41 = load i8*, i8** %40
-  %42 = bitcast i8* %41 to i1*
-  %43 = load i1, i1* %42
-  tail call void @free(i8* %41)
-  br i1 %39, label %then3, label %hook_BOOL_and4
-
-then3:                                            ; preds = %tag21
-  br label %hook_BOOL_and4
-
-hook_BOOL_and4:                                   ; preds = %then3, %tag21
-  %phi5 = phi i1 [ %43, %then3 ], [ %39, %tag21 ]
-  %malloccall6 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
-  %44 = bitcast i8* %malloccall6 to i1*
-  store i1 %phi5, i1* %44
-  %45 = bitcast i1* %44 to i8*
+  %21 = alloca %set
+  call void @hook_SET_unit(%set* %21)
+  %22 = load %set, %set* %21
+  %malloccall2 = tail call i8* @malloc(i64 ptrtoint (%set* getelementptr (%set, %set* null, i32 1) to i64))
+  %23 = bitcast i8* %malloccall2 to %set*
+  store %set %22, %set* %23
+  %24 = bitcast %set* %23 to i8*
   br label %exit
 
 tag22:                                            ; preds = %entry
-  %46 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %47 = load i8*, i8** %46
-  %48 = bitcast i8* %47 to %mpz*
-  %49 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
-  %50 = load i8*, i8** %49
-  %51 = bitcast i8* %50 to %mpz*
-  %52 = call %mpz* @hook_INT_ediv(%mpz* %48, %mpz* %51)
-  %53 = bitcast %mpz* %52 to i8*
+  %25 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %26 = load i8*, i8** %25
+  %27 = bitcast i8* %26 to %mpz*
+  %28 = call %mpz* @hook_INT_not(%mpz* %27)
+  %29 = bitcast %mpz* %28 to i8*
   br label %exit
 
 tag23:                                            ; preds = %entry
-  %54 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %55 = load i8*, i8** %54
-  %56 = bitcast i8* %55 to %mpz*
-  %57 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
-  %58 = load i8*, i8** %57
-  %59 = bitcast i8* %58 to %mpz*
-  %60 = call i1 @"eval_Lbl'Unds'dividesInt'UndsUnds'INT'UndsUnds'Int'Unds'Int{SortInt{},SortInt{}}"(%mpz* %56, %mpz* %59)
-  %malloccall7 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
-  %61 = bitcast i8* %malloccall7 to i1*
-  store i1 %60, i1* %61
-  %62 = bitcast i1* %61 to i8*
+  %30 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %31 = load i8*, i8** %30
+  %32 = bitcast i8* %31 to %mpz*
+  %33 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %34 = load i8*, i8** %33
+  %35 = bitcast i8* %34 to %mpz*
+  %36 = call %mpz* @hook_INT_sub(%mpz* %32, %mpz* %35)
+  %37 = bitcast %mpz* %36 to i8*
   br label %exit
 
 tag24:                                            ; preds = %entry
-  %63 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %64 = load i8*, i8** %63
-  %65 = bitcast i8* %64 to i1*
-  %66 = load i1, i1* %65
-  tail call void @free(i8* %64)
-  %67 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
-  %68 = load i8*, i8** %67
-  %69 = bitcast i8* %68 to i1*
-  %70 = load i1, i1* %69
-  tail call void @free(i8* %68)
-  br i1 %66, label %then8, label %hook_BOOL_implies
-
-then8:                                            ; preds = %tag24
-  br label %hook_BOOL_implies
-
-hook_BOOL_implies:                                ; preds = %then8, %tag24
-  %phi9 = phi i1 [ %70, %then8 ], [ true, %tag24 ]
-  %malloccall10 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
-  %71 = bitcast i8* %malloccall10 to i1*
-  store i1 %phi9, i1* %71
-  %72 = bitcast i1* %71 to i8*
+  %38 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %39 = load i8*, i8** %38
+  %40 = bitcast i8* %39 to %map*
+  %41 = load %map, %map* %40
+  tail call void @free(i8* %39)
+  %42 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %43 = load i8*, i8** %42
+  %44 = bitcast i8* %43 to %map*
+  %45 = load %map, %map* %44
+  tail call void @free(i8* %43)
+  %46 = alloca %map
+  %47 = alloca %map
+  store %map %41, %map* %47
+  %48 = alloca %map
+  store %map %45, %map* %48
+  call void @hook_MAP_difference(%map* %46, %map* %47, %map* %48)
+  %49 = load %map, %map* %46
+  %malloccall3 = tail call i8* @malloc(i64 ptrtoint (%map* getelementptr (%map, %map* null, i32 1) to i64))
+  %50 = bitcast i8* %malloccall3 to %map*
+  store %map %49, %map* %50
+  %51 = bitcast %map* %50 to i8*
   br label %exit
 
 tag25:                                            ; preds = %entry
-  %73 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %74 = load i8*, i8** %73
-  %75 = bitcast i8* %74 to %mpz*
-  %76 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
-  %77 = load i8*, i8** %76
-  %78 = bitcast i8* %77 to %mpz*
-  %79 = call %mpz* @hook_INT_emod(%mpz* %75, %mpz* %78)
-  %80 = bitcast %mpz* %79 to i8*
+  %52 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %53 = load i8*, i8** %52
+  %54 = bitcast i8* %53 to %list*
+  %55 = load %list, %list* %54
+  tail call void @free(i8* %53)
+  %56 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %57 = load i8*, i8** %56
+  %58 = bitcast i8* %57 to %list*
+  %59 = load %list, %list* %58
+  tail call void @free(i8* %57)
+  %60 = alloca %list
+  %61 = alloca %list
+  store %list %55, %list* %61
+  %62 = alloca %list
+  store %list %59, %list* %62
+  call void @hook_LIST_concat(%list* %60, %list* %61, %list* %62)
+  %63 = load %list, %list* %60
+  %malloccall4 = tail call i8* @malloc(i64 ptrtoint (%list* getelementptr (%list, %list* null, i32 1) to i64))
+  %64 = bitcast i8* %malloccall4 to %list*
+  store %list %63, %list* %64
+  %65 = bitcast %list* %64 to i8*
   br label %exit
 
 tag26:                                            ; preds = %entry
-  %81 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %82 = load i8*, i8** %81
-  %83 = bitcast i8* %82 to i1*
-  %84 = load i1, i1* %83
-  tail call void @free(i8* %82)
-  %85 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
-  %86 = load i8*, i8** %85
-  %87 = bitcast i8* %86 to i1*
-  %88 = load i1, i1* %87
-  tail call void @free(i8* %86)
-  br i1 %84, label %hook_BOOL_or, label %else
-
-else:                                             ; preds = %tag26
-  br label %hook_BOOL_or
-
-hook_BOOL_or:                                     ; preds = %else, %tag26
-  %phi11 = phi i1 [ %88, %else ], [ %84, %tag26 ]
-  %malloccall12 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
-  %89 = bitcast i8* %malloccall12 to i1*
-  store i1 %phi11, i1* %89
-  %90 = bitcast i1* %89 to i8*
+  %66 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %67 = load i8*, i8** %66
+  %68 = bitcast i8* %67 to %map*
+  %69 = load %map, %map* %68
+  tail call void @free(i8* %67)
+  %70 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %71 = load i8*, i8** %70
+  %72 = bitcast i8* %71 to %map*
+  %73 = load %map, %map* %72
+  tail call void @free(i8* %71)
+  %74 = alloca %map
+  %75 = alloca %map
+  store %map %69, %map* %75
+  %76 = alloca %map
+  store %map %73, %map* %76
+  call void @hook_MAP_concat(%map* %74, %map* %75, %map* %76)
+  %77 = load %map, %map* %74
+  %malloccall5 = tail call i8* @malloc(i64 ptrtoint (%map* getelementptr (%map, %map* null, i32 1) to i64))
+  %78 = bitcast i8* %malloccall5 to %map*
+  store %map %77, %map* %78
+  %79 = bitcast %map* %78 to i8*
   br label %exit
 
 tag27:                                            ; preds = %entry
-  %91 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %92 = load i8*, i8** %91
-  %93 = bitcast i8* %92 to i1*
-  %94 = load i1, i1* %93
-  tail call void @free(i8* %92)
-  %95 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
-  %96 = load i8*, i8** %95
-  %97 = bitcast i8* %96 to i1*
-  %98 = load i1, i1* %97
-  tail call void @free(i8* %96)
-  br i1 %94, label %hook_BOOL_or14, label %else13
-
-else13:                                           ; preds = %tag27
-  br label %hook_BOOL_or14
-
-hook_BOOL_or14:                                   ; preds = %else13, %tag27
-  %phi15 = phi i1 [ %98, %else13 ], [ %94, %tag27 ]
-  %malloccall16 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
-  %99 = bitcast i8* %malloccall16 to i1*
-  store i1 %phi15, i1* %99
-  %100 = bitcast i1* %99 to i8*
+  %80 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %81 = load i8*, i8** %80
+  %82 = bitcast i8* %81 to %set*
+  %83 = load %set, %set* %82
+  tail call void @free(i8* %81)
+  %84 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %85 = load i8*, i8** %84
+  %86 = bitcast i8* %85 to %set*
+  %87 = load %set, %set* %86
+  tail call void @free(i8* %85)
+  %88 = alloca %set
+  %89 = alloca %set
+  store %set %83, %set* %89
+  %90 = alloca %set
+  store %set %87, %set* %90
+  call void @hook_SET_concat(%set* %88, %set* %89, %set* %90)
+  %91 = load %set, %set* %88
+  %malloccall6 = tail call i8* @malloc(i64 ptrtoint (%set* getelementptr (%set, %set* null, i32 1) to i64))
+  %92 = bitcast i8* %malloccall6 to %set*
+  store %set %91, %set* %92
+  %93 = bitcast %set* %92 to i8*
   br label %exit
 
 tag28:                                            ; preds = %entry
-  %101 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %102 = load i8*, i8** %101
-  %103 = bitcast i8* %102 to i1*
-  %104 = load i1, i1* %103
-  tail call void @free(i8* %102)
-  %105 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
-  %106 = load i8*, i8** %105
-  %107 = bitcast i8* %106 to i1*
-  %108 = load i1, i1* %107
-  tail call void @free(i8* %106)
-  %hook_BOOL_ne = xor i1 %104, %108
-  %malloccall17 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
-  %109 = bitcast i8* %malloccall17 to i1*
-  store i1 %hook_BOOL_ne, i1* %109
-  %110 = bitcast i1* %109 to i8*
+  %94 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %95 = load i8*, i8** %94
+  %96 = bitcast i8* %95 to i1*
+  %97 = load i1, i1* %96
+  tail call void @free(i8* %95)
+  %98 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %99 = load i8*, i8** %98
+  %100 = bitcast i8* %99 to i1*
+  %101 = load i1, i1* %100
+  tail call void @free(i8* %99)
+  br i1 %97, label %then7, label %hook_BOOL_and
+
+then7:                                            ; preds = %tag28
+  br label %hook_BOOL_and
+
+hook_BOOL_and:                                    ; preds = %then7, %tag28
+  %phi8 = phi i1 [ %101, %then7 ], [ %97, %tag28 ]
+  %malloccall9 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
+  %102 = bitcast i8* %malloccall9 to i1*
+  store i1 %phi8, i1* %102
+  %103 = bitcast i1* %102 to i8*
   br label %exit
 
 tag29:                                            ; preds = %entry
-  %111 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %112 = load i8*, i8** %111
-  %113 = bitcast i8* %112 to %mpz*
-  %114 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
-  %115 = load i8*, i8** %114
-  %116 = bitcast i8* %115 to %mpz*
-  %117 = call %mpz* @hook_INT_shr(%mpz* %113, %mpz* %116)
-  %118 = bitcast %mpz* %117 to i8*
+  %104 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %105 = load i8*, i8** %104
+  %106 = bitcast i8* %105 to i1*
+  %107 = load i1, i1* %106
+  tail call void @free(i8* %105)
+  %108 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %109 = load i8*, i8** %108
+  %110 = bitcast i8* %109 to i1*
+  %111 = load i1, i1* %110
+  tail call void @free(i8* %109)
+  br i1 %107, label %then10, label %hook_BOOL_and11
+
+then10:                                           ; preds = %tag29
+  br label %hook_BOOL_and11
+
+hook_BOOL_and11:                                  ; preds = %then10, %tag29
+  %phi12 = phi i1 [ %111, %then10 ], [ %107, %tag29 ]
+  %malloccall13 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
+  %112 = bitcast i8* %malloccall13 to i1*
+  store i1 %phi12, i1* %112
+  %113 = bitcast i1* %112 to i8*
   br label %exit
 
 tag30:                                            ; preds = %entry
-  %119 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %120 = load i8*, i8** %119
-  %121 = bitcast i8* %120 to %mpz*
-  %122 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
-  %123 = load i8*, i8** %122
-  %124 = bitcast i8* %123 to %mpz*
-  %125 = call i1 @hook_INT_ge(%mpz* %121, %mpz* %124)
-  %malloccall18 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
-  %126 = bitcast i8* %malloccall18 to i1*
-  store i1 %125, i1* %126
-  %127 = bitcast i1* %126 to i8*
+  %114 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %115 = load i8*, i8** %114
+  %116 = bitcast i8* %115 to %mpz*
+  %117 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %118 = load i8*, i8** %117
+  %119 = bitcast i8* %118 to %mpz*
+  %120 = call %mpz* @hook_INT_ediv(%mpz* %116, %mpz* %119)
+  %121 = bitcast %mpz* %120 to i8*
   br label %exit
 
 tag31:                                            ; preds = %entry
-  %128 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %129 = load i8*, i8** %128
-  %130 = bitcast i8* %129 to %mpz*
-  %131 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
-  %132 = load i8*, i8** %131
-  %133 = bitcast i8* %132 to %mpz*
-  %134 = call %mpz* @hook_INT_shl(%mpz* %130, %mpz* %133)
-  %135 = bitcast %mpz* %134 to i8*
+  %122 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %123 = load i8*, i8** %122
+  %124 = bitcast i8* %123 to %mpz*
+  %125 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %126 = load i8*, i8** %125
+  %127 = bitcast i8* %126 to %mpz*
+  %128 = call i1 @"eval_Lbl'Unds'dividesInt'UndsUnds'INT'UndsUnds'Int'Unds'Int{SortInt{}, SortInt{}}"(%mpz* %124, %mpz* %127)
+  %malloccall14 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
+  %129 = bitcast i8* %malloccall14 to i1*
+  store i1 %128, i1* %129
+  %130 = bitcast i1* %129 to i8*
   br label %exit
 
 tag32:                                            ; preds = %entry
-  %136 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %137 = load i8*, i8** %136
-  %138 = bitcast i8* %137 to %mpz*
-  %139 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
-  %140 = load i8*, i8** %139
-  %141 = bitcast i8* %140 to %mpz*
-  %142 = call i1 @hook_INT_le(%mpz* %138, %mpz* %141)
+  %131 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %132 = load i8*, i8** %131
+  %133 = bitcast i8* %132 to i1*
+  %134 = load i1, i1* %133
+  tail call void @free(i8* %132)
+  %135 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %136 = load i8*, i8** %135
+  %137 = bitcast i8* %136 to i1*
+  %138 = load i1, i1* %137
+  tail call void @free(i8* %136)
+  br i1 %134, label %then15, label %hook_BOOL_implies
+
+then15:                                           ; preds = %tag32
+  br label %hook_BOOL_implies
+
+hook_BOOL_implies:                                ; preds = %then15, %tag32
+  %phi16 = phi i1 [ %138, %then15 ], [ true, %tag32 ]
+  %malloccall17 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
+  %139 = bitcast i8* %malloccall17 to i1*
+  store i1 %phi16, i1* %139
+  %140 = bitcast i1* %139 to i8*
+  br label %exit
+
+tag33:                                            ; preds = %entry
+  %141 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %142 = load i8*, i8** %141
+  %143 = bitcast i8* %142 to %block*
+  %144 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %145 = load i8*, i8** %144
+  %146 = bitcast i8* %145 to %map*
+  %147 = load %map, %map* %146
+  tail call void @free(i8* %145)
+  %148 = alloca %map
+  store %map %147, %map* %148
+  %149 = call i1 @hook_MAP_in_keys(%block* %143, %map* %148)
+  %malloccall18 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
+  %150 = bitcast i8* %malloccall18 to i1*
+  store i1 %149, i1* %150
+  %151 = bitcast i1* %150 to i8*
+  br label %exit
+
+tag34:                                            ; preds = %entry
+  %152 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %153 = load i8*, i8** %152
+  %154 = bitcast i8* %153 to %block*
+  %155 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %156 = load i8*, i8** %155
+  %157 = bitcast i8* %156 to %list*
+  %158 = load %list, %list* %157
+  tail call void @free(i8* %156)
+  %159 = alloca %list
+  store %list %158, %list* %159
+  %160 = call i1 @hook_LIST_in(%block* %154, %list* %159)
   %malloccall19 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
-  %143 = bitcast i8* %malloccall19 to i1*
-  store i1 %142, i1* %143
-  %144 = bitcast i1* %143 to i8*
+  %161 = bitcast i8* %malloccall19 to i1*
+  store i1 %160, i1* %161
+  %162 = bitcast i1* %161 to i8*
+  br label %exit
+
+tag35:                                            ; preds = %entry
+  %163 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %164 = load i8*, i8** %163
+  %165 = bitcast i8* %164 to %mpz*
+  %166 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %167 = load i8*, i8** %166
+  %168 = bitcast i8* %167 to %mpz*
+  %169 = call %mpz* @hook_INT_emod(%mpz* %165, %mpz* %168)
+  %170 = bitcast %mpz* %169 to i8*
   br label %exit
 
 tag36:                                            ; preds = %entry
-  %145 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %146 = load i8*, i8** %145
-  %147 = bitcast i8* %146 to i1*
-  %148 = load i1, i1* %147
-  tail call void @free(i8* %146)
-  %149 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
-  %150 = load i8*, i8** %149
-  %151 = bitcast i8* %150 to i1*
-  %152 = load i1, i1* %151
-  tail call void @free(i8* %150)
-  %hook_BOOL_eq = icmp eq i1 %148, %152
-  %malloccall20 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
-  %153 = bitcast i8* %malloccall20 to i1*
-  store i1 %hook_BOOL_eq, i1* %153
-  %154 = bitcast i1* %153 to i8*
+  %171 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %172 = load i8*, i8** %171
+  %173 = bitcast i8* %172 to i1*
+  %174 = load i1, i1* %173
+  tail call void @free(i8* %172)
+  %175 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %176 = load i8*, i8** %175
+  %177 = bitcast i8* %176 to i1*
+  %178 = load i1, i1* %177
+  tail call void @free(i8* %176)
+  br i1 %174, label %hook_BOOL_or, label %else20
+
+else20:                                           ; preds = %tag36
+  br label %hook_BOOL_or
+
+hook_BOOL_or:                                     ; preds = %else20, %tag36
+  %phi21 = phi i1 [ %178, %else20 ], [ %174, %tag36 ]
+  %malloccall22 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
+  %179 = bitcast i8* %malloccall22 to i1*
+  store i1 %phi21, i1* %179
+  %180 = bitcast i1* %179 to i8*
   br label %exit
 
 tag37:                                            ; preds = %entry
-  %155 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %156 = load i8*, i8** %155
-  %157 = bitcast i8* %156 to %mpz*
-  %158 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
-  %159 = load i8*, i8** %158
-  %160 = bitcast i8* %159 to %mpz*
-  %161 = call i1 @hook_INT_eq(%mpz* %157, %mpz* %160)
-  %malloccall21 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
-  %162 = bitcast i8* %malloccall21 to i1*
-  store i1 %161, i1* %162
-  %163 = bitcast i1* %162 to i8*
+  %181 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %182 = load i8*, i8** %181
+  %183 = bitcast i8* %182 to i1*
+  %184 = load i1, i1* %183
+  tail call void @free(i8* %182)
+  %185 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %186 = load i8*, i8** %185
+  %187 = bitcast i8* %186 to i1*
+  %188 = load i1, i1* %187
+  tail call void @free(i8* %186)
+  br i1 %184, label %hook_BOOL_or24, label %else23
+
+else23:                                           ; preds = %tag37
+  br label %hook_BOOL_or24
+
+hook_BOOL_or24:                                   ; preds = %else23, %tag37
+  %phi25 = phi i1 [ %188, %else23 ], [ %184, %tag37 ]
+  %malloccall26 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
+  %189 = bitcast i8* %malloccall26 to i1*
+  store i1 %phi25, i1* %189
+  %190 = bitcast i1* %189 to i8*
   br label %exit
 
 tag38:                                            ; preds = %entry
-  %164 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %165 = load i8*, i8** %164
-  %166 = bitcast i8* %165 to i1*
-  %167 = load i1, i1* %166
-  tail call void @free(i8* %165)
-  %168 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
-  %169 = load i8*, i8** %168
-  %170 = bitcast i8* %169 to i1*
-  %171 = load i1, i1* %170
-  tail call void @free(i8* %169)
-  %hook_BOOL_ne22 = xor i1 %167, %171
-  %malloccall23 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
-  %172 = bitcast i8* %malloccall23 to i1*
-  store i1 %hook_BOOL_ne22, i1* %172
-  %173 = bitcast i1* %172 to i8*
+  %191 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %192 = load i8*, i8** %191
+  %193 = bitcast i8* %192 to i1*
+  %194 = load i1, i1* %193
+  tail call void @free(i8* %192)
+  %195 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %196 = load i8*, i8** %195
+  %197 = bitcast i8* %196 to i1*
+  %198 = load i1, i1* %197
+  tail call void @free(i8* %196)
+  %hook_BOOL_ne = xor i1 %194, %198
+  %malloccall27 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
+  %199 = bitcast i8* %malloccall27 to i1*
+  store i1 %hook_BOOL_ne, i1* %199
+  %200 = bitcast i1* %199 to i8*
   br label %exit
 
 tag39:                                            ; preds = %entry
-  %174 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %175 = load i8*, i8** %174
-  %176 = bitcast i8* %175 to %mpz*
-  %177 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
-  %178 = load i8*, i8** %177
-  %179 = bitcast i8* %178 to %mpz*
-  %180 = call i1 @hook_INT_ne(%mpz* %176, %mpz* %179)
-  %malloccall24 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
-  %181 = bitcast i8* %malloccall24 to i1*
-  store i1 %180, i1* %181
-  %182 = bitcast i1* %181 to i8*
+  %201 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %202 = load i8*, i8** %201
+  %203 = bitcast i8* %202 to %mpz*
+  %204 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %205 = load i8*, i8** %204
+  %206 = bitcast i8* %205 to %mpz*
+  %207 = call %mpz* @hook_INT_xor(%mpz* %203, %mpz* %206)
+  %208 = bitcast %mpz* %207 to i8*
+  br label %exit
+
+tag40:                                            ; preds = %entry
+  %209 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %210 = load i8*, i8** %209
+  %211 = bitcast i8* %210 to %mpz*
+  %212 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %213 = load i8*, i8** %212
+  %214 = bitcast i8* %213 to %mpz*
+  %215 = call i1 @hook_INT_gt(%mpz* %211, %mpz* %214)
+  %malloccall28 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
+  %216 = bitcast i8* %malloccall28 to i1*
+  store i1 %215, i1* %216
+  %217 = bitcast i1* %216 to i8*
   br label %exit
 
 tag41:                                            ; preds = %entry
-  %183 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %184 = load i8*, i8** %183
-  %185 = bitcast i8* %184 to %mpz*
-  %186 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
-  %187 = load i8*, i8** %186
-  %188 = bitcast i8* %187 to %mpz*
-  %189 = call %mpz* @hook_INT_tmod(%mpz* %185, %mpz* %188)
-  %190 = bitcast %mpz* %189 to i8*
+  %218 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %219 = load i8*, i8** %218
+  %220 = bitcast i8* %219 to %mpz*
+  %221 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %222 = load i8*, i8** %221
+  %223 = bitcast i8* %222 to %mpz*
+  %224 = call %mpz* @hook_INT_shr(%mpz* %220, %mpz* %223)
+  %225 = bitcast %mpz* %224 to i8*
   br label %exit
 
 tag42:                                            ; preds = %entry
-  %191 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %192 = load i8*, i8** %191
-  %193 = bitcast i8* %192 to %block*
-  %194 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
-  %195 = load i8*, i8** %194
-  %196 = bitcast i8* %195 to %block*
-  %197 = call %map @hook_MAP_element(%block* %193, %block* %196)
-  %malloccall25 = tail call i8* @malloc(i64 ptrtoint (%map* getelementptr (%map, %map* null, i32 1) to i64))
-  %198 = bitcast i8* %malloccall25 to %map*
-  store %map %197, %map* %198
-  %199 = bitcast %map* %198 to i8*
+  %226 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %227 = load i8*, i8** %226
+  %228 = bitcast i8* %227 to %mpz*
+  %229 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %230 = load i8*, i8** %229
+  %231 = bitcast i8* %230 to %mpz*
+  %232 = call i1 @hook_INT_ge(%mpz* %228, %mpz* %231)
+  %malloccall29 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
+  %233 = bitcast i8* %malloccall29 to i1*
+  store i1 %232, i1* %233
+  %234 = bitcast i1* %233 to i8*
   br label %exit
 
 tag43:                                            ; preds = %entry
-  %200 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %201 = load i8*, i8** %200
-  %202 = bitcast i8* %201 to %mpz*
-  %203 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
-  %204 = load i8*, i8** %203
-  %205 = bitcast i8* %204 to %mpz*
-  %206 = call %mpz* @hook_INT_add(%mpz* %202, %mpz* %205)
-  %207 = bitcast %mpz* %206 to i8*
+  %235 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %236 = load i8*, i8** %235
+  %237 = bitcast i8* %236 to %mpz*
+  %238 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %239 = load i8*, i8** %238
+  %240 = bitcast i8* %239 to %mpz*
+  %241 = call i1 @hook_INT_lt(%mpz* %237, %mpz* %240)
+  %malloccall30 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
+  %242 = bitcast i8* %malloccall30 to i1*
+  store i1 %241, i1* %242
+  %243 = bitcast i1* %242 to i8*
+  br label %exit
+
+tag44:                                            ; preds = %entry
+  %244 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %245 = load i8*, i8** %244
+  %246 = bitcast i8* %245 to %mpz*
+  %247 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %248 = load i8*, i8** %247
+  %249 = bitcast i8* %248 to %mpz*
+  %250 = call %mpz* @hook_INT_shl(%mpz* %246, %mpz* %249)
+  %251 = bitcast %mpz* %250 to i8*
   br label %exit
 
 tag45:                                            ; preds = %entry
-  %208 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %209 = load i8*, i8** %208
-  %210 = bitcast i8* %209 to %mpz*
-  %211 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
-  %212 = load i8*, i8** %211
-  %213 = bitcast i8* %212 to %mpz*
-  %214 = call %mpz* @hook_INT_tdiv(%mpz* %210, %mpz* %213)
-  %215 = bitcast %mpz* %214 to i8*
+  %252 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %253 = load i8*, i8** %252
+  %254 = bitcast i8* %253 to %mpz*
+  %255 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %256 = load i8*, i8** %255
+  %257 = bitcast i8* %256 to %mpz*
+  %258 = call i1 @hook_INT_le(%mpz* %254, %mpz* %257)
+  %malloccall31 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
+  %259 = bitcast i8* %malloccall31 to i1*
+  store i1 %258, i1* %259
+  %260 = bitcast i1* %259 to i8*
+  br label %exit
+
+tag46:                                            ; preds = %entry
+  %261 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %262 = load i8*, i8** %261
+  %263 = bitcast i8* %262 to %map*
+  %264 = load %map, %map* %263
+  tail call void @free(i8* %262)
+  %265 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %266 = load i8*, i8** %265
+  %267 = bitcast i8* %266 to %map*
+  %268 = load %map, %map* %267
+  tail call void @free(i8* %266)
+  %269 = alloca %map
+  store %map %264, %map* %269
+  %270 = alloca %map
+  store %map %268, %map* %270
+  %271 = call i1 @hook_MAP_inclusion(%map* %269, %map* %270)
+  %malloccall32 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
+  %272 = bitcast i8* %malloccall32 to i1*
+  store i1 %271, i1* %272
+  %273 = bitcast i1* %272 to i8*
+  br label %exit
+
+tag47:                                            ; preds = %entry
+  %274 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %275 = load i8*, i8** %274
+  %276 = bitcast i8* %275 to %set*
+  %277 = load %set, %set* %276
+  tail call void @free(i8* %275)
+  %278 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %279 = load i8*, i8** %278
+  %280 = bitcast i8* %279 to %set*
+  %281 = load %set, %set* %280
+  tail call void @free(i8* %279)
+  %282 = alloca %set
+  store %set %277, %set* %282
+  %283 = alloca %set
+  store %set %281, %set* %283
+  %284 = call i1 @hook_SET_inclusion(%set* %282, %set* %283)
+  %malloccall33 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
+  %285 = bitcast i8* %malloccall33 to i1*
+  store i1 %284, i1* %285
+  %286 = bitcast i1* %285 to i8*
   br label %exit
 
 tag49:                                            ; preds = %entry
-  %216 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %217 = load i8*, i8** %216
-  %218 = bitcast i8* %217 to %map*
-  %219 = load %map, %map* %218
-  tail call void @free(i8* %217)
-  %220 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
-  %221 = load i8*, i8** %220
-  %222 = bitcast i8* %221 to %block*
-  %223 = alloca %map
-  store %map %219, %map* %223
-  %224 = call %block* @hook_MAP_lookup(%map* %223, %block* %222)
-  %225 = bitcast %block* %224 to i8*
-  br label %exit
-
-tag50:                                            ; preds = %entry
-  %226 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %227 = load i8*, i8** %226
-  %228 = bitcast i8* %227 to %block*
-  %229 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
-  %230 = load i8*, i8** %229
-  %231 = bitcast i8* %230 to %set*
-  %232 = load %set, %set* %231
-  tail call void @free(i8* %230)
-  %233 = alloca %set
-  store %set %232, %set* %233
-  %234 = call i1 @hook_SET_in(%block* %228, %set* %233)
-  %malloccall26 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
-  %235 = bitcast i8* %malloccall26 to i1*
-  store i1 %234, i1* %235
-  %236 = bitcast i1* %235 to i8*
-  br label %exit
-
-tag51:                                            ; preds = %entry
-  %237 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %238 = load i8*, i8** %237
-  %239 = bitcast i8* %238 to %mpz*
-  %240 = call %mpz* @hook_INT_abs(%mpz* %239)
-  %241 = bitcast %mpz* %240 to i8*
+  %287 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %288 = load i8*, i8** %287
+  %289 = bitcast i8* %288 to %mpz*
+  %290 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %291 = load i8*, i8** %290
+  %292 = bitcast i8* %291 to %mpz*
+  %293 = call %mpz* @hook_INT_and(%mpz* %289, %mpz* %292)
+  %294 = bitcast %mpz* %293 to i8*
   br label %exit
 
 tag52:                                            ; preds = %entry
-  %242 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %243 = load i8*, i8** %242
-  %244 = bitcast i8* %243 to %mpz*
-  %245 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
-  %246 = load i8*, i8** %245
-  %247 = bitcast i8* %246 to %mpz*
-  %248 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 2
-  %249 = load i8*, i8** %248
-  %250 = bitcast i8* %249 to %mpz*
-  %251 = call %mpz* @hook_INT_bitRange(%mpz* %244, %mpz* %247, %mpz* %250)
-  %252 = bitcast %mpz* %251 to i8*
+  %295 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %296 = load i8*, i8** %295
+  %297 = bitcast i8* %296 to i1*
+  %298 = load i1, i1* %297
+  tail call void @free(i8* %296)
+  %299 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %300 = load i8*, i8** %299
+  %301 = bitcast i8* %300 to i1*
+  %302 = load i1, i1* %301
+  tail call void @free(i8* %300)
+  %hook_BOOL_eq = icmp eq i1 %298, %302
+  %malloccall34 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
+  %303 = bitcast i8* %malloccall34 to i1*
+  store i1 %hook_BOOL_eq, i1* %303
+  %304 = bitcast i1* %303 to i8*
   br label %exit
 
 tag53:                                            ; preds = %entry
-  %253 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %254 = load i8*, i8** %253
-  %255 = bitcast i8* %254 to %mpz*
-  %256 = call %mpz* @"eval_LblfreshInt'LParUndsRParUnds'INT'UndsUnds'Int{SortInt{}}"(%mpz* %255)
-  %257 = bitcast %mpz* %256 to i8*
+  %305 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %306 = load i8*, i8** %305
+  %307 = bitcast i8* %306 to %mpz*
+  %308 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %309 = load i8*, i8** %308
+  %310 = bitcast i8* %309 to %mpz*
+  %311 = call i1 @hook_INT_eq(%mpz* %307, %mpz* %310)
+  %malloccall35 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
+  %312 = bitcast i8* %malloccall35 to i1*
+  store i1 %311, i1* %312
+  %313 = bitcast i1* %312 to i8*
+  br label %exit
+
+tag54:                                            ; preds = %entry
+  %314 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %315 = load i8*, i8** %314
+  %316 = bitcast i8* %315 to %block*
+  %317 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %318 = load i8*, i8** %317
+  %319 = bitcast i8* %318 to %block*
+  %320 = call i1 @hook_KEQUAL_eq(%block* %316, %block* %319)
+  %malloccall36 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
+  %321 = bitcast i8* %malloccall36 to i1*
+  store i1 %320, i1* %321
+  %322 = bitcast i1* %321 to i8*
   br label %exit
 
 tag55:                                            ; preds = %entry
-  %258 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %259 = load i8*, i8** %258
-  %260 = bitcast i8* %259 to %map*
-  %261 = load %map, %map* %260
-  tail call void @free(i8* %259)
-  %262 = alloca %map
-  store %map %261, %map* %262
-  %263 = call %block* @"eval_LblinitKCell{SortMap{}}"(%map* %262)
-  %264 = bitcast %block* %263 to i8*
+  %323 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %324 = load i8*, i8** %323
+  %325 = bitcast i8* %324 to i1*
+  %326 = load i1, i1* %325
+  tail call void @free(i8* %324)
+  %327 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %328 = load i8*, i8** %327
+  %329 = bitcast i8* %328 to i1*
+  %330 = load i1, i1* %329
+  tail call void @free(i8* %328)
+  %hook_BOOL_ne37 = xor i1 %326, %330
+  %malloccall38 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
+  %331 = bitcast i8* %malloccall38 to i1*
+  store i1 %hook_BOOL_ne37, i1* %331
+  %332 = bitcast i1* %331 to i8*
   br label %exit
 
 tag56:                                            ; preds = %entry
-  %265 = call %block* @"eval_LblinitStateCell{}"()
-  %266 = bitcast %block* %265 to i8*
+  %333 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %334 = load i8*, i8** %333
+  %335 = bitcast i8* %334 to %mpz*
+  %336 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %337 = load i8*, i8** %336
+  %338 = bitcast i8* %337 to %mpz*
+  %339 = call i1 @hook_INT_ne(%mpz* %335, %mpz* %338)
+  %malloccall39 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
+  %340 = bitcast i8* %malloccall39 to i1*
+  store i1 %339, i1* %340
+  %341 = bitcast i1* %340 to i8*
   br label %exit
 
 tag57:                                            ; preds = %entry
-  %267 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %268 = load i8*, i8** %267
-  %269 = bitcast i8* %268 to %map*
-  %270 = load %map, %map* %269
-  tail call void @free(i8* %268)
-  %271 = alloca %map
-  store %map %270, %map* %271
-  %272 = call %block* @"eval_LblinitTCell{SortMap{}}"(%map* %271)
-  %273 = bitcast %block* %272 to i8*
+  %342 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %343 = load i8*, i8** %342
+  %344 = bitcast i8* %343 to %block*
+  %345 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %346 = load i8*, i8** %345
+  %347 = bitcast i8* %346 to %block*
+  %348 = call i1 @hook_KEQUAL_ne(%block* %344, %block* %347)
+  %malloccall40 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
+  %349 = bitcast i8* %malloccall40 to i1*
+  store i1 %348, i1* %349
+  %350 = bitcast i1* %349 to i8*
   br label %exit
 
 tag59:                                            ; preds = %entry
-  %274 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %275 = load i8*, i8** %274
-  %276 = bitcast i8* %275 to %block*
-  %277 = call i1 @"eval_LblisAExp{SortK{}}"(%block* %276)
-  %malloccall27 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
-  %278 = bitcast i8* %malloccall27 to i1*
-  store i1 %277, i1* %278
-  %279 = bitcast i1* %278 to i8*
+  %351 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %352 = load i8*, i8** %351
+  %353 = bitcast i8* %352 to %map*
+  %354 = load %map, %map* %353
+  tail call void @free(i8* %352)
+  %355 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %356 = load i8*, i8** %355
+  %357 = bitcast i8* %356 to %block*
+  %358 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 2
+  %359 = load i8*, i8** %358
+  %360 = bitcast i8* %359 to %block*
+  %361 = alloca %map
+  %362 = alloca %map
+  store %map %354, %map* %362
+  call void @hook_MAP_update(%map* %361, %map* %362, %block* %357, %block* %360)
+  %363 = load %map, %map* %361
+  %malloccall41 = tail call i8* @malloc(i64 ptrtoint (%map* getelementptr (%map, %map* null, i32 1) to i64))
+  %364 = bitcast i8* %malloccall41 to %map*
+  store %map %363, %map* %364
+  %365 = bitcast %map* %364 to i8*
   br label %exit
 
 tag60:                                            ; preds = %entry
-  %280 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %281 = load i8*, i8** %280
-  %282 = bitcast i8* %281 to %block*
-  %283 = call i1 @"eval_LblisBExp{SortK{}}"(%block* %282)
-  %malloccall28 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
-  %284 = bitcast i8* %malloccall28 to i1*
-  store i1 %283, i1* %284
-  %285 = bitcast i1* %284 to i8*
+  %366 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %367 = load i8*, i8** %366
+  %368 = bitcast i8* %367 to %map*
+  %369 = load %map, %map* %368
+  tail call void @free(i8* %367)
+  %370 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %371 = load i8*, i8** %370
+  %372 = bitcast i8* %371 to %block*
+  %373 = alloca %map
+  %374 = alloca %map
+  store %map %369, %map* %374
+  call void @hook_MAP_remove(%map* %373, %map* %374, %block* %372)
+  %375 = load %map, %map* %373
+  %malloccall42 = tail call i8* @malloc(i64 ptrtoint (%map* getelementptr (%map, %map* null, i32 1) to i64))
+  %376 = bitcast i8* %malloccall42 to %map*
+  store %map %375, %map* %376
+  %377 = bitcast %map* %376 to i8*
   br label %exit
 
 tag61:                                            ; preds = %entry
-  %286 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %287 = load i8*, i8** %286
-  %288 = bitcast i8* %287 to %block*
-  %289 = call i1 @"eval_LblisBlock{SortK{}}"(%block* %288)
-  %malloccall29 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
-  %290 = bitcast i8* %malloccall29 to i1*
-  store i1 %289, i1* %290
-  %291 = bitcast i1* %290 to i8*
+  %378 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %379 = load i8*, i8** %378
+  %380 = bitcast i8* %379 to %map*
+  %381 = load %map, %map* %380
+  tail call void @free(i8* %379)
+  %382 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %383 = load i8*, i8** %382
+  %384 = bitcast i8* %383 to %block*
+  %385 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 2
+  %386 = load i8*, i8** %385
+  %387 = bitcast i8* %386 to %block*
+  %388 = alloca %map
+  store %map %381, %map* %388
+  %389 = call %block* @hook_MAP_lookupOrDefault(%map* %388, %block* %384, %block* %387)
+  %390 = bitcast %block* %389 to i8*
   br label %exit
 
 tag62:                                            ; preds = %entry
-  %292 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %293 = load i8*, i8** %292
-  %294 = bitcast i8* %293 to %block*
-  %295 = call i1 @"eval_LblisBool{SortK{}}"(%block* %294)
-  %malloccall30 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
-  %296 = bitcast i8* %malloccall30 to i1*
-  store i1 %295, i1* %296
-  %297 = bitcast i1* %296 to i8*
+  %391 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %392 = load i8*, i8** %391
+  %393 = bitcast i8* %392 to %mpz*
+  %394 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %395 = load i8*, i8** %394
+  %396 = bitcast i8* %395 to %mpz*
+  %397 = call %mpz* @hook_INT_tmod(%mpz* %393, %mpz* %396)
+  %398 = bitcast %mpz* %397 to i8*
   br label %exit
 
 tag63:                                            ; preds = %entry
-  %298 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %299 = load i8*, i8** %298
-  %300 = bitcast i8* %299 to %block*
-  %301 = call i1 @"eval_LblisCell{SortK{}}"(%block* %300)
-  %malloccall31 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
-  %302 = bitcast i8* %malloccall31 to i1*
-  store i1 %301, i1* %302
-  %303 = bitcast i1* %302 to i8*
+  %399 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %400 = load i8*, i8** %399
+  %401 = bitcast i8* %400 to %block*
+  %402 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %403 = load i8*, i8** %402
+  %404 = bitcast i8* %403 to %block*
+  %405 = alloca %map
+  call void @hook_MAP_element(%map* %405, %block* %401, %block* %404)
+  %406 = load %map, %map* %405
+  %malloccall43 = tail call i8* @malloc(i64 ptrtoint (%map* getelementptr (%map, %map* null, i32 1) to i64))
+  %407 = bitcast i8* %malloccall43 to %map*
+  store %map %406, %map* %407
+  %408 = bitcast %map* %407 to i8*
   br label %exit
 
 tag64:                                            ; preds = %entry
-  %304 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %305 = load i8*, i8** %304
-  %306 = bitcast i8* %305 to %block*
-  %307 = call i1 @"eval_LblisId{SortK{}}"(%block* %306)
-  %malloccall32 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
-  %308 = bitcast i8* %malloccall32 to i1*
-  store i1 %307, i1* %308
-  %309 = bitcast i1* %308 to i8*
+  %409 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %410 = load i8*, i8** %409
+  %411 = bitcast i8* %410 to %mpz*
+  %412 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %413 = load i8*, i8** %412
+  %414 = bitcast i8* %413 to %mpz*
+  %415 = call %mpz* @hook_INT_or(%mpz* %411, %mpz* %414)
+  %416 = bitcast %mpz* %415 to i8*
   br label %exit
 
 tag65:                                            ; preds = %entry
-  %310 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %311 = load i8*, i8** %310
-  %312 = bitcast i8* %311 to %block*
-  %313 = call i1 @"eval_LblisIds{SortK{}}"(%block* %312)
-  %malloccall33 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
-  %314 = bitcast i8* %malloccall33 to i1*
-  store i1 %313, i1* %314
-  %315 = bitcast i1* %314 to i8*
-  br label %exit
-
-tag66:                                            ; preds = %entry
-  %316 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %317 = load i8*, i8** %316
-  %318 = bitcast i8* %317 to %block*
-  %319 = call i1 @"eval_LblisInt{SortK{}}"(%block* %318)
-  %malloccall34 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
-  %320 = bitcast i8* %malloccall34 to i1*
-  store i1 %319, i1* %320
-  %321 = bitcast i1* %320 to i8*
+  %417 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %418 = load i8*, i8** %417
+  %419 = bitcast i8* %418 to %mpz*
+  %420 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %421 = load i8*, i8** %420
+  %422 = bitcast i8* %421 to %mpz*
+  %423 = call %mpz* @hook_INT_add(%mpz* %419, %mpz* %422)
+  %424 = bitcast %mpz* %423 to i8*
   br label %exit
 
 tag67:                                            ; preds = %entry
-  %322 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %323 = load i8*, i8** %322
-  %324 = bitcast i8* %323 to %block*
-  %325 = call i1 @"eval_LblisK{SortK{}}"(%block* %324)
-  %malloccall35 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
-  %326 = bitcast i8* %malloccall35 to i1*
-  store i1 %325, i1* %326
-  %327 = bitcast i1* %326 to i8*
-  br label %exit
-
-tag68:                                            ; preds = %entry
-  %328 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %329 = load i8*, i8** %328
-  %330 = bitcast i8* %329 to %block*
-  %331 = call i1 @"eval_LblisKCell{SortK{}}"(%block* %330)
-  %malloccall36 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
-  %332 = bitcast i8* %malloccall36 to i1*
-  store i1 %331, i1* %332
-  %333 = bitcast i1* %332 to i8*
+  %425 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %426 = load i8*, i8** %425
+  %427 = bitcast i8* %426 to %mpz*
+  %428 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %429 = load i8*, i8** %428
+  %430 = bitcast i8* %429 to %mpz*
+  %431 = call %mpz* @hook_INT_tdiv(%mpz* %427, %mpz* %430)
+  %432 = bitcast %mpz* %431 to i8*
   br label %exit
 
 tag69:                                            ; preds = %entry
-  %334 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %335 = load i8*, i8** %334
-  %336 = bitcast i8* %335 to %block*
-  %337 = call i1 @"eval_LblisKCellOpt{SortK{}}"(%block* %336)
-  %malloccall37 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
-  %338 = bitcast i8* %malloccall37 to i1*
-  store i1 %337, i1* %338
-  %339 = bitcast i1* %338 to i8*
-  br label %exit
-
-tag70:                                            ; preds = %entry
-  %340 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %341 = load i8*, i8** %340
-  %342 = bitcast i8* %341 to %block*
-  %343 = call i1 @"eval_LblisKConfigVar{SortK{}}"(%block* %342)
-  %malloccall38 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
-  %344 = bitcast i8* %malloccall38 to i1*
-  store i1 %343, i1* %344
-  %345 = bitcast i1* %344 to i8*
-  br label %exit
-
-tag71:                                            ; preds = %entry
-  %346 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %347 = load i8*, i8** %346
-  %348 = bitcast i8* %347 to %block*
-  %349 = call i1 @"eval_LblisKItem{SortK{}}"(%block* %348)
-  %malloccall39 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
-  %350 = bitcast i8* %malloccall39 to i1*
-  store i1 %349, i1* %350
-  %351 = bitcast i1* %350 to i8*
+  %433 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %434 = load i8*, i8** %433
+  %435 = bitcast i8* %434 to %mpz*
+  %436 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %437 = load i8*, i8** %436
+  %438 = bitcast i8* %437 to %mpz*
+  %439 = call %mpz* @hook_INT_mul(%mpz* %435, %mpz* %438)
+  %440 = bitcast %mpz* %439 to i8*
   br label %exit
 
 tag72:                                            ; preds = %entry
-  %352 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %353 = load i8*, i8** %352
-  %354 = bitcast i8* %353 to %block*
-  %355 = call i1 @"eval_LblisKResult{SortK{}}"(%block* %354)
-  %malloccall40 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
-  %356 = bitcast i8* %malloccall40 to i1*
-  store i1 %355, i1* %356
-  %357 = bitcast i1* %356 to i8*
+  %441 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %442 = load i8*, i8** %441
+  %443 = bitcast i8* %442 to %block*
+  %444 = alloca %list
+  call void @hook_LIST_element(%list* %444, %block* %443)
+  %445 = load %list, %list* %444
+  %malloccall44 = tail call i8* @malloc(i64 ptrtoint (%list* getelementptr (%list, %list* null, i32 1) to i64))
+  %446 = bitcast i8* %malloccall44 to %list*
+  store %list %445, %list* %446
+  %447 = bitcast %list* %446 to i8*
   br label %exit
 
 tag73:                                            ; preds = %entry
-  %358 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %359 = load i8*, i8** %358
-  %360 = bitcast i8* %359 to %block*
-  %361 = call i1 @"eval_LblisList{SortK{}}"(%block* %360)
-  %malloccall41 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
-  %362 = bitcast i8* %malloccall41 to i1*
-  store i1 %361, i1* %362
-  %363 = bitcast i1* %362 to i8*
+  %448 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %449 = load i8*, i8** %448
+  %450 = bitcast i8* %449 to %map*
+  %451 = load %map, %map* %450
+  tail call void @free(i8* %449)
+  %452 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %453 = load i8*, i8** %452
+  %454 = bitcast i8* %453 to %block*
+  %455 = alloca %map
+  store %map %451, %map* %455
+  %456 = call %block* @hook_MAP_lookup(%map* %455, %block* %454)
+  %457 = bitcast %block* %456 to i8*
   br label %exit
 
 tag74:                                            ; preds = %entry
-  %364 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %365 = load i8*, i8** %364
-  %366 = bitcast i8* %365 to %block*
-  %367 = call i1 @"eval_LblisMap{SortK{}}"(%block* %366)
-  %malloccall42 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
-  %368 = bitcast i8* %malloccall42 to i1*
-  store i1 %367, i1* %368
-  %369 = bitcast i1* %368 to i8*
+  %458 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %459 = load i8*, i8** %458
+  %460 = bitcast i8* %459 to %set*
+  %461 = load %set, %set* %460
+  tail call void @free(i8* %459)
+  %462 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %463 = load i8*, i8** %462
+  %464 = bitcast i8* %463 to %set*
+  %465 = load %set, %set* %464
+  tail call void @free(i8* %463)
+  %466 = alloca %set
+  %467 = alloca %set
+  store %set %461, %set* %467
+  %468 = alloca %set
+  store %set %465, %set* %468
+  call void @hook_SET_difference(%set* %466, %set* %467, %set* %468)
+  %469 = load %set, %set* %466
+  %malloccall45 = tail call i8* @malloc(i64 ptrtoint (%set* getelementptr (%set, %set* null, i32 1) to i64))
+  %470 = bitcast i8* %malloccall45 to %set*
+  store %set %469, %set* %470
+  %471 = bitcast %set* %470 to i8*
   br label %exit
 
 tag75:                                            ; preds = %entry
-  %370 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %371 = load i8*, i8** %370
-  %372 = bitcast i8* %371 to %block*
-  %373 = call i1 @"eval_LblisPgm{SortK{}}"(%block* %372)
-  %malloccall43 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
-  %374 = bitcast i8* %malloccall43 to i1*
-  store i1 %373, i1* %374
-  %375 = bitcast i1* %374 to i8*
+  %472 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %473 = load i8*, i8** %472
+  %474 = bitcast i8* %473 to %block*
+  %475 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %476 = load i8*, i8** %475
+  %477 = bitcast i8* %476 to %set*
+  %478 = load %set, %set* %477
+  tail call void @free(i8* %476)
+  %479 = alloca %set
+  store %set %478, %set* %479
+  %480 = call i1 @hook_SET_in(%block* %474, %set* %479)
+  %malloccall46 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
+  %481 = bitcast i8* %malloccall46 to i1*
+  store i1 %480, i1* %481
+  %482 = bitcast i1* %481 to i8*
   br label %exit
 
 tag76:                                            ; preds = %entry
-  %376 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %377 = load i8*, i8** %376
-  %378 = bitcast i8* %377 to %block*
-  %379 = call i1 @"eval_LblisSet{SortK{}}"(%block* %378)
-  %malloccall44 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
-  %380 = bitcast i8* %malloccall44 to i1*
-  store i1 %379, i1* %380
-  %381 = bitcast i1* %380 to i8*
+  %483 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %484 = load i8*, i8** %483
+  %485 = bitcast i8* %484 to %block*
+  %486 = alloca %set
+  call void @hook_SET_element(%set* %486, %block* %485)
+  %487 = load %set, %set* %486
+  %malloccall47 = tail call i8* @malloc(i64 ptrtoint (%set* getelementptr (%set, %set* null, i32 1) to i64))
+  %488 = bitcast i8* %malloccall47 to %set*
+  store %set %487, %set* %488
+  %489 = bitcast %set* %488 to i8*
   br label %exit
 
 tag77:                                            ; preds = %entry
-  %382 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %383 = load i8*, i8** %382
-  %384 = bitcast i8* %383 to %block*
-  %385 = call i1 @"eval_LblisStateCell{SortK{}}"(%block* %384)
-  %malloccall45 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
-  %386 = bitcast i8* %malloccall45 to i1*
-  store i1 %385, i1* %386
-  %387 = bitcast i1* %386 to i8*
+  %490 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %491 = load i8*, i8** %490
+  %492 = bitcast i8* %491 to %mpz*
+  %493 = call %mpz* @hook_INT_abs(%mpz* %492)
+  %494 = bitcast %mpz* %493 to i8*
   br label %exit
 
 tag78:                                            ; preds = %entry
-  %388 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %389 = load i8*, i8** %388
-  %390 = bitcast i8* %389 to %block*
-  %391 = call i1 @"eval_LblisStateCellOpt{SortK{}}"(%block* %390)
-  %malloccall46 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
-  %392 = bitcast i8* %malloccall46 to i1*
-  store i1 %391, i1* %392
-  %393 = bitcast i1* %392 to i8*
+  %495 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %496 = load i8*, i8** %495
+  %497 = bitcast i8* %496 to %mpz*
+  %498 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %499 = load i8*, i8** %498
+  %500 = bitcast i8* %499 to %mpz*
+  %501 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 2
+  %502 = load i8*, i8** %501
+  %503 = bitcast i8* %502 to %mpz*
+  %504 = call %mpz* @hook_INT_bitRange(%mpz* %497, %mpz* %500, %mpz* %503)
+  %505 = bitcast %mpz* %504 to i8*
   br label %exit
 
 tag79:                                            ; preds = %entry
-  %394 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %395 = load i8*, i8** %394
-  %396 = bitcast i8* %395 to %block*
-  %397 = call i1 @"eval_LblisStmt{SortK{}}"(%block* %396)
-  %malloccall47 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
-  %398 = bitcast i8* %malloccall47 to i1*
-  store i1 %397, i1* %398
-  %399 = bitcast i1* %398 to i8*
+  %506 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %507 = load i8*, i8** %506
+  %508 = bitcast i8* %507 to %mpz*
+  %509 = call %block* @"eval_LblfreshId'LParUndsRParUnds'ID-SYNTAX'UndsUnds'Int{SortInt{}}"(%mpz* %508)
+  %510 = bitcast %block* %509 to i8*
   br label %exit
 
 tag80:                                            ; preds = %entry
-  %400 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %401 = load i8*, i8** %400
-  %402 = bitcast i8* %401 to %block*
-  %403 = call i1 @"eval_LblisString{SortK{}}"(%block* %402)
-  %malloccall48 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
-  %404 = bitcast i8* %malloccall48 to i1*
-  store i1 %403, i1* %404
-  %405 = bitcast i1* %404 to i8*
-  br label %exit
-
-tag81:                                            ; preds = %entry
-  %406 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %407 = load i8*, i8** %406
-  %408 = bitcast i8* %407 to %block*
-  %409 = call i1 @"eval_LblisTCell{SortK{}}"(%block* %408)
-  %malloccall49 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
-  %410 = bitcast i8* %malloccall49 to i1*
-  store i1 %409, i1* %410
-  %411 = bitcast i1* %410 to i8*
+  %511 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %512 = load i8*, i8** %511
+  %513 = bitcast i8* %512 to %mpz*
+  %514 = call %mpz* @"eval_LblfreshInt'LParUndsRParUnds'INT'UndsUnds'Int{SortInt{}}"(%mpz* %513)
+  %515 = bitcast %mpz* %514 to i8*
   br label %exit
 
 tag82:                                            ; preds = %entry
-  %412 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %413 = load i8*, i8** %412
-  %414 = bitcast i8* %413 to %block*
-  %415 = call i1 @"eval_LblisTCellFragment{SortK{}}"(%block* %414)
-  %malloccall50 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
-  %416 = bitcast i8* %malloccall50 to i1*
-  store i1 %415, i1* %416
-  %417 = bitcast i1* %416 to i8*
+  %516 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %517 = load i8*, i8** %516
+  %518 = bitcast i8* %517 to %map*
+  %519 = load %map, %map* %518
+  tail call void @free(i8* %517)
+  %520 = alloca %map
+  store %map %519, %map* %520
+  %521 = call %block* @"eval_LblinitKCell{SortMap{}}"(%map* %520)
+  %522 = bitcast %block* %521 to i8*
   br label %exit
 
 tag83:                                            ; preds = %entry
-  %418 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %419 = load i8*, i8** %418
-  %420 = bitcast i8* %419 to %map*
-  %421 = load %map, %map* %420
-  tail call void @free(i8* %419)
-  %422 = alloca %map
-  store %map %421, %map* %422
-  %423 = call %set @hook_MAP_keys(%map* %422)
-  %malloccall51 = tail call i8* @malloc(i64 ptrtoint (%set* getelementptr (%set, %set* null, i32 1) to i64))
-  %424 = bitcast i8* %malloccall51 to %set*
-  store %set %423, %set* %424
-  %425 = bitcast %set* %424 to i8*
+  %523 = call %block* @"eval_LblinitStateCell{}"()
+  %524 = bitcast %block* %523 to i8*
   br label %exit
 
 tag84:                                            ; preds = %entry
-  %426 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %427 = load i8*, i8** %426
-  %428 = bitcast i8* %427 to %mpz*
-  %429 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
-  %430 = load i8*, i8** %429
-  %431 = bitcast i8* %430 to %mpz*
-  %432 = call %mpz* @hook_INT_min(%mpz* %428, %mpz* %431)
-  %433 = bitcast %mpz* %432 to i8*
-  br label %exit
-
-tag85:                                            ; preds = %entry
-  %434 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %435 = load i8*, i8** %434
-  %436 = bitcast i8* %435 to i1*
-  %437 = load i1, i1* %436
-  tail call void @free(i8* %435)
-  %hook_BOOL_not = xor i1 %437, true
-  %malloccall52 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
-  %438 = bitcast i8* %malloccall52 to i1*
-  store i1 %hook_BOOL_not, i1* %438
-  %439 = bitcast i1* %438 to i8*
+  %525 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %526 = load i8*, i8** %525
+  %527 = bitcast i8* %526 to %map*
+  %528 = load %map, %map* %527
+  tail call void @free(i8* %526)
+  %529 = alloca %map
+  store %map %528, %map* %529
+  %530 = call %block* @"eval_LblinitTCell{SortMap{}}"(%map* %529)
+  %531 = bitcast %block* %530 to i8*
   br label %exit
 
 tag86:                                            ; preds = %entry
-  %440 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %441 = load i8*, i8** %440
-  %442 = bitcast i8* %441 to %mpz*
-  %443 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
-  %444 = load i8*, i8** %443
-  %445 = bitcast i8* %444 to %mpz*
-  %446 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 2
-  %447 = load i8*, i8** %446
-  %448 = bitcast i8* %447 to %mpz*
-  %449 = call %mpz* @hook_INT_signExtendBitRange(%mpz* %442, %mpz* %445, %mpz* %448)
-  %450 = bitcast %mpz* %449 to i8*
+  %532 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %533 = load i8*, i8** %532
+  %534 = bitcast i8* %533 to %set*
+  %535 = load %set, %set* %534
+  tail call void @free(i8* %533)
+  %536 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %537 = load i8*, i8** %536
+  %538 = bitcast i8* %537 to %set*
+  %539 = load %set, %set* %538
+  tail call void @free(i8* %537)
+  %540 = alloca %set
+  %541 = alloca %set
+  store %set %535, %set* %541
+  %542 = alloca %set
+  store %set %539, %set* %542
+  call void @hook_SET_intersection(%set* %540, %set* %541, %set* %542)
+  %543 = load %set, %set* %540
+  %malloccall48 = tail call i8* @malloc(i64 ptrtoint (%set* getelementptr (%set, %set* null, i32 1) to i64))
+  %544 = bitcast i8* %malloccall48 to %set*
+  store %set %543, %set* %544
+  %545 = bitcast %set* %544 to i8*
+  br label %exit
+
+tag87:                                            ; preds = %entry
+  %546 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %547 = load i8*, i8** %546
+  %548 = bitcast i8* %547 to %block*
+  %549 = call i1 @"eval_LblisAExp{SortK{}}"(%block* %548)
+  %malloccall49 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
+  %550 = bitcast i8* %malloccall49 to i1*
+  store i1 %549, i1* %550
+  %551 = bitcast i1* %550 to i8*
   br label %exit
 
 tag88:                                            ; preds = %entry
-  %451 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
-  %452 = load i8*, i8** %451
-  %453 = bitcast i8* %452 to %block*
-  %454 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
-  %455 = load i8*, i8** %454
-  %456 = bitcast i8* %455 to %block*
-  %457 = call %block* @"eval_append{SortK{},SortK{}}"(%block* %453, %block* %456)
-  %458 = bitcast %block* %457 to i8*
+  %552 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %553 = load i8*, i8** %552
+  %554 = bitcast i8* %553 to %block*
+  %555 = call i1 @"eval_LblisBExp{SortK{}}"(%block* %554)
+  %malloccall50 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
+  %556 = bitcast i8* %malloccall50 to i1*
+  store i1 %555, i1* %556
+  %557 = bitcast i1* %556 to i8*
   br label %exit
 
-exit:                                             ; preds = %tag88, %tag86, %tag85, %tag84, %tag83, %tag82, %tag81, %tag80, %tag79, %tag78, %tag77, %tag76, %tag75, %tag74, %tag73, %tag72, %tag71, %tag70, %tag69, %tag68, %tag67, %tag66, %tag65, %tag64, %tag63, %tag62, %tag61, %tag60, %tag59, %tag57, %tag56, %tag55, %tag53, %tag52, %tag51, %tag50, %tag49, %tag45, %tag43, %tag42, %tag41, %tag39, %tag38, %tag37, %tag36, %tag32, %tag31, %tag30, %tag29, %tag28, %hook_BOOL_or14, %hook_BOOL_or, %tag25, %hook_BOOL_implies, %tag23, %tag22, %hook_BOOL_and4, %hook_BOOL_and, %tag19, %tag18, %tag17
-  %phi53 = phi i8* [ %4, %tag17 ], [ %12, %tag18 ], [ %25, %tag19 ], [ %35, %hook_BOOL_and ], [ %45, %hook_BOOL_and4 ], [ %53, %tag22 ], [ %62, %tag23 ], [ %72, %hook_BOOL_implies ], [ %80, %tag25 ], [ %90, %hook_BOOL_or ], [ %100, %hook_BOOL_or14 ], [ %110, %tag28 ], [ %118, %tag29 ], [ %127, %tag30 ], [ %135, %tag31 ], [ %144, %tag32 ], [ %154, %tag36 ], [ %163, %tag37 ], [ %173, %tag38 ], [ %182, %tag39 ], [ %190, %tag41 ], [ %199, %tag42 ], [ %207, %tag43 ], [ %215, %tag45 ], [ %225, %tag49 ], [ %236, %tag50 ], [ %241, %tag51 ], [ %252, %tag52 ], [ %257, %tag53 ], [ %264, %tag55 ], [ %266, %tag56 ], [ %273, %tag57 ], [ %279, %tag59 ], [ %285, %tag60 ], [ %291, %tag61 ], [ %297, %tag62 ], [ %303, %tag63 ], [ %309, %tag64 ], [ %315, %tag65 ], [ %321, %tag66 ], [ %327, %tag67 ], [ %333, %tag68 ], [ %339, %tag69 ], [ %345, %tag70 ], [ %351, %tag71 ], [ %357, %tag72 ], [ %363, %tag73 ], [ %369, %tag74 ], [ %375, %tag75 ], [ %381, %tag76 ], [ %387, %tag77 ], [ %393, %tag78 ], [ %399, %tag79 ], [ %405, %tag80 ], [ %411, %tag81 ], [ %417, %tag82 ], [ %425, %tag83 ], [ %433, %tag84 ], [ %439, %tag85 ], [ %450, %tag86 ], [ %458, %tag88 ]
-  ret i8* %phi53
+tag89:                                            ; preds = %entry
+  %558 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %559 = load i8*, i8** %558
+  %560 = bitcast i8* %559 to %block*
+  %561 = call i1 @"eval_LblisBlock{SortK{}}"(%block* %560)
+  %malloccall51 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
+  %562 = bitcast i8* %malloccall51 to i1*
+  store i1 %561, i1* %562
+  %563 = bitcast i1* %562 to i8*
+  br label %exit
+
+tag90:                                            ; preds = %entry
+  %564 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %565 = load i8*, i8** %564
+  %566 = bitcast i8* %565 to %block*
+  %567 = call i1 @"eval_LblisBool{SortK{}}"(%block* %566)
+  %malloccall52 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
+  %568 = bitcast i8* %malloccall52 to i1*
+  store i1 %567, i1* %568
+  %569 = bitcast i1* %568 to i8*
+  br label %exit
+
+tag91:                                            ; preds = %entry
+  %570 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %571 = load i8*, i8** %570
+  %572 = bitcast i8* %571 to %block*
+  %573 = call i1 @"eval_LblisCell{SortK{}}"(%block* %572)
+  %malloccall53 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
+  %574 = bitcast i8* %malloccall53 to i1*
+  store i1 %573, i1* %574
+  %575 = bitcast i1* %574 to i8*
+  br label %exit
+
+tag92:                                            ; preds = %entry
+  %576 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %577 = load i8*, i8** %576
+  %578 = bitcast i8* %577 to %block*
+  %579 = call i1 @"eval_LblisId{SortK{}}"(%block* %578)
+  %malloccall54 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
+  %580 = bitcast i8* %malloccall54 to i1*
+  store i1 %579, i1* %580
+  %581 = bitcast i1* %580 to i8*
+  br label %exit
+
+tag93:                                            ; preds = %entry
+  %582 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %583 = load i8*, i8** %582
+  %584 = bitcast i8* %583 to %block*
+  %585 = call i1 @"eval_LblisIds{SortK{}}"(%block* %584)
+  %malloccall55 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
+  %586 = bitcast i8* %malloccall55 to i1*
+  store i1 %585, i1* %586
+  %587 = bitcast i1* %586 to i8*
+  br label %exit
+
+tag94:                                            ; preds = %entry
+  %588 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %589 = load i8*, i8** %588
+  %590 = bitcast i8* %589 to %block*
+  %591 = call i1 @"eval_LblisInt{SortK{}}"(%block* %590)
+  %malloccall56 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
+  %592 = bitcast i8* %malloccall56 to i1*
+  store i1 %591, i1* %592
+  %593 = bitcast i1* %592 to i8*
+  br label %exit
+
+tag95:                                            ; preds = %entry
+  %594 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %595 = load i8*, i8** %594
+  %596 = bitcast i8* %595 to %block*
+  %597 = call i1 @"eval_LblisK{SortK{}}"(%block* %596)
+  %malloccall57 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
+  %598 = bitcast i8* %malloccall57 to i1*
+  store i1 %597, i1* %598
+  %599 = bitcast i1* %598 to i8*
+  br label %exit
+
+tag96:                                            ; preds = %entry
+  %600 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %601 = load i8*, i8** %600
+  %602 = bitcast i8* %601 to %block*
+  %603 = call i1 @"eval_LblisKCell{SortK{}}"(%block* %602)
+  %malloccall58 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
+  %604 = bitcast i8* %malloccall58 to i1*
+  store i1 %603, i1* %604
+  %605 = bitcast i1* %604 to i8*
+  br label %exit
+
+tag97:                                            ; preds = %entry
+  %606 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %607 = load i8*, i8** %606
+  %608 = bitcast i8* %607 to %block*
+  %609 = call i1 @"eval_LblisKCellOpt{SortK{}}"(%block* %608)
+  %malloccall59 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
+  %610 = bitcast i8* %malloccall59 to i1*
+  store i1 %609, i1* %610
+  %611 = bitcast i1* %610 to i8*
+  br label %exit
+
+tag98:                                            ; preds = %entry
+  %612 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %613 = load i8*, i8** %612
+  %614 = bitcast i8* %613 to %block*
+  %615 = call i1 @"eval_LblisKConfigVar{SortK{}}"(%block* %614)
+  %malloccall60 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
+  %616 = bitcast i8* %malloccall60 to i1*
+  store i1 %615, i1* %616
+  %617 = bitcast i1* %616 to i8*
+  br label %exit
+
+tag99:                                            ; preds = %entry
+  %618 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %619 = load i8*, i8** %618
+  %620 = bitcast i8* %619 to %block*
+  %621 = call i1 @"eval_LblisKItem{SortK{}}"(%block* %620)
+  %malloccall61 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
+  %622 = bitcast i8* %malloccall61 to i1*
+  store i1 %621, i1* %622
+  %623 = bitcast i1* %622 to i8*
+  br label %exit
+
+tag100:                                           ; preds = %entry
+  %624 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %625 = load i8*, i8** %624
+  %626 = bitcast i8* %625 to %block*
+  %627 = call i1 @"eval_LblisKResult{SortK{}}"(%block* %626)
+  %malloccall62 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
+  %628 = bitcast i8* %malloccall62 to i1*
+  store i1 %627, i1* %628
+  %629 = bitcast i1* %628 to i8*
+  br label %exit
+
+tag101:                                           ; preds = %entry
+  %630 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %631 = load i8*, i8** %630
+  %632 = bitcast i8* %631 to %block*
+  %633 = call i1 @"eval_LblisList{SortK{}}"(%block* %632)
+  %malloccall63 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
+  %634 = bitcast i8* %malloccall63 to i1*
+  store i1 %633, i1* %634
+  %635 = bitcast i1* %634 to i8*
+  br label %exit
+
+tag102:                                           ; preds = %entry
+  %636 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %637 = load i8*, i8** %636
+  %638 = bitcast i8* %637 to %block*
+  %639 = call i1 @"eval_LblisMap{SortK{}}"(%block* %638)
+  %malloccall64 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
+  %640 = bitcast i8* %malloccall64 to i1*
+  store i1 %639, i1* %640
+  %641 = bitcast i1* %640 to i8*
+  br label %exit
+
+tag103:                                           ; preds = %entry
+  %642 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %643 = load i8*, i8** %642
+  %644 = bitcast i8* %643 to %block*
+  %645 = call i1 @"eval_LblisPgm{SortK{}}"(%block* %644)
+  %malloccall65 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
+  %646 = bitcast i8* %malloccall65 to i1*
+  store i1 %645, i1* %646
+  %647 = bitcast i1* %646 to i8*
+  br label %exit
+
+tag104:                                           ; preds = %entry
+  %648 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %649 = load i8*, i8** %648
+  %650 = bitcast i8* %649 to %block*
+  %651 = call i1 @"eval_LblisSet{SortK{}}"(%block* %650)
+  %malloccall66 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
+  %652 = bitcast i8* %malloccall66 to i1*
+  store i1 %651, i1* %652
+  %653 = bitcast i1* %652 to i8*
+  br label %exit
+
+tag105:                                           ; preds = %entry
+  %654 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %655 = load i8*, i8** %654
+  %656 = bitcast i8* %655 to %block*
+  %657 = call i1 @"eval_LblisStateCell{SortK{}}"(%block* %656)
+  %malloccall67 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
+  %658 = bitcast i8* %malloccall67 to i1*
+  store i1 %657, i1* %658
+  %659 = bitcast i1* %658 to i8*
+  br label %exit
+
+tag106:                                           ; preds = %entry
+  %660 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %661 = load i8*, i8** %660
+  %662 = bitcast i8* %661 to %block*
+  %663 = call i1 @"eval_LblisStateCellOpt{SortK{}}"(%block* %662)
+  %malloccall68 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
+  %664 = bitcast i8* %malloccall68 to i1*
+  store i1 %663, i1* %664
+  %665 = bitcast i1* %664 to i8*
+  br label %exit
+
+tag107:                                           ; preds = %entry
+  %666 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %667 = load i8*, i8** %666
+  %668 = bitcast i8* %667 to %block*
+  %669 = call i1 @"eval_LblisStmt{SortK{}}"(%block* %668)
+  %malloccall69 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
+  %670 = bitcast i8* %malloccall69 to i1*
+  store i1 %669, i1* %670
+  %671 = bitcast i1* %670 to i8*
+  br label %exit
+
+tag108:                                           ; preds = %entry
+  %672 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %673 = load i8*, i8** %672
+  %674 = bitcast i8* %673 to %block*
+  %675 = call i1 @"eval_LblisString{SortK{}}"(%block* %674)
+  %malloccall70 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
+  %676 = bitcast i8* %malloccall70 to i1*
+  store i1 %675, i1* %676
+  %677 = bitcast i1* %676 to i8*
+  br label %exit
+
+tag109:                                           ; preds = %entry
+  %678 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %679 = load i8*, i8** %678
+  %680 = bitcast i8* %679 to %block*
+  %681 = call i1 @"eval_LblisTCell{SortK{}}"(%block* %680)
+  %malloccall71 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
+  %682 = bitcast i8* %malloccall71 to i1*
+  store i1 %681, i1* %682
+  %683 = bitcast i1* %682 to i8*
+  br label %exit
+
+tag110:                                           ; preds = %entry
+  %684 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %685 = load i8*, i8** %684
+  %686 = bitcast i8* %685 to %block*
+  %687 = call i1 @"eval_LblisTCellFragment{SortK{}}"(%block* %686)
+  %malloccall72 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
+  %688 = bitcast i8* %malloccall72 to i1*
+  store i1 %687, i1* %688
+  %689 = bitcast i1* %688 to i8*
+  br label %exit
+
+tag111:                                           ; preds = %entry
+  %690 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %691 = load i8*, i8** %690
+  %692 = bitcast i8* %691 to %map*
+  %693 = load %map, %map* %692
+  tail call void @free(i8* %691)
+  %694 = alloca %set
+  %695 = alloca %map
+  store %map %693, %map* %695
+  call void @hook_MAP_keys(%set* %694, %map* %695)
+  %696 = load %set, %set* %694
+  %malloccall73 = tail call i8* @malloc(i64 ptrtoint (%set* getelementptr (%set, %set* null, i32 1) to i64))
+  %697 = bitcast i8* %malloccall73 to %set*
+  store %set %696, %set* %697
+  %698 = bitcast %set* %697 to i8*
+  br label %exit
+
+tag112:                                           ; preds = %entry
+  %699 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %700 = load i8*, i8** %699
+  %701 = bitcast i8* %700 to %mpz*
+  %702 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %703 = load i8*, i8** %702
+  %704 = bitcast i8* %703 to %mpz*
+  %705 = call %mpz* @hook_INT_max(%mpz* %701, %mpz* %704)
+  %706 = bitcast %mpz* %705 to i8*
+  br label %exit
+
+tag113:                                           ; preds = %entry
+  %707 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %708 = load i8*, i8** %707
+  %709 = bitcast i8* %708 to %mpz*
+  %710 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %711 = load i8*, i8** %710
+  %712 = bitcast i8* %711 to %mpz*
+  %713 = call %mpz* @hook_INT_min(%mpz* %709, %mpz* %712)
+  %714 = bitcast %mpz* %713 to i8*
+  br label %exit
+
+tag116:                                           ; preds = %entry
+  %715 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %716 = load i8*, i8** %715
+  %717 = bitcast i8* %716 to i1*
+  %718 = load i1, i1* %717
+  tail call void @free(i8* %716)
+  %hook_BOOL_not = xor i1 %718, true
+  %malloccall74 = tail call i8* @malloc(i64 ptrtoint (i1* getelementptr (i1, i1* null, i32 1) to i64))
+  %719 = bitcast i8* %malloccall74 to i1*
+  store i1 %hook_BOOL_not, i1* %719
+  %720 = bitcast i1* %719 to i8*
+  br label %exit
+
+tag117:                                           ; preds = %entry
+  %721 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %722 = load i8*, i8** %721
+  %723 = bitcast i8* %722 to %map*
+  %724 = load %map, %map* %723
+  tail call void @free(i8* %722)
+  %725 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %726 = load i8*, i8** %725
+  %727 = bitcast i8* %726 to %set*
+  %728 = load %set, %set* %727
+  tail call void @free(i8* %726)
+  %729 = alloca %map
+  %730 = alloca %map
+  store %map %724, %map* %730
+  %731 = alloca %set
+  store %set %728, %set* %731
+  call void @hook_MAP_removeAll(%map* %729, %map* %730, %set* %731)
+  %732 = load %map, %map* %729
+  %malloccall75 = tail call i8* @malloc(i64 ptrtoint (%map* getelementptr (%map, %map* null, i32 1) to i64))
+  %733 = bitcast i8* %malloccall75 to %map*
+  store %map %732, %map* %733
+  %734 = bitcast %map* %733 to i8*
+  br label %exit
+
+tag118:                                           ; preds = %entry
+  %735 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %736 = load i8*, i8** %735
+  %737 = bitcast i8* %736 to %mpz*
+  %738 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %739 = load i8*, i8** %738
+  %740 = bitcast i8* %739 to %mpz*
+  %741 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 2
+  %742 = load i8*, i8** %741
+  %743 = bitcast i8* %742 to %mpz*
+  %744 = call %mpz* @hook_INT_signExtendBitRange(%mpz* %737, %mpz* %740, %mpz* %743)
+  %745 = bitcast %mpz* %744 to i8*
+  br label %exit
+
+tag119:                                           ; preds = %entry
+  %746 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %747 = load i8*, i8** %746
+  %748 = bitcast i8* %747 to %list*
+  %749 = load %list, %list* %748
+  tail call void @free(i8* %747)
+  %750 = alloca %list
+  store %list %749, %list* %750
+  %751 = call %mpz* @hook_LIST_size(%list* %750)
+  %752 = bitcast %mpz* %751 to i8*
+  br label %exit
+
+tag120:                                           ; preds = %entry
+  %753 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %754 = load i8*, i8** %753
+  %755 = bitcast i8* %754 to %map*
+  %756 = load %map, %map* %755
+  tail call void @free(i8* %754)
+  %757 = alloca %map
+  store %map %756, %map* %757
+  %758 = call %mpz* @hook_MAP_size(%map* %757)
+  %759 = bitcast %mpz* %758 to i8*
+  br label %exit
+
+tag121:                                           ; preds = %entry
+  %760 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %761 = load i8*, i8** %760
+  %762 = bitcast i8* %761 to %set*
+  %763 = load %set, %set* %762
+  tail call void @free(i8* %761)
+  %764 = alloca %set
+  store %set %763, %set* %764
+  %765 = call %mpz* @hook_SET_size(%set* %764)
+  %766 = bitcast %mpz* %765 to i8*
+  br label %exit
+
+tag122:                                           ; preds = %entry
+  %767 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %768 = load i8*, i8** %767
+  %769 = bitcast i8* %768 to %map*
+  %770 = load %map, %map* %769
+  tail call void @free(i8* %768)
+  %771 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %772 = load i8*, i8** %771
+  %773 = bitcast i8* %772 to %map*
+  %774 = load %map, %map* %773
+  tail call void @free(i8* %772)
+  %775 = alloca %map
+  %776 = alloca %map
+  store %map %770, %map* %776
+  %777 = alloca %map
+  store %map %774, %map* %777
+  call void @hook_MAP_updateAll(%map* %775, %map* %776, %map* %777)
+  %778 = load %map, %map* %775
+  %malloccall76 = tail call i8* @malloc(i64 ptrtoint (%map* getelementptr (%map, %map* null, i32 1) to i64))
+  %779 = bitcast i8* %malloccall76 to %map*
+  store %map %778, %map* %779
+  %780 = bitcast %map* %779 to i8*
+  br label %exit
+
+tag124:                                           ; preds = %entry
+  %781 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 0
+  %782 = load i8*, i8** %781
+  %783 = bitcast i8* %782 to %block*
+  %784 = getelementptr [0 x i8*], [0 x i8*]* %1, i64 0, i64 1
+  %785 = load i8*, i8** %784
+  %786 = bitcast i8* %785 to %block*
+  %787 = call %block* @"eval_append{SortK{}, SortK{}}"(%block* %783, %block* %786)
+  %788 = bitcast %block* %787 to i8*
+  br label %exit
+
+exit:                                             ; preds = %tag124, %tag122, %tag121, %tag120, %tag119, %tag118, %tag117, %tag116, %tag113, %tag112, %tag111, %tag110, %tag109, %tag108, %tag107, %tag106, %tag105, %tag104, %tag103, %tag102, %tag101, %tag100, %tag99, %tag98, %tag97, %tag96, %tag95, %tag94, %tag93, %tag92, %tag91, %tag90, %tag89, %tag88, %tag87, %tag86, %tag84, %tag83, %tag82, %tag80, %tag79, %tag78, %tag77, %tag76, %tag75, %tag74, %tag73, %tag72, %tag69, %tag67, %tag65, %tag64, %tag63, %tag62, %tag61, %tag60, %tag59, %tag57, %tag56, %tag55, %tag54, %tag53, %tag52, %tag49, %tag47, %tag46, %tag45, %tag44, %tag43, %tag42, %tag41, %tag40, %tag39, %tag38, %hook_BOOL_or24, %hook_BOOL_or, %tag35, %tag34, %tag33, %hook_BOOL_implies, %tag31, %tag30, %hook_BOOL_and11, %hook_BOOL_and, %tag27, %tag26, %tag25, %tag24, %tag23, %tag22, %tag21, %tag20, %tag18, %hook_KEQUAL_ite
+  %phi77 = phi i8* [ %12, %hook_KEQUAL_ite ], [ %16, %tag18 ], [ %20, %tag20 ], [ %24, %tag21 ], [ %29, %tag22 ], [ %37, %tag23 ], [ %51, %tag24 ], [ %65, %tag25 ], [ %79, %tag26 ], [ %93, %tag27 ], [ %103, %hook_BOOL_and ], [ %113, %hook_BOOL_and11 ], [ %121, %tag30 ], [ %130, %tag31 ], [ %140, %hook_BOOL_implies ], [ %151, %tag33 ], [ %162, %tag34 ], [ %170, %tag35 ], [ %180, %hook_BOOL_or ], [ %190, %hook_BOOL_or24 ], [ %200, %tag38 ], [ %208, %tag39 ], [ %217, %tag40 ], [ %225, %tag41 ], [ %234, %tag42 ], [ %243, %tag43 ], [ %251, %tag44 ], [ %260, %tag45 ], [ %273, %tag46 ], [ %286, %tag47 ], [ %294, %tag49 ], [ %304, %tag52 ], [ %313, %tag53 ], [ %322, %tag54 ], [ %332, %tag55 ], [ %341, %tag56 ], [ %350, %tag57 ], [ %365, %tag59 ], [ %377, %tag60 ], [ %390, %tag61 ], [ %398, %tag62 ], [ %408, %tag63 ], [ %416, %tag64 ], [ %424, %tag65 ], [ %432, %tag67 ], [ %440, %tag69 ], [ %447, %tag72 ], [ %457, %tag73 ], [ %471, %tag74 ], [ %482, %tag75 ], [ %489, %tag76 ], [ %494, %tag77 ], [ %505, %tag78 ], [ %510, %tag79 ], [ %515, %tag80 ], [ %522, %tag82 ], [ %524, %tag83 ], [ %531, %tag84 ], [ %545, %tag86 ], [ %551, %tag87 ], [ %557, %tag88 ], [ %563, %tag89 ], [ %569, %tag90 ], [ %575, %tag91 ], [ %581, %tag92 ], [ %587, %tag93 ], [ %593, %tag94 ], [ %599, %tag95 ], [ %605, %tag96 ], [ %611, %tag97 ], [ %617, %tag98 ], [ %623, %tag99 ], [ %629, %tag100 ], [ %635, %tag101 ], [ %641, %tag102 ], [ %647, %tag103 ], [ %653, %tag104 ], [ %659, %tag105 ], [ %665, %tag106 ], [ %671, %tag107 ], [ %677, %tag108 ], [ %683, %tag109 ], [ %689, %tag110 ], [ %698, %tag111 ], [ %706, %tag112 ], [ %714, %tag113 ], [ %720, %tag116 ], [ %734, %tag117 ], [ %745, %tag118 ], [ %752, %tag119 ], [ %759, %tag120 ], [ %766, %tag121 ], [ %780, %tag122 ], [ %788, %tag124 ]
+  ret i8* %phi77
 
 stuck:                                            ; preds = %entry
   call void @abort()
   unreachable
 }
 
-declare %map @hook_MAP_unit()
+declare void @hook_LIST_unit(%list* sret)
 
 declare noalias i8* @malloc(i64)
 
+declare void @hook_MAP_unit(%map* sret)
+
+declare void @hook_SET_unit(%set* sret)
+
+declare %mpz* @hook_INT_not(%mpz*)
+
 declare %mpz* @hook_INT_sub(%mpz*, %mpz*)
 
-declare %map @hook_MAP_concat(%map*, %map*)
+declare void @hook_MAP_difference(%map* sret, %map*, %map*)
+
+declare void @hook_LIST_concat(%list* sret, %list*, %list*)
+
+declare void @hook_MAP_concat(%map* sret, %map*, %map*)
+
+declare void @hook_SET_concat(%set* sret, %set*, %set*)
 
 declare %mpz* @hook_INT_ediv(%mpz*, %mpz*)
 
-declare i1 @"eval_Lbl'Unds'dividesInt'UndsUnds'INT'UndsUnds'Int'Unds'Int{SortInt{},SortInt{}}"(%mpz*, %mpz*)
+declare i1 @"eval_Lbl'Unds'dividesInt'UndsUnds'INT'UndsUnds'Int'Unds'Int{SortInt{}, SortInt{}}"(%mpz*, %mpz*)
+
+declare i1 @hook_MAP_in_keys(%block*, %map*)
+
+declare i1 @hook_LIST_in(%block*, %list*)
 
 declare %mpz* @hook_INT_emod(%mpz*, %mpz*)
+
+declare %mpz* @hook_INT_xor(%mpz*, %mpz*)
+
+declare i1 @hook_INT_gt(%mpz*, %mpz*)
 
 declare %mpz* @hook_INT_shr(%mpz*, %mpz*)
 
 declare i1 @hook_INT_ge(%mpz*, %mpz*)
 
+declare i1 @hook_INT_lt(%mpz*, %mpz*)
+
 declare %mpz* @hook_INT_shl(%mpz*, %mpz*)
 
 declare i1 @hook_INT_le(%mpz*, %mpz*)
 
+declare i1 @hook_MAP_inclusion(%map*, %map*)
+
+declare i1 @hook_SET_inclusion(%set*, %set*)
+
+declare %mpz* @hook_INT_and(%mpz*, %mpz*)
+
 declare i1 @hook_INT_eq(%mpz*, %mpz*)
+
+declare i1 @hook_KEQUAL_eq(%block*, %block*)
 
 declare i1 @hook_INT_ne(%mpz*, %mpz*)
 
+declare i1 @hook_KEQUAL_ne(%block*, %block*)
+
+declare void @hook_MAP_update(%map* sret, %map*, %block*, %block*)
+
+declare void @hook_MAP_remove(%map* sret, %map*, %block*)
+
+declare %block* @hook_MAP_lookupOrDefault(%map*, %block*, %block*)
+
 declare %mpz* @hook_INT_tmod(%mpz*, %mpz*)
 
-declare %map @hook_MAP_element(%block*, %block*)
+declare void @hook_MAP_element(%map* sret, %block*, %block*)
+
+declare %mpz* @hook_INT_or(%mpz*, %mpz*)
 
 declare %mpz* @hook_INT_add(%mpz*, %mpz*)
 
 declare %mpz* @hook_INT_tdiv(%mpz*, %mpz*)
 
+declare %mpz* @hook_INT_mul(%mpz*, %mpz*)
+
+declare void @hook_LIST_element(%list* sret, %block*)
+
 declare %block* @hook_MAP_lookup(%map*, %block*)
 
+declare void @hook_SET_difference(%set* sret, %set*, %set*)
+
 declare i1 @hook_SET_in(%block*, %set*)
+
+declare void @hook_SET_element(%set* sret, %block*)
 
 declare %mpz* @hook_INT_abs(%mpz*)
 
 declare %mpz* @hook_INT_bitRange(%mpz*, %mpz*, %mpz*)
+
+declare %block* @"eval_LblfreshId'LParUndsRParUnds'ID-SYNTAX'UndsUnds'Int{SortInt{}}"(%mpz*)
 
 declare %mpz* @"eval_LblfreshInt'LParUndsRParUnds'INT'UndsUnds'Int{SortInt{}}"(%mpz*)
 
@@ -3989,6 +5725,8 @@ declare %block* @"eval_LblinitKCell{SortMap{}}"(%map*)
 declare %block* @"eval_LblinitStateCell{}"()
 
 declare %block* @"eval_LblinitTCell{SortMap{}}"(%map*)
+
+declare void @hook_SET_intersection(%set* sret, %set*, %set*)
 
 declare i1 @"eval_LblisAExp{SortK{}}"(%block*)
 
@@ -4038,13 +5776,25 @@ declare i1 @"eval_LblisTCell{SortK{}}"(%block*)
 
 declare i1 @"eval_LblisTCellFragment{SortK{}}"(%block*)
 
-declare %set @hook_MAP_keys(%map*)
+declare void @hook_MAP_keys(%set* sret, %map*)
+
+declare %mpz* @hook_INT_max(%mpz*, %mpz*)
 
 declare %mpz* @hook_INT_min(%mpz*, %mpz*)
 
+declare void @hook_MAP_removeAll(%map* sret, %map*, %set*)
+
 declare %mpz* @hook_INT_signExtendBitRange(%mpz*, %mpz*, %mpz*)
 
-declare %block* @"eval_append{SortK{},SortK{}}"(%block*, %block*)
+declare %mpz* @hook_LIST_size(%list*)
+
+declare %mpz* @hook_MAP_size(%map*)
+
+declare %mpz* @hook_SET_size(%set*)
+
+declare void @hook_MAP_updateAll(%map* sret, %map*, %map*)
+
+declare %block* @"eval_append{SortK{}, SortK{}}"(%block*, %block*)
 
 define i8* @getToken(i8*, i64, i8*) {
 is_SortList:
@@ -4243,6 +5993,42 @@ entry:
     i32 111, label %tag111
     i32 112, label %tag112
     i32 113, label %tag113
+    i32 114, label %tag114
+    i32 115, label %tag115
+    i32 116, label %tag116
+    i32 117, label %tag117
+    i32 118, label %tag118
+    i32 119, label %tag119
+    i32 120, label %tag120
+    i32 121, label %tag121
+    i32 122, label %tag122
+    i32 123, label %tag123
+    i32 124, label %tag124
+    i32 125, label %tag125
+    i32 126, label %tag126
+    i32 127, label %tag127
+    i32 128, label %tag128
+    i32 129, label %tag129
+    i32 130, label %tag130
+    i32 131, label %tag131
+    i32 132, label %tag132
+    i32 133, label %tag133
+    i32 134, label %tag134
+    i32 135, label %tag135
+    i32 136, label %tag136
+    i32 137, label %tag137
+    i32 138, label %tag138
+    i32 139, label %tag139
+    i32 140, label %tag140
+    i32 141, label %tag141
+    i32 142, label %tag142
+    i32 143, label %tag143
+    i32 144, label %tag144
+    i32 145, label %tag145
+    i32 146, label %tag146
+    i32 147, label %tag147
+    i32 148, label %tag148
+    i32 149, label %tag149
   ]
 
 tag0:                                             ; preds = %entry
@@ -4587,8 +6373,116 @@ tag112:                                           ; preds = %entry
 tag113:                                           ; preds = %entry
   br label %exit
 
-exit:                                             ; preds = %tag113, %tag112, %tag111, %tag110, %tag109, %tag108, %tag107, %tag106, %tag105, %tag104, %tag103, %tag102, %tag101, %tag100, %tag99, %tag98, %tag97, %tag96, %tag95, %tag94, %tag93, %tag92, %tag91, %tag90, %tag89, %tag88, %tag87, %tag86, %tag85, %tag84, %tag83, %tag82, %tag81, %tag80, %tag79, %tag78, %tag77, %tag76, %tag75, %tag74, %tag73, %tag72, %tag71, %tag70, %tag69, %tag68, %tag67, %tag66, %tag65, %tag64, %tag63, %tag62, %tag61, %tag60, %tag59, %tag58, %tag57, %tag56, %tag55, %tag54, %tag53, %tag52, %tag51, %tag50, %tag49, %tag48, %tag47, %tag46, %tag45, %tag44, %tag43, %tag42, %tag41, %tag40, %tag39, %tag38, %tag37, %tag36, %tag35, %tag34, %tag33, %tag32, %tag31, %tag30, %tag29, %tag28, %tag27, %tag26, %tag25, %tag24, %tag23, %tag22, %tag21, %tag20, %tag19, %tag18, %tag17, %tag16, %tag15, %tag14, %tag13, %tag12, %tag11, %tag10, %tag9, %tag8, %tag7, %tag6, %tag5, %tag4, %tag3, %tag2, %tag1, %tag0
-  %phi = phi i8* [ getelementptr inbounds ([19 x i8], [19 x i8]* @"sym_name_Lbl'-LT-'T'-GT-'{}", i64 0, i64 0), %tag0 ], [ getelementptr inbounds ([19 x i8], [19 x i8]* @"sym_name_Lbl'-LT-'k'-GT-'{}", i64 0, i64 0), %tag1 ], [ getelementptr inbounds ([23 x i8], [23 x i8]* @"sym_name_Lbl'-LT-'state'-GT-'{}", i64 0, i64 0), %tag2 ], [ getelementptr inbounds ([44 x i8], [44 x i8]* @"sym_name_Lbl'BangUndsUnds'IMP-SYNTAX'UndsUnds'BExp{}", i64 0, i64 0), %tag3 ], [ getelementptr inbounds ([64 x i8], [64 x i8]* @"sym_name_Lbl'Hash'freezer'BangUndsUnds'IMP-SYNTAX'UndsUnds'BExp0'Unds'{}", i64 0, i64 0), %tag4 ], [ getelementptr inbounds ([82 x i8], [82 x i8]* @"sym_name_Lbl'Hash'freezer'Unds-LT-EqlsUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp0'Unds'{}", i64 0, i64 0), %tag5 ], [ getelementptr inbounds ([82 x i8], [82 x i8]* @"sym_name_Lbl'Hash'freezer'Unds-LT-EqlsUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp1'Unds'{}", i64 0, i64 0), %tag6 ], [ getelementptr inbounds ([80 x i8], [80 x i8]* @"sym_name_Lbl'Hash'freezer'UndsAndAndUndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'BExp1'Unds'{}", i64 0, i64 0), %tag7 ], [ getelementptr inbounds ([80 x i8], [80 x i8]* @"sym_name_Lbl'Hash'freezer'UndsEqlsUndsSClnUnds'IMP-SYNTAX'UndsUnds'Id'Unds'AExp0'Unds'{}", i64 0, i64 0), %tag8 ], [ getelementptr inbounds ([78 x i8], [78 x i8]* @"sym_name_Lbl'Hash'freezer'UndsPlusUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp0'Unds'{}", i64 0, i64 0), %tag9 ], [ getelementptr inbounds ([78 x i8], [78 x i8]* @"sym_name_Lbl'Hash'freezer'UndsPlusUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp1'Unds'{}", i64 0, i64 0), %tag10 ], [ getelementptr inbounds ([78 x i8], [78 x i8]* @"sym_name_Lbl'Hash'freezer'UndsSlshUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp0'Unds'{}", i64 0, i64 0), %tag11 ], [ getelementptr inbounds ([78 x i8], [78 x i8]* @"sym_name_Lbl'Hash'freezer'UndsSlshUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp1'Unds'{}", i64 0, i64 0), %tag12 ], [ getelementptr inbounds ([106 x i8], [106 x i8]* @"sym_name_Lbl'Hash'freezerif'LParUndsRParUnds'else'UndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'Block'Unds'Block1'Unds'{}", i64 0, i64 0), %tag13 ], [ getelementptr inbounds ([36 x i8], [36 x i8]* @"sym_name_Lbl'LBraRBraUnds'IMP-SYNTAX'Unds'{}", i64 0, i64 0), %tag14 ], [ getelementptr inbounds ([48 x i8], [48 x i8]* @"sym_name_Lbl'LBraUndsRBraUnds'IMP-SYNTAX'UndsUnds'Stmt{}", i64 0, i64 0), %tag15 ], [ getelementptr inbounds ([90 x i8], [90 x i8]* @"sym_name_Lbl'Stop'List'LBraQuotUndsCommUndsUnds'IMP-SYNTAX'UndsUnds'Id'Unds'Ids'QuotRBraUnds'Ids{}", i64 0, i64 0), %tag16 ], [ getelementptr inbounds ([15 x i8], [15 x i8]* @"sym_name_Lbl'Stop'Map{}", i64 0, i64 0), %tag17 ], [ getelementptr inbounds ([51 x i8], [51 x i8]* @"sym_name_Lbl'Unds'-Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", i64 0, i64 0), %tag18 ], [ getelementptr inbounds ([21 x i8], [21 x i8]* @"sym_name_Lbl'Unds'Map'Unds'{}", i64 0, i64 0), %tag19 ], [ getelementptr inbounds ([25 x i8], [25 x i8]* @"sym_name_Lbl'Unds'andBool'Unds'{}", i64 0, i64 0), %tag20 ], [ getelementptr inbounds ([61 x i8], [61 x i8]* @"sym_name_Lbl'Unds'andThenBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}", i64 0, i64 0), %tag21 ], [ getelementptr inbounds ([53 x i8], [53 x i8]* @"sym_name_Lbl'Unds'divInt'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", i64 0, i64 0), %tag22 ], [ getelementptr inbounds ([57 x i8], [57 x i8]* @"sym_name_Lbl'Unds'dividesInt'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", i64 0, i64 0), %tag23 ], [ getelementptr inbounds ([61 x i8], [61 x i8]* @"sym_name_Lbl'Unds'impliesBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}", i64 0, i64 0), %tag24 ], [ getelementptr inbounds ([53 x i8], [53 x i8]* @"sym_name_Lbl'Unds'modInt'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", i64 0, i64 0), %tag25 ], [ getelementptr inbounds ([56 x i8], [56 x i8]* @"sym_name_Lbl'Unds'orBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}", i64 0, i64 0), %tag26 ], [ getelementptr inbounds ([60 x i8], [60 x i8]* @"sym_name_Lbl'Unds'orElseBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}", i64 0, i64 0), %tag27 ], [ getelementptr inbounds ([57 x i8], [57 x i8]* @"sym_name_Lbl'Unds'xorBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}", i64 0, i64 0), %tag28 ], [ getelementptr inbounds ([58 x i8], [58 x i8]* @"sym_name_Lbl'Unds-GT--GT-'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", i64 0, i64 0), %tag29 ], [ getelementptr inbounds ([58 x i8], [58 x i8]* @"sym_name_Lbl'Unds-GT-Eqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", i64 0, i64 0), %tag30 ], [ getelementptr inbounds ([58 x i8], [58 x i8]* @"sym_name_Lbl'Unds-LT--LT-'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", i64 0, i64 0), %tag31 ], [ getelementptr inbounds ([58 x i8], [58 x i8]* @"sym_name_Lbl'Unds-LT-Eqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", i64 0, i64 0), %tag32 ], [ getelementptr inbounds ([62 x i8], [62 x i8]* @"sym_name_Lbl'Unds-LT-EqlsUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp{}", i64 0, i64 0), %tag33 ], [ getelementptr inbounds ([60 x i8], [60 x i8]* @"sym_name_Lbl'UndsAndAndUndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'BExp{}", i64 0, i64 0), %tag34 ], [ getelementptr inbounds ([55 x i8], [55 x i8]* @"sym_name_Lbl'UndsCommUndsUnds'IMP-SYNTAX'UndsUnds'Id'Unds'Ids{}", i64 0, i64 0), %tag35 ], [ getelementptr inbounds ([62 x i8], [62 x i8]* @"sym_name_Lbl'UndsEqlsEqls'Bool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}", i64 0, i64 0), %tag36 ], [ getelementptr inbounds ([58 x i8], [58 x i8]* @"sym_name_Lbl'UndsEqlsEqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", i64 0, i64 0), %tag37 ], [ getelementptr inbounds ([66 x i8], [66 x i8]* @"sym_name_Lbl'UndsEqlsSlshEqls'Bool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}", i64 0, i64 0), %tag38 ], [ getelementptr inbounds ([62 x i8], [62 x i8]* @"sym_name_Lbl'UndsEqlsSlshEqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", i64 0, i64 0), %tag39 ], [ getelementptr inbounds ([60 x i8], [60 x i8]* @"sym_name_Lbl'UndsEqlsUndsSClnUnds'IMP-SYNTAX'UndsUnds'Id'Unds'AExp{}", i64 0, i64 0), %tag40 ], [ getelementptr inbounds ([54 x i8], [54 x i8]* @"sym_name_Lbl'UndsPerc'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", i64 0, i64 0), %tag41 ], [ getelementptr inbounds ([27 x i8], [27 x i8]* @"sym_name_Lbl'UndsPipe'-'-GT-Unds'{}", i64 0, i64 0), %tag42 ], [ getelementptr inbounds ([54 x i8], [54 x i8]* @"sym_name_Lbl'UndsPlus'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", i64 0, i64 0), %tag43 ], [ getelementptr inbounds ([58 x i8], [58 x i8]* @"sym_name_Lbl'UndsPlusUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp{}", i64 0, i64 0), %tag44 ], [ getelementptr inbounds ([54 x i8], [54 x i8]* @"sym_name_Lbl'UndsSlsh'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", i64 0, i64 0), %tag45 ], [ getelementptr inbounds ([58 x i8], [58 x i8]* @"sym_name_Lbl'UndsSlshUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp{}", i64 0, i64 0), %tag46 ], [ getelementptr inbounds ([54 x i8], [54 x i8]* @"sym_name_Lbl'UndsUndsUnds'IMP-SYNTAX'UndsUnds'Stmt'Unds'Stmt{}", i64 0, i64 0), %tag47 ], [ getelementptr inbounds ([40 x i8], [40 x i8]* @"sym_name_Lbl-'UndsUnds'IMP-SYNTAX'UndsUnds'Int{}", i64 0, i64 0), %tag48 ], [ getelementptr inbounds ([21 x i8], [21 x i8]* @"sym_name_LblMap'Coln'lookup{}", i64 0, i64 0), %tag49 ], [ getelementptr inbounds ([17 x i8], [17 x i8]* @"sym_name_LblSet'Coln'in{}", i64 0, i64 0), %tag50 ], [ getelementptr inbounds ([46 x i8], [46 x i8]* @"sym_name_LblabsInt'LParUndsRParUnds'INT'UndsUnds'Int{}", i64 0, i64 0), %tag51 ], [ getelementptr inbounds ([85 x i8], [85 x i8]* @"sym_name_LblbitRangeInt'LParUndsCommUndsCommUndsRParUnds'INT'UndsUnds'Int'Unds'Int'Unds'Int{}", i64 0, i64 0), %tag52 ], [ getelementptr inbounds ([48 x i8], [48 x i8]* @"sym_name_LblfreshInt'LParUndsRParUnds'INT'UndsUnds'Int{}", i64 0, i64 0), %tag53 ], [ getelementptr inbounds ([86 x i8], [86 x i8]* @"sym_name_Lblif'LParUndsRParUnds'else'UndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'Block'Unds'Block{}", i64 0, i64 0), %tag54 ], [ getelementptr inbounds ([15 x i8], [15 x i8]* @"sym_name_LblinitKCell{}", i64 0, i64 0), %tag55 ], [ getelementptr inbounds ([19 x i8], [19 x i8]* @"sym_name_LblinitStateCell{}", i64 0, i64 0), %tag56 ], [ getelementptr inbounds ([15 x i8], [15 x i8]* @"sym_name_LblinitTCell{}", i64 0, i64 0), %tag57 ], [ getelementptr inbounds ([60 x i8], [60 x i8]* @"sym_name_Lblint'UndsSClnUndsUnds'IMP-SYNTAX'UndsUnds'Ids'Unds'Stmt{}", i64 0, i64 0), %tag58 ], [ getelementptr inbounds ([12 x i8], [12 x i8]* @"sym_name_LblisAExp{}", i64 0, i64 0), %tag59 ], [ getelementptr inbounds ([12 x i8], [12 x i8]* @"sym_name_LblisBExp{}", i64 0, i64 0), %tag60 ], [ getelementptr inbounds ([13 x i8], [13 x i8]* @"sym_name_LblisBlock{}", i64 0, i64 0), %tag61 ], [ getelementptr inbounds ([12 x i8], [12 x i8]* @"sym_name_LblisBool{}", i64 0, i64 0), %tag62 ], [ getelementptr inbounds ([12 x i8], [12 x i8]* @"sym_name_LblisCell{}", i64 0, i64 0), %tag63 ], [ getelementptr inbounds ([10 x i8], [10 x i8]* @"sym_name_LblisId{}", i64 0, i64 0), %tag64 ], [ getelementptr inbounds ([11 x i8], [11 x i8]* @"sym_name_LblisIds{}", i64 0, i64 0), %tag65 ], [ getelementptr inbounds ([11 x i8], [11 x i8]* @"sym_name_LblisInt{}", i64 0, i64 0), %tag66 ], [ getelementptr inbounds ([9 x i8], [9 x i8]* @"sym_name_LblisK{}", i64 0, i64 0), %tag67 ], [ getelementptr inbounds ([13 x i8], [13 x i8]* @"sym_name_LblisKCell{}", i64 0, i64 0), %tag68 ], [ getelementptr inbounds ([16 x i8], [16 x i8]* @"sym_name_LblisKCellOpt{}", i64 0, i64 0), %tag69 ], [ getelementptr inbounds ([18 x i8], [18 x i8]* @"sym_name_LblisKConfigVar{}", i64 0, i64 0), %tag70 ], [ getelementptr inbounds ([13 x i8], [13 x i8]* @"sym_name_LblisKItem{}", i64 0, i64 0), %tag71 ], [ getelementptr inbounds ([15 x i8], [15 x i8]* @"sym_name_LblisKResult{}", i64 0, i64 0), %tag72 ], [ getelementptr inbounds ([12 x i8], [12 x i8]* @"sym_name_LblisList{}", i64 0, i64 0), %tag73 ], [ getelementptr inbounds ([11 x i8], [11 x i8]* @"sym_name_LblisMap{}", i64 0, i64 0), %tag74 ], [ getelementptr inbounds ([11 x i8], [11 x i8]* @"sym_name_LblisPgm{}", i64 0, i64 0), %tag75 ], [ getelementptr inbounds ([11 x i8], [11 x i8]* @"sym_name_LblisSet{}", i64 0, i64 0), %tag76 ], [ getelementptr inbounds ([17 x i8], [17 x i8]* @"sym_name_LblisStateCell{}", i64 0, i64 0), %tag77 ], [ getelementptr inbounds ([20 x i8], [20 x i8]* @"sym_name_LblisStateCellOpt{}", i64 0, i64 0), %tag78 ], [ getelementptr inbounds ([12 x i8], [12 x i8]* @"sym_name_LblisStmt{}", i64 0, i64 0), %tag79 ], [ getelementptr inbounds ([14 x i8], [14 x i8]* @"sym_name_LblisString{}", i64 0, i64 0), %tag80 ], [ getelementptr inbounds ([13 x i8], [13 x i8]* @"sym_name_LblisTCell{}", i64 0, i64 0), %tag81 ], [ getelementptr inbounds ([21 x i8], [21 x i8]* @"sym_name_LblisTCellFragment{}", i64 0, i64 0), %tag82 ], [ getelementptr inbounds ([44 x i8], [44 x i8]* @"sym_name_Lblkeys'LParUndsRParUnds'MAP'UndsUnds'Map{}", i64 0, i64 0), %tag83 ], [ getelementptr inbounds ([63 x i8], [63 x i8]* @"sym_name_LblminInt'LParUndsCommUndsRParUnds'INT'UndsUnds'Int'Unds'Int{}", i64 0, i64 0), %tag84 ], [ getelementptr inbounds ([19 x i8], [19 x i8]* @"sym_name_LblnotBool'Unds'{}", i64 0, i64 0), %tag85 ], [ getelementptr inbounds ([95 x i8], [95 x i8]* @"sym_name_LblsignExtendBitRangeInt'LParUndsCommUndsCommUndsRParUnds'INT'UndsUnds'Int'Unds'Int'Unds'Int{}", i64 0, i64 0), %tag86 ], [ getelementptr inbounds ([68 x i8], [68 x i8]* @"sym_name_Lblwhile'LParUndsRParUndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'Block{}", i64 0, i64 0), %tag87 ], [ getelementptr inbounds ([9 x i8], [9 x i8]* @"sym_name_append{}", i64 0, i64 0), %tag88 ], [ getelementptr inbounds ([7 x i8], [7 x i8]* @"sym_name_dotk{}", i64 0, i64 0), %tag89 ], [ getelementptr inbounds ([23 x i8], [23 x i8]* @"sym_name_inj{SortIds{},SortK{}}", i64 0, i64 0), %tag90 ], [ getelementptr inbounds ([24 x i8], [24 x i8]* @"sym_name_inj{SortAExp{},SortK{}}", i64 0, i64 0), %tag91 ], [ getelementptr inbounds ([28 x i8], [28 x i8]* @"sym_name_inj{SortStmt{},SortKItem{}}", i64 0, i64 0), %tag92 ], [ getelementptr inbounds ([24 x i8], [24 x i8]* @"sym_name_inj{SortBool{},SortK{}}", i64 0, i64 0), %tag93 ], [ getelementptr inbounds ([29 x i8], [29 x i8]* @"sym_name_inj{SortBlock{},SortKItem{}}", i64 0, i64 0), %tag94 ], [ getelementptr inbounds ([25 x i8], [25 x i8]* @"sym_name_inj{SortKItem{},SortK{}}", i64 0, i64 0), %tag95 ], [ getelementptr inbounds ([23 x i8], [23 x i8]* @"sym_name_inj{SortSet{},SortK{}}", i64 0, i64 0), %tag96 ], [ getelementptr inbounds ([28 x i8], [28 x i8]* @"sym_name_inj{SortBExp{},SortKItem{}}", i64 0, i64 0), %tag97 ], [ getelementptr inbounds ([23 x i8], [23 x i8]* @"sym_name_inj{SortInt{},SortK{}}", i64 0, i64 0), %tag98 ], [ getelementptr inbounds ([25 x i8], [25 x i8]* @"sym_name_inj{SortKCell{},SortK{}}", i64 0, i64 0), %tag99 ], [ getelementptr inbounds ([25 x i8], [25 x i8]* @"sym_name_inj{SortTCell{},SortK{}}", i64 0, i64 0), %tag100 ], [ getelementptr inbounds ([24 x i8], [24 x i8]* @"sym_name_inj{SortList{},SortK{}}", i64 0, i64 0), %tag101 ], [ getelementptr inbounds ([22 x i8], [22 x i8]* @"sym_name_inj{SortId{},SortK{}}", i64 0, i64 0), %tag102 ], [ getelementptr inbounds ([33 x i8], [33 x i8]* @"sym_name_inj{SortTCellFragment{},SortK{}}", i64 0, i64 0), %tag103 ], [ getelementptr inbounds ([29 x i8], [29 x i8]* @"sym_name_inj{SortStateCell{},SortK{}}", i64 0, i64 0), %tag104 ], [ getelementptr inbounds ([30 x i8], [30 x i8]* @"sym_name_inj{SortKConfigVar{},SortK{}}", i64 0, i64 0), %tag105 ], [ getelementptr inbounds ([32 x i8], [32 x i8]* @"sym_name_inj{SortStateCellOpt{},SortK{}}", i64 0, i64 0), %tag106 ], [ getelementptr inbounds ([28 x i8], [28 x i8]* @"sym_name_inj{SortKCellOpt{},SortK{}}", i64 0, i64 0), %tag107 ], [ getelementptr inbounds ([23 x i8], [23 x i8]* @"sym_name_inj{SortPgm{},SortK{}}", i64 0, i64 0), %tag108 ], [ getelementptr inbounds ([27 x i8], [27 x i8]* @"sym_name_inj{SortKResult{},SortK{}}", i64 0, i64 0), %tag109 ], [ getelementptr inbounds ([23 x i8], [23 x i8]* @"sym_name_inj{SortMap{},SortK{}}", i64 0, i64 0), %tag110 ], [ getelementptr inbounds ([24 x i8], [24 x i8]* @"sym_name_inj{SortCell{},SortK{}}", i64 0, i64 0), %tag111 ], [ getelementptr inbounds ([26 x i8], [26 x i8]* @"sym_name_inj{SortString{},SortK{}}", i64 0, i64 0), %tag112 ], [ getelementptr inbounds ([7 x i8], [7 x i8]* @"sym_name_kseq{}", i64 0, i64 0), %tag113 ]
+tag114:                                           ; preds = %entry
+  br label %exit
+
+tag115:                                           ; preds = %entry
+  br label %exit
+
+tag116:                                           ; preds = %entry
+  br label %exit
+
+tag117:                                           ; preds = %entry
+  br label %exit
+
+tag118:                                           ; preds = %entry
+  br label %exit
+
+tag119:                                           ; preds = %entry
+  br label %exit
+
+tag120:                                           ; preds = %entry
+  br label %exit
+
+tag121:                                           ; preds = %entry
+  br label %exit
+
+tag122:                                           ; preds = %entry
+  br label %exit
+
+tag123:                                           ; preds = %entry
+  br label %exit
+
+tag124:                                           ; preds = %entry
+  br label %exit
+
+tag125:                                           ; preds = %entry
+  br label %exit
+
+tag126:                                           ; preds = %entry
+  br label %exit
+
+tag127:                                           ; preds = %entry
+  br label %exit
+
+tag128:                                           ; preds = %entry
+  br label %exit
+
+tag129:                                           ; preds = %entry
+  br label %exit
+
+tag130:                                           ; preds = %entry
+  br label %exit
+
+tag131:                                           ; preds = %entry
+  br label %exit
+
+tag132:                                           ; preds = %entry
+  br label %exit
+
+tag133:                                           ; preds = %entry
+  br label %exit
+
+tag134:                                           ; preds = %entry
+  br label %exit
+
+tag135:                                           ; preds = %entry
+  br label %exit
+
+tag136:                                           ; preds = %entry
+  br label %exit
+
+tag137:                                           ; preds = %entry
+  br label %exit
+
+tag138:                                           ; preds = %entry
+  br label %exit
+
+tag139:                                           ; preds = %entry
+  br label %exit
+
+tag140:                                           ; preds = %entry
+  br label %exit
+
+tag141:                                           ; preds = %entry
+  br label %exit
+
+tag142:                                           ; preds = %entry
+  br label %exit
+
+tag143:                                           ; preds = %entry
+  br label %exit
+
+tag144:                                           ; preds = %entry
+  br label %exit
+
+tag145:                                           ; preds = %entry
+  br label %exit
+
+tag146:                                           ; preds = %entry
+  br label %exit
+
+tag147:                                           ; preds = %entry
+  br label %exit
+
+tag148:                                           ; preds = %entry
+  br label %exit
+
+tag149:                                           ; preds = %entry
+  br label %exit
+
+exit:                                             ; preds = %tag149, %tag148, %tag147, %tag146, %tag145, %tag144, %tag143, %tag142, %tag141, %tag140, %tag139, %tag138, %tag137, %tag136, %tag135, %tag134, %tag133, %tag132, %tag131, %tag130, %tag129, %tag128, %tag127, %tag126, %tag125, %tag124, %tag123, %tag122, %tag121, %tag120, %tag119, %tag118, %tag117, %tag116, %tag115, %tag114, %tag113, %tag112, %tag111, %tag110, %tag109, %tag108, %tag107, %tag106, %tag105, %tag104, %tag103, %tag102, %tag101, %tag100, %tag99, %tag98, %tag97, %tag96, %tag95, %tag94, %tag93, %tag92, %tag91, %tag90, %tag89, %tag88, %tag87, %tag86, %tag85, %tag84, %tag83, %tag82, %tag81, %tag80, %tag79, %tag78, %tag77, %tag76, %tag75, %tag74, %tag73, %tag72, %tag71, %tag70, %tag69, %tag68, %tag67, %tag66, %tag65, %tag64, %tag63, %tag62, %tag61, %tag60, %tag59, %tag58, %tag57, %tag56, %tag55, %tag54, %tag53, %tag52, %tag51, %tag50, %tag49, %tag48, %tag47, %tag46, %tag45, %tag44, %tag43, %tag42, %tag41, %tag40, %tag39, %tag38, %tag37, %tag36, %tag35, %tag34, %tag33, %tag32, %tag31, %tag30, %tag29, %tag28, %tag27, %tag26, %tag25, %tag24, %tag23, %tag22, %tag21, %tag20, %tag19, %tag18, %tag17, %tag16, %tag15, %tag14, %tag13, %tag12, %tag11, %tag10, %tag9, %tag8, %tag7, %tag6, %tag5, %tag4, %tag3, %tag2, %tag1, %tag0
+  %phi = phi i8* [ getelementptr inbounds ([19 x i8], [19 x i8]* @"sym_name_Lbl'-LT-'T'-GT-'{}", i64 0, i64 0), %tag0 ], [ getelementptr inbounds ([28 x i8], [28 x i8]* @"sym_name_Lbl'-LT-'T'-GT-'-fragment{}", i64 0, i64 0), %tag1 ], [ getelementptr inbounds ([19 x i8], [19 x i8]* @"sym_name_Lbl'-LT-'k'-GT-'{}", i64 0, i64 0), %tag2 ], [ getelementptr inbounds ([23 x i8], [23 x i8]* @"sym_name_Lbl'-LT-'state'-GT-'{}", i64 0, i64 0), %tag3 ], [ getelementptr inbounds ([44 x i8], [44 x i8]* @"sym_name_Lbl'BangUndsUnds'IMP-SYNTAX'UndsUnds'BExp{}", i64 0, i64 0), %tag4 ], [ getelementptr inbounds ([64 x i8], [64 x i8]* @"sym_name_Lbl'Hash'freezer'BangUndsUnds'IMP-SYNTAX'UndsUnds'BExp0'Unds'{}", i64 0, i64 0), %tag5 ], [ getelementptr inbounds ([82 x i8], [82 x i8]* @"sym_name_Lbl'Hash'freezer'Unds-LT-EqlsUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp0'Unds'{}", i64 0, i64 0), %tag6 ], [ getelementptr inbounds ([82 x i8], [82 x i8]* @"sym_name_Lbl'Hash'freezer'Unds-LT-EqlsUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp1'Unds'{}", i64 0, i64 0), %tag7 ], [ getelementptr inbounds ([80 x i8], [80 x i8]* @"sym_name_Lbl'Hash'freezer'UndsAndAndUndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'BExp1'Unds'{}", i64 0, i64 0), %tag8 ], [ getelementptr inbounds ([80 x i8], [80 x i8]* @"sym_name_Lbl'Hash'freezer'UndsEqlsUndsSClnUnds'IMP-SYNTAX'UndsUnds'Id'Unds'AExp0'Unds'{}", i64 0, i64 0), %tag9 ], [ getelementptr inbounds ([78 x i8], [78 x i8]* @"sym_name_Lbl'Hash'freezer'UndsPlusUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp0'Unds'{}", i64 0, i64 0), %tag10 ], [ getelementptr inbounds ([78 x i8], [78 x i8]* @"sym_name_Lbl'Hash'freezer'UndsPlusUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp1'Unds'{}", i64 0, i64 0), %tag11 ], [ getelementptr inbounds ([78 x i8], [78 x i8]* @"sym_name_Lbl'Hash'freezer'UndsSlshUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp0'Unds'{}", i64 0, i64 0), %tag12 ], [ getelementptr inbounds ([78 x i8], [78 x i8]* @"sym_name_Lbl'Hash'freezer'UndsSlshUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp1'Unds'{}", i64 0, i64 0), %tag13 ], [ getelementptr inbounds ([106 x i8], [106 x i8]* @"sym_name_Lbl'Hash'freezerif'LParUndsRParUnds'else'UndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'Block'Unds'Block1'Unds'{}", i64 0, i64 0), %tag14 ], [ getelementptr inbounds ([102 x i8], [102 x i8]* @"sym_name_Lbl'Hash'if'UndsHash'then'UndsHash'else'UndsHash'fi'Unds'K-EQUAL'UndsUnds'Bool'Unds'K'Unds'K{SortK{}}", i64 0, i64 0), %tag15 ], [ getelementptr inbounds ([36 x i8], [36 x i8]* @"sym_name_Lbl'LBraRBraUnds'IMP-SYNTAX'Unds'{}", i64 0, i64 0), %tag16 ], [ getelementptr inbounds ([48 x i8], [48 x i8]* @"sym_name_Lbl'LBraUndsRBraUnds'IMP-SYNTAX'UndsUnds'Stmt{}", i64 0, i64 0), %tag17 ], [ getelementptr inbounds ([16 x i8], [16 x i8]* @"sym_name_Lbl'Stop'List{}", i64 0, i64 0), %tag18 ], [ getelementptr inbounds ([90 x i8], [90 x i8]* @"sym_name_Lbl'Stop'List'LBraQuotUndsCommUndsUnds'IMP-SYNTAX'UndsUnds'Id'Unds'Ids'QuotRBraUnds'Ids{}", i64 0, i64 0), %tag19 ], [ getelementptr inbounds ([15 x i8], [15 x i8]* @"sym_name_Lbl'Stop'Map{}", i64 0, i64 0), %tag20 ], [ getelementptr inbounds ([15 x i8], [15 x i8]* @"sym_name_Lbl'Stop'Set{}", i64 0, i64 0), %tag21 ], [ getelementptr inbounds ([41 x i8], [41 x i8]* @"sym_name_Lbl'Tild'Int'UndsUnds'INT'UndsUnds'Int{}", i64 0, i64 0), %tag22 ], [ getelementptr inbounds ([51 x i8], [51 x i8]* @"sym_name_Lbl'Unds'-Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", i64 0, i64 0), %tag23 ], [ getelementptr inbounds ([51 x i8], [51 x i8]* @"sym_name_Lbl'Unds'-Map'UndsUnds'MAP'UndsUnds'Map'Unds'Map{}", i64 0, i64 0), %tag24 ], [ getelementptr inbounds ([22 x i8], [22 x i8]* @"sym_name_Lbl'Unds'List'Unds'{}", i64 0, i64 0), %tag25 ], [ getelementptr inbounds ([21 x i8], [21 x i8]* @"sym_name_Lbl'Unds'Map'Unds'{}", i64 0, i64 0), %tag26 ], [ getelementptr inbounds ([21 x i8], [21 x i8]* @"sym_name_Lbl'Unds'Set'Unds'{}", i64 0, i64 0), %tag27 ], [ getelementptr inbounds ([25 x i8], [25 x i8]* @"sym_name_Lbl'Unds'andBool'Unds'{}", i64 0, i64 0), %tag28 ], [ getelementptr inbounds ([61 x i8], [61 x i8]* @"sym_name_Lbl'Unds'andThenBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}", i64 0, i64 0), %tag29 ], [ getelementptr inbounds ([53 x i8], [53 x i8]* @"sym_name_Lbl'Unds'divInt'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", i64 0, i64 0), %tag30 ], [ getelementptr inbounds ([57 x i8], [57 x i8]* @"sym_name_Lbl'Unds'dividesInt'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", i64 0, i64 0), %tag31 ], [ getelementptr inbounds ([61 x i8], [61 x i8]* @"sym_name_Lbl'Unds'impliesBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}", i64 0, i64 0), %tag32 ], [ getelementptr inbounds ([65 x i8], [65 x i8]* @"sym_name_Lbl'Unds'in'Unds'keys'LParUndsRParUnds'MAP'UndsUnds'K'Unds'Map{}", i64 0, i64 0), %tag33 ], [ getelementptr inbounds ([49 x i8], [49 x i8]* @"sym_name_Lbl'Unds'in'UndsUnds'LIST'UndsUnds'K'Unds'List{}", i64 0, i64 0), %tag34 ], [ getelementptr inbounds ([53 x i8], [53 x i8]* @"sym_name_Lbl'Unds'modInt'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", i64 0, i64 0), %tag35 ], [ getelementptr inbounds ([56 x i8], [56 x i8]* @"sym_name_Lbl'Unds'orBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}", i64 0, i64 0), %tag36 ], [ getelementptr inbounds ([60 x i8], [60 x i8]* @"sym_name_Lbl'Unds'orElseBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}", i64 0, i64 0), %tag37 ], [ getelementptr inbounds ([57 x i8], [57 x i8]* @"sym_name_Lbl'Unds'xorBool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}", i64 0, i64 0), %tag38 ], [ getelementptr inbounds ([53 x i8], [53 x i8]* @"sym_name_Lbl'Unds'xorInt'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", i64 0, i64 0), %tag39 ], [ getelementptr inbounds ([54 x i8], [54 x i8]* @"sym_name_Lbl'Unds-GT-'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", i64 0, i64 0), %tag40 ], [ getelementptr inbounds ([58 x i8], [58 x i8]* @"sym_name_Lbl'Unds-GT--GT-'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", i64 0, i64 0), %tag41 ], [ getelementptr inbounds ([58 x i8], [58 x i8]* @"sym_name_Lbl'Unds-GT-Eqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", i64 0, i64 0), %tag42 ], [ getelementptr inbounds ([54 x i8], [54 x i8]* @"sym_name_Lbl'Unds-LT-'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", i64 0, i64 0), %tag43 ], [ getelementptr inbounds ([58 x i8], [58 x i8]* @"sym_name_Lbl'Unds-LT--LT-'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", i64 0, i64 0), %tag44 ], [ getelementptr inbounds ([58 x i8], [58 x i8]* @"sym_name_Lbl'Unds-LT-Eqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", i64 0, i64 0), %tag45 ], [ getelementptr inbounds ([58 x i8], [58 x i8]* @"sym_name_Lbl'Unds-LT-Eqls'Map'UndsUnds'MAP'UndsUnds'Map'Unds'Map{}", i64 0, i64 0), %tag46 ], [ getelementptr inbounds ([58 x i8], [58 x i8]* @"sym_name_Lbl'Unds-LT-Eqls'Set'UndsUnds'SET'UndsUnds'Set'Unds'Set{}", i64 0, i64 0), %tag47 ], [ getelementptr inbounds ([62 x i8], [62 x i8]* @"sym_name_Lbl'Unds-LT-EqlsUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp{}", i64 0, i64 0), %tag48 ], [ getelementptr inbounds ([53 x i8], [53 x i8]* @"sym_name_Lbl'UndsAnd'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", i64 0, i64 0), %tag49 ], [ getelementptr inbounds ([60 x i8], [60 x i8]* @"sym_name_Lbl'UndsAndAndUndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'BExp{}", i64 0, i64 0), %tag50 ], [ getelementptr inbounds ([55 x i8], [55 x i8]* @"sym_name_Lbl'UndsCommUndsUnds'IMP-SYNTAX'UndsUnds'Id'Unds'Ids{}", i64 0, i64 0), %tag51 ], [ getelementptr inbounds ([62 x i8], [62 x i8]* @"sym_name_Lbl'UndsEqlsEqls'Bool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}", i64 0, i64 0), %tag52 ], [ getelementptr inbounds ([58 x i8], [58 x i8]* @"sym_name_Lbl'UndsEqlsEqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", i64 0, i64 0), %tag53 ], [ getelementptr inbounds ([27 x i8], [27 x i8]* @"sym_name_Lbl'UndsEqlsEqls'K'Unds'{}", i64 0, i64 0), %tag54 ], [ getelementptr inbounds ([66 x i8], [66 x i8]* @"sym_name_Lbl'UndsEqlsSlshEqls'Bool'UndsUnds'BOOL'UndsUnds'Bool'Unds'Bool{}", i64 0, i64 0), %tag55 ], [ getelementptr inbounds ([62 x i8], [62 x i8]* @"sym_name_Lbl'UndsEqlsSlshEqls'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", i64 0, i64 0), %tag56 ], [ getelementptr inbounds ([60 x i8], [60 x i8]* @"sym_name_Lbl'UndsEqlsSlshEqls'K'UndsUnds'K-EQUAL'UndsUnds'K'Unds'K{}", i64 0, i64 0), %tag57 ], [ getelementptr inbounds ([60 x i8], [60 x i8]* @"sym_name_Lbl'UndsEqlsUndsSClnUnds'IMP-SYNTAX'UndsUnds'Id'Unds'AExp{}", i64 0, i64 0), %tag58 ], [ getelementptr inbounds ([69 x i8], [69 x i8]* @"sym_name_Lbl'UndsLSqBUnds-LT-'-'UndsRSqBUnds'MAP'UndsUnds'Map'Unds'K'Unds'K{}", i64 0, i64 0), %tag59 ], [ getelementptr inbounds ([36 x i8], [36 x i8]* @"sym_name_Lbl'UndsLSqBUnds-LT-'-undef'RSqB'{}", i64 0, i64 0), %tag60 ], [ getelementptr inbounds ([73 x i8], [73 x i8]* @"sym_name_Lbl'UndsLSqBUndsRSqB'orDefault'UndsUnds'MAP'UndsUnds'Map'Unds'K'Unds'K{}", i64 0, i64 0), %tag61 ], [ getelementptr inbounds ([54 x i8], [54 x i8]* @"sym_name_Lbl'UndsPerc'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", i64 0, i64 0), %tag62 ], [ getelementptr inbounds ([27 x i8], [27 x i8]* @"sym_name_Lbl'UndsPipe'-'-GT-Unds'{}", i64 0, i64 0), %tag63 ], [ getelementptr inbounds ([54 x i8], [54 x i8]* @"sym_name_Lbl'UndsPipe'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", i64 0, i64 0), %tag64 ], [ getelementptr inbounds ([54 x i8], [54 x i8]* @"sym_name_Lbl'UndsPlus'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", i64 0, i64 0), %tag65 ], [ getelementptr inbounds ([58 x i8], [58 x i8]* @"sym_name_Lbl'UndsPlusUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp{}", i64 0, i64 0), %tag66 ], [ getelementptr inbounds ([54 x i8], [54 x i8]* @"sym_name_Lbl'UndsSlsh'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", i64 0, i64 0), %tag67 ], [ getelementptr inbounds ([58 x i8], [58 x i8]* @"sym_name_Lbl'UndsSlshUndsUnds'IMP-SYNTAX'UndsUnds'AExp'Unds'AExp{}", i64 0, i64 0), %tag68 ], [ getelementptr inbounds ([54 x i8], [54 x i8]* @"sym_name_Lbl'UndsStar'Int'UndsUnds'INT'UndsUnds'Int'Unds'Int{}", i64 0, i64 0), %tag69 ], [ getelementptr inbounds ([54 x i8], [54 x i8]* @"sym_name_Lbl'UndsUndsUnds'IMP-SYNTAX'UndsUnds'Stmt'Unds'Stmt{}", i64 0, i64 0), %tag70 ], [ getelementptr inbounds ([40 x i8], [40 x i8]* @"sym_name_Lbl-'UndsUnds'IMP-SYNTAX'UndsUnds'Int{}", i64 0, i64 0), %tag71 ], [ getelementptr inbounds ([14 x i8], [14 x i8]* @"sym_name_LblListItem{}", i64 0, i64 0), %tag72 ], [ getelementptr inbounds ([21 x i8], [21 x i8]* @"sym_name_LblMap'Coln'lookup{}", i64 0, i64 0), %tag73 ], [ getelementptr inbounds ([25 x i8], [25 x i8]* @"sym_name_LblSet'Coln'difference{}", i64 0, i64 0), %tag74 ], [ getelementptr inbounds ([17 x i8], [17 x i8]* @"sym_name_LblSet'Coln'in{}", i64 0, i64 0), %tag75 ], [ getelementptr inbounds ([13 x i8], [13 x i8]* @"sym_name_LblSetItem{}", i64 0, i64 0), %tag76 ], [ getelementptr inbounds ([46 x i8], [46 x i8]* @"sym_name_LblabsInt'LParUndsRParUnds'INT'UndsUnds'Int{}", i64 0, i64 0), %tag77 ], [ getelementptr inbounds ([85 x i8], [85 x i8]* @"sym_name_LblbitRangeInt'LParUndsCommUndsCommUndsRParUnds'INT'UndsUnds'Int'Unds'Int'Unds'Int{}", i64 0, i64 0), %tag78 ], [ getelementptr inbounds ([53 x i8], [53 x i8]* @"sym_name_LblfreshId'LParUndsRParUnds'ID-SYNTAX'UndsUnds'Int{}", i64 0, i64 0), %tag79 ], [ getelementptr inbounds ([48 x i8], [48 x i8]* @"sym_name_LblfreshInt'LParUndsRParUnds'INT'UndsUnds'Int{}", i64 0, i64 0), %tag80 ], [ getelementptr inbounds ([86 x i8], [86 x i8]* @"sym_name_Lblif'LParUndsRParUnds'else'UndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'Block'Unds'Block{}", i64 0, i64 0), %tag81 ], [ getelementptr inbounds ([15 x i8], [15 x i8]* @"sym_name_LblinitKCell{}", i64 0, i64 0), %tag82 ], [ getelementptr inbounds ([19 x i8], [19 x i8]* @"sym_name_LblinitStateCell{}", i64 0, i64 0), %tag83 ], [ getelementptr inbounds ([15 x i8], [15 x i8]* @"sym_name_LblinitTCell{}", i64 0, i64 0), %tag84 ], [ getelementptr inbounds ([60 x i8], [60 x i8]* @"sym_name_Lblint'UndsSClnUndsUnds'IMP-SYNTAX'UndsUnds'Ids'Unds'Stmt{}", i64 0, i64 0), %tag85 ], [ getelementptr inbounds ([69 x i8], [69 x i8]* @"sym_name_LblintersectSet'LParUndsCommUndsRParUnds'SET'UndsUnds'Set'Unds'Set{}", i64 0, i64 0), %tag86 ], [ getelementptr inbounds ([12 x i8], [12 x i8]* @"sym_name_LblisAExp{}", i64 0, i64 0), %tag87 ], [ getelementptr inbounds ([12 x i8], [12 x i8]* @"sym_name_LblisBExp{}", i64 0, i64 0), %tag88 ], [ getelementptr inbounds ([13 x i8], [13 x i8]* @"sym_name_LblisBlock{}", i64 0, i64 0), %tag89 ], [ getelementptr inbounds ([12 x i8], [12 x i8]* @"sym_name_LblisBool{}", i64 0, i64 0), %tag90 ], [ getelementptr inbounds ([12 x i8], [12 x i8]* @"sym_name_LblisCell{}", i64 0, i64 0), %tag91 ], [ getelementptr inbounds ([10 x i8], [10 x i8]* @"sym_name_LblisId{}", i64 0, i64 0), %tag92 ], [ getelementptr inbounds ([11 x i8], [11 x i8]* @"sym_name_LblisIds{}", i64 0, i64 0), %tag93 ], [ getelementptr inbounds ([11 x i8], [11 x i8]* @"sym_name_LblisInt{}", i64 0, i64 0), %tag94 ], [ getelementptr inbounds ([9 x i8], [9 x i8]* @"sym_name_LblisK{}", i64 0, i64 0), %tag95 ], [ getelementptr inbounds ([13 x i8], [13 x i8]* @"sym_name_LblisKCell{}", i64 0, i64 0), %tag96 ], [ getelementptr inbounds ([16 x i8], [16 x i8]* @"sym_name_LblisKCellOpt{}", i64 0, i64 0), %tag97 ], [ getelementptr inbounds ([18 x i8], [18 x i8]* @"sym_name_LblisKConfigVar{}", i64 0, i64 0), %tag98 ], [ getelementptr inbounds ([13 x i8], [13 x i8]* @"sym_name_LblisKItem{}", i64 0, i64 0), %tag99 ], [ getelementptr inbounds ([15 x i8], [15 x i8]* @"sym_name_LblisKResult{}", i64 0, i64 0), %tag100 ], [ getelementptr inbounds ([12 x i8], [12 x i8]* @"sym_name_LblisList{}", i64 0, i64 0), %tag101 ], [ getelementptr inbounds ([11 x i8], [11 x i8]* @"sym_name_LblisMap{}", i64 0, i64 0), %tag102 ], [ getelementptr inbounds ([11 x i8], [11 x i8]* @"sym_name_LblisPgm{}", i64 0, i64 0), %tag103 ], [ getelementptr inbounds ([11 x i8], [11 x i8]* @"sym_name_LblisSet{}", i64 0, i64 0), %tag104 ], [ getelementptr inbounds ([17 x i8], [17 x i8]* @"sym_name_LblisStateCell{}", i64 0, i64 0), %tag105 ], [ getelementptr inbounds ([20 x i8], [20 x i8]* @"sym_name_LblisStateCellOpt{}", i64 0, i64 0), %tag106 ], [ getelementptr inbounds ([12 x i8], [12 x i8]* @"sym_name_LblisStmt{}", i64 0, i64 0), %tag107 ], [ getelementptr inbounds ([14 x i8], [14 x i8]* @"sym_name_LblisString{}", i64 0, i64 0), %tag108 ], [ getelementptr inbounds ([13 x i8], [13 x i8]* @"sym_name_LblisTCell{}", i64 0, i64 0), %tag109 ], [ getelementptr inbounds ([21 x i8], [21 x i8]* @"sym_name_LblisTCellFragment{}", i64 0, i64 0), %tag110 ], [ getelementptr inbounds ([44 x i8], [44 x i8]* @"sym_name_Lblkeys'LParUndsRParUnds'MAP'UndsUnds'Map{}", i64 0, i64 0), %tag111 ], [ getelementptr inbounds ([63 x i8], [63 x i8]* @"sym_name_LblmaxInt'LParUndsCommUndsRParUnds'INT'UndsUnds'Int'Unds'Int{}", i64 0, i64 0), %tag112 ], [ getelementptr inbounds ([63 x i8], [63 x i8]* @"sym_name_LblminInt'LParUndsCommUndsRParUnds'INT'UndsUnds'Int'Unds'Int{}", i64 0, i64 0), %tag113 ], [ getelementptr inbounds ([13 x i8], [13 x i8]* @"sym_name_LblnoKCell{}", i64 0, i64 0), %tag114 ], [ getelementptr inbounds ([17 x i8], [17 x i8]* @"sym_name_LblnoStateCell{}", i64 0, i64 0), %tag115 ], [ getelementptr inbounds ([19 x i8], [19 x i8]* @"sym_name_LblnotBool'Unds'{}", i64 0, i64 0), %tag116 ], [ getelementptr inbounds ([66 x i8], [66 x i8]* @"sym_name_LblremoveAll'LParUndsCommUndsRParUnds'MAP'UndsUnds'Map'Unds'Set{}", i64 0, i64 0), %tag117 ], [ getelementptr inbounds ([95 x i8], [95 x i8]* @"sym_name_LblsignExtendBitRangeInt'LParUndsCommUndsCommUndsRParUnds'INT'UndsUnds'Int'Unds'Int'Unds'Int{}", i64 0, i64 0), %tag118 ], [ getelementptr inbounds ([46 x i8], [46 x i8]* @"sym_name_Lblsize'LParUndsRParUnds'LIST'UndsUnds'List{}", i64 0, i64 0), %tag119 ], [ getelementptr inbounds ([44 x i8], [44 x i8]* @"sym_name_Lblsize'LParUndsRParUnds'MAP'UndsUnds'Map{}", i64 0, i64 0), %tag120 ], [ getelementptr inbounds ([44 x i8], [44 x i8]* @"sym_name_Lblsize'LParUndsRParUnds'SET'UndsUnds'Set{}", i64 0, i64 0), %tag121 ], [ getelementptr inbounds ([66 x i8], [66 x i8]* @"sym_name_LblupdateMap'LParUndsCommUndsRParUnds'MAP'UndsUnds'Map'Unds'Map{}", i64 0, i64 0), %tag122 ], [ getelementptr inbounds ([68 x i8], [68 x i8]* @"sym_name_Lblwhile'LParUndsRParUndsUnds'IMP-SYNTAX'UndsUnds'BExp'Unds'Block{}", i64 0, i64 0), %tag123 ], [ getelementptr inbounds ([9 x i8], [9 x i8]* @"sym_name_append{}", i64 0, i64 0), %tag124 ], [ getelementptr inbounds ([7 x i8], [7 x i8]* @"sym_name_dotk{}", i64 0, i64 0), %tag125 ], [ getelementptr inbounds ([28 x i8], [28 x i8]* @"sym_name_inj{SortInt{}, SortKItem{}}", i64 0, i64 0), %tag126 ], [ getelementptr inbounds ([28 x i8], [28 x i8]* @"sym_name_inj{SortPgm{}, SortKItem{}}", i64 0, i64 0), %tag127 ], [ getelementptr inbounds ([30 x i8], [30 x i8]* @"sym_name_inj{SortKCell{}, SortKItem{}}", i64 0, i64 0), %tag128 ], [ getelementptr inbounds ([37 x i8], [37 x i8]* @"sym_name_inj{SortStateCellOpt{}, SortKItem{}}", i64 0, i64 0), %tag129 ], [ getelementptr inbounds ([28 x i8], [28 x i8]* @"sym_name_inj{SortSet{}, SortKItem{}}", i64 0, i64 0), %tag130 ], [ getelementptr inbounds ([29 x i8], [29 x i8]* @"sym_name_inj{SortAExp{}, SortKItem{}}", i64 0, i64 0), %tag131 ], [ getelementptr inbounds ([28 x i8], [28 x i8]* @"sym_name_inj{SortMap{}, SortKItem{}}", i64 0, i64 0), %tag132 ], [ getelementptr inbounds ([30 x i8], [30 x i8]* @"sym_name_inj{SortTCell{}, SortKItem{}}", i64 0, i64 0), %tag133 ], [ getelementptr inbounds ([29 x i8], [29 x i8]* @"sym_name_inj{SortList{}, SortKItem{}}", i64 0, i64 0), %tag134 ], [ getelementptr inbounds ([38 x i8], [38 x i8]* @"sym_name_inj{SortTCellFragment{}, SortKItem{}}", i64 0, i64 0), %tag135 ], [ getelementptr inbounds ([34 x i8], [34 x i8]* @"sym_name_inj{SortStateCell{}, SortKItem{}}", i64 0, i64 0), %tag136 ], [ getelementptr inbounds ([29 x i8], [29 x i8]* @"sym_name_inj{SortCell{}, SortKItem{}}", i64 0, i64 0), %tag137 ], [ getelementptr inbounds ([28 x i8], [28 x i8]* @"sym_name_inj{SortBool{}, SortBExp{}}", i64 0, i64 0), %tag138 ], [ getelementptr inbounds ([28 x i8], [28 x i8]* @"sym_name_inj{SortIds{}, SortKItem{}}", i64 0, i64 0), %tag139 ], [ getelementptr inbounds ([27 x i8], [27 x i8]* @"sym_name_inj{SortId{}, SortKItem{}}", i64 0, i64 0), %tag140 ], [ getelementptr inbounds ([29 x i8], [29 x i8]* @"sym_name_inj{SortStmt{}, SortKItem{}}", i64 0, i64 0), %tag141 ], [ getelementptr inbounds ([29 x i8], [29 x i8]* @"sym_name_inj{SortBExp{}, SortKItem{}}", i64 0, i64 0), %tag142 ], [ getelementptr inbounds ([33 x i8], [33 x i8]* @"sym_name_inj{SortKCellOpt{}, SortKItem{}}", i64 0, i64 0), %tag143 ], [ getelementptr inbounds ([31 x i8], [31 x i8]* @"sym_name_inj{SortString{}, SortKItem{}}", i64 0, i64 0), %tag144 ], [ getelementptr inbounds ([32 x i8], [32 x i8]* @"sym_name_inj{SortKResult{}, SortKItem{}}", i64 0, i64 0), %tag145 ], [ getelementptr inbounds ([30 x i8], [30 x i8]* @"sym_name_inj{SortBlock{}, SortKItem{}}", i64 0, i64 0), %tag146 ], [ getelementptr inbounds ([26 x i8], [26 x i8]* @"sym_name_inj{SortKItem{}, SortK{}}", i64 0, i64 0), %tag147 ], [ getelementptr inbounds ([35 x i8], [35 x i8]* @"sym_name_inj{SortKConfigVar{}, SortKItem{}}", i64 0, i64 0), %tag148 ], [ getelementptr inbounds ([7 x i8], [7 x i8]* @"sym_name_kseq{}", i64 0, i64 0), %tag149 ]
   ret i8* %phi
 
 stuck:                                            ; preds = %entry
@@ -4596,17 +6490,17 @@ stuck:                                            ; preds = %entry
   unreachable
 }
 
-define void @visitChildren(%block*, %FILE*, void (%FILE*, %block*, i8*)*, void (%FILE*, %map*, i8*, i8*, i8*)*, void (%FILE*, %list*, i8*, i8*, i8*)*, void (%FILE*, %set*, i8*, i8*, i8*)*, void (%FILE*, %mpz*, i8*)*, void (%FILE*, %mpfr*, i8*)*, void (%FILE*, i1, i8*)*, void (%FILE*, i8*, i8*)*) {
+define void @visitChildren(%block*, %FILE*, void (%FILE*, %block*, i8*)*, void (%FILE*, %map*, i8*, i8*, i8*)*, void (%FILE*, %list*, i8*, i8*, i8*)*, void (%FILE*, %set*, i8*, i8*, i8*)*, void (%FILE*, %mpz*, i8*)*, void (%FILE*, %mpfr*, i8*)*, void (%FILE*, i1, i8*)*, void (%FILE*, i8*, i8*)*, void (%FILE*)*) {
 entry:
-  %10 = getelementptr inbounds %block, %block* %0, i64 0, i32 0, i32 0
-  %11 = load i64, i64* %10
-  %12 = trunc i64 %11 to i32
-  switch i32 %12, label %stuck [
+  %11 = getelementptr inbounds %block, %block* %0, i64 0, i32 0, i32 0
+  %12 = load i64, i64* %11
+  %13 = trunc i64 %12 to i32
+  switch i32 %13, label %stuck [
     i32 0, label %tag0
     i32 1, label %tag1
     i32 2, label %tag2
     i32 3, label %tag3
-    i32 5, label %tag5
+    i32 4, label %tag4
     i32 6, label %tag6
     i32 7, label %tag7
     i32 8, label %tag8
@@ -4615,11 +6509,9 @@ entry:
     i32 11, label %tag11
     i32 12, label %tag12
     i32 13, label %tag13
+    i32 14, label %tag14
     i32 15, label %tag15
-    i32 18, label %tag18
-    i32 19, label %tag19
-    i32 20, label %tag20
-    i32 21, label %tag21
+    i32 17, label %tag17
     i32 22, label %tag22
     i32 23, label %tag23
     i32 24, label %tag24
@@ -4654,6 +6546,7 @@ entry:
     i32 53, label %tag53
     i32 54, label %tag54
     i32 55, label %tag55
+    i32 56, label %tag56
     i32 57, label %tag57
     i32 58, label %tag58
     i32 59, label %tag59
@@ -4680,12 +6573,12 @@ entry:
     i32 80, label %tag80
     i32 81, label %tag81
     i32 82, label %tag82
-    i32 83, label %tag83
     i32 84, label %tag84
     i32 85, label %tag85
     i32 86, label %tag86
     i32 87, label %tag87
     i32 88, label %tag88
+    i32 89, label %tag89
     i32 90, label %tag90
     i32 91, label %tag91
     i32 92, label %tag92
@@ -4710,898 +6603,1414 @@ entry:
     i32 111, label %tag111
     i32 112, label %tag112
     i32 113, label %tag113
+    i32 116, label %tag116
+    i32 117, label %tag117
+    i32 118, label %tag118
+    i32 119, label %tag119
+    i32 120, label %tag120
+    i32 121, label %tag121
+    i32 122, label %tag122
+    i32 123, label %tag123
+    i32 124, label %tag124
+    i32 126, label %tag126
+    i32 127, label %tag127
+    i32 128, label %tag128
+    i32 129, label %tag129
+    i32 130, label %tag130
+    i32 131, label %tag131
+    i32 132, label %tag132
+    i32 133, label %tag133
+    i32 134, label %tag134
+    i32 135, label %tag135
+    i32 136, label %tag136
+    i32 137, label %tag137
+    i32 138, label %tag138
+    i32 139, label %tag139
+    i32 140, label %tag140
+    i32 141, label %tag141
+    i32 142, label %tag142
+    i32 143, label %tag143
+    i32 144, label %tag144
+    i32 145, label %tag145
+    i32 146, label %tag146
+    i32 147, label %tag147
+    i32 148, label %tag148
+    i32 149, label %tag149
   ]
 
 tag0:                                             ; preds = %entry
-  %13 = bitcast %block* %0 to { %blockheader, [0 x i64], %block*, %block* }*
-  %14 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %13, i64 0, i32 2
-  %15 = load %block*, %block** %14
-  call void %2(%FILE* %1, %block* %15, i8* getelementptr inbounds ([12 x i8], [12 x i8]* @"sort_name_SortKCell{}", i64 0, i64 0))
-  %16 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %13, i64 0, i32 3
-  %17 = load %block*, %block** %16
-  call void %2(%FILE* %1, %block* %17, i8* getelementptr inbounds ([16 x i8], [16 x i8]* @"sort_name_SortStateCell{}", i64 0, i64 0))
+  %14 = bitcast %block* %0 to { %blockheader, [0 x i64], %block*, %block* }*
+  %15 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %14, i64 0, i32 2
+  %16 = load %block*, %block** %15
+  call void %2(%FILE* %1, %block* %16, i8* getelementptr inbounds ([12 x i8], [12 x i8]* @"sort_name_SortKCell{}", i64 0, i64 0))
+  call void %10(%FILE* %1)
+  %17 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %14, i64 0, i32 3
+  %18 = load %block*, %block** %17
+  call void %2(%FILE* %1, %block* %18, i8* getelementptr inbounds ([16 x i8], [16 x i8]* @"sort_name_SortStateCell{}", i64 0, i64 0))
   ret void
 
 tag1:                                             ; preds = %entry
-  %18 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %19 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %18, i64 0, i32 2
-  %20 = load %block*, %block** %19
-  call void %2(%FILE* %1, %block* %20, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
+  %19 = bitcast %block* %0 to { %blockheader, [0 x i64], %block*, %block* }*
+  %20 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %19, i64 0, i32 2
+  %21 = load %block*, %block** %20
+  call void %2(%FILE* %1, %block* %21, i8* getelementptr inbounds ([15 x i8], [15 x i8]* @"sort_name_SortKCellOpt{}", i64 0, i64 0))
+  call void %10(%FILE* %1)
+  %22 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %19, i64 0, i32 3
+  %23 = load %block*, %block** %22
+  call void %2(%FILE* %1, %block* %23, i8* getelementptr inbounds ([19 x i8], [19 x i8]* @"sort_name_SortStateCellOpt{}", i64 0, i64 0))
   ret void
 
 tag2:                                             ; preds = %entry
-  %21 = bitcast %block* %0 to { %blockheader, [0 x i64], %map }*
-  %22 = getelementptr inbounds { %blockheader, [0 x i64], %map }, { %blockheader, [0 x i64], %map }* %21, i64 0, i32 2
-  %23 = load %map, %map* %22
-  call void %3(%FILE* %1, %map* %22, i8* getelementptr inbounds ([15 x i8], [15 x i8]* @"sym_name_Lbl'Stop'Map{}", i64 0, i64 0), i8* getelementptr inbounds ([27 x i8], [27 x i8]* @"sym_name_Lbl'UndsPipe'-'-GT-Unds'{}", i64 0, i64 0), i8* getelementptr inbounds ([21 x i8], [21 x i8]* @"sym_name_Lbl'Unds'Map'Unds'{}", i64 0, i64 0))
-  ret void
-
-tag3:                                             ; preds = %entry
   %24 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
   %25 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %24, i64 0, i32 2
   %26 = load %block*, %block** %25
-  call void %2(%FILE* %1, %block* %26, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sort_name_SortBExp{}", i64 0, i64 0))
+  call void %2(%FILE* %1, %block* %26, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
   ret void
 
-tag5:                                             ; preds = %entry
-  %27 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %28 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %27, i64 0, i32 2
-  %29 = load %block*, %block** %28
-  call void %2(%FILE* %1, %block* %29, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
+tag3:                                             ; preds = %entry
+  %27 = bitcast %block* %0 to { %blockheader, [0 x i64], %map }*
+  %28 = getelementptr inbounds { %blockheader, [0 x i64], %map }, { %blockheader, [0 x i64], %map }* %27, i64 0, i32 2
+  %29 = load %map, %map* %28
+  call void %3(%FILE* %1, %map* %28, i8* getelementptr inbounds ([15 x i8], [15 x i8]* @"sym_name_Lbl'Stop'Map{}", i64 0, i64 0), i8* getelementptr inbounds ([27 x i8], [27 x i8]* @"sym_name_Lbl'UndsPipe'-'-GT-Unds'{}", i64 0, i64 0), i8* getelementptr inbounds ([21 x i8], [21 x i8]* @"sym_name_Lbl'Unds'Map'Unds'{}", i64 0, i64 0))
   ret void
 
-tag6:                                             ; preds = %entry
+tag4:                                             ; preds = %entry
   %30 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
   %31 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %30, i64 0, i32 2
   %32 = load %block*, %block** %31
-  call void %2(%FILE* %1, %block* %32, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
+  call void %2(%FILE* %1, %block* %32, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sort_name_SortBExp{}", i64 0, i64 0))
   ret void
 
-tag7:                                             ; preds = %entry
+tag6:                                             ; preds = %entry
   %33 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
   %34 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %33, i64 0, i32 2
   %35 = load %block*, %block** %34
   call void %2(%FILE* %1, %block* %35, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
   ret void
 
-tag8:                                             ; preds = %entry
+tag7:                                             ; preds = %entry
   %36 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
   %37 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %36, i64 0, i32 2
   %38 = load %block*, %block** %37
   call void %2(%FILE* %1, %block* %38, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
   ret void
 
-tag9:                                             ; preds = %entry
+tag8:                                             ; preds = %entry
   %39 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
   %40 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %39, i64 0, i32 2
   %41 = load %block*, %block** %40
   call void %2(%FILE* %1, %block* %41, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
   ret void
 
-tag10:                                            ; preds = %entry
+tag9:                                             ; preds = %entry
   %42 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
   %43 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %42, i64 0, i32 2
   %44 = load %block*, %block** %43
   call void %2(%FILE* %1, %block* %44, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
   ret void
 
-tag11:                                            ; preds = %entry
+tag10:                                            ; preds = %entry
   %45 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
   %46 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %45, i64 0, i32 2
   %47 = load %block*, %block** %46
   call void %2(%FILE* %1, %block* %47, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
   ret void
 
-tag12:                                            ; preds = %entry
+tag11:                                            ; preds = %entry
   %48 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
   %49 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %48, i64 0, i32 2
   %50 = load %block*, %block** %49
   call void %2(%FILE* %1, %block* %50, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
   ret void
 
-tag13:                                            ; preds = %entry
-  %51 = bitcast %block* %0 to { %blockheader, [0 x i64], %block*, %block* }*
-  %52 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %51, i64 0, i32 2
+tag12:                                            ; preds = %entry
+  %51 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %52 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %51, i64 0, i32 2
   %53 = load %block*, %block** %52
   call void %2(%FILE* %1, %block* %53, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
-  %54 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %51, i64 0, i32 3
-  %55 = load %block*, %block** %54
-  call void %2(%FILE* %1, %block* %55, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
+  ret void
+
+tag13:                                            ; preds = %entry
+  %54 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %55 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %54, i64 0, i32 2
+  %56 = load %block*, %block** %55
+  call void %2(%FILE* %1, %block* %56, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
+  ret void
+
+tag14:                                            ; preds = %entry
+  %57 = bitcast %block* %0 to { %blockheader, [0 x i64], %block*, %block* }*
+  %58 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %57, i64 0, i32 2
+  %59 = load %block*, %block** %58
+  call void %2(%FILE* %1, %block* %59, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
+  call void %10(%FILE* %1)
+  %60 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %57, i64 0, i32 3
+  %61 = load %block*, %block** %60
+  call void %2(%FILE* %1, %block* %61, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
   ret void
 
 tag15:                                            ; preds = %entry
-  %56 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %57 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %56, i64 0, i32 2
-  %58 = load %block*, %block** %57
-  call void %2(%FILE* %1, %block* %58, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sort_name_SortStmt{}", i64 0, i64 0))
+  %62 = bitcast %block* %0 to { %blockheader, [0 x i64], i1, %block*, %block* }*
+  %63 = getelementptr inbounds { %blockheader, [0 x i64], i1, %block*, %block* }, { %blockheader, [0 x i64], i1, %block*, %block* }* %62, i64 0, i32 2
+  %64 = load i1, i1* %63
+  call void %8(%FILE* %1, i1 %64, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sort_name_SortBool{}", i64 0, i64 0))
+  call void %10(%FILE* %1)
+  %65 = getelementptr inbounds { %blockheader, [0 x i64], i1, %block*, %block* }, { %blockheader, [0 x i64], i1, %block*, %block* }* %62, i64 0, i32 3
+  %66 = load %block*, %block** %65
+  call void %2(%FILE* %1, %block* %66, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
+  call void %10(%FILE* %1)
+  %67 = getelementptr inbounds { %blockheader, [0 x i64], i1, %block*, %block* }, { %blockheader, [0 x i64], i1, %block*, %block* }* %62, i64 0, i32 4
+  %68 = load %block*, %block** %67
+  call void %2(%FILE* %1, %block* %68, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
   ret void
 
-tag18:                                            ; preds = %entry
-  %59 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz*, %mpz* }*
-  %60 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %59, i64 0, i32 2
-  %61 = load %mpz*, %mpz** %60
-  call void %6(%FILE* %1, %mpz* %61, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
-  %62 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %59, i64 0, i32 3
-  %63 = load %mpz*, %mpz** %62
-  call void %6(%FILE* %1, %mpz* %63, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
-  ret void
-
-tag19:                                            ; preds = %entry
-  %64 = bitcast %block* %0 to { %blockheader, [0 x i64], %map, %map }*
-  %65 = getelementptr inbounds { %blockheader, [0 x i64], %map, %map }, { %blockheader, [0 x i64], %map, %map }* %64, i64 0, i32 2
-  %66 = load %map, %map* %65
-  call void %3(%FILE* %1, %map* %65, i8* getelementptr inbounds ([15 x i8], [15 x i8]* @"sym_name_Lbl'Stop'Map{}", i64 0, i64 0), i8* getelementptr inbounds ([27 x i8], [27 x i8]* @"sym_name_Lbl'UndsPipe'-'-GT-Unds'{}", i64 0, i64 0), i8* getelementptr inbounds ([21 x i8], [21 x i8]* @"sym_name_Lbl'Unds'Map'Unds'{}", i64 0, i64 0))
-  %67 = getelementptr inbounds { %blockheader, [0 x i64], %map, %map }, { %blockheader, [0 x i64], %map, %map }* %64, i64 0, i32 3
-  %68 = load %map, %map* %67
-  call void %3(%FILE* %1, %map* %67, i8* getelementptr inbounds ([15 x i8], [15 x i8]* @"sym_name_Lbl'Stop'Map{}", i64 0, i64 0), i8* getelementptr inbounds ([27 x i8], [27 x i8]* @"sym_name_Lbl'UndsPipe'-'-GT-Unds'{}", i64 0, i64 0), i8* getelementptr inbounds ([21 x i8], [21 x i8]* @"sym_name_Lbl'Unds'Map'Unds'{}", i64 0, i64 0))
-  ret void
-
-tag20:                                            ; preds = %entry
-  %69 = bitcast %block* %0 to { %blockheader, [0 x i64], i1, i1 }*
-  %70 = getelementptr inbounds { %blockheader, [0 x i64], i1, i1 }, { %blockheader, [0 x i64], i1, i1 }* %69, i64 0, i32 2
-  %71 = load i1, i1* %70
-  call void %8(%FILE* %1, i1 %71, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sort_name_SortBool{}", i64 0, i64 0))
-  %72 = getelementptr inbounds { %blockheader, [0 x i64], i1, i1 }, { %blockheader, [0 x i64], i1, i1 }* %69, i64 0, i32 3
-  %73 = load i1, i1* %72
-  call void %8(%FILE* %1, i1 %73, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sort_name_SortBool{}", i64 0, i64 0))
-  ret void
-
-tag21:                                            ; preds = %entry
-  %74 = bitcast %block* %0 to { %blockheader, [0 x i64], i1, i1 }*
-  %75 = getelementptr inbounds { %blockheader, [0 x i64], i1, i1 }, { %blockheader, [0 x i64], i1, i1 }* %74, i64 0, i32 2
-  %76 = load i1, i1* %75
-  call void %8(%FILE* %1, i1 %76, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sort_name_SortBool{}", i64 0, i64 0))
-  %77 = getelementptr inbounds { %blockheader, [0 x i64], i1, i1 }, { %blockheader, [0 x i64], i1, i1 }* %74, i64 0, i32 3
-  %78 = load i1, i1* %77
-  call void %8(%FILE* %1, i1 %78, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sort_name_SortBool{}", i64 0, i64 0))
+tag17:                                            ; preds = %entry
+  %69 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %70 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %69, i64 0, i32 2
+  %71 = load %block*, %block** %70
+  call void %2(%FILE* %1, %block* %71, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sort_name_SortStmt{}", i64 0, i64 0))
   ret void
 
 tag22:                                            ; preds = %entry
-  %79 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz*, %mpz* }*
-  %80 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %79, i64 0, i32 2
-  %81 = load %mpz*, %mpz** %80
-  call void %6(%FILE* %1, %mpz* %81, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
-  %82 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %79, i64 0, i32 3
-  %83 = load %mpz*, %mpz** %82
-  call void %6(%FILE* %1, %mpz* %83, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
+  %72 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz* }*
+  %73 = getelementptr inbounds { %blockheader, [0 x i64], %mpz* }, { %blockheader, [0 x i64], %mpz* }* %72, i64 0, i32 2
+  %74 = load %mpz*, %mpz** %73
+  call void %6(%FILE* %1, %mpz* %74, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
   ret void
 
 tag23:                                            ; preds = %entry
-  %84 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz*, %mpz* }*
-  %85 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %84, i64 0, i32 2
-  %86 = load %mpz*, %mpz** %85
-  call void %6(%FILE* %1, %mpz* %86, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
-  %87 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %84, i64 0, i32 3
-  %88 = load %mpz*, %mpz** %87
-  call void %6(%FILE* %1, %mpz* %88, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
+  %75 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz*, %mpz* }*
+  %76 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %75, i64 0, i32 2
+  %77 = load %mpz*, %mpz** %76
+  call void %6(%FILE* %1, %mpz* %77, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
+  call void %10(%FILE* %1)
+  %78 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %75, i64 0, i32 3
+  %79 = load %mpz*, %mpz** %78
+  call void %6(%FILE* %1, %mpz* %79, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
   ret void
 
 tag24:                                            ; preds = %entry
-  %89 = bitcast %block* %0 to { %blockheader, [0 x i64], i1, i1 }*
-  %90 = getelementptr inbounds { %blockheader, [0 x i64], i1, i1 }, { %blockheader, [0 x i64], i1, i1 }* %89, i64 0, i32 2
-  %91 = load i1, i1* %90
-  call void %8(%FILE* %1, i1 %91, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sort_name_SortBool{}", i64 0, i64 0))
-  %92 = getelementptr inbounds { %blockheader, [0 x i64], i1, i1 }, { %blockheader, [0 x i64], i1, i1 }* %89, i64 0, i32 3
-  %93 = load i1, i1* %92
-  call void %8(%FILE* %1, i1 %93, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sort_name_SortBool{}", i64 0, i64 0))
+  %80 = bitcast %block* %0 to { %blockheader, [0 x i64], %map, %map }*
+  %81 = getelementptr inbounds { %blockheader, [0 x i64], %map, %map }, { %blockheader, [0 x i64], %map, %map }* %80, i64 0, i32 2
+  %82 = load %map, %map* %81
+  call void %3(%FILE* %1, %map* %81, i8* getelementptr inbounds ([15 x i8], [15 x i8]* @"sym_name_Lbl'Stop'Map{}", i64 0, i64 0), i8* getelementptr inbounds ([27 x i8], [27 x i8]* @"sym_name_Lbl'UndsPipe'-'-GT-Unds'{}", i64 0, i64 0), i8* getelementptr inbounds ([21 x i8], [21 x i8]* @"sym_name_Lbl'Unds'Map'Unds'{}", i64 0, i64 0))
+  call void %10(%FILE* %1)
+  %83 = getelementptr inbounds { %blockheader, [0 x i64], %map, %map }, { %blockheader, [0 x i64], %map, %map }* %80, i64 0, i32 3
+  %84 = load %map, %map* %83
+  call void %3(%FILE* %1, %map* %83, i8* getelementptr inbounds ([15 x i8], [15 x i8]* @"sym_name_Lbl'Stop'Map{}", i64 0, i64 0), i8* getelementptr inbounds ([27 x i8], [27 x i8]* @"sym_name_Lbl'UndsPipe'-'-GT-Unds'{}", i64 0, i64 0), i8* getelementptr inbounds ([21 x i8], [21 x i8]* @"sym_name_Lbl'Unds'Map'Unds'{}", i64 0, i64 0))
   ret void
 
 tag25:                                            ; preds = %entry
-  %94 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz*, %mpz* }*
-  %95 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %94, i64 0, i32 2
-  %96 = load %mpz*, %mpz** %95
-  call void %6(%FILE* %1, %mpz* %96, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
-  %97 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %94, i64 0, i32 3
-  %98 = load %mpz*, %mpz** %97
-  call void %6(%FILE* %1, %mpz* %98, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
+  %85 = bitcast %block* %0 to { %blockheader, [0 x i64], %list, %list }*
+  %86 = getelementptr inbounds { %blockheader, [0 x i64], %list, %list }, { %blockheader, [0 x i64], %list, %list }* %85, i64 0, i32 2
+  %87 = load %list, %list* %86
+  call void %4(%FILE* %1, %list* %86, i8* getelementptr inbounds ([16 x i8], [16 x i8]* @"sym_name_Lbl'Stop'List{}", i64 0, i64 0), i8* getelementptr inbounds ([14 x i8], [14 x i8]* @"sym_name_LblListItem{}", i64 0, i64 0), i8* getelementptr inbounds ([22 x i8], [22 x i8]* @"sym_name_Lbl'Unds'List'Unds'{}", i64 0, i64 0))
+  call void %10(%FILE* %1)
+  %88 = getelementptr inbounds { %blockheader, [0 x i64], %list, %list }, { %blockheader, [0 x i64], %list, %list }* %85, i64 0, i32 3
+  %89 = load %list, %list* %88
+  call void %4(%FILE* %1, %list* %88, i8* getelementptr inbounds ([16 x i8], [16 x i8]* @"sym_name_Lbl'Stop'List{}", i64 0, i64 0), i8* getelementptr inbounds ([14 x i8], [14 x i8]* @"sym_name_LblListItem{}", i64 0, i64 0), i8* getelementptr inbounds ([22 x i8], [22 x i8]* @"sym_name_Lbl'Unds'List'Unds'{}", i64 0, i64 0))
   ret void
 
 tag26:                                            ; preds = %entry
-  %99 = bitcast %block* %0 to { %blockheader, [0 x i64], i1, i1 }*
-  %100 = getelementptr inbounds { %blockheader, [0 x i64], i1, i1 }, { %blockheader, [0 x i64], i1, i1 }* %99, i64 0, i32 2
-  %101 = load i1, i1* %100
-  call void %8(%FILE* %1, i1 %101, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sort_name_SortBool{}", i64 0, i64 0))
-  %102 = getelementptr inbounds { %blockheader, [0 x i64], i1, i1 }, { %blockheader, [0 x i64], i1, i1 }* %99, i64 0, i32 3
-  %103 = load i1, i1* %102
-  call void %8(%FILE* %1, i1 %103, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sort_name_SortBool{}", i64 0, i64 0))
+  %90 = bitcast %block* %0 to { %blockheader, [0 x i64], %map, %map }*
+  %91 = getelementptr inbounds { %blockheader, [0 x i64], %map, %map }, { %blockheader, [0 x i64], %map, %map }* %90, i64 0, i32 2
+  %92 = load %map, %map* %91
+  call void %3(%FILE* %1, %map* %91, i8* getelementptr inbounds ([15 x i8], [15 x i8]* @"sym_name_Lbl'Stop'Map{}", i64 0, i64 0), i8* getelementptr inbounds ([27 x i8], [27 x i8]* @"sym_name_Lbl'UndsPipe'-'-GT-Unds'{}", i64 0, i64 0), i8* getelementptr inbounds ([21 x i8], [21 x i8]* @"sym_name_Lbl'Unds'Map'Unds'{}", i64 0, i64 0))
+  call void %10(%FILE* %1)
+  %93 = getelementptr inbounds { %blockheader, [0 x i64], %map, %map }, { %blockheader, [0 x i64], %map, %map }* %90, i64 0, i32 3
+  %94 = load %map, %map* %93
+  call void %3(%FILE* %1, %map* %93, i8* getelementptr inbounds ([15 x i8], [15 x i8]* @"sym_name_Lbl'Stop'Map{}", i64 0, i64 0), i8* getelementptr inbounds ([27 x i8], [27 x i8]* @"sym_name_Lbl'UndsPipe'-'-GT-Unds'{}", i64 0, i64 0), i8* getelementptr inbounds ([21 x i8], [21 x i8]* @"sym_name_Lbl'Unds'Map'Unds'{}", i64 0, i64 0))
   ret void
 
 tag27:                                            ; preds = %entry
-  %104 = bitcast %block* %0 to { %blockheader, [0 x i64], i1, i1 }*
-  %105 = getelementptr inbounds { %blockheader, [0 x i64], i1, i1 }, { %blockheader, [0 x i64], i1, i1 }* %104, i64 0, i32 2
-  %106 = load i1, i1* %105
-  call void %8(%FILE* %1, i1 %106, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sort_name_SortBool{}", i64 0, i64 0))
-  %107 = getelementptr inbounds { %blockheader, [0 x i64], i1, i1 }, { %blockheader, [0 x i64], i1, i1 }* %104, i64 0, i32 3
-  %108 = load i1, i1* %107
-  call void %8(%FILE* %1, i1 %108, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sort_name_SortBool{}", i64 0, i64 0))
+  %95 = bitcast %block* %0 to { %blockheader, [0 x i64], %set, %set }*
+  %96 = getelementptr inbounds { %blockheader, [0 x i64], %set, %set }, { %blockheader, [0 x i64], %set, %set }* %95, i64 0, i32 2
+  %97 = load %set, %set* %96
+  call void %5(%FILE* %1, %set* %96, i8* getelementptr inbounds ([15 x i8], [15 x i8]* @"sym_name_Lbl'Stop'Set{}", i64 0, i64 0), i8* getelementptr inbounds ([13 x i8], [13 x i8]* @"sym_name_LblSetItem{}", i64 0, i64 0), i8* getelementptr inbounds ([21 x i8], [21 x i8]* @"sym_name_Lbl'Unds'Set'Unds'{}", i64 0, i64 0))
+  call void %10(%FILE* %1)
+  %98 = getelementptr inbounds { %blockheader, [0 x i64], %set, %set }, { %blockheader, [0 x i64], %set, %set }* %95, i64 0, i32 3
+  %99 = load %set, %set* %98
+  call void %5(%FILE* %1, %set* %98, i8* getelementptr inbounds ([15 x i8], [15 x i8]* @"sym_name_Lbl'Stop'Set{}", i64 0, i64 0), i8* getelementptr inbounds ([13 x i8], [13 x i8]* @"sym_name_LblSetItem{}", i64 0, i64 0), i8* getelementptr inbounds ([21 x i8], [21 x i8]* @"sym_name_Lbl'Unds'Set'Unds'{}", i64 0, i64 0))
   ret void
 
 tag28:                                            ; preds = %entry
-  %109 = bitcast %block* %0 to { %blockheader, [0 x i64], i1, i1 }*
-  %110 = getelementptr inbounds { %blockheader, [0 x i64], i1, i1 }, { %blockheader, [0 x i64], i1, i1 }* %109, i64 0, i32 2
-  %111 = load i1, i1* %110
-  call void %8(%FILE* %1, i1 %111, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sort_name_SortBool{}", i64 0, i64 0))
-  %112 = getelementptr inbounds { %blockheader, [0 x i64], i1, i1 }, { %blockheader, [0 x i64], i1, i1 }* %109, i64 0, i32 3
-  %113 = load i1, i1* %112
-  call void %8(%FILE* %1, i1 %113, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sort_name_SortBool{}", i64 0, i64 0))
+  %100 = bitcast %block* %0 to { %blockheader, [0 x i64], i1, i1 }*
+  %101 = getelementptr inbounds { %blockheader, [0 x i64], i1, i1 }, { %blockheader, [0 x i64], i1, i1 }* %100, i64 0, i32 2
+  %102 = load i1, i1* %101
+  call void %8(%FILE* %1, i1 %102, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sort_name_SortBool{}", i64 0, i64 0))
+  call void %10(%FILE* %1)
+  %103 = getelementptr inbounds { %blockheader, [0 x i64], i1, i1 }, { %blockheader, [0 x i64], i1, i1 }* %100, i64 0, i32 3
+  %104 = load i1, i1* %103
+  call void %8(%FILE* %1, i1 %104, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sort_name_SortBool{}", i64 0, i64 0))
   ret void
 
 tag29:                                            ; preds = %entry
-  %114 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz*, %mpz* }*
-  %115 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %114, i64 0, i32 2
-  %116 = load %mpz*, %mpz** %115
-  call void %6(%FILE* %1, %mpz* %116, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
-  %117 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %114, i64 0, i32 3
-  %118 = load %mpz*, %mpz** %117
-  call void %6(%FILE* %1, %mpz* %118, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
+  %105 = bitcast %block* %0 to { %blockheader, [0 x i64], i1, i1 }*
+  %106 = getelementptr inbounds { %blockheader, [0 x i64], i1, i1 }, { %blockheader, [0 x i64], i1, i1 }* %105, i64 0, i32 2
+  %107 = load i1, i1* %106
+  call void %8(%FILE* %1, i1 %107, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sort_name_SortBool{}", i64 0, i64 0))
+  call void %10(%FILE* %1)
+  %108 = getelementptr inbounds { %blockheader, [0 x i64], i1, i1 }, { %blockheader, [0 x i64], i1, i1 }* %105, i64 0, i32 3
+  %109 = load i1, i1* %108
+  call void %8(%FILE* %1, i1 %109, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sort_name_SortBool{}", i64 0, i64 0))
   ret void
 
 tag30:                                            ; preds = %entry
-  %119 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz*, %mpz* }*
-  %120 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %119, i64 0, i32 2
-  %121 = load %mpz*, %mpz** %120
-  call void %6(%FILE* %1, %mpz* %121, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
-  %122 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %119, i64 0, i32 3
-  %123 = load %mpz*, %mpz** %122
-  call void %6(%FILE* %1, %mpz* %123, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
+  %110 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz*, %mpz* }*
+  %111 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %110, i64 0, i32 2
+  %112 = load %mpz*, %mpz** %111
+  call void %6(%FILE* %1, %mpz* %112, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
+  call void %10(%FILE* %1)
+  %113 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %110, i64 0, i32 3
+  %114 = load %mpz*, %mpz** %113
+  call void %6(%FILE* %1, %mpz* %114, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
   ret void
 
 tag31:                                            ; preds = %entry
-  %124 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz*, %mpz* }*
-  %125 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %124, i64 0, i32 2
-  %126 = load %mpz*, %mpz** %125
-  call void %6(%FILE* %1, %mpz* %126, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
-  %127 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %124, i64 0, i32 3
-  %128 = load %mpz*, %mpz** %127
-  call void %6(%FILE* %1, %mpz* %128, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
+  %115 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz*, %mpz* }*
+  %116 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %115, i64 0, i32 2
+  %117 = load %mpz*, %mpz** %116
+  call void %6(%FILE* %1, %mpz* %117, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
+  call void %10(%FILE* %1)
+  %118 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %115, i64 0, i32 3
+  %119 = load %mpz*, %mpz** %118
+  call void %6(%FILE* %1, %mpz* %119, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
   ret void
 
 tag32:                                            ; preds = %entry
-  %129 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz*, %mpz* }*
-  %130 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %129, i64 0, i32 2
-  %131 = load %mpz*, %mpz** %130
-  call void %6(%FILE* %1, %mpz* %131, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
-  %132 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %129, i64 0, i32 3
-  %133 = load %mpz*, %mpz** %132
-  call void %6(%FILE* %1, %mpz* %133, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
+  %120 = bitcast %block* %0 to { %blockheader, [0 x i64], i1, i1 }*
+  %121 = getelementptr inbounds { %blockheader, [0 x i64], i1, i1 }, { %blockheader, [0 x i64], i1, i1 }* %120, i64 0, i32 2
+  %122 = load i1, i1* %121
+  call void %8(%FILE* %1, i1 %122, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sort_name_SortBool{}", i64 0, i64 0))
+  call void %10(%FILE* %1)
+  %123 = getelementptr inbounds { %blockheader, [0 x i64], i1, i1 }, { %blockheader, [0 x i64], i1, i1 }* %120, i64 0, i32 3
+  %124 = load i1, i1* %123
+  call void %8(%FILE* %1, i1 %124, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sort_name_SortBool{}", i64 0, i64 0))
   ret void
 
 tag33:                                            ; preds = %entry
-  %134 = bitcast %block* %0 to { %blockheader, [0 x i64], %block*, %block* }*
-  %135 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %134, i64 0, i32 2
-  %136 = load %block*, %block** %135
-  call void %2(%FILE* %1, %block* %136, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sort_name_SortAExp{}", i64 0, i64 0))
-  %137 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %134, i64 0, i32 3
-  %138 = load %block*, %block** %137
-  call void %2(%FILE* %1, %block* %138, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sort_name_SortAExp{}", i64 0, i64 0))
+  %125 = bitcast %block* %0 to { %blockheader, [0 x i64], %block*, %map }*
+  %126 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %map }, { %blockheader, [0 x i64], %block*, %map }* %125, i64 0, i32 2
+  %127 = load %block*, %block** %126
+  call void %2(%FILE* %1, %block* %127, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
+  call void %10(%FILE* %1)
+  %128 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %map }, { %blockheader, [0 x i64], %block*, %map }* %125, i64 0, i32 3
+  %129 = load %map, %map* %128
+  call void %3(%FILE* %1, %map* %128, i8* getelementptr inbounds ([15 x i8], [15 x i8]* @"sym_name_Lbl'Stop'Map{}", i64 0, i64 0), i8* getelementptr inbounds ([27 x i8], [27 x i8]* @"sym_name_Lbl'UndsPipe'-'-GT-Unds'{}", i64 0, i64 0), i8* getelementptr inbounds ([21 x i8], [21 x i8]* @"sym_name_Lbl'Unds'Map'Unds'{}", i64 0, i64 0))
   ret void
 
 tag34:                                            ; preds = %entry
-  %139 = bitcast %block* %0 to { %blockheader, [0 x i64], %block*, %block* }*
-  %140 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %139, i64 0, i32 2
-  %141 = load %block*, %block** %140
-  call void %2(%FILE* %1, %block* %141, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sort_name_SortBExp{}", i64 0, i64 0))
-  %142 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %139, i64 0, i32 3
-  %143 = load %block*, %block** %142
-  call void %2(%FILE* %1, %block* %143, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sort_name_SortBExp{}", i64 0, i64 0))
+  %130 = bitcast %block* %0 to { %blockheader, [0 x i64], %block*, %list }*
+  %131 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %list }, { %blockheader, [0 x i64], %block*, %list }* %130, i64 0, i32 2
+  %132 = load %block*, %block** %131
+  call void %2(%FILE* %1, %block* %132, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
+  call void %10(%FILE* %1)
+  %133 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %list }, { %blockheader, [0 x i64], %block*, %list }* %130, i64 0, i32 3
+  %134 = load %list, %list* %133
+  call void %4(%FILE* %1, %list* %133, i8* getelementptr inbounds ([16 x i8], [16 x i8]* @"sym_name_Lbl'Stop'List{}", i64 0, i64 0), i8* getelementptr inbounds ([14 x i8], [14 x i8]* @"sym_name_LblListItem{}", i64 0, i64 0), i8* getelementptr inbounds ([22 x i8], [22 x i8]* @"sym_name_Lbl'Unds'List'Unds'{}", i64 0, i64 0))
   ret void
 
 tag35:                                            ; preds = %entry
-  %144 = bitcast %block* %0 to { %blockheader, [0 x i64], %block*, %block* }*
-  %145 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %144, i64 0, i32 2
-  %146 = load %block*, %block** %145
-  call void %2(%FILE* %1, %block* %146, i8* getelementptr inbounds ([9 x i8], [9 x i8]* @"sort_name_SortId{}", i64 0, i64 0))
-  %147 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %144, i64 0, i32 3
-  %148 = load %block*, %block** %147
-  call void %2(%FILE* %1, %block* %148, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortIds{}", i64 0, i64 0))
+  %135 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz*, %mpz* }*
+  %136 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %135, i64 0, i32 2
+  %137 = load %mpz*, %mpz** %136
+  call void %6(%FILE* %1, %mpz* %137, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
+  call void %10(%FILE* %1)
+  %138 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %135, i64 0, i32 3
+  %139 = load %mpz*, %mpz** %138
+  call void %6(%FILE* %1, %mpz* %139, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
   ret void
 
 tag36:                                            ; preds = %entry
-  %149 = bitcast %block* %0 to { %blockheader, [0 x i64], i1, i1 }*
-  %150 = getelementptr inbounds { %blockheader, [0 x i64], i1, i1 }, { %blockheader, [0 x i64], i1, i1 }* %149, i64 0, i32 2
-  %151 = load i1, i1* %150
-  call void %8(%FILE* %1, i1 %151, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sort_name_SortBool{}", i64 0, i64 0))
-  %152 = getelementptr inbounds { %blockheader, [0 x i64], i1, i1 }, { %blockheader, [0 x i64], i1, i1 }* %149, i64 0, i32 3
-  %153 = load i1, i1* %152
-  call void %8(%FILE* %1, i1 %153, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sort_name_SortBool{}", i64 0, i64 0))
+  %140 = bitcast %block* %0 to { %blockheader, [0 x i64], i1, i1 }*
+  %141 = getelementptr inbounds { %blockheader, [0 x i64], i1, i1 }, { %blockheader, [0 x i64], i1, i1 }* %140, i64 0, i32 2
+  %142 = load i1, i1* %141
+  call void %8(%FILE* %1, i1 %142, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sort_name_SortBool{}", i64 0, i64 0))
+  call void %10(%FILE* %1)
+  %143 = getelementptr inbounds { %blockheader, [0 x i64], i1, i1 }, { %blockheader, [0 x i64], i1, i1 }* %140, i64 0, i32 3
+  %144 = load i1, i1* %143
+  call void %8(%FILE* %1, i1 %144, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sort_name_SortBool{}", i64 0, i64 0))
   ret void
 
 tag37:                                            ; preds = %entry
-  %154 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz*, %mpz* }*
-  %155 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %154, i64 0, i32 2
-  %156 = load %mpz*, %mpz** %155
-  call void %6(%FILE* %1, %mpz* %156, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
-  %157 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %154, i64 0, i32 3
-  %158 = load %mpz*, %mpz** %157
-  call void %6(%FILE* %1, %mpz* %158, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
+  %145 = bitcast %block* %0 to { %blockheader, [0 x i64], i1, i1 }*
+  %146 = getelementptr inbounds { %blockheader, [0 x i64], i1, i1 }, { %blockheader, [0 x i64], i1, i1 }* %145, i64 0, i32 2
+  %147 = load i1, i1* %146
+  call void %8(%FILE* %1, i1 %147, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sort_name_SortBool{}", i64 0, i64 0))
+  call void %10(%FILE* %1)
+  %148 = getelementptr inbounds { %blockheader, [0 x i64], i1, i1 }, { %blockheader, [0 x i64], i1, i1 }* %145, i64 0, i32 3
+  %149 = load i1, i1* %148
+  call void %8(%FILE* %1, i1 %149, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sort_name_SortBool{}", i64 0, i64 0))
   ret void
 
 tag38:                                            ; preds = %entry
-  %159 = bitcast %block* %0 to { %blockheader, [0 x i64], i1, i1 }*
-  %160 = getelementptr inbounds { %blockheader, [0 x i64], i1, i1 }, { %blockheader, [0 x i64], i1, i1 }* %159, i64 0, i32 2
-  %161 = load i1, i1* %160
-  call void %8(%FILE* %1, i1 %161, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sort_name_SortBool{}", i64 0, i64 0))
-  %162 = getelementptr inbounds { %blockheader, [0 x i64], i1, i1 }, { %blockheader, [0 x i64], i1, i1 }* %159, i64 0, i32 3
-  %163 = load i1, i1* %162
-  call void %8(%FILE* %1, i1 %163, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sort_name_SortBool{}", i64 0, i64 0))
+  %150 = bitcast %block* %0 to { %blockheader, [0 x i64], i1, i1 }*
+  %151 = getelementptr inbounds { %blockheader, [0 x i64], i1, i1 }, { %blockheader, [0 x i64], i1, i1 }* %150, i64 0, i32 2
+  %152 = load i1, i1* %151
+  call void %8(%FILE* %1, i1 %152, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sort_name_SortBool{}", i64 0, i64 0))
+  call void %10(%FILE* %1)
+  %153 = getelementptr inbounds { %blockheader, [0 x i64], i1, i1 }, { %blockheader, [0 x i64], i1, i1 }* %150, i64 0, i32 3
+  %154 = load i1, i1* %153
+  call void %8(%FILE* %1, i1 %154, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sort_name_SortBool{}", i64 0, i64 0))
   ret void
 
 tag39:                                            ; preds = %entry
-  %164 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz*, %mpz* }*
-  %165 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %164, i64 0, i32 2
-  %166 = load %mpz*, %mpz** %165
-  call void %6(%FILE* %1, %mpz* %166, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
-  %167 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %164, i64 0, i32 3
-  %168 = load %mpz*, %mpz** %167
-  call void %6(%FILE* %1, %mpz* %168, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
+  %155 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz*, %mpz* }*
+  %156 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %155, i64 0, i32 2
+  %157 = load %mpz*, %mpz** %156
+  call void %6(%FILE* %1, %mpz* %157, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
+  call void %10(%FILE* %1)
+  %158 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %155, i64 0, i32 3
+  %159 = load %mpz*, %mpz** %158
+  call void %6(%FILE* %1, %mpz* %159, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
   ret void
 
 tag40:                                            ; preds = %entry
-  %169 = bitcast %block* %0 to { %blockheader, [0 x i64], %block*, %block* }*
-  %170 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %169, i64 0, i32 2
-  %171 = load %block*, %block** %170
-  call void %2(%FILE* %1, %block* %171, i8* getelementptr inbounds ([9 x i8], [9 x i8]* @"sort_name_SortId{}", i64 0, i64 0))
-  %172 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %169, i64 0, i32 3
-  %173 = load %block*, %block** %172
-  call void %2(%FILE* %1, %block* %173, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sort_name_SortAExp{}", i64 0, i64 0))
+  %160 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz*, %mpz* }*
+  %161 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %160, i64 0, i32 2
+  %162 = load %mpz*, %mpz** %161
+  call void %6(%FILE* %1, %mpz* %162, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
+  call void %10(%FILE* %1)
+  %163 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %160, i64 0, i32 3
+  %164 = load %mpz*, %mpz** %163
+  call void %6(%FILE* %1, %mpz* %164, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
   ret void
 
 tag41:                                            ; preds = %entry
-  %174 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz*, %mpz* }*
-  %175 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %174, i64 0, i32 2
-  %176 = load %mpz*, %mpz** %175
-  call void %6(%FILE* %1, %mpz* %176, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
-  %177 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %174, i64 0, i32 3
-  %178 = load %mpz*, %mpz** %177
-  call void %6(%FILE* %1, %mpz* %178, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
+  %165 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz*, %mpz* }*
+  %166 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %165, i64 0, i32 2
+  %167 = load %mpz*, %mpz** %166
+  call void %6(%FILE* %1, %mpz* %167, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
+  call void %10(%FILE* %1)
+  %168 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %165, i64 0, i32 3
+  %169 = load %mpz*, %mpz** %168
+  call void %6(%FILE* %1, %mpz* %169, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
   ret void
 
 tag42:                                            ; preds = %entry
-  %179 = bitcast %block* %0 to { %blockheader, [0 x i64], %block*, %block* }*
-  %180 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %179, i64 0, i32 2
-  %181 = load %block*, %block** %180
-  call void %2(%FILE* %1, %block* %181, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
-  %182 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %179, i64 0, i32 3
-  %183 = load %block*, %block** %182
-  call void %2(%FILE* %1, %block* %183, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
+  %170 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz*, %mpz* }*
+  %171 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %170, i64 0, i32 2
+  %172 = load %mpz*, %mpz** %171
+  call void %6(%FILE* %1, %mpz* %172, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
+  call void %10(%FILE* %1)
+  %173 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %170, i64 0, i32 3
+  %174 = load %mpz*, %mpz** %173
+  call void %6(%FILE* %1, %mpz* %174, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
   ret void
 
 tag43:                                            ; preds = %entry
-  %184 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz*, %mpz* }*
-  %185 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %184, i64 0, i32 2
-  %186 = load %mpz*, %mpz** %185
-  call void %6(%FILE* %1, %mpz* %186, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
-  %187 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %184, i64 0, i32 3
-  %188 = load %mpz*, %mpz** %187
-  call void %6(%FILE* %1, %mpz* %188, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
+  %175 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz*, %mpz* }*
+  %176 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %175, i64 0, i32 2
+  %177 = load %mpz*, %mpz** %176
+  call void %6(%FILE* %1, %mpz* %177, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
+  call void %10(%FILE* %1)
+  %178 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %175, i64 0, i32 3
+  %179 = load %mpz*, %mpz** %178
+  call void %6(%FILE* %1, %mpz* %179, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
   ret void
 
 tag44:                                            ; preds = %entry
-  %189 = bitcast %block* %0 to { %blockheader, [0 x i64], %block*, %block* }*
-  %190 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %189, i64 0, i32 2
-  %191 = load %block*, %block** %190
-  call void %2(%FILE* %1, %block* %191, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sort_name_SortAExp{}", i64 0, i64 0))
-  %192 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %189, i64 0, i32 3
-  %193 = load %block*, %block** %192
-  call void %2(%FILE* %1, %block* %193, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sort_name_SortAExp{}", i64 0, i64 0))
+  %180 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz*, %mpz* }*
+  %181 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %180, i64 0, i32 2
+  %182 = load %mpz*, %mpz** %181
+  call void %6(%FILE* %1, %mpz* %182, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
+  call void %10(%FILE* %1)
+  %183 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %180, i64 0, i32 3
+  %184 = load %mpz*, %mpz** %183
+  call void %6(%FILE* %1, %mpz* %184, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
   ret void
 
 tag45:                                            ; preds = %entry
-  %194 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz*, %mpz* }*
-  %195 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %194, i64 0, i32 2
-  %196 = load %mpz*, %mpz** %195
-  call void %6(%FILE* %1, %mpz* %196, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
-  %197 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %194, i64 0, i32 3
-  %198 = load %mpz*, %mpz** %197
-  call void %6(%FILE* %1, %mpz* %198, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
+  %185 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz*, %mpz* }*
+  %186 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %185, i64 0, i32 2
+  %187 = load %mpz*, %mpz** %186
+  call void %6(%FILE* %1, %mpz* %187, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
+  call void %10(%FILE* %1)
+  %188 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %185, i64 0, i32 3
+  %189 = load %mpz*, %mpz** %188
+  call void %6(%FILE* %1, %mpz* %189, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
   ret void
 
 tag46:                                            ; preds = %entry
-  %199 = bitcast %block* %0 to { %blockheader, [0 x i64], %block*, %block* }*
-  %200 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %199, i64 0, i32 2
-  %201 = load %block*, %block** %200
-  call void %2(%FILE* %1, %block* %201, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sort_name_SortAExp{}", i64 0, i64 0))
-  %202 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %199, i64 0, i32 3
-  %203 = load %block*, %block** %202
-  call void %2(%FILE* %1, %block* %203, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sort_name_SortAExp{}", i64 0, i64 0))
+  %190 = bitcast %block* %0 to { %blockheader, [0 x i64], %map, %map }*
+  %191 = getelementptr inbounds { %blockheader, [0 x i64], %map, %map }, { %blockheader, [0 x i64], %map, %map }* %190, i64 0, i32 2
+  %192 = load %map, %map* %191
+  call void %3(%FILE* %1, %map* %191, i8* getelementptr inbounds ([15 x i8], [15 x i8]* @"sym_name_Lbl'Stop'Map{}", i64 0, i64 0), i8* getelementptr inbounds ([27 x i8], [27 x i8]* @"sym_name_Lbl'UndsPipe'-'-GT-Unds'{}", i64 0, i64 0), i8* getelementptr inbounds ([21 x i8], [21 x i8]* @"sym_name_Lbl'Unds'Map'Unds'{}", i64 0, i64 0))
+  call void %10(%FILE* %1)
+  %193 = getelementptr inbounds { %blockheader, [0 x i64], %map, %map }, { %blockheader, [0 x i64], %map, %map }* %190, i64 0, i32 3
+  %194 = load %map, %map* %193
+  call void %3(%FILE* %1, %map* %193, i8* getelementptr inbounds ([15 x i8], [15 x i8]* @"sym_name_Lbl'Stop'Map{}", i64 0, i64 0), i8* getelementptr inbounds ([27 x i8], [27 x i8]* @"sym_name_Lbl'UndsPipe'-'-GT-Unds'{}", i64 0, i64 0), i8* getelementptr inbounds ([21 x i8], [21 x i8]* @"sym_name_Lbl'Unds'Map'Unds'{}", i64 0, i64 0))
   ret void
 
 tag47:                                            ; preds = %entry
-  %204 = bitcast %block* %0 to { %blockheader, [0 x i64], %block*, %block* }*
-  %205 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %204, i64 0, i32 2
-  %206 = load %block*, %block** %205
-  call void %2(%FILE* %1, %block* %206, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sort_name_SortStmt{}", i64 0, i64 0))
-  %207 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %204, i64 0, i32 3
-  %208 = load %block*, %block** %207
-  call void %2(%FILE* %1, %block* %208, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sort_name_SortStmt{}", i64 0, i64 0))
+  %195 = bitcast %block* %0 to { %blockheader, [0 x i64], %set, %set }*
+  %196 = getelementptr inbounds { %blockheader, [0 x i64], %set, %set }, { %blockheader, [0 x i64], %set, %set }* %195, i64 0, i32 2
+  %197 = load %set, %set* %196
+  call void %5(%FILE* %1, %set* %196, i8* getelementptr inbounds ([15 x i8], [15 x i8]* @"sym_name_Lbl'Stop'Set{}", i64 0, i64 0), i8* getelementptr inbounds ([13 x i8], [13 x i8]* @"sym_name_LblSetItem{}", i64 0, i64 0), i8* getelementptr inbounds ([21 x i8], [21 x i8]* @"sym_name_Lbl'Unds'Set'Unds'{}", i64 0, i64 0))
+  call void %10(%FILE* %1)
+  %198 = getelementptr inbounds { %blockheader, [0 x i64], %set, %set }, { %blockheader, [0 x i64], %set, %set }* %195, i64 0, i32 3
+  %199 = load %set, %set* %198
+  call void %5(%FILE* %1, %set* %198, i8* getelementptr inbounds ([15 x i8], [15 x i8]* @"sym_name_Lbl'Stop'Set{}", i64 0, i64 0), i8* getelementptr inbounds ([13 x i8], [13 x i8]* @"sym_name_LblSetItem{}", i64 0, i64 0), i8* getelementptr inbounds ([21 x i8], [21 x i8]* @"sym_name_Lbl'Unds'Set'Unds'{}", i64 0, i64 0))
   ret void
 
 tag48:                                            ; preds = %entry
-  %209 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz* }*
-  %210 = getelementptr inbounds { %blockheader, [0 x i64], %mpz* }, { %blockheader, [0 x i64], %mpz* }* %209, i64 0, i32 2
-  %211 = load %mpz*, %mpz** %210
-  call void %6(%FILE* %1, %mpz* %211, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
+  %200 = bitcast %block* %0 to { %blockheader, [0 x i64], %block*, %block* }*
+  %201 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %200, i64 0, i32 2
+  %202 = load %block*, %block** %201
+  call void %2(%FILE* %1, %block* %202, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sort_name_SortAExp{}", i64 0, i64 0))
+  call void %10(%FILE* %1)
+  %203 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %200, i64 0, i32 3
+  %204 = load %block*, %block** %203
+  call void %2(%FILE* %1, %block* %204, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sort_name_SortAExp{}", i64 0, i64 0))
   ret void
 
 tag49:                                            ; preds = %entry
-  %212 = bitcast %block* %0 to { %blockheader, [0 x i64], %map, %block* }*
-  %213 = getelementptr inbounds { %blockheader, [0 x i64], %map, %block* }, { %blockheader, [0 x i64], %map, %block* }* %212, i64 0, i32 2
-  %214 = load %map, %map* %213
-  call void %3(%FILE* %1, %map* %213, i8* getelementptr inbounds ([15 x i8], [15 x i8]* @"sym_name_Lbl'Stop'Map{}", i64 0, i64 0), i8* getelementptr inbounds ([27 x i8], [27 x i8]* @"sym_name_Lbl'UndsPipe'-'-GT-Unds'{}", i64 0, i64 0), i8* getelementptr inbounds ([21 x i8], [21 x i8]* @"sym_name_Lbl'Unds'Map'Unds'{}", i64 0, i64 0))
-  %215 = getelementptr inbounds { %blockheader, [0 x i64], %map, %block* }, { %blockheader, [0 x i64], %map, %block* }* %212, i64 0, i32 3
-  %216 = load %block*, %block** %215
-  call void %2(%FILE* %1, %block* %216, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
+  %205 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz*, %mpz* }*
+  %206 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %205, i64 0, i32 2
+  %207 = load %mpz*, %mpz** %206
+  call void %6(%FILE* %1, %mpz* %207, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
+  call void %10(%FILE* %1)
+  %208 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %205, i64 0, i32 3
+  %209 = load %mpz*, %mpz** %208
+  call void %6(%FILE* %1, %mpz* %209, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
   ret void
 
 tag50:                                            ; preds = %entry
-  %217 = bitcast %block* %0 to { %blockheader, [0 x i64], %block*, %set }*
-  %218 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %set }, { %blockheader, [0 x i64], %block*, %set }* %217, i64 0, i32 2
-  %219 = load %block*, %block** %218
-  call void %2(%FILE* %1, %block* %219, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
-  %220 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %set }, { %blockheader, [0 x i64], %block*, %set }* %217, i64 0, i32 3
-  %221 = load %set, %set* %220
-  call void %5(%FILE* %1, %set* %220, i8* getelementptr inbounds ([15 x i8], [15 x i8]* @"sym_name_Lbl'Stop'Set{}", i64 0, i64 0), i8* getelementptr inbounds ([13 x i8], [13 x i8]* @"sym_name_LblSetItem{}", i64 0, i64 0), i8* getelementptr inbounds ([21 x i8], [21 x i8]* @"sym_name_Lbl'Unds'Set'Unds'{}", i64 0, i64 0))
+  %210 = bitcast %block* %0 to { %blockheader, [0 x i64], %block*, %block* }*
+  %211 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %210, i64 0, i32 2
+  %212 = load %block*, %block** %211
+  call void %2(%FILE* %1, %block* %212, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sort_name_SortBExp{}", i64 0, i64 0))
+  call void %10(%FILE* %1)
+  %213 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %210, i64 0, i32 3
+  %214 = load %block*, %block** %213
+  call void %2(%FILE* %1, %block* %214, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sort_name_SortBExp{}", i64 0, i64 0))
   ret void
 
 tag51:                                            ; preds = %entry
-  %222 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz* }*
-  %223 = getelementptr inbounds { %blockheader, [0 x i64], %mpz* }, { %blockheader, [0 x i64], %mpz* }* %222, i64 0, i32 2
-  %224 = load %mpz*, %mpz** %223
-  call void %6(%FILE* %1, %mpz* %224, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
+  %215 = bitcast %block* %0 to { %blockheader, [0 x i64], %block*, %block* }*
+  %216 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %215, i64 0, i32 2
+  %217 = load %block*, %block** %216
+  call void %2(%FILE* %1, %block* %217, i8* getelementptr inbounds ([9 x i8], [9 x i8]* @"sort_name_SortId{}", i64 0, i64 0))
+  call void %10(%FILE* %1)
+  %218 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %215, i64 0, i32 3
+  %219 = load %block*, %block** %218
+  call void %2(%FILE* %1, %block* %219, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortIds{}", i64 0, i64 0))
   ret void
 
 tag52:                                            ; preds = %entry
-  %225 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz*, %mpz*, %mpz* }*
-  %226 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz*, %mpz* }* %225, i64 0, i32 2
-  %227 = load %mpz*, %mpz** %226
-  call void %6(%FILE* %1, %mpz* %227, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
-  %228 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz*, %mpz* }* %225, i64 0, i32 3
-  %229 = load %mpz*, %mpz** %228
-  call void %6(%FILE* %1, %mpz* %229, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
-  %230 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz*, %mpz* }* %225, i64 0, i32 4
-  %231 = load %mpz*, %mpz** %230
-  call void %6(%FILE* %1, %mpz* %231, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
+  %220 = bitcast %block* %0 to { %blockheader, [0 x i64], i1, i1 }*
+  %221 = getelementptr inbounds { %blockheader, [0 x i64], i1, i1 }, { %blockheader, [0 x i64], i1, i1 }* %220, i64 0, i32 2
+  %222 = load i1, i1* %221
+  call void %8(%FILE* %1, i1 %222, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sort_name_SortBool{}", i64 0, i64 0))
+  call void %10(%FILE* %1)
+  %223 = getelementptr inbounds { %blockheader, [0 x i64], i1, i1 }, { %blockheader, [0 x i64], i1, i1 }* %220, i64 0, i32 3
+  %224 = load i1, i1* %223
+  call void %8(%FILE* %1, i1 %224, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sort_name_SortBool{}", i64 0, i64 0))
   ret void
 
 tag53:                                            ; preds = %entry
-  %232 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz* }*
-  %233 = getelementptr inbounds { %blockheader, [0 x i64], %mpz* }, { %blockheader, [0 x i64], %mpz* }* %232, i64 0, i32 2
-  %234 = load %mpz*, %mpz** %233
-  call void %6(%FILE* %1, %mpz* %234, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
+  %225 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz*, %mpz* }*
+  %226 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %225, i64 0, i32 2
+  %227 = load %mpz*, %mpz** %226
+  call void %6(%FILE* %1, %mpz* %227, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
+  call void %10(%FILE* %1)
+  %228 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %225, i64 0, i32 3
+  %229 = load %mpz*, %mpz** %228
+  call void %6(%FILE* %1, %mpz* %229, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
   ret void
 
 tag54:                                            ; preds = %entry
-  %235 = bitcast %block* %0 to { %blockheader, [0 x i64], %block*, %block*, %block* }*
-  %236 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block*, %block* }, { %blockheader, [0 x i64], %block*, %block*, %block* }* %235, i64 0, i32 2
-  %237 = load %block*, %block** %236
-  call void %2(%FILE* %1, %block* %237, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sort_name_SortBExp{}", i64 0, i64 0))
-  %238 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block*, %block* }, { %blockheader, [0 x i64], %block*, %block*, %block* }* %235, i64 0, i32 3
-  %239 = load %block*, %block** %238
-  call void %2(%FILE* %1, %block* %239, i8* getelementptr inbounds ([12 x i8], [12 x i8]* @"sort_name_SortBlock{}", i64 0, i64 0))
-  %240 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block*, %block* }, { %blockheader, [0 x i64], %block*, %block*, %block* }* %235, i64 0, i32 4
-  %241 = load %block*, %block** %240
-  call void %2(%FILE* %1, %block* %241, i8* getelementptr inbounds ([12 x i8], [12 x i8]* @"sort_name_SortBlock{}", i64 0, i64 0))
+  %230 = bitcast %block* %0 to { %blockheader, [0 x i64], %block*, %block* }*
+  %231 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %230, i64 0, i32 2
+  %232 = load %block*, %block** %231
+  call void %2(%FILE* %1, %block* %232, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
+  call void %10(%FILE* %1)
+  %233 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %230, i64 0, i32 3
+  %234 = load %block*, %block** %233
+  call void %2(%FILE* %1, %block* %234, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
   ret void
 
 tag55:                                            ; preds = %entry
-  %242 = bitcast %block* %0 to { %blockheader, [0 x i64], %map }*
-  %243 = getelementptr inbounds { %blockheader, [0 x i64], %map }, { %blockheader, [0 x i64], %map }* %242, i64 0, i32 2
-  %244 = load %map, %map* %243
-  call void %3(%FILE* %1, %map* %243, i8* getelementptr inbounds ([15 x i8], [15 x i8]* @"sym_name_Lbl'Stop'Map{}", i64 0, i64 0), i8* getelementptr inbounds ([27 x i8], [27 x i8]* @"sym_name_Lbl'UndsPipe'-'-GT-Unds'{}", i64 0, i64 0), i8* getelementptr inbounds ([21 x i8], [21 x i8]* @"sym_name_Lbl'Unds'Map'Unds'{}", i64 0, i64 0))
+  %235 = bitcast %block* %0 to { %blockheader, [0 x i64], i1, i1 }*
+  %236 = getelementptr inbounds { %blockheader, [0 x i64], i1, i1 }, { %blockheader, [0 x i64], i1, i1 }* %235, i64 0, i32 2
+  %237 = load i1, i1* %236
+  call void %8(%FILE* %1, i1 %237, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sort_name_SortBool{}", i64 0, i64 0))
+  call void %10(%FILE* %1)
+  %238 = getelementptr inbounds { %blockheader, [0 x i64], i1, i1 }, { %blockheader, [0 x i64], i1, i1 }* %235, i64 0, i32 3
+  %239 = load i1, i1* %238
+  call void %8(%FILE* %1, i1 %239, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sort_name_SortBool{}", i64 0, i64 0))
+  ret void
+
+tag56:                                            ; preds = %entry
+  %240 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz*, %mpz* }*
+  %241 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %240, i64 0, i32 2
+  %242 = load %mpz*, %mpz** %241
+  call void %6(%FILE* %1, %mpz* %242, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
+  call void %10(%FILE* %1)
+  %243 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %240, i64 0, i32 3
+  %244 = load %mpz*, %mpz** %243
+  call void %6(%FILE* %1, %mpz* %244, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
   ret void
 
 tag57:                                            ; preds = %entry
-  %245 = bitcast %block* %0 to { %blockheader, [0 x i64], %map }*
-  %246 = getelementptr inbounds { %blockheader, [0 x i64], %map }, { %blockheader, [0 x i64], %map }* %245, i64 0, i32 2
-  %247 = load %map, %map* %246
-  call void %3(%FILE* %1, %map* %246, i8* getelementptr inbounds ([15 x i8], [15 x i8]* @"sym_name_Lbl'Stop'Map{}", i64 0, i64 0), i8* getelementptr inbounds ([27 x i8], [27 x i8]* @"sym_name_Lbl'UndsPipe'-'-GT-Unds'{}", i64 0, i64 0), i8* getelementptr inbounds ([21 x i8], [21 x i8]* @"sym_name_Lbl'Unds'Map'Unds'{}", i64 0, i64 0))
+  %245 = bitcast %block* %0 to { %blockheader, [0 x i64], %block*, %block* }*
+  %246 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %245, i64 0, i32 2
+  %247 = load %block*, %block** %246
+  call void %2(%FILE* %1, %block* %247, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
+  call void %10(%FILE* %1)
+  %248 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %245, i64 0, i32 3
+  %249 = load %block*, %block** %248
+  call void %2(%FILE* %1, %block* %249, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
   ret void
 
 tag58:                                            ; preds = %entry
-  %248 = bitcast %block* %0 to { %blockheader, [0 x i64], %block*, %block* }*
-  %249 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %248, i64 0, i32 2
-  %250 = load %block*, %block** %249
-  call void %2(%FILE* %1, %block* %250, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortIds{}", i64 0, i64 0))
-  %251 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %248, i64 0, i32 3
+  %250 = bitcast %block* %0 to { %blockheader, [0 x i64], %block*, %block* }*
+  %251 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %250, i64 0, i32 2
   %252 = load %block*, %block** %251
-  call void %2(%FILE* %1, %block* %252, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sort_name_SortStmt{}", i64 0, i64 0))
+  call void %2(%FILE* %1, %block* %252, i8* getelementptr inbounds ([9 x i8], [9 x i8]* @"sort_name_SortId{}", i64 0, i64 0))
+  call void %10(%FILE* %1)
+  %253 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %250, i64 0, i32 3
+  %254 = load %block*, %block** %253
+  call void %2(%FILE* %1, %block* %254, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sort_name_SortAExp{}", i64 0, i64 0))
   ret void
 
 tag59:                                            ; preds = %entry
-  %253 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %254 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %253, i64 0, i32 2
-  %255 = load %block*, %block** %254
-  call void %2(%FILE* %1, %block* %255, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
-  ret void
-
-tag60:                                            ; preds = %entry
-  %256 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %257 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %256, i64 0, i32 2
-  %258 = load %block*, %block** %257
-  call void %2(%FILE* %1, %block* %258, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
-  ret void
-
-tag61:                                            ; preds = %entry
-  %259 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %260 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %259, i64 0, i32 2
+  %255 = bitcast %block* %0 to { %blockheader, [0 x i64], %map, %block*, %block* }*
+  %256 = getelementptr inbounds { %blockheader, [0 x i64], %map, %block*, %block* }, { %blockheader, [0 x i64], %map, %block*, %block* }* %255, i64 0, i32 2
+  %257 = load %map, %map* %256
+  call void %3(%FILE* %1, %map* %256, i8* getelementptr inbounds ([15 x i8], [15 x i8]* @"sym_name_Lbl'Stop'Map{}", i64 0, i64 0), i8* getelementptr inbounds ([27 x i8], [27 x i8]* @"sym_name_Lbl'UndsPipe'-'-GT-Unds'{}", i64 0, i64 0), i8* getelementptr inbounds ([21 x i8], [21 x i8]* @"sym_name_Lbl'Unds'Map'Unds'{}", i64 0, i64 0))
+  call void %10(%FILE* %1)
+  %258 = getelementptr inbounds { %blockheader, [0 x i64], %map, %block*, %block* }, { %blockheader, [0 x i64], %map, %block*, %block* }* %255, i64 0, i32 3
+  %259 = load %block*, %block** %258
+  call void %2(%FILE* %1, %block* %259, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
+  call void %10(%FILE* %1)
+  %260 = getelementptr inbounds { %blockheader, [0 x i64], %map, %block*, %block* }, { %blockheader, [0 x i64], %map, %block*, %block* }* %255, i64 0, i32 4
   %261 = load %block*, %block** %260
   call void %2(%FILE* %1, %block* %261, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
   ret void
 
-tag62:                                            ; preds = %entry
-  %262 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %263 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %262, i64 0, i32 2
-  %264 = load %block*, %block** %263
-  call void %2(%FILE* %1, %block* %264, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
+tag60:                                            ; preds = %entry
+  %262 = bitcast %block* %0 to { %blockheader, [0 x i64], %map, %block* }*
+  %263 = getelementptr inbounds { %blockheader, [0 x i64], %map, %block* }, { %blockheader, [0 x i64], %map, %block* }* %262, i64 0, i32 2
+  %264 = load %map, %map* %263
+  call void %3(%FILE* %1, %map* %263, i8* getelementptr inbounds ([15 x i8], [15 x i8]* @"sym_name_Lbl'Stop'Map{}", i64 0, i64 0), i8* getelementptr inbounds ([27 x i8], [27 x i8]* @"sym_name_Lbl'UndsPipe'-'-GT-Unds'{}", i64 0, i64 0), i8* getelementptr inbounds ([21 x i8], [21 x i8]* @"sym_name_Lbl'Unds'Map'Unds'{}", i64 0, i64 0))
+  call void %10(%FILE* %1)
+  %265 = getelementptr inbounds { %blockheader, [0 x i64], %map, %block* }, { %blockheader, [0 x i64], %map, %block* }* %262, i64 0, i32 3
+  %266 = load %block*, %block** %265
+  call void %2(%FILE* %1, %block* %266, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
   ret void
 
-tag63:                                            ; preds = %entry
-  %265 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %266 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %265, i64 0, i32 2
-  %267 = load %block*, %block** %266
-  call void %2(%FILE* %1, %block* %267, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
-  ret void
-
-tag64:                                            ; preds = %entry
-  %268 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %269 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %268, i64 0, i32 2
-  %270 = load %block*, %block** %269
-  call void %2(%FILE* %1, %block* %270, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
-  ret void
-
-tag65:                                            ; preds = %entry
-  %271 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %272 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %271, i64 0, i32 2
+tag61:                                            ; preds = %entry
+  %267 = bitcast %block* %0 to { %blockheader, [0 x i64], %map, %block*, %block* }*
+  %268 = getelementptr inbounds { %blockheader, [0 x i64], %map, %block*, %block* }, { %blockheader, [0 x i64], %map, %block*, %block* }* %267, i64 0, i32 2
+  %269 = load %map, %map* %268
+  call void %3(%FILE* %1, %map* %268, i8* getelementptr inbounds ([15 x i8], [15 x i8]* @"sym_name_Lbl'Stop'Map{}", i64 0, i64 0), i8* getelementptr inbounds ([27 x i8], [27 x i8]* @"sym_name_Lbl'UndsPipe'-'-GT-Unds'{}", i64 0, i64 0), i8* getelementptr inbounds ([21 x i8], [21 x i8]* @"sym_name_Lbl'Unds'Map'Unds'{}", i64 0, i64 0))
+  call void %10(%FILE* %1)
+  %270 = getelementptr inbounds { %blockheader, [0 x i64], %map, %block*, %block* }, { %blockheader, [0 x i64], %map, %block*, %block* }* %267, i64 0, i32 3
+  %271 = load %block*, %block** %270
+  call void %2(%FILE* %1, %block* %271, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
+  call void %10(%FILE* %1)
+  %272 = getelementptr inbounds { %blockheader, [0 x i64], %map, %block*, %block* }, { %blockheader, [0 x i64], %map, %block*, %block* }* %267, i64 0, i32 4
   %273 = load %block*, %block** %272
   call void %2(%FILE* %1, %block* %273, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
   ret void
 
+tag62:                                            ; preds = %entry
+  %274 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz*, %mpz* }*
+  %275 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %274, i64 0, i32 2
+  %276 = load %mpz*, %mpz** %275
+  call void %6(%FILE* %1, %mpz* %276, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
+  call void %10(%FILE* %1)
+  %277 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %274, i64 0, i32 3
+  %278 = load %mpz*, %mpz** %277
+  call void %6(%FILE* %1, %mpz* %278, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
+  ret void
+
+tag63:                                            ; preds = %entry
+  %279 = bitcast %block* %0 to { %blockheader, [0 x i64], %block*, %block* }*
+  %280 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %279, i64 0, i32 2
+  %281 = load %block*, %block** %280
+  call void %2(%FILE* %1, %block* %281, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
+  call void %10(%FILE* %1)
+  %282 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %279, i64 0, i32 3
+  %283 = load %block*, %block** %282
+  call void %2(%FILE* %1, %block* %283, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
+  ret void
+
+tag64:                                            ; preds = %entry
+  %284 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz*, %mpz* }*
+  %285 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %284, i64 0, i32 2
+  %286 = load %mpz*, %mpz** %285
+  call void %6(%FILE* %1, %mpz* %286, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
+  call void %10(%FILE* %1)
+  %287 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %284, i64 0, i32 3
+  %288 = load %mpz*, %mpz** %287
+  call void %6(%FILE* %1, %mpz* %288, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
+  ret void
+
+tag65:                                            ; preds = %entry
+  %289 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz*, %mpz* }*
+  %290 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %289, i64 0, i32 2
+  %291 = load %mpz*, %mpz** %290
+  call void %6(%FILE* %1, %mpz* %291, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
+  call void %10(%FILE* %1)
+  %292 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %289, i64 0, i32 3
+  %293 = load %mpz*, %mpz** %292
+  call void %6(%FILE* %1, %mpz* %293, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
+  ret void
+
 tag66:                                            ; preds = %entry
-  %274 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %275 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %274, i64 0, i32 2
-  %276 = load %block*, %block** %275
-  call void %2(%FILE* %1, %block* %276, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
+  %294 = bitcast %block* %0 to { %blockheader, [0 x i64], %block*, %block* }*
+  %295 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %294, i64 0, i32 2
+  %296 = load %block*, %block** %295
+  call void %2(%FILE* %1, %block* %296, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sort_name_SortAExp{}", i64 0, i64 0))
+  call void %10(%FILE* %1)
+  %297 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %294, i64 0, i32 3
+  %298 = load %block*, %block** %297
+  call void %2(%FILE* %1, %block* %298, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sort_name_SortAExp{}", i64 0, i64 0))
   ret void
 
 tag67:                                            ; preds = %entry
-  %277 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %278 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %277, i64 0, i32 2
-  %279 = load %block*, %block** %278
-  call void %2(%FILE* %1, %block* %279, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
+  %299 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz*, %mpz* }*
+  %300 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %299, i64 0, i32 2
+  %301 = load %mpz*, %mpz** %300
+  call void %6(%FILE* %1, %mpz* %301, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
+  call void %10(%FILE* %1)
+  %302 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %299, i64 0, i32 3
+  %303 = load %mpz*, %mpz** %302
+  call void %6(%FILE* %1, %mpz* %303, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
   ret void
 
 tag68:                                            ; preds = %entry
-  %280 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %281 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %280, i64 0, i32 2
-  %282 = load %block*, %block** %281
-  call void %2(%FILE* %1, %block* %282, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
+  %304 = bitcast %block* %0 to { %blockheader, [0 x i64], %block*, %block* }*
+  %305 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %304, i64 0, i32 2
+  %306 = load %block*, %block** %305
+  call void %2(%FILE* %1, %block* %306, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sort_name_SortAExp{}", i64 0, i64 0))
+  call void %10(%FILE* %1)
+  %307 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %304, i64 0, i32 3
+  %308 = load %block*, %block** %307
+  call void %2(%FILE* %1, %block* %308, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sort_name_SortAExp{}", i64 0, i64 0))
   ret void
 
 tag69:                                            ; preds = %entry
-  %283 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %284 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %283, i64 0, i32 2
-  %285 = load %block*, %block** %284
-  call void %2(%FILE* %1, %block* %285, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
+  %309 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz*, %mpz* }*
+  %310 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %309, i64 0, i32 2
+  %311 = load %mpz*, %mpz** %310
+  call void %6(%FILE* %1, %mpz* %311, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
+  call void %10(%FILE* %1)
+  %312 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %309, i64 0, i32 3
+  %313 = load %mpz*, %mpz** %312
+  call void %6(%FILE* %1, %mpz* %313, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
   ret void
 
 tag70:                                            ; preds = %entry
-  %286 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %287 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %286, i64 0, i32 2
-  %288 = load %block*, %block** %287
-  call void %2(%FILE* %1, %block* %288, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
+  %314 = bitcast %block* %0 to { %blockheader, [0 x i64], %block*, %block* }*
+  %315 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %314, i64 0, i32 2
+  %316 = load %block*, %block** %315
+  call void %2(%FILE* %1, %block* %316, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sort_name_SortStmt{}", i64 0, i64 0))
+  call void %10(%FILE* %1)
+  %317 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %314, i64 0, i32 3
+  %318 = load %block*, %block** %317
+  call void %2(%FILE* %1, %block* %318, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sort_name_SortStmt{}", i64 0, i64 0))
   ret void
 
 tag71:                                            ; preds = %entry
-  %289 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %290 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %289, i64 0, i32 2
-  %291 = load %block*, %block** %290
-  call void %2(%FILE* %1, %block* %291, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
+  %319 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz* }*
+  %320 = getelementptr inbounds { %blockheader, [0 x i64], %mpz* }, { %blockheader, [0 x i64], %mpz* }* %319, i64 0, i32 2
+  %321 = load %mpz*, %mpz** %320
+  call void %6(%FILE* %1, %mpz* %321, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
   ret void
 
 tag72:                                            ; preds = %entry
-  %292 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %293 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %292, i64 0, i32 2
-  %294 = load %block*, %block** %293
-  call void %2(%FILE* %1, %block* %294, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
-  ret void
-
-tag73:                                            ; preds = %entry
-  %295 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %296 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %295, i64 0, i32 2
-  %297 = load %block*, %block** %296
-  call void %2(%FILE* %1, %block* %297, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
-  ret void
-
-tag74:                                            ; preds = %entry
-  %298 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %299 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %298, i64 0, i32 2
-  %300 = load %block*, %block** %299
-  call void %2(%FILE* %1, %block* %300, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
-  ret void
-
-tag75:                                            ; preds = %entry
-  %301 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %302 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %301, i64 0, i32 2
-  %303 = load %block*, %block** %302
-  call void %2(%FILE* %1, %block* %303, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
-  ret void
-
-tag76:                                            ; preds = %entry
-  %304 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %305 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %304, i64 0, i32 2
-  %306 = load %block*, %block** %305
-  call void %2(%FILE* %1, %block* %306, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
-  ret void
-
-tag77:                                            ; preds = %entry
-  %307 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %308 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %307, i64 0, i32 2
-  %309 = load %block*, %block** %308
-  call void %2(%FILE* %1, %block* %309, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
-  ret void
-
-tag78:                                            ; preds = %entry
-  %310 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %311 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %310, i64 0, i32 2
-  %312 = load %block*, %block** %311
-  call void %2(%FILE* %1, %block* %312, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
-  ret void
-
-tag79:                                            ; preds = %entry
-  %313 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %314 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %313, i64 0, i32 2
-  %315 = load %block*, %block** %314
-  call void %2(%FILE* %1, %block* %315, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
-  ret void
-
-tag80:                                            ; preds = %entry
-  %316 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %317 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %316, i64 0, i32 2
-  %318 = load %block*, %block** %317
-  call void %2(%FILE* %1, %block* %318, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
-  ret void
-
-tag81:                                            ; preds = %entry
-  %319 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %320 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %319, i64 0, i32 2
-  %321 = load %block*, %block** %320
-  call void %2(%FILE* %1, %block* %321, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
-  ret void
-
-tag82:                                            ; preds = %entry
   %322 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
   %323 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %322, i64 0, i32 2
   %324 = load %block*, %block** %323
   call void %2(%FILE* %1, %block* %324, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
   ret void
 
-tag83:                                            ; preds = %entry
-  %325 = bitcast %block* %0 to { %blockheader, [0 x i64], %map }*
-  %326 = getelementptr inbounds { %blockheader, [0 x i64], %map }, { %blockheader, [0 x i64], %map }* %325, i64 0, i32 2
+tag73:                                            ; preds = %entry
+  %325 = bitcast %block* %0 to { %blockheader, [0 x i64], %map, %block* }*
+  %326 = getelementptr inbounds { %blockheader, [0 x i64], %map, %block* }, { %blockheader, [0 x i64], %map, %block* }* %325, i64 0, i32 2
   %327 = load %map, %map* %326
   call void %3(%FILE* %1, %map* %326, i8* getelementptr inbounds ([15 x i8], [15 x i8]* @"sym_name_Lbl'Stop'Map{}", i64 0, i64 0), i8* getelementptr inbounds ([27 x i8], [27 x i8]* @"sym_name_Lbl'UndsPipe'-'-GT-Unds'{}", i64 0, i64 0), i8* getelementptr inbounds ([21 x i8], [21 x i8]* @"sym_name_Lbl'Unds'Map'Unds'{}", i64 0, i64 0))
+  call void %10(%FILE* %1)
+  %328 = getelementptr inbounds { %blockheader, [0 x i64], %map, %block* }, { %blockheader, [0 x i64], %map, %block* }* %325, i64 0, i32 3
+  %329 = load %block*, %block** %328
+  call void %2(%FILE* %1, %block* %329, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
+  ret void
+
+tag74:                                            ; preds = %entry
+  %330 = bitcast %block* %0 to { %blockheader, [0 x i64], %set, %set }*
+  %331 = getelementptr inbounds { %blockheader, [0 x i64], %set, %set }, { %blockheader, [0 x i64], %set, %set }* %330, i64 0, i32 2
+  %332 = load %set, %set* %331
+  call void %5(%FILE* %1, %set* %331, i8* getelementptr inbounds ([15 x i8], [15 x i8]* @"sym_name_Lbl'Stop'Set{}", i64 0, i64 0), i8* getelementptr inbounds ([13 x i8], [13 x i8]* @"sym_name_LblSetItem{}", i64 0, i64 0), i8* getelementptr inbounds ([21 x i8], [21 x i8]* @"sym_name_Lbl'Unds'Set'Unds'{}", i64 0, i64 0))
+  call void %10(%FILE* %1)
+  %333 = getelementptr inbounds { %blockheader, [0 x i64], %set, %set }, { %blockheader, [0 x i64], %set, %set }* %330, i64 0, i32 3
+  %334 = load %set, %set* %333
+  call void %5(%FILE* %1, %set* %333, i8* getelementptr inbounds ([15 x i8], [15 x i8]* @"sym_name_Lbl'Stop'Set{}", i64 0, i64 0), i8* getelementptr inbounds ([13 x i8], [13 x i8]* @"sym_name_LblSetItem{}", i64 0, i64 0), i8* getelementptr inbounds ([21 x i8], [21 x i8]* @"sym_name_Lbl'Unds'Set'Unds'{}", i64 0, i64 0))
+  ret void
+
+tag75:                                            ; preds = %entry
+  %335 = bitcast %block* %0 to { %blockheader, [0 x i64], %block*, %set }*
+  %336 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %set }, { %blockheader, [0 x i64], %block*, %set }* %335, i64 0, i32 2
+  %337 = load %block*, %block** %336
+  call void %2(%FILE* %1, %block* %337, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
+  call void %10(%FILE* %1)
+  %338 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %set }, { %blockheader, [0 x i64], %block*, %set }* %335, i64 0, i32 3
+  %339 = load %set, %set* %338
+  call void %5(%FILE* %1, %set* %338, i8* getelementptr inbounds ([15 x i8], [15 x i8]* @"sym_name_Lbl'Stop'Set{}", i64 0, i64 0), i8* getelementptr inbounds ([13 x i8], [13 x i8]* @"sym_name_LblSetItem{}", i64 0, i64 0), i8* getelementptr inbounds ([21 x i8], [21 x i8]* @"sym_name_Lbl'Unds'Set'Unds'{}", i64 0, i64 0))
+  ret void
+
+tag76:                                            ; preds = %entry
+  %340 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %341 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %340, i64 0, i32 2
+  %342 = load %block*, %block** %341
+  call void %2(%FILE* %1, %block* %342, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
+  ret void
+
+tag77:                                            ; preds = %entry
+  %343 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz* }*
+  %344 = getelementptr inbounds { %blockheader, [0 x i64], %mpz* }, { %blockheader, [0 x i64], %mpz* }* %343, i64 0, i32 2
+  %345 = load %mpz*, %mpz** %344
+  call void %6(%FILE* %1, %mpz* %345, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
+  ret void
+
+tag78:                                            ; preds = %entry
+  %346 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz*, %mpz*, %mpz* }*
+  %347 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz*, %mpz* }* %346, i64 0, i32 2
+  %348 = load %mpz*, %mpz** %347
+  call void %6(%FILE* %1, %mpz* %348, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
+  call void %10(%FILE* %1)
+  %349 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz*, %mpz* }* %346, i64 0, i32 3
+  %350 = load %mpz*, %mpz** %349
+  call void %6(%FILE* %1, %mpz* %350, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
+  call void %10(%FILE* %1)
+  %351 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz*, %mpz* }* %346, i64 0, i32 4
+  %352 = load %mpz*, %mpz** %351
+  call void %6(%FILE* %1, %mpz* %352, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
+  ret void
+
+tag79:                                            ; preds = %entry
+  %353 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz* }*
+  %354 = getelementptr inbounds { %blockheader, [0 x i64], %mpz* }, { %blockheader, [0 x i64], %mpz* }* %353, i64 0, i32 2
+  %355 = load %mpz*, %mpz** %354
+  call void %6(%FILE* %1, %mpz* %355, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
+  ret void
+
+tag80:                                            ; preds = %entry
+  %356 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz* }*
+  %357 = getelementptr inbounds { %blockheader, [0 x i64], %mpz* }, { %blockheader, [0 x i64], %mpz* }* %356, i64 0, i32 2
+  %358 = load %mpz*, %mpz** %357
+  call void %6(%FILE* %1, %mpz* %358, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
+  ret void
+
+tag81:                                            ; preds = %entry
+  %359 = bitcast %block* %0 to { %blockheader, [0 x i64], %block*, %block*, %block* }*
+  %360 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block*, %block* }, { %blockheader, [0 x i64], %block*, %block*, %block* }* %359, i64 0, i32 2
+  %361 = load %block*, %block** %360
+  call void %2(%FILE* %1, %block* %361, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sort_name_SortBExp{}", i64 0, i64 0))
+  call void %10(%FILE* %1)
+  %362 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block*, %block* }, { %blockheader, [0 x i64], %block*, %block*, %block* }* %359, i64 0, i32 3
+  %363 = load %block*, %block** %362
+  call void %2(%FILE* %1, %block* %363, i8* getelementptr inbounds ([12 x i8], [12 x i8]* @"sort_name_SortBlock{}", i64 0, i64 0))
+  call void %10(%FILE* %1)
+  %364 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block*, %block* }, { %blockheader, [0 x i64], %block*, %block*, %block* }* %359, i64 0, i32 4
+  %365 = load %block*, %block** %364
+  call void %2(%FILE* %1, %block* %365, i8* getelementptr inbounds ([12 x i8], [12 x i8]* @"sort_name_SortBlock{}", i64 0, i64 0))
+  ret void
+
+tag82:                                            ; preds = %entry
+  %366 = bitcast %block* %0 to { %blockheader, [0 x i64], %map }*
+  %367 = getelementptr inbounds { %blockheader, [0 x i64], %map }, { %blockheader, [0 x i64], %map }* %366, i64 0, i32 2
+  %368 = load %map, %map* %367
+  call void %3(%FILE* %1, %map* %367, i8* getelementptr inbounds ([15 x i8], [15 x i8]* @"sym_name_Lbl'Stop'Map{}", i64 0, i64 0), i8* getelementptr inbounds ([27 x i8], [27 x i8]* @"sym_name_Lbl'UndsPipe'-'-GT-Unds'{}", i64 0, i64 0), i8* getelementptr inbounds ([21 x i8], [21 x i8]* @"sym_name_Lbl'Unds'Map'Unds'{}", i64 0, i64 0))
   ret void
 
 tag84:                                            ; preds = %entry
-  %328 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz*, %mpz* }*
-  %329 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %328, i64 0, i32 2
-  %330 = load %mpz*, %mpz** %329
-  call void %6(%FILE* %1, %mpz* %330, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
-  %331 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %328, i64 0, i32 3
-  %332 = load %mpz*, %mpz** %331
-  call void %6(%FILE* %1, %mpz* %332, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
+  %369 = bitcast %block* %0 to { %blockheader, [0 x i64], %map }*
+  %370 = getelementptr inbounds { %blockheader, [0 x i64], %map }, { %blockheader, [0 x i64], %map }* %369, i64 0, i32 2
+  %371 = load %map, %map* %370
+  call void %3(%FILE* %1, %map* %370, i8* getelementptr inbounds ([15 x i8], [15 x i8]* @"sym_name_Lbl'Stop'Map{}", i64 0, i64 0), i8* getelementptr inbounds ([27 x i8], [27 x i8]* @"sym_name_Lbl'UndsPipe'-'-GT-Unds'{}", i64 0, i64 0), i8* getelementptr inbounds ([21 x i8], [21 x i8]* @"sym_name_Lbl'Unds'Map'Unds'{}", i64 0, i64 0))
   ret void
 
 tag85:                                            ; preds = %entry
-  %333 = bitcast %block* %0 to { %blockheader, [0 x i64], i1 }*
-  %334 = getelementptr inbounds { %blockheader, [0 x i64], i1 }, { %blockheader, [0 x i64], i1 }* %333, i64 0, i32 2
-  %335 = load i1, i1* %334
-  call void %8(%FILE* %1, i1 %335, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sort_name_SortBool{}", i64 0, i64 0))
+  %372 = bitcast %block* %0 to { %blockheader, [0 x i64], %block*, %block* }*
+  %373 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %372, i64 0, i32 2
+  %374 = load %block*, %block** %373
+  call void %2(%FILE* %1, %block* %374, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortIds{}", i64 0, i64 0))
+  call void %10(%FILE* %1)
+  %375 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %372, i64 0, i32 3
+  %376 = load %block*, %block** %375
+  call void %2(%FILE* %1, %block* %376, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sort_name_SortStmt{}", i64 0, i64 0))
   ret void
 
 tag86:                                            ; preds = %entry
-  %336 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz*, %mpz*, %mpz* }*
-  %337 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz*, %mpz* }* %336, i64 0, i32 2
-  %338 = load %mpz*, %mpz** %337
-  call void %6(%FILE* %1, %mpz* %338, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
-  %339 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz*, %mpz* }* %336, i64 0, i32 3
-  %340 = load %mpz*, %mpz** %339
-  call void %6(%FILE* %1, %mpz* %340, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
-  %341 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz*, %mpz* }* %336, i64 0, i32 4
-  %342 = load %mpz*, %mpz** %341
-  call void %6(%FILE* %1, %mpz* %342, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
+  %377 = bitcast %block* %0 to { %blockheader, [0 x i64], %set, %set }*
+  %378 = getelementptr inbounds { %blockheader, [0 x i64], %set, %set }, { %blockheader, [0 x i64], %set, %set }* %377, i64 0, i32 2
+  %379 = load %set, %set* %378
+  call void %5(%FILE* %1, %set* %378, i8* getelementptr inbounds ([15 x i8], [15 x i8]* @"sym_name_Lbl'Stop'Set{}", i64 0, i64 0), i8* getelementptr inbounds ([13 x i8], [13 x i8]* @"sym_name_LblSetItem{}", i64 0, i64 0), i8* getelementptr inbounds ([21 x i8], [21 x i8]* @"sym_name_Lbl'Unds'Set'Unds'{}", i64 0, i64 0))
+  call void %10(%FILE* %1)
+  %380 = getelementptr inbounds { %blockheader, [0 x i64], %set, %set }, { %blockheader, [0 x i64], %set, %set }* %377, i64 0, i32 3
+  %381 = load %set, %set* %380
+  call void %5(%FILE* %1, %set* %380, i8* getelementptr inbounds ([15 x i8], [15 x i8]* @"sym_name_Lbl'Stop'Set{}", i64 0, i64 0), i8* getelementptr inbounds ([13 x i8], [13 x i8]* @"sym_name_LblSetItem{}", i64 0, i64 0), i8* getelementptr inbounds ([21 x i8], [21 x i8]* @"sym_name_Lbl'Unds'Set'Unds'{}", i64 0, i64 0))
   ret void
 
 tag87:                                            ; preds = %entry
-  %343 = bitcast %block* %0 to { %blockheader, [0 x i64], %block*, %block* }*
-  %344 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %343, i64 0, i32 2
-  %345 = load %block*, %block** %344
-  call void %2(%FILE* %1, %block* %345, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sort_name_SortBExp{}", i64 0, i64 0))
-  %346 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %343, i64 0, i32 3
-  %347 = load %block*, %block** %346
-  call void %2(%FILE* %1, %block* %347, i8* getelementptr inbounds ([12 x i8], [12 x i8]* @"sort_name_SortBlock{}", i64 0, i64 0))
+  %382 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %383 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %382, i64 0, i32 2
+  %384 = load %block*, %block** %383
+  call void %2(%FILE* %1, %block* %384, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
   ret void
 
 tag88:                                            ; preds = %entry
-  %348 = bitcast %block* %0 to { %blockheader, [0 x i64], %block*, %block* }*
-  %349 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %348, i64 0, i32 2
-  %350 = load %block*, %block** %349
-  call void %2(%FILE* %1, %block* %350, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
-  %351 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %348, i64 0, i32 3
-  %352 = load %block*, %block** %351
-  call void %2(%FILE* %1, %block* %352, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
+  %385 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %386 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %385, i64 0, i32 2
+  %387 = load %block*, %block** %386
+  call void %2(%FILE* %1, %block* %387, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
+  ret void
+
+tag89:                                            ; preds = %entry
+  %388 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %389 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %388, i64 0, i32 2
+  %390 = load %block*, %block** %389
+  call void %2(%FILE* %1, %block* %390, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
   ret void
 
 tag90:                                            ; preds = %entry
-  %353 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %354 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %353, i64 0, i32 2
-  %355 = load %block*, %block** %354
-  call void %2(%FILE* %1, %block* %355, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortIds{}", i64 0, i64 0))
+  %391 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %392 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %391, i64 0, i32 2
+  %393 = load %block*, %block** %392
+  call void %2(%FILE* %1, %block* %393, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
   ret void
 
 tag91:                                            ; preds = %entry
-  %356 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %357 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %356, i64 0, i32 2
-  %358 = load %block*, %block** %357
-  call void %2(%FILE* %1, %block* %358, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sort_name_SortAExp{}", i64 0, i64 0))
+  %394 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %395 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %394, i64 0, i32 2
+  %396 = load %block*, %block** %395
+  call void %2(%FILE* %1, %block* %396, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
   ret void
 
 tag92:                                            ; preds = %entry
-  %359 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %360 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %359, i64 0, i32 2
-  %361 = load %block*, %block** %360
-  call void %2(%FILE* %1, %block* %361, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sort_name_SortStmt{}", i64 0, i64 0))
+  %397 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %398 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %397, i64 0, i32 2
+  %399 = load %block*, %block** %398
+  call void %2(%FILE* %1, %block* %399, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
   ret void
 
 tag93:                                            ; preds = %entry
-  %362 = bitcast %block* %0 to { %blockheader, [0 x i64], i1 }*
-  %363 = getelementptr inbounds { %blockheader, [0 x i64], i1 }, { %blockheader, [0 x i64], i1 }* %362, i64 0, i32 2
-  %364 = load i1, i1* %363
-  call void %8(%FILE* %1, i1 %364, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sort_name_SortBool{}", i64 0, i64 0))
+  %400 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %401 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %400, i64 0, i32 2
+  %402 = load %block*, %block** %401
+  call void %2(%FILE* %1, %block* %402, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
   ret void
 
 tag94:                                            ; preds = %entry
-  %365 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %366 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %365, i64 0, i32 2
-  %367 = load %block*, %block** %366
-  call void %2(%FILE* %1, %block* %367, i8* getelementptr inbounds ([12 x i8], [12 x i8]* @"sort_name_SortBlock{}", i64 0, i64 0))
+  %403 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %404 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %403, i64 0, i32 2
+  %405 = load %block*, %block** %404
+  call void %2(%FILE* %1, %block* %405, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
   ret void
 
 tag95:                                            ; preds = %entry
-  %368 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %369 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %368, i64 0, i32 2
-  %370 = load %block*, %block** %369
-  call void %2(%FILE* %1, %block* %370, i8* getelementptr inbounds ([12 x i8], [12 x i8]* @"sort_name_SortKItem{}", i64 0, i64 0))
+  %406 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %407 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %406, i64 0, i32 2
+  %408 = load %block*, %block** %407
+  call void %2(%FILE* %1, %block* %408, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
   ret void
 
 tag96:                                            ; preds = %entry
-  %371 = bitcast %block* %0 to { %blockheader, [0 x i64], %set }*
-  %372 = getelementptr inbounds { %blockheader, [0 x i64], %set }, { %blockheader, [0 x i64], %set }* %371, i64 0, i32 2
-  %373 = load %set, %set* %372
-  call void %5(%FILE* %1, %set* %372, i8* getelementptr inbounds ([15 x i8], [15 x i8]* @"sym_name_Lbl'Stop'Set{}", i64 0, i64 0), i8* getelementptr inbounds ([13 x i8], [13 x i8]* @"sym_name_LblSetItem{}", i64 0, i64 0), i8* getelementptr inbounds ([21 x i8], [21 x i8]* @"sym_name_Lbl'Unds'Set'Unds'{}", i64 0, i64 0))
+  %409 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %410 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %409, i64 0, i32 2
+  %411 = load %block*, %block** %410
+  call void %2(%FILE* %1, %block* %411, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
   ret void
 
 tag97:                                            ; preds = %entry
-  %374 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %375 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %374, i64 0, i32 2
-  %376 = load %block*, %block** %375
-  call void %2(%FILE* %1, %block* %376, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sort_name_SortBExp{}", i64 0, i64 0))
+  %412 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %413 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %412, i64 0, i32 2
+  %414 = load %block*, %block** %413
+  call void %2(%FILE* %1, %block* %414, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
   ret void
 
 tag98:                                            ; preds = %entry
-  %377 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz* }*
-  %378 = getelementptr inbounds { %blockheader, [0 x i64], %mpz* }, { %blockheader, [0 x i64], %mpz* }* %377, i64 0, i32 2
-  %379 = load %mpz*, %mpz** %378
-  call void %6(%FILE* %1, %mpz* %379, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
+  %415 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %416 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %415, i64 0, i32 2
+  %417 = load %block*, %block** %416
+  call void %2(%FILE* %1, %block* %417, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
   ret void
 
 tag99:                                            ; preds = %entry
-  %380 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %381 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %380, i64 0, i32 2
-  %382 = load %block*, %block** %381
-  call void %2(%FILE* %1, %block* %382, i8* getelementptr inbounds ([12 x i8], [12 x i8]* @"sort_name_SortKCell{}", i64 0, i64 0))
+  %418 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %419 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %418, i64 0, i32 2
+  %420 = load %block*, %block** %419
+  call void %2(%FILE* %1, %block* %420, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
   ret void
 
 tag100:                                           ; preds = %entry
-  %383 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %384 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %383, i64 0, i32 2
-  %385 = load %block*, %block** %384
-  call void %2(%FILE* %1, %block* %385, i8* getelementptr inbounds ([12 x i8], [12 x i8]* @"sort_name_SortTCell{}", i64 0, i64 0))
+  %421 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %422 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %421, i64 0, i32 2
+  %423 = load %block*, %block** %422
+  call void %2(%FILE* %1, %block* %423, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
   ret void
 
 tag101:                                           ; preds = %entry
-  %386 = bitcast %block* %0 to { %blockheader, [0 x i64], %list }*
-  %387 = getelementptr inbounds { %blockheader, [0 x i64], %list }, { %blockheader, [0 x i64], %list }* %386, i64 0, i32 2
-  %388 = load %list, %list* %387
-  call void %4(%FILE* %1, %list* %387, i8* getelementptr inbounds ([16 x i8], [16 x i8]* @"sym_name_Lbl'Stop'List{}", i64 0, i64 0), i8* getelementptr inbounds ([14 x i8], [14 x i8]* @"sym_name_LblListItem{}", i64 0, i64 0), i8* getelementptr inbounds ([22 x i8], [22 x i8]* @"sym_name_Lbl'Unds'List'Unds'{}", i64 0, i64 0))
-  ret void
-
-tag102:                                           ; preds = %entry
-  %389 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %390 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %389, i64 0, i32 2
-  %391 = load %block*, %block** %390
-  call void %2(%FILE* %1, %block* %391, i8* getelementptr inbounds ([9 x i8], [9 x i8]* @"sort_name_SortId{}", i64 0, i64 0))
-  ret void
-
-tag103:                                           ; preds = %entry
-  %392 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %393 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %392, i64 0, i32 2
-  %394 = load %block*, %block** %393
-  call void %2(%FILE* %1, %block* %394, i8* getelementptr inbounds ([20 x i8], [20 x i8]* @"sort_name_SortTCellFragment{}", i64 0, i64 0))
-  ret void
-
-tag104:                                           ; preds = %entry
-  %395 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %396 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %395, i64 0, i32 2
-  %397 = load %block*, %block** %396
-  call void %2(%FILE* %1, %block* %397, i8* getelementptr inbounds ([16 x i8], [16 x i8]* @"sort_name_SortStateCell{}", i64 0, i64 0))
-  ret void
-
-tag105:                                           ; preds = %entry
-  %398 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %399 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %398, i64 0, i32 2
-  %400 = load %block*, %block** %399
-  call void %2(%FILE* %1, %block* %400, i8* getelementptr inbounds ([17 x i8], [17 x i8]* @"sort_name_SortKConfigVar{}", i64 0, i64 0))
-  ret void
-
-tag106:                                           ; preds = %entry
-  %401 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %402 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %401, i64 0, i32 2
-  %403 = load %block*, %block** %402
-  call void %2(%FILE* %1, %block* %403, i8* getelementptr inbounds ([19 x i8], [19 x i8]* @"sort_name_SortStateCellOpt{}", i64 0, i64 0))
-  ret void
-
-tag107:                                           ; preds = %entry
-  %404 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %405 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %404, i64 0, i32 2
-  %406 = load %block*, %block** %405
-  call void %2(%FILE* %1, %block* %406, i8* getelementptr inbounds ([15 x i8], [15 x i8]* @"sort_name_SortKCellOpt{}", i64 0, i64 0))
-  ret void
-
-tag108:                                           ; preds = %entry
-  %407 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %408 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %407, i64 0, i32 2
-  %409 = load %block*, %block** %408
-  call void %2(%FILE* %1, %block* %409, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortPgm{}", i64 0, i64 0))
-  ret void
-
-tag109:                                           ; preds = %entry
-  %410 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %411 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %410, i64 0, i32 2
-  %412 = load %block*, %block** %411
-  call void %2(%FILE* %1, %block* %412, i8* getelementptr inbounds ([14 x i8], [14 x i8]* @"sort_name_SortKResult{}", i64 0, i64 0))
-  ret void
-
-tag110:                                           ; preds = %entry
-  %413 = bitcast %block* %0 to { %blockheader, [0 x i64], %map }*
-  %414 = getelementptr inbounds { %blockheader, [0 x i64], %map }, { %blockheader, [0 x i64], %map }* %413, i64 0, i32 2
-  %415 = load %map, %map* %414
-  call void %3(%FILE* %1, %map* %414, i8* getelementptr inbounds ([15 x i8], [15 x i8]* @"sym_name_Lbl'Stop'Map{}", i64 0, i64 0), i8* getelementptr inbounds ([27 x i8], [27 x i8]* @"sym_name_Lbl'UndsPipe'-'-GT-Unds'{}", i64 0, i64 0), i8* getelementptr inbounds ([21 x i8], [21 x i8]* @"sym_name_Lbl'Unds'Map'Unds'{}", i64 0, i64 0))
-  ret void
-
-tag111:                                           ; preds = %entry
-  %416 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %417 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %416, i64 0, i32 2
-  %418 = load %block*, %block** %417
-  call void %2(%FILE* %1, %block* %418, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sort_name_SortCell{}", i64 0, i64 0))
-  ret void
-
-tag112:                                           ; preds = %entry
-  %419 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
-  %420 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %419, i64 0, i32 2
-  %421 = load %block*, %block** %420
-  call void %2(%FILE* %1, %block* %421, i8* getelementptr inbounds ([13 x i8], [13 x i8]* @"sort_name_SortString{}", i64 0, i64 0))
-  ret void
-
-tag113:                                           ; preds = %entry
-  %422 = bitcast %block* %0 to { %blockheader, [0 x i64], %block*, %block* }*
-  %423 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %422, i64 0, i32 2
-  %424 = load %block*, %block** %423
-  call void %2(%FILE* %1, %block* %424, i8* getelementptr inbounds ([12 x i8], [12 x i8]* @"sort_name_SortKItem{}", i64 0, i64 0))
-  %425 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %422, i64 0, i32 3
+  %424 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %425 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %424, i64 0, i32 2
   %426 = load %block*, %block** %425
   call void %2(%FILE* %1, %block* %426, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
   ret void
+
+tag102:                                           ; preds = %entry
+  %427 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %428 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %427, i64 0, i32 2
+  %429 = load %block*, %block** %428
+  call void %2(%FILE* %1, %block* %429, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
+  ret void
+
+tag103:                                           ; preds = %entry
+  %430 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %431 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %430, i64 0, i32 2
+  %432 = load %block*, %block** %431
+  call void %2(%FILE* %1, %block* %432, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
+  ret void
+
+tag104:                                           ; preds = %entry
+  %433 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %434 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %433, i64 0, i32 2
+  %435 = load %block*, %block** %434
+  call void %2(%FILE* %1, %block* %435, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
+  ret void
+
+tag105:                                           ; preds = %entry
+  %436 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %437 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %436, i64 0, i32 2
+  %438 = load %block*, %block** %437
+  call void %2(%FILE* %1, %block* %438, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
+  ret void
+
+tag106:                                           ; preds = %entry
+  %439 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %440 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %439, i64 0, i32 2
+  %441 = load %block*, %block** %440
+  call void %2(%FILE* %1, %block* %441, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
+  ret void
+
+tag107:                                           ; preds = %entry
+  %442 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %443 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %442, i64 0, i32 2
+  %444 = load %block*, %block** %443
+  call void %2(%FILE* %1, %block* %444, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
+  ret void
+
+tag108:                                           ; preds = %entry
+  %445 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %446 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %445, i64 0, i32 2
+  %447 = load %block*, %block** %446
+  call void %2(%FILE* %1, %block* %447, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
+  ret void
+
+tag109:                                           ; preds = %entry
+  %448 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %449 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %448, i64 0, i32 2
+  %450 = load %block*, %block** %449
+  call void %2(%FILE* %1, %block* %450, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
+  ret void
+
+tag110:                                           ; preds = %entry
+  %451 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %452 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %451, i64 0, i32 2
+  %453 = load %block*, %block** %452
+  call void %2(%FILE* %1, %block* %453, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
+  ret void
+
+tag111:                                           ; preds = %entry
+  %454 = bitcast %block* %0 to { %blockheader, [0 x i64], %map }*
+  %455 = getelementptr inbounds { %blockheader, [0 x i64], %map }, { %blockheader, [0 x i64], %map }* %454, i64 0, i32 2
+  %456 = load %map, %map* %455
+  call void %3(%FILE* %1, %map* %455, i8* getelementptr inbounds ([15 x i8], [15 x i8]* @"sym_name_Lbl'Stop'Map{}", i64 0, i64 0), i8* getelementptr inbounds ([27 x i8], [27 x i8]* @"sym_name_Lbl'UndsPipe'-'-GT-Unds'{}", i64 0, i64 0), i8* getelementptr inbounds ([21 x i8], [21 x i8]* @"sym_name_Lbl'Unds'Map'Unds'{}", i64 0, i64 0))
+  ret void
+
+tag112:                                           ; preds = %entry
+  %457 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz*, %mpz* }*
+  %458 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %457, i64 0, i32 2
+  %459 = load %mpz*, %mpz** %458
+  call void %6(%FILE* %1, %mpz* %459, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
+  call void %10(%FILE* %1)
+  %460 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %457, i64 0, i32 3
+  %461 = load %mpz*, %mpz** %460
+  call void %6(%FILE* %1, %mpz* %461, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
+  ret void
+
+tag113:                                           ; preds = %entry
+  %462 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz*, %mpz* }*
+  %463 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %462, i64 0, i32 2
+  %464 = load %mpz*, %mpz** %463
+  call void %6(%FILE* %1, %mpz* %464, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
+  call void %10(%FILE* %1)
+  %465 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* %462, i64 0, i32 3
+  %466 = load %mpz*, %mpz** %465
+  call void %6(%FILE* %1, %mpz* %466, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
+  ret void
+
+tag116:                                           ; preds = %entry
+  %467 = bitcast %block* %0 to { %blockheader, [0 x i64], i1 }*
+  %468 = getelementptr inbounds { %blockheader, [0 x i64], i1 }, { %blockheader, [0 x i64], i1 }* %467, i64 0, i32 2
+  %469 = load i1, i1* %468
+  call void %8(%FILE* %1, i1 %469, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sort_name_SortBool{}", i64 0, i64 0))
+  ret void
+
+tag117:                                           ; preds = %entry
+  %470 = bitcast %block* %0 to { %blockheader, [0 x i64], %map, %set }*
+  %471 = getelementptr inbounds { %blockheader, [0 x i64], %map, %set }, { %blockheader, [0 x i64], %map, %set }* %470, i64 0, i32 2
+  %472 = load %map, %map* %471
+  call void %3(%FILE* %1, %map* %471, i8* getelementptr inbounds ([15 x i8], [15 x i8]* @"sym_name_Lbl'Stop'Map{}", i64 0, i64 0), i8* getelementptr inbounds ([27 x i8], [27 x i8]* @"sym_name_Lbl'UndsPipe'-'-GT-Unds'{}", i64 0, i64 0), i8* getelementptr inbounds ([21 x i8], [21 x i8]* @"sym_name_Lbl'Unds'Map'Unds'{}", i64 0, i64 0))
+  call void %10(%FILE* %1)
+  %473 = getelementptr inbounds { %blockheader, [0 x i64], %map, %set }, { %blockheader, [0 x i64], %map, %set }* %470, i64 0, i32 3
+  %474 = load %set, %set* %473
+  call void %5(%FILE* %1, %set* %473, i8* getelementptr inbounds ([15 x i8], [15 x i8]* @"sym_name_Lbl'Stop'Set{}", i64 0, i64 0), i8* getelementptr inbounds ([13 x i8], [13 x i8]* @"sym_name_LblSetItem{}", i64 0, i64 0), i8* getelementptr inbounds ([21 x i8], [21 x i8]* @"sym_name_Lbl'Unds'Set'Unds'{}", i64 0, i64 0))
+  ret void
+
+tag118:                                           ; preds = %entry
+  %475 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz*, %mpz*, %mpz* }*
+  %476 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz*, %mpz* }* %475, i64 0, i32 2
+  %477 = load %mpz*, %mpz** %476
+  call void %6(%FILE* %1, %mpz* %477, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
+  call void %10(%FILE* %1)
+  %478 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz*, %mpz* }* %475, i64 0, i32 3
+  %479 = load %mpz*, %mpz** %478
+  call void %6(%FILE* %1, %mpz* %479, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
+  call void %10(%FILE* %1)
+  %480 = getelementptr inbounds { %blockheader, [0 x i64], %mpz*, %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz*, %mpz* }* %475, i64 0, i32 4
+  %481 = load %mpz*, %mpz** %480
+  call void %6(%FILE* %1, %mpz* %481, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
+  ret void
+
+tag119:                                           ; preds = %entry
+  %482 = bitcast %block* %0 to { %blockheader, [0 x i64], %list }*
+  %483 = getelementptr inbounds { %blockheader, [0 x i64], %list }, { %blockheader, [0 x i64], %list }* %482, i64 0, i32 2
+  %484 = load %list, %list* %483
+  call void %4(%FILE* %1, %list* %483, i8* getelementptr inbounds ([16 x i8], [16 x i8]* @"sym_name_Lbl'Stop'List{}", i64 0, i64 0), i8* getelementptr inbounds ([14 x i8], [14 x i8]* @"sym_name_LblListItem{}", i64 0, i64 0), i8* getelementptr inbounds ([22 x i8], [22 x i8]* @"sym_name_Lbl'Unds'List'Unds'{}", i64 0, i64 0))
+  ret void
+
+tag120:                                           ; preds = %entry
+  %485 = bitcast %block* %0 to { %blockheader, [0 x i64], %map }*
+  %486 = getelementptr inbounds { %blockheader, [0 x i64], %map }, { %blockheader, [0 x i64], %map }* %485, i64 0, i32 2
+  %487 = load %map, %map* %486
+  call void %3(%FILE* %1, %map* %486, i8* getelementptr inbounds ([15 x i8], [15 x i8]* @"sym_name_Lbl'Stop'Map{}", i64 0, i64 0), i8* getelementptr inbounds ([27 x i8], [27 x i8]* @"sym_name_Lbl'UndsPipe'-'-GT-Unds'{}", i64 0, i64 0), i8* getelementptr inbounds ([21 x i8], [21 x i8]* @"sym_name_Lbl'Unds'Map'Unds'{}", i64 0, i64 0))
+  ret void
+
+tag121:                                           ; preds = %entry
+  %488 = bitcast %block* %0 to { %blockheader, [0 x i64], %set }*
+  %489 = getelementptr inbounds { %blockheader, [0 x i64], %set }, { %blockheader, [0 x i64], %set }* %488, i64 0, i32 2
+  %490 = load %set, %set* %489
+  call void %5(%FILE* %1, %set* %489, i8* getelementptr inbounds ([15 x i8], [15 x i8]* @"sym_name_Lbl'Stop'Set{}", i64 0, i64 0), i8* getelementptr inbounds ([13 x i8], [13 x i8]* @"sym_name_LblSetItem{}", i64 0, i64 0), i8* getelementptr inbounds ([21 x i8], [21 x i8]* @"sym_name_Lbl'Unds'Set'Unds'{}", i64 0, i64 0))
+  ret void
+
+tag122:                                           ; preds = %entry
+  %491 = bitcast %block* %0 to { %blockheader, [0 x i64], %map, %map }*
+  %492 = getelementptr inbounds { %blockheader, [0 x i64], %map, %map }, { %blockheader, [0 x i64], %map, %map }* %491, i64 0, i32 2
+  %493 = load %map, %map* %492
+  call void %3(%FILE* %1, %map* %492, i8* getelementptr inbounds ([15 x i8], [15 x i8]* @"sym_name_Lbl'Stop'Map{}", i64 0, i64 0), i8* getelementptr inbounds ([27 x i8], [27 x i8]* @"sym_name_Lbl'UndsPipe'-'-GT-Unds'{}", i64 0, i64 0), i8* getelementptr inbounds ([21 x i8], [21 x i8]* @"sym_name_Lbl'Unds'Map'Unds'{}", i64 0, i64 0))
+  call void %10(%FILE* %1)
+  %494 = getelementptr inbounds { %blockheader, [0 x i64], %map, %map }, { %blockheader, [0 x i64], %map, %map }* %491, i64 0, i32 3
+  %495 = load %map, %map* %494
+  call void %3(%FILE* %1, %map* %494, i8* getelementptr inbounds ([15 x i8], [15 x i8]* @"sym_name_Lbl'Stop'Map{}", i64 0, i64 0), i8* getelementptr inbounds ([27 x i8], [27 x i8]* @"sym_name_Lbl'UndsPipe'-'-GT-Unds'{}", i64 0, i64 0), i8* getelementptr inbounds ([21 x i8], [21 x i8]* @"sym_name_Lbl'Unds'Map'Unds'{}", i64 0, i64 0))
+  ret void
+
+tag123:                                           ; preds = %entry
+  %496 = bitcast %block* %0 to { %blockheader, [0 x i64], %block*, %block* }*
+  %497 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %496, i64 0, i32 2
+  %498 = load %block*, %block** %497
+  call void %2(%FILE* %1, %block* %498, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sort_name_SortBExp{}", i64 0, i64 0))
+  call void %10(%FILE* %1)
+  %499 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %496, i64 0, i32 3
+  %500 = load %block*, %block** %499
+  call void %2(%FILE* %1, %block* %500, i8* getelementptr inbounds ([12 x i8], [12 x i8]* @"sort_name_SortBlock{}", i64 0, i64 0))
+  ret void
+
+tag124:                                           ; preds = %entry
+  %501 = bitcast %block* %0 to { %blockheader, [0 x i64], %block*, %block* }*
+  %502 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %501, i64 0, i32 2
+  %503 = load %block*, %block** %502
+  call void %2(%FILE* %1, %block* %503, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
+  call void %10(%FILE* %1)
+  %504 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %501, i64 0, i32 3
+  %505 = load %block*, %block** %504
+  call void %2(%FILE* %1, %block* %505, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
+  ret void
+
+tag126:                                           ; preds = %entry
+  %506 = bitcast %block* %0 to { %blockheader, [0 x i64], %mpz* }*
+  %507 = getelementptr inbounds { %blockheader, [0 x i64], %mpz* }, { %blockheader, [0 x i64], %mpz* }* %506, i64 0, i32 2
+  %508 = load %mpz*, %mpz** %507
+  call void %6(%FILE* %1, %mpz* %508, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortInt{}", i64 0, i64 0))
+  ret void
+
+tag127:                                           ; preds = %entry
+  %509 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %510 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %509, i64 0, i32 2
+  %511 = load %block*, %block** %510
+  call void %2(%FILE* %1, %block* %511, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortPgm{}", i64 0, i64 0))
+  ret void
+
+tag128:                                           ; preds = %entry
+  %512 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %513 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %512, i64 0, i32 2
+  %514 = load %block*, %block** %513
+  call void %2(%FILE* %1, %block* %514, i8* getelementptr inbounds ([12 x i8], [12 x i8]* @"sort_name_SortKCell{}", i64 0, i64 0))
+  ret void
+
+tag129:                                           ; preds = %entry
+  %515 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %516 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %515, i64 0, i32 2
+  %517 = load %block*, %block** %516
+  call void %2(%FILE* %1, %block* %517, i8* getelementptr inbounds ([19 x i8], [19 x i8]* @"sort_name_SortStateCellOpt{}", i64 0, i64 0))
+  ret void
+
+tag130:                                           ; preds = %entry
+  %518 = bitcast %block* %0 to { %blockheader, [0 x i64], %set }*
+  %519 = getelementptr inbounds { %blockheader, [0 x i64], %set }, { %blockheader, [0 x i64], %set }* %518, i64 0, i32 2
+  %520 = load %set, %set* %519
+  call void %5(%FILE* %1, %set* %519, i8* getelementptr inbounds ([15 x i8], [15 x i8]* @"sym_name_Lbl'Stop'Set{}", i64 0, i64 0), i8* getelementptr inbounds ([13 x i8], [13 x i8]* @"sym_name_LblSetItem{}", i64 0, i64 0), i8* getelementptr inbounds ([21 x i8], [21 x i8]* @"sym_name_Lbl'Unds'Set'Unds'{}", i64 0, i64 0))
+  ret void
+
+tag131:                                           ; preds = %entry
+  %521 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %522 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %521, i64 0, i32 2
+  %523 = load %block*, %block** %522
+  call void %2(%FILE* %1, %block* %523, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sort_name_SortAExp{}", i64 0, i64 0))
+  ret void
+
+tag132:                                           ; preds = %entry
+  %524 = bitcast %block* %0 to { %blockheader, [0 x i64], %map }*
+  %525 = getelementptr inbounds { %blockheader, [0 x i64], %map }, { %blockheader, [0 x i64], %map }* %524, i64 0, i32 2
+  %526 = load %map, %map* %525
+  call void %3(%FILE* %1, %map* %525, i8* getelementptr inbounds ([15 x i8], [15 x i8]* @"sym_name_Lbl'Stop'Map{}", i64 0, i64 0), i8* getelementptr inbounds ([27 x i8], [27 x i8]* @"sym_name_Lbl'UndsPipe'-'-GT-Unds'{}", i64 0, i64 0), i8* getelementptr inbounds ([21 x i8], [21 x i8]* @"sym_name_Lbl'Unds'Map'Unds'{}", i64 0, i64 0))
+  ret void
+
+tag133:                                           ; preds = %entry
+  %527 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %528 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %527, i64 0, i32 2
+  %529 = load %block*, %block** %528
+  call void %2(%FILE* %1, %block* %529, i8* getelementptr inbounds ([12 x i8], [12 x i8]* @"sort_name_SortTCell{}", i64 0, i64 0))
+  ret void
+
+tag134:                                           ; preds = %entry
+  %530 = bitcast %block* %0 to { %blockheader, [0 x i64], %list }*
+  %531 = getelementptr inbounds { %blockheader, [0 x i64], %list }, { %blockheader, [0 x i64], %list }* %530, i64 0, i32 2
+  %532 = load %list, %list* %531
+  call void %4(%FILE* %1, %list* %531, i8* getelementptr inbounds ([16 x i8], [16 x i8]* @"sym_name_Lbl'Stop'List{}", i64 0, i64 0), i8* getelementptr inbounds ([14 x i8], [14 x i8]* @"sym_name_LblListItem{}", i64 0, i64 0), i8* getelementptr inbounds ([22 x i8], [22 x i8]* @"sym_name_Lbl'Unds'List'Unds'{}", i64 0, i64 0))
+  ret void
+
+tag135:                                           ; preds = %entry
+  %533 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %534 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %533, i64 0, i32 2
+  %535 = load %block*, %block** %534
+  call void %2(%FILE* %1, %block* %535, i8* getelementptr inbounds ([20 x i8], [20 x i8]* @"sort_name_SortTCellFragment{}", i64 0, i64 0))
+  ret void
+
+tag136:                                           ; preds = %entry
+  %536 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %537 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %536, i64 0, i32 2
+  %538 = load %block*, %block** %537
+  call void %2(%FILE* %1, %block* %538, i8* getelementptr inbounds ([16 x i8], [16 x i8]* @"sort_name_SortStateCell{}", i64 0, i64 0))
+  ret void
+
+tag137:                                           ; preds = %entry
+  %539 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %540 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %539, i64 0, i32 2
+  %541 = load %block*, %block** %540
+  call void %2(%FILE* %1, %block* %541, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sort_name_SortCell{}", i64 0, i64 0))
+  ret void
+
+tag138:                                           ; preds = %entry
+  %542 = bitcast %block* %0 to { %blockheader, [0 x i64], i1 }*
+  %543 = getelementptr inbounds { %blockheader, [0 x i64], i1 }, { %blockheader, [0 x i64], i1 }* %542, i64 0, i32 2
+  %544 = load i1, i1* %543
+  call void %8(%FILE* %1, i1 %544, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sort_name_SortBool{}", i64 0, i64 0))
+  ret void
+
+tag139:                                           ; preds = %entry
+  %545 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %546 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %545, i64 0, i32 2
+  %547 = load %block*, %block** %546
+  call void %2(%FILE* %1, %block* %547, i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"sort_name_SortIds{}", i64 0, i64 0))
+  ret void
+
+tag140:                                           ; preds = %entry
+  %548 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %549 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %548, i64 0, i32 2
+  %550 = load %block*, %block** %549
+  call void %2(%FILE* %1, %block* %550, i8* getelementptr inbounds ([9 x i8], [9 x i8]* @"sort_name_SortId{}", i64 0, i64 0))
+  ret void
+
+tag141:                                           ; preds = %entry
+  %551 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %552 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %551, i64 0, i32 2
+  %553 = load %block*, %block** %552
+  call void %2(%FILE* %1, %block* %553, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sort_name_SortStmt{}", i64 0, i64 0))
+  ret void
+
+tag142:                                           ; preds = %entry
+  %554 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %555 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %554, i64 0, i32 2
+  %556 = load %block*, %block** %555
+  call void %2(%FILE* %1, %block* %556, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @"sort_name_SortBExp{}", i64 0, i64 0))
+  ret void
+
+tag143:                                           ; preds = %entry
+  %557 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %558 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %557, i64 0, i32 2
+  %559 = load %block*, %block** %558
+  call void %2(%FILE* %1, %block* %559, i8* getelementptr inbounds ([15 x i8], [15 x i8]* @"sort_name_SortKCellOpt{}", i64 0, i64 0))
+  ret void
+
+tag144:                                           ; preds = %entry
+  %560 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %561 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %560, i64 0, i32 2
+  %562 = load %block*, %block** %561
+  call void %2(%FILE* %1, %block* %562, i8* getelementptr inbounds ([13 x i8], [13 x i8]* @"sort_name_SortString{}", i64 0, i64 0))
+  ret void
+
+tag145:                                           ; preds = %entry
+  %563 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %564 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %563, i64 0, i32 2
+  %565 = load %block*, %block** %564
+  call void %2(%FILE* %1, %block* %565, i8* getelementptr inbounds ([14 x i8], [14 x i8]* @"sort_name_SortKResult{}", i64 0, i64 0))
+  ret void
+
+tag146:                                           ; preds = %entry
+  %566 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %567 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %566, i64 0, i32 2
+  %568 = load %block*, %block** %567
+  call void %2(%FILE* %1, %block* %568, i8* getelementptr inbounds ([12 x i8], [12 x i8]* @"sort_name_SortBlock{}", i64 0, i64 0))
+  ret void
+
+tag147:                                           ; preds = %entry
+  %569 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %570 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %569, i64 0, i32 2
+  %571 = load %block*, %block** %570
+  call void %2(%FILE* %1, %block* %571, i8* getelementptr inbounds ([12 x i8], [12 x i8]* @"sort_name_SortKItem{}", i64 0, i64 0))
+  ret void
+
+tag148:                                           ; preds = %entry
+  %572 = bitcast %block* %0 to { %blockheader, [0 x i64], %block* }*
+  %573 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %572, i64 0, i32 2
+  %574 = load %block*, %block** %573
+  call void %2(%FILE* %1, %block* %574, i8* getelementptr inbounds ([17 x i8], [17 x i8]* @"sort_name_SortKConfigVar{}", i64 0, i64 0))
+  ret void
+
+tag149:                                           ; preds = %entry
+  %575 = bitcast %block* %0 to { %blockheader, [0 x i64], %block*, %block* }*
+  %576 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %575, i64 0, i32 2
+  %577 = load %block*, %block** %576
+  call void %2(%FILE* %1, %block* %577, i8* getelementptr inbounds ([12 x i8], [12 x i8]* @"sort_name_SortKItem{}", i64 0, i64 0))
+  call void %10(%FILE* %1)
+  %578 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %575, i64 0, i32 3
+  %579 = load %block*, %block** %578
+  call void %2(%FILE* %1, %block* %579, i8* getelementptr inbounds ([8 x i8], [8 x i8]* @"sort_name_SortK{}", i64 0, i64 0))
+  ret void
+
+stuck:                                            ; preds = %entry
+  call void @abort()
+  unreachable
+}
+
+define %layout @getLayoutData(i16) {
+entry:
+  switch i16 %0, label %stuck [
+    i16 1, label %layout1
+    i16 2, label %layout2
+    i16 3, label %layout3
+    i16 4, label %layout4
+    i16 5, label %layout5
+    i16 6, label %layout6
+    i16 7, label %layout7
+    i16 8, label %layout8
+    i16 9, label %layout9
+    i16 10, label %layout10
+    i16 11, label %layout11
+    i16 12, label %layout12
+    i16 13, label %layout13
+    i16 14, label %layout14
+    i16 15, label %layout15
+    i16 16, label %layout16
+    i16 17, label %layout17
+    i16 18, label %layout18
+    i16 19, label %layout19
+    i16 20, label %layout20
+    i16 21, label %layout21
+    i16 22, label %layout22
+  ]
+
+layout1:                                          ; preds = %entry
+  br label %exit
+
+layout2:                                          ; preds = %entry
+  br label %exit
+
+layout3:                                          ; preds = %entry
+  br label %exit
+
+layout4:                                          ; preds = %entry
+  br label %exit
+
+layout5:                                          ; preds = %entry
+  br label %exit
+
+layout6:                                          ; preds = %entry
+  br label %exit
+
+layout7:                                          ; preds = %entry
+  br label %exit
+
+layout8:                                          ; preds = %entry
+  br label %exit
+
+layout9:                                          ; preds = %entry
+  br label %exit
+
+layout10:                                         ; preds = %entry
+  br label %exit
+
+layout11:                                         ; preds = %entry
+  br label %exit
+
+layout12:                                         ; preds = %entry
+  br label %exit
+
+layout13:                                         ; preds = %entry
+  br label %exit
+
+layout14:                                         ; preds = %entry
+  br label %exit
+
+layout15:                                         ; preds = %entry
+  br label %exit
+
+layout16:                                         ; preds = %entry
+  br label %exit
+
+layout17:                                         ; preds = %entry
+  br label %exit
+
+layout18:                                         ; preds = %entry
+  br label %exit
+
+layout19:                                         ; preds = %entry
+  br label %exit
+
+layout20:                                         ; preds = %entry
+  br label %exit
+
+layout21:                                         ; preds = %entry
+  br label %exit
+
+layout22:                                         ; preds = %entry
+  br label %exit
+
+exit:                                             ; preds = %layout22, %layout21, %layout20, %layout19, %layout18, %layout17, %layout16, %layout15, %layout14, %layout13, %layout12, %layout11, %layout10, %layout9, %layout8, %layout7, %layout6, %layout5, %layout4, %layout3, %layout2, %layout1
+  %phi = phi %layout [ { i8 2, %layoutitem* getelementptr inbounds ([2 x %layoutitem], [2 x %layoutitem]* @layout_1, i64 0, i64 0) }, %layout1 ], [ { i8 1, %layoutitem* getelementptr inbounds ([1 x %layoutitem], [1 x %layoutitem]* @layout_2, i64 0, i64 0) }, %layout2 ], [ { i8 1, %layoutitem* getelementptr inbounds ([1 x %layoutitem], [1 x %layoutitem]* @layout_3, i64 0, i64 0) }, %layout3 ], [ { i8 0, %layoutitem* getelementptr inbounds ([0 x %layoutitem], [0 x %layoutitem]* @layout_4, i64 0, i64 0) }, %layout4 ], [ { i8 3, %layoutitem* getelementptr inbounds ([3 x %layoutitem], [3 x %layoutitem]* @layout_5, i64 0, i64 0) }, %layout5 ], [ { i8 1, %layoutitem* getelementptr inbounds ([1 x %layoutitem], [1 x %layoutitem]* @layout_6, i64 0, i64 0) }, %layout6 ], [ { i8 2, %layoutitem* getelementptr inbounds ([2 x %layoutitem], [2 x %layoutitem]* @layout_7, i64 0, i64 0) }, %layout7 ], [ { i8 2, %layoutitem* getelementptr inbounds ([2 x %layoutitem], [2 x %layoutitem]* @layout_8, i64 0, i64 0) }, %layout8 ], [ { i8 2, %layoutitem* getelementptr inbounds ([2 x %layoutitem], [2 x %layoutitem]* @layout_9, i64 0, i64 0) }, %layout9 ], [ { i8 2, %layoutitem* getelementptr inbounds ([2 x %layoutitem], [2 x %layoutitem]* @layout_10, i64 0, i64 0) }, %layout10 ], [ { i8 2, %layoutitem* getelementptr inbounds ([2 x %layoutitem], [2 x %layoutitem]* @layout_11, i64 0, i64 0) }, %layout11 ], [ { i8 2, %layoutitem* getelementptr inbounds ([2 x %layoutitem], [2 x %layoutitem]* @layout_12, i64 0, i64 0) }, %layout12 ], [ { i8 2, %layoutitem* getelementptr inbounds ([2 x %layoutitem], [2 x %layoutitem]* @layout_13, i64 0, i64 0) }, %layout13 ], [ { i8 3, %layoutitem* getelementptr inbounds ([3 x %layoutitem], [3 x %layoutitem]* @layout_14, i64 0, i64 0) }, %layout14 ], [ { i8 2, %layoutitem* getelementptr inbounds ([2 x %layoutitem], [2 x %layoutitem]* @layout_15, i64 0, i64 0) }, %layout15 ], [ { i8 2, %layoutitem* getelementptr inbounds ([2 x %layoutitem], [2 x %layoutitem]* @layout_16, i64 0, i64 0) }, %layout16 ], [ { i8 3, %layoutitem* getelementptr inbounds ([3 x %layoutitem], [3 x %layoutitem]* @layout_17, i64 0, i64 0) }, %layout17 ], [ { i8 3, %layoutitem* getelementptr inbounds ([3 x %layoutitem], [3 x %layoutitem]* @layout_18, i64 0, i64 0) }, %layout18 ], [ { i8 1, %layoutitem* getelementptr inbounds ([1 x %layoutitem], [1 x %layoutitem]* @layout_19, i64 0, i64 0) }, %layout19 ], [ { i8 2, %layoutitem* getelementptr inbounds ([2 x %layoutitem], [2 x %layoutitem]* @layout_20, i64 0, i64 0) }, %layout20 ], [ { i8 1, %layoutitem* getelementptr inbounds ([1 x %layoutitem], [1 x %layoutitem]* @layout_21, i64 0, i64 0) }, %layout21 ], [ { i8 1, %layoutitem* getelementptr inbounds ([1 x %layoutitem], [1 x %layoutitem]* @layout_22, i64 0, i64 0) }, %layout22 ]
+  ret %layout %phi
 
 stuck:                                            ; preds = %entry
   call void @abort()

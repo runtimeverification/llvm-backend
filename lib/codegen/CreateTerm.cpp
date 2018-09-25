@@ -64,6 +64,9 @@ target triple = "x86_64-unknown-linux-gnu"
 %blockheader = type { i64 } 
 %block = type { %blockheader, [0 x i64 *] } ; 16-bit layout, 8-bit length, 32-bit tag, children
 
+%layout = type { i8, %layoutitem* }
+%layoutitem = type { i64, i16 }
+
 ; The layout of a block uniquely identifies the categories of its children as
 ; well as how to allocate/deallocate them and whether to follow their pointers
 ; during gc. Roughly speaking, the following rules apply:
@@ -323,15 +326,32 @@ llvm::Value *CreateTerm::createHook(KOREObjectCompositePattern *hookAtt, KOREObj
     abort();
   } else {
     std::string hookName = "hook_" + name.substr(0, name.find('.')) + "_" + name.substr(name.find('.') + 1);
-    return createFunctionCall(hookName, pattern);
+    return createFunctionCall(hookName, pattern, true);
   }
 }
 
-llvm::Value *CreateTerm::createFunctionCall(std::string name, KOREObjectCompositePattern *pattern) {
+llvm::Value *CreateTerm::createFunctionCall(std::string name, KOREObjectCompositePattern *pattern, bool sret) {
   std::vector<llvm::Value *> args;
   std::vector<llvm::Type *> types;
   auto returnSort = dynamic_cast<KOREObjectCompositeSort *>(pattern->getConstructor()->getSort());
-  llvm::Type *returnType = getValueType(returnSort->getCategory(Definition), Module);
+  auto returnCat = returnSort->getCategory(Definition);
+  llvm::Type *returnType = getValueType(returnCat, Module);
+  switch (returnCat) {
+  case SortCategory::Map:
+  case SortCategory::List:
+  case SortCategory::Set:
+    break;
+  default:
+    sret = false; 
+    break;
+  }
+  llvm::Value *AllocSret;
+  if (sret) {
+    AllocSret = new llvm::AllocaInst(returnType, 0, "", CurrentBlock);
+    args.push_back(AllocSret);
+    types.push_back(AllocSret->getType());
+    returnType = llvm::Type::getVoidTy(Ctx);
+  }
   int i = 0;
   for (auto sort : pattern->getConstructor()->getArguments()) {
     auto concreteSort = dynamic_cast<KOREObjectCompositeSort *>(sort);
@@ -353,8 +373,35 @@ llvm::Value *CreateTerm::createFunctionCall(std::string name, KOREObjectComposit
     }
   }
   llvm::FunctionType *funcType = llvm::FunctionType::get(returnType, types, false);
-  llvm::Constant *func = Module->getOrInsertFunction(name, funcType);
+  llvm::Function *func = llvm::dyn_cast<llvm::Function>(Module->getOrInsertFunction(name, funcType));
+  if (sret) {
+    func->arg_begin()->addAttr(llvm::Attribute::StructRet);
+    llvm::CallInst::Create(func, args, "", CurrentBlock);
+    return new llvm::LoadInst(AllocSret, "", CurrentBlock);
+  }
   return llvm::CallInst::Create(func, args, "", CurrentBlock);
+}
+
+/* create a term, given the assumption that the created term will not be a triangle injection pair */
+llvm::Value *CreateTerm::notInjectionCase(KOREObjectCompositePattern *constructor, llvm::Value *val) {
+  const KOREObjectSymbol *symbol = constructor->getConstructor();
+  llvm::StructType *BlockType = getBlockType(Module, Definition, symbol);
+  llvm::Value *BlockHeader = getBlockHeader(Module, Definition, symbol, BlockType);
+  llvm::Value *Block = allocateBlock(BlockType, CurrentBlock);
+  llvm::Value *BlockHeaderPtr = llvm::GetElementPtrInst::CreateInBounds(BlockType, Block, {llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0), llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), 0)}, symbol->getName(), CurrentBlock);
+  new llvm::StoreInst(BlockHeader, BlockHeaderPtr, CurrentBlock);
+  int idx = 2;
+  for (auto child : constructor->getArguments()) {
+    llvm::Value *ChildValue;
+    if (idx == 2 && val != nullptr) {
+      ChildValue = val;
+    } else {
+      ChildValue = (*this)(child);
+    }
+    llvm::Value *ChildPtr = llvm::GetElementPtrInst::CreateInBounds(BlockType, Block, {llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0), llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), idx++)}, "", CurrentBlock);
+    new llvm::StoreInst(ChildValue, ChildPtr, CurrentBlock);
+  }
+  return new llvm::BitCastInst(Block, llvm::PointerType::getUnqual(Module->getTypeByName(BLOCK_STRUCT)), "", CurrentBlock);
 }
 
 llvm::Value *CreateTerm::operator()(KOREPattern *pattern) {
@@ -375,26 +422,44 @@ llvm::Value *CreateTerm::operator()(KOREPattern *pattern) {
       } else {
         std::ostringstream Out;
         symbol->print(Out, 0, false);
-        return createFunctionCall("eval_" + Out.str(), constructor);
+        return createFunctionCall("eval_" + Out.str(), constructor, false);
       }
     } else if (symbol->getArguments().empty()) {
       llvm::StructType *BlockType = Module->getTypeByName(BLOCK_STRUCT);
       llvm::IntToPtrInst *Cast = new llvm::IntToPtrInst(llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), (((uint64_t)symbol->getTag()) << 32) | 1), llvm::PointerType::getUnqual(BlockType), "", CurrentBlock);
       return Cast;
-    } else {
-      llvm::StructType *BlockType = getBlockType(Module, Definition, symbol);
-      llvm::Value *BlockHeader = getBlockHeader(Module, Definition, symbol, BlockType);
-      llvm::Value *Block = allocateBlock(BlockType, CurrentBlock);
-      llvm::Value *BlockHeaderPtr = llvm::GetElementPtrInst::CreateInBounds(BlockType, Block, {llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0), llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), 0)}, symbol->getName(), CurrentBlock);
-      new llvm::StoreInst(BlockHeader, BlockHeaderPtr, CurrentBlock);
-      int idx = 2;
-      for (auto child : constructor->getArguments()) {
-        llvm::Value *ChildValue = (*this)(child);
-        llvm::Value *ChildPtr = llvm::GetElementPtrInst::CreateInBounds(BlockType, Block, {llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0), llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), idx++)}, "", CurrentBlock);
-        new llvm::StoreInst(ChildValue, ChildPtr, CurrentBlock);
+    } else if (symbolDecl->getAttributes().count("sortInjection")
+        && dynamic_cast<KOREObjectCompositeSort *>(symbol->getArguments()[0])->getCategory(Definition) == SortCategory::Symbol) {
+      llvm::Value *val = (*this)(constructor->getArguments()[0]);
+      if (llvm::isa<llvm::Argument>(val)) {
+        llvm::Value *Tag = llvm::CallInst::Create(Module->getOrInsertFunction("getTag", llvm::Type::getInt32Ty(Ctx), getValueType(SortCategory::Symbol, Module)), val, "tag", CurrentBlock);
+        auto inj = Definition->getInjSymbol();
+        auto GeBlock = llvm::BasicBlock::Create(Ctx, "geFirst", CurrentBlock->getParent());
+        auto FalseBlock = llvm::BasicBlock::Create(Ctx, "notInjection", CurrentBlock->getParent());
+        auto TrueBlock = llvm::BasicBlock::Create(Ctx, "merge", CurrentBlock->getParent());
+        auto cmp = new llvm::ICmpInst(*CurrentBlock, llvm::CmpInst::ICMP_UGE, Tag,
+            llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), inj->getFirstTag()));
+        llvm::BranchInst::Create(GeBlock, FalseBlock, cmp, CurrentBlock);
+  
+        CurrentBlock = GeBlock;
+        cmp = new llvm::ICmpInst(*CurrentBlock, llvm::CmpInst::ICMP_ULE, Tag,
+            llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), inj->getLastTag()));
+        llvm::BranchInst::Create(TrueBlock, FalseBlock, cmp, CurrentBlock);
+   
+        CurrentBlock = FalseBlock;
+        auto Cast = notInjectionCase(constructor, val);
+        llvm::BranchInst::Create(TrueBlock, CurrentBlock);
+  
+        CurrentBlock = TrueBlock;
+        llvm::PHINode *Phi = llvm::PHINode::Create(Cast->getType(), 2, "phi", CurrentBlock);
+        Phi->addIncoming(Cast, FalseBlock);
+        Phi->addIncoming(val, GeBlock);
+        return Phi;
+      } else {
+        return notInjectionCase(constructor, val);
       }
-      llvm::BitCastInst *Cast = new llvm::BitCastInst(Block, llvm::PointerType::getUnqual(Module->getTypeByName(BLOCK_STRUCT)), "", CurrentBlock);
-      return Cast;
+    } else {
+     return notInjectionCase(constructor, nullptr);
     }
   } else {
     assert(false && "not supported yet: meta level");

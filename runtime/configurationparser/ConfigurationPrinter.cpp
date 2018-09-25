@@ -24,7 +24,11 @@ void printMInt(FILE *file, void *i, const char *sort) {
   abort();
 }
 
-void printConfiguration(FILE *file, block *subject, const char *sort) {
+void printComma(FILE *file) {
+  fprintf(file, ",");
+}
+
+void printConfigurationInternal(FILE *file, block *subject, const char *sort) {
   bool isConstant = ((uintptr_t)subject) & 1;
   if (isConstant) {
     uint32_t tag = ((uintptr_t)subject) >> 32;
@@ -73,13 +77,13 @@ void printConfiguration(FILE *file, block *subject, const char *sort) {
   uint32_t tag = subject->header.header & 0xffffffffLL;
   const char *symbol = getSymbolNameForTag(tag);
   fprintf(file, "%s(", symbol);
-  visitChildren(subject, file, printConfiguration, printMap, printList, printSet, printInt, printFloat,
-      printBool, printMInt);
+  visitChildren(subject, file, printConfigurationInternal, printMap, printList, printSet, printInt, printFloat,
+      printBool, printMInt, printComma);
   fprintf(file, ")");
 }
 
 void printConfiguration(int fd, block *subject) {
   FILE *file = fdopen(fd, "w");
-  printConfiguration(file, subject, nullptr);
+  printConfigurationInternal(file, subject, nullptr);
 }
 

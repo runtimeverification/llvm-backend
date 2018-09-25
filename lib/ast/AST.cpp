@@ -265,10 +265,11 @@ static const std::string COMM = "comm";
 static const std::string IDEM = "idem";
 static const std::string UNIT = "unit";
 static const std::string FUNCTIONAL = "functional";
+static const std::string SUBSORT = "subsort";
 static const std::string CONSTRUCTOR = "constructor";
 
 bool KOREAxiomDeclaration::isRequired() {
-  return !attributes.count(ASSOC) && !attributes.count(COMM) && !attributes.count(IDEM) && !attributes.count(UNIT) && !attributes.count(FUNCTIONAL) && !attributes.count(CONSTRUCTOR);
+  return !attributes.count(ASSOC) && !attributes.count(COMM) && !attributes.count(IDEM) && !attributes.count(UNIT) && !attributes.count(FUNCTIONAL) && !attributes.count(CONSTRUCTOR) && !attributes.count(SUBSORT);
 }
 
 KOREPattern *KOREAxiomDeclaration::getRightHandSide() const {
@@ -388,10 +389,10 @@ void KOREDefinition::preprocess() {
   for (auto iter = axioms.begin(); iter != axioms.end();) {
     auto axiom = *iter;
     axiom->ordinal = nextOrdinal++;
+    axiom->pattern->markSymbols(symbols);
     if (!axiom->isRequired()) {
       iter = axioms.erase(iter);
     } else {
-      axiom->pattern->markSymbols(symbols);
       ++iter;
     }
   }
@@ -424,6 +425,9 @@ void KOREDefinition::preprocess() {
         symbol->firstTag = symbol->lastTag = instantiations.at(*symbol);
         symbol->layout = layouts.at(layoutStr);
         objectSymbols[symbol->firstTag] = symbol;
+        std::ostringstream Out;
+        symbol->print(Out);
+        allObjectSymbols[Out.str()] = symbol;
       }
     }
     uint32_t lastTag = nextSymbol-1;
@@ -437,9 +441,14 @@ void KOREDefinition::preprocess() {
     for (auto iter = entry.second.begin(); iter != entry.second.end(); ++iter) {
       KOREObjectSymbol *symbol = *iter;
       if (!symbol->isConcrete()) {
-        assert(symbol->isPolymorphic() && "Unsupported polymorphism");
-        symbol->firstTag = range.first;
-        symbol->lastTag = range.second;
+        if (symbol->isPolymorphic()) {
+          symbol->firstTag = range.first;
+          symbol->lastTag = range.second;
+          auto decl = symbolDeclarations.lookup(symbol->getName());
+          if (decl->getAttributes().count("sortInjection")) {
+            injSymbol = symbol;
+          }
+        }
       }
     }
   }
@@ -484,7 +493,7 @@ void KOREObjectSymbol::print(std::ostream &Out, unsigned indent, bool formal) co
   bool isFirst = true;
   for (const KOREObjectSort *Argument : (formal ? formalArguments : arguments)) {
     if (!isFirst)
-      Out << ",";
+      Out << ", ";
     Argument->print(Out);
     isFirst = false;
   }
@@ -639,7 +648,7 @@ void KOREDeclaration::printSortVariables(std::ostream &Out) const {
 void KOREObjectCompositeSortDeclaration::print(
   std::ostream &Out, unsigned indent) const {
   std::string Indent(indent, ' ');
-  Out << Indent << (isHooked ? "hooked-sort " : "sort ") << sortName;
+  Out << Indent << (_isHooked ? "hooked-sort " : "sort ") << sortName;
   printSortVariables(Out);
   Out << " ";
   printAttributeList(Out, attributes);
@@ -648,7 +657,7 @@ void KOREObjectCompositeSortDeclaration::print(
 void
 KOREObjectSymbolDeclaration::print(std::ostream &Out, unsigned indent) const {
   std::string Indent(indent, ' ');
-  Out << Indent << (isHooked ? "hooked-symbol " : "symbol ")
+  Out << Indent << (_isHooked ? "hooked-symbol " : "symbol ")
       << symbol->getName();
   printSortVariables(Out);
   Out << "(";
