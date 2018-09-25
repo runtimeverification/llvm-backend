@@ -94,21 +94,28 @@ extern "C" {
     return move_int(result);
   }
 
-  // -1 means take the entire rest of the string.
-  const string * hook_STRING_substr(const string * input, const int64_t start, int64_t len) {
-    if (len == -1) len = input->b.len;
-    auto minLen = std::max(std::min(len, input->b.len - start), 0L);
-    auto ret = static_cast<string *>(malloc(sizeof(string) + sizeof(KCHAR) * minLen));
-    ret->b.len = minLen;
-    memcpy(&(ret->data), &(input->data[start]), minLen * sizeof(KCHAR));
-    return ret;
-  }
-
   static inline uint64_t gs(mpz_t i) {
     if (!mpz_fits_ulong_p(i)) {
       throw std::invalid_argument("Arg too large for int64_t");
     }
     return mpz_get_ui(i);
+  }
+
+  // -1 means take the entire rest of the string.
+  string * hook_STRING_substr(string * input, mpz_t start, mpz_t end) {
+    uint64_t ustart = gs(start);
+    uint64_t uend = gs(end);
+    if (uend < ustart) {
+      throw std::invalid_argument("Invalid string slice");
+    }
+    if (uend > input->b.len) {
+      throw std::invalid_argument("Invalid string slice");
+    }
+    uint64_t len = uend - ustart;
+    auto ret = static_cast<string *>(malloc(sizeof(string) + sizeof(KCHAR) * len));
+    ret->b.len = len;
+    memcpy(&(ret->data), &(input->data[ustart]), len * sizeof(KCHAR));
+    return ret;
   }
 
   mpz_ptr hook_STRING_find(const string * haystack, const string * needle, mpz_t pos) {

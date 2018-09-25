@@ -242,15 +242,29 @@ BOOST_AUTO_TEST_CASE(ord) {
 BOOST_AUTO_TEST_CASE(substr) {
   auto catAll = makeString("hellohehf");
 
-  BOOST_CHECK_EQUAL(memcmp(hook_STRING_substr(catAll, 2, -1)->data, "llohehf", 7), 0);
-  BOOST_CHECK_EQUAL(memcmp(hook_STRING_substr(catAll, 2, 4)->data, "lloh", 4), 0);
-  BOOST_CHECK_EQUAL(memcmp(hook_STRING_substr(catAll, 0, 4)->data, "hell", 4), 0);
-  BOOST_CHECK_EQUAL(memcmp(hook_STRING_substr(catAll, 6, 4)->data, "ehf", 3), 0);
-  BOOST_CHECK_EQUAL(memcmp(hook_STRING_substr(catAll, 7, 40)->data, "hf", 2), 0);
-  BOOST_CHECK_EQUAL(memcmp(hook_STRING_substr(catAll, 8, 40)->data, "f", 1), 0);
-  BOOST_CHECK_EQUAL(memcmp(hook_STRING_substr(catAll, 8, -1)->data, "f", 1), 0);
-  BOOST_CHECK_EQUAL(hook_STRING_substr(catAll, 10, 40)->b.len, 0);
-  BOOST_CHECK_EQUAL(hook_STRING_substr(catAll, 10124, 4024)->b.len, 0);
+  mpz_t _2, _9, _6, _0, _4, _7, _40, _8, _10, _1024, _4096;
+  mpz_init_set_si(_2, 2);
+  mpz_init_set_si(_9, 9);
+  mpz_init_set_si(_6, 6);
+  mpz_init_set_si(_0, 0);
+  mpz_init_set_si(_4, 4);
+  mpz_init_set_si(_7, 7);
+  mpz_init_set_si(_40, 40);
+  mpz_init_set_si(_8, 8);
+  mpz_init_set_si(_10, 10);
+  mpz_init_set_si(_1024, 1024);
+  mpz_init_set_si(_4096, 4096);
+  BOOST_CHECK_EQUAL(memcmp(hook_STRING_substr(catAll, _2, _9)->data, "llohehf", 7), 0);
+  BOOST_CHECK_EQUAL(memcmp(hook_STRING_substr(catAll, _2, _6)->data, "lloh", 4), 0);
+  BOOST_CHECK_EQUAL(memcmp(hook_STRING_substr(catAll, _0, _4)->data, "hell", 4), 0);
+  BOOST_CHECK_EQUAL(memcmp(hook_STRING_substr(catAll, _6, _9)->data, "ehf", 3), 0);
+  BOOST_CHECK_THROW(hook_STRING_substr(catAll, _7, _40), std::invalid_argument);
+  BOOST_CHECK_THROW(hook_STRING_substr(catAll, _8, _40), std::invalid_argument);
+  BOOST_CHECK_EQUAL(memcmp(hook_STRING_substr(catAll, _8, _9)->data, "f", 1), 0);
+  BOOST_CHECK_EQUAL(hook_STRING_substr(catAll, _9, _9)->b.len, 0);
+  BOOST_CHECK_THROW(hook_STRING_substr(catAll, _8, _7), std::invalid_argument);
+  BOOST_CHECK_THROW(hook_STRING_substr(catAll, _7, _10), std::invalid_argument);
+  BOOST_CHECK_THROW(hook_STRING_substr(catAll, _1024, _4096), std::invalid_argument);
 }
 
 BOOST_AUTO_TEST_CASE(find) {
