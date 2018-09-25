@@ -22,7 +22,14 @@ extern "C" {
     KCHAR data[0];
   };
 
+  struct stringbuffer {
+    uint64_t capacity;
+    string *contents;
+  };
+
   mpz_ptr move_int(mpz_t);
+
+  string *hook_BYTES_bytes2string(string *);
 
   bool hook_STRING_gt(const string * a, const string * b) {
     auto res = memcmp(a->data, b->data, std::min(a->b.len, b->b.len));
@@ -292,5 +299,34 @@ extern "C" {
     mpz_t result;
     mpz_init_set_ui(result, i);
     return move_int(result);
+  }
+
+  stringbuffer *hook_BUFFER_empty() {
+    auto result = static_cast<stringbuffer *>(malloc(sizeof(stringbuffer)));
+    result->capacity = 16;
+    auto str = static_cast<string *>(malloc(sizeof(string) + 16));
+    str->b.len = 0;
+    result->contents = str;
+    return result;
+  }
+
+  stringbuffer *hook_BUFFER_concat(stringbuffer *buf, string *s) {
+    uint64_t newCapacity = buf->capacity;
+    uint64_t minCapacity = buf->contents->b.len + s->b.len;
+    if (newCapacity < minCapacity) {
+      newCapacity = buf->contents->b.len * 2 + 2;
+      if (newCapacity < minCapacity) {
+        newCapacity = minCapacity;
+      }
+      buf->capacity = newCapacity;
+      buf->contents = static_cast<string *>(realloc(buf->contents, sizeof(string) + newCapacity));
+    }
+    memcpy(buf->contents->data + buf->contents->b.len, s->data, s->b.len);
+    buf->contents->b.len += s->b.len;
+    return buf;
+  }
+
+  string *hook_BUFFER_toString(stringbuffer *buf) {
+    return hook_BYTES_bytes2string(buf->contents);
   }
 }
