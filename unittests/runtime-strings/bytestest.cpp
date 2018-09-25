@@ -14,8 +14,12 @@ extern "C" {
     KCHAR data[0];
   };
 
-  extern const uint64_t tag_big_endian = 0;
-  extern const uint64_t tag_unsigned = 0;
+  uint32_t getTagForSymbolName(char *s) {
+    return 0;
+  }
+
+  uint64_t tag_big_endian();
+  uint64_t tag_unsigned();
 
   mpz_ptr hook_BYTES_bytes2int(string *b, uint64_t endianness, uint64_t signedness);
   string *hook_BYTES_int2bytes(mpz_t len, mpz_t i, uint64_t endianness);
@@ -35,42 +39,42 @@ BOOST_AUTO_TEST_SUITE(BytesTest)
 
 BOOST_AUTO_TEST_CASE(bytes2int) {
   auto empty = makeString("");
-  BOOST_CHECK_EQUAL(0, mpz_cmp_si(hook_BYTES_bytes2int(empty, 0, 0), 0));
-  BOOST_CHECK_EQUAL(0, mpz_cmp_si(hook_BYTES_bytes2int(empty, 1, 0), 0));
-  BOOST_CHECK_EQUAL(0, mpz_cmp_si(hook_BYTES_bytes2int(empty, 0, 1), 0));
-  BOOST_CHECK_EQUAL(0, mpz_cmp_si(hook_BYTES_bytes2int(empty, 1, 1), 0));
+  BOOST_CHECK_EQUAL(0, mpz_cmp_si(hook_BYTES_bytes2int(empty, tag_big_endian(), tag_unsigned()), 0));
+  BOOST_CHECK_EQUAL(0, mpz_cmp_si(hook_BYTES_bytes2int(empty, 2, tag_unsigned()), 0));
+  BOOST_CHECK_EQUAL(0, mpz_cmp_si(hook_BYTES_bytes2int(empty, tag_big_endian(), 2), 0));
+  BOOST_CHECK_EQUAL(0, mpz_cmp_si(hook_BYTES_bytes2int(empty, 2, 2), 0));
 
   auto ff = makeString("\xff");
-  BOOST_CHECK_EQUAL(0, mpz_cmp_si(hook_BYTES_bytes2int(ff, 0, 0), 255));
-  BOOST_CHECK_EQUAL(0, mpz_cmp_si(hook_BYTES_bytes2int(ff, 0, 1), -1));
-  BOOST_CHECK_EQUAL(0, mpz_cmp_si(hook_BYTES_bytes2int(ff, 1, 0), 255));
-  BOOST_CHECK_EQUAL(0, mpz_cmp_si(hook_BYTES_bytes2int(ff, 1, 1), -1));
+  BOOST_CHECK_EQUAL(0, mpz_cmp_si(hook_BYTES_bytes2int(ff, tag_big_endian(), tag_unsigned()), 255));
+  BOOST_CHECK_EQUAL(0, mpz_cmp_si(hook_BYTES_bytes2int(ff, tag_big_endian(), 2), -1));
+  BOOST_CHECK_EQUAL(0, mpz_cmp_si(hook_BYTES_bytes2int(ff, 2, tag_unsigned()), 255));
+  BOOST_CHECK_EQUAL(0, mpz_cmp_si(hook_BYTES_bytes2int(ff, 2, 2), -1));
 
   auto _00ff = makeString("\x00\xff", 2);
-  BOOST_CHECK_EQUAL(0, mpz_cmp_si(hook_BYTES_bytes2int(_00ff, 0, 0), 255));
-  BOOST_CHECK_EQUAL(0, mpz_cmp_si(hook_BYTES_bytes2int(_00ff, 0, 1), 255));
+  BOOST_CHECK_EQUAL(0, mpz_cmp_si(hook_BYTES_bytes2int(_00ff, tag_big_endian(), tag_unsigned()), 255));
+  BOOST_CHECK_EQUAL(0, mpz_cmp_si(hook_BYTES_bytes2int(_00ff, tag_big_endian(), 2), 255));
 
   auto ff00 = makeString("\xff\x00", 2);
-  BOOST_CHECK_EQUAL(0, mpz_cmp_si(hook_BYTES_bytes2int(ff00, 1, 1), 255));
-  BOOST_CHECK_EQUAL(0, mpz_cmp_si(hook_BYTES_bytes2int(ff00, 1, 0), 255));
+  BOOST_CHECK_EQUAL(0, mpz_cmp_si(hook_BYTES_bytes2int(ff00, 2, 2), 255));
+  BOOST_CHECK_EQUAL(0, mpz_cmp_si(hook_BYTES_bytes2int(ff00, 2, tag_unsigned()), 255));
 }
 
 BOOST_AUTO_TEST_CASE(int2bytes) {
   mpz_t _0;
   mpz_init_set_ui(_0, 0);
 
-  auto res = hook_BYTES_int2bytes(_0, _0, 0);
+  auto res = hook_BYTES_int2bytes(_0, _0, tag_big_endian());
   BOOST_CHECK_EQUAL(0, res->b.len);
-  res = hook_BYTES_int2bytes(_0, _0, 1);
+  res = hook_BYTES_int2bytes(_0, _0, 2);
   BOOST_CHECK_EQUAL(0, res->b.len);
 
   mpz_t _4;
   mpz_init_set_ui(_4, 4);
 
-  res = hook_BYTES_int2bytes(_4, _0, 0);
+  res = hook_BYTES_int2bytes(_4, _0, tag_big_endian());
   BOOST_CHECK_EQUAL(4, res->b.len);
   BOOST_CHECK_EQUAL(0, memcmp(res->data, "\x00\x00\x00\x00", 4));
-  res = hook_BYTES_int2bytes(_4, _0, 1);
+  res = hook_BYTES_int2bytes(_4, _0, 2);
   BOOST_CHECK_EQUAL(4, res->b.len);
   BOOST_CHECK_EQUAL(0, memcmp(res->data, "\x00\x00\x00\x00", 4));
 
@@ -78,37 +82,37 @@ BOOST_AUTO_TEST_CASE(int2bytes) {
   mpz_init_set_ui(_1, 1);
   mpz_init_set_si(neg128, -128);
 
-  res = hook_BYTES_int2bytes(_1, neg128, 0);
+  res = hook_BYTES_int2bytes(_1, neg128, tag_big_endian());
   BOOST_CHECK_EQUAL(1, res->b.len);
   BOOST_CHECK_EQUAL(0, memcmp(res->data, "\x80", 1));
-  res = hook_BYTES_int2bytes(_1, neg128, 1);
+  res = hook_BYTES_int2bytes(_1, neg128, 2);
   BOOST_CHECK_EQUAL(1, res->b.len);
   BOOST_CHECK_EQUAL(0, memcmp(res->data, "\x80", 1));
 
   mpz_t _128;
   mpz_init_set_ui(_128, 128);
 
-  res = hook_BYTES_int2bytes(_1, _128, 0);
+  res = hook_BYTES_int2bytes(_1, _128, tag_big_endian());
   BOOST_CHECK_EQUAL(1, res->b.len);
   BOOST_CHECK_EQUAL(0, memcmp(res->data, "\x80", 1));
-  res = hook_BYTES_int2bytes(_1, _128, 1);
+  res = hook_BYTES_int2bytes(_1, _128, 2);
   BOOST_CHECK_EQUAL(1, res->b.len);
   BOOST_CHECK_EQUAL(0, memcmp(res->data, "\x80", 1));
 
   mpz_t _2;
   mpz_init_set_ui(_2, 2);
 
-  res = hook_BYTES_int2bytes(_2, _128, 0);
+  res = hook_BYTES_int2bytes(_2, _128, tag_big_endian());
   BOOST_CHECK_EQUAL(2, res->b.len);
   BOOST_CHECK_EQUAL(0, memcmp(res->data, "\x00\x80", 2));
-  res = hook_BYTES_int2bytes(_2, _128, 1);
+  res = hook_BYTES_int2bytes(_2, _128, 2);
   BOOST_CHECK_EQUAL(2, res->b.len);
   BOOST_CHECK_EQUAL(0, memcmp(res->data, "\x80\x00", 2));
 
-  res = hook_BYTES_int2bytes(_2, neg128, 0);
+  res = hook_BYTES_int2bytes(_2, neg128, tag_big_endian());
   BOOST_CHECK_EQUAL(2, res->b.len);
   BOOST_CHECK_EQUAL(0, memcmp(res->data, "\xff\x80", 2));
-  res = hook_BYTES_int2bytes(_2, neg128, 1);
+  res = hook_BYTES_int2bytes(_2, neg128, 2);
   BOOST_CHECK_EQUAL(2, res->b.len);
   BOOST_CHECK_EQUAL(0, memcmp(res->data, "\x80\xff", 2));
 }
