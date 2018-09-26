@@ -137,10 +137,6 @@ extern "C" {
     mpz_t result;
     uint64_t upos = gs(pos);
     upos += needle->b.len;
-    if (upos <= needle->b.len) {
-      mpz_init_set_si(result, -1);
-      return move_int(result);
-    }
     auto end = (upos < haystack->b.len)?upos:haystack->b.len;
     auto out = std::find_end(&haystack->data[0], &haystack->data[end],
         &needle->data[0], &needle->data[needle->b.len]);
