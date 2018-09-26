@@ -19,7 +19,6 @@ private:
 
   llvm::Value *createHook(KOREObjectCompositePattern *hookAtt, KOREObjectCompositePattern *pattern);
   llvm::Value *createFunctionCall(std::string name, KOREObjectCompositePattern *pattern, bool sret);
-  llvm::Value *createToken(SortCategory sort, std::string contents);
   llvm::Value *notInjectionCase(KOREObjectCompositePattern *constructor, llvm::Value *val);
 public:
   CreateTerm(
@@ -37,6 +36,7 @@ public:
    an llvm value corresponding to the specified KORE RHS pattern and substitution in the
    specified definition, and returns the value itself. */
   llvm::Value *operator()(KOREPattern *pattern);
+  llvm::Value *createToken(SortCategory sort, std::string contents);
 
   llvm::BasicBlock *getCurrentBlock() const { return CurrentBlock; }
 };

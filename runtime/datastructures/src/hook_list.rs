@@ -40,6 +40,15 @@ pub unsafe extern "C" fn hook_LIST_in(value: K, list: *const List) -> bool {
   (*list).contains(&KElem(value))
 }
 
+#[no_mangle]
+pub unsafe extern "C" fn hook_LIST_in_keys(index: *const Int, list: *const List) -> bool {
+  let (status, index_long) = get_long(index);
+  if !status {
+    panic!("Index out of range")
+  }
+  index_long < (*list).len()
+}
+
 unsafe fn get_long(i: *const Int) -> (bool, usize) {
   if !(__gmpz_fits_ulong_p(i) != 0) {
     return (false, 0);
@@ -57,6 +66,11 @@ pub unsafe extern "C" fn hook_LIST_get(list: *const List, index: *const Int) -> 
     Some(KElem(elem)) => { *elem }
     None => panic!("Index out of range")
   }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn hook_LIST_lookup(list: *const List, index: *const Int) -> K {
+  hook_LIST_get(list, index)
 }
 
 #[no_mangle]

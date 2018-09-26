@@ -7,9 +7,11 @@ import           Pattern.Parser        (unifiedPatternRAlgebra,SymLib(..), getTo
                                         AxiomInfo(..))
 import           Control.Monad.Free    (Free (..))
 import           Data.Bits             (shiftL)
+import           Data.Either           (isLeft)
 import           Data.Functor.Foldable (Fix (..), para)
 import           Data.List             (transpose)
 import qualified Data.Map              as Map
+import           Data.Maybe            (isJust)
 import           Data.Text             (unpack)
 import           Data.Tuple.Select     (sel1)
 import           Kore.AST.Common       (Rewrites (..), Sort (..),
@@ -49,8 +51,8 @@ instance KoreRewrite (Rewrites lvl CommonKorePattern) where
   getLeftHandSide = (: []) . rewritesFirst
   getRightHandSide = rewritesSecond
 
-genPattern :: KoreRewrite pattern => (Sort Object -> Int) -> pattern -> [Fix P.Pattern]
-genPattern getBitwidth rewrite =
+genPattern :: KoreRewrite pattern => MetadataTools Object StepperAttributes -> pattern -> [Fix P.Pattern]
+genPattern tools rewrite =
   let lhs = getLeftHandSide rewrite
   in map (para (unifiedPatternRAlgebra (error "unsupported: meta level") rAlgebra)) lhs
   where
@@ -59,13 +61,15 @@ genPattern getBitwidth rewrite =
              -> Fix P.Pattern
     rAlgebra (ApplicationPattern (Application sym ps)) = Fix $ P.Pattern (Left sym) Nothing (map snd ps)
     rAlgebra (DomainValuePattern (DomainValue sort (Fix (StringLiteralPattern (StringLiteral str))))) =
-      Fix $ P.Pattern (case str of
-                         "true" -> Right "1"
-                         "false" -> Right "0"
-                         _ -> Right str)
-        (Just $ getBitwidth sort) []
+      let att = getHook $ hook $ sortAttributes tools sort
+      in Fix $ P.Pattern (if att == Just "BOOL.Bool" then case str of
+                           "true" -> Right "1"
+                           "false" -> Right "0"
+                           _ -> Right str else Right str)
+          (if att == Nothing then Just "STRING.String" else att) []
     rAlgebra (VariablePattern (Variable (Id name _) _)) = Fix $ P.Variable name
-    rAlgebra _ = error "Unsupported pattern type"
+    rAlgebra (AndPattern (And _ p (_,Fix (P.Variable name)))) = Fix $ P.As name $ snd p
+    rAlgebra pat = error $ show pat
 
 genVars :: CommonKorePattern -> [String]
 genVars = para (unifiedPatternRAlgebra rAlgebra rAlgebra)
@@ -90,7 +94,7 @@ genVars = para (unifiedPatternRAlgebra rAlgebra rAlgebra)
     rAlgebra _                                            = []
 
 defaultMetadata :: Sort Object -> P.Metadata
-defaultMetadata sort = P.Metadata 1 [] sort (const $ Just [])
+defaultMetadata sort = P.Metadata 1 (const []) sort (\c -> if isLeft c then Nothing else Just [])
 
 genMetadatas :: SymLib -> KoreIndexedModule StepperAttributes -> Map.Map (Sort Object) P.Metadata
 genMetadatas syms@(SymLib symbols sorts) indexedMod =
@@ -100,28 +104,48 @@ genMetadatas syms@(SymLib symbols sorts) indexedMod =
     genMetadata sort@(SortActualSort _) constructors =
       let att = sortAttributes (extractMetadataTools indexedMod) sort
           hookAtt = getHook $ hook att
-          isToken = case hookAtt of
+          isInt = case hookAtt of
             Just "BOOL.Bool" -> True
             Just "MINT.MInt" -> True
             _                -> False
-      in if isToken then
+          isToken = case hookAtt of
+            Just "STRING.String" -> True
+            Just "INT.Int" -> True
+            Just "FLOAT.Float" -> True
+            Just "BUFFER.StringBuffer" -> True
+            Just "BYTES.Bytes" -> True
+            Just "MINT.MInt" -> True
+            Just _ -> False
+            Nothing -> False
+      in if isInt then
         let tools = extractMetadataTools indexedMod
             bw = bitwidth tools sort
-        in Just $ P.Metadata (shiftL 1 bw) [] sort (const $ Just [])
+        in Just $ P.Metadata (shiftL 1 bw) (const []) sort (const $ Just [])
+      else if isToken then
+        Just $ defaultMetadata sort
       else
         let metadatas = genMetadatas syms indexedMod
             keys = map Left constructors
             args = map getArgs constructors
             injections = filter isInjection keys
-            children = map (map $ (\s -> Map.findWithDefault (defaultMetadata sort) s metadatas)) args
+            usedInjs = map (\c -> filter (isSubsort metadatas c) injections) injections
+            children = map (map $ (\s -> Map.findWithDefault (defaultMetadata s) s metadatas)) args
             metaMap = Map.fromList (zip keys children)
-        in Just $ P.Metadata (toInteger $ length constructors) injections sort (flip Map.lookup metaMap)
+            injMap = Map.fromList (zip injections usedInjs)
+        in Just $ P.Metadata (toInteger $ length constructors) (injMap Map.!) sort (\c -> if isLeft c then Map.lookup c metaMap else Just [])
     genMetadata _ _ = Nothing
     getArgs :: SymbolOrAlias Object -> [Sort Object]
     getArgs sym = sel1 $ symbols Map.! sym
     isInjection :: P.Constructor -> Bool
     isInjection (Left (SymbolOrAlias (Id "inj" _) _)) = True
     isInjection _ = False
+    isSubsort :: Map.Map (Sort Object) P.Metadata -> P.Constructor -> P.Constructor -> Bool
+    isSubsort metas (Left (SymbolOrAlias name [b,_])) (Left (SymbolOrAlias _ [a,_])) =
+      let (P.Metadata _ _ _ childMeta) = Map.findWithDefault (defaultMetadata b) b metas
+          child = Left (SymbolOrAlias name [a,b])
+      in isJust $ childMeta $ child
+    isSubsort _ _ _ = error "invalid injection"
+
 
 genClauseMatrix :: KoreRewrite pattern 
                => SymLib
@@ -134,14 +158,13 @@ genClauseMatrix symlib indexedMod axioms sorts =
       rewrites = map getRewrite axioms
       sideConditions = map getSideCondition axioms
       tools = extractMetadataTools indexedMod
-      bw = bitwidth tools
-      patterns = map (genPattern bw) rewrites
+      patterns = map (genPattern tools) rewrites
       rhsVars = map (genVars . getRightHandSide) rewrites
       scVars = map (maybe Nothing (Just . genVars)) sideConditions
       actions = zipWith3 P.Action indices rhsVars scVars
       metas = genMetadatas symlib indexedMod
       meta = map (metas Map.!) sorts
-      col = zipWith P.Column meta (transpose patterns)
+      col = zipWith P.mkColumn meta (transpose patterns)
   in case P.mkClauseMatrix col actions of
        Left err -> error (unpack err)
        Right m -> m

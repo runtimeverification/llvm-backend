@@ -38,13 +38,13 @@ instance IsPattern Lst where
 
 instance IsPattern IntPat where
   toPattern :: IntPat -> Fix Pattern
-  toPattern (IntLit i) = Fix (Pattern (Right $ show i) (Just 32) [])
+  toPattern (IntLit i) = Fix (Pattern (Right $ show i) (Just "MINT.MInt 32") [])
   toPattern IntWld     = Fix Wildcard
   toPattern (IntVar v) = Fix (Variable v)
 
 instance HasMetadata IntPat where
   getMetadata :: Proxy IntPat -> Metadata
-  getMetadata _ = Metadata (shiftL 1 32) [] (SortActualSort (SortActual (Id "Int" AstLocationNone) [])) f
+  getMetadata _ = Metadata (shiftL 1 32) (const []) (SortActualSort (SortActual (Id "Int" AstLocationNone) [])) f
     where
       f :: Constructor -> Maybe [Metadata]
       f _ = Just []
@@ -58,7 +58,7 @@ instance HasMetadata Lst where
                                , getMetadata (Proxy :: Proxy Lst)
                                ]) -- Cns Lst (1)
                     ]
-    in Metadata (toInteger $ length m) [] (SortActualSort (SortActual (Id "Lst" AstLocationNone) [])) (flip M.lookup m)
+    in Metadata (toInteger $ length m) (const []) (SortActualSort (SortActual (Id "Lst" AstLocationNone) [])) (flip M.lookup m)
 
 vars :: [Lst] -> [String]
 vars l = concat (map varLst l)
@@ -80,7 +80,7 @@ mkLstPattern pats =
       vs = map vars ls
       as' = zipWith3 Action as vs conds 
       md = getMetadata (Proxy :: Proxy Lst)
-      cs = fmap (Column md . (toPattern <$>)) (transpose ls)
+      cs = fmap (mkColumn md . (toPattern <$>)) (transpose ls)
   in case mkClauseMatrix cs as' of
        Right matrix -> matrix
        Left  msg    -> error $ "Invalid definition: " ++ show msg
@@ -125,30 +125,30 @@ appendTests = testGroup "Basic pattern compilation"
   [ testCase "Naive compilation of the append pattern" $
       compilePattern appendPattern @?=
         switch [1] [ ("nil", leaf 1 [])
-               , ("cons", simplify [0, 1] (simplify [1, 1]
+               , ("cons", swap 2
                            (switch [2] [ ("nil", leaf 2 [])
                                    , ("cons", leaf 3 [])
-                                   ] Nothing )))
+                                   ] Nothing ))
                ] Nothing
   , testCase "Naive compilation of the append pattern with variable bindings" $
       compilePattern appendBindPattern @?=
         switch [1] [ ("nil", leaf 1 [[2]])
-               , ("cons", simplify [0, 1] (simplify [1, 1]
+               , ("cons", swap 2
                            (switch [2] [ ("nil", leaf 2 [[1]])
                                    , ("cons", leaf 3 [[0, 2], [1, 2], [0, 1], [1, 1]])
-                                   ] Nothing )))
+                                   ] Nothing ))
                ] Nothing
   , testCase "Naive compilation of the append pattern with side condition" $
       compilePattern appendCondPattern @?=
         switch [1] [ ("nil", leaf 1 [[2]])
-               , ("cons", simplify [0, 1] (simplify [1, 1]
+               , ("cons", swap 2
                            (switch [2] [ ("nil", leaf 2 [[1]])
-                                   , ("cons", (function "side_condition_3" [[1, 2], [0, 1]] "BOOL.Bool" (switchLit [0, 0] 1 [("1", leaf 3 [[0, 2], [1, 2], [0, 1], [1, 1]]), ("0", failure)] Nothing)))
-                                   ] Nothing )))
+                                   , ("cons", (function "side_condition_3" [[1, 2], [0, 1]] "BOOL.Bool" (switchLiteral [0, 0] 1 [("1", leaf 3 [[0, 2], [1, 2], [0, 1], [1, 1]]), ("0", failure)] Nothing)))
+                                   ] Nothing ))
                ] Nothing
   , testCase "Yaml serialization" $
       (serializeToYaml $ shareDt $ compilePattern $ appendBindPattern) @?= 
-        "&6\n" <>
+        "&5\n" <>
         "specializations:\n" <>
         "- - nil\n" <>
         "  - &0\n" <>
@@ -156,44 +156,37 @@ appendTests = testGroup "Basic pattern compilation"
         "    - 1\n" <>
         "    - - - 2\n" <>
         "- - cons\n" <>
-        "  - &5\n" <>
-        "    specializations: []\n" <>
-        "    default: &4\n" <>
-        "      specializations: []\n" <>
-        "      default: &3\n" <>
-        "        specializations:\n" <>
-        "        - - nil\n" <>
-        "          - &1\n" <>
-        "            action:\n" <>
-        "            - 2\n" <>
-        "            - - - 1\n" <>
-        "        - - cons\n" <>
-        "          - &2\n" <>
-        "            action:\n" <>
-        "            - 3\n" <>
-        "            - - - 0\n" <>
-        "                - 2\n" <>
-        "              - - 1\n" <>
-        "                - 2\n" <>
-        "              - - 0\n" <>
-        "                - 1\n" <>
-        "              - - 1\n" <>
-        "                - 1\n" <>
-        "        default: null\n" <>
-        "        occurrence:\n" <>
-        "        - 2\n" <>
+        "  - &4\n" <>
+        "    swap:\n" <>
+        "    - 2\n" <>
+        "    - &3\n" <>
+        "      specializations:\n" <>
+        "      - - nil\n" <>
+        "        - &1\n" <>
+        "          action:\n" <>
+        "          - 2\n" <>
+        "          - - - 1\n" <>
+        "      - - cons\n" <>
+        "        - &2\n" <>
+        "          action:\n" <>
+        "          - 3\n" <>
+        "          - - - 0\n" <>
+        "              - 2\n" <>
+        "            - - 1\n" <>
+        "              - 2\n" <>
+        "            - - 0\n" <>
+        "              - 1\n" <>
+        "            - - 1\n" <>
+        "              - 1\n" <>
+        "      default: null\n" <>
         "      occurrence:\n" <>
-        "      - 1\n" <>
-        "      - 1\n" <>
-        "    occurrence:\n" <>
-        "    - 0\n" <>
-        "    - 1\n" <>
+        "      - 2\n" <>
         "default: null\n" <>
         "occurrence:\n" <>
         "- 1\n"
   , testCase "Naive compilation of integer literal patterns" $
       compilePattern matchHeadPattern @?=
-        switch [1] [ ("cons", (switchLit [0, 1] 32 [ ("0", leaf 1 [])
+        switch [1] [ ("cons", (switchLiteral [0, 1] 32 [ ("0", leaf 1 [])
                                      , ("1", leaf 2 [])
                                      , ("-1", leaf 3 [])
                                      , ("1000000", leaf 4 [])

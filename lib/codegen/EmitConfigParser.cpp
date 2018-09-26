@@ -442,11 +442,16 @@ static void visitCollection(KOREDefinition *definition, llvm::Module *module, KO
   llvm::Constant *zero = llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0);
   auto indices = std::vector<llvm::Constant *>{zero, zero};
   auto sortDecl = definition->getSortDeclarations().lookup(compositeSort->getName());
-  auto concat = (KOREObjectCompositePattern *)sortDecl->getAttributes().lookup("concat")->getArguments()[0];
+  llvm::Constant *concatPtr;
+  if (sortDecl->getAttributes().count("concat")) {
+    auto concat = (KOREObjectCompositePattern *)sortDecl->getAttributes().lookup("concat")->getArguments()[0];
+    concatPtr = getSymbolNamePtr(concat->getConstructor(), nullptr, module);
+  } else {
+    concatPtr = llvm::ConstantPointerNull::get(llvm::Type::getInt8PtrTy(Ctx));
+  }
   auto unit = (KOREObjectCompositePattern *)sortDecl->getAttributes().lookup("unit")->getArguments()[0];
-  auto element = (KOREObjectCompositePattern *)sortDecl->getAttributes().lookup("element")->getArguments()[0];
-  auto concatPtr = getSymbolNamePtr(concat->getConstructor(), nullptr, module);
   auto unitPtr = getSymbolNamePtr(unit->getConstructor(), nullptr, module);
+  auto element = (KOREObjectCompositePattern *)sortDecl->getAttributes().lookup("element")->getArguments()[0];
   auto elementPtr = getSymbolNamePtr(element->getConstructor(), nullptr, module);
   llvm::CallInst::Create(func->arg_begin()+offset, {func->arg_begin()+1, ChildPtr, unitPtr, elementPtr, concatPtr}, "", CaseBlock);
 }
@@ -460,7 +465,7 @@ static void getVisitor(KOREDefinition *definition, llvm::Module *module, KOREObj
   auto BlockType = getBlockType(module, definition, symbol);
   auto cast = new llvm::BitCastInst(func->arg_begin(),
       llvm::PointerType::getUnqual(BlockType), "", CaseBlock);
-  int i = 0;
+  unsigned i = 0;
   for (auto sort : symbol->getArguments()) {
     auto compositeSort = dynamic_cast<KOREObjectCompositeSort *>(sort);
     SortCategory cat = compositeSort->getCategory(definition);
@@ -479,6 +484,7 @@ static void getVisitor(KOREDefinition *definition, llvm::Module *module, KOREObj
     switch(cat) {
     case SortCategory::StringBuffer:
       Child = new llvm::LoadInst(Child, "", CaseBlock);
+      Child = new llvm::BitCastInst(Child, getValueType(SortCategory::Symbol, module), "", CaseBlock);
       // fall through
     case SortCategory::Symbol:
       llvm::CallInst::Create(func->arg_begin()+2, {func->arg_begin()+1, Child, CharPtr}, "", CaseBlock);

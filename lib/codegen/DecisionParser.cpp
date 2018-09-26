@@ -16,12 +16,13 @@ private:
   KOREObjectSymbol *dv;
 
   enum Kind {
-    Switch, SwitchLit, Function, Leaf, Fail, Swap
+    Switch, SwitchLiteral, EqualsLiteral, Function, Leaf, Fail, Swap
   };
 
   static Kind getKind(YAML::Node node) {
     if (node.IsScalar()) return Fail;
-    if (node["bitwidth"]) return SwitchLit;
+    if (node["hook"]) return EqualsLiteral;
+    if (node["bitwidth"]) return SwitchLiteral;
     if (node["specializations"]) return Switch;
     if (node["action"]) return Leaf;
     if (node["swap"]) return Swap;
@@ -72,6 +73,23 @@ public:
     return result;
   }
 
+  DecisionNode *equalsLiteral(YAML::Node node) {
+    std::string binding = constructors.back();
+    std::string hookName = node["hook"].as<std::string>();
+    std::string literal = node["literal"].as<std::string>();
+    SortCategory cat = KOREObjectCompositeSort::getCategory(hookName);
+
+    std::string name = "_" + std::to_string(counter++);
+    occurrences[{functionDepth++, 0}] = name;
+    constructors.push_back(name);
+
+    auto child = (*this)(node["next"]); 
+
+    functionDepth--;
+
+    return EqualsLiteralNode::Create(name, binding, cat, literal, child);
+  }
+
   DecisionNode *switchCase(Kind kind, YAML::Node node) {
     YAML::Node list = node["specializations"];
     std::string name = constructors.back();
@@ -83,7 +101,7 @@ public:
       std::vector<std::string> copy = constructors;
       std::vector<std::string> bindings;
       KOREObjectSymbol *symbol;
-      if (kind == SwitchLit) {
+      if (kind == SwitchLiteral) {
         symbol = dv;
       } else {
         std::string symName = _case[0].as<std::string>();
@@ -100,7 +118,7 @@ public:
       }
       DecisionNode *child = (*this)(_case[1]);
       constructors = copy;
-      if (kind == SwitchLit) {
+      if (kind == SwitchLiteral) {
         unsigned bitwidth = node["bitwidth"].as<unsigned>();
         result->addCase({symbol, {bitwidth, _case[0].as<std::string>(), 10}, child}); 
       } else {
@@ -139,7 +157,9 @@ public:
       return FailNode::get();
     case Function:
       return function(node);
-    case SwitchLit:
+    case EqualsLiteral:
+      return equalsLiteral(node);
+    case SwitchLiteral:
     case Switch:
       return switchCase(kind, node);
     case Leaf:
