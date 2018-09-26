@@ -4,7 +4,7 @@
 module Pattern.Parser where
 
 import           Data.Functor.Foldable      (Fix (..), para)
-import           Data.List                  (sortBy)
+import           Data.List                  (sortBy, nub)
 import           Data.List.Index            (indexed)
 import qualified Data.Map                   as Map
 import           Data.Functor.Impredicative (Rotate31 (..))
@@ -80,12 +80,15 @@ parseAxiomForSymbols = parsePatternForSymbols . sentenceAxiomPattern
     rAlgebra (NextPattern (Next _ (_, p)))                = p
     rAlgebra (NotPattern (Not _ (_, p)))                  = p
     rAlgebra (OrPattern (Or _ (_, p₀) (_, p₁)))           = p₀ ++ p₁
+    rAlgebra (RewritesPattern (Rewrites _ (_, p₀) (_, p₁))) = p₀ ++ p₁
     rAlgebra _                                            = []
 
 mkSymLib :: [SymbolOrAlias Object] 
          -> MetadataTools Object StepperAttributes
          -> SymLib
-mkSymLib symbols metaTools = foldl go (SymLib Map.empty Map.empty) symbols
+mkSymLib symbols metaTools = 
+  let (SymLib sorts syms) = foldl go (SymLib Map.empty Map.empty) symbols
+  in SymLib sorts (Map.map nub syms)
   where
     go (SymLib dIx rIx) symbol =
       let as = (sortTools metaTools) symbol

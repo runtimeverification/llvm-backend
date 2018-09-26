@@ -69,6 +69,39 @@ public:
   virtual void codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution);
 };
 
+class EqualsLiteralNode : public DecisionNode {
+private:
+  std::string name;
+  std::string binding;
+  SortCategory cat;
+  std::string literal;
+  DecisionNode *child;
+
+  EqualsLiteralNode(
+    const std::string &name,
+    const std::string &binding,
+    SortCategory cat,
+    const std::string literal,
+    DecisionNode *child) :
+      name(name),
+      binding(binding),
+      cat(cat),
+      literal(literal),
+      child(child) {}
+
+public:
+  static EqualsLiteralNode *Create(
+      const std::string &name,
+      const std::string &binding,
+      SortCategory cat,
+      const std::string literal,
+      DecisionNode *child) {
+    return new EqualsLiteralNode(name, binding, cat, literal, child);
+  }
+
+  virtual void codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution);
+};
+
 class FunctionNode : public DecisionNode {
 private:
   /* the list of arguments to the function. */
@@ -169,6 +202,7 @@ public:
   void operator()(DecisionNode *entry, llvm::StringMap<llvm::Value *> substitution);
 
   friend class SwitchNode;
+  friend class EqualsLiteralNode;
   friend class FunctionNode;
   friend class LeafNode;
 };
