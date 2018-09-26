@@ -82,10 +82,10 @@ data Constructor = Symbol (SymbolOrAlias Object)
 type Index       = Int
 data Pattern a   = Pattern Constructor (Maybe String) ![a]
                  | ListPattern
-                   { getHead :: ![a]
-                   , getFrame :: Maybe a
-                   , getTail :: [a]
-                   , element :: SymbolOrAlias Object
+                   { getHead :: ![a] -- match elements at front of list
+                   , getFrame :: Maybe a -- match remainder of list
+                   , getTail :: [a] -- match elements at back of list
+                   , element :: SymbolOrAlias Object -- ListItem symbol
                    }
                  | As String String a
                  | Wildcard
