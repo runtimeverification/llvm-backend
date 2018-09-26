@@ -7,8 +7,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 add_definitions(-Wall -Werror -flto)
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -flto")
-set(CMAKE_AR "llvm-ar")
-set(CMAKE_RANLIB "llvm-ranlib")
+set(CMAKE_AR "llvm-ar-5.0")
+set(CMAKE_RANLIB "llvm-ranlib-5.0")
 
 find_package(LLVM 5 REQUIRED CONFIG)
 

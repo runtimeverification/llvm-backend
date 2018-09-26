@@ -20,4 +20,5 @@ macro(add_kllvm_unittest test_name)
 endmacro(add_kllvm_unittest test_name)
 
 add_subdirectory(runtime-arithmetic)
+add_subdirectory(runtime-strings)
 add_subdirectory(compiler)
