@@ -176,11 +176,11 @@ extern "C" {
 
   const string * hook_STRING_int2string(const mpz_t input) {
     size_t len = mpz_sizeinbase(input, 10) + 2;
-    // +1 for null terminator needed by mpz_get_str
+    // +1 for null terminator needed by mpz_get_str, +1 for minus sign
     auto result = static_cast<string *>(malloc(sizeof(string) + len));
     mpz_get_str(result->data, 10, input);
     result->b.len = strlen(result->data);
-    return result;
+    return static_cast<string *>(realloc(result, sizeof(string) + result->b.len));
   }
 
   const mpz_ptr hook_STRING_string2base_long(const string *input, uint64_t base) {
