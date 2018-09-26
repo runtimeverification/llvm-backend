@@ -2,10 +2,9 @@ cmake_minimum_required (VERSION 3.4)
 
 project (KLLVM CXX C)
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 add_definitions(-Wall -Werror -flto)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -flto")
 set(CMAKE_AR "llvm-ar-5.0")
 set(CMAKE_RANLIB "llvm-ranlib-5.0")
