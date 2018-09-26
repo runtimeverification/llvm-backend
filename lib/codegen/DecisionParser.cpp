@@ -16,13 +16,13 @@ private:
   KOREObjectSymbol *dv;
 
   enum Kind {
-    Switch, SwitchLit, EqualsLiteral, Function, Leaf, Fail, Swap
+    Switch, SwitchLiteral, EqualsLiteral, Function, Leaf, Fail, Swap
   };
 
   static Kind getKind(YAML::Node node) {
     if (node.IsScalar()) return Fail;
     if (node["hook"]) return EqualsLiteral;
-    if (node["bitwidth"]) return SwitchLit;
+    if (node["bitwidth"]) return SwitchLiteral;
     if (node["specializations"]) return Switch;
     if (node["action"]) return Leaf;
     if (node["swap"]) return Swap;
@@ -101,7 +101,7 @@ public:
       std::vector<std::string> copy = constructors;
       std::vector<std::string> bindings;
       KOREObjectSymbol *symbol;
-      if (kind == SwitchLit) {
+      if (kind == SwitchLiteral) {
         symbol = dv;
       } else {
         std::string symName = _case[0].as<std::string>();
@@ -118,7 +118,7 @@ public:
       }
       DecisionNode *child = (*this)(_case[1]);
       constructors = copy;
-      if (kind == SwitchLit) {
+      if (kind == SwitchLiteral) {
         unsigned bitwidth = node["bitwidth"].as<unsigned>();
         result->addCase({symbol, {bitwidth, _case[0].as<std::string>(), 10}, child}); 
       } else {
@@ -159,7 +159,7 @@ public:
       return function(node);
     case EqualsLiteral:
       return equalsLiteral(node);
-    case SwitchLit:
+    case SwitchLiteral:
     case Switch:
       return switchCase(kind, node);
     case Leaf:

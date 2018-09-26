@@ -143,7 +143,7 @@ appendTests = testGroup "Basic pattern compilation"
         switch [1] [ ("nil", leaf 1 [[2]])
                , ("cons", swap 2
                            (switch [2] [ ("nil", leaf 2 [[1]])
-                                   , ("cons", (function "side_condition_3" [[1, 2], [0, 1]] "BOOL.Bool" (switchLit [0, 0] 1 [("1", leaf 3 [[0, 2], [1, 2], [0, 1], [1, 1]]), ("0", failure)] Nothing)))
+                                   , ("cons", (function "side_condition_3" [[1, 2], [0, 1]] "BOOL.Bool" (switchLiteral [0, 0] 1 [("1", leaf 3 [[0, 2], [1, 2], [0, 1], [1, 1]]), ("0", failure)] Nothing)))
                                    ] Nothing ))
                ] Nothing
   , testCase "Yaml serialization" $
@@ -186,7 +186,7 @@ appendTests = testGroup "Basic pattern compilation"
         "- 1\n"
   , testCase "Naive compilation of integer literal patterns" $
       compilePattern matchHeadPattern @?=
-        switch [1] [ ("cons", (switchLit [0, 1] 32 [ ("0", leaf 1 [])
+        switch [1] [ ("cons", (switchLiteral [0, 1] 32 [ ("0", leaf 1 [])
                                      , ("1", leaf 2 [])
                                      , ("-1", leaf 3 [])
                                      , ("1000000", leaf 4 [])

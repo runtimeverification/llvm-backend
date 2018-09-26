@@ -25,7 +25,7 @@ module Pattern ( PatternMatrix(..)
                , failure
                , leaf
                , switch
-               , switchLit
+               , switchLiteral
                , function
                , swap
                , simplify
@@ -140,13 +140,13 @@ switch o brs def =
   Fix $ Switch o L { getSpecializations = brs
                  , getDefault = def }
 
-switchLit :: Occurrence
+switchLiteral :: Occurrence
           -> Int
           -> [(Text, Fix DecisionTree)]
           -> Maybe (Fix DecisionTree)
           -> Fix DecisionTree
-switchLit o bw brs def =
-  Fix $ SwitchLit o bw L { getSpecializations = brs
+switchLiteral o bw brs def =
+  Fix $ SwitchLiteral o bw L { getSpecializations = brs
                     , getDefault = def }
 
 function :: Text
@@ -347,7 +347,7 @@ data L a = L
 data DecisionTree a = Leaf (Int, [Occurrence])
                     | Fail
                     | Switch Occurrence !(L a)
-                    | SwitchLit Occurrence Int !(L a)
+                    | SwitchLiteral Occurrence Int !(L a)
                     | EqualLiteral Text Text !a
                     | Swap Index !a
                     | Function Text [Occurrence] Text !a  
@@ -379,7 +379,7 @@ instance Y.ToYaml a => Y.ToYaml (Anchor a) where
                                 )
       , "occurrence" Y..= Y.toYaml o
       ]
-    toYaml (Anchor a (SwitchLit o i x)) = Y.namedMapping a
+    toYaml (Anchor a (SwitchLiteral o i x)) = Y.namedMapping a
       ["specializations" Y..= Y.array (map (\(i1, i2) -> Y.array [Y.toYaml i1, Y.toYaml i2]) (getSpecializations x))
       , "default" Y..= Y.toYaml (case (getDefault x) of
                                     Just d -> Y.toYaml d
@@ -423,7 +423,7 @@ getLeaf ix os ps (Clause (Action a rhsVars maybeSideCondition) matchedVars) next
     Nothing -> Fix $ Leaf (a, newVars)
     Just cond -> let condFiltered = filter (flip elem cond . fst) sorted
                      (_, condVars) = unzip condFiltered
-                 in function (pack $ "side_condition_" ++ (show a)) condVars "BOOL.Bool" (switchLit [ix, 0] 1 [("1", (leaf a newVars)), ("0", next)] Nothing)
+                 in function (pack $ "side_condition_" ++ (show a)) condVars "BOOL.Bool" (switchLiteral [ix, 0] 1 [("1", (leaf a newVars)), ("0", next)] Nothing)
 
 swapAt :: Int -> Int -> [a] -> [a]
 swapAt i j xs = 
@@ -464,11 +464,11 @@ compilePattern cm =
                     { getSpecializations = map (second (compilePattern' ix)) ls
                     , getDefault = compilePattern' ix <$> d
                     }
-                Just "BOOL.Bool" -> Fix $ SwitchLit (head os') 1 L
+                Just "BOOL.Bool" -> Fix $ SwitchLiteral (head os') 1 L
                     { getSpecializations = map (second (compilePattern' ix)) ls
                     , getDefault = compilePattern' ix <$> d
                     }
-                Just ('M':'I':'N':'T':'.':'M':'I':'n':'t':' ':bw) -> Fix $ SwitchLit (head os') (read bw) L
+                Just ('M':'I':'N':'T':'.':'M':'I':'n':'t':' ':bw) -> Fix $ SwitchLiteral (head os') (read bw) L
                     { getSpecializations = map (second (compilePattern' ix)) ls
                     , getDefault = compilePattern' ix <$> d
                     }
@@ -484,7 +484,7 @@ compilePattern cm =
     equalLiteral :: Int -> [Occurrence] -> String -> [(Text, (ClauseMatrix, [Occurrence]))] -> Maybe (ClauseMatrix, [Occurrence]) -> Fix DecisionTree
     equalLiteral o os _ [] (Just d) = Fix $ Switch (head os) L { getSpecializations = [], getDefault = Just $ compilePattern' o d }
     equalLiteral _ _ _ [] (Nothing) = Fix Fail
-    equalLiteral o os hookName ((name,spec):tl) d = Fix $ EqualLiteral (pack hookName) name $ Fix $ SwitchLit [o, 0] 1 $ L [("1", Fix $ Switch (head os) L { getSpecializations = [], getDefault = Just $ compilePattern' (o+1) spec }),("0", equalLiteral (o+1) os hookName tl d)] Nothing
+    equalLiteral o os hookName ((name,spec):tl) d = Fix $ EqualLiteral (pack hookName) name $ Fix $ SwitchLiteral [o, 0] 1 $ L [("1", Fix $ Switch (head os) L { getSpecializations = [], getDefault = Just $ compilePattern' (o+1) spec }),("0", equalLiteral (o+1) os hookName tl d)] Nothing
 
 
 shareDt :: Fix DecisionTree -> Free Anchor Alias
@@ -506,7 +506,7 @@ shareDt =
                         Fix (EqualLiteral h l a) -> let (m',child) = mapChild a in (addName m',Free (Anchor (Just $ name m') (EqualLiteral h l child)))
                         Fix (Function n os s a) -> let (m',child) = mapChild a in (addName m', Free (Anchor (Just $ name m') (Function n os s child)))
                         Fix (Switch o (L s d)) -> let (m',s') = mapSpec m s in let (m'',d') = mapDefault m' d in (addName m'', Free (Anchor (Just $ name m'') (Switch o (L s' d'))))
-                        Fix (SwitchLit o bw (L s d)) -> let (m',s') = mapSpec m s in let (m'',d') = mapDefault m' d in (addName m'', Free (Anchor (Just $ name m'') (SwitchLit o bw (L s' d'))))
+                        Fix (SwitchLiteral o bw (L s d)) -> let (m',s') = mapSpec m s in let (m'',d') = mapDefault m' d in (addName m'', Free (Anchor (Just $ name m'') (SwitchLiteral o bw (L s' d'))))
                         
     mapSpec :: Map.Map (Fix DecisionTree) Alias -> [(Text,Fix DecisionTree)] -> (Map.Map (Fix DecisionTree) Alias,[(Text,Free Anchor Alias)])
     mapSpec m s =
