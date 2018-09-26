@@ -247,8 +247,14 @@ extern "C" {
     ret->b.len = new_len;
     int m = 0;
     for (size_t r = 0, h = 0; r < new_len;) {
-      if (r < matches[m] - (diff * m) || m >= i) {
-        ret->data[r++] = haystack->data[h++];
+      if (m >= i) {
+        memcpy(ret->data+r, haystack->data+h, new_len - r);
+        break;
+      } else if (r < matches[m] - diff * m) {
+        auto size = matches[m] - diff * m - r;
+        memcpy(ret->data+r, haystack->data+h, size);
+        r += size;
+        h += size;
       } else {
         ++m;
         memcpy(&ret->data[r], replacer->data, replacer->b.len);
