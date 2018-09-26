@@ -442,11 +442,11 @@ $(deriveOrd1 ''L)
 $(deriveOrd1 ''DecisionTree)
 
 instance Y.ToYaml a => Y.ToYaml (Anchor a) where
-    toYaml (Anchor a (Leaf (act, x))) = Y.namedMapping a [
+    toYaml (Anchor a (Leaf (act, x))) = Y.maybeNamedMapping a [
         "action" Y..= Y.array [Y.toYaml act, Y.toYaml x]
       ]
-    toYaml (Anchor a Fail) = Y.namedString a "fail"
-    toYaml (Anchor a (Switch o x)) = Y.namedMapping a
+    toYaml (Anchor a Fail) = Y.maybeNamedString a "fail"
+    toYaml (Anchor a (Switch o x)) = Y.maybeNamedMapping a
       ["specializations" Y..= Y.array (map (\(i1, i2) -> Y.array [Y.toYaml i1, Y.toYaml i2]) (getSpecializations x))
       , "default" Y..= Y.toYaml (case (getDefault x) of
                                     Just i -> Y.toYaml i
@@ -454,7 +454,7 @@ instance Y.ToYaml a => Y.ToYaml (Anchor a) where
                                 )
       , "occurrence" Y..= Y.toYaml o
       ]
-    toYaml (Anchor a (SwitchLiteral o i x)) = Y.namedMapping a
+    toYaml (Anchor a (SwitchLiteral o i x)) = Y.maybeNamedMapping a
       ["specializations" Y..= Y.array (map (\(i1, i2) -> Y.array [Y.toYaml i1, Y.toYaml i2]) (getSpecializations x))
       , "default" Y..= Y.toYaml (case (getDefault x) of
                                     Just d -> Y.toYaml d
@@ -463,16 +463,16 @@ instance Y.ToYaml a => Y.ToYaml (Anchor a) where
       , "bitwidth" Y..= Y.toYaml i
       , "occurrence" Y..= Y.toYaml o
       ]
-    toYaml (Anchor a (EqualLiteral h o1 o2 l x)) = Y.namedMapping a
+    toYaml (Anchor a (EqualLiteral h o1 o2 l x)) = Y.maybeNamedMapping a
       ["hook" Y..= Y.toYaml h
       , "occurrence" Y..= Y.toYaml o1
       , "arg" Y..= Y.toYaml o2
       , "literal" Y..= Y.toYaml l
       , "next" Y..= Y.toYaml x
       ]
-    toYaml (Anchor a (Swap i x)) = Y.namedMapping a
+    toYaml (Anchor a (Swap i x)) = Y.maybeNamedMapping a
       ["swap" Y..= Y.array [Y.toYaml i, Y.toYaml x]]
-    toYaml (Anchor a (Function name o bindings sort x)) = Y.namedMapping a
+    toYaml (Anchor a (Function name o bindings sort x)) = Y.maybeNamedMapping a
       ["function" Y..= Y.toYaml name
       , "sort" Y..= Y.toYaml sort
       , "occurrence" Y..= Y.toYaml o
