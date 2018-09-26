@@ -560,7 +560,7 @@ compilePattern cm =
                     { getSpecializations = map (second (compilePattern' ix)) ls
                     , getDefault = compilePattern' ix <$> d
                     }
-                Just "LIST.List" -> listPattern ix os' ls d s₁ (head cs)
+                Just "LIST.List" -> listPattern ix os' ls d s₁ (head cs')
                 Just ('M':'I':'N':'T':'.':'M':'I':'n':'t':' ':bw) -> Fix $ SwitchLiteral (head os') (read bw) L
                     { getSpecializations = map (second (compilePattern' ix)) ls
                     , getDefault = compilePattern' ix <$> d
