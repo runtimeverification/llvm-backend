@@ -1,9 +1,9 @@
 #include<gmp.h>
 #include<mpfr.h>
-#include<cstdlib>
-#include<cstring>
 #include<algorithm>
+#include<cstdlib>
 #include<cstdint>
+#include<cstring>
 #include<iomanip>
 #include<string>
 #include<sstream>
