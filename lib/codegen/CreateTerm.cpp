@@ -327,6 +327,7 @@ llvm::Value *CreateTerm::createHook(KOREObjectCompositePattern *hookAtt, KOREObj
   } else {
     std::string domain = name.substr(0, name.find('.'));
     if (domain == "ARRAY") {
+      // array and list are backed by the same type in llvm
       domain = "LIST";
     }
     std::string hookName = "hook_" + domain + "_" + name.substr(name.find('.') + 1);
