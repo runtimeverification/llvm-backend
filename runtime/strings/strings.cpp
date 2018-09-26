@@ -71,11 +71,15 @@ extern "C" {
     return move_int(result);
   }
 
-  const string * hook_STRING_chr(mpz_t ord) {
-    if (!mpz_fits_ulong_p(ord)) {
-      throw std::invalid_argument("Ord too large for uint64_t");
+  static inline uint64_t gs(mpz_t i) {
+    if (!mpz_fits_ulong_p(i)) {
+      throw std::invalid_argument("Arg too large for int64_t");
     }
-    uint64_t uord = mpz_get_ui(ord);
+    return mpz_get_ui(i);
+  }
+
+  const string * hook_STRING_chr(mpz_t ord) {
+    uint64_t uord = gs(ord);
     if (uord > 255) {
       throw std::invalid_argument("Ord must be <= 255");
     }
@@ -94,14 +98,6 @@ extern "C" {
     return move_int(result);
   }
 
-  static inline uint64_t gs(mpz_t i) {
-    if (!mpz_fits_ulong_p(i)) {
-      throw std::invalid_argument("Arg too large for int64_t");
-    }
-    return mpz_get_ui(i);
-  }
-
-  // -1 means take the entire rest of the string.
   string * hook_STRING_substr(string * input, mpz_t start, mpz_t end) {
     uint64_t ustart = gs(start);
     uint64_t uend = gs(end);
