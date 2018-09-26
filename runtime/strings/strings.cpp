@@ -4,7 +4,6 @@
 #include<cstdlib>
 #include<cstdint>
 #include<cstring>
-#include<functional>
 #include<iomanip>
 #include<string>
 #include<sstream>
@@ -222,16 +221,14 @@ extern "C" {
   }
 
   inline const string * hook_STRING_replace(const string * haystack, const string * needle, const string * replacer, mpz_t occurences) {
-
     uint64_t uoccurences = gs(occurences);
     auto start = &haystack->data[0];
     auto pos = start;
     auto end = &haystack->data[haystack->b.len];
     size_t matches[haystack->b.len];
     int i = 0;
-    auto searcher = std::boyer_moore_searcher(needle->data, needle->data + needle->b.len);
     while (i < uoccurences) {
-      pos = std::search(pos, end, searcher);
+      pos = std::search(pos, end, &needle->data[0], &needle->data[needle->b.len]);
       if (pos == end) {
         break;
       }
