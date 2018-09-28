@@ -524,7 +524,9 @@ computeMapScore m c ks vs tl =
   in maximumBy (comparing snd) scores
 
 computeMapElementScore :: Metadata -> Clause -> [(Fix Pattern,Clause)] -> (Fix Pattern, Fix Pattern) -> Double
-computeMapElementScore m c tl (k,v) = computeScore m [(v,c)] * computeElementScore k c tl
+computeMapElementScore m c tl (k,v) =
+  let score = computeElementScore k c tl
+  in if score == -1.0 / 0.0 then score else score * computeScore m [(v,c)]
 
 canonicalizePattern :: Clause -> Fix Pattern -> Fix (P Occurrence)
 canonicalizePattern (Clause _ vars _) (Fix (Variable name hookAtt)) =
