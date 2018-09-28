@@ -104,6 +104,14 @@ void MakeLiteralNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substi
   substitution[name] = literal;
   child->codegen(d, substitution);
 }
+
+void MakePatternNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution) {
+  CreateTerm creator(substitution, d->Definition, d->CurrentBlock, d->Module);
+  llvm::Value *val = creator(pattern);
+  substitution[name] = val;
+  child->codegen(d, substitution);
+}
+
 void FunctionNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution) {
   std::vector<llvm::Value *> args;
   std::vector<llvm::Type *> types;

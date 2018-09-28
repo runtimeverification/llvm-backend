@@ -100,6 +100,33 @@ public:
   virtual void codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution);
 };
 
+class MakePatternNode : public DecisionNode {
+private:
+  std::string name;
+  KOREObjectPattern *pattern;
+  DecisionNode *child;
+
+  MakePatternNode(
+    const std::string &name,
+    KOREObjectPattern *pattern,
+    DecisionNode *child) :
+      name(name),
+      pattern(pattern),
+      child(child) {}
+
+public:
+  static MakePatternNode *Create(
+      const std::string &name,
+      KOREObjectPattern *pattern,
+      DecisionNode *child) {
+    return new MakePatternNode(name, pattern, child);
+  }
+
+  virtual void codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution);
+};
+
+
+
 class FunctionNode : public DecisionNode {
 private:
   /* the list of arguments to the function. */
@@ -201,6 +228,7 @@ public:
 
   friend class SwitchNode;
   friend class MakeLiteralNode;
+  friend class MakePatternNode;
   friend class FunctionNode;
   friend class LeafNode;
 };

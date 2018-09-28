@@ -11,6 +11,8 @@ using namespace kllvm;
 
 BOOST_AUTO_TEST_SUITE(DecisionTest)
 
+const llvm::StringMap<KOREObjectCompositeSort *> emptyMap;
+
 static std::string EXPECTED = R"(target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
 target triple = "x86_64-unknown-linux-gnu"
 
@@ -221,7 +223,7 @@ occurrence:
   map["Foo"] = Foo;
   map["Bar"] = Bar;
   map["Baz"] = Baz;
-  auto compiledDt = parseYamlDecisionTreeFromString(dt, 1, map);
+  auto compiledDt = parseYamlDecisionTreeFromString(dt, 1, map, emptyMap);
 
   llvm::LLVMContext Ctx;
   auto mod = newModule("test_decision", Ctx);
@@ -242,7 +244,7 @@ BOOST_AUTO_TEST_CASE(stepper) {
   std::string dt = "fail";
 
   llvm::StringMap<KOREObjectSymbol *> map;
-  auto compiledDt = parseYamlDecisionTreeFromString(dt, 1, map);
+  auto compiledDt = parseYamlDecisionTreeFromString(dt, 1, map, emptyMap);
 
   llvm::LLVMContext Ctx;
   auto mod = newModule("test_decision", Ctx);
@@ -325,7 +327,7 @@ occurrence:
   llvm::StringMap<KOREObjectSymbol *> map;
   map["Nil"] = Nil;
   map["Cons"] = Cons;
-  auto compiledDt = parseYamlDecisionTreeFromString(dt, 2, map);
+  auto compiledDt = parseYamlDecisionTreeFromString(dt, 2, map, emptyMap);
 
   llvm::LLVMContext Ctx;
   auto mod = newModule("test_decision", Ctx);

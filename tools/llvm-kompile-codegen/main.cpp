@@ -39,14 +39,14 @@ int main (int argc, char **argv) {
 
   emitConfigParserFunctions(definition, mod.get());
 
-  auto dt = parseYamlDecisionTree(argv[2], 1, definition->getAllSymbols());
+  auto dt = parseYamlDecisionTree(argv[2], 1, definition->getAllSymbols(), definition->getHookedSorts());
   makeStepFunction(definition, mod.get(), dt);
 
   for (auto &entry : definition->getSymbolDeclarations()) {
     auto decl = entry.second;
     if (decl->getAttributes().count("function") && !decl->isHooked()) {
       std::string filename = argv[3] + std::string("/") + decl->getSymbol()->getName() + ".yaml";
-      auto funcDt = parseYamlDecisionTree(filename, decl->getSymbol()->getArguments().size(), definition->getAllSymbols());
+      auto funcDt = parseYamlDecisionTree(filename, decl->getSymbol()->getArguments().size(), definition->getAllSymbols(), definition->getHookedSorts());
       makeEvalFunction(decl->getSymbol(), definition, mod.get(), funcDt);
     }
   }
