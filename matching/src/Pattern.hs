@@ -505,8 +505,8 @@ computeScore m ((Fix (Pattern ix@(Symbol (SymbolOrAlias (Id "inj" _) _)) _ _),_)
 computeScore m ((Fix (Pattern _ _ _),_):tl) = 1.0 + computeScore m tl
 computeScore m ((Fix (ListPattern _ _ _ _ _),_):tl) = 1.0 + computeScore m tl
 computeScore m ((Fix (As _ _ pat),c):tl) = computeScore m ((pat,c):tl)
-computeScore _ ((Fix Wildcard,_):_) = 0.0
-computeScore _ ((Fix (Variable _ _),_):_) = 0.0
+computeScore m ((Fix Wildcard,_):tl) = min 0.0 $ computeScore m tl
+computeScore m ((Fix (Variable _ _),_):tl) = min 0.0 $ computeScore m tl
 computeScore m ((Fix (MapPattern [] [] Nothing _ _),_):tl) = 1.0 + computeScore m tl
 computeScore m ((Fix (MapPattern [] [] (Just p) _ _),c):tl) = computeScore m ((p,c):tl)
 computeScore m ((Fix (MapPattern ks vs _ _ _),c):tl) = snd $ computeMapScore m c ks vs tl
