@@ -513,6 +513,8 @@ computeScore m ((Fix (MapPattern ks vs _ _ _),c):tl) = snd $ computeMapScore m c
 
 getBestMapKey :: Column -> [Clause] -> Maybe (Fix BoundPattern)
 getBestMapKey (Column m _ (Fix (MapPattern (k:ks) vs _ _ _):tl)) cs = fst $ computeMapScore m (head cs) (k:ks) vs (zip tl $ tail cs)
+getBestMapKey (Column m s (Fix Wildcard:tl)) cs = getBestMapKey (Column m s tl) (tail cs)
+getBestMapKey (Column m s (Fix (Variable _ _):tl)) cs = getBestMapKey (Column m s tl) (tail cs)
 getBestMapKey _ _ = Nothing
 
 computeMapScore :: Metadata -> Clause -> [Fix Pattern] -> [Fix Pattern] -> [(Fix Pattern,Clause)] -> (Maybe (Fix BoundPattern), Double)
