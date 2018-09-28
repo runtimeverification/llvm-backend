@@ -18,6 +18,7 @@ module Pattern ( PatternMatrix(..)
                , Action(..)
                , Occurrence
                , Index
+               , Ignoring(..)
                , Constructor(..)
                , mkClauseMatrix
                , sigma
@@ -100,6 +101,15 @@ data Constructor = Symbol (SymbolOrAlias Object)
                    , getListLength :: Int
                    }
                  deriving (Show, Eq, Ord)
+
+newtype Ignoring a = Ignoring a
+                   deriving (Show)
+
+instance Eq (Ignoring a) where
+  _ == _ = True
+
+instance Ord (Ignoring a) where
+  _ <= _ = True
 
 type Index       = Int
 data P var a   = Pattern Constructor (Maybe String) ![a]
