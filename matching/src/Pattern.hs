@@ -622,8 +622,8 @@ swapAt i j xs =
   in left ++ (elemJ:middle) ++ (elemI:right)
 
 compilePattern :: (ClauseMatrix, [Occurrence]) -> (Fix DecisionTree)
-compilePattern cm =
-  compilePattern' 0 cm
+compilePattern firstCm =
+  compilePattern' 0 firstCm
   where
     compilePattern' :: Int -> (ClauseMatrix, [Occurrence]) -> (Fix DecisionTree)
     compilePattern' ix ((ClauseMatrix pm@(PatternMatrix cs) ac), os) = 
