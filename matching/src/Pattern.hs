@@ -44,8 +44,8 @@ import           Data.Bifunctor        (second)
 import           Data.Deriving         (deriveOrd1, deriveShow1, deriveEq1, deriveEq2, deriveShow2, deriveOrd2)
 import           Data.Function         (on)
 import           Data.Functor.Classes  (Show1(..), Eq1(..), Ord1(..), liftEq2, liftCompare2, liftShowsPrec2)
-import           Data.Functor.Foldable (Fix (..))
 import           Data.List             (transpose,nub,sortBy,maximumBy)
+import           Data.Functor.Foldable (Fix (..), cata)
 import           Data.List.Index       (indexed)
 import           Data.Maybe            (catMaybes,isJust,fromJust,listToMaybe)
 import           Data.Ord              (comparing)
@@ -470,7 +470,8 @@ data DecisionTree a = Leaf (Int, [Occurrence])
                     | Fail
                     | Switch Occurrence !(L a)
                     | SwitchLiteral Occurrence Int !(L a)
-                    | EqualLiteral Hook Occurrence Occurrence Text !a
+                    | IsNull Occurrence !(L a)
+                    | MakePattern Occurrence (Fix BoundPattern) !a
                     | Swap Index !a
                     | Function Text Occurrence [Occurrence] Hook !a  
                     deriving (Show, Eq, Functor, Ord)
@@ -501,6 +502,12 @@ instance Y.ToYaml a => Y.ToYaml (Anchor a) where
                                 )
       , "occurrence" Y..= Y.toYaml o
       ]
+    toYaml (Anchor a (IsNull o x)) = Y.maybeNamedMapping a
+      ["specializations" Y..= Y.array (map (\(i1, i2) -> Y.array [Y.toYaml i1, Y.toYaml i2]) (getSpecializations x))
+      , "occurrence" Y..= Y.toYaml o
+      , "isnull" Y..= Y.toYaml ("true" :: Text)
+      , "default" Y..= Y.null
+      ]
     toYaml (Anchor a (SwitchLiteral o i x)) = Y.maybeNamedMapping a
       ["specializations" Y..= Y.array (map (\(i1, i2) -> Y.array [Y.toYaml i1, Y.toYaml i2]) (getSpecializations x))
       , "default" Y..= Y.toYaml (case (getDefault x) of
@@ -509,13 +516,6 @@ instance Y.ToYaml a => Y.ToYaml (Anchor a) where
                                 )
       , "bitwidth" Y..= Y.toYaml i
       , "occurrence" Y..= Y.toYaml o
-      ]
-    toYaml (Anchor a (EqualLiteral h o1 o2 l x)) = Y.maybeNamedMapping a
-      ["hook" Y..= Y.toYaml h
-      , "occurrence" Y..= Y.toYaml o1
-      , "arg" Y..= Y.toYaml o2
-      , "literal" Y..= Y.toYaml l
-      , "next" Y..= Y.toYaml x
       ]
     toYaml (Anchor a (Swap i x)) = Y.maybeNamedMapping a
       ["swap" Y..= Y.array [Y.toYaml i, Y.toYaml x]]
@@ -526,9 +526,36 @@ instance Y.ToYaml a => Y.ToYaml (Anchor a) where
       , "args" Y..= Y.toYaml bindings
       , "next" Y..= Y.toYaml x
       ]
+    toYaml (Anchor a (MakePattern o p x)) = Y.maybeNamedMapping a
+      ["pattern" Y..= Y.toYaml p
+      , "occurrence" Y..= Y.toYaml o
+      , "next" Y..= Y.toYaml x
+      ]
+
+instance Y.ToYaml a => Y.ToYaml (BoundPattern a) where
+  toYaml Wildcard = error "Unsupported map/set pattern"
+  toYaml (Variable o h) = Y.mapping
+    ["hook" Y..= Y.toYaml (pack h)
+    , "occurrence" Y..= Y.toYaml o
+    ]
+  toYaml (As _ _ p) = Y.toYaml p
+  toYaml (MapPattern _ _ _ _ o) = Y.toYaml o
+  toYaml (ListPattern _ _ _ _ o) = Y.toYaml o
+  toYaml (Pattern (Literal s) (Just h) []) = Y.mapping
+    ["hook" Y..= Y.toYaml (pack h)
+    , "literal" Y..= Y.toYaml (pack s)
+    ]
+  toYaml (Pattern (Symbol s) Nothing ps) = Y.mapping
+    ["constructor" Y..= Y.toYaml (pack $ unparseToString s)
+    , "args" Y..= Y.array (map Y.toYaml ps)
+    ]
+  toYaml (Pattern _ _ _) = error "Unsupported map/set pattern"
 
 instance Y.ToYaml Alias where
     toYaml (Alias name) = Y.alias name
+
+instance Y.ToYaml (Fix BoundPattern) where
+  toYaml = cata Y.toYaml
 
 serializeToYaml :: (Free Anchor Alias) -> B.ByteString
 serializeToYaml = Y.toByteString . Y.toYaml
@@ -665,11 +692,13 @@ compilePattern cm =
     -- otherweise, test the next literal
     equalLiteral o litO hookName ((name,spec):tl) d =
       let newO = [o, 0]
-      in Fix $ EqualLiteral (pack hookName) newO litO name $ 
-             Fix $ SwitchLiteral newO 1 $ L [("1", Fix $ Switch litO L 
-                                                         { getSpecializations = [], getDefault = Just $ compilePattern' (o+1) spec }),
-                                             ("0", equalLiteral (o+1) litO hookName tl d)
-                                            ] Nothing
+          eqO = [o+1,0]
+      in Fix $ MakePattern newO (Fix (Pattern (Literal name) (Just hookName) [])) $ 
+             Fix $ Function (equalityFun hookName) eqO [litO, newO] "BOOL.Bool" $
+                 Fix $ SwitchLiteral eqO 1 $ L [("1", Fix $ Switch litO L 
+                                                             { getSpecializations = [], getDefault = Just $ compilePattern' (o+2) spec }),
+                                                 ("0", equalLiteral (o+2) litO hookName tl d)
+                                                ] Nothing
     -- construct a tree to test the length of the list and bind the elements of the list to their occurrences
     listPattern :: Int -> Occurrence -> [(Text, (ClauseMatrix, [Occurrence]))] -> Maybe (ClauseMatrix, [Occurrence]) -> [Constructor] -> Column -> Fix DecisionTree
     listPattern nextO listO ls d signature firstCol =
@@ -721,10 +750,12 @@ shareDt =
                         Fix (Leaf a) -> (addName m, Free (Anchor (Just $ name m) (Leaf a)))
                         Fix Fail -> (m, Free (Anchor Nothing Fail))
                         Fix (Swap i a) -> let (m',child) = mapChild a in (addName m',Free (Anchor (Just $ name m') (Swap i child)))
-                        Fix (EqualLiteral h o1 o2 l a) -> let (m',child) = mapChild a in (addName m',Free (Anchor (Just $ name m') (EqualLiteral h o1 o2 l child)))
+                        Fix (MakePattern o p a) -> let (m',child) = mapChild a in (addName m', Free (Anchor (Just $ name m') (MakePattern o p child)))
                         Fix (Function n o os s a) -> let (m',child) = mapChild a in (addName m', Free (Anchor (Just $ name m') (Function n o os s child)))
                         Fix (Switch o (L s d)) -> let (m',s') = mapSpec m s in let (m'',d') = mapDefault m' d in (addName m'', Free (Anchor (Just $ name m'') (Switch o (L s' d'))))
+                        Fix (IsNull o (L s d)) -> let (m',s') = mapSpec m s in let (m'',d') = mapDefault m' d in (addName m'', Free (Anchor (Just $ name m'') (IsNull o (L s' d'))))
                         Fix (SwitchLiteral o bw (L s d)) -> let (m',s') = mapSpec m s in let (m'',d') = mapDefault m' d in (addName m'', Free (Anchor (Just $ name m'') (SwitchLiteral o bw (L s' d'))))
+                      
                         
     mapSpec :: Map.Map (Fix DecisionTree) Alias -> [(Text,Fix DecisionTree)] -> (Map.Map (Fix DecisionTree) Alias,[(Text,Free Anchor Alias)])
     mapSpec m s =
