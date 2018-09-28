@@ -132,7 +132,7 @@ public:
       } else {
         std::string symName = _case[0].as<std::string>();
         symbol = syms.lookup(symName);
-        for (int i = 0; i < symbol->getArguments().size(); ++i) {
+        for (unsigned i = 0; i < symbol->getArguments().size(); ++i) {
           std::string binding = "_" + std::to_string(counter++);
           bindings.push_back(binding);
           auto newOccurrence = occurrence;
