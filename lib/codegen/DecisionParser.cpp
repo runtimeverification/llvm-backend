@@ -14,13 +14,13 @@ private:
   KOREObjectSymbol *dv;
 
   enum Kind {
-    Switch, SwitchLiteral, CheckNull, EqualsLiteral, Function, Leaf, Fail, Swap
+    Switch, SwitchLiteral, CheckNull, MakeLiteral, Function, Leaf, Fail, Swap
   };
 
   static Kind getKind(YAML::Node node) {
     if (node.IsScalar()) return Fail;
     if (node["isnull"]) return CheckNull;
-    if (node["hook"]) return EqualsLiteral;
+    if (node["hook"]) return MakeLiteral;
     if (node["bitwidth"]) return SwitchLiteral;
     if (node["specializations"]) return Switch;
     if (node["action"]) return Leaf;
@@ -68,8 +68,7 @@ public:
     return result;
   }
 
-  DecisionNode *equalsLiteral(YAML::Node node) {
-    std::string binding = occurrences[node["arg"].as<std::vector<int>>()];
+  DecisionNode *makeLiteral(YAML::Node node) {
     std::string hookName = node["hook"].as<std::string>();
     std::string literal = node["literal"].as<std::string>();
     ValueType cat = KOREObjectCompositeSort::getCategory(hookName);
@@ -79,7 +78,7 @@ public:
 
     auto child = (*this)(node["next"]); 
     
-    return EqualsLiteralNode::Create(name, binding, cat, literal, child);
+    return MakeLiteralNode::Create(name, cat, literal, child);
   }
 
   DecisionNode *switchCase(Kind kind, YAML::Node node) {
@@ -156,8 +155,8 @@ public:
       return FailNode::get();
     case Function:
       return function(node);
-    case EqualsLiteral:
-      return equalsLiteral(node);
+    case MakeLiteral:
+      return makeLiteral(node);
     case SwitchLiteral:
     case Switch:
     case CheckNull:

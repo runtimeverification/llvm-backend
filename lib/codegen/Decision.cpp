@@ -97,35 +97,11 @@ void SwitchNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitutio
   }
 }
 
-void EqualsLiteralNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution) {
-  std::string funcName;
-  switch (cat.cat) {
-  case SortCategory::Uncomputed:
-  case SortCategory::Map:
-  case SortCategory::List:
-  case SortCategory::Set:
-  case SortCategory::Bool:
-  case SortCategory::MInt:
-    assert(false && "not supported");
-    abort();
-    break;
-  case SortCategory::Int:
-    funcName = "hook_INT_eq";
-    break;
-  case SortCategory::StringBuffer:
-  case SortCategory::Float:
-    assert(false && "not implemented yet");
-    abort();
-    break;
-  case SortCategory::Symbol:
-    funcName = "hook_KEQUAL_eq";
-    break;
-  }
+void MakeLiteralNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution) {
   llvm::StringMap<llvm::Value *> subst;
   CreateTerm creator(subst, d->Definition, d->CurrentBlock, d->Module);
   llvm::Value *literal = creator.createToken(cat, this->literal);
-  auto Call = llvm::CallInst::Create(d->Module->getOrInsertFunction(funcName, llvm::Type::getInt1Ty(d->Ctx), getValueType(cat, d->Module), getValueType(cat, d->Module)), {substitution.lookup(binding), literal}, name, d->CurrentBlock);
-  substitution[name] = Call;
+  substitution[name] = literal;
   child->codegen(d, substitution);
 }
 void FunctionNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution) {
