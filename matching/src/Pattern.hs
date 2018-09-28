@@ -569,7 +569,7 @@ getLeaf :: Int -> [Occurrence] -> [Fix Pattern] -> Clause -> (Int -> Fix Decisio
 getLeaf ix os ps (Clause (Action a rhsVars maybeSideCondition) matchedVars ranges) next =
   let row = zip os ps
       -- first, add all remaining variable bindings to the clause
-      vars = foldr (\(o, p) -> (addVarToRow Nothing o p)) matchedVars row
+      vars = nub $ foldr (\(o, p) -> (addVarToRow Nothing o p)) matchedVars row
       -- then group the bound variables by their name
       grouped = foldr (\(VariableBinding name hookAtt o) -> \m -> Map.insert (name,hookAtt) (o : Map.findWithDefault [] (name,hookAtt) m) m) Map.empty vars
       -- compute the variables bound more than once
