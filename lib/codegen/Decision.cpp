@@ -42,6 +42,12 @@ void SwitchNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitutio
       defaultCase = &_case;
     }
   }
+  if (isCheckNull) {
+    auto cast = new llvm::PtrToIntInst(val, llvm::Type::getInt64Ty(d->Ctx), "", d->CurrentBlock);
+    auto cmp = new llvm::ICmpInst(*d->CurrentBlock, llvm::CmpInst::ICMP_EQ, cast, llvm::ConstantExpr::getPtrToInt(llvm::ConstantPointerNull::get(llvm::dyn_cast<llvm::PointerType>(val->getType())), llvm::Type::getInt64Ty(d->Ctx)));
+    val = cmp;
+    isInt = true;
+  }
   if (isInt) {
     auto _switch = llvm::SwitchInst::Create(val, _default, cases.size(), d->CurrentBlock);
     for (auto &_case : caseData) {

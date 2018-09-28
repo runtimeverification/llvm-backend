@@ -94,13 +94,13 @@ BOOST_AUTO_TEST_CASE(simple) {
                  | Baz -> let b = eval_foo(r) in apply_rule_2(r, b)
    | _ -> fail()
 */
-  auto Literal = SwitchNode::Create("_2");
+  auto Literal = SwitchNode::Create("_2", false);
   auto dv = KOREObjectSymbol::Create("\\dv");
 
   Literal->addCase({dv, llvm::APInt(1, 1), LeafNode::Create("apply_rule_0")});
   Literal->addCase({dv, llvm::APInt(1, 0), LeafNode::Create("apply_rule_1")});
 
-  auto Inner = SwitchNode::Create("_0");
+  auto Inner = SwitchNode::Create("_0", false);
   auto Bar = KOREObjectSymbol::Create("Bar");
   auto Baz = KOREObjectSymbol::Create("Baz");
   auto InnerSort = KOREObjectCompositeSort::Create("Inner", {SortCategory::Symbol, 0});
@@ -121,7 +121,7 @@ BOOST_AUTO_TEST_CASE(simple) {
   Func->addBinding("_1");
   Inner->addCase({Baz, std::vector<std::string>{}, Func});
 
-  auto Outer = SwitchNode::Create("subject0");
+  auto Outer = SwitchNode::Create("subject0", false);
   auto Foo = KOREObjectSymbol::Create("Foo");
   auto OuterSort = KOREObjectCompositeSort::Create("Outer", {SortCategory::Symbol, 0});
   auto Int = KOREObjectCompositeSort::Create("Int", {SortCategory::Int, 0});

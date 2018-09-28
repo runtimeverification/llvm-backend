@@ -54,13 +54,15 @@ private:
   /* the name of the variable being matched on. */
   std::string name;
 
-  SwitchNode(const std::string &name) : name(name) {}
+  bool isCheckNull;
+
+  SwitchNode(const std::string &name, bool isCheckNull) : name(name), isCheckNull(isCheckNull) {}
 
 public:
   void addCase(DecisionCase _case) { cases.push_back(_case); }
 
-  static SwitchNode *Create(const std::string &name) {
-    return new SwitchNode(name);
+  static SwitchNode *Create(const std::string &name, bool isCheckNull) {
+    return new SwitchNode(name, isCheckNull);
   }
 
   std::string getName() const { return name; }

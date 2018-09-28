@@ -14,11 +14,12 @@ private:
   KOREObjectSymbol *dv;
 
   enum Kind {
-    Switch, SwitchLiteral, EqualsLiteral, Function, Leaf, Fail, Swap
+    Switch, SwitchLiteral, CheckNull, EqualsLiteral, Function, Leaf, Fail, Swap
   };
 
   static Kind getKind(YAML::Node node) {
     if (node.IsScalar()) return Fail;
+    if (node["isnull"]) return CheckNull;
     if (node["hook"]) return EqualsLiteral;
     if (node["bitwidth"]) return SwitchLiteral;
     if (node["specializations"]) return Switch;
@@ -85,13 +86,13 @@ public:
     YAML::Node list = node["specializations"];
     auto occurrence = node["occurrence"].as<std::vector<int>>();
     std::string name = occurrences[occurrence];
-    auto result = SwitchNode::Create(name);
+    auto result = SwitchNode::Create(name, kind == CheckNull);
     for (auto iter = list.begin(); iter != list.end(); ++iter) {
       auto _case = *iter;
       auto copy = occurrences;
       std::vector<std::string> bindings;
       KOREObjectSymbol *symbol;
-      if (kind == SwitchLiteral) {
+      if (kind == SwitchLiteral || kind == CheckNull) {
         symbol = dv;
       } else {
         std::string symName = _case[0].as<std::string>();
@@ -106,11 +107,21 @@ public:
       }
       DecisionNode *child = (*this)(_case[1]);
       occurrences = copy;
-      if (kind == SwitchLiteral) {
+      switch (kind) {
+      case SwitchLiteral: {
         unsigned bitwidth = node["bitwidth"].as<unsigned>();
         result->addCase({symbol, {bitwidth, _case[0].as<std::string>(), 10}, child}); 
-      } else {
+        break;
+      }
+      case Switch:
         result->addCase({symbol, bindings, child});
+        break;
+      case CheckNull:
+        result->addCase({symbol, {1, _case[0].as<std::string>(), 10}, child}); 
+        break;
+      default:
+        assert(false && "not reachable");
+        abort();
       }
     }
     auto _case = node["default"];
@@ -149,6 +160,7 @@ public:
       return equalsLiteral(node);
     case SwitchLiteral:
     case Switch:
+    case CheckNull:
       return switchCase(kind, node);
     case Leaf:
       return leaf(node);
