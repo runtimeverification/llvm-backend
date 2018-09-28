@@ -3,6 +3,7 @@
 #include <yaml-cpp/yaml.h>
 
 #include <stack>
+#include <iostream>
 
 namespace kllvm {
 
@@ -132,6 +133,10 @@ public:
       } else {
         std::string symName = _case[0].as<std::string>();
         symbol = syms.lookup(symName);
+        if (!symbol) {
+          std::cerr << symName << std::endl;
+          abort();
+        }
         for (unsigned i = 0; i < symbol->getArguments().size(); ++i) {
           std::string binding = "_" + std::to_string(counter++);
           bindings.push_back(binding);
