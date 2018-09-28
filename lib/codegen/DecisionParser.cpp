@@ -27,7 +27,8 @@ private:
     if (node["specializations"]) return Switch;
     if (node["action"]) return Leaf;
     if (node["swap"]) return Swap;
-    return Function;
+    if (node["function"]) return Function;
+    throw node;
   }
 
 public:

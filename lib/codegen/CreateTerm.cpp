@@ -387,7 +387,12 @@ llvm::Value *CreateTerm::createFunctionCall(std::string name, ValueType returnCa
   }
  
   llvm::FunctionType *funcType = llvm::FunctionType::get(returnType, types, false);
-  llvm::Function *func = llvm::dyn_cast<llvm::Function>(Module->getOrInsertFunction(name, funcType));
+  llvm::Constant *constant = Module->getOrInsertFunction(name, funcType);
+  llvm::Function *func = llvm::dyn_cast<llvm::Function>(constant);
+  if (!func) {
+    constant->print(llvm::errs());
+    abort();
+  }
   if (sret) {
     func->arg_begin()->addAttr(llvm::Attribute::StructRet);
     llvm::CallInst::Create(func, args, "", CurrentBlock);
