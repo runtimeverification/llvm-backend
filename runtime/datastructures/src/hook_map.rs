@@ -35,11 +35,20 @@ pub unsafe extern "C" fn hook_MAP_concat(m1: *const Map, m2: *const Map) -> Map 
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn hook_MAP_lookup(m: *const Map, key: K) -> K {
+pub unsafe extern "C" fn hook_MAP_lookup_null(m: *const Map, key: K) -> K {
   match (*m).get(&KElem(key)) {
-    Some(KElem(v)) => { *v }
-    None => panic!("key not found")
+    Some(KElem(v)) => { *v } 
+    None => ptr::null()
   }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn hook_MAP_lookup(m: *const Map, key: K) -> K {
+  let res = hook_MAP_lookup_null(m, key);
+  if res == ptr::null() {
+    panic!("key not found")
+  }
+  res
 }
 
 #[no_mangle]
@@ -94,9 +103,14 @@ pub unsafe extern "C" fn hook_MAP_choice(m: *const Map) -> K {
 }
 
 #[no_mangle]
+pub unsafe extern "C" fn hook_MAP_size_long(m: *const Map) -> usize {
+  (*m).len()
+}
+
+#[no_mangle]
 pub unsafe extern "C" fn hook_MAP_size(m: *const Map) -> *mut Int {
   let mut result = Int(0, 0, ptr::null());
-  __gmpz_init_set_ui(&mut result, (*m).len());
+  __gmpz_init_set_ui(&mut result, hook_MAP_size_long(m));
   move_int(&mut result)
 }
 
