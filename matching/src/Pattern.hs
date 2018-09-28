@@ -12,7 +12,8 @@ module Pattern ( PatternMatrix(..)
                , Column(..)
                , mkColumn
                , Metadata(..)
-               , Pattern(..)
+               , P(..)
+               , Pattern
                , Clause(..)
                , Action(..)
                , Occurrence
@@ -39,8 +40,9 @@ module Pattern ( PatternMatrix(..)
 
 import           Control.Monad.Free    (Free (..))
 import           Data.Bifunctor        (second)
-import           Data.Deriving         (deriveOrd1, deriveShow1, deriveEq1)
+import           Data.Deriving         (deriveOrd1, deriveShow1, deriveEq1, deriveEq2, deriveShow2, deriveOrd2)
 import           Data.Function         (on)
+import           Data.Functor.Classes  (Show1(..), Eq1(..), Ord1(..), liftEq2, liftCompare2, liftShowsPrec2)
 import           Data.Functor.Foldable (Fix (..))
 import           Data.List             (transpose,nub,sortBy,maximumBy)
 import           Data.List.Index       (indexed)
@@ -74,6 +76,23 @@ data Metadata = Metadata
                 , getChildren :: Constructor -> Maybe [Metadata]
                 }
 
+instance (Show Metadata) where
+  show (Metadata _ _ sort _) = show sort
+
+type Occurrence   = [Int]
+
+instance Show1 Pattern where
+  liftShowsPrec showP showL prec pat = liftShowsPrec2 showsPrec showList showP showL prec pat
+instance Show1 BoundPattern where
+  liftShowsPrec showP showL prec pat = liftShowsPrec2 showsPrec showList showP showL prec pat
+
+instance Eq1 BoundPattern where
+  liftEq eqT a b = liftEq2 (==) eqT a b
+
+instance Ord1 BoundPattern where
+  liftCompare liftT a b = liftCompare2 (compare) liftT a b
+
+
 data Constructor = Symbol (SymbolOrAlias Object)
                  | Literal String
                  | List 
@@ -83,22 +102,28 @@ data Constructor = Symbol (SymbolOrAlias Object)
                  deriving (Show, Eq, Ord)
 
 type Index       = Int
-data Pattern a   = Pattern Constructor (Maybe String) ![a]
+data P var a   = Pattern Constructor (Maybe String) ![a]
                  | ListPattern
                    { getHead :: ![a] -- match elements at front of list
                    , getFrame :: Maybe a -- match remainder of list
                    , getTail :: [a] -- match elements at back of list
                    , element :: SymbolOrAlias Object -- ListItem symbol
                    }
-                 | As String String a
+                 | As var String a
                  | Wildcard
-                 | Variable String String
+                 | Variable var String
                  deriving (Show, Eq, Functor)
+
+type Pattern = P String
+type BoundPattern = P Occurrence
+
+$(deriveEq2 ''P)
+$(deriveShow2 ''P)
+$(deriveOrd2 ''P)
 
 newtype PatternMatrix = PatternMatrix [Column]
                         deriving (Show)
 
-type Occurrence   = [Int]
 data Action       = Action
                     { getRuleNumber :: Int
                     , getRhsVars :: [String]
@@ -119,13 +144,7 @@ data Clause       = Clause
 
 data ClauseMatrix = ClauseMatrix PatternMatrix ![Clause]
                     deriving (Show)
-
-instance (Show Metadata) where
-  show (Metadata _ _ sort _) = show sort
-
-$(deriveEq1 ''Pattern)
-$(deriveShow1 ''Pattern)
-
+ 
 -- [ Builders ]
 
 mkClauseMatrix :: [Column]
