@@ -141,11 +141,18 @@ data Action       = Action
                     }
                     deriving (Show)
 
+data VariableBinding = VariableBinding
+                       { getName :: String
+                       , getHook :: String
+                       , getOccurrence :: Occurrence
+                       }
+                       deriving (Show, Eq)
+
 data Clause       = Clause
                     -- the rule to be applied if this row succeeds
                     { getAction :: Action
                     -- the variable bindings made so far while matching this row
-                    , getVariableBindings :: [(String, String, Occurrence)]
+                    , getVariableBindings :: [VariableBinding]
                     -- the length of the head and tail of any list patterns
                     -- with frame variables bound so far in this row
                     , getListRanges :: [(Occurrence, Int, Int)]
@@ -373,14 +380,14 @@ addVars ix as c o =
   let rows = zip c as
   in map (\(p, (Clause a vars ranges)) -> (Clause a (addVarToRow ix o p vars) $ addRange ix o p ranges)) rows
 
-addVarToRow :: Maybe Constructor -> Occurrence -> Fix Pattern -> [(String, String, Occurrence)] -> [(String, String, Occurrence)]
-addVarToRow _ o (Fix (Variable name hookAtt)) vars = (name, hookAtt, o) : vars
-addVarToRow _ o (Fix (As name hookAtt _)) vars = (name, hookAtt, o) : vars
+addVarToRow :: Maybe Constructor -> Occurrence -> Fix Pattern -> [VariableBinding] -> [VariableBinding]
+addVarToRow _ o (Fix (Variable name hookAtt)) vars = VariableBinding name hookAtt o : vars
+addVarToRow _ o (Fix (As name hookAtt _)) vars = VariableBinding name hookAtt o : vars
 addVarToRow _ _ (Fix Wildcard) vars = vars
 addVarToRow (Just (Symbol (SymbolOrAlias (Id "inj" _) [a,_]))) o (Fix (Pattern (Symbol (SymbolOrAlias (Id "inj" _) [b,_])) _ [p])) vars = if a == b then vars else addVarToRow Nothing o p vars
 addVarToRow _ _ (Fix (Pattern _ _ _)) vars = vars
 addVarToRow _ _ (Fix (ListPattern _ Nothing _ _)) vars = vars
-addVarToRow (Just (List _ len)) o (Fix (ListPattern _ (Just (Fix (Variable name hookAtt))) _ _)) vars = (name, hookAtt, len : o) : vars
+addVarToRow (Just (List _ len)) o (Fix (ListPattern _ (Just p) _ _)) vars = addVarToRow Nothing (len : o) p vars
 addVarToRow _ _ (Fix (ListPattern _ (Just _) _ _)) vars = vars
 
 addRange :: Maybe Constructor -> Occurrence -> Fix Pattern -> [(Occurrence, Int, Int)] -> [(Occurrence, Int, Int)]
@@ -537,7 +544,7 @@ getLeaf ix os ps (Clause (Action a rhsVars maybeSideCondition) matchedVars range
       -- first, add all remaining variable bindings to the clause
       vars = foldr (\(o, p) -> (addVarToRow Nothing o p)) matchedVars row
       -- then group the bound variables by their name
-      grouped = foldr (\(name,hookAtt,o) -> \m -> Map.insert (name,hookAtt) (o : Map.findWithDefault [] (name,hookAtt) m) m) Map.empty vars
+      grouped = foldr (\(VariableBinding name hookAtt o) -> \m -> Map.insert (name,hookAtt) (o : Map.findWithDefault [] (name,hookAtt) m) m) Map.empty vars
       -- compute the variables bound more than once
       nonlinear = Map.filter ((> 1) . length) grouped
       nonlinearPairs = Map.map (\l -> zip l (tail l)) nonlinear
