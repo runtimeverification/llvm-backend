@@ -189,7 +189,7 @@ metaLookup _ (P.Literal _) = Just []
 metaLookup f (P.List c i) = Just $ replicate i $ head $ fromJust $ f $ P.Symbol c
 metaLookup _ P.Empty = Just []
 metaLookup _ (P.NonEmpty (P.Ignoring m)) = Just [m]
-metaLookup f (P.HasKey e (P.Ignoring m) _) = Just [head $ fromJust $ f $ P.Symbol e, m, m]
+metaLookup f (P.HasKey e (P.Ignoring m) _) = Just [head $ tail $ fromJust $ f $ P.Symbol e, m, m]
 metaLookup _ (P.HasNoKey (P.Ignoring m) _) = Just [m]
 
 defaultMetadata :: Sort Object -> P.Metadata
