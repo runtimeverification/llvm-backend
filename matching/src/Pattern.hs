@@ -603,11 +603,12 @@ getLeaf ix os ps (Clause (Action a rhsVars maybeSideCondition) matchedVars range
     makeEquality :: String -> (Occurrence, Occurrence) -> (Fix DecisionTree, Int) -> (Fix DecisionTree, Int)
     -- compare the values of the variables with the same name and if they are equal, continue, otherwise go to the next row
     makeEquality hookAtt (o1,o2) (dt,ix') = (function (equalityFun hookAtt) [ix', 0] [o1, o2] "BOOL.Bool" (switchLiteral [ix', 0] 1 [("1", dt), ("0", (next $ ix'+1))] Nothing), ix'+1)
-    equalityFun :: String -> Text
-    equalityFun "BOOL.Bool" = "hook_BOOL_eq"
-    equalityFun "INT.Int" = "hook_INT_eq"
-    equalityFun "STRING.String" = "hook_KEQUAL_eq"
-    equalityFun _ = error "unexpected hook"
+
+equalityFun :: String -> Text
+equalityFun "BOOL.Bool" = "hook_BOOL_eq"
+equalityFun "INT.Int" = "hook_INT_eq"
+equalityFun "STRING.String" = "hook_KEQUAL_eq"
+equalityFun s = error ("unexpected hook: " ++ s)
 
 swapAt :: Int -> Int -> [a] -> [a]
 swapAt i j xs = 
