@@ -63,10 +63,15 @@ extern "C" {
     return move_int(result);
   }
 
-  string *hook_BYTES_int2bytes(mpz_t len, mpz_t i, uint64_t endianness) {
-    if (!mpz_fits_ulong_p(len)) {
-      throw std::invalid_argument("Integer overflow on len");
+  unsigned long get_ui(mpz_t i) {
+    if (!mpz_fits_ulong_p(i)) {
+      throw std::invalid_argument("Integer overflow");
     }
+    return mpz_get_ui(i);
+  }
+
+
+  string *hook_BYTES_int2bytes(mpz_t len, mpz_t i, uint64_t endianness) {
     unsigned long len_long = mpz_get_ui(len);
     if (len_long == 0) {
       return hook_BYTES_empty();
@@ -105,10 +110,7 @@ extern "C" {
   }
 
   string *hook_BYTES_replaceAt(string *b, mpz_t start, string *b2) {
-    if (!mpz_fits_ulong_p(start)) {
-      throw std::invalid_argument("Integer overflow on offset");
-    }
-    unsigned long start_long = mpz_get_ui(start);
+    unsigned long start_long = get_ui(start);
     if (start_long + b2->b.len > b->b.len) {
       throw std::invalid_argument("Buffer overflow on replaceAt");
     }
@@ -121,17 +123,11 @@ extern "C" {
   }
 
   string *hook_BYTES_padRight(string *b, mpz_t len, mpz_t v) {
-    if (!mpz_fits_ulong_p(len)) {
-      throw std::invalid_argument("Integer overflow on len");
-    }
-    uint64_t ulen = mpz_get_ui(len);
+    unsigned long ulen = get_ui(len);
     if (ulen <= b->b.len) {
       return b;
     }
-    if (!mpz_fits_ulong_p(v)) {
-      throw std::invalid_argument("Integer overflow on value");
-    }
-    uint64_t uv = mpz_get_ui(v);
+    unsigned long uv = get_ui(v);
     if (uv > 255) {
       throw std::invalid_argument("Integer overflow on value");
     }
@@ -143,17 +139,11 @@ extern "C" {
   }
 
   string *hook_BYTES_padLeft(string *b, mpz_t len, mpz_t v) {
-    if (!mpz_fits_ulong_p(len)) {
-      throw std::invalid_argument("Integer overflow on len");
-    }
-    uint64_t ulen = mpz_get_ui(len);
+    unsigned long ulen = get_ui(len);
     if (ulen <= b->b.len) {
       return b;
     }
-    if (!mpz_fits_ulong_p(v)) {
-      throw std::invalid_argument("Integer overflow on value");
-    }
-    uint64_t uv = mpz_get_ui(v);
+    unsigned long uv = get_ui(v);
     if (uv > 255) {
       throw std::invalid_argument("Integer overflow on value");
     }
