@@ -102,7 +102,7 @@ data Constructor = Symbol (SymbolOrAlias Object)
                    }
                  | Empty
                  | NonEmpty (Ignoring Metadata)
-                 | HasKey (SymbolOrAlias Object) (Ignoring Metadata) (Maybe (Fix BoundPattern))
+                 | HasKey Bool (SymbolOrAlias Object) (Ignoring Metadata) (Maybe (Fix BoundPattern))
                  | HasNoKey (Ignoring Metadata) (Maybe (Fix BoundPattern))
                  deriving (Show, Eq, Ord)
 
@@ -129,7 +129,13 @@ data P var a   = Pattern Constructor (Maybe String) ![a]
                    , getValues :: ![a]
                    , getFrame :: !(Maybe a)
                    , element :: SymbolOrAlias Object
-                   , original :: a
+                   , original :: !a
+                   }
+                 | SetPattern
+                   { getElements :: ![a]
+                   , getFrame :: !(Maybe a)
+                   , element :: SymbolOrAlias Object
+                   , original :: !a
                    }
                  | As var String a
                  | Wildcard
@@ -236,7 +242,7 @@ swap ix tm = Fix (Swap ix tm)
 sigma :: Column -> [Clause] -> [Constructor]
 sigma c cs =
   let used = concat $ zipWith ix cs $ getTerms c
-      bestKey = getBestMapKey c cs
+      bestKey = getBestKey c cs
       bestUsed = case bestKey of
                    Nothing -> used
                    Just k -> filter (isBest k) used
@@ -259,12 +265,24 @@ sigma c cs =
       let m = Ignoring $ getMetadata c
           bound = isBound getName cls k
           canonK = if bound then Just $ canonicalizePattern cls k else Nothing
-      in [HasKey e m canonK, HasNoKey m canonK]
+      in [HasKey False e m canonK, HasNoKey m canonK]
     ix cls (Fix (MapPattern (k:k':ks) vs f e o)) = 
       let m = Ignoring $ getMetadata c
           bound = isBound getName cls k
           canonK = if bound then Just $ canonicalizePattern cls k else Nothing
-      in [HasKey e m canonK, HasNoKey m canonK] ++ ix cls (Fix (MapPattern (k':ks) vs f e o))
+      in [HasKey False e m canonK, HasNoKey m canonK] ++ ix cls (Fix (MapPattern (k':ks) vs f e o))
+    ix _ (Fix (SetPattern [] Nothing _ _)) = [Empty]
+    ix cls (Fix (SetPattern [] (Just p) _ _)) = ix cls p
+    ix cls (Fix (SetPattern (k:[]) _ e _)) = 
+      let m = Ignoring $ getMetadata c
+          bound = isBound getName cls k
+          canonK = if bound then Just $ canonicalizePattern cls k else Nothing
+      in [HasKey True e m canonK, HasNoKey m canonK]
+    ix cls (Fix (SetPattern (k:k':ks) f e o)) = 
+      let m = Ignoring $ getMetadata c
+          bound = isBound getName cls k
+          canonK = if bound then Just $ canonicalizePattern cls k else Nothing
+      in [HasKey True e m canonK, HasNoKey m canonK] ++ ix cls (Fix (SetPattern (k':ks) f e o))
     ix cls (Fix (As _ _ pat))      = ix cls pat
     ix _ (Fix Wildcard)          = []
     ix _ (Fix (Variable _ _))    = []
@@ -272,9 +290,9 @@ sigma c cs =
     isInj (Symbol (SymbolOrAlias (Id "inj" _) _)) = True
     isInj _ = False
     isBest :: Fix BoundPattern -> Constructor -> Bool
-    isBest k (HasKey _ _ (Just k')) = k == k'
+    isBest k (HasKey _ _ _ (Just k')) = k == k'
     isBest k (HasNoKey _ (Just k')) = k == k'
-    isBest _ (HasKey _ _ Nothing) = False
+    isBest _ (HasKey _ _ _ Nothing) = False
     isBest _ (HasNoKey _ Nothing) = False
     isBest _ _ = True
    
@@ -294,6 +312,7 @@ hook (PatternMatrix (c : _)) =
     ix (Fix (Pattern _ bw' _)) = bw'
     ix (Fix (ListPattern _ _ _ _ _)) = Just "LIST.List"
     ix (Fix (MapPattern _ _ _ _ _)) = Just "MAP.Map"
+    ix (Fix (SetPattern _ _ _ _)) = Just "SET.Set"
     ix (Fix (As _ _ pat))    = ix pat
     ix (Fix Wildcard)        = Nothing
     ix (Fix (Variable _ _))  = Nothing
@@ -322,7 +341,7 @@ expandOccurrence (ClauseMatrix (PatternMatrix (c : _)) _) o ix =
   case ix of
     Empty -> []
     NonEmpty _ -> [o]
-    HasKey _ _ _ -> [0 : o, 1 : o, o]
+    HasKey isSet _ _ _ -> if isSet then [1 : o, o] else [0 : o, 1 : o, o]
     HasNoKey _ _ -> [o]
     _ -> let (Metadata _ _ _ mtd) = getMetadata c
              a = length $ fromJust $ mtd ix
@@ -339,11 +358,12 @@ mDefault (cm@(ClauseMatrix pm@(PatternMatrix (c : _)) as),o : os) =
         Just "INT.Int" -> True
         Just "STRING.String" -> True
         Just _ -> False
-      isMap = case hook pm of
+      isMapOrSet = case hook pm of
         Nothing -> False
         Just "MAP.Map" -> True
+        Just "SET.Set" -> True
         Just _ -> False
-  in  if infiniteLength || null s₁ || elem Empty s₁ || (not isMap && (toInteger $ length s₁) /= mtd)
+  in  if infiniteLength || null s₁ || elem Empty s₁ || (not isMapOrSet && (toInteger $ length s₁) /= mtd)
       then Just ((expandDefault (getDefaultConstructor c as) (hook pm) (filterMatrix (getDefaultConstructor c as) isDefault (cm,o))),expandDefaultOccurrence cm o <> os)
       else Nothing
 mDefault _ = Nothing
@@ -382,10 +402,12 @@ expandDefault (Just ix) hookAtt (ClauseMatrix (PatternMatrix (c : cs)) as) =
     Just "LIST.List" -> 
       ClauseMatrix (PatternMatrix $ expandColumn ix c as <> cs) as
     Just "MAP.Map" -> 
-      ClauseMatrix (PatternMatrix $ expandColumn maxList c as <> cs) as
+      ClauseMatrix (PatternMatrix $ expandColumn ix c as <> cs) as
+    Just "SET.Set" -> 
+      ClauseMatrix (PatternMatrix $ expandColumn ix c as <> cs) as
     _ -> ClauseMatrix (PatternMatrix cs) as
-expandDefault Nothing (ClauseMatrix (PatternMatrix (_ : cs)) as) = ClauseMatrix (PatternMatrix cs) as
-expandDefault _ _ = error "must have at least one column"
+expandDefault Nothing _ (ClauseMatrix (PatternMatrix (_ : cs)) as) = ClauseMatrix (PatternMatrix cs) as
+expandDefault _ _ _ = error "must have at least one column"
 
 expandDefaultOccurrence :: ClauseMatrix -> Occurrence -> [Occurrence]
 expandDefaultOccurrence cm@(ClauseMatrix pm@(PatternMatrix (c : _)) as) o =
@@ -395,6 +417,10 @@ expandDefaultOccurrence cm@(ClauseMatrix pm@(PatternMatrix (c : _)) as) o =
       let cons = fromJust $ getDefaultConstructor c as
       in expandOccurrence cm o cons
     Just "MAP.Map" ->
+      case getDefaultConstructor c as of
+        Nothing -> []
+        Just cons -> expandOccurrence cm o cons
+    Just "SET.Set" ->
       case getDefaultConstructor c as of
         Nothing -> []
         Just cons -> expandOccurrence cm o cons
@@ -422,6 +448,8 @@ isDefault (_, Fix Wildcard) = True
 isDefault (_, Fix (Variable _ _)) = True
 isDefault (_, Fix (MapPattern _ _ (Just _) _ _)) = True
 isDefault (_, Fix (MapPattern ks vs Nothing _ _)) = length ks > 0 || length vs > 0
+isDefault (_, Fix (SetPattern _ (Just _) _ _)) = True
+isDefault (_, Fix (SetPattern es Nothing _ _)) = length es > 0
 
 mightUnify :: Fix BoundPattern -> Fix BoundPattern -> Bool
 mightUnify (Fix Wildcard) _ = True
@@ -433,9 +461,11 @@ mightUnify p (Fix (As _ _ p')) = mightUnify p p'
 mightUnify (Fix (Pattern c _ ps)) (Fix (Pattern c' _ ps')) = c == c' && (and $ zipWith mightUnify ps ps')
 mightUnify (Fix (ListPattern _ _ _ _ _)) (Fix (ListPattern _ _ _ _ _)) = True
 mightUnify (Fix (MapPattern _ _ _ _ _)) (Fix (MapPattern _ _ _ _ _)) = True
+mightUnify (Fix (SetPattern _ _ _ _)) (Fix (SetPattern _ _ _ _)) = True
 mightUnify (Fix (Pattern _ _ _)) _ = False
 mightUnify (Fix (ListPattern _ _ _ _ _)) _ = False
 mightUnify (Fix (MapPattern _ _ _ _ _)) _ = False
+mightUnify (Fix (SetPattern _ _ _ _)) _ = False
 
 checkPatternIndex :: Constructor -> Metadata -> (Clause, Fix Pattern) -> Bool
 checkPatternIndex _ _ (_, Fix Wildcard) = True
@@ -450,14 +480,21 @@ checkPatternIndex (Symbol (SymbolOrAlias (Id "inj" _) [a,c])) (Metadata _ _ _ me
   in c == c' && (a == b || ((isJust $ childMeta $ child) && checkPatternIndex child m (cls,p)))
 checkPatternIndex ix _ (_, Fix (Pattern ix' _ _)) = ix == ix'
 checkPatternIndex Empty _ (_, Fix (MapPattern ks vs _ _ _)) = length ks == 0 && length vs == 0
-checkPatternIndex (HasKey _ _ _) _ (_, Fix (MapPattern _ _ (Just _) _ _)) = True
-checkPatternIndex (HasKey _ _ (Just p)) _ (c, Fix (MapPattern ks _ Nothing _ _)) = any (mightUnify p) $ map (canonicalizePattern c) ks
-checkPatternIndex (HasKey _ _ Nothing) _ _ = error "TODO: map/set choice"
+checkPatternIndex Empty _ (_, Fix (SetPattern es _ _ _)) = length es == 0
+checkPatternIndex (HasKey _ _ _ _) _ (_, Fix (MapPattern _ _ (Just _) _ _)) = True
+checkPatternIndex (HasKey _ _ _ _) _ (_, Fix (SetPattern _ (Just _) _ _)) = True
+checkPatternIndex (HasKey _ _ _ (Just p)) _ (c, Fix (MapPattern ks _ Nothing _ _)) = any (mightUnify p) $ map (canonicalizePattern c) ks
+checkPatternIndex (HasKey _ _ _ (Just p)) _ (c, Fix (SetPattern es Nothing _ _)) = any (mightUnify p) $ map (canonicalizePattern c) es
+checkPatternIndex (HasKey _ _ _ Nothing) _ _ = error "TODO: map/set choice"
 checkPatternIndex (HasNoKey _ (Just p)) _ (c, Fix (MapPattern ks _ _ _ _)) =
   let canonKs = map (canonicalizePattern c) ks
   in not $ elem p canonKs
+checkPatternIndex (HasNoKey _ (Just p)) _ (c, Fix (SetPattern es _ _ _)) =
+  let canonEs = map (canonicalizePattern c) es
+  in not $ elem p canonEs
 checkPatternIndex (HasNoKey _ Nothing) _ _ = error "TODO: map/set choice"
 checkPatternIndex _ _ (_, Fix (MapPattern _ _ _ _ _)) = error "Invalid map pattern"
+checkPatternIndex _ _ (_, Fix (SetPattern _ _ _ _)) = error "Invalid map pattern"
 
 addVars :: Maybe Constructor -> [Clause] -> [Fix Pattern] -> Occurrence -> [Clause]
 addVars ix as c o =
@@ -475,6 +512,8 @@ addVarToRow (Just (List _ len)) o (Fix (ListPattern _ (Just p) _ _ _)) vars = ad
 addVarToRow _ _ (Fix (ListPattern _ (Just _) _ _ _)) vars = vars
 addVarToRow _ o (Fix (MapPattern [] [] (Just p) _ _)) vars = addVarToRow Nothing o p vars
 addVarToRow _ _ (Fix (MapPattern _ _ _ _ _)) vars = vars
+addVarToRow _ o (Fix (SetPattern [] (Just p) _ _)) vars = addVarToRow Nothing o p vars
+addVarToRow _ _ (Fix (SetPattern _ _ _ _)) vars = vars
 
 addRange :: Maybe Constructor -> Occurrence -> Fix Pattern -> [(Occurrence, Int, Int)] -> [(Occurrence, Int, Int)]
 addRange (Just (List _ len)) o (Fix (ListPattern hd (Just (Fix (Variable _ _))) tl _ _)) ranges = (len : o, length hd, length tl) : ranges
@@ -510,17 +549,26 @@ computeScore m ((Fix (Variable _ _),_):tl) = min 0.0 $ computeScore m tl
 computeScore m ((Fix (MapPattern [] [] Nothing _ _),_):tl) = 1.0 + computeScore m tl
 computeScore m ((Fix (MapPattern [] [] (Just p) _ _),c):tl) = computeScore m ((p,c):tl)
 computeScore m ((Fix (MapPattern ks vs _ _ _),c):tl) = snd $ computeMapScore m c ks vs tl
+computeScore m ((Fix (SetPattern [] Nothing _ _),_):tl) = 1.0 + computeScore m tl
+computeScore m ((Fix (SetPattern [] (Just p) _ _),c):tl) = computeScore m ((p,c):tl)
+computeScore _ ((Fix (SetPattern es _ _ _),c):tl) = snd $ computeSetScore c es tl
 
-getBestMapKey :: Column -> [Clause] -> Maybe (Fix BoundPattern)
-getBestMapKey (Column m _ (Fix (MapPattern (k:ks) vs _ _ _):tl)) cs = fst $ computeMapScore m (head cs) (k:ks) vs (zip tl $ tail cs)
-getBestMapKey (Column m s (Fix Wildcard:tl)) cs = getBestMapKey (Column m s tl) (tail cs)
-getBestMapKey (Column m s (Fix (Variable _ _):tl)) cs = getBestMapKey (Column m s tl) (tail cs)
-getBestMapKey _ _ = Nothing
+getBestKey :: Column -> [Clause] -> Maybe (Fix BoundPattern)
+getBestKey (Column m _ (Fix (MapPattern (k:ks) vs _ _ _):tl)) cs = fst $ computeMapScore m (head cs) (k:ks) vs (zip tl $ tail cs)
+getBestKey (Column _ _ (Fix (SetPattern (k:ks) _ _ _):tl)) cs = fst $ computeSetScore (head cs) (k:ks) (zip tl $ tail cs)
+getBestKey (Column m s (Fix Wildcard:tl)) cs = getBestKey (Column m s tl) (tail cs)
+getBestKey (Column m s (Fix (Variable _ _):tl)) cs = getBestKey (Column m s tl) (tail cs)
+getBestKey _ _ = Nothing
 
 computeMapScore :: Metadata -> Clause -> [Fix Pattern] -> [Fix Pattern] -> [(Fix Pattern,Clause)] -> (Maybe (Fix BoundPattern), Double)
 computeMapScore m c ks vs tl =
   let zipped = zip ks vs
       scores = map (\(k,v) -> (if isBound getName c k then Just $ canonicalizePattern c k else Nothing,computeMapElementScore m c tl (k,v))) zipped
+  in maximumBy (comparing snd) scores
+
+computeSetScore :: Clause -> [Fix Pattern] -> [(Fix Pattern,Clause)] -> (Maybe (Fix BoundPattern), Double)
+computeSetScore c es tl =
+  let scores = map (\e -> (if isBound getName c e then Just $ canonicalizePattern c e else Nothing,computeElementScore e c tl)) es
   in maximumBy (comparing snd) scores
 
 computeMapElementScore :: Metadata -> Clause -> [(Fix Pattern,Clause)] -> (Fix Pattern, Fix Pattern) -> Double
@@ -545,6 +593,8 @@ canonicalizePattern c' (Fix (ListPattern hd f tl' e o)) =
   Fix (ListPattern (mapPat c' hd) (mapPat c' f) (mapPat c' tl') e $ canonicalizePattern c' o)
 canonicalizePattern c' (Fix (MapPattern ks vs f e o)) = 
   Fix (MapPattern (mapPat c' ks) (mapPat c' vs) (mapPat c' f) e $ canonicalizePattern c' o)
+canonicalizePattern c' (Fix (SetPattern es f e o)) = 
+  Fix (SetPattern (mapPat c' es) (mapPat c' f) e $ canonicalizePattern c' o)
 
 mapPat :: Functor f => Clause -> f (Fix Pattern) -> f (Fix BoundPattern)
 mapPat c' = fmap (canonicalizePattern c')
@@ -578,6 +628,7 @@ isBound :: Eq a => (VariableBinding -> a) -> Clause -> Fix (P a) -> Bool
 isBound get c' (Fix (Pattern _ _ ps)) = all (isBound get c') ps
 isBound get c' (Fix (ListPattern hd f tl' _ _)) = all (isBound get c') hd && all (isBound get c') tl' && maybe True (isBound get c') f
 isBound get c' (Fix (MapPattern ks vs f _ _)) = all (isBound get c') ks && all (isBound get c') vs && maybe True (isBound get c') f
+isBound get c' (Fix (SetPattern es f _ _)) = all (isBound get c') es && maybe True (isBound get c') f
 isBound get c'@(Clause _ vars _) (Fix (As name _ p)) = 
   isBound get c' p && (elem name $ map get vars )
 isBound _ _ (Fix Wildcard) = False
@@ -621,17 +672,24 @@ expandPattern :: Constructor
 expandPattern (List _ len) _ (Fix (ListPattern hd _ tl _ _), _) = (hd ++ (replicate (len - length hd - length tl) (Fix Wildcard)) ++ tl, Nothing)
 expandPattern _ _ (Fix (ListPattern _ _ _ _ _), _) = error "invalid list pattern"
 expandPattern (Symbol (SymbolOrAlias name [a, _])) _ (Fix (Pattern (Symbol (SymbolOrAlias (Id "inj" _) [b, _])) _ [fixedP]), _) = ([fixedP], if a == b then Nothing else Just (Symbol (SymbolOrAlias name [a,b])))
-expandPattern Empty _ (Fix (MapPattern _ _ _ _ _), _) = ([], Nothing)
+expandPattern Empty _ (_, _) = ([], Nothing)
 expandPattern (NonEmpty _) _ (p,_) = ([p], Nothing)
-expandPattern (HasKey _ _ (Just p)) _ (m@(Fix (MapPattern ks vs f e o)),c) = 
+expandPattern (HasKey _ _ _ (Just p)) _ (m@(Fix (MapPattern ks vs f e o)),c) = 
   let canonKs = map (canonicalizePattern c) ks
       hasKey = elemIndex p canonKs
   in case hasKey of
        Just i -> ([vs !! i, Fix (MapPattern (except i ks) (except i vs) f e o), Fix Wildcard],Nothing)
        Nothing -> ([Fix Wildcard, Fix Wildcard, m],Nothing)
-expandPattern (HasKey _ _ Nothing) _ _ = error "TODO: map/set choice"
+expandPattern (HasKey _ _ _ (Just p)) _ (m@(Fix (SetPattern es f e o)),c) = 
+  let canonEs = map (canonicalizePattern c) es
+      hasElem = elemIndex p canonEs
+  in case hasElem of
+       Just i -> ([Fix (SetPattern (except i es) f e o), Fix Wildcard],Nothing)
+       Nothing -> ([Fix Wildcard, m],Nothing)
+expandPattern (HasKey _ _ _ Nothing) _ _ = error "TODO: map/set choice"
 expandPattern (HasNoKey _ _) _ (p,_) = ([p], Nothing)
 expandPattern _ _ ((Fix (MapPattern _ _ _ _ _)),_) = error "Invalid map pattern"
+expandPattern _ _ ((Fix (SetPattern _ _ _ _)),_) = error "Invalid set pattern"
 expandPattern _ _ (Fix (Pattern _ _ fixedPs), _)  = (fixedPs,Nothing)
 expandPattern ix ms (Fix (As _ _ pat), c)         = expandPattern ix ms (pat, c)
 expandPattern _ ms (Fix Wildcard, _)              = (replicate (length ms) (Fix Wildcard), Nothing)
@@ -718,6 +776,7 @@ instance Y.ToYaml a => Y.ToYaml (BoundPattern a) where
     ]
   toYaml (As _ _ p) = Y.toYaml p
   toYaml (MapPattern _ _ _ _ o) = Y.toYaml o
+  toYaml (SetPattern _ _ _ o) = Y.toYaml o
   toYaml (ListPattern _ _ _ _ o) = Y.toYaml o
   toYaml (Pattern (Literal s) (Just h) []) = Y.mapping
     ["hook" Y..= Y.toYaml (pack h)
@@ -844,8 +903,9 @@ compilePattern firstCm =
                 Just "LIST.List" -> listPattern ix (head os') ls d s₁ (head cs')
                 -- matching a map, so construct a node to decompose the map by one of its elements
                 Just "MAP.Map" -> mapPattern ix (head os') ls d s₁ (head cs') ac
+                -- matching a set, so construct a node to decompose the set by one of its elements
+                Just "SET.Set" -> setPattern ix (head os') ls d s₁ (head cs') ac
                 -- matching an mint, so match the integer value of the mint with the specified bitwidth
-                Just "MAP.Map" -> mapPattern ix (head os') ls d s₁ (head cs') ac
                 Just ('M':'I':'N':'T':'.':'M':'I':'n':'t':' ':bw) -> Fix $ SwitchLiteral (head os') (read bw) L
                     { getSpecializations = map (second (compilePattern' ix)) ls
                     , getDefault = compilePattern' ix <$> d
@@ -864,6 +924,8 @@ compilePattern firstCm =
     isWildcard (Fix (Pattern _ _ _)) = False
     isWildcard (Fix (MapPattern [] [] (Just p) _ _)) = isWildcard p
     isWildcard (Fix (MapPattern _ _ _ _ _)) = False
+    isWildcard (Fix (SetPattern [] (Just p) _ _)) = isWildcard p
+    isWildcard (Fix (SetPattern _ _ _ _)) = False
     isWildcard (Fix (ListPattern _ _ _ _)) = False
     -- constructs a tree to test the current occurrence against each possible match in turn
     equalLiteral :: Int -> Occurrence -> String -> [(Text, (ClauseMatrix, [Occurrence]))] -> Maybe (ClauseMatrix, [Occurrence]) -> Fix DecisionTree
@@ -928,7 +990,7 @@ compilePattern firstCm =
             }
       else
         -- otherwise, get the best key and test whether the best key is in the map or not
-        let key = getBestMapKey c cs
+        let key = getBestKey c cs
         in case key of
              Nothing -> Fix $ Switch mapO $ L
                { getSpecializations = map (second (compilePattern' (o+1))) ls
@@ -941,6 +1003,32 @@ compilePattern firstCm =
                                { getSpecializations = map (second (compilePattern' (o+1))) ls
                                , getDefault = compilePattern' (o+1) <$> d
                                }
+    setPattern :: Int -> Occurrence -> [(Text, (ClauseMatrix, [Occurrence]))] -> Maybe (ClauseMatrix, [Occurrence]) -> [Constructor] -> Column -> [Clause] -> Fix DecisionTree
+    setPattern o setO ls d s c cs =
+      let newO = [o, 0]
+      -- if Empty is in the signature, test whether the set is empty or not.
+      in if elem Empty s then
+        Fix $ Function "hook_SET_size_long" newO [setO] "MINT.MInt 64" $
+          Fix $ SwitchLiteral newO 64 $ L
+            { getSpecializations = map (second (compilePattern' (o+1))) ls
+            , getDefault = compilePattern' (o+1) <$> d
+            }
+      else
+        -- otherwise, get the best element and test whether the best element is in the set or not
+        let key = getBestKey c cs
+        in case key of
+             Nothing -> Fix $ Switch setO $ L
+               { getSpecializations = map (second (compilePattern' (o+1))) ls
+               , getDefault = compilePattern' (o+1) <$> d
+               }
+             Just k -> Fix $ MakePattern newO k $
+                         Fix $ Function "hook_SET_in" (0 : setO) [newO, setO] "BOOL.Bool" $
+                           Fix $ Function "hook_SET_remove" (1 : setO) [setO, newO] "SET.Set" $
+                             Fix $ SwitchLiteral (0 : setO) 1 $ L
+                               { getSpecializations = map (second (compilePattern' (o+1))) ls
+                               , getDefault = compilePattern' (o+1) <$> d
+                               }
+
 
 shareDt :: Fix DecisionTree -> Free Anchor Alias
 shareDt =

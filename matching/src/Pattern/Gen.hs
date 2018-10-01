@@ -71,6 +71,9 @@ genPattern tools (SymLib _ sorts) rewrite =
         Just "MAP.concat" -> mapPattern sym Concat (map snd ps) (getSym "MAP.element" (sorts Map.! sort))
         Just "MAP.unit" -> mapPattern sym Unit [] (getSym "MAP.element" (sorts Map.! sort))
         Just "MAP.element" -> mapPattern sym Element (map snd ps) (getSym "MAP.element" (sorts Map.! sort))
+        Just "SET.concat" -> setPattern sym Concat (map snd ps) (getSym "SET.element" (sorts Map.! sort))
+        Just "SET.unit" -> setPattern sym Unit [] (getSym "SET.element" (sorts Map.! sort))
+        Just "SET.element" -> setPattern sym Element (map snd ps) (getSym "SET.element" (sorts Map.! sort))
         Just _ -> Fix $ P.Pattern (P.Symbol sym) Nothing (map snd ps)
         Nothing -> Fix $ P.Pattern (P.Symbol sym) Nothing (map snd ps)
     rAlgebra (DomainValuePattern (DomainValue sort (Fix (StringLiteralPattern (StringLiteral str))))) =
@@ -90,34 +93,38 @@ genPattern tools (SymLib _ sorts) rewrite =
                 -> [Fix P.Pattern]
                 -> SymbolOrAlias Object
                 -> Fix P.Pattern
-    listPattern Concat [Fix (P.ListPattern hd Nothing tl _), Fix (P.ListPattern hd' frame tl' _)] c =
-      Fix (P.ListPattern (hd ++ tl ++ hd') frame tl' c)
-    listPattern Concat [Fix (P.ListPattern hd frame tl _), Fix (P.ListPattern hd' Nothing tl' _)] c =
-      Fix (P.ListPattern hd frame (tl ++ hd' ++ tl') c)
-    listPattern Concat [Fix (P.ListPattern hd Nothing tl _), p@(Fix (P.Variable _ _))] c =
-      Fix (P.ListPattern (hd ++ tl) (Just p) [] c)
-    listPattern Concat [Fix (P.ListPattern hd Nothing tl _), p@(Fix P.Wildcard)] c =
-      Fix (P.ListPattern (hd ++ tl) (Just p) [] c)
-    listPattern Concat [p@(Fix (P.Variable _ _)), Fix (P.ListPattern hd Nothing tl _)] c =
-      Fix (P.ListPattern [] (Just p) (hd ++ tl) c)
-    listPattern Concat [p@(Fix P.Wildcard), Fix (P.ListPattern hd Nothing tl _)] c =
-      Fix (P.ListPattern [] (Just p) (hd ++ tl) c)
-    listPattern Unit [] c = Fix (P.ListPattern [] Nothing [] c)
-    listPattern Element [p] c = Fix (P.ListPattern [p] Nothing [] c)
-    listPattern Concat [_, Fix (P.ListPattern _ (Just _) _ _)] _ = error "unsupported list pattern"
-    listPattern Concat [Fix (P.ListPattern _ (Just _) _ _), _] _ = error "unsupported list pattern"
-    listPattern Concat [Fix (P.As _ _ _), _] _ = error "unsupported list pattern"
-    listPattern Concat [_, Fix (P.As _ _ _)] _ = error "unsupported list pattern"
-    listPattern Concat [Fix (P.Pattern _ _ _), _] _ = error "unsupported list pattern"
-    listPattern Concat [_, Fix (P.Pattern _ _ _)] _ = error "unsupported list pattern"
-    listPattern Concat [Fix P.Wildcard, _] _ = error "unsupported list pattern"
-    listPattern Concat [Fix (P.Variable _ _), _] _ = error "unsupported list pattern"
-    listPattern Concat [] _ = error "unsupported list pattern"
-    listPattern Concat (_:[]) _ = error "unsupported list pattern"
-    listPattern Concat (_:_:_:_) _ = error "unsupported list pattern"
-    listPattern Unit (_:_) _ = error "unsupported list pattern"
-    listPattern Element [] _ = error "unsupported list pattern"
-    listPattern Element (_:_:_) _ = error "unsupported list pattern"
+    listPattern sym Concat [Fix (P.ListPattern hd Nothing tl _ o), Fix (P.ListPattern hd' frame tl' _ o')] c =
+      Fix (P.ListPattern (hd ++ tl ++ hd') frame tl' c $ Fix $ P.Pattern (P.Symbol sym) Nothing [o, o'])
+    listPattern sym Concat [Fix (P.ListPattern hd frame tl _ o), Fix (P.ListPattern hd' Nothing tl' _ o')] c =
+      Fix (P.ListPattern hd frame (tl ++ hd' ++ tl') c $ Fix $ P.Pattern (P.Symbol sym) Nothing [o, o'])
+    listPattern sym Concat [Fix (P.ListPattern hd Nothing tl _ o), p@(Fix (P.Variable _ _))] c =
+      Fix (P.ListPattern (hd ++ tl) (Just p) [] c $ Fix $ P.Pattern (P.Symbol sym) Nothing [o, p])
+    listPattern sym Concat [Fix (P.ListPattern hd Nothing tl _ o), p@(Fix P.Wildcard)] c =
+      Fix (P.ListPattern (hd ++ tl) (Just p) [] c $ Fix $ P.Pattern (P.Symbol sym) Nothing [o, p])
+    listPattern sym Concat [p@(Fix (P.Variable _ _)), Fix (P.ListPattern hd Nothing tl _ o)] c =
+      Fix (P.ListPattern [] (Just p) (hd ++ tl) c $ Fix $ P.Pattern (P.Symbol sym) Nothing [p, o])
+    listPattern sym Concat [p@(Fix P.Wildcard), Fix (P.ListPattern hd Nothing tl _ o)] c =
+      Fix (P.ListPattern [] (Just p) (hd ++ tl) c $ Fix $ P.Pattern (P.Symbol sym) Nothing [p, o])
+    listPattern sym Unit [] c = Fix (P.ListPattern [] Nothing [] c $ Fix $ P.Pattern (P.Symbol sym) Nothing [])
+    listPattern sym Element [p] c = Fix (P.ListPattern [p] Nothing [] c $ Fix $ P.Pattern (P.Symbol sym) Nothing [p])
+    listPattern _ Concat [_, Fix (P.MapPattern _ _ _ _ _)] _ = error "unsupported list pattern"
+    listPattern _ Concat [Fix (P.MapPattern _ _ _ _ _), _] _ = error "unsupported list pattern"
+    listPattern _ Concat [_, Fix (P.SetPattern _ _ _ _)] _ = error "unsupported list pattern"
+    listPattern _ Concat [Fix (P.SetPattern _ _ _ _), _] _ = error "unsupported list pattern"
+    listPattern _ Concat [_, Fix (P.ListPattern _ (Just _) _ _ _)] _ = error "unsupported list pattern"
+    listPattern _ Concat [Fix (P.ListPattern _ (Just _) _ _ _), _] _ = error "unsupported list pattern"
+    listPattern _ Concat [Fix (P.As _ _ _), _] _ = error "unsupported list pattern"
+    listPattern _ Concat [_, Fix (P.As _ _ _)] _ = error "unsupported list pattern"
+    listPattern _ Concat [Fix (P.Pattern _ _ _), _] _ = error "unsupported list pattern"
+    listPattern _ Concat [_, Fix (P.Pattern _ _ _)] _ = error "unsupported list pattern"
+    listPattern _ Concat [Fix P.Wildcard, _] _ = error "unsupported list pattern"
+    listPattern _ Concat [Fix (P.Variable _ _), _] _ = error "unsupported list pattern"
+    listPattern _ Concat [] _ = error "unsupported list pattern"
+    listPattern _ Concat (_:[]) _ = error "unsupported list pattern"
+    listPattern _ Concat (_:_:_:_) _ = error "unsupported list pattern"
+    listPattern _ Unit (_:_) _ = error "unsupported list pattern"
+    listPattern _ Element [] _ = error "unsupported list pattern"
+    listPattern _ Element (_:_:_) _ = error "unsupported list pattern"
     mapPattern :: SymbolOrAlias Object
                -> CollectionCons
                -> [Fix P.Pattern]
@@ -141,6 +148,8 @@ genPattern tools (SymLib _ sorts) rewrite =
     mapPattern _ Concat [Fix (P.MapPattern _ _ (Just _) _ _), _] _ = error "unsupported map pattern"
     mapPattern _ Concat [_, Fix (P.ListPattern _ _ _ _ _)] _ = error "unsupported map pattern"
     mapPattern _ Concat [Fix (P.ListPattern _ _ _ _ _), _] _ = error "unsupported map pattern"
+    mapPattern _ Concat [_, Fix (P.SetPattern _ _ _ _)] _ = error "unsupported map pattern"
+    mapPattern _ Concat [Fix (P.SetPattern _ _ _ _), _] _ = error "unsupported map pattern"
     mapPattern _ Concat [Fix (P.As _ _ _), _] _ = error "unsupported map pattern"
     mapPattern _ Concat [_, Fix (P.As _ _ _)] _ = error "unsupported map pattern"
     mapPattern _ Concat [Fix (P.Pattern _ _ _), _] _ = error "unsupported map pattern"
@@ -154,6 +163,44 @@ genPattern tools (SymLib _ sorts) rewrite =
     mapPattern _ Element [] _ = error "unsupported map pattern"
     mapPattern _ Element (_:[]) _ = error "unsupported map pattern"
     mapPattern _ Element (_:_:_:_) _ = error "unsupported map pattern"
+    setPattern :: SymbolOrAlias Object
+               -> CollectionCons
+               -> [Fix P.Pattern]
+               -> SymbolOrAlias Object
+               -> Fix P.Pattern
+    setPattern sym Concat [Fix (P.SetPattern ks Nothing _ o), Fix (P.SetPattern ks' frame _ o')] c =
+      Fix (P.SetPattern (ks ++ ks') frame c $ Fix $ P.Pattern (P.Symbol sym) Nothing [o, o'])
+    setPattern sym Concat [Fix (P.SetPattern ks frame _ o), Fix (P.SetPattern ks' Nothing _ o')] c =
+      Fix (P.SetPattern (ks ++ ks') frame c $ Fix $ P.Pattern (P.Symbol sym) Nothing [o, o'])
+    setPattern sym Concat [Fix (P.SetPattern ks Nothing _ o), p@(Fix (P.Variable _ _))] c =
+      Fix (P.SetPattern ks (Just p) c $ Fix $ P.Pattern (P.Symbol sym) Nothing [o, p])
+    setPattern sym Concat [Fix (P.SetPattern ks Nothing _ o), p@(Fix P.Wildcard)] c =
+      Fix (P.SetPattern ks (Just p) c $ Fix $ P.Pattern (P.Symbol sym) Nothing [o, p])
+    setPattern sym Concat [p@(Fix (P.Variable _ _)), Fix (P.SetPattern ks Nothing _ o)] c =
+      Fix (P.SetPattern ks (Just p) c $ Fix $ P.Pattern (P.Symbol sym) Nothing [p, o])
+    setPattern sym Concat [p@(Fix P.Wildcard), Fix (P.SetPattern ks Nothing _ o)] c =
+      Fix (P.SetPattern ks (Just p) c $ Fix $ P.Pattern (P.Symbol sym) Nothing [p, o])
+    setPattern sym Unit [] c = Fix (P.SetPattern [] Nothing c $ Fix $ P.Pattern (P.Symbol sym) Nothing [])
+    setPattern sym Element [e] c = Fix (P.SetPattern [e] Nothing c $ Fix $ P.Pattern (P.Symbol sym) Nothing [e])
+    setPattern _ Concat [_, Fix (P.SetPattern _ (Just _) _ _)] _ = error "unsupported set pattern"
+    setPattern _ Concat [Fix (P.SetPattern _ (Just _) _ _), _] _ = error "unsupported set pattern"
+    setPattern _ Concat [_, Fix (P.MapPattern _ _ _ _ _)] _ = error "unsupported set pattern"
+    setPattern _ Concat [Fix (P.MapPattern _ _ _ _ _), _] _ = error "unsupported set pattern"
+    setPattern _ Concat [_, Fix (P.ListPattern _ _ _ _ _)] _ = error "unsupported set pattern"
+    setPattern _ Concat [Fix (P.ListPattern _ _ _ _ _), _] _ = error "unsupported set pattern"
+    setPattern _ Concat [Fix (P.As _ _ _), _] _ = error "unsupported set pattern"
+    setPattern _ Concat [_, Fix (P.As _ _ _)] _ = error "unsupported set pattern"
+    setPattern _ Concat [Fix (P.Pattern _ _ _), _] _ = error "unsupported set pattern"
+    setPattern _ Concat [_, Fix (P.Pattern _ _ _)] _ = error "unsupported set pattern"
+    setPattern _ Concat [Fix P.Wildcard, _] _ = error "unsupported set pattern"
+    setPattern _ Concat [Fix (P.Variable _ _), _] _ = error "unsupported set pattern"
+    setPattern _ Concat [] _ = error "unsupported set pattern"
+    setPattern _ Concat (_:[]) _ = error "unsupported set pattern"
+    setPattern _ Concat (_:_:_:_) _ = error "unsupported set pattern"
+    setPattern _ Unit (_:_) _ = error "unsupported set pattern"
+    setPattern _ Element [] _ = error "unsupported set pattern"
+    setPattern _ Element (_:_:_) _ = error "unsupported set pattern"
+ 
     getSym :: String -> [SymbolOrAlias Object] -> SymbolOrAlias Object
     getSym hookAtt syms = head $ filter (isHook hookAtt) syms
     isHook :: String -> SymbolOrAlias Object -> Bool
@@ -189,7 +236,9 @@ metaLookup _ (P.Literal _) = Just []
 metaLookup f (P.List c i) = Just $ replicate i $ head $ fromJust $ f $ P.Symbol c
 metaLookup _ P.Empty = Just []
 metaLookup _ (P.NonEmpty (P.Ignoring m)) = Just [m]
-metaLookup f (P.HasKey e (P.Ignoring m) _) = Just [head $ tail $ fromJust $ f $ P.Symbol e, m, m]
+metaLookup f (P.HasKey isSet e (P.Ignoring m) _) = 
+  let metas = fromJust $ f $ P.Symbol e
+  in if isSet then Just [m, m] else Just [head $ tail $ metas, m, m]
 metaLookup _ (P.HasNoKey (P.Ignoring m) _) = Just [m]
 
 defaultMetadata :: Sort Object -> P.Metadata
