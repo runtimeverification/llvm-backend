@@ -80,8 +80,7 @@ mkLstPattern pats =
       vs = map vars ls
       as' = zipWith3 Action as vs conds 
       md = getMetadata (Proxy :: Proxy Lst)
-      cls = map (\a -> Clause a [] []) as'
-      cs = fmap (mkColumn cls md . (toPattern <$>)) (transpose ls)
+      cs = fmap (Column md . (toPattern <$>)) (transpose ls)
   in case mkClauseMatrix cs as' of
        Right matrix -> matrix
        Left  msg    -> error $ "Invalid definition: " ++ show msg
