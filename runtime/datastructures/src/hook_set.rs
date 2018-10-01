@@ -45,6 +45,11 @@ pub unsafe extern "C" fn hook_SET_difference(s1: *const Set, s2: *const Set) -> 
 }
 
 #[no_mangle]
+pub unsafe extern "C" fn hook_SET_remove(s: *const Set, value: K) -> Set {
+  (*s).without(&KElem(value))
+}
+
+#[no_mangle]
 pub unsafe extern "C" fn hook_SET_inclusion(s1: *const Set, s2: *const Set) -> bool {
   (*s1).is_subset(&*s2)
 }
@@ -63,9 +68,14 @@ pub unsafe extern "C" fn hook_SET_choice(s: *const Set) -> K {
 }
 
 #[no_mangle]
+pub unsafe extern "C" fn hook_SET_size_long(s: *const Set) -> usize {
+  (*s).len()
+}
+
+#[no_mangle]
 pub unsafe extern "C" fn hook_SET_size(s: *const Set) -> *mut Int {
   let mut result = Int(0, 0, ptr::null());
-  __gmpz_init_set_ui(&mut result, (*s).len());
+  __gmpz_init_set_ui(&mut result, hook_SET_size_long(s));
   move_int(&mut result)
 }
 
