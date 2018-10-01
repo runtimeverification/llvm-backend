@@ -23,6 +23,8 @@ module Pattern ( PatternMatrix(..)
                , sigma
                , mSpecialize
                , mDefault
+               , getRealScore
+               , swapAt
                , failure
                , leaf
                , switch
@@ -44,7 +46,7 @@ import           Data.Deriving         (deriveOrd1, deriveShow1, deriveEq1, deri
 import           Data.Function         (on)
 import           Data.Functor.Classes  (Show1(..), Eq1(..), Ord1(..), liftEq2, liftCompare2, liftShowsPrec2)
 import           Data.Functor.Foldable (Fix (..), cata)
-import           Data.List             (transpose,nub,sortBy,maximumBy,elemIndex)
+import           Data.List             (transpose,nub,sortBy,maximumBy,elemIndex,intersect)
 import           Data.List.Index       (indexed)
 import           Data.Maybe            (catMaybes,isJust,fromJust,listToMaybe)
 import           Data.Ord              (comparing)
@@ -572,10 +574,15 @@ computeSetScore c es tl =
   let scores = map (\e -> (if isBound getName c e then Just $ canonicalizePattern c e else Nothing,computeElementScore e c tl)) es
   in maximumBy (comparing snd) scores
 
+minPositiveDouble :: Double
+minPositiveDouble = encodeFloat 1 $ fst (floatRange (0.0 :: Double)) - floatDigits (0.0 :: Double)
+
 computeMapElementScore :: Metadata -> Clause -> [(Fix Pattern,Clause)] -> (Fix Pattern, Fix Pattern) -> Double
 computeMapElementScore m c tl (k,v) =
   let score = computeElementScore k c tl
-  in if score == -1.0 / 0.0 then score else score * computeScore m [(v,c)]
+  in if score == -1.0 / 0.0 then score else 
+  let finalScore = score * computeScore m [(v,c)]
+  in if finalScore == 0.0 then minPositiveDouble else finalScore
 
 canonicalizePattern :: Clause -> Fix Pattern -> Fix BoundPattern
 canonicalizePattern (Clause _ vars _) (Fix (Variable name hookAtt)) =
@@ -856,6 +863,32 @@ swapAt i j xs =
       right = drop (j + 1) xs
   in left ++ (elemJ:middle) ++ (elemI:right)
 
+getRealScore :: ClauseMatrix -> Column -> Double
+getRealScore (ClauseMatrix (PatternMatrix cs) as) c =
+  let score = getScore as c in
+  if score /= 0.0 then score else
+  let unboundMapColumns = filter ((== (-1.0 / 0.0)) . getScore as) cs
+      patterns = transpose $ map getTerms unboundMapColumns
+      keys = map (concatMap getMapOrSetKeys) patterns
+      vars = map (concatMap getVariables) keys
+      boundVars = map getVariables $ getTerms c
+      intersection = zipWith intersect vars boundVars
+      needed = any (not . null) intersection
+  in if needed then minPositiveDouble else 0.0
+  where
+    getMapOrSetKeys :: Fix Pattern -> [Fix Pattern]
+    getMapOrSetKeys (Fix (SetPattern ks _ _ _)) = ks
+    getMapOrSetKeys (Fix (MapPattern ks _ _ _ _)) = ks
+    getMapOrSetKeys _ = []
+    getVariables :: Fix Pattern -> [String]
+    getVariables (Fix (Variable name _)) = [name]
+    getVariables (Fix (As name _ p)) = name : getVariables p
+    getVariables (Fix (Pattern _ _ ps)) = concatMap getVariables ps
+    getVariables (Fix (ListPattern _ _ _ _ o)) = getVariables o
+    getVariables (Fix (MapPattern _ _ _ _ o)) = getVariables o
+    getVariables (Fix (SetPattern _ _ _ o)) = getVariables o
+    getVariables (Fix Wildcard) = []
+
 compilePattern :: (ClauseMatrix, [Occurrence]) -> (Fix DecisionTree)
 compilePattern firstCm =
   compilePattern' 0 firstCm
@@ -871,7 +904,7 @@ compilePattern firstCm =
             if length ac == 1 then getLeaf ix os (firstRow pm) hd (const failure) else getLeaf ix os (firstRow pm) hd (flip compilePattern' ((ClauseMatrix (notFirstRow pm) tl), os))
           else 
           -- compute the column with the best score, choosing the first such column if they are equal
-          let bestColIx = fst $ maximumBy (comparing (getScore . snd)) $ reverse $ indexed cs
+          let bestColIx = fst $ maximumBy (comparing (getRealScore cm . snd)) $ reverse $ indexed cs
               -- swap the columns and occurrences so that the best column is first
               cs' = swapAt 0 bestColIx cs
               os' = swapAt 0 bestColIx os
