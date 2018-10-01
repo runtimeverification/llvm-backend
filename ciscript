@@ -30,4 +30,6 @@ export PATH=$PATH:~/.local/bin
 ./interpreter ../test/test4.kore -1 | diff - ../test/test4.out
 ../bin/llvm-kompile ../test/test5.kore TEST -o interpreter
 ./interpreter ../test/test5.kore -1 | diff - ../test/test5.out
+../bin/llvm-kompile ../test/test6.kore TEST -o interpreter
+./interpreter ../test/test6.kore -1 | diff - ../test/test6.out
 rm -f configparser configparser.ll interpreterQ
