@@ -312,8 +312,8 @@ mSpecialize ix (cm@(ClauseMatrix (PatternMatrix (c : _)) _), o : os) =
      getConstructor (List _ i) = pack $ show i
      getConstructor Empty = "0"
      getConstructor (NonEmpty _) = error "Invalid map pattern"
-     getConstructor (HasKey _ _ _) = "0"
-     getConstructor (HasNoKey _ _) = "1"
+     getConstructor (HasKey _ _ _ _) = "1"
+     getConstructor (HasNoKey _ _) = "0"
 
 mSpecialize _ _ = error "must have at least one column"
 
@@ -648,7 +648,7 @@ data DecisionTree a = Leaf (Int, [Occurrence])
                     | Fail
                     | Switch Occurrence !(L a)
                     | SwitchLiteral Occurrence Int !(L a)
-                    | IsNull Occurrence !(L a)
+                    | CheckNull Occurrence !(L a)
                     | MakePattern Occurrence (Fix BoundPattern) !a
                     | Swap Index !a
                     | Function Text Occurrence [Occurrence] Hook !a  
@@ -680,7 +680,7 @@ instance Y.ToYaml a => Y.ToYaml (Anchor a) where
                                 )
       , "occurrence" Y..= Y.toYaml o
       ]
-    toYaml (Anchor a (IsNull o x)) = Y.maybeNamedMapping a
+    toYaml (Anchor a (CheckNull o x)) = Y.maybeNamedMapping a
       ["specializations" Y..= Y.array (map (\(i1, i2) -> Y.array [Y.toYaml i1, Y.toYaml i2]) (getSpecializations x))
       , "occurrence" Y..= Y.toYaml o
       , "isnull" Y..= Y.toYaml ("true" :: Text)
@@ -937,7 +937,7 @@ compilePattern firstCm =
              Just k -> Fix $ MakePattern newO k $ 
                          Fix $ Function "hook_MAP_lookup_null" (0 : mapO) [mapO, newO] "STRING.String" $
                            Fix $ Function "hook_MAP_remove" (1 : mapO) [mapO, newO] "MAP.Map" $
-                             Fix $ IsNull (0 : mapO) $ L
+                             Fix $ CheckNull (0 : mapO) $ L
                                { getSpecializations = map (second (compilePattern' (o+1))) ls
                                , getDefault = compilePattern' (o+1) <$> d
                                }
@@ -961,7 +961,7 @@ shareDt =
                         Fix (MakePattern o p a) -> let (m',child) = mapChild a in (addName m', Free (Anchor (Just $ name m') (MakePattern o p child)))
                         Fix (Function n o os s a) -> let (m',child) = mapChild a in (addName m', Free (Anchor (Just $ name m') (Function n o os s child)))
                         Fix (Switch o (L s d)) -> let (m',s') = mapSpec m s in let (m'',d') = mapDefault m' d in (addName m'', Free (Anchor (Just $ name m'') (Switch o (L s' d'))))
-                        Fix (IsNull o (L s d)) -> let (m',s') = mapSpec m s in let (m'',d') = mapDefault m' d in (addName m'', Free (Anchor (Just $ name m'') (IsNull o (L s' d'))))
+                        Fix (CheckNull o (L s d)) -> let (m',s') = mapSpec m s in let (m'',d') = mapDefault m' d in (addName m'', Free (Anchor (Just $ name m'') (CheckNull o (L s' d'))))
                         Fix (SwitchLiteral o bw (L s d)) -> let (m',s') = mapSpec m s in let (m'',d') = mapDefault m' d in (addName m'', Free (Anchor (Just $ name m'') (SwitchLiteral o bw (L s' d'))))
                       
                         
