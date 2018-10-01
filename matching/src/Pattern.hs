@@ -10,7 +10,6 @@
 module Pattern ( PatternMatrix(..)
                , ClauseMatrix(..)
                , Column(..)
-               , mkColumn
                , Metadata(..)
                , P(..)
                , Pattern
@@ -62,12 +61,11 @@ import qualified Data.ByteString as B
 
 data Column = Column
               { getMetadata :: !Metadata
-              , getScore    :: !Double
               , getTerms    :: ![Fix Pattern]
               }
 
 instance Show Column where
-  showsPrec _ (Column _ _ ts) =
+  showsPrec _ (Column _ ts) =
     showString "Column " . showList ts
 
 data Metadata = Metadata
@@ -429,10 +427,10 @@ expandDefaultOccurrence _ _ = error "must have at least one column"
 
 firstRow :: PatternMatrix -> [Fix Pattern]
 firstRow (PatternMatrix cs) =
-  map (\(Column _ _ (p : _)) -> p) cs
-notFirstRow :: ClauseMatrix -> PatternMatrix
-notFirstRow (ClauseMatrix (PatternMatrix cs) cls) =
-  PatternMatrix (map (\(Column m _ (_ : ps)) -> mkColumn (tail cls) m ps) cs)
+  map (\(Column _ (p : _)) -> p) cs
+notFirstRow :: PatternMatrix -> PatternMatrix
+notFirstRow (PatternMatrix cs) =
+  PatternMatrix (map (\(Column m (_ : ps)) -> Column m ps) cs)
 
 filterByList :: [Bool] -> [a] -> [a]
 filterByList (True  : bs) (x : xs) = x : filterByList bs xs
@@ -524,18 +522,21 @@ filterMatrix ix checkPattern ((ClauseMatrix (PatternMatrix cs@(c : _)) as), o) =
   let filteredRows = map checkPattern $ zip as $ getTerms c
       varsAs = addVars ix as (getTerms c) o
       newAs = filterByList filteredRows varsAs
-      newCs = map (filterRows newAs filteredRows) cs
+      newCs = map (filterRows filteredRows) cs
   in ClauseMatrix (PatternMatrix newCs) newAs
   where
-    filterRows :: [Clause] -> [Bool] -> Column -> Column
-    filterRows newCs fr (Column md _ rs) =
-      mkColumn newCs md (filterByList fr rs)
+    filterRows :: [Bool] -> Column -> Column
+    filterRows fr (Column md rs) =
+      Column md (filterByList fr rs)
 filterMatrix _ _ (cmx,_) = cmx
 
 expandMatrix :: Constructor -> ClauseMatrix -> ClauseMatrix
 expandMatrix ix (ClauseMatrix (PatternMatrix (c : cs)) as) =
   ClauseMatrix (PatternMatrix (expandColumn ix c as <> cs)) as
 expandMatrix _ _ = error "Cannot expand empty matrix."
+
+getScore :: [Clause] -> Column -> Double
+getScore cs (Column m ps) = computeScore m (zip ps cs)
 
 -- TODO: improve
 computeScore :: Metadata -> [(Fix Pattern,Clause)] -> Double
@@ -554,10 +555,10 @@ computeScore m ((Fix (SetPattern [] (Just p) _ _),c):tl) = computeScore m ((p,c)
 computeScore _ ((Fix (SetPattern es _ _ _),c):tl) = snd $ computeSetScore c es tl
 
 getBestKey :: Column -> [Clause] -> Maybe (Fix BoundPattern)
-getBestKey (Column m _ (Fix (MapPattern (k:ks) vs _ _ _):tl)) cs = fst $ computeMapScore m (head cs) (k:ks) vs (zip tl $ tail cs)
-getBestKey (Column _ _ (Fix (SetPattern (k:ks) _ _ _):tl)) cs = fst $ computeSetScore (head cs) (k:ks) (zip tl $ tail cs)
-getBestKey (Column m s (Fix Wildcard:tl)) cs = getBestKey (Column m s tl) (tail cs)
-getBestKey (Column m s (Fix (Variable _ _):tl)) cs = getBestKey (Column m s tl) (tail cs)
+getBestKey (Column m (Fix (MapPattern (k:ks) vs _ _ _):tl)) cs = fst $ computeMapScore m (head cs) (k:ks) vs (zip tl $ tail cs)
+getBestKey (Column _ (Fix (SetPattern (k:ks) _ _ _):tl)) cs = fst $ computeSetScore (head cs) (k:ks) (zip tl $ tail cs)
+getBestKey (Column m (Fix Wildcard:tl)) cs = getBestKey (Column m tl) (tail cs)
+getBestKey (Column m (Fix (Variable _ _):tl)) cs = getBestKey (Column m tl) (tail cs)
 getBestKey _ _ = Nothing
 
 computeMapScore :: Metadata -> Clause -> [Fix Pattern] -> [Fix Pattern] -> [(Fix Pattern,Clause)] -> (Maybe (Fix BoundPattern), Double)
@@ -635,15 +636,12 @@ isBound _ _ (Fix Wildcard) = False
 isBound get (Clause _ vars _) (Fix (Variable name _)) =
   elem name $ map get vars
 
-mkColumn :: [Clause] -> Metadata -> [Fix Pattern] -> Column
-mkColumn cs m ps = Column m (computeScore m (zip ps cs)) ps
-
 expandColumn :: Constructor -> Column -> [Clause] -> [Column]
-expandColumn ix (Column m _ ps) cs =
+expandColumn ix (Column m ps) cs =
   let metas    = expandMetadata ix m
       expanded = map (expandPattern ix metas) (zip ps cs)
       ps'' = map (expandIfJust ix metas) (zip expanded cs)
-  in  zipWith (mkColumn cs) metas (transpose ps'')
+  in  zipWith Column metas (transpose ps'')
 
 expandMetadata :: Constructor -> Metadata -> [Metadata]
 expandMetadata ix (Metadata _ _ sort ms) =
@@ -870,7 +868,7 @@ compilePattern firstCm =
           if isWildcardRow pm then
             -- if there is only one row left, then try to match it and fail the matching if it fails
             -- otherwise, if it fails, try to match the remainder of hte matrix
-            if length ac == 1 then getLeaf ix os (firstRow pm) hd (const failure) else getLeaf ix os (firstRow pm) hd (flip compilePattern' ((ClauseMatrix (notFirstRow cm) tl), os))
+            if length ac == 1 then getLeaf ix os (firstRow pm) hd (const failure) else getLeaf ix os (firstRow pm) hd (flip compilePattern' ((ClauseMatrix (notFirstRow pm) tl), os))
           else 
           -- compute the column with the best score, choosing the first such column if they are equal
           let bestColIx = fst $ maximumBy (comparing (getScore . snd)) $ reverse $ indexed cs

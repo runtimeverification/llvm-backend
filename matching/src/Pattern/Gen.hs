@@ -299,10 +299,9 @@ genClauseMatrix symlib indexedMod axioms sorts =
       rhsVars = map (genVars . getRightHandSide) rewrites
       scVars = map (maybe Nothing (Just . genVars)) sideConditions
       actions = zipWith3 P.Action indices rhsVars scVars
-      clauses = map (\a -> P.Clause a [] []) actions
       metas = genMetadatas symlib indexedMod
       meta = map (metas Map.!) sorts
-      col = zipWith (P.mkColumn clauses) meta (transpose patterns)
+      col = zipWith P.Column meta (transpose patterns)
   in case P.mkClauseMatrix col actions of
        Left err -> error (unpack err)
        Right m -> m
