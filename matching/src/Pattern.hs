@@ -344,7 +344,7 @@ mDefault (cm@(ClauseMatrix pm@(PatternMatrix (c : _)) as),o : os) =
         Just "MAP.Map" -> True
         Just _ -> False
   in  if infiniteLength || null s₁ || elem Empty s₁ || (not isMap && (toInteger $ length s₁) /= mtd)
-      then Just ((expandDefault (getDefaultConstructor c as) (filterMatrix (getDefaultConstructor c as) isDefault (cm,o))),expandDefaultOccurrence cm o <> os)
+      then Just ((expandDefault (getDefaultConstructor c as) (hook pm) (filterMatrix (getDefaultConstructor c as) isDefault (cm,o))),expandDefaultOccurrence cm o <> os)
       else Nothing
 mDefault _ = Nothing
 
@@ -376,9 +376,9 @@ getDefaultConstructor c cs =
                         List sym _ -> Just $ List sym $ (hd + tl)
                         _ -> Nothing
 
-expandDefault :: Maybe Constructor -> ClauseMatrix -> ClauseMatrix
-expandDefault (Just ix) (ClauseMatrix pm@(PatternMatrix (c : cs)) as) =
-  case hook pm of
+expandDefault :: Maybe Constructor -> Maybe String -> ClauseMatrix -> ClauseMatrix
+expandDefault (Just ix) hookAtt (ClauseMatrix (PatternMatrix (c : cs)) as) =
+  case hookAtt of
     Just "LIST.List" -> 
       ClauseMatrix (PatternMatrix $ expandColumn ix c as <> cs) as
     Just "MAP.Map" -> 
