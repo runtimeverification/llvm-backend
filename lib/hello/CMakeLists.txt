@@ -3,7 +3,7 @@ set(LLVM_LINK_COMPONENTS
   Support
 )
 
-add_kllvm_library(Hello
+add_library(Hello
   hello.cpp
 )
 

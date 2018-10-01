@@ -35,26 +35,6 @@ include_directories (${PROJECT_SOURCE_DIR}/include)
 
 set(CMAKE_INSTALL_PREFIX "install")
 
-macro(add_kllvm_library name)
-  add_library(${name} ${ARGN})
-  install(
-    TARGETS ${name}
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib
-    COMPONENT ${name}
-  )
-endmacro(add_kllvm_library name)
-
-macro(add_kllvm_runtime_library name)
-  add_library(${name} ${ARGN})
-  install(
-    TARGETS ${name}
-    LIBRARY DESTINATION runtime
-    ARCHIVE DESTINATION runtime
-    COMPONENT ${name}
-  )
-endmacro(add_kllvm_runtime_library name)
-
 # Find the libraries that correspond to the LLVM components
 # that we wish to use
 llvm_map_components_to_libnames(llvm_libs support core irreader)
@@ -66,15 +46,40 @@ macro(kllvm_add_tool name)
   target_link_libraries(${name} ${llvm_libs})
 endmacro(kllvm_add_tool)
 
+install(
+  FILES rustalloc.lds
+  DESTINATION lib/kllvm/rust
+)
+
+FILE(GLOB LLVMFiles runtime/*.ll)
+
+install(
+  FILES ${LLVMFiles}
+  DESTINATION lib/kllvm/llvm
+)
+
+install(
+  PROGRAMS bin/llvm-kompile bin/llvm-kompile-matching
+  DESTINATION bin
+)
+
+FILE(GLOB_RECURSE HaskellSources matching/src/*.hs matching/app/Main.hs)
+
+add_custom_command(
+  OUTPUT bin/llvm-kompile-matching
+  DEPENDS ${HaskellSources}
+  COMMAND stack build
+  COMMAND stack install --local-bin-path ../bin
+  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/matching
+)
+
+add_custom_target(matching
+  ALL DEPENDS bin/llvm-kompile-matching
+)
+
 # Auto-generated header path
 set(KLLVM_AUTOGEN_INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR}/include)
 include_directories(${KLLVM_AUTOGEN_INCLUDE_DIR})
-
-install(DIRECTORY include/kllvm ${KLLVM_AUTOGEN_INCLUDE_DIR}/kllvm
-  DESTINATION include
-  COMPONENT kllvm-headers
-  FILES_MATCHING PATTERN "*.h" PATTERN "*.hh"
-)
 
 add_subdirectory(lib)
 add_subdirectory(tools)

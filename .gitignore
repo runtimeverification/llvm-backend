@@ -32,6 +32,7 @@ a.out
 
 # Build directory
 build/
+bin/llvm-kompile-matching
 
 # Rust stuff
 Cargo.lock

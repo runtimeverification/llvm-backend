@@ -1,6 +1,10 @@
 set(LLVM_REQUIRES_EH ON)
 
-add_kllvm_runtime_library(arithmetic STATIC
+add_library(arithmetic STATIC
   int.cpp
 )
 
+install(
+  TARGETS arithmetic
+  ARCHIVE DESTINATION lib/kllvm
+)

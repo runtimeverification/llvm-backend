@@ -46,7 +46,7 @@ add_custom_command(
 set(LLVM_REQUIRES_RTTI ON)
 set(LLVM_REQUIRES_EH ON)
 
-add_kllvm_library(Parser
+add_library(Parser
   KOREScanner.cpp
   KOREParser.cpp
   KOREParserDriver.cpp
@@ -55,6 +55,11 @@ add_kllvm_library(Parser
   ${BISON_AUTOGEN_INCLUDE_DIR}/location.hh
   ${BISON_AUTOGEN_INCLUDE_DIR}/position.hh
   ${BISON_AUTOGEN_INCLUDE_DIR}/stack.hh
+)
+
+install(
+  TARGETS Parser
+  ARCHIVE DESTINATION lib/kllvm
 )
 
 add_definitions(${LLVM_DEFINITIONS})
