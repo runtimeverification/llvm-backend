@@ -98,6 +98,8 @@ genPattern tools (SymLib _ sorts) rewrite =
       Fix (P.ListPattern [] (Just p) (hd ++ tl) c)
     listPattern Concat [p@(Fix P.Wildcard), Fix (P.ListPattern hd Nothing tl _)] c =
       Fix (P.ListPattern [] (Just p) (hd ++ tl) c)
+    listPattern Unit [] c = Fix (P.ListPattern [] Nothing [] c)
+    listPattern Element [p] c = Fix (P.ListPattern [p] Nothing [] c)
     listPattern Concat [_, Fix (P.ListPattern _ (Just _) _ _)] _ = error "unsupported list pattern"
     listPattern Concat [Fix (P.ListPattern _ (Just _) _ _), _] _ = error "unsupported list pattern"
     listPattern Concat [Fix (P.As _ _ _), _] _ = error "unsupported list pattern"
@@ -109,9 +111,7 @@ genPattern tools (SymLib _ sorts) rewrite =
     listPattern Concat [] _ = error "unsupported list pattern"
     listPattern Concat (_:[]) _ = error "unsupported list pattern"
     listPattern Concat (_:_:_:_) _ = error "unsupported list pattern"
-    listPattern Unit [] c = Fix (P.ListPattern [] Nothing [] c)
     listPattern Unit (_:_) _ = error "unsupported list pattern"
-    listPattern Element [p] c = Fix (P.ListPattern [p] Nothing [] c)
     listPattern Element [] _ = error "unsupported list pattern"
     listPattern Element (_:_:_) _ = error "unsupported list pattern"
     getListElement :: [SymbolOrAlias Object] -> SymbolOrAlias Object
