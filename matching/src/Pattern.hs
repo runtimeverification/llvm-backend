@@ -567,34 +567,49 @@ compilePattern cm =
         [] -> Fix Fail
         hd:tl -> 
           if isWildcardRow pm then
+            -- if there is only one row left, then try to match it and fail the matching if it fails
+            -- otherwise, if it fails, try to match the remainder of hte matrix
             if length ac == 1 then getLeaf ix os (firstRow pm) hd (const failure) else getLeaf ix os (firstRow pm) hd (flip compilePattern' ((ClauseMatrix (notFirstRow pm) tl), os))
           else 
+          -- compute the column with the best score, choosing the first such column if they are equal
           let bestColIx = fst $ maximumBy (comparing (getScore . snd)) $ reverse $ indexed cs
-              --if the first column is equal to bestCol then choose it instead so we don't generate a swap
+              -- swap the columns and occurrences so that the best column is first
               cs' = swapAt 0 bestColIx cs
               os' = swapAt 0 bestColIx os
               pm' = PatternMatrix cs'
               cm' = (ClauseMatrix pm' ac,os')
+              -- compute the hook attribute of the new first column
               hookAtt = hook pm'
+              -- c9ompute the signature of the new first column
               s₁ = sigma₁ pm'
+              -- specialize on each constructor in the signature
               ls = map (`mSpecialize` cm') s₁
+              -- compute the default matrix if it exists
               d  = mDefault cm'
               dt = case hookAtt of
+                -- not matching a builtin, therefore construct a regular switch
+                -- that matches the tag of the block.
                 Nothing -> Fix $ Switch (head os') L
                     { getSpecializations = map (second (compilePattern' ix)) ls
                     , getDefault = compilePattern' ix <$> d
                     }
+                -- matching a bool, so match the integer value of the bool with a bitwidth of 1
                 Just "BOOL.Bool" -> Fix $ SwitchLiteral (head os') 1 L
                     { getSpecializations = map (second (compilePattern' ix)) ls
                     , getDefault = compilePattern' ix <$> d
                     }
-                Just "LIST.List" -> listPattern ix os' ls d s₁ (head cs')
+                -- matching a list, so construct a node to decompose the list into its elements
+                Just "LIST.List" -> listPattern ix (head os') ls d s₁ (head cs')
+                -- matching an mint, so match the integer value of the mint with the specified bitwidth
                 Just ('M':'I':'N':'T':'.':'M':'I':'n':'t':' ':bw) -> Fix $ SwitchLiteral (head os') (read bw) L
                     { getSpecializations = map (second (compilePattern' ix)) ls
                     , getDefault = compilePattern' ix <$> d
                     }
-                Just hookName -> equalLiteral ix os' hookName ls d
+                -- matching a string or int, so compare the value of the token against a list of constants
+                Just hookName -> equalLiteral ix (head os') hookName ls d
+          -- if necessary, generate a swap node
           in if bestColIx == 0 then dt else Fix $ Swap bestColIx dt
+    -- returns whether the row is done matching
     isWildcardRow :: PatternMatrix -> Bool
     isWildcardRow = and . map isWildcard . firstRow
     isWildcard :: Fix Pattern -> Bool
@@ -603,36 +618,48 @@ compilePattern cm =
     isWildcard (Fix (As _ _ pat)) = isWildcard pat
     isWildcard (Fix (Pattern _ _ _)) = False
     isWildcard (Fix (ListPattern _ _ _ _)) = False
-    equalLiteral :: Int -> [Occurrence] -> String -> [(Text, (ClauseMatrix, [Occurrence]))] -> Maybe (ClauseMatrix, [Occurrence]) -> Fix DecisionTree
-    equalLiteral o os _ [] (Just d) = Fix $ Switch (head os) L { getSpecializations = [], getDefault = Just $ compilePattern' o d }
+    -- constructs a tree to test the current occurrence against each possible match in turn
+    equalLiteral :: Int -> Occurrence -> String -> [(Text, (ClauseMatrix, [Occurrence]))] -> Maybe (ClauseMatrix, [Occurrence]) -> Fix DecisionTree
+    -- if no specializations remain and a default exists, consume the occurrence and continue with the default
+    equalLiteral o litO _ [] (Just d) = Fix $ Switch litO L { getSpecializations = [], getDefault = Just $ compilePattern' o d }
+    -- if no specializations remain and no default exists, fail the match
     equalLiteral _ _ _ [] (Nothing) = Fix Fail
-    equalLiteral o os hookName ((name,spec):tl) d =
+    -- consume each specialization one at a time and try to match it
+    -- if it succeseds, consume the occurrence and continue with the specialized matrix
+    -- otherweise, test the next literal
+    equalLiteral o litO hookName ((name,spec):tl) d =
       let newO = [o, 0]
-          litO = head os
       in Fix $ EqualLiteral (pack hookName) newO litO name $ 
              Fix $ SwitchLiteral newO 1 $ L [("1", Fix $ Switch litO L 
                                                          { getSpecializations = [], getDefault = Just $ compilePattern' (o+1) spec }),
-                                             ("0", equalLiteral (o+1) os hookName tl d)
+                                             ("0", equalLiteral (o+1) litO hookName tl d)
                                             ] Nothing
+    -- construct a tree to test the length of the list and bind the elements of the list to their occurrences
     listPattern :: Int -> [Occurrence] -> [(Text, (ClauseMatrix, [Occurrence]))] -> Maybe (ClauseMatrix, [Occurrence]) -> [Constructor] -> Column -> Fix DecisionTree
-    listPattern nextO os ls d signature firstCol =
-      let listO = head os
-          newO = [nextO, 0]
+    listPattern nextO listO ls d signature firstCol =
+      let newO = [nextO, 0]
           (cons,matrices) = unzip ls
           specs = zip cons $ zip signature matrices
           maxList = maxListSize firstCol
+      -- test the length of the list against the specializations of the matrix
+      -- if it succeeds, bind the occurrences and continue with the specialized matrix
+      -- otherwise, try the default case
       in Fix $ Function "hook_LIST_size_long" newO [listO] "MINT.MInt 64" $
            Fix $ SwitchLiteral newO 64 $ L 
              { getSpecializations = map (second (expandListPattern (nextO+1) listO)) specs
              , getDefault = expandListPatternDefault (nextO+1) listO maxList <$> d
              }
+    -- get each element of the list specified in the list pattern and bind it to the occurrences,
+    -- then compile the remaining matrix
     expandListPattern :: Int -> Occurrence -> (Constructor, (ClauseMatrix, [Occurrence])) -> Fix DecisionTree
     expandListPattern nextO listO ((List _ i),cm') =
       foldl (listGet listO Nothing) (compilePattern' nextO cm') [0..i-1]
     expandListPattern _ _ _ = error "invalid list pattern"
+    -- get each element of the list and bind it to the occurrence, then compile the default matrix
     expandListPatternDefault :: Int -> Occurrence -> (Int,Int) -> (ClauseMatrix, [Occurrence]) -> Fix DecisionTree
     expandListPatternDefault nextO listO (hd,tl) cm' =
       foldl (listGet listO $ Just (hd,tl)) (foldl (listGet listO Nothing) (compilePattern' nextO cm') [0..hd-1]) [hd..hd+tl-1]
+    -- generate a single list lookup operation to bind one element of the list against its occurrence
     listGet :: Occurrence -> Maybe (Int, Int) -> Fix DecisionTree -> Int -> Fix DecisionTree
     listGet listO l dt o = 
       Fix $ Function "hook_LIST_get_long" (o : listO) 
