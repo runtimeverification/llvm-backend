@@ -635,7 +635,7 @@ compilePattern cm =
                                              ("0", equalLiteral (o+1) litO hookName tl d)
                                             ] Nothing
     -- construct a tree to test the length of the list and bind the elements of the list to their occurrences
-    listPattern :: Int -> [Occurrence] -> [(Text, (ClauseMatrix, [Occurrence]))] -> Maybe (ClauseMatrix, [Occurrence]) -> [Constructor] -> Column -> Fix DecisionTree
+    listPattern :: Int -> Occurrence -> [(Text, (ClauseMatrix, [Occurrence]))] -> Maybe (ClauseMatrix, [Occurrence]) -> [Constructor] -> Column -> Fix DecisionTree
     listPattern nextO listO ls d signature firstCol =
       let newO = [nextO, 0]
           (cons,matrices) = unzip ls
