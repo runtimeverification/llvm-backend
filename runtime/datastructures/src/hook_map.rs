@@ -153,20 +153,20 @@ pub unsafe extern "C" fn printMap(file: *mut FILE, map: *const Map, unit: *const
   }
   let mut i = 1;
   let parens = CString::new(")").unwrap();
+  let comma = CString::new(",").unwrap();
+  let sort = CString::new("K").unwrap();
+  let fmt = CString::new("%s(").unwrap();
   for (KElem(key), KElem(value)) in (*map).iter() {
-    let fmt = CString::new("%s(").unwrap();
     if i < (*map).len() {
       fprintf(file, fmt.as_ptr(), concat);
     }
     fprintf(file, fmt.as_ptr(), element);
-    let sort = CString::new("K").unwrap();
     printConfigurationInternal(file, *key, sort.as_ptr());
-    let comma = CString::new(",").unwrap();
     fprintf(file, comma.as_ptr());
     printConfigurationInternal(file, *value, sort.as_ptr());
     fprintf(file, parens.as_ptr());
     if i < (*map).len() {
-      fprintf(file, parens.as_ptr());
+      fprintf(file, comma.as_ptr());
     }
     i += 1
   }
