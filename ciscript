@@ -19,15 +19,15 @@ diff configparser.ll ../test/configparser.ll
 export PATH=$PATH:`pwd`/install/bin
 make install
 llvm-kompile ../test/imp.kore IMP -o interpreter
-./interpreter ../test/collatz.kore -1 | grep -q "Lbl'-LT-'T'-GT-'{}(Lbl'-LT-'k'-GT-'{}(dotk{}())"
+./interpreter ../test/collatz.kore -1 /dev/stdout | grep -q "Lbl'-LT-'T'-GT-'{}(Lbl'-LT-'k'-GT-'{}(dotk{}())"
 llvm-kompile ../test/test2.kore TEST -o interpreter
-./interpreter ../test/test2.kore -1 | grep -q "Lbl'-LT-'k'-GT-'{}(kseq{}(inj{SortDone{}, SortKItem{}}(Lbldone'Unds'TEST'Unds'{}()),dotk{}()))"
+./interpreter ../test/test2.kore -1 /dev/stdout | grep -q "Lbl'-LT-'k'-GT-'{}(kseq{}(inj{SortDone{}, SortKItem{}}(Lbldone'Unds'TEST'Unds'{}()),dotk{}()))"
 llvm-kompile ../test/test3.kore TEST -o interpreter
-./interpreter ../test/test3.kore -1 | grep -q "Lbl'-LT-'k'-GT-'{}(kseq{}(inj{SortDone{}, SortKItem{}}(Lbldone'Unds'TEST'Unds'{}()),dotk{}()))"
+./interpreter ../test/test3.kore -1 /dev/stdout | grep -q "Lbl'-LT-'k'-GT-'{}(kseq{}(inj{SortDone{}, SortKItem{}}(Lbldone'Unds'TEST'Unds'{}()),dotk{}()))"
 llvm-kompile ../test/test4.kore TEST -o interpreter
-./interpreter ../test/test4.kore -1 | diff - ../test/test4.out
+./interpreter ../test/test4.kore -1 /dev/stdout | diff - ../test/test4.out
 llvm-kompile ../test/test5.kore TEST -o interpreter
-./interpreter ../test/test5.kore -1 | diff - ../test/test5.out
+./interpreter ../test/test5.kore -1 /dev/stdout | diff - ../test/test5.out
 llvm-kompile ../test/test6.kore TEST -o interpreter
-./interpreter ../test/test6.kore -1 | diff - ../test/test6.out
+./interpreter ../test/test6.kore -1 /dev/stdout | diff - ../test/test6.out
 rm -f configparser configparser.ll interpreterQ
