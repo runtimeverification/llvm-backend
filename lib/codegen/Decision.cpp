@@ -175,6 +175,7 @@ void makeEvalFunction(KOREObjectSymbol *function, KOREDefinition *definition, ll
   std::string name = "eval_" + Out.str();
   llvm::Constant *func = module->getOrInsertFunction(name, funcType);
   llvm::Function *matchFunc = llvm::cast<llvm::Function>(func);
+  matchFunc->setCallingConv(llvm::CallingConv::Fast);
   llvm::StringMap<llvm::Value *> subst;
   llvm::BasicBlock *block = llvm::BasicBlock::Create(module->getContext(), "entry", matchFunc);
   int i = 0;

@@ -541,6 +541,7 @@ bool makeFunction(std::string name, KOREPattern *pattern, KOREDefinition *defini
     llvm::FunctionType *funcType = llvm::FunctionType::get(termType(pattern, params, definition, Module), paramTypes, false);
     llvm::Constant *func = Module->getOrInsertFunction(name, funcType);
     llvm::Function *applyRule = llvm::cast<llvm::Function>(func);
+    applyRule->setCallingConv(llvm::CallingConv::Fast);
     llvm::StringMap<llvm::Value *> subst;
     llvm::BasicBlock *block = llvm::BasicBlock::Create(Module->getContext(), "entry", applyRule);
     int i = 0;
