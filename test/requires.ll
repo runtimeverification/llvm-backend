@@ -23,37 +23,41 @@ then:                                             ; preds = %entry
   %kseq = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %0, i64 0, i32 0
   store %blockheader { i64 281487861612693 }, %blockheader* %kseq
   %tag = call i32 @getTag(%block* %VarHOLE)
-  %1 = icmp uge i32 %tag, 126
-  br i1 %1, label %geFirst, label %notInjection
+  %1 = icmp ne i32 %tag, -1
+  br i1 %1, label %notString, label %notInjection
 
 hook_BOOL_and:                                    ; preds = %merge, %entry
   %phi2 = phi i1 [ %hook_BOOL_not, %merge ], [ true, %entry ]
   ret i1 %phi2
 
-geFirst:                                          ; preds = %then
-  %2 = icmp ule i32 %tag, 148
-  br i1 %2, label %merge, label %notInjection
+notString:                                        ; preds = %then
+  %2 = icmp uge i32 %tag, 126
+  br i1 %2, label %geFirst, label %notInjection
 
-notInjection:                                     ; preds = %geFirst, %then
+geFirst:                                          ; preds = %notString
+  %3 = icmp ule i32 %tag, 148
+  br i1 %3, label %merge, label %notInjection
+
+notInjection:                                     ; preds = %geFirst, %notString, %then
   %malloccall1 = tail call i8* @malloc(i64 ptrtoint ({ %blockheader, [0 x i64], %block* }* getelementptr ({ %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* null, i32 1) to i64))
-  %3 = bitcast i8* %malloccall1 to { %blockheader, [0 x i64], %block* }*
-  %inj = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %3, i64 0, i32 0
+  %4 = bitcast i8* %malloccall1 to { %blockheader, [0 x i64], %block* }*
+  %inj = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %4, i64 0, i32 0
   store %blockheader { i64 562958543356035 }, %blockheader* %inj
-  %4 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %3, i64 0, i32 2
-  store %block* %VarHOLE, %block** %4
-  %5 = bitcast { %blockheader, [0 x i64], %block* }* %3 to %block*
+  %5 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %4, i64 0, i32 2
+  store %block* %VarHOLE, %block** %5
+  %6 = bitcast { %blockheader, [0 x i64], %block* }* %4 to %block*
   br label %merge
 
 merge:                                            ; preds = %notInjection, %geFirst
-  %phi = phi %block* [ %5, %notInjection ], [ %VarHOLE, %geFirst ]
-  %6 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %0, i64 0, i32 2
-  store %block* %phi, %block** %6
-  %7 = inttoptr i64 536870912001 to %block*
-  %8 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %0, i64 0, i32 3
-  store %block* %7, %block** %8
-  %9 = bitcast { %blockheader, [0 x i64], %block*, %block* }* %0 to %block*
-  %10 = call i1 @"eval_LblisKResult{SortK{}}"(%block* %9)
-  %hook_BOOL_not = xor i1 %10, true
+  %phi = phi %block* [ %6, %notInjection ], [ %VarHOLE, %geFirst ]
+  %7 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %0, i64 0, i32 2
+  store %block* %phi, %block** %7
+  %8 = inttoptr i64 536870912001 to %block*
+  %9 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %0, i64 0, i32 3
+  store %block* %8, %block** %9
+  %10 = bitcast { %blockheader, [0 x i64], %block*, %block* }* %0 to %block*
+  %11 = call i1 @"eval_LblisKResult{SortK{}}"(%block* %10)
+  %hook_BOOL_not = xor i1 %11, true
   br label %hook_BOOL_and
 }
 
@@ -73,37 +77,41 @@ then:                                             ; preds = %entry
   %kseq = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %0, i64 0, i32 0
   store %blockheader { i64 281487861612693 }, %blockheader* %kseq
   %tag = call i32 @getTag(%block* %VarHOLE)
-  %1 = icmp uge i32 %tag, 126
-  br i1 %1, label %geFirst, label %notInjection
+  %1 = icmp ne i32 %tag, -1
+  br i1 %1, label %notString, label %notInjection
 
 hook_BOOL_and:                                    ; preds = %merge, %entry
   %phi2 = phi i1 [ %hook_BOOL_not, %merge ], [ true, %entry ]
   ret i1 %phi2
 
-geFirst:                                          ; preds = %then
-  %2 = icmp ule i32 %tag, 148
-  br i1 %2, label %merge, label %notInjection
+notString:                                        ; preds = %then
+  %2 = icmp uge i32 %tag, 126
+  br i1 %2, label %geFirst, label %notInjection
 
-notInjection:                                     ; preds = %geFirst, %then
+geFirst:                                          ; preds = %notString
+  %3 = icmp ule i32 %tag, 148
+  br i1 %3, label %merge, label %notInjection
+
+notInjection:                                     ; preds = %geFirst, %notString, %then
   %malloccall1 = tail call i8* @malloc(i64 ptrtoint ({ %blockheader, [0 x i64], %block* }* getelementptr ({ %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* null, i32 1) to i64))
-  %3 = bitcast i8* %malloccall1 to { %blockheader, [0 x i64], %block* }*
-  %inj = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %3, i64 0, i32 0
+  %4 = bitcast i8* %malloccall1 to { %blockheader, [0 x i64], %block* }*
+  %inj = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %4, i64 0, i32 0
   store %blockheader { i64 562958543356046 }, %blockheader* %inj
-  %4 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %3, i64 0, i32 2
-  store %block* %VarHOLE, %block** %4
-  %5 = bitcast { %blockheader, [0 x i64], %block* }* %3 to %block*
+  %5 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %4, i64 0, i32 2
+  store %block* %VarHOLE, %block** %5
+  %6 = bitcast { %blockheader, [0 x i64], %block* }* %4 to %block*
   br label %merge
 
 merge:                                            ; preds = %notInjection, %geFirst
-  %phi = phi %block* [ %5, %notInjection ], [ %VarHOLE, %geFirst ]
-  %6 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %0, i64 0, i32 2
-  store %block* %phi, %block** %6
-  %7 = inttoptr i64 536870912001 to %block*
-  %8 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %0, i64 0, i32 3
-  store %block* %7, %block** %8
-  %9 = bitcast { %blockheader, [0 x i64], %block*, %block* }* %0 to %block*
-  %10 = call i1 @"eval_LblisKResult{SortK{}}"(%block* %9)
-  %hook_BOOL_not = xor i1 %10, true
+  %phi = phi %block* [ %6, %notInjection ], [ %VarHOLE, %geFirst ]
+  %7 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %0, i64 0, i32 2
+  store %block* %phi, %block** %7
+  %8 = inttoptr i64 536870912001 to %block*
+  %9 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %0, i64 0, i32 3
+  store %block* %8, %block** %9
+  %10 = bitcast { %blockheader, [0 x i64], %block*, %block* }* %0 to %block*
+  %11 = call i1 @"eval_LblisKResult{SortK{}}"(%block* %10)
+  %hook_BOOL_not = xor i1 %11, true
   br label %hook_BOOL_and
 }
 
@@ -125,37 +133,41 @@ then:                                             ; preds = %entry
   %kseq = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %0, i64 0, i32 0
   store %blockheader { i64 281487861612693 }, %blockheader* %kseq
   %tag = call i32 @getTag(%block* %VarHOLE)
-  %1 = icmp uge i32 %tag, 126
-  br i1 %1, label %geFirst, label %notInjection
+  %1 = icmp ne i32 %tag, -1
+  br i1 %1, label %notString, label %notInjection
 
 hook_BOOL_and:                                    ; preds = %merge, %entry
   %phi2 = phi i1 [ %hook_BOOL_not, %merge ], [ true, %entry ]
   ret i1 %phi2
 
-geFirst:                                          ; preds = %then
-  %2 = icmp ule i32 %tag, 148
-  br i1 %2, label %merge, label %notInjection
+notString:                                        ; preds = %then
+  %2 = icmp uge i32 %tag, 126
+  br i1 %2, label %geFirst, label %notInjection
 
-notInjection:                                     ; preds = %geFirst, %then
+geFirst:                                          ; preds = %notString
+  %3 = icmp ule i32 %tag, 148
+  br i1 %3, label %merge, label %notInjection
+
+notInjection:                                     ; preds = %geFirst, %notString, %then
   %malloccall1 = tail call i8* @malloc(i64 ptrtoint ({ %blockheader, [0 x i64], %block* }* getelementptr ({ %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* null, i32 1) to i64))
-  %3 = bitcast i8* %malloccall1 to { %blockheader, [0 x i64], %block* }*
-  %inj = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %3, i64 0, i32 0
+  %4 = bitcast i8* %malloccall1 to { %blockheader, [0 x i64], %block* }*
+  %inj = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %4, i64 0, i32 0
   store %blockheader { i64 562958543356035 }, %blockheader* %inj
-  %4 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %3, i64 0, i32 2
-  store %block* %VarHOLE, %block** %4
-  %5 = bitcast { %blockheader, [0 x i64], %block* }* %3 to %block*
+  %5 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %4, i64 0, i32 2
+  store %block* %VarHOLE, %block** %5
+  %6 = bitcast { %blockheader, [0 x i64], %block* }* %4 to %block*
   br label %merge
 
 merge:                                            ; preds = %notInjection, %geFirst
-  %phi = phi %block* [ %5, %notInjection ], [ %VarHOLE, %geFirst ]
-  %6 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %0, i64 0, i32 2
-  store %block* %phi, %block** %6
-  %7 = inttoptr i64 536870912001 to %block*
-  %8 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %0, i64 0, i32 3
-  store %block* %7, %block** %8
-  %9 = bitcast { %blockheader, [0 x i64], %block*, %block* }* %0 to %block*
-  %10 = call i1 @"eval_LblisKResult{SortK{}}"(%block* %9)
-  %hook_BOOL_not = xor i1 %10, true
+  %phi = phi %block* [ %6, %notInjection ], [ %VarHOLE, %geFirst ]
+  %7 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %0, i64 0, i32 2
+  store %block* %phi, %block** %7
+  %8 = inttoptr i64 536870912001 to %block*
+  %9 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %0, i64 0, i32 3
+  store %block* %8, %block** %9
+  %10 = bitcast { %blockheader, [0 x i64], %block*, %block* }* %0 to %block*
+  %11 = call i1 @"eval_LblisKResult{SortK{}}"(%block* %10)
+  %hook_BOOL_not = xor i1 %11, true
   br label %hook_BOOL_and
 }
 
@@ -169,37 +181,41 @@ then:                                             ; preds = %entry
   %kseq = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %0, i64 0, i32 0
   store %blockheader { i64 281487861612693 }, %blockheader* %kseq
   %tag = call i32 @getTag(%block* %VarHOLE)
-  %1 = icmp uge i32 %tag, 126
-  br i1 %1, label %geFirst, label %notInjection
+  %1 = icmp ne i32 %tag, -1
+  br i1 %1, label %notString, label %notInjection
 
 hook_BOOL_and:                                    ; preds = %merge, %entry
   %phi2 = phi i1 [ %hook_BOOL_not, %merge ], [ true, %entry ]
   ret i1 %phi2
 
-geFirst:                                          ; preds = %then
-  %2 = icmp ule i32 %tag, 148
-  br i1 %2, label %merge, label %notInjection
+notString:                                        ; preds = %then
+  %2 = icmp uge i32 %tag, 126
+  br i1 %2, label %geFirst, label %notInjection
 
-notInjection:                                     ; preds = %geFirst, %then
+geFirst:                                          ; preds = %notString
+  %3 = icmp ule i32 %tag, 148
+  br i1 %3, label %merge, label %notInjection
+
+notInjection:                                     ; preds = %geFirst, %notString, %then
   %malloccall1 = tail call i8* @malloc(i64 ptrtoint ({ %blockheader, [0 x i64], %block* }* getelementptr ({ %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* null, i32 1) to i64))
-  %3 = bitcast i8* %malloccall1 to { %blockheader, [0 x i64], %block* }*
-  %inj = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %3, i64 0, i32 0
+  %4 = bitcast i8* %malloccall1 to { %blockheader, [0 x i64], %block* }*
+  %inj = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %4, i64 0, i32 0
   store %blockheader { i64 562958543356046 }, %blockheader* %inj
-  %4 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %3, i64 0, i32 2
-  store %block* %VarHOLE, %block** %4
-  %5 = bitcast { %blockheader, [0 x i64], %block* }* %3 to %block*
+  %5 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %4, i64 0, i32 2
+  store %block* %VarHOLE, %block** %5
+  %6 = bitcast { %blockheader, [0 x i64], %block* }* %4 to %block*
   br label %merge
 
 merge:                                            ; preds = %notInjection, %geFirst
-  %phi = phi %block* [ %5, %notInjection ], [ %VarHOLE, %geFirst ]
-  %6 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %0, i64 0, i32 2
-  store %block* %phi, %block** %6
-  %7 = inttoptr i64 536870912001 to %block*
-  %8 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %0, i64 0, i32 3
-  store %block* %7, %block** %8
-  %9 = bitcast { %blockheader, [0 x i64], %block*, %block* }* %0 to %block*
-  %10 = call i1 @"eval_LblisKResult{SortK{}}"(%block* %9)
-  %hook_BOOL_not = xor i1 %10, true
+  %phi = phi %block* [ %6, %notInjection ], [ %VarHOLE, %geFirst ]
+  %7 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %0, i64 0, i32 2
+  store %block* %phi, %block** %7
+  %8 = inttoptr i64 536870912001 to %block*
+  %9 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %0, i64 0, i32 3
+  store %block* %8, %block** %9
+  %10 = bitcast { %blockheader, [0 x i64], %block*, %block* }* %0 to %block*
+  %11 = call i1 @"eval_LblisKResult{SortK{}}"(%block* %10)
+  %hook_BOOL_not = xor i1 %11, true
   br label %hook_BOOL_and
 }
 
@@ -225,35 +241,39 @@ entry:
   %kseq = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %1, i64 0, i32 0
   store %blockheader { i64 281487861612693 }, %blockheader* %kseq
   %tag = call i32 @getTag(%block* %VarX)
-  %2 = icmp uge i32 %tag, 126
-  br i1 %2, label %geFirst, label %notInjection
+  %2 = icmp ne i32 %tag, -1
+  br i1 %2, label %notString, label %notInjection
 
-geFirst:                                          ; preds = %entry
-  %3 = icmp ule i32 %tag, 148
-  br i1 %3, label %merge, label %notInjection
+notString:                                        ; preds = %entry
+  %3 = icmp uge i32 %tag, 126
+  br i1 %3, label %geFirst, label %notInjection
 
-notInjection:                                     ; preds = %geFirst, %entry
+geFirst:                                          ; preds = %notString
+  %4 = icmp ule i32 %tag, 148
+  br i1 %4, label %merge, label %notInjection
+
+notInjection:                                     ; preds = %geFirst, %notString, %entry
   %malloccall1 = tail call i8* @malloc(i64 ptrtoint ({ %blockheader, [0 x i64], %block* }* getelementptr ({ %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* null, i32 1) to i64))
-  %4 = bitcast i8* %malloccall1 to { %blockheader, [0 x i64], %block* }*
-  %inj = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %4, i64 0, i32 0
+  %5 = bitcast i8* %malloccall1 to { %blockheader, [0 x i64], %block* }*
+  %inj = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %5, i64 0, i32 0
   store %blockheader { i64 562958543356044 }, %blockheader* %inj
-  %5 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %4, i64 0, i32 2
-  store %block* %VarX, %block** %5
-  %6 = bitcast { %blockheader, [0 x i64], %block* }* %4 to %block*
+  %6 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %5, i64 0, i32 2
+  store %block* %VarX, %block** %6
+  %7 = bitcast { %blockheader, [0 x i64], %block* }* %5 to %block*
   br label %merge
 
 merge:                                            ; preds = %notInjection, %geFirst
-  %phi = phi %block* [ %6, %notInjection ], [ %VarX, %geFirst ]
-  %7 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %1, i64 0, i32 2
-  store %block* %phi, %block** %7
-  %8 = inttoptr i64 536870912001 to %block*
-  %9 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %1, i64 0, i32 3
-  store %block* %8, %block** %9
-  %10 = bitcast { %blockheader, [0 x i64], %block*, %block* }* %1 to %block*
-  %11 = alloca %map
-  store %map %VarRho, %map* %11
-  %12 = call i1 @hook_MAP_in_keys(%block* %10, %map* %11)
-  %hook_BOOL_not = xor i1 %12, true
+  %phi = phi %block* [ %7, %notInjection ], [ %VarX, %geFirst ]
+  %8 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %1, i64 0, i32 2
+  store %block* %phi, %block** %8
+  %9 = inttoptr i64 536870912001 to %block*
+  %10 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %1, i64 0, i32 3
+  store %block* %9, %block** %10
+  %11 = bitcast { %blockheader, [0 x i64], %block*, %block* }* %1 to %block*
+  %12 = alloca %map
+  store %map %VarRho, %map* %12
+  %13 = call i1 @hook_MAP_in_keys(%block* %11, %map* %12)
+  %hook_BOOL_not = xor i1 %13, true
   ret i1 %hook_BOOL_not
 }
 
@@ -277,37 +297,41 @@ then:                                             ; preds = %entry
   %kseq = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %0, i64 0, i32 0
   store %blockheader { i64 281487861612693 }, %blockheader* %kseq
   %tag = call i32 @getTag(%block* %VarHOLE)
-  %1 = icmp uge i32 %tag, 126
-  br i1 %1, label %geFirst, label %notInjection
+  %1 = icmp ne i32 %tag, -1
+  br i1 %1, label %notString, label %notInjection
 
 hook_BOOL_and:                                    ; preds = %merge, %entry
   %phi2 = phi i1 [ %hook_BOOL_not, %merge ], [ true, %entry ]
   ret i1 %phi2
 
-geFirst:                                          ; preds = %then
-  %2 = icmp ule i32 %tag, 148
-  br i1 %2, label %merge, label %notInjection
+notString:                                        ; preds = %then
+  %2 = icmp uge i32 %tag, 126
+  br i1 %2, label %geFirst, label %notInjection
 
-notInjection:                                     ; preds = %geFirst, %then
+geFirst:                                          ; preds = %notString
+  %3 = icmp ule i32 %tag, 148
+  br i1 %3, label %merge, label %notInjection
+
+notInjection:                                     ; preds = %geFirst, %notString, %then
   %malloccall1 = tail call i8* @malloc(i64 ptrtoint ({ %blockheader, [0 x i64], %block* }* getelementptr ({ %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* null, i32 1) to i64))
-  %3 = bitcast i8* %malloccall1 to { %blockheader, [0 x i64], %block* }*
-  %inj = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %3, i64 0, i32 0
+  %4 = bitcast i8* %malloccall1 to { %blockheader, [0 x i64], %block* }*
+  %inj = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %4, i64 0, i32 0
   store %blockheader { i64 562958543356035 }, %blockheader* %inj
-  %4 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %3, i64 0, i32 2
-  store %block* %VarHOLE, %block** %4
-  %5 = bitcast { %blockheader, [0 x i64], %block* }* %3 to %block*
+  %5 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %4, i64 0, i32 2
+  store %block* %VarHOLE, %block** %5
+  %6 = bitcast { %blockheader, [0 x i64], %block* }* %4 to %block*
   br label %merge
 
 merge:                                            ; preds = %notInjection, %geFirst
-  %phi = phi %block* [ %5, %notInjection ], [ %VarHOLE, %geFirst ]
-  %6 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %0, i64 0, i32 2
-  store %block* %phi, %block** %6
-  %7 = inttoptr i64 536870912001 to %block*
-  %8 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %0, i64 0, i32 3
-  store %block* %7, %block** %8
-  %9 = bitcast { %blockheader, [0 x i64], %block*, %block* }* %0 to %block*
-  %10 = call i1 @"eval_LblisKResult{SortK{}}"(%block* %9)
-  %hook_BOOL_not = xor i1 %10, true
+  %phi = phi %block* [ %6, %notInjection ], [ %VarHOLE, %geFirst ]
+  %7 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %0, i64 0, i32 2
+  store %block* %phi, %block** %7
+  %8 = inttoptr i64 536870912001 to %block*
+  %9 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %0, i64 0, i32 3
+  store %block* %8, %block** %9
+  %10 = bitcast { %blockheader, [0 x i64], %block*, %block* }* %0 to %block*
+  %11 = call i1 @"eval_LblisKResult{SortK{}}"(%block* %10)
+  %hook_BOOL_not = xor i1 %11, true
   br label %hook_BOOL_and
 }
 
@@ -327,37 +351,41 @@ then:                                             ; preds = %entry
   %kseq = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %0, i64 0, i32 0
   store %blockheader { i64 281487861612693 }, %blockheader* %kseq
   %tag = call i32 @getTag(%block* %VarHOLE)
-  %1 = icmp uge i32 %tag, 126
-  br i1 %1, label %geFirst, label %notInjection
+  %1 = icmp ne i32 %tag, -1
+  br i1 %1, label %notString, label %notInjection
 
 hook_BOOL_and:                                    ; preds = %merge, %entry
   %phi2 = phi i1 [ %hook_BOOL_not, %merge ], [ true, %entry ]
   ret i1 %phi2
 
-geFirst:                                          ; preds = %then
-  %2 = icmp ule i32 %tag, 148
-  br i1 %2, label %merge, label %notInjection
+notString:                                        ; preds = %then
+  %2 = icmp uge i32 %tag, 126
+  br i1 %2, label %geFirst, label %notInjection
 
-notInjection:                                     ; preds = %geFirst, %then
+geFirst:                                          ; preds = %notString
+  %3 = icmp ule i32 %tag, 148
+  br i1 %3, label %merge, label %notInjection
+
+notInjection:                                     ; preds = %geFirst, %notString, %then
   %malloccall1 = tail call i8* @malloc(i64 ptrtoint ({ %blockheader, [0 x i64], %block* }* getelementptr ({ %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* null, i32 1) to i64))
-  %3 = bitcast i8* %malloccall1 to { %blockheader, [0 x i64], %block* }*
-  %inj = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %3, i64 0, i32 0
+  %4 = bitcast i8* %malloccall1 to { %blockheader, [0 x i64], %block* }*
+  %inj = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %4, i64 0, i32 0
   store %blockheader { i64 562958543356035 }, %blockheader* %inj
-  %4 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %3, i64 0, i32 2
-  store %block* %VarHOLE, %block** %4
-  %5 = bitcast { %blockheader, [0 x i64], %block* }* %3 to %block*
+  %5 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %4, i64 0, i32 2
+  store %block* %VarHOLE, %block** %5
+  %6 = bitcast { %blockheader, [0 x i64], %block* }* %4 to %block*
   br label %merge
 
 merge:                                            ; preds = %notInjection, %geFirst
-  %phi = phi %block* [ %5, %notInjection ], [ %VarHOLE, %geFirst ]
-  %6 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %0, i64 0, i32 2
-  store %block* %phi, %block** %6
-  %7 = inttoptr i64 536870912001 to %block*
-  %8 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %0, i64 0, i32 3
-  store %block* %7, %block** %8
-  %9 = bitcast { %blockheader, [0 x i64], %block*, %block* }* %0 to %block*
-  %10 = call i1 @"eval_LblisKResult{SortK{}}"(%block* %9)
-  %hook_BOOL_not = xor i1 %10, true
+  %phi = phi %block* [ %6, %notInjection ], [ %VarHOLE, %geFirst ]
+  %7 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %0, i64 0, i32 2
+  store %block* %phi, %block** %7
+  %8 = inttoptr i64 536870912001 to %block*
+  %9 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %0, i64 0, i32 3
+  store %block* %8, %block** %9
+  %10 = bitcast { %blockheader, [0 x i64], %block*, %block* }* %0 to %block*
+  %11 = call i1 @"eval_LblisKResult{SortK{}}"(%block* %10)
+  %hook_BOOL_not = xor i1 %11, true
   br label %hook_BOOL_and
 }
 
@@ -382,37 +410,41 @@ then:                                             ; preds = %entry
   %kseq = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %0, i64 0, i32 0
   store %blockheader { i64 281487861612693 }, %blockheader* %kseq
   %tag = call i32 @getTag(%block* %VarHOLE)
-  %1 = icmp uge i32 %tag, 126
-  br i1 %1, label %geFirst, label %notInjection
+  %1 = icmp ne i32 %tag, -1
+  br i1 %1, label %notString, label %notInjection
 
 hook_BOOL_and:                                    ; preds = %merge, %entry
   %phi2 = phi i1 [ %hook_BOOL_not, %merge ], [ true, %entry ]
   ret i1 %phi2
 
-geFirst:                                          ; preds = %then
-  %2 = icmp ule i32 %tag, 148
-  br i1 %2, label %merge, label %notInjection
+notString:                                        ; preds = %then
+  %2 = icmp uge i32 %tag, 126
+  br i1 %2, label %geFirst, label %notInjection
 
-notInjection:                                     ; preds = %geFirst, %then
+geFirst:                                          ; preds = %notString
+  %3 = icmp ule i32 %tag, 148
+  br i1 %3, label %merge, label %notInjection
+
+notInjection:                                     ; preds = %geFirst, %notString, %then
   %malloccall1 = tail call i8* @malloc(i64 ptrtoint ({ %blockheader, [0 x i64], %block* }* getelementptr ({ %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* null, i32 1) to i64))
-  %3 = bitcast i8* %malloccall1 to { %blockheader, [0 x i64], %block* }*
-  %inj = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %3, i64 0, i32 0
+  %4 = bitcast i8* %malloccall1 to { %blockheader, [0 x i64], %block* }*
+  %inj = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %4, i64 0, i32 0
   store %blockheader { i64 562958543356035 }, %blockheader* %inj
-  %4 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %3, i64 0, i32 2
-  store %block* %VarHOLE, %block** %4
-  %5 = bitcast { %blockheader, [0 x i64], %block* }* %3 to %block*
+  %5 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %4, i64 0, i32 2
+  store %block* %VarHOLE, %block** %5
+  %6 = bitcast { %blockheader, [0 x i64], %block* }* %4 to %block*
   br label %merge
 
 merge:                                            ; preds = %notInjection, %geFirst
-  %phi = phi %block* [ %5, %notInjection ], [ %VarHOLE, %geFirst ]
-  %6 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %0, i64 0, i32 2
-  store %block* %phi, %block** %6
-  %7 = inttoptr i64 536870912001 to %block*
-  %8 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %0, i64 0, i32 3
-  store %block* %7, %block** %8
-  %9 = bitcast { %blockheader, [0 x i64], %block*, %block* }* %0 to %block*
-  %10 = call i1 @"eval_LblisKResult{SortK{}}"(%block* %9)
-  %hook_BOOL_not = xor i1 %10, true
+  %phi = phi %block* [ %6, %notInjection ], [ %VarHOLE, %geFirst ]
+  %7 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %0, i64 0, i32 2
+  store %block* %phi, %block** %7
+  %8 = inttoptr i64 536870912001 to %block*
+  %9 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %0, i64 0, i32 3
+  store %block* %8, %block** %9
+  %10 = bitcast { %blockheader, [0 x i64], %block*, %block* }* %0 to %block*
+  %11 = call i1 @"eval_LblisKResult{SortK{}}"(%block* %10)
+  %hook_BOOL_not = xor i1 %11, true
   br label %hook_BOOL_and
 }
 
@@ -423,71 +455,79 @@ entry:
   %kseq = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %0, i64 0, i32 0
   store %blockheader { i64 281487861612693 }, %blockheader* %kseq
   %tag = call i32 @getTag(%block* %VarK0)
-  %1 = icmp uge i32 %tag, 126
-  br i1 %1, label %geFirst, label %notInjection
+  %1 = icmp ne i32 %tag, -1
+  br i1 %1, label %notString, label %notInjection
 
-geFirst:                                          ; preds = %entry
-  %2 = icmp ule i32 %tag, 148
-  br i1 %2, label %merge, label %notInjection
+notString:                                        ; preds = %entry
+  %2 = icmp uge i32 %tag, 126
+  br i1 %2, label %geFirst, label %notInjection
 
-notInjection:                                     ; preds = %geFirst, %entry
+geFirst:                                          ; preds = %notString
+  %3 = icmp ule i32 %tag, 148
+  br i1 %3, label %merge, label %notInjection
+
+notInjection:                                     ; preds = %geFirst, %notString, %entry
   %malloccall1 = tail call i8* @malloc(i64 ptrtoint ({ %blockheader, [0 x i64], %block* }* getelementptr ({ %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* null, i32 1) to i64))
-  %3 = bitcast i8* %malloccall1 to { %blockheader, [0 x i64], %block* }*
-  %inj = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %3, i64 0, i32 0
+  %4 = bitcast i8* %malloccall1 to { %blockheader, [0 x i64], %block* }*
+  %inj = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %4, i64 0, i32 0
   store %blockheader { i64 562958543356035 }, %blockheader* %inj
-  %4 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %3, i64 0, i32 2
-  store %block* %VarK0, %block** %4
-  %5 = bitcast { %blockheader, [0 x i64], %block* }* %3 to %block*
+  %5 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %4, i64 0, i32 2
+  store %block* %VarK0, %block** %5
+  %6 = bitcast { %blockheader, [0 x i64], %block* }* %4 to %block*
   br label %merge
 
 merge:                                            ; preds = %notInjection, %geFirst
-  %phi = phi %block* [ %5, %notInjection ], [ %VarK0, %geFirst ]
-  %6 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %0, i64 0, i32 2
-  store %block* %phi, %block** %6
-  %7 = inttoptr i64 536870912001 to %block*
-  %8 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %0, i64 0, i32 3
-  store %block* %7, %block** %8
-  %9 = bitcast { %blockheader, [0 x i64], %block*, %block* }* %0 to %block*
-  %10 = call i1 @"eval_LblisKResult{SortK{}}"(%block* %9)
-  br i1 %10, label %then, label %hook_BOOL_and
+  %phi = phi %block* [ %6, %notInjection ], [ %VarK0, %geFirst ]
+  %7 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %0, i64 0, i32 2
+  store %block* %phi, %block** %7
+  %8 = inttoptr i64 536870912001 to %block*
+  %9 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %0, i64 0, i32 3
+  store %block* %8, %block** %9
+  %10 = bitcast { %blockheader, [0 x i64], %block*, %block* }* %0 to %block*
+  %11 = call i1 @"eval_LblisKResult{SortK{}}"(%block* %10)
+  br i1 %11, label %then, label %hook_BOOL_and
 
 then:                                             ; preds = %merge
   %malloccall2 = tail call i8* @malloc(i64 ptrtoint ({ %blockheader, [0 x i64], %block*, %block* }* getelementptr ({ %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* null, i32 1) to i64))
-  %11 = bitcast i8* %malloccall2 to { %blockheader, [0 x i64], %block*, %block* }*
-  %kseq3 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %11, i64 0, i32 0
+  %12 = bitcast i8* %malloccall2 to { %blockheader, [0 x i64], %block*, %block* }*
+  %kseq3 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %12, i64 0, i32 0
   store %blockheader { i64 281487861612693 }, %blockheader* %kseq3
   %tag4 = call i32 @getTag(%block* %VarHOLE)
-  %12 = icmp uge i32 %tag4, 126
-  br i1 %12, label %geFirst5, label %notInjection6
+  %13 = icmp ne i32 %tag4, -1
+  br i1 %13, label %notString5, label %notInjection7
 
-hook_BOOL_and:                                    ; preds = %merge7, %merge
-  %phi11 = phi i1 [ %hook_BOOL_not, %merge7 ], [ %10, %merge ]
-  ret i1 %phi11
+hook_BOOL_and:                                    ; preds = %merge8, %merge
+  %phi12 = phi i1 [ %hook_BOOL_not, %merge8 ], [ %11, %merge ]
+  ret i1 %phi12
 
-geFirst5:                                         ; preds = %then
-  %13 = icmp ule i32 %tag4, 148
-  br i1 %13, label %merge7, label %notInjection6
+notString5:                                       ; preds = %then
+  %14 = icmp uge i32 %tag4, 126
+  br i1 %14, label %geFirst6, label %notInjection7
 
-notInjection6:                                    ; preds = %geFirst5, %then
-  %malloccall8 = tail call i8* @malloc(i64 ptrtoint ({ %blockheader, [0 x i64], %block* }* getelementptr ({ %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* null, i32 1) to i64))
-  %14 = bitcast i8* %malloccall8 to { %blockheader, [0 x i64], %block* }*
-  %inj9 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %14, i64 0, i32 0
-  store %blockheader { i64 562958543356035 }, %blockheader* %inj9
-  %15 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %14, i64 0, i32 2
-  store %block* %VarHOLE, %block** %15
-  %16 = bitcast { %blockheader, [0 x i64], %block* }* %14 to %block*
-  br label %merge7
+geFirst6:                                         ; preds = %notString5
+  %15 = icmp ule i32 %tag4, 148
+  br i1 %15, label %merge8, label %notInjection7
 
-merge7:                                           ; preds = %notInjection6, %geFirst5
-  %phi10 = phi %block* [ %16, %notInjection6 ], [ %VarHOLE, %geFirst5 ]
-  %17 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %11, i64 0, i32 2
-  store %block* %phi10, %block** %17
-  %18 = inttoptr i64 536870912001 to %block*
-  %19 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %11, i64 0, i32 3
-  store %block* %18, %block** %19
-  %20 = bitcast { %blockheader, [0 x i64], %block*, %block* }* %11 to %block*
-  %21 = call i1 @"eval_LblisKResult{SortK{}}"(%block* %20)
-  %hook_BOOL_not = xor i1 %21, true
+notInjection7:                                    ; preds = %geFirst6, %notString5, %then
+  %malloccall9 = tail call i8* @malloc(i64 ptrtoint ({ %blockheader, [0 x i64], %block* }* getelementptr ({ %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* null, i32 1) to i64))
+  %16 = bitcast i8* %malloccall9 to { %blockheader, [0 x i64], %block* }*
+  %inj10 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %16, i64 0, i32 0
+  store %blockheader { i64 562958543356035 }, %blockheader* %inj10
+  %17 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %16, i64 0, i32 2
+  store %block* %VarHOLE, %block** %17
+  %18 = bitcast { %blockheader, [0 x i64], %block* }* %16 to %block*
+  br label %merge8
+
+merge8:                                           ; preds = %notInjection7, %geFirst6
+  %phi11 = phi %block* [ %18, %notInjection7 ], [ %VarHOLE, %geFirst6 ]
+  %19 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %12, i64 0, i32 2
+  store %block* %phi11, %block** %19
+  %20 = inttoptr i64 536870912001 to %block*
+  %21 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %12, i64 0, i32 3
+  store %block* %20, %block** %21
+  %22 = bitcast { %blockheader, [0 x i64], %block*, %block* }* %12 to %block*
+  %23 = call i1 @"eval_LblisKResult{SortK{}}"(%block* %22)
+  %hook_BOOL_not = xor i1 %23, true
   br label %hook_BOOL_and
 }
 
@@ -499,35 +539,39 @@ entry:
   %kseq = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %1, i64 0, i32 0
   store %blockheader { i64 281487861612693 }, %blockheader* %kseq
   %tag = call i32 @getTag(%block* %VarX)
-  %2 = icmp uge i32 %tag, 126
-  br i1 %2, label %geFirst, label %notInjection
+  %2 = icmp ne i32 %tag, -1
+  br i1 %2, label %notString, label %notInjection
 
-geFirst:                                          ; preds = %entry
-  %3 = icmp ule i32 %tag, 148
-  br i1 %3, label %merge, label %notInjection
+notString:                                        ; preds = %entry
+  %3 = icmp uge i32 %tag, 126
+  br i1 %3, label %geFirst, label %notInjection
 
-notInjection:                                     ; preds = %geFirst, %entry
+geFirst:                                          ; preds = %notString
+  %4 = icmp ule i32 %tag, 148
+  br i1 %4, label %merge, label %notInjection
+
+notInjection:                                     ; preds = %geFirst, %notString, %entry
   %malloccall1 = tail call i8* @malloc(i64 ptrtoint ({ %blockheader, [0 x i64], %block* }* getelementptr ({ %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* null, i32 1) to i64))
-  %4 = bitcast i8* %malloccall1 to { %blockheader, [0 x i64], %block* }*
-  %inj = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %4, i64 0, i32 0
+  %5 = bitcast i8* %malloccall1 to { %blockheader, [0 x i64], %block* }*
+  %inj = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %5, i64 0, i32 0
   store %blockheader { i64 562958543356044 }, %blockheader* %inj
-  %5 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %4, i64 0, i32 2
-  store %block* %VarX, %block** %5
-  %6 = bitcast { %blockheader, [0 x i64], %block* }* %4 to %block*
+  %6 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %5, i64 0, i32 2
+  store %block* %VarX, %block** %6
+  %7 = bitcast { %blockheader, [0 x i64], %block* }* %5 to %block*
   br label %merge
 
 merge:                                            ; preds = %notInjection, %geFirst
-  %phi = phi %block* [ %6, %notInjection ], [ %VarX, %geFirst ]
-  %7 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %1, i64 0, i32 2
-  store %block* %phi, %block** %7
-  %8 = inttoptr i64 536870912001 to %block*
-  %9 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %1, i64 0, i32 3
-  store %block* %8, %block** %9
-  %10 = bitcast { %blockheader, [0 x i64], %block*, %block* }* %1 to %block*
-  %11 = alloca %map
-  store %map %VarRho, %map* %11
-  %12 = call i1 @hook_MAP_in_keys(%block* %10, %map* %11)
-  ret i1 %12
+  %phi = phi %block* [ %7, %notInjection ], [ %VarX, %geFirst ]
+  %8 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %1, i64 0, i32 2
+  store %block* %phi, %block** %8
+  %9 = inttoptr i64 536870912001 to %block*
+  %10 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %1, i64 0, i32 3
+  store %block* %9, %block** %10
+  %11 = bitcast { %blockheader, [0 x i64], %block*, %block* }* %1 to %block*
+  %12 = alloca %map
+  store %map %VarRho, %map* %12
+  %13 = call i1 @hook_MAP_in_keys(%block* %11, %map* %12)
+  ret i1 %13
 }
 
 define i1 @side_condition_327(%block* %VarHOLE) {
@@ -540,37 +584,41 @@ then:                                             ; preds = %entry
   %kseq = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %0, i64 0, i32 0
   store %blockheader { i64 281487861612693 }, %blockheader* %kseq
   %tag = call i32 @getTag(%block* %VarHOLE)
-  %1 = icmp uge i32 %tag, 126
-  br i1 %1, label %geFirst, label %notInjection
+  %1 = icmp ne i32 %tag, -1
+  br i1 %1, label %notString, label %notInjection
 
 hook_BOOL_and:                                    ; preds = %merge, %entry
   %phi2 = phi i1 [ %hook_BOOL_not, %merge ], [ true, %entry ]
   ret i1 %phi2
 
-geFirst:                                          ; preds = %then
-  %2 = icmp ule i32 %tag, 148
-  br i1 %2, label %merge, label %notInjection
+notString:                                        ; preds = %then
+  %2 = icmp uge i32 %tag, 126
+  br i1 %2, label %geFirst, label %notInjection
 
-notInjection:                                     ; preds = %geFirst, %then
+geFirst:                                          ; preds = %notString
+  %3 = icmp ule i32 %tag, 148
+  br i1 %3, label %merge, label %notInjection
+
+notInjection:                                     ; preds = %geFirst, %notString, %then
   %malloccall1 = tail call i8* @malloc(i64 ptrtoint ({ %blockheader, [0 x i64], %block* }* getelementptr ({ %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* null, i32 1) to i64))
-  %3 = bitcast i8* %malloccall1 to { %blockheader, [0 x i64], %block* }*
-  %inj = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %3, i64 0, i32 0
+  %4 = bitcast i8* %malloccall1 to { %blockheader, [0 x i64], %block* }*
+  %inj = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %4, i64 0, i32 0
   store %blockheader { i64 562958543356046 }, %blockheader* %inj
-  %4 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %3, i64 0, i32 2
-  store %block* %VarHOLE, %block** %4
-  %5 = bitcast { %blockheader, [0 x i64], %block* }* %3 to %block*
+  %5 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %4, i64 0, i32 2
+  store %block* %VarHOLE, %block** %5
+  %6 = bitcast { %blockheader, [0 x i64], %block* }* %4 to %block*
   br label %merge
 
 merge:                                            ; preds = %notInjection, %geFirst
-  %phi = phi %block* [ %5, %notInjection ], [ %VarHOLE, %geFirst ]
-  %6 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %0, i64 0, i32 2
-  store %block* %phi, %block** %6
-  %7 = inttoptr i64 536870912001 to %block*
-  %8 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %0, i64 0, i32 3
-  store %block* %7, %block** %8
-  %9 = bitcast { %blockheader, [0 x i64], %block*, %block* }* %0 to %block*
-  %10 = call i1 @"eval_LblisKResult{SortK{}}"(%block* %9)
-  %hook_BOOL_not = xor i1 %10, true
+  %phi = phi %block* [ %6, %notInjection ], [ %VarHOLE, %geFirst ]
+  %7 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %0, i64 0, i32 2
+  store %block* %phi, %block** %7
+  %8 = inttoptr i64 536870912001 to %block*
+  %9 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %0, i64 0, i32 3
+  store %block* %8, %block** %9
+  %10 = bitcast { %blockheader, [0 x i64], %block*, %block* }* %0 to %block*
+  %11 = call i1 @"eval_LblisKResult{SortK{}}"(%block* %10)
+  %hook_BOOL_not = xor i1 %11, true
   br label %hook_BOOL_and
 }
 
@@ -584,36 +632,40 @@ then:                                             ; preds = %entry
   %kseq = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %0, i64 0, i32 0
   store %blockheader { i64 281487861612693 }, %blockheader* %kseq
   %tag = call i32 @getTag(%block* %VarHOLE)
-  %1 = icmp uge i32 %tag, 126
-  br i1 %1, label %geFirst, label %notInjection
+  %1 = icmp ne i32 %tag, -1
+  br i1 %1, label %notString, label %notInjection
 
 hook_BOOL_and:                                    ; preds = %merge, %entry
   %phi2 = phi i1 [ %hook_BOOL_not, %merge ], [ true, %entry ]
   ret i1 %phi2
 
-geFirst:                                          ; preds = %then
-  %2 = icmp ule i32 %tag, 148
-  br i1 %2, label %merge, label %notInjection
+notString:                                        ; preds = %then
+  %2 = icmp uge i32 %tag, 126
+  br i1 %2, label %geFirst, label %notInjection
 
-notInjection:                                     ; preds = %geFirst, %then
+geFirst:                                          ; preds = %notString
+  %3 = icmp ule i32 %tag, 148
+  br i1 %3, label %merge, label %notInjection
+
+notInjection:                                     ; preds = %geFirst, %notString, %then
   %malloccall1 = tail call i8* @malloc(i64 ptrtoint ({ %blockheader, [0 x i64], %block* }* getelementptr ({ %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* null, i32 1) to i64))
-  %3 = bitcast i8* %malloccall1 to { %blockheader, [0 x i64], %block* }*
-  %inj = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %3, i64 0, i32 0
+  %4 = bitcast i8* %malloccall1 to { %blockheader, [0 x i64], %block* }*
+  %inj = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %4, i64 0, i32 0
   store %blockheader { i64 562958543356035 }, %blockheader* %inj
-  %4 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %3, i64 0, i32 2
-  store %block* %VarHOLE, %block** %4
-  %5 = bitcast { %blockheader, [0 x i64], %block* }* %3 to %block*
+  %5 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %4, i64 0, i32 2
+  store %block* %VarHOLE, %block** %5
+  %6 = bitcast { %blockheader, [0 x i64], %block* }* %4 to %block*
   br label %merge
 
 merge:                                            ; preds = %notInjection, %geFirst
-  %phi = phi %block* [ %5, %notInjection ], [ %VarHOLE, %geFirst ]
-  %6 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %0, i64 0, i32 2
-  store %block* %phi, %block** %6
-  %7 = inttoptr i64 536870912001 to %block*
-  %8 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %0, i64 0, i32 3
-  store %block* %7, %block** %8
-  %9 = bitcast { %blockheader, [0 x i64], %block*, %block* }* %0 to %block*
-  %10 = call i1 @"eval_LblisKResult{SortK{}}"(%block* %9)
-  %hook_BOOL_not = xor i1 %10, true
+  %phi = phi %block* [ %6, %notInjection ], [ %VarHOLE, %geFirst ]
+  %7 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %0, i64 0, i32 2
+  store %block* %phi, %block** %7
+  %8 = inttoptr i64 536870912001 to %block*
+  %9 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %0, i64 0, i32 3
+  store %block* %8, %block** %9
+  %10 = bitcast { %blockheader, [0 x i64], %block*, %block* }* %0 to %block*
+  %11 = call i1 @"eval_LblisKResult{SortK{}}"(%block* %10)
+  %hook_BOOL_not = xor i1 %11, true
   br label %hook_BOOL_and
 }
