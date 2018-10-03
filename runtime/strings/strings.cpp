@@ -30,6 +30,9 @@ extern "C" {
   mpz_ptr move_int(mpz_t);
 
   string *hook_BYTES_bytes2string(string *);
+  string *hook_BYTES_concat(string *a, string *b);
+  mpz_ptr hook_BYTES_length(string *a);
+  string *hook_BYTES_substr(string *a, mpz_t start, mpz_t end);
 
   bool hook_STRING_gt(const string * a, const string * b) {
     auto res = memcmp(a->data, b->data, std::min(a->b.len, b->b.len));
@@ -62,20 +65,11 @@ extern "C" {
   }
 
   string * hook_STRING_concat(string * a, string * b) {
-    auto len_a = a->b.len;
-    auto len_b = b->b.len;
-    auto newlen = len_a  + len_b;
-    auto ret = static_cast<string *>(malloc(sizeof(string) + newlen));
-    ret->b.len = newlen;
-    memcpy(&(ret->data), &(a->data), a->b.len * sizeof(KCHAR));
-    memcpy(&(ret->data[a->b.len]), &(b->data), b->b.len * sizeof(KCHAR));
-    return ret;
+    return hook_BYTES_concat(a, b);
   }
 
   mpz_ptr hook_STRING_length(string * a) {
-    mpz_t result;
-    mpz_init_set_ui(result, a->b.len);
-    return move_int(result);
+    return hook_BYTES_length(a);
   }
 
   static inline uint64_t gs(mpz_t i) {
@@ -106,19 +100,7 @@ extern "C" {
   }
 
   string * hook_STRING_substr(string * input, mpz_t start, mpz_t end) {
-    uint64_t ustart = gs(start);
-    uint64_t uend = gs(end);
-    if (uend < ustart) {
-      throw std::invalid_argument("Invalid string slice");
-    }
-    if (uend > input->b.len) {
-      throw std::invalid_argument("Invalid string slice");
-    }
-    uint64_t len = uend - ustart;
-    auto ret = static_cast<string *>(malloc(sizeof(string) + sizeof(KCHAR) * len));
-    ret->b.len = len;
-    memcpy(&(ret->data), &(input->data[ustart]), len * sizeof(KCHAR));
-    return ret;
+    return hook_BYTES_substr(input, start, end);
   }
 
   mpz_ptr hook_STRING_find(const string * haystack, const string * needle, mpz_t pos) {

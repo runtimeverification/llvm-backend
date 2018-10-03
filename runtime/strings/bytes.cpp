@@ -26,10 +26,6 @@ extern "C" {
     return &empty;
   }
 
-  string *hook_STRING_concat(string *a, string *b);
-  mpz_ptr hook_STRING_length(string *a);
-  string *hook_STRING_substr(string *a, mpz_t start, mpz_t end);
-
   uint32_t getTagForSymbolName(const char *);
 
   uint64_t tag_big_endian() {
@@ -105,8 +101,20 @@ extern "C" {
     return hook_BYTES_bytes2string(s);
   }
 
-  string *hook_BYTES_substr(string *b, mpz_t start, mpz_t end) {
-    return hook_STRING_substr(b, start, end);
+  bytes *hook_BYTES_substr(bytes *input, mpz_t start, mpz_t end) {
+    uint64_t ustart = get_ui(start);
+    uint64_t uend = get_ui(end);
+    if (uend < ustart) {
+      throw std::invalid_argument("Invalid string slice");
+    }
+    if (uend > input->b.len) {
+      throw std::invalid_argument("Invalid string slice");
+    }
+    uint64_t len = uend - ustart;
+    auto ret = static_cast<bytes *>(malloc(sizeof(bytes) + sizeof(KCHAR) * len));
+    ret->b.len = len;
+    memcpy(&(ret->data), &(input->data[ustart]), len * sizeof(KCHAR));
+    return ret;
   }
 
   bytes *hook_BYTES_replaceAt(bytes *b, mpz_t start, bytes *b2) {
@@ -118,8 +126,10 @@ extern "C" {
     return b;
   }
 
-  mpz_ptr hook_BYTES_length(string *b) {
-    return hook_STRING_length(b);
+  mpz_ptr hook_BYTES_length(bytes *a) {
+    mpz_t result;
+    mpz_init_set_ui(result, a->b.len);
+    return move_int(result);
   }
 
   bytes *hook_BYTES_padRight(bytes *b, mpz_t len, mpz_t v) {
@@ -159,8 +169,15 @@ extern "C" {
     return b;
   }
 
-  string *hook_BYTES_concat(string *b1, string *b2) {
-    return hook_STRING_concat(b1, b2);
+  bytes *hook_BYTES_concat(bytes *a, bytes *b) {
+    auto len_a = a->b.len;
+    auto len_b = b->b.len;
+    auto newlen = len_a  + len_b;
+    auto ret = static_cast<bytes *>(malloc(sizeof(bytes) + newlen));
+    ret->b.len = newlen;
+    memcpy(&(ret->data), &(a->data), a->b.len * sizeof(KCHAR));
+    memcpy(&(ret->data[a->b.len]), &(b->data), b->b.len * sizeof(KCHAR));
+    return ret;
   }
 
 }
