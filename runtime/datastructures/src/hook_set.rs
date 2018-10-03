@@ -109,17 +109,18 @@ pub unsafe extern "C" fn printSet(file: *mut FILE, set: *const Set, unit: *const
   }
   let mut i = 1;
   let parens = CString::new(")").unwrap();
+  let comma = CString::new(",").unwrap();
+  let sort = CString::new("K").unwrap();
+  let fmt = CString::new("%s(").unwrap();
   for KElem(value) in (*set).iter() {
-    let fmt = CString::new("%s(").unwrap();
     if i < (*set).len() {
       fprintf(file, fmt.as_ptr(), concat);
     }
     fprintf(file, fmt.as_ptr(), element);
-    let sort = CString::new("K").unwrap();
     printConfigurationInternal(file, *value, sort.as_ptr());
     fprintf(file, parens.as_ptr());
     if i < (*set).len() {
-      fprintf(file, parens.as_ptr());
+      fprintf(file, comma.as_ptr());
     }
     i += 1
   }
