@@ -28,22 +28,21 @@ extern "C" {
 
   uint32_t getTagForSymbolName(const char *);
 
-  uint64_t tag_big_endian() {
-    return (((uint64_t)getTagForSymbolName("LblbigEndianBytes{}")) << 32) | 1;
-  }
-
-  uint64_t tag_unsigned() {
-    return (((uint64_t)getTagForSymbolName("LblunsignedBytes{}")) << 32) | 1;
-  }
+  // bytes2int and int2bytes expect constructors of sort Endianness, which become a uint64_t 
+  // constant value in the K term representation
+  uint64_t tag_big_endian = (((uint64_t)getTagForSymbolName("LblbigEndianBytes{}")) << 32) | 1;
+  // bytes2int expects constructors of sort Endianness, which become a uint64_t 
+  // constant value in the K term representation
+  uint64_t tag_unsigned = (((uint64_t)getTagForSymbolName("LblunsignedBytes{}")) << 32) | 1;
 
   mpz_ptr hook_BYTES_bytes2int(bytes *b, uint64_t endianness, uint64_t signedness) {
     mpz_t result;
     mpz_init(result);
-    int order = endianness == tag_big_endian() ? 1 : -1;
+    int order = endianness == tag_big_endian ? 1 : -1;
     mpz_import(result, b->b.len, order, 1, 0, 0, b->data);
-    if (signedness != tag_unsigned() && b->b.len != 0) {
+    if (signedness != tag_unsigned && b->b.len != 0) {
       bool msb;
-      if (endianness == tag_big_endian()) {
+      if (endianness == tag_big_endian) {
         msb = b->data[0] & 0x80;
       } else {
         msb = b->data[b->b.len - 1] & 0x80;
@@ -77,8 +76,8 @@ extern "C" {
     bytes *result = static_cast<bytes *>(malloc(sizeof(bytes) + len_long));
     result->b.len = len_long;
     memset(result->data, neg ? 0xff : 0x00, len_long);
-    int order = endianness == tag_big_endian() ? 1 : -1;
-    void *start = result->data + (endianness == tag_big_endian() ? len_long - sizeInBytes : 0);
+    int order = endianness == tag_big_endian ? 1 : -1;
+    void *start = result->data + (endianness == tag_big_endian ? len_long - sizeInBytes : 0);
     mpz_t twos;
     mpz_init_set(twos, i);
     if (mpz_sgn(i) < 0) {
