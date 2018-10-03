@@ -13,15 +13,15 @@ extern "C" {
     uint64_t len;
   };
 
-  struct string {
+  struct bytes {
     blockheader b;
     KCHAR data[0];
   };
 
   mpz_ptr move_int(mpz_t);
 
-  string *hook_BYTES_empty() {
-    static string empty;
+  bytes *hook_BYTES_empty() {
+    static bytes empty;
     empty.b.len = 0;
     return &empty;
   }
@@ -40,7 +40,7 @@ extern "C" {
     return (((uint64_t)getTagForSymbolName("LblunsignedBytes{}")) << 32) | 1;
   }
 
-  mpz_ptr hook_BYTES_bytes2int(string *b, uint64_t endianness, uint64_t signedness) {
+  mpz_ptr hook_BYTES_bytes2int(bytes *b, uint64_t endianness, uint64_t signedness) {
     mpz_t result;
     mpz_init(result);
     int order = endianness == tag_big_endian() ? 1 : -1;
@@ -71,14 +71,14 @@ extern "C" {
   }
 
 
-  string *hook_BYTES_int2bytes(mpz_t len, mpz_t i, uint64_t endianness) {
+  bytes *hook_BYTES_int2bytes(mpz_t len, mpz_t i, uint64_t endianness) {
     unsigned long len_long = mpz_get_ui(len);
     if (len_long == 0) {
       return hook_BYTES_empty();
     }
     size_t sizeInBytes = (mpz_sizeinbase(i, 2) + 7) / 8;
     bool neg = mpz_cmp_si(i, 0) < 0;
-    string *result = static_cast<string *>(malloc(sizeof(string) + len_long));
+    bytes *result = static_cast<bytes *>(malloc(sizeof(bytes) + len_long));
     result->b.len = len_long;
     memset(result->data, neg ? 0xff : 0x00, len_long);
     int order = endianness == tag_big_endian() ? 1 : -1;
@@ -94,14 +94,14 @@ extern "C" {
     return result;
   }
 
-  string *hook_BYTES_bytes2string(string *b) {
-    size_t size = sizeof(string) + b->b.len;
-    string *result = static_cast<string *>(malloc(size));
+  bytes *hook_BYTES_bytes2string(bytes *b) {
+    size_t size = sizeof(bytes) + b->b.len;
+    bytes *result = static_cast<bytes *>(malloc(size));
     memcpy(result, b, size);
     return result;
   }
 
-  string *hook_BYTES_string2bytes(string *s) {
+  bytes *hook_BYTES_string2bytes(bytes *s) {
     return hook_BYTES_bytes2string(s);
   }
 
@@ -109,7 +109,7 @@ extern "C" {
     return hook_STRING_substr(b, start, end);
   }
 
-  string *hook_BYTES_replaceAt(string *b, mpz_t start, string *b2) {
+  bytes *hook_BYTES_replaceAt(bytes *b, mpz_t start, bytes *b2) {
     unsigned long start_long = get_ui(start);
     if (start_long + b2->b.len > b->b.len) {
       throw std::invalid_argument("Buffer overflow on replaceAt");
@@ -122,7 +122,7 @@ extern "C" {
     return hook_STRING_length(b);
   }
 
-  string *hook_BYTES_padRight(string *b, mpz_t len, mpz_t v) {
+  bytes *hook_BYTES_padRight(bytes *b, mpz_t len, mpz_t v) {
     unsigned long ulen = get_ui(len);
     if (ulen <= b->b.len) {
       return b;
@@ -131,14 +131,14 @@ extern "C" {
     if (uv > 255) {
       throw std::invalid_argument("Integer overflow on value");
     }
-    string *result = static_cast<string *>(malloc(sizeof(string) + ulen));
+    bytes *result = static_cast<bytes *>(malloc(sizeof(bytes) + ulen));
     result->b.len = ulen;
     memcpy(result->data, b->data, b->b.len);
     memset(result->data + b->b.len, uv, ulen - b->b.len);
     return result;
   }
 
-  string *hook_BYTES_padLeft(string *b, mpz_t len, mpz_t v) {
+  bytes *hook_BYTES_padLeft(bytes *b, mpz_t len, mpz_t v) {
     unsigned long ulen = get_ui(len);
     if (ulen <= b->b.len) {
       return b;
@@ -147,14 +147,14 @@ extern "C" {
     if (uv > 255) {
       throw std::invalid_argument("Integer overflow on value");
     }
-    string *result = static_cast<string *>(malloc(sizeof(string) + ulen));
+    bytes *result = static_cast<bytes *>(malloc(sizeof(bytes) + ulen));
     result->b.len = ulen;
     memset(result->data, uv, ulen - b->b.len);
     memcpy(result->data + ulen - b->b.len, b->data, b->b.len);
     return result;
   }
 
-  string *hook_BYTES_reverse(string *b) {
+  bytes *hook_BYTES_reverse(bytes *b) {
     std::reverse(b->data, b->data + b->b.len);
     return b;
   }
