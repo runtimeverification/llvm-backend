@@ -29,11 +29,19 @@ extern "C" {
   uint32_t getTagForSymbolName(const char *);
 
   uint64_t tag_big_endian() {
-    return (((uint64_t)getTagForSymbolName("LblbigEndianBytes{}")) << 32) | 1;
+    static uint64_t tag = (uint64_t)-1;
+    if (tag == -1) {
+      tag = (((uint64_t)getTagForSymbolName("LblbigEndianBytes{}")) << 32) | 1;
+    }
+    return tag;
   }
 
   uint64_t tag_unsigned() {
-    return (((uint64_t)getTagForSymbolName("LblunsignedBytes{}")) << 32) | 1;
+    static uint64_t tag = (uint64_t)-1;
+    if (tag == -1) {
+      tag = (((uint64_t)getTagForSymbolName("LblunsignedBytes{}")) << 32) | 1;
+    }
+    return tag;
   }
 
   mpz_ptr hook_BYTES_bytes2int(bytes *b, uint64_t endianness, uint64_t signedness) {
