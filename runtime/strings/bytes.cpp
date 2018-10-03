@@ -48,6 +48,7 @@ extern "C" {
     return tag;
   }
 
+  // syntax Int ::= Bytes2Int(Bytes, Endianness, Signedness)
   mpz_ptr hook_BYTES_bytes2int(bytes *b, uint64_t endianness, uint64_t signedness) {
     mpz_t result;
     mpz_init(result);
@@ -79,6 +80,7 @@ extern "C" {
   }
 
 
+  // syntax Bytes ::= Int2Bytes(Int, Int, Endianness)
   bytes *hook_BYTES_int2bytes(mpz_t len, mpz_t i, uint64_t endianness) {
     unsigned long len_long = mpz_get_ui(len);
     if (len_long == 0) {
