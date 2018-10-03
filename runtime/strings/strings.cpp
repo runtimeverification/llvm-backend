@@ -95,7 +95,7 @@ extern "C" {
     if (input->b.len != 1) {
       throw std::invalid_argument("Input must a string of length 1");
     }
-    mpz_init_set_ui(result, static_cast<uint64_t>(input->data[0]));
+    mpz_init_set_ui(result, static_cast<unsigned char>(input->data[0]));
     return move_int(result);
   }
 
