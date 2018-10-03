@@ -40,7 +40,7 @@ static void *allocatePatternAsConfiguration(const KOREPattern *Pattern) {
     return (block *) ((uint64_t)tag << 32 | 1);
   }
 
-  block *Block = (block *) malloc(size);
+  block *Block = (block *) koreAlloc(size);
   Block->header = headerVal;
 
   std::vector<void *> children;
