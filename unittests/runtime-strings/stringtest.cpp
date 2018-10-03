@@ -2,6 +2,7 @@
 #include<gmp.h>
 #include<mpfr.h>
 #include<cstdint>
+#include<cstdlib>
 #include<cstring>
 
 #define KCHAR char
@@ -15,6 +16,11 @@ extern "C" {
     KCHAR data[0];
   };
 
+  struct stringbuffer {
+    uint64_t capacity;
+    string *contents;
+  };
+ 
   bool hook_STRING_gt(const string *, const string *);
   bool hook_STRING_ge(const string *, const string *);
   bool hook_STRING_lt(const string *, const string *);
@@ -37,7 +43,10 @@ extern "C" {
   const string * hook_STRING_replace(const string *, const string *, const string *, mpz_t);
   const string * hook_STRING_replaceFirst(const string *, const string *, const string *);
   mpz_ptr hook_STRING_countAllOccurrences(const string *, const string *);
-  string * makeString(const KCHAR *);
+  string * makeString(const KCHAR *, int64_t len = -1);
+  stringbuffer *hook_BUFFER_empty();
+  stringbuffer *hook_BUFFER_concat(stringbuffer *, string *);
+  string *hook_BUFFER_toString(stringbuffer *);
 
   mpz_ptr move_int(mpz_t i) {
     mpz_ptr result = (mpz_ptr)malloc(sizeof(__mpz_struct));
@@ -427,6 +436,31 @@ BOOST_AUTO_TEST_CASE(countAllOccurrences) {
   replacee = makeString("hel world hel world hello world he worl");
   matcher = makeString("hello");
   BOOST_CHECK_EQUAL(mpz_cmp_ui(hook_STRING_countAllOccurrences(replacee, matcher), 1), 0);
+}
+
+BOOST_AUTO_TEST_CASE(buffer_empty) {
+  auto buf = hook_BUFFER_empty();
+  BOOST_CHECK_EQUAL(16, buf->capacity);
+  BOOST_CHECK_EQUAL(0, buf->contents->b.len);
+}
+
+BOOST_AUTO_TEST_CASE(buffer_concat) {
+  auto buf = hook_BUFFER_empty();
+  int totalLen = 0;
+  for (int i = 0; i < 10000; i++) {
+    int len = rand() % 1000;
+    totalLen += len;
+    auto str = static_cast<string *>(malloc(sizeof(string) + len));
+    str->b.len = len;
+    memset(str->data, 'a', len);
+    hook_BUFFER_concat(buf, str);
+  }
+  auto result = hook_BUFFER_toString(buf);
+  auto expected = static_cast<string *>(malloc(sizeof(string) + totalLen));
+  expected->b.len = totalLen;
+  memset(expected->data, 'a', totalLen);
+  BOOST_CHECK_EQUAL(totalLen, result->b.len);
+  BOOST_CHECK_EQUAL(0, memcmp(result->data, expected->data, totalLen));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

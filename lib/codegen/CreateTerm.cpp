@@ -49,13 +49,14 @@ target triple = "x86_64-unknown-linux-gnu"
 ; float: %mpfr *
 ; string: %string *
 ; bytes: %string *
-; string buffer: %string **
+; string buffer: %stringbuffer *
 ; boolean: i1
 ; machine integer of N bits: iN
 
 ; We also define the following LLVM structure types:
 
 %string = type { %blockheader, [0 x i8] } ; 16-bit layout, 48-bit length, bytes
+%stringbuffer = type { i64, %string* } ; capacity and current contents
 %map = type { i64, i8 *, i8 * } ; im::hashmap::HashMap
 %set = type { i8 *, i8 *, i64 } ; im::hashset::HashSet
 %list = type { i64, i64, i8 *, i8 *, i8 *, i8 *, i8 * } ; im::vector::Vector
@@ -77,7 +78,7 @@ target triple = "x86_64-unknown-linux-gnu"
 ; %block *: managed heap, follow
 ; %mpz *: malloc/mpz_clear->free, do not follow
 ; %mpfr *: malloc/mpfr_clear->free, do not follow
-; %string **: malloc->malloc/free->free, do not follow
+; %stringbuffer *: malloc->malloc/free->free, do not follow
 
 ; We also automatically generate for each unique layout id a struct type
 ; corresponding to the actual layout of that block. For example, if we have
@@ -105,6 +106,7 @@ static std::string SET_STRUCT = "set";
 static std::string INT_STRUCT = "mpz";
 static std::string FLOAT_STRUCT = "mpfr";
 static std::string STRING_STRUCT = "string";
+static std::string BUFFER_STRUCT = "stringbuffer";
 static std::string BLOCK_STRUCT = "block";
 static std::string BLOCKHEADER_STRUCT = "blockheader";
 
@@ -121,7 +123,7 @@ llvm::Type *getValueType(ValueType sort, llvm::Module *Module) {
   case SortCategory::Float:
     return llvm::PointerType::getUnqual(Module->getTypeByName(FLOAT_STRUCT));
   case SortCategory::StringBuffer:
-    return llvm::PointerType::getUnqual(llvm::PointerType::getUnqual(Module->getTypeByName(STRING_STRUCT)));
+    return llvm::PointerType::getUnqual(Module->getTypeByName(BUFFER_STRUCT));
   case SortCategory::Bool:
     return llvm::Type::getInt1Ty(Module->getContext());
   case SortCategory::MInt:
