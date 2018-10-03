@@ -7,6 +7,7 @@
 
 extern "C" {
 
+#include "alloc.h"
 #define KCHAR char
 
   struct blockheader {
@@ -88,7 +89,7 @@ extern "C" {
     }
     size_t sizeInBytes = (mpz_sizeinbase(i, 2) + 7) / 8;
     bool neg = mpz_cmp_si(i, 0) < 0;
-    bytes *result = static_cast<bytes *>(malloc(sizeof(bytes) + len_long));
+    bytes *result = static_cast<bytes *>(koreAlloc(sizeof(bytes) + len_long));
     result->b.len = len_long;
     memset(result->data, neg ? 0xff : 0x00, len_long);
     int order = endianness == tag_big_endian() ? 1 : -1;
@@ -106,7 +107,7 @@ extern "C" {
 
   bytes *hook_BYTES_bytes2string(bytes *b) {
     size_t size = sizeof(bytes) + b->b.len;
-    bytes *result = static_cast<bytes *>(malloc(size));
+    bytes *result = static_cast<bytes *>(koreAlloc(size));
     memcpy(result, b, size);
     return result;
   }
@@ -125,7 +126,7 @@ extern "C" {
       throw std::invalid_argument("Invalid string slice");
     }
     uint64_t len = uend - ustart;
-    auto ret = static_cast<bytes *>(malloc(sizeof(bytes) + sizeof(KCHAR) * len));
+    auto ret = static_cast<bytes *>(koreAlloc(sizeof(bytes) + sizeof(KCHAR) * len));
     ret->b.len = len;
     memcpy(&(ret->data), &(input->data[ustart]), len * sizeof(KCHAR));
     return ret;
@@ -155,7 +156,7 @@ extern "C" {
     if (uv > 255) {
       throw std::invalid_argument("Integer overflow on value");
     }
-    bytes *result = static_cast<bytes *>(malloc(sizeof(bytes) + ulen));
+    bytes *result = static_cast<bytes *>(koreAlloc(sizeof(bytes) + ulen));
     result->b.len = ulen;
     memcpy(result->data, b->data, b->b.len);
     memset(result->data + b->b.len, uv, ulen - b->b.len);
@@ -171,7 +172,7 @@ extern "C" {
     if (uv > 255) {
       throw std::invalid_argument("Integer overflow on value");
     }
-    bytes *result = static_cast<bytes *>(malloc(sizeof(bytes) + ulen));
+    bytes *result = static_cast<bytes *>(koreAlloc(sizeof(bytes) + ulen));
     result->b.len = ulen;
     memset(result->data, uv, ulen - b->b.len);
     memcpy(result->data + ulen - b->b.len, b->data, b->b.len);
@@ -187,7 +188,7 @@ extern "C" {
     auto len_a = a->b.len;
     auto len_b = b->b.len;
     auto newlen = len_a  + len_b;
-    auto ret = static_cast<bytes *>(malloc(sizeof(bytes) + newlen));
+    auto ret = static_cast<bytes *>(koreAlloc(sizeof(bytes) + newlen));
     ret->b.len = newlen;
     memcpy(&(ret->data), &(a->data), a->b.len * sizeof(KCHAR));
     memcpy(&(ret->data[a->b.len]), &(b->data), b->b.len * sizeof(KCHAR));
