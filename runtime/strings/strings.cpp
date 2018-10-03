@@ -11,6 +11,9 @@
 
 extern "C" {
 
+#include "alloc.h"
+#include<stdexcept>
+
 #define KCHAR char
 
   struct blockheader {
@@ -84,7 +87,7 @@ extern "C" {
     if (uord > 255) {
       throw std::invalid_argument("Ord must be <= 255");
     }
-    auto ret = static_cast<string *>(malloc(sizeof(string) + sizeof(KCHAR)));
+    auto ret = static_cast<string *>(koreAlloc(sizeof(string) + sizeof(KCHAR)));
     ret->b.len = 1;
     ret->data[0] = static_cast<KCHAR>(uord);
     return ret;
@@ -100,7 +103,23 @@ extern "C" {
   }
 
   string * hook_STRING_substr(string * input, mpz_t start, mpz_t end) {
+<<<<<<< HEAD
     return hook_BYTES_substr(input, start, end);
+=======
+    uint64_t ustart = gs(start);
+    uint64_t uend = gs(end);
+    if (uend < ustart) {
+      throw std::invalid_argument("Invalid string slice");
+    }
+    if (uend > input->b.len) {
+      throw std::invalid_argument("Invalid string slice");
+    }
+    uint64_t len = uend - ustart;
+    auto ret = static_cast<string *>(koreAlloc(sizeof(string) + sizeof(KCHAR) * len));
+    ret->b.len = len;
+    memcpy(&(ret->data), &(input->data[ustart]), len * sizeof(KCHAR));
+    return ret;
+>>>>>>> alloc change in string, plus hacks
   }
 
   mpz_ptr hook_STRING_find(const string * haystack, const string * needle, mpz_t pos) {
@@ -153,9 +172,17 @@ extern "C" {
     return hook_STRING_rfind(haystack, needle, pos);
   }
 
+<<<<<<< HEAD
   string * makeString(const KCHAR * input, ssize_t len = -1) {
     if (len == -1) {
       len = strlen(input);
+=======
+  string * makeString(const KCHAR * input) {
+    auto len = strlen(input);
+    auto ret = static_cast<string *>(koreAlloc(sizeof(string) + len));
+    for (unsigned i = 0; i < len; ++i) {
+      ret->data[i] = input[i];
+>>>>>>> alloc change in string, plus hacks
     }
     auto ret = static_cast<string *>(malloc(sizeof(string) + len));
     memcpy(ret->data, input, len);
@@ -166,15 +193,15 @@ extern "C" {
   const string * hook_STRING_int2string(const mpz_t input) {
     size_t len = mpz_sizeinbase(input, 10) + 2;
     // +1 for null terminator needed by mpz_get_str, +1 for minus sign
-    auto result = static_cast<string *>(malloc(sizeof(string) + len));
+    auto result = static_cast<string *>(koreAlloc(sizeof(string) + len));
     mpz_get_str(result->data, 10, input);
     result->b.len = strlen(result->data);
-    return static_cast<string *>(realloc(result, sizeof(string) + result->b.len));
+    return static_cast<string *>(koreResizeLastAlloc(result, sizeof(string) + result->b.len));
   }
 
   const mpz_ptr hook_STRING_string2base_long(const string *input, uint64_t base) {
     mpz_t result;
-    auto copy = static_cast<char *>(malloc(input->b.len + 1));
+    auto copy = static_cast<char *>(koreAlloc(input->b.len + 1));
     memcpy(copy, input->data, input->b.len);
     copy[input->b.len] = 0;
     if (mpz_init_set_str(result, copy, base)) {
@@ -229,7 +256,7 @@ extern "C" {
     }
     auto diff = needle->b.len - replacer->b.len;
     size_t new_len = haystack->b.len - i * diff;
-    auto ret = static_cast<string *>(malloc(sizeof(string) + new_len * sizeof(KCHAR)));
+    auto ret = static_cast<string *>(koreAlloc(sizeof(string) + new_len * sizeof(KCHAR)));
     ret->b.len = new_len;
     int m = 0;
     for (size_t r = 0, h = 0; r < new_len;) {
