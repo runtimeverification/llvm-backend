@@ -158,9 +158,7 @@ extern "C" {
       len = strlen(input);
     }
     auto ret = static_cast<string *>(malloc(sizeof(string) + len));
-    for (unsigned i = 0; i < len; ++i) {
-      ret->data[i] = input[i];
-    }
+    memcpy(ret->data, input, len);
     ret->b.len = len;
     return ret;
   }
