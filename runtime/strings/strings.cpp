@@ -22,7 +22,17 @@ extern "C" {
     KCHAR data[0];
   };
 
+  struct stringbuffer {
+    uint64_t capacity;
+    string *contents;
+  };
+
   mpz_ptr move_int(mpz_t);
+
+  string *hook_BYTES_bytes2string(string *);
+  string *hook_BYTES_concat(string *a, string *b);
+  mpz_ptr hook_BYTES_length(string *a);
+  string *hook_BYTES_substr(string *a, mpz_t start, mpz_t end);
 
   bool hook_STRING_gt(const string * a, const string * b) {
     auto res = memcmp(a->data, b->data, std::min(a->b.len, b->b.len));
@@ -55,20 +65,11 @@ extern "C" {
   }
 
   string * hook_STRING_concat(string * a, string * b) {
-    auto len_a = a->b.len;
-    auto len_b = b->b.len;
-    auto newlen = len_a  + len_b;
-    auto ret = static_cast<string *>(malloc(sizeof(string) + newlen));
-    ret->b.len = newlen;
-    memcpy(&(ret->data), &(a->data), a->b.len * sizeof(KCHAR));
-    memcpy(&(ret->data[a->b.len]), &(b->data), b->b.len * sizeof(KCHAR));
-    return ret;
+    return hook_BYTES_concat(a, b);
   }
 
   mpz_ptr hook_STRING_length(string * a) {
-    mpz_t result;
-    mpz_init_set_ui(result, a->b.len);
-    return move_int(result);
+    return hook_BYTES_length(a);
   }
 
   static inline uint64_t gs(mpz_t i) {
@@ -99,19 +100,7 @@ extern "C" {
   }
 
   string * hook_STRING_substr(string * input, mpz_t start, mpz_t end) {
-    uint64_t ustart = gs(start);
-    uint64_t uend = gs(end);
-    if (uend < ustart) {
-      throw std::invalid_argument("Invalid string slice");
-    }
-    if (uend > input->b.len) {
-      throw std::invalid_argument("Invalid string slice");
-    }
-    uint64_t len = uend - ustart;
-    auto ret = static_cast<string *>(malloc(sizeof(string) + sizeof(KCHAR) * len));
-    ret->b.len = len;
-    memcpy(&(ret->data), &(input->data[ustart]), len * sizeof(KCHAR));
-    return ret;
+    return hook_BYTES_substr(input, start, end);
   }
 
   mpz_ptr hook_STRING_find(const string * haystack, const string * needle, mpz_t pos) {
@@ -164,12 +153,12 @@ extern "C" {
     return hook_STRING_rfind(haystack, needle, pos);
   }
 
-  string * makeString(const KCHAR * input) {
-    auto len = strlen(input);
-    auto ret = static_cast<string *>(malloc(sizeof(string) + len));
-    for (unsigned i = 0; i < len; ++i) {
-      ret->data[i] = input[i];
+  string * makeString(const KCHAR * input, ssize_t len = -1) {
+    if (len == -1) {
+      len = strlen(input);
     }
+    auto ret = static_cast<string *>(malloc(sizeof(string) + len));
+    memcpy(ret->data, input, len);
     ret->b.len = len;
     return ret;
   }
@@ -290,5 +279,34 @@ extern "C" {
     mpz_t result;
     mpz_init_set_ui(result, i);
     return move_int(result);
+  }
+
+  stringbuffer *hook_BUFFER_empty() {
+    auto result = static_cast<stringbuffer *>(malloc(sizeof(stringbuffer)));
+    result->capacity = 16;
+    auto str = static_cast<string *>(malloc(sizeof(string) + 16));
+    str->b.len = 0;
+    result->contents = str;
+    return result;
+  }
+
+  stringbuffer *hook_BUFFER_concat(stringbuffer *buf, string *s) {
+    uint64_t newCapacity = buf->capacity;
+    uint64_t minCapacity = buf->contents->b.len + s->b.len;
+    if (newCapacity < minCapacity) {
+      newCapacity = buf->contents->b.len * 2 + 2;
+      if (newCapacity < minCapacity) {
+        newCapacity = minCapacity;
+      }
+      buf->capacity = newCapacity;
+      buf->contents = static_cast<string *>(realloc(buf->contents, sizeof(string) + newCapacity));
+    }
+    memcpy(buf->contents->data + buf->contents->b.len, s->data, s->b.len);
+    buf->contents->b.len += s->b.len;
+    return buf;
+  }
+
+  string *hook_BUFFER_toString(stringbuffer *buf) {
+    return hook_BYTES_bytes2string(buf->contents);
   }
 }
