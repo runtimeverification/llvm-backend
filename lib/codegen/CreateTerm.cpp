@@ -454,13 +454,19 @@ llvm::Value *CreateTerm::operator()(KOREPattern *pattern) {
     } else if (symbolDecl->getAttributes().count("sortInjection")
         && dynamic_cast<KOREObjectCompositeSort *>(symbol->getArguments()[0])->getCategory(Definition).cat == SortCategory::Symbol) {
       llvm::Value *val = (*this)(constructor->getArguments()[0]);
-      if (llvm::isa<llvm::Argument>(val)) {
+      if (llvm::isa<llvm::Argument>(val) || llvm::isa<llvm::CallInst>(val)) {
         llvm::Value *Tag = llvm::CallInst::Create(Module->getOrInsertFunction("getTag", llvm::Type::getInt32Ty(Ctx), getValueType({SortCategory::Symbol, 0}, Module)), val, "tag", CurrentBlock);
         auto inj = Definition->getInjSymbol();
+        auto NotStringBlock = llvm::BasicBlock::Create(Ctx, "notString", CurrentBlock->getParent());
         auto GeBlock = llvm::BasicBlock::Create(Ctx, "geFirst", CurrentBlock->getParent());
         auto FalseBlock = llvm::BasicBlock::Create(Ctx, "notInjection", CurrentBlock->getParent());
         auto TrueBlock = llvm::BasicBlock::Create(Ctx, "merge", CurrentBlock->getParent());
-        auto cmp = new llvm::ICmpInst(*CurrentBlock, llvm::CmpInst::ICMP_UGE, Tag,
+        auto cmp = new llvm::ICmpInst(*CurrentBlock, llvm::CmpInst::ICMP_NE, Tag,
+            llvm::ConstantInt::getSigned(llvm::Type::getInt32Ty(Ctx), -1));
+        llvm::BranchInst::Create(NotStringBlock, FalseBlock, cmp, CurrentBlock);
+
+        CurrentBlock = NotStringBlock;
+        cmp = new llvm::ICmpInst(*CurrentBlock, llvm::CmpInst::ICMP_UGE, Tag,
             llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), inj->getFirstTag()));
         llvm::BranchInst::Create(GeBlock, FalseBlock, cmp, CurrentBlock);
   

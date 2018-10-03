@@ -14,9 +14,12 @@ constant:
 block:
   %hdrptr = getelementptr inbounds %block, %block* %arg, i64 0, i32 0, i32 0
   %hdr = load i64, i64* %hdrptr
+  %layout = lshr i64 %hdr, 48
+  %isstring = icmp eq i64 %layout, 0
+  %tagorstring = select i1 %isstring, i64 -1, i64 %hdr
   br label %exit
 exit:
-  %phi = phi i64 [ %hdr, %block ], [ %taglong, %constant ]
+  %phi = phi i64 [ %tagorstring, %block ], [ %taglong, %constant ]
   %tag = trunc i64 %phi to i32
   ret i32 %tag
 }
