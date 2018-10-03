@@ -28,6 +28,8 @@ extern "C" {
 
   uint32_t getTagForSymbolName(const char *);
 
+  // bytes2int and int2bytes expect constructors of sort Endianness, which become a uint64_t
+  // constant value in the K term representation
   uint64_t tag_big_endian() {
     static uint64_t tag = (uint64_t)-1;
     if (tag == -1) {
@@ -36,6 +38,8 @@ extern "C" {
     return tag;
   }
 
+  // bytes2int expects constructors of sort Signedness, which become a uint64_t
+  // constant value in the K term representation
   uint64_t tag_unsigned() {
     static uint64_t tag = (uint64_t)-1;
     if (tag == -1) {
