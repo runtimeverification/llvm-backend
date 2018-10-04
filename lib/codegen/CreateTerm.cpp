@@ -333,11 +333,11 @@ llvm::Value *CreateTerm::createHook(KOREObjectCompositePattern *hookAtt, KOREObj
       domain = "LIST";
     }
     std::string hookName = "hook_" + domain + "_" + name.substr(name.find('.') + 1);
-    return createFunctionCall(hookName, pattern, true);
+    return createFunctionCall(hookName, pattern, true, false);
   }
 }
 
-llvm::Value *CreateTerm::createFunctionCall(std::string name, KOREObjectCompositePattern *pattern, bool sret) {
+llvm::Value *CreateTerm::createFunctionCall(std::string name, KOREObjectCompositePattern *pattern, bool sret, bool fastcc) {
   std::vector<llvm::Value *> args;
   auto returnSort = dynamic_cast<KOREObjectCompositeSort *>(pattern->getConstructor()->getSort());
   auto returnCat = returnSort->getCategory(Definition);
@@ -359,10 +359,10 @@ llvm::Value *CreateTerm::createFunctionCall(std::string name, KOREObjectComposit
       break;
     }
   }
-  return createFunctionCall(name, returnCat, args, sret, true);
+  return createFunctionCall(name, returnCat, args, sret, fastcc);
 }
 
-llvm::Value *CreateTerm::createFunctionCall(std::string name, ValueType returnCat, std::vector<llvm::Value *> &args, bool sret, bool load) {
+llvm::Value *CreateTerm::createFunctionCall(std::string name, ValueType returnCat, std::vector<llvm::Value *> &args, bool sret, bool fastcc) {
   llvm::Type *returnType = getValueType(returnCat, Module);
   std::vector<llvm::Type *> types;
   switch (returnCat.cat) {
@@ -393,16 +393,15 @@ llvm::Value *CreateTerm::createFunctionCall(std::string name, ValueType returnCa
     constant->print(llvm::errs());
     abort();
   }
+  auto call = llvm::CallInst::Create(func, args, "", CurrentBlock);
+  if (fastcc) {
+    call->setCallingConv(llvm::CallingConv::Fast);
+  }
   if (sret) {
     func->arg_begin()->addAttr(llvm::Attribute::StructRet);
-    llvm::CallInst::Create(func, args, "", CurrentBlock);
-    if (load) {
-      return new llvm::LoadInst(AllocSret, "", CurrentBlock);
-    } else {
-      return AllocSret;
-    }
+    return AllocSret;
   }
-  return llvm::CallInst::Create(func, args, "", CurrentBlock);
+  return call;
 }
 
 /* create a term, given the assumption that the created term will not be a triangle injection pair */
@@ -445,7 +444,7 @@ llvm::Value *CreateTerm::operator()(KOREPattern *pattern) {
       } else {
         std::ostringstream Out;
         symbol->print(Out, 0, false);
-        return createFunctionCall("eval_" + Out.str(), constructor, false);
+        return createFunctionCall("eval_" + Out.str(), constructor, false, true);
       }
     } else if (symbol->getArguments().empty()) {
       llvm::StructType *BlockType = Module->getTypeByName(BLOCK_STRUCT);
@@ -504,7 +503,7 @@ void addAbort(llvm::BasicBlock *block, llvm::Module *Module) {
     new llvm::UnreachableInst(Module->getContext(), block);
 }
 
-bool makeFunction(std::string name, KOREPattern *pattern, KOREDefinition *definition, llvm::Module *Module) {
+bool makeFunction(std::string name, KOREPattern *pattern, KOREDefinition *definition, llvm::Module *Module, bool fastcc) {
     std::map<std::string, KOREObjectVariablePattern *> vars;
     pattern->markVariables(vars);
     llvm::StringMap<llvm::Type *> params;
@@ -562,7 +561,7 @@ bool makeFunction(std::string name, KOREPattern *pattern, KOREDefinition *defini
 std::string makeApplyRuleFunction(KOREAxiomDeclaration *axiom, KOREDefinition *definition, llvm::Module *Module) {
     KOREPattern *pattern = axiom->getRightHandSide();
     std::string name = "apply_rule_" + std::to_string(axiom->getOrdinal());
-    if (makeFunction(name, pattern, definition, Module)) {
+    if (makeFunction(name, pattern, definition, Module, true)) {
       return name;
     }
     return "";
@@ -574,7 +573,7 @@ std::string makeSideConditionFunction(KOREAxiomDeclaration *axiom, KOREDefinitio
       return "";
     }
     std::string name = "side_condition_" + std::to_string(axiom->getOrdinal());
-    if (makeFunction(name, pattern, definition, Module)) {
+    if (makeFunction(name, pattern, definition, Module, false)) {
       return name;
     }
     return "";

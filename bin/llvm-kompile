@@ -1,12 +1,14 @@
 #!/bin/bash
 dt_dir="$(mktemp -d)"
 mod="$(mktemp tmp.XXXXXXXXXX.ll)"
+modopt="$(mktemp tmp.XXXXXXXXXX.bc)"
 trap "rm -rf $dt_dir $mod" INT TERM EXIT
 definition="$1"
 moduleName="$2"
 shift; shift
 "$(dirname "$0")"/llvm-kompile-matching "$definition" "$moduleName" "$dt_dir"
 "$(dirname "$0")"/llvm-kompile-codegen "$definition" "$dt_dir"/dt.yaml "$dt_dir" > "$mod"
+opt -tailcallelim -tailcallopt "$mod" -o "$modopt"
 RUSTDIR=`rustc --print sysroot`/lib/rustlib/x86_64-unknown-linux-gnu/lib/
 LIBDIR="$(dirname "$0")"/../lib/kllvm/
-clang++ -Wno-override-module "$mod" "$LIBDIR"/libarithmetic.a "$LIBDIR"/libstrings.a "$LIBDIR"/rust/libdatastructures.rlib "$LIBDIR"/rust/deps/*.rlib "$RUSTDIR"/libcore-*.rlib "$RUSTDIR"/libstd-*.rlib "$RUSTDIR"/liballoc-*.rlib "$RUSTDIR"/libunwind-*.rlib "$RUSTDIR"/libcompiler_builtins-*.rlib "$RUSTDIR"/libpanic_abort-*.rlib "$RUSTDIR"/liballoc_system-*.rlib "$LIBDIR"/rust/rustalloc.lds "$LIBDIR"/llvm/*.ll "$LIBDIR"/libconfigurationparser.a "$LIBDIR"/libParser.a "$LIBDIR"/libAST.a -lgmp -lpthread -ldl -L/usr/lib/llvm-5.0/lib -lLLVMIRReader -lLLVMBitReader -lLLVMAsmParser -lLLVMCore -lLLVMBinaryFormat -lLLVMSupport -lLLVMDemangle -flto "$@"
+clang++ -Wno-override-module "$modopt" "$LIBDIR"/libarithmetic.a "$LIBDIR"/libstrings.a "$LIBDIR"/rust/libdatastructures.rlib "$LIBDIR"/rust/deps/*.rlib "$RUSTDIR"/libcore-*.rlib "$RUSTDIR"/libstd-*.rlib "$RUSTDIR"/liballoc-*.rlib "$RUSTDIR"/libunwind-*.rlib "$RUSTDIR"/libcompiler_builtins-*.rlib "$RUSTDIR"/libpanic_abort-*.rlib "$RUSTDIR"/liballoc_system-*.rlib "$LIBDIR"/rust/rustalloc.lds "$LIBDIR"/llvm/*.ll "$LIBDIR"/libconfigurationparser.a "$LIBDIR"/libParser.a "$LIBDIR"/libAST.a -lgmp -lpthread -ldl -L/usr/lib/llvm-5.0/lib -lLLVMIRReader -lLLVMBitReader -lLLVMAsmParser -lLLVMCore -lLLVMBinaryFormat -lLLVMSupport -lLLVMDemangle -flto "$@"

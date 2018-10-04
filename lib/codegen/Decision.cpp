@@ -141,7 +141,7 @@ void LeafNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution)
     types.push_back(val->getType());
   }
   auto Call = llvm::CallInst::Create(d->Module->getOrInsertFunction(name, llvm::FunctionType::get(getValueType(d->Cat, d->Module), types, false)), args, "", d->CurrentBlock);
-  Call->setTailCall(true);
+  Call->setCallingConv(llvm::CallingConv::Fast);
   llvm::ReturnInst::Create(d->Ctx, Call, d->CurrentBlock);
 }
 

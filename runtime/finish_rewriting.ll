@@ -12,7 +12,7 @@ declare i64 @__gmpz_get_ui(%mpz*)
 @exit_int_0 = global %mpz { i32 0, i32 0, i64* getelementptr inbounds ([0 x i64], [0 x i64]* @exit_int_0_limbs, i32 0, i32 0) }
 @exit_int_0_limbs = global [0 x i64] zeroinitializer
 
-define weak %mpz* @"eval_LblgetExitCode{SortGeneratedTopCell{}}"(%block*) {
+define weak fastcc %mpz* @"eval_LblgetExitCode{SortGeneratedTopCell{}}"(%block*) {
   ret %mpz* @exit_int_0
 }
 
@@ -21,7 +21,7 @@ define weak %mpz* @"eval_LblgetExitCode{SortGeneratedTopCell{}}"(%block*) {
 define void @finish_rewriting(%block* %subject) #0 {
   %output = load i8*, i8** @output_file
   call void @printConfiguration(i8* %output, %block* %subject)
-  %exit_z = call %mpz* @"eval_LblgetExitCode{SortGeneratedTopCell{}}"(%block* %subject)
+  %exit_z = call fastcc %mpz* @"eval_LblgetExitCode{SortGeneratedTopCell{}}"(%block* %subject)
   %exit_ul = call i64 @__gmpz_get_ui(%mpz* %exit_z)
   %exit = trunc i64 %exit_ul to i32
   call void @exit(i32 %exit)
