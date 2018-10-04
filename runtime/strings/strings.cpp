@@ -11,7 +11,7 @@
 
 extern "C" {
 
-#include "alloc.h"
+#include "runtime/alloc.h"
 #include<stdexcept>
 
 #define KCHAR char
@@ -103,23 +103,7 @@ extern "C" {
   }
 
   string * hook_STRING_substr(string * input, mpz_t start, mpz_t end) {
-<<<<<<< HEAD
     return hook_BYTES_substr(input, start, end);
-=======
-    uint64_t ustart = gs(start);
-    uint64_t uend = gs(end);
-    if (uend < ustart) {
-      throw std::invalid_argument("Invalid string slice");
-    }
-    if (uend > input->b.len) {
-      throw std::invalid_argument("Invalid string slice");
-    }
-    uint64_t len = uend - ustart;
-    auto ret = static_cast<string *>(koreAlloc(sizeof(string) + sizeof(KCHAR) * len));
-    ret->b.len = len;
-    memcpy(&(ret->data), &(input->data[ustart]), len * sizeof(KCHAR));
-    return ret;
->>>>>>> alloc change in string, plus hacks
   }
 
   mpz_ptr hook_STRING_find(const string * haystack, const string * needle, mpz_t pos) {
@@ -172,19 +156,11 @@ extern "C" {
     return hook_STRING_rfind(haystack, needle, pos);
   }
 
-<<<<<<< HEAD
   string * makeString(const KCHAR * input, ssize_t len = -1) {
     if (len == -1) {
       len = strlen(input);
-=======
-  string * makeString(const KCHAR * input) {
-    auto len = strlen(input);
-    auto ret = static_cast<string *>(koreAlloc(sizeof(string) + len));
-    for (unsigned i = 0; i < len; ++i) {
-      ret->data[i] = input[i];
->>>>>>> alloc change in string, plus hacks
     }
-    auto ret = static_cast<string *>(malloc(sizeof(string) + len));
+    auto ret = static_cast<string *>(koreAlloc(sizeof(string) + len));
     memcpy(ret->data, input, len);
     ret->b.len = len;
     return ret;
@@ -207,7 +183,6 @@ extern "C" {
     if (mpz_init_set_str(result, copy, base)) {
       throw std::invalid_argument("Not a valid integer");
     }
-    free(copy);
     return move_int(result);
   }
 
@@ -309,9 +284,9 @@ extern "C" {
   }
 
   stringbuffer *hook_BUFFER_empty() {
-    auto result = static_cast<stringbuffer *>(malloc(sizeof(stringbuffer)));
+    auto result = static_cast<stringbuffer *>(koreAlloc(sizeof(stringbuffer)));
     result->capacity = 16;
-    auto str = static_cast<string *>(malloc(sizeof(string) + 16));
+    auto str = static_cast<string *>(koreAlloc(sizeof(string) + 16));
     str->b.len = 0;
     result->contents = str;
     return result;
@@ -326,7 +301,10 @@ extern "C" {
         newCapacity = minCapacity;
       }
       buf->capacity = newCapacity;
-      buf->contents = static_cast<string *>(realloc(buf->contents, sizeof(string) + newCapacity));
+      string* new_contents = static_cast<string *>(koreAlloc(sizeof(string) + newCapacity));
+      memcpy(new_contents, buf->contents, sizeof(string) + buf->contents->b.len);
+      // TODO: free/decref old contents.
+      buf->contents = new_contents;
     }
     memcpy(buf->contents->data + buf->contents->b.len, s->data, s->b.len);
     buf->contents->b.len += s->b.len;

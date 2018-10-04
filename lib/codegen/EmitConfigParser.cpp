@@ -1,6 +1,6 @@
-#include "kllvm/Alloc.h"
 #include "kllvm/codegen/EmitConfigParser.h"
 #include "kllvm/codegen/CreateTerm.h"
+#include "kllvm/codegen/GenAlloc.h"
 
 #include "llvm/IR/Constants.h"
 #include "llvm/IR/Instructions.h"
@@ -146,7 +146,7 @@ static llvm::Value *getArgValue(llvm::Value *ArgumentsArray, int idx,
     auto cast = new llvm::BitCastInst(arg,
         llvm::PointerType::getUnqual(getValueType(cat, mod)), "", CaseBlock);
     auto load = new llvm::LoadInst(cast, "", CaseBlock);
-    CaseBlock->getInstList().push_back(llvm::CallInst::CreateFree(arg, CaseBlock));
+//    CaseBlock->getInstList().push_back(llvm::CallInst::CreateFree(arg, CaseBlock));
     arg = load;
     break;
   }

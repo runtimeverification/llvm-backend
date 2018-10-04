@@ -1,6 +1,7 @@
 add_subdirectory(arithmetic)
 add_subdirectory(configurationparser)
 add_subdirectory(strings)
+add_subdirectory(alloc)
 
 set(RUSTDIR_ debug)
 set(RUSTDIR_Debug debug)

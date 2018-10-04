@@ -1,8 +1,10 @@
-#include "jemalloc/jemalloc.h"
 #include <string.h>
+#include <stdio.h>
+#include "jemalloc/jemalloc.h"
+
+#include "runtime/alloc.h"
 
 #ifdef ALLOC_DBG
-#include <stdio.h>
 #define DBG(...) fprintf(stderr, __VA_ARGS__)
 #else
 #define DBG(...)
@@ -19,6 +21,7 @@ static void freshBlock() {
 }
 
 void* koreAlloc(size_t requested) {
+  requested = (requested + 7) & ~7;
   if (remaining < requested) {
     DBG("Block at %p too small, %zd remaining but %zd needed\n", block, remaining, requested);
     freshBlock();
@@ -32,6 +35,7 @@ void* koreAlloc(size_t requested) {
 }
 
 void* koreResizeLastAlloc(void* oldptr, size_t newrequest) {
+  newrequest = (newrequest + 7) & ~7;
   if (oldptr != block - last_size) {
     DBG("May only reallocate last allocation. Tried to reallocate %p to %zd\n", oldptr, newrequest);
     exit(255);

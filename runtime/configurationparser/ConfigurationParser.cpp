@@ -1,5 +1,6 @@
 #include "kllvm/parser/KOREScanner.h"
 #include "kllvm/parser/KOREParserDriver.h"
+#include "runtime/alloc.h"
 
 #include <gmp.h>
 
