@@ -349,9 +349,13 @@ llvm::Value *CreateTerm::createFunctionCall(std::string name, KOREObjectComposit
     case SortCategory::Map:
     case SortCategory::List:
     case SortCategory::Set: {
-      llvm::AllocaInst *AllocCollection = new llvm::AllocaInst(arg->getType(), 0, "", CurrentBlock);
-      new llvm::StoreInst(arg, AllocCollection, CurrentBlock);
-      args.push_back(AllocCollection);
+      if (!arg->getType()->isPointerTy()) {
+          llvm::AllocaInst *AllocCollection = new llvm::AllocaInst(arg->getType(), 0, "", CurrentBlock);
+          new llvm::StoreInst(arg, AllocCollection, CurrentBlock);
+          args.push_back(AllocCollection);
+      } else {
+        args.push_back(arg);
+      }
       break;
     }
     default:
@@ -380,7 +384,8 @@ llvm::Value *CreateTerm::createFunctionCall(std::string name, ValueType returnCa
     types.push_back(arg->getType());
   }
   if (sret) {
-    AllocSret = new llvm::AllocaInst(returnType, 0, "", CurrentBlock);
+    // we don't use alloca here because the tail call optimization pass for llvm doesn't handle correctly functions with alloca
+    AllocSret = allocateBlock(returnType, CurrentBlock);
     args.insert(args.begin(), AllocSret);
     types.insert(types.begin(), AllocSret->getType());
     returnType = llvm::Type::getVoidTy(Ctx);
@@ -421,6 +426,9 @@ llvm::Value *CreateTerm::notInjectionCase(KOREObjectCompositePattern *constructo
       ChildValue = (*this)(child);
     }
     llvm::Value *ChildPtr = llvm::GetElementPtrInst::CreateInBounds(BlockType, Block, {llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0), llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), idx++)}, "", CurrentBlock);
+    if (ChildValue->getType() == ChildPtr->getType()) {
+      ChildValue = new llvm::LoadInst(ChildValue, "", CurrentBlock);
+    }
     new llvm::StoreInst(ChildValue, ChildPtr, CurrentBlock);
   }
   return new llvm::BitCastInst(Block, llvm::PointerType::getUnqual(Module->getTypeByName(BLOCK_STRUCT)), "", CurrentBlock);
@@ -509,7 +517,6 @@ bool makeFunction(std::string name, KOREPattern *pattern, KOREDefinition *defini
     llvm::StringMap<llvm::Type *> params;
     std::vector<llvm::Type *> paramTypes;
     std::vector<std::string> paramNames;
-    std::vector<bool> needsLoad;
     for (auto iter = vars.begin(); iter != vars.end(); ++iter) {
       auto &entry = *iter;
       auto sort = dynamic_cast<KOREObjectCompositeSort *>(entry.second->getSort());
@@ -520,13 +527,11 @@ bool makeFunction(std::string name, KOREPattern *pattern, KOREDefinition *defini
       auto cat = sort->getCategory(definition);
       llvm::Type *varType = getValueType(cat, Module);
       llvm::Type *paramType = varType;
-      bool load = false;
       switch(cat.cat) {
       case SortCategory::Map:
       case SortCategory::List:
       case SortCategory::Set:
         paramType = llvm::PointerType::getUnqual(paramType);
-        load = true;
         break;
       default:
         break;
@@ -535,25 +540,24 @@ bool makeFunction(std::string name, KOREPattern *pattern, KOREDefinition *defini
       params.insert({entry.first, varType});
       paramTypes.push_back(paramType);
       paramNames.push_back(entry.first);
-      needsLoad.push_back(load);
     }
     llvm::FunctionType *funcType = llvm::FunctionType::get(termType(pattern, params, definition, Module), paramTypes, false);
     llvm::Constant *func = Module->getOrInsertFunction(name, funcType);
     llvm::Function *applyRule = llvm::cast<llvm::Function>(func);
-    applyRule->setCallingConv(llvm::CallingConv::Fast);
+    if (fastcc) {
+      applyRule->setCallingConv(llvm::CallingConv::Fast);
+    }
     llvm::StringMap<llvm::Value *> subst;
     llvm::BasicBlock *block = llvm::BasicBlock::Create(Module->getContext(), "entry", applyRule);
     int i = 0;
     for (auto val = applyRule->arg_begin(); val != applyRule->arg_end(); ++val, ++i) {
-      llvm::Value *realVal = val;
-      if (needsLoad[i]) {
-        realVal = new llvm::LoadInst(val, "", block);
-      }
-      realVal->setName(paramNames[i]);
-      subst.insert({paramNames[i], realVal});
+      subst.insert({paramNames[i], val});
     }
     CreateTerm creator = CreateTerm(subst, definition, block, Module);
     llvm::Value *retval = creator(pattern);
+    if (retval->getType() == llvm::PointerType::getUnqual(funcType->getReturnType())) {
+      retval = new llvm::LoadInst(retval, "", creator.getCurrentBlock());
+    }
     llvm::ReturnInst::Create(Module->getContext(), retval, creator.getCurrentBlock());
     return true;
 }

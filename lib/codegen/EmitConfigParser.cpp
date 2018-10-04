@@ -178,6 +178,7 @@ static std::pair<llvm::Value *, llvm::BasicBlock *> getEval(KOREDefinition *def,
     subst.insert({name, arg});
     pattern->addArgument(KOREObjectVariablePattern::Create(name, sort));
   }
+  KOREObjectSymbolDeclaration *symbolDecl = def->getSymbolDeclarations().lookup(symbol->getName());
   CreateTerm creator(subst, def, CaseBlock, mod);
   llvm::Value *result = creator(pattern);
   for (auto arg : pattern->getArguments()) {
@@ -187,9 +188,24 @@ static std::pair<llvm::Value *, llvm::BasicBlock *> getEval(KOREDefinition *def,
   llvm::Value *retval;
   ValueType cat = dynamic_cast<KOREObjectCompositeSort *>(symbol->getSort())->getCategory(def);
   switch(cat.cat) {
+  case SortCategory::Int:
+  case SortCategory::Float:
+  case SortCategory::StringBuffer:
+  case SortCategory::Symbol:
+    retval = new llvm::BitCastInst(result, llvm::Type::getInt8PtrTy(Ctx), "",
+        creator.getCurrentBlock());
+    break;
   case SortCategory::Map:
   case SortCategory::List:
   case SortCategory::Set:
+    if (symbolDecl->getAttributes().count("hook")) {
+      // if this is a hook then we are using the sret abi and the reutrned value
+      // is a pointer. Otherwise we need to store it like Bool/MInt
+      retval = new llvm::BitCastInst(result, llvm::Type::getInt8PtrTy(Ctx), "",
+          creator.getCurrentBlock());
+      break;
+    }
+    // fall through
   case SortCategory::Bool:
   case SortCategory::MInt: {
     llvm::Instruction *Malloc = llvm::CallInst::CreateMalloc(
@@ -201,13 +217,6 @@ static std::pair<llvm::Value *, llvm::BasicBlock *> getEval(KOREDefinition *def,
         creator.getCurrentBlock());
     break;
   }
-  case SortCategory::Int:
-  case SortCategory::Float:
-  case SortCategory::StringBuffer:
-  case SortCategory::Symbol:
-    retval = new llvm::BitCastInst(result, llvm::Type::getInt8PtrTy(Ctx), "",
-        creator.getCurrentBlock());
-    break;
   case SortCategory::Uncomputed:
     abort();
   }
