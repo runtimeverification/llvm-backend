@@ -7,7 +7,7 @@
 
 extern "C" {
 
-#include "alloc.h"
+#include "runtime/alloc.h"
 #define KCHAR char
 
   struct blockheader {

@@ -28,6 +28,7 @@ clang++-6.0 -Wno-override-module "$modopt" \
   "$LIBDIR"/libconfigurationparser.a \
   "$LIBDIR"/libParser.a \
   "$LIBDIR"/libAST.a \
+  "$LIBDIR"/liballoc.a \
   -lgmp -lpthread -ldl \
   -L/usr/lib/llvm-6.0/lib \
   -lLLVMIRReader -lLLVMBitReader -lLLVMAsmParser -lLLVMCore -lLLVMBinaryFormat -lLLVMSupport -lLLVMDemangle \

@@ -1,4 +1,4 @@
-#include "kllvm/Alloc.h"
+#include "kllvm/codegen/GenAlloc.h"
 
 namespace kllvm {
 
