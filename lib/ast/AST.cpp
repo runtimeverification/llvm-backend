@@ -376,10 +376,8 @@ void KOREDefinition::addModule(KOREModule *Module) {
   for (auto decl : Module->getDeclarations()) {
     if (auto sortDecl = dynamic_cast<KOREObjectCompositeSortDeclaration *>(decl)) {
       sortDeclarations.insert({sortDecl->getName(), sortDecl});
-      if (sortDecl->isHooked()) {
-        auto sort = KOREObjectCompositeSort::Create(sortDecl->getName());
-        hookedSorts[sort->getHook(this)] = sort;
-      }
+      auto sort = KOREObjectCompositeSort::Create(sortDecl->getName());
+      hookedSorts[sort->getHook(this)] = sort;
     } else if (auto symbolDecl = dynamic_cast<KOREObjectSymbolDeclaration *>(decl)) {
       symbolDeclarations.insert({symbolDecl->getSymbol()->getName(), symbolDecl});
     } else if (auto axiom = dynamic_cast<KOREAxiomDeclaration *>(decl)) {
