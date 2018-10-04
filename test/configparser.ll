@@ -204,24 +204,24 @@ target triple = "x86_64-unknown-linux-gnu"
 @"sort_name_SortKResult{}" = global [14 x i8] c"SortKResult{}\00"
 @"sort_name_SortKItem{}" = global [12 x i8] c"SortKItem{}\00"
 @"sort_name_SortKConfigVar{}" = global [17 x i8] c"SortKConfigVar{}\00"
-@layout_1 = global [2 x %layoutitem] [%layoutitem { i64 ptrtoint (%block** getelementptr ({ %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* null, i64 0, i32 2) to i64), i16 9 }, %layoutitem { i64 ptrtoint (%block** getelementptr ({ %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* null, i64 0, i32 3) to i64), i16 9 }]
-@layout_2 = global [1 x %layoutitem] [%layoutitem { i64 ptrtoint (%block** getelementptr ({ %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* null, i64 0, i32 2) to i64), i16 9 }]
+@layout_1 = global [2 x %layoutitem] [%layoutitem { i64 ptrtoint (%block** getelementptr ({ %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* null, i64 0, i32 2) to i64), i16 8 }, %layoutitem { i64 ptrtoint (%block** getelementptr ({ %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* null, i64 0, i32 3) to i64), i16 8 }]
+@layout_2 = global [1 x %layoutitem] [%layoutitem { i64 ptrtoint (%block** getelementptr ({ %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* null, i64 0, i32 2) to i64), i16 8 }]
 @layout_3 = global [1 x %layoutitem] [%layoutitem { i64 ptrtoint (%map* getelementptr ({ %blockheader, [0 x i64], %map }, { %blockheader, [0 x i64], %map }* null, i64 0, i32 2) to i64), i16 1 }]
 @layout_4 = global [0 x %layoutitem] zeroinitializer
-@layout_5 = global [3 x %layoutitem] [%layoutitem { i64 ptrtoint (i1* getelementptr ({ %blockheader, [0 x i64], i1, %block*, %block* }, { %blockheader, [0 x i64], i1, %block*, %block* }* null, i64 0, i32 2) to i64), i16 7 }, %layoutitem { i64 ptrtoint (%block** getelementptr ({ %blockheader, [0 x i64], i1, %block*, %block* }, { %blockheader, [0 x i64], i1, %block*, %block* }* null, i64 0, i32 3) to i64), i16 9 }, %layoutitem { i64 ptrtoint (%block** getelementptr ({ %blockheader, [0 x i64], i1, %block*, %block* }, { %blockheader, [0 x i64], i1, %block*, %block* }* null, i64 0, i32 4) to i64), i16 9 }]
+@layout_5 = global [3 x %layoutitem] [%layoutitem { i64 ptrtoint (i1* getelementptr ({ %blockheader, [0 x i64], i1, %block*, %block* }, { %blockheader, [0 x i64], i1, %block*, %block* }* null, i64 0, i32 2) to i64), i16 7 }, %layoutitem { i64 ptrtoint (%block** getelementptr ({ %blockheader, [0 x i64], i1, %block*, %block* }, { %blockheader, [0 x i64], i1, %block*, %block* }* null, i64 0, i32 3) to i64), i16 8 }, %layoutitem { i64 ptrtoint (%block** getelementptr ({ %blockheader, [0 x i64], i1, %block*, %block* }, { %blockheader, [0 x i64], i1, %block*, %block* }* null, i64 0, i32 4) to i64), i16 8 }]
 @layout_6 = global [1 x %layoutitem] [%layoutitem { i64 ptrtoint (%mpz** getelementptr ({ %blockheader, [0 x i64], %mpz* }, { %blockheader, [0 x i64], %mpz* }* null, i64 0, i32 2) to i64), i16 4 }]
 @layout_7 = global [2 x %layoutitem] [%layoutitem { i64 ptrtoint (%mpz** getelementptr ({ %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* null, i64 0, i32 2) to i64), i16 4 }, %layoutitem { i64 ptrtoint (%mpz** getelementptr ({ %blockheader, [0 x i64], %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz* }* null, i64 0, i32 3) to i64), i16 4 }]
 @layout_8 = global [2 x %layoutitem] [%layoutitem { i64 ptrtoint (%map* getelementptr ({ %blockheader, [0 x i64], %map, %map }, { %blockheader, [0 x i64], %map, %map }* null, i64 0, i32 2) to i64), i16 1 }, %layoutitem { i64 ptrtoint (%map* getelementptr ({ %blockheader, [0 x i64], %map, %map }, { %blockheader, [0 x i64], %map, %map }* null, i64 0, i32 3) to i64), i16 1 }]
 @layout_9 = global [2 x %layoutitem] [%layoutitem { i64 ptrtoint (%list* getelementptr ({ %blockheader, [0 x i64], %list, %list }, { %blockheader, [0 x i64], %list, %list }* null, i64 0, i32 2) to i64), i16 2 }, %layoutitem { i64 ptrtoint (%list* getelementptr ({ %blockheader, [0 x i64], %list, %list }, { %blockheader, [0 x i64], %list, %list }* null, i64 0, i32 3) to i64), i16 2 }]
 @layout_10 = global [2 x %layoutitem] [%layoutitem { i64 ptrtoint (%set* getelementptr ({ %blockheader, [0 x i64], %set, %set }, { %blockheader, [0 x i64], %set, %set }* null, i64 0, i32 2) to i64), i16 3 }, %layoutitem { i64 ptrtoint (%set* getelementptr ({ %blockheader, [0 x i64], %set, %set }, { %blockheader, [0 x i64], %set, %set }* null, i64 0, i32 3) to i64), i16 3 }]
 @layout_11 = global [2 x %layoutitem] [%layoutitem { i64 ptrtoint (i1* getelementptr ({ %blockheader, [0 x i64], i1, i1 }, { %blockheader, [0 x i64], i1, i1 }* null, i64 0, i32 2) to i64), i16 7 }, %layoutitem { i64 ptrtoint (i1* getelementptr ({ %blockheader, [0 x i64], i1, i1 }, { %blockheader, [0 x i64], i1, i1 }* null, i64 0, i32 3) to i64), i16 7 }]
-@layout_12 = global [2 x %layoutitem] [%layoutitem { i64 ptrtoint (%block** getelementptr ({ %blockheader, [0 x i64], %block*, %map }, { %blockheader, [0 x i64], %block*, %map }* null, i64 0, i32 2) to i64), i16 9 }, %layoutitem { i64 ptrtoint (%map* getelementptr ({ %blockheader, [0 x i64], %block*, %map }, { %blockheader, [0 x i64], %block*, %map }* null, i64 0, i32 3) to i64), i16 1 }]
-@layout_13 = global [2 x %layoutitem] [%layoutitem { i64 ptrtoint (%block** getelementptr ({ %blockheader, [0 x i64], %block*, %list }, { %blockheader, [0 x i64], %block*, %list }* null, i64 0, i32 2) to i64), i16 9 }, %layoutitem { i64 ptrtoint (%list* getelementptr ({ %blockheader, [0 x i64], %block*, %list }, { %blockheader, [0 x i64], %block*, %list }* null, i64 0, i32 3) to i64), i16 2 }]
-@layout_14 = global [3 x %layoutitem] [%layoutitem { i64 ptrtoint (%map* getelementptr ({ %blockheader, [0 x i64], %map, %block*, %block* }, { %blockheader, [0 x i64], %map, %block*, %block* }* null, i64 0, i32 2) to i64), i16 1 }, %layoutitem { i64 ptrtoint (%block** getelementptr ({ %blockheader, [0 x i64], %map, %block*, %block* }, { %blockheader, [0 x i64], %map, %block*, %block* }* null, i64 0, i32 3) to i64), i16 9 }, %layoutitem { i64 ptrtoint (%block** getelementptr ({ %blockheader, [0 x i64], %map, %block*, %block* }, { %blockheader, [0 x i64], %map, %block*, %block* }* null, i64 0, i32 4) to i64), i16 9 }]
-@layout_15 = global [2 x %layoutitem] [%layoutitem { i64 ptrtoint (%map* getelementptr ({ %blockheader, [0 x i64], %map, %block* }, { %blockheader, [0 x i64], %map, %block* }* null, i64 0, i32 2) to i64), i16 1 }, %layoutitem { i64 ptrtoint (%block** getelementptr ({ %blockheader, [0 x i64], %map, %block* }, { %blockheader, [0 x i64], %map, %block* }* null, i64 0, i32 3) to i64), i16 9 }]
-@layout_16 = global [2 x %layoutitem] [%layoutitem { i64 ptrtoint (%block** getelementptr ({ %blockheader, [0 x i64], %block*, %set }, { %blockheader, [0 x i64], %block*, %set }* null, i64 0, i32 2) to i64), i16 9 }, %layoutitem { i64 ptrtoint (%set* getelementptr ({ %blockheader, [0 x i64], %block*, %set }, { %blockheader, [0 x i64], %block*, %set }* null, i64 0, i32 3) to i64), i16 3 }]
+@layout_12 = global [2 x %layoutitem] [%layoutitem { i64 ptrtoint (%block** getelementptr ({ %blockheader, [0 x i64], %block*, %map }, { %blockheader, [0 x i64], %block*, %map }* null, i64 0, i32 2) to i64), i16 8 }, %layoutitem { i64 ptrtoint (%map* getelementptr ({ %blockheader, [0 x i64], %block*, %map }, { %blockheader, [0 x i64], %block*, %map }* null, i64 0, i32 3) to i64), i16 1 }]
+@layout_13 = global [2 x %layoutitem] [%layoutitem { i64 ptrtoint (%block** getelementptr ({ %blockheader, [0 x i64], %block*, %list }, { %blockheader, [0 x i64], %block*, %list }* null, i64 0, i32 2) to i64), i16 8 }, %layoutitem { i64 ptrtoint (%list* getelementptr ({ %blockheader, [0 x i64], %block*, %list }, { %blockheader, [0 x i64], %block*, %list }* null, i64 0, i32 3) to i64), i16 2 }]
+@layout_14 = global [3 x %layoutitem] [%layoutitem { i64 ptrtoint (%map* getelementptr ({ %blockheader, [0 x i64], %map, %block*, %block* }, { %blockheader, [0 x i64], %map, %block*, %block* }* null, i64 0, i32 2) to i64), i16 1 }, %layoutitem { i64 ptrtoint (%block** getelementptr ({ %blockheader, [0 x i64], %map, %block*, %block* }, { %blockheader, [0 x i64], %map, %block*, %block* }* null, i64 0, i32 3) to i64), i16 8 }, %layoutitem { i64 ptrtoint (%block** getelementptr ({ %blockheader, [0 x i64], %map, %block*, %block* }, { %blockheader, [0 x i64], %map, %block*, %block* }* null, i64 0, i32 4) to i64), i16 8 }]
+@layout_15 = global [2 x %layoutitem] [%layoutitem { i64 ptrtoint (%map* getelementptr ({ %blockheader, [0 x i64], %map, %block* }, { %blockheader, [0 x i64], %map, %block* }* null, i64 0, i32 2) to i64), i16 1 }, %layoutitem { i64 ptrtoint (%block** getelementptr ({ %blockheader, [0 x i64], %map, %block* }, { %blockheader, [0 x i64], %map, %block* }* null, i64 0, i32 3) to i64), i16 8 }]
+@layout_16 = global [2 x %layoutitem] [%layoutitem { i64 ptrtoint (%block** getelementptr ({ %blockheader, [0 x i64], %block*, %set }, { %blockheader, [0 x i64], %block*, %set }* null, i64 0, i32 2) to i64), i16 8 }, %layoutitem { i64 ptrtoint (%set* getelementptr ({ %blockheader, [0 x i64], %block*, %set }, { %blockheader, [0 x i64], %block*, %set }* null, i64 0, i32 3) to i64), i16 3 }]
 @layout_17 = global [3 x %layoutitem] [%layoutitem { i64 ptrtoint (%mpz** getelementptr ({ %blockheader, [0 x i64], %mpz*, %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz*, %mpz* }* null, i64 0, i32 2) to i64), i16 4 }, %layoutitem { i64 ptrtoint (%mpz** getelementptr ({ %blockheader, [0 x i64], %mpz*, %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz*, %mpz* }* null, i64 0, i32 3) to i64), i16 4 }, %layoutitem { i64 ptrtoint (%mpz** getelementptr ({ %blockheader, [0 x i64], %mpz*, %mpz*, %mpz* }, { %blockheader, [0 x i64], %mpz*, %mpz*, %mpz* }* null, i64 0, i32 4) to i64), i16 4 }]
-@layout_18 = global [3 x %layoutitem] [%layoutitem { i64 ptrtoint (%block** getelementptr ({ %blockheader, [0 x i64], %block*, %block*, %block* }, { %blockheader, [0 x i64], %block*, %block*, %block* }* null, i64 0, i32 2) to i64), i16 9 }, %layoutitem { i64 ptrtoint (%block** getelementptr ({ %blockheader, [0 x i64], %block*, %block*, %block* }, { %blockheader, [0 x i64], %block*, %block*, %block* }* null, i64 0, i32 3) to i64), i16 9 }, %layoutitem { i64 ptrtoint (%block** getelementptr ({ %blockheader, [0 x i64], %block*, %block*, %block* }, { %blockheader, [0 x i64], %block*, %block*, %block* }* null, i64 0, i32 4) to i64), i16 9 }]
+@layout_18 = global [3 x %layoutitem] [%layoutitem { i64 ptrtoint (%block** getelementptr ({ %blockheader, [0 x i64], %block*, %block*, %block* }, { %blockheader, [0 x i64], %block*, %block*, %block* }* null, i64 0, i32 2) to i64), i16 8 }, %layoutitem { i64 ptrtoint (%block** getelementptr ({ %blockheader, [0 x i64], %block*, %block*, %block* }, { %blockheader, [0 x i64], %block*, %block*, %block* }* null, i64 0, i32 3) to i64), i16 8 }, %layoutitem { i64 ptrtoint (%block** getelementptr ({ %blockheader, [0 x i64], %block*, %block*, %block* }, { %blockheader, [0 x i64], %block*, %block*, %block* }* null, i64 0, i32 4) to i64), i16 8 }]
 @layout_19 = global [1 x %layoutitem] [%layoutitem { i64 ptrtoint (i1* getelementptr ({ %blockheader, [0 x i64], i1 }, { %blockheader, [0 x i64], i1 }* null, i64 0, i32 2) to i64), i16 7 }]
 @layout_20 = global [2 x %layoutitem] [%layoutitem { i64 ptrtoint (%map* getelementptr ({ %blockheader, [0 x i64], %map, %set }, { %blockheader, [0 x i64], %map, %set }* null, i64 0, i32 2) to i64), i16 1 }, %layoutitem { i64 ptrtoint (%set* getelementptr ({ %blockheader, [0 x i64], %map, %set }, { %blockheader, [0 x i64], %map, %set }* null, i64 0, i32 3) to i64), i16 3 }]
 @layout_21 = global [1 x %layoutitem] [%layoutitem { i64 ptrtoint (%list* getelementptr ({ %blockheader, [0 x i64], %list }, { %blockheader, [0 x i64], %list }* null, i64 0, i32 2) to i64), i16 2 }]
@@ -4356,12 +4356,12 @@ tag24:                                            ; preds = %entry
   %45 = load %map, %map* %44
   tail call void @free(i8* %43)
   %46 = alloca %map
+  store %map %41, %map* %46
   %47 = alloca %map
-  store %map %41, %map* %47
+  store %map %45, %map* %47
   %48 = alloca %map
-  store %map %45, %map* %48
-  call void @hook_MAP_difference(%map* %46, %map* %47, %map* %48)
-  %49 = load %map, %map* %46
+  call void @hook_MAP_difference(%map* %48, %map* %46, %map* %47)
+  %49 = load %map, %map* %48
   %malloccall3 = tail call i8* @malloc(i64 ptrtoint (%map* getelementptr (%map, %map* null, i32 1) to i64))
   %50 = bitcast i8* %malloccall3 to %map*
   store %map %49, %map* %50
@@ -4380,12 +4380,12 @@ tag25:                                            ; preds = %entry
   %59 = load %list, %list* %58
   tail call void @free(i8* %57)
   %60 = alloca %list
+  store %list %55, %list* %60
   %61 = alloca %list
-  store %list %55, %list* %61
+  store %list %59, %list* %61
   %62 = alloca %list
-  store %list %59, %list* %62
-  call void @hook_LIST_concat(%list* %60, %list* %61, %list* %62)
-  %63 = load %list, %list* %60
+  call void @hook_LIST_concat(%list* %62, %list* %60, %list* %61)
+  %63 = load %list, %list* %62
   %malloccall4 = tail call i8* @malloc(i64 ptrtoint (%list* getelementptr (%list, %list* null, i32 1) to i64))
   %64 = bitcast i8* %malloccall4 to %list*
   store %list %63, %list* %64
@@ -4404,12 +4404,12 @@ tag26:                                            ; preds = %entry
   %73 = load %map, %map* %72
   tail call void @free(i8* %71)
   %74 = alloca %map
+  store %map %69, %map* %74
   %75 = alloca %map
-  store %map %69, %map* %75
+  store %map %73, %map* %75
   %76 = alloca %map
-  store %map %73, %map* %76
-  call void @hook_MAP_concat(%map* %74, %map* %75, %map* %76)
-  %77 = load %map, %map* %74
+  call void @hook_MAP_concat(%map* %76, %map* %74, %map* %75)
+  %77 = load %map, %map* %76
   %malloccall5 = tail call i8* @malloc(i64 ptrtoint (%map* getelementptr (%map, %map* null, i32 1) to i64))
   %78 = bitcast i8* %malloccall5 to %map*
   store %map %77, %map* %78
@@ -4428,12 +4428,12 @@ tag27:                                            ; preds = %entry
   %87 = load %set, %set* %86
   tail call void @free(i8* %85)
   %88 = alloca %set
+  store %set %83, %set* %88
   %89 = alloca %set
-  store %set %83, %set* %89
+  store %set %87, %set* %89
   %90 = alloca %set
-  store %set %87, %set* %90
-  call void @hook_SET_concat(%set* %88, %set* %89, %set* %90)
-  %91 = load %set, %set* %88
+  call void @hook_SET_concat(%set* %90, %set* %88, %set* %89)
+  %91 = load %set, %set* %90
   %malloccall6 = tail call i8* @malloc(i64 ptrtoint (%set* getelementptr (%set, %set* null, i32 1) to i64))
   %92 = bitcast i8* %malloccall6 to %set*
   store %set %91, %set* %92
@@ -4899,10 +4899,10 @@ tag59:                                            ; preds = %entry
   %359 = load i8*, i8** %358
   %360 = bitcast i8* %359 to %block*
   %361 = alloca %map
+  store %map %354, %map* %361
   %362 = alloca %map
-  store %map %354, %map* %362
-  call void @hook_MAP_update(%map* %361, %map* %362, %block* %357, %block* %360)
-  %363 = load %map, %map* %361
+  call void @hook_MAP_update(%map* %362, %map* %361, %block* %357, %block* %360)
+  %363 = load %map, %map* %362
   %malloccall41 = tail call i8* @malloc(i64 ptrtoint (%map* getelementptr (%map, %map* null, i32 1) to i64))
   %364 = bitcast i8* %malloccall41 to %map*
   store %map %363, %map* %364
@@ -4919,10 +4919,10 @@ tag60:                                            ; preds = %entry
   %371 = load i8*, i8** %370
   %372 = bitcast i8* %371 to %block*
   %373 = alloca %map
+  store %map %369, %map* %373
   %374 = alloca %map
-  store %map %369, %map* %374
-  call void @hook_MAP_remove(%map* %373, %map* %374, %block* %372)
-  %375 = load %map, %map* %373
+  call void @hook_MAP_remove(%map* %374, %map* %373, %block* %372)
+  %375 = load %map, %map* %374
   %malloccall42 = tail call i8* @malloc(i64 ptrtoint (%map* getelementptr (%map, %map* null, i32 1) to i64))
   %376 = bitcast i8* %malloccall42 to %map*
   store %map %375, %map* %376
@@ -5058,12 +5058,12 @@ tag74:                                            ; preds = %entry
   %465 = load %set, %set* %464
   tail call void @free(i8* %463)
   %466 = alloca %set
+  store %set %461, %set* %466
   %467 = alloca %set
-  store %set %461, %set* %467
+  store %set %465, %set* %467
   %468 = alloca %set
-  store %set %465, %set* %468
-  call void @hook_SET_difference(%set* %466, %set* %467, %set* %468)
-  %469 = load %set, %set* %466
+  call void @hook_SET_difference(%set* %468, %set* %466, %set* %467)
+  %469 = load %set, %set* %468
   %malloccall45 = tail call i8* @malloc(i64 ptrtoint (%set* getelementptr (%set, %set* null, i32 1) to i64))
   %470 = bitcast i8* %malloccall45 to %set*
   store %set %469, %set* %470
@@ -5180,12 +5180,12 @@ tag86:                                            ; preds = %entry
   %539 = load %set, %set* %538
   tail call void @free(i8* %537)
   %540 = alloca %set
+  store %set %535, %set* %540
   %541 = alloca %set
-  store %set %535, %set* %541
+  store %set %539, %set* %541
   %542 = alloca %set
-  store %set %539, %set* %542
-  call void @hook_SET_intersection(%set* %540, %set* %541, %set* %542)
-  %543 = load %set, %set* %540
+  call void @hook_SET_intersection(%set* %542, %set* %540, %set* %541)
+  %543 = load %set, %set* %542
   %malloccall48 = tail call i8* @malloc(i64 ptrtoint (%set* getelementptr (%set, %set* null, i32 1) to i64))
   %544 = bitcast i8* %malloccall48 to %set*
   store %set %543, %set* %544
@@ -5462,11 +5462,11 @@ tag111:                                           ; preds = %entry
   %692 = bitcast i8* %691 to %map*
   %693 = load %map, %map* %692
   tail call void @free(i8* %691)
-  %694 = alloca %set
-  %695 = alloca %map
-  store %map %693, %map* %695
-  call void @hook_MAP_keys(%set* %694, %map* %695)
-  %696 = load %set, %set* %694
+  %694 = alloca %map
+  store %map %693, %map* %694
+  %695 = alloca %set
+  call void @hook_MAP_keys(%set* %695, %map* %694)
+  %696 = load %set, %set* %695
   %malloccall73 = tail call i8* @malloc(i64 ptrtoint (%set* getelementptr (%set, %set* null, i32 1) to i64))
   %697 = bitcast i8* %malloccall73 to %set*
   store %set %696, %set* %697
@@ -5520,12 +5520,12 @@ tag117:                                           ; preds = %entry
   %728 = load %set, %set* %727
   tail call void @free(i8* %726)
   %729 = alloca %map
-  %730 = alloca %map
-  store %map %724, %map* %730
-  %731 = alloca %set
-  store %set %728, %set* %731
-  call void @hook_MAP_removeAll(%map* %729, %map* %730, %set* %731)
-  %732 = load %map, %map* %729
+  store %map %724, %map* %729
+  %730 = alloca %set
+  store %set %728, %set* %730
+  %731 = alloca %map
+  call void @hook_MAP_removeAll(%map* %731, %map* %729, %set* %730)
+  %732 = load %map, %map* %731
   %malloccall75 = tail call i8* @malloc(i64 ptrtoint (%map* getelementptr (%map, %map* null, i32 1) to i64))
   %733 = bitcast i8* %malloccall75 to %map*
   store %map %732, %map* %733
@@ -5594,12 +5594,12 @@ tag122:                                           ; preds = %entry
   %774 = load %map, %map* %773
   tail call void @free(i8* %772)
   %775 = alloca %map
+  store %map %770, %map* %775
   %776 = alloca %map
-  store %map %770, %map* %776
+  store %map %774, %map* %776
   %777 = alloca %map
-  store %map %774, %map* %777
-  call void @hook_MAP_updateAll(%map* %775, %map* %776, %map* %777)
-  %778 = load %map, %map* %775
+  call void @hook_MAP_updateAll(%map* %777, %map* %775, %map* %776)
+  %778 = load %map, %map* %777
   %malloccall76 = tail call i8* @malloc(i64 ptrtoint (%map* getelementptr (%map, %map* null, i32 1) to i64))
   %779 = bitcast i8* %malloccall76 to %map*
   store %map %778, %map* %779

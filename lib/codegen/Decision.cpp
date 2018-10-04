@@ -65,12 +65,21 @@ void SwitchNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitutio
     }
     d->CurrentBlock = entry.first;
     if (!isInt) {
-      int offset = 2;
+      int offset = 0;
       llvm::StructType *BlockType = getBlockType(d->Module, d->Definition, _case.getConstructor());
       llvm::BitCastInst *Cast = new llvm::BitCastInst(val, llvm::PointerType::getUnqual(BlockType), "", d->CurrentBlock);
       for (std::string binding : _case.getBindings()) {
-        llvm::Value *ChildPtr = llvm::GetElementPtrInst::CreateInBounds(BlockType, Cast, {llvm::ConstantInt::get(llvm::Type::getInt64Ty(d->Ctx), 0), llvm::ConstantInt::get(llvm::Type::getInt32Ty(d->Ctx), offset++)}, "", d->CurrentBlock);
-        substitution[binding] = new llvm::LoadInst(ChildPtr, binding, d->CurrentBlock);
+        llvm::Value *ChildPtr = llvm::GetElementPtrInst::CreateInBounds(BlockType, Cast, {llvm::ConstantInt::get(llvm::Type::getInt64Ty(d->Ctx), 0), llvm::ConstantInt::get(llvm::Type::getInt32Ty(d->Ctx), offset+2)}, "", d->CurrentBlock);
+        switch (dynamic_cast<KOREObjectCompositeSort *>(_case.getConstructor()->getArguments()[offset++])->getCategory(d->Definition).cat) {
+        case SortCategory::Map:
+        case SortCategory::List:
+        case SortCategory::Set:
+          substitution[binding] = ChildPtr;
+          break;
+        default:
+          substitution[binding] = new llvm::LoadInst(ChildPtr, binding, d->CurrentBlock);
+          break;
+        }
       }
     }
     _case.getChild()->codegen(d, substitution);
@@ -84,7 +93,7 @@ void SwitchNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitutio
 
 void EqualsLiteralNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution) {
   std::string funcName;
-  switch (cat) {
+  switch (cat.cat) {
   case SortCategory::Uncomputed:
   case SortCategory::Map:
   case SortCategory::List:
@@ -117,11 +126,18 @@ void FunctionNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitut
   std::vector<llvm::Value *> args;
   std::vector<llvm::Type *> types;
   for (auto arg : bindings) {
-    auto val = substitution.lookup(arg);
+    llvm::Value *val;
+    if (arg.find_first_not_of("-0123456789") == std::string::npos) {
+      val = llvm::ConstantInt::get(llvm::Type::getInt64Ty(d->Ctx), std::stoi(arg));
+    } else {
+      val = substitution.lookup(arg);
+    }
     args.push_back(val);
     types.push_back(val->getType());
   }
-  auto Call = llvm::CallInst::Create(d->Module->getOrInsertFunction(function, llvm::FunctionType::get(getValueType(cat, d->Module), types, false)), args, name, d->CurrentBlock);
+  CreateTerm creator(substitution, d->Definition, d->CurrentBlock, d->Module);
+  auto Call = creator.createFunctionCall(function, cat, args, function.substr(0, 5) == "hook_", false);
+  Call->setName(name);
   substitution[name] = Call;
   child->codegen(d, substitution);
 }
@@ -139,17 +155,17 @@ void LeafNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution)
 }
 
 llvm::Value *Decision::getTag(llvm::Value *val) {
-  return llvm::CallInst::Create(Module->getOrInsertFunction("getTag", llvm::Type::getInt32Ty(Ctx), getValueType(SortCategory::Symbol, Module)), val, "tag", CurrentBlock);
+  return llvm::CallInst::Create(Module->getOrInsertFunction("getTag", llvm::Type::getInt32Ty(Ctx), getValueType({SortCategory::Symbol, 0}, Module)), val, "tag", CurrentBlock);
 }
 
 void makeEvalFunction(KOREObjectSymbol *function, KOREDefinition *definition, llvm::Module *module, DecisionNode *dt) {
   auto returnSort = dynamic_cast<KOREObjectCompositeSort *>(function->getSort())->getCategory(definition);
   auto returnType = getValueType(returnSort, module);
   std::vector<llvm::Type *> args;
-  std::vector<SortCategory> cats;
+  std::vector<ValueType> cats;
   for (auto sort : function->getArguments()) {
     auto cat = dynamic_cast<KOREObjectCompositeSort *>(sort)->getCategory(definition);
-    switch (cat) {
+    switch (cat.cat) {
     case SortCategory::Map:
     case SortCategory::List:
     case SortCategory::Set:
@@ -172,18 +188,8 @@ void makeEvalFunction(KOREObjectSymbol *function, KOREDefinition *definition, ll
   llvm::BasicBlock *block = llvm::BasicBlock::Create(module->getContext(), "entry", matchFunc);
   int i = 0;
   for (auto val = matchFunc->arg_begin(); val != matchFunc->arg_end(); ++val, ++i) {
-    switch(cats[i]) {
-    case SortCategory::Map:
-    case SortCategory::Set:
-    case SortCategory::List: {
-      auto load = new llvm::LoadInst(val, "subject" + std::to_string(i), block);
-      subst.insert({load->getName(), load});
-      break;
-    } default:
-      val->setName("subject" + std::to_string(i));
-      subst.insert({val->getName(), val});
-      break;
-    }
+    val->setName("subject" + std::to_string(i));
+    subst.insert({val->getName(), val});
   }
   llvm::BasicBlock *stuck = llvm::BasicBlock::Create(module->getContext(), "stuck", matchFunc);
   addAbort(stuck, module);
@@ -193,7 +199,7 @@ void makeEvalFunction(KOREObjectSymbol *function, KOREDefinition *definition, ll
 }
 
 void makeStepFunction(KOREDefinition *definition, llvm::Module *module, DecisionNode *dt) {
-  auto blockType = getValueType(SortCategory::Symbol, module);
+  auto blockType = getValueType({SortCategory::Symbol, 0}, module);
   llvm::FunctionType *funcType = llvm::FunctionType::get(blockType, {blockType}, false);
   std::string name = "step";
   llvm::Constant *func = module->getOrInsertFunction(name, funcType);
@@ -210,7 +216,7 @@ void makeStepFunction(KOREDefinition *definition, llvm::Module *module, Decision
   llvm::CallInst::Create(FinishFunc, {val}, "", stuck);
   new llvm::UnreachableInst(module->getContext(), stuck);
 
-  Decision codegen(definition, block, stuck, module, SortCategory::Symbol);
+  Decision codegen(definition, block, stuck, module, {SortCategory::Symbol, 0});
   codegen(dt, subst);
 }
 

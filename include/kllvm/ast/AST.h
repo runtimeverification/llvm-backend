@@ -84,7 +84,15 @@ private:
 };
 
 enum class SortCategory {
-  Uncomputed, Map, List, Set, Int, Float, StringBuffer, Bool, MInt, Symbol
+  Uncomputed, Map, List, Set, Int, Float, StringBuffer, Bool, Symbol, MInt
+};
+
+// represents the syntactic category of an LLVM backend term at runtime
+struct ValueType {
+  // fundamental category of the term
+  SortCategory cat;
+  // if this is an MInt, the number of bits in the MInt
+  uint64_t bits;
 };
 
 class KOREDefinition;
@@ -93,16 +101,16 @@ class KOREObjectCompositeSort : public KOREObjectSort {
 private:
   std::string name;
   std::vector<KOREObjectSort *> arguments;
-  SortCategory category;
+  ValueType category;
 
 public:
-  static KOREObjectCompositeSort *Create(const std::string &Name, SortCategory Cat = SortCategory::Uncomputed) {
+  static KOREObjectCompositeSort *Create(const std::string &Name, ValueType Cat = {SortCategory::Uncomputed, 0}) {
     return new KOREObjectCompositeSort(Name, Cat);
   }
 
   const std::string getName() const { return name; }
-  SortCategory getCategory(KOREDefinition *definition);
-  static SortCategory getCategory(std::string hook);
+  ValueType getCategory(KOREDefinition *definition);
+  static ValueType getCategory(std::string hook);
 
   virtual bool isConcrete() const override { return true; }
   virtual KOREObjectSort *substitute(const substitution &subst) override;
@@ -112,7 +120,7 @@ public:
   virtual bool operator==(const KOREObjectSort &other) const override;
 
 private:
-  KOREObjectCompositeSort(const std::string &Name, SortCategory category) : name(Name), category(category) {}
+  KOREObjectCompositeSort(const std::string &Name, ValueType category) : name(Name), category(category) {}
 };
 
 class KOREMetaCompositeSort : public KOREMetaSort {

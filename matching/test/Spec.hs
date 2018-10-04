@@ -31,16 +31,16 @@ data Lst  = Cns IntPat Lst -- index 1
 
 instance IsPattern Lst where
   toPattern :: Lst -> Fix Pattern
-  toPattern (Cns i l) = Fix (Pattern (Right "cons") Nothing [toPattern i, toPattern l])
-  toPattern Nil     = Fix (Pattern (Right "nil") Nothing  [])
+  toPattern (Cns i l) = Fix (Pattern (Literal "cons") Nothing [toPattern i, toPattern l])
+  toPattern Nil     = Fix (Pattern (Literal "nil") Nothing  [])
   toPattern Wld     = Fix Wildcard
-  toPattern (Var v) = Fix (Variable v)
+  toPattern (Var v) = Fix (Variable v "STRING.String")
 
 instance IsPattern IntPat where
   toPattern :: IntPat -> Fix Pattern
-  toPattern (IntLit i) = Fix (Pattern (Right $ show i) (Just "MINT.MInt 32") [])
+  toPattern (IntLit i) = Fix (Pattern (Literal $ show i) (Just "MINT.MInt 32") [])
   toPattern IntWld     = Fix Wildcard
-  toPattern (IntVar v) = Fix (Variable v)
+  toPattern (IntVar v) = Fix (Variable v "INT.Int")
 
 instance HasMetadata IntPat where
   getMetadata :: Proxy IntPat -> Metadata
@@ -53,8 +53,8 @@ instance HasMetadata Lst where
   getMetadata :: Proxy Lst -> Metadata
   getMetadata _ =
     let m = M.fromList
-                    [ (Right "nil", []) -- Nil
-                    , (Right "cons", [ getMetadata (Proxy :: Proxy IntPat)
+                    [ (Literal "nil", []) -- Nil
+                    , (Literal "cons", [ getMetadata (Proxy :: Proxy IntPat)
                                , getMetadata (Proxy :: Proxy Lst)
                                ]) -- Cns Lst (1)
                     ]
@@ -143,7 +143,7 @@ appendTests = testGroup "Basic pattern compilation"
         switch [1] [ ("nil", leaf 1 [[2]])
                , ("cons", swap 2
                            (switch [2] [ ("nil", leaf 2 [[1]])
-                                   , ("cons", (function "side_condition_3" [[1, 2], [0, 1]] "BOOL.Bool" (switchLiteral [0, 0] 1 [("1", leaf 3 [[0, 2], [1, 2], [0, 1], [1, 1]]), ("0", failure)] Nothing)))
+                                   , ("cons", (function "side_condition_3" [0, 0] [[1, 2], [0, 1]] "BOOL.Bool" (switchLiteral [0, 0] 1 [("1", leaf 3 [[0, 2], [1, 2], [0, 1], [1, 1]]), ("0", failure)] Nothing)))
                                    ] Nothing ))
                ] Nothing
   , testCase "Yaml serialization" $

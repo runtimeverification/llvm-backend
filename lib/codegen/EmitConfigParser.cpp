@@ -128,7 +128,7 @@ static void emitIsSymbolAFunction(KOREDefinition *def, llvm::Module *mod) {
 }
 
 static llvm::Value *getArgValue(llvm::Value *ArgumentsArray, int idx,
-    llvm::BasicBlock *CaseBlock, SortCategory cat, llvm::Module *mod) {
+    llvm::BasicBlock *CaseBlock, ValueType cat, llvm::Module *mod) {
   llvm::LLVMContext &Ctx = mod->getContext();
   llvm::Constant *zero = llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0);
   auto addr = llvm::GetElementPtrInst::Create(
@@ -136,7 +136,7 @@ static llvm::Value *getArgValue(llvm::Value *ArgumentsArray, int idx,
       ArgumentsArray, {zero, llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), idx)},
       "", CaseBlock);
   llvm::Value *arg = new llvm::LoadInst(addr, "", CaseBlock);
-  switch(cat) {
+  switch(cat.cat) {
   case SortCategory::Map:
   case SortCategory::List:
   case SortCategory::Set:
@@ -172,7 +172,7 @@ static std::pair<llvm::Value *, llvm::BasicBlock *> getEval(KOREDefinition *def,
   llvm::StringMap<llvm::Value *> subst;
   auto pattern = KOREObjectCompositePattern::Create(symbol);
   for (auto sort : symbol->getArguments()) {
-    SortCategory cat = dynamic_cast<KOREObjectCompositeSort *>(sort)->getCategory(def);
+    ValueType cat = dynamic_cast<KOREObjectCompositeSort *>(sort)->getCategory(def);
     llvm::Value *arg = getArgValue(ArgumentsArray, idx, CaseBlock, cat, mod);
     std::string name = "_" + std::to_string(idx++);
     subst.insert({name, arg});
@@ -185,8 +185,8 @@ static std::pair<llvm::Value *, llvm::BasicBlock *> getEval(KOREDefinition *def,
   }
   delete pattern;
   llvm::Value *retval;
-  SortCategory cat = dynamic_cast<KOREObjectCompositeSort *>(symbol->getSort())->getCategory(def);
-  switch(cat) {
+  ValueType cat = dynamic_cast<KOREObjectCompositeSort *>(symbol->getSort())->getCategory(def);
+  switch(cat.cat) {
   case SortCategory::Map:
   case SortCategory::List:
   case SortCategory::Set:
@@ -242,8 +242,8 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
     auto &entry = *iter;
     std::string name = entry.first();
     auto sort = KOREObjectCompositeSort::Create(name);
-    SortCategory cat = sort->getCategory(definition);
-    if (cat == SortCategory::Symbol) {
+    ValueType cat = sort->getCategory(definition);
+    if (cat.cat == SortCategory::Symbol) {
       continue;
     }
     CurrentBlock->insertInto(func);
@@ -262,7 +262,7 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
     auto FalseBlock = llvm::BasicBlock::Create(Ctx, "");
     auto CaseBlock = llvm::BasicBlock::Create(Ctx, name, func);
     llvm::BranchInst::Create(CaseBlock, FalseBlock, icmp, CurrentBlock);
-    switch(cat) {
+    switch(cat.cat) {
     case SortCategory::Map:
     case SortCategory::List:
     case SortCategory::Set:
@@ -362,18 +362,18 @@ static void emitTraversal(std::string name, KOREDefinition *definition, llvm::Mo
       llvm::BasicBlock *)) {
   llvm::LLVMContext &Ctx = module->getContext();
   std::vector<llvm::Type *> argTypes;
-  argTypes.push_back(getValueType(SortCategory::Symbol, module));
+  argTypes.push_back(getValueType({SortCategory::Symbol, 0}, module));
   if (isVisitor) {
     // cf runtime/configurationparser/header.h visitChildren
     auto file = llvm::PointerType::getUnqual(llvm::StructType::create(Ctx, "FILE"));
     argTypes.push_back(file);
-    argTypes.push_back(makeVisitorType(Ctx, file, getValueType(SortCategory::Symbol, module), 1));
-    argTypes.push_back(makeVisitorType(Ctx, file, llvm::PointerType::getUnqual(getValueType(SortCategory::Map, module)), 3));
-    argTypes.push_back(makeVisitorType(Ctx, file, llvm::PointerType::getUnqual(getValueType(SortCategory::List, module)), 3));
-    argTypes.push_back(makeVisitorType(Ctx, file, llvm::PointerType::getUnqual(getValueType(SortCategory::Set, module)), 3));
-    argTypes.push_back(makeVisitorType(Ctx, file, getValueType(SortCategory::Int, module), 1));
-    argTypes.push_back(makeVisitorType(Ctx, file, getValueType(SortCategory::Float, module), 1));
-    argTypes.push_back(makeVisitorType(Ctx, file, getValueType(SortCategory::Bool, module), 1));
+    argTypes.push_back(makeVisitorType(Ctx, file, getValueType({SortCategory::Symbol, 0}, module), 1));
+    argTypes.push_back(makeVisitorType(Ctx, file, llvm::PointerType::getUnqual(getValueType({SortCategory::Map, 0}, module)), 3));
+    argTypes.push_back(makeVisitorType(Ctx, file, llvm::PointerType::getUnqual(getValueType({SortCategory::List, 0}, module)), 3));
+    argTypes.push_back(makeVisitorType(Ctx, file, llvm::PointerType::getUnqual(getValueType({SortCategory::Set, 0}, module)), 3));
+    argTypes.push_back(makeVisitorType(Ctx, file, getValueType({SortCategory::Int, 0}, module), 1));
+    argTypes.push_back(makeVisitorType(Ctx, file, getValueType({SortCategory::Float, 0}, module), 1));
+    argTypes.push_back(makeVisitorType(Ctx, file, getValueType({SortCategory::Bool, 0}, module), 1));
     argTypes.push_back(makeVisitorType(Ctx, file, llvm::Type::getInt8PtrTy(Ctx), 1));
     argTypes.push_back(llvm::PointerType::getUnqual(llvm::FunctionType::get(llvm::Type::getVoidTy(Ctx), {file}, false)));
   } else {
@@ -418,7 +418,7 @@ static void getStore(KOREDefinition *definition, llvm::Module *module, KOREObjec
   auto cast = new llvm::BitCastInst(func->arg_begin(),
       llvm::PointerType::getUnqual(BlockType), "", CaseBlock);
   for (auto sort : symbol->getArguments()) {
-    SortCategory cat = dynamic_cast<KOREObjectCompositeSort *>(sort)->getCategory(definition);
+    ValueType cat = dynamic_cast<KOREObjectCompositeSort *>(sort)->getCategory(definition);
     llvm::Value *arg = getArgValue(ArgumentsArray, idx, CaseBlock, cat, module);
     llvm::Value *ChildPtr = llvm::GetElementPtrInst::CreateInBounds(BlockType, cast,
         {zero, llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), idx++ + 2)}, "", CaseBlock);
@@ -469,7 +469,7 @@ static void getVisitor(KOREDefinition *definition, llvm::Module *module, KOREObj
   unsigned i = 0;
   for (auto sort : symbol->getArguments()) {
     auto compositeSort = dynamic_cast<KOREObjectCompositeSort *>(sort);
-    SortCategory cat = compositeSort->getCategory(definition);
+    ValueType cat = compositeSort->getCategory(definition);
     llvm::Value *ChildPtr = llvm::GetElementPtrInst::CreateInBounds(BlockType, cast,
         {zero, llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), idx++ + 2)}, "", CaseBlock);
     llvm::Value *Child = new llvm::LoadInst(ChildPtr, "", CaseBlock);
@@ -482,14 +482,14 @@ static void getVisitor(KOREDefinition *definition, llvm::Module *module, KOREObj
       globalVar->setInitializer(Str);
     }
     llvm::Constant *CharPtr = llvm::ConstantExpr::getInBoundsGetElementPtr(Str->getType(), global, indices);
-    switch(cat) {
+    switch(cat.cat) {
     case SortCategory::StringBuffer:
       Child = llvm::GetElementPtrInst::Create(
           module->getTypeByName(BUFFER_STRUCT),
           Child, {zero, llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), 1)},
           "", CaseBlock);
       Child = new llvm::LoadInst(Child, "", CaseBlock);
-      Child = new llvm::BitCastInst(Child, getValueType(SortCategory::Symbol, module), "", CaseBlock);
+      Child = new llvm::BitCastInst(Child, getValueType({SortCategory::Symbol, 0}, module), "", CaseBlock);
       // fall through
     case SortCategory::Symbol:
       llvm::CallInst::Create(func->arg_begin()+2, {func->arg_begin()+1, Child, CharPtr}, "", CaseBlock);
@@ -533,9 +533,9 @@ static llvm::Constant *getLayoutData(uint16_t layout, KOREObjectSymbol *symbol, 
   auto BlockType = getBlockType(module, def, symbol);
   int i = 2;
   for (auto sort : symbol->getArguments()) {
-    SortCategory cat = dynamic_cast<KOREObjectCompositeSort *>(sort)->getCategory(def);
+    ValueType cat = dynamic_cast<KOREObjectCompositeSort *>(sort)->getCategory(def);
     auto offset = llvm::ConstantExpr::getOffsetOf(BlockType, i++);
-    elements.push_back(llvm::ConstantStruct::get(module->getTypeByName(LAYOUTITEM_STRUCT), offset, llvm::ConstantInt::get(llvm::Type::getInt16Ty(Ctx), (int)cat)));
+    elements.push_back(llvm::ConstantStruct::get(module->getTypeByName(LAYOUTITEM_STRUCT), offset, llvm::ConstantInt::get(llvm::Type::getInt16Ty(Ctx), (int)cat.cat + cat.bits)));
   }
   auto Arr = llvm::ConstantArray::get(llvm::ArrayType::get(module->getTypeByName(LAYOUTITEM_STRUCT), len), elements);
   auto global = module->getOrInsertGlobal("layout_" + std::to_string(layout), Arr->getType());

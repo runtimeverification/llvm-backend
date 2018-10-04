@@ -36,7 +36,18 @@ public:
    an llvm value corresponding to the specified KORE RHS pattern and substitution in the
    specified definition, and returns the value itself. */
   llvm::Value *operator()(KOREPattern *pattern);
-  llvm::Value *createToken(SortCategory sort, std::string contents);
+  llvm::Value *createToken(ValueType sort, std::string contents);
+  /* creates a call instructin calling a particular llvm function, abstracting certain abi and calling convention details. 
+   * name: the nmae of the function to call in llvm
+   * returnCat: the value category of the return type of the function
+   * args: the arguments to pass to the functgion
+   * sret: if true, this is a function that returns a struct constant via the C abi, ie, 
+   * the function actually returns void and the return value is via a pointe. Note that this 
+   * can be set to true even if the function does not return a struct, in which case its value
+   * is ignored.
+   * load: if the function returns a struct via sret, then if load is true, we load the value 
+   * returned from the function before returning it. */
+  llvm::Value *createFunctionCall(std::string name, ValueType returnCat, std::vector<llvm::Value *> &args, bool sret, bool load);
 
   llvm::BasicBlock *getCurrentBlock() const { return CurrentBlock; }
 };
@@ -59,7 +70,7 @@ std::string makeApplyRuleFunction(KOREAxiomDeclaration *axiom, KOREDefinition *d
 std::string makeSideConditionFunction(KOREAxiomDeclaration *axiom, KOREDefinition *definition, llvm::Module *Module);
 
 /* returns the llvm::Type corresponding to the specified KORE sort category */
-llvm::Type *getValueType(SortCategory sort, llvm::Module *Module);
+llvm::Type *getValueType(ValueType sort, llvm::Module *Module);
 
 void addAbort(llvm::BasicBlock *block, llvm::Module *Module);
 

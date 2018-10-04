@@ -65,7 +65,9 @@ pub type List = Vector<KElem>;
 extern "C" {
   pub fn __gmpz_init_set_ui(rop: *mut Int, op: usize);
   pub fn __gmpz_fits_ulong_p(op: *const Int) -> i32;
-  pub fn __gmpz_get_ui(op: *const Int) -> u64;
+  pub fn __gmpz_fits_slong_p(op: *const Int) -> i32;
+  pub fn __gmpz_get_ui(op: *const Int) -> usize;
+  pub fn __gmpz_get_si(op: *const Int) -> isize;
 }
 
 extern "C" {

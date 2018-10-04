@@ -51,12 +51,12 @@ KOREObjectSort *KOREObjectCompositeSort::substitute(const std::unordered_map<KOR
   return this;
 }
 
-SortCategory KOREObjectCompositeSort::getCategory(KOREDefinition *definition) {
-  if (category != SortCategory::Uncomputed)
+ValueType KOREObjectCompositeSort::getCategory(KOREDefinition *definition) {
+  if (category.cat != SortCategory::Uncomputed)
     return category;
   auto &att = definition->getSortDeclarations().lookup(this->getName())->getAttributes();
   if (!att.count("hook")) {
-    category = SortCategory::Symbol;
+    category = {SortCategory::Symbol, 0};
     return category;
   }
   KOREObjectCompositePattern *hookAtt = att.lookup("hook");
@@ -67,8 +67,9 @@ SortCategory KOREObjectCompositeSort::getCategory(KOREDefinition *definition) {
   return category;
 }
 
-SortCategory KOREObjectCompositeSort::getCategory(std::string name) {
+ValueType KOREObjectCompositeSort::getCategory(std::string name) {
   SortCategory category;
+  uint64_t bits = 0;
   if (name == "MAP.Map") category = SortCategory::Map;
   else if (name == "LIST.List") category = SortCategory::List;
   else if (name == "SET.Set") category = SortCategory::Set;
@@ -77,9 +78,13 @@ SortCategory KOREObjectCompositeSort::getCategory(std::string name) {
   else if (name == "FLOAT.Float") category = SortCategory::Float;
   else if (name == "BUFFER.StringBuffer") category = SortCategory::StringBuffer;
   else if (name == "BOOL.Bool") category = SortCategory::Bool;
-  else if (name == "MINT.MInt") category = SortCategory::MInt;
+  // we expect the "hook" of a MInt to be of the form "MINT.MInt N" for some bitwidth N
+  else if (name.substr(0, 9) == "MINT.MInt") {
+    category = SortCategory::MInt;
+    bits = std::stoi(name.substr(10));
+  }
   else category = SortCategory::Symbol;
-  return category;
+  return {category, bits};
 }
 
 void KOREObjectSymbol::addArgument(KOREObjectSort *Argument) {
@@ -108,7 +113,8 @@ std::string KOREObjectSymbol::layoutString(KOREDefinition *definition) const {
   std::string result;
   for (auto arg : arguments) {
     auto sort = dynamic_cast<KOREObjectCompositeSort *>(arg);
-    switch(sort->getCategory(definition)) {
+    ValueType cat = sort->getCategory(definition);
+    switch(cat.cat) {
     case SortCategory::Map:
       result.push_back('1');
       break;
@@ -131,7 +137,7 @@ std::string KOREObjectSymbol::layoutString(KOREDefinition *definition) const {
       result.push_back('7');
       break;
     case SortCategory::MInt:
-      assert(false && "not implemented yet: MInt");
+      result.append("_" + std::to_string(cat.bits) + "_");
     case SortCategory::Symbol:
       result.push_back('0');
       break;

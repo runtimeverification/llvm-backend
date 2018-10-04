@@ -73,14 +73,14 @@ class EqualsLiteralNode : public DecisionNode {
 private:
   std::string name;
   std::string binding;
-  SortCategory cat;
+  ValueType cat;
   std::string literal;
   DecisionNode *child;
 
   EqualsLiteralNode(
     const std::string &name,
     const std::string &binding,
-    SortCategory cat,
+    ValueType cat,
     const std::string literal,
     DecisionNode *child) :
       name(name),
@@ -93,7 +93,7 @@ public:
   static EqualsLiteralNode *Create(
       const std::string &name,
       const std::string &binding,
-      SortCategory cat,
+      ValueType cat,
       const std::string literal,
       DecisionNode *child) {
     return new EqualsLiteralNode(name, binding, cat, literal, child);
@@ -113,13 +113,13 @@ private:
   /* the successor node in the tree */
   DecisionNode *child;
   /* the return sort of the function */
-  SortCategory cat;
+  ValueType cat;
   
   FunctionNode(
     const std::string &name,
     const std::string &function,
     DecisionNode *child,
-    SortCategory cat) :
+    ValueType cat) :
       name(name),
       function(function),
       child(child),
@@ -130,7 +130,7 @@ public:
       const std::string &name,
       const std::string &function,
       DecisionNode *child,
-      SortCategory cat) {
+      ValueType cat) {
     return new FunctionNode(name, function, child, cat);
   }
 
@@ -180,7 +180,7 @@ private:
   llvm::BasicBlock *StuckBlock;
   llvm::Module *Module;
   llvm::LLVMContext &Ctx;
-  SortCategory Cat;
+  ValueType Cat;
 
   llvm::Value *getTag(llvm::Value *);
 public:
@@ -189,7 +189,7 @@ public:
     llvm::BasicBlock *EntryBlock,
     llvm::BasicBlock *StuckBlock,
     llvm::Module *Module,
-    SortCategory Cat) :
+    ValueType Cat) :
       Definition(Definition),
       CurrentBlock(EntryBlock),
       StuckBlock(StuckBlock),

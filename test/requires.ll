@@ -217,42 +217,43 @@ entry:
   ret i1 %0
 }
 
-define i1 @side_condition_234(%map %VarRho, %block* %VarX) {
+define i1 @side_condition_234(%map*, %block* %VarX) {
 entry:
+  %VarRho = load %map, %map* %0
   %malloccall = tail call i8* @malloc(i64 ptrtoint ({ %blockheader, [0 x i64], %block*, %block* }* getelementptr ({ %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* null, i32 1) to i64))
-  %0 = bitcast i8* %malloccall to { %blockheader, [0 x i64], %block*, %block* }*
-  %kseq = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %0, i64 0, i32 0
+  %1 = bitcast i8* %malloccall to { %blockheader, [0 x i64], %block*, %block* }*
+  %kseq = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %1, i64 0, i32 0
   store %blockheader { i64 281487861612693 }, %blockheader* %kseq
   %tag = call i32 @getTag(%block* %VarX)
-  %1 = icmp uge i32 %tag, 126
-  br i1 %1, label %geFirst, label %notInjection
+  %2 = icmp uge i32 %tag, 126
+  br i1 %2, label %geFirst, label %notInjection
 
 geFirst:                                          ; preds = %entry
-  %2 = icmp ule i32 %tag, 148
-  br i1 %2, label %merge, label %notInjection
+  %3 = icmp ule i32 %tag, 148
+  br i1 %3, label %merge, label %notInjection
 
 notInjection:                                     ; preds = %geFirst, %entry
   %malloccall1 = tail call i8* @malloc(i64 ptrtoint ({ %blockheader, [0 x i64], %block* }* getelementptr ({ %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* null, i32 1) to i64))
-  %3 = bitcast i8* %malloccall1 to { %blockheader, [0 x i64], %block* }*
-  %inj = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %3, i64 0, i32 0
+  %4 = bitcast i8* %malloccall1 to { %blockheader, [0 x i64], %block* }*
+  %inj = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %4, i64 0, i32 0
   store %blockheader { i64 562958543356044 }, %blockheader* %inj
-  %4 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %3, i64 0, i32 2
-  store %block* %VarX, %block** %4
-  %5 = bitcast { %blockheader, [0 x i64], %block* }* %3 to %block*
+  %5 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %4, i64 0, i32 2
+  store %block* %VarX, %block** %5
+  %6 = bitcast { %blockheader, [0 x i64], %block* }* %4 to %block*
   br label %merge
 
 merge:                                            ; preds = %notInjection, %geFirst
-  %phi = phi %block* [ %5, %notInjection ], [ %VarX, %geFirst ]
-  %6 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %0, i64 0, i32 2
-  store %block* %phi, %block** %6
-  %7 = inttoptr i64 536870912001 to %block*
-  %8 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %0, i64 0, i32 3
-  store %block* %7, %block** %8
-  %9 = bitcast { %blockheader, [0 x i64], %block*, %block* }* %0 to %block*
-  %10 = alloca %map
-  store %map %VarRho, %map* %10
-  %11 = call i1 @hook_MAP_in_keys(%block* %9, %map* %10)
-  %hook_BOOL_not = xor i1 %11, true
+  %phi = phi %block* [ %6, %notInjection ], [ %VarX, %geFirst ]
+  %7 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %1, i64 0, i32 2
+  store %block* %phi, %block** %7
+  %8 = inttoptr i64 536870912001 to %block*
+  %9 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %1, i64 0, i32 3
+  store %block* %8, %block** %9
+  %10 = bitcast { %blockheader, [0 x i64], %block*, %block* }* %1 to %block*
+  %11 = alloca %map
+  store %map %VarRho, %map* %11
+  %12 = call i1 @hook_MAP_in_keys(%block* %10, %map* %11)
+  %hook_BOOL_not = xor i1 %12, true
   ret i1 %hook_BOOL_not
 }
 
@@ -490,42 +491,43 @@ merge7:                                           ; preds = %notInjection6, %geF
   br label %hook_BOOL_and
 }
 
-define i1 @side_condition_325(%map %VarRho, %block* %VarX) {
+define i1 @side_condition_325(%map*, %block* %VarX) {
 entry:
+  %VarRho = load %map, %map* %0
   %malloccall = tail call i8* @malloc(i64 ptrtoint ({ %blockheader, [0 x i64], %block*, %block* }* getelementptr ({ %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* null, i32 1) to i64))
-  %0 = bitcast i8* %malloccall to { %blockheader, [0 x i64], %block*, %block* }*
-  %kseq = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %0, i64 0, i32 0
+  %1 = bitcast i8* %malloccall to { %blockheader, [0 x i64], %block*, %block* }*
+  %kseq = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %1, i64 0, i32 0
   store %blockheader { i64 281487861612693 }, %blockheader* %kseq
   %tag = call i32 @getTag(%block* %VarX)
-  %1 = icmp uge i32 %tag, 126
-  br i1 %1, label %geFirst, label %notInjection
+  %2 = icmp uge i32 %tag, 126
+  br i1 %2, label %geFirst, label %notInjection
 
 geFirst:                                          ; preds = %entry
-  %2 = icmp ule i32 %tag, 148
-  br i1 %2, label %merge, label %notInjection
+  %3 = icmp ule i32 %tag, 148
+  br i1 %3, label %merge, label %notInjection
 
 notInjection:                                     ; preds = %geFirst, %entry
   %malloccall1 = tail call i8* @malloc(i64 ptrtoint ({ %blockheader, [0 x i64], %block* }* getelementptr ({ %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* null, i32 1) to i64))
-  %3 = bitcast i8* %malloccall1 to { %blockheader, [0 x i64], %block* }*
-  %inj = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %3, i64 0, i32 0
+  %4 = bitcast i8* %malloccall1 to { %blockheader, [0 x i64], %block* }*
+  %inj = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %4, i64 0, i32 0
   store %blockheader { i64 562958543356044 }, %blockheader* %inj
-  %4 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %3, i64 0, i32 2
-  store %block* %VarX, %block** %4
-  %5 = bitcast { %blockheader, [0 x i64], %block* }* %3 to %block*
+  %5 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %4, i64 0, i32 2
+  store %block* %VarX, %block** %5
+  %6 = bitcast { %blockheader, [0 x i64], %block* }* %4 to %block*
   br label %merge
 
 merge:                                            ; preds = %notInjection, %geFirst
-  %phi = phi %block* [ %5, %notInjection ], [ %VarX, %geFirst ]
-  %6 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %0, i64 0, i32 2
-  store %block* %phi, %block** %6
-  %7 = inttoptr i64 536870912001 to %block*
-  %8 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %0, i64 0, i32 3
-  store %block* %7, %block** %8
-  %9 = bitcast { %blockheader, [0 x i64], %block*, %block* }* %0 to %block*
-  %10 = alloca %map
-  store %map %VarRho, %map* %10
-  %11 = call i1 @hook_MAP_in_keys(%block* %9, %map* %10)
-  ret i1 %11
+  %phi = phi %block* [ %6, %notInjection ], [ %VarX, %geFirst ]
+  %7 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %1, i64 0, i32 2
+  store %block* %phi, %block** %7
+  %8 = inttoptr i64 536870912001 to %block*
+  %9 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %1, i64 0, i32 3
+  store %block* %8, %block** %9
+  %10 = bitcast { %blockheader, [0 x i64], %block*, %block* }* %1 to %block*
+  %11 = alloca %map
+  store %map %VarRho, %map* %11
+  %12 = call i1 @hook_MAP_in_keys(%block* %10, %map* %11)
+  ret i1 %12
 }
 
 define i1 @side_condition_327(%block* %VarHOLE) {

@@ -102,8 +102,8 @@ hashChild:
 				   i16 5, label %stuck
 				   i16 6, label %stuck
 				   i16 7, label %hashBool
-				   i16 8, label %stuck
-				   i16 9, label %hashSymbol ]
+				   i16 8, label %hashSymbol
+				   i16 9, label %stuck ]
 hashMap:
   %mapptr = inttoptr i64 %childintptr to %map*
   call void @map_hash(%map* %mapptr, i8* %hasher)

@@ -1,6 +1,6 @@
 extern crate libc;
 
-use super::decls::{List,Int,K,KElem,__gmpz_fits_ulong_p,__gmpz_get_ui,__gmpz_init_set_ui,move_int,printConfigurationInternal};
+use super::decls::{List,Int,K,KElem,__gmpz_fits_ulong_p,__gmpz_fits_slong_p,__gmpz_get_si,__gmpz_get_ui,__gmpz_init_set_ui,move_int,printConfigurationInternal};
 use std::ptr;
 use std::mem;
 use std::hash::Hash;
@@ -53,15 +53,28 @@ unsafe fn get_long(i: *const Int) -> (bool, usize) {
   if !(__gmpz_fits_ulong_p(i) != 0) {
     return (false, 0);
   }
-  (true, __gmpz_get_ui(i) as usize)
+  (true, __gmpz_get_ui(i))
+}
+
+unsafe fn get_slong(i: *const Int) -> (bool, isize) {
+  if !(__gmpz_fits_slong_p(i) != 0) {
+    return (false, 0);
+  }
+  (true, __gmpz_get_si(i))
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_LIST_get(list: *const List, index: *const Int) -> K {
-  let (status, index_long) = get_long(index);
+  let (status, index_long) = get_slong(index);
   if !status {
     panic!("Index out of range")
   }
+  hook_LIST_get_long(list, index_long)
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn hook_LIST_get_long(list: *const List, index: isize) -> K {
+  let index_long = if index < 0 { ((*list).len() as isize) + index } else { index } as usize;
   match (*list).get(index_long) {
     Some(KElem(elem)) => { *elem }
     None => panic!("Index out of range")
@@ -83,18 +96,28 @@ pub unsafe extern "C" fn hook_LIST_range(list: *const List, from_front: *const I
   if !status {
     panic!("Index out of range")
   }
+  hook_LIST_range_long(list, front_long, back_long)
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn hook_LIST_range_long(list: *const List, from_front: usize, from_back: usize) -> List {
   let old_len = (*list).len();
-  if old_len < front_long + back_long {
+  if old_len < from_front + from_back {
     panic!("Index out of range")
   }
-  (*list).clone().slice(front_long..old_len - front_long - back_long)
+  (*list).clone().slice(from_front..old_len - from_back)
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_LIST_size(l: *const List) -> *mut Int {
   let mut result = Int(0, 0, ptr::null());
-  __gmpz_init_set_ui(&mut result, (*l).len());
+  __gmpz_init_set_ui(&mut result, hook_LIST_size_long(l));
   move_int(&mut result)
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn hook_LIST_size_long(l: *const List) -> usize {
+  (*l).len()
 }
 
 #[no_mangle]
@@ -194,7 +217,12 @@ pub mod tests {
       __gmpz_init_set_ui(index, 0);
       let result = hook_LIST_get(&list, index);
       assert_eq!(result, DUMMY0);
+      let index2 = alloc_int();
+      __gmpz_init_set_si(index2, -1);
+      let result = hook_LIST_get(&list, index2);
+      assert_eq!(result, DUMMY0);
       free_int(index);
+      free_int(index2);
     }
   }
 
@@ -245,7 +273,7 @@ pub mod tests {
   fn test_get_negative() {
     unsafe {
       let index = alloc_int();
-      __gmpz_init_set_si(index, -1);
+      __gmpz_init_set_si(index, -2);
       let list = hook_LIST_element(DUMMY0);
       hook_LIST_get(&list, index);
     }
@@ -309,8 +337,18 @@ pub mod tests {
       let list = hook_LIST_element(DUMMY0);
       let result = hook_LIST_range(&list, zero, one);
       free_int(zero);
+      free_int(one);
       let zero = hook_LIST_size(&result);
       assert_eq!(__gmpz_cmp_ui(zero, 0), 0);
+      free_int(zero);
+      let zero = alloc_int();
+      let one = alloc_int();
+      __gmpz_init_set_ui(zero, 0);
+      __gmpz_init_set_ui(one, 1);
+      let list = hook_LIST_concat(&list, &list);
+      let result = hook_LIST_range(&list, one, zero);
+      let one = hook_LIST_size(&result);
+      assert_eq!(__gmpz_cmp_ui(one, 1), 0);
       free_int(zero);
       free_int(one);
     }
