@@ -51,7 +51,7 @@ import           Data.List.Index       (indexed)
 import           Data.Maybe            (catMaybes,isJust,fromJust,listToMaybe)
 import           Data.Ord              (comparing)
 import           Data.Semigroup        ((<>))
-import           Data.Text             (Text, pack)
+import           Data.Text             (Text, pack, unpack)
 import           Data.Traversable      (mapAccumL)
 import           Kore.AST.Common       (SymbolOrAlias (..), Id (..), Sort(..))
 import           Kore.AST.MetaOrObject (Object (..))
@@ -957,7 +957,7 @@ compilePattern firstCm =
     isWildcard (Fix (MapPattern _ _ _ _ _)) = False
     isWildcard (Fix (SetPattern [] (Just p) _ _)) = isWildcard p
     isWildcard (Fix (SetPattern _ _ _ _)) = False
-    isWildcard (Fix (ListPattern _ _ _ _)) = False
+    isWildcard (Fix (ListPattern _ _ _ _ _)) = False
     -- constructs a tree to test the current occurrence against each possible match in turn
     equalLiteral :: Int -> Occurrence -> String -> [(Text, (ClauseMatrix, [Occurrence]))] -> Maybe (ClauseMatrix, [Occurrence]) -> Fix DecisionTree
     -- if no specializations remain and a default exists, consume the occurrence and continue with the default
@@ -970,7 +970,7 @@ compilePattern firstCm =
     equalLiteral o litO hookName ((name,spec):tl) d =
       let newO = [o, 0]
           eqO = [o+1,0]
-      in Fix $ MakePattern newO (Fix (Pattern (Literal name) (Just hookName) [])) $ 
+      in Fix $ MakePattern newO (Fix (Pattern (Literal (unpack name)) (Just hookName) [])) $ 
              Fix $ Function (equalityFun hookName) eqO [litO, newO] "BOOL.Bool" $
                  Fix $ SwitchLiteral eqO 1 $ L [("1", Fix $ Switch litO L 
                                                              { getSpecializations = [], getDefault = Just $ compilePattern' (o+2) spec }),
