@@ -10,13 +10,17 @@
 #define DBG(...)
 #endif
 
+// const size_t BLOCK_SIZE = 1048568;
+// 1 MiB minus 16 bytes for libc malloc overhead
+const size_t BLOCK_SIZE = 1000000000;
+
 static char* block = 0;
 static size_t remaining = 0;
 static size_t last_size = 0;
 
 static void freshBlock() {
-    block = malloc(1048568);
-    remaining = 1048568;
+    block = malloc(BLOCK_SIZE);
+    remaining = BLOCK_SIZE;
     DBG("New block at %p (remaining %zd)\n", block, remaining);
 }
 
@@ -24,7 +28,11 @@ void* koreAlloc(size_t requested) {
   requested = (requested + 7) & ~7;
   if (remaining < requested) {
     DBG("Block at %p too small, %zd remaining but %zd needed\n", block, remaining, requested);
-    freshBlock();
+    if (requested > BLOCK_SIZE) {
+      return malloc(requested);
+    } else {
+      freshBlock();
+    }
   }
   void* result = block;
   block += requested;
