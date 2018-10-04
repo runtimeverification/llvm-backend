@@ -87,8 +87,11 @@ enum class SortCategory {
   Uncomputed, Map, List, Set, Int, Float, StringBuffer, Bool, Symbol, MInt
 };
 
+// represents the syntactic category of an LLVM backend term at runtime
 struct ValueType {
+  // fundamental category of the term
   SortCategory cat;
+  // if this is an MInt, the number of bits in the MInt
   uint64_t bits;
 };
 
