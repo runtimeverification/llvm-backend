@@ -108,6 +108,7 @@ void MakeLiteralNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substi
 void MakePatternNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution) {
   CreateTerm creator(substitution, d->Definition, d->CurrentBlock, d->Module);
   llvm::Value *val = creator(pattern);
+  d->CurrentBlock = creator.getCurrentBlock();
   substitution[name] = val;
   child->codegen(d, substitution);
 }
