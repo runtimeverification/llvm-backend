@@ -1,6 +1,7 @@
 #include "kllvm/codegen/CreateTerm.h"
 
 #include <gmp.h>
+#include <iomanip>
 
 #include "llvm/IRReader/IRReader.h"
 #include "llvm/IR/BasicBlock.h"
@@ -188,6 +189,16 @@ llvm::Type *termType(KOREPattern *pattern, llvm::StringMap<llvm::Type *> &substi
   }
 }
 
+std::string escape(std::string str) {
+  std::stringstream os;
+  os << std::setfill('0') << std::setw(2) << std::hex;
+  for (char c : str) {
+    unsigned char uc = c;
+    os << (int)uc;
+  }
+  return os.str();
+}
+
 llvm::Value *CreateTerm::createToken(ValueType sort, std::string contents) {
   switch(sort.cat) {
   case SortCategory::Map:
@@ -225,7 +236,7 @@ llvm::Value *CreateTerm::createToken(ValueType sort, std::string contents) {
     return llvm::ConstantInt::get(llvm::Type::getInt1Ty(Ctx), contents == "true");
   case SortCategory::Symbol: {
     llvm::StructType *StringType = llvm::StructType::get(Ctx, {Module->getTypeByName(BLOCKHEADER_STRUCT), llvm::ArrayType::get(llvm::Type::getInt8Ty(Ctx), contents.size())});
-    llvm::Constant *global = Module->getOrInsertGlobal("token_" + contents, StringType);
+    llvm::Constant *global = Module->getOrInsertGlobal("token_" + escape(contents), StringType);
     llvm::GlobalVariable *globalVar = llvm::dyn_cast<llvm::GlobalVariable>(global);
     if (!globalVar->hasInitializer()) {
       llvm::StructType *BlockHeaderType = Module->getTypeByName(BLOCKHEADER_STRUCT);
