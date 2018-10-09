@@ -137,9 +137,6 @@ static llvm::Value *getArgValue(llvm::Value *ArgumentsArray, int idx,
       "", CaseBlock);
   llvm::Value *arg = new llvm::LoadInst(addr, "", CaseBlock);
   switch(cat.cat) {
-  case SortCategory::Map:
-  case SortCategory::List:
-  case SortCategory::Set:
   case SortCategory::Bool:
   case SortCategory::MInt: {
     auto cast = new llvm::BitCastInst(arg,
@@ -149,6 +146,11 @@ static llvm::Value *getArgValue(llvm::Value *ArgumentsArray, int idx,
     arg = load;
     break;
   }
+  case SortCategory::Map:
+  case SortCategory::List:
+  case SortCategory::Set:
+    arg = new llvm::BitCastInst(arg, llvm::PointerType::getUnqual(getValueType(cat, mod)), "", CaseBlock);
+    break;
   case SortCategory::Int:
   case SortCategory::Float:
   case SortCategory::StringBuffer:
@@ -431,6 +433,9 @@ static void getStore(KOREDefinition *definition, llvm::Module *module, KOREObjec
     llvm::Value *arg = getArgValue(ArgumentsArray, idx, CaseBlock, cat, module);
     llvm::Value *ChildPtr = llvm::GetElementPtrInst::CreateInBounds(BlockType, cast,
         {zero, llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), idx++ + 2)}, "", CaseBlock);
+    if (arg->getType() == ChildPtr->getType()) {
+      arg = new llvm::LoadInst(arg, "", CaseBlock);
+    }
     new llvm::StoreInst(arg, ChildPtr, CaseBlock);
   }
 }
