@@ -286,9 +286,21 @@ KOREPattern *KOREAxiomDeclaration::getRightHandSide() const {
     if (top->getConstructor()->getName() == "\\implies" && top->getArguments().size() == 2) {
       if (auto andPattern = dynamic_cast<KOREObjectCompositePattern *>(top->getArguments()[1])) {
         if (andPattern->getConstructor()->getName() == "\\and" && andPattern->getArguments().size() == 2) {
-          if (auto equals = dynamic_cast<KOREObjectCompositePattern *>(andPattern->getArguments()[0])) {
-            if (equals->getConstructor()->getName() == "\\equals" && equals->getArguments().size() == 2) {
-              return equals->getArguments()[1];
+          if (auto bottomPattern = dynamic_cast<KOREObjectCompositePattern *>(top->getArguments()[0])) {
+            if (bottomPattern->getConstructor()->getName() == "\\bottom" && bottomPattern->getArguments().empty()) {
+              if (auto andPattern2 = dynamic_cast<KOREObjectCompositePattern *>(andPattern->getArguments()[1])) {
+                if (andPattern2->getConstructor()->getName() == "\\and" && andPattern2->getArguments().size() == 2) {
+                  if (auto rewrites = dynamic_cast<KOREObjectCompositePattern *>(andPattern2->getArguments()[1])) {
+                    if (rewrites->getConstructor()->getName() == "\\rewrites" && rewrites->getArguments().size() == 2) {
+                      return rewrites->getArguments()[1];
+                    }
+                  }
+                }
+              }
+            } else if (auto equals = dynamic_cast<KOREObjectCompositePattern *>(andPattern->getArguments()[0])) {
+              if (equals->getConstructor()->getName() == "\\equals" && equals->getArguments().size() == 2) {
+                return equals->getArguments()[1];
+              }
             }
           }
         }
@@ -323,6 +335,19 @@ KOREPattern *KOREAxiomDeclaration::getRequires() const {
           return equals->getArguments()[0];
         } else if (equals->getConstructor()->getName() == "\\top" && equals->getArguments().empty()) {
           return nullptr;
+        } else if (equals->getConstructor()->getName() == "\\bottom" && equals->getArguments().empty()) {
+          // sttrategy axiom hack
+          if (auto trueTop = dynamic_cast<KOREObjectCompositePattern *>(top->getArguments()[1])) {
+            if (trueTop->getConstructor()->getName() == "\\and" && trueTop->getArguments().size() == 2) {
+              if (auto equals = dynamic_cast<KOREObjectCompositePattern *>(trueTop->getArguments()[0])) {
+                if (equals->getConstructor()->getName() == "\\equals" && equals->getArguments().size() == 2) {
+                  return equals->getArguments()[0];
+                } else if (equals->getConstructor()->getName() == "\\top" && equals->getArguments().empty()) {
+                  return nullptr;
+                }
+              }
+            }
+          }
         }
       }
     } else if (top->getConstructor()->getName() == "\\and" && top->getArguments().size() == 2) {
