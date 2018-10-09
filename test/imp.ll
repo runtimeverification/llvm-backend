@@ -6,7 +6,7 @@ target triple = "x86_64-unknown-linux-gnu"
 %block = type { %blockheader, [0 x i64*] }
 %map = type { i64, i8*, i8* }
 
-@"token_$PGM" = global { %blockheader, [4 x i8] } { %blockheader { i64 4 }, [4 x i8] c"$PGM" }
+@token_2450474d = global { %blockheader, [4 x i8] } { %blockheader { i64 4 }, [4 x i8] c"$PGM" }
 @int_0 = global %mpz { i32 0, i32 0, i64* getelementptr inbounds ([0 x i64], [0 x i64]* @int_0_limbs, i32 0, i32 0) }
 @int_0_limbs = global [0 x i64] zeroinitializer
 @int_1 = global %mpz { i32 1, i32 1, i64* getelementptr inbounds ([1 x i64], [1 x i64]* @int_1_limbs, i32 0, i32 0) }
@@ -75,7 +75,7 @@ entry:
   %inj = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %3, i64 0, i32 0
   store %blockheader { i64 562958543356052 }, %blockheader* %inj
   %4 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %3, i64 0, i32 2
-  store %block* bitcast ({ %blockheader, [4 x i8] }* @"token_$PGM" to %block*), %block** %4
+  store %block* bitcast ({ %blockheader, [4 x i8] }* @token_2450474d to %block*), %block** %4
   %5 = bitcast { %blockheader, [0 x i64], %block* }* %3 to %block*
   %6 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %2, i64 0, i32 2
   store %block* %5, %block** %6

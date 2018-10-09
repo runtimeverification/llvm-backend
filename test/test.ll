@@ -10,8 +10,8 @@ target triple = "x86_64-unknown-linux-gnu"
 @int_0_limbs = global [0 x i64] zeroinitializer
 @int_1 = global %mpz { i32 1, i32 1, i64* getelementptr inbounds ([1 x i64], [1 x i64]* @int_1_limbs, i32 0, i32 0) }
 @int_1_limbs = global [1 x i64] [i64 1]
-@"token_$PGM" = global { %blockheader, [4 x i8] } { %blockheader { i64 4 }, [4 x i8] c"$PGM" }
-@token_token = global { %blockheader, [5 x i8] } { %blockheader { i64 5 }, [5 x i8] c"token" }
+@token_2450474d = global { %blockheader, [4 x i8] } { %blockheader { i64 4 }, [4 x i8] c"$PGM" }
+@token_746f6b656e = global { %blockheader, [5 x i8] } { %blockheader { i64 5 }, [5 x i8] c"token" }
 @int_2 = global %mpz { i32 1, i32 1, i64* getelementptr inbounds ([1 x i64], [1 x i64]* @int_2_limbs, i32 0, i32 0) }
 @int_2_limbs = global [1 x i64] [i64 2]
 
@@ -509,7 +509,7 @@ entry:
   %inj = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %2, i64 0, i32 0
   store %blockheader { i64 281483566645358 }, %blockheader* %inj
   %3 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %2, i64 0, i32 2
-  store %block* bitcast ({ %blockheader, [4 x i8] }* @"token_$PGM" to %block*), %block** %3
+  store %block* bitcast ({ %blockheader, [4 x i8] }* @token_2450474d to %block*), %block** %3
   %4 = bitcast { %blockheader, [0 x i64], %block* }* %2 to %block*
   %5 = call %block* @hook_MAP_lookup(%map* %0, %block* %4)
   %6 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %1, i64 0, i32 2
@@ -595,7 +595,7 @@ entry:
   %inj = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %3, i64 0, i32 0
   store %blockheader { i64 281483566645352 }, %blockheader* %inj
   %4 = getelementptr inbounds { %blockheader, [0 x i64], %block* }, { %blockheader, [0 x i64], %block* }* %3, i64 0, i32 2
-  store %block* bitcast ({ %blockheader, [5 x i8] }* @token_token to %block*), %block** %4
+  store %block* bitcast ({ %blockheader, [5 x i8] }* @token_746f6b656e to %block*), %block** %4
   %5 = bitcast { %blockheader, [0 x i64], %block* }* %3 to %block*
   %6 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %2, i64 0, i32 2
   store %block* %5, %block** %6
