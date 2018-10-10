@@ -1,5 +1,6 @@
 #include<gmp.h>
-#include<stdlib.h>
+#include<cstdlib>
+#include<cstring>
 #include<stdexcept>
 
 extern "C" {
@@ -230,6 +231,7 @@ mpz_ptr hook_INT_log2(mpz_t a) {
 void extract(mpz_t result, mpz_t i, size_t off, size_t len) {
   size_t size = (len + LIMB_BITS - 1) / LIMB_BITS;
   mpz_init2(result, len+LIMB_BITS);
+  memset(result->_mp_d, 0, size);
   size_t off_words = off / LIMB_BITS;
   size_t off_bits = off % LIMB_BITS;
   size_t num_limbs = mpz_size(i);
