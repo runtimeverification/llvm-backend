@@ -143,7 +143,7 @@ data P var a   = Pattern Constructor (Maybe String) ![a]
                  deriving (Show, Eq, Functor)
 
 type Pattern = P String
-type BoundPattern = P Occurrence
+type BoundPattern = P (Maybe Occurrence)
 
 $(deriveEq2 ''P)
 $(deriveShow2 ''P)
@@ -589,12 +589,12 @@ canonicalizePattern (Clause _ vars _) (Fix (Variable name hookAtt)) =
   let names = map getName vars
       os = map getOccurrence vars
       oMap = Map.fromList $ zip names os
-  in Fix $ Variable (oMap Map.! name) hookAtt
+  in Fix $ Variable (Map.lookup name oMap) hookAtt
 canonicalizePattern c'@(Clause _ vars _) (Fix (As name hookAtt p)) =
   let names = map getName vars
       os = map getOccurrence vars
       oMap = Map.fromList $ zip names os
-  in Fix $ As (oMap Map.! name) hookAtt $ canonicalizePattern c' p
+  in Fix $ As (Map.lookup name oMap) hookAtt $ canonicalizePattern c' p
 canonicalizePattern c' (Fix (Pattern name hookAtt ps)) = Fix (Pattern name hookAtt $ map (canonicalizePattern c') ps)
 canonicalizePattern _ (Fix Wildcard) = Fix Wildcard
 canonicalizePattern c' (Fix (ListPattern hd f tl' e o)) = 
@@ -614,7 +614,7 @@ computeElementScore k c tl =
     let canonKey = canonicalizePattern c k
         (ps,cs) = unzip tl
         canonCs = map canonicalizeClause cs
-        boundedCanonCs = takeWhile (flip (isBound getOccurrence) canonKey) canonCs
+        boundedCanonCs = takeWhile (flip (isBound (Just . getOccurrence)) canonKey) canonCs
         boundedPs = take (length boundedCanonCs) ps
         boundedCs = take (length boundedCanonCs) cs
         canonPs = zipWith canonicalizePattern boundedCs boundedPs
@@ -775,10 +775,11 @@ instance Y.ToYaml a => Y.ToYaml (Anchor a) where
 
 instance Y.ToYaml a => Y.ToYaml (BoundPattern a) where
   toYaml Wildcard = error "Unsupported map/set pattern"
-  toYaml (Variable o h) = Y.mapping
+  toYaml (Variable (Just o) h) = Y.mapping
     ["hook" Y..= Y.toYaml (pack h)
     , "occurrence" Y..= Y.toYaml o
     ]
+  toYaml (Variable Nothing _) = error "Unsupported map/set pattern"
   toYaml (As _ _ p) = Y.toYaml p
   toYaml (MapPattern _ _ _ _ o) = Y.toYaml o
   toYaml (SetPattern _ _ _ o) = Y.toYaml o
