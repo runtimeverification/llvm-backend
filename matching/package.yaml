@@ -23,7 +23,7 @@ dependencies:
 - recursion-schemes
 - text
 - text-show
-- yaml
+- yaml >= 0.10.3.0
 - bytestring
 - kore
 - containers

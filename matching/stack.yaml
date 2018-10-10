@@ -41,7 +41,7 @@ packages:
 # (e.g., acme-missiles-0.3)
 extra-deps:
 - submodules/kore/src/main/haskell/kore
-- submodules/yaml
+- yaml-0.10.3.0
 
 # Override default flag values for local packages and extra-deps
 # flags: {}
