@@ -318,9 +318,9 @@ hook (PatternMatrix (c : _)) =
     ix (Fix (Variable _ _))  = Nothing
 hook _                       = Nothing
 
-mSpecialize :: Constructor -> (ClauseMatrix, [Occurrence]) -> (Text, (ClauseMatrix, [Occurrence]))
-mSpecialize ix (cm@(ClauseMatrix (PatternMatrix (c : _)) _), o : os) = 
-   let newOs = expandOccurrence cm o ix <> os
+mSpecialize :: Int -> Constructor -> (ClauseMatrix, [Occurrence]) -> (Text, (ClauseMatrix, [Occurrence]))
+mSpecialize nextO ix (cm@(ClauseMatrix (PatternMatrix (c : _)) _), o : os) = 
+   let newOs = expandOccurrence nextO cm o ix <> os
        cm' = filterMatrix (Just ix) (checkPatternIndex ix (getMetadata c)) (cm,o)
        cm'' = expandMatrix ix cm'
    in (getConstructor ix, (cm'', newOs))
@@ -334,19 +334,19 @@ mSpecialize ix (cm@(ClauseMatrix (PatternMatrix (c : _)) _), o : os) =
      getConstructor (HasKey _ _ _ _) = "1"
      getConstructor (HasNoKey _ _) = "0"
 
-mSpecialize _ _ = error "must have at least one column"
+mSpecialize _ _ _ = error "must have at least one column"
 
-expandOccurrence :: ClauseMatrix -> Occurrence -> Constructor -> [Occurrence]
-expandOccurrence (ClauseMatrix (PatternMatrix (c : _)) _) o ix =
+expandOccurrence :: Int -> ClauseMatrix -> Occurrence -> Constructor -> [Occurrence]
+expandOccurrence nextO (ClauseMatrix (PatternMatrix (c : _)) _) o ix =
   case ix of
     Empty -> []
     NonEmpty _ -> [o]
-    HasKey isSet _ _ _ -> if isSet then [1 : o, o] else [0 : o, 1 : o, o]
+    HasKey isSet _ _ _ -> if isSet then [nextO + 1 : o, o] else [nextO : o, nextO + 1 : o, o]
     HasNoKey _ _ -> [o]
     _ -> let (Metadata _ _ _ mtd) = getMetadata c
              a = length $ fromJust $ mtd ix
          in map (\i -> i : o) [0..a-1]
-expandOccurrence _ _ _ = error "must have at least one column"
+expandOccurrence _ _ _ _ = error "must have at least one column"
 
 mDefault :: (ClauseMatrix, [Occurrence]) -> Maybe (ClauseMatrix, [Occurrence])
 mDefault (cm@(ClauseMatrix pm@(PatternMatrix (c : _)) as),o : os) =
@@ -415,15 +415,15 @@ expandDefaultOccurrence cm@(ClauseMatrix pm@(PatternMatrix (c : _)) as) o =
     Nothing -> []
     Just "LIST.List" ->
       let cons = fromJust $ getDefaultConstructor c as
-      in expandOccurrence cm o cons
+      in expandOccurrence 0 cm o cons
     Just "MAP.Map" ->
       case getDefaultConstructor c as of
         Nothing -> []
-        Just cons -> expandOccurrence cm o cons
+        Just cons -> expandOccurrence 0 cm o cons
     Just "SET.Set" ->
       case getDefaultConstructor c as of
         Nothing -> []
-        Just cons -> expandOccurrence cm o cons
+        Just cons -> expandOccurrence 0 cm o cons
     Just _ -> []
 expandDefaultOccurrence _ _ = error "must have at least one column"
 
@@ -916,7 +916,7 @@ compilePattern firstCm =
               -- c9ompute the signature of the new first column
               s₁ = sigma₁ $ fst cm'
               -- specialize on each constructor in the signature
-              ls = map (`mSpecialize` cm') s₁
+              ls = map (\c -> mSpecialize ix c cm') s₁
               -- compute the default matrix if it exists
               d  = mDefault cm'
               dt = case hookAtt of
@@ -1029,11 +1029,11 @@ compilePattern firstCm =
                , getDefault = compilePattern' (o+1) <$> d
                }
              Just k -> Fix $ MakePattern newO k $ 
-                         Fix $ Function "hook_MAP_lookup_null" (0 : mapO) [mapO, newO] "STRING.String" $
-                           Fix $ Function "hook_MAP_remove" (1 : mapO) [mapO, newO] "MAP.Map" $
-                             Fix $ CheckNull (0 : mapO) $ L
-                               { getSpecializations = map (second (compilePattern' (o+1))) ls
-                               , getDefault = compilePattern' (o+1) <$> d
+                         Fix $ Function "hook_MAP_lookup_null" (o : mapO) [mapO, newO] "STRING.String" $
+                           Fix $ Function "hook_MAP_remove" (o+1 : mapO) [mapO, newO] "MAP.Map" $
+                             Fix $ CheckNull (o : mapO) $ L
+                               { getSpecializations = map (second (compilePattern' (o+2))) ls
+                               , getDefault = compilePattern' (o+2) <$> d
                                }
     setPattern :: Int -> Occurrence -> [(Text, (ClauseMatrix, [Occurrence]))] -> Maybe (ClauseMatrix, [Occurrence]) -> [Constructor] -> Column -> [Clause] -> Fix DecisionTree
     setPattern o setO ls d s c cs =
@@ -1054,11 +1054,11 @@ compilePattern firstCm =
                , getDefault = compilePattern' (o+1) <$> d
                }
              Just k -> Fix $ MakePattern newO k $
-                         Fix $ Function "hook_SET_in" (0 : setO) [newO, setO] "BOOL.Bool" $
-                           Fix $ Function "hook_SET_remove" (1 : setO) [setO, newO] "SET.Set" $
-                             Fix $ SwitchLiteral (0 : setO) 1 $ L
-                               { getSpecializations = map (second (compilePattern' (o+1))) ls
-                               , getDefault = compilePattern' (o+1) <$> d
+                         Fix $ Function "hook_SET_in" (o : setO) [newO, setO] "BOOL.Bool" $
+                           Fix $ Function "hook_SET_remove" (o+1 : setO) [setO, newO] "SET.Set" $
+                             Fix $ SwitchLiteral (o : setO) 1 $ L
+                               { getSpecializations = map (second (compilePattern' (o+2))) ls
+                               , getDefault = compilePattern' (o+2) <$> d
                                }
 
 
