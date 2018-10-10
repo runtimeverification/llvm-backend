@@ -1004,6 +1004,7 @@ compilePattern firstCm =
       foldl (listGet listO $ Just (hd,tl)) (foldl (listGet listO Nothing) (compilePattern' nextO cm') [0..hd-1]) [hd..hd+tl-1]
     -- generate a single list lookup operation to bind one element of the list against its occurrence
     listGet :: Occurrence -> Maybe (Int, Int) -> Fix DecisionTree -> Int -> Fix DecisionTree
+    listGet _ _ (Fix Fail) _ = Fix Fail
     listGet listO l dt o = 
       Fix $ Function "hook_LIST_get_long" (o : listO) 
         [listO, case l of
