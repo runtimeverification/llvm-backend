@@ -121,7 +121,7 @@ public:
   DecisionNode *switchCase(Kind kind, YAML::Node node) {
     YAML::Node list = node["specializations"];
     auto occurrence = node["occurrence"].as<std::vector<int>>();
-    std::string name = occurrences[occurrence];
+    std::string name = occurrences.at(occurrence);
     auto result = SwitchNode::Create(name, kind == CheckNull);
     for (auto iter = list.begin(); iter != list.end(); ++iter) {
       auto _case = *iter;

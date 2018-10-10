@@ -195,7 +195,7 @@ private:
 public:
   static FailNode *get() { return &instance; }
 
-  virtual void codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution) {}
+  virtual void codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution) { abort(); }
 };
 
 class Decision {
