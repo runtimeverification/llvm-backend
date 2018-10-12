@@ -85,5 +85,6 @@ void printConfigurationInternal(FILE *file, block *subject, const char *sort) {
 void printConfiguration(const char *filename, block *subject) {
   FILE *file = fopen(filename, "w");
   printConfigurationInternal(file, subject, nullptr);
+  fclose(file);
 }
 
