@@ -11,7 +11,7 @@ target triple = "x86_64-unknown-linux-gnu"
 %layout = type { i8, %layoutitem* }
 
 declare void @abort() #0
-declare %layout @getLayoutData(i16)
+declare %layout* @getLayoutData(i16)
 
 declare void @map_hash(%map*, i8*)
 declare void @list_hash(%list*, i8*)
@@ -79,7 +79,8 @@ compareByte:
 hashChildren:
   call void @add_hash64(i8* %hasher, i64 %arghdr)
   %arglayoutshort = trunc i64 %arglayout to i16
-  %layoutData = call %layout @getLayoutData(i16 %arglayoutshort)
+  %layoutPtr = call %layout* @getLayoutData(i16 %arglayoutshort)
+  %layoutData = load %layout, %layout* %layoutPtr
   %length = extractvalue %layout %layoutData, 0
   %children = extractvalue %layout %layoutData, 1
   br label %childrenLoop

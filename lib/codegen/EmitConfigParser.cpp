@@ -554,7 +554,7 @@ static llvm::Constant *getLayoutData(uint16_t layout, KOREObjectSymbol *symbol, 
     elements.push_back(llvm::ConstantStruct::get(module->getTypeByName(LAYOUTITEM_STRUCT), offset, llvm::ConstantInt::get(llvm::Type::getInt16Ty(Ctx), (int)cat.cat + cat.bits)));
   }
   auto Arr = llvm::ConstantArray::get(llvm::ArrayType::get(module->getTypeByName(LAYOUTITEM_STRUCT), len), elements);
-  auto global = module->getOrInsertGlobal("layout_" + std::to_string(layout), Arr->getType());
+  auto global = module->getOrInsertGlobal("layout_item_" + std::to_string(layout), Arr->getType());
   llvm::GlobalVariable *globalVar = llvm::dyn_cast<llvm::GlobalVariable>(global);
   if (!globalVar->hasInitializer()) {
     globalVar->setInitializer(Arr);
@@ -562,7 +562,12 @@ static llvm::Constant *getLayoutData(uint16_t layout, KOREObjectSymbol *symbol, 
   llvm::Constant *zero = llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0);
   auto indices = std::vector<llvm::Constant *>{zero, zero};
   auto Ptr = llvm::ConstantExpr::getInBoundsGetElementPtr(Arr->getType(), globalVar, indices);
-  return llvm::ConstantStruct::get(module->getTypeByName(LAYOUT_STRUCT), llvm::ConstantInt::get(llvm::Type::getInt8Ty(Ctx), len), Ptr);
+  auto global2 = module->getOrInsertGlobal("layout_" + std::to_string(layout), module->getTypeByName(LAYOUT_STRUCT));
+  llvm::GlobalVariable *globalVar2 = llvm::dyn_cast<llvm::GlobalVariable>(global2);
+  if (!globalVar2->hasInitializer()) {
+    globalVar2->setInitializer(llvm::ConstantStruct::get(module->getTypeByName(LAYOUT_STRUCT), llvm::ConstantInt::get(llvm::Type::getInt8Ty(Ctx), len), Ptr));
+  }
+  return globalVar2;
 }
 
 static void emitLayouts(KOREDefinition *definition, llvm::Module *module) {
@@ -574,12 +579,12 @@ static void emitLayouts(KOREDefinition *definition, llvm::Module *module) {
   std::vector<llvm::Type *> argTypes;
   argTypes.push_back(llvm::Type::getInt16Ty(Ctx));
   auto func = llvm::dyn_cast<llvm::Function>(module->getOrInsertFunction(
-      "getLayoutData", llvm::FunctionType::get(module->getTypeByName(LAYOUT_STRUCT), argTypes, false)));
+      "getLayoutData", llvm::FunctionType::get(llvm::PointerType::getUnqual(module->getTypeByName(LAYOUT_STRUCT)), argTypes, false)));
   auto EntryBlock = llvm::BasicBlock::Create(Ctx, "entry", func);
   auto MergeBlock = llvm::BasicBlock::Create(Ctx, "exit");
   auto stuck = llvm::BasicBlock::Create(Ctx, "stuck");
   auto Switch = llvm::SwitchInst::Create(func->arg_begin(), stuck, layouts.size(), EntryBlock);
-  auto Phi = llvm::PHINode::Create(module->getTypeByName(LAYOUT_STRUCT), layouts.size(), "phi", MergeBlock);
+  auto Phi = llvm::PHINode::Create(llvm::PointerType::getUnqual(module->getTypeByName(LAYOUT_STRUCT)), layouts.size(), "phi", MergeBlock);
   for (auto iter = layouts.begin(); iter != layouts.end(); ++iter) {
     auto entry = *iter;
     uint16_t layout = entry.first;

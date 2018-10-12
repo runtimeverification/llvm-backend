@@ -12,7 +12,7 @@ target triple = "x86_64-unknown-linux-gnu"
 
 declare i32 @memcmp(i8* %ptr1, i8* %ptr2, i64 %num)
 declare void @abort() #0
-declare %layout @getLayoutData(i16)
+declare %layout* @getLayoutData(i16)
 
 declare i1 @hook_MAP_eq(%map*, %map*)
 declare i1 @hook_LIST_eq(%list*, %list*)
@@ -55,7 +55,8 @@ eqString:
   br label %exit
 compareChildren:
   %arglayoutshort = trunc i64 %arglayout to i16
-  %layoutData = call %layout @getLayoutData(i16 %arglayoutshort)
+  %layoutPtr = call %layout* @getLayoutData(i16 %arglayoutshort)
+  %layoutData = load %layout, %layout* %layoutPtr
   %length = extractvalue %layout %layoutData, 0
   %children = extractvalue %layout %layoutData, 1
   br label %loop
