@@ -42,6 +42,12 @@ void SwitchNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitutio
       defaultCase = &_case;
     }
   }
+  if (isCheckNull) {
+    auto cast = new llvm::PtrToIntInst(val, llvm::Type::getInt64Ty(d->Ctx), "", d->CurrentBlock);
+    auto cmp = new llvm::ICmpInst(*d->CurrentBlock, llvm::CmpInst::ICMP_NE, cast, llvm::ConstantExpr::getPtrToInt(llvm::ConstantPointerNull::get(llvm::dyn_cast<llvm::PointerType>(val->getType())), llvm::Type::getInt64Ty(d->Ctx)));
+    val = cmp;
+    isInt = true;
+  }
   if (isInt) {
     auto _switch = llvm::SwitchInst::Create(val, _default, cases.size(), d->CurrentBlock);
     for (auto &_case : caseData) {
@@ -85,43 +91,30 @@ void SwitchNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitutio
     _case.getChild()->codegen(d, substitution);
   }
   if (defaultCase) {
-    // process default also
-    d->CurrentBlock = _default;
-    defaultCase->getChild()->codegen(d, substitution);
+    if (_default != d->StuckBlock) {
+      // process default also
+      d->CurrentBlock = _default;
+      defaultCase->getChild()->codegen(d, substitution);
+    }
   }
 }
 
-void EqualsLiteralNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution) {
-  std::string funcName;
-  switch (cat.cat) {
-  case SortCategory::Uncomputed:
-  case SortCategory::Map:
-  case SortCategory::List:
-  case SortCategory::Set:
-  case SortCategory::Bool:
-  case SortCategory::MInt:
-    assert(false && "not supported");
-    abort();
-    break;
-  case SortCategory::Int:
-    funcName = "hook_INT_eq";
-    break;
-  case SortCategory::StringBuffer:
-  case SortCategory::Float:
-    assert(false && "not implemented yet");
-    abort();
-    break;
-  case SortCategory::Symbol:
-    funcName = "hook_KEQUAL_eq";
-    break;
-  }
+void MakeLiteralNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution) {
   llvm::StringMap<llvm::Value *> subst;
   CreateTerm creator(subst, d->Definition, d->CurrentBlock, d->Module);
   llvm::Value *literal = creator.createToken(cat, this->literal);
-  auto Call = llvm::CallInst::Create(d->Module->getOrInsertFunction(funcName, llvm::Type::getInt1Ty(d->Ctx), getValueType(cat, d->Module), getValueType(cat, d->Module)), {substitution.lookup(binding), literal}, name, d->CurrentBlock);
-  substitution[name] = Call;
+  substitution[name] = literal;
   child->codegen(d, substitution);
 }
+
+void MakePatternNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution) {
+  CreateTerm creator(substitution, d->Definition, d->CurrentBlock, d->Module);
+  llvm::Value *val = creator(pattern);
+  d->CurrentBlock = creator.getCurrentBlock();
+  substitution[name] = val;
+  child->codegen(d, substitution);
+}
+
 void FunctionNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution) {
   std::vector<llvm::Value *> args;
   std::vector<llvm::Type *> types;
@@ -151,6 +144,7 @@ void LeafNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution)
     types.push_back(val->getType());
   }
   auto Call = llvm::CallInst::Create(d->Module->getOrInsertFunction(name, llvm::FunctionType::get(getValueType(d->Cat, d->Module), types, false)), args, "", d->CurrentBlock);
+  Call->setCallingConv(llvm::CallingConv::Fast);
   llvm::ReturnInst::Create(d->Ctx, Call, d->CurrentBlock);
 }
 
@@ -184,6 +178,7 @@ void makeEvalFunction(KOREObjectSymbol *function, KOREDefinition *definition, ll
   std::string name = "eval_" + Out.str();
   llvm::Constant *func = module->getOrInsertFunction(name, funcType);
   llvm::Function *matchFunc = llvm::cast<llvm::Function>(func);
+  matchFunc->setCallingConv(llvm::CallingConv::Fast);
   llvm::StringMap<llvm::Value *> subst;
   llvm::BasicBlock *block = llvm::BasicBlock::Create(module->getContext(), "entry", matchFunc);
   int i = 0;

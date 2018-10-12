@@ -1,7 +1,3 @@
 [submodule "matching/submodules/kore"]
 	path = matching/submodules/kore
 	url = https://github.com/kframework/kore.git
-[submodule "matching/submodules/yaml"]
-	path = matching/submodules/yaml
-	url = https://github.com/dwightguth/yaml
-	branch = anchor

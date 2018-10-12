@@ -54,13 +54,15 @@ private:
   /* the name of the variable being matched on. */
   std::string name;
 
-  SwitchNode(const std::string &name) : name(name) {}
+  bool isCheckNull;
+
+  SwitchNode(const std::string &name, bool isCheckNull) : name(name), isCheckNull(isCheckNull) {}
 
 public:
   void addCase(DecisionCase _case) { cases.push_back(_case); }
 
-  static SwitchNode *Create(const std::string &name) {
-    return new SwitchNode(name);
+  static SwitchNode *Create(const std::string &name, bool isCheckNull) {
+    return new SwitchNode(name, isCheckNull);
   }
 
   std::string getName() const { return name; }
@@ -69,38 +71,61 @@ public:
   virtual void codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution);
 };
 
-class EqualsLiteralNode : public DecisionNode {
+class MakeLiteralNode : public DecisionNode {
 private:
   std::string name;
-  std::string binding;
   ValueType cat;
   std::string literal;
   DecisionNode *child;
 
-  EqualsLiteralNode(
+  MakeLiteralNode(
     const std::string &name,
-    const std::string &binding,
     ValueType cat,
     const std::string literal,
     DecisionNode *child) :
       name(name),
-      binding(binding),
       cat(cat),
       literal(literal),
       child(child) {}
 
 public:
-  static EqualsLiteralNode *Create(
+  static MakeLiteralNode *Create(
       const std::string &name,
-      const std::string &binding,
       ValueType cat,
       const std::string literal,
       DecisionNode *child) {
-    return new EqualsLiteralNode(name, binding, cat, literal, child);
+    return new MakeLiteralNode(name, cat, literal, child);
   }
 
   virtual void codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution);
 };
+
+class MakePatternNode : public DecisionNode {
+private:
+  std::string name;
+  KOREObjectPattern *pattern;
+  DecisionNode *child;
+
+  MakePatternNode(
+    const std::string &name,
+    KOREObjectPattern *pattern,
+    DecisionNode *child) :
+      name(name),
+      pattern(pattern),
+      child(child) {}
+
+public:
+  static MakePatternNode *Create(
+      const std::string &name,
+      KOREObjectPattern *pattern,
+      DecisionNode *child) {
+    return new MakePatternNode(name, pattern, child);
+  }
+
+  virtual void codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution);
+};
+
+
 
 class FunctionNode : public DecisionNode {
 private:
@@ -170,7 +195,7 @@ private:
 public:
   static FailNode *get() { return &instance; }
 
-  virtual void codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution) {}
+  virtual void codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution) { abort(); }
 };
 
 class Decision {
@@ -202,7 +227,8 @@ public:
   void operator()(DecisionNode *entry, llvm::StringMap<llvm::Value *> substitution);
 
   friend class SwitchNode;
-  friend class EqualsLiteralNode;
+  friend class MakeLiteralNode;
+  friend class MakePatternNode;
   friend class FunctionNode;
   friend class LeafNode;
 };

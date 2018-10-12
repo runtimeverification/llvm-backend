@@ -9,6 +9,8 @@ declare i32 @atoi(i8*)
 
 declare void @take_steps(i32, %block*) #0
 
+@output_file = global i8* zeroinitializer
+
 define i32 @main(i32 %argc, i8** %argv) {
 entry:
   %filename_ptr = getelementptr inbounds i8*, i8** %argv, i64 1
@@ -16,6 +18,9 @@ entry:
   %depth_ptr = getelementptr inbounds i8*, i8** %argv, i64 2
   %depth_str = load i8*, i8** %depth_ptr
   %depth = call i32 @atoi(i8* %depth_str)
+  %output_ptr = getelementptr inbounds i8*, i8** %argv, i64 3
+  %output_str = load i8*, i8** %output_ptr
+  store i8* %output_str, i8** @output_file
   %ret = call %block* @parseConfiguration(i8* %filename)
   call void @take_steps(i32 %depth, %block* %ret)
   unreachable

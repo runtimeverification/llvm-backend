@@ -7,10 +7,8 @@ make -j`nproc`
 make run-unittests
 cd ../runtime/datastructures
 cargo test
-cargo build --release
 cd ../../matching
 stack test
-stack install
 cd ../build
 ./tools/test_rhs/test_rhs ../test/test.kore | diff - ../test/test.ll
 ./tools/test_rhs/test_rhs ../test/imp.kore | diff - ../test/imp.ll
@@ -18,14 +16,20 @@ cd ../build
 
 ./tools/test_configparser/test_configparser ../test/imp.kore > configparser.ll
 diff configparser.ll ../test/configparser.ll
-RUSTDIR=`rustc --print sysroot`/lib/rustlib/x86_64-unknown-linux-gnu/lib/
-export PATH=$PATH:~/.local/bin
-../bin/llvm-kompile ../test/imp.kore IMP -o interpreter
-./interpreter ../test/collatz.kore -1 | grep -q "Lbl'-LT-'T'-GT-'{}(Lbl'-LT-'k'-GT-'{}(dotk{}())"
-../bin/llvm-kompile ../test/test2.kore TEST -o interpreter
-./interpreter ../test/test2.kore -1 | grep -q "Lbl'-LT-'k'-GT-'{}(kseq{}(inj{SortDone{}, SortKItem{}}(Lbldone'Unds'TEST'Unds'{}()),dotk{}()))"
-../bin/llvm-kompile ../test/test3.kore TEST -o interpreter
-./interpreter ../test/test3.kore -1 | grep -q "Lbl'-LT-'k'-GT-'{}(kseq{}(inj{SortDone{}, SortKItem{}}(Lbldone'Unds'TEST'Unds'{}()),dotk{}()))"
-../bin/llvm-kompile ../test/test4.kore TEST -o interpreter
-./interpreter ../test/test4.kore -1 | diff - ../test/test4.out
-rm -f configparser configparser.ll interpreter
+export PATH=$PATH:`pwd`/install/bin
+make install
+llvm-kompile ../test/imp.kore IMP -o interpreter
+./interpreter ../test/collatz.kore -1 /dev/stdout | grep -q "Lbl'-LT-'T'-GT-'{}(Lbl'-LT-'k'-GT-'{}(dotk{}())"
+llvm-kompile ../test/test2.kore TEST -o interpreter
+./interpreter ../test/test2.kore -1 /dev/stdout | grep -q "Lbl'-LT-'k'-GT-'{}(kseq{}(inj{SortDone{}, SortKItem{}}(Lbldone'Unds'TEST'Unds'{}()),dotk{}()))"
+llvm-kompile ../test/test3.kore TEST -o interpreter
+./interpreter ../test/test3.kore -1 /dev/stdout | grep -q "Lbl'-LT-'k'-GT-'{}(kseq{}(inj{SortDone{}, SortKItem{}}(Lbldone'Unds'TEST'Unds'{}()),dotk{}()))"
+llvm-kompile ../test/test4.kore TEST -o interpreter
+./interpreter ../test/test4.kore -1 /dev/stdout | diff - ../test/test4.out
+llvm-kompile ../test/test5.kore TEST -o interpreter
+./interpreter ../test/test5.kore -1 /dev/stdout | diff - ../test/test5.out
+llvm-kompile ../test/test6.kore TEST -o interpreter
+./interpreter ../test/test6.kore -1 /dev/stdout | diff - ../test/test6.out
+llvm-kompile ../test/test7.kore TEST -o interpreter
+./interpreter ../test/test7.in.kore -1 /dev/null
+rm -f configparser configparser.ll interpreterQ

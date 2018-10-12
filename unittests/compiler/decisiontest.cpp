@@ -11,6 +11,8 @@ using namespace kllvm;
 
 BOOST_AUTO_TEST_SUITE(DecisionTest)
 
+const llvm::StringMap<KOREObjectCompositeSort *> emptyMap;
+
 static std::string EXPECTED = R"(target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
 target triple = "x86_64-unknown-linux-gnu"
 
@@ -22,7 +24,7 @@ declare %block* @parseConfiguration(i8*)
 
 declare void @printConfiguration(i32, %block*)
 
-define %mpz* @"eval_func{Outer{}}"(%block* %subject0) {
+define fastcc %mpz* @"eval_func{Outer{}}"(%block* %subject0) {
 entry:
   %tag = call i32 @getTag(%block* %subject0)
   switch i32 %tag, label %stuck [
@@ -57,15 +59,15 @@ _0_case_0:                                        ; preds = %subject0_case_0
 _0_case_1:                                        ; preds = %subject0_case_0
   %5 = bitcast %block* %_0 to { %blockheader, [0 x i64] }*
   %_3 = call i1 @eval_foo(%mpz* %_1)
-  %6 = call %mpz* @apply_rule_2(%mpz* %_1, i1 %_3)
+  %6 = call fastcc %mpz* @apply_rule_2(%mpz* %_1, i1 %_3)
   ret %mpz* %6
 
 _2_case_0:                                        ; preds = %_0_case_0
-  %7 = call %mpz* @apply_rule_0()
+  %7 = call fastcc %mpz* @apply_rule_0()
   ret %mpz* %7
 
 _2_case_1:                                        ; preds = %_0_case_0
-  %8 = call %mpz* @apply_rule_1()
+  %8 = call fastcc %mpz* @apply_rule_1()
   ret %mpz* %8
 }
 
@@ -94,13 +96,13 @@ BOOST_AUTO_TEST_CASE(simple) {
                  | Baz -> let b = eval_foo(r) in apply_rule_2(r, b)
    | _ -> fail()
 */
-  auto Literal = SwitchNode::Create("_2");
+  auto Literal = SwitchNode::Create("_2", false);
   auto dv = KOREObjectSymbol::Create("\\dv");
 
   Literal->addCase({dv, llvm::APInt(1, 1), LeafNode::Create("apply_rule_0")});
   Literal->addCase({dv, llvm::APInt(1, 0), LeafNode::Create("apply_rule_1")});
 
-  auto Inner = SwitchNode::Create("_0");
+  auto Inner = SwitchNode::Create("_0", false);
   auto Bar = KOREObjectSymbol::Create("Bar");
   auto Baz = KOREObjectSymbol::Create("Baz");
   auto InnerSort = KOREObjectCompositeSort::Create("Inner", {SortCategory::Symbol, 0});
@@ -121,7 +123,7 @@ BOOST_AUTO_TEST_CASE(simple) {
   Func->addBinding("_1");
   Inner->addCase({Baz, std::vector<std::string>{}, Func});
 
-  auto Outer = SwitchNode::Create("subject0");
+  auto Outer = SwitchNode::Create("subject0", false);
   auto Foo = KOREObjectSymbol::Create("Foo");
   auto OuterSort = KOREObjectCompositeSort::Create("Outer", {SortCategory::Symbol, 0});
   auto Int = KOREObjectCompositeSort::Create("Int", {SortCategory::Int, 0});
@@ -221,7 +223,7 @@ occurrence:
   map["Foo"] = Foo;
   map["Bar"] = Bar;
   map["Baz"] = Baz;
-  auto compiledDt = parseYamlDecisionTreeFromString(dt, 1, map);
+  auto compiledDt = parseYamlDecisionTreeFromString(dt, 1, map, emptyMap);
 
   llvm::LLVMContext Ctx;
   auto mod = newModule("test_decision", Ctx);
@@ -242,7 +244,7 @@ BOOST_AUTO_TEST_CASE(stepper) {
   std::string dt = "fail";
 
   llvm::StringMap<KOREObjectSymbol *> map;
-  auto compiledDt = parseYamlDecisionTreeFromString(dt, 1, map);
+  auto compiledDt = parseYamlDecisionTreeFromString(dt, 1, map, emptyMap);
 
   llvm::LLVMContext Ctx;
   auto mod = newModule("test_decision", Ctx);
@@ -325,7 +327,7 @@ occurrence:
   llvm::StringMap<KOREObjectSymbol *> map;
   map["Nil"] = Nil;
   map["Cons"] = Cons;
-  auto compiledDt = parseYamlDecisionTreeFromString(dt, 2, map);
+  auto compiledDt = parseYamlDecisionTreeFromString(dt, 2, map, emptyMap);
 
   llvm::LLVMContext Ctx;
   auto mod = newModule("test_decision", Ctx);
@@ -350,7 +352,7 @@ declare %block* @parseConfiguration(i8*)
 
 declare void @printConfiguration(i32, %block*)
 
-define %block* @"eval_append{List{}, List{}}"(%block* %subject0, %block* %subject1) {
+define fastcc %block* @"eval_append{List{}, List{}}"(%block* %subject0, %block* %subject1) {
 entry:
   %tag = call i32 @getTag(%block* %subject0)
   switch i32 %tag, label %stuck [
@@ -364,7 +366,7 @@ stuck:                                            ; preds = %_0_case_0, %entry
 
 subject0_case_0:                                  ; preds = %entry
   %0 = bitcast %block* %subject0 to { %blockheader, [0 x i64] }*
-  %1 = call %block* @apply_rule_1(%block* %subject1)
+  %1 = call fastcc %block* @apply_rule_1(%block* %subject1)
   ret %block* %1
 
 subject0_case_1:                                  ; preds = %entry
@@ -384,7 +386,7 @@ _0_case_0:                                        ; preds = %subject0_case_1
 
 subject1_case_0:                                  ; preds = %_0_case_0
   %5 = bitcast %block* %subject1 to { %blockheader, [0 x i64] }*
-  %6 = call %block* @apply_rule_2(%block* %subject0)
+  %6 = call fastcc %block* @apply_rule_2(%block* %subject0)
   ret %block* %6
 
 subject1_case_1:                                  ; preds = %_0_case_0
@@ -393,7 +395,7 @@ subject1_case_1:                                  ; preds = %_0_case_0
   %_2 = load %block*, %block** %8
   %9 = getelementptr inbounds { %blockheader, [0 x i64], %block*, %block* }, { %blockheader, [0 x i64], %block*, %block* }* %7, i64 0, i32 3
   %_3 = load %block*, %block** %9
-  %10 = call %block* @apply_rule_3(%block* %_3, %block* %_1)
+  %10 = call fastcc %block* @apply_rule_3(%block* %_3, %block* %_1)
   ret %block* %10
 }
 

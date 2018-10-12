@@ -54,17 +54,20 @@ KOREObjectSort *KOREObjectCompositeSort::substitute(const std::unordered_map<KOR
 ValueType KOREObjectCompositeSort::getCategory(KOREDefinition *definition) {
   if (category.cat != SortCategory::Uncomputed)
     return category;
+  std::string name = getHook(definition);
+  category = getCategory(name);
+  return category;
+}
+
+std::string KOREObjectCompositeSort::getHook(KOREDefinition *definition) {
   auto &att = definition->getSortDeclarations().lookup(this->getName())->getAttributes();
   if (!att.count("hook")) {
-    category = {SortCategory::Symbol, 0};
-    return category;
+    return "STRING.String";
   }
   KOREObjectCompositePattern *hookAtt = att.lookup("hook");
   assert(hookAtt->getArguments().size() == 1);
   auto strPattern = dynamic_cast<KOREMetaStringPattern *>(hookAtt->getArguments()[0]);
-  std::string name = strPattern->getContents();
-  category = getCategory(name);
-  return category;
+  return strPattern->getContents();
 }
 
 ValueType KOREObjectCompositeSort::getCategory(std::string name) {
@@ -373,6 +376,8 @@ void KOREDefinition::addModule(KOREModule *Module) {
   for (auto decl : Module->getDeclarations()) {
     if (auto sortDecl = dynamic_cast<KOREObjectCompositeSortDeclaration *>(decl)) {
       sortDeclarations.insert({sortDecl->getName(), sortDecl});
+      auto sort = KOREObjectCompositeSort::Create(sortDecl->getName());
+      hookedSorts[sort->getHook(this)] = sort;
     } else if (auto symbolDecl = dynamic_cast<KOREObjectSymbolDeclaration *>(decl)) {
       symbolDeclarations.insert({symbolDecl->getSymbol()->getName(), symbolDecl});
     } else if (auto axiom = dynamic_cast<KOREAxiomDeclaration *>(decl)) {

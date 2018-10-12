@@ -1,11 +1,14 @@
 #!/bin/bash
 dt_dir="$(mktemp -d)"
 mod="$(mktemp tmp.XXXXXXXXXX.ll)"
-trap "rm -rf $dt_dir $mod" INT TERM EXIT
+modopt="$(mktemp tmp.XXXXXXXXXX.bc)"
+trap "rm -rf $dt_dir $mod $modopt" INT TERM EXIT
 definition="$1"
 moduleName="$2"
 shift; shift
-llvm-kompile-matching "$definition" "$moduleName" "$dt_dir"
-./tools/llvm-kompile-codegen/llvm-kompile-codegen "$definition" "$dt_dir"/dt.yaml "$dt_dir" > "$mod"
+"$(dirname "$0")"/llvm-kompile-matching "$definition" "$moduleName" "$dt_dir"
+"$(dirname "$0")"/llvm-kompile-codegen "$definition" "$dt_dir"/dt.yaml "$dt_dir" > "$mod"
+opt-5.0 -tailcallelim -tailcallopt "$mod" -o "$modopt"
 RUSTDIR=`rustc --print sysroot`/lib/rustlib/x86_64-unknown-linux-gnu/lib/
-clang++ -Wno-override-module "$mod" runtime/arithmetic/libarithmetic.a runtime/strings/libstrings.a ../runtime/datastructures/target/release/libdatastructures.rlib ../runtime/datastructures/target/release/deps/*.rlib "$RUSTDIR"/libcore-*.rlib "$RUSTDIR"/libstd-*.rlib "$RUSTDIR"/liballoc-*.rlib "$RUSTDIR"/libunwind-*.rlib "$RUSTDIR"/libcompiler_builtins-*.rlib "$RUSTDIR"/libpanic_abort-*.rlib "$RUSTDIR"/liballoc_system-*.rlib ../rustalloc.lds ../runtime/*.ll runtime/configurationparser/libconfigurationparser.a lib/parser/libParser.a lib/ast/libAST.a -lgmp -lpthread -ldl -L/usr/lib/llvm-5.0/lib -lLLVMIRReader -lLLVMBitReader -lLLVMAsmParser -lLLVMCore -lLLVMBinaryFormat -lLLVMSupport -lLLVMDemangle -flto "$@"
+LIBDIR="$(dirname "$0")"/../lib/kllvm/
+clang++-5.0 -Wno-override-module "$modopt" "$LIBDIR"/libarithmetic.a "$LIBDIR"/libstrings.a "$LIBDIR"/rust/libdatastructures.rlib "$LIBDIR"/rust/deps/*.rlib "$RUSTDIR"/libcore-*.rlib "$RUSTDIR"/libstd-*.rlib "$RUSTDIR"/liballoc-*.rlib "$RUSTDIR"/libunwind-*.rlib "$RUSTDIR"/libcompiler_builtins-*.rlib "$RUSTDIR"/libpanic_abort-*.rlib "$RUSTDIR"/liballoc_system-*.rlib "$LIBDIR"/rust/rustalloc.lds "$LIBDIR"/llvm/*.ll "$LIBDIR"/libconfigurationparser.a "$LIBDIR"/libParser.a "$LIBDIR"/libAST.a -lgmp -lpthread -ldl -L/usr/lib/llvm-5.0/lib -lLLVMIRReader -lLLVMBitReader -lLLVMAsmParser -lLLVMCore -lLLVMBinaryFormat -lLLVMSupport -lLLVMDemangle -flto "$@"

@@ -18,7 +18,7 @@ private:
   llvm::LLVMContext &Ctx;
 
   llvm::Value *createHook(KOREObjectCompositePattern *hookAtt, KOREObjectCompositePattern *pattern);
-  llvm::Value *createFunctionCall(std::string name, KOREObjectCompositePattern *pattern, bool sret);
+  llvm::Value *createFunctionCall(std::string name, KOREObjectCompositePattern *pattern, bool sret, bool fastcc);
   llvm::Value *notInjectionCase(KOREObjectCompositePattern *constructor, llvm::Value *val);
 public:
   CreateTerm(
@@ -46,8 +46,9 @@ public:
    * can be set to true even if the function does not return a struct, in which case its value
    * is ignored.
    * load: if the function returns a struct via sret, then if load is true, we load the value 
+   * fastcc: true if we should use the fastcc calling convention
    * returned from the function before returning it. */
-  llvm::Value *createFunctionCall(std::string name, ValueType returnCat, std::vector<llvm::Value *> &args, bool sret, bool load);
+  llvm::Value *createFunctionCall(std::string name, ValueType returnCat, std::vector<llvm::Value *> &args, bool sret, bool fastcc);
 
   llvm::BasicBlock *getCurrentBlock() const { return CurrentBlock; }
 };

@@ -247,6 +247,8 @@ BOOST_AUTO_TEST_CASE(ord) {
   BOOST_CHECK_EQUAL(mpz_cmp_ui(result, 65), 0);
   result = hook_STRING_ord(makeString(" "));
   BOOST_CHECK_EQUAL(mpz_cmp_ui(result, 32), 0);
+  result = hook_STRING_ord(makeString("\xff"));
+  BOOST_CHECK_EQUAL(mpz_cmp_ui(result, 255), 0);
   BOOST_CHECK_THROW(hook_STRING_ord(makeString("")), std::invalid_argument);
   BOOST_CHECK_THROW(hook_STRING_ord(makeString("AA")), std::invalid_argument);
 }

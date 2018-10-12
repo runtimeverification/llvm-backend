@@ -1,9 +1,14 @@
 set(LLVM_REQUIRES_RTTI ON)
 set(LLVM_REQUIRES_EH ON)
 
-add_kllvm_runtime_library(configurationparser STATIC
+add_library(configurationparser STATIC
   ConfigurationParser.cpp
   ConfigurationPrinter.cpp
+)
+
+install(
+  TARGETS configurationparser
+  ARCHIVE DESTINATION lib/kllvm
 )
 
 target_link_libraries(configurationparser Parser AST)

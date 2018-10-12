@@ -51,7 +51,7 @@ extern "C" {
  
   // This function is exported to be used by the interpreter 
   block *parseConfiguration(const char *filename);
-  void printConfiguration(int fd, block *subject);
+  void printConfiguration(const char *filename, block *subject);
   void printConfigurationInternal(FILE *file, block *subject, const char *sort);
 
   // The following functions have to be generated at kompile time

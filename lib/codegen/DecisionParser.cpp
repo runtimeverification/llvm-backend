@@ -3,6 +3,7 @@
 #include <yaml-cpp/yaml.h>
 
 #include <stack>
+#include <iostream>
 
 namespace kllvm {
 
@@ -10,26 +11,33 @@ class DTPreprocessor {
 private:
   std::map<std::vector<int>, std::string> occurrences;
   const llvm::StringMap<KOREObjectSymbol *> &syms;
+  const llvm::StringMap<KOREObjectCompositeSort *> &sorts;
   int counter;
   KOREObjectSymbol *dv;
 
   enum Kind {
-    Switch, SwitchLiteral, EqualsLiteral, Function, Leaf, Fail, Swap
+    Switch, SwitchLiteral, CheckNull, MakeLiteral, MakePattern, Function, Leaf, Fail, Swap
   };
 
   static Kind getKind(YAML::Node node) {
     if (node.IsScalar()) return Fail;
-    if (node["hook"]) return EqualsLiteral;
+    if (node["isnull"]) return CheckNull;
+    if (node["hook"]) return MakeLiteral;
+    if (node["pattern"]) return MakePattern;
     if (node["bitwidth"]) return SwitchLiteral;
     if (node["specializations"]) return Switch;
     if (node["action"]) return Leaf;
     if (node["swap"]) return Swap;
-    return Function;
+    if (node["function"]) return Function;
+    throw node;
   }
 
 public:
-  DTPreprocessor(int numSubjects, const llvm::StringMap<KOREObjectSymbol *> &syms) 
-      : syms(syms), counter(0) {
+  DTPreprocessor(
+      int numSubjects, 
+      const llvm::StringMap<KOREObjectSymbol *> &syms,
+      const llvm::StringMap<KOREObjectCompositeSort *> &sorts)
+      : syms(syms), sorts(sorts), counter(0) {
     for (int i = numSubjects - 1; i >= 0; --i) {
       std::string name = "subject" + std::to_string(i);
       occurrences[{i+1}] = name;
@@ -67,8 +75,7 @@ public:
     return result;
   }
 
-  DecisionNode *equalsLiteral(YAML::Node node) {
-    std::string binding = occurrences[node["arg"].as<std::vector<int>>()];
+  DecisionNode *makeLiteral(YAML::Node node) {
     std::string hookName = node["hook"].as<std::string>();
     std::string literal = node["literal"].as<std::string>();
     ValueType cat = KOREObjectCompositeSort::getCategory(hookName);
@@ -78,25 +85,59 @@ public:
 
     auto child = (*this)(node["next"]); 
     
-    return EqualsLiteralNode::Create(name, binding, cat, literal, child);
+    return MakeLiteralNode::Create(name, cat, literal, child);
+  }
+
+  KOREObjectPattern *parsePattern(YAML::Node node) {
+    if (node["occurrence"]) {
+      return KOREObjectVariablePattern::Create(occurrences[node["occurrence"].as<std::vector<int>>()], sorts.lookup(node["hook"].as<std::string>()));
+    } else if (node["literal"]) {
+      auto sym = KOREObjectSymbol::Create("\\dv");
+      sym->addFormalArgument(sorts.lookup(node["hook"].as<std::string>()));
+      auto pat = KOREObjectCompositePattern::Create(sym);
+      pat->addArgument(KOREMetaStringPattern::Create(node["literal"].as<std::string>()));
+      return pat;
+    } else {
+      auto sym = syms.lookup(node["constructor"].as<std::string>());
+      auto pat = KOREObjectCompositePattern::Create(sym);
+      for (auto child : node["args"]) {
+        pat->addArgument(parsePattern(child));
+      }
+      return pat;
+    }
+  }
+
+  DecisionNode *makePattern(YAML::Node node) {
+    std::string name = "_" + std::to_string(counter++);
+    occurrences[node["occurrence"].as<std::vector<int>>()] = name;
+
+    KOREObjectPattern *pat = parsePattern(node["pattern"]);
+
+    auto child = (*this)(node["next"]);
+
+    return MakePatternNode::Create(name, pat, child);
   }
 
   DecisionNode *switchCase(Kind kind, YAML::Node node) {
     YAML::Node list = node["specializations"];
     auto occurrence = node["occurrence"].as<std::vector<int>>();
-    std::string name = occurrences[occurrence];
-    auto result = SwitchNode::Create(name);
+    std::string name = occurrences.at(occurrence);
+    auto result = SwitchNode::Create(name, kind == CheckNull);
     for (auto iter = list.begin(); iter != list.end(); ++iter) {
       auto _case = *iter;
       auto copy = occurrences;
       std::vector<std::string> bindings;
       KOREObjectSymbol *symbol;
-      if (kind == SwitchLiteral) {
+      if (kind == SwitchLiteral || kind == CheckNull) {
         symbol = dv;
       } else {
         std::string symName = _case[0].as<std::string>();
         symbol = syms.lookup(symName);
-        for (int i = 0; i < symbol->getArguments().size(); ++i) {
+        if (!symbol) {
+          std::cerr << symName << std::endl;
+          abort();
+        }
+        for (unsigned i = 0; i < symbol->getArguments().size(); ++i) {
           std::string binding = "_" + std::to_string(counter++);
           bindings.push_back(binding);
           auto newOccurrence = occurrence;
@@ -106,11 +147,21 @@ public:
       }
       DecisionNode *child = (*this)(_case[1]);
       occurrences = copy;
-      if (kind == SwitchLiteral) {
+      switch (kind) {
+      case SwitchLiteral: {
         unsigned bitwidth = node["bitwidth"].as<unsigned>();
         result->addCase({symbol, {bitwidth, _case[0].as<std::string>(), 10}, child}); 
-      } else {
+        break;
+      }
+      case Switch:
         result->addCase({symbol, bindings, child});
+        break;
+      case CheckNull:
+        result->addCase({symbol, {1, _case[0].as<std::string>(), 10}, child}); 
+        break;
+      default:
+        assert(false && "not reachable");
+        abort();
       }
     }
     auto _case = node["default"];
@@ -145,25 +196,28 @@ public:
       return FailNode::get();
     case Function:
       return function(node);
-    case EqualsLiteral:
-      return equalsLiteral(node);
+    case MakeLiteral:
+      return makeLiteral(node);
+    case MakePattern:
+      return makePattern(node);
     case SwitchLiteral:
     case Switch:
+    case CheckNull:
       return switchCase(kind, node);
     case Leaf:
       return leaf(node);
-    }     
+    }    
   }
 };
 
-DecisionNode *parseYamlDecisionTreeFromString(std::string yaml, int numSubjects, const llvm::StringMap<KOREObjectSymbol *> &syms) {
+DecisionNode *parseYamlDecisionTreeFromString(std::string yaml, int numSubjects, const llvm::StringMap<KOREObjectSymbol *> &syms, const llvm::StringMap<KOREObjectCompositeSort *> &sorts) {
   YAML::Node root = YAML::Load(yaml);
-  return DTPreprocessor(numSubjects, syms)(root);
+  return DTPreprocessor(numSubjects, syms, sorts)(root);
 }
 
-DecisionNode *parseYamlDecisionTree(std::string filename, int numSubjects, const llvm::StringMap<KOREObjectSymbol *> &syms) {
+DecisionNode *parseYamlDecisionTree(std::string filename, int numSubjects, const llvm::StringMap<KOREObjectSymbol *> &syms, const llvm::StringMap<KOREObjectCompositeSort *> &sorts) {
   YAML::Node root = YAML::LoadFile(filename);
-  return DTPreprocessor(numSubjects, syms)(root);
+  return DTPreprocessor(numSubjects, syms, sorts)(root);
 }
 
 }

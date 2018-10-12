@@ -110,6 +110,7 @@ public:
 
   const std::string getName() const { return name; }
   ValueType getCategory(KOREDefinition *definition);
+  std::string getHook(KOREDefinition *definition);
   static ValueType getCategory(std::string hook);
 
   virtual bool isConcrete() const override { return true; }
@@ -688,6 +689,7 @@ public:
   using KOREMetaVariableMapType = llvm::StringMap<KOREMetaVariable *>;
 
   using KOREObjectCompositeSortDeclarationMapType = llvm::StringMap<KOREObjectCompositeSortDeclaration *>;
+  using KOREObjectCompositeSortMapType = llvm::StringMap<KOREObjectCompositeSort *>;
 
   using KOREObjectSymbolDeclarationMapType = llvm::StringMap<KOREObjectSymbolDeclaration *>;
 
@@ -705,6 +707,7 @@ private:
   KOREModuleMapType moduleNames;
   KOREObjectCompositeSortDeclarationMapType sortDeclarations;
   KOREObjectSymbolDeclarationMapType symbolDeclarations;
+  KOREObjectCompositeSortMapType hookedSorts;
 
   std::vector<KOREModule *> modules;
   llvm::StringMap<KOREObjectCompositePattern *> attributes;
@@ -733,6 +736,7 @@ public:
   const KOREObjectSymbolDeclarationMapType &getSymbolDeclarations() const { return symbolDeclarations; }
   const KOREObjectSymbolMapType &getSymbols() const { return objectSymbols; }
   const KOREObjectSymbolStringMapType &getAllSymbols() const { return allObjectSymbols; }
+  const KOREObjectCompositeSortMapType getHookedSorts() const { return hookedSorts; }
   const std::list<KOREAxiomDeclaration *> &getAxioms() const { return axioms; }
   const llvm::StringMap<KOREObjectCompositePattern *> &getAttributes() const {
     return attributes;
