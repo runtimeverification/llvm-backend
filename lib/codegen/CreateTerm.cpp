@@ -66,8 +66,8 @@ target triple = "x86_64-unknown-linux-gnu"
 %blockheader = type { i64 } 
 %block = type { %blockheader, [0 x i64 *] } ; 16-bit layout, 8-bit length, 32-bit tag, children
 
-%layout = type { i8, %layoutitem* }
-%layoutitem = type { i64, i16 }
+%layout = type { i8, %layoutitem* } ; number of children, array of children
+%layoutitem = type { i64, i16 } ; offset, category
 
 ; The layout of a block uniquely identifies the categories of its children as
 ; well as how to allocate/deallocate them and whether to follow their pointers
@@ -106,7 +106,6 @@ static std::string LIST_STRUCT = "list";
 static std::string SET_STRUCT = "set";
 static std::string INT_STRUCT = "mpz";
 static std::string FLOAT_STRUCT = "mpfr";
-static std::string STRING_STRUCT = "string";
 static std::string BUFFER_STRUCT = "stringbuffer";
 static std::string BLOCK_STRUCT = "block";
 static std::string BLOCKHEADER_STRUCT = "blockheader";
