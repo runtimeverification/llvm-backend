@@ -65,6 +65,11 @@ install(
   DESTINATION bin
 )
 
+install(
+  DIRECTORY include/runtime
+  DESTINATION include
+)
+
 FILE(GLOB_RECURSE HaskellSources matching/src/*.hs matching/app/Main.hs)
 
 add_custom_command(

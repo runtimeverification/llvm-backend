@@ -34,5 +34,6 @@ clang++-6.0 -Wno-override-module "$modopt" \
   -lLLVMIRReader -lLLVMBitReader -lLLVMAsmParser -lLLVMCore -lLLVMBinaryFormat -lLLVMSupport -lLLVMDemangle \
   -lncurses \
   -ljemalloc \
+  -I "$(dirname "$0")"/../include \
   -flto \
   "$@"
