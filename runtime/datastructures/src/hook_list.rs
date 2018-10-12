@@ -25,7 +25,7 @@ pub unsafe extern "C" fn hook_LIST_unit() -> List {
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_LIST_element(value: K) -> List {
-  List::singleton(KElem(value))
+  List::singleton(KElem::new(value))
 }
 
 #[no_mangle]
@@ -37,7 +37,7 @@ pub unsafe extern "C" fn hook_LIST_concat(l1: *const List, l2: *const List) -> L
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_LIST_in(value: K, list: *const List) -> bool {
-  (*list).contains(&KElem(value))
+  (*list).contains(&KElem::new(value))
 }
 
 #[no_mangle]
@@ -76,7 +76,7 @@ pub unsafe extern "C" fn hook_LIST_get(list: *const List, index: *const Int) -> 
 pub unsafe extern "C" fn hook_LIST_get_long(list: *const List, index: isize) -> K {
   let index_long = if index < 0 { ((*list).len() as isize) + index } else { index } as usize;
   match (*list).get(index_long) {
-    Some(KElem(elem)) => { *elem }
+    Some(KElem(elem)) => { *elem.get() }
     None => panic!("Index out of range")
   }
 }
@@ -128,7 +128,7 @@ pub unsafe extern "C" fn hook_LIST_make(len: *const Int, value: K) -> List {
     panic!("Index out of range")
   }
   for _ in 0..len_long {
-    tmp.push_back(KElem(value));
+    tmp.push_back(KElem::new(value));
   }
   tmp
 }
@@ -142,7 +142,7 @@ pub unsafe extern "C" fn hook_LIST_update(list: *const List, index: *const Int, 
   if index_long >= (*list).len() {
     panic!("Index out of range")
   }
-  (*list).update(index_long, KElem(value))
+  (*list).update(index_long, KElem::new(value))
 }
 
 #[no_mangle]
@@ -191,7 +191,7 @@ pub unsafe extern "C" fn printList(file: *mut FILE, list: *const List, unit: *co
       fprintf(file, fmt.as_ptr(), concat);
     }
     fprintf(file, fmt.as_ptr(), element);
-    printConfigurationInternal(file, *value, sort.as_ptr());
+    printConfigurationInternal(file, *value.get(), sort.as_ptr());
     fprintf(file, parens.as_ptr());
     if i < (*list).len() {
       fprintf(file, comma.as_ptr());
