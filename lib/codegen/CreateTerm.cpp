@@ -160,12 +160,12 @@ llvm::Value *getBlockHeader(llvm::Module *Module, KOREDefinition *definition, co
   return llvm::ConstantStruct::get(BlockHeaderType, llvm::ConstantInt::get(llvm::Type::getInt64Ty(Module->getContext()), headerVal));
 }
 
-llvm::Value *allocateBlock(llvm::Type *AllocType, llvm::BasicBlock *block) {
-  return allocateBlock(AllocType, llvm::ConstantExpr::getSizeOf(AllocType), block);
+llvm::Value *allocateBlock(llvm::Type *AllocType, llvm::BasicBlock *block, std::string name) {
+  return allocateBlock(AllocType, llvm::ConstantExpr::getSizeOf(AllocType), block, name);
 }
 
-llvm::Value *allocateBlock(llvm::Type *AllocType, llvm::Value *Len, llvm::BasicBlock *block) {
-  llvm::Instruction *Malloc = llvm::CallInst::CreateMalloc(block, llvm::Type::getInt64Ty(block->getContext()), AllocType, Len, nullptr, koreHeapAlloc(block->getModule()));
+llvm::Value *allocateBlock(llvm::Type *AllocType, llvm::Value *Len, llvm::BasicBlock *block, std::string name) {
+  llvm::Instruction *Malloc = llvm::CallInst::CreateMalloc(block, llvm::Type::getInt64Ty(block->getContext()), AllocType, Len, nullptr, koreHeapAlloc(name, block->getModule()));
   block->getInstList().push_back(Malloc);
   return Malloc;
 }
@@ -388,7 +388,7 @@ llvm::Value *CreateTerm::createFunctionCall(std::string name, ValueType returnCa
   }
   if (sret) {
     // we don't use alloca here because the tail call optimization pass for llvm doesn't handle correctly functions with alloca
-    AllocSret = allocateBlock(returnType, CurrentBlock);
+    AllocSret = allocateBlock(returnType, CurrentBlock, "malloc");
     args.insert(args.begin(), AllocSret);
     types.insert(types.begin(), AllocSret->getType());
     returnType = llvm::Type::getVoidTy(Ctx);

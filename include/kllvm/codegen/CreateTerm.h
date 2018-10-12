@@ -75,8 +75,8 @@ llvm::Type *getValueType(ValueType sort, llvm::Module *Module);
 
 void addAbort(llvm::BasicBlock *block, llvm::Module *Module);
 
-llvm::Value *allocateBlock(llvm::Type *AllocType, llvm::BasicBlock *block);
-llvm::Value *allocateBlock(llvm::Type *AllocType, llvm::Value *Len, llvm::BasicBlock *block);
+llvm::Value *allocateBlock(llvm::Type *AllocType, llvm::BasicBlock *block, std::string name = "koreAlloc");
+llvm::Value *allocateBlock(llvm::Type *AllocType, llvm::Value *Len, llvm::BasicBlock *block, std::string name = "koreAlloc");
 }
 
 #endif // CREATE_TERM_H

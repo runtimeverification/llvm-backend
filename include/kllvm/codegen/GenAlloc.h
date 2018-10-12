@@ -5,7 +5,7 @@
 
 namespace kllvm {
 
-llvm::Function* koreHeapAlloc(llvm::Module *module);
+llvm::Function* koreHeapAlloc(std::string name, llvm::Module *module);
 
 }
 #endif // KLLVM_ALLOC_H 

@@ -211,7 +211,7 @@ static std::pair<llvm::Value *, llvm::BasicBlock *> getEval(KOREDefinition *def,
   case SortCategory::MInt: {
     llvm::Instruction *Malloc = llvm::CallInst::CreateMalloc(
         creator.getCurrentBlock(), llvm::Type::getInt64Ty(Ctx), result->getType(), 
-        llvm::ConstantExpr::getSizeOf(result->getType()), nullptr, koreHeapAlloc(mod));
+        llvm::ConstantExpr::getSizeOf(result->getType()), nullptr, nullptr);
     creator.getCurrentBlock()->getInstList().push_back(Malloc);
     new llvm::StoreInst(result, Malloc, creator.getCurrentBlock());
     retval = new llvm::BitCastInst(Malloc, llvm::Type::getInt8PtrTy(Ctx), "",
@@ -297,7 +297,7 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
           {func->arg_begin()+2, Ptr, func->arg_begin()+1, Len}, "", CaseBlock);
       llvm::Instruction *Malloc = llvm::CallInst::CreateMalloc(
           CaseBlock, llvm::Type::getInt64Ty(Ctx), compare->getType(), 
-          llvm::ConstantExpr::getSizeOf(compare->getType()), nullptr, koreHeapAlloc(module));
+          llvm::ConstantExpr::getSizeOf(compare->getType()), nullptr, nullptr);
       CaseBlock->getInstList().push_back(Malloc);
       new llvm::StoreInst(compare, Malloc, CaseBlock);
       auto result = new llvm::BitCastInst(Malloc, llvm::Type::getInt8PtrTy(Ctx), "", CaseBlock);
