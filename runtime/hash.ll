@@ -56,12 +56,12 @@ constant:
 block:
   %arghdrptr = getelementptr inbounds %block, %block* %arg, i64 0, i32 0, i32 0
   %arghdr = load i64, i64* %arghdrptr
-  call void @add_hash64(i8* %hasher, i64 %arghdr)
   %arglayout = lshr i64 %arghdr, 48
   %isString = icmp eq i64 %arglayout, 0
   br i1 %isString, label %hashString, label %hashChildren
 hashString:
-  %arglen = and i64 %arghdr, 281474976710655
+  %arglen = and i64 %arghdr, 70368744177663
+  call void @add_hash64(i8* %hasher, i64 %arglen)
   %strptrlong = getelementptr inbounds %block, %block* %arg, i64 0, i32 1, i64 0
   %strptr = bitcast i64** %strptrlong to i8*
   br label %stringLoop
@@ -77,6 +77,7 @@ compareByte:
   call void @add_hash8(i8* %hasher, i8 %byte)
   br label %stringLoop
 hashChildren:
+  call void @add_hash64(i8* %hasher, i64 %arghdr)
   %arglayoutshort = trunc i64 %arglayout to i16
   %layoutData = call %layout @getLayoutData(i16 %arglayoutshort)
   %length = extractvalue %layout %layoutData, 0

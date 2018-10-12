@@ -338,7 +338,10 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
   llvm::Value *Block = allocateBlock(StringType, Len, CurrentBlock);
   auto HdrPtr = llvm::GetElementPtrInst::CreateInBounds(Block,
       {zero, zero32, zero32}, "", CurrentBlock);
-  new llvm::StoreInst(func->arg_begin()+1, HdrPtr, CurrentBlock);
+  auto Hdr = new llvm::LoadInst(HdrPtr, "", CurrentBlock);
+  auto HdrOred = llvm::BinaryOperator::Create(llvm::Instruction::Or,
+      func->arg_begin()+1, Hdr, "", CurrentBlock);
+  new llvm::StoreInst(HdrOred, HdrPtr, CurrentBlock);
   llvm::Constant *Memcpy = module->getOrInsertFunction("memcpy", 
       llvm::Type::getInt8PtrTy(Ctx), llvm::Type::getInt8PtrTy(Ctx),
       llvm::Type::getInt8PtrTy(Ctx), llvm::Type::getInt64Ty(Ctx));

@@ -37,19 +37,20 @@ block:
   %arg2hdrptr = getelementptr inbounds %block, %block* %arg2, i64 0, i32 0, i32 0
   %arg1hdr = load i64, i64* %arg1hdrptr
   %arg2hdr = load i64, i64* %arg2hdrptr
-  %eqblock = icmp eq i64 %arg1hdr, %arg2hdr
+  %arg1len = and i64 %arg1hdr, 70368744177663
+  %arg2len = and i64 %arg2hdr, 70368744177663
+  %eqblock = icmp eq i64 %arg1len, %arg2len
   br i1 %eqblock, label %getChildren, label %exit
 getChildren:
   %arglayout = lshr i64 %arg1hdr, 48
   %isString = icmp eq i64 %arglayout, 0
   br i1 %isString, label %eqString, label %compareChildren
 eqString:
-  %arglen = and i64 %arg1hdr, 281474976710655
   %str1ptrlong = getelementptr inbounds %block, %block* %arg1, i64 0, i32 1, i64 0
   %str2ptrlong = getelementptr inbounds %block, %block* %arg2, i64 0, i32 1, i64 0
   %str1ptr = bitcast i64** %str1ptrlong to i8*
   %str2ptr = bitcast i64** %str2ptrlong to i8*
-  %retval = call i32 @memcmp(i8* %str1ptr, i8* %str2ptr, i64 %arglen)
+  %retval = call i32 @memcmp(i8* %str1ptr, i8* %str2ptr, i64 %arg1len)
   %eqcontents = icmp eq i32 %retval, 0
   br label %exit
 compareChildren:

@@ -30,12 +30,15 @@ void* koreAlloc(size_t requested) {
   if (remaining < requested) {
     DBG("Block at %p too small, %zd remaining but %zd needed\n", block, remaining, requested);
     if (requested > BLOCK_SIZE) {
-      return malloc(requested);
+      void *bigObject = malloc(requested);
+      *((uint64_t *)bigObject) = 0x400000000000;
+      return bigObject;
     } else {
       freshBlock();
     }
   }
   void* result = block;
+  *((uint64_t *)result) = 0;
   block += requested;
   remaining -= requested;
   last_size = requested;

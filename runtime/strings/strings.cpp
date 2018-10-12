@@ -38,33 +38,33 @@ extern "C" {
   string *hook_BYTES_substr(string *a, mpz_t start, mpz_t end);
 
   bool hook_STRING_gt(const string * a, const string * b) {
-    auto res = memcmp(a->data, b->data, std::min(a->b.len, b->b.len));
-    return res > 0 || (res == 0 && a->b.len > b->b.len);
+    auto res = memcmp(a->data, b->data, std::min(len(a), len(b)));
+    return res > 0 || (res == 0 && len(a) > len(b));
   }
 
   bool hook_STRING_ge(const string * a, const string * b) {
-    auto res = memcmp(a->data, b->data, std::min(a->b.len, b->b.len));
-    return (res > 0 || (res == 0 && a->b.len >= b->b.len));
+    auto res = memcmp(a->data, b->data, std::min(len(a), len(b)));
+    return (res > 0 || (res == 0 && len(a) >= len(b)));
   }
 
   bool hook_STRING_lt(const string * a, const string * b) {
-    auto res = memcmp(a->data, b->data, std::min(a->b.len, b->b.len));
-    return res < 0 || (res == 0 && a->b.len < b->b.len);
+    auto res = memcmp(a->data, b->data, std::min(len(a), len(b)));
+    return res < 0 || (res == 0 && len(a) < len(b));
   }
 
   bool hook_STRING_le(const string * a, const string * b) {
-    auto res = memcmp(a->data, b->data, std::min(a->b.len, b->b.len));
-    return (res < 0 || (res == 0 && a->b.len <= b->b.len));
+    auto res = memcmp(a->data, b->data, std::min(len(a), len(b)));
+    return (res < 0 || (res == 0 && len(a) <= len(b)));
   }
 
   bool hook_STRING_eq(const string * a, const string * b) {
-    auto res = memcmp(a->data, b->data, std::min(a->b.len, b->b.len));
-    return (res == 0 && a->b.len == b->b.len);
+    auto res = memcmp(a->data, b->data, std::min(len(a), len(b)));
+    return (res == 0 && len(a) == len(b));
   }
 
   bool hook_STRING_ne(const string * a, const string * b) {
-    auto res = memcmp(a->data, b->data, std::min(a->b.len, b->b.len));
-    return (res != 0 || a->b.len != b->b.len);
+    auto res = memcmp(a->data, b->data, std::min(len(a), len(b)));
+    return (res != 0 || len(a) != len(b));
   }
 
   string * hook_STRING_concat(string * a, string * b) {
@@ -88,14 +88,14 @@ extern "C" {
       throw std::invalid_argument("Ord must be <= 255");
     }
     auto ret = static_cast<string *>(koreAlloc(sizeof(string) + sizeof(KCHAR)));
-    ret->b.len = 1;
+    set_len(ret, 1);
     ret->data[0] = static_cast<KCHAR>(uord);
     return ret;
   }
 
   const mpz_ptr hook_STRING_ord(const string * input) {
     mpz_t result;
-    if (input->b.len != 1) {
+    if (len(input) != 1) {
       throw std::invalid_argument("Input must a string of length 1");
     }
     mpz_init_set_ui(result, static_cast<unsigned char>(input->data[0]));
@@ -109,15 +109,15 @@ extern "C" {
   mpz_ptr hook_STRING_find(const string * haystack, const string * needle, mpz_t pos) {
     mpz_t result;
     uint64_t upos = gs(pos);
-    if (upos >= haystack->b.len) {
+    if (upos >= len(haystack)) {
       mpz_init_set_si(result, -1);
       return move_int(result);
     }
-    auto out = std::search(haystack->data + upos * sizeof(KCHAR), haystack->data + haystack->b.len * sizeof(KCHAR),
-        needle->data,   needle->data   + needle->b.len * sizeof(KCHAR));
+    auto out = std::search(haystack->data + upos * sizeof(KCHAR), haystack->data + len(haystack) * sizeof(KCHAR),
+        needle->data,   needle->data   + len(needle) * sizeof(KCHAR));
     int64_t ret = (out - haystack->data) / sizeof(KCHAR);
     // search returns the end of the range if it is not found, but we want -1 in such a case.
-    auto res = (ret < haystack->b.len)?ret:-1;
+    auto res = (ret < len(haystack))?ret:-1;
     mpz_init_set_si(result, res);
     return move_int(result);
   }
@@ -128,10 +128,10 @@ extern "C" {
     // or the end of the haystack, if that's less.
     mpz_t result;
     uint64_t upos = gs(pos);
-    upos += needle->b.len;
-    auto end = (upos < haystack->b.len)?upos:haystack->b.len;
+    upos += len(needle);
+    auto end = (upos < len(haystack))?upos:len(haystack);
     auto out = std::find_end(&haystack->data[0], &haystack->data[end],
-        &needle->data[0], &needle->data[needle->b.len]);
+        &needle->data[0], &needle->data[len(needle)]);
     auto ret = &*out - &haystack->data[0];
     auto res = (ret < end)?ret:-1;
     mpz_init_set_si(result, res);
@@ -139,7 +139,7 @@ extern "C" {
   }
 
   mpz_ptr hook_STRING_findChar(const string * haystack, const string * needle, mpz_t pos) {
-    if (needle->b.len > 1) {
+    if (len(needle) > 1) {
       mpz_t result;
       mpz_init_set_si(result, -1);
       return move_int(result);
@@ -148,7 +148,7 @@ extern "C" {
   }
 
   mpz_ptr hook_STRING_rfindChar(const string * haystack, const string * needle, mpz_ptr pos) {
-    if (needle->b.len > 1) {
+    if (len(needle) > 1) {
       mpz_t result;
       mpz_init_set_si(result, -1);
       return move_int(result);
@@ -162,7 +162,7 @@ extern "C" {
     }
     auto ret = static_cast<string *>(koreAlloc(sizeof(string) + len));
     memcpy(ret->data, input, len);
-    ret->b.len = len;
+    set_len(ret, len);
     return ret;
   }
 
@@ -171,15 +171,15 @@ extern "C" {
     // +1 for null terminator needed by mpz_get_str, +1 for minus sign
     auto result = static_cast<string *>(koreAlloc(sizeof(string) + len));
     mpz_get_str(result->data, 10, input);
-    result->b.len = strlen(result->data);
-    return static_cast<string *>(koreResizeLastAlloc(result, sizeof(string) + result->b.len));
+    set_len(result, strlen(result->data));
+    return static_cast<string *>(koreResizeLastAlloc(result, sizeof(string) + len(result)));
   }
 
   const mpz_ptr hook_STRING_string2base_long(const string *input, uint64_t base) {
     mpz_t result;
-    auto copy = static_cast<char *>(koreAlloc(input->b.len + 1));
-    memcpy(copy, input->data, input->b.len);
-    copy[input->b.len] = 0;
+    auto copy = static_cast<char *>(koreAlloc(len(input) + 1));
+    memcpy(copy, input->data, len(input));
+    copy[len(input)] = 0;
     if (mpz_init_set_str(result, copy, base)) {
       throw std::invalid_argument("Not a valid integer");
     }
@@ -215,11 +215,11 @@ extern "C" {
     uint64_t uoccurences = gs(occurences);
     auto start = &haystack->data[0];
     auto pos = start;
-    auto end = &haystack->data[haystack->b.len];
-    size_t matches[haystack->b.len];
+    auto end = &haystack->data[len(haystack)];
+    size_t matches[len(haystack)];
     int i = 0;
     while (i < uoccurences) {
-      pos = std::search(pos, end, &needle->data[0], &needle->data[needle->b.len]);
+      pos = std::search(pos, end, &needle->data[0], &needle->data[len(needle)]);
       if (pos == end) {
         break;
       }
@@ -229,10 +229,10 @@ extern "C" {
     if ( i == 0 ) {
       return haystack;
     }
-    auto diff = needle->b.len - replacer->b.len;
-    size_t new_len = haystack->b.len - i * diff;
+    auto diff = len(needle) - len(replacer);
+    size_t new_len = len(haystack) - i * diff;
     auto ret = static_cast<string *>(koreAlloc(sizeof(string) + new_len * sizeof(KCHAR)));
-    ret->b.len = new_len;
+    set_len(ret, new_len);
     int m = 0;
     for (size_t r = 0, h = 0; r < new_len;) {
       if (m >= i) {
@@ -245,9 +245,9 @@ extern "C" {
         h += size;
       } else {
         ++m;
-        memcpy(&ret->data[r], replacer->data, replacer->b.len);
-        r += replacer->b.len;
-        h += needle->b.len;
+        memcpy(&ret->data[r], replacer->data, len(replacer));
+        r += len(replacer);
+        h += len(needle);
       }
     }
     return ret;
@@ -257,7 +257,7 @@ extern "C" {
     // It's guaranteed that there can be no more replacements than the length of the haystack, so this
     // gives us the functionality of replaceAll.
     mpz_t arg;
-    mpz_init_set_si(arg, haystack->b.len);
+    mpz_init_set_si(arg, len(haystack));
     return hook_STRING_replace(haystack, needle, replacer, arg);
   }
 
@@ -269,10 +269,10 @@ extern "C" {
 
   mpz_ptr hook_STRING_countAllOccurrences(const string * haystack, const string * needle) {
     auto pos = &haystack->data[0];
-    auto end = &haystack->data[haystack->b.len];
+    auto end = &haystack->data[len(haystack)];
     int i = 0;
     while (true) {
-      pos = std::search(pos, end, &needle->data[0], &needle->data[needle->b.len]);
+      pos = std::search(pos, end, &needle->data[0], &needle->data[len(needle)]);
       if (pos == end) {
         break;
       }
@@ -287,27 +287,27 @@ extern "C" {
     auto result = static_cast<stringbuffer *>(koreAlloc(sizeof(stringbuffer)));
     result->capacity = 16;
     auto str = static_cast<string *>(koreAlloc(sizeof(string) + 16));
-    str->b.len = 0;
+    set_len(str, 0);
     result->contents = str;
     return result;
   }
 
   stringbuffer *hook_BUFFER_concat(stringbuffer *buf, string *s) {
     uint64_t newCapacity = buf->capacity;
-    uint64_t minCapacity = buf->contents->b.len + s->b.len;
+    uint64_t minCapacity = len(buf->contents) + len(s);
     if (newCapacity < minCapacity) {
-      newCapacity = buf->contents->b.len * 2 + 2;
+      newCapacity = len(buf->contents) * 2 + 2;
       if (newCapacity < minCapacity) {
         newCapacity = minCapacity;
       }
       buf->capacity = newCapacity;
       string* new_contents = static_cast<string *>(koreAlloc(sizeof(string) + newCapacity));
-      memcpy(new_contents, buf->contents, sizeof(string) + buf->contents->b.len);
+      memcpy(new_contents, buf->contents, sizeof(string) + len(buf->contents));
       // TODO: free/decref old contents.
       buf->contents = new_contents;
     }
-    memcpy(buf->contents->data + buf->contents->b.len, s->data, s->b.len);
-    buf->contents->b.len += s->b.len;
+    memcpy(buf->contents->data + len(buf->contents), s->data, len(s));
+    set_len(buf->contents, len(buf->contents) + len(s));
     return buf;
   }
 
