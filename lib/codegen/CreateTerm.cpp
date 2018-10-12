@@ -337,6 +337,9 @@ llvm::Value *CreateTerm::createHook(KOREObjectCompositePattern *hookAtt, KOREObj
   }
 }
 
+// we use fastcc calling convention for apply_rule_* and eval_* functions so that the
+// -tailcallopt LLVM pass can be used to make K functions tail recursive when their K
+// definitions are tail recursive.
 llvm::Value *CreateTerm::createFunctionCall(std::string name, KOREObjectCompositePattern *pattern, bool sret, bool fastcc) {
   std::vector<llvm::Value *> args;
   auto returnSort = dynamic_cast<KOREObjectCompositeSort *>(pattern->getConstructor()->getSort());
