@@ -87,7 +87,7 @@ extern "C" {
     if (uord > 255) {
       throw std::invalid_argument("Ord must be <= 255");
     }
-    auto ret = static_cast<string *>(koreAlloc(sizeof(string) + sizeof(KCHAR)));
+    auto ret = static_cast<string *>(koreAllocToken(sizeof(string) + sizeof(KCHAR)));
     set_len(ret, 1);
     ret->data[0] = static_cast<KCHAR>(uord);
     return ret;
@@ -160,7 +160,7 @@ extern "C" {
     if (len == -1) {
       len = strlen(input);
     }
-    auto ret = static_cast<string *>(koreAlloc(sizeof(string) + len));
+    auto ret = static_cast<string *>(koreAllocToken(sizeof(string) + len));
     memcpy(ret->data, input, len);
     set_len(ret, len);
     return ret;
@@ -169,15 +169,15 @@ extern "C" {
   const string * hook_STRING_int2string(const mpz_t input) {
     size_t len = mpz_sizeinbase(input, 10) + 2;
     // +1 for null terminator needed by mpz_get_str, +1 for minus sign
-    auto result = static_cast<string *>(koreAlloc(sizeof(string) + len));
+    auto result = static_cast<string *>(koreAllocToken(sizeof(string) + len));
     mpz_get_str(result->data, 10, input);
     set_len(result, strlen(result->data));
-    return static_cast<string *>(koreResizeLastAlloc(result, sizeof(string) + len(result)));
+    return static_cast<string *>(koreResizeLastAlloc(result, sizeof(string) + len(result), sizeof(string) + len));
   }
 
   const mpz_ptr hook_STRING_string2base_long(const string *input, uint64_t base) {
     mpz_t result;
-    auto copy = static_cast<char *>(koreAlloc(len(input) + 1));
+    auto copy = static_cast<char *>(koreAllocToken(len(input) + 1));
     memcpy(copy, input->data, len(input));
     copy[len(input)] = 0;
     if (mpz_init_set_str(result, copy, base)) {
@@ -231,7 +231,7 @@ extern "C" {
     }
     auto diff = len(needle) - len(replacer);
     size_t new_len = len(haystack) - i * diff;
-    auto ret = static_cast<string *>(koreAlloc(sizeof(string) + new_len * sizeof(KCHAR)));
+    auto ret = static_cast<string *>(koreAllocToken(sizeof(string) + new_len * sizeof(KCHAR)));
     set_len(ret, new_len);
     int m = 0;
     for (size_t r = 0, h = 0; r < new_len;) {
@@ -284,9 +284,9 @@ extern "C" {
   }
 
   stringbuffer *hook_BUFFER_empty() {
-    auto result = static_cast<stringbuffer *>(koreAlloc(sizeof(stringbuffer)));
+    auto result = static_cast<stringbuffer *>(koreAllocToken(sizeof(stringbuffer)));
     result->capacity = 16;
-    auto str = static_cast<string *>(koreAlloc(sizeof(string) + 16));
+    auto str = static_cast<string *>(koreAllocToken(sizeof(string) + 16));
     set_len(str, 0);
     result->contents = str;
     return result;
@@ -301,7 +301,7 @@ extern "C" {
         newCapacity = minCapacity;
       }
       buf->capacity = newCapacity;
-      string* new_contents = static_cast<string *>(koreAlloc(sizeof(string) + newCapacity));
+      string* new_contents = static_cast<string *>(koreAllocToken(sizeof(string) + newCapacity));
       memcpy(new_contents, buf->contents, sizeof(string) + len(buf->contents));
       // TODO: free/decref old contents.
       buf->contents = new_contents;

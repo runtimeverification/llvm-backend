@@ -89,7 +89,7 @@ extern "C" {
     }
     size_t sizeInBytes = (mpz_sizeinbase(i, 2) + 7) / 8;
     bool neg = mpz_cmp_si(i, 0) < 0;
-    bytes *result = static_cast<bytes *>(koreAlloc(sizeof(bytes) + len_long));
+    bytes *result = static_cast<bytes *>(koreAllocToken(sizeof(bytes) + len_long));
     set_len(result, len_long);
     memset(result->data, neg ? 0xff : 0x00, len_long);
     int order = endianness == tag_big_endian() ? 1 : -1;
@@ -107,7 +107,7 @@ extern "C" {
 
   bytes *hook_BYTES_bytes2string(bytes *b) {
     size_t size = sizeof(bytes) + len(b);
-    bytes *result = static_cast<bytes *>(koreAlloc(size));
+    bytes *result = static_cast<bytes *>(koreAllocToken(size));
     memcpy(result, b, size);
     return result;
   }
@@ -126,7 +126,7 @@ extern "C" {
       throw std::invalid_argument("Invalid string slice");
     }
     uint64_t len = uend - ustart;
-    auto ret = static_cast<bytes *>(koreAlloc(sizeof(bytes) + sizeof(KCHAR) * len));
+    auto ret = static_cast<bytes *>(koreAllocToken(sizeof(bytes) + sizeof(KCHAR) * len));
     set_len(ret, len);
     memcpy(&(ret->data), &(input->data[ustart]), len * sizeof(KCHAR));
     return ret;
@@ -156,7 +156,7 @@ extern "C" {
     if (uv > 255) {
       throw std::invalid_argument("Integer overflow on value");
     }
-    bytes *result = static_cast<bytes *>(koreAlloc(sizeof(bytes) + ulen));
+    bytes *result = static_cast<bytes *>(koreAllocToken(sizeof(bytes) + ulen));
     set_len(result, ulen);
     memcpy(result->data, b->data, len(b));
     memset(result->data + len(b), uv, ulen - len(b));
@@ -172,7 +172,7 @@ extern "C" {
     if (uv > 255) {
       throw std::invalid_argument("Integer overflow on value");
     }
-    bytes *result = static_cast<bytes *>(koreAlloc(sizeof(bytes) + ulen));
+    bytes *result = static_cast<bytes *>(koreAllocToken(sizeof(bytes) + ulen));
     set_len(result, ulen);
     memset(result->data, uv, ulen - len(b));
     memcpy(result->data + ulen - len(b), b->data, len(b));
@@ -188,7 +188,7 @@ extern "C" {
     auto len_a = len(a);
     auto len_b = len(b);
     auto newlen = len_a  + len_b;
-    auto ret = static_cast<bytes *>(koreAlloc(sizeof(bytes) + newlen));
+    auto ret = static_cast<bytes *>(koreAllocToken(sizeof(bytes) + newlen));
     set_len(ret, newlen);
     memcpy(&(ret->data), &(a->data), len(a) * sizeof(KCHAR));
     memcpy(&(ret->data[len(a)]), &(b->data), len(b) * sizeof(KCHAR));

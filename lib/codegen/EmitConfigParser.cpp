@@ -338,12 +338,18 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
   auto StringType = module->getTypeByName(STRING_STRUCT);
   auto Len = llvm::BinaryOperator::Create(llvm::Instruction::Add,
       func->arg_begin()+1, llvm::ConstantExpr::getSizeOf(StringType), "", CurrentBlock);
-  llvm::Value *Block = allocateBlock(StringType, Len, CurrentBlock);
+  llvm::Value *Block = allocateBlock(StringType, Len, CurrentBlock, "koreAllocToken");
   auto HdrPtr = llvm::GetElementPtrInst::CreateInBounds(Block,
       {zero, zero32, zero32}, "", CurrentBlock);
-  auto Hdr = new llvm::LoadInst(HdrPtr, "", CurrentBlock);
+  auto BlockSize = module->getOrInsertGlobal("BLOCK_SIZE", llvm::Type::getInt64Ty(Ctx));
+  auto BlockSizeVal = new llvm::LoadInst(BlockSize, "", CurrentBlock);
+  auto BlockAllocSize = llvm::BinaryOperator::Create(llvm::Instruction::Sub,
+      BlockSizeVal, llvm::ConstantExpr::getSizeOf(llvm::Type::getInt8PtrTy(Ctx)), "", CurrentBlock);
+  auto icmp = new llvm::ICmpInst(*CurrentBlock, llvm::CmpInst::ICMP_UGT,
+      Len, BlockAllocSize);
+  auto Mask = llvm::SelectInst::Create(icmp, llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0x400000000000), llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0), "", CurrentBlock);
   auto HdrOred = llvm::BinaryOperator::Create(llvm::Instruction::Or,
-      func->arg_begin()+1, Hdr, "", CurrentBlock);
+      func->arg_begin()+1, Mask, "", CurrentBlock);
   new llvm::StoreInst(HdrOred, HdrPtr, CurrentBlock);
   llvm::Constant *Memcpy = module->getOrInsertFunction("memcpy", 
       llvm::Type::getInt8PtrTy(Ctx), llvm::Type::getInt8PtrTy(Ctx),

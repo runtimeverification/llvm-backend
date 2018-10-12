@@ -2,6 +2,7 @@
 #include<stdbool.h>
 #include<stdlib.h>
 #include<string.h>
+#include "runtime/alloc.h"
 
 extern const size_t BLOCK_SIZE;
 
@@ -32,11 +33,9 @@ typedef struct {
   block *contents;
 } stringbuffer;
 
-void* koreAlloc(size_t);
 char *alloc_ptr(void);
 char *arena_ptr(void);
 char* fromspace_ptr(void);
-void koreAllocSwap(void);
 layout *getLayoutData(uint16_t);
 void map_foreach(void *, void(block**));
 void set_foreach(void *, void(block**));
@@ -44,7 +43,7 @@ void list_foreach(void *, void(block**));
 
 static size_t get_size(block *block, uint16_t layout) {
   if (!layout) {
-    return block->h.hdr + sizeof(block);
+    return (block->h.hdr + sizeof(block) + 7) & ~7;
   } else {
     return ((block->h.hdr >> 32) & 0xff) * 8;
   }
@@ -80,7 +79,7 @@ static void copy_string_buffer(stringbuffer** bufferPtr) {
   if (!hasForwardingAddress) {
     stringbuffer *newBuffer = koreAlloc(sizeof(stringbuffer));
     memcpy(newBuffer, buffer, sizeof(stringbuffer));
-    block *newContents = koreAlloc(sizeof(block) + buffer->capacity);
+    block *newContents = koreAllocToken(sizeof(block) + buffer->capacity);
     memcpy(newContents, buffer->contents, buffer->contents->h.hdr);
     newBuffer->contents = newContents;
     memcpy(buffer->contents, &newBuffer, sizeof(stringbuffer *));
@@ -90,8 +89,7 @@ static void copy_string_buffer(stringbuffer** bufferPtr) {
 }
 
 static char* get_next(char* scan_ptr, size_t size) {
-  char *end_ptr = scan_ptr + size;
-  char *next_ptr = (char *)(((uintptr_t)(end_ptr + 7)) & ~7);
+  char *next_ptr = scan_ptr + size;
   if (next_ptr < current_tospace_end) {
     if (arena_ptr() == current_tospace_start && next_ptr >= alloc_ptr()) {
       return 0;
