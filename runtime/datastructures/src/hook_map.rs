@@ -175,6 +175,14 @@ pub unsafe extern "C" fn printMap(file: *mut FILE, map: *const Map, unit: *const
   }
 }
 
+#[no_mangle]
+pub unsafe extern "C" fn map_foreach(map: *mut Map, copy: extern fn(block: *mut K)) {
+  for (key, value) in (*map).iter() {
+    copy(key.0.get());
+    copy(value.0.get());
+  }
+}
+
 #[cfg(test)]
 mod tests {
   extern crate libc;

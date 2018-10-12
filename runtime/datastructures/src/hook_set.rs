@@ -129,6 +129,13 @@ pub unsafe extern "C" fn printSet(file: *mut FILE, set: *const Set, unit: *const
   }
 }
 
+#[no_mangle]
+pub unsafe extern "C" fn set_foreach(set: *mut Set, copy: extern fn(block: *mut K)) {
+  for value in (*set).iter_mut() {
+    copy(value.0.get());
+  }
+}
+
 #[cfg(test)]
 pub mod tests {
   extern crate libc;

@@ -1,6 +1,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include "jemalloc/jemalloc.h"
 
 #include "runtime/alloc.h"
@@ -15,13 +16,52 @@
 // 1 MiB minus 16 bytes for libc malloc overhead
 const size_t BLOCK_SIZE = 1000000000;
 
+static char* first_block = 0;
+static char* first_tospace_block = 0;
 static char* block = 0;
+static char* block_start = 0;
 static size_t remaining = 0;
 static size_t last_size = 0;
 
+char *fromspace_ptr() {
+  return first_block;
+}
+
+char *alloc_ptr() {
+  return block;
+}
+
+char *arena_ptr() {
+  return block_start;
+}
+
+void koreAllocSwap() {
+  char *tmp = first_block;
+  first_block = first_tospace_block;
+  first_tospace_block = tmp;
+  block = first_block ? first_block + sizeof(char *) : 0;
+  block_start = first_block;
+  remaining = first_block ? BLOCK_SIZE - sizeof(char *) : 0;
+  last_size = 0;
+}
+
 static void freshBlock() {
-    block = malloc(BLOCK_SIZE);
-    remaining = BLOCK_SIZE;
+    char *nextBlock;
+    if (block_start == 0) {
+      nextBlock = malloc(BLOCK_SIZE);
+      first_block = nextBlock;
+      memset(nextBlock, 0, sizeof(char *));
+    } else {
+      memcpy(&nextBlock, block_start, sizeof(char *));
+      if (!nextBlock) {
+        nextBlock = malloc(BLOCK_SIZE);
+        memcpy(block_start, &nextBlock, sizeof(char *));
+        memset(nextBlock, 0, sizeof(char *));
+      }
+    }
+    block = nextBlock + sizeof(char *);
+    block_start = nextBlock;
+    remaining = BLOCK_SIZE - sizeof(char *);
     DBG("New block at %p (remaining %zd)\n", block, remaining);
 }
 

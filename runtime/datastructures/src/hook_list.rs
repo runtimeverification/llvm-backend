@@ -203,6 +203,13 @@ pub unsafe extern "C" fn printList(file: *mut FILE, list: *const List, unit: *co
   }
 }
 
+#[no_mangle]
+pub unsafe extern "C" fn list_foreach(list: *mut List, copy: extern fn(block: *mut K)) {
+  for value in (*list).iter_mut() {
+    copy(value.0.get());
+  }
+}
+
 #[cfg(test)]
 pub mod tests {
   extern crate libc;
