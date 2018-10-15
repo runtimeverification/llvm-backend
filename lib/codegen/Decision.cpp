@@ -26,13 +26,17 @@ void SwitchNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitutio
   int idx = 0;
   bool isInt = false;
   for (auto &_case : cases) {
+    auto child = _case.getChild();
     llvm::BasicBlock *CaseBlock;
-    if (_case.getChild() == FailNode::get()) {
+    if (child == FailNode::get()) {
       CaseBlock = d->StuckBlock;
+	} else if (child->cachedCode != nullptr) {
+      CaseBlock = child->cachedCode;
     } else {
       CaseBlock = llvm::BasicBlock::Create(d->Ctx, 
           name + "_case_" + std::to_string(idx++),
           d->CurrentBlock->getParent());
+	  child->cachedCode = CaseBlock;
     }
     if (auto sym = _case.getConstructor()) {
       isInt = isInt || sym->getName() == "\\dv";

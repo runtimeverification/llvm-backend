@@ -13,6 +13,7 @@ class Decision;
 
 class DecisionNode {
 public:
+  llvm::BasicBlock * cachedCode = nullptr;
   virtual void codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution) = 0;
 };
 
@@ -26,7 +27,7 @@ private:
   /* the literal int to match on. must have a bit width equal to the
      size of the sort being matched. */
   llvm::APInt literal;
-  /* the node in the tree to juwp to if this constructor is matched */
+  /* the node in the tree to jump to if this constructor is matched */
   DecisionNode *child;
 
 public:

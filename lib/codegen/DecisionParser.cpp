@@ -9,6 +9,7 @@ namespace kllvm {
 
 class DTPreprocessor {
 private:
+  std::map<YAML::Node, DecisionNode *> uniqueNodes;
   std::map<std::vector<int>, std::string> occurrences;
   const llvm::StringMap<KOREObjectSymbol *> &syms;
   const llvm::StringMap<KOREObjectCompositeSort *> &sorts;
@@ -186,27 +187,34 @@ public:
     }
     return result;
   }
- 
+
   DecisionNode *operator()(YAML::Node node) {
+    auto unique = uniqueNodes.find(node);
+	if (unique != uniqueNodes.end()) {
+      return unique->second;
+	}
     Kind kind = getKind(node);
-    switch(kind) {
+    DecisionNode * ret = nullptr;
+	switch(kind) {
     case Swap:
-      return swap(node);
+      ret = swap(node); break;
     case Fail:
-      return FailNode::get();
+      ret = FailNode::get(); break;
     case Function:
-      return function(node);
+      ret = function(node); break;
     case MakeLiteral:
-      return makeLiteral(node);
+      ret = makeLiteral(node); break;
     case MakePattern:
-      return makePattern(node);
+      ret = makePattern(node); break;
     case SwitchLiteral:
     case Switch:
     case CheckNull:
-      return switchCase(kind, node);
+      ret = switchCase(kind, node); break;
     case Leaf:
-      return leaf(node);
-    }    
+      ret = leaf(node); break;
+    }
+    uniqueNodes[node] = ret;
+	return ret;
   }
 };
 
