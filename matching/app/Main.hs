@@ -1,3 +1,12 @@
+{-|
+Module      : Main
+Description : Generates a decision tree from the .kore file.
+Copyright   : (c) Runtime Verification, 2018
+License     : UIUC/NCSA
+Maintainer  : radu.ometita@iohk.io
+Stability   : experimental
+Portability : POSIX
+-}
 module Main where
 
 import           Control.Monad.Free    (Free (..))

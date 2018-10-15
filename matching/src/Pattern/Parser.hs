@@ -1,48 +1,62 @@
-{-# LANGUAGE GADTs      #-}
-{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE GADTs           #-}
+{-# LANGUAGE LambdaCase      #-}
 {-# LANGUAGE PatternSynonyms #-}
+{-|
+Module      : Pattern.Parser
+Description : Generates patterns from a Kore definition.
+Copyright   : (c) Runtime Verification, 2018
+License     : UIUC/NCSA
+Maintainer  : radu.ometita@iohk.io
+Stability   : experimental
+Portability : POSIX
+-}
 module Pattern.Parser where
 
-import           Data.Functor.Foldable      (Fix (..), para)
-import           Data.List                  (sortBy, nub)
-import           Data.List.Index            (indexed)
-import qualified Data.Map                   as Map
-import           Data.Functor.Impredicative (Rotate31 (..))
-import           Data.Ord                   (comparing)
-import           Data.Proxy                 (Proxy (..))
-import           Kore.AST.Common            (And (..), Equals (..),
-                                             Pattern (..),
-                                             Rewrites (..), 
-                                             Variable, SymbolOrAlias (..),
-                                             Application (..), Sort (..),
-                                             And (..), Ceil (..), Equals (..), Exists (..),
-                                             Floor (..), Forall (..), Implies (..), Iff (..),
-                                             In (..), Next (..), Not (..), Or (..), Id (..))
-import           Kore.AST.Kore              (CommonKorePattern,
-                                             UnifiedPattern (..), 
-                                             UnifiedSortVariable,
-                                             pattern KoreObjectPattern)
-import           Kore.AST.MetaOrObject      (Meta (..), Object (..),
-                                             Unified (..))
-import           Kore.AST.Sentence          (KoreDefinition,
-                                             Definition (..), Module (..),
-                                             SentenceAxiom (..),
-                                             applyUnifiedSentence,
-                                             ModuleName (..), Sentence (..),
-                                             Attributes (..))
-import           Kore.ASTHelpers            (ApplicationSorts (..))
-import           Kore.ASTVerifier.DefinitionVerifier
-                                            (defaultAttributesVerification, verifyAndIndexDefinition)
-import qualified Kore.Builtin               as Builtin
-import           Kore.Error                 (printError)
-import           Kore.IndexedModule.IndexedModule
-                                            (KoreIndexedModule)
-import           Kore.IndexedModule.MetadataTools
-                                            (extractMetadataTools,
-                                             MetadataTools (..))
-import           Kore.Parser.Parser         (fromKore)
-import           Kore.Step.StepperAttributes
-                                            (StepperAttributes (..))
+import           Data.Functor.Foldable               (Fix (..), para)
+import           Data.Functor.Impredicative          (Rotate31 (..))
+import           Data.List                           (nub, sortBy)
+import           Data.List.Index                     (indexed)
+import qualified Data.Map                            as Map
+import           Data.Ord                            (comparing)
+import           Data.Proxy                          (Proxy (..))
+import           Kore.AST.Common                     (And (..),
+                                                      Application (..),
+                                                      Ceil (..), Equals (..),
+                                                      Equals (..), Exists (..),
+                                                      Floor (..), Forall (..),
+                                                      Id (..), Iff (..),
+                                                      Implies (..), In (..),
+                                                      Next (..), Not (..),
+                                                      Or (..), Pattern (..),
+                                                      Rewrites (..), Sort (..),
+                                                      Sort (..),
+                                                      SymbolOrAlias (..),
+                                                      Top (..), Variable)
+import           Kore.AST.Kore                       (CommonKorePattern,
+                                                      pattern KoreObjectPattern,
+                                                      KorePattern,
+                                                      UnifiedPattern (..),
+                                                      UnifiedSortVariable)
+import           Kore.AST.MetaOrObject               (Meta (..), Object (..),
+                                                      Unified (..))
+import           Kore.AST.Sentence                   (Attributes (..),
+                                                      Definition (..),
+                                                      KoreDefinition,
+                                                      Module (..),
+                                                      ModuleName (..),
+                                                      Sentence (..),
+                                                      SentenceAxiom (..),
+                                                      applyUnifiedSentence)
+import           Kore.ASTHelpers                     (ApplicationSorts (..))
+import           Kore.ASTVerifier.DefinitionVerifier (defaultAttributesVerification,
+                                                      verifyAndIndexDefinition)
+import qualified Kore.Builtin                        as Builtin
+import           Kore.Error                          (printError)
+import           Kore.IndexedModule.IndexedModule    (KoreIndexedModule)
+import           Kore.IndexedModule.MetadataTools    (MetadataTools (..),
+                                                      extractMetadataTools)
+import           Kore.Parser.Parser                  (fromKore)
+import           Kore.Step.StepperAttributes         (StepperAttributes (..))
 
 --[ Metadata ]--
 
@@ -55,7 +69,7 @@ isConcrete :: SymbolOrAlias Object -> Bool
 isConcrete (SymbolOrAlias _ params) = all isConcreteSort params
   where
     isConcreteSort :: Sort Object -> Bool
-    isConcreteSort (SortActualSort _) = True
+    isConcreteSort (SortActualSort _)   = True
     isConcreteSort (SortVariableSort _) = False
 
 parseAxiomForSymbols :: SentenceAxiom UnifiedSortVariable UnifiedPattern Variable
@@ -83,10 +97,10 @@ parseAxiomForSymbols = parsePatternForSymbols . sentenceAxiomPattern
     rAlgebra (RewritesPattern (Rewrites _ (_, p₀) (_, p₁))) = p₀ ++ p₁
     rAlgebra _                                            = []
 
-mkSymLib :: [SymbolOrAlias Object] 
+mkSymLib :: [SymbolOrAlias Object]
          -> MetadataTools Object StepperAttributes
          -> SymLib
-mkSymLib symbols metaTools = 
+mkSymLib symbols metaTools =
   let (SymLib sorts syms) = foldl go (SymLib Map.empty Map.empty) symbols
   in SymLib sorts (Map.map nub syms)
   where
@@ -110,7 +124,7 @@ parseSymbols def indexedMod =
 hasAtt :: SentenceAxiom UnifiedSortVariable UnifiedPattern Variable
        -> String
        -> Bool
-hasAtt sentence att = 
+hasAtt sentence att =
   let Attributes attr = sentenceAxiomAttributes sentence
   in any isAtt attr
   where
@@ -130,9 +144,9 @@ rulePriority s =
   0
 
 data AxiomInfo pat = AxiomInfo
-                   { getPriority :: Int
-                   , getOrdinal :: Int
-                   , getRewrite :: pat
+                   { getPriority      :: Int
+                   , getOrdinal       :: Int
+                   , getRewrite       :: pat
                    , getSideCondition :: Maybe CommonKorePattern
                    }
 
@@ -156,23 +170,56 @@ splitFunction :: SymbolOrAlias Object
               -> Maybe (Equals Object CommonKorePattern, Maybe CommonKorePattern)
 splitFunction symbol topPattern =
   case topPattern of
-    KoreObjectPattern (ImpliesPattern (Implies _ (KoreObjectPattern (EqualsPattern (Equals _ _ pat _))) (KoreObjectPattern (AndPattern (And _ (KoreObjectPattern (EqualsPattern eq@(Equals _ _ (KoreObjectPattern (ApplicationPattern (Application s _))) _))) _))))) -> if s == symbol then Just (eq, Just pat) else Nothing
-    KoreObjectPattern (ImpliesPattern (Implies _ (KoreObjectPattern (TopPattern _)) (KoreObjectPattern (AndPattern (And _ (KoreObjectPattern (EqualsPattern eq@(Equals _ _ (KoreObjectPattern (ApplicationPattern (Application s _))) _))) _))))) -> if s == symbol then Just (eq, Nothing) else Nothing
-    KoreObjectPattern (ImpliesPattern (Implies _ (KoreObjectPattern (AndPattern (And _ _ (KoreObjectPattern (EqualsPattern (Equals _ _ pat _)))))) (KoreObjectPattern (AndPattern (And _ (KoreObjectPattern (EqualsPattern eq@(Equals _ _ (KoreObjectPattern (ApplicationPattern (Application s _))) _))) _))))) -> if s == symbol then Just (eq, Just pat) else Nothing
-    KoreObjectPattern (ImpliesPattern (Implies _ (KoreObjectPattern (AndPattern (And _ _ (KoreObjectPattern (TopPattern _))))) (KoreObjectPattern (AndPattern (And _ (KoreObjectPattern (EqualsPattern eq@(Equals _ _ (KoreObjectPattern (ApplicationPattern (Application s _))) _))) _))))) -> if s == symbol then Just (eq, Nothing) else Nothing
-    KoreObjectPattern (EqualsPattern eq@(Equals _ _ (KoreObjectPattern (ApplicationPattern (Application s _))) _)) -> if s == symbol then Just (eq, Nothing) else Nothing
+    SImplies _ (SEquals _ _ pat _)
+               (SAnd _ eq@(SEquals _ _ (SApp s _) _) _) ->
+      if s == symbol
+      then Just (extract eq, Just pat)
+      else Nothing
+    SImplies _ (STop _)
+               (SAnd _ eq@(SEquals _ _ (SApp s _) _) _) ->
+      if s == symbol
+      then Just (extract eq, Nothing)
+      else Nothing
+    SImplies _ (SAnd _ _ (SEquals _ _ pat _))
+               (SAnd _ eq@(SEquals _ _ (SApp s _) _) _) ->
+      if s == symbol
+      then Just (extract eq, Just pat)
+      else Nothing
+    SImplies _ (SAnd _ _ (STop _))
+               (SAnd _ eq@(SEquals _ _ (SApp s _) _) _) ->
+      if s == symbol
+      then Just(extract eq, Nothing)
+      else Nothing
+    eq@(SEquals _ _ (SApp s _) _) ->
+      if s == symbol
+      then Just (extract eq, Nothing)
+      else Nothing
     _ -> Nothing
-        
+  where
+    extract :: KorePattern v -> Equals Object (KorePattern v)
+    extract (KoreObjectPattern (EqualsPattern eq)) = eq
+    extract _                                      = undefined -- ^ This is only called after matching `EqualsPattern` so matching should never reach this pattern
+
 
 splitTop :: CommonKorePattern
            -> Maybe (Rewrites Object CommonKorePattern, Maybe CommonKorePattern)
 splitTop topPattern =
   case topPattern of
-    KoreObjectPattern (AndPattern (And _ (KoreObjectPattern (EqualsPattern (Equals _ _ pat _))) (KoreObjectPattern (AndPattern ((And _ _ (KoreObjectPattern (RewritesPattern (r@(Rewrites _ _ _)))))))))) -> Just (r, Just pat)
-    KoreObjectPattern (AndPattern (And _ (KoreObjectPattern (TopPattern _)) (KoreObjectPattern (AndPattern ((And _ _ (KoreObjectPattern (RewritesPattern (r@(Rewrites _ _ _)))))))))) -> Just (r, Nothing)
+    SAnd _ (SEquals _ _ pat _)
+           (SAnd _ _ rw@(SRewrites _ _ _)) ->
+      Just (extract rw, Just pat)
+    SAnd _ (STop _)
+           (SAnd _ _ rw@(SRewrites _ _ _)) ->
+      Just (extract rw, Nothing)
     _ -> Nothing
+  where
+    extract :: KorePattern v -> Rewrites Object (KorePattern v)
+    extract (KoreObjectPattern (RewritesPattern rw)) = rw
+    extract _                                        = undefined -- ^ This is only called after matching `RewritesPattern` so matching should never reach this pattern
 
-getAxioms :: KoreDefinition -> [SentenceAxiom UnifiedSortVariable UnifiedPattern Variable]
+-- |'getAxiom' retrieves the 'SentenceAxiom' patterns from a KoreDefinition
+getAxioms :: KoreDefinition
+          -> [SentenceAxiom UnifiedSortVariable UnifiedPattern Variable]
 getAxioms koreDefinition =
   let modules   = definitionModules koreDefinition
       sentences = mconcat (moduleSentences <$> modules)
@@ -237,3 +284,22 @@ getTopChildren (KoreObjectPattern (ApplicationPattern (Application _ ps))) = ps
 getTopChildren (KoreObjectPattern (ApplicationPattern (Application _ ps))) = ps
 getTopChildren _ = error "Unexpected pattern on lhs of function"
 
+-- [ Patterns ]
+
+pattern SImplies :: Sort Object -> KorePattern v -> KorePattern v -> KorePattern v
+pattern SImplies sort fst snd = KoreObjectPattern (ImpliesPattern (Implies sort fst snd))
+
+pattern SApp :: SymbolOrAlias Object -> [KorePattern v] -> KorePattern v
+pattern SApp symbolOrAlias cs = KoreObjectPattern (ApplicationPattern (Application symbolOrAlias cs))
+
+pattern SAnd :: Sort Object -> KorePattern v -> KorePattern v -> KorePattern v
+pattern SAnd sort left right <- KoreObjectPattern (AndPattern (And sort left right))
+
+pattern SEquals :: Sort Object -> Sort Object -> KorePattern var -> KorePattern var -> KorePattern var
+pattern SEquals operandSort resultSort fst snd <- KoreObjectPattern (EqualsPattern (Equals operandSort resultSort fst snd))
+
+pattern SRewrites :: Sort Object -> KorePattern var -> KorePattern var -> KorePattern var
+pattern SRewrites sort fst snd = KoreObjectPattern (RewritesPattern (Rewrites sort fst snd))
+
+pattern STop :: Sort Object -> KorePattern var
+pattern STop sort = KoreObjectPattern (TopPattern (Top sort))
