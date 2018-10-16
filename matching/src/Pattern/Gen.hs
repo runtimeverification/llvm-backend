@@ -48,8 +48,9 @@ import           Kore.Step.StepperAttributes
                  ( StepperAttributes (..) )
 import qualified Pattern as P
 import           Pattern.Parser
-                 ( AxiomInfo (..), PatternWithSideCondition (..), SymLib (..),
-                 getTopChildren, unifiedPatternRAlgebra )
+                 ( AxiomInfo (..), SymLib (..), getAxiomPattern,
+                 getAxiomSideCondition, getTopChildren,
+                 unifiedPatternRAlgebra )
 
 bitwidth :: MetadataTools Object StepperAttributes -> Sort Object -> Int
 bitwidth tools sort =
@@ -312,8 +313,8 @@ genClauseMatrix :: KoreRewrite pat
                -> (P.ClauseMatrix, [P.Occurrence])
 genClauseMatrix symlib indexedMod axioms sorts =
   let indices = map getOrdinal axioms
-      rewrites = map (getPattern <$> getPatternWithSideCondition) axioms
-      sideConditions = map (getSideCondition <$> getPatternWithSideCondition) axioms
+      rewrites = map getAxiomPattern axioms
+      sideConditions = map getAxiomSideCondition axioms
       tools = extractMetadataTools indexedMod
       patterns = map (genPattern tools symlib) rewrites
       rhsVars = map (genVars . getRightHandSide) rewrites

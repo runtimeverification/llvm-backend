@@ -169,6 +169,12 @@ data AxiomInfo pat = AxiomInfo
                    , getPatternWithSideCondition :: PatternWithSideCondition pat
                    }
 
+getAxiomPattern :: AxiomInfo pat -> pat
+getAxiomPattern = getPattern . getPatternWithSideCondition
+
+getAxiomSideCondition :: AxiomInfo pat -> Maybe CommonKorePattern
+getAxiomSideCondition = getSideCondition . getPatternWithSideCondition
+
 parseAxiomSentence :: (CommonKorePattern -> Maybe (PatternWithSideCondition pat))
                    -> (Int, SentenceAxiom UnifiedSortVariable UnifiedPattern Variable)
                    -> Maybe (AxiomInfo pat)
