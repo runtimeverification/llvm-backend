@@ -9,20 +9,29 @@ Portability : POSIX
 -}
 module Main where
 
-import           Control.Monad.Free    (Free (..))
+import           Control.Monad.Free
+                 ( Free (..) )
 import qualified Data.ByteString.Char8 as B
-import           Data.Map              ((!))
-import           Data.Tuple.Select     (sel1)
-import           Kore.AST.Common       (Rewrites (..), SymbolOrAlias (..), Id (..))
-import           Pattern               (serializeToYaml, failure, Anchor, Alias,
-                                        shareDt)
-import           Pattern.Parser        (parseDefinition, parseTopAxioms, mainVerify,
-                                        parseSymbols, getFunctions, SymLib (..),
-                                        parseFunctionAxioms, AxiomInfo(..))
-import           Pattern.Gen           (mkDecisionTree)
-import           System.Directory      (createDirectoryIfMissing)
-import           System.Environment    (getArgs)
-import           System.FilePath       (joinPath)
+import           Data.Map
+                 ( (!) )
+import           Data.Tuple.Select
+                 ( sel1 )
+import           Kore.AST.Common
+                 ( Id (..), Rewrites (..), SymbolOrAlias (..) )
+import           Pattern
+                 ( Alias, Anchor, failure, serializeToYaml, shareDt )
+import           Pattern.Gen
+                 ( mkDecisionTree )
+import           Pattern.Parser
+                 ( AxiomInfo (..), PatternWithSideCondition (..), SymLib (..),
+                 getFunctions, mainVerify, parseDefinition,
+                 parseFunctionAxioms, parseSymbols, parseTopAxioms )
+import           System.Directory
+                 ( createDirectoryIfMissing )
+import           System.Environment
+                 ( getArgs )
+import           System.FilePath
+                 ( joinPath )
 
 writeFiles :: FilePath -> [(String,Free Anchor Alias)] -> IO ()
 writeFiles _ [] = return ()
@@ -41,7 +50,7 @@ main = do
   let symlib = parseSymbols def indexedMod
   let !dt = case axioms of
              [] -> shareDt failure
-             (AxiomInfo _ _ r _):_ -> mkDecisionTree symlib indexedMod axioms [rewritesSort r]
+             (AxiomInfo _ _ (PatternWithSideCondition r _)):_ -> mkDecisionTree symlib indexedMod axioms [rewritesSort r]
   let functions = getFunctions $ symCs symlib
   let funcAxioms = fmap (parseFunctionAxioms def) functions
   let sorts = fmap (sel1 . (symCs symlib !)) functions

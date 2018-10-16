@@ -1,38 +1,58 @@
-{-# LANGUAGE GADTs      #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GADTs             #-}
+{-|
+Module      : Pattern.Gen
+Description : Generates matching patterns from Kore Axioms.
+Copyright   : (c) Runtime Verification, 2018
+License     : UIUC/NCSA
+Maintainer  : radu.ometita@iohk.io
+Stability   : experimental
+Portability : POSIX
+-}
 module Pattern.Gen where
 
-import qualified Pattern               as P
-import           Pattern.Parser        (unifiedPatternRAlgebra,SymLib(..), getTopChildren,
-                                        AxiomInfo(..))
-import           Control.Monad.Free    (Free (..))
-import           Data.Bits             (shiftL)
-import           Data.Functor.Foldable (Fix (..), para)
-import           Data.List             (transpose)
-import qualified Data.Map              as Map
-import           Data.Maybe            (maybe, isJust, fromJust)
-import           Data.Text             (unpack)
-import           Data.Tuple.Select     (sel1)
-import           Kore.AST.Common       (Rewrites (..), Sort (..),
-                                        Variable (..), Application (..),
-                                        DomainValue (..), StringLiteral (..),
-                                        And (..), Ceil (..), Equals (..), Exists (..),
-                                        Floor (..), Forall (..), Implies (..), Iff (..),
-                                        In (..), Next (..), Not (..), Or (..),
-                                        Pattern (..), Id (..), SymbolOrAlias (..))
-import           Kore.AST.Kore         (CommonKorePattern)
-import           Kore.AST.MetaOrObject (Object (..))
-import           Kore.ASTHelpers       (ApplicationSorts (..))
-import           Kore.Builtin.Hook     (Hook (..))
+import           Control.Monad.Free
+                 ( Free (..) )
+import           Data.Bits
+                 ( shiftL )
+import           Data.Functor.Foldable
+                 ( Fix (..), para )
+import           Data.List
+                 ( transpose )
+import qualified Data.Map as Map
+import           Data.Maybe
+                 ( fromJust, isJust, maybe )
+import           Data.Text
+                 ( unpack )
+import           Data.Tuple.Select
+                 ( sel1 )
+import           Kore.AST.Common
+                 ( And (..), Application (..), Ceil (..), DomainValue (..),
+                 Equals (..), Exists (..), Floor (..), Forall (..), Id (..),
+                 Iff (..), Implies (..), In (..), Next (..), Not (..), Or (..),
+                 Pattern (..), Rewrites (..), Sort (..), StringLiteral (..),
+                 SymbolOrAlias (..), Variable (..) )
+import           Kore.AST.Kore
+                 ( CommonKorePattern )
+import           Kore.AST.MetaOrObject
+                 ( Object (..) )
+import           Kore.ASTHelpers
+                 ( ApplicationSorts (..) )
+import           Kore.Builtin.Hook
+                 ( Hook (..) )
 import           Kore.IndexedModule.IndexedModule
-                                       (KoreIndexedModule)
+                 ( KoreIndexedModule )
 import           Kore.IndexedModule.MetadataTools
-                                       (MetadataTools (..), extractMetadataTools)
+                 ( MetadataTools (..), extractMetadataTools )
 import           Kore.Step.StepperAttributes
-                                       (StepperAttributes (..))
+                 ( StepperAttributes (..) )
+import qualified Pattern as P
+import           Pattern.Parser
+                 ( AxiomInfo (..), PatternWithSideCondition (..), SymLib (..),
+                 getTopChildren, unifiedPatternRAlgebra )
 
 bitwidth :: MetadataTools Object StepperAttributes -> Sort Object -> Int
-bitwidth tools sort = 
+bitwidth tools sort =
   let att = sortAttributes tools sort
       hookAtt = hook att
   in case getHook hookAtt of
@@ -53,7 +73,7 @@ instance KoreRewrite (Rewrites lvl CommonKorePattern) where
 
 data CollectionCons = Concat | Unit | Element
 
-genPattern :: KoreRewrite pattern => MetadataTools Object StepperAttributes -> SymLib -> pattern -> [Fix P.Pattern]
+genPattern :: KoreRewrite pat => MetadataTools Object StepperAttributes -> SymLib -> pat -> [Fix P.Pattern]
 genPattern tools (SymLib _ sorts) rewrite =
   let lhs = getLeftHandSide rewrite
   in map (para (unifiedPatternRAlgebra (error "unsupported: meta level") rAlgebra)) lhs
@@ -200,7 +220,7 @@ genPattern tools (SymLib _ sorts) rewrite =
     setPattern _ Unit (_:_) _ = error "unsupported set pattern"
     setPattern _ Element [] _ = error "unsupported set pattern"
     setPattern _ Element (_:_:_) _ = error "unsupported set pattern"
- 
+
     getSym :: String -> [SymbolOrAlias Object] -> SymbolOrAlias Object
     getSym hookAtt syms = head $ filter (isHook hookAtt) syms
     isHook :: String -> SymbolOrAlias Object -> Bool
@@ -236,7 +256,7 @@ metaLookup _ (P.Literal _) = Just []
 metaLookup f (P.List c i) = Just $ replicate i $ head $ fromJust $ f $ P.Symbol c
 metaLookup _ P.Empty = Just []
 metaLookup _ (P.NonEmpty (P.Ignoring m)) = Just [m]
-metaLookup f (P.HasKey isSet e (P.Ignoring m) _) = 
+metaLookup f (P.HasKey isSet e (P.Ignoring m) _) =
   let metas = fromJust $ f $ P.Symbol e
   in if isSet then Just [m, m] else Just [head $ tail $ metas, m, m]
 metaLookup _ (P.HasNoKey (P.Ignoring m) _) = Just [m]
@@ -284,16 +304,16 @@ genMetadatas syms@(SymLib symbols sorts) indexedMod =
     isSubsort _ _ _ = error "invalid injection"
 
 
-genClauseMatrix :: KoreRewrite pattern 
+genClauseMatrix :: KoreRewrite pat
                => SymLib
                -> KoreIndexedModule StepperAttributes
-               -> [AxiomInfo pattern]
+               -> [AxiomInfo pat]
                -> [Sort Object]
                -> (P.ClauseMatrix, [P.Occurrence])
 genClauseMatrix symlib indexedMod axioms sorts =
   let indices = map getOrdinal axioms
-      rewrites = map getRewrite axioms
-      sideConditions = map getSideCondition axioms
+      rewrites = map (getPattern <$> getPatternWithSideCondition) axioms
+      sideConditions = map (getSideCondition <$> getPatternWithSideCondition) axioms
       tools = extractMetadataTools indexedMod
       patterns = map (genPattern tools symlib) rewrites
       rhsVars = map (genVars . getRightHandSide) rewrites
@@ -306,10 +326,10 @@ genClauseMatrix symlib indexedMod axioms sorts =
        Left err -> error (unpack err)
        Right m -> m
 
-mkDecisionTree :: KoreRewrite pattern 
+mkDecisionTree :: KoreRewrite pat
                => SymLib
                -> KoreIndexedModule StepperAttributes
-               -> [AxiomInfo pattern]
+               -> [AxiomInfo pat]
                -> [Sort Object]
                -> Free P.Anchor P.Alias
 mkDecisionTree symlib indexedMod axioms sorts =
