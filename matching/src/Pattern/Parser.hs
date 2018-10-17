@@ -1,7 +1,3 @@
-{-# LANGUAGE GADTs           #-}
-{-# LANGUAGE LambdaCase      #-}
-{-# LANGUAGE PatternSynonyms #-}
-{-# LANGUAGE ViewPatterns    #-}
 {-|
 Module      : Pattern.Parser
 Description : Parses rewrite rules and functions from Kore definitions.
@@ -11,7 +7,25 @@ Maintainer  : radu.ometita@iohk.io
 Stability   : experimental
 Portability : POSIX
 -}
-module Pattern.Parser where
+module Pattern.Parser (
+  -- * Symbols index
+  -- $symbols
+    SymLib(..)
+  , parseSymbols
+  -- * Axiom Patterns
+  -- $axioms
+  , AxiomPattern(..)
+  , PatternWithSideCondition(..)
+  , getAxiomSideCondition
+  , getAxiomPattern
+  , findFunctionSymbols
+  , getTopChildren
+  , unifiedPatternRAlgebra
+  , parseTopAxioms
+  , parseFunctionAxioms
+  , parseDefinition
+  , mainVerify
+  ) where
 
 import           Control.Monad
                  ( guard, (>=>) )
@@ -25,7 +39,7 @@ import           Data.List.Index
                  ( indexed )
 import qualified Data.Map as Map
 import           Data.Maybe
-                 ( catMaybes, mapMaybe )
+                 ( catMaybes, mapMaybe, fromMaybe )
 import           Data.Ord
                  ( comparing )
 import           Data.Proxy
@@ -69,12 +83,12 @@ data SymLib = SymLib
   , symSt :: Map.Map (Sort Object) [SymbolOrAlias Object]
   } deriving (Show, Eq)
 
-isConcrete :: SymbolOrAlias Object -> Bool
-isConcrete (SymbolOrAlias _ params) = all isConcreteSort params
+isLiteralSymbol :: SymbolOrAlias Object -> Bool
+isLiteralSymbol (SymbolOrAlias _ params) = all isLiteralSort params
   where
-    isConcreteSort :: Sort Object -> Bool
-    isConcreteSort (SortActualSort _)   = True
-    isConcreteSort (SortVariableSort _) = False
+    isLiteralSort :: Sort Object -> Bool
+    isLiteralSort (SortActualSort _)   = True
+    isLiteralSort (SortVariableSort _) = False
 
 parseAxiomForSymbols :: SentenceAxiom UnifiedSortVariable UnifiedPattern Variable
                      -> [SymbolOrAlias Object]
@@ -86,7 +100,11 @@ parseAxiomForSymbols = parsePatternForSymbols . sentenceAxiomPattern
                                      [SymbolOrAlias Object])
              -> [SymbolOrAlias Object]
     rAlgebra (AndPattern (And _ (_, p₀) (_, p₁)))         = p₀ ++ p₁
-    rAlgebra (ApplicationPattern (Application s ps))      = (if isConcrete s then [s] else []) ++ (mconcat $ map snd ps)
+    rAlgebra (ApplicationPattern (Application s ps))      =
+      let parameterSymbols = (mconcat $ map snd ps)
+      in  if isLiteralSymbol s
+          then s : parameterSymbols
+          else parameterSymbols
     rAlgebra (CeilPattern (Ceil _ _ (_, p)))              = p
     rAlgebra (EqualsPattern (Equals _ _ (_, p₀) (_, p₁))) = p₀ ++ p₁
     rAlgebra (ExistsPattern (Exists _ _ (_, p)))          = p
@@ -163,30 +181,30 @@ data PatternWithSideCondition pat =
                            , getSideCondition :: Maybe CommonKorePattern
                            }
 
-data AxiomInfo pat = AxiomInfo
-                   { getPriority                 :: Int
-                   , getOrdinal                  :: Int
-                   , getPatternWithSideCondition :: PatternWithSideCondition pat
-                   }
+data AxiomPattern pat = AxiomPattern
+                        { getPriority                 :: Int
+                        , getOrdinal                  :: Int
+                        , getPatternWithSideCondition :: PatternWithSideCondition pat
+                        }
 
-getAxiomPattern :: AxiomInfo pat -> pat
+getAxiomPattern :: AxiomPattern pat -> pat
 getAxiomPattern = getPattern . getPatternWithSideCondition
 
-getAxiomSideCondition :: AxiomInfo pat -> Maybe CommonKorePattern
+getAxiomSideCondition :: AxiomPattern pat -> Maybe CommonKorePattern
 getAxiomSideCondition = getSideCondition . getPatternWithSideCondition
 
 parseAxiomSentence :: (CommonKorePattern -> Maybe (PatternWithSideCondition pat))
                    -> (Int, SentenceAxiom UnifiedSortVariable UnifiedPattern Variable)
-                   -> Maybe (AxiomInfo pat)
+                   -> Maybe (AxiomPattern pat)
 parseAxiomSentence split (ix, sentence) = do
   PatternWithSideCondition rewrite sideCondition <-
     split (sentenceAxiomPattern sentence)
   guard (any (hasSentenceAttribute sentence) skipAttrs)
-  return $ AxiomInfo { getPriority = (rulePriority sentence)
-                     , getOrdinal = ix
-                     , getPatternWithSideCondition =
-                         PatternWithSideCondition rewrite sideCondition
-                     }
+  return $ AxiomPattern { getPriority = (rulePriority sentence)
+                        , getOrdinal = ix
+                        , getPatternWithSideCondition =
+                            PatternWithSideCondition rewrite sideCondition
+                        }
   where
     skipAttrs = ["comm", "assoc", "idem"]
 
@@ -198,10 +216,10 @@ unifiedPatternRAlgebra metaT _ (UnifiedPattern (UnifiedMeta meta)) =
 unifiedPatternRAlgebra _ objectT (UnifiedPattern (UnifiedObject object)) =
   objectT (unRotate31 object)
 
-splitFunction :: SymbolOrAlias Object
+matchFunction :: SymbolOrAlias Object
               -> CommonKorePattern
               -> Maybe (PatternWithSideCondition (Equals Object CommonKorePattern))
-splitFunction symbol topPattern =
+matchFunction symbol topPattern =
   case topPattern of
     SImplies _ (SEquals _ _ pat _)
                (SAnd _ eq@(SEquals _ _ (SApp s _) _) _) ->
@@ -231,12 +249,12 @@ splitFunction symbol topPattern =
   where
     extract :: KorePattern v -> Equals Object (KorePattern v)
     extract (KoreObjectPattern (EqualsPattern eq)) = eq
-    extract _                                      = undefined -- ^ This is only called after matching `EqualsPattern` so matching should never reach this pattern
+    -- This is only called after matching `EqualsPattern` so matching should never reach this pattern
+    extract _                                      = undefined
 
-
-splitTop :: CommonKorePattern
-           -> Maybe (PatternWithSideCondition (Rewrites Object CommonKorePattern))
-splitTop topPattern =
+matchTop :: CommonKorePattern
+         -> Maybe (PatternWithSideCondition (Rewrites Object CommonKorePattern))
+matchTop topPattern =
   case topPattern of
     SAnd _ (SEquals _ _ pat _)
            (SAnd _ _ rw@(SRewrites _ _ _)) ->
@@ -248,7 +266,8 @@ splitTop topPattern =
   where
     extract :: KorePattern v -> Rewrites Object (KorePattern v)
     extract (KoreObjectPattern (RewritesPattern rw)) = rw
-    extract _                                        = undefined -- ^ This is only called after matching `RewritesPattern` so matching should never reach this pattern
+    -- This is only called after matching `RewritesPattern` so matching should never reach this pattern
+    extract _                                        = undefined
 
 -- |'getAxiom' retrieves the 'SentenceAxiom' patterns from a KoreDefinition
 getAxioms :: KoreDefinition
@@ -265,20 +284,20 @@ getAxioms koreDefinition =
       _ -> []
 
 parseTopAxioms :: KoreDefinition
-               -> [AxiomInfo (Rewrites Object CommonKorePattern)]
+               -> [AxiomPattern (Rewrites Object CommonKorePattern)]
 parseTopAxioms koreDefinition =
   let axioms = getAxioms koreDefinition
       withIndex = indexed axioms
-      withOwise = mapMaybe (parseAxiomSentence splitTop) withIndex
+      withOwise = mapMaybe (parseAxiomSentence matchTop) withIndex
   in sortBy (comparing getPriority) withOwise
 
 parseFunctionAxioms :: KoreDefinition
                     -> SymbolOrAlias Object
-                    -> [AxiomInfo (Equals Object CommonKorePattern)]
+                    -> [AxiomPattern (Equals Object CommonKorePattern)]
 parseFunctionAxioms koreDefinition symbol =
   let axioms = getAxioms koreDefinition
       withIndex = indexed axioms
-      withOwise = mapMaybe (parseAxiomSentence (splitFunction symbol)) withIndex
+      withOwise = mapMaybe (parseAxiomSentence (matchFunction symbol)) withIndex
   in sortBy (comparing getPriority) withOwise
 
 parseDefinition :: FilePath -> IO KoreDefinition
@@ -296,28 +315,30 @@ mainVerify
 mainVerify definition mainModuleName =
     let attributesVerification = defaultAttributesVerification Proxy
         verifyResult = verifyAndIndexDefinition
-                attributesVerification
-                Builtin.koreVerifiers
-                definition
+                       attributesVerification
+                       Builtin.koreVerifiers
+                       definition
     in case verifyResult of
-        Left err1            -> error (printError err1)
-        Right indexedModules -> case Map.lookup (ModuleName mainModuleName) indexedModules of
-                                  Nothing -> error "Could not find main module"
-                                  Just m -> m
+         Left  err     -> error (printError err)
+         Right modules ->
+           fromMaybe (error "Could not find main module") $
+                     Map.lookup (ModuleName mainModuleName) modules
 
--- Return the function symbol and whether or not the symbol is actually a function.
-getPossibleFunction :: (SymbolOrAlias Object, ([Sort Object], Sort Object, StepperAttributes)) -> (SymbolOrAlias Object, Bool)
-getPossibleFunction (k, (_,_,attrs)) =  (k, isFunction attrs)
+hasFunctionalAttributes :: (SymbolOrAlias Object,
+                            ([Sort Object], Sort Object, StepperAttributes))
+                        -> Bool
+hasFunctionalAttributes (_, (_, _, attributes)) = isFunction attributes
+hasFunctionalAttributes _                       = False
 
 -- Return the list of symbols that are actually functions.
-getFunctions :: Map.Map (SymbolOrAlias Object) ([Sort Object], Sort Object, StepperAttributes)
-    -> [SymbolOrAlias Object]
-
-getFunctions = (fmap fst) . (filter snd) . (fmap getPossibleFunction) . Map.assocs
+findFunctionSymbols :: Map.Map (SymbolOrAlias Object)
+                        ([Sort Object], Sort Object, StepperAttributes)
+                    -> [SymbolOrAlias Object]
+findFunctionSymbols signatures =
+  fst <$> filter hasFunctionalAttributes (Map.assocs signatures)
 
 getTopChildren :: CommonKorePattern -> [CommonKorePattern]
-getTopChildren (KoreObjectPattern (ApplicationPattern (Application _ ps))) = ps
-getTopChildren (KoreObjectPattern (ApplicationPattern (Application _ ps))) = ps
+getTopChildren (SApp _ ps) = ps
 getTopChildren _ = error "Unexpected pattern on lhs of function"
 
 -- [ Patterns ]

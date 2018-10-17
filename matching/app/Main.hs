@@ -23,8 +23,8 @@ import           Pattern
 import           Pattern.Gen
                  ( mkDecisionTree )
 import           Pattern.Parser
-                 ( AxiomInfo (..), PatternWithSideCondition (..), SymLib (..),
-                 getFunctions, mainVerify, parseDefinition,
+                 ( AxiomPattern (..), PatternWithSideCondition (..), SymLib (..),
+                 findFunctionSymbols, mainVerify, parseDefinition,
                  parseFunctionAxioms, parseSymbols, parseTopAxioms )
 import           System.Directory
                  ( createDirectoryIfMissing )
@@ -50,8 +50,8 @@ main = do
   let symlib = parseSymbols def indexedMod
   let !dt = case axioms of
              [] -> shareDt failure
-             (AxiomInfo _ _ (PatternWithSideCondition r _)):_ -> mkDecisionTree symlib indexedMod axioms [rewritesSort r]
-  let functions = getFunctions $ symCs symlib
+             (AxiomPattern _ _ (PatternWithSideCondition r _)):_ -> mkDecisionTree symlib indexedMod axioms [rewritesSort r]
+  let functions = findFunctionSymbols $ symCs symlib
   let funcAxioms = fmap (parseFunctionAxioms def) functions
   let sorts = fmap (sel1 . (symCs symlib !)) functions
   let dts = zipWith (mkDecisionTree symlib indexedMod) funcAxioms sorts

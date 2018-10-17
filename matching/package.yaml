@@ -34,6 +34,21 @@ dependencies:
 - free
 - deriving-compat
 
+default-extensions:
+  - DeriveFoldable
+  - DeriveFunctor
+  - DeriveGeneric
+  - DeriveTraversable
+  - GADTs
+  - GeneralizedNewtypeDeriving
+  - LambdaCase
+  - InstanceSigs
+  - MultiParamTypeClasses
+  - OverloadedStrings
+  - PatternSynonyms
+  - RankNTypes
+  - ViewPatterns
+
 executables:
   llvm-kompile-matching:
     main: Main.hs

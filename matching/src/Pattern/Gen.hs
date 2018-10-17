@@ -48,7 +48,7 @@ import           Kore.Step.StepperAttributes
                  ( StepperAttributes (..) )
 import qualified Pattern as P
 import           Pattern.Parser
-                 ( AxiomInfo (..), SymLib (..), getAxiomPattern,
+                 ( AxiomPattern (..), SymLib (..), getAxiomPattern,
                  getAxiomSideCondition, getTopChildren,
                  unifiedPatternRAlgebra )
 
@@ -308,7 +308,7 @@ genMetadatas syms@(SymLib symbols sorts) indexedMod =
 genClauseMatrix :: KoreRewrite pat
                => SymLib
                -> KoreIndexedModule StepperAttributes
-               -> [AxiomInfo pat]
+               -> [AxiomPattern pat]
                -> [Sort Object]
                -> (P.ClauseMatrix, [P.Occurrence])
 genClauseMatrix symlib indexedMod axioms sorts =
@@ -330,7 +330,7 @@ genClauseMatrix symlib indexedMod axioms sorts =
 mkDecisionTree :: KoreRewrite pat
                => SymLib
                -> KoreIndexedModule StepperAttributes
-               -> [AxiomInfo pat]
+               -> [AxiomPattern pat]
                -> [Sort Object]
                -> Free P.Anchor P.Alias
 mkDecisionTree symlib indexedMod axioms sorts =
