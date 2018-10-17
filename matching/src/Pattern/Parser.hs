@@ -8,7 +8,7 @@ Stability   : experimental
 Portability : POSIX
 -}
 module Pattern.Parser (
-  -- * Symbols index
+  -- * Symbols indexing
   -- $symbols
     SymLib(..)
   , parseSymbols
@@ -328,7 +328,6 @@ hasFunctionalAttributes :: (SymbolOrAlias Object,
                             ([Sort Object], Sort Object, StepperAttributes))
                         -> Bool
 hasFunctionalAttributes (_, (_, _, attributes)) = isFunction attributes
-hasFunctionalAttributes _                       = False
 
 -- Return the list of symbols that are actually functions.
 findFunctionSymbols :: Map.Map (SymbolOrAlias Object)
