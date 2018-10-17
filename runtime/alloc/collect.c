@@ -43,11 +43,11 @@ void map_foreach(void *, void(block**));
 void set_foreach(void *, void(block**));
 void list_foreach(void *, void(block**));
 
-static size_t get_size(block *block, uint16_t layout) {
+static size_t get_size(uint64_t hdr, uint16_t layout) {
   if (!layout) {
-    return (block->h.hdr + sizeof(block) + 7) & ~7;
+    return (hdr + sizeof(block) + 7) & ~7;
   } else {
-    return ((block->h.hdr >> 32) & 0xff) * 8;
+    return ((hdr >> 32) & 0xff) * 8;
   }
 }
 
@@ -57,22 +57,24 @@ static void migrate(block** blockPtr) {
   if (intptr & 1) {
     return;
   }
-  bool hasForwardingAddress = currBlock->h.hdr & (1LL << 47);
-  uint16_t layout = currBlock->h.hdr >> 48;
-  if (!layout) {
-    bool isNotOnKoreHeap = currBlock->h.hdr & (1LL << 46);
-    if (isNotOnKoreHeap) {
-      return;
-    }
+  const uint64_t hdr = currBlock->h.hdr;
+  bool isNotOnKoreHeap = hdr & (1LL << 46);
+  if (isNotOnKoreHeap) {
+    return;
   }
-  size_t lenInBytes = get_size(currBlock, layout);
+  bool hasForwardingAddress = hdr & (1LL << 47);
+  uint16_t layout = hdr >> 48;
+  size_t lenInBytes = get_size(hdr, layout);
+  block** forwardingAddress = (block**)(currBlock + 1);
   if (!hasForwardingAddress) {
     block *newBlock = koreAlloc(lenInBytes);
     memcpy(newBlock, currBlock, lenInBytes);
     *forwardingAddress = newBlock;
     currBlock->h.hdr |= (1LL << 47);
+    *blockPtr = newBlock;
+  } else {
+    *blockPtr = *forwardingAddress;
   }
-  *blockPtr = *(block **)(currBlock+1);
 }
 
 static void migrate_string_buffer(stringbuffer** bufferPtr) {
@@ -117,7 +119,8 @@ void koreCollect(block** root) {
   char *scan_ptr = current_tospace_start + sizeof(memory_block_header);
   while(scan_ptr) {
     block *currBlock = (block *)scan_ptr;
-    uint16_t layoutInt = currBlock->h.hdr >> 48;
+    const uint64_t hdr = currBlock->h.hdr;
+    uint16_t layoutInt = hdr >> 48;
     if (layoutInt) {
       layout *layoutData = getLayoutData(layoutInt);
       for (unsigned i = 0; i < layoutData->nargs; i++) {
@@ -147,7 +150,7 @@ void koreCollect(block** root) {
         }
       }
     }
-    scan_ptr = get_next(scan_ptr, get_size(currBlock, layoutInt));
+    scan_ptr = get_next(scan_ptr, get_size(hdr, layoutInt));
   }
   DBG("Finishing garbage collection\n");
 }
