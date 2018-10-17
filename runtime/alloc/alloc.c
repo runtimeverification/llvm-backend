@@ -6,9 +6,8 @@
 
 #include "runtime/alloc.h"
 
+const size_t BLOCK_SIZE = 1024 * 1024;
 
-// 1 MiB minus 16 bytes for libc malloc overhead
-const size_t BLOCK_SIZE = 1048568;
 
 static char* first_block = 0;
 static char* first_tospace_block = 0;
@@ -37,16 +36,30 @@ void koreAllocSwap() {
   block_end = first_block ? first_block + BLOCK_SIZE : first_block;
 }
 
+static void* superblock_ptr = 0;
+static unsigned blocks_left = 0;
+
+static void* megabyte_malloc() {
+  if (blocks_left == 0) {
+    blocks_left = 15;
+    posix_memalign(&superblock_ptr, BLOCK_SIZE, BLOCK_SIZE * 15);
+  }
+  blocks_left--;
+  void* result = superblock_ptr;
+  superblock_ptr += BLOCK_SIZE;
+  return result;
+}
+
 static void freshBlock() {
     char *nextBlock;
     if (block_start == 0) {
-      nextBlock = malloc(BLOCK_SIZE);
+      nextBlock = megabyte_malloc();
       first_block = nextBlock;
       memset(nextBlock, 0, sizeof(char *));
     } else {
       memcpy(&nextBlock, block_start, sizeof(char *));
       if (!nextBlock) {
-        nextBlock = malloc(BLOCK_SIZE);
+        nextBlock = megabyte_malloc();
         memcpy(block_start, &nextBlock, sizeof(char *));
         memset(nextBlock, 0, sizeof(char *));
       }
