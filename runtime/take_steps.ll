@@ -14,11 +14,11 @@ entry:
 
 loop:
   %currSubject = phi %block* [ %subject, %entry ], [ %finalSubject, %finish ]
-  %currInterval = phi i32 [ 500, %entry ], [ %nextInterval, %finish ]
+  %currInterval = phi i32 [ 1000, %entry ], [ %nextInterval, %finish ]
   %nextSubject = call %block* @step(%block* %currSubject)
   %isCollect = icmp eq i32 %currInterval, 0
   %currIntervalMinusOne = sub i32 %currInterval, 1
-  %nextInterval = select i1 %isCollect, i32 500, i32 %currIntervalMinusOne
+  %nextInterval = select i1 %isCollect, i32 1000, i32 %currIntervalMinusOne
   br i1 %isCollect, label %collect, label %finish
 collect:
   %subjPtr = alloca %block*
@@ -39,7 +39,7 @@ entry:
 loop:
   %currDepth = phi i32 [ %depth, %entry ], [ %nextDepth, %finish ]
   %currSubject = phi %block* [ %subject, %entry ], [ %finalSubject, %finish ]
-  %currInterval = urem i32 %currDepth, 500
+  %currInterval = urem i32 %currDepth, 1000
   %atEnd = icmp eq i32 %currDepth, 0
   br i1 %atEnd, label %finished, label %nextStep
 finished:
