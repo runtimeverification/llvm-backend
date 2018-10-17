@@ -64,6 +64,13 @@ static void freshBlock() {
       memcpy(nextBlock, &hdr, sizeof(hdr));
     } else {
       nextBlock = *(char**)block_start;
+      if (block != block_end) {
+        if (block_end - block == 8) {
+          *(uint64_t *)block = 0x0000400000000000LL;
+        } else {
+          *(uint64_t *)block = block_end - block - 8;
+        }
+      }
       if (!nextBlock) {
         DBG("Allocating new block for the first time in semispace %d\n", true_is_fromspace);
         nextBlock = megabyte_malloc();
@@ -108,7 +115,8 @@ void* koreAlloc(size_t requested) {
 }
 
 void* koreAllocToken(size_t requested) {
-  return doAlloc((requested + 7) & ~7);
+  size_t size = (requested + 7) & ~7;
+  return doAlloc(size < 16 ? 16 : size);
 }
 
 void* koreResizeLastAlloc(void* oldptr, size_t newrequest, size_t last_size) {

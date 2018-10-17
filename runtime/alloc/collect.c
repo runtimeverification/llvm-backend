@@ -45,7 +45,8 @@ void list_foreach(void *, void(block**));
 
 static size_t get_size(uint64_t hdr, uint16_t layout) {
   if (!layout) {
-    return (hdr + sizeof(block) + 7) & ~7;
+    size_t size = (hdr + sizeof(block) + 7) & ~7;
+    return hdr & 0x400000000000LL ? 8 : size < 16 ? 16 : size;
   } else {
     return ((hdr >> 32) & 0xff) * 8;
   }
@@ -77,6 +78,17 @@ static void migrate(block** blockPtr) {
   }
 }
 
+static void migrate_once(block** blockPtr) {
+  block* currBlock = *blockPtr;
+  uintptr_t intptr = (uintptr_t) currBlock;
+  intptr = intptr & ~(BLOCK_SIZE-1);
+  memory_block_header *hdr = (memory_block_header *)intptr;
+  // bit has been flipped by now, so we need != and not ==
+  if (true_is_fromspace != hdr->semispace) {
+    migrate(blockPtr);
+  }
+}
+
 static void migrate_string_buffer(stringbuffer** bufferPtr) {
   stringbuffer* buffer = *bufferPtr;
   bool hasForwardingAddress = buffer->contents->h.hdr & (1LL << 47);
@@ -94,12 +106,11 @@ static void migrate_string_buffer(stringbuffer** bufferPtr) {
 
 static char* get_next(char* scan_ptr, size_t size) {
   char *next_ptr = scan_ptr + size;
-  if (next_ptr < current_tospace_end) {
-    if (arena_ptr() == current_tospace_start && next_ptr >= alloc_ptr()) {
-      return 0;
-    } else {
-      return next_ptr;
-    }
+  if (next_ptr == alloc_ptr()) {
+    return 0;
+  }
+  if (next_ptr != current_tospace_end) {
+    return next_ptr;
   }
   char *next_block = *(char **)current_tospace_start;
   if (!next_block) {
@@ -128,13 +139,13 @@ void koreCollect(block** root) {
         void *arg = ((char *)currBlock) + argData->offset;
         switch(argData->cat) {
         case 1: // map
-          map_foreach(arg, migrate);
+          map_foreach(arg, migrate_once);
 	  break;
         case 2: // list
-          list_foreach(arg, migrate); 
+          list_foreach(arg, migrate_once); 
 	  break;
         case 3: // set
-          set_foreach(arg, migrate);
+          set_foreach(arg, migrate_once);
 	  break;
         case 6:  // stringbuffer
           migrate_string_buffer(arg);
