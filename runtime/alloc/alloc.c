@@ -92,7 +92,7 @@ static void* __attribute__ ((noinline)) doAllocSlow(size_t requested) {
   }
 }
 
-static inline void* doAlloc(size_t requested) {
+static inline __attribute__ ((always_inline)) void* doAlloc(size_t requested) {
   if (block + requested > block_end) {
     return doAllocSlow(requested);
   }
