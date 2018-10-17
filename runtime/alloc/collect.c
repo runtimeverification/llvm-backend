@@ -5,6 +5,7 @@
 #include "runtime/alloc.h"
 
 extern const size_t BLOCK_SIZE;
+extern bool true_is_fromspace;
 
 static char* current_tospace_start = 0;
 static char* current_tospace_end = 0;
@@ -104,7 +105,7 @@ static char* get_next(char* scan_ptr, size_t size) {
   }
   current_tospace_start = next_block;
   current_tospace_end = next_block + BLOCK_SIZE;
-  return current_tospace_start + sizeof(char *);
+  return current_tospace_start + sizeof(memory_block_header);
 }
 
 void koreCollect(block** root) {
@@ -112,7 +113,7 @@ void koreCollect(block** root) {
   migrate(root);
   current_tospace_start = fromspace_ptr();
   current_tospace_end = fromspace_ptr() + BLOCK_SIZE;
-  char *scan_ptr = current_tospace_start + sizeof(char *);
+  char *scan_ptr = current_tospace_start + sizeof(memory_block_header);
   while(scan_ptr) {
     block *currBlock = (block *)scan_ptr;
     uint16_t layoutInt = currBlock->h.hdr >> 48;

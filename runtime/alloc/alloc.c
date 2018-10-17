@@ -2,12 +2,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <stdbool.h>
 #include "jemalloc/jemalloc.h"
 
 #include "runtime/alloc.h"
 
 const size_t BLOCK_SIZE = 1024 * 1024;
 
+bool true_is_fromspace = false;
 
 static char* first_block = 0;
 static char* first_tospace_block = 0;
@@ -31,9 +33,10 @@ void koreAllocSwap() {
   char *tmp = first_block;
   first_block = first_tospace_block;
   first_tospace_block = tmp;
-  block = first_block ? first_block + sizeof(char *) : 0;
+  block = first_block ? first_block + sizeof(memory_block_header) : 0;
   block_start = first_block;
   block_end = first_block ? first_block + BLOCK_SIZE : first_block;
+  true_is_fromspace = !true_is_fromspace;
 }
 
 static void* superblock_ptr = 0;
@@ -55,24 +58,30 @@ static void freshBlock() {
     if (block_start == 0) {
       nextBlock = megabyte_malloc();
       first_block = nextBlock;
-      memset(nextBlock, 0, sizeof(char *));
+      memory_block_header hdr;
+      hdr.next_block = 0;
+      hdr.semispace = true_is_fromspace;
+      memcpy(nextBlock, &hdr, sizeof(hdr));
     } else {
       memcpy(&nextBlock, block_start, sizeof(char *));
       if (!nextBlock) {
         nextBlock = megabyte_malloc();
         memcpy(block_start, &nextBlock, sizeof(char *));
-        memset(nextBlock, 0, sizeof(char *));
+        memory_block_header hdr;
+        hdr.next_block = 0;
+        hdr.semispace = true_is_fromspace;
+        memcpy(nextBlock, &hdr, sizeof(hdr));
       }
     }
-    block = nextBlock + sizeof(char *);
+    block = nextBlock + sizeof(memory_block_header);
     block_start = nextBlock;
     block_end = nextBlock + BLOCK_SIZE;
-    DBG("New block at %p (remaining %zd)\n", block, BLOCK_SIZE - sizeof(char *));
+    DBG("New block at %p (remaining %zd)\n", block, BLOCK_SIZE - sizeof(memory_block_header));
 }
 
 static void* __attribute__ ((noinline)) doAllocSlow(size_t requested) {
   DBG("Block at %p too small, %zd remaining but %zd needed\n", block, block_end-block, requested);
-  if (requested > BLOCK_SIZE - sizeof(char *)) {
+  if (requested > BLOCK_SIZE - sizeof(memory_block_header)) {
      return malloc(requested);
   } else {
     freshBlock();
