@@ -68,7 +68,7 @@ static void migrate(block** blockPtr) {
   if (!hasForwardingAddress) {
     block *newBlock = koreAlloc(lenInBytes);
     memcpy(newBlock, currBlock, lenInBytes);
-    memcpy((block **)(currBlock+1), &newBlock, sizeof(block *));
+    *forwardingAddress = newBlock;
     currBlock->h.hdr |= (1LL << 47);
   }
   *blockPtr = *(block **)(currBlock+1);
@@ -83,7 +83,7 @@ static void migrate_string_buffer(stringbuffer** bufferPtr) {
     block *newContents = koreAllocToken(sizeof(block) + buffer->capacity);
     memcpy(newContents, buffer->contents, buffer->contents->h.hdr);
     newBuffer->contents = newContents;
-    memcpy(buffer->contents, &newBuffer, sizeof(stringbuffer *));
+    *(stringbuffer **)(buffer->contents) = newBuffer;
     buffer->contents->h.hdr |= (1LL << 47);
   }
   *bufferPtr = *(stringbuffer **)(buffer->contents);
@@ -98,8 +98,7 @@ static char* get_next(char* scan_ptr, size_t size) {
       return next_ptr;
     }
   }
-  char *next_block;
-  memcpy(&next_block, current_tospace_start, sizeof(char *));
+  char *next_block = *(char **)current_tospace_start;
   if (!next_block) {
     return 0;
   }

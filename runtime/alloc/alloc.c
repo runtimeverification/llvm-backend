@@ -63,10 +63,10 @@ static void freshBlock() {
       hdr.semispace = true_is_fromspace;
       memcpy(nextBlock, &hdr, sizeof(hdr));
     } else {
-      memcpy(&nextBlock, block_start, sizeof(char *));
+      nextBlock = *(char**)block_start;
       if (!nextBlock) {
         nextBlock = megabyte_malloc();
-        memcpy(block_start, &nextBlock, sizeof(char *));
+        *(char **)block_start = nextBlock;
         memory_block_header hdr;
         hdr.next_block = 0;
         hdr.semispace = true_is_fromspace;
