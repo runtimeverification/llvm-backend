@@ -49,7 +49,7 @@ static size_t get_size(block *block, uint16_t layout) {
   }
 }
 
-static void copy(block** blockPtr) {
+static void migrate(block** blockPtr) {
   block* currBlock = *blockPtr;
   uintptr_t intptr = (uintptr_t)currBlock;
   if (intptr & 1) {
@@ -73,7 +73,7 @@ static void copy(block** blockPtr) {
   *blockPtr = *(block **)(currBlock+1);
 }
 
-static void copy_string_buffer(stringbuffer** bufferPtr) {
+static void migrate_string_buffer(stringbuffer** bufferPtr) {
   stringbuffer* buffer = *bufferPtr;
   bool hasForwardingAddress = buffer->contents->h.hdr & (1LL << 47);
   if (!hasForwardingAddress) {
@@ -109,7 +109,7 @@ static char* get_next(char* scan_ptr, size_t size) {
 
 void koreCollect(block** root) {
   koreAllocSwap();
-  copy(root);
+  migrate(root);
   current_tospace_start = fromspace_ptr();
   current_tospace_end = fromspace_ptr() + BLOCK_SIZE;
   char *scan_ptr = current_tospace_start + sizeof(char *);
@@ -123,19 +123,19 @@ void koreCollect(block** root) {
         void *arg = ((char *)currBlock) + argData->offset;
         switch(argData->cat) {
         case 1: // map
-          map_foreach(arg, copy);
+          map_foreach(arg, migrate);
 	  break;
         case 2: // list
-          list_foreach(arg, copy); 
+          list_foreach(arg, migrate); 
 	  break;
         case 3: // set
-          set_foreach(arg, copy);
+          set_foreach(arg, migrate);
 	  break;
         case 6:  // stringbuffer
-          copy_string_buffer(arg);
+          migrate_string_buffer(arg);
           break;
         case 8:  // block
-          copy(arg);
+          migrate(arg);
           break;
         case 4: //int
         case 5: //float
