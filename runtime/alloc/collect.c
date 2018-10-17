@@ -1,5 +1,6 @@
-#include<stdint.h>
 #include<stdbool.h>
+#include<stdint.h>
+#include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
 #include "runtime/alloc.h"
@@ -108,6 +109,7 @@ static char* get_next(char* scan_ptr, size_t size) {
 }
 
 void koreCollect(block** root) {
+  DBG("Starting garbage collection\n");
   koreAllocSwap();
   migrate(root);
   current_tospace_start = fromspace_ptr();
@@ -147,4 +149,5 @@ void koreCollect(block** root) {
     }
     scan_ptr = get_next(scan_ptr, get_size(currBlock, layoutInt));
   }
+  DBG("Finishing garbage collection\n");
 }

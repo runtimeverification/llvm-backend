@@ -65,6 +65,7 @@ static void freshBlock() {
     } else {
       nextBlock = *(char**)block_start;
       if (!nextBlock) {
+        DBG("Allocating new block for the first time in semispace %d\n", true_is_fromspace);
         nextBlock = megabyte_malloc();
         *(char **)block_start = nextBlock;
         memory_block_header hdr;
