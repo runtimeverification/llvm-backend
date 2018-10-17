@@ -6,11 +6,6 @@
 
 #include "runtime/alloc.h"
 
-#ifdef ALLOC_DBG
-#define DBG(...) fprintf(stderr, __VA_ARGS__)
-#else
-#define DBG(...)
-#endif
 
 // 1 MiB minus 16 bytes for libc malloc overhead
 const size_t BLOCK_SIZE = 1048568;
