@@ -7,6 +7,7 @@
 
 extern const size_t BLOCK_SIZE;
 extern bool true_is_fromspace;
+extern size_t alloced;
 
 static char* current_tospace_start = 0;
 static char* current_tospace_end = 0;
@@ -43,9 +44,15 @@ void map_foreach(void *, void(block**));
 void set_foreach(void *, void(block**));
 void list_foreach(void *, void(block**));
 
+static unsigned collect_cycle = 0;
+
 static size_t get_size(uint64_t hdr, uint16_t layout) {
   if (!layout) {
+#ifdef COLLECT_DBG
+    size_t size = ((hdr & 0xffffffffff) + sizeof(block) + 7) & ~7;
+#else
     size_t size = (hdr + sizeof(block) + 7) & ~7;
+#endif
     return hdr & 0x400000000000LL ? 8 : size < 16 ? 16 : size;
   } else {
     return ((hdr >> 32) & 0xff) * 8;
@@ -68,6 +75,14 @@ static void migrate(block** blockPtr) {
   size_t lenInBytes = get_size(hdr, layout);
   block** forwardingAddress = (block**)(currBlock + 1);
   if (!hasForwardingAddress) {
+#ifdef COLLECT_DBG
+    uint8_t age = (hdr >> 40) & 0x3f;
+    if (collect_cycle % 1 == 0) {
+      currBlock->h.hdr &= 0xffffc0ffffffffff;
+      currBlock->h.hdr |= ((uint64_t)(age == 63 ? age : age + 1)) << 40;
+    }
+    fprintf(stderr, "%d %d %ld %d\n", collect_cycle, age*1+1, lenInBytes, layout);
+#endif
     block *newBlock = koreAlloc(lenInBytes);
     memcpy(newBlock, currBlock, lenInBytes);
     *forwardingAddress = newBlock;
@@ -105,6 +120,7 @@ static void migrate_string_buffer(stringbuffer** bufferPtr) {
 }
 
 static char* get_next(char* scan_ptr, size_t size) {
+  DBG("evacuating object at %p of size %ld\n", scan_ptr, size);
   char *next_ptr = scan_ptr + size;
   if (next_ptr == alloc_ptr()) {
     return 0;
@@ -123,6 +139,8 @@ static char* get_next(char* scan_ptr, size_t size) {
 
 void koreCollect(block** root) {
   DBG("Starting garbage collection\n");
+  collect_cycle++;
+  size_t alloced_before = alloced+alloc_ptr()-arena_ptr()-sizeof(memory_block_header);
   koreAllocSwap();
   migrate(root);
   current_tospace_start = fromspace_ptr();
@@ -163,5 +181,7 @@ void koreCollect(block** root) {
     }
     scan_ptr = get_next(scan_ptr, get_size(hdr, layoutInt));
   }
+  size_t alloced_after = alloced+alloc_ptr()-arena_ptr()-sizeof(memory_block_header);
+  fprintf(stderr, "%d 0 %ld\n", collect_cycle, alloced_before-alloced_after);
   DBG("Finishing garbage collection\n");
 }

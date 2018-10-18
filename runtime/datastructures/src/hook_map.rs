@@ -31,7 +31,7 @@ pub unsafe extern "C" fn hook_MAP_unit() -> Map {
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_MAP_concat(m1: *const Map, m2: *const Map) -> Map {
-  (*m1).clone().union_with((*m2).clone(), |_, _| { panic!("Duplicate keys") })
+  (*m1).clone().union_with((*m2).clone(), |v1, v2| { if v1 == v2 { v1 } else {panic!("Duplicate keys") } })
 }
 
 #[no_mangle]

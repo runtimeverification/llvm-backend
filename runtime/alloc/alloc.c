@@ -17,6 +17,8 @@ static char* block = 0;
 static char* block_start = 0;
 static char* block_end = 0;
 
+size_t alloced;
+
 char *fromspace_ptr() {
   return first_block;
 }
@@ -37,6 +39,7 @@ void koreAllocSwap() {
   block_start = first_block;
   block_end = first_block ? first_block + BLOCK_SIZE : first_block;
   true_is_fromspace = !true_is_fromspace;
+  alloced = 0;
 }
 
 static void* superblock_ptr = 0;
@@ -64,6 +67,7 @@ static void freshBlock() {
       memcpy(nextBlock, &hdr, sizeof(hdr));
     } else {
       nextBlock = *(char**)block_start;
+      alloced += BLOCK_SIZE-sizeof(memory_block_header)+(block_end-block);
       if (block != block_end) {
         if (block_end - block == 8) {
           *(uint64_t *)block = 0x0000400000000000LL;

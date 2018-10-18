@@ -60,7 +60,7 @@ block:
   %isString = icmp eq i64 %arglayout, 0
   br i1 %isString, label %hashString, label %hashChildren
 hashString:
-  %arglen = and i64 %arghdr, 70368744177663
+  %arglen = and i64 %arghdr, 1099511627775
   call void @add_hash64(i8* %hasher, i64 %arglen)
   %strptrlong = getelementptr inbounds %block, %block* %arg, i64 0, i32 1, i64 0
   %strptr = bitcast i64** %strptrlong to i8*

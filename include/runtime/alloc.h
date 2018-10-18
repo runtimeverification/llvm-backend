@@ -11,8 +11,14 @@ void koreAllocSwap(void);
 void* koreAllocToken(size_t requested);
 void* koreResizeLastAlloc(void* oldptr, size_t newrequest, size_t oldrequest);
 
+#define COLLECT_DBG
+#ifdef COLLECT_DBG
+#define len(s) ((s)->b.len & 0x000000ffffffffff)
+#define set_len(s, l) ((s)->b.len = (l) | (l > BLOCK_SIZE - sizeof(char *) ? 0x400000000000 : 0))
+#else
 #define len(s) ((s)->b.len & 0xffff3fffffffffff)
 #define set_len(s, l) ((s)->b.len = (l) | (l > BLOCK_SIZE - sizeof(char *) ? 0x400000000000 : 0))
+#endif
 
 typedef struct {
   char* next_block;

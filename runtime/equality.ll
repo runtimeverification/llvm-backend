@@ -37,8 +37,8 @@ block:
   %arg2hdrptr = getelementptr inbounds %block, %block* %arg2, i64 0, i32 0, i32 0
   %arg1hdr = load i64, i64* %arg1hdrptr
   %arg2hdr = load i64, i64* %arg2hdrptr
-  %arg1len = and i64 %arg1hdr, 70368744177663
-  %arg2len = and i64 %arg2hdr, 70368744177663
+  %arg1len = and i64 %arg1hdr, 1099511627775
+  %arg2len = and i64 %arg2hdr, 1099511627775
   %eqblock = icmp eq i64 %arg1len, %arg2len
   br i1 %eqblock, label %getChildren, label %exit
 getChildren:
