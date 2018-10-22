@@ -199,7 +199,7 @@ parseAxiomSentence :: (CommonKorePattern -> Maybe (PatternWithSideCondition pat)
 parseAxiomSentence split (ix, sentence) = do
   PatternWithSideCondition rewrite sideCondition <-
     split (sentenceAxiomPattern sentence)
-  guard (any (hasSentenceAttribute sentence) skipAttrs)
+  guard  $ not (any (hasSentenceAttribute sentence) skipAttrs)
   return $ AxiomPattern { getPriority = (rulePriority sentence)
                         , getOrdinal = ix
                         , getPatternWithSideCondition =
