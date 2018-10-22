@@ -35,3 +35,7 @@ install(
   DESTINATION lib/kllvm/rust/deps
   PATTERN *.rlib
 )
+
+if (CMAKE_BUILD_TYPE STREQUAL "Release")
+  install(SCRIPT ../cmake/mkrlib.cmake)
+endif()

@@ -14,4 +14,6 @@ name = "datastructures"
 panic = "abort"
 
 [profile.release]
+lto = true
+codegen-units=1
 panic = "abort"
