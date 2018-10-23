@@ -9,7 +9,10 @@ namespace kllvm {
 
 class DTPreprocessor {
 private:
-  std::map<YAML::Node, DecisionNode *> uniqueNodes;
+  // we do a giant nasty hack around the fact that YAML::Node doesn't
+  // implement comparison or hashing by storing the pointer to the cached
+  // DecisionNode as a scalar in a YAML node.
+  YAML::Node uniqueNodes;
   std::map<std::vector<int>, std::string> occurrences;
   const llvm::StringMap<KOREObjectSymbol *> &syms;
   const llvm::StringMap<KOREObjectCompositeSort *> &sorts;
@@ -189,13 +192,13 @@ public:
   }
 
   DecisionNode *operator()(YAML::Node node) {
-    auto unique = uniqueNodes.find(node);
-	if (unique != uniqueNodes.end()) {
-      return unique->second;
-	}
+    auto unique = uniqueNodes[node];
+    if (unique) {
+      return (DecisionNode *)unique.as<uintptr_t>();
+    }
     Kind kind = getKind(node);
     DecisionNode * ret = nullptr;
-	switch(kind) {
+    switch(kind) {
     case Swap:
       ret = swap(node); break;
     case Fail:
@@ -213,8 +216,8 @@ public:
     case Leaf:
       ret = leaf(node); break;
     }
-    uniqueNodes[node] = ret;
-	return ret;
+    uniqueNodes[node] = (uintptr_t)ret;
+    return ret;
   }
 };
 
