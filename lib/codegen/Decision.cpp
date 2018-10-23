@@ -32,6 +32,7 @@ void SwitchNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitutio
       CaseBlock = d->StuckBlock;
 	} else if (child->cachedCode != nullptr) {
       CaseBlock = child->cachedCode;
+	  _case.setCompleted();
     } else {
       CaseBlock = llvm::BasicBlock::Create(d->Ctx, 
           name + "_case_" + std::to_string(idx++),
