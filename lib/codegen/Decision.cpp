@@ -32,7 +32,6 @@ void SwitchNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitutio
       CaseBlock = d->StuckBlock;
 	} else if (child->cachedCode != nullptr) {
       CaseBlock = child->cachedCode;
-	  _case.setCompleted();
     } else {
       CaseBlock = llvm::BasicBlock::Create(d->Ctx, 
           name + "_case_" + std::to_string(idx++),
@@ -71,7 +70,7 @@ void SwitchNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitutio
   }
   for (auto &entry : caseData) {
     auto &_case = *entry.second;
-    if (_case.getCompleted() || entry.first == d->StuckBlock) {
+    if (_case.getChild()->isCompleted() || entry.first == d->StuckBlock) {
       continue;
     }
     d->CurrentBlock = entry.first;
@@ -94,12 +93,14 @@ void SwitchNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitutio
       }
     }
     _case.getChild()->codegen(d, substitution);
+    _case.getChild()->setCompleted();
   }
   if (defaultCase) {
-    if (_default != d->StuckBlock) {
+    if (_default != d->StuckBlock && !defaultCase->getChild()->isCompleted()) {
       // process default also
       d->CurrentBlock = _default;
       defaultCase->getChild()->codegen(d, substitution);
+      defaultCase->getChild()->setCompleted();
     }
   }
 }

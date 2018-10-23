@@ -14,7 +14,13 @@ class Decision;
 class DecisionNode {
 public:
   llvm::BasicBlock * cachedCode = nullptr;
+  /* completed tracks whether codegen for this DecisionNode has concluded */
+  bool completed = false;
+
   virtual void codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution) = 0;
+
+  void setCompleted() { completed = true; }
+  bool isCompleted() const { return completed; }
 };
 
 class DecisionCase {
@@ -29,8 +35,6 @@ private:
   llvm::APInt literal;
   /* the node in the tree to jump to if this constructor is matched */
   DecisionNode *child;
-  /* completed tracks whether codegen for this DecisionNode has concluded */
-  bool completed;
 
 public:
   DecisionCase(
@@ -48,8 +52,6 @@ public:
   void addBinding(std::string name) { bindings.push_back(name); }
   llvm::APInt getLiteral() const { return literal; }
   DecisionNode *getChild() const { return child; }
-  void setCompleted() { completed = true; }
-  bool getCompleted() const { return completed; }
 };
   
 class SwitchNode : public DecisionNode {
