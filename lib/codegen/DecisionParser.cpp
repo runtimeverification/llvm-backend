@@ -13,10 +13,8 @@ private:
   // implement comparison or hashing by storing the pointer to the cached
   // DecisionNode as a scalar in a YAML node.
   YAML::Node uniqueNodes;
-  std::map<std::vector<int>, std::string> occurrences;
   const llvm::StringMap<KOREObjectSymbol *> &syms;
   const llvm::StringMap<KOREObjectCompositeSort *> &sorts;
-  int counter;
   KOREObjectSymbol *dv;
 
   enum Kind {
@@ -38,15 +36,19 @@ private:
 
 public:
   DTPreprocessor(
-      int numSubjects, 
       const llvm::StringMap<KOREObjectSymbol *> &syms,
       const llvm::StringMap<KOREObjectCompositeSort *> &sorts)
-      : syms(syms), sorts(sorts), counter(0) {
-    for (int i = numSubjects - 1; i >= 0; --i) {
-      std::string name = "subject" + std::to_string(i);
-      occurrences[{i+1}] = name;
-    }
+      : syms(syms), sorts(sorts) {
     dv = KOREObjectSymbol::Create("\\dv");
+  }
+
+  std::string to_string(std::vector<int> occurrence) {
+    std::string result = "";
+    for (int i : occurrence) {
+      result.push_back('_');
+      result += std::to_string(i);
+    }
+    return result;
   }
 
   DecisionNode *swap(YAML::Node node) {
@@ -59,8 +61,7 @@ public:
     std::string hookName = node["sort"].as<std::string>();
     ValueType cat = KOREObjectCompositeSort::getCategory(hookName);
 
-    std::string binding = "_" + std::to_string(counter++);
-    occurrences[node["occurrence"].as<std::vector<int>>()] = binding;
+    std::string binding = to_string(node["occurrence"].as<std::vector<int>>());
 
     auto child = (*this)(node["next"]); 
 
@@ -73,7 +74,7 @@ public:
       if (occurrence.size() == 2 && occurrence[1] == -1) {
         result->addBinding(std::to_string(occurrence[0]));
       } else {
-        result->addBinding(occurrences[occurrence]);
+        result->addBinding(to_string(occurrence));
       }
     }
     return result;
@@ -84,8 +85,7 @@ public:
     std::string literal = node["literal"].as<std::string>();
     ValueType cat = KOREObjectCompositeSort::getCategory(hookName);
 
-    std::string name = "_" + std::to_string(counter++);
-    occurrences[node["occurrence"].as<std::vector<int>>()] = name;
+    std::string name = to_string(node["occurrence"].as<std::vector<int>>());
 
     auto child = (*this)(node["next"]); 
     
@@ -94,7 +94,7 @@ public:
 
   KOREObjectPattern *parsePattern(YAML::Node node) {
     if (node["occurrence"]) {
-      return KOREObjectVariablePattern::Create(occurrences[node["occurrence"].as<std::vector<int>>()], sorts.lookup(node["hook"].as<std::string>()));
+      return KOREObjectVariablePattern::Create(to_string(node["occurrence"].as<std::vector<int>>()), sorts.lookup(node["hook"].as<std::string>()));
     } else if (node["literal"]) {
       auto sym = KOREObjectSymbol::Create("\\dv");
       sym->addFormalArgument(sorts.lookup(node["hook"].as<std::string>()));
@@ -112,8 +112,7 @@ public:
   }
 
   DecisionNode *makePattern(YAML::Node node) {
-    std::string name = "_" + std::to_string(counter++);
-    occurrences[node["occurrence"].as<std::vector<int>>()] = name;
+    std::string name = to_string(node["occurrence"].as<std::vector<int>>());
 
     KOREObjectPattern *pat = parsePattern(node["pattern"]);
 
@@ -125,11 +124,10 @@ public:
   DecisionNode *switchCase(Kind kind, YAML::Node node) {
     YAML::Node list = node["specializations"];
     auto occurrence = node["occurrence"].as<std::vector<int>>();
-    std::string name = occurrences.at(occurrence);
+    std::string name = to_string(occurrence);
     auto result = SwitchNode::Create(name, kind == CheckNull);
     for (auto iter = list.begin(); iter != list.end(); ++iter) {
       auto _case = *iter;
-      auto copy = occurrences;
       std::vector<std::string> bindings;
       KOREObjectSymbol *symbol;
       if (kind == SwitchLiteral || kind == CheckNull) {
@@ -142,15 +140,13 @@ public:
           abort();
         }
         for (unsigned i = 0; i < symbol->getArguments().size(); ++i) {
-          std::string binding = "_" + std::to_string(counter++);
-          bindings.push_back(binding);
           auto newOccurrence = occurrence;
           newOccurrence.insert(newOccurrence.begin(), i);
-          occurrences[newOccurrence] = binding;
+          std::string binding = to_string(newOccurrence);
+          bindings.push_back(binding);
         }
       }
       DecisionNode *child = (*this)(_case[1]);
-      occurrences = copy;
       switch (kind) {
       case SwitchLiteral: {
         unsigned bitwidth = node["bitwidth"].as<unsigned>();
@@ -170,9 +166,7 @@ public:
     }
     auto _case = node["default"];
     if (!_case.IsNull()) {
-      auto copy = occurrences;
       DecisionNode *child = (*this)(_case);
-      occurrences = copy;
       result->addCase({nullptr, std::vector<std::string>{}, child});
     }
     return result;
@@ -186,7 +180,7 @@ public:
     for (auto iter = vars.begin(); iter != vars.end(); ++iter) {
       auto var = *iter;
       auto occurrence = var.as<std::vector<int>>();
-      result->addBinding(occurrences[occurrence]);
+      result->addBinding(to_string(occurrence));
     }
     return result;
   }
@@ -221,14 +215,14 @@ public:
   }
 };
 
-DecisionNode *parseYamlDecisionTreeFromString(std::string yaml, int numSubjects, const llvm::StringMap<KOREObjectSymbol *> &syms, const llvm::StringMap<KOREObjectCompositeSort *> &sorts) {
+DecisionNode *parseYamlDecisionTreeFromString(std::string yaml, const llvm::StringMap<KOREObjectSymbol *> &syms, const llvm::StringMap<KOREObjectCompositeSort *> &sorts) {
   YAML::Node root = YAML::Load(yaml);
-  return DTPreprocessor(numSubjects, syms, sorts)(root);
+  return DTPreprocessor(syms, sorts)(root);
 }
 
-DecisionNode *parseYamlDecisionTree(std::string filename, int numSubjects, const llvm::StringMap<KOREObjectSymbol *> &syms, const llvm::StringMap<KOREObjectCompositeSort *> &sorts) {
+DecisionNode *parseYamlDecisionTree(std::string filename, const llvm::StringMap<KOREObjectSymbol *> &syms, const llvm::StringMap<KOREObjectCompositeSort *> &sorts) {
   YAML::Node root = YAML::LoadFile(filename);
-  return DTPreprocessor(numSubjects, syms, sorts)(root);
+  return DTPreprocessor(syms, sorts)(root);
 }
 
 }

@@ -189,7 +189,7 @@ void makeEvalFunction(KOREObjectSymbol *function, KOREDefinition *definition, ll
   llvm::BasicBlock *block = llvm::BasicBlock::Create(module->getContext(), "entry", matchFunc);
   int i = 0;
   for (auto val = matchFunc->arg_begin(); val != matchFunc->arg_end(); ++val, ++i) {
-    val->setName("subject" + std::to_string(i));
+    val->setName("_" + std::to_string(i+1));
     subst.insert({val->getName(), val});
   }
   llvm::BasicBlock *stuck = llvm::BasicBlock::Create(module->getContext(), "stuck", matchFunc);
@@ -207,7 +207,7 @@ void makeStepFunction(KOREDefinition *definition, llvm::Module *module, Decision
   llvm::Function *matchFunc = llvm::cast<llvm::Function>(func);
   llvm::StringMap<llvm::Value *> subst;
   auto val = matchFunc->arg_begin();
-  val->setName("subject0");
+  val->setName("_1");
   subst.insert({val->getName(), val});
   llvm::BasicBlock *block = llvm::BasicBlock::Create(module->getContext(), "entry", matchFunc);
   llvm::BasicBlock *stuck = llvm::BasicBlock::Create(module->getContext(), "stuck", matchFunc);
