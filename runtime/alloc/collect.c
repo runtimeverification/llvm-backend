@@ -31,7 +31,7 @@ void list_foreach(void *, void(block**));
 
 static size_t get_size(uint64_t hdr, uint16_t layout) {
   if (!layout) {
-    size_t size = (hdr + sizeof(block) + 7) & ~7;
+    size_t size = ((hdr & 0x1fffffffffff)  + sizeof(block) + 7) & ~7;
     return hdr & 0x400000000000LL ? 8 : size < 16 ? 16 : size;
   } else {
     return size_hdr(hdr);
@@ -55,6 +55,7 @@ static void migrate(block** blockPtr) {
   block** forwardingAddress = (block**)(currBlock + 1);
   if (!hasForwardingAddress) {
     block *newBlock = koreAlloc(lenInBytes);
+    currBlock->h.hdr |= (1LL << 45);
     memcpy(newBlock, currBlock, lenInBytes);
     *forwardingAddress = newBlock;
     currBlock->h.hdr |= (1LL << 47);
@@ -82,7 +83,8 @@ static void migrate_string_buffer(stringbuffer** bufferPtr) {
     stringbuffer *newBuffer = koreAlloc(sizeof(stringbuffer));
     memcpy(newBuffer, buffer, sizeof(stringbuffer));
     string *newContents = koreAllocToken(sizeof(string) + buffer->capacity);
-    memcpy(newContents, buffer->contents, buffer->contents->h.hdr);
+    buffer->contents->h.hdr |= YOUNG_AGE_BIT;
+    memcpy(newContents, buffer->contents, len(buffer->contents));
     newBuffer->contents = newContents;
     *(stringbuffer **)(buffer->contents) = newBuffer;
     buffer->contents->h.hdr |= (1LL << 47);
