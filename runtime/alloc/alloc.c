@@ -27,12 +27,17 @@ char *fromspace_ptr() {
   return fromspace.first_block;
 }
 
-char *alloc_ptr() {
-  return fromspace.block;
+char *oldspace_ptr() {
+  return oldspace.first_block;
 }
 
-char *arena_ptr() {
-  return fromspace.block_start;
+char **alloc_ptr() {
+  return &fromspace.block;
+}
+
+char **old_alloc_ptr() {
+  return &oldspace.block;
+}
 
 char fromspace_id() {
   return 1 - fromspace.semispace_id;

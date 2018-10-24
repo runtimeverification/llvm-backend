@@ -19,9 +19,10 @@ typedef struct {
   layoutitem *args;
 } layout;
 
-char *alloc_ptr(void);
-char *arena_ptr(void);
+char **alloc_ptr(void);
+char **old_alloc_ptr(void);
 char* fromspace_ptr(void);
+char* oldspace_ptr(void);
 char fromspace_id(void);
 layout *getLayoutData(uint16_t);
 void map_foreach(void *, void(block**));
@@ -108,9 +109,9 @@ static void migrate_string_buffer(stringbuffer** bufferPtr) {
   *bufferPtr = *(stringbuffer **)(buffer->contents);
 }
 
-static char* get_next(char* scan_ptr, size_t size) {
+static char* get_next(char* scan_ptr, size_t size, char* alloc_ptr) {
   char *next_ptr = scan_ptr + size;
-  if (next_ptr == alloc_ptr()) {
+  if (next_ptr == alloc_ptr) {
     return 0;
   }
   if (next_ptr != current_tospace_end) {
@@ -125,47 +126,64 @@ static char* get_next(char* scan_ptr, size_t size) {
   return current_tospace_start + sizeof(memory_block_header);
 }
 
+static char* evacuate(char* scan_ptr, char** alloc_ptr) {
+  block *currBlock = (block *)scan_ptr;
+  const uint64_t hdr = currBlock->h.hdr;
+  uint16_t layoutInt = hdr >> 48;
+  if (layoutInt) {
+    layout *layoutData = getLayoutData(layoutInt);
+    for (unsigned i = 0; i < layoutData->nargs; i++) {
+      layoutitem *argData = layoutData->args + i;
+      void *arg = ((char *)currBlock) + argData->offset;
+      switch(argData->cat) {
+      case 1: // map
+        map_foreach(arg, migrate_once);
+	break;
+      case 2: // list
+        list_foreach(arg, migrate_once); 
+	break;
+      case 3: // set
+        set_foreach(arg, migrate_once);
+	break;
+      case 6:  // stringbuffer
+        migrate_string_buffer(arg);
+        break;
+      case 8:  // block
+        migrate(arg);
+        break;
+      case 4: //int
+      case 5: //float
+      case 7: // bool
+      default: //mint
+        break;
+      }
+    }
+  }
+  return get_next(scan_ptr, get_size(hdr, layoutInt), *alloc_ptr);
+}
+
 void koreCollect(block** root) {
   MEM_LOG("Starting garbage collection\n");
   koreAllocSwap();
+  char* oldspace_start = *old_alloc_ptr();
   migrate(root);
   current_tospace_start = fromspace_ptr();
   current_tospace_end = fromspace_ptr() + BLOCK_SIZE;
   char *scan_ptr = current_tospace_start + sizeof(memory_block_header);
+  MEM_LOG("Evacuating young generation\n");
   while(scan_ptr) {
-    block *currBlock = (block *)scan_ptr;
-    const uint64_t hdr = currBlock->h.hdr;
-    uint16_t layoutInt = hdr >> 48;
-    if (layoutInt) {
-      layout *layoutData = getLayoutData(layoutInt);
-      for (unsigned i = 0; i < layoutData->nargs; i++) {
-        layoutitem *argData = layoutData->args + i;
-        void *arg = ((char *)currBlock) + argData->offset;
-        switch(argData->cat) {
-        case 1: // map
-          map_foreach(arg, migrate_once);
-	  break;
-        case 2: // list
-          list_foreach(arg, migrate_once); 
-	  break;
-        case 3: // set
-          set_foreach(arg, migrate_once);
-	  break;
-        case 6:  // stringbuffer
-          migrate_string_buffer(arg);
-          break;
-        case 8:  // block
-          migrate(arg);
-          break;
-        case 4: //int
-        case 5: //float
-        case 7: // bool
-        default: //mint
-          break;
-        }
-      }
+    scan_ptr = evacuate(scan_ptr, alloc_ptr());
+  }
+  uintptr_t oldspace_block_start = (uintptr_t)oldspace_start;
+  oldspace_block_start = oldspace_block_start & ~(BLOCK_SIZE-1);
+  current_tospace_start = (char*) oldspace_block_start;
+  current_tospace_end = current_tospace_start + BLOCK_SIZE;
+  scan_ptr = oldspace_start == 0 ? oldspace_ptr() == 0 ? 0 : oldspace_ptr() + sizeof(memory_block_header) : oldspace_start;
+  if (scan_ptr != *old_alloc_ptr()) {
+    MEM_LOG("Evacuating promoted objects\n");
+    while(scan_ptr) {
+      scan_ptr = evacuate(scan_ptr, old_alloc_ptr());
     }
-    scan_ptr = get_next(scan_ptr, get_size(hdr, layoutInt));
   }
   MEM_LOG("Finishing garbage collection\n");
 }
