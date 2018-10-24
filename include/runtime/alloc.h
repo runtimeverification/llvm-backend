@@ -9,13 +9,15 @@ extern "C" {
 
 extern const size_t BLOCK_SIZE;
 void* koreAlloc(size_t requested);
-void koreAllocSwap(void);
 void* koreAllocToken(size_t requested);
+void* koreAllocOld(size_t requested);
+void* koreAllocTokenOld(size_t requested);
+void koreAllocSwap(void);
 void* koreResizeLastAlloc(void* oldptr, size_t newrequest, size_t oldrequest);
 
 typedef struct {
   char* next_block;
-  bool semispace;
+  char semispace;
 } memory_block_header;
 
 #ifdef ALLOC_DBG

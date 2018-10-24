@@ -6,7 +6,7 @@
 #include "runtime/alloc.h"
 #include "runtime/header.h"
 
-extern bool true_is_fromspace;
+extern char fromspace_id;
 
 static char* current_tospace_start = 0;
 static char* current_tospace_end = 0;
@@ -71,7 +71,7 @@ static void migrate_once(block** blockPtr) {
   block* currBlock = *blockPtr;
   memory_block_header *hdr = mem_block_header(currBlock);
   // bit has been flipped by now, so we need != and not ==
-  if (true_is_fromspace != hdr->semispace) {
+  if (fromspace_id != hdr->semispace) {
     migrate(blockPtr);
   }
 }
