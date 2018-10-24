@@ -10,17 +10,16 @@
 
 const size_t BLOCK_SIZE = 1024 * 1024;
 
-char fromspace_id = 0;
-
 struct semispace_info {
   char* first_block;
   char* block;
   char* block_start;
   char* block_end;
+  char semispace_id;
 };
 
 static struct semispace_info fromspace;
-static struct semispace_info oldspace;
+static struct semispace_info oldspace = {0, 0, 0, 0, 2};
 
 static char* first_tospace_block;
 
@@ -34,6 +33,9 @@ char *alloc_ptr() {
 
 char *arena_ptr() {
   return fromspace.block_start;
+
+char fromspace_id() {
+  return 1 - fromspace.semispace_id;
 }
 
 void koreAllocSwap() {
@@ -43,7 +45,7 @@ void koreAllocSwap() {
   fromspace.block = fromspace.first_block ? fromspace.first_block + sizeof(memory_block_header) : 0;
   fromspace.block_start = fromspace.first_block;
   fromspace.block_end = fromspace.first_block ? fromspace.first_block + BLOCK_SIZE : fromspace.first_block;
-  fromspace_id = 1 - fromspace_id;
+  fromspace.semispace_id = 1 - fromspace.semispace_id;
 }
 
 static void* superblock_ptr = 0;
@@ -67,7 +69,7 @@ static void freshBlock(struct semispace_info *space) {
       space->first_block = nextBlock;
       memory_block_header hdr;
       hdr.next_block = 0;
-      hdr.semispace = fromspace_id;
+      hdr.semispace = space->semispace_id;
       *(memory_block_header *)nextBlock = hdr;
     } else {
       nextBlock = *(char**)space->block_start;
@@ -79,12 +81,12 @@ static void freshBlock(struct semispace_info *space) {
         }
       }
       if (!nextBlock) {
-        MEM_LOG("Allocating new block for the first time in semispace %d\n", fromspace_id);
+        MEM_LOG("Allocating new block for the first time in semispace %d\n", space->semispace_id);
         nextBlock = megabyte_malloc();
         *(char **)space->block_start = nextBlock;
         memory_block_header hdr;
         hdr.next_block = 0;
-        hdr.semispace = fromspace_id;
+        hdr.semispace = space->semispace_id;
         memcpy(nextBlock, &hdr, sizeof(hdr));
       }
     }

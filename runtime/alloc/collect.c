@@ -6,8 +6,6 @@
 #include "runtime/alloc.h"
 #include "runtime/header.h"
 
-extern char fromspace_id;
-
 static char* current_tospace_start = 0;
 static char* current_tospace_end = 0;
 
@@ -24,6 +22,7 @@ typedef struct {
 char *alloc_ptr(void);
 char *arena_ptr(void);
 char* fromspace_ptr(void);
+char fromspace_id(void);
 layout *getLayoutData(uint16_t);
 void map_foreach(void *, void(block**));
 void set_foreach(void *, void(block**));
@@ -49,14 +48,21 @@ static void migrate(block** blockPtr) {
   if (isNotOnKoreHeap) {
     return;
   }
+  bool shouldPromote = hdr & YOUNG_AGE_BIT;
+  uint64_t mask = shouldPromote ? NOT_YOUNG_OBJECT_BIT : YOUNG_AGE_BIT;
   bool hasForwardingAddress = hdr & FWD_PTR_BIT;
   uint16_t layout = hdr >> 48;
   size_t lenInBytes = get_size(hdr, layout);
   block** forwardingAddress = (block**)(currBlock + 1);
   if (!hasForwardingAddress) {
-    block *newBlock = koreAlloc(lenInBytes);
-    currBlock->h.hdr |= YOUNG_AGE_BIT;
+    block *newBlock;
+    if (shouldPromote) {
+      newBlock = koreAllocOld(lenInBytes);
+    } else {
+      newBlock = koreAlloc(lenInBytes);
+    }
     memcpy(newBlock, currBlock, lenInBytes);
+    newBlock->h.hdr |= mask;
     *forwardingAddress = newBlock;
     currBlock->h.hdr |= FWD_PTR_BIT;
     *blockPtr = newBlock;
@@ -71,20 +77,30 @@ static void migrate_once(block** blockPtr) {
   block* currBlock = *blockPtr;
   memory_block_header *hdr = mem_block_header(currBlock);
   // bit has been flipped by now, so we need != and not ==
-  if (fromspace_id != hdr->semispace) {
+  if (fromspace_id() == hdr->semispace) {
     migrate(blockPtr);
   }
 }
 
 static void migrate_string_buffer(stringbuffer** bufferPtr) {
   stringbuffer* buffer = *bufferPtr;
+  bool shouldPromote = buffer->contents->h.hdr & YOUNG_AGE_BIT;
+  uint64_t mask = shouldPromote ? NOT_YOUNG_OBJECT_BIT : YOUNG_AGE_BIT;
   bool hasForwardingAddress = buffer->contents->h.hdr & FWD_PTR_BIT;
   if (!hasForwardingAddress) {
-    stringbuffer *newBuffer = koreAlloc(sizeof(stringbuffer));
-    memcpy(newBuffer, buffer, sizeof(stringbuffer));
-    string *newContents = koreAllocToken(sizeof(string) + buffer->capacity);
-    buffer->contents->h.hdr |= YOUNG_AGE_BIT;
+    stringbuffer *newBuffer;
+    string *newContents;
+    if (shouldPromote) {
+      newBuffer = koreAllocOld(sizeof(stringbuffer));
+      memcpy(newBuffer, buffer, sizeof(stringbuffer));
+      newContents = koreAllocTokenOld(sizeof(string) + buffer->capacity);
+    } else {
+      newBuffer = koreAlloc(sizeof(stringbuffer));
+      memcpy(newBuffer, buffer, sizeof(stringbuffer));
+      newContents = koreAllocToken(sizeof(string) + buffer->capacity);
+    }
     memcpy(newContents, buffer->contents, len(buffer->contents));
+    newContents->h.hdr |= mask;
     newBuffer->contents = newContents;
     *(stringbuffer **)(buffer->contents) = newBuffer;
     buffer->contents->h.hdr |= FWD_PTR_BIT;
