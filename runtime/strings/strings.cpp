@@ -288,7 +288,12 @@ extern "C" {
         newCapacity = minCapacity;
       }
       buf->capacity = newCapacity;
-      string* new_contents = static_cast<string *>(koreAllocToken(sizeof(string) + newCapacity));
+      string* new_contents;
+      if (buf->contents->h.hdr & 0x400000000000LL) {
+        new_contents = static_cast<string *>(koreAllocTokenOld(sizeof(string) + newCapacity));
+      } else {
+        new_contents = static_cast<string *>(koreAllocToken(sizeof(string) + newCapacity));
+      }
       memcpy(new_contents, buf->contents, sizeof(string) + len(buf->contents));
       // TODO: free/decref old contents.
       buf->contents = new_contents;
