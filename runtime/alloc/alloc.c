@@ -66,9 +66,9 @@ static void freshBlock() {
       nextBlock = *(char**)block_start;
       if (block != block_end) {
         if (block_end - block == 8) {
-          *(uint64_t *)block = 0x0000400000000000LL;
+          *(uint64_t *)block = 0x0000400000000000LL; // 8 bit sentinel value
         } else {
-          *(uint64_t *)block = block_end - block - 8;
+          *(uint64_t *)block = block_end - block - 8; // 16-bit or more sentinel value
         }
       }
       if (!nextBlock) {
