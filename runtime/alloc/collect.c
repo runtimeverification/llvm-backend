@@ -174,11 +174,11 @@ void koreCollect(block** root) {
   while(scan_ptr) {
     scan_ptr = evacuate(scan_ptr, alloc_ptr());
   }
-  uintptr_t oldspace_block_start = (uintptr_t)oldspace_start;
+  scan_ptr = oldspace_start == 0 ? oldspace_ptr() == 0 ? 0 : oldspace_ptr() + sizeof(memory_block_header) : oldspace_start;
+  uintptr_t oldspace_block_start = (uintptr_t)scan_ptr;
   oldspace_block_start = oldspace_block_start & ~(BLOCK_SIZE-1);
   current_tospace_start = (char*) oldspace_block_start;
   current_tospace_end = current_tospace_start + BLOCK_SIZE;
-  scan_ptr = oldspace_start == 0 ? oldspace_ptr() == 0 ? 0 : oldspace_ptr() + sizeof(memory_block_header) : oldspace_start;
   if (scan_ptr != *old_alloc_ptr()) {
     MEM_LOG("Evacuating promoted objects\n");
     while(scan_ptr) {
