@@ -159,3 +159,12 @@ void* koreResizeLastAlloc(void* oldptr, size_t newrequest, size_t last_size) {
     return newptr;
   }
 }
+
+void* koreReallocOld(void* ptr, size_t old_size, size_t new_size) {
+  void* new = koreAllocOld(new_size);
+  size_t min = old_size > new_size ? new_size : old_size;
+  memcpy(new, ptr, min);
+  return new;
+}
+
+void koreFree(void* ptr, size_t size) {}
