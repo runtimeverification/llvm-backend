@@ -18,6 +18,19 @@ void Decision::operator()(DecisionNode *entry, llvm::StringMap<llvm::Value *> su
   }
 }
 
+std::set<std::string> DecisionNode::collectVars(const DecisionCase &parent) {
+  std::set<std::string> defs, vars;
+  collectDefs(defs);
+  collectUses(vars);
+  for (std::string var : defs) {
+    vars.erase(var);
+  }
+  for (std::string var : parent.getBindings()) {
+    vars.erase(var);
+  }
+  return vars;
+}
+
 void SwitchNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution) {
   llvm::Value *val = substitution.lookup(name);
   llvm::BasicBlock *_default = d->StuckBlock;

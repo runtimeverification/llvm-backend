@@ -10,6 +10,7 @@
 namespace kllvm {
 
 class Decision;
+class DecisionCase;
 
 class DecisionNode {
 public:
@@ -18,6 +19,9 @@ public:
   bool completed = false;
 
   virtual void codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution) = 0;
+  virtual void collectUses(std::set<std::string> &vars) = 0;
+  virtual void collectDefs(std::set<std::string> &vars) = 0;
+  std::set<std::string> collectVars(const DecisionCase &parent);
 
   void setCompleted() { completed = true; }
   bool isCompleted() const { return completed; }
@@ -76,6 +80,8 @@ public:
   const std::vector<DecisionCase> &getCases() const { return cases; }
   
   virtual void codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution);
+  virtual void collectUses(std::set<std::string> &vars) { if(cases.size() != 1 || cases[0].getConstructor()) vars.insert(name); for (auto _case : cases) { _case.getChild()->collectUses(vars); } }
+  virtual void collectDefs(std::set<std::string> &vars) { for (auto _case : cases) { vars.insert(_case.getBindings().begin(), _case.getBindings().end()); _case.getChild()->collectDefs(vars); } }
 };
 
 class MakePatternNode : public DecisionNode {
@@ -101,6 +107,8 @@ public:
   }
 
   virtual void codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution);
+  virtual void collectUses(std::set<std::string> &vars) { child->collectUses(vars); }
+  virtual void collectDefs(std::set<std::string> &vars) { vars.insert(name); child->collectDefs(vars); }
 };
 
 
@@ -141,6 +149,15 @@ public:
   void addBinding(std::string name) { bindings.push_back(name); }
   
   virtual void codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution);
+  virtual void collectUses(std::set<std::string> &vars) { 
+    for (auto var : bindings) { 
+      if (var.find_first_not_of("-0123456789") != std::string::npos) {
+        vars.insert(var);
+      }
+    }
+    child->collectUses(vars);
+  }
+  virtual void collectDefs(std::set<std::string> &vars) { vars.insert(name); child->collectDefs(vars); }
 };
 
 class LeafNode : public DecisionNode {
@@ -163,6 +180,8 @@ public:
   void addBinding(std::string name) { bindings.push_back(name); }
   
   virtual void codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution);
+  virtual void collectUses(std::set<std::string> &vars) { vars.insert(bindings.begin(), bindings.end()); }
+  virtual void collectDefs(std::set<std::string> &vars) {}
 };
 
 class FailNode : public DecisionNode {
@@ -174,6 +193,8 @@ public:
   static FailNode *get() { return &instance; }
 
   virtual void codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution) { abort(); }
+  virtual void collectUses(std::set<std::string> &vars) {}
+  virtual void collectDefs(std::set<std::string> &vars) {}
 };
 
 class Decision {
