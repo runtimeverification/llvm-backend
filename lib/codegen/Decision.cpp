@@ -105,14 +105,6 @@ void SwitchNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitutio
   }
 }
 
-void MakeLiteralNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution) {
-  llvm::StringMap<llvm::Value *> subst;
-  CreateTerm creator(subst, d->Definition, d->CurrentBlock, d->Module);
-  llvm::Value *literal = creator.createToken(cat, this->literal);
-  substitution[name] = literal;
-  child->codegen(d, substitution);
-}
-
 void MakePatternNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution) {
   CreateTerm creator(substitution, d->Definition, d->CurrentBlock, d->Module);
   llvm::Value *val = creator(pattern);

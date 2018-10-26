@@ -78,35 +78,6 @@ public:
   virtual void codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution);
 };
 
-class MakeLiteralNode : public DecisionNode {
-private:
-  std::string name;
-  ValueType cat;
-  std::string literal;
-  DecisionNode *child;
-
-  MakeLiteralNode(
-    const std::string &name,
-    ValueType cat,
-    const std::string literal,
-    DecisionNode *child) :
-      name(name),
-      cat(cat),
-      literal(literal),
-      child(child) {}
-
-public:
-  static MakeLiteralNode *Create(
-      const std::string &name,
-      ValueType cat,
-      const std::string literal,
-      DecisionNode *child) {
-    return new MakeLiteralNode(name, cat, literal, child);
-  }
-
-  virtual void codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution);
-};
-
 class MakePatternNode : public DecisionNode {
 private:
   std::string name;
@@ -234,7 +205,6 @@ public:
   void operator()(DecisionNode *entry, llvm::StringMap<llvm::Value *> substitution);
 
   friend class SwitchNode;
-  friend class MakeLiteralNode;
   friend class MakePatternNode;
   friend class FunctionNode;
   friend class LeafNode;

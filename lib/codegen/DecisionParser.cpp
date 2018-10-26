@@ -18,13 +18,12 @@ private:
   KOREObjectSymbol *dv;
 
   enum Kind {
-    Switch, SwitchLiteral, CheckNull, MakeLiteral, MakePattern, Function, Leaf, Fail, Swap
+    Switch, SwitchLiteral, CheckNull, MakePattern, Function, Leaf, Fail, Swap
   };
 
   static Kind getKind(YAML::Node node) {
     if (node.IsScalar()) return Fail;
     if (node["isnull"]) return CheckNull;
-    if (node["hook"]) return MakeLiteral;
     if (node["pattern"]) return MakePattern;
     if (node["bitwidth"]) return SwitchLiteral;
     if (node["specializations"]) return Switch;
@@ -78,18 +77,6 @@ public:
       }
     }
     return result;
-  }
-
-  DecisionNode *makeLiteral(YAML::Node node) {
-    std::string hookName = node["hook"].as<std::string>();
-    std::string literal = node["literal"].as<std::string>();
-    ValueType cat = KOREObjectCompositeSort::getCategory(hookName);
-
-    std::string name = to_string(node["occurrence"].as<std::vector<int>>());
-
-    auto child = (*this)(node["next"]); 
-    
-    return MakeLiteralNode::Create(name, cat, literal, child);
   }
 
   KOREObjectPattern *parsePattern(YAML::Node node) {
@@ -199,8 +186,6 @@ public:
       ret = FailNode::get(); break;
     case Function:
       ret = function(node); break;
-    case MakeLiteral:
-      ret = makeLiteral(node); break;
     case MakePattern:
       ret = makePattern(node); break;
     case SwitchLiteral:
