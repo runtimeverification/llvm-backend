@@ -176,9 +176,16 @@ void koreCollect(block** root) {
   }
   scan_ptr = oldspace_start == 0 ? oldspace_ptr() == 0 ? 0 : oldspace_ptr() + sizeof(memory_block_header) : oldspace_start;
   uintptr_t oldspace_block_start = (uintptr_t)scan_ptr;
-  oldspace_block_start = oldspace_block_start & ~(BLOCK_SIZE-1);
-  current_tospace_start = (char*) oldspace_block_start;
-  current_tospace_end = current_tospace_start + BLOCK_SIZE;
+  if (!(oldspace_block_start & (BLOCK_SIZE-1))) {
+    // this happens when oldspace_start is at the exact end of a block
+    current_tospace_end = oldspace_start;
+    current_tospace_start = oldspace_start - BLOCK_SIZE;
+    scan_ptr = get_next(scan_ptr, 0, *old_alloc_ptr());
+  } else {
+    oldspace_block_start = oldspace_block_start & ~(BLOCK_SIZE-1);
+    current_tospace_start = (char*) oldspace_block_start;
+    current_tospace_end = current_tospace_start + BLOCK_SIZE;
+  }
   if (scan_ptr != *old_alloc_ptr()) {
     MEM_LOG("Evacuating promoted objects\n");
     while(scan_ptr) {
