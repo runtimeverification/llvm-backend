@@ -15,6 +15,7 @@ class DecisionCase;
 class DecisionNode {
 public:
   llvm::BasicBlock * cachedCode = nullptr;
+  llvm::StringMap<llvm::PHINode *> phis;
   /* completed tracks whether codegen for this DecisionNode has concluded */
   bool completed = false;
 

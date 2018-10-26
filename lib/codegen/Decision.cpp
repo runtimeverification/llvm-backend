@@ -45,11 +45,20 @@ void SwitchNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitutio
       CaseBlock = d->StuckBlock;
 	} else if (child->cachedCode != nullptr) {
       CaseBlock = child->cachedCode;
+      for (std::string var : child->collectVars(_case)) {
+          child->phis[var]->addIncoming(substitution[var], d->CurrentBlock);
+      }
+ 
     } else {
       CaseBlock = llvm::BasicBlock::Create(d->Ctx, 
           name + "_case_" + std::to_string(idx++),
           d->CurrentBlock->getParent());
-	  child->cachedCode = CaseBlock;
+	    child->cachedCode = CaseBlock;
+      for (std::string var : child->collectVars(_case)) {
+          auto Phi = llvm::PHINode::Create(substitution[var]->getType(), 1, "phi" + var, CaseBlock);
+          Phi->addIncoming(substitution[var], d->CurrentBlock);
+          child->phis[var] = Phi;
+      }
     }
     if (auto sym = _case.getConstructor()) {
       isInt = isInt || sym->getName() == "\\dv";
@@ -87,32 +96,41 @@ void SwitchNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitutio
       continue;
     }
     d->CurrentBlock = entry.first;
+    auto newSubst = substitution;
+    for (std::string var : _case.getChild()->collectVars(_case)) {
+      newSubst[var] = _case.getChild()->phis.lookup(var);
+    }
     if (!isInt) {
       int offset = 0;
       llvm::StructType *BlockType = getBlockType(d->Module, d->Definition, _case.getConstructor());
-      llvm::BitCastInst *Cast = new llvm::BitCastInst(substitution.lookup(name), llvm::PointerType::getUnqual(BlockType), "", d->CurrentBlock);
+      llvm::BitCastInst *Cast = new llvm::BitCastInst(newSubst.lookup(name), llvm::PointerType::getUnqual(BlockType), "", d->CurrentBlock);
       for (std::string binding : _case.getBindings()) {
         llvm::Value *ChildPtr = llvm::GetElementPtrInst::CreateInBounds(BlockType, Cast, {llvm::ConstantInt::get(llvm::Type::getInt64Ty(d->Ctx), 0), llvm::ConstantInt::get(llvm::Type::getInt32Ty(d->Ctx), offset+2)}, "", d->CurrentBlock);
         switch (dynamic_cast<KOREObjectCompositeSort *>(_case.getConstructor()->getArguments()[offset++])->getCategory(d->Definition).cat) {
         case SortCategory::Map:
         case SortCategory::List:
         case SortCategory::Set:
-          substitution[binding] = ChildPtr;
+          newSubst[binding] = ChildPtr;
           break;
         default:
-          substitution[binding] = new llvm::LoadInst(ChildPtr, binding, d->CurrentBlock);
+          newSubst[binding] = new llvm::LoadInst(ChildPtr, binding, d->CurrentBlock);
           break;
         }
       }
     }
-    _case.getChild()->codegen(d, substitution);
+    _case.getChild()->codegen(d, newSubst);
     _case.getChild()->setCompleted();
   }
   if (defaultCase) {
     if (_default != d->StuckBlock && !defaultCase->getChild()->isCompleted()) {
       // process default also
       d->CurrentBlock = _default;
-      defaultCase->getChild()->codegen(d, substitution);
+    auto newSubst = substitution;
+    for (std::string var : defaultCase->getChild()->collectVars(*defaultCase)) {
+      newSubst[var] = defaultCase->getChild()->phis.lookup(var);
+    }
+ 
+      defaultCase->getChild()->codegen(d, newSubst);
       defaultCase->getChild()->setCompleted();
     }
   }
