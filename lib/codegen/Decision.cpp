@@ -140,9 +140,13 @@ void SwitchNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitutio
 }
 
 void MakePatternNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution) {
-  CreateTerm creator(substitution, d->Definition, d->CurrentBlock, d->Module);
+  auto makePatternBasicBlock = llvm::BasicBlock::Create(d->Ctx,
+         name,
+          d->CurrentBlock->getParent());
+  llvm::BranchInst::Create(makePatternBasicBlock, d->CurrentBlock);
+  CreateTerm creator(substitution, d->Definition, makePatternBasicBlock, d->Module);
   llvm::Value *val = creator(pattern);
-  d->CurrentBlock = creator.getCurrentBlock();
+  d->CurrentBlock = makePatternBasicBlock;
   substitution[name] = val;
   child->codegen(d, substitution);
 }
@@ -150,6 +154,10 @@ void MakePatternNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substi
 void FunctionNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution) {
   std::vector<llvm::Value *> args;
   std::vector<llvm::Type *> types;
+  auto functionNodeBasicBlock = llvm::BasicBlock::Create(d->Ctx,
+         "function" + name,
+          d->CurrentBlock->getParent());
+  llvm::BranchInst::Create(functionNodeBasicBlock, d->CurrentBlock);
   for (auto arg : bindings) {
     llvm::Value *val;
     if (arg.find_first_not_of("-0123456789") == std::string::npos) {
@@ -160,10 +168,11 @@ void FunctionNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitut
     args.push_back(val);
     types.push_back(val->getType());
   }
-  CreateTerm creator(substitution, d->Definition, d->CurrentBlock, d->Module);
+  CreateTerm creator(substitution, d->Definition, functionNodeBasicBlock, d->Module);
   auto Call = creator.createFunctionCall(function, cat, args, function.substr(0, 5) == "hook_", false);
   Call->setName(name);
   substitution[name] = Call;
+  d->CurrentBlock = functionNodeBasicBlock;
   child->codegen(d, substitution);
 }
 
