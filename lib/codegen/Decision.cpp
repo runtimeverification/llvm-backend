@@ -4,6 +4,8 @@
 #include "llvm/IR/Constants.h"
 #include "llvm/IR/Instructions.h" 
 
+#include <iostream>
+
 namespace kllvm {
 
 static std::string BLOCK_STRUCT = "block";
@@ -54,7 +56,8 @@ void SwitchNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitutio
           name + "_case_" + std::to_string(idx++),
           d->CurrentBlock->getParent());
 	    child->cachedCode = CaseBlock;
-      for (std::string var : child->collectVars(_case)) {
+      //TODO: fix up Phi Nodes
+	  for (std::string var : child->collectVars(_case)) {
           auto Phi = llvm::PHINode::Create(substitution[var]->getType(), 1, "phi" + var, CaseBlock);
           Phi->addIncoming(substitution[var], d->CurrentBlock);
           child->phis[var] = Phi;
@@ -164,6 +167,7 @@ void FunctionNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitut
   child->codegen(d, substitution);
 }
 
+
 void LeafNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution) {
   std::vector<llvm::Value *> args;
   std::vector<llvm::Type *> types;
@@ -172,9 +176,13 @@ void LeafNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution)
     args.push_back(val);
     types.push_back(val->getType());
   }
-  auto Call = llvm::CallInst::Create(d->Module->getOrInsertFunction(name, llvm::FunctionType::get(getValueType(d->Cat, d->Module), types, false)), args, "", d->CurrentBlock);
+  auto leafBasicBlock = llvm::BasicBlock::Create(d->Ctx,
+         name,
+          d->CurrentBlock->getParent());
+  auto Call = llvm::CallInst::Create(d->Module->getOrInsertFunction(name, llvm::FunctionType::get(getValueType(d->Cat, d->Module), types, false)), args, "", leafBasicBlock);
   Call->setCallingConv(llvm::CallingConv::Fast);
-  llvm::ReturnInst::Create(d->Ctx, Call, d->CurrentBlock);
+  llvm::ReturnInst::Create(d->Ctx, Call, leafBasicBlock);
+  llvm::BranchInst::Create(leafBasicBlock, d->CurrentBlock);
 }
 
 llvm::Value *Decision::getTag(llvm::Value *val) {
