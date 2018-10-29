@@ -79,9 +79,11 @@ public:
     return result;
   }
 
-  KOREObjectPattern *parsePattern(YAML::Node node) {
+  KOREObjectPattern *parsePattern(YAML::Node node, std::vector<std::string> &uses) {
     if (node["occurrence"]) {
-      return KOREObjectVariablePattern::Create(to_string(node["occurrence"].as<std::vector<int>>()), sorts.lookup(node["hook"].as<std::string>()));
+      std::string name = to_string(node["occurrence"].as<std::vector<int>>());
+      uses.push_back(name);
+      return KOREObjectVariablePattern::Create(name, sorts.lookup(node["hook"].as<std::string>()));
     } else if (node["literal"]) {
       auto sym = KOREObjectSymbol::Create("\\dv");
       sym->addFormalArgument(sorts.lookup(node["hook"].as<std::string>()));
@@ -92,7 +94,7 @@ public:
       auto sym = syms.lookup(node["constructor"].as<std::string>());
       auto pat = KOREObjectCompositePattern::Create(sym);
       for (auto child : node["args"]) {
-        pat->addArgument(parsePattern(child));
+        pat->addArgument(parsePattern(child, uses));
       }
       return pat;
     }
@@ -101,11 +103,13 @@ public:
   DecisionNode *makePattern(YAML::Node node) {
     std::string name = to_string(node["occurrence"].as<std::vector<int>>());
 
-    KOREObjectPattern *pat = parsePattern(node["pattern"]);
+    std::vector<std::string> uses;
+
+    KOREObjectPattern *pat = parsePattern(node["pattern"], uses);
 
     auto child = (*this)(node["next"]);
 
-    return MakePatternNode::Create(name, pat, child);
+    return MakePatternNode::Create(name, pat, uses, child);
   }
 
   DecisionNode *switchCase(Kind kind, YAML::Node node) {

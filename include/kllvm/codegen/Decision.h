@@ -90,26 +90,30 @@ class MakePatternNode : public DecisionNode {
 private:
   std::string name;
   KOREObjectPattern *pattern;
+  std::vector<std::string> uses;
   DecisionNode *child;
 
   MakePatternNode(
     const std::string &name,
     KOREObjectPattern *pattern,
+    std::vector<std::string> &uses,
     DecisionNode *child) :
       name(name),
       pattern(pattern),
+      uses(uses),
       child(child) {}
 
 public:
   static MakePatternNode *Create(
       const std::string &name,
       KOREObjectPattern *pattern,
+      std::vector<std::string> &uses,
       DecisionNode *child) {
-    return new MakePatternNode(name, pattern, child);
+    return new MakePatternNode(name, pattern, uses, child);
   }
 
   virtual void codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution);
-  virtual void collectUses(std::set<std::string> &vars) { child->collectUses(vars); }
+  virtual void collectUses(std::set<std::string> &vars) { vars.insert(uses.begin(), uses.end()); child->collectUses(vars); }
   virtual void collectDefs(std::set<std::string> &vars) { vars.insert(name); child->collectDefs(vars); }
 };
 
