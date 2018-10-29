@@ -156,6 +156,10 @@ void MakePatternNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substi
 }
 
 void FunctionNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution) {
+  if (cachedCode != nullptr) {
+      llvm::BranchInst::Create(cachedCode, d->CurrentBlock);
+	  return;
+  }
   std::vector<llvm::Value *> args;
   std::vector<llvm::Type *> types;
   auto functionNodeBasicBlock = llvm::BasicBlock::Create(d->Ctx,
