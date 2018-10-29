@@ -180,17 +180,21 @@ void FunctionNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitut
 void LeafNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution) {
   std::vector<llvm::Value *> args;
   std::vector<llvm::Type *> types;
-  for (auto arg : bindings) {
-    auto val = substitution.lookup(arg);
-    args.push_back(val);
-    types.push_back(val->getType());
-  }
-  auto leafBasicBlock = llvm::BasicBlock::Create(d->Ctx,
-         name,
+  auto *leafBasicBlock = cachedCode;
+  if (cachedCode == nullptr) {
+	  std::cerr << name << std::endl;
+      leafBasicBlock = llvm::BasicBlock::Create(d->Ctx,
+          name,
           d->CurrentBlock->getParent());
-  auto Call = llvm::CallInst::Create(d->Module->getOrInsertFunction(name, llvm::FunctionType::get(getValueType(d->Cat, d->Module), types, false)), args, "", leafBasicBlock);
-  Call->setCallingConv(llvm::CallingConv::Fast);
-  llvm::ReturnInst::Create(d->Ctx, Call, leafBasicBlock);
+      for (auto arg : bindings) {
+          auto val = substitution.lookup(arg);
+          args.push_back(val);
+          types.push_back(val->getType());
+      }
+      auto Call = llvm::CallInst::Create(d->Module->getOrInsertFunction(name, llvm::FunctionType::get(getValueType(d->Cat, d->Module), types, false)), args, "", leafBasicBlock);
+      Call->setCallingConv(llvm::CallingConv::Fast);
+      llvm::ReturnInst::Create(d->Ctx, Call, leafBasicBlock);
+  }
   llvm::BranchInst::Create(leafBasicBlock, d->CurrentBlock);
 }
 
