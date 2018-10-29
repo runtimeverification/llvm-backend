@@ -22,7 +22,8 @@ public:
   virtual void codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution) = 0;
   virtual void collectUses(std::set<std::string> &vars) = 0;
   virtual void collectDefs(std::set<std::string> &vars) = 0;
-  std::set<std::string> collectVars(const DecisionCase &parent);
+  std::set<std::string> collectVars(void);
+  bool beginNode(Decision *d, std::string name, llvm::StringMap<llvm::Value *> &substitution);
 
   void setCompleted() { completed = true; }
   bool isCompleted() const { return completed; }
@@ -230,6 +231,7 @@ public:
   friend class MakePatternNode;
   friend class FunctionNode;
   friend class LeafNode;
+  friend class DecisionNode;
 };
 
 /* construct the function that evaluates the specified function symbol
