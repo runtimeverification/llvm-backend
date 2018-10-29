@@ -45,7 +45,7 @@ void SwitchNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitutio
     llvm::BasicBlock *CaseBlock;
     if (child == FailNode::get()) {
       CaseBlock = d->StuckBlock;
-    } else if (child->cachedCode != nullptr) {
+	} else if (child->cachedCode != nullptr) {
       CaseBlock = child->cachedCode;
       for (std::string var : child->collectVars(_case)) {
           child->phis[var]->addIncoming(substitution[var], d->CurrentBlock);
@@ -55,9 +55,9 @@ void SwitchNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitutio
       CaseBlock = llvm::BasicBlock::Create(d->Ctx, 
           name + "_case_" + std::to_string(idx++),
           d->CurrentBlock->getParent());
-        child->cachedCode = CaseBlock;
+	    child->cachedCode = CaseBlock;
       //TODO: fix up Phi Nodes
-      for (std::string var : child->collectVars(_case)) {
+	  for (std::string var : child->collectVars(_case)) {
           auto Phi = llvm::PHINode::Create(substitution[var]->getType(), 1, "phi" + var, CaseBlock);
           Phi->addIncoming(substitution[var], d->CurrentBlock);
           child->phis[var] = Phi;
@@ -132,7 +132,7 @@ void SwitchNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitutio
     for (std::string var : defaultCase->getChild()->collectVars(*defaultCase)) {
       newSubst[var] = defaultCase->getChild()->phis.lookup(var);
     }
-
+ 
       defaultCase->getChild()->codegen(d, newSubst);
       defaultCase->getChild()->setCompleted();
     }
@@ -141,12 +141,8 @@ void SwitchNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitutio
 
 void MakePatternNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution) {
   if (cachedCode) {
-      // don't loop to self.
-      if (cachedCode == d->CurrentBlock) {
-          return;
-      }
-      llvm::BranchInst::Create(cachedCode, d->CurrentBlock);
-      return;
+	  llvm::BranchInst::Create(cachedCode, d->CurrentBlock);
+	  return;
   }
   auto makePatternBasicBlock = llvm::BasicBlock::Create(d->Ctx,
          name,
@@ -161,12 +157,8 @@ void MakePatternNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substi
 
 void FunctionNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution) {
   if (cachedCode != nullptr) {
-      // don't loop to self.
-      if (cachedCode == d->CurrentBlock) {
-          return;
-      }
       llvm::BranchInst::Create(cachedCode, d->CurrentBlock);
-      return;
+	  return;
   }
   std::vector<llvm::Value *> args;
   std::vector<llvm::Type *> types;
@@ -195,12 +187,8 @@ void FunctionNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitut
 
 void LeafNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution) {
   if (cachedCode != nullptr) {
-      // don't loop to self.
-      if (cachedCode == d->CurrentBlock) {
-          return;
-      }
       llvm::BranchInst::Create(cachedCode, d->CurrentBlock);
-      return;
+	  return;
   }
   std::vector<llvm::Value *> args;
   std::vector<llvm::Type *> types;
