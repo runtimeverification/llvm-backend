@@ -31,8 +31,8 @@ void list_foreach(void *, void(block**));
 
 static size_t get_size(uint64_t hdr, uint16_t layout) {
   if (!layout) {
-    size_t size = ((hdr & 0x1fffffffffff)  + sizeof(block) + 7) & ~7;
-    return hdr & 0x400000000000LL ? 8 : size < 16 ? 16 : size;
+    size_t size = (len_hdr(hdr)  + sizeof(block) + 7) & ~7;
+    return hdr == NOT_YOUNG_OBJECT_BIT ? 8 : size < 16 ? 16 : size;
   } else {
     return size_hdr(hdr);
   }
@@ -45,20 +45,20 @@ static void migrate(block** blockPtr) {
     return;
   }
   const uint64_t hdr = currBlock->h.hdr;
-  bool isNotOnKoreHeap = hdr & (1LL << 46);
+  bool isNotOnKoreHeap = hdr & NOT_YOUNG_OBJECT_BIT;
   if (isNotOnKoreHeap) {
     return;
   }
-  bool hasForwardingAddress = hdr & (1LL << 47);
+  bool hasForwardingAddress = hdr & FWD_PTR_BIT;
   uint16_t layout = hdr >> 48;
   size_t lenInBytes = get_size(hdr, layout);
   block** forwardingAddress = (block**)(currBlock + 1);
   if (!hasForwardingAddress) {
     block *newBlock = koreAlloc(lenInBytes);
-    currBlock->h.hdr |= (1LL << 45);
+    currBlock->h.hdr |= YOUNG_AGE_BIT;
     memcpy(newBlock, currBlock, lenInBytes);
     *forwardingAddress = newBlock;
-    currBlock->h.hdr |= (1LL << 47);
+    currBlock->h.hdr |= FWD_PTR_BIT;
     *blockPtr = newBlock;
   } else {
     *blockPtr = *forwardingAddress;
@@ -78,7 +78,7 @@ static void migrate_once(block** blockPtr) {
 
 static void migrate_string_buffer(stringbuffer** bufferPtr) {
   stringbuffer* buffer = *bufferPtr;
-  bool hasForwardingAddress = buffer->contents->h.hdr & (1LL << 47);
+  bool hasForwardingAddress = buffer->contents->h.hdr & FWD_PTR_BIT;
   if (!hasForwardingAddress) {
     stringbuffer *newBuffer = koreAlloc(sizeof(stringbuffer));
     memcpy(newBuffer, buffer, sizeof(stringbuffer));
@@ -87,7 +87,7 @@ static void migrate_string_buffer(stringbuffer** bufferPtr) {
     memcpy(newContents, buffer->contents, len(buffer->contents));
     newBuffer->contents = newContents;
     *(stringbuffer **)(buffer->contents) = newBuffer;
-    buffer->contents->h.hdr |= (1LL << 47);
+    buffer->contents->h.hdr |= FWD_PTR_BIT;
   }
   *bufferPtr = *(stringbuffer **)(buffer->contents);
 }

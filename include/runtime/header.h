@@ -6,10 +6,13 @@
 #include <mpfr.h>
 
 // the actual length is equal to the block header with the gc bits masked out.
-#define len(s) ((s)->h.hdr & 0x1fffffffffff)
+#define len(s) len_hdr((s)->h.hdr)
+#define len_hdr(s) ((s) & 0x1fffffffffff)
 #define set_len(s, l) ((s)->h.hdr = (l) | (l > BLOCK_SIZE - sizeof(char *) ? 0x400000000000 : 0))
 #define size_hdr(s) ((((s) >> 32) & 0xff) * 8)
 #define NOT_YOUNG_OBJECT_BIT 0x400000000000
+#define YOUNG_AGE_BIT 0x200000000000
+#define FWD_PTR_BIT 0x800000000000
 
 #ifdef __cplusplus
 extern "C" {
