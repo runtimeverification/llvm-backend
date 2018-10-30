@@ -7,6 +7,8 @@
 #include "llvm/IR/Module.h"
 #include "llvm/IR/Value.h"
 
+#define NOT_YOUNG_OBJECT_BIT 0x400000000000
+
 namespace kllvm {
 
 class CreateTerm {
