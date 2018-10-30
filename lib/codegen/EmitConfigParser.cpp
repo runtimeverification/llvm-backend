@@ -338,7 +338,7 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
   auto StringType = module->getTypeByName(STRING_STRUCT);
   auto Len = llvm::BinaryOperator::Create(llvm::Instruction::Add,
       func->arg_begin()+1, llvm::ConstantExpr::getSizeOf(StringType), "", CurrentBlock);
-  llvm::Value *Block = allocateBlock(StringType, Len, CurrentBlock, "koreAllocToken");
+  llvm::Value *Block = allocateTerm(StringType, Len, CurrentBlock, "koreAllocToken");
   auto HdrPtr = llvm::GetElementPtrInst::CreateInBounds(Block,
       {zero, zero32, zero32}, "", CurrentBlock);
   auto BlockSize = module->getOrInsertGlobal("BLOCK_SIZE", llvm::Type::getInt64Ty(Ctx));
