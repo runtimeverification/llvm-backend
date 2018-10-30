@@ -9,14 +9,14 @@ add_definitions(-Wall -Werror)
 set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -flto")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -flto")
 set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} -flto")
-set(CMAKE_AR "llvm-ar-5.0")
-set(CMAKE_RANLIB "llvm-ranlib-5.0")
+set(CMAKE_AR "llvm-ar-6.0")
+set(CMAKE_RANLIB "llvm-ranlib-6.0")
 
 find_package(LLVM 6 REQUIRED CONFIG)
 
 message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
-if (${LLVM_PACKAGE_VERSION} VERSION_LESS 5.0)
-  message(FATAL_ERROR "LLVM 5.0 or newer is required")
+if (${LLVM_PACKAGE_VERSION} VERSION_LESS 6.0)
+  message(FATAL_ERROR "LLVM 6.0 or newer is required")
 endif()
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
