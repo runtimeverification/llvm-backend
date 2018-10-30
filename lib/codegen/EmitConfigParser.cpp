@@ -1,5 +1,6 @@
 #include "kllvm/codegen/EmitConfigParser.h"
 #include "kllvm/codegen/CreateTerm.h"
+#include "kllvm/codegen/GenAlloc.h"
 
 #include "llvm/IR/Constants.h"
 #include "llvm/IR/Instructions.h"
@@ -145,7 +146,6 @@ static llvm::Value *getArgValue(llvm::Value *ArgumentsArray, int idx,
     auto cast = new llvm::BitCastInst(arg,
         llvm::PointerType::getUnqual(getValueType(cat, mod)), "", CaseBlock);
     auto load = new llvm::LoadInst(cast, "", CaseBlock);
-    CaseBlock->getInstList().push_back(llvm::CallInst::CreateFree(arg, CaseBlock));
     arg = load;
     break;
   }
@@ -306,17 +306,17 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
     }
     case SortCategory::Int: {
       llvm::Type *Int = module->getTypeByName(INT_STRUCT);
-      llvm::Value *Block = allocateBlock(Int, CaseBlock);
+      llvm::Value *Term = allocateTerm(Int, CaseBlock, "malloc");
       llvm::Constant *MpzInitSet = module->getOrInsertFunction("__gmpz_init_set_str",
           llvm::Type::getInt32Ty(Ctx), llvm::PointerType::getUnqual(Int), 
           llvm::Type::getInt8PtrTy(Ctx), llvm::Type::getInt32Ty(Ctx));
-      auto Call = llvm::CallInst::Create(MpzInitSet, {Block, func->arg_begin()+2,
+      auto Call = llvm::CallInst::Create(MpzInitSet, {Term, func->arg_begin()+2,
           llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), 10)}, "", CaseBlock);
       auto icmp = new llvm::ICmpInst(*CaseBlock, llvm::CmpInst::ICMP_EQ, 
           Call, zero32);
       auto AbortBlock = llvm::BasicBlock::Create(Ctx, "invalid_int", func);
       addAbort(AbortBlock, module);
-      auto cast = new llvm::BitCastInst(Block,
+      auto cast = new llvm::BitCastInst(Term,
           llvm::Type::getInt8PtrTy(Ctx), "", CaseBlock);
       llvm::BranchInst::Create(MergeBlock, AbortBlock, icmp, CaseBlock);
       Phi->addIncoming(cast, CaseBlock);
@@ -334,10 +334,19 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
   auto StringType = module->getTypeByName(STRING_STRUCT);
   auto Len = llvm::BinaryOperator::Create(llvm::Instruction::Add,
       func->arg_begin()+1, llvm::ConstantExpr::getSizeOf(StringType), "", CurrentBlock);
-  llvm::Value *Block = allocateBlock(StringType, Len, CurrentBlock);
+  llvm::Value *Block = allocateTerm(StringType, Len, CurrentBlock, "koreAllocToken");
   auto HdrPtr = llvm::GetElementPtrInst::CreateInBounds(Block,
       {zero, zero32, zero32}, "", CurrentBlock);
-  new llvm::StoreInst(func->arg_begin()+1, HdrPtr, CurrentBlock);
+  auto BlockSize = module->getOrInsertGlobal("BLOCK_SIZE", llvm::Type::getInt64Ty(Ctx));
+  auto BlockSizeVal = new llvm::LoadInst(BlockSize, "", CurrentBlock);
+  auto BlockAllocSize = llvm::BinaryOperator::Create(llvm::Instruction::Sub,
+      BlockSizeVal, llvm::ConstantExpr::getSizeOf(llvm::Type::getInt8PtrTy(Ctx)), "", CurrentBlock);
+  auto icmp = new llvm::ICmpInst(*CurrentBlock, llvm::CmpInst::ICMP_UGT,
+      Len, BlockAllocSize);
+  auto Mask = llvm::SelectInst::Create(icmp, llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0x400000000000), llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0), "", CurrentBlock);
+  auto HdrOred = llvm::BinaryOperator::Create(llvm::Instruction::Or,
+      func->arg_begin()+1, Mask, "", CurrentBlock);
+  new llvm::StoreInst(HdrOred, HdrPtr, CurrentBlock);
   llvm::Constant *Memcpy = module->getOrInsertFunction("memcpy", 
       llvm::Type::getInt8PtrTy(Ctx), llvm::Type::getInt8PtrTy(Ctx),
       llvm::Type::getInt8PtrTy(Ctx), llvm::Type::getInt64Ty(Ctx));
@@ -547,7 +556,7 @@ static llvm::Constant *getLayoutData(uint16_t layout, KOREObjectSymbol *symbol, 
     elements.push_back(llvm::ConstantStruct::get(module->getTypeByName(LAYOUTITEM_STRUCT), offset, llvm::ConstantInt::get(llvm::Type::getInt16Ty(Ctx), (int)cat.cat + cat.bits)));
   }
   auto Arr = llvm::ConstantArray::get(llvm::ArrayType::get(module->getTypeByName(LAYOUTITEM_STRUCT), len), elements);
-  auto global = module->getOrInsertGlobal("layout_" + std::to_string(layout), Arr->getType());
+  auto global = module->getOrInsertGlobal("layout_item_" + std::to_string(layout), Arr->getType());
   llvm::GlobalVariable *globalVar = llvm::dyn_cast<llvm::GlobalVariable>(global);
   if (!globalVar->hasInitializer()) {
     globalVar->setInitializer(Arr);
@@ -555,7 +564,12 @@ static llvm::Constant *getLayoutData(uint16_t layout, KOREObjectSymbol *symbol, 
   llvm::Constant *zero = llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0);
   auto indices = std::vector<llvm::Constant *>{zero, zero};
   auto Ptr = llvm::ConstantExpr::getInBoundsGetElementPtr(Arr->getType(), globalVar, indices);
-  return llvm::ConstantStruct::get(module->getTypeByName(LAYOUT_STRUCT), llvm::ConstantInt::get(llvm::Type::getInt8Ty(Ctx), len), Ptr);
+  auto global2 = module->getOrInsertGlobal("layout_" + std::to_string(layout), module->getTypeByName(LAYOUT_STRUCT));
+  llvm::GlobalVariable *globalVar2 = llvm::dyn_cast<llvm::GlobalVariable>(global2);
+  if (!globalVar2->hasInitializer()) {
+    globalVar2->setInitializer(llvm::ConstantStruct::get(module->getTypeByName(LAYOUT_STRUCT), llvm::ConstantInt::get(llvm::Type::getInt8Ty(Ctx), len), Ptr));
+  }
+  return globalVar2;
 }
 
 static void emitLayouts(KOREDefinition *definition, llvm::Module *module) {
@@ -567,12 +581,12 @@ static void emitLayouts(KOREDefinition *definition, llvm::Module *module) {
   std::vector<llvm::Type *> argTypes;
   argTypes.push_back(llvm::Type::getInt16Ty(Ctx));
   auto func = llvm::dyn_cast<llvm::Function>(module->getOrInsertFunction(
-      "getLayoutData", llvm::FunctionType::get(module->getTypeByName(LAYOUT_STRUCT), argTypes, false)));
+      "getLayoutData", llvm::FunctionType::get(llvm::PointerType::getUnqual(module->getTypeByName(LAYOUT_STRUCT)), argTypes, false)));
   auto EntryBlock = llvm::BasicBlock::Create(Ctx, "entry", func);
   auto MergeBlock = llvm::BasicBlock::Create(Ctx, "exit");
   auto stuck = llvm::BasicBlock::Create(Ctx, "stuck");
   auto Switch = llvm::SwitchInst::Create(func->arg_begin(), stuck, layouts.size(), EntryBlock);
-  auto Phi = llvm::PHINode::Create(module->getTypeByName(LAYOUT_STRUCT), layouts.size(), "phi", MergeBlock);
+  auto Phi = llvm::PHINode::Create(llvm::PointerType::getUnqual(module->getTypeByName(LAYOUT_STRUCT)), layouts.size(), "phi", MergeBlock);
   for (auto iter = layouts.begin(); iter != layouts.end(); ++iter) {
     auto entry = *iter;
     uint16_t layout = entry.first;

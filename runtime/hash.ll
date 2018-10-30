@@ -11,7 +11,7 @@ target triple = "x86_64-unknown-linux-gnu"
 %layout = type { i8, %layoutitem* }
 
 declare void @abort() #0
-declare %layout @getLayoutData(i16)
+declare %layout* @getLayoutData(i16)
 
 declare void @map_hash(%map*, i8*)
 declare void @list_hash(%list*, i8*)
@@ -24,7 +24,8 @@ declare void @add_hash64(i8*, i64)
 declare void @add_hash8(i8*, i8)
 
 @hash_depth = thread_local global i32 0
-@HASH_THRESHOLD = constant i32 5
+@HASH_THRESHOLD = private constant i32 5
+@HDR_MASK = private constant i64 70368744177663 ; 0x3fffffffffff, cf header.h
 
 define i1 @hash_enter() {
   %depth = load i32, i32* @hash_depth
@@ -56,12 +57,13 @@ constant:
 block:
   %arghdrptr = getelementptr inbounds %block, %block* %arg, i64 0, i32 0, i32 0
   %arghdr = load i64, i64* %arghdrptr
-  call void @add_hash64(i8* %hasher, i64 %arghdr)
   %arglayout = lshr i64 %arghdr, 48
   %isString = icmp eq i64 %arglayout, 0
   br i1 %isString, label %hashString, label %hashChildren
 hashString:
-  %arglen = and i64 %arghdr, 281474976710655
+  %mask = load i64, i64* @HDR_MASK
+  %arglen = and i64 %arghdr, %mask
+  call void @add_hash64(i8* %hasher, i64 %arglen)
   %strptrlong = getelementptr inbounds %block, %block* %arg, i64 0, i32 1, i64 0
   %strptr = bitcast i64** %strptrlong to i8*
   br label %stringLoop
@@ -77,8 +79,10 @@ compareByte:
   call void @add_hash8(i8* %hasher, i8 %byte)
   br label %stringLoop
 hashChildren:
+  call void @add_hash64(i8* %hasher, i64 %arghdr)
   %arglayoutshort = trunc i64 %arglayout to i16
-  %layoutData = call %layout @getLayoutData(i16 %arglayoutshort)
+  %layoutPtr = call %layout* @getLayoutData(i16 %arglayoutshort)
+  %layoutData = load %layout, %layout* %layoutPtr
   %length = extractvalue %layout %layoutData, 0
   %children = extractvalue %layout %layoutData, 1
   br label %childrenLoop

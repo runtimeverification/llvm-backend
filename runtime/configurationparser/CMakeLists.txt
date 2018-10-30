@@ -11,6 +11,6 @@ install(
   ARCHIVE DESTINATION lib/kllvm
 )
 
-target_link_libraries(configurationparser Parser AST)
+target_link_libraries(configurationparser PUBLIC Parser AST)
 
 add_definitions(${LLVM_DEFINITIONS})

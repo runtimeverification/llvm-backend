@@ -1,9 +1,10 @@
 #include "kllvm/parser/KOREScanner.h"
 #include "kllvm/parser/KOREParserDriver.h"
+#include "runtime/alloc.h"
 
 #include <gmp.h>
 
-#include "header.h"
+#include "runtime/header.h"
 
 using namespace kllvm;
 using namespace kllvm::parser;
@@ -34,14 +35,14 @@ static void *allocatePatternAsConfiguration(const KOREPattern *Pattern) {
   }
 
   struct blockheader headerVal = getBlockHeaderForSymbol(tag);
-  size_t size = ((headerVal.header & 0xff00000000) >> 32) * 8;
+  size_t size = ((headerVal.hdr & 0xff00000000) >> 32) * 8;
   
   if (size == 8) {
     return (block *) ((uint64_t)tag << 32 | 1);
   }
 
-  block *Block = (block *) malloc(size);
-  Block->header = headerVal;
+  block *Block = (block *) koreAlloc(size);
+  Block->h = headerVal;
 
   std::vector<void *> children;
   for (const auto child : constructor->getArguments()) {

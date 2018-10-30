@@ -2,7 +2,7 @@ kllvm_add_tool(hello
   main.cpp
 )
 
-target_link_libraries(hello Hello)
+target_link_libraries(hello PUBLIC Hello)
 
 llvm_config(hello
   ${LLVM_TARGETS_TO_BUILD}

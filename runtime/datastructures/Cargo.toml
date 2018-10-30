@@ -14,4 +14,5 @@ name = "datastructures"
 panic = "abort"
 
 [profile.release]
+lto = "true"
 panic = "abort"

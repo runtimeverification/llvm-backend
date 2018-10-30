@@ -4,6 +4,7 @@ add_kllvm_unittest(compiler-tests
 )
 
 target_link_libraries(compiler-tests
+  PUBLIC
   AST
   Codegen
   gmp
