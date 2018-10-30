@@ -336,7 +336,7 @@ KOREPattern *KOREAxiomDeclaration::getRequires() const {
         } else if (equals->getConstructor()->getName() == "\\top" && equals->getArguments().empty()) {
           return nullptr;
         } else if (equals->getConstructor()->getName() == "\\bottom" && equals->getArguments().empty()) {
-          // sttrategy axiom hack
+          // strategy axiom hack
           if (auto trueTop = dynamic_cast<KOREObjectCompositePattern *>(top->getArguments()[1])) {
             if (trueTop->getConstructor()->getName() == "\\and" && trueTop->getArguments().size() == 2) {
               if (auto equals = dynamic_cast<KOREObjectCompositePattern *>(trueTop->getArguments()[0])) {
