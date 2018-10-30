@@ -176,10 +176,10 @@ pub unsafe extern "C" fn printMap(file: *mut FILE, map: *const Map, unit: *const
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn map_foreach(map: *mut Map, copy: extern fn(block: *mut K)) {
+pub unsafe extern "C" fn map_foreach(map: *mut Map, process: extern fn(block: *mut K)) {
   for (key, value) in (*map).iter() {
-    copy(key.0.get());
-    copy(value.0.get());
+    process(key.0.get());
+    process(value.0.get());
   }
 }
 

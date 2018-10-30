@@ -130,9 +130,9 @@ pub unsafe extern "C" fn printSet(file: *mut FILE, set: *const Set, unit: *const
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn set_foreach(set: *mut Set, copy: extern fn(block: *mut K)) {
+pub unsafe extern "C" fn set_foreach(set: *mut Set, process: extern fn(block: *mut K)) {
   for value in (*set).iter() {
-    copy(value.0.get());
+    process(value.0.get());
   }
 }
 

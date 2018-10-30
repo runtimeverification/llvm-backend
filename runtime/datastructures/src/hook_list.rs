@@ -204,9 +204,9 @@ pub unsafe extern "C" fn printList(file: *mut FILE, list: *const List, unit: *co
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn list_foreach(list: *mut List, copy: extern fn(block: *mut K)) {
+pub unsafe extern "C" fn list_foreach(list: *mut List, process: extern fn(block: *mut K)) {
   for value in (*list).iter() {
-    copy(value.0.get());
+    process(value.0.get());
   }
 }
 
