@@ -19,6 +19,8 @@ declare i1 @hook_LIST_eq(%list*, %list*)
 declare i1 @hook_SET_eq(%set*, %set*)
 declare i1 @hook_INT_eq(%mpz*, %mpz*)
 
+@HDR_MASK = private constant i64 70368744177663 ; 0x3fffffffffff, cf header.h
+
 define i1 @hook_KEQUAL_eq(%block* %arg1, %block* %arg2) {
 entry:
   %arg1intptr = ptrtoint %block* %arg1 to i64
@@ -37,8 +39,9 @@ block:
   %arg2hdrptr = getelementptr inbounds %block, %block* %arg2, i64 0, i32 0, i32 0
   %arg1hdr = load i64, i64* %arg1hdrptr
   %arg2hdr = load i64, i64* %arg2hdrptr
-  %arg1len = and i64 %arg1hdr, 70368744177663
-  %arg2len = and i64 %arg2hdr, 70368744177663
+  %mask = load i64, i64* @HDR_MASK
+  %arg1len = and i64 %arg1hdr, %mask
+  %arg2len = and i64 %arg2hdr, %mask
   %eqblock = icmp eq i64 %arg1len, %arg2len
   br i1 %eqblock, label %getChildren, label %exit
 getChildren:

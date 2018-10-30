@@ -24,7 +24,8 @@ declare void @add_hash64(i8*, i64)
 declare void @add_hash8(i8*, i8)
 
 @hash_depth = thread_local global i32 0
-@HASH_THRESHOLD = constant i32 5
+@HASH_THRESHOLD = private constant i32 5
+@HDR_MASK = private constant i64 70368744177663 ; 0x3fffffffffff, cf header.h
 
 define i1 @hash_enter() {
   %depth = load i32, i32* @hash_depth
@@ -60,7 +61,8 @@ block:
   %isString = icmp eq i64 %arglayout, 0
   br i1 %isString, label %hashString, label %hashChildren
 hashString:
-  %arglen = and i64 %arghdr, 70368744177663
+  %mask = load i64, i64* @HDR_MASK
+  %arglen = and i64 %arghdr, %mask
   call void @add_hash64(i8* %hasher, i64 %arglen)
   %strptrlong = getelementptr inbounds %block, %block* %arg, i64 0, i32 1, i64 0
   %strptr = bitcast i64** %strptrlong to i8*
