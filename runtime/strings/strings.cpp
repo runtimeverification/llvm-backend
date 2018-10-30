@@ -12,23 +12,10 @@
 extern "C" {
 
 #include "runtime/alloc.h"
+#include "runtime/header.h"
 #include<stdexcept>
 
 #define KCHAR char
-
-  struct blockheader {
-    uint64_t len;
-  };
-
-  struct string {
-    blockheader b;
-    KCHAR data[0];
-  };
-
-  struct stringbuffer {
-    uint64_t capacity;
-    string *contents;
-  };
 
   mpz_ptr move_int(mpz_t);
 

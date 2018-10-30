@@ -5,22 +5,10 @@
 #include<cstdlib>
 #include<cstring>
 
+#include "runtime/header.h"
+
 #define KCHAR char
 extern "C" {
-  struct blockheader {
-    uint64_t len;
-  };
-
-  struct string {
-    blockheader b;
-    KCHAR data[0];
-  };
-
-  struct stringbuffer {
-    uint64_t capacity;
-    string *contents;
-  };
- 
   bool hook_STRING_gt(const string *, const string *);
   bool hook_STRING_ge(const string *, const string *);
   bool hook_STRING_lt(const string *, const string *);
@@ -208,17 +196,17 @@ BOOST_AUTO_TEST_CASE(concat) {
   auto d = makeString("");
 
   auto emptyCatR = hook_STRING_concat(a, d);
-  BOOST_CHECK_EQUAL(0, memcmp(emptyCatR->data, a->data, emptyCatR->b.len));
-  BOOST_CHECK_EQUAL(emptyCatR->b.len, a->b.len);
+  BOOST_CHECK_EQUAL(0, memcmp(emptyCatR->data, a->data, emptyCatR->h.hdr));
+  BOOST_CHECK_EQUAL(emptyCatR->h.hdr, a->h.hdr);
 
   auto emptyCatL = hook_STRING_concat(d, a);
-  BOOST_CHECK_EQUAL(0, memcmp(emptyCatL->data, a->data, emptyCatL->b.len));
-  BOOST_CHECK_EQUAL(emptyCatL->b.len, a->b.len);
+  BOOST_CHECK_EQUAL(0, memcmp(emptyCatL->data, a->data, emptyCatL->h.hdr));
+  BOOST_CHECK_EQUAL(emptyCatL->h.hdr, a->h.hdr);
 
   auto catAll = hook_STRING_concat(hook_STRING_concat(a,b), c);
   auto expected = makeString("hellohehf");
-  BOOST_CHECK_EQUAL(0, memcmp(catAll->data, expected->data, catAll->b.len));
-  BOOST_CHECK_EQUAL(catAll->b.len, expected->b.len);
+  BOOST_CHECK_EQUAL(0, memcmp(catAll->data, expected->data, catAll->h.hdr));
+  BOOST_CHECK_EQUAL(catAll->h.hdr, expected->h.hdr);
 }
 
 
@@ -231,9 +219,9 @@ BOOST_AUTO_TEST_CASE(chr) {
   const string * space = hook_STRING_chr(b);
 
   BOOST_CHECK_EQUAL(A->data[0], 'A');
-  BOOST_CHECK_EQUAL(A->b.len, 1);
+  BOOST_CHECK_EQUAL(A->h.hdr, 1);
   BOOST_CHECK_EQUAL(space->data[0], ' ');
-  BOOST_CHECK_EQUAL(space->b.len, 1);
+  BOOST_CHECK_EQUAL(space->h.hdr, 1);
 }
 
 BOOST_AUTO_TEST_CASE(length) {
@@ -275,7 +263,7 @@ BOOST_AUTO_TEST_CASE(substr) {
   BOOST_CHECK_THROW(hook_STRING_substr(catAll, _7, _40), std::invalid_argument);
   BOOST_CHECK_THROW(hook_STRING_substr(catAll, _8, _40), std::invalid_argument);
   BOOST_CHECK_EQUAL(memcmp(hook_STRING_substr(catAll, _8, _9)->data, "f", 1), 0);
-  BOOST_CHECK_EQUAL(hook_STRING_substr(catAll, _9, _9)->b.len, 0);
+  BOOST_CHECK_EQUAL(hook_STRING_substr(catAll, _9, _9)->h.hdr, 0);
   BOOST_CHECK_THROW(hook_STRING_substr(catAll, _8, _7), std::invalid_argument);
   BOOST_CHECK_THROW(hook_STRING_substr(catAll, _7, _10), std::invalid_argument);
   BOOST_CHECK_THROW(hook_STRING_substr(catAll, _1024, _4096), std::invalid_argument);
@@ -338,22 +326,22 @@ BOOST_AUTO_TEST_CASE(int2string) {
   mpz_init_set_ui(a, 10);
 
   auto res = hook_STRING_int2string(a);
-  BOOST_CHECK_EQUAL(2, res->b.len);
+  BOOST_CHECK_EQUAL(2, res->h.hdr);
   BOOST_CHECK_EQUAL(0, memcmp(res->data, "10", 2));
 
   mpz_set_ui(a, 1234);
   res = hook_STRING_int2string(a);
-  BOOST_CHECK_EQUAL(4, res->b.len);
+  BOOST_CHECK_EQUAL(4, res->h.hdr);
   BOOST_CHECK_EQUAL(0, memcmp(res->data, "1234", 4));
 
   mpz_set_si(a, -1234);
   res = hook_STRING_int2string(a);
-  BOOST_CHECK_EQUAL(5, res->b.len);
+  BOOST_CHECK_EQUAL(5, res->h.hdr);
   BOOST_CHECK_EQUAL(0, memcmp(res->data, "-1234", 5));
 
   mpz_set_ui(a, 0);
   res = hook_STRING_int2string(a);
-  BOOST_CHECK_EQUAL(1, res->b.len);
+  BOOST_CHECK_EQUAL(1, res->h.hdr);
   BOOST_CHECK_EQUAL(0, memcmp(res->data, "0", 1));
 }
 
@@ -443,7 +431,7 @@ BOOST_AUTO_TEST_CASE(countAllOccurrences) {
 BOOST_AUTO_TEST_CASE(buffer_empty) {
   auto buf = hook_BUFFER_empty();
   BOOST_CHECK_EQUAL(16, buf->capacity);
-  BOOST_CHECK_EQUAL(0, buf->contents->b.len);
+  BOOST_CHECK_EQUAL(0, buf->contents->h.hdr);
 }
 
 BOOST_AUTO_TEST_CASE(buffer_concat) {
@@ -453,15 +441,15 @@ BOOST_AUTO_TEST_CASE(buffer_concat) {
     int len = rand() % 1000;
     totalLen += len;
     auto str = static_cast<string *>(malloc(sizeof(string) + len));
-    str->b.len = len;
+    str->h.hdr = len;
     memset(str->data, 'a', len);
     hook_BUFFER_concat(buf, str);
   }
   auto result = hook_BUFFER_toString(buf);
   auto expected = static_cast<string *>(malloc(sizeof(string) + totalLen));
-  expected->b.len = totalLen;
+  expected->h.hdr = totalLen;
   memset(expected->data, 'a', totalLen);
-  BOOST_CHECK_EQUAL(totalLen | 0x400000000000, result->b.len);
+  BOOST_CHECK_EQUAL(totalLen | 0x400000000000, result->h.hdr);
   BOOST_CHECK_EQUAL(0, memcmp(result->data, expected->data, totalLen));
 }
 

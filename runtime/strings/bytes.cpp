@@ -5,25 +5,18 @@
 #include <algorithm>
 #include <stdexcept>
 
+#include "runtime/alloc.h"
+#include "runtime/header.h"
+
 extern "C" {
 
-#include "runtime/alloc.h"
 #define KCHAR char
-
-  struct blockheader {
-    uint64_t len;
-  };
-
-  struct bytes {
-    blockheader b;
-    KCHAR data[0];
-  };
 
   mpz_ptr move_int(mpz_t);
 
-  bytes *hook_BYTES_empty() {
-    static bytes empty;
-    empty.b.len = 0x400000000000;
+  string *hook_BYTES_empty() {
+    static string empty;
+    empty.h.hdr = 0x400000000000;
     return &empty;
   }
 
@@ -50,7 +43,7 @@ extern "C" {
   }
 
   // syntax Int ::= Bytes2Int(Bytes, Endianness, Signedness)
-  mpz_ptr hook_BYTES_bytes2int(bytes *b, uint64_t endianness, uint64_t signedness) {
+  mpz_ptr hook_BYTES_bytes2int(string *b, uint64_t endianness, uint64_t signedness) {
     mpz_t result;
     mpz_init(result);
     int order = endianness == tag_big_endian() ? 1 : -1;
@@ -82,14 +75,14 @@ extern "C" {
 
 
   // syntax Bytes ::= Int2Bytes(Int, Int, Endianness)
-  bytes *hook_BYTES_int2bytes(mpz_t len, mpz_t i, uint64_t endianness) {
+  string *hook_BYTES_int2bytes(mpz_t len, mpz_t i, uint64_t endianness) {
     unsigned long len_long = mpz_get_ui(len);
     if (len_long == 0) {
       return hook_BYTES_empty();
     }
     size_t sizeInBytes = (mpz_sizeinbase(i, 2) + 7) / 8;
     bool neg = mpz_cmp_si(i, 0) < 0;
-    bytes *result = static_cast<bytes *>(koreAllocToken(sizeof(bytes) + len_long));
+    string *result = static_cast<string *>(koreAllocToken(sizeof(string) + len_long));
     set_len(result, len_long);
     memset(result->data, neg ? 0xff : 0x00, len_long);
     int order = endianness == tag_big_endian() ? 1 : -1;
@@ -105,18 +98,18 @@ extern "C" {
     return result;
   }
 
-  bytes *hook_BYTES_bytes2string(bytes *b) {
-    size_t size = sizeof(bytes) + len(b);
-    bytes *result = static_cast<bytes *>(koreAllocToken(size));
+  string *hook_BYTES_bytes2string(string *b) {
+    size_t size = sizeof(string) + len(b);
+    string *result = static_cast<string *>(koreAllocToken(size));
     memcpy(result, b, size);
     return result;
   }
 
-  bytes *hook_BYTES_string2bytes(bytes *s) {
+  string *hook_BYTES_string2bytes(string *s) {
     return hook_BYTES_bytes2string(s);
   }
 
-  bytes *hook_BYTES_substr(bytes *input, mpz_t start, mpz_t end) {
+  string *hook_BYTES_substr(string *input, mpz_t start, mpz_t end) {
     uint64_t ustart = get_ui(start);
     uint64_t uend = get_ui(end);
     if (uend < ustart) {
@@ -126,13 +119,13 @@ extern "C" {
       throw std::invalid_argument("Invalid string slice");
     }
     uint64_t len = uend - ustart;
-    auto ret = static_cast<bytes *>(koreAllocToken(sizeof(bytes) + sizeof(KCHAR) * len));
+    auto ret = static_cast<string *>(koreAllocToken(sizeof(string) + sizeof(KCHAR) * len));
     set_len(ret, len);
     memcpy(&(ret->data), &(input->data[ustart]), len * sizeof(KCHAR));
     return ret;
   }
 
-  bytes *hook_BYTES_replaceAt(bytes *b, mpz_t start, bytes *b2) {
+  string *hook_BYTES_replaceAt(string *b, mpz_t start, string *b2) {
     unsigned long start_long = get_ui(start);
     if (start_long + len(b2) > len(b)) {
       throw std::invalid_argument("Buffer overflow on replaceAt");
@@ -141,13 +134,13 @@ extern "C" {
     return b;
   }
 
-  mpz_ptr hook_BYTES_length(bytes *a) {
+  mpz_ptr hook_BYTES_length(string *a) {
     mpz_t result;
     mpz_init_set_ui(result, len(a));
     return move_int(result);
   }
 
-  bytes *hook_BYTES_padRight(bytes *b, mpz_t len, mpz_t v) {
+  string *hook_BYTES_padRight(string *b, mpz_t len, mpz_t v) {
     unsigned long ulen = get_ui(len);
     if (ulen <= len(b)) {
       return b;
@@ -156,14 +149,14 @@ extern "C" {
     if (uv > 255) {
       throw std::invalid_argument("Integer overflow on value");
     }
-    bytes *result = static_cast<bytes *>(koreAllocToken(sizeof(bytes) + ulen));
+    string *result = static_cast<string *>(koreAllocToken(sizeof(string) + ulen));
     set_len(result, ulen);
     memcpy(result->data, b->data, len(b));
     memset(result->data + len(b), uv, ulen - len(b));
     return result;
   }
 
-  bytes *hook_BYTES_padLeft(bytes *b, mpz_t len, mpz_t v) {
+  string *hook_BYTES_padLeft(string *b, mpz_t len, mpz_t v) {
     unsigned long ulen = get_ui(len);
     if (ulen <= len(b)) {
       return b;
@@ -172,23 +165,23 @@ extern "C" {
     if (uv > 255) {
       throw std::invalid_argument("Integer overflow on value");
     }
-    bytes *result = static_cast<bytes *>(koreAllocToken(sizeof(bytes) + ulen));
+    string *result = static_cast<string *>(koreAllocToken(sizeof(string) + ulen));
     set_len(result, ulen);
     memset(result->data, uv, ulen - len(b));
     memcpy(result->data + ulen - len(b), b->data, len(b));
     return result;
   }
 
-  bytes *hook_BYTES_reverse(bytes *b) {
+  string *hook_BYTES_reverse(string *b) {
     std::reverse(b->data, b->data + len(b));
     return b;
   }
 
-  bytes *hook_BYTES_concat(bytes *a, bytes *b) {
+  string *hook_BYTES_concat(string *a, string *b) {
     auto len_a = len(a);
     auto len_b = len(b);
     auto newlen = len_a  + len_b;
-    auto ret = static_cast<bytes *>(koreAllocToken(sizeof(bytes) + newlen));
+    auto ret = static_cast<string *>(koreAllocToken(sizeof(string) + newlen));
     set_len(ret, newlen);
     memcpy(&(ret->data), &(a->data), len(a) * sizeof(KCHAR));
     memcpy(&(ret->data[len(a)]), &(b->data), len(b) * sizeof(KCHAR));

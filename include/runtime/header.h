@@ -5,23 +5,33 @@
 #include <gmp.h>
 #include <mpfr.h>
 
+// the actual length is equal to the block header with the gc bits masked out.
+#define len(s) ((s)->h.hdr & 0xffff3fffffffffff)
+#define set_len(s, l) ((s)->h.hdr = (l) | (l > BLOCK_SIZE - sizeof(char *) ? 0x400000000000 : 0))
+
 extern "C" {
   // llvm: blockheader = type { i64 } 
   struct blockheader {
-    uint64_t header;
+    uint64_t hdr;
   };
 
   // llvm: block = type { %blockheader, [0 x i64 *] }
   struct block {
-    blockheader header;
+    blockheader h;
     uint64_t *children[];
   };
 
   
   // llvm: string = type { %blockheader, [0 x i8] }
   struct string {
-    blockheader header;
-    char bytes[];
+    blockheader h;
+    char data[];
+  };
+  
+  // llvm: stringbuffer = type { i64, %string* }
+  struct stringbuffer {
+    uint64_t capacity;
+    string *contents;
   };
 
   // llvm: map = type { i64, i8 *, i8 * }
