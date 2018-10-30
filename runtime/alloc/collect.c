@@ -108,7 +108,7 @@ static char* get_next(char* scan_ptr, size_t size) {
 }
 
 void koreCollect(block** root) {
-  DBG("Starting garbage collection\n");
+  MEM_LOG("Starting garbage collection\n");
   koreAllocSwap();
   migrate(root);
   current_tospace_start = fromspace_ptr();
@@ -149,5 +149,5 @@ void koreCollect(block** root) {
     }
     scan_ptr = get_next(scan_ptr, get_size(hdr, layoutInt));
   }
-  DBG("Finishing garbage collection\n");
+  MEM_LOG("Finishing garbage collection\n");
 }

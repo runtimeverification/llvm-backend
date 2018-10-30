@@ -19,9 +19,9 @@ typedef struct {
 } memory_block_header;
 
 #ifdef ALLOC_DBG
-#define DBG(...) fprintf(stderr, __VA_ARGS__)
+#define MEM_LOG(...) fprintf(stderr, __VA_ARGS__)
 #else
-#define DBG(...)
+#define MEM_LOG(...)
 #endif
 
 #ifdef __cplusplus

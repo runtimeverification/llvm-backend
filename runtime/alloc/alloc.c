@@ -75,7 +75,7 @@ static void freshBlock() {
         }
       }
       if (!nextBlock) {
-        DBG("Allocating new block for the first time in semispace %d\n", true_is_fromspace);
+        MEM_LOG("Allocating new block for the first time in semispace %d\n", true_is_fromspace);
         nextBlock = megabyte_malloc();
         *(char **)block_start = nextBlock;
         memory_block_header hdr;
@@ -87,18 +87,18 @@ static void freshBlock() {
     block_ptr = nextBlock + sizeof(memory_block_header);
     block_start = nextBlock;
     block_end = nextBlock + BLOCK_SIZE;
-    DBG("New block at %p (remaining %zd)\n", block_ptr, BLOCK_SIZE - sizeof(memory_block_header));
+    MEM_LOG("New block at %p (remaining %zd)\n", block_ptr, BLOCK_SIZE - sizeof(memory_block_header));
 }
 
 static void* __attribute__ ((noinline)) doAllocSlow(size_t requested) {
-  DBG("Block at %p too small, %zd remaining but %zd needed\n", block_ptr, block_end-block_ptr, requested);
+  MEM_LOG("Block at %p too small, %zd remaining but %zd needed\n", block_ptr, block_end-block_ptr, requested);
   if (requested > BLOCK_SIZE - sizeof(memory_block_header)) {
      return malloc(requested);
   } else {
     freshBlock();
     void* result = block_ptr;
     block_ptr += requested;
-    DBG("Allocation at %p (size %zd), next alloc at %p (if it fits)\n", result, requested, block_ptr);
+    MEM_LOG("Allocation at %p (size %zd), next alloc at %p (if it fits)\n", result, requested, block_ptr);
     return result;
   }
 }
@@ -109,7 +109,7 @@ static inline __attribute__ ((always_inline)) void* doAlloc(size_t requested) {
   }
   void* result = block_ptr;
   block_ptr += requested;
-  DBG("Allocation at %p (size %zd), next alloc at %p (if it fits)\n", result, requested, block_ptr);
+  MEM_LOG("Allocation at %p (size %zd), next alloc at %p (if it fits)\n", result, requested, block_ptr);
   return result;
 }
 
@@ -126,7 +126,7 @@ void* koreResizeLastAlloc(void* oldptr, size_t newrequest, size_t last_size) {
   newrequest = (newrequest + 7) & ~7;
   last_size = (last_size + 7) & ~7;
   if (oldptr != block_ptr - last_size) {
-    DBG("May only reallocate last allocation. Tried to reallocate %p to %zd\n", oldptr, newrequest);
+    MEM_LOG("May only reallocate last allocation. Tried to reallocate %p to %zd\n", oldptr, newrequest);
     exit(255);
   }
   ssize_t increase = newrequest - last_size;
