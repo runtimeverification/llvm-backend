@@ -160,11 +160,11 @@ llvm::Value *getBlockHeader(llvm::Module *Module, KOREDefinition *definition, co
   return llvm::ConstantStruct::get(BlockHeaderType, llvm::ConstantInt::get(llvm::Type::getInt64Ty(Module->getContext()), headerVal));
 }
 
-llvm::Value *allocateBlock(llvm::Type *AllocType, llvm::BasicBlock *block, std::string name) {
+llvm::Value *allocateBlock(llvm::Type *AllocType, llvm::BasicBlock *block, const char *name) {
   return allocateBlock(AllocType, llvm::ConstantExpr::getSizeOf(AllocType), block, name);
 }
 
-llvm::Value *allocateBlock(llvm::Type *AllocType, llvm::Value *Len, llvm::BasicBlock *block, std::string name) {
+llvm::Value *allocateBlock(llvm::Type *AllocType, llvm::Value *Len, llvm::BasicBlock *block, const char *name) {
   llvm::Instruction *Malloc = llvm::CallInst::CreateMalloc(block, llvm::Type::getInt64Ty(block->getContext()), AllocType, Len, nullptr, koreHeapAlloc(name, block->getModule()));
   block->getInstList().push_back(Malloc);
   return Malloc;
