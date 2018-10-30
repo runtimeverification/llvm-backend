@@ -306,20 +306,17 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
     }
     case SortCategory::Int: {
       llvm::Type *Int = module->getTypeByName(INT_STRUCT);
-      llvm::Instruction *Malloc = llvm::CallInst::CreateMalloc(
-          CaseBlock, llvm::Type::getInt64Ty(Ctx), Int, 
-          llvm::ConstantExpr::getSizeOf(Int), nullptr, nullptr);
-      CaseBlock->getInstList().push_back(Malloc);
+      llvm::Value *Term = allocateTerm(Int, CaseBlock, "malloc");
       llvm::Constant *MpzInitSet = module->getOrInsertFunction("__gmpz_init_set_str",
           llvm::Type::getInt32Ty(Ctx), llvm::PointerType::getUnqual(Int), 
           llvm::Type::getInt8PtrTy(Ctx), llvm::Type::getInt32Ty(Ctx));
-      auto Call = llvm::CallInst::Create(MpzInitSet, {Malloc, func->arg_begin()+2,
+      auto Call = llvm::CallInst::Create(MpzInitSet, {Term, func->arg_begin()+2,
           llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), 10)}, "", CaseBlock);
       auto icmp = new llvm::ICmpInst(*CaseBlock, llvm::CmpInst::ICMP_EQ, 
           Call, zero32);
       auto AbortBlock = llvm::BasicBlock::Create(Ctx, "invalid_int", func);
       addAbort(AbortBlock, module);
-      auto cast = new llvm::BitCastInst(Malloc,
+      auto cast = new llvm::BitCastInst(Term,
           llvm::Type::getInt8PtrTy(Ctx), "", CaseBlock);
       llvm::BranchInst::Create(MergeBlock, AbortBlock, icmp, CaseBlock);
       Phi->addIncoming(cast, CaseBlock);
