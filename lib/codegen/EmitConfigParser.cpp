@@ -146,7 +146,6 @@ static llvm::Value *getArgValue(llvm::Value *ArgumentsArray, int idx,
     auto cast = new llvm::BitCastInst(arg,
         llvm::PointerType::getUnqual(getValueType(cat, mod)), "", CaseBlock);
     auto load = new llvm::LoadInst(cast, "", CaseBlock);
-//    CaseBlock->getInstList().push_back(llvm::CallInst::CreateFree(arg, CaseBlock));
     arg = load;
     break;
   }
