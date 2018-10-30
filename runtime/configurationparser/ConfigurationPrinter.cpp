@@ -39,7 +39,7 @@ void printConfigurationInternal(FILE *file, block *subject, const char *sort) {
   uint16_t layout = subject->h.hdr >> 48;
   if (!layout) {
     string *str = (string *)subject;
-    size_t len = subject->h.hdr & 0x3fffffffffffLL;
+    size_t len = len(subject);
     fprintf(file, "\\dv{%s}(\"", sort);
     for (size_t i = 0; i < len; ++i) {
       char c = str->data[i];
