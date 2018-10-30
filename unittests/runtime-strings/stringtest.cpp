@@ -449,7 +449,7 @@ BOOST_AUTO_TEST_CASE(buffer_concat) {
   auto expected = static_cast<string *>(malloc(sizeof(string) + totalLen));
   expected->h.hdr = totalLen;
   memset(expected->data, 'a', totalLen);
-  BOOST_CHECK_EQUAL(totalLen | 0x400000000000, result->h.hdr);
+  BOOST_CHECK_EQUAL(totalLen | NOT_YOUNG_OBJECT_BIT, result->h.hdr);
   BOOST_CHECK_EQUAL(0, memcmp(result->data, expected->data, totalLen));
 }
 

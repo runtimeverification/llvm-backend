@@ -6,6 +6,7 @@
 #include "jemalloc/jemalloc.h"
 
 #include "runtime/alloc.h"
+#include "runtime/header.h"
 
 const size_t BLOCK_SIZE = 1024 * 1024;
 
@@ -13,7 +14,7 @@ bool true_is_fromspace = false;
 
 static char* first_block = 0;
 static char* first_tospace_block = 0;
-static char* block = 0;
+static char* block_ptr = 0;
 static char* block_start = 0;
 static char* block_end = 0;
 
@@ -22,7 +23,7 @@ char *fromspace_ptr() {
 }
 
 char *alloc_ptr() {
-  return block;
+  return block_ptr;
 }
 
 char *arena_ptr() {
@@ -33,7 +34,7 @@ void koreAllocSwap() {
   char *tmp = first_block;
   first_block = first_tospace_block;
   first_tospace_block = tmp;
-  block = first_block ? first_block + sizeof(memory_block_header) : 0;
+  block_ptr = first_block ? first_block + sizeof(memory_block_header) : 0;
   block_start = first_block;
   block_end = first_block ? first_block + BLOCK_SIZE : first_block;
   true_is_fromspace = !true_is_fromspace;
@@ -61,14 +62,16 @@ static void freshBlock() {
       memory_block_header hdr;
       hdr.next_block = 0;
       hdr.semispace = true_is_fromspace;
-      memcpy(nextBlock, &hdr, sizeof(hdr));
+      *(memory_block_header *)nextBlock = hdr;
     } else {
       nextBlock = *(char**)block_start;
-      if (block != block_end) {
-        if (block_end - block == 8) {
-          *(uint64_t *)block = 0x0000400000000000LL; // 8 bit sentinel value
+      if (block_ptr != block_end) {
+        if (block_end - block_ptr == 8) {
+          // we special case this value to 8 bytes.
+          *(uint64_t *)block_ptr = NOT_YOUNG_OBJECT_BIT; // 8 bit sentinel value
         } else {
-          *(uint64_t *)block = block_end - block - 8; // 16-bit or more sentinel value
+          // this is a valid struct string
+          *(uint64_t *)block_ptr = block_end - block_ptr - 8; // 16-bit or more sentinel value
         }
       }
       if (!nextBlock) {
@@ -81,32 +84,32 @@ static void freshBlock() {
         memcpy(nextBlock, &hdr, sizeof(hdr));
       }
     }
-    block = nextBlock + sizeof(memory_block_header);
+    block_ptr = nextBlock + sizeof(memory_block_header);
     block_start = nextBlock;
     block_end = nextBlock + BLOCK_SIZE;
-    DBG("New block at %p (remaining %zd)\n", block, BLOCK_SIZE - sizeof(memory_block_header));
+    DBG("New block at %p (remaining %zd)\n", block_ptr, BLOCK_SIZE - sizeof(memory_block_header));
 }
 
 static void* __attribute__ ((noinline)) doAllocSlow(size_t requested) {
-  DBG("Block at %p too small, %zd remaining but %zd needed\n", block, block_end-block, requested);
+  DBG("Block at %p too small, %zd remaining but %zd needed\n", block_ptr, block_end-block_ptr, requested);
   if (requested > BLOCK_SIZE - sizeof(memory_block_header)) {
      return malloc(requested);
   } else {
     freshBlock();
-    void* result = block;
-    block += requested;
-    DBG("Allocation at %p (size %zd), next alloc at %p (if it fits)\n", result, requested, block);
+    void* result = block_ptr;
+    block_ptr += requested;
+    DBG("Allocation at %p (size %zd), next alloc at %p (if it fits)\n", result, requested, block_ptr);
     return result;
   }
 }
 
 static inline __attribute__ ((always_inline)) void* doAlloc(size_t requested) {
-  if (block + requested > block_end) {
+  if (block_ptr + requested > block_end) {
     return doAllocSlow(requested);
   }
-  void* result = block;
-  block += requested;
-  DBG("Allocation at %p (size %zd), next alloc at %p (if it fits)\n", result, requested, block);
+  void* result = block_ptr;
+  block_ptr += requested;
+  DBG("Allocation at %p (size %zd), next alloc at %p (if it fits)\n", result, requested, block_ptr);
   return result;
 }
 
@@ -122,13 +125,13 @@ void* koreAllocToken(size_t requested) {
 void* koreResizeLastAlloc(void* oldptr, size_t newrequest, size_t last_size) {
   newrequest = (newrequest + 7) & ~7;
   last_size = (last_size + 7) & ~7;
-  if (oldptr != block - last_size) {
+  if (oldptr != block_ptr - last_size) {
     DBG("May only reallocate last allocation. Tried to reallocate %p to %zd\n", oldptr, newrequest);
     exit(255);
   }
   ssize_t increase = newrequest - last_size;
-  if (block + increase <= block_end) {
-    block += increase;
+  if (block_ptr + increase <= block_end) {
+    block_ptr += increase;
     return oldptr;
   } else {
     void* newptr = koreAlloc(newrequest);

@@ -8,48 +8,52 @@
 // the actual length is equal to the block header with the gc bits masked out.
 #define len(s) ((s)->h.hdr & 0xffff3fffffffffff)
 #define set_len(s, l) ((s)->h.hdr = (l) | (l > BLOCK_SIZE - sizeof(char *) ? 0x400000000000 : 0))
+#define size_hdr(s) ((((s) >> 32) & 0xff) * 8)
+#define NOT_YOUNG_OBJECT_BIT 0x400000000000
 
+#ifdef __cplusplus
 extern "C" {
+#endif
   // llvm: blockheader = type { i64 } 
-  struct blockheader {
+  typedef struct blockheader {
     uint64_t hdr;
-  };
+  } blockheader;
 
   // llvm: block = type { %blockheader, [0 x i64 *] }
-  struct block {
+  typedef struct block {
     blockheader h;
     uint64_t *children[];
-  };
+  } block;
 
   
   // llvm: string = type { %blockheader, [0 x i8] }
-  struct string {
+  typedef struct string {
     blockheader h;
     char data[];
-  };
+  } string;
   
   // llvm: stringbuffer = type { i64, %string* }
-  struct stringbuffer {
+  typedef struct stringbuffer {
     uint64_t capacity;
     string *contents;
-  };
+  } stringbuffer;
 
   // llvm: map = type { i64, i8 *, i8 * }
-  struct map {
+  typedef struct map {
     uint64_t a;
     void *b;
     void *c;
-  };
+  } map;
 
   // llvm: set = type { i8 *, i8 *, i64 }
-  struct set {
+  typedef struct set {
     void *a;
     void *b;
     uint64_t c;
-  };
+  } set;
 
   // llvm: list = type { i64, i64, i8 *, i8 *, i8 *, i8 *, i8 * }
-  struct list {
+  typedef struct list {
     uint64_t a;
     uint64_t b;
     void *c;
@@ -57,7 +61,7 @@ extern "C" {
     void *e;
     void *f;
     char *g;
-  };
+  } list;
  
   // This function is exported to be used by the interpreter 
   block *parseConfiguration(const char *filename);
@@ -88,6 +92,9 @@ extern "C" {
       void visitBool(FILE *, bool, const char *),
       void visitMInt(FILE *, void *, const char *),
       void visitSeparator(FILE *));
+
+#ifdef __cplusplus
 }
+#endif
 
 #endif // RUNTIME_HEADER_H

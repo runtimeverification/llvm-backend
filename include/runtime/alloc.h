@@ -5,6 +5,8 @@
 extern "C" {
 #endif
 
+#define mem_block_header(ptr) ((memory_block_header *)(((uintptr_t)(ptr)) & ~(BLOCK_SIZE-1)))
+
 extern const size_t BLOCK_SIZE;
 void* koreAlloc(size_t requested);
 void koreAllocSwap(void);

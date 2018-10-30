@@ -4,8 +4,8 @@
 #include<stdlib.h>
 #include<string.h>
 #include "runtime/alloc.h"
+#include "runtime/header.h"
 
-extern const size_t BLOCK_SIZE;
 extern bool true_is_fromspace;
 
 static char* current_tospace_start = 0;
@@ -21,20 +21,6 @@ typedef struct {
   layoutitem *args;
 } layout;
 
-typedef struct {
-  uint64_t hdr;
-} blockheader;
-
-typedef struct block {
-  blockheader h;
-  struct block* children[];
-} block;
-
-typedef struct {
-  uint64_t capacity;
-  block *contents;
-} stringbuffer;
-
 char *alloc_ptr(void);
 char *arena_ptr(void);
 char* fromspace_ptr(void);
@@ -48,7 +34,7 @@ static size_t get_size(uint64_t hdr, uint16_t layout) {
     size_t size = (hdr + sizeof(block) + 7) & ~7;
     return hdr & 0x400000000000LL ? 8 : size < 16 ? 16 : size;
   } else {
-    return ((hdr >> 32) & 0xff) * 8;
+    return size_hdr(hdr);
   }
 }
 
@@ -78,11 +64,11 @@ static void migrate(block** blockPtr) {
   }
 }
 
+// call this function instead of migrate on objects directly referenced by shared objects (like collection nodes)
+// that are not tracked by gc
 static void migrate_once(block** blockPtr) {
   block* currBlock = *blockPtr;
-  uintptr_t intptr = (uintptr_t) currBlock;
-  intptr = intptr & ~(BLOCK_SIZE-1);
-  memory_block_header *hdr = (memory_block_header *)intptr;
+  memory_block_header *hdr = mem_block_header(currBlock);
   // bit has been flipped by now, so we need != and not ==
   if (true_is_fromspace != hdr->semispace) {
     migrate(blockPtr);
@@ -95,7 +81,7 @@ static void migrate_string_buffer(stringbuffer** bufferPtr) {
   if (!hasForwardingAddress) {
     stringbuffer *newBuffer = koreAlloc(sizeof(stringbuffer));
     memcpy(newBuffer, buffer, sizeof(stringbuffer));
-    block *newContents = koreAllocToken(sizeof(block) + buffer->capacity);
+    string *newContents = koreAllocToken(sizeof(string) + buffer->capacity);
     memcpy(newContents, buffer->contents, buffer->contents->h.hdr);
     newBuffer->contents = newContents;
     *(stringbuffer **)(buffer->contents) = newBuffer;

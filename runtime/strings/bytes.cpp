@@ -16,7 +16,7 @@ extern "C" {
 
   string *hook_BYTES_empty() {
     static string empty;
-    empty.h.hdr = 0x400000000000;
+    empty.h.hdr = NOT_YOUNG_OBJECT_BIT;
     return &empty;
   }
 

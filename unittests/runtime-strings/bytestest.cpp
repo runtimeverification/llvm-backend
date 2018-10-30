@@ -57,9 +57,9 @@ BOOST_AUTO_TEST_CASE(int2bytes) {
   mpz_init_set_ui(_0, 0);
 
   auto res = hook_BYTES_int2bytes(_0, _0, tag_big_endian());
-  BOOST_CHECK_EQUAL(1LL << 46, res->h.hdr);
+  BOOST_CHECK_EQUAL(NOT_YOUNG_OBJECT_BIT, res->h.hdr);
   res = hook_BYTES_int2bytes(_0, _0, 2);
-  BOOST_CHECK_EQUAL(1LL << 46, res->h.hdr);
+  BOOST_CHECK_EQUAL(NOT_YOUNG_OBJECT_BIT, res->h.hdr);
 
   mpz_t _4;
   mpz_init_set_ui(_4, 4);
