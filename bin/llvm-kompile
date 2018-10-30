@@ -8,7 +8,32 @@ moduleName="$2"
 shift; shift
 "$(dirname "$0")"/llvm-kompile-matching "$definition" "$moduleName" "$dt_dir"
 "$(dirname "$0")"/llvm-kompile-codegen "$definition" "$dt_dir"/dt.yaml "$dt_dir" > "$mod"
-opt-5.0 -tailcallelim -tailcallopt "$mod" -o "$modopt"
+opt-6.0 -tailcallelim -tailcallopt "$mod" -o "$modopt"
 RUSTDIR=`rustc --print sysroot`/lib/rustlib/x86_64-unknown-linux-gnu/lib/
 LIBDIR="$(dirname "$0")"/../lib/kllvm/
-clang++-5.0 -Wno-override-module "$modopt" "$LIBDIR"/libarithmetic.a "$LIBDIR"/libstrings.a "$LIBDIR"/rust/libdatastructures.rlib "$LIBDIR"/rust/deps/*.rlib "$RUSTDIR"/libcore-*.rlib "$RUSTDIR"/libstd-*.rlib "$RUSTDIR"/liballoc-*.rlib "$RUSTDIR"/libunwind-*.rlib "$RUSTDIR"/libcompiler_builtins-*.rlib "$RUSTDIR"/libpanic_abort-*.rlib "$RUSTDIR"/liballoc_system-*.rlib "$LIBDIR"/rust/rustalloc.lds "$LIBDIR"/llvm/*.ll "$LIBDIR"/libconfigurationparser.a "$LIBDIR"/libParser.a "$LIBDIR"/libAST.a -lgmp -lpthread -ldl -L/usr/lib/llvm-5.0/lib -lLLVMIRReader -lLLVMBitReader -lLLVMAsmParser -lLLVMCore -lLLVMBinaryFormat -lLLVMSupport -lLLVMDemangle -flto "$@"
+clang++-6.0 -Wno-override-module "$modopt" \
+  "$LIBDIR"/libarithmetic.a \
+  "$LIBDIR"/libstrings.a \
+  "$LIBDIR"/rust/libdatastructures.rlib \
+  "$LIBDIR"/rust/deps/*.rlib \
+  "$RUSTDIR"/libcore-*.rlib \
+  "$RUSTDIR"/libstd-*.rlib \
+  "$RUSTDIR"/liballoc-*.rlib \
+  "$RUSTDIR"/libunwind-*.rlib \
+  "$RUSTDIR"/libcompiler_builtins-*.rlib \
+  "$RUSTDIR"/libpanic_abort-*.rlib \
+  "$RUSTDIR"/liballoc_system-*.rlib \
+  "$LIBDIR"/rust/rustalloc.lds \
+  "$LIBDIR"/llvm/*.ll \
+  "$LIBDIR"/libconfigurationparser.a \
+  "$LIBDIR"/libParser.a \
+  "$LIBDIR"/libAST.a \
+  "$LIBDIR"/liballoc.a \
+  -lgmp -lpthread -ldl \
+  -L/usr/lib/llvm-6.0/lib \
+  -lLLVMIRReader -lLLVMBitReader -lLLVMAsmParser -lLLVMCore -lLLVMBinaryFormat -lLLVMSupport -lLLVMDemangle \
+  -lncurses \
+  -ljemalloc \
+  -I "$(dirname "$0")"/../include \
+  -flto \
+  "$@"

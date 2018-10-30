@@ -6,16 +6,17 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 add_definitions(-Wall -Werror)
+set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -flto")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -flto")
 set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} -flto")
-set(CMAKE_AR "llvm-ar-5.0")
-set(CMAKE_RANLIB "llvm-ranlib-5.0")
+set(CMAKE_AR "llvm-ar-6.0")
+set(CMAKE_RANLIB "llvm-ranlib-6.0")
 
-find_package(LLVM 5 REQUIRED CONFIG)
+find_package(LLVM 6 REQUIRED CONFIG)
 
 message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
-if (${LLVM_PACKAGE_VERSION} VERSION_LESS 5.0)
-  message(FATAL_ERROR "LLVM 5.0 or newer is required")
+if (${LLVM_PACKAGE_VERSION} VERSION_LESS 6.0)
+  message(FATAL_ERROR "LLVM 6.0 or newer is required")
 endif()
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
@@ -43,7 +44,8 @@ macro(kllvm_add_tool name)
   add_executable(${name} ${ARGN})
 
   # Link against LLVM libraries
-  target_link_libraries(${name} ${llvm_libs})
+  llvm_config(${name})
+  target_link_libraries(${name} PUBLIC "-ljemalloc" "-Wl,-rpath=/usr/local/lib")
 endmacro(kllvm_add_tool)
 
 install(
@@ -61,6 +63,11 @@ install(
 install(
   PROGRAMS bin/llvm-kompile bin/llvm-kompile-matching
   DESTINATION bin
+)
+
+install(
+  DIRECTORY include/runtime
+  DESTINATION include
 )
 
 FILE(GLOB_RECURSE HaskellSources matching/src/*.hs matching/app/Main.hs)

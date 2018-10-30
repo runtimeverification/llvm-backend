@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "header.h"
+#include "runtime/header.h"
 
 void printInt(FILE *file, mpz_t i, const char *sort) {
   char *str = mpz_get_str(NULL, 10, i);
@@ -36,13 +36,13 @@ void printConfigurationInternal(FILE *file, block *subject, const char *sort) {
     fprintf(file, "%s()", symbol);
     return;
   }
-  uint16_t layout = subject->header.header >> 48;
+  uint16_t layout = subject->h.hdr >> 48;
   if (!layout) {
     string *str = (string *)subject;
-    size_t len = subject->header.header & 0xffffffffffffLL;
+    size_t len = len(subject);
     fprintf(file, "\\dv{%s}(\"", sort);
     for (size_t i = 0; i < len; ++i) {
-      char c = str->bytes[i];
+      char c = str->data[i];
       switch(c) {
       case '\\':
         fprintf(file, "\\\\");
@@ -74,7 +74,7 @@ void printConfigurationInternal(FILE *file, block *subject, const char *sort) {
     fprintf(file, "\")");
     return;
   }
-  uint32_t tag = subject->header.header & 0xffffffffLL;
+  uint32_t tag = subject->h.hdr & 0xffffffffLL;
   const char *symbol = getSymbolNameForTag(tag);
   fprintf(file, "%s(", symbol);
   visitChildren(subject, file, printConfigurationInternal, printMap, printList, printSet, printInt, printFloat,
@@ -85,5 +85,6 @@ void printConfigurationInternal(FILE *file, block *subject, const char *sort) {
 void printConfiguration(const char *filename, block *subject) {
   FILE *file = fopen(filename, "w");
   printConfigurationInternal(file, subject, nullptr);
+  fclose(file);
 }
 

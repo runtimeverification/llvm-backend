@@ -2,20 +2,16 @@
 export PATH=$PATH:~/.cargo/bin
 mkdir -p build
 cd build
-CC=clang CXX=clang++ cmake .. -DCMAKE_BUILD_TYPE=Debug
+CC=clang-6.0 CXX=clang++-6.0 cmake .. -DCMAKE_BUILD_TYPE=Debug
 make -j`nproc`
 make run-unittests
 cd ../runtime/datastructures
 cargo test
 cd ../../matching
 stack test
+stack install
 cd ../build
-./tools/test_rhs/test_rhs ../test/test.kore | diff - ../test/test.ll
-./tools/test_rhs/test_rhs ../test/imp.kore | diff - ../test/imp.ll
-./tools/test_sideconditions/test_sideconditions ../test/imp.kore | diff - ../test/requires.ll
 
-./tools/test_configparser/test_configparser ../test/imp.kore > configparser.ll
-diff configparser.ll ../test/configparser.ll
 export PATH=$PATH:`pwd`/install/bin
 make install
 llvm-kompile ../test/imp.kore IMP -o interpreter

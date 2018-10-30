@@ -1,6 +1,7 @@
 extern crate im;
 extern crate libc;
 
+use std::cell::UnsafeCell;
 use std::hash::{Hash,Hasher};
 use decls::im::hashmap::HashMap;
 use decls::im::hashset::HashSet;
@@ -21,15 +22,26 @@ pub struct Int(
 
 pub type K = *const Block;
 
-#[derive(Clone)]
 #[derive(Debug)]
 pub struct KElem(
-  pub K
+  pub UnsafeCell<K>
 );
+
+impl Clone for KElem {
+  fn clone(&self) -> KElem {
+    unsafe { KElem(UnsafeCell::new(*self.0.get())) }
+  }
+}
+
+impl KElem {
+  pub fn new(k: K) -> KElem {
+    KElem(UnsafeCell::new(k))
+  }
+}
 
 impl PartialEq for KElem {
   fn eq(&self, other: &KElem) -> bool {
-    unsafe { hook_KEQUAL_eq(self.0, other.0) }
+    unsafe { hook_KEQUAL_eq(*self.0.get(), *other.0.get()) }
   }
 }
 
@@ -39,12 +51,13 @@ impl Hash for KElem {
   fn hash<H: Hasher>(&self, state: &mut H) {
     unsafe {
       if hash_enter() {
-        k_hash(self.0, &mut (state as &mut Hasher) as *mut &mut Hasher as *mut c_void);
+        k_hash(*self.0.get(), &mut (state as &mut Hasher) as *mut &mut Hasher as *mut c_void);
       }
       hash_exit();
     }
   }
 }
+
 
 #[no_mangle]
 pub unsafe extern "C" fn add_hash8(h: *mut c_void, data: u8) {

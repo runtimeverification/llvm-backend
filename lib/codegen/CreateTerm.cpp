@@ -1,4 +1,5 @@
 #include "kllvm/codegen/CreateTerm.h"
+#include "kllvm/codegen/GenAlloc.h"
 
 #include <gmp.h>
 
@@ -10,6 +11,7 @@
 #include "llvm/Support/MemoryBuffer.h"
 #include "llvm/Support/SourceMgr.h"
 #include "llvm/Support/raw_ostream.h"
+#include "runtime/header.h" //for macros
 
 namespace kllvm {
 
@@ -65,8 +67,8 @@ target triple = "x86_64-unknown-linux-gnu"
 %blockheader = type { i64 } 
 %block = type { %blockheader, [0 x i64 *] } ; 16-bit layout, 8-bit length, 32-bit tag, children
 
-%layout = type { i8, %layoutitem* }
-%layoutitem = type { i64, i16 }
+%layout = type { i8, %layoutitem* } ; number of children, array of children
+%layoutitem = type { i64, i16 } ; offset, category
 
 ; The layout of a block uniquely identifies the categories of its children as
 ; well as how to allocate/deallocate them and whether to follow their pointers
@@ -105,7 +107,6 @@ static std::string LIST_STRUCT = "list";
 static std::string SET_STRUCT = "set";
 static std::string INT_STRUCT = "mpz";
 static std::string FLOAT_STRUCT = "mpfr";
-static std::string STRING_STRUCT = "string";
 static std::string BUFFER_STRUCT = "stringbuffer";
 static std::string BLOCK_STRUCT = "block";
 static std::string BLOCKHEADER_STRUCT = "blockheader";
@@ -160,12 +161,12 @@ llvm::Value *getBlockHeader(llvm::Module *Module, KOREDefinition *definition, co
   return llvm::ConstantStruct::get(BlockHeaderType, llvm::ConstantInt::get(llvm::Type::getInt64Ty(Module->getContext()), headerVal));
 }
 
-llvm::Value *allocateBlock(llvm::Type *AllocType, llvm::BasicBlock *block) {
-  return allocateBlock(AllocType, llvm::ConstantExpr::getSizeOf(AllocType), block);
+llvm::Value *allocateTerm(llvm::Type *AllocType, llvm::BasicBlock *block, const char *allocFn) {
+  return allocateTerm(AllocType, llvm::ConstantExpr::getSizeOf(AllocType), block, allocFn);
 }
 
-llvm::Value *allocateBlock(llvm::Type *AllocType, llvm::Value *Len, llvm::BasicBlock *block) {
-  llvm::Instruction *Malloc = llvm::CallInst::CreateMalloc(block, llvm::Type::getInt64Ty(block->getContext()), AllocType, Len, nullptr, nullptr);
+llvm::Value *allocateTerm(llvm::Type *AllocType, llvm::Value *Len, llvm::BasicBlock *block, const char *allocFn) {
+  llvm::Instruction *Malloc = llvm::CallInst::CreateMalloc(block, llvm::Type::getInt64Ty(block->getContext()), AllocType, Len, nullptr, koreHeapAlloc(allocFn, block->getModule()));
   block->getInstList().push_back(Malloc);
   return Malloc;
 }
@@ -229,7 +230,8 @@ llvm::Value *CreateTerm::createToken(ValueType sort, std::string contents) {
     llvm::GlobalVariable *globalVar = llvm::dyn_cast<llvm::GlobalVariable>(global);
     if (!globalVar->hasInitializer()) {
       llvm::StructType *BlockHeaderType = Module->getTypeByName(BLOCKHEADER_STRUCT);
-      llvm::Constant *BlockHeader = llvm::ConstantStruct::get(BlockHeaderType, llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), contents.size()));
+      // this object does not live on the young generation, so we need to set the correct gc bit.
+      llvm::Constant *BlockHeader = llvm::ConstantStruct::get(BlockHeaderType, llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), contents.size() | NOT_YOUNG_OBJECT_BIT));
       globalVar->setInitializer(llvm::ConstantStruct::get(StringType, BlockHeader, llvm::ConstantDataArray::getString(Ctx, contents, false)));
     }
     return llvm::ConstantExpr::getPointerCast(global, llvm::PointerType::getUnqual(Module->getTypeByName(BLOCK_STRUCT)));
@@ -388,7 +390,7 @@ llvm::Value *CreateTerm::createFunctionCall(std::string name, ValueType returnCa
   }
   if (sret) {
     // we don't use alloca here because the tail call optimization pass for llvm doesn't handle correctly functions with alloca
-    AllocSret = allocateBlock(returnType, CurrentBlock);
+    AllocSret = allocateTerm(returnType, CurrentBlock, "malloc");
     args.insert(args.begin(), AllocSret);
     types.insert(types.begin(), AllocSret->getType());
     returnType = llvm::Type::getVoidTy(Ctx);
@@ -417,7 +419,7 @@ llvm::Value *CreateTerm::notInjectionCase(KOREObjectCompositePattern *constructo
   const KOREObjectSymbol *symbol = constructor->getConstructor();
   llvm::StructType *BlockType = getBlockType(Module, Definition, symbol);
   llvm::Value *BlockHeader = getBlockHeader(Module, Definition, symbol, BlockType);
-  llvm::Value *Block = allocateBlock(BlockType, CurrentBlock);
+  llvm::Value *Block = allocateTerm(BlockType, CurrentBlock);
   llvm::Value *BlockHeaderPtr = llvm::GetElementPtrInst::CreateInBounds(BlockType, Block, {llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0), llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), 0)}, symbol->getName(), CurrentBlock);
   new llvm::StoreInst(BlockHeader, BlockHeaderPtr, CurrentBlock);
   int idx = 2;

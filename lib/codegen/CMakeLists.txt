@@ -6,6 +6,9 @@ add_library(Codegen
   Decision.cpp
   DecisionParser.cpp
   EmitConfigParser.cpp
+  GenAlloc.cpp
 )
+
+target_link_libraries(Codegen PUBLIC AST)
 
 add_definitions(${LLVM_DEFINITIONS})

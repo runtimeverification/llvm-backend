@@ -21,7 +21,7 @@ pub unsafe extern "C" fn drop_set(ptr: *mut Set) {
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_SET_in(value: K, set: *const Set) -> bool {
-  (*set).contains(&KElem(value))
+  (*set).contains(&KElem::new(value))
 }
 
 #[no_mangle]
@@ -31,7 +31,7 @@ pub unsafe extern "C" fn hook_SET_unit() -> Set {
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_SET_element(value: K) -> Set {
-  Set::singleton(KElem(value))
+  Set::singleton(KElem::new(value))
 }
 
 #[no_mangle]
@@ -46,7 +46,7 @@ pub unsafe extern "C" fn hook_SET_difference(s1: *const Set, s2: *const Set) -> 
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_SET_remove(s: *const Set, value: K) -> Set {
-  (*s).without(&KElem(value))
+  (*s).without(&KElem::new(value))
 }
 
 #[no_mangle]
@@ -64,7 +64,7 @@ pub unsafe extern "C" fn hook_SET_choice(s: *const Set) -> K {
   if (*s).is_empty() {
     panic!("Set is empty")
   }
-  (*s).iter().next().unwrap().0
+  *(*s).iter().next().unwrap().0.get()
 }
 
 #[no_mangle]
@@ -117,7 +117,7 @@ pub unsafe extern "C" fn printSet(file: *mut FILE, set: *const Set, unit: *const
       fprintf(file, fmt.as_ptr(), concat);
     }
     fprintf(file, fmt.as_ptr(), element);
-    printConfigurationInternal(file, *value, sort.as_ptr());
+    printConfigurationInternal(file, *value.get(), sort.as_ptr());
     fprintf(file, parens.as_ptr());
     if i < (*set).len() {
       fprintf(file, comma.as_ptr());
@@ -126,6 +126,13 @@ pub unsafe extern "C" fn printSet(file: *mut FILE, set: *const Set, unit: *const
   }
   for _ in 0..(*set).len()-1 {
     fprintf(file, parens.as_ptr());
+  }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn set_foreach(set: *mut Set, process: extern fn(block: *mut K)) {
+  for value in (*set).iter() {
+    process(value.0.get());
   }
 }
 
@@ -240,9 +247,9 @@ pub mod tests {
   fn test_list2set() {
     unsafe {
       let mut list = List::new();
-      (list).push_back(KElem(DUMMY0));
-      (list).push_back(KElem(DUMMY1));
-      (list).push_back(KElem(DUMMY2));
+      (list).push_back(KElem::new(DUMMY0));
+      (list).push_back(KElem::new(DUMMY1));
+      (list).push_back(KElem::new(DUMMY2));
       let set = hook_SET_list2set(&list);
       let result = hook_SET_size(&set);
       assert_eq!(__gmpz_cmp_ui(result, 3), 0);

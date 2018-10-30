@@ -6,6 +6,9 @@ kllvm_add_tool(parser
   main.cpp
 )
 
-target_link_libraries(parser Parser AST)
+llvm_config(parser
+  ${LLVM_TARGETS_TO_BUILD}
+)
+target_link_libraries(parser PUBLIC Parser AST)
 
 add_definitions(${LLVM_DEFINITIONS})
