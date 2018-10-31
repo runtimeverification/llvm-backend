@@ -1,0 +1,1 @@
+Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("6")),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")),Lbl'-LT-'s'-GT-'{}(kseq{}(inj{SortStrategy{}, SortKItem{}}(Lbl'Hash'STUCK{}()),kseq{}(inj{SortStrategyApply{}, SortKItem{}}(Lbl'Hash'applyRule{}(\dv{Sort'Hash'RuleTag{}}("regular"))),dotk{}()))))
