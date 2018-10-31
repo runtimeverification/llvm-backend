@@ -551,22 +551,22 @@ computeScore m ((Fix Wildcard,_):tl) = min 0.0 $ computeScore m tl
 computeScore m ((Fix (Variable _ _),_):tl) = min 0.0 $ computeScore m tl
 computeScore m ((Fix (MapPattern [] [] Nothing _ _),_):tl) = 1.0 + computeScore m tl
 computeScore m ((Fix (MapPattern [] [] (Just p) _ _),c):tl) = computeScore m ((p,c):tl)
-computeScore m ((Fix (MapPattern ks vs _ _ _),c):tl) = if computeScore m tl == -1.0 / 0.0 then -1.0 / 0.0 else snd $ computeMapScore m c ks vs tl
+computeScore m ((Fix (MapPattern ks vs _ e _),c):tl) = if computeScore m tl == -1.0 / 0.0 then -1.0 / 0.0 else snd $ computeMapScore m e c ks vs tl
 computeScore m ((Fix (SetPattern [] Nothing _ _),_):tl) = 1.0 + computeScore m tl
 computeScore m ((Fix (SetPattern [] (Just p) _ _),c):tl) = computeScore m ((p,c):tl)
 computeScore m ((Fix (SetPattern es _ _ _),c):tl) = if computeScore m tl == -1.0 / 0.0 then -1.0 / 0.0 else snd $ computeSetScore c es tl
 
 getBestKey :: Column -> [Clause] -> Maybe (Fix BoundPattern)
-getBestKey (Column m (Fix (MapPattern (k:ks) vs _ _ _):tl)) cs = fst $ computeMapScore m (head cs) (k:ks) vs (zip tl $ tail cs)
+getBestKey (Column m (Fix (MapPattern (k:ks) vs _ e _):tl)) cs = fst $ computeMapScore m e (head cs) (k:ks) vs (zip tl $ tail cs)
 getBestKey (Column _ (Fix (SetPattern (k:ks) _ _ _):tl)) cs = fst $ computeSetScore (head cs) (k:ks) (zip tl $ tail cs)
 getBestKey (Column m (Fix Wildcard:tl)) cs = getBestKey (Column m tl) (tail cs)
 getBestKey (Column m (Fix (Variable _ _):tl)) cs = getBestKey (Column m tl) (tail cs)
 getBestKey _ _ = Nothing
 
-computeMapScore :: Metadata -> Clause -> [Fix Pattern] -> [Fix Pattern] -> [(Fix Pattern,Clause)] -> (Maybe (Fix BoundPattern), Double)
-computeMapScore m c ks vs tl =
+computeMapScore :: Metadata -> SymbolOrAlias Object -> Clause -> [Fix Pattern] -> [Fix Pattern] -> [(Fix Pattern,Clause)] -> (Maybe (Fix BoundPattern), Double)
+computeMapScore m e c ks vs tl =
   let zipped = zip ks vs
-      scores = map (\(k,v) -> (if isBound getName c k then Just $ canonicalizePattern c k else Nothing,computeMapElementScore m c tl (k,v))) zipped
+      scores = map (\(k,v) -> (if isBound getName c k then Just $ canonicalizePattern c k else Nothing,computeMapElementScore m e c tl (k,v))) zipped
   in maximumBy (comparing snd) scores
 
 computeSetScore :: Clause -> [Fix Pattern] -> [(Fix Pattern,Clause)] -> (Maybe (Fix BoundPattern), Double)
@@ -577,11 +577,11 @@ computeSetScore c es tl =
 minPositiveDouble :: Double
 minPositiveDouble = encodeFloat 1 $ fst (floatRange (0.0 :: Double)) - floatDigits (0.0 :: Double)
 
-computeMapElementScore :: Metadata -> Clause -> [(Fix Pattern,Clause)] -> (Fix Pattern, Fix Pattern) -> Double
-computeMapElementScore m c tl (k,v) =
+computeMapElementScore :: Metadata -> SymbolOrAlias Object -> Clause -> [(Fix Pattern,Clause)] -> (Fix Pattern, Fix Pattern) -> Double
+computeMapElementScore m e c tl (k,v) =
   let score = computeElementScore k c tl
   in if score == -1.0 / 0.0 then score else 
-  let finalScore = score * computeScore m [(v,c)]
+  let finalScore = score * computeScore (head $ fromJust $ getChildren m (HasKey False e (Ignoring m) Nothing)) [(v,c)]
   in if finalScore == 0.0 then minPositiveDouble else finalScore
 
 canonicalizePattern :: Clause -> Fix Pattern -> Fix BoundPattern
