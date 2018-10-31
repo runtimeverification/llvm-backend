@@ -170,6 +170,7 @@ splitTop topPattern =
   case topPattern of
     KoreObjectPattern (AndPattern (And _ (KoreObjectPattern (EqualsPattern (Equals _ _ pat _))) (KoreObjectPattern (AndPattern ((And _ _ (KoreObjectPattern (RewritesPattern (r@(Rewrites _ _ _)))))))))) -> Just (r, Just pat)
     KoreObjectPattern (AndPattern (And _ (KoreObjectPattern (TopPattern _)) (KoreObjectPattern (AndPattern ((And _ _ (KoreObjectPattern (RewritesPattern (r@(Rewrites _ _ _)))))))))) -> Just (r, Nothing)
+    KoreObjectPattern (ImpliesPattern (Implies _ (KoreObjectPattern (BottomPattern _)) p)) -> splitTop p
     _ -> Nothing
 
 getAxioms :: KoreDefinition -> [SentenceAxiom UnifiedSortVariable UnifiedPattern Variable]
