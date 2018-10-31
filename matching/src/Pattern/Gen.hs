@@ -12,14 +12,14 @@ import           Data.List             (transpose)
 import qualified Data.Map              as Map
 import           Data.Maybe            (maybe, isJust, fromJust)
 import           Data.Text             (unpack)
-import           Data.Tuple.Select     (sel1)
+import           Data.Tuple.Select     (sel1, sel2)
 import           Kore.AST.Common       (Rewrites (..), Sort (..),
                                         Variable (..), Application (..),
                                         DomainValue (..), StringLiteral (..),
                                         And (..), Ceil (..), Equals (..), Exists (..),
                                         Floor (..), Forall (..), Implies (..), Iff (..),
                                         In (..), Next (..), Not (..), Or (..),
-                                        Pattern (..), Id (..), SymbolOrAlias (..))
+                                        Pattern (..), Id (..), SymbolOrAlias (..), AstLocation(..))
 import           Kore.AST.Kore         (CommonKorePattern)
 import           Kore.AST.MetaOrObject (Object (..))
 import           Kore.ASTHelpers       (ApplicationSorts (..))
@@ -242,7 +242,7 @@ metaLookup f (P.HasKey isSet e (P.Ignoring m) _) =
 metaLookup _ (P.HasNoKey (P.Ignoring m) _) = Just [m]
 
 defaultMetadata :: Sort Object -> P.Metadata
-defaultMetadata sort = P.Metadata 1 (const []) sort $ metaLookup $ const Nothing
+defaultMetadata sort = P.Metadata 1 (const []) (const []) sort $ metaLookup $ const Nothing
 
 genMetadatas :: SymLib -> KoreIndexedModule StepperAttributes -> Map.Map (Sort Object) P.Metadata
 genMetadatas syms@(SymLib symbols sorts allOverloads) indexedMod =
@@ -259,30 +259,44 @@ genMetadatas syms@(SymLib symbols sorts allOverloads) indexedMod =
       in if isInt then
         let tools = extractMetadataTools indexedMod
             bw = bitwidth tools sort
-        in Just $ P.Metadata (shiftL 1 bw) (const []) sort (metaLookup $ const Nothing)
+        in Just $ P.Metadata (shiftL 1 bw) (const []) (const []) sort (metaLookup $ const Nothing)
       else
         let metadatas = genMetadatas syms indexedMod
             keys = map P.Symbol constructors
             args = map getArgs constructors
             injections = filter isInjection keys
+            overloads = filter isOverload keys
             usedInjs = map (\c -> filter (isSubsort metadatas c) injections) injections
+            usedOverloads = map (\c -> filter (isGreaterThan c) overloads) overloads
             children = map (map $ (\s -> Map.findWithDefault (defaultMetadata s) s metadatas)) args
             metaMap = Map.fromList (zip keys children)
             injMap = Map.fromList (zip injections usedInjs)
-        in Just $ P.Metadata (toInteger $ length constructors) (injMap Map.!) sort $ metaLookup $ flip Map.lookup metaMap
+            overloadMap = Map.fromList (zip overloads usedOverloads)
+            overloadInjMap = Map.mapWithKey (\k -> (map $ injectionForOverload k)) overloadMap
+            trueInjMap = Map.union injMap overloadInjMap
+        in Just $ P.Metadata (toInteger $ length constructors) (\s -> if isInjection s || isOverload s then trueInjMap Map.! s else []) (overloadMap Map.!) sort $ metaLookup $ flip Map.lookup metaMap
     genMetadata _ _ = Nothing
     getArgs :: SymbolOrAlias Object -> [Sort Object]
     getArgs sym = sel1 $ symbols Map.! sym
     isInjection :: P.Constructor -> Bool
     isInjection (P.Symbol (SymbolOrAlias (Id "inj" _) _)) = True
     isInjection _ = False
+    isOverload :: P.Constructor -> Bool
+    isOverload (P.Symbol s) = Map.member s allOverloads
+    isOverload _ = False
     isSubsort :: Map.Map (Sort Object) P.Metadata -> P.Constructor -> P.Constructor -> Bool
     isSubsort metas (P.Symbol (SymbolOrAlias name [b,_])) (P.Symbol (SymbolOrAlias _ [a,_])) =
       let (P.Metadata _ _ _ _ childMeta) = Map.findWithDefault (defaultMetadata b) b metas
           child = P.Symbol (SymbolOrAlias name [a,b])
       in isJust $ childMeta $ child
     isSubsort _ _ _ = error "invalid injection"
-
+    isGreaterThan :: P.Constructor -> P.Constructor -> Bool
+    isGreaterThan (P.Symbol g) (P.Symbol l) =
+      elem l $ allOverloads Map.! g
+    isGreaterThan _ _ = error "invalid overload"
+    injectionForOverload :: P.Constructor -> P.Constructor -> P.Constructor
+    injectionForOverload (P.Symbol g) (P.Symbol l) = P.Symbol $ SymbolOrAlias (Id "inj" AstLocationNone) [sel2 (symbols Map.! l), sel2 (symbols Map.! g)]
+    injectionForOverload _ _ = error "invalid overload"
 
 genClauseMatrix :: KoreRewrite pattern 
                => SymLib

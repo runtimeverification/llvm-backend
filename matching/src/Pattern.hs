@@ -73,12 +73,13 @@ instance Show Column where
 data Metadata = Metadata
                 { getLength :: !Integer
                 , getInjections :: Constructor -> [Constructor]
+                , getOverloads :: Constructor -> [Constructor]
                 , getSort :: Sort Object
                 , getChildren :: Constructor -> Maybe [Metadata]
                 }
 
 instance (Show Metadata) where
-  show (Metadata _ _ sort _) = show sort
+  show (Metadata _ _ _ sort _) = show sort
 
 type Occurrence   = [Int]
 
@@ -246,8 +247,7 @@ sigma c cs =
       bestUsed = case bestKey of
                    Nothing -> used
                    Just k -> filter (isBest k) used
-      inj = nub $ filter isInj bestUsed
-      usedInjs = nub $ concatMap (getInjections $ getMetadata c) inj
+      usedInjs = nub $ concatMap (getInjections $ getMetadata c) bestUsed
       dups = bestUsed ++ usedInjs
       nodups = nub dups
   in if elem Empty nodups then [Empty] else filter (not . (== Empty)) nodups
@@ -286,9 +286,6 @@ sigma c cs =
     ix cls (Fix (As _ _ pat))      = ix cls pat
     ix _ (Fix Wildcard)          = []
     ix _ (Fix (Variable _ _))    = []
-    isInj :: Constructor -> Bool
-    isInj (Symbol (SymbolOrAlias (Id "inj" _) _)) = True
-    isInj _ = False
     isBest :: Fix BoundPattern -> Constructor -> Bool
     isBest k (HasKey _ _ _ (Just k')) = k == k'
     isBest k (HasNoKey _ (Just k')) = k == k'
@@ -343,14 +340,14 @@ expandOccurrence nextO (ClauseMatrix (PatternMatrix (c : _)) _) o ix =
     NonEmpty _ -> [o]
     HasKey isSet _ _ _ -> if isSet then [nextO + 1 : o, o] else [nextO : o, nextO + 1 : o, o]
     HasNoKey _ _ -> [o]
-    _ -> let (Metadata _ _ _ mtd) = getMetadata c
+    _ -> let (Metadata _ _ _ _ mtd) = getMetadata c
              a = length $ fromJust $ mtd ix
          in map (\i -> i : o) [0..a-1]
 expandOccurrence _ _ _ _ = error "must have at least one column"
 
 mDefault :: (ClauseMatrix, [Occurrence]) -> Maybe (ClauseMatrix, [Occurrence])
 mDefault (cm@(ClauseMatrix pm@(PatternMatrix (c : _)) as),o : os) =
-  let (Metadata mtd _ _ _) = getMetadata c
+  let (Metadata mtd _ _ _ _) = getMetadata c
       s₁ = sigma c as
       infiniteLength = case hook pm of
         Nothing -> False
@@ -474,8 +471,8 @@ checkPatternIndex _ _ (_, Fix (Variable _ _)) = True
 checkPatternIndex (List _ len) _ (_, Fix (ListPattern hd Nothing tl _ _)) = len == (length hd + length tl)
 checkPatternIndex (List _ len) _ (_, Fix (ListPattern hd (Just _) tl _ _)) = len >= (length hd + length tl)
 checkPatternIndex _ _ (_, Fix (ListPattern _ _ _ _ _)) = False
-checkPatternIndex (Symbol (SymbolOrAlias (Id "inj" _) [a,c])) (Metadata _ _ _ meta) (cls, Fix (Pattern ix@(Symbol (SymbolOrAlias name@(Id "inj" _) [b,c'])) _ [p])) =
-  let m@(Metadata _ _ _ childMeta) = (fromJust $ meta ix) !! 0
+checkPatternIndex (Symbol (SymbolOrAlias (Id "inj" _) [a,c])) (Metadata _ _ _ _ meta) (cls, Fix (Pattern ix@(Symbol (SymbolOrAlias name@(Id "inj" _) [b,c'])) _ [p])) =
+  let m@(Metadata _ _ _ _ childMeta) = (fromJust $ meta ix) !! 0
       child = Symbol (SymbolOrAlias name [a,b])
   in c == c' && (a == b || ((isJust $ childMeta $ child) && checkPatternIndex child m (cls,p)))
 checkPatternIndex ix _ (_, Fix (Pattern ix' _ _)) = ix == ix'
@@ -651,7 +648,7 @@ expandColumn ix (Column m ps) cs =
   in  zipWith Column metas (transpose ps'')
 
 expandMetadata :: Constructor -> Metadata -> [Metadata]
-expandMetadata ix (Metadata _ _ sort ms) =
+expandMetadata ix (Metadata _ _ _ sort ms) =
   case ms ix of
     Just m -> m
     Nothing -> error $ show (ix,sort)
