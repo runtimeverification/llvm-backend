@@ -4,9 +4,10 @@
 module Pattern.Parser where
 
 import           Data.Functor.Foldable      (Fix (..), para)
-import           Data.List                  (sortBy, nub)
+import           Data.List                  (sortBy, nub, find)
 import           Data.List.Index            (indexed)
 import qualified Data.Map                   as Map
+import           Data.Maybe                 (isJust)
 import           Data.Functor.Impredicative (Rotate31 (..))
 import           Data.Ord                   (comparing)
 import           Data.Proxy                 (Proxy (..))
@@ -49,6 +50,7 @@ import           Kore.Step.StepperAttributes
 data SymLib = SymLib
   { symCs :: Map.Map (SymbolOrAlias Object) ([Sort Object], Sort Object, StepperAttributes)
   , symSt :: Map.Map (Sort Object) [SymbolOrAlias Object]
+  , symOs :: Map.Map (SymbolOrAlias Object) [SymbolOrAlias Object]
   } deriving (Show, Eq)
 
 isConcrete :: SymbolOrAlias Object -> Bool
@@ -85,34 +87,48 @@ parseAxiomForSymbols = parsePatternForSymbols . sentenceAxiomPattern
 
 mkSymLib :: [SymbolOrAlias Object] 
          -> MetadataTools Object StepperAttributes
+         -> [(SymbolOrAlias Object, SymbolOrAlias Object)]
          -> SymLib
-mkSymLib symbols metaTools = 
-  let (SymLib sorts syms) = foldl go (SymLib Map.empty Map.empty) symbols
-  in SymLib sorts (Map.map nub syms)
+mkSymLib symbols metaTools overloads = 
+  let (SymLib sorts syms _) = foldl go (SymLib Map.empty Map.empty Map.empty) symbols
+  in SymLib sorts (Map.map nub syms) (Map.map nub $ foldl mkOverloads Map.empty overloads)
   where
-    go (SymLib dIx rIx) symbol =
+    go (SymLib dIx rIx oIx) symbol =
       let as = (sortTools metaTools) symbol
           att = (symAttributes metaTools) symbol
           args = applicationSortsOperands as
           result = applicationSortsResult as
       in SymLib { symCs = Map.insert symbol (args, result, att) dIx
              , symSt = Map.insert result (symbol : (Map.findWithDefault [] result rIx)) rIx
+             , symOs = oIx
              }
+    mkOverloads oIx (greater,lesser) =
+      Map.insert greater (lesser : (Map.findWithDefault [] greater oIx)) oIx
+
+getOverloads :: [SentenceAxiom UnifiedSortVariable UnifiedPattern Variable]
+             -> [(SymbolOrAlias Object, SymbolOrAlias Object)]
+getOverloads [] = []
+getOverloads (s : tl) =
+  case getAtt s "overload" of
+    Nothing -> getOverloads tl
+    Just (KoreObjectPattern (ApplicationPattern (Application _ [(KoreObjectPattern (ApplicationPattern (Application g _))),(KoreObjectPattern (ApplicationPattern (Application l _)))]))) -> (g,l):(getOverloads tl)
+    Just _ -> error "invalid overload attribute"
 
 parseSymbols :: KoreDefinition -> KoreIndexedModule StepperAttributes -> SymLib
 parseSymbols def indexedMod =
   let axioms = getAxioms def
       symbols = mconcat (parseAxiomForSymbols <$> axioms)
       metaTools = extractMetadataTools indexedMod
-  in mkSymLib symbols metaTools
+      overloads = getOverloads axioms
+  in mkSymLib symbols metaTools overloads
 
 --[ Patterns ]--
-hasAtt :: SentenceAxiom UnifiedSortVariable UnifiedPattern Variable
+getAtt :: SentenceAxiom UnifiedSortVariable UnifiedPattern Variable
        -> String
-       -> Bool
-hasAtt sentence att = 
+       -> Maybe CommonKorePattern
+getAtt sentence att =
   let Attributes attr = sentenceAxiomAttributes sentence
-  in any isAtt attr
+  in find isAtt attr
   where
     isAtt :: CommonKorePattern -> Bool
     isAtt (Fix (UnifiedPattern (UnifiedObject object))) =
@@ -120,6 +136,13 @@ hasAtt sentence att =
         ApplicationPattern (Application (SymbolOrAlias (Id x _) _) _) -> x == att
         _ -> False
     isAtt _ = False
+
+
+hasAtt :: SentenceAxiom UnifiedSortVariable UnifiedPattern Variable
+       -> String
+       -> Bool
+hasAtt sentence att = 
+  isJust (getAtt sentence att)
 
 rulePriority :: SentenceAxiom UnifiedSortVariable UnifiedPattern Variable
              -> Int
@@ -140,7 +163,7 @@ parseAxiomSentence :: (CommonKorePattern -> Maybe (pat, Maybe CommonKorePattern)
                    -> (Int, SentenceAxiom UnifiedSortVariable UnifiedPattern Variable)
                    -> [AxiomInfo pat]
 parseAxiomSentence split (i,s) = case split (sentenceAxiomPattern s) of
-      Just (r,sc) -> if hasAtt s "comm" || hasAtt s "assoc" || hasAtt s "idem" then [] else [AxiomInfo (rulePriority s) i r sc]
+      Just (r,sc) -> if hasAtt s "comm" || hasAtt s "assoc" || hasAtt s "idem" || hasAtt s "overload" then [] else [AxiomInfo (rulePriority s) i r sc]
       Nothing -> []
 
 unifiedPatternRAlgebra :: (Pattern Meta variable (CommonKorePattern, b) -> b)

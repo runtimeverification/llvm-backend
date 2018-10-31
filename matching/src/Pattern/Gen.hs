@@ -54,7 +54,7 @@ instance KoreRewrite (Rewrites lvl CommonKorePattern) where
 data CollectionCons = Concat | Unit | Element
 
 genPattern :: KoreRewrite pattern => MetadataTools Object StepperAttributes -> SymLib -> pattern -> [Fix P.Pattern]
-genPattern tools (SymLib _ sorts) rewrite =
+genPattern tools (SymLib _ sorts _) rewrite =
   let lhs = getLeftHandSide rewrite
   in map (para (unifiedPatternRAlgebra (error "unsupported: meta level") rAlgebra)) lhs
   where
@@ -245,7 +245,7 @@ defaultMetadata :: Sort Object -> P.Metadata
 defaultMetadata sort = P.Metadata 1 (const []) sort $ metaLookup $ const Nothing
 
 genMetadatas :: SymLib -> KoreIndexedModule StepperAttributes -> Map.Map (Sort Object) P.Metadata
-genMetadatas syms@(SymLib symbols sorts) indexedMod =
+genMetadatas syms@(SymLib symbols sorts allOverloads) indexedMod =
   Map.mapMaybeWithKey genMetadata sorts
   where
     genMetadata :: Sort Object -> [SymbolOrAlias Object] -> Maybe P.Metadata
@@ -278,7 +278,7 @@ genMetadatas syms@(SymLib symbols sorts) indexedMod =
     isInjection _ = False
     isSubsort :: Map.Map (Sort Object) P.Metadata -> P.Constructor -> P.Constructor -> Bool
     isSubsort metas (P.Symbol (SymbolOrAlias name [b,_])) (P.Symbol (SymbolOrAlias _ [a,_])) =
-      let (P.Metadata _ _ _ childMeta) = Map.findWithDefault (defaultMetadata b) b metas
+      let (P.Metadata _ _ _ _ childMeta) = Map.findWithDefault (defaultMetadata b) b metas
           child = P.Symbol (SymbolOrAlias name [a,b])
       in isJust $ childMeta $ child
     isSubsort _ _ _ = error "invalid injection"
