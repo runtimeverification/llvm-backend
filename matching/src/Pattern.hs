@@ -53,7 +53,7 @@ import           Data.Ord              (comparing)
 import           Data.Semigroup        ((<>))
 import           Data.Text             (Text, pack, unpack)
 import           Data.Traversable      (mapAccumL)
-import           Kore.AST.Common       (SymbolOrAlias (..), Id (..), Sort(..))
+import           Kore.AST.Common       (SymbolOrAlias (..), Id (..), Sort(..), AstLocation(..))
 import           Kore.AST.MetaOrObject (Object (..))
 import           Kore.Unparser.Unparse (unparseToString)
 import           TextShow              (showt)
@@ -464,6 +464,21 @@ mightUnify (Fix (ListPattern _ _ _ _ _)) _ = False
 mightUnify (Fix (MapPattern _ _ _ _ _)) _ = False
 mightUnify (Fix (SetPattern _ _ _ _)) _ = False
 
+isValidOverload :: [Fix Pattern] -> Metadata -> Clause -> [Metadata] -> Constructor -> Bool
+isValidOverload ps (Metadata _ _ _ _ childMeta) cls metaPs less =
+  case childMeta less of
+    Nothing -> False
+    Just metaTs -> 
+      let items = zipWith3 isValidChild ps metaPs metaTs
+      in or items
+  where
+    isValidChild :: Fix Pattern -> Metadata -> Metadata -> Bool
+    isValidChild p metaP metaT =
+      let sortP = getSort metaP
+          sortT = getSort metaT
+          child = Symbol (SymbolOrAlias (Id "inj" AstLocationNone) [sortT, sortP])
+      in getSort metaP == getSort metaT || checkPatternIndex child metaP (cls,p)
+
 checkPatternIndex :: Constructor -> Metadata -> (Clause, Fix Pattern) -> Bool
 checkPatternIndex _ _ (_, Fix Wildcard) = True
 checkPatternIndex ix m (c, Fix (As _ _ pat)) = checkPatternIndex ix m (c,pat)
@@ -475,6 +490,11 @@ checkPatternIndex (Symbol (SymbolOrAlias (Id "inj" _) [a,c])) (Metadata _ _ _ _ 
   let m@(Metadata _ _ _ _ childMeta) = (fromJust $ meta ix) !! 0
       child = Symbol (SymbolOrAlias name [a,b])
   in c == c' && (a == b || ((isJust $ childMeta $ child) && checkPatternIndex child m (cls,p)))
+checkPatternIndex inj@(Symbol (SymbolOrAlias (Id "inj" _) _)) (Metadata _ _ overloads _ meta) (cls, Fix (Pattern ix _ ps)) =
+  let less = overloads ix
+      childMeta = (fromJust $ meta inj) !! 0
+  in any (isValidOverload ps childMeta cls $ fromJust $ meta ix) less
+  
 checkPatternIndex ix _ (_, Fix (Pattern ix' _ _)) = ix == ix'
 checkPatternIndex Empty _ (_, Fix (MapPattern ks vs _ _ _)) = length ks == 0 && length vs == 0
 checkPatternIndex Empty _ (_, Fix (SetPattern es _ _ _)) = length es == 0

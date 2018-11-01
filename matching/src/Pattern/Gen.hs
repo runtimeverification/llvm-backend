@@ -274,7 +274,7 @@ genMetadatas syms@(SymLib symbols sorts allOverloads) indexedMod =
             overloadMap = Map.fromList (zip overloads usedOverloads)
             overloadInjMap = Map.mapWithKey (\k -> (map $ injectionForOverload k)) overloadMap
             trueInjMap = Map.union injMap overloadInjMap
-        in Just $ P.Metadata (toInteger $ length constructors) (\s -> if isInjection s || isOverload s then trueInjMap Map.! s else []) (overloadMap Map.!) sort $ metaLookup $ flip Map.lookup metaMap
+        in Just $ P.Metadata (toInteger $ length constructors) (\s -> if isInjection s || isOverload s then trueInjMap Map.! s else []) (\s -> Map.findWithDefault [] s overloadMap) sort $ metaLookup $ flip Map.lookup metaMap
     genMetadata _ _ = Nothing
     getArgs :: SymbolOrAlias Object -> [Sort Object]
     getArgs sym = sel1 $ symbols Map.! sym
