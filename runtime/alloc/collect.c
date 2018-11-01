@@ -161,6 +161,30 @@ static char* evacuate(char* scan_ptr, char** alloc_ptr) {
   return get_next(scan_ptr, get_size(hdr, layoutInt), *alloc_ptr);
 }
 
+// computes scan ptr, current_tospace_start, and current_tospace_end for old generation
+// this is necessary because unlike the young generation, we don't start scanning at the beginning,
+// so the process of computing the address to scan from is more complicated.
+static char* computeScanPtr(char* oldspace_start) {
+  // if no allocations have happened yet, don't scan anything.
+  // if no allocations had happened at the start of gc, start scanning from
+  // the beginning. otherwise, start scanning from where we were at beginning of gc.
+  char* scan_ptr = oldspace_start == 0 ? oldspace_ptr() == 0 ? 0 : oldspace_ptr() + sizeof(memory_block_header) : oldspace_start;
+  uintptr_t oldspace_block_start = (uintptr_t)scan_ptr;
+  if (!(oldspace_block_start & (BLOCK_SIZE-1))) {
+    // this happens when oldspace_start is at the exact end of a block
+    // we need to jump to the next block, so we use get_next with a length of 0 to do this
+    current_tospace_end = oldspace_start;
+    current_tospace_start = oldspace_start - BLOCK_SIZE;
+    scan_ptr = get_next(scan_ptr, 0, *old_alloc_ptr());
+  } else {
+    // we have the scan ptr, so we compute current_tospace_start and current_tospace_end from it
+    oldspace_block_start = oldspace_block_start & ~(BLOCK_SIZE-1);
+    current_tospace_start = (char*) oldspace_block_start;
+    current_tospace_end = current_tospace_start + BLOCK_SIZE;
+  }
+  return scan_ptr;
+}
+
 void koreCollect(block** root) {
   MEM_LOG("Starting garbage collection\n");
   koreAllocSwap();
@@ -173,18 +197,7 @@ void koreCollect(block** root) {
   while(scan_ptr) {
     scan_ptr = evacuate(scan_ptr, alloc_ptr());
   }
-  scan_ptr = oldspace_start == 0 ? oldspace_ptr() == 0 ? 0 : oldspace_ptr() + sizeof(memory_block_header) : oldspace_start;
-  uintptr_t oldspace_block_start = (uintptr_t)scan_ptr;
-  if (!(oldspace_block_start & (BLOCK_SIZE-1))) {
-    // this happens when oldspace_start is at the exact end of a block
-    current_tospace_end = oldspace_start;
-    current_tospace_start = oldspace_start - BLOCK_SIZE;
-    scan_ptr = get_next(scan_ptr, 0, *old_alloc_ptr());
-  } else {
-    oldspace_block_start = oldspace_block_start & ~(BLOCK_SIZE-1);
-    current_tospace_start = (char*) oldspace_block_start;
-    current_tospace_end = current_tospace_start + BLOCK_SIZE;
-  }
+  scan_ptr = computeScanPtr(oldspace_start);
   if (scan_ptr != *old_alloc_ptr()) {
     MEM_LOG("Evacuating promoted objects\n");
     while(scan_ptr) {
