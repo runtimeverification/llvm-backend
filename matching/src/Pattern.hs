@@ -561,7 +561,7 @@ getScore cs (Column m ps) = computeScore m (zip ps cs)
 computeScore :: Metadata -> [(Fix Pattern,Clause)] -> Double
 computeScore _ [] = 0.0
 computeScore m ((Fix (Pattern ix@(Symbol (SymbolOrAlias (Id "inj" _) _)) _ _),_):tl) = (1.0 / (fromIntegral $ length $ getInjections m ix)) + computeScore m tl
-computeScore m ((Fix (Pattern _ _ _),_):tl) = 1.0 + computeScore m tl
+computeScore m ((Fix (Pattern ix _ _),_):tl) = (1.0 / (1.0 + (fromIntegral $ length $ getOverloads m ix))) + computeScore m tl
 computeScore m ((Fix (ListPattern _ _ _ _ _),_):tl) = 1.0 + computeScore m tl
 computeScore m ((Fix (As _ _ pat),c):tl) = computeScore m ((pat,c):tl)
 computeScore m ((Fix Wildcard,_):tl) = min 0.0 $ computeScore m tl
