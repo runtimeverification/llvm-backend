@@ -125,20 +125,20 @@ static inline __attribute__ ((always_inline)) void* doAlloc(size_t requested, st
   return result;
 }
 
-void* koreAlloc(size_t requested) {
+__attribute__ ((always_inline)) void* koreAlloc(size_t requested) {
   return doAlloc(requested, &fromspace);
 }
 
-void* koreAllocToken(size_t requested) {
+__attribute__ ((always_inline)) void* koreAllocToken(size_t requested) {
   size_t size = (requested + 7) & ~7;
   return doAlloc(size < 16 ? 16 : size, &fromspace);
 }
 
-void* koreAllocOld(size_t requested) {
+__attribute__ ((always_inline)) void* koreAllocOld(size_t requested) {
   return doAlloc(requested, &oldspace);
 }
 
-void* koreAllocTokenOld(size_t requested) {
+__attribute__ ((always_inline)) void* koreAllocTokenOld(size_t requested) {
   size_t size = (requested + 7) & ~7;
   return doAlloc(size < 16 ? 16 : size, &oldspace);
 }
