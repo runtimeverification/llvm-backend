@@ -6,6 +6,7 @@
 #include<cstring>
 
 #include "runtime/header.h"
+#include "runtime/alloc.h"
 
 #define KCHAR char
 extern "C" {
@@ -196,17 +197,17 @@ BOOST_AUTO_TEST_CASE(concat) {
   auto d = makeString("");
 
   auto emptyCatR = hook_STRING_concat(a, d);
-  BOOST_CHECK_EQUAL(0, memcmp(emptyCatR->data, a->data, emptyCatR->h.hdr));
-  BOOST_CHECK_EQUAL(emptyCatR->h.hdr, a->h.hdr);
+  BOOST_CHECK_EQUAL(0, memcmp(emptyCatR->data, a->data, len(emptyCatR)));
+  BOOST_CHECK_EQUAL(len(emptyCatR), len(a));
 
   auto emptyCatL = hook_STRING_concat(d, a);
-  BOOST_CHECK_EQUAL(0, memcmp(emptyCatL->data, a->data, emptyCatL->h.hdr));
-  BOOST_CHECK_EQUAL(emptyCatL->h.hdr, a->h.hdr);
+  BOOST_CHECK_EQUAL(0, memcmp(emptyCatL->data, a->data, len(emptyCatL)));
+  BOOST_CHECK_EQUAL(len(emptyCatL), len(a));
 
   auto catAll = hook_STRING_concat(hook_STRING_concat(a,b), c);
   auto expected = makeString("hellohehf");
-  BOOST_CHECK_EQUAL(0, memcmp(catAll->data, expected->data, catAll->h.hdr));
-  BOOST_CHECK_EQUAL(catAll->h.hdr, expected->h.hdr);
+  BOOST_CHECK_EQUAL(0, memcmp(catAll->data, expected->data, len(catAll)));
+  BOOST_CHECK_EQUAL(len(catAll), len(expected));
 }
 
 
@@ -219,9 +220,9 @@ BOOST_AUTO_TEST_CASE(chr) {
   const string * space = hook_STRING_chr(b);
 
   BOOST_CHECK_EQUAL(A->data[0], 'A');
-  BOOST_CHECK_EQUAL(A->h.hdr, 1);
+  BOOST_CHECK_EQUAL(len(A), 1);
   BOOST_CHECK_EQUAL(space->data[0], ' ');
-  BOOST_CHECK_EQUAL(space->h.hdr, 1);
+  BOOST_CHECK_EQUAL(len(space), 1);
 }
 
 BOOST_AUTO_TEST_CASE(length) {
@@ -263,8 +264,8 @@ BOOST_AUTO_TEST_CASE(substr) {
   BOOST_CHECK_THROW(hook_STRING_substr(catAll, _7, _40), std::invalid_argument);
   BOOST_CHECK_THROW(hook_STRING_substr(catAll, _8, _40), std::invalid_argument);
   BOOST_CHECK_EQUAL(memcmp(hook_STRING_substr(catAll, _8, _9)->data, "f", 1), 0);
-  BOOST_CHECK_EQUAL(hook_STRING_substr(catAll, _9, _9)->h.hdr, 0);
-  BOOST_CHECK_THROW(hook_STRING_substr(catAll, _8, _7), std::invalid_argument);
+  BOOST_CHECK_EQUAL(len(hook_STRING_substr(catAll, _9, _9)), 0);
+BOOST_CHECK_THROW(hook_STRING_substr(catAll, _8, _7), std::invalid_argument);
   BOOST_CHECK_THROW(hook_STRING_substr(catAll, _7, _10), std::invalid_argument);
   BOOST_CHECK_THROW(hook_STRING_substr(catAll, _1024, _4096), std::invalid_argument);
 }
@@ -326,22 +327,22 @@ BOOST_AUTO_TEST_CASE(int2string) {
   mpz_init_set_ui(a, 10);
 
   auto res = hook_STRING_int2string(a);
-  BOOST_CHECK_EQUAL(2, res->h.hdr);
+  BOOST_CHECK_EQUAL(2, len(res));
   BOOST_CHECK_EQUAL(0, memcmp(res->data, "10", 2));
 
   mpz_set_ui(a, 1234);
   res = hook_STRING_int2string(a);
-  BOOST_CHECK_EQUAL(4, res->h.hdr);
+  BOOST_CHECK_EQUAL(4, len(res));
   BOOST_CHECK_EQUAL(0, memcmp(res->data, "1234", 4));
 
   mpz_set_si(a, -1234);
   res = hook_STRING_int2string(a);
-  BOOST_CHECK_EQUAL(5, res->h.hdr);
+  BOOST_CHECK_EQUAL(5, len(res));
   BOOST_CHECK_EQUAL(0, memcmp(res->data, "-1234", 5));
 
   mpz_set_ui(a, 0);
   res = hook_STRING_int2string(a);
-  BOOST_CHECK_EQUAL(1, res->h.hdr);
+  BOOST_CHECK_EQUAL(1, len(res));
   BOOST_CHECK_EQUAL(0, memcmp(res->data, "0", 1));
 }
 
@@ -431,7 +432,7 @@ BOOST_AUTO_TEST_CASE(countAllOccurrences) {
 BOOST_AUTO_TEST_CASE(buffer_empty) {
   auto buf = hook_BUFFER_empty();
   BOOST_CHECK_EQUAL(16, buf->capacity);
-  BOOST_CHECK_EQUAL(0, buf->contents->h.hdr);
+  BOOST_CHECK_EQUAL(0, len(buf->contents));
 }
 
 BOOST_AUTO_TEST_CASE(buffer_concat) {
@@ -441,15 +442,15 @@ BOOST_AUTO_TEST_CASE(buffer_concat) {
     int len = rand() % 1000;
     totalLen += len;
     auto str = static_cast<string *>(malloc(sizeof(string) + len));
-    str->h.hdr = len;
+    set_len(str, len);
     memset(str->data, 'a', len);
     hook_BUFFER_concat(buf, str);
   }
   auto result = hook_BUFFER_toString(buf);
   auto expected = static_cast<string *>(malloc(sizeof(string) + totalLen));
-  expected->h.hdr = totalLen;
+  set_len(expected, totalLen);
   memset(expected->data, 'a', totalLen);
-  BOOST_CHECK_EQUAL(totalLen | NOT_YOUNG_OBJECT_BIT, result->h.hdr);
+  BOOST_CHECK_EQUAL(totalLen, len(result));
   BOOST_CHECK_EQUAL(0, memcmp(result->data, expected->data, totalLen));
 }
 

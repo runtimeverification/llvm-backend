@@ -308,7 +308,7 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
     }
     case SortCategory::Int: {
       llvm::Type *Int = module->getTypeByName(INT_STRUCT);
-      llvm::Value *Term = allocateTerm(Int, CaseBlock, "malloc");
+      llvm::Value *Term = allocateTerm(Int, CaseBlock, "koreAllocOld");
       llvm::Constant *MpzInitSet = module->getOrInsertFunction("__gmpz_init_set_str",
           llvm::Type::getInt32Ty(Ctx), llvm::PointerType::getUnqual(Int), 
           llvm::Type::getInt8PtrTy(Ctx), llvm::Type::getInt32Ty(Ctx));

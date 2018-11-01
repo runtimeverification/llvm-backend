@@ -19,7 +19,7 @@ declare i1 @hook_LIST_eq(%list*, %list*)
 declare i1 @hook_SET_eq(%set*, %set*)
 declare i1 @hook_INT_eq(%mpz*, %mpz*)
 
-@HDR_MASK = private constant i64 70368744177663 ; 0x3fffffffffff, cf header.h
+@HDR_MASK = private constant i64 -246290604621825 ; 0xffff1fffffffffff, cf header.h
 
 define i1 @hook_KEQUAL_eq(%block* %arg1, %block* %arg2) {
 entry:

@@ -6,7 +6,6 @@
 void printInt(FILE *file, mpz_t i, const char *sort) {
   char *str = mpz_get_str(NULL, 10, i);
   fprintf(file, "\\dv{%s}(\"%s\")", sort, str);
-  free(str);
 }
 
 void printFloat(FILE *file, mpfr_t f, const char *sort) {
