@@ -40,6 +40,7 @@ char **old_alloc_ptr() {
 }
 
 char fromspace_id() {
+  // bit has been flipped by now, so we need flip it back
   return 1 - fromspace.semispace_id;
 }
 

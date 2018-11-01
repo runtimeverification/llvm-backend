@@ -77,7 +77,6 @@ static void migrate(block** blockPtr) {
 static void migrate_once(block** blockPtr) {
   block* currBlock = *blockPtr;
   memory_block_header *hdr = mem_block_header(currBlock);
-  // bit has been flipped by now, so we need != and not ==
   if (fromspace_id() == hdr->semispace) {
     migrate(blockPtr);
   }
