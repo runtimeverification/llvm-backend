@@ -92,11 +92,11 @@ static void migrate_string_buffer(stringbuffer** bufferPtr) {
     string *newContents;
     if (shouldPromote) {
       newBuffer = koreAllocOld(sizeof(stringbuffer));
-      memcpy(newBuffer, buffer, sizeof(uint64_t)); // contents is written below
+      newBuffer->capacity = buffer->capacity; // contents is written below
       newContents = koreAllocTokenOld(sizeof(string) + buffer->capacity);
     } else {
       newBuffer = koreAlloc(sizeof(stringbuffer));
-      memcpy(newBuffer, buffer, sizeof(uint64_t)); // contents is written below
+      newBuffer->capacity = buffer->capacity; // contents is written below
       newContents = koreAllocToken(sizeof(string) + buffer->capacity);
     }
     memcpy(newContents, buffer->contents, len(buffer->contents));
