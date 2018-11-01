@@ -52,7 +52,7 @@ static void migrate(block** blockPtr) {
   bool shouldPromote = hdr & YOUNG_AGE_BIT;
   uint64_t mask = shouldPromote ? NOT_YOUNG_OBJECT_BIT : YOUNG_AGE_BIT;
   bool hasForwardingAddress = hdr & FWD_PTR_BIT;
-  uint16_t layout = hdr >> 48;
+  uint16_t layout = layout_hdr(hdr);
   size_t lenInBytes = get_size(hdr, layout);
   block** forwardingAddress = (block**)(currBlock + 1);
   if (!hasForwardingAddress) {
@@ -129,31 +129,31 @@ static char* get_next(char* scan_ptr, size_t size, char* alloc_ptr) {
 static char* evacuate(char* scan_ptr, char** alloc_ptr) {
   block *currBlock = (block *)scan_ptr;
   const uint64_t hdr = currBlock->h.hdr;
-  uint16_t layoutInt = hdr >> 48;
+  uint16_t layoutInt = layout_hdr(hdr);
   if (layoutInt) {
     layout *layoutData = getLayoutData(layoutInt);
     for (unsigned i = 0; i < layoutData->nargs; i++) {
       layoutitem *argData = layoutData->args + i;
       void *arg = ((char *)currBlock) + argData->offset;
       switch(argData->cat) {
-      case 1: // map
+      case MAP_LAYOUT:
         map_foreach(arg, migrate_once);
 	break;
-      case 2: // list
+      case LIST_LAYOUT:
         list_foreach(arg, migrate_once); 
 	break;
-      case 3: // set
+      case SET_LAYOUT:
         set_foreach(arg, migrate_once);
 	break;
-      case 6:  // stringbuffer
+      case STRINGBUFFER_LAYOUT:
         migrate_string_buffer(arg);
         break;
-      case 8:  // block
+      case SYMBOL_LAYOUT:
         migrate(arg);
         break;
-      case 4: //int
-      case 5: //float
-      case 7: // bool
+      case INT_LAYOUT:
+      case FLOAT_LAYOUT:
+      case BOOL_LAYOUT:
       default: //mint
         break;
       }

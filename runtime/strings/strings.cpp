@@ -289,7 +289,7 @@ extern "C" {
       }
       buf->capacity = newCapacity;
       string* new_contents;
-      if (buf->contents->h.hdr & 0x400000000000LL) {
+      if (buf->contents->h.hdr & NOT_YOUNG_OBJECT_BIT) {
         new_contents = static_cast<string *>(koreAllocTokenOld(sizeof(string) + newCapacity));
       } else {
         new_contents = static_cast<string *>(koreAllocToken(sizeof(string) + newCapacity));
