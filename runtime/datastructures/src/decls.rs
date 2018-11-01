@@ -7,6 +7,17 @@ use decls::im::hashmap::HashMap;
 use decls::im::hashset::HashSet;
 use decls::im::vector::Vector;
 use self::libc::{FILE,c_char,c_void};
+use std::alloc::{GlobalAlloc, Layout};
+
+pub struct KoreAllocator;
+
+unsafe impl GlobalAlloc for KoreAllocator {
+  #[inline(always)]
+  unsafe fn alloc(&self, _layout: Layout) -> *mut u8 {
+    koreAllocOld(_layout.size())
+  }
+  unsafe fn dealloc(&self, _ptr: *mut u8, _layout: Layout) {}
+}
 
 pub enum Block {}
 #[allow(non_camel_case_types)]
@@ -90,6 +101,7 @@ extern "C" {
   pub fn k_hash<'a>(k1: K, h: *mut c_void) -> u64;
   pub fn hash_enter() -> bool;
   pub fn hash_exit();
+  pub fn koreAllocOld(size: usize) -> *mut u8;
 }
 
 #[cfg(test)]

@@ -25,7 +25,7 @@ declare void @add_hash8(i8*, i8)
 
 @hash_depth = thread_local global i32 0
 @HASH_THRESHOLD = private constant i32 5
-@HDR_MASK = private constant i64 70368744177663 ; 0x3fffffffffff, cf header.h
+@HDR_MASK = private constant i64 -246290604621825 ; 0xffff1fffffffffff, cf header.h
 
 define i1 @hash_enter() {
   %depth = load i32, i32* @hash_depth
@@ -58,19 +58,19 @@ block:
   %arghdrptr = getelementptr inbounds %block, %block* %arg, i64 0, i32 0, i32 0
   %arghdr = load i64, i64* %arghdrptr
   %arglayout = lshr i64 %arghdr, 48
+  %mask = load i64, i64* @HDR_MASK
+  %arghdrcanon = and i64 %arghdr, %mask
   %isString = icmp eq i64 %arglayout, 0
   br i1 %isString, label %hashString, label %hashChildren
 hashString:
-  %mask = load i64, i64* @HDR_MASK
-  %arglen = and i64 %arghdr, %mask
-  call void @add_hash64(i8* %hasher, i64 %arglen)
+  call void @add_hash64(i8* %hasher, i64 %arghdrcanon)
   %strptrlong = getelementptr inbounds %block, %block* %arg, i64 0, i32 1, i64 0
   %strptr = bitcast i64** %strptrlong to i8*
   br label %stringLoop
 stringLoop:
-  %counter = phi i64 [ %arglen, %hashString ], [ %sub1, %compareByte ]
+  %counter = phi i64 [ %arghdrcanon, %hashString ], [ %sub1, %compareByte ]
   %sub1 = sub i64 %counter, 1
-  %index = sub i64 %arglen, %counter
+  %index = sub i64 %arghdrcanon, %counter
   %finished = icmp eq i64 %counter, 0
   br i1 %finished, label %exit, label %compareByte
 compareByte:
@@ -79,7 +79,7 @@ compareByte:
   call void @add_hash8(i8* %hasher, i8 %byte)
   br label %stringLoop
 hashChildren:
-  call void @add_hash64(i8* %hasher, i64 %arghdr)
+  call void @add_hash64(i8* %hasher, i64 %arghdrcanon)
   %arglayoutshort = trunc i64 %arglayout to i16
   %layoutPtr = call %layout* @getLayoutData(i16 %arglayoutshort)
   %layoutData = load %layout, %layout* %layoutPtr

@@ -4,6 +4,7 @@
 #include<cstring>
 
 #include "runtime/header.h"
+#include "runtime/alloc.h"
 
 #define KCHAR char
 extern "C" {
@@ -57,18 +58,18 @@ BOOST_AUTO_TEST_CASE(int2bytes) {
   mpz_init_set_ui(_0, 0);
 
   auto res = hook_BYTES_int2bytes(_0, _0, tag_big_endian());
-  BOOST_CHECK_EQUAL(NOT_YOUNG_OBJECT_BIT, res->h.hdr);
+  BOOST_CHECK_EQUAL(0, len(res));
   res = hook_BYTES_int2bytes(_0, _0, 2);
-  BOOST_CHECK_EQUAL(NOT_YOUNG_OBJECT_BIT, res->h.hdr);
+  BOOST_CHECK_EQUAL(0, len(res));
 
   mpz_t _4;
   mpz_init_set_ui(_4, 4);
 
   res = hook_BYTES_int2bytes(_4, _0, tag_big_endian());
-  BOOST_CHECK_EQUAL(4, res->h.hdr);
+  BOOST_CHECK_EQUAL(4, len(res));
   BOOST_CHECK_EQUAL(0, memcmp(res->data, "\x00\x00\x00\x00", 4));
   res = hook_BYTES_int2bytes(_4, _0, 2);
-  BOOST_CHECK_EQUAL(4, res->h.hdr);
+  BOOST_CHECK_EQUAL(4, len(res));
   BOOST_CHECK_EQUAL(0, memcmp(res->data, "\x00\x00\x00\x00", 4));
 
   mpz_t _1, neg128;
@@ -76,37 +77,37 @@ BOOST_AUTO_TEST_CASE(int2bytes) {
   mpz_init_set_si(neg128, -128);
 
   res = hook_BYTES_int2bytes(_1, neg128, tag_big_endian());
-  BOOST_CHECK_EQUAL(1, res->h.hdr);
+  BOOST_CHECK_EQUAL(1, len(res));
   BOOST_CHECK_EQUAL(0, memcmp(res->data, "\x80", 1));
   res = hook_BYTES_int2bytes(_1, neg128, 2);
-  BOOST_CHECK_EQUAL(1, res->h.hdr);
+  BOOST_CHECK_EQUAL(1, len(res));
   BOOST_CHECK_EQUAL(0, memcmp(res->data, "\x80", 1));
 
   mpz_t _128;
   mpz_init_set_ui(_128, 128);
 
   res = hook_BYTES_int2bytes(_1, _128, tag_big_endian());
-  BOOST_CHECK_EQUAL(1, res->h.hdr);
+  BOOST_CHECK_EQUAL(1, len(res));
   BOOST_CHECK_EQUAL(0, memcmp(res->data, "\x80", 1));
   res = hook_BYTES_int2bytes(_1, _128, 2);
-  BOOST_CHECK_EQUAL(1, res->h.hdr);
+  BOOST_CHECK_EQUAL(1, len(res));
   BOOST_CHECK_EQUAL(0, memcmp(res->data, "\x80", 1));
 
   mpz_t _2;
   mpz_init_set_ui(_2, 2);
 
   res = hook_BYTES_int2bytes(_2, _128, tag_big_endian());
-  BOOST_CHECK_EQUAL(2, res->h.hdr);
+  BOOST_CHECK_EQUAL(2, len(res));
   BOOST_CHECK_EQUAL(0, memcmp(res->data, "\x00\x80", 2));
   res = hook_BYTES_int2bytes(_2, _128, 2);
-  BOOST_CHECK_EQUAL(2, res->h.hdr);
+  BOOST_CHECK_EQUAL(2, len(res));
   BOOST_CHECK_EQUAL(0, memcmp(res->data, "\x80\x00", 2));
 
   res = hook_BYTES_int2bytes(_2, neg128, tag_big_endian());
-  BOOST_CHECK_EQUAL(2, res->h.hdr);
+  BOOST_CHECK_EQUAL(2, len(res));
   BOOST_CHECK_EQUAL(0, memcmp(res->data, "\xff\x80", 2));
   res = hook_BYTES_int2bytes(_2, neg128, 2);
-  BOOST_CHECK_EQUAL(2, res->h.hdr);
+  BOOST_CHECK_EQUAL(2, len(res));
   BOOST_CHECK_EQUAL(0, memcmp(res->data, "\x80\xff", 2));
 }
 
@@ -114,12 +115,12 @@ BOOST_AUTO_TEST_CASE(bytes2string) {
   auto empty = makeString("");
   auto res = hook_BYTES_bytes2string(empty);
   BOOST_CHECK(res != empty);
-  BOOST_CHECK_EQUAL(empty->h.hdr, 0);
+  BOOST_CHECK_EQUAL(len(empty), 0);
 
   auto _1234 = makeString("1234");
   res = hook_BYTES_bytes2string(_1234);
   BOOST_CHECK(res != _1234);
-  BOOST_CHECK_EQUAL(_1234->h.hdr, 4);
+  BOOST_CHECK_EQUAL(len(_1234), 4);
   BOOST_CHECK_EQUAL(0, memcmp(_1234->data, "1234", 4));
 }
 
@@ -127,12 +128,12 @@ BOOST_AUTO_TEST_CASE(string2bytes) {
   auto empty = makeString("");
   auto res = hook_BYTES_string2bytes(empty);
   BOOST_CHECK(res != empty);
-  BOOST_CHECK_EQUAL(empty->h.hdr, 0);
+  BOOST_CHECK_EQUAL(len(empty), 0);
 
   auto _1234 = makeString("1234");
   res = hook_BYTES_string2bytes(_1234);
   BOOST_CHECK(res != _1234);
-  BOOST_CHECK_EQUAL(_1234->h.hdr, 4);
+  BOOST_CHECK_EQUAL(len(_1234), 4);
   BOOST_CHECK_EQUAL(0, memcmp(_1234->data, "1234", 4));
 }
 
@@ -158,7 +159,7 @@ BOOST_AUTO_TEST_CASE(substr) {
   BOOST_CHECK_THROW(hook_BYTES_substr(catAll, _7, _40), std::invalid_argument);
   BOOST_CHECK_THROW(hook_BYTES_substr(catAll, _8, _40), std::invalid_argument);
   BOOST_CHECK_EQUAL(memcmp(hook_BYTES_substr(catAll, _8, _9)->data, "f", 1), 0);
-  BOOST_CHECK_EQUAL(hook_BYTES_substr(catAll, _9, _9)->h.hdr, 0);
+  BOOST_CHECK_EQUAL(len(hook_BYTES_substr(catAll, _9, _9)), 0);
   BOOST_CHECK_THROW(hook_BYTES_substr(catAll, _8, _7), std::invalid_argument);
   BOOST_CHECK_THROW(hook_BYTES_substr(catAll, _7, _10), std::invalid_argument);
   BOOST_CHECK_THROW(hook_BYTES_substr(catAll, _1024, _4096), std::invalid_argument);
@@ -172,7 +173,7 @@ BOOST_AUTO_TEST_CASE(replaceAt) {
 
   auto res = hook_BYTES_replaceAt(_1234, _0, _2);
   BOOST_CHECK_EQUAL(_1234, res);
-  BOOST_CHECK_EQUAL(4, res->h.hdr);
+  BOOST_CHECK_EQUAL(4, len(res));
   BOOST_CHECK_EQUAL(0, memcmp(res->data, "2234", 4));
 
   auto _23 = makeString("23");
@@ -180,7 +181,7 @@ BOOST_AUTO_TEST_CASE(replaceAt) {
 
   res = hook_BYTES_replaceAt(_1234, _0, _23);
   BOOST_CHECK_EQUAL(_1234, res);
-  BOOST_CHECK_EQUAL(4, res->h.hdr);
+  BOOST_CHECK_EQUAL(4, len(res));
   BOOST_CHECK_EQUAL(0, memcmp(res->data, "2334", 4));
 
   auto empty = makeString("");
@@ -188,7 +189,7 @@ BOOST_AUTO_TEST_CASE(replaceAt) {
 
   res = hook_BYTES_replaceAt(_1234, _0, empty);
   BOOST_CHECK_EQUAL(_1234, res);
-  BOOST_CHECK_EQUAL(4, res->h.hdr);
+  BOOST_CHECK_EQUAL(4, len(res));
   BOOST_CHECK_EQUAL(0, memcmp(res->data, "1234", 4));
 
   mpz_t _1;
@@ -197,7 +198,7 @@ BOOST_AUTO_TEST_CASE(replaceAt) {
 
   res = hook_BYTES_replaceAt(_1234, _1, _12);
   BOOST_CHECK_EQUAL(_1234, res);
-  BOOST_CHECK_EQUAL(4, res->h.hdr);
+  BOOST_CHECK_EQUAL(4, len(res));
   BOOST_CHECK_EQUAL(0, memcmp(res->data, "1124", 4));
 }
 
@@ -216,14 +217,14 @@ BOOST_AUTO_TEST_CASE(padRight) {
 
   auto res = hook_BYTES_padRight(empty, _0, _0);
   BOOST_CHECK_EQUAL(empty, res);
-  BOOST_CHECK_EQUAL(0, empty->h.hdr);
+  BOOST_CHECK_EQUAL(0, len(empty));
 
   mpz_t _4, _97;
   mpz_init_set_ui(_4, 4);
   mpz_init_set_ui(_97, 97);
 
   res = hook_BYTES_padRight(empty, _4, _97);
-  BOOST_CHECK_EQUAL(4, res->h.hdr);
+  BOOST_CHECK_EQUAL(4, len(res));
   BOOST_CHECK_EQUAL(0, memcmp(res->data, "aaaa", 4));
 
   auto _1234 = makeString("1234");
@@ -231,7 +232,7 @@ BOOST_AUTO_TEST_CASE(padRight) {
   mpz_init_set_ui(_8, 8);
 
   res = hook_BYTES_padRight(_1234, _8, _97);
-  BOOST_CHECK_EQUAL(8, res->h.hdr);
+  BOOST_CHECK_EQUAL(8, len(res));
   BOOST_CHECK_EQUAL(0, memcmp(res->data, "1234aaaa", 8));
 }
 
@@ -242,14 +243,14 @@ BOOST_AUTO_TEST_CASE(padLeft) {
 
   auto res = hook_BYTES_padLeft(empty, _0, _0);
   BOOST_CHECK_EQUAL(empty, res);
-  BOOST_CHECK_EQUAL(0, empty->h.hdr);
+  BOOST_CHECK_EQUAL(0, len(empty));
 
   mpz_t _4, _97;
   mpz_init_set_ui(_4, 4);
   mpz_init_set_ui(_97, 97);
 
   res = hook_BYTES_padLeft(empty, _4, _97);
-  BOOST_CHECK_EQUAL(4, res->h.hdr);
+  BOOST_CHECK_EQUAL(4, len(res));
   BOOST_CHECK_EQUAL(0, memcmp(res->data, "aaaa", 4));
 
   auto _1234 = makeString("1234");
@@ -257,7 +258,7 @@ BOOST_AUTO_TEST_CASE(padLeft) {
   mpz_init_set_ui(_8, 8);
 
   res = hook_BYTES_padLeft(_1234, _8, _97);
-  BOOST_CHECK_EQUAL(8, res->h.hdr);
+  BOOST_CHECK_EQUAL(8, len(res));
   BOOST_CHECK_EQUAL(0, memcmp(res->data, "aaaa1234", 8));
 }
 
@@ -265,12 +266,12 @@ BOOST_AUTO_TEST_CASE(reverse) {
   auto empty = makeString("");
   auto res = hook_BYTES_reverse(empty);
   BOOST_CHECK_EQUAL(empty, res);
-  BOOST_CHECK_EQUAL(empty->h.hdr, 0);
+  BOOST_CHECK_EQUAL(len(empty), 0);
 
   auto _1234 = makeString("1234");
   res = hook_BYTES_reverse(_1234);
   BOOST_CHECK_EQUAL(_1234, res);
-  BOOST_CHECK_EQUAL(_1234->h.hdr, 4);
+  BOOST_CHECK_EQUAL(len(_1234), 4);
   BOOST_CHECK_EQUAL(0, memcmp(_1234->data, "4321", 4));
 }
 
@@ -281,17 +282,17 @@ BOOST_AUTO_TEST_CASE(concat) {
   auto d = makeString("");
 
   auto emptyCatR = hook_BYTES_concat(a, d);
-  BOOST_CHECK_EQUAL(0, memcmp(emptyCatR->data, a->data, emptyCatR->h.hdr));
-  BOOST_CHECK_EQUAL(emptyCatR->h.hdr, a->h.hdr);
+  BOOST_CHECK_EQUAL(0, memcmp(emptyCatR->data, a->data, len(emptyCatR)));
+  BOOST_CHECK_EQUAL(len(emptyCatR), len(a));
 
   auto emptyCatL = hook_BYTES_concat(d, a);
-  BOOST_CHECK_EQUAL(0, memcmp(emptyCatL->data, a->data, emptyCatL->h.hdr));
-  BOOST_CHECK_EQUAL(emptyCatL->h.hdr, a->h.hdr);
+  BOOST_CHECK_EQUAL(0, memcmp(emptyCatL->data, a->data, len(emptyCatL)));
+  BOOST_CHECK_EQUAL(len(emptyCatL), len(a));
 
   auto catAll = hook_BYTES_concat(hook_BYTES_concat(a,b), c);
   auto expected = makeString("hellohehf");
-  BOOST_CHECK_EQUAL(0, memcmp(catAll->data, expected->data, catAll->h.hdr));
-  BOOST_CHECK_EQUAL(catAll->h.hdr, expected->h.hdr);
+  BOOST_CHECK_EQUAL(0, memcmp(catAll->data, expected->data, len(catAll)));
+  BOOST_CHECK_EQUAL(len(catAll), len(expected));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
