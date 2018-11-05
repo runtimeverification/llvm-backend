@@ -1,11 +1,11 @@
-extern crate im;
+extern crate im_rc;
 extern crate libc;
 
 use std::cell::UnsafeCell;
 use std::hash::{Hash,Hasher};
-use decls::im::hashmap::HashMap;
-use decls::im::hashset::HashSet;
-use decls::im::vector::Vector;
+use decls::im_rc::hashmap::HashMap;
+use decls::im_rc::hashset::HashSet;
+use decls::im_rc::vector::Vector;
 use self::libc::{FILE,c_char,c_void};
 use std::alloc::{GlobalAlloc, Layout};
 
