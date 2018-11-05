@@ -152,6 +152,25 @@ where K: Ord + Hash + Clone {
     return Ordering::Greater;
 }
 
+#[no_mangle]
+pub unsafe extern "C" fn hook_MAP_cmp(a: *const c_void, b: *const c_void) -> i64 {
+  match hash_map_compare(std::mem::transmute::<*const c_void, &Map>(a),
+                         std::mem::transmute::<*const c_void, &Map>(b)) {
+    Ordering::Less => -1,
+    Ordering::Equal => 0,
+    Ordering::Greater => 1,
+  }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn hook_SET_cmp(a: *const c_void, b: *const c_void) -> i64 {
+  match hash_set_compare(std::mem::transmute::<*const c_void, &Set>(a),
+                         std::mem::transmute::<*const c_void, &Set>(b)) {
+    Ordering::Less => -1,
+    Ordering::Equal => 0,
+    Ordering::Greater => 1,
+  }
+}
 
 #[no_mangle]
 pub unsafe extern "C" fn add_hash8(h: *mut c_void, data: u8) {
