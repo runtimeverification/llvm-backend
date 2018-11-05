@@ -30,4 +30,6 @@ llvm-kompile ../test/test7.kore TEST -o interpreter
 ./interpreter ../test/test7.in.kore -1 /dev/null
 llvm-kompile ../test/test8.kore TEST -o interpreter
 ./interpreter ../test/test8.kore -1 /dev/stdout | diff - ../test/test8.out
+llvm-kompile ../test/test9.kore TEST -o interpreter
+./interpreter ../test/test9.kore -1 /dev/stdout | diff - ../test/test9.out
 rm -f configparser configparser.ll interpreterQ
