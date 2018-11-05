@@ -477,14 +477,14 @@ isValidOverload ps (Metadata _ _ _ _ childMeta) cls metaPs less =
     Nothing -> False
     Just metaTs -> 
       let items = zipWith3 isValidChild ps metaPs metaTs
-      in or items
+      in and items
   where
     isValidChild :: Fix Pattern -> Metadata -> Metadata -> Bool
-    isValidChild p metaP metaT =
+    isValidChild p metaP@(Metadata _ _ _ _ m) metaT =
       let sortP = getSort metaP
           sortT = getSort metaT
           child = Symbol (SymbolOrAlias (Id "inj" AstLocationNone) [sortT, sortP])
-      in sortP == sortT || checkPatternIndex child metaP (cls,p)
+      in sortP == sortT || ((isJust $ m $ child) && checkPatternIndex child metaP (cls,p))
 
 checkPatternIndex :: Constructor -> Metadata -> (Clause, Fix Pattern) -> Bool
 checkPatternIndex _ _ (_, Fix Wildcard) = True
