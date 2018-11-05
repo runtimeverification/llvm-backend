@@ -47,7 +47,7 @@ import           Data.Deriving         (deriveOrd1, deriveShow1, deriveEq1, deri
 import           Data.Function         (on)
 import           Data.Functor.Classes  (Show1(..), Eq1(..), Ord1(..), liftEq2, liftCompare2, liftShowsPrec2)
 import           Data.Functor.Foldable (Fix (..), cata)
-import           Data.List             (transpose,nub,sortBy,maximumBy,elemIndex,intersect)
+import           Data.List             (transpose,nub,sortBy,maximumBy,elemIndex,intersect,zipWith4)
 import           Data.List.Index       (indexed)
 import           Data.Maybe            (catMaybes,isJust,fromJust,listToMaybe)
 import           Data.Ord              (comparing)
@@ -177,6 +177,7 @@ data Clause       = Clause
                     -- the length of the head and tail of any list patterns
                     -- with frame variables bound so far in this row
                     , getListRanges :: [(Occurrence, Int, Int)]
+                    , getOverloadChildren :: [(Constructor, VariableBinding)]
                     }
                     deriving (Show)
 
@@ -190,7 +191,7 @@ mkClauseMatrix :: [Column]
                -> Either Text (ClauseMatrix, Fringe)
 mkClauseMatrix cs as = do
   validateColumnLength (length as) cs
-  pure ((ClauseMatrix (PatternMatrix cs) (map (\a -> Clause a [] []) as)),map (\i -> ([i], False)) [1..length cs]) 
+  pure ((ClauseMatrix (PatternMatrix cs) (map (\a -> Clause a [] [] []) as)),map (\i -> ([i], False)) [1..length cs]) 
   where
     validateColumnLength :: Int -> [Column] -> Either Text ()
     validateColumnLength as' =
@@ -519,10 +520,10 @@ checkPatternIndex (HasNoKey _ Nothing) _ _ = error "TODO: map/set choice"
 checkPatternIndex _ _ (_, Fix (MapPattern _ _ _ _ _)) = error "Invalid map pattern"
 checkPatternIndex _ _ (_, Fix (SetPattern _ _ _ _)) = error "Invalid map pattern"
 
-addVars :: Maybe Constructor -> [Clause] -> [Fix Pattern] -> Occurrence -> [Clause]
-addVars ix as c o =
-  let rows = zip c as
-  in map (\(p, (Clause a vars ranges)) -> (Clause a (addVarToRow ix o p vars) $ addRange ix o p ranges)) rows
+addVars :: Maybe Constructor -> [Clause] -> Column -> Occurrence -> [Clause]
+addVars ix as (Column m ps) o =
+  let rows = zip ps as
+  in map (\(p, (Clause a vars ranges children)) -> (Clause a (addVarToRow ix o p vars) (addRange ix o p ranges) $ addOverloads m ix o p children)) rows
 
 addVarToRow :: Maybe Constructor -> Occurrence -> Fix Pattern -> [VariableBinding] -> [VariableBinding]
 addVarToRow _ o (Fix (Variable name hookAtt)) vars = VariableBinding name hookAtt o : vars
@@ -542,10 +543,37 @@ addRange :: Maybe Constructor -> Occurrence -> Fix Pattern -> [(Occurrence, Int,
 addRange (Just (List _ len)) o (Fix (ListPattern hd (Just (Fix (Variable _ _))) tl _ _)) ranges = (len : o, length hd, length tl) : ranges
 addRange _ _ _ ranges = ranges
 
+addOverloads :: Metadata -> Maybe Constructor -> Occurrence -> Fix Pattern -> [(Constructor, VariableBinding)] -> [(Constructor, VariableBinding)]
+addOverloads (Metadata _ _ _ _ meta) (Just (Symbol (SymbolOrAlias name@(Id "inj" _) [a,_]))) o (Fix (Pattern ix@(Symbol (SymbolOrAlias (Id "inj" _) [b,_])) _ [p])) children = 
+  if a == b then 
+    children  
+  else
+    let childMeta = (fromJust $ meta ix) !! 0
+    in addOverloads childMeta (Just (Symbol (SymbolOrAlias name [a,b]))) (0 : o) p children
+addOverloads (Metadata _ _ overloads _ meta) (Just inj@(Symbol (SymbolOrAlias (Id "inj" _) _))) o (Fix (Pattern ix _ ps)) children = 
+  let less = overloads ix
+      metaPs = fromJust $ meta ix
+      (Metadata _ _ _ _ childMeta) = (fromJust $ meta inj) !! 0
+      childMaybe = listToMaybe $ catMaybes $ map childMeta less
+  in case childMaybe of
+    Nothing -> children
+    Just metaTs -> 
+      let items = concat $ zipWith4 getVar metaPs metaTs ps [0..length metaPs-1]
+      in items ++ children
+  where
+    getVar :: Metadata -> Metadata -> Fix Pattern -> Int -> [(Constructor, VariableBinding)]
+    getVar metaP metaT p i =
+      let vars = addVarToRow Nothing (-1 : i : 0 : o) p []
+          sortP = getSort metaP
+          sortT = getSort metaT
+          child = Symbol (SymbolOrAlias (Id "inj" AstLocationNone) [sortT, sortP])
+      in if sortP == sortT then [] else zip (replicate (length vars) child) vars
+addOverloads _ _ _ _ children = children
+
 filterMatrix :: Maybe Constructor -> ((Clause, Fix Pattern) -> Bool) -> (ClauseMatrix, Occurrence) -> ClauseMatrix
 filterMatrix ix checkPattern ((ClauseMatrix (PatternMatrix cs@(c : _)) as), o) =
   let filteredRows = map checkPattern $ zip as $ getTerms c
-      varsAs = addVars ix as (getTerms c) o
+      varsAs = addVars ix as c o
       newAs = filterByList filteredRows varsAs
       newCs = map (filterRows filteredRows) cs
   in ClauseMatrix (PatternMatrix newCs) newAs
@@ -608,12 +636,12 @@ computeMapElementScore m e c tl (k,v) =
   in if finalScore == 0.0 then minPositiveDouble else finalScore
 
 canonicalizePattern :: Clause -> Fix Pattern -> Fix BoundPattern
-canonicalizePattern (Clause _ vars _) (Fix (Variable name hookAtt)) =
+canonicalizePattern (Clause _ vars _ _) (Fix (Variable name hookAtt)) =
   let names = map getName vars
       os = map getOccurrence vars
       oMap = Map.fromList $ zip names os
   in Fix $ Variable (Map.lookup name oMap) hookAtt
-canonicalizePattern c'@(Clause _ vars _) (Fix (As name hookAtt p)) =
+canonicalizePattern c'@(Clause _ vars _ _) (Fix (As name hookAtt p)) =
   let names = map getName vars
       os = map getOccurrence vars
       oMap = Map.fromList $ zip names os
@@ -649,21 +677,21 @@ computeElementScore k c tl =
     mapContainsKey k' (Fix (MapPattern ks _ _ _ _)) = elem k' ks
     mapContainsKey _ _ = False
     canonicalizeClause :: Clause -> Clause
-    canonicalizeClause (Clause a vars ranges) =
+    canonicalizeClause (Clause a vars ranges children) =
       let hooks = map getHook vars
           os = map getOccurrence vars
           names = map show os
-      in (Clause a (zipWith3 VariableBinding names hooks os) ranges)
+      in (Clause a (zipWith3 VariableBinding names hooks os) ranges children)
 
 isBound :: Eq a => (VariableBinding -> a) -> Clause -> Fix (P a) -> Bool
 isBound get c' (Fix (Pattern _ _ ps)) = all (isBound get c') ps
 isBound get c' (Fix (ListPattern hd f tl' _ _)) = all (isBound get c') hd && all (isBound get c') tl' && maybe True (isBound get c') f
 isBound get c' (Fix (MapPattern ks vs f _ _)) = all (isBound get c') ks && all (isBound get c') vs && maybe True (isBound get c') f
 isBound get c' (Fix (SetPattern es f _ _)) = all (isBound get c') es && maybe True (isBound get c') f
-isBound get c'@(Clause _ vars _) (Fix (As name _ p)) = 
+isBound get c'@(Clause _ vars _ _) (Fix (As name _ p)) = 
   isBound get c' p && (elem name $ map get vars )
 isBound _ _ (Fix Wildcard) = False
-isBound get (Clause _ vars _) (Fix (Variable name _)) =
+isBound get (Clause _ vars _ _) (Fix (Variable name _)) =
   elem name $ map get vars
 
 expandColumn :: Constructor -> Column -> [Clause] -> [Column]
@@ -830,13 +858,15 @@ instance Y.ToYaml (Anchor (Free Anchor Alias)) => Y.ToYaml (Free Anchor Alias) w
     toYaml (Free f) = Y.toYaml f
 
 -- gets the decision tree for handling the leaf of a particular row
-getLeaf ix os ps (Clause (Action a rhsVars maybeSideCondition) matchedVars ranges) next =
 getLeaf :: Int -> Fringe -> [Fix Pattern] -> Clause -> (Int -> Fix DecisionTree) -> Fix DecisionTree
+getLeaf ix os ps (Clause (Action a rhsVars maybeSideCondition) matchedVars ranges children) next =
   let row = zip os ps
       -- first, add all remaining variable bindings to the clause
       vars = nub $ foldr (\((o,_), p) -> (addVarToRow Nothing o p)) matchedVars row
+      (_, overloadVars) = unzip children
+      allVars = vars ++ overloadVars
       -- then group the bound variables by their name
-      grouped = foldr (\(VariableBinding name hookAtt o) -> \m -> Map.insert (name,hookAtt) (o : Map.findWithDefault [] (name,hookAtt) m) m) Map.empty vars
+      grouped = foldr (\(VariableBinding name hookAtt o) -> \m -> Map.insert (name,hookAtt) (o : Map.findWithDefault [] (name,hookAtt) m) m) Map.empty allVars
       -- compute the variables bound more than once
       nonlinear = Map.filter ((> 1) . length) grouped
       nonlinearPairs = Map.map (\l -> zip l (tail l)) nonlinear
@@ -862,8 +892,9 @@ getLeaf :: Int -> Fringe -> [Fix Pattern] -> Clause -> (Int -> Fix DecisionTree)
                                  switchLiteral newO 1 [("1", nonlinearLeaf),
                                                        ("0", (next $ ix'+1))
                                                       ] Nothing)
-  -- fill out the bindings for list range variables
-  in foldr (\(o, hd, tl) -> Fix . Function "hook_LIST_range_long" o [tail o, [hd, -1], [tl, -1]] "LIST.List") sc ranges
+      -- fill out the bindings for list range variables
+      withRanges = foldr (\(o, hd, tl) -> Fix . Function "hook_LIST_range_long" o [tail o, [hd, -1], [tl, -1]] "LIST.List") sc ranges
+  in foldr (\(inj, VariableBinding _ h o) -> Fix . MakePattern o (Fix $ Pattern inj Nothing [Fix $ Variable (Just $ tail o) h])) withRanges children
   where
     makeEquality :: String -> (Occurrence, Occurrence) -> (Fix DecisionTree, Int) -> (Fix DecisionTree, Int)
     -- compare the values of the variables with the same name and if they are equal, continue, otherwise go to the next row
