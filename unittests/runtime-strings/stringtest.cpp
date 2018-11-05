@@ -16,6 +16,7 @@ extern "C" {
   bool hook_STRING_le(const string *, const string *);
   bool hook_STRING_eq(const string *, const string *);
   bool hook_STRING_ne(const string *, const string *);
+  int64_t hook_STRING_cmp(const string *, const string *);
   const string * hook_STRING_concat(const string *, const string *);
   mpz_ptr hook_STRING_length(const string *);
   const string * hook_STRING_chr(const mpz_t);
@@ -188,6 +189,30 @@ BOOST_AUTO_TEST_CASE(ne) {
   BOOST_CHECK_EQUAL(true,  hook_STRING_ne(d,b));
   BOOST_CHECK_EQUAL(true,  hook_STRING_ne(d,c));
   BOOST_CHECK_EQUAL(false, hook_STRING_ne(d,d));
+}
+
+BOOST_AUTO_TEST_CASE(cmp) {
+  auto a = makeString("hello");
+  auto b = makeString("he");
+  auto c = makeString("hf");
+  auto d = makeString("");
+
+  BOOST_CHECK_EQUAL(0, hook_STRING_cmp(a,a));
+  BOOST_CHECK_EQUAL(3,  hook_STRING_cmp(a,b));
+  BOOST_CHECK_EQUAL(3,  hook_STRING_cmp(a,c));
+  BOOST_CHECK_EQUAL(5,  hook_STRING_cmp(a,d));
+  BOOST_CHECK_EQUAL(-3,  hook_STRING_cmp(b,a));
+  BOOST_CHECK_EQUAL(0, hook_STRING_cmp(b,b));
+  BOOST_CHECK_EQUAL(-257,  hook_STRING_cmp(b,c));
+  BOOST_CHECK_EQUAL(2,  hook_STRING_cmp(b,d));
+  BOOST_CHECK_EQUAL(-3,  hook_STRING_cmp(c,a));
+  BOOST_CHECK_EQUAL(257,  hook_STRING_cmp(c,b));
+  BOOST_CHECK_EQUAL(0, hook_STRING_cmp(c,c));
+  BOOST_CHECK_EQUAL(2,  hook_STRING_cmp(c,d));
+  BOOST_CHECK_EQUAL(-5,  hook_STRING_cmp(d,a));
+  BOOST_CHECK_EQUAL(-2,  hook_STRING_cmp(d,b));
+  BOOST_CHECK_EQUAL(-2,  hook_STRING_cmp(d,c));
+  BOOST_CHECK_EQUAL(0, hook_STRING_cmp(d,d));
 }
 
 BOOST_AUTO_TEST_CASE(concat) {

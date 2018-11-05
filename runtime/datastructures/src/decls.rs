@@ -3,6 +3,8 @@ extern crate libc;
 
 use std::cell::UnsafeCell;
 use std::hash::{Hash,Hasher};
+use std::collections::BinaryHeap;
+use std::cmp::Ordering;
 use decls::im::hashmap::HashMap;
 use decls::im::hashset::HashSet;
 use decls::im::vector::Vector;
@@ -56,6 +58,36 @@ impl PartialEq for KElem {
   }
 }
 
+impl PartialOrd for KElem {
+    fn partial_cmp(&self, other: &KElem) -> Option<Ordering> {
+        let ret: i64 = unsafe {
+            hook_KORD_cmp(*self.0.get(), *other.0.get())
+        };
+        if ret < 0 {
+            Some(Ordering::Less)
+        } else if ret == 0 {
+            Some(Ordering::Equal)
+        } else {
+            Some(Ordering::Greater)
+        }
+    }
+}
+
+impl Ord for KElem {
+    fn cmp(&self, other: &KElem) -> Ordering {
+        let ret: i64 = unsafe {
+            hook_KORD_cmp(*self.0.get(), *other.0.get())
+        };
+        if ret < 0 {
+            Ordering::Less
+        } else if ret == 0 {
+            Ordering::Equal
+        } else {
+            Ordering::Greater
+        }
+    }
+}
+
 impl Eq for KElem {}
 
 impl Hash for KElem {
@@ -67,6 +99,57 @@ impl Hash for KElem {
       hash_exit();
     }
   }
+}
+
+fn hash_map_compare<K,V>(a: &HashMap<K, V>, b: &HashMap<K, V>) -> Ordering
+where K: Ord + Hash + Clone, V: Ord + Clone {
+    let mut a_keys : BinaryHeap<_> = a.keys().collect();
+    let mut b_keys : BinaryHeap<_> = b.keys().collect();
+    while !(a_keys.is_empty() || b_keys.is_empty()) {
+        let (a_top, b_top) = (a_keys.pop(), b_keys.pop());
+        if a_top > b_top {
+            return Ordering::Greater;
+        }
+        if b_top > a_top {
+            return Ordering::Less;
+        }
+        let (a_top_elem, b_top_elem) = (a.get(a_top.unwrap()), b.get(b_top.unwrap()));
+        if a_top_elem > b_top_elem {
+            return Ordering::Greater;
+        }
+        if b_top_elem > a_top_elem {
+            return Ordering::Less;
+        }
+    }
+    if a_keys.is_empty() {
+        if b_keys.is_empty() {
+            return Ordering::Equal;
+        }
+        return Ordering::Less;
+    }
+    return Ordering::Greater;
+}
+
+fn hash_set_compare<K>(a: &HashSet<K>, b: &HashSet<K>) -> Ordering
+where K: Ord + Hash + Clone {
+    let mut a_vals : BinaryHeap<_> = a.iter().collect();
+    let mut b_vals : BinaryHeap<_> = b.iter().collect();
+    while !(a_vals.is_empty() || b_vals.is_empty()) {
+        let (a_top, b_top) = (a_vals.pop(), b_vals.pop());
+        if a_top > b_top {
+            return Ordering::Greater;
+        }
+        if b_top > a_top {
+            return Ordering::Less;
+        }
+    }
+    if a_vals.is_empty() {
+        if b_vals.is_empty() {
+            return Ordering::Equal;
+        }
+        return Ordering::Less;
+    }
+    return Ordering::Greater;
 }
 
 
@@ -98,6 +181,7 @@ extern "C" {
   pub fn move_int(result: *mut Int) -> *mut Int;
   pub fn printConfigurationInternal(file: *mut FILE, subject: *const Block, sort: *const c_char);
   pub fn hook_KEQUAL_eq(k1: K, k2: K) -> bool;
+  pub fn hook_KORD_cmp(k1: K, k2: K) -> i64;
   pub fn k_hash<'a>(k1: K, h: *mut c_void) -> u64;
   pub fn hash_enter() -> bool;
   pub fn hash_exit();
