@@ -86,11 +86,13 @@ parseAxiomForSymbols = parsePatternForSymbols . sentenceAxiomPattern
     rAlgebra _                                            = []
 
 mkSymLib :: [SymbolOrAlias Object] 
+         -> [Sort Object]
          -> MetadataTools Object StepperAttributes
          -> [(SymbolOrAlias Object, SymbolOrAlias Object)]
          -> SymLib
-mkSymLib symbols metaTools overloads = 
-  let (SymLib sorts syms _) = foldl go (SymLib Map.empty Map.empty Map.empty) symbols
+mkSymLib symbols sortDecls metaTools overloads = 
+  let empty = replicate (length sortDecls) []
+      (SymLib sorts syms _) = foldl go (SymLib Map.empty (Map.fromList $ zip sortDecls empty) Map.empty) symbols
   in SymLib sorts (Map.map nub syms) (Map.map nub $ foldl mkOverloads Map.empty overloads)
   where
     go (SymLib dIx rIx oIx) symbol =
@@ -118,9 +120,10 @@ parseSymbols :: KoreDefinition -> KoreIndexedModule StepperAttributes -> SymLib
 parseSymbols def indexedMod =
   let axioms = getAxioms def
       symbols = mconcat (parseAxiomForSymbols <$> axioms)
+      allSorts = concatMap symbolOrAliasParams symbols
       metaTools = extractMetadataTools indexedMod
       overloads = getOverloads axioms
-  in mkSymLib symbols metaTools overloads
+  in mkSymLib symbols allSorts metaTools overloads
 
 --[ Patterns ]--
 getAtt :: SentenceAxiom UnifiedSortVariable UnifiedPattern Variable
