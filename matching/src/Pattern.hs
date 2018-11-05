@@ -697,8 +697,8 @@ isBound get (Clause _ vars _ _) (Fix (Variable name _)) =
 expandColumn :: Constructor -> Column -> [Clause] -> [Column]
 expandColumn ix (Column m ps) cs =
   let metas    = expandMetadata ix m
-      expanded = map (expandPattern ix metas) (zip ps cs)
-      ps'' = map (expandIfJust metas) (zip expanded cs)
+      expanded = map (expandPattern ix metas m) (zip ps cs)
+      ps'' = map expandIfJust (zip expanded cs)
   in  zipWith Column metas (transpose ps'')
 
 expandMetadata :: Constructor -> Metadata -> [Metadata]
@@ -707,13 +707,13 @@ expandMetadata ix (Metadata _ _ _ sort ms) =
     Just m -> m
     Nothing -> error $ show (ix,sort)
 
-expandIfJust :: [Metadata]
-             -> ([(Fix Pattern,Maybe Constructor)],Clause)
+expandIfJust :: ([(Fix Pattern,Maybe (Constructor,Metadata))],Clause)
              -> [Fix Pattern]
-expandIfJust _ ([],_) = []
-expandIfJust ms ((p,Nothing):tl,c) = p : expandIfJust ms (tl,c)
-expandIfJust ms ((p,Just ix):tl,c) =
-  (expandIfJust ms (expandPattern ix ms (p,c),c) !! 0) : expandIfJust ms (tl,c)
+expandIfJust ([],_) = []
+expandIfJust ((p,Nothing):tl,c) = p : expandIfJust (tl,c)
+expandIfJust ((p,Just (ix,m)):tl,c) =
+  let metas = expandMetadata ix m
+  in (expandIfJust (expandPattern ix metas m (p,c),c) !! 0) : expandIfJust (tl,c)
 
 except :: Int -> [a] -> [a]
 except i as =
@@ -722,33 +722,54 @@ except i as =
 
 expandPattern :: Constructor
               -> [Metadata]
+              -> Metadata
               -> (Fix Pattern,Clause)
-              -> [(Fix Pattern,Maybe Constructor)]
-expandPattern (List _ len) _ (Fix (ListPattern hd _ tl _ _), _) = zip (hd ++ (replicate (len - length hd - length tl) (Fix Wildcard)) ++ tl) (replicate len Nothing)
-expandPattern _ _ (Fix (ListPattern _ _ _ _ _), _) = error "invalid list pattern"
-expandPattern (Symbol (SymbolOrAlias name [a, _])) _ (Fix (Pattern (Symbol (SymbolOrAlias (Id "inj" _) [b, _])) _ [fixedP]), _) = [(fixedP, if a == b then Nothing else Just (Symbol (SymbolOrAlias name [a,b])))]
-expandPattern Empty _ (_, _) = []
-expandPattern (NonEmpty _) _ (p,_) = [(p,Nothing)]
-expandPattern (HasKey _ _ _ (Just p)) _ (m@(Fix (MapPattern ks vs f e o)),c) = 
+              -> [(Fix Pattern,Maybe (Constructor,Metadata))]
+expandPattern (List _ len) _ _ (Fix (ListPattern hd _ tl _ _), _) = zip (hd ++ (replicate (len - length hd - length tl) (Fix Wildcard)) ++ tl) (replicate len Nothing)
+expandPattern _ _ _ (Fix (ListPattern _ _ _ _ _), _) = error "invalid list pattern"
+expandPattern (Symbol (SymbolOrAlias name [a, _])) _ (Metadata _ _ _ _ meta) (Fix (Pattern ix@(Symbol (SymbolOrAlias (Id "inj" _) [b, _])) _ [fixedP]), _) = [(fixedP, if a == b then Nothing else Just (Symbol (SymbolOrAlias name [a,b]), (fromJust $ meta ix) !! 0))]
+expandPattern (Symbol (SymbolOrAlias (Id "inj" _) _)) ms (Metadata _ _ overloads _ meta) (Fix (Pattern ix hookAtt fixedPs), cls) =
+  let less = overloads ix
+      childMeta = ms !! 0
+      metaPs = fromJust $ meta ix
+      validLess = case filter (isValidOverload fixedPs childMeta cls metaPs) less of
+        [hd] -> hd
+        _ -> error "invalid overload pattern"
+  in [(Fix $ Pattern validLess hookAtt $ expandOverload fixedPs childMeta metaPs validLess, Nothing)]
+  where
+    expandOverload :: [Fix Pattern] -> Metadata -> [Metadata] -> Constructor -> [Fix Pattern]
+    expandOverload ps (Metadata _ _ _ _ childMeta) metaPs less =
+      let metaTs = fromJust $ childMeta less
+      in zipWith3 expandOverload' ps metaPs metaTs
+    expandOverload' :: Fix Pattern -> Metadata -> Metadata -> Fix Pattern
+    expandOverload' p metaP metaT = 
+      let sortP = getSort metaP
+          sortT = getSort metaT
+          child = Symbol (SymbolOrAlias (Id "inj" AstLocationNone) [sortT,sortP])
+          maybeChild = if sortP == sortT then Nothing else Just (child,metaP)
+      in (expandIfJust ([(p,maybeChild)],cls)) !! 0
+expandPattern Empty _ _ (_, _) = []
+expandPattern (NonEmpty _) _ _ (p,_) = [(p,Nothing)]
+expandPattern (HasKey _ _ _ (Just p)) _ _ (m@(Fix (MapPattern ks vs f e o)),c) = 
   let canonKs = map (canonicalizePattern c) ks
       hasKey = elemIndex p canonKs
   in case hasKey of
        Just i -> [(vs !! i,Nothing), (Fix (MapPattern (except i ks) (except i vs) f e o), Nothing), (Fix Wildcard, Nothing)]
        Nothing -> [(Fix Wildcard,Nothing), (Fix Wildcard,Nothing), (m,Nothing)]
-expandPattern (HasKey _ _ _ (Just p)) _ (m@(Fix (SetPattern es f e o)),c) = 
+expandPattern (HasKey _ _ _ (Just p)) _ _ (m@(Fix (SetPattern es f e o)),c) = 
   let canonEs = map (canonicalizePattern c) es
       hasElem = elemIndex p canonEs
   in case hasElem of
        Just i -> [(Fix (SetPattern (except i es) f e o), Nothing), (Fix Wildcard,Nothing)]
        Nothing -> [(Fix Wildcard,Nothing), (m,Nothing)]
-expandPattern (HasKey _ _ _ Nothing) _ _ = error "TODO: map/set choice"
-expandPattern (HasNoKey _ _) _ (p,_) = [(p,Nothing)]
-expandPattern _ _ ((Fix (MapPattern _ _ _ _ _)),_) = error "Invalid map pattern"
-expandPattern _ _ ((Fix (SetPattern _ _ _ _)),_) = error "Invalid set pattern"
-expandPattern _ _ (Fix (Pattern _ _ fixedPs), _)  = zip fixedPs $ replicate (length fixedPs) Nothing
-expandPattern ix ms (Fix (As _ _ pat), c)         = expandPattern ix ms (pat, c)
-expandPattern _ ms (Fix Wildcard, _)              = replicate (length ms) (Fix Wildcard,Nothing)
-expandPattern _ ms (Fix (Variable _ _), _)        = replicate (length ms) (Fix Wildcard,Nothing)
+expandPattern (HasKey _ _ _ Nothing) _ _ _ = error "TODO: map/set choice"
+expandPattern (HasNoKey _ _) _ _ (p,_) = [(p,Nothing)]
+expandPattern _ _ _ ((Fix (MapPattern _ _ _ _ _)),_) = error "Invalid map pattern"
+expandPattern _ _ _ ((Fix (SetPattern _ _ _ _)),_) = error "Invalid set pattern"
+expandPattern _ _ _ (Fix (Pattern _ _ fixedPs), _)  = zip fixedPs $ replicate (length fixedPs) Nothing
+expandPattern ix ms m (Fix (As _ _ pat), c)         = expandPattern ix ms m (pat, c)
+expandPattern _ ms _ (Fix Wildcard, _)              = replicate (length ms) (Fix Wildcard,Nothing)
+expandPattern _ ms _ (Fix (Variable _ _), _)        = replicate (length ms) (Fix Wildcard,Nothing)
 
 data L a = L
            { getSpecializations :: ![(Text, a)]
