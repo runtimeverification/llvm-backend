@@ -303,7 +303,7 @@ genClauseMatrix :: KoreRewrite pattern
                -> KoreIndexedModule StepperAttributes
                -> [AxiomInfo pattern]
                -> [Sort Object]
-               -> (P.ClauseMatrix, [P.Occurrence])
+               -> (P.ClauseMatrix, P.Fringe)
 genClauseMatrix symlib indexedMod axioms sorts =
   let indices = map getOrdinal axioms
       rewrites = map getRewrite axioms

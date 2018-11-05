@@ -73,7 +73,7 @@ vars l = concat (map varLst l)
     varInt IntWld = []
     varInt (IntVar s) = [s]
 
-mkLstPattern :: [([Lst],Maybe [String])] -> (ClauseMatrix, [Occurrence])
+mkLstPattern :: [([Lst],Maybe [String])] -> (ClauseMatrix, Fringe)
 mkLstPattern pats =
   let as = take (length ls) [1..]
       (ls, conds) = unzip pats
@@ -85,32 +85,32 @@ mkLstPattern pats =
        Right matrix -> matrix
        Left  msg    -> error $ "Invalid definition: " ++ show msg
 
-defaultPattern :: (ClauseMatrix, [Occurrence])
+defaultPattern :: (ClauseMatrix, Fringe)
 defaultPattern =
   mkLstPattern [ ([Nil, Wld], Nothing)
                , ([Wld, Nil], Nothing)
                , ([Wld, Wld], Nothing) ]
 
-appendPattern :: (ClauseMatrix, [Occurrence])
+appendPattern :: (ClauseMatrix, Fringe)
 appendPattern =
   mkLstPattern [ ([Nil, Wld], Nothing)
                , ([Wld, Nil], Nothing)
                , ([Cns IntWld Wld, Cns IntWld Wld], Nothing) ]
 
-appendBindPattern :: (ClauseMatrix, [Occurrence])
+appendBindPattern :: (ClauseMatrix, Fringe)
 appendBindPattern =
   mkLstPattern [ ([Nil, Var "as"], Nothing)
                , ([Var "bs", Nil], Nothing)
                , ([Cns (IntVar "b") (Var "bs"), Cns (IntVar "a") (Var "as")], Nothing) ]
 
-appendCondPattern :: (ClauseMatrix, [Occurrence])
+appendCondPattern :: (ClauseMatrix, Fringe)
 appendCondPattern =
   mkLstPattern [ ([Nil, Var "as"], Nothing)
                , ([Var "bs", Nil], Nothing)
                , ([Cns (IntVar "b") (Var "bs"), Cns (IntVar "a") (Var "as")], Just ["as", "b"]) ]
 
 
-matchHeadPattern :: (ClauseMatrix, [Occurrence])
+matchHeadPattern :: (ClauseMatrix, Fringe)
 matchHeadPattern =
   mkLstPattern [ ([Cns (IntLit 0) Wld], Nothing)
                , ([Cns (IntLit 1) Wld], Nothing)
