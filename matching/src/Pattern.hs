@@ -484,7 +484,7 @@ isValidOverload ps (Metadata _ _ _ _ childMeta) cls metaPs less =
       let sortP = getSort metaP
           sortT = getSort metaT
           child = Symbol (SymbolOrAlias (Id "inj" AstLocationNone) [sortT, sortP])
-      in getSort metaP == getSort metaT || checkPatternIndex child metaP (cls,p)
+      in sortP == sortT || checkPatternIndex child metaP (cls,p)
 
 checkPatternIndex :: Constructor -> Metadata -> (Clause, Fix Pattern) -> Bool
 checkPatternIndex _ _ (_, Fix Wildcard) = True
