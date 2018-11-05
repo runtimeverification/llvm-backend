@@ -35,7 +35,7 @@ public:
 /* adds code to the specified basic block in the specified module which constructs
    an llvm value corresponding to the specified KORE RHS pattern and substitution in the
    specified definition, and returns the value itself. */
-  llvm::Value *operator()(KOREPattern *pattern);
+  std::pair<llvm::Value *, bool> operator()(KOREPattern *pattern);
   llvm::Value *createToken(ValueType sort, std::string contents);
   /* creates a call instructin calling a particular llvm function, abstracting certain abi and calling convention details. 
    * name: the nmae of the function to call in llvm

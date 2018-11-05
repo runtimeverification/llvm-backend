@@ -145,7 +145,7 @@ void MakePatternNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substi
     return;
   }
   CreateTerm creator(substitution, d->Definition, d->CurrentBlock, d->Module);
-  llvm::Value *val = creator(pattern);
+  llvm::Value *val = creator(pattern).first;
   d->CurrentBlock = creator.getCurrentBlock();
   substitution[name] = val;
   child->codegen(d, substitution);
