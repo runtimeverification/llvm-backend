@@ -56,12 +56,12 @@ extern "C" {
 
   int64_t hook_STRING_cmp(const string * a, const string * b) {
     auto len_a = len(a);
-	auto len_b = len(b);
-	int64_t diff = len_a - len_b;
-	if (diff != 0) {
-		return diff;
-	}
-	return memcmp(a->data, b->data, len_a);
+    auto len_b = len(b);
+    int64_t diff = len_a - len_b;
+    if (diff != 0) {
+        return diff;
+    }
+    return memcmp(a->data, b->data, len_a);
   }
 
   string * hook_STRING_concat(string * a, string * b) {
