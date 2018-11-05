@@ -153,6 +153,16 @@ where K: Ord + Hash + Clone {
 }
 
 #[no_mangle]
+pub unsafe extern "C" fn hook_LIST_cmp(a: *const c_void, b: *const c_void) -> i64 {
+  match std::mem::transmute::<*const c_void, &List>(a)
+      .cmp(std::mem::transmute::<*const c_void, &List>(b)) {
+    Ordering::Less => -1,
+    Ordering::Equal => 0,
+    Ordering::Greater => 1,
+  }
+}
+
+#[no_mangle]
 pub unsafe extern "C" fn hook_MAP_cmp(a: *const c_void, b: *const c_void) -> i64 {
   match hash_map_compare(std::mem::transmute::<*const c_void, &Map>(a),
                          std::mem::transmute::<*const c_void, &Map>(b)) {
