@@ -267,7 +267,7 @@ genMetadatas syms@(SymLib symbols sorts allOverloads) indexedMod =
             injections = filter isInjection keys
             overloads = filter isOverload keys
             usedInjs = map (\c -> filter (isSubsort metadatas c) injections) injections
-            usedOverloads = map (\c -> filter (isGreaterThan c) overloads) overloads
+            usedOverloads = map (map P.Symbol . (allOverloads Map.!) . (\(P.Symbol s) -> s)) overloads
             children = map (map $ (\s -> Map.findWithDefault (defaultMetadata s) s metadatas)) args
             metaMap = Map.fromList (zip keys children)
             injMap = Map.fromList (zip injections usedInjs)
@@ -290,10 +290,6 @@ genMetadatas syms@(SymLib symbols sorts allOverloads) indexedMod =
           child = P.Symbol (SymbolOrAlias name [a,b])
       in isJust $ childMeta $ child
     isSubsort _ _ _ = error "invalid injection"
-    isGreaterThan :: P.Constructor -> P.Constructor -> Bool
-    isGreaterThan (P.Symbol g) (P.Symbol l) =
-      elem l $ allOverloads Map.! g
-    isGreaterThan _ _ = error "invalid overload"
     injectionForOverload :: P.Constructor -> P.Constructor -> P.Constructor
     injectionForOverload (P.Symbol g) (P.Symbol l) = P.Symbol $ SymbolOrAlias (Id "inj" AstLocationNone) [sel2 (symbols Map.! l), sel2 (symbols Map.! g)]
     injectionForOverload _ _ = error "invalid overload"
