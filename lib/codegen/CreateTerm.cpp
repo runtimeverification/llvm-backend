@@ -343,8 +343,10 @@ llvm::Value *CreateTerm::createHook(KOREObjectCompositePattern *hookAtt, KOREObj
   } else {
     std::string domain = name.substr(0, name.find('.'));
     if (domain == "ARRAY") {
-      // array and list are backed by the same type in llvm
-      domain = "LIST";
+      // array is not really hooked in llvm, it's implemented in K
+      std::ostringstream Out;
+      pattern->getConstructor()->print(Out, 0, false);
+      return createFunctionCall("eval_" + Out.str(), pattern, false, true);
     }
     std::string hookName = "hook_" + domain + "_" + name.substr(name.find('.') + 1);
     return createFunctionCall(hookName, pattern, true, false);
