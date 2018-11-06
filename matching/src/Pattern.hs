@@ -527,7 +527,7 @@ addVars ix as (Column m ps) o =
 
 addVarToRow :: Maybe Constructor -> Occurrence -> Fix Pattern -> [VariableBinding] -> [VariableBinding]
 addVarToRow _ o (Fix (Variable name hookAtt)) vars = VariableBinding name hookAtt o : vars
-addVarToRow _ o (Fix (As name hookAtt _)) vars = VariableBinding name hookAtt o : vars
+addVarToRow ix o (Fix (As name hookAtt p)) vars = VariableBinding name hookAtt o : addVarToRow ix o p vars
 addVarToRow _ _ (Fix Wildcard) vars = vars
 addVarToRow (Just (Symbol (SymbolOrAlias (Id "inj" _) [a,_]))) o (Fix (Pattern (Symbol (SymbolOrAlias (Id "inj" _) [b,_])) _ [p])) vars = if a == b then vars else addVarToRow Nothing o p vars
 addVarToRow _ _ (Fix (Pattern _ _ _)) vars = vars
