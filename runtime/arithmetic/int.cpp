@@ -43,6 +43,10 @@ mpz_ptr hook_INT_add(mpz_t a, mpz_t b) {
   return move_int(result);
 }
 
+int64_t hook_INT_cmp(mpz_t a, mpz_t b) {
+  return static_cast<int64_t>(mpz_cmp(a, b));
+}
+
 bool hook_INT_le(mpz_t a, mpz_t b) {
   return mpz_cmp(a, b) <= 0;
 }
