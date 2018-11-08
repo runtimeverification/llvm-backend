@@ -470,7 +470,7 @@ std::pair<llvm::Value *, bool> CreateTerm::operator()(KOREPattern *pattern) {
       return std::make_pair(createToken(sort->getCategory(Definition), strPattern->getContents()), false);
     }
     KOREObjectSymbolDeclaration *symbolDecl = Definition->getSymbolDeclarations().lookup(symbol->getName());
-    if (symbolDecl->getAttributes().count("function")) {
+    if (symbolDecl->getAttributes().count("function") || (symbolDecl->getAttributes().count("anywhere") && !isAnywhereOwise)) {
       if (symbolDecl->getAttributes().count("hook")) {
         return std::make_pair(createHook(symbolDecl->getAttributes().lookup("hook"), constructor), true);
       } else {
@@ -577,7 +577,7 @@ bool makeFunction(std::string name, KOREPattern *pattern, KOREDefinition *defini
     for (auto val = applyRule->arg_begin(); val != applyRule->arg_end(); ++val, ++i) {
       subst.insert({paramNames[i], val});
     }
-    CreateTerm creator = CreateTerm(subst, definition, block, Module);
+    CreateTerm creator = CreateTerm(subst, definition, block, Module, false);
     llvm::Value *retval = creator(pattern).first;
     if (retval->getType() == llvm::PointerType::getUnqual(funcType->getReturnType())) {
       retval = new llvm::LoadInst(retval, "", creator.getCurrentBlock());

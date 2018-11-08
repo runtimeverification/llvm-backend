@@ -181,7 +181,7 @@ static std::pair<llvm::Value *, llvm::BasicBlock *> getEval(KOREDefinition *def,
     pattern->addArgument(KOREObjectVariablePattern::Create(name, sort));
   }
   KOREObjectSymbolDeclaration *symbolDecl = def->getSymbolDeclarations().lookup(symbol->getName());
-  CreateTerm creator(subst, def, CaseBlock, mod);
+  CreateTerm creator(subst, def, CaseBlock, mod, false);
   llvm::Value *result = creator(pattern).first;
   for (auto arg : pattern->getArguments()) {
     delete arg;
