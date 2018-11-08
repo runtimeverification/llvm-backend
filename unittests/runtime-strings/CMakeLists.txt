@@ -7,6 +7,7 @@ add_kllvm_unittest(runtime-strings-tests
 target_link_libraries(runtime-strings-tests
   PUBLIC
   strings
+  arithmetic
   alloc
   gmp
   mpfr

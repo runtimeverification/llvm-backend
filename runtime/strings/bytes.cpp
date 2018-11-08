@@ -73,6 +73,7 @@ extern "C" {
     return mpz_get_ui(i);
   }
 
+  void extract(mpz_t, mpz_t, size_t, size_t);
 
   // syntax Bytes ::= Int2Bytes(Int, Int, Endianness)
   string *hook_BYTES_int2bytes(mpz_t len, mpz_t i, uint64_t endianness) {
@@ -81,17 +82,18 @@ extern "C" {
       return hook_BYTES_empty();
     }
     size_t sizeInBytes = (mpz_sizeinbase(i, 2) + 7) / 8;
-    bool neg = mpz_cmp_si(i, 0) < 0;
+    bool neg = mpz_sgn(i) < 0;
     string *result = static_cast<string *>(koreAllocToken(sizeof(string) + len_long));
     set_len(result, len_long);
     memset(result->data, neg ? 0xff : 0x00, len_long);
     int order = endianness == tag_big_endian() ? 1 : -1;
     void *start = result->data + (endianness == tag_big_endian() ? len_long - sizeInBytes : 0);
     mpz_t twos;
-    mpz_init_set(twos, i);
-    if (mpz_sgn(i) < 0) {
-      mpz_com(twos, twos);
-      mpz_add_ui(twos, twos, 1);
+    if (neg) {
+      mpz_init(twos);
+      extract(twos, i, 0, sizeInBytes*8);
+    } else {
+      mpz_init_set(twos, i);
     }
     mpz_export(start, nullptr, order, 1, 0, 0, twos);
     mpz_clear(twos);

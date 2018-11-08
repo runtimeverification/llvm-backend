@@ -42,6 +42,8 @@ extern "C" {
     *result = *i;
     return result;
   }
+
+  void add_hash64(void*, uint64_t) {}
 }
 
 BOOST_AUTO_TEST_SUITE(StringTest)
