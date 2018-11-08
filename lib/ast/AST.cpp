@@ -384,6 +384,10 @@ void KOREMetaAliasDeclaration::addPattern(KOREMetaPattern *Pattern) {
   pattern = Pattern;
 }
 
+bool KOREObjectSymbolDeclaration::isAnywhere() {
+  return getAttributes().count("anywhere");
+}
+
 void KOREModule::addAttribute(KOREPattern *Attribute) {
   if (auto constructor = dynamic_cast<KOREObjectCompositePattern *>(Attribute)) {
     attributes.insert({constructor->getConstructor()->getName(), constructor});
