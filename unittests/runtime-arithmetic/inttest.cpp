@@ -504,6 +504,13 @@ BOOST_AUTO_TEST_CASE(bitRange) {
   BOOST_CHECK_EQUAL(mpz_cmp_ui(result, 255), 0);
   mpz_clear(result);
   free(result);
+  mpz_set_ui(i, 0x8040201008040201);
+  mpz_set_ui(off, 256);
+  mpz_set_ui(len, 8);
+  result = hook_INT_bitRange(i, off, len);
+  BOOST_CHECK_EQUAL(mpz_cmp_ui(result, 0), 0);
+  mpz_clear(result);
+  free(result);
   mpz_clear(i);
   mpz_clear(off);
   mpz_clear(len);
