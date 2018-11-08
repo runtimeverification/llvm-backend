@@ -523,7 +523,7 @@ checkPatternIndex _ _ (_, Fix (SetPattern _ _ _ _)) = error "Invalid map pattern
 addVars :: Maybe Constructor -> [Clause] -> Column -> Occurrence -> [Clause]
 addVars ix as (Column m ps) o =
   let rows = zip ps as
-  in map (\(p, (Clause a vars ranges children)) -> (Clause a (addVarToRow ix o p vars) (addRange ix o p ranges) $ addOverloads m ix o p children)) rows
+  in map (\(p, (Clause a vars ranges children)) -> (Clause a (addVarToRow ix o p vars) (addRange ix o p ranges) $ addOverloads m ix (0 : o) p children)) rows
 
 addVarToRow :: Maybe Constructor -> Occurrence -> Fix Pattern -> [VariableBinding] -> [VariableBinding]
 addVarToRow _ o (Fix (Variable name hookAtt)) vars = VariableBinding name hookAtt o : vars
@@ -549,7 +549,7 @@ addOverloads (Metadata _ _ _ _ meta) (Just (Symbol (SymbolOrAlias name@(Id "inj"
     children  
   else
     let childMeta = (fromJust $ meta ix) !! 0
-    in addOverloads childMeta (Just (Symbol (SymbolOrAlias name [a,b]))) (0 : o) p children
+    in addOverloads childMeta (Just (Symbol (SymbolOrAlias name [a,b]))) o p children
 addOverloads (Metadata _ _ overloads _ meta) (Just inj@(Symbol (SymbolOrAlias (Id "inj" _) _))) o (Fix (Pattern ix _ ps)) children = 
   let less = overloads ix
       metaPs = fromJust $ meta ix
@@ -563,11 +563,12 @@ addOverloads (Metadata _ _ overloads _ meta) (Just inj@(Symbol (SymbolOrAlias (I
   where
     getVar :: Metadata -> Metadata -> Fix Pattern -> Int -> [(Constructor, VariableBinding)]
     getVar metaP metaT p i =
-      let vars = addVarToRow Nothing (-1 : i : 0 : o) p []
+      let vars = addVarToRow Nothing (-1 : i : o) p []
           sortP = getSort metaP
           sortT = getSort metaT
           child = Symbol (SymbolOrAlias (Id "inj" AstLocationNone) [sortT, sortP])
-      in if sortP == sortT then [] else zip (replicate (length vars) child) vars
+          childOverloads = addOverloads metaP (Just child) (i : o) p []
+      in if sortP == sortT then [] else zip (replicate (length vars) child) vars ++ childOverloads
 addOverloads _ _ _ _ children = children
 
 filterMatrix :: Maybe Constructor -> ((Clause, Fix Pattern) -> Bool) -> (ClauseMatrix, Occurrence) -> ClauseMatrix
