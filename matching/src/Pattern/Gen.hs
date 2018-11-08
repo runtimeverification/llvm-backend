@@ -1,5 +1,6 @@
 {-# LANGUAGE GADTs      #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE OverloadedStrings #-}
 module Pattern.Gen where
 
 import qualified Pattern               as P
@@ -11,7 +12,7 @@ import           Data.Functor.Foldable (Fix (..), para)
 import           Data.List             (transpose)
 import qualified Data.Map              as Map
 import           Data.Maybe            (maybe, isJust, fromJust)
-import           Data.Text             (unpack)
+import           Data.Text             (unpack, Text)
 import           Data.Tuple.Select     (sel1, sel2)
 import           Kore.AST.Common       (Rewrites (..), Sort (..),
                                         Variable (..), Application (..),
@@ -19,7 +20,8 @@ import           Kore.AST.Common       (Rewrites (..), Sort (..),
                                         And (..), Ceil (..), Equals (..), Exists (..),
                                         Floor (..), Forall (..), Implies (..), Iff (..),
                                         In (..), Next (..), Not (..), Or (..),
-                                        Pattern (..), Id (..), SymbolOrAlias (..), AstLocation(..))
+                                        Pattern (..), Id (..), SymbolOrAlias (..), AstLocation(..),
+                                        BuiltinDomain (..))
 import           Kore.AST.Kore         (CommonKorePattern)
 import           Kore.AST.MetaOrObject (Object (..))
 import           Kore.ASTHelpers       (ApplicationSorts (..))
@@ -63,7 +65,7 @@ genPattern tools (SymLib _ sorts _) rewrite =
              -> Fix P.Pattern
     rAlgebra (ApplicationPattern (Application sym ps)) =
       let att = getHook $ hook $ symAttributes tools sym
-          sort = applicationSortsResult $ sortTools tools sym
+          sort = applicationSortsResult $ symbolOrAliasSorts tools sym
       in case att of
         Just "LIST.concat" -> listPattern sym Concat (map snd ps) (getSym "LIST.element" (sorts Map.! sort))
         Just "LIST.unit" -> listPattern sym Unit [] (getSym "LIST.element" (sorts Map.! sort))
@@ -76,7 +78,7 @@ genPattern tools (SymLib _ sorts _) rewrite =
         Just "SET.element" -> setPattern sym Element (map snd ps) (getSym "SET.element" (sorts Map.! sort))
         Just _ -> Fix $ P.Pattern (P.Symbol sym) Nothing (map snd ps)
         Nothing -> Fix $ P.Pattern (P.Symbol sym) Nothing (map snd ps)
-    rAlgebra (DomainValuePattern (DomainValue sort (Fix (StringLiteralPattern (StringLiteral str))))) =
+    rAlgebra (DomainValuePattern (DomainValue sort (BuiltinDomainPattern (Fix (StringLiteralPattern (StringLiteral str)))))) =
       let att = getHook $ hook $ sortAttributes tools sort
       in Fix $ P.Pattern (if att == Just "BOOL.Bool" then case str of
                            "true" -> P.Literal "1"
@@ -85,7 +87,7 @@ genPattern tools (SymLib _ sorts _) rewrite =
           (if att == Nothing then Just "STRING.String" else att) []
     rAlgebra (VariablePattern (Variable (Id name _) sort)) =
       let att = getHook $ hook $ sortAttributes tools sort
-      in Fix $ P.Variable name $ maybe "STRING.String" id att
+      in Fix $ P.Variable (unpack name) $ maybe "STRING.String" id att
     rAlgebra (AndPattern (And _ p (_,Fix (P.Variable name hookAtt)))) = Fix $ P.As name hookAtt $ snd p
     rAlgebra pat = error $ show pat
     listPattern :: SymbolOrAlias Object
@@ -201,9 +203,9 @@ genPattern tools (SymLib _ sorts _) rewrite =
     setPattern _ Element [] _ = error "unsupported set pattern"
     setPattern _ Element (_:_:_) _ = error "unsupported set pattern"
  
-    getSym :: String -> [SymbolOrAlias Object] -> SymbolOrAlias Object
+    getSym :: Text -> [SymbolOrAlias Object] -> SymbolOrAlias Object
     getSym hookAtt syms = head $ filter (isHook hookAtt) syms
-    isHook :: String -> SymbolOrAlias Object -> Bool
+    isHook :: Text -> SymbolOrAlias Object -> Bool
     isHook hookAtt sym =
       let att = getHook $ hook $ symAttributes tools sym
       in att == Just hookAtt
@@ -214,7 +216,7 @@ genVars = para (unifiedPatternRAlgebra rAlgebra rAlgebra)
     rAlgebra :: Pattern lvl Variable (CommonKorePattern,
                                      [String])
              -> [String]
-    rAlgebra (VariablePattern (Variable (Id name _) _)) = [name]
+    rAlgebra (VariablePattern (Variable (Id name _) _)) = [unpack name]
     rAlgebra (AndPattern (And _ (_, p₀) (_, p₁)))         = p₀ ++ p₁
     rAlgebra (ApplicationPattern (Application _ ps))      = mconcat $ map snd ps
     rAlgebra (CeilPattern (Ceil _ _ (_, p)))              = p

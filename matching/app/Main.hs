@@ -3,6 +3,7 @@ module Main where
 import           Control.Monad.Free    (Free (..))
 import qualified Data.ByteString.Char8 as B
 import           Data.Map              ((!))
+import           Data.Text             (unpack,pack)
 import           Data.Tuple.Select     (sel1)
 import           Kore.AST.Common       (Rewrites (..), SymbolOrAlias (..), Id (..))
 import           Pattern               (serializeToYaml, failure, Anchor, Alias,
@@ -27,7 +28,7 @@ main = do
   (filename:moduleName:outputFolder:_) <- getArgs
   def <- parseDefinition filename
   createDirectoryIfMissing True outputFolder;
-  let indexedMod = mainVerify def moduleName
+  let indexedMod = mainVerify def (pack moduleName)
   let axioms = parseTopAxioms def
   let symlib = parseSymbols def indexedMod
   let !dt = case axioms of
@@ -39,6 +40,6 @@ main = do
   let dts = zipWith (mkDecisionTree symlib indexedMod) funcAxioms sorts
   let path = joinPath [outputFolder, "dt.yaml"]
   B.writeFile path $ serializeToYaml dt;
-  let names = fmap (\(SymbolOrAlias (Id name _) _) -> name) functions
+  let names = fmap (\(SymbolOrAlias (Id name _) _) -> unpack name) functions
   let files = zip names dts
   writeFiles outputFolder files

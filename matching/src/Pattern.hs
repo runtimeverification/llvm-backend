@@ -56,7 +56,7 @@ import           Data.Text             (Text, pack, unpack)
 import           Data.Traversable      (mapAccumL)
 import           Kore.AST.Common       (SymbolOrAlias (..), Id (..), Sort(..), AstLocation(..))
 import           Kore.AST.MetaOrObject (Object (..))
-import           Kore.Unparser.Unparse (unparseToString)
+import           Kore.Unparser         (unparseToString)
 import           TextShow              (showt)
 import qualified Data.Map.Strict as Map
 import qualified Data.Yaml.Builder as Y

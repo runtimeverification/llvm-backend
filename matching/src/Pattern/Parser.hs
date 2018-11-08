@@ -1,6 +1,7 @@
 {-# LANGUAGE GADTs      #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE PatternSynonyms #-}
+{-# LANGUAGE OverloadedStrings #-}
 module Pattern.Parser where
 
 import           Data.Functor.Foldable      (Fix (..), para)
@@ -11,6 +12,7 @@ import           Data.Maybe                 (isJust)
 import           Data.Functor.Impredicative (Rotate31 (..))
 import           Data.Ord                   (comparing)
 import           Data.Proxy                 (Proxy (..))
+import           Data.Text                  (Text)
 import           Kore.AST.Common            (And (..), Equals (..),
                                              Pattern (..),
                                              Rewrites (..), 
@@ -96,7 +98,7 @@ mkSymLib symbols sortDecls metaTools overloads =
   in SymLib sorts (Map.map nub syms) (Map.map nub $ foldl mkOverloads Map.empty overloads)
   where
     go (SymLib dIx rIx oIx) symbol =
-      let as = (sortTools metaTools) symbol
+      let as = (symbolOrAliasSorts metaTools) symbol
           att = (symAttributes metaTools) symbol
           args = applicationSortsOperands as
           result = applicationSortsResult as
@@ -127,22 +129,22 @@ parseSymbols def indexedMod =
 
 --[ Patterns ]--
 getAtt :: SentenceAxiom UnifiedSortVariable UnifiedPattern Variable
-       -> String
+       -> Text
        -> Maybe CommonKorePattern
 getAtt sentence att =
   let Attributes attr = sentenceAxiomAttributes sentence
-  in find isAtt attr
-  where
-    isAtt :: CommonKorePattern -> Bool
-    isAtt (Fix (UnifiedPattern (UnifiedObject object))) =
-      case unRotate31 object of
-        ApplicationPattern (Application (SymbolOrAlias (Id x _) _) _) -> x == att
-        _ -> False
-    isAtt _ = False
+  in find (isAtt att) attr
+
+isAtt :: Text -> CommonKorePattern -> Bool
+isAtt att (Fix (UnifiedPattern (UnifiedObject object))) =
+  case unRotate31 object of
+    ApplicationPattern (Application (SymbolOrAlias (Id x _) _) _) -> x == att
+    _ -> False
+isAtt _ _ = False
 
 
 hasAtt :: SentenceAxiom UnifiedSortVariable UnifiedPattern Variable
-       -> String
+       -> Text
        -> Bool
 hasAtt sentence att = 
   isJust (getAtt sentence att)
@@ -235,7 +237,7 @@ parseDefinition fileName = do
 
 mainVerify
     :: KoreDefinition
-    -> String
+    -> Text
     -> KoreIndexedModule StepperAttributes
 mainVerify definition mainModuleName =
     let attributesVerification = defaultAttributesVerification Proxy
