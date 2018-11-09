@@ -3,6 +3,7 @@ extern crate libc;
 use super::decls::{List,Int,K,KElem,__gmpz_fits_ulong_p,__gmpz_fits_slong_p,__gmpz_get_si,__gmpz_get_ui,__gmpz_init_set_ui,move_int,printConfigurationInternal};
 use std::ptr;
 use std::mem;
+use std::cmp::Ordering;
 use std::hash::Hash;
 use std::collections::hash_map::DefaultHasher;
 use std::ffi::CString;
@@ -21,6 +22,16 @@ pub unsafe extern "C" fn drop_list(ptr: *mut List) {
 #[no_mangle]
 pub unsafe extern "C" fn hook_LIST_unit() -> List {
   List::new()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn hook_LIST_cmp(a: *const c_void, b: *const c_void) -> i64 {
+  match std::mem::transmute::<*const c_void, &List>(a)
+      .cmp(std::mem::transmute::<*const c_void, &List>(b)) {
+    Ordering::Less => -1,
+    Ordering::Equal => 0,
+    Ordering::Greater => 1,
+  }
 }
 
 #[no_mangle]

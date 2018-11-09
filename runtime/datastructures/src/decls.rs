@@ -2,9 +2,9 @@ extern crate im;
 extern crate libc;
 
 use std::cell::UnsafeCell;
-use std::hash::{Hash,Hasher};
 use std::collections::BinaryHeap;
 use std::cmp::Ordering;
+use std::hash::{Hash,Hasher};
 use decls::im::hashmap::HashMap;
 use decls::im::hashset::HashSet;
 use decls::im::vector::Vector;
@@ -32,6 +32,58 @@ pub struct Int(
   pub i32, // _mp_size
   pub *const mp_limb_t, // _mp_d
 );
+
+pub fn hash_map_compare<K,V>(a: &HashMap<K, V>, b: &HashMap<K, V>) -> Ordering
+where K: Ord + Hash + Clone, V: Ord + Clone {
+    let mut a_keys : BinaryHeap<_> = a.keys().collect();
+    let mut b_keys : BinaryHeap<_> = b.keys().collect();
+    while !(a_keys.is_empty() || b_keys.is_empty()) {
+        let (a_top, b_top) = (a_keys.pop(), b_keys.pop());
+        if a_top > b_top {
+            return Ordering::Greater;
+        }
+        if b_top > a_top {
+            return Ordering::Less;
+        }
+        let (a_top_elem, b_top_elem) = (a.get(a_top.unwrap()), b.get(b_top.unwrap()));
+        if a_top_elem > b_top_elem {
+            return Ordering::Greater;
+        }
+        if b_top_elem > a_top_elem {
+            return Ordering::Less;
+        }
+    }
+    if a_keys.is_empty() {
+        if b_keys.is_empty() {
+            return Ordering::Equal;
+        }
+        return Ordering::Less;
+    }
+    return Ordering::Greater;
+}
+
+pub fn hash_set_compare<K>(a: &HashSet<K>, b: &HashSet<K>) -> Ordering
+where K: Ord + Hash + Clone {
+    let mut a_vals : BinaryHeap<_> = a.iter().collect();
+    let mut b_vals : BinaryHeap<_> = b.iter().collect();
+    while !(a_vals.is_empty() || b_vals.is_empty()) {
+        let (a_top, b_top) = (a_vals.pop(), b_vals.pop());
+        if a_top > b_top {
+            return Ordering::Greater;
+        }
+        if b_top > a_top {
+            return Ordering::Less;
+        }
+    }
+    if a_vals.is_empty() {
+        if b_vals.is_empty() {
+            return Ordering::Equal;
+        }
+        return Ordering::Less;
+    }
+    return Ordering::Greater;
+}
+
 
 pub type K = *const Block;
 
@@ -98,87 +150,6 @@ impl Hash for KElem {
       }
       hash_exit();
     }
-  }
-}
-
-fn hash_map_compare<K,V>(a: &HashMap<K, V>, b: &HashMap<K, V>) -> Ordering
-where K: Ord + Hash + Clone, V: Ord + Clone {
-    let mut a_keys : BinaryHeap<_> = a.keys().collect();
-    let mut b_keys : BinaryHeap<_> = b.keys().collect();
-    while !(a_keys.is_empty() || b_keys.is_empty()) {
-        let (a_top, b_top) = (a_keys.pop(), b_keys.pop());
-        if a_top > b_top {
-            return Ordering::Greater;
-        }
-        if b_top > a_top {
-            return Ordering::Less;
-        }
-        let (a_top_elem, b_top_elem) = (a.get(a_top.unwrap()), b.get(b_top.unwrap()));
-        if a_top_elem > b_top_elem {
-            return Ordering::Greater;
-        }
-        if b_top_elem > a_top_elem {
-            return Ordering::Less;
-        }
-    }
-    if a_keys.is_empty() {
-        if b_keys.is_empty() {
-            return Ordering::Equal;
-        }
-        return Ordering::Less;
-    }
-    return Ordering::Greater;
-}
-
-fn hash_set_compare<K>(a: &HashSet<K>, b: &HashSet<K>) -> Ordering
-where K: Ord + Hash + Clone {
-    let mut a_vals : BinaryHeap<_> = a.iter().collect();
-    let mut b_vals : BinaryHeap<_> = b.iter().collect();
-    while !(a_vals.is_empty() || b_vals.is_empty()) {
-        let (a_top, b_top) = (a_vals.pop(), b_vals.pop());
-        if a_top > b_top {
-            return Ordering::Greater;
-        }
-        if b_top > a_top {
-            return Ordering::Less;
-        }
-    }
-    if a_vals.is_empty() {
-        if b_vals.is_empty() {
-            return Ordering::Equal;
-        }
-        return Ordering::Less;
-    }
-    return Ordering::Greater;
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn hook_LIST_cmp(a: *const c_void, b: *const c_void) -> i64 {
-  match std::mem::transmute::<*const c_void, &List>(a)
-      .cmp(std::mem::transmute::<*const c_void, &List>(b)) {
-    Ordering::Less => -1,
-    Ordering::Equal => 0,
-    Ordering::Greater => 1,
-  }
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn hook_MAP_cmp(a: *const c_void, b: *const c_void) -> i64 {
-  match hash_map_compare(std::mem::transmute::<*const c_void, &Map>(a),
-                         std::mem::transmute::<*const c_void, &Map>(b)) {
-    Ordering::Less => -1,
-    Ordering::Equal => 0,
-    Ordering::Greater => 1,
-  }
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn hook_SET_cmp(a: *const c_void, b: *const c_void) -> i64 {
-  match hash_set_compare(std::mem::transmute::<*const c_void, &Set>(a),
-                         std::mem::transmute::<*const c_void, &Set>(b)) {
-    Ordering::Less => -1,
-    Ordering::Equal => 0,
-    Ordering::Greater => 1,
   }
 }
 

@@ -1,6 +1,7 @@
 extern crate libc;
 
-use super::decls::{Map,Set,List,Int,K,KElem,__gmpz_init_set_ui,move_int,printConfigurationInternal};
+use super::decls::{Map,Set,List,Int,K,KElem,hash_map_compare,__gmpz_init_set_ui,move_int,printConfigurationInternal};
+use std::cmp::Ordering;
 use std::iter::FromIterator;
 use std::hash::Hash;
 use std::collections::hash_map::DefaultHasher;
@@ -32,6 +33,16 @@ pub unsafe extern "C" fn hook_MAP_unit() -> Map {
 #[no_mangle]
 pub unsafe extern "C" fn hook_MAP_concat(m1: *const Map, m2: *const Map) -> Map {
   (*m1).clone().union_with((*m2).clone(), |_, _| { panic!("Duplicate keys") })
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn hook_MAP_cmp(a: *const c_void, b: *const c_void) -> i64 {
+  match hash_map_compare(std::mem::transmute::<*const c_void, &Map>(a),
+                         std::mem::transmute::<*const c_void, &Map>(b)) {
+    Ordering::Less => -1,
+    Ordering::Equal => 0,
+    Ordering::Greater => 1,
+  }
 }
 
 #[no_mangle]
