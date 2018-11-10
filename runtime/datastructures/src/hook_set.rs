@@ -26,9 +26,9 @@ pub unsafe extern "C" fn hook_SET_in(value: K, set: *const Set) -> bool {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn hook_SET_cmp(a: *const c_void, b: *const c_void) -> i64 {
-  match hash_set_compare(std::mem::transmute::<*const c_void, &Set>(a),
-                         std::mem::transmute::<*const c_void, &Set>(b)) {
+pub unsafe extern "C" fn hook_SET_cmp(a: *const Set, b: *const Set) -> i64 {
+  match hash_set_compare(std::mem::transmute::<*const Set, &Set>(a),
+                         std::mem::transmute::<*const Set, &Set>(b)) {
     Ordering::Less => -1,
     Ordering::Equal => 0,
     Ordering::Greater => 1,
@@ -214,6 +214,28 @@ pub mod tests {
       let s2 = hook_SET_concat(&s2, &s1);
       let result = hook_SET_inclusion(&s1, &s2);
       assert!(result);
+    }
+  }
+
+  #[test]
+  fn test_cmp() {
+    unsafe {
+      let s1 = hook_SET_element(DUMMY0);
+      let s2 = hook_SET_element(DUMMY1);
+      assert_eq!(hook_SET_cmp(&s1, &s2), -1);
+      assert_eq!(hook_SET_cmp(&s2, &s1), 1);
+      assert_eq!(hook_SET_cmp(&s1, &s1), 0);
+      assert_eq!(hook_SET_cmp(&s2, &s2), 0);
+      let s3 = hook_SET_element(DUMMY2);
+      let s4 = hook_SET_element(DUMMY3);
+      assert_eq!(hook_SET_cmp(&s3, &s3), 0);
+      assert_eq!(hook_SET_cmp(&s4, &s4), 0);
+      let s5 = hook_SET_concat(&s1, &s3);
+      let s6 = hook_SET_concat(&s2, &s4);
+      assert_eq!(hook_SET_cmp(&s5, &s6), -1);
+      assert_eq!(hook_SET_cmp(&s6, &s5), 1);
+      assert_eq!(hook_SET_cmp(&s5, &s5), 0);
+      assert_eq!(hook_SET_cmp(&s6, &s6), 0);
     }
   }
 
