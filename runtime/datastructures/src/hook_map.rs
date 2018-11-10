@@ -307,8 +307,12 @@ mod tests {
       assert_eq!(hook_MAP_cmp(&m2, &m1), 1);
       assert_eq!(hook_MAP_cmp(&m1, &m1), 0);
       assert_eq!(hook_MAP_cmp(&m2, &m2), 0);
+      // These two show that we order correctly where
+      // the key is the same but the value differs.
       let m3 = hook_MAP_element(DUMMY2, DUMMY3);
-      let m4 = hook_MAP_element(DUMMY3, DUMMY4);
+      let m4 = hook_MAP_element(DUMMY2, DUMMY4);
+      assert_eq!(hook_MAP_cmp(&m3, &m4), -1);
+      assert_eq!(hook_MAP_cmp(&m4, &m3), 1);
       assert_eq!(hook_MAP_cmp(&m3, &m3), 0);
       assert_eq!(hook_MAP_cmp(&m4, &m4), 0);
       let m5 = hook_MAP_concat(&m1, &m3);
