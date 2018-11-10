@@ -25,9 +25,9 @@ pub unsafe extern "C" fn hook_LIST_unit() -> List {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn hook_LIST_cmp(a: *const c_void, b: *const c_void) -> i64 {
-  match std::mem::transmute::<*const c_void, &List>(a)
-      .cmp(std::mem::transmute::<*const c_void, &List>(b)) {
+pub unsafe extern "C" fn hook_LIST_cmp(a: *const List, b: *const List) -> i64 {
+  match std::mem::transmute::<*const List, &List>(a)
+      .cmp(std::mem::transmute::<*const List, &List>(b)) {
     Ordering::Less => -1,
     Ordering::Equal => 0,
     Ordering::Greater => 1,
@@ -273,6 +273,28 @@ pub mod tests {
       let index = hook_LIST_size(&list);
       assert_eq!(__gmpz_cmp_ui(index, 2), 0);
       free_int(index);
+    }
+  }
+
+  #[test]
+  fn test_cmp() {
+    unsafe {
+      let l1 = hook_LIST_element(DUMMY0);
+      let l2 = hook_LIST_element(DUMMY1);
+      assert_eq!(hook_LIST_cmp(&l1, &l2), -1);
+      assert_eq!(hook_LIST_cmp(&l2, &l1), 1);
+      assert_eq!(hook_LIST_cmp(&l1, &l1), 0);
+      assert_eq!(hook_LIST_cmp(&l2, &l2), 0);
+      let l3 = hook_LIST_element(DUMMY2);
+      let l4 = hook_LIST_element(DUMMY3);
+      assert_eq!(hook_LIST_cmp(&l3, &l3), 0);
+      assert_eq!(hook_LIST_cmp(&l4, &l4), 0);
+      let l5 = hook_LIST_concat(&l1, &l3);
+      let l6 = hook_LIST_concat(&l2, &l4);
+      assert_eq!(hook_LIST_cmp(&l5, &l6), -1);
+      assert_eq!(hook_LIST_cmp(&l6, &l5), 1);
+      assert_eq!(hook_LIST_cmp(&l5, &l5), 0);
+      assert_eq!(hook_LIST_cmp(&l6, &l6), 0);
     }
   }
 
