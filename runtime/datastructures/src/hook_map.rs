@@ -36,16 +36,6 @@ pub unsafe extern "C" fn hook_MAP_concat(m1: *const Map, m2: *const Map) -> Map 
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn hook_MAP_cmp(a: *const c_void, b: *const c_void) -> i64 {
-  match hash_map_compare(std::mem::transmute::<*const c_void, &Map>(a),
-                         std::mem::transmute::<*const c_void, &Map>(b)) {
-    Ordering::Less => -1,
-    Ordering::Equal => 0,
-    Ordering::Greater => 1,
-  }
-}
-
-#[no_mangle]
 pub unsafe extern "C" fn hook_MAP_lookup_null(m: *const Map, key: K) -> K {
   match (*m).get(&KElem::new(key)) {
     Some(KElem(v)) => { *v.get() } 
@@ -147,6 +137,16 @@ pub unsafe extern "C" fn hook_MAP_removeAll(map: *const Map, set: *const Set) ->
 #[no_mangle]
 pub unsafe extern "C" fn hook_MAP_eq(m1: *const Map, m2: *const Map) -> bool {
   *m1 == *m2
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn hook_MAP_cmp(a: *const Map, b: *const Map) -> i64 {
+  match hash_map_compare(std::mem::transmute::<*const Map, &Map>(a),
+                         std::mem::transmute::<*const Map, &Map>(b)) {
+    Ordering::Less => -1,
+    Ordering::Equal => 0,
+    Ordering::Greater => 1,
+  }
 }
 
 #[no_mangle]
@@ -295,6 +295,28 @@ mod tests {
       let result = hook_MAP_size(&map);
       assert_eq!(__gmpz_cmp_ui(result, 1), 0);
       free_int(result);
+    }
+  }
+
+  #[test]
+  fn test_cmp() {
+    unsafe {
+      let m1 = hook_MAP_element(DUMMY0, DUMMY1);
+      let m2 = hook_MAP_element(DUMMY1, DUMMY2);
+      assert_eq!(hook_MAP_cmp(&m1, &m2), -1);
+      assert_eq!(hook_MAP_cmp(&m2, &m1), 1);
+      assert_eq!(hook_MAP_cmp(&m1, &m1), 0);
+      assert_eq!(hook_MAP_cmp(&m2, &m2), 0);
+      let m3 = hook_MAP_element(DUMMY2, DUMMY3);
+      let m4 = hook_MAP_element(DUMMY3, DUMMY4);
+      assert_eq!(hook_MAP_cmp(&m3, &m3), 0);
+      assert_eq!(hook_MAP_cmp(&m4, &m4), 0);
+      let m5 = hook_MAP_concat(&m1, &m3);
+      let m6 = hook_MAP_concat(&m2, &m4);
+      assert_eq!(hook_MAP_cmp(&m5, &m6), -1);
+      assert_eq!(hook_MAP_cmp(&m6, &m5), 1);
+      assert_eq!(hook_MAP_cmp(&m5, &m5), 0);
+      assert_eq!(hook_MAP_cmp(&m6, &m6), 0);
     }
   }
 

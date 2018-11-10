@@ -210,6 +210,8 @@ pub mod testing {
   pub const DUMMY0: K = &DummyBlock{header: 0} as *const DummyBlock as K;
   pub const DUMMY1: K = &DummyBlock{header: 1} as *const DummyBlock as K;
   pub const DUMMY2: K = &DummyBlock{header: 2} as *const DummyBlock as K;
+  pub const DUMMY3: K = &DummyBlock{header: 3} as *const DummyBlock as K;
+  pub const DUMMY4: K = &DummyBlock{header: 4} as *const DummyBlock as K;
 
   pub fn alloc_k() -> *mut K {
     let b = Box::new(ptr::null());
@@ -237,6 +239,19 @@ pub mod testing {
   #[no_mangle]
   pub unsafe extern "C" fn hook_KEQUAL_eq(k1: K, k2: K) -> bool {
     k1 == k2
+  }
+
+  // Dummy hook_KORD_cmp for cargo test use.
+  #[no_mangle]
+  pub unsafe extern "C" fn hook_KORD_cmp(k1: K, k2: K) -> i64 {
+     let kd1 = std::mem::transmute::<K, *const DummyBlock>(k1);
+     let kd2 = std::mem::transmute::<K, *const DummyBlock>(k2);
+     if (*kd1).header < (*kd2).header {
+        return -1;
+     } else if (*kd1).header > (*kd2).header {
+        return 1;
+     }
+     0
   }
 
   #[no_mangle]
