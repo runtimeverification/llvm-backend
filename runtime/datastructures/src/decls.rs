@@ -35,6 +35,7 @@ pub struct Int(
   pub *const mp_limb_t, // _mp_d
 );
 
+// This helper makes it simpler to switch between Ord/Hash in the hook.
 pub fn ord_map_compare<K,V>(a: &OrdMap<K, V>, b: &OrdMap<K, V>) -> Ordering
 where K: Ord + Clone, V: Ord + Clone {
     a.cmp(b)
@@ -69,6 +70,7 @@ where K: Ord + Hash + Clone, V: Ord + Clone {
     return Ordering::Greater;
 }
 
+// This helper makes it simpler to switch between Ord/Hash in the hook.
 pub fn ord_set_compare<K>(a: &OrdSet<K>, b: &OrdSet<K>) -> Ordering
 where K: Ord + Clone {
     a.cmp(b)
