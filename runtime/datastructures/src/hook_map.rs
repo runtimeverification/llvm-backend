@@ -1,6 +1,6 @@
 extern crate libc;
 
-use super::decls::{Map,Set,List,Int,K,KElem,hash_map_compare,__gmpz_init_set_ui,move_int,printConfigurationInternal};
+use super::decls::{Map,Set,List,Int,K,KElem,ord_map_compare,__gmpz_init_set_ui,move_int,printConfigurationInternal};
 use std::cmp::Ordering;
 use std::iter::FromIterator;
 use std::hash::Hash;
@@ -141,7 +141,7 @@ pub unsafe extern "C" fn hook_MAP_eq(m1: *const Map, m2: *const Map) -> bool {
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_MAP_cmp(a: *const Map, b: *const Map) -> i64 {
-  match hash_map_compare(std::mem::transmute::<*const Map, &Map>(a),
+  match ord_map_compare(std::mem::transmute::<*const Map, &Map>(a),
                          std::mem::transmute::<*const Map, &Map>(b)) {
     Ordering::Less => -1,
     Ordering::Equal => 0,

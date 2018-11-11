@@ -1,6 +1,6 @@
 extern crate libc;
 
-use super::decls::{Set,List,Int,K,KElem,hash_set_compare,__gmpz_init_set_ui,move_int,printConfigurationInternal};
+use super::decls::{Set,List,Int,K,KElem,ord_set_compare,__gmpz_init_set_ui,move_int,printConfigurationInternal};
 use std::cmp::Ordering;
 use std::iter::FromIterator;
 use std::hash::Hash;
@@ -27,7 +27,7 @@ pub unsafe extern "C" fn hook_SET_in(value: K, set: *const Set) -> bool {
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_SET_cmp(a: *const Set, b: *const Set) -> i64 {
-  match hash_set_compare(std::mem::transmute::<*const Set, &Set>(a),
+  match ord_set_compare(std::mem::transmute::<*const Set, &Set>(a),
                          std::mem::transmute::<*const Set, &Set>(b)) {
     Ordering::Less => -1,
     Ordering::Equal => 0,

@@ -1,13 +1,15 @@
-extern crate im;
+extern crate im_rc;
 extern crate libc;
 
 use std::cell::UnsafeCell;
 use std::collections::BinaryHeap;
 use std::cmp::Ordering;
 use std::hash::{Hash,Hasher};
-use decls::im::hashmap::HashMap;
-use decls::im::hashset::HashSet;
-use decls::im::vector::Vector;
+use decls::im_rc::hashmap::HashMap;
+use decls::im_rc::ordmap::OrdMap;
+use decls::im_rc::hashset::HashSet;
+use decls::im_rc::ordset::OrdSet;
+use decls::im_rc::vector::Vector;
 use self::libc::{FILE,c_char,c_void};
 use std::alloc::{GlobalAlloc, Layout};
 
@@ -32,6 +34,11 @@ pub struct Int(
   pub i32, // _mp_size
   pub *const mp_limb_t, // _mp_d
 );
+
+pub fn ord_map_compare<K,V>(a: &OrdMap<K, V>, b: &OrdMap<K, V>) -> Ordering
+where K: Ord + Clone, V: Ord + Clone {
+    a.cmp(b)
+}
 
 pub fn hash_map_compare<K,V>(a: &HashMap<K, V>, b: &HashMap<K, V>) -> Ordering
 where K: Ord + Hash + Clone, V: Ord + Clone {
@@ -60,6 +67,11 @@ where K: Ord + Hash + Clone, V: Ord + Clone {
         return Ordering::Less;
     }
     return Ordering::Greater;
+}
+
+pub fn ord_set_compare<K>(a: &OrdSet<K>, b: &OrdSet<K>) -> Ordering
+where K: Ord + Clone {
+    a.cmp(b)
 }
 
 pub fn hash_set_compare<K>(a: &HashSet<K>, b: &HashSet<K>) -> Ordering
@@ -155,8 +167,8 @@ pub unsafe extern "C" fn add_hash64(h: *mut c_void, data: u64) {
   (*hasher).write_u64(data)
 }
 
-pub type Map = HashMap<KElem, KElem>;
-pub type Set = HashSet<KElem>;
+pub type Map = OrdMap<KElem, KElem>;
+pub type Set = OrdSet<KElem>;
 pub type List = Vector<KElem>;
 
 #[link(name="gmp")]
