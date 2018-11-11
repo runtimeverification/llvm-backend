@@ -289,6 +289,16 @@ extern "C" {
     return result;
   }
 
+  int64_t hook_BUFFER_cmp(const stringbuffer * a, const stringbuffer * b) {
+    auto len_a = a->capacity;
+    auto len_b = b->capacity;
+    int64_t diff = len_a - len_b;
+    if (diff != 0) {
+        return diff;
+    }
+    return memcmp(a->contents, b->contents, len_a);
+  }
+
   stringbuffer *hook_BUFFER_concat(stringbuffer *buf, string *s) {
     uint64_t newCapacity = buf->capacity;
     uint64_t minCapacity = len(buf->contents) + len(s);
