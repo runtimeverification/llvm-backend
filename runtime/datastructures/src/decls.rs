@@ -113,7 +113,7 @@ impl PartialEq for KElem {
 impl PartialOrd for KElem {
     fn partial_cmp(&self, other: &KElem) -> Option<Ordering> {
         let ret: i64 = unsafe {
-            hook_KORD_cmp(*self.0.get(), *other.0.get())
+            hook_KEQUAL_cmp(*self.0.get(), *other.0.get())
         };
         if ret < 0 {
             Some(Ordering::Less)
@@ -172,7 +172,7 @@ extern "C" {
   pub fn move_int(result: *mut Int) -> *mut Int;
   pub fn printConfigurationInternal(file: *mut FILE, subject: *const Block, sort: *const c_char);
   pub fn hook_KEQUAL_eq(k1: K, k2: K) -> bool;
-  pub fn hook_KORD_cmp(k1: K, k2: K) -> i64;
+  pub fn hook_KEQUAL_cmp(k1: K, k2: K) -> i64;
   pub fn k_hash<'a>(k1: K, h: *mut c_void) -> u64;
   pub fn hash_enter() -> bool;
   pub fn hash_exit();
@@ -232,9 +232,9 @@ pub mod testing {
     k1 == k2
   }
 
-  // Dummy hook_KORD_cmp for cargo test use.
+  // Dummy hook_KEQUAL_cmp for cargo test use.
   #[no_mangle]
-  pub unsafe extern "C" fn hook_KORD_cmp(k1: K, k2: K) -> i64 {
+  pub unsafe extern "C" fn hook_KEQUAL_cmp(k1: K, k2: K) -> i64 {
      let kd1 = std::mem::transmute::<K, *const DummyBlock>(k1);
      let kd2 = std::mem::transmute::<K, *const DummyBlock>(k2);
      if (*kd1).header < (*kd2).header {

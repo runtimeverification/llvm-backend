@@ -34,7 +34,7 @@ extern "C" {
     return 0LL;
   }
 
-  int64_t hook_KCMP_cmp(block *a, block *b){
+  int64_t hook_KEQUAL_cmp(block *a, block *b){
      auto aptr = reinterpret_cast<int64_t>(a);
      auto bptr = reinterpret_cast<int64_t>(b);
      auto aleastbit = aptr & 1LL;
