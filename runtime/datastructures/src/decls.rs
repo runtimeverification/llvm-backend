@@ -127,16 +127,7 @@ impl PartialOrd for KElem {
 
 impl Ord for KElem {
     fn cmp(&self, other: &KElem) -> Ordering {
-        let ret: i64 = unsafe {
-            hook_KORD_cmp(*self.0.get(), *other.0.get())
-        };
-        if ret < 0 {
-            Ordering::Less
-        } else if ret == 0 {
-            Ordering::Equal
-        } else {
-            Ordering::Greater
-        }
+        self.partial_cmp(other).unwrap()
     }
 }
 
