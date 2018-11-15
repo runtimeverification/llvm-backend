@@ -1,6 +1,5 @@
 add_kllvm_unittest(compiler-tests
   asttest.cpp
-  decisiontest.cpp
   main.cpp
 )
 
