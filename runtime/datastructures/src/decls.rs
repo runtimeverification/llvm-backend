@@ -182,15 +182,11 @@ extern "C" {
   pub fn __gmpz_get_si(op: *const Int) -> isize;
 }
 
-#[link(name="ordering")]
-extern "C" {
-  pub fn hook_KEQUAL_cmp(k1: K, k2: K) -> i64;
-}
-
 extern "C" {
   pub fn move_int(result: *mut Int) -> *mut Int;
   pub fn printConfigurationInternal(file: *mut FILE, subject: *const Block, sort: *const c_char);
   pub fn hook_KEQUAL_eq(k1: K, k2: K) -> bool;
+  pub fn hook_KEQUAL_cmp(k1: K, k2: K) -> i64;
   pub fn k_hash<'a>(k1: K, h: *mut c_void) -> u64;
   pub fn hash_enter() -> bool;
   pub fn hash_exit();

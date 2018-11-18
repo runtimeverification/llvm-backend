@@ -1,5 +1,6 @@
 #include <cstdint>
 #include <cstdlib>
+#include <iostream>
 #include "runtime/header.h"
 
 extern "C" {
@@ -35,6 +36,7 @@ extern "C" {
   }
 
   int64_t hook_KEQUAL_cmp(block *a, block *b){
+	 std::cout << "CMP" << std::endl;
      auto aptr = reinterpret_cast<int64_t>(a);
      auto bptr = reinterpret_cast<int64_t>(b);
      auto aleastbit = aptr & 1LL;

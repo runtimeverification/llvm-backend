@@ -3,8 +3,10 @@ target triple = "x86_64-unknown-linux-gnu"
 
 %blockheader = type { i64 } 
 %block = type { %blockheader, [0 x i64 *] } ; 16-bit layout, 8-bit length, 32-bit tag, children
-%map = type { i64, i8 *, i8 * } ; im::hashmap::HashMap
-%set = type { i8 *, i8 *, i64 } ; im::hashset::HashSet
+; %map = type { i64, i8 *, i8 * } ; im::hashmap::HashMap
+%map = type { i64, i8 *} ; im::ordmap::OrdMap
+; %set = type { i8 *, i8 *, i64 } ; im::hashset::HashSet
+%set = type { i64, i8 * } ; im::ordset::OrdSet
 %list = type { i64, i64, i8 *, i8 *, i8 *, i8 *, i8 * } ; im::vector::Vector
 %mpz = type { i32, i32, i64 * } ; mpz_t
 %layoutitem = type { i64, i16 }
