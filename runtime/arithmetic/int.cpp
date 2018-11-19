@@ -239,19 +239,25 @@ void extract(mpz_t result, mpz_t i, size_t off, size_t len) {
   if (copy_size > size + 1) {
     copy_size = size + 1;
   }
+  mp_limb_t carry = 0;
   if (copy_size > 0) {
     if (off_bits) {
-      mpn_rshift(result->_mp_d, i->_mp_d + off_words, copy_size, off_bits);
+      carry = mpn_rshift(result->_mp_d, i->_mp_d + off_words, copy_size, off_bits);
     }
     else {
-      mpn_copyi(result->_mp_d, i->_mp_d, copy_size);
+      mpn_copyi(result->_mp_d, i->_mp_d + off_words, copy_size);
     }
   } else {
     copy_size = 0;
   }
   if (mpz_sgn(i) < 0) {
     mpn_com(result->_mp_d, result->_mp_d, size);
-    mpn_add_1(result->_mp_d, result->_mp_d, size, 1);
+    for (int j = 0; !carry && j < off_words && j < num_limbs; i++) {
+      carry = i->_mp_d[j];
+    }
+    if (!carry) {
+      mpn_add_1(result->_mp_d, result->_mp_d, size, 1);
+    }
   }
   len %= LIMB_BITS;
   if (len) {
