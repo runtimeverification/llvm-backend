@@ -15,7 +15,7 @@ import qualified Data.Map              as Map
 import           Data.Maybe            (maybe, isJust, fromJust)
 import           Data.Text             (unpack, Text)
 import           Data.Tuple.Select     (sel1, sel2)
-import           Kore.AST.Common       (Rewrites (..), Sort (..),
+import           Kore.AST.Common       (Rewrites (..), Sort (..), SortActual(..),
                                         Variable (..), Application (..),
                                         DomainValue (..), StringLiteral (..),
                                         And (..), Ceil (..), Equals (..), Exists (..),
@@ -61,6 +61,13 @@ instance KoreRewrite (Rewrites lvl CommonKorePattern) where
 
 data CollectionCons = Concat | Unit | Element
 
+stripLoc :: SymbolOrAlias Object -> SymbolOrAlias Object
+stripLoc (SymbolOrAlias (Id name _) s) = (SymbolOrAlias (Id name AstLocationNone) $ map stripLocSort s)
+  where
+    stripLocSort :: Sort Object -> Sort Object
+    stripLocSort (SortActualSort (SortActual (Id x _) args)) = (SortActualSort (SortActual (Id x AstLocationNone) $ map stripLocSort args))
+    stripLocSort sort = sort
+
 genPattern :: KoreRewrite pattern => MetadataTools Object Attributes -> SymLib -> pattern -> [Fix P.Pattern]
 genPattern tools (SymLib _ sorts _) rewrite =
   let lhs = getLeftHandSide rewrite
@@ -69,8 +76,9 @@ genPattern tools (SymLib _ sorts _) rewrite =
     rAlgebra :: Pattern Object Variable (CommonKorePattern,
                                          Fix P.Pattern)
              -> Fix P.Pattern
-    rAlgebra (ApplicationPattern (Application sym ps)) =
-      let att = fmap unpack $ getHook $ hook $ parseAtt $ symAttributes tools sym
+    rAlgebra (ApplicationPattern (Application rawSym ps)) =
+      let sym = stripLoc rawSym 
+          att = fmap unpack $ getHook $ hook $ parseAtt $ symAttributes tools sym
           sort = applicationSortsResult $ symbolOrAliasSorts tools sym
       in case att of
         Just "LIST.concat" -> listPattern sym Concat (map snd ps) (getSym "LIST.element" (sorts Map.! sort))
