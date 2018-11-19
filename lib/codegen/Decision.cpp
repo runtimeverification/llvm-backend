@@ -279,11 +279,7 @@ void makeStepFunction(KOREDefinition *definition, llvm::Module *module, Decision
   subst.insert({val->getName(), val});
   llvm::BasicBlock *block = llvm::BasicBlock::Create(module->getContext(), "entry", matchFunc);
   llvm::BasicBlock *stuck = llvm::BasicBlock::Create(module->getContext(), "stuck", matchFunc);
-  llvm::FunctionType *FinishType = llvm::FunctionType::get(llvm::Type::getVoidTy(module->getContext()), {blockType}, false);
-  llvm::Function *FinishFunc = llvm::dyn_cast<llvm::Function>(module->getOrInsertFunction("finish_rewriting", FinishType));
-  FinishFunc->addFnAttr(llvm::Attribute::NoReturn);
-  llvm::CallInst::Create(FinishFunc, {val}, "", stuck);
-  new llvm::UnreachableInst(module->getContext(), stuck);
+  llvm::ReturnInst::Create(module->getContext(), llvm::ConstantPointerNull::get(llvm::dyn_cast<llvm::PointerType>(blockType)), stuck);
 
   Decision codegen(definition, block, stuck, module, {SortCategory::Symbol, 0});
   codegen(dt, subst);

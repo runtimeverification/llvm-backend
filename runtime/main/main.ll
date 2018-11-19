@@ -7,7 +7,8 @@ target triple = "x86_64-unknown-linux-gnu"
 declare %block* @parseConfiguration(i8*)
 declare i32 @atoi(i8*)
 
-declare void @take_steps(i32, %block*) #0
+declare %block* @take_steps(i32, %block*)
+declare void @finish_rewriting(%block*) #0
 
 declare i8* @koreAllocOld(i64)
 declare i8* @koreReallocOld(i8*, i64, i64)
@@ -31,7 +32,8 @@ entry:
   call void @__gmp_set_memory_functions(i8* (i64) * @koreAllocOld, i8* (i8*, i64, i64) * @koreReallocOld, void (i8*, i64) * @koreFree)
 
   %ret = call %block* @parseConfiguration(i8* %filename)
-  call void @take_steps(i32 %depth, %block* %ret)
+  %result = call %block* @take_steps(i32 %depth, %block* %ret)
+  call void @finish_rewriting(%block* %result)
   unreachable
 }
 
