@@ -62,6 +62,9 @@ target triple = "x86_64-unknown-linux-gnu"
 %stringbuffer = type { i64, %string* } ; capacity and current contents
 %map = type { i64, i8 * } ; im::ordmap::OrdMap
 %set = type { i64, i8 * } ; im::ordset::OrdSet
+; %map = type { i64, i8 *, i8 * } ; im::hashmap::HashMap
+; %set = type { i8 *, i8 *, i64 } ; im::hashset::HashSet
+
 %list = type { i64, i64, i8 *, i8 *, i8 *, i8 *, i8 * } ; im::vector::Vector
 %mpz = type { i32, i32, i64 * } ; mpz_t
 %mpfr = type { i64, i32, i64, i64 * } ; mpfr_t

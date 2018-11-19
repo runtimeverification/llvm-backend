@@ -52,17 +52,30 @@ extern "C" {
   } stringbuffer;
 
   // llvm: map = type { i64, i8 *, i8 * }
+  //typedef struct map {
+  //  uint64_t a;
+  //  void *b;
+  //  void *c;
+  //} map;
+
+  // llvm: set = type { i8 *, i8 *, i64 }
+  // typedef struct set {
+  //  void *a;
+  //  void *b;
+  //  uint64_t c;
+  //} set;
+  //
+
+  // llvm: map = type { i64, i8 * }
   typedef struct map {
     uint64_t a;
     void *b;
-    void *c;
   } map;
 
-  // llvm: set = type { i8 *, i8 *, i64 }
-  typedef struct set {
-    void *a;
+  // llvm: set = type { i8 *, i8 * }
+   typedef struct set {
+    uint64_t a;
     void *b;
-    uint64_t c;
   } set;
 
   // llvm: list = type { i64, i64, i8 *, i8 *, i8 *, i8 *, i8 * }
