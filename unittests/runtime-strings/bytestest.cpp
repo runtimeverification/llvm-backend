@@ -125,6 +125,14 @@ BOOST_AUTO_TEST_CASE(int2bytes) {
   BOOST_CHECK_EQUAL(2, len(res));
   BOOST_CHECK_EQUAL(0, memcmp(res->data, "\xfe\xff", 2));
 
+  mpz_t num;
+  mpz_init_set_str(num, "-340240827991474256463460986840063997951", 10);
+  mpz_t _17;
+  mpz_init_set_ui(_17, 17);
+
+  res = hook_BYTES_int2bytes(_17, num, tag_big_endian());
+  BOOST_CHECK_EQUAL(17, len(res));
+  BOOST_CHECK_EQUAL(0, memcmp(res->data, "\xff\x00\x08\x00\x06\xFF\xFE\xFF\xF0\x00\x08\xFF\xFF\xFF\xFF\x08\x01", 17));
 }
 
 BOOST_AUTO_TEST_CASE(bytes2string) {

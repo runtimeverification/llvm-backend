@@ -81,20 +81,16 @@ extern "C" {
     if (len_long == 0) {
       return hook_BYTES_empty();
     }
-    size_t sizeInBytes = (mpz_sizeinbase(i, 2) + 7) / 8;
     bool neg = mpz_sgn(i) < 0;
     string *result = static_cast<string *>(koreAllocToken(sizeof(string) + len_long));
     set_len(result, len_long);
     memset(result->data, neg ? 0xff : 0x00, len_long);
     int order = endianness == tag_big_endian() ? 1 : -1;
-    void *start = result->data + (endianness == tag_big_endian() ? len_long - sizeInBytes : 0);
     mpz_t twos;
-    if (neg) {
-      mpz_init(twos);
-      extract(twos, i, 0, sizeInBytes*8);
-    } else {
-      mpz_init_set(twos, i);
-    }
+    mpz_init(twos);
+    extract(twos, i, 0, len_long*8);
+    size_t sizeInBytes = (mpz_sizeinbase(twos, 2) + 7) / 8;
+    void *start = result->data + (endianness == tag_big_endian() ? len_long - sizeInBytes : 0);
     mpz_export(start, nullptr, order, 1, 0, 0, twos);
     mpz_clear(twos);
     return result;
