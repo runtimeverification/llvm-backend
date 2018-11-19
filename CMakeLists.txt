@@ -61,6 +61,12 @@ install(
 )
 
 install(
+  FILES runtime/main/main.ll
+  DESTINATION lib/kllvm/llvm/main
+)
+
+
+install(
   PROGRAMS bin/llvm-kompile bin/llvm-kompile-matching
   DESTINATION bin
 )

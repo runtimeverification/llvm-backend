@@ -5,12 +5,18 @@ modopt="$(mktemp tmp.XXXXXXXXXX.bc)"
 trap "rm -rf $dt_dir $mod $modopt" INT TERM EXIT
 definition="$1"
 moduleName="$2"
-shift; shift
+main="$3"
+shift; shift; shift
 "$(dirname "$0")"/llvm-kompile-matching "$definition" "$moduleName" "$dt_dir"
 "$(dirname "$0")"/llvm-kompile-codegen "$definition" "$dt_dir"/dt.yaml "$dt_dir" > "$mod"
 opt-6.0 -tailcallelim -tailcallopt "$mod" -o "$modopt"
 RUSTDIR=`rustc --print sysroot`/lib/rustlib/x86_64-unknown-linux-gnu/lib/
 LIBDIR="$(dirname "$0")"/../lib/kllvm/
+if [ "$main" = "main" ]; then
+  MAINFILES="$LIBDIR"/llvm/main/main.ll
+else
+  MAINFILES=""
+fi
 clang++-6.0 -Wno-override-module "$modopt" \
   "$LIBDIR"/libarithmetic.a \
   "$LIBDIR"/libstrings.a \
@@ -25,6 +31,7 @@ clang++-6.0 -Wno-override-module "$modopt" \
   "$RUSTDIR"/liballoc_system-*.rlib \
   "$LIBDIR"/rust/rustalloc.lds \
   "$LIBDIR"/llvm/*.ll \
+  "$MAINFILES" \
   "$LIBDIR"/libconfigurationparser.a \
   "$LIBDIR"/libParser.a \
   "$LIBDIR"/libAST.a \
