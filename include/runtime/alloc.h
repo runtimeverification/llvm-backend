@@ -25,6 +25,7 @@ void* koreResizeLastAlloc(void* oldptr, size_t newrequest, size_t oldrequest);
 
 typedef struct {
   char* next_block;
+  char* next_superblock;
   char semispace;
 } memory_block_header;
 

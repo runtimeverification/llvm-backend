@@ -55,12 +55,35 @@ void koreAllocSwap() {
 }
 
 static void* superblock_ptr = 0;
+static char** next_superblock_ptr = 0;
 static unsigned blocks_left = 0;
+
+void freeAllKoreMem() {
+  memory_block_header *superblock = (memory_block_header *)(fromspace.semispace_id == 0 ? fromspace.first_block : first_tospace_block);
+  while (superblock) {
+    memory_block_header* next_superblock = (memory_block_header *)superblock->next_superblock;
+    free(superblock);
+    superblock = next_superblock;
+  }
+
+  fromspace = (struct semispace_info){0, 0, 0, 0, 0};
+  first_tospace_block = 0;
+  oldspace = (struct semispace_info){0, 0, 0, 0, 2};
+  superblock_ptr = 0;
+  next_superblock_ptr = 0;
+  blocks_left = 0;
+}
 
 static void* megabyte_malloc() {
   if (blocks_left == 0) {
     blocks_left = 15;
     posix_memalign(&superblock_ptr, BLOCK_SIZE, BLOCK_SIZE * 15);
+    if (next_superblock_ptr) {
+      *next_superblock_ptr = superblock_ptr;
+    }
+    memory_block_header *hdr = (memory_block_header *)superblock_ptr;
+    next_superblock_ptr = &hdr->next_superblock;
+    hdr->next_superblock = 0;
   }
   blocks_left--;
   void* result = superblock_ptr;
@@ -73,10 +96,9 @@ static void freshBlock(struct semispace_info *space) {
     if (space->block_start == 0) {
       nextBlock = megabyte_malloc();
       space->first_block = nextBlock;
-      memory_block_header hdr;
-      hdr.next_block = 0;
-      hdr.semispace = space->semispace_id;
-      *(memory_block_header *)nextBlock = hdr;
+      memory_block_header *nextHeader = (memory_block_header *)nextBlock;
+      nextHeader->next_block = 0;
+      nextHeader->semispace = space->semispace_id;
     } else {
       nextBlock = *(char**)space->block_start;
       if (space->block != space->block_end) {
@@ -90,10 +112,9 @@ static void freshBlock(struct semispace_info *space) {
         MEM_LOG("Allocating new block for the first time in semispace %d\n", space->semispace_id);
         nextBlock = megabyte_malloc();
         *(char **)space->block_start = nextBlock;
-        memory_block_header hdr;
-        hdr.next_block = 0;
-        hdr.semispace = space->semispace_id;
-        memcpy(nextBlock, &hdr, sizeof(hdr));
+        memory_block_header *nextHeader = (memory_block_header *)nextBlock;
+        nextHeader->next_block = 0;
+        nextHeader->semispace = space->semispace_id;
       }
     }
     space->block = nextBlock + sizeof(memory_block_header);
