@@ -18,7 +18,7 @@ private:
   KOREObjectSymbol *dv;
 
   enum Kind {
-    Switch, SwitchLiteral, CheckNull, MakePattern, Function, Leaf, Fail, Swap
+    Switch, SwitchLiteral, CheckNull, MakePattern, Function, Leaf, Fail
   };
 
   static Kind getKind(YAML::Node node) {
@@ -28,7 +28,6 @@ private:
     if (node["bitwidth"]) return SwitchLiteral;
     if (node["specializations"]) return Switch;
     if (node["action"]) return Leaf;
-    if (node["swap"]) return Swap;
     if (node["function"]) return Function;
     throw node;
   }
@@ -47,11 +46,6 @@ public:
       result.push_back('_');
       result += std::to_string(i);
     }
-    return result;
-  }
-
-  DecisionNode *swap(YAML::Node node) {
-    auto result = (*this)(node["swap"][1]);
     return result;
   }
 
@@ -184,8 +178,6 @@ public:
     Kind kind = getKind(node);
     DecisionNode * ret = nullptr;
     switch(kind) {
-    case Swap:
-      ret = swap(node); break;
     case Fail:
       ret = FailNode::get(); break;
     case Function:

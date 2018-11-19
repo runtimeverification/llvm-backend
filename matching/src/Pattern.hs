@@ -31,7 +31,6 @@ module Pattern ( PatternMatrix(..)
                , switch
                , switchLiteral
                , function
-               , swap
                , simplify
                , DecisionTree(..)
                , Anchor(..)
@@ -237,11 +236,6 @@ function name o vars sort child =
 
 simplify :: Occurrence -> Fix DecisionTree -> Fix DecisionTree
 simplify o dt = switch o [] (Just dt)
-
-swap :: Index
-     -> Fix DecisionTree
-     -> Fix DecisionTree
-swap ix tm = Fix (Swap ix tm)
 
 -- [ Matrix ]
 
@@ -793,7 +787,6 @@ data DecisionTree a = Leaf (Int, [Occurrence])
                     | SwitchLiteral Occurrence Int !(L a)
                     | CheckNull Occurrence !(L a)
                     | MakePattern Occurrence (Fix BoundPattern) !a
-                    | Swap Index !a
                     | Function Text Occurrence [Occurrence] Hook !a  
                     deriving (Show, Eq, Functor, Ord)
 
@@ -838,8 +831,6 @@ instance Y.ToYaml a => Y.ToYaml (Anchor a) where
       , "bitwidth" Y..= Y.toYaml i
       , "occurrence" Y..= Y.toYaml o
       ]
-    toYaml (Anchor a (Swap i x)) = Y.maybeNamedMapping a
-      ["swap" Y..= Y.array [Y.toYaml i, Y.toYaml x]]
     toYaml (Anchor a (Function name o bindings sort x)) = Y.maybeNamedMapping a
       ["function" Y..= Y.toYaml name
       , "sort" Y..= Y.toYaml sort
@@ -1028,7 +1019,7 @@ compilePattern firstCm =
                 -- matching a string or int, so compare the value of the token against a list of constants
                 Just hookName -> equalLiteral ix (fst $ head os') hookName ls d
           -- if necessary, generate a swap node
-          in if bestColIx == 0 then dt else Fix $ Swap bestColIx dt
+          in dt
     -- returns whether the row is done matching
     isWildcardRow :: PatternMatrix -> Bool
     isWildcardRow = and . map isWildcard . firstRow
@@ -1161,7 +1152,6 @@ shareDt =
            Nothing -> case dt of
                         Fix (Leaf a) -> (addName m, Free (Anchor (Just $ name m) (Leaf a)))
                         Fix Fail -> (m, Free (Anchor Nothing Fail))
-                        Fix (Swap i a) -> let (m',child) = mapChild a in (addName m',Free (Anchor (Just $ name m') (Swap i child)))
                         Fix (MakePattern o p a) -> let (m',child) = mapChild a in (addName m', Free (Anchor (Just $ name m') (MakePattern o p child)))
                         Fix (Function n o os s a) -> let (m',child) = mapChild a in (addName m', Free (Anchor (Just $ name m') (Function n o os s child)))
                         Fix (Switch o (L s d)) -> let (m',s') = mapSpec m s in let (m'',d') = mapDefault m' d in (addName m'', Free (Anchor (Just $ name m'') (Switch o (L s' d'))))
