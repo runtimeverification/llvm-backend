@@ -40,11 +40,11 @@ public:
     dv = KOREObjectSymbol::Create("\\dv");
   }
 
-  std::string to_string(std::vector<int> occurrence) {
+  std::string to_string(std::vector<std::string> occurrence) {
     std::string result = "";
-    for (int i : occurrence) {
+    for (std::string i : occurrence) {
       result.push_back('_');
-      result += std::to_string(i);
+      result += i;
     }
     return result;
   }
@@ -54,7 +54,7 @@ public:
     std::string hookName = node["sort"].as<std::string>();
     ValueType cat = KOREObjectCompositeSort::getCategory(hookName);
 
-    std::string binding = to_string(node["occurrence"].as<std::vector<int>>());
+    std::string binding = to_string(node["occurrence"].as<std::vector<std::string>>());
 
     auto child = (*this)(node["next"]); 
 
@@ -63,9 +63,9 @@ public:
     YAML::Node vars = node["args"];
     for (auto iter = vars.begin(); iter != vars.end(); ++iter) {
       auto var = *iter;
-      auto occurrence = var.as<std::vector<int>>();
-      if (occurrence.size() == 2 && occurrence[1] == -1) {
-        result->addBinding(std::to_string(occurrence[0]));
+      auto occurrence = var.as<std::vector<std::string>>();
+      if (occurrence.size() == 3 && occurrence[0] == "lit" && occurrence[2] == "MINT.MInt 64") {
+        result->addBinding(occurrence[1]);
       } else {
         result->addBinding(to_string(occurrence));
       }
@@ -75,7 +75,7 @@ public:
 
   KOREObjectPattern *parsePattern(YAML::Node node, std::vector<std::string> &uses) {
     if (node["occurrence"]) {
-      std::string name = to_string(node["occurrence"].as<std::vector<int>>());
+      std::string name = to_string(node["occurrence"].as<std::vector<std::string>>());
       uses.push_back(name);
       return KOREObjectVariablePattern::Create(name, sorts.lookup(node["hook"].as<std::string>()));
     } else if (node["literal"]) {
@@ -95,7 +95,7 @@ public:
   }
 
   DecisionNode *makePattern(YAML::Node node) {
-    std::string name = to_string(node["occurrence"].as<std::vector<int>>());
+    std::string name = to_string(node["occurrence"].as<std::vector<std::string>>());
 
     std::vector<std::string> uses;
 
@@ -108,7 +108,7 @@ public:
 
   DecisionNode *switchCase(Kind kind, YAML::Node node) {
     YAML::Node list = node["specializations"];
-    auto occurrence = node["occurrence"].as<std::vector<int>>();
+    auto occurrence = node["occurrence"].as<std::vector<std::string>>();
     std::string name = to_string(occurrence);
     auto result = SwitchNode::Create(name, kind == CheckNull);
     for (auto iter = list.begin(); iter != list.end(); ++iter) {
@@ -126,7 +126,7 @@ public:
         }
         for (unsigned i = 0; i < symbol->getArguments().size(); ++i) {
           auto newOccurrence = occurrence;
-          newOccurrence.insert(newOccurrence.begin(), i);
+          newOccurrence.insert(newOccurrence.begin(), std::to_string(i));
           std::string binding = to_string(newOccurrence);
           bindings.push_back(binding);
         }
@@ -164,7 +164,7 @@ public:
     YAML::Node vars = node["action"][1];
     for (auto iter = vars.begin(); iter != vars.end(); ++iter) {
       auto var = *iter;
-      auto occurrence = var.as<std::vector<int>>();
+      auto occurrence = var.as<std::vector<std::string>>();
       result->addBinding(to_string(occurrence));
     }
     return result;
