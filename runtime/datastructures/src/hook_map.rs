@@ -22,11 +22,13 @@ pub unsafe extern "C" fn drop_map(ptr: *mut Map) {
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_MAP_element(key: K, value: K) -> Map {
+    println!("ELE");
   Map::singleton(KElem::new(key), KElem::new(value))
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_MAP_unit() -> Map {
+    println!("UNIT");
   Map::new()
 }
 
@@ -62,6 +64,7 @@ pub unsafe extern "C" fn hook_MAP_lookupOrDefault(m: *const Map, key: K, default
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_MAP_update(m: *const Map, key: K, value: K) -> Map {
+  println!("{:?} <= {:?} to {:?}", *m, key, value);
   (*m).update(KElem::new(key), KElem::new(value))
 }
 
