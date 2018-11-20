@@ -78,16 +78,22 @@ extern "C" {
     void *b;
   } set;
 
-  // llvm: list = type { i64, i64, i8 *, i8 *, i8 *, i8 *, i8 * }
+  //llvm:  %list = type { i64, [7 x i64] } ; im::vector:Vector
   typedef struct list {
-    uint64_t a;
-    uint64_t b;
-    void *c;
-    void *d;
-    void *e;
-    void *f;
-    char *g;
+	uint64_t a;
+	uint64_t b[7];
   } list;
+  
+  // llvm: list = type { i64, i64, i8 *, i8 *, i8 *, i8 *, i8 * }
+  //typedef struct list {
+  // uint64_t a;
+  //  uint64_t b;
+  //  void *c;
+  //  void *d;
+  //  void *e;
+  //  void *f;
+  //  char *g;
+  //} list;
  
   // This function is exported to be used by the interpreter 
   block *parseConfiguration(const char *filename);

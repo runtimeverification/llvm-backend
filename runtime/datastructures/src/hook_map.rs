@@ -29,7 +29,9 @@ pub unsafe extern "C" fn hook_MAP_element(key: K, value: K) -> Map {
 #[no_mangle]
 pub unsafe extern "C" fn hook_MAP_unit() -> Map {
     println!("UNIT");
-  Map::new()
+  let x = Map::new();
+  println!("NEW {:?}", x);
+  x
 }
 
 #[no_mangle]
