@@ -76,7 +76,7 @@ ValueType KOREObjectCompositeSort::getCategory(std::string name) {
   if (name == "MAP.Map") category = SortCategory::Map;
   else if (name == "LIST.List") category = SortCategory::List;
   else if (name == "SET.Set") category = SortCategory::Set;
-  else if (name == "ARRAY.Array") category = SortCategory::Symbol;
+  else if (name == "ARRAY.Array") category = SortCategory::Symbol; // ARRAY is implemented in K
   else if (name == "INT.Int") category = SortCategory::Int;
   else if (name == "FLOAT.Float") category = SortCategory::Float;
   else if (name == "BUFFER.StringBuffer") category = SortCategory::StringBuffer;

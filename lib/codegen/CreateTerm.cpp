@@ -453,6 +453,7 @@ llvm::Value *CreateTerm::notInjectionCase(KOREObjectCompositePattern *constructo
   return new llvm::BitCastInst(Block, llvm::PointerType::getUnqual(Module->getTypeByName(BLOCK_STRUCT)), "", CurrentBlock);
 }
 
+// returns a value and a boolean indicating whetther that value could be an injection
 std::pair<llvm::Value *, bool> CreateTerm::operator()(KOREPattern *pattern) {
   if (auto variable = dynamic_cast<KOREObjectVariablePattern *>(pattern)) {
     auto val = Substitution.lookup(variable->getName());
