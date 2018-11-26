@@ -22,25 +22,33 @@ pub unsafe extern "C" fn drop_map(ptr: *mut Map) {
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_MAP_element(key: K, value: K) -> Map {
-    println!("ELE");
+  println!("!!! ELE");
   Map::singleton(KElem::new(key), KElem::new(value))
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn hook_MAP_unit() -> Map {
-    println!("UNIT");
+pub unsafe extern "C" fn hook_MAP_unit(m: *mut Map) {
   let x = Map::new();
-  println!("NEW {:?}", x);
-  x
+  let outview = m as *mut u64;
+  println!("UNIT PASSED ADDR: {:?}", m);
+  let view = &x as *const _ as *const u64;
+    for i in 0..2 {
+        println!("{}: {:08x} ", i, *view.offset(i));
+        *outview.offset(i) = *view.offset(i);
+    }
+    println!("DONE UNIT");
+  //x
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_MAP_concat(m1: *const Map, m2: *const Map) -> Map {
+  println!("!!! CAT {:?} & {:?}", m1, m2);
   (*m1).clone().union_with((*m2).clone(), |_, _| { panic!("Duplicate keys") })
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_MAP_lookup_null(m: *const Map, key: K) -> K {
+  println!("!!! LUN {:?} ", m);
   match (*m).get(&KElem::new(key)) {
     Some(KElem(v)) => { *v.get() } 
     None => ptr::null()
@@ -49,6 +57,7 @@ pub unsafe extern "C" fn hook_MAP_lookup_null(m: *const Map, key: K) -> K {
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_MAP_lookup(m: *const Map, key: K) -> K {
+  println!("!!! LU {:?} ", m);
   let res = hook_MAP_lookup_null(m, key);
   if res == ptr::null() {
     panic!("key not found")
@@ -58,6 +67,7 @@ pub unsafe extern "C" fn hook_MAP_lookup(m: *const Map, key: K) -> K {
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_MAP_lookupOrDefault(m: *const Map, key: K, default: K) -> K {
+  println!("!!! LUD {:?} ", m);
   match (*m).get(&KElem::new(key)) {
     Some(KElem(v)) => *v.get(),
     None => default
@@ -66,42 +76,53 @@ pub unsafe extern "C" fn hook_MAP_lookupOrDefault(m: *const Map, key: K, default
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_MAP_update(m: *const Map, key: K, value: K) -> Map {
-  println!("{:?} <= {:?} to {:?}", *m, key, value);
+  let view = m as *mut u64;
+  // println!("UPDATE ADDR {:?} with key: {:?}, value: {:?}", m, key, value);
+  for i in 0..2 {
+    println!("{}: {:08x} ", i, *view.offset(i));
+  }
   (*m).update(KElem::new(key), KElem::new(value))
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_MAP_remove(m: *const Map, key: K) -> Map {
+  println!("!!! REM {:?} ", m);
   (*m).without(&KElem::new(key))
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_MAP_difference(m1: *const Map, m2: *const Map) -> Map {
+  println!("!!! DIFF {:?} & {:?}", m1, m2);
   (*m1).clone().difference_with((*m2).clone(), |v1, v2| if v1 == v2 { None } else { Some(v1) })
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_MAP_keys(m: *const Map) -> Set {
+  println!("!!! KEYS {:?} ", m);
   Set::from_iter((*m).keys().cloned())
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_MAP_keys_list(m: *const Map) -> List {
+  println!("!!! KEYSL {:?} ", m);
   List::from_iter((*m).keys().cloned())
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_MAP_in_keys(key: K, m: *const Map) -> bool {
+  println!("!!! IN {:?} ", m);
   (*m).contains_key(&KElem::new(key))
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_MAP_values(m: *const Map) -> List {
+  println!("!!! VALS {:?} ", m);
   List::from_iter((*m).values().cloned())
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_MAP_choice(m: *const Map) -> K {
+  println!("!!! CHOICE {:?} ", m);
   if (*m).is_empty() {
     panic!("Map is empty")
   }
@@ -110,11 +131,13 @@ pub unsafe extern "C" fn hook_MAP_choice(m: *const Map) -> K {
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_MAP_size_long(m: *const Map) -> usize {
+  println!("!!! SIZEL {:?} ", m);
   (*m).len()
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_MAP_size(m: *const Map) -> *mut Int {
+  println!("!!! KEYS {:?} ", m);
   let mut result = Int(0, 0, ptr::null());
   __gmpz_init_set_ui(&mut result, hook_MAP_size_long(m));
   move_int(&mut result)
@@ -122,16 +145,19 @@ pub unsafe extern "C" fn hook_MAP_size(m: *const Map) -> *mut Int {
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_MAP_inclusion(m1: *const Map, m2: *const Map) -> bool {
+  println!("!!! INC {:?} & {:?}", m1, m2);
   (*m1).is_submap(&*m2)
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_MAP_updateAll(m1: *const Map, m2: *const Map) -> Map {
+  println!("!!! UPALL {:?} & {:?}", m1, m2);
   (*m2).clone().union((*m1).clone())
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_MAP_removeAll(map: *const Map, set: *const Set) -> Map {
+  println!("!!! REMALL {:?}", map);
   let mut tmp = (*map).clone();
   for KElem(key) in (*set).iter() {
     tmp.remove(&KElem::new(*key.get()));
@@ -141,13 +167,15 @@ pub unsafe extern "C" fn hook_MAP_removeAll(map: *const Map, set: *const Set) ->
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_MAP_eq(m1: *const Map, m2: *const Map) -> bool {
+  println!("!!! EQ {:?} & {:?}", m1, m2);
   *m1 == *m2
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn hook_MAP_cmp(a: *const Map, b: *const Map) -> i64 {
-  match ord_map_compare(std::mem::transmute::<*const Map, &Map>(a),
-                         std::mem::transmute::<*const Map, &Map>(b)) {
+pub unsafe extern "C" fn hook_MAP_cmp(m1: *const Map, m2: *const Map) -> i64 {
+  println!("!!! EQ {:?} & {:?}", m1, m2);
+  match ord_map_compare(std::mem::transmute::<*const Map, &Map>(m1),
+                         std::mem::transmute::<*const Map, &Map>(m2)) {
     Ordering::Less => -1,
     Ordering::Equal => 0,
     Ordering::Greater => 1,
@@ -156,6 +184,7 @@ pub unsafe extern "C" fn hook_MAP_cmp(a: *const Map, b: *const Map) -> i64 {
 
 #[no_mangle]
 pub unsafe extern "C" fn map_hash(m: *const Map, h: *mut c_void) {
+  println!("!!! HASH {:?}", m);
   let hasher = h as *mut &mut DefaultHasher;
   m.hash(*hasher)
 }

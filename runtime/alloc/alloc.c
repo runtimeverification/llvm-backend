@@ -135,7 +135,9 @@ __attribute__ ((always_inline)) void* koreAllocToken(size_t requested) {
 }
 
 __attribute__ ((always_inline)) void* koreAllocOld(size_t requested) {
-  return doAlloc(requested, &oldspace);
+  void *out = doAlloc(requested, &oldspace);
+  printf("ALLOC OLD requested: %ld @ %llx\n", requested, (unsigned long long)out);
+  return out;
 }
 
 __attribute__ ((always_inline)) void* koreAllocTokenOld(size_t requested) {
