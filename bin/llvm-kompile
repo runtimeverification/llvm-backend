@@ -1,5 +1,5 @@
 #!/bin/bash
-if [ $# -lt 3 ];
+if [ $# -lt 3 ]; then
   echo "Usage: $0 <definition.kore> <MODULE-NAME> [main|library] <clang flags>"
   echo '"main" means that a main function will be generated that matches the signature "interpreter <input.kore> <depth> <output.kore>"'
   echo '"library" means that no main function is generated and must be passed via <clang flags>'
