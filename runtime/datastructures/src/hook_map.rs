@@ -70,12 +70,10 @@ pub unsafe extern "C" fn hook_MAP_lookupOrDefault(m: *const Map, key: K, default
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_MAP_update(m: *const Map, key: K, value: K) -> Map {
-  let view = m as *mut u64;
   println!("UPDATE ADDR {:?} with key: {:?}, value: {:?}", m, key, value);
-  for i in 0..2 {
-    println!("{}: {:08x} ", i, *view.offset(i));
-  }
-  (*m).update(KElem::new(key), KElem::new(value))
+  let ret = (*m).update(KElem::new(key), KElem::new(value));
+  //println!("UPDATED: {:?}", ret);
+  ret
 }
 
 #[no_mangle]

@@ -9,6 +9,8 @@
 #include<sstream>
 #include<stdexcept>
 
+#include<iostream>
+
 extern "C" {
 
 #include "runtime/alloc.h"
@@ -57,6 +59,7 @@ extern "C" {
   int64_t hook_STRING_cmp(const string * a, const string * b) {
     auto len_a = len(a);
     auto len_b = len(b);
+	std::cout << "len a " << len_a << " len_b " << len_b << std::endl;
     int64_t diff = len_a - len_b;
     if (diff != 0) {
         return diff;

@@ -35,23 +35,27 @@ extern "C" {
     return 0LL;
   }
 
-  int64_t hook_KEQUAL_cmp(block *a, block *b){
-	 std::cout << "CMP" << std::endl;
+int64_t hook_KEQUAL_cmp(block *a, block *b){
+	 std::cout << "CMP: " << std::hex << (long long)a << " -- " << (long long)b << std::endl;
      auto aptr = reinterpret_cast<int64_t>(a);
      auto bptr = reinterpret_cast<int64_t>(b);
      auto aleastbit = aptr & 1LL;
      auto bleastbit = bptr & 1LL;
      if(aleastbit != bleastbit) {
+		 std::cout << "PTR CMP" << std::endl;
          return ptr_compare(aptr, bptr);
      }
      if (aleastbit == 1LL) {
+		 std::cout << "PTR CMP 2" << std::endl;
          return ptr_compare(aptr, bptr);
      }
      auto alen = len(a);
      auto blen = len(b);
      if(alen < blen) {
+		 std::cout << "LEN LT " << alen << " -- " << blen << std::endl;
          return -1LL;
      } else if (blen < alen) {
+		 std::cout << "LEN GT" << std::endl;
          return 1LL;
      }
      auto ahdr = a->h.hdr;
@@ -59,17 +63,21 @@ extern "C" {
      uint64_t alayoutInt = layout_hdr(ahdr);
      uint64_t blayoutInt = layout_hdr(bhdr);
      if (!alayoutInt) {
+		 std::cout << "NOT AINT" << std::endl;
          return -1LL;
      }
      if (!blayoutInt) {
+		 std::cout << "NOT BINT" << std::endl;
          return 1LL;
      }
      auto alayoutData = getLayoutData(alayoutInt);
      auto blayoutData = getLayoutData(blayoutInt);
      if (alayoutData->nargs < blayoutData->nargs) {
+		 std::cout << "AARGS LT" << std::endl;
         return -1LL;
      }
      if (alayoutData->nargs > blayoutData->nargs) {
+		 std::cout << "AARGS GT" << std::endl;
         return 1LL;
      }
      for (unsigned i = 0; i < alayoutData->nargs; ++i) {
@@ -81,9 +89,11 @@ extern "C" {
        // based on child type (number), which should be consist
        // in any given run.
        if (aArgData->cat < bArgData->cat) {
+		   std::cout << "ARG: " << i << " CAT LT" << std::endl;
            return -1LL;
        }
        if (aArgData->cat > bArgData->cat) {
+		   std::cout << "ARG: " << i << " CAT GT" << std::endl;
            return 1LL;
        }
        // Here the types must be the same, so we switch on
@@ -91,6 +101,7 @@ extern "C" {
        switch (aArgData->cat) {
             case MAP_LAYOUT: {
                  auto res = hook_MAP_cmp(aArg, bArg);
+		   		  std::cout << "MAP: " << i << " RES: " << res << std::endl;
                  if (res != 0) {
                      return res;
                  }
@@ -98,6 +109,7 @@ extern "C" {
             }
             case SET_LAYOUT: {
                  auto res = hook_SET_cmp(aArg, bArg);
+		   		  std::cout << "SET: " << i << " RES: " << res << std::endl;
                  if (res != 0) {
                      return res;
                  }
@@ -105,6 +117,7 @@ extern "C" {
             }
             case LIST_LAYOUT: {
                  auto res = hook_LIST_cmp(aArg, bArg);
+		   		  std::cout << "LIST: " << i << " RES: " << res << std::endl;
                  if (res != 0) {
                      return res;
                  }
@@ -112,20 +125,24 @@ extern "C" {
             }
             case STRINGBUFFER_LAYOUT: {
                  auto res = hook_BUFFER_cmp(aArg, bArg);
+		   		  std::cout << "SBUFF: " << i << " RES: " << res << std::endl;
                  if (res != 0) {
                      return res;
                  }
                  break;
             }
             case SYMBOL_LAYOUT: {
-                 auto res = hook_STRING_cmp(aArg, bArg);
+                 auto res = hook_KEQUAL_cmp(static_cast<block *>(aArg),
+						                    static_cast<block *>(bArg));
+		   		  std::cout << "SYMBOL: " << i << " RES: " << res << std::endl;
                  if (res != 0) {
                      return res;
                  }
                  break;
             }
 			case INT_LAYOUT: {
-                 auto res = hook_BUFFER_cmp(aArg, bArg);
+                 auto res = hook_INT_cmp(aArg, bArg);
+		   		  std::cout << "INT: " << i << " RES: " << res << std::endl;
                  if (res != 0) {
                      return res;
                  }
