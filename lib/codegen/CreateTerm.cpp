@@ -389,13 +389,22 @@ llvm::Value *CreateTerm::createFunctionCall(std::string name, KOREObjectComposit
 llvm::Value *CreateTerm::createFunctionCall(std::string name, ValueType returnCat, std::vector<llvm::Value *> &args, bool sret, bool fastcc) {
   llvm::Type *returnType = getValueType(returnCat, Module);
   std::vector<llvm::Type *> types;
+  bool structType = false;
   switch (returnCat.cat) {
   case SortCategory::List:
+	sret = sizeof(list) >= SRET_MIN_SIZE;
+	structType = true;
+	break;
   case SortCategory::Map:
+	sret = sizeof(map) >= SRET_MIN_SIZE;
+	structType = true;
+	break;
   case SortCategory::Set:
+	sret = sizeof(set) >= SRET_MIN_SIZE;
+	structType = true;
     break;
   default:
-    sret = false; 
+    sret = false;
     break;
   }
   llvm::Value *AllocSret;
@@ -409,6 +418,11 @@ llvm::Value *CreateTerm::createFunctionCall(std::string name, ValueType returnCa
     args.insert(args.begin(), AllocSret);
     types.insert(types.begin(), AllocSret->getType());
     returnType = llvm::Type::getVoidTy(Ctx);
+  } else if (structType) {
+	// if we have a struct return type, but we aren't sreting, we need to store the result
+	// to a pointer to be consistent with the variable types expected elsewhere based
+	// on the previous assumption of sret.
+	AllocSret = allocateTerm(returnType, CurrentBlock, "koreAllocOld");
   }
  
   llvm::FunctionType *funcType = llvm::FunctionType::get(returnType, types, false);
@@ -425,6 +439,9 @@ llvm::Value *CreateTerm::createFunctionCall(std::string name, ValueType returnCa
   if (sret) {
     func->arg_begin()->addAttr(llvm::Attribute::StructRet);
     return AllocSret;
+  } else if (structType) {
+    new llvm::StoreInst(call, AllocSret, CurrentBlock);
+	return AllocSret;
   }
   return call;
 }

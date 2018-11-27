@@ -24,6 +24,8 @@
 #define BOOL_LAYOUT 7
 #define SYMBOL_LAYOUT 8
 
+#define SRET_MIN_SIZE 24
+
 #ifdef __cplusplus
 extern "C" {
 #endif
