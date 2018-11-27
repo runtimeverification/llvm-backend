@@ -27,17 +27,11 @@ pub unsafe extern "C" fn hook_MAP_element(key: K, value: K) -> Map {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn hook_MAP_unit(m: *mut Map) {
-  let x = Map::new();
-  let outview = m as *mut u64;
-  println!("UNIT PASSED ADDR: {:?}", m);
-  let view = &x as *const _ as *const u64;
-    for i in 0..2 {
-        println!("{}: {:08x} ", i, *view.offset(i));
-        *outview.offset(i) = *view.offset(i);
-    }
-    println!("DONE UNIT");
-  //x
+pub unsafe extern "C" fn hook_MAP_unit() -> Map {
+   println!("UNIT");
+   let x = Map::new();
+   println!("NEW {:?}", x);
+   x
 }
 
 #[no_mangle]
@@ -77,7 +71,7 @@ pub unsafe extern "C" fn hook_MAP_lookupOrDefault(m: *const Map, key: K, default
 #[no_mangle]
 pub unsafe extern "C" fn hook_MAP_update(m: *const Map, key: K, value: K) -> Map {
   let view = m as *mut u64;
-  // println!("UPDATE ADDR {:?} with key: {:?}, value: {:?}", m, key, value);
+  println!("UPDATE ADDR {:?} with key: {:?}, value: {:?}", m, key, value);
   for i in 0..2 {
     println!("{}: {:08x} ", i, *view.offset(i));
   }

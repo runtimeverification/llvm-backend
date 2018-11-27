@@ -390,8 +390,8 @@ llvm::Value *CreateTerm::createFunctionCall(std::string name, ValueType returnCa
   llvm::Type *returnType = getValueType(returnCat, Module);
   std::vector<llvm::Type *> types;
   switch (returnCat.cat) {
-  case SortCategory::Map:
   case SortCategory::List:
+  case SortCategory::Map:
   case SortCategory::Set:
     break;
   default:
