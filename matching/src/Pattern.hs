@@ -74,7 +74,7 @@ instance Show Column where
 data Metadata = Metadata
                 { getLength :: !Integer
                 , getInjections :: Constructor -> [Constructor]
-                , getOverloads :: Constructor -> [Constructor]
+                , getOverloads :: Constructor -> [Constructor] -- list of overloaded productions less than specified production
                 , getSort :: Sort Object
                 , getChildren :: Constructor -> Maybe [Metadata]
                 }
@@ -83,7 +83,7 @@ instance (Show Metadata) where
   show (Metadata _ _ _ sort _) = show sort
 
 type Occurrence   = [Int]
-type Fringe = [(Occurrence, Bool)]
+type Fringe = [(Occurrence, Bool)] -- occurrence and whether to match the exact sort
 
 instance Show1 Pattern where
   liftShowsPrec showP showL prec pat = liftShowsPrec2 showsPrec showList showP showL prec pat
@@ -177,6 +177,8 @@ data Clause       = Clause
                     -- the length of the head and tail of any list patterns
                     -- with frame variables bound so far in this row
                     , getListRanges :: [(Occurrence, Int, Int)]
+                    -- variable bindings to injections that need to be constructed
+                    -- since they do not actually exist in the original subject term
                     , getOverloadChildren :: [(Constructor, VariableBinding)]
                     }
                     deriving (Show)
@@ -471,6 +473,7 @@ mightUnify (Fix (ListPattern _ _ _ _ _)) _ = False
 mightUnify (Fix (MapPattern _ _ _ _ _)) _ = False
 mightUnify (Fix (SetPattern _ _ _ _)) _ = False
 
+-- returns true if the specified constructor is an overload of the current pattern and can match it
 isValidOverload :: [Fix Pattern] -> Metadata -> Clause -> [Metadata] -> Constructor -> Bool
 isValidOverload ps (Metadata _ _ _ _ childMeta) cls metaPs less =
   case childMeta less of
@@ -543,6 +546,9 @@ addRange :: Maybe Constructor -> Occurrence -> Fix Pattern -> [(Occurrence, Int,
 addRange (Just (List _ len)) o (Fix (ListPattern hd (Just (Fix (Variable _ _))) tl _ _)) ranges = (len : o, length hd, length tl) : ranges
 addRange _ _ _ ranges = ranges
 
+-- computes the list of injections that are bound to variables in the current pattern as a result of matching on an overload of the current
+-- pattern. these injections are bound to variables despite not existing in the current term, so they need to be tracked so they can be
+-- created later
 addOverloads :: Metadata -> Maybe Constructor -> Occurrence -> Fix Pattern -> [(Constructor, VariableBinding)] -> [(Constructor, VariableBinding)]
 addOverloads (Metadata _ _ _ _ meta) (Just (Symbol (SymbolOrAlias name@(Id "inj" _) [a,_]))) o (Fix (Pattern ix@(Symbol (SymbolOrAlias (Id "inj" _) [b,_])) _ [p])) children = 
   if a == b then 
