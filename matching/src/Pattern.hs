@@ -551,30 +551,32 @@ addRange _ _ _ ranges = ranges
 -- created later
 addOverloads :: Metadata -> Maybe Constructor -> Occurrence -> Fix Pattern -> [(Constructor, VariableBinding)] -> [(Constructor, VariableBinding)]
 addOverloads (Metadata _ _ _ _ meta) (Just (Symbol (SymbolOrAlias name@(Id "inj" _) [a,_]))) o (Fix (Pattern ix@(Symbol (SymbolOrAlias (Id "inj" _) [b,_])) _ [p])) children = 
-  if a == b then 
+  if a == b then -- exact match, don't recurse
     children  
-  else
-    let childMeta = (fromJust $ meta ix) !! 0
-    in addOverloads childMeta (Just (Symbol (SymbolOrAlias name [a,b]))) o p children
+  else -- flexible injection, so recurse into child
+    let metaB = (fromJust $ meta ix) !! 0
+    in addOverloads metaB (Just (Symbol (SymbolOrAlias name [a,b]))) o p children
 addOverloads (Metadata _ _ overloads _ meta) (Just inj@(Symbol (SymbolOrAlias (Id "inj" _) _))) o (Fix (Pattern ix _ ps)) children = 
   let less = overloads ix
       metaPs = fromJust $ meta ix
-      (Metadata _ _ _ _ childMeta) = (fromJust $ meta inj) !! 0
+      (Metadata _ _ _ _ childMeta) = (fromJust $ meta inj) !! 0 -- metadata for child of injection
       childMaybe = listToMaybe $ catMaybes $ map childMeta less
   in case childMaybe of
-    Nothing -> children
+    Nothing -> children -- no overloads exist
     Just metaTs -> 
-      let items = concat $ zipWith4 getVar metaPs metaTs ps [0..length metaPs-1]
+      let items = concat $ zipWith4 getVar metaPs metaTs ps [0..length metaPs-1] -- compute variable bindings
       in items ++ children
   where
     getVar :: Metadata -> Metadata -> Fix Pattern -> Int -> [(Constructor, VariableBinding)]
     getVar metaP metaT p i =
-      let vars = addVarToRow Nothing (-1 : i : o) p []
+      let vars = addVarToRow Nothing (-1 : i : o) p [] -- compute variable bindings for this pattern
           sortP = getSort metaP
           sortT = getSort metaT
           child = Symbol (SymbolOrAlias (Id "inj" AstLocationNone) [sortT, sortP])
-          childOverloads = addOverloads metaP (Just child) (i : o) p []
-      in if sortP == sortT then [] else zip (replicate (length vars) child) vars ++ childOverloads
+          childOverloads = addOverloads metaP (Just child) (i : o) p [] -- recurse into child term
+      in if sortP == sortT then
+        [] -- exact match, so no bindings
+      else zip (replicate (length vars) child) vars ++ childOverloads
 addOverloads _ _ _ _ children = children
 
 filterMatrix :: Maybe Constructor -> ((Clause, Fix Pattern) -> Bool) -> (ClauseMatrix, Occurrence) -> ClauseMatrix
