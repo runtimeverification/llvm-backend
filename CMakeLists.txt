@@ -73,7 +73,7 @@ install(
 
 
 install(
-  PROGRAMS bin/llvm-kompile bin/llvm-kompile-matching bin/llvm-kompile-rust-lto
+  PROGRAMS bin/llvm-kompile bin/llvm-kompile-clang bin/llvm-kompile-matching bin/llvm-kompile-rust-lto
   DESTINATION bin
 )
 

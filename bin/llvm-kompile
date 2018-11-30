@@ -15,47 +15,12 @@ definition="$1"
 moduleName="$2"
 main="$3"
 shift; shift; shift
-LIBDIR="$(dirname "$0")"/../lib/kllvm/
 if [[ "$OSTYPE" == "darwin"* ]]; then
     SUFFIX=""
-    RUSTDIR=`rustc --print sysroot`/lib/rustlib/x86_64-apple-darwin/lib/
-    LLVMLIB="-L/usr/local/opt/llvm@6/lib"
 else
     SUFFIX="-6.0"
-    RUSTDIR=`rustc --print sysroot`/lib/rustlib/x86_64-unknown-linux-gnu/lib/
-    LLVMLIB="-L/usr/lib/llvm-6.0/lib"
 fi
 "$(dirname "$0")"/llvm-kompile-matching "$definition" "$moduleName" "$dt_dir"
 "$(dirname "$0")"/llvm-kompile-codegen "$definition" "$dt_dir"/dt.yaml "$dt_dir" > "$mod"
 "opt$SUFFIX" -tailcallelim -tailcallopt "$mod" -o "$modopt"
-if [ "$main" = "main" ]; then
-  MAINFILES="$LIBDIR"/llvm/main/main.ll
-else
-  MAINFILES=""
-fi
-"clang++$SUFFIX" -Wno-override-module "$modopt" \
-  "$LIBDIR"/libarithmetic.a \
-  "$LIBDIR"/libstrings.a \
-  "$LIBDIR"/rust/libdatastructures.rlib \
-  "$LIBDIR"/rust/deps/*.rlib \
-  "$RUSTDIR"/libcore-*.rlib \
-  "$RUSTDIR"/libstd-*.rlib \
-  "$RUSTDIR"/liballoc-*.rlib \
-  "$RUSTDIR"/libunwind-*.rlib \
-  "$RUSTDIR"/libcompiler_builtins-*.rlib \
-  "$RUSTDIR"/libpanic_abort-*.rlib \
-  "$RUSTDIR"/liballoc_system-*.rlib \
-  "$LIBDIR"/llvm/*.ll \
-  "$MAINFILES" \
-  "$LIBDIR"/libconfigurationparser.a \
-  "$LIBDIR"/libParser.a \
-  "$LIBDIR"/libAST.a \
-  "$LIBDIR"/liballoc.a \
-  -lgmp -lpthread -ldl \
-  "$LLVMLIB" \
-  -lLLVMIRReader -lLLVMBitReader -lLLVMAsmParser -lLLVMCore -lLLVMBinaryFormat -lLLVMSupport -lLLVMDemangle \
-  -ltinfo \
-  -ljemalloc \
-  -I "$(dirname "$0")"/../include \
-  -flto \
-  "$@"
+"$(dirname "$0")"/llvm-kompile-clang "$modopt" "$main" -flto -Wl,-plugin-opt=-tailcallopt "$@"
