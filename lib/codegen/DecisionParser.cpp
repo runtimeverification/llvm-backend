@@ -7,6 +7,15 @@
 
 namespace kllvm {
 
+std::string to_string(std::vector<std::string> occurrence) {
+  std::string result = "";
+  for (std::string i : occurrence) {
+    result.push_back('_');
+    result += i;
+  }
+  return result;
+}
+
 class DTPreprocessor {
 private:
   // we do a giant nasty hack around the fact that YAML::Node doesn't
@@ -40,15 +49,6 @@ public:
     dv = KOREObjectSymbol::Create("\\dv");
   }
 
-  std::string to_string(std::vector<std::string> occurrence) {
-    std::string result = "";
-    for (std::string i : occurrence) {
-      result.push_back('_');
-      result += i;
-    }
-    return result;
-  }
-
   DecisionNode *function(YAML::Node node) {
     std::string function = node["function"].as<std::string>();
     std::string hookName = node["sort"].as<std::string>();
@@ -75,17 +75,32 @@ public:
 
   KOREObjectPattern *parsePattern(YAML::Node node, std::vector<std::string> &uses) {
     if (node["occurrence"]) {
-      std::string name = to_string(node["occurrence"].as<std::vector<std::string>>());
+      std::string name;
+      if (node["occurrence"].IsSequence()) {
+        name = to_string(node["occurrence"].as<std::vector<std::string>>());
+      } else {
+        name = node["occurrence"].as<std::string>();
+      }
       uses.push_back(name);
       return KOREObjectVariablePattern::Create(name, sorts.lookup(node["hook"].as<std::string>()));
     } else if (node["literal"]) {
       auto sym = KOREObjectSymbol::Create("\\dv");
-      sym->addFormalArgument(sorts.lookup(node["hook"].as<std::string>()));
+      auto hook = node["hook"].as<std::string>();
+      auto val = node["literal"].as<std::string>();
+      if (hook == "BOOL.Bool") {
+        val = val == "1" ? "true" : "false";
+      }
+      sym->addFormalArgument(sorts.lookup(hook));
       auto pat = KOREObjectCompositePattern::Create(sym);
-      pat->addArgument(KOREMetaStringPattern::Create(node["literal"].as<std::string>()));
+      pat->addArgument(KOREMetaStringPattern::Create(val));
       return pat;
     } else {
-      auto sym = syms.lookup(node["constructor"].as<std::string>());
+      auto constructor = node["constructor"].as<std::string>();
+      auto sym = syms.lookup(constructor);
+      if (!sym) {
+        std::cerr << constructor << std::endl;
+        abort();
+      }
       auto pat = KOREObjectCompositePattern::Create(sym);
       for (auto child : node["args"]) {
         pat->addArgument(parsePattern(child, uses));
