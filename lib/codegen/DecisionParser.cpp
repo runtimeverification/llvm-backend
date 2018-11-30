@@ -1,4 +1,5 @@
 #include "kllvm/codegen/DecisionParser.h"
+#include "kllvm/codegen/Decision.h"
 
 #include <yaml-cpp/yaml.h>
 
@@ -209,6 +210,21 @@ public:
     uniqueNodes[node] = (uintptr_t)ret;
     return ret;
   }
+
+  PartialStep makeResiduals(YAML::Node residuals, DecisionNode *dt) {
+    std::vector<Residual> res;
+    for (YAML::Node node : residuals) {
+      Residual r;
+      r.occurrence = to_string(node[1].as<std::vector<std::string>>());
+      std::vector<std::string> uses;
+      r.pattern = parsePattern(node[0], uses);
+      res.push_back(r);
+    }
+    PartialStep retval;
+    retval.dt = dt;
+    retval.residuals = res;
+    return retval;
+  }
 };
 
 DecisionNode *parseYamlDecisionTreeFromString(std::string yaml, const llvm::StringMap<KOREObjectSymbol *> &syms, const llvm::StringMap<KOREObjectCompositeSort *> &sorts) {
@@ -220,5 +236,13 @@ DecisionNode *parseYamlDecisionTree(std::string filename, const llvm::StringMap<
   YAML::Node root = YAML::LoadFile(filename);
   return DTPreprocessor(syms, sorts)(root);
 }
+
+PartialStep parseYamlSpecialDecisionTree(std::string filename, const llvm::StringMap<KOREObjectSymbol *> &syms, const llvm::StringMap<KOREObjectCompositeSort *> &sorts) {
+  YAML::Node root = YAML::LoadFile(filename);
+  auto pp = DTPreprocessor(syms, sorts);
+  auto dt = pp(root[0]);
+  return pp.makeResiduals(root[1], dt);
+}
+
 
 }
