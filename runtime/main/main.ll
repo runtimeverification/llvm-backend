@@ -5,9 +5,9 @@ target triple = "x86_64-unknown-linux-gnu"
 %block = type { %blockheader, [0 x i64 *] } ; 16-bit layout, 8-bit length, 32-bit tag, children
 
 declare %block* @parseConfiguration(i8*)
-declare i32 @atoi(i8*)
+declare i64 @atol(i8*)
 
-declare %block* @take_steps(i32, %block*)
+declare %block* @take_steps(i64, %block*)
 declare void @finish_rewriting(%block*) #0
 
 declare i8* @koreAllocOld(i64)
@@ -24,7 +24,7 @@ entry:
   %filename = load i8*, i8** %filename_ptr
   %depth_ptr = getelementptr inbounds i8*, i8** %argv, i64 2
   %depth_str = load i8*, i8** %depth_ptr
-  %depth = call i32 @atoi(i8* %depth_str)
+  %depth = call i64 @atol(i8* %depth_str)
   %output_ptr = getelementptr inbounds i8*, i8** %argv, i64 3
   %output_str = load i8*, i8** %output_ptr
   store i8* %output_str, i8** @output_file
@@ -32,7 +32,7 @@ entry:
   call void @__gmp_set_memory_functions(i8* (i64) * @koreAllocOld, i8* (i8*, i64, i64) * @koreReallocOld, void (i8*, i64) * @koreFree)
 
   %ret = call %block* @parseConfiguration(i8* %filename)
-  %result = call %block* @take_steps(i32 %depth, %block* %ret)
+  %result = call %block* @take_steps(i64 %depth, %block* %ret)
   call void @finish_rewriting(%block* %result)
   unreachable
 }
