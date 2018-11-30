@@ -67,6 +67,7 @@ extern "C" {
 
   // llvm: list = type { i64, [7 x i64] }
   typedef struct list {
+    uint64_t a;
     uint64_t b[7];
   } list;
  
