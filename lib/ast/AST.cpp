@@ -281,6 +281,33 @@ bool KOREAxiomDeclaration::isRequired() {
   return !attributes.count(ASSOC) && !attributes.count(COMM) && !attributes.count(IDEM) && !attributes.count(UNIT) && !attributes.count(FUNCTIONAL) && !attributes.count(CONSTRUCTOR) && !attributes.count(SUBSORT);
 }
 
+bool KOREAxiomDeclaration::isFunction() const {
+  if (auto top = dynamic_cast<KOREObjectCompositePattern *>(pattern)) {
+    if (top->getConstructor()->getName() == "\\and" && top->getArguments().size() == 2) {
+      return false;
+    } else if (top->getConstructor()->getName() == "\\implies" && top->getArguments().size() == 2) {
+      if (auto andPattern = dynamic_cast<KOREObjectCompositePattern *>(top->getArguments()[1])) {
+        if (andPattern->getConstructor()->getName() == "\\and" && andPattern->getArguments().size() == 2) {
+          if (auto bottomPattern = dynamic_cast<KOREObjectCompositePattern *>(top->getArguments()[0])) {
+            if (bottomPattern->getConstructor()->getName() == "\\bottom" && bottomPattern->getArguments().empty()) {
+              if (auto andPattern2 = dynamic_cast<KOREObjectCompositePattern *>(andPattern->getArguments()[1])) {
+                if (andPattern2->getConstructor()->getName() == "\\and" && andPattern2->getArguments().size() == 2) {
+                  if (auto rewrites = dynamic_cast<KOREObjectCompositePattern *>(andPattern2->getArguments()[1])) {
+                    if (rewrites->getConstructor()->getName() == "\\rewrites" && rewrites->getArguments().size() == 2) {
+                      return false;
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  return true;
+}
+
 KOREPattern *KOREAxiomDeclaration::getRightHandSide() const {
   if (auto top = dynamic_cast<KOREObjectCompositePattern *>(pattern)) {
     if (top->getConstructor()->getName() == "\\implies" && top->getArguments().size() == 2) {

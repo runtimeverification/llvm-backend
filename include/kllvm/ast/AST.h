@@ -322,7 +322,8 @@ public:
 };
 
 class KOREObjectPattern : public KOREPattern {
-
+public:
+  virtual KOREObjectSort *getSort(void) const = 0;
 };
 
 class KOREMetaPattern : public KOREPattern {
@@ -342,7 +343,7 @@ public:
   }
 
   std::string getName() const;
-  KOREObjectSort *getSort() const { return sort; }
+  virtual KOREObjectSort *getSort() const override { return sort; }
 
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
   virtual void markSymbols(std::map<std::string, std::vector<KOREObjectSymbol *>> &) override {}
@@ -387,6 +388,8 @@ public:
   static KOREObjectCompositePattern *Create(KOREObjectSymbol *Sym) {
     return new KOREObjectCompositePattern(Sym);
   }
+
+  KOREObjectSort *getSort() const override { return constructor->getSort(); }
 
   KOREObjectSymbol *getConstructor() const { return constructor; }
   const std::vector<KOREPattern *> &getArguments() const { return arguments; }
@@ -618,6 +621,7 @@ public:
      required for concrete execution. Axioms that are not required are elided
      from the definition by KOREDefinition::preprocess. */
   bool isRequired();
+  bool isFunction() const;
   KOREPattern *getRightHandSide() const;
   KOREPattern *getRequires() const;
   unsigned getOrdinal() const { return ordinal; }
