@@ -1,4 +1,5 @@
 #include "kllvm/codegen/DecisionParser.h"
+#include "kllvm/codegen/Decision.h"
 
 #include <yaml.h>
 
@@ -19,6 +20,20 @@ private:
     Switch, SwitchLiteral, CheckNull, MakePattern, Function, MakeIterator, IterNext, Leaf, Fail
   };
 
+  Kind getKind(yaml_node_t *node) {
+    if (node->type == YAML_SCALAR_NODE) return Fail;
+    if (get(node, "collection")) return MakeIterator;
+    if (get(node, "iterator")) return IterNext;
+    if (get(node, "isnull")) return CheckNull;
+    if (get(node, "pattern")) return MakePattern;
+    if (get(node, "bitwidth")) return SwitchLiteral;
+    if (get(node, "specializations")) return Switch;
+    if (get(node, "action")) return Leaf;
+    if (get(node, "function")) return Function;
+    throw node;
+  }
+
+public:
   yaml_node_t *get(yaml_node_t *node, std::string name) {
     yaml_node_pair_t *entry;
     for (entry = node->data.mapping.pairs.start; entry < node->data.mapping.pairs.top; ++entry) {
@@ -47,20 +62,6 @@ private:
     return result;
   }
 
-  Kind getKind(yaml_node_t *node) {
-    if (node->type == YAML_SCALAR_NODE) return Fail;
-    if (get(node, "collection")) return MakeIterator;
-    if (get(node, "iterator")) return IterNext;
-    if (get(node, "isnull")) return CheckNull;
-    if (get(node, "pattern")) return MakePattern;
-    if (get(node, "bitwidth")) return SwitchLiteral;
-    if (get(node, "specializations")) return Switch;
-    if (get(node, "action")) return Leaf;
-    if (get(node, "function")) return Function;
-    throw node;
-  }
-
-public:
   DTPreprocessor(
       const std::map<std::string, KOREObjectSymbol *> &syms,
       const std::map<std::string, KOREObjectCompositeSort *> &sorts,
@@ -251,6 +252,22 @@ public:
     uniqueNodes[node] = ret;
     return ret;
   }
+
+  PartialStep makeResiduals(yaml_node_t *residuals, DecisionNode *dt) {
+    std::vector<Residual> res;
+    for (auto iter = residuals->data.sequence.items.start; iter < residuals->data.sequence.items.top; ++iter) {
+      Residual r;
+      yaml_node_t *node = yaml_document_get_node(doc, *iter);
+      r.occurrence = to_string(vec(get(node, 1)));
+      std::vector<std::string> uses;
+      r.pattern = parsePattern(get(node, 0), uses);
+      res.push_back(r);
+    }
+    PartialStep retval;
+    retval.dt = dt;
+    retval.residuals = res;
+    return retval;
+  }
 };
 
 DecisionNode *parseYamlDecisionTreeFromString(std::string yaml, const std::map<std::string, KOREObjectSymbol *> &syms, const std::map<std::string, KOREObjectCompositeSort *> &sorts) {
@@ -280,5 +297,23 @@ DecisionNode *parseYamlDecisionTree(std::string filename, const std::map<std::st
   fclose(f);
   return result;
 }
+
+PartialStep parseYamlSpecialDecisionTree(std::string filename, const std::map<std::string, KOREObjectSymbol *> &syms, const std::map<std::string, KOREObjectCompositeSort *> &sorts) {
+  yaml_parser_t parser;
+  yaml_document_t doc;
+  yaml_parser_initialize(&parser);
+  FILE *f = fopen(filename.c_str(), "rb");
+  yaml_parser_set_input_file(&parser, f);
+  yaml_parser_load(&parser, &doc);
+  yaml_node_t *root = yaml_document_get_root_node(&doc);
+  auto pp = DTPreprocessor(syms, sorts, &doc);
+  auto dt = pp(pp.get(root, 0));
+  auto result = pp.makeResiduals(pp.get(root, 1), dt);
+  yaml_document_delete(&doc);
+  yaml_parser_delete(&parser);
+  fclose(f);
+  return result;
+}
+
 
 }

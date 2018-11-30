@@ -688,6 +688,80 @@ std::string makeApplyRuleFunction(KOREAxiomDeclaration *axiom, KOREDefinition *d
     return "";
 }
 
+std::string makeApplyRuleFunction(KOREAxiomDeclaration *axiom, KOREDefinition *definition, llvm::Module *Module, std::vector<Residual> residuals) {
+    std::map<std::string, KOREObjectVariablePattern *> vars;
+    for (auto residual : residuals) {
+      residual.pattern->markVariables(vars);
+    }
+    llvm::StringMap<llvm::Type *> params;
+    std::vector<llvm::Type *> paramTypes;
+    std::vector<std::string> paramNames;
+    for (auto iter = vars.begin(); iter != vars.end(); ++iter) {
+      auto &entry = *iter;
+      auto sort = dynamic_cast<KOREObjectCompositeSort *>(entry.second->getSort());
+      if (!sort) {
+        // TODO: sort variables
+        return "";
+      }
+      auto cat = sort->getCategory(definition);
+      llvm::Type *varType = getValueType(cat, Module);
+      llvm::Type *paramType = varType;
+      switch(cat.cat) {
+      case SortCategory::Map:
+      case SortCategory::List:
+      case SortCategory::Set:
+        paramType = llvm::PointerType::getUnqual(paramType);
+        break;
+      default:
+        break;
+      }
+      
+      params.insert({entry.first, varType});
+      paramTypes.push_back(paramType);
+      paramNames.push_back(entry.first);
+    }
+    llvm::FunctionType *funcType = llvm::FunctionType::get(getValueType({SortCategory::Symbol, 0}, Module), paramTypes, false);
+    std::string name = "apply_rule_" + std::to_string(axiom->getOrdinal());
+    llvm::Constant *func = Module->getOrInsertFunction(name, funcType);
+    llvm::Function *applyRule = llvm::cast<llvm::Function>(func);
+    applyRule->setCallingConv(llvm::CallingConv::Fast);
+    llvm::StringMap<llvm::Value *> subst;
+    llvm::BasicBlock *block = llvm::BasicBlock::Create(Module->getContext(), "entry", applyRule);
+    int i = 0;
+    for (auto val = applyRule->arg_begin(); val != applyRule->arg_end(); ++val, ++i) {
+      subst.insert({paramNames[i], val});
+    }
+    CreateTerm creator = CreateTerm(subst, definition, block, Module, false);
+    std::vector<llvm::Value *> args;
+    std::vector<llvm::Type *> types;
+    for (auto residual : residuals) {
+      llvm::Value *arg = creator(residual.pattern).first;
+      auto sort = dynamic_cast<KOREObjectCompositeSort *>(residual.pattern->getSort());
+      auto cat = sort->getCategory(definition);
+      switch (cat.cat) {
+      case SortCategory::Map:
+      case SortCategory::List:
+      case SortCategory::Set:
+        if (!arg->getType()->isPointerTy()) {
+          auto ptr = allocateTerm(arg->getType(), creator.getCurrentBlock(), "koreAllocOld");
+          new llvm::StoreInst(arg, ptr, creator.getCurrentBlock());
+          arg = ptr;
+        }
+        break;
+      default:
+        break;
+      }
+      args.push_back(arg);
+      types.push_back(arg->getType());
+    }
+    llvm::Type *blockType = getValueType({SortCategory::Symbol, 0}, Module);
+    llvm::Constant *step = Module->getOrInsertFunction("step_" + std::to_string(axiom->getOrdinal()), llvm::FunctionType::get(blockType, types, false));
+    auto retval = llvm::CallInst::Create(step, args, "", creator.getCurrentBlock());
+    retval->setCallingConv(llvm::CallingConv::Fast);
+    llvm::ReturnInst::Create(Module->getContext(), retval, creator.getCurrentBlock());
+    return name;
+}
+
 std::string makeSideConditionFunction(KOREAxiomDeclaration *axiom, KOREDefinition *definition, llvm::Module *Module) {
     KOREPattern *pattern = axiom->getRequires();
     if (!pattern) {

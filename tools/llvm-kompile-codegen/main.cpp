@@ -11,6 +11,7 @@
 #include "llvm/Support/raw_ostream.h"
 
 #include <libgen.h>
+#include <sys/stat.h>
 
 #include <fstream>
 
@@ -39,8 +40,20 @@ int main (int argc, char **argv) {
   std::unique_ptr<llvm::Module> mod = newModule("definition", Context);
 
   for (auto axiom : definition->getAxioms()) {
-    makeApplyRuleFunction(axiom, definition, mod.get(), axiom->isTopAxiom());
     makeSideConditionFunction(axiom, definition, mod.get());
+    if (axiom->isTopAxiom()) {
+      makeApplyRuleFunction(axiom, definition, mod.get());
+    } else {
+      std::string filename = argv[3] + std::string("/") + "dt_" + std::to_string(axiom->getOrdinal()) + ".yaml";
+      struct stat buf;
+      if (stat(filename.c_str(), &buf) == 0) {
+        auto residuals = parseYamlSpecialDecisionTree(filename, definition->getAllSymbols(), definition->getHookedSorts());
+        makeApplyRuleFunction(axiom, definition, mod.get(), residuals.residuals);
+        makeStepFunction(axiom, definition, mod.get(), residuals);
+      } else {
+        makeApplyRuleFunction(axiom, definition, mod.get(), true);
+      }
+    }
   }
 
   emitConfigParserFunctions(definition, mod.get());
