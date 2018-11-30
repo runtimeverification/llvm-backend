@@ -39,7 +39,7 @@ int main (int argc, char **argv) {
   std::unique_ptr<llvm::Module> mod = newModule("definition", Context);
 
   for (auto axiom : definition->getAxioms()) {
-    makeApplyRuleFunction(axiom, definition, mod.get());
+    makeApplyRuleFunction(axiom, definition, mod.get(), axiom->isTopAxiom());
     makeSideConditionFunction(axiom, definition, mod.get());
   }
 

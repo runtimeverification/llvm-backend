@@ -617,7 +617,7 @@ void addAbort(llvm::BasicBlock *block, llvm::Module *Module) {
     new llvm::UnreachableInst(Module->getContext(), block);
 }
 
-bool makeFunction(std::string name, KOREPattern *pattern, KOREDefinition *definition, llvm::Module *Module, bool fastcc) {
+bool makeFunction(std::string name, KOREPattern *pattern, KOREDefinition *definition, llvm::Module *Module, bool fastcc, bool bigStep) {
     std::map<std::string, KOREObjectVariablePattern *> vars;
     pattern->markVariables(vars);
     llvm::StringMap<llvm::Type *> params;
@@ -649,7 +649,11 @@ bool makeFunction(std::string name, KOREPattern *pattern, KOREDefinition *defini
     }
     llvm::FunctionType *funcType = llvm::FunctionType::get(termType(pattern, params, definition, Module), paramTypes, false);
     llvm::Constant *func = Module->getOrInsertFunction(name, funcType);
-    llvm::Function *applyRule = llvm::cast<llvm::Function>(func);
+    llvm::Function *applyRule = llvm::dyn_cast<llvm::Function>(func);
+    if (!applyRule) {
+      func->print(llvm::errs());
+      abort();
+    }
     if (fastcc) {
       applyRule->setCallingConv(llvm::CallingConv::Fast);
     }
@@ -664,14 +668,21 @@ bool makeFunction(std::string name, KOREPattern *pattern, KOREDefinition *defini
     if (retval->getType() == llvm::PointerType::getUnqual(funcType->getReturnType())) {
       retval = new llvm::LoadInst(retval, "", creator.getCurrentBlock());
     }
+    if (bigStep) {
+      llvm::Type *blockType = getValueType({SortCategory::Symbol, 0}, Module);
+      llvm::Constant *step = Module->getOrInsertFunction("step", llvm::FunctionType::get(blockType, {blockType}, false));
+      auto call = llvm::CallInst::Create(step, {retval}, "", creator.getCurrentBlock());
+      call->setCallingConv(llvm::CallingConv::Fast);
+      retval = call;
+    }
     llvm::ReturnInst::Create(Module->getContext(), retval, creator.getCurrentBlock());
     return true;
 }
 
-std::string makeApplyRuleFunction(KOREAxiomDeclaration *axiom, KOREDefinition *definition, llvm::Module *Module) {
+std::string makeApplyRuleFunction(KOREAxiomDeclaration *axiom, KOREDefinition *definition, llvm::Module *Module, bool bigStep) {
     KOREPattern *pattern = axiom->getRightHandSide();
     std::string name = "apply_rule_" + std::to_string(axiom->getOrdinal());
-    if (makeFunction(name, pattern, definition, Module, true)) {
+    if (makeFunction(name, pattern, definition, Module, true, bigStep)) {
       return name;
     }
     return "";
@@ -683,7 +694,7 @@ std::string makeSideConditionFunction(KOREAxiomDeclaration *axiom, KOREDefinitio
       return "";
     }
     std::string name = "side_condition_" + std::to_string(axiom->getOrdinal());
-    if (makeFunction(name, pattern, definition, Module, false)) {
+    if (makeFunction(name, pattern, definition, Module, false, false)) {
       return name;
     }
     return "";

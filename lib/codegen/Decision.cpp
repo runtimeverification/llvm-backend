@@ -12,6 +12,7 @@
 namespace kllvm {
 
 static std::string BLOCK_STRUCT = "block";
+static std::string LAYOUTITEM_STRUCT = "layoutitem";
 
 FailNode FailNode::instance;
 
@@ -447,28 +448,133 @@ void makeAnywhereFunction(KOREObjectSymbol *function, KOREDefinition *definition
   makeEvalOrAnywhereFunction(function, definition, module, dt, addOwise);
 }
 
+std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> stepFunctionHeader(unsigned ordinal, llvm::Module *module, KOREDefinition *definition, llvm::BasicBlock *block, llvm::BasicBlock *stuck, std::vector<llvm::Value *> args, std::vector<ValueType> types) {
+  auto finished = module->getOrInsertFunction("finished_rewriting", llvm::FunctionType::get(llvm::Type::getInt1Ty(module->getContext()), {}, false));
+  auto isFinished = llvm::CallInst::Create(finished, {}, "", block);
+  auto checkCollect = llvm::BasicBlock::Create(module->getContext(), "checkCollect", block->getParent());
+  llvm::BranchInst::Create(stuck, checkCollect, isFinished, block);
+
+  auto collection = module->getOrInsertFunction("is_collection", llvm::FunctionType::get(llvm::Type::getInt1Ty(module->getContext()), {}, false));
+  auto isCollection = llvm::CallInst::Create(collection, {}, "", checkCollect);
+  auto collect = llvm::BasicBlock::Create(module->getContext(), "isCollect", block->getParent());
+  auto merge = llvm::BasicBlock::Create(module->getContext(), "step", block->getParent());
+  llvm::BranchInst::Create(collect, merge, isCollection, checkCollect);
+
+  unsigned nroots = 0;
+  unsigned i = 0;
+  std::vector<llvm::Type *> ptrTypes;
+  std::vector<llvm::Value *> roots;
+  for (auto type : types) {
+    switch(type.cat) {
+      case SortCategory::Map:
+      case SortCategory::List:
+      case SortCategory::Set:
+        nroots++;
+        ptrTypes.push_back(llvm::PointerType::getUnqual(getValueType(type, module)));
+        roots.push_back(args[i]);
+        break;
+      case SortCategory::StringBuffer:
+      case SortCategory::Symbol:
+        nroots++;
+        ptrTypes.push_back(getValueType(type, module));
+        roots.push_back(args[i]);
+        break;
+      default:
+        break;
+    }
+    i++;
+  }
+  auto arr = module->getOrInsertGlobal("gc_roots", llvm::ArrayType::get(llvm::Type::getInt8PtrTy(module->getContext()), 256));
+  std::vector<llvm::Value *> rootPtrs;
+  for (unsigned i = 0; i < nroots; i++) {
+    auto ptr = llvm::GetElementPtrInst::CreateInBounds(llvm::dyn_cast<llvm::PointerType>(arr->getType())->getElementType(), arr, {llvm::ConstantInt::get(llvm::Type::getInt64Ty(module->getContext()), 0), llvm::ConstantInt::get(llvm::Type::getInt64Ty(module->getContext()), i)}, "", collect);
+    auto casted = new llvm::BitCastInst(ptr, llvm::PointerType::getUnqual(ptrTypes[i]), "", collect);
+    new llvm::StoreInst(roots[i], casted, collect);
+    rootPtrs.push_back(casted);
+  }
+  std::vector<llvm::Constant *> elements;
+  i = 0;
+  for (auto cat : types) {
+    switch(cat.cat) {
+      case SortCategory::Map:
+      case SortCategory::List:
+      case SortCategory::Set:
+      case SortCategory::StringBuffer:
+      case SortCategory::Symbol:
+        elements.push_back(llvm::ConstantStruct::get(module->getTypeByName(LAYOUTITEM_STRUCT), llvm::ConstantInt::get(llvm::Type::getInt64Ty(module->getContext()), i++ * 8), llvm::ConstantInt::get(llvm::Type::getInt16Ty(module->getContext()), (int)cat.cat + cat.bits)));
+        break;
+      default:
+        break;
+    }
+  }
+  auto layoutArr = llvm::ConstantArray::get(llvm::ArrayType::get(module->getTypeByName(LAYOUTITEM_STRUCT), elements.size()), elements);
+  auto layout = module->getOrInsertGlobal("layout_item_rule_" + std::to_string(ordinal), layoutArr->getType());
+  llvm::GlobalVariable *globalVar = llvm::dyn_cast<llvm::GlobalVariable>(layout);
+  if (!globalVar->hasInitializer()) {
+    globalVar->setInitializer(layoutArr);
+  }
+  auto koreCollect = module->getOrInsertFunction("koreCollect", llvm::FunctionType::get(llvm::Type::getVoidTy(module->getContext()), {arr->getType(), llvm::Type::getInt8Ty(module->getContext()), layout->getType()}, false));
+  llvm::CallInst::Create(koreCollect, {arr, llvm::ConstantInt::get(llvm::Type::getInt8Ty(module->getContext()), nroots), layout}, "", collect);
+  i = 0;
+  std::vector<llvm::Value *> phis;
+  for (auto ptr : rootPtrs) {
+    auto loaded = new llvm::LoadInst(ptr, "", collect);
+    auto phi = llvm::PHINode::Create(loaded->getType(), 2, "phi", merge);
+    phi->addIncoming(loaded, collect);
+    phi->addIncoming(roots[i++], checkCollect);
+    phis.push_back(phi);
+  }
+  llvm::BranchInst::Create(merge, collect);
+  i = 0;
+  unsigned rootIdx = 0;
+  std::vector<llvm::Value *> results;
+  for (auto type : types) {
+    switch(type.cat) {
+      case SortCategory::Map:
+      case SortCategory::List:
+      case SortCategory::Set:
+      case SortCategory::StringBuffer:
+      case SortCategory::Symbol:
+        results.push_back(phis[rootIdx++]);
+        break;
+      default:
+        results.push_back(args[i]);
+    }
+    i++;
+  }
+  return std::make_pair(results, merge);
+}
+
 void makeStepFunction(KOREDefinition *definition, llvm::Module *module, DecisionNode *dt) {
   auto blockType = getValueType({SortCategory::Symbol, 0}, module);
   llvm::FunctionType *funcType = llvm::FunctionType::get(blockType, {blockType}, false);
   std::string name = "step";
   llvm::Constant *func = module->getOrInsertFunction(name, funcType);
   llvm::Function *matchFunc = llvm::cast<llvm::Function>(func);
+  matchFunc->setCallingConv(llvm::CallingConv::Fast);
   llvm::StringMap<llvm::Value *> subst;
   auto val = matchFunc->arg_begin();
-  val->setName("_1");
-  subst.insert({val->getName(), val});
   llvm::BasicBlock *block = llvm::BasicBlock::Create(module->getContext(), "entry", matchFunc);
   llvm::AllocaInst *addr = new llvm::AllocaInst(llvm::Type::getInt8PtrTy(module->getContext()), 0, "jumpTo", block);
   llvm::BasicBlock *stuck = llvm::BasicBlock::Create(module->getContext(), "stuck", matchFunc);
-  new llvm::StoreInst(llvm::BlockAddress::get(matchFunc, stuck), addr, block);
-  llvm::ReturnInst::Create(module->getContext(), llvm::ConstantPointerNull::get(llvm::dyn_cast<llvm::PointerType>(blockType)), stuck);
+  llvm::BasicBlock *pre_stuck = llvm::BasicBlock::Create(module->getContext(), "pre_stuck", matchFunc);
+  new llvm::StoreInst(llvm::BlockAddress::get(matchFunc, pre_stuck), addr, block);
+  llvm::BranchInst::Create(stuck, pre_stuck);
+  auto result = stepFunctionHeader(0, module, definition, block, stuck, {val}, {{SortCategory::Symbol, 0}});
+  auto collectedVal = result.first[0];
+  collectedVal->setName("_1");
+  subst.insert({collectedVal->getName(), collectedVal});
+  auto phi = llvm::PHINode::Create(collectedVal->getType(), 2, "phi_1", stuck);
+  phi->addIncoming(val, block);
+  phi->addIncoming(collectedVal, pre_stuck);
+  llvm::ReturnInst::Create(module->getContext(), phi, stuck);
 
   llvm::BasicBlock *fail = llvm::BasicBlock::Create(module->getContext(), "fail", matchFunc);
   llvm::LoadInst *load = new llvm::LoadInst(addr, "", fail);
   llvm::IndirectBrInst *jump = llvm::IndirectBrInst::Create(load, 1, fail);
-  jump->addDestination(stuck);
+  jump->addDestination(pre_stuck);
 
-  Decision codegen(definition, block, fail, jump, addr, module, {SortCategory::Symbol, 0});
+  Decision codegen(definition, result.second, fail, jump, addr, module, {SortCategory::Symbol, 0});
   codegen(dt, subst);
 }
 

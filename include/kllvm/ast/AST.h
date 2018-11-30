@@ -616,6 +616,7 @@ public:
      required for concrete execution. Axioms that are not required are elided
      from the definition by KOREDefinition::preprocess. */
   bool isRequired();
+  bool isTopAxiom();
   KOREPattern *getRightHandSide() const;
   KOREPattern *getRequires() const;
   unsigned getOrdinal() const { return ordinal; }
