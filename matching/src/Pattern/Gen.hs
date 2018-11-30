@@ -49,15 +49,15 @@ bitwidth tools sort =
 
 class KoreRewrite a where
   getLeftHandSide :: a -> [CommonKorePattern]
-  getRightHandSide :: a -> CommonKorePattern
+  getRightHandSide :: a -> [CommonKorePattern]
 
 instance KoreRewrite (Equals lvl CommonKorePattern) where
   getLeftHandSide = getTopChildren . equalsFirst
-  getRightHandSide = equalsSecond
+  getRightHandSide = (: []) . equalsSecond
 
 instance KoreRewrite (Rewrites lvl CommonKorePattern) where
   getLeftHandSide = (: []) . rewritesFirst
-  getRightHandSide = rewritesSecond
+  getRightHandSide = (: []) . rewritesSecond
 
 data CollectionCons = Concat | Unit | Element
 
@@ -68,9 +68,16 @@ stripLoc (SymbolOrAlias (Id name _) s) = (SymbolOrAlias (Id name AstLocationNone
     stripLocSort (SortActualSort (SortActual (Id x _) args)) = (SortActualSort (SortActual (Id x AstLocationNone) $ map stripLocSort args))
     stripLocSort sort = sort
 
-genPattern :: KoreRewrite pattern => MetadataTools Object Attributes -> SymLib -> pattern -> [Fix P.Pattern]
-genPattern tools (SymLib _ sorts _) rewrite =
-  let lhs = getLeftHandSide rewrite
+genLHSPattern :: KoreRewrite pattern => MetadataTools Object Attributes -> SymLib -> pattern -> [Fix P.Pattern]
+genLHSPattern tools lib rewrite =
+  genPattern getLeftHandSide tools lib rewrite
+genRHSPattern :: KoreRewrite pattern => MetadataTools Object Attributes -> SymLib -> pattern -> [Fix P.Pattern]
+genRHSPattern tools lib rewrite =
+  genPattern getRightHandSide tools lib rewrite
+
+genPattern :: KoreRewrite pattern => (pattern -> [CommonKorePattern]) -> MetadataTools Object Attributes -> SymLib -> pattern -> [Fix P.Pattern]
+genPattern getSide tools (SymLib _ sorts _) rewrite =
+  let lhs = getSide rewrite
   in map (para (unifiedPatternRAlgebra (error "unsupported: meta level") rAlgebra)) lhs
   where
     rAlgebra :: Pattern Object Variable (CommonKorePattern,
@@ -78,9 +85,10 @@ genPattern tools (SymLib _ sorts _) rewrite =
              -> Fix P.Pattern
     rAlgebra (ApplicationPattern (Application rawSym ps)) =
       let sym = stripLoc rawSym 
-          att = fmap unpack $ getHook $ hook $ parseAtt $ symAttributes tools sym
+          att = parseAtt $ symAttributes tools sym
+          hookAtt = fmap unpack $ getHook $ hook att
           sort = applicationSortsResult $ symbolOrAliasSorts tools sym
-      in case att of
+      in case hookAtt of
         Just "LIST.concat" -> listPattern sym Concat (map snd ps) (getSym "LIST.element" (sorts Map.! sort))
         Just "LIST.unit" -> listPattern sym Unit [] (getSym "LIST.element" (sorts Map.! sort))
         Just "LIST.element" -> listPattern sym Element (map snd ps) (getSym "LIST.element" (sorts Map.! sort))
@@ -265,13 +273,14 @@ genMetadatas syms@(SymLib symbols sorts allOverloads) indexedMod =
   Map.mapMaybeWithKey genMetadata sorts
   where
     genMetadata :: Sort Object -> [SymbolOrAlias Object] -> Maybe P.Metadata
-    genMetadata sort@(SortActualSort _) constructors =
+    genMetadata sort@(SortActualSort _) allConstructors =
       let att = parseAtt $ sortAttributes (extractMetadataTools indexedMod) sort
           hookAtt = getHook $ hook att
           isInt = case hookAtt of
             Just "BOOL.Bool" -> True
             Just "MINT.MInt" -> True
             _                -> False
+          constructors = filter (not . isFunctionSym) allConstructors
       in if isInt then
         let tools = extractMetadataTools indexedMod
             bw = bitwidth tools sort
@@ -309,6 +318,22 @@ genMetadatas syms@(SymLib symbols sorts allOverloads) indexedMod =
     injectionForOverload :: P.Constructor -> P.Constructor -> P.Constructor
     injectionForOverload (P.Symbol g) (P.Symbol l) = P.Symbol $ SymbolOrAlias (Id "inj" AstLocationNone) [sel2 (symbols Map.! l), sel2 (symbols Map.! g)]
     injectionForOverload _ _ = error "invalid overload"
+    isFunctionSym :: SymbolOrAlias Object -> Bool
+    isFunctionSym sym = 
+      let (_,_,att) = symbols Map.! sym
+          parsed = parseAtt att
+          hookAtt = getHook $ hook parsed
+      in case hookAtt of
+        Just "LIST.concat" -> False
+        Just "LIST.unit" -> False
+        Just "LIST.element" -> False
+        Just "MAP.concat" -> False
+        Just "MAP.unit" -> False
+        Just "MAP.element" -> False
+        Just "SET.concat" -> False
+        Just "SET.unit" -> False
+        Just "SET.element" -> False
+        _ -> isFunction parsed
 
 genClauseMatrix :: KoreRewrite pattern 
                => SymLib
@@ -321,8 +346,8 @@ genClauseMatrix symlib indexedMod axioms sorts =
       rewrites = map getRewrite axioms
       sideConditions = map getSideCondition axioms
       tools = extractMetadataTools indexedMod
-      patterns = map (genPattern tools symlib) rewrites
-      rhsVars = map (genVars . getRightHandSide) rewrites
+      patterns = map (genLHSPattern tools symlib) rewrites
+      rhsVars = map (genVars . head . getRightHandSide) rewrites
       scVars = map (maybe Nothing (Just . genVars)) sideConditions
       actions = zipWith3 P.Action indices rhsVars scVars
       metas = genMetadatas symlib indexedMod
@@ -342,3 +367,45 @@ mkDecisionTree symlib indexedMod axioms sorts =
   let matrix = genClauseMatrix symlib indexedMod axioms sorts
       dt = P.compilePattern matrix
   in P.shareDt dt
+
+isPoorlySpecialized :: P.ClauseMatrix -> P.ClauseMatrix -> Bool
+isPoorlySpecialized (P.ClauseMatrix _ sa) (P.ClauseMatrix _ a) = length sa >= length a `quot` 2
+
+translateVars :: Map.Map (Fix P.Pattern) P.Occurrence -> [P.VariableBinding] -> [(Fix P.BoundPattern, P.Occurrence)]
+translateVars _ [] = []
+translateVars m (P.VariableBinding { P.getPattern = Nothing } : tl) = translateVars m tl
+translateVars m (P.VariableBinding { P.getOccurrence = o, P.getPattern = Just p } : tl) = 
+  (substituteBy p, o) : translateVars m tl
+  where
+    substituteBy :: Fix P.Pattern -> Fix P.BoundPattern
+    substituteBy pat | Map.member pat m = Fix $ P.Variable (Map.lookup pat m) $ hook' pat
+    substituteBy (Fix (P.Pattern ix h ps)) = Fix $ P.Pattern ix h $ map substituteBy ps
+    substituteBy pat = error $ show pat
+    hook' :: Fix P.Pattern -> String
+    hook' (Fix (P.Pattern _ Nothing _)) = "STRING.String"
+    hook' (Fix (P.Pattern _ (Just h) _)) = h
+    hook' (Fix (P.SetPattern {})) = "SET.Set"
+    hook' (Fix (P.MapPattern {})) = "MAP.Map"
+    hook' (Fix (P.ListPattern {})) = "LIST.List"
+    hook' (Fix (P.Variable _ h)) = h
+    hook' (Fix (P.As _ h _)) = h
+    hook' (Fix P.Wildcard) = error "invalid residual"
+
+mkSpecialDecisionTree :: KoreRewrite pattern
+                      => SymLib
+                      -> KoreIndexedModule Attributes
+                      -> [AxiomInfo pattern]
+                      -> [Sort Object]
+                      -> AxiomInfo pattern
+                      -> Maybe (Free P.Anchor P.Alias, [(Fix P.Pattern, P.Occurrence)])
+mkSpecialDecisionTree symlib indexedMod axioms sorts axiom =
+  let matrix = genClauseMatrix symlib indexedMod axioms sorts
+      tools = extractMetadataTools indexedMod
+      rhs = genRHSPattern tools symlib $ getRewrite axiom
+      ((P.ClauseMatrix pm as),f,r) = P.specializeBy matrix rhs
+      (os,_) = unzip f
+      residualMap = Map.fromList $ zip r os
+      as' = map (\c@(P.Clause { P.getVariableBindings = vars, P.getSpecializedVars = specials }) -> c { P.getSpecializedVars = specials ++ translateVars residualMap vars })  as
+      cm = P.ClauseMatrix pm as'
+      dt = P.compilePattern (cm,f)
+  in if isPoorlySpecialized cm (fst matrix) then Nothing else Just $ (P.shareDt dt, zip r os)

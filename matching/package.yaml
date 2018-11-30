@@ -33,6 +33,7 @@ dependencies:
 - directory
 - free
 - deriving-compat
+- prettyprinter
 
 executables:
   llvm-kompile-matching:

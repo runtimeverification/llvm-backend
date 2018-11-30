@@ -10,6 +10,7 @@ import           Data.List             (transpose,concat)
 import qualified Data.Map.Strict       as M
 import           Data.Proxy            (Proxy (..))
 import           Data.Semigroup        ((<>))
+import qualified Data.Yaml.Builder     as Y
 import           Kore.AST.Common       (Id (..), Sort(..), SortActual(..), AstLocation(..))
 
 import           Test.Tasty            (TestTree, defaultMain, testGroup)
@@ -144,7 +145,7 @@ appendTests = testGroup "Basic pattern compilation"
                                    ] Nothing ))
                ] Nothing
   , testCase "Yaml serialization" $
-      (serializeToYaml $ shareDt $ compilePattern $ appendBindPattern) @?= 
+      (Y.toByteString $ Y.toYaml $ shareDt $ compilePattern $ appendBindPattern) @?= 
         "&4\n" <>
         "specializations:\n" <>
         "- - nil\n" <>
