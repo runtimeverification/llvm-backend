@@ -67,7 +67,7 @@ install(
 
 
 install(
-  PROGRAMS bin/llvm-kompile bin/llvm-kompile-matching
+  PROGRAMS bin/llvm-kompile bin/llvm-kompile-clang bin/llvm-kompile-matching
   DESTINATION bin
 )
 
