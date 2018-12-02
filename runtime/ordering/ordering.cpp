@@ -35,8 +35,15 @@ extern "C" {
     return 0LL;
   }
 
+constexpr unsigned long long HEADER_MASK = 0xffff1fffffffffffLL;
+
+
 int64_t hook_KEQUAL_cmp(block *a, block *b){
-	 std::cout << "CMP: " << std::hex << (long long)a << " -- " << (long long)b << std::endl;
+	std::cout << "CMP " << a << "  " << b << std::endl;
+	 if (a == b) {
+		std::cout << "EQUAL PTRS" << std::endl;
+		return 0LL;
+     }
      auto aptr = reinterpret_cast<int64_t>(a);
      auto bptr = reinterpret_cast<int64_t>(b);
      auto aleastbit = aptr & 1LL;
@@ -49,8 +56,13 @@ int64_t hook_KEQUAL_cmp(block *a, block *b){
 		 std::cout << "PTR CMP 2" << std::endl;
          return ptr_compare(aptr, bptr);
      }
-     auto alen = len(a);
-     auto blen = len(b);
+     //auto alen = len(a);
+     //auto blen = len(b);
+     auto ahdr = a->h.hdr;
+     auto bhdr = b->h.hdr;
+	 auto alen = ahdr & HEADER_MASK;
+	 auto blen = bhdr & HEADER_MASK;
+	 std::cout << "ALEN: " << alen << " -- BLEN: " << blen << std::endl;
      if(alen < blen) {
 		 std::cout << "LEN LT " << alen << " -- " << blen << std::endl;
          return -1LL;
@@ -58,8 +70,6 @@ int64_t hook_KEQUAL_cmp(block *a, block *b){
 		 std::cout << "LEN GT" << std::endl;
          return 1LL;
      }
-     auto ahdr = a->h.hdr;
-     auto bhdr = b->h.hdr;
      uint64_t alayoutInt = layout_hdr(ahdr);
      uint64_t blayoutInt = layout_hdr(bhdr);
      if (!alayoutInt) {
@@ -80,25 +90,26 @@ int64_t hook_KEQUAL_cmp(block *a, block *b){
 		 std::cout << "AARGS GT" << std::endl;
         return 1LL;
      }
+	 std::cout << "$$$ ARG COUNT: " << (int) alayoutData->nargs << std::endl;
      for (unsigned i = 0; i < alayoutData->nargs; ++i) {
-       auto *aArgData = alayoutData->args + i;
-       auto *bArgData = blayoutData->args + i;
-       void *aArg = ((char *)a) + aArgData->offset;
-       void *bArg = ((char *)b) + bArgData->offset;
+       auto aArgData = alayoutData->args[i];
+       auto bArgData = blayoutData->args[i];
+       void *aArg = ((char *)a) + aArgData.offset;
+       void *bArg = ((char *)b) + bArgData.offset;
        // if any children types are different, we order
        // based on child type (number), which should be consist
        // in any given run.
-       if (aArgData->cat < bArgData->cat) {
+       if (aArgData.cat < bArgData.cat) {
 		   std::cout << "ARG: " << i << " CAT LT" << std::endl;
            return -1LL;
        }
-       if (aArgData->cat > bArgData->cat) {
+       if (aArgData.cat > bArgData.cat) {
 		   std::cout << "ARG: " << i << " CAT GT" << std::endl;
            return 1LL;
        }
        // Here the types must be the same, so we switch on
        // type category to decide which other cmp procedure to use.
-       switch (aArgData->cat) {
+       switch (aArgData.cat) {
             case MAP_LAYOUT: {
                  auto res = hook_MAP_cmp(aArg, bArg);
 		   		  std::cout << "MAP: " << i << " RES: " << res << std::endl;
@@ -132,6 +143,7 @@ int64_t hook_KEQUAL_cmp(block *a, block *b){
                  break;
             }
             case SYMBOL_LAYOUT: {
+				 std::cout << "SYMBOL" << std::endl;
                  auto res = hook_KEQUAL_cmp(static_cast<block *>(aArg),
 						                    static_cast<block *>(bArg));
 		   		  std::cout << "SYMBOL: " << i << " RES: " << res << std::endl;

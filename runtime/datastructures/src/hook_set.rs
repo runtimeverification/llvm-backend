@@ -1,310 +1,321 @@
 extern crate libc;
 
-use super::decls::{Set,List,Int,K,KElem,ord_set_compare,__gmpz_init_set_ui,move_int,printConfigurationInternal};
+use self::libc::{c_char, c_void, fprintf, FILE};
+use super::decls::{
+    Int, KElem, List, Set, __gmpz_init_set_ui, move_int, ord_set_compare,
+    printConfigurationInternal, K,
+};
 use std::cmp::Ordering;
-use std::iter::FromIterator;
-use std::hash::Hash;
 use std::collections::hash_map::DefaultHasher;
-use std::ptr;
-use std::mem;
 use std::ffi::CString;
-use self::libc::{FILE,c_char,c_void,fprintf};
+use std::hash::Hash;
+use std::iter::FromIterator;
+use std::mem;
+use std::ptr;
 
 #[no_mangle]
 pub extern "C" fn size_set() -> usize {
-  mem::size_of::<Set>()
+    mem::size_of::<Set>()
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn drop_set(ptr: *mut Set) {
-  ptr::drop_in_place(ptr)
+    ptr::drop_in_place(ptr)
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_SET_in(value: K, set: *const Set) -> bool {
-  (*set).contains(&KElem::new(value))
+    (*set).contains(&KElem::new(value))
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_SET_cmp(a: *const Set, b: *const Set) -> i64 {
-  match ord_set_compare(std::mem::transmute::<*const Set, &Set>(a),
-                         std::mem::transmute::<*const Set, &Set>(b)) {
-    Ordering::Less => -1,
-    Ordering::Equal => 0,
-    Ordering::Greater => 1,
-  }
+    match ord_set_compare(
+        std::mem::transmute::<*const Set, &Set>(a),
+        std::mem::transmute::<*const Set, &Set>(b),
+    ) {
+        Ordering::Less => -1,
+        Ordering::Equal => 0,
+        Ordering::Greater => 1,
+    }
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_SET_unit() -> Set {
-  Set::new()
+    Set::new()
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_SET_element(value: K) -> Set {
-  Set::singleton(KElem::new(value))
+    Set::singleton(KElem::new(value))
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_SET_concat(s1: *const Set, s2: *const Set) -> Set {
-  (*s1).clone().union((*s2).clone())
+    (*s1).clone().union((*s2).clone())
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_SET_difference(s1: *const Set, s2: *const Set) -> Set {
-  (*s1).clone().difference((*s2).clone())
+    (*s1).clone().difference((*s2).clone())
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_SET_remove(s: *const Set, value: K) -> Set {
-  (*s).without(&KElem::new(value))
+    (*s).without(&KElem::new(value))
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_SET_inclusion(s1: *const Set, s2: *const Set) -> bool {
-  (*s1).is_subset(&*s2)
+    (*s1).is_subset(&*s2)
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_SET_intersection(s1: *const Set, s2: *const Set) -> Set {
-  (*s1).clone().intersection((*s2).clone())
+    (*s1).clone().intersection((*s2).clone())
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_SET_choice(s: *const Set) -> K {
-  if (*s).is_empty() {
-    panic!("Set is empty")
-  }
-  *(*s).iter().next().unwrap().0.get()
+    if (*s).is_empty() {
+        panic!("Set is empty")
+    }
+    *(*s).iter().next().unwrap().0.get()
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_SET_size_long(s: *const Set) -> usize {
-  (*s).len()
+    (*s).len()
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_SET_size(s: *const Set) -> *mut Int {
-  let mut result = Int(0, 0, ptr::null());
-  __gmpz_init_set_ui(&mut result, hook_SET_size_long(s));
-  move_int(&mut result)
+    let mut result = Int(0, 0, ptr::null());
+    __gmpz_init_set_ui(&mut result, hook_SET_size_long(s));
+    move_int(&mut result)
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_SET_set2list(s: *const Set) -> List {
-  List::from_iter((*s).iter().cloned())
+    List::from_iter((*s).iter().cloned())
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_SET_list2set(l: *const List) -> Set {
-  Set::from_iter((*l).iter().cloned())
+    Set::from_iter((*l).iter().cloned())
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_SET_eq(s1: *const Set, s2: *const Set) -> bool {
-  *s1 == *s2
+    *s1 == *s2
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn set_hash(s: *const Set, h: *mut c_void) {
-  let hasher = h as *mut &mut DefaultHasher;
-  s.hash(*hasher)
+    let hasher = h as *mut &mut DefaultHasher;
+    s.hash(*hasher)
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn printSet(file: *mut FILE, set: *const Set, unit: *const c_char, element: *const c_char, concat: *const c_char) {
-  if (*set).len() == 0 {
-    let fmt = CString::new("%s()").unwrap();
-    fprintf(file, fmt.as_ptr(), unit);
-    return;
-  }
-  let mut i = 1;
-  let parens = CString::new(")").unwrap();
-  let comma = CString::new(",").unwrap();
-  let sort = CString::new("K").unwrap();
-  let fmt = CString::new("%s(").unwrap();
-  for KElem(value) in (*set).iter() {
-    if i < (*set).len() {
-      fprintf(file, fmt.as_ptr(), concat);
+pub unsafe extern "C" fn printSet(
+    file: *mut FILE,
+    set: *const Set,
+    unit: *const c_char,
+    element: *const c_char,
+    concat: *const c_char,
+) {
+    if (*set).len() == 0 {
+        let fmt = CString::new("%s()").unwrap();
+        fprintf(file, fmt.as_ptr(), unit);
+        return;
     }
-    fprintf(file, fmt.as_ptr(), element);
-    printConfigurationInternal(file, *value.get(), sort.as_ptr());
-    fprintf(file, parens.as_ptr());
-    if i < (*set).len() {
-      fprintf(file, comma.as_ptr());
+    let mut i = 1;
+    let parens = CString::new(")").unwrap();
+    let comma = CString::new(",").unwrap();
+    let sort = CString::new("K").unwrap();
+    let fmt = CString::new("%s(").unwrap();
+    for KElem(value) in (*set).iter() {
+        if i < (*set).len() {
+            fprintf(file, fmt.as_ptr(), concat);
+        }
+        fprintf(file, fmt.as_ptr(), element);
+        printConfigurationInternal(file, *value.get(), sort.as_ptr());
+        fprintf(file, parens.as_ptr());
+        if i < (*set).len() {
+            fprintf(file, comma.as_ptr());
+        }
+        i += 1
     }
-    i += 1
-  }
-  for _ in 0..(*set).len()-1 {
-    fprintf(file, parens.as_ptr());
-  }
+    for _ in 0..(*set).len() - 1 {
+        fprintf(file, parens.as_ptr());
+    }
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn set_foreach(set: *mut Set, process: extern fn(block: *mut K)) {
-  for value in (*set).iter() {
-    process(value.0.get());
-  }
+pub unsafe extern "C" fn set_foreach(set: *mut Set, process: extern "C" fn(block: *mut K)) {
+    for value in (*set).iter() {
+        process(value.0.get());
+    }
 }
 
 #[cfg(test)]
 pub mod tests {
-  extern crate libc;
+    extern crate libc;
 
-  use decls::testing::*;
-  use hook_set::*;
+    use decls::testing::*;
+    use hook_set::*;
 
-  #[test]
-  fn test_element() {
-    unsafe {
-      let set = hook_SET_element(DUMMY0);
-      let result = hook_SET_choice(&set);
-      assert_eq!(result, DUMMY0);
-      let contains = hook_SET_in(DUMMY0, &set);
-      assert!(contains);
+    #[test]
+    fn test_element() {
+        unsafe {
+            let set = hook_SET_element(DUMMY0);
+            let result = hook_SET_choice(&set);
+            assert_eq!(result, DUMMY0);
+            let contains = hook_SET_in(DUMMY0, &set);
+            assert!(contains);
+        }
     }
-  }
 
-  #[test]
-  fn test_unit() {
-    unsafe {
-      let set = hook_SET_unit();
-      let result = hook_SET_size(&set);
-      assert_eq!(__gmpz_cmp_ui(result, 0), 0);
-      free_int(result);
+    #[test]
+    fn test_unit() {
+        unsafe {
+            let set = hook_SET_unit();
+            let result = hook_SET_size(&set);
+            assert_eq!(__gmpz_cmp_ui(result, 0), 0);
+            free_int(result);
+        }
     }
-  }
 
-  #[test]
-  fn test_concat() {
-    unsafe {
-      let s1 = hook_SET_element(DUMMY0);
-      let s2 = hook_SET_element(DUMMY1);
-      let set = hook_SET_concat(&s1, &s2);
-      let result = hook_SET_size(&set);
-      assert_eq!(__gmpz_cmp_ui(result, 2), 0);
-      free_int(result);
+    #[test]
+    fn test_concat() {
+        unsafe {
+            let s1 = hook_SET_element(DUMMY0);
+            let s2 = hook_SET_element(DUMMY1);
+            let set = hook_SET_concat(&s1, &s2);
+            let result = hook_SET_size(&set);
+            assert_eq!(__gmpz_cmp_ui(result, 2), 0);
+            free_int(result);
+        }
     }
-  }
 
-  #[test]
-  fn test_difference() {
-    unsafe {
-      let s1 = hook_SET_element(DUMMY0);
-      let s2 = hook_SET_element(DUMMY0);
-      let s3 = hook_SET_element(DUMMY1);
-      let set = hook_SET_difference(&s1, &s2);
-      let result = hook_SET_size(&set);
-      assert_eq!(__gmpz_cmp_ui(result, 0), 0);
-      let s1 = hook_SET_concat(&s1, &s3);
-      let set = hook_SET_difference(&s1, &s2);
-      let result = hook_SET_size(&set);
-      assert_eq!(__gmpz_cmp_ui(result, 1), 0);
-      free_int(result);
+    #[test]
+    fn test_difference() {
+        unsafe {
+            let s1 = hook_SET_element(DUMMY0);
+            let s2 = hook_SET_element(DUMMY0);
+            let s3 = hook_SET_element(DUMMY1);
+            let set = hook_SET_difference(&s1, &s2);
+            let result = hook_SET_size(&set);
+            assert_eq!(__gmpz_cmp_ui(result, 0), 0);
+            let s1 = hook_SET_concat(&s1, &s3);
+            let set = hook_SET_difference(&s1, &s2);
+            let result = hook_SET_size(&set);
+            assert_eq!(__gmpz_cmp_ui(result, 1), 0);
+            free_int(result);
+        }
     }
-  }
 
-  #[test]
-  fn test_inclusion() {
-    unsafe {
-      let s1 = hook_SET_element(DUMMY0);
-      let s2 = hook_SET_element(DUMMY1);
-      let result = hook_SET_inclusion(&s1, &s2);
-      assert!(!result);
-      let s2 = hook_SET_concat(&s2, &s1);
-      let result = hook_SET_inclusion(&s1, &s2);
-      assert!(result);
+    #[test]
+    fn test_inclusion() {
+        unsafe {
+            let s1 = hook_SET_element(DUMMY0);
+            let s2 = hook_SET_element(DUMMY1);
+            let result = hook_SET_inclusion(&s1, &s2);
+            assert!(!result);
+            let s2 = hook_SET_concat(&s2, &s1);
+            let result = hook_SET_inclusion(&s1, &s2);
+            assert!(result);
+        }
     }
-  }
 
-  #[test]
-  fn test_cmp() {
-    unsafe {
-      let s1 = hook_SET_element(DUMMY0);
-      let s2 = hook_SET_element(DUMMY1);
-      assert_eq!(hook_SET_cmp(&s1, &s2), -1);
-      assert_eq!(hook_SET_cmp(&s2, &s1), 1);
-      assert_eq!(hook_SET_cmp(&s1, &s1), 0);
-      assert_eq!(hook_SET_cmp(&s2, &s2), 0);
-      let s3 = hook_SET_element(DUMMY2);
-      let s4 = hook_SET_element(DUMMY3);
-      assert_eq!(hook_SET_cmp(&s3, &s3), 0);
-      assert_eq!(hook_SET_cmp(&s4, &s4), 0);
-      let s5 = hook_SET_concat(&s1, &s3);
-      let s6 = hook_SET_concat(&s2, &s4);
-      assert_eq!(hook_SET_cmp(&s5, &s6), -1);
-      assert_eq!(hook_SET_cmp(&s6, &s5), 1);
-      assert_eq!(hook_SET_cmp(&s5, &s5), 0);
-      assert_eq!(hook_SET_cmp(&s6, &s6), 0);
+    #[test]
+    fn test_cmp() {
+        unsafe {
+            let s1 = hook_SET_element(DUMMY0);
+            let s2 = hook_SET_element(DUMMY1);
+            assert_eq!(hook_SET_cmp(&s1, &s2), -1);
+            assert_eq!(hook_SET_cmp(&s2, &s1), 1);
+            assert_eq!(hook_SET_cmp(&s1, &s1), 0);
+            assert_eq!(hook_SET_cmp(&s2, &s2), 0);
+            let s3 = hook_SET_element(DUMMY2);
+            let s4 = hook_SET_element(DUMMY3);
+            assert_eq!(hook_SET_cmp(&s3, &s3), 0);
+            assert_eq!(hook_SET_cmp(&s4, &s4), 0);
+            let s5 = hook_SET_concat(&s1, &s3);
+            let s6 = hook_SET_concat(&s2, &s4);
+            assert_eq!(hook_SET_cmp(&s5, &s6), -1);
+            assert_eq!(hook_SET_cmp(&s6, &s5), 1);
+            assert_eq!(hook_SET_cmp(&s5, &s5), 0);
+            assert_eq!(hook_SET_cmp(&s6, &s6), 0);
+        }
     }
-  }
 
-  #[test]
-  fn test_intersection() {
-    unsafe {
-      let s1 = hook_SET_element(DUMMY0);
-      let s2 = hook_SET_element(DUMMY1);
-      let s3 = hook_SET_element(DUMMY2);
-      let s3 = hook_SET_concat(&s3, &s1);
-      let set = hook_SET_intersection(&s1, &s2);
-      let result = hook_SET_size(&set);
-      assert_eq!(__gmpz_cmp_ui(result, 0), 0);
-      let s1 = hook_SET_concat(&s1, &s2);
-      let set = hook_SET_intersection(&s1, &s3);
-      let result = hook_SET_size(&set);
-      assert_eq!(__gmpz_cmp_ui(result, 1), 0);
-      let set = hook_SET_intersection(&s3, &s1);
-      let result = hook_SET_size(&set);
-      assert_eq!(__gmpz_cmp_ui(result, 1), 0);
-      let set = hook_SET_intersection(&s2, &s2);
-      let result = hook_SET_size(&set);
-      assert_eq!(__gmpz_cmp_ui(result, 1), 0);
-      free_int(result);
+    #[test]
+    fn test_intersection() {
+        unsafe {
+            let s1 = hook_SET_element(DUMMY0);
+            let s2 = hook_SET_element(DUMMY1);
+            let s3 = hook_SET_element(DUMMY2);
+            let s3 = hook_SET_concat(&s3, &s1);
+            let set = hook_SET_intersection(&s1, &s2);
+            let result = hook_SET_size(&set);
+            assert_eq!(__gmpz_cmp_ui(result, 0), 0);
+            let s1 = hook_SET_concat(&s1, &s2);
+            let set = hook_SET_intersection(&s1, &s3);
+            let result = hook_SET_size(&set);
+            assert_eq!(__gmpz_cmp_ui(result, 1), 0);
+            let set = hook_SET_intersection(&s3, &s1);
+            let result = hook_SET_size(&set);
+            assert_eq!(__gmpz_cmp_ui(result, 1), 0);
+            let set = hook_SET_intersection(&s2, &s2);
+            let result = hook_SET_size(&set);
+            assert_eq!(__gmpz_cmp_ui(result, 1), 0);
+            free_int(result);
+        }
     }
-  }
 
-  #[test]
-  fn test_set2list() {
-    unsafe {
-      let set = hook_SET_element(DUMMY0);
-      let set2 = hook_SET_element(DUMMY1);
-      let set = hook_SET_concat(&set, &set2);
-      let set2 = hook_SET_element(DUMMY2);
-      let set = hook_SET_concat(&set, &set2);
-      let list = hook_SET_set2list(&set);
-      assert_eq!((list).len(), 3);
+    #[test]
+    fn test_set2list() {
+        unsafe {
+            let set = hook_SET_element(DUMMY0);
+            let set2 = hook_SET_element(DUMMY1);
+            let set = hook_SET_concat(&set, &set2);
+            let set2 = hook_SET_element(DUMMY2);
+            let set = hook_SET_concat(&set, &set2);
+            let list = hook_SET_set2list(&set);
+            assert_eq!((list).len(), 3);
+        }
     }
-  }
 
-  #[test]
-  fn test_list2set() {
-    unsafe {
-      let mut list = List::new();
-      (list).push_back(KElem::new(DUMMY0));
-      (list).push_back(KElem::new(DUMMY1));
-      (list).push_back(KElem::new(DUMMY2));
-      let set = hook_SET_list2set(&list);
-      let result = hook_SET_size(&set);
-      assert_eq!(__gmpz_cmp_ui(result, 3), 0);
-      let contains = hook_SET_in(DUMMY0, &set);
-      assert!(contains);
-      let contains = hook_SET_in(DUMMY1, &set);
-      assert!(contains);
-      let contains = hook_SET_in(DUMMY2, &set);
-      assert!(contains);
+    #[test]
+    fn test_list2set() {
+        unsafe {
+            let mut list = List::new();
+            (list).push_back(KElem::new(DUMMY0));
+            (list).push_back(KElem::new(DUMMY1));
+            (list).push_back(KElem::new(DUMMY2));
+            let set = hook_SET_list2set(&list);
+            let result = hook_SET_size(&set);
+            assert_eq!(__gmpz_cmp_ui(result, 3), 0);
+            let contains = hook_SET_in(DUMMY0, &set);
+            assert!(contains);
+            let contains = hook_SET_in(DUMMY1, &set);
+            assert!(contains);
+            let contains = hook_SET_in(DUMMY2, &set);
+            assert!(contains);
+        }
     }
-  }
 
-  #[test]
-  fn test_eq() {
-    unsafe {
-      let set = hook_SET_element(DUMMY0);
-      let set2 = hook_SET_element(DUMMY1);
-      let result = hook_SET_eq(&set, &set2);
-      assert!(!result);
-      let set2 = hook_SET_element(DUMMY0);
-      let result = hook_SET_eq(&set, &set2);
-      assert!(result);
+    #[test]
+    fn test_eq() {
+        unsafe {
+            let set = hook_SET_element(DUMMY0);
+            let set2 = hook_SET_element(DUMMY1);
+            let result = hook_SET_eq(&set, &set2);
+            assert!(!result);
+            let set2 = hook_SET_element(DUMMY0);
+            let result = hook_SET_eq(&set, &set2);
+            assert!(result);
+        }
     }
-  }
 }
