@@ -242,6 +242,7 @@ public:
    according to the specified decision tree and returns the result of the
    function. */
 void makeEvalFunction(KOREObjectSymbol *function, KOREDefinition *definition, llvm::Module *module, DecisionNode *dt);
+void makeAnywhereFunction(KOREObjectSymbol *function, KOREDefinition *definition, llvm::Module *module, DecisionNode *dt);
 
 void makeStepFunction(KOREDefinition *definition, llvm::Module *module, DecisionNode *dt);
 

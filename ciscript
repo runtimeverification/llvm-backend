@@ -14,20 +14,24 @@ cd ../build
 
 export PATH=$PATH:`pwd`/install/bin
 make install
-llvm-kompile ../test/imp.kore IMP -o interpreter
+llvm-kompile ../test/imp.kore IMP main -o interpreter
 ./interpreter ../test/collatz.kore -1 /dev/stdout | grep -q "Lbl'-LT-'T'-GT-'{}(Lbl'-LT-'k'-GT-'{}(dotk{}())"
-llvm-kompile ../test/test2.kore TEST -o interpreter
+llvm-kompile ../test/test2.kore TEST main -o interpreter
 ./interpreter ../test/test2.kore -1 /dev/stdout | grep -q "Lbl'-LT-'k'-GT-'{}(kseq{}(inj{SortDone{}, SortKItem{}}(Lbldone'Unds'TEST'Unds'{}()),dotk{}()))"
-llvm-kompile ../test/test3.kore TEST -o interpreter
+llvm-kompile ../test/test3.kore TEST main -o interpreter
 ./interpreter ../test/test3.kore -1 /dev/stdout | grep -q "Lbl'-LT-'k'-GT-'{}(kseq{}(inj{SortDone{}, SortKItem{}}(Lbldone'Unds'TEST'Unds'{}()),dotk{}()))"
-llvm-kompile ../test/test4.kore TEST -o interpreter
+llvm-kompile ../test/test4.kore TEST main -o interpreter
 ./interpreter ../test/test4.kore -1 /dev/stdout | diff - ../test/test4.out
-llvm-kompile ../test/test5.kore TEST -o interpreter
+llvm-kompile ../test/test5.kore TEST main -o interpreter
 ./interpreter ../test/test5.kore -1 /dev/stdout | diff - ../test/test5.out
-llvm-kompile ../test/test6.kore TEST -o interpreter
+llvm-kompile ../test/test6.kore TEST main -o interpreter
 ./interpreter ../test/test6.kore -1 /dev/stdout | diff - ../test/test6.out
-llvm-kompile ../test/test7.kore TEST -o interpreter
+llvm-kompile ../test/test7.kore TEST main -o interpreter
 ./interpreter ../test/test7.in.kore -1 /dev/null
-llvm-kompile ../test/test8.kore TEST -o interpreter
+llvm-kompile ../test/test8.kore TEST main -o interpreter
 ./interpreter ../test/test8.kore -1 /dev/stdout | diff - ../test/test8.out
-rm -f configparser configparser.ll interpreterQ
+llvm-kompile ../test/test9.kore TEST main -o interpreter
+./interpreter ../test/test9.kore -1 /dev/stdout | diff - ../test/test9.out
+llvm-kompile ../test/test10.kore TEST main -o interpreter
+./interpreter ../test/test10.in.kore -1 /dev/stdout | diff - ../test/test10.out
+rm -f configparser configparser.ll interpreter

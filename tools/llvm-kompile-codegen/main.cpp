@@ -44,10 +44,15 @@ int main (int argc, char **argv) {
 
   for (auto &entry : definition->getSymbolDeclarations()) {
     auto decl = entry.second;
-    if (decl->getAttributes().count("function") && !decl->isHooked()) {
-      std::string filename = argv[3] + std::string("/") + decl->getSymbol()->getName() + ".yaml";
+    std::string filename = argv[3] + std::string("/") + decl->getSymbol()->getName() + ".yaml";
+    if ((decl->getAttributes().count("function") && !decl->isHooked())) {
       auto funcDt = parseYamlDecisionTree(filename, definition->getAllSymbols(), definition->getHookedSorts());
       makeEvalFunction(decl->getSymbol(), definition, mod.get(), funcDt);
+    } else if (decl->isAnywhere()) {
+      auto funcDt = parseYamlDecisionTree(filename, definition->getAllSymbols(), definition->getHookedSorts());
+      std::ostringstream Out;
+      decl->getSymbol()->print(Out);
+      makeAnywhereFunction(definition->getAllSymbols().lookup(Out.str()), definition, mod.get(), funcDt);
     }
   }
 

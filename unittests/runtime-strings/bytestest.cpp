@@ -72,9 +72,10 @@ BOOST_AUTO_TEST_CASE(int2bytes) {
   BOOST_CHECK_EQUAL(4, len(res));
   BOOST_CHECK_EQUAL(0, memcmp(res->data, "\x00\x00\x00\x00", 4));
 
-  mpz_t _1, neg128;
+  mpz_t _1, neg128, neg2;
   mpz_init_set_ui(_1, 1);
   mpz_init_set_si(neg128, -128);
+  mpz_init_set_si(neg2, -2);
 
   res = hook_BYTES_int2bytes(_1, neg128, tag_big_endian());
   BOOST_CHECK_EQUAL(1, len(res));
@@ -82,6 +83,13 @@ BOOST_AUTO_TEST_CASE(int2bytes) {
   res = hook_BYTES_int2bytes(_1, neg128, 2);
   BOOST_CHECK_EQUAL(1, len(res));
   BOOST_CHECK_EQUAL(0, memcmp(res->data, "\x80", 1));
+
+  res = hook_BYTES_int2bytes(_1, neg2, tag_big_endian());
+  BOOST_CHECK_EQUAL(1, len(res));
+  BOOST_CHECK_EQUAL(0, memcmp(res->data, "\xfe", 1));
+  res = hook_BYTES_int2bytes(_1, neg2, 2);
+  BOOST_CHECK_EQUAL(1, len(res));
+  BOOST_CHECK_EQUAL(0, memcmp(res->data, "\xfe", 1));
 
   mpz_t _128;
   mpz_init_set_ui(_128, 128);
@@ -109,6 +117,22 @@ BOOST_AUTO_TEST_CASE(int2bytes) {
   res = hook_BYTES_int2bytes(_2, neg128, 2);
   BOOST_CHECK_EQUAL(2, len(res));
   BOOST_CHECK_EQUAL(0, memcmp(res->data, "\x80\xff", 2));
+
+  res = hook_BYTES_int2bytes(_2, neg2, tag_big_endian());
+  BOOST_CHECK_EQUAL(2, len(res));
+  BOOST_CHECK_EQUAL(0, memcmp(res->data, "\xff\xfe", 2));
+  res = hook_BYTES_int2bytes(_2, neg2, 2);
+  BOOST_CHECK_EQUAL(2, len(res));
+  BOOST_CHECK_EQUAL(0, memcmp(res->data, "\xfe\xff", 2));
+
+  mpz_t num;
+  mpz_init_set_str(num, "-340240827991474256463460986840063997951", 10);
+  mpz_t _17;
+  mpz_init_set_ui(_17, 17);
+
+  res = hook_BYTES_int2bytes(_17, num, tag_big_endian());
+  BOOST_CHECK_EQUAL(17, len(res));
+  BOOST_CHECK_EQUAL(0, memcmp(res->data, "\xff\x00\x08\x00\x06\xFF\xFE\xFF\xF0\x00\x08\xFF\xFF\xFF\xFF\x08\x01", 17));
 }
 
 BOOST_AUTO_TEST_CASE(bytes2string) {
