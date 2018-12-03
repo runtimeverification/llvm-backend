@@ -81,6 +81,7 @@ pub unsafe extern "C" fn hook_MAP_update(m: *const Map, key: K, value: K) -> Map
     );
     println!("!!! PUPDATED: {:?}", *m);
     let ret = (*m).update(KElem::new(key), KElem::new(value));
+    println!("!!! UPDATED: {:?}", ret);
     ret
 }
 

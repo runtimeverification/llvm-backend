@@ -94,8 +94,8 @@ int64_t hook_KEQUAL_cmp(block *a, block *b){
      for (unsigned i = 0; i < alayoutData->nargs; ++i) {
        auto aArgData = alayoutData->args[i];
        auto bArgData = blayoutData->args[i];
-       void *aArg = ((char *)a) + aArgData.offset;
-       void *bArg = ((char *)b) + bArgData.offset;
+       void *aArg = &(((char *)a)[aArgData.offset]);
+       void *bArg = &(((char *)b)[bArgData.offset]);
        // if any children types are different, we order
        // based on child type (number), which should be consist
        // in any given run.
