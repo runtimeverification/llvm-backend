@@ -405,7 +405,9 @@ mkSpecialDecisionTree symlib indexedMod axioms sorts axiom =
       ((P.ClauseMatrix pm as),f,r) = P.specializeBy matrix rhs
       (os,_) = unzip f
       residualMap = Map.fromList $ zip r os
-      as' = map (\c@(P.Clause { P.getVariableBindings = vars, P.getSpecializedVars = specials }) -> c { P.getSpecializedVars = specials ++ translateVars residualMap vars })  as
+      as' = map (\c@(P.Clause { P.getVariableBindings = vars, P.getOverloadChildren = overloads, P.getSpecializedVars = specials }) -> 
+                       let (_,overloadVars) = unzip overloads
+                       in c { P.getOverloadChildren = [], P.getSpecializedVars = specials ++ translateVars residualMap (vars++overloadVars) })  as
       cm = P.ClauseMatrix pm as'
       dt = P.compilePattern (cm,f)
   in if isPoorlySpecialized cm (fst matrix) then Nothing else Just $ (P.shareDt dt, zip r os)
