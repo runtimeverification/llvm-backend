@@ -24,7 +24,7 @@ pub unsafe extern "C" fn hook_LIST_unit() -> List {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn hook_LIST_element(value: K) -> List {
+pub extern "C" fn hook_LIST_element(value: K) -> List {
   List::singleton(KElem::new(value))
 }
 
@@ -505,6 +505,19 @@ pub mod tests {
       let l2 = hook_LIST_element(DUMMY0);
       let result = hook_LIST_eq(&l1, &l2);
       assert!(result);
+    }
+  }
+
+  #[test]
+  fn test_long_list() {
+    unsafe {
+      let mut l = hook_LIST_element(DUMMY0);
+      for i in 0..4036 {
+        l = hook_LIST_concat(&hook_LIST_element(DUMMY0), &l)
+      }
+      for i in 0..4036 {
+        l = hook_LIST_range_long(&l, 1, 0)
+      }
     }
   }
 }
