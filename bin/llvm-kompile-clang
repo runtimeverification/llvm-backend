@@ -10,7 +10,6 @@ else
   MAINFILES=""
 fi
 clang++-6.0 -Wno-override-module "$modopt" \
-  "$LIBDIR"/libarithmetic.a \
   "$LIBDIR"/libstrings.a \
   "$LIBDIR"/rust/libdatastructures.rlib \
   "$LIBDIR"/rust/deps/*.rlib \
@@ -23,6 +22,7 @@ clang++-6.0 -Wno-override-module "$modopt" \
   "$RUSTDIR"/liballoc_system-*.rlib \
   "$LIBDIR"/rust/rustalloc.lds \
   "$LIBDIR"/llvm/*.ll \
+  "$LIBDIR"/libarithmetic.a \
   "$MAINFILES" \
   "$LIBDIR"/libconfigurationparser.a \
   "$LIBDIR"/libParser.a \
