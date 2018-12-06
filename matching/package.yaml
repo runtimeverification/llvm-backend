@@ -41,10 +41,8 @@ executables:
     source-dirs: app
     ghc-options:
       - -Wall
-      - -threaded
       - -rtsopts
-      - -with-rtsopts=-N
-      - -O3
+      - -O2
     dependencies:
       - matching
 

@@ -16,8 +16,8 @@ import           Data.Text                  (Text)
 import           Kore.AST.Common            (And (..), Equals (..),
                                              Pattern (..),
                                              Rewrites (..), 
-                                             Variable, SymbolOrAlias (..),
-                                             Application (..), Sort (..),
+                                             Variable, SymbolOrAlias (..), AstLocation(..),
+                                             Application (..), Sort (..), DomainValue (..),
                                              And (..), Ceil (..), Equals (..), Exists (..),
                                              Floor (..), Forall (..), Implies (..), Iff (..),
                                              In (..), Next (..), Not (..), Or (..), Id (..))
@@ -71,6 +71,7 @@ parseAxiomForSymbols = parsePatternForSymbols . sentenceAxiomPattern
              -> [SymbolOrAlias Object]
     rAlgebra (AndPattern (And _ (_, p₀) (_, p₁)))         = p₀ ++ p₁
     rAlgebra (ApplicationPattern (Application s ps))      = (if isConcrete s then [s] else []) ++ (mconcat $ map snd ps)
+    rAlgebra (DomainValuePattern (DomainValue sort _))    = [SymbolOrAlias (Id "\\dv" AstLocationNone) [sort]]
     rAlgebra (CeilPattern (Ceil _ _ (_, p)))              = p
     rAlgebra (EqualsPattern (Equals _ _ (_, p₀) (_, p₁))) = p₀ ++ p₁
     rAlgebra (ExistsPattern (Exists _ _ (_, p)))          = p
@@ -95,7 +96,13 @@ mkSymLib symbols sortDecls metaTools overloads =
       (SymLib sorts syms _) = foldl go (SymLib Map.empty (Map.fromList $ zip sortDecls empty) Map.empty) symbols
   in SymLib sorts (Map.map nub syms) (Map.map nub $ foldl mkOverloads Map.empty overloads)
   where
-    go (SymLib dIx rIx oIx) symbol =
+    go (SymLib dIx rIx oIx) symbol@(SymbolOrAlias (Id name _) sorts) =
+      if name == "\\dv" then 
+        SymLib { symCs = dIx
+               , symSt = Map.insert (head sorts) (symbol : (Map.findWithDefault [] (head sorts) rIx)) rIx
+               , symOs = oIx
+               }
+      else
       let as = (symbolOrAliasSorts metaTools) symbol
           att = (symAttributes metaTools) symbol
           args = applicationSortsOperands as

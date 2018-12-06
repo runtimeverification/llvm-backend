@@ -81,12 +81,13 @@ data Metadata = Metadata
                 { getLength :: !Integer
                 , getInjections :: Constructor -> [Constructor]
                 , getOverloads :: Constructor -> [Constructor]
+                , getAnywhere :: Constructor -> Bool
                 , getSort :: Sort Object
                 , getChildren :: Constructor -> Maybe [Metadata]
                 }
 
 instance (Show Metadata) where
-  show (Metadata _ _ _ sort _) = show sort
+  show (Metadata { getSort = sort }) = show sort
 
 type Occurrence   = [Text]
 type Fringe = [(Occurrence, Bool)]
@@ -354,7 +355,7 @@ expandOccurrence (ClauseMatrix (PatternMatrix (c : _)) _) o ix =
     HasKey isSet _ _ (Just k) -> if isSet then [(pack (show k ++ "_rem") : fst o, False), o] else [(pack (show k ++ "_val") : fst o, False), (pack (show k ++ "_rem") : fst o, False), o]
     HasKey _ _ _ Nothing -> error "Invalid map/set pattern"
     HasNoKey _ _ -> [o]
-    _ -> let (Metadata _ _ _ _ mtd) = getMetadata c
+    _ -> let (Metadata { getChildren = mtd }) = getMetadata c
              a = length $ fromJust $ mtd ix
              os = map (\i -> (pack $ show i) : fst o) [0..a-1]
              isExact = isInj ix
@@ -367,7 +368,7 @@ expandOccurrence _ _ _ = error "must have at least one column"
 
 mDefault :: [Constructor] -> (ClauseMatrix, Fringe) -> Maybe (ClauseMatrix, Fringe)
 mDefault s₁ (cm@(ClauseMatrix pm@(PatternMatrix (c : _)) _),o : os) =
-  let (Metadata mtd _ _ _ _) = getMetadata c
+  let (Metadata { getLength = mtd }) = getMetadata c
       infiniteLength = case hook pm of
         Nothing -> False
         Just "LIST.List" -> True
@@ -483,7 +484,7 @@ mightUnify (Fix (MapPattern _ _ _ _ _)) _ = False
 mightUnify (Fix (SetPattern _ _ _ _)) _ = False
 
 isValidOverload :: [Fix Pattern] -> Metadata -> Clause -> [Metadata] -> Constructor -> Bool
-isValidOverload ps (Metadata _ _ _ _ childMeta) cls metaPs less =
+isValidOverload ps (Metadata { getChildren = childMeta }) cls metaPs less =
   case childMeta less of
     Nothing -> False
     Just metaTs -> 
@@ -491,7 +492,7 @@ isValidOverload ps (Metadata _ _ _ _ childMeta) cls metaPs less =
       in and items
   where
     isValidChild :: Fix Pattern -> Metadata -> Metadata -> Bool
-    isValidChild p metaP@(Metadata _ _ _ _ m) metaT =
+    isValidChild p metaP@(Metadata { getChildren = m }) metaT =
       let sortP = getSort metaP
           sortT = getSort metaT
           child = Symbol (SymbolOrAlias (Id "inj" AstLocationNone) [sortT, sortP])
@@ -504,13 +505,13 @@ checkPatternIndex _ _ _ (_, Fix (Variable _ _)) = True
 checkPatternIndex (List _ len) _ _ (_, Fix (ListPattern hd Nothing tl _ _)) = len == (length hd + length tl)
 checkPatternIndex (List _ len) _ _ (_, Fix (ListPattern hd (Just _) tl _ _)) = len >= (length hd + length tl)
 checkPatternIndex _ _ _ (_, Fix (ListPattern _ _ _ _ _)) = False
-checkPatternIndex ix'@(Symbol (SymbolOrAlias (Id "inj" _) [a,c])) exact (Metadata _ _ _ _ meta) (cls, Fix (Pattern ix@(Symbol (SymbolOrAlias name@(Id "inj" _) [b,c'])) _ [p])) =
-  let m@(Metadata _ _ _ _ metaB) = (fromJust $ meta ix) !! 0
-      (Metadata _ _ _ _ metaA) = (fromJust $ meta ix') !! 0
+checkPatternIndex ix'@(Symbol (SymbolOrAlias (Id "inj" _) [a,c])) exact (Metadata { getChildren = meta }) (cls, Fix (Pattern ix@(Symbol (SymbolOrAlias name@(Id "inj" _) [b,c'])) _ [p])) =
+  let m@(Metadata { getChildren = metaB} ) = (fromJust $ meta ix) !! 0
+      (Metadata { getChildren = metaA }) = (fromJust $ meta ix') !! 0
       childAB = Symbol (SymbolOrAlias name [a,b])
       childBA = Symbol (SymbolOrAlias name [b,a])
   in c == c' && (a == b || ((isJust $ metaB $ childAB) && checkPatternIndex childAB exact m (cls,p)) || (not exact && (isJust $ metaA $ childBA)))
-checkPatternIndex inj@(Symbol (SymbolOrAlias (Id "inj" _) _)) _ (Metadata _ _ overloads _ meta) (cls, Fix (Pattern ix _ ps)) =
+checkPatternIndex inj@(Symbol (SymbolOrAlias (Id "inj" _) _)) _ (Metadata { getOverloads = overloads, getChildren = meta }) (cls, Fix (Pattern ix _ ps)) =
   let less = overloads ix
       childMeta = (fromJust $ meta inj) !! 0
   in any (isValidOverload ps childMeta cls $ fromJust $ meta ix) less
@@ -542,9 +543,9 @@ addVarToRow :: Maybe Constructor -> Maybe (Fix Pattern) -> Occurrence -> Fix Pat
 addVarToRow _ p o (Fix (Variable name hookAtt)) _ vars = VariableBinding name hookAtt o p : vars
 addVarToRow ix p' o (Fix (As name hookAtt p)) m vars = VariableBinding name hookAtt o p' : addVarToRow ix p' o p m vars
 addVarToRow _ _ _ (Fix Wildcard) _ vars = vars
-addVarToRow (Just (Symbol (SymbolOrAlias (Id "inj" _) [a,_]))) p' o (Fix (Pattern ix@(Symbol (SymbolOrAlias name@(Id "inj" _) [b,_])) _ [p])) (Just m@(Metadata _ _ _ _ meta)) vars = 
+addVarToRow (Just (Symbol (SymbolOrAlias (Id "inj" _) [a,_]))) p' o (Fix (Pattern ix@(Symbol (SymbolOrAlias name@(Id "inj" _) [b,_])) _ [p])) (Just m@(Metadata { getChildren = meta })) vars = 
   if a == b then vars else 
-  let (Metadata _ _ _ _ metaB) = (fromJust $ meta ix) !! 0
+  let (Metadata { getChildren = metaB }) = (fromJust $ meta ix) !! 0
       childAB = Symbol (SymbolOrAlias name [a,b])
   in if isJust $ metaB $ childAB then addVarToRow Nothing p' o p (Just m) vars else vars
 addVarToRow _ _ _ (Fix (Pattern _ _ _)) _ vars = vars
@@ -561,16 +562,16 @@ addRange (Just (List _ len)) o (Fix (ListPattern hd (Just (Fix (Variable _ _))) 
 addRange _ _ _ ranges = ranges
 
 addOverloads :: Metadata -> Maybe Constructor -> Maybe (Fix Pattern) -> Occurrence -> Fix Pattern -> [(Constructor, VariableBinding)] -> [(Constructor, VariableBinding)]
-addOverloads (Metadata _ _ _ _ meta) (Just (Symbol (SymbolOrAlias name@(Id "inj" _) [a,_]))) p' o (Fix (Pattern ix@(Symbol (SymbolOrAlias (Id "inj" _) [b,_])) _ [p])) children = 
+addOverloads (Metadata { getChildren = meta }) (Just (Symbol (SymbolOrAlias name@(Id "inj" _) [a,_]))) p' o (Fix (Pattern ix@(Symbol (SymbolOrAlias (Id "inj" _) [b,_])) _ [p])) children = 
   if a == b then 
     children  
   else
     let childMeta = (fromJust $ meta ix) !! 0
     in addOverloads childMeta (Just (Symbol (SymbolOrAlias name [a,b]))) p' o p children
-addOverloads (Metadata _ _ overloads _ meta) (Just inj@(Symbol (SymbolOrAlias (Id "inj" _) _))) p' o (Fix (Pattern ix _ ps)) children = 
+addOverloads (Metadata { getOverloads = overloads, getChildren = meta }) (Just inj@(Symbol (SymbolOrAlias (Id "inj" _) _))) p' o (Fix (Pattern ix _ ps)) children = 
   let less = overloads ix
       metaPs = fromJust $ meta ix
-      (Metadata _ _ _ _ childMeta) = (fromJust $ meta inj) !! 0
+      (Metadata { getChildren = childMeta }) = (fromJust $ meta inj) !! 0
       childMaybe = listToMaybe $ catMaybes $ map childMeta less
   in case childMaybe of
     Nothing -> children
@@ -721,7 +722,7 @@ expandColumn ix (Column m ps) cs =
   in  zipWith Column metas (transpose ps'')
 
 expandMetadata :: Constructor -> Metadata -> [Metadata]
-expandMetadata ix (Metadata _ _ _ sort ms) =
+expandMetadata ix (Metadata { getSort = sort, getChildren = ms }) =
   case ms ix of
     Just m -> m
     Nothing -> error $ show (ix,sort)
@@ -746,13 +747,13 @@ expandPattern :: Constructor
               -> [(Fix Pattern,Maybe (Constructor,Metadata))]
 expandPattern (List _ len) _ _ (Fix (ListPattern hd _ tl _ _), _) = zip (hd ++ (replicate (len - length hd - length tl) (Fix Wildcard)) ++ tl) (replicate len Nothing)
 expandPattern _ _ _ (Fix (ListPattern _ _ _ _ _), _) = error "invalid list pattern"
-expandPattern (Symbol (SymbolOrAlias name [a, _])) _ (Metadata _ _ _ _ meta) (Fix (Pattern ix@(Symbol (SymbolOrAlias (Id "inj" _) [b, _])) _ [fixedP]), _) =
-  let m@(Metadata _ _ _ _ metaB) = (fromJust $ meta ix) !! 0
+expandPattern (Symbol (SymbolOrAlias name [a, _])) _ (Metadata { getChildren = meta }) (Fix (Pattern ix@(Symbol (SymbolOrAlias (Id "inj" _) [b, _])) _ [fixedP]), _) =
+  let m@(Metadata { getChildren = metaB }) = (fromJust $ meta ix) !! 0
       childAB = Symbol (SymbolOrAlias name [a,b])
   in if isJust $ metaB $ childAB then 
     [(fixedP, if a == b then Nothing else Just (Symbol (SymbolOrAlias name [a,b]), m))]
   else if a == b then [(fixedP, Nothing)] else [(Fix (Pattern (Symbol (SymbolOrAlias name [b,a])) Nothing [fixedP]), Nothing)]
-expandPattern (Symbol (SymbolOrAlias (Id "inj" _) _)) ms (Metadata _ _ overloads _ meta) (Fix (Pattern ix hookAtt fixedPs), cls) =
+expandPattern (Symbol (SymbolOrAlias (Id "inj" _) _)) ms (Metadata { getOverloads = overloads, getChildren = meta }) (Fix (Pattern ix hookAtt fixedPs), cls) =
   let less = overloads ix
       childMeta = ms !! 0
       metaPs = fromJust $ meta ix
@@ -762,7 +763,7 @@ expandPattern (Symbol (SymbolOrAlias (Id "inj" _) _)) ms (Metadata _ _ overloads
   in [(Fix $ Pattern validLess hookAtt $ expandOverload fixedPs childMeta metaPs validLess, Nothing)]
   where
     expandOverload :: [Fix Pattern] -> Metadata -> [Metadata] -> Constructor -> [Fix Pattern]
-    expandOverload ps (Metadata _ _ _ _ childMeta) metaPs less =
+    expandOverload ps (Metadata { getChildren = childMeta }) metaPs less =
       let metaTs = fromJust $ childMeta less
       in zipWith3 expandOverload' ps metaPs metaTs
     expandOverload' :: Fix Pattern -> Metadata -> Metadata -> Fix Pattern
@@ -1192,7 +1193,7 @@ isResidual :: Fix Pattern -> Column -> Bool
 isResidual (Fix (ListPattern {})) _ = True
 isResidual (Fix (MapPattern {})) _ = True
 isResidual (Fix (SetPattern {})) _ = True
-isResidual (Fix (Pattern c _ _)) (Column (Metadata _ _ _ _ m) _) = not $ isJust $ m c
+isResidual (Fix (Pattern c _ _)) (Column (Metadata { getAnywhere = anywhere, getChildren = m }) _) = (not $ isJust $ m c) || anywhere c
 isResidual _ _ = False
 
 specializeBy :: (ClauseMatrix, Fringe) -> [Fix Pattern] -> (ClauseMatrix, Fringe, [Fix Pattern])

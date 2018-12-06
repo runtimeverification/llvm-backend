@@ -5,12 +5,12 @@ module Pattern.Gen where
 
 import qualified Pattern               as P
 import           Pattern.Parser        (unifiedPatternRAlgebra,SymLib(..), getTopChildren,
-                                        AxiomInfo(..))
+                                        AxiomInfo(..), isAtt)
 import           Control.Monad.Free    (Free (..))
 import           Data.Bits             (shiftL)
 import           Data.Either           (fromRight)
 import           Data.Functor.Foldable (Fix (..), para)
-import           Data.List             (transpose)
+import           Data.List             (transpose, find)
 import qualified Data.Map              as Map
 import           Data.Maybe            (maybe, isJust, fromJust)
 import           Data.Text             (unpack, Text)
@@ -266,7 +266,7 @@ metaLookup f (P.HasKey isSet e (P.Ignoring m) _) =
 metaLookup _ (P.HasNoKey (P.Ignoring m) _) = Just [m]
 
 defaultMetadata :: Sort Object -> P.Metadata
-defaultMetadata sort = P.Metadata 1 (const []) (const []) sort $ metaLookup $ const Nothing
+defaultMetadata sort = P.Metadata 1 (const []) (const []) (const False) sort $ metaLookup $ const Nothing
 
 genMetadatas :: SymLib -> KoreIndexedModule Attributes -> Map.Map (Sort Object) P.Metadata
 genMetadatas syms@(SymLib symbols sorts allOverloads) indexedMod =
@@ -284,7 +284,7 @@ genMetadatas syms@(SymLib symbols sorts allOverloads) indexedMod =
       in if isInt then
         let tools = extractMetadataTools indexedMod
             bw = bitwidth tools sort
-        in Just $ P.Metadata (shiftL 1 bw) (const []) (const []) sort (metaLookup $ const Nothing)
+        in Just $ P.Metadata (shiftL 1 bw) (const []) (const []) (const False) sort (metaLookup $ const Nothing)
       else
         let metadatas = genMetadatas syms indexedMod
             keys = map P.Symbol constructors
@@ -299,7 +299,7 @@ genMetadatas syms@(SymLib symbols sorts allOverloads) indexedMod =
             overloadMap = Map.fromList (zip overloads usedOverloads)
             overloadInjMap = Map.mapWithKey (\k -> (map $ injectionForOverload k)) overloadMap
             trueInjMap = Map.union injMap overloadInjMap
-        in Just $ P.Metadata (toInteger $ length constructors) (\s -> if isInjection s || isOverload s then trueInjMap Map.! s else []) (\s -> Map.findWithDefault [] s overloadMap) sort $ metaLookup $ flip Map.lookup metaMap
+        in Just $ P.Metadata (toInteger $ length constructors) (\s -> if isInjection s || isOverload s then trueInjMap Map.! s else []) (\s -> Map.findWithDefault [] s overloadMap) isAnywhere sort $ metaLookup $ flip Map.lookup metaMap
     genMetadata _ _ = Nothing
     getArgs :: SymbolOrAlias Object -> [Sort Object]
     getArgs sym = sel1 $ symbols Map.! sym
@@ -311,7 +311,7 @@ genMetadatas syms@(SymLib symbols sorts allOverloads) indexedMod =
     isOverload _ = False
     isSubsort :: Map.Map (Sort Object) P.Metadata -> P.Constructor -> P.Constructor -> Bool
     isSubsort metas (P.Symbol (SymbolOrAlias name [b,_])) (P.Symbol (SymbolOrAlias _ [a,_])) =
-      let (P.Metadata _ _ _ _ childMeta) = Map.findWithDefault (defaultMetadata b) b metas
+      let (P.Metadata { P.getChildren = childMeta }) = Map.findWithDefault (defaultMetadata b) b metas
           child = P.Symbol (SymbolOrAlias name [a,b])
       in isJust $ childMeta $ child
     isSubsort _ _ _ = error "invalid injection"
@@ -319,7 +319,8 @@ genMetadatas syms@(SymLib symbols sorts allOverloads) indexedMod =
     injectionForOverload (P.Symbol g) (P.Symbol l) = P.Symbol $ SymbolOrAlias (Id "inj" AstLocationNone) [sel2 (symbols Map.! l), sel2 (symbols Map.! g)]
     injectionForOverload _ _ = error "invalid overload"
     isFunctionSym :: SymbolOrAlias Object -> Bool
-    isFunctionSym sym = 
+    isFunctionSym sym@(SymbolOrAlias (Id name _) _) = 
+      if name == "\\dv" then False else
       let (_,_,att) = symbols Map.! sym
           parsed = parseAtt att
           hookAtt = getHook $ hook parsed
@@ -334,6 +335,12 @@ genMetadatas syms@(SymLib symbols sorts allOverloads) indexedMod =
         Just "SET.unit" -> False
         Just "SET.element" -> False
         _ -> isFunction parsed
+    isAnywhere :: P.Constructor -> Bool
+    isAnywhere (P.Symbol sym@(SymbolOrAlias (Id name _) _)) = 
+      if name == "\\dv" then False else
+      let (_,_,Attributes att) = symbols Map.! sym
+      in isJust $ find (isAtt "anywhere") att
+    isAnywhere _ = False
 
 genClauseMatrix :: KoreRewrite pattern 
                => SymLib
@@ -407,7 +414,7 @@ mkSpecialDecisionTree symlib indexedMod axioms sorts axiom =
       residualMap = Map.fromList $ zip r os
       as' = map (\c@(P.Clause { P.getVariableBindings = vars, P.getOverloadChildren = overloads, P.getSpecializedVars = specials }) -> 
                        let (_,overloadVars) = unzip overloads
-                       in c { P.getOverloadChildren = [], P.getSpecializedVars = specials ++ translateVars residualMap (vars++overloadVars) })  as
+                       in c { P.getVariableBindings = vars ++ overloadVars, P.getOverloadChildren = [], P.getSpecializedVars = specials ++ translateVars residualMap (vars++overloadVars) })  as
       cm = P.ClauseMatrix pm as'
       dt = P.compilePattern (cm,f)
   in if isPoorlySpecialized cm (fst matrix) then Nothing else Just $ (P.shareDt dt, zip r os)
