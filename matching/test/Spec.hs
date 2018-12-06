@@ -45,7 +45,7 @@ instance IsPattern IntPat where
 
 instance HasMetadata IntPat where
   getMetadata :: Proxy IntPat -> Metadata
-  getMetadata _ = Metadata (shiftL 1 32) (const []) (const []) (SortActualSort (SortActual (Id "Int" AstLocationNone) [])) f
+  getMetadata _ = Metadata (shiftL 1 32) (const []) (const []) (const False) (SortActualSort (SortActual (Id "Int" AstLocationNone) [])) f
     where
       f :: Constructor -> Maybe [Metadata]
       f _ = Just []
@@ -59,7 +59,7 @@ instance HasMetadata Lst where
                                , getMetadata (Proxy :: Proxy Lst)
                                ]) -- Cns Lst (1)
                     ]
-    in Metadata (toInteger $ length m) (const []) (const []) (SortActualSort (SortActual (Id "Lst" AstLocationNone) [])) (flip M.lookup m)
+    in Metadata (toInteger $ length m) (const []) (const []) (const False) (SortActualSort (SortActual (Id "Lst" AstLocationNone) [])) (flip M.lookup m)
 
 vars :: [Lst] -> [String]
 vars l = concat (map varLst l)
