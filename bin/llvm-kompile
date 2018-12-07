@@ -15,15 +15,15 @@ main="$3"
 shift; shift; shift
 "$(dirname "$0")"/llvm-kompile-matching "$definition" "$moduleName" "$dt_dir"
 "$(dirname "$0")"/llvm-kompile-codegen "$definition" "$dt_dir"/dt.yaml "$dt_dir" > "$mod"
-opt-6.0 -tailcallelim -tailcallopt "$mod" -o "$modopt"
-RUSTDIR=`rustc --print sysroot`/lib/rustlib/x86_64-unknown-linux-gnu/lib/
+opt -tailcallelim -tailcallopt "$mod" -o "$modopt"
+RUSTDIR=`rustc --print sysroot`/lib/rustlib/x86_64-apple-darwin/lib/
 LIBDIR="$(dirname "$0")"/../lib/kllvm/
 if [ "$main" = "main" ]; then
   MAINFILES="$LIBDIR"/llvm/main/main.ll
 else
   MAINFILES=""
 fi
-clang++-6.0 -Wno-override-module "$modopt" \
+clang++ -Wno-override-module "$modopt" \
   "$LIBDIR"/libarithmetic.a \
   "$LIBDIR"/libstrings.a \
   "$LIBDIR"/rust/libdatastructures.rlib \
@@ -43,7 +43,8 @@ clang++-6.0 -Wno-override-module "$modopt" \
   "$LIBDIR"/libAST.a \
   "$LIBDIR"/liballoc.a \
   -lgmp -lpthread -ldl \
-  -L/usr/lib/llvm-6.0/lib \
+  -Wl,-alias_list "$LIBDIR"/rust/rustalloc.alias \
+  -L/usr/local/opt/llvm@6/lib \
   -lLLVMIRReader -lLLVMBitReader -lLLVMAsmParser -lLLVMCore -lLLVMBinaryFormat -lLLVMSupport -lLLVMDemangle \
   -lncurses \
   -ljemalloc \

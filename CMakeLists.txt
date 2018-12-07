@@ -9,8 +9,8 @@ add_definitions(-Wall -Werror)
 set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -flto")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -flto")
 set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} -flto")
-set(CMAKE_AR "llvm-ar-6.0")
-set(CMAKE_RANLIB "llvm-ranlib-6.0")
+set(CMAKE_AR "llvm-ar")
+set(CMAKE_RANLIB "llvm-ranlib")
 
 find_package(LLVM 6 REQUIRED CONFIG)
 
@@ -45,11 +45,11 @@ macro(kllvm_add_tool name)
 
   # Link against LLVM libraries
   llvm_config(${name})
-  target_link_libraries(${name} PUBLIC "-ljemalloc" "-Wl,-rpath=/usr/local/lib")
+  target_link_libraries(${name} PUBLIC "-ljemalloc" "-Wl,-rpath /usr/local/lib")
 endmacro(kllvm_add_tool)
 
 install(
-  FILES rustalloc.lds
+  FILES rustalloc.lds rustalloc.alias
   DESTINATION lib/kllvm/rust
 )
 
