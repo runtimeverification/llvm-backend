@@ -13,15 +13,7 @@ definition="$1"
 moduleName="$2"
 main="$3"
 shift; shift; shift
-"$(dirname "$0")"/llvm-kompile-matching "$definition" "$moduleName" "$dt_dir"
-"$(dirname "$0")"/llvm-kompile-codegen "$definition" "$dt_dir"/dt.yaml "$dt_dir" > "$mod"
-"opt$SUFFIX" -tailcallelim -tailcallopt "$mod" -o "$modopt"
 LIBDIR="$(dirname "$0")"/../lib/kllvm/
-if [ "$main" = "main" ]; then
-  MAINFILES="$LIBDIR"/llvm/main/main.ll
-else
-  MAINFILES=""
-fi
 if [[ "$OSTYPE" == "darwin"* ]]; then
     SUFFIX=""
     RUSTDIR=`rustc --print sysroot`/lib/rustlib/x86_64-apple-darwin/lib/
@@ -32,6 +24,14 @@ else
     RUSTDIR=`rustc --print sysroot`/lib/rustlib/x86_64-unknown-linux-gnu/lib/
     RUSTALIAS="$LIBDIR/rust/libdatastructures.rlib"
     LLVMLIB="-L/usr/lib/llvm-6.0/lib"
+fi
+"$(dirname "$0")"/llvm-kompile-matching "$definition" "$moduleName" "$dt_dir"
+"$(dirname "$0")"/llvm-kompile-codegen "$definition" "$dt_dir"/dt.yaml "$dt_dir" > "$mod"
+"opt$SUFFIX" -tailcallelim -tailcallopt "$mod" -o "$modopt"
+if [ "$main" = "main" ]; then
+  MAINFILES="$LIBDIR"/llvm/main/main.ll
+else
+  MAINFILES=""
 fi
 clang++ -Wno-override-module "$modopt" \
   "$LIBDIR"/libarithmetic.a \
