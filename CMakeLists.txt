@@ -9,8 +9,15 @@ add_definitions(-Wall -Werror)
 set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -flto")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -flto")
 set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} -flto")
+
+# On MacOs the compiler version is not appended
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
 set(CMAKE_AR "llvm-ar")
 set(CMAKE_RANLIB "llvm-ranlib")
+else()
+set(CMAKE_AR "llvm-ar-6.0")
+set(CMAKE_RANLIB "llvm-ranlib-6.0")
+endif()
 
 find_package(LLVM 6 REQUIRED CONFIG)
 
@@ -45,7 +52,11 @@ macro(kllvm_add_tool name)
 
   # Link against LLVM libraries
   llvm_config(${name})
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
   target_link_libraries(${name} PUBLIC "-ljemalloc" "-Wl,-rpath /usr/local/lib")
+else()
+  target_link_libraries(${name} PUBLIC "-ljemalloc" "-Wl,-rpath=/usr/local/lib")
+endif()
 endmacro(kllvm_add_tool)
 
 install(
