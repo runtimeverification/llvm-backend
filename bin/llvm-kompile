@@ -1,4 +1,6 @@
 #!/bin/bash
+set -e
+
 if [ $# -lt 3 ]; then
   echo "Usage: $0 <definition.kore> <MODULE-NAME> [main|library] <clang flags>"
   echo '"main" means that a main function will be generated that matches the signature "interpreter <input.kore> <depth> <output.kore>"'
