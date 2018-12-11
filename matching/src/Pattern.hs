@@ -15,7 +15,7 @@ module Pattern ( PatternMatrix(..)
                , Pattern
                , Clause(..)
                , Action(..)
-               , Occurrence
+               , Occurrence(..)
                , Fringe
                , Index
                , Ignoring(..)
@@ -81,7 +81,17 @@ data Metadata = Metadata
 instance (Show Metadata) where
   show (Metadata _ _ _ sort _) = show sort
 
-type Occurrence   = [Text]
+data Occurrence = Num Int Occurrence
+                | Base
+                | Lit Text Text
+                | Equal Occurrence Occurrence
+                | SC Int
+                | Value (Fix BoundPattern) Occurrence
+                | Rem (Fix BoundPattern) Occurrence
+                | Size Occurrence
+                | Inj Occurrence
+                deriving (Show, Eq, Ord)
+
 type Fringe = [(Occurrence, Bool)] -- occurrence and whether to match the exact sort
 
 instance Show1 Pattern where
@@ -192,7 +202,7 @@ mkClauseMatrix :: [Column]
                -> Either Text (ClauseMatrix, Fringe)
 mkClauseMatrix cs as = do
   validateColumnLength (length as) cs
-  pure ((ClauseMatrix (PatternMatrix cs) (map (\a -> Clause a [] [] []) as)),map (\i -> ([pack $ show i], False)) [1..length cs]) 
+  pure ((ClauseMatrix (PatternMatrix cs) (map (\a -> Clause a [] [] []) as)),map (\i -> (Num i Base, False)) [1..length cs]) 
   where
     validateColumnLength :: Int -> [Column] -> Either Text ()
     validateColumnLength as' =
@@ -337,12 +347,12 @@ expandOccurrence (ClauseMatrix (PatternMatrix (c : _)) _) o ix =
   case ix of
     Empty -> []
     NonEmpty _ -> [o]
-    HasKey isSet _ _ (Just k) -> if isSet then [(pack (show k ++ "_rem") : fst o, False), o] else [(pack (show k ++ "_val") : fst o, False), (pack (show k ++ "_rem") : fst o, False), o]
+    HasKey isSet _ _ (Just k) -> if isSet then [(Rem k (fst o), False), o] else [(Value k (fst o), False), (Rem k (fst o), False), o]
     HasKey _ _ _ Nothing -> error "Invalid map/set pattern"
     HasNoKey _ _ -> [o]
     _ -> let (Metadata _ _ _ _ mtd) = getMetadata c
              a = length $ fromJust $ mtd ix
-             os = map (\i -> (pack $ show i) : fst o) [0..a-1]
+             os = map (\i -> Num i $ fst o) [0..a-1]
              isExact = isInj ix
          in zip os $ replicate (length os) isExact
   where
@@ -521,7 +531,7 @@ checkPatternIndex _ _ (_, Fix (SetPattern _ _ _ _)) = error "Invalid map pattern
 addVars :: Maybe Constructor -> [Clause] -> Column -> Occurrence -> [Clause]
 addVars ix as (Column m ps) o =
   let rows = zip ps as
-  in map (\(p, (Clause a vars ranges children)) -> (Clause a (addVarToRow ix o p vars) (addRange ix o p ranges) $ addOverloads m ix ("0" : o) p children)) rows
+  in map (\(p, (Clause a vars ranges children)) -> (Clause a (addVarToRow ix o p vars) (addRange ix o p ranges) $ addOverloads m ix (Num 0 o) p children)) rows
 
 addVarToRow :: Maybe Constructor -> Occurrence -> Fix Pattern -> [VariableBinding] -> [VariableBinding]
 addVarToRow _ o (Fix (Variable name hookAtt)) vars = VariableBinding name hookAtt o : vars
@@ -530,7 +540,7 @@ addVarToRow _ _ (Fix Wildcard) vars = vars
 addVarToRow (Just (Symbol (SymbolOrAlias (Id "inj" _) [a,_]))) o (Fix (Pattern (Symbol (SymbolOrAlias (Id "inj" _) [b,_])) _ [p])) vars = if a == b then vars else addVarToRow Nothing o p vars
 addVarToRow _ _ (Fix (Pattern _ _ _)) vars = vars
 addVarToRow _ _ (Fix (ListPattern _ Nothing _ _ _)) vars = vars
-addVarToRow (Just (List _ len)) o (Fix (ListPattern _ (Just p) _ _ _)) vars = addVarToRow Nothing ((pack $ show len) : o) p vars
+addVarToRow (Just (List _ len)) o (Fix (ListPattern _ (Just p) _ _ _)) vars = addVarToRow Nothing (Num len o) p vars
 addVarToRow _ _ (Fix (ListPattern _ (Just _) _ _ _)) vars = vars
 addVarToRow _ o (Fix (MapPattern [] [] (Just p) _ _)) vars = addVarToRow Nothing o p vars
 addVarToRow _ _ (Fix (MapPattern _ _ _ _ _)) vars = vars
@@ -538,7 +548,7 @@ addVarToRow _ o (Fix (SetPattern [] (Just p) _ _)) vars = addVarToRow Nothing o 
 addVarToRow _ _ (Fix (SetPattern _ _ _ _)) vars = vars
 
 addRange :: Maybe Constructor -> Occurrence -> Fix Pattern -> [(Occurrence, Int, Int)] -> [(Occurrence, Int, Int)]
-addRange (Just (List _ len)) o (Fix (ListPattern hd (Just (Fix (Variable _ _))) tl _ _)) ranges = ((pack $ show len) : o, length hd, length tl) : ranges
+addRange (Just (List _ len)) o (Fix (ListPattern hd (Just (Fix (Variable _ _))) tl _ _)) ranges = (Num len o, length hd, length tl) : ranges
 addRange _ _ _ ranges = ranges
 
 -- computes the list of injections that are bound to variables in the current pattern as a result of matching on an overload of the current
@@ -564,11 +574,11 @@ addOverloads (Metadata _ _ overloads _ meta) (Just inj@(Symbol (SymbolOrAlias (I
   where
     getVar :: Metadata -> Metadata -> Fix Pattern -> Int -> [(Constructor, VariableBinding)]
     getVar metaP metaT p i =
-      let vars = addVarToRow Nothing ("-1" : (pack $ show i) : o) p [] -- compute variable bindings for this pattern
+      let vars = addVarToRow Nothing (Inj $ Num i o) p [] -- compute variable bindings for this pattern
           sortP = getSort metaP
           sortT = getSort metaT
           child = Symbol (SymbolOrAlias (Id "inj" AstLocationNone) [sortT, sortP])
-          childOverloads = addOverloads metaP (Just child) ((pack $ show i) : o) p [] -- recurse into child term
+          childOverloads = addOverloads metaP (Just child) (Num i o) p [] -- recurse into child term
       in if sortP == sortT then
         [] -- exact match, so no bindings
       else zip (replicate (length vars) child) vars ++ childOverloads
@@ -775,6 +785,17 @@ expandPattern ix ms m (Fix (As _ _ pat), c)         = expandPattern ix ms m (pat
 expandPattern _ ms _ (Fix Wildcard, _)              = replicate (length ms) (Fix Wildcard,Nothing)
 expandPattern _ ms _ (Fix (Variable _ _), _)        = replicate (length ms) (Fix Wildcard,Nothing)
 
+serializeOccurrence :: Occurrence -> [Text]
+serializeOccurrence (Num i o) = (pack $ show i) : serializeOccurrence o
+serializeOccurrence Base = []
+serializeOccurrence (Lit s1 s2) = "lit" : s1 : s2 : []
+serializeOccurrence (Equal o1 o2) = "eq" : (serializeOccurrence o1 ++ ["and"] ++ serializeOccurrence o2)
+serializeOccurrence (SC i) = [pack $ "side_condition_" ++ show i]
+serializeOccurrence (Value p o) = pack (show p ++ "_val") : serializeOccurrence o
+serializeOccurrence (Rem p o) = pack (show p ++ "_rem") : serializeOccurrence o
+serializeOccurrence (Size o) = "size" : serializeOccurrence o
+serializeOccurrence (Inj o) = "-1" : serializeOccurrence o
+
 data L a = L
            { getSpecializations :: ![(Text, a)]
            , getDefault         :: !(Maybe a)
@@ -845,6 +866,9 @@ instance Y.ToYaml a => Y.ToYaml (Anchor a) where
       , "next" Y..= Y.toYaml x
       ]
 
+instance Y.ToYaml Occurrence where
+  toYaml o = Y.toYaml $ serializeOccurrence o
+
 instance Y.ToYaml a => Y.ToYaml (BoundPattern a) where
   toYaml Wildcard = error "Unsupported map/set pattern"
   toYaml (Variable (Just o) h) = Y.mapping
@@ -908,19 +932,19 @@ getLeaf os ps (Clause (Action a rhsVars maybeSideCondition) matchedVars ranges c
                           -- filter by the variables used in the side condition
              Just cond -> let condFiltered = filter (flip elem cond . fst) sorted
                               (_, condVars) = unzip condFiltered
-                              newO = [pack $ "side_condition_" ++ (show a)]
+                              newO = SC a
                           -- evaluate the side condition and if it is true, continue, otherwise go to the next row
                           in function (pack $ "side_condition_" ++ (show a)) newO condVars "BOOL.Bool" (
                                  switchLiteral newO 1 [("1", nonlinearLeaf),
                                                        ("0", next)
                                                       ] Nothing)
       -- fill out the bindings for list range variables
-      withRanges = foldr (\(o, hd, tl) -> Fix . Function "hook_LIST_range_long" o [tail o, ["lit", (pack $ show hd), "MINT.MInt 64"], ["lit", (pack $ show tl), "MINT.MInt 64"]] "LIST.List") sc ranges
-  in foldr (\(inj, VariableBinding _ h o) -> Fix . MakePattern o (Fix $ Pattern inj Nothing [Fix $ Variable (Just $ tail o) h])) withRanges children
+      withRanges = foldr (\(o@(Num _ o'), hd, tl) -> Fix . Function "hook_LIST_range_long" o [o', (Lit (pack $ show hd) "MINT.MInt 64"), (Lit (pack $ show tl) "MINT.MInt 64")] "LIST.List") sc ranges
+  in foldr (\(inj, VariableBinding _ h (Inj o)) -> Fix . MakePattern (Inj o) (Fix $ Pattern inj Nothing [Fix $ Variable (Just o) h])) withRanges children
   where
     makeEquality :: String -> (Occurrence, Occurrence) -> Fix DecisionTree -> Fix DecisionTree
     -- compare the values of the variables with the same name and if they are equal, continue, otherwise go to the next row
-    makeEquality hookAtt (o1,o2) dt = function (equalityFun hookAtt) ("eq" : (o1 ++ ["and"] ++ o2)) [o1, o2] "BOOL.Bool" (switchLiteral ("eq" : (o1 ++ ["and"] ++ o2)) 1 [("1", dt), ("0", next)] Nothing)
+    makeEquality hookAtt (o1,o2) dt = function (equalityFun hookAtt) (Equal o1 o2) [o1, o2] "BOOL.Bool" (switchLiteral (Equal o1 o2) 1 [("1", dt), ("0", next)] Nothing)
 
 equalityFun :: String -> Text
 equalityFun "BOOL.Bool" = "hook_BOOL_eq"
@@ -1044,8 +1068,8 @@ compilePattern firstCm =
     -- if it succeseds, consume the occurrence and continue with the specialized matrix
     -- otherweise, test the next literal
     equalLiteral litO hookName ((name,spec):tl) d =
-      let newO = ["lit", name, pack hookName]
-          eqO = "eq" : (litO ++ ["and"] ++ newO)
+      let newO = Lit name $ pack hookName
+          eqO = Equal litO newO
       in Fix $ MakePattern newO (Fix (Pattern (Literal (unpack name)) (Just hookName) [])) $ 
              Fix $ Function (equalityFun hookName) eqO [litO, newO] "BOOL.Bool" $
                  Fix $ SwitchLiteral eqO 1 $ L [("1", Fix $ Switch litO L 
@@ -1055,7 +1079,7 @@ compilePattern firstCm =
     -- construct a tree to test the length of the list and bind the elements of the list to their occurrences
     listPattern :: Occurrence -> [(Text, (ClauseMatrix, Fringe))] -> Maybe (ClauseMatrix, Fringe) -> [Constructor] -> Column -> Fix DecisionTree
     listPattern listO ls d signature firstCol =
-      let newO = "size" : listO
+      let newO = Size listO
           (cons,matrices) = unzip ls
           specs = zip cons $ zip signature matrices
           maxList = maxListSize firstCol
@@ -1081,14 +1105,14 @@ compilePattern firstCm =
     listGet :: Occurrence -> Maybe (Int, Int) -> Fix DecisionTree -> Int -> Fix DecisionTree
     listGet _ _ (Fix Fail) _ = Fix Fail
     listGet listO l dt o = 
-      Fix $ Function "hook_LIST_get_long" ((pack $ show o) : listO) 
+      Fix $ Function "hook_LIST_get_long" (Num o listO) 
         [listO, case l of
-                  Nothing -> ["lit", pack $ show o, "MINT.MInt 64"]
-                  Just (hd,tl) -> ["lit", pack $ show (o-tl-hd), "MINT.MInt 64"]
+                  Nothing -> Lit (pack $ show o) "MINT.MInt 64"
+                  Just (hd,tl) -> Lit (pack $ show (o-tl-hd)) "MINT.MInt 64"
         ] "STRING.String" dt
     mapPattern :: Occurrence -> [(Text, (ClauseMatrix, Fringe))] -> Maybe (ClauseMatrix, Fringe) -> [Constructor] -> Column -> [Clause] -> Fix DecisionTree
     mapPattern mapO ls d s c cs =
-      let newO = "size" : mapO
+      let newO = Size mapO
       -- if Empty is in the signature, test whether the map is empty or not.
       in if elem Empty s then
         Fix $ Function "hook_MAP_size_long" newO [mapO] "MINT.MInt 64" $
@@ -1105,15 +1129,15 @@ compilePattern firstCm =
                , getDefault = compilePattern' <$> d
                }
              Just k -> Fix $ MakePattern newO k $ 
-                         Fix $ Function "hook_MAP_lookup_null" ((pack (show k ++ "_val")) : mapO) [mapO, newO] "STRING.String" $
-                           Fix $ Function "hook_MAP_remove" ((pack (show k ++ "_rem")) : mapO) [mapO, newO] "MAP.Map" $
-                             Fix $ CheckNull ((pack (show k ++ "_val")) : mapO) $ L
+                         Fix $ Function "hook_MAP_lookup_null" (Value k mapO) [mapO, newO] "STRING.String" $
+                           Fix $ Function "hook_MAP_remove" (Rem k mapO) [mapO, newO] "MAP.Map" $
+                             Fix $ CheckNull (Value k mapO) $ L
                                { getSpecializations = map (second compilePattern') ls
                                , getDefault = compilePattern' <$> d
                                }
     setPattern :: Occurrence -> [(Text, (ClauseMatrix, Fringe))] -> Maybe (ClauseMatrix, Fringe) -> [Constructor] -> Column -> [Clause] -> Fix DecisionTree
     setPattern setO ls d s c cs =
-      let newO = "size" : setO
+      let newO = Size setO
       -- if Empty is in the signature, test whether the set is empty or not.
       in if elem Empty s then
         Fix $ Function "hook_SET_size_long" newO [setO] "MINT.MInt 64" $
@@ -1130,9 +1154,9 @@ compilePattern firstCm =
                , getDefault = compilePattern' <$> d
                }
              Just k -> Fix $ MakePattern newO k $
-                         Fix $ Function "hook_SET_in" ((pack (show k ++ "_val")) : setO) [newO, setO] "BOOL.Bool" $
-                           Fix $ Function "hook_SET_remove" ((pack (show k ++ "_rem")) : setO) [setO, newO] "SET.Set" $
-                             Fix $ SwitchLiteral ((pack (show k ++ "_val")) : setO) 1 $ L
+                         Fix $ Function "hook_SET_in" (Value k setO) [newO, setO] "BOOL.Bool" $
+                           Fix $ Function "hook_SET_remove" (Rem k setO) [setO, newO] "SET.Set" $
+                             Fix $ SwitchLiteral (Value k setO) 1 $ L
                                { getSpecializations = map (second compilePattern') ls
                                , getDefault = compilePattern' <$> d
                                }
