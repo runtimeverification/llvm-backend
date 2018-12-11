@@ -1,8 +1,21 @@
 #!/bin/bash -ex
 export PATH=$PATH:~/.cargo/bin
+
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    export PATH="/usr/local/opt/flex/bin:/usr/local/opt/llvm@6/bin:$PATH"
+    export LDFLAGS="-L/usr/local/opt/bison/lib -L/usr/local/opt/llvm@6/lib -L/usr/local/opt/flex/lib"
+    export CPPFLAGS="-I/usr/local/opt/llvm@6/include -I/usr/local/opt/flex/include"
+    export PATH="/usr/local/opt/bison/bin:$PATH"
+    export FLEX_EXECUTABLE="/usr/local/opt/flex/bin/flex"
+    export BISON_EXECUTABLE="/usr/local/opt/bison/bin/bison"
+    SUFFIX=""
+else
+    SUFFIX="-6.0"
+fi
+
 mkdir -p build
 cd build
-CC=clang-6.0 CXX=clang++-6.0 cmake .. -DCMAKE_BUILD_TYPE=Debug
+CC="clang$SUFFIX" CXX="clang++$SUFFIX" cmake .. -DCMAKE_BUILD_TYPE=Debug
 make -j`nproc`
 make run-unittests
 cd ../runtime/datastructures
