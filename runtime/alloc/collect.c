@@ -29,6 +29,12 @@ void map_foreach(void *, void(block**));
 void set_foreach(void *, void(block**));
 void list_foreach(void *, void(block**));
 
+static bool is_gc = false;
+
+bool during_gc() {
+  return is_gc;
+}
+
 static size_t get_size(uint64_t hdr, uint16_t layout) {
   if (!layout) {
     size_t size = (len_hdr(hdr)  + sizeof(block) + 7) & ~7;
@@ -186,6 +192,7 @@ static char* computeScanPtr(char* oldspace_start) {
 }
 
 void koreCollect(block** root) {
+  is_gc = true;
   MEM_LOG("Starting garbage collection\n");
   koreAllocSwap();
   char* oldspace_start = *old_alloc_ptr();
@@ -205,4 +212,5 @@ void koreCollect(block** root) {
     }
   }
   MEM_LOG("Finishing garbage collection\n");
+  is_gc = false;
 }

@@ -47,7 +47,6 @@ fi
   "$RUSTDIR"/libcompiler_builtins-*.rlib \
   "$RUSTDIR"/libpanic_abort-*.rlib \
   "$RUSTDIR"/liballoc_system-*.rlib \
-  "$LIBDIR"/rust/rustalloc.lds \
   "$LIBDIR"/llvm/*.ll \
   "$MAINFILES" \
   "$LIBDIR"/libconfigurationparser.a \
