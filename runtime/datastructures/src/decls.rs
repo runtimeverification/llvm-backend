@@ -14,9 +14,17 @@ pub struct KoreAllocator;
 unsafe impl GlobalAlloc for KoreAllocator {
   #[inline(always)]
   unsafe fn alloc(&self, _layout: Layout) -> *mut u8 {
-    koreAllocOld(_layout.size())
+    if during_gc() {
+      malloc(_layout.size())
+    } else {
+      koreAllocOld(_layout.size())
+    }
   }
-  unsafe fn dealloc(&self, _ptr: *mut u8, _layout: Layout) {}
+  unsafe fn dealloc(&self, _ptr: *mut u8, _layout: Layout) {
+    if during_gc() {
+      free(_ptr);
+    }
+  }
 }
 
 pub enum Block {}
@@ -102,6 +110,9 @@ extern "C" {
   pub fn hash_enter() -> bool;
   pub fn hash_exit();
   pub fn koreAllocOld(size: usize) -> *mut u8;
+  pub fn during_gc() -> bool;
+  pub fn malloc(size: usize) -> *mut u8;
+  pub fn free(ptr: *mut u8);
 }
 
 #[cfg(test)]
