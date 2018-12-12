@@ -59,11 +59,6 @@ else()
 endif()
 endmacro(kllvm_add_tool)
 
-install(
-  FILES rustalloc.lds rustalloc.alias
-  DESTINATION lib/kllvm/rust
-)
-
 FILE(GLOB LLVMFiles runtime/*.ll)
 
 install(
