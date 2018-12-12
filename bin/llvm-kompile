@@ -37,10 +37,10 @@ else
 fi
 "clang++$SUFFIX" -Wno-override-module "$modopt" \
   "$LIBDIR"/libarithmetic.a \
-  "$LIBDIR"/libordering.a \
   "$LIBDIR"/libstrings.a \
   "$LIBDIR"/rust/libdatastructures.rlib \
   "$LIBDIR"/rust/deps/*.rlib \
+  "$LIBDIR"/libordering.a \
   "$RUSTDIR"/libcore-*.rlib \
   "$RUSTDIR"/libstd-*.rlib \
   "$RUSTDIR"/liballoc-*.rlib \

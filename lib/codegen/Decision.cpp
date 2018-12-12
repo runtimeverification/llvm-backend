@@ -3,6 +3,7 @@
 
 #include "llvm/IR/Constants.h"
 #include "llvm/IR/Instructions.h" 
+#include "llvm/Support/raw_ostream.h"
 
 #include <iostream>
 
@@ -223,7 +224,11 @@ void makeEvalOrAnywhereFunction(KOREObjectSymbol *function, KOREDefinition *defi
   function->print(Out, 0, false);
   std::string name = "eval_" + Out.str();
   llvm::Constant *func = module->getOrInsertFunction(name, funcType);
-  llvm::Function *matchFunc = llvm::cast<llvm::Function>(func);
+  llvm::Function *matchFunc = llvm::dyn_cast<llvm::Function>(func);
+  if (!matchFunc) {
+    func->print(llvm::errs());
+    abort();
+  }
   matchFunc->setCallingConv(llvm::CallingConv::Fast);
   llvm::StringMap<llvm::Value *> subst;
   llvm::BasicBlock *block = llvm::BasicBlock::Create(module->getContext(), "entry", matchFunc);

@@ -391,16 +391,16 @@ llvm::Value *CreateTerm::createFunctionCall(std::string name, ValueType returnCa
   bool structType = false;
   switch (returnCat.cat) {
   case SortCategory::List:
-	sret = sizeof(list) >= SRET_MIN_SIZE;
-	structType = true;
+	structType = sret;
+	sret &= sizeof(list) >= SRET_MIN_SIZE;
 	break;
   case SortCategory::Map:
-	sret = sizeof(map) >= SRET_MIN_SIZE;
-	structType = true;
+	structType = sret;
+	sret &= sizeof(map) >= SRET_MIN_SIZE;
 	break;
   case SortCategory::Set:
-	sret = sizeof(set) >= SRET_MIN_SIZE;
-	structType = true;
+	structType = sret;
+	sret &= sizeof(set) >= SRET_MIN_SIZE;
     break;
   default:
     sret = false;
