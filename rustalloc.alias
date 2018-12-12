@@ -1,4 +1,0 @@
-___rdl_alloc ___rust_alloc 
-___rdl_alloc_zeroed ___rust_alloc_zeroed
-___rdl_dealloc ___rust_dealloc
-___rdl_realloc ___rust_realloc
