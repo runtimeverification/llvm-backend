@@ -2,15 +2,12 @@ extern crate im_rc;
 extern crate libc;
 
 use self::libc::{c_char, c_void, FILE};
-use decls::im_rc::hashmap::HashMap;
-use decls::im_rc::hashset::HashSet;
 use decls::im_rc::ordmap::OrdMap;
 use decls::im_rc::ordset::OrdSet;
 use decls::im_rc::vector::Vector;
 use std::alloc::{GlobalAlloc, Layout};
 use std::cell::UnsafeCell;
 use std::cmp::Ordering;
-use std::collections::BinaryHeap;
 use std::hash::{Hash, Hasher};
 
 pub struct KoreAllocator;
@@ -34,79 +31,6 @@ pub struct Int(
     pub i32,              // _mp_size
     pub *const mp_limb_t, // _mp_d
 );
-
-// This helper makes it simpler to switch between Ord/Hash in the hook.
-pub fn ord_map_compare<K, V>(a: &OrdMap<K, V>, b: &OrdMap<K, V>) -> Ordering
-where
-    K: Ord + Clone,
-    V: Ord + Clone,
-{
-    a.cmp(b)
-}
-
-pub fn hash_map_compare<K, V>(a: &HashMap<K, V>, b: &HashMap<K, V>) -> Ordering
-where
-    K: Ord + Hash + Clone,
-    V: Ord + Clone,
-{
-    let mut a_keys: BinaryHeap<_> = a.keys().collect();
-    let mut b_keys: BinaryHeap<_> = b.keys().collect();
-    while !(a_keys.is_empty() || b_keys.is_empty()) {
-        let (a_top, b_top) = (a_keys.pop(), b_keys.pop());
-        if a_top > b_top {
-            return Ordering::Greater;
-        }
-        if b_top > a_top {
-            return Ordering::Less;
-        }
-        let (a_top_elem, b_top_elem) = (a.get(a_top.unwrap()), b.get(b_top.unwrap()));
-        if a_top_elem > b_top_elem {
-            return Ordering::Greater;
-        }
-        if b_top_elem > a_top_elem {
-            return Ordering::Less;
-        }
-    }
-    if a_keys.is_empty() {
-        if b_keys.is_empty() {
-            return Ordering::Equal;
-        }
-        return Ordering::Less;
-    }
-    return Ordering::Greater;
-}
-
-// This helper makes it simpler to switch between Ord/Hash in the hook.
-pub fn ord_set_compare<K>(a: &OrdSet<K>, b: &OrdSet<K>) -> Ordering
-where
-    K: Ord + Clone,
-{
-    a.cmp(b)
-}
-
-pub fn hash_set_compare<K>(a: &HashSet<K>, b: &HashSet<K>) -> Ordering
-where
-    K: Ord + Hash + Clone,
-{
-    let mut a_vals: BinaryHeap<_> = a.iter().collect();
-    let mut b_vals: BinaryHeap<_> = b.iter().collect();
-    while !(a_vals.is_empty() || b_vals.is_empty()) {
-        let (a_top, b_top) = (a_vals.pop(), b_vals.pop());
-        if a_top > b_top {
-            return Ordering::Greater;
-        }
-        if b_top > a_top {
-            return Ordering::Less;
-        }
-    }
-    if a_vals.is_empty() {
-        if b_vals.is_empty() {
-            return Ordering::Equal;
-        }
-        return Ordering::Less;
-    }
-    return Ordering::Greater;
-}
 
 pub type K = *const Block;
 
@@ -134,7 +58,6 @@ impl PartialEq for KElem {
 impl PartialOrd for KElem {
     fn partial_cmp(&self, other: &KElem) -> Option<Ordering> {
         let ret: i64 = unsafe { hook_KEQUAL_cmp(*self.0.get(), *other.0.get()) };
-        println!("\n%%%%% RET {:?}\n", ret);
         if ret < 0 {
             Some(Ordering::Less)
         } else if ret == 0 {
@@ -208,6 +131,7 @@ pub mod testing {
     use std::collections::hash_map::DefaultHasher;
     use std::hash::{Hash, Hasher};
     use std::ptr;
+    use std::mem;
 
     #[link(name = "gmp")]
     extern "C" {
@@ -258,8 +182,8 @@ pub mod testing {
     // Dummy hook_KEQUAL_cmp for cargo test use.
     #[no_mangle]
     pub unsafe extern "C" fn hook_KEQUAL_cmp(k1: K, k2: K) -> i64 {
-        let kd1 = std::mem::transmute::<K, *const DummyBlock>(k1);
-        let kd2 = std::mem::transmute::<K, *const DummyBlock>(k2);
+        let kd1 = mem::transmute::<K, *const DummyBlock>(k1);
+        let kd2 = mem::transmute::<K, *const DummyBlock>(k2);
         if (*kd1).header < (*kd2).header {
             return -1;
         } else if (*kd1).header > (*kd2).header {

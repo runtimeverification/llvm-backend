@@ -2,7 +2,7 @@ extern crate libc;
 
 use self::libc::{c_char, c_void, fprintf, FILE};
 use super::decls::{
-    Int, KElem, List, Set, __gmpz_init_set_ui, move_int, ord_set_compare,
+    Int, KElem, List, Set, __gmpz_init_set_ui, move_int,
     printConfigurationInternal, K,
 };
 use std::cmp::Ordering;
@@ -30,10 +30,7 @@ pub unsafe extern "C" fn hook_SET_in(value: K, set: *const Set) -> bool {
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_SET_cmp(a: *const Set, b: *const Set) -> i64 {
-    match ord_set_compare(
-        std::mem::transmute::<*const Set, &Set>(a),
-        std::mem::transmute::<*const Set, &Set>(b),
-    ) {
+    match (*a).cmp(&*b) {
         Ordering::Less => -1,
         Ordering::Equal => 0,
         Ordering::Greater => 1,

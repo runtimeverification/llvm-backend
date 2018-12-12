@@ -2,8 +2,6 @@
 #include "kllvm/parser/KOREParserDriver.h"
 #include "runtime/alloc.h"
 
-#include <iostream>
-
 #include <gmp.h>
 
 #include "runtime/header.h"
@@ -27,7 +25,6 @@ static void *allocatePatternAsConfiguration(const KOREPattern *Pattern) {
   std::ostringstream Out;
   symbol->print(Out);
   uint32_t tag = getTagForSymbolName(Out.str().c_str());
-  std::cout << "TAG " << tag << ": " << getSymbolNameForTag(tag) << std::endl;
 
   if (isSymbolAFunction(tag)) {
     std::vector<void *> arguments;

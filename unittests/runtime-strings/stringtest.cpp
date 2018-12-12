@@ -203,10 +203,10 @@ BOOST_AUTO_TEST_CASE(cmp) {
   BOOST_CHECK_EQUAL(5,  hook_STRING_cmp(a,d));
   BOOST_CHECK_EQUAL(-3,  hook_STRING_cmp(b,a));
   BOOST_CHECK_EQUAL(0, hook_STRING_cmp(b,b));
-  BOOST_CHECK_EQUAL(-257,  hook_STRING_cmp(b,c));
+  BOOST_CHECK_EQUAL(-256,  hook_STRING_cmp(b,c));
   BOOST_CHECK_EQUAL(2,  hook_STRING_cmp(b,d));
   BOOST_CHECK_EQUAL(-3,  hook_STRING_cmp(c,a));
-  BOOST_CHECK_EQUAL(257,  hook_STRING_cmp(c,b));
+  BOOST_CHECK_EQUAL(256,  hook_STRING_cmp(c,b));
   BOOST_CHECK_EQUAL(0, hook_STRING_cmp(c,c));
   BOOST_CHECK_EQUAL(2,  hook_STRING_cmp(c,d));
   BOOST_CHECK_EQUAL(-5,  hook_STRING_cmp(d,a));

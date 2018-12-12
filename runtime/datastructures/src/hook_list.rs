@@ -26,8 +26,7 @@ pub unsafe extern "C" fn hook_LIST_unit() -> List {
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_LIST_cmp(a: *const List, b: *const List) -> i64 {
-  match std::mem::transmute::<*const List, &List>(a)
-      .cmp(std::mem::transmute::<*const List, &List>(b)) {
+  match (*a).cmp(&*b) {
     Ordering::Less => -1,
     Ordering::Equal => 0,
     Ordering::Greater => 1,

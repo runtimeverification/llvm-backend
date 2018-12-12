@@ -53,21 +53,6 @@ extern "C" {
     string *contents;
   } stringbuffer;
 
-  // llvm: map = type { i64, i8 *, i8 * }
-  //typedef struct map {
-  //  uint64_t a;
-  //  void *b;
-  //  void *c;
-  //} map;
-
-  // llvm: set = type { i8 *, i8 *, i64 }
-  // typedef struct set {
-  //  void *a;
-  //  void *b;
-  //  uint64_t c;
-  //} set;
-  
-
   // llvm: map = type { i64, i8 * }
   typedef struct map {
     uint64_t a;
@@ -86,17 +71,6 @@ extern "C" {
 	uint64_t b[7];
   } list;
   
-  // llvm: list = type { i64, i64, i8 *, i8 *, i8 *, i8 *, i8 * }
-  //typedef struct list {
-  // uint64_t a;
-  //  uint64_t b;
-  //  void *c;
-  //  void *d;
-  //  void *e;
-  //  void *f;
-  //  char *g;
-  //} list;
- 
   // This function is exported to be used by the interpreter 
   block *parseConfiguration(const char *filename);
   void printConfiguration(const char *filename, block *subject);
