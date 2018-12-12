@@ -124,69 +124,63 @@ appendTests :: TestTree
 appendTests = testGroup "Basic pattern compilation"
   [ testCase "Naive compilation of the append pattern" $
       compilePattern appendPattern @?=
-        switch [1] [ ("nil", leaf 1 [])
-               , ("cons", swap 2
-                           (switch [2] [ ("nil", leaf 2 [])
+        switch (Num 1 Base) [ ("nil", leaf 1 [])
+               , ("cons", (switch (Num 2 Base) [ ("nil", leaf 2 [])
                                    , ("cons", leaf 3 [])
                                    ] Nothing ))
                ] Nothing
   , testCase "Naive compilation of the append pattern with variable bindings" $
       compilePattern appendBindPattern @?=
-        switch [1] [ ("nil", leaf 1 [[2]])
-               , ("cons", swap 2
-                           (switch [2] [ ("nil", leaf 2 [[1]])
-                                   , ("cons", leaf 3 [[0, 2], [1, 2], [0, 1], [1, 1]])
+        switch (Num 1 Base) [ ("nil", leaf 1 [Num 2 Base])
+               , ("cons", (switch (Num 2 Base) [ ("nil", leaf 2 [Num 1 Base])
+                                   , ("cons", leaf 3 [(Num 0 $ Num 2 Base), (Num 1 $ Num 2 Base), (Num 0 $ Num 1 Base), (Num 1 $ Num 1 Base)])
                                    ] Nothing ))
                ] Nothing
   , testCase "Naive compilation of the append pattern with side condition" $
       compilePattern appendCondPattern @?=
-        switch [1] [ ("nil", leaf 1 [[2]])
-               , ("cons", swap 2
-                           (switch [2] [ ("nil", leaf 2 [[1]])
-                                   , ("cons", (function "side_condition_3" [0, 0] [[1, 2], [0, 1]] "BOOL.Bool" (switchLiteral [0, 0] 1 [("1", leaf 3 [[0, 2], [1, 2], [0, 1], [1, 1]]), ("0", failure)] Nothing)))
+        switch (Num 1 Base) [ ("nil", leaf 1 [Num 2 Base])
+               , ("cons", (switch (Num 2 Base) [ ("nil", leaf 2 [Num 1 Base])
+                                   , ("cons", (function "side_condition_3" (SC 3) [(Num 1 $ Num 2 Base), (Num 0 $ Num 1 Base)] "BOOL.Bool" (switchLiteral (SC 3) 1 [("1", leaf 3 [(Num 0 $ Num 2 Base), (Num 1 $ Num 2 Base), (Num 0 $ Num 1 Base), (Num 1 $ Num 1 Base)]), ("0", failure)] Nothing)))
                                    ] Nothing ))
                ] Nothing
   , testCase "Yaml serialization" $
       (serializeToYaml $ shareDt $ compilePattern $ appendBindPattern) @?= 
-        "&5\n" <>
+        "&4\n" <>
         "specializations:\n" <>
         "- - nil\n" <>
         "  - &0\n" <>
         "    action:\n" <>
         "    - 1\n" <>
-        "    - - - 2\n" <>
+        "    - - - '2'\n" <>
         "- - cons\n" <>
-        "  - &4\n" <>
-        "    swap:\n" <>
-        "    - 2\n" <>
-        "    - &3\n" <>
-        "      specializations:\n" <>
-        "      - - nil\n" <>
-        "        - &1\n" <>
-        "          action:\n" <>
-        "          - 2\n" <>
-        "          - - - 1\n" <>
-        "      - - cons\n" <>
-        "        - &2\n" <>
-        "          action:\n" <>
-        "          - 3\n" <>
-        "          - - - 0\n" <>
-        "              - 2\n" <>
-        "            - - 1\n" <>
-        "              - 2\n" <>
-        "            - - 0\n" <>
-        "              - 1\n" <>
-        "            - - 1\n" <>
-        "              - 1\n" <>
-        "      default: null\n" <>
-        "      occurrence:\n" <>
-        "      - 2\n" <>
+        "  - &3\n" <>
+        "    specializations:\n" <>
+        "    - - nil\n" <>
+        "      - &1\n" <>
+        "        action:\n" <>
+        "        - 2\n" <>
+        "        - - - '1'\n" <>
+        "    - - cons\n" <>
+        "      - &2\n" <>
+        "        action:\n" <>
+        "        - 3\n" <>
+        "        - - - '0'\n" <>
+        "            - '2'\n" <>
+        "          - - '1'\n" <>
+        "            - '2'\n" <>
+        "          - - '0'\n" <>
+        "            - '1'\n" <>
+        "          - - '1'\n" <>
+        "            - '1'\n" <>
+        "    default: null\n" <>
+        "    occurrence:\n" <>
+        "    - '2'\n" <>
         "default: null\n" <>
         "occurrence:\n" <>
-        "- 1\n"
+        "- '1'\n"
   , testCase "Naive compilation of integer literal patterns" $
       compilePattern matchHeadPattern @?=
-        switch [1] [ ("cons", (switchLiteral [0, 1] 32 [ ("0", leaf 1 [])
+        switch (Num 1 Base) [ ("cons", (switchLiteral (Num 0 $ Num 1 Base) 32 [ ("0", leaf 1 [])
                                      , ("1", leaf 2 [])
                                      , ("-1", leaf 3 [])
                                      , ("1000000", leaf 4 [])
