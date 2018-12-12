@@ -4,6 +4,8 @@
 #include "llvm/IR/Constants.h"
 #include "llvm/IR/Instructions.h" 
 
+#include <iostream>
+
 namespace kllvm {
 
 static std::string BLOCK_STRUCT = "block";
@@ -18,7 +20,44 @@ void Decision::operator()(DecisionNode *entry, llvm::StringMap<llvm::Value *> su
   }
 }
 
+std::set<std::string> DecisionNode::collectVars() {
+  std::set<std::string> defs, vars;
+  collectDefs(defs);
+  collectUses(vars);
+  for (std::string var : defs) {
+    vars.erase(var);
+  }
+  return vars;
+}
+
+bool DecisionNode::beginNode(Decision *d, std::string name, llvm::StringMap<llvm::Value *> &substitution) {
+  if (isCompleted()) {
+    llvm::BranchInst::Create(cachedCode, d->CurrentBlock);
+    for (std::string var : collectVars()) {
+      phis.lookup(var)->addIncoming(substitution[var], d->CurrentBlock);
+      substitution[var] = phis.lookup(var);
+    }
+    return true;
+  }
+  auto Block = llvm::BasicBlock::Create(d->Ctx,
+      name,
+      d->CurrentBlock->getParent());
+  cachedCode = Block;
+  llvm::BranchInst::Create(Block, d->CurrentBlock);
+  for (std::string var : collectVars()) {
+    auto Phi = llvm::PHINode::Create(substitution[var]->getType(), 1, "phi" + var, Block);
+    Phi->addIncoming(substitution[var], d->CurrentBlock);
+    phis[var] = Phi;
+    substitution[var] = Phi;
+  }
+  d->CurrentBlock = Block;
+  return false;
+}
+
 void SwitchNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution) {
+  if (beginNode(d, "switch" + name, substitution)) {
+    return;
+  }
   llvm::Value *val = substitution.lookup(name);
   llvm::BasicBlock *_default = d->StuckBlock;
   const DecisionCase *defaultCase = nullptr;
@@ -26,8 +65,9 @@ void SwitchNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitutio
   int idx = 0;
   bool isInt = false;
   for (auto &_case : cases) {
+    auto child = _case.getChild();
     llvm::BasicBlock *CaseBlock;
-    if (_case.getChild() == FailNode::get()) {
+    if (child == FailNode::get()) {
       CaseBlock = d->StuckBlock;
     } else {
       CaseBlock = llvm::BasicBlock::Create(d->Ctx, 
@@ -73,7 +113,7 @@ void SwitchNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitutio
     if (!isInt) {
       int offset = 0;
       llvm::StructType *BlockType = getBlockType(d->Module, d->Definition, _case.getConstructor());
-      llvm::BitCastInst *Cast = new llvm::BitCastInst(val, llvm::PointerType::getUnqual(BlockType), "", d->CurrentBlock);
+      llvm::BitCastInst *Cast = new llvm::BitCastInst(substitution.lookup(name), llvm::PointerType::getUnqual(BlockType), "", d->CurrentBlock);
       for (std::string binding : _case.getBindings()) {
         llvm::Value *ChildPtr = llvm::GetElementPtrInst::CreateInBounds(BlockType, Cast, {llvm::ConstantInt::get(llvm::Type::getInt64Ty(d->Ctx), 0), llvm::ConstantInt::get(llvm::Type::getInt32Ty(d->Ctx), offset+2)}, "", d->CurrentBlock);
         switch (dynamic_cast<KOREObjectCompositeSort *>(_case.getConstructor()->getArguments()[offset++])->getCategory(d->Definition).cat) {
@@ -97,25 +137,25 @@ void SwitchNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitutio
       defaultCase->getChild()->codegen(d, substitution);
     }
   }
-}
-
-void MakeLiteralNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution) {
-  llvm::StringMap<llvm::Value *> subst;
-  CreateTerm creator(subst, d->Definition, d->CurrentBlock, d->Module);
-  llvm::Value *literal = creator.createToken(cat, this->literal);
-  substitution[name] = literal;
-  child->codegen(d, substitution);
+  setCompleted();
 }
 
 void MakePatternNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution) {
-  CreateTerm creator(substitution, d->Definition, d->CurrentBlock, d->Module);
-  llvm::Value *val = creator(pattern);
+  if (beginNode(d, "pattern" + name, substitution)) {
+    return;
+  }
+  CreateTerm creator(substitution, d->Definition, d->CurrentBlock, d->Module, false);
+  llvm::Value *val = creator(pattern).first;
   d->CurrentBlock = creator.getCurrentBlock();
   substitution[name] = val;
   child->codegen(d, substitution);
+  setCompleted();
 }
 
 void FunctionNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution) {
+  if (beginNode(d, "function" + name, substitution)) {
+    return;
+  }
   std::vector<llvm::Value *> args;
   std::vector<llvm::Type *> types;
   for (auto arg : bindings) {
@@ -128,14 +168,19 @@ void FunctionNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitut
     args.push_back(val);
     types.push_back(val->getType());
   }
-  CreateTerm creator(substitution, d->Definition, d->CurrentBlock, d->Module);
+  CreateTerm creator(substitution, d->Definition, d->CurrentBlock, d->Module, false);
   auto Call = creator.createFunctionCall(function, cat, args, function.substr(0, 5) == "hook_", false);
   Call->setName(name);
   substitution[name] = Call;
   child->codegen(d, substitution);
+  setCompleted();
 }
 
+
 void LeafNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution) {
+  if (beginNode(d, name, substitution)) {
+    return;
+  }
   std::vector<llvm::Value *> args;
   std::vector<llvm::Type *> types;
   for (auto arg : bindings) {
@@ -146,13 +191,14 @@ void LeafNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution)
   auto Call = llvm::CallInst::Create(d->Module->getOrInsertFunction(name, llvm::FunctionType::get(getValueType(d->Cat, d->Module), types, false)), args, "", d->CurrentBlock);
   Call->setCallingConv(llvm::CallingConv::Fast);
   llvm::ReturnInst::Create(d->Ctx, Call, d->CurrentBlock);
+  setCompleted();
 }
 
 llvm::Value *Decision::getTag(llvm::Value *val) {
   return llvm::CallInst::Create(Module->getOrInsertFunction("getTag", llvm::Type::getInt32Ty(Ctx), getValueType({SortCategory::Symbol, 0}, Module)), val, "tag", CurrentBlock);
 }
 
-void makeEvalFunction(KOREObjectSymbol *function, KOREDefinition *definition, llvm::Module *module, DecisionNode *dt) {
+void makeEvalOrAnywhereFunction(KOREObjectSymbol *function, KOREDefinition *definition, llvm::Module *module, DecisionNode *dt, void (*addStuck)(llvm::BasicBlock*, llvm::Module*, KOREObjectSymbol *, llvm::StringMap<llvm::Value *>&, KOREDefinition *)) {
   auto returnSort = dynamic_cast<KOREObjectCompositeSort *>(function->getSort())->getCategory(definition);
   auto returnType = getValueType(returnSort, module);
   std::vector<llvm::Type *> args;
@@ -183,14 +229,42 @@ void makeEvalFunction(KOREObjectSymbol *function, KOREDefinition *definition, ll
   llvm::BasicBlock *block = llvm::BasicBlock::Create(module->getContext(), "entry", matchFunc);
   int i = 0;
   for (auto val = matchFunc->arg_begin(); val != matchFunc->arg_end(); ++val, ++i) {
-    val->setName("subject" + std::to_string(i));
+    val->setName("_" + std::to_string(i+1));
     subst.insert({val->getName(), val});
   }
   llvm::BasicBlock *stuck = llvm::BasicBlock::Create(module->getContext(), "stuck", matchFunc);
-  addAbort(stuck, module);
+  addStuck(stuck, module, function, subst, definition);
 
   Decision codegen(definition, block, stuck, module, returnSort);
   codegen(dt, subst);
+}
+
+void abortWhenStuck(llvm::BasicBlock *stuck, llvm::Module *module, KOREObjectSymbol *, llvm::StringMap<llvm::Value *> &, KOREDefinition *) {
+  addAbort(stuck, module);
+}
+
+void makeEvalFunction(KOREObjectSymbol *function, KOREDefinition *definition, llvm::Module *module, DecisionNode *dt) {
+  makeEvalOrAnywhereFunction(function, definition, module, dt, abortWhenStuck);
+}
+
+void addOwise(llvm::BasicBlock *stuck, llvm::Module *module, KOREObjectSymbol *symbol, llvm::StringMap<llvm::Value *> &subst, KOREDefinition *d) {
+  CreateTerm creator = CreateTerm(subst, d, stuck, module, true);
+  KOREObjectCompositePattern *pat = KOREObjectCompositePattern::Create(symbol);
+  for (int i = 0; i < symbol->getArguments().size(); i++) {
+     auto var = KOREObjectVariablePattern::Create("_" + std::to_string(i+1), symbol->getArguments()[i]);
+     pat->addArgument(var);
+  }
+  llvm::Value *retval = creator(pat).first;
+  auto returnSort = dynamic_cast<KOREObjectCompositeSort *>(symbol->getSort())->getCategory(d);
+  auto returnType = getValueType(returnSort, module);
+  if (retval->getType() == llvm::PointerType::getUnqual(returnType)) {
+    retval = new llvm::LoadInst(retval, "", creator.getCurrentBlock());
+  }
+  llvm::ReturnInst::Create(module->getContext(), retval, creator.getCurrentBlock());
+}
+
+void makeAnywhereFunction(KOREObjectSymbol *function, KOREDefinition *definition, llvm::Module *module, DecisionNode *dt) {
+  makeEvalOrAnywhereFunction(function, definition, module, dt, addOwise);
 }
 
 void makeStepFunction(KOREDefinition *definition, llvm::Module *module, DecisionNode *dt) {
@@ -201,15 +275,11 @@ void makeStepFunction(KOREDefinition *definition, llvm::Module *module, Decision
   llvm::Function *matchFunc = llvm::cast<llvm::Function>(func);
   llvm::StringMap<llvm::Value *> subst;
   auto val = matchFunc->arg_begin();
-  val->setName("subject0");
+  val->setName("_1");
   subst.insert({val->getName(), val});
   llvm::BasicBlock *block = llvm::BasicBlock::Create(module->getContext(), "entry", matchFunc);
   llvm::BasicBlock *stuck = llvm::BasicBlock::Create(module->getContext(), "stuck", matchFunc);
-  llvm::FunctionType *FinishType = llvm::FunctionType::get(llvm::Type::getVoidTy(module->getContext()), {blockType}, false);
-  llvm::Function *FinishFunc = llvm::dyn_cast<llvm::Function>(module->getOrInsertFunction("finish_rewriting", FinishType));
-  FinishFunc->addFnAttr(llvm::Attribute::NoReturn);
-  llvm::CallInst::Create(FinishFunc, {val}, "", stuck);
-  new llvm::UnreachableInst(module->getContext(), stuck);
+  llvm::ReturnInst::Create(module->getContext(), llvm::ConstantPointerNull::get(llvm::dyn_cast<llvm::PointerType>(blockType)), stuck);
 
   Decision codegen(definition, block, stuck, module, {SortCategory::Symbol, 0});
   codegen(dt, subst);

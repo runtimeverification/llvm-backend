@@ -174,6 +174,28 @@ pub unsafe extern "C" fn hook_LIST_updateAll(l1: *const List, index: *const Int,
 }
 
 #[no_mangle]
+pub unsafe extern "C" fn hook_LIST_fill(l: *const List, index: *const Int, len: *const Int, val: K) -> List {
+  let (status, index_long) = get_long(index);
+  if !status {
+    panic!("Index out of range")
+  }
+  let (status, len_long) = get_long(len);
+  if !status {
+    panic!("Index out of range")
+  }
+  if index_long != 0 && len_long != 0 {
+    if index_long + len_long - 1 >= (*l).len() {
+      panic!("Index out of range")
+    }
+  }
+  let mut tmp = (*l).clone();
+  for i in index_long..index_long+len_long {
+    tmp.set(i, KElem::new(val));
+  }
+  tmp
+}
+
+#[no_mangle]
 pub unsafe extern "C" fn hook_LIST_eq(l1: *const List, l2: *const List) -> bool {
   *l1 == *l2
 }

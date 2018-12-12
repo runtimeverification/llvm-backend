@@ -3,6 +3,7 @@
 
 #include <gmp.h>
 #include <iomanip>
+#include <iostream>
 
 #include "llvm/IRReader/IRReader.h"
 #include "llvm/IR/BasicBlock.h"
@@ -258,13 +259,13 @@ llvm::Value *CreateTerm::createHook(KOREObjectCompositePattern *hookAtt, KOREObj
   std::string name = strPattern->getContents();
   if (name == "BOOL.and" || name == "BOOL.andThen") {
     assert(pattern->getArguments().size() == 2);
-    llvm::Value *firstArg = (*this)(pattern->getArguments()[0]);
+    llvm::Value *firstArg = (*this)(pattern->getArguments()[0]).first;
     llvm::BasicBlock *CondBlock = CurrentBlock;
     llvm::BasicBlock *TrueBlock = llvm::BasicBlock::Create(Ctx, "then", CurrentBlock->getParent());
     llvm::BasicBlock *MergeBlock = llvm::BasicBlock::Create(Ctx, "hook_BOOL_and", CurrentBlock->getParent());
     llvm::BranchInst::Create(TrueBlock, MergeBlock, firstArg, CurrentBlock);
     CurrentBlock = TrueBlock;
-    llvm::Value *secondArg = (*this)(pattern->getArguments()[1]);
+    llvm::Value *secondArg = (*this)(pattern->getArguments()[1]).first;
     llvm::BranchInst::Create(MergeBlock, CurrentBlock);
     llvm::PHINode *Phi = llvm::PHINode::Create(llvm::Type::getInt1Ty(Ctx), 2, "phi", MergeBlock);
     Phi->addIncoming(secondArg, CurrentBlock);
@@ -273,13 +274,13 @@ llvm::Value *CreateTerm::createHook(KOREObjectCompositePattern *hookAtt, KOREObj
     return Phi;
   } else if (name == "BOOL.or" || name == "BOOL.orElse") {
     assert(pattern->getArguments().size() == 2);
-    llvm::Value *firstArg = (*this)(pattern->getArguments()[0]);
+    llvm::Value *firstArg = (*this)(pattern->getArguments()[0]).first;
     llvm::BasicBlock *CondBlock = CurrentBlock;
     llvm::BasicBlock *FalseBlock = llvm::BasicBlock::Create(Ctx, "else", CurrentBlock->getParent());
     llvm::BasicBlock *MergeBlock = llvm::BasicBlock::Create(Ctx, "hook_BOOL_or", CurrentBlock->getParent());
     llvm::BranchInst::Create(MergeBlock, FalseBlock, firstArg, CurrentBlock);
     CurrentBlock = FalseBlock;
-    llvm::Value *secondArg = (*this)(pattern->getArguments()[1]);
+    llvm::Value *secondArg = (*this)(pattern->getArguments()[1]).first;
     llvm::BranchInst::Create(MergeBlock, CurrentBlock);
     llvm::PHINode *Phi = llvm::PHINode::Create(llvm::Type::getInt1Ty(Ctx), 2, "phi", MergeBlock);
     Phi->addIncoming(secondArg, CurrentBlock);
@@ -288,18 +289,18 @@ llvm::Value *CreateTerm::createHook(KOREObjectCompositePattern *hookAtt, KOREObj
     return Phi;
   } else if (name == "BOOL.not") {
     assert(pattern->getArguments().size() == 1);
-    llvm::Value *arg = (*this)(pattern->getArguments()[0]);
+    llvm::Value *arg = (*this)(pattern->getArguments()[0]).first;
     llvm::BinaryOperator *Not = llvm::BinaryOperator::Create(llvm::Instruction::Xor, arg, llvm::ConstantInt::get(llvm::Type::getInt1Ty(Ctx), 1), "hook_BOOL_not", CurrentBlock);
     return Not;
   } else if (name == "BOOL.implies") {
     assert(pattern->getArguments().size() == 2);
-    llvm::Value *firstArg = (*this)(pattern->getArguments()[0]);
+    llvm::Value *firstArg = (*this)(pattern->getArguments()[0]).first;
     llvm::BasicBlock *CondBlock = CurrentBlock;
     llvm::BasicBlock *TrueBlock = llvm::BasicBlock::Create(Ctx, "then", CurrentBlock->getParent());
     llvm::BasicBlock *MergeBlock = llvm::BasicBlock::Create(Ctx, "hook_BOOL_implies", CurrentBlock->getParent());
     llvm::BranchInst::Create(TrueBlock, MergeBlock, firstArg, CurrentBlock);
     CurrentBlock = TrueBlock;
-    llvm::Value *secondArg = (*this)(pattern->getArguments()[1]);
+    llvm::Value *secondArg = (*this)(pattern->getArguments()[1]).first;
     llvm::BranchInst::Create(MergeBlock, CurrentBlock);
     llvm::PHINode *Phi = llvm::PHINode::Create(llvm::Type::getInt1Ty(Ctx), 2, "phi", MergeBlock);
     Phi->addIncoming(secondArg, CurrentBlock);
@@ -308,30 +309,30 @@ llvm::Value *CreateTerm::createHook(KOREObjectCompositePattern *hookAtt, KOREObj
     return Phi;
   } else if (name == "BOOL.ne" || name == "BOOL.xor") {
     assert(pattern->getArguments().size() == 2);
-    llvm::Value *firstArg = (*this)(pattern->getArguments()[0]);
-    llvm::Value *secondArg = (*this)(pattern->getArguments()[1]);
+    llvm::Value *firstArg = (*this)(pattern->getArguments()[0]).first;
+    llvm::Value *secondArg = (*this)(pattern->getArguments()[1]).first;
     llvm::BinaryOperator *Xor = llvm::BinaryOperator::Create(llvm::Instruction::Xor, firstArg, secondArg, "hook_BOOL_ne", CurrentBlock);
     return Xor;
   } else if (name == "BOOL.eq") {
     assert(pattern->getArguments().size() == 2);
-    llvm::Value *firstArg = (*this)(pattern->getArguments()[0]);
-    llvm::Value *secondArg = (*this)(pattern->getArguments()[1]);
+    llvm::Value *firstArg = (*this)(pattern->getArguments()[0]).first;
+    llvm::Value *secondArg = (*this)(pattern->getArguments()[1]).first;
     llvm::ICmpInst *Eq = new llvm::ICmpInst(*CurrentBlock, llvm::CmpInst::ICMP_EQ, firstArg, secondArg, "hook_BOOL_eq");
     return Eq;
   } else if (name == "KEQUAL.ite") {
     assert(pattern->getArguments().size() == 3);
-    llvm::Value *cond = (*this)(pattern->getArguments()[0]);
+    llvm::Value *cond = (*this)(pattern->getArguments()[0]).first;
     llvm::BasicBlock *TrueBlock = llvm::BasicBlock::Create(Ctx, "then", CurrentBlock->getParent());
     llvm::BasicBlock *FalseBlock = llvm::BasicBlock::Create(Ctx, "else", CurrentBlock->getParent());
     llvm::BasicBlock *MergeBlock = llvm::BasicBlock::Create(Ctx, "hook_KEQUAL_ite", CurrentBlock->getParent());
     llvm::BranchInst::Create(TrueBlock, FalseBlock, cond, CurrentBlock);
     CurrentBlock = TrueBlock;
-    llvm::Value *trueArg = (*this)(pattern->getArguments()[1]);
+    llvm::Value *trueArg = (*this)(pattern->getArguments()[1]).first;
     llvm::BranchInst::Create(MergeBlock, CurrentBlock);
     llvm::PHINode *Phi = llvm::PHINode::Create(trueArg->getType(), 2, "phi", MergeBlock);
     Phi->addIncoming(trueArg, CurrentBlock);
     CurrentBlock = FalseBlock;
-    llvm::Value *falseArg = (*this)(pattern->getArguments()[2]);
+    llvm::Value *falseArg = (*this)(pattern->getArguments()[2]).first;
     llvm::BranchInst::Create(MergeBlock, CurrentBlock);
     Phi->addIncoming(falseArg, CurrentBlock);
     CurrentBlock = MergeBlock;
@@ -342,8 +343,10 @@ llvm::Value *CreateTerm::createHook(KOREObjectCompositePattern *hookAtt, KOREObj
   } else {
     std::string domain = name.substr(0, name.find('.'));
     if (domain == "ARRAY") {
-      // array and list are backed by the same type in llvm
-      domain = "LIST";
+      // array is not really hooked in llvm, it's implemented in K
+      std::ostringstream Out;
+      pattern->getConstructor()->print(Out, 0, false);
+      return createFunctionCall("eval_" + Out.str(), pattern, false, true);
     }
     std::string hookName = "hook_" + domain + "_" + name.substr(name.find('.') + 1);
     return createFunctionCall(hookName, pattern, true, false);
@@ -360,7 +363,7 @@ llvm::Value *CreateTerm::createFunctionCall(std::string name, KOREObjectComposit
   int i = 0;
   for (auto sort : pattern->getConstructor()->getArguments()) {
     auto concreteSort = dynamic_cast<KOREObjectCompositeSort *>(sort);
-    llvm::Value *arg = (*this)(pattern->getArguments()[i++]);
+    llvm::Value *arg = (*this)(pattern->getArguments()[i++]).first;
     switch(concreteSort->getCategory(Definition).cat) {
     case SortCategory::Map:
     case SortCategory::List:
@@ -456,7 +459,7 @@ llvm::Value *CreateTerm::notInjectionCase(KOREObjectCompositePattern *constructo
     if (idx == 2 && val != nullptr) {
       ChildValue = val;
     } else {
-      ChildValue = (*this)(child);
+      ChildValue = (*this)(child).first;
     }
     llvm::Value *ChildPtr = llvm::GetElementPtrInst::CreateInBounds(BlockType, Block, {llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0), llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), idx++)}, "", CurrentBlock);
     if (ChildValue->getType() == ChildPtr->getType()) {
@@ -467,35 +470,41 @@ llvm::Value *CreateTerm::notInjectionCase(KOREObjectCompositePattern *constructo
   return new llvm::BitCastInst(Block, llvm::PointerType::getUnqual(Module->getTypeByName(BLOCK_STRUCT)), "", CurrentBlock);
 }
 
-llvm::Value *CreateTerm::operator()(KOREPattern *pattern) {
+// returns a value and a boolean indicating whether that value could be an injection
+std::pair<llvm::Value *, bool> CreateTerm::operator()(KOREPattern *pattern) {
   if (auto variable = dynamic_cast<KOREObjectVariablePattern *>(pattern)) {
-    return Substitution.lookup(variable->getName());
+    auto val = Substitution.lookup(variable->getName());
+    if (!val) {
+      std::cerr << variable->getName() << std::endl;
+      abort();
+    }
+    return std::make_pair(val, true);
   } else if (auto constructor = dynamic_cast<KOREObjectCompositePattern *>(pattern)) {
     const KOREObjectSymbol *symbol = constructor->getConstructor();
     assert(symbol->isConcrete() && "not supported yet: sort variables");
     if (symbol->getName() == "\\dv") {
       auto sort = dynamic_cast<KOREObjectCompositeSort *>(symbol->getFormalArguments()[0]);
       auto strPattern = dynamic_cast<KOREMetaStringPattern *>(constructor->getArguments()[0]);
-      return createToken(sort->getCategory(Definition), strPattern->getContents());
+      return std::make_pair(createToken(sort->getCategory(Definition), strPattern->getContents()), false);
     }
     KOREObjectSymbolDeclaration *symbolDecl = Definition->getSymbolDeclarations().lookup(symbol->getName());
-    if (symbolDecl->getAttributes().count("function")) {
+    if (symbolDecl->getAttributes().count("function") || (symbolDecl->getAttributes().count("anywhere") && !isAnywhereOwise)) {
       if (symbolDecl->getAttributes().count("hook")) {
-        return createHook(symbolDecl->getAttributes().lookup("hook"), constructor);
+        return std::make_pair(createHook(symbolDecl->getAttributes().lookup("hook"), constructor), true);
       } else {
         std::ostringstream Out;
         symbol->print(Out, 0, false);
-        return createFunctionCall("eval_" + Out.str(), constructor, false, true);
+        return std::make_pair(createFunctionCall("eval_" + Out.str(), constructor, false, true), true);
       }
     } else if (symbol->getArguments().empty()) {
       llvm::StructType *BlockType = Module->getTypeByName(BLOCK_STRUCT);
       llvm::IntToPtrInst *Cast = new llvm::IntToPtrInst(llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), (((uint64_t)symbol->getTag()) << 32) | 1), llvm::PointerType::getUnqual(BlockType), "", CurrentBlock);
-      return Cast;
+      return std::make_pair(Cast,false);
     } else if (symbolDecl->getAttributes().count("sortInjection")
         && dynamic_cast<KOREObjectCompositeSort *>(symbol->getArguments()[0])->getCategory(Definition).cat == SortCategory::Symbol) {
-      llvm::Value *val = (*this)(constructor->getArguments()[0]);
-      if (llvm::isa<llvm::Argument>(val) || llvm::isa<llvm::CallInst>(val)) {
-        llvm::Value *Tag = llvm::CallInst::Create(Module->getOrInsertFunction("getTag", llvm::Type::getInt32Ty(Ctx), getValueType({SortCategory::Symbol, 0}, Module)), val, "tag", CurrentBlock);
+      std::pair<llvm::Value *, bool> val = (*this)(constructor->getArguments()[0]);
+      if (val.second) {
+        llvm::Value *Tag = llvm::CallInst::Create(Module->getOrInsertFunction("getTag", llvm::Type::getInt32Ty(Ctx), getValueType({SortCategory::Symbol, 0}, Module)), val.first, "tag", CurrentBlock);
         auto inj = Definition->getInjSymbol();
         auto NotStringBlock = llvm::BasicBlock::Create(Ctx, "notString", CurrentBlock->getParent());
         auto GeBlock = llvm::BasicBlock::Create(Ctx, "geFirst", CurrentBlock->getParent());
@@ -516,19 +525,19 @@ llvm::Value *CreateTerm::operator()(KOREPattern *pattern) {
         llvm::BranchInst::Create(TrueBlock, FalseBlock, cmp, CurrentBlock);
    
         CurrentBlock = FalseBlock;
-        auto Cast = notInjectionCase(constructor, val);
+        auto Cast = notInjectionCase(constructor, val.first);
         llvm::BranchInst::Create(TrueBlock, CurrentBlock);
   
         CurrentBlock = TrueBlock;
         llvm::PHINode *Phi = llvm::PHINode::Create(Cast->getType(), 2, "phi", CurrentBlock);
         Phi->addIncoming(Cast, FalseBlock);
-        Phi->addIncoming(val, GeBlock);
-        return Phi;
+        Phi->addIncoming(val.first, GeBlock);
+        return std::make_pair(Phi, true);
       } else {
-        return notInjectionCase(constructor, val);
+        return std::make_pair(notInjectionCase(constructor, val.first), true);
       }
     } else {
-     return notInjectionCase(constructor, nullptr);
+     return std::make_pair(notInjectionCase(constructor, nullptr), false);
     }
   } else {
     assert(false && "not supported yet: meta level");
@@ -586,8 +595,8 @@ bool makeFunction(std::string name, KOREPattern *pattern, KOREDefinition *defini
     for (auto val = applyRule->arg_begin(); val != applyRule->arg_end(); ++val, ++i) {
       subst.insert({paramNames[i], val});
     }
-    CreateTerm creator = CreateTerm(subst, definition, block, Module);
-    llvm::Value *retval = creator(pattern);
+    CreateTerm creator = CreateTerm(subst, definition, block, Module, false);
+    llvm::Value *retval = creator(pattern).first;
     if (retval->getType() == llvm::PointerType::getUnqual(funcType->getReturnType())) {
       retval = new llvm::LoadInst(retval, "", creator.getCurrentBlock());
     }

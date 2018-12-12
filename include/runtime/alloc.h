@@ -23,8 +23,13 @@ void koreAllocSwap(void);
 // resizes the last allocation into the young generation
 void* koreResizeLastAlloc(void* oldptr, size_t newrequest, size_t oldrequest);
 
+void* koreReallocOld(void*, size_t, size_t);
+
+void koreFree(void*, size_t);
+
 typedef struct {
   char* next_block;
+  char* next_superblock;
   char semispace;
 } memory_block_header;
 

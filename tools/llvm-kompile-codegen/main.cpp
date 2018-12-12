@@ -39,15 +39,20 @@ int main (int argc, char **argv) {
 
   emitConfigParserFunctions(definition, mod.get());
 
-  auto dt = parseYamlDecisionTree(argv[2], 1, definition->getAllSymbols(), definition->getHookedSorts());
+  auto dt = parseYamlDecisionTree(argv[2], definition->getAllSymbols(), definition->getHookedSorts());
   makeStepFunction(definition, mod.get(), dt);
 
   for (auto &entry : definition->getSymbolDeclarations()) {
     auto decl = entry.second;
-    if (decl->getAttributes().count("function") && !decl->isHooked()) {
-      std::string filename = argv[3] + std::string("/") + decl->getSymbol()->getName() + ".yaml";
-      auto funcDt = parseYamlDecisionTree(filename, decl->getSymbol()->getArguments().size(), definition->getAllSymbols(), definition->getHookedSorts());
+    std::string filename = argv[3] + std::string("/") + decl->getSymbol()->getName() + ".yaml";
+    if ((decl->getAttributes().count("function") && !decl->isHooked())) {
+      auto funcDt = parseYamlDecisionTree(filename, definition->getAllSymbols(), definition->getHookedSorts());
       makeEvalFunction(decl->getSymbol(), definition, mod.get(), funcDt);
+    } else if (decl->isAnywhere()) {
+      auto funcDt = parseYamlDecisionTree(filename, definition->getAllSymbols(), definition->getHookedSorts());
+      std::ostringstream Out;
+      decl->getSymbol()->print(Out);
+      makeAnywhereFunction(definition->getAllSymbols().lookup(Out.str()), definition, mod.get(), funcDt);
     }
   }
 

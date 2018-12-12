@@ -539,6 +539,8 @@ public:
 
   bool isHooked() const { return _isHooked; }
 
+  bool isAnywhere();
+
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
 
 private:

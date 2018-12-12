@@ -1,17 +1,41 @@
 #!/bin/bash
+set -e
+
+if [ $# -lt 3 ]; then
+  echo "Usage: $0 <definition.kore> <MODULE-NAME> [main|library] <clang flags>"
+  echo '"main" means that a main function will be generated that matches the signature "interpreter <input.kore> <depth> <output.kore>"'
+  echo '"library" means that no main function is generated and must be passed via <clang flags>'
+  exit 1
+fi
 dt_dir="$(mktemp -d)"
 mod="$(mktemp tmp.XXXXXXXXXX.ll)"
 modopt="$(mktemp tmp.XXXXXXXXXX.bc)"
 trap "rm -rf $dt_dir $mod $modopt" INT TERM EXIT
 definition="$1"
 moduleName="$2"
-shift; shift
+main="$3"
+shift; shift; shift
+LIBDIR="$(dirname "$0")"/../lib/kllvm/
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    SUFFIX=""
+    RUSTDIR=`rustc --print sysroot`/lib/rustlib/x86_64-apple-darwin/lib/
+    RUSTALIAS="-Wl,-alias_list $LIBDIR/rust/rustalloc.alias"
+    LLVMLIB="-L/usr/local/opt/llvm@6/lib"
+else
+    SUFFIX="-6.0"
+    RUSTDIR=`rustc --print sysroot`/lib/rustlib/x86_64-unknown-linux-gnu/lib/
+    RUSTALIAS="$LIBDIR/rust/libdatastructures.rlib"
+    LLVMLIB="-L/usr/lib/llvm-6.0/lib"
+fi
 "$(dirname "$0")"/llvm-kompile-matching "$definition" "$moduleName" "$dt_dir"
 "$(dirname "$0")"/llvm-kompile-codegen "$definition" "$dt_dir"/dt.yaml "$dt_dir" > "$mod"
-opt-6.0 -tailcallelim -tailcallopt "$mod" -o "$modopt"
-RUSTDIR=`rustc --print sysroot`/lib/rustlib/x86_64-unknown-linux-gnu/lib/
-LIBDIR="$(dirname "$0")"/../lib/kllvm/
-clang++-6.0 -Wno-override-module "$modopt" \
+"opt$SUFFIX" -tailcallelim -tailcallopt "$mod" -o "$modopt"
+if [ "$main" = "main" ]; then
+  MAINFILES="$LIBDIR"/llvm/main/main.ll
+else
+  MAINFILES=""
+fi
+"clang++$SUFFIX" -Wno-override-module "$modopt" \
   "$LIBDIR"/libarithmetic.a \
   "$LIBDIR"/libordering.a \
   "$LIBDIR"/libstrings.a \
@@ -26,12 +50,14 @@ clang++-6.0 -Wno-override-module "$modopt" \
   "$RUSTDIR"/liballoc_system-*.rlib \
   "$LIBDIR"/rust/rustalloc.lds \
   "$LIBDIR"/llvm/*.ll \
+  "$MAINFILES" \
   "$LIBDIR"/libconfigurationparser.a \
   "$LIBDIR"/libParser.a \
   "$LIBDIR"/libAST.a \
   "$LIBDIR"/liballoc.a \
   -lgmp -lpthread -ldl \
-  -L/usr/lib/llvm-6.0/lib \
+  $RUSTALIAS \
+  "$LLVMLIB" \
   -lLLVMIRReader -lLLVMBitReader -lLLVMAsmParser -lLLVMCore -lLLVMBinaryFormat -lLLVMSupport -lLLVMDemangle \
   -lncurses \
   -ljemalloc \

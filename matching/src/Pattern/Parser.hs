@@ -1,15 +1,18 @@
 {-# LANGUAGE GADTs      #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE PatternSynonyms #-}
+{-# LANGUAGE OverloadedStrings #-}
 module Pattern.Parser where
 
 import           Data.Functor.Foldable      (Fix (..), para)
-import           Data.List                  (sortBy, nub)
+import           Data.List                  (sortBy, nub, find)
 import           Data.List.Index            (indexed)
 import qualified Data.Map                   as Map
+import           Data.Maybe                 (isJust)
 import           Data.Functor.Impredicative (Rotate31 (..))
 import           Data.Ord                   (comparing)
 import           Data.Proxy                 (Proxy (..))
+import           Data.Text                  (Text)
 import           Kore.AST.Common            (And (..), Equals (..),
                                              Pattern (..),
                                              Rewrites (..), 
@@ -41,14 +44,13 @@ import           Kore.IndexedModule.MetadataTools
                                             (extractMetadataTools,
                                              MetadataTools (..))
 import           Kore.Parser.Parser         (fromKore)
-import           Kore.Step.StepperAttributes
-                                            (StepperAttributes (..))
 
 --[ Metadata ]--
 
 data SymLib = SymLib
-  { symCs :: Map.Map (SymbolOrAlias Object) ([Sort Object], Sort Object, StepperAttributes)
+  { symCs :: Map.Map (SymbolOrAlias Object) ([Sort Object], Sort Object, Attributes)
   , symSt :: Map.Map (Sort Object) [SymbolOrAlias Object]
+  , symOs :: Map.Map (SymbolOrAlias Object) [SymbolOrAlias Object]
   } deriving (Show, Eq)
 
 isConcrete :: SymbolOrAlias Object -> Bool
@@ -84,42 +86,66 @@ parseAxiomForSymbols = parsePatternForSymbols . sentenceAxiomPattern
     rAlgebra _                                            = []
 
 mkSymLib :: [SymbolOrAlias Object] 
-         -> MetadataTools Object StepperAttributes
+         -> [Sort Object]
+         -> MetadataTools Object Attributes
+         -> [(SymbolOrAlias Object, SymbolOrAlias Object)]
          -> SymLib
-mkSymLib symbols metaTools = 
-  let (SymLib sorts syms) = foldl go (SymLib Map.empty Map.empty) symbols
-  in SymLib sorts (Map.map nub syms)
+mkSymLib symbols sortDecls metaTools overloads = 
+  let empty = replicate (length sortDecls) []
+      (SymLib sorts syms _) = foldl go (SymLib Map.empty (Map.fromList $ zip sortDecls empty) Map.empty) symbols
+  in SymLib sorts (Map.map nub syms) (Map.map nub $ foldl mkOverloads Map.empty overloads)
   where
-    go (SymLib dIx rIx) symbol =
-      let as = (sortTools metaTools) symbol
+    go (SymLib dIx rIx oIx) symbol =
+      let as = (symbolOrAliasSorts metaTools) symbol
           att = (symAttributes metaTools) symbol
           args = applicationSortsOperands as
           result = applicationSortsResult as
       in SymLib { symCs = Map.insert symbol (args, result, att) dIx
              , symSt = Map.insert result (symbol : (Map.findWithDefault [] result rIx)) rIx
+             , symOs = oIx
              }
+    mkOverloads oIx (greater,lesser) =
+      Map.insert greater (lesser : (Map.findWithDefault [] greater oIx)) oIx
 
-parseSymbols :: KoreDefinition -> KoreIndexedModule StepperAttributes -> SymLib
+getOverloads :: [SentenceAxiom UnifiedSortVariable UnifiedPattern Variable]
+             -> [(SymbolOrAlias Object, SymbolOrAlias Object)]
+getOverloads [] = []
+getOverloads (s : tl) =
+  case getAtt s "overload" of
+    Nothing -> getOverloads tl
+    Just (KoreObjectPattern (ApplicationPattern (Application _ [(KoreObjectPattern (ApplicationPattern (Application g _))),(KoreObjectPattern (ApplicationPattern (Application l _)))]))) -> (g,l):(getOverloads tl)
+    Just _ -> error "invalid overload attribute"
+
+parseSymbols :: KoreDefinition -> KoreIndexedModule Attributes -> SymLib
 parseSymbols def indexedMod =
   let axioms = getAxioms def
       symbols = mconcat (parseAxiomForSymbols <$> axioms)
+      allSorts = concatMap symbolOrAliasParams symbols
       metaTools = extractMetadataTools indexedMod
-  in mkSymLib symbols metaTools
+      overloads = getOverloads axioms
+  in mkSymLib symbols allSorts metaTools overloads
 
 --[ Patterns ]--
+getAtt :: SentenceAxiom UnifiedSortVariable UnifiedPattern Variable
+       -> Text
+       -> Maybe CommonKorePattern
+getAtt sentence att =
+  let Attributes attr = sentenceAxiomAttributes sentence
+  in find (isAtt att) attr
+
+isAtt :: Text -> CommonKorePattern -> Bool
+isAtt att (Fix (UnifiedPattern (UnifiedObject object))) =
+  case unRotate31 object of
+    ApplicationPattern (Application (SymbolOrAlias (Id x _) _) _) -> x == att
+    _ -> False
+isAtt _ _ = False
+
+
 hasAtt :: SentenceAxiom UnifiedSortVariable UnifiedPattern Variable
-       -> String
+       -> Text
        -> Bool
 hasAtt sentence att = 
-  let Attributes attr = sentenceAxiomAttributes sentence
-  in any isAtt attr
-  where
-    isAtt :: CommonKorePattern -> Bool
-    isAtt (Fix (UnifiedPattern (UnifiedObject object))) =
-      case unRotate31 object of
-        ApplicationPattern (Application (SymbolOrAlias (Id x _) _) _) -> x == att
-        _ -> False
-    isAtt _ = False
+  isJust (getAtt sentence att)
 
 rulePriority :: SentenceAxiom UnifiedSortVariable UnifiedPattern Variable
              -> Int
@@ -209,8 +235,8 @@ parseDefinition fileName = do
 
 mainVerify
     :: KoreDefinition
-    -> String
-    -> KoreIndexedModule StepperAttributes
+    -> Text
+    -> KoreIndexedModule Attributes
 mainVerify definition mainModuleName =
     let attributesVerification = defaultAttributesVerification Proxy
         verifyResult = verifyAndIndexDefinition
@@ -224,11 +250,11 @@ mainVerify definition mainModuleName =
                                   Just m -> m
 
 -- Return the function symbol and whether or not the symbol is actually a function.
-getPossibleFunction :: (SymbolOrAlias Object, ([Sort Object], Sort Object, StepperAttributes)) -> (SymbolOrAlias Object, Bool)
-getPossibleFunction (k, (_,_,attrs)) =  (k, isFunction attrs)
+getPossibleFunction :: (SymbolOrAlias Object, ([Sort Object], Sort Object, Attributes)) -> (SymbolOrAlias Object, Bool)
+getPossibleFunction (k, (_,_,Attributes attrs)) =  (k, (isJust $ find (isAtt "function") attrs) || (isJust $ find (isAtt "anywhere") attrs))
 
 -- Return the list of symbols that are actually functions.
-getFunctions :: Map.Map (SymbolOrAlias Object) ([Sort Object], Sort Object, StepperAttributes)
+getFunctions :: Map.Map (SymbolOrAlias Object) ([Sort Object], Sort Object, Attributes)
     -> [SymbolOrAlias Object]
 
 getFunctions = (fmap fst) . (filter snd) . (fmap getPossibleFunction) . Map.assocs

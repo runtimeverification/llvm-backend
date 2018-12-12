@@ -16,6 +16,7 @@ private:
   llvm::BasicBlock *CurrentBlock;
   llvm::Module *Module;
   llvm::LLVMContext &Ctx;
+  bool isAnywhereOwise;
 
   llvm::Value *createHook(KOREObjectCompositePattern *hookAtt, KOREObjectCompositePattern *pattern);
   llvm::Value *createFunctionCall(std::string name, KOREObjectCompositePattern *pattern, bool sret, bool fastcc);
@@ -25,17 +26,19 @@ public:
     llvm::StringMap<llvm::Value *> &Substitution,
     KOREDefinition *Definition,
     llvm::BasicBlock *EntryBlock,
-    llvm::Module *Module) :
+    llvm::Module *Module,
+    bool isAnywhereOwise) :
       Substitution(Substitution),
       Definition(Definition),
       CurrentBlock(EntryBlock),
       Module(Module),
-      Ctx(Module->getContext()) {}
+      Ctx(Module->getContext()),
+      isAnywhereOwise(isAnywhereOwise) {}
 
 /* adds code to the specified basic block in the specified module which constructs
    an llvm value corresponding to the specified KORE RHS pattern and substitution in the
-   specified definition, and returns the value itself. */
-  llvm::Value *operator()(KOREPattern *pattern);
+   specified definition, and returns the value itself, along with a boolean indicating whether the resulting term could be an injection. */
+  std::pair<llvm::Value *, bool> operator()(KOREPattern *pattern);
   llvm::Value *createToken(ValueType sort, std::string contents);
   /* creates a call instructin calling a particular llvm function, abstracting certain abi and calling convention details. 
    * name: the nmae of the function to call in llvm
