@@ -36,7 +36,11 @@ pub unsafe extern "C" fn hook_SET_element(value: K) -> Set {
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_SET_concat(s1: *const Set, s2: *const Set) -> Set {
-  (*s1).clone().union((*s2).clone())
+  if (*s1).len() < (*s2).len() {
+    (*s2).clone().union((*s1).clone())
+  } else {
+    (*s1).clone().union((*s2).clone())
+  }
 }
 
 #[no_mangle]
@@ -56,7 +60,11 @@ pub unsafe extern "C" fn hook_SET_inclusion(s1: *const Set, s2: *const Set) -> b
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_SET_intersection(s1: *const Set, s2: *const Set) -> Set {
-  (*s1).clone().intersection((*s2).clone())
+  if (*s1).len() < (*s2).len() {
+    (*s2).clone().intersection((*s1).clone())
+  } else {
+    (*s1).clone().intersection((*s2).clone())
+  }
 }
 
 #[no_mangle]
