@@ -19,12 +19,10 @@ LIBDIR="$(dirname "$0")"/../lib/kllvm/
 if [[ "$OSTYPE" == "darwin"* ]]; then
     SUFFIX=""
     RUSTDIR=`rustc --print sysroot`/lib/rustlib/x86_64-apple-darwin/lib/
-    RUSTALIAS="-Wl,-alias_list $LIBDIR/rust/rustalloc.alias"
     LLVMLIB="-L/usr/local/opt/llvm@6/lib"
 else
     SUFFIX="-6.0"
     RUSTDIR=`rustc --print sysroot`/lib/rustlib/x86_64-unknown-linux-gnu/lib/
-    RUSTALIAS="$LIBDIR/rust/libdatastructures.rlib"
     LLVMLIB="-L/usr/lib/llvm-6.0/lib"
 fi
 "$(dirname "$0")"/llvm-kompile-matching "$definition" "$moduleName" "$dt_dir"
@@ -54,7 +52,6 @@ fi
   "$LIBDIR"/libAST.a \
   "$LIBDIR"/liballoc.a \
   -lgmp -lpthread -ldl \
-  $RUSTALIAS \
   "$LLVMLIB" \
   -lLLVMIRReader -lLLVMBitReader -lLLVMAsmParser -lLLVMCore -lLLVMBinaryFormat -lLLVMSupport -lLLVMDemangle \
   -lncurses \
