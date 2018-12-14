@@ -57,7 +57,7 @@ fi
   $RUSTALIAS \
   "$LLVMLIB" \
   -lLLVMIRReader -lLLVMBitReader -lLLVMAsmParser -lLLVMCore -lLLVMBinaryFormat -lLLVMSupport -lLLVMDemangle \
-  -lncurses \
+  -ltinfo \
   -ljemalloc \
   -I "$(dirname "$0")"/../include \
   -flto \
