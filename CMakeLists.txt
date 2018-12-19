@@ -73,7 +73,7 @@ install(
 
 
 install(
-  PROGRAMS bin/llvm-kompile bin/llvm-kompile-matching
+  PROGRAMS bin/llvm-kompile bin/llvm-kompile-matching bin/llvm-kompile-rust-lto
   DESTINATION bin
 )
 
@@ -88,7 +88,7 @@ add_custom_command(
   OUTPUT bin/llvm-kompile-matching
   DEPENDS ${HaskellSources}
   COMMAND stack build
-  COMMAND stack install --local-bin-path ../bin
+  COMMAND stack install --local-bin-path ${PROJECT_SOURCE_DIR}/bin
   WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/matching
 )
 

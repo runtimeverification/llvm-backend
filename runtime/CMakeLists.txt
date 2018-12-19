@@ -38,5 +38,5 @@ install(
 )
 
 if (CMAKE_BUILD_TYPE STREQUAL "Release")
-  install(SCRIPT ../cmake/mkrlib.cmake)
+  install(SCRIPT ${PROJECT_SOURCE_DIR}/cmake/mkrlib.cmake)
 endif()
