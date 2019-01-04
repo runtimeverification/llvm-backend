@@ -232,6 +232,12 @@ splitTop topPattern =
     And_ _ (Top_ _)
            (And_ _ _ rw@(Rewrites_ _ _ _)) ->
       Just (extract rw, Nothing)
+    Rewrites_ s (And_ _ (Equals_ _ _ pat _) l)
+           (And_ _ _ r) ->
+      Just ((Rewrites s l r), Just pat)
+    Rewrites_ s (And_ _ (Top_ _) l)
+           (And_ _ _ r) ->
+      Just ((Rewrites s l r), Nothing)
     Implies_ _ (Bottom_ _) p -> splitTop p
     KoreObjectPattern (ImpliesPattern (Implies _ (KoreObjectPattern (BottomPattern _)) p)) -> splitTop p
     _ -> Nothing
