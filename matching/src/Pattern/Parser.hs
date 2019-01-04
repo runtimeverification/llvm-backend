@@ -5,7 +5,7 @@
 module Pattern.Parser where
 
 import           Data.Functor.Foldable
-                 ( Fix (..), cata, para )
+                 ( Fix (..), para )
 import           Data.Functor.Impredicative
                  ( Rotate31 (..) )
 import           Data.List
@@ -31,8 +31,7 @@ import           Kore.AST.Kore
                  ( CommonKorePattern, pattern KoreObjectPattern, KorePattern,
                  UnifiedPattern (..), UnifiedSortVariable )
 import           Kore.AST.MetaOrObject
-                 ( Meta (..), MetaOrObject (..), Object (..), Unified (..),
-                 transformUnified )
+                 ( Meta (..), Object (..), Unified (..) )
 import           Kore.AST.Sentence
                  ( Attributes (..), Definition (..), KoreDefinition,
                  Module (..), ModuleName (..), Sentence (..),
