@@ -5,7 +5,7 @@
 module Pattern.Parser where
 
 import           Data.Functor.Foldable
-                 ( Fix (..), cata, para )
+                 ( Fix (..), para )
 import           Data.Functor.Impredicative
                  ( Rotate31 (..) )
 import           Data.List
@@ -31,8 +31,7 @@ import           Kore.AST.Kore
                  ( CommonKorePattern, pattern KoreObjectPattern, KorePattern,
                  UnifiedPattern (..), UnifiedSortVariable )
 import           Kore.AST.MetaOrObject
-                 ( Meta (..), MetaOrObject (..), Object (..), Unified (..),
-                 transformUnified )
+                 ( Meta (..), Object (..), Unified (..) )
 import           Kore.AST.Sentence
                  ( Attributes (..), Definition (..), KoreDefinition,
                  Module (..), ModuleName (..), Sentence (..),
@@ -233,6 +232,12 @@ splitTop topPattern =
     And_ _ (Top_ _)
            (And_ _ _ rw@(Rewrites_ _ _ _)) ->
       Just (extract rw, Nothing)
+    Rewrites_ s (And_ _ (Equals_ _ _ pat _) l)
+           (And_ _ _ r) ->
+      Just ((Rewrites s l r), Just pat)
+    Rewrites_ s (And_ _ (Top_ _) l)
+           (And_ _ _ r) ->
+      Just ((Rewrites s l r), Nothing)
     Implies_ _ (Bottom_ _) p -> splitTop p
     KoreObjectPattern (ImpliesPattern (Implies _ (KoreObjectPattern (BottomPattern _)) p)) -> splitTop p
     _ -> Nothing

@@ -295,6 +295,12 @@ KOREPattern *KOREAxiomDeclaration::getRightHandSide() const {
                       return rewrites->getArguments()[1];
                     }
                   }
+                } else if (andPattern2->getConstructor()->getName() == "\\rewrites" && andPattern2->getArguments().size() == 2) {
+                  if (auto andPattern3 = dynamic_cast<KOREObjectCompositePattern *>(andPattern2->getArguments()[1])) {
+                    if (andPattern3->getConstructor()->getName() == "\\and" && andPattern3->getArguments().size() == 2) {
+                      return andPattern3->getArguments()[1];
+                    }
+                  }
                 }
               }
             } else if (auto equals = dynamic_cast<KOREObjectCompositePattern *>(andPattern->getArguments()[0])) {
@@ -317,6 +323,12 @@ KOREPattern *KOREAxiomDeclaration::getRightHandSide() const {
       }
     } else if (top->getConstructor()->getName() == "\\equals" && top->getArguments().size() == 2) {
       return top->getArguments()[1];
+    } else if (top->getConstructor()->getName() == "\\rewrites" && top->getArguments().size() == 2) {
+      if (auto andPattern = dynamic_cast<KOREObjectCompositePattern *>(top->getArguments()[1])) {
+        if (andPattern->getConstructor()->getName() == "\\and" && andPattern->getArguments().size() == 2) {
+          return andPattern->getArguments()[1];
+        }
+      }
     }
   }
   assert(false && "could not compute right hand side of axiom");
@@ -346,6 +358,18 @@ KOREPattern *KOREAxiomDeclaration::getRequires() const {
                   return nullptr;
                 }
               }
+            } else if (trueTop->getConstructor()->getName() == "\\rewrites" && trueTop->getArguments().size() == 2) {
+              if (auto andPattern = dynamic_cast<KOREObjectCompositePattern *>(trueTop->getArguments()[0])) {
+                if (andPattern->getConstructor()->getName() == "\\and" && andPattern->getArguments().size() == 2) {
+                  if (auto equals = dynamic_cast<KOREObjectCompositePattern *>(andPattern->getArguments()[0])) {
+                    if (equals->getConstructor()->getName() == "\\equals" && equals->getArguments().size() == 2) {
+                      return equals->getArguments()[0];
+                    } else if (equals->getConstructor()->getName() == "\\top" && equals->getArguments().empty()) {
+                      return nullptr;
+                    }
+                  }
+                }
+              }
             }
           }
         }
@@ -360,6 +384,18 @@ KOREPattern *KOREAxiomDeclaration::getRequires() const {
       }
     } else if (top->getConstructor()->getName() == "\\equals" && top->getArguments().size() == 2) {
       return nullptr;
+    } else if (top->getConstructor()->getName() == "\\rewrites" && top->getArguments().size() == 2) {
+      if (auto andPattern = dynamic_cast<KOREObjectCompositePattern *>(top->getArguments()[0])) {
+        if (andPattern->getConstructor()->getName() == "\\and" && andPattern->getArguments().size() == 2) {
+          if (auto equals = dynamic_cast<KOREObjectCompositePattern *>(andPattern->getArguments()[0])) {
+            if (equals->getConstructor()->getName() == "\\equals" && equals->getArguments().size() == 2) {
+              return equals->getArguments()[0];
+            } else if (equals->getConstructor()->getName() == "\\top" && equals->getArguments().empty()) {
+              return nullptr;
+            }
+          }
+        }
+      }
     }
   }
   assert(false && "ill-formed axiom");
