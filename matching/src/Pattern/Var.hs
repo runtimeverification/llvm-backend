@@ -1,3 +1,5 @@
+{-# LANGUAGE ScopedTypeVariables #-}
+
 module Pattern.Var
   ( isBound
   , canonicalizePattern
@@ -5,11 +7,14 @@ module Pattern.Var
   ) where
 
 import           Data.Functor.Foldable
-                 ( Fix (..) )
+                 ( Fix (..), cata )
 import qualified Data.Map.Strict as Map
+import           Data.Maybe
+                 ( fromMaybe )
 
 import Pattern.Type
 
+-- | Checks to see if the variable name has been bound in the clause.
 lookupCanonicalName :: Clause
                     -> Fix Pattern
                     -> Maybe (Fix BoundPattern)
@@ -18,37 +23,39 @@ lookupCanonicalName cls p =
   then Just (canonicalizePattern cls p)
   else Nothing
 
-canonicalizePattern :: Clause -> Fix Pattern -> Fix BoundPattern
-canonicalizePattern (Clause _ vars _ _) (Fix (Variable name hookAtt)) =
-  let names = map getName vars
-      os = map getOccurrence vars
-      oMap = Map.fromList $ zip names os
-  in Fix $ Variable (Map.lookup name oMap) hookAtt
-canonicalizePattern c'@(Clause _ vars _ _) (Fix (As name hookAtt p)) =
-  let names = map getName vars
-      os = map getOccurrence vars
-      oMap = Map.fromList $ zip names os
-  in Fix $ As (Map.lookup name oMap) hookAtt $ canonicalizePattern c' p
-canonicalizePattern c' (Fix (Pattern name hookAtt ps)) = Fix (Pattern name hookAtt $ map (canonicalizePattern c') ps)
-canonicalizePattern _ (Fix Wildcard) = Fix Wildcard
-canonicalizePattern c' (Fix (ListPattern hd f tl' e o)) =
-  Fix (ListPattern (mapPat c' hd) (mapPat c' f) (mapPat c' tl') e $ canonicalizePattern c' o)
-canonicalizePattern c' (Fix (MapPattern ks vs f e o)) =
-  Fix (MapPattern (mapPat c' ks) (mapPat c' vs) (mapPat c' f) e $ canonicalizePattern c' o)
-canonicalizePattern c' (Fix (SetPattern es f e o)) =
-  Fix (SetPattern (mapPat c' es) (mapPat c' f) e $ canonicalizePattern c' o)
+-- | Looks up all variables from the pattern in the clause and replaces
+-- them with the occurrences it finds.
+canonicalizePattern :: Clause
+                    -> Fix Pattern
+                    -> Fix BoundPattern
+canonicalizePattern clause = cata go
+  where
+    bs :: Map.Map String Occurrence
+    bs = Map.fromList
+         $   (\b -> (getName b, getOccurrence b))
+         <$> getVariableBindings clause
+    go :: Pattern (Fix BoundPattern) -> Fix BoundPattern
+    go (Variable name hook)      = Fix $ Variable (Map.lookup name bs) hook
+    go (As name hook p)          = Fix $ As (Map.lookup name bs) hook p
+    go (Pattern name hook ps)    = Fix $ Pattern name hook ps
+    go (ListPattern hd f tl e o) = Fix $ ListPattern hd f tl e o
+    go (MapPattern  ks vs f e o) = Fix $ MapPattern  ks vs f e o
+    go (SetPattern     vs f e o) = Fix $ SetPattern     vs f e o
+    go Wildcard                  = Fix Wildcard
 
-isBound :: Eq a => (VariableBinding -> a) -> Clause -> Fix (P a) -> Bool
-isBound get c' (Fix (Pattern _ _ ps)) = all (isBound get c') ps
-isBound get c' (Fix (ListPattern hd f tl' _ _)) = all (isBound get c') hd && all (isBound get c') tl' && maybe True (isBound get c') f
-isBound get c' (Fix (MapPattern ks vs f _ _)) = all (isBound get c') ks && all (isBound get c') vs && maybe True (isBound get c') f
-isBound get c' (Fix (SetPattern es f _ _)) = all (isBound get c') es && maybe True (isBound get c') f
-isBound get c'@(Clause _ vars _ _) (Fix (As name _ p)) =
-  isBound get c' p && elem name (map get vars)
-isBound _ _ (Fix Wildcard) = False
-isBound get (Clause _ vars _ _) (Fix (Variable name _)) =
-  elem name $ map get vars
-
-mapPat :: Functor f => Clause -> f (Fix Pattern) -> f (Fix BoundPattern)
-mapPat c' = fmap (canonicalizePattern c')
-
+-- | Checks if all variables in the pattern are bound.
+isBound :: forall a. Eq a
+        => (VariableBinding -> a)
+        -> Clause
+        -> Fix (P a)
+        -> Bool
+isBound get (Clause _ vars _ _) = cata go
+  where
+    go :: P a Bool -> Bool
+    go (Pattern _ _ ps)          = and ps
+    go (ListPattern hd f tl _ _) = and hd && and tl && fromMaybe True f
+    go (MapPattern  ks vs f _ _) = and ks && and vs && fromMaybe True f
+    go (SetPattern  vs    f _ _) = and vs && fromMaybe True f
+    go (As name _ p)             = p && name `elem` map get vars
+    go (Variable name _) = name `elem` map get vars
+    go Wildcard = False
