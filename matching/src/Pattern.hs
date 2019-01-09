@@ -67,6 +67,7 @@ import           TextShow
 import Pattern.Type
 import Pattern.Var
 import Pattern.Map
+import Pattern.Set
 
 -- [ Builders ]
 
@@ -144,18 +145,9 @@ sigma exact c cs =
     ix cls p@(Fix MapPattern{}) =
       let (cs', kont) = getMapCs c cls p in
         cs' ++ maybe [] (ix cls) kont
-    ix _ (Fix (SetPattern [] Nothing _ _)) = [Empty]
-    ix cls (Fix (SetPattern [] (Just p) _ _)) = ix cls p
-    ix cls (Fix (SetPattern [k] _ e _)) =
-      let m = Ignoring $ getMetadata c
-          bound = isBound getName cls k
-          canonK = if bound then Just $ canonicalizePattern cls k else Nothing
-      in [HasKey True e m canonK, HasNoKey m canonK]
-    ix cls (Fix (SetPattern (k:k':ks) f e o)) =
-      let m = Ignoring $ getMetadata c
-          bound = isBound getName cls k
-          canonK = if bound then Just $ canonicalizePattern cls k else Nothing
-      in [HasKey True e m canonK, HasNoKey m canonK] ++ ix cls (Fix (SetPattern (k':ks) f e o))
+    ix cls p@(Fix SetPattern{}) =
+      let (cs', kont) = getSetCs c cls p in
+        cs' ++ maybe [] (ix cls) kont
     ix cls (Fix (As _ _ pat))      = ix cls pat
     ix _ (Fix Wildcard)          = []
     ix _ (Fix (Variable _ _))    = []

@@ -9,7 +9,7 @@ import Pattern.Type
 import Pattern.Var
 
 -- | Extracts the constructors from a map pattern. It also returns
--- a sort a pattern for the next keys in the map.
+-- a pattern for the next keys in the map.
 getMapCs :: Column
          -> Clause
          -> Fix Pattern
@@ -38,11 +38,3 @@ nextMap (Fix (MapPattern (_ : ks) vs f e o)) =
   then Nothing
   else Just (Fix (MapPattern ks vs f e o))
 nextMap _ = error "This should only be called on non-empty Maps"
-
-lookupCanonicalName :: Clause
-                    -> Fix Pattern
-                    -> Maybe (Fix BoundPattern)
-lookupCanonicalName cls p =
-  if   isBound getName cls p
-  then Just (canonicalizePattern cls p)
-  else Nothing

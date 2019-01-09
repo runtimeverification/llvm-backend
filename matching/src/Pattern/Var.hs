@@ -1,6 +1,7 @@
 module Pattern.Var
   ( isBound
   , canonicalizePattern
+  , lookupCanonicalName
   ) where
 
 import           Data.Functor.Foldable
@@ -8,6 +9,14 @@ import           Data.Functor.Foldable
 import qualified Data.Map.Strict as Map
 
 import Pattern.Type
+
+lookupCanonicalName :: Clause
+                    -> Fix Pattern
+                    -> Maybe (Fix BoundPattern)
+lookupCanonicalName cls p =
+  if   isBound getName cls p
+  then Just (canonicalizePattern cls p)
+  else Nothing
 
 canonicalizePattern :: Clause -> Fix Pattern -> Fix BoundPattern
 canonicalizePattern (Clause _ vars _ _) (Fix (Variable name hookAtt)) =
