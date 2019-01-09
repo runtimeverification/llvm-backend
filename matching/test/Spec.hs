@@ -1,22 +1,32 @@
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE InstanceSigs      #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module Main where
 
-import           Data.Bits             (shiftL)
-import           Data.Functor.Foldable (Fix (..))
-import           Data.List             (transpose,concat)
-import qualified Data.Map.Strict       as M
-import           Data.Proxy            (Proxy (..))
-import           Data.Semigroup        ((<>))
-import           Kore.AST.Common       (Id (..), Sort(..), SortActual(..), AstLocation(..))
+import           Data.Bits
+                 ( shiftL )
+import           Data.Functor.Foldable
+                 ( Fix (..) )
+import           Data.List
+                 ( concat, transpose )
+import qualified Data.Map.Strict as M
+import           Data.Proxy
+                 ( Proxy (..) )
+import           Data.Semigroup
+                 ( (<>) )
+import           Kore.AST.Common
+                 ( AstLocation (..), Id (..), Sort (..), SortActual (..) )
 
-import           Test.Tasty            (TestTree, defaultMain, testGroup)
-import           Test.Tasty.HUnit      (testCase, (@?=))
+import Test.Tasty
+       ( TestTree, defaultMain, testGroup )
+import Test.Tasty.HUnit
+       ( testCase, (@?=) )
 
-import           Pattern               hiding (getMetadata)
-import           Pattern.Class
+import Pattern
+import Pattern.Class
+import Pattern.Type hiding
+       ( getMetadata )
 
 data IntPat = IntLit Int
             | IntWld
@@ -78,7 +88,7 @@ mkLstPattern pats =
   let as = take (length ls) [1..]
       (ls, conds) = unzip pats
       vs = map vars ls
-      as' = zipWith3 Action as vs conds 
+      as' = zipWith3 Action as vs conds
       md = getMetadata (Proxy :: Proxy Lst)
       cs = fmap (Column md . (toPattern <$>)) (transpose ls)
   in case mkClauseMatrix cs as' of
@@ -144,7 +154,7 @@ appendTests = testGroup "Basic pattern compilation"
                                    ] Nothing ))
                ] Nothing
   , testCase "Yaml serialization" $
-      (serializeToYaml $ shareDt $ compilePattern $ appendBindPattern) @?= 
+      (serializeToYaml $ shareDt $ compilePattern $ appendBindPattern) @?=
         "&4\n" <>
         "specializations:\n" <>
         "- - nil\n" <>

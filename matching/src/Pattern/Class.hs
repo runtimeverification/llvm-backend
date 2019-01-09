@@ -5,7 +5,7 @@ module Pattern.Class ( IsPattern(..)
 import Data.Functor.Foldable (Fix(..))
 import Data.Proxy (Proxy(..))
 
-import Pattern
+import Pattern.Type
 
 class IsPattern a where
   toPattern :: a -> Fix Pattern
