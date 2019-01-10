@@ -4,6 +4,7 @@
 module Pattern.Gen where
 
 import qualified Pattern               as P
+import qualified Pattern.Type          as P
 import           Pattern.Parser        (unifiedPatternRAlgebra,SymLib(..), getTopChildren,
                                         AxiomInfo(..))
 import           Control.Monad.Free    (Free (..))
@@ -68,7 +69,7 @@ stripLoc (SymbolOrAlias (Id name _) s) = (SymbolOrAlias (Id name AstLocationNone
     stripLocSort (SortActualSort (SortActual (Id x _) args)) = (SortActualSort (SortActual (Id x AstLocationNone) $ map stripLocSort args))
     stripLocSort sort = sort
 
-genPattern :: KoreRewrite pattern => MetadataTools Object Attributes -> SymLib -> pattern -> [Fix P.Pattern]
+genPattern :: KoreRewrite pat => MetadataTools Object Attributes -> SymLib -> pat -> [Fix P.Pattern]
 genPattern tools (SymLib _ sorts _) rewrite =
   let lhs = getLeftHandSide rewrite
   in map (para (unifiedPatternRAlgebra (error "unsupported: meta level") rAlgebra)) lhs
@@ -310,10 +311,10 @@ genMetadatas syms@(SymLib symbols sorts allOverloads) indexedMod =
     injectionForOverload (P.Symbol g) (P.Symbol l) = P.Symbol $ SymbolOrAlias (Id "inj" AstLocationNone) [sel2 (symbols Map.! l), sel2 (symbols Map.! g)]
     injectionForOverload _ _ = error "invalid overload"
 
-genClauseMatrix :: KoreRewrite pattern 
+genClauseMatrix :: KoreRewrite pat
                => SymLib
                -> KoreIndexedModule Attributes
-               -> [AxiomInfo pattern]
+               -> [AxiomInfo pat]
                -> [Sort Object]
                -> (P.ClauseMatrix, P.Fringe)
 genClauseMatrix symlib indexedMod axioms sorts =
@@ -332,10 +333,10 @@ genClauseMatrix symlib indexedMod axioms sorts =
        Left err -> error (unpack err)
        Right m -> m
 
-mkDecisionTree :: KoreRewrite pattern 
+mkDecisionTree :: KoreRewrite pat
                => SymLib
                -> KoreIndexedModule Attributes
-               -> [AxiomInfo pattern]
+               -> [AxiomInfo pat]
                -> [Sort Object]
                -> Free P.Anchor P.Alias
 mkDecisionTree symlib indexedMod axioms sorts =

@@ -2,25 +2,12 @@
 {-# LANGUAGE FlexibleContexts     #-}
 {-# LANGUAGE FlexibleInstances    #-}
 {-# LANGUAGE OverloadedStrings    #-}
-{-# LANGUAGE TemplateHaskell      #-}
+{-# LANGUAGE TemplateHaskell   #-}
 {-# LANGUAGE TupleSections        #-}
 {-# LANGUAGE TypeSynonymInstances #-}
 {-# LANGUAGE UndecidableInstances #-}
 
-module Pattern ( PatternMatrix(..)
-               , ClauseMatrix(..)
-               , Column(..)
-               , Metadata(..)
-               , P(..)
-               , Pattern
-               , Clause(..)
-               , Action(..)
-               , Occurrence(..)
-               , Fringe
-               , Index
-               , Ignoring(..)
-               , Constructor(..)
-               , mkClauseMatrix
+module Pattern ( mkClauseMatrix
                , sigma
                , mSpecialize
                , mDefault
@@ -46,15 +33,11 @@ import           Data.Bifunctor
                  ( second )
 import qualified Data.ByteString as B
 import           Data.Deriving
-                 ( deriveEq1, deriveEq2, deriveOrd1, deriveOrd2, deriveShow1,
-                 deriveShow2 )
+                 ( deriveEq1, deriveOrd1, deriveShow1 )
 import           Data.Function
                  ( on )
-import           Data.Functor.Classes
-                 ( Eq1 (..), Ord1 (..), Show1 (..), liftCompare2, liftEq2,
-                 liftShowsPrec2 )
 import           Data.Functor.Foldable
-                 ( Fix (..), cata )
+                 ( Fix (..) )
 import           Data.List
                  ( elemIndex, intersect, maximumBy, nub, sortBy, transpose,
                  zipWith4 )
@@ -73,7 +56,7 @@ import           Data.Traversable
                  ( mapAccumL )
 import qualified Data.Yaml.Builder as Y
 import           Kore.AST.Common
-                 ( AstLocation (..), Id (..), Sort (..), SymbolOrAlias (..) )
+                 ( AstLocation (..), Id (..), SymbolOrAlias (..) )
 import           Kore.AST.MetaOrObject
                  ( Object (..) )
 import           Kore.Unparser
@@ -81,139 +64,10 @@ import           Kore.Unparser
 import           TextShow
                  ( showt )
 
-data Column = Column
-              { getMetadata :: !Metadata
-              , getTerms    :: ![Fix Pattern]
-              }
-
-instance Show Column where
-  showsPrec _ (Column _ ts) =
-    showString "Column " . showList ts
-
-data Metadata = Metadata
-                { getLength :: !Integer
-                , getInjections :: Constructor -> [Constructor]
-                , getOverloads :: Constructor -> [Constructor] -- list of overloaded productions less than specified production
-                , getSort :: Sort Object
-                , getChildren :: Constructor -> Maybe [Metadata]
-                }
-
-instance (Show Metadata) where
-  show (Metadata _ _ _ sort _) = show sort
-
-data Occurrence = Num Int Occurrence
-                | Base
-                | Lit Text Text
-                | Equal Occurrence Occurrence
-                | SC Int
-                | Value (Fix BoundPattern) Occurrence
-                | Rem (Fix BoundPattern) Occurrence
-                | Size Occurrence
-                | Inj Occurrence
-                deriving (Show, Eq, Ord)
-
-type Fringe = [(Occurrence, Bool)] -- occurrence and whether to match the exact sort
-
-instance Show1 Pattern where
-  liftShowsPrec = liftShowsPrec2 showsPrec showList
-instance Show1 BoundPattern where
-  liftShowsPrec = liftShowsPrec2 showsPrec showList
-
-instance Eq1 BoundPattern where
-  liftEq = liftEq2 (==)
-
-instance Ord1 BoundPattern where
-  liftCompare = liftCompare2 compare
-
-
-data Constructor = Symbol (SymbolOrAlias Object)
-                 | Literal String
-                 | List
-                   { getElement :: SymbolOrAlias Object
-                   , getListLength :: Int
-                   }
-                 | Empty
-                 | NonEmpty (Ignoring Metadata)
-                 | HasKey Bool (SymbolOrAlias Object) (Ignoring Metadata) (Maybe (Fix BoundPattern))
-                 | HasNoKey (Ignoring Metadata) (Maybe (Fix BoundPattern))
-                 deriving (Show, Eq, Ord)
-
-newtype Ignoring a = Ignoring a
-                   deriving (Show)
-
-instance Eq (Ignoring a) where
-  _ == _ = True
-
-instance Ord (Ignoring a) where
-  _ <= _ = True
-
-type Index       = Int
-data P var a   = Pattern Constructor (Maybe String) ![a]
-                 | ListPattern
-                   { getHead :: ![a] -- match elements at front of list
-                   , getFrame :: !(Maybe a) -- match remainder of list
-                   , getTail :: ![a] -- match elements at back of list
-                   , element :: SymbolOrAlias Object -- ListItem symbol
-                   , original :: a
-                   }
-                 | MapPattern
-                   { getKeys :: ![a]
-                   , getValues :: ![a]
-                   , getFrame :: !(Maybe a)
-                   , element :: SymbolOrAlias Object
-                   , original :: !a
-                   }
-                 | SetPattern
-                   { getElements :: ![a]
-                   , getFrame :: !(Maybe a)
-                   , element :: SymbolOrAlias Object
-                   , original :: !a
-                   }
-                 | As var String a
-                 | Wildcard
-                 | Variable var String
-                 deriving (Show, Eq, Functor)
-
-type Pattern = P String
-type BoundPattern = P (Maybe Occurrence)
-
-$(deriveEq2 ''P)
-$(deriveShow2 ''P)
-$(deriveOrd2 ''P)
-
-newtype PatternMatrix = PatternMatrix [Column]
-                        deriving (Show)
-
-data Action       = Action
-                    { getRuleNumber :: Int
-                    , getRhsVars :: [String]
-                    , getSideConditionVars :: Maybe [String]
-                    }
-                    deriving (Show)
-
-data VariableBinding = VariableBinding
-                       { getName :: String
-                       , getHook :: String
-                       , getOccurrence :: Occurrence
-                       }
-                       deriving (Show, Eq)
-
-data Clause       = Clause
-                    -- the rule to be applied if this row succeeds
-                    { getAction :: Action
-                    -- the variable bindings made so far while matching this row
-                    , getVariableBindings :: [VariableBinding]
-                    -- the length of the head and tail of any list patterns
-                    -- with frame variables bound so far in this row
-                    , getListRanges :: [(Occurrence, Int, Int)]
-                    -- variable bindings to injections that need to be constructed
-                    -- since they do not actually exist in the original subject term
-                    , getOverloadChildren :: [(Constructor, VariableBinding)]
-                    }
-                    deriving (Show)
-
-data ClauseMatrix = ClauseMatrix PatternMatrix ![Clause]
-                    deriving (Show)
+import Pattern.Type
+import Pattern.Var
+import Pattern.Map
+import Pattern.Set
 
 -- [ Builders ]
 
@@ -288,30 +142,12 @@ sigma exact c cs =
     -- is performed via the default case of the switch, which means that we need
     -- to create a switch case per list of lesser length
     ix _ (Fix (ListPattern hd (Just _) tl s _)) = map (List s) [0..(length hd + length tl)]
-    ix _ (Fix (MapPattern [] _ Nothing _ _)) = [Empty]
-    ix cls (Fix (MapPattern [] _ (Just p) _ _)) = ix cls p
-    ix cls (Fix (MapPattern [k] _ _ e _)) =
-      let m = Ignoring $ getMetadata c
-          bound = isBound getName cls k
-          canonK = if bound then Just $ canonicalizePattern cls k else Nothing
-      in [HasKey False e m canonK, HasNoKey m canonK]
-    ix cls (Fix (MapPattern (k:k':ks) vs f e o)) =
-      let m = Ignoring $ getMetadata c
-          bound = isBound getName cls k
-          canonK = if bound then Just $ canonicalizePattern cls k else Nothing
-      in [HasKey False e m canonK, HasNoKey m canonK] ++ ix cls (Fix (MapPattern (k':ks) vs f e o))
-    ix _ (Fix (SetPattern [] Nothing _ _)) = [Empty]
-    ix cls (Fix (SetPattern [] (Just p) _ _)) = ix cls p
-    ix cls (Fix (SetPattern [k] _ e _)) =
-      let m = Ignoring $ getMetadata c
-          bound = isBound getName cls k
-          canonK = if bound then Just $ canonicalizePattern cls k else Nothing
-      in [HasKey True e m canonK, HasNoKey m canonK]
-    ix cls (Fix (SetPattern (k:k':ks) f e o)) =
-      let m = Ignoring $ getMetadata c
-          bound = isBound getName cls k
-          canonK = if bound then Just $ canonicalizePattern cls k else Nothing
-      in [HasKey True e m canonK, HasNoKey m canonK] ++ ix cls (Fix (SetPattern (k':ks) f e o))
+    ix cls p@(Fix MapPattern{}) =
+      let (cs', kont) = getMapCs c cls p in
+        cs' ++ maybe [] (ix cls) kont
+    ix cls p@(Fix SetPattern{}) =
+      let (cs', kont) = getSetCs c cls p in
+        cs' ++ maybe [] (ix cls) kont
     ix cls (Fix (As _ _ pat))      = ix cls pat
     ix _ (Fix Wildcard)          = []
     ix _ (Fix (Variable _ _))    = []
@@ -669,29 +505,6 @@ computeMapElementScore m e c tl (k,v) =
   let finalScore = score * computeScore (head $ fromJust $ getChildren m (HasKey False e (Ignoring m) Nothing)) [(v,c)]
   in if finalScore == 0.0 then minPositiveDouble else finalScore
 
-canonicalizePattern :: Clause -> Fix Pattern -> Fix BoundPattern
-canonicalizePattern (Clause _ vars _ _) (Fix (Variable name hookAtt)) =
-  let names = map getName vars
-      os = map getOccurrence vars
-      oMap = Map.fromList $ zip names os
-  in Fix $ Variable (Map.lookup name oMap) hookAtt
-canonicalizePattern c'@(Clause _ vars _ _) (Fix (As name hookAtt p)) =
-  let names = map getName vars
-      os = map getOccurrence vars
-      oMap = Map.fromList $ zip names os
-  in Fix $ As (Map.lookup name oMap) hookAtt $ canonicalizePattern c' p
-canonicalizePattern c' (Fix (Pattern name hookAtt ps)) = Fix (Pattern name hookAtt $ map (canonicalizePattern c') ps)
-canonicalizePattern _ (Fix Wildcard) = Fix Wildcard
-canonicalizePattern c' (Fix (ListPattern hd f tl' e o)) =
-  Fix (ListPattern (mapPat c' hd) (mapPat c' f) (mapPat c' tl') e $ canonicalizePattern c' o)
-canonicalizePattern c' (Fix (MapPattern ks vs f e o)) =
-  Fix (MapPattern (mapPat c' ks) (mapPat c' vs) (mapPat c' f) e $ canonicalizePattern c' o)
-canonicalizePattern c' (Fix (SetPattern es f e o)) =
-  Fix (SetPattern (mapPat c' es) (mapPat c' f) e $ canonicalizePattern c' o)
-
-mapPat :: Functor f => Clause -> f (Fix Pattern) -> f (Fix BoundPattern)
-mapPat c' = fmap (canonicalizePattern c')
-
 computeElementScore :: Fix Pattern -> Clause -> [(Fix Pattern,Clause)] -> Double
 computeElementScore k c tl =
   let bound = isBound getName c k
@@ -716,17 +529,6 @@ computeElementScore k c tl =
           os = map getOccurrence vars
           names = map show os
       in Clause a (zipWith3 VariableBinding names hooks os) ranges children
-
-isBound :: Eq a => (VariableBinding -> a) -> Clause -> Fix (P a) -> Bool
-isBound get c' (Fix (Pattern _ _ ps)) = all (isBound get c') ps
-isBound get c' (Fix (ListPattern hd f tl' _ _)) = all (isBound get c') hd && all (isBound get c') tl' && maybe True (isBound get c') f
-isBound get c' (Fix (MapPattern ks vs f _ _)) = all (isBound get c') ks && all (isBound get c') vs && maybe True (isBound get c') f
-isBound get c' (Fix (SetPattern es f _ _)) = all (isBound get c') es && maybe True (isBound get c') f
-isBound get c'@(Clause _ vars _ _) (Fix (As name _ p)) =
-  isBound get c' p && elem name (map get vars)
-isBound _ _ (Fix Wildcard) = False
-isBound get (Clause _ vars _ _) (Fix (Variable name _)) =
-  elem name $ map get vars
 
 expandColumn :: Constructor -> Column -> [Clause] -> [Column]
 expandColumn ix (Column m ps) cs =
@@ -803,16 +605,6 @@ expandPattern ix ms m (Fix (As _ _ pat), c)         = expandPattern ix ms m (pat
 expandPattern _ ms _ (Fix Wildcard, _)              = replicate (length ms) (Fix Wildcard,Nothing)
 expandPattern _ ms _ (Fix (Variable _ _), _)        = replicate (length ms) (Fix Wildcard,Nothing)
 
-serializeOccurrence :: Occurrence -> [Text]
-serializeOccurrence (Num i o) = pack (show i) : serializeOccurrence o
-serializeOccurrence Base = []
-serializeOccurrence (Lit s1 s2) = ["lit", s1, s2]
-serializeOccurrence (Equal o1 o2) = "eq" : (serializeOccurrence o1 ++ ["and"] ++ serializeOccurrence o2)
-serializeOccurrence (SC i) = [pack $ "side_condition_" ++ show i]
-serializeOccurrence (Value p o) = pack (show p ++ "_val") : serializeOccurrence o
-serializeOccurrence (Rem p o) = pack (show p ++ "_rem") : serializeOccurrence o
-serializeOccurrence (Size o) = "size" : serializeOccurrence o
-serializeOccurrence (Inj o) = "-1" : serializeOccurrence o
 
 data L a = L
            { getSpecializations :: ![(Text, a)]
@@ -884,35 +676,8 @@ instance Y.ToYaml a => Y.ToYaml (Anchor a) where
       , "next" Y..= Y.toYaml x
       ]
 
-instance Y.ToYaml Occurrence where
-  toYaml o = Y.toYaml $ serializeOccurrence o
-
-instance Y.ToYaml a => Y.ToYaml (BoundPattern a) where
-  toYaml Wildcard = error "Unsupported map/set pattern"
-  toYaml (Variable (Just o) h) = Y.mapping
-    ["hook" Y..= Y.toYaml (pack h)
-    , "occurrence" Y..= Y.toYaml o
-    ]
-  toYaml (Variable Nothing _) = error "Unsupported map/set pattern"
-  toYaml (As _ _ p) = Y.toYaml p
-  toYaml (MapPattern _ _ _ _ o) = Y.toYaml o
-  toYaml (SetPattern _ _ _ o) = Y.toYaml o
-  toYaml (ListPattern _ _ _ _ o) = Y.toYaml o
-  toYaml (Pattern (Literal s) (Just h) []) = Y.mapping
-    ["hook" Y..= Y.toYaml (pack h)
-    , "literal" Y..= Y.toYaml (pack s)
-    ]
-  toYaml (Pattern (Symbol s) Nothing ps) = Y.mapping
-    ["constructor" Y..= Y.toYaml (pack $ unparseToString s)
-    , "args" Y..= Y.array (map Y.toYaml ps)
-    ]
-  toYaml Pattern{} = error "Unsupported map/set pattern"
-
 instance Y.ToYaml Alias where
     toYaml (Alias name) = Y.alias name
-
-instance Y.ToYaml (Fix BoundPattern) where
-  toYaml = cata Y.toYaml
 
 serializeToYaml :: Free Anchor Alias -> B.ByteString
 serializeToYaml = Y.toByteString . Y.toYaml
