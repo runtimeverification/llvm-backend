@@ -7,6 +7,7 @@ target triple = "x86_64-unknown-linux-gnu"
 %set = type { i8 *, i8 *, i64 } ; im::hashset::HashSet
 %list = type { i64, i64, i8 *, i8 *, i8 *, i8 *, i8 * } ; im::vector::Vector
 %mpz = type { i32, i32, i64 * } ; mpz_t
+%floating = type { i64, { i64, i32, i64, i64 * } } ; exp, mpfr_t
 %layoutitem = type { i64, i16 }
 %layout = type { i8, %layoutitem* }
 
@@ -17,6 +18,7 @@ declare void @map_hash(%map*, i8*)
 declare void @list_hash(%list*, i8*)
 declare void @set_hash(%set*, i8*)
 declare void @int_hash(%mpz*, i8*)
+declare void @float_hash(%floating*, i8*)
 
 declare i64 @__gmpz_get_si(%mpz*)
 
@@ -87,7 +89,7 @@ hashChildren:
   %children = extractvalue %layout %layoutData, 1
   br label %childrenLoop
 childrenLoop:
-  %counter2 = phi i8 [ %length, %hashChildren ], [ %sub12, %hashMap ], [ %sub12, %hashList ], [ %sub12, %hashSet ], [ %sub12, %hashInt ], [ %sub12, %hashBool ], [ %sub12, %hashSymbol ]
+  %counter2 = phi i8 [ %length, %hashChildren ], [ %sub12, %hashMap ], [ %sub12, %hashList ], [ %sub12, %hashSet ], [ %sub12, %hashInt ], [ %sub12, %hashFloat ], [ %sub12, %hashBool ], [ %sub12, %hashSymbol ]
   %index2 = sub i8 %length, %counter2
   %indexlong2 = zext i8 %index2 to i64
   %sub12 = sub i8 %counter2, 1
@@ -103,7 +105,7 @@ hashChild:
                                    i16 2, label %hashList
 				   i16 3, label %hashSet
 				   i16 4, label %hashInt
-				   i16 5, label %stuck
+				   i16 5, label %hashFloat
 				   i16 6, label %stuck
 				   i16 7, label %hashBool
 				   i16 8, label %hashSymbol
@@ -124,6 +126,11 @@ hashInt:
   %intptrptr = inttoptr i64 %childintptr to %mpz**
   %intptr = load %mpz*, %mpz** %intptrptr
   call void @int_hash(%mpz* %intptr, i8* %hasher)
+  br label %childrenLoop
+hashFloat:
+  %floatptrptr = inttoptr i64 %childintptr to %floating**
+  %floatptr = load %floating*, %floating** %floatptrptr
+  call void @float_hash(%floating* %floatptr, i8* %hasher)
   br label %childrenLoop
 hashBool:
   %boolptr = inttoptr i64 %childintptr to i1*
