@@ -43,6 +43,12 @@ extern "C" {
     return result;
   }
 
+  floating *move_float(floating *i) {
+    floating *result = (floating *)malloc(sizeof(floating));
+    *result = *i;
+    return result;
+  }
+
   void add_hash64(void*, uint64_t) {}
 }
 

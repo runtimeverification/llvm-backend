@@ -1,7 +1,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <cinttypes>
+#include <string>
 
 #include "runtime/header.h"
 #include "runtime/alloc.h"
@@ -12,40 +12,8 @@ void printInt(FILE *file, mpz_t i, const char *sort) {
 }
 
 void printFloat(FILE *file, floating *f, const char *sort) {
-  uint64_t prec = mpfr_get_prec(f->f);
-  uint64_t exp = f->exp;
-  char suffix[41]; // 19 chars per long + p and x and null byte
-  if (prec == 53 && exp == 11) {
-    suffix[0] = 0;
-  } else if (prec == 24 && exp == 8) {
-    suffix[0] = 'f';
-    suffix[1] = 0;
-  } else {
-    sprintf(suffix, "p%" PRIu64 "x%" PRIu64, prec, exp);
-  }
-  if (mpfr_nan_p(f->f)) {
-    fprintf(file, "\\dv{%s}(\"NaN%s\")", sort, suffix);
-  } else if (mpfr_inf_p(f->f)) {
-    if (mpfr_signbit(f->f)) {
-      fprintf(file, "\\dv{%s}(\"-Infinity%s\")", sort, suffix);
-    } else {
-      fprintf(file, "\\dv{%s}(\"Infinity%s\")", sort, suffix);
-    }
-  } else {
-    mpfr_exp_t printed_exp;
-    char *str = mpfr_get_str(NULL, &printed_exp, 10, 0, f->f, MPFR_RNDN);
-    size_t len = strlen(str);
-    char *newstr = (char *)koreAllocOld(len+2);
-    size_t idx = 0;
-    if (str[0] == '-') {
-      newstr[0] = '-';
-      idx = 1;
-    }
-    newstr[idx] = '0';
-    newstr[idx+1] = '.';
-    strcpy(newstr+idx+2,str+idx);
-    fprintf(file, "\\dv{%s}(\"%se%ld%s\")", sort, newstr, printed_exp, suffix);
-  }
+  std::string str = floatToString(f);
+  fprintf(file, "\\dv{%s}(\"%s\")", sort, str.c_str());
 }
 
 void printBool(FILE *file, bool b, const char *sort) {
