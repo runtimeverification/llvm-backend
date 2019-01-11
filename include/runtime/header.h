@@ -75,6 +75,11 @@ extern "C" {
     void *f;
     char *g;
   } list;
+
+  typedef struct floating {
+    uint64_t exp;
+    mpfr_t f;
+  } floating;
  
   // This function is exported to be used by the interpreter 
   block *parseConfiguration(const char *filename);
@@ -101,7 +106,7 @@ extern "C" {
       void visitList(FILE *, list *, const char *, const char *, const char *), 
       void visitSet(FILE *, set *, const char *, const char *, const char *), 
       void visitInt(FILE *, mpz_t, const char *),
-      void visitFloat(FILE *, mpfr_t, const char *),
+      void visitFloat(FILE *, floating *, const char *),
       void visitBool(FILE *, bool, const char *),
       void visitMInt(FILE *, void *, const char *),
       void visitSeparator(FILE *));

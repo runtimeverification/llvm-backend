@@ -50,7 +50,7 @@ target triple = "x86_64-unknown-linux-gnu"
 ; set: %set
 ; array: %list
 ; integer: %mpz *
-; float: %mpfr *
+; float: %floating *
 ; string: %string *
 ; bytes: %string *
 ; string buffer: %stringbuffer *
@@ -65,8 +65,8 @@ target triple = "x86_64-unknown-linux-gnu"
 %set = type { i8 *, i8 *, i64 } ; im::hashset::HashSet
 %list = type { i64, i64, i8 *, i8 *, i8 *, i8 *, i8 * } ; im::vector::Vector
 %mpz = type { i32, i32, i64 * } ; mpz_t
-%mpfr = type { i64, i32, i64, i64 * } ; mpfr_t
-%blockheader = type { i64 } 
+%floating = type { i64, { i64, i32, i64, i64 * } } ; exp, mpfr_t
+%blockheader = type { i64 }
 %block = type { %blockheader, [0 x i64 *] } ; 16-bit layout, 8-bit length, 32-bit tag, children
 
 %layout = type { i8, %layoutitem* } ; number of children, array of children
@@ -81,7 +81,7 @@ target triple = "x86_64-unknown-linux-gnu"
 ; %map, %set, %list: noop/drop_in_place, follow
 ; %block *: managed heap, follow
 ; %mpz *: malloc/mpz_clear->free, do not follow
-; %mpfr *: malloc/mpfr_clear->free, do not follow
+; %floating *: malloc/mpfr_clear->free, do not follow
 ; %stringbuffer *: malloc->malloc/free->free, do not follow
 
 ; We also automatically generate for each unique layout id a struct type
@@ -108,7 +108,7 @@ static std::string MAP_STRUCT = "map";
 static std::string LIST_STRUCT = "list";
 static std::string SET_STRUCT = "set";
 static std::string INT_STRUCT = "mpz";
-static std::string FLOAT_STRUCT = "mpfr";
+static std::string FLOAT_STRUCT = "floating";
 static std::string BUFFER_STRUCT = "stringbuffer";
 static std::string BLOCK_STRUCT = "block";
 static std::string BLOCKHEADER_STRUCT = "blockheader";

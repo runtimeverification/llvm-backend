@@ -60,6 +60,7 @@ static void emitGetTagForSymbolName(KOREDefinition *definition, llvm::Module *mo
 
 static std::string BLOCKHEADER_STRUCT = "blockheader";
 static std::string INT_STRUCT = "mpz";
+static std::string FLOAT_STRUCT = "floating";
 static std::string STRING_STRUCT = "string";
 static std::string BUFFER_STRUCT = "stringbuffer";
 static std::string LAYOUT_STRUCT = "layout";
