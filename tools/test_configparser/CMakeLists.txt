@@ -4,7 +4,7 @@ kllvm_add_tool(test_configparser
   main.cpp
 )
 
-target_link_libraries(test_configparser PUBLIC Codegen AST gmp Parser)
+target_link_libraries(test_configparser PUBLIC Codegen AST gmp mpfr Parser)
 
 llvm_config(test_configparser
   ${LLVM_TARGETS_TO_BUILD}

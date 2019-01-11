@@ -36,7 +36,7 @@ fi
   "$LIBDIR"/libParser.a \
   "$LIBDIR"/libAST.a \
   "$LIBDIR"/liballoc.a \
-  -lgmp -lpthread -ldl \
+  -lgmp -lmpfr -lpthread -ldl \
   "$LLVMLIB" \
   -lLLVMIRReader -lLLVMBitReader -lLLVMAsmParser -lLLVMCore -lLLVMBinaryFormat -lLLVMSupport -lLLVMDemangle \
   -ltinfo \

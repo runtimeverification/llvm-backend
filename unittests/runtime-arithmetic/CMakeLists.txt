@@ -7,5 +7,6 @@ target_link_libraries(runtime-arithmetic-tests
   PUBLIC
   arithmetic
   gmp
+  mpfr
   ${Boost_UNIT_TEST_FRAMEWORK_LIBRARIES}
 )
