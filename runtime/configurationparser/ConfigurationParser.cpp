@@ -9,6 +9,33 @@
 using namespace kllvm;
 using namespace kllvm::parser;
 
+extern "C" void init_float(floating *result, const char *c_str) {
+  std::string contents = std::string(c_str);
+  size_t is_float = contents.find_first_of("fF");
+  size_t prec, exp;
+  if (is_float != std::string::npos) {
+    prec = 24;
+    exp = 8;
+  } else {
+    size_t has_prec = contents.find_first_of("pP");
+    if (has_prec == std::string::npos) {
+       prec = 53;
+       exp = 11;
+    } else {
+      size_t exp = contents.find_first_of("xX");
+      std::string prec_str = contents.substr(has_prec+1, exp-has_prec);
+      std::string exp_str = contents.substr(exp+1);
+      prec = atoll(prec_str.c_str());
+      exp = atoll(exp_str.c_str());
+    }
+  }
+  mpfr_t value;
+  mpfr_init2(value, prec);
+  size_t last = contents.find_first_of("fFdDpP");
+  std::string str_value = contents.substr(0, last);
+  mpfr_set_str(value, str_value.c_str(), 10, MPFR_RNDN);
+}
+
 static void *allocatePatternAsConfiguration(const KOREPattern *Pattern) {
   const auto constructor = dynamic_cast<const KOREObjectCompositePattern *>(Pattern);
   assert(constructor);
