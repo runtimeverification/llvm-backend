@@ -19,6 +19,7 @@ else
 fi
 
 "clang++$SUFFIX" -Wno-override-module "$modopt" \
+  "$LIBDIR"/llvm/*.ll \
   "$LIBDIR"/libarithmetic.a \
   "$LIBDIR"/libstrings.a \
   "$LIBDIR"/rust/libdatastructures.rlib \
@@ -30,7 +31,6 @@ fi
   "$RUSTDIR"/libcompiler_builtins-*.rlib \
   "$RUSTDIR"/libpanic_abort-*.rlib \
   "$RUSTDIR"/liballoc_system-*.rlib \
-  "$LIBDIR"/llvm/*.ll \
   "$MAINFILES" \
   "$LIBDIR"/libconfigurationparser.a \
   "$LIBDIR"/libParser.a \
