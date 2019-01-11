@@ -7,6 +7,7 @@ target triple = "x86_64-unknown-linux-gnu"
 %set = type { i8 *, i8 *, i64 } ; im::hashset::HashSet
 %list = type { i64, i64, i8 *, i8 *, i8 *, i8 *, i8 * } ; im::vector::Vector
 %mpz = type { i32, i32, i64 * } ; mpz_t
+%floating = type { i64, { i64, i32, i64, i64 * } } ; exp, mpfr_t
 %layoutitem = type { i64, i16 }
 %layout = type { i8, %layoutitem* }
 
@@ -18,6 +19,7 @@ declare i1 @hook_MAP_eq(%map*, %map*)
 declare i1 @hook_LIST_eq(%list*, %list*)
 declare i1 @hook_SET_eq(%set*, %set*)
 declare i1 @hook_INT_eq(%mpz*, %mpz*)
+declare i1 @hook_FLOAT_trueeq(%floating*, %floating*)
 
 @HDR_MASK = private constant i64 -246290604621825 ; 0xffff1fffffffffff, cf header.h
 
@@ -64,7 +66,7 @@ compareChildren:
   %children = extractvalue %layout %layoutData, 1
   br label %loop
 loop:
-  %counter = phi i8 [ %length, %compareChildren ], [ %sub1, %compareMap ], [ %sub1, %compareList ], [ %sub1, %compareSet ], [ %sub1, %compareInt ], [ %sub1, %compareBool ], [ %sub1, %compareSymbol ]
+  %counter = phi i8 [ %length, %compareChildren ], [ %sub1, %compareMap ], [ %sub1, %compareList ], [ %sub1, %compareSet ], [ %sub1, %compareInt ], [ %sub1, %compareFloat ], [ %sub1, %compareBool ], [ %sub1, %compareSymbol ]
   %index = sub i8 %length, %counter
   %indexlong = zext i8 %index to i64
   %sub1 = sub i8 %counter, 1
@@ -81,7 +83,7 @@ compareChild:
                                    i16 2, label %compareList
 				   i16 3, label %compareSet
 				   i16 4, label %compareInt
-				   i16 5, label %stuck
+				   i16 5, label %compareFloat
 				   i16 6, label %stuck
 				   i16 7, label %compareBool
 				   i16 8, label %compareSymbol
@@ -108,6 +110,13 @@ compareInt:
   %int2ptr = load %mpz*, %mpz** %int2ptrptr
   %comparedInt = call i1 @hook_INT_eq(%mpz* %int1ptr, %mpz* %int2ptr)
   br i1 %comparedInt, label %loop, label %exit
+compareFloat:
+  %float1ptrptr = inttoptr i64 %child1intptr to %floating**
+  %float2ptrptr = inttoptr i64 %child2intptr to %floating**
+  %float1ptr = load %floating*, %floating** %float1ptrptr
+  %float2ptr = load %floating*, %floating** %float2ptrptr
+  %comparedFloat = call i1 @hook_FLOAT_trueeq(%floating* %float1ptr, %floating* %float2ptr)
+  br i1 %comparedFloat, label %loop, label %exit
 compareBool:
   %bool1ptr = inttoptr i64 %child1intptr to i1*
   %bool2ptr = inttoptr i64 %child2intptr to i1*
@@ -123,7 +132,7 @@ compareSymbol:
   %comparedSymbol = call i1 @hook_KEQUAL_eq(%block* %child1ptr, %block* %child2ptr)
   br i1 %comparedSymbol, label %loop, label %exit
 exit:
-  %phi = phi i1 [ 0, %entry ], [ %eqconstant, %constant ], [ 0, %block ], [ %eqcontents, %eqString ], [ 1, %loop ], [ 0, %compareMap ], [ 0, %compareList ], [ 0, %compareSet ], [ 0, %compareInt ], [ 0, %compareBool ], [ 0, %compareSymbol ]
+  %phi = phi i1 [ 0, %entry ], [ %eqconstant, %constant ], [ 0, %block ], [ %eqcontents, %eqString ], [ 1, %loop ], [ 0, %compareMap ], [ 0, %compareList ], [ 0, %compareSet ], [ 0, %compareInt ], [ 0, %compareFloat ], [ 0, %compareBool ], [ 0, %compareSymbol ]
   ret i1 %phi
 stuck:
   call void @abort()
