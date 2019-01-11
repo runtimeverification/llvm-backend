@@ -230,7 +230,51 @@ llvm::Value *CreateTerm::createToken(ValueType sort, std::string contents) {
     }
     return global;
   }
-  case SortCategory::Float:
+  case SortCategory::Float: {
+    llvm::Constant *global = Module->getOrInsertGlobal("float_" + contents, Module->getTypeByName(FLOAT_STRUCT));
+    llvm::GlobalVariable *globalVar = llvm::dyn_cast<llvm::GlobalVariable>(global);
+    if (!globalVar->hasInitializer()) {
+      size_t is_float = contents.find_first_of("fF");
+      size_t prec, exp;
+      if (is_float != std::string::npos) {
+        prec = 24;
+        exp = 8;
+      } else {
+        size_t has_prec = contents.find_first_of("pP");
+        if (has_prec == std::string::npos) {
+           prec = 53;
+           exp = 11;
+        } else {
+          size_t exp_idx = contents.find_first_of("xX");
+          std::string prec_str = contents.substr(has_prec+1, exp_idx-has_prec);
+          std::string exp_str = contents.substr(exp_idx+1);
+          prec = atoll(prec_str.c_str());
+          exp = atoll(exp_str.c_str());
+        }
+      }
+      mpfr_t value;
+      mpfr_init2(value, prec);
+      size_t last = contents.find_first_of("fFdDpP");
+      std::string str_value = contents.substr(0, last);
+      mpfr_set_str(value, str_value.c_str(), 10, MPFR_RNDN);
+      size_t size = (prec + 63) / 64;
+      llvm::ArrayType *limbsType = llvm::ArrayType::get(llvm::Type::getInt64Ty(Ctx), size);
+      llvm::Constant *limbs = Module->getOrInsertGlobal("float_" + contents + "_limbs", limbsType);
+      llvm::GlobalVariable *limbsVar = llvm::dyn_cast<llvm::GlobalVariable>(limbs);
+      std::vector<llvm::Constant *> allocdLimbs;
+      for (size_t i = 0; i < size; i++) {
+        allocdLimbs.push_back(llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), value->_mpfr_d[i]));
+      }
+      limbsVar->setInitializer(llvm::ConstantArray::get(limbsType, allocdLimbs));
+      llvm::Constant *expbits = llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), exp);
+      llvm::Constant *mpfr_prec = llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), prec);
+      llvm::Constant *mpfr_sign = llvm::ConstantInt::getSigned(llvm::Type::getInt32Ty(Ctx), value->_mpfr_sign);
+      llvm::Constant *mpfr_exp = llvm::ConstantInt::getSigned(llvm::Type::getInt64Ty(Ctx), value->_mpfr_exp);
+      globalVar->setInitializer(llvm::ConstantStruct::get(Module->getTypeByName(FLOAT_STRUCT), expbits, llvm::ConstantStruct::getAnon({mpfr_prec, mpfr_sign, mpfr_exp, llvm::ConstantExpr::getPointerCast(limbsVar, llvm::Type::getInt64PtrTy(Ctx))})));
+      mpfr_clear(value);
+    }
+    return global;
+  }
   case SortCategory::StringBuffer:
   case SortCategory::MInt:
     assert(false && "not implemented yet: tokens");
