@@ -25,7 +25,7 @@ stack test
 stack install
 cd ../build
 
-export PATH=$PATH:`pwd`/install/bin
+export PATH=`pwd`/install/bin:$PATH
 make install
 llvm-kompile ../test/imp.kore IMP main -o interpreter
 ./interpreter ../test/collatz.kore -1 /dev/stdout | grep -q "Lbl'-LT-'T'-GT-'{}(Lbl'-LT-'k'-GT-'{}(dotk{}())"
