@@ -77,7 +77,7 @@ extern "C" {
   } list;
 
   typedef struct floating {
-    uint64_t exp;
+    uint64_t exp; // number of bits in exponent range
     mpfr_t f;
   } floating;
  

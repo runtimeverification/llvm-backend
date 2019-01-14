@@ -270,6 +270,9 @@ llvm::Value *CreateTerm::createToken(ValueType sort, std::string contents) {
       llvm::Constant *mpfr_prec = llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), prec);
       llvm::Constant *mpfr_sign = llvm::ConstantInt::getSigned(llvm::Type::getInt32Ty(Ctx), value->_mpfr_sign);
       llvm::Constant *mpfr_exp = llvm::ConstantInt::getSigned(llvm::Type::getInt64Ty(Ctx), value->_mpfr_exp);
+      // create struct floating with an exponent range and an __mpfr_struct. Note that we are assuming the format of the struct, but it's unlikely to change except possibly between major releases
+      // which happen less than once every couple years, because the C++ ABI depends on it. We are also assuming that the host and target have the same arch, but since we don't yet support
+      // cross compiling anyway, that's a safe assumption.
       globalVar->setInitializer(llvm::ConstantStruct::get(Module->getTypeByName(FLOAT_STRUCT), expbits, llvm::ConstantStruct::getAnon({mpfr_prec, mpfr_sign, mpfr_exp, llvm::ConstantExpr::getPointerCast(limbsVar, llvm::Type::getInt64PtrTy(Ctx))})));
       mpfr_clear(value);
     }
