@@ -18,6 +18,11 @@ static mpfr_exp_t emax(mpfr_exp_t e) {
 
 static mpfr_exp_t default_emax, default_emin;
 
+/* Each floating point number contains a number of exponent bits (here e) and
+ * a precision (p). Here we initialize the result of a floating point computation
+ * with that exponent range and precision and then prepare mpfr to perform the calculation
+ * by transferring ourselves to that exponent range. An overload also exists to
+ * get the value from a floating * if one already exists in the arguments to the function. */
 static void mpfr_enter(mpfr_prec_t p, mpfr_exp_t e, floating *result) {
   mpfr_init2(result->f, p);
   result->exp = e;
@@ -32,6 +37,9 @@ static void mpfr_enter(floating *arg, floating *result) {
   mpfr_enter(p, arg->exp, result);
 }
 
+/* Here we finalize the computation by ensuring that the value is correctly rounded into
+ * The result exponent range, including subnormal arithmetic, and then restore the previous
+ * values for emin and emax within mpfr. */
 static void mpfr_leave(int t, floating *result) {
   t = mpfr_check_range(result->f, t, MPFR_RNDN);
   mpfr_subnormalize(result->f, t, MPFR_RNDN);
