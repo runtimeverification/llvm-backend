@@ -19,11 +19,11 @@ else()
 set(RUST_TARGET_TRIPLE "x86_64-unknown-linux-gnu")
 endif()
 
-find_package(LLVM 6 REQUIRED CONFIG)
+find_package(LLVM 7 REQUIRED CONFIG)
 
 message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
-if (${LLVM_PACKAGE_VERSION} VERSION_LESS 6.0)
-  message(FATAL_ERROR "LLVM 6.0 or newer is required")
+if (${LLVM_PACKAGE_VERSION} VERSION_LESS 7.0)
+  message(FATAL_ERROR "LLVM 7.0 or newer is required")
 endif()
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
