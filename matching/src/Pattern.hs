@@ -173,7 +173,7 @@ hook (PatternMatrix (c : _)) =
     ix :: Fix Pattern -> Maybe String
     ix (Fix (Pattern _ bw' _)) = bw'
     ix (Fix ListPattern{}) = Just "LIST.List"
-    ix (Fix MapPattern{}) = Just "MAP.Map"
+    ix (Fix MapPattern {}) = getMapHookName
     ix (Fix SetPattern{}) = Just "SET.Set"
     ix (Fix (As _ _ pat))    = ix pat
     ix (Fix Wildcard)        = Nothing
@@ -313,8 +313,8 @@ isDefault (_, Fix (ListPattern _ (Just _) _ _ _)) = True
 isDefault (c, Fix (As _ _ pat)) = isDefault (c,pat)
 isDefault (_, Fix Wildcard) = True
 isDefault (_, Fix (Variable _ _)) = True
-isDefault (_, Fix (MapPattern _ _ (Just _) _ _)) = True
-isDefault (_, Fix (MapPattern ks vs Nothing _ _)) = not (null ks) || not (null vs)
+isDefault (c, p@(Fix MapPattern{})) =
+  isDefaultMap c p
 isDefault (_, Fix (SetPattern _ (Just _) _ _)) = True
 isDefault (_, Fix (SetPattern es Nothing _ _)) = not (null es)
 
@@ -327,11 +327,11 @@ mightUnify (Fix (As _ _ p)) p' = mightUnify p p'
 mightUnify p (Fix (As _ _ p')) = mightUnify p p'
 mightUnify (Fix (Pattern c _ ps)) (Fix (Pattern c' _ ps')) = c == c' && (and $ zipWith mightUnify ps ps')
 mightUnify (Fix ListPattern{}) (Fix ListPattern{}) = True
-mightUnify (Fix MapPattern{}) (Fix MapPattern{}) = True
+mightUnify x@(Fix MapPattern{}) y =
+  mightUnifyMap x y
 mightUnify (Fix SetPattern{}) (Fix SetPattern{}) = True
 mightUnify (Fix Pattern{}) _ = False
 mightUnify (Fix ListPattern{}) _ = False
-mightUnify (Fix MapPattern{}) _ = False
 mightUnify (Fix SetPattern{}) _ = False
 
 -- returns true if the specified constructor is an overload of the current pattern and can match it
@@ -367,21 +367,16 @@ checkPatternIndex inj@(Symbol (SymbolOrAlias (Id "inj" _) _)) (Metadata _ _ over
   in any (isValidOverload ps childMeta cls $ fromJust $ meta ix) less
 
 checkPatternIndex ix _ (_, Fix (Pattern ix' _ _)) = ix == ix'
-checkPatternIndex Empty _ (_, Fix (MapPattern ks vs _ _ _)) = null ks && null vs
+checkPatternIndex c m p@(_, Fix MapPattern{}) =
+  checkMapPatternIndex mightUnify c m p
 checkPatternIndex Empty _ (_, Fix (SetPattern es _ _ _)) = null es
-checkPatternIndex HasKey{} _ (_, Fix (MapPattern _ _ (Just _) _ _)) = True
 checkPatternIndex HasKey{} _ (_, Fix (SetPattern _ (Just _) _ _)) = True
-checkPatternIndex (HasKey _ _ _ (Just p)) _ (c, Fix (MapPattern ks _ Nothing _ _)) = any (mightUnify p) $ map (canonicalizePattern c) ks
 checkPatternIndex (HasKey _ _ _ (Just p)) _ (c, Fix (SetPattern es Nothing _ _)) = any (mightUnify p) $ map (canonicalizePattern c) es
 checkPatternIndex (HasKey _ _ _ Nothing) _ _ = error "TODO: map/set choice"
-checkPatternIndex (HasNoKey _ (Just p)) _ (c, Fix (MapPattern ks _ _ _ _)) =
-  let canonKs = map (canonicalizePattern c) ks
-  in p `notElem` canonKs
 checkPatternIndex (HasNoKey _ (Just p)) _ (c, Fix (SetPattern es _ _ _)) =
   let canonEs = map (canonicalizePattern c) es
   in p `notElem` canonEs
 checkPatternIndex (HasNoKey _ Nothing) _ _ = error "TODO: map/set choice"
-checkPatternIndex _ _ (_, Fix MapPattern{}) = error "Invalid map pattern"
 checkPatternIndex _ _ (_, Fix SetPattern{}) = error "Invalid map pattern"
 
 addVars :: Maybe Constructor -> [Clause] -> Column -> Occurrence -> [Clause]
@@ -398,8 +393,8 @@ addVarToRow _ _ (Fix Pattern{}) vars = vars
 addVarToRow _ _ (Fix (ListPattern _ Nothing _ _ _)) vars = vars
 addVarToRow (Just (List _ len)) o (Fix (ListPattern _ (Just p) _ _ _)) vars = addVarToRow Nothing (Num len o) p vars
 addVarToRow _ _ (Fix (ListPattern _ (Just _) _ _ _)) vars = vars
-addVarToRow _ o (Fix (MapPattern [] [] (Just p) _ _)) vars = addVarToRow Nothing o p vars
-addVarToRow _ _ (Fix MapPattern{}) vars = vars
+addVarToRow c o p@(Fix MapPattern{}) vars =
+  addMapVarToRow addVarToRow c o p vars
 addVarToRow _ o (Fix (SetPattern [] (Just p) _ _)) vars = addVarToRow Nothing o p vars
 addVarToRow _ _ (Fix SetPattern{}) vars = vars
 
