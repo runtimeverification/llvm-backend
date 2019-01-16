@@ -10,11 +10,9 @@ else
 fi
 if [[ "$OSTYPE" == "darwin"* ]]; then
     SUFFIX=""
-    RUSTDIR=`rustc --print sysroot`/lib/rustlib/x86_64-apple-darwin/lib/
     LLVMLIB="-L/usr/local/opt/llvm@6/lib"
 else
     SUFFIX="-6.0"
-    RUSTDIR=`rustc --print sysroot`/lib/rustlib/x86_64-unknown-linux-gnu/lib/
     LLVMLIB="-L/usr/lib/llvm-6.0/lib"
 fi
 
@@ -24,13 +22,7 @@ fi
   "$LIBDIR"/libstrings.a \
   "$LIBDIR"/rust/libdatastructures.rlib \
   "$LIBDIR"/rust/deps/*.rlib \
-  "$RUSTDIR"/libcore-*.rlib \
-  "$RUSTDIR"/libstd-*.rlib \
-  "$RUSTDIR"/liballoc-*.rlib \
-  "$RUSTDIR"/libunwind-*.rlib \
-  "$RUSTDIR"/libcompiler_builtins-*.rlib \
-  "$RUSTDIR"/libpanic_abort-*.rlib \
-  "$RUSTDIR"/liballoc_system-*.rlib \
+  "$LIBDIR"/rust/deps/stdlib/*.rlib \
   "$MAINFILES" \
   "$LIBDIR"/libconfigurationparser.a \
   "$LIBDIR"/libParser.a \
