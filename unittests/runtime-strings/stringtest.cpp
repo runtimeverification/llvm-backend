@@ -26,7 +26,9 @@ extern "C" {
   mpz_ptr hook_STRING_findChar(const string *, const string *, mpz_ptr);
   mpz_ptr hook_STRING_rfindChar(const string *, const string *, mpz_ptr);
   const mpz_ptr hook_STRING_string2int(const string *);
+  floating *hook_STRING_string2float(const string *);
   const mpz_ptr hook_STRING_string2base(const string *, mpz_t);
+  string * hook_STRING_float2string(floating *);
   const string * hook_STRING_int2string(const mpz_t);
   const string * hook_STRING_replaceAll(const string *, const string *, const string *);
   const string * hook_STRING_replace(const string *, const string *, const string *, mpz_t);
@@ -386,6 +388,20 @@ BOOST_AUTO_TEST_CASE(string2base) {
   BOOST_CHECK_EQUAL(mpz_cmp_si(hook_STRING_string2base(_10, int16), 16), 0);
   BOOST_CHECK_EQUAL(mpz_cmp_si(hook_STRING_string2base(neg10, int16), -16), 0);
   BOOST_CHECK_EQUAL(mpz_cmp_si(hook_STRING_string2base(ff, int16), 255), 0);
+}
+
+BOOST_AUTO_TEST_CASE(string2float) {
+  auto _8 = makeString("8.0f");
+  floating *result;
+  result = hook_STRING_string2float(_8);
+  
+  BOOST_CHECK_EQUAL(24, mpfr_get_prec(result->f));
+  BOOST_CHECK_EQUAL(8, result->exp);
+  BOOST_CHECK_EQUAL(mpfr_cmp_d(result->f, 8.0), 0);
+
+  string *result2 = hook_STRING_float2string(result);
+  std::string resultSTL = std::string(result2->data, len(result2));
+  BOOST_CHECK_EQUAL(resultSTL, "0.800000000e1f");
 }
 
 BOOST_AUTO_TEST_CASE(replace) {
