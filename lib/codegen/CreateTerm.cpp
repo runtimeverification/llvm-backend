@@ -50,7 +50,7 @@ target triple = "x86_64-unknown-linux-gnu"
 ; set: %set
 ; array: %list
 ; integer: %mpz *
-; float: %mpfr *
+; float: %floating *
 ; string: %string *
 ; bytes: %string *
 ; string buffer: %stringbuffer *
@@ -65,8 +65,8 @@ target triple = "x86_64-unknown-linux-gnu"
 %set = type { i8 *, i8 *, i64 } ; im::hashset::HashSet
 %list = type { i64, i64, i8 *, i8 *, i8 *, i8 *, i8 * } ; im::vector::Vector
 %mpz = type { i32, i32, i64 * } ; mpz_t
-%mpfr = type { i64, i32, i64, i64 * } ; mpfr_t
-%blockheader = type { i64 } 
+%floating = type { i64, { i64, i32, i64, i64 * } } ; exp, mpfr_t
+%blockheader = type { i64 }
 %block = type { %blockheader, [0 x i64 *] } ; 16-bit layout, 8-bit length, 32-bit tag, children
 
 %layout = type { i8, %layoutitem* } ; number of children, array of children
@@ -81,7 +81,7 @@ target triple = "x86_64-unknown-linux-gnu"
 ; %map, %set, %list: noop/drop_in_place, follow
 ; %block *: managed heap, follow
 ; %mpz *: malloc/mpz_clear->free, do not follow
-; %mpfr *: malloc/mpfr_clear->free, do not follow
+; %floating *: malloc/mpfr_clear->free, do not follow
 ; %stringbuffer *: malloc->malloc/free->free, do not follow
 
 ; We also automatically generate for each unique layout id a struct type
@@ -108,7 +108,7 @@ static std::string MAP_STRUCT = "map";
 static std::string LIST_STRUCT = "list";
 static std::string SET_STRUCT = "set";
 static std::string INT_STRUCT = "mpz";
-static std::string FLOAT_STRUCT = "mpfr";
+static std::string FLOAT_STRUCT = "floating";
 static std::string BUFFER_STRUCT = "stringbuffer";
 static std::string BLOCK_STRUCT = "block";
 static std::string BLOCKHEADER_STRUCT = "blockheader";
@@ -230,7 +230,54 @@ llvm::Value *CreateTerm::createToken(ValueType sort, std::string contents) {
     }
     return global;
   }
-  case SortCategory::Float:
+  case SortCategory::Float: {
+    llvm::Constant *global = Module->getOrInsertGlobal("float_" + contents, Module->getTypeByName(FLOAT_STRUCT));
+    llvm::GlobalVariable *globalVar = llvm::dyn_cast<llvm::GlobalVariable>(global);
+    if (!globalVar->hasInitializer()) {
+      size_t is_float = contents.find_first_of("fF");
+      size_t prec, exp;
+      if (is_float != std::string::npos) {
+        prec = 24;
+        exp = 8;
+      } else {
+        size_t has_prec = contents.find_first_of("pP");
+        if (has_prec == std::string::npos) {
+           prec = 53;
+           exp = 11;
+        } else {
+          size_t exp_idx = contents.find_first_of("xX");
+          std::string prec_str = contents.substr(has_prec+1, exp_idx-has_prec);
+          std::string exp_str = contents.substr(exp_idx+1);
+          prec = atoll(prec_str.c_str());
+          exp = atoll(exp_str.c_str());
+        }
+      }
+      mpfr_t value;
+      mpfr_init2(value, prec);
+      size_t last = contents.find_first_of("fFdDpP");
+      std::string str_value = contents.substr(0, last);
+      mpfr_set_str(value, str_value.c_str(), 10, MPFR_RNDN);
+      size_t size = (prec + 63) / 64;
+      llvm::ArrayType *limbsType = llvm::ArrayType::get(llvm::Type::getInt64Ty(Ctx), size);
+      llvm::Constant *limbs = Module->getOrInsertGlobal("float_" + contents + "_limbs", limbsType);
+      llvm::GlobalVariable *limbsVar = llvm::dyn_cast<llvm::GlobalVariable>(limbs);
+      std::vector<llvm::Constant *> allocdLimbs;
+      for (size_t i = 0; i < size; i++) {
+        allocdLimbs.push_back(llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), value->_mpfr_d[i]));
+      }
+      limbsVar->setInitializer(llvm::ConstantArray::get(limbsType, allocdLimbs));
+      llvm::Constant *expbits = llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), exp);
+      llvm::Constant *mpfr_prec = llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), prec);
+      llvm::Constant *mpfr_sign = llvm::ConstantInt::getSigned(llvm::Type::getInt32Ty(Ctx), value->_mpfr_sign);
+      llvm::Constant *mpfr_exp = llvm::ConstantInt::getSigned(llvm::Type::getInt64Ty(Ctx), value->_mpfr_exp);
+      // create struct floating with an exponent range and an __mpfr_struct. Note that we are assuming the format of the struct, but it's unlikely to change except possibly between major releases
+      // which happen less than once every couple years, because the C++ ABI depends on it. We are also assuming that the host and target have the same arch, but since we don't yet support
+      // cross compiling anyway, that's a safe assumption.
+      globalVar->setInitializer(llvm::ConstantStruct::get(Module->getTypeByName(FLOAT_STRUCT), expbits, llvm::ConstantStruct::getAnon({mpfr_prec, mpfr_sign, mpfr_exp, llvm::ConstantExpr::getPointerCast(limbsVar, llvm::Type::getInt64PtrTy(Ctx))})));
+      mpfr_clear(value);
+    }
+    return global;
+  }
   case SortCategory::StringBuffer:
   case SortCategory::MInt:
     assert(false && "not implemented yet: tokens");

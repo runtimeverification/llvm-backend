@@ -60,6 +60,7 @@ static void emitGetTagForSymbolName(KOREDefinition *definition, llvm::Module *mo
 
 static std::string BLOCKHEADER_STRUCT = "blockheader";
 static std::string INT_STRUCT = "mpz";
+static std::string FLOAT_STRUCT = "floating";
 static std::string STRING_STRUCT = "string";
 static std::string BUFFER_STRUCT = "stringbuffer";
 static std::string LAYOUT_STRUCT = "layout";
@@ -279,7 +280,6 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
     case SortCategory::Set:
       addAbort(CaseBlock, module);
       break;
-    case SortCategory::Float:
     case SortCategory::StringBuffer:
     case SortCategory::MInt:
       //TODO: tokens
@@ -303,6 +303,19 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
       new llvm::StoreInst(compare, Malloc, CaseBlock);
       auto result = new llvm::BitCastInst(Malloc, llvm::Type::getInt8PtrTy(Ctx), "", CaseBlock);
       Phi->addIncoming(result, CaseBlock);
+      llvm::BranchInst::Create(MergeBlock, CaseBlock);
+      break;
+    }
+    case SortCategory::Float: {
+      llvm::Type *Float = module->getTypeByName(FLOAT_STRUCT);
+      llvm::Value *Term = allocateTerm(Float, CaseBlock, "koreAllocOld");
+      llvm::Constant *InitFloat = module->getOrInsertFunction("init_float",
+          llvm::Type::getVoidTy(Ctx), llvm::PointerType::getUnqual(Float), 
+          llvm::Type::getInt8PtrTy(Ctx));
+      llvm::CallInst::Create(InitFloat, {Term, func->arg_begin()+2}, "", CaseBlock);
+      auto cast = new llvm::BitCastInst(Term,
+          llvm::Type::getInt8PtrTy(Ctx), "", CaseBlock);
+      Phi->addIncoming(cast, CaseBlock);
       llvm::BranchInst::Create(MergeBlock, CaseBlock);
       break;
     }

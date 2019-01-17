@@ -75,8 +75,19 @@ extern "C" {
     void *f;
     char *g;
   } list;
+
+  typedef struct floating {
+    uint64_t exp; // number of bits in exponent range
+    mpfr_t f;
+  } floating;
  
   // This function is exported to be used by the interpreter 
+  #ifdef __cplusplus
+  extern "C++" {
+    std::string floatToString(const floating *);
+    void init_float2(floating *, std::string);
+  }
+  #endif
   block *parseConfiguration(const char *filename);
   void printConfiguration(const char *filename, block *subject);
   void printConfigurationInternal(FILE *file, block *subject, const char *sort);
@@ -101,7 +112,7 @@ extern "C" {
       void visitList(FILE *, list *, const char *, const char *, const char *), 
       void visitSet(FILE *, set *, const char *, const char *, const char *), 
       void visitInt(FILE *, mpz_t, const char *),
-      void visitFloat(FILE *, mpfr_t, const char *),
+      void visitFloat(FILE *, floating *, const char *),
       void visitBool(FILE *, bool, const char *),
       void visitMInt(FILE *, void *, const char *),
       void visitSeparator(FILE *));

@@ -1,0 +1,45 @@
+#!/bin/bash
+modopt="$1"
+main="$2"
+shift; shift
+LIBDIR="$(dirname "$0")"/../lib/kllvm/
+if [ "$main" = "main" ]; then
+  MAINFILES="$LIBDIR"/llvm/main/main.ll
+else
+  MAINFILES=""
+fi
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    SUFFIX=""
+    RUSTDIR=`rustc --print sysroot`/lib/rustlib/x86_64-apple-darwin/lib/
+    LLVMLIB="-L/usr/local/opt/llvm@6/lib"
+else
+    SUFFIX="-6.0"
+    RUSTDIR=`rustc --print sysroot`/lib/rustlib/x86_64-unknown-linux-gnu/lib/
+    LLVMLIB="-L/usr/lib/llvm-6.0/lib"
+fi
+
+"clang++$SUFFIX" -Wno-override-module "$modopt" \
+  "$LIBDIR"/llvm/*.ll \
+  "$LIBDIR"/libarithmetic.a \
+  "$LIBDIR"/libstrings.a \
+  "$LIBDIR"/rust/libdatastructures.rlib \
+  "$LIBDIR"/rust/deps/*.rlib \
+  "$RUSTDIR"/libcore-*.rlib \
+  "$RUSTDIR"/libstd-*.rlib \
+  "$RUSTDIR"/liballoc-*.rlib \
+  "$RUSTDIR"/libunwind-*.rlib \
+  "$RUSTDIR"/libcompiler_builtins-*.rlib \
+  "$RUSTDIR"/libpanic_abort-*.rlib \
+  "$RUSTDIR"/liballoc_system-*.rlib \
+  "$MAINFILES" \
+  "$LIBDIR"/libconfigurationparser.a \
+  "$LIBDIR"/libParser.a \
+  "$LIBDIR"/libAST.a \
+  "$LIBDIR"/liballoc.a \
+  -lgmp -lmpfr -lpthread -ldl \
+  "$LLVMLIB" \
+  -lLLVMIRReader -lLLVMBitReader -lLLVMAsmParser -lLLVMCore -lLLVMBinaryFormat -lLLVMSupport -lLLVMDemangle \
+  -ltinfo \
+  -ljemalloc \
+  -I "$(dirname "$0")"/../include \
+  "$@"

@@ -1,6 +1,7 @@
 #include<gmp.h>
 #include<mpfr.h>
 #include<algorithm>
+#include<cinttypes>
 #include<cstdlib>
 #include<cstdint>
 #include<cstring>
@@ -18,6 +19,7 @@ extern "C" {
 #define KCHAR char
 
   mpz_ptr move_int(mpz_t);
+  floating *move_float(floating *);
 
   string *hook_BYTES_bytes2string(string *);
   string *hook_BYTES_concat(string *a, string *b);
@@ -182,12 +184,15 @@ extern "C" {
     return hook_STRING_string2base_long(input, ubase);
   }
 
-  const string * hook_STRING_float2string(const mpfr_t input) {
-    throw std::logic_error("TODO: floats");
+  const string * hook_STRING_float2string(const floating *input) {
+    std::string result = floatToString(input);
+    return makeString(result.c_str());
   }
 
-  mpfr_ptr hook_STRING_string2float(const string * input) {
-    throw std::logic_error("TODO: floats");
+  floating *hook_STRING_string2float(const string * input) {
+    floating result[1];
+    init_float2(result, std::string(input->data, len(input)));
+    return move_float(result);
   }
 
   const string * hook_STRING_string2token(const string * input) {
@@ -305,5 +310,68 @@ extern "C" {
 
   string *hook_BUFFER_toString(stringbuffer *buf) {
     return hook_BYTES_bytes2string(buf->contents);
+  }
+}
+
+void init_float2(floating *result, std::string contents) {
+  size_t is_float = contents.find_first_of("fF");
+  size_t prec, exp;
+  if (is_float != std::string::npos) {
+    prec = 24;
+    exp = 8;
+  } else {
+    size_t has_prec = contents.find_first_of("pP");
+    if (has_prec == std::string::npos) {
+       prec = 53;
+       exp = 11;
+    } else {
+      size_t exp_idx = contents.find_first_of("xX");
+      std::string prec_str = contents.substr(has_prec+1, exp_idx-has_prec);
+      std::string exp_str = contents.substr(exp_idx+1);
+      prec = atoll(prec_str.c_str());
+      exp = atoll(exp_str.c_str());
+    }
+  }
+  result->exp = exp;
+  mpfr_init2(result->f, prec);
+  size_t last = contents.find_first_of("fFdDpP");
+  std::string str_value = contents.substr(0, last);
+  mpfr_set_str(result->f, str_value.c_str(), 10, MPFR_RNDN);
+}
+
+std::string floatToString(const floating *f) {
+  uint64_t prec = mpfr_get_prec(f->f);
+  uint64_t exp = f->exp;
+  char suffix[41]; // 19 chars per long + p and x and null byte
+  if (prec == 53 && exp == 11) {
+    suffix[0] = 0;
+  } else if (prec == 24 && exp == 8) {
+    suffix[0] = 'f';
+    suffix[1] = 0;
+  } else {
+    sprintf(suffix, "p%" PRIu64 "x%" PRIu64, prec, exp);
+  }
+  if (mpfr_nan_p(f->f)) {
+    return "NaN" + std::string(suffix);
+  } else if (mpfr_inf_p(f->f)) {
+    if (mpfr_signbit(f->f)) {
+      return "-Infinity" + std::string(suffix);
+    } else {
+      return "Infinity" + std::string(suffix);
+    }
+  } else {
+    mpfr_exp_t printed_exp;
+    char *str = mpfr_get_str(NULL, &printed_exp, 10, 0, f->f, MPFR_RNDN);
+    size_t len = strlen(str);
+    char *newstr = (char *)koreAllocOld(len+2);
+    size_t idx = 0;
+    if (str[0] == '-') {
+      newstr[0] = '-';
+      idx = 1;
+    }
+    newstr[idx] = '0';
+    newstr[idx+1] = '.';
+    strcpy(newstr+idx+2,str+idx);
+    return std::string(newstr) + "e" + std::to_string(printed_exp) + suffix;
   }
 }

@@ -9,6 +9,13 @@
 using namespace kllvm;
 using namespace kllvm::parser;
 
+extern "C" {
+  void init_float(floating *result, const char *c_str) {
+    std::string contents = std::string(c_str);
+    init_float2(result, contents);
+  }
+}
+
 static void *allocatePatternAsConfiguration(const KOREPattern *Pattern) {
   const auto constructor = dynamic_cast<const KOREObjectCompositePattern *>(Pattern);
   assert(constructor);
