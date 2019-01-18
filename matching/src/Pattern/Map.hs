@@ -101,6 +101,7 @@ addMapVarToRow f _ o (Fix (MapPattern [] [] (Just p) _ _)) vars =
 addMapVarToRow _ _ _ (Fix MapPattern{}) vars = vars
 addMapVarToRow _ _ _ _ _ = error "Fourth argument must contain a map."
 
+-- | This function computes the score for a map.
 computeMapScore :: (Metadata -> [(Fix Pattern, Clause)] -> Double)
                 -> Metadata
                 -> [(Fix Pattern, Clause)]
@@ -110,6 +111,8 @@ computeMapScore f m ((Fix (MapPattern [] [] (Just p) _ _),c):tl) = f m ((p,c):tl
 computeMapScore f m ((Fix (MapPattern ks vs _ e _),c):tl) = if f m tl == -1.0 / 0.0 then -1.0 / 0.0 else snd $ computeMapScore' f m e c ks vs tl
 computeMapScore _ _ _ = error "The first pattern must be a map."
 
+-- | This function selects the best candidate key to use when
+-- computing the score for a map.
 getBestMapKey :: (Metadata -> [(Fix Pattern, Clause)] -> Double)
               -> Column
               -> [Clause]
@@ -132,7 +135,8 @@ computeMapScore' f m e c ks vs tl =
       scores = map (\(k,v) -> (if isBound getName c k then Just $ canonicalizePattern c k else Nothing, computeMapElementScore f m e c tl (k,v))) zipped
   in maximumBy (comparing snd) scores
 
-
+-- | This function computes the score for a map when there are
+-- keys and values defined.
 computeMapElementScore :: (Metadata -> [(Fix Pattern, Clause)] -> Double)
                        -> Metadata
                        -> SymbolOrAlias Object
@@ -146,6 +150,7 @@ computeMapElementScore f m e c tl (k,v) =
   let finalScore = score * f (head $ fromJust $ getChildren m (HasKey False e (Ignoring m) Nothing)) [(v,c)]
   in if finalScore == 0.0 then minPositiveDouble else finalScore
 
+-- | This computes the final score for a map given the best key.
 computeElementScore :: Fix Pattern -> Clause -> [(Fix Pattern,Clause)] -> Double
 computeElementScore k c tl =
   let bound = isBound getName c k
@@ -163,7 +168,7 @@ computeElementScore k c tl =
   where
     mapContainsKey :: Fix BoundPattern -> Fix BoundPattern -> Bool
     mapContainsKey k' (Fix (MapPattern ks _ _ _ _)) = k' `elem` ks
-    mapContainsKey _ _ = False
+    mapContainsKey _ _ = error "This function only supports map patterns."
     canonicalizeClause :: Clause -> Clause
     canonicalizeClause (Clause a vars ranges children) =
       let hooks = map getHook vars
