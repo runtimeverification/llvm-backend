@@ -744,14 +744,16 @@ getRealScore (ClauseMatrix (PatternMatrix cs) as) c =
   where
     getMapOrSetKeys :: Fix Pattern -> [Fix Pattern]
     getMapOrSetKeys (Fix (SetPattern ks _ _ _)) = ks
-    getMapOrSetKeys (Fix (MapPattern ks _ _ _ _)) = ks
+    getMapOrSetKeys p@(Fix MapPattern{}) =
+      getMapKeys p
     getMapOrSetKeys _ = []
     getVariables :: Fix Pattern -> [String]
     getVariables (Fix (Variable name _)) = [name]
     getVariables (Fix (As name _ p)) = name : getVariables p
     getVariables (Fix (Pattern _ _ ps)) = concatMap getVariables ps
     getVariables (Fix (ListPattern _ _ _ _ o)) = getVariables o
-    getVariables (Fix (MapPattern _ _ _ _ o)) = getVariables o
+    getVariables p@(Fix MapPattern{}) =
+      getMapVariables getVariables p
     getVariables (Fix (SetPattern _ _ _ o)) = getVariables o
     getVariables (Fix Wildcard) = []
 

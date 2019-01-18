@@ -7,6 +7,8 @@ module Pattern.Map
   , addMapVarToRow
   , getBestMapKey
   , computeMapScore
+  , getMapKeys
+  , getMapVariables
   ) where
 
 import Data.Functor.Foldable
@@ -179,3 +181,11 @@ computeElementScore k c tl =
 minPositiveDouble :: Double
 minPositiveDouble = encodeFloat 1 $ fst (floatRange (0.0 :: Double)) - floatDigits (0.0 :: Double)
 
+getMapKeys :: Fix Pattern -> [Fix Pattern]
+getMapKeys (Fix (MapPattern ks _ _ _ _)) = ks
+getMapKeys _ = error "The getMapKeys function only support map patterns."
+
+getMapVariables :: (Fix Pattern -> [String])
+                -> Fix Pattern -> [String]
+getMapVariables f (Fix (MapPattern _ _ _ _ o)) = f o
+getMapVariables _ _ = error "The getMapVariables function only accepts maps."
