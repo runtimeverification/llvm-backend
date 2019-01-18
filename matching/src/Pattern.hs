@@ -57,8 +57,6 @@ import           Data.Traversable
 import qualified Data.Yaml.Builder as Y
 import           Kore.AST.Common
                  ( AstLocation (..), Id (..), SymbolOrAlias (..) )
-import           Kore.AST.MetaOrObject
-                 ( Object (..) )
 import           Kore.Unparser
                  ( unparseToString )
 import           TextShow
@@ -325,7 +323,7 @@ mightUnify _ (Fix (Variable _ _)) = True
 mightUnify (Fix (Variable _ _)) _ = True
 mightUnify (Fix (As _ _ p)) p' = mightUnify p p'
 mightUnify p (Fix (As _ _ p')) = mightUnify p p'
-mightUnify (Fix (Pattern c _ ps)) (Fix (Pattern c' _ ps')) = c == c' && (and $ zipWith mightUnify ps ps')
+mightUnify (Fix (Pattern c _ ps)) (Fix (Pattern c' _ ps')) = c == c' && and (zipWith mightUnify ps ps')
 mightUnify (Fix ListPattern{}) (Fix ListPattern{}) = True
 mightUnify x@(Fix MapPattern{}) y =
   mightUnifyMap x y
@@ -465,25 +463,21 @@ computeScore m ((Fix ListPattern{}, _) : tl) = 1.0 + computeScore m tl
 computeScore m ((Fix (As _ _ pat),c):tl) = computeScore m ((pat,c):tl)
 computeScore m ((Fix Wildcard,_):tl) = min 0.0 $ computeScore m tl
 computeScore m ((Fix (Variable _ _),_):tl) = min 0.0 $ computeScore m tl
-computeScore m ((Fix (MapPattern [] [] Nothing _ _),_):tl) = 1.0 + computeScore m tl
-computeScore m ((Fix (MapPattern [] [] (Just p) _ _),c):tl) = computeScore m ((p,c):tl)
-computeScore m ((Fix (MapPattern ks vs _ e _),c):tl) = if computeScore m tl == -1.0 / 0.0 then -1.0 / 0.0 else snd $ computeMapScore m e c ks vs tl
+computeScore m pc@((Fix MapPattern{}, _) : _) =
+  computeMapScore computeScore m pc
 computeScore m ((Fix (SetPattern [] Nothing _ _),_):tl) = 1.0 + computeScore m tl
 computeScore m ((Fix (SetPattern [] (Just p) _ _),c):tl) = computeScore m ((p,c):tl)
 computeScore m ((Fix (SetPattern es _ _ _),c):tl) = if computeScore m tl == -1.0 / 0.0 then -1.0 / 0.0 else snd $ computeSetScore c es tl
 
+-- | Gets the best key or element to use from a set or map when computing
+-- the score
 getBestKey :: Column -> [Clause] -> Maybe (Fix BoundPattern)
-getBestKey (Column m (Fix (MapPattern (k:ks) vs _ e _):tl)) cs = fst $ computeMapScore m e (head cs) (k:ks) vs (zip tl $ tail cs)
+getBestKey columns@(Column _ (Fix MapPattern{} : _)) clauses =
+  getBestMapKey computeScore columns clauses
 getBestKey (Column _ (Fix (SetPattern (k:ks) _ _ _):tl)) cs = fst $ computeSetScore (head cs) (k:ks) (zip tl $ tail cs)
 getBestKey (Column m (Fix Wildcard:tl)) cs = getBestKey (Column m tl) (tail cs)
 getBestKey (Column m (Fix (Variable _ _):tl)) cs = getBestKey (Column m tl) (tail cs)
 getBestKey _ _ = Nothing
-
-computeMapScore :: Metadata -> SymbolOrAlias Object -> Clause -> [Fix Pattern] -> [Fix Pattern] -> [(Fix Pattern,Clause)] -> (Maybe (Fix BoundPattern), Double)
-computeMapScore m e c ks vs tl =
-  let zipped = zip ks vs
-      scores = map (\(k,v) -> (if isBound getName c k then Just $ canonicalizePattern c k else Nothing,computeMapElementScore m e c tl (k,v))) zipped
-  in maximumBy (comparing snd) scores
 
 computeSetScore :: Clause -> [Fix Pattern] -> [(Fix Pattern,Clause)] -> (Maybe (Fix BoundPattern), Double)
 computeSetScore c es tl =
@@ -492,13 +486,6 @@ computeSetScore c es tl =
 
 minPositiveDouble :: Double
 minPositiveDouble = encodeFloat 1 $ fst (floatRange (0.0 :: Double)) - floatDigits (0.0 :: Double)
-
-computeMapElementScore :: Metadata -> SymbolOrAlias Object -> Clause -> [(Fix Pattern,Clause)] -> (Fix Pattern, Fix Pattern) -> Double
-computeMapElementScore m e c tl (k,v) =
-  let score = computeElementScore k c tl
-  in if score == -1.0 / 0.0 then score else
-  let finalScore = score * computeScore (head $ fromJust $ getChildren m (HasKey False e (Ignoring m) Nothing)) [(v,c)]
-  in if finalScore == 0.0 then minPositiveDouble else finalScore
 
 computeElementScore :: Fix Pattern -> Clause -> [(Fix Pattern,Clause)] -> Double
 computeElementScore k c tl =
@@ -516,7 +503,6 @@ computeElementScore k c tl =
   else -1.0 / 0.0
   where
     mapContainsKey :: Fix BoundPattern -> Fix BoundPattern -> Bool
-    mapContainsKey k' (Fix (MapPattern ks _ _ _ _)) = k' `elem` ks
     mapContainsKey _ _ = False
     canonicalizeClause :: Clause -> Clause
     canonicalizeClause (Clause a vars ranges children) =
