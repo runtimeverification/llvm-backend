@@ -565,12 +565,8 @@ expandPattern (Symbol (SymbolOrAlias (Id "inj" _) _)) ms (Metadata _ _ overloads
       in head (expandIfJust ([(p,maybeChild)],cls))
 expandPattern Empty _ _ (_, _) = []
 expandPattern (NonEmpty _) _ _ (p,_) = [(p,Nothing)]
-expandPattern (HasKey _ _ _ (Just p)) _ _ (m@(Fix (MapPattern ks vs f e o)),c) =
-  let canonKs = map (canonicalizePattern c) ks
-      hasKey = elemIndex p canonKs
-  in case hasKey of
-       Just i -> [(vs !! i,Nothing), (Fix (MapPattern (except i ks) (except i vs) f e o), Nothing), (Fix Wildcard, Nothing)]
-       Nothing -> [(Fix Wildcard,Nothing), (Fix Wildcard,Nothing), (m,Nothing)]
+expandPattern s ms m pc@(Fix MapPattern{},_) =
+  expandMapPattern s ms m pc
 expandPattern (HasKey _ _ _ (Just p)) _ _ (m@(Fix (SetPattern es f e o)),c) =
   let canonEs = map (canonicalizePattern c) es
       hasElem = elemIndex p canonEs
@@ -579,7 +575,6 @@ expandPattern (HasKey _ _ _ (Just p)) _ _ (m@(Fix (SetPattern es f e o)),c) =
        Nothing -> [(Fix Wildcard,Nothing), (m,Nothing)]
 expandPattern (HasKey _ _ _ Nothing) _ _ _ = error "TODO: map/set choice"
 expandPattern (HasNoKey _ _) _ _ (p,_) = [(p,Nothing)]
-expandPattern _ _ _ (Fix MapPattern{},_) = error "Invalid map pattern"
 expandPattern _ _ _ (Fix SetPattern{},_) = error "Invalid set pattern"
 expandPattern _ _ _ (Fix (Pattern _ _ fixedPs), _)  = zip fixedPs $ replicate (length fixedPs) Nothing
 expandPattern ix ms m (Fix (As _ _ pat), c)         = expandPattern ix ms m (pat, c)

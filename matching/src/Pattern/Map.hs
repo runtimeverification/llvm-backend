@@ -9,12 +9,13 @@ module Pattern.Map
   , computeMapScore
   , getMapKeys
   , getMapVariables
+  , expandMapPattern
   ) where
 
 import Data.Functor.Foldable
        ( Fix (..) )
 import Data.List
-       ( maximumBy )
+       ( maximumBy, elemIndex )
 import Data.Ord
        ( comparing )
 import Data.Maybe (fromJust)
@@ -189,3 +190,23 @@ getMapVariables :: (Fix Pattern -> [String])
                 -> Fix Pattern -> [String]
 getMapVariables f (Fix (MapPattern _ _ _ _ o)) = f o
 getMapVariables _ _ = error "The getMapVariables function only accepts maps."
+
+expandMapPattern :: Constructor
+                 -> [Metadata]
+                 -> Metadata
+                 -> (Fix Pattern,Clause)
+                 -> [(Fix Pattern,Maybe (Constructor,Metadata))]
+expandMapPattern (HasKey _ _ _ (Just p)) _ _ (m@(Fix (MapPattern ks vs f e o)),c) =
+  let canonKs = map (canonicalizePattern c) ks
+      hasKey = elemIndex p canonKs
+  in case hasKey of
+       Just i -> [(vs !! i,Nothing), (Fix (MapPattern (except i ks) (except i vs) f e o), Nothing), (Fix Wildcard, Nothing)]
+       Nothing -> [(Fix Wildcard,Nothing), (Fix Wildcard,Nothing), (m,Nothing)]
+expandMapPattern (HasNoKey _ _) _ _ (p,_) = [(p,Nothing)]
+expandMapPattern _ _ _ (Fix MapPattern{},_) = error "Invalid map pattern."
+expandMapPattern _ _ _ _ = error "The expandMapPattern function expects a map parameter as its final argument."
+
+except :: Int -> [a] -> [a]
+except i as =
+  let (hd,tl) = splitAt i as
+  in hd ++ tail tl
