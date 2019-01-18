@@ -63,8 +63,8 @@ data Occurrence = Num Int Occurrence
                 | Lit Text Text
                 | Equal Occurrence Occurrence
                 | SC Int
-                | Value (Fix BoundPattern) Occurrence
-                | Rem (Fix BoundPattern) Occurrence
+                | Value Text Occurrence
+                | Rem Text Occurrence
                 | Size Occurrence
                 | Inj Occurrence
                 deriving (Show, Eq, Ord)

@@ -193,15 +193,20 @@ mSpecialize ix (cm@(ClauseMatrix (PatternMatrix (c : _)) _), o : os) =
      getConstructor (NonEmpty _) = error "Invalid map pattern"
      getConstructor HasKey{} = "1"
      getConstructor (HasNoKey _ _) = "0"
-
 mSpecialize _ _ = error "must have at least one column"
+
+tshow :: Show a => a -> Text
+tshow = pack . show
 
 expandOccurrence :: ClauseMatrix -> (Occurrence,Bool) -> Constructor -> Fringe
 expandOccurrence (ClauseMatrix (PatternMatrix (c : _)) _) o ix =
   case ix of
     Empty -> []
     NonEmpty _ -> [o]
-    HasKey isSet _ _ (Just k) -> if isSet then [(Rem k (fst o), False), o] else [(Value k (fst o), False), (Rem k (fst o), False), o]
+    HasKey isSet _ _ (Just k) ->
+      if isSet
+      then [(Rem (tshow k) (fst o), False), o]
+      else [(Value (tshow k) (fst o), False), (Rem (tshow k) (fst o), False), o]
     HasKey _ _ _ Nothing -> error "Invalid map/set pattern"
     HasNoKey _ _ -> [o]
     _ -> let (Metadata _ _ _ _ mtd) = getMetadata c
@@ -891,9 +896,9 @@ compilePattern = compilePattern'
                , getDefault = compilePattern' <$> d
                }
              Just k -> Fix $ MakePattern newO k $
-                         Fix $ Function "hook_MAP_lookup_null" (Value k mapO) [mapO, newO] "STRING.String" $
-                           Fix $ Function "hook_MAP_remove" (Rem k mapO) [mapO, newO] "MAP.Map" $
-                             Fix $ CheckNull (Value k mapO) $ L
+                         Fix $ Function "hook_MAP_lookup_null" (Value (tshow k) mapO) [mapO, newO] "STRING.String" $
+                           Fix $ Function "hook_MAP_remove" (Rem (tshow k) mapO) [mapO, newO] "MAP.Map" $
+                             Fix $ CheckNull (Value (tshow k) mapO) $ L
                                { getSpecializations = map (second compilePattern') ls
                                , getDefault = compilePattern' <$> d
                                }
@@ -916,9 +921,9 @@ compilePattern = compilePattern'
                , getDefault = compilePattern' <$> d
                }
              Just k -> Fix $ MakePattern newO k $
-                         Fix $ Function "hook_SET_in" (Value k setO) [newO, setO] "BOOL.Bool" $
-                           Fix $ Function "hook_SET_remove" (Rem k setO) [setO, newO] "SET.Set" $
-                             Fix $ SwitchLiteral (Value k setO) 1 $ L
+                         Fix $ Function "hook_SET_in" (Value (tshow k) setO) [newO, setO] "BOOL.Bool" $
+                           Fix $ Function "hook_SET_remove" (Rem (tshow k) setO) [setO, newO] "SET.Set" $
+                             Fix $ SwitchLiteral (Value (tshow k) setO) 1 $ L
                                { getSpecializations = map (second compilePattern') ls
                                , getDefault = compilePattern' <$> d
                                }
