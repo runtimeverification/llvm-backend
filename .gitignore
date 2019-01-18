@@ -37,3 +37,6 @@ bin/llvm-kompile-matching
 # Rust stuff
 Cargo.lock
 target/
+
+# Haskell tags
+TAGS
