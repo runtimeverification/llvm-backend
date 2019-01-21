@@ -38,6 +38,7 @@ default-extensions:
   - DeriveFunctor
   - FlexibleContexts
   - FlexibleInstances
+  - GADTs
   - OverloadedStrings
   - TemplateHaskell
   - TupleSections

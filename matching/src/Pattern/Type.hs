@@ -19,6 +19,10 @@ module Pattern.Type
   , Fringe
   , Index
   , Constructor (..)
+  , Symbol (..)
+  , Literal (..)
+  , getPatternConstructor
+  , getConstructorPattern
   ) where
 
 import Data.Deriving
@@ -38,24 +42,24 @@ import           Kore.Unparser
                  ( unparseToString )
 import qualified Data.Yaml.Builder as Y
 
-data Column = Column
-              { getMetadata :: !Metadata
-              , getTerms    :: ![Fix Pattern]
-              }
+data Column p bp = Column
+                   { getMetadata :: !(Metadata bp)
+                   , getTerms    :: ![Fix p]
+                   }
 
-instance Show Column where
+instance Show1 p => Show (Column p bp) where
   showsPrec _ (Column _ ts) =
     showString "Column " . showList ts
 
-data Metadata = Metadata
-                { getLength :: !Integer
-                , getInjections :: Constructor -> [Constructor]
-                , getOverloads :: Constructor -> [Constructor] -- list of overloaded productions less than specified production
-                , getSort :: Sort Object
-                , getChildren :: Constructor -> Maybe [Metadata]
-                }
+data Metadata bp = Metadata
+                   { getLength :: !Integer
+                   , getInjections :: Constructor bp -> [Constructor bp]
+                   , getOverloads :: Constructor bp -> [Constructor bp] -- list of overloaded productions less than specified production
+                   , getSort :: Sort Object
+                   , getChildren :: Constructor bp -> Maybe [Metadata bp]
+                   }
 
-instance (Show Metadata) where
+instance Show (Metadata bp) where
   show (Metadata _ _ _ sort _) = show sort
 
 data Occurrence = Num Int Occurrence
@@ -94,11 +98,11 @@ instance Y.ToYaml a => Y.ToYaml (BoundPattern a) where
   toYaml (MapPattern _ _ _ _ o) = Y.toYaml o
   toYaml (SetPattern _ _ _ o) = Y.toYaml o
   toYaml (ListPattern _ _ _ _ o) = Y.toYaml o
-  toYaml (Pattern (Literal s) (Just h) []) = Y.mapping
+  toYaml (Pattern (Right (Literal s)) (Just h) []) = Y.mapping
     ["hook" Y..= Y.toYaml (pack h)
     , "literal" Y..= Y.toYaml (pack s)
     ]
-  toYaml (Pattern (Symbol s) Nothing ps) = Y.mapping
+  toYaml (Pattern (Left (Symbol s)) Nothing ps) = Y.mapping
     ["constructor" Y..= Y.toYaml (pack $ unparseToString s)
     , "args" Y..= Y.array (map Y.toYaml ps)
     ]
@@ -115,25 +119,28 @@ instance Show1 Pattern where
   liftShowsPrec = liftShowsPrec2 showsPrec showList
 instance Show1 BoundPattern where
   liftShowsPrec = liftShowsPrec2 showsPrec showList
-
 instance Eq1 BoundPattern where
   liftEq = liftEq2 (==)
-
 instance Ord1 BoundPattern where
   liftCompare = liftCompare2 compare
 
+newtype Symbol = Symbol (SymbolOrAlias Object)
+                 deriving (Eq, Show, Ord)
 
-data Constructor = Symbol (SymbolOrAlias Object)
-                 | Literal String
-                 | List
-                   { getElement :: SymbolOrAlias Object
-                   , getListLength :: Int
-                   }
-                 | Empty
-                 | NonEmpty (Ignoring Metadata)
-                 | HasKey Bool (SymbolOrAlias Object) (Ignoring Metadata) (Maybe (Fix BoundPattern))
-                 | HasNoKey (Ignoring Metadata) (Maybe (Fix BoundPattern))
-                 deriving (Show, Eq, Ord)
+newtype Literal = Literal String
+                  deriving (Eq, Show, Ord)
+
+data Constructor bp = SymbolConstructor Symbol
+                    | LiteralConstructor Literal
+                    | List
+                      { getElement :: SymbolOrAlias Object
+                      , getListLength :: Int
+                      }
+                    | Empty
+                    | NonEmpty (Ignoring (Metadata bp))
+                    | HasKey Bool (SymbolOrAlias Object) (Ignoring (Metadata bp)) (Maybe (Fix bp))
+                    | HasNoKey (Ignoring (Metadata bp)) (Maybe (Fix bp))
+                    deriving (Show, Eq, Ord)
 
 newtype Ignoring a = Ignoring a
                    deriving (Show)
@@ -144,8 +151,18 @@ instance Eq (Ignoring a) where
 instance Ord (Ignoring a) where
   _ <= _ = True
 
+getPatternConstructor :: Either Symbol Literal
+                      -> Constructor bp
+getPatternConstructor = either SymbolConstructor LiteralConstructor
+
+getConstructorPattern :: Constructor bp
+                      -> Either Symbol Literal
+getConstructorPattern (SymbolConstructor s)  = Left s
+getConstructorPattern (LiteralConstructor l) = Right l
+getConstructorPattern _ = error "Pattern constructor must be Symbol or Literal"
+
 type Index       = Int
-data P var a   = Pattern Constructor (Maybe String) ![a]
+data P var a   = Pattern (Either Symbol Literal) (Maybe String) ![a]
                  | ListPattern
                    { getHead :: ![a] -- match elements at front of list
                    , getFrame :: !(Maybe a) -- match remainder of list
@@ -178,8 +195,8 @@ $(deriveEq2 ''P)
 $(deriveShow2 ''P)
 $(deriveOrd2 ''P)
 
-newtype PatternMatrix = PatternMatrix [Column]
-                        deriving (Show)
+newtype PatternMatrix p bp = PatternMatrix [Column p bp]
+                             deriving (Show)
 
 data Action       = Action
                     { getRuleNumber :: Int
@@ -195,7 +212,7 @@ data VariableBinding = VariableBinding
                        }
                        deriving (Show, Eq)
 
-data Clause       = Clause
+data Clause  bp     = Clause
                     -- the rule to be applied if this row succeeds
                     { getAction :: Action
                     -- the variable bindings made so far while matching this row
@@ -205,10 +222,10 @@ data Clause       = Clause
                     , getListRanges :: [(Occurrence, Int, Int)]
                     -- variable bindings to injections that need to be constructed
                     -- since they do not actually exist in the original subject term
-                    , getOverloadChildren :: [(Constructor, VariableBinding)]
+                    , getOverloadChildren :: [(Constructor bp, VariableBinding)]
                     }
                     deriving (Show)
 
-data ClauseMatrix = ClauseMatrix PatternMatrix ![Clause]
-                    deriving (Show)
+data ClauseMatrix p bp = ClauseMatrix (PatternMatrix p bp) ![Clause bp]
+                         deriving (Show)
 

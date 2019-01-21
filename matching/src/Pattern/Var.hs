@@ -15,7 +15,7 @@ import           Data.Maybe
 import Pattern.Type
 
 -- | Checks to see if the variable name has been bound in the clause.
-lookupCanonicalName :: Clause
+lookupCanonicalName :: Clause BoundPattern
                     -> Fix Pattern
                     -> Maybe (Fix BoundPattern)
 lookupCanonicalName cls p =
@@ -25,7 +25,7 @@ lookupCanonicalName cls p =
 
 -- | Looks up all variables from the pattern in the clause and replaces
 -- them with the occurrences it finds.
-canonicalizePattern :: Clause
+canonicalizePattern :: Clause BoundPattern
                     -> Fix Pattern
                     -> Fix BoundPattern
 canonicalizePattern clause = cata go
@@ -46,7 +46,7 @@ canonicalizePattern clause = cata go
 -- | Checks if all variables in the pattern are bound.
 isBound :: forall a. Eq a
         => (VariableBinding -> a)
-        -> Clause
+        -> Clause BoundPattern
         -> Fix (P a)
         -> Bool
 isBound get (Clause _ vars _ _) = cata go
