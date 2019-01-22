@@ -5,10 +5,20 @@ module Pattern.Map
   , mightUnifyMap
   , checkMapPatternIndex
   , addMapVarToRow
+  , getBestMapKey
+  , computeMapScore
+  , getMapKeys
+  , getMapVariables
+  , expandMapPattern
   ) where
 
 import Data.Functor.Foldable
        ( Fix (..) )
+import Data.List
+       ( maximumBy, elemIndex )
+import Data.Ord
+       ( comparing )
+import Data.Maybe (fromJust)
 
 import Kore.AST.Common
        ( SymbolOrAlias (..) )
@@ -17,6 +27,7 @@ import Kore.AST.MetaOrObject
 
 import Pattern.Type
 import Pattern.Var
+import Pattern.Optimiser.Score
 
 -- | Extracts the constructors from a map pattern. It also returns
 -- a pattern for the next keys in the map.
@@ -76,12 +87,13 @@ checkMapPatternIndex :: (Fix BoundPattern -> Fix BoundPattern -> Bool)
 checkMapPatternIndex _ Empty _ (_, Fix (MapPattern ks vs _ _ _)) =
   null ks && null vs
 checkMapPatternIndex _ HasKey{} _ (_, Fix (MapPattern _ _ (Just _) _ _)) = True
-checkMapPatternIndex mu (HasKey _ _ _ (Just p)) _ (c, Fix (MapPattern ks _ Nothing _ _)) = any (mu p) $ map (canonicalizePattern c) ks
+checkMapPatternIndex f (HasKey _ _ _ (Just p)) _ (c, Fix (MapPattern ks _ Nothing _ _)) = any (f p) $ map (canonicalizePattern c) ks
 checkMapPatternIndex _ (HasNoKey _ (Just p)) _ (c, Fix (MapPattern ks _ _ _ _)) =
   let canonKs = map (canonicalizePattern c) ks
   in p `notElem` canonKs
 checkMapPatternIndex _ _ _ _ = error "Third argument must contain a map."
 
+-- | Add variables bound in the pattern to the binding list
 addMapVarToRow :: ( Maybe Constructor -> Occurrence -> Fix Pattern -> [VariableBinding] -> [VariableBinding] )
                -> Maybe Constructor
                -> Occurrence
@@ -92,3 +104,84 @@ addMapVarToRow f _ o (Fix (MapPattern [] [] (Just p) _ _)) vars =
   f Nothing o p vars
 addMapVarToRow _ _ _ (Fix MapPattern{}) vars = vars
 addMapVarToRow _ _ _ _ _ = error "Fourth argument must contain a map."
+
+-- | This function computes the score for a map.
+computeMapScore :: (Metadata -> [(Fix Pattern, Clause)] -> Double)
+                -> Metadata
+                -> [(Fix Pattern, Clause)]
+                -> Double
+computeMapScore f m ((Fix (MapPattern [] [] Nothing _ _),_):tl) = 1.0 + f m tl
+computeMapScore f m ((Fix (MapPattern [] [] (Just p) _ _),c):tl) = f m ((p,c):tl)
+computeMapScore f m ((Fix (MapPattern ks vs _ e _),c):tl) = if f m tl == -1.0 / 0.0 then -1.0 / 0.0 else snd $ computeMapScore' f m e c ks vs tl
+computeMapScore _ _ _ = error "The first pattern must be a map."
+
+-- | This function selects the best candidate key to use when
+-- computing the score for a map.
+getBestMapKey :: (Metadata -> [(Fix Pattern, Clause)] -> Double)
+              -> Column
+              -> [Clause]
+              -> Maybe (Fix BoundPattern)
+getBestMapKey f (Column m (Fix (MapPattern (k:ks) vs _ e _):tl)) cs =
+  fst $ computeMapScore' f  m e (head cs) (k:ks) vs (zip tl $ tail cs)
+getBestMapKey _ (Column _ (Fix MapPattern{}:_)) _ = Nothing
+getBestMapKey _ _ _ = error "Column must contain a map pattern."
+
+computeMapScore' :: (Metadata -> [(Fix Pattern, Clause)] -> Double)
+                 -> Metadata
+                 -> SymbolOrAlias Object -- ^ Map.element
+                 -> Clause
+                 -> [Fix Pattern]
+                 -> [Fix Pattern]
+                 -> [(Fix Pattern,Clause)]
+                 -> (Maybe (Fix BoundPattern), Double)
+computeMapScore' f m e c ks vs tl =
+  let zipped = zip ks vs
+      scores = map (\(k,v) -> (if isBound getName c k then Just $ canonicalizePattern c k else Nothing, computeMapElementScore f m e c tl (k,v))) zipped
+  in maximumBy (comparing snd) scores
+
+-- | This function computes the score for a map when there are
+-- keys and values defined.
+computeMapElementScore :: (Metadata -> [(Fix Pattern, Clause)] -> Double)
+                       -> Metadata
+                       -> SymbolOrAlias Object
+                       -> Clause
+                       -> [(Fix Pattern,Clause)]
+                       -> (Fix Pattern, Fix Pattern)
+                       -> Double
+computeMapElementScore f m e c tl (k,v) =
+  let score = computeElementScore k c tl
+  in if score == -1.0 / 0.0 then score else
+  let finalScore = score * f (head $ fromJust $ getChildren m (HasKey False e (Ignoring m) Nothing)) [(v,c)]
+  in if finalScore == 0.0 then minPositiveDouble else finalScore
+
+minPositiveDouble :: Double
+minPositiveDouble = encodeFloat 1 $ fst (floatRange (0.0 :: Double)) - floatDigits (0.0 :: Double)
+
+getMapKeys :: Fix Pattern -> [Fix Pattern]
+getMapKeys (Fix (MapPattern ks _ _ _ _)) = ks
+getMapKeys _ = error "The getMapKeys function only support map patterns."
+
+getMapVariables :: (Fix Pattern -> [String])
+                -> Fix Pattern -> [String]
+getMapVariables f (Fix (MapPattern _ _ _ _ o)) = f o
+getMapVariables _ _ = error "The getMapVariables function only accepts maps."
+
+expandMapPattern :: Constructor
+                 -> [Metadata]
+                 -> Metadata
+                 -> (Fix Pattern,Clause)
+                 -> [(Fix Pattern,Maybe (Constructor,Metadata))]
+expandMapPattern (HasKey _ _ _ (Just p)) _ _ (m@(Fix (MapPattern ks vs f e o)),c) =
+  let canonKs = map (canonicalizePattern c) ks
+      hasKey = elemIndex p canonKs
+  in case hasKey of
+       Just i -> [(vs !! i,Nothing), (Fix (MapPattern (except i ks) (except i vs) f e o), Nothing), (Fix Wildcard, Nothing)]
+       Nothing -> [(Fix Wildcard,Nothing), (Fix Wildcard,Nothing), (m,Nothing)]
+expandMapPattern (HasNoKey _ _) _ _ (p,_) = [(p,Nothing)]
+expandMapPattern _ _ _ (Fix MapPattern{},_) = error "Invalid map pattern."
+expandMapPattern _ _ _ _ = error "The expandMapPattern function expects a map parameter as its final argument."
+
+except :: Int -> [a] -> [a]
+except i as =
+  let (hd,tl) = splitAt i as
+  in hd ++ tail tl

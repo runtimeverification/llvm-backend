@@ -57,8 +57,6 @@ import           Data.Traversable
 import qualified Data.Yaml.Builder as Y
 import           Kore.AST.Common
                  ( AstLocation (..), Id (..), SymbolOrAlias (..) )
-import           Kore.AST.MetaOrObject
-                 ( Object (..) )
 import           Kore.Unparser
                  ( unparseToString )
 import           TextShow
@@ -68,6 +66,7 @@ import Pattern.Type
 import Pattern.Var
 import Pattern.Map
 import Pattern.Set
+import Pattern.Optimiser.Score
 
 -- [ Builders ]
 
@@ -195,15 +194,20 @@ mSpecialize ix (cm@(ClauseMatrix (PatternMatrix (c : _)) _), o : os) =
      getConstructor (NonEmpty _) = error "Invalid map pattern"
      getConstructor HasKey{} = "1"
      getConstructor (HasNoKey _ _) = "0"
-
 mSpecialize _ _ = error "must have at least one column"
+
+tshow :: Show a => a -> Text
+tshow = pack . show
 
 expandOccurrence :: ClauseMatrix -> (Occurrence,Bool) -> Constructor -> Fringe
 expandOccurrence (ClauseMatrix (PatternMatrix (c : _)) _) o ix =
   case ix of
     Empty -> []
     NonEmpty _ -> [o]
-    HasKey isSet _ _ (Just k) -> if isSet then [(Rem k (fst o), False), o] else [(Value k (fst o), False), (Rem k (fst o), False), o]
+    HasKey isSet _ _ (Just k) ->
+      if isSet
+      then [(Rem (tshow k) (fst o), False), o]
+      else [(Value (tshow k) (fst o), False), (Rem (tshow k) (fst o), False), o]
     HasKey _ _ _ Nothing -> error "Invalid map/set pattern"
     HasNoKey _ _ -> [o]
     _ -> let (Metadata _ _ _ _ mtd) = getMetadata c
@@ -325,7 +329,7 @@ mightUnify _ (Fix (Variable _ _)) = True
 mightUnify (Fix (Variable _ _)) _ = True
 mightUnify (Fix (As _ _ p)) p' = mightUnify p p'
 mightUnify p (Fix (As _ _ p')) = mightUnify p p'
-mightUnify (Fix (Pattern c _ ps)) (Fix (Pattern c' _ ps')) = c == c' && (and $ zipWith mightUnify ps ps')
+mightUnify (Fix (Pattern c _ ps)) (Fix (Pattern c' _ ps')) = c == c' && and (zipWith mightUnify ps ps')
 mightUnify (Fix ListPattern{}) (Fix ListPattern{}) = True
 mightUnify x@(Fix MapPattern{}) y =
   mightUnifyMap x y
@@ -465,25 +469,21 @@ computeScore m ((Fix ListPattern{}, _) : tl) = 1.0 + computeScore m tl
 computeScore m ((Fix (As _ _ pat),c):tl) = computeScore m ((pat,c):tl)
 computeScore m ((Fix Wildcard,_):tl) = min 0.0 $ computeScore m tl
 computeScore m ((Fix (Variable _ _),_):tl) = min 0.0 $ computeScore m tl
-computeScore m ((Fix (MapPattern [] [] Nothing _ _),_):tl) = 1.0 + computeScore m tl
-computeScore m ((Fix (MapPattern [] [] (Just p) _ _),c):tl) = computeScore m ((p,c):tl)
-computeScore m ((Fix (MapPattern ks vs _ e _),c):tl) = if computeScore m tl == -1.0 / 0.0 then -1.0 / 0.0 else snd $ computeMapScore m e c ks vs tl
+computeScore m pc@((Fix MapPattern{}, _) : _) =
+  computeMapScore computeScore m pc
 computeScore m ((Fix (SetPattern [] Nothing _ _),_):tl) = 1.0 + computeScore m tl
 computeScore m ((Fix (SetPattern [] (Just p) _ _),c):tl) = computeScore m ((p,c):tl)
 computeScore m ((Fix (SetPattern es _ _ _),c):tl) = if computeScore m tl == -1.0 / 0.0 then -1.0 / 0.0 else snd $ computeSetScore c es tl
 
+-- | Gets the best key or element to use from a set or map when computing
+-- the score
 getBestKey :: Column -> [Clause] -> Maybe (Fix BoundPattern)
-getBestKey (Column m (Fix (MapPattern (k:ks) vs _ e _):tl)) cs = fst $ computeMapScore m e (head cs) (k:ks) vs (zip tl $ tail cs)
+getBestKey columns@(Column _ (Fix MapPattern{} : _)) clauses =
+  getBestMapKey computeScore columns clauses
 getBestKey (Column _ (Fix (SetPattern (k:ks) _ _ _):tl)) cs = fst $ computeSetScore (head cs) (k:ks) (zip tl $ tail cs)
 getBestKey (Column m (Fix Wildcard:tl)) cs = getBestKey (Column m tl) (tail cs)
 getBestKey (Column m (Fix (Variable _ _):tl)) cs = getBestKey (Column m tl) (tail cs)
 getBestKey _ _ = Nothing
-
-computeMapScore :: Metadata -> SymbolOrAlias Object -> Clause -> [Fix Pattern] -> [Fix Pattern] -> [(Fix Pattern,Clause)] -> (Maybe (Fix BoundPattern), Double)
-computeMapScore m e c ks vs tl =
-  let zipped = zip ks vs
-      scores = map (\(k,v) -> (if isBound getName c k then Just $ canonicalizePattern c k else Nothing,computeMapElementScore m e c tl (k,v))) zipped
-  in maximumBy (comparing snd) scores
 
 computeSetScore :: Clause -> [Fix Pattern] -> [(Fix Pattern,Clause)] -> (Maybe (Fix BoundPattern), Double)
 computeSetScore c es tl =
@@ -492,38 +492,6 @@ computeSetScore c es tl =
 
 minPositiveDouble :: Double
 minPositiveDouble = encodeFloat 1 $ fst (floatRange (0.0 :: Double)) - floatDigits (0.0 :: Double)
-
-computeMapElementScore :: Metadata -> SymbolOrAlias Object -> Clause -> [(Fix Pattern,Clause)] -> (Fix Pattern, Fix Pattern) -> Double
-computeMapElementScore m e c tl (k,v) =
-  let score = computeElementScore k c tl
-  in if score == -1.0 / 0.0 then score else
-  let finalScore = score * computeScore (head $ fromJust $ getChildren m (HasKey False e (Ignoring m) Nothing)) [(v,c)]
-  in if finalScore == 0.0 then minPositiveDouble else finalScore
-
-computeElementScore :: Fix Pattern -> Clause -> [(Fix Pattern,Clause)] -> Double
-computeElementScore k c tl =
-  let bound = isBound getName c k
-  in if bound then
-    let canonKey = canonicalizePattern c k
-        (ps,cs) = unzip tl
-        canonCs = map canonicalizeClause cs
-        boundedCanonCs = takeWhile (flip (isBound (Just . getOccurrence)) canonKey) canonCs
-        boundedPs = take (length boundedCanonCs) ps
-        boundedCs = take (length boundedCanonCs) cs
-        canonPs = zipWith canonicalizePattern boundedCs boundedPs
-        psWithK = takeWhile (mapContainsKey canonKey) canonPs
-    in fromIntegral $ length psWithK
-  else -1.0 / 0.0
-  where
-    mapContainsKey :: Fix BoundPattern -> Fix BoundPattern -> Bool
-    mapContainsKey k' (Fix (MapPattern ks _ _ _ _)) = k' `elem` ks
-    mapContainsKey _ _ = False
-    canonicalizeClause :: Clause -> Clause
-    canonicalizeClause (Clause a vars ranges children) =
-      let hooks = map getHook vars
-          os = map getOccurrence vars
-          names = map show os
-      in Clause a (zipWith3 VariableBinding names hooks os) ranges children
 
 expandColumn :: Constructor -> Column -> [Clause] -> [Column]
 expandColumn ix (Column m ps) cs =
@@ -579,12 +547,8 @@ expandPattern (Symbol (SymbolOrAlias (Id "inj" _) _)) ms (Metadata _ _ overloads
       in head (expandIfJust ([(p,maybeChild)],cls))
 expandPattern Empty _ _ (_, _) = []
 expandPattern (NonEmpty _) _ _ (p,_) = [(p,Nothing)]
-expandPattern (HasKey _ _ _ (Just p)) _ _ (m@(Fix (MapPattern ks vs f e o)),c) =
-  let canonKs = map (canonicalizePattern c) ks
-      hasKey = elemIndex p canonKs
-  in case hasKey of
-       Just i -> [(vs !! i,Nothing), (Fix (MapPattern (except i ks) (except i vs) f e o), Nothing), (Fix Wildcard, Nothing)]
-       Nothing -> [(Fix Wildcard,Nothing), (Fix Wildcard,Nothing), (m,Nothing)]
+expandPattern s ms m pc@(Fix MapPattern{},_) =
+  expandMapPattern s ms m pc
 expandPattern (HasKey _ _ _ (Just p)) _ _ (m@(Fix (SetPattern es f e o)),c) =
   let canonEs = map (canonicalizePattern c) es
       hasElem = elemIndex p canonEs
@@ -593,7 +557,6 @@ expandPattern (HasKey _ _ _ (Just p)) _ _ (m@(Fix (SetPattern es f e o)),c) =
        Nothing -> [(Fix Wildcard,Nothing), (m,Nothing)]
 expandPattern (HasKey _ _ _ Nothing) _ _ _ = error "TODO: map/set choice"
 expandPattern (HasNoKey _ _) _ _ (p,_) = [(p,Nothing)]
-expandPattern _ _ _ (Fix MapPattern{},_) = error "Invalid map pattern"
 expandPattern _ _ _ (Fix SetPattern{},_) = error "Invalid set pattern"
 expandPattern _ _ _ (Fix (Pattern _ _ fixedPs), _)  = zip fixedPs $ replicate (length fixedPs) Nothing
 expandPattern ix ms m (Fix (As _ _ pat), c)         = expandPattern ix ms m (pat, c)
@@ -758,14 +721,16 @@ getRealScore (ClauseMatrix (PatternMatrix cs) as) c =
   where
     getMapOrSetKeys :: Fix Pattern -> [Fix Pattern]
     getMapOrSetKeys (Fix (SetPattern ks _ _ _)) = ks
-    getMapOrSetKeys (Fix (MapPattern ks _ _ _ _)) = ks
+    getMapOrSetKeys p@(Fix MapPattern{}) =
+      getMapKeys p
     getMapOrSetKeys _ = []
     getVariables :: Fix Pattern -> [String]
     getVariables (Fix (Variable name _)) = [name]
     getVariables (Fix (As name _ p)) = name : getVariables p
     getVariables (Fix (Pattern _ _ ps)) = concatMap getVariables ps
     getVariables (Fix (ListPattern _ _ _ _ o)) = getVariables o
-    getVariables (Fix (MapPattern _ _ _ _ o)) = getVariables o
+    getVariables p@(Fix MapPattern{}) =
+      getMapVariables getVariables p
     getVariables (Fix (SetPattern _ _ _ o)) = getVariables o
     getVariables (Fix Wildcard) = []
 
@@ -908,9 +873,9 @@ compilePattern = compilePattern'
                , getDefault = compilePattern' <$> d
                }
              Just k -> Fix $ MakePattern newO k $
-                         Fix $ Function "hook_MAP_lookup_null" (Value k mapO) [mapO, newO] "STRING.String" $
-                           Fix $ Function "hook_MAP_remove" (Rem k mapO) [mapO, newO] "MAP.Map" $
-                             Fix $ CheckNull (Value k mapO) $ L
+                         Fix $ Function "hook_MAP_lookup_null" (Value (tshow k) mapO) [mapO, newO] "STRING.String" $
+                           Fix $ Function "hook_MAP_remove" (Rem (tshow k) mapO) [mapO, newO] "MAP.Map" $
+                             Fix $ CheckNull (Value (tshow k) mapO) $ L
                                { getSpecializations = map (second compilePattern') ls
                                , getDefault = compilePattern' <$> d
                                }
@@ -933,9 +898,9 @@ compilePattern = compilePattern'
                , getDefault = compilePattern' <$> d
                }
              Just k -> Fix $ MakePattern newO k $
-                         Fix $ Function "hook_SET_in" (Value k setO) [newO, setO] "BOOL.Bool" $
-                           Fix $ Function "hook_SET_remove" (Rem k setO) [setO, newO] "SET.Set" $
-                             Fix $ SwitchLiteral (Value k setO) 1 $ L
+                         Fix $ Function "hook_SET_in" (Value (tshow k) setO) [newO, setO] "BOOL.Bool" $
+                           Fix $ Function "hook_SET_remove" (Rem (tshow k) setO) [setO, newO] "SET.Set" $
+                             Fix $ SwitchLiteral (Value (tshow k) setO) 1 $ L
                                { getSpecializations = map (second compilePattern') ls
                                , getDefault = compilePattern' <$> d
                                }

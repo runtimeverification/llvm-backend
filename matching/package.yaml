@@ -34,6 +34,17 @@ dependencies:
 - free
 - deriving-compat
 
+default-extensions:
+  - DeriveFunctor
+  - FlexibleContexts
+  - FlexibleInstances
+  - OverloadedStrings
+  - TemplateHaskell
+  - TupleSections
+  - TypeSynonymInstances
+  - UndecidableInstances
+  - ScopedTypeVariables
+
 executables:
   llvm-kompile-matching:
     main: Main.hs
