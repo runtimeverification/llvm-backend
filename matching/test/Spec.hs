@@ -41,30 +41,30 @@ data Lst  = Cns IntPat Lst -- index 1
 
 instance IsPattern Lst where
   toPattern :: Lst -> Fix Pattern
-  toPattern (Cns i l) = Fix (Pattern (Literal "cons") Nothing [toPattern i, toPattern l])
-  toPattern Nil     = Fix (Pattern (Literal "nil") Nothing  [])
+  toPattern (Cns i l) = Fix (Pattern (Right $ Literal "cons") Nothing [toPattern i, toPattern l])
+  toPattern Nil     = Fix (Pattern (Right $ Literal "nil") Nothing  [])
   toPattern Wld     = Fix Wildcard
   toPattern (Var v) = Fix (Variable v "STRING.String")
 
 instance IsPattern IntPat where
   toPattern :: IntPat -> Fix Pattern
-  toPattern (IntLit i) = Fix (Pattern (Literal $ show i) (Just "MINT.MInt 32") [])
+  toPattern (IntLit i) = Fix (Pattern (Right $ Literal $ show i) (Just "MINT.MInt 32") [])
   toPattern IntWld     = Fix Wildcard
   toPattern (IntVar v) = Fix (Variable v "INT.Int")
 
 instance HasMetadata IntPat where
-  getMetadata :: Proxy IntPat -> Metadata
+  getMetadata :: Proxy IntPat -> Metadata BoundPattern
   getMetadata _ = Metadata (shiftL 1 32) (const []) (const []) (SortActualSort (SortActual (Id "Int" AstLocationNone) [])) f
     where
-      f :: Constructor -> Maybe [Metadata]
+      f :: Constructor BoundPattern -> Maybe [Metadata BoundPattern]
       f _ = Just []
 
 instance HasMetadata Lst where
-  getMetadata :: Proxy Lst -> Metadata
+  getMetadata :: Proxy Lst -> Metadata BoundPattern
   getMetadata _ =
     let m = M.fromList
-                    [ (Literal "nil", []) -- Nil
-                    , (Literal "cons", [ getMetadata (Proxy :: Proxy IntPat)
+                    [ (LiteralConstructor $ Literal "nil", []) -- Nil
+                    , (LiteralConstructor $ Literal "cons", [ getMetadata (Proxy :: Proxy IntPat)
                                , getMetadata (Proxy :: Proxy Lst)
                                ]) -- Cns Lst (1)
                     ]
@@ -83,7 +83,7 @@ vars l = concat (map varLst l)
     varInt IntWld = []
     varInt (IntVar s) = [s]
 
-mkLstPattern :: [([Lst],Maybe [String])] -> (ClauseMatrix, Fringe)
+mkLstPattern :: [([Lst],Maybe [String])] -> (ClauseMatrix Pattern BoundPattern, Fringe)
 mkLstPattern pats =
   let as = take (length ls) [1..]
       (ls, conds) = unzip pats
@@ -95,32 +95,32 @@ mkLstPattern pats =
        Right matrix -> matrix
        Left  msg    -> error $ "Invalid definition: " ++ show msg
 
-defaultPattern :: (ClauseMatrix, Fringe)
+defaultPattern :: (ClauseMatrix Pattern BoundPattern, Fringe)
 defaultPattern =
   mkLstPattern [ ([Nil, Wld], Nothing)
                , ([Wld, Nil], Nothing)
                , ([Wld, Wld], Nothing) ]
 
-appendPattern :: (ClauseMatrix, Fringe)
+appendPattern :: (ClauseMatrix Pattern BoundPattern, Fringe)
 appendPattern =
   mkLstPattern [ ([Nil, Wld], Nothing)
                , ([Wld, Nil], Nothing)
                , ([Cns IntWld Wld, Cns IntWld Wld], Nothing) ]
 
-appendBindPattern :: (ClauseMatrix, Fringe)
+appendBindPattern :: (ClauseMatrix Pattern BoundPattern, Fringe)
 appendBindPattern =
   mkLstPattern [ ([Nil, Var "as"], Nothing)
                , ([Var "bs", Nil], Nothing)
                , ([Cns (IntVar "b") (Var "bs"), Cns (IntVar "a") (Var "as")], Nothing) ]
 
-appendCondPattern :: (ClauseMatrix, Fringe)
+appendCondPattern :: (ClauseMatrix Pattern BoundPattern, Fringe)
 appendCondPattern =
   mkLstPattern [ ([Nil, Var "as"], Nothing)
                , ([Var "bs", Nil], Nothing)
                , ([Cns (IntVar "b") (Var "bs"), Cns (IntVar "a") (Var "as")], Just ["as", "b"]) ]
 
 
-matchHeadPattern :: (ClauseMatrix, Fringe)
+matchHeadPattern :: (ClauseMatrix Pattern BoundPattern, Fringe)
 matchHeadPattern =
   mkLstPattern [ ([Cns (IntLit 0) Wld], Nothing)
                , ([Cns (IntLit 1) Wld], Nothing)

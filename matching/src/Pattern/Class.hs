@@ -11,4 +11,4 @@ class IsPattern a where
   toPattern :: a -> Fix Pattern
 
 class HasMetadata a where
-  getMetadata :: Proxy a -> Metadata
+  getMetadata :: Proxy a -> Metadata BoundPattern

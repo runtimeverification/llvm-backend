@@ -31,17 +31,17 @@ import Pattern.Optimiser.Score
 
 -- | Extracts the constructors from a map pattern. It also returns
 -- a pattern for the next keys in the map.
-getMapCs :: Column
-         -> Clause
+getMapCs :: Column Pattern BoundPattern
+         -> Clause BoundPattern
          -> Fix Pattern
-         -> ([Constructor], Maybe (Fix Pattern))
+         -> ([Constructor BoundPattern], Maybe (Fix Pattern))
 getMapCs c cls = go
   where
-    metadata :: Ignoring Metadata
+    metadata :: Ignoring (Metadata BoundPattern)
     metadata  = Ignoring (getMetadata c)
     key :: Fix Pattern -> Maybe (Fix BoundPattern)
     key  = lookupCanonicalName cls
-    go :: Fix Pattern -> ([Constructor], Maybe (Fix Pattern))
+    go :: Fix Pattern -> ([Constructor BoundPattern], Maybe (Fix Pattern))
     go (Fix (MapPattern [] _ Nothing _ _))  = ([Empty], Nothing)
     go (Fix (MapPattern [] _ (Just next) _ _)) = ([], Just next)
     go p@(Fix (MapPattern (k : _) _ _ e _)) =
@@ -67,7 +67,7 @@ getMapHookName = Just "MAP.Map"
 
 -- | This matches the default case for maps. We may be able to remove
 -- this one from the public interface
-isDefaultMap :: Clause -> Fix Pattern -> Bool
+isDefaultMap :: Clause BoundPattern -> Fix Pattern -> Bool
 isDefaultMap _ (Fix (MapPattern _ _ (Just _) _ _))  = True
 isDefaultMap _ (Fix (MapPattern ks vs Nothing _ _)) = not (null ks) || not (null vs)
 isDefaultMap _ _ = error "This should only be called on maps"
@@ -80,9 +80,9 @@ mightUnifyMap (Fix MapPattern{}) _                  = False
 mightUnifyMap _ _ = error "First argument must be a map"
 
 checkMapPatternIndex :: (Fix BoundPattern -> Fix BoundPattern -> Bool)
-                     -> Constructor
-                     -> Metadata
-                     -> (Clause, Fix Pattern)
+                     -> Constructor BoundPattern
+                     -> Metadata BoundPattern
+                     -> (Clause BoundPattern, Fix Pattern)
                      -> Bool
 checkMapPatternIndex _ Empty _ (_, Fix (MapPattern ks vs _ _ _)) =
   null ks && null vs
@@ -94,8 +94,8 @@ checkMapPatternIndex _ (HasNoKey _ (Just p)) _ (c, Fix (MapPattern ks _ _ _ _)) 
 checkMapPatternIndex _ _ _ _ = error "Third argument must contain a map."
 
 -- | Add variables bound in the pattern to the binding list
-addMapVarToRow :: ( Maybe Constructor -> Occurrence -> Fix Pattern -> [VariableBinding] -> [VariableBinding] )
-               -> Maybe Constructor
+addMapVarToRow :: ( Maybe (Constructor BoundPattern) -> Occurrence -> Fix Pattern -> [VariableBinding] -> [VariableBinding] )
+               -> Maybe (Constructor BoundPattern)
                -> Occurrence
                -> Fix Pattern
                -> [VariableBinding]
@@ -106,9 +106,9 @@ addMapVarToRow _ _ _ (Fix MapPattern{}) vars = vars
 addMapVarToRow _ _ _ _ _ = error "Fourth argument must contain a map."
 
 -- | This function computes the score for a map.
-computeMapScore :: (Metadata -> [(Fix Pattern, Clause)] -> Double)
-                -> Metadata
-                -> [(Fix Pattern, Clause)]
+computeMapScore :: (Metadata BoundPattern-> [(Fix Pattern, Clause BoundPattern)] -> Double)
+                -> Metadata BoundPattern
+                -> [(Fix Pattern, Clause BoundPattern)]
                 -> Double
 computeMapScore f m ((Fix (MapPattern [] [] Nothing _ _),_):tl) = 1.0 + f m tl
 computeMapScore f m ((Fix (MapPattern [] [] (Just p) _ _),c):tl) = f m ((p,c):tl)
@@ -117,22 +117,22 @@ computeMapScore _ _ _ = error "The first pattern must be a map."
 
 -- | This function selects the best candidate key to use when
 -- computing the score for a map.
-getBestMapKey :: (Metadata -> [(Fix Pattern, Clause)] -> Double)
-              -> Column
-              -> [Clause]
+getBestMapKey :: (Metadata BoundPattern -> [(Fix Pattern, Clause BoundPattern)] -> Double)
+              -> Column Pattern BoundPattern
+              -> [Clause BoundPattern]
               -> Maybe (Fix BoundPattern)
 getBestMapKey f (Column m (Fix (MapPattern (k:ks) vs _ e _):tl)) cs =
   fst $ computeMapScore' f  m e (head cs) (k:ks) vs (zip tl $ tail cs)
 getBestMapKey _ (Column _ (Fix MapPattern{}:_)) _ = Nothing
 getBestMapKey _ _ _ = error "Column must contain a map pattern."
 
-computeMapScore' :: (Metadata -> [(Fix Pattern, Clause)] -> Double)
-                 -> Metadata
+computeMapScore' :: (Metadata BoundPattern -> [(Fix Pattern, Clause BoundPattern)] -> Double)
+                 -> Metadata BoundPattern
                  -> SymbolOrAlias Object -- ^ Map.element
-                 -> Clause
+                 -> Clause BoundPattern
                  -> [Fix Pattern]
                  -> [Fix Pattern]
-                 -> [(Fix Pattern,Clause)]
+                 -> [(Fix Pattern,Clause BoundPattern)]
                  -> (Maybe (Fix BoundPattern), Double)
 computeMapScore' f m e c ks vs tl =
   let zipped = zip ks vs
@@ -141,11 +141,11 @@ computeMapScore' f m e c ks vs tl =
 
 -- | This function computes the score for a map when there are
 -- keys and values defined.
-computeMapElementScore :: (Metadata -> [(Fix Pattern, Clause)] -> Double)
-                       -> Metadata
+computeMapElementScore :: (Metadata BoundPattern -> [(Fix Pattern, Clause BoundPattern)] -> Double)
+                       -> Metadata BoundPattern
                        -> SymbolOrAlias Object
-                       -> Clause
-                       -> [(Fix Pattern,Clause)]
+                       -> Clause BoundPattern
+                       -> [(Fix Pattern,Clause BoundPattern)]
                        -> (Fix Pattern, Fix Pattern)
                        -> Double
 computeMapElementScore f m e c tl (k,v) =
@@ -166,11 +166,11 @@ getMapVariables :: (Fix Pattern -> [String])
 getMapVariables f (Fix (MapPattern _ _ _ _ o)) = f o
 getMapVariables _ _ = error "The getMapVariables function only accepts maps."
 
-expandMapPattern :: Constructor
-                 -> [Metadata]
-                 -> Metadata
-                 -> (Fix Pattern,Clause)
-                 -> [(Fix Pattern,Maybe (Constructor,Metadata))]
+expandMapPattern :: Constructor BoundPattern
+                 -> [Metadata BoundPattern]
+                 -> Metadata BoundPattern
+                 -> (Fix Pattern,Clause BoundPattern)
+                 -> [(Fix Pattern,Maybe (Constructor BoundPattern, Metadata BoundPattern))]
 expandMapPattern (HasKey _ _ _ (Just p)) _ _ (m@(Fix (MapPattern ks vs f e o)),c) =
   let canonKs = map (canonicalizePattern c) ks
       hasKey = elemIndex p canonKs

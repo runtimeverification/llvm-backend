@@ -9,7 +9,7 @@ import Pattern.Type
 import Pattern.Var
 
 -- | This computes the final score for a map given the best key.
-computeElementScore :: Fix Pattern -> Clause -> [(Fix Pattern,Clause)] -> Double
+computeElementScore :: Fix Pattern -> Clause BoundPattern -> [(Fix Pattern, Clause BoundPattern)] -> Double
 computeElementScore k c tl =
   let bound = isBound getName c k
   in if bound then
@@ -26,7 +26,7 @@ computeElementScore k c tl =
   where
     mapContainsKey :: Fix BoundPattern -> Fix BoundPattern -> Bool
     mapContainsKey _ _ = False
-    canonicalizeClause :: Clause -> Clause
+    canonicalizeClause :: Clause BoundPattern -> Clause BoundPattern
     canonicalizeClause (Clause a vars ranges children) =
       let hooks = map getHook vars
           os = map getOccurrence vars

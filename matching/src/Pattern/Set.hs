@@ -1,3 +1,4 @@
+{-# LANGUAGE ScopedTypeVariables #-}
 module Pattern.Set
   ( getSetCs ) where
 
@@ -9,17 +10,17 @@ import Pattern.Var
 
 -- | Extracts the constructors from a set pattern. It also returns
 -- a pattern for the next values in the set.
-getSetCs :: Column
-         -> Clause
+getSetCs :: Column Pattern BoundPattern
+         -> Clause BoundPattern
          -> Fix Pattern
-         -> ([Constructor], Maybe (Fix Pattern))
+         -> ([Constructor BoundPattern], Maybe (Fix Pattern))
 getSetCs c cls = go
   where
-    metadata :: Ignoring Metadata
+    metadata :: Ignoring (Metadata BoundPattern)
     metadata  = Ignoring (getMetadata c)
     value :: Fix Pattern -> Maybe (Fix BoundPattern)
     value  = lookupCanonicalName cls
-    go :: Fix Pattern -> ([Constructor], Maybe (Fix Pattern))
+    go :: Fix Pattern -> ([Constructor BoundPattern], Maybe (Fix Pattern))
     go (Fix (SetPattern [] Nothing _ _))  = ([Empty], Nothing)
     go (Fix (SetPattern [] (Just next) _ _)) = ([], Just next)
     go p@(Fix (SetPattern (k : _) _ e _)) =
