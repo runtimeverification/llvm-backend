@@ -1,8 +1,6 @@
 pipeline {
   agent {
-    dockerfile {
-      true
-    }
+    dockerfile true
   }
   options {
     skipDefaultCheckout true
