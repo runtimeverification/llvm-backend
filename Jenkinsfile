@@ -2,9 +2,6 @@ pipeline {
   agent {
     dockerfile true
   }
-  options {
-    skipDefaultCheckout true
-  }
   stages {
     stage("Init title") {
       when { changeRequest() }
@@ -12,12 +9,6 @@ pipeline {
         script {
           currentBuild.displayName = "PR ${env.CHANGE_ID}: ${env.CHANGE_TITLE}"
         }
-      }
-    }
-    stage('Checkout code') {
-      steps {
-        sh 'rm -rf ./*'
-        checkout scm
       }
     }
     stage('Install dependencies') {
