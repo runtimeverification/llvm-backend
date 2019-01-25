@@ -1,5 +1,5 @@
 #!/bin/bash -ex
-export PATH=$PATH:~/.cargo/bin
+export PATH=$HOME/.cargo/bin:$HOME/.local/bin:$PATH
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
     export PATH="/usr/local/opt/flex/bin:/usr/local/opt/llvm@6/bin:$PATH"
