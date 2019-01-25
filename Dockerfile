@@ -10,4 +10,4 @@ RUN groupadd -g $GROUP_ID user && \
     useradd -m -u $USER_ID -s /bin/sh -g user user
 
 USER $USER_ID:$GROUP_ID
-RUN curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain 1.28
+RUN curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain 1.28.0
