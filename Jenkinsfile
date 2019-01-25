@@ -1,6 +1,7 @@
 pipeline {
   agent {
     dockerfile true
+    args '-u 1000'
   }
   stages {
     stage("Init title") {
