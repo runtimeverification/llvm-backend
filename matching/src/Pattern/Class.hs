@@ -6,6 +6,7 @@ import Data.Functor.Foldable (Fix(..))
 import Data.Proxy (Proxy(..))
 
 import Pattern.Type
+import Pattern
 
 class IsPattern a where
   toPattern :: a -> Fix Pattern

@@ -7,6 +7,7 @@ import Data.Functor.Foldable
 
 import Pattern.Type
 import Pattern.Var
+import Pattern
 
 -- | Extracts the constructors from a set pattern. It also returns
 -- a pattern for the next values in the set.

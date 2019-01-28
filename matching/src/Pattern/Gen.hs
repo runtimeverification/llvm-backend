@@ -3,53 +3,54 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Pattern.Gen where
 
-import           Control.Monad.Free
-                 ( Free (..) )
-import           Data.Bits
-                 ( shiftL )
-import           Data.Either
-                 ( fromRight )
-import           Data.Functor.Foldable
-                 ( Fix (..), para )
-import           Data.List
-                 ( transpose )
+import Control.Monad.Free
+       ( Free (..) )
+import Data.Bits
+       ( shiftL )
+import Data.Either
+       ( fromRight )
+import Data.Functor.Foldable
+       ( Fix (..), para )
+import Data.List
+       ( transpose )
+import Data.Maybe
+       ( fromJust, isJust, maybe )
+import Data.Text
+       ( Text, unpack )
+import Data.Tuple.Select
+       ( sel1, sel2 )
+import Kore.AST.Common
+       ( And (..), Application (..), AstLocation (..), BuiltinDomain (..),
+       Ceil (..), DomainValue (..), Equals (..), Exists (..), Floor (..),
+       Forall (..), Id (..), Iff (..), Implies (..), In (..), Next (..),
+       Not (..), Or (..), Pattern (..), Rewrites (..), Sort (..),
+       SortActual (..), StringLiteral (..), SymbolOrAlias (..), Variable (..) )
+import Kore.AST.Kore
+       ( CommonKorePattern )
+import Kore.AST.MetaOrObject
+       ( Object (..) )
+import Kore.AST.Sentence
+       ( Attributes (..) )
+import Kore.ASTHelpers
+       ( ApplicationSorts (..) )
+import Kore.Attribute.Parser
+       ( parseAttributes )
+import Kore.Builtin.Hook
+       ( Hook (..) )
+import Kore.IndexedModule.IndexedModule
+       ( KoreIndexedModule )
+import Kore.IndexedModule.MetadataTools
+       ( MetadataTools (..), extractMetadataTools )
+import Kore.Step.StepperAttributes
+       ( StepperAttributes (..) )
+import Pattern.Parser
+       ( AxiomInfo (..), SymLib (..), getTopChildren, unifiedPatternRAlgebra )
+
 import qualified Data.Map as Map
-import           Data.Maybe
-                 ( fromJust, isJust, maybe )
-import           Data.Text
-                 ( Text, unpack )
-import           Data.Tuple.Select
-                 ( sel1, sel2 )
-import           Kore.AST.Common
-                 ( And (..), Application (..), AstLocation (..),
-                 BuiltinDomain (..), Ceil (..), DomainValue (..), Equals (..),
-                 Exists (..), Floor (..), Forall (..), Id (..), Iff (..),
-                 Implies (..), In (..), Next (..), Not (..), Or (..),
-                 Pattern (..), Rewrites (..), Sort (..), SortActual (..),
-                 StringLiteral (..), SymbolOrAlias (..), Variable (..) )
-import           Kore.AST.Kore
-                 ( CommonKorePattern )
-import           Kore.AST.MetaOrObject
-                 ( Object (..) )
-import           Kore.AST.Sentence
-                 ( Attributes (..) )
-import           Kore.ASTHelpers
-                 ( ApplicationSorts (..) )
-import           Kore.Attribute.Parser
-                 ( parseAttributes )
-import           Kore.Builtin.Hook
-                 ( Hook (..) )
-import           Kore.IndexedModule.IndexedModule
-                 ( KoreIndexedModule )
-import           Kore.IndexedModule.MetadataTools
-                 ( MetadataTools (..), extractMetadataTools )
-import           Kore.Step.StepperAttributes
-                 ( StepperAttributes (..) )
-import qualified Pattern as P
-import           Pattern.Parser
-                 ( AxiomInfo (..), SymLib (..), getTopChildren,
-                 unifiedPatternRAlgebra )
+
+import qualified Everything as P
 import qualified Pattern.Type as P
+import qualified Pattern as P
 
 parseAtt :: Attributes -> StepperAttributes
 parseAtt = fromRight (error "invalid attr") . parseAttributes
