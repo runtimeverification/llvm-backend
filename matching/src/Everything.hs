@@ -1,31 +1,22 @@
-{-# LANGUAGE DeriveFunctor        #-}
-{-# LANGUAGE FlexibleContexts     #-}
-{-# LANGUAGE FlexibleInstances    #-}
-{-# LANGUAGE OverloadedStrings    #-}
-{-# LANGUAGE TemplateHaskell      #-}
-{-# LANGUAGE TupleSections        #-}
-{-# LANGUAGE TypeSynonymInstances #-}
-{-# LANGUAGE UndecidableInstances #-}
-
-module Pattern ( mkClauseMatrix
-               , sigma
-               , mSpecialize
-               , mDefault
-               , getRealScore
-               , swapAt
-               , failure
-               , leaf
-               , switch
-               , switchLiteral
-               , function
-               , simplify
-               , DecisionTree(..)
-               , Anchor(..)
-               , Alias(..)
-               , compilePattern
-               , shareDt
-               , serializeToYaml
-               ) where
+module Everything ( mkClauseMatrix
+                  , sigma
+                  , mSpecialize
+                  , mDefault
+                  , getRealScore
+                  , swapAt
+                  , failure
+                  , leaf
+                  , switch
+                  , switchLiteral
+                  , function
+                  , simplify
+                  , DecisionTree(..)
+                  , Anchor(..)
+                  , Alias(..)
+                  , compilePattern
+                  , shareDt
+                  , serializeToYaml
+                  ) where
 
 import Control.Monad.Free
        ( Free (..) )

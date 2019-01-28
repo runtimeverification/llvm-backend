@@ -10,7 +10,6 @@ import           Data.Functor.Foldable
                  ( Fix (..) )
 import           Data.List
                  ( concat, transpose )
-import qualified Data.Map.Strict as M
 import           Data.Proxy
                  ( Proxy (..) )
 import           Data.Semigroup
@@ -18,12 +17,14 @@ import           Data.Semigroup
 import           Kore.AST.Common
                  ( AstLocation (..), Id (..), Sort (..), SortActual (..) )
 
+import qualified Data.Map.Strict as M
+
 import Test.Tasty
        ( TestTree, defaultMain, testGroup )
 import Test.Tasty.HUnit
        ( testCase, (@?=) )
 
-import Pattern
+import Everything
 import Pattern.Class
 import Pattern.Type hiding
        ( getMetadata )

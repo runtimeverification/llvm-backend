@@ -6,7 +6,7 @@ import           Data.Map              ((!))
 import           Data.Text             (unpack,pack)
 import           Data.Tuple.Select     (sel1)
 import           Kore.AST.Common       (Rewrites (..), SymbolOrAlias (..), Id (..))
-import           Pattern               (serializeToYaml, failure, Anchor, Alias,
+import           Everything               (serializeToYaml, failure, Anchor, Alias,
                                         shareDt)
 import           Pattern.Parser        (parseDefinition, parseTopAxioms, mainVerify,
                                         parseSymbols, getFunctions, SymLib (..),
