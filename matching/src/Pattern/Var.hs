@@ -13,6 +13,7 @@ import           Data.Maybe
                  ( fromMaybe )
 
 import Pattern.Type
+import Pattern
 
 -- | Checks to see if the variable name has been bound in the clause.
 lookupCanonicalName :: Clause BoundPattern

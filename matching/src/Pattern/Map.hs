@@ -28,6 +28,7 @@ import Kore.AST.MetaOrObject
 import Pattern.Type
 import Pattern.Var
 import Pattern.Optimiser.Score
+import Pattern
 
 -- | Extracts the constructors from a map pattern. It also returns
 -- a pattern for the next keys in the map.

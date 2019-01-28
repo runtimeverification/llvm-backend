@@ -50,6 +50,7 @@ import qualified Data.Map as Map
 
 import qualified Everything as P
 import qualified Pattern.Type as P
+import qualified Pattern as P
 
 parseAtt :: Attributes -> StepperAttributes
 parseAtt = fromRight (error "invalid attr") . parseAttributes

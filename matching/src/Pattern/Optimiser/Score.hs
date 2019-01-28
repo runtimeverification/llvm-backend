@@ -7,6 +7,7 @@ import Data.Functor.Foldable
 
 import Pattern.Type
 import Pattern.Var
+import Pattern
 
 -- | This computes the final score for a map given the best key.
 computeElementScore :: Fix Pattern -> Clause BoundPattern -> [(Fix Pattern, Clause BoundPattern)] -> Double

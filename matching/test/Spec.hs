@@ -25,6 +25,7 @@ import Test.Tasty.HUnit
        ( testCase, (@?=) )
 
 import Everything
+import Pattern
 import Pattern.Class
 import Pattern.Type hiding
        ( getMetadata )

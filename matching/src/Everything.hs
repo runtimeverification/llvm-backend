@@ -58,6 +58,7 @@ import Pattern.Optimiser.Score
 import Pattern.Set
 import Pattern.Type
 import Pattern.Var
+import Pattern
 
 -- [ Builders ]
 
