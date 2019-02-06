@@ -1,5 +1,11 @@
 cmake_minimum_required (VERSION 3.4)
 
+find_program(CMAKE_C_COMPILER clang-7)
+find_program(CMAKE_C_COMPILER clang-6.0)
+find_program(CMAKE_C_COMPILER clang)
+find_program(CMAKE_CXX_COMPILER clang++-7)
+find_program(CMAKE_CXX_COMPILER clang++-6.0)
+find_program(CMAKE_CXX_COMPILER clang++)
 project (KLLVM CXX C)
 
 set(CMAKE_CXX_STANDARD 14)
@@ -20,7 +26,11 @@ else()
 set(RUST_TARGET_TRIPLE "x86_64-unknown-linux-gnu")
 endif()
 
-find_package(LLVM 6 REQUIRED CONFIG)
+find_package(LLVM 7 QUIET CONFIG)
+
+if (NOT LLVM_FOUND) 
+	find_package(LLVM 6 REQUIRED CONFIG)	
+endif()
 
 message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
 if (${LLVM_PACKAGE_VERSION} VERSION_LESS 6.0)

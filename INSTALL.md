@@ -13,7 +13,7 @@ cd llvm-backend
 git submodule update --init
 mkdir build
 cd build
-CC=clang-6.0 CXX=clang++-6.0 cmake .. -DCMAKE_BUILD_TYPE=Release # or Debug
+cmake .. -DCMAKE_BUILD_TYPE=Release # or Debug
 make -j16
 make install
 ```
