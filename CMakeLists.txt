@@ -82,9 +82,20 @@ install(
   DESTINATION lib/kllvm/llvm/main
 )
 
+find_program(OPT opt-7)
+find_program(OPT opt-6.0)
+find_program(OPT opt)
+if(${OPT} STREQUAL "OPT-NOTFOUND")
+  message(FATAL_ERROR "Could not find an opt binary. Is llvm installed on your PATH?")
+endif()
+
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin)
+configure_file(bin/llvm-kompile bin @ONLY)
+configure_file(bin/llvm-kompile-clang bin @ONLY)
+configure_file(bin/llvm-kompile-rust-lto bin @ONLY)
 
 install(
-  PROGRAMS bin/llvm-kompile bin/llvm-kompile-clang bin/llvm-kompile-matching bin/llvm-kompile-rust-lto
+  PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/bin/llvm-kompile ${CMAKE_CURRENT_BINARY_DIR}/bin/llvm-kompile-clang ${CMAKE_CURRENT_BINARY_DIR}/bin/llvm-kompile-matching ${CMAKE_CURRENT_BINARY_DIR}/bin/llvm-kompile-rust-lto
   DESTINATION bin
 )
 
@@ -96,10 +107,10 @@ install(
 FILE(GLOB_RECURSE HaskellSources matching/src/*.hs matching/app/Main.hs)
 
 add_custom_command(
-  OUTPUT bin/llvm-kompile-matching
+  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/bin/llvm-kompile-matching
   DEPENDS ${HaskellSources}
   COMMAND stack build
-  COMMAND stack install --local-bin-path ${PROJECT_SOURCE_DIR}/bin
+  COMMAND stack install --local-bin-path ${CMAKE_CURRENT_BINARY_DIR}/bin
   WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/matching
 )
 
