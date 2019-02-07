@@ -88,7 +88,7 @@ static void emitDataForSymbol(std::string name, llvm::Type *ty, KOREDefinition *
     auto entry = *iter;
     uint32_t tag = entry.first;
     auto symbol = entry.second;
-    auto decl = definition->getSymbolDeclarations().lookup(symbol->getName());
+    auto decl = definition->getSymbolDeclarations().at(symbol->getName());
     bool isFunc = decl->getAttributes().count("function");
     if (isEval && !isFunc) {
       continue;
@@ -118,7 +118,7 @@ static void emitGetBlockHeaderForSymbol(KOREDefinition *def, llvm::Module *mod) 
 
 static std::pair<llvm::Value *, llvm::BasicBlock *> getFunction(KOREDefinition *def, llvm::Module *mod,
     KOREObjectSymbol *symbol, llvm::Instruction *inst) {
-  auto decl = def->getSymbolDeclarations().lookup(symbol->getName());
+  auto decl = def->getSymbolDeclarations().at(symbol->getName());
   bool res = decl->getAttributes().count("function");
   return std::make_pair(llvm::ConstantInt::get(llvm::Type::getInt1Ty(mod->getContext()), res),
       inst->getParent());
@@ -181,7 +181,7 @@ static std::pair<llvm::Value *, llvm::BasicBlock *> getEval(KOREDefinition *def,
     subst.insert({name, arg});
     pattern->addArgument(KOREObjectVariablePattern::Create(name, sort));
   }
-  KOREObjectSymbolDeclaration *symbolDecl = def->getSymbolDeclarations().lookup(symbol->getName());
+  KOREObjectSymbolDeclaration *symbolDecl = def->getSymbolDeclarations().at(symbol->getName());
   CreateTerm creator(subst, def, CaseBlock, mod, false);
   llvm::Value *result = creator(pattern).first;
   for (auto arg : pattern->getArguments()) {
@@ -252,7 +252,7 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
   llvm::Constant *zero32 = llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), 0);
   for (auto iter = sorts.begin(); iter != sorts.end(); ++iter) {
     auto &entry = *iter;
-    std::string name = entry.first();
+    std::string name = entry.first;
     auto sort = KOREObjectCompositeSort::Create(name);
     ValueType cat = sort->getCategory(definition);
     if (cat.cat == SortCategory::Symbol) {
@@ -478,17 +478,17 @@ static void visitCollection(KOREDefinition *definition, llvm::Module *module, KO
   llvm::LLVMContext &Ctx = module->getContext();
   llvm::Constant *zero = llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0);
   auto indices = std::vector<llvm::Constant *>{zero, zero};
-  auto sortDecl = definition->getSortDeclarations().lookup(compositeSort->getName());
+  auto sortDecl = definition->getSortDeclarations().at(compositeSort->getName());
   llvm::Constant *concatPtr;
   if (sortDecl->getAttributes().count("concat")) {
-    auto concat = (KOREObjectCompositePattern *)sortDecl->getAttributes().lookup("concat")->getArguments()[0];
+    auto concat = (KOREObjectCompositePattern *)sortDecl->getAttributes().at("concat")->getArguments()[0];
     concatPtr = getSymbolNamePtr(concat->getConstructor(), nullptr, module);
   } else {
     concatPtr = llvm::ConstantPointerNull::get(llvm::Type::getInt8PtrTy(Ctx));
   }
-  auto unit = (KOREObjectCompositePattern *)sortDecl->getAttributes().lookup("unit")->getArguments()[0];
+  auto unit = (KOREObjectCompositePattern *)sortDecl->getAttributes().at("unit")->getArguments()[0];
   auto unitPtr = getSymbolNamePtr(unit->getConstructor(), nullptr, module);
-  auto element = (KOREObjectCompositePattern *)sortDecl->getAttributes().lookup("element")->getArguments()[0];
+  auto element = (KOREObjectCompositePattern *)sortDecl->getAttributes().at("element")->getArguments()[0];
   auto elementPtr = getSymbolNamePtr(element->getConstructor(), nullptr, module);
   llvm::CallInst::Create(func->arg_begin()+offset, {func->arg_begin()+1, ChildPtr, unitPtr, elementPtr, concatPtr}, "", CaseBlock);
 }

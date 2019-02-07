@@ -10,10 +10,8 @@ else
 fi
 if [[ "$OSTYPE" == "darwin"* ]]; then
     SUFFIX=""
-    LLVMLIB="-L/usr/local/opt/llvm@6/lib"
 else
     SUFFIX="-6.0"
-    LLVMLIB="-L/usr/lib/llvm-6.0/lib"
 fi
 
 "clang++$SUFFIX" -Wno-override-module "$modopt" \
@@ -29,8 +27,6 @@ fi
   "$LIBDIR"/libAST.a \
   "$LIBDIR"/liballoc.a \
   -lgmp -lmpfr -lpthread -ldl \
-  "$LLVMLIB" \
-  -lLLVMIRReader -lLLVMBitReader -lLLVMAsmParser -lLLVMCore -lLLVMBinaryFormat -lLLVMSupport -lLLVMDemangle \
   -ltinfo \
   -ljemalloc \
   -I "$(dirname "$0")"/../include \

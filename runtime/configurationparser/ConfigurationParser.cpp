@@ -74,7 +74,7 @@ block *parseConfiguration(const char *filename) {
   // We expect the initial configuration as an attribute named "initial-configuration"
   assert(definition->getAttributes().count("initial-configuration"));
   const KOREObjectCompositePattern *InitialConfigurationAttribute =
-    definition->getAttributes().lookup("initial-configuration");
+    definition->getAttributes().at("initial-configuration");
   assert(InitialConfigurationAttribute->getArguments().size() > 0);
   const KOREPattern *InitialConfiguration =
     InitialConfigurationAttribute->getArguments()[0];

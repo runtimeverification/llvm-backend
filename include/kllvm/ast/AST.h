@@ -3,8 +3,6 @@
 
 #include <boost/functional/hash.hpp>
 
-#include "llvm/ADT/StringMap.h"
-
 #include <string>
 #include <vector>
 #include <list>
@@ -463,7 +461,7 @@ private:
 // KOREDeclaration
 class KOREDeclaration {
 protected:
-  llvm::StringMap<KOREObjectCompositePattern *> attributes;
+  std::map<std::string, KOREObjectCompositePattern *> attributes;
   std::vector<KOREObjectSortVariable *> objectSortVariables;
   std::vector<KOREMetaSortVariable *> metaSortVariables;
 
@@ -472,7 +470,7 @@ public:
   void addObjectSortVariable(KOREObjectSortVariable *SortVariable);
   void addMetaSortVariable(KOREMetaSortVariable *SortVariable);
   virtual void print(std::ostream &Out, unsigned indent = 0) const =0;
-  const llvm::StringMap<KOREObjectCompositePattern *> &getAttributes() const { return attributes; }
+  const std::map<std::string, KOREObjectCompositePattern *> &getAttributes() const { return attributes; }
   const std::vector<KOREObjectSortVariable *> &getObjectSortVariables() const { return objectSortVariables; }
 
 protected:
@@ -646,7 +644,7 @@ class KOREModule {
 private:
   std::string name;
   std::vector<KOREDeclaration *> declarations;
-  llvm::StringMap<KOREObjectCompositePattern *> attributes;
+  std::map<std::string, KOREObjectCompositePattern *> attributes;
 
 public:
   static KOREModule *Create(const std::string &Name) {
@@ -667,33 +665,33 @@ private:
 class KOREDefinition {
 public:
   // Symbol table types
-  using KOREModuleMapType = llvm::StringMap<KOREModule *>;
+  using KOREModuleMapType = std::map<std::string, KOREModule *>;
 
   using KOREObjectSortConstructorMapType =
-    llvm::StringMap<KOREObjectCompositeSort *>;
+    std::map<std::string, KOREObjectCompositeSort *>;
 
   using KOREMetaSortConstructorMapType =
-    llvm::StringMap<KOREMetaCompositeSort *>;
+    std::map<std::string, KOREMetaCompositeSort *>;
 
   using KOREObjectSymbolMapType = std::map<uint32_t, KOREObjectSymbol *>;
 
-  using KOREObjectSymbolStringMapType = llvm::StringMap<KOREObjectSymbol *>;
+  using KOREObjectSymbolStringMapType = std::map<std::string, KOREObjectSymbol *>;
 
-  using KOREMetaSymbolMapType = llvm::StringMap<KOREMetaSymbol *>;
+  using KOREMetaSymbolMapType = std::map<std::string, KOREMetaSymbol *>;
 
   using KOREObjectSortVariableMapType =
-    llvm::StringMap<KOREObjectSortVariable *>;
+    std::map<std::string, KOREObjectSortVariable *>;
 
-  using KOREMetaSortVariableMapType = llvm::StringMap<KOREMetaSortVariable *>;
+  using KOREMetaSortVariableMapType = std::map<std::string, KOREMetaSortVariable *>;
 
-  using KOREObjectVariableMapType = llvm::StringMap<KOREObjectVariable *>;
+  using KOREObjectVariableMapType = std::map<std::string, KOREObjectVariable *>;
 
-  using KOREMetaVariableMapType = llvm::StringMap<KOREMetaVariable *>;
+  using KOREMetaVariableMapType = std::map<std::string, KOREMetaVariable *>;
 
-  using KOREObjectCompositeSortDeclarationMapType = llvm::StringMap<KOREObjectCompositeSortDeclaration *>;
-  using KOREObjectCompositeSortMapType = llvm::StringMap<KOREObjectCompositeSort *>;
+  using KOREObjectCompositeSortDeclarationMapType = std::map<std::string, KOREObjectCompositeSortDeclaration *>;
+  using KOREObjectCompositeSortMapType = std::map<std::string, KOREObjectCompositeSort *>;
 
-  using KOREObjectSymbolDeclarationMapType = llvm::StringMap<KOREObjectSymbolDeclaration *>;
+  using KOREObjectSymbolDeclarationMapType = std::map<std::string, KOREObjectSymbolDeclaration *>;
 
 private:
   // Symbol tables
@@ -712,7 +710,7 @@ private:
   KOREObjectCompositeSortMapType hookedSorts;
 
   std::vector<KOREModule *> modules;
-  llvm::StringMap<KOREObjectCompositePattern *> attributes;
+  std::map<std::string, KOREObjectCompositePattern *> attributes;
   /* an automatically computed list of all the axioms in the definition */
   std::list<KOREAxiomDeclaration *> axioms;
 
@@ -740,7 +738,7 @@ public:
   const KOREObjectSymbolStringMapType &getAllSymbols() const { return allObjectSymbols; }
   const KOREObjectCompositeSortMapType getHookedSorts() const { return hookedSorts; }
   const std::list<KOREAxiomDeclaration *> &getAxioms() const { return axioms; }
-  const llvm::StringMap<KOREObjectCompositePattern *> &getAttributes() const {
+  const std::map<std::string, KOREObjectCompositePattern *> &getAttributes() const {
     return attributes;
   }
   KOREObjectSymbol *getInjSymbol() { return injSymbol; }
