@@ -517,10 +517,10 @@ std::pair<llvm::Value *, bool> CreateTerm::operator()(KOREPattern *pattern) {
       auto strPattern = dynamic_cast<KOREMetaStringPattern *>(constructor->getArguments()[0]);
       return std::make_pair(createToken(sort->getCategory(Definition), strPattern->getContents()), false);
     }
-    KOREObjectSymbolDeclaration *symbolDecl = Definition->getSymbolDeclarations().lookup(symbol->getName());
+    KOREObjectSymbolDeclaration *symbolDecl = Definition->getSymbolDeclarations().at(symbol->getName());
     if (symbolDecl->getAttributes().count("function") || (symbolDecl->getAttributes().count("anywhere") && !isAnywhereOwise)) {
       if (symbolDecl->getAttributes().count("hook")) {
-        return std::make_pair(createHook(symbolDecl->getAttributes().lookup("hook"), constructor), true);
+        return std::make_pair(createHook(symbolDecl->getAttributes().at("hook"), constructor), true);
       } else {
         std::ostringstream Out;
         symbol->print(Out, 0, false);

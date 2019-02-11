@@ -14,4 +14,4 @@ done
 rm *.bc.z
 rm *.gz
 rm "$archive"
-llvm-ar-6.0 rs "${archive}" ./*
+@CMAKE_AR@ rs "${archive}" ./*

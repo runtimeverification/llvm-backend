@@ -60,11 +60,11 @@ ValueType KOREObjectCompositeSort::getCategory(KOREDefinition *definition) {
 }
 
 std::string KOREObjectCompositeSort::getHook(KOREDefinition *definition) {
-  auto &att = definition->getSortDeclarations().lookup(this->getName())->getAttributes();
+  auto &att = definition->getSortDeclarations().at(this->getName())->getAttributes();
   if (!att.count("hook")) {
     return "STRING.String";
   }
-  KOREObjectCompositePattern *hookAtt = att.lookup("hook");
+  KOREObjectCompositePattern *hookAtt = att.at("hook");
   assert(hookAtt->getArguments().size() == 1);
   auto strPattern = dynamic_cast<KOREMetaStringPattern *>(hookAtt->getArguments()[0]);
   return strPattern->getContents();
@@ -477,7 +477,7 @@ void KOREDefinition::preprocess() {
     auto entry = *iter;
     for (auto iter = entry.second.begin(); iter != entry.second.end(); ++iter) {
       KOREObjectSymbol *symbol = *iter;
-      auto decl = symbolDeclarations.lookup(symbol->getName());
+      auto decl = symbolDeclarations.at(symbol->getName());
       symbol->instantiateSymbol(decl);
     }
   }
@@ -521,7 +521,7 @@ void KOREDefinition::preprocess() {
         if (symbol->isPolymorphic()) {
           symbol->firstTag = range.first;
           symbol->lastTag = range.second;
-          auto decl = symbolDeclarations.lookup(symbol->getName());
+          auto decl = symbolDeclarations.at(symbol->getName());
           if (decl->getAttributes().count("sortInjection")) {
             injSymbol = symbol;
           }
@@ -689,7 +689,7 @@ void KOREMetaCharPattern::print(std::ostream &Out, unsigned indent) const {
 }
 
 static void printAttributeList(
-  std::ostream &Out, const llvm::StringMap<KOREObjectCompositePattern *> attributes,
+  std::ostream &Out, const std::map<std::string, KOREObjectCompositePattern *> attributes,
   unsigned indent = 0) {
 
   std::string Indent(indent, ' ');

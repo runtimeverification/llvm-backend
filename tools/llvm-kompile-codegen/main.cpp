@@ -52,7 +52,7 @@ int main (int argc, char **argv) {
       auto funcDt = parseYamlDecisionTree(filename, definition->getAllSymbols(), definition->getHookedSorts());
       std::ostringstream Out;
       decl->getSymbol()->print(Out);
-      makeAnywhereFunction(definition->getAllSymbols().lookup(Out.str()), definition, mod.get(), funcDt);
+      makeAnywhereFunction(definition->getAllSymbols().at(Out.str()), definition, mod.get(), funcDt);
     }
   }
 

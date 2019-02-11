@@ -13,8 +13,8 @@ private:
   // implement comparison or hashing by storing the pointer to the cached
   // DecisionNode as a scalar in a YAML node.
   YAML::Node uniqueNodes;
-  const llvm::StringMap<KOREObjectSymbol *> &syms;
-  const llvm::StringMap<KOREObjectCompositeSort *> &sorts;
+  const std::map<std::string, KOREObjectSymbol *> &syms;
+  const std::map<std::string, KOREObjectCompositeSort *> &sorts;
   KOREObjectSymbol *dv;
 
   enum Kind {
@@ -34,8 +34,8 @@ private:
 
 public:
   DTPreprocessor(
-      const llvm::StringMap<KOREObjectSymbol *> &syms,
-      const llvm::StringMap<KOREObjectCompositeSort *> &sorts)
+      const std::map<std::string, KOREObjectSymbol *> &syms,
+      const std::map<std::string, KOREObjectCompositeSort *> &sorts)
       : syms(syms), sorts(sorts) {
     dv = KOREObjectSymbol::Create("\\dv");
   }
@@ -77,15 +77,15 @@ public:
     if (node["occurrence"]) {
       std::string name = to_string(node["occurrence"].as<std::vector<std::string>>());
       uses.push_back(name);
-      return KOREObjectVariablePattern::Create(name, sorts.lookup(node["hook"].as<std::string>()));
+      return KOREObjectVariablePattern::Create(name, sorts.at(node["hook"].as<std::string>()));
     } else if (node["literal"]) {
       auto sym = KOREObjectSymbol::Create("\\dv");
-      sym->addFormalArgument(sorts.lookup(node["hook"].as<std::string>()));
+      sym->addFormalArgument(sorts.at(node["hook"].as<std::string>()));
       auto pat = KOREObjectCompositePattern::Create(sym);
       pat->addArgument(KOREMetaStringPattern::Create(node["literal"].as<std::string>()));
       return pat;
     } else {
-      auto sym = syms.lookup(node["constructor"].as<std::string>());
+      auto sym = syms.at(node["constructor"].as<std::string>());
       auto pat = KOREObjectCompositePattern::Create(sym);
       for (auto child : node["args"]) {
         pat->addArgument(parsePattern(child, uses));
@@ -119,7 +119,7 @@ public:
         symbol = dv;
       } else {
         std::string symName = _case[0].as<std::string>();
-        symbol = syms.lookup(symName);
+        symbol = syms.at(symName);
         if (!symbol) {
           std::cerr << symName << std::endl;
           abort();
@@ -196,12 +196,12 @@ public:
   }
 };
 
-DecisionNode *parseYamlDecisionTreeFromString(std::string yaml, const llvm::StringMap<KOREObjectSymbol *> &syms, const llvm::StringMap<KOREObjectCompositeSort *> &sorts) {
+DecisionNode *parseYamlDecisionTreeFromString(std::string yaml, const std::map<std::string, KOREObjectSymbol *> &syms, const std::map<std::string, KOREObjectCompositeSort *> &sorts) {
   YAML::Node root = YAML::Load(yaml);
   return DTPreprocessor(syms, sorts)(root);
 }
 
-DecisionNode *parseYamlDecisionTree(std::string filename, const llvm::StringMap<KOREObjectSymbol *> &syms, const llvm::StringMap<KOREObjectCompositeSort *> &sorts) {
+DecisionNode *parseYamlDecisionTree(std::string filename, const std::map<std::string, KOREObjectSymbol *> &syms, const std::map<std::string, KOREObjectCompositeSort *> &sorts) {
   YAML::Node root = YAML::LoadFile(filename);
   return DTPreprocessor(syms, sorts)(root);
 }

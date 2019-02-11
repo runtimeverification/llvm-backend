@@ -2,7 +2,7 @@ On Ubuntu 18.04:
 
 ```
 sudo apt-get update
-sudo apt-get install git cmake clang-6.0 clang++-6.0 llvm-6.0 zlib1g-dev bison flex libboost-test-dev libgmp-dev libmpfr-dev libyaml-cpp-dev libjemalloc-dev curl
+sudo apt-get install git cmake clang-6.0 clang++-6.0 llvm-6.0 zlib1g-dev bison flex libboost-test-dev libgmp-dev libmpfr-dev libyaml-cpp-dev libjemalloc-dev curl libtinfo-dev
 curl https://sh.rustup.rs -sSf | sh
 source $HOME/.cargo/env
 rustup toolchain install 1.28.0
@@ -13,7 +13,7 @@ cd llvm-backend
 git submodule update --init
 mkdir build
 cd build
-CC=clang-6.0 CXX=clang++-6.0 cmake .. -DCMAKE_BUILD_TYPE=Release # or Debug
+cmake .. -DCMAKE_BUILD_TYPE=Release # or Debug
 make -j16
 make install
 ```
