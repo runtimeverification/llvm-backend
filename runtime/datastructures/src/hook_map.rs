@@ -187,6 +187,16 @@ pub unsafe extern "C" fn map_foreach(map: *mut Map, process: extern fn(block: *m
   }
 }
 
+#[no_mangle]
+pub unsafe extern "C" fn map_map(map: *const Map, process: extern fn(block: K) -> K) -> Map {
+  let mut result = (*map).clone();
+  for (key,value) in (*map).iter() {
+    let prev = result.remove_with_key(key);
+    result.insert(prev.unwrap().0, KElem::new(process(*value.0.get())));
+  }
+  result
+}
+
 #[cfg(test)]
 mod tests {
   extern crate libc;
