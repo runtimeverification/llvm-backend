@@ -131,6 +131,20 @@ static void emitIsSymbolAFunction(KOREDefinition *def, llvm::Module *mod) {
       def, mod, false, getFunction);
 }
 
+static std::pair<llvm::Value *, llvm::BasicBlock *> getBinder(KOREDefinition *def, llvm::Module *mod,
+    KOREObjectSymbol *symbol, llvm::Instruction *inst) {
+  auto decl = def->getSymbolDeclarations().lookup(symbol->getName());
+  bool res = decl->getAttributes().count("binder");
+  return std::make_pair(llvm::ConstantInt::get(llvm::Type::getInt1Ty(mod->getContext()), res),
+      inst->getParent());
+}
+
+static void emitIsSymbolABinder(KOREDefinition *def, llvm::Module *mod) {
+  emitDataForSymbol("isSymbolABinder", llvm::Type::getInt1Ty(mod->getContext()),
+      def, mod, false, getBinder);
+}
+
+
 static llvm::Value *getArgValue(llvm::Value *ArgumentsArray, int idx,
     llvm::BasicBlock *CaseBlock, ValueType cat, llvm::Module *mod) {
   llvm::LLVMContext &Ctx = mod->getContext();
@@ -631,6 +645,7 @@ void emitConfigParserFunctions(KOREDefinition *definition, llvm::Module *module)
   emitGetTagForSymbolName(definition, module); 
   emitGetBlockHeaderForSymbol(definition, module); 
   emitIsSymbolAFunction(definition, module); 
+  emitIsSymbolABinder(definition, module); 
   emitStoreSymbolChildren(definition, module); 
   emitEvaluateFunctionSymbol(definition, module); 
   emitGetToken(definition, module); 
