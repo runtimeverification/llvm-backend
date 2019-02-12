@@ -15,7 +15,13 @@ fi
   "$LIBDIR"/libstrings.a \
   "$LIBDIR"/rust/libdatastructures.rlib \
   "$LIBDIR"/rust/deps/*.rlib \
-  "$LIBDIR"/rust/deps/stdlib/*.rlib \
+  "$LIBDIR"/rust/deps/stdlib/libcore-*.rlib \
+  "$LIBDIR"/rust/deps/stdlib/libstd-*.rlib \
+  "$LIBDIR"/rust/deps/stdlib/liballoc-*.rlib \
+  "$LIBDIR"/rust/deps/stdlib/libunwind-*.rlib \
+  "$LIBDIR"/rust/deps/stdlib/libcompiler_builtins-*.rlib \
+  "$LIBDIR"/rust/deps/stdlib/libpanic_abort-*.rlib \
+  "$LIBDIR"/rust/deps/stdlib/liballoc_system-*.rlib \
   "$MAINFILES" \
   "$LIBDIR"/libconfigurationparser.a \
   "$LIBDIR"/libParser.a \
