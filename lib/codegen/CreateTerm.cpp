@@ -159,7 +159,7 @@ llvm::Value *getBlockHeader(llvm::Module *Module, KOREDefinition *definition, co
   uint64_t sizeInBytes = llvm::DataLayout(Module).getTypeAllocSize(BlockType);
   assert(sizeInBytes % 8 == 0);
   headerVal |= (sizeInBytes / 8) << 32;
-  headerVal |= (uint64_t)symbol->getLayout() << 48;
+  headerVal |= (uint64_t)symbol->getLayout() << LAYOUT_OFFSET;
   return llvm::ConstantStruct::get(BlockHeaderType, llvm::ConstantInt::get(llvm::Type::getInt64Ty(Module->getContext()), headerVal));
 }
 

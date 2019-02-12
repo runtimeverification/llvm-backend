@@ -38,7 +38,7 @@ void printConfigurationInternal(FILE *file, block *subject, const char *sort) {
     fprintf(file, "%s()", symbol);
     return;
   }
-  uint16_t layout = subject->h.hdr >> 48;
+  uint16_t layout = layout(subject);
   if (!layout) {
     string *str = (string *)subject;
     size_t len = len(subject);
@@ -76,7 +76,7 @@ void printConfigurationInternal(FILE *file, block *subject, const char *sort) {
     fprintf(file, "\")");
     return;
   }
-  uint32_t tag = subject->h.hdr & 0xffffffffLL;
+  uint32_t tag = tag_hdr(subject->h.hdr);
   const char *symbol = getSymbolNameForTag(tag);
   fprintf(file, "%s(", symbol);
   visitChildren(subject, file, printConfigurationInternal, printMap, printList, printSet, printInt, printFloat,

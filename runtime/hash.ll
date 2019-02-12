@@ -27,7 +27,6 @@ declare void @add_hash8(i8*, i8)
 
 @hash_depth = thread_local global i32 0
 @HASH_THRESHOLD = private constant i32 5
-@HDR_MASK = private constant i64 -246290604621825 ; 0xffff1fffffffffff, cf header.h
 
 define i1 @hash_enter() {
   %depth = load i32, i32* @hash_depth
@@ -59,9 +58,8 @@ constant:
 block:
   %arghdrptr = getelementptr inbounds %block, %block* %arg, i64 0, i32 0, i32 0
   %arghdr = load i64, i64* %arghdrptr
-  %arglayout = lshr i64 %arghdr, 48
-  %mask = load i64, i64* @HDR_MASK
-  %arghdrcanon = and i64 %arghdr, %mask
+  %arglayout = lshr i64 %arghdr, @LAYOUT_OFFSET@
+  %arghdrcanon = and i64 %arghdr, @HDR_MASK@
   %isString = icmp eq i64 %arglayout, 0
   br i1 %isString, label %hashString, label %hashChildren
 hashString:
@@ -101,15 +99,14 @@ hashChild:
   %kindPtr = getelementptr %layoutitem, %layoutitem* %children, i64 %indexlong2, i32 1
   %kind = load i16, i16* %kindPtr
   %childintptr = add i64 %argintptr, %offset
-  switch i16 %kind, label %stuck [ i16 1, label %hashMap
-                                   i16 2, label %hashList
-				   i16 3, label %hashSet
-				   i16 4, label %hashInt
-				   i16 5, label %hashFloat
-				   i16 6, label %stuck
-				   i16 7, label %hashBool
-				   i16 8, label %hashSymbol
-				   i16 9, label %stuck ]
+  switch i16 %kind, label %stuck [ i16 @MAP_LAYOUT@, label %hashMap
+                                   i16 @LIST_LAYOUT@, label %hashList
+				   i16 @SET_LAYOUT@, label %hashSet
+				   i16 @INT_LAYOUT@, label %hashInt
+				   i16 @FLOAT_LAYOUT@, label %hashFloat
+				   i16 @STRINGBUFFER_LAYOUT@, label %stuck
+				   i16 @BOOL_LAYOUT@, label %hashBool
+				   i16 @SYMBOL_LAYOUT@, label %hashSymbol ]
 hashMap:
   %mapptr = inttoptr i64 %childintptr to %map*
   call void @map_hash(%map* %mapptr, i8* %hasher)
