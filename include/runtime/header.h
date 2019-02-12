@@ -72,6 +72,16 @@ extern "C" {
     uint64_t exp; // number of bits in exponent range
     mpfr_t f;
   } floating;
+
+  typedef struct {
+    uint64_t offset;
+    uint16_t cat;
+  } layoutitem;
+
+  typedef struct {
+    uint8_t nargs;
+    layoutitem *args;
+  } layout;
  
   // This function is exported to be used by the interpreter 
   #ifdef __cplusplus
@@ -92,6 +102,7 @@ extern "C" {
   void storeSymbolChildren(block *symbol, void *children[]);
   void *evaluateFunctionSymbol(uint32_t tag, void *arguments[]);
   void *getToken(const char *sortname, uint64_t len, const char *tokencontents);
+  layout *getLayoutData(uint16_t);
 
   const char *getSymbolNameForTag(uint32_t tag);
   const char *topSort(void);

@@ -9,22 +9,11 @@
 static char* current_tospace_start = 0;
 static char* current_tospace_end = 0;
 
-typedef struct {
-  uint64_t offset;
-  uint16_t cat;
-} layoutitem;
-
-typedef struct {
-  uint8_t nargs;
-  layoutitem *args;
-} layout;
-
 char **alloc_ptr(void);
 char **old_alloc_ptr(void);
 char* fromspace_ptr(void);
 char* oldspace_ptr(void);
 char fromspace_id(void);
-layout *getLayoutData(uint16_t);
 void map_foreach(void *, void(block**));
 void set_foreach(void *, void(block**));
 void list_foreach(void *, void(block**));
