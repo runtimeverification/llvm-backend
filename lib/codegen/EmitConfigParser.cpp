@@ -5,6 +5,8 @@
 #include "llvm/IR/Constants.h"
 #include "llvm/IR/Instructions.h"
 
+#include "runtime/header.h"
+
 namespace kllvm {
 
 static llvm::Constant *getSymbolNamePtr(KOREObjectSymbol *symbol, llvm::BasicBlock *SetBlockName, llvm::Module *module) {
@@ -358,7 +360,7 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
       BlockSizeVal, llvm::ConstantExpr::getSizeOf(llvm::Type::getInt8PtrTy(Ctx)), "", CurrentBlock);
   auto icmp = new llvm::ICmpInst(*CurrentBlock, llvm::CmpInst::ICMP_UGT,
       Len, BlockAllocSize);
-  auto Mask = llvm::SelectInst::Create(icmp, llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0x400000000000), llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0), "", CurrentBlock);
+  auto Mask = llvm::SelectInst::Create(icmp, llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), NOT_YOUNG_OBJECT_BIT), llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0), "", CurrentBlock);
   auto HdrOred = llvm::BinaryOperator::Create(llvm::Instruction::Or,
       func->arg_begin()+1, Mask, "", CurrentBlock);
   new llvm::StoreInst(HdrOred, HdrPtr, CurrentBlock);

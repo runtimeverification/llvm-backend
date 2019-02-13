@@ -72,13 +72,6 @@ else()
 endif()
 endmacro(kllvm_add_tool)
 
-FILE(GLOB LLVMFiles runtime/*.ll)
-
-install(
-  FILES ${LLVMFiles}
-  DESTINATION lib/kllvm/llvm
-)
-
 install(
   FILES runtime/main/main.ll
   DESTINATION lib/kllvm/llvm/main
@@ -104,6 +97,46 @@ install(
 install(
   DIRECTORY include/runtime
   DESTINATION include
+)
+
+install(
+  DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/include/config
+  DESTINATION include
+)
+
+set(NOT_YOUNG_OBJECT_BIT 0x10000000000000)
+set(YOUNG_AGE_BIT 0x8000000000000)
+set(FWD_PTR_BIT 0x20000000000000)
+set(LAYOUT_OFFSET 54)
+set(HDR_MASK -15762598695796737)
+
+set(MAP_LAYOUT 1)
+set(LIST_LAYOUT 2)
+set(SET_LAYOUT 3)
+set(INT_LAYOUT 4)
+set(FLOAT_LAYOUT 5)
+set(STRINGBUFFER_LAYOUT 6)
+set(BOOL_LAYOUT 7)
+set(SYMBOL_LAYOUT 8)
+
+configure_file(config/macros.h include/config/macros.h @ONLY)
+
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/runtime)
+configure_file(runtime/equality.ll runtime @ONLY)
+configure_file(runtime/finish_rewriting.ll runtime @ONLY)
+configure_file(runtime/getTag.ll runtime @ONLY)
+configure_file(runtime/hash.ll runtime @ONLY)
+configure_file(runtime/move_float.ll runtime @ONLY)
+configure_file(runtime/move_int.ll runtime @ONLY)
+configure_file(runtime/rustalloc.ll runtime @ONLY)
+configure_file(runtime/string_equal.ll runtime @ONLY)
+configure_file(runtime/take_steps.ll runtime @ONLY)
+
+FILE(GLOB LLVMFiles ${CMAKE_CURRENT_BINARY_DIR}/runtime/*.ll)
+
+install(
+  FILES ${LLVMFiles}
+  DESTINATION lib/kllvm/llvm
 )
 
 FILE(GLOB_RECURSE HaskellSources matching/src/*.hs matching/app/Main.hs)

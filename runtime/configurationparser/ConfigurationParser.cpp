@@ -42,7 +42,7 @@ static void *allocatePatternAsConfiguration(const KOREPattern *Pattern) {
   }
 
   struct blockheader headerVal = getBlockHeaderForSymbol(tag);
-  size_t size = ((headerVal.hdr & 0xff00000000) >> 32) * 8;
+  size_t size = size_hdr(headerVal.hdr);
   
   if (size == 8) {
     return (block *) ((uint64_t)tag << 32 | 1);

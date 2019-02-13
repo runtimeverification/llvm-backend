@@ -21,8 +21,6 @@ declare i1 @hook_SET_eq(%set*, %set*)
 declare i1 @hook_INT_eq(%mpz*, %mpz*)
 declare i1 @hook_FLOAT_trueeq(%floating*, %floating*)
 
-@HDR_MASK = private constant i64 -246290604621825 ; 0xffff1fffffffffff, cf header.h
-
 define i1 @hook_KEQUAL_eq(%block* %arg1, %block* %arg2) {
 entry:
   %arg1intptr = ptrtoint %block* %arg1 to i64
@@ -41,13 +39,12 @@ block:
   %arg2hdrptr = getelementptr inbounds %block, %block* %arg2, i64 0, i32 0, i32 0
   %arg1hdr = load i64, i64* %arg1hdrptr
   %arg2hdr = load i64, i64* %arg2hdrptr
-  %mask = load i64, i64* @HDR_MASK
-  %arg1len = and i64 %arg1hdr, %mask
-  %arg2len = and i64 %arg2hdr, %mask
+  %arg1len = and i64 %arg1hdr, @HDR_MASK@
+  %arg2len = and i64 %arg2hdr, @HDR_MASK@
   %eqblock = icmp eq i64 %arg1len, %arg2len
   br i1 %eqblock, label %getChildren, label %exit
 getChildren:
-  %arglayout = lshr i64 %arg1hdr, 48
+  %arglayout = lshr i64 %arg1hdr, @LAYOUT_OFFSET@
   %isString = icmp eq i64 %arglayout, 0
   br i1 %isString, label %eqString, label %compareChildren
 eqString:
@@ -79,15 +76,14 @@ compareChild:
   %kind = load i16, i16* %kindPtr
   %child1intptr = add i64 %arg1intptr, %offset
   %child2intptr = add i64 %arg2intptr, %offset
-  switch i16 %kind, label %stuck [ i16 1, label %compareMap
-                                   i16 2, label %compareList
-				   i16 3, label %compareSet
-				   i16 4, label %compareInt
-				   i16 5, label %compareFloat
-				   i16 6, label %stuck
-				   i16 7, label %compareBool
-				   i16 8, label %compareSymbol
-				   i16 9, label %stuck ]
+  switch i16 %kind, label %stuck [ i16 @MAP_LAYOUT@, label %compareMap
+                                   i16 @LIST_LAYOUT@, label %compareList
+				   i16 @SET_LAYOUT@, label %compareSet
+				   i16 @INT_LAYOUT@, label %compareInt
+				   i16 @FLOAT_LAYOUT@, label %compareFloat
+				   i16 @STRINGBUFFER_LAYOUT@, label %stuck
+				   i16 @BOOL_LAYOUT@, label %compareBool
+				   i16 @SYMBOL_LAYOUT@, label %compareSymbol ]
 compareMap:
   %map1ptr = inttoptr i64 %child1intptr to %map*
   %map2ptr = inttoptr i64 %child2intptr to %map*

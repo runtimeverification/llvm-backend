@@ -4,25 +4,17 @@
 #include <stdint.h>
 #include <gmp.h>
 #include <mpfr.h>
+#include "config/macros.h"
 
 // the actual length is equal to the block header with the gc bits masked out.
-#define len(s) len_hdr((s)->h.hdr)
-#define len_hdr(s) ((s) & 0x1fffffffffff)
-#define set_len(s, l) ((s)->h.hdr = (l) | (l > BLOCK_SIZE - sizeof(char *) ? 0x400000000000 : 0))
-#define size_hdr(s) ((((s) >> 32) & 0xff) * 8)
-#define layout_hdr(s) ((s) >> 48)
-#define NOT_YOUNG_OBJECT_BIT 0x400000000000
-#define YOUNG_AGE_BIT 0x200000000000
-#define FWD_PTR_BIT 0x800000000000
 
-#define MAP_LAYOUT 1
-#define LIST_LAYOUT 2
-#define SET_LAYOUT 3
-#define INT_LAYOUT 4
-#define FLOAT_LAYOUT 5
-#define STRINGBUFFER_LAYOUT 6
-#define BOOL_LAYOUT 7
-#define SYMBOL_LAYOUT 8
+#define len(s) len_hdr((s)->h.hdr)
+#define len_hdr(s) ((s) & 0xffffffffff)
+#define set_len(s, l) ((s)->h.hdr = (l) | (l > BLOCK_SIZE - sizeof(char *) ? NOT_YOUNG_OBJECT_BIT : 0))
+#define size_hdr(s) ((((s) >> 32) & 0xff) * 8)
+#define layout(s) layout_hdr((s)->h.hdr)
+#define layout_hdr(s) ((s) >> LAYOUT_OFFSET)
+#define tag_hdr(s) (s & 0xffffffffLL)
 
 #ifdef __cplusplus
 extern "C" {
