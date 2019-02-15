@@ -121,6 +121,8 @@ extern "C" {
       void visitMInt(FILE *, void *, const char *),
       void visitSeparator(FILE *));
 
+  block *debruijnize(block *);
+
 #ifdef __cplusplus
 }
 #endif
