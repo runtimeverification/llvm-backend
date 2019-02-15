@@ -15,6 +15,7 @@
 #define layout(s) layout_hdr((s)->h.hdr)
 #define layout_hdr(s) ((s) >> LAYOUT_OFFSET)
 #define tag_hdr(s) (s & 0xffffffffLL)
+#define reset_gc(s) ((s)->h.hdr = (s)->h.hdr & ~(NOT_YOUNG_OBJECT_BIT | YOUNG_AGE_BIT | FWD_PTR_BIT))
 
 #ifdef __cplusplus
 extern "C" {
