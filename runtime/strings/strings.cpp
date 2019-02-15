@@ -47,6 +47,14 @@ extern "C" {
   }
 
   bool hook_STRING_eq(const string * a, const string * b) {
+    uintptr_t aint = (uintptr_t) a;
+    uintptr_t bint = (uintptr_t) b;
+    if ((aint & 3) == 3 || (bint & 3) == 3) {
+      return a == b;
+    }
+    if (a->h.hdr & VARIABLE_BIT || b->h.hdr & VARIABLE_BIT) {
+      return a == b;
+    }
     auto res = memcmp(a->data, b->data, std::min(len(a), len(b)));
     return (res == 0 && len(a) == len(b));
   }

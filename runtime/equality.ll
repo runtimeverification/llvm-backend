@@ -20,6 +20,7 @@ declare i1 @hook_LIST_eq(%list*, %list*)
 declare i1 @hook_SET_eq(%set*, %set*)
 declare i1 @hook_INT_eq(%mpz*, %mpz*)
 declare i1 @hook_FLOAT_trueeq(%floating*, %floating*)
+declare i1 @hook_STRING_eq(%block*, %block*)
 
 define i1 @hook_KEQUAL_eq(%block* %arg1, %block* %arg2) {
 entry:
@@ -48,12 +49,7 @@ getChildren:
   %isString = icmp eq i64 %arglayout, 0
   br i1 %isString, label %eqString, label %compareChildren
 eqString:
-  %str1ptrlong = getelementptr inbounds %block, %block* %arg1, i64 0, i32 1, i64 0
-  %str2ptrlong = getelementptr inbounds %block, %block* %arg2, i64 0, i32 1, i64 0
-  %str1ptr = bitcast i64** %str1ptrlong to i8*
-  %str2ptr = bitcast i64** %str2ptrlong to i8*
-  %retval = call i32 @memcmp(i8* %str1ptr, i8* %str2ptr, i64 %arg1len)
-  %eqcontents = icmp eq i32 %retval, 0
+  %eqcontents = call i1 @hook_STRING_eq(%block* %arg1, %block* %arg2)
   br label %exit
 compareChildren:
   %arglayoutshort = trunc i64 %arglayout to i16
