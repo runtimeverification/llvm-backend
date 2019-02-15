@@ -133,7 +133,7 @@ static void emitIsSymbolAFunction(KOREDefinition *def, llvm::Module *mod) {
 
 static std::pair<llvm::Value *, llvm::BasicBlock *> getBinder(KOREDefinition *def, llvm::Module *mod,
     KOREObjectSymbol *symbol, llvm::Instruction *inst) {
-  auto decl = def->getSymbolDeclarations().lookup(symbol->getName());
+  auto decl = def->getSymbolDeclarations().at(symbol->getName());
   bool res = decl->getAttributes().count("binder");
   return std::make_pair(llvm::ConstantInt::get(llvm::Type::getInt1Ty(mod->getContext()), res),
       inst->getParent());
