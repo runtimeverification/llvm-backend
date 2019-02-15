@@ -1,0 +1,1 @@
+Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(inj{SortExp{}, SortKItem{}}(Lbl'UndsUndsUnds'LAMBDA'UndsUnds'Exp'Unds'Exp{}(inj{SortKVar{}, SortKItem{}}(\dv{SortKVar{}}("a")),inj{SortKVar{}, SortKItem{}}(inj{SortKVar{}, SortKItem{}}(\dv{SortKVar{}}("y"))))),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))
