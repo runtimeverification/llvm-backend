@@ -516,7 +516,9 @@ expandMatrix _ _ = error "Cannot expand empty matrix."
 getScore :: [Clause BoundPattern]
          -> Column Pattern BoundPattern
          -> Double
-getScore cs (Column m ps) = computeScore m (zip ps cs)
+getScore cs c@(Column m ps) =
+  let score = computeScore m (zip ps cs)
+  in if score /= score then error ("found a NaN score: " ++ (show (cs,c))) else score
 
 -- TODO: improve
 computeScore :: Metadata BoundPattern
