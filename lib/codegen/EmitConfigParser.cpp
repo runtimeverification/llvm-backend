@@ -172,6 +172,7 @@ static llvm::Value *getArgValue(llvm::Value *ArgumentsArray, int idx,
   case SortCategory::Float:
   case SortCategory::StringBuffer:
   case SortCategory::Symbol:
+  case SortCategory::Variable:
     arg = new llvm::BitCastInst(arg, getValueType(cat, mod), "", CaseBlock);
     break;
   case SortCategory::Uncomputed:
@@ -211,6 +212,7 @@ static std::pair<llvm::Value *, llvm::BasicBlock *> getEval(KOREDefinition *def,
   case SortCategory::Float:
   case SortCategory::StringBuffer:
   case SortCategory::Symbol:
+  case SortCategory::Variable:
     retval = new llvm::BitCastInst(result, llvm::Type::getInt8PtrTy(Ctx), "",
         creator.getCurrentBlock());
     break;
@@ -271,7 +273,7 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
     std::string name = entry.first;
     auto sort = KOREObjectCompositeSort::Create(name);
     ValueType cat = sort->getCategory(definition);
-    if (cat.cat == SortCategory::Symbol) {
+    if (cat.cat == SortCategory::Symbol || cat.cat == SortCategory::Variable) {
       continue;
     }
     CurrentBlock->insertInto(func);
@@ -353,6 +355,7 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
       Phi->addIncoming(cast, CaseBlock);
       break;
     }
+    case SortCategory::Variable:
     case SortCategory::Symbol:
       break;
     case SortCategory::Uncomputed:
@@ -543,6 +546,7 @@ static void getVisitor(KOREDefinition *definition, llvm::Module *module, KOREObj
       Child = new llvm::LoadInst(Child, "", CaseBlock);
       Child = new llvm::BitCastInst(Child, getValueType({SortCategory::Symbol, 0}, module), "", CaseBlock);
       // fall through
+    case SortCategory::Variable:
     case SortCategory::Symbol:
       llvm::CallInst::Create(func->arg_begin()+2, {func->arg_begin()+1, Child, CharPtr}, "", CaseBlock);
       break;

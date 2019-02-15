@@ -142,7 +142,8 @@ static char* evacuate(char* scan_ptr, char** alloc_ptr) {
       case STRINGBUFFER_LAYOUT:
         migrate_string_buffer(arg);
         break;
-      case SYMBOL_LAYOUT:
+      case SYMBOL_LAYOUT: 
+      case VARIABLE_LAYOUT:
         migrate(arg);
         break;
       case INT_LAYOUT:

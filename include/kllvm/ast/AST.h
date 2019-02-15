@@ -82,7 +82,7 @@ private:
 };
 
 enum class SortCategory {
-  Uncomputed, Map, List, Set, Int, Float, StringBuffer, Bool, Symbol, MInt
+  Uncomputed, Map, List, Set, Int, Float, StringBuffer, Bool, Symbol, Variable, MInt
 };
 
 // represents the syntactic category of an LLVM backend term at runtime

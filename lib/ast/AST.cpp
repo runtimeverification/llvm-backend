@@ -81,6 +81,7 @@ ValueType KOREObjectCompositeSort::getCategory(std::string name) {
   else if (name == "FLOAT.Float") category = SortCategory::Float;
   else if (name == "BUFFER.StringBuffer") category = SortCategory::StringBuffer;
   else if (name == "BOOL.Bool") category = SortCategory::Bool;
+  else if (name == "KVAR.KVar") category = SortCategory::Variable;
   // we expect the "hook" of a MInt to be of the form "MINT.MInt N" for some bitwidth N
   else if (name.substr(0, 9) == "MINT.MInt") {
     category = SortCategory::MInt;
@@ -138,6 +139,9 @@ std::string KOREObjectSymbol::layoutString(KOREDefinition *definition) const {
       break;
     case SortCategory::Bool:
       result.push_back('7');
+      break;
+    case SortCategory::Variable:
+      result.push_back('8');
       break;
     case SortCategory::MInt:
       result.append("_" + std::to_string(cat.bits) + "_");

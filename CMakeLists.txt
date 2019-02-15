@@ -118,6 +118,7 @@ set(FLOAT_LAYOUT 5)
 set(STRINGBUFFER_LAYOUT 6)
 set(BOOL_LAYOUT 7)
 set(SYMBOL_LAYOUT 8)
+set(VARIABLE_LAYOUT 9)
 
 configure_file(config/macros.h include/config/macros.h @ONLY)
 

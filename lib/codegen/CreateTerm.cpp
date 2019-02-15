@@ -132,6 +132,7 @@ llvm::Type *getValueType(ValueType sort, llvm::Module *Module) {
   case SortCategory::MInt:
     return llvm::IntegerType::get(Module->getContext(), sort.bits);
   case SortCategory::Symbol:
+  case SortCategory::Variable:
     return llvm::PointerType::getUnqual(Module->getTypeByName(BLOCK_STRUCT));
   case SortCategory::Uncomputed:
     abort();
@@ -283,6 +284,7 @@ llvm::Value *CreateTerm::createToken(ValueType sort, std::string contents) {
     assert(false && "not implemented yet: tokens");
   case SortCategory::Bool:
     return llvm::ConstantInt::get(llvm::Type::getInt1Ty(Ctx), contents == "true");
+  case SortCategory::Variable:
   case SortCategory::Symbol: {
     llvm::StructType *StringType = llvm::StructType::get(Ctx, {Module->getTypeByName(BLOCKHEADER_STRUCT), llvm::ArrayType::get(llvm::Type::getInt8Ty(Ctx), contents.size())});
     llvm::Constant *global = Module->getOrInsertGlobal("token_" + escape(contents), StringType);

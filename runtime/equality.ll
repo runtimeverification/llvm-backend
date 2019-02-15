@@ -63,7 +63,7 @@ compareChildren:
   %children = extractvalue %layout %layoutData, 1
   br label %loop
 loop:
-  %counter = phi i8 [ %length, %compareChildren ], [ %sub1, %compareMap ], [ %sub1, %compareList ], [ %sub1, %compareSet ], [ %sub1, %compareInt ], [ %sub1, %compareFloat ], [ %sub1, %compareBool ], [ %sub1, %compareSymbol ]
+  %counter = phi i8 [ %length, %compareChildren ], [ %sub1, %compareMap ], [ %sub1, %compareList ], [ %sub1, %compareSet ], [ %sub1, %compareInt ], [ %sub1, %compareFloat ], [ %sub1, %compareBool ], [ %sub1, %compareSymbol ], [ %sub1, %compareVariable ]
   %index = sub i8 %length, %counter
   %indexlong = zext i8 %index to i64
   %sub1 = sub i8 %counter, 1
@@ -83,7 +83,8 @@ compareChild:
 				   i16 @FLOAT_LAYOUT@, label %compareFloat
 				   i16 @STRINGBUFFER_LAYOUT@, label %stuck
 				   i16 @BOOL_LAYOUT@, label %compareBool
-				   i16 @SYMBOL_LAYOUT@, label %compareSymbol ]
+				   i16 @SYMBOL_LAYOUT@, label %compareSymbol
+				   i16 @VARIABLE_LAYOUT@, label %compareVariable ]
 compareMap:
   %map1ptr = inttoptr i64 %child1intptr to %map*
   %map2ptr = inttoptr i64 %child2intptr to %map*
@@ -127,8 +128,15 @@ compareSymbol:
   %child2ptr = load %block*, %block** %child2ptrptr
   %comparedSymbol = call i1 @hook_KEQUAL_eq(%block* %child1ptr, %block* %child2ptr)
   br i1 %comparedSymbol, label %loop, label %exit
+compareVariable:
+  %var1ptrptr = inttoptr i64 %child1intptr to %block**
+  %var2ptrptr = inttoptr i64 %child2intptr to %block**
+  %var1ptr = load %block*, %block** %var1ptrptr
+  %var2ptr = load %block*, %block** %var2ptrptr
+  %comparedVar = call i1 @hook_STRING_eq(%block* %var1ptr, %block* %var2ptr)
+  br i1 %comparedVar, label %loop, label %exit
 exit:
-  %phi = phi i1 [ 0, %entry ], [ %eqconstant, %constant ], [ 0, %block ], [ %eqcontents, %eqString ], [ 1, %loop ], [ 0, %compareMap ], [ 0, %compareList ], [ 0, %compareSet ], [ 0, %compareInt ], [ 0, %compareFloat ], [ 0, %compareBool ], [ 0, %compareSymbol ]
+  %phi = phi i1 [ 0, %entry ], [ %eqconstant, %constant ], [ 0, %block ], [ %eqcontents, %eqString ], [ 1, %loop ], [ 0, %compareMap ], [ 0, %compareList ], [ 0, %compareSet ], [ 0, %compareInt ], [ 0, %compareFloat ], [ 0, %compareBool ], [ 0, %compareSymbol ], [ 0, %compareVariable ]
   ret i1 %phi
 stuck:
   call void @abort()
