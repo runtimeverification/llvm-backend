@@ -51,7 +51,7 @@ void *arenaAlloc(struct arena *, size_t);
 // the resize succeeds, returns 0 otherwise.
 void *arenaResizeLastAlloc(struct arena *, ssize_t);
 
-// Exchenges the current allocation and collection semispaces and clears the new
+// Exchanges the current allocation and collection semispaces and clears the new
 // current allocation semispace. It is used before garbage collection.
 void arenaSwapAndReset(struct arena *);
 
@@ -59,8 +59,8 @@ void arenaSwapAndReset(struct arena *);
 // Returns 0 if nothing has been allocated ever in that arena.
 char *arenaStartPtr(const struct arena *);
 
-// Returns a pointer to the address of the byte following the last allocated
-// byte in the given arena.
+// Returns a pointer to a location holding the address of last allocated
+// byte in the given arena plus 1.
 // This address is 0 if nothing has been allocated ever in that arena.
 char **arenaEndPtr(struct arena *);
 
