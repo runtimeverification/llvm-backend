@@ -19,12 +19,14 @@ void* koreAllocOld(size_t requested);
 // allocates enough space for a string token whose raw size is requested into the old generation.
 // rounds up to the nearest 8 bytes and always allocates at least 16 bytes
 void* koreAllocTokenOld(size_t requested);
+// allocates exactly requested bytes into the not garbage-collected arena
+void* koreAllocNoGC(size_t requested);
 // swaps the two semispace of the young generation as part of garbage collection
 void koreAllocSwap(void);
 // resizes the last allocation into the young generation
 void* koreResizeLastAlloc(void* oldptr, size_t newrequest, size_t oldrequest);
 
-void* koreReallocOld(void*, size_t, size_t);
+void* koreReallocNoGC(void*, size_t, size_t);
 
 void koreFree(void*, size_t);
 

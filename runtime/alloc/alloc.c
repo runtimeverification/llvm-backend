@@ -11,6 +11,7 @@
 
 REGISTER_ARENA(youngspace, 0);
 REGISTER_ARENA(oldspace, 1);
+REGISTER_ARENA(nogcspace, 2);
 
 char *youngspace_ptr() {
   return arenaStartPtr(&youngspace);
@@ -40,6 +41,7 @@ void freeAllKoreMem() {
   freeAllMemory();
   arenaReset(&youngspace);
   arenaReset(&oldspace);
+  arenaReset(&nogcspace);
 }
 
 __attribute__ ((always_inline)) void* koreAlloc(size_t requested) {
@@ -60,6 +62,10 @@ __attribute__ ((always_inline)) void* koreAllocTokenOld(size_t requested) {
   return arenaAlloc(&oldspace, size < 16 ? 16 : size);
 }
 
+__attribute__ ((always_inline)) void* koreAllocNoGC(size_t requested) {
+  return arenaAlloc(&nogcspace, requested);
+}
+
 void* koreResizeLastAlloc(void* oldptr, size_t newrequest, size_t last_size) {
   newrequest = (newrequest + 7) & ~7;
   last_size = (last_size + 7) & ~7;
@@ -77,8 +83,8 @@ void* koreResizeLastAlloc(void* oldptr, size_t newrequest, size_t last_size) {
   }
 }
 
-void* koreReallocOld(void* ptr, size_t old_size, size_t new_size) {
-  void* new = koreAllocOld(new_size);
+void* koreReallocNoGC(void* ptr, size_t old_size, size_t new_size) {
+  void* new = koreAllocNoGC(new_size);
   size_t min = old_size > new_size ? new_size : old_size;
   memcpy(new, ptr, min);
   return new;
