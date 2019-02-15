@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <string>
+#include <vector>
 
 #include "runtime/header.h"
 #include "runtime/alloc.h"
@@ -30,10 +31,17 @@ void printComma(FILE *file) {
   fprintf(file, ",");
 }
 
+static thread_local std::vector<block *> boundVariables;
+
 void printConfigurationInternal(FILE *file, block *subject, const char *sort) {
-  bool isConstant = ((uintptr_t)subject) & 1;
+  uint8_t isConstant = ((uintptr_t)subject) & 3;
   if (isConstant) {
     uint32_t tag = ((uintptr_t)subject) >> 32;
+    if (isConstant == 3) {
+      // bound variable
+      printConfigurationInternal(file, boundVariables[boundVariables.size()-1-tag], sort);
+      return;
+    }
     const char *symbol = getSymbolNameForTag(tag);
     fprintf(file, "%s()", symbol);
     return;
@@ -77,15 +85,23 @@ void printConfigurationInternal(FILE *file, block *subject, const char *sort) {
     return;
   }
   uint32_t tag = tag_hdr(subject->h.hdr);
+  bool isBinder = isSymbolABinder(tag);
+  if (isBinder) {
+    boundVariables.push_back(*(block **)(((char *)subject) + sizeof(blockheader)));
+  }
   const char *symbol = getSymbolNameForTag(tag);
   fprintf(file, "%s(", symbol);
   visitChildren(subject, file, printConfigurationInternal, printMap, printList, printSet, printInt, printFloat,
       printBool, printMInt, printComma);
+  if (isBinder) {
+    boundVariables.pop_back();
+  }
   fprintf(file, ")");
 }
 
 void printConfiguration(const char *filename, block *subject) {
   FILE *file = fopen(filename, "w");
+  boundVariables.clear();
   printConfigurationInternal(file, subject, nullptr);
   fclose(file);
 }
