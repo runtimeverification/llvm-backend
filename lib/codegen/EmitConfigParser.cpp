@@ -145,6 +145,23 @@ static void emitIsSymbolABinder(KOREDefinition *def, llvm::Module *mod) {
 }
 
 
+static std::pair<llvm::Value *, llvm::BasicBlock *> getInjection(KOREDefinition *def, llvm::Module *mod,
+    KOREObjectSymbol *symbol, llvm::Instruction *inst) {
+  llvm::Constant *tag = llvm::ConstantInt::get(llvm::Type::getInt32Ty(mod->getContext()), 0);
+  for (auto sym : def->getSymbols()) {
+    if (sym.second->getName() == "inj" && *sym.second->getArguments()[0] == *symbol->getSort()) {
+      tag = llvm::ConstantInt::get(llvm::Type::getInt32Ty(mod->getContext()), sym.first);
+      break;
+    }
+  }
+  return std::make_pair(tag, inst->getParent());
+}
+
+static void emitGetInjectionForSortOfTag(KOREDefinition *def, llvm::Module *mod) {
+  emitDataForSymbol("getInjectionForSortOfTag", llvm::Type::getInt32Ty(mod->getContext()),
+      def, mod, false, getInjection);
+}
+
 static llvm::Value *getArgValue(llvm::Value *ArgumentsArray, int idx,
     llvm::BasicBlock *CaseBlock, ValueType cat, llvm::Module *mod) {
   llvm::LLVMContext &Ctx = mod->getContext();
@@ -653,6 +670,7 @@ void emitConfigParserFunctions(KOREDefinition *definition, llvm::Module *module)
   emitStoreSymbolChildren(definition, module); 
   emitEvaluateFunctionSymbol(definition, module); 
   emitGetToken(definition, module); 
+  emitGetInjectionForSortOfTag(definition, module);
 
   emitGetSymbolNameForTag(definition, module);
   emitVisitChildren(definition, module);

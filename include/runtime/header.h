@@ -104,6 +104,7 @@ extern "C" {
   void *evaluateFunctionSymbol(uint32_t tag, void *arguments[]);
   void *getToken(const char *sortname, uint64_t len, const char *tokencontents);
   layout *getLayoutData(uint16_t);
+  uint32_t getInjectionForSortOfTag(uint32_t tag);
 
   const char *getSymbolNameForTag(uint32_t tag);
   const char *topSort(void);
