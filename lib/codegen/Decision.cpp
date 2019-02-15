@@ -114,18 +114,36 @@ void SwitchNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitutio
       int offset = 0;
       llvm::StructType *BlockType = getBlockType(d->Module, d->Definition, _case.getConstructor());
       llvm::BitCastInst *Cast = new llvm::BitCastInst(substitution.lookup(name), llvm::PointerType::getUnqual(BlockType), "", d->CurrentBlock);
+      KOREObjectSymbolDeclaration *symbolDecl = d->Definition->getSymbolDeclarations().at(_case.getConstructor()->getName());
+      llvm::Value *Renamed;
       for (std::string binding : _case.getBindings()) {
         llvm::Value *ChildPtr = llvm::GetElementPtrInst::CreateInBounds(BlockType, Cast, {llvm::ConstantInt::get(llvm::Type::getInt64Ty(d->Ctx), 0), llvm::ConstantInt::get(llvm::Type::getInt32Ty(d->Ctx), offset+2)}, "", d->CurrentBlock);
-        switch (dynamic_cast<KOREObjectCompositeSort *>(_case.getConstructor()->getArguments()[offset++])->getCategory(d->Definition).cat) {
+	llvm::Value *Child;
+        switch (dynamic_cast<KOREObjectCompositeSort *>(_case.getConstructor()->getArguments()[offset])->getCategory(d->Definition).cat) {
         case SortCategory::Map:
         case SortCategory::List:
         case SortCategory::Set:
-          substitution[binding] = ChildPtr;
+          Child = ChildPtr;
           break;
         default:
-          substitution[binding] = new llvm::LoadInst(ChildPtr, binding, d->CurrentBlock);
+          Child = new llvm::LoadInst(ChildPtr, binding, d->CurrentBlock);
           break;
         }
+        auto BlockPtr = llvm::PointerType::getUnqual(d->Module->getTypeByName(BLOCK_STRUCT));
+        if (symbolDecl->getAttributes().count("binder")) {
+          if (offset == 0) {
+            Renamed = llvm::CallInst::Create(d->Module->getOrInsertFunction("alphaRename", BlockPtr, BlockPtr), Child, "renamedVar", d->CurrentBlock);
+	    substitution[binding] = Renamed;
+          } else if (offset == _case.getBindings().size() - 1) {
+            llvm::Value *Replaced = llvm::CallInst::Create(d->Module->getOrInsertFunction("replaceBinderIndex", BlockPtr, BlockPtr, BlockPtr), {Child, Renamed}, "withUnboundIndex", d->CurrentBlock);
+	    substitution[binding] = Replaced;
+          } else {
+            substitution[binding] = Child;
+          }
+        } else {
+          substitution[binding] = Child;
+        }
+	offset++;
       }
     }
     _case.getChild()->codegen(d, substitution);
