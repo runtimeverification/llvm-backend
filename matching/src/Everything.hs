@@ -524,7 +524,7 @@ getScore cs c@(Column m ps) =
 computeScore :: Metadata BoundPattern
              -> [(Fix Pattern, Clause BoundPattern)] -> Double
 computeScore _ [] = 0.0
-computeScore m ((Fix (Pattern ix@(Left (Symbol (SymbolOrAlias (Id "inj" _) _))) _ _),_):tl) = (1.0 / fromIntegral (length $ getInjections m (getPatternConstructor ix))) + computeScore m tl
+computeScore m ((Fix (Pattern ix@(Left (Symbol (SymbolOrAlias (Id "inj" _) _))) _ _),_):tl) = (1.0 / (1.0 + fromIntegral (length $ getInjections m (getPatternConstructor ix)))) + computeScore m tl
 computeScore m ((Fix (Pattern ix _ _),_):tl) = (1.0 / (1.0 + fromIntegral (length $ getOverloads m $ getPatternConstructor ix))) + computeScore m tl
 computeScore m ((Fix ListPattern{}, _) : tl) = 1.0 + computeScore m tl
 computeScore m ((Fix (As _ _ pat),c):tl) = computeScore m ((pat,c):tl)
