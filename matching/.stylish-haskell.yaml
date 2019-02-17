@@ -261,6 +261,7 @@ language_extensions:
   - RankNTypes
   - ScopedTypeVariables
   - StandaloneDeriving
+  - TemplateHaskell
   - TypeApplications
   - TypeFamilies
   - TypeSynonymInstances

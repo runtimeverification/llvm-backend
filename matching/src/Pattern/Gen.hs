@@ -1,6 +1,3 @@
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE GADTs             #-}
-{-# LANGUAGE OverloadedStrings #-}
 module Pattern.Gen where
 
 import Control.Monad.Free
@@ -19,12 +16,14 @@ import Data.Text
        ( Text, unpack )
 import Data.Tuple.Select
        ( sel1, sel2 )
+
 import Kore.AST.Common
-       ( And (..), Application (..), AstLocation (..), BuiltinDomain (..),
-       Ceil (..), DomainValue (..), Equals (..), Exists (..), Floor (..),
-       Forall (..), Id (..), Iff (..), Implies (..), In (..), Next (..),
-       Not (..), Or (..), Pattern (..), Rewrites (..), Sort (..),
-       SortActual (..), StringLiteral (..), SymbolOrAlias (..), Variable (..) )
+       ( And (..), Application (..), Ceil (..), DomainValue (..), Equals (..),
+       Exists (..), Floor (..), Forall (..), Iff (..), Implies (..), In (..),
+       Next (..), Not (..), Or (..), Pattern (..), Rewrites (..),
+       StringLiteral (..), SymbolOrAlias (..), Variable (..) )
+import Kore.AST.Identifier
+       ( AstLocation (..), Id (..) )
 import Kore.AST.Kore
        ( CommonKorePattern )
 import Kore.AST.MetaOrObject
@@ -33,24 +32,35 @@ import Kore.AST.Sentence
        ( Attributes (..) )
 import Kore.ASTHelpers
        ( ApplicationSorts (..) )
+import Kore.Attribute.Hook
+       ( Hook (..) )
 import Kore.Attribute.Parser
        ( parseAttributes )
-import Kore.Builtin.Hook
-       ( Hook (..) )
+import Kore.Domain.Builtin
+       ( Builtin (..) )
 import Kore.IndexedModule.IndexedModule
        ( KoreIndexedModule )
+import Kore.IndexedModule.IndexedModule
+       ( VerifiedModule (..) )
 import Kore.IndexedModule.MetadataTools
        ( MetadataTools (..), extractMetadataTools )
+import Kore.Sort
+       ( Sort (..), SortActual (..) )
 import Kore.Step.StepperAttributes
        ( StepperAttributes (..) )
+import KorePatterns
+       ( pattern KoreObjectPattern )
 import Pattern.Parser
-       ( AxiomInfo (..), SymLib (..), getTopChildren, unifiedPatternRAlgebra )
+       ( AxiomInfo (..), SymLib (..), getTopChildren, symbolOrAliasSorts',
+       unifiedPatternRAlgebra )
+
+import qualified Kore.Domain.Builtin as Domain
+import qualified Kore.AST.Valid as Pure
 
 import qualified Data.Map as Map
-
 import qualified Everything as P
-import qualified Pattern.Type as P
 import qualified Pattern as P
+import qualified Pattern.Type as P
 
 parseAtt :: Attributes -> StepperAttributes
 parseAtt = fromRight (error "invalid attr") . parseAttributes
@@ -84,18 +94,23 @@ stripLoc (SymbolOrAlias (Id name _) s) = (SymbolOrAlias (Id name AstLocationNone
     stripLocSort (SortActualSort (SortActual (Id x _) args)) = (SortActualSort (SortActual (Id x AstLocationNone) $ map stripLocSort args))
     stripLocSort sort = sort
 
-genPattern :: KoreRewrite pat => MetadataTools Object Attributes -> SymLib -> pat -> [Fix P.Pattern]
-genPattern tools (SymLib _ sorts _) rewrite =
+genPattern :: KoreRewrite pat
+           => VerifiedModule Attributes Attributes
+           -> SymLib
+           -> pat
+           -> [Fix P.Pattern]
+genPattern ixModule (SymLib _ sorts _) rewrite =
   let lhs = getLeftHandSide rewrite
   in map (para (unifiedPatternRAlgebra (error "unsupported: meta level") rAlgebra)) lhs
   where
-    rAlgebra :: Pattern Object Variable (CommonKorePattern,
-                                         Fix P.Pattern)
+    tools = extractMetadataTools ixModule
+    rAlgebra :: Pattern Object Domain.Builtin Variable (CommonKorePattern,
+                                                        Fix P.Pattern)
              -> Fix P.Pattern
     rAlgebra (ApplicationPattern (Application rawSym ps)) =
       let sym = stripLoc rawSym
           att = fmap unpack $ getHook $ hook $ parseAtt $ symAttributes tools sym
-          sort = applicationSortsResult $ symbolOrAliasSorts tools sym
+          sort = applicationSortsResult $ symbolOrAliasSorts' ixModule sym
       in case att of
         Just "LIST.concat" -> listPattern sym Concat (map snd ps) (getSym "LIST.element" (sorts Map.! sort))
         Just "LIST.unit" -> listPattern sym Unit [] (getSym "LIST.element" (sorts Map.! sort))
@@ -108,7 +123,7 @@ genPattern tools (SymLib _ sorts _) rewrite =
         Just "SET.element" -> setPattern sym Element (map snd ps) (getSym "SET.element" (sorts Map.! sort))
         Just _ -> Fix $ P.Pattern (Left (P.Symbol sym)) Nothing (map snd ps)
         Nothing -> Fix $ P.Pattern (Left (P.Symbol sym)) Nothing (map snd ps)
-    rAlgebra (DomainValuePattern (DomainValue sort (BuiltinDomainPattern (Fix (StringLiteralPattern (StringLiteral str)))))) =
+    rAlgebra (DomainValuePattern (DomainValue sort (BuiltinPattern (Pure.StringLiteral_ str)))) =
       let att = fmap unpack $ getHook $ hook $ parseAtt $ sortAttributes tools sort
       in Fix $ P.Pattern (if att == Just "BOOL.Bool" then case str of
                            "true" -> Right $ P.Literal "1"
@@ -244,8 +259,9 @@ genPattern tools (SymLib _ sorts _) rewrite =
 genVars :: CommonKorePattern -> [String]
 genVars = para (unifiedPatternRAlgebra rAlgebra rAlgebra)
   where
-    rAlgebra :: Pattern lvl Variable (CommonKorePattern,
-                                     [String])
+    rAlgebra :: Functor domain
+             => Pattern lvl domain Variable (CommonKorePattern,
+                                             [String])
              -> [String]
     rAlgebra (VariablePattern (Variable (Id name _) _)) = [unpack name]
     rAlgebra (AndPattern (And _ (_, p₀) (_, p₁)))         = p₀ ++ p₁
@@ -279,7 +295,7 @@ metaLookup _ (P.HasNoKey (P.Ignoring m) _) = Just [m]
 defaultMetadata :: Sort Object -> P.Metadata P.BoundPattern
 defaultMetadata sort = P.Metadata 1 (const []) (const []) sort $ metaLookup $ const Nothing
 
-genMetadatas :: SymLib -> KoreIndexedModule Attributes -> Map.Map (Sort Object) (P.Metadata P.BoundPattern)
+genMetadatas :: SymLib -> VerifiedModule Attributes Attributes -> Map.Map (Sort Object) (P.Metadata P.BoundPattern)
 genMetadatas syms@(SymLib symbols sorts allOverloads) indexedMod =
   Map.mapMaybeWithKey genMetadata sorts
   where
@@ -331,7 +347,7 @@ genMetadatas syms@(SymLib symbols sorts allOverloads) indexedMod =
 
 genClauseMatrix :: KoreRewrite pat
                => SymLib
-               -> KoreIndexedModule Attributes
+               -> VerifiedModule Attributes Attributes
                -> [AxiomInfo pat]
                -> [Sort Object]
                -> (P.ClauseMatrix P.Pattern P.BoundPattern, P.Fringe)
@@ -339,8 +355,7 @@ genClauseMatrix symlib indexedMod axioms sorts =
   let indices = map getOrdinal axioms
       rewrites = map getRewrite axioms
       sideConditions = map getSideCondition axioms
-      tools = extractMetadataTools indexedMod
-      patterns = map (genPattern tools symlib) rewrites
+      patterns = map (genPattern indexedMod symlib) rewrites
       rhsVars = map (genVars . getRightHandSide) rewrites
       scVars = map (maybe Nothing (Just . genVars)) sideConditions
       actions = zipWith3 P.Action indices rhsVars scVars
@@ -353,7 +368,7 @@ genClauseMatrix symlib indexedMod axioms sorts =
 
 mkDecisionTree :: KoreRewrite pat
                => SymLib
-               -> KoreIndexedModule Attributes
+               -> VerifiedModule Attributes Attributes
                -> [AxiomInfo pat]
                -> [Sort Object]
                -> Free P.Anchor P.Alias

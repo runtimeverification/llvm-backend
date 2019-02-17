@@ -1,20 +1,32 @@
 module Main where
 
-import           Control.Monad.Free    (Free (..))
+import           Control.Monad.Free
+                 ( Free (..) )
 import qualified Data.ByteString.Char8 as B
-import           Data.Map              ((!))
-import           Data.Text             (unpack,pack)
-import           Data.Tuple.Select     (sel1)
-import           Kore.AST.Common       (Rewrites (..), SymbolOrAlias (..), Id (..))
-import           Everything               (serializeToYaml, failure, Anchor, Alias,
-                                        shareDt)
-import           Pattern.Parser        (parseDefinition, parseTopAxioms, mainVerify,
-                                        parseSymbols, getFunctions, SymLib (..),
-                                        parseFunctionAxioms, AxiomInfo(..))
-import           Pattern.Gen           (mkDecisionTree)
-import           System.Directory      (createDirectoryIfMissing)
-import           System.Environment    (getArgs)
-import           System.FilePath       (joinPath)
+import           Data.Map
+                 ( (!) )
+import           Data.Text
+                 ( pack, unpack )
+import           Data.Tuple.Select
+                 ( sel1 )
+import           Everything
+                 ( Alias, Anchor, failure, serializeToYaml, shareDt )
+import           Kore.AST.Common
+                 ( Rewrites (..), SymbolOrAlias (..) )
+import           Kore.AST.Identifier
+                 ( Id (..) )
+import           Pattern.Gen
+                 ( mkDecisionTree )
+import           Pattern.Parser
+                 ( AxiomInfo (..), SymLib (..), getFunctions, mainVerify,
+                 parseDefinition, parseFunctionAxioms, parseSymbols,
+                 parseTopAxioms )
+import           System.Directory
+                 ( createDirectoryIfMissing )
+import           System.Environment
+                 ( getArgs )
+import           System.FilePath
+                 ( joinPath )
 
 writeFiles :: FilePath -> [(String,Free Anchor Alias)] -> IO ()
 writeFiles _ [] = return ()

@@ -39,12 +39,15 @@ default-extensions:
   - FlexibleContexts
   - FlexibleInstances
   - GADTs
+  - LambdaCase
   - OverloadedStrings
+  - PatternSynonyms
   - TemplateHaskell
   - TupleSections
   - TypeSynonymInstances
   - UndecidableInstances
   - ScopedTypeVariables
+  - ViewPatterns
 
 executables:
   llvm-kompile-matching:
