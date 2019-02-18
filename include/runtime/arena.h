@@ -64,9 +64,15 @@ char *arenaStartPtr(const struct arena *);
 // This address is 0 if nothing has been allocated ever in that arena.
 char **arenaEndPtr(struct arena *);
 
-// Returns a pointer to the byte following the given number of bytes starting
-// from the given pointer.
-// Returns 0 if the result is out of bounds (exceeding the last allocated byte).
+// Given a starting pointer to an address allocated in an arena and a size in
+// bytes, this function returns a pointer to an address allocated in the
+// same arena after size bytes from the starting pointer.
+//
+// 1st argument: the starting pointer
+// 2nd argument: the size in bytes to add to the starting pointer
+// 3rd argument: the address of last allocated byte in the arena plus 1
+// Return value: the address allocated in the arena after size bytes from the
+//               starting pointer, or 0 if this is equal to the 3rd argument.
 char *movePtr(char *, size_t, const char *);
 
 // Deallocates all the memory allocated for registered arenas.
