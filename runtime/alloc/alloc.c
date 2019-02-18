@@ -1,3 +1,4 @@
+#include <gmp.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -42,6 +43,10 @@ void freeAllKoreMem() {
   arenaReset(&youngspace);
   arenaReset(&oldspace);
   arenaReset(&nogcspace);
+}
+
+void setKoreMemoryFunctionsForGMP() {
+   mp_set_memory_functions(koreAllocNoGC, koreReallocNoGC, koreFree);
 }
 
 __attribute__ ((always_inline)) void* koreAlloc(size_t requested) {
