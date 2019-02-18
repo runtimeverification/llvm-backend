@@ -3,70 +3,59 @@ module Pattern.Parser where
 import Control.Comonad.Trans.Cofree
        ( CofreeF (..) )
 import Data.Functor.Foldable
-       ( Fix (..), para )
+       ( para )
 import Data.List
-       ( find, nub, sortBy )
+       ( find, nub, sortOn )
 import Data.List.Index
        ( indexed )
 import Data.Maybe
-       ( isJust )
-import Data.Ord
-       ( comparing )
+       ( fromMaybe, isJust )
 import Data.Proxy
        ( Proxy (..) )
 import Data.Text
        ( Text )
 
-import Data.Functor.Identity
-       ( Identity (..) )
-
 import qualified Data.Map as Map
 
-import           Kore.Annotation.Valid
-                 ( Valid (..) )
-import           Kore.AST.Common
-                 ( And (..), Application (..), Ceil (..), Equals (..),
-                 Exists (..), Floor (..), Forall (..), Iff (..), Implies (..),
-                 In (..), Next (..), Not (..), Or (..), Pattern (..),
-                 Rewrites (..), SymbolOrAlias (..), Variable )
-import           Kore.AST.Identifier
-                 ( Id (..) )
-import           Kore.AST.Kore
-                 ( CommonKorePattern, KorePattern, UnifiedPattern (..),
-                 UnifiedSortVariable, VerifiedKorePattern )
-import           Kore.AST.MetaOrObject
-                 ( Meta (..), Object (..), Unified (..) )
-import           Kore.AST.Sentence
-                 ( Attributes (..), Definition (..), KoreDefinition,
-                 KoreSentenceAxiom (..), Module (..), ModuleName (..),
-                 Sentence (..), SentenceAlias (..), SentenceAxiom (..),
-                 SentenceSymbol (..), applyUnifiedSentence )
-import           Kore.ASTHelpers
-                 ( ApplicationSorts (..) )
-import           Kore.ASTHelpers
-                 ( symbolOrAliasSorts )
-import           Kore.ASTVerifier.DefinitionVerifier
-                 ( defaultAttributesVerification, verifyAndIndexDefinition )
+import Kore.AST.Common
+       ( And (..), Application (..), Ceil (..), Equals (..), Exists (..),
+       Floor (..), Forall (..), Iff (..), Implies (..), In (..), Next (..),
+       Not (..), Or (..), Pattern (..), Rewrites (..), SymbolOrAlias (..),
+       Variable )
+import Kore.AST.Identifier
+       ( Id (..) )
+import Kore.AST.Kore
+       ( CommonKorePattern, KorePattern, UnifiedPattern (..),
+       UnifiedSortVariable )
+import Kore.AST.MetaOrObject
+       ( Meta (..), Object (..) )
+import Kore.AST.Sentence
+       ( Attributes (..), Definition (..), KoreDefinition, KoreSentenceAxiom,
+       Module (..), ModuleName (..), Sentence (..), SentenceAxiom (..),
+       applyUnifiedSentence )
+import Kore.ASTHelpers
+       ( ApplicationSorts (..) )
+import Kore.ASTVerifier.DefinitionVerifier
+       ( defaultAttributesVerification, verifyAndIndexDefinition )
+import Kore.Error
+       ( printError )
+import Kore.IndexedModule.IndexedModule
+       ( VerifiedModule )
+import Kore.IndexedModule.MetadataTools
+       ( MetadataTools (..), extractMetadataTools )
+import Kore.IndexedModule.Resolvers
+       ( getHeadApplicationSorts )
+import Kore.Parser.Parser
+       ( fromKore )
+import Kore.Sort
+       ( Sort (..) )
+import KorePatterns
+       ( pattern And_, pattern App_, pattern Bottom_, pattern Equals_,
+       pattern Implies_, pattern KoreObjectPattern, pattern Rewrites_,
+       pattern Top_ )
+
 import qualified Kore.Builtin as Builtin
 import qualified Kore.Domain.Builtin as Domain
-import           Kore.Error
-                 ( printError )
-import           Kore.Error
-                 ( Error (..) )
-import           Kore.IndexedModule.IndexedModule
-                 ( IndexedModule (..), KoreIndexedModule, VerifiedModule )
-import           Kore.IndexedModule.MetadataTools
-                 ( MetadataTools (..), extractMetadataTools )
-import           Kore.IndexedModule.Resolvers
-                 ( getHeadApplicationSorts )
-import           Kore.Parser.Parser
-                 ( fromKore )
-import           Kore.Sort
-                 ( Sort (..) )
-import           KorePatterns
-                 ( pattern And_, pattern App_, pattern Bottom_,
-                 pattern Equals_, pattern Implies_, pattern KoreMetaPattern,
-                 pattern KoreObjectPattern, pattern Rewrites_, pattern Top_ )
 
 --[ Metadata ]--
 
@@ -93,7 +82,7 @@ parseAxiomForSymbols = parsePatternForSymbols . sentenceAxiomPattern
                  (CommonKorePattern, [SymbolOrAlias Object])
              -> [SymbolOrAlias Object]
     rAlgebra (AndPattern (And _ (_, p₀) (_, p₁)))         = p₀ ++ p₁
-    rAlgebra (ApplicationPattern (Application s ps))      = (if isConcrete s then [s] else []) ++ (mconcat $ map snd ps)
+    rAlgebra (ApplicationPattern (Application s ps))      = [s | isConcrete s] ++ mconcat (map snd ps)
     rAlgebra (CeilPattern (Ceil _ _ (_, p)))              = p
     rAlgebra (EqualsPattern (Equals _ _ (_, p₀) (_, p₁))) = p₀ ++ p₁
     rAlgebra (ExistsPattern (Exists _ _ (_, p)))          = p
@@ -108,29 +97,6 @@ parseAxiomForSymbols = parsePatternForSymbols . sentenceAxiomPattern
     rAlgebra (RewritesPattern (Rewrites _ (_, p₀) (_, p₁))) = p₀ ++ p₁
     rAlgebra _                                            = []
 
-symbolOrAliasSorts' :: VerifiedModule Attributes Attributes
-                    -> SymbolOrAlias Object
-                    -> ApplicationSorts Object
-symbolOrAliasSorts' = getHeadApplicationSorts
-
-{-  either (error . errorError) id go
-  where
-    aliasesIx :: Map.Map (Id Object) (Attributes, SentenceAlias Object VerifiedKorePattern)
-    aliasesIx = indexedModuleObjectAliasSentences ixModule
-    symbolsIx :: Map.Map (Id Object) (Attributes, SentenceSymbol Object VerifiedKorePattern)
-    symbolsIx = indexedModuleObjectSymbolSentences ixModule
-    ctor :: Id Object
-    ctor = symbolOrAliasConstructor symbol
-    go :: Either (Error a) (ApplicationSorts Object)
-    go =
-      let mSymbol = Map.lookup ctor symbolsIx
-          mAlias  = Map.lookup ctor aliasesIx
-      in  case (mSymbol, mAlias) of
-            (Just (_, symbol'), _) -> symbolOrAliasSorts ([] :: [Sort Object]) symbol'
-            (_, Just  (_, alias))  -> symbolOrAliasSorts ([] :: [Sort Object]) alias
-            _ -> error $ "Failed to find symbol or alias with name: " ++ show ctor
--}
-
 mkSymLib :: [SymbolOrAlias Object]
          -> [Sort Object]
          -> VerifiedModule Attributes Attributes
@@ -143,16 +109,16 @@ mkSymLib symbols sortDecls ixModule overloads =
   where
     metaTools = extractMetadataTools ixModule
     go (SymLib dIx rIx oIx) symbol =
-      let as = (symbolOrAliasSorts' ixModule) symbol
-          att = (symAttributes metaTools) symbol
+      let as = getHeadApplicationSorts ixModule symbol
+          att = symAttributes metaTools symbol
           args = applicationSortsOperands as
           result = applicationSortsResult as
       in SymLib { symCs = Map.insert symbol (args, result, att) dIx
-             , symSt = Map.insert result (symbol : (Map.findWithDefault [] result rIx)) rIx
+             , symSt = Map.insert result (symbol : Map.findWithDefault [] result rIx) rIx
              , symOs = oIx
              }
     mkOverloads oIx (greater,lesser) =
-      Map.insert greater (lesser : (Map.findWithDefault [] greater oIx)) oIx
+      Map.insert greater (lesser : Map.findWithDefault [] greater oIx) oIx
 
 getOverloads :: [KoreSentenceAxiom]
              -> [(SymbolOrAlias Object, SymbolOrAlias Object)]
@@ -160,7 +126,7 @@ getOverloads [] = []
 getOverloads (s : tl) =
   case getAtt s "overload" of
     Nothing -> getOverloads tl
-    Just (KoreObjectPattern (ApplicationPattern (Application _ [(KoreObjectPattern (ApplicationPattern (Application g _))),(KoreObjectPattern (ApplicationPattern (Application l _)))]))) -> (g,l):(getOverloads tl)
+    Just (KoreObjectPattern (ApplicationPattern (Application _ [KoreObjectPattern (ApplicationPattern (Application g _)),KoreObjectPattern (ApplicationPattern (Application l _))]))) -> (g,l) : getOverloads tl
     Just _ -> error "invalid overload attribute"
 
 parseSymbols :: KoreDefinition
@@ -196,11 +162,11 @@ hasAtt sentence att =
 
 rulePriority :: KoreSentenceAxiom
              -> Int
-rulePriority s =
-  if hasAtt s "owise" then 3 else
-  if hasAtt s "cool" then 2 else
-  if hasAtt s "heat" then 1 else
-  0
+rulePriority s
+  | hasAtt s "owise" = 3
+  | hasAtt s "cool"  = 2
+  | hasAtt s "heat"  = 1
+  | otherwise        = 0
 
 data AxiomInfo pat = AxiomInfo
                    { getPriority :: Int
@@ -269,17 +235,17 @@ splitTop :: CommonKorePattern
 splitTop topPattern =
   case topPattern of
     And_ _ (Equals_ _ _ pat _)
-           (And_ _ _ rw@(Rewrites_ _ _ _)) ->
+           (And_ _ _ rw@Rewrites_{}) ->
       Just (extract rw, Just pat)
     And_ _ (Top_ _)
-           (And_ _ _ rw@(Rewrites_ _ _ _)) ->
+           (And_ _ _ rw@Rewrites_{}) ->
       Just (extract rw, Nothing)
     Rewrites_ s (And_ _ (Equals_ _ _ pat _) l)
            (And_ _ _ r) ->
-      Just ((Rewrites s l r), Just pat)
+      Just (Rewrites s l r, Just pat)
     Rewrites_ s (And_ _ (Top_ _) l)
            (And_ _ _ r) ->
-      Just ((Rewrites s l r), Nothing)
+      Just (Rewrites s l r, Nothing)
     Implies_ _ (Bottom_ _) p -> splitTop p
     KoreObjectPattern (ImpliesPattern (Implies _ (KoreObjectPattern (BottomPattern _)) p)) -> splitTop p
     _ -> Nothing
@@ -292,7 +258,7 @@ getAxioms :: KoreDefinition -> [KoreSentenceAxiom]
 getAxioms koreDefinition =
   let modules   = definitionModules koreDefinition
       sentences = mconcat (moduleSentences <$> modules)
-  in mconcat ((applyUnifiedSentence metaT metaT) <$> sentences)
+  in mconcat (applyUnifiedSentence metaT metaT <$> sentences)
   where
     metaT :: Sentence lvl UnifiedSortVariable CommonKorePattern
           -> [KoreSentenceAxiom]
@@ -304,15 +270,15 @@ parseTopAxioms :: KoreDefinition -> [AxiomInfo (Rewrites Object CommonKorePatter
 parseTopAxioms koreDefinition =
   let axioms = getAxioms koreDefinition
       withIndex = indexed axioms
-      withOwise = mconcat ((parseAxiomSentence splitTop) <$> withIndex)
-  in sortBy (comparing getPriority) withOwise
+      withOwise = mconcat (parseAxiomSentence splitTop <$> withIndex)
+  in sortOn getPriority withOwise
 
 parseFunctionAxioms :: KoreDefinition -> SymbolOrAlias Object -> [AxiomInfo (Equals Object CommonKorePattern)]
 parseFunctionAxioms koreDefinition symbol =
   let axioms = getAxioms koreDefinition
       withIndex = indexed axioms
-      withOwise = mconcat ((parseAxiomSentence (splitFunction symbol)) <$> withIndex)
-  in sortBy (comparing getPriority) withOwise
+      withOwise = mconcat (parseAxiomSentence (splitFunction symbol) <$> withIndex)
+  in sortOn getPriority withOwise
 
 parseDefinition :: FilePath -> IO KoreDefinition
 parseDefinition fileName = do
@@ -334,19 +300,18 @@ mainVerify definition mainModuleName =
                 definition
     in case verifyResult of
         Left err1            -> error (printError err1)
-        Right indexedModules -> case Map.lookup (ModuleName mainModuleName) indexedModules of
-                                  Nothing -> error "Could not find main module"
-                                  Just m -> m
+        Right indexedModules -> fromMaybe (error "Could not find main module")
+                                (Map.lookup (ModuleName mainModuleName) indexedModules)
 
 -- Return the function symbol and whether or not the symbol is actually a function.
 getPossibleFunction :: (SymbolOrAlias Object, ([Sort Object], Sort Object, Attributes)) -> (SymbolOrAlias Object, Bool)
-getPossibleFunction (k, (_,_,Attributes attrs)) =  (k, (isJust $ find (isAtt "function") attrs) || (isJust $ find (isAtt "anywhere") attrs))
+getPossibleFunction (k, (_,_,Attributes attrs)) =  (k, isJust (find (isAtt "function") attrs) || isJust (find (isAtt "anywhere") attrs))
 
 -- Return the list of symbols that are actually functions.
 getFunctions :: Map.Map (SymbolOrAlias Object) ([Sort Object], Sort Object, Attributes)
     -> [SymbolOrAlias Object]
 
-getFunctions = (fmap fst) . (filter snd) . (fmap getPossibleFunction) . Map.assocs
+getFunctions = fmap fst . filter snd . fmap getPossibleFunction . Map.assocs
 
 getTopChildren :: CommonKorePattern -> [CommonKorePattern]
 getTopChildren (KoreObjectPattern (ApplicationPattern (Application _ ps))) = ps
