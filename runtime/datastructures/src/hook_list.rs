@@ -213,7 +213,7 @@ pub unsafe extern "C" fn printList(file: *mut FILE, list: *const List, unit: *co
       fprintf(file, fmt.as_ptr(), concat);
     }
     fprintf(file, fmt.as_ptr(), element);
-    printConfigurationInternal(file, *value.get(), sort.as_ptr());
+    printConfigurationInternal(file, *value.get(), sort.as_ptr(), false);
     fprintf(file, parens.as_ptr());
     if i < (*list).len() {
       fprintf(file, comma.as_ptr());

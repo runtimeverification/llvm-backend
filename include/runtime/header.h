@@ -93,7 +93,7 @@ extern "C" {
   #endif
   block *parseConfiguration(const char *filename);
   void printConfiguration(const char *filename, block *subject);
-  void printConfigurationInternal(FILE *file, block *subject, const char *sort);
+  void printConfigurationInternal(FILE *file, block *subject, const char *sort, bool);
 
   // The following functions have to be generated at kompile time
   // and linked with the interpreter.
@@ -113,7 +113,7 @@ extern "C" {
   void printSet(FILE *, set *, const char *, const char *, const char *);
   void printList(FILE *, list *, const char *, const char *, const char *);
   void visitChildren(block *subject, FILE *file,
-      void visitConfig(FILE *, block *, const char *), 
+      void visitConfig(FILE *, block *, const char *, bool), 
       void visitMap(FILE *, map *, const char *, const char *, const char *), 
       void visitList(FILE *, list *, const char *, const char *, const char *), 
       void visitSet(FILE *, set *, const char *, const char *, const char *), 

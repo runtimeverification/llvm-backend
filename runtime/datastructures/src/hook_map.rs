@@ -165,9 +165,9 @@ pub unsafe extern "C" fn printMap(file: *mut FILE, map: *const Map, unit: *const
       fprintf(file, fmt.as_ptr(), concat);
     }
     fprintf(file, fmt.as_ptr(), element);
-    printConfigurationInternal(file, *key.get(), sort.as_ptr());
+    printConfigurationInternal(file, *key.get(), sort.as_ptr(), false);
     fprintf(file, comma.as_ptr());
-    printConfigurationInternal(file, *value.get(), sort.as_ptr());
+    printConfigurationInternal(file, *value.get(), sort.as_ptr(), false);
     fprintf(file, parens.as_ptr());
     if i < (*map).len() {
       fprintf(file, comma.as_ptr());

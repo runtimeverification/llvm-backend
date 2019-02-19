@@ -413,12 +413,15 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
   MergeBlock->insertInto(func);
 }
 
-static llvm::PointerType *makeVisitorType(llvm::LLVMContext &Ctx, llvm::Type *file, llvm::Type *item, int numStrs) {
+static llvm::PointerType *makeVisitorType(llvm::LLVMContext &Ctx, llvm::Type *file, llvm::Type *item, int numStrs, int numBools) {
   std::vector<llvm::Type *> types;
   types.push_back(file);
   types.push_back(item);
   for (int i = 0; i < numStrs; i++) {
     types.push_back(llvm::Type::getInt8PtrTy(Ctx));
+  }
+  for (int i = 0; i < numBools; i++) {
+    types.push_back(llvm::Type::getInt1Ty(Ctx));
   }
   return llvm::PointerType::getUnqual(llvm::FunctionType::get(llvm::Type::getVoidTy(Ctx), types, false));
 }
@@ -436,14 +439,14 @@ static void emitTraversal(std::string name, KOREDefinition *definition, llvm::Mo
     // cf runtime/configurationparser/header.h visitChildren
     auto file = llvm::PointerType::getUnqual(llvm::StructType::create(Ctx, "FILE"));
     argTypes.push_back(file);
-    argTypes.push_back(makeVisitorType(Ctx, file, getValueType({SortCategory::Symbol, 0}, module), 1));
-    argTypes.push_back(makeVisitorType(Ctx, file, llvm::PointerType::getUnqual(getValueType({SortCategory::Map, 0}, module)), 3));
-    argTypes.push_back(makeVisitorType(Ctx, file, llvm::PointerType::getUnqual(getValueType({SortCategory::List, 0}, module)), 3));
-    argTypes.push_back(makeVisitorType(Ctx, file, llvm::PointerType::getUnqual(getValueType({SortCategory::Set, 0}, module)), 3));
-    argTypes.push_back(makeVisitorType(Ctx, file, getValueType({SortCategory::Int, 0}, module), 1));
-    argTypes.push_back(makeVisitorType(Ctx, file, getValueType({SortCategory::Float, 0}, module), 1));
-    argTypes.push_back(makeVisitorType(Ctx, file, getValueType({SortCategory::Bool, 0}, module), 1));
-    argTypes.push_back(makeVisitorType(Ctx, file, llvm::Type::getInt8PtrTy(Ctx), 1));
+    argTypes.push_back(makeVisitorType(Ctx, file, getValueType({SortCategory::Symbol, 0}, module), 1, 1));
+    argTypes.push_back(makeVisitorType(Ctx, file, llvm::PointerType::getUnqual(getValueType({SortCategory::Map, 0}, module)), 3, 0));
+    argTypes.push_back(makeVisitorType(Ctx, file, llvm::PointerType::getUnqual(getValueType({SortCategory::List, 0}, module)), 3, 0));
+    argTypes.push_back(makeVisitorType(Ctx, file, llvm::PointerType::getUnqual(getValueType({SortCategory::Set, 0}, module)), 3, 0));
+    argTypes.push_back(makeVisitorType(Ctx, file, getValueType({SortCategory::Int, 0}, module), 1, 0));
+    argTypes.push_back(makeVisitorType(Ctx, file, getValueType({SortCategory::Float, 0}, module), 1, 0));
+    argTypes.push_back(makeVisitorType(Ctx, file, getValueType({SortCategory::Bool, 0}, module), 1, 0));
+    argTypes.push_back(makeVisitorType(Ctx, file, llvm::Type::getInt8PtrTy(Ctx), 1, 0));
     argTypes.push_back(llvm::PointerType::getUnqual(llvm::FunctionType::get(llvm::Type::getVoidTy(Ctx), {file}, false)));
   } else {
     argTypes.push_back(llvm::PointerType::getUnqual(llvm::ArrayType::get(llvm::Type::getInt8PtrTy(Ctx), 0)));
@@ -565,7 +568,7 @@ static void getVisitor(KOREDefinition *definition, llvm::Module *module, KOREObj
       // fall through
     case SortCategory::Variable:
     case SortCategory::Symbol:
-      llvm::CallInst::Create(func->arg_begin()+2, {func->arg_begin()+1, Child, CharPtr}, "", CaseBlock);
+      llvm::CallInst::Create(func->arg_begin()+2, {func->arg_begin()+1, Child, CharPtr, llvm::ConstantInt::get(llvm::Type::getInt1Ty(Ctx), cat.cat == SortCategory::Variable)}, "", CaseBlock);
       break;
     case SortCategory::Int:
       llvm::CallInst::Create(func->arg_begin()+6, {func->arg_begin()+1, Child, CharPtr}, "", CaseBlock);

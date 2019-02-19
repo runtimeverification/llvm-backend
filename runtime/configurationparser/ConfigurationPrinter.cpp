@@ -33,13 +33,13 @@ void printComma(FILE *file) {
 
 static thread_local std::vector<block *> boundVariables;
 
-void printConfigurationInternal(FILE *file, block *subject, const char *sort) {
+void printConfigurationInternal(FILE *file, block *subject, const char *sort, bool isVar) {
   uint8_t isConstant = ((uintptr_t)subject) & 3;
   if (isConstant) {
     uint32_t tag = ((uintptr_t)subject) >> 32;
     if (isConstant == 3) {
       // bound variable
-      printConfigurationInternal(file, boundVariables[boundVariables.size()-1-tag], sort);
+      printConfigurationInternal(file, boundVariables[boundVariables.size()-1-tag], sort, true);
       return;
     }
     const char *symbol = getSymbolNameForTag(tag);
@@ -102,7 +102,7 @@ void printConfigurationInternal(FILE *file, block *subject, const char *sort) {
 void printConfiguration(const char *filename, block *subject) {
   FILE *file = fopen(filename, "w");
   boundVariables.clear();
-  printConfigurationInternal(file, subject, nullptr);
+  printConfigurationInternal(file, subject, nullptr, false);
   fclose(file);
 }
 

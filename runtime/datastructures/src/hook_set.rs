@@ -125,7 +125,7 @@ pub unsafe extern "C" fn printSet(file: *mut FILE, set: *const Set, unit: *const
       fprintf(file, fmt.as_ptr(), concat);
     }
     fprintf(file, fmt.as_ptr(), element);
-    printConfigurationInternal(file, *value.get(), sort.as_ptr());
+    printConfigurationInternal(file, *value.get(), sort.as_ptr(), false);
     fprintf(file, parens.as_ptr());
     if i < (*set).len() {
       fprintf(file, comma.as_ptr());
