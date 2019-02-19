@@ -169,7 +169,7 @@ block *substituteInternal(block *currBlock) {
     if (layoutInt) {
       uint32_t tag = tag_hdr(hdr);
       uint32_t injTag = getInjectionForSortOfTag(tag);
-      if (tag_hdr(replacementInj->h.hdr) == injTag) {
+      if (tag_hdr(replacementInj->h.hdr) != injTag) {
         return replacementInj;
       }
     }
@@ -256,10 +256,16 @@ block *replaceBinderIndex(block *term, block *variable) {
 }
 
 block *hook_SUBSTITUTION_substOne(block *body, block *newVal, block *varInj) {
-  replacement = newVal;
   bool isSameSort = tag_hdr(newVal->h.hdr) == tag_hdr(varInj->h.hdr);
-  to_replace = isSameSort ? *(block **)(((char *)varInj) + sizeof(blockheader)) : varInj;
-  replacementInj = varInj;
+  if (isSameSort) {
+    to_replace = *(block **)(((char *)varInj) + sizeof(blockheader));
+    replacement = *(block **)(((char *)newVal) + sizeof(blockheader));
+    replacementInj = replacement;
+  } else {
+    to_replace = varInj;
+    replacementInj = newVal;
+    replacement = *(block **)(((char *)newVal) + sizeof(blockheader));
+  }
   return substituteInternal(body);
 }
 }
