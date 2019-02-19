@@ -43,7 +43,9 @@ import Data.Text
 import Data.Traversable
        ( mapAccumL )
 import Kore.AST.Common
-       ( AstLocation (..), Id (..), SymbolOrAlias (..) )
+       ( SymbolOrAlias (..) )
+import Kore.AST.Identifier
+       ( AstLocation (..), Id (..) )
 import Kore.Unparser
        ( unparseToString )
 import TextShow
@@ -53,12 +55,12 @@ import qualified Data.ByteString as B
 import qualified Data.Map.Strict as Map
 import qualified Data.Yaml.Builder as Y
 
+import Pattern
 import Pattern.Map
 import Pattern.Optimiser.Score
 import Pattern.Set
 import Pattern.Type
 import Pattern.Var
-import Pattern
 
 -- [ Builders ]
 
