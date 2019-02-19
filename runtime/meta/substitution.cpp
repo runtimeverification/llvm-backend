@@ -234,6 +234,8 @@ block *debruijnize(block *term) {
     bool dirty = false;
     makeDirty(dirty, layoutBody.offset, newBody, newBlock);
   }
+  auto newVar = *(string **)(((char *)newBlock) + layoutVar.offset);
+  newVar->h.hdr |= VARIABLE_BIT;
   return newBlock;
 }
 
