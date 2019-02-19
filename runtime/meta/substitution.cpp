@@ -10,7 +10,6 @@ static thread_local block *replacementInj;
 static thread_local uint64_t idx;
 
 extern "C" {
-  bool hook_STRING_eq(string *, string *);
   bool hook_KEQUAL_eq(block *, block *);
   map map_map(void *, block *(block *));
   list list_map(void *, block *(block *));
