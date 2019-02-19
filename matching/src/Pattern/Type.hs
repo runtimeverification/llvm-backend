@@ -22,10 +22,13 @@ import Data.Functor.Foldable
        ( Fix (..) )
 import Data.Text
        ( Text, pack )
+
 import Kore.AST.Common
-       ( Sort (..), SymbolOrAlias (..) )
+       ( SymbolOrAlias (..) )
 import Kore.AST.MetaOrObject
        ( Object (..) )
+import Kore.Sort
+       ( Sort (..) )
 
 import qualified Data.Yaml.Builder as Y
 

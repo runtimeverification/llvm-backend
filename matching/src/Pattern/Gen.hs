@@ -1,6 +1,3 @@
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE GADTs             #-}
-{-# LANGUAGE OverloadedStrings #-}
 module Pattern.Gen where
 
 import Control.Monad.Free
@@ -14,17 +11,19 @@ import Data.Functor.Foldable
 import Data.List
        ( transpose )
 import Data.Maybe
-       ( fromJust, isJust, maybe )
+       ( fromJust, fromMaybe, isJust, isNothing )
 import Data.Text
        ( Text, unpack )
 import Data.Tuple.Select
        ( sel1, sel2 )
+
 import Kore.AST.Common
-       ( And (..), Application (..), AstLocation (..), BuiltinDomain (..),
-       Ceil (..), DomainValue (..), Equals (..), Exists (..), Floor (..),
-       Forall (..), Id (..), Iff (..), Implies (..), In (..), Next (..),
-       Not (..), Or (..), Pattern (..), Rewrites (..), Sort (..),
-       SortActual (..), StringLiteral (..), SymbolOrAlias (..), Variable (..) )
+       ( And (..), Application (..), Ceil (..), DomainValue (..), Equals (..),
+       Exists (..), Floor (..), Forall (..), Iff (..), Implies (..), In (..),
+       Next (..), Not (..), Or (..), Pattern (..), Rewrites (..),
+       SymbolOrAlias (..), Variable (..) )
+import Kore.AST.Identifier
+       ( AstLocation (..), Id (..) )
 import Kore.AST.Kore
        ( CommonKorePattern )
 import Kore.AST.MetaOrObject
@@ -33,24 +32,32 @@ import Kore.AST.Sentence
        ( Attributes (..) )
 import Kore.ASTHelpers
        ( ApplicationSorts (..) )
+import Kore.Attribute.Hook
+       ( Hook (..) )
 import Kore.Attribute.Parser
        ( parseAttributes )
-import Kore.Builtin.Hook
-       ( Hook (..) )
+import Kore.Domain.Builtin
+       ( Builtin (..) )
 import Kore.IndexedModule.IndexedModule
-       ( KoreIndexedModule )
+       ( VerifiedModule )
 import Kore.IndexedModule.MetadataTools
        ( MetadataTools (..), extractMetadataTools )
+import Kore.IndexedModule.Resolvers
+       ( getHeadApplicationSorts )
+import Kore.Sort
+       ( Sort (..), SortActual (..) )
 import Kore.Step.StepperAttributes
        ( StepperAttributes (..) )
 import Pattern.Parser
        ( AxiomInfo (..), SymLib (..), getTopChildren, unifiedPatternRAlgebra )
 
-import qualified Data.Map as Map
+import qualified Kore.AST.Valid as Pure
+import qualified Kore.Domain.Builtin as Domain
 
+import qualified Data.Map as Map
 import qualified Everything as P
-import qualified Pattern.Type as P
 import qualified Pattern as P
+import qualified Pattern.Type as P
 
 parseAtt :: Attributes -> StepperAttributes
 parseAtt = fromRight (error "invalid attr") . parseAttributes
@@ -78,24 +85,29 @@ instance KoreRewrite (Rewrites lvl CommonKorePattern) where
 data CollectionCons = Concat | Unit | Element
 
 stripLoc :: SymbolOrAlias Object -> SymbolOrAlias Object
-stripLoc (SymbolOrAlias (Id name _) s) = (SymbolOrAlias (Id name AstLocationNone) $ map stripLocSort s)
+stripLoc (SymbolOrAlias (Id name _) s) = SymbolOrAlias (Id name AstLocationNone) $ map stripLocSort s
   where
     stripLocSort :: Sort Object -> Sort Object
-    stripLocSort (SortActualSort (SortActual (Id x _) args)) = (SortActualSort (SortActual (Id x AstLocationNone) $ map stripLocSort args))
+    stripLocSort (SortActualSort (SortActual (Id x _) args)) = SortActualSort (SortActual (Id x AstLocationNone) $ map stripLocSort args)
     stripLocSort sort = sort
 
-genPattern :: KoreRewrite pat => MetadataTools Object Attributes -> SymLib -> pat -> [Fix P.Pattern]
-genPattern tools (SymLib _ sorts _) rewrite =
+genPattern :: KoreRewrite pat
+           => VerifiedModule Attributes Attributes
+           -> SymLib
+           -> pat
+           -> [Fix P.Pattern]
+genPattern ixModule (SymLib _ sorts _) rewrite =
   let lhs = getLeftHandSide rewrite
   in map (para (unifiedPatternRAlgebra (error "unsupported: meta level") rAlgebra)) lhs
   where
-    rAlgebra :: Pattern Object Variable (CommonKorePattern,
-                                         Fix P.Pattern)
+    tools = extractMetadataTools ixModule
+    rAlgebra :: Pattern Object Domain.Builtin Variable (CommonKorePattern,
+                                                        Fix P.Pattern)
              -> Fix P.Pattern
     rAlgebra (ApplicationPattern (Application rawSym ps)) =
       let sym = stripLoc rawSym
           att = fmap unpack $ getHook $ hook $ parseAtt $ symAttributes tools sym
-          sort = applicationSortsResult $ symbolOrAliasSorts tools sym
+          sort = applicationSortsResult $ getHeadApplicationSorts ixModule sym
       in case att of
         Just "LIST.concat" -> listPattern sym Concat (map snd ps) (getSym "LIST.element" (sorts Map.! sort))
         Just "LIST.unit" -> listPattern sym Unit [] (getSym "LIST.element" (sorts Map.! sort))
@@ -108,17 +120,17 @@ genPattern tools (SymLib _ sorts _) rewrite =
         Just "SET.element" -> setPattern sym Element (map snd ps) (getSym "SET.element" (sorts Map.! sort))
         Just _ -> Fix $ P.Pattern (Left (P.Symbol sym)) Nothing (map snd ps)
         Nothing -> Fix $ P.Pattern (Left (P.Symbol sym)) Nothing (map snd ps)
-    rAlgebra (DomainValuePattern (DomainValue sort (BuiltinDomainPattern (Fix (StringLiteralPattern (StringLiteral str)))))) =
+    rAlgebra (DomainValuePattern (DomainValue sort (BuiltinPattern (Pure.StringLiteral_ str)))) =
       let att = fmap unpack $ getHook $ hook $ parseAtt $ sortAttributes tools sort
       in Fix $ P.Pattern (if att == Just "BOOL.Bool" then case str of
                            "true" -> Right $ P.Literal "1"
                            "false" -> Right $ P.Literal "0"
                            _ -> Right $ P.Literal str
                            else Right $ P.Literal str)
-          (if att == Nothing then Just "STRING.String" else att) []
+          (if isNothing att then Just "STRING.String" else att) []
     rAlgebra (VariablePattern (Variable (Id name _) sort)) =
       let att = fmap unpack $ getHook $ hook $ parseAtt $ sortAttributes tools sort
-      in Fix $ P.Variable (unpack name) $ maybe "STRING.String" id att
+      in Fix $ P.Variable (unpack name) $ fromMaybe "STRING.String" att
     rAlgebra (AndPattern (And _ p (_,Fix (P.Variable name hookAtt)))) = Fix $ P.As name hookAtt $ snd p
     rAlgebra pat = error $ show pat
     listPattern :: SymbolOrAlias Object
@@ -140,20 +152,20 @@ genPattern tools (SymLib _ sorts _) rewrite =
       Fix (P.ListPattern [] (Just p) (hd ++ tl) c $ Fix $ P.Pattern (Left $ P.Symbol sym) Nothing [p, o])
     listPattern sym Unit [] c = Fix (P.ListPattern [] Nothing [] c $ Fix $ P.Pattern (Left $ P.Symbol sym) Nothing [])
     listPattern sym Element [p] c = Fix (P.ListPattern [p] Nothing [] c $ Fix $ P.Pattern (Left $ P.Symbol sym) Nothing [p])
-    listPattern _ Concat [_, Fix (P.MapPattern _ _ _ _ _)] _ = error "unsupported list pattern"
-    listPattern _ Concat [Fix (P.MapPattern _ _ _ _ _), _] _ = error "unsupported list pattern"
-    listPattern _ Concat [_, Fix (P.SetPattern _ _ _ _)] _ = error "unsupported list pattern"
-    listPattern _ Concat [Fix (P.SetPattern _ _ _ _), _] _ = error "unsupported list pattern"
+    listPattern _ Concat [_, Fix P.MapPattern{}] _ = error "unsupported list pattern"
+    listPattern _ Concat [Fix P.MapPattern{}, _] _ = error "unsupported list pattern"
+    listPattern _ Concat [_, Fix P.SetPattern{}] _ = error "unsupported list pattern"
+    listPattern _ Concat [Fix P.SetPattern{}, _] _ = error "unsupported list pattern"
     listPattern _ Concat [_, Fix (P.ListPattern _ (Just _) _ _ _)] _ = error "unsupported list pattern"
     listPattern _ Concat [Fix (P.ListPattern _ (Just _) _ _ _), _] _ = error "unsupported list pattern"
-    listPattern _ Concat [Fix (P.As _ _ _), _] _ = error "unsupported list pattern"
-    listPattern _ Concat [_, Fix (P.As _ _ _)] _ = error "unsupported list pattern"
-    listPattern _ Concat [Fix (P.Pattern _ _ _), _] _ = error "unsupported list pattern"
-    listPattern _ Concat [_, Fix (P.Pattern _ _ _)] _ = error "unsupported list pattern"
+    listPattern _ Concat [Fix P.As{}, _] _ = error "unsupported list pattern"
+    listPattern _ Concat [_, Fix P.As{}] _ = error "unsupported list pattern"
+    listPattern _ Concat [Fix P.Pattern{}, _] _ = error "unsupported list pattern"
+    listPattern _ Concat [_, Fix P.Pattern{}] _ = error "unsupported list pattern"
     listPattern _ Concat [Fix P.Wildcard, _] _ = error "unsupported list pattern"
-    listPattern _ Concat [Fix (P.Variable _ _), _] _ = error "unsupported list pattern"
+    listPattern _ Concat [Fix P.Variable{}, _] _ = error "unsupported list pattern"
     listPattern _ Concat [] _ = error "unsupported list pattern"
-    listPattern _ Concat (_:[]) _ = error "unsupported list pattern"
+    listPattern _ Concat [_] _ = error "unsupported list pattern"
     listPattern _ Concat (_:_:_:_) _ = error "unsupported list pattern"
     listPattern _ Unit (_:_) _ = error "unsupported list pattern"
     listPattern _ Element [] _ = error "unsupported list pattern"
@@ -179,22 +191,22 @@ genPattern tools (SymLib _ sorts _) rewrite =
     mapPattern sym Element [k,v] c = Fix (P.MapPattern [k] [v] Nothing c $ Fix $ P.Pattern (Left $ P.Symbol sym) Nothing [k,v])
     mapPattern _ Concat [_, Fix (P.MapPattern _ _ (Just _) _ _)] _ = error "unsupported map pattern"
     mapPattern _ Concat [Fix (P.MapPattern _ _ (Just _) _ _), _] _ = error "unsupported map pattern"
-    mapPattern _ Concat [_, Fix (P.ListPattern _ _ _ _ _)] _ = error "unsupported map pattern"
-    mapPattern _ Concat [Fix (P.ListPattern _ _ _ _ _), _] _ = error "unsupported map pattern"
-    mapPattern _ Concat [_, Fix (P.SetPattern _ _ _ _)] _ = error "unsupported map pattern"
-    mapPattern _ Concat [Fix (P.SetPattern _ _ _ _), _] _ = error "unsupported map pattern"
-    mapPattern _ Concat [Fix (P.As _ _ _), _] _ = error "unsupported map pattern"
-    mapPattern _ Concat [_, Fix (P.As _ _ _)] _ = error "unsupported map pattern"
-    mapPattern _ Concat [Fix (P.Pattern _ _ _), _] _ = error "unsupported map pattern"
-    mapPattern _ Concat [_, Fix (P.Pattern _ _ _)] _ = error "unsupported map pattern"
+    mapPattern _ Concat [_, Fix P.ListPattern{}] _ = error "unsupported map pattern"
+    mapPattern _ Concat [Fix P.ListPattern{}, _] _ = error "unsupported map pattern"
+    mapPattern _ Concat [_, Fix P.SetPattern{}] _ = error "unsupported map pattern"
+    mapPattern _ Concat [Fix P.SetPattern{}, _] _ = error "unsupported map pattern"
+    mapPattern _ Concat [Fix P.As{}, _] _ = error "unsupported map pattern"
+    mapPattern _ Concat [_, Fix P.As{}] _ = error "unsupported map pattern"
+    mapPattern _ Concat [Fix P.Pattern{}, _] _ = error "unsupported map pattern"
+    mapPattern _ Concat [_, Fix P.Pattern{}] _ = error "unsupported map pattern"
     mapPattern _ Concat [Fix P.Wildcard, _] _ = error "unsupported map pattern"
     mapPattern _ Concat [Fix (P.Variable _ _), _] _ = error "unsupported map pattern"
     mapPattern _ Concat [] _ = error "unsupported map pattern"
-    mapPattern _ Concat (_:[]) _ = error "unsupported map pattern"
+    mapPattern _ Concat [_] _ = error "unsupported map pattern"
     mapPattern _ Concat (_:_:_:_) _ = error "unsupported map pattern"
     mapPattern _ Unit (_:_) _ = error "unsupported map pattern"
     mapPattern _ Element [] _ = error "unsupported map pattern"
-    mapPattern _ Element (_:[]) _ = error "unsupported map pattern"
+    mapPattern _ Element [_] _ = error "unsupported map pattern"
     mapPattern _ Element (_:_:_:_) _ = error "unsupported map pattern"
     setPattern :: SymbolOrAlias Object
                -> CollectionCons
@@ -217,18 +229,18 @@ genPattern tools (SymLib _ sorts _) rewrite =
     setPattern sym Element [e] c = Fix (P.SetPattern [e] Nothing c $ Fix $ P.Pattern (Left $ P.Symbol sym) Nothing [e])
     setPattern _ Concat [_, Fix (P.SetPattern _ (Just _) _ _)] _ = error "unsupported set pattern"
     setPattern _ Concat [Fix (P.SetPattern _ (Just _) _ _), _] _ = error "unsupported set pattern"
-    setPattern _ Concat [_, Fix (P.MapPattern _ _ _ _ _)] _ = error "unsupported set pattern"
-    setPattern _ Concat [Fix (P.MapPattern _ _ _ _ _), _] _ = error "unsupported set pattern"
-    setPattern _ Concat [_, Fix (P.ListPattern _ _ _ _ _)] _ = error "unsupported set pattern"
-    setPattern _ Concat [Fix (P.ListPattern _ _ _ _ _), _] _ = error "unsupported set pattern"
-    setPattern _ Concat [Fix (P.As _ _ _), _] _ = error "unsupported set pattern"
-    setPattern _ Concat [_, Fix (P.As _ _ _)] _ = error "unsupported set pattern"
-    setPattern _ Concat [Fix (P.Pattern _ _ _), _] _ = error "unsupported set pattern"
-    setPattern _ Concat [_, Fix (P.Pattern _ _ _)] _ = error "unsupported set pattern"
+    setPattern _ Concat [_, Fix P.MapPattern{}] _ = error "unsupported set pattern"
+    setPattern _ Concat [Fix P.MapPattern{}, _] _ = error "unsupported set pattern"
+    setPattern _ Concat [_, Fix P.ListPattern{}] _ = error "unsupported set pattern"
+    setPattern _ Concat [Fix P.ListPattern{}, _] _ = error "unsupported set pattern"
+    setPattern _ Concat [Fix P.As{}, _] _ = error "unsupported set pattern"
+    setPattern _ Concat [_, Fix P.As{}] _ = error "unsupported set pattern"
+    setPattern _ Concat [Fix P.Pattern{}, _] _ = error "unsupported set pattern"
+    setPattern _ Concat [_, Fix P.Pattern{}] _ = error "unsupported set pattern"
     setPattern _ Concat [Fix P.Wildcard, _] _ = error "unsupported set pattern"
-    setPattern _ Concat [Fix (P.Variable _ _), _] _ = error "unsupported set pattern"
+    setPattern _ Concat [Fix P.Variable{}, _] _ = error "unsupported set pattern"
     setPattern _ Concat [] _ = error "unsupported set pattern"
-    setPattern _ Concat (_:[]) _ = error "unsupported set pattern"
+    setPattern _ Concat [_] _ = error "unsupported set pattern"
     setPattern _ Concat (_:_:_:_) _ = error "unsupported set pattern"
     setPattern _ Unit (_:_) _ = error "unsupported set pattern"
     setPattern _ Element [] _ = error "unsupported set pattern"
@@ -244,8 +256,9 @@ genPattern tools (SymLib _ sorts _) rewrite =
 genVars :: CommonKorePattern -> [String]
 genVars = para (unifiedPatternRAlgebra rAlgebra rAlgebra)
   where
-    rAlgebra :: Pattern lvl Variable (CommonKorePattern,
-                                     [String])
+    rAlgebra :: Functor domain
+             => Pattern lvl domain Variable (CommonKorePattern,
+                                             [String])
              -> [String]
     rAlgebra (VariablePattern (Variable (Id name _) _)) = [unpack name]
     rAlgebra (AndPattern (And _ (_, p₀) (_, p₁)))         = p₀ ++ p₁
@@ -273,13 +286,13 @@ metaLookup _ P.Empty = Just []
 metaLookup _ (P.NonEmpty (P.Ignoring m)) = Just [m]
 metaLookup f (P.HasKey isSet e (P.Ignoring m) _) =
   let metas = fromJust $ f $ P.SymbolConstructor $ P.Symbol e
-  in if isSet then Just [m, m] else Just [head $ tail $ metas, m, m]
+  in if isSet then Just [m, m] else Just [head $ tail metas, m, m]
 metaLookup _ (P.HasNoKey (P.Ignoring m) _) = Just [m]
 
 defaultMetadata :: Sort Object -> P.Metadata P.BoundPattern
 defaultMetadata sort = P.Metadata 1 (const []) (const []) sort $ metaLookup $ const Nothing
 
-genMetadatas :: SymLib -> KoreIndexedModule Attributes -> Map.Map (Sort Object) (P.Metadata P.BoundPattern)
+genMetadatas :: SymLib -> VerifiedModule Attributes Attributes -> Map.Map (Sort Object) (P.Metadata P.BoundPattern)
 genMetadatas syms@(SymLib symbols sorts allOverloads) indexedMod =
   Map.mapMaybeWithKey genMetadata sorts
   where
@@ -303,11 +316,11 @@ genMetadatas syms@(SymLib symbols sorts allOverloads) indexedMod =
             overloads = filter isOverload keys
             usedInjs = map (\c -> filter (isSubsort metadatas c) injections) injections
             usedOverloads = map (map (P.SymbolConstructor . P.Symbol) . (allOverloads Map.!) . (\(P.SymbolConstructor (P.Symbol s)) -> s)) overloads
-            children = map (map $ (\s -> Map.findWithDefault (defaultMetadata s) s metadatas)) args
+            children = map (map (\s -> Map.findWithDefault (defaultMetadata s) s metadatas)) args
             metaMap = Map.fromList (zip keys children)
             injMap = Map.fromList (zip injections usedInjs)
             overloadMap = Map.fromList (zip overloads usedOverloads)
-            overloadInjMap = Map.mapWithKey (\k -> (map $ injectionForOverload k)) overloadMap
+            overloadInjMap = Map.mapWithKey (map . injectionForOverload) overloadMap
             trueInjMap = Map.union injMap overloadInjMap
         in Just $ P.Metadata (toInteger $ length constructors) (\s -> if isInjection s || isOverload s then trueInjMap Map.! s else []) (\s -> Map.findWithDefault [] s overloadMap) sort $ metaLookup $ flip Map.lookup metaMap
     genMetadata _ _ = Nothing
@@ -323,7 +336,7 @@ genMetadatas syms@(SymLib symbols sorts allOverloads) indexedMod =
     isSubsort metas (P.SymbolConstructor (P.Symbol (SymbolOrAlias name [b,_]))) (P.SymbolConstructor (P.Symbol (SymbolOrAlias _ [a,_]))) =
       let (P.Metadata _ _ _ _ childMeta) = Map.findWithDefault (defaultMetadata b) b metas
           child = P.Symbol (SymbolOrAlias name [a,b])
-      in isJust $ childMeta $ (P.SymbolConstructor child)
+      in isJust $ childMeta $ P.SymbolConstructor child
     isSubsort _ _ _ = error "invalid injection"
     injectionForOverload :: P.Constructor P.BoundPattern -> P.Constructor P.BoundPattern -> P.Constructor P.BoundPattern
     injectionForOverload (P.SymbolConstructor (P.Symbol g)) (P.SymbolConstructor (P.Symbol l)) = P.SymbolConstructor $ P.Symbol $ SymbolOrAlias (Id "inj" AstLocationNone) [sel2 (symbols Map.! l), sel2 (symbols Map.! g)]
@@ -331,7 +344,7 @@ genMetadatas syms@(SymLib symbols sorts allOverloads) indexedMod =
 
 genClauseMatrix :: KoreRewrite pat
                => SymLib
-               -> KoreIndexedModule Attributes
+               -> VerifiedModule Attributes Attributes
                -> [AxiomInfo pat]
                -> [Sort Object]
                -> (P.ClauseMatrix P.Pattern P.BoundPattern, P.Fringe)
@@ -339,10 +352,9 @@ genClauseMatrix symlib indexedMod axioms sorts =
   let indices = map getOrdinal axioms
       rewrites = map getRewrite axioms
       sideConditions = map getSideCondition axioms
-      tools = extractMetadataTools indexedMod
-      patterns = map (genPattern tools symlib) rewrites
+      patterns = map (genPattern indexedMod symlib) rewrites
       rhsVars = map (genVars . getRightHandSide) rewrites
-      scVars = map (maybe Nothing (Just . genVars)) sideConditions
+      scVars = map (fmap genVars) sideConditions
       actions = zipWith3 P.Action indices rhsVars scVars
       metas = genMetadatas symlib indexedMod
       meta = map (metas Map.!) sorts
@@ -353,7 +365,7 @@ genClauseMatrix symlib indexedMod axioms sorts =
 
 mkDecisionTree :: KoreRewrite pat
                => SymLib
-               -> KoreIndexedModule Attributes
+               -> VerifiedModule Attributes Attributes
                -> [AxiomInfo pat]
                -> [Sort Object]
                -> Free P.Anchor P.Alias

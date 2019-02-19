@@ -4,18 +4,20 @@
 
 module Main where
 
-import           Data.Bits
-                 ( shiftL )
-import           Data.Functor.Foldable
-                 ( Fix (..) )
-import           Data.List
-                 ( concat, transpose )
-import           Data.Proxy
-                 ( Proxy (..) )
-import           Data.Semigroup
-                 ( (<>) )
-import           Kore.AST.Common
-                 ( AstLocation (..), Id (..), Sort (..), SortActual (..) )
+import Data.Bits
+       ( shiftL )
+import Data.Functor.Foldable
+       ( Fix (..) )
+import Data.List
+       ( concat, transpose )
+import Data.Proxy
+       ( Proxy (..) )
+import Data.Semigroup
+       ( (<>) )
+import Kore.AST.Identifier
+       ( AstLocation (..), Id (..) )
+import Kore.Sort
+       ( Sort (..), SortActual (..) )
 
 import qualified Data.Map.Strict as M
 
