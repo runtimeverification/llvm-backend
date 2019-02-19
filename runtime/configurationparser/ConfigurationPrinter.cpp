@@ -3,6 +3,8 @@
 #include <cstring>
 #include <string>
 #include <vector>
+#include <unordered_map>
+#include <set>
 #include <functional>
 
 #include "runtime/header.h"
@@ -45,6 +47,9 @@ struct StringEq {
 };
 
 static thread_local std::vector<block *> boundVariables;
+static thread_local std::unordered_map<string *, std::string, StringHash, StringEq> varNames;
+static thread_local std::set<std::string> usedVarNames;
+static thread_local uint64_t varCounter = 0;
 
 void printConfigurationInternal(FILE *file, block *subject, const char *sort, bool isVar) {
   uint8_t isConstant = ((uintptr_t)subject) & 3;
@@ -94,6 +99,19 @@ void printConfigurationInternal(FILE *file, block *subject, const char *sort, bo
         break;
       }
     }
+    if (isVar && !varNames.count(str)) {
+      std::string stdStr = std::string(str->data, len(str));
+      std::string suffix = "";
+      while (usedVarNames.count(stdStr + suffix)) {
+        suffix = std::to_string(varCounter++);
+      }
+      stdStr = stdStr + suffix;
+      fprintf(file, "%s", suffix.c_str());
+      usedVarNames.insert(stdStr);
+      varNames[str] = suffix;
+    } else if (isVar) {
+      fprintf(file, "%s", varNames[str].c_str());
+    }
     fprintf(file, "\")");
     return;
   }
@@ -115,7 +133,10 @@ void printConfigurationInternal(FILE *file, block *subject, const char *sort, bo
 void printConfiguration(const char *filename, block *subject) {
   FILE *file = fopen(filename, "w");
   boundVariables.clear();
+  varCounter = 0;
   printConfigurationInternal(file, subject, nullptr, false);
+  varNames.clear();
+  usedVarNames.clear();
   fclose(file);
 }
 
