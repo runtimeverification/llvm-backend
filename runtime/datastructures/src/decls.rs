@@ -17,7 +17,7 @@ unsafe impl GlobalAlloc for KoreAllocator {
     if during_gc() {
       malloc(_layout.size())
     } else {
-      koreAllocOld(_layout.size())
+      koreAllocNoGC(_layout.size())
     }
   }
   unsafe fn dealloc(&self, _ptr: *mut u8, _layout: Layout) {
@@ -109,7 +109,7 @@ extern "C" {
   pub fn k_hash<'a>(k1: K, h: *mut c_void) -> u64;
   pub fn hash_enter() -> bool;
   pub fn hash_exit();
-  pub fn koreAllocOld(size: usize) -> *mut u8;
+  pub fn koreAllocNoGC(size: usize) -> *mut u8;
   pub fn during_gc() -> bool;
   pub fn malloc(size: usize) -> *mut u8;
   pub fn free(ptr: *mut u8);
