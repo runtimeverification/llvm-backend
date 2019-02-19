@@ -5,15 +5,13 @@
 #include<string.h>
 #include "runtime/alloc.h"
 #include "runtime/header.h"
+#include "runtime/arena.h"
 
-static char* current_tospace_start = 0;
-static char* current_tospace_end = 0;
-
-char **alloc_ptr(void);
+char **young_alloc_ptr(void);
 char **old_alloc_ptr(void);
-char* fromspace_ptr(void);
+char* youngspace_ptr(void);
 char* oldspace_ptr(void);
-char fromspace_id(void);
+char youngspace_collection_id(void);
 void map_foreach(void *, void(block**));
 void set_foreach(void *, void(block**));
 void list_foreach(void *, void(block**));
@@ -71,8 +69,7 @@ static void migrate(block** blockPtr) {
 // that are not tracked by gc
 static void migrate_once(block** blockPtr) {
   block* currBlock = *blockPtr;
-  memory_block_header *hdr = mem_block_header(currBlock);
-  if (fromspace_id() == hdr->semispace) {
+  if (youngspace_collection_id() == getArenaSemispaceIDOfObject((void *)currBlock)) {
     migrate(blockPtr);
   }
 }
@@ -103,24 +100,7 @@ static void migrate_string_buffer(stringbuffer** bufferPtr) {
   *bufferPtr = *(stringbuffer **)(buffer->contents);
 }
 
-static char* get_next(char* scan_ptr, size_t size, char* alloc_ptr) {
-  char *next_ptr = scan_ptr + size;
-  if (next_ptr == alloc_ptr) {
-    return 0;
-  }
-  if (next_ptr != current_tospace_end) {
-    return next_ptr;
-  }
-  char *next_block = *(char **)current_tospace_start;
-  if (!next_block) {
-    return 0;
-  }
-  current_tospace_start = next_block;
-  current_tospace_end = next_block + BLOCK_SIZE;
-  return current_tospace_start + sizeof(memory_block_header);
-}
-
-static char* evacuate(char* scan_ptr, char** alloc_ptr) {
+static char* evacuate(char* scan_ptr, char **alloc_ptr) {
   block *currBlock = (block *)scan_ptr;
   const uint64_t hdr = currBlock->h.hdr;
   uint16_t layoutInt = layout_hdr(hdr);
@@ -154,7 +134,7 @@ static char* evacuate(char* scan_ptr, char** alloc_ptr) {
       }
     }
   }
-  return get_next(scan_ptr, get_size(hdr, layoutInt), *alloc_ptr);
+  return movePtr(scan_ptr, get_size(hdr, layoutInt), *alloc_ptr);
 }
 
 // computes scan ptr, current_tospace_start, and current_tospace_end for old generation
@@ -164,19 +144,12 @@ static char* computeScanPtr(char* oldspace_start) {
   // if no allocations have happened yet, don't scan anything.
   // if no allocations had happened at the start of gc, start scanning from
   // the beginning. otherwise, start scanning from where we were at beginning of gc.
-  char* scan_ptr = oldspace_start == 0 ? oldspace_ptr() == 0 ? 0 : oldspace_ptr() + sizeof(memory_block_header) : oldspace_start;
+  char* scan_ptr = oldspace_start == 0 ? oldspace_ptr() : oldspace_start;
   uintptr_t oldspace_block_start = (uintptr_t)scan_ptr;
   if (!(oldspace_block_start & (BLOCK_SIZE-1))) {
     // this happens when oldspace_start is at the exact end of a block
-    // we need to jump to the next block, so we use get_next with a length of 0 to do this
-    current_tospace_end = oldspace_start;
-    current_tospace_start = oldspace_start - BLOCK_SIZE;
-    scan_ptr = get_next(scan_ptr, 0, *old_alloc_ptr());
-  } else {
-    // we have the scan ptr, so we compute current_tospace_start and current_tospace_end from it
-    oldspace_block_start = oldspace_block_start & ~(BLOCK_SIZE-1);
-    current_tospace_start = (char*) oldspace_block_start;
-    current_tospace_end = current_tospace_start + BLOCK_SIZE;
+    // we need to jump to the next block, so we use movePtr with a length of 0 to do this
+    scan_ptr = movePtr(scan_ptr, 0, *old_alloc_ptr());
   }
   return scan_ptr;
 }
@@ -187,12 +160,10 @@ void koreCollect(block** root) {
   koreAllocSwap();
   char* oldspace_start = *old_alloc_ptr();
   migrate(root);
-  current_tospace_start = fromspace_ptr();
-  current_tospace_end = fromspace_ptr() + BLOCK_SIZE;
-  char *scan_ptr = current_tospace_start + sizeof(memory_block_header);
+  char *scan_ptr = youngspace_ptr();
   MEM_LOG("Evacuating young generation\n");
   while(scan_ptr) {
-    scan_ptr = evacuate(scan_ptr, alloc_ptr());
+    scan_ptr = evacuate(scan_ptr, young_alloc_ptr());
   }
   scan_ptr = computeScanPtr(oldspace_start);
   if (scan_ptr != *old_alloc_ptr()) {
