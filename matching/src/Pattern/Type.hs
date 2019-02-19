@@ -82,7 +82,7 @@ type Fringe = [(Occurrence, Bool)] -- occurrence and whether to match the exact 
 newtype Symbol = Symbol (SymbolOrAlias Object)
                  deriving (Eq, Show, Ord)
 
-newtype Literal = Literal String
+newtype Literal = Literal Text
                   deriving (Eq, Show, Ord)
 
 data Constructor bp = SymbolConstructor Symbol
