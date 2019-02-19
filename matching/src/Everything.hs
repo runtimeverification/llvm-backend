@@ -39,7 +39,7 @@ import Data.Ord
 import Data.Semigroup
        ( (<>) )
 import Data.Text
-       ( Text, pack, unpack )
+       ( Text, pack )
 import Data.Traversable
        ( mapAccumL )
 import Kore.AST.Common
@@ -195,7 +195,7 @@ mSpecialize ix (cm@(ClauseMatrix (PatternMatrix (c : _)) _), o : os) =
    where
      getConstructor :: Constructor BoundPattern -> Text
      getConstructor (SymbolConstructor (Symbol sym)) = pack $ unparseToString sym
-     getConstructor (LiteralConstructor (Literal str)) = pack str
+     getConstructor (LiteralConstructor (Literal str)) = str
      getConstructor (List _ i) = pack $ show i
      getConstructor Empty = "0"
      getConstructor (NonEmpty _) = error "Invalid map pattern"
@@ -918,7 +918,7 @@ compilePattern = compilePattern'
     equalLiteral litO hookName ((name,spec):tl) d =
       let newO = Lit name $ pack hookName
           eqO = Equal litO newO
-      in Fix $ MakePattern newO (Fix (Pattern (Right (Literal (unpack name))) (Just hookName) [])) $
+      in Fix $ MakePattern newO (Fix (Pattern (Right (Literal name)) (Just hookName) [])) $
              Fix $ Function (equalityFun hookName) eqO [litO, newO] "BOOL.Bool" $
                  Fix $ SwitchLiteral eqO 1 $ L [("1", Fix $ Switch litO L
                                                              { getSpecializations = [], getDefault = Just $ compilePattern' spec }),
