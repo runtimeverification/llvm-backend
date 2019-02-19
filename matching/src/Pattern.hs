@@ -79,7 +79,7 @@ instance Y.ToYaml a => Y.ToYaml (BoundPattern a) where
   toYaml (ListPattern _ _ _ _ o) = Y.toYaml o
   toYaml (Pattern (Right (Literal s)) (Just h) []) = Y.mapping
     ["hook" Y..= Y.toYaml (pack h)
-    , "literal" Y..= Y.toYaml (pack s)
+    , "literal" Y..= Y.toYaml s
     ]
   toYaml (Pattern (Left (Symbol s)) Nothing ps) = Y.mapping
     ["constructor" Y..= Y.toYaml (pack $ unparseToString s)

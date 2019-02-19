@@ -18,6 +18,8 @@ import Kore.AST.Identifier
        ( AstLocation (..), Id (..) )
 import Kore.Sort
        ( Sort (..), SortActual (..) )
+import TextShow
+       ( showt )
 
 import qualified Data.Map.Strict as M
 
@@ -52,7 +54,7 @@ instance IsPattern Lst where
 
 instance IsPattern IntPat where
   toPattern :: IntPat -> Fix Pattern
-  toPattern (IntLit i) = Fix (Pattern (Right $ Literal $ show i) (Just "MINT.MInt 32") [])
+  toPattern (IntLit i) = Fix (Pattern (Right $ Literal $ showt i) (Just "MINT.MInt 32") [])
   toPattern IntWld     = Fix Wildcard
   toPattern (IntVar v) = Fix (Variable v "INT.Int")
 

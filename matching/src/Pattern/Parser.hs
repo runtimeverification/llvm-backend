@@ -46,7 +46,7 @@ import Kore.IndexedModule.MetadataTools
 import Kore.IndexedModule.Resolvers
        ( getHeadApplicationSorts )
 import Kore.Parser.Parser
-       ( fromKore )
+       ( parseKoreDefinition )
 import Kore.Sort
        ( Sort (..) )
 import KorePatterns
@@ -283,7 +283,7 @@ parseFunctionAxioms koreDefinition symbol =
 parseDefinition :: FilePath -> IO KoreDefinition
 parseDefinition fileName = do
   contents  <- readFile fileName
-  let result = fromKore fileName contents
+  let result = parseKoreDefinition fileName contents
   case result of
     Left err         -> error err
     Right definition -> return definition

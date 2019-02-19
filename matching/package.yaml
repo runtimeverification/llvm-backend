@@ -48,6 +48,7 @@ default-extensions:
   - UndecidableInstances
   - ScopedTypeVariables
   - ViewPatterns
+  - BangPatterns
 
 executables:
   llvm-kompile-matching:
