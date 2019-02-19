@@ -3,6 +3,7 @@
 #include <cstring>
 #include <string>
 #include <vector>
+#include <functional>
 
 #include "runtime/header.h"
 #include "runtime/alloc.h"
@@ -30,6 +31,18 @@ void printMInt(FILE *file, void *i, const char *sort) {
 void printComma(FILE *file) {
   fprintf(file, ",");
 }
+
+struct StringHash {
+  size_t operator() (string * const& k) const {
+    return std::hash<std::string>{}(std::string(k->data, len(k)));
+  }
+};
+
+struct StringEq {
+  bool operator() (string * const& lhs, string * const& rhs) const {
+    return hook_STRING_eq(lhs, rhs);
+  }
+};
 
 static thread_local std::vector<block *> boundVariables;
 
