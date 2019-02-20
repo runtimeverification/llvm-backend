@@ -146,11 +146,7 @@ pub unsafe extern "C" fn set_foreach(set: *mut Set, process: extern fn(block: *m
 
 #[no_mangle]
 pub unsafe extern "C" fn set_map(set: *const Set, process: extern fn(block: K) -> K) -> Set {
-  let mut result = Set::new();
-  for value in (*set).iter() {
-    result.insert(KElem::new(process(*value.0.get())));
-  }
-  result
+  (*set).iter().map(|value| KElem::new(process(*value.0.get()))).collect()
 }
 
 #[cfg(test)]

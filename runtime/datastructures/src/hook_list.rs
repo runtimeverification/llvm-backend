@@ -234,13 +234,7 @@ pub unsafe extern "C" fn list_foreach(list: *mut List, process: extern fn(block:
 
 #[no_mangle]
 pub unsafe extern "C" fn list_map(list: *const List, process: extern fn(block: K) -> K) -> List {
-  let mut result = (*list).clone();
-  let mut idx = 0;
-  for value in (*list).iter() {
-    result.set(idx, KElem::new(process(*value.0.get())));
-    idx+=1;
-  }
-  result
+  (*list).iter().map(|value| KElem::new(process(*value.0.get()))).collect()
 }
 
 #[cfg(test)]
