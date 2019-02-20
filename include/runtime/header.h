@@ -15,6 +15,7 @@
 #define layout(s) layout_hdr((s)->h.hdr)
 #define layout_hdr(s) ((s) >> LAYOUT_OFFSET)
 #define tag_hdr(s) (s & 0xffffffffLL)
+#define reset_gc(s) ((s)->h.hdr = (s)->h.hdr & ~(NOT_YOUNG_OBJECT_BIT | YOUNG_AGE_BIT | FWD_PTR_BIT))
 
 #ifdef __cplusplus
 extern "C" {
@@ -24,6 +25,12 @@ extern "C" {
     uint64_t hdr;
   } blockheader;
 
+  // A value b of type block* is either a constant or a block.
+  // if (((uintptr_t)b) & 3) == 3, then it is a bound variable and
+  // ((uintptr_t)b) >> 32 is the debruijn index. If ((uintptr_t)b) & 3 == 1)
+  // then it is a symbol with 0 arguments and ((uintptr_t)b) >> 32 is the tag
+  // of the symbol. Otherwise, if ((uintptr_t)b) & 1 == 0 then it is a pointer to
+  // a block.
   // llvm: block = type { %blockheader, [0 x i64 *] }
   typedef struct block {
     blockheader h;
@@ -72,6 +79,16 @@ extern "C" {
     uint64_t exp; // number of bits in exponent range
     mpfr_t f;
   } floating;
+
+  typedef struct {
+    uint64_t offset;
+    uint16_t cat;
+  } layoutitem;
+
+  typedef struct {
+    uint8_t nargs;
+    layoutitem *args;
+  } layout;
  
   // This function is exported to be used by the interpreter 
   #ifdef __cplusplus
@@ -82,16 +99,21 @@ extern "C" {
   #endif
   block *parseConfiguration(const char *filename);
   void printConfiguration(const char *filename, block *subject);
-  void printConfigurationInternal(FILE *file, block *subject, const char *sort);
+  void printConfigurationInternal(FILE *file, block *subject, const char *sort, bool);
 
   // The following functions have to be generated at kompile time
   // and linked with the interpreter.
   uint32_t getTagForSymbolName(const char *symbolname);
   struct blockheader getBlockHeaderForSymbol(uint32_t tag);
   bool isSymbolAFunction(uint32_t tag);
+  bool isSymbolABinder(uint32_t tag);
   void storeSymbolChildren(block *symbol, void *children[]);
   void *evaluateFunctionSymbol(uint32_t tag, void *arguments[]);
   void *getToken(const char *sortname, uint64_t len, const char *tokencontents);
+  layout *getLayoutData(uint16_t);
+  uint32_t getInjectionForSortOfTag(uint32_t tag);
+
+  bool hook_STRING_eq(const string *, const string *);
 
   const char *getSymbolNameForTag(uint32_t tag);
   const char *topSort(void);
@@ -99,7 +121,7 @@ extern "C" {
   void printSet(FILE *, set *, const char *, const char *, const char *);
   void printList(FILE *, list *, const char *, const char *, const char *);
   void visitChildren(block *subject, FILE *file,
-      void visitConfig(FILE *, block *, const char *), 
+      void visitConfig(FILE *, block *, const char *, bool), 
       void visitMap(FILE *, map *, const char *, const char *, const char *), 
       void visitList(FILE *, list *, const char *, const char *, const char *), 
       void visitSet(FILE *, set *, const char *, const char *, const char *), 
@@ -108,6 +130,8 @@ extern "C" {
       void visitBool(FILE *, bool, const char *),
       void visitMInt(FILE *, void *, const char *),
       void visitSeparator(FILE *));
+
+  block *debruijnize(block *);
 
 #ifdef __cplusplus
 }

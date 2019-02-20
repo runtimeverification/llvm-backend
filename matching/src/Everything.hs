@@ -817,6 +817,7 @@ equalityFun "BOOL.Bool" = "hook_BOOL_eq"
 equalityFun "FLOAT.Float" = "hook_FLOAT_trueeq"
 equalityFun "INT.Int" = "hook_INT_eq"
 equalityFun "STRING.String" = "hook_KEQUAL_eq"
+equalityFun "KVAR.KVar" = "hook_STRING_eq"
 equalityFun s = error ("unexpected hook: " ++ s)
 
 swapAt :: Int -> Int -> [a] -> [a]

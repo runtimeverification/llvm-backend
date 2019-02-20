@@ -165,9 +165,9 @@ pub unsafe extern "C" fn printMap(file: *mut FILE, map: *const Map, unit: *const
       fprintf(file, fmt.as_ptr(), concat);
     }
     fprintf(file, fmt.as_ptr(), element);
-    printConfigurationInternal(file, *key.get(), sort.as_ptr());
+    printConfigurationInternal(file, *key.get(), sort.as_ptr(), false);
     fprintf(file, comma.as_ptr());
-    printConfigurationInternal(file, *value.get(), sort.as_ptr());
+    printConfigurationInternal(file, *value.get(), sort.as_ptr(), false);
     fprintf(file, parens.as_ptr());
     if i < (*map).len() {
       fprintf(file, comma.as_ptr());
@@ -185,6 +185,11 @@ pub unsafe extern "C" fn map_foreach(map: *mut Map, process: extern fn(block: *m
     process(key.0.get());
     process(value.0.get());
   }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn map_map(map: *const Map, process: extern fn(block: K) -> K) -> Map {
+  (*map).clone().into_iter().map(|(key,value)| (key, KElem::new(process(*value.0.get())))).collect()
 }
 
 #[cfg(test)]

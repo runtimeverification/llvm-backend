@@ -7,22 +7,11 @@
 #include "runtime/header.h"
 #include "runtime/arena.h"
 
-typedef struct {
-  uint64_t offset;
-  uint16_t cat;
-} layoutitem;
-
-typedef struct {
-  uint8_t nargs;
-  layoutitem *args;
-} layout;
-
 char **young_alloc_ptr(void);
 char **old_alloc_ptr(void);
 char* youngspace_ptr(void);
 char* oldspace_ptr(void);
 char youngspace_collection_id(void);
-layout *getLayoutData(uint16_t);
 void map_foreach(void *, void(block**));
 void set_foreach(void *, void(block**));
 void list_foreach(void *, void(block**));
@@ -133,7 +122,8 @@ static char* evacuate(char* scan_ptr, char **alloc_ptr) {
       case STRINGBUFFER_LAYOUT:
         migrate_string_buffer(arg);
         break;
-      case SYMBOL_LAYOUT:
+      case SYMBOL_LAYOUT: 
+      case VARIABLE_LAYOUT:
         migrate(arg);
         break;
       case INT_LAYOUT:

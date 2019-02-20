@@ -26,6 +26,10 @@ export PATH="`pwd`/install/bin:$PATH"
 make install
 llvm-kompile ../test/imp.kore IMP main -o interpreter
 ./interpreter ../test/collatz.kore -1 /dev/stdout | grep -q "Lbl'-LT-'T'-GT-'{}(Lbl'-LT-'k'-GT-'{}(dotk{}())"
+llvm-kompile ../test/lambda.kore LAMBDA main -o interpreter
+./interpreter ../test/closed-variable-capture.kore -1 /dev/stdout | diff - ../test/closed-variable-capture.out
+./interpreter ../test/free-variable-capture.kore -1 /dev/stdout | diff - ../test/free-variable-capture.out
+./interpreter ../test/alpha-rename.kore -1 /dev/stdout | diff - ../test/alpha-rename.out
 llvm-kompile ../test/test2.kore TEST main -o interpreter
 ./interpreter ../test/test2.kore -1 /dev/stdout | grep -q "Lbl'-LT-'k'-GT-'{}(kseq{}(inj{SortDone{}, SortKItem{}}(Lbldone'Unds'TEST'Unds'{}()),dotk{}()))"
 llvm-kompile ../test/test3.kore TEST main -o interpreter

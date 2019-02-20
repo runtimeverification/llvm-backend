@@ -56,6 +56,9 @@ static void *allocatePatternAsConfiguration(const KOREPattern *Pattern) {
     children.push_back(allocatePatternAsConfiguration(child));
   }
   storeSymbolChildren(Block, &children[0]);
+  if (isSymbolABinder(tag)) {
+    Block = debruijnize(Block);
+  }
   return Block;
 }
 
