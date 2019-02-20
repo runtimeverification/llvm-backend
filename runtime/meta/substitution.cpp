@@ -257,14 +257,13 @@ block *replaceBinderIndex(block *term, block *variable) {
 
 block *hook_SUBSTITUTION_substOne(block *body, block *newVal, block *varInj) {
   bool isSameSort = tag_hdr(newVal->h.hdr) == tag_hdr(varInj->h.hdr);
+  replacement = *(block **)(((char *)newVal) + sizeof(blockheader));
   if (isSameSort) {
     to_replace = *(block **)(((char *)varInj) + sizeof(blockheader));
-    replacement = *(block **)(((char *)newVal) + sizeof(blockheader));
     replacementInj = replacement;
   } else {
     to_replace = varInj;
     replacementInj = newVal;
-    replacement = *(block **)(((char *)newVal) + sizeof(blockheader));
   }
   return substituteInternal(body);
 }
