@@ -191,7 +191,7 @@ mSpecialize :: Constructor BoundPattern
             -> (Text, (ClauseMatrix Pattern BoundPattern, Fringe))
 mSpecialize ix (cm@(ClauseMatrix (PatternMatrix (c : _)) _), o : os) =
    let newOs = expandOccurrence cm o ix <> os
-       cm' = filterMatrix (Just ix) (checkPatternIndex ix (getMetadata c)) (cm,fst o)
+       cm' = filterMatrix (Just ix) (checkPatternIndex ix (getMetadata c)) (expandOrPatterns cm,fst o)
        cm'' = expandMatrix ix cm'
    in (getConstructor ix, (cm'', newOs))
    where
@@ -250,7 +250,7 @@ mDefault s₁ (cm@(ClauseMatrix pm@(PatternMatrix (c : _)) _),o : os) =
         Just "SET.Set" -> True
         Just _ -> False
   in  if infiniteLength || null s₁ || elem Empty s₁ || (not isMapOrSet && toInteger (length s₁) /= mtd)
-      then Just (expandDefault (getDefaultConstructor c s₁) (hook pm) (filterMatrix (getDefaultConstructor c s₁) isDefault (cm,fst o)), expandDefaultOccurrence cm o s₁ <> os)
+      then Just (expandDefault (getDefaultConstructor c s₁) (hook pm) (filterMatrix (getDefaultConstructor c s₁) isDefault (expandOrPatterns cm,fst o)), expandDefaultOccurrence cm o s₁ <> os)
       else Nothing
 mDefault _ _ = Nothing
 
@@ -514,6 +514,27 @@ filterMatrix ix checkPattern (ClauseMatrix (PatternMatrix cs@(c : _)) as, o) =
     filterRows fr (Column md rs) =
       Column md (filterByList fr rs)
 filterMatrix _ _ (cmx,_) = cmx
+
+expandOrPatterns :: ClauseMatrix Pattern BoundPattern -> ClauseMatrix Pattern BoundPattern
+expandOrPatterns (ClauseMatrix (PatternMatrix (c : cs)) as) =
+  let p0s = getTerms c
+  in (ClauseMatrix (PatternMatrix ((expandOrColumn c) : (map (expandOrColumns p0s) cs))) (expandIfOr p0s as))
+  where
+    expandOrColumn :: Column Pattern BoundPattern -> Column Pattern BoundPattern
+    expandOrColumn (Column m ps) = Column m (concatMap expandOrs ps)
+    expandOrs :: Fix Pattern -> [Fix Pattern]
+    expandOrs (Fix (Or ps)) = ps
+    expandOrs p = [p]
+    expandOrColumns :: [Fix Pattern] -> Column Pattern BoundPattern -> Column Pattern BoundPattern
+    expandOrColumns p0s (Column m ps) = Column m (expandIfOr p0s ps)
+    expandIfOr :: [Fix Pattern] -> [a] -> [a]
+    expandIfOr p0s items =
+      let zipped = zip p0s items
+      in concatMap expandRowIfOr zipped
+    expandRowIfOr :: (Fix Pattern,a) -> [a]
+    expandRowIfOr ((Fix (Or ps)),a) = replicate (length ps) a
+    expandRowIfOr (_,a) = [a]
+expandOrPatterns cmx = cmx
 
 expandMatrix :: Constructor BoundPattern
              -> ClauseMatrix Pattern BoundPattern
