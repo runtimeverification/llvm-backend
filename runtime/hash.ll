@@ -106,7 +106,8 @@ hashChild:
 				   i16 @FLOAT_LAYOUT@, label %hashFloat
 				   i16 @STRINGBUFFER_LAYOUT@, label %stuck
 				   i16 @BOOL_LAYOUT@, label %hashBool
-				   i16 @SYMBOL_LAYOUT@, label %hashSymbol ]
+				   i16 @SYMBOL_LAYOUT@, label %hashSymbol
+				   i16 @VARIABLE_LAYOUT@, label %hashSymbol ]
 hashMap:
   %mapptr = inttoptr i64 %childintptr to %map*
   call void @map_hash(%map* %mapptr, i8* %hasher)

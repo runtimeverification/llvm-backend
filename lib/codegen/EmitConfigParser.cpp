@@ -131,6 +131,37 @@ static void emitIsSymbolAFunction(KOREDefinition *def, llvm::Module *mod) {
       def, mod, false, getFunction);
 }
 
+static std::pair<llvm::Value *, llvm::BasicBlock *> getBinder(KOREDefinition *def, llvm::Module *mod,
+    KOREObjectSymbol *symbol, llvm::Instruction *inst) {
+  auto decl = def->getSymbolDeclarations().at(symbol->getName());
+  bool res = decl->getAttributes().count("binder");
+  return std::make_pair(llvm::ConstantInt::get(llvm::Type::getInt1Ty(mod->getContext()), res),
+      inst->getParent());
+}
+
+static void emitIsSymbolABinder(KOREDefinition *def, llvm::Module *mod) {
+  emitDataForSymbol("isSymbolABinder", llvm::Type::getInt1Ty(mod->getContext()),
+      def, mod, false, getBinder);
+}
+
+
+static std::pair<llvm::Value *, llvm::BasicBlock *> getInjection(KOREDefinition *def, llvm::Module *mod,
+    KOREObjectSymbol *symbol, llvm::Instruction *inst) {
+  llvm::Constant *tag = llvm::ConstantInt::get(llvm::Type::getInt32Ty(mod->getContext()), 0);
+  for (auto sym : def->getSymbols()) {
+    if (sym.second->getName() == "inj" && *sym.second->getArguments()[0] == *symbol->getSort()) {
+      tag = llvm::ConstantInt::get(llvm::Type::getInt32Ty(mod->getContext()), sym.first);
+      break;
+    }
+  }
+  return std::make_pair(tag, inst->getParent());
+}
+
+static void emitGetInjectionForSortOfTag(KOREDefinition *def, llvm::Module *mod) {
+  emitDataForSymbol("getInjectionForSortOfTag", llvm::Type::getInt32Ty(mod->getContext()),
+      def, mod, false, getInjection);
+}
+
 static llvm::Value *getArgValue(llvm::Value *ArgumentsArray, int idx,
     llvm::BasicBlock *CaseBlock, ValueType cat, llvm::Module *mod) {
   llvm::LLVMContext &Ctx = mod->getContext();
@@ -158,6 +189,7 @@ static llvm::Value *getArgValue(llvm::Value *ArgumentsArray, int idx,
   case SortCategory::Float:
   case SortCategory::StringBuffer:
   case SortCategory::Symbol:
+  case SortCategory::Variable:
     arg = new llvm::BitCastInst(arg, getValueType(cat, mod), "", CaseBlock);
     break;
   case SortCategory::Uncomputed:
@@ -197,6 +229,7 @@ static std::pair<llvm::Value *, llvm::BasicBlock *> getEval(KOREDefinition *def,
   case SortCategory::Float:
   case SortCategory::StringBuffer:
   case SortCategory::Symbol:
+  case SortCategory::Variable:
     retval = new llvm::BitCastInst(result, llvm::Type::getInt8PtrTy(Ctx), "",
         creator.getCurrentBlock());
     break;
@@ -257,7 +290,7 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
     std::string name = entry.first;
     auto sort = KOREObjectCompositeSort::Create(name);
     ValueType cat = sort->getCategory(definition);
-    if (cat.cat == SortCategory::Symbol) {
+    if (cat.cat == SortCategory::Symbol || cat.cat == SortCategory::Variable) {
       continue;
     }
     CurrentBlock->insertInto(func);
@@ -339,6 +372,7 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
       Phi->addIncoming(cast, CaseBlock);
       break;
     }
+    case SortCategory::Variable:
     case SortCategory::Symbol:
       break;
     case SortCategory::Uncomputed:
@@ -379,12 +413,15 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
   MergeBlock->insertInto(func);
 }
 
-static llvm::PointerType *makeVisitorType(llvm::LLVMContext &Ctx, llvm::Type *file, llvm::Type *item, int numStrs) {
+static llvm::PointerType *makeVisitorType(llvm::LLVMContext &Ctx, llvm::Type *file, llvm::Type *item, int numStrs, int numBools) {
   std::vector<llvm::Type *> types;
   types.push_back(file);
   types.push_back(item);
   for (int i = 0; i < numStrs; i++) {
     types.push_back(llvm::Type::getInt8PtrTy(Ctx));
+  }
+  for (int i = 0; i < numBools; i++) {
+    types.push_back(llvm::Type::getInt1Ty(Ctx));
   }
   return llvm::PointerType::getUnqual(llvm::FunctionType::get(llvm::Type::getVoidTy(Ctx), types, false));
 }
@@ -402,14 +439,14 @@ static void emitTraversal(std::string name, KOREDefinition *definition, llvm::Mo
     // cf runtime/configurationparser/header.h visitChildren
     auto file = llvm::PointerType::getUnqual(llvm::StructType::create(Ctx, "FILE"));
     argTypes.push_back(file);
-    argTypes.push_back(makeVisitorType(Ctx, file, getValueType({SortCategory::Symbol, 0}, module), 1));
-    argTypes.push_back(makeVisitorType(Ctx, file, llvm::PointerType::getUnqual(getValueType({SortCategory::Map, 0}, module)), 3));
-    argTypes.push_back(makeVisitorType(Ctx, file, llvm::PointerType::getUnqual(getValueType({SortCategory::List, 0}, module)), 3));
-    argTypes.push_back(makeVisitorType(Ctx, file, llvm::PointerType::getUnqual(getValueType({SortCategory::Set, 0}, module)), 3));
-    argTypes.push_back(makeVisitorType(Ctx, file, getValueType({SortCategory::Int, 0}, module), 1));
-    argTypes.push_back(makeVisitorType(Ctx, file, getValueType({SortCategory::Float, 0}, module), 1));
-    argTypes.push_back(makeVisitorType(Ctx, file, getValueType({SortCategory::Bool, 0}, module), 1));
-    argTypes.push_back(makeVisitorType(Ctx, file, llvm::Type::getInt8PtrTy(Ctx), 1));
+    argTypes.push_back(makeVisitorType(Ctx, file, getValueType({SortCategory::Symbol, 0}, module), 1, 1));
+    argTypes.push_back(makeVisitorType(Ctx, file, llvm::PointerType::getUnqual(getValueType({SortCategory::Map, 0}, module)), 3, 0));
+    argTypes.push_back(makeVisitorType(Ctx, file, llvm::PointerType::getUnqual(getValueType({SortCategory::List, 0}, module)), 3, 0));
+    argTypes.push_back(makeVisitorType(Ctx, file, llvm::PointerType::getUnqual(getValueType({SortCategory::Set, 0}, module)), 3, 0));
+    argTypes.push_back(makeVisitorType(Ctx, file, getValueType({SortCategory::Int, 0}, module), 1, 0));
+    argTypes.push_back(makeVisitorType(Ctx, file, getValueType({SortCategory::Float, 0}, module), 1, 0));
+    argTypes.push_back(makeVisitorType(Ctx, file, getValueType({SortCategory::Bool, 0}, module), 1, 0));
+    argTypes.push_back(makeVisitorType(Ctx, file, llvm::Type::getInt8PtrTy(Ctx), 1, 0));
     argTypes.push_back(llvm::PointerType::getUnqual(llvm::FunctionType::get(llvm::Type::getVoidTy(Ctx), {file}, false)));
   } else {
     argTypes.push_back(llvm::PointerType::getUnqual(llvm::ArrayType::get(llvm::Type::getInt8PtrTy(Ctx), 0)));
@@ -529,8 +566,9 @@ static void getVisitor(KOREDefinition *definition, llvm::Module *module, KOREObj
       Child = new llvm::LoadInst(Child, "", CaseBlock);
       Child = new llvm::BitCastInst(Child, getValueType({SortCategory::Symbol, 0}, module), "", CaseBlock);
       // fall through
+    case SortCategory::Variable:
     case SortCategory::Symbol:
-      llvm::CallInst::Create(func->arg_begin()+2, {func->arg_begin()+1, Child, CharPtr}, "", CaseBlock);
+      llvm::CallInst::Create(func->arg_begin()+2, {func->arg_begin()+1, Child, CharPtr, llvm::ConstantInt::get(llvm::Type::getInt1Ty(Ctx), cat.cat == SortCategory::Variable)}, "", CaseBlock);
       break;
     case SortCategory::Int:
       llvm::CallInst::Create(func->arg_begin()+6, {func->arg_begin()+1, Child, CharPtr}, "", CaseBlock);
@@ -631,9 +669,11 @@ void emitConfigParserFunctions(KOREDefinition *definition, llvm::Module *module)
   emitGetTagForSymbolName(definition, module); 
   emitGetBlockHeaderForSymbol(definition, module); 
   emitIsSymbolAFunction(definition, module); 
+  emitIsSymbolABinder(definition, module); 
   emitStoreSymbolChildren(definition, module); 
   emitEvaluateFunctionSymbol(definition, module); 
   emitGetToken(definition, module); 
+  emitGetInjectionForSortOfTag(definition, module);
 
   emitGetSymbolNameForTag(definition, module);
   emitVisitChildren(definition, module);

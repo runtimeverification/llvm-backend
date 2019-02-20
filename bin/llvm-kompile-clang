@@ -27,6 +27,7 @@ fi
   "$LIBDIR"/libParser.a \
   "$LIBDIR"/libAST.a \
   "$LIBDIR"/liballoc.a \
+  "$LIBDIR"/libmeta.a \
   -lgmp -lmpfr -lpthread -ldl \
   -ltinfo \
   -ljemalloc \

@@ -213,7 +213,7 @@ pub unsafe extern "C" fn printList(file: *mut FILE, list: *const List, unit: *co
       fprintf(file, fmt.as_ptr(), concat);
     }
     fprintf(file, fmt.as_ptr(), element);
-    printConfigurationInternal(file, *value.get(), sort.as_ptr());
+    printConfigurationInternal(file, *value.get(), sort.as_ptr(), false);
     fprintf(file, parens.as_ptr());
     if i < (*list).len() {
       fprintf(file, comma.as_ptr());
@@ -230,6 +230,11 @@ pub unsafe extern "C" fn list_foreach(list: *mut List, process: extern fn(block:
   for value in (*list).iter() {
     process(value.0.get());
   }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn list_map(list: *const List, process: extern fn(block: K) -> K) -> List {
+  (*list).iter().map(|value| KElem::new(process(*value.0.get()))).collect()
 }
 
 #[cfg(test)]

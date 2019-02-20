@@ -132,6 +132,7 @@ llvm::Type *getValueType(ValueType sort, llvm::Module *Module) {
   case SortCategory::MInt:
     return llvm::IntegerType::get(Module->getContext(), sort.bits);
   case SortCategory::Symbol:
+  case SortCategory::Variable:
     return llvm::PointerType::getUnqual(Module->getTypeByName(BLOCK_STRUCT));
   case SortCategory::Uncomputed:
     abort();
@@ -283,6 +284,7 @@ llvm::Value *CreateTerm::createToken(ValueType sort, std::string contents) {
     assert(false && "not implemented yet: tokens");
   case SortCategory::Bool:
     return llvm::ConstantInt::get(llvm::Type::getInt1Ty(Ctx), contents == "true");
+  case SortCategory::Variable:
   case SortCategory::Symbol: {
     llvm::StructType *StringType = llvm::StructType::get(Ctx, {Module->getTypeByName(BLOCKHEADER_STRUCT), llvm::ArrayType::get(llvm::Type::getInt8Ty(Ctx), contents.size())});
     llvm::Constant *global = Module->getOrInsertGlobal("token_" + escape(contents), StringType);
@@ -478,6 +480,7 @@ llvm::Value *CreateTerm::createFunctionCall(std::string name, ValueType returnCa
 /* create a term, given the assumption that the created term will not be a triangle injection pair */
 llvm::Value *CreateTerm::notInjectionCase(KOREObjectCompositePattern *constructor, llvm::Value *val) {
   const KOREObjectSymbol *symbol = constructor->getConstructor();
+  KOREObjectSymbolDeclaration *symbolDecl = Definition->getSymbolDeclarations().at(symbol->getName());
   llvm::StructType *BlockType = getBlockType(Module, Definition, symbol);
   llvm::Value *BlockHeader = getBlockHeader(Module, Definition, symbol, BlockType);
   llvm::Value *Block = allocateTerm(BlockType, CurrentBlock);
@@ -497,7 +500,14 @@ llvm::Value *CreateTerm::notInjectionCase(KOREObjectCompositePattern *constructo
     }
     new llvm::StoreInst(ChildValue, ChildPtr, CurrentBlock);
   }
-  return new llvm::BitCastInst(Block, llvm::PointerType::getUnqual(Module->getTypeByName(BLOCK_STRUCT)), "", CurrentBlock);
+  auto BlockPtr = llvm::PointerType::getUnqual(Module->getTypeByName(BLOCK_STRUCT));
+  auto bitcast = new llvm::BitCastInst(Block, BlockPtr, "", CurrentBlock);
+  if (symbolDecl->getAttributes().count("binder")) {
+    auto call = llvm::CallInst::Create(Module->getOrInsertFunction("debruijnize", BlockPtr, BlockPtr), bitcast, "withIndices", CurrentBlock);
+    return call; 
+  } else {
+    return bitcast;
+  }
 }
 
 // returns a value and a boolean indicating whether that value could be an injection

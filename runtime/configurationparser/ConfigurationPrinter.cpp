@@ -2,6 +2,10 @@
 #include <cstdlib>
 #include <cstring>
 #include <string>
+#include <vector>
+#include <unordered_map>
+#include <set>
+#include <functional>
 
 #include "runtime/header.h"
 #include "runtime/alloc.h"
@@ -30,10 +34,32 @@ void printComma(FILE *file) {
   fprintf(file, ",");
 }
 
-void printConfigurationInternal(FILE *file, block *subject, const char *sort) {
-  bool isConstant = ((uintptr_t)subject) & 1;
+struct StringHash {
+  size_t operator() (string * const& k) const {
+    return std::hash<std::string>{}(std::string(k->data, len(k)));
+  }
+};
+
+struct StringEq {
+  bool operator() (string * const& lhs, string * const& rhs) const {
+    return hook_STRING_eq(lhs, rhs);
+  }
+};
+
+static thread_local std::vector<block *> boundVariables;
+static thread_local std::unordered_map<string *, std::string, StringHash, StringEq> varNames;
+static thread_local std::set<std::string> usedVarNames;
+static thread_local uint64_t varCounter = 0;
+
+void printConfigurationInternal(FILE *file, block *subject, const char *sort, bool isVar) {
+  uint8_t isConstant = ((uintptr_t)subject) & 3;
   if (isConstant) {
     uint32_t tag = ((uintptr_t)subject) >> 32;
+    if (isConstant == 3) {
+      // bound variable
+      printConfigurationInternal(file, boundVariables[boundVariables.size()-1-tag], sort, true);
+      return;
+    }
     const char *symbol = getSymbolNameForTag(tag);
     fprintf(file, "%s()", symbol);
     return;
@@ -73,20 +99,44 @@ void printConfigurationInternal(FILE *file, block *subject, const char *sort) {
         break;
       }
     }
+    if (isVar && !varNames.count(str)) {
+      std::string stdStr = std::string(str->data, len(str));
+      std::string suffix = "";
+      while (usedVarNames.count(stdStr + suffix)) {
+        suffix = std::to_string(varCounter++);
+      }
+      stdStr = stdStr + suffix;
+      fprintf(file, "%s", suffix.c_str());
+      usedVarNames.insert(stdStr);
+      varNames[str] = suffix;
+    } else if (isVar) {
+      fprintf(file, "%s", varNames[str].c_str());
+    }
     fprintf(file, "\")");
     return;
   }
   uint32_t tag = tag_hdr(subject->h.hdr);
+  bool isBinder = isSymbolABinder(tag);
+  if (isBinder) {
+    boundVariables.push_back(*(block **)(((char *)subject) + sizeof(blockheader)));
+  }
   const char *symbol = getSymbolNameForTag(tag);
   fprintf(file, "%s(", symbol);
   visitChildren(subject, file, printConfigurationInternal, printMap, printList, printSet, printInt, printFloat,
       printBool, printMInt, printComma);
+  if (isBinder) {
+    boundVariables.pop_back();
+  }
   fprintf(file, ")");
 }
 
 void printConfiguration(const char *filename, block *subject) {
   FILE *file = fopen(filename, "w");
-  printConfigurationInternal(file, subject, nullptr);
+  boundVariables.clear();
+  varCounter = 0;
+  printConfigurationInternal(file, subject, nullptr, false);
+  varNames.clear();
+  usedVarNames.clear();
   fclose(file);
 }
 

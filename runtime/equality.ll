@@ -20,6 +20,7 @@ declare i1 @hook_LIST_eq(%list*, %list*)
 declare i1 @hook_SET_eq(%set*, %set*)
 declare i1 @hook_INT_eq(%mpz*, %mpz*)
 declare i1 @hook_FLOAT_trueeq(%floating*, %floating*)
+declare i1 @hook_STRING_eq(%block*, %block*)
 
 define i1 @hook_KEQUAL_eq(%block* %arg1, %block* %arg2) {
 entry:
@@ -48,12 +49,7 @@ getChildren:
   %isString = icmp eq i64 %arglayout, 0
   br i1 %isString, label %eqString, label %compareChildren
 eqString:
-  %str1ptrlong = getelementptr inbounds %block, %block* %arg1, i64 0, i32 1, i64 0
-  %str2ptrlong = getelementptr inbounds %block, %block* %arg2, i64 0, i32 1, i64 0
-  %str1ptr = bitcast i64** %str1ptrlong to i8*
-  %str2ptr = bitcast i64** %str2ptrlong to i8*
-  %retval = call i32 @memcmp(i8* %str1ptr, i8* %str2ptr, i64 %arg1len)
-  %eqcontents = icmp eq i32 %retval, 0
+  %eqcontents = call i1 @hook_STRING_eq(%block* %arg1, %block* %arg2)
   br label %exit
 compareChildren:
   %arglayoutshort = trunc i64 %arglayout to i16
@@ -63,7 +59,7 @@ compareChildren:
   %children = extractvalue %layout %layoutData, 1
   br label %loop
 loop:
-  %counter = phi i8 [ %length, %compareChildren ], [ %sub1, %compareMap ], [ %sub1, %compareList ], [ %sub1, %compareSet ], [ %sub1, %compareInt ], [ %sub1, %compareFloat ], [ %sub1, %compareBool ], [ %sub1, %compareSymbol ]
+  %counter = phi i8 [ %length, %compareChildren ], [ %sub1, %compareMap ], [ %sub1, %compareList ], [ %sub1, %compareSet ], [ %sub1, %compareInt ], [ %sub1, %compareFloat ], [ %sub1, %compareBool ], [ %sub1, %compareSymbol ], [ %sub1, %compareVariable ]
   %index = sub i8 %length, %counter
   %indexlong = zext i8 %index to i64
   %sub1 = sub i8 %counter, 1
@@ -83,7 +79,8 @@ compareChild:
 				   i16 @FLOAT_LAYOUT@, label %compareFloat
 				   i16 @STRINGBUFFER_LAYOUT@, label %stuck
 				   i16 @BOOL_LAYOUT@, label %compareBool
-				   i16 @SYMBOL_LAYOUT@, label %compareSymbol ]
+				   i16 @SYMBOL_LAYOUT@, label %compareSymbol
+				   i16 @VARIABLE_LAYOUT@, label %compareVariable ]
 compareMap:
   %map1ptr = inttoptr i64 %child1intptr to %map*
   %map2ptr = inttoptr i64 %child2intptr to %map*
@@ -127,8 +124,15 @@ compareSymbol:
   %child2ptr = load %block*, %block** %child2ptrptr
   %comparedSymbol = call i1 @hook_KEQUAL_eq(%block* %child1ptr, %block* %child2ptr)
   br i1 %comparedSymbol, label %loop, label %exit
+compareVariable:
+  %var1ptrptr = inttoptr i64 %child1intptr to %block**
+  %var2ptrptr = inttoptr i64 %child2intptr to %block**
+  %var1ptr = load %block*, %block** %var1ptrptr
+  %var2ptr = load %block*, %block** %var2ptrptr
+  %comparedVar = call i1 @hook_STRING_eq(%block* %var1ptr, %block* %var2ptr)
+  br i1 %comparedVar, label %loop, label %exit
 exit:
-  %phi = phi i1 [ 0, %entry ], [ %eqconstant, %constant ], [ 0, %block ], [ %eqcontents, %eqString ], [ 1, %loop ], [ 0, %compareMap ], [ 0, %compareList ], [ 0, %compareSet ], [ 0, %compareInt ], [ 0, %compareFloat ], [ 0, %compareBool ], [ 0, %compareSymbol ]
+  %phi = phi i1 [ 0, %entry ], [ %eqconstant, %constant ], [ 0, %block ], [ %eqcontents, %eqString ], [ 1, %loop ], [ 0, %compareMap ], [ 0, %compareList ], [ 0, %compareSet ], [ 0, %compareInt ], [ 0, %compareFloat ], [ 0, %compareBool ], [ 0, %compareSymbol ], [ 0, %compareVariable ]
   ret i1 %phi
 stuck:
   call void @abort()
