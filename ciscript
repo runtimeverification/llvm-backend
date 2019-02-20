@@ -45,4 +45,8 @@ llvm-kompile ../test/test9.kore TEST main -o interpreter
 llvm-kompile ../test/test10.kore TEST main -o interpreter
 ./interpreter ../test/test10.in.kore -1 /dev/stdout | diff - ../test/test10.out
 llvm-kompile ../test/test11.kore TEST main -o interpreter
+llvm-kompile ../test/test12.kore TEST main -o interpreter
+./interpreter ../test/test12-1.kore -1 /dev/stdout | diff - ../test/test12.out
+./interpreter ../test/test12-2.kore -1 /dev/stdout | diff - ../test/test12.out
+./interpreter ../test/test12-3.kore -1 /dev/stdout | diff - ../test/test12.out
 rm -f configparser configparser.ll interpreter
