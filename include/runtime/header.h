@@ -25,6 +25,12 @@ extern "C" {
     uint64_t hdr;
   } blockheader;
 
+  // A value b of type block* is either a constant or a block.
+  // if (((uintptr_t)b) & 3) == 3, then it is a bound variable and
+  // ((uintptr_t)b) >> 32 is the debruijn index. If ((uintptr_t)b) & 3 == 1)
+  // then it is a symbol with 0 arguments and ((uintptr_t)b) >> 32 is the tag
+  // of the symbol. Otherwise, if ((uintptr_t)b) & 1 == 0 then it is a pointer to
+  // a block.
   // llvm: block = type { %blockheader, [0 x i64 *] }
   typedef struct block {
     blockheader h;
