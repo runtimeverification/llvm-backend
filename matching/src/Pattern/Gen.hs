@@ -132,6 +132,9 @@ genPattern ixModule (SymLib _ sorts _) rewrite =
       let att = fmap unpack $ getHook $ hook $ parseAtt $ sortAttributes tools sort
       in Fix $ P.Variable (unpack name) $ fromMaybe "STRING.String" att
     rAlgebra (AndPattern (And _ p (_,Fix (P.Variable name hookAtt)))) = Fix $ P.As name hookAtt $ snd p
+    rAlgebra (OrPattern (Or _ (_,Fix (P.Or ps)) p)) = Fix $ P.Or (ps++[snd p])
+    rAlgebra (OrPattern (Or _ p (_,Fix (P.Or ps)))) = Fix $ P.Or ((snd p):ps)
+    rAlgebra (OrPattern (Or _ p1 p2)) = Fix $ P.Or [snd p1, snd p2]
     rAlgebra pat = error $ show pat
     listPattern :: SymbolOrAlias Object
                 -> CollectionCons
@@ -160,6 +163,8 @@ genPattern ixModule (SymLib _ sorts _) rewrite =
     listPattern _ Concat [Fix (P.ListPattern _ (Just _) _ _ _), _] _ = error "unsupported list pattern"
     listPattern _ Concat [Fix P.As{}, _] _ = error "unsupported list pattern"
     listPattern _ Concat [_, Fix P.As{}] _ = error "unsupported list pattern"
+    listPattern _ Concat [Fix P.Or{}, _] _ = error "unsupported list pattern"
+    listPattern _ Concat [_, Fix P.Or{}] _ = error "unsupported list pattern"
     listPattern _ Concat [Fix P.Pattern{}, _] _ = error "unsupported list pattern"
     listPattern _ Concat [_, Fix P.Pattern{}] _ = error "unsupported list pattern"
     listPattern _ Concat [Fix P.Wildcard, _] _ = error "unsupported list pattern"
@@ -197,6 +202,8 @@ genPattern ixModule (SymLib _ sorts _) rewrite =
     mapPattern _ Concat [Fix P.SetPattern{}, _] _ = error "unsupported map pattern"
     mapPattern _ Concat [Fix P.As{}, _] _ = error "unsupported map pattern"
     mapPattern _ Concat [_, Fix P.As{}] _ = error "unsupported map pattern"
+    mapPattern _ Concat [Fix P.Or{}, _] _ = error "unsupported map pattern"
+    mapPattern _ Concat [_, Fix P.Or{}] _ = error "unsupported map pattern"
     mapPattern _ Concat [Fix P.Pattern{}, _] _ = error "unsupported map pattern"
     mapPattern _ Concat [_, Fix P.Pattern{}] _ = error "unsupported map pattern"
     mapPattern _ Concat [Fix P.Wildcard, _] _ = error "unsupported map pattern"
@@ -233,6 +240,8 @@ genPattern ixModule (SymLib _ sorts _) rewrite =
     setPattern _ Concat [Fix P.MapPattern{}, _] _ = error "unsupported set pattern"
     setPattern _ Concat [_, Fix P.ListPattern{}] _ = error "unsupported set pattern"
     setPattern _ Concat [Fix P.ListPattern{}, _] _ = error "unsupported set pattern"
+    setPattern _ Concat [Fix P.Or{}, _] _ = error "unsupported set pattern"
+    setPattern _ Concat [_, Fix P.Or{}] _ = error "unsupported set pattern"
     setPattern _ Concat [Fix P.As{}, _] _ = error "unsupported set pattern"
     setPattern _ Concat [_, Fix P.As{}] _ = error "unsupported set pattern"
     setPattern _ Concat [Fix P.Pattern{}, _] _ = error "unsupported set pattern"

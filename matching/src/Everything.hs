@@ -149,6 +149,7 @@ sigma exact c cs =
       let (cs', kont) = getSetCs c cls p in
         cs' ++ maybe [] (ix cls) kont
     ix cls (Fix (As _ _ pat))      = ix cls pat
+    ix cls (Fix (Or ps)) = concatMap (ix cls) ps
     ix _ (Fix Wildcard)          = []
     ix _ (Fix (Variable _ _))    = []
     isBest :: Fix BoundPattern
@@ -180,6 +181,7 @@ hook (PatternMatrix (c : _)) =
     ix (Fix MapPattern {}) = getMapHookName
     ix (Fix SetPattern{}) = Just "SET.Set"
     ix (Fix (As _ _ pat))    = ix pat
+    ix (Fix (Or ps))      = listToMaybe $ catMaybes $ map ix ps
     ix (Fix Wildcard)        = Nothing
     ix (Fix (Variable _ _))  = Nothing
 hook _                       = Nothing
@@ -337,6 +339,7 @@ isDefault (_, Fix Pattern{}) = False
 isDefault (_, Fix (ListPattern _ Nothing _ _ _)) = False
 isDefault (_, Fix (ListPattern _ (Just _) _ _ _)) = True
 isDefault (c, Fix (As _ _ pat)) = isDefault (c,pat)
+isDefault (c, Fix (Or ps)) = any isDefault (zip (replicate (length ps) c) ps)
 isDefault (_, Fix Wildcard) = True
 isDefault (_, Fix (Variable _ _)) = True
 isDefault (c, p@(Fix MapPattern{})) =
@@ -349,6 +352,8 @@ mightUnify (Fix Wildcard) _ = True
 mightUnify _ (Fix Wildcard) = True
 mightUnify _ (Fix (Variable _ _)) = True
 mightUnify (Fix (Variable _ _)) _ = True
+mightUnify (Fix (Or ps)) p = any (mightUnify p) ps
+mightUnify p (Fix (Or ps)) = any (mightUnify p) ps
 mightUnify (Fix (As _ _ p)) p' = mightUnify p p'
 mightUnify p (Fix (As _ _ p')) = mightUnify p p'
 mightUnify (Fix (Pattern c _ ps)) (Fix (Pattern c' _ ps')) = c == c' && and (zipWith mightUnify ps ps')
@@ -389,6 +394,7 @@ checkPatternIndex :: Constructor BoundPattern
 checkPatternIndex _ _ (_, Fix Wildcard) = True
 checkPatternIndex ix m (c, Fix (As _ _ pat)) = checkPatternIndex ix m (c,pat)
 checkPatternIndex _ _ (_, Fix (Variable _ _)) = True
+checkPatternIndex ix m (c, Fix (Or ps)) = any (checkPatternIndex ix m) (zip (replicate (length ps) c) ps)
 checkPatternIndex (List _ len) _ (_, Fix (ListPattern hd Nothing tl _ _)) = len == (length hd + length tl)
 checkPatternIndex (List _ len) _ (_, Fix (ListPattern hd (Just _) tl _ _)) = len >= (length hd + length tl)
 checkPatternIndex _ _ (_, Fix ListPattern{}) = False
@@ -431,6 +437,7 @@ addVarToRow :: Maybe (Constructor BoundPattern)
 addVarToRow _ o (Fix (Variable name hookAtt)) vars = VariableBinding name hookAtt o : vars
 addVarToRow ix o (Fix (As name hookAtt p)) vars = VariableBinding name hookAtt o : addVarToRow ix o p vars
 addVarToRow _ _ (Fix Wildcard) vars = vars
+addVarToRow _ _ (Fix (Or{})) _ = error "Unexpanded or pattern"
 addVarToRow (Just (SymbolConstructor (Symbol (SymbolOrAlias (Id "inj" _) [a,_])))) o (Fix (Pattern (Left (Symbol (SymbolOrAlias (Id "inj" _) [b,_]))) _ [p])) vars = if a == b then vars else addVarToRow Nothing o p vars
 addVarToRow _ _ (Fix Pattern{}) vars = vars
 addVarToRow _ _ (Fix (ListPattern _ Nothing _ _ _)) vars = vars
@@ -532,6 +539,7 @@ computeScore m ((Fix ListPattern{}, _) : tl) = 1.0 + computeScore m tl
 computeScore m ((Fix (As _ _ pat),c):tl) = computeScore m ((pat,c):tl)
 computeScore m ((Fix Wildcard,_):tl) = min 0.0 $ computeScore m tl
 computeScore m ((Fix (Variable _ _),_):tl) = min 0.0 $ computeScore m tl
+computeScore m ((Fix (Or ps),c):tl) = computeScore m ((zip ps (replicate (length ps) c)) ++ tl)
 computeScore m pc@((Fix MapPattern{}, _) : _) =
   computeMapScore computeScore m pc
 computeScore m ((Fix (SetPattern [] Nothing _ _),_):tl) = 1.0 + computeScore m tl
@@ -655,6 +663,7 @@ expandPattern (HasNoKey _ _) _ _ (p,_) = [(p,Nothing)]
 expandPattern _ _ _ (Fix SetPattern{},_) = error "Invalid set pattern"
 expandPattern _ _ _ (Fix (Pattern _ _ fixedPs), _)  = zip fixedPs $ replicate (length fixedPs) Nothing
 expandPattern ix ms m (Fix (As _ _ pat), c)         = expandPattern ix ms m (pat, c)
+expandPattern _ _ _ (Fix (Or{}), _)                 = error "Unexpanded or pattern"
 expandPattern _ ms _ (Fix Wildcard, _)              = replicate (length ms) (Fix Wildcard,Nothing)
 expandPattern _ ms _ (Fix (Variable _ _), _)        = replicate (length ms) (Fix Wildcard,Nothing)
 
@@ -824,6 +833,7 @@ getRealScore (ClauseMatrix (PatternMatrix cs) as) c =
     getVariables :: Fix Pattern -> [String]
     getVariables (Fix (Variable name _)) = [name]
     getVariables (Fix (As name _ p)) = name : getVariables p
+    getVariables (Fix (Or ps)) = concatMap getVariables ps
     getVariables (Fix (Pattern _ _ ps)) = concatMap getVariables ps
     getVariables (Fix (ListPattern _ _ _ _ o)) = getVariables o
     getVariables p@(Fix MapPattern{}) =
@@ -895,6 +905,7 @@ compilePattern = compilePattern'
     isWildcard (Fix Wildcard) = True
     isWildcard (Fix (Variable _ _)) = True
     isWildcard (Fix (As _ _ pat)) = isWildcard pat
+    isWildcard (Fix (Or ps)) = or $ map isWildcard ps
     isWildcard (Fix Pattern{}) = False
     isWildcard (Fix (MapPattern [] [] (Just p) _ _)) = isWildcard p
     isWildcard (Fix MapPattern{}) = False

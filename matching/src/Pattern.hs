@@ -47,6 +47,7 @@ data P var a   = Pattern (Either Symbol Literal) (Maybe String) ![a]
                    , original :: !a
                    }
                  | As var String a
+                 | Or [a]
                  | Wildcard
                  | Variable var String
                  deriving (Show, Eq, Functor)
@@ -67,6 +68,7 @@ instance Eq1 BoundPattern where
 instance Ord1 BoundPattern where
   liftCompare = liftCompare2 compare
 instance Y.ToYaml a => Y.ToYaml (BoundPattern a) where
+  toYaml Or{} = error "Unsupported or pattern"
   toYaml Wildcard = error "Unsupported map/set pattern"
   toYaml (Variable (Just o) h) = Y.mapping
     ["hook" Y..= Y.toYaml (pack h)
