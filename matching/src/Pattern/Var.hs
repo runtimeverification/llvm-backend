@@ -38,6 +38,7 @@ canonicalizePattern clause = cata go
     go :: Pattern (Fix BoundPattern) -> Fix BoundPattern
     go (Variable name hook)      = Fix $ Variable (Map.lookup name bs) hook
     go (As name hook p)          = Fix $ As (Map.lookup name bs) hook p
+    go (Or ps)                   = Fix $ Or ps
     go (Pattern name hook ps)    = Fix $ Pattern name hook ps
     go (ListPattern hd f tl e o) = Fix $ ListPattern hd f tl e o
     go (MapPattern  ks vs f e o) = Fix $ MapPattern  ks vs f e o
@@ -58,5 +59,6 @@ isBound get (Clause _ vars _ _) = cata go
     go (MapPattern  ks vs f _ _) = and ks && and vs && fromMaybe True f
     go (SetPattern  vs    f _ _) = and vs && fromMaybe True f
     go (As name _ p)             = p && name `elem` map get vars
+    go (Or ps)                   = and ps
     go (Variable name _) = name `elem` map get vars
     go Wildcard = False
