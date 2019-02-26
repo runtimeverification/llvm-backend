@@ -100,6 +100,7 @@ extern "C" {
     size_t size = sizeof(string) + len(b);
     string *result = static_cast<string *>(koreAllocToken(size));
     memcpy(result, b, size);
+    reset_gc(result);
     return result;
   }
 

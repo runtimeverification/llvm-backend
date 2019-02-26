@@ -295,6 +295,8 @@ extern "C" {
   stringbuffer *hook_BUFFER_concat(stringbuffer *buf, string *s) {
     uint64_t newCapacity = buf->capacity;
     uint64_t minCapacity = len(buf->contents) + len(s);
+    uint64_t notYoungObjectBit = buf->contents->h.hdr & NOT_YOUNG_OBJECT_BIT;
+    uint64_t youngAgeBit = buf->contents->h.hdr & YOUNG_AGE_BIT;
     if (newCapacity < minCapacity) {
       newCapacity = len(buf->contents) * 2 + 2;
       if (newCapacity < minCapacity) {
@@ -302,7 +304,7 @@ extern "C" {
       }
       buf->capacity = newCapacity;
       string* new_contents;
-      if (buf->contents->h.hdr & NOT_YOUNG_OBJECT_BIT) {
+      if (notYoungObjectBit) {
         new_contents = static_cast<string *>(koreAllocTokenOld(sizeof(string) + newCapacity));
       } else {
         new_contents = static_cast<string *>(koreAllocToken(sizeof(string) + newCapacity));
@@ -313,6 +315,8 @@ extern "C" {
     }
     memcpy(buf->contents->data + len(buf->contents), s->data, len(s));
     set_len(buf->contents, len(buf->contents) + len(s));
+    buf->contents->h.hdr |= notYoungObjectBit;
+    buf->contents->h.hdr |= youngAgeBit;
     return buf;
   }
 
