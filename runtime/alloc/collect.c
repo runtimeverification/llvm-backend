@@ -112,13 +112,13 @@ static char* evacuate(char* scan_ptr, char **alloc_ptr) {
       switch(argData->cat) {
       case MAP_LAYOUT:
         map_foreach(arg, migrate_once);
-	break;
+        break;
       case LIST_LAYOUT:
         list_foreach(arg, migrate_once); 
-	break;
+        break;
       case SET_LAYOUT:
         set_foreach(arg, migrate_once);
-	break;
+        break;
       case STRINGBUFFER_LAYOUT:
         migrate_string_buffer(arg);
         break;
