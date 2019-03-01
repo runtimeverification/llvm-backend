@@ -23,23 +23,29 @@ extern "C" {
   mpz_ptr hook_IO_open(string * filename, string * control) {
     int flags = 0;
     char * ctl = getTerminatedString(control);
-    switch (ctl[0]) {
+
+    switch (*ctl) {
       case 'r':
         flags = O_RDONLY;
-        if (ctl[1] == '+'){
+        if (len(control) > 1 && *(++ctl) == '+'){
           flags = O_RDWR;
         }
       case 'w':
-        flags = O_RDWR | O_TRUNC | O_CREAT;
+        flags = O_WRONLY | O_TRUNC | O_CREAT;
+        if (len(control) > 1 && *(++ctl) == '+'){
+          flags = O_RDWR | O_TRUNC | O_CREAT;
+        }
       case 'a':
-        flags = O_RDWR | O_APPEND | O_CREAT;
+        flags = O_WRONLY | O_APPEND | O_CREAT;
+        if (len(control) > 1 && *(++ctl) == '+'){
+          flags = O_RDWR | O_APPEND | O_CREAT;
+        }
       default:
         flags = O_RDONLY;
     }
 
-    char * f = getTerminatedString(filename);
-
     mpz_t result;
+    char * f = getTerminatedString(filename);
     int fd = open(f, flags, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH);
     mpz_init_set_si(result, fd);
 
@@ -106,9 +112,29 @@ extern "C" {
     close(fd);
   }
 
+  void hook_IO_seek(mpz_t i, mpz_t loc) {
+    if (!mpz_fits_sint_p(i) || !mpz_fits_sint_p(i)) {
+      throw std::invalid_argument("Arg too large");
+    }
+
+    int fd = mpz_get_si(i);
+    int l = mpz_get_si(loc);
+    lseek(fd, l, SEEK_SET);
+  }
+
+  void hook_IO_seekEnd(mpz_t i, mpz_t loc) {
+    if (!mpz_fits_sint_p(i) || !mpz_fits_sint_p(i)) {
+      throw std::invalid_argument("Arg too large");
+    }
+
+    int fd = mpz_get_si(i);
+    int l = mpz_get_si(loc);
+    lseek(fd, l, SEEK_END);
+  }
+
   void hook_IO_putc(mpz_t i, mpz_t c) {
     if (!mpz_fits_sint_p(i) || !mpz_fits_sint_p(i)) {
-      throw std::invalid_argument("Arg too large for int32_t");
+      throw std::invalid_argument("Arg too large");
     }
 
     int fd = mpz_get_si(i);
@@ -116,5 +142,18 @@ extern "C" {
 
     write(fd, &ch, 1);
   }
+
+  void hook_IO_write(mpz_t i, string * str) {
+    if (!mpz_fits_sint_p(i)) {
+      throw std::invalid_argument("Arg too large for int32_t");
+    }
+
+    int fd = mpz_get_si(i);
+    char * s = getTerminatedString(str);
+
+    write(fd, s, len(str));
+  }
+
+
 
 }

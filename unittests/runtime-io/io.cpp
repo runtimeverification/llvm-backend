@@ -25,7 +25,10 @@ extern "C" {
   mpz_ptr hook_IO_getc(mpz_t i);
   string * hook_IO_read(mpz_t i, mpz_t len);
   void hook_IO_close(mpz_t i);
+  void hook_IO_seek(mpz_t i, mpz_t loc);
+  void hook_IO_seekEnd(mpz_t i, mpz_t loc);
   void hook_IO_putc(mpz_t i, mpz_t c);
+  void hook_IO_write(mpz_t i, string * str);
 
   mpz_ptr move_int(mpz_t i) {
     mpz_ptr result = (mpz_ptr)malloc(sizeof(__mpz_struct));
@@ -152,6 +155,13 @@ BOOST_AUTO_TEST_CASE(putc) {
   BOOST_CHECK_EQUAL(0, strncmp("howdy", ret, 2));
 
   ::close(fd);
+}
+
+BOOST_AUTO_TEST_CASE(seek) {
+}
+BOOST_AUTO_TEST_CASE(seekEnd) {
+}
+BOOST_AUTO_TEST_CASE(write) {
 }
 
 BOOST_AUTO_TEST_SUITE_END()
