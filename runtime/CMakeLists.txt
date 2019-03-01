@@ -1,6 +1,7 @@
 add_subdirectory(arithmetic)
 add_subdirectory(configurationparser)
 add_subdirectory(strings)
+add_subdirectory(meta)
 add_subdirectory(alloc)
 add_subdirectory(io)
 

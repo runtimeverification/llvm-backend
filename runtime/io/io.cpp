@@ -154,6 +154,25 @@ extern "C" {
     write(fd, s, len(str));
   }
 
+  void hook_IO_lock(mpz_t i, mpz_t len) {
+    if (!mpz_fits_sint_p(i) || !mpz_fits_sint_p(len)) {
+      throw std::invalid_argument("Arg too large");
+    }
 
+    int fd = mpz_get_si(i);
+    int l = mpz_get_si(len);
 
+    lockf(fd, F_LOCK, l);
+  }
+
+  void hook_IO_unlock(mpz_t i, mpz_t len) {
+    if (!mpz_fits_sint_p(i) || !mpz_fits_sint_p(len)) {
+      throw std::invalid_argument("Arg too large");
+    }
+
+    int fd = mpz_get_si(i);
+    int l = mpz_get_si(len);
+
+    lockf(fd, F_ULOCK, l);
+  }
 }
