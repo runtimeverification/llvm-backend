@@ -40,9 +40,19 @@ extern "C" {
   }
 }
 
+int overwriteTestFile() {
+  int fd = ::open("test.txt", O_RDWR | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH);
+  ::write(fd, "hello world!", 12);
+  ::lseek(fd, 0, SEEK_SET);
+  return fd;
+}
+
 BOOST_AUTO_TEST_SUITE(IoTest)
 
 BOOST_AUTO_TEST_CASE(open) {
+  int fd = overwriteTestFile();
+  ::close(fd);
+
   auto realFilename = makeString("test.txt");
   auto fakeFilename = makeString("testFake.txt");
   auto control = makeString("r");
@@ -53,7 +63,7 @@ BOOST_AUTO_TEST_CASE(open) {
 
 BOOST_AUTO_TEST_CASE(tell) {
   mpz_t f;
-  int fd = ::open("test.txt", O_RDWR);
+  int fd = overwriteTestFile();
   mpz_init_set_si(f, fd);
 
   BOOST_CHECK_EQUAL(0, mpz_cmp_si(hook_IO_tell(f), lseek(mpz_get_si(f), 0, SEEK_CUR)));
@@ -65,11 +75,13 @@ BOOST_AUTO_TEST_CASE(tell) {
   lseek(mpz_get_si(f), -4, SEEK_CUR);
   BOOST_CHECK_EQUAL(0, mpz_cmp_si(hook_IO_tell(f), 1));
   BOOST_CHECK_EQUAL(0, mpz_cmp_si(hook_IO_tell(f), lseek(mpz_get_si(f), 0, SEEK_CUR)));
+
+  ::close(fd);
 }
 
 BOOST_AUTO_TEST_CASE(getc) {
   mpz_t f;
-  int fd = ::open("test.txt", O_RDWR);
+  int fd = overwriteTestFile();
   mpz_init_set_si(f, fd);
 
   BOOST_CHECK_EQUAL(0, mpz_cmp_si(hook_IO_getc(f), int('h')));
@@ -77,12 +89,14 @@ BOOST_AUTO_TEST_CASE(getc) {
   BOOST_CHECK_EQUAL(0, mpz_cmp_si(hook_IO_getc(f), int('l')));
   BOOST_CHECK_EQUAL(0, mpz_cmp_si(hook_IO_getc(f), int('l')));
   BOOST_CHECK_EQUAL(0, mpz_cmp_si(hook_IO_getc(f), int('o')));
+
+  ::close(fd);
 }
 
 BOOST_AUTO_TEST_CASE(read) {
   mpz_t f;
   mpz_t len;
-  int fd = ::open("test.txt", O_RDWR);
+  int fd = overwriteTestFile();
   mpz_init_set_si(f, fd);
   mpz_init_set_si(len, 6);
 
@@ -91,14 +105,16 @@ BOOST_AUTO_TEST_CASE(read) {
   BOOST_CHECK_EQUAL(0, strncmp(str->data, "hello ", 6));
   str = hook_IO_read(f, len);
   BOOST_CHECK_EQUAL(0, strncmp(str->data, "world!", 6));
+
+  ::close(fd);
 }
 
 BOOST_AUTO_TEST_CASE(close) {
   mpz_t f1;
   mpz_t f2;
-  int fd1 = ::open("test.txt", O_RDONLY);
+  int fd1 = overwriteTestFile();
   mpz_init_set_si(f1, fd1);
-  int fd2 = ::open("test.txt", O_RDONLY);
+  int fd2 = overwriteTestFile();
   mpz_init_set_si(f2, fd2);
 
   hook_IO_close(f1);
@@ -109,37 +125,33 @@ BOOST_AUTO_TEST_CASE(close) {
 }
 
 BOOST_AUTO_TEST_CASE(putc) {
-  /*
-  char rc[2];
   mpz_t f;
   mpz_t c;
 
-  int fd = ::open("test.txt", O_RDWR | O_TRUNC);
+  int fd = overwriteTestFile();
   mpz_init_set_si(f, fd);
+
+  lseek(fd, 0, SEEK_SET);
 
   mpz_init_set_si(c, int('h'));
   hook_IO_putc(f, c);
-  lseek(mpz_get_si(f), -1, SEEK_CUR);
-  ::read(fd, &rc, 1);
-
-  printf("%s\n", rc);
-
-  BOOST_CHECK_EQUAL('h', rc[0]);
-
-  mpz_set_si(c, int('e'));
+  mpz_set_si(c, int('o'));
   hook_IO_putc(f, c);
-  lseek(mpz_get_si(f), -1, SEEK_CUR);
-  ::read(fd, &rc, 1);
-  printf("%s\n", rc);
+  mpz_set_si(c, int('w'));
+  hook_IO_putc(f, c);
+  mpz_set_si(c, int('d'));
+  hook_IO_putc(f, c);
+  mpz_set_si(c, int('y'));
+  hook_IO_putc(f, c);
 
-  BOOST_CHECK_EQUAL('e', rc[0]);
+  char ret[5];
 
-  lseek(mpz_get_si(f), 0, SEEK_SET);
-  ::read(fd, rc, 2);
-  printf("%s\n", rc);
+  lseek(fd, 0, SEEK_SET);
+  ::read(fd, ret, 5);
 
-  BOOST_CHECK_EQUAL(0, strncmp("he", &(rc[0]), 2));
-  */
+  BOOST_CHECK_EQUAL(0, strncmp("howdy", ret, 2));
+
+  ::close(fd);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
