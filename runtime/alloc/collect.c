@@ -151,7 +151,7 @@ static char* evacuate(char* scan_ptr, char **alloc_ptr) {
 // Contains the decision logic for collecting the old generation.
 // For now, we collect the old generation every 10 young generation collections.
 static bool shouldCollectOldGen() {
-  if (++num_collection_only_young == 10) {
+  if (++num_collection_only_young == 50) {
     num_collection_only_young = 0;
     return true;
   }
