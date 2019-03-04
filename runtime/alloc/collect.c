@@ -12,11 +12,14 @@ char **old_alloc_ptr(void);
 char* youngspace_ptr(void);
 char* oldspace_ptr(void);
 char youngspace_collection_id(void);
+char oldspace_collection_id(void);
 void map_foreach(void *, void(block**));
 void set_foreach(void *, void(block**));
 void list_foreach(void *, void(block**));
 
 static bool is_gc = false;
+static bool collect_old = false;
+static uint8_t num_collection_only_young = 0;
 
 bool during_gc() {
   return is_gc;
@@ -38,11 +41,12 @@ static void migrate(block** blockPtr) {
     return;
   }
   const uint64_t hdr = currBlock->h.hdr;
-  bool isNotOnKoreHeap = hdr & NOT_YOUNG_OBJECT_BIT;
-  if (isNotOnKoreHeap) {
+  bool isNotInYoungGen = hdr & NOT_YOUNG_OBJECT_BIT;
+  bool hasAged = hdr & YOUNG_AGE_BIT;
+  if (isNotInYoungGen && !(hasAged && collect_old)) {
     return;
   }
-  bool shouldPromote = hdr & YOUNG_AGE_BIT;
+  bool shouldPromote = !isNotInYoungGen && hasAged;
   uint64_t mask = shouldPromote ? NOT_YOUNG_OBJECT_BIT : YOUNG_AGE_BIT;
   bool hasForwardingAddress = hdr & FWD_PTR_BIT;
   uint16_t layout = layout_hdr(hdr);
@@ -50,7 +54,7 @@ static void migrate(block** blockPtr) {
   block** forwardingAddress = (block**)(currBlock + 1);
   if (!hasForwardingAddress) {
     block *newBlock;
-    if (shouldPromote) {
+    if (shouldPromote || (hasAged && collect_old)) {
       newBlock = koreAllocOld(lenInBytes);
     } else {
       newBlock = koreAlloc(lenInBytes);
@@ -69,20 +73,27 @@ static void migrate(block** blockPtr) {
 // that are not tracked by gc
 static void migrate_once(block** blockPtr) {
   block* currBlock = *blockPtr;
-  if (youngspace_collection_id() == getArenaSemispaceIDOfObject((void *)currBlock)) {
+  if (youngspace_collection_id() == getArenaSemispaceIDOfObject((void *)currBlock) ||
+      oldspace_collection_id() == getArenaSemispaceIDOfObject((void *)currBlock)) {
     migrate(blockPtr);
   }
 }
 
 static void migrate_string_buffer(stringbuffer** bufferPtr) {
   stringbuffer* buffer = *bufferPtr;
-  bool shouldPromote = buffer->contents->h.hdr & YOUNG_AGE_BIT;
+  const uint64_t hdr = buffer->contents->h.hdr;
+  bool isNotInYoungGen = hdr & NOT_YOUNG_OBJECT_BIT;
+  bool hasAged = hdr & YOUNG_AGE_BIT;
+  if (isNotInYoungGen && !(hasAged && collect_old)) {
+    return;
+  }
+  bool shouldPromote = !isNotInYoungGen && hasAged;
   uint64_t mask = shouldPromote ? NOT_YOUNG_OBJECT_BIT : YOUNG_AGE_BIT;
-  bool hasForwardingAddress = buffer->contents->h.hdr & FWD_PTR_BIT;
+  bool hasForwardingAddress = hdr & FWD_PTR_BIT;
   if (!hasForwardingAddress) {
     stringbuffer *newBuffer;
     string *newContents;
-    if (shouldPromote) {
+    if (shouldPromote || (hasAged && collect_old)) {
       newBuffer = koreAllocOld(sizeof(stringbuffer));
       newBuffer->capacity = buffer->capacity; // contents is written below
       newContents = koreAllocTokenOld(sizeof(string) + buffer->capacity);
@@ -112,13 +123,13 @@ static char* evacuate(char* scan_ptr, char **alloc_ptr) {
       switch(argData->cat) {
       case MAP_LAYOUT:
         map_foreach(arg, migrate_once);
-	break;
+        break;
       case LIST_LAYOUT:
         list_foreach(arg, migrate_once); 
-	break;
+        break;
       case SET_LAYOUT:
         set_foreach(arg, migrate_once);
-	break;
+        break;
       case STRINGBUFFER_LAYOUT:
         migrate_string_buffer(arg);
         break;
@@ -137,37 +148,31 @@ static char* evacuate(char* scan_ptr, char **alloc_ptr) {
   return movePtr(scan_ptr, get_size(hdr, layoutInt), *alloc_ptr);
 }
 
-// computes scan ptr, current_tospace_start, and current_tospace_end for old generation
-// this is necessary because unlike the young generation, we don't start scanning at the beginning,
-// so the process of computing the address to scan from is more complicated.
-static char* computeScanPtr(char* oldspace_start) {
-  // if no allocations have happened yet, don't scan anything.
-  // if no allocations had happened at the start of gc, start scanning from
-  // the beginning. otherwise, start scanning from where we were at beginning of gc.
-  char* scan_ptr = oldspace_start == 0 ? oldspace_ptr() : oldspace_start;
-  uintptr_t oldspace_block_start = (uintptr_t)scan_ptr;
-  if (!(oldspace_block_start & (BLOCK_SIZE-1))) {
-    // this happens when oldspace_start is at the exact end of a block
-    // we need to jump to the next block, so we use movePtr with a length of 0 to do this
-    scan_ptr = movePtr(scan_ptr, 0, *old_alloc_ptr());
+// Contains the decision logic for collecting the old generation.
+// For now, we collect the old generation every 10 young generation collections.
+static bool shouldCollectOldGen() {
+  if (++num_collection_only_young == 50) {
+    num_collection_only_young = 0;
+    return true;
   }
-  return scan_ptr;
+
+  return false;
 }
 
 void koreCollect(block** root) {
   is_gc = true;
+  collect_old = shouldCollectOldGen();
   MEM_LOG("Starting garbage collection\n");
-  koreAllocSwap();
-  char* oldspace_start = *old_alloc_ptr();
+  koreAllocSwap(collect_old);
   migrate(root);
   char *scan_ptr = youngspace_ptr();
   MEM_LOG("Evacuating young generation\n");
   while(scan_ptr) {
     scan_ptr = evacuate(scan_ptr, young_alloc_ptr());
   }
-  scan_ptr = computeScanPtr(oldspace_start);
+  scan_ptr = oldspace_ptr();
   if (scan_ptr != *old_alloc_ptr()) {
-    MEM_LOG("Evacuating promoted objects\n");
+    MEM_LOG("Evacuating old generation\n");
     while(scan_ptr) {
       scan_ptr = evacuate(scan_ptr, old_alloc_ptr());
     }
