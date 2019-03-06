@@ -7,9 +7,9 @@ cd rustc-1.33.0-src
 cd ..
 rm -rf rustc-1.33.0-src rustc-src.tar.gz
 
-apt-get install cargo
+apt-get install -y cargo
 git clone https://github.com/rust-lang/cargo -b rust-1.33.0 --depth 1
 cd cargo
 cargo build --release
 cargo install --path . --root /usr/local
-apt-get remove cargo rustc
+apt-get remove -y cargo rustc
