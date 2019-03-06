@@ -11,6 +11,9 @@ RUN groupadd -g $GROUP_ID user && \
 
 USER $USER_ID:$GROUP_ID
 
+ADD install-rust /home/user/
+RUN cd /home/user && ./install-rust
+
 ENV LC_ALL=C.UTF-8
 ADD --chown=user:user matching/stack.yaml /home/user/.tmp-haskell2/
 ADD --chown=user:user matching/package.yaml /home/user/.tmp-haskell2/
@@ -18,6 +21,3 @@ ADD --chown=user:user matching/submodules/kore/stack.yaml /home/user/.tmp-haskel
 ADD --chown=user:user matching/submodules/kore/src/main/haskell/kore/package.yaml /home/user/.tmp-haskell2/submodules/kore/src/main/haskell/kore/
 RUN    cd /home/user/.tmp-haskell2 \
     && stack build --only-snapshot --test
-
-ADD install-rust /home/user/
-RUN cd /home/user && ./install-rust
