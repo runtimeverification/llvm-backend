@@ -1,4 +1,4 @@
-#!/bin/sh-e
+#!/bin/sh -e
 curl -L https://static.rust-lang.org/dist/rustc-1.33.0-src.tar.gz -o rustc-src.tar.gz
 tar xvf rustc-src.tar.gz
 cd rustc-1.33.0-src
