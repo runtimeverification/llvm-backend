@@ -4,7 +4,7 @@ version = "0.1.0"
 authors = ["Dwight Guth <dwight.guth@runtimeverification.com>"]
 
 [dependencies]
-im-rc = "12.3.0"
+im-rc = "12.3.2"
 libc = "0.2.42"
 
 [lib]

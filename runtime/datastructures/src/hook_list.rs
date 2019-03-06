@@ -517,7 +517,7 @@ pub mod tests {
   #[test]
   fn test_long_list() {
     let mut l = im_rc::Vector::singleton(0);
-    for _ in 0..4099 {
+    for _ in 0..9000 {
       let mut tmp = im_rc::Vector::singleton(0);
       tmp.append(l);
       l = tmp;
