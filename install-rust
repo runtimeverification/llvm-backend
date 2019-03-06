@@ -3,13 +3,13 @@ curl -L https://static.rust-lang.org/dist/rustc-1.33.0-src.tar.gz -o rustc-src.t
 tar xvf rustc-src.tar.gz
 cd rustc-1.33.0-src
 ./configure --llvm-root=/usr/lib/llvm-6.0 --enable-llvm-link-shared
-sudo ./x.py install
+./x.py install
 cd ..
 rm -rf rustc-1.33.0-src rustc-src.tar.gz
 
-sudo apt-get install cargo
+apt-get install cargo
 git clone https://github.com/rust-lang/cargo -b rust-1.33.0 --depth 1
 cd cargo
 cargo build --release
-sudo cargo install --path . --root /usr/local
-sudo apt-get remove cargo rustc
+cargo install --path . --root /usr/local
+apt-get remove cargo rustc
