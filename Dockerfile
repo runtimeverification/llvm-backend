@@ -19,5 +19,5 @@ ADD --chown=user:user matching/submodules/kore/src/main/haskell/kore/package.yam
 RUN    cd /home/user/.tmp-haskell2 \
     && stack build --only-snapshot --test
 
-ADD install-rust /home/user
+ADD install-rust /home/user/
 RUN cd /home/user && ./install-rust
