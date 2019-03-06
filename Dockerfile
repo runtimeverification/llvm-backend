@@ -1,7 +1,7 @@
 FROM ubuntu:bionic
 
 RUN apt-get update && \
-    apt-get install -y git cmake clang-6.0 llvm-6.0-tools zlib1g-dev bison flex libboost-test-dev libgmp-dev libmpfr-dev libyaml-cpp-dev libjemalloc-dev curl libssl-dev
+    apt-get install -y git cmake clang-6.0 llvm-6.0-tools zlib1g-dev bison flex libboost-test-dev libgmp-dev libmpfr-dev libyaml-cpp-dev libjemalloc-dev curl libssl-dev pkg-config
 RUN curl -sSL https://get.haskellstack.org/ | sh      
 
 ADD install-rust /root/
