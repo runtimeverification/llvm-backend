@@ -1,5 +1,8 @@
 #!/bin/sh -e
 curl -L https://static.rust-lang.org/dist/rustc-1.33.0-src.tar.gz -o rustc-src.tar.gz
+curl -L https://github.com/rust-lang/cargo/archive/0.34.0.tar.gz -o cargo.tar.gz
+sha512sum -c rust-checksum
+
 tar xvf rustc-src.tar.gz
 cd rustc-1.33.0-src
 ./configure --llvm-root=/usr/lib/llvm-6.0 --enable-llvm-link-shared
@@ -8,7 +11,6 @@ cd ..
 rm -rf rustc-1.33.0-src rustc-src.tar.gz
 
 apt-get install -y cargo
-curl -L https://github.com/rust-lang/cargo/archive/0.34.0.tar.gz -o cargo.tar.gz
 tar xvf cargo.tar.gz
 cd cargo-0.34.0
 cargo build --release
