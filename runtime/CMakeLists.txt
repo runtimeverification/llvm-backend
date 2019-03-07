@@ -54,7 +54,9 @@ install(
   PATTERN libunwind-*.rlib
   PATTERN libcompiler_builtins-*.rlib
   PATTERN libpanic_abort-*.rlib
-  PATTERN liballoc_system-*.rlib
+  PATTERN libbacktrace_sys-*.rlib
+  PATTERN librustc_demangle-*.rlib
+  PATTERN libcfg_if-*.rlib
 )
 
 if (CMAKE_BUILD_TYPE STREQUAL "Release")

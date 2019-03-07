@@ -64,15 +64,10 @@ extern "C" {
     uint64_t c;
   } set;
 
-  // llvm: list = type { i64, i64, i8 *, i8 *, i8 *, i8 *, i8 * }
+  // llvm: list = type { i64, [7 x i64] }
   typedef struct list {
     uint64_t a;
-    uint64_t b;
-    void *c;
-    void *d;
-    void *e;
-    void *f;
-    char *g;
+    uint64_t b[7];
   } list;
 
   typedef struct floating {
