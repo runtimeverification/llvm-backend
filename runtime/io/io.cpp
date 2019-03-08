@@ -306,11 +306,11 @@ extern "C" {
 
     if (ret == -1) {
       block * retBlock = static_cast<block *>(koreAlloc(sizeof(block) + 2 * sizeof(uint64_t)));
-      retBlock->h = header;
-      block * inj = static_cast<block *>(koreAlloc(sizeof(block + sizeof(uint64_t))));
+      retBlock->h = kseqHeader;
+      block * inj = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(uint64_t)));
       inj->h = header_err();
-      block * err = block_err();
-      memcpy(&(inj->children[0]), &block_err, sizeof(uint64_t));
+      block * err = block_errno();
+      memcpy(&(inj->children[0]), &err, sizeof(uint64_t));
       memcpy(&(retBlock->children[0]), &inj, sizeof(uint64_t));
       memcpy(&(retBlock->children[1]), &dotK, sizeof(uint64_t));
       return retBlock;
