@@ -143,32 +143,90 @@ extern "C" {
     return buf->data;
   }
 
+#define MODE_R 1
+#define MODE_W 2
+#define MODE_A 4
+#define MODE_E 8
+#define MODE_X 16
+#define MODE_B 32
+#define MODE_P 64
+
+  int getFileModes(string * modes) {
+    int flags = 0;
+    int length = len(modes);
+
+    if (length <= 0) {
+      return -1;
+    }
+
+    switch (modes->data[0]) {
+      case 'r': flags |= MODE_R; break;
+      case 'w': flags |= MODE_W; break;
+      case 'a': flags |= MODE_A; break;
+      default: return -1;
+    }
+
+    for (int i = 1; i < length; i++) {
+      switch (modes->data[i]) {
+        case 'e':
+          flags |= (flags & MODE_E) ? -1 : MODE_E;
+          break;
+        case 'x':
+          flags |= (flags & MODE_X) ? -1 : MODE_X;
+          break;
+        case 'b':
+          flags |= (flags & MODE_B) ? -1 : MODE_B;
+          break;
+        case '+':
+          flags |= (flags & MODE_P) ? -1 : MODE_P;
+          break;
+        default: return -1;
+      }
+    }
+
+    return (flags < 0) ? -1 : flags;
+  }
+
   block * hook_IO_open(string * filename, string * control) {
     int flags = 0;
-    int length = len(control);
-
-    // TODO: Add x, e, b
-    switch (control->data[0]) {
-      case 'r':
-        flags = O_RDONLY;
-      case 'w':
-        flags = O_WRONLY | O_TRUNC | O_CREAT;
-      case 'a':
-        flags = O_WRONLY | O_APPEND | O_CREAT;
-      default:
-        flags = O_RDONLY;
-    }
-
-    // Temporary until x/e/b added
-    if ((length > 1 && control->data[1] == '+') || (length > 2 && control->data[2] == '+')) {
-      flags &= (~O_WRONLY) & ~(O_RDONLY);
-      flags |= O_RDWR;
-    }
-
+    int access = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;
+    int modes = getFileModes(control);
+    int fd;
     mpz_t result;
-    char * f = getTerminatedString(filename);
     block * retBlock = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(uint64_t)));
-    int fd = open(f, flags, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH);
+
+    if (-1 != modes) {
+      switch (modes & 7) {
+        case 1:
+          flags = O_RDONLY;
+        case 2:
+          flags = O_WRONLY | O_TRUNC | O_CREAT;
+        case 4:
+          flags = O_WRONLY | O_APPEND | O_CREAT;
+      }
+
+      if (modes & MODE_P) {
+        flags &= (~O_WRONLY) & ~(O_RDONLY);
+        flags |= O_RDWR;
+      }
+
+      if (modes & MODE_E) {
+        flags |= O_CLOEXEC;
+      }
+
+      if (modes & MODE_X) {
+        flags |= O_EXCL;
+      }
+
+      if (modes & MODE_B) {
+      }
+
+      char * f = getTerminatedString(filename);
+      fd = open(f, flags, access);
+    } else {
+      errno = EINVAL;
+      fd = -1;
+    }
 
     if (-1 == fd) {
       retBlock->h = header_err();
