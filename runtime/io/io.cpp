@@ -136,13 +136,21 @@ extern "C" {
 
   inline block * getKSeqErrorBlock() {
     block * err = block_errno();
-    block * retBlock = static_cast<block *>(koreAlloc(sizeof(block) + 2 * sizeof(uint64_t)));
-    block * inj = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(uint64_t)));
+    block * retBlock = static_cast<block *>(koreAlloc(sizeof(block) + 2 * sizeof(block *)));
+    block * inj = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(block *)));
     retBlock->h = kseqHeader;
     inj->h = header_err();
     memcpy(inj->children, &err, sizeof(block *));
     memcpy(retBlock->children, &inj, sizeof(block *));
     memcpy(&(retBlock->children[1]), &dotK, sizeof(block *));
+    return retBlock;
+  }
+
+  inline block* getInjErrorBlock() {
+    block * retBlock = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(block *)));
+    retBlock->h = header_err();
+    block * p = block_errno();
+    memcpy(retBlock->children, &p, sizeof(block *));
     return retBlock;
   }
 
@@ -205,7 +213,6 @@ extern "C" {
     int modes = getFileModes(control);
     int fd;
     mpz_t result;
-    block * retBlock = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(uint64_t)));
 
     if (-1 != modes) {
       switch (modes & 7) {
@@ -241,17 +248,14 @@ extern "C" {
     }
 
     if (-1 == fd) {
-      retBlock->h = header_err();
-      block * p = block_errno();
-      memcpy(retBlock->children, &p, sizeof(block *));
-
-    } else {
-      retBlock->h = header_int();
-      mpz_init_set_si(result, fd);
-      mpz_ptr p = move_int(result);
-      memcpy(retBlock->children, &p, sizeof(mpz_ptr));
+      return getInjErrorBlock();
     }
 
+    block * retBlock = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(uint64_t)));
+    retBlock->h = header_int();
+    mpz_init_set_si(result, fd);
+    mpz_ptr p = move_int(result);
+    memcpy(retBlock->children, &p, sizeof(mpz_ptr));
     return retBlock;
   }
 
@@ -260,23 +264,19 @@ extern "C" {
       throw std::invalid_argument("Arg too large for int32_t");
     }
 
-    block * retBlock = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(uint64_t)));
-
     int fd = mpz_get_si(i);
     off_t loc = lseek(fd, 0, SEEK_CUR);
 
     if (-1 == loc) {
-      retBlock->h = header_err();
-      block * p = block_errno();
-      memcpy(retBlock->children, &p, sizeof(block *));
-    } else {
-      retBlock->h = header_int();
-      mpz_t result;
-      mpz_init_set_si(result, (long) loc);
-      mpz_ptr p =  move_int(result);
-      memcpy(retBlock->children, &p, sizeof(mpz_ptr));
+      return getInjErrorBlock();
     }
 
+    block * retBlock = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(uint64_t)));
+    retBlock->h = header_int();
+    mpz_t result;
+    mpz_init_set_si(result, (long) loc);
+    mpz_ptr p =  move_int(result);
+    memcpy(retBlock->children, &p, sizeof(mpz_ptr));
     return retBlock;
   }
 
@@ -285,25 +285,21 @@ extern "C" {
       throw std::invalid_argument("Arg too large for int32_t");
     }
 
-    block * retBlock = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(uint64_t)));
-
     int fd = mpz_get_si(i);
     char c;
     ssize_t ret = read(fd, &c, sizeof(char));
 
 
     if (-1 == ret) {
-      retBlock->h = header_err();
-      block * p = block_errno();
-      memcpy(retBlock->children, &p, sizeof(block *));
-    } else {
-      retBlock->h = header_int();
-      mpz_t result;
-      mpz_init_set_si(result, (int) c);
-      mpz_ptr p = move_int(result);
-      memcpy(retBlock->children, &p, sizeof(mpz_ptr));
+      return getInjErrorBlock();
     }
 
+    block * retBlock = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(uint64_t)));
+    retBlock->h = header_int();
+    mpz_t result;
+    mpz_init_set_si(result, (int) c);
+    mpz_ptr p = move_int(result);
+    memcpy(retBlock->children, &p, sizeof(mpz_ptr));
     return retBlock;
   }
 
@@ -315,21 +311,18 @@ extern "C" {
     int fd = mpz_get_si(i);
     size_t length = mpz_get_ui(len);
 
-    block * retBlock = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(uint64_t)));
     auto result = static_cast<string *>(koreAllocToken(sizeof(string) + length));
     int bytes = read(fd, &(result->data), length);
 
     if (-1 == bytes) {
-      retBlock->h = header_err();
-      block * p = block_errno();
-      memcpy(retBlock->children, &p, sizeof(block *));
-    } else {
-      retBlock->h = header_string();
-      result = static_cast<string *>(koreResizeLastAlloc(result, bytes, length));
-      set_len(result, bytes);
-      memcpy(retBlock->children, &result, sizeof(string *));
+      return getInjErrorBlock();
     }
 
+    block * retBlock = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(uint64_t)));
+    retBlock->h = header_string();
+    result = static_cast<string *>(koreResizeLastAlloc(result, bytes, length));
+    set_len(result, bytes);
+    memcpy(retBlock->children, &result, sizeof(string *));
     return retBlock;
   }
 
