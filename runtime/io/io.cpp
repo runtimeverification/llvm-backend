@@ -134,6 +134,18 @@ extern "C" {
     return header;
   }
 
+  inline block * getKSeqErrorBlock() {
+    block * err = block_errno();
+    block * retBlock = static_cast<block *>(koreAlloc(sizeof(block) + 2 * sizeof(uint64_t)));
+    block * inj = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(uint64_t)));
+    retBlock->h = kseqHeader;
+    inj->h = header_err();
+    memcpy(inj->children, &err, sizeof(block *));
+    memcpy(retBlock->children, &inj, sizeof(block *));
+    memcpy(&(retBlock->children[1]), &dotK, sizeof(block *));
+    return retBlock;
+  }
+
   char * getTerminatedString(string * str) {
     int length = len(str);
     string * buf = static_cast<string *>(koreAllocToken(sizeof(string) + (length + 1)));
@@ -330,15 +342,7 @@ extern "C" {
     int ret = close(fd);
 
     if (ret == -1) {
-      block * err = block_errno();
-      block * retBlock = static_cast<block *>(koreAlloc(sizeof(block) + 2 * sizeof(uint64_t)));
-      block * inj = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(uint64_t)));
-      retBlock->h = kseqHeader;
-      inj->h = header_err();
-      memcpy(inj->children, &err, sizeof(block *));
-      memcpy(retBlock->children, &inj, sizeof(block *));
-      memcpy(&(retBlock->children[1]), &dotK, sizeof(block *));
-      return retBlock;
+      return getKSeqErrorBlock();
     }
 
     return dotK;
@@ -354,15 +358,7 @@ extern "C" {
     int ret = lseek(fd, l, SEEK_SET);
 
     if (ret == -1) {
-      block * err = block_errno();
-      block * retBlock = static_cast<block *>(koreAlloc(sizeof(block) + 2 * sizeof(uint64_t)));
-      block * inj = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(uint64_t)));
-      retBlock->h = kseqHeader;
-      inj->h = header_err();
-      memcpy(inj->children, &err, sizeof(block *));
-      memcpy(retBlock->children, &inj, sizeof(block *));
-      memcpy(&(retBlock->children[1]), &dotK, sizeof(block *));
-      return retBlock;
+      return getKSeqErrorBlock();
     }
 
     return dotK;
@@ -378,15 +374,7 @@ extern "C" {
     int ret = lseek(fd, l, SEEK_END);
 
     if (ret == -1) {
-      block * err = block_errno();
-      block * retBlock = static_cast<block *>(koreAlloc(sizeof(block) + 2 * sizeof(uint64_t)));
-      block * inj = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(uint64_t)));
-      retBlock->h = kseqHeader;
-      inj->h = header_err();
-      memcpy(inj->children, &err, sizeof(block *));
-      memcpy(retBlock->children, &inj, sizeof(block *));
-      memcpy(&(retBlock->children[1]), &dotK, sizeof(block *));
-      return retBlock;
+      return getKSeqErrorBlock();
     }
 
     return dotK;
@@ -399,8 +387,12 @@ extern "C" {
 
     int fd = mpz_get_si(i);
     int ch = mpz_get_si(c);
+    int ret = write(fd, &ch, 1);
 
-    write(fd, &ch, 1);
+    if (ret == -1) {
+      return getKSeqErrorBlock();
+    }
+
     return dotK;
   }
 
@@ -413,15 +405,7 @@ extern "C" {
     int ret = write(fd, str->data, len(str));
 
     if (ret == -1) {
-      block * err = block_errno();
-      block * retBlock = static_cast<block *>(koreAlloc(sizeof(block) + 2 * sizeof(uint64_t)));
-      block * inj = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(uint64_t)));
-      retBlock->h = kseqHeader;
-      inj->h = header_err();
-      memcpy(inj->children, &err, sizeof(block *));
-      memcpy(retBlock->children, &inj, sizeof(block *));
-      memcpy(&(retBlock->children[1]), &dotK, sizeof(block *));
-      return retBlock;
+      return getKSeqErrorBlock();
     }
 
     return dotK;
@@ -438,15 +422,7 @@ extern "C" {
     int ret = lockf(fd, F_LOCK, l);
 
     if (ret == -1) {
-      block * err = block_errno();
-      block * retBlock = static_cast<block *>(koreAlloc(sizeof(block) + 2 * sizeof(uint64_t)));
-      block * inj = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(uint64_t)));
-      retBlock->h = kseqHeader;
-      inj->h = header_err();
-      memcpy(inj->children, &err, sizeof(block *));
-      memcpy(retBlock->children, &inj, sizeof(block *));
-      memcpy(&(retBlock->children[1]), &dotK, sizeof(block *));
-      return retBlock;
+      return getKSeqErrorBlock();
     }
 
     return dotK;
@@ -463,15 +439,7 @@ extern "C" {
     int ret = lockf(fd, F_ULOCK, l);
 
     if (ret == -1) {
-      block * err = block_errno();
-      block * retBlock = static_cast<block *>(koreAlloc(sizeof(block) + 2 * sizeof(uint64_t)));
-      block * inj = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(uint64_t)));
-      retBlock->h = kseqHeader;
-      inj->h = header_err();
-      memcpy(inj->children, &err, sizeof(block *));
-      memcpy(retBlock->children, &inj, sizeof(block *));
-      memcpy(&(retBlock->children[1]), &dotK, sizeof(block *));
-      return retBlock;
+      return getKSeqErrorBlock();
     }
 
     return dotK;
