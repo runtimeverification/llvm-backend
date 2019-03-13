@@ -53,7 +53,7 @@ void freeAllKoreMem() {
 }
 
 void setKoreMemoryFunctionsForGMP() {
-   mp_set_memory_functions(koreAllocNoGC, koreReallocNoGC, koreFree);
+   mp_set_memory_functions(koreAllocMP, koreReallocMP, koreFree);
 }
 
 __attribute__ ((always_inline)) void* koreAlloc(size_t requested) {
@@ -95,11 +95,42 @@ void* koreResizeLastAlloc(void* oldptr, size_t newrequest, size_t last_size) {
   }
 }
 
-void* koreReallocNoGC(void* ptr, size_t old_size, size_t new_size) {
-  void* new = koreAllocNoGC(new_size);
+void* koreAllocMP(size_t requested) {
+  string* new = (string *) koreAllocToken(sizeof(string) + requested);
+  set_len(new, requested);
+  return new->data;
+}
+
+void* koreReallocMP(void* ptr, size_t old_size, size_t new_size) {
+  string* new = (string *) koreAllocToken(sizeof(string) + new_size);
   size_t min = old_size > new_size ? new_size : old_size;
-  memcpy(new, ptr, min);
-  return new;
+  memcpy(new->data, ptr, min);
+  set_len(new, new_size);
+  return new->data;
 }
 
 void koreFree(void* ptr, size_t size) {}
+
+__attribute__ ((always_inline)) void* koreAllocInteger(size_t requested) {
+  integer *result = (integer *) koreAlloc(sizeof(integer));
+  set_len(result, sizeof(mpz_t));
+  return &result->i;
+}
+
+__attribute__ ((always_inline)) void* koreAllocFloating(size_t requested) {
+  floating *result = (floating *) koreAlloc(sizeof(floating));
+  set_len(result, sizeof(mpfr_t)+8);
+  return result;
+}
+
+__attribute__ ((always_inline)) void* koreAllocIntegerOld(size_t requested) {
+  integer *result = (integer *) koreAllocOld(sizeof(integer));
+  set_len(result, sizeof(mpz_t));
+  return &result->i;
+}
+
+__attribute__ ((always_inline)) void* koreAllocFloatingOld(size_t requested) {
+  floating *result = (floating *) koreAllocOld(sizeof(floating));
+  set_len(result, sizeof(mpfr_t)+8);
+  return result;
+}

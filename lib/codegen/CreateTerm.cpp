@@ -49,7 +49,7 @@ target triple = "x86_64-unknown-linux-gnu"
 ; list: %list
 ; set: %set
 ; array: %list
-; integer: %mpz *
+; integer: %integer *
 ; float: %floating *
 ; string: %string *
 ; bytes: %string *
@@ -65,7 +65,8 @@ target triple = "x86_64-unknown-linux-gnu"
 %set = type { i8 *, i8 *, i64 } ; im::hashset::HashSet
 %list = type { i64, [7 x i64] } ; im::vector::Vector
 %mpz = type { i32, i32, i64 * } ; mpz_t
-%floating = type { i64, { i64, i32, i64, i64 * } } ; exp, mpfr_t
+%integer = type { %blockheader, %mpz } ; 16-bit layout, 48-bit length, mpz_t
+%floating = type { %blockheader, i64, { i64, i32, i64, i64 * } } ; 16-bit layout, 48-bit length, exp, mpfr_t
 %blockheader = type { i64 }
 %block = type { %blockheader, [0 x i64 *] } ; 16-bit layout, 8-bit length, 32-bit tag, children
 
@@ -107,6 +108,7 @@ std::unique_ptr<llvm::Module> newModule(std::string name, llvm::LLVMContext &Con
 static std::string MAP_STRUCT = "map";
 static std::string LIST_STRUCT = "list";
 static std::string SET_STRUCT = "set";
+static std::string INT_WRAPPER_STRUCT = "integer";
 static std::string INT_STRUCT = "mpz";
 static std::string FLOAT_STRUCT = "floating";
 static std::string BUFFER_STRUCT = "stringbuffer";
@@ -209,7 +211,7 @@ llvm::Value *CreateTerm::createToken(ValueType sort, std::string contents) {
   case SortCategory::Set:
     assert (false && "cannot create tokens of collection category");
   case SortCategory::Int: {
-    llvm::Constant *global = Module->getOrInsertGlobal("int_" + contents, Module->getTypeByName(INT_STRUCT));
+    llvm::Constant *global = Module->getOrInsertGlobal("int_" + contents, Module->getTypeByName(INT_WRAPPER_STRUCT));
     llvm::GlobalVariable *globalVar = llvm::dyn_cast<llvm::GlobalVariable>(global);
     if (!globalVar->hasInitializer()) {
       mpz_t value;
@@ -224,12 +226,16 @@ llvm::Value *CreateTerm::createToken(ValueType sort, std::string contents) {
         allocdLimbs.push_back(llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), value->_mp_d[i]));
       }
       limbsVar->setInitializer(llvm::ConstantArray::get(limbsType, allocdLimbs));
+      llvm::Constant *hdr = llvm::ConstantStruct::get(Module->getTypeByName(BLOCKHEADER_STRUCT), llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), sizeof(mpz_t) | NOT_YOUNG_OBJECT_BIT));
       llvm::ConstantInt *numLimbs = llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), size);
       llvm::Constant *mp_size = llvm::ConstantExpr::getMul(numLimbs, llvm::ConstantInt::getSigned(llvm::Type::getInt32Ty(Ctx), sign));
-      globalVar->setInitializer(llvm::ConstantStruct::get(Module->getTypeByName(INT_STRUCT), {numLimbs, mp_size, llvm::ConstantExpr::getPointerCast(limbsVar, llvm::Type::getInt64PtrTy(Ctx))}));
+      globalVar->setInitializer(llvm::ConstantStruct::get(
+        Module->getTypeByName(INT_WRAPPER_STRUCT), hdr,
+        llvm::ConstantStruct::get(Module->getTypeByName(INT_STRUCT), numLimbs, mp_size, llvm::ConstantExpr::getPointerCast(limbsVar, llvm::Type::getInt64PtrTy(Ctx)))));
       mpz_clear(value);
     }
-    return global;
+    std::vector<llvm::Constant *> Idxs = {llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0), llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), 1)};
+    return llvm::ConstantExpr::getInBoundsGetElementPtr(Module->getTypeByName(INT_WRAPPER_STRUCT), globalVar, Idxs);
   }
   case SortCategory::Float: {
     llvm::Constant *global = Module->getOrInsertGlobal("float_" + contents, Module->getTypeByName(FLOAT_STRUCT));
@@ -267,6 +273,7 @@ llvm::Value *CreateTerm::createToken(ValueType sort, std::string contents) {
         allocdLimbs.push_back(llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), value->_mpfr_d[i]));
       }
       limbsVar->setInitializer(llvm::ConstantArray::get(limbsType, allocdLimbs));
+      llvm::Constant *hdr = llvm::ConstantStruct::get(Module->getTypeByName(BLOCKHEADER_STRUCT), llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), (sizeof(mpfr_t)+8) | NOT_YOUNG_OBJECT_BIT));
       llvm::Constant *expbits = llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), exp);
       llvm::Constant *mpfr_prec = llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), prec);
       llvm::Constant *mpfr_sign = llvm::ConstantInt::getSigned(llvm::Type::getInt32Ty(Ctx), value->_mpfr_sign);
@@ -274,7 +281,7 @@ llvm::Value *CreateTerm::createToken(ValueType sort, std::string contents) {
       // create struct floating with an exponent range and an __mpfr_struct. Note that we are assuming the format of the struct, but it's unlikely to change except possibly between major releases
       // which happen less than once every couple years, because the C++ ABI depends on it. We are also assuming that the host and target have the same arch, but since we don't yet support
       // cross compiling anyway, that's a safe assumption.
-      globalVar->setInitializer(llvm::ConstantStruct::get(Module->getTypeByName(FLOAT_STRUCT), expbits, llvm::ConstantStruct::getAnon({mpfr_prec, mpfr_sign, mpfr_exp, llvm::ConstantExpr::getPointerCast(limbsVar, llvm::Type::getInt64PtrTy(Ctx))})));
+      globalVar->setInitializer(llvm::ConstantStruct::get(Module->getTypeByName(FLOAT_STRUCT), hdr, expbits, llvm::ConstantStruct::getAnon({mpfr_prec, mpfr_sign, mpfr_exp, llvm::ConstantExpr::getPointerCast(limbsVar, llvm::Type::getInt64PtrTy(Ctx))})));
       mpfr_clear(value);
     }
     return global;

@@ -3,6 +3,7 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
+#include<assert.h>
 #include "runtime/alloc.h"
 #include "runtime/header.h"
 #include "runtime/arena.h"
@@ -27,7 +28,7 @@ bool during_gc() {
 
 static size_t get_size(uint64_t hdr, uint16_t layout) {
   if (!layout) {
-    size_t size = (len_hdr(hdr)  + sizeof(block) + 7) & ~7;
+    size_t size = (len_hdr(hdr)  + sizeof(blockheader) + 7) & ~7;
     return hdr == NOT_YOUNG_OBJECT_BIT ? 8 : size < 16 ? 16 : size;
   } else {
     return size_hdr(hdr);
@@ -111,6 +112,78 @@ static void migrate_string_buffer(stringbuffer** bufferPtr) {
   *bufferPtr = *(stringbuffer **)(buffer->contents);
 }
 
+static void migrate_mpz(mpz_ptr *mpzPtr) {
+  integer *intgr = struct_base(integer, i, *mpzPtr);
+  const uint64_t hdr = intgr->h.hdr;
+  bool isNotInYoungGen = hdr & NOT_YOUNG_OBJECT_BIT;
+  bool hasAged = hdr & YOUNG_AGE_BIT;
+  if (isNotInYoungGen && !(hasAged && collect_old)) {
+    return;
+  }
+  bool shouldPromote = !isNotInYoungGen && hasAged;
+  uint64_t mask = shouldPromote ? NOT_YOUNG_OBJECT_BIT : YOUNG_AGE_BIT;
+  bool hasForwardingAddress = hdr & FWD_PTR_BIT;
+  if (!hasForwardingAddress) {
+    integer *newIntgr;
+    string *newLimbs;
+    string *limbs = struct_base(string, data, intgr->i->_mp_d);
+    size_t lenLimbs = len(limbs);
+
+    assert(intgr->i->_mp_alloc * sizeof(mp_limb_t) == lenLimbs);
+
+    if (shouldPromote || (hasAged && collect_old)) {
+      newIntgr = struct_base(integer, i, koreAllocIntegerOld(0));
+      newLimbs = (string *) koreAllocTokenOld(sizeof(string) + lenLimbs);
+    } else {
+      newIntgr = struct_base(integer, i, koreAllocInteger(0));
+      newLimbs = (string *) koreAllocToken(sizeof(string) + lenLimbs);
+    }
+    memcpy(newLimbs, limbs, sizeof(string) + lenLimbs);
+    memcpy(newIntgr, intgr, sizeof(integer));
+    newIntgr->h.hdr |= mask;
+    newIntgr->i->_mp_d = (mp_limb_t *)newLimbs->data;
+    *(mpz_ptr *)(intgr->i->_mp_d) = newIntgr->i;
+    intgr->h.hdr |= FWD_PTR_BIT;
+  }
+  *mpzPtr = *(mpz_ptr *)(intgr->i->_mp_d);
+}
+
+static void migrate_floating(floating **floatingPtr) {
+  floating *flt = *floatingPtr;
+  const uint64_t hdr = flt->h.hdr;
+  bool isNotInYoungGen = hdr & NOT_YOUNG_OBJECT_BIT;
+  bool hasAged = hdr & YOUNG_AGE_BIT;
+  if (isNotInYoungGen && !(hasAged && collect_old)) {
+    return;
+  }
+  bool shouldPromote = !isNotInYoungGen && hasAged;
+  uint64_t mask = shouldPromote ? NOT_YOUNG_OBJECT_BIT : YOUNG_AGE_BIT;
+  bool hasForwardingAddress = hdr & FWD_PTR_BIT;
+  if (!hasForwardingAddress) {
+    floating *newFlt;
+    string *newLimbs;
+    string *limbs = struct_base(string, data, flt->f->_mpfr_d-1);
+    size_t lenLimbs = len(limbs);
+
+    assert(((flt->f->_mpfr_prec + mp_bits_per_limb - 1) / mp_bits_per_limb) * sizeof(mp_limb_t) <= lenLimbs);
+
+    if (shouldPromote || (hasAged && collect_old)) {
+      newFlt = (floating *) koreAllocFloatingOld(0);
+      newLimbs = (string *) koreAllocTokenOld(sizeof(string) + lenLimbs);
+    } else {
+      newFlt = (floating *) koreAllocFloating(0);
+      newLimbs = (string *) koreAllocToken(sizeof(string) + lenLimbs);
+    }
+    memcpy(newLimbs, limbs, sizeof(string) + lenLimbs);
+    memcpy(newFlt, flt, sizeof(floating));
+    newFlt->h.hdr |= mask;
+    newFlt->f->_mpfr_d = (mp_limb_t *)newLimbs->data+1;
+    *(floating **)(flt->f->_mpfr_d) = newFlt;
+    flt->h.hdr |= FWD_PTR_BIT;
+  }
+  *floatingPtr = *(floating **)(flt->f->_mpfr_d);
+}
+
 static char* evacuate(char* scan_ptr, char **alloc_ptr) {
   block *currBlock = (block *)scan_ptr;
   const uint64_t hdr = currBlock->h.hdr;
@@ -138,7 +211,11 @@ static char* evacuate(char* scan_ptr, char **alloc_ptr) {
         migrate(arg);
         break;
       case INT_LAYOUT:
+        migrate_mpz(arg);
+        break;
       case FLOAT_LAYOUT:
+        migrate_floating(arg);
+        break;
       case BOOL_LAYOUT:
       default: //mint
         break;
