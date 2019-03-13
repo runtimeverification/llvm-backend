@@ -92,7 +92,7 @@ extern "C" {
     case ELOOP: errStr = ERRTAG(ELOOP); break;
     case EOVERFLOW: errStr = ERRTAG(EOVERFLOW); break;
     default:
-      block * retBlock = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(uint64_t)));
+      block * retBlock = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(mpz_ptr)));
       retBlock->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("Lbl'Hash'unknownIOError"));
       mpz_t err;
       mpz_init_set_si(err, errno);
@@ -142,14 +142,14 @@ extern "C" {
     inj->h = header_err();
     memcpy(inj->children, &err, sizeof(block *));
     memcpy(retBlock->children, &inj, sizeof(block *));
-    memcpy(&(retBlock->children[1]), &dotK, sizeof(block *));
+    memcpy(retBlock->children + 1, &dotK, sizeof(block *));
     return retBlock;
   }
 
   inline block* getInjErrorBlock() {
+    block * p = block_errno();
     block * retBlock = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(block *)));
     retBlock->h = header_err();
-    block * p = block_errno();
     memcpy(retBlock->children, &p, sizeof(block *));
     return retBlock;
   }
@@ -261,7 +261,7 @@ extern "C" {
 
   block * hook_IO_tell(mpz_t i) {
     if (!mpz_fits_sint_p(i)) {
-      throw std::invalid_argument("Arg too large for int32_t");
+      throw std::invalid_argument("Arg too large for int");
     }
 
     int fd = mpz_get_si(i);
@@ -282,7 +282,7 @@ extern "C" {
 
   block * hook_IO_getc(mpz_t i) {
     if (!mpz_fits_sint_p(i)) {
-      throw std::invalid_argument("Arg too large for int32_t");
+      throw std::invalid_argument("Arg too large for int");
     }
 
     int fd = mpz_get_si(i);
@@ -318,9 +318,9 @@ extern "C" {
       return getInjErrorBlock();
     }
 
+    result = static_cast<string *>(koreResizeLastAlloc(result, bytes, length));
     block * retBlock = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(uint64_t)));
     retBlock->h = header_string();
-    result = static_cast<string *>(koreResizeLastAlloc(result, bytes, length));
     set_len(result, bytes);
     memcpy(retBlock->children, &result, sizeof(string *));
     return retBlock;
@@ -328,7 +328,7 @@ extern "C" {
 
   block * hook_IO_close(mpz_t i) {
     if (!mpz_fits_sint_p(i)) {
-      throw std::invalid_argument("Arg too large for int32_t");
+      throw std::invalid_argument("Arg too large for int");
     }
 
     int fd = mpz_get_si(i);
@@ -391,7 +391,7 @@ extern "C" {
 
   block * hook_IO_write(mpz_t i, string * str) {
     if (!mpz_fits_sint_p(i)) {
-      throw std::invalid_argument("Arg too large for int32_t");
+      throw std::invalid_argument("Arg too large for int");
     }
 
     int fd = mpz_get_si(i);

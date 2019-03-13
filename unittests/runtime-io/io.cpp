@@ -24,10 +24,11 @@ extern "C" {
   void add_hash64(void*, uint64_t) {}
 
   string * makeString(const KCHAR *, int64_t len = -1);
-  mpz_ptr hook_IO_open(string * filename, string * control);
-  mpz_ptr hook_IO_tell(mpz_t i);
-  mpz_ptr hook_IO_getc(mpz_t i);
-  string * hook_IO_read(mpz_t i, mpz_t len);
+  blockheader header_err();
+  block * hook_IO_open(string * filename, string * control);
+  block * hook_IO_tell(mpz_t i);
+  block * hook_IO_getc(mpz_t i);
+  block * hook_IO_read(mpz_t i, mpz_t len);
   block * hook_IO_close(mpz_t i);
   block * hook_IO_seek(mpz_t i, mpz_t loc);
   block * hook_IO_seekEnd(mpz_t i, mpz_t loc);
@@ -64,8 +65,12 @@ BOOST_AUTO_TEST_CASE(open) {
   auto fakeFilename = makeString("testFake.txt");
   auto control = makeString("r");
 
-  BOOST_CHECK(0 < mpz_cmp_si(hook_IO_open(realFilename, control), 0));
-  BOOST_CHECK(0 > mpz_cmp_si(hook_IO_open(fakeFilename, control), 0));
+  block * b1 = hook_IO_open(realFilename, control);
+  BOOST_CHECK(0 < mpz_cmp_si((mpz_ptr) *(b1->children), 0));
+
+  block * b2 = hook_IO_open(fakeFilename, control);
+  BOOST_CHECK_EQUAL(errno, EACCES);
+  BOOST_CHECK_EQUAL(b2->h.hdr, header_err().hdr);
 }
 
 BOOST_AUTO_TEST_CASE(tell) {
@@ -73,15 +78,25 @@ BOOST_AUTO_TEST_CASE(tell) {
   int fd = overwriteTestFile();
   mpz_init_set_si(f, fd);
 
-  BOOST_CHECK_EQUAL(0, mpz_cmp_si(hook_IO_tell(f), lseek(mpz_get_si(f), 0, SEEK_CUR)));
+  block * b = hook_IO_tell(f);
+
+  BOOST_CHECK_EQUAL(0, mpz_cmp_si((mpz_ptr) *(b->children), lseek(mpz_get_si(f), 0, SEEK_CUR)));
 
   lseek(mpz_get_si(f), 5, SEEK_CUR);
-  BOOST_CHECK_EQUAL(0, mpz_cmp_si(hook_IO_tell(f), 5));
-  BOOST_CHECK_EQUAL(0, mpz_cmp_si(hook_IO_tell(f), lseek(mpz_get_si(f), 0, SEEK_CUR)));
+
+  b = hook_IO_tell(f);
+  BOOST_CHECK_EQUAL(0, mpz_cmp_si((mpz_ptr) *(b->children), 5));
+
+  b = hook_IO_tell(f);
+  BOOST_CHECK_EQUAL(0, mpz_cmp_si((mpz_ptr) *(b->children), lseek(mpz_get_si(f), 0, SEEK_CUR)));
 
   lseek(mpz_get_si(f), -4, SEEK_CUR);
-  BOOST_CHECK_EQUAL(0, mpz_cmp_si(hook_IO_tell(f), 1));
-  BOOST_CHECK_EQUAL(0, mpz_cmp_si(hook_IO_tell(f), lseek(mpz_get_si(f), 0, SEEK_CUR)));
+
+  b = hook_IO_tell(f);
+  BOOST_CHECK_EQUAL(0, mpz_cmp_si((mpz_ptr) *(b->children), 1));
+
+  b = hook_IO_tell(f);
+  BOOST_CHECK_EQUAL(0, mpz_cmp_si((mpz_ptr) *(b->children), lseek(mpz_get_si(f), 0, SEEK_CUR)));
 
   ::close(fd);
 }
@@ -91,11 +106,20 @@ BOOST_AUTO_TEST_CASE(getc) {
   int fd = overwriteTestFile();
   mpz_init_set_si(f, fd);
 
-  BOOST_CHECK_EQUAL(0, mpz_cmp_si(hook_IO_getc(f), int('h')));
-  BOOST_CHECK_EQUAL(0, mpz_cmp_si(hook_IO_getc(f), int('e')));
-  BOOST_CHECK_EQUAL(0, mpz_cmp_si(hook_IO_getc(f), int('l')));
-  BOOST_CHECK_EQUAL(0, mpz_cmp_si(hook_IO_getc(f), int('l')));
-  BOOST_CHECK_EQUAL(0, mpz_cmp_si(hook_IO_getc(f), int('o')));
+  block * b = hook_IO_getc(f);
+  BOOST_CHECK_EQUAL(0, mpz_cmp_si((mpz_ptr) *(b->children), int('h')));
+
+  b = hook_IO_getc(f);
+  BOOST_CHECK_EQUAL(0, mpz_cmp_si((mpz_ptr) *(b->children), int('e')));
+
+  b = hook_IO_getc(f);
+  BOOST_CHECK_EQUAL(0, mpz_cmp_si((mpz_ptr) *(b->children), int('l')));
+
+  b = hook_IO_getc(f);
+  BOOST_CHECK_EQUAL(0, mpz_cmp_si((mpz_ptr) *(b->children), int('l')));
+
+  b = hook_IO_getc(f);
+  BOOST_CHECK_EQUAL(0, mpz_cmp_si((mpz_ptr) *(b->children), int('o')));
 
   ::close(fd);
 }
@@ -107,15 +131,18 @@ BOOST_AUTO_TEST_CASE(read) {
   mpz_init_set_si(f, fd);
   mpz_init_set_si(len, 6);
 
-  auto str = hook_IO_read(f, len);
+  block * b = hook_IO_read(f, len);
+  string * str = (string *) *(b->children);
 
   BOOST_CHECK_EQUAL(0, strncmp(str->data, "hello ", 6));
-  str = hook_IO_read(f, len);
+
+  b = hook_IO_read(f, len);
+  str = (string *) *(b->children);
   BOOST_CHECK_EQUAL(0, strncmp(str->data, "world!", 6));
 
   ::close(fd);
 }
-/*
+
 BOOST_AUTO_TEST_CASE(close) {
   mpz_t f1;
   mpz_t f2;
@@ -170,6 +197,6 @@ BOOST_AUTO_TEST_CASE(write) {
 BOOST_AUTO_TEST_CASE(lock) {
 }
 BOOST_AUTO_TEST_CASE(unlock) {
-}*/
+}
 
 BOOST_AUTO_TEST_SUITE_END()
