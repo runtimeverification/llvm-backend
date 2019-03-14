@@ -1,6 +1,6 @@
 #!/bin/bash -e
 curl -L https://static.rust-lang.org/dist/rustc-1.33.0-src.tar.gz -o rustc-src.tar.gz
-sha512sum -c "$(dirname "$0")/rust-checksum"
+shasum -a 512 -c "$(dirname "$0")/rust-checksum"
 
 curl https://sh.rustup.rs -sSf | sh -s -- -y
 source ~/.cargo/env
