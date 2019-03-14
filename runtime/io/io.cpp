@@ -318,7 +318,7 @@ extern "C" {
       return getInjErrorBlock();
     }
 
-    result = static_cast<string *>(koreResizeLastAlloc(result, bytes, length));
+    result = static_cast<string *>(koreResizeLastAlloc(result, sizeof(string) + bytes, sizeof(string) + length));
     block * retBlock = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(uint64_t)));
     retBlock->h = header_string();
     set_len(result, bytes);
