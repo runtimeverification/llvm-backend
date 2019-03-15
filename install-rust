@@ -5,6 +5,12 @@ shasum -a 512 -c "$(dirname "$0")/rust-checksum"
 curl https://sh.rustup.rs -sSf | sh -s -- -y
 source ~/.cargo/env
 
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    export PATH="/usr/local/opt/llvm@6/bin:$PATH"
+    export LDFLAGS="-L/usr/local/opt/llvm@6/lib"
+    export CPPFLAGS="-I/usr/local/opt/llvm@6/include"
+fi
+
 tar xvf rustc-src.tar.gz
 cd rustc-1.33.0-src
 ./configure --llvm-root=`llvm-config-6.0 --prefix` --enable-llvm-link-shared
