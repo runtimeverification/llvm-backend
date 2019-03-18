@@ -7,8 +7,7 @@ source ~/.cargo/env
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
     export PATH="/usr/local/opt/llvm@6/bin:$PATH"
-    export LDFLAGS="-L/usr/local/opt/llvm@6/lib -L/usr/local/opt/libffi/lib -lffi"
-    export CPPFLAGS="-I/usr/local/opt/llvm@6/include"
+    export RUSTFLAGS="-C link-arg=-L/usr/local/opt/libffi/lib -C link-arg=-lffi"
     export CONFIGFLAGS=""
 else
     export CONFIGFLAGS="--enable-llvm-link-shared"
