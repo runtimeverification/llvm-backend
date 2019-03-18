@@ -96,12 +96,15 @@ extern "C" {
     return result;
   }
 
-  string *hook_BYTES_bytes2string(string *b) {
-    size_t size = sizeof(string) + len(b);
-    string *result = static_cast<string *>(koreAllocToken(size));
-    memcpy(result, b, size);
-    reset_gc(result);
+  string *bytes2string(string *b, size_t len) {
+    string *result = static_cast<string *>(koreAllocToken(sizeof(string) + len));
+    memcpy(result->data, b->data, len);
+    set_len(result, len);
     return result;
+  }
+
+  string *hook_BYTES_bytes2string(string *b) {
+    return bytes2string(b, len(b));
   }
 
   string *hook_BYTES_string2bytes(string *s) {
