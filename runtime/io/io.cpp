@@ -218,10 +218,13 @@ extern "C" {
       switch (modes & 7) {
         case 1:
           flags = O_RDONLY;
+          break;
         case 2:
           flags = O_WRONLY | O_TRUNC | O_CREAT;
+          break;
         case 4:
           flags = O_WRONLY | O_APPEND | O_CREAT;
+          break;
       }
 
       if (modes & MODE_P) {

@@ -189,8 +189,39 @@ BOOST_AUTO_TEST_CASE(putc) {
 }
 
 BOOST_AUTO_TEST_CASE(seek) {
+  mpz_t f;
+  mpz_t loc;
+  mpz_init(loc);
+
+  int fd = overwriteTestFile();
+  mpz_init_set_si(f, fd);
+
+  int deltas[5] = {3, 0, 2, 5, 1};
+
+  for (int d : deltas) {
+    mpz_set_si(loc, d);
+    hook_IO_seek(f, loc);
+    BOOST_CHECK_EQUAL(d, lseek(fd, 0, SEEK_CUR));
+  }
 }
 BOOST_AUTO_TEST_CASE(seekEnd) {
+  mpz_t f;
+  mpz_t loc;
+
+  int fd = overwriteTestFile();
+  mpz_init_set_si(f, fd);
+  mpz_init(loc);
+
+  int cur, end;
+  int deltas[5] = {-5, 0, -3, -4, -2};
+
+  for (int d: deltas) {
+    mpz_set_si(loc, d);
+    hook_IO_seekEnd(f, loc);
+    cur = lseek(fd, 0, SEEK_CUR);
+    end = lseek(fd, d, SEEK_END);
+    BOOST_CHECK_EQUAL(cur, end);
+  }
 }
 BOOST_AUTO_TEST_CASE(write) {
 }
