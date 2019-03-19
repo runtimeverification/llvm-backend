@@ -10,11 +10,11 @@
 extern "C" {
 
 #define KCHAR char
-#define ERRTAG(err) "Lbl'hash'" #err
+#define ERRTAG(err) "Lbl'hash'" #err "{}"
 
   mpz_ptr move_int(mpz_t);
 
-  static block * dotK = (block *)((((uint64_t)getTagForSymbolName("dotk")) << 32) | 1);
+  static block * dotK = (block *)((((uint64_t)getTagForSymbolName("dotk{}")) << 32) | 1);
   static blockheader kseqHeader = {getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("kseq{}"))};
 
   block * block_errno() {
@@ -93,7 +93,7 @@ extern "C" {
     case EOVERFLOW: errStr = ERRTAG(EOVERFLOW); break;
     default:
       block * retBlock = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(mpz_ptr)));
-      retBlock->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("Lbl'Hash'unknownIOError"));
+      retBlock->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("Lbl'Hash'unknownIOError{}"));
       mpz_t err;
       mpz_init_set_si(err, errno);
       mpz_ptr p = move_int(err);
@@ -108,7 +108,7 @@ extern "C" {
     static blockheader header = {(uint64_t)-1};
 
     if (header.hdr == -1) {
-      header = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("inj{SortInt, SortIOInt}"));
+      header = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("inj{SortInt{}, SortIOInt{}}"));
     }
 
     return header;
@@ -118,7 +118,7 @@ extern "C" {
     static blockheader header = {(uint64_t)-1};
 
     if (header.hdr == -1) {
-      header = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("inj{SortIOError, SortKItem}"));
+      header = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("inj{SortIOError{}, SortKItem{}}"));
     }
 
     return header;
@@ -128,7 +128,7 @@ extern "C" {
     static blockheader header = {(uint64_t)-1};
 
     if (header.hdr == -1) {
-      header = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("inj{SortString, SortIOString}"));
+      header = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("inj{SortString{}, SortIOString{}}"));
     }
 
     return header;
