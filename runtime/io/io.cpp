@@ -440,13 +440,4 @@ extern "C" {
 
     return dotK;
   }
-
-  //TEST
-  block * hook_IO_stat(string * str) { return NULL; }
-  block * hook_IO_lstat(string * str) { return NULL; }
-  block * hook_IO_opendir(string * str) { return NULL; }
-  block * hook_IO_parse(string * str1, string * str2) { return NULL; }
-  block * hook_IO_parseInModule(string * str1, string * str2, string * str3) { return NULL; }
-  block * hook_IO_system(string * str) { return NULL; }
-  block * hook_IO_log(string * str1, string * str2) { return NULL; }
 }
