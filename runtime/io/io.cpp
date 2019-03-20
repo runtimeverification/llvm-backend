@@ -167,35 +167,35 @@ extern "C" {
     return buf->data;
   }
 
-	static std::string dirname(std::string path) {
-		if (path == "/") {
-			return "/";
-		}
+  static std::string dirname(std::string path) {
+    if (path == "/") {
+      return "/";
+    }
 
-		size_t i = path.rfind('/', path.length());
-		if (i != std::string::npos && path != "") {
-			return path.substr(0, i);
-		}
+    size_t i = path.rfind('/', path.length());
+    if (i != std::string::npos && path != "") {
+      return path.substr(0, i);
+    }
 
-		return ".";
-	}
+    return ".";
+  }
 
-	static std::string basename(std::string path) {
-		if (path == "") {
-			return ".";
-		}
+  static std::string basename(std::string path) {
+    if (path == "") {
+      return ".";
+    }
 
-		if (path == "/") {
-			return "/";
-		}
+    if (path == "/") {
+      return "/";
+    }
 
-		size_t i = path.rfind('/', path.length());
-		if (i != std::string::npos && i < path.length()) {
-			return path.substr(i + 1, path.length());
-		}
+    size_t i = path.rfind('/', path.length());
+    if (i != std::string::npos && i < path.length()) {
+      return path.substr(i + 1, path.length());
+    }
 
-		return path;
-	}
+    return path;
+  }
 
 #define MODE_R 1
 #define MODE_W 2
@@ -478,14 +478,14 @@ extern "C" {
   void flush_logs() {
     std::string pid = std::to_string(getpid());
     for (auto const& log : logFiles) {
-			std::string path = log.first;
-			std::string msg = log.second;
-			std::string dir = dirname(path);
-			std::string base = basename(path);
-			std::string fullPath = dir + "/" + pid + "_" + base;
-			FILE* f = fopen(fullPath.c_str(), "a+");
-			fwrite(msg.c_str(), sizeof(char), msg.length(), f);
-			fclose(f);
+      std::string path = log.first;
+      std::string msg = log.second;
+      std::string dir = dirname(path);
+      std::string base = basename(path);
+      std::string fullPath = dir + "/" + pid + "_" + base;
+      FILE* f = fopen(fullPath.c_str(), "a+");
+      fwrite(msg.c_str(), sizeof(char), msg.length(), f);
+      fclose(f);
     }
   }
 
