@@ -2,7 +2,7 @@ target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
 target triple = "x86_64-unknown-linux-gnu"
 
 %blockheader = type { i64 }
-%floating = type { %blockheader, i64, { i64, i32, i64, i64 * } } ; 16-bit layout, 48-bit length, exp, mpfr_t
+%floating = type { %blockheader, i64, { i64, i32, i64, i64 * } } ; 10-bit layout, 4-bit gc flags, 40-bit length, exp, mpfr_t
 
 ; helper function for float hooks
 define %floating* @move_float(%floating* %val) {

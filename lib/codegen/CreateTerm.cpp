@@ -66,7 +66,7 @@ target triple = "x86_64-unknown-linux-gnu"
 %list = type { i64, [7 x i64] } ; im::vector::Vector
 %mpz = type { i32, i32, i64 * } ; mpz_t
 %integer = type { %blockheader, %mpz } ; 16-bit layout, 48-bit length, mpz_t
-%floating = type { %blockheader, i64, { i64, i32, i64, i64 * } } ; 16-bit layout, 48-bit length, exp, mpfr_t
+%floating = type { %blockheader, i64, { i64, i32, i64, i64 * } } ; 10-bit layout, 4-bit gc flags, 40-bit length, exp, mpfr_t
 %blockheader = type { i64 }
 %block = type { %blockheader, [0 x i64 *] } ; 16-bit layout, 8-bit length, 32-bit tag, children
 
