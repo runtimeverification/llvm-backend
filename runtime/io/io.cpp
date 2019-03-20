@@ -1,8 +1,10 @@
 #include <gmp.h>
 #include <cstring>
 #include <stdexcept>
+#include <map>
 
 #include "fcntl.h"
+#include "sys/types.h"
 #include "unistd.h"
 #include "runtime/alloc.h"
 #include "runtime/header.h"
@@ -16,6 +18,8 @@ extern "C" {
 
   static block * dotK = (block *)((((uint64_t)getTagForSymbolName("dotk{}")) << 32) | 1);
   static blockheader kseqHeader = {getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("kseq{}"))};
+
+  static std::map<std::string, std::string> logFiles;
 
   block * block_errno() {
     const char * errStr;
@@ -154,7 +158,7 @@ extern "C" {
     return retBlock;
   }
 
-  char * getTerminatedString(string * str) {
+  static char * getTerminatedString(string * str) {
     int length = len(str);
     string * buf = static_cast<string *>(koreAllocToken(sizeof(string) + (length + 1)));
     memcpy(buf->data, str->data, length);
@@ -162,6 +166,36 @@ extern "C" {
     buf->data[length] = '\0';
     return buf->data;
   }
+
+	static std::string dirname(std::string path) {
+		if (path == "/") {
+			return "/";
+		}
+
+		size_t i = path.rfind('/', path.length());
+		if (i != std::string::npos && path != "") {
+			return path.substr(0, i);
+		}
+
+		return ".";
+	}
+
+	static std::string basename(std::string path) {
+		if (path == "") {
+			return ".";
+		}
+
+		if (path == "/") {
+			return "/";
+		}
+
+		size_t i = path.rfind('/', path.length());
+		if (i != std::string::npos && i < path.length()) {
+			return path.substr(i + 1, path.length());
+		}
+
+		return path;
+	}
 
 #define MODE_R 1
 #define MODE_W 2
@@ -171,7 +205,7 @@ extern "C" {
 #define MODE_B 32
 #define MODE_P 64
 
-  int getFileModes(string * modes) {
+  static int getFileModes(string * modes) {
     int flags = 0;
     int length = len(modes);
 
@@ -437,6 +471,37 @@ extern "C" {
     if (ret == -1) {
       return getKSeqErrorBlock();
     }
+
+    return dotK;
+  }
+
+  void flush_logs() {
+    std::string pid = std::to_string(getpid());
+    for (auto const& log : logFiles) {
+			std::string path = log.first;
+			std::string msg = log.second;
+			std::string dir = dirname(path);
+			std::string base = basename(path);
+			std::string fullPath = dir + "/" + pid + "_" + base;
+			FILE* f = fopen(fullPath.c_str(), "a+");
+			fwrite(msg.c_str(), sizeof(char), msg.length(), f);
+			fclose(f);
+    }
+  }
+
+  block * hook_IO_log(string * path, string * msg) {
+    char * p = getTerminatedString(path);
+    char * m = getTerminatedString(msg);
+
+    static bool flushRegistered = false;
+    if (!flushRegistered) {
+      atexit(&flush_logs);
+      flushRegistered = true;
+    }
+
+    std::string log = logFiles[p];
+    log.append(m);
+    logFiles[p] = log;
 
     return dotK;
   }
