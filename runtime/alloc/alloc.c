@@ -113,24 +113,24 @@ void koreFree(void* ptr, size_t size) {}
 
 __attribute__ ((always_inline)) void* koreAllocInteger(size_t requested) {
   integer *result = (integer *) koreAlloc(sizeof(integer));
-  set_len(result, sizeof(mpz_t));
+  set_len(result, sizeof(integer) - sizeof(blockheader));
   return &result->i;
 }
 
 __attribute__ ((always_inline)) void* koreAllocFloating(size_t requested) {
   floating *result = (floating *) koreAlloc(sizeof(floating));
-  set_len(result, sizeof(mpfr_t)+8);
+  set_len(result, sizeof(floating) - sizeof(blockheader));
   return result;
 }
 
 __attribute__ ((always_inline)) void* koreAllocIntegerOld(size_t requested) {
   integer *result = (integer *) koreAllocOld(sizeof(integer));
-  set_len(result, sizeof(mpz_t));
+  set_len(result, sizeof(integer) - sizeof(blockheader));
   return &result->i;
 }
 
 __attribute__ ((always_inline)) void* koreAllocFloatingOld(size_t requested) {
   floating *result = (floating *) koreAllocOld(sizeof(floating));
-  set_len(result, sizeof(mpfr_t)+8);
+  set_len(result, sizeof(floating) - sizeof(blockheader));
   return result;
 }
