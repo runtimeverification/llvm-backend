@@ -69,7 +69,7 @@ BOOST_AUTO_TEST_CASE(open) {
   BOOST_CHECK(0 < mpz_cmp_si((mpz_ptr) *(b1->children), 0));
 
   block * b2 = hook_IO_open(fakeFilename, control);
-  BOOST_CHECK_EQUAL(errno, EACCES);
+  BOOST_CHECK_EQUAL(errno, ENOENT);
   BOOST_CHECK_EQUAL(b2->h.hdr, header_err().hdr);
 }
 
@@ -228,6 +228,8 @@ BOOST_AUTO_TEST_CASE(write) {
 BOOST_AUTO_TEST_CASE(lock) {
 }
 BOOST_AUTO_TEST_CASE(unlock) {
+}
+BOOST_AUTO_TEST_CASE(log) {
 }
 
 BOOST_AUTO_TEST_SUITE_END()
