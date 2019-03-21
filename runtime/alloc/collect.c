@@ -113,7 +113,7 @@ static void migrate_string_buffer(stringbuffer** bufferPtr) {
 }
 
 static void migrate_mpz(mpz_ptr *mpzPtr) {
-  integer *intgr = struct_base(integer, i, *mpzPtr);
+  mpz_hdr *intgr = struct_base(mpz_hdr, i, *mpzPtr);
   const uint64_t hdr = intgr->h.hdr;
   bool isNotInYoungGen = hdr & NOT_YOUNG_OBJECT_BIT;
   bool hasAged = hdr & YOUNG_AGE_BIT;
@@ -124,7 +124,7 @@ static void migrate_mpz(mpz_ptr *mpzPtr) {
   uint64_t mask = shouldPromote ? NOT_YOUNG_OBJECT_BIT : YOUNG_AGE_BIT;
   bool hasForwardingAddress = hdr & FWD_PTR_BIT;
   if (!hasForwardingAddress) {
-    integer *newIntgr;
+    mpz_hdr *newIntgr;
     string *newLimbs;
     string *limbs = struct_base(string, data, intgr->i->_mp_d);
     size_t lenLimbs = len(limbs);
@@ -132,14 +132,14 @@ static void migrate_mpz(mpz_ptr *mpzPtr) {
     assert(intgr->i->_mp_alloc * sizeof(mp_limb_t) == lenLimbs);
 
     if (shouldPromote || (hasAged && collect_old)) {
-      newIntgr = struct_base(integer, i, koreAllocIntegerOld(0));
+      newIntgr = struct_base(mpz_hdr, i, koreAllocIntegerOld(0));
       newLimbs = (string *) koreAllocTokenOld(sizeof(string) + lenLimbs);
     } else {
-      newIntgr = struct_base(integer, i, koreAllocInteger(0));
+      newIntgr = struct_base(mpz_hdr, i, koreAllocInteger(0));
       newLimbs = (string *) koreAllocToken(sizeof(string) + lenLimbs);
     }
     memcpy(newLimbs, limbs, sizeof(string) + lenLimbs);
-    memcpy(newIntgr, intgr, sizeof(integer));
+    memcpy(newIntgr, intgr, sizeof(mpz_hdr));
     newIntgr->h.hdr |= mask;
     newIntgr->i->_mp_d = (mp_limb_t *)newLimbs->data;
     *(mpz_ptr *)(intgr->i->_mp_d) = newIntgr->i;

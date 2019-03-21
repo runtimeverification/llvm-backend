@@ -72,10 +72,10 @@ extern "C" {
     uint64_t b[7];
   } list;
 
-  typedef struct integer {
+  typedef struct mpz_hdr {
     blockheader h;
     mpz_t i;
-  } integer;
+  } mpz_hdr;
 
   typedef struct floating {
     uint64_t exp; // number of bits in exponent range
