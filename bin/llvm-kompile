@@ -19,8 +19,8 @@ shift; shift; shift
 "$(dirname "$0")"/llvm-kompile-codegen "$definition" "$dt_dir"/dt.yaml "$dt_dir" > "$mod"
 @OPT@ -tailcallelim -tailcallopt "$mod" -o "$modopt"
 if [[ "$OSTYPE" == "darwin"* ]]; then
-  flags=
+  flags=-Wl,-mllvm,-tailcallopt
 else
-  flags=-fuse-ld=gold
+  flags=-fuse-ld=gold -Wl,-plugin-opt=-tailcallopt
 fi
-"$(dirname "$0")"/llvm-kompile-clang "$modopt" "$main" $flags -flto -Wl,-plugin-opt=-tailcallopt "$@"
+"$(dirname "$0")"/llvm-kompile-clang "$modopt" "$main" $flags -flto "$@"
