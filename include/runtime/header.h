@@ -78,10 +78,14 @@ extern "C" {
   } integer;
 
   typedef struct floating {
-    blockheader h;
     uint64_t exp; // number of bits in exponent range
     mpfr_t f;
   } floating;
+
+  typedef struct floating_hdr {
+    blockheader h;
+    floating f;
+  } floating_hdr;
 
   typedef struct {
     uint64_t offset;

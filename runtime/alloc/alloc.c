@@ -118,9 +118,9 @@ __attribute__ ((always_inline)) void* koreAllocInteger(size_t requested) {
 }
 
 __attribute__ ((always_inline)) void* koreAllocFloating(size_t requested) {
-  floating *result = (floating *) koreAlloc(sizeof(floating));
-  set_len(result, sizeof(floating) - sizeof(blockheader));
-  return result;
+  floating_hdr *result = (floating_hdr *) koreAlloc(sizeof(floating_hdr));
+  set_len(result, sizeof(floating_hdr) - sizeof(blockheader));
+  return &result->f;
 }
 
 __attribute__ ((always_inline)) void* koreAllocIntegerOld(size_t requested) {
@@ -130,7 +130,7 @@ __attribute__ ((always_inline)) void* koreAllocIntegerOld(size_t requested) {
 }
 
 __attribute__ ((always_inline)) void* koreAllocFloatingOld(size_t requested) {
-  floating *result = (floating *) koreAllocOld(sizeof(floating));
-  set_len(result, sizeof(floating) - sizeof(blockheader));
-  return result;
+  floating_hdr *result = (floating_hdr *) koreAllocOld(sizeof(floating_hdr));
+  set_len(result, sizeof(floating_hdr) - sizeof(blockheader));
+  return &result->f;
 }

@@ -149,7 +149,7 @@ static void migrate_mpz(mpz_ptr *mpzPtr) {
 }
 
 static void migrate_floating(floating **floatingPtr) {
-  floating *flt = *floatingPtr;
+  floating_hdr *flt = struct_base(floating_hdr, f, *floatingPtr);
   const uint64_t hdr = flt->h.hdr;
   bool isNotInYoungGen = hdr & NOT_YOUNG_OBJECT_BIT;
   bool hasAged = hdr & YOUNG_AGE_BIT;
@@ -160,28 +160,28 @@ static void migrate_floating(floating **floatingPtr) {
   uint64_t mask = shouldPromote ? NOT_YOUNG_OBJECT_BIT : YOUNG_AGE_BIT;
   bool hasForwardingAddress = hdr & FWD_PTR_BIT;
   if (!hasForwardingAddress) {
-    floating *newFlt;
+    floating_hdr *newFlt;
     string *newLimbs;
-    string *limbs = struct_base(string, data, flt->f->_mpfr_d-1);
+    string *limbs = struct_base(string, data, flt->f.f->_mpfr_d-1);
     size_t lenLimbs = len(limbs);
 
-    assert(((flt->f->_mpfr_prec + mp_bits_per_limb - 1) / mp_bits_per_limb) * sizeof(mp_limb_t) <= lenLimbs);
+    assert(((flt->f.f->_mpfr_prec + mp_bits_per_limb - 1) / mp_bits_per_limb) * sizeof(mp_limb_t) <= lenLimbs);
 
     if (shouldPromote || (hasAged && collect_old)) {
-      newFlt = (floating *) koreAllocFloatingOld(0);
+      newFlt = struct_base(floating_hdr, f, koreAllocFloatingOld(0));
       newLimbs = (string *) koreAllocTokenOld(sizeof(string) + lenLimbs);
     } else {
-      newFlt = (floating *) koreAllocFloating(0);
+      newFlt = struct_base(floating_hdr, f, koreAllocFloating(0));
       newLimbs = (string *) koreAllocToken(sizeof(string) + lenLimbs);
     }
     memcpy(newLimbs, limbs, sizeof(string) + lenLimbs);
-    memcpy(newFlt, flt, sizeof(floating));
+    memcpy(newFlt, flt, sizeof(floating_hdr));
     newFlt->h.hdr |= mask;
-    newFlt->f->_mpfr_d = (mp_limb_t *)newLimbs->data+1;
-    *(floating **)(flt->f->_mpfr_d) = newFlt;
+    newFlt->f.f->_mpfr_d = (mp_limb_t *)newLimbs->data+1;
+    *(floating **)(flt->f.f->_mpfr_d) = &newFlt->f;
     flt->h.hdr |= FWD_PTR_BIT;
   }
-  *floatingPtr = *(floating **)(flt->f->_mpfr_d);
+  *floatingPtr = *(floating **)(flt->f.f->_mpfr_d);
 }
 
 static char* evacuate(char* scan_ptr, char **alloc_ptr) {
