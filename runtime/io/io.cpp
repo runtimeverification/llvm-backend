@@ -21,7 +21,7 @@ extern "C" {
 
   static std::map<std::string, std::string> logFiles;
 
-  block * block_errno() {
+  static block * block_errno() {
     const char * errStr;
     switch (errno) {
     case EOF: errStr = ERRTAG(EOF); break;
@@ -108,7 +108,7 @@ extern "C" {
     return (block *)((((uint64_t)getTagForSymbolName(errStr)) << 32) | 1);
   }
 
-  blockheader header_int() {
+  static blockheader header_int() {
     static blockheader header = {(uint64_t)-1};
 
     if (header.hdr == -1) {
@@ -128,7 +128,7 @@ extern "C" {
     return header;
   }
 
-  blockheader header_string() {
+  static blockheader header_string() {
     static blockheader header = {(uint64_t)-1};
 
     if (header.hdr == -1) {
@@ -138,7 +138,7 @@ extern "C" {
     return header;
   }
 
-  inline block * getKSeqErrorBlock() {
+  static inline block * getKSeqErrorBlock() {
     block * err = block_errno();
     block * retBlock = static_cast<block *>(koreAlloc(sizeof(block) + 2 * sizeof(block *)));
     block * inj = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(block *)));
@@ -150,7 +150,7 @@ extern "C" {
     return retBlock;
   }
 
-  inline block* getInjErrorBlock() {
+  static inline block* getInjErrorBlock() {
     block * p = block_errno();
     block * retBlock = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(block *)));
     retBlock->h = header_err();
@@ -449,7 +449,8 @@ extern "C" {
     int fd = mpz_get_si(i);
     off_t l = mpz_get_si(len);
 
-    int ret = lockf(fd, F_LOCK, l);
+    struct flock lockp = {.l_type = F_WRLCK, .l_whence = SEEK_CUR, .l_start = 0, .l_len = l};
+    int ret = fcntl(fd, F_SETLKW, &lockp);
 
     if (ret == -1) {
       return getKSeqErrorBlock();
@@ -466,7 +467,8 @@ extern "C" {
     int fd = mpz_get_si(i);
     off_t l = mpz_get_si(len);
 
-    int ret = lockf(fd, F_ULOCK, l);
+    struct flock lockp = {.l_type = F_UNLCK, .l_whence = SEEK_CUR, .l_start = 0, .l_len = l};
+    int ret = fcntl(fd, F_SETLKW, &lockp);
 
     if (ret == -1) {
       return getKSeqErrorBlock();
@@ -475,7 +477,7 @@ extern "C" {
     return dotK;
   }
 
-  void flush_logs() {
+  void flush_IO_logs() {
     std::string pid = std::to_string(getpid());
     for (auto const& log : logFiles) {
       std::string path = log.first;
@@ -495,7 +497,7 @@ extern "C" {
 
     static bool flushRegistered = false;
     if (!flushRegistered) {
-      atexit(&flush_logs);
+      atexit(&flush_IO_logs);
       flushRegistered = true;
     }
 
