@@ -237,11 +237,9 @@ static std::pair<llvm::Value *, llvm::BasicBlock *> getEval(KOREDefinition *def,
   case SortCategory::List:
   case SortCategory::Set:
     if (symbolDecl->getAttributes().count("hook")) {
-      // if this is a hook then we are using the sret abi and the reutrned value
-      // is a pointer. Otherwise we need to store it like Bool/MInt
-      retval = new llvm::BitCastInst(result, llvm::Type::getInt8PtrTy(Ctx), "",
-          creator.getCurrentBlock());
-      break;
+      // if this is a hook then we are using the sret abi and the returned value
+      // is a pointer. We load the pointer and store the struct like Bool/MInt
+      result = new llvm::LoadInst(result, "", creator.getCurrentBlock());
     }
     // fall through
   case SortCategory::Bool:
