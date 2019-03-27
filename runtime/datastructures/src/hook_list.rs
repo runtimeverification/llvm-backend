@@ -240,6 +240,7 @@ pub unsafe extern "C" fn list_map(list: *const List, process: extern fn(block: K
 #[cfg(test)]
 pub mod tests {
   extern crate libc;
+  extern crate im_rc;
 
   use decls::testing::*;
   use hook_list::*;
@@ -511,5 +512,17 @@ pub mod tests {
       let result = hook_LIST_eq(&l1, &l2);
       assert!(result);
     }
+  }
+
+  #[test]
+  fn test_long_list() {
+    let mut l = im_rc::Vector::singleton(0);
+    for _ in 0..9000 {
+      let mut tmp = im_rc::Vector::singleton(0);
+      tmp.append(l);
+      l = tmp;
+    }
+    let len = l.len();
+    l.slice(1..len);
   }
 }

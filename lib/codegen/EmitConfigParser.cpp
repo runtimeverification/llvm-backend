@@ -343,7 +343,7 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
     }
     case SortCategory::Float: {
       llvm::Type *Float = module->getTypeByName(FLOAT_STRUCT);
-      llvm::Value *Term = allocateTerm(Float, CaseBlock, "koreAllocOld");
+      llvm::Value *Term = allocateTerm(Float, CaseBlock, "koreAllocNoGC");
       llvm::Constant *InitFloat = module->getOrInsertFunction("init_float",
           llvm::Type::getVoidTy(Ctx), llvm::PointerType::getUnqual(Float), 
           llvm::Type::getInt8PtrTy(Ctx));
@@ -356,7 +356,7 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
     }
     case SortCategory::Int: {
       llvm::Type *Int = module->getTypeByName(INT_STRUCT);
-      llvm::Value *Term = allocateTerm(Int, CaseBlock, "koreAllocOld");
+      llvm::Value *Term = allocateTerm(Int, CaseBlock, "koreAllocNoGC");
       llvm::Constant *MpzInitSet = module->getOrInsertFunction("__gmpz_init_set_str",
           llvm::Type::getInt32Ty(Ctx), llvm::PointerType::getUnqual(Int), 
           llvm::Type::getInt8PtrTy(Ctx), llvm::Type::getInt32Ty(Ctx));

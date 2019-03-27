@@ -17,7 +17,7 @@ FILE(GLOB DatastructuresSources datastructures/Cargo.toml datastructures/src/*.r
 set(RUSTLIB "datastructures/target/${RUSTDIR}/libdatastructures.rlib")
 set(RUSTDEPS datastructures/target/${RUSTDIR}/deps/)
 execute_process(
-  COMMAND rustc --print sysroot
+  COMMAND rustc +rust-1.33.0-llvm-6.0 --print sysroot
   OUTPUT_VARIABLE RUSTSYSROOT
   OUTPUT_STRIP_TRAILING_WHITESPACE)
 set(RUSTSTDLIB "${RUSTSYSROOT}/lib/rustlib/${RUST_TARGET_TRIPLE}/lib/")
@@ -25,7 +25,7 @@ set(RUSTSTDLIB "${RUSTSYSROOT}/lib/rustlib/${RUST_TARGET_TRIPLE}/lib/")
 add_custom_command(
   OUTPUT ${RUSTLIB}
   DEPENDS ${DatastructuresSources}
-  COMMAND cargo build ${RUSTFLAGS}
+  COMMAND cargo +rust-1.33.0-llvm-6.0 build ${RUSTFLAGS}
   WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/runtime/datastructures
 )
 
@@ -55,7 +55,9 @@ install(
   PATTERN libunwind-*.rlib
   PATTERN libcompiler_builtins-*.rlib
   PATTERN libpanic_abort-*.rlib
-  PATTERN liballoc_system-*.rlib
+  PATTERN libbacktrace_sys-*.rlib
+  PATTERN librustc_demangle-*.rlib
+  PATTERN libcfg_if-*.rlib
 )
 
 if (CMAKE_BUILD_TYPE STREQUAL "Release")

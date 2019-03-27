@@ -34,8 +34,15 @@ char youngspace_collection_id() {
   return getArenaCollectionSemispaceID(&youngspace);
 }
 
-void koreAllocSwap() {
+char oldspace_collection_id() {
+  return getArenaCollectionSemispaceID(&oldspace);
+}
+
+void koreAllocSwap(bool swapOld) {
   arenaSwapAndReset(&youngspace);
+  if (swapOld) {
+    arenaSwapAndReset(&oldspace);
+  }
 }
 
 void freeAllKoreMem() {
