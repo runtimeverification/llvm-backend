@@ -4,6 +4,7 @@
 #include <map>
 
 #include "fcntl.h"
+#include "libgen.h"
 #include "sys/types.h"
 #include "unistd.h"
 #include "runtime/alloc.h"
@@ -19,7 +20,7 @@ extern "C" {
   static block * dotK = (block *)((((uint64_t)getTagForSymbolName("dotk{}")) << 32) | 1);
   static blockheader kseqHeader = {getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("kseq{}"))};
 
-  static std::map<std::string, std::string> logFiles;
+  static std::map<char *, std::string> logFiles;
 
   static block * block_errno() {
     const char * errStr;
@@ -165,36 +166,6 @@ extern "C" {
     set_len(buf, length + 1);
     buf->data[length] = '\0';
     return buf->data;
-  }
-
-  static std::string dirname(std::string path) {
-    if (path == "/") {
-      return "/";
-    }
-
-    size_t i = path.rfind('/', path.length());
-    if (i != std::string::npos && path != "") {
-      return path.substr(0, i);
-    }
-
-    return ".";
-  }
-
-  static std::string basename(std::string path) {
-    if (path == "") {
-      return ".";
-    }
-
-    if (path == "/") {
-      return "/";
-    }
-
-    size_t i = path.rfind('/', path.length());
-    if (i != std::string::npos && i < path.length()) {
-      return path.substr(i + 1, path.length());
-    }
-
-    return path;
   }
 
 #define MODE_R 1
@@ -477,11 +448,11 @@ extern "C" {
   void flush_IO_logs() {
     std::string pid = std::to_string(getpid());
     for (auto const& log : logFiles) {
-      std::string path = log.first;
+      char * path = log.first;
       std::string msg = log.second;
-      std::string dir = dirname(path);
-      std::string base = basename(path);
-      std::string fullPath = dir + "/" + pid + "_" + base;
+      char * dir = dirname(path);
+      char * base = basename(path);
+      std::string fullPath = std::string(dir) + "/" + pid + "_" + std::string(base);
       FILE* f = fopen(fullPath.c_str(), "a+");
       fwrite(msg.c_str(), sizeof(char), msg.length(), f);
       fclose(f);
@@ -498,9 +469,7 @@ extern "C" {
       flushRegistered = true;
     }
 
-    std::string log = logFiles[p];
-    log.append(m);
-    logFiles[p] = log;
+    logFiles[p].append(m);
 
     return dotK;
   }

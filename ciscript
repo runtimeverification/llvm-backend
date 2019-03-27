@@ -55,12 +55,7 @@ llvm-kompile ../test/test12.kore TEST main -o interpreter
 ./interpreter ../test/test12-3.kore -1 /dev/stdout | diff - ../test/test12.out
 llvm-kompile ../test/io.kore IO main -o interpreter
 ./interpreter ../test/ioTest1.kore -1 /dev/stdout | grep -q "Lbl'-LT-'k'-GT-'{}(dotk{}())"
-cat `ls | grep io_output1.txt`
-echo
 ./interpreter ../test/ioTest2.kore -1 /dev/stdout | diff - ../test/ioTest2.out
 ./interpreter ../test/ioTest3.kore -1 /dev/stdout | grep -q "Lbl'-LT-'k'-GT-'{}(dotk{}())"
-cat `ls | grep io_log`
-echo
-rm `ls | grep io_log`
 ./interpreter ../test/ioTest4.kore -1 /dev/stdout | diff - ../test/ioTest4.out
 rm -f configparser configparser.ll interpreter
