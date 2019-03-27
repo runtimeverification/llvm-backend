@@ -450,14 +450,21 @@ extern "C" {
     for (auto const& log : logFiles) {
       std::string pathStr = log.first;
       std::string msg = log.second;
-      char * path = strdup(pathStr.c_str());
-      char * dir = dirname(path);
-      char * base = basename(path);
+      size_t length = pathStr.length();
+      char * path1 = (char *) malloc(sizeof(char) * (length + 1));
+      strcpy(path1, pathStr.c_str());
+      path1[length] = '\0';
+      char * path2 = (char *) malloc(sizeof(char) * (length + 1));
+      strcpy(path2, pathStr.c_str());
+      path2[length] = '\0';
+      char * dir = dirname(path1);
+      char * base = basename(path2);
       std::string fullPath = std::string(dir) + "/" + pid + "_" + std::string(base);
       FILE* f = fopen(fullPath.c_str(), "a+");
       fwrite(msg.c_str(), sizeof(char), msg.length(), f);
       fclose(f);
-      free(path);
+      free(path1);
+      free(path2);
     }
   }
 
