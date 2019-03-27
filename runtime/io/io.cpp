@@ -250,20 +250,17 @@ extern "C" {
 
     if (-1 != modes) {
       switch (modes & 7) {
-        case 1:
-          flags = O_RDONLY;
+        case MODE_R:
+          flags = (modes & MODE_P) ? O_RDWR : O_RDONLY;
           break;
-        case 2:
-          flags = O_WRONLY | O_TRUNC | O_CREAT;
+        case MODE_W:
+          flags = (modes & MODE_P) ? O_RDWR : O_WRONLY;
+          flags |= O_TRUNC | O_CREAT;
           break;
-        case 4:
-          flags = O_WRONLY | O_APPEND | O_CREAT;
+        case MODE_A:
+          flags = (modes & MODE_P) ? O_RDWR : O_WRONLY;
+          flags |= O_APPEND | O_CREAT;
           break;
-      }
-
-      if (modes & MODE_P) {
-        flags &= (~O_WRONLY) & ~(O_RDONLY);
-        flags |= O_RDWR;
       }
 
       if (modes & MODE_E) {
