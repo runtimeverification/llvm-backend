@@ -20,7 +20,7 @@ extern "C" {
   static block * dotK = (block *)((((uint64_t)getTagForSymbolName("dotk{}")) << 32) | 1);
   static blockheader kseqHeader = {getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("kseq{}"))};
 
-  static std::map<char *, std::string> logFiles;
+  static std::map<std::string, std::string> logFiles;
 
   static block * block_errno() {
     const char * errStr;
@@ -448,14 +448,16 @@ extern "C" {
   void flush_IO_logs() {
     std::string pid = std::to_string(getpid());
     for (auto const& log : logFiles) {
-      char * path = log.first;
+      std::string pathStr = log.first;
       std::string msg = log.second;
+      char * path = strdup(pathStr.c_str());
       char * dir = dirname(path);
       char * base = basename(path);
       std::string fullPath = std::string(dir) + "/" + pid + "_" + std::string(base);
       FILE* f = fopen(fullPath.c_str(), "a+");
       fwrite(msg.c_str(), sizeof(char), msg.length(), f);
       fclose(f);
+      free(path);
     }
   }
 
