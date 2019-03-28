@@ -374,15 +374,16 @@ std::string floatToString(const floating *f) {
     mpfr_exp_t printed_exp;
     char *str = mpfr_get_str(NULL, &printed_exp, 10, 0, f->f, MPFR_RNDN);
     size_t len = strlen(str);
-    char *newstr = (char *)koreAllocNoGC(len+2);
+    string *newstr = (string *)koreAllocToken(sizeof(string) + len + 2);
+    set_len(newstr, len + 2);
     size_t idx = 0;
     if (str[0] == '-') {
-      newstr[0] = '-';
+      newstr->data[0] = '-';
       idx = 1;
     }
-    newstr[idx] = '0';
-    newstr[idx+1] = '.';
-    strcpy(newstr+idx+2,str+idx);
-    return std::string(newstr) + "e" + std::to_string(printed_exp) + suffix;
+    newstr->data[idx] = '0';
+    newstr->data[idx+1] = '.';
+    strcpy(newstr->data + idx + 2, str + idx);
+    return std::string(newstr->data) + "e" + std::to_string(printed_exp) + suffix;
   }
 }
