@@ -295,7 +295,13 @@ extern "C" {
     ssize_t ret = read(fd, &c, sizeof(char));
 
 
-    if (-1 == ret) {
+    if (0 == ret) {
+      block * p = (block *)((((uint64_t)getTagForSymbolName(ERRTAG(EOF))) << 32) | 1);
+      block * retBlock = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(block *)));
+      retBlock->h = header_err();
+      memcpy(retBlock->children, &p, sizeof(block *));
+      return retBlock;
+    } else if (-1 == ret) {
       return getInjErrorBlock();
     }
 
