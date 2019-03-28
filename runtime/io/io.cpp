@@ -453,10 +453,8 @@ extern "C" {
       size_t length = pathStr.length();
       char * path1 = (char *) malloc(sizeof(char) * (length + 1));
       strcpy(path1, pathStr.c_str());
-      path1[length] = '\0';
       char * path2 = (char *) malloc(sizeof(char) * (length + 1));
       strcpy(path2, pathStr.c_str());
-      path2[length] = '\0';
       char * dir = dirname(path1);
       char * base = basename(path2);
       std::string fullPath = std::string(dir) + "/" + pid + "_" + std::string(base);
