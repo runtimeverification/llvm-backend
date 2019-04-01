@@ -1,0 +1,1 @@
+Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'T'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(inj{SortString{}, SortIOString{}}(\dv{SortString{}}("hello")),dotk{}())),Lbl'-LT-'state'-GT-'{}(Lbl'UndsPipe'-'-GT-Unds'{}(inj{SortId{}, SortKItem{}}(\dv{SortId{}}("x")),inj{SortInt{}, SortIOInt{}}(\dv{SortInt{}}("4"))))),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))
