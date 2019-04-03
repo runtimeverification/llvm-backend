@@ -66,4 +66,5 @@ diff `ls | grep io_log` ../test/ioTest3.out
 rm `ls | grep io_log`
 ./interpreter ../test/ioTest4.kore -1 /dev/stdout | diff - ../test/ioTest4.out
 llvm-kompile ../test/test13.kore TEST main -o interpreter
+./interpreter ../test/test13.in.kore -1 /dev/stdout | diff - ../test/test13.out.kore
 rm -f configparser configparser.ll interpreter
