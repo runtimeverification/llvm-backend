@@ -15,6 +15,9 @@
 #define layout(s) layout_hdr((s)->h.hdr)
 #define layout_hdr(s) ((s) >> LAYOUT_OFFSET)
 #define tag_hdr(s) (s & 0xffffffffLL)
+#define is_in_young_gen_hdr(s) (!((s) & NOT_YOUNG_OBJECT_BIT))
+#define is_in_old_gen_hdr(s) \
+        (((s) & NOT_YOUNG_OBJECT_BIT) && ((s) & YOUNG_AGE_BIT))
 #define reset_gc(s) ((s)->h.hdr = (s)->h.hdr & ~(NOT_YOUNG_OBJECT_BIT | YOUNG_AGE_BIT | FWD_PTR_BIT))
 #define struct_base(struct_type, member_name, member_addr) \
         ((struct_type *)((char *)(member_addr) - offsetof(struct_type, member_name)))

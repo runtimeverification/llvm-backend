@@ -42,12 +42,13 @@ static void migrate(block** blockPtr) {
     return;
   }
   const uint64_t hdr = currBlock->h.hdr;
-  bool isNotInYoungGen = hdr & NOT_YOUNG_OBJECT_BIT;
+  bool isInYoungGen = is_in_young_gen_hdr(hdr);
   bool hasAged = hdr & YOUNG_AGE_BIT;
-  if (isNotInYoungGen && !(hasAged && collect_old)) {
+  bool isInOldGen = is_in_old_gen_hdr(hdr);
+  if (!(isInYoungGen || (isInOldGen && collect_old))) {
     return;
   }
-  bool shouldPromote = !isNotInYoungGen && hasAged;
+  bool shouldPromote = isInYoungGen && hasAged;
   uint64_t mask = shouldPromote ? NOT_YOUNG_OBJECT_BIT : YOUNG_AGE_BIT;
   bool hasForwardingAddress = hdr & FWD_PTR_BIT;
   uint16_t layout = layout_hdr(hdr);
@@ -55,7 +56,7 @@ static void migrate(block** blockPtr) {
   block** forwardingAddress = (block**)(currBlock + 1);
   if (!hasForwardingAddress) {
     block *newBlock;
-    if (shouldPromote || (hasAged && collect_old)) {
+    if (shouldPromote || (isInOldGen && collect_old)) {
       newBlock = koreAllocOld(lenInBytes);
     } else {
       newBlock = koreAlloc(lenInBytes);
@@ -83,18 +84,19 @@ static void migrate_once(block** blockPtr) {
 static void migrate_string_buffer(stringbuffer** bufferPtr) {
   stringbuffer* buffer = *bufferPtr;
   const uint64_t hdr = buffer->contents->h.hdr;
-  bool isNotInYoungGen = hdr & NOT_YOUNG_OBJECT_BIT;
+  bool isInYoungGen = is_in_young_gen_hdr(hdr);
   bool hasAged = hdr & YOUNG_AGE_BIT;
-  if (isNotInYoungGen && !(hasAged && collect_old)) {
+  bool isInOldGen = is_in_old_gen_hdr(hdr);
+  if (!(isInYoungGen || (isInOldGen && collect_old))) {
     return;
   }
-  bool shouldPromote = !isNotInYoungGen && hasAged;
+  bool shouldPromote = isInYoungGen && hasAged;
   uint64_t mask = shouldPromote ? NOT_YOUNG_OBJECT_BIT : YOUNG_AGE_BIT;
   bool hasForwardingAddress = hdr & FWD_PTR_BIT;
   if (!hasForwardingAddress) {
     stringbuffer *newBuffer;
     string *newContents;
-    if (shouldPromote || (hasAged && collect_old)) {
+    if (shouldPromote || (isInOldGen && collect_old)) {
       newBuffer = koreAllocOld(sizeof(stringbuffer));
       newBuffer->capacity = buffer->capacity; // contents is written below
       newContents = koreAllocTokenOld(sizeof(string) + buffer->capacity);
@@ -115,12 +117,13 @@ static void migrate_string_buffer(stringbuffer** bufferPtr) {
 static void migrate_mpz(mpz_ptr *mpzPtr) {
   mpz_hdr *intgr = struct_base(mpz_hdr, i, *mpzPtr);
   const uint64_t hdr = intgr->h.hdr;
-  bool isNotInYoungGen = hdr & NOT_YOUNG_OBJECT_BIT;
+  bool isInYoungGen = is_in_young_gen_hdr(hdr);
   bool hasAged = hdr & YOUNG_AGE_BIT;
-  if (isNotInYoungGen && !(hasAged && collect_old)) {
+  bool isInOldGen = is_in_old_gen_hdr(hdr);
+  if (!(isInYoungGen || (isInOldGen && collect_old))) {
     return;
   }
-  bool shouldPromote = !isNotInYoungGen && hasAged;
+  bool shouldPromote = isInYoungGen && hasAged;
   uint64_t mask = shouldPromote ? NOT_YOUNG_OBJECT_BIT : YOUNG_AGE_BIT;
   bool hasForwardingAddress = hdr & FWD_PTR_BIT;
   if (!hasForwardingAddress) {
@@ -131,7 +134,7 @@ static void migrate_mpz(mpz_ptr *mpzPtr) {
 
     assert(intgr->i->_mp_alloc * sizeof(mp_limb_t) == lenLimbs);
 
-    if (shouldPromote || (hasAged && collect_old)) {
+    if (shouldPromote || (isInOldGen && collect_old)) {
       newIntgr = struct_base(mpz_hdr, i, koreAllocIntegerOld(0));
       newLimbs = (string *) koreAllocTokenOld(sizeof(string) + lenLimbs);
     } else {
@@ -151,12 +154,13 @@ static void migrate_mpz(mpz_ptr *mpzPtr) {
 static void migrate_floating(floating **floatingPtr) {
   floating_hdr *flt = struct_base(floating_hdr, f, *floatingPtr);
   const uint64_t hdr = flt->h.hdr;
-  bool isNotInYoungGen = hdr & NOT_YOUNG_OBJECT_BIT;
+  bool isInYoungGen = is_in_young_gen_hdr(hdr);
   bool hasAged = hdr & YOUNG_AGE_BIT;
-  if (isNotInYoungGen && !(hasAged && collect_old)) {
+  bool isInOldGen = is_in_old_gen_hdr(hdr);
+  if (!(isInYoungGen || (isInOldGen && collect_old))) {
     return;
   }
-  bool shouldPromote = !isNotInYoungGen && hasAged;
+  bool shouldPromote = isInYoungGen && hasAged;
   uint64_t mask = shouldPromote ? NOT_YOUNG_OBJECT_BIT : YOUNG_AGE_BIT;
   bool hasForwardingAddress = hdr & FWD_PTR_BIT;
   if (!hasForwardingAddress) {
@@ -167,7 +171,7 @@ static void migrate_floating(floating **floatingPtr) {
 
     assert(((flt->f.f->_mpfr_prec + mp_bits_per_limb - 1) / mp_bits_per_limb) * sizeof(mp_limb_t) <= lenLimbs);
 
-    if (shouldPromote || (hasAged && collect_old)) {
+    if (shouldPromote || (isInOldGen && collect_old)) {
       newFlt = struct_base(floating_hdr, f, koreAllocFloatingOld(0));
       newLimbs = (string *) koreAllocTokenOld(sizeof(string) + lenLimbs);
     } else {
