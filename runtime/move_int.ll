@@ -6,11 +6,11 @@ target triple = "x86_64-unknown-linux-gnu"
 ; helper function for int hooks
 define %mpz* @move_int(%mpz* %val) {
   %loaded = load %mpz, %mpz* %val
-  %malloccall = tail call i8* @koreAllocNoGC(i64 ptrtoint (%mpz* getelementptr (%mpz, %mpz* null, i32 1) to i64))
+  %malloccall = tail call i8* @koreAllocInteger(i64 0)
   %ptr = bitcast i8* %malloccall to %mpz*
   store %mpz %loaded, %mpz* %ptr
   ret %mpz* %ptr
 }
 
-declare noalias i8* @koreAllocNoGC(i64)
+declare noalias i8* @koreAllocInteger(i64)
 

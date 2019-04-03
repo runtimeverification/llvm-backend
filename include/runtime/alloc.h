@@ -26,10 +26,21 @@ void* koreAllocNoGC(size_t requested);
 void koreAllocSwap(bool swapOld);
 // resizes the last allocation into the young generation
 void* koreResizeLastAlloc(void* oldptr, size_t newrequest, size_t oldrequest);
-
-void* koreReallocNoGC(void*, size_t, size_t);
-
+// allocator hook for the GMP library
+void* koreAllocMP(size_t);
+// reallocator hook for the GMP library
+void* koreReallocMP(void*, size_t, size_t);
+// deallocator hook for the GMP library
 void koreFree(void*, size_t);
+
+// helper allocators for integers and floats
+// they allocate enough space into the corresponding generation and initialize the blockheader
+// with the correct length. The size argument is ignored but exists for uniformity with
+// the standard malloc signature. The caller has to set the appropriate gc bits.
+void* koreAllocInteger(size_t requested);
+void* koreAllocFloating(size_t requested);
+void* koreAllocIntegerOld(size_t requested);
+void* koreAllocFloatingOld(size_t requested);
 
 #ifdef ALLOC_DBG
 #define MEM_LOG(...) fprintf(stderr, __VA_ARGS__)

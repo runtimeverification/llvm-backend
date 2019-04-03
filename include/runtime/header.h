@@ -15,7 +15,12 @@
 #define layout(s) layout_hdr((s)->h.hdr)
 #define layout_hdr(s) ((s) >> LAYOUT_OFFSET)
 #define tag_hdr(s) (s & 0xffffffffLL)
+#define is_in_young_gen_hdr(s) (!((s) & NOT_YOUNG_OBJECT_BIT))
+#define is_in_old_gen_hdr(s) \
+        (((s) & NOT_YOUNG_OBJECT_BIT) && ((s) & YOUNG_AGE_BIT))
 #define reset_gc(s) ((s)->h.hdr = (s)->h.hdr & ~(NOT_YOUNG_OBJECT_BIT | YOUNG_AGE_BIT | FWD_PTR_BIT))
+#define struct_base(struct_type, member_name, member_addr) \
+        ((struct_type *)((char *)(member_addr) - offsetof(struct_type, member_name)))
 
 #ifdef __cplusplus
 extern "C" {
@@ -70,10 +75,20 @@ extern "C" {
     uint64_t b[7];
   } list;
 
+  typedef struct mpz_hdr {
+    blockheader h;
+    mpz_t i;
+  } mpz_hdr;
+
   typedef struct floating {
     uint64_t exp; // number of bits in exponent range
     mpfr_t f;
   } floating;
+
+  typedef struct floating_hdr {
+    blockheader h;
+    floating f;
+  } floating_hdr;
 
   typedef struct {
     uint64_t offset;

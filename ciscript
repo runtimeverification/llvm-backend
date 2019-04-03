@@ -53,6 +53,10 @@ llvm-kompile ../test/test12.kore TEST main -o interpreter
 ./interpreter ../test/test12-1.kore -1 /dev/stdout | diff - ../test/test12.out
 ./interpreter ../test/test12-2.kore -1 /dev/stdout | diff - ../test/test12.out
 ./interpreter ../test/test12-3.kore -1 /dev/stdout | diff - ../test/test12.out
+llvm-kompile ../test/test-gc-int.kore IMP main -o interpreter
+./interpreter ../test/test-gc-int-1.kore -1 /dev/stdout | grep -q "Lbl'-LT-'T'-GT-'{}(Lbl'-LT-'k'-GT-'{}(dotk{}()).*inj{SortId{}, SortKItem{}}(\\\\dv{SortId{}}(\"x\")),inj{SortInt{}, SortKItem{}}(\\\\dv{SortInt{}}(\"43466557686937456435688527675040625802564660517371780402481729089536555417949051890403879840079255169295922593080322634775209689623239873322471161642996440906533187938298969649928516003704476137795166849228875\"))"
+llvm-kompile ../test/test-gc-float.kore IMP-FLOAT main -o interpreter
+./interpreter ../test/test-gc-float-1.kore -1 /dev/stdout | grep -q "Lbl'-LT-'T'-GT-'{}(Lbl'-LT-'k'-GT-'{}(dotk{}()).*inj{SortId{}, SortKItem{}}(\\\\dv{SortId{}}(\"x\")),inj{SortFloat{}, SortKItem{}}(\\\\dv{SortFloat{}}(\"0.43466557686937428e209\"))"
 llvm-kompile ../test/io.kore IO main -o interpreter
 ./interpreter ../test/ioTest1.kore -1 /dev/stdout | grep -q "Lbl'-LT-'k'-GT-'{}(dotk{}())"
 diff io_output1.txt ../test/ioTest1.out
