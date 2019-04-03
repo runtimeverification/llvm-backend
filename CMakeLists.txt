@@ -1,15 +1,11 @@
 cmake_minimum_required (VERSION 3.4)
 
-find_program(CMAKE_C_COMPILER clang-7)
 find_program(CMAKE_C_COMPILER clang-6.0)
 find_program(CMAKE_C_COMPILER clang)
-find_program(CMAKE_CXX_COMPILER clang++-7)
 find_program(CMAKE_CXX_COMPILER clang++-6.0)
 find_program(CMAKE_CXX_COMPILER clang++)
-find_program(CMAKE_C_COMPILER_AR llvm-ar-7)
 find_program(CMAKE_C_COMPILER_AR llvm-ar-6.0)
 find_program(CMAKE_C_COMPILER_AR llvm-ar)
-find_program(CMAKE_C_COMPILER_RANLIB llvm-ranlib-7)
 find_program(CMAKE_C_COMPILER_RANLIB llvm-ranlib-6.0)
 find_program(CMAKE_C_COMPILER_RANLIB llvm-ranlib)
 project (KLLVM CXX C)
@@ -27,9 +23,10 @@ set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} -flto")
 set(CMAKE_AR "${CMAKE_C_COMPILER_AR}")
 set(CMAKE_RANLIB "${CMAKE_C_COMPILER_RANLIB}")
 
-# On MacOs the compiler version is not appended
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
 set(RUST_TARGET_TRIPLE "x86_64-apple-darwin")
+include_directories(AFTER SYSTEM /usr/local/include)
+link_directories(AFTER /usr/local/lib)
 else()
 set(RUST_TARGET_TRIPLE "x86_64-unknown-linux-gnu")
 endif()
@@ -83,7 +80,6 @@ install(
   DESTINATION lib/kllvm/llvm/main
 )
 
-find_program(OPT opt-7)
 find_program(OPT opt-6.0)
 find_program(OPT opt)
 if(${OPT} STREQUAL "OPT-NOTFOUND")

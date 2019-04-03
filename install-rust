@@ -5,9 +5,17 @@ shasum -a 512 -c "$(dirname "$0")/rust-checksum"
 curl https://sh.rustup.rs -sSf | sh -s -- -y
 source ~/.cargo/env
 
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    export PATH="/usr/local/opt/llvm@6/bin:$PATH"
+    export RUSTFLAGS="-C link-arg=-L/usr/local/opt/libffi/lib -C link-arg=-lffi"
+    export CONFIGFLAGS=""
+else
+    export CONFIGFLAGS="--enable-llvm-link-shared"
+fi
+
 tar xvf rustc-src.tar.gz
 cd rustc-1.33.0-src
-./configure --llvm-root=/usr/lib/llvm-6.0 --enable-llvm-link-shared
+./configure --llvm-root=`llvm-config-6.0 --prefix 2>/dev/null || llvm-config --prefix` $CONFIGFLAGS
 ./x.py build
 if [[ "$OSTYPE" == "darwin"* ]]; then
   triple=x86_64-apple-darwin

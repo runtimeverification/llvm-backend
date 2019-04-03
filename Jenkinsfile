@@ -4,6 +4,9 @@ pipeline {
       additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)'
     }
   }
+  options {
+    ansiColor('xterm')
+  }
   stages {
     stage("Init title") {
       when { changeRequest() }
@@ -15,11 +18,9 @@ pipeline {
     }
     stage('Build and Test') {
       steps {
-        ansiColor('xterm') {
-          sh '''
-            ./ciscript
-          '''
-        }
+        sh '''
+          ./ciscript
+        '''
       }
     }
   }
