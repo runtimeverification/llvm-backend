@@ -534,6 +534,7 @@ expandOrPatterns (ClauseMatrix (PatternMatrix (c : cs)) as) =
       in concatMap expandRowIfOr zipped
     expandRowIfOr :: (Fix Pattern,a) -> [a]
     expandRowIfOr ((Fix (Or ps)),a) = replicate (length ps) a
+    expandRowIfOr ((Fix (As _ _ (Fix (Or ps)))),a) = replicate (length ps) a
     expandRowIfOr (_,a) = [a]
 expandOrPatterns cmx = cmx
 
