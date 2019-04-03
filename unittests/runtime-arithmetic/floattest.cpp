@@ -134,41 +134,41 @@ BOOST_AUTO_TEST_CASE(int2float) {
 BOOST_AUTO_TEST_CASE(trig) {
   floating a[1];
   floating *result;
-  set_float(a, 53, 11, M_PI_4l);
+  set_float(a, 53, 11, M_PI_4);
   result = hook_FLOAT_sin(a);
   double e = 0.000000000000001;
-  BOOST_CHECK_CLOSE_FRACTION(mpfr_get_d(result->f, MPFR_RNDN), sin(M_PI_4l), e);
+  BOOST_CHECK_CLOSE_FRACTION(mpfr_get_d(result->f, MPFR_RNDN), sin(M_PI_4), e);
   result = hook_FLOAT_cos(a);
-  BOOST_CHECK_CLOSE_FRACTION(mpfr_get_d(result->f, MPFR_RNDN), cos(M_PI_4l), e);
+  BOOST_CHECK_CLOSE_FRACTION(mpfr_get_d(result->f, MPFR_RNDN), cos(M_PI_4), e);
   result = hook_FLOAT_tan(a);
   BOOST_CHECK_CLOSE_FRACTION(mpfr_get_d(result->f, MPFR_RNDN), 1.0, e);
   result = hook_FLOAT_sec(a);
-  BOOST_CHECK_CLOSE_FRACTION(mpfr_get_d(result->f, MPFR_RNDN), 1.0/cos(M_PI_4l), e);
+  BOOST_CHECK_CLOSE_FRACTION(mpfr_get_d(result->f, MPFR_RNDN), 1.0/cos(M_PI_4), e);
   result = hook_FLOAT_csc(a);
-  BOOST_CHECK_CLOSE_FRACTION(mpfr_get_d(result->f, MPFR_RNDN), 1.0/sin(M_PI_4l), e);
+  BOOST_CHECK_CLOSE_FRACTION(mpfr_get_d(result->f, MPFR_RNDN), 1.0/sin(M_PI_4), e);
   result = hook_FLOAT_cot(a);
   BOOST_CHECK_CLOSE_FRACTION(mpfr_get_d(result->f, MPFR_RNDN), 1.0, e);
   set_float(a, 53, 11, 0.0);
   result = hook_FLOAT_asin(a);
   BOOST_CHECK_CLOSE_FRACTION(mpfr_get_d(result->f, MPFR_RNDN), 0.0, e);
   result = hook_FLOAT_acos(a);
-  BOOST_CHECK_CLOSE_FRACTION(mpfr_get_d(result->f, MPFR_RNDN), M_PI_2l, e);
+  BOOST_CHECK_CLOSE_FRACTION(mpfr_get_d(result->f, MPFR_RNDN), M_PI_2, e);
   result = hook_FLOAT_atan(a);
   BOOST_CHECK_CLOSE_FRACTION(mpfr_get_d(result->f, MPFR_RNDN), 0, e);
   set_float(a, 53, 11, 1.0);
   result = hook_FLOAT_asin(a);
-  BOOST_CHECK_CLOSE_FRACTION(mpfr_get_d(result->f, MPFR_RNDN), M_PI_2l, e);
+  BOOST_CHECK_CLOSE_FRACTION(mpfr_get_d(result->f, MPFR_RNDN), M_PI_2, e);
   result = hook_FLOAT_acos(a);
   BOOST_CHECK_CLOSE_FRACTION(mpfr_get_d(result->f, MPFR_RNDN), 0, e);
   result = hook_FLOAT_atan(a);
-  BOOST_CHECK_CLOSE_FRACTION(mpfr_get_d(result->f, MPFR_RNDN), M_PI_4l, e);
+  BOOST_CHECK_CLOSE_FRACTION(mpfr_get_d(result->f, MPFR_RNDN), M_PI_4, e);
   floating b[1];
   set_float(b, 53, 11, 0.0);
   result = hook_FLOAT_atan2(a, b);
-  BOOST_CHECK_CLOSE_FRACTION(mpfr_get_d(result->f, MPFR_RNDN), M_PI_2l, e);
+  BOOST_CHECK_CLOSE_FRACTION(mpfr_get_d(result->f, MPFR_RNDN), M_PI_2, e);
   set_float(a, 53, 11, -1.0);
   result = hook_FLOAT_atan2(a, b);
-  BOOST_CHECK_CLOSE_FRACTION(mpfr_get_d(result->f, MPFR_RNDN), -M_PI_2l, e);
+  BOOST_CHECK_CLOSE_FRACTION(mpfr_get_d(result->f, MPFR_RNDN), -M_PI_2, e);
 }
 
 BOOST_AUTO_TEST_CASE(precision) {

@@ -3,6 +3,7 @@ add_subdirectory(configurationparser)
 add_subdirectory(strings)
 add_subdirectory(meta)
 add_subdirectory(alloc)
+add_subdirectory(io)
 
 set(RUSTDIR_ debug)
 set(RUSTDIR_Debug debug)
