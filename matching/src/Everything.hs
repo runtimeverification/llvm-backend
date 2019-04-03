@@ -524,6 +524,7 @@ expandOrPatterns (ClauseMatrix (PatternMatrix (c : cs)) as) =
     expandOrColumn (Column m ps) = Column m (concatMap expandOrs ps)
     expandOrs :: Fix Pattern -> [Fix Pattern]
     expandOrs (Fix (Or ps)) = ps
+    expandOrs (Fix (As name hookAtt (Fix (Or ps)))) = fmap (Fix . As name hookAtt) ps
     expandOrs p = [p]
     expandOrColumns :: [Fix Pattern] -> Column Pattern BoundPattern -> Column Pattern BoundPattern
     expandOrColumns p0s (Column m ps) = Column m (expandIfOr p0s ps)
