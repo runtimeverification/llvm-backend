@@ -8,7 +8,9 @@ add_subdirectory(io)
 set(RUSTDIR_ debug)
 set(RUSTDIR_Debug debug)
 set(RUSTDIR_Release release)
+set(RUSTDIR_RelWithDebInfo release)
 set(RUSTFLAGS_Release --release)
+set(RUSTFLAGS_RelWithDebInfo --release)
 set(RUSTFLAGS ${RUSTFLAGS_${CMAKE_BUILD_TYPE}})
 set(RUSTDIR ${RUSTDIR_${CMAKE_BUILD_TYPE}})
 
@@ -60,6 +62,6 @@ install(
   PATTERN libcfg_if-*.rlib
 )
 
-if (CMAKE_BUILD_TYPE STREQUAL "Release")
+if (CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
   install(SCRIPT ${PROJECT_SOURCE_DIR}/cmake/mkrlib.cmake)
 endif()
