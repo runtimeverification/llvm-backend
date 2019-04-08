@@ -59,8 +59,8 @@ target triple = "x86_64-unknown-linux-gnu"
 
 ; We also define the following LLVM structure types:
 
-%string = type { %blockheader, [0 x i8] } ; 16-bit layout, 48-bit length, bytes
-%stringbuffer = type { i64, %string* } ; capacity and current contents
+%string = type { %blockheader, [0 x i8] } ; 10-bit layout, 4-bit gc flags, 10 unused bits, 40-bit length (or buffer capacity for string pointed by stringbuffers), bytes
+%stringbuffer = type { i64, i64, %string* } ; 10-bit layout, 4-bit gc flags, 10 unused bits, 40-bit length, string length, current contents
 %map = type { i64, i8 *, i8 * } ; im::hashmap::HashMap
 %set = type { i8 *, i8 *, i64 } ; im::hashset::HashSet
 %list = type { i64, [7 x i64] } ; im::vector::Vector
