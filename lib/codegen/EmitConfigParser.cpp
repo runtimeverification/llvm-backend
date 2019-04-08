@@ -446,6 +446,7 @@ static void emitTraversal(std::string name, KOREDefinition *definition, llvm::Mo
     argTypes.push_back(makeVisitorType(Ctx, file, getValueType({SortCategory::Int, 0}, module), 1, 0));
     argTypes.push_back(makeVisitorType(Ctx, file, getValueType({SortCategory::Float, 0}, module), 1, 0));
     argTypes.push_back(makeVisitorType(Ctx, file, getValueType({SortCategory::Bool, 0}, module), 1, 0));
+    argTypes.push_back(makeVisitorType(Ctx, file, getValueType({SortCategory::StringBuffer, 0}, module), 1, 0));
     argTypes.push_back(makeVisitorType(Ctx, file, llvm::Type::getInt8PtrTy(Ctx), 1, 0));
     argTypes.push_back(llvm::PointerType::getUnqual(llvm::FunctionType::get(llvm::Type::getVoidTy(Ctx), {file}, false)));
   } else {
@@ -558,14 +559,6 @@ static void getVisitor(KOREDefinition *definition, llvm::Module *module, KOREObj
     }
     llvm::Constant *CharPtr = llvm::ConstantExpr::getInBoundsGetElementPtr(Str->getType(), global, indices);
     switch(cat.cat) {
-    case SortCategory::StringBuffer:
-      Child = llvm::GetElementPtrInst::Create(
-          module->getTypeByName(BUFFER_STRUCT),
-          Child, {zero, llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), 1)},
-          "", CaseBlock);
-      Child = new llvm::LoadInst(Child, "", CaseBlock);
-      Child = new llvm::BitCastInst(Child, getValueType({SortCategory::Symbol, 0}, module), "", CaseBlock);
-      // fall through
     case SortCategory::Variable:
     case SortCategory::Symbol:
       llvm::CallInst::Create(func->arg_begin()+2, {func->arg_begin()+1, Child, CharPtr, llvm::ConstantInt::get(llvm::Type::getInt1Ty(Ctx), cat.cat == SortCategory::Variable)}, "", CaseBlock);
@@ -579,9 +572,12 @@ static void getVisitor(KOREDefinition *definition, llvm::Module *module, KOREObj
     case SortCategory::Bool:
       llvm::CallInst::Create(func->arg_begin()+8, {func->arg_begin()+1, Child, CharPtr}, "", CaseBlock);
       break;
+    case SortCategory::StringBuffer:
+      llvm::CallInst::Create(func->arg_begin()+9, {func->arg_begin()+1, Child, CharPtr}, "", CaseBlock);
+      break;
     case SortCategory::MInt:
       ChildPtr = new llvm::BitCastInst(ChildPtr, llvm::Type::getInt8PtrTy(Ctx), "", CaseBlock);
-      llvm::CallInst::Create(func->arg_begin()+9, {func->arg_begin()+1, ChildPtr, CharPtr}, "", CaseBlock);
+      llvm::CallInst::Create(func->arg_begin()+10, {func->arg_begin()+1, ChildPtr, CharPtr}, "", CaseBlock);
       break;
     case SortCategory::Map:
       visitCollection(definition, module, compositeSort, func, ChildPtr, CaseBlock, 3);
@@ -596,7 +592,7 @@ static void getVisitor(KOREDefinition *definition, llvm::Module *module, KOREObj
       abort();
     }
     if (i != symbol->getArguments().size() - 1) {
-      llvm::CallInst::Create(func->arg_begin()+10, {func->arg_begin()+1}, "", CaseBlock);
+      llvm::CallInst::Create(func->arg_begin()+11, {func->arg_begin()+1}, "", CaseBlock);
     }
     i++;
   }

@@ -1,6 +1,7 @@
 #include<gmp.h>
 #include<mpfr.h>
 #include<algorithm>
+#include<cassert>
 #include<cinttypes>
 #include<cstdlib>
 #include<cstdint>
@@ -21,7 +22,7 @@ extern "C" {
   mpz_ptr move_int(mpz_t);
   floating *move_float(floating *);
 
-  string *hook_BYTES_bytes2string(string *);
+  string *bytes2string(string *, size_t);
   string *hook_BYTES_concat(string *a, string *b);
   mpz_ptr hook_BYTES_length(string *a);
   string *hook_BYTES_substr(string *a, mpz_t start, mpz_t end);
@@ -284,44 +285,42 @@ extern "C" {
   }
 
   stringbuffer *hook_BUFFER_empty() {
-    auto result = static_cast<stringbuffer *>(koreAllocToken(sizeof(stringbuffer)));
-    result->capacity = 16;
+    auto result = static_cast<stringbuffer *>(koreAlloc(sizeof(stringbuffer)));
+    set_len(result, sizeof(stringbuffer) - sizeof(blockheader));
+    result->strlen = 0;
     auto str = static_cast<string *>(koreAllocToken(sizeof(string) + 16));
-    set_len(str, 0);
+    set_len(str, 16);
     result->contents = str;
     return result;
   }
 
   stringbuffer *hook_BUFFER_concat(stringbuffer *buf, string *s) {
-    uint64_t newCapacity = buf->capacity;
-    uint64_t minCapacity = len(buf->contents) + len(s);
-    uint64_t notYoungObjectBit = buf->contents->h.hdr & NOT_YOUNG_OBJECT_BIT;
-    uint64_t youngAgeBit = buf->contents->h.hdr & YOUNG_AGE_BIT;
+    uint64_t newCapacity = len(buf->contents);
+    uint64_t minCapacity = buf->strlen + len(s);
+    uint64_t notYoungObjectBit = buf->h.hdr & NOT_YOUNG_OBJECT_BIT;
     if (newCapacity < minCapacity) {
       newCapacity = len(buf->contents) * 2 + 2;
       if (newCapacity < minCapacity) {
         newCapacity = minCapacity;
       }
-      buf->capacity = newCapacity;
       string* new_contents;
       if (notYoungObjectBit) {
+        assert(buf->h.hdr & YOUNG_AGE_BIT);
         new_contents = static_cast<string *>(koreAllocTokenOld(sizeof(string) + newCapacity));
       } else {
         new_contents = static_cast<string *>(koreAllocToken(sizeof(string) + newCapacity));
       }
-      memcpy(new_contents, buf->contents, sizeof(string) + len(buf->contents));
-      // TODO: free/decref old contents.
+      memcpy(new_contents->data, buf->contents->data, buf->strlen);
       buf->contents = new_contents;
     }
-    memcpy(buf->contents->data + len(buf->contents), s->data, len(s));
-    set_len(buf->contents, len(buf->contents) + len(s));
-    buf->contents->h.hdr |= notYoungObjectBit;
-    buf->contents->h.hdr |= youngAgeBit;
+    memcpy(buf->contents->data + buf->strlen, s->data, len(s));
+    buf->strlen += len(s);
+    set_len(buf->contents, newCapacity);
     return buf;
   }
 
   string *hook_BUFFER_toString(stringbuffer *buf) {
-    return hook_BYTES_bytes2string(buf->contents);
+    return bytes2string(buf->contents, buf->strlen);
   }
 }
 

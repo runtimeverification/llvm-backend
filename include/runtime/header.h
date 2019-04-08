@@ -49,9 +49,10 @@ extern "C" {
     char data[];
   } string;
   
-  // llvm: stringbuffer = type { i64, %string* }
+  // llvm: stringbuffer = type { i64, i64, %string* }
   typedef struct stringbuffer {
-    uint64_t capacity;
+    blockheader h;
+    uint64_t strlen;
     string *contents;
   } stringbuffer;
 
@@ -138,6 +139,7 @@ extern "C" {
       void visitInt(FILE *, mpz_t, const char *),
       void visitFloat(FILE *, floating *, const char *),
       void visitBool(FILE *, bool, const char *),
+      void visitStringBuffer(FILE *, stringbuffer *, const char *),
       void visitMInt(FILE *, void *, const char *),
       void visitSeparator(FILE *));
 

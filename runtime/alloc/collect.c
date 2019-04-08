@@ -83,7 +83,8 @@ static void migrate_once(block** blockPtr) {
 
 static void migrate_string_buffer(stringbuffer** bufferPtr) {
   stringbuffer* buffer = *bufferPtr;
-  const uint64_t hdr = buffer->contents->h.hdr;
+  const uint64_t hdr = buffer->h.hdr;
+  const uint64_t cap = len(buffer->contents);
   bool isInYoungGen = is_in_young_gen_hdr(hdr);
   bool hasAged = hdr & YOUNG_AGE_BIT;
   bool isInOldGen = is_in_old_gen_hdr(hdr);
@@ -98,18 +99,17 @@ static void migrate_string_buffer(stringbuffer** bufferPtr) {
     string *newContents;
     if (shouldPromote || (isInOldGen && collect_old)) {
       newBuffer = koreAllocOld(sizeof(stringbuffer));
-      newBuffer->capacity = buffer->capacity; // contents is written below
-      newContents = koreAllocTokenOld(sizeof(string) + buffer->capacity);
+      newContents = koreAllocTokenOld(sizeof(string) + cap);
     } else {
       newBuffer = koreAlloc(sizeof(stringbuffer));
-      newBuffer->capacity = buffer->capacity; // contents is written below
-      newContents = koreAllocToken(sizeof(string) + buffer->capacity);
+      newContents = koreAllocToken(sizeof(string) + cap);
     }
-    memcpy(newContents, buffer->contents, len(buffer->contents));
-    newContents->h.hdr |= mask;
+    memcpy(newContents, buffer->contents, sizeof(string) + buffer->strlen);
+    memcpy(newBuffer, buffer, sizeof(stringbuffer));
+    newBuffer->h.hdr |= mask;
     newBuffer->contents = newContents;
     *(stringbuffer **)(buffer->contents) = newBuffer;
-    buffer->contents->h.hdr |= FWD_PTR_BIT;
+    buffer->h.hdr |= FWD_PTR_BIT;
   }
   *bufferPtr = *(stringbuffer **)(buffer->contents);
 }
