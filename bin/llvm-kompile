@@ -21,6 +21,6 @@ shift; shift; shift
 if [[ "$OSTYPE" == "darwin"* ]]; then
   flags=-Wl,-mllvm,-tailcallopt
 else
-  flags="-fuse-ld=gold -Wl,-plugin-opt=-tailcallopt"
+  flags="-fuse-ld=lld -Wl,-mllvm,-tailcallopt"
 fi
 "$(dirname "$0")"/llvm-kompile-clang "$modopt" "$main" $flags -flto "$@"
