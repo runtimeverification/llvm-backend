@@ -1,14 +1,11 @@
 module Pattern.Map
   ( getMapCs
-  , getMapHookName
   , isDefaultMap
   , mightUnifyMap
   , checkMapPatternIndex
   , addMapVarToRow
   , getBestMapKey
   , computeMapScore
-  , getMapKeys
-  , getMapVariables
   , expandMapPattern
   ) where
 
@@ -28,6 +25,7 @@ import Kore.AST.MetaOrObject
 import Pattern.Type
 import Pattern.Var
 import Pattern.Optimiser.Score
+import Pattern.Util
 import Pattern
 
 -- | Extracts the constructors from a map pattern. It also returns
@@ -61,11 +59,6 @@ nextMap (Fix (MapPattern (_ : ks) vs f e o)) =
   else Just (Fix (MapPattern ks vs f e o))
 nextMap _ = error "This should only be called on non-empty Maps"
 
--- | This is the hook name for maps. We may be able to remove this
--- one from the public interface
-getMapHookName :: Maybe String
-getMapHookName = Just "MAP.Map"
-
 -- | This matches the default case for maps. We may be able to remove
 -- this one from the public interface
 isDefaultMap :: Clause BoundPattern -> Fix Pattern -> Bool
@@ -92,6 +85,8 @@ checkMapPatternIndex f (HasKey _ _ _ (Just p)) _ (c, Fix (MapPattern ks _ Nothin
 checkMapPatternIndex _ (HasNoKey _ (Just p)) _ (c, Fix (MapPattern ks _ _ _ _)) =
   let canonKs = map (canonicalizePattern c) ks
   in p `notElem` canonKs
+checkMapPatternIndex _ (HasKey _ _ _ Nothing) _ _ = error "TODO: map choice"
+checkMapPatternIndex _ (HasNoKey _ Nothing) _ _ = error "TODO: map choice"
 checkMapPatternIndex _ _ _ _ = error "Third argument must contain a map."
 
 -- | Add variables bound in the pattern to the binding list
@@ -107,7 +102,7 @@ addMapVarToRow _ _ _ (Fix MapPattern{}) vars = vars
 addMapVarToRow _ _ _ _ _ = error "Fourth argument must contain a map."
 
 -- | This function computes the score for a map.
-computeMapScore :: (Metadata BoundPattern-> [(Fix Pattern, Clause BoundPattern)] -> Double)
+computeMapScore :: (Metadata BoundPattern -> [(Fix Pattern, Clause BoundPattern)] -> Double)
                 -> Metadata BoundPattern
                 -> [(Fix Pattern, Clause BoundPattern)]
                 -> Double
@@ -155,18 +150,6 @@ computeMapElementScore f m e c tl (k,v) =
   let finalScore = score * f (head $ fromJust $ getChildren m (HasKey False e (Ignoring m) Nothing)) [(v,c)]
   in if finalScore == 0.0 then minPositiveDouble else finalScore
 
-minPositiveDouble :: Double
-minPositiveDouble = encodeFloat 1 $ fst (floatRange (0.0 :: Double)) - floatDigits (0.0 :: Double)
-
-getMapKeys :: Fix Pattern -> [Fix Pattern]
-getMapKeys (Fix (MapPattern ks _ _ _ _)) = ks
-getMapKeys _ = error "The getMapKeys function only support map patterns."
-
-getMapVariables :: (Fix Pattern -> [String])
-                -> Fix Pattern -> [String]
-getMapVariables f (Fix (MapPattern _ _ _ _ o)) = f o
-getMapVariables _ _ = error "The getMapVariables function only accepts maps."
-
 expandMapPattern :: Constructor BoundPattern
                  -> [Metadata BoundPattern]
                  -> Metadata BoundPattern
@@ -179,10 +162,6 @@ expandMapPattern (HasKey _ _ _ (Just p)) _ _ (m@(Fix (MapPattern ks vs f e o)),c
        Just i -> [(vs !! i,Nothing), (Fix (MapPattern (except i ks) (except i vs) f e o), Nothing), (Fix Wildcard, Nothing)]
        Nothing -> [(Fix Wildcard,Nothing), (Fix Wildcard,Nothing), (m,Nothing)]
 expandMapPattern (HasNoKey _ _) _ _ (p,_) = [(p,Nothing)]
+expandMapPattern (HasKey _ _ _ Nothing) _ _ _ = error "TODO: map choice"
 expandMapPattern _ _ _ (Fix MapPattern{},_) = error "Invalid map pattern."
 expandMapPattern _ _ _ _ = error "The expandMapPattern function expects a map parameter as its final argument."
-
-except :: Int -> [a] -> [a]
-except i as =
-  let (hd,tl) = splitAt i as
-  in hd ++ tail tl

@@ -1,5 +1,6 @@
 module Pattern.Optimiser.Score
   ( computeElementScore
+  , minPositiveDouble
   ) where
 
 import Data.Functor.Foldable
@@ -33,3 +34,7 @@ computeElementScore k c tl =
           os = map getOccurrence vars
           names = map show os
       in Clause a (zipWith3 VariableBinding names hooks os) ranges children
+
+minPositiveDouble :: Double
+minPositiveDouble = encodeFloat 1 $ fst (floatRange (0.0 :: Double)) - floatDigits (0.0 :: Double)
+

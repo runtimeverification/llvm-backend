@@ -29,7 +29,7 @@ import Data.Function
 import Data.Functor.Foldable
        ( Fix (..) )
 import Data.List
-       ( elemIndex, intersect, maximumBy, nub, sortBy, transpose, zipWith4 )
+       ( intersect, maximumBy, nub, sortBy, transpose, zipWith4 )
 import Data.List.Index
        ( indexed )
 import Data.Maybe
@@ -60,7 +60,6 @@ import Pattern.Map
 import Pattern.Optimiser.Score
 import Pattern.Set
 import Pattern.Type
-import Pattern.Var
 
 -- [ Builders ]
 
@@ -178,7 +177,7 @@ hook (PatternMatrix (c : _)) =
     ix :: Fix Pattern -> Maybe String
     ix (Fix (Pattern _ bw' _)) = bw'
     ix (Fix ListPattern{}) = Just "LIST.List"
-    ix (Fix MapPattern {}) = getMapHookName
+    ix (Fix MapPattern {}) = Just "MAP.Map"
     ix (Fix SetPattern{}) = Just "SET.Set"
     ix (Fix (As _ _ pat))    = ix pat
     ix (Fix (Or ps))      = listToMaybe $ catMaybes $ map ix ps
@@ -344,8 +343,8 @@ isDefault (_, Fix Wildcard) = True
 isDefault (_, Fix (Variable _ _)) = True
 isDefault (c, p@(Fix MapPattern{})) =
   isDefaultMap c p
-isDefault (_, Fix (SetPattern _ (Just _) _ _)) = True
-isDefault (_, Fix (SetPattern es Nothing _ _)) = not (null es)
+isDefault (c, p@(Fix SetPattern{})) =
+  isDefaultSet c p
 
 mightUnify :: Fix BoundPattern -> Fix BoundPattern -> Bool
 mightUnify (Fix Wildcard) _ = True
@@ -360,10 +359,10 @@ mightUnify (Fix (Pattern c _ ps)) (Fix (Pattern c' _ ps')) = c == c' && and (zip
 mightUnify (Fix ListPattern{}) (Fix ListPattern{}) = True
 mightUnify x@(Fix MapPattern{}) y =
   mightUnifyMap x y
-mightUnify (Fix SetPattern{}) (Fix SetPattern{}) = True
+mightUnify x@(Fix SetPattern{}) y =
+  mightUnifySet x y
 mightUnify (Fix Pattern{}) _ = False
 mightUnify (Fix ListPattern{}) _ = False
-mightUnify (Fix SetPattern{}) _ = False
 
 -- returns true if the specified constructor is an overload of the current pattern and can match it
 isValidOverload :: [Fix Pattern]
@@ -410,15 +409,8 @@ checkPatternIndex inj@(SymbolConstructor (Symbol (SymbolOrAlias (Id "inj" _) _))
 checkPatternIndex ix _ (_, Fix (Pattern ix' _ _)) = ix == getPatternConstructor ix'
 checkPatternIndex c m p@(_, Fix MapPattern{}) =
   checkMapPatternIndex mightUnify c m p
-checkPatternIndex Empty _ (_, Fix (SetPattern es _ _ _)) = null es
-checkPatternIndex HasKey{} _ (_, Fix (SetPattern _ (Just _) _ _)) = True
-checkPatternIndex (HasKey _ _ _ (Just p)) _ (c, Fix (SetPattern es Nothing _ _)) = any (mightUnify p) $ map (canonicalizePattern c) es
-checkPatternIndex (HasKey _ _ _ Nothing) _ _ = error "TODO: map/set choice"
-checkPatternIndex (HasNoKey _ (Just p)) _ (c, Fix (SetPattern es _ _ _)) =
-  let canonEs = map (canonicalizePattern c) es
-  in p `notElem` canonEs
-checkPatternIndex (HasNoKey _ Nothing) _ _ = error "TODO: map/set choice"
-checkPatternIndex _ _ (_, Fix SetPattern{}) = error "Invalid map pattern"
+checkPatternIndex c m p@(_, Fix SetPattern{}) =
+  checkSetPatternIndex mightUnify c m p
 
 addVars :: Maybe (Constructor BoundPattern)
         -> [Clause BoundPattern]
@@ -445,8 +437,8 @@ addVarToRow (Just (List _ len)) o (Fix (ListPattern _ (Just p) _ _ _)) vars = ad
 addVarToRow _ _ (Fix (ListPattern _ (Just _) _ _ _)) vars = vars
 addVarToRow c o p@(Fix MapPattern{}) vars =
   addMapVarToRow addVarToRow c o p vars
-addVarToRow _ o (Fix (SetPattern [] (Just p) _ _)) vars = addVarToRow Nothing o p vars
-addVarToRow _ _ (Fix SetPattern{}) vars = vars
+addVarToRow c o p@(Fix SetPattern{}) vars =
+  addSetVarToRow addVarToRow c o p vars
 
 addRange :: Maybe (Constructor BoundPattern)
          -> Occurrence
@@ -565,9 +557,8 @@ computeScore m ((Fix (Variable _ _),_):tl) = min 0.0 $ computeScore m tl
 computeScore m ((Fix (Or ps),c):tl) = computeScore m ((zip ps (replicate (length ps) c)) ++ tl)
 computeScore m pc@((Fix MapPattern{}, _) : _) =
   computeMapScore computeScore m pc
-computeScore m ((Fix (SetPattern [] Nothing _ _),_):tl) = 1.0 + computeScore m tl
-computeScore m ((Fix (SetPattern [] (Just p) _ _),c):tl) = computeScore m ((p,c):tl)
-computeScore m ((Fix (SetPattern es _ _ _),c):tl) = if computeScore m tl == -1.0 / 0.0 then -1.0 / 0.0 else snd $ computeSetScore c es tl
+computeScore m pc@((Fix SetPattern{}, _) : _) =
+  computeSetScore computeScore m pc
 
 -- | Gets the best key or element to use from a set or map when computing
 -- the score
@@ -576,21 +567,11 @@ getBestKey :: Column Pattern BoundPattern
            -> Maybe (Fix BoundPattern)
 getBestKey columns@(Column _ (Fix MapPattern{} : _)) clauses =
   getBestMapKey computeScore columns clauses
-getBestKey (Column _ (Fix (SetPattern (k:ks) _ _ _):tl)) cs = fst $ computeSetScore (head cs) (k:ks) (zip tl $ tail cs)
+getBestKey columns@(Column _ (Fix SetPattern{} : _)) clauses =
+  getBestSetKey columns clauses
 getBestKey (Column m (Fix Wildcard:tl)) cs = getBestKey (Column m tl) (tail cs)
 getBestKey (Column m (Fix (Variable _ _):tl)) cs = getBestKey (Column m tl) (tail cs)
 getBestKey _ _ = Nothing
-
-computeSetScore :: Clause BoundPattern
-                -> [Fix Pattern]
-                -> [(Fix Pattern, Clause BoundPattern)]
-                -> (Maybe (Fix BoundPattern), Double)
-computeSetScore c es tl =
-  let scores = map (\e -> (if isBound getName c e then Just $ canonicalizePattern c e else Nothing,computeElementScore e c tl)) es
-  in maximumBy (comparing snd) scores
-
-minPositiveDouble :: Double
-minPositiveDouble = encodeFloat 1 $ fst (floatRange (0.0 :: Double)) - floatDigits (0.0 :: Double)
 
 expandColumn :: Constructor BoundPattern
              -> Column Pattern BoundPattern
@@ -617,11 +598,6 @@ expandIfJust ((p,Nothing):tl,c) = p : expandIfJust (tl,c)
 expandIfJust ((p,Just (ix,m)):tl,c) =
   let metas = expandMetadata ix m
   in head (expandIfJust (expandPattern ix metas m (p,c),c)) : expandIfJust (tl,c)
-
-except :: Int -> [a] -> [a]
-except i as =
-  let (hd,tl) = splitAt i as
-  in hd ++ tail tl
 
 expandPattern :: Constructor BoundPattern
               -> [Metadata BoundPattern]
@@ -675,15 +651,8 @@ expandPattern Empty _ _ (_, _) = []
 expandPattern (NonEmpty _) _ _ (p,_) = [(p,Nothing)]
 expandPattern s ms m pc@(Fix MapPattern{},_) =
   expandMapPattern s ms m pc
-expandPattern (HasKey _ _ _ (Just p)) _ _ (m@(Fix (SetPattern es f e o)),c) =
-  let canonEs = map (canonicalizePattern c) es
-      hasElem = elemIndex p canonEs
-  in case hasElem of
-       Just i -> [(Fix (SetPattern (except i es) f e o), Nothing), (Fix Wildcard,Nothing)]
-       Nothing -> [(Fix Wildcard,Nothing), (m,Nothing)]
-expandPattern (HasKey _ _ _ Nothing) _ _ _ = error "TODO: map/set choice"
-expandPattern (HasNoKey _ _) _ _ (p,_) = [(p,Nothing)]
-expandPattern _ _ _ (Fix SetPattern{},_) = error "Invalid set pattern"
+expandPattern s ms m pc@(Fix SetPattern{},_) =
+  expandSetPattern s ms m pc
 expandPattern _ _ _ (Fix (Pattern _ _ fixedPs), _)  = zip fixedPs $ replicate (length fixedPs) Nothing
 expandPattern ix ms m (Fix (As _ _ pat), c)         = expandPattern ix ms m (pat, c)
 expandPattern _ _ _ (Fix (Or{}), _)                 = error "Unexpanded or pattern"
@@ -851,8 +820,7 @@ getRealScore (ClauseMatrix (PatternMatrix cs) as) c =
   where
     getMapOrSetKeys :: Fix Pattern -> [Fix Pattern]
     getMapOrSetKeys (Fix (SetPattern ks _ _ _)) = ks
-    getMapOrSetKeys p@(Fix MapPattern{}) =
-      getMapKeys p
+    getMapOrSetKeys (Fix (MapPattern ks _ _ _ _)) = ks
     getMapOrSetKeys _ = []
     getVariables :: Fix Pattern -> [String]
     getVariables (Fix (Variable name _)) = [name]
@@ -860,8 +828,7 @@ getRealScore (ClauseMatrix (PatternMatrix cs) as) c =
     getVariables (Fix (Or ps)) = concatMap getVariables ps
     getVariables (Fix (Pattern _ _ ps)) = concatMap getVariables ps
     getVariables (Fix (ListPattern _ _ _ _ o)) = getVariables o
-    getVariables p@(Fix MapPattern{}) =
-      getMapVariables getVariables p
+    getVariables (Fix (MapPattern _ _ _ _ o)) = getVariables o
     getVariables (Fix (SetPattern _ _ _ o)) = getVariables o
     getVariables (Fix Wildcard) = []
 
