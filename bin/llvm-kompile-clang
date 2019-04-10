@@ -23,6 +23,7 @@ fi
   "$LIBDIR"/libio.a \
   "$LIBDIR"/rust/libdatastructures.rlib \
   "$LIBDIR"/rust/deps/libim_rc-*.rlib \
+  "$LIBDIR"/rust/deps/liblibc-*.rlib \
   "$LIBDIR"/rust/deps/libsized_chunks-*.rlib \
   "$LIBDIR"/rust/deps/libtypenum-*.rlib \
   "$LIBDIR"/rust/deps/stdlib/libstd-*.rlib \
