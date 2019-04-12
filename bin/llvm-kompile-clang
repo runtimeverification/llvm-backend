@@ -21,7 +21,6 @@ fi
   "$LIBDIR"/libconfigurationparser.a \
   "$LIBDIR"/libstrings.a \
   "$LIBDIR"/libio.a \
-  "$LIBDIR"/libffi.a \
   "$LIBDIR"/rust/libdatastructures.rlib \
   "$LIBDIR"/rust/deps/*.rlib \
   "$LIBDIR"/rust/deps/stdlib/libstd-*.rlib \
