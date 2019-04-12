@@ -141,7 +141,7 @@ extern "C" {
         if (elem->h.hdr != (uint64_t)getTagForSymbolName("inj{SortBytes{}}")) {
           throw std::invalid_argument("Args list contains non-bytes type");
         }
-        avalues[i]= (string *) *elem->children;
+        avalues[i] = (string *) *elem->children;
     }
 
     rtype = getTypeFromSymbol((uint64_t)ret);
@@ -160,15 +160,13 @@ extern "C" {
         break;
     }
 
-    void * rvalue = static_cast<void *>(koreAlloc(rtype->size));
-    ffi_call(&cif, address, rvalue, avalues);
+    string * rvalue = static_cast<string *>(koreAlloc(rtype->size));
+    ffi_call(&cif, address, (void *)rvalue, avalues);
 
+    set_len(rvalue, rtype->size);
     free(avalues);
 
-    string * retString = static_cast<string *>(koreAlloc(sizeof(block) + rtype->size));
-    set_len(retString, rtype->size);
-
-    return retString;
+    return rvalue;
   }
 
   mpz_ptr hook_FFI_address(string * fn) {
