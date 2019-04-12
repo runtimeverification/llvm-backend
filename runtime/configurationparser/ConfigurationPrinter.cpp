@@ -25,6 +25,11 @@ void printBool(FILE *file, bool b, const char *sort) {
   fprintf(file, "\\dv{%s}(\"%s\")", sort, str);
 }
 
+void printStringBuffer(FILE *file, stringbuffer *b, const char *sort) {
+  std::string str(b->contents->data, b->strlen);
+  fprintf(file, "\\dv{%s}(\"%s\")", sort, str.c_str());
+}
+
 void printMInt(FILE *file, void *i, const char *sort) {
   //TODO: print mint
   abort();
@@ -123,7 +128,7 @@ void printConfigurationInternal(FILE *file, block *subject, const char *sort, bo
   const char *symbol = getSymbolNameForTag(tag);
   fprintf(file, "%s(", symbol);
   visitChildren(subject, file, printConfigurationInternal, printMap, printList, printSet, printInt, printFloat,
-      printBool, printMInt, printComma);
+      printBool, printStringBuffer, printMInt, printComma);
   if (isBinder) {
     boundVariables.pop_back();
   }

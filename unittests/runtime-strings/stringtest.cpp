@@ -455,8 +455,8 @@ BOOST_AUTO_TEST_CASE(countAllOccurrences) {
 
 BOOST_AUTO_TEST_CASE(buffer_empty) {
   auto buf = hook_BUFFER_empty();
-  BOOST_CHECK_EQUAL(16, buf->capacity);
-  BOOST_CHECK_EQUAL(0, len(buf->contents));
+  BOOST_CHECK_EQUAL(16, len(buf->contents));
+  BOOST_CHECK_EQUAL(0, buf->strlen);
 }
 
 BOOST_AUTO_TEST_CASE(buffer_concat) {
