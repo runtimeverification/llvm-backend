@@ -18,7 +18,7 @@ make run-unittests
 cd ../runtime/datastructures
 cargo test
 cd ../../matching-scala
-mvn verify
+mvn verify -U
 cd ../build
 
 export PATH="`pwd`/install/bin:`pwd`/bin:$PATH"
