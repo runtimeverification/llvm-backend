@@ -14,6 +14,6 @@ USER $USER_ID:$GROUP_ID
 ADD install-rust rust-checksum /home/user/
 RUN cd /home/user/ && ./install-rust
 
-ADD matching-scala/pom.xml /home/user/.tmp-maven/
+ADD matching/pom.xml /home/user/.tmp-maven/
 RUN    cd /home/user/.tmp-maven \
     && mvn dependency:go-offline
