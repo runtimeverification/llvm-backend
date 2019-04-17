@@ -89,10 +89,9 @@ endif()
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin)
 configure_file(bin/llvm-kompile bin @ONLY)
 configure_file(bin/llvm-kompile-clang bin @ONLY)
-configure_file(bin/llvm-kompile-rust-lto bin @ONLY)
 
 install(
-  PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/bin/llvm-kompile ${CMAKE_CURRENT_BINARY_DIR}/bin/llvm-kompile-clang ${CMAKE_CURRENT_BINARY_DIR}/bin/llvm-kompile-matching ${CMAKE_CURRENT_BINARY_DIR}/bin/llvm-kompile-rust-lto
+  PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/bin/llvm-kompile ${CMAKE_CURRENT_BINARY_DIR}/bin/llvm-kompile-clang ${CMAKE_CURRENT_BINARY_DIR}/bin/llvm-kompile-matching
   DESTINATION bin
 )
 

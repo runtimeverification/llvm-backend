@@ -16,10 +16,14 @@ set(RUSTDIR ${RUSTDIR_${CMAKE_BUILD_TYPE}})
 
 FILE(GLOB DatastructuresSources datastructures/Cargo.toml datastructures/src/*.rs)
 
+if (CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
+	set(RUSTFLAGS_ENV "-Clinker-plugin-lto -Clink-args=-flto -Clinker=${CMAKE_C_COMPILER}")
+endif()
+
 set(RUSTLIB "datastructures/target/${RUSTDIR}/libdatastructures.rlib")
 set(RUSTDEPS datastructures/target/${RUSTDIR}/deps/)
 execute_process(
-  COMMAND rustc +rust-1.33.0-llvm-6.0 --print sysroot
+  COMMAND rustc +rust-1.34.0-llvm-6.0 --print sysroot
   OUTPUT_VARIABLE RUSTSYSROOT
   OUTPUT_STRIP_TRAILING_WHITESPACE)
 set(RUSTSTDLIB "${RUSTSYSROOT}/lib/rustlib/${RUST_TARGET_TRIPLE}/lib/")
@@ -27,7 +31,7 @@ set(RUSTSTDLIB "${RUSTSYSROOT}/lib/rustlib/${RUST_TARGET_TRIPLE}/lib/")
 add_custom_command(
   OUTPUT ${RUSTLIB}
   DEPENDS ${DatastructuresSources}
-  COMMAND cargo +rust-1.33.0-llvm-6.0 build ${RUSTFLAGS}
+  COMMAND ${CMAKE_COMMAND} -E env RUSTFLAGS=${RUSTFLAGS_ENV} cargo +rust-1.34.0-llvm-6.0 build ${RUSTFLAGS}
   WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/runtime/datastructures
 )
 
@@ -61,7 +65,3 @@ install(
   PATTERN librustc_demangle-*.rlib
   PATTERN libcfg_if-*.rlib
 )
-
-if (CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
-  install(SCRIPT ${PROJECT_SOURCE_DIR}/cmake/mkrlib.cmake)
-endif()
