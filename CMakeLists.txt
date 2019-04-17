@@ -88,10 +88,11 @@ endif()
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin)
 configure_file(bin/llvm-kompile bin @ONLY)
+configure_file(bin/llvm-kompile-testing bin @ONLY)
 configure_file(bin/llvm-kompile-clang bin @ONLY)
 
 install(
-  PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/bin/llvm-kompile ${CMAKE_CURRENT_BINARY_DIR}/bin/llvm-kompile-clang ${CMAKE_CURRENT_BINARY_DIR}/bin/llvm-kompile-matching
+  PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/bin/llvm-kompile ${CMAKE_CURRENT_BINARY_DIR}/bin/llvm-kompile-clang
   DESTINATION bin
 )
 
@@ -143,18 +144,6 @@ install(
 )
 
 FILE(GLOB_RECURSE HaskellSources matching/src/*.hs matching/app/Main.hs)
-
-add_custom_command(
-  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/bin/llvm-kompile-matching
-  DEPENDS ${HaskellSources}
-  COMMAND stack build
-  COMMAND stack install --local-bin-path ${CMAKE_CURRENT_BINARY_DIR}/bin
-  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/matching
-)
-
-add_custom_target(matching
-  ALL DEPENDS bin/llvm-kompile-matching
-)
 
 # Auto-generated header path
 set(KLLVM_AUTOGEN_INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR}/include)

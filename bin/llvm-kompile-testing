@@ -1,0 +1,17 @@
+#!/bin/bash
+set -e
+
+if [ $# -lt 3 ]; then
+  echo "Usage: $0 <definition.kore> <MODULE-NAME> [main|library] <clang flags>"
+  echo '"main" means that a main function will be generated that matches the signature "interpreter <input.kore> <depth> <output.kore>"'
+  echo '"library" means that no main function is generated and must be passed via <clang flags>'
+  exit 1
+fi
+dt_dir="$(mktemp -d)"
+trap "rm -rf $dt_dir" INT TERM EXIT
+definition="$1"
+moduleName="$2"
+main="$3"
+shift; shift; shift
+( cd "@PROJECT_SOURCE_DIR@"/matching-scala && mvn exec:java -Dexec.args="$definition $moduleName $dt_dir" -q )
+llvm-kompile "$definition" "$dt_dir" "$main" "$@"
