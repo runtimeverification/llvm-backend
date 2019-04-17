@@ -1,3 +1,0 @@
-[submodule "matching/submodules/kore"]
-	path = matching/submodules/kore
-	url = https://github.com/kframework/kore.git
