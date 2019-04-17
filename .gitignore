@@ -41,3 +41,7 @@ rustc-1.34.0-src/
 
 # Haskell tags
 TAGS
+
+# Java stuff
+.idea
+*.iml
