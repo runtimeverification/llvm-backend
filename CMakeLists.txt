@@ -1,11 +1,15 @@
 cmake_minimum_required (VERSION 3.4)
 
+find_program(CMAKE_C_COMPILER clang-8.0)
 find_program(CMAKE_C_COMPILER clang-6.0)
 find_program(CMAKE_C_COMPILER clang)
+find_program(CMAKE_CXX_COMPILER clang++-8.0)
 find_program(CMAKE_CXX_COMPILER clang++-6.0)
 find_program(CMAKE_CXX_COMPILER clang++)
+find_program(CMAKE_C_COMPILER_AR llvm-ar-8.0)
 find_program(CMAKE_C_COMPILER_AR llvm-ar-6.0)
 find_program(CMAKE_C_COMPILER_AR llvm-ar)
+find_program(CMAKE_C_COMPILER_RANLIB llvm-ranlib-8.0)
 find_program(CMAKE_C_COMPILER_RANLIB llvm-ranlib-6.0)
 find_program(CMAKE_C_COMPILER_RANLIB llvm-ranlib)
 project (KLLVM CXX C)
@@ -31,7 +35,7 @@ else()
 set(RUST_TARGET_TRIPLE "x86_64-unknown-linux-gnu")
 endif()
 
-find_package(LLVM 7 QUIET CONFIG)
+find_package(LLVM 8 QUIET CONFIG)
 
 if (NOT LLVM_FOUND) 
 	find_package(LLVM 6 REQUIRED CONFIG)	
@@ -80,6 +84,7 @@ install(
   DESTINATION lib/kllvm/llvm/main
 )
 
+find_program(OPT opt-8.0)
 find_program(OPT opt-6.0)
 find_program(OPT opt)
 if(${OPT} STREQUAL "OPT-NOTFOUND")
