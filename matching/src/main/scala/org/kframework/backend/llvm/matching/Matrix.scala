@@ -6,12 +6,12 @@ import org.kframework.backend.llvm.matching.pattern._
 import org.kframework.backend.llvm.matching.dt._
 
 class Column(val fringe: Fringe, val patterns: Seq[Pattern[String]]) {
-  def hookAtt: Option[String] = {
-    val ps = patterns.map(_.hookAtt).filter(_.isDefined)
+  def category: SortCategory = {
+    val ps = patterns.map(_.category).filter(_.isDefined)
     if (ps.isEmpty) {
-      None
+      SymbolS()
     } else {
-      ps.head
+      ps.head.get
     }
   }
 
@@ -80,7 +80,7 @@ class Column(val fringe: Fringe, val patterns: Seq[Pattern[String]]) {
   }
 }
 
-class VariableBinding[T](val name: T, val hook: String, val occurrence: Occurrence) {}
+class VariableBinding[T](val name: T, val category: SortCategory, val occurrence: Occurrence) {}
 
 class Fringe(val symlib: Parser.SymLib, val sort: Sort, val occurrence: Occurrence, val isExact: Boolean) { 
   private lazy val constructors = symlib.symbolsForSort.getOrElse(sort, Seq())
@@ -91,15 +91,9 @@ class Fringe(val symlib: Parser.SymLib, val sort: Sort, val occurrence: Occurren
   private lazy val overloadInjMap = overloadMap.map(e => (e._1, e._2.map(g => B.SymbolOrAlias("inj", Seq(symlib.signatures(g)._2, symlib.signatures(e._1)._2)))))
   private lazy val trueInjMap = injMap ++ overloadInjMap
 
-  lazy val hookAtt: Option[String] = Parser.getStringAtt(symlib.sortAtt(sort), "hook")
+  lazy val category: SortCategory = SortCategory(Parser.getStringAtt(symlib.sortAtt(sort), "hook"))
 
-  lazy val length: Int = {
-    hookAtt match {
-      case Some("BOOL.Bool") => 2
-      case Some("MINT.MInt") => ???
-      case _ => constructors.size
-    }
-  }
+  lazy val length: Int = category.length(constructors.size)
 
   def overloads(sym: SymbolOrAlias): Seq[SymbolOrAlias] = {
     symlib.overloads.getOrElse(sym, Seq())
@@ -245,25 +239,8 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: Seq[Colu
     Matrix.fromRows(symlib, newRows, fringe, expanded = false)
   }
 
-  def hasIncompleteSignature: Boolean = {
-    val infiniteLength = bestCol.hookAtt match {
-      case None => false
-      case Some("LIST.List") => true
-      case Some("INT.Int") => true
-      case Some("STRING.String") => true
-      case Some(_) => false
-    }
-    val isMapOrSet = bestCol.hookAtt match {
-      case None => false
-      case Some("MAP.Map") => true
-      case Some("SET.Set") => true
-      case Some(_) => false
-    }
-    infiniteLength || sigma.isEmpty || sigma.contains(Empty()) || (!isMapOrSet && sigma.size != bestCol.fringe.length)
-  }
-
   lazy val default: Option[Matrix] = {
-    if (hasIncompleteSignature) {
+    if (bestCol.category.hasIncompleteSignature(sigma, bestCol.fringe)) {
       val defaultConstructor = {
         if (sigma.contains(Empty())) Some(NonEmpty())
         else if (sigma.isEmpty) None
@@ -277,10 +254,10 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: Seq[Colu
       }
       val filtered = filterMatrix(defaultConstructor, (_, p) => p.isDefault)
       val expanded = if (defaultConstructor.isDefined) {
-        bestCol.hookAtt match {
-          case Some("LIST.List") | Some("MAP.Map") | Some("SET.Set") =>
-            Matrix.fromColumns(symlib, filtered.columns(bestColIx).expand(defaultConstructor.get, filtered.clauses) ++ filtered.notBestCol(bestColIx), filtered.clauses)
-          case _ => Matrix.fromColumns(symlib, filtered.notBestCol(bestColIx), filtered.clauses)
+        if (bestCol.category.isExpandDefault) {
+          Matrix.fromColumns(symlib, filtered.columns(bestColIx).expand(defaultConstructor.get, filtered.clauses) ++ filtered.notBestCol(bestColIx), filtered.clauses)
+        } else {
+          Matrix.fromColumns(symlib, filtered.notBestCol(bestColIx), filtered.clauses)
         }
       } else {
         Matrix.fromColumns(symlib, filtered.notBestCol(bestColIx), filtered.clauses)
@@ -294,8 +271,8 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: Seq[Colu
   def compiledDefault: Option[DecisionTree] = default.map(_.compile)
 
   def getLeaf(row: Row, child: DecisionTree): DecisionTree = {
-    def makeEquality(hookAtt: String, os: (Occurrence, Occurrence), dt: DecisionTree): DecisionTree = {
-      Function(equalityFun(hookAtt), Equal(os._1, os._2), Seq(os._1, os._2), "BOOL.Bool",
+    def makeEquality(category: SortCategory, os: (Occurrence, Occurrence), dt: DecisionTree): DecisionTree = {
+      Function(category.equalityFun, Equal(os._1, os._2), Seq(os._1, os._2), "BOOL.Bool",
         SwitchLit(Equal(os._1, os._2), 1, Seq(("1", dt), ("0", child)), None))
     }
     // first, add all remaining variable bindings to the clause
@@ -303,7 +280,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: Seq[Colu
     val overloadVars = row.clause.overloadChildren.map(_._2)
     val allVars = vars ++ overloadVars
     // then group the bound variables by their name
-    val grouped = allVars.groupBy(v => (v.name, v.hook)).mapValues(_.map(_.occurrence))
+    val grouped = allVars.groupBy(v => (v.name, v.category)).mapValues(_.map(_.occurrence))
     // compute the variables bound more than once
     val nonlinear = grouped.filter(_._2.size > 1)
     val nonlinearPairs = nonlinear.mapValues(l => (l, l.tail).zipped)
@@ -334,120 +311,8 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: Seq[Colu
       case ((o @ Num(_, o2), hd, tl), dt) => Function("hook_LIST_range_long", o, Seq(o2, Lit(hd.toString, "MINT.MInt 64"), Lit(tl.toString, "MINT.MInt 64")), "LIST.List", dt)
     })
     row.clause.overloadChildren.foldRight(withRanges)({
-      case ((SymbolC(inj), v),dt) => MakePattern(v.occurrence, SymbolP(inj, Seq(VariableP(Some(v.occurrence.asInstanceOf[Inj].rest), v.hook))), dt)
+      case ((SymbolC(inj), v),dt) => MakePattern(v.occurrence, SymbolP(inj, Seq(VariableP(Some(v.occurrence.asInstanceOf[Inj].rest), v.category))), dt)
     })
-  }
-
-  def equalityFun(hook: String): String = {
-    hook match {
-      case "BOOL.Bool" => "hook_BOOL_eq"
-      case "FLOAT.Float" => "hook_FLOAT_trueeq"
-      case "INT.Int" => "hook_INT_eq"
-      case "STRING.String" => "hook_KEQUAL_eq"
-      case "MAP.Map" => "hook_MAP_eq"
-      case "KVAR.KVar" =>"hook_STRING_eq"
-    }
-  }
-
-  // constructs a tree to test the current occurrence against each possible match in turn
-  def equalLiteral(hookName: String, ls: Seq[(String, Matrix)]): DecisionTree = {
-    val litO = bestCol.fringe.occurrence
-    if (default.isDefined && ls.isEmpty) {
-      // if no specializations remain and a default exists, consume the occurrence and continue with the default
-      Switch(litO, Seq(), Some(default.get.compile))
-    } else if (ls.isEmpty) {
-      // if no specializations remain and no default exists, fail the match
-      Failure()
-    } else {
-      // consume each specialization one at a time and try to match it
-      // if it succeseds, consume the occurrence and continue with the specialized matrix
-      // otherweise, test the next literal
-      val newO = Lit(ls.head._1, hookName)
-      val eqO = Equal(litO, newO)
-      MakePattern(newO, LiteralP(ls.head._1, hookName),
-        Function(equalityFun(hookName), eqO, Seq(litO, newO), "BOOL.Bool",
-          SwitchLit(eqO, 1, Seq(("1", Switch(litO, Seq(), Some(ls.head._2.compile))),
-                                ("0", equalLiteral(hookName, ls.tail))), None)))
-    }
-  }
-
-  // generate a single list lookup operation to bind one element of the list against its occurrence
-  def listGet(listO: Occurrence, len: Option[(Int, Int)], dt: DecisionTree, i: Int): DecisionTree = {
-    if (dt.isInstanceOf[Failure]) {
-      dt
-    } else {
-      Function("hook_LIST_get_long", Num(i, listO), Seq(listO, len match {
-        case None => Lit(i.toString, "MINT.MInt 64")
-        case Some((hd, tl)) => Lit((i-tl-hd).toString, "MINT.MInt 64")
-      }), "STRING.String", dt)
-    }
-  }
-
-  // get each element of the list specified in the list pattern and bind it to the occurrences,
-  // then compile the remaining matrix
-  def expandListPattern(listO: Occurrence, cons: ListC): DecisionTree = {
-    (0 until cons.length).foldLeft(compile)((dt, i) => listGet(listO, None, dt, i))
-  }
-
-  // get each element of the list and bind it to the occurrence, then compile the default matrix
-  def expandListPatternDefault(listO: Occurrence, maxList: (Int, Int)): DecisionTree = {
-    val hd = maxList._1
-    val tl = maxList._2
-    (hd until hd+tl).foldLeft((0 until hd).foldLeft(compile)((dt, i) => listGet(listO, None, dt, i)))((dt, i) => listGet(listO, Some(maxList), dt, i))
-  }
-
-  // construct a tree to test the length of the list and bind the elements of the list to their occurrences
-  def listPattern: DecisionTree = {
-    val listO = bestCol.fringe.occurrence
-    val newO = Size(listO)
-    val maxList = bestCol.maxListSize
-    // test the length of the list against the specializations of the matrix
-    // if it succeeds, bind the occurrences and continue with the specialized matrix
-    // otherwise, try the default case
-    Function("hook_LIST_size_long", newO, Seq(listO), "MINT.MInt 64",
-      SwitchLit(newO, 64, cases.zipWithIndex.map(l => (l._1._1, l._1._2.expandListPattern(listO, sigma(l._2).asInstanceOf[ListC]))), default.map(_.expandListPatternDefault(listO, maxList))))
-  }
-
-  def mapPattern: DecisionTree = {
-    val mapO = bestCol.fringe.occurrence
-    val newO = Size(mapO)
-    // if Empty is in the signature, test whether the map is empty or not.
-    if (sigma.contains(Empty())) {
-      Function("hook_MAP_size_long", newO, Seq(mapO), "MINT.MInt 64",
-        SwitchLit(newO, 64, compiledCases, compiledDefault))
-    } else {
-      // otherwise, get the best key and test whether the best key is in the map or not
-      val key = bestCol.bestKey(clauses)
-      key match {
-        case None => Switch(mapO, compiledCases, compiledDefault)
-        case Some(k) =>
-          MakePattern(newO, k,
-            Function("hook_MAP_lookup_null", Value(k, mapO), Seq(mapO, newO), "STRING.String",
-              Function("hook_MAP_remove", Rem(k, mapO), Seq(mapO, newO), "MAP.Map",
-                CheckNull(Value(k, mapO), compiledCases, compiledDefault))))
-      }
-    }
-  }
-
-  def setPattern: DecisionTree = {
-    val setO = bestCol.fringe.occurrence
-    val newO = Size(setO)
-    // if Empty is in the signature, test whether the set is empty or not.
-    if (sigma.contains(Empty())) {
-      Function("hook_SET_size_long", newO, Seq(setO), "MINT.MInt 64",
-        SwitchLit(newO, 64, compiledCases, compiledDefault))
-    } else {
-      // otherwise, get the best element and test whether the best element is in the set or not
-      val key = bestCol.bestKey(clauses)
-      key match {
-        case None => Switch(setO, compiledCases, compiledDefault)
-        case Some(k) =>
-          MakePattern(newO, k,
-            Function("hook_SET_in", Value(k, setO), Seq(newO, setO), "BOOL.Bool",
-              Function("hook_SET_remove", Rem(k, setO), Seq(setO, newO), "SET.Set",
-                SwitchLit(Value(k, setO), 1, compiledCases, compiledDefault))))
-      }
-    }
   }
 
   def expand: Matrix = {
@@ -470,24 +335,8 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: Seq[Colu
         // otherwise, if it fails, try to match the remainder of hte matrix
         getLeaf(rows.head, notFirstRow.compile)
       } else {
-        // compute the hook attribute of the best column
-        bestCol.hookAtt match {
-          // not matching a builtin, therefore construct a regular switch
-          // that matches the tag of the block.
-          case None => Switch(bestCol.fringe.occurrence, compiledCases, compiledDefault)
-          // matching a bool, so match the integer value of the bool with a bitwidth of 1
-          case Some("BOOL.Bool") => SwitchLit(bestCol.fringe.occurrence, 1, compiledCases, compiledDefault)
-          // matching a list, so construct a node to decompose the list into its elements
-          case Some("LIST.List") => listPattern
-          // matching a map, so construct a node to decompose the map by one of its elements
-          case Some("MAP.Map") => mapPattern
-          // matching a set, so construct a node to decompose the set by one of its elements
-          case Some("SET.Set") => setPattern
-          // matching an mint, so match the integer value of the mint with the specified bitwidth
-          case Some(s) if s.startsWith("MINT.MInt ") => SwitchLit(bestCol.fringe.occurrence, s.substring(10).toInt, compiledCases, compiledDefault)
-          // matching a string or int, so compare the value of the token against a list of constants
-          case Some(hookName) => equalLiteral(hookName, cases)
-        }
+        // compute the sort category of the best column
+        bestCol.category.tree(this)
       }
     }
   }

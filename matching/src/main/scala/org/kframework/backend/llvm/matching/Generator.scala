@@ -1,7 +1,7 @@
 package org.kframework.backend.llvm.matching
 
 import org.kframework.backend.llvm.matching.dt.DecisionTree
-import org.kframework.backend.llvm.matching.pattern.{Pattern => P, SymbolP, LiteralP, VariableP, AsP, OrP, ListP, MapP, SetP, WildcardP}
+import org.kframework.backend.llvm.matching.pattern.{Pattern => P, SymbolP, LiteralP, VariableP, AsP, OrP, ListP, MapP, SetP, WildcardP, SortCategory}
 import org.kframework.parser.kore._
 
 object Generator {
@@ -87,14 +87,14 @@ object Generator {
               case "false" => "0"
               case _ => str
             }
-          } else str, hookAtt.getOrElse("STRING.String"))
+          } else str, SortCategory(hookAtt.orElse(Some("STRING.String"))))
         case Variable(name, sort) =>
           val att = symlib.sortAtt(sort)
           val hookAtt = Parser.getStringAtt(att, "hook")
-          VariableP(name, hookAtt.getOrElse("STRING.String"))
+          VariableP(name, SortCategory(hookAtt.orElse(Some("STRING.String"))))
         case And(_, p, v @ Variable(_, _)) =>
           val _var = genPattern(v).asInstanceOf[VariableP[String]]
-          AsP(_var.name, _var.hook, genPattern(p))
+          AsP(_var.name, _var.sort, genPattern(p))
         case Or(_, p1, p2) => OrP(genPattern(p1), genPattern(p2))
       }
     }

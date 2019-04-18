@@ -19,7 +19,7 @@ sealed trait Pattern[T] {
   def bestKey(f: Fringe, clause: Clause, ps: Seq[Pattern[T]], clauses: Seq[Clause]): Option[Pattern[Option[Occurrence]]] = None
   def listRange(ix: Option[Constructor], o: Occurrence): Seq[(Occurrence, Int, Int)] = Seq()
   def overloadChildren(f: Fringe, ix: Option[Constructor], o: Occurrence): Seq[(Constructor, VariableBinding[T])] = Seq()
-  def hookAtt: Option[String]
+  def category: Option[SortCategory]
   def variables: Seq[T]
   def canonicalize(clause: Clause): Pattern[Option[Occurrence]]
   def isBound(clause: Clause): Boolean
@@ -43,7 +43,7 @@ object Pattern {
   }
 }
 
-case class AsP[T](name: T, hook: String, pat: Pattern[T]) extends Pattern[T] {
+case class AsP[T](name: T, sort: SortCategory, pat: Pattern[T]) extends Pattern[T] {
   def signature(clause: Clause): Seq[Constructor] = {
     pat.signature(clause)
   }
@@ -56,16 +56,16 @@ case class AsP[T](name: T, hook: String, pat: Pattern[T]) extends Pattern[T] {
     pat.score(f, c, ps, cs)
   }
   def bindings(ix: Option[Constructor], occurrence: Occurrence): Seq[VariableBinding[T]] = {
-    Seq(new VariableBinding(name, hook, occurrence))
+    Seq(new VariableBinding(name, sort, occurrence))
   }
   def expand(ix: Constructor, fringes: Seq[Fringe], f: Fringe, clause: Clause): Seq[Pattern[T]] = {
     pat.expand(ix, fringes, f, clause)
   }
-  override def expandOr: Seq[AsP[T]] = pat.expandOr.map(AsP(name, hook, _))
+  override def expandOr: Seq[AsP[T]] = pat.expandOr.map(AsP(name, sort, _))
 
-  def hookAtt: Option[String] = pat.hookAtt
+  def category: Option[SortCategory] = pat.category
   def variables: Seq[T] = Seq(name) ++ pat.variables
-  def canonicalize(clause: Clause): Pattern[Option[Occurrence]] = AsP(clause.canonicalize(name.toString), hook, pat.canonicalize(clause))
+  def canonicalize(clause: Clause): Pattern[Option[Occurrence]] = AsP(clause.canonicalize(name.toString), sort, pat.canonicalize(clause))
   def isBound(clause: Clause): Boolean = clause.bindingsMap.contains(name.toString) && pat.isBound(clause)
 }
 
@@ -125,13 +125,13 @@ case class ListP[T](head: Seq[Pattern[T]], frame: Option[Pattern[T]], tail: Seq[
     case _ => Seq()
   }
 
-  def hookAtt = Some("LIST.List")
+  def category = Some(ListS())
   def variables: Seq[T] = orig.variables
   def canonicalize(clause: Clause): Pattern[Option[Occurrence]] = ListP(head.map(_.canonicalize(clause)), frame.map(_.canonicalize(clause)), tail.map(_.canonicalize(clause)), ctr, orig.canonicalize(clause))
   def isBound(clause: Clause): Boolean = head.forall(_.isBound(clause)) && frame.forall(_.isBound(clause)) && tail.forall(_.isBound(clause))
 }
 
-case class LiteralP[T](literal: String, hook: String) extends Pattern[T] {
+case class LiteralP[T](literal: String, sort: SortCategory) extends Pattern[T] {
   def signature(clause: Clause): Seq[Constructor] = {
     Seq(LiteralC(literal))
   }
@@ -150,9 +150,9 @@ case class LiteralP[T](literal: String, hook: String) extends Pattern[T] {
   def bindings(ix: Option[Constructor], occurrence: Occurrence): Seq[VariableBinding[T]] = Seq()
   def expand(ix: Constructor, fringes: Seq[Fringe], f: Fringe, clause: Clause): Seq[Pattern[T]] = Seq()
 
-  def hookAtt = Some(hook)
+  def category = Some(sort)
   def variables: Seq[Nothing] = Seq()
-  def canonicalize(clause: Clause): Pattern[Option[Occurrence]] = LiteralP(literal, hook)
+  def canonicalize(clause: Clause): Pattern[Option[Occurrence]] = LiteralP(literal, sort)
   def isBound(clause: Clause): Boolean = true
 }
 
@@ -246,7 +246,7 @@ case class MapP[T](keys: Seq[Pattern[T]], values: Seq[Pattern[T]], frame: Option
     }
   }
 
-  def hookAtt = Some("MAP.Map")
+  def category = Some(MapS())
   def variables: Seq[T] = orig.variables
   def canonicalize(clause: Clause): Pattern[Option[Occurrence]] = MapP(keys.map(_.canonicalize(clause)), values.map(_.canonicalize(clause)), frame.map(_.canonicalize(clause)), ctr, orig.canonicalize(clause))
   def isBound(clause: Clause): Boolean = keys.forall(_.isBound(clause)) && values.forall(_.isBound(clause)) && frame.forall(_.isBound(clause))
@@ -263,8 +263,8 @@ case class OrP[T](ps: Seq[Pattern[T]]) extends Pattern[T] {
   def bindings(ix: Option[Constructor], occurrence: Occurrence): Seq[VariableBinding[T]] = ???
   def expand(ix: Constructor, fringes: Seq[Fringe], f: Fringe, clause: Clause): Seq[Pattern[T]] = ???
   override def expandOr: Seq[Pattern[T]] = ps
-  def hookAtt: Option[String] = {
-    val s = ps.map(_.hookAtt).filter(_.isDefined)
+  def category: Option[SortCategory] = {
+    val s = ps.map(_.category).filter(_.isDefined)
     if (s.isEmpty) {
       None
     } else {
@@ -364,7 +364,7 @@ case class SetP[T](elements: Seq[Pattern[T]], frame: Option[Pattern[T]], ctr: Sy
     elements.map(e => (clause.canonicalize(e), CollectionP.elementScore(e, clause, ps, clauses))).maxBy(_._2)
   }
 
-  def hookAtt = Some("SET.Set")
+  def category = Some(SetS())
   def variables: Seq[T] = orig.variables
   def canonicalize(clause: Clause): Pattern[Option[Occurrence]] = SetP(elements.map(_.canonicalize(clause)), frame.map(_.canonicalize(clause)), ctr, orig.canonicalize(clause))
   def isBound(clause: Clause): Boolean = elements.forall(_.isBound(clause)) && frame.forall(_.isBound(clause))
@@ -507,13 +507,13 @@ case class SymbolP[T](sym: SymbolOrAlias, ps: Seq[Pattern[T]]) extends Pattern[T
     }
   }
 
-  def hookAtt: None.type = None
+  def category: None.type = None
   def variables: Seq[T] = ps.flatMap(_.variables)
   def canonicalize(clause: Clause): Pattern[Option[Occurrence]] = SymbolP(sym, ps.map(_.canonicalize(clause)))
   def isBound(clause: Clause): Boolean = ps.forall(_.isBound(clause))
 }
 
-case class VariableP[T](name: T, hook: String) extends Pattern[T] {
+case class VariableP[T](name: T, sort: SortCategory) extends Pattern[T] {
   def signature(clause: Clause): Seq[Constructor] = Seq()
   def isWildcard = true
   def isDefault = true
@@ -525,15 +525,15 @@ case class VariableP[T](name: T, hook: String) extends Pattern[T] {
     }
   }
   def bindings(ix: Option[Constructor], occurrence: Occurrence): Seq[VariableBinding[T]] = {
-    Seq(new VariableBinding(name, hook, occurrence))
+    Seq(new VariableBinding(name, sort, occurrence))
   }
   def expand(ix: Constructor, fringes: Seq[Fringe], f: Fringe, clause: Clause): Seq[Pattern[T]] = {
     fringes.map(_ => WildcardP().asInstanceOf[Pattern[T]])
   }
 
-  def hookAtt: None.type = None
+  def category: None.type = None
   def variables: Seq[T] = Seq(name)
-  def canonicalize(clause: Clause): Pattern[Option[Occurrence]] = VariableP(clause.canonicalize(name.toString), hook)
+  def canonicalize(clause: Clause): Pattern[Option[Occurrence]] = VariableP(clause.canonicalize(name.toString), sort)
   def isBound(clause: Clause): Boolean = clause.bindingsMap.contains(name.toString)
 }
 
@@ -554,7 +554,7 @@ case class WildcardP[T]() extends Pattern[T] {
     fringes.map(_ => WildcardP().asInstanceOf[Pattern[T]])
   }
 
-  def hookAtt: None.type = None
+  def category: None.type = None
   def variables: Seq[Nothing] = Seq()
   def canonicalize(clause: Clause): Pattern[Option[Occurrence]] = WildcardP()
   def isBound(clause: Clause): Boolean = true

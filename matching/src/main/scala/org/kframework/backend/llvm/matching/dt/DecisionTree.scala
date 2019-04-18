@@ -105,14 +105,14 @@ case class MakePattern private(occurrence: Occurrence, pattern: Pattern[Option[O
     pattern match {
       case OrP(_) | WildcardP() | VariableP(None, _) => ???
       case VariableP(Some(o), h) =>
-        result.put("hook", h)
+        result.put("hook", h.hookAtt)
         result.put("occurrence", o.representation)
       case AsP(_, _, p) => representPattern(p)
       case MapP(_, _, _, _, o) => representPattern(o)
       case SetP(_, _, _, o) => representPattern(o)
       case ListP(_, _, _, _, o) => representPattern(o)
       case LiteralP(s, h) =>
-        result.put("hook", h)
+        result.put("hook", h.hookAtt)
         result.put("literal", s)
       case SymbolP(s, ps) =>
         result.put("constructor", s.toString)
