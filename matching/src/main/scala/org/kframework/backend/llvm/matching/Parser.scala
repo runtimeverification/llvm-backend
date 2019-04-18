@@ -16,7 +16,7 @@ object Parser {
   }
 
   def getStringAtt(att: Attributes, attName: String): Option[String] = {
-    att.patterns.find(isAtt(attName, _)).map(_.asInstanceOf[Application].args(0).asInstanceOf[StringLiteral].str)
+    att.patterns.find(isAtt(attName, _)).map(_.asInstanceOf[Application].args.head.asInstanceOf[StringLiteral].str)
   }
 
   private def isAtt(att: String, pat: Pattern): Boolean = {
@@ -42,19 +42,19 @@ object Parser {
     private def instantiate(s: Seq[Sort], params: Seq[Sort], args: Seq[Sort]): Seq[Sort] = s.map(instantiate(_, params, args))
 
     val signatures: Map[SymbolOrAlias, (Seq[Sort], Sort, Attributes)] = {
-      symbols.map(symbol => (symbol, (instantiate(symbolDecls(symbol.ctr)(0).argSorts, symbolDecls(symbol.ctr)(0).symbol.params, symbol.params), instantiate(symbolDecls(symbol.ctr)(0).returnSort, symbolDecls(symbol.ctr)(0).symbol.params, symbol.params), symbolDecls(symbol.ctr)(0).att))).toMap
+      symbols.map(symbol => (symbol, (instantiate(symbolDecls(symbol.ctr).head.argSorts, symbolDecls(symbol.ctr).head.symbol.params, symbol.params), instantiate(symbolDecls(symbol.ctr).head.returnSort, symbolDecls(symbol.ctr).head.symbol.params, symbol.params), symbolDecls(symbol.ctr).head.att))).toMap
     }
 
     val symbolsForSort: Map[Sort, Seq[SymbolOrAlias]] = {
-      signatures.groupBy(_._2._2).mapValues(_.map(_._1).toSeq)
+      signatures.groupBy(_._2._2).mapValues(_.keys.toSeq)
     }
 
     val sortAtt: Map[Sort, Attributes] = {
-      sorts.filter(_.isInstanceOf[CompoundSort]).map(sort => (sort, sortDecls(sort.asInstanceOf[CompoundSort].ctr)(0).att)).toMap
+      sorts.filter(_.isInstanceOf[CompoundSort]).map(sort => (sort, sortDecls(sort.asInstanceOf[CompoundSort].ctr).head.att)).toMap
     }
 
     val functions: Seq[SymbolOrAlias] = {
-      signatures.filter(s => s._2._3.patterns.find(isAtt("anywhere", _)).isDefined || s._2._3.patterns.find(isAtt("function", _)).isDefined).keys.toSeq
+      signatures.filter(s => s._2._3.patterns.exists(isAtt("anywhere", _)) || s._2._3.patterns.exists(isAtt("function", _))).keys.toSeq
     }
 
     val overloads: Map[SymbolOrAlias, Seq[SymbolOrAlias]] = {
@@ -131,7 +131,7 @@ object Parser {
   private def parsePatternForSymbols(pat: Pattern): Seq[SymbolOrAlias] = {
     pat match {
       case And(_, p1, p2) => parsePatternForSymbols(p1) ++ parsePatternForSymbols(p2)
-      case Application(s, ps) => Seq(s).filter(isConcrete(_)) ++ ps.flatMap(parsePatternForSymbols(_))
+      case Application(s, ps) => Seq(s).filter(isConcrete) ++ ps.flatMap(parsePatternForSymbols)
       case Ceil(_, _, p) => parsePatternForSymbols(p)
       case Equals(_, _, p1, p2) => parsePatternForSymbols(p1) ++ parsePatternForSymbols(p2)
       case Exists(_, _, p) => parsePatternForSymbols(p)
@@ -153,12 +153,11 @@ object Parser {
       Seq()
     }
     axioms.filter(hasAtt(_, "overload")).map(getAtt(_, "overload") match {
-      case Some(Application(_, args)) => {
+      case Some(Application(_, args)) =>
         assert(args.size == 2)
-        (args(0), args(1)) match {
+        (args.head, args(1)) match {
           case (Application(g, _), Application(l, _)) => (g, l)
         }
-      }
     })
   }
 

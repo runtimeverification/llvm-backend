@@ -13,12 +13,12 @@ object Generator {
 
   private def listPattern(sym: SymbolOrAlias, cons: CollectionCons, ps: Seq[P[String]], c: SymbolOrAlias) : P[String] = {
     (cons, ps) match {
-      case (Concat(), Seq(ListP(hd1, None, tl1, _, o1), ListP(hd2, frame, tl2, _, o2))) => ListP((hd1 ++ tl1 ++ hd2), frame, tl2, c, SymbolP(sym, Seq(o1, o2)))
-      case (Concat(), Seq(ListP(hd1, frame, tl1, _, o1), ListP(hd2, None, tl2, _, o2))) => ListP(hd1, frame, (tl1 ++ hd2 ++ tl2), c, SymbolP(sym, Seq(o1, o2)))
-      case (Concat(), Seq(ListP(hd, None, tl, _, o), p @ VariableP(_, _))) => ListP((hd ++ tl), Some(p), Seq(), c, SymbolP(sym, Seq(o, p)))
-      case (Concat(), Seq(ListP(hd, None, tl, _, o), p @ WildcardP())) => ListP((hd ++ tl), Some(p), Seq(), c, SymbolP(sym, Seq(o, p)))
-      case (Concat(), Seq(p @ VariableP(_, _), ListP(hd, None, tl, _, o))) => ListP(Seq(), Some(p), (hd ++ tl), c, SymbolP(sym, Seq(p, o)))
-      case (Concat(), Seq(p @ WildcardP(), ListP(hd, None, tl, _, o))) => ListP(Seq(), Some(p), (hd ++ tl), c, SymbolP(sym, Seq(p, o)))
+      case (Concat(), Seq(ListP(hd1, None, tl1, _, o1), ListP(hd2, frame, tl2, _, o2))) => ListP(hd1 ++ tl1 ++ hd2, frame, tl2, c, SymbolP(sym, Seq(o1, o2)))
+      case (Concat(), Seq(ListP(hd1, frame, tl1, _, o1), ListP(hd2, None, tl2, _, o2))) => ListP(hd1, frame, tl1 ++ hd2 ++ tl2, c, SymbolP(sym, Seq(o1, o2)))
+      case (Concat(), Seq(ListP(hd, None, tl, _, o), p @ VariableP(_, _))) => ListP(hd ++ tl, Some(p), Seq(), c, SymbolP(sym, Seq(o, p)))
+      case (Concat(), Seq(ListP(hd, None, tl, _, o), p @ WildcardP())) => ListP(hd ++ tl, Some(p), Seq(), c, SymbolP(sym, Seq(o, p)))
+      case (Concat(), Seq(p @ VariableP(_, _), ListP(hd, None, tl, _, o))) => ListP(Seq(), Some(p), hd ++ tl, c, SymbolP(sym, Seq(p, o)))
+      case (Concat(), Seq(p @ WildcardP(), ListP(hd, None, tl, _, o))) => ListP(Seq(), Some(p), hd ++ tl, c, SymbolP(sym, Seq(p, o)))
       case (Unit(), Seq()) => ListP(Seq(), None, Seq(), c, SymbolP(sym, Seq()))
       case (Element(), Seq(p)) => ListP(Seq(p), None, Seq(), c, SymbolP(sym, Seq(p)))
     }
@@ -26,8 +26,8 @@ object Generator {
 
   private def mapPattern(sym: SymbolOrAlias, cons: CollectionCons, ps: Seq[P[String]], c: SymbolOrAlias) : P[String] = {
     (cons, ps) match {
-      case (Concat(), Seq(MapP(ks1, vs1, None, _, o1), MapP(ks2, vs2, frame, _, o2))) => MapP((ks1 ++ ks2), (vs1 ++ vs2), frame, c, SymbolP(sym, Seq(o1, o2)))
-      case (Concat(), Seq(MapP(ks1, vs1, frame,_, o1), MapP(ks2, vs2, None, _, o2))) => MapP((ks1 ++ ks2), (vs1 ++ vs2), frame, c, SymbolP(sym, Seq(o1, o2)))
+      case (Concat(), Seq(MapP(ks1, vs1, None, _, o1), MapP(ks2, vs2, frame, _, o2))) => MapP(ks1 ++ ks2, vs1 ++ vs2, frame, c, SymbolP(sym, Seq(o1, o2)))
+      case (Concat(), Seq(MapP(ks1, vs1, frame,_, o1), MapP(ks2, vs2, None, _, o2))) => MapP(ks1 ++ ks2, vs1 ++ vs2, frame, c, SymbolP(sym, Seq(o1, o2)))
       case (Concat(), Seq(MapP(ks, vs, None, _, o), p @ VariableP(_, _))) => MapP(ks, vs, Some(p), c, SymbolP(sym, Seq(o, p)))
       case (Concat(), Seq(MapP(ks, vs, None, _, o), p @ WildcardP())) => MapP(ks, vs, Some(p), c, SymbolP(sym, Seq(o, p)))
       case (Concat(), Seq(p @ VariableP(_, _), MapP(ks, vs, None, _, o))) => MapP(ks, vs, Some(p), c, SymbolP(sym, Seq(p, o)))
@@ -39,8 +39,8 @@ object Generator {
 
   private def setPattern(sym: SymbolOrAlias, cons: CollectionCons, ps: Seq[P[String]], c: SymbolOrAlias) : P[String] = {
     (cons, ps) match {
-      case (Concat(), Seq(SetP(ks1, None, _, o1), SetP(ks2, frame, _, o2))) => SetP((ks1 ++ ks2), frame, c, SymbolP(sym, Seq(o1, o2)))
-      case (Concat(), Seq(SetP(ks1, frame,_, o1), SetP(ks2, None, _, o2))) => SetP((ks1 ++ ks2), frame, c, SymbolP(sym, Seq(o1, o2)))
+      case (Concat(), Seq(SetP(ks1, None, _, o1), SetP(ks2, frame, _, o2))) => SetP(ks1 ++ ks2, frame, c, SymbolP(sym, Seq(o1, o2)))
+      case (Concat(), Seq(SetP(ks1, frame,_, o1), SetP(ks2, None, _, o2))) => SetP(ks1 ++ ks2, frame, c, SymbolP(sym, Seq(o1, o2)))
       case (Concat(), Seq(SetP(ks, None, _, o), p @ VariableP(_, _))) => SetP(ks, Some(p), c, SymbolP(sym, Seq(o, p)))
       case (Concat(), Seq(SetP(ks, None, _, o), p @ WildcardP())) => SetP(ks, Some(p), c, SymbolP(sym, Seq(o, p)))
       case (Concat(), Seq(p @ VariableP(_, _), SetP(ks, None, _, o))) => SetP(ks, Some(p), c, SymbolP(sym, Seq(p, o)))
@@ -58,11 +58,11 @@ object Generator {
     def isHook(hookAttStr: String, sym: SymbolOrAlias): Boolean = {
       val att = symlib.signatures(sym)._3
       val hookAtt = Parser.getStringAtt(att, "hook")
-      Some(hookAttStr) == hookAtt
+      hookAtt.contains(hookAttStr)
     }
     def genPattern(pat: Pattern) : P[String] = {
       pat match {
-        case Application(sym, ps) => {
+        case Application(sym, ps) =>
           val att = symlib.signatures(sym)._3
           val hookAtt = Parser.getStringAtt(att, "hook")
           val sort = symlib.signatures(sym)._2
@@ -78,27 +78,23 @@ object Generator {
             case Some("SET.element") => setPattern(sym, Element(), ps.map(genPattern), getSym("SET.element", symlib.symbolsForSort(sort)))
             case _ => SymbolP(sym, ps.map(genPattern))
           }
-        }
-        case DomainValue(sort, str) => {
+        case DomainValue(sort, str) =>
           val att = symlib.sortAtt(sort)
           val hookAtt = Parser.getStringAtt(att, "hook")
-          LiteralP(if (hookAtt == Some("BOOL.Bool")) {
+          LiteralP(if (hookAtt.contains("BOOL.Bool")) {
             str match {
               case "true" => "1"
               case "false" => "0"
               case _ => str
             }
           } else str, hookAtt.getOrElse("STRING.String"))
-        }
-        case Variable(name, sort) => {
+        case Variable(name, sort) =>
           val att = symlib.sortAtt(sort)
           val hookAtt = Parser.getStringAtt(att, "hook")
           VariableP(name, hookAtt.getOrElse("STRING.String"))
-        }
-        case And(_, p, v @ Variable(_, _)) => {
+        case And(_, p, v @ Variable(_, _)) =>
           val _var = genPattern(v).asInstanceOf[VariableP[String]]
           AsP(_var.name, _var.hook, genPattern(p))
-        }
         case Or(_, p1, p2) => OrP(genPattern(p1), genPattern(p2))
       }
     }

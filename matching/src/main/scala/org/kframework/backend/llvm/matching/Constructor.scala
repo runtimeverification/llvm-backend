@@ -14,7 +14,7 @@ case class Empty() extends Constructor {
 }
 
 case class NonEmpty() extends Constructor {
-  def name = ???
+  def name: String = ???
   def isBest(pat: Pattern[Option[Occurrence]]): Boolean = true
 }
 
@@ -29,16 +29,16 @@ case class HasNoKey(key: Option[Pattern[Option[Occurrence]]]) extends Constructo
 }
 
 case class ListC(element: SymbolOrAlias, length: Int) extends Constructor {
-  def name = length.toString
+  def name: String = length.toString
   def isBest(pat: Pattern[Option[Occurrence]]): Boolean = true
 }
 
 case class SymbolC(sym: SymbolOrAlias) extends Constructor {
-  def name = sym.toString
+  def name: String = sym.toString
   def isBest(pat: Pattern[Option[Occurrence]]): Boolean = true
 }
 
 case class LiteralC(literal: String) extends Constructor {
-  def name = literal
+  def name: String = literal
   def isBest(pat: Pattern[Option[Occurrence]]): Boolean = true
 }

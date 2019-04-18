@@ -16,7 +16,7 @@ class Column(val fringe: Fringe, val patterns: Seq[Pattern[String]]) {
   }
 
   private def rawScore(clauses: Seq[Clause]): Double = {
-    val raw = patterns(0).score(fringe, clauses(0), patterns.tail, clauses.tail)
+    val raw = patterns.head.score(fringe, clauses.head, patterns.tail, clauses.tail)
     assert(!raw.isNaN)
     raw
   }
@@ -32,7 +32,7 @@ class Column(val fringe: Fringe, val patterns: Seq[Pattern[String]]) {
       val vars = keys.map(_.flatMap(_.variables)).toSet
       val boundVars = patterns.map(_.variables).toSet
       val intersection = (vars, boundVars).zipped.map(_.intersect(_))
-      val needed = intersection.exists(!_.isEmpty)
+      val needed = intersection.exists(_.nonEmpty)
       if (needed) {
         Double.MinPositiveValue
       } else {
@@ -47,7 +47,7 @@ class Column(val fringe: Fringe, val patterns: Seq[Pattern[String]]) {
       case None => used
       case Some(k) => used.filter(_.isBest(k))
     }
-    val usedInjs = bestUsed.flatMap(fringe.injections(_))
+    val usedInjs = bestUsed.flatMap(fringe.injections)
     val dups = if (fringe.isExact) bestUsed else bestUsed ++ usedInjs
     val nodups = dups.distinct
     if (nodups.contains(Empty())) {
@@ -65,7 +65,7 @@ class Column(val fringe: Fringe, val patterns: Seq[Pattern[String]]) {
   }
 
   def bestKey(clauses: Seq[Clause]): Option[Pattern[Option[Occurrence]]] = {
-    for ((pat, clause, i) <- (patterns, clauses, 0 until clauses.size).zipped) {
+    for ((pat, clause, i) <- (patterns, clauses, clauses.indices).zipped) {
       if (!pat.isWildcard) {
         return pat.bestKey(fringe, clause, patterns.drop(i), clauses.drop(i))
       }
@@ -85,13 +85,13 @@ class VariableBinding[T](val name: T, val hook: String, val occurrence: Occurren
 class Fringe(val symlib: Parser.SymLib, val sort: Sort, val occurrence: Occurrence, val isExact: Boolean) { 
   private lazy val constructors = symlib.symbolsForSort.getOrElse(sort, Seq())
   private lazy val rawInjections = constructors.filter(_.ctr == "inj")
-  private lazy val injMap = rawInjections.map(b => (b, rawInjections.filter(a => isSubsorted(a.params(0), b.params(0))))).toMap
-  private lazy val rawOverloads = constructors.filter(symlib.overloads.contains(_))
+  private lazy val injMap = rawInjections.map(b => (b, rawInjections.filter(a => isSubsorted(a.params.head, b.params.head)))).toMap
+  private lazy val rawOverloads = constructors.filter(symlib.overloads.contains)
   private lazy val overloadMap = rawOverloads.map(s => (s, symlib.overloads(s))).toMap
   private lazy val overloadInjMap = overloadMap.map(e => (e._1, e._2.map(g => B.SymbolOrAlias("inj", Seq(symlib.signatures(g)._2, symlib.signatures(e._1)._2)))))
   private lazy val trueInjMap = injMap ++ overloadInjMap
 
-  lazy val hookAtt = Parser.getStringAtt(symlib.sortAtt(sort), "hook")
+  lazy val hookAtt: Option[String] = Parser.getStringAtt(symlib.sortAtt(sort), "hook")
 
   lazy val length: Int = {
     hookAtt match {
@@ -111,13 +111,12 @@ class Fringe(val symlib: Parser.SymLib, val sort: Sort, val occurrence: Occurren
 
   def injections(ix: Constructor): Seq[Constructor] = {
     ix match {
-      case SymbolC(sym) => {
+      case SymbolC(sym) =>
         if (symlib.overloads.contains(sym) ||sym.ctr == "inj") {
-          trueInjMap(sym).map(SymbolC(_))
+          trueInjMap(sym).map(SymbolC)
         } else {
           Seq()
         }
-      }
       case _ => Seq()
     }
   }
@@ -132,33 +131,29 @@ class Fringe(val symlib: Parser.SymLib, val sort: Sort, val occurrence: Occurren
 
   def lookup(ix: Constructor): Option[Seq[Fringe]] = {
     ix match {
-      case SymbolC(sym) => {
+      case SymbolC(sym) =>
         if (symlib.signatures(sym)._2 != sort) {
           None
         } else {
           val sorts = symlib.signatures(sym)._1
           Some(sorts.zipWithIndex.map(t => new Fringe(symlib, t._1, Num(t._2, occurrence), sym.ctr == "inj")))
         }
-      }
       case LiteralC(_) => Some(Seq())
-      case ListC(sym, len) => {
-        val sort = symlib.signatures(sym)._1(0)
+      case ListC(sym, len) =>
+        val sort = symlib.signatures(sym)._1.head
         Some((0 until len).map(i => new Fringe(symlib, sort, Num(i, occurrence), false)))
-      }
       case Empty() => Some(Seq())
       case NonEmpty() => Some(Seq(new Fringe(symlib, sort, occurrence, isExact)))
       case HasKey(_, _, None) => ???
-      case HasKey(isSet, sym, Some(key)) => {
+      case HasKey(isSet, sym, Some(key)) =>
         val sorts = symlib.signatures(sym)._1
         if (isSet) {
           Some(Seq(new Fringe(symlib, sort, Rem(key, occurrence), false), this))
         } else {
           Some(Seq(new Fringe(symlib, sorts(1), Value(key, occurrence), false), new Fringe(symlib, sort, Rem(key, occurrence), false), this))
         }
-    }
-      case HasNoKey(key) => {
+      case HasNoKey(_) =>
         Some(Seq(this))
-      }
     }
   }
 }
@@ -177,8 +172,8 @@ class Clause(
   // since they do not actually exist in the original subject term
   val overloadChildren: Seq[(Constructor, VariableBinding[String])]) {
 
-  lazy val bindingsMap = bindings.groupBy(_.name).mapValues(_(0))
-  lazy val boundOccurrences = bindings.map(_.occurrence).toSet
+  lazy val bindingsMap: Map[String, VariableBinding[String]] = bindings.groupBy(_.name).mapValues(_.head)
+  lazy val boundOccurrences: Set[Occurrence] = bindings.map(_.occurrence).toSet
 
   def canonicalize(name: String): Option[Occurrence] = {
     bindingsMap.get(name).map(_.occurrence)
@@ -246,8 +241,8 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: Seq[Colu
     }
   }
 
-  def this(symlib: Parser.SymLib, cols: Seq[Tuple2[Sort, Seq[Pattern[String]]]], actions: Seq[Action]) {
-    this(symlib, (cols, (1 to cols.size).map(i => new Fringe(symlib, cols(i-1)._1, Num(i, Base()), false)).toSeq).zipped.toSeq.map(pair => new Column(pair._2, pair._1._2)), null, actions.map(new Clause(_, Seq(), Seq(), Seq())), null, false)
+  def this(symlib: Parser.SymLib, cols: Seq[(Sort, Seq[Pattern[String]])], actions: Seq[Action]) {
+    this(symlib, (cols, (1 to cols.size).map(i => new Fringe(symlib, cols(i - 1)._1, Num(i, Base()), false))).zipped.toSeq.map(pair => new Column(pair._2, pair._1._2)), null, actions.map(new Clause(_, Seq(), Seq(), Seq())), null, false)
   }
 
   // compute the column with the best score, choosing the first such column if they are equal
@@ -265,13 +260,13 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: Seq[Colu
     (ix.name, expanded)
   }
 
-  def cases: Seq[(String, Matrix)] = sigma.map(specialize(_))
+  def cases: Seq[(String, Matrix)] = sigma.map(specialize)
 
   def compiledCases: Seq[(String, DecisionTree)] = cases.map(l => (l._1, l._2.compile))
 
   def filterMatrix(ix: Option[Constructor], checkPattern: (Clause, Pattern[String]) => Boolean): Matrix = {
     val newRows = rows.filter(row => checkPattern(row.clause, row.patterns(bestColIx))).map(row => new Row(row.patterns, row.clause.addVars(ix, row.patterns(bestColIx), columns(bestColIx).fringe)))
-    Matrix.fromRows(symlib, newRows, fringe, false)
+    Matrix.fromRows(symlib, newRows, fringe, expanded = false)
   }
 
   def hasIncompleteSignature: Boolean = {
@@ -304,7 +299,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: Seq[Colu
           }
         }
       }
-      val filtered = filterMatrix(defaultConstructor, (c, p) => p.isDefault)
+      val filtered = filterMatrix(defaultConstructor, (_, p) => p.isDefault)
       val expanded = if (defaultConstructor.isDefined) {
         bestCol.hookAtt match {
           case Some("LIST.List") | Some("MAP.Map") | Some("SET.Set") =>
@@ -328,7 +323,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: Seq[Colu
         SwitchLit(Equal(os._1, os._2), 1, Seq(("1", dt), ("0", child)), None))
     }
     // first, add all remaining variable bindings to the clause
-    val vars = row.clause.bindings ++ columns.flatMap(col => col.patterns(0).bindings(None, col.fringe.occurrence))
+    val vars = row.clause.bindings ++ columns.flatMap(col => col.patterns.head.bindings(None, col.fringe.occurrence))
     val overloadVars = row.clause.overloadChildren.map(_._2)
     val allVars = vars ++ overloadVars
     // then group the bound variables by their name
@@ -349,7 +344,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: Seq[Colu
     val sc = row.clause.action.scVars match {
       // if there is no side condition, continue
       case None => nonlinearLeaf
-      case Some(cond) => {
+      case Some(cond) =>
         // filter by the variables used in the side condition
         val condFiltered = sorted.filter(t => cond.contains(t._1))
         val condVars = condFiltered.map(_._2)
@@ -357,7 +352,6 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: Seq[Colu
         // evaluate the side condition and if it is true, continue, otherwise go to the next row
         Function("side_condition_" + row.clause.action.ordinal, newO, condVars, "BOOL.Bool",
           SwitchLit(newO, 1, Seq(("1", nonlinearLeaf), ("0", child)), None))
-      }
     }
     // fill out the bindings for list range variables
     val withRanges = row.clause.listRanges.foldRight(sc)({
@@ -450,12 +444,11 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: Seq[Colu
       val key = bestCol.bestKey(clauses)
       key match {
         case None => Switch(mapO, compiledCases, compiledDefault)
-        case Some(k) => {
+        case Some(k) =>
           MakePattern(newO, k,
             Function("hook_MAP_lookup_null", Value(k, mapO), Seq(mapO, newO), "STRING.String",
               Function("hook_MAP_remove", Rem(k, mapO), Seq(mapO, newO), "MAP.Map",
                 CheckNull(Value(k, mapO), compiledCases, compiledDefault))))
-        }
       }
     }
   }
@@ -472,12 +465,11 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: Seq[Colu
       val key = bestCol.bestKey(clauses)
       key match {
         case None => Switch(setO, compiledCases, compiledDefault)
-        case Some(k) => {
+        case Some(k) =>
           MakePattern(newO, k,
             Function("hook_SET_in", Value(k, setO), Seq(newO, setO), "BOOL.Bool",
               Function("hook_SET_remove", Rem(k, setO), Seq(setO, newO), "SET.Set",
                 SwitchLit(Value(k, setO), 1, compiledCases, compiledDefault))))
-        }
       }
     }
   }
@@ -486,7 +478,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: Seq[Colu
     if (columns.isEmpty) {
       new Matrix(symlib, rawColumns, rawRows, rawClauses, rawFringe, true)
     } else {
-      Matrix.fromRows(symlib, rows.flatMap(_.expand(bestColIx)), fringe, true)
+      Matrix.fromRows(symlib, rows.flatMap(_.expand(bestColIx)), fringe, expanded = true)
     }
   }
 
@@ -497,10 +489,10 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: Seq[Colu
     if (rows.isEmpty)
       Failure()
     else {
-      if (rows(0).isWildcard) {
+      if (rows.head.isWildcard) {
         // if there is only one row left, then try to match it and fail the matching if it fails
         // otherwise, if it fails, try to match the remainder of hte matrix
-        getLeaf(rows(0), notFirstRow.compile)
+        getLeaf(rows.head, notFirstRow.compile)
       } else {
         // compute the hook attribute of the best column
         bestCol.hookAtt match {
@@ -525,7 +517,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: Seq[Colu
   }
 
   def notFirstRow: Matrix = {
-    Matrix.fromRows(symlib, rows.tail, fringe, false)
+    Matrix.fromRows(symlib, rows.tail, fringe, expanded = false)
   }
 
   def notBestCol(colIx: Int): Seq[Column] = {

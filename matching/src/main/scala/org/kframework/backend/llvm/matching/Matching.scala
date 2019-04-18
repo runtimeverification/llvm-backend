@@ -9,7 +9,7 @@ import java.io.File
 object Matching {
   def writeDecisionTreeToFile(filename: File, moduleName: String, outputFolder: File) {
     val defn = new TextToKore().parse(filename)
-    outputFolder.mkdirs();
+    outputFolder.mkdirs()
     val axioms = Parser.parseTopAxioms(defn)
     val symlib = Parser.parseSymbols(defn)
     val dt = if (axioms.isEmpty) {

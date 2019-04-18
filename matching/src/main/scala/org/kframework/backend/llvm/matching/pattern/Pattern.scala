@@ -47,8 +47,8 @@ case class AsP[T](name: T, hook: String, pat: Pattern[T]) extends Pattern[T] {
   def signature(clause: Clause): Seq[Constructor] = {
     pat.signature(clause)
   }
-  def isWildcard = pat.isWildcard
-  def isDefault = pat.isDefault
+  def isWildcard: Boolean = pat.isWildcard
+  def isDefault: Boolean = pat.isDefault
   def isSpecialized(ix: Constructor, f: Fringe, c: Clause): Boolean = {
     pat.isSpecialized(ix, f, c)
   }
@@ -61,10 +61,10 @@ case class AsP[T](name: T, hook: String, pat: Pattern[T]) extends Pattern[T] {
   def expand(ix: Constructor, fringes: Seq[Fringe], f: Fringe, clause: Clause): Seq[Pattern[T]] = {
     pat.expand(ix, fringes, f, clause)
   }
-  override def expandOr = pat.expandOr.map(AsP(name, hook, _))
+  override def expandOr: Seq[AsP[T]] = pat.expandOr.map(AsP(name, hook, _))
 
-  def hookAtt = pat.hookAtt
-  def variables = Seq(name) ++ pat.variables
+  def hookAtt: Option[String] = pat.hookAtt
+  def variables: Seq[T] = Seq(name) ++ pat.variables
   def canonicalize(clause: Clause): Pattern[Option[Occurrence]] = AsP(clause.canonicalize(name.toString), hook, pat.canonicalize(clause))
   def isBound(clause: Clause): Boolean = clause.bindingsMap.contains(name.toString) && pat.isBound(clause)
 }
@@ -78,20 +78,21 @@ case class ListP[T](head: Seq[Pattern[T]], frame: Option[Pattern[T]], tail: Seq[
     }
   }
   def isWildcard = false
-  def isDefault = frame.isDefined
+  def isDefault: Boolean = frame.isDefined
   def isSpecialized(ix: Constructor, f: Fringe, c: Clause): Boolean = {
-    if (ix.isInstanceOf[ListC]) {
-      val len = ix.asInstanceOf[ListC].length
-      if (frame.isEmpty) {
-        len == head.size + tail.size
-      } else {
-        // if the list has a frame, then matching lists longer than the current head and tail
-        // is performed via the default case of the switch, which means that we need
-        // to create a switch case per list of lesser length
-        len >= head.size + tail.size
-      }
-    } else {
-      false
+    ix match {
+      case listC: ListC =>
+        val len = listC.length
+        if (frame.isEmpty) {
+          len == head.size + tail.size
+        } else {
+          // if the list has a frame, then matching lists longer than the current head and tail
+          // is performed via the default case of the switch, which means that we need
+          // to create a switch case per list of lesser length
+          len >= head.size + tail.size
+        }
+      case _ =>
+        false
     }
   }
   def score(f: Fringe, c: Clause, ps: Seq[Pattern[T]], cs: Seq[Clause]): Double = {
@@ -103,18 +104,18 @@ case class ListP[T](head: Seq[Pattern[T]], frame: Option[Pattern[T]], tail: Seq[
   def bindings(ix: Option[Constructor], occurrence: Occurrence): Seq[VariableBinding[T]] = {
     if (frame.isEmpty) {
       Seq()
-    } else if (ix.get.isInstanceOf[ListC]) {
-      val len = ix.get.asInstanceOf[ListC].length
-      frame.get.bindings(None, Num(len, occurrence))
-    } else {
-      Seq()
+    } else ix.get match {
+      case listC: ListC =>
+        val len = listC.length
+        frame.get.bindings(None, Num(len, occurrence))
+      case _ =>
+        Seq()
     }
   }
   def expand(ix: Constructor, fringes: Seq[Fringe], f: Fringe, clause: Clause): Seq[Pattern[T]] = {
     ix match {
-      case ListC(_, len) => {
+      case ListC(_, len) =>
         head ++ (0 until len - head.size - tail.size).map(_ => WildcardP().asInstanceOf[Pattern[T]]) ++ tail
-      }
       case _ => ???
     }
   }
@@ -125,9 +126,9 @@ case class ListP[T](head: Seq[Pattern[T]], frame: Option[Pattern[T]], tail: Seq[
   }
 
   def hookAtt = Some("LIST.List")
-  def variables = orig.variables
+  def variables: Seq[T] = orig.variables
   def canonicalize(clause: Clause): Pattern[Option[Occurrence]] = ListP(head.map(_.canonicalize(clause)), frame.map(_.canonicalize(clause)), tail.map(_.canonicalize(clause)), ctr, orig.canonicalize(clause))
-  def isBound(clause: Clause): Boolean = head.forall(_.isBound(clause)) && frame.map(_.isBound(clause)).getOrElse(true) && tail.forall(_.isBound(clause))
+  def isBound(clause: Clause): Boolean = head.forall(_.isBound(clause)) && frame.forall(_.isBound(clause)) && tail.forall(_.isBound(clause))
 }
 
 case class LiteralP[T](literal: String, hook: String) extends Pattern[T] {
@@ -150,7 +151,7 @@ case class LiteralP[T](literal: String, hook: String) extends Pattern[T] {
   def expand(ix: Constructor, fringes: Seq[Fringe], f: Fringe, clause: Clause): Seq[Pattern[T]] = Seq()
 
   def hookAtt = Some(hook)
-  def variables = Seq()
+  def variables: Seq[Nothing] = Seq()
   def canonicalize(clause: Clause): Pattern[Option[Occurrence]] = LiteralP(literal, hook)
   def isBound(clause: Clause): Boolean = true
 }
@@ -162,13 +163,13 @@ case class MapP[T](keys: Seq[Pattern[T]], values: Seq[Pattern[T]], frame: Option
     } else if (keys.isEmpty) {
       frame.get.signature(clause)
     } else if (frame.isEmpty) {
-      keys.flatMap(key => Seq(HasKey(false, ctr, clause.canonicalize(key)), HasNoKey(clause.canonicalize(key))))
+      keys.flatMap(key => Seq(HasKey(isSet = false, ctr, clause.canonicalize(key)), HasNoKey(clause.canonicalize(key))))
     } else {
-      keys.flatMap(key => Seq(HasKey(false, ctr, clause.canonicalize(key)), HasNoKey(clause.canonicalize(key)))) ++ frame.get.signature(clause)
+      keys.flatMap(key => Seq(HasKey(isSet = false, ctr, clause.canonicalize(key)), HasNoKey(clause.canonicalize(key)))) ++ frame.get.signature(clause)
     }
   }
-  def isWildcard = keys.isEmpty && values.isEmpty && frame.isDefined && frame.get.isWildcard
-  def isDefault = frame.isDefined || !keys.isEmpty || !values.isEmpty
+  def isWildcard: Boolean = keys.isEmpty && values.isEmpty && frame.isDefined && frame.get.isWildcard
+  def isDefault: Boolean = frame.isDefined || keys.nonEmpty || values.nonEmpty
   def isSpecialized(ix: Constructor, fringe: Fringe, clause: Clause): Boolean = {
     (ix, frame) match {
       case (Empty(), _) => keys.isEmpty && values.isEmpty
@@ -189,13 +190,12 @@ case class MapP[T](keys: Seq[Pattern[T]], values: Seq[Pattern[T]], frame: Option
     } else {
       ps match {
         case Seq() => computeScore(f, clause, ps, cs)._2
-        case _ => {
+        case _ =>
           if (ps.head.score(f, cs.head, ps.tail, cs.tail).isNegInfinity) {
             Double.NegativeInfinity
           } else {
             computeScore(f, clause, ps, cs)._2
           }
-        }
       }
     }
   }
@@ -209,19 +209,18 @@ case class MapP[T](keys: Seq[Pattern[T]], values: Seq[Pattern[T]], frame: Option
   def expand(ix: Constructor, fringes: Seq[Fringe], f: Fringe, clause: Clause): Seq[Pattern[T]] = {
     ix match {
       case Empty() => Seq()
-      case HasKey(_, _, Some(p)) => {
+      case HasKey(_, _, Some(p)) =>
         val canonKs = keys.map(_.canonicalize(clause))
         canonKs.indexOf(p) match {
           case -1 => Seq(WildcardP(), WildcardP(), this)
           case i => Seq(values(i), MapP(keys.take(i) ++ keys.takeRight(keys.size - i - 1), values.take(i) ++ values.takeRight(values.size - i - 1), frame, ctr, orig), WildcardP())
         }
-      }
       case HasNoKey(_) | NonEmpty() => Seq(this)
       case _ => ???
     }
   }
 
-  override def mapOrSetKeys = keys
+  override def mapOrSetKeys: Seq[Pattern[T]] = keys
   override def bestKey(f: Fringe, clause: Clause, ps: Seq[Pattern[T]], clauses: Seq[Clause]): Option[Pattern[Option[Occurrence]]] = {
     if (keys.isEmpty) {
       None
@@ -238,7 +237,7 @@ case class MapP[T](keys: Seq[Pattern[T]], values: Seq[Pattern[T]], frame: Option
     if (rawScore.isNegInfinity) {
       rawScore
     } else {
-      val finalScore = rawScore * value.score(f.expand(HasKey(false, ctr, Some(key.canonicalize(clause)))).head, clause, Seq(), Seq())
+      val finalScore = rawScore * value.score(f.expand(HasKey(isSet = false, ctr, Some(key.canonicalize(clause)))).head, clause, Seq(), Seq())
       if (finalScore == 0.0) {
         Double.MinPositiveValue
       } else {
@@ -248,23 +247,23 @@ case class MapP[T](keys: Seq[Pattern[T]], values: Seq[Pattern[T]], frame: Option
   }
 
   def hookAtt = Some("MAP.Map")
-  def variables = orig.variables
+  def variables: Seq[T] = orig.variables
   def canonicalize(clause: Clause): Pattern[Option[Occurrence]] = MapP(keys.map(_.canonicalize(clause)), values.map(_.canonicalize(clause)), frame.map(_.canonicalize(clause)), ctr, orig.canonicalize(clause))
-  def isBound(clause: Clause): Boolean = keys.forall(_.isBound(clause)) && values.forall(_.isBound(clause)) && frame.map(_.isBound(clause)).getOrElse(true)
+  def isBound(clause: Clause): Boolean = keys.forall(_.isBound(clause)) && values.forall(_.isBound(clause)) && frame.forall(_.isBound(clause))
 }
 
 case class OrP[T](ps: Seq[Pattern[T]]) extends Pattern[T] {
   def signature(clause: Clause): Seq[Constructor] = ???
-  def isWildcard = ???
-  def isDefault = ???
+  def isWildcard: Boolean = ???
+  def isDefault: Boolean = ???
   def isSpecialized(ix: Constructor, f: Fringe, c: Clause): Boolean = ???
   def score(f: Fringe, c: Clause, tailPs: Seq[Pattern[T]], cs: Seq[Clause]): Double = {
-    ps.head.score(f, c, ps.tail ++ tailPs, (0 until ps.size).map(_ => c) ++ cs)
+    ps.head.score(f, c, ps.tail ++ tailPs, ps.indices.map(_ => c) ++ cs)
   }
   def bindings(ix: Option[Constructor], occurrence: Occurrence): Seq[VariableBinding[T]] = ???
   def expand(ix: Constructor, fringes: Seq[Fringe], f: Fringe, clause: Clause): Seq[Pattern[T]] = ???
-  override def expandOr = ps
-  def hookAtt = {
+  override def expandOr: Seq[Pattern[T]] = ps
+  def hookAtt: Option[String] = {
     val s = ps.map(_.hookAtt).filter(_.isDefined)
     if (s.isEmpty) {
       None
@@ -272,7 +271,7 @@ case class OrP[T](ps: Seq[Pattern[T]]) extends Pattern[T] {
       s.head
     }
   }
-  def variables = ps.flatMap(_.variables)
+  def variables: Seq[T] = ps.flatMap(_.variables)
   def canonicalize(clause: Clause): Pattern[Option[Occurrence]] = OrP(ps.map(_.canonicalize(clause)))
   def isBound(clause: Clause): Boolean = ps.forall(_.isBound(clause))
 }
@@ -280,9 +279,9 @@ case class OrP[T](ps: Seq[Pattern[T]]) extends Pattern[T] {
 object OrP {
   def apply[T](p1: Pattern[T], p2: Pattern[T]): OrP[T] = {
     (p1, p2) match {
-      case (OrP(p1), OrP(p2)) => OrP(p1 ++ p2)
-      case (OrP(p1), p2) => OrP(p1 ++ Seq(p2))
-      case (p1, OrP(p2)) => OrP(Seq(p1) ++ p2)
+      case (OrP(ps1), OrP(ps2)) => OrP(ps1 ++ ps2)
+      case (OrP(ps1), _) => OrP(ps1 ++ Seq(p2))
+      case (_, OrP(ps2)) => OrP(Seq(p1) ++ ps2)
       case _ => OrP(Seq(p1, p2))
     }
   }
@@ -295,13 +294,13 @@ case class SetP[T](elements: Seq[Pattern[T]], frame: Option[Pattern[T]], ctr: Sy
     } else if (elements.isEmpty) {
       frame.get.signature(clause)
     } else if (frame.isEmpty) {
-      elements.flatMap(elem => Seq(HasKey(true, ctr, clause.canonicalize(elem)), HasNoKey(clause.canonicalize(elem))))
+      elements.flatMap(elem => Seq(HasKey(isSet = true, ctr, clause.canonicalize(elem)), HasNoKey(clause.canonicalize(elem))))
     } else {
-      elements.flatMap(elem => Seq(HasKey(true, ctr, clause.canonicalize(elem)), HasNoKey(clause.canonicalize(elem)))) ++ frame.get.signature(clause)
+      elements.flatMap(elem => Seq(HasKey(isSet = true, ctr, clause.canonicalize(elem)), HasNoKey(clause.canonicalize(elem)))) ++ frame.get.signature(clause)
     }
   }
-  def isWildcard = elements.isEmpty && frame.isDefined && frame.get.isWildcard
-  def isDefault = frame.isDefined || !elements.isEmpty
+  def isWildcard: Boolean = elements.isEmpty && frame.isDefined && frame.get.isWildcard
+  def isDefault: Boolean = frame.isDefined || elements.nonEmpty
   def isSpecialized(ix: Constructor, fringe: Fringe, clause: Clause): Boolean = {
     (ix, frame) match {
       case (Empty(), _) => elements.isEmpty
@@ -322,13 +321,12 @@ case class SetP[T](elements: Seq[Pattern[T]], frame: Option[Pattern[T]], ctr: Sy
     } else {
       ps match {
         case Seq() => computeScore(clause, ps, cs)._2
-        case _ => {
+        case _ =>
           if (ps.head.score(f, cs.head, ps.tail, cs.tail).isNegInfinity) {
             Double.NegativeInfinity
           } else {
             computeScore(clause, ps, cs)._2
           }
-        }
       }
     }
   }
@@ -342,19 +340,18 @@ case class SetP[T](elements: Seq[Pattern[T]], frame: Option[Pattern[T]], ctr: Sy
   def expand(ix: Constructor, fringes: Seq[Fringe], f: Fringe, clause: Clause): Seq[Pattern[T]] = {
     ix match {
       case Empty() => Seq()
-      case HasKey(_, _, Some(p)) => {
+      case HasKey(_, _, Some(p)) =>
         val canonEs = elements.map(_.canonicalize(clause))
         canonEs.indexOf(p) match {
           case -1 => Seq(WildcardP(), this)
           case i => Seq(SetP(elements.take(i) ++ elements.takeRight(elements.size - i - 1), frame, ctr, orig), WildcardP())
         }
-      }
       case HasNoKey(_) | NonEmpty() => Seq(this)
       case _ => ???
     }
   }
 
-  override def mapOrSetKeys = elements
+  override def mapOrSetKeys: Seq[Pattern[T]] = elements
   override def bestKey(f: Fringe, clause: Clause, ps: Seq[Pattern[T]], clauses: Seq[Clause]): Option[Pattern[Option[Occurrence]]] = {
     if (elements.isEmpty) {
       None
@@ -368,9 +365,9 @@ case class SetP[T](elements: Seq[Pattern[T]], frame: Option[Pattern[T]], ctr: Sy
   }
 
   def hookAtt = Some("SET.Set")
-  def variables = orig.variables
+  def variables: Seq[T] = orig.variables
   def canonicalize(clause: Clause): Pattern[Option[Occurrence]] = SetP(elements.map(_.canonicalize(clause)), frame.map(_.canonicalize(clause)), ctr, orig.canonicalize(clause))
-  def isBound(clause: Clause): Boolean = elements.forall(_.isBound(clause)) && frame.map(_.isBound(clause)).getOrElse(true)
+  def isBound(clause: Clause): Boolean = elements.forall(_.isBound(clause)) && frame.forall(_.isBound(clause))
 }
 
 private[pattern] object CollectionP {
@@ -402,15 +399,13 @@ case class SymbolP[T](sym: SymbolOrAlias, ps: Seq[Pattern[T]]) extends Pattern[T
   def isDefault = false
   def isSpecialized(ix: Constructor, f: Fringe, clause: Clause): Boolean = {
     (ix, sym) match {
-      case (SymbolC(SymbolOrAlias("inj",Seq(a,c))), SymbolOrAlias("inj",Seq(b,c2))) => {
+      case (SymbolC(SymbolOrAlias("inj",Seq(a,c))), SymbolOrAlias("inj",Seq(b,c2))) =>
         lazy val f2 = f.expand(SymbolC(sym)).head
-        c == c2 && (a == b || (f.isSubsorted(a, b) && ps(0).isSpecialized(SymbolC(B.SymbolOrAlias("inj",Seq(a,b))), f2, clause)))
-      }
-      case (SymbolC(SymbolOrAlias("inj",_)), _) => {
+        c == c2 && (a == b || (f.isSubsorted(a, b) && ps.head.isSpecialized(SymbolC(B.SymbolOrAlias("inj",Seq(a,b))), f2, clause)))
+      case (SymbolC(SymbolOrAlias("inj",_)), _) =>
         val less = f.overloads(sym)
         lazy val f2 = f.expand(ix).head
         less.exists(isValidOverload(f2, clause, f.expand(SymbolC(sym)), _))
-      }
       case (SymbolC(ix2), _) => ix2 == sym
     }
   }
@@ -423,26 +418,24 @@ case class SymbolP[T](sym: SymbolOrAlias, ps: Seq[Pattern[T]]) extends Pattern[T
   }
   def bindings(ix: Option[Constructor], occurrence: Occurrence): Seq[VariableBinding[T]] = {
     (ix, sym) match {
-      case (Some(SymbolC(SymbolOrAlias("inj",Seq(a,_)))), SymbolOrAlias("inj",Seq(b,_))) => {
+      case (Some(SymbolC(SymbolOrAlias("inj",Seq(a,_)))), SymbolOrAlias("inj",Seq(b,_))) =>
         if (a == b) {
           Seq()
         } else {
-          ps(0).bindings(None, occurrence)
+          ps.head.bindings(None, occurrence)
         }
-      }
       case _ => Seq()
     }
   }
   def expand(ix: Constructor, fringes: Seq[Fringe], f: Fringe, clause: Clause): Seq[Pattern[T]] = {
     (ix, sym) match {
-      case (SymbolC(SymbolOrAlias("inj", Seq(a, _))), inj @ SymbolOrAlias("inj", Seq(b, _))) => {
+      case (SymbolC(SymbolOrAlias("inj", Seq(a, _))), inj @ SymbolOrAlias("inj", Seq(b, _))) =>
         if (a == b) {
-          Seq(ps(0))
+          Seq(ps.head)
         } else {
-          ps(0).expand(SymbolC(B.SymbolOrAlias("inj", Seq(a, b))), fringes, f.expand(SymbolC(inj)).head, clause)
+          ps.head.expand(SymbolC(B.SymbolOrAlias("inj", Seq(a, b))), fringes, f.expand(SymbolC(inj)).head, clause)
         }
-      }
-      case (SymbolC(SymbolOrAlias("inj", _)), _) => {
+      case (SymbolC(SymbolOrAlias("inj", _)), _) =>
         val less = f.overloads(sym)
         val f2 = fringes.head
         val fringePs = f.expand(SymbolC(sym))
@@ -451,16 +444,14 @@ case class SymbolP[T](sym: SymbolOrAlias, ps: Seq[Pattern[T]]) extends Pattern[T
         }
         val fringeTs = f2.expand(SymbolC(validLess))
         val newPs = (ps, fringePs, fringeTs).zipped.map({
-          case (p, fringeP, fringeT) => {
+          case (p, fringeP, fringeT) =>
             if (fringeP.sort == fringeT.sort) {
               p
             } else {
               p.expand(SymbolC(B.SymbolOrAlias("inj", Seq(fringeT.sort, fringeP.sort))), Seq(fringeT), fringeP, clause).head
             }
-          }
         })
         Seq(SymbolP(validLess, newPs))
-      }
       case _ => ps
     }
   }
@@ -474,7 +465,7 @@ case class SymbolP[T](sym: SymbolOrAlias, ps: Seq[Pattern[T]]) extends Pattern[T
     val cons = SymbolC(less)
     if (f.contains(cons)) {
       val fringeTs = f.expand(cons)
-      (ps, fringePs, fringeTs).zipped.toIterable.map(t => isValidChild(t._1, t._2, t._3)).forall(identity(_))
+      (ps, fringePs, fringeTs).zipped.toIterable.map(t => isValidChild(t._1, t._2, t._3)).forall(identity)
     } else {
       false
     }
@@ -491,19 +482,18 @@ case class SymbolP[T](sym: SymbolOrAlias, ps: Seq[Pattern[T]]) extends Pattern[T
       if (fringeP.sort == fringeT.sort) {
         Seq() // exact match, so no bindings
       } else {
-        vars.map(v => (child, v))
+        vars.map(v => (child, v)) ++ childOverloads
       }
     }
     (ix, sym) match {
-      case (Some(SymbolC(SymbolOrAlias("inj", Seq(a, _)))), SymbolOrAlias("inj", Seq(b,_))) => {
+      case (Some(SymbolC(SymbolOrAlias("inj", Seq(a, _)))), SymbolOrAlias("inj", Seq(b,_))) =>
         if (a == b) { // exact match, don't recurse
           Seq()
         } else { // flexible injection, so recurse into child
           val fringeB = f.expand(SymbolC(sym)).head
-          ps(0).overloadChildren(fringeB, Some(SymbolC(B.SymbolOrAlias("inj", Seq(a, b)))), o)
+          ps.head.overloadChildren(fringeB, Some(SymbolC(B.SymbolOrAlias("inj", Seq(a, b)))), o)
         }
-      }
-      case (Some(inj @ SymbolC(SymbolOrAlias("inj", _))), _) => {
+      case (Some(inj @ SymbolC(SymbolOrAlias("inj", _))), _) =>
         val less = f.overloads(sym)
         val fringePs = f.expand(SymbolC(sym))
         val f2 = f.expand(inj).head // fringe for child of injection
@@ -513,13 +503,12 @@ case class SymbolP[T](sym: SymbolOrAlias, ps: Seq[Pattern[T]]) extends Pattern[T
           case None => Seq() // no overloads exist
           case Some(fringeTs) => (fringePs, fringeTs, ps).zipped.toSeq.zipWithIndex.flatMap(t => getVar(t._1._1, t._1._2, t._1._3, t._2)) // compute variable bindings
         }
-      }
       case _ => Seq()
     }
   }
 
-  def hookAtt = None
-  def variables = ps.flatMap(_.variables)
+  def hookAtt: None.type = None
+  def variables: Seq[T] = ps.flatMap(_.variables)
   def canonicalize(clause: Clause): Pattern[Option[Occurrence]] = SymbolP(sym, ps.map(_.canonicalize(clause)))
   def isBound(clause: Clause): Boolean = ps.forall(_.isBound(clause))
 }
@@ -542,8 +531,8 @@ case class VariableP[T](name: T, hook: String) extends Pattern[T] {
     fringes.map(_ => WildcardP().asInstanceOf[Pattern[T]])
   }
 
-  def hookAtt = None
-  def variables = Seq(name)
+  def hookAtt: None.type = None
+  def variables: Seq[T] = Seq(name)
   def canonicalize(clause: Clause): Pattern[Option[Occurrence]] = VariableP(clause.canonicalize(name.toString), hook)
   def isBound(clause: Clause): Boolean = clause.bindingsMap.contains(name.toString)
 }
@@ -565,8 +554,8 @@ case class WildcardP[T]() extends Pattern[T] {
     fringes.map(_ => WildcardP().asInstanceOf[Pattern[T]])
   }
 
-  def hookAtt = None
-  def variables = Seq()
+  def hookAtt: None.type = None
+  def variables: Seq[Nothing] = Seq()
   def canonicalize(clause: Clause): Pattern[Option[Occurrence]] = WildcardP()
   def isBound(clause: Clause): Boolean = true
 }
