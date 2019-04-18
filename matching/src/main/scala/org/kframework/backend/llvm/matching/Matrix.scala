@@ -130,31 +130,7 @@ class Fringe(val symlib: Parser.SymLib, val sort: Sort, val occurrence: Occurren
   }
 
   def lookup(ix: Constructor): Option[Seq[Fringe]] = {
-    ix match {
-      case SymbolC(sym) =>
-        if (symlib.signatures(sym)._2 != sort) {
-          None
-        } else {
-          val sorts = symlib.signatures(sym)._1
-          Some(sorts.zipWithIndex.map(t => new Fringe(symlib, t._1, Num(t._2, occurrence), sym.ctr == "inj")))
-        }
-      case LiteralC(_) => Some(Seq())
-      case ListC(sym, len) =>
-        val sort = symlib.signatures(sym)._1.head
-        Some((0 until len).map(i => new Fringe(symlib, sort, Num(i, occurrence), false)))
-      case Empty() => Some(Seq())
-      case NonEmpty() => Some(Seq(new Fringe(symlib, sort, occurrence, isExact)))
-      case HasKey(_, _, None) => ???
-      case HasKey(isSet, sym, Some(key)) =>
-        val sorts = symlib.signatures(sym)._1
-        if (isSet) {
-          Some(Seq(new Fringe(symlib, sort, Rem(key, occurrence), false), this))
-        } else {
-          Some(Seq(new Fringe(symlib, sorts(1), Value(key, occurrence), false), new Fringe(symlib, sort, Rem(key, occurrence), false), this))
-        }
-      case HasNoKey(_) =>
-        Some(Seq(this))
-    }
+    ix.expand(this)
   }
 }
 
