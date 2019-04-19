@@ -23,6 +23,8 @@ sealed trait DecisionTree {
 
 case class Failure private() extends DecisionTree {
   val representation = "fail"
+  override def hashCode: Int = super.hashCode
+  override def equals(that: Any): Boolean = that.isInstanceOf[AnyRef] && (this eq that.asInstanceOf[AnyRef])
 }
 
 case class Leaf private(ordinal: Int, occurrences: Seq[Occurrence]) extends DecisionTree {
@@ -35,6 +37,8 @@ case class Leaf private(ordinal: Int, occurrences: Seq[Occurrence]) extends Deci
   for (occurrence <- occurrences) {
     os.add(occurrence.representation)
   }
+  override def hashCode: Int = super.hashCode
+  override def equals(that: Any): Boolean = that.isInstanceOf[AnyRef] && (this eq that.asInstanceOf[AnyRef])
 }
 
 case class Switch private(occurrence: Occurrence, cases: Seq[(String, DecisionTree)], default: Option[DecisionTree]) extends DecisionTree {
@@ -49,6 +53,8 @@ case class Switch private(occurrence: Occurrence, cases: Seq[(String, DecisionTr
   }
   representation.put("default", default.map(_.representation).orNull)
   representation.put("occurrence", occurrence.representation)
+  override def hashCode: Int = super.hashCode
+  override def equals(that: Any): Boolean = that.isInstanceOf[AnyRef] && (this eq that.asInstanceOf[AnyRef])
 }
 
 case class SwitchLit private(occurrence: Occurrence, bitwidth: Int, cases: Seq[(String, DecisionTree)], default: Option[DecisionTree]) extends DecisionTree {
@@ -64,6 +70,8 @@ case class SwitchLit private(occurrence: Occurrence, bitwidth: Int, cases: Seq[(
   representation.put("bitwidth", bitwidth.asInstanceOf[AnyRef])
   representation.put("default", default.map(_.representation).orNull)
   representation.put("occurrence", occurrence.representation)
+  override def hashCode: Int = super.hashCode
+  override def equals(that: Any): Boolean = that.isInstanceOf[AnyRef] && (this eq that.asInstanceOf[AnyRef])
 }
 
 case class Function private(name: String, occurrence: Occurrence, vars: Seq[Occurrence], hook: String, child: DecisionTree) extends DecisionTree {
@@ -77,6 +85,8 @@ case class Function private(name: String, occurrence: Occurrence, vars: Seq[Occu
     args.add(v.representation)
   }
   representation.put("next", child.representation)
+  override def hashCode: Int = super.hashCode
+  override def equals(that: Any): Boolean = that.isInstanceOf[AnyRef] && (this eq that.asInstanceOf[AnyRef])
 }
 
 case class CheckNull private(occurrence: Occurrence, cases: Seq[(String, DecisionTree)], default: Option[DecisionTree]) extends DecisionTree {
@@ -92,6 +102,8 @@ case class CheckNull private(occurrence: Occurrence, cases: Seq[(String, Decisio
   representation.put("default", default.map(_.representation).orNull)
   representation.put("isnull", true.asInstanceOf[AnyRef])
   representation.put("occurrence", occurrence.representation)
+  override def hashCode: Int = super.hashCode
+  override def equals(that: Any): Boolean = that.isInstanceOf[AnyRef] && (this eq that.asInstanceOf[AnyRef])
 }
 
 case class MakePattern private(occurrence: Occurrence, pattern: Pattern[Option[Occurrence]], child: DecisionTree) extends DecisionTree {
@@ -124,6 +136,8 @@ case class MakePattern private(occurrence: Occurrence, pattern: Pattern[Option[O
     }
     result
   }
+  override def hashCode: Int = super.hashCode
+  override def equals(that: Any): Boolean = that.isInstanceOf[AnyRef] && (this eq that.asInstanceOf[AnyRef])
 }
 
 object Failure {

@@ -13,12 +13,14 @@ case class Empty() extends Constructor {
   def name = "0"
   def isBest(pat: Pattern[Option[Occurrence]]): Boolean = true
   def expand(f: Fringe): Option[Seq[Fringe]] = Some(Seq())
+  override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
 }
 
 case class NonEmpty() extends Constructor {
   def name: String = ???
   def isBest(pat: Pattern[Option[Occurrence]]): Boolean = true
   def expand(f: Fringe): Option[Seq[Fringe]] = Some(Seq(f))
+  override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
 }
 
 case class HasKey(isSet: Boolean, element: SymbolOrAlias, key: Option[Pattern[Option[Occurrence]]]) extends Constructor {
@@ -36,12 +38,14 @@ case class HasKey(isSet: Boolean, element: SymbolOrAlias, key: Option[Pattern[Op
         }
     }
   }
+  override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
 }
 
 case class HasNoKey(key: Option[Pattern[Option[Occurrence]]]) extends Constructor {
   def name = "0"
   def isBest(pat: Pattern[Option[Occurrence]]): Boolean = key.isDefined && pat == key.get
   def expand(f: Fringe): Option[Seq[Fringe]] = Some(Seq(f))
+  override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
 }
 
 case class ListC(element: SymbolOrAlias, length: Int) extends Constructor {
@@ -51,6 +55,7 @@ case class ListC(element: SymbolOrAlias, length: Int) extends Constructor {
     val sort = f.symlib.signatures(element)._1.head
     Some((0 until length).map(i => new Fringe(f.symlib, sort, Num(i, f.occurrence), false)))
   }
+  override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
 }
 
 case class SymbolC(sym: SymbolOrAlias) extends Constructor {
@@ -64,10 +69,12 @@ case class SymbolC(sym: SymbolOrAlias) extends Constructor {
       Some(sorts.zipWithIndex.map(t => new Fringe(f.symlib, t._1, Num(t._2, f.occurrence), sym.ctr == "inj")))
     }
   }
+  override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
 }
 
 case class LiteralC(literal: String) extends Constructor {
   def name: String = literal
   def isBest(pat: Pattern[Option[Occurrence]]): Boolean = true
   def expand(f: Fringe): Option[Seq[Fringe]] = Some(Seq())
+  override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
 }

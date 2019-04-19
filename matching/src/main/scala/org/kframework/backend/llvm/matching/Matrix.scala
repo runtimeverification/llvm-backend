@@ -4,6 +4,8 @@ import org.kframework.parser.kore.{Sort,SymbolOrAlias}
 import org.kframework.parser.kore.implementation.{DefaultBuilders => B}
 import org.kframework.backend.llvm.matching.pattern._
 import org.kframework.backend.llvm.matching.dt._
+import java.util
+import java.util.HashMap
 
 class Column(val fringe: Fringe, val patterns: Seq[Pattern[String]]) {
   def category: SortCategory = {
@@ -83,31 +85,21 @@ class Column(val fringe: Fringe, val patterns: Seq[Pattern[String]]) {
 class VariableBinding[T](val name: T, val category: SortCategory, val occurrence: Occurrence) {}
 
 class Fringe(val symlib: Parser.SymLib, val sort: Sort, val occurrence: Occurrence, val isExact: Boolean) { 
-  private lazy val constructors = symlib.symbolsForSort.getOrElse(sort, Seq())
-  private lazy val rawInjections = constructors.filter(_.ctr == "inj")
-  private lazy val injMap = rawInjections.map(b => (b, rawInjections.filter(a => isSubsorted(a.params.head, b.params.head)))).toMap
-  private lazy val rawOverloads = constructors.filter(symlib.overloads.contains)
-  private lazy val overloadMap = rawOverloads.map(s => (s, symlib.overloads(s))).toMap
-  private lazy val overloadInjMap = overloadMap.map(e => (e._1, e._2.map(g => B.SymbolOrAlias("inj", Seq(symlib.signatures(g)._2, symlib.signatures(e._1)._2)))))
-  private lazy val trueInjMap = injMap ++ overloadInjMap
+  val sortInfo = SortInfo(sort, symlib)
 
   lazy val category: SortCategory = SortCategory(Parser.getStringAtt(symlib.sortAtt(sort), "hook"))
 
-  lazy val length: Int = category.length(constructors.size)
+  lazy val length: Int = category.length(sortInfo.constructors.size)
 
   def overloads(sym: SymbolOrAlias): Seq[SymbolOrAlias] = {
     symlib.overloads.getOrElse(sym, Seq())
-  }
-
-  def isSubsorted(less: Sort, greater: Sort): Boolean = {
-    symlib.signatures.contains(B.SymbolOrAlias("inj",Seq(less,greater)))
   }
 
   def injections(ix: Constructor): Seq[Constructor] = {
     ix match {
       case SymbolC(sym) =>
         if (symlib.overloads.contains(sym) ||sym.ctr == "inj") {
-          trueInjMap(sym).map(SymbolC)
+          sortInfo.trueInjMap(sym).map(SymbolC)
         } else {
           Seq()
         }
@@ -125,6 +117,22 @@ class Fringe(val symlib: Parser.SymLib, val sort: Sort, val occurrence: Occurren
 
   def lookup(ix: Constructor): Option[Seq[Fringe]] = {
     ix.expand(this)
+  }
+}
+
+class SortInfo private(sort: Sort, symlib: Parser.SymLib) {
+  val constructors = symlib.symbolsForSort.getOrElse(sort, Seq())
+  private val rawInjections = constructors.filter(_.ctr == "inj")
+  private val injMap = rawInjections.map(b => (b, rawInjections.filter(a => symlib.isSubsorted(a.params.head, b.params.head)))).toMap
+  private val rawOverloads = constructors.filter(symlib.overloads.contains)
+  private val overloadMap = rawOverloads.map(s => (s, symlib.overloads(s))).toMap
+  private val overloadInjMap = overloadMap.map(e => (e._1, e._2.map(g => B.SymbolOrAlias("inj", Seq(symlib.signatures(g)._2, symlib.signatures(e._1)._2)))))
+  val trueInjMap = injMap ++ overloadInjMap
+}
+object SortInfo {
+  private val cache = new util.HashMap[Sort, SortInfo]()
+  def apply(sort: Sort, symlib: Parser.SymLib): SortInfo = {
+    cache.computeIfAbsent(sort, s => new SortInfo(s, symlib))
   }
 }
 

@@ -60,6 +60,10 @@ object Parser {
     val overloads: Map[SymbolOrAlias, Seq[SymbolOrAlias]] = {
       overloadSeq.groupBy(_._1).mapValues(_.map(_._2).toSeq)
     }
+
+    def isSubsorted(less: Sort, greater: Sort): Boolean = {
+      signatures.contains(B.SymbolOrAlias("inj",Seq(less,greater)))
+    }
   }
 
   private def rulePriority(axiom: AxiomDeclaration): Int = {

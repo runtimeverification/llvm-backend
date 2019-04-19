@@ -67,6 +67,7 @@ case class AsP[T](name: T, sort: SortCategory, pat: Pattern[T]) extends Pattern[
   def variables: Seq[T] = Seq(name) ++ pat.variables
   def canonicalize(clause: Clause): Pattern[Option[Occurrence]] = AsP(clause.canonicalize(name.toString), sort, pat.canonicalize(clause))
   def isBound(clause: Clause): Boolean = clause.bindingsMap.contains(name.toString) && pat.isBound(clause)
+  override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
 }
 
 case class ListP[T](head: Seq[Pattern[T]], frame: Option[Pattern[T]], tail: Seq[Pattern[T]], ctr: SymbolOrAlias, orig: Pattern[T]) extends Pattern[T] {
@@ -129,6 +130,7 @@ case class ListP[T](head: Seq[Pattern[T]], frame: Option[Pattern[T]], tail: Seq[
   def variables: Seq[T] = orig.variables
   def canonicalize(clause: Clause): Pattern[Option[Occurrence]] = ListP(head.map(_.canonicalize(clause)), frame.map(_.canonicalize(clause)), tail.map(_.canonicalize(clause)), ctr, orig.canonicalize(clause))
   def isBound(clause: Clause): Boolean = head.forall(_.isBound(clause)) && frame.forall(_.isBound(clause)) && tail.forall(_.isBound(clause))
+  override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
 }
 
 case class LiteralP[T](literal: String, sort: SortCategory) extends Pattern[T] {
@@ -154,6 +156,7 @@ case class LiteralP[T](literal: String, sort: SortCategory) extends Pattern[T] {
   def variables: Seq[Nothing] = Seq()
   def canonicalize(clause: Clause): Pattern[Option[Occurrence]] = LiteralP(literal, sort)
   def isBound(clause: Clause): Boolean = true
+  override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
 }
 
 case class MapP[T](keys: Seq[Pattern[T]], values: Seq[Pattern[T]], frame: Option[Pattern[T]], ctr: SymbolOrAlias, orig: Pattern[T]) extends Pattern[T] {
@@ -250,6 +253,7 @@ case class MapP[T](keys: Seq[Pattern[T]], values: Seq[Pattern[T]], frame: Option
   def variables: Seq[T] = orig.variables
   def canonicalize(clause: Clause): Pattern[Option[Occurrence]] = MapP(keys.map(_.canonicalize(clause)), values.map(_.canonicalize(clause)), frame.map(_.canonicalize(clause)), ctr, orig.canonicalize(clause))
   def isBound(clause: Clause): Boolean = keys.forall(_.isBound(clause)) && values.forall(_.isBound(clause)) && frame.forall(_.isBound(clause))
+  override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
 }
 
 case class OrP[T](ps: Seq[Pattern[T]]) extends Pattern[T] {
@@ -274,6 +278,7 @@ case class OrP[T](ps: Seq[Pattern[T]]) extends Pattern[T] {
   def variables: Seq[T] = ps.flatMap(_.variables)
   def canonicalize(clause: Clause): Pattern[Option[Occurrence]] = OrP(ps.map(_.canonicalize(clause)))
   def isBound(clause: Clause): Boolean = ps.forall(_.isBound(clause))
+  override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
 }
 
 object OrP {
@@ -368,6 +373,7 @@ case class SetP[T](elements: Seq[Pattern[T]], frame: Option[Pattern[T]], ctr: Sy
   def variables: Seq[T] = orig.variables
   def canonicalize(clause: Clause): Pattern[Option[Occurrence]] = SetP(elements.map(_.canonicalize(clause)), frame.map(_.canonicalize(clause)), ctr, orig.canonicalize(clause))
   def isBound(clause: Clause): Boolean = elements.forall(_.isBound(clause)) && frame.forall(_.isBound(clause))
+  override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
 }
 
 private[pattern] object CollectionP {
@@ -401,7 +407,7 @@ case class SymbolP[T](sym: SymbolOrAlias, ps: Seq[Pattern[T]]) extends Pattern[T
     (ix, sym) match {
       case (SymbolC(SymbolOrAlias("inj",Seq(a,c))), SymbolOrAlias("inj",Seq(b,c2))) =>
         lazy val f2 = f.expand(SymbolC(sym)).head
-        c == c2 && (a == b || (f.isSubsorted(a, b) && ps.head.isSpecialized(SymbolC(B.SymbolOrAlias("inj",Seq(a,b))), f2, clause)))
+        c == c2 && (a == b || (f.symlib.isSubsorted(a, b) && ps.head.isSpecialized(SymbolC(B.SymbolOrAlias("inj",Seq(a,b))), f2, clause)))
       case (SymbolC(SymbolOrAlias("inj",_)), _) =>
         val less = f.overloads(sym)
         lazy val f2 = f.expand(ix).head
@@ -459,7 +465,7 @@ case class SymbolP[T](sym: SymbolOrAlias, ps: Seq[Pattern[T]]) extends Pattern[T
   // returns true if the specified constructor is an overload of the current pattern and can match it
   private def isValidOverload(f: Fringe, clause: Clause, fringePs: Seq[Fringe], less: SymbolOrAlias): Boolean = {
     def isValidChild(p: Pattern[T], fringeP: Fringe, fringeT: Fringe): Boolean = {
-      fringeP.sort == fringeT.sort || (fringeP.isSubsorted(fringeT.sort, fringeP.sort) && p.isSpecialized(SymbolC(B.SymbolOrAlias("inj", Seq(fringeT.sort, fringeP.sort))), fringeP, clause))
+      fringeP.sort == fringeT.sort || (fringeP.symlib.isSubsorted(fringeT.sort, fringeP.sort) && p.isSpecialized(SymbolC(B.SymbolOrAlias("inj", Seq(fringeT.sort, fringeP.sort))), fringeP, clause))
     }
 
     val cons = SymbolC(less)
@@ -511,6 +517,7 @@ case class SymbolP[T](sym: SymbolOrAlias, ps: Seq[Pattern[T]]) extends Pattern[T
   def variables: Seq[T] = ps.flatMap(_.variables)
   def canonicalize(clause: Clause): Pattern[Option[Occurrence]] = SymbolP(sym, ps.map(_.canonicalize(clause)))
   def isBound(clause: Clause): Boolean = ps.forall(_.isBound(clause))
+  override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
 }
 
 case class VariableP[T](name: T, sort: SortCategory) extends Pattern[T] {
@@ -535,6 +542,7 @@ case class VariableP[T](name: T, sort: SortCategory) extends Pattern[T] {
   def variables: Seq[T] = Seq(name)
   def canonicalize(clause: Clause): Pattern[Option[Occurrence]] = VariableP(clause.canonicalize(name.toString), sort)
   def isBound(clause: Clause): Boolean = clause.bindingsMap.contains(name.toString)
+  override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
 }
 
 case class WildcardP[T]() extends Pattern[T] {
@@ -558,4 +566,5 @@ case class WildcardP[T]() extends Pattern[T] {
   def variables: Seq[Nothing] = Seq()
   def canonicalize(clause: Clause): Pattern[Option[Occurrence]] = WildcardP()
   def isBound(clause: Clause): Boolean = true
+  override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
 }
