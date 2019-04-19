@@ -43,7 +43,7 @@ class Column(val fringe: Fringe, val patterns: Seq[Pattern[String]]) {
     }
   }
 
-  def signature(clauses: Seq[Clause]): Seq[Constructor] = {
+  def signature(clauses: Seq[Clause]): List[Constructor] = {
     val used = patterns.zipWithIndex.flatMap(p => p._1.signature(clauses(p._2)))
     val bestUsed = bestKey(clauses) match {
       case None => used
@@ -51,9 +51,9 @@ class Column(val fringe: Fringe, val patterns: Seq[Pattern[String]]) {
     }
     val usedInjs = bestUsed.flatMap(fringe.injections)
     val dups = if (fringe.isExact) bestUsed else bestUsed ++ usedInjs
-    val nodups = dups.distinct
+    val nodups = dups.distinct.toList
     if (nodups.contains(Empty())) {
-      Seq(Empty())
+      List(Empty())
     } else {
       nodups.filter(_ != Empty())
     }
@@ -230,7 +230,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: Seq[Colu
 
   def bestCol: Column = columns(bestColIx)
 
-  lazy val sigma: Seq[Constructor] = bestCol.signature(clauses)
+  lazy val sigma: List[Constructor] = bestCol.signature(clauses)
 
   def specialize(ix: Constructor): (String, Matrix) = {
     val filtered = filterMatrix(Some(ix), (c, p) => p.isSpecialized(ix, bestCol.fringe, c))
@@ -238,7 +238,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: Seq[Colu
     (ix.name, expanded)
   }
 
-  def cases: Seq[(String, Matrix)] = sigma.map(specialize)
+  def cases: List[(String, Matrix)] = sigma.map(specialize)
 
   def compiledCases: Seq[(String, DecisionTree)] = cases.map(l => (l._1, l._2.compile))
 
@@ -276,7 +276,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: Seq[Colu
     }
   }
 
-  def compiledDefault: Option[DecisionTree] = default.map(_.compile)
+  lazy val compiledDefault: Option[DecisionTree] = default.map(_.compile)
 
   def getLeaf(row: Row, child: DecisionTree): DecisionTree = {
     def makeEquality(category: SortCategory, os: (Occurrence, Occurrence), dt: DecisionTree): DecisionTree = {
