@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!-- Copyright (c) 2015-2019 Runtime Verification, Inc. (RV-Match team). All Rights Reserved. -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.runtimeverification.k</groupId>
+    <artifactId>parent</artifactId>
+    <version>1.0-SNAPSHOT</version>
+  </parent>
+  <artifactId>llvm-backend-matching</artifactId>
+  <packaging>jar</packaging>
+
+  <name>K Framework LLVM Backend Pattern Matching</name>
+
+  <repositories>
+    <repository>
+      <id>runtime.verification</id>
+      <name>Runtime Verification Repository</name>
+      <url>https://s3.us-east-2.amazonaws.com/runtimeverificationmaven/internal</url>
+      <snapshots><enabled>false</enabled></snapshots>
+      <releases><enabled>true</enabled></releases>
+    </repository>
+    <repository>
+      <id>runtime.verification.snapshots</id>
+      <name>Runtime Verification Snapshot Repository</name>
+      <url>https://s3.us-east-2.amazonaws.com/runtimeverificationmaven/snapshots</url>
+      <snapshots><enabled>true</enabled></snapshots>
+      <releases><enabled>false</enabled></releases>
+    </repository>
+  </repositories>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.runtimeverification.k</groupId>
+      <artifactId>kore</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.esotericsoftware.yamlbeans</groupId>
+      <artifactId>yamlbeans</artifactId>
+      <version>1.13</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>net.alchim31.maven</groupId>
+        <artifactId>scala-maven-plugin</artifactId>
+        <version>3.3.1</version>
+        <executions>
+          <execution>
+            <id>scala-compile-first</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>add-source</goal>
+              <goal>compile</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>scala-test-compile</id>
+            <phase>process-test-resources</phase>
+            <goals>
+              <goal>testCompile</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <args>
+            <arg>-Xexperimental</arg>
+            <arg>-feature</arg>
+            <arg>-deprecation</arg>
+            <arg>-language:implicitConversions</arg>
+            <arg>-language:postfixOps</arg>
+          </args>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+	<artifactId>exec-maven-plugin</artifactId>
+	<version>1.6.0</version>
+	<configuration>
+          <mainClass>org.kframework.backend.llvm.matching.Matching</mainClass>
+	</configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>
