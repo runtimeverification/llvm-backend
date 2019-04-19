@@ -50,7 +50,7 @@ object Generator {
     }
   }
 
-  private def genPatterns(mod: Definition, symlib: Parser.SymLib, rewrite: GeneralizedRewrite) : Seq[P[String]] = {
+  private def genPatterns(mod: Definition, symlib: Parser.SymLib, rewrite: GeneralizedRewrite) : List[P[String]] = {
     val lhs = rewrite.getLeftHandSide
     def getSym(hookAtt: String, syms: Seq[SymbolOrAlias]): SymbolOrAlias = {
       syms.filter(isHook(hookAtt, _)).head
@@ -98,7 +98,7 @@ object Generator {
         case Or(_, p1, p2) => OrP(genPattern(p1), genPattern(p2))
       }
     }
-    lhs.map(genPattern)
+    lhs.map(genPattern).toList
   }
 
   private def genVars(pat: Pattern) : Seq[String] = {
@@ -124,7 +124,7 @@ object Generator {
   private def genClauseMatrix[T](
       symlib: Parser.SymLib,
       mod: Definition,
-      axioms: Seq[AxiomInfo],
+      axioms: List[AxiomInfo],
       sorts: Seq[Sort]) :
       Matrix = {
     val actions = axioms.map(a => new Action(a.ordinal, genVars(a.rewrite.getRightHandSide), a.sideCondition.map(genVars)))
@@ -134,7 +134,7 @@ object Generator {
   }
     
   
-  def mkDecisionTree[T](symlib: Parser.SymLib, mod: Definition, axioms: Seq[AxiomInfo], sorts: Seq[Sort]) : DecisionTree = {
+  def mkDecisionTree[T](symlib: Parser.SymLib, mod: Definition, axioms: List[AxiomInfo], sorts: Seq[Sort]) : DecisionTree = {
     val matrix = genClauseMatrix(symlib, mod, axioms, sorts)
     matrix.compile
   }

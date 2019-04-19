@@ -116,16 +116,16 @@ object Parser {
     defn.modules.flatMap(_.decls).filter(_.isInstanceOf[AxiomDeclaration]).map(_.asInstanceOf[AxiomDeclaration])
   }
 
-  def parseTopAxioms(defn: Definition) : Seq[AxiomInfo] = {
+  def parseTopAxioms(defn: Definition) : List[AxiomInfo] = {
     val axioms = getAxioms(defn).zipWithIndex
     val withOwise = axioms.flatMap(parseAxiomSentence(splitTop, _))
-    withOwise.sortWith(_.priority < _.priority)
+    withOwise.sortWith(_.priority < _.priority).toList
   }
 
-  def parseFunctionAxioms(defn: Definition, symbol: SymbolOrAlias) : Seq[AxiomInfo] = {
+  def parseFunctionAxioms(defn: Definition, symbol: SymbolOrAlias) : List[AxiomInfo] = {
     val axioms = getAxioms(defn).zipWithIndex
     val withOwise = axioms.flatMap(parseAxiomSentence(a => splitFunction(symbol, a), _))
-    withOwise.sortWith(_.priority < _.priority)
+    withOwise.sortWith(_.priority < _.priority).toList
   }
 
   private def isConcrete(symbol: SymbolOrAlias) : Boolean = {
