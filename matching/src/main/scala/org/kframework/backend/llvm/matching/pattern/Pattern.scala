@@ -461,6 +461,13 @@ case class SymbolP[T](sym: SymbolOrAlias, ps: Seq[Pattern[T]]) extends Pattern[T
       case _ => ps
     }
   }
+  override def expandOr: Seq[Pattern[T]] = {
+    sym match {
+      case SymbolOrAlias("inj", _) =>
+        ps.head.expandOr.map(p => SymbolP(sym, Seq(p)))
+      case _ => Seq(this)
+    }
+  }
 
   // returns true if the specified constructor is an overload of the current pattern and can match it
   private def isValidOverload(f: Fringe, clause: Clause, fringePs: Seq[Fringe], less: SymbolOrAlias): Boolean = {
