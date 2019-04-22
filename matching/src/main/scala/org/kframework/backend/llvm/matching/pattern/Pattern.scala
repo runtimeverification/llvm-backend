@@ -266,7 +266,7 @@ case class OrP[T](ps: Seq[Pattern[T]]) extends Pattern[T] {
   }
   def bindings(ix: Option[Constructor], occurrence: Occurrence): Seq[VariableBinding[T]] = ???
   def expand(ix: Constructor, fringes: Seq[Fringe], f: Fringe, clause: Clause): Seq[Pattern[T]] = ???
-  override def expandOr: Seq[Pattern[T]] = ps
+  override def expandOr: Seq[Pattern[T]] = ps.flatMap(_.expandOr)
   def category: Option[SortCategory] = {
     val s = ps.map(_.category).filter(_.isDefined)
     if (s.isEmpty) {
