@@ -69,9 +69,9 @@ macro(kllvm_add_tool name)
   # Link against LLVM libraries
   llvm_config(${name})
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
-  target_link_libraries(${name} PUBLIC "-ljemalloc" "-Wl,-rpath /usr/local/lib")
+  target_link_libraries(${name} PUBLIC "-ljemalloc" "-Wl,-rpath /usr/local/lib" "-ldl")
 else()
-  target_link_libraries(${name} PUBLIC "-ljemalloc" "-Wl,-rpath=/usr/local/lib")
+  target_link_libraries(${name} PUBLIC "-ljemalloc" "-Wl,-rpath=/usr/local/lib" "-ldl")
 endif()
 endmacro(kllvm_add_tool)
 
