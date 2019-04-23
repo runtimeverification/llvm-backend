@@ -540,7 +540,8 @@ case class VariableP[T](name: T, sort: SortCategory) extends Pattern[T] {
   def isDefault = true
   def isSpecialized(ix: Constructor, fringe: Fringe, clause: Clause): Boolean = true
   def score(f: Fringe, c: Clause, ps: Seq[Pattern[T]], cs: Seq[Clause]): Double = {
-    ps match {
+    if (!f.sortInfo.isCollection) 0.0
+    else ps match {
       case Seq() => 0.0
       case _ => min(0.0, ps.head.score(f, cs.head, ps.tail, cs.tail))
     }
@@ -567,7 +568,8 @@ case class WildcardP[T]() extends Pattern[T] {
   def isSpecialized(ix: Constructor, fringe: Fringe, clause: Clause): Boolean = true
 
   def score(f: Fringe, c: Clause, ps: Seq[Pattern[T]], cs: Seq[Clause]): Double = {
-    ps match {
+    if (!f.sortInfo.isCollection) 0.0
+    else ps match {
       case Seq() => 0.0
       case _ => min(0.0, ps.head.score(f, cs.head, ps.tail, cs.tail))
     }
