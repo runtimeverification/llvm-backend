@@ -182,7 +182,7 @@ class Row(val patterns: IndexedSeq[Pattern[String]], val clause: Clause) {
     p0s.map(p => new Row(patterns.updated(colIx, p), clause))
   }
 
-  override def toString: String = patterns.map(new util.Formatter().format("%12.12s", _)).mkString(" ") + " " + clause.toString
+  override def toString: String = patterns.map(p => new util.Formatter().format("%12.12s", p.toShortString)).mkString(" ") + " " + clause.toString
 }
 
 class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedSeq[Column], private val rawRows: List[Row], private val rawClauses: List[Clause], private val rawFringe: IndexedSeq[Fringe]) {
