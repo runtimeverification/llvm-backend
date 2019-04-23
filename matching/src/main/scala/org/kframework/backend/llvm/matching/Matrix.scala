@@ -75,10 +75,10 @@ class Column(val fringe: Fringe, val patterns: List[Pattern[String]]) {
     None
   }
 
-  def expand(ix: Constructor, clauses: Seq[Clause]): Seq[Column] = {
+  def expand(ix: Constructor, clauses: Seq[Clause]): IndexedSeq[Column] = {
     val fringes = fringe.expand(ix)
     val ps = (patterns, clauses).zipped.toIterable.map(t => t._1.expand(ix, fringes, fringe, t._2))
-    (fringes, ps.transpose).zipped.toSeq.map(t => new Column(t._1, t._2.toList))
+    (fringes, ps.transpose).zipped.toIndexedSeq.map(t => new Column(t._1, t._2.toList))
   }
 }
 
@@ -169,19 +169,19 @@ class Clause(
   }
 }
 
-class Row(val patterns: Seq[Pattern[String]], val clause: Clause) {
+class Row(val patterns: IndexedSeq[Pattern[String]], val clause: Clause) {
   // returns whether the row is done matching
   def isWildcard: Boolean = patterns.forall(_.isWildcard)
 
   def expand(colIx: Int): Seq[Row] = {
     val p0s = patterns(colIx).expandOr
-    p0s.map(p => new Row(patterns.take(colIx) ++ Seq(p) ++ patterns.takeRight(patterns.size - colIx - 1), clause))
+    p0s.map(p => new Row(patterns.updated(colIx, p), clause))
   }
 }
 
-class Matrix private(val symlib: Parser.SymLib, private val rawColumns: Seq[Column], private val rawRows: List[Row], private val rawClauses: List[Clause], private val rawFringe: Seq[Fringe], expanded: Boolean) {
+class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedSeq[Column], private val rawRows: List[Row], private val rawClauses: List[Clause], private val rawFringe: IndexedSeq[Fringe], expanded: Boolean) {
 
-  val columns: Seq[Column] = {
+  val columns: IndexedSeq[Column] = {
     if (rawColumns != null) {
       rawColumns
     } else if (rawRows.isEmpty) {
@@ -196,7 +196,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: Seq[Colu
     if (rawRows != null) {
       rawRows
     } else if (rawColumns.isEmpty) {
-      rawClauses.map(clause => new Row(Seq(), clause))
+      rawClauses.map(clause => new Row(IndexedSeq(), clause))
     } else {
       val ps = rawColumns.map(_.patterns).transpose
       (ps, rawClauses).zipped.toList.map(row => new Row(row._1, row._2))
@@ -219,8 +219,8 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: Seq[Colu
     }
   }
 
-  def this(symlib: Parser.SymLib, cols: Seq[(Sort, List[Pattern[String]])], actions: List[Action]) {
-    this(symlib, (cols, (1 to cols.size).map(i => new Fringe(symlib, cols(i - 1)._1, Num(i, Base()), false))).zipped.toSeq.map(pair => new Column(pair._2, pair._1._2)), null, actions.map(new Clause(_, Seq(), Seq(), Seq())), null, false)
+  def this(symlib: Parser.SymLib, cols: IndexedSeq[(Sort, List[Pattern[String]])], actions: List[Action]) {
+    this(symlib, (cols, (1 to cols.size).map(i => new Fringe(symlib, cols(i - 1)._1, Num(i, Base()), false))).zipped.toIndexedSeq.map(pair => new Column(pair._2, pair._1._2)), null, actions.map(new Clause(_, Seq(), Seq(), Seq())), null, false)
   }
 
   // compute the column with the best score, choosing the first such column if they are equal
@@ -353,17 +353,17 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: Seq[Colu
     Matrix.fromRows(symlib, rows.tail, fringe, expanded = false)
   }
 
-  def notBestCol(colIx: Int): Seq[Column] = {
-    columns.take(colIx) ++ columns.takeRight(columns.size - colIx - 1)
+  def notBestCol(colIx: Int): IndexedSeq[Column] = {
+    columns.patch(colIx, Nil, 1)
   }
 }
 
 object Matrix {
-  def fromRows(symlib: Parser.SymLib, rows: List[Row], fringe: Seq[Fringe], expanded: Boolean): Matrix = {
+  def fromRows(symlib: Parser.SymLib, rows: List[Row], fringe: IndexedSeq[Fringe]), expanded: Boolean: Matrix = {
     new Matrix(symlib, null, rows, null, fringe, expanded)
   }
 
-  def fromColumns(symlib: Parser.SymLib, cols: Seq[Column], clauses: List[Clause]): Matrix = {
+  def fromColumns(symlib: Parser.SymLib, cols: IndexedSeq[Column], clauses: List[Clause]): Matrix = {
     new Matrix(symlib, cols, null, clauses, null, false)
   }
 }

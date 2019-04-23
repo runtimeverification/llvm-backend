@@ -129,7 +129,7 @@ object Generator {
       Matrix = {
     val actions = axioms.map(a => new Action(a.ordinal, genVars(a.rewrite.getRightHandSide), a.sideCondition.map(genVars)))
     val patterns = axioms.map(a => genPatterns(mod, symlib, a.rewrite)).transpose
-    val cols = (sorts, patterns).zipped.toSeq
+    val cols = (sorts, patterns).zipped.toIndexedSeq
     new Matrix(symlib, cols, actions)
   }
     
