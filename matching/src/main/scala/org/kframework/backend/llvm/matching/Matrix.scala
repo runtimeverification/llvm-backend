@@ -110,6 +110,8 @@ class Fringe(val symlib: Parser.SymLib, val sort: Sort, val occurrence: Occurren
   def lookup(ix: Constructor): Option[Seq[Fringe]] = {
     ix.expand(this)
   }
+
+  override def toString: String = new util.Formatter().format("%12.12s", sort.toString).toString
 }
 
 class SortInfo private(sort: Sort, symlib: Parser.SymLib) {
@@ -167,6 +169,8 @@ class Clause(
   def addVars(ix: Option[Constructor], pat: Pattern[String], f: Fringe): Clause = {
     new Clause(action, bindings ++ pat.bindings(ix, f.occurrence), listRanges ++ pat.listRange(ix, f.occurrence), overloadChildren ++ pat.overloadChildren(f, ix, Num(0, f.occurrence)))
   }
+
+  override def toString: String = action.ordinal.toString
 }
 
 class Row(val patterns: IndexedSeq[Pattern[String]], val clause: Clause) {
@@ -177,6 +181,8 @@ class Row(val patterns: IndexedSeq[Pattern[String]], val clause: Clause) {
     val p0s = patterns(colIx).expandOr
     p0s.map(p => new Row(patterns.updated(colIx, p), clause))
   }
+
+  override def toString: String = patterns.map(new util.Formatter().format("%12.12s", _)).mkString(" ") + " " + clause.toString
 }
 
 class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedSeq[Column], private val rawRows: List[Row], private val rawClauses: List[Clause], private val rawFringe: IndexedSeq[Fringe]) {
@@ -341,6 +347,9 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
   def compile: DecisionTree = expand.compileInternal
 
   def compileInternal: DecisionTree = {
+    if (Matching.logging) {
+      System.out.println(toString)
+    }
     if (rows.isEmpty)
       Failure()
     else {
@@ -362,6 +371,8 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
   def notBestCol(colIx: Int): IndexedSeq[Column] = {
     columns.patch(colIx, Nil, 1)
   }
+
+  override def toString: String = fringe.map(_.toString).mkString(" ") + "\n" + rows.map(_.toString).mkString("\n") + "\n"
 }
 
 object Matrix {

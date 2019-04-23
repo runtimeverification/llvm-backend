@@ -28,9 +28,12 @@ object Matching {
     }
   }
 
+  var logging = false
+
   def main(args: Array[String]): Unit = {
     val file = new File(args(0))
     val outputFolder = new File(args(2))
+    logging = args.size > 3
     writeDecisionTreeToFile(file, args(1), outputFolder)
   }
 }

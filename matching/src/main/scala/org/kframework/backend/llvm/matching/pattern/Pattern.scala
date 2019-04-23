@@ -68,6 +68,7 @@ case class AsP[T](name: T, sort: SortCategory, pat: Pattern[T]) extends Pattern[
   def canonicalize(clause: Clause): Pattern[Option[Occurrence]] = AsP(clause.canonicalize(name.toString), sort, pat.canonicalize(clause))
   def isBound(clause: Clause): Boolean = clause.bindingsMap.contains(name.toString) && pat.isBound(clause)
   override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
+  override def toString: String = name.toString + " #as " + pat.toString
 }
 
 case class ListP[T](head: Seq[Pattern[T]], frame: Option[Pattern[T]], tail: Seq[Pattern[T]], ctr: SymbolOrAlias, orig: Pattern[T]) extends Pattern[T] {
@@ -131,6 +132,7 @@ case class ListP[T](head: Seq[Pattern[T]], frame: Option[Pattern[T]], tail: Seq[
   def canonicalize(clause: Clause): Pattern[Option[Occurrence]] = ListP(head.map(_.canonicalize(clause)), frame.map(_.canonicalize(clause)), tail.map(_.canonicalize(clause)), ctr, orig.canonicalize(clause))
   def isBound(clause: Clause): Boolean = head.forall(_.isBound(clause)) && frame.forall(_.isBound(clause)) && tail.forall(_.isBound(clause))
   override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
+  override def toString: String = "L(" + head.size + " " + frame.isDefined + " " + tail.size + ")"
 }
 
 case class LiteralP[T](literal: String, sort: SortCategory) extends Pattern[T] {
@@ -157,6 +159,7 @@ case class LiteralP[T](literal: String, sort: SortCategory) extends Pattern[T] {
   def canonicalize(clause: Clause): Pattern[Option[Occurrence]] = LiteralP(literal, sort)
   def isBound(clause: Clause): Boolean = true
   override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
+  override def toString: String = literal
 }
 
 case class MapP[T](keys: Seq[Pattern[T]], values: Seq[Pattern[T]], frame: Option[Pattern[T]], ctr: SymbolOrAlias, orig: Pattern[T]) extends Pattern[T] {
@@ -254,6 +257,7 @@ case class MapP[T](keys: Seq[Pattern[T]], values: Seq[Pattern[T]], frame: Option
   def canonicalize(clause: Clause): Pattern[Option[Occurrence]] = MapP(keys.map(_.canonicalize(clause)), values.map(_.canonicalize(clause)), frame.map(_.canonicalize(clause)), ctr, orig.canonicalize(clause))
   def isBound(clause: Clause): Boolean = keys.forall(_.isBound(clause)) && values.forall(_.isBound(clause)) && frame.forall(_.isBound(clause))
   override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
+  override def toString: String = "M(" + keys.size + " " + frame.isDefined + ")"
 }
 
 case class OrP[T](ps: Seq[Pattern[T]]) extends Pattern[T] {
@@ -279,6 +283,7 @@ case class OrP[T](ps: Seq[Pattern[T]]) extends Pattern[T] {
   def canonicalize(clause: Clause): Pattern[Option[Occurrence]] = OrP(ps.map(_.canonicalize(clause)))
   def isBound(clause: Clause): Boolean = ps.forall(_.isBound(clause))
   override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
+  override def toString: String = ps.mkString(" #Or ")
 }
 
 object OrP {
@@ -374,6 +379,7 @@ case class SetP[T](elements: Seq[Pattern[T]], frame: Option[Pattern[T]], ctr: Sy
   def canonicalize(clause: Clause): Pattern[Option[Occurrence]] = SetP(elements.map(_.canonicalize(clause)), frame.map(_.canonicalize(clause)), ctr, orig.canonicalize(clause))
   def isBound(clause: Clause): Boolean = elements.forall(_.isBound(clause)) && frame.forall(_.isBound(clause))
   override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
+  override def toString: String = "S(" + elements.size + " " + frame.isDefined + ")"
 }
 
 private[pattern] object CollectionP {
@@ -525,6 +531,7 @@ case class SymbolP[T](sym: SymbolOrAlias, ps: Seq[Pattern[T]]) extends Pattern[T
   def canonicalize(clause: Clause): Pattern[Option[Occurrence]] = SymbolP(sym, ps.map(_.canonicalize(clause)))
   def isBound(clause: Clause): Boolean = ps.forall(_.isBound(clause))
   override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
+  override def toString: String = sym.toString
 }
 
 case class VariableP[T](name: T, sort: SortCategory) extends Pattern[T] {
@@ -550,6 +557,7 @@ case class VariableP[T](name: T, sort: SortCategory) extends Pattern[T] {
   def canonicalize(clause: Clause): Pattern[Option[Occurrence]] = VariableP(clause.canonicalize(name.toString), sort)
   def isBound(clause: Clause): Boolean = clause.bindingsMap.contains(name.toString)
   override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
+  override def toString: String = name.toString
 }
 
 case class WildcardP[T]() extends Pattern[T] {
@@ -574,4 +582,5 @@ case class WildcardP[T]() extends Pattern[T] {
   def canonicalize(clause: Clause): Pattern[Option[Occurrence]] = WildcardP()
   def isBound(clause: Clause): Boolean = true
   override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
+  override def toString: String = "_"
 }
