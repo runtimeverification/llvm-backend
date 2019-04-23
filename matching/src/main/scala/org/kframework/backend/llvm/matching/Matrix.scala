@@ -87,10 +87,6 @@ class VariableBinding[T](val name: T, val category: SortCategory, val occurrence
 class Fringe(val symlib: Parser.SymLib, val sort: Sort, val occurrence: Occurrence, val isExact: Boolean) { 
   val sortInfo = SortInfo(sort, symlib)
 
-  lazy val category: SortCategory = SortCategory(Parser.getStringAtt(symlib.sortAtt(sort), "hook"))
-
-  lazy val length: Int = category.length(sortInfo.constructors.size)
-
   def overloads(sym: SymbolOrAlias): Seq[SymbolOrAlias] = {
     symlib.overloads.getOrElse(sym, Seq())
   }
@@ -128,6 +124,14 @@ class SortInfo private(sort: Sort, symlib: Parser.SymLib) {
   private val overloadMap = rawOverloads.map(s => (s, symlib.overloads(s))).toMap
   private val overloadInjMap = overloadMap.map(e => (e._1, e._2.map(g => B.SymbolOrAlias("inj", Seq(symlib.signatures(g)._2, symlib.signatures(e._1)._2)))))
   val trueInjMap = injMap ++ overloadInjMap
+  val category: SortCategory = SortCategory(Parser.getStringAtt(symlib.sortAtt(sort), "hook"))
+  val length: Int = category.length(constructors.size)
+  val isCollection: Boolean = {
+    category match {
+      case MapS() | SetS() => true
+      case _ => false
+    }
+  }
 }
 object SortInfo {
   private val cache = new util.HashMap[Sort, SortInfo]()
