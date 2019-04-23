@@ -179,43 +179,41 @@ class Row(val patterns: IndexedSeq[Pattern[String]], val clause: Clause) {
   }
 }
 
-class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedSeq[Column], private val rawRows: List[Row], private val rawClauses: List[Clause], private val rawFringe: IndexedSeq[Fringe], expanded: Boolean) {
+class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedSeq[Column], private val rawRows: List[Row], private val rawClauses: List[Clause], private val rawFringe: IndexedSeq[Fringe]) {
+  lazy val clauses: List[Clause] = {
+    if (rawClauses != null) {
+      rawClauses
+    } else {
+      rawRows.map(_.clause)
+    }
+  }
 
-  val columns: IndexedSeq[Column] = {
+  lazy val fringe: IndexedSeq[Fringe] = {
+    if (rawFringe != null) {
+      rawFringe
+    } else {
+      rawColumns.map(_.fringe)
+    }
+  }
+
+  lazy val columns: IndexedSeq[Column] = {
     if (rawColumns != null) {
       rawColumns
     } else if (rawRows.isEmpty) {
       rawFringe.map(f => new Column(f, List(), List()))
     } else {
-      val ps = rawRows.map(_.patterns).transpose
-      (rawFringe, ps).zipped.toSeq.map(col => new Column(col._1, col._2.toList))
+      rawFringe.zipWithIndex.map(col => new Column(col._1, rawRows.map(_.patterns(col._2)), clauses))
     }
   }
 
-  val rows: List[Row] = {
+  lazy val rows: List[Row] = {
     if (rawRows != null) {
       rawRows
     } else if (rawColumns.isEmpty) {
       rawClauses.map(clause => new Row(IndexedSeq(), clause))
     } else {
-      val ps = rawColumns.map(_.patterns).transpose
-      (ps, rawClauses).zipped.toList.map(row => new Row(row._1, row._2))
-    }
-  }
-
-  val clauses: List[Clause] = {
-    if (rawClauses != null) {
-      rawClauses
-    } else {
-      rows.map(_.clause)
-    }
-  }
-
-  val fringe: Seq[Fringe] = {
-    if (rawFringe != null) {
-      rawFringe
-    } else {
-      columns.map(_.fringe)
+      val ps = rawColumns.map(_.patterns)
+      rawClauses.foldLeft((List[Row](), ps))((tl, clause) => (new Row(tl._2.map(_.head), clause) :: tl._1, tl._2.map(_.tail)))._1.reverse
     }
   }
 
@@ -253,7 +251,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
 
   def filterMatrix(ix: Option[Constructor], checkPattern: (Clause, Pattern[String]) => Boolean): Matrix = {
     val newRows = rows.filter(row => checkPattern(row.clause, row.patterns(bestColIx))).map(row => new Row(row.patterns, row.clause.addVars(ix, row.patterns(bestColIx), columns(bestColIx).fringe)))
-    Matrix.fromRows(symlib, newRows, fringe, expanded = false)
+    Matrix.fromRows(symlib, newRows, fringe)
   }
 
   lazy val default: Option[Matrix] = {
@@ -293,7 +291,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
         SwitchLit(Equal(os._1, os._2), 1, Seq(("1", dt), ("0", child)), None))
     }
     // first, add all remaining variable bindings to the clause
-    val vars = row.clause.bindings ++ columns.flatMap(col => col.patterns.head.bindings(None, col.fringe.occurrence))
+    val vars = row.clause.bindings ++ (fringe, row.patterns).zipped.toSeq.flatMap(t => t._2.bindings(None, t._1.occurrence))
     val overloadVars = row.clause.overloadChildren.map(_._2)
     val allVars = vars ++ overloadVars
     // then group the bound variables by their name
@@ -333,17 +331,16 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
   }
 
   def expand: Matrix = {
-    if (columns.isEmpty) {
-      new Matrix(symlib, rawColumns, rawRows, rawClauses, rawFringe, true)
+    if (fringe.isEmpty) {
+      new Matrix(symlib, rawColumns, rawRows, rawClauses, rawFringe)
     } else {
-      Matrix.fromRows(symlib, rows.flatMap(_.expand(bestColIx)), fringe, expanded = true)
+      Matrix.fromRows(symlib, rows.flatMap(_.expand(bestColIx)), fringe)
     }
   }
 
-  def compile: DecisionTree = {
-    if (!expanded) {
-      return expand.compile
-    }
+  def compile: DecisionTree = expand.compileInternal
+
+  def compileInternal: DecisionTree = {
     if (rows.isEmpty)
       Failure()
     else {
@@ -359,7 +356,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
   }
 
   def notFirstRow: Matrix = {
-    Matrix.fromRows(symlib, rows.tail, fringe, expanded = false)
+    Matrix.fromRows(symlib, rows.tail, fringe)
   }
 
   def notBestCol(colIx: Int): IndexedSeq[Column] = {
@@ -368,11 +365,11 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
 }
 
 object Matrix {
-  def fromRows(symlib: Parser.SymLib, rows: List[Row], fringe: IndexedSeq[Fringe]), expanded: Boolean: Matrix = {
-    new Matrix(symlib, null, rows, null, fringe, expanded)
+  def fromRows(symlib: Parser.SymLib, rows: List[Row], fringe: IndexedSeq[Fringe]): Matrix = {
+    new Matrix(symlib, null, rows, null, fringe)
   }
 
   def fromColumns(symlib: Parser.SymLib, cols: IndexedSeq[Column], clauses: List[Clause]): Matrix = {
-    new Matrix(symlib, cols, null, clauses, null, false)
+    new Matrix(symlib, cols, null, clauses, null)
   }
 }
