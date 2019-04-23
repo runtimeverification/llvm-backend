@@ -129,7 +129,7 @@ case class MapS() extends SortCategory {
         SwitchLit(newO, 64, matrix.compiledCases, matrix.compiledDefault))
     } else {
       // otherwise, get the best key and test whether the best key is in the map or not
-      val key = matrix.bestCol.bestKey(matrix.clauses)
+      val key = matrix.bestCol.bestKey
       key match {
         case None => Switch(mapO, matrix.compiledCases, matrix.compiledDefault)
         case Some(k) =>
@@ -156,7 +156,7 @@ case class SetS() extends SortCategory {
         SwitchLit(newO, 64, matrix.compiledCases, matrix.compiledDefault))
     } else {
       // otherwise, get the best element and test whether the best element is in the set or not
-      val key = matrix.bestCol.bestKey(matrix.clauses)
+      val key = matrix.bestCol.bestKey
       key match {
         case None => Switch(setO, matrix.compiledCases, matrix.compiledDefault)
         case Some(k) =>

@@ -7,7 +7,7 @@ import org.kframework.backend.llvm.matching.dt._
 import java.util
 import java.util.HashMap
 
-class Column(val fringe: Fringe, val patterns: List[Pattern[String]]) {
+class Column(val fringe: Fringe, val patterns: List[Pattern[String]], val clauses: List[Clause]) {
   def category: SortCategory = {
     val ps = patterns.map(_.category).filter(_.isDefined)
     if (ps.isEmpty) {
@@ -17,35 +17,25 @@ class Column(val fringe: Fringe, val patterns: List[Pattern[String]]) {
     }
   }
 
-  private def rawScore(clauses: List[Clause]): Double = {
+  lazy val score: Double = {
     val raw = patterns.head.score(fringe, clauses.head, patterns.tail, clauses.tail)
     assert(!raw.isNaN)
     raw
   }
 
-  def score(matrix: Matrix): Double = {
-    val raw = rawScore(matrix.clauses)
-    if (raw != 0.0) {
-      raw
+  private lazy val boundVars: Seq[Set[String]] = patterns.map(_.variables)
+  def needed(vars: Seq[Set[String]]): Boolean = {
+    if (score < 0) {
+      false
     } else {
-      val unboundMapColumns = matrix.columns.filter(col => col.rawScore(matrix.clauses).isNegInfinity)
-      val unboundPatterns = unboundMapColumns.map(_.patterns).transpose
-      val keys = unboundPatterns.map(_.flatMap(_.mapOrSetKeys))
-      val vars = keys.map(_.flatMap(_.variables))
-      val boundVars = patterns.map(_.variables)
       val intersection = (vars, boundVars).zipped.map(_.intersect(_))
-      val needed = intersection.exists(_.nonEmpty)
-      if (needed) {
-        Double.MinPositiveValue
-      } else {
-        0.0
-      }
+      intersection.exists(_.nonEmpty)
     }
   }
 
-  def signature(clauses: Seq[Clause]): List[Constructor] = {
+  lazy val signature: List[Constructor] = {
     val used = patterns.zipWithIndex.flatMap(p => p._1.signature(clauses(p._2)))
-    val bestUsed = bestKey(clauses) match {
+    val bestUsed = bestKey match {
       case None => used
       case Some(k) => used.filter(_.isBest(k))
     }
@@ -66,19 +56,25 @@ class Column(val fringe: Fringe, val patterns: List[Pattern[String]]) {
     (longestHead, longestTail)
   }
 
-  def bestKey(clauses: Seq[Clause]): Option[Pattern[Option[Occurrence]]] = {
-    for ((pat, clause, i) <- (patterns, clauses, clauses.indices).zipped) {
-      if (!pat.isWildcard) {
-        return pat.bestKey(fringe, clause, patterns.drop(i), clauses.drop(i))
+  lazy val bestKey: Option[Pattern[Option[Occurrence]]] = {
+    if (!fringe.sortInfo.isCollection) None
+    else {
+      def go: Option[Pattern[Option[Occurrence]]] = {
+        for ((pat, clause, i) <- (patterns, clauses, clauses.indices).zipped) {
+          if (!pat.isWildcard) {
+            return pat.bestKey(fringe, clause, patterns.drop(i), clauses.drop(i))
+          }
+        }
+        None
       }
+      go
     }
-    None
   }
 
-  def expand(ix: Constructor, clauses: Seq[Clause]): IndexedSeq[Column] = {
+  def expand(ix: Constructor): IndexedSeq[Column] = {
     val fringes = fringe.expand(ix)
     val ps = (patterns, clauses).zipped.toIterable.map(t => t._1.expand(ix, fringes, fringe, t._2))
-    (fringes, ps.transpose).zipped.toIndexedSeq.map(t => new Column(t._1, t._2.toList))
+    (fringes, ps.transpose).zipped.toIndexedSeq.map(t => new Column(t._1, t._2.toList, clauses))
   }
 }
 
@@ -189,7 +185,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
     if (rawColumns != null) {
       rawColumns
     } else if (rawRows.isEmpty) {
-      rawFringe.map(f => new Column(f, List()))
+      rawFringe.map(f => new Column(f, List(), List()))
     } else {
       val ps = rawRows.map(_.patterns).transpose
       (rawFringe, ps).zipped.toSeq.map(col => new Column(col._1, col._2.toList))
@@ -224,21 +220,30 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
   }
 
   def this(symlib: Parser.SymLib, cols: IndexedSeq[(Sort, List[Pattern[String]])], actions: List[Action]) {
-    this(symlib, (cols, (1 to cols.size).map(i => new Fringe(symlib, cols(i - 1)._1, Num(i, Base()), false))).zipped.toIndexedSeq.map(pair => new Column(pair._2, pair._1._2)), null, actions.map(new Clause(_, Seq(), Seq(), Seq())), null, false)
+    this(symlib, (cols, (1 to cols.size).map(i => new Fringe(symlib, cols(i - 1)._1, Num(i, Base()), false))).zipped.toIndexedSeq.map(pair => new Column(pair._2, pair._1._2, actions.map(new Clause(_, Seq(), Seq(), Seq())))), null, actions.map(new Clause(_, Seq(), Seq(), Seq())), null)
   }
 
   // compute the column with the best score, choosing the first such column if they are equal
   lazy val bestColIx: Int = {
-    columns.zipWithIndex.maxBy(_._1.score(this))._2
+    val best = columns.zipWithIndex.maxBy(_._1.score)
+    if (best._1.score == 0.0) {
+      val unboundMapColumns = columns.filter(col => col.score.isNegInfinity)
+      val unboundPatterns = unboundMapColumns.map(_.patterns).transpose
+      val keys = unboundPatterns.map(_.flatMap(_.mapOrSetKeys))
+      val vars = keys.map(_.flatMap(_.variables).toSet)
+      columns.zipWithIndex.find(_._1.needed(vars)).getOrElse(columns.head, 0)._2
+    } else {
+      best._2
+    }
   }
 
   lazy val bestCol: Column = columns(bestColIx)
 
-  lazy val sigma: List[Constructor] = bestCol.signature(clauses)
+  lazy val sigma: List[Constructor] = bestCol.signature
 
   def specialize(ix: Constructor): (String, Matrix) = {
     val filtered = filterMatrix(Some(ix), (c, p) => p.isSpecialized(ix, bestCol.fringe, c))
-    val expanded = Matrix.fromColumns(symlib, filtered.columns(bestColIx).expand(ix, filtered.clauses) ++ filtered.notBestCol(bestColIx), filtered.clauses)
+    val expanded = Matrix.fromColumns(symlib, filtered.columns(bestColIx).expand(ix) ++ filtered.notBestCol(bestColIx), filtered.clauses)
     (ix.name, expanded)
   }
 
@@ -267,7 +272,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
       val filtered = filterMatrix(defaultConstructor, (_, p) => p.isDefault)
       val expanded = if (defaultConstructor.isDefined) {
         if (bestCol.category.isExpandDefault) {
-          Matrix.fromColumns(symlib, filtered.columns(bestColIx).expand(defaultConstructor.get, filtered.clauses) ++ filtered.notBestCol(bestColIx), filtered.clauses)
+          Matrix.fromColumns(symlib, filtered.columns(bestColIx).expand(defaultConstructor.get) ++ filtered.notBestCol(bestColIx), filtered.clauses)
         } else {
           Matrix.fromColumns(symlib, filtered.notBestCol(bestColIx), filtered.clauses)
         }
