@@ -7,7 +7,7 @@ import org.kframework.backend.llvm.matching.dt._
 import java.util
 import java.util.HashMap
 
-class Column(val fringe: Fringe, val patterns: List[Pattern[String]], val clauses: List[Clause]) {
+class Column(val fringe: Fringe, val patterns: IndexedSeq[Pattern[String]], val clauses: IndexedSeq[Clause]) {
   def category: SortCategory = {
     val ps = patterns.map(_.category).filter(_.isDefined)
     if (ps.isEmpty) {
@@ -18,7 +18,7 @@ class Column(val fringe: Fringe, val patterns: List[Pattern[String]], val clause
   }
 
   lazy val score: Double = {
-    val raw = patterns.head.score(fringe, clauses.head, patterns.tail, clauses.tail)
+    val raw = (patterns, clauses).zipped.takeWhile(_._2.action.priority == clauses.head.action.priority).map(t => t._1.score(fringe, t._2, bestKey)).sum
     assert(!raw.isNaN)
     raw
   }
@@ -74,7 +74,7 @@ class Column(val fringe: Fringe, val patterns: List[Pattern[String]], val clause
   def expand(ix: Constructor): IndexedSeq[Column] = {
     val fringes = fringe.expand(ix)
     val ps = (patterns, clauses).zipped.toIterable.map(t => t._1.expand(ix, fringes, fringe, t._2))
-    (fringes, ps.transpose).zipped.toIndexedSeq.map(t => new Column(t._1, t._2.toList, clauses))
+    (fringes, ps.transpose).zipped.toIndexedSeq.map(t => new Column(t._1, t._2.toIndexedSeq, clauses))
   }
 }
 
@@ -138,7 +138,7 @@ object SortInfo {
   }
 }
 
-class Action(val ordinal: Int, val rhsVars: Seq[String], val scVars: Option[Seq[String]]) {}
+class Action(val ordinal: Int, val rhsVars: Seq[String], val scVars: Option[Seq[String]], val priority: Int) {}
 
 class Clause(
   // the rule to be applied if this row succeeds
@@ -185,8 +185,8 @@ class Row(val patterns: IndexedSeq[Pattern[String]], val clause: Clause) {
   override def toString: String = patterns.map(p => new util.Formatter().format("%12.12s", p.toShortString)).mkString(" ") + " " + clause.toString
 }
 
-class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedSeq[Column], private val rawRows: List[Row], private val rawClauses: List[Clause], private val rawFringe: IndexedSeq[Fringe]) {
-  lazy val clauses: List[Clause] = {
+class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedSeq[Column], private val rawRows: IndexedSeq[Row], private val rawClauses: IndexedSeq[Clause], private val rawFringe: IndexedSeq[Fringe]) {
+  lazy val clauses: IndexedSeq[Clause] = {
     if (rawClauses != null) {
       rawClauses
     } else {
@@ -206,24 +206,24 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
     if (rawColumns != null) {
       rawColumns
     } else if (rawRows.isEmpty) {
-      rawFringe.map(f => new Column(f, List(), List()))
+      rawFringe.map(f => new Column(f, IndexedSeq(), IndexedSeq()))
     } else {
       rawFringe.zipWithIndex.map(col => new Column(col._1, rawRows.map(_.patterns(col._2)), clauses))
     }
   }
 
-  lazy val rows: List[Row] = {
+  lazy val rows: IndexedSeq[Row] = {
     if (rawRows != null) {
       rawRows
     } else if (rawColumns.isEmpty) {
       rawClauses.map(clause => new Row(IndexedSeq(), clause))
     } else {
       val ps = rawColumns.map(_.patterns)
-      rawClauses.foldLeft((List[Row](), ps))((tl, clause) => (new Row(tl._2.map(_.head), clause) :: tl._1, tl._2.map(_.tail)))._1.reverse
+      rawClauses.foldLeft((IndexedSeq[Row](), ps))((tl, clause) => (new Row(tl._2.map(_.head), clause) +: tl._1, tl._2.map(_.tail)))._1.reverse
     }
   }
 
-  def this(symlib: Parser.SymLib, cols: IndexedSeq[(Sort, List[Pattern[String]])], actions: List[Action]) {
+  def this(symlib: Parser.SymLib, cols: IndexedSeq[(Sort, IndexedSeq[Pattern[String]])], actions: IndexedSeq[Action]) {
     this(symlib, (cols, (1 to cols.size).map(i => new Fringe(symlib, cols(i - 1)._1, Num(i, Base()), false))).zipped.toIndexedSeq.map(pair => new Column(pair._2, pair._1._2, actions.map(new Clause(_, Seq(), Seq(), Seq())))), null, actions.map(new Clause(_, Seq(), Seq(), Seq())), null)
   }
 
@@ -346,6 +346,12 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
 
   def compile: DecisionTree = expand.compileInternal
 
+  lazy val firstGroup = rows.takeWhile(_.clause.action.priority == rows.head.clause.action.priority)
+
+  lazy val bestRowIx = firstGroup.indexWhere(_.isWildcard)
+
+  lazy val bestRow = rows(bestRowIx)
+
   def compileInternal: DecisionTree = {
     if (Matching.logging) {
       System.out.println(toString)
@@ -353,19 +359,20 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
     if (rows.isEmpty)
       Failure()
     else {
-      if (rows.head.isWildcard) {
-        // if there is only one row left, then try to match it and fail the matching if it fails
-        // otherwise, if it fails, try to match the remainder of hte matrix
-        getLeaf(rows.head, notFirstRow.compile)
-      } else {
-        // compute the sort category of the best column
-        bestCol.category.tree(this)
+      bestRowIx match {
+        case -1 => 
+          // compute the sort category of the best column
+          bestCol.category.tree(this)
+        case _ =>
+          // if there is only one row left, then try to match it and fail the matching if it fails
+          // otherwise, if it fails, try to match the remainder of hte matrix
+          getLeaf(bestRow, notBestRow.compile)
       }
     }
   }
 
-  def notFirstRow: Matrix = {
-    Matrix.fromRows(symlib, rows.tail, fringe)
+  def notBestRow: Matrix = {
+    Matrix.fromRows(symlib, rows.patch(bestRowIx, Nil, 1), fringe)
   }
 
   def notBestCol(colIx: Int): IndexedSeq[Column] = {
@@ -376,11 +383,11 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
 }
 
 object Matrix {
-  def fromRows(symlib: Parser.SymLib, rows: List[Row], fringe: IndexedSeq[Fringe]): Matrix = {
+  def fromRows(symlib: Parser.SymLib, rows: IndexedSeq[Row], fringe: IndexedSeq[Fringe]): Matrix = {
     new Matrix(symlib, null, rows, null, fringe)
   }
 
-  def fromColumns(symlib: Parser.SymLib, cols: IndexedSeq[Column], clauses: List[Clause]): Matrix = {
+  def fromColumns(symlib: Parser.SymLib, cols: IndexedSeq[Column], clauses: IndexedSeq[Clause]): Matrix = {
     new Matrix(symlib, cols, null, clauses, null)
   }
 }

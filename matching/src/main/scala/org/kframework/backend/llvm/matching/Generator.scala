@@ -124,17 +124,17 @@ object Generator {
   private def genClauseMatrix[T](
       symlib: Parser.SymLib,
       mod: Definition,
-      axioms: List[AxiomInfo],
+      axioms: IndexedSeq[AxiomInfo],
       sorts: Seq[Sort]) :
       Matrix = {
-    val actions = axioms.map(a => new Action(a.ordinal, genVars(a.rewrite.getRightHandSide), a.sideCondition.map(genVars)))
+    val actions = axioms.map(a => new Action(a.ordinal, genVars(a.rewrite.getRightHandSide), a.sideCondition.map(genVars), a.priority))
     val patterns = axioms.map(a => genPatterns(mod, symlib, a.rewrite)).transpose
     val cols = (sorts, patterns).zipped.toIndexedSeq
     new Matrix(symlib, cols, actions)
   }
     
   
-  def mkDecisionTree[T](symlib: Parser.SymLib, mod: Definition, axioms: List[AxiomInfo], sorts: Seq[Sort]) : DecisionTree = {
+  def mkDecisionTree[T](symlib: Parser.SymLib, mod: Definition, axioms: IndexedSeq[AxiomInfo], sorts: Seq[Sort]) : DecisionTree = {
     val matrix = genClauseMatrix(symlib, mod, axioms, sorts)
     matrix.compile
   }
