@@ -17,10 +17,22 @@ class Column(val fringe: Fringe, val patterns: IndexedSeq[Pattern[String]], val 
     }
   }
 
-  lazy val score: Double = {
-    val raw = (patterns, clauses).zipped.takeWhile(_._2.action.priority == clauses.head.action.priority).map(t => t._1.score(fringe, t._2, bestKey)).sum
-    assert(!raw.isNaN)
-    raw
+  lazy val score: Double = computeScore
+  
+  def computeScore: Double = {
+    if (isWildcard) {
+      Double.PositiveInfinity
+    } else {
+      var result = 0.0
+      for (i <- patterns.indices) {
+        result += patterns(i).score(fringe, clauses(i), bestKey)
+        if (result == Double.NegativeInfinity) {
+          return result
+        }
+      }
+      assert(!result.isNaN)
+      result
+    }
   }
 
   private lazy val boundVars: Seq[Set[String]] = patterns.map(_.variables)
@@ -76,6 +88,8 @@ class Column(val fringe: Fringe, val patterns: IndexedSeq[Pattern[String]], val 
     val ps = (patterns, clauses).zipped.toIterable.map(t => t._1.expand(ix, fringes, fringe, t._2))
     (fringes, ps.transpose).zipped.toIndexedSeq.map(t => new Column(t._1, t._2.toIndexedSeq, clauses))
   }
+
+  lazy val isWildcard: Boolean = patterns.forall(_.isWildcard)
 }
 
 class VariableBinding[T](val name: T, val category: SortCategory, val occurrence: Occurrence) {}
@@ -208,8 +222,13 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
     } else if (rawRows.isEmpty) {
       rawFringe.map(f => new Column(f, IndexedSeq(), IndexedSeq()))
     } else {
-      rawFringe.zipWithIndex.map(col => new Column(col._1, rawRows.map(_.patterns(col._2)), clauses))
+      computeColumns
     }
+  }
+
+  private def computeColumns: IndexedSeq[Column] = {
+    val ps = rawRows.map(_.patterns).transpose
+    rawFringe.indices.map(col => new Column(rawFringe(col), ps(col), clauses))
   }
 
   lazy val rows: IndexedSeq[Row] = {
@@ -218,9 +237,13 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
     } else if (rawColumns.isEmpty) {
       rawClauses.map(clause => new Row(IndexedSeq(), clause))
     } else {
-      val ps = rawColumns.map(_.patterns)
-      rawClauses.foldLeft((IndexedSeq[Row](), ps))((tl, clause) => (new Row(tl._2.map(_.head), clause) +: tl._1, tl._2.map(_.tail)))._1.reverse
+      computeRows
     }
+  }
+
+  private def computeRows: IndexedSeq[Row] = {
+    val ps = rawColumns.map(_.patterns).transpose
+    rawClauses.indices.map(row => new Row(ps(row), rawClauses(row)))
   }
 
   def this(symlib: Parser.SymLib, cols: IndexedSeq[(Sort, IndexedSeq[Pattern[String]])], actions: IndexedSeq[Action]) {
@@ -246,7 +269,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
   lazy val sigma: List[Constructor] = bestCol.signature
 
   def specialize(ix: Constructor): (String, Matrix) = {
-    val filtered = filterMatrix(Some(ix), (c, p) => p.isSpecialized(ix, bestCol.fringe, c))
+    val filtered = expand(bestColIx).filterMatrix(Some(ix), (c, p) => p.isSpecialized(ix, bestCol.fringe, c))
     val expanded = Matrix.fromColumns(symlib, filtered.columns(bestColIx).expand(ix) ++ filtered.notBestCol(bestColIx), filtered.clauses)
     (ix.name, expanded)
   }
@@ -256,7 +279,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
   lazy val compiledCases: Seq[(String, DecisionTree)] = cases.map(l => (l._1, l._2.compile))
 
   def filterMatrix(ix: Option[Constructor], checkPattern: (Clause, Pattern[String]) => Boolean): Matrix = {
-    val newRows = rows.filter(row => checkPattern(row.clause, row.patterns(bestColIx))).map(row => new Row(row.patterns, row.clause.addVars(ix, row.patterns(bestColIx), columns(bestColIx).fringe)))
+    val newRows = rows.filter(row => checkPattern(row.clause, row.patterns(bestColIx))).map(row => new Row(row.patterns, row.clause.addVars(ix, row.patterns(bestColIx), fringe(bestColIx))))
     Matrix.fromRows(symlib, newRows, fringe)
   }
 
@@ -273,7 +296,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
           }
         }
       }
-      val filtered = filterMatrix(defaultConstructor, (_, p) => p.isDefault)
+      val filtered = expand(bestColIx).filterMatrix(defaultConstructor, (_, p) => p.isDefault)
       val expanded = if (defaultConstructor.isDefined) {
         if (bestCol.category.isExpandDefault) {
           Matrix.fromColumns(symlib, filtered.columns(bestColIx).expand(defaultConstructor.get) ++ filtered.notBestCol(bestColIx), filtered.clauses)
@@ -336,15 +359,13 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
     })
   }
 
-  def expand: Matrix = {
+  def expand(colIx: Int): Matrix = {
     if (fringe.isEmpty) {
       new Matrix(symlib, rawColumns, rawRows, rawClauses, rawFringe)
     } else {
-      Matrix.fromRows(symlib, rows.flatMap(_.expand(bestColIx)), fringe)
+      Matrix.fromRows(symlib, rows.flatMap(_.expand(colIx)), fringe)
     }
   }
-
-  def compile: DecisionTree = expand.compileInternal
 
   lazy val firstGroup = rows.takeWhile(_.clause.action.priority == rows.head.clause.action.priority)
 
@@ -352,17 +373,23 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
 
   lazy val bestRow = rows(bestRowIx)
 
-  def compileInternal: DecisionTree = {
+  def compile: DecisionTree = {
     if (Matching.logging) {
       System.out.println(toString)
     }
-    if (rows.isEmpty)
+    if (clauses.isEmpty)
       Failure()
     else {
       bestRowIx match {
         case -1 => 
-          // compute the sort category of the best column
-          bestCol.category.tree(this)
+          if (bestCol.score.isPosInfinity) {
+            // decompose this column as it contains only wildcards
+            val newClauses = (clauses, bestCol.patterns).zipped.toIndexedSeq.map(t => t._1.addVars(None, t._2, bestCol.fringe))
+            Matrix.fromColumns(symlib, notBestCol(bestColIx).map(c => new Column(c.fringe, c.patterns, newClauses)), newClauses).compile
+          } else {
+            // compute the sort category of the best column
+            bestCol.category.tree(this)
+          }
         case _ =>
           // if there is only one row left, then try to match it and fail the matching if it fails
           // otherwise, if it fails, try to match the remainder of hte matrix

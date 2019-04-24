@@ -242,8 +242,8 @@ case class MapP[T](keys: Seq[Pattern[T]], values: Seq[Pattern[T]], frame: Option
 }
 
 case class OrP[T](ps: Seq[Pattern[T]]) extends Pattern[T] {
-  def signature(clause: Clause): Seq[Constructor] = ???
-  def isWildcard: Boolean = ???
+  def signature(clause: Clause): Seq[Constructor] = ps.flatMap(_.signature(clause))
+  def isWildcard: Boolean = ps.forall(_.isWildcard)
   def isDefault: Boolean = ???
   def isSpecialized(ix: Constructor, f: Fringe, c: Clause): Boolean = ???
   def score(f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]]): Double = {
