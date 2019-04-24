@@ -92,11 +92,26 @@ class Column(val fringe: Fringe, val patterns: IndexedSeq[Pattern[String]], val 
   }
 
   lazy val isWildcard: Boolean = patterns.forall(_.isWildcard)
+
+  def canEqual(other: Any): Boolean = other.isInstanceOf[Column]
+
+  override def equals(other: Any): Boolean = other match {
+    case that: Column =>
+      (that canEqual this) &&
+        fringe == that.fringe &&
+        patterns == that.patterns
+    case _ => false
+  }
+
+  override def hashCode(): Int = {
+    val state = Seq(fringe, patterns)
+    state.map(_.hashCode()).foldLeft(0)((a, b) => 31 * a + b)
+  }
 }
 
-class VariableBinding[T](val name: T, val category: SortCategory, val occurrence: Occurrence) {}
+case class VariableBinding[T](val name: T, val category: SortCategory, val occurrence: Occurrence) {}
 
-class Fringe(val symlib: Parser.SymLib, val sort: Sort, val occurrence: Occurrence, val isExact: Boolean) { 
+case class Fringe(val symlib: Parser.SymLib, val sort: Sort, val occurrence: Occurrence, val isExact: Boolean) {
   val sortInfo = SortInfo(sort, symlib)
 
   def overloads(sym: SymbolOrAlias): Seq[SymbolOrAlias] = {
@@ -154,9 +169,9 @@ object SortInfo {
   }
 }
 
-class Action(val ordinal: Int, val rhsVars: Seq[String], val scVars: Option[Seq[String]], val priority: Int) {}
+case class Action(val ordinal: Int, val rhsVars: Seq[String], val scVars: Option[Seq[String]], val priority: Int) {}
 
-class Clause(
+case class Clause(
   // the rule to be applied if this row succeeds
   val action: Action,
   // the variable bindings made so far while matching this row
@@ -189,7 +204,7 @@ class Clause(
   override def toString: String = action.ordinal.toString
 }
 
-class Row(val patterns: IndexedSeq[Pattern[String]], val clause: Clause) {
+case class Row(val patterns: IndexedSeq[Pattern[String]], val clause: Clause) {
   // returns whether the row is done matching
   def isWildcard: Boolean = patterns.forall(_.isWildcard)
 
@@ -376,6 +391,10 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
   lazy val bestRow = rows(bestRowIx)
 
   def compile: DecisionTree = {
+    return Matrix.cache.computeIfAbsent(this, k => k.compileInternal)
+  }
+
+  def compileInternal: DecisionTree = {
     if (Matching.logging) {
       System.out.println(toString)
     }
@@ -409,6 +428,21 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
   }
 
   override def toString: String = fringe.map(_.toString).mkString(" ") + "\n" + rows.map(_.toString).mkString("\n") + "\n"
+
+  def canEqual(other: Any): Boolean = other.isInstanceOf[Matrix]
+
+  override def equals(other: Any): Boolean = other match {
+    case that: Matrix =>
+      (that canEqual this) &&
+        columns == that.columns &&
+        rows == that.rows
+    case _ => false
+  }
+
+  override def hashCode(): Int = {
+    val state = Seq(columns, rows)
+    state.map(_.hashCode()).foldLeft(0)((a, b) => 31 * a + b)
+  }
 }
 
 object Matrix {
@@ -419,4 +453,6 @@ object Matrix {
   def fromColumns(symlib: Parser.SymLib, cols: IndexedSeq[Column], clauses: IndexedSeq[Clause]): Matrix = {
     new Matrix(symlib, cols, null, clauses, null)
   }
+
+  private val cache: util.HashMap[Matrix, DecisionTree] = new util.HashMap[Matrix, DecisionTree]()
 }
