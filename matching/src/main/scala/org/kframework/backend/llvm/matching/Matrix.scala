@@ -8,7 +8,7 @@ import java.util
 import java.util.HashMap
 
 class Column(val fringe: Fringe, val patterns: IndexedSeq[Pattern[String]], val clauses: IndexedSeq[Clause]) {
-  def category: SortCategory = {
+  lazy val category: SortCategory = {
     val ps = patterns.map(_.category).filter(_.isDefined)
     if (ps.isEmpty) {
       SymbolS()
@@ -25,6 +25,8 @@ class Column(val fringe: Fringe, val patterns: IndexedSeq[Pattern[String]], val 
     } else {
       var result = 0.0
       for (i <- patterns.indices) {
+        if (clauses(i).action.priority != clauses.head.action.priority)
+          return result
         result += patterns(i).score(fringe, clauses(i), bestKey)
         if (result == Double.NegativeInfinity) {
           return result
@@ -384,7 +386,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
         case -1 => 
           if (bestCol.score.isPosInfinity) {
             // decompose this column as it contains only wildcards
-            val newClauses = (clauses, bestCol.patterns).zipped.toIndexedSeq.map(t => t._1.addVars(None, t._2, bestCol.fringe))
+            val newClauses = (bestCol.clauses, bestCol.patterns).zipped.toIndexedSeq.map(t => t._1.addVars(None, t._2, bestCol.fringe))
             Matrix.fromColumns(symlib, notBestCol(bestColIx).map(c => new Column(c.fringe, c.patterns, newClauses)), newClauses).compile
           } else {
             // compute the sort category of the best column
