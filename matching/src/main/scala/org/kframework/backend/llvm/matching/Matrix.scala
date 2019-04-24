@@ -293,7 +293,12 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
 
   def cases: List[(String, Matrix)] = sigma.map(specialize)
 
-  lazy val compiledCases: Seq[(String, DecisionTree)] = cases.map(l => (l._1, l._2.compile))
+  lazy val compiledCases: Seq[(String, DecisionTree)] = {
+    Matrix.remaining += sigma.length
+    val result = cases.map(l => (l._1, l._2.compile))
+    Matrix.remaining -= sigma.length
+    result
+  }
 
   def filterMatrix(ix: Option[Constructor], checkPattern: (Clause, Pattern[String]) => Boolean): Matrix = {
     val newRows = rows.filter(row => checkPattern(row.clause, row.patterns(bestColIx))).map(row => new Row(row.patterns, row.clause.addVars(ix, row.patterns(bestColIx), fringe(bestColIx))))
@@ -329,7 +334,12 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
     }
   }
 
-  lazy val compiledDefault: Option[DecisionTree] = default.map(_.compile)
+  lazy val compiledDefault: Option[DecisionTree] = {
+    Matrix.remaining += 1
+    val result = default.map(_.compile)
+    Matrix.remaining -= 1
+    result
+  }
 
   def getLeaf(row: Row, child: DecisionTree): DecisionTree = {
     def makeEquality(category: SortCategory, os: (Occurrence, Occurrence), dt: DecisionTree): DecisionTree = {
@@ -397,6 +407,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
   def compileInternal: DecisionTree = {
     if (Matching.logging) {
       System.out.println(toString)
+      System.out.println("remaining: " + Matrix.remaining)
     }
     if (clauses.isEmpty)
       Failure()
@@ -446,6 +457,8 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
 }
 
 object Matrix {
+  var remaining = 0
+
   def fromRows(symlib: Parser.SymLib, rows: IndexedSeq[Row], fringe: IndexedSeq[Fringe]): Matrix = {
     new Matrix(symlib, null, rows, null, fringe)
   }
