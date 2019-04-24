@@ -4,10 +4,13 @@
 #include<cstdint>
 #include<cstdlib>
 #include<cstring>
+#include<vector>
 #include<dlfcn.h>
 
 #include "runtime/header.h"
 #include "runtime/alloc.h"
+
+#include "stdio.h"
 
 #define KCHAR char
 extern "C" {
@@ -26,7 +29,20 @@ extern "C" {
 
   string * makeString(const KCHAR *, int64_t len = -1);
 
-  struct list hook_LIST_element(block * value);
+  struct list hook_LIST_element(block * value) {
+    struct list l;
+    l.a = (uint64_t)(koreAlloc(sizeof(std::vector<block *>)));
+    ((std::vector<block *> *)l.a)->push_back(value);
+    return l;
+  }
+
+  size_t hook_LIST_size_long(struct list * l) {
+    return ((std::vector<block *> *)l->a)->size();
+  }
+
+  block * hook_LIST_get(struct list * l, int idx) {
+    return ((std::vector<block *> *) l->a)->at(idx);
+  }
 
   mpz_ptr move_int(mpz_t i) {
     mpz_ptr result = (mpz_ptr)malloc(sizeof(__mpz_struct));
@@ -44,14 +60,15 @@ extern "C" {
 BOOST_AUTO_TEST_SUITE(FfiTest)
 
 BOOST_AUTO_TEST_CASE(address) {
+  string * fn = makeString("timesTwo");
+  mpz_ptr addr = hook_FFI_address(fn);
+  BOOST_CHECK(0 < mpz_cmp_ui(addr, 0));
 }
 
 BOOST_AUTO_TEST_CASE(call) {
-  void * handle = dlopen("lib.so", RTLD_NOW);
-
-  BOOST_CHECK(handle != NULL);
-
-  string * argstr = makeString("*"); 
+  int x = 25;
+  const char * str = (char *) &x;
+  string * argstr = makeString(str); 
 
   block * arg = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(string *)));
   arg->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("inj{SortBytes{}}"));
@@ -72,6 +89,10 @@ BOOST_AUTO_TEST_CASE(call) {
   string * bytes = hook_FFI_call(addr, &args, &types, type_sint);
 
   BOOST_CHECK(bytes != NULL);
+
+  int ret = *(int *) bytes;
+
+  BOOST_CHECK_EQUAL(ret, x * 2);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
