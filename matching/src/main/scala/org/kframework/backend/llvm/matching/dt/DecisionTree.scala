@@ -7,12 +7,12 @@ import java.io.FileWriter
 import java.util
 import java.util.concurrent.ConcurrentHashMap
 
-import com.esotericsoftware.yamlbeans.YamlWriter
+import org.yaml.snakeyaml.Yaml
 
 sealed trait DecisionTree {
   def serializeToYaml(file: File): Unit = {
-    val writer = new YamlWriter(new FileWriter(file))
-    writer.write(representation)
+    val writer = new FileWriter(file)
+    new Yaml().dump(representation, writer)
     writer.close()
   }
 
