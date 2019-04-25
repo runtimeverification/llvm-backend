@@ -401,7 +401,14 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
   lazy val bestRow = rows(bestRowIx)
 
   def compile: DecisionTree = {
-    return Matrix.cache.computeIfAbsent(this, k => k.compileInternal)
+    val result = Matrix.cache.get(this)
+    if (result == null) {
+      val computed = compileInternal
+      Matrix.cache.put(this, computed)
+      computed
+    } else {
+      result
+    }
   }
 
   def compileInternal: DecisionTree = {
