@@ -5,9 +5,7 @@ import org.kframework.backend.llvm.matching.pattern._
 import java.io.File
 import java.io.FileWriter
 import java.util
-import java.util.Map
-import java.util.HashMap
-import java.util.ArrayList
+import java.util.concurrent.ConcurrentHashMap
 
 import com.esotericsoftware.yamlbeans.YamlWriter
 
@@ -146,42 +144,42 @@ object Failure {
 }
 
 object Leaf {
-  private val cache = new util.HashMap[(Int, Seq[Occurrence]), Leaf]()
+  private val cache = new ConcurrentHashMap[(Int, Seq[Occurrence]), Leaf]()
   def apply(ordinal: Int, occurrences: Seq[Occurrence]): Leaf = {
     cache.computeIfAbsent((ordinal, occurrences), k => new Leaf(k._1, k._2))
   }
 }
 
 object Switch {
-  val cache = new util.HashMap[(Occurrence, Seq[(String, DecisionTree)], Option[DecisionTree]), Switch]()
+  val cache = new ConcurrentHashMap[(Occurrence, Seq[(String, DecisionTree)], Option[DecisionTree]), Switch]()
   def apply(occurrence: Occurrence, cases: Seq[(String, DecisionTree)], default: Option[DecisionTree]): Switch = {
     cache.computeIfAbsent((occurrence, cases, default), k => new Switch(k._1, k._2, k._3))
   }
 }
 
 object SwitchLit {
-  val cache = new util.HashMap[(Occurrence, Int, Seq[(String, DecisionTree)], Option[DecisionTree]), SwitchLit]()
+  val cache = new ConcurrentHashMap[(Occurrence, Int, Seq[(String, DecisionTree)], Option[DecisionTree]), SwitchLit]()
   def apply(occurrence: Occurrence, bitwidth: Int, cases: Seq[(String, DecisionTree)], default: Option[DecisionTree]): SwitchLit = {
     cache.computeIfAbsent((occurrence, bitwidth, cases, default), k => new SwitchLit(k._1, k._2, k._3, k._4))
   }
 }
 
 object Function {
-  val cache = new util.HashMap[(String, Occurrence, Seq[Occurrence], String, DecisionTree), Function]()
+  val cache = new ConcurrentHashMap[(String, Occurrence, Seq[Occurrence], String, DecisionTree), Function]()
   def apply(name: String, occurrence: Occurrence, vars: Seq[Occurrence], hook: String, child: DecisionTree): Function = {
     cache.computeIfAbsent((name, occurrence, vars, hook, child), k => new Function(k._1, k._2, k._3, k._4, k._5))
   }
 }
 
 object CheckNull {
-  val cache = new util.HashMap[(Occurrence, Seq[(String, DecisionTree)], Option[DecisionTree]), CheckNull]()
+  val cache = new ConcurrentHashMap[(Occurrence, Seq[(String, DecisionTree)], Option[DecisionTree]), CheckNull]()
   def apply(occurrence: Occurrence, cases: Seq[(String, DecisionTree)], default: Option[DecisionTree]): CheckNull = {
     cache.computeIfAbsent((occurrence, cases, default), k => new CheckNull(k._1, k._2, k._3))
   }
 }
 
 object MakePattern {
-  val cache = new util.HashMap[(Occurrence, Pattern[Option[Occurrence]], DecisionTree), MakePattern]()
+  val cache = new ConcurrentHashMap[(Occurrence, Pattern[Option[Occurrence]], DecisionTree), MakePattern]()
   def apply(occurrence: Occurrence, pattern: Pattern[Option[Occurrence]], child: DecisionTree): MakePattern = {
     cache.computeIfAbsent((occurrence, pattern, child), k => new MakePattern(k._1, k._2, k._3))
   }

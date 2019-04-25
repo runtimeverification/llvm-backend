@@ -5,7 +5,7 @@ import org.kframework.parser.kore.implementation.{DefaultBuilders => B}
 import org.kframework.backend.llvm.matching.pattern._
 import org.kframework.backend.llvm.matching.dt._
 import java.util
-import java.util.HashMap
+import java.util.concurrent.ConcurrentHashMap
 
 class Column(val fringe: Fringe, val patterns: IndexedSeq[Pattern[String]], val clauses: IndexedSeq[Clause]) {
   lazy val category: SortCategory = {
@@ -163,9 +163,8 @@ class SortInfo private(sort: Sort, symlib: Parser.SymLib) {
   }
 }
 object SortInfo {
-  private val cache = new util.HashMap[Sort, SortInfo]()
   def apply(sort: Sort, symlib: Parser.SymLib): SortInfo = {
-    cache.computeIfAbsent(sort, s => new SortInfo(s, symlib))
+    symlib.sortCache.computeIfAbsent(sort, s => new SortInfo(s, symlib))
   }
 }
 
@@ -452,13 +451,14 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
   override def equals(other: Any): Boolean = other match {
     case that: Matrix =>
       (that canEqual this) &&
+        symlib == that.symlib &&
         columns == that.columns &&
         rows == that.rows
     case _ => false
   }
 
   override def hashCode(): Int = {
-    val state = Seq(columns, rows)
+    val state = Seq(symlib, columns, rows)
     state.map(_.hashCode()).foldLeft(0)((a, b) => 31 * a + b)
   }
 }
@@ -474,5 +474,5 @@ object Matrix {
     new Matrix(symlib, cols, null, clauses, null)
   }
 
-  private val cache: util.HashMap[Matrix, DecisionTree] = new util.HashMap[Matrix, DecisionTree]()
+  private val cache = new ConcurrentHashMap[Matrix, DecisionTree]()
 }

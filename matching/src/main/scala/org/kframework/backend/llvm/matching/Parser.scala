@@ -2,6 +2,7 @@ package org.kframework.backend.llvm.matching
 
 import org.kframework.parser.kore._
 import org.kframework.parser.kore.implementation.{DefaultBuilders => B}
+import java.util
 
 case class AxiomInfo(priority: Int, ordinal: Int, rewrite: GeneralizedRewrite, sideCondition: Option[Pattern]) {}
 
@@ -27,6 +28,8 @@ object Parser {
   }
 
   class SymLib(symbols: Seq[SymbolOrAlias], sorts: Seq[Sort], mod: Definition, overloadSeq: Seq[(SymbolOrAlias, SymbolOrAlias)]) {
+    val sortCache = new util.HashMap[Sort, SortInfo]()
+
     private val symbolDecls = mod.modules.flatMap(_.decls).filter(_.isInstanceOf[SymbolDeclaration]).map(_.asInstanceOf[SymbolDeclaration]).groupBy(_.symbol.ctr)
 
     private val sortDecls = mod.modules.flatMap(_.decls).filter(_.isInstanceOf[SortDeclaration]).map(_.asInstanceOf[SortDeclaration]).groupBy(_.sort.asInstanceOf[CompoundSort].ctr)
