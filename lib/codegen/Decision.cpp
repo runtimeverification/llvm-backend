@@ -21,12 +21,16 @@ void Decision::operator()(DecisionNode *entry, llvm::StringMap<llvm::Value *> su
 }
 
 std::set<std::string> DecisionNode::collectVars() {
-  std::set<std::string> defs, vars;
+  if (hasVars) {
+    return vars;
+  }
+  std::set<std::string> defs;
   collectDefs(defs);
   collectUses(vars);
   for (std::string var : defs) {
     vars.erase(var);
   }
+  hasVars = true;
   return vars;
 }
 

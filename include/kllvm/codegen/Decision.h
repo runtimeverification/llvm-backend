@@ -27,6 +27,10 @@ public:
 
   void setCompleted() { completed = true; }
   bool isCompleted() const { return completed; }
+
+private:
+  bool hasVars = false;
+  std::set<std::string> vars;
 };
 
 class DecisionCase {
