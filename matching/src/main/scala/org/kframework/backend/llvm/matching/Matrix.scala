@@ -185,6 +185,13 @@ case class Clause(
   lazy val bindingsMap: Map[String, VariableBinding[String]] = bindings.groupBy(_.name).mapValues(_.head)
   lazy val boundOccurrences: Set[Occurrence] = bindings.map(_.occurrence).toSet
 
+  def isBound(binding: Any) = {
+    binding match {
+      case name: String => bindingsMap.contains(name)
+      case o: Option[_] => boundOccurrences.contains(o.get.asInstanceOf[Occurrence])
+    }
+  }
+
   def canonicalize(name: String): Option[Occurrence] = {
     bindingsMap.get(name).map(_.occurrence)
   }

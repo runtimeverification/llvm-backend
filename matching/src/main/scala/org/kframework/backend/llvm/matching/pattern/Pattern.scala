@@ -65,7 +65,7 @@ case class AsP[T](name: T, sort: SortCategory, pat: Pattern[T]) extends Pattern[
   def category: Option[SortCategory] = pat.category
   def variables: Set[T] = Set(name) ++ pat.variables
   def canonicalize(clause: Clause): Pattern[Option[Occurrence]] = AsP(clause.canonicalize(name.toString), sort, pat.canonicalize(clause))
-  def isBound(clause: Clause): Boolean = clause.bindingsMap.contains(name.toString) && pat.isBound(clause)
+  def isBound(clause: Clause): Boolean = clause.isBound(name) && pat.isBound(clause)
   override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
   def toShortString: String = name.toString + " #as " + pat.toShortString
 }
@@ -179,7 +179,7 @@ case class MapP[T](keys: Seq[Pattern[T]], values: Seq[Pattern[T]], frame: Option
       1.0
     } else if (keys.isEmpty) {
       frame.get.score(f, c, key)
-    } else if (isBound(c)) {
+    } else if (key.isDefined && key.get.isBound(c)) {
       if (canonicalize(c).keys.contains(key.get)) 1.0 else 0.0
     } else {
       Double.NegativeInfinity
@@ -306,7 +306,7 @@ case class SetP[T](elements: Seq[Pattern[T]], frame: Option[Pattern[T]], ctr: Sy
       1.0
     } else if (elements.isEmpty) {
       frame.get.score(f, c, key)
-    } else if (isBound(c)) {
+    } else if (key.isDefined && key.get.isBound(c)) {
       if (canonicalize(c).elements.contains(key.get)) 1.0 else 0.0
     } else {
       Double.NegativeInfinity
@@ -519,7 +519,7 @@ case class VariableP[T](name: T, sort: SortCategory) extends Pattern[T] {
   def category: None.type = None
   val variables: Set[T] = Set(name)
   def canonicalize(clause: Clause): Pattern[Option[Occurrence]] = VariableP(clause.canonicalize(name.toString), sort)
-  def isBound(clause: Clause): Boolean = clause.bindingsMap.contains(name.toString)
+  def isBound(clause: Clause): Boolean = clause.isBound(name)
   override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
   def toShortString: String = name.toString
 }
