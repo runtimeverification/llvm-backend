@@ -90,7 +90,7 @@ BOOST_AUTO_TEST_CASE(call) {
 
   BOOST_CHECK(bytes != NULL);
 
-  int ret = *(int *) bytes;
+  int ret = *(int *) bytes->data;
 
   BOOST_CHECK_EQUAL(ret, x * 2);
 }

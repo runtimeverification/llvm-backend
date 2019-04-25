@@ -115,7 +115,7 @@ extern "C" {
     if (!mpz_fits_ulong_p(addr)) {
       throw std::invalid_argument("Addr is too large");
     }
-    *(void **)(&address) = (void *) mpz_get_ui(addr);
+    address = (void (*) (void))  mpz_get_ui(addr);
 
     size_t nargs = hook_LIST_size_long(args);
     size_t ntypes = hook_LIST_size_long(types);
@@ -141,7 +141,7 @@ extern "C" {
         if (elem->h.hdr != (uint64_t)getTagForSymbolName("inj{SortBytes{}}")) {
           throw std::invalid_argument("Args list contains non-bytes type");
         }
-        avalues[i] = (string *) *elem->children;
+        avalues[i] = ((string *) *elem->children)->data;
     }
 
     rtype = getTypeFromSymbol((uint64_t)ret);
@@ -161,7 +161,7 @@ extern "C" {
     }
 
     string * rvalue = static_cast<string *>(koreAlloc(rtype->size));
-    ffi_call(&cif, address, (void *)rvalue, avalues);
+    ffi_call(&cif, address, (void *)(rvalue->data), avalues);
 
     set_len(rvalue, rtype->size);
     free(avalues);
