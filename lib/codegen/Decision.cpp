@@ -24,9 +24,9 @@ std::set<std::string> DecisionNode::collectVars() {
   if (hasVars) {
     return vars;
   }
-  std::set<std::string> defs;
-  collectDefs(defs);
-  collectUses(vars);
+  collectDefs();
+  collectUses();
+  vars = uses;
   for (std::string var : defs) {
     vars.erase(var);
   }
