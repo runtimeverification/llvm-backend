@@ -17,6 +17,7 @@ object SortCategory {
     hookAtt match {
       case None => SymbolS()
       case Some("STRING.String") => StringS()
+      case Some("BYTES.Bytes") => BytesS()
       case Some("LIST.List") => ListS()
       case Some("MAP.Map") => MapS()
       case Some("SET.Set") => SetS()
@@ -68,6 +69,10 @@ abstract class EqualLiteral() extends SortCategory {
 }
 case class StringS() extends EqualLiteral {
   def hookAtt = "STRING.String"
+  def equalityFun = "hook_KEQUAL_eq"
+}
+case class BytesS() extends EqualLiteral {
+  def hookAtt = "BYTES.Bytes"
   def equalityFun = "hook_KEQUAL_eq"
 }
 case class ListS() extends SortCategory {

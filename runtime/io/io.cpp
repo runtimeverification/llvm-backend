@@ -453,6 +453,17 @@ extern "C" {
     return dotK;
   }
 
+  block * hook_IO_remove(string * path) {
+    char * p = getTerminatedString(path);
+
+    int ret = unlink(p);
+    if (ret == -1) {
+      return getKSeqErrorBlock();
+    }
+
+    return dotK;
+  }
+
   void flush_IO_logs() {
     std::string pid = std::to_string(getpid());
     for (auto const& log : logFiles) {
@@ -487,5 +498,9 @@ extern "C" {
     logFiles[p].append(m);
 
     return dotK;
+  }
+
+  block * hook_META_parseKAST(string *kast) {
+    throw std::invalid_argument("not implemented: META.parseKast");
   }
 }

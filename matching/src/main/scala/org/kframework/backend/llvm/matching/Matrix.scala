@@ -5,10 +5,10 @@ import org.kframework.parser.kore.implementation.{DefaultBuilders => B}
 import org.kframework.backend.llvm.matching.pattern._
 import org.kframework.backend.llvm.matching.dt._
 import java.util
-import java.util.HashMap
+import java.util.concurrent.ConcurrentHashMap
 
-class Column(val fringe: Fringe, val patterns: List[Pattern[String]], val clauses: List[Clause]) {
-  def category: SortCategory = {
+class Column(val fringe: Fringe, val patterns: IndexedSeq[Pattern[String]], val clauses: IndexedSeq[Clause]) {
+  lazy val category: SortCategory = {
     val ps = patterns.map(_.category).filter(_.isDefined)
     if (ps.isEmpty) {
       SymbolS()
@@ -17,10 +17,24 @@ class Column(val fringe: Fringe, val patterns: List[Pattern[String]], val clause
     }
   }
 
-  lazy val score: Double = {
-    val raw = patterns.head.score(fringe, clauses.head, patterns.tail, clauses.tail)
-    assert(!raw.isNaN)
-    raw
+  lazy val score: Double = computeScore
+  
+  def computeScore: Double = {
+    if (isWildcard) {
+      Double.PositiveInfinity
+    } else {
+      var result = 0.0
+      for (i <- patterns.indices) {
+        if (clauses(i).action.priority != clauses.head.action.priority)
+          return result
+        result += patterns(i).score(fringe, clauses(i), bestKey)
+        if (result == Double.NegativeInfinity) {
+          return result
+        }
+      }
+      assert(!result.isNaN)
+      result
+    }
   }
 
   private lazy val boundVars: Seq[Set[String]] = patterns.map(_.variables)
@@ -74,13 +88,30 @@ class Column(val fringe: Fringe, val patterns: List[Pattern[String]], val clause
   def expand(ix: Constructor): IndexedSeq[Column] = {
     val fringes = fringe.expand(ix)
     val ps = (patterns, clauses).zipped.toIterable.map(t => t._1.expand(ix, fringes, fringe, t._2))
-    (fringes, ps.transpose).zipped.toIndexedSeq.map(t => new Column(t._1, t._2.toList, clauses))
+    (fringes, ps.transpose).zipped.toIndexedSeq.map(t => new Column(t._1, t._2.toIndexedSeq, clauses))
+  }
+
+  lazy val isWildcard: Boolean = patterns.forall(_.isWildcard)
+
+  def canEqual(other: Any): Boolean = other.isInstanceOf[Column]
+
+  override def equals(other: Any): Boolean = other match {
+    case that: Column =>
+      (that canEqual this) &&
+        fringe == that.fringe &&
+        patterns == that.patterns
+    case _ => false
+  }
+
+  override def hashCode(): Int = {
+    val state = Seq(fringe, patterns)
+    state.map(_.hashCode()).foldLeft(0)((a, b) => 31 * a + b)
   }
 }
 
-class VariableBinding[T](val name: T, val category: SortCategory, val occurrence: Occurrence) {}
+case class VariableBinding[T](val name: T, val category: SortCategory, val occurrence: Occurrence) {}
 
-class Fringe(val symlib: Parser.SymLib, val sort: Sort, val occurrence: Occurrence, val isExact: Boolean) { 
+case class Fringe(val symlib: Parser.SymLib, val sort: Sort, val occurrence: Occurrence, val isExact: Boolean) {
   val sortInfo = SortInfo(sort, symlib)
 
   def overloads(sym: SymbolOrAlias): Seq[SymbolOrAlias] = {
@@ -132,15 +163,14 @@ class SortInfo private(sort: Sort, symlib: Parser.SymLib) {
   }
 }
 object SortInfo {
-  private val cache = new util.HashMap[Sort, SortInfo]()
   def apply(sort: Sort, symlib: Parser.SymLib): SortInfo = {
-    cache.computeIfAbsent(sort, s => new SortInfo(s, symlib))
+    symlib.sortCache.computeIfAbsent(sort, s => new SortInfo(s, symlib))
   }
 }
 
-class Action(val ordinal: Int, val rhsVars: Seq[String], val scVars: Option[Seq[String]]) {}
+case class Action(val ordinal: Int, val rhsVars: Seq[String], val scVars: Option[Seq[String]], val priority: Int) {}
 
-class Clause(
+case class Clause(
   // the rule to be applied if this row succeeds
   val action: Action,
   // the variable bindings made so far while matching this row
@@ -154,6 +184,13 @@ class Clause(
 
   lazy val bindingsMap: Map[String, VariableBinding[String]] = bindings.groupBy(_.name).mapValues(_.head)
   lazy val boundOccurrences: Set[Occurrence] = bindings.map(_.occurrence).toSet
+
+  def isBound(binding: Any) = {
+    binding match {
+      case name: String => bindingsMap.contains(name)
+      case o: Option[_] => boundOccurrences.contains(o.get.asInstanceOf[Occurrence])
+    }
+  }
 
   def canonicalize(name: String): Option[Occurrence] = {
     bindingsMap.get(name).map(_.occurrence)
@@ -173,7 +210,7 @@ class Clause(
   override def toString: String = action.ordinal.toString
 }
 
-class Row(val patterns: IndexedSeq[Pattern[String]], val clause: Clause) {
+case class Row(val patterns: IndexedSeq[Pattern[String]], val clause: Clause) {
   // returns whether the row is done matching
   def isWildcard: Boolean = patterns.forall(_.isWildcard)
 
@@ -185,8 +222,8 @@ class Row(val patterns: IndexedSeq[Pattern[String]], val clause: Clause) {
   override def toString: String = patterns.map(p => new util.Formatter().format("%12.12s", p.toShortString)).mkString(" ") + " " + clause.toString
 }
 
-class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedSeq[Column], private val rawRows: List[Row], private val rawClauses: List[Clause], private val rawFringe: IndexedSeq[Fringe]) {
-  lazy val clauses: List[Clause] = {
+class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedSeq[Column], private val rawRows: IndexedSeq[Row], private val rawClauses: IndexedSeq[Clause], private val rawFringe: IndexedSeq[Fringe]) {
+  lazy val clauses: IndexedSeq[Clause] = {
     if (rawClauses != null) {
       rawClauses
     } else {
@@ -206,24 +243,33 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
     if (rawColumns != null) {
       rawColumns
     } else if (rawRows.isEmpty) {
-      rawFringe.map(f => new Column(f, List(), List()))
+      rawFringe.map(f => new Column(f, IndexedSeq(), IndexedSeq()))
     } else {
-      rawFringe.zipWithIndex.map(col => new Column(col._1, rawRows.map(_.patterns(col._2)), clauses))
+      computeColumns
     }
   }
 
-  lazy val rows: List[Row] = {
+  private def computeColumns: IndexedSeq[Column] = {
+    val ps = rawRows.map(_.patterns).transpose
+    rawFringe.indices.map(col => new Column(rawFringe(col), ps(col), clauses))
+  }
+
+  lazy val rows: IndexedSeq[Row] = {
     if (rawRows != null) {
       rawRows
     } else if (rawColumns.isEmpty) {
       rawClauses.map(clause => new Row(IndexedSeq(), clause))
     } else {
-      val ps = rawColumns.map(_.patterns)
-      rawClauses.foldLeft((List[Row](), ps))((tl, clause) => (new Row(tl._2.map(_.head), clause) :: tl._1, tl._2.map(_.tail)))._1.reverse
+      computeRows
     }
   }
 
-  def this(symlib: Parser.SymLib, cols: IndexedSeq[(Sort, List[Pattern[String]])], actions: List[Action]) {
+  private def computeRows: IndexedSeq[Row] = {
+    val ps = rawColumns.map(_.patterns).transpose
+    rawClauses.indices.map(row => new Row(ps(row), rawClauses(row)))
+  }
+
+  def this(symlib: Parser.SymLib, cols: IndexedSeq[(Sort, IndexedSeq[Pattern[String]])], actions: IndexedSeq[Action]) {
     this(symlib, (cols, (1 to cols.size).map(i => new Fringe(symlib, cols(i - 1)._1, Num(i, Base()), false))).zipped.toIndexedSeq.map(pair => new Column(pair._2, pair._1._2, actions.map(new Clause(_, Seq(), Seq(), Seq())))), null, actions.map(new Clause(_, Seq(), Seq(), Seq())), null)
   }
 
@@ -246,17 +292,22 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
   lazy val sigma: List[Constructor] = bestCol.signature
 
   def specialize(ix: Constructor): (String, Matrix) = {
-    val filtered = filterMatrix(Some(ix), (c, p) => p.isSpecialized(ix, bestCol.fringe, c))
+    val filtered = expand(bestColIx).filterMatrix(Some(ix), (c, p) => p.isSpecialized(ix, bestCol.fringe, c))
     val expanded = Matrix.fromColumns(symlib, filtered.columns(bestColIx).expand(ix) ++ filtered.notBestCol(bestColIx), filtered.clauses)
     (ix.name, expanded)
   }
 
   def cases: List[(String, Matrix)] = sigma.map(specialize)
 
-  lazy val compiledCases: Seq[(String, DecisionTree)] = cases.map(l => (l._1, l._2.compile))
+  lazy val compiledCases: Seq[(String, DecisionTree)] = {
+    Matrix.remaining += sigma.length
+    val result = cases.map(l => (l._1, l._2.compile))
+    Matrix.remaining -= sigma.length
+    result
+  }
 
   def filterMatrix(ix: Option[Constructor], checkPattern: (Clause, Pattern[String]) => Boolean): Matrix = {
-    val newRows = rows.filter(row => checkPattern(row.clause, row.patterns(bestColIx))).map(row => new Row(row.patterns, row.clause.addVars(ix, row.patterns(bestColIx), columns(bestColIx).fringe)))
+    val newRows = rows.filter(row => checkPattern(row.clause, row.patterns(bestColIx))).map(row => new Row(row.patterns, row.clause.addVars(ix, row.patterns(bestColIx), fringe(bestColIx))))
     Matrix.fromRows(symlib, newRows, fringe)
   }
 
@@ -273,7 +324,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
           }
         }
       }
-      val filtered = filterMatrix(defaultConstructor, (_, p) => p.isDefault)
+      val filtered = expand(bestColIx).filterMatrix(defaultConstructor, (_, p) => p.isDefault)
       val expanded = if (defaultConstructor.isDefined) {
         if (bestCol.category.isExpandDefault) {
           Matrix.fromColumns(symlib, filtered.columns(bestColIx).expand(defaultConstructor.get) ++ filtered.notBestCol(bestColIx), filtered.clauses)
@@ -289,7 +340,12 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
     }
   }
 
-  lazy val compiledDefault: Option[DecisionTree] = default.map(_.compile)
+  lazy val compiledDefault: Option[DecisionTree] = {
+    Matrix.remaining += 1
+    val result = default.map(_.compile)
+    Matrix.remaining -= 1
+    result
+  }
 
   def getLeaf(row: Row, child: DecisionTree): DecisionTree = {
     def makeEquality(category: SortCategory, os: (Occurrence, Occurrence), dt: DecisionTree): DecisionTree = {
@@ -336,36 +392,59 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
     })
   }
 
-  def expand: Matrix = {
+  def expand(colIx: Int): Matrix = {
     if (fringe.isEmpty) {
       new Matrix(symlib, rawColumns, rawRows, rawClauses, rawFringe)
     } else {
-      Matrix.fromRows(symlib, rows.flatMap(_.expand(bestColIx)), fringe)
+      Matrix.fromRows(symlib, rows.flatMap(_.expand(colIx)), fringe)
     }
   }
 
-  def compile: DecisionTree = expand.compileInternal
+  lazy val firstGroup = rows.takeWhile(_.clause.action.priority == rows.head.clause.action.priority)
+
+  lazy val bestRowIx = firstGroup.indexWhere(_.isWildcard)
+
+  lazy val bestRow = rows(bestRowIx)
+
+  def compile: DecisionTree = {
+    val result = Matrix.cache.get(this)
+    if (result == null) {
+      val computed = compileInternal
+      Matrix.cache.put(this, computed)
+      computed
+    } else {
+      result
+    }
+  }
 
   def compileInternal: DecisionTree = {
     if (Matching.logging) {
       System.out.println(toString)
+      System.out.println("remaining: " + Matrix.remaining)
     }
-    if (rows.isEmpty)
+    if (clauses.isEmpty)
       Failure()
     else {
-      if (rows.head.isWildcard) {
-        // if there is only one row left, then try to match it and fail the matching if it fails
-        // otherwise, if it fails, try to match the remainder of hte matrix
-        getLeaf(rows.head, notFirstRow.compile)
-      } else {
-        // compute the sort category of the best column
-        bestCol.category.tree(this)
+      bestRowIx match {
+        case -1 => 
+          if (bestCol.score.isPosInfinity) {
+            // decompose this column as it contains only wildcards
+            val newClauses = (bestCol.clauses, bestCol.patterns).zipped.toIndexedSeq.map(t => t._1.addVars(None, t._2, bestCol.fringe))
+            Matrix.fromColumns(symlib, notBestCol(bestColIx).map(c => new Column(c.fringe, c.patterns, newClauses)), newClauses).compile
+          } else {
+            // compute the sort category of the best column
+            bestCol.category.tree(this)
+          }
+        case _ =>
+          // if there is only one row left, then try to match it and fail the matching if it fails
+          // otherwise, if it fails, try to match the remainder of hte matrix
+          getLeaf(bestRow, notBestRow.compile)
       }
     }
   }
 
-  def notFirstRow: Matrix = {
-    Matrix.fromRows(symlib, rows.tail, fringe)
+  def notBestRow: Matrix = {
+    Matrix.fromRows(symlib, rows.patch(bestRowIx, Nil, 1), fringe)
   }
 
   def notBestCol(colIx: Int): IndexedSeq[Column] = {
@@ -373,14 +452,34 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
   }
 
   override def toString: String = fringe.map(_.toString).mkString(" ") + "\n" + rows.map(_.toString).mkString("\n") + "\n"
+
+  def canEqual(other: Any): Boolean = other.isInstanceOf[Matrix]
+
+  override def equals(other: Any): Boolean = other match {
+    case that: Matrix =>
+      (that canEqual this) &&
+        symlib == that.symlib &&
+        columns == that.columns &&
+        rows == that.rows
+    case _ => false
+  }
+
+  override def hashCode(): Int = {
+    val state = Seq(symlib, columns, rows)
+    state.map(_.hashCode()).foldLeft(0)((a, b) => 31 * a + b)
+  }
 }
 
 object Matrix {
-  def fromRows(symlib: Parser.SymLib, rows: List[Row], fringe: IndexedSeq[Fringe]): Matrix = {
+  var remaining = 0
+
+  def fromRows(symlib: Parser.SymLib, rows: IndexedSeq[Row], fringe: IndexedSeq[Fringe]): Matrix = {
     new Matrix(symlib, null, rows, null, fringe)
   }
 
-  def fromColumns(symlib: Parser.SymLib, cols: IndexedSeq[Column], clauses: List[Clause]): Matrix = {
+  def fromColumns(symlib: Parser.SymLib, cols: IndexedSeq[Column], clauses: IndexedSeq[Clause]): Matrix = {
     new Matrix(symlib, cols, null, clauses, null)
   }
+
+  private val cache = new ConcurrentHashMap[Matrix, DecisionTree]()
 }
