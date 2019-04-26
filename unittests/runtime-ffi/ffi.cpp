@@ -46,6 +46,14 @@ extern "C" {
     return l;
   }
 
+  struct list hook_LIST_concat(struct list l1, struct list l2) {
+    struct list l;
+    l.a = (uint64_t)(koreAlloc(sizeof(std::vector<block *>)));
+    ((std::vector<block *> *)l.a)->insert(((std::vector<block *> *)l.a)->end(),((std::vector<block *> *)l1.a)->begin(), ((std::vector<block *> *)l1.a)->end());
+    ((std::vector<block *> *)l.a)->insert(((std::vector<block *> *)l.a)->end(),((std::vector<block *> *)l2.a)->begin(), ((std::vector<block *> *)l2.a)->end());
+    return l;
+  }
+
   size_t hook_LIST_size_long(struct list * l) {
     return ((std::vector<block *> *)l->a)->size();
   }
@@ -73,19 +81,23 @@ BOOST_AUTO_TEST_CASE(address) {
   string * fn = makeString("timesTwo");
   mpz_ptr addr = hook_FFI_address(fn);
   BOOST_CHECK(0 < mpz_cmp_ui(addr, 0));
+
+  fn = makeString("times");
+  addr = hook_FFI_address(fn);
+  BOOST_CHECK(0 < mpz_cmp_ui(addr, 0));
 }
 
 BOOST_AUTO_TEST_CASE(call) {
   int x = 25;
-  const char * str = (char *) &x;
-  string * argstr = makeString(str); 
+  const char * xstr = (char *) &x;
+  string * xargstr = makeString(xstr); 
 
-  block * arg = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(string *)));
-  arg->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("inj{SortBytes{}}"));
-  memcpy(arg->children, &argstr, sizeof(string *));
+  block * xarg = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(string *)));
+  xarg->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("inj{SortBytes{}}"));
+  memcpy(xarg->children, &xargstr, sizeof(string *));
 
-  struct list args = hook_LIST_element(arg);
-  block * type_sint = (block *)((((uint64_t)getTagForSymbolName("Lbl'hash'sint{}")) << 32) | 1);
+  struct list args = hook_LIST_element(xarg);
+  block * type_sint = (block *)((((uint64_t)getTagForSymbolName(TYPETAG(sint))) << 32) | 1);
 
   block * argtype = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(block *)));
   argtype->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("inj{SortFFIType{}}"));
@@ -103,6 +115,28 @@ BOOST_AUTO_TEST_CASE(call) {
   int ret = *(int *) bytes->data;
 
   BOOST_CHECK_EQUAL(ret, x * 2);
+
+  int y = 4;
+  const char * ystr = (char *) &y;
+  string * yargstr = makeString(ystr);
+
+  block * yarg = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(string *)));
+  yarg->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("inj{SortBytes{}}"));
+  memcpy(yarg->children, &yargstr, sizeof(string *));
+
+  struct list yargs = hook_LIST_element(yarg);
+
+  args = hook_LIST_concat(args, yargs);
+  types = hook_LIST_concat(types, types);
+
+  fn = makeString("times");
+  addr = hook_FFI_address(fn);
+
+  bytes = hook_FFI_call(addr, &args, &types, type_sint);
+
+  ret = *(int *) bytes->data;
+
+  BOOST_CHECK_EQUAL(ret, x * y);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
