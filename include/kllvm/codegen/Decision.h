@@ -35,7 +35,6 @@ private:
   friend class MakePatternNode;
   friend class FunctionNode;
   friend class LeafNode;
-  friend class DecisionNode;
 };
 
 class DecisionCase {
