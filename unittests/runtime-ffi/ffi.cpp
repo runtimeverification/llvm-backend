@@ -13,9 +13,19 @@
 #include "stdio.h"
 
 #define KCHAR char
+#define TYPETAG(type) "Lbl'hash'" #type "{}"
 extern "C" {
 
+#define NUM_SYMBOLS 3
+  const char * symbols[NUM_SYMBOLS] = {TYPETAG(sint), "inj{SortBytes{}}", "inj{SortFFIType{}}"};
+
   uint32_t getTagForSymbolName(const char *s) {
+    for (int i = 0; i < NUM_SYMBOLS; i++) {
+      if (0 == strcmp(symbols[i], s)) {
+        return i + 1;
+      }
+    }
+
     return 0;
   }
 
