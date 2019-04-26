@@ -72,11 +72,7 @@ case class AsP[T](name: T, sort: SortCategory, pat: Pattern[T]) extends Pattern[
 
 case class ListP[T](head: Seq[Pattern[T]], frame: Option[Pattern[T]], tail: Seq[Pattern[T]], ctr: SymbolOrAlias, orig: Pattern[T]) extends Pattern[T] {
   def signature(clause: Clause): Seq[Constructor] = {
-    if (frame.isEmpty) {
-      Seq(ListC(ctr, head.size + tail.size))
-    } else {
-      (0 to (head.size + tail.size)).map(ListC(ctr, _))
-    }
+    (0 to (head.size + tail.size)).map(ListC(ctr, _))
   }
   def isWildcard = false
   def isDefault: Boolean = frame.isDefined
