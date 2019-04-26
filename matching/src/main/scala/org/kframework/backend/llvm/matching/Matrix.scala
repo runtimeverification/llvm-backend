@@ -103,13 +103,15 @@ class Column(val fringe: Fringe, val patterns: IndexedSeq[Pattern[String]], val 
     case _ => false
   }
 
-  override def hashCode(): Int = {
+  override lazy val hashCode: Int = {
     val state = Seq(fringe, patterns)
     state.map(_.hashCode()).foldLeft(0)((a, b) => 31 * a + b)
   }
 }
 
-case class VariableBinding[T](val name: T, val category: SortCategory, val occurrence: Occurrence) {}
+case class VariableBinding[T](val name: T, val category: SortCategory, val occurrence: Occurrence) {
+  override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
+}
 
 case class Fringe(val symlib: Parser.SymLib, val sort: Sort, val occurrence: Occurrence, val isExact: Boolean) {
   val sortInfo = SortInfo(sort, symlib)
@@ -143,6 +145,7 @@ case class Fringe(val symlib: Parser.SymLib, val sort: Sort, val occurrence: Occ
   }
 
   override def toString: String = new util.Formatter().format("%12.12s", sort.toString).toString
+  override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
 }
 
 class SortInfo private(sort: Sort, symlib: Parser.SymLib) {
@@ -168,7 +171,9 @@ object SortInfo {
   }
 }
 
-case class Action(val ordinal: Int, val rhsVars: Seq[String], val scVars: Option[Seq[String]], val priority: Int) {}
+case class Action(val ordinal: Int, val rhsVars: Seq[String], val scVars: Option[Seq[String]], val priority: Int) {
+  override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
+}
 
 case class Clause(
   // the rule to be applied if this row succeeds
@@ -208,6 +213,7 @@ case class Clause(
   }
 
   override def toString: String = action.ordinal.toString
+  override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
 }
 
 case class Row(val patterns: IndexedSeq[Pattern[String]], val clause: Clause) {
@@ -220,6 +226,7 @@ case class Row(val patterns: IndexedSeq[Pattern[String]], val clause: Clause) {
   }
 
   override def toString: String = patterns.map(p => new util.Formatter().format("%12.12s", p.toShortString)).mkString(" ") + " " + clause.toString
+  override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
 }
 
 class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedSeq[Column], private val rawRows: IndexedSeq[Row], private val rawClauses: IndexedSeq[Clause], private val rawFringe: IndexedSeq[Fringe]) {
@@ -464,7 +471,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
     case _ => false
   }
 
-  override def hashCode(): Int = {
+  override lazy val hashCode: Int = {
     val state = Seq(symlib, columns, rows)
     state.map(_.hashCode()).foldLeft(0)((a, b) => 31 * a + b)
   }
