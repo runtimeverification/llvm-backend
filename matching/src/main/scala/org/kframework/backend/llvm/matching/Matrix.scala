@@ -179,13 +179,13 @@ case class Clause(
   // the rule to be applied if this row succeeds
   val action: Action,
   // the variable bindings made so far while matching this row
-  val bindings: Seq[VariableBinding[String]],
+  val bindings: Vector[VariableBinding[String]],
   // the length of the head and tail of any list patterns
   // with frame variables bound so far in this row
-  val listRanges: Seq[(Occurrence, Int, Int)],
+  val listRanges: Vector[(Occurrence, Int, Int)],
   // variable bindings to injections that need to be constructed
   // since they do not actually exist in the original subject term
-  val overloadChildren: Seq[(Constructor, VariableBinding[String])]) {
+  val overloadChildren: Vector[(Constructor, VariableBinding[String])]) {
 
   lazy val bindingsMap: Map[String, VariableBinding[String]] = bindings.groupBy(_.name).mapValues(_.head)
   lazy val boundOccurrences: Set[Occurrence] = bindings.map(_.occurrence).toSet
@@ -277,7 +277,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
   }
 
   def this(symlib: Parser.SymLib, cols: IndexedSeq[(Sort, IndexedSeq[Pattern[String]])], actions: IndexedSeq[Action]) {
-    this(symlib, (cols, (1 to cols.size).map(i => new Fringe(symlib, cols(i - 1)._1, Num(i, Base()), false))).zipped.toIndexedSeq.map(pair => new Column(pair._2, pair._1._2, actions.map(new Clause(_, Seq(), Seq(), Seq())))), null, actions.map(new Clause(_, Seq(), Seq(), Seq())), null)
+    this(symlib, (cols, (1 to cols.size).map(i => new Fringe(symlib, cols(i - 1)._1, Num(i, Base()), false))).zipped.toIndexedSeq.map(pair => new Column(pair._2, pair._1._2, actions.map(new Clause(_, Vector(), Vector(), Vector())))), null, actions.map(new Clause(_, Vector(), Vector(), Vector())), null)
   }
 
   // compute the column with the best score, choosing the first such column if they are equal
