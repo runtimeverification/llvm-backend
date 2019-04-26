@@ -500,7 +500,7 @@ extern "C" {
     return dotK;
   }
 
-  block * hook_META_parseKast(string *kast) {
+  block * hook_META_parseKAST(string *kast) {
     throw std::invalid_argument("not implemented: META.parseKast");
   }
 }
