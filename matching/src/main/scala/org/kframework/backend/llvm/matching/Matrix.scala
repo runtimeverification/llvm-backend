@@ -299,7 +299,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
   lazy val sigma: List[Constructor] = bestCol.signature
 
   def specialize(ix: Constructor): (String, Matrix) = {
-    val filtered = expand(bestColIx).filterMatrix(Some(ix), (c, p) => p.isSpecialized(ix, bestCol.fringe, c))
+    val filtered = filterMatrix(Some(ix), (c, p) => p.isSpecialized(ix, bestCol.fringe, c))
     val expanded = Matrix.fromColumns(symlib, filtered.columns(bestColIx).expand(ix) ++ filtered.notBestCol(bestColIx), filtered.clauses)
     (ix.name, expanded)
   }
@@ -331,7 +331,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
           }
         }
       }
-      val filtered = expand(bestColIx).filterMatrix(defaultConstructor, (_, p) => p.isDefault)
+      val filtered = filterMatrix(defaultConstructor, (_, p) => p.isDefault)
       val expanded = if (defaultConstructor.isDefined) {
         if (bestCol.category.isExpandDefault) {
           Matrix.fromColumns(symlib, filtered.columns(bestColIx).expand(defaultConstructor.get) ++ filtered.notBestCol(bestColIx), filtered.clauses)
@@ -399,11 +399,11 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
     })
   }
 
-  def expand(colIx: Int): Matrix = {
+  def expand: Matrix = {
     if (fringe.isEmpty) {
       new Matrix(symlib, rawColumns, rawRows, rawClauses, rawFringe)
     } else {
-      Matrix.fromRows(symlib, rows.flatMap(_.expand(colIx)), fringe)
+      fringe.indices.foldLeft(this)((accum, colIx) => Matrix.fromRows(symlib, accum.rows.flatMap(_.expand(colIx)), fringe))
     }
   }
 

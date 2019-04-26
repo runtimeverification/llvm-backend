@@ -13,7 +13,7 @@ sealed trait Pattern[T] {
   def score(fringe: Fringe, clause: Clause, key: Option[Pattern[Option[Occurrence]]]): Double
   def bindings(ix: Option[Constructor], occurrence: Occurrence): Seq[VariableBinding[T]]
   def expand(ix: Constructor, fringes: Seq[Fringe], f: Fringe, clause: Clause): Seq[Pattern[T]]
-  def expandOr: Seq[Pattern[T]] = Seq(this)
+  def expandOr: Seq[Pattern[T]]
 
   def mapOrSetKeys: Seq[Pattern[T]] = Seq()
   def bestKey(f: Fringe, clause: Clause, ps: Seq[Pattern[T]], clauses: Seq[Clause]): Option[Pattern[Option[Occurrence]]] = None
@@ -60,7 +60,7 @@ case class AsP[T](name: T, sort: SortCategory, pat: Pattern[T]) extends Pattern[
   def expand(ix: Constructor, fringes: Seq[Fringe], f: Fringe, clause: Clause): Seq[Pattern[T]] = {
     pat.expand(ix, fringes, f, clause)
   }
-  override def expandOr: Seq[AsP[T]] = pat.expandOr.map(AsP(name, sort, _))
+  def expandOr: Seq[AsP[T]] = pat.expandOr.map(AsP(name, sort, _))
 
   def category: Option[SortCategory] = pat.category
   def variables: Set[T] = Set(name) ++ pat.variables
@@ -111,6 +111,15 @@ case class ListP[T](head: Seq[Pattern[T]], frame: Option[Pattern[T]], tail: Seq[
       case _ => ???
     }
   }
+  def expandOr: Seq[Pattern[T]] = {
+    val withHead = head.indices.foldLeft(Seq(this))((accum, ix) => accum.flatMap(l => l.head(ix).expandOr.map(p => ListP(l.head.updated(ix, p), l.frame, l.tail, ctr, orig))))
+    val withTail = tail.indices.foldLeft(withHead)((accum, ix) => accum.flatMap(l => l.tail(ix).expandOr.map(p => ListP(l.head, l.frame, l.tail.updated(ix, p), ctr, orig))))
+    if (frame.isDefined) {
+      withTail.flatMap(l => l.frame.get.expandOr.map(p => ListP(l.head, Some(p), l.tail, ctr, orig)))
+    } else {
+      withTail
+    }
+  }
 
   override def listRange(ix: Option[Constructor], o: Occurrence): Seq[(Occurrence, Int, Int)] = ix match {
     case Some(ListC(_, len)) => Seq((Num(len, o), head.size, tail.size))
@@ -118,7 +127,7 @@ case class ListP[T](head: Seq[Pattern[T]], frame: Option[Pattern[T]], tail: Seq[
   }
 
   def category = Some(ListS())
-  def variables: Set[T] = orig.variables
+  def variables: Set[T] = head.flatMap(_.variables).toSet ++ tail.flatMap(_.variables).toSet ++ frame.map(_.variables).getOrElse(Set())
   def canonicalize(clause: Clause): Pattern[Option[Occurrence]] = ListP(head.map(_.canonicalize(clause)), frame.map(_.canonicalize(clause)), tail.map(_.canonicalize(clause)), ctr, orig.canonicalize(clause))
   def isBound(clause: Clause): Boolean = head.forall(_.isBound(clause)) && frame.forall(_.isBound(clause)) && tail.forall(_.isBound(clause))
   override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
@@ -138,6 +147,7 @@ case class LiteralP[T](literal: String, sort: SortCategory) extends Pattern[T] {
   def score(f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]]): Double = 1.0
   def bindings(ix: Option[Constructor], occurrence: Occurrence): Seq[VariableBinding[T]] = Seq()
   def expand(ix: Constructor, fringes: Seq[Fringe], f: Fringe, clause: Clause): Seq[Pattern[T]] = Seq()
+  def expandOr: Seq[Pattern[T]] = Seq(this)
 
   def category = Some(sort)
   def variables: Set[T] = Set()
@@ -202,6 +212,15 @@ case class MapP[T](keys: Seq[Pattern[T]], values: Seq[Pattern[T]], frame: Option
       case _ => ???
     }
   }
+  def expandOr: Seq[Pattern[T]] = {
+    val withKeys = keys.indices.foldLeft(Seq(this))((accum, ix) => accum.flatMap(m => m.keys(ix).expandOr.map(p => MapP(m.keys.updated(ix, p), m.values, m.frame, ctr, orig))))
+    val withValues = values.indices.foldLeft(withKeys)((accum, ix) => accum.flatMap(m => m.values(ix).expandOr.map(p => MapP(m.keys, m.values.updated(ix, p), m.frame, ctr, orig))))
+    if (frame.isDefined) {
+      withValues.flatMap(m => m.frame.get.expandOr.map(p => MapP(m.keys, m.values, Some(p), ctr, orig)))
+    } else {
+      withValues
+    }
+  }
 
   override def mapOrSetKeys: Seq[Pattern[T]] = keys
   override def bestKey(f: Fringe, clause: Clause, ps: Seq[Pattern[T]], clauses: Seq[Clause]): Option[Pattern[Option[Occurrence]]] = {
@@ -230,7 +249,7 @@ case class MapP[T](keys: Seq[Pattern[T]], values: Seq[Pattern[T]], frame: Option
   }
 
   def category = Some(MapS())
-  def variables: Set[T] = orig.variables
+  def variables: Set[T] = keys.flatMap(_.variables).toSet ++ values.flatMap(_.variables).toSet ++ frame.map(_.variables).getOrElse(Set())
   def canonicalize(clause: Clause): MapP[Option[Occurrence]] = MapP(keys.map(_.canonicalize(clause)), values.map(_.canonicalize(clause)), frame.map(_.canonicalize(clause)), ctr, orig.canonicalize(clause))
   def isBound(clause: Clause): Boolean = keys.forall(_.isBound(clause)) && values.forall(_.isBound(clause)) && frame.forall(_.isBound(clause))
   override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
@@ -247,7 +266,7 @@ case class OrP[T](ps: Seq[Pattern[T]]) extends Pattern[T] {
   }
   def bindings(ix: Option[Constructor], occurrence: Occurrence): Seq[VariableBinding[T]] = ???
   def expand(ix: Constructor, fringes: Seq[Fringe], f: Fringe, clause: Clause): Seq[Pattern[T]] = ???
-  override def expandOr: Seq[Pattern[T]] = ps.flatMap(_.expandOr)
+  def expandOr: Seq[Pattern[T]] = ps.flatMap(_.expandOr)
   def category: Option[SortCategory] = {
     val s = ps.map(_.category).filter(_.isDefined)
     if (s.isEmpty) {
@@ -328,6 +347,16 @@ case class SetP[T](elements: Seq[Pattern[T]], frame: Option[Pattern[T]], ctr: Sy
       case _ => ???
     }
   }
+  def expandOr: Seq[Pattern[T]] = {
+    val withElements = elements.indices.foldLeft(Seq(this))((accum, ix) => accum.flatMap(s => s.elements(ix).expandOr.map(p => SetP(s.elements.updated(ix, p), s.frame, ctr, orig))))
+    if (frame.isDefined) {
+      withElements.flatMap(s => s.frame.get.expandOr.map(p => SetP(s.elements, Some(p), ctr, orig)))
+    } else {
+      withElements
+    }
+  }
+
+
 
   override def mapOrSetKeys: Seq[Pattern[T]] = elements
   override def bestKey(f: Fringe, clause: Clause, ps: Seq[Pattern[T]], clauses: Seq[Clause]): Option[Pattern[Option[Occurrence]]] = {
@@ -343,7 +372,7 @@ case class SetP[T](elements: Seq[Pattern[T]], frame: Option[Pattern[T]], ctr: Sy
   }
 
   def category = Some(SetS())
-  def variables: Set[T] = orig.variables
+  def variables: Set[T] = elements.flatMap(_.variables).toSet ++ frame.map(_.variables).getOrElse(Set())
   def canonicalize(clause: Clause): SetP[Option[Occurrence]] = SetP(elements.map(_.canonicalize(clause)), frame.map(_.canonicalize(clause)), ctr, orig.canonicalize(clause))
   def isBound(clause: Clause): Boolean = elements.forall(_.isBound(clause)) && frame.forall(_.isBound(clause))
   override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
@@ -432,12 +461,8 @@ case class SymbolP[T](sym: SymbolOrAlias, ps: Seq[Pattern[T]]) extends Pattern[T
       case _ => ps
     }
   }
-  override def expandOr: Seq[Pattern[T]] = {
-    sym match {
-      case SymbolOrAlias("inj", _) =>
-        ps.head.expandOr.map(p => SymbolP(sym, Seq(p)))
-      case _ => Seq(this)
-    }
+  def expandOr: Seq[Pattern[T]] = {
+    ps.indices.foldLeft(Seq(this))((accum, ix) => accum.flatMap(s => s.ps(ix).expandOr.map(p => SymbolP(sym, s.ps.updated(ix, p)))))
   }
 
   // returns true if the specified constructor is an overload of the current pattern and can match it
@@ -511,6 +536,7 @@ case class VariableP[T](name: T, sort: SortCategory) extends Pattern[T] {
   def expand(ix: Constructor, fringes: Seq[Fringe], f: Fringe, clause: Clause): Seq[Pattern[T]] = {
     fringes.map(_ => WildcardP().asInstanceOf[Pattern[T]])
   }
+  def expandOr: Seq[Pattern[T]] = Seq(this)
 
   def category: None.type = None
   val variables: Set[T] = Set(name)
@@ -531,6 +557,7 @@ case class WildcardP[T]() extends Pattern[T] {
   def expand(ix: Constructor, fringes: Seq[Fringe], f: Fringe, clause: Clause): Seq[Pattern[T]] = {
     fringes.map(_ => WildcardP().asInstanceOf[Pattern[T]])
   }
+  def expandOr: Seq[Pattern[T]] = Seq(this)
 
   def category: None.type = None
   def variables: Set[T] = Set()
