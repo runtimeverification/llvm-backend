@@ -212,7 +212,7 @@ case class Clause(
     new Clause(action, bindings ++ pat.bindings(ix, f.occurrence), listRanges ++ pat.listRange(ix, f.occurrence), overloadChildren ++ pat.overloadChildren(f, ix, Num(0, f.occurrence)))
   }
 
-  override def toString: String = action.ordinal.toString
+  override def toString: String = action.ordinal.toString + "(" + action.priority.toString + ")"
   override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
 }
 
