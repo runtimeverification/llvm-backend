@@ -63,6 +63,8 @@ class Column(val fringe: Fringe, val patterns: IndexedSeq[Pattern[String]], val 
     }
   }
 
+  def isChoice: Boolean = fringe.sortInfo.isCollection && bestKey == None
+
   def maxListSize: (Int, Int) = {
     val listPs = patterns.filter(_.isInstanceOf[ListP[String]]).map(_.asInstanceOf[ListP[String]])
     val longestHead = listPs.map(_.head.size).max

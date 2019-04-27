@@ -138,6 +138,23 @@ case class MakePattern private(occurrence: Occurrence, pattern: Pattern[Option[O
   override def equals(that: Any): Boolean = that.isInstanceOf[AnyRef] && (this eq that.asInstanceOf[AnyRef])
 }
 
+case class MakeIterator private(occurrence: Occurrence, child: DecisionTree) extends DecisionTree {
+  val representation = new util.HashMap[String, AnyRef]()
+  representation.put("collection", occurrence.representation)
+  representation.put("next", child.representation)
+  override lazy val hashCode: Int = super.hashCode
+  override def equals(that: Any): Boolean = that.isInstanceOf[AnyRef] && (this eq that.asInstanceOf[AnyRef])
+}
+
+case class IterNext private(iterator: Occurrence, binding: Occurrence, child: DecisionTree) extends DecisionTree {
+  val representation = new util.HashMap[String, AnyRef]()
+  representation.put("iterator", iterator.representation)
+  representation.put("binding", binding.representation)
+  representation.put("next", child.representation)
+  override lazy val hashCode: Int = super.hashCode
+  override def equals(that: Any): Boolean = that.isInstanceOf[AnyRef] && (this eq that.asInstanceOf[AnyRef])
+}
+
 object Failure {
   private val instance = new Failure()
   def apply(): Failure = instance
@@ -182,5 +199,19 @@ object MakePattern {
   val cache = new ConcurrentHashMap[(Occurrence, Pattern[Option[Occurrence]], DecisionTree), MakePattern]()
   def apply(occurrence: Occurrence, pattern: Pattern[Option[Occurrence]], child: DecisionTree): MakePattern = {
     cache.computeIfAbsent((occurrence, pattern, child), k => new MakePattern(k._1, k._2, k._3))
+  }
+}
+
+object MakeIterator {
+  val cache = new ConcurrentHashMap[(Occurrence, DecisionTree), MakeIterator]()
+  def apply(occurrence: Occurrence, child: DecisionTree): MakeIterator = {
+    cache.computeIfAbsent((occurrence, child), k => new MakeIterator(k._1, k._2))
+  }
+}
+
+object IterNext {
+  val cache = new ConcurrentHashMap[(Occurrence, Occurrence, DecisionTree), IterNext]()
+  def apply(iterator: Occurrence, binding: Occurrence, child: DecisionTree): IterNext = {
+    cache.computeIfAbsent((iterator, binding, child), k => new IterNext(k._1, k._2, k._3))
   }
 }

@@ -27,10 +27,15 @@ case class HasKey(isSet: Boolean, element: SymbolOrAlias, key: Option[Pattern[Op
   def name = "1"
   def isBest(pat: Pattern[Option[Occurrence]]): Boolean = key.isDefined && pat == key.get
   def expand(f: Fringe): Option[Seq[Fringe]] = {
+    val sorts = f.symlib.signatures(element)._1
     key match {
-      case None => ???
+      case None => 
+        if (isSet) {
+          Some(Seq(new Fringe(f.symlib, sorts(0), Choice(f.occurrence), false), new Fringe(f.symlib, f.sort, ChoiceRem(f.occurrence), false)))
+        } else {
+          Some(Seq(new Fringe(f.symlib, sorts(0), Choice(f.occurrence), false), new Fringe(f.symlib, sorts(1), ChoiceValue(f.occurrence), false), new Fringe(f.symlib, f.sort, ChoiceRem(f.occurrence), false)))
+        }
       case Some(k) =>
-        val sorts = f.symlib.signatures(element)._1
         if (isSet) {
           Some(Seq(new Fringe(f.symlib, f.sort, Rem(k, f.occurrence), false), f))
         } else {

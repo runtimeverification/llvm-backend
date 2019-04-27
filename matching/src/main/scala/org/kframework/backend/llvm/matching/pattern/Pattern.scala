@@ -177,7 +177,9 @@ case class MapP[T](keys: Seq[Pattern[T]], values: Seq[Pattern[T]], frame: Option
       case (HasKey(_, _, _), Some(_)) => true
       case (HasKey(_, _, Some(p)), None) => keys.map(_.canonicalize(clause)).exists(Pattern.mightUnify(p, _))
       case (HasNoKey(Some(p)), _) => !keys.map(_.canonicalize(clause)).contains(p)
-      case _ => ???
+      case (HasKey(_, _, None), None) => keys.nonEmpty
+      case (HasKey(_, _, None), Some(_)) => true
+      case (HasNoKey(None), _) => false
     }
   }
   def score(f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]]): Double = {
@@ -209,7 +211,8 @@ case class MapP[T](keys: Seq[Pattern[T]], values: Seq[Pattern[T]], frame: Option
           case i => Seq(values(i), MapP(keys.take(i) ++ keys.takeRight(keys.size - i - 1), values.take(i) ++ values.takeRight(values.size - i - 1), frame, ctr, orig), WildcardP())
         }
       case HasNoKey(_) | NonEmpty() => Seq(this)
-      case _ => ???
+      case HasKey(_, _, None) =>
+        Seq(keys.head, values.head, MapP(keys.tail, values.tail, frame, ctr, orig))
     }
   }
   def expandOr: Seq[Pattern[T]] = {
@@ -313,7 +316,9 @@ case class SetP[T](elements: Seq[Pattern[T]], frame: Option[Pattern[T]], ctr: Sy
       case (HasKey(_, _, _), Some(_)) => true
       case (HasKey(_, _, Some(p)), None) => elements.map(_.canonicalize(clause)).exists(Pattern.mightUnify(p, _))
       case (HasNoKey(Some(p)), _) => !elements.map(_.canonicalize(clause)).contains(p)
-      case _ => ???
+      case (HasKey(_, _, None), None) => elements.nonEmpty
+      case (HasKey(_, _, None), Some(_)) => true
+      case (HasNoKey(None), _) => false
     }
   }
   def score(f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]]): Double = {
@@ -344,7 +349,8 @@ case class SetP[T](elements: Seq[Pattern[T]], frame: Option[Pattern[T]], ctr: Sy
           case i => Seq(SetP(elements.take(i) ++ elements.takeRight(elements.size - i - 1), frame, ctr, orig), WildcardP())
         }
       case HasNoKey(_) | NonEmpty() => Seq(this)
-      case _ => ???
+      case HasKey(_, _, None) =>
+        Seq(elements.head, SetP(elements.tail, frame, ctr, orig))
     }
   }
   def expandOr: Seq[Pattern[T]] = {

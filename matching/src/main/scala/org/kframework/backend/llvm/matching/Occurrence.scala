@@ -63,3 +63,21 @@ case class Rem(pat: Pattern[Option[Occurrence]], rest: Occurrence) extends Occur
   representation.addAll(rest.representation)
   override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
 }
+case class Choice(rest: Occurrence) extends Occurrence {
+  val representation = new util.ArrayList[AnyRef]()
+  representation.add("key")
+  representation.addAll(rest.representation)
+  override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
+}
+case class ChoiceValue(rest: Occurrence) extends Occurrence {
+  val representation = new util.ArrayList[AnyRef]()
+  representation.add("val")
+  representation.addAll(rest.representation)
+  override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
+}
+case class ChoiceRem(rest: Occurrence) extends Occurrence {
+  val representation = new util.ArrayList[AnyRef]()
+  representation.add("rem")
+  representation.addAll(rest.representation)
+  override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
+}
