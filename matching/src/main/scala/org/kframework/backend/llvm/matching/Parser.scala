@@ -74,9 +74,8 @@ object Parser {
   }
 
   private def rulePriority(axiom: AxiomDeclaration): Int = {
-    if (hasAtt(axiom, "owise")) 3
-    else if (hasAtt(axiom, "cool")) 2
-    else if (hasAtt(axiom, "heat")) 1
+    if (hasAtt(axiom, "owise")) 2
+    else if (hasAtt(axiom, "cool")) 1
     else 0
   }
 
