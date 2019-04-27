@@ -81,58 +81,56 @@ object Parser {
   }
 
   private def parseAxiomSentence[T <: GeneralizedRewrite](
-      split: Pattern => Option[(T, Option[Pattern])],
+      split: Pattern => Option[(Option[SymbolOrAlias], T, Option[Pattern])],
       axiom: (AxiomDeclaration, Int)) :
-      Seq[AxiomInfo] = {
+      Seq[(Option[SymbolOrAlias], AxiomInfo)] = {
     val splitted = split(axiom._1.pattern)
     if (splitted.isDefined) {
       val s = axiom._1
       if (hasAtt(s, "comm") || hasAtt(s, "assoc") || hasAtt(s, "idem")) {
         Seq()
       } else {
-        Seq(AxiomInfo(rulePriority(s), axiom._2, splitted.get._1, splitted.get._2))
+        Seq((splitted.get._1, AxiomInfo(rulePriority(s), axiom._2, splitted.get._2, splitted.get._3)))
       }
     } else {
       Seq()
     }
   }
 
-  private def splitTop(topPattern: Pattern): Option[(Rewrites, Option[Pattern])] = {
+  private def splitTop(topPattern: Pattern): Option[(Option[SymbolOrAlias], Rewrites, Option[Pattern])] = {
     topPattern match {
-      case And(_, Equals(_, _, pat, _), And(_, _, rw @ Rewrites(_, _, _))) => Some((rw, Some(pat)))
-      case And(_, Top(_), And(_, _, rw @ Rewrites(_, _, _))) => Some((rw, None))
-      case Rewrites(s, And(_, Equals(_, _, pat, _), l), And(_, _, r)) => Some((B.Rewrites(s, l, r), Some(pat)))
-      case Rewrites(s, And(_, Top(_), l), And(_, _, r)) => Some((B.Rewrites(s, l, r), None))
+      case And(_, Equals(_, _, pat, _), And(_, _, rw @ Rewrites(_, _, _))) => Some((None, rw, Some(pat)))
+      case And(_, Top(_), And(_, _, rw @ Rewrites(_, _, _))) => Some((None, rw, None))
+      case Rewrites(s, And(_, Equals(_, _, pat, _), l), And(_, _, r)) => Some((None, B.Rewrites(s, l, r), Some(pat)))
+      case Rewrites(s, And(_, Top(_), l), And(_, _, r)) => Some((None, B.Rewrites(s, l, r), None))
       case Implies(_, Bottom(_), p) => splitTop(p)
       case _ => None
     }
   }
 
-  private def splitFunction(symbol: SymbolOrAlias, topPattern: Pattern): Option[(Equals, Option[Pattern])] = {
+  private def splitFunction(topPattern: Pattern): Option[(Option[SymbolOrAlias], Equals, Option[Pattern])] = {
     topPattern match {
-      case Implies(_, Equals(_, _, pat, _), And(_, eq @ Equals(_, _, Application(`symbol`, _), _), _)) => Some(eq, Some(pat))
-      case Implies(_, Top(_), And(_, eq @ Equals(_, _, Application(`symbol`, _), _), _)) => Some(eq, None)
-      case Implies(_, And(_, _, Equals(_, _, pat, _)), And(_, eq @ Equals(_, _, Application(`symbol`, _), _), _)) => Some(eq, Some(pat))
-      case Implies(_, And(_, _, Top(_)), And(_, eq @ Equals(_, _, Application(`symbol`, _), _), _)) => Some(eq, None)
-      case eq @ Equals(_, _, Application(`symbol`, _), _) => Some(eq, None)
+      case Implies(_, Equals(_, _, pat, _), And(_, eq @ Equals(_, _, Application(symbol, _), _), _)) => Some(Some(symbol), eq, Some(pat))
+      case Implies(_, Top(_), And(_, eq @ Equals(_, _, Application(symbol, _), _), _)) => Some(Some(symbol), eq, None)
+      case Implies(_, And(_, _, Equals(_, _, pat, _)), And(_, eq @ Equals(_, _, Application(symbol, _), _), _)) => Some(Some(symbol), eq, Some(pat))
+      case Implies(_, And(_, _, Top(_)), And(_, eq @ Equals(_, _, Application(symbol, _), _), _)) => Some(Some(symbol), eq, None)
+      case eq @ Equals(_, _, Application(symbol, _), _) => Some(Some(symbol), eq, None)
       case _ => None
     }
   }
 
-  private def getAxioms(defn: Definition) : Seq[AxiomDeclaration] = {
+  def getAxioms(defn: Definition) : Seq[AxiomDeclaration] = {
     defn.modules.flatMap(_.decls).filter(_.isInstanceOf[AxiomDeclaration]).map(_.asInstanceOf[AxiomDeclaration])
   }
 
-  def parseTopAxioms(defn: Definition) : IndexedSeq[AxiomInfo] = {
-    val axioms = getAxioms(defn).zipWithIndex
+  def parseTopAxioms(axioms: Seq[(AxiomDeclaration, Int)]) : IndexedSeq[AxiomInfo] = {
     val withOwise = axioms.flatMap(parseAxiomSentence(splitTop, _))
-    withOwise.sortWith(_.priority < _.priority).toIndexedSeq
+    withOwise.map(_._2).sortWith(_.priority < _.priority).toIndexedSeq
   }
 
-  def parseFunctionAxioms(defn: Definition, symbol: SymbolOrAlias) : IndexedSeq[AxiomInfo] = {
-    val axioms = getAxioms(defn).zipWithIndex
-    val withOwise = axioms.flatMap(parseAxiomSentence(a => splitFunction(symbol, a), _))
-    withOwise.sortWith(_.priority < _.priority).toIndexedSeq
+  def parseFunctionAxioms(axioms: Seq[(AxiomDeclaration, Int)]) : Map[SymbolOrAlias, IndexedSeq[AxiomInfo]] = {
+    val withOwise = axioms.flatMap(parseAxiomSentence(a => splitFunction(a), _))
+    withOwise.sortWith(_._2.priority < _._2.priority).toIndexedSeq.filter(_._1.isDefined).map(t => (t._1.get, t._2)).groupBy(_._1).mapValues(_.map(_._2))
   }
 
   private def isConcrete(symbol: SymbolOrAlias) : Boolean = {
