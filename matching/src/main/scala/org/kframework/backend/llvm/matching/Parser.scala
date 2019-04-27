@@ -20,6 +20,10 @@ object Parser {
     att.patterns.find(isAtt(attName, _)).map(_.asInstanceOf[Application].args.head.asInstanceOf[StringLiteral].str)
   }
 
+  def getSymbolAtt(att: Attributes, attName: String): Option[SymbolOrAlias] = {
+    att.patterns.find(isAtt(attName, _)).map(_.asInstanceOf[Application].args.head.asInstanceOf[Application].head)
+  }
+
   private def isAtt(att: String, pat: Pattern): Boolean = {
     pat match {
       case Application(SymbolOrAlias(x, _), _) => x == att
