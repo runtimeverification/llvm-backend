@@ -67,9 +67,13 @@ class Column(val fringe: Fringe, val patterns: IndexedSeq[Pattern[String]], val 
 
   def maxListSize: (Int, Int) = {
     val listPs = patterns.filter(_.isInstanceOf[ListP[String]]).map(_.asInstanceOf[ListP[String]])
-    val longestHead = listPs.map(_.head.size).max
-    val longestTail = listPs.map(_.tail.size).max
-    (longestHead, longestTail)
+    if (listPs.isEmpty) {
+      (0, 0)
+    } else {
+      val longestHead = listPs.map(_.head.size).max
+      val longestTail = listPs.map(_.tail.size).max
+      (longestHead, longestTail)
+    }
   }
 
   lazy val bestKey: Option[Pattern[Option[Occurrence]]] = {
