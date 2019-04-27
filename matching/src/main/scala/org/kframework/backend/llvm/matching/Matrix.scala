@@ -110,7 +110,7 @@ class Column(val fringe: Fringe, val patterns: IndexedSeq[Pattern[String]], val 
   }
 
   override lazy val hashCode: Int = {
-    val state = Seq(fringe, patterns)
+    val state = Seq(patterns)
     state.map(_.hashCode()).foldLeft(0)((a, b) => 31 * a + b)
   }
 }
@@ -472,13 +472,12 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
     case that: Matrix =>
       (that canEqual this) &&
         symlib == that.symlib &&
-        columns == that.columns &&
         rows == that.rows
     case _ => false
   }
 
   override lazy val hashCode: Int = {
-    val state = Seq(symlib, columns, rows)
+    val state = Seq(symlib, rows)
     state.map(_.hashCode()).foldLeft(0)((a, b) => 31 * a + b)
   }
 }
