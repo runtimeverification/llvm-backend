@@ -1,6 +1,6 @@
 extern crate libc;
 
-use super::decls::{Map,Set,List,Int,K,KElem,__gmpz_init_set_ui,move_int,printConfigurationInternal};
+use super::decls::{Map,MapIter,Set,List,Int,K,KElem,__gmpz_init_set_ui,move_int,printConfigurationInternal};
 use std::iter::FromIterator;
 use std::hash::Hash;
 use std::collections::hash_map::DefaultHasher;
@@ -17,6 +17,19 @@ pub extern "C" fn size_map() -> usize {
 #[no_mangle]
 pub unsafe extern "C" fn drop_map(ptr: *mut Map) {
   ptr::drop_in_place(ptr)
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn map_iterator(map: *const Map) -> MapIter {
+  (*map).iter()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn map_iterator_next(iter: *mut MapIter) -> K {
+  match (*iter).next() {
+    Some((KElem(elem),_)) => { *elem.get() }
+    None => ptr::null()
+  }
 }
 
 #[no_mangle]
