@@ -31,7 +31,7 @@ pub unsafe extern "C" fn hook_SET_unit() -> Set {
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_SET_element(value: K) -> Set {
-  Set::singleton(KElem::new(value))
+  Set::unit(KElem::new(value))
 }
 
 #[no_mangle]

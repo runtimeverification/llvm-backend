@@ -21,7 +21,7 @@ pub unsafe extern "C" fn drop_map(ptr: *mut Map) {
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_MAP_element(key: K, value: K) -> Map {
-  Map::singleton(KElem::new(key), KElem::new(value))
+  Map::unit(KElem::new(key), KElem::new(value))
 }
 
 #[no_mangle]
