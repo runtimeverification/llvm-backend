@@ -134,8 +134,8 @@ case class MapS() extends SortCategory {
         SwitchLit(newO, 64, matrix.compiledCases, matrix.compiledDefault))
     } else if (matrix.bestCol.isChoice) {
       val m = matrix.compiledCases.toMap
-      MakeIterator(mapO,
-        IterNext(mapO, Choice(mapO),
+      MakeIterator("map_iterator", mapO,
+        IterNext("map_iterator_next", mapO, Choice(mapO),
           CheckNull(Choice(mapO), Seq(("0", m("0")), ("1", 
             Function("hook_MAP_lookup", ChoiceValue(mapO), Seq(mapO, Choice(mapO)), "STRING.String",
               Function("hook_MAP_remove", ChoiceRem(mapO), Seq(mapO, Choice(mapO)), "MAP.Map",
@@ -170,8 +170,8 @@ case class SetS() extends SortCategory {
         SwitchLit(newO, 64, matrix.compiledCases, matrix.compiledDefault))
     } else if (matrix.bestCol.isChoice) {
       val m = matrix.compiledCases.toMap
-      MakeIterator(setO,
-        IterNext(setO, Choice(setO),
+      MakeIterator("set_iterator", setO,
+        IterNext("set_iterator_next", setO, Choice(setO),
           CheckNull(Choice(setO), Seq(("0", m("0")), ("1", 
             Function("hook_SET_remove", ChoiceRem(setO), Seq(setO, Choice(setO)), "SET.Set",
               m("1")))), None)))
