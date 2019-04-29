@@ -23,6 +23,7 @@ public:
   virtual void collectUses(void) = 0;
   virtual void collectDefs(void) = 0;
   std::set<std::string> collectVars(void);
+  void sharedNode(Decision *d, llvm::StringMap<llvm::Value *> &substitution, llvm::BasicBlock *Block);
   bool beginNode(Decision *d, std::string name, llvm::StringMap<llvm::Value *> &substitution);
 
   void setCompleted() { completed = true; }
@@ -35,6 +36,8 @@ private:
   friend class MakePatternNode;
   friend class FunctionNode;
   friend class LeafNode;
+  friend class MakeIteratorNode;
+  friend class IterNextNode;
 };
 
 class DecisionCase {
@@ -239,6 +242,68 @@ public:
   virtual void collectDefs() {}
 };
 
+class MakeIteratorNode : public DecisionNode {
+private:
+  std::string collection;
+  std::string name;
+  std::string hookName;
+  DecisionNode *child;
+
+  MakeIteratorNode(const std::string &collection, const std::string &name, const std::string &hookName, DecisionNode *child) : collection(collection), name(name), hookName(hookName), child(child) {}
+
+public:
+  static MakeIteratorNode *Create(const std::string &collection, const std::string &name, const std::string &hookName, DecisionNode *child) {
+    return new MakeIteratorNode(collection, name, hookName, child);
+  }
+
+  virtual void codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution);
+  virtual void collectUses() {
+    if (hasUses) return;
+    uses.insert(collection);
+    child->collectUses();
+    uses.insert(child->uses.begin(), child->uses.end());
+    hasUses = true;
+  }
+  virtual void collectDefs() {
+    if (hasDefs) return;
+    defs.insert(name);
+    child->collectDefs();
+    defs.insert(child->defs.begin(), child->defs.end());
+    hasDefs = true;
+  }
+};
+
+class IterNextNode : public DecisionNode {
+private:
+  std::string iterator;
+  std::string binding;
+  std::string hookName;
+  DecisionNode *child;
+
+  IterNextNode(const std::string &iterator, const std::string &binding, const std::string &hookName, DecisionNode *child) : iterator(iterator), binding(binding), hookName(hookName), child(child) {}
+
+public:
+  static IterNextNode *Create(const std::string &iterator, const std::string &binding, const std::string &hookName, DecisionNode *child) {
+    return new IterNextNode(iterator, binding, hookName, child);
+  }
+
+  virtual void codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution);
+  virtual void collectUses() {
+    if (hasUses) return;
+    uses.insert(iterator);
+    child->collectUses();
+    uses.insert(child->uses.begin(), child->uses.end());
+    hasUses = true;
+  }
+  virtual void collectDefs() {
+    if (hasDefs) return;
+    defs.insert(binding);
+    child->collectDefs();
+    defs.insert(child->defs.begin(), child->defs.end());
+    hasDefs = true;
+  }
+};
+
 class FailNode : public DecisionNode {
 private:
   FailNode() {}
@@ -257,6 +322,10 @@ private:
   KOREDefinition *Definition;
   llvm::BasicBlock *CurrentBlock;
   llvm::BasicBlock *StuckBlock;
+  llvm::BasicBlock *FailureBlock;
+  llvm::BasicBlock *ChoiceBlock;
+  DecisionNode *ChoiceNode;
+  std::set<std::string> ChoiceVars;
   llvm::Module *Module;
   llvm::LLVMContext &Ctx;
   ValueType Cat;
@@ -272,6 +341,10 @@ public:
       Definition(Definition),
       CurrentBlock(EntryBlock),
       StuckBlock(StuckBlock),
+      FailureBlock(StuckBlock),
+      ChoiceBlock(nullptr),
+      ChoiceNode(nullptr),
+      ChoiceVars(),
       Module(Module),
       Ctx(Module->getContext()),
       Cat(Cat) {}
@@ -284,6 +357,8 @@ public:
   friend class MakePatternNode;
   friend class FunctionNode;
   friend class LeafNode;
+  friend class MakeIteratorNode;
+  friend class IterNextNode;
   friend class DecisionNode;
 };
 

@@ -18,11 +18,13 @@ private:
   KOREObjectSymbol *dv;
 
   enum Kind {
-    Switch, SwitchLiteral, CheckNull, MakePattern, Function, Leaf, Fail
+    Switch, SwitchLiteral, CheckNull, MakePattern, Function, MakeIterator, IterNext, Leaf, Fail
   };
 
   static Kind getKind(YAML::Node node) {
     if (node.IsScalar()) return Fail;
+    if (node["collection"]) return MakeIterator;
+    if (node["iterator"]) return IterNext;
     if (node["isnull"]) return CheckNull;
     if (node["pattern"]) return MakePattern;
     if (node["bitwidth"]) return SwitchLiteral;
@@ -105,6 +107,24 @@ public:
 
     return MakePatternNode::Create(name, pat, uses, child);
   }
+
+  DecisionNode *makeIterator(YAML::Node node) {
+    std::string name = to_string(node["collection"].as<std::vector<std::string>>());
+    std::string function = node["function"].as<std::string>();
+    auto child = (*this)(node["next"]);
+
+    return MakeIteratorNode::Create(name, name + "_iter", function, child);
+  }
+
+  DecisionNode *iterNext(YAML::Node node) {
+    std::string iterator = to_string(node["iterator"].as<std::vector<std::string>>()) + "_iter";
+    std::string name = to_string(node["binding"].as<std::vector<std::string>>());
+    std::string function = node["function"].as<std::string>();
+    auto child = (*this)(node["next"]);
+
+    return IterNextNode::Create(iterator, name, function, child);
+  }
+
 
   DecisionNode *switchCase(Kind kind, YAML::Node node) {
     YAML::Node list = node["specializations"];
@@ -190,6 +210,10 @@ public:
       ret = switchCase(kind, node); break;
     case Leaf:
       ret = leaf(node); break;
+    case MakeIterator:
+      ret = makeIterator(node); break;
+    case IterNext:
+      ret = iterNext(node); break;
     }
     uniqueNodes[node] = (uintptr_t)ret;
     return ret;

@@ -2,7 +2,9 @@
 #include "kllvm/codegen/CreateTerm.h"
 
 #include "llvm/IR/Constants.h"
+#include "llvm/IR/CFG.h"
 #include "llvm/IR/Instructions.h" 
+#include "llvm/Support/raw_ostream.h"
 
 #include <iostream>
 
@@ -14,7 +16,7 @@ FailNode FailNode::instance;
 
 void Decision::operator()(DecisionNode *entry, llvm::StringMap<llvm::Value *> substitution) {
   if (entry == FailNode::get()) {
-    llvm::BranchInst::Create(this->StuckBlock, this->CurrentBlock);
+    llvm::BranchInst::Create(this->FailureBlock, this->CurrentBlock);
   } else {
     entry->codegen(this, substitution);
   }
@@ -34,21 +36,35 @@ std::set<std::string> DecisionNode::collectVars() {
   return vars;
 }
 
+void DecisionNode::sharedNode(Decision *d, llvm::StringMap<llvm::Value *> &substitution, llvm::BasicBlock *Block) {
+  std::set<std::string> vars = collectVars();
+  vars.insert(d->ChoiceVars.begin(), d->ChoiceVars.end());
+  for (std::string var : vars) {
+    auto Phi = phis.lookup(var);
+    for (llvm::BasicBlock *pred : predecessors(Phi->getParent())) {
+      if (pred == Block) {
+        Phi->addIncoming(substitution[var], Block);
+      }
+    }
+    substitution[var] = phis.lookup(var);
+  }
+}
+ 
+
 bool DecisionNode::beginNode(Decision *d, std::string name, llvm::StringMap<llvm::Value *> &substitution) {
   if (isCompleted()) {
     llvm::BranchInst::Create(cachedCode, d->CurrentBlock);
-    for (std::string var : collectVars()) {
-      phis.lookup(var)->addIncoming(substitution[var], d->CurrentBlock);
-      substitution[var] = phis.lookup(var);
-    }
+    sharedNode(d, substitution, d->CurrentBlock);
     return true;
   }
+  std::set<std::string> vars = collectVars();
+  vars.insert(d->ChoiceVars.begin(), d->ChoiceVars.end());
   auto Block = llvm::BasicBlock::Create(d->Ctx,
       name,
       d->CurrentBlock->getParent());
   cachedCode = Block;
   llvm::BranchInst::Create(Block, d->CurrentBlock);
-  for (std::string var : collectVars()) {
+  for (std::string var : vars) {
     auto Phi = llvm::PHINode::Create(substitution[var]->getType(), 1, "phi" + var, Block);
     Phi->addIncoming(substitution[var], d->CurrentBlock);
     phis[var] = Phi;
@@ -62,8 +78,12 @@ void SwitchNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitutio
   if (beginNode(d, "switch" + name, substitution)) {
     return;
   }
+  llvm::BasicBlock *CurrentFailureBlock = d->FailureBlock;
+  if (d->ChoiceBlock) {
+    d->FailureBlock = d->ChoiceBlock;
+  }
   llvm::Value *val = substitution.lookup(name);
-  llvm::BasicBlock *_default = d->StuckBlock;
+  llvm::BasicBlock *_default = CurrentFailureBlock;
   const DecisionCase *defaultCase = nullptr;
   std::vector<std::pair<llvm::BasicBlock *, const DecisionCase *>> caseData;
   int idx = 0;
@@ -72,7 +92,7 @@ void SwitchNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitutio
     auto child = _case.getChild();
     llvm::BasicBlock *CaseBlock;
     if (child == FailNode::get()) {
-      CaseBlock = d->StuckBlock;
+      CaseBlock = CurrentFailureBlock;
     } else {
       CaseBlock = llvm::BasicBlock::Create(d->Ctx, 
           name + "_case_" + std::to_string(idx++),
@@ -108,9 +128,13 @@ void SwitchNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitutio
       }
     }
   }
+  auto switchBlock = d->CurrentBlock;
   for (auto &entry : caseData) {
     auto &_case = *entry.second;
-    if (entry.first == d->StuckBlock) {
+    if (entry.first == CurrentFailureBlock) {
+      if (CurrentFailureBlock == d->ChoiceBlock) {
+        d->ChoiceNode->sharedNode(d, substitution, switchBlock);
+      }
       continue;
     }
     d->CurrentBlock = entry.first;
@@ -153,10 +177,12 @@ void SwitchNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitutio
     _case.getChild()->codegen(d, substitution);
   }
   if (defaultCase) {
-    if (_default != d->StuckBlock) {
+    if (_default != CurrentFailureBlock) {
       // process default also
       d->CurrentBlock = _default;
       defaultCase->getChild()->codegen(d, substitution);
+    } else if (CurrentFailureBlock == d->ChoiceBlock) {
+      d->ChoiceNode->sharedNode(d, substitution, switchBlock);
     }
   }
   setCompleted();
@@ -179,7 +205,6 @@ void FunctionNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitut
     return;
   }
   std::vector<llvm::Value *> args;
-  std::vector<llvm::Type *> types;
   for (auto arg : bindings) {
     llvm::Value *val;
     if (arg.find_first_not_of("-0123456789") == std::string::npos) {
@@ -188,7 +213,6 @@ void FunctionNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitut
       val = substitution.lookup(arg);
     }
     args.push_back(val);
-    types.push_back(val->getType());
   }
   CreateTerm creator(substitution, d->Definition, d->CurrentBlock, d->Module, false);
   auto Call = creator.createFunctionCall(function, cat, args, function.substr(0, 5) == "hook_", false);
@@ -198,6 +222,60 @@ void FunctionNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitut
   setCompleted();
 }
 
+void MakeIteratorNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution) {
+  if (beginNode(d, "new_iterator" + name, substitution)) {
+    return;
+  }
+  std::vector<llvm::Value *> args;
+  std::vector<llvm::Type *> types;
+  llvm::Value *arg = substitution.lookup(collection);
+  args.push_back(arg);
+  types.push_back(arg->getType());
+  llvm::Value *AllocSret = allocateTerm(d->Module->getTypeByName("iter"), d->CurrentBlock, "koreAllocNoGC");
+  AllocSret->setName(name);
+  args.insert(args.begin(), AllocSret);
+  types.insert(types.begin(), AllocSret->getType());
+
+  llvm::FunctionType *funcType = llvm::FunctionType::get(llvm::Type::getVoidTy(d->Module->getContext()), types, false);
+  llvm::Constant *constant = d->Module->getOrInsertFunction(hookName, funcType);
+  llvm::Function *func = llvm::dyn_cast<llvm::Function>(constant);
+  if (!func) {
+    constant->print(llvm::errs());
+    abort();
+  }
+  llvm::CallInst::Create(func, args, "", d->CurrentBlock);
+  func->arg_begin()->addAttr(llvm::Attribute::StructRet);
+  substitution[name] = AllocSret;
+  child->codegen(d, substitution);
+  setCompleted();
+}
+
+void IterNextNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution) {
+  if (beginNode(d, "choice" + binding, substitution)) {
+    return;
+  }
+  if (d->ChoiceBlock) {
+    abort();
+  }
+  d->ChoiceBlock = d->CurrentBlock;
+  d->ChoiceVars = collectVars();
+  d->ChoiceNode = this;
+  llvm::Value *arg = substitution.lookup(iterator);
+
+  llvm::FunctionType *funcType = llvm::FunctionType::get(getValueType({SortCategory::Symbol, 0}, d->Module), {arg->getType()}, false);
+  llvm::Constant *constant = d->Module->getOrInsertFunction(hookName, funcType);
+  llvm::Function *func = llvm::dyn_cast<llvm::Function>(constant);
+  if (!func) {
+    constant->print(llvm::errs());
+    abort();
+  }
+  auto Call = llvm::CallInst::Create(func, {arg}, binding, d->CurrentBlock);
+  substitution[binding] = Call;
+  child->codegen(d, substitution);
+  d->ChoiceBlock = nullptr;
+  d->FailureBlock = d->StuckBlock;
+  setCompleted();
+}
 
 void LeafNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution) {
   if (beginNode(d, name, substitution)) {
