@@ -390,12 +390,22 @@ llvm::Value *CreateTerm::createHook(KOREObjectCompositePattern *hookAtt, KOREObj
     llvm::BranchInst::Create(TrueBlock, FalseBlock, cond, CurrentBlock);
     CurrentBlock = TrueBlock;
     llvm::Value *trueArg = (*this)(pattern->getArguments()[1]).first;
-    llvm::BranchInst::Create(MergeBlock, CurrentBlock);
-    llvm::PHINode *Phi = llvm::PHINode::Create(trueArg->getType(), 2, "phi", MergeBlock);
-    Phi->addIncoming(trueArg, CurrentBlock);
+    llvm::BasicBlock *NewTrueBlock = CurrentBlock;
     CurrentBlock = FalseBlock;
     llvm::Value *falseArg = (*this)(pattern->getArguments()[2]).first;
+    if (trueArg->getType()->isPointerTy() && !falseArg->getType()->isPointerTy()) {
+      llvm::AllocaInst *AllocCollection = new llvm::AllocaInst(falseArg->getType(), 0, "", CurrentBlock);
+      new llvm::StoreInst(falseArg, AllocCollection, CurrentBlock);
+      falseArg = AllocCollection;
+    } else if (!trueArg->getType()->isPointerTy() && falseArg->getType()->isPointerTy()) {
+      llvm::AllocaInst *AllocCollection = new llvm::AllocaInst(trueArg->getType(), 0, "", NewTrueBlock);
+      new llvm::StoreInst(trueArg, AllocCollection, NewTrueBlock);
+      trueArg = AllocCollection;
+    }
     llvm::BranchInst::Create(MergeBlock, CurrentBlock);
+    llvm::BranchInst::Create(MergeBlock, NewTrueBlock);
+    llvm::PHINode *Phi = llvm::PHINode::Create(trueArg->getType(), 2, "phi", MergeBlock);
+    Phi->addIncoming(trueArg, NewTrueBlock);
     Phi->addIncoming(falseArg, CurrentBlock);
     CurrentBlock = MergeBlock;
     return Phi;
