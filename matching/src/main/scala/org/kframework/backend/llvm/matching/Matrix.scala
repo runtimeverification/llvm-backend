@@ -472,6 +472,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
     case that: Matrix =>
       (that canEqual this) &&
         symlib == that.symlib &&
+        fringe == that.fringe &&
         rows == that.rows
     case _ => false
   }
