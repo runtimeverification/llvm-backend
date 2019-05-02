@@ -18,8 +18,12 @@ class Column(val fringe: Fringe, val patterns: IndexedSeq[Pattern[String]], val 
   }
 
   lazy val score: Double = computeScore
-  
+
   def computeScore: Double = {
+    computeScoreForKey(bestKey)
+  }
+
+  def computeScoreForKey(key: Option[Pattern[Option[Occurrence]]]): Double = {
     if (isWildcard) {
       Double.PositiveInfinity
     } else {
@@ -27,7 +31,7 @@ class Column(val fringe: Fringe, val patterns: IndexedSeq[Pattern[String]], val 
       for (i <- patterns.indices) {
         if (clauses(i).action.priority != clauses.head.action.priority)
           return result
-        result += patterns(i).score(fringe, clauses(i), bestKey)
+        result += patterns(i).score(fringe, clauses(i), key)
         if (result == Double.NegativeInfinity) {
           return result
         }
@@ -47,12 +51,16 @@ class Column(val fringe: Fringe, val patterns: IndexedSeq[Pattern[String]], val 
     }
   }
 
+  private lazy val rawSignature: Seq[Constructor] = {
+    patterns.zipWithIndex.flatMap(p => p._1.signature(clauses(p._2)))
+  }
+
   lazy val signature: List[Constructor] = {
-    val used = patterns.zipWithIndex.flatMap(p => p._1.signature(clauses(p._2)))
     val bestUsed = bestKey match {
-      case None => used
-      case Some(k) => used.filter(_.isBest(k))
+      case None => rawSignature
+      case Some(k) => rawSignature.filter(_.isBest(k))
     }
+    assert(bestUsed.nonEmpty)
     val usedInjs = bestUsed.flatMap(fringe.injections)
     val dups = if (fringe.isExact) bestUsed else bestUsed ++ usedInjs
     val nodups = dups.distinct.toList
@@ -77,17 +85,19 @@ class Column(val fringe: Fringe, val patterns: IndexedSeq[Pattern[String]], val 
   }
 
   lazy val bestKey: Option[Pattern[Option[Occurrence]]] = {
-    if (!fringe.sortInfo.isCollection) None
-    else {
-      def go: Option[Pattern[Option[Occurrence]]] = {
-        for ((pat, clause, i) <- (patterns, clauses, clauses.indices).zipped) {
-          if (!pat.isWildcard) {
-            return pat.bestKey(fringe, clause, patterns.drop(i), clauses.drop(i))
-          }
-        }
+    val possibleKeys = rawSignature.flatMap({
+      case HasKey(_, _, Some(k)) => Seq(k)
+      case _ => Seq()
+    })
+    if (possibleKeys.isEmpty) {
+      None
+    } else {
+      val rawBestKey = possibleKeys.map(k => (k, computeScoreForKey(Some(k)))).maxBy(_._2)
+      if (rawBestKey._2 == Double.NegativeInfinity) {
         None
+      } else {
+        Some(rawBestKey._1)
       }
-      go
     }
   }
 
