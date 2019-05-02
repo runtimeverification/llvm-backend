@@ -178,7 +178,6 @@ case class MapP[T](keys: Seq[Pattern[T]], values: Seq[Pattern[T]], frame: Option
       case (HasKey(_, _, Some(p)), None) => keys.map(_.canonicalize(clause)).exists(Pattern.mightUnify(p, _))
       case (HasNoKey(Some(p)), _) => !keys.map(_.canonicalize(clause)).contains(p)
       case (HasKey(_, _, None), None) => keys.nonEmpty
-      case (HasKey(_, _, None), Some(_)) => true
       case (HasNoKey(None), _) => false
     }
   }
@@ -317,7 +316,6 @@ case class SetP[T](elements: Seq[Pattern[T]], frame: Option[Pattern[T]], ctr: Sy
       case (HasKey(_, _, Some(p)), None) => elements.map(_.canonicalize(clause)).exists(Pattern.mightUnify(p, _))
       case (HasNoKey(Some(p)), _) => !elements.map(_.canonicalize(clause)).contains(p)
       case (HasKey(_, _, None), None) => elements.nonEmpty
-      case (HasKey(_, _, None), Some(_)) => true
       case (HasNoKey(None), _) => false
     }
   }
