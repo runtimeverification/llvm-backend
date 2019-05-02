@@ -55,7 +55,7 @@ case class AsP[T](name: T, sort: SortCategory, pat: Pattern[T]) extends Pattern[
   }
   def score(f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]]): Double = pat.score(f, c, key)
   def bindings(ix: Option[Constructor], occurrence: Occurrence): Seq[VariableBinding[T]] = {
-    Seq(new VariableBinding(name, sort, occurrence))
+    Seq(new VariableBinding(name, sort, occurrence)) ++ pat.bindings(ix, occurrence)
   }
   def expand(ix: Constructor, fringes: Seq[Fringe], f: Fringe, clause: Clause): Seq[Pattern[T]] = {
     pat.expand(ix, fringes, f, clause)
