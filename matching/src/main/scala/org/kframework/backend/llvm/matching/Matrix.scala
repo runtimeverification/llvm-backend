@@ -389,27 +389,19 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
     val overloadVars = row.clause.overloadChildren.map(_._2)
     val allVars = vars ++ overloadVars
     // then group the bound variables by their name
-    val grouped = allVars.groupBy(v => (v.name, v.category)).mapValues(_.map(_.occurrence))
+    val grouped = allVars.groupBy(v => v.name).mapValues(_.map(v => (v.category, v.occurrence)))
     // compute the variables bound more than once
     val nonlinear = grouped.filter(_._2.size > 1)
     val nonlinearPairs = nonlinear.mapValues(l => (l, l.tail).zipped)
-    // get some random occurrence bound for each variable in the map
-    val deduped = grouped.toSeq.map(e => (e._1._1, e._2.head))
-    // sort alphabetically by variable name
-    val sorted = deduped.sortWith(_._1 < _._1)
-    // filter by the variables used in the rhs
-    val filtered = sorted.filter(v => row.clause.action.rhsVars.contains(v._1))
-    val newVars = filtered.map(_._2)
+    val newVars = row.clause.action.rhsVars.map(v => grouped(v).head._2)
     val atomicLeaf = Leaf(row.clause.action.ordinal, newVars)
     // check that all occurrences of the same variable are equal
-    val nonlinearLeaf = nonlinearPairs.foldRight[DecisionTree](atomicLeaf)((e, dt) => e._2.foldRight(dt)((os,dt2) => makeEquality(e._1._2, os, dt2)))
+    val nonlinearLeaf = nonlinearPairs.foldRight[DecisionTree](atomicLeaf)((e, dt) => e._2.foldRight(dt)((os,dt2) => makeEquality(os._1._1, (os._1._2, os._2._2), dt2)))
     val sc = row.clause.action.scVars match {
       // if there is no side condition, continue
       case None => nonlinearLeaf
       case Some(cond) =>
-        // filter by the variables used in the side condition
-        val condFiltered = sorted.filter(t => cond.contains(t._1))
-        val condVars = condFiltered.map(_._2)
+        val condVars = cond.map(v => grouped(v).head._2)
         val newO = SC(row.clause.action.ordinal)
         // evaluate the side condition and if it is true, continue, otherwise go to the next row
         Function("side_condition_" + row.clause.action.ordinal, newO, condVars, "BOOL.Bool",
