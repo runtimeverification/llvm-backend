@@ -65,6 +65,14 @@ bool DecisionNode::beginNode(Decision *d, std::string name, llvm::StringMap<llvm
   cachedCode = Block;
   llvm::BranchInst::Create(Block, d->CurrentBlock);
   for (std::string var : vars) {
+    auto val = substitution.lookup(var);
+    if (!val) {
+      std::cerr << var << std::endl;
+      for (auto key : substitution.keys()) {
+        std::cerr << key.str() << std::endl;
+      }
+      abort();
+    }
     auto Phi = llvm::PHINode::Create(substitution[var]->getType(), 1, "phi" + var, Block);
     Phi->addIncoming(substitution[var], d->CurrentBlock);
     phis[var] = Phi;

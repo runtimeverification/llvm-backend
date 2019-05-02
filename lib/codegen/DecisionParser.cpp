@@ -87,6 +87,10 @@ public:
       pat->addArgument(KOREMetaStringPattern::Create(node["literal"].as<std::string>()));
       return pat;
     } else {
+      if (!node["constructor"]) {
+        std::cerr << node << std::endl;
+	abort();
+      }
       auto sym = syms.at(node["constructor"].as<std::string>());
       auto pat = KOREObjectCompositePattern::Create(sym);
       for (auto child : node["args"]) {
