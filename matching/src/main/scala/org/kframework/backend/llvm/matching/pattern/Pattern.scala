@@ -186,7 +186,7 @@ case class MapP[T](keys: Seq[Pattern[T]], values: Seq[Pattern[T]], frame: Option
       1.0
     } else if (keys.isEmpty) {
       frame.get.score(f, c, key)
-    } else if (key.isDefined && key.get.isBound(c)) {
+    } else if (key.isDefined) {
       if (canonicalize(c).keys.contains(key.get)) 1.0 else 0.0
     } else {
       Double.NegativeInfinity
@@ -324,7 +324,7 @@ case class SetP[T](elements: Seq[Pattern[T]], frame: Option[Pattern[T]], ctr: Sy
       1.0
     } else if (elements.isEmpty) {
       frame.get.score(f, c, key)
-    } else if (key.isDefined && key.get.isBound(c)) {
+    } else if (key.isDefined) {
       if (canonicalize(c).elements.contains(key.get)) 1.0 else 0.0
     } else {
       Double.NegativeInfinity
