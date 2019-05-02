@@ -114,24 +114,28 @@ case class MakePattern private(occurrence: Occurrence, pattern: Pattern[Option[O
     val result = new util.HashMap[String, AnyRef]()
     pattern match {
       case OrP(_) | WildcardP() | VariableP(None, _) => ???
-      case VariableP(Some(o), h) =>
+      case VariableP(Some(o), h) => {
         result.put("hook", h.hookAtt)
         result.put("occurrence", o.representation)
-      case AsP(_, _, p) => representPattern(p)
-      case MapP(_, _, _, _, o) => representPattern(o)
-      case SetP(_, _, _, o) => representPattern(o)
-      case ListP(_, _, _, _, o) => representPattern(o)
-      case LiteralP(s, h) =>
+      }
+      case AsP(_, _, p) => return representPattern(p)
+      case MapP(_, _, _, _, o) => return representPattern(o)
+      case SetP(_, _, _, o) => return representPattern(o)
+      case ListP(_, _, _, _, o) => return representPattern(o)
+      case LiteralP(s, h) => {
         result.put("hook", h.hookAtt)
         result.put("literal", s)
-      case SymbolP(s, ps) =>
+      }
+      case SymbolP(s, ps) => {
         result.put("constructor", s.toString)
         val args = new util.ArrayList[AnyRef]()
         result.put("args", args)
         for (p <- ps) {
           args.add(representPattern(p))
         }
+      }
     }
+    assert(!result.isEmpty())
     result
   }
   override lazy val hashCode: Int = super.hashCode
