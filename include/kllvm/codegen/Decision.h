@@ -22,6 +22,7 @@ public:
   virtual void codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution) = 0;
   virtual void collectUses(void) = 0;
   virtual void collectDefs(void) = 0;
+  virtual void collectFail(void) = 0;
   std::set<std::string> collectVars(void);
   void sharedNode(Decision *d, llvm::StringMap<llvm::Value *> &substitution, llvm::BasicBlock *Block);
   bool beginNode(Decision *d, std::string name, llvm::StringMap<llvm::Value *> &substitution);
@@ -30,12 +31,13 @@ public:
   bool isCompleted() const { return completed; }
 
 private:
-  bool hasVars = false, hasUses = false, hasDefs = false;
+  bool hasVars = false, hasUses = false, hasDefs = false, hasContainsFail = false, containsFailNode = false;
   std::set<std::string> vars, uses, defs;
   friend class SwitchNode;
   friend class MakePatternNode;
   friend class FunctionNode;
   friend class LeafNode;
+  friend class FailNode;
   friend class MakeIteratorNode;
   friend class IterNextNode;
 };
@@ -111,6 +113,14 @@ public:
     }
     hasDefs = true;
   }
+  virtual void collectFail() {
+    if(hasContainsFail) return;
+    for (auto _case : cases) {
+      _case.getChild()->collectFail();
+      containsFailNode = containsFailNode || _case.getChild()->containsFailNode;
+    }
+    hasContainsFail = true;
+  }
 };
 
 class MakePatternNode : public DecisionNode {
@@ -153,6 +163,11 @@ public:
     child->collectDefs();
     defs.insert(child->defs.begin(), child->defs.end());
     hasDefs = true;
+  }
+  virtual void collectFail() {
+    if (hasContainsFail) return;
+    child->collectFail();
+    containsFailNode = containsFailNode || child->containsFailNode;
   }
 };
 
@@ -212,6 +227,11 @@ public:
     defs.insert(child->defs.begin(), child->defs.end());
     hasDefs = true;
   }
+  virtual void collectFail() {
+    if (hasContainsFail) return;
+    child->collectFail();
+    containsFailNode = containsFailNode || child->containsFailNode;
+  }
 };
 
 class LeafNode : public DecisionNode {
@@ -240,6 +260,7 @@ public:
     hasUses = true;
   }
   virtual void collectDefs() {}
+  virtual void collectFail() {}
 };
 
 class MakeIteratorNode : public DecisionNode {
@@ -270,6 +291,11 @@ public:
     child->collectDefs();
     defs.insert(child->defs.begin(), child->defs.end());
     hasDefs = true;
+  }
+  virtual void collectFail() {
+    if (hasContainsFail) return;
+    child->collectFail();
+    containsFailNode = containsFailNode || child->containsFailNode;
   }
 };
 
@@ -302,6 +328,11 @@ public:
     defs.insert(child->defs.begin(), child->defs.end());
     hasDefs = true;
   }
+  virtual void collectFail() {
+    if (hasContainsFail) return;
+    child->collectFail();
+    containsFailNode = containsFailNode || child->containsFailNode;
+  }
 };
 
 class FailNode : public DecisionNode {
@@ -315,6 +346,7 @@ public:
   virtual void codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution) { abort(); }
   virtual void collectUses() {}
   virtual void collectDefs() {}
+  virtual void collectFail() { containsFailNode = true; }
 };
 
 class Decision {
