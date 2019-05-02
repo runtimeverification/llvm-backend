@@ -38,7 +38,10 @@ std::set<std::string> DecisionNode::collectVars() {
 
 void DecisionNode::sharedNode(Decision *d, llvm::StringMap<llvm::Value *> &substitution, llvm::BasicBlock *Block) {
   std::set<std::string> vars = collectVars();
-  vars.insert(d->ChoiceVars.begin(), d->ChoiceVars.end());
+  collectFail();
+  if (containsFailNode) {
+    vars.insert(d->ChoiceVars.begin(), d->ChoiceVars.end());
+  }
   for (std::string var : vars) {
     auto Phi = phis.lookup(var);
     if (!Phi) {
@@ -288,6 +291,7 @@ void IterNextNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitut
   child->codegen(d, substitution);
   d->ChoiceBlock = nullptr;
   d->FailureBlock = d->StuckBlock;
+  d->ChoiceVars.clear();
   setCompleted();
 }
 
