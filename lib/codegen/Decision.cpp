@@ -41,6 +41,12 @@ void DecisionNode::sharedNode(Decision *d, llvm::StringMap<llvm::Value *> &subst
   vars.insert(d->ChoiceVars.begin(), d->ChoiceVars.end());
   for (std::string var : vars) {
     auto Phi = phis.lookup(var);
+    if (!Phi) {
+      for (std::string v : collectVars()) {
+        std::cerr << v << std::endl;
+      }
+      abort();
+    }
     for (llvm::BasicBlock *pred : predecessors(Phi->getParent())) {
       if (pred == Block) {
         Phi->addIncoming(substitution[var], Block);
