@@ -19,7 +19,7 @@ sealed trait DecisionTree {
   def representation: AnyRef
 }
 
-case class Failure private() extends DecisionTree {
+case class Failure private(private val failureId: Int) extends DecisionTree {
   val representation = "fail"
   override lazy val hashCode: Int = super.hashCode
   override def equals(that: Any): Boolean = that.isInstanceOf[AnyRef] && (this eq that.asInstanceOf[AnyRef])
@@ -162,8 +162,10 @@ case class IterNext private(hookName: String, iterator: Occurrence, binding: Occ
 }
 
 object Failure {
-  private val instance = new Failure()
-  def apply(): Failure = instance
+  private val cache = new ConcurrentHashMap[Int, Failure]()
+  def apply(failureId: Int): Failure = {
+    cache.computeIfAbsent(failureId, k => new Failure(k))
+  }
 }
 
 object Leaf {
