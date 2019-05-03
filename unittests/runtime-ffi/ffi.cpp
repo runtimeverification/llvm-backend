@@ -105,7 +105,6 @@ BOOST_AUTO_TEST_CASE(call) {
   /* int timesTwo(int x) */
   int x = -3;
   string * xargstr = makeString((char *) &x, sizeof(int)); 
-  set_len(xargstr, sizeof(int));
 
   block * xarg = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(string *)));
   xarg->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("inj{SortBytes{}}"));
@@ -156,8 +155,7 @@ BOOST_AUTO_TEST_CASE(call) {
 
   /* int times(int x, int y) */
   int y = 4;
-  string * yargstr = makeString((char *) &y);
-  set_len(yargstr, sizeof(int));
+  string * yargstr = makeString((char *) &y, sizeof(int));
 
   memcpy(argtype->children, &type_sint, sizeof(block *));
 
