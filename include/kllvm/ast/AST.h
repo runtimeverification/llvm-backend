@@ -708,6 +708,7 @@ private:
   KOREObjectCompositeSortDeclarationMapType sortDeclarations;
   KOREObjectSymbolDeclarationMapType symbolDeclarations;
   KOREObjectCompositeSortMapType hookedSorts;
+  KOREObjectSymbolStringMapType freshFunctions;
 
   std::vector<KOREModule *> modules;
   std::map<std::string, KOREObjectCompositePattern *> attributes;
@@ -741,6 +742,7 @@ public:
   const std::map<std::string, KOREObjectCompositePattern *> &getAttributes() const {
     return attributes;
   }
+  const KOREObjectSymbolStringMapType &getFreshFunctions() const { return freshFunctions; }
   KOREObjectSymbol *getInjSymbol() { return injSymbol; }
 };
 

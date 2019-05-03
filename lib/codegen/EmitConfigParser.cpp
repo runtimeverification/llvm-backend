@@ -267,6 +267,55 @@ static void emitEvaluateFunctionSymbol(KOREDefinition *def, llvm::Module *mod) {
       def, mod, true, getEval);
 }
 
+static void emitGetTagForFreshSort(KOREDefinition *definition, llvm::Module *module) {
+  llvm::LLVMContext &Ctx = module->getContext();
+  auto func = llvm::dyn_cast<llvm::Function>(module->getOrInsertFunction(
+      "getTagForFreshSort", llvm::Type::getInt32Ty(Ctx), llvm::Type::getInt8PtrTy(Ctx)));
+  auto CurrentBlock = llvm::BasicBlock::Create(Ctx, "");
+  auto MergeBlock = llvm::BasicBlock::Create(Ctx, "exit");
+  auto Phi = llvm::PHINode::Create(llvm::Type::getInt32Ty(Ctx), definition->getSortDeclarations().size(), "phi", MergeBlock);
+  auto &sorts = definition->getSortDeclarations();
+  llvm::Constant *Strcmp = module->getOrInsertFunction("strcmp", 
+      llvm::Type::getInt32Ty(Ctx), llvm::Type::getInt8PtrTy(Ctx),
+      llvm::Type::getInt8PtrTy(Ctx));
+  llvm::Constant *zero = llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0);
+  llvm::Constant *zero32 = llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), 0);
+  for (auto iter = sorts.begin(); iter != sorts.end(); ++iter) {
+    auto &entry = *iter;
+    std::string name = entry.first;
+    if (!definition->getFreshFunctions().count(name)) {
+      continue;
+    }
+    CurrentBlock->insertInto(func);
+    CurrentBlock->setName("is_" + name);
+    auto Str = llvm::ConstantDataArray::getString(Ctx, name, true);
+    auto global = module->getOrInsertGlobal("sort_name_" + name, Str->getType());
+    llvm::GlobalVariable *globalVar = llvm::dyn_cast<llvm::GlobalVariable>(global);
+    if (!globalVar->hasInitializer()) {
+      globalVar->setInitializer(Str);
+    }
+    auto indices = std::vector<llvm::Constant *>{zero, zero};
+    auto Ptr = llvm::ConstantExpr::getInBoundsGetElementPtr(Str->getType(), globalVar, indices);
+    auto compare = llvm::CallInst::Create(Strcmp, {func->arg_begin(), Ptr}, "", CurrentBlock);
+    auto icmp = new llvm::ICmpInst(*CurrentBlock, llvm::CmpInst::ICMP_EQ, 
+       compare, zero32);
+    auto FalseBlock = llvm::BasicBlock::Create(Ctx, "");
+    auto CaseBlock = llvm::BasicBlock::Create(Ctx, name, func);
+    llvm::BranchInst::Create(CaseBlock, FalseBlock, icmp, CurrentBlock);
+    auto symbol = definition->getFreshFunctions().at(name);
+    std::ostringstream Out;
+    symbol->print(Out);
+    Phi->addIncoming(llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), definition->getAllSymbols().at(Out.str())->getTag()), CaseBlock);
+    llvm::BranchInst::Create(MergeBlock, CaseBlock);
+    CurrentBlock = FalseBlock;
+  }
+  CurrentBlock->insertInto(func);
+  addAbort(CurrentBlock, module);
+  llvm::ReturnInst::Create(Ctx, Phi, MergeBlock);
+  MergeBlock->insertInto(func);
+}
+
+
 static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
   llvm::LLVMContext &Ctx = module->getContext();
   auto func = llvm::dyn_cast<llvm::Function>(module->getOrInsertFunction(
@@ -669,6 +718,7 @@ void emitConfigParserFunctions(KOREDefinition *definition, llvm::Module *module)
   emitStoreSymbolChildren(definition, module); 
   emitEvaluateFunctionSymbol(definition, module); 
   emitGetToken(definition, module); 
+  emitGetTagForFreshSort(definition, module);
   emitGetInjectionForSortOfTag(definition, module);
 
   emitGetSymbolNameForTag(definition, module);
