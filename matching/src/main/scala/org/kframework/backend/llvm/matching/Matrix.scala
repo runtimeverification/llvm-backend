@@ -187,7 +187,7 @@ object SortInfo {
   }
 }
 
-case class Action(val ordinal: Int, val rhsVars: Seq[String], val scVars: Option[Seq[String]], val priority: Int) {
+case class Action(val ordinal: Int, val rhsVars: Seq[String], val scVars: Option[Seq[String]], val freshConstants: Seq[(String, Sort)], val arity: Int, val priority: Int) {
   override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
 }
 
@@ -384,10 +384,14 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
       Function(category.equalityFun, Equal(os._1, os._2), Seq(os._1, os._2), "BOOL.Bool",
         SwitchLit(Equal(os._1, os._2), 1, Seq(("1", dt), ("0", child)), None))
     }
+    def sortCat(sort: Sort): SortCategory = {
+      SortCategory(Parser.getStringAtt(symlib.sortAtt(sort), "hook").orElse(Some("STRING.String")))
+    }
     // first, add all remaining variable bindings to the clause
     val vars = row.clause.bindings ++ (fringe, row.patterns).zipped.toSeq.flatMap(t => t._2.bindings(None, t._1.occurrence))
     val overloadVars = row.clause.overloadChildren.map(_._2)
-    val allVars = vars ++ overloadVars
+    val freshVars = row.clause.action.freshConstants.map(t => VariableBinding(t._1, sortCat(t._2), Fresh(t._1)))
+    val allVars = vars ++ overloadVars ++ freshVars
     // then group the bound variables by their name
     val grouped = allVars.groupBy(v => v.name).mapValues(_.map(v => (v.category, v.occurrence)))
     // compute the variables bound more than once
@@ -411,8 +415,14 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
     val withRanges = row.clause.listRanges.foldRight(sc)({
       case ((o @ Num(_, o2), hd, tl), dt) => Function("hook_LIST_range_long", o, Seq(o2, Lit(hd.toString, "MINT.MInt 64"), Lit(tl.toString, "MINT.MInt 64")), "LIST.List", dt)
     })
-    row.clause.overloadChildren.foldRight(withRanges)({
+    val withOverloads = row.clause.overloadChildren.foldRight(withRanges)({
       case ((SymbolC(inj), v),dt) => MakePattern(v.occurrence, SymbolP(inj, Seq(VariableP(Some(v.occurrence.asInstanceOf[Inj].rest), v.category))), dt)
+    })
+    row.clause.action.freshConstants.foldRight(withOverloads)({
+      case ((name, sort),dt) => 
+        val litO = Lit(sort.toString, "STRING.String")
+        MakePattern(litO, LiteralP(sort.toString, StringS()),
+          Function("get_fresh_constant", Fresh(name), Seq(litO, Num(row.clause.action.arity, Base())), sortCat(sort).hookAtt, dt))
     })
   }
 

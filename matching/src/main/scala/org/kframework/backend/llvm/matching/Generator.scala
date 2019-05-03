@@ -96,9 +96,9 @@ object Generator {
     lhs.map(genPattern).toList
   }
 
-  private def genVars(pat: Pattern) : Seq[String] = {
+  private def genVars(pat: Pattern) : Seq[Variable] = {
     pat match {
-      case Variable(name, _) => Seq(name)
+      case v @ Variable(_, _) => Seq(v)
       case And(_, p1, p2) => genVars(p1) ++ genVars(p2)
       case Application(_, ps) => ps.flatMap(genVars)
       case Ceil(_, _, p) => genVars(p)
@@ -122,7 +122,11 @@ object Generator {
       axioms: IndexedSeq[AxiomInfo],
       sorts: Seq[Sort]) :
       Matrix = {
-    val actions = axioms.map(a => new Action(a.ordinal, genVars(a.rewrite.getRightHandSide).sorted.distinct, a.sideCondition.map(genVars(_).sorted.distinct), a.priority))
+    val actions = axioms.map(a => {
+      val rhsVars = genVars(a.rewrite.getRightHandSide)
+      val scVars = a.sideCondition.map(genVars(_))
+      new Action(a.ordinal, rhsVars.map(_.name).sorted.distinct, scVars.map(_.map(_.name).sorted.distinct), (rhsVars ++ scVars.getOrElse(Seq())).filter(_.name.startsWith("Var'Bang'")).map(v => (v.name, v.sort)), a.rewrite.getLeftHandSide.size, a.priority)
+    })
     val patterns = axioms.map(a => genPatterns(mod, symlib, a.rewrite)).transpose
     val cols = (sorts, patterns).zipped.toIndexedSeq
     new Matrix(symlib, cols, actions).expand
