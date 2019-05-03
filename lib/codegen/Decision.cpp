@@ -248,11 +248,17 @@ void MakeIteratorNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> subst
   llvm::Value *arg = substitution.lookup(collection);
   args.push_back(arg);
   types.push_back(arg->getType());
-  llvm::Value *AllocSret = allocateTerm(d->Module->getTypeByName("iter"), d->CurrentBlock, "koreAllocNoGC");
+  llvm::BasicBlock *EntryBlock = &d->CurrentBlock->getParent()->getEntryBlock();
+  llvm::Instruction *FirstNonPHIInst = EntryBlock->getFirstNonPHI();
+  llvm::AllocaInst *AllocSret;
+  if (FirstNonPHIInst) {
+    AllocSret = new llvm::AllocaInst(d->Module->getTypeByName("iter"), 0, "", FirstNonPHIInst);
+  } else {
+    AllocSret = new llvm::AllocaInst(d->Module->getTypeByName("iter"), 0, "", EntryBlock);
+  }
   AllocSret->setName(name);
   args.insert(args.begin(), AllocSret);
   types.insert(types.begin(), AllocSret->getType());
-
   llvm::FunctionType *funcType = llvm::FunctionType::get(llvm::Type::getVoidTy(d->Module->getContext()), types, false);
   llvm::Constant *constant = d->Module->getOrInsertFunction(hookName, funcType);
   llvm::Function *func = llvm::dyn_cast<llvm::Function>(constant);
@@ -260,8 +266,9 @@ void MakeIteratorNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> subst
     constant->print(llvm::errs());
     abort();
   }
-  llvm::CallInst::Create(func, args, "", d->CurrentBlock);
+  auto call = llvm::CallInst::Create(func, args, "", d->CurrentBlock);
   func->arg_begin()->addAttr(llvm::Attribute::StructRet);
+  call->addParamAttr(0, llvm::Attribute::StructRet);
   substitution[name] = AllocSret;
   child->codegen(d, substitution);
   setCompleted();
