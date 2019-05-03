@@ -16,8 +16,10 @@
 #define TYPETAG(type) "Lbl'hash'" #type "{}"
 extern "C" {
 
-#define NUM_SYMBOLS 3
-  const char * symbols[NUM_SYMBOLS] = {TYPETAG(sint), "inj{SortBytes{}}", "inj{SortFFIType{}}"};
+#define NUM_SYMBOLS 4
+  const char * symbols[NUM_SYMBOLS] = {TYPETAG(uint), TYPETAG(sint), "inj{SortBytes{}}", "inj{SortFFIType{}}"};
+
+  char * getTerminatedString(string * str);
 
   uint32_t getTagForSymbolName(const char *s) {
     for (int i = 0; i < NUM_SYMBOLS; i++) {
@@ -82,15 +84,28 @@ BOOST_AUTO_TEST_CASE(address) {
   mpz_ptr addr = hook_FFI_address(fn);
   BOOST_CHECK(0 < mpz_cmp_ui(addr, 0));
 
+  fn = makeString("utimesTwo");
+  addr = hook_FFI_address(fn);
+  BOOST_CHECK(0 < mpz_cmp_ui(addr, 0));
+
   fn = makeString("times");
+  addr = hook_FFI_address(fn);
+  BOOST_CHECK(0 < mpz_cmp_ui(addr, 0));
+
+  fn = makeString("getX");
+  addr = hook_FFI_address(fn);
+  BOOST_CHECK(0 < mpz_cmp_ui(addr, 0));
+
+  fn = makeString("increaseX");
   addr = hook_FFI_address(fn);
   BOOST_CHECK(0 < mpz_cmp_ui(addr, 0));
 }
 
 BOOST_AUTO_TEST_CASE(call) {
-  int x = 25;
-  const char * xstr = (char *) &x;
-  string * xargstr = makeString(xstr); 
+  /* int timesTwo(int x) */
+  int x = -3;
+  string * xargstr = makeString((char *) &x, sizeof(int)); 
+  set_len(xargstr, sizeof(int));
 
   block * xarg = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(string *)));
   xarg->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("inj{SortBytes{}}"));
@@ -116,9 +131,35 @@ BOOST_AUTO_TEST_CASE(call) {
 
   BOOST_CHECK_EQUAL(ret, x * 2);
 
+  /* unsigned int utimesTwo(unsigned int x) */
+  x = 4;
+  xargstr = makeString((char *) &x, sizeof(int)); 
+
+  memcpy(xarg->children, &xargstr, sizeof(string *));
+
+  args = hook_LIST_element(xarg);
+  block * type_uint = (block *)((((uint64_t)getTagForSymbolName(TYPETAG(uint))) << 32) | 1);
+  memcpy(argtype->children, &type_uint, sizeof(block *));
+
+  types = hook_LIST_element(argtype);
+
+  fn = makeString("utimesTwo");
+  addr = hook_FFI_address(fn);
+
+  bytes = hook_FFI_call(addr, &args, &types, type_uint);
+
+  BOOST_CHECK(bytes != NULL);
+
+  ret = *(unsigned int *) bytes->data;
+
+  BOOST_CHECK_EQUAL(ret, x * 2);
+
+  /* int times(int x, int y) */
   int y = 4;
-  const char * ystr = (char *) &y;
-  string * yargstr = makeString(ystr);
+  string * yargstr = makeString((char *) &y);
+  set_len(yargstr, sizeof(int));
+
+  memcpy(argtype->children, &type_sint, sizeof(block *));
 
   block * yarg = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(string *)));
   yarg->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("inj{SortBytes{}}"));
@@ -131,12 +172,31 @@ BOOST_AUTO_TEST_CASE(call) {
 
   fn = makeString("times");
   addr = hook_FFI_address(fn);
-
   bytes = hook_FFI_call(addr, &args, &types, type_sint);
-
   ret = *(int *) bytes->data;
 
   BOOST_CHECK_EQUAL(ret, x * y);
+
+  /* int getX(void) */
+  fn = makeString("getX");
+  addr = hook_FFI_address(fn);
+  bytes = hook_FFI_call(addr, &args, &types, type_sint);
+  ret = *(int *) bytes->data;
+
+  BOOST_CHECK_EQUAL(ret, 1);
+
+  /* void increaseX(void) */
+  fn = makeString("increaseX");
+  addr = hook_FFI_address(fn);
+  bytes = hook_FFI_call(addr, &args, &types, type_sint);
+
+  /* int getX(void) */
+  fn = makeString("getX");
+  addr = hook_FFI_address(fn);
+  bytes = hook_FFI_call(addr, &args, &types, type_sint);
+  ret = *(int *) bytes->data;
+
+  BOOST_CHECK_EQUAL(ret, 2);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
