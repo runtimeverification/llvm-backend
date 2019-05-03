@@ -10,8 +10,10 @@ declare fastcc %block* @"eval_LblgetGeneratedCounterCell{SortGeneratedTopCell{}}
 declare i32 @getTagForFreshSort(i8*)
 declare %mpz* @hook_INT_add(%mpz*, %mpz*)
 declare i8* @evaluateFunctionSymbol(i32, i8**)
+declare i8* @getTerminatedString(%string*)
 
-@exit_int_0 = external global %mpz
+@fresh_int_1 = global %mpz { i32 1, i32 1, i64* getelementptr inbounds ([1 x i64], [1 x i64]* @fresh_int_1_limbs, i32 0, i32 0) }
+@fresh_int_1_limbs = global [1 x i64] [i64 1]
 
 define i8* @get_fresh_constant(%string* %sort, %block* %top) {
 entry:
@@ -19,9 +21,9 @@ entry:
   %counterCellPointer = getelementptr %block, %block* %counterCell, i64 0, i32 1, i64 0
   %mpzPtrPtr = bitcast i64** %counterCellPointer to %mpz**
   %currCounter = load %mpz*, %mpz** %mpzPtrPtr
-  %nextCounter = call %mpz* @hook_INT_add(%mpz* %currCounter, %mpz* @exit_int_0)
+  %nextCounter = call %mpz* @hook_INT_add(%mpz* %currCounter, %mpz* @fresh_int_1)
   store %mpz* %nextCounter, %mpz** %mpzPtrPtr
-  %sortData = getelementptr %string, %string* %sort, i64 0, i32 1, i64 1
+  %sortData = call i8* @getTerminatedString(%string* %sort)
   %tag = call i32 @getTagForFreshSort(i8* %sortData)
   %args = alloca i8*
   %voidPtr = bitcast %mpz* %currCounter to i8*

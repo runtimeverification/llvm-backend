@@ -1,6 +1,6 @@
 package org.kframework.backend.llvm.matching
 
-import org.kframework.parser.kore.{Sort,SymbolOrAlias}
+import org.kframework.parser.kore.{Sort,CompoundSort,SymbolOrAlias}
 import org.kframework.parser.kore.implementation.{DefaultBuilders => B}
 import org.kframework.backend.llvm.matching.pattern._
 import org.kframework.backend.llvm.matching.dt._
@@ -420,8 +420,9 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
     })
     row.clause.action.freshConstants.foldRight(withOverloads)({
       case ((name, sort),dt) => 
-        val litO = Lit(sort.toString, "STRING.String")
-        MakePattern(litO, LiteralP(sort.toString, StringS()),
+        val sortName = sort.asInstanceOf[CompoundSort].ctr
+        val litO = Lit(sortName, "STRING.String")
+        MakePattern(litO, LiteralP(sortName, StringS()),
           Function("get_fresh_constant", Fresh(name), Seq(litO, Num(row.clause.action.arity, Base())), sortCat(sort).hookAtt, dt))
     })
   }
