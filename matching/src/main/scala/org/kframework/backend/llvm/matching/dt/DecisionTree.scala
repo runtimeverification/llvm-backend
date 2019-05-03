@@ -19,9 +19,9 @@ sealed trait DecisionTree {
   def representation: AnyRef
 }
 
-case class Failure private() extends DecisionTree {
+case class Failure private(private val failureId: Int) extends DecisionTree {
   val representation = "fail"
-  override def hashCode: Int = super.hashCode
+  override lazy val hashCode: Int = super.hashCode
   override def equals(that: Any): Boolean = that.isInstanceOf[AnyRef] && (this eq that.asInstanceOf[AnyRef])
 }
 
@@ -35,7 +35,7 @@ case class Leaf private(ordinal: Int, occurrences: Seq[Occurrence]) extends Deci
   for (occurrence <- occurrences) {
     os.add(occurrence.representation)
   }
-  override def hashCode: Int = super.hashCode
+  override lazy val hashCode: Int = super.hashCode
   override def equals(that: Any): Boolean = that.isInstanceOf[AnyRef] && (this eq that.asInstanceOf[AnyRef])
 }
 
@@ -51,7 +51,7 @@ case class Switch private(occurrence: Occurrence, cases: Seq[(String, DecisionTr
   }
   representation.put("default", default.map(_.representation).orNull)
   representation.put("occurrence", occurrence.representation)
-  override def hashCode: Int = super.hashCode
+  override lazy val hashCode: Int = super.hashCode
   override def equals(that: Any): Boolean = that.isInstanceOf[AnyRef] && (this eq that.asInstanceOf[AnyRef])
 }
 
@@ -68,7 +68,7 @@ case class SwitchLit private(occurrence: Occurrence, bitwidth: Int, cases: Seq[(
   representation.put("bitwidth", bitwidth.asInstanceOf[AnyRef])
   representation.put("default", default.map(_.representation).orNull)
   representation.put("occurrence", occurrence.representation)
-  override def hashCode: Int = super.hashCode
+  override lazy val hashCode: Int = super.hashCode
   override def equals(that: Any): Boolean = that.isInstanceOf[AnyRef] && (this eq that.asInstanceOf[AnyRef])
 }
 
@@ -83,7 +83,7 @@ case class Function private(name: String, occurrence: Occurrence, vars: Seq[Occu
     args.add(v.representation)
   }
   representation.put("next", child.representation)
-  override def hashCode: Int = super.hashCode
+  override lazy val hashCode: Int = super.hashCode
   override def equals(that: Any): Boolean = that.isInstanceOf[AnyRef] && (this eq that.asInstanceOf[AnyRef])
 }
 
@@ -100,7 +100,7 @@ case class CheckNull private(occurrence: Occurrence, cases: Seq[(String, Decisio
   representation.put("default", default.map(_.representation).orNull)
   representation.put("isnull", true.asInstanceOf[AnyRef])
   representation.put("occurrence", occurrence.representation)
-  override def hashCode: Int = super.hashCode
+  override lazy val hashCode: Int = super.hashCode
   override def equals(that: Any): Boolean = that.isInstanceOf[AnyRef] && (this eq that.asInstanceOf[AnyRef])
 }
 
@@ -114,33 +114,58 @@ case class MakePattern private(occurrence: Occurrence, pattern: Pattern[Option[O
     val result = new util.HashMap[String, AnyRef]()
     pattern match {
       case OrP(_) | WildcardP() | VariableP(None, _) => ???
-      case VariableP(Some(o), h) =>
+      case VariableP(Some(o), h) => {
         result.put("hook", h.hookAtt)
         result.put("occurrence", o.representation)
-      case AsP(_, _, p) => representPattern(p)
-      case MapP(_, _, _, _, o) => representPattern(o)
-      case SetP(_, _, _, o) => representPattern(o)
-      case ListP(_, _, _, _, o) => representPattern(o)
-      case LiteralP(s, h) =>
+      }
+      case AsP(_, _, p) => return representPattern(p)
+      case MapP(_, _, _, _, o) => return representPattern(o)
+      case SetP(_, _, _, o) => return representPattern(o)
+      case ListP(_, _, _, _, o) => return representPattern(o)
+      case LiteralP(s, h) => {
         result.put("hook", h.hookAtt)
         result.put("literal", s)
-      case SymbolP(s, ps) =>
+      }
+      case SymbolP(s, ps) => {
         result.put("constructor", s.toString)
         val args = new util.ArrayList[AnyRef]()
         result.put("args", args)
         for (p <- ps) {
           args.add(representPattern(p))
         }
+      }
     }
+    assert(!result.isEmpty())
     result
   }
-  override def hashCode: Int = super.hashCode
+  override lazy val hashCode: Int = super.hashCode
+  override def equals(that: Any): Boolean = that.isInstanceOf[AnyRef] && (this eq that.asInstanceOf[AnyRef])
+}
+
+case class MakeIterator private(hookName: String, occurrence: Occurrence, child: DecisionTree) extends DecisionTree {
+  val representation = new util.HashMap[String, AnyRef]()
+  representation.put("function", hookName)
+  representation.put("collection", occurrence.representation)
+  representation.put("next", child.representation)
+  override lazy val hashCode: Int = super.hashCode
+  override def equals(that: Any): Boolean = that.isInstanceOf[AnyRef] && (this eq that.asInstanceOf[AnyRef])
+}
+
+case class IterNext private(hookName: String, iterator: Occurrence, binding: Occurrence, child: DecisionTree) extends DecisionTree {
+  val representation = new util.HashMap[String, AnyRef]()
+  representation.put("function", hookName)
+  representation.put("iterator", iterator.representation)
+  representation.put("binding", binding.representation)
+  representation.put("next", child.representation)
+  override lazy val hashCode: Int = super.hashCode
   override def equals(that: Any): Boolean = that.isInstanceOf[AnyRef] && (this eq that.asInstanceOf[AnyRef])
 }
 
 object Failure {
-  private val instance = new Failure()
-  def apply(): Failure = instance
+  private val cache = new ConcurrentHashMap[Int, Failure]()
+  def apply(failureId: Int): Failure = {
+    cache.computeIfAbsent(failureId, k => new Failure(k))
+  }
 }
 
 object Leaf {
@@ -182,5 +207,19 @@ object MakePattern {
   val cache = new ConcurrentHashMap[(Occurrence, Pattern[Option[Occurrence]], DecisionTree), MakePattern]()
   def apply(occurrence: Occurrence, pattern: Pattern[Option[Occurrence]], child: DecisionTree): MakePattern = {
     cache.computeIfAbsent((occurrence, pattern, child), k => new MakePattern(k._1, k._2, k._3))
+  }
+}
+
+object MakeIterator {
+  val cache = new ConcurrentHashMap[(String, Occurrence, DecisionTree), MakeIterator]()
+  def apply(function: String, occurrence: Occurrence, child: DecisionTree): MakeIterator = {
+    cache.computeIfAbsent((function, occurrence, child), k => new MakeIterator(k._1, k._2, k._3))
+  }
+}
+
+object IterNext {
+  val cache = new ConcurrentHashMap[(String, Occurrence, Occurrence, DecisionTree), IterNext]()
+  def apply(function: String, iterator: Occurrence, binding: Occurrence, child: DecisionTree): IterNext = {
+    cache.computeIfAbsent((function, iterator, binding, child), k => new IterNext(k._1, k._2, k._3, k._4))
   }
 }

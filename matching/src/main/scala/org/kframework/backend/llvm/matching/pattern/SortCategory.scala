@@ -53,7 +53,7 @@ abstract class EqualLiteral() extends SortCategory {
       Switch(litO, Seq(), Some(matrix.default.get.compile))
     } else if (ls.isEmpty) {
       // if no specializations remain and no default exists, fail the match
-      Failure()
+      Failure(matrix.failureId)
     } else {
       // consume each specialization one at a time and try to match it
       // if it succeseds, consume the occurrence and continue with the specialized matrix
@@ -132,6 +132,15 @@ case class MapS() extends SortCategory {
     if (matrix.sigma.contains(Empty())) {
       Function("hook_MAP_size_long", newO, Seq(mapO), "MINT.MInt 64",
         SwitchLit(newO, 64, matrix.compiledCases, matrix.compiledDefault))
+    } else if (matrix.bestCol.isChoice) {
+      val m = matrix.compiledCases.toMap
+      MakeIterator("map_iterator", mapO,
+        IterNext("map_iterator_next", mapO, Choice(mapO),
+          CheckNull(Choice(mapO), Seq(("0", m("0")), ("1", 
+            Function("hook_MAP_lookup", ChoiceValue(mapO), Seq(mapO, Choice(mapO)), "STRING.String",
+              Function("hook_MAP_remove", ChoiceRem(mapO), Seq(mapO, Choice(mapO)), "MAP.Map",
+                m("1"))))), None)))
+
     } else {
       // otherwise, get the best key and test whether the best key is in the map or not
       val key = matrix.bestCol.bestKey
@@ -159,6 +168,13 @@ case class SetS() extends SortCategory {
     if (matrix.sigma.contains(Empty())) {
       Function("hook_SET_size_long", newO, Seq(setO), "MINT.MInt 64",
         SwitchLit(newO, 64, matrix.compiledCases, matrix.compiledDefault))
+    } else if (matrix.bestCol.isChoice) {
+      val m = matrix.compiledCases.toMap
+      MakeIterator("set_iterator", setO,
+        IterNext("set_iterator_next", setO, Choice(setO),
+          CheckNull(Choice(setO), Seq(("0", m("0")), ("1", 
+            Function("hook_SET_remove", ChoiceRem(setO), Seq(setO, Choice(setO)), "SET.Set",
+              m("1")))), None)))
     } else {
       // otherwise, get the best element and test whether the best element is in the set or not
       val key = matrix.bestCol.bestKey

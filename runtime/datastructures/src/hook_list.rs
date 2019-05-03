@@ -25,7 +25,7 @@ pub unsafe extern "C" fn hook_LIST_unit() -> List {
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_LIST_element(value: K) -> List {
-  List::singleton(KElem::new(value))
+  List::unit(KElem::new(value))
 }
 
 #[no_mangle]

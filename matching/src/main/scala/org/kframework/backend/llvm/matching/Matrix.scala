@@ -18,8 +18,12 @@ class Column(val fringe: Fringe, val patterns: IndexedSeq[Pattern[String]], val 
   }
 
   lazy val score: Double = computeScore
-  
+
   def computeScore: Double = {
+    computeScoreForKey(bestKey)
+  }
+
+  def computeScoreForKey(key: Option[Pattern[Option[Occurrence]]]): Double = {
     if (isWildcard) {
       Double.PositiveInfinity
     } else {
@@ -27,7 +31,7 @@ class Column(val fringe: Fringe, val patterns: IndexedSeq[Pattern[String]], val 
       for (i <- patterns.indices) {
         if (clauses(i).action.priority != clauses.head.action.priority)
           return result
-        result += patterns(i).score(fringe, clauses(i), bestKey)
+        result += patterns(i).score(fringe, clauses(i), key)
         if (result == Double.NegativeInfinity) {
           return result
         }
@@ -47,12 +51,16 @@ class Column(val fringe: Fringe, val patterns: IndexedSeq[Pattern[String]], val 
     }
   }
 
+  private lazy val rawSignature: Seq[Constructor] = {
+    patterns.zipWithIndex.flatMap(p => p._1.signature(clauses(p._2)))
+  }
+
   lazy val signature: List[Constructor] = {
-    val used = patterns.zipWithIndex.flatMap(p => p._1.signature(clauses(p._2)))
     val bestUsed = bestKey match {
-      case None => used
-      case Some(k) => used.filter(_.isBest(k))
+      case None => rawSignature
+      case Some(k) => rawSignature.filter(_.isBest(k))
     }
+    assert(bestUsed.nonEmpty)
     val usedInjs = bestUsed.flatMap(fringe.injections)
     val dups = if (fringe.isExact) bestUsed else bestUsed ++ usedInjs
     val nodups = dups.distinct.toList
@@ -63,25 +71,33 @@ class Column(val fringe: Fringe, val patterns: IndexedSeq[Pattern[String]], val 
     }
   }
 
+  def isChoice: Boolean = fringe.sortInfo.isCollection && bestKey == None
+
   def maxListSize: (Int, Int) = {
     val listPs = patterns.filter(_.isInstanceOf[ListP[String]]).map(_.asInstanceOf[ListP[String]])
-    val longestHead = listPs.map(_.head.size).max
-    val longestTail = listPs.map(_.tail.size).max
-    (longestHead, longestTail)
+    if (listPs.isEmpty) {
+      (0, 0)
+    } else {
+      val longestHead = listPs.map(_.head.size).max
+      val longestTail = listPs.map(_.tail.size).max
+      (longestHead, longestTail)
+    }
   }
 
   lazy val bestKey: Option[Pattern[Option[Occurrence]]] = {
-    if (!fringe.sortInfo.isCollection) None
-    else {
-      def go: Option[Pattern[Option[Occurrence]]] = {
-        for ((pat, clause, i) <- (patterns, clauses, clauses.indices).zipped) {
-          if (!pat.isWildcard) {
-            return pat.bestKey(fringe, clause, patterns.drop(i), clauses.drop(i))
-          }
-        }
+    val possibleKeys = rawSignature.flatMap({
+      case HasKey(_, _, Some(k)) => Seq(k)
+      case _ => Seq()
+    })
+    if (possibleKeys.isEmpty) {
+      None
+    } else {
+      val rawBestKey = possibleKeys.map(k => (k, computeScoreForKey(Some(k)))).maxBy(_._2)
+      if (rawBestKey._2 == Double.NegativeInfinity) {
         None
+      } else {
+        Some(rawBestKey._1)
       }
-      go
     }
   }
 
@@ -103,13 +119,15 @@ class Column(val fringe: Fringe, val patterns: IndexedSeq[Pattern[String]], val 
     case _ => false
   }
 
-  override def hashCode(): Int = {
-    val state = Seq(fringe, patterns)
+  override lazy val hashCode: Int = {
+    val state = Seq(patterns)
     state.map(_.hashCode()).foldLeft(0)((a, b) => 31 * a + b)
   }
 }
 
-case class VariableBinding[T](val name: T, val category: SortCategory, val occurrence: Occurrence) {}
+case class VariableBinding[T](val name: T, val category: SortCategory, val occurrence: Occurrence) {
+  override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
+}
 
 case class Fringe(val symlib: Parser.SymLib, val sort: Sort, val occurrence: Occurrence, val isExact: Boolean) {
   val sortInfo = SortInfo(sort, symlib)
@@ -143,6 +161,7 @@ case class Fringe(val symlib: Parser.SymLib, val sort: Sort, val occurrence: Occ
   }
 
   override def toString: String = new util.Formatter().format("%12.12s", sort.toString).toString
+  override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
 }
 
 class SortInfo private(sort: Sort, symlib: Parser.SymLib) {
@@ -168,19 +187,21 @@ object SortInfo {
   }
 }
 
-case class Action(val ordinal: Int, val rhsVars: Seq[String], val scVars: Option[Seq[String]], val priority: Int) {}
+case class Action(val ordinal: Int, val rhsVars: Seq[String], val scVars: Option[Seq[String]], val priority: Int) {
+  override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
+}
 
 case class Clause(
   // the rule to be applied if this row succeeds
   val action: Action,
   // the variable bindings made so far while matching this row
-  val bindings: Seq[VariableBinding[String]],
+  val bindings: Vector[VariableBinding[String]],
   // the length of the head and tail of any list patterns
   // with frame variables bound so far in this row
-  val listRanges: Seq[(Occurrence, Int, Int)],
+  val listRanges: Vector[(Occurrence, Int, Int)],
   // variable bindings to injections that need to be constructed
   // since they do not actually exist in the original subject term
-  val overloadChildren: Seq[(Constructor, VariableBinding[String])]) {
+  val overloadChildren: Vector[(Constructor, VariableBinding[String])]) {
 
   lazy val bindingsMap: Map[String, VariableBinding[String]] = bindings.groupBy(_.name).mapValues(_.head)
   lazy val boundOccurrences: Set[Occurrence] = bindings.map(_.occurrence).toSet
@@ -207,7 +228,8 @@ case class Clause(
     new Clause(action, bindings ++ pat.bindings(ix, f.occurrence), listRanges ++ pat.listRange(ix, f.occurrence), overloadChildren ++ pat.overloadChildren(f, ix, Num(0, f.occurrence)))
   }
 
-  override def toString: String = action.ordinal.toString
+  override def toString: String = action.ordinal.toString + "(" + action.priority.toString + ")"
+  override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
 }
 
 case class Row(val patterns: IndexedSeq[Pattern[String]], val clause: Clause) {
@@ -220,9 +242,10 @@ case class Row(val patterns: IndexedSeq[Pattern[String]], val clause: Clause) {
   }
 
   override def toString: String = patterns.map(p => new util.Formatter().format("%12.12s", p.toShortString)).mkString(" ") + " " + clause.toString
+  override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
 }
 
-class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedSeq[Column], private val rawRows: IndexedSeq[Row], private val rawClauses: IndexedSeq[Clause], private val rawFringe: IndexedSeq[Fringe]) {
+class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedSeq[Column], private val rawRows: IndexedSeq[Row], private val rawClauses: IndexedSeq[Clause], private val rawFringe: IndexedSeq[Fringe], val failureId: Int) {
   lazy val clauses: IndexedSeq[Clause] = {
     if (rawClauses != null) {
       rawClauses
@@ -270,7 +293,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
   }
 
   def this(symlib: Parser.SymLib, cols: IndexedSeq[(Sort, IndexedSeq[Pattern[String]])], actions: IndexedSeq[Action]) {
-    this(symlib, (cols, (1 to cols.size).map(i => new Fringe(symlib, cols(i - 1)._1, Num(i, Base()), false))).zipped.toIndexedSeq.map(pair => new Column(pair._2, pair._1._2, actions.map(new Clause(_, Seq(), Seq(), Seq())))), null, actions.map(new Clause(_, Seq(), Seq(), Seq())), null)
+    this(symlib, (cols, (1 to cols.size).map(i => new Fringe(symlib, cols(i - 1)._1, Num(i, Base()), false))).zipped.toIndexedSeq.map(pair => new Column(pair._2, pair._1._2, actions.map(new Clause(_, Vector(), Vector(), Vector())))), null, actions.map(new Clause(_, Vector(), Vector(), Vector())), null, 0)
   }
 
   // compute the column with the best score, choosing the first such column if they are equal
@@ -292,8 +315,8 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
   lazy val sigma: List[Constructor] = bestCol.signature
 
   def specialize(ix: Constructor): (String, Matrix) = {
-    val filtered = expand(bestColIx).filterMatrix(Some(ix), (c, p) => p.isSpecialized(ix, bestCol.fringe, c))
-    val expanded = Matrix.fromColumns(symlib, filtered.columns(bestColIx).expand(ix) ++ filtered.notBestCol(bestColIx), filtered.clauses)
+    val filtered = filterMatrix(Some(ix), (c, p) => p.isSpecialized(ix, bestCol.fringe, c))
+    val expanded = Matrix.fromColumns(symlib, filtered.columns(bestColIx).expand(ix) ++ filtered.notBestCol(bestColIx), filtered.clauses, nextFailureId)
     (ix.name, expanded)
   }
 
@@ -308,7 +331,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
 
   def filterMatrix(ix: Option[Constructor], checkPattern: (Clause, Pattern[String]) => Boolean): Matrix = {
     val newRows = rows.filter(row => checkPattern(row.clause, row.patterns(bestColIx))).map(row => new Row(row.patterns, row.clause.addVars(ix, row.patterns(bestColIx), fringe(bestColIx))))
-    Matrix.fromRows(symlib, newRows, fringe)
+    Matrix.fromRows(symlib, newRows, fringe, failureId)
   }
 
   lazy val default: Option[Matrix] = {
@@ -324,19 +347,28 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
           }
         }
       }
-      val filtered = expand(bestColIx).filterMatrix(defaultConstructor, (_, p) => p.isDefault)
+      val filtered = filterMatrix(defaultConstructor, (_, p) => p.isDefault)
       val expanded = if (defaultConstructor.isDefined) {
         if (bestCol.category.isExpandDefault) {
-          Matrix.fromColumns(symlib, filtered.columns(bestColIx).expand(defaultConstructor.get) ++ filtered.notBestCol(bestColIx), filtered.clauses)
+          Matrix.fromColumns(symlib, filtered.columns(bestColIx).expand(defaultConstructor.get) ++ filtered.notBestCol(bestColIx), filtered.clauses, nextFailureId)
         } else {
-          Matrix.fromColumns(symlib, filtered.notBestCol(bestColIx), filtered.clauses)
+          Matrix.fromColumns(symlib, filtered.notBestCol(bestColIx), filtered.clauses, nextFailureId)
         }
       } else {
-        Matrix.fromColumns(symlib, filtered.notBestCol(bestColIx), filtered.clauses)
+        Matrix.fromColumns(symlib, filtered.notBestCol(bestColIx), filtered.clauses, nextFailureId)
       }
       Some(expanded)
     } else {
       None
+    }
+  }
+
+  def nextFailureId: Int = {
+    if (bestCol.isChoice) {
+      Matrix.nextFailureId += 1
+      Matrix.nextFailureId
+    } else {
+      failureId
     }
   }
 
@@ -357,27 +389,19 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
     val overloadVars = row.clause.overloadChildren.map(_._2)
     val allVars = vars ++ overloadVars
     // then group the bound variables by their name
-    val grouped = allVars.groupBy(v => (v.name, v.category)).mapValues(_.map(_.occurrence))
+    val grouped = allVars.groupBy(v => v.name).mapValues(_.map(v => (v.category, v.occurrence)))
     // compute the variables bound more than once
     val nonlinear = grouped.filter(_._2.size > 1)
     val nonlinearPairs = nonlinear.mapValues(l => (l, l.tail).zipped)
-    // get some random occurrence bound for each variable in the map
-    val deduped = grouped.toSeq.map(e => (e._1._1, e._2.head))
-    // sort alphabetically by variable name
-    val sorted = deduped.sortWith(_._1 < _._1)
-    // filter by the variables used in the rhs
-    val filtered = sorted.filter(v => row.clause.action.rhsVars.contains(v._1))
-    val newVars = filtered.map(_._2)
+    val newVars = row.clause.action.rhsVars.map(v => grouped(v).head._2)
     val atomicLeaf = Leaf(row.clause.action.ordinal, newVars)
     // check that all occurrences of the same variable are equal
-    val nonlinearLeaf = nonlinearPairs.foldRight[DecisionTree](atomicLeaf)((e, dt) => e._2.foldRight(dt)((os,dt2) => makeEquality(e._1._2, os, dt2)))
+    val nonlinearLeaf = nonlinearPairs.foldRight[DecisionTree](atomicLeaf)((e, dt) => e._2.foldRight(dt)((os,dt2) => makeEquality(os._1._1, (os._1._2, os._2._2), dt2)))
     val sc = row.clause.action.scVars match {
       // if there is no side condition, continue
       case None => nonlinearLeaf
       case Some(cond) =>
-        // filter by the variables used in the side condition
-        val condFiltered = sorted.filter(t => cond.contains(t._1))
-        val condVars = condFiltered.map(_._2)
+        val condVars = cond.map(v => grouped(v).head._2)
         val newO = SC(row.clause.action.ordinal)
         // evaluate the side condition and if it is true, continue, otherwise go to the next row
         Function("side_condition_" + row.clause.action.ordinal, newO, condVars, "BOOL.Bool",
@@ -392,11 +416,11 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
     })
   }
 
-  def expand(colIx: Int): Matrix = {
+  def expand: Matrix = {
     if (fringe.isEmpty) {
-      new Matrix(symlib, rawColumns, rawRows, rawClauses, rawFringe)
+      new Matrix(symlib, rawColumns, rawRows, rawClauses, rawFringe, failureId)
     } else {
-      Matrix.fromRows(symlib, rows.flatMap(_.expand(colIx)), fringe)
+      fringe.indices.foldLeft(this)((accum, colIx) => Matrix.fromRows(symlib, accum.rows.flatMap(_.expand(colIx)), fringe, failureId))
     }
   }
 
@@ -423,14 +447,14 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
       System.out.println("remaining: " + Matrix.remaining)
     }
     if (clauses.isEmpty)
-      Failure()
+      Failure(failureId)
     else {
       bestRowIx match {
         case -1 => 
           if (bestCol.score.isPosInfinity) {
             // decompose this column as it contains only wildcards
             val newClauses = (bestCol.clauses, bestCol.patterns).zipped.toIndexedSeq.map(t => t._1.addVars(None, t._2, bestCol.fringe))
-            Matrix.fromColumns(symlib, notBestCol(bestColIx).map(c => new Column(c.fringe, c.patterns, newClauses)), newClauses).compile
+            Matrix.fromColumns(symlib, notBestCol(bestColIx).map(c => new Column(c.fringe, c.patterns, newClauses)), newClauses, failureId).compile
           } else {
             // compute the sort category of the best column
             bestCol.category.tree(this)
@@ -444,7 +468,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
   }
 
   def notBestRow: Matrix = {
-    Matrix.fromRows(symlib, rows.patch(bestRowIx, Nil, 1), fringe)
+    Matrix.fromRows(symlib, rows.patch(bestRowIx, Nil, 1), fringe, failureId)
   }
 
   def notBestCol(colIx: Int): IndexedSeq[Column] = {
@@ -459,26 +483,28 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
     case that: Matrix =>
       (that canEqual this) &&
         symlib == that.symlib &&
-        columns == that.columns &&
-        rows == that.rows
+        fringe == that.fringe &&
+        rows == that.rows &&
+        failureId == that.failureId
     case _ => false
   }
 
-  override def hashCode(): Int = {
-    val state = Seq(symlib, columns, rows)
+  override lazy val hashCode: Int = {
+    val state = Seq(symlib, rows, failureId)
     state.map(_.hashCode()).foldLeft(0)((a, b) => 31 * a + b)
   }
 }
 
 object Matrix {
   var remaining = 0
+  var nextFailureId = 0
 
-  def fromRows(symlib: Parser.SymLib, rows: IndexedSeq[Row], fringe: IndexedSeq[Fringe]): Matrix = {
-    new Matrix(symlib, null, rows, null, fringe)
+  def fromRows(symlib: Parser.SymLib, rows: IndexedSeq[Row], fringe: IndexedSeq[Fringe], failureId: Int): Matrix = {
+    new Matrix(symlib, null, rows, null, fringe, failureId)
   }
 
-  def fromColumns(symlib: Parser.SymLib, cols: IndexedSeq[Column], clauses: IndexedSeq[Clause]): Matrix = {
-    new Matrix(symlib, cols, null, clauses, null)
+  def fromColumns(symlib: Parser.SymLib, cols: IndexedSeq[Column], clauses: IndexedSeq[Clause], failureId: Int): Matrix = {
+    new Matrix(symlib, cols, null, clauses, null, failureId)
   }
 
   private val cache = new ConcurrentHashMap[Matrix, DecisionTree]()
