@@ -52,13 +52,8 @@ object Generator {
 
   private def genPatterns(mod: Definition, symlib: Parser.SymLib, rewrite: GeneralizedRewrite) : List[P[String]] = {
     val lhs = rewrite.getLeftHandSide
-    def getSym(hookAtt: String, syms: Seq[SymbolOrAlias]): SymbolOrAlias = {
-      syms.filter(isHook(hookAtt, _)).head
-    }
-    def isHook(hookAttStr: String, sym: SymbolOrAlias): Boolean = {
-      val att = symlib.signatures(sym)._3
-      val hookAtt = Parser.getStringAtt(att, "hook")
-      hookAtt.contains(hookAttStr)
+    def getElementSym(sort: Sort): SymbolOrAlias = {
+      Parser.getSymbolAtt(symlib.sortAtt(sort), "element").get
     }
     def genPattern(pat: Pattern) : P[String] = {
       pat match {
@@ -67,15 +62,15 @@ object Generator {
           val hookAtt = Parser.getStringAtt(att, "hook")
           val sort = symlib.signatures(sym)._2
           hookAtt match {
-            case Some("LIST.concat") => listPattern(sym, Concat(), ps.map(genPattern), getSym("LIST.element", symlib.symbolsForSort(sort)))
-            case Some("LIST.unit") => listPattern(sym, Unit(), Seq(), getSym("LIST.element", symlib.symbolsForSort(sort)))
-            case Some("LIST.element") => listPattern(sym, Element(), ps.map(genPattern), getSym("LIST.element", symlib.symbolsForSort(sort)))
-            case Some("MAP.concat") => mapPattern(sym, Concat(), ps.map(genPattern), getSym("MAP.element", symlib.symbolsForSort(sort)))
-            case Some("MAP.unit") => mapPattern(sym, Unit(), Seq(), getSym("MAP.element", symlib.symbolsForSort(sort)))
-            case Some("MAP.element") => mapPattern(sym, Element(), ps.map(genPattern), getSym("MAP.element", symlib.symbolsForSort(sort)))
-            case Some("SET.concat") => setPattern(sym, Concat(), ps.map(genPattern), getSym("SET.element", symlib.symbolsForSort(sort)))
-            case Some("SET.unit") => setPattern(sym, Unit(), Seq(), getSym("SET.element", symlib.symbolsForSort(sort)))
-            case Some("SET.element") => setPattern(sym, Element(), ps.map(genPattern), getSym("SET.element", symlib.symbolsForSort(sort)))
+            case Some("LIST.concat") => listPattern(sym, Concat(), ps.map(genPattern), getElementSym(sort))
+            case Some("LIST.unit") => listPattern(sym, Unit(), Seq(), getElementSym(sort))
+            case Some("LIST.element") => listPattern(sym, Element(), ps.map(genPattern), getElementSym(sort))
+            case Some("MAP.concat") => mapPattern(sym, Concat(), ps.map(genPattern), getElementSym(sort))
+            case Some("MAP.unit") => mapPattern(sym, Unit(), Seq(), getElementSym(sort))
+            case Some("MAP.element") => mapPattern(sym, Element(), ps.map(genPattern), getElementSym(sort))
+            case Some("SET.concat") => setPattern(sym, Concat(), ps.map(genPattern), getElementSym(sort))
+            case Some("SET.unit") => setPattern(sym, Unit(), Seq(), getElementSym(sort))
+            case Some("SET.element") => setPattern(sym, Element(), ps.map(genPattern), getElementSym(sort))
             case _ => SymbolP(sym, ps.map(genPattern))
           }
         case DomainValue(sort, str) =>
@@ -127,10 +122,10 @@ object Generator {
       axioms: IndexedSeq[AxiomInfo],
       sorts: Seq[Sort]) :
       Matrix = {
-    val actions = axioms.map(a => new Action(a.ordinal, genVars(a.rewrite.getRightHandSide), a.sideCondition.map(genVars), a.priority))
+    val actions = axioms.map(a => new Action(a.ordinal, genVars(a.rewrite.getRightHandSide).sorted.distinct, a.sideCondition.map(genVars(_).sorted.distinct), a.priority))
     val patterns = axioms.map(a => genPatterns(mod, symlib, a.rewrite)).transpose
     val cols = (sorts, patterns).zipped.toIndexedSeq
-    new Matrix(symlib, cols, actions)
+    new Matrix(symlib, cols, actions).expand
   }
     
   

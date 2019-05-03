@@ -5,6 +5,8 @@ use std::cell::UnsafeCell;
 use std::hash::{Hash,Hasher};
 use decls::im_rc::hashmap::HashMap;
 use decls::im_rc::hashset::HashSet;
+use decls::im_rc::hashset;
+use decls::im_rc::hashmap;
 use decls::im_rc::vector::Vector;
 use self::libc::{FILE,c_char,c_void};
 use std::alloc::{GlobalAlloc, Layout};
@@ -92,6 +94,8 @@ pub unsafe extern "C" fn add_hash64(h: *mut c_void, data: u64) {
 pub type Map = HashMap<KElem, KElem>;
 pub type Set = HashSet<KElem>;
 pub type List = Vector<KElem>;
+pub type SetIter = hashset::Iter<'static, KElem>;
+pub type MapIter = hashmap::Iter<'static, KElem, KElem>;
 
 #[link(name="gmp")]
 extern "C" {
