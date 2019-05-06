@@ -280,12 +280,14 @@ static void emitGetTagForFreshSort(KOREDefinition *definition, llvm::Module *mod
       llvm::Type::getInt8PtrTy(Ctx));
   llvm::Constant *zero = llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0);
   llvm::Constant *zero32 = llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), 0);
+  bool hasCase = false;
   for (auto iter = sorts.begin(); iter != sorts.end(); ++iter) {
     auto &entry = *iter;
     std::string name = entry.first;
     if (!definition->getFreshFunctions().count(name)) {
       continue;
     }
+    hasCase = true;
     CurrentBlock->insertInto(func);
     CurrentBlock->setName("is_" + name);
     auto Str = llvm::ConstantDataArray::getString(Ctx, name, true);
@@ -311,8 +313,10 @@ static void emitGetTagForFreshSort(KOREDefinition *definition, llvm::Module *mod
   }
   CurrentBlock->insertInto(func);
   addAbort(CurrentBlock, module);
-  llvm::ReturnInst::Create(Ctx, Phi, MergeBlock);
-  MergeBlock->insertInto(func);
+  if (hasCase) {
+    llvm::ReturnInst::Create(Ctx, Phi, MergeBlock);
+    MergeBlock->insertInto(func);
+  }
 }
 
 
