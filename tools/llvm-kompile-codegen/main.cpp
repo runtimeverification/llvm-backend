@@ -11,6 +11,7 @@
 #include "llvm/Support/raw_ostream.h"
 
 #include <libgen.h>
+#include <yaml-cpp/yaml.h>
 
 using namespace kllvm;
 using namespace kllvm::parser;
@@ -42,9 +43,11 @@ int main (int argc, char **argv) {
   auto dt = parseYamlDecisionTree(argv[2], definition->getAllSymbols(), definition->getHookedSorts());
   makeStepFunction(definition, mod.get(), dt);
 
-  for (auto &entry : definition->getSymbolDeclarations()) {
-    auto decl = entry.second;
+  for (auto &entry : definition->getSymbols()) {
+    auto symbol = entry.second;
+    auto decl = definition->getSymbolDeclarations().at(symbol->getName());
     std::string filename = argv[3] + std::string("/") + decl->getSymbol()->getName() + ".yaml";
+    try {
     if ((decl->getAttributes().count("function") && !decl->isHooked())) {
       auto funcDt = parseYamlDecisionTree(filename, definition->getAllSymbols(), definition->getHookedSorts());
       makeEvalFunction(decl->getSymbol(), definition, mod.get(), funcDt);
@@ -53,6 +56,10 @@ int main (int argc, char **argv) {
       std::ostringstream Out;
       decl->getSymbol()->print(Out);
       makeAnywhereFunction(definition->getAllSymbols().at(Out.str()), definition, mod.get(), funcDt);
+    }
+    } catch (YAML::BadFile f) {
+      std::cerr << filename << std::endl;
+      throw;
     }
   }
 
