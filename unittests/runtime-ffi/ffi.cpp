@@ -99,6 +99,10 @@ BOOST_AUTO_TEST_CASE(address) {
   fn = makeString("increaseX");
   addr = hook_FFI_address(fn);
   BOOST_CHECK(0 < mpz_cmp_ui(addr, 0));
+
+  fn = makeString("fakeFunction");
+  addr = hook_FFI_address(fn);
+  BOOST_CHECK_EQUAL(0, mpz_cmp_ui(addr, 0));
 }
 
 BOOST_AUTO_TEST_CASE(call) {
