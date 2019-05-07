@@ -161,7 +161,7 @@ extern "C" {
     return retBlock;
   }
 
-  static char * getTerminatedString(string * str) {
+  char * getTerminatedString(string * str) {
     int length = len(str);
     string * buf = static_cast<string *>(koreAllocToken(sizeof(string) + (length + 1)));
     memcpy(buf->data, str->data, length);
