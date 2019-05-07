@@ -200,6 +200,8 @@ void SwitchNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitutio
     } else if (CurrentFailureBlock == d->ChoiceBlock) {
       d->ChoiceNode->sharedNode(d, oldSubst, substitution, switchBlock);
     }
+  } else if (CurrentFailureBlock == d->ChoiceBlock) {
+    d->ChoiceNode->sharedNode(d, oldSubst, substitution, switchBlock);
   }
   setCompleted();
 }
