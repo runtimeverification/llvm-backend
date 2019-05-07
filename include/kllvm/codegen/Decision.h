@@ -24,7 +24,7 @@ public:
   virtual void collectDefs(void) = 0;
   virtual void collectFail(void) = 0;
   std::set<std::string> collectVars(void);
-  void sharedNode(Decision *d, llvm::StringMap<llvm::Value *> &substitution, llvm::BasicBlock *Block);
+  void sharedNode(Decision *d, llvm::StringMap<llvm::Value *> &oldSubst, llvm::StringMap<llvm::Value *> &substitution, llvm::BasicBlock *Block);
   bool beginNode(Decision *d, std::string name, llvm::StringMap<llvm::Value *> &substitution);
 
   void setCompleted() { completed = true; }
