@@ -2,7 +2,6 @@
 #include "kllvm/codegen/CreateTerm.h"
 
 #include "llvm/IR/Constants.h"
-#include "llvm/IR/CFG.h"
 #include "llvm/IR/Instructions.h" 
 #include "llvm/Support/raw_ostream.h"
 
@@ -50,11 +49,7 @@ void DecisionNode::sharedNode(Decision *d, llvm::StringMap<llvm::Value *> &subst
       }
       abort();
     }
-    for (llvm::BasicBlock *pred : predecessors(Phi->getParent())) {
-      if (pred == Block) {
-        Phi->addIncoming(substitution[var], Block);
-      }
-    }
+    Phi->addIncoming(substitution[var], Block);
     substitution[var] = phis.lookup(var);
   }
 }
