@@ -115,9 +115,14 @@ public:
   }
   virtual void collectFail() {
     if(hasContainsFail) return;
+    bool hasDefault = false;
     for (auto _case : cases) {
       _case.getChild()->collectFail();
       containsFailNode = containsFailNode || _case.getChild()->containsFailNode;
+      hasDefault = hasDefault || _case.getConstructor() == nullptr;
+    }
+    if (!hasDefault) {
+      containsFailNode = true;
     }
     hasContainsFail = true;
   }
