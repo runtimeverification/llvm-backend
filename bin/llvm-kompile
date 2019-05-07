@@ -2,20 +2,18 @@
 set -e
 
 if [ $# -lt 3 ]; then
-  echo "Usage: $0 <definition.kore> <MODULE-NAME> [main|library] <clang flags>"
+  echo "Usage: $0 <definition.kore> <dt_dir> [main|library] <clang flags>"
   echo '"main" means that a main function will be generated that matches the signature "interpreter <input.kore> <depth> <output.kore>"'
   echo '"library" means that no main function is generated and must be passed via <clang flags>'
   exit 1
 fi
-dt_dir="$(mktemp -d)"
 mod="$(mktemp tmp.XXXXXXXXXX.ll)"
 modopt="$(mktemp tmp.XXXXXXXXXX.bc)"
 trap "rm -rf $dt_dir $mod $modopt" INT TERM EXIT
 definition="$1"
-moduleName="$2"
+dt_dir="$2"
 main="$3"
 shift; shift; shift
-"$(dirname "$0")"/llvm-kompile-matching "$definition" "$moduleName" "$dt_dir"
 "$(dirname "$0")"/llvm-kompile-codegen "$definition" "$dt_dir"/dt.yaml "$dt_dir" > "$mod"
 @OPT@ -tailcallelim -tailcallopt "$mod" -o "$modopt"
 if [[ "$OSTYPE" == "darwin"* ]]; then

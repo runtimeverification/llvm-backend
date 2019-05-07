@@ -1,6 +1,6 @@
 extern crate libc;
 
-use super::decls::{Set,List,Int,K,KElem,__gmpz_init_set_ui,move_int,printConfigurationInternal};
+use super::decls::{Set,SetIter,List,Int,K,KElem,__gmpz_init_set_ui,move_int,printConfigurationInternal};
 use std::iter::FromIterator;
 use std::hash::Hash;
 use std::collections::hash_map::DefaultHasher;
@@ -20,6 +20,19 @@ pub unsafe extern "C" fn drop_set(ptr: *mut Set) {
 }
 
 #[no_mangle]
+pub unsafe extern "C" fn set_iterator(set: *const Set) -> SetIter {
+  (*set).iter()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn set_iterator_next(iter: *mut SetIter) -> K {
+  match (*iter).next() {
+    Some(KElem(elem)) => { *elem.get() }
+    None => ptr::null()
+  }
+}
+
+#[no_mangle]
 pub unsafe extern "C" fn hook_SET_in(value: K, set: *const Set) -> bool {
   (*set).contains(&KElem::new(value))
 }
@@ -31,7 +44,7 @@ pub unsafe extern "C" fn hook_SET_unit() -> Set {
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_SET_element(value: K) -> Set {
-  Set::singleton(KElem::new(value))
+  Set::unit(KElem::new(value))
 }
 
 #[no_mangle]

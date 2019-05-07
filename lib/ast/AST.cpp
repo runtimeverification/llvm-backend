@@ -314,7 +314,13 @@ KOREPattern *KOREAxiomDeclaration::getRightHandSide() const {
               }
             }
           }
-        }
+        } else if (andPattern->getConstructor()->getName() == "\\rewrites" && andPattern->getArguments().size() == 2) {
+          if (auto andPattern2 = dynamic_cast<KOREObjectCompositePattern *>(andPattern->getArguments()[1])) {
+            if (andPattern2->getConstructor()->getName() == "\\and" && andPattern2->getArguments().size() == 2) {
+              return andPattern2->getArguments()[1];
+            }
+          }
+	}
       }
     } else if (top->getConstructor()->getName() == "\\and" && top->getArguments().size() == 2) {
       if (auto andPattern = dynamic_cast<KOREObjectCompositePattern *>(top->getArguments()[1])) {

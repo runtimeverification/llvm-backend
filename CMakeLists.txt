@@ -1,11 +1,15 @@
 cmake_minimum_required (VERSION 3.4)
 
+find_program(CMAKE_C_COMPILER clang-8.0)
 find_program(CMAKE_C_COMPILER clang-6.0)
 find_program(CMAKE_C_COMPILER clang)
+find_program(CMAKE_CXX_COMPILER clang++-8.0)
 find_program(CMAKE_CXX_COMPILER clang++-6.0)
 find_program(CMAKE_CXX_COMPILER clang++)
+find_program(CMAKE_C_COMPILER_AR llvm-ar-8.0)
 find_program(CMAKE_C_COMPILER_AR llvm-ar-6.0)
 find_program(CMAKE_C_COMPILER_AR llvm-ar)
+find_program(CMAKE_C_COMPILER_RANLIB llvm-ranlib-8.0)
 find_program(CMAKE_C_COMPILER_RANLIB llvm-ranlib-6.0)
 find_program(CMAKE_C_COMPILER_RANLIB llvm-ranlib)
 project (KLLVM CXX C)
@@ -17,8 +21,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 add_definitions(-Wall -Werror)
 set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -flto")
+set(CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO} -flto -fno-omit-frame-pointer")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -flto")
+set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO} -flto -fno-omit-frame-pointer")
 set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} -flto")
+set(CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO "${CMAKE_EXE_LINKER_FLAGS_RELEASE} -flto")
 
 set(CMAKE_AR "${CMAKE_C_COMPILER_AR}")
 set(CMAKE_RANLIB "${CMAKE_C_COMPILER_RANLIB}")
@@ -31,7 +38,7 @@ else()
 set(RUST_TARGET_TRIPLE "x86_64-unknown-linux-gnu")
 endif()
 
-find_package(LLVM 7 QUIET CONFIG)
+find_package(LLVM 8 QUIET CONFIG)
 
 if (NOT LLVM_FOUND) 
 	find_package(LLVM 6 REQUIRED CONFIG)	
@@ -80,6 +87,7 @@ install(
   DESTINATION lib/kllvm/llvm/main
 )
 
+find_program(OPT opt-8.0)
 find_program(OPT opt-6.0)
 find_program(OPT opt)
 if(${OPT} STREQUAL "OPT-NOTFOUND")
@@ -88,11 +96,11 @@ endif()
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin)
 configure_file(bin/llvm-kompile bin @ONLY)
+configure_file(bin/llvm-kompile-testing bin @ONLY)
 configure_file(bin/llvm-kompile-clang bin @ONLY)
-configure_file(bin/llvm-kompile-rust-lto bin @ONLY)
 
 install(
-  PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/bin/llvm-kompile ${CMAKE_CURRENT_BINARY_DIR}/bin/llvm-kompile-clang ${CMAKE_CURRENT_BINARY_DIR}/bin/llvm-kompile-matching ${CMAKE_CURRENT_BINARY_DIR}/bin/llvm-kompile-rust-lto
+  PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/bin/llvm-kompile ${CMAKE_CURRENT_BINARY_DIR}/bin/llvm-kompile-clang
   DESTINATION bin
 )
 
@@ -144,18 +152,6 @@ install(
 )
 
 FILE(GLOB_RECURSE HaskellSources matching/src/*.hs matching/app/Main.hs)
-
-add_custom_command(
-  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/bin/llvm-kompile-matching
-  DEPENDS ${HaskellSources}
-  COMMAND stack build
-  COMMAND stack install --local-bin-path ${CMAKE_CURRENT_BINARY_DIR}/bin
-  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/matching
-)
-
-add_custom_target(matching
-  ALL DEPENDS bin/llvm-kompile-matching
-)
 
 # Auto-generated header path
 set(KLLVM_AUTOGEN_INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR}/include)

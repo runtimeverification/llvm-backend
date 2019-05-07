@@ -63,6 +63,7 @@ target triple = "x86_64-unknown-linux-gnu"
 %stringbuffer = type { i64, i64, %string* } ; 10-bit layout, 4-bit gc flags, 10 unused bits, 40-bit length, string length, current contents
 %map = type { i64, i8 *, i8 * } ; im::hashmap::HashMap
 %set = type { i8 *, i8 *, i64 } ; im::hashset::HashSet
+%iter = type { i64, { { i64 *, i64 }, i64 }, { { i64, i32 }, i8 * }, { i64, [3 x i64] } } ; im::nodes::hamt::Iter
 %list = type { i64, [7 x i64] } ; im::vector::Vector
 %mpz = type { i32, i32, i64 * } ; mpz_t
 %mpz_hdr = type { %blockheader, %mpz } ; 10-bit layout, 4-bit gc flags, 10 unused bits, 40-bit length, mpz_t
@@ -389,12 +390,22 @@ llvm::Value *CreateTerm::createHook(KOREObjectCompositePattern *hookAtt, KOREObj
     llvm::BranchInst::Create(TrueBlock, FalseBlock, cond, CurrentBlock);
     CurrentBlock = TrueBlock;
     llvm::Value *trueArg = (*this)(pattern->getArguments()[1]).first;
-    llvm::BranchInst::Create(MergeBlock, CurrentBlock);
-    llvm::PHINode *Phi = llvm::PHINode::Create(trueArg->getType(), 2, "phi", MergeBlock);
-    Phi->addIncoming(trueArg, CurrentBlock);
+    llvm::BasicBlock *NewTrueBlock = CurrentBlock;
     CurrentBlock = FalseBlock;
     llvm::Value *falseArg = (*this)(pattern->getArguments()[2]).first;
+    if (trueArg->getType()->isPointerTy() && !falseArg->getType()->isPointerTy()) {
+      llvm::AllocaInst *AllocCollection = new llvm::AllocaInst(falseArg->getType(), 0, "", CurrentBlock);
+      new llvm::StoreInst(falseArg, AllocCollection, CurrentBlock);
+      falseArg = AllocCollection;
+    } else if (!trueArg->getType()->isPointerTy() && falseArg->getType()->isPointerTy()) {
+      llvm::AllocaInst *AllocCollection = new llvm::AllocaInst(trueArg->getType(), 0, "", NewTrueBlock);
+      new llvm::StoreInst(trueArg, AllocCollection, NewTrueBlock);
+      trueArg = AllocCollection;
+    }
     llvm::BranchInst::Create(MergeBlock, CurrentBlock);
+    llvm::BranchInst::Create(MergeBlock, NewTrueBlock);
+    llvm::PHINode *Phi = llvm::PHINode::Create(trueArg->getType(), 2, "phi", MergeBlock);
+    Phi->addIncoming(trueArg, NewTrueBlock);
     Phi->addIncoming(falseArg, CurrentBlock);
     CurrentBlock = MergeBlock;
     return Phi;
