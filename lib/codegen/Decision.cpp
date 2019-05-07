@@ -62,7 +62,10 @@ bool DecisionNode::beginNode(Decision *d, std::string name, llvm::StringMap<llvm
     return true;
   }
   std::set<std::string> vars = collectVars();
-  vars.insert(d->ChoiceVars.begin(), d->ChoiceVars.end());
+  collectFail();
+  if (containsFailNode) {
+    vars.insert(d->ChoiceVars.begin(), d->ChoiceVars.end());
+  }
   auto Block = llvm::BasicBlock::Create(d->Ctx,
       name,
       d->CurrentBlock->getParent());
