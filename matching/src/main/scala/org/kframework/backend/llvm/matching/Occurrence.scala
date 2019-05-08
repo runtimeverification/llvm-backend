@@ -32,6 +32,12 @@ case class Lit(name: String, hook: String) extends Occurrence {
   representation.add(hook)
   override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
 }
+case class Fresh(name: String) extends Occurrence {
+  val representation = new util.ArrayList[AnyRef]()
+  representation.add("fresh")
+  representation.add(name)
+  override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
+}
 case class SC(ordinal: Int) extends Occurrence {
   val representation = new util.ArrayList[AnyRef]()
   representation.add("side_condition_" + ordinal)

@@ -2,7 +2,6 @@
 #include "kllvm/codegen/CreateTerm.h"
 
 #include "llvm/IR/Constants.h"
-#include "llvm/IR/CFG.h"
 #include "llvm/IR/Instructions.h" 
 #include "llvm/Support/raw_ostream.h"
 
@@ -36,7 +35,7 @@ std::set<std::string> DecisionNode::collectVars() {
   return vars;
 }
 
-void DecisionNode::sharedNode(Decision *d, llvm::StringMap<llvm::Value *> &substitution, llvm::BasicBlock *Block) {
+void DecisionNode::sharedNode(Decision *d, llvm::StringMap<llvm::Value *> &oldSubst, llvm::StringMap<llvm::Value *> &substitution, llvm::BasicBlock *Block) {
   std::set<std::string> vars = collectVars();
   collectFail();
   if (containsFailNode) {
@@ -50,11 +49,7 @@ void DecisionNode::sharedNode(Decision *d, llvm::StringMap<llvm::Value *> &subst
       }
       abort();
     }
-    for (llvm::BasicBlock *pred : predecessors(Phi->getParent())) {
-      if (pred == Block) {
-        Phi->addIncoming(substitution[var], Block);
-      }
-    }
+    Phi->addIncoming(oldSubst[var], Block);
     substitution[var] = phis.lookup(var);
   }
 }
@@ -63,11 +58,14 @@ void DecisionNode::sharedNode(Decision *d, llvm::StringMap<llvm::Value *> &subst
 bool DecisionNode::beginNode(Decision *d, std::string name, llvm::StringMap<llvm::Value *> &substitution) {
   if (isCompleted()) {
     llvm::BranchInst::Create(cachedCode, d->CurrentBlock);
-    sharedNode(d, substitution, d->CurrentBlock);
+    sharedNode(d, substitution, substitution, d->CurrentBlock);
     return true;
   }
   std::set<std::string> vars = collectVars();
-  vars.insert(d->ChoiceVars.begin(), d->ChoiceVars.end());
+  collectFail();
+  if (containsFailNode) {
+    vars.insert(d->ChoiceVars.begin(), d->ChoiceVars.end());
+  }
   auto Block = llvm::BasicBlock::Create(d->Ctx,
       name,
       d->CurrentBlock->getParent());
@@ -146,11 +144,12 @@ void SwitchNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitutio
     }
   }
   auto switchBlock = d->CurrentBlock;
+  auto oldSubst = substitution;
   for (auto &entry : caseData) {
     auto &_case = *entry.second;
     if (entry.first == CurrentFailureBlock) {
       if (CurrentFailureBlock == d->ChoiceBlock) {
-        d->ChoiceNode->sharedNode(d, substitution, switchBlock);
+        d->ChoiceNode->sharedNode(d, oldSubst, substitution, switchBlock);
       }
       continue;
     }
@@ -199,8 +198,10 @@ void SwitchNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitutio
       d->CurrentBlock = _default;
       defaultCase->getChild()->codegen(d, substitution);
     } else if (CurrentFailureBlock == d->ChoiceBlock) {
-      d->ChoiceNode->sharedNode(d, substitution, switchBlock);
+      d->ChoiceNode->sharedNode(d, oldSubst, substitution, switchBlock);
     }
+  } else if (CurrentFailureBlock == d->ChoiceBlock) {
+    d->ChoiceNode->sharedNode(d, oldSubst, substitution, switchBlock);
   }
   setCompleted();
 }

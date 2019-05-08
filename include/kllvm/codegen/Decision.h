@@ -24,7 +24,7 @@ public:
   virtual void collectDefs(void) = 0;
   virtual void collectFail(void) = 0;
   std::set<std::string> collectVars(void);
-  void sharedNode(Decision *d, llvm::StringMap<llvm::Value *> &substitution, llvm::BasicBlock *Block);
+  void sharedNode(Decision *d, llvm::StringMap<llvm::Value *> &oldSubst, llvm::StringMap<llvm::Value *> &substitution, llvm::BasicBlock *Block);
   bool beginNode(Decision *d, std::string name, llvm::StringMap<llvm::Value *> &substitution);
 
   void setCompleted() { completed = true; }
@@ -115,9 +115,14 @@ public:
   }
   virtual void collectFail() {
     if(hasContainsFail) return;
+    bool hasDefault = false;
     for (auto _case : cases) {
       _case.getChild()->collectFail();
       containsFailNode = containsFailNode || _case.getChild()->containsFailNode;
+      hasDefault = hasDefault || _case.getConstructor() == nullptr;
+    }
+    if (!hasDefault) {
+      containsFailNode = true;
     }
     hasContainsFail = true;
   }
