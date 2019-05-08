@@ -164,11 +164,11 @@ extern "C" {
     return ret;
   }
 
-  const string * hook_STRING_int2string(const mpz_t input) {
-    size_t len = mpz_sizeinbase(input, 10) + 2;
+  const string *hook_STRING_base2string_long(const mpz_t input, uint64_t base) {
+    size_t len = mpz_sizeinbase(input, base) + 2;
     // +1 for null terminator needed by mpz_get_str, +1 for minus sign
     auto result = static_cast<string *>(koreAllocToken(sizeof(string) + len));
-    mpz_get_str(result->data, 10, input);
+    mpz_get_str(result->data, base, input);
     set_len(result, strlen(result->data));
     return static_cast<string *>(koreResizeLastAlloc(result, sizeof(string) + len(result), sizeof(string) + len));
   }
@@ -184,6 +184,10 @@ extern "C" {
     return move_int(result);
   }
 
+  const string * hook_STRING_int2string(const mpz_t input) {
+    return hook_STRING_base2string_long(input, 10);
+  }
+
   const mpz_ptr hook_STRING_string2int(const string *input) {
     return hook_STRING_string2base_long(input, 10);
   }
@@ -191,6 +195,11 @@ extern "C" {
   const mpz_ptr hook_STRING_string2base(const string *input, mpz_t base) {
     uint64_t ubase = gs(base);
     return hook_STRING_string2base_long(input, ubase);
+  }
+
+  const string *hook_STRING_base2string(mpz_t input, mpz_t base) {
+    uint64_t ubase = gs(base);
+    return hook_STRING_base2string_long(input, ubase);
   }
 
   const string * hook_STRING_float2string(const floating *input) {
