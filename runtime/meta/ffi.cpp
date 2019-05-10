@@ -64,90 +64,86 @@ extern "C" {
     return handle;
   }
 
-  static ffi_type * getTypeFromSymbol(uint64_t symbol) {
-    if (symbol == tag_type_void()) {
-      return &ffi_type_void;
-    } else if (symbol == tag_type_uint8()) {
-      return &ffi_type_uint8;
-    } else if (symbol == tag_type_sint8()) {
-      return &ffi_type_sint8;
-    } else if (symbol == tag_type_uint16()) {
-      return &ffi_type_uint16;
-    } else if (symbol == tag_type_sint16()) {
-      return &ffi_type_sint16;
-    } else if (symbol == tag_type_uint32()) {
-      return &ffi_type_uint32;
-    } else if (symbol == tag_type_sint32()) {
-      return &ffi_type_sint32;
-    } else if (symbol == tag_type_uint64()) {
-      return &ffi_type_uint64;
-    } else if (symbol == tag_type_sint64()) {
-      return &ffi_type_sint64;
-    } else if (symbol == tag_type_float()) {
-      return &ffi_type_float;
-    } else if (symbol == tag_type_double()) {
-      return &ffi_type_double;
-    } else if (symbol == tag_type_uchar()) {
-      return &ffi_type_uchar;
-    } else if (symbol == tag_type_schar()) {
-      return &ffi_type_schar;
-    } else if (symbol == tag_type_ushort()) {
-      return &ffi_type_ushort;
-    } else if (symbol == tag_type_sshort()) {
-      return &ffi_type_sshort;
-    } else if (symbol == tag_type_uint()) {
-      return &ffi_type_uint;
-    } else if (symbol == tag_type_sint()) {
-      return &ffi_type_sint;
-    } else if (symbol == tag_type_ulong()) {
-      return &ffi_type_ulong;
-    } else if (symbol == tag_type_slong()) {
-      return &ffi_type_slong;
-    } else if (symbol == tag_type_longdouble()) {
-      return &ffi_type_longdouble;
-    } else {
-      return NULL;
-    }
-  }
+  static ffi_type * getTypeFromBlock(block * elem) {
+    if ((uint64_t) elem & 1) {
+      uint64_t symbol = (uint64_t) elem;
 
-  static ffi_type * getStructType(struct list * elements) {
-    size_t numFields = hook_LIST_size_long(elements);
-    std::vector<ffi_type *> structElements;
-    block * structField;
-    ffi_type * type;
-    size_t structSize = 0;
+      if (symbol == tag_type_void()) {
+        return &ffi_type_void;
+      } else if (symbol == tag_type_uint8()) {
+        return &ffi_type_uint8;
+      } else if (symbol == tag_type_sint8()) {
+        return &ffi_type_sint8;
+      } else if (symbol == tag_type_uint16()) {
+        return &ffi_type_uint16;
+      } else if (symbol == tag_type_sint16()) {
+        return &ffi_type_sint16;
+      } else if (symbol == tag_type_uint32()) {
+        return &ffi_type_uint32;
+      } else if (symbol == tag_type_sint32()) {
+        return &ffi_type_sint32;
+      } else if (symbol == tag_type_uint64()) {
+        return &ffi_type_uint64;
+      } else if (symbol == tag_type_sint64()) {
+        return &ffi_type_sint64;
+      } else if (symbol == tag_type_float()) {
+        return &ffi_type_float;
+      } else if (symbol == tag_type_double()) {
+        return &ffi_type_double;
+      } else if (symbol == tag_type_uchar()) {
+        return &ffi_type_uchar;
+      } else if (symbol == tag_type_schar()) {
+        return &ffi_type_schar;
+      } else if (symbol == tag_type_ushort()) {
+        return &ffi_type_ushort;
+      } else if (symbol == tag_type_sshort()) {
+        return &ffi_type_sshort;
+      } else if (symbol == tag_type_uint()) {
+        return &ffi_type_uint;
+      } else if (symbol == tag_type_sint()) {
+        return &ffi_type_sint;
+      } else if (symbol == tag_type_ulong()) {
+        return &ffi_type_ulong;
+      } else if (symbol == tag_type_slong()) {
+        return &ffi_type_slong;
+      } else if (symbol == tag_type_longdouble()) {
+        return &ffi_type_longdouble;
+      }
+    } else if (elem->h.hdr == (uint64_t)getTagForSymbolName(TYPETAG(struct))){
+      struct list * elements = (struct list *) *elem->children;
+      size_t numFields = hook_LIST_size_long(elements);
+      std::vector<ffi_type *> structElements;
+      block * structField;
+      ffi_type * type;
+      size_t structSize = 0;
 
-    for (int j = 0; j < numFields; j++) {
-      structField = hook_LIST_get(elements, j);
+      for (int j = 0; j < numFields; j++) {
+        structField = hook_LIST_get(elements, j);
 
-      type = getTypeFromSymbol((uint64_t)*(structField->children));
-      
-      if (type == NULL && structField->h.hdr == (uint64_t)getTagForSymbolName(TYPETAG(struct))) {
-        struct list * subElements = (struct list *) *structField->children;
-        type = getStructType(subElements);
-      } else if (type == NULL) {
-        throw std::invalid_argument("Struct type contains invalid FFI type");
+        type = getTypeFromBlock((block *) *(structField->children));
+
+        structElements.push_back(type);
+        structSize += type->size;
       }
 
-      structElements.push_back(type);
-      structSize += type->size;
+      ffi_type * structType = (ffi_type *) malloc(sizeof(ffi_type));
+      structType->size = 0;
+      structType->alignment = 0;
+      structType->type = FFI_TYPE_STRUCT;
+      structType->elements = (ffi_type **) malloc(sizeof(ffi_type *) * (structSize + 1));
+
+      for (int j = 0; j < numFields; j++) {
+        structType->elements[j] = structElements[j];
+      }
+
+      structType->elements[numFields] = NULL;
+
+      structTypes.push_back(structType);
+
+      return structType;
     }
 
-    ffi_type * structType = (ffi_type *) malloc(sizeof(ffi_type));
-    structType->size = 0;
-    structType->alignment = 0;
-    structType->type = FFI_TYPE_STRUCT;
-    structType->elements = (ffi_type **) malloc(sizeof(ffi_type *) * (structSize + 1));
-
-    for (int j = 0; j < numFields; j++) {
-      structType->elements[j] = structElements[j];
-    }
-
-    structType->elements[numFields] = NULL;
-
-    structTypes.push_back(structType);
-
-    return structType;
+    throw std::invalid_argument("Arg is not a supported type");
   }
 
   string * hook_FFI_call(mpz_t addr, struct list * args, struct list * types, block * ret) {
@@ -178,16 +174,7 @@ extern "C" {
 
         elem = (block *) *elem->children;
 
-        ffi_type * type = getTypeFromSymbol((uint64_t)elem);
-
-        if (type != NULL) {
-          argtypes[i] = type;
-        } else if (elem->h.hdr == (uint64_t)getTagForSymbolName(TYPETAG(struct))) {
-          struct list * elements = (struct list *) *elem->children;
-          argtypes[i] = getStructType(elements);
-        } else {
-          throw std::invalid_argument("Arg is not a supported type");
-        }
+        argtypes[i] = getTypeFromBlock(elem);
     }
 
     void ** avalues = (void **) malloc(sizeof(void *) * nargs);
@@ -199,11 +186,7 @@ extern "C" {
         avalues[i] = ((string *) *elem->children)->data;
     }
 
-    rtype = getTypeFromSymbol((uint64_t)ret);
-
-    if (rtype == NULL && ret->h.hdr == (uint64_t)getTagForSymbolName(TYPETAG(struct))) {
-      rtype = getStructType((struct list *) *ret->children);
-    }
+    rtype = getTypeFromBlock(ret);
 
     ffi_status status = ffi_prep_cif(&cif, FFI_DEFAULT_ABI, nargs, rtype, argtypes);
     free(argtypes);
