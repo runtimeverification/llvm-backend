@@ -255,7 +255,6 @@ BOOST_AUTO_TEST_CASE(call) {
    * }
    *
    * int timesPoint2(struct point2 p) */
-  /*
   struct point2 p2 = {.p = p};
   string * pargstr2 = makeString((char *) &p2, sizeof(struct point2));
 
@@ -266,8 +265,12 @@ BOOST_AUTO_TEST_CASE(call) {
   block * structType2 = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(block *)));
   structType2->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName(TYPETAG(struct)));
 
+  block * structArgType = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(block *)));
+  structArgType->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("inj{SortFFIType{}}"));
+  memcpy(structArgType->children, &structType, sizeof(block *));
+
   struct list * structFields2 = static_cast<struct list *>(koreAlloc(sizeof(struct list)));
-  *structFields2 = hook_LIST_element(structType);
+  *structFields2 = hook_LIST_element(structArgType);
 
   memcpy(structType2->children, &structFields2, sizeof(struct list *));
   
@@ -280,8 +283,7 @@ BOOST_AUTO_TEST_CASE(call) {
   bytes = hook_FFI_call(addr, &args, &types, type_sint);
   ret = *(int *) bytes->data;
 
-  BOOST_CHECK_EQUAL(ret, p.x * p.y);
-  */
+  BOOST_CHECK_EQUAL(ret, p2.p.x * p2.p.y);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

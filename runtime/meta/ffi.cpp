@@ -122,6 +122,11 @@ extern "C" {
 
       for (int j = 0; j < numFields; j++) {
         structField = hook_LIST_get(elements, j);
+
+        if (structField->h.hdr != (uint64_t)getTagForSymbolName("inj{SortFFIType{}}")) {
+          throw std::invalid_argument("Struct list contains invalid FFI type");
+        }
+
         structType->elements[j]= getTypeFromBlock((block *) *(structField->children));
       }
 
