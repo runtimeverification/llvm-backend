@@ -3,6 +3,7 @@
 #include <ffi.h>
 #include <gmp.h>
 #include <stdexcept>
+#include <vector>
 
 #include "runtime/alloc.h"
 #include "runtime/header.h"
@@ -19,6 +20,8 @@ extern "C" {
   } \
   return tag; \
 }
+
+  static std::vector<ffi_type *> structTypes;
 
   TAG_TYPE(void)
   TAG_TYPE(uint8)
@@ -103,8 +106,48 @@ extern "C" {
     } else if (symbol == tag_type_longdouble()) {
       return &ffi_type_longdouble;
     } else {
-      throw std::invalid_argument("Arg is not a supported type");
+      return NULL;
     }
+  }
+
+  static ffi_type * getStructType(struct list * elements) {
+    size_t numFields = hook_LIST_size_long(elements);
+    std::vector<ffi_type *> structElements;
+    block * structField;
+    ffi_type * type;
+    size_t structSize = 0;
+
+    for (int j = 0; j < numFields; j++) {
+      structField = hook_LIST_get(elements, j);
+
+      type = getTypeFromSymbol((uint64_t)*(structField->children));
+      
+      if (type == NULL && structField->h.hdr == (uint64_t)getTagForSymbolName(TYPETAG(struct))) {
+        struct list * subElements = (struct list *) *structField->children;
+        type = getStructType(subElements);
+      } else if (type == NULL) {
+        throw std::invalid_argument("Struct type contains invalid FFI type");
+      }
+
+      structElements.push_back(type);
+      structSize += type->size;
+    }
+
+    ffi_type * structType = (ffi_type *) malloc(sizeof(ffi_type));
+    structType->size = 0;
+    structType->alignment = 0;
+    structType->type = FFI_TYPE_STRUCT;
+    structType->elements = (ffi_type **) malloc(sizeof(ffi_type *) * (structSize + 1));
+
+    for (int j = 0; j < numFields; j++) {
+      structType->elements[j] = structElements[j];
+    }
+
+    structType->elements[numFields] = NULL;
+
+    structTypes.push_back(structType);
+
+    return structType;
   }
 
   string * hook_FFI_call(mpz_t addr, struct list * args, struct list * types, block * ret) {
@@ -132,7 +175,19 @@ extern "C" {
         if (elem->h.hdr != (uint64_t)getTagForSymbolName("inj{SortFFIType{}}")) {
           throw std::invalid_argument("Types list contains invalid FFI type");
         }
-        argtypes[i] = getTypeFromSymbol((uint64_t)*elem->children);
+
+        elem = (block *) *elem->children;
+
+        ffi_type * type = getTypeFromSymbol((uint64_t)elem);
+
+        if (type != NULL) {
+          argtypes[i] = type;
+        } else if (elem->h.hdr == (uint64_t)getTagForSymbolName(TYPETAG(struct))) {
+          struct list * elements = (struct list *) *elem->children;
+          argtypes[i] = getStructType(elements);
+        } else {
+          throw std::invalid_argument("Arg is not a supported type");
+        }
     }
 
     void ** avalues = (void **) malloc(sizeof(void *) * nargs);
@@ -145,6 +200,10 @@ extern "C" {
     }
 
     rtype = getTypeFromSymbol((uint64_t)ret);
+
+    if (rtype == NULL && ret->h.hdr == (uint64_t)getTagForSymbolName(TYPETAG(struct))) {
+      rtype = getStructType((struct list *) *ret->children);
+    }
 
     ffi_status status = ffi_prep_cif(&cif, FFI_DEFAULT_ABI, nargs, rtype, argtypes);
     free(argtypes);
@@ -165,6 +224,11 @@ extern "C" {
 
     set_len(rvalue, rtype->size);
     free(avalues);
+
+    for (auto &s : structTypes) {
+      free(s->elements);
+      free(s);
+    }
 
     return rvalue;
   }

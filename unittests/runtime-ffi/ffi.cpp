@@ -16,8 +16,17 @@
 #define TYPETAG(type) "Lbl'hash'" #type "{}"
 extern "C" {
 
-#define NUM_SYMBOLS 4
-  const char * symbols[NUM_SYMBOLS] = {TYPETAG(uint), TYPETAG(sint), "inj{SortBytes{}}", "inj{SortFFIType{}}"};
+  struct point {
+    int x;
+    int y;
+  };
+
+  struct point2 {
+    struct point p;
+  };
+
+#define NUM_SYMBOLS 5
+  const char * symbols[NUM_SYMBOLS] = {TYPETAG(struct), TYPETAG(uint), TYPETAG(sint), "inj{SortBytes{}}", "inj{SortFFIType{}}"};
 
   char * getTerminatedString(string * str);
 
@@ -97,6 +106,10 @@ BOOST_AUTO_TEST_CASE(address) {
   BOOST_CHECK(0 < mpz_cmp_ui(addr, 0));
 
   fn = makeString("increaseX");
+  addr = hook_FFI_address(fn);
+  BOOST_CHECK(0 < mpz_cmp_ui(addr, 0));
+
+  fn = makeString("timesPoint");
   addr = hook_FFI_address(fn);
   BOOST_CHECK(0 < mpz_cmp_ui(addr, 0));
 
@@ -199,6 +212,76 @@ BOOST_AUTO_TEST_CASE(call) {
   ret = *(int *) bytes->data;
 
   BOOST_CHECK_EQUAL(ret, 2);
+
+  /* struct point {
+   *  int x;
+   *  int y;
+   * }
+   *
+   * int timesPoint(struct point p) */
+  struct point p = {.x = 2, .y = 5};
+  string * pargstr = makeString((char *) &p, sizeof(struct point));
+
+  block * parg = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(string *)));
+  parg->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("inj{SortBytes{}}"));
+  memcpy(parg->children, &pargstr, sizeof(string *));
+
+  args = hook_LIST_element(parg);
+
+  block * structType = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(block *)));
+  structType->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName(TYPETAG(struct)));
+
+  struct list * structFields = static_cast<struct list *>(koreAlloc(sizeof(struct list)));
+  *structFields = hook_LIST_element(argtype);
+  *structFields = hook_LIST_concat(*structFields, *structFields);
+
+  memcpy(structType->children, &structFields, sizeof(struct list *));
+  
+  block * new_argtype = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(block *)));
+  new_argtype->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("inj{SortFFIType{}}"));
+  memcpy(new_argtype->children, &structType, sizeof(block *));
+  types = hook_LIST_element(new_argtype);
+
+  fn = makeString("timesPoint");
+  addr = hook_FFI_address(fn);
+
+  bytes = hook_FFI_call(addr, &args, &types, type_sint);
+  ret = *(int *) bytes->data;
+
+  BOOST_CHECK_EQUAL(ret, p.x * p.y);
+
+  /* struct point2 {
+   *  struct point p;
+   * }
+   *
+   * int timesPoint2(struct point2 p) */
+  /*
+  struct point2 p2 = {.p = p};
+  string * pargstr2 = makeString((char *) &p2, sizeof(struct point2));
+
+  memcpy(parg->children, &pargstr2, sizeof(string *));
+
+  args = hook_LIST_element(parg);
+
+  block * structType2 = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(block *)));
+  structType2->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName(TYPETAG(struct)));
+
+  struct list * structFields2 = static_cast<struct list *>(koreAlloc(sizeof(struct list)));
+  *structFields2 = hook_LIST_element(structType);
+
+  memcpy(structType2->children, &structFields2, sizeof(struct list *));
+  
+  memcpy(new_argtype->children, &structType2, sizeof(block *));
+  types = hook_LIST_element(new_argtype);
+
+  fn = makeString("timesPoint2");
+  addr = hook_FFI_address(fn);
+
+  bytes = hook_FFI_call(addr, &args, &types, type_sint);
+  ret = *(int *) bytes->data;
+
+  BOOST_CHECK_EQUAL(ret, p.x * p.y);
+  */
 }
 
 BOOST_AUTO_TEST_SUITE_END()
