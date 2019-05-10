@@ -37,4 +37,8 @@ extern "C" {
   int timesPoint2(struct point2 p) {
     return p.p.x * p.p.y;
   }
+
+  struct point constructPoint(int x, int y) {
+    return {.x = x, .y = y};
+  }
 }

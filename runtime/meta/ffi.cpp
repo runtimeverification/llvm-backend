@@ -21,7 +21,7 @@ extern "C" {
   return tag; \
 }
 
-  static std::vector<ffi_type *> structTypes;
+  thread_local static std::vector<ffi_type *> structTypes;
 
   TAG_TYPE(void)
   TAG_TYPE(uint8)

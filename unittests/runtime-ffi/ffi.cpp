@@ -192,6 +192,24 @@ BOOST_AUTO_TEST_CASE(call) {
 
   BOOST_CHECK_EQUAL(ret, x * y);
 
+  /* struct point constructPoint(int x, int y) */
+  block * structType = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(block *)));
+  structType->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName(TYPETAG(struct)));
+
+  struct list * structFields = static_cast<struct list *>(koreAlloc(sizeof(struct list)));
+  *structFields = hook_LIST_element(argtype);
+  *structFields = hook_LIST_concat(*structFields, *structFields);
+
+  memcpy(structType->children, &structFields, sizeof(struct list *));
+
+  fn = makeString("constructPoint");
+  addr = hook_FFI_address(fn);
+  bytes = hook_FFI_call(addr, &args, &types, structType);
+
+  struct point p = *(struct point *) bytes->data;
+  BOOST_CHECK_EQUAL(p.x, x);
+  BOOST_CHECK_EQUAL(p.y, y);
+
   /* int getX(void) */
   fn = makeString("getX");
   addr = hook_FFI_address(fn);
@@ -219,7 +237,7 @@ BOOST_AUTO_TEST_CASE(call) {
    * }
    *
    * int timesPoint(struct point p) */
-  struct point p = {.x = 2, .y = 5};
+  p = {.x = 2, .y = 5};
   string * pargstr = makeString((char *) &p, sizeof(struct point));
 
   block * parg = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(string *)));
@@ -228,15 +246,6 @@ BOOST_AUTO_TEST_CASE(call) {
 
   args = hook_LIST_element(parg);
 
-  block * structType = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(block *)));
-  structType->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName(TYPETAG(struct)));
-
-  struct list * structFields = static_cast<struct list *>(koreAlloc(sizeof(struct list)));
-  *structFields = hook_LIST_element(argtype);
-  *structFields = hook_LIST_concat(*structFields, *structFields);
-
-  memcpy(structType->children, &structFields, sizeof(struct list *));
-  
   block * new_argtype = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(block *)));
   new_argtype->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("inj{SortFFIType{}}"));
   memcpy(new_argtype->children, &structType, sizeof(block *));
