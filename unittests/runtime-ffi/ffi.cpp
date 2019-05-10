@@ -284,6 +284,12 @@ BOOST_AUTO_TEST_CASE(call) {
   ret = *(int *) bytes->data;
 
   BOOST_CHECK_EQUAL(ret, p2.p.x * p2.p.y);
+
+  /* Make sure there is no double free */
+  bytes = hook_FFI_call(addr, &args, &types, type_sint);
+  ret = *(int *) bytes->data;
+
+  BOOST_CHECK_EQUAL(ret, p2.p.x * p2.p.y);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
