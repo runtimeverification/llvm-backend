@@ -172,9 +172,7 @@ extern "C" {
           throw std::invalid_argument("Types list contains invalid FFI type");
         }
 
-        elem = (block *) *elem->children;
-
-        argtypes[i] = getTypeFromBlock(elem);
+        argtypes[i] = getTypeFromBlock((block *) *elem->children);
     }
 
     void ** avalues = (void **) malloc(sizeof(void *) * nargs);
