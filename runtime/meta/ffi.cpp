@@ -112,28 +112,17 @@ extern "C" {
     } else if (elem->h.hdr == (uint64_t)getTagForSymbolName(TYPETAG(struct))){
       struct list * elements = (struct list *) *elem->children;
       size_t numFields = hook_LIST_size_long(elements);
-      std::vector<ffi_type *> structElements;
       block * structField;
-      ffi_type * type;
-      size_t structSize = 0;
-
-      for (int j = 0; j < numFields; j++) {
-        structField = hook_LIST_get(elements, j);
-
-        type = getTypeFromBlock((block *) *(structField->children));
-
-        structElements.push_back(type);
-        structSize += type->size;
-      }
 
       ffi_type * structType = (ffi_type *) malloc(sizeof(ffi_type));
       structType->size = 0;
       structType->alignment = 0;
       structType->type = FFI_TYPE_STRUCT;
-      structType->elements = (ffi_type **) malloc(sizeof(ffi_type *) * (structSize + 1));
+      structType->elements = (ffi_type **) malloc(sizeof(ffi_type *) * (numFields + 1));
 
       for (int j = 0; j < numFields; j++) {
-        structType->elements[j] = structElements[j];
+        structField = hook_LIST_get(elements, j);
+        structType->elements[j]= getTypeFromBlock((block *) *(structField->children));
       }
 
       structType->elements[numFields] = NULL;
@@ -210,6 +199,8 @@ extern "C" {
       free(s->elements);
       free(s);
     }
+
+    structTypes.clear();
 
     return rvalue;
   }
