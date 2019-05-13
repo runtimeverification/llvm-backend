@@ -6,7 +6,13 @@ target triple = "x86_64-unknown-linux-gnu"
 %block = type { %blockheader, [0 x i64 *] } ; 16-bit layout, 8-bit length, 32-bit tag, children
 %mpz = type { i32, i32, i64* }
 
-declare fastcc %block* @"eval_LblgetGeneratedCounterCell{SortGeneratedTopCell{}}"(%block*)
+declare void @abort() #0
+
+define weak fastcc %block* @"eval_LblgetGeneratedCounterCell{SortGeneratedTopCell{}}"(%block*) {
+  call void @abort()
+  unreachable
+}
+
 declare i32 @getTagForFreshSort(i8*)
 declare %mpz* @hook_INT_add(%mpz*, %mpz*)
 declare i8* @evaluateFunctionSymbol(i32, i8**)
@@ -31,3 +37,5 @@ entry:
   %retval = call i8* @evaluateFunctionSymbol(i32 %tag, i8** %args)
   ret i8* %retval
 }
+
+attributes #0 = { noreturn }

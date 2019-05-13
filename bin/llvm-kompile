@@ -21,4 +21,4 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
 else
   flags="-fuse-ld=lld -Wl,-mllvm,-tailcallopt"
 fi
-"$(dirname "$0")"/llvm-kompile-clang "$modopt" "$main" $flags -flto "$@"
+"$(dirname "$0")"/llvm-kompile-clang "$modopt" "$main" $flags @LLVM_KOMPILE_CLANG_FLAGS@ "$@"
