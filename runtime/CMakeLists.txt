@@ -7,10 +7,13 @@ add_subdirectory(io)
 
 set(RUSTDIR_ debug)
 set(RUSTDIR_Debug debug)
+set(RUSTDIR_DebugRuntime debug)
 set(RUSTDIR_Release release)
 set(RUSTDIR_RelWithDebInfo release)
+set(RUSTDIR_FastBuild release)
 set(RUSTFLAGS_Release --release)
 set(RUSTFLAGS_RelWithDebInfo --release)
+set(RUSTFLAGS_FastBuild --release)
 set(RUSTFLAGS ${RUSTFLAGS_${CMAKE_BUILD_TYPE}})
 set(RUSTDIR ${RUSTDIR_${CMAKE_BUILD_TYPE}})
 
