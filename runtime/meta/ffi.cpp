@@ -210,6 +210,87 @@ extern "C" {
     return rvalue;
   }
 
+  string * hook_FFI_call_variadic(mpz_t addr, struct list * args, struct list * fixtypes, struct list * vartypes, block * ret) {
+    ffi_cif cif;
+    ffi_type ** argtypes, * rtype;
+    void (* address)(void);
+
+    if (!mpz_fits_ulong_p(addr)) {
+      throw std::invalid_argument("Addr is too large");
+    }
+    address = (void (*) (void))  mpz_get_ui(addr);
+
+    size_t nargs = hook_LIST_size_long(args);
+    size_t nfixtypes = hook_LIST_size_long(fixtypes);
+    size_t nvartypes = hook_LIST_size_long(vartypes);
+
+    if (nargs != nfixtypes + nvartypes) {
+      throw std::invalid_argument("Args size does not match types size");
+    }
+
+    argtypes = (ffi_type **) malloc(sizeof(ffi_type *) * nargs);
+
+    block * elem;
+    for (int i = 0; i < nfixtypes; i++) {
+        elem = hook_LIST_get(fixtypes, i);
+        if (elem->h.hdr != (uint64_t)getTagForSymbolName("inj{SortFFIType{}}")) {
+          throw std::invalid_argument("Fixed types list contains invalid FFI type");
+        }
+
+        argtypes[i] = getTypeFromBlock((block *) *elem->children);
+    }
+
+    for (int i = 0; i < nvartypes; i++) {
+        elem = hook_LIST_get(vartypes, i);
+        if (elem->h.hdr != (uint64_t)getTagForSymbolName("inj{SortFFIType{}}")) {
+          throw std::invalid_argument("Variadic types list contains invalid FFI type");
+        }
+
+        argtypes[nfixtypes + i] = getTypeFromBlock((block *) *elem->children);
+    }
+
+    void ** avalues = (void **) malloc(sizeof(void *) * nargs);
+    for (int i = 0; i < nargs; i++) {
+        elem = hook_LIST_get(args, i);
+        if (elem->h.hdr != (uint64_t)getTagForSymbolName("inj{SortBytes{}}")) {
+          throw std::invalid_argument("Args list contains non-bytes type");
+        }
+        avalues[i] = ((string *) *elem->children)->data;
+    }
+
+    rtype = getTypeFromBlock(ret);
+
+    ffi_status status = ffi_prep_cif_var(&cif, FFI_DEFAULT_ABI, nfixtypes, nargs, rtype, argtypes);
+    free(argtypes);
+
+    switch (status) {
+      case FFI_OK:
+        break;
+      case FFI_BAD_TYPEDEF:
+          throw std::invalid_argument("Types list contains invalid FFI type");
+        break;
+      case FFI_BAD_ABI:
+          throw std::invalid_argument("Invalid ABI mode");
+        break;
+    }
+
+    string * rvalue = static_cast<string *>(koreAlloc(rtype->size));
+    ffi_call(&cif, address, (void *)(rvalue->data), avalues);
+
+    set_len(rvalue, rtype->size);
+    free(avalues);
+
+    for (auto &s : structTypes) {
+      free(s->elements);
+      free(s);
+    }
+
+    structTypes.clear();
+
+    return rvalue;
+  }
+
+
   mpz_ptr hook_FFI_address(string * fn) {
     char * func = getTerminatedString(fn);
     void * handle = so_lib_handle();
