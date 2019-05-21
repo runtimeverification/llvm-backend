@@ -30,6 +30,15 @@ set(CMAKE_EXE_LINKER_FLAGS_FASTBUILD "${CMAKE_EXE_LINKER_FLAGS_RELEASE}")
 set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} -flto")
 set(CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO "${CMAKE_EXE_LINKER_FLAGS_RELEASE} -flto")
 
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
+set(RUST_TARGET_TRIPLE "x86_64-apple-darwin")
+include_directories(AFTER SYSTEM /usr/local/include)
+link_directories(AFTER /usr/local/lib)
+set(ENV{PKG_CONFIG_PATH} "/usr/local/opt/libffi/lib/pkgconfig")
+else()
+set(RUST_TARGET_TRIPLE "x86_64-unknown-linux-gnu")
+endif()
+
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(FFI REQUIRED libffi)
 include_directories(AFTER SYSTEM ${FFI_INCLUDE_DIRS})
@@ -42,14 +51,6 @@ endif()
 
 set(CMAKE_AR "${CMAKE_C_COMPILER_AR}")
 set(CMAKE_RANLIB "${CMAKE_C_COMPILER_RANLIB}")
-
-if(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
-set(RUST_TARGET_TRIPLE "x86_64-apple-darwin")
-include_directories(AFTER SYSTEM /usr/local/include)
-link_directories(AFTER /usr/local/lib)
-else()
-set(RUST_TARGET_TRIPLE "x86_64-unknown-linux-gnu")
-endif()
 
 find_package(LLVM 8 QUIET CONFIG)
 
@@ -111,9 +112,10 @@ file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin)
 configure_file(bin/llvm-kompile bin @ONLY)
 configure_file(bin/llvm-kompile-testing bin @ONLY)
 configure_file(bin/llvm-kompile-clang bin @ONLY)
+configure_file(bin/llvm-kompile-rust-lto bin @ONLY)
 
 install(
-  PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/bin/llvm-kompile ${CMAKE_CURRENT_BINARY_DIR}/bin/llvm-kompile-clang
+  PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/bin/llvm-kompile ${CMAKE_CURRENT_BINARY_DIR}/bin/llvm-kompile-clang ${CMAKE_CURRENT_BINARY_DIR}/bin/llvm-kompile-rust-lto
   DESTINATION bin
 )
 

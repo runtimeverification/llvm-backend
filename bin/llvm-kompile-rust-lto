@@ -1,0 +1,17 @@
+#!/bin/bash
+dir="$(mktemp -d)"
+trap "rm -rf $dir" INT TERM EXIT
+archive=$(realpath -m $1)
+cd "$dir"
+ar x "$archive"
+rm ./*.rcgu.o
+for file in *.bc.z; do
+len=`od -An -t u4 -j 15 -N4 $file`
+blen=`od -An -t u8 -j $((len+19)) -N8 $file`
+tail -c+$((len+28)) $file | head -c $blen > $file.bc.gz
+printf "\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\x00" |cat - $file.bc.gz |gzip -dc > ${file%.bc.z}.o
+done
+rm *.bc.z
+rm *.gz
+rm "$archive"
+@CMAKE_AR@ rs "${archive}" ./*
