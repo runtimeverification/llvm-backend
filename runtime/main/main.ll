@@ -12,7 +12,7 @@ declare void @finish_rewriting(%block*) #0
 
 declare void @setKoreMemoryFunctionsForGMP()
 
-@output_file = global i8* zeroinitializer
+@output_file = external global i8*
 
 define i32 @main(i32 %argc, i8** %argv) {
 entry:

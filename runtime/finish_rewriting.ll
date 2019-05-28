@@ -16,7 +16,7 @@ define weak fastcc %mpz* @"eval_LblgetExitCode{SortGeneratedTopCell{}}"(%block*)
   ret %mpz* @exit_int_0
 }
 
-@output_file = external global i8*
+@output_file = global i8* zeroinitializer
 
 define void @finish_rewriting(%block* %subject) #0 {
   %output = load i8*, i8** @output_file
