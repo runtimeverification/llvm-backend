@@ -492,10 +492,10 @@ case class SymbolP[T](sym: SymbolOrAlias, ps: Seq[Pattern[T]]) extends Pattern[T
     def getVar(fringeP: Fringe, fringeT: Fringe, pat: Pattern[T], i: Int): Seq[(Constructor, VariableBinding[T])] = {
       val vars = pat.bindings(None, Inj(Num(i, o))) // compute variable bindings for this pattern
       val child = SymbolC(B.SymbolOrAlias("inj", Seq(fringeT.sort, fringeP.sort)))
-      val childOverloads = pat.overloadChildren(fringeP, Some(child), Num(i, o)) // recurse into child term
       if (fringeP.sort == fringeT.sort) {
         Seq() // exact match, so no bindings
       } else {
+        val childOverloads = pat.overloadChildren(fringeP, Some(child), Num(i, o)) // recurse into child term
         vars.map(v => (child, v)) ++ childOverloads
       }
     }
