@@ -67,7 +67,7 @@ case class AsP[T](name: T, sort: SortCategory, pat: Pattern[T]) extends Pattern[
   def canonicalize(clause: Clause): Pattern[Option[Occurrence]] = AsP(clause.canonicalize(name.toString), sort, pat.canonicalize(clause))
   def isBound(clause: Clause): Boolean = clause.isBound(name) && pat.isBound(clause)
   override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
-  def toShortString: String = name.toString + " #as " + pat.toShortString
+  def toShortString: String = pat.toShortString + " #as " + name.toString
 }
 
 case class ListP[T](head: Seq[Pattern[T]], frame: Option[Pattern[T]], tail: Seq[Pattern[T]], ctr: SymbolOrAlias, orig: Pattern[T]) extends Pattern[T] {
