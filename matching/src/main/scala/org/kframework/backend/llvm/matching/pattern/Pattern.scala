@@ -432,7 +432,7 @@ case class SymbolP[T](sym: SymbolOrAlias, ps: Seq[Pattern[T]]) extends Pattern[T
         if (a == b) {
           Seq()
         } else {
-          ps.head.bindings(None, occurrence)
+          ps.head.bindings(Some(SymbolC(B.SymbolOrAlias("inj",Seq(a,b)))), occurrence)
         }
       case _ => Seq()
     }
