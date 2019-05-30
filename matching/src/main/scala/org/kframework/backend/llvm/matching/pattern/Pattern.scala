@@ -62,6 +62,7 @@ case class AsP[T](name: T, sort: SortCategory, pat: Pattern[T]) extends Pattern[
   }
   def expandOr: Seq[AsP[T]] = pat.expandOr.map(AsP(name, sort, _))
 
+  override def overloadChildren(f: Fringe, ix: Option[Constructor], o: Occurrence): Seq[(Constructor, VariableBinding[T])] = pat.overloadChildren(f, ix, o)
   def category: Option[SortCategory] = pat.category
   def variables: Set[T] = Set(name) ++ pat.variables
   def canonicalize(clause: Clause): Pattern[Option[Occurrence]] = AsP(clause.canonicalize(name.toString), sort, pat.canonicalize(clause))
