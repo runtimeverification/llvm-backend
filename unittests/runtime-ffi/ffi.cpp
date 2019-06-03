@@ -403,8 +403,6 @@ BOOST_AUTO_TEST_CASE(call_variadic) {
   ret = *(int *) bytes->data;
 
   BOOST_CHECK_EQUAL(ret, 0);
-
-
 }
 
 BOOST_AUTO_TEST_SUITE_END()
