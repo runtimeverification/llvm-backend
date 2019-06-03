@@ -228,7 +228,6 @@ extern "C" {
     structTypes.clear();
 
     return rvalue;
-
   }
 
   string * hook_FFI_call(mpz_t addr, struct list * args, struct list * types, block * ret) {
