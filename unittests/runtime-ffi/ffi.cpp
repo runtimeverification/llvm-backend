@@ -66,6 +66,12 @@ extern "C" {
     return l;
   }
 
+  struct list hook_LIST_unit() {
+    struct list l;
+    l.a = (uint64_t)(koreAlloc(sizeof(std::vector<block *>)));
+    return l;
+  }
+
   size_t hook_LIST_size_long(struct list * l) {
     return ((std::vector<block *> *)l->a)->size();
   }
@@ -381,6 +387,23 @@ BOOST_AUTO_TEST_CASE(call_variadic) {
   ret = *(int *) bytes->data;
 
   BOOST_CHECK_EQUAL(ret, arg1 + arg2);
+
+  /* addInts with 0 var args */
+  n = 0;
+  nargstr = makeString((char *) &n, sizeof(int));
+  memcpy(narg->children, &nargstr, sizeof(string *));
+  args = hook_LIST_element(narg);
+
+  vartypes = hook_LIST_unit();
+
+  bytes = hook_FFI_call_variadic(addr, &args, &fixtypes, &vartypes, type_sint);
+
+  BOOST_CHECK(bytes != NULL);
+
+  ret = *(int *) bytes->data;
+
+  BOOST_CHECK_EQUAL(ret, 0);
+
 
 }
 
