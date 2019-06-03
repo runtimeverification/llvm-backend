@@ -62,12 +62,13 @@ case class AsP[T](name: T, sort: SortCategory, pat: Pattern[T]) extends Pattern[
   }
   def expandOr: Seq[AsP[T]] = pat.expandOr.map(AsP(name, sort, _))
 
+  override def overloadChildren(f: Fringe, ix: Option[Constructor], o: Occurrence): Seq[(Constructor, VariableBinding[T])] = pat.overloadChildren(f, ix, o)
   def category: Option[SortCategory] = pat.category
   def variables: Set[T] = Set(name) ++ pat.variables
   def canonicalize(clause: Clause): Pattern[Option[Occurrence]] = AsP(clause.canonicalize(name.toString), sort, pat.canonicalize(clause))
   def isBound(clause: Clause): Boolean = clause.isBound(name) && pat.isBound(clause)
   override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
-  def toShortString: String = name.toString + " #as " + pat.toShortString
+  def toShortString: String = pat.toShortString + " #as " + name.toString
 }
 
 case class ListP[T](head: Seq[Pattern[T]], frame: Option[Pattern[T]], tail: Seq[Pattern[T]], ctr: SymbolOrAlias, orig: Pattern[T]) extends Pattern[T] {
@@ -432,7 +433,7 @@ case class SymbolP[T](sym: SymbolOrAlias, ps: Seq[Pattern[T]]) extends Pattern[T
         if (a == b) {
           Seq()
         } else {
-          ps.head.bindings(None, occurrence)
+          ps.head.bindings(Some(SymbolC(B.SymbolOrAlias("inj",Seq(a,b)))), occurrence)
         }
       case _ => Seq()
     }
@@ -491,10 +492,10 @@ case class SymbolP[T](sym: SymbolOrAlias, ps: Seq[Pattern[T]]) extends Pattern[T
     def getVar(fringeP: Fringe, fringeT: Fringe, pat: Pattern[T], i: Int): Seq[(Constructor, VariableBinding[T])] = {
       val vars = pat.bindings(None, Inj(Num(i, o))) // compute variable bindings for this pattern
       val child = SymbolC(B.SymbolOrAlias("inj", Seq(fringeT.sort, fringeP.sort)))
-      val childOverloads = pat.overloadChildren(fringeP, Some(child), Num(i, o)) // recurse into child term
       if (fringeP.sort == fringeT.sort) {
         Seq() // exact match, so no bindings
       } else {
+        val childOverloads = pat.overloadChildren(fringeP, Some(child), Num(i, o)) // recurse into child term
         vars.map(v => (child, v)) ++ childOverloads
       }
     }

@@ -73,8 +73,16 @@ class Column(val fringe: Fringe, val patterns: IndexedSeq[Pattern[String]], val 
 
   def isChoice: Boolean = fringe.sortInfo.isCollection && bestKey == None
 
+  private def asListP(p: Pattern[String]): Seq[ListP[String]] = {
+    p match {
+      case l@ListP(_, _, _, _, _) => Seq(l)
+      case AsP(_, _, pat) => asListP(pat)
+      case _ => Seq()
+    }
+  }
+
   def maxListSize: (Int, Int) = {
-    val listPs = patterns.filter(_.isInstanceOf[ListP[String]]).map(_.asInstanceOf[ListP[String]])
+    val listPs = patterns.flatMap(asListP(_))
     if (listPs.isEmpty) {
       (0, 0)
     } else {
