@@ -140,7 +140,7 @@ extern "C" {
     throw std::invalid_argument("Arg is not a supported type");
   }
 
-  string * hook_FFI_call(mpz_t addr, struct list * args, struct list * types, block * ret) {
+  string * ffiCall(bool isVariadic, mpz_t addr, struct list * args, struct list * fixtypes, struct list * vartypes,  block * ret) {
     ffi_cif cif;
     ffi_type ** argtypes, * rtype;
     void (* address)(void);
@@ -151,7 +151,12 @@ extern "C" {
     address = (void (*) (void))  mpz_get_ui(addr);
 
     size_t nargs = hook_LIST_size_long(args);
-    size_t ntypes = hook_LIST_size_long(types);
+    size_t nfixtypes = hook_LIST_size_long(fixtypes);
+    size_t ntypes = nfixtypes;
+
+    if (isVariadic) {
+      ntypes += hook_LIST_size_long(vartypes);
+    }
 
     if (nargs != ntypes) {
       throw std::invalid_argument("Args size does not match types size");
@@ -160,10 +165,19 @@ extern "C" {
     argtypes = (ffi_type **) malloc(sizeof(ffi_type *) * nargs);
 
     block * elem;
-    for (int i = 0; i < nargs; i++) {
-        elem = hook_LIST_get(types, i);
+    for (int i = 0; i < nfixtypes; i++) {
+        elem = hook_LIST_get(fixtypes, i);
         if (elem->h.hdr != (uint64_t)getTagForSymbolName("inj{SortFFIType{}}")) {
-          throw std::invalid_argument("Types list contains invalid FFI type");
+          throw std::invalid_argument("Fix types list contains invalid FFI type");
+        }
+
+        argtypes[i] = getTypeFromBlock((block *) *elem->children);
+    }
+
+    for (int i = nfixtypes; i < nargs; i++) {
+        elem = hook_LIST_get(vartypes, i);
+        if (elem->h.hdr != (uint64_t)getTagForSymbolName("inj{SortFFIType{}}")) {
+          throw std::invalid_argument("Var types list contains invalid FFI type");
         }
 
         argtypes[i] = getTypeFromBlock((block *) *elem->children);
@@ -180,7 +194,13 @@ extern "C" {
 
     rtype = getTypeFromBlock(ret);
 
-    ffi_status status = ffi_prep_cif(&cif, FFI_DEFAULT_ABI, nargs, rtype, argtypes);
+    ffi_status status;
+    if (isVariadic) {
+      status = ffi_prep_cif_var(&cif, FFI_DEFAULT_ABI, nfixtypes, nargs, rtype, argtypes);
+    } else {
+      status = ffi_prep_cif(&cif, FFI_DEFAULT_ABI, nargs, rtype, argtypes);
+    }
+
     free(argtypes);
 
     switch (status) {
@@ -208,9 +228,15 @@ extern "C" {
     structTypes.clear();
 
     return rvalue;
+
+  }
+
+  string * hook_FFI_call(mpz_t addr, struct list * args, struct list * types, block * ret) {
+    return ffiCall(false, addr, args, types, NULL, ret);
   }
 
   string * hook_FFI_call_variadic(mpz_t addr, struct list * args, struct list * fixtypes, struct list * vartypes, block * ret) {
+    return ffiCall(true, addr, args, fixtypes, vartypes, ret);
   }
 
   mpz_ptr hook_FFI_address(string * fn) {
