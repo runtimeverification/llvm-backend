@@ -210,6 +210,9 @@ extern "C" {
     return rvalue;
   }
 
+  string * hook_FFI_call_variadic(mpz_t addr, struct list * args, struct list * fixtypes, struct list * vartypes, block * ret) {
+  }
+
   mpz_ptr hook_FFI_address(string * fn) {
     char * func = getTerminatedString(fn);
     void * handle = so_lib_handle();
