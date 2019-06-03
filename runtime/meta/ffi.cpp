@@ -140,7 +140,7 @@ extern "C" {
     throw std::invalid_argument("Arg is not a supported type");
   }
 
-  string * ffiCall(bool isVariadic, mpz_t addr, struct list * args, struct list * fixtypes, struct list * vartypes,  block * ret) {
+  string * ffiCall(bool isVariadic, mpz_t addr, struct list * args, struct list * fixtypes, struct list * vartypes, block * ret) {
     ffi_cif cif;
     ffi_type ** argtypes, * rtype;
     void (* address)(void);
@@ -148,6 +148,7 @@ extern "C" {
     if (!mpz_fits_ulong_p(addr)) {
       throw std::invalid_argument("Addr is too large");
     }
+
     address = (void (*) (void))  mpz_get_ui(addr);
 
     size_t nargs = hook_LIST_size_long(args);
