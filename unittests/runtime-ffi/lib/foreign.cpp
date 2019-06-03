@@ -1,3 +1,4 @@
+#include <cstdarg>
 extern "C" {
   struct point {
     int x;
@@ -40,5 +41,20 @@ extern "C" {
 
   struct point constructPoint(int x, int y) {
     return {.x = x, .y = y};
+  }
+
+  int addAll(int nargs...) {
+    va_list args;
+    va_start(args, nargs);
+
+    int sum = 0;
+
+    for (int i = 0; i < nargs; i++) {
+      sum += va_arg(args, int);
+    }
+
+    va_end(args);
+
+    return sum;
   }
 }
