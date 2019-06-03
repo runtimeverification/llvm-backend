@@ -347,6 +347,41 @@ BOOST_AUTO_TEST_CASE(call_variadic) {
   int ret = *(int *) bytes->data;
 
   BOOST_CHECK_EQUAL(ret, arg1);
+
+  /* addInts with 2 var args */
+  n = 2;
+  nargstr = makeString((char *) &n, sizeof(int));
+  memcpy(narg->children, &nargstr, sizeof(string *));
+  args = hook_LIST_element(narg);
+
+  arg1 = 20;
+  arg1str = makeString((char *) &arg1, sizeof(int));
+  memcpy(arg1block->children, &arg1str, sizeof(string *));
+  arg1list = hook_LIST_element(arg1block);
+  args = hook_LIST_concat(args, arg1list);
+
+  int arg2 = 15;
+  string * arg2str = makeString((char *) &arg2, sizeof(int));
+
+  block * arg2block = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(string *)));
+  arg2block->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("inj{SortBytes{}}"));
+  memcpy(arg2block->children, &arg2str, sizeof(string *));
+
+  struct list arg2list = hook_LIST_element(arg2block);
+
+  args = hook_LIST_concat(args, arg2list);
+
+  vartypes = hook_LIST_element(varargtype);
+  vartypes = hook_LIST_concat(vartypes, vartypes);
+
+  bytes = hook_FFI_call_variadic(addr, &args, &fixtypes, &vartypes, type_sint);
+
+  BOOST_CHECK(bytes != NULL);
+
+  ret = *(int *) bytes->data;
+
+  BOOST_CHECK_EQUAL(ret, arg1 + arg2);
+
 }
 
 BOOST_AUTO_TEST_SUITE_END()
