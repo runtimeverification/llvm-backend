@@ -303,7 +303,7 @@ BOOST_AUTO_TEST_CASE(call) {
 }
 
 BOOST_AUTO_TEST_CASE(call_variadic) {
-  /* int sumInts(int x, ...) */
+  /* int addInts(int x, ...) */
   int n = 1;
   string * nargstr = makeString((char *) &n, sizeof(int)); 
 
@@ -337,7 +337,7 @@ BOOST_AUTO_TEST_CASE(call_variadic) {
   struct list fixtypes = hook_LIST_element(fixargtype);
   struct list vartypes = hook_LIST_element(varargtype);
 
-  string * fn = makeString("sumInts");
+  string * fn = makeString("addInts");
   mpz_ptr addr = hook_FFI_address(fn);
 
   string * bytes = hook_FFI_call_variadic(addr, &args, &fixtypes, &vartypes, type_sint);
