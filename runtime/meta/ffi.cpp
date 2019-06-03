@@ -152,13 +152,13 @@ extern "C" {
 
     size_t nargs = hook_LIST_size_long(args);
     size_t nfixtypes = hook_LIST_size_long(fixtypes);
-    size_t ntypes = nfixtypes;
+    size_t nvartypes = 0;
 
     if (isVariadic) {
-      ntypes += hook_LIST_size_long(vartypes);
+      nvartypes = hook_LIST_size_long(vartypes);
     }
 
-    if (nargs != ntypes) {
+    if (nargs != (nfixtypes + nvartypes)) {
       throw std::invalid_argument("Args size does not match types size");
     }
 
@@ -174,13 +174,13 @@ extern "C" {
         argtypes[i] = getTypeFromBlock((block *) *elem->children);
     }
 
-    for (int i = nfixtypes; i < nargs; i++) {
+    for (int i = 0; i < nvartypes; i++) {
         elem = hook_LIST_get(vartypes, i);
         if (elem->h.hdr != (uint64_t)getTagForSymbolName("inj{SortFFIType{}}")) {
           throw std::invalid_argument("Var types list contains invalid FFI type");
         }
 
-        argtypes[i] = getTypeFromBlock((block *) *elem->children);
+        argtypes[i + nfixtypes] = getTypeFromBlock((block *) *elem->children);
     }
 
     void ** avalues = (void **) malloc(sizeof(void *) * nargs);

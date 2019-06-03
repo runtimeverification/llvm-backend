@@ -47,6 +47,7 @@ extern "C" {
   void add_hash64(void*, uint64_t) {}
   mpz_ptr hook_FFI_address(string * fn);
   string * hook_FFI_call(mpz_t addr, struct list * args, struct list * types, block * ret);
+  string * hook_FFI_call_variadic(mpz_t addr, struct list * args, struct list * fixtypes, struct list * vartypes, block * ret);
 
   string * makeString(const KCHAR *, int64_t len = -1);
 
@@ -299,6 +300,53 @@ BOOST_AUTO_TEST_CASE(call) {
   ret = *(int *) bytes->data;
 
   BOOST_CHECK_EQUAL(ret, p2.p.x * p2.p.y);
+}
+
+BOOST_AUTO_TEST_CASE(call_variadic) {
+  /* int sumInts(int x, ...) */
+  int n = 1;
+  string * nargstr = makeString((char *) &n, sizeof(int)); 
+
+  block * narg = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(string *)));
+  narg->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("inj{SortBytes{}}"));
+  memcpy(narg->children, &nargstr, sizeof(string *));
+
+  struct list args = hook_LIST_element(narg);
+
+  int arg1 = 1;
+  string * arg1str = makeString((char *) &arg1, sizeof(int)); 
+
+  block * arg1block = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(string *)));
+  arg1block->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("inj{SortBytes{}}"));
+  memcpy(arg1block->children, &arg1str, sizeof(string *));
+
+  struct list arg1list = hook_LIST_element(arg1block);
+
+  args = hook_LIST_concat(args, arg1list);
+
+  block * type_sint = (block *)((((uint64_t)getTagForSymbolName(TYPETAG(sint))) << 32) | 1);
+
+  block * fixargtype = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(block *)));
+  fixargtype->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("inj{SortFFIType{}}"));
+  memcpy(fixargtype->children, &type_sint, sizeof(block *));
+
+  block * varargtype = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(block *)));
+  varargtype->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("inj{SortFFIType{}}"));
+  memcpy(varargtype->children, &type_sint, sizeof(block *));
+
+  struct list fixtypes = hook_LIST_element(fixargtype);
+  struct list vartypes = hook_LIST_element(varargtype);
+
+  string * fn = makeString("sumInts");
+  mpz_ptr addr = hook_FFI_address(fn);
+
+  string * bytes = hook_FFI_call_variadic(addr, &args, &fixtypes, &vartypes, type_sint);
+
+  BOOST_CHECK(bytes != NULL);
+
+  int ret = *(int *) bytes->data;
+
+  BOOST_CHECK_EQUAL(ret, arg1);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
