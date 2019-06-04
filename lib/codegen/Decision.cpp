@@ -57,17 +57,26 @@ void DecisionNode::sharedNode(Decision *d, llvm::StringMap<llvm::Value *> &oldSu
     vars.insert(d->ChoiceVars.begin(), d->ChoiceVars.end());
   }
   for (std::string var : vars) {
-    auto Phi = phis.lookup(var);
+    auto Phi = phis[var][oldSubst[var]->getType()];
     if (!Phi) {
-      Phi = llvm::PHINode::Create(oldSubst[var]->getType(), 1, "phi" + var, Block->getFirstNonPHI());
+      Phi = llvm::PHINode::Create(oldSubst[var]->getType(), 1, "aux_phi" + var, cachedCode->getFirstNonPHI());
       for (llvm::BasicBlock *pred : predecessors) {
         Phi->addIncoming(llvm::UndefValue::get(Phi->getType()), pred);
       }
-      phis[var] = Phi;
+      phis[var][oldSubst[var]->getType()] = Phi;
     }
     Phi->addIncoming(oldSubst[var], Block);
-    predecessors.push_back(Block);
-    substitution[var] = phis.lookup(var);
+    substitution[var] = Phi;
+  }
+  predecessors.push_back(Block);
+  for (auto &entry : phis) {
+    std::string var = entry.first();
+    for (auto &entry2 : entry.second) {
+      auto Phi = entry2.second;
+      if (!vars.count(var) || oldSubst[var]->getType() != entry2.first) {
+        Phi->addIncoming(llvm::UndefValue::get(Phi->getType()), Block);
+      }
+    }
   }
 }
  
@@ -99,10 +108,10 @@ bool DecisionNode::beginNode(Decision *d, std::string name, llvm::StringMap<llvm
     }
     auto Phi = llvm::PHINode::Create(substitution[var]->getType(), 1, "phi" + var, Block);
     Phi->addIncoming(substitution[var], d->CurrentBlock);
-    predecessors.push_back(d->CurrentBlock);
-    phis[var] = Phi;
+    phis[var][substitution[var]->getType()] = Phi;
     substitution[var] = Phi;
   }
+  predecessors.push_back(d->CurrentBlock);
   d->CurrentBlock = Block;
   return false;
 }
@@ -295,6 +304,7 @@ void MakeIteratorNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> subst
 }
 
 void IterNextNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution) {
+  d->ChoiceVars = collectVars();
   if (beginNode(d, "choice" + binding, substitution)) {
     return;
   }
@@ -302,14 +312,13 @@ void IterNextNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitut
     abort();
   }
   d->ChoiceBlock = d->CurrentBlock;
-  d->ChoiceVars = collectVars();
   d->ChoiceNode = this;
   llvm::Value *arg = substitution.lookup(iterator);
 
   collectFail();
   if (containsFailNode) {
     for (std::string var : d->ChoiceVars) {
-      auto Phi = phis.lookup(var);
+      auto Phi = phis[var][substitution[var]->getType()];
       if (!Phi) {
         for (std::string v : collectVars()) {
           std::cerr << v << std::endl;
