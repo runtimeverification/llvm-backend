@@ -140,7 +140,7 @@ extern "C" {
     throw std::invalid_argument("Arg is not a supported type");
   }
 
-  string * hook_FFI_call(mpz_t addr, struct list * args, struct list * types, block * ret) {
+  string * ffiCall(bool isVariadic, mpz_t addr, struct list * args, struct list * fixtypes, struct list * vartypes, block * ret) {
     ffi_cif cif;
     ffi_type ** argtypes, * rtype;
     void (* address)(void);
@@ -148,25 +148,40 @@ extern "C" {
     if (!mpz_fits_ulong_p(addr)) {
       throw std::invalid_argument("Addr is too large");
     }
+
     address = (void (*) (void))  mpz_get_ui(addr);
 
     size_t nargs = hook_LIST_size_long(args);
-    size_t ntypes = hook_LIST_size_long(types);
+    size_t nfixtypes = hook_LIST_size_long(fixtypes);
+    size_t nvartypes = 0;
 
-    if (nargs != ntypes) {
+    if (isVariadic) {
+      nvartypes = hook_LIST_size_long(vartypes);
+    }
+
+    if (nargs != (nfixtypes + nvartypes)) {
       throw std::invalid_argument("Args size does not match types size");
     }
 
     argtypes = (ffi_type **) malloc(sizeof(ffi_type *) * nargs);
 
     block * elem;
-    for (int i = 0; i < nargs; i++) {
-        elem = hook_LIST_get(types, i);
+    for (int i = 0; i < nfixtypes; i++) {
+        elem = hook_LIST_get(fixtypes, i);
         if (elem->h.hdr != (uint64_t)getTagForSymbolName("inj{SortFFIType{}}")) {
-          throw std::invalid_argument("Types list contains invalid FFI type");
+          throw std::invalid_argument("Fix types list contains invalid FFI type");
         }
 
         argtypes[i] = getTypeFromBlock((block *) *elem->children);
+    }
+
+    for (int i = 0; i < nvartypes; i++) {
+        elem = hook_LIST_get(vartypes, i);
+        if (elem->h.hdr != (uint64_t)getTagForSymbolName("inj{SortFFIType{}}")) {
+          throw std::invalid_argument("Var types list contains invalid FFI type");
+        }
+
+        argtypes[i + nfixtypes] = getTypeFromBlock((block *) *elem->children);
     }
 
     void ** avalues = (void **) malloc(sizeof(void *) * nargs);
@@ -180,7 +195,13 @@ extern "C" {
 
     rtype = getTypeFromBlock(ret);
 
-    ffi_status status = ffi_prep_cif(&cif, FFI_DEFAULT_ABI, nargs, rtype, argtypes);
+    ffi_status status;
+    if (isVariadic) {
+      status = ffi_prep_cif_var(&cif, FFI_DEFAULT_ABI, nfixtypes, nargs, rtype, argtypes);
+    } else {
+      status = ffi_prep_cif(&cif, FFI_DEFAULT_ABI, nargs, rtype, argtypes);
+    }
+
     free(argtypes);
 
     switch (status) {
@@ -208,6 +229,14 @@ extern "C" {
     structTypes.clear();
 
     return rvalue;
+  }
+
+  string * hook_FFI_call(mpz_t addr, struct list * args, struct list * types, block * ret) {
+    return ffiCall(false, addr, args, types, NULL, ret);
+  }
+
+  string * hook_FFI_call_variadic(mpz_t addr, struct list * args, struct list * fixtypes, struct list * vartypes, block * ret) {
+    return ffiCall(true, addr, args, fixtypes, vartypes, ret);
   }
 
   mpz_ptr hook_FFI_address(string * fn) {

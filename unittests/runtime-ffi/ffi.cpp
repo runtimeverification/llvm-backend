@@ -47,6 +47,7 @@ extern "C" {
   void add_hash64(void*, uint64_t) {}
   mpz_ptr hook_FFI_address(string * fn);
   string * hook_FFI_call(mpz_t addr, struct list * args, struct list * types, block * ret);
+  string * hook_FFI_call_variadic(mpz_t addr, struct list * args, struct list * fixtypes, struct list * vartypes, block * ret);
 
   string * makeString(const KCHAR *, int64_t len = -1);
 
@@ -62,6 +63,12 @@ extern "C" {
     l.a = (uint64_t)(koreAlloc(sizeof(std::vector<block *>)));
     ((std::vector<block *> *)l.a)->insert(((std::vector<block *> *)l.a)->end(),((std::vector<block *> *)l1.a)->begin(), ((std::vector<block *> *)l1.a)->end());
     ((std::vector<block *> *)l.a)->insert(((std::vector<block *> *)l.a)->end(),((std::vector<block *> *)l2.a)->begin(), ((std::vector<block *> *)l2.a)->end());
+    return l;
+  }
+
+  struct list hook_LIST_unit() {
+    struct list l;
+    l.a = (uint64_t)(koreAlloc(sizeof(std::vector<block *>)));
     return l;
   }
 
@@ -299,6 +306,103 @@ BOOST_AUTO_TEST_CASE(call) {
   ret = *(int *) bytes->data;
 
   BOOST_CHECK_EQUAL(ret, p2.p.x * p2.p.y);
+}
+
+BOOST_AUTO_TEST_CASE(call_variadic) {
+  /* int addInts(int x, ...) */
+  int n = 1;
+  string * nargstr = makeString((char *) &n, sizeof(int)); 
+
+  block * narg = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(string *)));
+  narg->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("inj{SortBytes{}}"));
+  memcpy(narg->children, &nargstr, sizeof(string *));
+
+  struct list args = hook_LIST_element(narg);
+
+  int arg1 = 1;
+  string * arg1str = makeString((char *) &arg1, sizeof(int)); 
+
+  block * arg1block = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(string *)));
+  arg1block->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("inj{SortBytes{}}"));
+  memcpy(arg1block->children, &arg1str, sizeof(string *));
+
+  struct list arg1list = hook_LIST_element(arg1block);
+
+  args = hook_LIST_concat(args, arg1list);
+
+  block * type_sint = (block *)((((uint64_t)getTagForSymbolName(TYPETAG(sint))) << 32) | 1);
+
+  block * fixargtype = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(block *)));
+  fixargtype->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("inj{SortFFIType{}}"));
+  memcpy(fixargtype->children, &type_sint, sizeof(block *));
+
+  block * varargtype = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(block *)));
+  varargtype->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("inj{SortFFIType{}}"));
+  memcpy(varargtype->children, &type_sint, sizeof(block *));
+
+  struct list fixtypes = hook_LIST_element(fixargtype);
+  struct list vartypes = hook_LIST_element(varargtype);
+
+  string * fn = makeString("addInts");
+  mpz_ptr addr = hook_FFI_address(fn);
+
+  string * bytes = hook_FFI_call_variadic(addr, &args, &fixtypes, &vartypes, type_sint);
+
+  BOOST_CHECK(bytes != NULL);
+
+  int ret = *(int *) bytes->data;
+
+  BOOST_CHECK_EQUAL(ret, arg1);
+
+  /* addInts with 2 var args */
+  n = 2;
+  nargstr = makeString((char *) &n, sizeof(int));
+  memcpy(narg->children, &nargstr, sizeof(string *));
+  args = hook_LIST_element(narg);
+
+  arg1 = 20;
+  arg1str = makeString((char *) &arg1, sizeof(int));
+  memcpy(arg1block->children, &arg1str, sizeof(string *));
+  arg1list = hook_LIST_element(arg1block);
+  args = hook_LIST_concat(args, arg1list);
+
+  int arg2 = 15;
+  string * arg2str = makeString((char *) &arg2, sizeof(int));
+
+  block * arg2block = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(string *)));
+  arg2block->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("inj{SortBytes{}}"));
+  memcpy(arg2block->children, &arg2str, sizeof(string *));
+
+  struct list arg2list = hook_LIST_element(arg2block);
+
+  args = hook_LIST_concat(args, arg2list);
+
+  vartypes = hook_LIST_element(varargtype);
+  vartypes = hook_LIST_concat(vartypes, vartypes);
+
+  bytes = hook_FFI_call_variadic(addr, &args, &fixtypes, &vartypes, type_sint);
+
+  BOOST_CHECK(bytes != NULL);
+
+  ret = *(int *) bytes->data;
+
+  BOOST_CHECK_EQUAL(ret, arg1 + arg2);
+
+  /* addInts with 0 var args */
+  n = 0;
+  nargstr = makeString((char *) &n, sizeof(int));
+  memcpy(narg->children, &nargstr, sizeof(string *));
+  args = hook_LIST_element(narg);
+
+  vartypes = hook_LIST_unit();
+
+  bytes = hook_FFI_call_variadic(addr, &args, &fixtypes, &vartypes, type_sint);
+
+  BOOST_CHECK(bytes != NULL);
+
+  ret = *(int *) bytes->data;
+
+  BOOST_CHECK_EQUAL(ret, 0);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
