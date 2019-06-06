@@ -23,33 +23,50 @@ class Column(val fringe: Fringe, val patterns: IndexedSeq[Pattern[String]], val 
     computeScoreForKey(bestKey)
   }
 
+  def isValid: Boolean = isValidForKey(bestKey)
+
+  def isValidForKey(key: Option[Pattern[Option[Occurrence]]]): Boolean = {
+    !fringe.sortInfo.isCollection || key.isDefined || !patterns.exists(_.isChoice)
+  }
+
   def computeScoreForKey(key: Option[Pattern[Option[Occurrence]]]): Double = {
+    def withChoice(result: Double): Double = {
+      if (key.isDefined) {
+        val none = computeScoreForKey(None)
+        if (none > result) {
+          none
+        } else {
+          result
+        }
+      } else {
+        result
+      }
+    }
     if (isWildcard) {
       Double.PositiveInfinity
     } else {
       var result = 0.0
       for (i <- patterns.indices) {
         if (clauses(i).action.priority != clauses.head.action.priority)
-          return result
-        result += patterns(i).score(fringe, clauses(i), key)
-        if (result == Double.NegativeInfinity) {
-          return result
-        }
+          return withChoice(result)
+        result += patterns(i).score(fringe, clauses(i), key, isEmpty)
       }
       assert(!result.isNaN)
-      result
+      withChoice(result)
     }
   }
 
+  lazy val keyVars: Seq[Set[String]] = {
+    val keys = patterns.map(_.mapOrSetKeys)
+    keys.map(_.flatMap(_.variables).toSet)
+  }
   private lazy val boundVars: Seq[Set[String]] = patterns.map(_.variables)
   def needed(vars: Seq[Set[String]]): Boolean = {
-    if (score < 0) {
-      false
-    } else {
-      val intersection = (vars, boundVars).zipped.map(_.intersect(_))
-      intersection.exists(_.nonEmpty)
-    }
+    val intersection = (vars, boundVars).zipped.map(_.intersect(_))
+    intersection.exists(_.nonEmpty)
   }
+
+  private lazy val isEmpty = fringe.sortInfo.isCollection && rawSignature.contains(Empty())
 
   private lazy val rawSignature: Seq[Constructor] = {
     patterns.zipWithIndex.flatMap(p => p._1.signature(clauses(p._2)))
@@ -100,10 +117,11 @@ class Column(val fringe: Fringe, val patterns: IndexedSeq[Pattern[String]], val 
     if (possibleKeys.isEmpty) {
       None
     } else {
-      val rawBestKey = possibleKeys.map(k => (k, computeScoreForKey(Some(k)))).maxBy(_._2)
-      if (rawBestKey._2 == Double.NegativeInfinity) {
+      val validKeys = possibleKeys.filter(k => isValidForKey(Some(k)))
+      if (validKeys.isEmpty) {
         None
       } else {
+        val rawBestKey = validKeys.map(k => (k, computeScoreForKey(Some(k)))).maxBy(_._2)
         Some(rawBestKey._1)
       }
     }
@@ -306,15 +324,20 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
 
   // compute the column with the best score, choosing the first such column if they are equal
   lazy val bestColIx: Int = {
-    val best = columns.zipWithIndex.maxBy(_._1.score)
-    if (best._1.score == 0.0) {
-      val unboundMapColumns = columns.filter(col => col.score.isNegInfinity)
-      val unboundPatterns = unboundMapColumns.map(_.patterns).transpose
-      val keys = unboundPatterns.map(_.flatMap(_.mapOrSetKeys))
-      val vars = keys.map(_.flatMap(_.variables).toSet)
-      columns.zipWithIndex.find(_._1.needed(vars)).getOrElse(columns.head, 0)._2
+    val validCols = columns.zipWithIndex.filter(col => col._1.isValid || columns.forall(c => c == col._1 || !c.needed(col._1.keyVars)))
+    if (validCols.isEmpty) {
+      0
     } else {
-      best._2
+      val best = validCols.maxBy(_._1.score)
+      if (best._1.score == 0.0) {
+        val unboundMapColumns = columns.filter(col => !col.isValid)
+        val unboundPatterns = unboundMapColumns.map(_.patterns).transpose
+        val keys = unboundPatterns.map(_.flatMap(_.mapOrSetKeys))
+        val vars = keys.map(_.flatMap(_.variables).toSet)
+        validCols.find(col => col._1.isValid && col._1.needed(vars)).getOrElse(columns.head, 0)._2
+      } else {
+        best._2
+      }
     }
   }
 
