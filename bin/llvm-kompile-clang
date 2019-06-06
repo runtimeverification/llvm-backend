@@ -39,7 +39,7 @@ fi
   "$LIBDIR"/libAST.a \
   "$LIBDIR"/liballoc.a \
   "$LIBDIR"/libmeta.a \
-  -lgmp -lmpfr -lpthread -ldl \
+  -lgmp -lmpfr -lpthread -ldl -lffi \
   $flags \
   -ljemalloc \
   -I "$(dirname "$0")"/../include \
