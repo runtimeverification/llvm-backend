@@ -14,7 +14,7 @@ object Matching {
     val axioms = Parser.parseTopAxioms(allAxioms)
     val symlib = Parser.parseSymbols(defn)
     val dt = if (axioms.isEmpty) {
-      Failure(0)
+      Failure()
     } else {
       Generator.mkDecisionTree(symlib, defn, axioms, Seq(axioms.head.rewrite.sort))
     }

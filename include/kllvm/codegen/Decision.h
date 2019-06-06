@@ -4,6 +4,7 @@
 #include "kllvm/ast/AST.h"
 
 #include "llvm/ADT/StringMap.h"
+#include "llvm/IR/Instructions.h" 
 #include "llvm/IR/Module.h"
 #include "llvm/IR/Value.h"
 
@@ -15,7 +16,8 @@ class DecisionCase;
 class DecisionNode {
 public:
   llvm::BasicBlock * cachedCode = nullptr;
-  llvm::StringMap<llvm::PHINode *> phis;
+  llvm::StringMap<std::map<llvm::Type *, llvm::PHINode *>> phis;
+  std::vector<llvm::BasicBlock *> predecessors;
   /* completed tracks whether codegen for this DecisionNode has concluded */
   bool completed = false;
 
@@ -358,8 +360,9 @@ class Decision {
 private:
   KOREDefinition *Definition;
   llvm::BasicBlock *CurrentBlock;
-  llvm::BasicBlock *StuckBlock;
   llvm::BasicBlock *FailureBlock;
+  llvm::IndirectBrInst *FailJump;
+  llvm::AllocaInst *FailAddress;
   llvm::BasicBlock *ChoiceBlock;
   DecisionNode *ChoiceNode;
   std::set<std::string> ChoiceVars;
@@ -367,18 +370,24 @@ private:
   llvm::LLVMContext &Ctx;
   ValueType Cat;
 
+  llvm::StringMap<std::map<llvm::Type *, llvm::PHINode *>> failPhis;
+
   llvm::Value *getTag(llvm::Value *);
+  void addFailPhiIncoming(llvm::StringMap<llvm::Value *> oldSubst, llvm::BasicBlock *switchBlock);
 public:
   Decision(
     KOREDefinition *Definition,
     llvm::BasicBlock *EntryBlock,
-    llvm::BasicBlock *StuckBlock,
+    llvm::BasicBlock *FailureBlock,
+    llvm::IndirectBrInst *FailJump,
+    llvm::AllocaInst *FailAddress,
     llvm::Module *Module,
     ValueType Cat) :
       Definition(Definition),
       CurrentBlock(EntryBlock),
-      StuckBlock(StuckBlock),
-      FailureBlock(StuckBlock),
+      FailureBlock(FailureBlock),
+      FailJump(FailJump),
+      FailAddress(FailAddress),
       ChoiceBlock(nullptr),
       ChoiceNode(nullptr),
       ChoiceVars(),
