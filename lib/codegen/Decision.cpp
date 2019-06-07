@@ -296,8 +296,9 @@ void MakeIteratorNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> subst
     constant->print(llvm::errs());
     abort();
   }
-  llvm::CallInst::Create(func, args, "", d->CurrentBlock);
+  auto call = llvm::CallInst::Create(func, args, "", d->CurrentBlock);
   func->arg_begin()->addAttr(llvm::Attribute::StructRet);
+  call->addParamAttr(0, llvm::Attribute::StructRet);
   substitution[name] = AllocSret;
   child->codegen(d, substitution);
   setCompleted();

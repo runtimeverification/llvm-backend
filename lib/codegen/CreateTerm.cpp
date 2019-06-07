@@ -495,6 +495,7 @@ llvm::Value *CreateTerm::createFunctionCall(std::string name, ValueType returnCa
   }
   if (sret) {
     func->arg_begin()->addAttr(llvm::Attribute::StructRet);
+    call->addParamAttr(0, llvm::Attribute::StructRet);
     return AllocSret;
   }
   return call;
