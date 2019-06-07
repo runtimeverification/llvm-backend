@@ -284,7 +284,7 @@ void MakeIteratorNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> subst
   llvm::Value *arg = substitution.lookup(collection);
   args.push_back(arg);
   types.push_back(arg->getType());
-  llvm::Value *AllocSret = allocateTerm(d->Module->getTypeByName("iter"), d->CurrentBlock, "koreAllocNoGC");
+  llvm::Value *AllocSret = allocateTerm(d->Module->getTypeByName("iter"), d->CurrentBlock, "koreAllocAlwaysGC");
   AllocSret->setName(name);
   args.insert(args.begin(), AllocSret);
   types.insert(types.begin(), AllocSret->getType());

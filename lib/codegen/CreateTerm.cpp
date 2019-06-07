@@ -476,7 +476,7 @@ llvm::Value *CreateTerm::createFunctionCall(std::string name, ValueType returnCa
   }
   if (sret) {
     // we don't use alloca here because the tail call optimization pass for llvm doesn't handle correctly functions with alloca
-    AllocSret = allocateTerm(returnType, CurrentBlock, "koreAllocNoGC");
+    AllocSret = allocateTerm(returnType, CurrentBlock, "koreAllocAlwaysGC");
     args.insert(args.begin(), AllocSret);
     types.insert(types.begin(), AllocSret->getType());
     returnType = llvm::Type::getVoidTy(Ctx);
