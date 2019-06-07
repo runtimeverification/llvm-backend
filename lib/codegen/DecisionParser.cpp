@@ -1,6 +1,6 @@
 #include "kllvm/codegen/DecisionParser.h"
 
-#include <yaml-cpp/yaml.h>
+#include <yaml.h>
 
 #include <stack>
 #include <iostream>
@@ -9,36 +9,63 @@ namespace kllvm {
 
 class DTPreprocessor {
 private:
-  // we do a giant nasty hack around the fact that YAML::Node doesn't
-  // implement comparison or hashing by storing the pointer to the cached
-  // DecisionNode as a scalar in a YAML node.
-  YAML::Node uniqueNodes;
+  std::map<yaml_node_t *, DecisionNode *> uniqueNodes;
   const std::map<std::string, KOREObjectSymbol *> &syms;
   const std::map<std::string, KOREObjectCompositeSort *> &sorts;
   KOREObjectSymbol *dv;
+  yaml_document_t *doc;
 
   enum Kind {
     Switch, SwitchLiteral, CheckNull, MakePattern, Function, MakeIterator, IterNext, Leaf, Fail
   };
 
-  static Kind getKind(YAML::Node node) {
-    if (node.IsScalar()) return Fail;
-    if (node["collection"]) return MakeIterator;
-    if (node["iterator"]) return IterNext;
-    if (node["isnull"]) return CheckNull;
-    if (node["pattern"]) return MakePattern;
-    if (node["bitwidth"]) return SwitchLiteral;
-    if (node["specializations"]) return Switch;
-    if (node["action"]) return Leaf;
-    if (node["function"]) return Function;
+  yaml_node_t *get(yaml_node_t *node, std::string name) {
+    yaml_node_pair_t *entry;
+    for (entry = node->data.mapping.pairs.start; entry < node->data.mapping.pairs.top; ++entry) {
+      yaml_node_t *key = yaml_document_get_node(doc, entry->key);
+      if (name == (char *)key->data.scalar.value) {
+        return yaml_document_get_node(doc, entry->value);
+      }
+    }
+    return nullptr;
+  }
+
+  yaml_node_t *get(yaml_node_t *node, size_t off) {
+    return yaml_document_get_node(doc, node->data.sequence.items.start[off]);
+  }
+  
+  std::string str(yaml_node_t *node) {
+    return std::string((char *)node->data.scalar.value, node->data.scalar.length);
+  }
+  
+  std::vector<std::string> vec(yaml_node_t *node) {
+    std::vector<std::string> result;
+    yaml_node_item_t *entry;
+    for (entry = node->data.sequence.items.start; entry < node->data.sequence.items.top; ++entry) {
+      result.push_back(str(yaml_document_get_node(doc, *entry)));
+    }
+    return result;
+  }
+
+  Kind getKind(yaml_node_t *node) {
+    if (node->type == YAML_SCALAR_NODE) return Fail;
+    if (get(node, "collection")) return MakeIterator;
+    if (get(node, "iterator")) return IterNext;
+    if (get(node, "isnull")) return CheckNull;
+    if (get(node, "pattern")) return MakePattern;
+    if (get(node, "bitwidth")) return SwitchLiteral;
+    if (get(node, "specializations")) return Switch;
+    if (get(node, "action")) return Leaf;
+    if (get(node, "function")) return Function;
     throw node;
   }
 
 public:
   DTPreprocessor(
       const std::map<std::string, KOREObjectSymbol *> &syms,
-      const std::map<std::string, KOREObjectCompositeSort *> &sorts)
-      : syms(syms), sorts(sorts) {
+      const std::map<std::string, KOREObjectCompositeSort *> &sorts,
+      yaml_document_t *doc)
+      : syms(syms), sorts(sorts), doc(doc) {
     dv = KOREObjectSymbol::Create("\\dv");
   }
 
@@ -51,21 +78,21 @@ public:
     return result;
   }
 
-  DecisionNode *function(YAML::Node node) {
-    std::string function = node["function"].as<std::string>();
-    std::string hookName = node["sort"].as<std::string>();
+  DecisionNode *function(yaml_node_t *node) {
+    std::string function = str(get(node, "function"));
+    std::string hookName = str(get(node, "sort"));
     ValueType cat = KOREObjectCompositeSort::getCategory(hookName);
 
-    std::string binding = to_string(node["occurrence"].as<std::vector<std::string>>());
+    std::string binding = to_string(vec(get(node, "occurrence")));
 
-    auto child = (*this)(node["next"]); 
+    auto child = (*this)(get(node, "next")); 
 
     auto result = FunctionNode::Create(binding, function, child, cat);
     
-    YAML::Node vars = node["args"];
-    for (auto iter = vars.begin(); iter != vars.end(); ++iter) {
-      auto var = *iter;
-      auto occurrence = var.as<std::vector<std::string>>();
+    yaml_node_t *vars = get(node, "args");
+    for (auto iter = vars->data.sequence.items.start; iter < vars->data.sequence.items.top; ++iter) {
+      auto var = yaml_document_get_node(doc, *iter);
+      auto occurrence = vec(var);
       if (occurrence.size() == 3 && occurrence[0] == "lit" && occurrence[2] == "MINT.MInt 64") {
         result->addBinding(occurrence[1]);
       } else {
@@ -75,74 +102,76 @@ public:
     return result;
   }
 
-  KOREObjectPattern *parsePattern(YAML::Node node, std::vector<std::string> &uses) {
-    if (node["occurrence"]) {
-      std::string name = to_string(node["occurrence"].as<std::vector<std::string>>());
+  KOREObjectPattern *parsePattern(yaml_node_t *node, std::vector<std::string> &uses) {
+    if (get(node, "occurrence")) {
+      std::string name = to_string(vec(get(node, "occurrence")));
       uses.push_back(name);
-      return KOREObjectVariablePattern::Create(name, sorts.at(node["hook"].as<std::string>()));
-    } else if (node["literal"]) {
+      return KOREObjectVariablePattern::Create(name, sorts.at(str(get(node, "hook"))));
+    } else if (get(node, "literal")) {
       auto sym = KOREObjectSymbol::Create("\\dv");
-      sym->addFormalArgument(sorts.at(node["hook"].as<std::string>()));
+      sym->addFormalArgument(sorts.at(str(get(node, "hook"))));
       auto pat = KOREObjectCompositePattern::Create(sym);
-      pat->addArgument(KOREMetaStringPattern::Create(node["literal"].as<std::string>()));
+      pat->addArgument(KOREMetaStringPattern::Create(str(get(node, "literal"))));
       return pat;
     } else {
-      if (!node["constructor"]) {
+      if (!get(node, "constructor")) {
         std::cerr << node << std::endl;
 	abort();
       }
-      auto sym = syms.at(node["constructor"].as<std::string>());
+      auto sym = syms.at(str(get(node, "constructor")));
       auto pat = KOREObjectCompositePattern::Create(sym);
-      for (auto child : node["args"]) {
+      auto seq = get(node, "args");
+      for (auto iter = seq->data.sequence.items.start; iter < seq->data.sequence.items.top; iter++) {
+        auto child = yaml_document_get_node(doc, *iter);
         pat->addArgument(parsePattern(child, uses));
       }
       return pat;
     }
   }
 
-  DecisionNode *makePattern(YAML::Node node) {
-    std::string name = to_string(node["occurrence"].as<std::vector<std::string>>());
+  DecisionNode *makePattern(yaml_node_t *node) {
+    std::string name = to_string(vec(get(node, "occurrence")));
 
     std::vector<std::string> uses;
 
-    KOREObjectPattern *pat = parsePattern(node["pattern"], uses);
+    KOREObjectPattern *pat = parsePattern(get(node, "pattern"), uses);
 
-    auto child = (*this)(node["next"]);
+    auto child = (*this)(get(node, "next"));
 
     return MakePatternNode::Create(name, pat, uses, child);
   }
 
-  DecisionNode *makeIterator(YAML::Node node) {
-    std::string name = to_string(node["collection"].as<std::vector<std::string>>());
-    std::string function = node["function"].as<std::string>();
-    auto child = (*this)(node["next"]);
+  DecisionNode *makeIterator(yaml_node_t *node) {
+    std::string name = to_string(vec(get(node, "collection")));
+    std::string function = str(get(node, "function"));
+    auto child = (*this)(get(node, "next"));
 
     return MakeIteratorNode::Create(name, name + "_iter", function, child);
   }
 
-  DecisionNode *iterNext(YAML::Node node) {
-    std::string iterator = to_string(node["iterator"].as<std::vector<std::string>>()) + "_iter";
-    std::string name = to_string(node["binding"].as<std::vector<std::string>>());
-    std::string function = node["function"].as<std::string>();
-    auto child = (*this)(node["next"]);
+  DecisionNode *iterNext(yaml_node_t *node) {
+    std::string iterator = to_string(vec(get(node, "iterator"))) + "_iter";
+    std::string name = to_string(vec(get(node, "binding")));
+    std::string function = str(get(node, "function"));
+    auto child = (*this)(get(node, "next"));
 
     return IterNextNode::Create(iterator, name, function, child);
   }
 
 
-  DecisionNode *switchCase(Kind kind, YAML::Node node) {
-    YAML::Node list = node["specializations"];
-    auto occurrence = node["occurrence"].as<std::vector<std::string>>();
+  DecisionNode *switchCase(Kind kind, yaml_node_t *node) {
+    yaml_node_t *list = get(node, "specializations");
+    auto occurrence = vec(get(node, "occurrence"));
     std::string name = to_string(occurrence);
     auto result = SwitchNode::Create(name, kind == CheckNull);
-    for (auto iter = list.begin(); iter != list.end(); ++iter) {
-      auto _case = *iter;
+    for (auto iter = list->data.sequence.items.start; iter < list->data.sequence.items.top; ++iter) {
+      auto _case = yaml_document_get_node(doc, *iter);
       std::vector<std::string> bindings;
       KOREObjectSymbol *symbol;
       if (kind == SwitchLiteral || kind == CheckNull) {
         symbol = dv;
       } else {
-        std::string symName = _case[0].as<std::string>();
+        std::string symName = str(get(_case, 0));
         symbol = syms.at(symName);
         if (!symbol) {
           std::cerr << symName << std::endl;
@@ -155,49 +184,49 @@ public:
           bindings.push_back(binding);
         }
       }
-      DecisionNode *child = (*this)(_case[1]);
+      DecisionNode *child = (*this)(get(_case, 1));
       switch (kind) {
       case SwitchLiteral: {
-        unsigned bitwidth = node["bitwidth"].as<unsigned>();
-        result->addCase({symbol, {bitwidth, _case[0].as<std::string>(), 10}, child}); 
+        unsigned bitwidth = stoi(str(get(node, "bitwidth")));
+        result->addCase({symbol, {bitwidth, str(get(_case, 0)), 10}, child}); 
         break;
       }
       case Switch:
         result->addCase({symbol, bindings, child});
         break;
       case CheckNull:
-        result->addCase({symbol, {1, _case[0].as<std::string>(), 10}, child}); 
+        result->addCase({symbol, {1, str(get(_case, 0)), 10}, child}); 
         break;
       default:
         assert(false && "not reachable");
         abort();
       }
     }
-    auto _case = node["default"];
-    if (!_case.IsNull()) {
+    auto _case = get(node, "default");
+    if (_case->type != YAML_SCALAR_NODE || !str(_case).empty()) {
       DecisionNode *child = (*this)(_case);
       result->addCase({nullptr, std::vector<std::string>{}, child});
     }
     return result;
   }
 
-  DecisionNode *leaf(YAML::Node node) {
-    int action = node["action"][0].as<int>();
+  DecisionNode *leaf(yaml_node_t *node) {
+    int action = stoi(str(get(get(node, "action"), 0)));
     std::string name = "apply_rule_" + std::to_string(action);
     auto result = LeafNode::Create(name);
-    YAML::Node vars = node["action"][1];
-    for (auto iter = vars.begin(); iter != vars.end(); ++iter) {
-      auto var = *iter;
-      auto occurrence = var.as<std::vector<std::string>>();
+    yaml_node_t *vars = get(get(node, "action"), 1);
+    for (auto iter = vars->data.sequence.items.start; iter < vars->data.sequence.items.top; ++iter) {
+      auto var = yaml_document_get_node(doc, *iter);
+      auto occurrence = vec(var);
       result->addBinding(to_string(occurrence));
     }
     return result;
   }
 
-  DecisionNode *operator()(YAML::Node node) {
+  DecisionNode *operator()(yaml_node_t *node) {
     auto unique = uniqueNodes[node];
     if (unique) {
-      return (DecisionNode *)unique.as<uintptr_t>();
+      return unique;
     }
     Kind kind = getKind(node);
     DecisionNode * ret = nullptr;
@@ -219,19 +248,37 @@ public:
     case IterNext:
       ret = iterNext(node); break;
     }
-    uniqueNodes[node] = (uintptr_t)ret;
+    uniqueNodes[node] = ret;
     return ret;
   }
 };
 
 DecisionNode *parseYamlDecisionTreeFromString(std::string yaml, const std::map<std::string, KOREObjectSymbol *> &syms, const std::map<std::string, KOREObjectCompositeSort *> &sorts) {
-  YAML::Node root = YAML::Load(yaml);
-  return DTPreprocessor(syms, sorts)(root);
+  yaml_parser_t parser;
+  yaml_document_t doc;
+  yaml_parser_initialize(&parser);
+  yaml_parser_set_input_string(&parser, (unsigned char *)yaml.c_str(), yaml.size());
+  yaml_parser_load(&parser, &doc);
+  yaml_node_t *root = yaml_document_get_root_node(&doc);
+  auto result = DTPreprocessor(syms, sorts, &doc)(root);
+  yaml_document_delete(&doc);
+  yaml_parser_delete(&parser);
+  return result;
 }
 
 DecisionNode *parseYamlDecisionTree(std::string filename, const std::map<std::string, KOREObjectSymbol *> &syms, const std::map<std::string, KOREObjectCompositeSort *> &sorts) {
-  YAML::Node root = YAML::LoadFile(filename);
-  return DTPreprocessor(syms, sorts)(root);
+  yaml_parser_t parser;
+  yaml_document_t doc;
+  yaml_parser_initialize(&parser);
+  FILE *f = fopen(filename.c_str(), "rb");
+  yaml_parser_set_input_file(&parser, f);
+  yaml_parser_load(&parser, &doc);
+  yaml_node_t *root = yaml_document_get_root_node(&doc);
+  auto result = DTPreprocessor(syms, sorts, &doc)(root);
+  yaml_document_delete(&doc);
+  yaml_parser_delete(&parser);
+  fclose(f);
+  return result;
 }
 
 }

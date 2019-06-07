@@ -11,7 +11,6 @@
 #include "llvm/Support/raw_ostream.h"
 
 #include <libgen.h>
-#include <yaml-cpp/yaml.h>
 
 #include <fstream>
 
@@ -64,7 +63,6 @@ int main (int argc, char **argv) {
   for (auto &entry : definition->getSymbols()) {
     auto symbol = entry.second;
     auto decl = definition->getSymbolDeclarations().at(symbol->getName());
-    try {
     if ((decl->getAttributes().count("function") && !decl->isHooked())) {
       std::string filename = getFilename(index, argv, decl);
       auto funcDt = parseYamlDecisionTree(filename, definition->getAllSymbols(), definition->getHookedSorts());
@@ -75,10 +73,6 @@ int main (int argc, char **argv) {
       std::ostringstream Out;
       decl->getSymbol()->print(Out);
       makeAnywhereFunction(definition->getAllSymbols().at(Out.str()), definition, mod.get(), funcDt);
-    }
-    } catch (YAML::BadFile f) {
-      std::cerr << filename << std::endl;
-      throw;
     }
   }
 
