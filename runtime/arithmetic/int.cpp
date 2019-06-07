@@ -3,6 +3,8 @@
 #include<cstring>
 #include<stdexcept>
 
+#include "runtime/header.h"
+
 extern "C" {
 
 mpz_ptr move_int(mpz_t);
@@ -344,6 +346,22 @@ void int_hash(mpz_t i, void *hasher) {
   for (int j = 0; j < nlimbs; j++) {
     add_hash64(hasher, i[0]._mp_d[j]);
   }
+}
+
+static block * dotK = (block *)((((uint64_t)getTagForSymbolName("dotk{}")) << 32) | 1);
+
+block *hook_INT_srand(mpz_t seed) {
+  if (!mpz_fits_uint_p(seed)) {
+    throw std::invalid_argument("Invalid seed");
+  }
+  srand(mpz_get_ui(seed));
+  return dotK;
+}
+
+mpz_ptr hook_INT_rand(void) {
+  mpz_t result;
+  mpz_init_set_si(result, rand());
+  return move_int(result);
 }
 
 }
