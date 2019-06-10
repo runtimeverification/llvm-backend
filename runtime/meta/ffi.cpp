@@ -255,7 +255,7 @@ extern "C" {
     return move_int(result);
   }
 
-  string * hook_FFI_alloc(block * kitem, mpz_ptr size) {
+  string * hook_FFI_alloc(block * kitem, mpz_t size) {
     if (!mpz_fits_ulong_p(size)) {
       throw std::invalid_argument("Size is too large");
     }
