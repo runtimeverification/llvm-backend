@@ -49,6 +49,12 @@ extern "C" {
   string * hook_FFI_call(mpz_t addr, struct list * args, struct list * types, block * ret);
   string * hook_FFI_call_variadic(mpz_t addr, struct list * args, struct list * fixtypes, struct list * vartypes, block * ret);
 
+  mpz_ptr hook_FFI_bytes_address(string * bytes);
+  block * hook_FFI_free(block * kitem);
+  block * hook_FFI_bytes_ref(string * bytes);
+  string * hook_FFI_alloc(block * kitem, mpz_t size);
+  bool hook_FFI_allocated(block * kitem);
+
   string * makeString(const KCHAR *, int64_t len = -1);
 
   struct list hook_LIST_element(block * value) {
@@ -403,6 +409,51 @@ BOOST_AUTO_TEST_CASE(call_variadic) {
   ret = *(int *) bytes->data;
 
   BOOST_CHECK_EQUAL(ret, 0);
+}
+
+BOOST_AUTO_TEST_CASE(alloc) {
+  block * i1 = (block *) 1;
+  mpz_t s1;
+  mpz_init_set_ui(s1, 1);
+
+  string * b1 = hook_FFI_alloc(i1, s1);
+  BOOST_CHECK(0 != b1);
+
+  string * b2 = hook_FFI_alloc(i1, s1);
+  BOOST_CHECK_EQUAL(b1, b2);
+}
+
+BOOST_AUTO_TEST_CASE(free) {
+  block * i1 = (block *) 1;
+  mpz_t s1;
+  mpz_init_set_ui(s1, 1);
+
+  hook_FFI_alloc(i1, s1);
+  hook_FFI_free(i1);
+}
+
+BOOST_AUTO_TEST_CASE(bytes_ref) {
+  block * i1 = (block *) 1;
+  mpz_t s1;
+  mpz_init_set_ui(s1, 1);
+
+  string * b1 = hook_FFI_alloc(i1, s1);
+
+  block * i2 = hook_FFI_bytes_ref(b1);
+
+  BOOST_CHECK_EQUAL(i1, i2);
+}
+
+BOOST_AUTO_TEST_CASE(allocated) {
+  block * i1 = (block *) 1;
+  mpz_t s1;
+  mpz_init_set_ui(s1, 1);
+
+  hook_FFI_alloc(i1, s1);
+  BOOST_CHECK_EQUAL(true, hook_FFI_allocated(i1));
+
+  block * i2 = (block *) 2;
+  BOOST_CHECK_EQUAL(false, hook_FFI_allocated(i2));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
