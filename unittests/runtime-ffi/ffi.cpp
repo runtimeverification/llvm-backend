@@ -25,8 +25,8 @@ extern "C" {
     struct point p;
   };
 
-#define NUM_SYMBOLS 5
-  const char * symbols[NUM_SYMBOLS] = {TYPETAG(struct), TYPETAG(uint), TYPETAG(sint), "inj{SortBytes{}}", "inj{SortFFIType{}}"};
+#define NUM_SYMBOLS 6
+  const char * symbols[NUM_SYMBOLS] = {TYPETAG(struct), TYPETAG(uint), TYPETAG(sint), TYPETAG(pointer), "inj{SortBytes{}}", "inj{SortFFIType{}}"};
 
   char * getTerminatedString(string * str);
 
@@ -312,6 +312,33 @@ BOOST_AUTO_TEST_CASE(call) {
   ret = *(int *) bytes->data;
 
   BOOST_CHECK_EQUAL(ret, p2.p.x * p2.p.y);
+
+  /* int pointerTest(int * x) */
+  x = 2;
+  int * ptr = &x;
+  string * ptrargstr = makeString((char *) &ptr, sizeof(int *)); 
+
+  block * ptrarg = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(string *)));
+  ptrarg->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("inj{SortBytes{}}"));
+  memcpy(ptrarg->children, &ptrargstr, sizeof(string *));
+
+  args = hook_LIST_element(ptrarg);
+  block * type_pointer = (block *)((((uint64_t)getTagForSymbolName(TYPETAG(pointer))) << 32) | 1);
+
+  memcpy(argtype->children, &type_pointer, sizeof(block *));
+
+  types = hook_LIST_element(argtype);
+
+  fn = makeString("pointerTest");
+  addr = hook_FFI_address(fn);
+
+  bytes = hook_FFI_call(addr, &args, &types, type_sint);
+
+  BOOST_CHECK(bytes != NULL);
+
+  ret = *(int *) bytes->data;
+
+  BOOST_CHECK_EQUAL(ret, x);
 }
 
 BOOST_AUTO_TEST_CASE(call_variadic) {
