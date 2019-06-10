@@ -4,6 +4,7 @@
 #include <gmp.h>
 #include <stdexcept>
 #include <vector>
+#include <map>
 
 #include "runtime/alloc.h"
 #include "runtime/header.h"
@@ -21,7 +22,12 @@ extern "C" {
   return tag; \
 }
 
+  static block * dotK = (block *)((((uint64_t)getTagForSymbolName("dotk{}")) << 32) | 1);
+
   thread_local static std::vector<ffi_type *> structTypes;
+
+  static std::map<block *, string *> allocatedKItemPtrs;
+  static std::map<string *, block *> allocatedBytesRefs;
 
   TAG_TYPE(void)
   TAG_TYPE(uint8)
@@ -248,4 +254,61 @@ extern "C" {
     mpz_init_set_ui(result, (uintptr_t)address);
     return move_int(result);
   }
+
+  string * hook_FFI_alloc(block * kitem, mpz_ptr size) {
+    if (!mpz_fits_ulong_p(size)) {
+      throw std::invalid_argument("Size is too large");
+    }
+
+    if (allocatedKItemPtrs.find(kitem) != allocatedKItemPtrs.end()) {
+      return allocatedKItemPtrs[kitem];
+    }
+
+    uintptr_t s = mpz_get_ui(size);
+
+    string * ret = (string *) calloc(sizeof(string *) + s, 1);
+    set_len(ret, s);
+
+    allocatedKItemPtrs[kitem] = ret;
+    allocatedBytesRefs[ret] = kitem;
+
+    return ret;
+  }
+
+  block * hook_FFI_free(block * kitem) {
+    auto ptrIter = allocatedKItemPtrs.find(kitem);
+    auto refIter = allocatedBytesRefs.find(ptrIter->second);
+
+    if (ptrIter != allocatedKItemPtrs.end()) {
+      allocatedKItemPtrs.erase(ptrIter);
+    }
+
+    if (refIter != allocatedBytesRefs.end()) {
+      allocatedBytesRefs.erase(refIter);
+    }
+
+    // Return error if maps are incorrect?
+    return dotK;
+  }
+
+  block * hook_FFI_bytes_ref(string * bytes) {
+    auto refIter = allocatedBytesRefs.find(bytes);
+
+    if (refIter == allocatedBytesRefs.end()) {
+      throw std::invalid_argument("Bytes have no reference");
+    }
+
+    return allocatedBytesRefs[bytes];
+  }
+
+  mpz_ptr hook_FFI_bytes_address(string * bytes) {
+    mpz_t addr;
+    mpz_init_set_ui(addr, (uintptr_t)bytes->data);
+    return move_int(addr);
+  }
+
+  bool hook_FFI_allocated(block * kitem) {
+    return allocatedKItemPtrs.find(kitem) != allocatedKItemPtrs.end();
+  }
 }
+
