@@ -5,6 +5,7 @@ import org.kframework.parser.kore._
 import org.kframework.parser.kore.parser.TextToKore
 
 import java.io.File
+import java.io.FileWriter
 
 object Matching {
   def writeDecisionTreeToFile(filename: File, moduleName: String, outputFolder: File) {
@@ -25,9 +26,15 @@ object Matching {
     val path = new File(outputFolder, "dt.yaml")
     dt.serializeToYaml(path)
     val files = (symlib.functions, dts).zipped.toIterable
+    val index = new File(outputFolder, "index.txt")
+    val writer = new FileWriter(index)
     for (pair <- files) {
-      pair._2.serializeToYaml(new File(outputFolder, pair._1.ctr + ".yaml"))
+      val sym = pair._1.ctr
+      val filename = (if (sym.length > 250) sym.substring(0, 250) else sym) + ".yaml"
+      pair._2.serializeToYaml(new File(outputFolder, filename))
+      writer.write(pair._1.ctr + "\t" + filename + "\n")
     }
+    writer.close
   }
 
   var logging = false
