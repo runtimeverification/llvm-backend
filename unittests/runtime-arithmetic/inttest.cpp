@@ -1,6 +1,8 @@
 #include <boost/test/unit_test.hpp>
 #include <gmp.h>
 
+#include "runtime/header.h"
+
 extern "C" {
   mpz_ptr hook_INT_tmod(mpz_t, mpz_t);
   mpz_ptr hook_INT_emod(mpz_t, mpz_t);
@@ -23,12 +25,14 @@ extern "C" {
   mpz_ptr hook_INT_not(mpz_t);
   mpz_ptr hook_INT_abs(mpz_t);
   mpz_ptr hook_INT_log2(mpz_t);
+  mpz_ptr hook_INT_rand(void);
   bool hook_INT_le(mpz_t, mpz_t);
   bool hook_INT_lt(mpz_t, mpz_t);
   bool hook_INT_eq(mpz_t, mpz_t);
   bool hook_INT_ne(mpz_t, mpz_t);
   bool hook_INT_ge(mpz_t, mpz_t);
   bool hook_INT_gt(mpz_t, mpz_t);
+  block *hook_INT_srand(mpz_t);
 
   mpz_ptr move_int(mpz_t i) {
     mpz_ptr result = (mpz_ptr)malloc(sizeof(__mpz_struct));
@@ -37,6 +41,10 @@ extern "C" {
   }
   
   void add_hash64(void*, uint64_t) {}
+
+  uint32_t getTagForSymbolName(const char *) {
+    return 0;
+  }
 }
 
 BOOST_AUTO_TEST_SUITE(IntTest)
@@ -594,6 +602,14 @@ BOOST_AUTO_TEST_CASE(signExtendBitRange) {
   mpz_clear(i);
   mpz_clear(off);
   mpz_clear(len);
+}
+
+BOOST_AUTO_TEST_CASE(rand) {
+  mpz_t seed;
+  mpz_init_set_ui(seed, 0);
+  BOOST_CHECK_EQUAL((uintptr_t)hook_INT_srand(seed), 1);
+  mpz_ptr result = hook_INT_rand();
+  BOOST_CHECK_EQUAL(mpz_cmp_ui(result, 1804289383), 0);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

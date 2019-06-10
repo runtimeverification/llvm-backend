@@ -53,7 +53,7 @@ abstract class EqualLiteral() extends SortCategory {
       Switch(litO, Seq(), Some(matrix.default.get.compile))
     } else if (ls.isEmpty) {
       // if no specializations remain and no default exists, fail the match
-      Failure(matrix.failureId)
+      Failure()
     } else {
       // consume each specialization one at a time and try to match it
       // if it succeseds, consume the occurrence and continue with the specialized matrix

@@ -1,6 +1,7 @@
 #include "kllvm/codegen/Decision.h"
 #include "kllvm/codegen/CreateTerm.h"
 
+#include "llvm/IR/CFG.h"
 #include "llvm/IR/Constants.h"
 #include "llvm/IR/Instructions.h" 
 #include "llvm/Support/raw_ostream.h"
@@ -18,6 +19,20 @@ void Decision::operator()(DecisionNode *entry, llvm::StringMap<llvm::Value *> su
     llvm::BranchInst::Create(this->FailureBlock, this->CurrentBlock);
   } else {
     entry->codegen(this, substitution);
+  }
+  for (auto &entry : failPhis) {
+    for (auto &entry2 : entry.second) {
+      llvm::PHINode *Phi = entry2.second;
+      std::vector<llvm::BasicBlock *> undefBlocks;
+      for (llvm::BasicBlock *block : llvm::predecessors(Phi->getParent())) {
+        if (Phi->getBasicBlockIndex(block) == -1) {
+          undefBlocks.push_back(block);
+	}
+      }
+      for (llvm::BasicBlock *block : undefBlocks) {
+        Phi->addIncoming(llvm::UndefValue::get(Phi->getType()), block);
+      }
+    }
   }
 }
 
@@ -42,15 +57,26 @@ void DecisionNode::sharedNode(Decision *d, llvm::StringMap<llvm::Value *> &oldSu
     vars.insert(d->ChoiceVars.begin(), d->ChoiceVars.end());
   }
   for (std::string var : vars) {
-    auto Phi = phis.lookup(var);
+    auto Phi = phis[var][oldSubst[var]->getType()];
     if (!Phi) {
-      for (std::string v : collectVars()) {
-        std::cerr << v << std::endl;
+      Phi = llvm::PHINode::Create(oldSubst[var]->getType(), 1, "aux_phi" + var, cachedCode->getFirstNonPHI());
+      for (llvm::BasicBlock *pred : predecessors) {
+        Phi->addIncoming(llvm::UndefValue::get(Phi->getType()), pred);
       }
-      abort();
+      phis[var][oldSubst[var]->getType()] = Phi;
     }
     Phi->addIncoming(oldSubst[var], Block);
-    substitution[var] = phis.lookup(var);
+    substitution[var] = Phi;
+  }
+  predecessors.push_back(Block);
+  for (auto &entry : phis) {
+    std::string var = entry.first();
+    for (auto &entry2 : entry.second) {
+      auto Phi = entry2.second;
+      if (!vars.count(var) || oldSubst[var]->getType() != entry2.first) {
+        Phi->addIncoming(llvm::UndefValue::get(Phi->getType()), Block);
+      }
+    }
   }
 }
  
@@ -82,23 +108,28 @@ bool DecisionNode::beginNode(Decision *d, std::string name, llvm::StringMap<llvm
     }
     auto Phi = llvm::PHINode::Create(substitution[var]->getType(), 1, "phi" + var, Block);
     Phi->addIncoming(substitution[var], d->CurrentBlock);
-    phis[var] = Phi;
+    phis[var][substitution[var]->getType()] = Phi;
     substitution[var] = Phi;
   }
+  predecessors.push_back(d->CurrentBlock);
   d->CurrentBlock = Block;
   return false;
+}
+
+void Decision::addFailPhiIncoming(llvm::StringMap<llvm::Value *> oldSubst, llvm::BasicBlock *switchBlock) {
+  if (ChoiceNode != nullptr) {
+    for (std::string var : ChoiceVars) {
+      failPhis[var][oldSubst[var]->getType()]->addIncoming(oldSubst[var], switchBlock);
+    }
+  }
 }
 
 void SwitchNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution) {
   if (beginNode(d, "switch" + name, substitution)) {
     return;
   }
-  llvm::BasicBlock *CurrentFailureBlock = d->FailureBlock;
-  if (d->ChoiceBlock) {
-    d->FailureBlock = d->ChoiceBlock;
-  }
   llvm::Value *val = substitution.lookup(name);
-  llvm::BasicBlock *_default = CurrentFailureBlock;
+  llvm::BasicBlock *_default = d->FailureBlock;
   const DecisionCase *defaultCase = nullptr;
   std::vector<std::pair<llvm::BasicBlock *, const DecisionCase *>> caseData;
   int idx = 0;
@@ -107,7 +138,7 @@ void SwitchNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitutio
     auto child = _case.getChild();
     llvm::BasicBlock *CaseBlock;
     if (child == FailNode::get()) {
-      CaseBlock = CurrentFailureBlock;
+      CaseBlock = d->FailureBlock;
     } else {
       CaseBlock = llvm::BasicBlock::Create(d->Ctx, 
           name + "_case_" + std::to_string(idx++),
@@ -126,6 +157,11 @@ void SwitchNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitutio
     auto cmp = new llvm::ICmpInst(*d->CurrentBlock, llvm::CmpInst::ICMP_NE, cast, llvm::ConstantExpr::getPtrToInt(llvm::ConstantPointerNull::get(llvm::dyn_cast<llvm::PointerType>(val->getType())), llvm::Type::getInt64Ty(d->Ctx)));
     val = cmp;
     isInt = true;
+  }
+  if (d->ChoiceBlock) {
+    new llvm::StoreInst(llvm::BlockAddress::get(d->CurrentBlock->getParent(), d->ChoiceBlock), d->FailAddress, d->CurrentBlock);
+    d->FailJump->addDestination(d->ChoiceBlock);
+    d->ChoiceBlock = nullptr;
   }
   if (isInt) {
     auto _switch = llvm::SwitchInst::Create(val, _default, cases.size(), d->CurrentBlock);
@@ -147,10 +183,8 @@ void SwitchNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitutio
   auto oldSubst = substitution;
   for (auto &entry : caseData) {
     auto &_case = *entry.second;
-    if (entry.first == CurrentFailureBlock) {
-      if (CurrentFailureBlock == d->ChoiceBlock) {
-        d->ChoiceNode->sharedNode(d, oldSubst, substitution, switchBlock);
-      }
+    if (entry.first == d->FailureBlock) {
+      d->addFailPhiIncoming(oldSubst, switchBlock);
       continue;
     }
     d->CurrentBlock = entry.first;
@@ -162,7 +196,7 @@ void SwitchNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitutio
       llvm::Value *Renamed;
       for (std::string binding : _case.getBindings()) {
         llvm::Value *ChildPtr = llvm::GetElementPtrInst::CreateInBounds(BlockType, Cast, {llvm::ConstantInt::get(llvm::Type::getInt64Ty(d->Ctx), 0), llvm::ConstantInt::get(llvm::Type::getInt32Ty(d->Ctx), offset+2)}, "", d->CurrentBlock);
-	llvm::Value *Child;
+        llvm::Value *Child;
         switch (dynamic_cast<KOREObjectCompositeSort *>(_case.getConstructor()->getArguments()[offset])->getCategory(d->Definition).cat) {
         case SortCategory::Map:
         case SortCategory::List:
@@ -177,32 +211,33 @@ void SwitchNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitutio
         if (symbolDecl->getAttributes().count("binder")) {
           if (offset == 0) {
             Renamed = llvm::CallInst::Create(d->Module->getOrInsertFunction("alphaRename", BlockPtr, BlockPtr), Child, "renamedVar", d->CurrentBlock);
-	    substitution[binding] = Renamed;
+            substitution[binding] = Renamed;
           } else if (offset == _case.getBindings().size() - 1) {
             llvm::Value *Replaced = llvm::CallInst::Create(d->Module->getOrInsertFunction("replaceBinderIndex", BlockPtr, BlockPtr, BlockPtr), {Child, Renamed}, "withUnboundIndex", d->CurrentBlock);
-	    substitution[binding] = Replaced;
+            substitution[binding] = Replaced;
           } else {
             substitution[binding] = Child;
           }
         } else {
           substitution[binding] = Child;
         }
-	offset++;
+        offset++;
       }
     }
     _case.getChild()->codegen(d, substitution);
   }
   if (defaultCase) {
-    if (_default != CurrentFailureBlock) {
+    if (_default != d->FailureBlock) {
       // process default also
       d->CurrentBlock = _default;
       defaultCase->getChild()->codegen(d, substitution);
-    } else if (CurrentFailureBlock == d->ChoiceBlock) {
-      d->ChoiceNode->sharedNode(d, oldSubst, substitution, switchBlock);
+    } else {
+      d->addFailPhiIncoming(oldSubst, switchBlock);
     }
-  } else if (CurrentFailureBlock == d->ChoiceBlock) {
-    d->ChoiceNode->sharedNode(d, oldSubst, substitution, switchBlock);
+  } else {
+    d->addFailPhiIncoming(oldSubst, switchBlock);
   }
+
   setCompleted();
 }
 
@@ -269,6 +304,7 @@ void MakeIteratorNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> subst
 }
 
 void IterNextNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution) {
+  d->ChoiceVars = collectVars();
   if (beginNode(d, "choice" + binding, substitution)) {
     return;
   }
@@ -276,9 +312,27 @@ void IterNextNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitut
     abort();
   }
   d->ChoiceBlock = d->CurrentBlock;
-  d->ChoiceVars = collectVars();
   d->ChoiceNode = this;
   llvm::Value *arg = substitution.lookup(iterator);
+
+  collectFail();
+  if (containsFailNode) {
+    for (std::string var : d->ChoiceVars) {
+      auto Phi = phis[var][substitution[var]->getType()];
+      if (!Phi) {
+        for (std::string v : collectVars()) {
+          std::cerr << v << std::endl;
+        }
+        abort();
+      }
+      auto failPhi = d->failPhis[var][Phi->getType()];
+      if (!failPhi) {
+        failPhi = llvm::PHINode::Create(Phi->getType(), 0, "phi" + var, d->FailureBlock->getFirstNonPHI());
+        d->failPhis[var][Phi->getType()] = failPhi;
+      }
+      Phi->addIncoming(failPhi, d->FailureBlock);
+    }
+  }
 
   llvm::FunctionType *funcType = llvm::FunctionType::get(getValueType({SortCategory::Symbol, 0}, d->Module), {arg->getType()}, false);
   llvm::Constant *constant = d->Module->getOrInsertFunction(hookName, funcType);
@@ -291,7 +345,7 @@ void IterNextNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitut
   substitution[binding] = Call;
   child->codegen(d, substitution);
   d->ChoiceBlock = nullptr;
-  d->FailureBlock = d->StuckBlock;
+  d->ChoiceNode = nullptr;
   d->ChoiceVars.clear();
   setCompleted();
 }
@@ -351,10 +405,17 @@ void makeEvalOrAnywhereFunction(KOREObjectSymbol *function, KOREDefinition *defi
     val->setName("_" + std::to_string(i+1));
     subst.insert({val->getName(), val});
   }
+  llvm::AllocaInst *addr = new llvm::AllocaInst(llvm::Type::getInt8PtrTy(module->getContext()), 0, "jumpTo", block);
   llvm::BasicBlock *stuck = llvm::BasicBlock::Create(module->getContext(), "stuck", matchFunc);
+  new llvm::StoreInst(llvm::BlockAddress::get(matchFunc, stuck), addr, block);
   addStuck(stuck, module, function, subst, definition);
 
-  Decision codegen(definition, block, stuck, module, returnSort);
+  llvm::BasicBlock *fail = llvm::BasicBlock::Create(module->getContext(), "fail", matchFunc);
+  llvm::LoadInst *load = new llvm::LoadInst(addr, "", fail);
+  llvm::IndirectBrInst *jump = llvm::IndirectBrInst::Create(load, 1, fail);
+  jump->addDestination(stuck);
+
+  Decision codegen(definition, block, fail, jump, addr, module, returnSort);
   codegen(dt, subst);
 }
 
@@ -397,10 +458,17 @@ void makeStepFunction(KOREDefinition *definition, llvm::Module *module, Decision
   val->setName("_1");
   subst.insert({val->getName(), val});
   llvm::BasicBlock *block = llvm::BasicBlock::Create(module->getContext(), "entry", matchFunc);
+  llvm::AllocaInst *addr = new llvm::AllocaInst(llvm::Type::getInt8PtrTy(module->getContext()), 0, "jumpTo", block);
   llvm::BasicBlock *stuck = llvm::BasicBlock::Create(module->getContext(), "stuck", matchFunc);
+  new llvm::StoreInst(llvm::BlockAddress::get(matchFunc, stuck), addr, block);
   llvm::ReturnInst::Create(module->getContext(), llvm::ConstantPointerNull::get(llvm::dyn_cast<llvm::PointerType>(blockType)), stuck);
 
-  Decision codegen(definition, block, stuck, module, {SortCategory::Symbol, 0});
+  llvm::BasicBlock *fail = llvm::BasicBlock::Create(module->getContext(), "fail", matchFunc);
+  llvm::LoadInst *load = new llvm::LoadInst(addr, "", fail);
+  llvm::IndirectBrInst *jump = llvm::IndirectBrInst::Create(load, 1, fail);
+  jump->addDestination(stuck);
+
+  Decision codegen(definition, block, fail, jump, addr, module, {SortCategory::Symbol, 0});
   codegen(dt, subst);
 }
 

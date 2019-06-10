@@ -145,4 +145,10 @@ define i1 @hook_KEQUAL_ne(%block* %arg1, %block* %arg2) {
   ret i1 %ne
 }
 
+define i1 @hook_BOOL_eq(i1 %arg1, i1 %arg2) #1 {
+  %eq = icmp eq i1 %arg1, %arg2
+  ret i1 %eq
+}
+
 attributes #0 = { noreturn }
+attributes #1 = { alwaysinline }
