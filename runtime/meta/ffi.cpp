@@ -49,6 +49,7 @@ extern "C" {
   TAG_TYPE(ulong)
   TAG_TYPE(slong)
   TAG_TYPE(longdouble)
+  TAG_TYPE(pointer)
 
   mpz_ptr move_int(mpz_t);
   char * getTerminatedString(string * str);
@@ -114,6 +115,8 @@ extern "C" {
         return &ffi_type_slong;
       } else if (symbol == tag_type_longdouble()) {
         return &ffi_type_longdouble;
+      } else if (symbol == tag_type_pointer()) {
+        return &ffi_type_pointer;
       }
     } else if (elem->h.hdr == (uint64_t)getTagForSymbolName(TYPETAG(struct))){
       struct list * elements = (struct list *) *elem->children;
@@ -282,10 +285,12 @@ extern "C" {
     if (ptrIter != allocatedKItemPtrs.end()) {
       free(allocatedKItemPtrs[kitem]);
       allocatedKItemPtrs.erase(ptrIter);
-    }
 
-    if (refIter != allocatedBytesRefs.end()) {
-      allocatedBytesRefs.erase(refIter);
+      if (refIter != allocatedBytesRefs.end()) {
+        allocatedBytesRefs.erase(refIter);
+      } else {
+        throw std::runtime_error("Internal memory map is out of sync");
+      }
     }
 
     return dotK;
