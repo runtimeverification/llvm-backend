@@ -264,7 +264,7 @@ extern "C" {
       return allocatedKItemPtrs[kitem];
     }
 
-    uintptr_t s = mpz_get_ui(size);
+    size_t s = mpz_get_ui(size);
 
     string * ret = (string *) calloc(sizeof(string *) + s, 1);
     set_len(ret, s);
@@ -280,6 +280,7 @@ extern "C" {
     auto refIter = allocatedBytesRefs.find(ptrIter->second);
 
     if (ptrIter != allocatedKItemPtrs.end()) {
+      free(allocatedKItemPtrs[kitem]);
       allocatedKItemPtrs.erase(ptrIter);
     }
 
@@ -287,7 +288,6 @@ extern "C" {
       allocatedBytesRefs.erase(refIter);
     }
 
-    // Return error if maps are incorrect?
     return dotK;
   }
 
