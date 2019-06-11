@@ -315,15 +315,16 @@ BOOST_AUTO_TEST_CASE(call) {
 
   /* int pointerTest(int * x) */
   x = 2;
-  string * b1 = hook_FFI_alloc((block *) 1, sizeof(int));
+  block * i1 = (block *) 1;
+  mpz_t s1;
+  mpz_init_set_ui(s1, sizeof(int));
+  string * b1 = hook_FFI_alloc(i1, s1);
   memcpy(b1->data, &x, sizeof(int));
 
-  mpz_ptr addr = hook_FFI_bytes_address(b1);
-  uintptr_t address = mpz_get_ui(addr);
+  mpz_ptr addr1 = hook_FFI_bytes_address(b1);
+  uintptr_t address1 = mpz_get_ui(addr1);
 
-  //int * ptr = &x;
-  //string * ptrargstr = makeString((char *) &ptr, sizeof(int *)); 
-  string * ptrargstr = makeString((char *) address, sizeof(uintptr_t)); 
+  string * ptrargstr = makeString((char *) &address1, sizeof(uintptr_t *));
 
   block * ptrarg = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(string *)));
   ptrarg->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("inj{SortBytes{}}"));
@@ -340,6 +341,8 @@ BOOST_AUTO_TEST_CASE(call) {
   addr = hook_FFI_address(fn);
 
   bytes = hook_FFI_call(addr, &args, &types, type_sint);
+
+  hook_FFI_free(i1);
 
   BOOST_CHECK(bytes != NULL);
 
