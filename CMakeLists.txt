@@ -42,6 +42,7 @@ endif()
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(FFI REQUIRED libffi)
 include_directories(AFTER SYSTEM ${FFI_INCLUDE_DIRS})
+link_directories(AFTER SYSTEM ${FFI_LIBRARY_DIRS})
 
 if (CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
 set(LLVM_KOMPILE_CLANG_FLAGS "-flto")
