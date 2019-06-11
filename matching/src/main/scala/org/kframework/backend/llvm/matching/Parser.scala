@@ -75,7 +75,6 @@ object Parser {
 
   private def rulePriority(axiom: AxiomDeclaration): Int = {
     if (hasAtt(axiom, "owise")) 150
-    else if (hasAtt(axiom, "cool")) 100
     else if (hasAtt(axiom, "priority")) getStringAtt(axiom.att, "priority").get.toInt
     else 50
   }
