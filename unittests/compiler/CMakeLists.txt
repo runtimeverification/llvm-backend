@@ -8,7 +8,7 @@ target_link_libraries(compiler-tests
   AST
   Codegen
   gmp
-  yaml-cpp
+  yaml
   ${Boost_UNIT_TEST_FRAMEWORK_LIBRARIES}
   ${llvm_libs}
 )

@@ -11,10 +11,15 @@
 #include "llvm/Support/raw_ostream.h"
 
 #include <libgen.h>
-#include <yaml-cpp/yaml.h>
+
+#include <fstream>
 
 using namespace kllvm;
 using namespace kllvm::parser;
+
+std::string getFilename(std::map<std::string, std::string> index, char **argv, KOREObjectSymbolDeclaration *decl) {
+  return argv[3] + std::string("/") + index.at(decl->getSymbol()->getName());
+}
 
 int main (int argc, char **argv) {
   if (argc < 4) {
@@ -43,23 +48,31 @@ int main (int argc, char **argv) {
   auto dt = parseYamlDecisionTree(argv[2], definition->getAllSymbols(), definition->getHookedSorts());
   makeStepFunction(definition, mod.get(), dt);
 
+  std::map<std::string, std::string> index;
+
+  std::ifstream in(argv[3] + std::string("/index.txt"));
+
+  std::string line;
+  while(std::getline(in, line)) {
+    size_t delim = line.find('\t');
+    index[line.substr(0, delim)] = line.substr(delim+1);
+  }
+
+  in.close();
+
   for (auto &entry : definition->getSymbols()) {
     auto symbol = entry.second;
     auto decl = definition->getSymbolDeclarations().at(symbol->getName());
-    std::string filename = argv[3] + std::string("/") + decl->getSymbol()->getName() + ".yaml";
-    try {
     if ((decl->getAttributes().count("function") && !decl->isHooked())) {
+      std::string filename = getFilename(index, argv, decl);
       auto funcDt = parseYamlDecisionTree(filename, definition->getAllSymbols(), definition->getHookedSorts());
       makeEvalFunction(decl->getSymbol(), definition, mod.get(), funcDt);
     } else if (decl->isAnywhere()) {
+      std::string filename = getFilename(index, argv, decl);
       auto funcDt = parseYamlDecisionTree(filename, definition->getAllSymbols(), definition->getHookedSorts());
       std::ostringstream Out;
       decl->getSymbol()->print(Out);
       makeAnywhereFunction(definition->getAllSymbols().at(Out.str()), definition, mod.get(), funcDt);
-    }
-    } catch (YAML::BadFile f) {
-      std::cerr << filename << std::endl;
-      throw;
     }
   }
 
