@@ -40,10 +40,10 @@ char oldspace_collection_id() {
 }
 
 void koreAllocSwap(bool swapOld) {
-  arenaSwapAndReset(&youngspace);
-  arenaSwapAndReset(&alwaysgcspace);
+  arenaSwapAndClear(&youngspace);
+  arenaClear(&alwaysgcspace);
   if (swapOld) {
-    arenaSwapAndReset(&oldspace);
+    arenaSwapAndClear(&oldspace);
   }
 }
 
