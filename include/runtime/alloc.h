@@ -21,6 +21,10 @@ void* koreAllocOld(size_t requested);
 void* koreAllocTokenOld(size_t requested);
 // allocates exactly requested bytes into the not garbage-collected arena
 void* koreAllocNoGC(size_t requested);
+// allocates exactly requested bytes into the always garbage-collected arena.
+// objects that can potentially survive a collection (i.e. can be reached from the
+// root during collection) should never be allocated in this arena.
+void* koreAllocAlwaysGC(size_t requested);
 // swaps the two semispace of the young generation as part of garbage collection
 // if the swapOld flag is set, it also swaps the two semispaces of the old generation
 void koreAllocSwap(bool swapOld);

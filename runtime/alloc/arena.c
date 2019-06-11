@@ -142,14 +142,18 @@ void *arenaResizeLastAlloc(struct arena *Arena, ssize_t increase) {
   return 0;
 }
 
-__attribute__ ((always_inline)) void arenaSwapAndReset(struct arena *Arena) {
+__attribute__ ((always_inline)) void arenaSwapAndClear(struct arena *Arena) {
   char *tmp = Arena->first_block;
   Arena->first_block = Arena->first_collection_block;
   Arena->first_collection_block = tmp;
+  Arena->allocation_semispace_id = ~Arena->allocation_semispace_id;
+  arenaClear(Arena);
+}
+
+__attribute__ ((always_inline)) void arenaClear(struct arena *Arena) {
   Arena->block = Arena->first_block ? Arena->first_block + sizeof(memory_block_header) : 0;
   Arena->block_start = Arena->first_block;
   Arena->block_end = Arena->first_block ? Arena->first_block + BLOCK_SIZE : 0;
-  Arena->allocation_semispace_id = ~Arena->allocation_semispace_id;
 }
 
 __attribute__ ((always_inline)) char *arenaStartPtr(const struct arena *Arena) {
