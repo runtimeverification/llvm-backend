@@ -10,7 +10,7 @@ else
 fi
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
-  flags=-lncurses
+  flags="-lncurses -L/usr/local/opt/libffi/lib"
 else
   flags=-ltinfo
 fi
