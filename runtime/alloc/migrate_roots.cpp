@@ -21,7 +21,7 @@ extern "C" {
     block_iterator BlockEndIt = BlockIteratorPair.second;
     
     for (block_iterator it =  BlockStartIt; it != BlockEndIt; ++it) {
-      migrate(&*it);
+      migrate(*it);
     }
   }
 }
