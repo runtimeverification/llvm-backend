@@ -14,7 +14,7 @@ sealed trait Heuristic {
   def scoreVariable[T](p: VariableP[T], f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double
   def scoreWildcard[T](p: WildcardP[T], f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double
 
-  def computeScoreForKey(c: Column, key: Option[Pattern[Option[Occurrence]]], withChoice: Double => Double): Double
+  def computeScoreForKey(c: Column, key: Option[Pattern[Option[Occurrence]]]): Double
 }
 
 object DefaultHeuristic extends Heuristic {
@@ -61,11 +61,11 @@ object DefaultHeuristic extends Heuristic {
   def scoreVariable[T](p: VariableP[T], f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double = 0.0
   def scoreWildcard[T](p: WildcardP[T], f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double = 0.0
 
-  def computeScoreForKey(c: Column, key: Option[Pattern[Option[Occurrence]]], withChoice: Double => Double): Double = {
+  def computeScoreForKey(c: Column, key: Option[Pattern[Option[Occurrence]]]): Double = {
     var result = 0.0
     for (i <- c.patterns.indices) {
       if (c.clauses(i).action.priority != c.clauses.head.action.priority)
-        return withChoice(result)
+        return result
       result += c.patterns(i).score(DefaultHeuristic, c.fringe, c.clauses(i), key, c.isEmpty)
     }
     result
