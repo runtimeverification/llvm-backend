@@ -53,7 +53,7 @@ case class AsP[T](name: T, sort: SortCategory, pat: Pattern[T]) extends Pattern[
   def isSpecialized(ix: Constructor, f: Fringe, c: Clause): Boolean = {
     pat.isSpecialized(ix, f, c)
   }
-  def score(h: Heuristic, f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double = h.scoreAs(f, c, key, isEmpty, pat)
+  def score(h: Heuristic, f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double = h.scoreAs(this, f, c, key, isEmpty)
   override def isChoice: Boolean = pat.isChoice
   def bindings(ix: Option[Constructor], occurrence: Occurrence): Seq[VariableBinding[T]] = {
     Seq(new VariableBinding(name, sort, occurrence)) ++ pat.bindings(ix, occurrence)
@@ -94,7 +94,7 @@ case class ListP[T](head: Seq[Pattern[T]], frame: Option[Pattern[T]], tail: Seq[
         false
     }
   }
-  def score(h: Heuristic, f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double = h.scoreList(f, c, key, isEmpty)
+  def score(h: Heuristic, f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double = h.scoreList(this, f, c, key, isEmpty)
   def bindings(ix: Option[Constructor], occurrence: Occurrence): Seq[VariableBinding[T]] = {
     if (frame.isEmpty) {
       Seq()
@@ -146,7 +146,7 @@ case class LiteralP[T](literal: String, sort: SortCategory) extends Pattern[T] {
     ix.isInstanceOf[LiteralC] && ix.asInstanceOf[LiteralC].literal == literal
   }
 
-  def score(h: Heuristic, f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double = h.scoreLiteral(f, c, key, isEmpty)
+  def score(h: Heuristic, f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double = h.scoreLiteral(this, f, c, key, isEmpty)
   def bindings(ix: Option[Constructor], occurrence: Occurrence): Seq[VariableBinding[T]] = Seq()
   def expand(ix: Constructor, fringes: Seq[Fringe], f: Fringe, clause: Clause): Seq[Pattern[T]] = Seq()
   def expandOr: Seq[Pattern[T]] = Seq(this)
@@ -183,7 +183,7 @@ case class MapP[T](keys: Seq[Pattern[T]], values: Seq[Pattern[T]], frame: Option
       case (HasNoKey(None), _) => false
     }
   }
-  def score(h: Heuristic, f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double = h.scoreMap(f, c, key, isEmpty, keys, frame, canonicalize)
+  def score(h: Heuristic, f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double = h.scoreMap(this, f, c, key, isEmpty)
   override def isChoice: Boolean = keys.nonEmpty
   def bindings(ix: Option[Constructor], occurrence: Occurrence): Seq[VariableBinding[T]] = {
     if (keys.isEmpty && values.isEmpty && frame.isDefined) {
@@ -235,7 +235,7 @@ case class OrP[T](ps: Seq[Pattern[T]]) extends Pattern[T] {
   def isWildcard: Boolean = ps.forall(_.isWildcard)
   def isDefault: Boolean = ???
   def isSpecialized(ix: Constructor, f: Fringe, c: Clause): Boolean = ???
-  def score(h: Heuristic, f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double = h.scoreOr(f, c, key, isEmpty, ps)
+  def score(h: Heuristic, f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double = h.scoreOr(this, f, c, key, isEmpty)
   override def isChoice: Boolean = ps.exists(_.isChoice)
   def bindings(ix: Option[Constructor], occurrence: Occurrence): Seq[VariableBinding[T]] = ???
   def expand(ix: Constructor, fringes: Seq[Fringe], f: Fringe, clause: Clause): Seq[Pattern[T]] = ???
@@ -290,7 +290,7 @@ case class SetP[T](elements: Seq[Pattern[T]], frame: Option[Pattern[T]], ctr: Sy
       case (HasNoKey(None), _) => false
     }
   }
-  def score(h: Heuristic, f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double = h.scoreSet(f, c, key, isEmpty, elements, frame, canonicalize)
+  def score(h: Heuristic, f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double = h.scoreSet(this, f, c, key, isEmpty)
   override def isChoice: Boolean = elements.nonEmpty
   def bindings(ix: Option[Constructor], occurrence: Occurrence): Seq[VariableBinding[T]] = {
     if (elements.isEmpty && frame.isDefined) {
@@ -352,7 +352,7 @@ case class SymbolP[T](sym: SymbolOrAlias, ps: Seq[Pattern[T]]) extends Pattern[T
       case (SymbolC(ix2), _) => ix2 == sym
     }
   }
-  def score(h: Heuristic, f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double = h.scoreSymbol(f, c, key, isEmpty, sym: SymbolOrAlias)
+  def score(h: Heuristic, f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double = h.scoreSymbol(this, f, c, key, isEmpty)
   def bindings(ix: Option[Constructor], occurrence: Occurrence): Seq[VariableBinding[T]] = {
     (ix, sym) match {
       case (Some(SymbolC(SymbolOrAlias("inj",Seq(a,_)))), SymbolOrAlias("inj",Seq(b,_))) =>
@@ -460,7 +460,7 @@ case class VariableP[T](name: T, sort: SortCategory) extends Pattern[T] {
   def isWildcard = true
   def isDefault = true
   def isSpecialized(ix: Constructor, fringe: Fringe, clause: Clause): Boolean = true
-  def score(h: Heuristic, f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double = h.scoreVariable(f, c, key, isEmpty)
+  def score(h: Heuristic, f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double = h.scoreVariable(this, f, c, key, isEmpty)
   def bindings(ix: Option[Constructor], occurrence: Occurrence): Seq[VariableBinding[T]] = {
     Seq(new VariableBinding(name, sort, occurrence))
   }
@@ -483,7 +483,7 @@ case class WildcardP[T]() extends Pattern[T] {
   def isDefault = true
   def isSpecialized(ix: Constructor, fringe: Fringe, clause: Clause): Boolean = true
 
-  def score(h: Heuristic, f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double = h.scoreWildcard(f, c, key, isEmpty)
+  def score(h: Heuristic, f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double = h.scoreWildcard(this, f, c, key, isEmpty)
   def bindings(ix: Option[Constructor], occurrence: Occurrence): Seq[VariableBinding[T]] = Seq()
   def expand(ix: Constructor, fringes: Seq[Fringe], f: Fringe, clause: Clause): Seq[Pattern[T]] = {
     fringes.map(_ => WildcardP().asInstanceOf[Pattern[T]])

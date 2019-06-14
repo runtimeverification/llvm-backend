@@ -46,11 +46,10 @@ class Column(val fringe: Fringe, val patterns: IndexedSeq[Pattern[String]], val 
       Double.PositiveInfinity
     } else {
       var result = 0.0
-      val heuristic = new FHeuristic()
       for (i <- patterns.indices) {
         if (clauses(i).action.priority != clauses.head.action.priority)
           return withChoice(result)
-        result += patterns(i).score(heuristic, fringe, clauses(i), key, isEmpty)
+        result += patterns(i).score(DefaultHeuristic, fringe, clauses(i), key, isEmpty)
       }
       assert(!result.isNaN)
       withChoice(result)

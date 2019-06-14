@@ -3,59 +3,59 @@ package org.kframework.backend.llvm.matching
 import org.kframework.parser.kore.SymbolOrAlias
 import org.kframework.backend.llvm.matching.pattern._
 
-trait Heuristic {
-  def scoreAs[T](f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean, pat: Pattern[T]): Double
-  def scoreList[T](f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double
-  def scoreLiteral[T](f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double
-  def scoreMap[T](f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean, keys: Seq[Pattern[T]], frame: Option[Pattern[T]], canonicalize: Clause => MapP[Option[Occurrence]]): Double
-  def scoreOr[T](f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean, ps: Seq[Pattern[T]]): Double
-  def scoreSet[T](f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean, elements: Seq[Pattern[T]], frame: Option[Pattern[T]], canonicalize: Clause => SetP[Option[Occurrence]]): Double
-  def scoreSymbol[T](f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean, sym: SymbolOrAlias): Double
-  def scoreVariable[T](f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double
-  def scoreWildcard[T](f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double
+sealed trait Heuristic {
+  def scoreAs[T](p: AsP[T], f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double
+  def scoreList[T](p: ListP[T], f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double
+  def scoreLiteral[T](p: LiteralP[T], f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double
+  def scoreMap[T](p: MapP[T], f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double
+  def scoreOr[T](p: OrP[T], f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double
+  def scoreSet[T](p: SetP[T], f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double
+  def scoreSymbol[T](p: SymbolP[T], f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double
+  def scoreVariable[T](p: VariableP[T], f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double
+  def scoreWildcard[T](p: WildcardP[T], f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double
 }
 
-class FHeuristic() extends Heuristic {
-  def scoreAs[T](f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean, pat: Pattern[T]): Double = pat.score(this, f, c, key, isEmpty)
-  def scoreList[T](f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double = 1.0
-  def scoreLiteral[T](f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double = 1.0
-  def scoreMap[T](f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean, keys: Seq[Pattern[T]], frame: Option[Pattern[T]], canonicalize: Clause => MapP[Option[Occurrence]]): Double = {
-    if (keys.isEmpty && frame.isEmpty) {
+object DefaultHeuristic extends Heuristic {
+  def scoreAs[T](p: AsP[T], f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double = p.pat.score(this, f, c, key, isEmpty)
+  def scoreList[T](p: ListP[T], f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double = 1.0
+  def scoreLiteral[T](p: LiteralP[T], f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double = 1.0
+  def scoreMap[T](p: MapP[T], f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double = {
+    if (p.keys.isEmpty && p.frame.isEmpty) {
       1.0
     } else if (isEmpty) {
       0.0
-    } else if (keys.isEmpty) {
-      frame.get.score(this, f, c, key, isEmpty)
+    } else if (p.keys.isEmpty) {
+      p.frame.get.score(this, f, c, key, isEmpty)
     } else if (key.isDefined) {
-      if (canonicalize(c).keys.contains(key.get)) 1.0 else 0.0
+      if (p.canonicalize(c).keys.contains(key.get)) 1.0 else 0.0
     } else {
       1.0
     }
   }
 
-  def scoreOr[T](f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean, ps: Seq[Pattern[T]]): Double = {
-    ps.map(_.score(this, f, c, key, isEmpty)).sum
+  def scoreOr[T](p: OrP[T], f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double = {
+    p.ps.map(_.score(this, f, c, key, isEmpty)).sum
   }
 
-  def scoreSet[T](f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean, elements: Seq[Pattern[T]], frame: Option[Pattern[T]], canonicalize: Clause => SetP[Option[Occurrence]]): Double = {
-    if (elements.isEmpty && frame.isEmpty) { 
+  def scoreSet[T](p: SetP[T], f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double = {
+    if (p.elements.isEmpty && p.frame.isEmpty) { 
       1.0
     } else if (isEmpty) {
       0.0
-    } else if (elements.isEmpty) {
-      frame.get.score(this, f, c, key, isEmpty)
+    } else if (p.elements.isEmpty) {
+      p.frame.get.score(this, f, c, key, isEmpty)
     } else if (key.isDefined) {
-      if (canonicalize(c).elements.contains(key.get)) 1.0 else 0.0
+      if (p.canonicalize(c).elements.contains(key.get)) 1.0 else 0.0
     } else {
       1.0
     }
   }
 
-  def scoreSymbol[T](f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean, sym: SymbolOrAlias): Double = {
-    val ncons = f.overloads(sym).size + 1.0
+  def scoreSymbol[T](p: SymbolP[T], f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double = {
+    val ncons = f.overloads(p.sym).size + 1.0
     1.0 / ncons
   }
 
-  def scoreVariable[T](f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double = 0.0
-  def scoreWildcard[T](f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double = 0.0
+  def scoreVariable[T](p: VariableP[T], f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double = 0.0
+  def scoreWildcard[T](p: WildcardP[T], f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double = 0.0
 }
