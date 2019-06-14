@@ -13,6 +13,7 @@
 REGISTER_ARENA(youngspace, 0);
 REGISTER_ARENA(oldspace, 1);
 REGISTER_ARENA(nogcspace, 2);
+REGISTER_ARENA(alwaysgcspace, 3);
 
 char *youngspace_ptr() {
   return arenaStartPtr(&youngspace);
@@ -39,9 +40,10 @@ char oldspace_collection_id() {
 }
 
 void koreAllocSwap(bool swapOld) {
-  arenaSwapAndReset(&youngspace);
+  arenaSwapAndClear(&youngspace);
+  arenaClear(&alwaysgcspace);
   if (swapOld) {
-    arenaSwapAndReset(&oldspace);
+    arenaSwapAndClear(&oldspace);
   }
 }
 
@@ -50,6 +52,7 @@ void freeAllKoreMem() {
   arenaReset(&youngspace);
   arenaReset(&oldspace);
   arenaReset(&nogcspace);
+  arenaReset(&alwaysgcspace);
 }
 
 void setKoreMemoryFunctionsForGMP() {
@@ -76,6 +79,10 @@ __attribute__ ((always_inline)) void* koreAllocTokenOld(size_t requested) {
 
 __attribute__ ((always_inline)) void* koreAllocNoGC(size_t requested) {
   return arenaAlloc(&nogcspace, requested);
+}
+
+__attribute__ ((always_inline)) void* koreAllocAlwaysGC(size_t requested) {
+  return arenaAlloc(&alwaysgcspace, requested);
 }
 
 void* koreResizeLastAlloc(void* oldptr, size_t newrequest, size_t last_size) {

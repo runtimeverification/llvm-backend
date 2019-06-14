@@ -52,8 +52,13 @@ void *arenaAlloc(struct arena *, size_t);
 void *arenaResizeLastAlloc(struct arena *, ssize_t);
 
 // Exchanges the current allocation and collection semispaces and clears the new
-// current allocation semispace. It is used before garbage collection.
-void arenaSwapAndReset(struct arena *);
+// current allocation semispace by setting its start back to its first block.
+// It is used before garbage collection.
+void arenaSwapAndClear(struct arena *);
+
+// Clears the current allocation space by setting its start back to its first block.
+// It is used during garbage collection to effectively collect all of the arena.
+void arenaClear(struct arena *);
 
 // Returns the address of the first byte that belongs in the given arena.
 // Returns 0 if nothing has been allocated ever in that arena.

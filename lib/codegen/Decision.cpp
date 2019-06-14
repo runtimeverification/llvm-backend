@@ -284,7 +284,7 @@ void MakeIteratorNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> subst
   llvm::Value *arg = substitution.lookup(collection);
   args.push_back(arg);
   types.push_back(arg->getType());
-  llvm::Value *AllocSret = allocateTerm(d->Module->getTypeByName("iter"), d->CurrentBlock, "koreAllocNoGC");
+  llvm::Value *AllocSret = allocateTerm(d->Module->getTypeByName("iter"), d->CurrentBlock, "koreAllocAlwaysGC");
   AllocSret->setName(name);
   args.insert(args.begin(), AllocSret);
   types.insert(types.begin(), AllocSret->getType());
@@ -296,8 +296,9 @@ void MakeIteratorNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> subst
     constant->print(llvm::errs());
     abort();
   }
-  llvm::CallInst::Create(func, args, "", d->CurrentBlock);
+  auto call = llvm::CallInst::Create(func, args, "", d->CurrentBlock);
   func->arg_begin()->addAttr(llvm::Attribute::StructRet);
+  call->addParamAttr(0, llvm::Attribute::StructRet);
   substitution[name] = AllocSret;
   child->codegen(d, substitution);
   setCompleted();

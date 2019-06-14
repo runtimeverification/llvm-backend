@@ -441,9 +441,9 @@ llvm::Value *CreateTerm::createFunctionCall(std::string name, KOREObjectComposit
     case SortCategory::List:
     case SortCategory::Set: {
       if (!arg->getType()->isPointerTy()) {
-          llvm::AllocaInst *AllocCollection = new llvm::AllocaInst(arg->getType(), 0, "", CurrentBlock);
-          new llvm::StoreInst(arg, AllocCollection, CurrentBlock);
-          args.push_back(AllocCollection);
+        llvm::AllocaInst *AllocCollection = new llvm::AllocaInst(arg->getType(), 0, "", CurrentBlock);
+        new llvm::StoreInst(arg, AllocCollection, CurrentBlock);
+        args.push_back(AllocCollection);
       } else {
         args.push_back(arg);
       }
@@ -470,13 +470,13 @@ llvm::Value *CreateTerm::createFunctionCall(std::string name, ValueType returnCa
     break;
   }
   llvm::Value *AllocSret;
- for (int i = 0; i < args.size(); i++) {
+  for (int i = 0; i < args.size(); i++) {
     llvm::Value *arg = args[i];
     types.push_back(arg->getType());
   }
   if (sret) {
     // we don't use alloca here because the tail call optimization pass for llvm doesn't handle correctly functions with alloca
-    AllocSret = allocateTerm(returnType, CurrentBlock, "koreAllocNoGC");
+    AllocSret = allocateTerm(returnType, CurrentBlock, "koreAllocAlwaysGC");
     args.insert(args.begin(), AllocSret);
     types.insert(types.begin(), AllocSret->getType());
     returnType = llvm::Type::getVoidTy(Ctx);
@@ -495,6 +495,7 @@ llvm::Value *CreateTerm::createFunctionCall(std::string name, ValueType returnCa
   }
   if (sret) {
     func->arg_begin()->addAttr(llvm::Attribute::StructRet);
+    call->addParamAttr(0, llvm::Attribute::StructRet);
     return AllocSret;
   }
   return call;
