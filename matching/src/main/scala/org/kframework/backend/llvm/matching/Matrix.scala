@@ -45,12 +45,7 @@ class Column(val fringe: Fringe, val patterns: IndexedSeq[Pattern[String]], val 
     if (isWildcard) {
       Double.PositiveInfinity
     } else {
-      var result = 0.0
-      for (i <- patterns.indices) {
-        if (clauses(i).action.priority != clauses.head.action.priority)
-          return withChoice(result)
-        result += patterns(i).score(fringe, clauses(i), key, isEmpty)
-      }
+      val result = DefaultHeuristic.computeScoreForKey(this, key)
       assert(!result.isNaN)
       withChoice(result)
     }
@@ -66,7 +61,7 @@ class Column(val fringe: Fringe, val patterns: IndexedSeq[Pattern[String]], val 
     intersection.exists(_.nonEmpty)
   }
 
-  private lazy val isEmpty = fringe.sortInfo.isCollection && rawSignature.contains(Empty())
+  lazy val isEmpty = fringe.sortInfo.isCollection && rawSignature.contains(Empty())
 
   private lazy val rawSignature: Seq[Constructor] = {
     patterns.zipWithIndex.flatMap(p => p._1.signature(clauses(p._2)))
@@ -494,7 +489,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
           }
         case _ =>
           // if there is only one row left, then try to match it and fail the matching if it fails
-          // otherwise, if it fails, try to match the remainder of hte matrix
+          // otherwise, if it fails, try to match the remainder of the matrix
           getLeaf(bestRow, notBestRow.compile)
       }
     }
