@@ -1,11 +1,6 @@
-#include "runtime/header.h"
 #include "runtime/collect.h"
 
-static BlockEnumerator blockEnumerator = nullptr;
-
-void registerGCRootsEnumerator(BlockEnumerator f) {
-  blockEnumerator = f;
-}
+extern BlockEnumerator blockEnumerator;
 
 extern "C" {
 

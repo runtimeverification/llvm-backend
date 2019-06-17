@@ -5,6 +5,7 @@ add_library(alloc STATIC
   arena.c
   collect.c
   migrate_roots.cpp
+  register_gc_roots_enum.cpp
 )
 
 install(
