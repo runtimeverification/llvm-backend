@@ -91,7 +91,7 @@ static void emitDataForSymbol(std::string name, llvm::Type *ty, KOREDefinition *
     uint32_t tag = entry.first;
     auto symbol = entry.second;
     auto decl = definition->getSymbolDeclarations().at(symbol->getName());
-    bool isFunc = decl->getAttributes().count("function");
+    bool isFunc = decl->getAttributes().count("function") || decl->getAttributes().count("anywhere");
     if (isEval && !isFunc) {
       continue;
     }
@@ -121,7 +121,7 @@ static void emitGetBlockHeaderForSymbol(KOREDefinition *def, llvm::Module *mod) 
 static std::pair<llvm::Value *, llvm::BasicBlock *> getFunction(KOREDefinition *def, llvm::Module *mod,
     KOREObjectSymbol *symbol, llvm::Instruction *inst) {
   auto decl = def->getSymbolDeclarations().at(symbol->getName());
-  bool res = decl->getAttributes().count("function");
+  bool res = decl->getAttributes().count("function") || decl->getAttributes().count("anywhere");
   return std::make_pair(llvm::ConstantInt::get(llvm::Type::getInt1Ty(mod->getContext()), res),
       inst->getParent());
 }
