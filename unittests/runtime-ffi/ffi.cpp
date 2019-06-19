@@ -45,6 +45,15 @@ extern "C" {
   }
 
   void add_hash64(void*, uint64_t) {}
+
+  uint64_t hash_k(block * kitem) {
+    return (uint64_t) kitem;
+  }
+
+   bool hook_KEQUAL_eq(block * lhs, block * rhs) {
+    return lhs == rhs;
+  }
+
   mpz_ptr hook_FFI_address(string * fn);
   string * hook_FFI_call(mpz_t addr, struct list * args, struct list * types, block * ret);
   string * hook_FFI_call_variadic(mpz_t addr, struct list * args, struct list * fixtypes, struct list * vartypes, block * ret);

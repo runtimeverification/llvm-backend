@@ -5,11 +5,15 @@
 #include <stdexcept>
 #include <vector>
 #include <map>
+#include <unordered_map>
 
 #include "runtime/alloc.h"
 #include "runtime/header.h"
 
 extern "C" {
+
+  uint64_t hash_k(block *);
+  bool hook_KEQUAL_eq(block *, block *);
 
 #define KCHAR char
 #define TYPETAG(type) "Lbl'hash'" #type "{}"
@@ -22,11 +26,23 @@ extern "C" {
   return tag; \
 }
 
+  struct KHash {
+    size_t operator() (block * const& kitem) const {
+      return hash_k(kitem);
+    }
+  };
+
+  struct KEq {
+    bool operator() (block * const& lhs, block * const& rhs) const {
+      return hook_KEQUAL_eq(lhs, rhs);
+    }
+  };
+
   static block * dotK = (block *)((((uint64_t)getTagForSymbolName("dotk{}")) << 32) | 1);
 
   thread_local static std::vector<ffi_type *> structTypes;
 
-  static std::map<block *, string *> allocatedKItemPtrs;
+  static std::unordered_map<block *, string *, KHash, KEq> allocatedKItemPtrs;
   static std::map<string *, block *> allocatedBytesRefs;
 
   TAG_TYPE(void)
@@ -258,7 +274,35 @@ extern "C" {
     return move_int(result);
   }
 
+  static std::pair<std::vector<block **>::iterator, std::vector<block **>::iterator> firstBlockEnumerator() {
+    static std::vector<block **> blocks;
+
+    for (auto &keyVal : allocatedKItemPtrs) {
+      blocks.push_back(const_cast<block**>(&(keyVal.first)));
+    }
+
+    return std::make_pair(blocks.begin(), blocks.end());
+  }
+
+  static std::pair<std::vector<block **>::iterator, std::vector<block **>::iterator> secondBlockEnumerator() {
+    static std::vector<block **> blocks;
+
+    for (auto &keyVal : allocatedBytesRefs) {
+      blocks.push_back(const_cast<block**>(&(keyVal.second)));
+    }
+
+    return std::make_pair(blocks.begin(), blocks.end());
+  }
+
   string * hook_FFI_alloc(block * kitem, mpz_t size) {
+    static int registered = -1;
+
+    if (registered == -1) {
+      registerGCRootsEnumerator(firstBlockEnumerator);
+      registerGCRootsEnumerator(secondBlockEnumerator);
+      registered = 0;
+    }
+
     if (!mpz_fits_ulong_p(size)) {
       throw std::invalid_argument("Size is too large");
     }
