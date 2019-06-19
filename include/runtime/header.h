@@ -76,6 +76,12 @@ extern "C" {
     uint64_t b[7];
   } list;
 
+  typedef struct collection_hdr {
+    blockheader h;
+    uint64_t size;
+    char data[];
+  } collection_hdr;
+
   typedef struct mpz_hdr {
     blockheader h;
     mpz_t i;

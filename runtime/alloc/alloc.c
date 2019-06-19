@@ -141,3 +141,19 @@ __attribute__ ((always_inline)) void* koreAllocFloatingOld(size_t requested) {
   set_len(result, sizeof(floating_hdr) - sizeof(blockheader));
   return &result->f;
 }
+
+__attribute__ ((always_inline)) void* koreAllocCollection(size_t requested) {
+  collection_hdr *result =
+    (collection_hdr *) koreAllocToken(sizeof(collection_hdr) + requested);
+  set_len(result, sizeof(collection_hdr) - sizeof(blockheader) + requested);
+  result->size = requested;
+  return &result->data;
+}
+
+__attribute__ ((always_inline)) void* koreAllocCollectionOld(size_t requested) {
+  collection_hdr *result =
+    (collection_hdr *) koreAllocTokenOld(sizeof(collection_hdr) + requested);
+  set_len(result, sizeof(collection_hdr) - sizeof(blockheader) + requested);
+  result->size = requested;
+  return &result->data;
+}

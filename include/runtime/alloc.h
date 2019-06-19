@@ -46,6 +46,13 @@ void* koreAllocFloating(size_t requested);
 void* koreAllocIntegerOld(size_t requested);
 void* koreAllocFloatingOld(size_t requested);
 
+// helper allocator for collections (maps, lists, sets)
+// they allocate the requested space into the corresponding generation and initialize
+// the blockheader with the correct length. The caller has to set the appropriate gc
+// bits.
+void* koreAllocCollection(size_t requested);
+void* koreAllocCollectionOld(size_t requested);
+
 #ifdef ALLOC_DBG
 #define MEM_LOG(...) fprintf(stderr, __VA_ARGS__)
 #else

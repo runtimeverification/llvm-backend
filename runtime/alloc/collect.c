@@ -192,6 +192,34 @@ static void migrate_floating(floating **floatingPtr) {
   *floatingPtr = *(floating **)(flt->f.f->_mpfr_d);
 }
 
+static void migrate_collection(char (**collectionPtr)[]) {
+  collection_hdr *coll = struct_base(collection_hdr, data, *collectionPtr);
+  const uint64_t hdr = coll->h.hdr;
+  const uint64_t size = coll->size;
+  bool isInYoungGen = is_in_young_gen_hdr(hdr);
+  bool hasAged = hdr & YOUNG_AGE_BIT;
+  bool isInOldGen = is_in_old_gen_hdr(hdr);
+  if (!(isInYoungGen || (isInOldGen && collect_old))) {
+    return;
+  }
+  bool shouldPromote = isInYoungGen && hasAged;
+  uint64_t mask = shouldPromote ? NOT_YOUNG_OBJECT_BIT : YOUNG_AGE_BIT;
+  bool hasForwardingAddress = hdr & FWD_PTR_BIT;
+  if (!hasForwardingAddress) {
+    collection_hdr *newColl;
+    if (shouldPromote || (isInOldGen && collect_old)) {
+      newColl = struct_base(collection_hdr, data, koreAllocCollectionOld(size));
+    } else {
+      newColl = struct_base(collection_hdr, data, koreAllocCollection(size));
+    }
+    memcpy(newColl, coll, sizeof(collection_hdr) + size);
+    newColl->h.hdr |= mask;
+    *(char (**)[])(coll->data) = &newColl->data;
+    coll->h.hdr |= FWD_PTR_BIT;
+  }
+  *collectionPtr = *(char (**)[])(coll->data);
+}
+
 static char* evacuate(char* scan_ptr, char **alloc_ptr) {
   block *currBlock = (block *)scan_ptr;
   const uint64_t hdr = currBlock->h.hdr;
@@ -204,12 +232,15 @@ static char* evacuate(char* scan_ptr, char **alloc_ptr) {
       switch(argData->cat) {
       case MAP_LAYOUT:
         map_foreach(arg, migrate_once);
+        migrate_collection(arg);
         break;
       case LIST_LAYOUT:
         list_foreach(arg, migrate_once); 
+        migrate_collection(arg);
         break;
       case SET_LAYOUT:
         set_foreach(arg, migrate_once);
+        migrate_collection(arg);
         break;
       case STRINGBUFFER_LAYOUT:
         migrate_string_buffer(arg);
