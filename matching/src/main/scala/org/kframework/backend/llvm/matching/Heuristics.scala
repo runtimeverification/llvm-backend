@@ -92,7 +92,7 @@ object AHeuristic extends Heuristic {
   }
 }
 
-object SDHeuristic extends Heuristic {
+object DHeuristic extends Heuristic {
   def scoreAs[T](p: AsP[T], f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double = ???
   def scoreList[T](p: ListP[T], f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double = ???
   def scoreLiteral[T](p: LiteralP[T], f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double = ???
@@ -104,6 +104,6 @@ object SDHeuristic extends Heuristic {
   def scoreWildcard[T](p: WildcardP[T], f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double = ???
 
    def computeScoreForKey(c: Column, key: Option[Pattern[Option[Occurrence]]]): Double = {
-    -(c.patterns.filter(_.isWildcard).size)
+    -(c.patterns.count(_.isDefault))
   }
 }
