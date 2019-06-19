@@ -714,6 +714,22 @@ static void emitVisitChildren(KOREDefinition *def, llvm::Module *mod) {
   emitTraversal("visitChildren", def, mod, true, getVisitor);
 }
 
+static void emitInjTags(KOREDefinition *def, llvm::Module *mod) {
+  llvm::LLVMContext &Ctx = mod->getContext();
+  auto global = mod->getOrInsertGlobal("first_inj_tag", llvm::Type::getInt32Ty(Ctx));
+  llvm::GlobalVariable *globalVar = llvm::dyn_cast<llvm::GlobalVariable>(global);
+  globalVar->setConstant(true);
+  if (!globalVar->hasInitializer()) {
+    globalVar->setInitializer(llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), def->getInjSymbol()->getFirstTag()));
+  }
+  global = mod->getOrInsertGlobal("last_inj_tag", llvm::Type::getInt32Ty(Ctx));
+  globalVar = llvm::dyn_cast<llvm::GlobalVariable>(global);
+  globalVar->setConstant(true);
+  if (!globalVar->hasInitializer()) {
+    globalVar->setInitializer(llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), def->getInjSymbol()->getLastTag()));
+  }
+}
+
 void emitConfigParserFunctions(KOREDefinition *definition, llvm::Module *module) {
   emitGetTagForSymbolName(definition, module); 
   emitGetBlockHeaderForSymbol(definition, module); 
@@ -729,6 +745,8 @@ void emitConfigParserFunctions(KOREDefinition *definition, llvm::Module *module)
   emitVisitChildren(definition, module);
 
   emitLayouts(definition, module);
+
+  emitInjTags(definition, module);
 }
 
 }
