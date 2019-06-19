@@ -8,6 +8,7 @@
 #include <unordered_map>
 
 #include "runtime/alloc.h"
+#include "runtime/collect.h"
 #include "runtime/header.h"
 
 extern "C" {
