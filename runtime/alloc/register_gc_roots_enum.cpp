@@ -1,8 +1,10 @@
+#include <vector>
+
 #include "runtime/header.h"
 #include "runtime/collect.h"
 
-BlockEnumerator blockEnumerator = nullptr;
+std::vector<BlockEnumerator> blockEnumerators;
 
 void registerGCRootsEnumerator(BlockEnumerator f) {
-  blockEnumerator = f;
+  blockEnumerators.push_back(f);
 }
