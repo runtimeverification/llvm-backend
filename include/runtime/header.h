@@ -146,6 +146,8 @@ extern "C" {
 
   block *debruijnize(block *);
 
+  extern const uint32_t first_inj_tag, last_inj_tag;
+
 #ifdef __cplusplus
 }
 #endif
