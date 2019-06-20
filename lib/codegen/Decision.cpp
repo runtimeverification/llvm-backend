@@ -34,6 +34,14 @@ void Decision::operator()(DecisionNode *entry, llvm::StringMap<llvm::Value *> su
       }
     }
   }
+  for (auto block = this->CurrentBlock->getParent()->begin(); block != this->CurrentBlock->getParent()->end(); ++block) {
+    if (block->getUniquePredecessor()) {
+      for (auto phi = block->phis().begin(); phi != block->phis().end(); phi = block->phis().begin()) {
+        phi->replaceAllUsesWith(phi->getIncomingValue(0));
+	phi->removeFromParent();
+      }
+    }
+  }
 }
 
 std::set<std::string> DecisionNode::collectVars() {
