@@ -54,6 +54,16 @@ do
     depth="$2"
     shift; shift
     ;;
+
+    -v|--verbose)
+    verbose=1
+    shift;
+    ;;
+
+    -save-temps)
+    trap - INT TERM EXIT
+    shift;
+    ;;
   esac
 done
 
@@ -105,7 +115,12 @@ endmodule []
 HERE
 
 set +e
+(
+if [ -n "$verbose" ]; then
+  set -x
+fi
 $debug "$dir"/interpreter $input_file $depth $output_file
+)
 EXIT=$?
 set -e
 
