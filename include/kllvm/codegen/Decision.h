@@ -22,10 +22,8 @@ public:
   bool completed = false;
 
   virtual void codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution) = 0;
-  virtual void collectUses(void) = 0;
-  virtual void collectDefs(void) = 0;
+  virtual void collectVars(void) = 0;
   virtual void collectFail(void) = 0;
-  std::set<std::string> collectVars(void);
   void sharedNode(Decision *d, llvm::StringMap<llvm::Value *> &oldSubst, llvm::StringMap<llvm::Value *> &substitution, llvm::BasicBlock *Block);
   bool beginNode(Decision *d, std::string name, llvm::StringMap<llvm::Value *> &substitution);
 
@@ -33,8 +31,8 @@ public:
   bool isCompleted() const { return completed; }
 
 private:
-  bool hasVars = false, hasUses = false, hasDefs = false, hasContainsFail = false, containsFailNode = false;
-  std::set<std::string> vars, uses, defs;
+  bool hasVars = false, hasContainsFail = false, containsFailNode = false;
+  std::set<std::string> vars;
   friend class SwitchNode;
   friend class MakePatternNode;
   friend class FunctionNode;
@@ -97,23 +95,18 @@ public:
   const std::vector<DecisionCase> &getCases() const { return cases; }
   
   virtual void codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution);
-  virtual void collectUses() { 
-    if(hasUses) return;
-    if(cases.size() != 1 || cases[0].getConstructor()) uses.insert(name); 
+  virtual void collectVars() { 
+    if(hasVars) return;
     for (auto _case : cases) { 
-      _case.getChild()->collectUses();
-      uses.insert(_case.getChild()->uses.begin(), _case.getChild()->uses.end());
+      _case.getChild()->collectVars();
+      std::set<std::string> caseVars = _case.getChild()->vars;
+      for (std::string var : _case.getBindings()) {
+        caseVars.erase(var);
+      }
+      vars.insert(caseVars.begin(), caseVars.end());
     }
-    hasUses = true;
-  }
-  virtual void collectDefs() {
-    if(hasDefs) return;
-    for (auto _case : cases) {
-      defs.insert(_case.getBindings().begin(), _case.getBindings().end());
-      _case.getChild()->collectDefs();
-      defs.insert(_case.getChild()->defs.begin(), _case.getChild()->defs.end());
-    }
-    hasDefs = true;
+    if(cases.size() != 1 || cases[0].getConstructor()) vars.insert(name); 
+    hasVars = true;
   }
   virtual void collectFail() {
     if(hasContainsFail) return;
@@ -157,19 +150,13 @@ public:
   }
 
   virtual void codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution);
-  virtual void collectUses() {
-    if(hasUses) return;
-    DecisionNode::uses.insert(uses.begin(), uses.end());
-    child->collectUses();
-    DecisionNode::uses.insert(child->uses.begin(), child->uses.end());
-    hasUses = true;
-  }
-  virtual void collectDefs() {
-    if (hasDefs) return;
-    defs.insert(name);
-    child->collectDefs();
-    defs.insert(child->defs.begin(), child->defs.end());
-    hasDefs = true;
+  virtual void collectVars() {
+    if(hasVars) return;
+    child->collectVars();
+    vars = child->vars;
+    vars.erase(name);
+    vars.insert(uses.begin(), uses.end());
+    hasVars = true;
   }
   virtual void collectFail() {
     if (hasContainsFail) return;
@@ -216,23 +203,17 @@ public:
   void addBinding(std::string name) { bindings.push_back(name); }
   
   virtual void codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution);
-  virtual void collectUses() { 
-    if (hasUses) return;
+  virtual void collectVars() { 
+    if (hasVars) return;
+    child->collectVars();
+    vars = child->vars;
+    vars.erase(name);
     for (auto var : bindings) { 
       if (var.find_first_not_of("-0123456789") != std::string::npos) {
-        uses.insert(var);
+        vars.insert(var);
       }
     }
-    child->collectUses();
-    uses.insert(child->uses.begin(), child->uses.end());
-    hasUses = true;
-  }
-  virtual void collectDefs() {
-    if (hasDefs) return;
-    defs.insert(name);
-    child->collectDefs();
-    defs.insert(child->defs.begin(), child->defs.end());
-    hasDefs = true;
+    hasVars = true;
   }
   virtual void collectFail() {
     if (hasContainsFail) return;
@@ -261,12 +242,11 @@ public:
   void addBinding(std::string name) { bindings.push_back(name); }
   
   virtual void codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution);
-  virtual void collectUses() {
-    if (hasUses) return;
-    uses.insert(bindings.begin(), bindings.end());
-    hasUses = true;
+  virtual void collectVars() {
+    if (hasVars) return;
+    vars.insert(bindings.begin(), bindings.end());
+    hasVars = true;
   }
-  virtual void collectDefs() {}
   virtual void collectFail() {}
 };
 
@@ -285,19 +265,13 @@ public:
   }
 
   virtual void codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution);
-  virtual void collectUses() {
-    if (hasUses) return;
-    uses.insert(collection);
-    child->collectUses();
-    uses.insert(child->uses.begin(), child->uses.end());
-    hasUses = true;
-  }
-  virtual void collectDefs() {
-    if (hasDefs) return;
-    defs.insert(name);
-    child->collectDefs();
-    defs.insert(child->defs.begin(), child->defs.end());
-    hasDefs = true;
+  virtual void collectVars() {
+    if (hasVars) return;
+    child->collectVars();
+    vars = child->vars;
+    vars.erase(name);
+    vars.insert(collection);
+    hasVars = true;
   }
   virtual void collectFail() {
     if (hasContainsFail) return;
@@ -321,19 +295,13 @@ public:
   }
 
   virtual void codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution);
-  virtual void collectUses() {
-    if (hasUses) return;
-    uses.insert(iterator);
-    child->collectUses();
-    uses.insert(child->uses.begin(), child->uses.end());
-    hasUses = true;
-  }
-  virtual void collectDefs() {
-    if (hasDefs) return;
-    defs.insert(binding);
-    child->collectDefs();
-    defs.insert(child->defs.begin(), child->defs.end());
-    hasDefs = true;
+  virtual void collectVars() {
+    if (hasVars) return;
+    child->collectVars();
+    vars = child->vars;
+    vars.erase(binding);
+    vars.insert(iterator);
+    hasVars = true;
   }
   virtual void collectFail() {
     if (hasContainsFail) return;
@@ -351,8 +319,7 @@ public:
   static FailNode *get() { return &instance; }
 
   virtual void codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution) { abort(); }
-  virtual void collectUses() {}
-  virtual void collectDefs() {}
+  virtual void collectVars() {}
   virtual void collectFail() { containsFailNode = true; }
 };
 
