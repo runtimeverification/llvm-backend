@@ -172,9 +172,11 @@ object Parser {
 
   def parseHeuristic(heuristic: Char): Heuristic = {
     heuristic match {
+      case 'f' => FHeuristic
       case 'd' => DHeuristic
       case 'b' => BHeuristic
       case 'a' => AHeuristic
+      case 'r' => RHeuristic
       case 'q' => QHeuristic
       case '_' => DefaultHeuristic
     }
