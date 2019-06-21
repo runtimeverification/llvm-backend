@@ -102,7 +102,8 @@ object AHeuristic extends Heuristic {
 object RHeuristic extends Heuristic {
   def computeScoreForKey(c: Column, key: Option[Pattern[Option[Occurrence]]]): Double = {
     var result = 0.0
-    for (con <- c.signatureForKey(key)) {
+    val signature = c.signatureForKey(key)
+    for (con <- signature) {
       for (i <- c.patterns.indices) {
         if (c.patterns(i).isSpecialized(con, c.fringe, c.clauses(i))) {
           result += 1.0
@@ -110,9 +111,11 @@ object RHeuristic extends Heuristic {
       }
     }
 
-    for (i <- c.patterns.indices) {
-      if (c.patterns(i).isDefault) {
-        result += 1.0
+    if (c.category.hasIncompleteSignature(sigma, c.fringe)) {
+      for (i <- c.patterns.indices) {
+        if (c.patterns(i).isDefault) {
+          result += 1.0
+        }
       }
     }
 
