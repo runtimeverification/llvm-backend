@@ -4,11 +4,17 @@
 #include <gmp.h>
 #include <stdexcept>
 #include <vector>
+#include <map>
+#include <unordered_map>
 
 #include "runtime/alloc.h"
+#include "runtime/collect.h"
 #include "runtime/header.h"
 
 extern "C" {
+
+  uint64_t hash_k(block *);
+  bool hook_KEQUAL_eq(block *, block *);
 
 #define KCHAR char
 #define TYPETAG(type) "Lbl'hash'" #type "{}"
@@ -21,7 +27,24 @@ extern "C" {
   return tag; \
 }
 
+  struct KHash {
+    size_t operator() (block * const& kitem) const {
+      return hash_k(kitem);
+    }
+  };
+
+  struct KEq {
+    bool operator() (block * const& lhs, block * const& rhs) const {
+      return hook_KEQUAL_eq(lhs, rhs);
+    }
+  };
+
+  static block * dotK = (block *)((((uint64_t)getTagForSymbolName("dotk{}")) << 32) | 1);
+
   thread_local static std::vector<ffi_type *> structTypes;
+
+  static std::unordered_map<block *, string *, KHash, KEq> allocatedKItemPtrs;
+  static std::map<string *, block *> allocatedBytesRefs;
 
   TAG_TYPE(void)
   TAG_TYPE(uint8)
@@ -43,6 +66,7 @@ extern "C" {
   TAG_TYPE(ulong)
   TAG_TYPE(slong)
   TAG_TYPE(longdouble)
+  TAG_TYPE(pointer)
 
   mpz_ptr move_int(mpz_t);
   char * getTerminatedString(string * str);
@@ -108,6 +132,8 @@ extern "C" {
         return &ffi_type_slong;
       } else if (symbol == tag_type_longdouble()) {
         return &ffi_type_longdouble;
+      } else if (symbol == tag_type_pointer()) {
+        return &ffi_type_pointer;
       }
     } else if (elem->h.hdr == (uint64_t)getTagForSymbolName(TYPETAG(struct))){
       struct list * elements = (struct list *) *elem->children;
@@ -248,4 +274,91 @@ extern "C" {
     mpz_init_set_ui(result, (uintptr_t)address);
     return move_int(result);
   }
+
+  static std::pair<std::vector<block **>::iterator, std::vector<block **>::iterator> firstBlockEnumerator() {
+    static std::vector<block **> blocks;
+
+    for (auto &keyVal : allocatedKItemPtrs) {
+      blocks.push_back(const_cast<block**>(&(keyVal.first)));
+    }
+
+    return std::make_pair(blocks.begin(), blocks.end());
+  }
+
+  static std::pair<std::vector<block **>::iterator, std::vector<block **>::iterator> secondBlockEnumerator() {
+    static std::vector<block **> blocks;
+
+    for (auto &keyVal : allocatedBytesRefs) {
+      blocks.push_back(const_cast<block**>(&(keyVal.second)));
+    }
+
+    return std::make_pair(blocks.begin(), blocks.end());
+  }
+
+  string * hook_FFI_alloc(block * kitem, mpz_t size) {
+    static int registered = -1;
+
+    if (registered == -1) {
+      registerGCRootsEnumerator(firstBlockEnumerator);
+      registerGCRootsEnumerator(secondBlockEnumerator);
+      registered = 0;
+    }
+
+    if (!mpz_fits_ulong_p(size)) {
+      throw std::invalid_argument("Size is too large");
+    }
+
+    if (allocatedKItemPtrs.find(kitem) != allocatedKItemPtrs.end()) {
+      return allocatedKItemPtrs[kitem];
+    }
+
+    size_t s = mpz_get_ui(size);
+
+    string * ret = (string *) calloc(sizeof(string *) + s, 1);
+    set_len(ret, s);
+
+    allocatedKItemPtrs[kitem] = ret;
+    allocatedBytesRefs[ret] = kitem;
+
+    return ret;
+  }
+
+  block * hook_FFI_free(block * kitem) {
+    auto ptrIter = allocatedKItemPtrs.find(kitem);
+    auto refIter = allocatedBytesRefs.find(ptrIter->second);
+
+    if (ptrIter != allocatedKItemPtrs.end()) {
+      free(allocatedKItemPtrs[kitem]);
+      allocatedKItemPtrs.erase(ptrIter);
+
+      if (refIter != allocatedBytesRefs.end()) {
+        allocatedBytesRefs.erase(refIter);
+      } else {
+        throw std::runtime_error("Internal memory map is out of sync");
+      }
+    }
+
+    return dotK;
+  }
+
+  block * hook_FFI_bytes_ref(string * bytes) {
+    auto refIter = allocatedBytesRefs.find(bytes);
+
+    if (refIter == allocatedBytesRefs.end()) {
+      throw std::invalid_argument("Bytes have no reference");
+    }
+
+    return allocatedBytesRefs[bytes];
+  }
+
+  mpz_ptr hook_FFI_bytes_address(string * bytes) {
+    mpz_t addr;
+    mpz_init_set_ui(addr, (uintptr_t)bytes->data);
+    return move_int(addr);
+  }
+
+  bool hook_FFI_allocated(block * kitem) {
+    return allocatedKItemPtrs.find(kitem) != allocatedKItemPtrs.end();
+  }
 }
+

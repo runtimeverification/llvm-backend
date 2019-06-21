@@ -10,6 +10,7 @@ use decls::im_rc::hashmap;
 use decls::im_rc::vector::Vector;
 use self::libc::{FILE,c_char,c_void};
 use std::alloc::{GlobalAlloc, Layout};
+use std::collections::hash_map::DefaultHasher;
 
 pub struct KoreAllocator;
 
@@ -89,6 +90,13 @@ pub unsafe extern "C" fn add_hash8(h: *mut c_void, data: u8) {
 pub unsafe extern "C" fn add_hash64(h: *mut c_void, data: u64) {
   let hasher = h as *mut &mut Hasher;
   (*hasher).write_u64(data)
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn hash_k(block: K) -> u64 {
+  let mut h = DefaultHasher::new();
+  KElem::new(block).hash(&mut h);
+  h.finish()
 }
 
 pub type Map = HashMap<KElem, KElem>;

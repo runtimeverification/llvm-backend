@@ -57,4 +57,8 @@ extern "C" {
 
     return sum;
   }
+
+  int pointerTest(int * x) {
+    return x == 0 ? 0 : *x;
+  }
 }
