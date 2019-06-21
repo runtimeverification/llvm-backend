@@ -72,22 +72,6 @@ object DefaultHeuristic extends Heuristic {
   }
 }
 
-object AHeuristic extends Heuristic {
-  def computeScoreForKey(c: Column, key: Option[Pattern[Option[Occurrence]]]): Double = {
-    var result = 0.0
-    for (con <- c.signatureForKey(key)) {
-      result -= c.fringe.expand(con).size
-    }
-    result
-  }
-}
-
-object DHeuristic extends Heuristic {
-  def computeScoreForKey(c: Column, key: Option[Pattern[Option[Occurrence]]]): Double = {
-    -(c.patterns.count(_.isDefault))
-  }
-}
-
 object FHeuristic extends Heuristic {
   def computeScoreForKey(c: Column, key: Option[Pattern[Option[Occurrence]]]): Double = {
     for (i <- c.patterns.indices) {
@@ -101,6 +85,12 @@ object FHeuristic extends Heuristic {
   }
 }
 
+object DHeuristic extends Heuristic {
+  def computeScoreForKey(c: Column, key: Option[Pattern[Option[Occurrence]]]): Double = {
+    -(c.patterns.count(_.isDefault))
+  }
+}
+
 object BHeuristic extends Heuristic {
   def computeScoreForKey(c: Column, key: Option[Pattern[Option[Occurrence]]]): Double = {
     val sigma = c.signatureForKey(key)
@@ -109,6 +99,16 @@ object BHeuristic extends Heuristic {
     } else {
       -sigma.size
     }
+  }
+}
+
+object AHeuristic extends Heuristic {
+  def computeScoreForKey(c: Column, key: Option[Pattern[Option[Occurrence]]]): Double = {
+    var result = 0.0
+    for (con <- c.signatureForKey(key)) {
+      result -= c.fringe.expand(con).size
+    }
+    result
   }
 }
 
