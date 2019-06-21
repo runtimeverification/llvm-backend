@@ -35,7 +35,7 @@ static size_t get_size(uint64_t hdr, uint16_t layout) {
   }
 }
 
-static void migrate(block** blockPtr) {
+void migrate(block** blockPtr) {
   block* currBlock = *blockPtr;
   uintptr_t intptr = (uintptr_t)currBlock;
   if (intptr & 1) {
@@ -240,12 +240,15 @@ static bool shouldCollectOldGen() {
   return false;
 }
 
+void migrateRoots();
+
 void koreCollect(block** root) {
   is_gc = true;
   collect_old = shouldCollectOldGen();
   MEM_LOG("Starting garbage collection\n");
   koreAllocSwap(collect_old);
   migrate(root);
+  migrateRoots();
   char *scan_ptr = youngspace_ptr();
   MEM_LOG("Evacuating young generation\n");
   while(scan_ptr) {
