@@ -513,12 +513,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
     columns.patch(colIx, Nil, 1)
   }
 
-  def colScoreString: String = {
-    val result = columns.map((c:Column) => "         " +  c.computeScoreForKey(FHeuristic, c.bestKey).toString.substring(0, 3)).mkString(" ")
-    result
-  }
-
-  override def toString: String = fringe.map(_.toString).mkString(" ") + "\n" + colScoreString + "\n" + rows.map(_.toString).mkString("\n") + "\n"
+  override def toString: String = fringe.map(_.toString).mkString(" ") + "\n" + rows.map(_.toString).mkString("\n") + "\n"
 
   def canEqual(other: Any): Boolean = other.isInstanceOf[Matrix]
 
