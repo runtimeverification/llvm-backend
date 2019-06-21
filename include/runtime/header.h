@@ -100,7 +100,7 @@ extern "C" {
     uint8_t nargs;
     layoutitem *args;
   } layout;
- 
+
   // This function is exported to be used by the interpreter 
   #ifdef __cplusplus
   extern "C++" {

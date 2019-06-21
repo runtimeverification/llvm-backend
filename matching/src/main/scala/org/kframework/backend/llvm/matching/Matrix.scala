@@ -17,10 +17,14 @@ class Column(val fringe: Fringe, val patterns: IndexedSeq[Pattern[String]], val 
     }
   }
 
-  lazy val score: Double = computeScore
+  lazy val score: Seq[Double] = computeScore
 
-  def computeScore: Double = {
+  def computeScore: Seq[Double] = {
     computeScoreForKey(bestKey)
+  }
+
+  def computeScoreForKey(key: Option[Pattern[Option[Occurrence]]]): Seq[Double] = {
+    fringe.symlib.heuristics.map(computeScoreForKey(_, key))
   }
 
   def isValid: Boolean = isValidForKey(bestKey)
@@ -29,10 +33,10 @@ class Column(val fringe: Fringe, val patterns: IndexedSeq[Pattern[String]], val 
     !fringe.sortInfo.isCollection || key.isDefined || !patterns.exists(_.isChoice)
   }
 
-  def computeScoreForKey(key: Option[Pattern[Option[Occurrence]]]): Double = {
+  def computeScoreForKey(heuristic: Heuristic, key: Option[Pattern[Option[Occurrence]]]): Double = {
     def withChoice(result: Double): Double = {
       if (key.isDefined) {
-        val none = computeScoreForKey(None)
+        val none = computeScoreForKey(heuristic, None)
         if (none > result) {
           none
         } else {
@@ -45,7 +49,7 @@ class Column(val fringe: Fringe, val patterns: IndexedSeq[Pattern[String]], val 
     if (isWildcard) {
       Double.PositiveInfinity
     } else {
-      val result = DefaultHeuristic.computeScoreForKey(this, key)
+      val result = heuristic.computeScoreForKey(this, key)
       assert(!result.isNaN)
       withChoice(result)
     }
@@ -67,8 +71,8 @@ class Column(val fringe: Fringe, val patterns: IndexedSeq[Pattern[String]], val 
     patterns.zipWithIndex.flatMap(p => p._1.signature(clauses(p._2)))
   }
 
-  lazy val signature: List[Constructor] = {
-    val bestUsed = bestKey match {
+  def signatureForKey(key: Option[Pattern[Option[Occurrence]]]): List[Constructor] = {
+    val bestUsed = key match {
       case None => rawSignature
       case Some(k) => rawSignature.filter(_.isBest(k))
     }
@@ -81,6 +85,10 @@ class Column(val fringe: Fringe, val patterns: IndexedSeq[Pattern[String]], val 
     } else {
       nodups.filter(_ != Empty())
     }
+  }
+
+  lazy val signature: List[Constructor] = {
+    signatureForKey(bestKey)
   }
 
   def isChoice: Boolean = fringe.sortInfo.isCollection && bestKey == None
@@ -116,6 +124,7 @@ class Column(val fringe: Fringe, val patterns: IndexedSeq[Pattern[String]], val 
       if (validKeys.isEmpty) {
         None
       } else {
+        import Ordering.Implicits._
         val rawBestKey = validKeys.map(k => (k, computeScoreForKey(Some(k)))).maxBy(_._2)
         Some(rawBestKey._1)
       }
@@ -323,6 +332,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
     if (validCols.isEmpty) {
       0
     } else {
+      import Ordering.Implicits._
       val best = validCols.maxBy(_._1.score)
       if (best._1.score == 0.0) {
         val unboundMapColumns = columns.filter(col => !col.isValid)
@@ -479,7 +489,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
     else {
       bestRowIx match {
         case -1 => 
-          if (bestCol.score.isPosInfinity) {
+          if (bestCol.score(0).isPosInfinity) {
             // decompose this column as it contains only wildcards
             val newClauses = (bestCol.clauses, bestCol.patterns).zipped.toIndexedSeq.map(t => t._1.addVars(None, t._2, bestCol.fringe))
             Matrix.fromColumns(symlib, notBestCol(bestColIx).map(c => new Column(c.fringe, c.patterns, newClauses)), newClauses).compile

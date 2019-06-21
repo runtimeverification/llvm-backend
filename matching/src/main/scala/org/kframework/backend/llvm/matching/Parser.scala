@@ -31,7 +31,7 @@ object Parser {
     }
   }
 
-  class SymLib(symbols: Seq[SymbolOrAlias], sorts: Seq[Sort], mod: Definition, overloadSeq: Seq[(SymbolOrAlias, SymbolOrAlias)]) {
+  class SymLib(symbols: Seq[SymbolOrAlias], sorts: Seq[Sort], mod: Definition, overloadSeq: Seq[(SymbolOrAlias, SymbolOrAlias)], val heuristics: Seq[Heuristic]) {
     val sortCache = new util.HashMap[Sort, SortInfo]()
 
     private val symbolDecls = mod.modules.flatMap(_.decls).filter(_.isInstanceOf[SymbolDeclaration]).map(_.asInstanceOf[SymbolDeclaration]).groupBy(_.symbol.ctr)
@@ -74,8 +74,9 @@ object Parser {
   }
 
   private def rulePriority(axiom: AxiomDeclaration): Int = {
-    if (hasAtt(axiom, "owise")) 150
-    else if (hasAtt(axiom, "cool")) 100
+    if (hasAtt(axiom, "owise")) 200
+    else if (hasAtt(axiom, "cool")) 150
+    else if (hasAtt(axiom, "cool-like")) 100
     else if (hasAtt(axiom, "priority")) getStringAtt(axiom.att, "priority").get.toInt
     else 50
   }
@@ -170,11 +171,25 @@ object Parser {
     })
   }
 
-  def parseSymbols(defn: Definition) : SymLib = {
+  def parseHeuristic(heuristic: Char): Heuristic = {
+    heuristic match {
+      case 'd' => DHeuristic
+      case 'b' => BHeuristic
+      case 'a' => AHeuristic
+      case 'q' => QHeuristic
+      case '_' => DefaultHeuristic
+    }
+  }
+
+  def parseHeuristics(heuristics: String): Seq[Heuristic] = {
+    heuristics.toList.map(parseHeuristic(_))
+  }
+
+  def parseSymbols(defn: Definition, heuristics: String) : SymLib = {
     val axioms = getAxioms(defn)
     val symbols = axioms.flatMap(a => parsePatternForSymbols(a.pattern))
     val allSorts = symbols.flatMap(_.params)
     val overloads = getOverloads(axioms)
-    new SymLib(symbols, allSorts, defn, overloads)
+    new SymLib(symbols, allSorts, defn, overloads, parseHeuristics(heuristics))
   }
 }

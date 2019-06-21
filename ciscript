@@ -23,44 +23,44 @@ cd ../build
 
 export PATH="`pwd`/install/bin:`pwd`/bin:$PATH"
 make install
-llvm-kompile-testing ../test/imp.kore IMP main -o interpreter
+llvm-kompile-testing ../test/imp.kore main -o interpreter
 ./interpreter ../test/collatz.kore -1 /dev/stdout | grep -q "Lbl'-LT-'T'-GT-'{}(Lbl'-LT-'k'-GT-'{}(dotk{}())"
-llvm-kompile-testing ../test/lambda.kore LAMBDA main -o interpreter
+llvm-kompile-testing ../test/lambda.kore main -o interpreter
 ./interpreter ../test/closed-variable-capture.kore -1 /dev/stdout | diff - ../test/closed-variable-capture.out
 ./interpreter ../test/free-variable-capture.kore -1 /dev/stdout | diff - ../test/free-variable-capture.out
 ./interpreter ../test/alpha-rename.kore -1 /dev/stdout | diff - ../test/alpha-rename.out
-llvm-kompile-testing ../test/test2.kore TEST main -o interpreter
+llvm-kompile-testing ../test/test2.kore main -o interpreter
 ./interpreter ../test/test2.kore -1 /dev/stdout | grep -q "Lbl'-LT-'k'-GT-'{}(kseq{}(inj{SortDone{}, SortKItem{}}(Lbldone'Unds'TEST'Unds'{}()),dotk{}()))"
-llvm-kompile-testing ../test/test3.kore TEST main -o interpreter
+llvm-kompile-testing ../test/test3.kore main -o interpreter
 ./interpreter ../test/test3.kore -1 /dev/stdout | grep -q "Lbl'-LT-'k'-GT-'{}(kseq{}(inj{SortDone{}, SortKItem{}}(Lbldone'Unds'TEST'Unds'{}()),dotk{}()))"
-llvm-kompile-testing ../test/test4.kore TEST main -o interpreter
+llvm-kompile-testing ../test/test4.kore main -o interpreter
 ./interpreter ../test/test4.kore -1 /dev/stdout | diff - ../test/test4.out
-llvm-kompile-testing ../test/test5.kore TEST main -o interpreter
+llvm-kompile-testing ../test/test5.kore main -o interpreter
 ./interpreter ../test/test5.kore -1 /dev/stdout | diff - ../test/test5.out
-llvm-kompile-testing ../test/test6.kore TEST main -o interpreter
+llvm-kompile-testing ../test/test6.kore main -o interpreter
 ./interpreter ../test/test6.kore -1 /dev/stdout | diff - ../test/test6.out
-llvm-kompile-testing ../test/test7.kore TEST main -o interpreter
+llvm-kompile-testing ../test/test7.kore main -o interpreter
 ./interpreter ../test/test7.in.kore -1 /dev/null
-llvm-kompile-testing ../test/test8.kore TEST main -o interpreter
+llvm-kompile-testing ../test/test8.kore main -o interpreter
 ./interpreter ../test/test8.kore -1 /dev/stdout | diff - ../test/test8.out
-llvm-kompile-testing ../test/test9.kore TEST main -o interpreter
+llvm-kompile-testing ../test/test9.kore main -o interpreter
 ./interpreter ../test/test9.kore -1 /dev/stdout | diff - ../test/test9.out
-llvm-kompile-testing ../test/test10.kore TEST main -o interpreter
+llvm-kompile-testing ../test/test10.kore main -o interpreter
 ./interpreter ../test/test10.in.kore -1 /dev/stdout | diff - ../test/test10.out
-llvm-kompile-testing ../test/test11.kore TEST main -o interpreter
-llvm-kompile-testing ../test/test12.kore TEST main -o interpreter
+llvm-kompile-testing ../test/test11.kore main -o interpreter
+llvm-kompile-testing ../test/test12.kore main -o interpreter
 ./interpreter ../test/test12-1.kore -1 /dev/stdout | diff - ../test/test12.out
 ./interpreter ../test/test12-2.kore -1 /dev/stdout | diff - ../test/test12.out
 ./interpreter ../test/test12-3.kore -1 /dev/stdout | diff - ../test/test12.out
-llvm-kompile-testing ../test/test-gc-int.kore IMP main -o interpreter
+llvm-kompile-testing ../test/test-gc-int.kore main -o interpreter
 ./interpreter ../test/test-gc-int-1.kore -1 /dev/stdout | grep -q "Lbl'-LT-'T'-GT-'{}(Lbl'-LT-'k'-GT-'{}(dotk{}()).*inj{SortId{}, SortKItem{}}(\\\\dv{SortId{}}(\"x\")),inj{SortInt{}, SortKItem{}}(\\\\dv{SortInt{}}(\"43466557686937456435688527675040625802564660517371780402481729089536555417949051890403879840079255169295922593080322634775209689623239873322471161642996440906533187938298969649928516003704476137795166849228875\"))"
-llvm-kompile-testing ../test/test-gc-float.kore IMP-FLOAT main -o interpreter
+llvm-kompile-testing ../test/test-gc-float.kore main -o interpreter
 ./interpreter ../test/test-gc-float-1.kore -1 /dev/stdout | grep -q "Lbl'-LT-'T'-GT-'{}(Lbl'-LT-'k'-GT-'{}(dotk{}()).*inj{SortId{}, SortKItem{}}(\\\\dv{SortId{}}(\"x\")),inj{SortFloat{}, SortKItem{}}(\\\\dv{SortFloat{}}(\"0.43466557686937428e209\"))"
-llvm-kompile-testing ../test/test-gc-stringbuffer.kore TEST main -o interpreter
+llvm-kompile-testing ../test/test-gc-stringbuffer.kore main -o interpreter
 ./interpreter ../test/test-gc-stringbuffer-1.kore -1 /dev/stdout | diff - ../test/test-gc-stringbuffer-1.out
-llvm-kompile-testing ../test/test-gc-alwaysgc.kore TEST main -o interpreter
+llvm-kompile-testing ../test/test-gc-alwaysgc.kore main -o interpreter
 ./interpreter ../test/test-gc-alwaysgc-1.kore -1 /dev/stdout | grep -q "Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'T'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(inj{SortInt{}, SortKItem{}}(\\\\dv{SortInt{}}(\"9876\")),dotk{}())),Lbl'-LT-'m'-GT-'{}(.*)),Lbl'-LT-'generatedCounter'-GT-'{}(\\\\dv{SortInt{}}(\"0\")))"
-llvm-kompile-testing ../test/io.kore IO main -o interpreter
+llvm-kompile-testing ../test/io.kore main -o interpreter
 ./interpreter ../test/ioTest1.kore -1 /dev/stdout | grep -q "Lbl'-LT-'k'-GT-'{}(dotk{}())"
 diff io_output1.txt ../test/ioTest1.out
 ./interpreter ../test/ioTest2.kore -1 /dev/stdout | diff - ../test/ioTest2.out
@@ -68,19 +68,21 @@ diff io_output1.txt ../test/ioTest1.out
 diff `ls | grep io_log` ../test/ioTest3.out
 rm `ls | grep io_log`
 ./interpreter ../test/ioTest4.kore -1 /dev/stdout | diff - ../test/ioTest4.out
-llvm-kompile-testing ../test/test13.kore TEST main -o interpreter
+llvm-kompile-testing ../test/test13.kore main -o interpreter
 ./interpreter ../test/test13.in.kore -1 /dev/stdout | diff - ../test/test13.out.kore
-llvm-kompile-testing ../test/test14.kore TEST main -o interpreter
+llvm-kompile-testing ../test/test14.kore main -o interpreter
 ./interpreter ../test/test14.in.kore -1 /dev/stdout | diff - ../test/test14.out.kore
-llvm-kompile-testing ../test/test15.kore TEST main -o interpreter
+llvm-kompile-testing ../test/test15.kore main -o interpreter
 ./interpreter ../test/test15.in.kore -1 /dev/stdout | diff - ../test/test15.out.kore
-llvm-kompile-testing ../test/test16.kore TEST main -o interpreter
+llvm-kompile-testing ../test/test16.kore main -o interpreter
 ./interpreter ../test/test16.in.kore -1 /dev/stdout | diff - ../test/test16.out.kore
-llvm-kompile-testing ../test/test17.kore TEST main -o interpreter
-llvm-kompile-testing ../test/test18.kore TEST main -o interpreter
+llvm-kompile-testing ../test/test17.kore main -o interpreter
+llvm-kompile-testing ../test/test18.kore main -o interpreter
 ./interpreter ../test/test18.in.kore -1 /dev/stdout | diff - ../test/test18.out.kore
-llvm-kompile-testing ../test/test19.kore TEST main -o interpreter
+llvm-kompile-testing ../test/test19.kore main -o interpreter
 ./interpreter ../test/test19.in.kore -1 /dev/stdout | diff - ../test/test19.out.kore
-llvm-kompile-testing ../test/test20.kore TEST main -o interpreter
+llvm-kompile-testing ../test/test20.kore main -o interpreter
 ./interpreter ../test/test20.in.kore -1 /dev/stdout | diff - ../test/test20.out.kore
+llvm-kompile-testing ../test/pointers.kore main -o interpreter
+./interpreter ../test/test21.in.kore -1 /dev/stdout | diff - ../test/test21.out.kore
 rm -f configparser configparser.ll interpreter
