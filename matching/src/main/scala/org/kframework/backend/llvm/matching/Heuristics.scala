@@ -87,3 +87,33 @@ object DHeuristic extends Heuristic {
     -(c.patterns.count(_.isDefault))
   }
 }
+
+object BHeuristic extends Heuristic {
+  def computeScoreForKey(c: Column, key: Option[Pattern[Option[Occurrence]]]): Double = {
+    val sigma = c.signatureForKey(key)
+    if (c.category.hasIncompleteSignature(sigma, c.fringe)) {
+      -sigma.size-1
+    } else {
+      -sigma.size
+    }
+  }
+}
+
+object QHeuristic extends Heuristic {
+  def computeScoreForKey(c: Column, key: Option[Pattern[Option[Occurrence]]]): Double = {
+    var result = 0
+    var priority = c.clauses.head.action.priority
+    for (i <- c.patterns.indices) {
+      if (c.clauses(i).action.priority != priority) {
+        if (result != i) {
+          return result
+        }
+        priority = c.clauses(i).action.priority
+      }
+      if (!c.patterns(i).isWildcard) {
+        result += 1
+      }
+    }
+    result
+  }
+}
