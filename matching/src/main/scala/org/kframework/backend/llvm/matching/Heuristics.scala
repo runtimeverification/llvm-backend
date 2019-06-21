@@ -111,7 +111,7 @@ object RHeuristic extends Heuristic {
       }
     }
 
-    if (c.category.hasIncompleteSignature(sigma, c.fringe)) {
+    if (c.category.hasIncompleteSignature(signature, c.fringe)) {
       for (i <- c.patterns.indices) {
         if (c.patterns(i).isDefault) {
           result += 1.0
