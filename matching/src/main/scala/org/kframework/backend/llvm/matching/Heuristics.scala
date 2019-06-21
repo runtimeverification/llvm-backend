@@ -75,7 +75,7 @@ object DefaultHeuristic extends Heuristic {
 object AHeuristic extends Heuristic {
   def computeScoreForKey(c: Column, key: Option[Pattern[Option[Occurrence]]]): Double = {
     var result = 0.0
-    for (con <- c.signature) {
+    for (con <- c.signatureForKey(key)) {
       result -= c.fringe.expand(con).size
     }
     result

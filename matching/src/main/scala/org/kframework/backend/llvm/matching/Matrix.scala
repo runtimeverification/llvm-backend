@@ -67,8 +67,8 @@ class Column(val fringe: Fringe, val patterns: IndexedSeq[Pattern[String]], val 
     patterns.zipWithIndex.flatMap(p => p._1.signature(clauses(p._2)))
   }
 
-  lazy val signature: List[Constructor] = {
-    val bestUsed = bestKey match {
+  def signatureForKey(key: Option[Pattern[Option[Occurrence]]]): List[Constructor] = {
+    val bestUsed = key match {
       case None => rawSignature
       case Some(k) => rawSignature.filter(_.isBest(k))
     }
@@ -81,6 +81,10 @@ class Column(val fringe: Fringe, val patterns: IndexedSeq[Pattern[String]], val 
     } else {
       nodups.filter(_ != Empty())
     }
+  }
+
+  lazy val signature: List[Constructor] = {
+    signatureForKey(bestKey)
   }
 
   def isChoice: Boolean = fringe.sortInfo.isCollection && bestKey == None
