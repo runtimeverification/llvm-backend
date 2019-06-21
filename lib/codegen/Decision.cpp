@@ -27,10 +27,18 @@ void Decision::operator()(DecisionNode *entry, llvm::StringMap<llvm::Value *> su
       for (llvm::BasicBlock *block : llvm::predecessors(Phi->getParent())) {
         if (Phi->getBasicBlockIndex(block) == -1) {
           undefBlocks.push_back(block);
-	}
+        }
       }
       for (llvm::BasicBlock *block : undefBlocks) {
         Phi->addIncoming(llvm::UndefValue::get(Phi->getType()), block);
+      }
+    }
+  }
+  for (auto block = this->CurrentBlock->getParent()->begin(); block != this->CurrentBlock->getParent()->end(); ++block) {
+    if (block->getUniquePredecessor()) {
+      for (auto phi = block->phis().begin(); phi != block->phis().end(); phi = block->phis().begin()) {
+        phi->replaceAllUsesWith(phi->getIncomingValue(0));
+        phi->removeFromParent();
       }
     }
   }

@@ -48,13 +48,28 @@ static void *allocatePatternAsConfiguration(const KOREPattern *Pattern) {
     return (block *) ((uint64_t)tag << 32 | 1);
   }
 
-  block *Block = (block *) koreAlloc(size);
-  Block->h = headerVal;
-
   std::vector<void *> children;
   for (const auto child : constructor->getArguments()) {
     children.push_back(allocatePatternAsConfiguration(child));
   }
+
+  if (symbol->getName() == "inj") {
+    uint16_t layout_code = layout_hdr(headerVal.hdr);
+    layout *data = getLayoutData(layout_code);
+    if (data->args[0].cat == SYMBOL_LAYOUT) {
+      block *child = (block *)children[0];
+      if (!((uint64_t)child & 1)) {
+        uint32_t tag = tag_hdr(child->h.hdr);
+	if (tag >= first_inj_tag && tag <= last_inj_tag) {
+          return child;
+	}
+      }
+    }
+  }
+
+  block *Block = (block *) koreAlloc(size);
+  Block->h = headerVal;
+
   storeSymbolChildren(Block, &children[0]);
   if (isSymbolABinder(tag)) {
     Block = debruijnize(Block);

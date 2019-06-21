@@ -91,7 +91,7 @@ static void emitDataForSymbol(std::string name, llvm::Type *ty, KOREDefinition *
     uint32_t tag = entry.first;
     auto symbol = entry.second;
     auto decl = definition->getSymbolDeclarations().at(symbol->getName());
-    bool isFunc = decl->getAttributes().count("function");
+    bool isFunc = decl->getAttributes().count("function") || decl->getAttributes().count("anywhere");
     if (isEval && !isFunc) {
       continue;
     }
@@ -121,7 +121,7 @@ static void emitGetBlockHeaderForSymbol(KOREDefinition *def, llvm::Module *mod) 
 static std::pair<llvm::Value *, llvm::BasicBlock *> getFunction(KOREDefinition *def, llvm::Module *mod,
     KOREObjectSymbol *symbol, llvm::Instruction *inst) {
   auto decl = def->getSymbolDeclarations().at(symbol->getName());
-  bool res = decl->getAttributes().count("function");
+  bool res = decl->getAttributes().count("function") || decl->getAttributes().count("anywhere");
   return std::make_pair(llvm::ConstantInt::get(llvm::Type::getInt1Ty(mod->getContext()), res),
       inst->getParent());
 }
@@ -714,6 +714,22 @@ static void emitVisitChildren(KOREDefinition *def, llvm::Module *mod) {
   emitTraversal("visitChildren", def, mod, true, getVisitor);
 }
 
+static void emitInjTags(KOREDefinition *def, llvm::Module *mod) {
+  llvm::LLVMContext &Ctx = mod->getContext();
+  auto global = mod->getOrInsertGlobal("first_inj_tag", llvm::Type::getInt32Ty(Ctx));
+  llvm::GlobalVariable *globalVar = llvm::dyn_cast<llvm::GlobalVariable>(global);
+  globalVar->setConstant(true);
+  if (!globalVar->hasInitializer()) {
+    globalVar->setInitializer(llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), def->getInjSymbol()->getFirstTag()));
+  }
+  global = mod->getOrInsertGlobal("last_inj_tag", llvm::Type::getInt32Ty(Ctx));
+  globalVar = llvm::dyn_cast<llvm::GlobalVariable>(global);
+  globalVar->setConstant(true);
+  if (!globalVar->hasInitializer()) {
+    globalVar->setInitializer(llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), def->getInjSymbol()->getLastTag()));
+  }
+}
+
 void emitConfigParserFunctions(KOREDefinition *definition, llvm::Module *module) {
   emitGetTagForSymbolName(definition, module); 
   emitGetBlockHeaderForSymbol(definition, module); 
@@ -729,6 +745,8 @@ void emitConfigParserFunctions(KOREDefinition *definition, llvm::Module *module)
   emitVisitChildren(definition, module);
 
   emitLayouts(definition, module);
+
+  emitInjTags(definition, module);
 }
 
 }

@@ -1,0 +1,131 @@
+#!/bin/bash
+set -e
+
+ARGV=()
+declare -A params
+output_file="$(mktemp tmp.out.XXXXXXXXXX.kore)"
+input_file="$(mktemp tmp.in.XXXXXXXXXX.kore)"
+trap "rm -rf $input_file $output_file" INT TERM EXIT
+initializer="LblinitGeneratedTopCell{}"
+dir=.
+debug=
+depth=-1
+
+while [[ $# -gt 0 ]]
+do
+  arg="$1"
+  case $arg in
+    -c)
+    name="$2"
+    value="$3"
+    type="$4"
+    case $type in
+      kore)
+      params[$name]="$value"
+      ;;
+      korefile)
+      params[$name]=`cat "$value"`
+      ;;
+    esac
+    shift; shift; shift; shift
+    ;;
+
+    -o|--output-file)
+    real_output_file="$2"
+    shift; shift
+    ;;
+
+    -i|--initializer)
+    initializer="$2"
+    shift; shift
+    ;;
+
+    -d)
+    dir="$2"
+    shift; shift
+    ;;
+
+    --debug)
+    debug="gdb --args "
+    shift;
+    ;;
+
+    --depth)
+    depth="$2"
+    shift; shift
+    ;;
+
+    -v|--verbose)
+    verbose=1
+    shift;
+    ;;
+
+    -save-temps)
+    trap - INT TERM EXIT
+    shift;
+    ;;
+  esac
+done
+
+cat <<HERE >> $input_file
+[initial-configuration{}(
+HERE
+
+echo "$initializer" >> $input_file
+
+cat <<HERE >> $input_file
+(
+HERE
+
+for param in "${!params[@]}"; do
+  cat <<HERE >> $input_file
+Lbl'Unds'Map'Unds'{}(
+HERE
+done
+
+cat <<HERE >> $input_file
+Lbl'Stop'Map{}()
+HERE
+
+for param in "${!params[@]}"; do
+  cat <<HERE >> $input_file
+, Lbl'UndsPipe'-'-GT-Unds'{}(inj{SortKConfigVar{}, SortKItem{}}(\dv{SortKConfigVar{}}(
+HERE
+  echo -n '"$' >> $input_file
+  echo -n "$param" >> $input_file
+  echo '"' >> $input_file
+
+  cat <<HERE >> $input_file
+)),
+HERE
+
+  echo "${params[$param]}" >> $input_file
+
+  cat <<HERE >> $input_file
+))
+HERE
+
+done
+
+cat <<HERE >> $input_file
+))]
+
+module TMP
+endmodule []
+HERE
+
+set +e
+(
+if [ -n "$verbose" ]; then
+  set -x
+fi
+$debug "$dir"/interpreter $input_file $depth $output_file
+)
+EXIT=$?
+set -e
+
+if [ -n "${real_output_file}" ]; then
+  mv -f $output_file "$real_output_file"
+fi
+
+exit $EXIT
