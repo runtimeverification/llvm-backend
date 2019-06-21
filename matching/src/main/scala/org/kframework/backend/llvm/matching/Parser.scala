@@ -178,6 +178,9 @@ object Parser {
       case 'a' => AHeuristic
       case 'q' => QHeuristic
       case '_' => DefaultHeuristic
+      case 'N' => NPseudoHeuristic
+      case 'L' => LPseudoHeuristic
+      case 'R' => RPseudoHeuristic
     }
   }
 
