@@ -513,11 +513,11 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
     columns.patch(colIx, Nil, 1)
   }
 
-  def colScoreString(heuristics: Seq[Heuristic]): String = {
-    heuristics.map((h:Heuristic) => columns.map((c:Column) => "%12.2f".format(c.computeScoreForKey(h, c.bestKey))).mkString(" ")).mkString("\n")
+  def colScoreString: String = {
+    symlib.heuristics.map(h => columns.map(c => "%12.2f".format(c.computeScoreForKey(h, c.bestKey))).mkString(" ")).mkString("\n")
   }
 
-  override def toString: String = fringe.map(_.toString).mkString(" ") + "\n" + colScoreString(Seq(FHeuristic, DHeuristic, BHeuristic, AHeuristic, RHeuristic, QHeuristic)) + "\n" + rows.map(_.toString).mkString("\n") + "\n"
+  override def toString: String = fringe.map(_.toString).mkString(" ") + "\n" + colScoreString + "\n" + rows.map(_.toString).mkString("\n") + "\n"
 
   def canEqual(other: Any): Boolean = other.isInstanceOf[Matrix]
 
