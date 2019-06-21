@@ -18,7 +18,8 @@ do
     -c)
     name="$2"
     value="$3"
-    type="$4"
+    sort="$4"
+    type="$5"
     case $type in
       kore)
       params[$name]="$value"
@@ -27,7 +28,14 @@ do
       params[$name]=`cat "$value"`
       ;;
     esac
-    shift; shift; shift; shift
+    case $sort in
+      KItem)
+      ;;
+      *)
+      params[$name]="inj{Sort$sort{}, SortKItem{}}(${params[$name]})"
+      ;;
+    esac
+    shift; shift; shift; shift; shift
     ;;
 
     -o|--output-file)
