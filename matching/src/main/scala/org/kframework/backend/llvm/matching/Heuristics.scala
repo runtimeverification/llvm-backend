@@ -85,8 +85,7 @@ object FHeuristic extends Heuristic {
   }
 }
 
-/*
-object FHeuristic extends Heuristic {
+object FHeuristic2 extends Heuristic {
   def computeScoreForKey(c: Column, key: Option[Pattern[Option[Occurrence]]]): Double = {
     for (i <- c.patterns.indices) {
       if (c.clauses(i).action.priority != c.clauses.head.action.priority)
@@ -98,7 +97,6 @@ object FHeuristic extends Heuristic {
     1.0
   }
 }
-*/
 
 object DHeuristic extends Heuristic {
   def computeScoreForKey(c: Column, key: Option[Pattern[Option[Occurrence]]]): Double = {
