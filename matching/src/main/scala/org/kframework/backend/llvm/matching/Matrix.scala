@@ -473,10 +473,10 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
   lazy val bestRow = rows(bestRowIx)
 
   def compile: DecisionTree = {
-    val result = Matrix.cache.get(this)
+    val result = symlib.cache.get(this)
     if (result == null) {
       val computed = compileInternal
-      Matrix.cache.put(this, computed)
+      symlib.cache.put(this, computed)
       computed
     } else {
       result
@@ -550,6 +550,4 @@ object Matrix {
   def fromColumns(symlib: Parser.SymLib, cols: IndexedSeq[Column], clauses: IndexedSeq[Clause]): Matrix = {
     new Matrix(symlib, cols, null, clauses, null)
   }
-
-  private val cache = new ConcurrentHashMap[Matrix, DecisionTree]()
 }

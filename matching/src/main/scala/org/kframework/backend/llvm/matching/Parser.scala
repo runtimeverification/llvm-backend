@@ -1,7 +1,10 @@
 package org.kframework.backend.llvm.matching
 
+import org.apache.commons.collections4.map.ReferenceMap
+import org.apache.commons.collections4.map.AbstractReferenceMap.ReferenceStrength
 import org.kframework.parser.kore._
 import org.kframework.parser.kore.implementation.{DefaultBuilders => B}
+import org.kframework.backend.llvm.matching.dt.DecisionTree
 import java.util
 
 case class AxiomInfo(priority: Int, ordinal: Int, rewrite: GeneralizedRewrite, sideCondition: Option[Pattern]) {}
@@ -33,6 +36,8 @@ object Parser {
 
   class SymLib(symbols: Seq[SymbolOrAlias], sorts: Seq[Sort], mod: Definition, overloadSeq: Seq[(SymbolOrAlias, SymbolOrAlias)], val heuristics: Seq[Heuristic]) {
     val sortCache = new util.HashMap[Sort, SortInfo]()
+
+    val cache = new ReferenceMap[Matrix, DecisionTree](ReferenceStrength.SOFT, ReferenceStrength.HARD)
 
     private val symbolDecls = mod.modules.flatMap(_.decls).filter(_.isInstanceOf[SymbolDeclaration]).map(_.asInstanceOf[SymbolDeclaration]).groupBy(_.symbol.ctr)
 
