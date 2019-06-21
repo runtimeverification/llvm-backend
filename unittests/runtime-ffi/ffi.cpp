@@ -25,8 +25,8 @@ extern "C" {
     struct point p;
   };
 
-#define NUM_SYMBOLS 5
-  const char * symbols[NUM_SYMBOLS] = {TYPETAG(struct), TYPETAG(uint), TYPETAG(sint), "inj{SortBytes{}}", "inj{SortFFIType{}}"};
+#define NUM_SYMBOLS 6
+  const char * symbols[NUM_SYMBOLS] = {TYPETAG(struct), TYPETAG(uint), TYPETAG(sint), TYPETAG(pointer), "inj{SortBytes{}}", "inj{SortFFIType{}}"};
 
   char * getTerminatedString(string * str);
 
@@ -45,9 +45,24 @@ extern "C" {
   }
 
   void add_hash64(void*, uint64_t) {}
+
+  uint64_t hash_k(block * kitem) {
+    return (uint64_t) kitem;
+  }
+
+   bool hook_KEQUAL_eq(block * lhs, block * rhs) {
+    return lhs == rhs;
+  }
+
   mpz_ptr hook_FFI_address(string * fn);
   string * hook_FFI_call(mpz_t addr, struct list * args, struct list * types, block * ret);
   string * hook_FFI_call_variadic(mpz_t addr, struct list * args, struct list * fixtypes, struct list * vartypes, block * ret);
+
+  mpz_ptr hook_FFI_bytes_address(string * bytes);
+  block * hook_FFI_free(block * kitem);
+  block * hook_FFI_bytes_ref(string * bytes);
+  string * hook_FFI_alloc(block * kitem, mpz_t size);
+  bool hook_FFI_allocated(block * kitem);
 
   string * makeString(const KCHAR *, int64_t len = -1);
 
@@ -306,6 +321,43 @@ BOOST_AUTO_TEST_CASE(call) {
   ret = *(int *) bytes->data;
 
   BOOST_CHECK_EQUAL(ret, p2.p.x * p2.p.y);
+
+  /* int pointerTest(int * x) */
+  x = 2;
+  block * i1 = (block *) 1;
+  mpz_t s1;
+  mpz_init_set_ui(s1, sizeof(int));
+  string * b1 = hook_FFI_alloc(i1, s1);
+  memcpy(b1->data, &x, sizeof(int));
+
+  mpz_ptr addr1 = hook_FFI_bytes_address(b1);
+  uintptr_t address1 = mpz_get_ui(addr1);
+
+  string * ptrargstr = makeString((char *) &address1, sizeof(uintptr_t *));
+
+  block * ptrarg = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(string *)));
+  ptrarg->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("inj{SortBytes{}}"));
+  memcpy(ptrarg->children, &ptrargstr, sizeof(string *));
+
+  args = hook_LIST_element(ptrarg);
+  block * type_pointer = (block *)((((uint64_t)getTagForSymbolName(TYPETAG(pointer))) << 32) | 1);
+
+  memcpy(argtype->children, &type_pointer, sizeof(block *));
+
+  types = hook_LIST_element(argtype);
+
+  fn = makeString("pointerTest");
+  addr = hook_FFI_address(fn);
+
+  bytes = hook_FFI_call(addr, &args, &types, type_sint);
+
+  hook_FFI_free(i1);
+
+  BOOST_CHECK(bytes != NULL);
+
+  ret = *(int *) bytes->data;
+
+  BOOST_CHECK_EQUAL(ret, x);
 }
 
 BOOST_AUTO_TEST_CASE(call_variadic) {
@@ -403,6 +455,51 @@ BOOST_AUTO_TEST_CASE(call_variadic) {
   ret = *(int *) bytes->data;
 
   BOOST_CHECK_EQUAL(ret, 0);
+}
+
+BOOST_AUTO_TEST_CASE(alloc) {
+  block * i1 = (block *) 1;
+  mpz_t s1;
+  mpz_init_set_ui(s1, 1);
+
+  string * b1 = hook_FFI_alloc(i1, s1);
+  BOOST_CHECK(0 != b1);
+
+  string * b2 = hook_FFI_alloc(i1, s1);
+  BOOST_CHECK_EQUAL(b1, b2);
+}
+
+BOOST_AUTO_TEST_CASE(free) {
+  block * i1 = (block *) 1;
+  mpz_t s1;
+  mpz_init_set_ui(s1, 1);
+
+  hook_FFI_alloc(i1, s1);
+  hook_FFI_free(i1);
+}
+
+BOOST_AUTO_TEST_CASE(bytes_ref) {
+  block * i1 = (block *) 1;
+  mpz_t s1;
+  mpz_init_set_ui(s1, 1);
+
+  string * b1 = hook_FFI_alloc(i1, s1);
+
+  block * i2 = hook_FFI_bytes_ref(b1);
+
+  BOOST_CHECK_EQUAL(i1, i2);
+}
+
+BOOST_AUTO_TEST_CASE(allocated) {
+  block * i1 = (block *) 1;
+  mpz_t s1;
+  mpz_init_set_ui(s1, 1);
+
+  hook_FFI_alloc(i1, s1);
+  BOOST_CHECK_EQUAL(true, hook_FFI_allocated(i1));
+
+  block * i2 = (block *) 2;
+  BOOST_CHECK_EQUAL(false, hook_FFI_allocated(i2));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
