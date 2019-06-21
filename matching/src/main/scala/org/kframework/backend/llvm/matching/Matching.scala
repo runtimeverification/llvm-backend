@@ -8,12 +8,12 @@ import java.io.File
 import java.io.FileWriter
 
 object Matching {
-  def writeDecisionTreeToFile(filename: File, moduleName: String, outputFolder: File) {
+  def writeDecisionTreeToFile(filename: File, heuristic: String, outputFolder: File) {
     val defn = new TextToKore().parse(filename)
     outputFolder.mkdirs()
     val allAxioms = Parser.getAxioms(defn).zipWithIndex
     val axioms = Parser.parseTopAxioms(allAxioms)
-    val symlib = Parser.parseSymbols(defn)
+    val symlib = Parser.parseSymbols(defn, heuristic)
     val dt = if (axioms.isEmpty) {
       Failure()
     } else {
