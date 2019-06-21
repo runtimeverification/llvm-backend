@@ -100,7 +100,7 @@ extern "C" {
     uint8_t nargs;
     layoutitem *args;
   } layout;
- 
+
   // This function is exported to be used by the interpreter 
   #ifdef __cplusplus
   extern "C++" {
@@ -145,6 +145,8 @@ extern "C" {
       void visitSeparator(FILE *));
 
   block *debruijnize(block *);
+
+  extern const uint32_t first_inj_tag, last_inj_tag;
 
 #ifdef __cplusplus
 }

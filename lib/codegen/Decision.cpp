@@ -27,10 +27,18 @@ void Decision::operator()(DecisionNode *entry, llvm::StringMap<llvm::Value *> su
       for (llvm::BasicBlock *block : llvm::predecessors(Phi->getParent())) {
         if (Phi->getBasicBlockIndex(block) == -1) {
           undefBlocks.push_back(block);
-	}
+        }
       }
       for (llvm::BasicBlock *block : undefBlocks) {
         Phi->addIncoming(llvm::UndefValue::get(Phi->getType()), block);
+      }
+    }
+  }
+  for (auto block = this->CurrentBlock->getParent()->begin(); block != this->CurrentBlock->getParent()->end(); ++block) {
+    if (block->getUniquePredecessor()) {
+      for (auto phi = block->phis().begin(); phi != block->phis().end(); phi = block->phis().begin()) {
+        phi->replaceAllUsesWith(phi->getIncomingValue(0));
+        phi->removeFromParent();
       }
     }
   }
@@ -284,7 +292,7 @@ void MakeIteratorNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> subst
   llvm::Value *arg = substitution.lookup(collection);
   args.push_back(arg);
   types.push_back(arg->getType());
-  llvm::Value *AllocSret = allocateTerm(d->Module->getTypeByName("iter"), d->CurrentBlock, "koreAllocNoGC");
+  llvm::Value *AllocSret = allocateTerm(d->Module->getTypeByName("iter"), d->CurrentBlock, "koreAllocAlwaysGC");
   AllocSret->setName(name);
   args.insert(args.begin(), AllocSret);
   types.insert(types.begin(), AllocSret->getType());
@@ -296,8 +304,9 @@ void MakeIteratorNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> subst
     constant->print(llvm::errs());
     abort();
   }
-  llvm::CallInst::Create(func, args, "", d->CurrentBlock);
+  auto call = llvm::CallInst::Create(func, args, "", d->CurrentBlock);
   func->arg_begin()->addAttr(llvm::Attribute::StructRet);
+  call->addParamAttr(0, llvm::Attribute::StructRet);
   substitution[name] = AllocSret;
   child->codegen(d, substitution);
   setCompleted();
