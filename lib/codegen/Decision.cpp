@@ -44,22 +44,9 @@ void Decision::operator()(DecisionNode *entry, llvm::StringMap<llvm::Value *> su
   }
 }
 
-std::set<std::string> DecisionNode::collectVars() {
-  if (hasVars) {
-    return vars;
-  }
-  collectDefs();
-  collectUses();
-  vars = uses;
-  for (std::string var : defs) {
-    vars.erase(var);
-  }
-  hasVars = true;
-  return vars;
-}
-
 void DecisionNode::sharedNode(Decision *d, llvm::StringMap<llvm::Value *> &oldSubst, llvm::StringMap<llvm::Value *> &substitution, llvm::BasicBlock *Block) {
-  std::set<std::string> vars = collectVars();
+  collectVars();
+  std::set<std::string> vars = this->vars;
   collectFail();
   if (containsFailNode) {
     vars.insert(d->ChoiceVars.begin(), d->ChoiceVars.end());
@@ -95,7 +82,8 @@ bool DecisionNode::beginNode(Decision *d, std::string name, llvm::StringMap<llvm
     sharedNode(d, substitution, substitution, d->CurrentBlock);
     return true;
   }
-  std::set<std::string> vars = collectVars();
+  collectVars();
+  std::set<std::string> vars = this->vars;
   collectFail();
   if (containsFailNode) {
     vars.insert(d->ChoiceVars.begin(), d->ChoiceVars.end());
@@ -313,7 +301,8 @@ void MakeIteratorNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> subst
 }
 
 void IterNextNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution) {
-  d->ChoiceVars = collectVars();
+  collectVars();
+  d->ChoiceVars = vars;
   if (beginNode(d, "choice" + binding, substitution)) {
     return;
   }
@@ -329,7 +318,7 @@ void IterNextNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitut
     for (std::string var : d->ChoiceVars) {
       auto Phi = phis[var][substitution[var]->getType()];
       if (!Phi) {
-        for (std::string v : collectVars()) {
+        for (std::string v : vars) {
           std::cerr << v << std::endl;
         }
         abort();
