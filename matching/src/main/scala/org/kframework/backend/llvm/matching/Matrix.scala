@@ -338,7 +338,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
       if (Matching.logging) {
         System.out.println("Chose column " + best._2)
       }
-      if (allBest == validCols) {
+      if (best._1.score(0) == 0.0) {
         val unboundMapColumns = columns.filter(col => !col.isValid)
         val unboundPatterns = unboundMapColumns.map(_.patterns).transpose
         val keys = unboundPatterns.map(_.flatMap(_.mapOrSetKeys))
