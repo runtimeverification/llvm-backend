@@ -335,7 +335,10 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
       import Ordering.Implicits._
       val allBest = symlib.heuristics.last.getBest(validCols)
       val best = symlib.heuristics.last.breakTies(allBest)
-      if (best._1.score == 0.0) {
+      if (Matching.logging) {
+        System.out.println("Chose column " + best._2)
+      }
+      if (allBest == validCols) {
         val unboundMapColumns = columns.filter(col => !col.isValid)
         val unboundPatterns = unboundMapColumns.map(_.patterns).transpose
         val keys = unboundPatterns.map(_.flatMap(_.mapOrSetKeys))
