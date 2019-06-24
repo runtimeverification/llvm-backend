@@ -55,6 +55,7 @@ case class AsP[T](name: T, sort: SortCategory, pat: Pattern[T]) extends Pattern[
   }
   def score(h: Heuristic, f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double = h.scoreAs(this, f, c, key, isEmpty)
   override def isChoice: Boolean = pat.isChoice
+  override def mapOrSetKeys: Seq[Pattern[T]] = pat.mapOrSetKeys
   def bindings(ix: Option[Constructor], occurrence: Occurrence): Seq[VariableBinding[T]] = {
     Seq(new VariableBinding(name, sort, occurrence)) ++ pat.bindings(ix, occurrence)
   }
@@ -237,6 +238,7 @@ case class OrP[T](ps: Seq[Pattern[T]]) extends Pattern[T] {
   def isSpecialized(ix: Constructor, f: Fringe, c: Clause): Boolean = ???
   def score(h: Heuristic, f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double = h.scoreOr(this, f, c, key, isEmpty)
   override def isChoice: Boolean = ps.exists(_.isChoice)
+  override def mapOrSetKeys: Seq[Pattern[T]] = ps.flatMap(_.mapOrSetKeys)
   def bindings(ix: Option[Constructor], occurrence: Occurrence): Seq[VariableBinding[T]] = ???
   def expand(ix: Constructor, fringes: Seq[Fringe], f: Fringe, clause: Clause): Seq[Pattern[T]] = ???
   def expandOr: Seq[Pattern[T]] = ps.flatMap(_.expandOr)
