@@ -126,6 +126,9 @@ class Column(val fringe: Fringe, val patterns: IndexedSeq[Pattern[String]], val 
       } else {
         import Ordering.Implicits._
         val rawBestKey = validKeys.map(k => (k, computeScoreForKey(Some(k)))).maxBy(_._2)
+        if (Matching.logging) {
+          System.out.println("Best key is " + rawBestKey._1)
+        }
         Some(rawBestKey._1)
       }
     }
