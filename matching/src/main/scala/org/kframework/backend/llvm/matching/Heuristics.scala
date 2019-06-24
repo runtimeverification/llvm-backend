@@ -15,6 +15,23 @@ sealed trait Heuristic {
   def scoreWildcard[T](p: WildcardP[T], f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double = ???
 
   def computeScoreForKey(c: Column, key: Option[Pattern[Option[Occurrence]]]): Double
+
+  def getBest(cols: Seq[(Column, Int)]): Seq[(Column, Int)] = {
+    var result: List[(Column, Int)] = Nil
+    var best = cols(0)._1.score
+    for (col <- cols) {
+      import Ordering.Implicits._
+      if (col._1.score > best) {
+        best = col._1.score
+        result = col :: Nil
+      } else if (col._1.score == best) {
+        result = col :: result
+      }
+    }
+    result
+  }
+
+  def breakTies(cols: Seq[(Column, Int)]): (Column, Int) = RPseudoHeuristic.breakTies(cols)
 }
 
 object DefaultHeuristic extends Heuristic {
@@ -152,5 +169,26 @@ object QHeuristic extends Heuristic {
       }
     }
     result
+  }
+}
+
+sealed trait PseudoHeuristic extends Heuristic {
+  def computeScoreForKey(c: Column, key: Option[Pattern[Option[Occurrence]]]): Double = 0.0
+}
+
+object NPseudoHeuristic extends PseudoHeuristic {
+  override def breakTies(cols: Seq[(Column, Int)]): (Column, Int) = {
+    cols(0)
+  }
+}
+
+object LPseudoHeuristic extends PseudoHeuristic {
+  override def breakTies(cols: Seq[(Column, Int)]): (Column, Int) = {
+    cols.minBy(_._1.fringe.occurrence.size)
+  }
+}
+object RPseudoHeuristic extends PseudoHeuristic {
+  override def breakTies(cols: Seq[(Column, Int)]): (Column, Int) = {
+    cols.reverse.minBy(_._1.fringe.occurrence.size)
   }
 }

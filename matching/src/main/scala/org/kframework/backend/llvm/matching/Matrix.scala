@@ -333,7 +333,8 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
       0
     } else {
       import Ordering.Implicits._
-      val best = validCols.maxBy(_._1.score)
+      val allBest = symlib.heuristics.last.getBest(validCols)
+      val best = symlib.heuristics.last.breakTies(allBest)
       if (best._1.score == 0.0) {
         val unboundMapColumns = columns.filter(col => !col.isValid)
         val unboundPatterns = unboundMapColumns.map(_.patterns).transpose
@@ -513,7 +514,11 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
     columns.patch(colIx, Nil, 1)
   }
 
-  override def toString: String = fringe.map(_.toString).mkString(" ") + "\n" + rows.map(_.toString).mkString("\n") + "\n"
+  def colScoreString: String = {
+    symlib.heuristics.map(h => columns.map(c => "%12.2f".format(c.computeScoreForKey(h, c.bestKey))).mkString(" ")).mkString("\n")
+  }
+
+  override def toString: String = fringe.map(_.toString).mkString(" ") + "\n" + colScoreString + "\n" + rows.map(_.toString).mkString("\n") + "\n"
 
   def canEqual(other: Any): Boolean = other.isInstanceOf[Matrix]
 
