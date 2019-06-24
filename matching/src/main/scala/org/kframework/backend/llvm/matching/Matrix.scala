@@ -126,6 +126,9 @@ class Column(val fringe: Fringe, val patterns: IndexedSeq[Pattern[String]], val 
       } else {
         import Ordering.Implicits._
         val rawBestKey = validKeys.map(k => (k, computeScoreForKey(Some(k)))).maxBy(_._2)
+        if (Matching.logging) {
+          System.out.println("Best key is " + rawBestKey._1)
+        }
         Some(rawBestKey._1)
       }
     }
@@ -338,7 +341,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
       if (Matching.logging) {
         System.out.println("Chose column " + best._2)
       }
-      if (allBest == validCols) {
+      if (best._1.score(0) == 0.0) {
         val unboundMapColumns = columns.filter(col => !col.isValid)
         val unboundPatterns = unboundMapColumns.map(_.patterns).transpose
         val keys = unboundPatterns.map(_.flatMap(_.mapOrSetKeys))
