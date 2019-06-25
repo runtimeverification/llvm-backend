@@ -58,7 +58,7 @@ pub unsafe extern "C" fn hook_SET_concat(s1: *const Set, s2: *const Set) -> Set 
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_SET_difference(s1: *const Set, s2: *const Set) -> Set {
-  (*s1).clone().difference((*s2).clone())
+  (*s1).clone().relative_complement((*s2).clone())
 }
 
 #[no_mangle]
