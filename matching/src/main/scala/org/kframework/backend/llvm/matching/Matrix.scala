@@ -333,23 +333,15 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
   lazy val bestColIx: Int = {
     val validCols = columns.zipWithIndex.filter(col => col._1.isValid || columns.forall(c => c == col._1 || !c.needed(col._1.keyVars)))
     if (validCols.isEmpty) {
-      0
+      symlib.heuristics.last.breakTies(columns.zipWithIndex)._2
     } else {
       import Ordering.Implicits._
-      val allBest = symlib.heuristics.last.getBest(validCols)
+      val allBest = Heuristic.getBest(validCols, columns.zipWithIndex)
       val best = symlib.heuristics.last.breakTies(allBest)
       if (Matching.logging) {
         System.out.println("Chose column " + best._2)
       }
-      if (best._1.score(0) == 0.0) {
-        val unboundMapColumns = columns.filter(col => !col.isValid)
-        val unboundPatterns = unboundMapColumns.map(_.patterns).transpose
-        val keys = unboundPatterns.map(_.flatMap(_.mapOrSetKeys))
-        val vars = keys.map(_.flatMap(_.variables).toSet)
-        validCols.find(col => col._1.isValid && col._1.needed(vars)).getOrElse(columns.head, 0)._2
-      } else {
-        best._2
-      }
+      best._2
     }
   }
 
