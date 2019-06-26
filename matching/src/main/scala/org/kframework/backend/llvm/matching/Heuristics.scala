@@ -15,23 +15,33 @@ sealed trait Heuristic {
   def scoreWildcard[T](p: WildcardP[T], f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double = ???
 
   def computeScoreForKey(c: Column, key: Option[Pattern[Option[Occurrence]]]): Double
+  def breakTies(cols: Seq[(Column, Int)]): (Column, Int) = RPseudoHeuristic.breakTies(cols)
+}
 
-  def getBest(cols: Seq[(Column, Int)]): Seq[(Column, Int)] = {
+object Heuristic {
+  def getBest(cols: Seq[(Column, Int)], allCols: Seq[(Column, Int)]): Seq[(Column, Int)] = {
     var result: List[(Column, Int)] = Nil
     var best = cols(0)._1.score
     for (col <- cols) {
       import Ordering.Implicits._
-      if (col._1.score > best) {
-        best = col._1.score
+      import scala.math.max
+
+      val bestInvalid = allCols.filter(c => !c._1.isValid && col._1.needed(c._1.keyVars)).maxBy(_._1.score)
+      var colBest = col._1.score
+
+      if (bestInvalid._1.score > colBest) {
+        colBest = bestInvalid._1.score
+      }
+
+      if (colBest > best) {
+        best = colBest
         result = col :: Nil
-      } else if (col._1.score == best) {
+      } else if (colBest == best) {
         result = col :: result
       }
     }
     result
   }
-
-  def breakTies(cols: Seq[(Column, Int)]): (Column, Int) = RPseudoHeuristic.breakTies(cols)
 }
 
 object DefaultHeuristic extends Heuristic {
