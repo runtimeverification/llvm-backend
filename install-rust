@@ -13,7 +13,7 @@ else
     export CONFIGFLAGS="--enable-llvm-link-shared"
 fi
 
-tar xvf rustc-src.tar.gz
+tar xvf rustc-src.tar.gz > /dev/null
 cd rustc-1.34.0-src
 ./configure --llvm-root=`llvm-config-6.0 --prefix 2>/dev/null || llvm-config --prefix` $CONFIGFLAGS
 ./x.py build
