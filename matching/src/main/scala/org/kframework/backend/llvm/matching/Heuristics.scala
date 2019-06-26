@@ -24,14 +24,11 @@ object Heuristic {
     var best = cols(0)._1.score
     for (col <- cols) {
       import Ordering.Implicits._
-      import scala.math.max
 
       val bestInvalid = allCols.filter(c => !c._1.isValid && col._1.needed(c._1.keyVars)).sortBy(_._1.score).headOption
       var colBest = col._1.score
 
-      if (!bestInvalid.isDefined) {
-        colBest = col._1.score
-      } else if (bestInvalid.get._1.score > colBest) {
+      if (bestInvalid.isDefined && bestInvalid.get._1.score > colBest) {
         colBest = bestInvalid.get._1.score
       }
 
