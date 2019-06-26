@@ -26,11 +26,13 @@ object Heuristic {
       import Ordering.Implicits._
       import scala.math.max
 
-      val bestInvalid = allCols.filter(c => !c._1.isValid && col._1.needed(c._1.keyVars)).maxBy(_._1.score)
+      val bestInvalid = allCols.filter(c => !c._1.isValid && col._1.needed(c._1.keyVars)).sortBy(_._1.score).headOption
       var colBest = col._1.score
 
-      if (bestInvalid._1.score > colBest) {
-        colBest = bestInvalid._1.score
+      if (!bestInvalid.isDefined) {
+        colBest = col._1.score
+      } else if (bestInvalid.get._1.score > colBest) {
+        colBest = bestInvalid.get._1.score
       }
 
       if (colBest > best) {
