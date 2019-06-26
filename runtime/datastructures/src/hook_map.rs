@@ -380,7 +380,7 @@ mod tests {
   #[test]
   fn test_remove_all() {
     unsafe {
-      let set = Set::singleton(KElem::new(DUMMY0));
+      let set = Set::unit(KElem::new(DUMMY0));
       let m1 = hook_MAP_element(DUMMY0, DUMMY0);
       let m2 = hook_MAP_removeAll(&m1, &set);
       let result = hook_MAP_size(&m2);
