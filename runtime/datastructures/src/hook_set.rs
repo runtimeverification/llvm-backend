@@ -118,7 +118,7 @@ pub unsafe extern "C" fn hook_SET_eq(s1: *const Set, s2: *const Set) -> bool {
 #[no_mangle]
 pub unsafe extern "C" fn set_hash(s: *const Set, h: *mut c_void) {
   let hasher = h as *mut &mut DefaultHasher;
-  s.hash(*hasher)
+  (*s).hash(*hasher)
 }
 
 #[no_mangle]
