@@ -26,8 +26,8 @@ object Heuristic {
       import Ordering.Implicits._
 
       val bestInvalid = allCols.filter(c => !c._1.isValid && col._1.needed(c._1.keyVars)).sortBy(_._1.score).headOption
-      val colBest = if (bestInvalid.isDefined && bestInvalid.get._1.score > colBest) {
-        colBest = bestInvalid.get._1.score
+      val colBest = if (bestInvalid.isDefined && bestInvalid.get._1.score > col._1.score) {
+        bestInvalid.get._1.score
       } else {
         col._1.score
       }
