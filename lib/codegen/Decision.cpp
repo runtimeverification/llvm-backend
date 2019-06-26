@@ -302,14 +302,13 @@ void MakeIteratorNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> subst
 
 void IterNextNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution) {
   collectVars();
+  auto oldVars = d->ChoiceVars;
   d->ChoiceVars = vars;
   if (beginNode(d, "choice" + binding, substitution)) {
     return;
   }
-  if (d->ChoiceBlock) {
-    abort();
-  }
   d->ChoiceBlock = d->CurrentBlock;
+  auto oldNode = d->ChoiceNode;
   d->ChoiceNode = this;
   llvm::Value *arg = substitution.lookup(iterator);
 
@@ -343,8 +342,8 @@ void IterNextNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitut
   substitution[binding] = Call;
   child->codegen(d, substitution);
   d->ChoiceBlock = nullptr;
-  d->ChoiceNode = nullptr;
-  d->ChoiceVars.clear();
+  d->ChoiceNode = oldNode;
+  d->ChoiceVars = oldVars;
   setCompleted();
 }
 
