@@ -212,7 +212,7 @@ pub mod tests {
       let result = hook_SET_size(&set);
       assert_eq!(__gmpz_cmp_ui(result, 0), 0);
       let s1 = hook_SET_concat(&s1, &s3);
-      let set = hook_SET_difference(&s1, &s2);
+      let set = hook_SET_difference(&s1, &s3);
       let result = hook_SET_size(&set);
       assert_eq!(__gmpz_cmp_ui(result, 1), 0);
       free_int(result);
