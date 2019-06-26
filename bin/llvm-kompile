@@ -15,7 +15,7 @@ dt_dir="$2"
 main="$3"
 shift; shift; shift
 "$(dirname "$0")"/llvm-kompile-codegen "$definition" "$dt_dir"/dt.yaml "$dt_dir" > "$mod"
-@OPT@ -tailcallelim -tailcallopt "$mod" -o "$modopt"
+@OPT@ -tailcallelim -tailcallopt -instcombine "$mod" -o "$modopt"
 if [[ "$OSTYPE" == "darwin"* ]]; then
   flags=-Wl,-mllvm,-tailcallopt
 else
