@@ -199,7 +199,7 @@ case class IntS() extends EqualLiteral {
 }
 case class BoolS() extends SortCategory {
   def hookAtt = "BOOL.Bool"
-  def hasIncompleteSignature(sigma: Seq[Constructor], f: Fringe): Boolean = f.sortInfo.length != 2
+  def hasIncompleteSignature(sigma: Seq[Constructor], f: Fringe): Boolean = sigma.length != 2
   def equalityFun = "hook_BOOL_eq"
   // matching a bool, so match the integer value of the bool with a bitwidth of 1
   def tree(matrix: Matrix): DecisionTree = SwitchLit(matrix.bestCol.fringe.occurrence, 1, matrix.compiledCases, matrix.compiledDefault)
@@ -215,7 +215,7 @@ case class BufferS() extends EqualLiteral {
 }
 case class MIntS(bitwidth: Int) extends SortCategory {
   def hookAtt = "MINT.MInt " + bitwidth
-  def hasIncompleteSignature(sigma: Seq[Constructor], f: Fringe): Boolean = f.sortInfo.length != (1 << bitwidth)
+  def hasIncompleteSignature(sigma: Seq[Constructor], f: Fringe): Boolean = sigma.length != (1 << bitwidth)
   // matching an mint, so match the integer value of the mint with the specified bitwidth
   def tree(matrix: Matrix): DecisionTree = SwitchLit(matrix.bestCol.fringe.occurrence, bitwidth, matrix.compiledCases, matrix.compiledDefault)
   def equalityFun = ???
