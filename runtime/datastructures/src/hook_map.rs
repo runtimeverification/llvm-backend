@@ -158,7 +158,7 @@ pub unsafe extern "C" fn hook_MAP_eq(m1: *const Map, m2: *const Map) -> bool {
 #[no_mangle]
 pub unsafe extern "C" fn map_hash(m: *const Map, h: *mut c_void) {
   let hasher = h as *mut &mut DefaultHasher;
-  m.hash(*hasher)
+  (*m).hash(*hasher)
 }
 
 #[no_mangle]
