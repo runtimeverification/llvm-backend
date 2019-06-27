@@ -1,0 +1,4 @@
+[initial-configuration{}(LblinitGeneratedTopCell{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Stop'Map{}(),Lbl'UndsPipe'-'-GT-Unds'{}(inj{SortKConfigVar{}, SortKItem{}}(\dv{SortKConfigVar{}}("$PGM")),inj{SortInt{}, SortKItem{}}(Lblfoo'LParUndsRParUnds'TEST'UndsUnds'Bool{}(\dv{SortBool{}}("true"))))),Lbl'UndsPipe'-'-GT-Unds'{}(inj{SortKConfigVar{}, SortKItem{}}(\dv{SortKConfigVar{}}("$STDIN")),inj{SortString{}, SortKItem{}}(\dv{SortString{}}("")))),Lbl'UndsPipe'-'-GT-Unds'{}(inj{SortKConfigVar{}, SortKItem{}}(\dv{SortKConfigVar{}}("$IO")),inj{SortString{}, SortKItem{}}(\dv{SortString{}}("on"))))))]
+
+module TMP
+endmodule []
