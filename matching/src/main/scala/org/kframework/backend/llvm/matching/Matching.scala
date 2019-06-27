@@ -22,7 +22,12 @@ object Matching {
     val funcAxioms = Parser.parseFunctionAxioms(allAxioms)
     val sortedFuncAxioms = symlib.functions.map(funcAxioms.getOrElse(_, IndexedSeq()))
     val sorts = symlib.functions.map(symlib.signatures(_)._1)
-    val dts = symlib.functions.map(f => Generator.mkDecisionTree(symlib, defn, funcAxioms.getOrElse(f, IndexedSeq()), symlib.signatures(f)._1))
+    val dts = symlib.functions.map(f => {
+      if (logging) {
+        System.out.println("Compiling " + f)
+      }
+      Generator.mkDecisionTree(symlib, defn, funcAxioms.getOrElse(f, IndexedSeq()), symlib.signatures(f)._1)
+    })
     val path = new File(outputFolder, "dt.yaml")
     dt.serializeToYaml(path)
     val files = (symlib.functions, dts).zipped.toIterable

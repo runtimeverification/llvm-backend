@@ -134,9 +134,17 @@ class Column(val fringe: Fringe, val patterns: IndexedSeq[Pattern[String]], val 
     }
   }
 
+  def maxPriority: Int = {
+    if (isChoice) {
+      clauses(0).action.priority
+    } else {
+      Int.MaxValue
+    }
+  }
+
   def expand(ix: Constructor): IndexedSeq[Column] = {
     val fringes = fringe.expand(ix)
-    val ps = (patterns, clauses).zipped.toIterable.map(t => t._1.expand(ix, fringes, fringe, t._2))
+    val ps = (patterns, clauses).zipped.toIterable.map(t => t._1.expand(ix, fringes, fringe, t._2, maxPriority))
     (fringes, ps.transpose).zipped.toIndexedSeq.map(t => new Column(t._1, t._2.toIndexedSeq, clauses))
   }
 
@@ -358,7 +366,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
   lazy val sigma: List[Constructor] = bestCol.signature
 
   def specialize(ix: Constructor): (String, Matrix) = {
-    val filtered = filterMatrix(Some(ix), (c, p) => p.isSpecialized(ix, bestCol.fringe, c))
+    val filtered = filterMatrix(Some(ix), (c, p) => p.isSpecialized(ix, bestCol.fringe, c, bestCol.maxPriority))
     val expanded = Matrix.fromColumns(symlib, filtered.columns(bestColIx).expand(ix) ++ filtered.notBestCol(bestColIx), filtered.clauses)
     (ix.name, expanded)
   }
