@@ -58,7 +58,7 @@ static void *allocatePatternAsConfiguration(const KOREPattern *Pattern) {
     layout *data = getLayoutData(layout_code);
     if (data->args[0].cat == SYMBOL_LAYOUT) {
       block *child = (block *)children[0];
-      if (!((uint64_t)child & 1)) {
+      if (!((uint64_t)child & 1) && layout(child) != 0) {
         uint32_t tag = tag_hdr(child->h.hdr);
 	if (tag >= first_inj_tag && tag <= last_inj_tag) {
           return child;
