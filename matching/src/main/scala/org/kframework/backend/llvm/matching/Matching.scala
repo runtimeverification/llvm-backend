@@ -19,6 +19,12 @@ object Matching {
     } else {
       Generator.mkDecisionTree(symlib, defn, axioms, Seq(axioms.head.rewrite.sort))
     }
+    val specialDts = axioms.map(a => {
+      if (logging) {
+        System.out.println("Compiling decision tree for axiom " + a.ordinal)
+      }
+      Generator.mkSpecialDecisionTree(symlib, defn, axioms, Seq(axioms.head.rewrite.sort), a)
+    })
     val funcAxioms = Parser.parseFunctionAxioms(allAxioms)
     val sortedFuncAxioms = symlib.functions.map(funcAxioms.getOrElse(_, IndexedSeq()))
     val sorts = symlib.functions.map(symlib.signatures(_)._1)
@@ -30,6 +36,14 @@ object Matching {
     })
     val path = new File(outputFolder, "dt.yaml")
     dt.serializeToYaml(path)
+    val specialFiles = (axioms, specialDts).zipped.toIterable
+    for (pair <- specialFiles) {
+      val ordinal = pair._1.ordinal
+      val filename = "dt_" + ordinal + ".yaml"
+      if (pair._2.isDefined) {
+        pair._2.get._1.serializeToYaml(new File(outputFolder, filename), pair._2.get._2)
+      }
+    }
     val files = (symlib.functions, dts).zipped.toIterable
     val index = new File(outputFolder, "index.txt")
     val writer = new FileWriter(index)

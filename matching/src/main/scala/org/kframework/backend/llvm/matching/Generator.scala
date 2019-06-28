@@ -50,8 +50,7 @@ object Generator {
     }
   }
 
-  private def genPatterns(mod: Definition, symlib: Parser.SymLib, rewrite: GeneralizedRewrite) : List[P[String]] = {
-    val lhs = rewrite.getLeftHandSide
+  private def genPatterns(mod: Definition, symlib: Parser.SymLib, lhs: Seq[Pattern]) : List[P[String]] = {
     def getElementSym(sort: Sort): SymbolOrAlias = {
       Parser.getSymbolAtt(symlib.sortAtt(sort), "element").get
     }
@@ -127,14 +126,33 @@ object Generator {
       val scVars = a.sideCondition.map(genVars(_))
       new Action(a.ordinal, rhsVars.map(_.name).sorted.distinct, scVars.map(_.map(_.name).sorted.distinct), (rhsVars ++ scVars.getOrElse(Seq())).filter(_.name.startsWith("Var'Bang'")).map(v => (v.name, v.sort)), a.rewrite.getLeftHandSide.size, a.priority)
     })
-    val patterns = axioms.map(a => genPatterns(mod, symlib, a.rewrite)).transpose
+    val patterns = axioms.map(a => genPatterns(mod, symlib, a.rewrite.getLeftHandSide)).transpose
     val cols = (sorts, patterns).zipped.toIndexedSeq
     new Matrix(symlib, cols, actions).expand
   }
     
   
-  def mkDecisionTree[T](symlib: Parser.SymLib, mod: Definition, axioms: IndexedSeq[AxiomInfo], sorts: Seq[Sort]) : DecisionTree = {
+  def mkDecisionTree(symlib: Parser.SymLib, mod: Definition, axioms: IndexedSeq[AxiomInfo], sorts: Seq[Sort]) : DecisionTree = {
     val matrix = genClauseMatrix(symlib, mod, axioms, sorts)
     matrix.compile
+  }
+
+  private def isPoorlySpecialized(finalMatrix: Matrix, originalMatrix: Matrix): Boolean = {
+    originalMatrix.rows.lengthCompare(finalMatrix.rows.size * 2) <= 0
+  }
+
+  def mkSpecialDecisionTree(symlib: Parser.SymLib, mod: Definition, axioms: IndexedSeq[AxiomInfo], sorts: Seq[Sort], axiom: AxiomInfo) : Option[(DecisionTree, Map[P[String], Occurrence])] = {
+    val matrix = genClauseMatrix(symlib, mod, axioms, sorts)
+    val rhs = genPatterns(mod, symlib, Seq(axiom.rewrite.getRightHandSide))
+    val (specialized,residuals) = matrix.specializeBy(rhs.toIndexedSeq)
+    val residualMap = (residuals, specialized.fringe.map(_.occurrence)).zipped.toMap
+    val newClauses = specialized.clauses.map(_.specializeBy(residualMap, symlib))
+    val finalMatrix = Matrix.fromColumns(symlib, specialized.columns.map(c => new Column(c.fringe.inexact, c.patterns, newClauses)), newClauses)
+    val dt = finalMatrix.compile
+    if (isPoorlySpecialized(finalMatrix, matrix)) {
+      None
+    } else {
+      Some((dt, residualMap))
+    }
   }
 }

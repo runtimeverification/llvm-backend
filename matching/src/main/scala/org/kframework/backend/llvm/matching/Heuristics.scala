@@ -191,7 +191,7 @@ object RHeuristic extends Heuristic {
     val signature = c.column.signatureForKey(key)
     for (con <- signature) {
       for (i <- c.column.patterns.indices) {
-        if (c.column.patterns(i).isSpecialized(con, c.column.fringe, c.column.clauses(i), c.column.maxPriority)) {
+        if (c.column.patterns(i).isSpecialized(con, false, c.column.fringe, c.column.clauses(i), c.column.maxPriority)) {
           result += 1.0
         }
       }
