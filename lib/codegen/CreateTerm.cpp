@@ -723,7 +723,12 @@ std::string makeApplyRuleFunction(KOREAxiomDeclaration *axiom, KOREDefinition *d
     llvm::FunctionType *funcType = llvm::FunctionType::get(getValueType({SortCategory::Symbol, 0}, Module), paramTypes, false);
     std::string name = "apply_rule_" + std::to_string(axiom->getOrdinal());
     llvm::Constant *func = Module->getOrInsertFunction(name, funcType);
-    llvm::Function *applyRule = llvm::cast<llvm::Function>(func);
+    llvm::Function *applyRule = llvm::dyn_cast<llvm::Function>(func);
+    if (!applyRule) {
+      printf("%lu\n", residuals.size());
+      func->print(llvm::errs());
+      abort();
+    }
     applyRule->setCallingConv(llvm::CallingConv::Fast);
     llvm::StringMap<llvm::Value *> subst;
     llvm::BasicBlock *block = llvm::BasicBlock::Create(Module->getContext(), "entry", applyRule);

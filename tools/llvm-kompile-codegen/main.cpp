@@ -41,7 +41,7 @@ int main (int argc, char **argv) {
 
   for (auto axiom : definition->getAxioms()) {
     makeSideConditionFunction(axiom, definition, mod.get());
-    if (axiom->isTopAxiom()) {
+    if (!axiom->isTopAxiom()) {
       makeApplyRuleFunction(axiom, definition, mod.get());
     } else {
       std::string filename = argv[3] + std::string("/") + "dt_" + std::to_string(axiom->getOrdinal()) + ".yaml";

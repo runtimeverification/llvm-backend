@@ -104,8 +104,13 @@ public:
   }
 
   KOREObjectPattern *parsePattern(yaml_node_t *node, std::vector<std::string> &uses) {
-    if (get(node, "occurrence")) {
-      std::string name = to_string(vec(get(node, "occurrence")));
+    if (auto o = get(node, "occurrence")) {
+      std::string name;
+      if (o->type == YAML_SEQUENCE_NODE) {
+        name = to_string(vec(o));
+      } else {
+        name = str(o);
+      }
       uses.push_back(name);
       return KOREObjectVariablePattern::Create(name, sorts.at(str(get(node, "hook"))));
     } else if (get(node, "literal")) {
@@ -255,12 +260,13 @@ public:
 
   PartialStep makeResiduals(yaml_node_t *residuals, DecisionNode *dt) {
     std::vector<Residual> res;
-    for (auto iter = residuals->data.sequence.items.start; iter < residuals->data.sequence.items.top; ++iter) {
+    for (auto iter = residuals->data.mapping.pairs.start; iter < residuals->data.mapping.pairs.top; ++iter) {
       Residual r;
-      yaml_node_t *node = yaml_document_get_node(doc, *iter);
-      r.occurrence = to_string(vec(get(node, 1)));
+      yaml_node_t *patNode = yaml_document_get_node(doc, iter->key);
+      yaml_node_t *oNode = yaml_document_get_node(doc, iter->value);
+      r.occurrence = to_string(vec(oNode));
       std::vector<std::string> uses;
-      r.pattern = parsePattern(get(node, 0), uses);
+      r.pattern = parsePattern(patNode, uses);
       res.push_back(r);
     }
     PartialStep retval;

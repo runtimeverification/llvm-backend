@@ -250,12 +250,14 @@ static bool shouldCollectOldGen() {
 
 void migrateRoots();
 
-void koreCollect(block** root) {
+void koreCollect(void** roots, uint8_t nroots, layoutitem *typeInfo) {
   is_gc = true;
   collect_old = shouldCollectOldGen();
   MEM_LOG("Starting garbage collection\n");
   koreAllocSwap(collect_old);
-  migrate(root);
+  for (int i = 0; i < nroots; i++) {
+    migrate_child(roots, typeInfo, i, true);
+  }
   migrateRoots();
   char *scan_ptr = youngspace_ptr();
   MEM_LOG("Evacuating young generation\n");
