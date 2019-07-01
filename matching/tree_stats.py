@@ -61,7 +61,11 @@ def count_nodes_shared(data):
 with open(sys.argv[1], 'r') as stream:
   try:
     doc = yaml.load(stream, Loader=Loader)
-    result = count_nodes_shared(doc)
+    if (isinstance(doc, list)):
+      result = count_nodes_shared(doc[0])
+    else:
+      result = count_nodes_shared(doc)
+    
     print("Size: " + "{:,}".format(result["count"]))
     print("Shared size: " + "{:,}".format(result["shared_count"]))
     print("Max path length: " + str(result["max_depth"]))
