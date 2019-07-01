@@ -35,6 +35,7 @@ object Matching {
         if (logging) {
           System.out.println("Compiling decision tree for axiom " + a.ordinal)
         }
+        Matrix.clearCache
         Generator.mkSpecialDecisionTree(symlib, defn, axioms, Seq(axioms.head.rewrite.sort), a)
       })
       val specialFiles = (axioms, specialDts).zipped.toIterable

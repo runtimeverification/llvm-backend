@@ -728,4 +728,8 @@ object Matrix {
   }
 
   private val cache = new ConcurrentHashMap[Matrix, DecisionTree]()
+
+  def clearCache: Unit = {
+    cache.clear
+  }
 }
