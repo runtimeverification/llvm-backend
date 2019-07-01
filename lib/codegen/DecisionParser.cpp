@@ -115,11 +115,17 @@ public:
       return KOREObjectVariablePattern::Create(name, sorts.at(str(get(node, "hook"))));
     } else if (get(node, "literal")) {
       auto sym = KOREObjectSymbol::Create("\\dv");
-      auto sort = sorts.at(str(get(node, "hook")));
+      auto hook = str(get(node, "hook"));
+      auto sort = sorts.at(hook);
+      auto val = str(get(node, "literal"));
+      if (hook == "BOOL.Bool") {
+        val = val == "1" ? "true" : "false";
+      }
+
       sym->addFormalArgument(sort);
       sym->addSort(sort);
       auto pat = KOREObjectCompositePattern::Create(sym);
-      pat->addArgument(KOREMetaStringPattern::Create(str(get(node, "literal"))));
+      pat->addArgument(KOREMetaStringPattern::Create(val));
       return pat;
     } else {
       if (!get(node, "constructor")) {
