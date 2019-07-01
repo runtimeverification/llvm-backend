@@ -748,7 +748,7 @@ std::string makeApplyRuleFunction(KOREAxiomDeclaration *axiom, KOREDefinition *d
       case SortCategory::List:
       case SortCategory::Set:
         if (!arg->getType()->isPointerTy()) {
-          auto ptr = allocateTerm(arg->getType(), creator.getCurrentBlock(), "koreAllocOld");
+          auto ptr = allocateTerm(arg->getType(), creator.getCurrentBlock(), "koreAllocNoGC");
           new llvm::StoreInst(arg, ptr, creator.getCurrentBlock());
           arg = ptr;
         }
