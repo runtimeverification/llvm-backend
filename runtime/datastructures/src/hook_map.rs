@@ -2,7 +2,7 @@ extern crate libc;
 
 use super::decls::{Map,MapIter,Set,List,Int,K,KElem,__gmpz_init_set_ui,move_int,printConfigurationInternal};
 use std::iter::FromIterator;
-use std::hash::Hash;
+use std::hash::{Hash,BuildHasherDefault};
 use std::collections::hash_map::DefaultHasher;
 use std::ptr;
 use std::mem;
@@ -34,12 +34,14 @@ pub unsafe extern "C" fn map_iterator_next(iter: *mut MapIter) -> K {
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_MAP_element(key: K, value: K) -> Map {
-  Map::unit(KElem::new(key), KElem::new(value))
+  let mut m = hook_MAP_unit();
+  m.insert(KElem::new(key), KElem::new(value));
+  m
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_MAP_unit() -> Map {
-  Map::new()
+  Map::with_hasher(BuildHasherDefault::<DefaultHasher>::default())
 }
 
 #[no_mangle]
@@ -211,6 +213,7 @@ mod tests {
 
   use decls::testing::*;
   use hook_map::*;
+  use hook_set::hook_SET_element;
 
   #[test]
   fn test_element() {
@@ -380,7 +383,7 @@ mod tests {
   #[test]
   fn test_remove_all() {
     unsafe {
-      let set = Set::unit(KElem::new(DUMMY0));
+      let set = hook_SET_element(DUMMY0);
       let m1 = hook_MAP_element(DUMMY0, DUMMY0);
       let m2 = hook_MAP_removeAll(&m1, &set);
       let result = hook_MAP_size(&m2);
