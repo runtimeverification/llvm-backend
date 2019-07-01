@@ -16,11 +16,14 @@ sealed trait DecisionTree {
     writer.close()
   }
 
-  def serializeToYaml(file: File, residuals: Map[Pattern[String], Occurrence]): Unit = {
+  def serializeToYaml(file: File, residuals: Seq[(Pattern[String], Occurrence)]): Unit = {
     val writer = new FileWriter(file)
-    val residualRepr = new util.HashMap[AnyRef, AnyRef]()
+    val residualRepr = new util.ArrayList[AnyRef]()
     for (entry <- residuals) {
-      residualRepr.put(MakePattern.representResidual(entry._1), entry._2.representation)
+      val pair = new util.ArrayList[AnyRef]()
+      pair.add(MakePattern.representResidual(entry._1))
+      pair.add(entry._2.representation)
+      residualRepr.add(pair)
     }
     val bothRepr = new util.ArrayList[AnyRef]()
     bothRepr.add(representation)

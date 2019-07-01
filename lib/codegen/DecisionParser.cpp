@@ -262,13 +262,12 @@ public:
 
   PartialStep makeResiduals(yaml_node_t *residuals, DecisionNode *dt) {
     std::vector<Residual> res;
-    for (auto iter = residuals->data.mapping.pairs.start; iter < residuals->data.mapping.pairs.top; ++iter) {
+    for (auto iter = residuals->data.sequence.items.start; iter < residuals->data.sequence.items.top; ++iter) {
       Residual r;
-      yaml_node_t *patNode = yaml_document_get_node(doc, iter->key);
-      yaml_node_t *oNode = yaml_document_get_node(doc, iter->value);
-      r.occurrence = to_string(vec(oNode));
+      yaml_node_t *listNode = yaml_document_get_node(doc, *iter);
+      r.occurrence = to_string(vec(get(listNode, 1)));
       std::vector<std::string> uses;
-      r.pattern = parsePattern(patNode, uses);
+      r.pattern = parsePattern(get(listNode, 0), uses);
       res.push_back(r);
     }
     PartialStep retval;

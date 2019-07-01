@@ -141,11 +141,11 @@ object Generator {
     originalMatrix.rows.lengthCompare(finalMatrix.rows.size * 2) <= 0
   }
 
-  def mkSpecialDecisionTree(symlib: Parser.SymLib, mod: Definition, axioms: IndexedSeq[AxiomInfo], sorts: Seq[Sort], axiom: AxiomInfo) : Option[(DecisionTree, Map[P[String], Occurrence])] = {
+  def mkSpecialDecisionTree(symlib: Parser.SymLib, mod: Definition, axioms: IndexedSeq[AxiomInfo], sorts: Seq[Sort], axiom: AxiomInfo) : Option[(DecisionTree, Seq[(P[String], Occurrence)])] = {
     val matrix = genClauseMatrix(symlib, mod, axioms, sorts)
     val rhs = genPatterns(mod, symlib, Seq(axiom.rewrite.getRightHandSide))
     val (specialized,residuals) = matrix.specializeBy(rhs.toIndexedSeq)
-    val residualMap = (residuals, specialized.fringe.map(_.occurrence)).zipped.toMap
+    val residualMap = (residuals, specialized.fringe.map(_.occurrence)).zipped.toSeq
     val newClauses = specialized.clauses.map(_.specializeBy(residualMap, symlib))
     val finalMatrix = Matrix.fromColumns(symlib, specialized.columns.map(c => new Column(c.fringe.inexact, c.patterns, newClauses)), newClauses)
     val dt = finalMatrix.compile

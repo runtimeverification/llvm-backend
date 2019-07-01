@@ -306,7 +306,8 @@ case class Clause(
     new Clause(action, bindings ++ pat.bindings(ix, residual, f.occurrence, f.symlib), listRanges ++ pat.listRange(ix, f.occurrence), overloadChildren ++ pat.overloadChildren(f, ix, residual, Num(0, f.occurrence)), specializedVars)
   }
 
-  private def translateVars(residualMap: Map[Pattern[String], Occurrence], allVars: Vector[VariableBinding[String]], symlib: Parser.SymLib): Seq[(Pattern[Option[Occurrence]], Occurrence)] = {
+  private def translateVars(residuals: Seq[(Pattern[String], Occurrence)], allVars: Vector[VariableBinding[String]], symlib: Parser.SymLib): Seq[(Pattern[Option[Occurrence]], Occurrence)] = {
+    val residualMap = residuals.toMap
     def substituteBy(pat: Pattern[String], category: SortCategory): Pattern[Option[Occurrence]] = {
       residualMap.get(pat) match {
         case Some(o) => VariableP(Some(o), category)
@@ -320,7 +321,7 @@ case class Clause(
     allVars.filter(_.pattern.isDefined).map(v => (substituteBy(v.pattern.get, v.category), v.occurrence))
   }
 
-  def specializeBy(residualMap: Map[Pattern[String], Occurrence], symlib: Parser.SymLib): Clause = {
+  def specializeBy(residualMap: Seq[(Pattern[String], Occurrence)], symlib: Parser.SymLib): Clause = {
     val overloadVars = overloadChildren.map(_._2)
     val allVars = bindings ++ overloadVars
     Clause(action, allVars, listRanges, Vector(), specializedVars ++ translateVars(residualMap, allVars, symlib))
