@@ -2,7 +2,7 @@ extern crate libc;
 
 use super::decls::{Set,SetIter,List,Int,K,KElem,__gmpz_init_set_ui,move_int,printConfigurationInternal};
 use std::iter::FromIterator;
-use std::hash::Hash;
+use std::hash::{Hash,BuildHasherDefault};
 use std::collections::hash_map::DefaultHasher;
 use std::ptr;
 use std::mem;
@@ -39,12 +39,14 @@ pub unsafe extern "C" fn hook_SET_in(value: K, set: *const Set) -> bool {
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_SET_unit() -> Set {
-  Set::new()
+  Set::with_hasher(BuildHasherDefault::<DefaultHasher>::default())
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn hook_SET_element(value: K) -> Set {
-  Set::unit(KElem::new(value))
+  let mut s = hook_SET_unit();
+  s.insert(KElem::new(value));
+  s
 }
 
 #[no_mangle]
