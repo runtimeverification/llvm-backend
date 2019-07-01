@@ -115,7 +115,9 @@ public:
       return KOREObjectVariablePattern::Create(name, sorts.at(str(get(node, "hook"))));
     } else if (get(node, "literal")) {
       auto sym = KOREObjectSymbol::Create("\\dv");
-      sym->addFormalArgument(sorts.at(str(get(node, "hook"))));
+      auto sort = sorts.at(str(get(node, "hook")));
+      sym->addFormalArgument(sort);
+      sym->addSort(sort);
       auto pat = KOREObjectCompositePattern::Create(sym);
       pat->addArgument(KOREMetaStringPattern::Create(str(get(node, "literal"))));
       return pat;
