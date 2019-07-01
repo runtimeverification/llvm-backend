@@ -2,7 +2,7 @@ extern crate im_rc;
 extern crate libc;
 
 use std::cell::UnsafeCell;
-use std::hash::{Hash,Hasher};
+use std::hash::{Hash,Hasher,BuildHasherDefault};
 use decls::im_rc::hashmap::HashMap;
 use decls::im_rc::hashset::HashSet;
 use decls::im_rc::hashset;
@@ -99,8 +99,8 @@ pub unsafe extern "C" fn hash_k(block: K) -> u64 {
   h.finish()
 }
 
-pub type Map = HashMap<KElem, KElem>;
-pub type Set = HashSet<KElem>;
+pub type Map = HashMap<KElem, KElem, BuildHasherDefault<DefaultHasher>>;
+pub type Set = HashSet<KElem, BuildHasherDefault<DefaultHasher>>;
 pub type List = Vector<KElem>;
 pub type SetIter = hashset::Iter<'static, KElem>;
 pub type MapIter = hashmap::Iter<'static, KElem, KElem>;
