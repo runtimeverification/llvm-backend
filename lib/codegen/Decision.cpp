@@ -473,14 +473,20 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> stepFunctionHeader(uns
         ptrTypes.push_back(llvm::PointerType::getUnqual(getValueType(type, module)));
         roots.push_back(args[i]);
         break;
+      case SortCategory::Int:
+      case SortCategory::Float:
       case SortCategory::StringBuffer:
       case SortCategory::Symbol:
+      case SortCategory::Variable:
         nroots++;
         ptrTypes.push_back(getValueType(type, module));
         roots.push_back(args[i]);
         break;
-      default:
+      case SortCategory::Bool:
+      case SortCategory::MInt:
         break;
+      case SortCategory::Uncomputed:
+        abort();
     }
     i++;
   }
@@ -501,10 +507,16 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> stepFunctionHeader(uns
       case SortCategory::Set:
       case SortCategory::StringBuffer:
       case SortCategory::Symbol:
+      case SortCategory::Variable:
+      case SortCategory::Int:
+      case SortCategory::Float:
         elements.push_back(llvm::ConstantStruct::get(module->getTypeByName(LAYOUTITEM_STRUCT), llvm::ConstantInt::get(llvm::Type::getInt64Ty(module->getContext()), i++ * 8), llvm::ConstantInt::get(llvm::Type::getInt16Ty(module->getContext()), (int)cat.cat + cat.bits)));
         break;
-      default:
+      case SortCategory::Bool:
+      case SortCategory::MInt:
         break;
+      case SortCategory::Uncomputed:
+        abort();
     }
   }
   auto layoutArr = llvm::ConstantArray::get(llvm::ArrayType::get(module->getTypeByName(LAYOUTITEM_STRUCT), elements.size()), elements);
@@ -535,6 +547,9 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> stepFunctionHeader(uns
       case SortCategory::Set:
       case SortCategory::StringBuffer:
       case SortCategory::Symbol:
+      case SortCategory::Variable:
+      case SortCategory::Int:
+      case SortCategory::Float:
         results.push_back(phis[rootIdx++]);
         break;
       default:
