@@ -15,6 +15,7 @@ trait AbstractColumn {
   def signatureForKey(key: Option[Pattern[Option[Occurrence]]]): List[Constructor]
   val isEmpty: Boolean
   val category: SortCategory
+  def maxPriority: Int
 }
 
 class MatrixColumn(val matrix: Matrix, colIx: Int) extends AbstractColumn {
@@ -25,6 +26,7 @@ class MatrixColumn(val matrix: Matrix, colIx: Int) extends AbstractColumn {
   def signatureForKey(key: Option[Pattern[Option[Occurrence]]]): List[Constructor] = matrix.columns(colIx).signatureForKey(key)
   lazy val isEmpty = matrix.columns(colIx).isEmpty
   lazy val category: SortCategory = matrix.columns(colIx).category
+  def maxPriority: Int = matrix.columns(colIx).maxPriority
 }
 
 class Column(val fringe: Fringe, val patterns: IndexedSeq[Pattern[String]], val clauses: IndexedSeq[Clause]) extends AbstractColumn {
