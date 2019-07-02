@@ -7,7 +7,29 @@ import org.kframework.backend.llvm.matching.dt._
 import java.util
 import java.util.concurrent.ConcurrentHashMap
 
-class Column(val fringe: Fringe, val patterns: IndexedSeq[Pattern[String]], val clauses: IndexedSeq[Clause]) {
+trait AbstractColumn {
+  val score: Seq[Double]
+  val clauses: IndexedSeq[Clause]
+  val patterns: IndexedSeq[Pattern[String]]
+  val fringe: Fringe
+  def signatureForKey(key: Option[Pattern[Option[Occurrence]]]): List[Constructor]
+  val isEmpty: Boolean
+  val category: SortCategory
+  def maxPriority: Int
+}
+
+class MatrixColumn(val matrix: Matrix, colIx: Int) extends AbstractColumn {
+  lazy val score: Seq[Double] = matrix.columns(colIx).score
+  val clauses: IndexedSeq[Clause] = matrix.columns(colIx).clauses
+  val patterns: IndexedSeq[Pattern[String]] = matrix.columns(colIx).patterns
+  val fringe: Fringe = matrix.columns(colIx).fringe
+  def signatureForKey(key: Option[Pattern[Option[Occurrence]]]): List[Constructor] = matrix.columns(colIx).signatureForKey(key)
+  lazy val isEmpty = matrix.columns(colIx).isEmpty
+  lazy val category: SortCategory = matrix.columns(colIx).category
+  def maxPriority: Int = matrix.columns(colIx).maxPriority
+}
+
+class Column(val fringe: Fringe, val patterns: IndexedSeq[Pattern[String]], val clauses: IndexedSeq[Clause]) extends AbstractColumn {
   lazy val category: SortCategory = {
     val ps = patterns.map(_.category).filter(_.isDefined)
     if (ps.isEmpty) {
