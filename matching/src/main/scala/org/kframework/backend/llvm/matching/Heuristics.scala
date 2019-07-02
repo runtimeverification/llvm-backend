@@ -142,18 +142,6 @@ object AHeuristic extends Heuristic {
   }
 }
 
-object LHeuristic extends Heuristic {
-  val needsMatrix: Boolean = true
-
-  def computeScoreForKey(c: AbstractColumn, key: Option[Pattern[Option[Occurrence]]]): Double = {
-    var result = 0.0
-    for (con <- c.column.signatureForKey(key)) {
-      result -= c.column.fringe.expand(con).size
-    }
-    result
-  }
-}
-
 object RHeuristic extends Heuristic {
   val needsMatrix: Boolean = false
 
