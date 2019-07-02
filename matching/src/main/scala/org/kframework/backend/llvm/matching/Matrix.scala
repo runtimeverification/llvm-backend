@@ -8,15 +8,15 @@ import java.util
 import java.util.concurrent.ConcurrentHashMap
 
 trait AbstractColumn {
-  val column: Column
+  def column: Column
 }
 
-class MatrixColumn(val matrix: Matrix, colIx: Int) extends AbstractColumn {
-  val column: Column = matrix.columns(colIx)
+case class MatrixColumn(val matrix: Matrix, colIx: Int) extends AbstractColumn {
+  def column: Column = matrix.columns(colIx)
 }
 
 class Column(val fringe: Fringe, val patterns: IndexedSeq[Pattern[String]], val clauses: IndexedSeq[Clause]) extends AbstractColumn {
-  val column: Column = this
+  def column: Column = this
 
   lazy val category: SortCategory = {
     val ps = patterns.map(_.category).filter(_.isDefined)
@@ -367,24 +367,24 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
 
   // compute the column with the best score, choosing the first such column if they are equal
   lazy val bestColIx: Int = {
-    val validCols = columns.zipWithIndex.filter(col => col._1.isValid || columns.forall(c => c == col._1 || !c.needed(col._1.keyVars)))
+    val validCols = columns.indices.map(MatrixColumn(this, _)).filter(col => col.column.isValid || columns.forall(c => c == col.column || !c.needed(col.column.keyVars)))
     if (validCols.isEmpty) {
       0
     } else {
       import Ordering.Implicits._
-      val allBest = symlib.heuristics.last.getBest(validCols, this)
+      val allBest = symlib.heuristics.last.getBest(validCols)
       val best = symlib.heuristics.last.breakTies(allBest)
       if (Matching.logging) {
-        System.out.println("Chose column " + best._2)
+        System.out.println("Chose column " + best.colIx)
       }
-      if (best._1.score(0) == 0.0) {
+      if (best.column.score(0) == 0.0) {
         val unboundMapColumns = columns.filter(col => !col.isValid)
         val unboundPatterns = unboundMapColumns.map(_.patterns).transpose
         val keys = unboundPatterns.map(_.flatMap(_.mapOrSetKeys))
         val vars = keys.map(_.flatMap(_.variables).toSet)
-        validCols.find(col => col._1.isValid && col._1.needed(vars)).getOrElse(columns.head, 0)._2
+        validCols.find(col => col.column.isValid && col.column.needed(vars)).getOrElse(MatrixColumn(this, 0)).colIx
       } else {
-        best._2
+        best.colIx
       }
     }
   }

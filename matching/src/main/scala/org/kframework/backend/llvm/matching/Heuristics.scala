@@ -18,12 +18,12 @@ sealed trait Heuristic {
 
   def computeScoreForKey(c: AbstractColumn, key: Option[Pattern[Option[Occurrence]]]): Double
 
-  def getBest(cols: Seq[(Column, Int)], matrix: Matrix): Seq[(Column, Int)] = {
-    var result: List[(Column, Int)] = Nil
-    var best = cols(0)._1.score(new MatrixColumn(matrix, 0))
+  def getBest(cols: Seq[MatrixColumn]): Seq[MatrixColumn] = {
+    var result: List[MatrixColumn] = Nil
+    var best = cols(0).column.score(cols(0))
     for (col <- cols) {
       import Ordering.Implicits._
-      val score = col._1.score(new MatrixColumn(matrix, cols.indexOf(col)))
+      val score = col.column.score(col)
       if (score > best) {
         best = score
         result = col :: Nil
@@ -34,7 +34,7 @@ sealed trait Heuristic {
     result
   }
 
-  def breakTies(cols: Seq[(Column, Int)]): (Column, Int) = RPseudoHeuristic.breakTies(cols)
+  def breakTies(cols: Seq[MatrixColumn]): MatrixColumn = RPseudoHeuristic.breakTies(cols)
 }
 
 object DefaultHeuristic extends Heuristic {
@@ -196,18 +196,18 @@ sealed trait PseudoHeuristic extends Heuristic {
 }
 
 object NPseudoHeuristic extends PseudoHeuristic {
-  override def breakTies(cols: Seq[(Column, Int)]): (Column, Int) = {
+  override def breakTies(cols: Seq[MatrixColumn]): MatrixColumn = {
     cols(0)
   }
 }
 
 object LPseudoHeuristic extends PseudoHeuristic {
-  override def breakTies(cols: Seq[(Column, Int)]): (Column, Int) = {
-    cols.minBy(_._1.fringe.occurrence.size)
+  override def breakTies(cols: Seq[MatrixColumn]): MatrixColumn = {
+    cols.minBy(_.column.fringe.occurrence.size)
   }
 }
 object RPseudoHeuristic extends PseudoHeuristic {
-  override def breakTies(cols: Seq[(Column, Int)]): (Column, Int) = {
-    cols.reverse.minBy(_._1.fringe.occurrence.size)
+  override def breakTies(cols: Seq[MatrixColumn]): MatrixColumn = {
+    cols.reverse.minBy(_.column.fringe.occurrence.size)
   }
 }
