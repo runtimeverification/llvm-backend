@@ -19,6 +19,7 @@ object Generator {
       case (Concat(), Seq(ListP(hd, None, tl, _, o), p @ WildcardP())) => ListP(hd ++ tl, Some(p), Seq(), c, SymbolP(sym, Seq(o, p)))
       case (Concat(), Seq(p @ VariableP(_, _), ListP(hd, None, tl, _, o))) => ListP(Seq(), Some(p), hd ++ tl, c, SymbolP(sym, Seq(p, o)))
       case (Concat(), Seq(p @ WildcardP(), ListP(hd, None, tl, _, o))) => ListP(Seq(), Some(p), hd ++ tl, c, SymbolP(sym, Seq(p, o)))
+      case (Concat(), Seq(p1, p2)) => ListP(Seq(), None, Seq(), c, SymbolP(sym, Seq(p1, p2))) // not valid, but necessary for iterated pattern matching
       case (Unit(), Seq()) => ListP(Seq(), None, Seq(), c, SymbolP(sym, Seq()))
       case (Element(), Seq(p)) => ListP(Seq(p), None, Seq(), c, SymbolP(sym, Seq(p)))
     }
@@ -32,6 +33,7 @@ object Generator {
       case (Concat(), Seq(MapP(ks, vs, None, _, o), p @ WildcardP())) => MapP(ks, vs, Some(p), c, SymbolP(sym, Seq(o, p)))
       case (Concat(), Seq(p @ VariableP(_, _), MapP(ks, vs, None, _, o))) => MapP(ks, vs, Some(p), c, SymbolP(sym, Seq(p, o)))
       case (Concat(), Seq(p @ WildcardP(), MapP(ks, vs, None, _, o))) => MapP(ks, vs, Some(p), c, SymbolP(sym, Seq(p, o)))
+      case (Concat(), Seq(p1, p2)) => MapP(Seq(), Seq(), None, c, SymbolP(sym, Seq(p1, p2))) // not valid, but necessary for iterated pattern matching
       case (Unit(), Seq()) => MapP(Seq(), Seq(), None, c, SymbolP(sym, Seq()))
       case (Element(), Seq(k, v)) => MapP(Seq(k), Seq(v), None, c, SymbolP(sym, Seq(k, v)))
     }
@@ -45,6 +47,7 @@ object Generator {
       case (Concat(), Seq(SetP(ks, None, _, o), p @ WildcardP())) => SetP(ks, Some(p), c, SymbolP(sym, Seq(o, p)))
       case (Concat(), Seq(p @ VariableP(_, _), SetP(ks, None, _, o))) => SetP(ks, Some(p), c, SymbolP(sym, Seq(p, o)))
       case (Concat(), Seq(p @ WildcardP(), SetP(ks, None, _, o))) => SetP(ks, Some(p), c, SymbolP(sym, Seq(p, o)))
+      case (Concat(), Seq(p1, p2)) => SetP(Seq(), None, c, SymbolP(sym, Seq(p1, p2))) // not valid, but necessary for iterated pattern matching
       case (Unit(), Seq()) => SetP(Seq(), None, c, SymbolP(sym, Seq()))
       case (Element(), Seq(e)) => SetP(Seq(e), None, c, SymbolP(sym, Seq(e)))
     }
