@@ -8,28 +8,16 @@ import java.util
 import java.util.concurrent.ConcurrentHashMap
 
 trait AbstractColumn {
-  val score: Seq[Double]
-  val clauses: IndexedSeq[Clause]
-  val patterns: IndexedSeq[Pattern[String]]
-  val fringe: Fringe
-  def signatureForKey(key: Option[Pattern[Option[Occurrence]]]): List[Constructor]
-  val isEmpty: Boolean
-  val category: SortCategory
-  def maxPriority: Int
+  def column: Column
 }
 
-class MatrixColumn(val matrix: Matrix, colIx: Int) extends AbstractColumn {
-  lazy val score: Seq[Double] = matrix.columns(colIx).score
-  val clauses: IndexedSeq[Clause] = matrix.columns(colIx).clauses
-  val patterns: IndexedSeq[Pattern[String]] = matrix.columns(colIx).patterns
-  val fringe: Fringe = matrix.columns(colIx).fringe
-  def signatureForKey(key: Option[Pattern[Option[Occurrence]]]): List[Constructor] = matrix.columns(colIx).signatureForKey(key)
-  lazy val isEmpty = matrix.columns(colIx).isEmpty
-  lazy val category: SortCategory = matrix.columns(colIx).category
-  def maxPriority: Int = matrix.columns(colIx).maxPriority
+case class MatrixColumn(val matrix: Matrix, colIx: Int) extends AbstractColumn {
+  def column: Column = matrix.columns(colIx)
 }
 
 class Column(val fringe: Fringe, val patterns: IndexedSeq[Pattern[String]], val clauses: IndexedSeq[Clause]) extends AbstractColumn {
+  def column: Column = this
+
   lazy val category: SortCategory = {
     val ps = patterns.map(_.category).filter(_.isDefined)
     if (ps.isEmpty) {
@@ -41,12 +29,30 @@ class Column(val fringe: Fringe, val patterns: IndexedSeq[Pattern[String]], val 
 
   lazy val score: Seq[Double] = computeScore
 
+  def score(matrixCol: MatrixColumn) : Seq[Double] = {
+    def zeroOrHeuristic(h: Heuristic): Double = {
+      if (h.needsMatrix) {
+        h.computeScoreForKey(matrixCol, bestKey)
+      } else {
+        0.0
+      }
+    }
+    fringe.symlib.heuristics.zip(score).map((hs: (Heuristic, Double)) => hs._2 + zeroOrHeuristic(hs._1))
+  }
+
   def computeScore: Seq[Double] = {
     computeScoreForKey(bestKey)
   }
 
   def computeScoreForKey(key: Option[Pattern[Option[Occurrence]]]): Seq[Double] = {
-    fringe.symlib.heuristics.map(computeScoreForKey(_, key))
+    def zeroOrHeuristic(h: Heuristic): Double = {
+      if (h.needsMatrix) {
+        return 0.0
+      } else {
+        return computeScoreForKey(h, key)
+      }
+    }
+    fringe.symlib.heuristics.map(zeroOrHeuristic(_))
   }
 
   def isValid: Boolean = isValidForKey(bestKey)
@@ -361,7 +367,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
 
   // compute the column with the best score, choosing the first such column if they are equal
   lazy val bestColIx: Int = {
-    val validCols = columns.zipWithIndex.filter(col => col._1.isValid || columns.forall(c => c == col._1 || !c.needed(col._1.keyVars)))
+    val validCols = columns.indices.map(MatrixColumn(this, _)).filter(col => col.column.isValid || columns.forall(c => c == col.column || !c.needed(col.column.keyVars)))
     if (validCols.isEmpty) {
       0
     } else {
@@ -369,16 +375,16 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
       val allBest = symlib.heuristics.last.getBest(validCols)
       val best = symlib.heuristics.last.breakTies(allBest)
       if (Matching.logging) {
-        System.out.println("Chose column " + best._2)
+        System.out.println("Chose column " + best.colIx)
       }
-      if (best._1.score(0) == 0.0) {
+      if (best.column.score(0) == 0.0) {
         val unboundMapColumns = columns.filter(col => !col.isValid)
         val unboundPatterns = unboundMapColumns.map(_.patterns).transpose
         val keys = unboundPatterns.map(_.flatMap(_.mapOrSetKeys))
         val vars = keys.map(_.flatMap(_.variables).toSet)
-        validCols.find(col => col._1.isValid && col._1.needed(vars)).getOrElse(columns.head, 0)._2
+        validCols.find(col => col.column.isValid && col.column.needed(vars)).getOrElse(MatrixColumn(this, 0)).colIx
       } else {
-        best._2
+        best.colIx
       }
     }
   }

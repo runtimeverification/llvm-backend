@@ -18,22 +18,23 @@ sealed trait Heuristic {
 
   def computeScoreForKey(c: AbstractColumn, key: Option[Pattern[Option[Occurrence]]]): Double
 
-  def getBest(cols: Seq[(Column, Int)]): Seq[(Column, Int)] = {
-    var result: List[(Column, Int)] = Nil
-    var best = cols(0)._1.score
+  def getBest(cols: Seq[MatrixColumn]): Seq[MatrixColumn] = {
+    var result: List[MatrixColumn] = Nil
+    var best = cols(0).column.score(cols(0))
     for (col <- cols) {
       import Ordering.Implicits._
-      if (col._1.score > best) {
-        best = col._1.score
+      val score = col.column.score(col)
+      if (score > best) {
+        best = score
         result = col :: Nil
-      } else if (col._1.score == best) {
+      } else if (score == best) {
         result = col :: result
       }
     }
     result
   }
 
-  def breakTies(cols: Seq[(Column, Int)]): (Column, Int) = RPseudoHeuristic.breakTies(cols)
+  def breakTies(cols: Seq[MatrixColumn]): MatrixColumn = RPseudoHeuristic.breakTies(cols)
 }
 
 object DefaultHeuristic extends Heuristic {
@@ -84,10 +85,10 @@ object DefaultHeuristic extends Heuristic {
 
   def computeScoreForKey(c: AbstractColumn, key: Option[Pattern[Option[Occurrence]]]): Double = {
     var result = 0.0
-    for (i <- c.patterns.indices) {
-      if (c.clauses(i).action.priority != c.clauses.head.action.priority)
+    for (i <- c.column.patterns.indices) {
+      if (c.column.clauses(i).action.priority != c.column.clauses.head.action.priority)
         return result
-      result += c.patterns(i).score(DefaultHeuristic, c.fringe, c.clauses(i), key, c.isEmpty)
+      result += c.column.patterns(i).score(DefaultHeuristic, c.column.fringe, c.column.clauses(i), key, c.column.isEmpty)
     }
     result
   }
@@ -97,10 +98,10 @@ object FHeuristic extends Heuristic {
   val needsMatrix: Boolean = false
 
   def computeScoreForKey(c: AbstractColumn, key: Option[Pattern[Option[Occurrence]]]): Double = {
-    for (i <- c.patterns.indices) {
-      if (c.clauses(i).action.priority != c.clauses.head.action.priority)
+    for (i <- c.column.patterns.indices) {
+      if (c.column.clauses(i).action.priority != c.column.clauses.head.action.priority)
         return 1.0
-      if (c.patterns(i).isWildcard) {
+      if (c.column.patterns(i).isWildcard) {
         return 0.0
       }
     }
@@ -112,7 +113,7 @@ object DHeuristic extends Heuristic {
   val needsMatrix: Boolean = false
 
   def computeScoreForKey(c: AbstractColumn, key: Option[Pattern[Option[Occurrence]]]): Double = {
-    -(c.patterns.count(_.isDefault))
+    -(c.column.patterns.count(_.isDefault))
   }
 }
 
@@ -120,8 +121,8 @@ object BHeuristic extends Heuristic {
   val needsMatrix: Boolean = false
 
   def computeScoreForKey(c: AbstractColumn, key: Option[Pattern[Option[Occurrence]]]): Double = {
-    val sigma = c.signatureForKey(key)
-    if (c.category.hasIncompleteSignature(sigma, c.fringe)) {
+    val sigma = c.column.signatureForKey(key)
+    if (c.column.category.hasIncompleteSignature(sigma, c.column.fringe)) {
       -sigma.size-1
     } else {
       -sigma.size
@@ -134,8 +135,8 @@ object AHeuristic extends Heuristic {
 
   def computeScoreForKey(c: AbstractColumn, key: Option[Pattern[Option[Occurrence]]]): Double = {
     var result = 0.0
-    for (con <- c.signatureForKey(key)) {
-      result -= c.fringe.expand(con).size
+    for (con <- c.column.signatureForKey(key)) {
+      result -= c.column.fringe.expand(con).size
     }
     result
   }
@@ -146,18 +147,18 @@ object RHeuristic extends Heuristic {
 
   def computeScoreForKey(c: AbstractColumn, key: Option[Pattern[Option[Occurrence]]]): Double = {
     var result = 0.0
-    val signature = c.signatureForKey(key)
+    val signature = c.column.signatureForKey(key)
     for (con <- signature) {
-      for (i <- c.patterns.indices) {
-        if (c.patterns(i).isSpecialized(con, c.fringe, c.clauses(i), c.maxPriority)) {
+      for (i <- c.column.patterns.indices) {
+        if (c.column.patterns(i).isSpecialized(con, c.column.fringe, c.column.clauses(i), c.column.maxPriority)) {
           result += 1.0
         }
       }
     }
 
-    if (c.category.hasIncompleteSignature(signature, c.fringe)) {
-      for (i <- c.patterns.indices) {
-        if (c.patterns(i).isDefault) {
+    if (c.column.category.hasIncompleteSignature(signature, c.column.fringe)) {
+      for (i <- c.column.patterns.indices) {
+        if (c.column.patterns(i).isDefault) {
           result += 1.0
         }
       }
@@ -172,15 +173,15 @@ object QHeuristic extends Heuristic {
 
   def computeScoreForKey(c: AbstractColumn, key: Option[Pattern[Option[Occurrence]]]): Double = {
     var result = 0
-    var priority = c.clauses.head.action.priority
-    for (i <- c.patterns.indices) {
-      if (c.clauses(i).action.priority != priority) {
+    var priority = c.column.clauses.head.action.priority
+    for (i <- c.column.patterns.indices) {
+      if (c.column.clauses(i).action.priority != priority) {
         if (result != i) {
           return result
         }
-        priority = c.clauses(i).action.priority
+        priority = c.column.clauses(i).action.priority
       }
-      if (!c.patterns(i).isWildcard) {
+      if (!c.column.patterns(i).isWildcard) {
         result += 1
       }
     }
@@ -195,18 +196,18 @@ sealed trait PseudoHeuristic extends Heuristic {
 }
 
 object NPseudoHeuristic extends PseudoHeuristic {
-  override def breakTies(cols: Seq[(Column, Int)]): (Column, Int) = {
+  override def breakTies(cols: Seq[MatrixColumn]): MatrixColumn = {
     cols(0)
   }
 }
 
 object LPseudoHeuristic extends PseudoHeuristic {
-  override def breakTies(cols: Seq[(Column, Int)]): (Column, Int) = {
-    cols.minBy(_._1.fringe.occurrence.size)
+  override def breakTies(cols: Seq[MatrixColumn]): MatrixColumn = {
+    cols.minBy(_.column.fringe.occurrence.size)
   }
 }
 object RPseudoHeuristic extends PseudoHeuristic {
-  override def breakTies(cols: Seq[(Column, Int)]): (Column, Int) = {
-    cols.reverse.minBy(_._1.fringe.occurrence.size)
+  override def breakTies(cols: Seq[MatrixColumn]): MatrixColumn = {
+    cols.reverse.minBy(_.column.fringe.occurrence.size)
   }
 }
