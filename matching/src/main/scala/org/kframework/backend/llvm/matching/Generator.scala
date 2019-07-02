@@ -151,10 +151,10 @@ object Generator {
     val residualMap = (residuals, specialized.fringe.map(_.occurrence)).zipped.toSeq
     val newClauses = specialized.clauses.map(_.specializeBy(residualMap, symlib))
     val finalMatrix = Matrix.fromColumns(symlib, specialized.columns.map(c => new Column(c.fringe.inexact, c.patterns, newClauses)), newClauses)
-    val dt = finalMatrix.compile
     if (isPoorlySpecialized(finalMatrix, matrix)) {
       None
     } else {
+      val dt = finalMatrix.compile
       Some((dt, residualMap))
     }
   }
