@@ -75,6 +75,10 @@ void migrate(block** blockPtr) {
 // that are not tracked by gc
 static void migrate_once(block** blockPtr) {
   block* currBlock = *blockPtr;
+  uintptr_t intptr = (uintptr_t)currBlock;
+  if (intptr & 1) {
+    return;
+  }
   if (youngspace_collection_id() == getArenaSemispaceIDOfObject((void *)currBlock) ||
       oldspace_collection_id() == getArenaSemispaceIDOfObject((void *)currBlock)) {
     migrate(blockPtr);

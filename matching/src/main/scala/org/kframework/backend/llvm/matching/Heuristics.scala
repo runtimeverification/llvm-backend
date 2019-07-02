@@ -149,7 +149,7 @@ object RHeuristic extends Heuristic {
     val signature = c.signatureForKey(key)
     for (con <- signature) {
       for (i <- c.patterns.indices) {
-        if (c.patterns(i).isSpecialized(con, c.fringe, c.clauses(i))) {
+        if (c.patterns(i).isSpecialized(con, c.fringe, c.clauses(i), c.maxPriority)) {
           result += 1.0
         }
       }
