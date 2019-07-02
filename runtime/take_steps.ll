@@ -7,6 +7,8 @@ target triple = "x86_64-unknown-linux-gnu"
 declare %block* @step(%block*)
 declare void @finish_rewriting(%block*) #0
 declare void @koreCollect(%block **)
+declare void @printConfiguration(i8*, %block*)
+@str.err = private constant [ 12 x i8] c"/dev/stderr\00", align 1
 
 define %block* @take_steps_no_depth(%block* %subject) {
 entry:
@@ -29,6 +31,7 @@ checkCollect:
 collect:
   %subjPtr = alloca %block*
   store %block* %nextSubject, %block** %subjPtr
+  call void @printConfiguration(i8* bitcast([12 x i8]* @str.err to i8*), %block* %nextSubject)
   call void @koreCollect(%block** %subjPtr)
   %collected = load %block*, %block** %subjPtr
   br label %finish

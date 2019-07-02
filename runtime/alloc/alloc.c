@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include<assert.h>
 
 #include "runtime/alloc.h"
 #include "runtime/header.h"
@@ -109,6 +110,7 @@ void* koreAllocMP(size_t requested) {
 }
 
 void* koreReallocMP(void* ptr, size_t old_size, size_t new_size) {
+  assert(!is_in_old_gen_hdr(struct_base(string, data, ptr)->h.hdr));
   string* new = (string *) koreAllocToken(sizeof(string) + new_size);
   size_t min = old_size > new_size ? new_size : old_size;
   memcpy(new->data, ptr, min);

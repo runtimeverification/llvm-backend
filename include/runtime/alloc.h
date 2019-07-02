@@ -46,6 +46,8 @@ void* koreAllocFloating(size_t requested);
 void* koreAllocIntegerOld(size_t requested);
 void* koreAllocFloatingOld(size_t requested);
 
+#define ALLOC_DBG
+
 #ifdef ALLOC_DBG
 #define MEM_LOG(...) fprintf(stderr, __VA_ARGS__)
 #else
