@@ -18,23 +18,30 @@ sealed trait Heuristic {
 
   def computeScoreForKey(c: AbstractColumn, key: Option[Pattern[Option[Occurrence]]]): Double
 
-  def getBest(cols: Seq[MatrixColumn]): Seq[MatrixColumn] = {
+  def breakTies(cols: Seq[MatrixColumn]): MatrixColumn = RPseudoHeuristic.breakTies(cols)
+}
+
+object Heuristic {
+  def getBest(cols: Seq[MatrixColumn], allCols: Seq[MatrixColumn]): Seq[MatrixColumn] = {
     var result: List[MatrixColumn] = Nil
-    var best = cols(0).column.score(cols(0))
+    var best = cols(0).score
     for (col <- cols) {
       import Ordering.Implicits._
-      val score = col.column.score(col)
-      if (score > best) {
-        best = score
+      val bestInvalid = allCols.filter(c => !c.column.isValid && col.column.needed(c.column.keyVars)).sortBy(_.score).headOption
+      val colBest = if (bestInvalid.isDefined && bestInvalid.get.score > col.score) {
+        bestInvalid.get.score
+      } else {
+        col.score
+      }
+      if (colBest > best) {
+        best = colBest
         result = col :: Nil
-      } else if (score == best) {
+      } else if (colBest == best) {
         result = col :: result
       }
     }
     result
   }
-
-  def breakTies(cols: Seq[MatrixColumn]): MatrixColumn = RPseudoHeuristic.breakTies(cols)
 }
 
 object DefaultHeuristic extends Heuristic {

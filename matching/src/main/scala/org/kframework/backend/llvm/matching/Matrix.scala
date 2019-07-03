@@ -31,12 +31,11 @@ trait AbstractColumn {
       withChoice(result)
     }
   }
-
-
 }
 
 case class MatrixColumn(val matrix: Matrix, colIx: Int) extends AbstractColumn {
   def column: Column = matrix.columns(colIx)
+  lazy val score: Seq[Double] = column.score(this)
 }
 
 class Column(val fringe: Fringe, val patterns: IndexedSeq[Pattern[String]], val clauses: IndexedSeq[Clause]) extends AbstractColumn {
@@ -367,17 +366,21 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
     this(symlib, (cols, (1 to cols.size).map(i => new Fringe(symlib, cols(i - 1)._1, Num(i, Base()), false))).zipped.toIndexedSeq.map(pair => new Column(pair._2, pair._1._2, actions.map(new Clause(_, Vector(), Vector(), Vector())))), null, actions.map(new Clause(_, Vector(), Vector(), Vector())), null)
   }
 
+  private lazy val matrixColumns: Seq[MatrixColumn] = {
+    columns.indices.map(MatrixColumn(this, _))
+  }
+
   private lazy val validCols: Seq[MatrixColumn] = {
-    columns.indices.map(MatrixColumn(this, _)).filter(col => col.column.isValid || columns.forall(c => c == col.column || !c.needed(col.column.keyVars)))
+    matrixColumns.filter(col => col.column.isValid || columns.forall(c => c == col.column || !c.needed(col.column.keyVars)))
   }
 
   // compute the column with the best score, choosing the first such column if they are equal
   lazy val bestColIx: Int = {
     if (validCols.isEmpty) {
-      0
+      symlib.heuristics.last.breakTies(matrixColumns).colIx
     } else {
       import Ordering.Implicits._
-      val allBest = symlib.heuristics.last.getBest(validCols)
+      val allBest = Heuristic.getBest(validCols, matrixColumns)
       val best = symlib.heuristics.last.breakTies(allBest)
       if (Matching.logging) {
         System.out.println("Chose column " + best.colIx)
@@ -541,7 +544,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
     else {
       bestRowIx match {
         case -1 => 
-          if (bestCol.score(MatrixColumn(this, bestColIx))(0).isPosInfinity) {
+          if (MatrixColumn(this, bestColIx).score(0).isPosInfinity) {
             // decompose this column as it contains only wildcards
             val newClauses = (bestCol.clauses, bestCol.patterns).zipped.toIndexedSeq.map(t => t._1.addVars(None, t._2, bestCol.fringe))
             Matrix.fromColumns(symlib, notBestCol(bestColIx).map(c => new Column(c.fringe, c.patterns, newClauses)), newClauses).compile
