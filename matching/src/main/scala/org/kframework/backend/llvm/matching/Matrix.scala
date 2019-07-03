@@ -365,9 +365,12 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
     this(symlib, (cols, (1 to cols.size).map(i => new Fringe(symlib, cols(i - 1)._1, Num(i, Base()), false))).zipped.toIndexedSeq.map(pair => new Column(pair._2, pair._1._2, actions.map(new Clause(_, Vector(), Vector(), Vector())))), null, actions.map(new Clause(_, Vector(), Vector(), Vector())), null)
   }
 
+  private lazy val validCols: Seq[MatrixColumn] = {
+    columns.indices.map(MatrixColumn(this, _)).filter(col => col.column.isValid || columns.forall(c => c == col.column || !c.needed(col.column.keyVars)))
+  }
+
   // compute the column with the best score, choosing the first such column if they are equal
   lazy val bestColIx: Int = {
-    val validCols = columns.indices.map(MatrixColumn(this, _)).filter(col => col.column.isValid || columns.forall(c => c == col.column || !c.needed(col.column.keyVars)))
     if (validCols.isEmpty) {
       0
     } else {
@@ -382,7 +385,11 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
         val unboundPatterns = unboundMapColumns.map(_.patterns).transpose
         val keys = unboundPatterns.map(_.flatMap(_.mapOrSetKeys))
         val vars = keys.map(_.flatMap(_.variables).toSet)
-        validCols.find(col => col.column.isValid && col.column.needed(vars)).getOrElse(MatrixColumn(this, 0)).colIx
+        val ix = validCols.find(col => col.column.isValid && col.column.needed(vars)).getOrElse(MatrixColumn(this, 0)).colIx
+        if (Matching.logging) {
+          System.out.println("Actually chose column " + ix)
+        }
+        ix
       } else {
         best.colIx
       }
@@ -560,7 +567,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
     symlib.heuristics.map(h => columns.map(c => "%12.2f".format(c.computeScoreForKey(h, c.bestKey))).mkString(" ")).mkString("\n")
   }
 
-  override def toString: String = fringe.map(_.toString).mkString(" ") + "\n" + colScoreString + "\n" + rows.map(_.toString).mkString("\n") + "\n"
+  override def toString: String = fringe.map(_.toString).mkString(" ") + "\n" + columns.indices.map(i => validCols.map(_.colIx).contains(i)).map(v => "%12.12s".format(v.toString)).mkString(" ") + "\n" + colScoreString + "\n" + rows.map(_.toString).mkString("\n") + "\n"
 
   def canEqual(other: Any): Boolean = other.isInstanceOf[Matrix]
 
