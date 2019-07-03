@@ -572,7 +572,11 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
     symlib.heuristics.map(h => columns.indices.map(c => "%12.2f".format(MatrixColumn(this, c).computeScoreForKey(h, columns(c).bestKey))).mkString(" ")).mkString("\n")
   }
 
-  override def toString: String = fringe.map(_.toString).mkString(" ") + "\n" + columns.indices.map(i => validCols.map(_.colIx).contains(i)).map(v => "%12.12s".format(v.toString)).mkString(" ") + "\n" + colScoreString + "\n" + rows.map(_.toString).mkString("\n") + "\n"
+  def neededString: String = {
+    matrixColumns.flatMap(col => matrixColumns.filter(c => !c.column.isValid && col.colIx != c.colIx && col.column.needed(c.column.keyVars)).map((col, _))).map(p => "Column " + p._2.colIx + " needs " + p._1.colIx).mkString("\n")
+  }
+
+  override def toString: String = fringe.map(_.occurrence.toString).mkString("\n") + "\n" + neededString + "\n" + fringe.map(_.toString).mkString(" ") + "\n" + columns.indices.map(i => validCols.map(_.colIx).contains(i)).map(v => "%12.12s".format(v.toString)).mkString(" ") + "\n" + colScoreString + "\n" + rows.map(_.toString).mkString("\n") + "\n"
 
   def canEqual(other: Any): Boolean = other.isInstanceOf[Matrix]
 
