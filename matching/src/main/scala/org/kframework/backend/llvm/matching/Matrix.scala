@@ -385,19 +385,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
       if (Matching.logging) {
         System.out.println("Chose column " + best.colIx)
       }
-      if (best.column.score(0) == 0.0) {
-        val unboundMapColumns = columns.filter(col => !col.isValid)
-        val unboundPatterns = unboundMapColumns.map(_.patterns).transpose
-        val keys = unboundPatterns.map(_.flatMap(_.mapOrSetKeys))
-        val vars = keys.map(_.flatMap(_.variables).toSet)
-        val ix = validCols.find(col => col.column.isValid && col.column.needed(vars)).getOrElse(MatrixColumn(this, 0)).colIx
-        if (Matching.logging) {
-          System.out.println("Actually chose column " + ix)
-        }
-        ix
-      } else {
-        best.colIx
-      }
+      best.colIx
     }
   }
 
