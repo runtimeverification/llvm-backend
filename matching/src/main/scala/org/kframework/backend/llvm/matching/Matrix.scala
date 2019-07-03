@@ -376,17 +376,17 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
 
   // compute the column with the best score, choosing the first such column if they are equal
   lazy val bestColIx: Int = {
-    if (validCols.isEmpty) {
-      symlib.heuristics.last.breakTies(matrixColumns).colIx
+    val allBest = if (validCols.nonEmpty) {
+      Heuristic.getBest(validCols, matrixColumns)
     } else {
-      import Ordering.Implicits._
-      val allBest = Heuristic.getBest(validCols, matrixColumns)
-      val best = symlib.heuristics.last.breakTies(allBest)
-      if (Matching.logging) {
-        System.out.println("Chose column " + best.colIx)
-      }
-      best.colIx
+      Heuristic.getBest(matrixColumns, matrixColumns)
     }
+    import Ordering.Implicits._
+    val best = symlib.heuristics.last.breakTies(allBest)
+    if (Matching.logging) {
+      System.out.println("Chose column " + best.colIx)
+    }
+    best.colIx
   }
 
   lazy val bestCol: Column = columns(bestColIx)
