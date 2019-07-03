@@ -9,10 +9,33 @@ import java.util.concurrent.ConcurrentHashMap
 
 trait AbstractColumn {
   def column: Column
+
+  def computeScoreForKey(heuristic: Heuristic, key: Option[Pattern[Option[Occurrence]]]): Double = {
+    def withChoice(result: Double): Double = {
+      if (key.isDefined) {
+        val none = computeScoreForKey(heuristic, None)
+        if (none > result) {
+          none
+        } else {
+          result
+        }
+      } else {
+        result
+      }
+    }
+    if (column.isWildcard) {
+      Double.PositiveInfinity
+    } else {
+      val result = heuristic.computeScoreForKey(this, key)
+      assert(!result.isNaN)
+      withChoice(result)
+    }
+  }
 }
 
 case class MatrixColumn(val matrix: Matrix, colIx: Int) extends AbstractColumn {
   def column: Column = matrix.columns(colIx)
+  lazy val score: Seq[Double] = column.score(this)
 }
 
 class Column(val fringe: Fringe, val patterns: IndexedSeq[Pattern[String]], val clauses: IndexedSeq[Clause]) extends AbstractColumn {
@@ -32,7 +55,7 @@ class Column(val fringe: Fringe, val patterns: IndexedSeq[Pattern[String]], val 
   def score(matrixCol: MatrixColumn) : Seq[Double] = {
     def zeroOrHeuristic(h: Heuristic): Double = {
       if (h.needsMatrix) {
-        h.computeScoreForKey(matrixCol, bestKey)
+        matrixCol.computeScoreForKey(h, bestKey)
       } else {
         0.0
       }
@@ -59,28 +82,6 @@ class Column(val fringe: Fringe, val patterns: IndexedSeq[Pattern[String]], val 
 
   def isValidForKey(key: Option[Pattern[Option[Occurrence]]]): Boolean = {
     !fringe.sortInfo.isCollection || key.isDefined || !patterns.exists(_.isChoice)
-  }
-
-  def computeScoreForKey(heuristic: Heuristic, key: Option[Pattern[Option[Occurrence]]]): Double = {
-    def withChoice(result: Double): Double = {
-      if (key.isDefined) {
-        val none = computeScoreForKey(heuristic, None)
-        if (none > result) {
-          none
-        } else {
-          result
-        }
-      } else {
-        result
-      }
-    }
-    if (isWildcard) {
-      Double.PositiveInfinity
-    } else {
-      val result = heuristic.computeScoreForKey(this, key)
-      assert(!result.isNaN)
-      withChoice(result)
-    }
   }
 
   lazy val keyVars: Seq[Set[String]] = {
@@ -365,28 +366,27 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
     this(symlib, (cols, (1 to cols.size).map(i => new Fringe(symlib, cols(i - 1)._1, Num(i, Base()), false))).zipped.toIndexedSeq.map(pair => new Column(pair._2, pair._1._2, actions.map(new Clause(_, Vector(), Vector(), Vector())))), null, actions.map(new Clause(_, Vector(), Vector(), Vector())), null)
   }
 
+  private lazy val matrixColumns: Seq[MatrixColumn] = {
+    columns.indices.map(MatrixColumn(this, _))
+  }
+
+  private lazy val validCols: Seq[MatrixColumn] = {
+    matrixColumns.filter(col => col.column.isValid || columns.forall(c => c == col.column || !c.needed(col.column.keyVars)))
+  }
+
   // compute the column with the best score, choosing the first such column if they are equal
   lazy val bestColIx: Int = {
-    val validCols = columns.indices.map(MatrixColumn(this, _)).filter(col => col.column.isValid || columns.forall(c => c == col.column || !c.needed(col.column.keyVars)))
-    if (validCols.isEmpty) {
-      0
+    val allBest = if (validCols.nonEmpty) {
+      Heuristic.getBest(validCols, matrixColumns)
     } else {
-      import Ordering.Implicits._
-      val allBest = symlib.heuristics.last.getBest(validCols)
-      val best = symlib.heuristics.last.breakTies(allBest)
-      if (Matching.logging) {
-        System.out.println("Chose column " + best.colIx)
-      }
-      if (best.column.score(0) == 0.0) {
-        val unboundMapColumns = columns.filter(col => !col.isValid)
-        val unboundPatterns = unboundMapColumns.map(_.patterns).transpose
-        val keys = unboundPatterns.map(_.flatMap(_.mapOrSetKeys))
-        val vars = keys.map(_.flatMap(_.variables).toSet)
-        validCols.find(col => col.column.isValid && col.column.needed(vars)).getOrElse(MatrixColumn(this, 0)).colIx
-      } else {
-        best.colIx
-      }
+      Heuristic.getBest(matrixColumns, matrixColumns)
     }
+    import Ordering.Implicits._
+    val best = symlib.heuristics.last.breakTies(allBest)
+    if (Matching.logging) {
+      System.out.println("Chose column " + best.colIx)
+    }
+    best.colIx
   }
 
   lazy val bestCol: Column = columns(bestColIx)
@@ -532,7 +532,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
     else {
       bestRowIx match {
         case -1 => 
-          if (bestCol.score(0).isPosInfinity) {
+          if (MatrixColumn(this, bestColIx).score(0).isPosInfinity) {
             // decompose this column as it contains only wildcards
             val newClauses = (bestCol.clauses, bestCol.patterns).zipped.toIndexedSeq.map(t => t._1.addVars(None, t._2, bestCol.fringe))
             Matrix.fromColumns(symlib, notBestCol(bestColIx).map(c => new Column(c.fringe, c.patterns, newClauses)), newClauses).compile
@@ -557,10 +557,14 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
   }
 
   def colScoreString: String = {
-    symlib.heuristics.map(h => columns.map(c => "%12.2f".format(c.computeScoreForKey(h, c.bestKey))).mkString(" ")).mkString("\n")
+    symlib.heuristics.map(h => columns.indices.map(c => "%12.2f".format(MatrixColumn(this, c).computeScoreForKey(h, columns(c).bestKey))).mkString(" ")).mkString("\n")
   }
 
-  override def toString: String = fringe.map(_.toString).mkString(" ") + "\n" + colScoreString + "\n" + rows.map(_.toString).mkString("\n") + "\n"
+  def neededString: String = {
+    matrixColumns.flatMap(col => matrixColumns.filter(c => !c.column.isValid && col.colIx != c.colIx && col.column.needed(c.column.keyVars)).map((col, _))).map(p => "Column " + p._2.colIx + " needs " + p._1.colIx).mkString("\n")
+  }
+
+  override def toString: String = fringe.map(_.occurrence.toString).mkString("\n") + "\n" + neededString + "\n" + fringe.map(_.toString).mkString(" ") + "\n" + columns.indices.map(i => validCols.map(_.colIx).contains(i)).map(v => "%12.12s".format(v.toString)).mkString(" ") + "\n" + colScoreString + "\n" + rows.map(_.toString).mkString("\n") + "\n"
 
   def canEqual(other: Any): Boolean = other.isInstanceOf[Matrix]
 
