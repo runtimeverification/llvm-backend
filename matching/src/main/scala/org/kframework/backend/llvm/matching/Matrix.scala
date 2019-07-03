@@ -9,6 +9,30 @@ import java.util.concurrent.ConcurrentHashMap
 
 trait AbstractColumn {
   def column: Column
+
+  def computeScoreForKey(heuristic: Heuristic, key: Option[Pattern[Option[Occurrence]]]): Double = {
+    def withChoice(result: Double): Double = {
+      if (key.isDefined) {
+        val none = computeScoreForKey(heuristic, None)
+        if (none > result) {
+          none
+        } else {
+          result
+        }
+      } else {
+        result
+      }
+    }
+    if (column.isWildcard) {
+      Double.PositiveInfinity
+    } else {
+      val result = heuristic.computeScoreForKey(this, key)
+      assert(!result.isNaN)
+      withChoice(result)
+    }
+  }
+
+
 }
 
 case class MatrixColumn(val matrix: Matrix, colIx: Int) extends AbstractColumn {
@@ -32,7 +56,7 @@ class Column(val fringe: Fringe, val patterns: IndexedSeq[Pattern[String]], val 
   def score(matrixCol: MatrixColumn) : Seq[Double] = {
     def zeroOrHeuristic(h: Heuristic): Double = {
       if (h.needsMatrix) {
-        h.computeScoreForKey(matrixCol, bestKey)
+        matrixCol.computeScoreForKey(h, bestKey)
       } else {
         0.0
       }
@@ -59,28 +83,6 @@ class Column(val fringe: Fringe, val patterns: IndexedSeq[Pattern[String]], val 
 
   def isValidForKey(key: Option[Pattern[Option[Occurrence]]]): Boolean = {
     !fringe.sortInfo.isCollection || key.isDefined || !patterns.exists(_.isChoice)
-  }
-
-  def computeScoreForKey(heuristic: Heuristic, key: Option[Pattern[Option[Occurrence]]]): Double = {
-    def withChoice(result: Double): Double = {
-      if (key.isDefined) {
-        val none = computeScoreForKey(heuristic, None)
-        if (none > result) {
-          none
-        } else {
-          result
-        }
-      } else {
-        result
-      }
-    }
-    if (isWildcard) {
-      Double.PositiveInfinity
-    } else {
-      val result = heuristic.computeScoreForKey(this, key)
-      assert(!result.isNaN)
-      withChoice(result)
-    }
   }
 
   lazy val keyVars: Seq[Set[String]] = {
@@ -539,7 +541,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
     else {
       bestRowIx match {
         case -1 => 
-          if (bestCol.score(0).isPosInfinity) {
+          if (bestCol.score(MatrixColumn(this, bestColIx))(0).isPosInfinity) {
             // decompose this column as it contains only wildcards
             val newClauses = (bestCol.clauses, bestCol.patterns).zipped.toIndexedSeq.map(t => t._1.addVars(None, t._2, bestCol.fringe))
             Matrix.fromColumns(symlib, notBestCol(bestColIx).map(c => new Column(c.fringe, c.patterns, newClauses)), newClauses).compile
@@ -564,7 +566,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
   }
 
   def colScoreString: String = {
-    symlib.heuristics.map(h => columns.map(c => "%12.2f".format(c.computeScoreForKey(h, c.bestKey))).mkString(" ")).mkString("\n")
+    symlib.heuristics.map(h => columns.indices.map(c => "%12.2f".format(MatrixColumn(this, c).computeScoreForKey(h, columns(c).bestKey))).mkString(" ")).mkString("\n")
   }
 
   override def toString: String = fringe.map(_.toString).mkString(" ") + "\n" + columns.indices.map(i => validCols.map(_.colIx).contains(i)).map(v => "%12.12s".format(v.toString)).mkString(" ") + "\n" + colScoreString + "\n" + rows.map(_.toString).mkString("\n") + "\n"
