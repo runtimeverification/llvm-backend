@@ -403,7 +403,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
     this(symlib, (cols, (1 to cols.size).map(i => new Fringe(symlib, cols(i - 1)._1, Num(i, Base()), false))).zipped.toIndexedSeq.map(pair => new Column(pair._2, pair._1._2, actions.map(new Clause(_, Vector(), Vector(), Vector(), Vector())))), null, actions.map(new Clause(_, Vector(), Vector(), Vector(), Vector())), null)
   }
 
-  private def isWildcardOrResidual(col: Column, pat: Pattern[String]): Boolean = {
+  private def isWildcardOrResidual(pat: Pattern[String]): Boolean = {
     pat.isWildcard || pat.isResidual(symlib)
   }
 
@@ -420,7 +420,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
   // compute the column with the best score, choosing the first such column if they are equal
   lazy val bestColIx: Int = {
     if (specializing.isDefined) {
-      columns.indices.find(i => !isWildcardOrResidual(columns(i), specializing.get(i))).get
+      columns.indices.find(i => !isWildcardOrResidual(specializing.get(i))).get
     } else {
       val allBest = if (validCols.nonEmpty) {
         Heuristic.getBest(validCols, matrixColumns)
@@ -667,7 +667,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
       System.out.println(toString)
       System.out.println("remaining: " + Matrix.remaining)
     }
-    if (clauses.isEmpty || columns.indices.forall(i => isWildcardOrResidual(columns(i), ps(i)))) {
+    if (clauses.isEmpty || columns.indices.forall(i => isWildcardOrResidual(ps(i)))) {
       (this, ps)
     } else {
       val residual = ps(bestColIx)
