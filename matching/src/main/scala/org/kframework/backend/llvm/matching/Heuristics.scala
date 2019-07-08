@@ -157,16 +157,17 @@ object LHeuristic extends Heuristic {
     val matrixColumn = c.asInstanceOf[MatrixColumn]
     val matrix = matrixColumn.matrix
     val colIx = matrixColumn.colIx
-    matrix.columns.updated(0, matrix.columns(colIx)).updated(colIx, matrix.columns(0))
 
-    for (con <- matrix.sigma) {
+    for (con <- matrix.columns(colIx).signatureForKey(key)) {
       val spec = matrix.specialize(con, colIx)._2
       if (spec.bestRowIx != -1) {
         result += 1.0
       }
     }
-    if (matrix.default(colIx).isDefined) {
-      if (matrix.default(colIx).get.bestRowIx != -1) {
+
+    val defaultMatrix = matrix.default(colIx)
+    if (defaultMatrix.isDefined) {
+      if (defaultMatrix.get.bestRowIx != -1) {
         result += 1.0
       }
     }

@@ -394,7 +394,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
   lazy val sigma: List[Constructor] = bestCol.signature
 
   def specialize(ix: Constructor, colIx: Int): (String, Matrix) = {
-    val filtered = filterMatrix(Some(ix), (c, p) => p.isSpecialized(ix, bestCol.fringe, c, bestCol.maxPriority))
+    val filtered = filterMatrix(Some(ix), (c, p) => p.isSpecialized(ix, columns(colIx).fringe, c, columns(colIx).maxPriority), colIx)
     val expanded = Matrix.fromColumns(symlib, filtered.columns(colIx).expand(ix) ++ filtered.notBestCol(colIx), filtered.clauses)
     (ix.name, expanded)
   }
@@ -408,28 +408,28 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
     result
   }
 
-  def filterMatrix(ix: Option[Constructor], checkPattern: (Clause, Pattern[String]) => Boolean): Matrix = {
-    val newRows = rows.filter(row => checkPattern(row.clause, row.patterns(bestColIx))).map(row => new Row(row.patterns, row.clause.addVars(ix, row.patterns(bestColIx), fringe(bestColIx))))
+  def filterMatrix(ix: Option[Constructor], checkPattern: (Clause, Pattern[String]) => Boolean, colIx: Int): Matrix = {
+    val newRows = rows.filter(row => checkPattern(row.clause, row.patterns(colIx))).map(row => new Row(row.patterns, row.clause.addVars(ix, row.patterns(colIx), fringe(colIx))))
     Matrix.fromRows(symlib, newRows, fringe)
   }
 
   def default(colIx: Int): Option[Matrix] = {
     val sigma = columns(colIx).signature
-    if (bestCol.category.hasIncompleteSignature(sigma, bestCol.fringe)) {
+    if (columns(colIx).category.hasIncompleteSignature(sigma, columns(colIx).fringe)) {
       val defaultConstructor = {
         if (sigma.contains(Empty())) Some(NonEmpty())
         else if (sigma.isEmpty) None
         else {
-          lazy val (hd, tl) = bestCol.maxListSize
+          lazy val (hd, tl) = columns(colIx).maxListSize
           sigma.head match {
             case ListC(sym,_) => Some(ListC(sym, hd + tl))
             case _ => None
           }
         }
       }
-      val filtered = filterMatrix(defaultConstructor, (_, p) => p.isDefault)
+      val filtered = filterMatrix(defaultConstructor, (_, p) => p.isDefault, colIx)
       val expanded = if (defaultConstructor.isDefined) {
-        if (bestCol.category.isExpandDefault) {
+        if (columns(colIx).category.isExpandDefault) {
           Matrix.fromColumns(symlib, filtered.columns(colIx).expand(defaultConstructor.get) ++ filtered.notBestCol(colIx), filtered.clauses)
         } else {
           Matrix.fromColumns(symlib, filtered.notBestCol(colIx), filtered.clauses)

@@ -48,9 +48,10 @@ abstract class EqualLiteral() extends SortCategory {
 
   private def tree(matrix: Matrix, ls: Seq[(String, Matrix)]): DecisionTree = {
     val litO = matrix.bestCol.fringe.occurrence
-    if (matrix.default(matrix.bestColIx).isDefined && ls.isEmpty) {
+    val defaultMatrix = matrix.default(matrix.bestColIx)
+    if (defaultMatrix.isDefined && ls.isEmpty) {
       // if no specializations remain and a default exists, consume the occurrence and continue with the default
-      Switch(litO, Seq(), Some(matrix.default(matrix.bestColIx).get.compile))
+      Switch(litO, Seq(), Some(defaultMatrix.get.compile))
     } else if (ls.isEmpty) {
       // if no specializations remain and no default exists, fail the match
       Failure()
