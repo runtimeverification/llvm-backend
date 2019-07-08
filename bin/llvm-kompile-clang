@@ -18,6 +18,7 @@ fi
 @CMAKE_CXX_COMPILER@ -Wno-override-module "$modopt" \
   "$LIBDIR"/llvm/*.ll \
   "$LIBDIR"/libarithmetic.a \
+  "$MAINFILES" \
   "$LIBDIR"/libconfigurationparser.a \
   "$LIBDIR"/libstrings.a \
   "$LIBDIR"/libio.a \
@@ -34,7 +35,6 @@ fi
   "$LIBDIR"/rust/deps/stdlib/libpanic_abort-*.rlib \
   "$LIBDIR"/rust/deps/stdlib/libbacktrace_sys-*.rlib \
   "$LIBDIR"/rust/deps/stdlib/librustc_demangle-*.rlib \
-  "$MAINFILES" \
   "$LIBDIR"/libParser.a \
   "$LIBDIR"/libAST.a \
   "$LIBDIR"/liballoc.a \
