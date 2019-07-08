@@ -44,6 +44,7 @@ object Heuristic {
   }
 }
 
+@NamedHeuristic(name='_')
 object DefaultHeuristic extends Heuristic {
   val needsMatrix: Boolean = false
 
@@ -101,6 +102,7 @@ object DefaultHeuristic extends Heuristic {
   }
 }
 
+@NamedHeuristic(name='f')
 object FHeuristic extends Heuristic {
   val needsMatrix: Boolean = false
 
@@ -116,6 +118,7 @@ object FHeuristic extends Heuristic {
   }
 }
 
+@NamedHeuristic(name='d')
 object DHeuristic extends Heuristic {
   val needsMatrix: Boolean = false
 
@@ -124,6 +127,7 @@ object DHeuristic extends Heuristic {
   }
 }
 
+@NamedHeuristic(name='b')
 object BHeuristic extends Heuristic {
   val needsMatrix: Boolean = false
 
@@ -137,6 +141,7 @@ object BHeuristic extends Heuristic {
   }
 }
 
+@NamedHeuristic(name='a')
 object AHeuristic extends Heuristic {
   val needsMatrix: Boolean = false
 
@@ -149,6 +154,7 @@ object AHeuristic extends Heuristic {
   }
 }
 
+@NamedHeuristic(name='l')
 object LHeuristic extends Heuristic {
   val needsMatrix: Boolean = true
 
@@ -175,6 +181,7 @@ object LHeuristic extends Heuristic {
   }
 }
 
+@NamedHeuristic(name='r')
 object RHeuristic extends Heuristic {
   val needsMatrix: Boolean = false
 
@@ -201,6 +208,7 @@ object RHeuristic extends Heuristic {
   }
 }
 
+@NamedHeuristic(name='q')
 object QHeuristic extends Heuristic {
   val needsMatrix: Boolean = false
 
@@ -228,17 +236,21 @@ sealed trait PseudoHeuristic extends Heuristic {
   def computeScoreForKey(c: AbstractColumn, key: Option[Pattern[Option[Occurrence]]]): Double = 0.0
 }
 
+@NamedHeuristic(name='N')
 object NPseudoHeuristic extends PseudoHeuristic {
   override def breakTies(cols: Seq[MatrixColumn]): MatrixColumn = {
     cols(0)
   }
 }
 
+@NamedHeuristic(name='L')
 object LPseudoHeuristic extends PseudoHeuristic {
   override def breakTies(cols: Seq[MatrixColumn]): MatrixColumn = {
     cols.minBy(_.column.fringe.occurrence.size)
   }
 }
+
+@NamedHeuristic(name='R')
 object RPseudoHeuristic extends PseudoHeuristic {
   override def breakTies(cols: Seq[MatrixColumn]): MatrixColumn = {
     cols.reverse.minBy(_.column.fringe.occurrence.size)
