@@ -393,13 +393,13 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
 
   lazy val sigma: List[Constructor] = bestCol.signature
 
-  def specialize(ix: Constructor): (String, Matrix) = {
+  def specialize(ix: Constructor, colIx: Int): (String, Matrix) = {
     val filtered = filterMatrix(Some(ix), (c, p) => p.isSpecialized(ix, bestCol.fringe, c, bestCol.maxPriority))
-    val expanded = Matrix.fromColumns(symlib, filtered.columns(bestColIx).expand(ix) ++ filtered.notBestCol(bestColIx), filtered.clauses)
+    val expanded = Matrix.fromColumns(symlib, filtered.columns(colIx).expand(ix) ++ filtered.notBestCol(colIx), filtered.clauses)
     (ix.name, expanded)
   }
 
-  def cases: List[(String, Matrix)] = sigma.map(specialize)
+  def cases: List[(String, Matrix)] = sigma.map(specialize(_, bestColIx))
 
   lazy val compiledCases: Seq[(String, DecisionTree)] = {
     Matrix.remaining += sigma.length
@@ -413,7 +413,8 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
     Matrix.fromRows(symlib, newRows, fringe)
   }
 
-  lazy val default: Option[Matrix] = {
+  def default(colIx: Int): Option[Matrix] = {
+    val sigma = columns(colIx).signature
     if (bestCol.category.hasIncompleteSignature(sigma, bestCol.fringe)) {
       val defaultConstructor = {
         if (sigma.contains(Empty())) Some(NonEmpty())
@@ -429,12 +430,12 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
       val filtered = filterMatrix(defaultConstructor, (_, p) => p.isDefault)
       val expanded = if (defaultConstructor.isDefined) {
         if (bestCol.category.isExpandDefault) {
-          Matrix.fromColumns(symlib, filtered.columns(bestColIx).expand(defaultConstructor.get) ++ filtered.notBestCol(bestColIx), filtered.clauses)
+          Matrix.fromColumns(symlib, filtered.columns(colIx).expand(defaultConstructor.get) ++ filtered.notBestCol(colIx), filtered.clauses)
         } else {
-          Matrix.fromColumns(symlib, filtered.notBestCol(bestColIx), filtered.clauses)
+          Matrix.fromColumns(symlib, filtered.notBestCol(colIx), filtered.clauses)
         }
       } else {
-        Matrix.fromColumns(symlib, filtered.notBestCol(bestColIx), filtered.clauses)
+        Matrix.fromColumns(symlib, filtered.notBestCol(colIx), filtered.clauses)
       }
       Some(expanded)
     } else {
@@ -444,7 +445,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
 
   lazy val compiledDefault: Option[DecisionTree] = {
     Matrix.remaining += 1
-    val result = default.map(_.compile)
+    val result = default(bestColIx).map(_.compile)
     Matrix.remaining -= 1
     result
   }

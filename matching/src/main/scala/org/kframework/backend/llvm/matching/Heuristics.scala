@@ -149,6 +149,31 @@ object AHeuristic extends Heuristic {
   }
 }
 
+object LHeuristic extends Heuristic {
+  val needsMatrix: Boolean = true
+
+  def computeScoreForKey(c: AbstractColumn, key: Option[Pattern[Option[Occurrence]]]): Double = {
+    var result = 0.0
+    val matrixColumn = c.asInstanceOf[MatrixColumn]
+    val matrix = matrixColumn.matrix
+    val colIx = matrixColumn.colIx
+    matrix.columns.updated(1, matrix.columns(colIx)).updated(colIx, matrix.columns(1))
+
+    for (con <- matrix.sigma) {
+      val spec = matrix.specialize(con, colIx)._2
+      if (spec.bestRowIx != -1) {
+        result += 1.0
+      }
+    }
+    if (matrix.default(colIx).isDefined) {
+      if (matrix.default(colIx).get.bestRowIx != -1) {
+        result += 1.0
+      }
+    }
+    result
+  }
+}
+
 object RHeuristic extends Heuristic {
   val needsMatrix: Boolean = false
 
