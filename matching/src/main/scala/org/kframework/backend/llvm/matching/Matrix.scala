@@ -583,7 +583,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
     else {
       bestRowIx match {
         case -1 => 
-          if (MatrixColumn(this, bestColIx).score(0).isPosInfinity) {
+          if (matrixColumns(bestColIx).score(0).isPosInfinity) {
             // decompose this column as it contains only wildcards
             val newClauses = (bestCol.clauses, bestCol.patterns).zipped.toIndexedSeq.map(t => t._1.addVars(None, None, t._2, bestCol.fringe))
             Matrix.fromColumns(symlib, notBestCol(bestColIx).map(c => new Column(c.fringe, c.patterns, newClauses)), newClauses).compile
@@ -694,7 +694,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
   }
 
   def colScoreString: String = {
-    symlib.heuristics.map(h => columns.indices.map(c => "%12.2f".format(MatrixColumn(this, c).computeScoreForKey(h, columns(c).bestKey))).mkString(" ")).mkString("\n")
+    symlib.heuristics.map(h => columns.indices.map(c => "%12.2f".format(matrixColumns(c).computeScoreForKey(h, columns(c).bestKey))).mkString(" ")).mkString("\n")
   }
 
   def neededString: String = {
