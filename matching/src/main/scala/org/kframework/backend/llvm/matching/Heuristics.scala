@@ -157,7 +157,7 @@ object LHeuristic extends Heuristic {
     val matrixColumn = c.asInstanceOf[MatrixColumn]
     val matrix = matrixColumn.matrix
     val colIx = matrixColumn.colIx
-    matrix.columns.updated(1, matrix.columns(colIx)).updated(colIx, matrix.columns(1))
+    matrix.columns.updated(0, matrix.columns(colIx)).updated(colIx, matrix.columns(0))
 
     for (con <- matrix.sigma) {
       val spec = matrix.specialize(con, colIx)._2
