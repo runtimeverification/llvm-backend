@@ -149,6 +149,9 @@ object Generator {
     val rhs = genPatterns(mod, symlib, Seq(axiom.rewrite.getRightHandSide))
     val (specialized,residuals) = matrix.specializeBy(rhs.toIndexedSeq)
     val residualMap = (residuals, specialized.fringe.map(_.occurrence)).zipped.toSeq
+    if (Matching.logging) {
+      System.out.println("Residuals: " + residualMap.toList)
+    }
     val newClauses = specialized.clauses.map(_.specializeBy(residualMap, symlib))
     val finalMatrix = Matrix.fromColumns(symlib, specialized.columns.map(c => new Column(c.fringe.inexact, c.patterns, newClauses)), newClauses)
     if (isPoorlySpecialized(finalMatrix, matrix)) {

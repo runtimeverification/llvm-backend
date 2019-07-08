@@ -671,6 +671,9 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
       (this, ps)
     } else {
       val residual = ps(bestColIx)
+      if (Matching.logging) {
+        System.out.println("Chose column " + bestColIx);
+      }
       val constructor = getConstructor(residual)
       val specialized = specialize(constructor, Some(residual))
       val args = expandChildren(residual)
