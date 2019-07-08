@@ -14,10 +14,11 @@ object Matching {
     val allAxioms = Parser.getAxioms(defn).zipWithIndex
     val axioms = Parser.parseTopAxioms(allAxioms)
     val symlib = Parser.parseSymbols(defn, heuristic)
-    val dt = if (axioms.isEmpty) {
-      Failure()
+    val (dt, matrix) = if (axioms.isEmpty) {
+      (Failure(), null)
     } else {
-      Generator.mkDecisionTree(symlib, defn, axioms, Seq(axioms.head.rewrite.sort))
+      val matrix = Generator.genClauseMatrix(symlib, defn, axioms, Seq(axioms.head.rewrite.sort))
+      (matrix.compile, matrix)
     }
     val funcAxioms = Parser.parseFunctionAxioms(allAxioms)
     val sortedFuncAxioms = symlib.functions.map(funcAxioms.getOrElse(_, IndexedSeq()))
@@ -36,7 +37,7 @@ object Matching {
           System.out.println("Compiling decision tree for axiom " + a.ordinal)
         }
         Matrix.clearCache
-        Generator.mkSpecialDecisionTree(symlib, defn, axioms, Seq(axioms.head.rewrite.sort), a)
+        Generator.mkSpecialDecisionTree(symlib, defn, matrix, a)
       })
       val specialFiles = (axioms, specialDts).zipped.toIterable
       for (pair <- specialFiles) {

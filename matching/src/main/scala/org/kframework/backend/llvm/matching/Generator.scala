@@ -118,7 +118,7 @@ object Generator {
     }
   }
 
-  private def genClauseMatrix[T](
+  def genClauseMatrix[T](
       symlib: Parser.SymLib,
       mod: Definition,
       axioms: IndexedSeq[AxiomInfo],
@@ -133,7 +133,6 @@ object Generator {
     val cols = (sorts, patterns).zipped.toIndexedSeq
     new Matrix(symlib, cols, actions).expand
   }
-    
   
   def mkDecisionTree(symlib: Parser.SymLib, mod: Definition, axioms: IndexedSeq[AxiomInfo], sorts: Seq[Sort]) : DecisionTree = {
     val matrix = genClauseMatrix(symlib, mod, axioms, sorts)
@@ -144,8 +143,7 @@ object Generator {
     originalMatrix.rows.lengthCompare(finalMatrix.rows.size * 2) <= 0
   }
 
-  def mkSpecialDecisionTree(symlib: Parser.SymLib, mod: Definition, axioms: IndexedSeq[AxiomInfo], sorts: Seq[Sort], axiom: AxiomInfo) : Option[(DecisionTree, Seq[(P[String], Occurrence)])] = {
-    val matrix = genClauseMatrix(symlib, mod, axioms, sorts)
+  def mkSpecialDecisionTree(symlib: Parser.SymLib, mod: Definition, matrix: Matrix, axiom: AxiomInfo) : Option[(DecisionTree, Seq[(P[String], Occurrence)])] = {
     val rhs = genPatterns(mod, symlib, Seq(axiom.rewrite.getRightHandSide))
     val (specialized,residuals) = matrix.specializeBy(rhs.toIndexedSeq)
     val residualMap = (residuals, specialized.fringe.map(_.occurrence)).zipped.toSeq
