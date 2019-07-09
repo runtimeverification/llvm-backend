@@ -584,7 +584,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
   }
 
   def rowUseless(rowIx: Int): Boolean = {
-    val filteredRows = (rows.take(rowIx) ++ rows.drop(rowIx + 1)).filter(_.clause.action.priority <= rows(rowIx).clause.action.priority)
+    val filteredRows = rows.take(rowIx) ++ rows.drop(rowIx + 1).takeWhile(_.clause.action.priority == rows(rowIx).clause.action.priority)
     val matrix = Matrix.fromRows(symlib, filteredRows, fringe)
     val row = rows(rowIx)
     !matrix.useful(row)
