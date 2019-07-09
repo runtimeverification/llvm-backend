@@ -549,12 +549,52 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
     }
   }
 
+  private def useless(r: Row): Boolean = {
+    if (columns.size == 0) {
+      if (rows.size > 0) {
+        false
+      } else {
+        true
+      }
+    }
+
+    if (!r.patterns(0).isWildcard) {
+      val con = r.patterns(0).signature(r.clause).head
+      val rowSpec = Matrix.fromRows(symlib, IndexedSeq(r), fringe).specialize(con, 0)._2.rows.head
+      specialize(con, 0)._2.useless(rowSpec)
+    } else {
+      if (columns(0).category.hasIncompleteSignature(columns(0).signature, columns(0).fringe)) {
+        default(0).isDefined && default(0).get.useless(new Row(r.patterns.drop(1), r.clause))
+      } else {
+        for (con <- columns(0).signature) {
+          val rowSpec = Matrix.fromRows(symlib, IndexedSeq(r), fringe).specialize(con, 0)._2.rows.head
+          if (specialize(con, 0)._2.useless(rowSpec)) {
+            true
+          }
+        }
+        false
+      }
+    }
+
+    false
+  }
+
+  def rowUseless(rowIx: Int): Boolean = {
+    val matrix = Matrix.fromRows(symlib, rows.take(rowIx) ++ rows.drop(rowIx + 1), fringe)
+    val row = rows(rowIx)
+    matrix.useless(row)
+  }
+
   def notBestRow: Matrix = {
     Matrix.fromRows(symlib, rows.patch(bestRowIx, Nil, 1), fringe)
   }
 
   def notBestCol(colIx: Int): IndexedSeq[Column] = {
     columns.patch(colIx, Nil, 1)
+  }
+
+  def notCol(colIx: Int): Matrix = {
+    Matrix.fromColumns(symlib, notBestCol(colIx), clauses)
   }
 
   def colScoreString: String = {
