@@ -149,18 +149,21 @@ class Column(val fringe: Fringe, val patterns: IndexedSeq[Pattern[String]], val 
     if (possibleKeys.isEmpty) {
       possibleKeys
     } else {
-      val validKeys = possibleKeys.filter(k => isValidForKey(Some(k)))
-      validKeys
+      possibleKeys.filter(k => isValidForKey(Some(k)))
     }
   }
 
   lazy val bestKey: Option[Pattern[Option[Occurrence]]] = {
     import Ordering.Implicits._
-    val rawBestKey = validKeys.map(k => (k, computeScoreForKey(Some(k)))).maxBy(_._2)
-    if (Matching.logging) {
-      System.out.println("Best key is " + rawBestKey._1)
+    if (validKeys.isEmpty) {
+      None
+    } else {
+      val rawBestKey = validKeys.map(k => (k, computeScoreForKey(Some(k)))).maxBy(_._2)
+      if (Matching.logging) {
+        System.out.println("Best key is " + rawBestKey._1)
+      }
+      Some(rawBestKey._1)
     }
-    Some(rawBestKey._1)
   }
 
   def maxPriority: Int = {
