@@ -171,19 +171,26 @@ object Parser {
     })
   }
 
+  val heuristicMap: Map[Char, Heuristic] = {
+    import scala.reflect.runtime.universe
+
+    val heuristicType = universe.typeOf[Heuristic]
+    val heuristicClass = heuristicType.typeSymbol.asClass
+    val pseudoHeuristicType = universe.typeOf[PseudoHeuristic]
+    val pseudoHeuristicClass = pseudoHeuristicType.typeSymbol.asClass
+    val runtimeMirror = universe.runtimeMirror(getClass.getClassLoader)
+    val classes = heuristicClass.knownDirectSubclasses.filter(!_.asClass.isTrait) ++ pseudoHeuristicClass.knownDirectSubclasses
+    classes.map(c => {
+        val name = c.annotations.head.tree.children.tail.head.children.tail.collect({ case universe.Literal(universe.Constant(id: Char)) => id }).head
+        val symbol = c.asClass.module.asModule
+        val moduleMirror = runtimeMirror.reflectModule(symbol)
+        val obj = moduleMirror.instance.asInstanceOf[Heuristic]
+        name -> obj
+      }).toMap
+  }
+
   def parseHeuristic(heuristic: Char): Heuristic = {
-    heuristic match {
-      case 'f' => FHeuristic
-      case 'd' => DHeuristic
-      case 'b' => BHeuristic
-      case 'a' => AHeuristic
-      case 'r' => RHeuristic
-      case 'q' => QHeuristic
-      case '_' => DefaultHeuristic
-      case 'N' => NPseudoHeuristic
-      case 'L' => LPseudoHeuristic
-      case 'R' => RPseudoHeuristic
-    }
+    heuristicMap(heuristic)
   }
 
   def parseHeuristics(heuristics: String): Seq[Heuristic] = {
