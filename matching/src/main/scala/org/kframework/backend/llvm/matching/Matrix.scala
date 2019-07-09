@@ -279,7 +279,7 @@ case class Clause(
   // variable bindings to injections that need to be constructed
   // since they do not actually exist in the original subject term
   val overloadChildren: Vector[(Constructor, VariableBinding[String])],
-  val specializedVars: Vector[(Pattern[Option[Occurrence]], Occurrence)]) {
+  val specializedVars: Map[Occurrence, Pattern[Option[Occurrence]]]) {
 
   lazy val bindingsMap: Map[String, VariableBinding[String]] = bindings.groupBy(_.name).mapValues(_.head)
   lazy val boundOccurrences: Set[Occurrence] = bindings.map(_.occurrence).toSet
@@ -306,7 +306,7 @@ case class Clause(
     new Clause(action, bindings ++ pat.bindings(ix, residual, f.occurrence, f.symlib), listRanges ++ pat.listRange(ix, f.occurrence), overloadChildren ++ pat.overloadChildren(f, ix, residual, Num(0, f.occurrence)), specializedVars)
   }
 
-  private def translateVars(residuals: Seq[(Pattern[String], Occurrence)], allVars: Vector[VariableBinding[String]], symlib: Parser.SymLib): Seq[(Pattern[Option[Occurrence]], Occurrence)] = {
+  private def translateVars(residuals: Seq[(Pattern[String], Occurrence)], allVars: Vector[VariableBinding[String]], symlib: Parser.SymLib): Map[Occurrence, Pattern[Option[Occurrence]]] = {
     val residualMap = residuals.toMap
     def substituteBy(pat: Pattern[String], category: SortCategory): Pattern[Option[Occurrence]] = {
       residualMap.get(pat) match {
@@ -318,7 +318,7 @@ case class Clause(
         }
       }
     }
-    allVars.filter(_.pattern.isDefined).map(v => (substituteBy(v.pattern.get, v.category), v.occurrence))
+    allVars.filter(_.pattern.isDefined).map(v => v.occurrence -> substituteBy(v.pattern.get, v.category)).toMap
   }
 
   def specializeBy(residualMap: Seq[(Pattern[String], Occurrence)], symlib: Parser.SymLib): Clause = {
@@ -400,7 +400,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
   }
 
   def this(symlib: Parser.SymLib, cols: IndexedSeq[(Sort, IndexedSeq[Pattern[String]])], actions: IndexedSeq[Action]) {
-    this(symlib, (cols, (1 to cols.size).map(i => new Fringe(symlib, cols(i - 1)._1, Num(i, Base()), false))).zipped.toIndexedSeq.map(pair => new Column(pair._2, pair._1._2, actions.map(new Clause(_, Vector(), Vector(), Vector(), Vector())))), null, actions.map(new Clause(_, Vector(), Vector(), Vector(), Vector())), null)
+    this(symlib, (cols, (1 to cols.size).map(i => new Fringe(symlib, cols(i - 1)._1, Num(i, Base()), false))).zipped.toIndexedSeq.map(pair => new Column(pair._2, pair._1._2, actions.map(new Clause(_, Vector(), Vector(), Vector(), Map())))), null, actions.map(new Clause(_, Vector(), Vector(), Vector(), Map())), null)
   }
 
   private def isWildcardOrResidual(pat: Pattern[String]): Boolean = {
@@ -536,7 +536,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
       case ((SymbolC(inj), v),dt) => MakePattern(v.occurrence, SymbolP(inj, Seq(VariableP(Some(v.occurrence.asInstanceOf[Inj].rest), v.category))), dt)
     })
     val withSpecials = row.clause.specializedVars.foldRight(withOverloads)({
-      case ((p, o),dt) => MakePattern(o, p, dt)
+      case ((o, p),dt) => MakePattern(o, p, dt)
     })
     row.clause.action.freshConstants.foldRight(withSpecials)({
       case ((name, sort),dt) => 
