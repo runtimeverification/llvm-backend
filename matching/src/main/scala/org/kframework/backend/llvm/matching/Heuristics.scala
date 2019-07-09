@@ -208,6 +208,19 @@ object RHeuristic extends Heuristic {
   }
 }
 
+@NamedHeuristic(name='n')
+object NHeuristic extends Heuristic {
+  val needsMatrix: Boolean = true
+
+  def computeScoreForKey(c: AbstractColumn, key: Option[Pattern[Option[Occurrence]]]): Double = {
+    val matrixColumn = c.asInstanceOf[MatrixColumn]
+    val matrix = matrixColumn.matrix
+    val colIx = matrixColumn.colIx
+    matrix.rows.indices.filter(matrix.necessary(_, colIx)).sum
+  }
+}
+
+
 @NamedHeuristic(name='q')
 object QHeuristic extends Heuristic {
   val needsMatrix: Boolean = false
