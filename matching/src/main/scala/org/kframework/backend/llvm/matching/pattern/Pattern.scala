@@ -490,7 +490,14 @@ case class VariableP[T](name: T, sort: SortCategory) extends Pattern[T] {
 
   def category: None.type = None
   lazy val variables: Set[T] = Set(name)
-  def canonicalize(clause: Clause): Pattern[Option[Occurrence]] = VariableP(clause.canonicalize(name.toString), sort)
+  def canonicalize(clause: Clause): Pattern[Option[Occurrence]] = {
+    val subst = clause.canonicalize(name.toString).flatMap(clause.specializedVars.get(_))
+    if (subst.isDefined) {
+      subst.get
+    } else {
+      VariableP(clause.canonicalize(name.toString), sort)
+    }
+  }
   def isBound(clause: Clause): Boolean = clause.isBound(name)
   def isResidual(symlib: Parser.SymLib) = false
   override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
