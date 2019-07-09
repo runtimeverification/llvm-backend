@@ -216,7 +216,7 @@ object NHeuristic extends Heuristic {
     val matrixColumn = c.asInstanceOf[MatrixColumn]
     val matrix = matrixColumn.matrix
     val colIx = matrixColumn.colIx
-    matrix.rows.indices.filter(matrix.necessary(_, colIx)).size
+    matrix.rows.indices.count(matrix.necessary(_, colIx))
   }
 }
 
