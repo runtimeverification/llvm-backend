@@ -216,12 +216,20 @@ object PHeuristic extends Heuristic {
     val matrixColumn = c.asInstanceOf[MatrixColumn]
     val matrix = matrixColumn.matrix
     val colIx = matrixColumn.colIx
-    val lastRow = matrix.rows.indices.takeWhile(matrix.necessary(_, colIx)).lastOption
-    if (lastRow.isDefined) {
-      return lastRow.get
-    } else {
-      0.0
+    var result = 0
+    var priority = c.column.clauses.head.action.priority
+    for (i <- c.column.patterns.indices) {
+      if (c.column.clauses(i).action.priority != priority) {
+        if (result != i) {
+          return result
+        }
+        priority = c.column.clauses(i).action.priority
+      }
+      if (matrix.necessary(i, colIx)) {
+        result += 1
+      }
     }
+    result
   }
 }
 
