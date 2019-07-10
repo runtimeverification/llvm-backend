@@ -341,7 +341,7 @@ case class Row(val patterns: IndexedSeq[Pattern[String]], val clause: Clause) {
   }
 
   def specialize(ix: Constructor, colIx: Int, symlib: Parser.SymLib, fringe: IndexedSeq[Fringe]): Option[Row] = {
-    Matrix.fromRows(symlib, IndexedSeq(this), fringe).specialize(ix, colIx)._2.rows.headOption
+    Matrix.fromRows(symlib, IndexedSeq(this), fringe).specialize(ix, colIx, None)._2.rows.headOption
   }
 
   def default(colIx: Int, sigma: Seq[Constructor], symlib: Parser.SymLib, fringe: IndexedSeq[Fringe]): Option[Row] = {
@@ -630,7 +630,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
             System.out.println("Testing constructor " + con);
           }
           val rowSpec = r.specialize(con, 0, symlib, fringe)
-          if (rowSpec.isDefined && specialize(con, 0)._2.useful(rowSpec.get)) {
+          if (rowSpec.isDefined && specialize(con, 0, None)._2.useful(rowSpec.get)) {
             return true
           }
         }
@@ -675,7 +675,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
         System.out.println("Chose column " + bestColIx);
       }
       val constructor = getConstructor(residual)
-      val specialized = specialize(constructor, Some(residual))
+      val specialized = specialize(constructor, bestColIx, Some(residual))
       val args = expandChildren(residual)
       specialized._2.specializeBy(args ++ ps.patch(bestColIx, Nil, 1))
     }
