@@ -7,7 +7,7 @@ add_subdirectory(io)
 
 set(RUSTDIR_ debug)
 set(RUSTDIR_Debug debug)
-set(RUSTDIR_DebugRuntime debug)
+set(RUSTDIR_DebugGcc debug)
 set(RUSTDIR_Release release)
 set(RUSTDIR_RelWithDebInfo release)
 set(RUSTDIR_FastBuild release)

@@ -141,25 +141,28 @@ class Column(val fringe: Fringe, val patterns: IndexedSeq[Pattern[String]], val 
     }
   }
 
-  lazy val bestKey: Option[Pattern[Option[Occurrence]]] = {
+  lazy val validKeys: Seq[Pattern[Option[Occurrence]]] = {
     val possibleKeys = rawSignature.flatMap({
       case HasKey(_, _, Some(k)) => Seq(k)
       case _ => Seq()
     })
     if (possibleKeys.isEmpty) {
+      possibleKeys
+    } else {
+      possibleKeys.filter(k => isValidForKey(Some(k)))
+    }
+  }
+
+  lazy val bestKey: Option[Pattern[Option[Occurrence]]] = {
+    import Ordering.Implicits._
+    if (validKeys.isEmpty) {
       None
     } else {
-      val validKeys = possibleKeys.filter(k => isValidForKey(Some(k)))
-      if (validKeys.isEmpty) {
-        None
-      } else {
-        import Ordering.Implicits._
-        val rawBestKey = validKeys.map(k => (k, computeScoreForKey(Some(k)))).maxBy(_._2)
-        if (Matching.logging) {
-          System.out.println("Best key is " + rawBestKey._1)
-        }
-        Some(rawBestKey._1)
+      val rawBestKey = validKeys.map(k => (k, computeScoreForKey(Some(k)))).maxBy(_._2)
+      if (Matching.logging) {
+        System.out.println("Best key is " + rawBestKey._1)
       }
+      Some(rawBestKey._1)
     }
   }
 
@@ -309,6 +312,14 @@ case class Row(val patterns: IndexedSeq[Pattern[String]], val clause: Clause) {
   def expand(colIx: Int): Seq[Row] = {
     val p0s = patterns(colIx).expandOr
     p0s.map(p => new Row(patterns.updated(colIx, p), clause))
+  }
+
+  def specialize(ix: Constructor, colIx: Int, symlib: Parser.SymLib, fringe: IndexedSeq[Fringe]): Option[Row] = {
+    Matrix.fromRows(symlib, IndexedSeq(this), fringe).specialize(ix, colIx)._2.rows.headOption
+  }
+
+  def default(colIx: Int, symlib: Parser.SymLib, fringe: IndexedSeq[Fringe]): Option[Row] = {
+    Matrix.fromRows(symlib, IndexedSeq(this), fringe).default(colIx).get.rows.headOption
   }
 
   override def toString: String = patterns.map(p => new util.Formatter().format("%12.12s", p.toShortString)).mkString(" ") + " " + clause.toString
@@ -549,12 +560,50 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
     }
   }
 
+  def necessary(rowIx: Int, colIx: Int): Boolean = {
+    !columns(colIx).patterns(rowIx).isWildcard || !notCol(colIx).rowUseless(rowIx)
+  }
+
+  private def useful(r: Row): Boolean = {
+    if (columns.size == 0) {
+      if (rows.size > 0) {
+        false
+      } else {
+        true
+      }
+    }
+    if (r.patterns(0).isWildcard && columns(0).category.hasIncompleteSignature(columns(0).signature, columns(0).fringe)) {
+      val rowDefault = r.default(0, symlib, fringe)
+      default(0).isDefined && rowDefault.isDefined && default(0).get.useful(rowDefault.get)
+    } else {
+      val key = columns(0).validKeys.headOption
+      for (con <- columns(0).signatureForKey(key)) {
+        val rowSpec = r.specialize(con, 0, symlib, fringe)
+        if (rowSpec.isDefined && specialize(con, 0)._2.useful(rowSpec.get)) {
+          return true
+        }
+      }
+      false
+    }
+  }
+
+  def rowUseless(rowIx: Int): Boolean = {
+    val filteredRows = rows.take(rowIx) ++ rows.drop(rowIx + 1).takeWhile(_.clause.action.priority == rows(rowIx).clause.action.priority)
+    val matrix = Matrix.fromRows(symlib, filteredRows, fringe)
+    val row = rows(rowIx)
+    !matrix.useful(row)
+  }
+
   def notBestRow: Matrix = {
     Matrix.fromRows(symlib, rows.patch(bestRowIx, Nil, 1), fringe)
   }
 
   def notBestCol(colIx: Int): IndexedSeq[Column] = {
     columns.patch(colIx, Nil, 1)
+  }
+
+  def notCol(colIx: Int): Matrix = {
+    Matrix.fromColumns(symlib, notBestCol(colIx), clauses)
   }
 
   def colScoreString: String = {
