@@ -1,7 +1,8 @@
 #!/bin/bash
 modopt="$1"
 main="$2"
-shift; shift
+lto="$3"
+shift; shift; shift
 LIBDIR="$(dirname "$0")"/../lib/kllvm/
 if [ "$main" = "main" ]; then
   MAINFILES="$LIBDIR"/llvm/main/main.ll
@@ -15,8 +16,23 @@ else
   flags=-ltinfo
 fi
 
-@CMAKE_CXX_COMPILER@ -Wno-override-module "$modopt" \
-  "$LIBDIR"/llvm/*.ll \
+if [ "$lto" = "lto" ]; then
+  flags="$flags -flto -Wl,-mllvm,-tailcallopt"
+  files=("$LIBDIR"/llvm/*.ll)
+else
+  files=()
+  modasm="$(mktemp tmp.XXXXXXXXXX.s)"
+  trap "rm -f $modasm" INT TERM EXIT
+  @LLC@ -tailcallopt "$modopt" -o "$modasm"
+  modopt="$modasm"
+  for file in "$LIBDIR"/llvm/*.ll; do
+    tmp="$(mktemp tmp.XXXXXXXXXX.s)"
+    @LLC@ -tailcallopt "$file" -o "$tmp"
+    files+=("$tmp")
+  done
+fi
+
+@CMAKE_CXX_COMPILER@ -Wno-override-module "$modopt" "${files[@]}" \
   "$LIBDIR"/libarithmetic.a \
   "$MAINFILES" \
   "$LIBDIR"/libconfigurationparser.a \
