@@ -1,16 +1,12 @@
 cmake_minimum_required (VERSION 3.4)
 
-find_program(CMAKE_C_COMPILER clang-8.0)
-find_program(CMAKE_C_COMPILER clang-6.0)
+find_program(CMAKE_C_COMPILER clang-8)
 find_program(CMAKE_C_COMPILER clang)
-find_program(CMAKE_CXX_COMPILER clang++-8.0)
-find_program(CMAKE_CXX_COMPILER clang++-6.0)
+find_program(CMAKE_CXX_COMPILER clang++-8)
 find_program(CMAKE_CXX_COMPILER clang++)
-find_program(CMAKE_C_COMPILER_AR llvm-ar-8.0)
-find_program(CMAKE_C_COMPILER_AR llvm-ar-6.0)
+find_program(CMAKE_C_COMPILER_AR llvm-ar-8)
 find_program(CMAKE_C_COMPILER_AR llvm-ar)
-find_program(CMAKE_C_COMPILER_RANLIB llvm-ranlib-8.0)
-find_program(CMAKE_C_COMPILER_RANLIB llvm-ranlib-6.0)
+find_program(CMAKE_C_COMPILER_RANLIB llvm-ranlib-8)
 find_program(CMAKE_C_COMPILER_RANLIB llvm-ranlib)
 project (KLLVM CXX C)
 
@@ -58,15 +54,11 @@ endif()
 set(CMAKE_AR "${CMAKE_C_COMPILER_AR}")
 set(CMAKE_RANLIB "${CMAKE_C_COMPILER_RANLIB}")
 
-find_package(LLVM 8 QUIET CONFIG)
-
-if (NOT LLVM_FOUND) 
-	find_package(LLVM 6 REQUIRED CONFIG)	
-endif()
+find_package(LLVM 8 REQUIRED CONFIG)
 
 message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
-if (${LLVM_PACKAGE_VERSION} VERSION_LESS 6.0)
-  message(FATAL_ERROR "LLVM 6.0 or newer is required")
+if (${LLVM_PACKAGE_VERSION} VERSION_LESS 8.0)
+  message(FATAL_ERROR "LLVM 8.0 or newer is required")
 endif()
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
@@ -107,8 +99,7 @@ install(
   DESTINATION lib/kllvm/llvm/main
 )
 
-find_program(OPT opt-8.0)
-find_program(OPT opt-6.0)
+find_program(OPT opt-8)
 find_program(OPT opt)
 if(${OPT} STREQUAL "OPT-NOTFOUND")
   message(FATAL_ERROR "Could not find an opt binary. Is llvm installed on your PATH?")
