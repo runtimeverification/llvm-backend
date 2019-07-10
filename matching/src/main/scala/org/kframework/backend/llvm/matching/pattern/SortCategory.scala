@@ -48,7 +48,7 @@ abstract class EqualLiteral() extends SortCategory {
 
   private def tree(matrix: Matrix, ls: Seq[(String, Matrix)]): DecisionTree = {
     val litO = matrix.bestCol.fringe.occurrence
-    val defaultMatrix = matrix.default(matrix.bestColIx)
+    val defaultMatrix = matrix.default(matrix.bestColIx, matrix.sigma)
     if (defaultMatrix.isDefined && ls.isEmpty) {
       // if no specializations remain and a default exists, consume the occurrence and continue with the default
       Switch(litO, Seq(), Some(defaultMatrix.get.compile))
@@ -117,7 +117,7 @@ case class ListS() extends SortCategory {
     // if it succeeds, bind the occurrences and continue with the specialized matrix
     // otherwise, try the default case
     Function("hook_LIST_size_long", newO, Seq(listO), "MINT.MInt 64",
-      SwitchLit(newO, 64, matrix.cases.zipWithIndex.map(l => (l._1._1, expandListPattern(l._1._2, listO, matrix.sigma(l._2).asInstanceOf[ListC]))), matrix.default(matrix.bestColIx).map(expandListPatternDefault(_, listO, maxList))))
+      SwitchLit(newO, 64, matrix.cases.zipWithIndex.map(l => (l._1._1, expandListPattern(l._1._2, listO, matrix.sigma(l._2).asInstanceOf[ListC]))), matrix.default(matrix.bestColIx, matrix.sigma).map(expandListPatternDefault(_, listO, maxList))))
   }
 }
 case class MapS() extends SortCategory {
