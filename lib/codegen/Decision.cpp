@@ -7,12 +7,15 @@
 #include "llvm/Support/raw_ostream.h"
 
 #include <iostream>
+#include <limits>
 
 namespace kllvm {
 
 static std::string BLOCK_STRUCT = "block";
 
 FailNode FailNode::instance;
+
+static unsigned max_name_length = 1024 - std::to_string(std::numeric_limits<unsigned long long>::max()).length();
 
 void Decision::operator()(DecisionNode *entry, llvm::StringMap<llvm::Value *> substitution) {
   if (entry == FailNode::get()) {
@@ -54,7 +57,7 @@ void DecisionNode::sharedNode(Decision *d, llvm::StringMap<llvm::Value *> &oldSu
   for (std::string var : vars) {
     auto Phi = phis[var][oldSubst[var]->getType()];
     if (!Phi) {
-      Phi = llvm::PHINode::Create(oldSubst[var]->getType(), 1, "aux_phi" + var, cachedCode->getFirstNonPHI());
+      Phi = llvm::PHINode::Create(oldSubst[var]->getType(), 1, "aux_phi" + var.substr(0, max_name_length), cachedCode->getFirstNonPHI());
       for (llvm::BasicBlock *pred : predecessors) {
         Phi->addIncoming(llvm::UndefValue::get(Phi->getType()), pred);
       }
@@ -89,7 +92,7 @@ bool DecisionNode::beginNode(Decision *d, std::string name, llvm::StringMap<llvm
     vars.insert(d->ChoiceVars.begin(), d->ChoiceVars.end());
   }
   auto Block = llvm::BasicBlock::Create(d->Ctx,
-      name,
+      name.substr(0, max_name_length),
       d->CurrentBlock->getParent());
   cachedCode = Block;
   llvm::BranchInst::Create(Block, d->CurrentBlock);
@@ -102,7 +105,7 @@ bool DecisionNode::beginNode(Decision *d, std::string name, llvm::StringMap<llvm
       }
       abort();
     }
-    auto Phi = llvm::PHINode::Create(substitution[var]->getType(), 1, "phi" + var, Block);
+    auto Phi = llvm::PHINode::Create(substitution[var]->getType(), 1, "phi" + var.substr(0, max_name_length), Block);
     Phi->addIncoming(substitution[var], d->CurrentBlock);
     phis[var][substitution[var]->getType()] = Phi;
     substitution[var] = Phi;
@@ -137,7 +140,7 @@ void SwitchNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitutio
       CaseBlock = d->FailureBlock;
     } else {
       CaseBlock = llvm::BasicBlock::Create(d->Ctx, 
-          name + "_case_" + std::to_string(idx++),
+          name.substr(0, max_name_length) + "_case_" + std::to_string(idx++),
           d->CurrentBlock->getParent());
     }
     if (auto sym = _case.getConstructor()) {
@@ -200,7 +203,7 @@ void SwitchNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitutio
           Child = ChildPtr;
           break;
         default:
-          Child = new llvm::LoadInst(ChildPtr, binding, d->CurrentBlock);
+          Child = new llvm::LoadInst(ChildPtr, binding.substr(0, max_name_length), d->CurrentBlock);
           break;
         }
         auto BlockPtr = llvm::PointerType::getUnqual(d->Module->getTypeByName(BLOCK_STRUCT));
@@ -265,7 +268,7 @@ void FunctionNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitut
   }
   CreateTerm creator(substitution, d->Definition, d->CurrentBlock, d->Module, false);
   auto Call = creator.createFunctionCall(function, cat, args, function.substr(0, 5) == "hook_", false);
-  Call->setName(name);
+  Call->setName(name.substr(0, max_name_length));
   substitution[name] = Call;
   child->codegen(d, substitution);
   setCompleted();
@@ -324,7 +327,7 @@ void IterNextNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitut
       }
       auto failPhi = d->failPhis[var][Phi->getType()];
       if (!failPhi) {
-        failPhi = llvm::PHINode::Create(Phi->getType(), 0, "phi" + var, d->FailureBlock->getFirstNonPHI());
+        failPhi = llvm::PHINode::Create(Phi->getType(), 0, "phi" + var.substr(0, max_name_length), d->FailureBlock->getFirstNonPHI());
         d->failPhis[var][Phi->getType()] = failPhi;
       }
       Phi->addIncoming(failPhi, d->FailureBlock);
@@ -338,7 +341,7 @@ void IterNextNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitut
     constant->print(llvm::errs());
     abort();
   }
-  auto Call = llvm::CallInst::Create(func, {arg}, binding, d->CurrentBlock);
+  auto Call = llvm::CallInst::Create(func, {arg}, binding.substr(0, max_name_length), d->CurrentBlock);
   substitution[binding] = Call;
   child->codegen(d, substitution);
   d->ChoiceBlock = nullptr;
