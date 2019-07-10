@@ -346,7 +346,7 @@ case class SymbolP[T](sym: SymbolOrAlias, ps: Seq[Pattern[T]]) extends Pattern[T
     (ix, sym) match {
       case (SymbolC(SymbolOrAlias("inj",Seq(a,c))), SymbolOrAlias("inj",Seq(b,c2))) =>
         lazy val f2 = f.expand(SymbolC(sym)).head
-        c == c2 && (a == b || (f.symlib.isSubsorted(a, b) && ps.head.isSpecialized(SymbolC(B.SymbolOrAlias("inj",Seq(a,b))), f2, clause, m)))
+        c == c2 && (a == b || (f.symlib.isSubsorted(a, b) && f2.sortInfo.category == SymbolS() && ps.head.isSpecialized(SymbolC(B.SymbolOrAlias("inj",Seq(a,b))), f2, clause, m)))
       case (SymbolC(SymbolOrAlias("inj",_)), _) =>
         val less = f.overloads(sym)
         lazy val f2 = f.expand(ix).head
@@ -401,7 +401,7 @@ case class SymbolP[T](sym: SymbolOrAlias, ps: Seq[Pattern[T]]) extends Pattern[T
   // returns true if the specified constructor is an overload of the current pattern and can match it
   private def isValidOverload(f: Fringe, clause: Clause, m: Int, fringePs: Seq[Fringe], less: SymbolOrAlias): Boolean = {
     def isValidChild(p: Pattern[T], fringeP: Fringe, fringeT: Fringe): Boolean = {
-      fringeP.sort == fringeT.sort || (fringeP.symlib.isSubsorted(fringeT.sort, fringeP.sort) && p.isSpecialized(SymbolC(B.SymbolOrAlias("inj", Seq(fringeT.sort, fringeP.sort))), fringeP, clause, m))
+      fringeP.sort == fringeT.sort || (fringeP.symlib.isSubsorted(fringeT.sort, fringeP.sort) && fringeP.sortInfo.category == SymbolS() && p.isSpecialized(SymbolC(B.SymbolOrAlias("inj", Seq(fringeT.sort, fringeP.sort))), fringeP, clause, m))
     }
 
     val cons = SymbolC(less)
