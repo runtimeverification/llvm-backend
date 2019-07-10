@@ -105,7 +105,6 @@ class Column(val fringe: Fringe, val patterns: IndexedSeq[Pattern[String]], val 
       case None => rawSignature
       case Some(k) => rawSignature.filter(_.isBest(k))
     }
-    assert(bestUsed.nonEmpty)
     val usedInjs = bestUsed.flatMap(fringe.injections)
     val dups = if (fringe.isExact) bestUsed else bestUsed ++ usedInjs
     val nodups = dups.distinct.toList
@@ -177,7 +176,8 @@ class Column(val fringe: Fringe, val patterns: IndexedSeq[Pattern[String]], val 
   def expand(ix: Constructor): IndexedSeq[Column] = {
     val fringes = fringe.expand(ix)
     val ps = (patterns, clauses).zipped.toIterable.map(t => t._1.expand(ix, fringes, fringe, t._2, maxPriority))
-    (fringes, ps.transpose).zipped.toIndexedSeq.map(t => new Column(t._1, t._2.toIndexedSeq, clauses))
+    val transposed = if (ps.isEmpty) fringes.map(_ => IndexedSeq()) else ps.transpose
+    (fringes, transposed).zipped.toIndexedSeq.map(t => new Column(t._1, t._2.toIndexedSeq, clauses))
   }
 
   lazy val isWildcard: Boolean = patterns.forall(_.isWildcard)
@@ -318,8 +318,8 @@ case class Row(val patterns: IndexedSeq[Pattern[String]], val clause: Clause) {
     Matrix.fromRows(symlib, IndexedSeq(this), fringe).specialize(ix, colIx)._2.rows.headOption
   }
 
-  def default(colIx: Int, symlib: Parser.SymLib, fringe: IndexedSeq[Fringe]): Option[Row] = {
-    Matrix.fromRows(symlib, IndexedSeq(this), fringe).default(colIx).get.rows.headOption
+  def default(colIx: Int, sigma: Seq[Constructor], symlib: Parser.SymLib, fringe: IndexedSeq[Fringe]): Option[Row] = {
+    Matrix.fromRows(symlib, IndexedSeq(this), fringe).default(colIx, sigma).get.rows.headOption
   }
 
   override def toString: String = patterns.map(p => new util.Formatter().format("%12.12s", p.toShortString)).mkString(" ") + " " + clause.toString
@@ -424,8 +424,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
     Matrix.fromRows(symlib, newRows, fringe)
   }
 
-  def default(colIx: Int): Option[Matrix] = {
-    val sigma = columns(colIx).signature
+  def default(colIx: Int, sigma: Seq[Constructor]): Option[Matrix] = {
     if (columns(colIx).category.hasIncompleteSignature(sigma, columns(colIx).fringe)) {
       val defaultConstructor = {
         if (sigma.contains(Empty())) Some(NonEmpty())
@@ -440,7 +439,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
       }
       val filtered = filterMatrix(defaultConstructor, (_, p) => p.isDefault, colIx)
       val expanded = if (defaultConstructor.isDefined) {
-        if (columns(colIx).category.isExpandDefault) {
+        if (columns(colIx).fringe.sortInfo.category.isExpandDefault) {
           Matrix.fromColumns(symlib, filtered.columns(colIx).expand(defaultConstructor.get) ++ filtered.notBestCol(colIx), filtered.clauses)
         } else {
           Matrix.fromColumns(symlib, filtered.notBestCol(colIx), filtered.clauses)
@@ -456,7 +455,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
 
   lazy val compiledDefault: Option[DecisionTree] = {
     Matrix.remaining += 1
-    val result = default(bestColIx).map(_.compile)
+    val result = default(bestColIx, sigma).map(_.compile)
     Matrix.remaining -= 1
     result
   }
@@ -536,6 +535,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
 
   def compileInternal: DecisionTree = {
     if (Matching.logging) {
+      System.out.println("-- Compile --")
       System.out.println(toString)
       System.out.println("remaining: " + Matrix.remaining)
     }
@@ -565,25 +565,38 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
   }
 
   private def useful(r: Row): Boolean = {
+    if (Matching.logging) {
+      System.out.println("-- Useful --")
+      System.out.println("Row: ")
+      System.out.println(r)
+      System.out.println("Matrix: ")
+      System.out.println(this)
+    }
+    assert(r.patterns.size == columns.size)
     if (columns.size == 0) {
       if (rows.size > 0) {
         false
       } else {
         true
       }
-    }
-    if (r.patterns(0).isWildcard && columns(0).category.hasIncompleteSignature(columns(0).signature, columns(0).fringe)) {
-      val rowDefault = r.default(0, symlib, fringe)
-      default(0).isDefined && rowDefault.isDefined && default(0).get.useful(rowDefault.get)
     } else {
       val key = columns(0).validKeys.headOption
-      for (con <- columns(0).signatureForKey(key)) {
-        val rowSpec = r.specialize(con, 0, symlib, fringe)
-        if (rowSpec.isDefined && specialize(con, 0)._2.useful(rowSpec.get)) {
-          return true
+      val sigma = columns(0).signatureForKey(key)
+      if (r.patterns(0).isWildcard && columns(0).category.hasIncompleteSignature(columns(0).signature, columns(0).fringe)) {
+        val rowDefault = r.default(0, sigma, symlib, fringe)
+        default(0, sigma).isDefined && rowDefault.isDefined && default(0, sigma).get.useful(rowDefault.get)
+      } else {
+        for (con <- sigma) {
+          if (Matching.logging) {
+            System.out.println("Testing constructor " + con);
+          }
+          val rowSpec = r.specialize(con, 0, symlib, fringe)
+          if (rowSpec.isDefined && specialize(con, 0)._2.useful(rowSpec.get)) {
+            return true
+          }
         }
+        false
       }
-      false
     }
   }
 
