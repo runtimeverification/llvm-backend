@@ -10,13 +10,14 @@ link_directories(../unittests/runtime-ffi/lib)
 target_link_libraries(runtime-ffi-tests
   PUBLIC
   ffitest
-  ffi
   meta
+  ffi
   io
   strings
   arithmetic
   alloc
   gmp
   mpfr
+  dl
   ${Boost_UNIT_TEST_FRAMEWORK_LIBRARIES}
 )
