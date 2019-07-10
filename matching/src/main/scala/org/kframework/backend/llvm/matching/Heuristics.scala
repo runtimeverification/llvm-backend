@@ -208,6 +208,43 @@ object RHeuristic extends Heuristic {
   }
 }
 
+@NamedHeuristic(name='n')
+object NHeuristic extends Heuristic {
+  val needsMatrix: Boolean = true
+
+  def computeScoreForKey(c: AbstractColumn, key: Option[Pattern[Option[Occurrence]]]): Double = {
+    val matrixColumn = c.asInstanceOf[MatrixColumn]
+    val matrix = matrixColumn.matrix
+    val colIx = matrixColumn.colIx
+    matrix.rows.indices.count(matrix.necessary(_, colIx))
+  }
+}
+
+@NamedHeuristic(name='p')
+object PHeuristic extends Heuristic {
+  val needsMatrix: Boolean = true
+
+  def computeScoreForKey(c: AbstractColumn, key: Option[Pattern[Option[Occurrence]]]): Double = {
+    val matrixColumn = c.asInstanceOf[MatrixColumn]
+    val matrix = matrixColumn.matrix
+    val colIx = matrixColumn.colIx
+    var result = 0
+    var priority = c.column.clauses.head.action.priority
+    for (i <- c.column.patterns.indices) {
+      if (c.column.clauses(i).action.priority != priority) {
+        if (result != i) {
+          return result
+        }
+        priority = c.column.clauses(i).action.priority
+      }
+      if (matrix.necessary(i, colIx)) {
+        result += 1
+      }
+    }
+    result
+  }
+}
+
 @NamedHeuristic(name='q')
 object QHeuristic extends Heuristic {
   val needsMatrix: Boolean = false

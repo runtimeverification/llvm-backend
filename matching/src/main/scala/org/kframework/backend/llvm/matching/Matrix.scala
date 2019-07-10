@@ -560,6 +560,10 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
     }
   }
 
+  def necessary(rowIx: Int, colIx: Int): Boolean = {
+    !columns(colIx).patterns(rowIx).isWildcard || !notCol(colIx).rowUseless(rowIx)
+  }
+
   private def useful(r: Row): Boolean = {
     if (columns.size == 0) {
       if (rows.size > 0) {
