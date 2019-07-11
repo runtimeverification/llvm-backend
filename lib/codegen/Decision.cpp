@@ -285,7 +285,7 @@ void MakeIteratorNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> subst
   args.push_back(arg);
   types.push_back(arg->getType());
   llvm::Value *AllocSret = allocateTerm(d->Module->getTypeByName("iter"), d->CurrentBlock, "koreAllocAlwaysGC");
-  AllocSret->setName(name);
+  AllocSret->setName(name.substr(0, max_name_length));
   args.insert(args.begin(), AllocSret);
   types.insert(types.begin(), AllocSret->getType());
 
@@ -664,7 +664,7 @@ void makeStepFunction(KOREAxiomDeclaration *axiom, KOREDefinition *definition, l
   auto header = stepFunctionHeader(axiom->getOrdinal(), module, definition, block, stuck, args, types);
   i = 0;
   for (auto val : header.first) {
-    val->setName(res.residuals[i].occurrence);
+    val->setName(res.residuals[i].occurrence.substr(0, max_name_length));
     subst.insert({val->getName(), val});
     stuckSubst.insert({val->getName(), phis[i]});
     phis[i++]->addIncoming(val, pre_stuck);
