@@ -213,6 +213,10 @@ case class Fringe(val symlib: Parser.SymLib, val sort: Sort, val occurrence: Occ
     ix match {
       case SymbolC(sym) =>
         if (symlib.overloads.contains(sym) ||sym.ctr == "inj") {
+          if (!sortInfo.trueInjMap.contains(sym)) {
+            System.err.println(sort)
+            System.err.println(sym)
+          }
           sortInfo.trueInjMap(sym).map(SymbolC)
         } else {
           Seq()
