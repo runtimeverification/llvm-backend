@@ -454,7 +454,12 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
 
   lazy val compiledCases: Seq[(String, DecisionTree)] = {
     Matrix.remaining += sigma.length
-    val result = cases.map(l => (l._1, l._2.compile))
+    val result = cases.map(l => {
+      if (Matching.logging) {
+        System.out.println("Specializing by " + l._1);
+      }
+      (l._1, l._2.compile)
+    })
     Matrix.remaining -= sigma.length
     result
   }
