@@ -410,7 +410,7 @@ case class SymbolP[T](sym: SymbolOrAlias, ps: Seq[Pattern[T]]) extends Pattern[T
   // returns true if the specified constructor is an overload of the current pattern and can match it
   private def isValidOverload(f: Fringe, isExact: Boolean, clause: Clause, m: Int, fringePs: Seq[Fringe], less: SymbolOrAlias): Boolean = {
     def isValidChild(p: Pattern[T], fringeP: Fringe, fringeT: Fringe): Boolean = {
-      fringeP.sort == fringeT.sort || (fringeP.symlib.isSubsorted(fringeT.sort, fringeP.sort) && fringeP.sortInfo.category == SymbolS() && p.isSpecialized(SymbolC(B.SymbolOrAlias("inj", Seq(fringeT.sort, fringeP.sort))), isExact, fringeP, clause, m))
+      fringeP.sort == fringeT.sort || (fringeP.symlib.isSubsorted(fringeT.sort, fringeP.sort) && fringeP.sortInfo.category == SymbolS() && p.isSpecialized(SymbolC(B.SymbolOrAlias("inj", Seq(fringeT.sort, fringeP.sort))), false, fringeP, clause, m))
     }
 
     val cons = SymbolC(less)
