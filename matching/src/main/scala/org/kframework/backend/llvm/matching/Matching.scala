@@ -4,11 +4,12 @@ import org.kframework.backend.llvm.matching.dt._
 import org.kframework.parser.kore._
 import org.kframework.parser.kore.parser.TextToKore
 
+import java.util.Optional
 import java.io.File
 import java.io.FileWriter
 
 object Matching {
-  def writeDecisionTreeToFile(filename: File, heuristic: String, outputFolder: File, iterated: Boolean) {
+  def writeDecisionTreeToFile(filename: File, heuristic: String, outputFolder: File, threshold: Optional[(Int, Int)]) {
     val defn = new TextToKore().parse(filename)
     outputFolder.mkdirs()
     val allAxioms = Parser.getAxioms(defn).zipWithIndex
@@ -31,22 +32,19 @@ object Matching {
     })
     val path = new File(outputFolder, "dt.yaml")
     dt.serializeToYaml(path)
-    if (iterated) {
-      val specialDts = axioms.map(a => {
+    if (threshold.isPresent) {
+      axioms.foreach(a => {
         if (logging) {
           System.out.println("Compiling decision tree for axiom " + a.ordinal)
         }
         Matrix.clearCache
-        Generator.mkSpecialDecisionTree(symlib, defn, matrix, a)
-      })
-      val specialFiles = (axioms, specialDts).zipped.toIterable
-      for (pair <- specialFiles) {
-        val ordinal = pair._1.ordinal
+        val dt = Generator.mkSpecialDecisionTree(symlib, defn, matrix, a, threshold.get)
+        val ordinal = a.ordinal
         val filename = "dt_" + ordinal + ".yaml"
-        if (pair._2.isDefined) {
-          pair._2.get._1.serializeToYaml(new File(outputFolder, filename), pair._2.get._2)
+        if (dt.isDefined) {
+          dt.get._1.serializeToYaml(new File(outputFolder, filename), dt.get._2)
         }
-      }
+      })
     }
     val files = (symlib.functions, dts).zipped.toIterable
     val index = new File(outputFolder, "index.txt")
@@ -62,10 +60,25 @@ object Matching {
 
   var logging = false
 
+  def getThreshold(arg: String): Optional[(Int, Int)] = {
+    val (numeratorStr, denominatorStr) = if (arg.indexOf('/') == -1) {
+      (arg, "1")
+    } else {
+      (arg.substring(0, arg.indexOf('/')), arg.substring(arg.indexOf('/') + 1))
+    }
+    val numerator = numeratorStr.trim.toInt
+    val denominator = denominatorStr.trim.toInt
+    if (numerator == 0) {
+      Optional.empty[(Int, Int)]
+    } else {
+      Optional.of((numerator, denominator))
+    }
+  }
+
   def main(args: Array[String]): Unit = {
     val file = new File(args(0))
     val outputFolder = new File(args(2))
     logging = args.size > 4
-    writeDecisionTreeToFile(file, args(1), outputFolder, args(3) == "on")
+    writeDecisionTreeToFile(file, args(1), outputFolder, getThreshold(args(3)))
   }
 }

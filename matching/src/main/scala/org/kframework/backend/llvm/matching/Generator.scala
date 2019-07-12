@@ -139,11 +139,16 @@ object Generator {
     matrix.compile
   }
 
-  private def isPoorlySpecialized(finalMatrix: Matrix, originalMatrix: Matrix): Boolean = {
-    originalMatrix.rows.lengthCompare(finalMatrix.rows.size * 2) <= 0
+  private def isPoorlySpecialized(finalMatrix: Matrix, originalMatrix: Matrix, threshold: (Int, Int)): Boolean = {
+    val numerator = originalMatrix.rows.size * threshold._1
+    val denominator = finalMatrix.rows.size * threshold._2
+    if (Matching.logging) {
+      System.out.println(finalMatrix.rows.size + "/" + originalMatrix.rows.size)
+    }
+    numerator <= denominator
   }
 
-  def mkSpecialDecisionTree(symlib: Parser.SymLib, mod: Definition, matrix: Matrix, axiom: AxiomInfo) : Option[(DecisionTree, Seq[(P[String], Occurrence)])] = {
+  def mkSpecialDecisionTree(symlib: Parser.SymLib, mod: Definition, matrix: Matrix, axiom: AxiomInfo, threshold: (Int, Int)) : Option[(DecisionTree, Seq[(P[String], Occurrence)])] = {
     val rhs = genPatterns(mod, symlib, Seq(axiom.rewrite.getRightHandSide))
     val (specialized,residuals) = matrix.specializeBy(rhs.toIndexedSeq)
     val residualMap = (residuals, specialized.fringe.map(_.occurrence)).zipped.toSeq
@@ -152,7 +157,7 @@ object Generator {
     }
     val newClauses = specialized.clauses.map(_.specializeBy(residualMap, symlib))
     val finalMatrix = Matrix.fromColumns(symlib, specialized.columns.map(c => new Column(c.fringe.inexact, c.patterns, newClauses)), newClauses)
-    if (isPoorlySpecialized(finalMatrix, matrix)) {
+    if (isPoorlySpecialized(finalMatrix, matrix, threshold)) {
       None
     } else {
       val dt = finalMatrix.compile
