@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
-CARGO_HOME="${CARGO_HOME:-$HOME/.cargo}"
-RUSTUP_HOME="${RUSTUP_HOME:-$HOME/.rustup}"
+export CARGO_HOME="${CARGO_HOME:-$HOME/.cargo}"
+export RUSTUP_HOME="${RUSTUP_HOME:-$HOME/.rustup}"
 
 curl -L https://static.rust-lang.org/dist/rustc-1.34.0-src.tar.gz -o rustc-src.tar.gz
 shasum -a 512 -c "$(dirname "$0")/rust-checksum"
