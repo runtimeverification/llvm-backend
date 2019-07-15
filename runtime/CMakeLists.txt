@@ -7,7 +7,7 @@ add_subdirectory(io)
 
 set(RUSTDIR_ debug)
 set(RUSTDIR_Debug debug)
-set(RUSTDIR_DebugRuntime debug)
+set(RUSTDIR_DebugGcc debug)
 set(RUSTDIR_Release release)
 set(RUSTDIR_RelWithDebInfo release)
 set(RUSTDIR_FastBuild release)
@@ -22,7 +22,7 @@ FILE(GLOB DatastructuresSources datastructures/Cargo.toml datastructures/src/*.r
 set(RUSTLIB "datastructures/target/${RUSTDIR}/libdatastructures.rlib")
 set(RUSTDEPS datastructures/target/${RUSTDIR}/deps/)
 execute_process(
-  COMMAND rustc +rust-1.34.0-llvm-6.0 --print sysroot
+  COMMAND rustc +rust-1.34.0-llvm-8 --print sysroot
   OUTPUT_VARIABLE RUSTSYSROOT
   OUTPUT_STRIP_TRAILING_WHITESPACE)
 set(RUSTSTDLIB "${RUSTSYSROOT}/lib/rustlib/${RUST_TARGET_TRIPLE}/lib/")
@@ -30,7 +30,7 @@ set(RUSTSTDLIB "${RUSTSYSROOT}/lib/rustlib/${RUST_TARGET_TRIPLE}/lib/")
 add_custom_command(
   OUTPUT ${RUSTLIB}
   DEPENDS ${DatastructuresSources}
-  COMMAND cargo +rust-1.34.0-llvm-6.0 build ${RUSTFLAGS}
+  COMMAND cargo +rust-1.34.0-llvm-8 build ${RUSTFLAGS}
   WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/runtime/datastructures
 )
 

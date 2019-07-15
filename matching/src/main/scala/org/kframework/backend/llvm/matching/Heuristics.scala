@@ -164,14 +164,15 @@ object LHeuristic extends Heuristic {
     val matrix = matrixColumn.matrix
     val colIx = matrixColumn.colIx
 
-    for (con <- matrix.columns(colIx).signatureForKey(key)) {
+    val sigma = matrix.columns(colIx).signatureForKey(key)
+    for (con <- sigma) {
       val spec = matrix.specialize(con, colIx)._2
       if (spec.bestRowIx != -1) {
         result += 1.0
       }
     }
 
-    val defaultMatrix = matrix.default(colIx)
+    val defaultMatrix = matrix.default(colIx, sigma)
     if (defaultMatrix.isDefined) {
       if (defaultMatrix.get.bestRowIx != -1) {
         result += 1.0
