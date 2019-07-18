@@ -193,7 +193,7 @@ pub unsafe extern "C" fn hook_LIST_eq(l1: *const List, l2: *const List) -> bool 
 #[no_mangle]
 pub unsafe extern "C" fn list_hash(l: *const List, h: *mut c_void) {
   let hasher = h as *mut &mut DefaultHasher;
-  l.hash(*hasher)
+  (*l).hash(*hasher)
 }
 
 #[no_mangle]

@@ -23,7 +23,7 @@ else
   files=()
   modasm="$(mktemp tmp.XXXXXXXXXX.s)"
   trap "rm -f $modasm" INT TERM EXIT
-  @LLC@ -tailcallopt "$modopt" -o "$modasm"
+  @LLC@ -tailcallopt "$modopt" -O0 -o "$modasm"
   modopt="$modasm"
   for file in "$LIBDIR"/llvm/*.ll; do
     tmp="$(mktemp tmp.XXXXXXXXXX.s)"
