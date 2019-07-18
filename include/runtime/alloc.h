@@ -9,7 +9,10 @@ extern "C" {
 // A contiguous area larger than that size cannot be allocated in any arena.
 extern const size_t BLOCK_SIZE;
 
+#define YOUNGSPACE_ID 0
+#define OLDSPACE_ID 1
 #define NOGCSPACE_ID 2
+#define ALWAYSGCSPACE_ID 3
 
 // allocates exactly requested bytes into the young generation
 void* koreAlloc(size_t requested);
