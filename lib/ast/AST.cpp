@@ -286,6 +286,24 @@ bool KOREAxiomDeclaration::isRequired() {
   return !attributes.count(ASSOC) && !attributes.count(COMM) && !attributes.count(IDEM) && !attributes.count(UNIT) && !attributes.count(FUNCTIONAL) && !attributes.count(CONSTRUCTOR) && !attributes.count(SUBSORT) && !attributes.count(CEIL);
 }
 
+bool KOREAxiomDeclaration::isTopAxiom() {
+  if (auto top = dynamic_cast<KOREObjectCompositePattern *>(pattern)) {
+    if (top->getConstructor()->getName() == "\\implies" && top->getArguments().size() == 2) {
+      if (auto bottomPattern = dynamic_cast<KOREObjectCompositePattern *>(top->getArguments()[0])) {
+        if (bottomPattern->getConstructor()->getName() == "\\bottom" && bottomPattern->getArguments().empty()) {
+          return true;
+	}
+      }
+      return false;
+    } else if (top->getConstructor()->getName() == "\\rewrites" && top->getArguments().size() == 2) {
+      return true;
+    } else if (top->getConstructor()->getName() == "\\and" && top->getArguments().size() == 2) {
+      return true;
+    }
+  }
+  return false;
+}
+
 KOREPattern *KOREAxiomDeclaration::getRightHandSide() const {
   if (auto top = dynamic_cast<KOREObjectCompositePattern *>(pattern)) {
     if (top->getConstructor()->getName() == "\\implies" && top->getArguments().size() == 2) {
