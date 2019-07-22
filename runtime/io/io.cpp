@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <string>
 #include <cerrno>
+#include <sys/wait.h>
 
 #include "runtime/alloc.h"
 #include "runtime/header.h"
@@ -507,38 +508,41 @@ extern "C" {
   }
 
   block * hook_IO_system(string * cmd) {
-    int ret;
-    int length = len(cmd);
+    pid_t pid;
+    int ret = 0, out[2], err[2];
     string * outBuffer = static_cast<string *>(koreAlloc(sizeof(string) + sizeof(char) * IOBUFSIZE));
     string * errBuffer = static_cast<string *>(koreAlloc(sizeof(string) + sizeof(char) * IOBUFSIZE));
     set_len(outBuffer, IOBUFSIZE);
     set_len(errBuffer, IOBUFSIZE);
 
-    freopen("/dev/null", "a", stdout);
-    setvbuf(stdout, outBuffer->data, _IOFBF, IOBUFSIZE);
-    freopen("/dev/null", "a", stderr);
-    setvbuf(stderr, errBuffer->data, _IOFBF, IOBUFSIZE);
-
-    /* If length <= 0 then pass NULL to check if shell is available */
-    if (length <= 0) {
-      ret = system(NULL);
-    } else {
-      char * command = getTerminatedString(cmd);
-      ret = system(command);
+    if (pipe(out) == -1 || pipe(err) == -1 || (pid = fork()) == -1) {
+      return getKSeqErrorBlock();
     }
 
-    /* If ssytem returns -1 then errno is set, so return it */
-    if (ret == -1) {
-      block * errBlock = getKSeqErrorBlock();
+    if (pid == 0) {
+      dup2(out[1], STDOUT_FILENO);
+      close(out[0]);
+      close(out[1]);
+      dup2(err[1], STDERR_FILENO);
+      close(err[0]);
+      close(err[1]);
 
-      freopen ("/dev/tty", "a", stdout);
-      freopen ("/dev/tty", "a", stderr);
-
-      return errBlock;
+      if (len(cmd) > 0) {
+        char * command = getTerminatedString(cmd);
+        ret = execl("/bin/sh", "/bin/sh", "-c", command, NULL);
+        ret == -1 ? exit(127) : exit(0);
+      } else {
+        ret = system(NULL);
+        exit(ret);
+      }
     }
 
-    freopen ("/dev/tty", "a", stdout);
-    freopen ("/dev/tty", "a", stderr);
+    close(out[1]);
+    close(err[1]);
+    read(out[0], outBuffer->data, sizeof(char) * IOBUFSIZE);
+    read(err[0], errBuffer->data, sizeof(char) * IOBUFSIZE);
+
+    waitpid(pid, &ret, 0);
 
     block * retBlock = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(mpz_ptr) + sizeof(string *) + sizeof(string *)));
 
