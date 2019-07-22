@@ -192,42 +192,46 @@ static void migrate_floating(floating **floatingPtr) {
   *floatingPtr = *(floating **)(flt->f.f->_mpfr_d);
 }
 
-static char* evacuate(char* scan_ptr, char **alloc_ptr) {
+static void migrate_child(void* currBlock, layoutitem *args, unsigned i, bool ptr) {
+  layoutitem *argData = args + i;
+  void *arg = ((char *)currBlock) + argData->offset;
+  switch(argData->cat) {
+  case MAP_LAYOUT:
+    map_foreach(ptr ? *(map**)arg : arg, migrate_once);
+   break;
+  case LIST_LAYOUT:
+    list_foreach(ptr ? *(list**)arg : arg, migrate_once);
+   break;
+  case SET_LAYOUT:
+    set_foreach(ptr ? *(set**)arg : arg, migrate_once);
+   break;
+  case STRINGBUFFER_LAYOUT:
+    migrate_string_buffer(arg);
+    break;
+  case SYMBOL_LAYOUT:
+  case VARIABLE_LAYOUT:
+    migrate(arg);
+    break;
+  case INT_LAYOUT:
+    migrate_mpz(arg);
+    break;
+  case FLOAT_LAYOUT:
+    migrate_floating(arg);
+    break;
+  case BOOL_LAYOUT:
+  default: //mint
+    break;
+  }
+}
+
+static char* evacuate(char* scan_ptr, char** alloc_ptr) {
   block *currBlock = (block *)scan_ptr;
   const uint64_t hdr = currBlock->h.hdr;
   uint16_t layoutInt = layout_hdr(hdr);
   if (layoutInt) {
     layout *layoutData = getLayoutData(layoutInt);
     for (unsigned i = 0; i < layoutData->nargs; i++) {
-      layoutitem *argData = layoutData->args + i;
-      void *arg = ((char *)currBlock) + argData->offset;
-      switch(argData->cat) {
-      case MAP_LAYOUT:
-        map_foreach(arg, migrate_once);
-        break;
-      case LIST_LAYOUT:
-        list_foreach(arg, migrate_once); 
-        break;
-      case SET_LAYOUT:
-        set_foreach(arg, migrate_once);
-        break;
-      case STRINGBUFFER_LAYOUT:
-        migrate_string_buffer(arg);
-        break;
-      case SYMBOL_LAYOUT: 
-      case VARIABLE_LAYOUT:
-        migrate(arg);
-        break;
-      case INT_LAYOUT:
-        migrate_mpz(arg);
-        break;
-      case FLOAT_LAYOUT:
-        migrate_floating(arg);
-        break;
-      case BOOL_LAYOUT:
-      default: //mint
-        break;
-      }
+      migrate_child(currBlock, layoutData->args, i, false);
     }
   }
   return movePtr(scan_ptr, get_size(hdr, layoutInt), *alloc_ptr);
@@ -246,17 +250,21 @@ static bool shouldCollectOldGen() {
 
 void migrateRoots();
 
-void koreCollect(block** root) {
+void koreCollect(void** roots, uint8_t nroots, layoutitem *typeInfo) {
   is_gc = true;
   collect_old = shouldCollectOldGen();
   MEM_LOG("Starting garbage collection\n");
   koreAllocSwap(collect_old);
-  migrate(root);
+  for (int i = 0; i < nroots; i++) {
+    migrate_child(roots, typeInfo, i, true);
+  }
   migrateRoots();
   char *scan_ptr = youngspace_ptr();
-  MEM_LOG("Evacuating young generation\n");
-  while(scan_ptr) {
-    scan_ptr = evacuate(scan_ptr, young_alloc_ptr());
+  if (scan_ptr != *young_alloc_ptr()) {
+    MEM_LOG("Evacuating young generation\n");
+    while(scan_ptr) {
+      scan_ptr = evacuate(scan_ptr, young_alloc_ptr());
+    }
   }
   scan_ptr = oldspace_ptr();
   if (scan_ptr != *old_alloc_ptr()) {

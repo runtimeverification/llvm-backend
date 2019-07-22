@@ -46,9 +46,9 @@ include_directories(AFTER SYSTEM ${FFI_INCLUDE_DIRS})
 link_directories(AFTER SYSTEM ${FFI_LIBRARY_DIRS})
 
 if (CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
-set(LLVM_KOMPILE_CLANG_FLAGS "-flto")
+set(LLVM_KOMPILE_LTO "lto")
 else()
-set(LLVM_KOMPILE_CLANG_FLAGS "")
+set(LLVM_KOMPILE_LTO "nolto")
 endif()
 
 set(CMAKE_AR "${CMAKE_C_COMPILER_AR}")
@@ -101,8 +101,13 @@ install(
 
 find_program(OPT opt-8)
 find_program(OPT opt)
+find_program(LLC llc-8)
+find_program(LLC llc)
 if(${OPT} STREQUAL "OPT-NOTFOUND")
   message(FATAL_ERROR "Could not find an opt binary. Is llvm installed on your PATH?")
+endif()
+if(${LLC} STREQUAL "OPT-NOTFOUND")
+  message(FATAL_ERROR "Could not find an llvm binary. Is llvm installed on your PATH?")
 endif()
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin)

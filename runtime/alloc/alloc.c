@@ -10,10 +10,10 @@
 #include "runtime/arena.h"
 
 
-REGISTER_ARENA(youngspace, 0);
-REGISTER_ARENA(oldspace, 1);
-REGISTER_ARENA(nogcspace, 2);
-REGISTER_ARENA(alwaysgcspace, 3);
+REGISTER_ARENA(youngspace, YOUNGSPACE_ID);
+REGISTER_ARENA(oldspace, OLDSPACE_ID);
+REGISTER_ARENA(nogcspace, NOGCSPACE_ID);
+REGISTER_ARENA(alwaysgcspace, ALWAYSGCSPACE_ID);
 
 char *youngspace_ptr() {
   return arenaStartPtr(&youngspace);

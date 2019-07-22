@@ -31,7 +31,7 @@ object SortCategory {
 }
 
 case class SymbolS() extends SortCategory {
-  def hookAtt = ???
+  def hookAtt = "STRING.String"
   def hasIncompleteSignature(sigma: Seq[Constructor], f: Fringe): Boolean = sigma.isEmpty || sigma.contains(Empty()) || sigma.size != f.sortInfo.length
   def equalityFun = "hook_KEQUAL_eq"
   // not matching a builtin, therefore construct a regular switch

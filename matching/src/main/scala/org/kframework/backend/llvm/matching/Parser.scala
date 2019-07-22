@@ -49,7 +49,13 @@ object Parser {
     private def instantiate(s: Seq[Sort], params: Seq[Sort], args: Seq[Sort]): Seq[Sort] = s.map(instantiate(_, params, args))
 
     val signatures: Map[SymbolOrAlias, (Seq[Sort], Sort, Attributes)] = {
-      symbols.map(symbol => (symbol, (instantiate(symbolDecls(symbol.ctr).head.argSorts, symbolDecls(symbol.ctr).head.symbol.params, symbol.params), instantiate(symbolDecls(symbol.ctr).head.returnSort, symbolDecls(symbol.ctr).head.symbol.params, symbol.params), symbolDecls(symbol.ctr).head.att))).toMap
+      symbols.map(symbol => {
+        if (symbol.ctr == "\\dv") {
+          (symbol, (Seq(), symbol.params(0), B.Attributes(Seq())))
+        } else {
+          (symbol, (instantiate(symbolDecls(symbol.ctr).head.argSorts, symbolDecls(symbol.ctr).head.symbol.params, symbol.params), instantiate(symbolDecls(symbol.ctr).head.returnSort, symbolDecls(symbol.ctr).head.symbol.params, symbol.params), symbolDecls(symbol.ctr).head.att))
+        }
+      }).toMap
     }
 
     val symbolsForSort: Map[Sort, Seq[SymbolOrAlias]] = {
@@ -142,6 +148,7 @@ object Parser {
     pat match {
       case And(_, p1, p2) => parsePatternForSymbols(p1) ++ parsePatternForSymbols(p2)
       case Application(s, ps) => Seq(s).filter(isConcrete) ++ ps.flatMap(parsePatternForSymbols)
+      case DomainValue(sort, _) => Seq(B.SymbolOrAlias("\\dv", Seq(sort)))
       case Ceil(_, _, p) => parsePatternForSymbols(p)
       case Equals(_, _, p1, p2) => parsePatternForSymbols(p1) ++ parsePatternForSymbols(p2)
       case Exists(_, _, p) => parsePatternForSymbols(p)
