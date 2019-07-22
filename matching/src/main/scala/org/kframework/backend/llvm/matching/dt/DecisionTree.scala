@@ -16,6 +16,22 @@ sealed trait DecisionTree {
     writer.close()
   }
 
+  def serializeToYaml(file: File, residuals: Seq[(Pattern[String], Occurrence)]): Unit = {
+    val writer = new FileWriter(file)
+    val residualRepr = new util.ArrayList[AnyRef]()
+    for (entry <- residuals) {
+      val pair = new util.ArrayList[AnyRef]()
+      pair.add(MakePattern.representResidual(entry._1))
+      pair.add(entry._2.representation)
+      residualRepr.add(pair)
+    }
+    val bothRepr = new util.ArrayList[AnyRef]()
+    bothRepr.add(representation)
+    bothRepr.add(residualRepr)
+    new Yaml().dump(bothRepr, writer)
+    writer.close()
+  }
+
   def representation: AnyRef
 }
 
@@ -106,38 +122,10 @@ case class CheckNull private(occurrence: Occurrence, cases: Seq[(String, Decisio
 
 case class MakePattern private(occurrence: Occurrence, pattern: Pattern[Option[Occurrence]], child: DecisionTree) extends DecisionTree {
   val representation = new util.HashMap[String, AnyRef]()
-  representation.put("pattern", representPattern(pattern))
+  representation.put("pattern", MakePattern.representPattern(pattern))
   representation.put("occurrence", occurrence.representation)
   representation.put("next", child.representation)
 
-  def representPattern(pattern: Pattern[Option[Occurrence]]): util.HashMap[String, AnyRef] = {
-    val result = new util.HashMap[String, AnyRef]()
-    pattern match {
-      case OrP(_) | WildcardP() | VariableP(None, _) => ???
-      case VariableP(Some(o), h) => {
-        result.put("hook", h.hookAtt)
-        result.put("occurrence", o.representation)
-      }
-      case AsP(_, _, p) => return representPattern(p)
-      case MapP(_, _, _, _, o) => return representPattern(o)
-      case SetP(_, _, _, o) => return representPattern(o)
-      case ListP(_, _, _, _, o) => return representPattern(o)
-      case LiteralP(s, h) => {
-        result.put("hook", h.hookAtt)
-        result.put("literal", s)
-      }
-      case SymbolP(s, ps) => {
-        result.put("constructor", s.toString)
-        val args = new util.ArrayList[AnyRef]()
-        result.put("args", args)
-        for (p <- ps) {
-          args.add(representPattern(p))
-        }
-      }
-    }
-    assert(!result.isEmpty())
-    result
-  }
   override lazy val hashCode: Int = super.hashCode
   override def equals(that: Any): Boolean = that.isInstanceOf[AnyRef] && (this eq that.asInstanceOf[AnyRef])
 }
@@ -205,6 +193,62 @@ object MakePattern {
   val cache = new ConcurrentHashMap[(Occurrence, Pattern[Option[Occurrence]], DecisionTree), MakePattern]()
   def apply(occurrence: Occurrence, pattern: Pattern[Option[Occurrence]], child: DecisionTree): MakePattern = {
     cache.computeIfAbsent((occurrence, pattern, child), k => new MakePattern(k._1, k._2, k._3))
+  }
+  def representPattern(pattern: Pattern[Option[Occurrence]]): util.HashMap[String, AnyRef] = {
+    val result = new util.HashMap[String, AnyRef]()
+    pattern match {
+      case OrP(_) | WildcardP() | VariableP(None, _) => ???
+      case VariableP(Some(o), h) => {
+        result.put("hook", h.hookAtt)
+        result.put("occurrence", o.representation)
+      }
+      case AsP(_, _, p) => return representPattern(p)
+      case MapP(_, _, _, _, o) => return representPattern(o)
+      case SetP(_, _, _, o) => return representPattern(o)
+      case ListP(_, _, _, _, o) => return representPattern(o)
+      case LiteralP(s, h) => {
+        result.put("hook", h.hookAtt)
+        result.put("literal", s)
+      }
+      case SymbolP(s, ps) => {
+        result.put("constructor", s.toString)
+        val args = new util.ArrayList[AnyRef]()
+        result.put("args", args)
+        for (p <- ps) {
+          args.add(representPattern(p))
+        }
+      }
+    }
+    assert(!result.isEmpty())
+    result
+  }
+  def representResidual(pattern: Pattern[String]): util.HashMap[String, AnyRef] = {
+    val result = new util.HashMap[String, AnyRef]()
+    pattern match {
+      case OrP(_) | WildcardP() => ???
+      case VariableP(o, h) => {
+        result.put("hook", h.hookAtt)
+        result.put("occurrence", o)
+      }
+      case AsP(_, _, p) => return representResidual(p)
+      case MapP(_, _, _, _, o) => return representResidual(o)
+      case SetP(_, _, _, o) => return representResidual(o)
+      case ListP(_, _, _, _, o) => return representResidual(o)
+      case LiteralP(s, h) => {
+        result.put("hook", h.hookAtt)
+        result.put("literal", s)
+      }
+      case SymbolP(s, ps) => {
+        result.put("constructor", s.toString)
+        val args = new util.ArrayList[AnyRef]()
+        result.put("args", args)
+        for (p <- ps) {
+          args.add(representResidual(p))
+        }
+      }
+    }
+    assert(!result.isEmpty())
+    result
   }
 }
 

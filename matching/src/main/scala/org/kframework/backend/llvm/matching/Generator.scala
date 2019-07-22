@@ -19,6 +19,7 @@ object Generator {
       case (Concat(), Seq(ListP(hd, None, tl, _, o), p @ WildcardP())) => ListP(hd ++ tl, Some(p), Seq(), c, SymbolP(sym, Seq(o, p)))
       case (Concat(), Seq(p @ VariableP(_, _), ListP(hd, None, tl, _, o))) => ListP(Seq(), Some(p), hd ++ tl, c, SymbolP(sym, Seq(p, o)))
       case (Concat(), Seq(p @ WildcardP(), ListP(hd, None, tl, _, o))) => ListP(Seq(), Some(p), hd ++ tl, c, SymbolP(sym, Seq(p, o)))
+      case (Concat(), Seq(p1, p2)) => ListP(Seq(), None, Seq(), c, SymbolP(sym, Seq(p1, p2))) // not valid, but necessary for iterated pattern matching
       case (Unit(), Seq()) => ListP(Seq(), None, Seq(), c, SymbolP(sym, Seq()))
       case (Element(), Seq(p)) => ListP(Seq(p), None, Seq(), c, SymbolP(sym, Seq(p)))
     }
@@ -32,6 +33,7 @@ object Generator {
       case (Concat(), Seq(MapP(ks, vs, None, _, o), p @ WildcardP())) => MapP(ks, vs, Some(p), c, SymbolP(sym, Seq(o, p)))
       case (Concat(), Seq(p @ VariableP(_, _), MapP(ks, vs, None, _, o))) => MapP(ks, vs, Some(p), c, SymbolP(sym, Seq(p, o)))
       case (Concat(), Seq(p @ WildcardP(), MapP(ks, vs, None, _, o))) => MapP(ks, vs, Some(p), c, SymbolP(sym, Seq(p, o)))
+      case (Concat(), Seq(p1, p2)) => MapP(Seq(), Seq(), None, c, SymbolP(sym, Seq(p1, p2))) // not valid, but necessary for iterated pattern matching
       case (Unit(), Seq()) => MapP(Seq(), Seq(), None, c, SymbolP(sym, Seq()))
       case (Element(), Seq(k, v)) => MapP(Seq(k), Seq(v), None, c, SymbolP(sym, Seq(k, v)))
     }
@@ -45,13 +47,13 @@ object Generator {
       case (Concat(), Seq(SetP(ks, None, _, o), p @ WildcardP())) => SetP(ks, Some(p), c, SymbolP(sym, Seq(o, p)))
       case (Concat(), Seq(p @ VariableP(_, _), SetP(ks, None, _, o))) => SetP(ks, Some(p), c, SymbolP(sym, Seq(p, o)))
       case (Concat(), Seq(p @ WildcardP(), SetP(ks, None, _, o))) => SetP(ks, Some(p), c, SymbolP(sym, Seq(p, o)))
+      case (Concat(), Seq(p1, p2)) => SetP(Seq(), None, c, SymbolP(sym, Seq(p1, p2))) // not valid, but necessary for iterated pattern matching
       case (Unit(), Seq()) => SetP(Seq(), None, c, SymbolP(sym, Seq()))
       case (Element(), Seq(e)) => SetP(Seq(e), None, c, SymbolP(sym, Seq(e)))
     }
   }
 
-  private def genPatterns(mod: Definition, symlib: Parser.SymLib, rewrite: GeneralizedRewrite) : List[P[String]] = {
-    val lhs = rewrite.getLeftHandSide
+  private def genPatterns(mod: Definition, symlib: Parser.SymLib, lhs: Seq[Pattern]) : List[P[String]] = {
     def getElementSym(sort: Sort): SymbolOrAlias = {
       Parser.getSymbolAtt(symlib.sortAtt(sort), "element").get
     }
@@ -116,7 +118,7 @@ object Generator {
     }
   }
 
-  private def genClauseMatrix[T](
+  def genClauseMatrix[T](
       symlib: Parser.SymLib,
       mod: Definition,
       axioms: IndexedSeq[AxiomInfo],
@@ -127,14 +129,39 @@ object Generator {
       val scVars = a.sideCondition.map(genVars(_))
       new Action(a.ordinal, rhsVars.map(_.name).sorted.distinct, scVars.map(_.map(_.name).sorted.distinct), (rhsVars ++ scVars.getOrElse(Seq())).filter(_.name.startsWith("Var'Bang'")).map(v => (v.name, v.sort)), a.rewrite.getLeftHandSide.size, a.priority)
     })
-    val patterns = axioms.map(a => genPatterns(mod, symlib, a.rewrite)).transpose
+    val patterns = axioms.map(a => genPatterns(mod, symlib, a.rewrite.getLeftHandSide)).transpose
     val cols = (sorts, patterns).zipped.toIndexedSeq
     new Matrix(symlib, cols, actions).expand
   }
-    
   
-  def mkDecisionTree[T](symlib: Parser.SymLib, mod: Definition, axioms: IndexedSeq[AxiomInfo], sorts: Seq[Sort]) : DecisionTree = {
+  def mkDecisionTree(symlib: Parser.SymLib, mod: Definition, axioms: IndexedSeq[AxiomInfo], sorts: Seq[Sort]) : DecisionTree = {
     val matrix = genClauseMatrix(symlib, mod, axioms, sorts)
     matrix.compile
+  }
+
+  private def isPoorlySpecialized(finalMatrix: Matrix, originalMatrix: Matrix, threshold: (Int, Int)): Boolean = {
+    val numerator = originalMatrix.rows.size * threshold._1
+    val denominator = finalMatrix.rows.size * threshold._2
+    if (Matching.logging) {
+      System.out.println(finalMatrix.rows.size + "/" + originalMatrix.rows.size)
+    }
+    numerator <= denominator
+  }
+
+  def mkSpecialDecisionTree(symlib: Parser.SymLib, mod: Definition, matrix: Matrix, axiom: AxiomInfo, threshold: (Int, Int)) : Option[(DecisionTree, Seq[(P[String], Occurrence)])] = {
+    val rhs = genPatterns(mod, symlib, Seq(axiom.rewrite.getRightHandSide))
+    val (specialized,residuals) = matrix.specializeBy(rhs.toIndexedSeq)
+    val residualMap = (residuals, specialized.fringe.map(_.occurrence)).zipped.toSeq
+    if (Matching.logging) {
+      System.out.println("Residuals: " + residualMap.toList)
+    }
+    val newClauses = specialized.clauses.map(_.specializeBy(residualMap, symlib))
+    val finalMatrix = Matrix.fromColumns(symlib, specialized.columns.map(c => new Column(c.fringe.inexact, c.patterns, newClauses)), newClauses)
+    if (isPoorlySpecialized(finalMatrix, matrix, threshold)) {
+      None
+    } else {
+      val dt = finalMatrix.compile
+      Some((dt, residualMap))
+    }
   }
 }

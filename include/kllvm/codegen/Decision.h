@@ -8,6 +8,8 @@
 #include "llvm/IR/Module.h"
 #include "llvm/IR/Value.h"
 
+#include "kllvm/codegen/DecisionParser.h"
+
 namespace kllvm {
 
 class Decision;
@@ -382,6 +384,7 @@ void makeEvalFunction(KOREObjectSymbol *function, KOREDefinition *definition, ll
 void makeAnywhereFunction(KOREObjectSymbol *function, KOREDefinition *definition, llvm::Module *module, DecisionNode *dt);
 
 void makeStepFunction(KOREDefinition *definition, llvm::Module *module, DecisionNode *dt);
+void makeStepFunction(KOREAxiomDeclaration *axiom, KOREDefinition *definition, llvm::Module *module, PartialStep res);
 
 }
 #endif // DECISION_H
