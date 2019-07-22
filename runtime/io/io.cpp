@@ -15,7 +15,9 @@
 extern "C" {
 
 #define KCHAR char
-#define ERRTAG(err) "Lbl'hash'" #err "{}"
+#define GETTAG(symbol) "Lbl'hash'" #symbol "{}"
+#define ERRTAG(err) GETTAG(err)
+#define IOBUFSIZE 256
 
   mpz_ptr move_int(mpz_t);
 
@@ -503,4 +505,56 @@ extern "C" {
   block * hook_META_parseKAST(string *kast) {
     throw std::invalid_argument("not implemented: META.parseKast");
   }
+
+  block * hook_IO_system(string * cmd) {
+    int ret;
+    int length = len(cmd);
+    string * outBuffer = static_cast<string *>(koreAlloc(sizeof(string) + sizeof(char) * IOBUFSIZE));
+    string * errBuffer = static_cast<string *>(koreAlloc(sizeof(string) + sizeof(char) * IOBUFSIZE));
+    set_len(outBuffer, IOBUFSIZE);
+    set_len(errBuffer, IOBUFSIZE);
+
+    block * retBlock = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(mpz_ptr) + sizeof(string *) + sizeof(string *)));
+
+    freopen("/dev/null", "a", stdout);
+    setvbuf(stdout, outBuffer->data, _IOFBF, IOBUFSIZE);
+    freopen("/dev/null", "a", stderr);
+    setvbuf(stderr, errBuffer->data, _IOFBF, IOBUFSIZE);
+
+    /* If length <= 0 then pass NULL to check if shell is available */
+    if (length <= 0) {
+      ret = system(NULL);
+    } else {
+      char * command = getTerminatedString(cmd);
+      ret = system(command);
+    }
+
+    /* If ssytem returns -1 then errno is set, so return it */
+    if (ret == -1) {
+      block * errBlock = getKSeqErrorBlock();
+      memcpy(retBlock->children, &errBlock, sizeof(block *));
+    } else {
+      mpz_t result;
+      mpz_init_set_si(result, ret);
+      mpz_ptr p = move_int(result);
+      memcpy(retBlock->children, &p, sizeof(mpz_ptr));
+    }
+
+    retBlock->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName(GETTAG(systemResult)));
+    memcpy(retBlock->children + 1, &outBuffer, sizeof(string *));
+    memcpy(retBlock->children + 2, &errBuffer, sizeof(string *));
+
+    freopen ("/dev/tty", "a", stdout);
+    freopen ("/dev/tty", "a", stderr);
+
+    return retBlock;
+  }
 }
+
+
+
+
+
+
+
+

@@ -14,10 +14,11 @@
 #define KCHAR char
 extern "C" {
 
-#define ERRTAG(err) "Lbl'hash'" #err "{}"
+#define GETTAG(symbol) "Lbl'hash'" #symbol "{}"
+#define ERRTAG(err) GETTAG(err)
 #define ERRBLOCK(tag) (((uint64_t)tag << 32) | 1)
-#define NUM_SYMBOLS 6
-  const char * symbols[NUM_SYMBOLS] = {ERRTAG(EOF), ERRTAG(ENOENT), ERRTAG(EBADF), "inj{SortInt{}, SortIOInt{}}", "inj{SortIOError{}, SortKItem{}}", "kseq{}"};
+#define NUM_SYMBOLS 7
+  const char * symbols[NUM_SYMBOLS] = {ERRTAG(EOF), ERRTAG(ENOENT), ERRTAG(EBADF), "inj{SortInt{}, SortIOInt{}}", "inj{SortIOError{}, SortKItem{}}", "kseq{}", GETTAG(systemResult)};
 
   uint32_t getTagForSymbolName(const char *s) {
     for (int i = 0; i < NUM_SYMBOLS; i++) {
@@ -50,6 +51,7 @@ extern "C" {
   block * hook_IO_lock(mpz_t i, mpz_t len);
   block * hook_IO_unlock(mpz_t i, mpz_t len);
   block * hook_IO_log(string * path, string * msg);
+  block * hook_IO_system(string * cmd);
 
   mpz_ptr move_int(mpz_t i) {
     mpz_ptr result = (mpz_ptr)malloc(sizeof(__mpz_struct));
@@ -387,4 +389,20 @@ BOOST_AUTO_TEST_CASE(log) {
 
   BOOST_CHECK_EQUAL(0, strncmp(buf, (strMsg + "Log3\n").c_str(), 10));
 }
+
+BOOST_AUTO_TEST_CASE(system) {
+  std::string command = "echo \"hello\"";
+  string * cmd = makeString(command.c_str());
+
+  block * ret = hook_IO_system(cmd);
+
+  BOOST_CHECK(ret != 0);
+
+  BOOST_CHECK_EQUAL(ret->h.hdr, getBlockHeaderForSymbol(getTagForSymbolName(GETTAG(systemResult))).hdr);
+  BOOST_CHECK_EQUAL(0, mpz_cmp_si((mpz_ptr) *(ret->children), 0));
+  string * out = (string *) *(ret->children + 1);
+
+  BOOST_CHECK_EQUAL(0, strncmp(out->data, "hello", 5));
+}
+
 BOOST_AUTO_TEST_SUITE_END()
