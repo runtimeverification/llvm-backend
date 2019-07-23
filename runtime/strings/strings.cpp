@@ -175,12 +175,10 @@ extern "C" {
 
   const mpz_ptr hook_STRING_string2base_long(const string *input, uint64_t base) {
     mpz_t result;
-
-    char c = input->data[0];
     size_t length;
     const char * dataStart;
 
-    if (c == '+') {
+    if (*(input->data) == '+') {
       length = len(input) - 1;
       dataStart = input->data + 1;
     } else {
