@@ -543,6 +543,7 @@ extern "C" {
     read(err[0], errBuffer->data, sizeof(char) * IOBUFSIZE);
 
     waitpid(pid, &ret, 0);
+    ret = WEXITSTATUS(ret);
 
     block * retBlock = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(mpz_ptr) + sizeof(string *) + sizeof(string *)));
 

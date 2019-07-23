@@ -396,13 +396,55 @@ BOOST_AUTO_TEST_CASE(system) {
 
   block * ret = hook_IO_system(cmd);
 
-  BOOST_CHECK(ret != 0);
+  BOOST_CHECK(ret != NULL);
+  BOOST_CHECK(ret->children != NULL);
+  BOOST_CHECK((ret->children + 1) != NULL);
+  BOOST_CHECK((ret->children + 2) != NULL);
 
   BOOST_CHECK_EQUAL(ret->h.hdr, getBlockHeaderForSymbol(getTagForSymbolName(GETTAG(systemResult))).hdr);
   BOOST_CHECK_EQUAL(0, mpz_cmp_si((mpz_ptr) *(ret->children), 0));
-  string * out = (string *) *(ret->children + 1);
 
+  string * out = (string *) *(ret->children + 1);
   BOOST_CHECK_EQUAL(0, strncmp(out->data, "hello", 5));
+
+  /* Check if shell is available */
+  command = "";
+  cmd = makeString(command.c_str());
+  ret = hook_IO_system(cmd);
+
+  BOOST_CHECK(ret != NULL);
+  BOOST_CHECK(ret->children != NULL);
+  BOOST_CHECK((ret->children + 1) != NULL);
+  BOOST_CHECK((ret->children + 2) != NULL);
+  BOOST_CHECK_EQUAL(ret->h.hdr, getBlockHeaderForSymbol(getTagForSymbolName(GETTAG(systemResult))).hdr);
+  BOOST_CHECK(mpz_cmp_si((mpz_ptr) *(ret->children), 0) > 0);
+
+  /* Execute program that segfaults */
+  command = "./IOTest 1";
+  cmd = makeString(command.c_str());
+  ret = hook_IO_system(cmd);
+  out = (string *) *(ret->children + 1);
+  BOOST_CHECK(ret != NULL);
+  BOOST_CHECK(ret->children != NULL);
+  BOOST_CHECK((ret->children + 1) != NULL);
+  BOOST_CHECK((ret->children + 2) != NULL);
+  BOOST_CHECK_EQUAL(ret->h.hdr, getBlockHeaderForSymbol(getTagForSymbolName(GETTAG(systemResult))).hdr);
+  BOOST_CHECK_EQUAL(0, mpz_cmp_si((mpz_ptr) *(ret->children), 139));
+
+  /* Execute program that prints to stderr */
+  command = "./IOTest";
+  cmd = makeString(command.c_str());
+  ret = hook_IO_system(cmd);
+  out = (string *) *(ret->children + 1);
+  BOOST_CHECK(ret != NULL);
+  BOOST_CHECK(ret->children != NULL);
+  BOOST_CHECK((ret->children + 1) != NULL);
+  BOOST_CHECK((ret->children + 2) != NULL);
+  BOOST_CHECK_EQUAL(ret->h.hdr, getBlockHeaderForSymbol(getTagForSymbolName(GETTAG(systemResult))).hdr);
+  BOOST_CHECK_EQUAL(0, mpz_cmp_si((mpz_ptr) *(ret->children), 0));
+
+  string * err = (string *) *(ret->children + 2);
+  BOOST_CHECK_EQUAL(0, strncmp(err->data, "Error", 5));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
