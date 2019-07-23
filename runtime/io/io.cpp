@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <string>
 #include <cerrno>
+#include <sys/wait.h>
 
 #include "runtime/alloc.h"
 #include "runtime/header.h"
@@ -15,7 +16,9 @@
 extern "C" {
 
 #define KCHAR char
-#define ERRTAG(err) "Lbl'hash'" #err "{}"
+#define GETTAG(symbol) "Lbl'hash'" #symbol "{}"
+#define ERRTAG(err) GETTAG(err)
+#define IOBUFSIZE 256
 
   mpz_ptr move_int(mpz_t);
 
@@ -502,5 +505,57 @@ extern "C" {
 
   block * hook_META_parseKAST(string *kast) {
     throw std::invalid_argument("not implemented: META.parseKast");
+  }
+
+  block * hook_IO_system(string * cmd) {
+    pid_t pid;
+    int ret = 0, out[2], err[2];
+    string * outBuffer = static_cast<string *>(koreAlloc(sizeof(string) + sizeof(char) * IOBUFSIZE));
+    string * errBuffer = static_cast<string *>(koreAlloc(sizeof(string) + sizeof(char) * IOBUFSIZE));
+    set_len(outBuffer, IOBUFSIZE);
+    set_len(errBuffer, IOBUFSIZE);
+
+    if (pipe(out) == -1 || pipe(err) == -1 || (pid = fork()) == -1) {
+      return getKSeqErrorBlock();
+    }
+
+    if (pid == 0) {
+      dup2(out[1], STDOUT_FILENO);
+      close(out[0]);
+      close(out[1]);
+      dup2(err[1], STDERR_FILENO);
+      close(err[0]);
+      close(err[1]);
+
+      if (len(cmd) > 0) {
+        char * command = getTerminatedString(cmd);
+        ret = execl("/bin/sh", "/bin/sh", "-c", command, NULL);
+        ret == -1 ? exit(127) : exit(0);
+      } else {
+        ret = system(NULL);
+        exit(ret);
+      }
+    }
+
+    close(out[1]);
+    close(err[1]);
+    read(out[0], outBuffer->data, sizeof(char) * IOBUFSIZE);
+    read(err[0], errBuffer->data, sizeof(char) * IOBUFSIZE);
+
+    waitpid(pid, &ret, 0);
+    ret = WEXITSTATUS(ret);
+
+    block * retBlock = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(mpz_ptr) + sizeof(string *) + sizeof(string *)));
+
+    mpz_t result;
+    mpz_init_set_si(result, ret);
+    mpz_ptr p = move_int(result);
+    memcpy(retBlock->children, &p, sizeof(mpz_ptr));
+    
+    retBlock->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName(GETTAG(systemResult)));
+    memcpy(retBlock->children + 1, &outBuffer, sizeof(string *));
+    memcpy(retBlock->children + 2, &errBuffer, sizeof(string *));
+
+    return retBlock;
   }
 }
