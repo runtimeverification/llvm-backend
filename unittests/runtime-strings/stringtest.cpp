@@ -361,11 +361,13 @@ BOOST_AUTO_TEST_CASE(string2int) {
   auto _10 = makeString("10");
   auto neg10 = makeString("-10");
   auto neg10000 = makeString("-10000");
+  auto plus1000 = makeString("+1000");
 
   BOOST_CHECK_EQUAL(mpz_cmp_si(hook_STRING_string2int(_0), 0), 0);
   BOOST_CHECK_EQUAL(mpz_cmp_si(hook_STRING_string2int(_10), 10), 0);
   BOOST_CHECK_EQUAL(mpz_cmp_si(hook_STRING_string2int(neg10), -10), 0);
   BOOST_CHECK_EQUAL(mpz_cmp_si(hook_STRING_string2int(neg10000), -10000), 0);
+  BOOST_CHECK_EQUAL(mpz_cmp_si(hook_STRING_string2int(plus1000), 1000), 0);
 }
 
 BOOST_AUTO_TEST_CASE(string2base) {

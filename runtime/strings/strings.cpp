@@ -175,9 +175,22 @@ extern "C" {
 
   const mpz_ptr hook_STRING_string2base_long(const string *input, uint64_t base) {
     mpz_t result;
-    auto copy = static_cast<char *>(koreAllocToken(len(input) + 1));
-    memcpy(copy, input->data, len(input));
-    copy[len(input)] = 0;
+
+    char c = input->data[0];
+    size_t length;
+    const char * dataStart;
+
+    if (c == '+') {
+      length = len(input) - 1;
+      dataStart = input->data + 1;
+    } else {
+      length = len(input);
+      dataStart = input->data;
+    }
+
+    auto copy = static_cast<char *>(koreAllocToken(length + 1));
+    memcpy(copy, dataStart, length);
+    copy[length] = 0;
     if (mpz_init_set_str(result, copy, base)) {
       throw std::invalid_argument("Not a valid integer");
     }
