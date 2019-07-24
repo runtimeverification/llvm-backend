@@ -22,6 +22,7 @@ extern "C" {
   string *hook_BYTES_substr(string *b, mpz_t start, mpz_t end);
   string *hook_BYTES_replaceAt(string *b, mpz_t start, string *b2);
   string *hook_BYTES_update(string *b, mpz_t off, mpz_t val);
+  mpz_ptr hook_BYTES_get(string *b, mpz_t off);
   mpz_ptr hook_BYTES_length(string *b);
   string *hook_BYTES_padRight(string *b, mpz_t len, mpz_t v);
   string *hook_BYTES_padLeft(string *b, mpz_t len, mpz_t v);
@@ -201,6 +202,17 @@ BOOST_AUTO_TEST_CASE(update) {
   BOOST_CHECK_EQUAL(4, len(res));
   BOOST_CHECK_EQUAL(0, memcmp(res->data, "1204", 4));
 }
+
+BOOST_AUTO_TEST_CASE(get) {
+  auto _1234 = makeString("1234");
+  mpz_t _0;
+  mpz_init_set_ui(_0, 0);
+
+  auto res = hook_BYTES_get(_1234, _0);
+  BOOST_CHECK_EQUAL(0, mpz_cmp_ui(res, '1'));
+}
+
+
 
 BOOST_AUTO_TEST_CASE(replaceAt) {
   auto _1234 = makeString("1234");
