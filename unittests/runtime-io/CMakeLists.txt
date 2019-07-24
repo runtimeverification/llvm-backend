@@ -13,3 +13,5 @@ target_link_libraries(runtime-io-tests
   mpfr
   ${Boost_UNIT_TEST_FRAMEWORK_LIBRARIES}
 )
+
+add_executable(IOTest iotest.cpp)
