@@ -127,6 +127,19 @@ extern "C" {
     return ret;
   }
 
+  string *hook_BYTES_update(string *b, mpz_t off, mpz_t val) {
+    unsigned long off_long = get_ui(off);
+    if (off_long >= len(b)) {
+      throw std::invalid_argument("Buffer overflow on update");
+    }
+    unsigned long val_long = get_ui(val);
+    if (val_long >= 256) {
+      throw std::invalid_argument("Not a valid value for a byte in update");
+    }
+    b->data[off_long] = (unsigned char)val_long;
+    return b;
+  }
+
   string *hook_BYTES_replaceAt(string *b, mpz_t start, string *b2) {
     unsigned long start_long = get_ui(start);
     if (start_long + len(b2) > len(b)) {
