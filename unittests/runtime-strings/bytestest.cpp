@@ -21,6 +21,7 @@ extern "C" {
   string *hook_BYTES_string2bytes(string *s);
   string *hook_BYTES_substr(string *b, mpz_t start, mpz_t end);
   string *hook_BYTES_replaceAt(string *b, mpz_t start, string *b2);
+  string *hook_BYTES_update(string *b, mpz_t off, mpz_t val);
   mpz_ptr hook_BYTES_length(string *b);
   string *hook_BYTES_padRight(string *b, mpz_t len, mpz_t v);
   string *hook_BYTES_padLeft(string *b, mpz_t len, mpz_t v);
@@ -187,6 +188,18 @@ BOOST_AUTO_TEST_CASE(substr) {
   BOOST_CHECK_THROW(hook_BYTES_substr(catAll, _8, _7), std::invalid_argument);
   BOOST_CHECK_THROW(hook_BYTES_substr(catAll, _7, _10), std::invalid_argument);
   BOOST_CHECK_THROW(hook_BYTES_substr(catAll, _1024, _4096), std::invalid_argument);
+}
+
+BOOST_AUTO_TEST_CASE(update) {
+  auto _1234 = makeString("1234");
+  mpz_t _0, _2;
+  mpz_init_set_ui(_0, '0');
+  mpz_init_set_ui(_2, 2);
+
+  auto res = hook_BYTES_update(_1234, _2, _0);
+  BOOST_CHECK_EQUAL(_1234, res);
+  BOOST_CHECK_EQUAL(4, len(res));
+  BOOST_CHECK_EQUAL(0, memcmp(res->data, "1204", 4));
 }
 
 BOOST_AUTO_TEST_CASE(replaceAt) {
