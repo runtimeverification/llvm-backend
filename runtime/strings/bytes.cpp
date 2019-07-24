@@ -127,6 +127,16 @@ extern "C" {
     return ret;
   }
 
+  mpz_ptr hook_BYTES_get(string *b, mpz_t off) {
+    unsigned long off_long = get_ui(off);
+    if (off_long >= len(b)) {
+      throw std::invalid_argument("Buffer overflow on get");
+    }
+    mpz_t result;
+    mpz_init_set_ui(result, (unsigned char)b->data[off_long]);
+    return move_int(result);
+  }
+
   string *hook_BYTES_update(string *b, mpz_t off, mpz_t val) {
     unsigned long off_long = get_ui(off);
     if (off_long >= len(b)) {
