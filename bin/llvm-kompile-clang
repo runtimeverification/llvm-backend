@@ -3,6 +3,20 @@ modopt="$1"
 main="$2"
 lto="$3"
 shift; shift; shift
+llc_flags="-O0"
+for arg in "$@"; do
+  case "$arg" in
+    -O[0-3])
+      llc_flags="$arg"
+      ;;
+    -O.)
+      echo "$0: invalid optimization level"
+      exit 1
+      ;;
+    *)
+      ;;
+  esac
+done
 LIBDIR="$(dirname "$0")"/../lib/kllvm/
 if [ "$main" = "main" ]; then
   MAINFILES="$LIBDIR"/llvm/main/main.ll
@@ -24,12 +38,12 @@ else
   files=()
   modasm="$(mktemp tmp.XXXXXXXXXX)"
   trap "rm -f $modasm" INT TERM EXIT
-  @LLC@ -tailcallopt "$modopt" -O0 -o "$modasm"
+  @LLC@ -tailcallopt "$modopt" $llc_flags -o "$modasm"
   modopt="$modasm"
   lang="-x assembler"
   for file in "$LIBDIR"/llvm/*.ll; do
     tmp="$(mktemp tmp.XXXXXXXXXX)"
-    @LLC@ -tailcallopt "$file" -o "$tmp"
+    @LLC@ -tailcallopt "$file" $llc_flags -o "$tmp"
     files+=("$tmp")
   done
 fi
