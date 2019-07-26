@@ -3,8 +3,8 @@ set -e
 
 ARGV=()
 declare -A params
-output_file="$(mktemp tmp.out.XXXXXXXXXX.kore)"
-input_file="$(mktemp tmp.in.XXXXXXXXXX.kore)"
+output_file="$(mktemp tmp.out.XXXXXXXXXX)"
+input_file="$(mktemp tmp.in.XXXXXXXXXX)"
 trap "rm -rf $input_file $output_file" INT TERM EXIT
 initializer="LblinitGeneratedTopCell{}"
 dir=.
