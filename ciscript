@@ -12,7 +12,7 @@ fi
 
 mkdir -p build
 cd build
-cmake .. -DCMAKE_BUILD_TYPE=FastBuild
+cmake .. -DCMAKE_BUILD_TYPE=Debug
 make -j`nproc`
 make run-unittests
 cd ../runtime/datastructures
