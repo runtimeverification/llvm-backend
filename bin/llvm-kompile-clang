@@ -16,23 +16,25 @@ else
   flags=-ltinfo
 fi
 
+lang="-x ir"
 if [ "$lto" = "lto" ]; then
   flags="$flags -flto -Wl,-mllvm,-tailcallopt"
   files=("$LIBDIR"/llvm/*.ll)
 else
   files=()
-  modasm="$(mktemp tmp.XXXXXXXXXX.s)"
+  modasm="$(mktemp tmp.XXXXXXXXXX)"
   trap "rm -f $modasm" INT TERM EXIT
   @LLC@ -tailcallopt "$modopt" -O0 -o "$modasm"
   modopt="$modasm"
+  lang="-x assembler"
   for file in "$LIBDIR"/llvm/*.ll; do
-    tmp="$(mktemp tmp.XXXXXXXXXX.s)"
+    tmp="$(mktemp tmp.XXXXXXXXXX)"
     @LLC@ -tailcallopt "$file" -o "$tmp"
     files+=("$tmp")
   done
 fi
 
-@CMAKE_CXX_COMPILER@ -Wno-override-module "$modopt" "${files[@]}" \
+@CMAKE_CXX_COMPILER@ -Wno-override-module $lang "$modopt" "${files[@]}" -x none \
   "$LIBDIR"/libarithmetic.a \
   "$MAINFILES" \
   "$LIBDIR"/libconfigurationparser.a \
