@@ -84,13 +84,13 @@ void printConfigurationInternal(FILE *file, block *subject, const char *sort, bo
         fprintf(file, "\\\"");
         break;
       case '\n':
-        fprintf(file, "\\\n");
+        fprintf(file, "\\n");
         break;
       case '\t':
-        fprintf(file, "\\\t");
+        fprintf(file, "\\t");
         break;
       case '\r':
-        fprintf(file, "\\\r");
+        fprintf(file, "\\r");
         break;
       case '\f':
         fprintf(file, "\\f");
