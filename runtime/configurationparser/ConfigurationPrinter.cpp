@@ -99,7 +99,7 @@ void printConfigurationInternal(FILE *file, block *subject, const char *sort, bo
         if ((unsigned char)c >= 32 && (unsigned char)c < 127) {
           fprintf(file, "%c", c);
         } else {
-          fprintf(file, "\\%03o", (unsigned char)c);
+          fprintf(file, "\\%02x", (unsigned char)c);
         }
         break;
       }
