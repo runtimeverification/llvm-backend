@@ -25,7 +25,7 @@ execute_process(
   COMMAND rustc +rust-1.34.0-llvm-8 --print sysroot
   OUTPUT_VARIABLE RUSTSYSROOT
   OUTPUT_STRIP_TRAILING_WHITESPACE)
-set(RUSTSTDLIB "${RUSTSYSROOT}/lib/rustlib/${TARGET_TRIPLE}/lib/")
+set(RUSTSTDLIB "${RUSTSYSROOT}/lib/rustlib/${BACKEND_TARGET_TRIPLE}/lib/")
 
 add_custom_command(
   OUTPUT ${RUSTLIB}
