@@ -38,12 +38,12 @@ else
   files=()
   modasm="$(mktemp tmp.XXXXXXXXXX)"
   trap "rm -f $modasm" INT TERM EXIT
-  @LLC@ -tailcallopt "$modopt" $llc_flags -o "$modasm"
+  @LLC@ -tailcallopt "$modopt" -mtriple=@TARGET_TRIPLE@ $llc_flags -o "$modasm"
   modopt="$modasm"
   lang="-x assembler"
   for file in "$LIBDIR"/llvm/*.ll; do
     tmp="$(mktemp tmp.XXXXXXXXXX)"
-    @LLC@ -tailcallopt "$file" $llc_flags -o "$tmp"
+    @LLC@ -tailcallopt "$file" -mtriple=@TARGET_TRIPLE@ $llc_flags -o "$tmp"
     files+=("$tmp")
   done
 fi
