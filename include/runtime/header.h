@@ -168,6 +168,11 @@ extern "C" {
 
   block *debruijnize(block *);
 
+  iter set_iterator(set *);
+  block *set_iterator_next(iter *);
+  iter map_iterator(set *);
+  block *map_iterator_next(iter *);
+
   extern const uint32_t first_inj_tag, last_inj_tag;
 
 #ifdef __cplusplus
