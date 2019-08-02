@@ -341,6 +341,14 @@ mpz_ptr hook_INT_signExtendBitRange(mpz_t i, mpz_t off, mpz_t len) {
   return move_int(result);
 }
 
+int32_t hook_INT_size_int(mpz_t t) {
+  return (int32_t)t->_mp_size;
+}
+
+uint64_t hook_INT_limb(mpz_t t, uint64_t i) {
+  return (uint64_t)t->_mp_d[i];
+}
+
 void int_hash(mpz_t i, void *hasher) {
   int nlimbs = mpz_size(i);
   for (int j = 0; j < nlimbs; j++) {
