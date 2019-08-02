@@ -264,9 +264,17 @@ llvm::Value *CreateTerm::createToken(ValueType sort, std::string contents) {
       }
       mpfr_t value;
       mpfr_init2(value, prec);
-      size_t last = contents.find_first_of("fFdDpP");
-      std::string str_value = contents.substr(0, last);
-      mpfr_set_str(value, str_value.c_str(), 10, MPFR_RNDN);
+      int retValue;
+      if (contents == "+Infinity" || contents == "-Infinity") {
+        retValue = mpfr_set_str(value, contents.c_str(), 10, MPFR_RNDN);
+      } else {
+        size_t last = contents.find_first_of("fFdDpP");
+        std::string str_value = contents.substr(0, last);
+        retValue = mpfr_set_str(value, str_value.c_str(), 10, MPFR_RNDN);
+      }
+      if (retValue != 0) {
+        throw std::invalid_argument("Can't convert to float");
+      }
       size_t size = (prec + 63) / 64;
       llvm::ArrayType *limbsType = llvm::ArrayType::get(llvm::Type::getInt64Ty(Ctx), size);
       llvm::Constant *limbs = Module->getOrInsertGlobal("float_" + contents + "_limbs", limbsType);
