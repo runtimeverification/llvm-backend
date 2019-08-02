@@ -194,9 +194,61 @@ case class FloatS() extends EqualLiteral {
   def hookAtt = "FLOAT.Float"
   def equalityFun = "hook_FLOAT_trueeq"
 }
-case class IntS() extends EqualLiteral {
+case class IntS() extends SortCategory {
   def hookAtt = "INT.Int"
+  def hasIncompleteSignature(sigma: Seq[Constructor], f: Fringe): Boolean = true
   def equalityFun = "hook_INT_eq"
+  def tree(matrix: Matrix): DecisionTree = {
+    val litO = matrix.bestCol.fringe.occurrence
+    val sizeO = Size(litO)
+    if (matrix.cases.isEmpty) {
+      if (matrix.compiledDefault.isDefined) {
+        matrix.compiledDefault.get
+      } else {
+        Failure()
+      }
+    } else {
+      Function("hook_INT_size_int", sizeO, Seq(litO), "MINT.MInt 32",
+        SwitchLit(sizeO, 32, sizeCases(litO, matrix.compiledCases, matrix.compiledDefault), matrix.compiledDefault))
+    }
+  }
+
+  def sizeCases(litO: Occurrence, cases: Seq[(String, DecisionTree)], default: Option[DecisionTree]): Seq[(String, DecisionTree)] = {
+    cases.groupBy(t => sizeOf(t._1)).toSeq.map(t => (t._1.toString, limbSwitch(litO, t._1.abs, t._2, default, 0)))
+  }
+
+  def limbSwitch(litO: Occurrence, size: Int, cases: Seq[(String, DecisionTree)], default: Option[DecisionTree], i: Int): DecisionTree = {
+    if (cases.isEmpty) {
+      Failure()
+    } else if (size == i) {
+      assert(cases.size == 1)
+      cases(0)._2
+    } else {
+      val limbO = Num(i, litO)
+      Function("hook_INT_limb", limbO, Seq(litO, Lit(i.toString, "MINT.MInt 64")), "MINT.MInt 64",
+        SwitchLit(limbO, 64, limbCases(litO, size, cases, default, i), default))
+    }
+  }
+
+  def limbCases(litO: Occurrence, size: Int, cases: Seq[(String, DecisionTree)], default: Option[DecisionTree], i: Int): Seq[(String, DecisionTree)] = {
+    cases.groupBy(t => getLimb(t._1, i)).toSeq.map(t => (t._1, limbSwitch(litO, size, t._2, default, i+1)))
+  }
+
+  def sizeOf(str: String): Int = {
+    val i = BigInt(str)
+    if (i.signum == 0) {
+      0
+    } else {
+      val nlimbs = (i.abs.bitLength + 63) / 64
+      nlimbs * i.signum
+    }
+  }
+
+  def getLimb(str: String, limb: Int): String = {
+    val i = BigInt(str)
+    val shifted = i.abs >> (limb * 64)
+    shifted.toLong.toString
+  }
 }
 case class BoolS() extends SortCategory {
   def hookAtt = "BOOL.Bool"
