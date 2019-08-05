@@ -369,7 +369,7 @@ void init_float2(floating *result, std::string contents) {
   if (contents == "+Infinity" || contents == "-Infinity") {
     retValue = mpfr_set_str(result->f, contents.c_str(), 10, MPFR_RNDN);
   } else {
-    size_t last = contents.find_first_of("fFdDpP");
+    size_t last = contents.find_last_of("fFdDpP");
     std::string str_value = contents.substr(0, last);
     retValue = mpfr_set_str(result->f, str_value.c_str(), 10, MPFR_RNDN);
   }
