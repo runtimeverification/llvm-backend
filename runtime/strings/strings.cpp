@@ -345,9 +345,9 @@ extern "C" {
 }
 
 void init_float2(floating *result, std::string contents) {
-  size_t is_float = contents.find_first_of("fF");
   size_t prec, exp;
-  if (is_float != std::string::npos) {
+  const char last = contents.back();
+  if (last == 'f' || last == 'F' || last == 'y') {
     prec = 24;
     exp = 8;
   } else {

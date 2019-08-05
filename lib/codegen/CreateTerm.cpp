@@ -245,9 +245,9 @@ llvm::Value *CreateTerm::createToken(ValueType sort, std::string contents) {
     llvm::Constant *global = Module->getOrInsertGlobal("float_" + contents, Module->getTypeByName(FLOAT_WRAPPER_STRUCT));
     llvm::GlobalVariable *globalVar = llvm::dyn_cast<llvm::GlobalVariable>(global);
     if (!globalVar->hasInitializer()) {
-      size_t is_float = contents.find_first_of("fF");
       size_t prec, exp;
-      if (is_float != std::string::npos) {
+      const char last = contents.back();
+      if (last == 'f' || last == 'F' || last == 'y') {
         prec = 24;
         exp = 8;
       } else {
