@@ -408,6 +408,20 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
       break;
     }
     case SortCategory::Int: {
+      llvm::Value *FirstChar = new llvm::LoadInst(llvm::Type::getInt8Ty(Ctx), func->arg_begin()+2, "", CaseBlock);
+      llvm::Constant *asciiPlus = llvm::ConstantInt::get(llvm::Type::getInt8Ty(Ctx), 43);
+      auto icmpFirst = new llvm::ICmpInst(*CaseBlock, llvm::CmpInst::ICMP_EQ, FirstChar, asciiPlus);
+      auto IfIsPlus = llvm::BasicBlock::Create(Ctx, "if_is_plus", func);
+      auto ElseNoPlus = llvm::BasicBlock::Create(Ctx, "else_no_plus", func);
+      llvm::BranchInst::Create(IfIsPlus, ElseNoPlus, icmpFirst, CaseBlock);
+      llvm::Constant *one = llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), 1);
+      llvm::Value *Pruned = llvm::GetElementPtrInst::CreateInBounds(llvm::Type::getInt8Ty(Ctx), func->arg_begin()+2,
+        {one}, "", IfIsPlus);
+      llvm::BranchInst::Create(ElseNoPlus, IfIsPlus);
+      auto phiStr = llvm::PHINode::Create(llvm::Type::getInt8PtrTy(Ctx), 2, "", ElseNoPlus);
+      phiStr->addIncoming(func->arg_begin()+2, CaseBlock);
+      phiStr->addIncoming(Pruned, IfIsPlus);
+      CaseBlock = ElseNoPlus;
       llvm::Type *Int = module->getTypeByName(INT_STRUCT);
       llvm::Value *Term = allocateTerm(Int, CaseBlock, "koreAllocInteger");
       llvm::Constant *MpzInitSet = module->getOrInsertFunction("__gmpz_init_set_str",

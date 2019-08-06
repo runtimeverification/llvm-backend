@@ -89,8 +89,10 @@ llvm-kompile-testing ../test/test22.kore main -o interpreter
 ./interpreter ../test/test22.in.kore -1 /dev/stdout | diff - ../test/test22.out.kore
 llvm-kompile-testing ../test/test23.kore main -o interpreter
 ./interpreter ../test/test23.in.kore -1 /dev/stdout | diff - ../test/test23.out.kore
-llvm-kompile-testing ../test/test-inj.kore main -o interpreter
-./interpreter ../test/test-inj.in.kore -1 /dev/stdout | diff - ../test/test-inj.out.kore
 llvm-kompile-testing ../test/test24.kore main -o interpreter
 ./interpreter ../test/test24.in.kore -1 /dev/stdout | diff - ../test/test24.out.kore
+llvm-kompile-testing ../test/test-inj.kore main -o interpreter
+./interpreter ../test/test-inj.in.kore -1 /dev/stdout | diff - ../test/test-inj.out.kore
+llvm-kompile-testing ../test/test25.kore main -o interpreter
+./interpreter ../test/test25.in.kore -1 /dev/stdout | diff - ../test/test25.out.kore
 rm -f configparser configparser.ll interpreter
