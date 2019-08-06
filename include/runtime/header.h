@@ -70,6 +70,28 @@ extern "C" {
     uint64_t c;
   } set;
 
+  typedef struct iter {
+    uint64_t a;
+    struct {
+      struct {
+        uint64_t *b;
+        uint64_t c;
+      };
+      uint64_t d;
+    };
+    struct {
+      struct {
+        uint64_t e;
+        uint32_t f;
+      };
+      void *g;
+    };
+    struct {
+      uint64_t h;
+      uint64_t i[3];
+    };
+  } iter;
+
   // llvm: list = type { i64, [7 x i64] }
   typedef struct list {
     uint64_t a;
@@ -145,6 +167,11 @@ extern "C" {
       void visitSeparator(FILE *));
 
   block *debruijnize(block *);
+
+  iter set_iterator(set *);
+  block *set_iterator_next(iter *);
+  iter map_iterator(set *);
+  block *map_iterator_next(iter *);
 
   extern const uint32_t first_inj_tag, last_inj_tag;
 

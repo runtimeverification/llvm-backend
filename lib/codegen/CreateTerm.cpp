@@ -218,7 +218,8 @@ llvm::Value *CreateTerm::createToken(ValueType sort, std::string contents) {
     llvm::GlobalVariable *globalVar = llvm::dyn_cast<llvm::GlobalVariable>(global);
     if (!globalVar->hasInitializer()) {
       mpz_t value;
-      mpz_init_set_str(value, contents.c_str(), 10);
+      const char * dataStart = contents.at(0) == '+' ? contents.c_str() + 1 : contents.c_str();
+      mpz_init_set_str(value, dataStart, 10);
       size_t size = mpz_size(value);
       int sign = mpz_sgn(value);
       llvm::ArrayType *limbsType = llvm::ArrayType::get(llvm::Type::getInt64Ty(Ctx), size);
