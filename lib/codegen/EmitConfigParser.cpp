@@ -409,7 +409,7 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
     }
     case SortCategory::Int: {
       llvm::Value *FirstChar = new llvm::LoadInst(llvm::Type::getInt8Ty(Ctx), func->arg_begin()+2, "", CaseBlock);
-      llvm::Constant *asciiPlus = llvm::ConstantInt::get(llvm::Type::getInt8Ty(Ctx), 43);
+      llvm::Constant *asciiPlus = llvm::ConstantInt::get(llvm::Type::getInt8Ty(Ctx), '+');
       auto icmpFirst = new llvm::ICmpInst(*CaseBlock, llvm::CmpInst::ICMP_EQ, FirstChar, asciiPlus);
       auto IfIsPlus = llvm::BasicBlock::Create(Ctx, "if_is_plus", func);
       auto ElseNoPlus = llvm::BasicBlock::Create(Ctx, "else_no_plus", func);
