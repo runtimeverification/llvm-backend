@@ -1,0 +1,28 @@
+KOMPILE=llvm-kompile-testing
+DEFNDIR = ../test/defn
+INPUTDIR = ../test/input
+OUTPUTDIR = ../test/output
+INTDIR = ../test/int
+DEFN = $(wildcard $(DEFNDIR)/*.kore)
+INPUT = $(wildcard $(INPUTDIR)/*.in.kore)
+OUTPUT= $(wildcard $(OUTPUTDIR)/*.out.kore)
+INT = $(patsubst $(DEFNDIR)/%.kore, $(INTDIR)/%.interpreter, $(DEFN))
+TESTS = $(addsuffix .test, $(basename $(DEFN)))
+
+all: $(INT)
+	@echo $(INT)
+
+#$(INTDIR)/%.interpreter: $(DEFNDIR)/%.kore $(INPUTDIR)/%.in.kore $(OUTPUTDIR)/%.out.kore
+	#$(KOMPILE) $< main -o $@
+	#$@ $(word 2, $^) -1 /dev/stdout | diff - $(word 3, $^)
+
+$(INTDIR)/%.interpreter: $(DEFNDIR)/%.kore
+	$(KOMPILE) $< main -o $@
+
+%.test: $(INTDIR)/%.interpreter $(INPUTDIR)/%.in.kore $(OUTPUTDIR)/%.out.kore
+	$< $(word 2, $^) -1 /dev/stdout | diff - $(word 3, $^)
+
+.PHONY: clean %.test
+
+clean:
+	rm $(INT)
