@@ -345,9 +345,9 @@ extern "C" {
 }
 
 void init_float2(floating *result, std::string contents) {
-  size_t is_float = contents.find_first_of("fF");
   size_t prec, exp;
-  if (is_float != std::string::npos) {
+  const char last = contents.back();
+  if (last == 'f' || last == 'F' || last == 'y') {
     prec = 24;
     exp = 8;
   } else {
@@ -365,9 +365,17 @@ void init_float2(floating *result, std::string contents) {
   }
   result->exp = exp;
   mpfr_init2(result->f, prec);
-  size_t last = contents.find_first_of("fFdDpP");
-  std::string str_value = contents.substr(0, last);
-  mpfr_set_str(result->f, str_value.c_str(), 10, MPFR_RNDN);
+  int retValue;
+  if (contents == "+Infinity" || contents == "-Infinity") {
+    retValue = mpfr_set_str(result->f, contents.c_str(), 10, MPFR_RNDN);
+  } else {
+    size_t last = contents.find_last_of("fFdDpP");
+    std::string str_value = contents.substr(0, last);
+    retValue = mpfr_set_str(result->f, str_value.c_str(), 10, MPFR_RNDN);
+  }
+  if (retValue != 0) {
+    throw std::invalid_argument("Can't convert to float");
+  }
 }
 
 std::string floatToString(const floating *f) {
