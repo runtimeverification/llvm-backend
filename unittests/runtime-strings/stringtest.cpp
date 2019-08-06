@@ -393,9 +393,9 @@ BOOST_AUTO_TEST_CASE(string2base) {
 }
 
 BOOST_AUTO_TEST_CASE(string2float) {
-  auto _8 = makeString("8.0f");
+  auto _float = makeString("8.0f");
   floating *result;
-  result = hook_STRING_string2float(_8);
+  result = hook_STRING_string2float(_float);
   
   BOOST_CHECK_EQUAL(24, mpfr_get_prec(result->f));
   BOOST_CHECK_EQUAL(8, result->exp);
@@ -404,6 +404,34 @@ BOOST_AUTO_TEST_CASE(string2float) {
   string *result2 = hook_STRING_float2string(result);
   std::string resultSTL = std::string(result2->data, len(result2));
   BOOST_CHECK_EQUAL(resultSTL, "0.800000000e1f");
+
+  _float = makeString("+Infinity");
+  result = hook_STRING_string2float(_float);
+
+  BOOST_CHECK_EQUAL(24, mpfr_get_prec(result->f));
+  BOOST_CHECK_EQUAL(8, result->exp);
+  BOOST_CHECK_EQUAL(mpfr_cmp_d(result->f, INFINITY), 0);
+
+  _float = makeString("-Infinity");
+  result = hook_STRING_string2float(_float);
+
+  BOOST_CHECK_EQUAL(24, mpfr_get_prec(result->f));
+  BOOST_CHECK_EQUAL(8, result->exp);
+  BOOST_CHECK_EQUAL(mpfr_cmp_d(result->f, -INFINITY), 0);
+
+  _float = makeString("Infinityf");
+  result = hook_STRING_string2float(_float);
+
+  BOOST_CHECK_EQUAL(24, mpfr_get_prec(result->f));
+  BOOST_CHECK_EQUAL(8, result->exp);
+  BOOST_CHECK_EQUAL(mpfr_cmp_d(result->f, INFINITY), 0);
+
+  _float = makeString("Infinityp50x10");
+  result = hook_STRING_string2float(_float);
+
+  BOOST_CHECK_EQUAL(50, mpfr_get_prec(result->f));
+  BOOST_CHECK_EQUAL(10, result->exp);
+  BOOST_CHECK_EQUAL(mpfr_cmp_d(result->f, INFINITY), 0);
 }
 
 BOOST_AUTO_TEST_CASE(replace) {
