@@ -19,4 +19,4 @@ shift; shift; shift
 if [[ "$OSTYPE" != "darwin"* ]]; then
   flags=-fuse-ld=lld
 fi
-"$(dirname "$0")"/llvm-kompile-clang "$modopt" "$main" @LLVM_KOMPILE_LTO@ $flags "$@"
+"$(dirname "$0")"/llvm-kompile-clang "$modopt" "$main" @LLVM_KOMPILE_LTO@ -fno-stack-protector $flags "$@"
