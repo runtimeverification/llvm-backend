@@ -26,7 +26,7 @@ make install
 
 cp ../test/Makefile ./TestMakefile
 
-make -f TestMakefile -j32
+make -f TestMakefile -j8
 
 diff io_output1.txt ../test/ioTest1.output
 diff `ls | grep io_log` ../test/ioTest3.output

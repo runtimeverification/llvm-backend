@@ -4,10 +4,14 @@ INPUTDIR = ../test/input
 OUTPUTDIR = ../test/output
 INTDIR = ../test/int
 
+SUFINKORE = .in.kore
+SUFOUTDIFF = .out.diff.kore
+SUFOUTGREP = .out.grep.kore
+
 DEFN = $(wildcard $(DEFNDIR)/*.kore)
-INPUT = $(wildcard $(INPUTDIR)/*.in.kore)
-DOUTPUT= $(wildcard $(OUTPUTDIR)/*.out.diff.kore)
-GOUTPUT= $(wildcard $(OUTPUTDIR)/*.out.grep.kore)
+INPUT = $(wildcard $(INPUTDIR)/*$(SUFINKORE))
+DOUTPUT= $(wildcard $(OUTPUTDIR)/*$(SUFOUTDIFF))
+GOUTPUT= $(wildcard $(OUTPUTDIR)/*$(SUFOUTGREP))
 INT = $(patsubst $(DEFNDIR)/%.kore, $(INTDIR)/%.interpreter, $(DEFN))
 
 # For definitions that don't compare to an output file
@@ -30,22 +34,22 @@ test: $(TESTS) $(TESTSN) $(TESTSD)
 $(INTDIR)/%.interpreter: $(DEFNDIR)/%.kore
 	$(KOMPILE) $< main -o $@
 
-$(DEFNDIR)/%.test: $(INTDIR)/%.interpreter $(INPUTDIR)/%.in.kore $(OUTPUTDIR)/%.out.diff.kore
+$(DEFNDIR)/%.test: $(INTDIR)/%.interpreter $(INPUTDIR)/%$(SUFINKORE) $(OUTPUTDIR)/%$(SUFOUTDIFF)
 	$< $(word 2, $^) -1 /dev/stdout | diff - $(word 3, $^)
 
-$(DEFNDIR)/%.test: $(INTDIR)/%.interpreter $(INPUTDIR)/%.in.kore $(OUTPUTDIR)/%.out.grep.kore
+$(DEFNDIR)/%.test: $(INTDIR)/%.interpreter $(INPUTDIR)/%$(SUFINKORE) $(OUTPUTDIR)/%$(SUFOUTGREP)
 	$< $(word 2, $^) -1 /dev/stdout | grep -f $(word 3, $^) -q
 
 $(DEFNDIR)/%.testd: $(INTDIR)/%.interpreter $(INPUTDIR)/%/ $(OUTPUTDIR)/%/
-	$(eval TMP_DIFF_OUT := $(wildcard $(word 3, $^)/*.out.diff.kore))
-	$(eval TMP_GREP_OUT := $(wildcard $(word 3, $^)/*.out.grep.kore))
-	$(eval TMP_DIFF_NAME := $(subst .out.diff.kore,,$(notdir $(TMP_DIFF_OUT))))
-	$(eval TMP_GREP_NAME := $(subst .out.grep.kore,, $(notdir $(TMP_GREP_OUT))))
+	$(eval TMP_DIFF_OUT := $(wildcard $(word 3, $^)/*$(SUFOUTDIFF)))
+	$(eval TMP_GREP_OUT := $(wildcard $(word 3, $^)/*$(SUFOUTGREP)))
+	$(eval TMP_DIFF_NAME := $(subst $(SUFOUTDIFF),,$(notdir $(TMP_DIFF_OUT))))
+	$(eval TMP_GREP_NAME := $(subst $(SUFOUTGREP),, $(notdir $(TMP_GREP_OUT))))
 	$(eval TMP_DIR_NAME := $(basename $(notdir $@)))
-	$(foreach file, $(TMP_DIFF_NAME), $< $(INPUTDIR)/$(TMP_DIR_NAME)/$(file).in.kore -1 /dev/stdout | diff - $(OUTPUTDIR)/$(TMP_DIR_NAME)/$(file).out.diff.kore ;)
-	$(foreach file, $(TMP_GREP_NAME), $< $(INPUTDIR)/$(TMP_DIR_NAME)/$(file).in.kore -1 /dev/stdout | grep -f $(OUTPUTDIR)/$(TMP_DIR_NAME)/$(file).out.grep.kore -q ;)
+	$(foreach file, $(TMP_DIFF_NAME), $< $(INPUTDIR)/$(TMP_DIR_NAME)/$(file)$(SUFINKORE) -1 /dev/stdout | diff - $(OUTPUTDIR)/$(TMP_DIR_NAME)/$(file)$(SUFOUTDIFF) ;)
+	$(foreach file, $(TMP_GREP_NAME), $< $(INPUTDIR)/$(TMP_DIR_NAME)/$(file)$(SUFINKORE) -1 /dev/stdout | grep -f $(OUTPUTDIR)/$(TMP_DIR_NAME)/$(file)$(SUFOUTGREP) -q ;)
 
-$(DEFNDIR)/%.testn: $(INTDIR)/%.interpreter $(INPUTDIR)/%.in.kore
+$(DEFNDIR)/%.testn: $(INTDIR)/%.interpreter $(INPUTDIR)/%$(SUFINKORE)
 	$< $(word 2, $^) -1 /dev/null
 
 .PHONY: clean
