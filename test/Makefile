@@ -19,8 +19,7 @@ TESTS = $(filter-out $(addprefix $(DEFNDIR)/, $(addsuffix .test, $(NOOUTS) $(DIR
 TESTSD = $(addprefix $(DEFNDIR)/, $(addsuffix .testd, $(DIRTESTNAMES)))
 TESTSN = $(addprefix $(DEFNDIR)/, $(addsuffix .testn, $(NOOUTS)))
 
-#all: $(INT) test
-all: $(INT) testd
+all: $(INT) test
 
 testd: $(TESTSD)
 
