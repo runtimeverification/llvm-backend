@@ -10,12 +10,14 @@ DOUTPUT= $(wildcard $(OUTPUTDIR)/*.out.diff.kore)
 GOUTPUT= $(wildcard $(OUTPUTDIR)/*.out.grep.kore)
 INT = $(patsubst $(DEFNDIR)/%.kore, $(INTDIR)/%.interpreter, $(DEFN))
 
+# For definitions that don't compare to an output file
 NOOUTS = test7
-SPECIAL = test11 test17
+NOTEST = test11 test17
+
 # For definitions that have multiple tests associated with them
 DIRTESTNAMES = $(notdir $(shell find $(INPUTDIR) -maxdepth 1 -mindepth 1 -type d))
 
-TESTS = $(filter-out $(addprefix $(DEFNDIR)/, $(addsuffix .test, $(NOOUTS) $(DIRTESTNAMES) $(SPECIAL))), $(addsuffix .test, $(basename $(DEFN))))
+TESTS = $(filter-out $(addprefix $(DEFNDIR)/, $(addsuffix .test, $(NOOUTS) $(DIRTESTNAMES) $(NOTEST))), $(addsuffix .test, $(basename $(DEFN))))
 TESTSD = $(addprefix $(DEFNDIR)/, $(addsuffix .testd, $(DIRTESTNAMES)))
 TESTSN = $(addprefix $(DEFNDIR)/, $(addsuffix .testn, $(NOOUTS)))
 
