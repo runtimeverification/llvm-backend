@@ -28,10 +28,10 @@ cp ../test/Makefile ./TestMakefile
 
 make -f TestMakefile
 
-diff io_output1.txt ../test/ioTest1.out
-diff `ls | grep io_log` ../test/ioTest3.out
+diff io_output1.txt ../test/ioTest1.output
+diff `ls | grep io_log` ../test/ioTest3.output
 rm `ls | grep io_log`
 
+make -f TestMakefile clean
 
-# rm -f configparser configparser.ll interpreter
 rm -f configparser configparser.ll
