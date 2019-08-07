@@ -8,7 +8,7 @@ declare fastcc %block* @step(%block*)
 declare void @koreCollect(%block **)
 
 @depth = thread_local global i64 zeroinitializer
-@INTERVAL = constant i64 @GC_INTERVAL@
+@INTERVAL = thread_local global i64 @GC_INTERVAL@
 @current_interval = thread_local global i64 0
 
 @gc_roots = global [256 x i8 *] zeroinitializer
