@@ -14,7 +14,7 @@
 #define KCHAR char
 extern "C" {
 
-#define GETTAG(symbol) "Lbl'hash'" #symbol "{}"
+#define GETTAG(symbol) "Lbl'Hash'" #symbol "{}"
 #define ERRTAG(err) GETTAG(err)
 #define ERRBLOCK(tag) (((uint64_t)tag << 32) | 1)
 #define NUM_SYMBOLS 7
