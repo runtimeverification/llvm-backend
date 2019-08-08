@@ -17,7 +17,7 @@
 extern "C" {
 
 #define KCHAR char
-#define GETTAG(symbol) "Lbl'hash'" #symbol "{}"
+#define GETTAG(symbol) "Lbl'Hash'" #symbol "{}"
 #define ERRTAG(err) GETTAG(err)
 #define IOBUFSIZE 256
 
