@@ -9,6 +9,7 @@
 #include <string>
 #include <cerrno>
 #include <sys/wait.h>
+#include <sys/socket.h>
 
 #include "runtime/alloc.h"
 #include "runtime/header.h"
@@ -460,6 +461,43 @@ extern "C" {
     char * p = getTerminatedString(path);
 
     int ret = unlink(p);
+    if (ret == -1) {
+      return getKSeqErrorBlock();
+    }
+
+    return dotK;
+  }
+
+  block *hook_IO_accept(mpz_t sock) {
+    if (!mpz_fits_sint_p(sock)) {
+      throw std::invalid_argument("Arg too large");
+    }
+
+    int fd = mpz_get_si(sock);
+    int clientsock = accept(fd, NULL, NULL);
+
+    if (clientsock == -1) {
+      return getInjErrorBlock();
+    }
+
+    block * retBlock = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(uint64_t)));
+    retBlock->h = header_int();
+
+    mpz_t result;
+    mpz_init_set_si(result, clientsock);
+    mpz_ptr p = move_int(result);
+    memcpy(retBlock->children, &p, sizeof(mpz_ptr));
+    return retBlock;
+  }
+
+  block *hook_IO_shutdownWrite(mpz_t sock) {
+    if (!mpz_fits_sint_p(sock)) {
+      throw std::invalid_argument("Arg too large");
+    }
+
+    int fd = mpz_get_si(sock);
+    int ret = shutdown(fd, SHUT_WR);
+
     if (ret == -1) {
       return getKSeqErrorBlock();
     }
