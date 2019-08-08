@@ -262,7 +262,7 @@ extern "C" {
       return getInjErrorBlock();
     }
 
-    block * retBlock = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(uint64_t)));
+    block * retBlock = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(mpz_ptr)));
     retBlock->h = header_int();
     mpz_init_set_si(result, fd);
     mpz_ptr p = move_int(result);
@@ -282,7 +282,7 @@ extern "C" {
       return getInjErrorBlock();
     }
 
-    block * retBlock = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(uint64_t)));
+    block * retBlock = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(mpz_ptr)));
     retBlock->h = header_int();
     mpz_t result;
     mpz_init_set_si(result, (long) loc);
@@ -311,7 +311,7 @@ extern "C" {
       return getInjErrorBlock();
     }
 
-    block * retBlock = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(uint64_t)));
+    block * retBlock = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(mpz_ptr)));
     retBlock->h = header_int();
     mpz_t result;
     mpz_init_set_si(result, (int) c);
@@ -336,7 +336,7 @@ extern "C" {
     }
 
     result = static_cast<string *>(koreResizeLastAlloc(result, sizeof(string) + bytes, sizeof(string) + length));
-    block * retBlock = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(uint64_t)));
+    block * retBlock = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(string *)));
     retBlock->h = header_string();
     set_len(result, bytes);
     memcpy(retBlock->children, &result, sizeof(string *));
@@ -480,7 +480,7 @@ extern "C" {
       return getInjErrorBlock();
     }
 
-    block * retBlock = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(uint64_t)));
+    block * retBlock = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(mpz_ptr)));
     retBlock->h = header_int();
 
     mpz_t result;
