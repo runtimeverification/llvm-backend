@@ -9,6 +9,7 @@
 #include <string>
 #include <cerrno>
 #include <sys/wait.h>
+#include <sys/socket.h>
 
 #include "runtime/alloc.h"
 #include "runtime/header.h"
@@ -16,7 +17,7 @@
 extern "C" {
 
 #define KCHAR char
-#define GETTAG(symbol) "Lbl'hash'" #symbol "{}"
+#define GETTAG(symbol) "Lbl'Hash'" #symbol "{}"
 #define ERRTAG(err) GETTAG(err)
 #define IOBUFSIZE 256
 
@@ -261,7 +262,7 @@ extern "C" {
       return getInjErrorBlock();
     }
 
-    block * retBlock = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(uint64_t)));
+    block * retBlock = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(mpz_ptr)));
     retBlock->h = header_int();
     mpz_init_set_si(result, fd);
     mpz_ptr p = move_int(result);
@@ -281,7 +282,7 @@ extern "C" {
       return getInjErrorBlock();
     }
 
-    block * retBlock = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(uint64_t)));
+    block * retBlock = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(mpz_ptr)));
     retBlock->h = header_int();
     mpz_t result;
     mpz_init_set_si(result, (long) loc);
@@ -310,7 +311,7 @@ extern "C" {
       return getInjErrorBlock();
     }
 
-    block * retBlock = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(uint64_t)));
+    block * retBlock = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(mpz_ptr)));
     retBlock->h = header_int();
     mpz_t result;
     mpz_init_set_si(result, (int) c);
@@ -335,7 +336,7 @@ extern "C" {
     }
 
     result = static_cast<string *>(koreResizeLastAlloc(result, sizeof(string) + bytes, sizeof(string) + length));
-    block * retBlock = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(uint64_t)));
+    block * retBlock = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(string *)));
     retBlock->h = header_string();
     set_len(result, bytes);
     memcpy(retBlock->children, &result, sizeof(string *));
@@ -460,6 +461,43 @@ extern "C" {
     char * p = getTerminatedString(path);
 
     int ret = unlink(p);
+    if (ret == -1) {
+      return getKSeqErrorBlock();
+    }
+
+    return dotK;
+  }
+
+  block *hook_IO_accept(mpz_t sock) {
+    if (!mpz_fits_sint_p(sock)) {
+      throw std::invalid_argument("Arg too large");
+    }
+
+    int fd = mpz_get_si(sock);
+    int clientsock = accept(fd, NULL, NULL);
+
+    if (clientsock == -1) {
+      return getInjErrorBlock();
+    }
+
+    block * retBlock = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(mpz_ptr)));
+    retBlock->h = header_int();
+
+    mpz_t result;
+    mpz_init_set_si(result, clientsock);
+    mpz_ptr p = move_int(result);
+    memcpy(retBlock->children, &p, sizeof(mpz_ptr));
+    return retBlock;
+  }
+
+  block *hook_IO_shutdownWrite(mpz_t sock) {
+    if (!mpz_fits_sint_p(sock)) {
+      throw std::invalid_argument("Arg too large");
+    }
+
+    int fd = mpz_get_si(sock);
+    int ret = shutdown(fd, SHUT_WR);
+
     if (ret == -1) {
       return getKSeqErrorBlock();
     }
