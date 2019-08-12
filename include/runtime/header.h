@@ -98,6 +98,13 @@ extern "C" {
     uint64_t b[7];
   } list;
 
+  typedef struct vector {
+    uint64_t size;
+    uint32_t shift;
+    uint8_t * root;
+    uint8_t * tail;
+  } vector;
+
   typedef struct mpz_hdr {
     blockheader h;
     mpz_t i;
@@ -153,11 +160,11 @@ extern "C" {
   const char *topSort(void);
   void printMap(FILE *, map *, const char *, const char *, const char *);
   void printSet(FILE *, set *, const char *, const char *, const char *);
-  void printList(FILE *, list *, const char *, const char *, const char *);
+  void printList(FILE *, vector *, const char *, const char *, const char *);
   void visitChildren(block *subject, FILE *file,
       void visitConfig(FILE *, block *, const char *, bool), 
       void visitMap(FILE *, map *, const char *, const char *, const char *), 
-      void visitList(FILE *, list *, const char *, const char *, const char *), 
+      void visitList(FILE *, vector *, const char *, const char *, const char *), 
       void visitSet(FILE *, set *, const char *, const char *, const char *), 
       void visitInt(FILE *, mpz_t, const char *),
       void visitFloat(FILE *, floating *, const char *),

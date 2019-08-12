@@ -9,6 +9,7 @@ using List = immer::vector<block *>;
 
 extern "C" {
   mpz_ptr move_int(mpz_t);
+  bool hook_KEQUAL_eq(block *, block *);
 
   List hook_LIST_unit() {
     return List();
@@ -20,15 +21,15 @@ extern "C" {
 
   List hook_LIST_concat(List * l1, List * l2) {
     auto tmp = l1->transient();
-    for (auto iter = l2->begin(); iter != l2->end(); iter++) {
+    for (auto iter = l2->begin(); iter != l2->end(); ++iter) {
       tmp.push_back(*iter);
     }
     return tmp.persistent();
   }
 
   bool hook_LIST_in(block * value, List * list) {
-    for (auto iter = list->begin(); iter != list->end(); iter++) {
-      if ((*iter) == value) {
+    for (auto iter = list->begin(); iter != list->end(); ++iter) {
+      if (hook_KEQUAL_eq(*iter, value)) {
         return true;
       }
     }
@@ -43,7 +44,7 @@ extern "C" {
     return idx < list->size();
   }
 
-  block * hook_LIST_get_long(List * list, long idx) {
+  block * hook_LIST_get_long(List * list, ssize_t idx) {
     size_t size = list->size();
     size_t abs_idx = idx < 0 ? (long) size + idx : idx;
     return list->at(abs_idx);
@@ -53,19 +54,19 @@ extern "C" {
     if (!mpz_fits_slong_p(index)) {
       throw std::invalid_argument("Index is too large for get");
     }
-    size_t idx = mpz_get_ui(index);
+    ssize_t idx = mpz_get_si(index);
     return hook_LIST_get_long(list, idx);
   }
 
   List hook_LIST_range_long(List * list, size_t front, size_t back) {
     size_t size = list->size();
 
-    if (size < front + back) {
+    if (size < size - back) {
       throw std::out_of_range("Index out of range range_long");
     }
 
     auto tmp = List().transient();
-    for (int i = front; i < front + back; i++) {
+    for (int i = front; i < front + back; ++i) {
       tmp.push_back((*list)[i]);
     }
 
@@ -100,23 +101,18 @@ extern "C" {
   void list_hash(List * l, void * h) {
   }
 
-  List list_foreach(List * list, void (process)(block *&)) {
-    auto tmp = List().transient();
+  void list_foreach(List * list, void (process)(block **)) {
     block * t;
-
-    for (auto iter = list->begin(); iter != list->end(); iter++) {
+    for (auto iter = list->begin(); iter != list->end(); ++iter) {
       t = *iter;
-      process(t);
-      tmp.push_back(t);
+      process(&t);
     }
-
-    return tmp.persistent();
   }
 
   List list_map(List * list, block * (process)(block *)) {
     auto tmp = List().transient();
 
-    for (auto iter = list->begin(); iter != list->end(); iter++) {
+    for (auto iter = list->begin(); iter != list->end(); ++iter) {
       tmp.push_back(process(*iter));
     }
 
@@ -133,23 +129,23 @@ extern "C" {
     }
 
     int i = 1;
-    for (auto iter = list->begin(); iter != list->end(); iter++) {
+    for (auto iter = list->begin(); iter != list->end(); ++iter) {
       if (i < size) {
         fprintf(file, "%s(", concat);
       }
 
       fprintf(file, "%s(", element);
-      printConfigurationInternal(file, *iter, "K", false);
+      printConfigurationInternal(file, *iter, "KItem", false);
       fprintf(file, ")");
 
       if (i < size) {
         fprintf(file, ",");
       }
 
-      i++;
+      ++i;
     }
 
-    for (auto j = 0; j < size; j++) {
+    for (auto j = 0; j < size - 1; ++j) {
       fprintf(file, ")");
     }
 

@@ -85,7 +85,6 @@ find_package(Boost REQUIRED COMPONENTS unit_test_framework)
 link_directories(${LLVM_LIBRARY_DIR})
 include_directories(${LLVM_INCLUDE_DIR})
 include_directories (${PROJECT_SOURCE_DIR}/include)
-include_directories (${PROJECT_SOURCE_DIR}/include/immer)
 
 set(CMAKE_INSTALL_PREFIX "install")
 
@@ -148,6 +147,8 @@ install(
   DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/include/config
   DESTINATION include
 )
+
+file(COPY ${PROJECT_SOURCE_DIR}/deps/immer/immer DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/include)
 
 set(GC_INTERVAL 2000 CACHE STRING "Garbage collect every N steps")
 

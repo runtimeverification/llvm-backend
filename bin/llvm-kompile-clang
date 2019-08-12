@@ -54,6 +54,7 @@ fi
   "$LIBDIR"/libconfigurationparser.a \
   "$LIBDIR"/libstrings.a \
   "$LIBDIR"/libio.a \
+  "$LIBDIR"/libcollections.a \
   "$LIBDIR"/rust/libdatastructures.rlib \
   "$LIBDIR"/rust/deps/libim_rc-*.rlib \
   "$LIBDIR"/rust/deps/liblibc-*.rlib \
@@ -71,7 +72,6 @@ fi
   "$LIBDIR"/libAST.a \
   "$LIBDIR"/liballoc.a \
   "$LIBDIR"/libmeta.a \
-  "$LIBDIR"/libcollections.a \
   -lgmp -lmpfr -lpthread -ldl -lffi \
   $flags \
   -ljemalloc \
