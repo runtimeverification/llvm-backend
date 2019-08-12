@@ -85,6 +85,7 @@ find_package(Boost REQUIRED COMPONENTS unit_test_framework)
 link_directories(${LLVM_LIBRARY_DIR})
 include_directories(${LLVM_INCLUDE_DIR})
 include_directories (${PROJECT_SOURCE_DIR}/include)
+include_directories (${PROJECT_SOURCE_DIR}/include/immer)
 
 set(CMAKE_INSTALL_PREFIX "install")
 
