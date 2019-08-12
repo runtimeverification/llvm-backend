@@ -26,6 +26,7 @@ make install
 
 cp ../test/Makefile ./TestMakefile
 
+make -f TestMakefile clean
 make -f TestMakefile -j`nproc`
 
 diff io_output1.txt ../test/ioTest1.output
