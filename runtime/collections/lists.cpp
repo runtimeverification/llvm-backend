@@ -61,12 +61,12 @@ extern "C" {
   List hook_LIST_range_long(List * list, size_t front, size_t back) {
     size_t size = list->size();
 
-    if (size < size - back) {
+    if (size < front + back) {
       throw std::out_of_range("Index out of range range_long");
     }
 
     auto tmp = List().transient();
-    for (int i = front; i < front + back; ++i) {
+    for (int i = front; i < size - back; ++i) {
       tmp.push_back((*list)[i]);
     }
 
