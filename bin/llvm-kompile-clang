@@ -71,6 +71,7 @@ fi
   "$LIBDIR"/libAST.a \
   "$LIBDIR"/liballoc.a \
   "$LIBDIR"/libmeta.a \
+  "$LIBDIR"/libcollections.a \
   -lgmp -lmpfr -lpthread -ldl -lffi \
   $flags \
   -ljemalloc \

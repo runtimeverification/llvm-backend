@@ -11,6 +11,9 @@
 #include "runtime/collect.h"
 #include "runtime/header.h"
 
+#include "immer/vector.hpp"
+using List = immer::vector<block *>;
+
 extern "C" {
 
   uint64_t hash_k(block *);
@@ -71,8 +74,8 @@ extern "C" {
   mpz_ptr move_int(mpz_t);
   char * getTerminatedString(string * str);
 
-  size_t hook_LIST_size_long(struct list * l);
-  block * hook_LIST_get(struct list * l, int idx);
+  size_t hook_LIST_size_long(List * l);
+  block * hook_LIST_get(List * l, int idx);
 
   static void * so_lib_handle() {
     static void * handle = NULL;
@@ -136,7 +139,7 @@ extern "C" {
         return &ffi_type_pointer;
       }
     } else if (elem->h.hdr == (uint64_t)getTagForSymbolName(TYPETAG(struct))){
-      struct list * elements = (struct list *) *elem->children;
+      List * elements = (List *) *elem->children;
       size_t numFields = hook_LIST_size_long(elements);
       block * structField;
 
@@ -166,7 +169,7 @@ extern "C" {
     throw std::invalid_argument("Arg is not a supported type");
   }
 
-  string * ffiCall(bool isVariadic, mpz_t addr, struct list * args, struct list * fixtypes, struct list * vartypes, block * ret) {
+  string * ffiCall(bool isVariadic, mpz_t addr, List * args, List * fixtypes, List * vartypes, block * ret) {
     ffi_cif cif;
     ffi_type ** argtypes, * rtype;
     void (* address)(void);
@@ -257,11 +260,11 @@ extern "C" {
     return rvalue;
   }
 
-  string * hook_FFI_call(mpz_t addr, struct list * args, struct list * types, block * ret) {
+  string * hook_FFI_call(mpz_t addr, List * args, List * types, block * ret) {
     return ffiCall(false, addr, args, types, NULL, ret);
   }
 
-  string * hook_FFI_call_variadic(mpz_t addr, struct list * args, struct list * fixtypes, struct list * vartypes, block * ret) {
+  string * hook_FFI_call_variadic(mpz_t addr, List * args, List * fixtypes, List * vartypes, block * ret) {
     return ffiCall(true, addr, args, fixtypes, vartypes, ret);
   }
 
