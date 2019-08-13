@@ -38,10 +38,6 @@ extern "C" {
   block * DUMMY0 = &D0;
   block D1 = {{1}, {}};
   block * DUMMY1 = &D1;
-  block D2 = {{2}, {}};
-  block * DUMMY2 = &D2;
-  block D3 = {{3}, {}};
-  block * DUMMY3 = &D3;
 }
 
 BOOST_AUTO_TEST_SUITE(CollectionsTest)
