@@ -3,6 +3,10 @@
 #include "runtime/header.h"
 #include "runtime/alloc.h"
 
+#include "immer/vector.hpp"
+
+using List = immer::vector<block *>;
+
 static thread_local string *var;
 static thread_local block *to_replace;
 static thread_local block *replacement;
@@ -12,7 +16,7 @@ static thread_local uint64_t idx;
 extern "C" {
   bool hook_KEQUAL_eq(block *, block *);
   map map_map(void *, block *(block *));
-  list list_map(void *, block *(block *));
+  List list_map(void *, block *(block *));
   set set_map(void *, block *(block *));
 }
 
@@ -55,7 +59,7 @@ block *debruijnizeInternal(block *currBlock) {
         makeDirty(dirty, argData->offset, newArg, newBlock);
 	break;
       } case LIST_LAYOUT: {
-        list newArg = list_map(arg, debruijnizeInternal);
+        List newArg = list_map(arg, debruijnizeInternal);
         makeDirty(dirty, argData->offset, newArg, newBlock);
 	break;
       } case SET_LAYOUT: {
@@ -125,7 +129,7 @@ block *replaceBinderInternal(block *currBlock) {
         makeDirty(dirty, argData->offset, newArg, newBlock);
 	break;
       } case LIST_LAYOUT: {
-        list newArg = list_map(arg, replaceBinderInternal);
+        List newArg = list_map(arg, replaceBinderInternal);
         makeDirty(dirty, argData->offset, newArg, newBlock);
 	break;
       } case SET_LAYOUT: {
@@ -188,7 +192,7 @@ block *substituteInternal(block *currBlock) {
         makeDirty(dirty, argData->offset, newArg, newBlock);
 	break;
       } case LIST_LAYOUT: {
-        list newArg = list_map(arg, substituteInternal);
+        List newArg = list_map(arg, substituteInternal);
         makeDirty(dirty, argData->offset, newArg, newBlock);
 	break;
       } case SET_LAYOUT: {

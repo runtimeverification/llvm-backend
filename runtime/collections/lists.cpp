@@ -183,7 +183,7 @@ extern "C" {
     return tmp.persistent();
   }
 
-  void printList(FILE * file, struct vector * l, const char * unit, const char * element, const char * concat) {
+  void printList(FILE * file, struct list * l, const char * unit, const char * element, const char * concat) {
     List * list = (List *) l;
     size_t size = list->size();
 
