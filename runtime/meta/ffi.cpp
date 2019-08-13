@@ -75,7 +75,7 @@ extern "C" {
   char * getTerminatedString(string * str);
 
   size_t hook_LIST_size_long(List * l);
-  block * hook_LIST_get(List * l, int idx);
+  block * hook_LIST_get_long(List * l, ssize_t idx);
 
   static void * so_lib_handle() {
     static void * handle = NULL;
@@ -150,7 +150,7 @@ extern "C" {
       structType->elements = (ffi_type **) malloc(sizeof(ffi_type *) * (numFields + 1));
 
       for (int j = 0; j < numFields; j++) {
-        structField = hook_LIST_get(elements, j);
+        structField = hook_LIST_get_long(elements, j);
 
         if (structField->h.hdr != (uint64_t)getTagForSymbolName("inj{SortFFIType{}}")) {
           throw std::invalid_argument("Struct list contains invalid FFI type");
@@ -196,7 +196,7 @@ extern "C" {
 
     block * elem;
     for (int i = 0; i < nfixtypes; i++) {
-        elem = hook_LIST_get(fixtypes, i);
+        elem = hook_LIST_get_long(fixtypes, i);
         if (elem->h.hdr != (uint64_t)getTagForSymbolName("inj{SortFFIType{}}")) {
           throw std::invalid_argument("Fix types list contains invalid FFI type");
         }
@@ -205,7 +205,7 @@ extern "C" {
     }
 
     for (int i = 0; i < nvartypes; i++) {
-        elem = hook_LIST_get(vartypes, i);
+        elem = hook_LIST_get_long(vartypes, i);
         if (elem->h.hdr != (uint64_t)getTagForSymbolName("inj{SortFFIType{}}")) {
           throw std::invalid_argument("Var types list contains invalid FFI type");
         }
@@ -215,7 +215,7 @@ extern "C" {
 
     void ** avalues = (void **) malloc(sizeof(void *) * nargs);
     for (int i = 0; i < nargs; i++) {
-        elem = hook_LIST_get(args, i);
+        elem = hook_LIST_get_long(args, i);
         if (elem->h.hdr != (uint64_t)getTagForSymbolName("inj{SortBytes{}}")) {
           throw std::invalid_argument("Args list contains non-bytes type");
         }
