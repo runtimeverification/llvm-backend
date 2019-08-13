@@ -13,6 +13,9 @@ extern "C" {
   List hook_LIST_concat(List *, List *);
   List hook_LIST_range(List *, mpz_t, mpz_t);
   List hook_LIST_range_long(List *, size_t, size_t);
+  List hook_LIST_make(mpz_t len, block * value);
+  List hook_LIST_update(List * list, mpz_t index, block * value);
+  List hook_LIST_updateAll(List * l1, mpz_t index, List * l2);
   mpz_ptr hook_LIST_size(List *);
   block * hook_LIST_get(List *, mpz_t);
   bool hook_LIST_in(block *, List *);
@@ -22,8 +25,6 @@ extern "C" {
     *result = *i;
     return result;
   }
-
-  //void add_hash64(void*, uint64_t) {}
 
   void printConfigurationInternal(FILE *file, block *subject, const char *sort, bool) {}
 
@@ -134,6 +135,38 @@ BOOST_AUTO_TEST_SUITE(CollectionsTest)
 
     mpz_ptr size = hook_LIST_size(&result);
     BOOST_CHECK_EQUAL(0, mpz_cmp_ui(size, 0));
+
+    list = hook_LIST_concat(&list, &list);
+    result = hook_LIST_range(&list, one, zero);
+
+    size = hook_LIST_size(&result);
+    BOOST_CHECK_EQUAL(0, mpz_cmp_ui(size, 1));
   }
 
+  BOOST_AUTO_TEST_CASE(make_out_of_range) {
+    mpz_t neg;
+    mpz_init_set_si(neg, -1);
+    BOOST_CHECK_THROW(hook_LIST_make(neg, DUMMY0), std::invalid_argument);
+  }
+
+  BOOST_AUTO_TEST_CASE(make) {
+    mpz_t zero, ten;
+    mpz_init_set_ui(zero, 0);
+    mpz_init_set_ui(ten, 10);
+    List list = hook_LIST_make(ten, DUMMY0);
+    block * result = hook_LIST_get(&list, zero);
+
+    BOOST_CHECK_EQUAL(true, hook_KEQUAL_eq(result, DUMMY0));
+    mpz_ptr size = hook_LIST_size(&list);
+
+    BOOST_CHECK_EQUAL(0, mpz_cmp_ui(size, 10));
+  }
+
+  BOOST_AUTO_TEST_CASE(update_neg) {
+    List list = hook_LIST_element(DUMMY0);
+    mpz_t neg;
+    mpz_init_set_si(neg, -1);
+
+    BOOST_CHECK_THROW(hook_LIST_update(&list, neg, DUMMY1), std::invalid_argument);
+  }
 BOOST_AUTO_TEST_SUITE_END()

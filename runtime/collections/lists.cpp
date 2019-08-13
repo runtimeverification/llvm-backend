@@ -94,6 +94,70 @@ extern "C" {
     return move_int(size);
   }
 
+  List hook_LIST_make(mpz_t len, block * value) {
+    if (!mpz_fits_ulong_p(len)) {
+      throw std::invalid_argument("Length is too large for make");
+    }
+
+    auto tmp = List().transient();
+    size_t length = mpz_get_ui(len);
+
+    for (int i = 0; i < length; ++i) {
+      tmp.push_back(value);
+    }
+
+    return tmp.persistent();
+  }
+
+  List hook_LIST_update(List * list, mpz_t index, block * value) {
+    if (!mpz_fits_ulong_p(index)) {
+      throw std::invalid_argument("Length is too large for update");
+    }
+    
+    size_t idx = mpz_get_ui(index);
+    if (idx >= list->size()) {
+      throw std::invalid_argument("Index out of range for update");
+    }
+
+    return list->set(idx, value);
+  }
+
+  List hook_LIST_updateAll(List * l1, mpz_t index, List * l2) {
+    if (!mpz_fits_ulong_p(index)) {
+      throw std::invalid_argument("Length is too large for updateAll");
+    }
+
+    size_t idx = mpz_get_ui(index);
+    size_t size = l1->size();
+    size_t size2 = l2->size();
+    if (idx != 0 && size2 != 0) {
+      if (idx + size2 - 1 >= size) {
+        throw std::invalid_argument("Index out of range for updateAll");
+      }
+    }
+
+    auto tmp = l1->take(idx).transient();
+
+    block * t;
+    for (int i = 0; i < size2; ++i) {
+      t = l2->at(i);
+      tmp.push_back(t);
+    }
+
+    for (int i = idx; i < size; ++i) {
+      t = l1->at(i);
+      tmp.push_back(t);
+    }
+
+    return tmp.persistent();
+  }
+
+  /*
+  List hook_LIST_fill(List * l, mpz_t index, mpz_t len, block * val) {
+  
+  }
+  */
+
   bool hook_LIST_eq(List * l1, List * l2) {
     return (*l1) == (*l2);
   }
