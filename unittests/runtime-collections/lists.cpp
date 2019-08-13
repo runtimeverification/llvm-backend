@@ -16,6 +16,7 @@ extern "C" {
   List hook_LIST_make(mpz_t len, block * value);
   List hook_LIST_update(List * list, mpz_t index, block * value);
   List hook_LIST_updateAll(List * l1, mpz_t index, List * l2);
+  List hook_LIST_fill(List * l, mpz_t index, mpz_t len, block * val);
   mpz_ptr hook_LIST_size(List *);
   block * hook_LIST_get(List *, mpz_t);
   bool hook_LIST_in(block *, List *);
@@ -226,6 +227,39 @@ BOOST_AUTO_TEST_SUITE(CollectionsTest)
     List l2 = hook_LIST_element(DUMMY1);
 
     BOOST_CHECK_THROW(hook_LIST_updateAll(&l1, one, &l2), std::invalid_argument);
+  }
+
+  BOOST_AUTO_TEST_CASE(fill_out_of_range) {
+    List list = hook_LIST_unit();
+    mpz_t index, len;
+    mpz_init_set_ui(index, 1);
+    mpz_init_set_ui(len, 2);
+
+    BOOST_CHECK_THROW(hook_LIST_fill(&list, index, len, DUMMY0), std::out_of_range);
+  }
+
+  BOOST_AUTO_TEST_CASE(fill) {
+    mpz_t zero, one, two, three, four;
+    mpz_init_set_ui(zero, 0);
+    mpz_init_set_ui(one, 1);
+    mpz_init_set_ui(two, 2);
+    mpz_init_set_ui(three, 3);
+    mpz_init_set_ui(four, 4);
+
+    List l1 = hook_LIST_make(four, DUMMY0);
+    List l2 = hook_LIST_fill(&l1, one, two, DUMMY1);
+
+    block * result = hook_LIST_get(&l2, zero);
+    BOOST_CHECK_EQUAL(true, hook_KEQUAL_eq(result, DUMMY0));
+
+    result = hook_LIST_get(&l2, one);
+    BOOST_CHECK_EQUAL(true, hook_KEQUAL_eq(result, DUMMY1));
+
+    result = hook_LIST_get(&l2, two);
+    BOOST_CHECK_EQUAL(true, hook_KEQUAL_eq(result, DUMMY1));
+
+    result = hook_LIST_get(&l2, three);
+    BOOST_CHECK_EQUAL(true, hook_KEQUAL_eq(result, DUMMY0));
   }
 
   BOOST_AUTO_TEST_CASE(eq) {

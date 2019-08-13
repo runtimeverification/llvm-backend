@@ -58,6 +58,10 @@ extern "C" {
     return hook_LIST_get_long(list, idx);
   }
 
+  block * hook_LIST_lookup(List * list, mpz_t index) {
+    return hook_LIST_get(list, index);
+  }
+
   List hook_LIST_range_long(List * list, size_t front, size_t back) {
     size_t size = list->size();
 
@@ -152,11 +156,32 @@ extern "C" {
     return tmp.persistent();
   }
 
-  /*
   List hook_LIST_fill(List * l, mpz_t index, mpz_t len, block * val) {
-  
+    if (!mpz_fits_ulong_p(index)) {
+      throw std::invalid_argument("Index is too large for fill");
+    }
+
+    if (!mpz_fits_ulong_p(len)) {
+      throw std::invalid_argument("Length is too large for fill");
+    }
+
+    size_t idx = mpz_get_ui(index);
+    size_t length = mpz_get_ui(len);
+
+    if (idx != 0 && length != 0) {
+      if (idx + length - 1 >= l->size()) {
+        throw std::out_of_range("Index out of range for fill");
+      }
+    }
+
+    auto tmp = l->transient();
+
+    for (auto i = idx; i < idx + length; ++i) {
+      tmp.set(i, val);
+    }
+
+    return tmp.persistent();
   }
-  */
 
   bool hook_LIST_eq(List * l1, List * l2) {
     return (*l1) == (*l2);
