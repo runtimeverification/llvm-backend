@@ -19,6 +19,7 @@ extern "C" {
   mpz_ptr hook_LIST_size(List *);
   block * hook_LIST_get(List *, mpz_t);
   bool hook_LIST_in(block *, List *);
+  bool hook_LIST_eq(List *, List *);
 
   mpz_ptr move_int(mpz_t i) {
     mpz_ptr result = (mpz_ptr)malloc(sizeof(__mpz_struct));
@@ -168,5 +169,74 @@ BOOST_AUTO_TEST_SUITE(CollectionsTest)
     mpz_init_set_si(neg, -1);
 
     BOOST_CHECK_THROW(hook_LIST_update(&list, neg, DUMMY1), std::invalid_argument);
+  }
+
+  BOOST_AUTO_TEST_CASE(update_out_of_range) {
+    List list = hook_LIST_element(DUMMY0);
+    mpz_t one;
+    mpz_init_set_ui(one, 1);
+
+    BOOST_CHECK_THROW(hook_LIST_update(&list, one, DUMMY1), std::invalid_argument);
+  }
+
+  BOOST_AUTO_TEST_CASE(update) {
+    List list = hook_LIST_element(DUMMY0);
+    mpz_t index;
+    mpz_init_set_ui(index, 0);
+    list = hook_LIST_update(&list, index, DUMMY1);
+    block * result = hook_LIST_get(&list, index);
+
+    BOOST_CHECK_EQUAL(true, hook_KEQUAL_eq(result, DUMMY1));
+  }
+
+  BOOST_AUTO_TEST_CASE(update_all_neg) {
+    mpz_t neg;
+    mpz_init_set_si(neg, -1);
+    List l1 = hook_LIST_element(DUMMY0);
+    List l2 = hook_LIST_unit();
+
+    BOOST_CHECK_THROW(hook_LIST_updateAll(&l1, neg, &l2), std::invalid_argument);
+  }
+
+  BOOST_AUTO_TEST_CASE(update_all) {
+    mpz_t zero, one;
+    mpz_init_set_ui(zero, 0);
+    mpz_init_set_ui(one, 1);
+    List l1 = hook_LIST_element(DUMMY0);
+    List l2 = hook_LIST_unit();
+    List list = hook_LIST_updateAll(&l1, one, &l2);
+    block * result = hook_LIST_get(&list, zero);
+
+    BOOST_CHECK_EQUAL(true, hook_KEQUAL_eq(result, DUMMY0));
+    list = hook_LIST_updateAll(&l1, zero, &l2);
+    result = hook_LIST_get(&list, zero);
+
+    BOOST_CHECK_EQUAL(true, hook_KEQUAL_eq(result, DUMMY0));
+    l2 = hook_LIST_element(DUMMY1);
+    list = hook_LIST_updateAll(&l1, zero, &l2);
+    result = hook_LIST_get(&list, zero);
+
+    BOOST_CHECK_EQUAL(true, hook_KEQUAL_eq(result, DUMMY1));
+  }
+
+  BOOST_AUTO_TEST_CASE(update_all_out_of_range) {
+    mpz_t one;
+    mpz_init_set_ui(one, 1);
+    List l1 = hook_LIST_element(DUMMY0);
+    List l2 = hook_LIST_element(DUMMY1);
+
+    BOOST_CHECK_THROW(hook_LIST_updateAll(&l1, one, &l2), std::invalid_argument);
+  }
+
+  BOOST_AUTO_TEST_CASE(eq) {
+    List l1 = hook_LIST_element(DUMMY0);
+    List l2 = hook_LIST_unit();
+    bool result = hook_LIST_eq(&l1, &l2);
+
+    BOOST_CHECK(!result);
+
+    l2 = hook_LIST_element(DUMMY0);
+    result = hook_LIST_eq(&l1, &l2);
+    BOOST_CHECK(result);
   }
 BOOST_AUTO_TEST_SUITE_END()
