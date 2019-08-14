@@ -17,7 +17,7 @@ using List = immer::vector<block *>;
 #include "stdio.h"
 
 #define KCHAR char
-#define TYPETAG(type) "Lbl'hash'" #type "{}"
+#define TYPETAG(type) "Lbl'Hash'" #type "{}"
 extern "C" {
 
   struct point {
