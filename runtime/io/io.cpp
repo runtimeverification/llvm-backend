@@ -540,8 +540,28 @@ extern "C" {
     return dotK;
   }
 
-  block * hook_META_parseKAST(string *kast) {
+  block * hook_KREFLECTION_parseKAST(string *kast) {
     throw std::invalid_argument("not implemented: META.parseKast");
+  }
+
+  block * hook_IO_mkstemp(string * filename) {
+    char * temp = getTerminatedString(filename);
+    int ret = mkstemp(temp);
+
+    if (ret == -1) {
+      return getInjErrorBlock();
+    }
+
+    block * retBlock = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(string *) + sizeof(mpz_ptr)));
+
+    mpz_t result;
+    mpz_init_set_si(result, ret);
+    mpz_ptr p = move_int(result);
+    memcpy(retBlock->children, &filename, sizeof(string *));
+    memcpy(retBlock->children + 1, &p, sizeof(mpz_ptr));
+    retBlock->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName(GETTAG(tempFile)));
+
+    return retBlock;
   }
 
   block * hook_IO_system(string * cmd) {
