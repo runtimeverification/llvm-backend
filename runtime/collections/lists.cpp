@@ -5,11 +5,27 @@
 #include "immer/vector.hpp"
 #include "immer/vector_transient.hpp"
 
-using List = immer::vector<block *>;
+extern "C" {
+  bool hook_KEQUAL_eq(block *, block *);
+}
+
+class KElem {
+public:
+  KElem(block * elem) {
+    this->elem = elem;
+  }
+
+  bool operator==(const KElem& other) {
+    return hook_KEQUAL_eq(this->elem, other.elem);
+  }
+
+  block * elem;
+};
+
+using List = immer::vector<KElem>;
 
 extern "C" {
   mpz_ptr move_int(mpz_t);
-  bool hook_KEQUAL_eq(block *, block *);
 
   List hook_LIST_unit() {
     return List();
@@ -29,7 +45,7 @@ extern "C" {
 
   bool hook_LIST_in(block * value, List * list) {
     for (auto iter = list->begin(); iter != list->end(); ++iter) {
-      if (hook_KEQUAL_eq(*iter, value)) {
+      if (hook_KEQUAL_eq(iter->elem, value)) {
         return true;
       }
     }
@@ -47,7 +63,7 @@ extern "C" {
   block * hook_LIST_get_long(List * list, ssize_t idx) {
     size_t size = list->size();
     size_t abs_idx = idx < 0 ? (long) size + idx : idx;
-    return list->at(abs_idx);
+    return list->at(abs_idx).elem;
   }
 
   block * hook_LIST_get(List * list, mpz_t index) {
@@ -144,12 +160,12 @@ extern "C" {
 
     block * t;
     for (int i = 0; i < size2; ++i) {
-      t = l2->at(i);
+      t = l2->at(i).elem;
       tmp.push_back(t);
     }
 
     for (int i = idx; i < size; ++i) {
-      t = l1->at(i);
+      t = l1->at(i).elem;
       tmp.push_back(t);
     }
 
@@ -193,7 +209,7 @@ extern "C" {
   void list_foreach(List * list, void (process)(block **)) {
     block * t;
     for (auto iter = list->begin(); iter != list->end(); ++iter) {
-      t = *iter;
+      t = iter->elem;
       process(&t);
     }
   }
@@ -202,7 +218,7 @@ extern "C" {
     auto tmp = List().transient();
 
     for (auto iter = list->begin(); iter != list->end(); ++iter) {
-      tmp.push_back(process(*iter));
+      tmp.push_back(process(iter->elem));
     }
 
     return tmp.persistent();
@@ -228,7 +244,7 @@ extern "C" {
       }
 
       fprintf(file, "%s(", element);
-      printConfigurationInternal(file, *iter, "KItem", false);
+      printConfigurationInternal(file, iter->elem, "KItem", false);
       fprintf(file, ")");
 
       if (i < size) {
