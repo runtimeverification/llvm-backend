@@ -7,7 +7,6 @@ use decls::im_rc::hashmap::HashMap;
 use decls::im_rc::hashset::HashSet;
 use decls::im_rc::hashset;
 use decls::im_rc::hashmap;
-use decls::im_rc::vector::Vector;
 use self::libc::{FILE,c_char,c_void};
 use std::alloc::{GlobalAlloc, Layout};
 use std::collections::hash_map::DefaultHasher;
@@ -44,6 +43,7 @@ pub struct Int(
 
 pub type K = *const Block;
 
+#[repr(C)]
 #[derive(Debug)]
 pub struct KElem(
   pub UnsafeCell<K>
@@ -101,9 +101,36 @@ pub unsafe extern "C" fn hash_k(block: K) -> u64 {
 
 pub type Map = HashMap<KElem, KElem>;
 pub type Set = HashSet<KElem>;
-pub type List = Vector<KElem>;
 pub type SetIter = hashset::Iter<'static, KElem>;
 pub type MapIter = hashmap::Iter<'static, KElem, KElem>;
+
+#[repr(C)]
+pub struct List(
+  pub i64,
+  pub i32,
+  pub *const i8,
+  pub *const i8
+);
+
+pub struct ListIter {
+  pub list: *const List,
+  pub idx: usize,
+}
+
+impl Iterator for ListIter {
+  type Item = KElem;
+
+  fn next(&mut self) -> Option<KElem> {
+    unsafe {
+      if self.idx >= hook_LIST_size_long(self.list) {
+        return None;
+      }
+      let elem = hook_LIST_get_long(self.list, self.idx as isize);
+      self.idx += 1;
+      Some(elem)
+    }
+  }
+}
 
 #[link(name="gmp")]
 extern "C" {
@@ -112,6 +139,13 @@ extern "C" {
   pub fn __gmpz_fits_slong_p(op: *const Int) -> i32;
   pub fn __gmpz_get_ui(op: *const Int) -> usize;
   pub fn __gmpz_get_si(op: *const Int) -> isize;
+}
+
+extern "C" {
+  pub fn hook_LIST_unit() -> List;
+  pub fn hook_LIST_size_long(list: *const List) -> usize;
+  pub fn hook_LIST_get_long(list: *const List, idx: isize) -> KElem;
+  pub fn list_push_back(list: *const List, value: KElem) -> List;
 }
 
 extern "C" {

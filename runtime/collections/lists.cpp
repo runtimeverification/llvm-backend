@@ -208,6 +208,10 @@ extern "C" {
     return tmp.persistent();
   }
 
+  List list_push_back(List * list, block * value) {
+    return list->push_back(value);
+  }
+
   void printList(FILE * file, struct list * l, const char * unit, const char * element, const char * concat) {
     List * list = (List *) l;
     size_t size = list->size();
