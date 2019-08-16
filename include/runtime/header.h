@@ -95,8 +95,8 @@ extern "C" {
   typedef struct list {
     uint64_t size;
     uint32_t shift;
-    uint8_t * root;
-    uint8_t * tail;
+    void *root;
+    void *tail;
   } list;
 
   typedef struct mpz_hdr {
