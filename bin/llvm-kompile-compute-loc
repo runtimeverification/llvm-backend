@@ -1,0 +1,7 @@
+#!/bin/sh
+ordinal=$1
+definition=$2
+line=$(grep -on '^  axiom' $definition/definition.kore | awk '{print $1 " " i++}' | grep "$ordinal\$" | awk -F ':' '{print $1}')
+echo "Line: $line"
+att=$(sed -n "$line,$((line+7))p;$((line+8))q" $definition/definition.kore | grep "'Stop'Source")
+echo "$att" | sed 's/.*Stop'\''Source{}("Source(//' | sed 's/)".*Stop'\''Location{}("Location(/:/' | sed 's/,\([0-9]\+\).*/:\1/'
