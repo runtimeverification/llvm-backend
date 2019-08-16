@@ -1,0 +1,5 @@
+#!/bin/sh
+line=$1
+definition=$2
+ordinal=$(grep -on '^  axiom' $definition/definition.kore | awk '{print $1 " " i++}' | grep "^$line" | awk '{print $2}')
+echo "Ordinal: $ordinal"
