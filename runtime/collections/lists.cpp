@@ -119,14 +119,8 @@ extern "C" {
       throw std::invalid_argument("Length is too large for make");
     }
 
-    auto tmp = List().transient();
     size_t length = mpz_get_ui(len);
-
-    for (int i = 0; i < length; ++i) {
-      tmp.push_back(value);
-    }
-
-    return tmp.persistent();
+    return List(length, value);
   }
 
   List hook_LIST_update(List * list, mpz_t index, block * value) {
@@ -156,17 +150,10 @@ extern "C" {
       }
     }
 
-    auto tmp = l1->take(idx).transient();
+    auto tmp = l1->transient();
 
-    block * t;
-    for (int i = 0; i < size2; ++i) {
-      t = l2->at(i).elem;
-      tmp.push_back(t);
-    }
-
-    for (int i = idx; i < size; ++i) {
-      t = l1->at(i).elem;
-      tmp.push_back(t);
+    for (int i = idx, j = 0; j < size2; ++i, ++j) {
+      tmp.set(i, l2->at(j));
     }
 
     return tmp.persistent();
@@ -207,10 +194,8 @@ extern "C" {
   }
 
   void list_foreach(List * list, void (process)(block **)) {
-    block * t;
     for (auto iter = list->begin(); iter != list->end(); ++iter) {
-      t = iter->elem;
-      process(&t);
+      process((block **)&iter->elem);
     }
   }
 
