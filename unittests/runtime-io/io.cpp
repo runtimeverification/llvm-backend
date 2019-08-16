@@ -15,10 +15,9 @@
 extern "C" {
 
 #define GETTAG(symbol) "Lbl'Hash'" #symbol "{}"
-#define ERRTAG(err) GETTAG(err)
 #define ERRBLOCK(tag) (((uint64_t)tag << 32) | 1)
 #define NUM_SYMBOLS 7
-  const char * symbols[NUM_SYMBOLS] = {ERRTAG(EOF), ERRTAG(ENOENT), ERRTAG(EBADF), "inj{SortInt{}, SortIOInt{}}", "inj{SortIOError{}, SortKItem{}}", "kseq{}", GETTAG(systemResult)};
+  const char * symbols[NUM_SYMBOLS] = {GETTAG(EOF), GETTAG(ENOENT), GETTAG(EBADF), "inj{SortInt{}, SortIOInt{}}", "inj{SortIOError{}, SortKItem{}}", "kseq{}", GETTAG(systemResult)};
 
   uint32_t getTagForSymbolName(const char *s) {
     for (int i = 0; i < NUM_SYMBOLS; i++) {
@@ -89,7 +88,7 @@ BOOST_AUTO_TEST_CASE(open) {
 
   block * b2 = hook_IO_open(fakeFilename, control);
   BOOST_CHECK_EQUAL(b2->h.hdr, getBlockHeaderForSymbol(getTagForSymbolName("inj{SortIOError{}, SortKItem{}}")).hdr);
-  BOOST_CHECK_EQUAL((uint64_t)*(b2->children), ERRBLOCK(getTagForSymbolName(ERRTAG(ENOENT))));
+  BOOST_CHECK_EQUAL((uint64_t)*(b2->children), ERRBLOCK(getTagForSymbolName(GETTAG(ENOENT))));
 }
 
 BOOST_AUTO_TEST_CASE(tell) {
@@ -126,7 +125,7 @@ BOOST_AUTO_TEST_CASE(tell) {
   mpz_set_si(f, -1);
   b = hook_IO_tell(f);
   BOOST_CHECK_EQUAL(b->h.hdr, getBlockHeaderForSymbol(getTagForSymbolName("inj{SortIOError{}, SortKItem{}}")).hdr);
-  BOOST_CHECK_EQUAL((uint64_t)*(b->children), ERRBLOCK(getTagForSymbolName(ERRTAG(EBADF))));
+  BOOST_CHECK_EQUAL((uint64_t)*(b->children), ERRBLOCK(getTagForSymbolName(GETTAG(EBADF))));
 }
 
 BOOST_AUTO_TEST_CASE(getc) {
@@ -157,14 +156,16 @@ BOOST_AUTO_TEST_CASE(getc) {
   ::lseek(fd, 0, SEEK_END);
   b = hook_IO_getc(f);
   BOOST_CHECK_EQUAL(b->h.hdr, getBlockHeaderForSymbol(getTagForSymbolName("inj{SortIOError{}, SortKItem{}}")).hdr);
-  BOOST_CHECK_EQUAL((uint64_t)*(b->children), ERRBLOCK(getTagForSymbolName(ERRTAG(EOF))));
+  const char * temp = GETTAG(EOF);
+  BOOST_CHECK(temp != "");
+  BOOST_CHECK_EQUAL((uint64_t)*(b->children), ERRBLOCK(getTagForSymbolName(GETTAG(EOF))));
 
   ::close(fd);
 
   mpz_set_si(f, -1);
   b = hook_IO_getc(f);
   BOOST_CHECK_EQUAL(b->h.hdr, getBlockHeaderForSymbol(getTagForSymbolName("inj{SortIOError{}, SortKItem{}}")).hdr);
-  BOOST_CHECK_EQUAL((uint64_t)*(b->children), ERRBLOCK(getTagForSymbolName(ERRTAG(EBADF))));
+  BOOST_CHECK_EQUAL((uint64_t)*(b->children), ERRBLOCK(getTagForSymbolName(GETTAG(EBADF))));
 }
 
 BOOST_AUTO_TEST_CASE(read) {
@@ -196,7 +197,7 @@ BOOST_AUTO_TEST_CASE(read) {
 
   b = hook_IO_read(f, len);
   BOOST_CHECK_EQUAL(b->h.hdr, getBlockHeaderForSymbol(getTagForSymbolName("inj{SortIOError{}, SortKItem{}}")).hdr);
-  BOOST_CHECK_EQUAL((uint64_t)*(b->children), ERRBLOCK(getTagForSymbolName(ERRTAG(EBADF))));
+  BOOST_CHECK_EQUAL((uint64_t)*(b->children), ERRBLOCK(getTagForSymbolName(GETTAG(EBADF))));
 }
 
 BOOST_AUTO_TEST_CASE(close) {
@@ -218,11 +219,11 @@ BOOST_AUTO_TEST_CASE(close) {
   block * b = hook_IO_close(f1);
   BOOST_CHECK_EQUAL(b->h.hdr, getBlockHeaderForSymbol(getTagForSymbolName("kseq{}")).hdr);
   BOOST_CHECK_EQUAL(((block*)*(b->children))->h.hdr, getBlockHeaderForSymbol(getTagForSymbolName("inj{SortIOError{}, SortKItem{}}")).hdr);
-  BOOST_CHECK_EQUAL((uint64_t)*(((block*)*(b->children))->children), ERRBLOCK(getTagForSymbolName(ERRTAG(EBADF))));
+  BOOST_CHECK_EQUAL((uint64_t)*(((block*)*(b->children))->children), ERRBLOCK(getTagForSymbolName(GETTAG(EBADF))));
   b = hook_IO_close(f2);
   BOOST_CHECK_EQUAL(b->h.hdr, getBlockHeaderForSymbol(getTagForSymbolName("kseq{}")).hdr);
   BOOST_CHECK_EQUAL(((block*)*(b->children))->h.hdr, getBlockHeaderForSymbol(getTagForSymbolName("inj{SortIOError{}, SortKItem{}}")).hdr);
-  BOOST_CHECK_EQUAL((uint64_t)*(((block*)*(b->children))->children), ERRBLOCK(getTagForSymbolName(ERRTAG(EBADF))));
+  BOOST_CHECK_EQUAL((uint64_t)*(((block*)*(b->children))->children), ERRBLOCK(getTagForSymbolName(GETTAG(EBADF))));
 }
 
 BOOST_AUTO_TEST_CASE(putc) {
@@ -257,7 +258,7 @@ BOOST_AUTO_TEST_CASE(putc) {
   block * b = hook_IO_putc(f, c);
   BOOST_CHECK_EQUAL(b->h.hdr, getBlockHeaderForSymbol(getTagForSymbolName("kseq{}")).hdr);
   BOOST_CHECK_EQUAL(((block*)*(b->children))->h.hdr, getBlockHeaderForSymbol(getTagForSymbolName("inj{SortIOError{}, SortKItem{}}")).hdr);
-  BOOST_CHECK_EQUAL((uint64_t)*(((block*)*(b->children))->children), ERRBLOCK(getTagForSymbolName(ERRTAG(EBADF))));
+  BOOST_CHECK_EQUAL((uint64_t)*(((block*)*(b->children))->children), ERRBLOCK(getTagForSymbolName(GETTAG(EBADF))));
 }
 
 BOOST_AUTO_TEST_CASE(seek) {
@@ -280,7 +281,7 @@ BOOST_AUTO_TEST_CASE(seek) {
   block * b = hook_IO_seek(f, loc);
   BOOST_CHECK_EQUAL(b->h.hdr, getBlockHeaderForSymbol(getTagForSymbolName("kseq{}")).hdr);
   BOOST_CHECK_EQUAL(((block*)*(b->children))->h.hdr, getBlockHeaderForSymbol(getTagForSymbolName("inj{SortIOError{}, SortKItem{}}")).hdr);
-  BOOST_CHECK_EQUAL((uint64_t)*(((block*)*(b->children))->children), ERRBLOCK(getTagForSymbolName(ERRTAG(EBADF))));
+  BOOST_CHECK_EQUAL((uint64_t)*(((block*)*(b->children))->children), ERRBLOCK(getTagForSymbolName(GETTAG(EBADF))));
 }
 BOOST_AUTO_TEST_CASE(seekEnd) {
   mpz_t f;
@@ -305,7 +306,7 @@ BOOST_AUTO_TEST_CASE(seekEnd) {
   block * b = hook_IO_seekEnd(f, loc);
   BOOST_CHECK_EQUAL(b->h.hdr, getBlockHeaderForSymbol(getTagForSymbolName("kseq{}")).hdr);
   BOOST_CHECK_EQUAL(((block*)*(b->children))->h.hdr, getBlockHeaderForSymbol(getTagForSymbolName("inj{SortIOError{}, SortKItem{}}")).hdr);
-  BOOST_CHECK_EQUAL((uint64_t)*(((block*)*(b->children))->children), ERRBLOCK(getTagForSymbolName(ERRTAG(EBADF))));
+  BOOST_CHECK_EQUAL((uint64_t)*(((block*)*(b->children))->children), ERRBLOCK(getTagForSymbolName(GETTAG(EBADF))));
 }
 
 BOOST_AUTO_TEST_CASE(write) {
@@ -327,7 +328,7 @@ BOOST_AUTO_TEST_CASE(write) {
   block * b = hook_IO_write(f, msg);
   BOOST_CHECK_EQUAL(b->h.hdr, getBlockHeaderForSymbol(getTagForSymbolName("kseq{}")).hdr);
   BOOST_CHECK_EQUAL(((block*)*(b->children))->h.hdr, getBlockHeaderForSymbol(getTagForSymbolName("inj{SortIOError{}, SortKItem{}}")).hdr);
-  BOOST_CHECK_EQUAL((uint64_t)*(((block*)*(b->children))->children), ERRBLOCK(getTagForSymbolName(ERRTAG(EBADF))));
+  BOOST_CHECK_EQUAL((uint64_t)*(((block*)*(b->children))->children), ERRBLOCK(getTagForSymbolName(GETTAG(EBADF))));
 }
 
 BOOST_AUTO_TEST_CASE(lock) {
@@ -347,7 +348,7 @@ BOOST_AUTO_TEST_CASE(lock) {
   b = hook_IO_lock(f, len);
   BOOST_CHECK_EQUAL(b->h.hdr, getBlockHeaderForSymbol(getTagForSymbolName("kseq{}")).hdr);
   BOOST_CHECK_EQUAL(((block*)*(b->children))->h.hdr, getBlockHeaderForSymbol(getTagForSymbolName("inj{SortIOError{}, SortKItem{}}")).hdr);
-  BOOST_CHECK_EQUAL((uint64_t)*(((block*)*(b->children))->children), ERRBLOCK(getTagForSymbolName(ERRTAG(EBADF))));
+  BOOST_CHECK_EQUAL((uint64_t)*(((block*)*(b->children))->children), ERRBLOCK(getTagForSymbolName(GETTAG(EBADF))));
 }
 
 BOOST_AUTO_TEST_CASE(unlock) {
@@ -367,7 +368,7 @@ BOOST_AUTO_TEST_CASE(unlock) {
   b = hook_IO_unlock(f, len);
   BOOST_CHECK_EQUAL(b->h.hdr, getBlockHeaderForSymbol(getTagForSymbolName("kseq{}")).hdr);
   BOOST_CHECK_EQUAL(((block*)*(b->children))->h.hdr, getBlockHeaderForSymbol(getTagForSymbolName("inj{SortIOError{}, SortKItem{}}")).hdr);
-  BOOST_CHECK_EQUAL((uint64_t)*(((block*)*(b->children))->children), ERRBLOCK(getTagForSymbolName(ERRTAG(EBADF))));
+  BOOST_CHECK_EQUAL((uint64_t)*(((block*)*(b->children))->children), ERRBLOCK(getTagForSymbolName(GETTAG(EBADF))));
 }
 
 BOOST_AUTO_TEST_CASE(log) {
