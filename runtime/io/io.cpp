@@ -557,7 +557,11 @@ extern "C" {
     mpz_t result;
     mpz_init_set_si(result, ret);
     mpz_ptr p = move_int(result);
-    memcpy(retBlock->children, &filename, sizeof(string *));
+    size_t length = len(filename);
+    string * retString = static_cast<string *>(koreAlloc(sizeof(string) + sizeof(char) * length));
+    memcpy(retString->data, temp, sizeof(char) * length);
+    set_len(retString, length);
+    memcpy(retBlock->children, &retString, sizeof(string *));
     memcpy(retBlock->children + 1, &p, sizeof(mpz_ptr));
     retBlock->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName(GETTAG(tempFile)));
 
