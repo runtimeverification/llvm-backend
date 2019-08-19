@@ -18,7 +18,6 @@ extern "C" {
 
 #define KCHAR char
 #define GETTAG(symbol) "Lbl'Hash'" #symbol "{}"
-#define ERRTAG(err) GETTAG(err)
 #define IOBUFSIZE 256
 
   mpz_ptr move_int(mpz_t);
@@ -31,77 +30,77 @@ extern "C" {
   static block * block_errno() {
     const char * errStr;
     switch (errno) {
-    case EOF: errStr = ERRTAG(EOF); break;
-    case E2BIG: errStr = ERRTAG(E2BIG); break;
-    case EACCES: errStr = ERRTAG(EACCES); break;
-    case EAGAIN: errStr = ERRTAG(EAGAIN); break;
-    case EBADF: errStr = ERRTAG(EBADF); break;
-    case EBUSY: errStr = ERRTAG(EBUSY); break;
-    case ECHILD: errStr = ERRTAG(ECHILD); break;
-    case EDEADLK: errStr = ERRTAG(EDEADLK); break;
-    case EDOM: errStr = ERRTAG(EDOM); break;
-    case EEXIST: errStr = ERRTAG(EEXIST); break;
-    case EFAULT: errStr = ERRTAG(EFAULT); break;
-    case EFBIG: errStr = ERRTAG(EFBIG); break;
-    case EINTR: errStr = ERRTAG(EINTR); break;
-    case EINVAL: errStr = ERRTAG(EINVAL); break;
-    case EIO: errStr = ERRTAG(EIO); break;
-    case EISDIR: errStr = ERRTAG(EISDIR); break;
-    case EMFILE: errStr = ERRTAG(EMFILE); break;
-    case EMLINK: errStr = ERRTAG(EMLINK); break;
-    case ENAMETOOLONG: errStr = ERRTAG(ENAMETOOLONG); break;
-    case ENFILE: errStr = ERRTAG(ENFILE); break;
-    case ENODEV: errStr = ERRTAG(ENODEV); break;
-    case ENOENT: errStr = ERRTAG(ENOENT); break;
-    case ENOEXEC: errStr = ERRTAG(ENOEXEC); break;
-    case ENOLCK: errStr = ERRTAG(ENOLCK); break;
-    case ENOMEM: errStr = ERRTAG(ENOMEM); break;
-    case ENOSPC: errStr = ERRTAG(ENOSPC); break;
-    case ENOSYS: errStr = ERRTAG(ENOSYS); break;
-    case ENOTDIR: errStr = ERRTAG(ENOTDIR); break;
-    case ENOTEMPTY: errStr = ERRTAG(ENOTEMPTY); break;
-    case ENOTTY: errStr = ERRTAG(ENOTTY); break;
-    case ENXIO: errStr = ERRTAG(ENXIO); break;
-    case EPERM: errStr = ERRTAG(EPERM); break;
-    case EPIPE: errStr = ERRTAG(EPIPE); break;
-    case ERANGE: errStr = ERRTAG(ERANGE); break;
-    case EROFS: errStr = ERRTAG(EROFS); break;
-    case ESPIPE: errStr = ERRTAG(ESPIPE); break;
-    case ESRCH: errStr = ERRTAG(ESRCH); break;
-    case EXDEV: errStr = ERRTAG(EXDEV); break;
+    case EOF: errStr = GETTAG(EOF); break;
+    case E2BIG: errStr = GETTAG(E2BIG); break;
+    case EACCES: errStr = GETTAG(EACCES); break;
+    case EAGAIN: errStr = GETTAG(EAGAIN); break;
+    case EBADF: errStr = GETTAG(EBADF); break;
+    case EBUSY: errStr = GETTAG(EBUSY); break;
+    case ECHILD: errStr = GETTAG(ECHILD); break;
+    case EDEADLK: errStr = GETTAG(EDEADLK); break;
+    case EDOM: errStr = GETTAG(EDOM); break;
+    case EEXIST: errStr = GETTAG(EEXIST); break;
+    case EFAULT: errStr = GETTAG(EFAULT); break;
+    case EFBIG: errStr = GETTAG(EFBIG); break;
+    case EINTR: errStr = GETTAG(EINTR); break;
+    case EINVAL: errStr = GETTAG(EINVAL); break;
+    case EIO: errStr = GETTAG(EIO); break;
+    case EISDIR: errStr = GETTAG(EISDIR); break;
+    case EMFILE: errStr = GETTAG(EMFILE); break;
+    case EMLINK: errStr = GETTAG(EMLINK); break;
+    case ENAMETOOLONG: errStr = GETTAG(ENAMETOOLONG); break;
+    case ENFILE: errStr = GETTAG(ENFILE); break;
+    case ENODEV: errStr = GETTAG(ENODEV); break;
+    case ENOENT: errStr = GETTAG(ENOENT); break;
+    case ENOEXEC: errStr = GETTAG(ENOEXEC); break;
+    case ENOLCK: errStr = GETTAG(ENOLCK); break;
+    case ENOMEM: errStr = GETTAG(ENOMEM); break;
+    case ENOSPC: errStr = GETTAG(ENOSPC); break;
+    case ENOSYS: errStr = GETTAG(ENOSYS); break;
+    case ENOTDIR: errStr = GETTAG(ENOTDIR); break;
+    case ENOTEMPTY: errStr = GETTAG(ENOTEMPTY); break;
+    case ENOTTY: errStr = GETTAG(ENOTTY); break;
+    case ENXIO: errStr = GETTAG(ENXIO); break;
+    case EPERM: errStr = GETTAG(EPERM); break;
+    case EPIPE: errStr = GETTAG(EPIPE); break;
+    case ERANGE: errStr = GETTAG(ERANGE); break;
+    case EROFS: errStr = GETTAG(EROFS); break;
+    case ESPIPE: errStr = GETTAG(ESPIPE); break;
+    case ESRCH: errStr = GETTAG(ESRCH); break;
+    case EXDEV: errStr = GETTAG(EXDEV); break;
 #if EWOULDBLOCK != EAGAIN
-    case EWOULDBLOCK: errStr = ERRTAG(EWOULDBLOCK); break;
+    case EWOULDBLOCK: errStr = GETTAG(EWOULDBLOCK); break;
 #endif 
-    case EINPROGRESS: errStr = ERRTAG(EINPROGRESS); break;
-    case EALREADY: errStr = ERRTAG(EALREADY); break;
-    case ENOTSOCK: errStr = ERRTAG(ENOTSOCK); break;
-    case EDESTADDRREQ: errStr = ERRTAG(EDESTADDRREQ); break;
-    case EMSGSIZE: errStr = ERRTAG(EMSGSIZE); break;
-    case EPROTOTYPE: errStr = ERRTAG(EPROTOTYPE); break;
-    case ENOPROTOOPT: errStr = ERRTAG(ENOPROTOOPT); break;
-    case EPROTONOSUPPORT: errStr = ERRTAG(EPROTONOSUPPORT); break;
-    case ESOCKTNOSUPPORT: errStr = ERRTAG(ESOCKTNOSUPPORT); break;
-    case EOPNOTSUPP: errStr = ERRTAG(EOPNOTSUPP); break;
-    case EPFNOSUPPORT: errStr = ERRTAG(EPFNOSUPPORT); break;
-    case EAFNOSUPPORT: errStr = ERRTAG(EAFNOSUPPORT); break;
-    case EADDRINUSE: errStr = ERRTAG(EADDRINUSE); break;
-    case EADDRNOTAVAIL: errStr = ERRTAG(EADDRNOTAVAIL); break;
-    case ENETDOWN: errStr = ERRTAG(ENETDOWN); break;
-    case ENETUNREACH: errStr = ERRTAG(ENETUNREACH); break;
-    case ENETRESET: errStr = ERRTAG(ENETRESET); break;
-    case ECONNABORTED: errStr = ERRTAG(ECONNABORTED); break;
-    case ECONNRESET: errStr = ERRTAG(ECONNRESET); break;
-    case ENOBUFS: errStr = ERRTAG(ENOBUFS); break;
-    case EISCONN: errStr = ERRTAG(EISCONN); break;
-    case ENOTCONN: errStr = ERRTAG(ENOTCONN); break;
-    case ESHUTDOWN: errStr = ERRTAG(ESHUTDOWN); break;
-    case ETOOMANYREFS: errStr = ERRTAG(ETOOMANYREFS); break;
-    case ETIMEDOUT: errStr = ERRTAG(ETIMEDOUT); break;
-    case ECONNREFUSED: errStr = ERRTAG(ECONNREFUSED); break;
-    case EHOSTDOWN: errStr = ERRTAG(EHOSTDOWN); break;
-    case EHOSTUNREACH: errStr = ERRTAG(EHOSTUNREACH); break;
-    case ELOOP: errStr = ERRTAG(ELOOP); break;
-    case EOVERFLOW: errStr = ERRTAG(EOVERFLOW); break;
+    case EINPROGRESS: errStr = GETTAG(EINPROGRESS); break;
+    case EALREADY: errStr = GETTAG(EALREADY); break;
+    case ENOTSOCK: errStr = GETTAG(ENOTSOCK); break;
+    case EDESTADDRREQ: errStr = GETTAG(EDESTADDRREQ); break;
+    case EMSGSIZE: errStr = GETTAG(EMSGSIZE); break;
+    case EPROTOTYPE: errStr = GETTAG(EPROTOTYPE); break;
+    case ENOPROTOOPT: errStr = GETTAG(ENOPROTOOPT); break;
+    case EPROTONOSUPPORT: errStr = GETTAG(EPROTONOSUPPORT); break;
+    case ESOCKTNOSUPPORT: errStr = GETTAG(ESOCKTNOSUPPORT); break;
+    case EOPNOTSUPP: errStr = GETTAG(EOPNOTSUPP); break;
+    case EPFNOSUPPORT: errStr = GETTAG(EPFNOSUPPORT); break;
+    case EAFNOSUPPORT: errStr = GETTAG(EAFNOSUPPORT); break;
+    case EADDRINUSE: errStr = GETTAG(EADDRINUSE); break;
+    case EADDRNOTAVAIL: errStr = GETTAG(EADDRNOTAVAIL); break;
+    case ENETDOWN: errStr = GETTAG(ENETDOWN); break;
+    case ENETUNREACH: errStr = GETTAG(ENETUNREACH); break;
+    case ENETRESET: errStr = GETTAG(ENETRESET); break;
+    case ECONNABORTED: errStr = GETTAG(ECONNABORTED); break;
+    case ECONNRESET: errStr = GETTAG(ECONNRESET); break;
+    case ENOBUFS: errStr = GETTAG(ENOBUFS); break;
+    case EISCONN: errStr = GETTAG(EISCONN); break;
+    case ENOTCONN: errStr = GETTAG(ENOTCONN); break;
+    case ESHUTDOWN: errStr = GETTAG(ESHUTDOWN); break;
+    case ETOOMANYREFS: errStr = GETTAG(ETOOMANYREFS); break;
+    case ETIMEDOUT: errStr = GETTAG(ETIMEDOUT); break;
+    case ECONNREFUSED: errStr = GETTAG(ECONNREFUSED); break;
+    case EHOSTDOWN: errStr = GETTAG(EHOSTDOWN); break;
+    case EHOSTUNREACH: errStr = GETTAG(EHOSTUNREACH); break;
+    case ELOOP: errStr = GETTAG(ELOOP); break;
+    case EOVERFLOW: errStr = GETTAG(EOVERFLOW); break;
     default:
       block * retBlock = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(mpz_ptr)));
       retBlock->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("Lbl'Hash'unknownIOError{}"));
@@ -302,7 +301,7 @@ extern "C" {
 
 
     if (0 == ret) {
-      block * p = (block *)((((uint64_t)getTagForSymbolName(ERRTAG(EOF))) << 32) | 1);
+      block * p = (block *)((((uint64_t)getTagForSymbolName(GETTAG(EOF))) << 32) | 1);
       block * retBlock = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(block *)));
       retBlock->h = header_err();
       memcpy(retBlock->children, &p, sizeof(block *));
