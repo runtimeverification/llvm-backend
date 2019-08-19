@@ -190,7 +190,16 @@ llvm::Type *termType(KOREPattern *pattern, llvm::StringMap<llvm::Type *> &substi
       return getValueType(sort->getCategory(definition), Module);
     }
     auto sort = dynamic_cast<KOREObjectCompositeSort *>(symbol->getSort());
-    return getValueType(sort->getCategory(definition), Module);
+    auto cat = sort->getCategory(definition);
+    auto type = getValueType(cat, Module);
+    switch(cat.cat) {
+    case SortCategory::Map:
+    case SortCategory::List:
+    case SortCategory::Set:
+      return llvm::PointerType::getUnqual(type);
+    default:
+      return type;
+    }
   } else {
     assert(false && "not supported yet: meta level");
     abort();
@@ -469,10 +478,12 @@ llvm::Value *CreateTerm::createFunctionCall(std::string name, KOREObjectComposit
 llvm::Value *CreateTerm::createFunctionCall(std::string name, ValueType returnCat, std::vector<llvm::Value *> &args, bool sret, bool fastcc) {
   llvm::Type *returnType = getValueType(returnCat, Module);
   std::vector<llvm::Type *> types;
+  bool collection = false;
   switch (returnCat.cat) {
   case SortCategory::Map:
   case SortCategory::List:
   case SortCategory::Set:
+    collection = true;
     break;
   default:
     sret = false; 
@@ -489,6 +500,8 @@ llvm::Value *CreateTerm::createFunctionCall(std::string name, ValueType returnCa
     args.insert(args.begin(), AllocSret);
     types.insert(types.begin(), AllocSret->getType());
     returnType = llvm::Type::getVoidTy(Ctx);
+  } else if (collection) {
+    returnType = llvm::PointerType::getUnqual(returnType);
   }
  
   llvm::FunctionType *funcType = llvm::FunctionType::get(returnType, types, false);
@@ -640,8 +653,7 @@ bool makeFunction(std::string name, KOREPattern *pattern, KOREDefinition *defini
         return false;
       }
       auto cat = sort->getCategory(definition);
-      llvm::Type *varType = getValueType(cat, Module);
-      llvm::Type *paramType = varType;
+      llvm::Type *paramType = getValueType(cat, Module);
       switch(cat.cat) {
       case SortCategory::Map:
       case SortCategory::List:
@@ -652,7 +664,7 @@ bool makeFunction(std::string name, KOREPattern *pattern, KOREDefinition *defini
         break;
       }
       
-      params.insert({entry.first, varType});
+      params.insert({entry.first, paramType});
       paramTypes.push_back(paramType);
       paramNames.push_back(entry.first);
     }
@@ -674,8 +686,10 @@ bool makeFunction(std::string name, KOREPattern *pattern, KOREDefinition *defini
     }
     CreateTerm creator = CreateTerm(subst, definition, block, Module, false);
     llvm::Value *retval = creator(pattern).first;
-    if (retval->getType() == llvm::PointerType::getUnqual(funcType->getReturnType())) {
-      retval = new llvm::LoadInst(retval, "", creator.getCurrentBlock());
+    if (funcType->getReturnType() == llvm::PointerType::getUnqual(retval->getType())) {
+      auto tempAlloc = allocateTerm(retval->getType(), creator.getCurrentBlock(), "koreAllocAlwaysGC");
+      new llvm::StoreInst(retval, tempAlloc, creator.getCurrentBlock());
+      retval = tempAlloc;
     }
     if (bigStep) {
       llvm::Type *blockType = getValueType({SortCategory::Symbol, 0}, Module);
@@ -713,8 +727,7 @@ std::string makeApplyRuleFunction(KOREAxiomDeclaration *axiom, KOREDefinition *d
         return "";
       }
       auto cat = sort->getCategory(definition);
-      llvm::Type *varType = getValueType(cat, Module);
-      llvm::Type *paramType = varType;
+      llvm::Type *paramType = getValueType(cat, Module);
       switch(cat.cat) {
       case SortCategory::Map:
       case SortCategory::List:
@@ -725,7 +738,7 @@ std::string makeApplyRuleFunction(KOREAxiomDeclaration *axiom, KOREDefinition *d
         break;
       }
       
-      params.insert({entry.first, varType});
+      params.insert({entry.first, paramType});
       paramTypes.push_back(paramType);
       paramNames.push_back(entry.first);
     }

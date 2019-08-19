@@ -362,7 +362,17 @@ void LeafNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution)
     args.push_back(val);
     types.push_back(val->getType());
   }
-  auto Call = llvm::CallInst::Create(d->Module->getOrInsertFunction(name, llvm::FunctionType::get(getValueType(d->Cat, d->Module), types, false)), args, "", d->CurrentBlock);
+  auto type = getValueType(d->Cat, d->Module);
+  switch(d->Cat.cat) {
+  case SortCategory::Map:
+  case SortCategory::List:
+  case SortCategory::Set:
+    type = llvm::PointerType::getUnqual(type);
+    break;
+  default:
+    break;
+  }
+  auto Call = llvm::CallInst::Create(d->Module->getOrInsertFunction(name, llvm::FunctionType::get(type, types, false)), args, "", d->CurrentBlock);
   Call->setCallingConv(llvm::CallingConv::Fast);
   llvm::ReturnInst::Create(d->Ctx, Call, d->CurrentBlock);
   setCompleted();
@@ -375,6 +385,15 @@ llvm::Value *Decision::getTag(llvm::Value *val) {
 void makeEvalOrAnywhereFunction(KOREObjectSymbol *function, KOREDefinition *definition, llvm::Module *module, DecisionNode *dt, void (*addStuck)(llvm::BasicBlock*, llvm::Module*, KOREObjectSymbol *, llvm::StringMap<llvm::Value *>&, KOREDefinition *)) {
   auto returnSort = dynamic_cast<KOREObjectCompositeSort *>(function->getSort())->getCategory(definition);
   auto returnType = getValueType(returnSort, module);
+  switch(returnSort.cat) {
+  case SortCategory::Map:
+  case SortCategory::List:
+  case SortCategory::Set:
+    returnType = llvm::PointerType::getUnqual(returnType);
+    break;
+  default:
+    break;
+  }
   std::vector<llvm::Type *> args;
   std::vector<ValueType> cats;
   for (auto sort : function->getArguments()) {
@@ -438,8 +457,18 @@ void addOwise(llvm::BasicBlock *stuck, llvm::Module *module, KOREObjectSymbol *s
   llvm::Value *retval = creator(pat).first;
   auto returnSort = dynamic_cast<KOREObjectCompositeSort *>(symbol->getSort())->getCategory(d);
   auto returnType = getValueType(returnSort, module);
-  if (retval->getType() == llvm::PointerType::getUnqual(returnType)) {
-    retval = new llvm::LoadInst(retval, "", creator.getCurrentBlock());
+  switch(returnSort.cat) {
+  case SortCategory::Map:
+  case SortCategory::List:
+  case SortCategory::Set:
+    if (retval->getType() == returnType) {
+      auto tempAlloc = allocateTerm(retval->getType(), creator.getCurrentBlock(), "koreAllocAlwaysGC");
+      new llvm::StoreInst(retval, tempAlloc, creator.getCurrentBlock());
+      retval = tempAlloc;
+    }
+    break;
+  default:
+    break;
   }
   llvm::ReturnInst::Create(module->getContext(), retval, creator.getCurrentBlock());
 }
