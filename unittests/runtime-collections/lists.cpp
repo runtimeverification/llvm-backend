@@ -2,10 +2,7 @@
 #include<gmp.h>
 
 #include "runtime/header.h"
-
-#include "immer/vector.hpp"
-
-using List = immer::vector<block *>;
+#include "runtime/header.hpp"
 
 extern "C" {
   List hook_LIST_unit();
@@ -26,6 +23,14 @@ extern "C" {
     mpz_ptr result = (mpz_ptr)malloc(sizeof(__mpz_struct));
     *result = *i;
     return result;
+  }
+
+  bool during_gc() {
+    return false;
+  }
+
+  void *koreAllocNoGC(size_t requested) {
+    return malloc(requested);
   }
 
   void printConfigurationInternal(FILE *file, block *subject, const char *sort, bool) {}

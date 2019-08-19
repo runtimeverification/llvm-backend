@@ -1,11 +1,9 @@
 #include<cstring>
 
 #include "runtime/header.h"
+#include "runtime/header.hpp"
 #include "runtime/alloc.h"
 
-#include "immer/vector.hpp"
-
-using List = immer::vector<block *>;
 
 static thread_local string *var;
 static thread_local block *to_replace;

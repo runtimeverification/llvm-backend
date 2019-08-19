@@ -10,9 +10,7 @@
 #include "runtime/alloc.h"
 #include "runtime/collect.h"
 #include "runtime/header.h"
-
-#include "immer/vector.hpp"
-using List = immer::vector<block *>;
+#include "runtime/header.hpp"
 
 extern "C" {
 

@@ -1,28 +1,9 @@
 #include <cstdio>
 
 #include "runtime/header.h"
+#include "runtime/header.hpp"
 
-#include "immer/vector.hpp"
 #include "immer/vector_transient.hpp"
-
-extern "C" {
-  bool hook_KEQUAL_eq(block *, block *);
-}
-
-class KElem {
-public:
-  KElem(block * elem) {
-    this->elem = elem;
-  }
-
-  bool operator==(const KElem& other) {
-    return hook_KEQUAL_eq(this->elem, other.elem);
-  }
-
-  block * elem;
-};
-
-using List = immer::vector<KElem>;
 
 extern "C" {
   mpz_ptr move_int(mpz_t);

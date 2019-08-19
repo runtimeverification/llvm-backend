@@ -2,19 +2,15 @@
 #include<gmp.h>
 #include<mpfr.h>
 #include<cstdint>
+#include<cstdio>
 #include<cstdlib>
 #include<cstring>
 #include<vector>
 #include<dlfcn.h>
 
 #include "runtime/header.h"
+#include "runtime/header.hpp"
 #include "runtime/alloc.h"
-
-#include "immer/vector.hpp"
-
-using List = immer::vector<block *>;
-
-#include "stdio.h"
 
 #define KCHAR char
 #define TYPETAG(type) "Lbl'Hash'" #type "{}"
@@ -52,6 +48,10 @@ extern "C" {
 
   uint64_t hash_k(block * kitem) {
     return (uint64_t) kitem;
+  }
+
+  bool during_gc() {
+    return false;
   }
 
   void printConfigurationInternal(FILE *file, block *subject, const char *sort, bool) {}
