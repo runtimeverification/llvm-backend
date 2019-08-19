@@ -41,7 +41,7 @@ struct kore_alloc_heap {
   }
 };
 
-using List = immer::vector<KElem, immer::memory_policy<immer::heap_policy<kore_alloc_heap>, immer::default_refcount_policy>>;
+using List = immer::vector<KElem, immer::memory_policy<immer::heap_policy<kore_alloc_heap>, immer::no_refcount_policy>>;
 
 #endif
 
