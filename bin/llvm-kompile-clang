@@ -71,6 +71,7 @@ fi
   "$LIBDIR"/libParser.a \
   "$LIBDIR"/libAST.a \
   "$LIBDIR"/liballoc.a \
+  "$LIBDIR"/libcollect.a \
   "$LIBDIR"/libmeta.a \
   -lgmp -lmpfr -lpthread -ldl -lffi \
   $flags \

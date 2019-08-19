@@ -3,6 +3,7 @@ add_subdirectory(configurationparser)
 add_subdirectory(strings)
 add_subdirectory(meta)
 add_subdirectory(alloc)
+add_subdirectory(collect)
 add_subdirectory(io)
 add_subdirectory(collections)
 
