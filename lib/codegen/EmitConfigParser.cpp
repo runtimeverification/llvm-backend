@@ -427,7 +427,7 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
       llvm::Constant *MpzInitSet = module->getOrInsertFunction("__gmpz_init_set_str",
           llvm::Type::getInt32Ty(Ctx), llvm::PointerType::getUnqual(Int), 
           llvm::Type::getInt8PtrTy(Ctx), llvm::Type::getInt32Ty(Ctx));
-      auto Call = llvm::CallInst::Create(MpzInitSet, {Term, func->arg_begin()+2,
+      auto Call = llvm::CallInst::Create(MpzInitSet, {Term, phiStr,
           llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), 10)}, "", CaseBlock);
       auto icmp = new llvm::ICmpInst(*CaseBlock, llvm::CmpInst::ICMP_EQ, 
           Call, zero32);
