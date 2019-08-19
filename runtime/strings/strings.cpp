@@ -304,6 +304,22 @@ extern "C" {
     return move_int(result);
   }
 
+  string *hook_STRING_uuid() {
+    throw std::invalid_argument("not implemented: STRING.uuid");
+  }
+
+  string *hook_STRING_category(string * str) {
+    throw std::invalid_argument("not implemented: STRING.category");
+  }
+
+  string *hook_STRING_directionality(string * str) {
+    throw std::invalid_argument("not implemented: STRING.directionality");
+  }
+
+  string *hook_STRING_floatFormat(string * str, string * fmt) {
+    throw std::invalid_argument("not implemented: STRING.floatFormat");
+  }
+
   stringbuffer *hook_BUFFER_empty() {
     auto result = static_cast<stringbuffer *>(koreAlloc(sizeof(stringbuffer)));
     set_len(result, sizeof(stringbuffer) - sizeof(blockheader));

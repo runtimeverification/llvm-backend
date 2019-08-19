@@ -540,8 +540,31 @@ extern "C" {
     return dotK;
   }
 
-  block * hook_META_parseKAST(string *kast) {
-    throw std::invalid_argument("not implemented: META.parseKast");
+  block * hook_KREFLECTION_parseKAST(string *kast) {
+    throw std::invalid_argument("not implemented: KREFLECTION.parseKast");
+  }
+
+  block * hook_KREFLECTION_configuration() {
+    throw std::invalid_argument("not implemented: KREFLECTION.configuration");
+  }
+
+  string * hook_KREFLECTION_getenv(string * str) {
+    throw std::invalid_argument("not implemented: KREFLECTION.getenv");
+  }
+
+  string * hook_KREFLECTION_sort(block * K) {
+    throw std::invalid_argument("not implemented: KREFLECTION.sort");
+  }
+
+  block * hook_KREFLECTION_getKLabel(block * K) {
+    throw std::invalid_argument("not implemented: KREFLECTION.getKLabel");
+  }
+
+  block * hook_KREFLECTION_fresh(string * str) {
+    throw std::invalid_argument("not implemented: KREFLECTION.fresh");
+  }
+  struct list hook_KREFLECTION_argv() {
+    throw std::invalid_argument("not implemented: KREFLECTION.argv");
   }
 
   block * hook_IO_system(string * cmd) {
@@ -594,5 +617,21 @@ extern "C" {
     memcpy(retBlock->children + 2, &errBuffer, sizeof(string *));
 
     return retBlock;
+  }
+
+  block * hook_IO_mkstemp(string * filename) {
+    throw std::invalid_argument("not implemented: IO.mkstemp");
+  }
+
+  block * hook_IO_stat(string * path) {
+    throw std::invalid_argument("not implemented: IO.stat");
+  }
+
+  block * hook_IO_lstat(string * path) {
+    throw std::invalid_argument("not implemented: IO.lstat");
+  }
+
+  block * hook_IO_opendir(string * path) {
+    throw std::invalid_argument("not implemented: IO.opendir");
   }
 }
