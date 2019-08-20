@@ -510,6 +510,19 @@ void KOREDefinition::preprocess() {
       ++iter;
     }
   }
+  for (auto moditer = modules.begin(); moditer != modules.end(); ++moditer) {
+    auto declarations = (*moditer)->getDeclarations();
+    for (auto iter = declarations.begin(); iter != declarations.end(); ++iter) {
+      KOREObjectSymbolDeclaration * decl = dynamic_cast<KOREObjectSymbolDeclaration *>(*iter);
+      if (decl == nullptr) {
+        continue;
+      }
+      if (decl->isHooked() && decl->getObjectSortVariables().empty()) {
+        KOREObjectSymbol * symbol = decl->getSymbol();
+        symbols.emplace(symbol->getName(), std::vector<KOREObjectSymbol *>{symbol});
+      }
+    }
+  }
   for (auto iter = symbols.begin(); iter != symbols.end(); ++iter) {
     auto entry = *iter;
     for (auto iter = entry.second.begin(); iter != entry.second.end(); ++iter) {
