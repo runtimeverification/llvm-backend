@@ -583,6 +583,34 @@ void KOREDefinition::preprocess() {
   }
 }
 
+void KOREDefinition::expandAliases(const KOREPattern *pattern) {
+  if (auto objPattern = dynamic_cast<const KOREObjectCompositePattern *>(pattern)) {
+    std::string name;
+    if (auto comp = dynamic_cast<const KOREObjectCompositePattern *>(objPattern)) {
+      for (auto arg : comp->getArguments()) {
+        expandAliases(arg);
+      }
+      name = comp->getConstructor()->getName();
+    } else if (auto var = dynamic_cast<const KOREObjectVariablePattern *>(objPattern)) {
+      name = var->getName();
+    } else {
+      // Unnecessary? KOREObjectPattern is abstract and can only be var or composite
+      return;
+    }
+    auto aliasMap = getAliasDeclarations();
+    if (aliasMap.count(name)) {
+      auto aliasDecl = aliasMap.at(name);
+      auto objSortVars = aliasDecl->getObjectSortVariables();
+      auto args = aliasDecl->getSymbol()->getArguments();
+      auto subst = std::unordered_map<KOREObjectSortVariable, KOREObjectSort *, HashSort>{};
+      for (auto var : objSortVars) {
+        subst.insert({*var, objPattern->getSort()});
+      }
+      objPattern->getSort()->substitute(subst);
+    }
+  }
+}
+
 // Pretty printer
 void KOREObjectSortVariable::print(std::ostream &Out, unsigned indent) const {
   std::string Indent(indent, ' ');

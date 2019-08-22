@@ -40,29 +40,7 @@ int main (int argc, char **argv) {
   std::unique_ptr<llvm::Module> mod = newModule("definition", Context);
 
   for (auto axiom : definition->getAxioms()) {
-    if (auto top = dynamic_cast<const KOREObjectCompositePattern *>(axiom->getPattern())) {
-      for (auto pattern : top->getArguments()) {
-        if (auto objPattern = dynamic_cast<KOREObjectPattern *>(pattern)) {
-          std::string name;
-          if (auto var = dynamic_cast<KOREObjectVariablePattern *>(objPattern)) {
-            name = var->getName();
-          } else if (auto comp = dynamic_cast<KOREObjectCompositePattern *>(objPattern)) {
-            name = comp->getConstructor()->getName();
-          }
-          auto aliasMap = definition->getAliasDeclarations();
-          if (aliasMap.count(name)) {
-            auto aliasDecl = aliasMap.at(name);
-            auto objSortVars = aliasDecl->getObjectSortVariables();
-            auto args = aliasDecl->getSymbol()->getArguments();
-            auto subst = std::unordered_map<KOREObjectSortVariable, KOREObjectSort *, HashSort>{};
-            for (auto var : objSortVars) {
-              subst.insert({*var, objPattern->getSort()});
-            }
-            objPattern->getSort()->substitute(subst);
-          }
-        }
-      }
-    }
+    definition->expandAliases(axiom->getPattern());
     makeSideConditionFunction(axiom, definition, mod.get());
     if (!axiom->isTopAxiom()) {
       makeApplyRuleFunction(axiom, definition, mod.get());

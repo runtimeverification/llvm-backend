@@ -737,6 +737,8 @@ public:
        in the definition. */
   void preprocess();
 
+  void expandAliases(const KOREPattern *pattern);
+
   void addModule(KOREModule *Module);
   void addAttribute(KOREPattern *Attribute);
   void print(std::ostream &Out, unsigned indent = 0) const;
