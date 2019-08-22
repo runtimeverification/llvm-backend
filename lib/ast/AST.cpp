@@ -476,6 +476,8 @@ void KOREDefinition::addModule(KOREModule *Module) {
       symbolDeclarations.insert({symbolDecl->getSymbol()->getName(), symbolDecl});
     } else if (auto axiom = dynamic_cast<KOREAxiomDeclaration *>(decl)) {
       axioms.push_back(axiom);
+    } else if (auto aliasDecl = dynamic_cast<KOREObjectAliasDeclaration *>(decl)) {
+      aliasDeclarations.insert({aliasDecl->getSymbol()->getName(), aliasDecl});
     }
   }
 }

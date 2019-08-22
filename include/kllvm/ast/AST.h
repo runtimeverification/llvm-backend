@@ -623,6 +623,7 @@ public:
   KOREPattern *getRightHandSide() const;
   KOREPattern *getRequires() const;
   unsigned getOrdinal() const { return ordinal; }
+  const KOREPattern *getPattern() const { return pattern; }
 
   friend KOREDefinition;
 };
@@ -697,6 +698,8 @@ public:
 
   using KOREObjectSymbolDeclarationMapType = std::map<std::string, KOREObjectSymbolDeclaration *>;
 
+  using KOREObjectAliasDeclarationMapType = std::map<std::string, KOREObjectAliasDeclaration *>;
+
 private:
   // Symbol tables
   KOREObjectSortConstructorMapType objectSortConstructors;
@@ -710,6 +713,7 @@ private:
   KOREMetaVariableMapType metaVariables;
   KOREModuleMapType moduleNames;
   KOREObjectCompositeSortDeclarationMapType sortDeclarations;
+  KOREObjectAliasDeclarationMapType aliasDeclarations;
   KOREObjectSymbolDeclarationMapType symbolDeclarations;
   KOREObjectCompositeSortMapType hookedSorts;
   KOREObjectSymbolStringMapType freshFunctions;
@@ -739,6 +743,7 @@ public:
 
   const KOREObjectCompositeSortDeclarationMapType &getSortDeclarations() const { return sortDeclarations; }
   const KOREObjectSymbolDeclarationMapType &getSymbolDeclarations() const { return symbolDeclarations; }
+  const KOREObjectAliasDeclarationMapType &getAliasDeclarations() const { return aliasDeclarations; }
   const KOREObjectSymbolMapType &getSymbols() const { return objectSymbols; }
   const KOREObjectSymbolStringMapType &getAllSymbols() const { return allObjectSymbols; }
   const KOREObjectCompositeSortMapType getHookedSorts() const { return hookedSorts; }
