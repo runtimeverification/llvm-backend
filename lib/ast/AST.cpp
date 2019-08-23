@@ -627,15 +627,6 @@ void KOREDefinition::preprocess() {
 }
 
 KOREObjectPattern *KOREObjectVariablePattern::expandAliases(KOREDefinition *definition) {
-  auto aliasMap = definition->getAliasDeclarations();
-  std::string name = getName();
-  if (aliasMap.count(name)) {
-    auto subst = std::unordered_map<std::string, KOREObjectPattern *, std::hash<std::string>>{};
-    auto aliasDecl = aliasMap.at(name);
-    auto boundVars = aliasDecl->getBoundVariables();
-    subst.insert({boundVars[0]->getName(), this});
-    return substitute(subst);
-  }
   return this;
 }
 
