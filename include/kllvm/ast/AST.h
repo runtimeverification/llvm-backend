@@ -588,7 +588,7 @@ public:
   void addVariable(KOREObjectVariablePattern *Variable);
   void addPattern(KOREObjectPattern *Pattern);
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
-  const KOREObjectPattern *getPattern() const { return pattern; }
+  KOREObjectPattern *getPattern() const { return pattern; }
   const std::vector<KOREObjectVariablePattern *> &getBoundVariables() const { return boundVariables; }
 
 private:

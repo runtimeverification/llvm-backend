@@ -639,18 +639,20 @@ void KOREDefinition::expandAliases(KOREPattern *pattern) {
     }
     auto aliasMap = getAliasDeclarations();
     if (aliasMap.count(name)) {
+      auto subst = std::unordered_map<std::string, KOREObjectPattern *, std::hash<std::string>>{};
       auto aliasDecl = aliasMap.at(name);
       auto boundVars = aliasDecl->getBoundVariables();
       if (auto pat = dynamic_cast<const KOREObjectCompositePattern *>(aliasDecl->getPattern())) {
         auto args = pat->getArguments();
-        auto subst = std::unordered_map<std::string, KOREObjectPattern *, std::hash<std::string>>{};
         for (int i = 0; i < boundVars.size(); ++i) {
           if (auto arg = dynamic_cast<KOREObjectPattern *>(args[i])) {
             subst.insert({boundVars[i]->getName(), arg});
           }
         }
-        objPattern->substitute(subst);
+      } else if (auto pat = dynamic_cast<KOREObjectVariablePattern *>(aliasDecl->getPattern())) {
+        subst.insert({boundVars[0]->getName(), pat});
       }
+      objPattern->substitute(subst);
     }
   }
 }
