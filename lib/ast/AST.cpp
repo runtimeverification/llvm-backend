@@ -645,14 +645,14 @@ void KOREDefinition::expandAliases(KOREPattern *pattern) {
       if (auto pat = dynamic_cast<const KOREObjectCompositePattern *>(aliasDecl->getPattern())) {
         auto args = pat->getArguments();
         for (int i = 0; i < boundVars.size(); ++i) {
-          if (auto arg = dynamic_cast<KOREObjectPattern *>(args[i])) {
-            subst.insert({boundVars[i]->getName(), arg});
+          if (auto arg = dynamic_cast<KOREObjectVariablePattern *>(args[i])) {
+            subst.insert({arg->getName(), boundVars[i]});
+          } else if (auto arg = dynamic_cast<KOREObjectCompositePattern *>(args[i])) {
+            subst.insert({arg->getConstructor()->getName(), boundVars[i]});
           }
         }
-      } else if (auto pat = dynamic_cast<KOREObjectVariablePattern *>(aliasDecl->getPattern())) {
-        subst.insert({boundVars[0]->getName(), pat});
+        objPattern->substitute(subst);
       }
-      objPattern->substitute(subst);
     }
   }
 }
