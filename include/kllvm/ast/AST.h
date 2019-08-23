@@ -321,7 +321,12 @@ public:
 
 class KOREObjectPattern : public KOREPattern {
 public:
+  using substitution = std::unordered_map<std::string, KOREObjectPattern *, std::hash<std::string>>;
   virtual KOREObjectSort *getSort(void) const = 0;
+  virtual KOREObjectPattern *substitute(const substitution &) = 0;
+
+  virtual bool operator==(const KOREObjectPattern &other) const = 0;
+  bool operator!=(const KOREObjectPattern &other) const { return !(*this == other); }
 };
 
 class KOREMetaPattern : public KOREPattern {
@@ -346,6 +351,9 @@ public:
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
   virtual void markSymbols(std::map<std::string, std::vector<KOREObjectSymbol *>> &) override {}
   virtual void markVariables(std::map<std::string, KOREObjectVariablePattern *> &map) override { map.insert({name->getName(), this}); }
+  virtual KOREObjectPattern *substitute(const substitution &subst) override { return subst.at(this->getName()); }
+
+  virtual bool operator==(const KOREObjectPattern &other) const override;
 
 private:
   KOREObjectVariablePattern(KOREObjectVariable *Name, KOREObjectSort *Sort)
@@ -396,6 +404,9 @@ public:
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
   virtual void markSymbols(std::map<std::string, std::vector<KOREObjectSymbol *>> &) override;
   virtual void markVariables(std::map<std::string, KOREObjectVariablePattern *> &) override;
+  virtual KOREObjectPattern *substitute(const substitution &subst) override;
+
+  virtual bool operator==(const KOREObjectPattern &other) const override;
 
 private:
   KOREObjectCompositePattern(KOREObjectSymbol *Constructor)
@@ -577,6 +588,8 @@ public:
   void addVariable(KOREObjectVariablePattern *Variable);
   void addPattern(KOREObjectPattern *Pattern);
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
+  const KOREObjectPattern *getPattern() const { return pattern; }
+  const std::vector<KOREObjectVariablePattern *> &getBoundVariables() const { return boundVariables; }
 
 private:
   KOREObjectAliasDeclaration(KOREObjectSymbol *Symbol)
@@ -623,7 +636,7 @@ public:
   KOREPattern *getRightHandSide() const;
   KOREPattern *getRequires() const;
   unsigned getOrdinal() const { return ordinal; }
-  const KOREPattern *getPattern() const { return pattern; }
+  KOREPattern *getPattern() const { return pattern; }
 
   friend KOREDefinition;
 };
@@ -737,7 +750,7 @@ public:
        in the definition. */
   void preprocess();
 
-  void expandAliases(const KOREPattern *pattern);
+  void expandAliases(KOREPattern *pattern);
 
   void addModule(KOREModule *Module);
   void addAttribute(KOREPattern *Attribute);

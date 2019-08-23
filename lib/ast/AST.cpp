@@ -210,6 +210,28 @@ std::string KOREObjectVariable::getName() const {
   return name;
 }
 
+bool KOREObjectVariablePattern::operator==(const KOREObjectPattern &other) const {
+  if (auto var = dynamic_cast<const KOREObjectVariablePattern *>(&other)) {
+    return var->name == name;
+  }
+  return false;
+}
+
+bool KOREObjectCompositePattern::operator==(const KOREObjectPattern &other) const {
+  if (auto pattern = dynamic_cast<const KOREObjectCompositePattern *>(&other)) {
+    if (pattern->constructor->getName() != constructor->getName() || pattern->arguments.size() != arguments.size()) {
+      return false;
+    }
+    for (int i = 0; i < arguments.size(); ++i) {
+        auto arg1 = dynamic_cast<const KOREObjectPattern *>(arguments[i]);
+        auto arg2 = dynamic_cast<const KOREObjectPattern *>(pattern->arguments[i]);
+        if (arg1 != nullptr && arg2 != nullptr && *arg1 != *arg2) return false;
+    }
+    return true;
+  }
+  return false;
+}
+
 std::string KOREObjectVariablePattern::getName() const {
   return name->getName();
 }
@@ -235,6 +257,27 @@ void KOREObjectCompositePattern::markVariables(std::map<std::string, KOREObjectV
     arg->markVariables(map);
   }
 }
+
+KOREObjectPattern *KOREObjectCompositePattern::substitute(const std::unordered_map<std::string, KOREObjectPattern *, std::hash<std::string>> &subst) {
+  bool dirty = false;
+  std::vector<KOREPattern *> newArgs;
+  for (auto arg : arguments) {
+    if (auto objArg = dynamic_cast<KOREObjectPattern *>(arg)) {
+      auto newArg = objArg->substitute(subst);
+      if (newArg != objArg) {
+        dirty = true;
+      }
+      newArgs.push_back(newArg);
+    }
+  }
+  if (dirty) {
+    KOREObjectCompositePattern *retval = Create(constructor->getName());
+    retval->arguments = newArgs;
+    return retval;
+  }
+  return this;
+}
+
 
 void KOREMetaCompositePattern::addArgument(KOREPattern *Argument) {
   arguments.push_back(Argument);
@@ -583,30 +626,31 @@ void KOREDefinition::preprocess() {
   }
 }
 
-void KOREDefinition::expandAliases(const KOREPattern *pattern) {
-  if (auto objPattern = dynamic_cast<const KOREObjectCompositePattern *>(pattern)) {
+void KOREDefinition::expandAliases(KOREPattern *pattern) {
+  if (auto objPattern = dynamic_cast<KOREObjectCompositePattern *>(pattern)) {
     std::string name;
-    if (auto comp = dynamic_cast<const KOREObjectCompositePattern *>(objPattern)) {
+    if (auto comp = dynamic_cast<KOREObjectCompositePattern *>(objPattern)) {
       for (auto arg : comp->getArguments()) {
         expandAliases(arg);
       }
       name = comp->getConstructor()->getName();
-    } else if (auto var = dynamic_cast<const KOREObjectVariablePattern *>(objPattern)) {
+    } else if (auto var = dynamic_cast<KOREObjectVariablePattern *>(objPattern)) {
       name = var->getName();
-    } else {
-      // Unnecessary? KOREObjectPattern is abstract and can only be var or composite
-      return;
     }
     auto aliasMap = getAliasDeclarations();
     if (aliasMap.count(name)) {
       auto aliasDecl = aliasMap.at(name);
-      auto objSortVars = aliasDecl->getObjectSortVariables();
-      auto args = aliasDecl->getSymbol()->getArguments();
-      auto subst = std::unordered_map<KOREObjectSortVariable, KOREObjectSort *, HashSort>{};
-      for (auto var : objSortVars) {
-        subst.insert({*var, objPattern->getSort()});
+      auto boundVars = aliasDecl->getBoundVariables();
+      if (auto pat = dynamic_cast<const KOREObjectCompositePattern *>(aliasDecl->getPattern())) {
+        auto args = pat->getArguments();
+        auto subst = std::unordered_map<std::string, KOREObjectPattern *, std::hash<std::string>>{};
+        for (int i = 0; i < boundVars.size(); ++i) {
+          if (auto arg = dynamic_cast<KOREObjectPattern *>(args[i])) {
+            subst.insert({boundVars[i]->getName(), arg});
+          }
+        }
+        objPattern->substitute(subst);
       }
-      objPattern->getSort()->substitute(subst);
     }
   }
 }
