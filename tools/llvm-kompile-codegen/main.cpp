@@ -40,7 +40,9 @@ int main (int argc, char **argv) {
   std::unique_ptr<llvm::Module> mod = newModule("definition", Context);
 
   for (auto axiom : definition->getAxioms()) {
-    definition->expandAliases(axiom->getPattern());
+    if (auto objPattern = dynamic_cast<KOREObjectPattern *>(axiom->getPattern())) {
+      objPattern->expandAliases(definition);
+    }
     makeSideConditionFunction(axiom, definition, mod.get());
     if (!axiom->isTopAxiom()) {
       makeApplyRuleFunction(axiom, definition, mod.get());

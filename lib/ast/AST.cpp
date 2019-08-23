@@ -626,35 +626,35 @@ void KOREDefinition::preprocess() {
   }
 }
 
-void KOREDefinition::expandAliases(KOREPattern *pattern) {
-  if (auto objPattern = dynamic_cast<KOREObjectCompositePattern *>(pattern)) {
-    std::string name;
-    if (auto comp = dynamic_cast<KOREObjectCompositePattern *>(objPattern)) {
-      for (auto arg : comp->getArguments()) {
-        expandAliases(arg);
-      }
-      name = comp->getConstructor()->getName();
-    } else if (auto var = dynamic_cast<KOREObjectVariablePattern *>(objPattern)) {
-      name = var->getName();
-    }
-    auto aliasMap = getAliasDeclarations();
-    if (aliasMap.count(name)) {
-      auto subst = std::unordered_map<std::string, KOREObjectPattern *, std::hash<std::string>>{};
-      auto aliasDecl = aliasMap.at(name);
-      auto boundVars = aliasDecl->getBoundVariables();
-      if (auto pat = dynamic_cast<const KOREObjectCompositePattern *>(aliasDecl->getPattern())) {
-        auto args = pat->getArguments();
-        for (int i = 0; i < boundVars.size(); ++i) {
-          if (auto arg = dynamic_cast<KOREObjectVariablePattern *>(args[i])) {
-            subst.insert({arg->getName(), boundVars[i]});
-          } else if (auto arg = dynamic_cast<KOREObjectCompositePattern *>(args[i])) {
-            subst.insert({arg->getConstructor()->getName(), boundVars[i]});
-          }
-        }
-        objPattern->substitute(subst);
-      }
-    }
+KOREObjectPattern *KOREObjectVariablePattern::expandAliases(KOREDefinition *definition) {
+  auto aliasMap = definition->getAliasDeclarations();
+  std::string name = getName();
+  if (aliasMap.count(name)) {
+    auto subst = std::unordered_map<std::string, KOREObjectPattern *, std::hash<std::string>>{};
+    auto aliasDecl = aliasMap.at(name);
+    auto boundVars = aliasDecl->getBoundVariables();
+    subst.insert({boundVars[0]->getName(), this});
+    return substitute(subst);
   }
+  return this;
+}
+
+KOREObjectPattern *KOREObjectCompositePattern::expandAliases(KOREDefinition *definition) {
+  auto aliasMap = definition->getAliasDeclarations();
+  std::string name = constructor->getName();
+  if (aliasMap.count(name)) {
+    auto subst = std::unordered_map<std::string, KOREObjectPattern *, std::hash<std::string>>{};
+    auto aliasDecl = aliasMap.at(name);
+    auto boundVars = aliasDecl->getBoundVariables();
+    for (int i = 0; i < boundVars.size(); ++i) {
+      if (auto arg = dynamic_cast<KOREObjectPattern *>(arguments[i])) {
+        auto expanded = arg->expandAliases(definition);
+        subst.insert({boundVars[i]->getName(), expanded});
+      }
+    }
+    return substitute(subst);
+  }
+  return this;
 }
 
 // Pretty printer

@@ -324,6 +324,7 @@ public:
   using substitution = std::unordered_map<std::string, KOREObjectPattern *, std::hash<std::string>>;
   virtual KOREObjectSort *getSort(void) const = 0;
   virtual KOREObjectPattern *substitute(const substitution &) = 0;
+  virtual KOREObjectPattern *expandAliases(KOREDefinition *definition) = 0;
 
   virtual bool operator==(const KOREObjectPattern &other) const = 0;
   bool operator!=(const KOREObjectPattern &other) const { return !(*this == other); }
@@ -352,6 +353,7 @@ public:
   virtual void markSymbols(std::map<std::string, std::vector<KOREObjectSymbol *>> &) override {}
   virtual void markVariables(std::map<std::string, KOREObjectVariablePattern *> &map) override { map.insert({name->getName(), this}); }
   virtual KOREObjectPattern *substitute(const substitution &subst) override { return subst.at(this->getName()); }
+  virtual KOREObjectPattern *expandAliases(KOREDefinition *definition) override;
 
   virtual bool operator==(const KOREObjectPattern &other) const override;
 
@@ -405,6 +407,7 @@ public:
   virtual void markSymbols(std::map<std::string, std::vector<KOREObjectSymbol *>> &) override;
   virtual void markVariables(std::map<std::string, KOREObjectVariablePattern *> &) override;
   virtual KOREObjectPattern *substitute(const substitution &subst) override;
+  virtual KOREObjectPattern *expandAliases(KOREDefinition *definition) override;
 
   virtual bool operator==(const KOREObjectPattern &other) const override;
 
@@ -749,8 +752,6 @@ public:
      * sets the tag and layout fields on all the KOREObjectSymbols declared by the user
        in the definition. */
   void preprocess();
-
-  void expandAliases(KOREPattern *pattern);
 
   void addModule(KOREModule *Module);
   void addAttribute(KOREPattern *Attribute);
