@@ -643,7 +643,7 @@ KOREObjectPattern *KOREObjectCompositePattern::expandAliases(KOREDefinition *def
         subst.insert({boundVars[i]->getName(), expanded});
       }
     }
-    return substitute(subst);
+    return aliasDecl->getPattern()->substitute(subst);
   }
   return this;
 }
