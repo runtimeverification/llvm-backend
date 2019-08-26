@@ -1,5 +1,6 @@
 #include "kllvm/codegen/Decision.h"
 #include "kllvm/codegen/CreateTerm.h"
+#include "kllvm/codegen/Debug.h"
 
 #include "llvm/IR/CFG.h"
 #include "llvm/IR/Constants.h"
