@@ -3,6 +3,7 @@ set(LLVM_REQUIRES_EH ON)
 
 add_library(Codegen
   CreateTerm.cpp
+  Debug.cpp
   Decision.cpp
   DecisionParser.cpp
   EmitConfigParser.cpp
