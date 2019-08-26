@@ -1,5 +1,6 @@
 #include "kllvm/codegen/CreateTerm.h"
 #include "kllvm/codegen/Decision.h"
+#include "kllvm/codegen/Debug.h"
 #include "kllvm/codegen/DecisionParser.h"
 #include "kllvm/codegen/EmitConfigParser.h"
 #include "kllvm/parser/KOREScanner.h"
@@ -23,10 +24,12 @@ std::string getFilename(std::map<std::string, std::string> index, char **argv, K
 }
 
 int main (int argc, char **argv) {
-  if (argc < 4) {
-    std::cerr << "Usage: llvm-kompile-codegen <def.kore> <dt.yaml> <dir>\n";
+  if (argc < 5) {
+    std::cerr << "Usage: llvm-kompile-codegen <def.kore> <dt.yaml> <dir> [1|0]\n";
     exit(1);
   }
+
+  CODEGEN_DEBUG = atoi(argv[4]);
 
   KOREScanner scanner(argv[1]);
   KOREParserDriver driver;
@@ -38,6 +41,10 @@ int main (int argc, char **argv) {
   llvm::LLVMContext Context;
 
   std::unique_ptr<llvm::Module> mod = newModule("definition", Context);
+
+  if (CODEGEN_DEBUG) {
+    initDebugInfo(mod.get(), argv[1]);
+  }
 
   for (auto axiom : definition->getAxioms()) {
     makeSideConditionFunction(axiom, definition, mod.get());
@@ -87,6 +94,10 @@ int main (int argc, char **argv) {
       decl->getSymbol()->print(Out);
       makeAnywhereFunction(definition->getAllSymbols().at(Out.str()), definition, mod.get(), funcDt);
     }
+  }
+
+  if (CODEGEN_DEBUG) {
+    finalizeDebugInfo();
   }
 
   mod->print(llvm::outs(), nullptr);
