@@ -179,7 +179,7 @@ llvm::Value *allocateTerm(llvm::Type *AllocType, llvm::Value *Len, llvm::BasicBl
   return Malloc;
 }
 
-llvm::Type *termType(KOREPattern *pattern, llvm::StringMap<llvm::Type *> &substitution, KOREDefinition *definition, llvm::Module *Module) {
+ValueType termType(KOREPattern *pattern, llvm::StringMap<ValueType> &substitution, KOREDefinition *definition) {
   if (auto variable = dynamic_cast<KOREObjectVariablePattern *>(pattern)) {
     return substitution.lookup(variable->getName());
   } else if (auto constructor = dynamic_cast<KOREObjectCompositePattern *>(pattern)) {
@@ -187,10 +187,10 @@ llvm::Type *termType(KOREPattern *pattern, llvm::StringMap<llvm::Type *> &substi
     assert(symbol->isConcrete() && "not supported yet: sort variables");
     if (symbol->getName() == "\\dv") {
       auto sort = dynamic_cast<KOREObjectCompositeSort *>(symbol->getFormalArguments()[0]);
-      return getValueType(sort->getCategory(definition), Module);
+      return sort->getCategory(definition);
     }
     auto sort = dynamic_cast<KOREObjectCompositeSort *>(symbol->getSort());
-    return getValueType(sort->getCategory(definition), Module);
+    return sort->getCategory(definition);
   } else {
     assert(false && "not supported yet: meta level");
     abort();
@@ -629,7 +629,7 @@ void addAbort(llvm::BasicBlock *block, llvm::Module *Module) {
 bool makeFunction(std::string name, KOREPattern *pattern, KOREDefinition *definition, llvm::Module *Module, bool fastcc, bool bigStep) {
     std::map<std::string, KOREObjectVariablePattern *> vars;
     pattern->markVariables(vars);
-    llvm::StringMap<llvm::Type *> params;
+    llvm::StringMap<ValueType> params;
     std::vector<llvm::Type *> paramTypes;
     std::vector<std::string> paramNames;
     for (auto iter = vars.begin(); iter != vars.end(); ++iter) {
@@ -652,11 +652,12 @@ bool makeFunction(std::string name, KOREPattern *pattern, KOREDefinition *defini
         break;
       }
       
-      params.insert({entry.first, varType});
+      params.insert({entry.first, cat});
       paramTypes.push_back(paramType);
       paramNames.push_back(entry.first);
     }
-    llvm::FunctionType *funcType = llvm::FunctionType::get(termType(pattern, params, definition, Module), paramTypes, false);
+    ValueType returnCat = termType(pattern, params, definition);
+    llvm::FunctionType *funcType = llvm::FunctionType::get(getValueType(returnCat, Module), paramTypes, false);
     llvm::Constant *func = Module->getOrInsertFunction(name, funcType);
     llvm::Function *applyRule = llvm::dyn_cast<llvm::Function>(func);
     if (!applyRule) {
@@ -702,7 +703,7 @@ std::string makeApplyRuleFunction(KOREAxiomDeclaration *axiom, KOREDefinition *d
     for (auto residual : residuals) {
       residual.pattern->markVariables(vars);
     }
-    llvm::StringMap<llvm::Type *> params;
+    llvm::StringMap<ValueType> params;
     std::vector<llvm::Type *> paramTypes;
     std::vector<std::string> paramNames;
     for (auto iter = vars.begin(); iter != vars.end(); ++iter) {
@@ -724,8 +725,8 @@ std::string makeApplyRuleFunction(KOREAxiomDeclaration *axiom, KOREDefinition *d
       default:
         break;
       }
-      
-      params.insert({entry.first, varType});
+
+      params.insert({entry.first, cat});
       paramTypes.push_back(paramType);
       paramNames.push_back(entry.first);
     }
