@@ -626,7 +626,7 @@ void addAbort(llvm::BasicBlock *block, llvm::Module *Module) {
     new llvm::UnreachableInst(Module->getContext(), block);
 }
 
-bool makeFunction(std::string name, KOREPattern *pattern, KOREDefinition *definition, llvm::Module *Module, bool fastcc, bool bigStep) {
+bool makeFunction(std::string name, KOREPattern *pattern, KOREDefinition *definition, llvm::Module *Module, bool fastcc, bool bigStep, KOREAxiomDeclaration *axiom) {
     std::map<std::string, KOREObjectVariablePattern *> vars;
     pattern->markVariables(vars);
     llvm::StringMap<ValueType> params;
@@ -692,7 +692,7 @@ bool makeFunction(std::string name, KOREPattern *pattern, KOREDefinition *defini
 std::string makeApplyRuleFunction(KOREAxiomDeclaration *axiom, KOREDefinition *definition, llvm::Module *Module, bool bigStep) {
     KOREPattern *pattern = axiom->getRightHandSide();
     std::string name = "apply_rule_" + std::to_string(axiom->getOrdinal());
-    if (makeFunction(name, pattern, definition, Module, true, bigStep)) {
+    if (makeFunction(name, pattern, definition, Module, true, bigStep, axiom)) {
       return name;
     }
     return "";
@@ -783,7 +783,7 @@ std::string makeSideConditionFunction(KOREAxiomDeclaration *axiom, KOREDefinitio
       return "";
     }
     std::string name = "side_condition_" + std::to_string(axiom->getOrdinal());
-    if (makeFunction(name, pattern, definition, Module, false, false)) {
+    if (makeFunction(name, pattern, definition, Module, false, false, axiom)) {
       return name;
     }
     return "";
