@@ -409,7 +409,8 @@ void makeEvalOrAnywhereFunction(KOREObjectSymbol *function, KOREDefinition *defi
   std::string name = "eval_" + Out.str();
   llvm::Constant *func = module->getOrInsertFunction(name, funcType);
   llvm::Function *matchFunc = llvm::cast<llvm::Function>(func);
-  resetDebugLoc();
+  KOREObjectSymbolDeclaration *symbolDecl = definition->getSymbolDeclarations().at(function->getName());
+  initDebugAxiom(symbolDecl->getAttributes());
   initDebugFunction(function->getName(), name, getDebugFunctionType(debugReturnType, debugArgs), definition, matchFunc);
   matchFunc->setCallingConv(llvm::CallingConv::Fast);
   llvm::StringMap<llvm::Value *> subst;
