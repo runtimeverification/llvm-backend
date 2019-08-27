@@ -631,7 +631,7 @@ void addAbort(llvm::BasicBlock *block, llvm::Module *Module) {
     new llvm::UnreachableInst(Module->getContext(), block);
 }
 
-bool makeFunction(std::string name, KOREPattern *pattern, KOREDefinition *definition, llvm::Module *Module, bool fastcc, bool bigStep, KOREAxiomDeclaration *axiom) {
+bool makeFunction(std::string name, KOREPattern *pattern, KOREDefinition *definition, llvm::Module *Module, bool fastcc, bool bigStep, KOREAxiomDeclaration *axiom, std::string postfix) {
     std::map<std::string, KOREObjectVariablePattern *> vars;
     pattern->markVariables(vars);
     llvm::StringMap<ValueType> params;
@@ -668,7 +668,15 @@ bool makeFunction(std::string name, KOREPattern *pattern, KOREDefinition *defini
     llvm::Constant *func = Module->getOrInsertFunction(name, funcType);
     llvm::Function *applyRule = llvm::dyn_cast<llvm::Function>(func);
     initDebugAxiom(axiom);
-    initDebugFunction(name, name, getDebugFunctionType(getDebugType(returnCat), debugArgs), definition, applyRule);
+    std::string debugName = name;
+    if (axiom->getAttributes().count("label")) {
+      KOREObjectCompositePattern *labelAtt = axiom->getAttributes().at("label");
+      assert(labelAtt->getArguments().size() == 1);
+      auto strPattern = dynamic_cast<KOREMetaStringPattern *>(labelAtt->getArguments()[0]);
+      std::string label = strPattern->getContents();
+      debugName = label + postfix;
+    }
+    initDebugFunction(debugName, debugName, getDebugFunctionType(getDebugType(returnCat), debugArgs), definition, applyRule);
     if (!applyRule) {
       func->print(llvm::errs());
       abort();
@@ -703,7 +711,7 @@ bool makeFunction(std::string name, KOREPattern *pattern, KOREDefinition *defini
 std::string makeApplyRuleFunction(KOREAxiomDeclaration *axiom, KOREDefinition *definition, llvm::Module *Module, bool bigStep) {
     KOREPattern *pattern = axiom->getRightHandSide();
     std::string name = "apply_rule_" + std::to_string(axiom->getOrdinal());
-    if (makeFunction(name, pattern, definition, Module, true, bigStep, axiom)) {
+    if (makeFunction(name, pattern, definition, Module, true, bigStep, axiom, ".rhs")) {
       return name;
     }
     return "";
@@ -800,7 +808,7 @@ std::string makeSideConditionFunction(KOREAxiomDeclaration *axiom, KOREDefinitio
       return "";
     }
     std::string name = "side_condition_" + std::to_string(axiom->getOrdinal());
-    if (makeFunction(name, pattern, definition, Module, false, false, axiom)) {
+    if (makeFunction(name, pattern, definition, Module, false, false, axiom, ".sc")) {
       return name;
     }
     return "";
