@@ -58,12 +58,18 @@ static std::string LOCATION_ATT = "org'Stop'kframework'Stop'attributes'Stop'Loca
 
 void initDebugAxiom(std::map<std::string, KOREObjectCompositePattern *> const& att) {
   if (!Dbg) return;
-  if (!att.count(SOURCE_ATT)) return;
+  if (!att.count(SOURCE_ATT)) {
+    resetDebugLoc();
+    return;
+  }
   KOREObjectCompositePattern *sourceAtt = att.at(SOURCE_ATT);
   assert(sourceAtt->getArguments().size() == 1);
   auto strPattern = dynamic_cast<KOREMetaStringPattern *>(sourceAtt->getArguments()[0]);
   std::string source = strPattern->getContents();
-  if (!att.count(LOCATION_ATT)) return;
+  if (!att.count(LOCATION_ATT)) {
+    resetDebugLoc();
+    return;
+  }
   KOREObjectCompositePattern *locationAtt = att.at(LOCATION_ATT);
   assert(locationAtt->getArguments().size() == 1);
   auto strPattern2 = dynamic_cast<KOREMetaStringPattern *>(locationAtt->getArguments()[0]);
