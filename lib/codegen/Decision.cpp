@@ -588,11 +588,11 @@ void makeStepFunction(KOREDefinition *definition, llvm::Module *module, Decision
   llvm::StringMap<llvm::Value *> subst;
   auto val = matchFunc->arg_begin();
   llvm::BasicBlock *block = llvm::BasicBlock::Create(module->getContext(), "entry", matchFunc);
-  initDebugParam(matchFunc, 0, "subject", {SortCategory::Symbol, 0});
   llvm::AllocaInst *addr = new llvm::AllocaInst(llvm::Type::getInt8PtrTy(module->getContext()), 0, "jumpTo", block);
   llvm::BasicBlock *stuck = llvm::BasicBlock::Create(module->getContext(), "stuck", matchFunc);
   llvm::BasicBlock *pre_stuck = llvm::BasicBlock::Create(module->getContext(), "pre_stuck", matchFunc);
   new llvm::StoreInst(llvm::BlockAddress::get(matchFunc, pre_stuck), addr, block);
+  initDebugParam(matchFunc, 0, "subject", {SortCategory::Symbol, 0});
   llvm::BranchInst::Create(stuck, pre_stuck);
   auto result = stepFunctionHeader(0, module, definition, block, stuck, {val}, {{SortCategory::Symbol, 0}});
   auto collectedVal = result.first[0];
