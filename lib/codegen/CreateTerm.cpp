@@ -667,7 +667,7 @@ bool makeFunction(std::string name, KOREPattern *pattern, KOREDefinition *defini
     llvm::FunctionType *funcType = llvm::FunctionType::get(getValueType(returnCat, Module), paramTypes, false);
     llvm::Constant *func = Module->getOrInsertFunction(name, funcType);
     llvm::Function *applyRule = llvm::dyn_cast<llvm::Function>(func);
-    initDebugAxiom(axiom);
+    initDebugAxiom(axiom->getAttributes());
     std::string debugName = name;
     if (axiom->getAttributes().count("label")) {
       KOREObjectCompositePattern *labelAtt = axiom->getAttributes().at("label");
@@ -755,7 +755,7 @@ std::string makeApplyRuleFunction(KOREAxiomDeclaration *axiom, KOREDefinition *d
     std::string name = "apply_rule_" + std::to_string(axiom->getOrdinal());
     llvm::Constant *func = Module->getOrInsertFunction(name, funcType);
     llvm::Function *applyRule = llvm::dyn_cast<llvm::Function>(func);
-    initDebugAxiom(axiom);
+    initDebugAxiom(axiom->getAttributes());
     initDebugFunction(name, name, getDebugFunctionType(getDebugType({SortCategory::Symbol, 0}), debugArgs), definition, applyRule);
     if (!applyRule) {
       printf("%lu\n", residuals.size());

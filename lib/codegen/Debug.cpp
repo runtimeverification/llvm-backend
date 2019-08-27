@@ -56,9 +56,8 @@ void initDebugParam(llvm::Function *func, unsigned argNo, std::string name, Valu
 static std::string SOURCE_ATT = "org'Stop'kframework'Stop'attributes'Stop'Source";
 static std::string LOCATION_ATT = "org'Stop'kframework'Stop'attributes'Stop'Location";
 
-void initDebugAxiom(KOREAxiomDeclaration *axiom) {
+void initDebugAxiom(std::map<std::string, KOREObjectCompositePattern *> const& att) {
   if (!Dbg) return;
-  auto &att = axiom->getAttributes();
   if (!att.count(SOURCE_ATT)) return;
   KOREObjectCompositePattern *sourceAtt = att.at(SOURCE_ATT);
   assert(sourceAtt->getArguments().size() == 1);
