@@ -281,6 +281,7 @@ class blockPrinter:
         self.block_ptr_ptr = gdb.lookup_type("block").pointer().pointer()
         self.mpz_ptr_ptr = gdb.lookup_type("__mpz_struct").pointer().pointer()
         self.map_ptr = gdb.lookup_type("map").pointer()
+        self.list_ptr = gdb.lookup_type("List").pointer()
 
     def getSymbolNameForTag(self, tag):
         return gdb.lookup_global_symbol("table_getSymbolNameForTag").value()[tag]
@@ -323,6 +324,24 @@ class blockPrinter:
         else:
             self.appendLimbs(size, val.dereference()['_mp_d'])
         self.result += "\", \"Int\")"
+
+    def appendList(self, val):
+        length = val.dereference()['impl_']['size']
+        if length == 0:
+            self.result += "`.List`(.KList)"
+            return
+        i = 1
+        for elem in ListIter(val):
+            if i < length:
+                self.result += "`_List_`("
+            self.result += "`ListItem`("
+            self.append(elem.cast(self.block_ptr), False)
+            self.result += ")"
+            if i < length:
+                self.result += ","
+            i += 1
+        for i in range(length-1):
+            self.result += ")"
 
     def appendMap(self, val):
         length = val.dereference()['a']
