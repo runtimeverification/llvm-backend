@@ -119,26 +119,39 @@ static std::string BLOCK_STRUCT = "block";
 
 llvm::DIType *getDebugType(ValueType type) {
   if (!Dbg) return nullptr;
+  static bool init = false;
+  static llvm::DIType *map, *list, *set, *integer, *floating, *buffer, *boolean, *symbol;
+  if (!init) {
+    init = true;
+    map = getPointerDebugType(getForwardDecl(MAP_STRUCT));
+    list = getPointerDebugType(getForwardDecl(LIST_STRUCT));
+    set = getPointerDebugType(getForwardDecl(SET_STRUCT));
+    integer = getPointerDebugType(getForwardDecl(INT_STRUCT));
+    floating = getPointerDebugType(getForwardDecl(FLOAT_STRUCT));
+    buffer = getPointerDebugType(getForwardDecl(BUFFER_STRUCT));
+    boolean = Dbg->createBasicType("Bool", 8, llvm::dwarf::DW_ATE_boolean);
+    symbol = getPointerDebugType(getForwardDecl(BLOCK_STRUCT));
+  }
   switch(type.cat) {
   case SortCategory::Map:
-    return getForwardDecl(MAP_STRUCT);
+    return map;
   case SortCategory::List:
-    return getForwardDecl(LIST_STRUCT);
+    return list;
   case SortCategory::Set:
-    return getForwardDecl(SET_STRUCT);
+    return set;
   case SortCategory::Int:
-    return Dbg->createPointerType(getForwardDecl(INT_STRUCT), sizeof(size_t) * 8);
+    return integer;
   case SortCategory::Float:
-    return Dbg->createPointerType(getForwardDecl(FLOAT_STRUCT), sizeof(size_t) * 8);
+    return floating;
   case SortCategory::StringBuffer:
-    return Dbg->createPointerType(getForwardDecl(BUFFER_STRUCT), sizeof(size_t) * 8);
+    return buffer;
   case SortCategory::Bool:
-    return Dbg->createBasicType("Bool", 8, llvm::dwarf::DW_ATE_boolean);
+    return boolean;
   case SortCategory::MInt:
     return Dbg->createBasicType("MInt", type.bits, llvm::dwarf::DW_ATE_unsigned);
   case SortCategory::Symbol:
   case SortCategory::Variable:
-    return Dbg->createPointerType(getForwardDecl(BLOCK_STRUCT), sizeof(size_t) * 8);
+    return symbol;
   case SortCategory::Uncomputed:
     abort();
 
