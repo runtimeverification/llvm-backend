@@ -126,7 +126,7 @@ llvm::DIType *getDebugType(ValueType type) {
   case SortCategory::StringBuffer:
     return Dbg->createPointerType(getForwardDecl(BUFFER_STRUCT), sizeof(size_t) * 8);
   case SortCategory::Bool:
-    return Dbg->createBasicType("Bool", 1, llvm::dwarf::DW_ATE_boolean);
+    return Dbg->createBasicType("Bool", 8, llvm::dwarf::DW_ATE_boolean);
   case SortCategory::MInt:
     return Dbg->createBasicType("MInt", type.bits, llvm::dwarf::DW_ATE_unsigned);
   case SortCategory::Symbol:
