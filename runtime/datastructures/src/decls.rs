@@ -3,10 +3,8 @@ extern crate libc;
 
 use std::cell::UnsafeCell;
 use std::hash::{Hash,Hasher};
-use decls::im_rc::hashmap::HashMap;
 use decls::im_rc::hashset::HashSet;
 use decls::im_rc::hashset;
-use decls::im_rc::hashmap;
 use self::libc::{c_char,c_void};
 use std::alloc::{GlobalAlloc, Layout};
 use std::collections::hash_map::DefaultHasher;
@@ -99,10 +97,8 @@ pub unsafe extern "C" fn hash_k(block: K) -> u64 {
   h.finish()
 }
 
-pub type Map = HashMap<KElem, KElem>;
 pub type Set = HashSet<KElem>;
 pub type SetIter = hashset::Iter<'static, KElem>;
-pub type MapIter = hashmap::Iter<'static, KElem, KElem>;
 
 #[repr(C)]
 pub struct List(
