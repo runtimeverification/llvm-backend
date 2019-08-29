@@ -1,6 +1,7 @@
 #include "kllvm/codegen/EmitConfigParser.h"
 #include "kllvm/codegen/CreateTerm.h"
 #include "kllvm/codegen/GenAlloc.h"
+#include "kllvm/codegen/Debug.h"
 
 #include "llvm/IR/Constants.h"
 #include "llvm/IR/Instructions.h"
@@ -68,7 +69,7 @@ static std::string BUFFER_STRUCT = "stringbuffer";
 static std::string LAYOUT_STRUCT = "layout";
 static std::string LAYOUTITEM_STRUCT = "layoutitem";
 
-static void emitDataForSymbol(std::string name, llvm::Type *ty, KOREDefinition *definition, llvm::Module *module, bool isEval,
+static void emitDataForSymbol(std::string name, llvm::Type *ty, llvm::DIType *dity, KOREDefinition *definition, llvm::Module *module, bool isEval,
     std::pair<llvm::Value *, llvm::BasicBlock *> getter(KOREDefinition *, llvm::Module *,
         KOREObjectSymbol *, llvm::Instruction *)) {
   llvm::LLVMContext &Ctx = module->getContext();
@@ -80,6 +81,9 @@ static void emitDataForSymbol(std::string name, llvm::Type *ty, KOREDefinition *
   }
   auto func = llvm::dyn_cast<llvm::Function>(module->getOrInsertFunction(
       name, llvm::FunctionType::get(ty, argTypes, false)));
+  if (!isEval) {
+    initDebugFunction(name, name, getDebugFunctionType(dity, {getIntDebugType()}), definition, func);
+  }
   auto EntryBlock = llvm::BasicBlock::Create(Ctx, "entry", func);
   auto MergeBlock = llvm::BasicBlock::Create(Ctx, "exit");
   auto stuck = llvm::BasicBlock::Create(Ctx, "stuck");
@@ -114,7 +118,7 @@ static std::pair<llvm::Value *, llvm::BasicBlock *> getHeader(KOREDefinition *de
 }
 
 static void emitGetBlockHeaderForSymbol(KOREDefinition *def, llvm::Module *mod) {
-  emitDataForSymbol("getBlockHeaderForSymbol", mod->getTypeByName(BLOCKHEADER_STRUCT),
+  emitDataForSymbol("getBlockHeaderForSymbol", mod->getTypeByName(BLOCKHEADER_STRUCT), getForwardDecl(BLOCKHEADER_STRUCT),
       def, mod, false, getHeader);
 }
 
@@ -127,7 +131,7 @@ static std::pair<llvm::Value *, llvm::BasicBlock *> getFunction(KOREDefinition *
 }
 
 static void emitIsSymbolAFunction(KOREDefinition *def, llvm::Module *mod) {
-  emitDataForSymbol("isSymbolAFunction", llvm::Type::getInt1Ty(mod->getContext()),
+  emitDataForSymbol("isSymbolAFunction", llvm::Type::getInt1Ty(mod->getContext()), getBoolDebugType(),
       def, mod, false, getFunction);
 }
 
@@ -140,7 +144,7 @@ static std::pair<llvm::Value *, llvm::BasicBlock *> getBinder(KOREDefinition *de
 }
 
 static void emitIsSymbolABinder(KOREDefinition *def, llvm::Module *mod) {
-  emitDataForSymbol("isSymbolABinder", llvm::Type::getInt1Ty(mod->getContext()),
+  emitDataForSymbol("isSymbolABinder", llvm::Type::getInt1Ty(mod->getContext()), getBoolDebugType(),
       def, mod, false, getBinder);
 }
 
@@ -158,7 +162,7 @@ static std::pair<llvm::Value *, llvm::BasicBlock *> getInjection(KOREDefinition 
 }
 
 static void emitGetInjectionForSortOfTag(KOREDefinition *def, llvm::Module *mod) {
-  emitDataForSymbol("getInjectionForSortOfTag", llvm::Type::getInt32Ty(mod->getContext()),
+  emitDataForSymbol("getInjectionForSortOfTag", llvm::Type::getInt32Ty(mod->getContext()), getIntDebugType(),
       def, mod, false, getInjection);
 }
 
@@ -263,7 +267,7 @@ static std::pair<llvm::Value *, llvm::BasicBlock *> getEval(KOREDefinition *def,
 }
 
 static void emitEvaluateFunctionSymbol(KOREDefinition *def, llvm::Module *mod) {
-  emitDataForSymbol("evaluateFunctionSymbol", llvm::Type::getInt8PtrTy(mod->getContext()),
+  emitDataForSymbol("evaluateFunctionSymbol", llvm::Type::getInt8PtrTy(mod->getContext()), nullptr,
       def, mod, true, getEval);
 }
 
@@ -578,7 +582,7 @@ static std::pair<llvm::Value *, llvm::BasicBlock *> getSymbolName(KOREDefinition
 }
 
 static void emitGetSymbolNameForTag(KOREDefinition *def, llvm::Module *mod) {
-  emitDataForSymbol("getSymbolNameForTag", llvm::Type::getInt8PtrTy(mod->getContext()), def, mod, false, getSymbolName);
+  emitDatFForSymbol("getSymbolNameForTag", llvm::Type::getInt8PtrTy(mod->getContext()), getCharPtrDebugType(), def, mod, false, getSymbolName);
 }
 
 static void visitCollection(KOREDefinition *definition, llvm::Module *module, KOREObjectCompositeSort *compositeSort, llvm::Function *func, llvm::Value *ChildPtr, llvm::BasicBlock *CaseBlock, unsigned offset) {
