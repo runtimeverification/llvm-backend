@@ -33,7 +33,8 @@ extern "C" {
     return malloc(requested);
   }
 
-  void printConfigurationInternal(FILE *file, block *subject, const char *sort, bool) {}
+  void printConfigurationInternal(writer *file, block *subject, const char *sort, bool) {}
+  void sfprintf(writer *, const char *, ...) {}
 
   bool hook_KEQUAL_eq(block * b1, block * b2) {
     return b1->h.hdr == b2->h.hdr;

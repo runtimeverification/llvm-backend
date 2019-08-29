@@ -54,7 +54,8 @@ extern "C" {
     return false;
   }
 
-  void printConfigurationInternal(FILE *file, block *subject, const char *sort, bool) {}
+  void printConfigurationInternal(writer *file, block *subject, const char *sort, bool) {}
+  void sfprintf(writer *, const char *, ...) {}
 
   bool hook_KEQUAL_eq(block * lhs, block * rhs) {
     return lhs->h.hdr == rhs->h.hdr;
