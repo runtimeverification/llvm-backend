@@ -56,7 +56,7 @@ extern "C" {
     string *contents;
   } stringbuffer;
 
-  // llvm: map = type { i64, i8 *, i8 * }
+  // llvm: map = type { i8 *, i64 }
   typedef struct map {
     void *root;
     size_t size;
@@ -91,6 +91,7 @@ extern "C" {
     };
   } iter;
 
+  // llvm: list = type { i64, i32, i8 *, i8 * }
   typedef struct list {
     size_t size;
     uint32_t shift;
