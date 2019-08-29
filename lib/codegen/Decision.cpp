@@ -1,5 +1,6 @@
 #include "kllvm/codegen/Decision.h"
 #include "kllvm/codegen/CreateTerm.h"
+#include "kllvm/codegen/Debug.h"
 
 #include "llvm/IR/CFG.h"
 #include "llvm/IR/Constants.h"
@@ -193,7 +194,7 @@ void SwitchNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitutio
       llvm::StructType *BlockType = getBlockType(d->Module, d->Definition, _case.getConstructor());
       llvm::BitCastInst *Cast = new llvm::BitCastInst(substitution.lookup(name), llvm::PointerType::getUnqual(BlockType), "", d->CurrentBlock);
       KOREObjectSymbolDeclaration *symbolDecl = d->Definition->getSymbolDeclarations().at(_case.getConstructor()->getName());
-      llvm::Value *Renamed;
+      llvm::Instruction *Renamed;
       for (std::string binding : _case.getBindings()) {
         llvm::Value *ChildPtr = llvm::GetElementPtrInst::CreateInBounds(BlockType, Cast, {llvm::ConstantInt::get(llvm::Type::getInt64Ty(d->Ctx), 0), llvm::ConstantInt::get(llvm::Type::getInt32Ty(d->Ctx), offset+2)}, "", d->CurrentBlock);
         llvm::Value *Child;
@@ -211,9 +212,11 @@ void SwitchNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitutio
         if (symbolDecl->getAttributes().count("binder")) {
           if (offset == 0) {
             Renamed = llvm::CallInst::Create(d->Module->getOrInsertFunction("alphaRename", BlockPtr, BlockPtr), Child, "renamedVar", d->CurrentBlock);
+            setDebugLoc(Renamed);
             substitution[binding] = Renamed;
           } else if (offset == _case.getBindings().size() - 1) {
-            llvm::Value *Replaced = llvm::CallInst::Create(d->Module->getOrInsertFunction("replaceBinderIndex", BlockPtr, BlockPtr, BlockPtr), {Child, Renamed}, "withUnboundIndex", d->CurrentBlock);
+            llvm::Instruction *Replaced = llvm::CallInst::Create(d->Module->getOrInsertFunction("replaceBinderIndex", BlockPtr, BlockPtr, BlockPtr), {Child, Renamed}, "withUnboundIndex", d->CurrentBlock);
+            setDebugLoc(Replaced);
             substitution[binding] = Replaced;
           } else {
             substitution[binding] = Child;
@@ -297,6 +300,7 @@ void MakeIteratorNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> subst
     abort();
   }
   auto call = llvm::CallInst::Create(func, args, "", d->CurrentBlock);
+  setDebugLoc(call);
   func->arg_begin()->addAttr(llvm::Attribute::StructRet);
   call->addParamAttr(0, llvm::Attribute::StructRet);
   substitution[name] = AllocSret;
@@ -343,6 +347,7 @@ void IterNextNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitut
     abort();
   }
   auto Call = llvm::CallInst::Create(func, {arg}, binding.substr(0, max_name_length), d->CurrentBlock);
+  setDebugLoc(Call);
   substitution[binding] = Call;
   child->codegen(d, substitution);
   d->ChoiceBlock = nullptr;
@@ -373,13 +378,16 @@ void LeafNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution)
     break;
   }
   auto Call = llvm::CallInst::Create(d->Module->getOrInsertFunction(name, llvm::FunctionType::get(type, types, false)), args, "", d->CurrentBlock);
+  setDebugLoc(Call);
   Call->setCallingConv(llvm::CallingConv::Fast);
   llvm::ReturnInst::Create(d->Ctx, Call, d->CurrentBlock);
   setCompleted();
 }
 
 llvm::Value *Decision::getTag(llvm::Value *val) {
-  return llvm::CallInst::Create(Module->getOrInsertFunction("getTag", llvm::Type::getInt32Ty(Ctx), getValueType({SortCategory::Symbol, 0}, Module)), val, "tag", CurrentBlock);
+  auto res = llvm::CallInst::Create(Module->getOrInsertFunction("getTag", llvm::Type::getInt32Ty(Ctx), getValueType({SortCategory::Symbol, 0}, Module)), val, "tag", CurrentBlock);
+  setDebugLoc(res);
+  return res;
 }
 
 void makeEvalOrAnywhereFunction(KOREObjectSymbol *function, KOREDefinition *definition, llvm::Module *module, DecisionNode *dt, void (*addStuck)(llvm::BasicBlock*, llvm::Module*, KOREObjectSymbol *, llvm::StringMap<llvm::Value *>&, KOREDefinition *)) {
@@ -394,10 +402,13 @@ void makeEvalOrAnywhereFunction(KOREObjectSymbol *function, KOREDefinition *defi
   default:
     break;
   }
+  auto debugReturnType = getDebugType(returnSort);
   std::vector<llvm::Type *> args;
+  std::vector<llvm::Metadata *> debugArgs;
   std::vector<ValueType> cats;
   for (auto sort : function->getArguments()) {
     auto cat = dynamic_cast<KOREObjectCompositeSort *>(sort)->getCategory(definition);
+    debugArgs.push_back(getDebugType(cat));
     switch (cat.cat) {
     case SortCategory::Map:
     case SortCategory::List:
@@ -417,6 +428,9 @@ void makeEvalOrAnywhereFunction(KOREObjectSymbol *function, KOREDefinition *defi
   std::string name = "eval_" + Out.str();
   llvm::Constant *func = module->getOrInsertFunction(name, funcType);
   llvm::Function *matchFunc = llvm::cast<llvm::Function>(func);
+  KOREObjectSymbolDeclaration *symbolDecl = definition->getSymbolDeclarations().at(function->getName());
+  initDebugAxiom(symbolDecl->getAttributes());
+  initDebugFunction(function->getName(), name, getDebugFunctionType(debugReturnType, debugArgs), definition, matchFunc);
   matchFunc->setCallingConv(llvm::CallingConv::Fast);
   llvm::StringMap<llvm::Value *> subst;
   llvm::BasicBlock *block = llvm::BasicBlock::Create(module->getContext(), "entry", matchFunc);
@@ -424,6 +438,7 @@ void makeEvalOrAnywhereFunction(KOREObjectSymbol *function, KOREDefinition *defi
   for (auto val = matchFunc->arg_begin(); val != matchFunc->arg_end(); ++val, ++i) {
     val->setName("_" + std::to_string(i+1));
     subst.insert({val->getName(), val});
+    initDebugParam(matchFunc, i, val->getName(), cats[i]);
   }
   llvm::AllocaInst *addr = new llvm::AllocaInst(llvm::Type::getInt8PtrTy(module->getContext()), 0, "jumpTo", block);
   llvm::BasicBlock *stuck = llvm::BasicBlock::Create(module->getContext(), "stuck", matchFunc);
@@ -595,6 +610,9 @@ void makeStepFunction(KOREDefinition *definition, llvm::Module *module, Decision
   std::string name = "step";
   llvm::Constant *func = module->getOrInsertFunction(name, funcType);
   llvm::Function *matchFunc = llvm::cast<llvm::Function>(func);
+  auto debugType = getDebugType({SortCategory::Symbol, 0});
+  resetDebugLoc();
+  initDebugFunction(name, name, getDebugFunctionType(debugType, {debugType}), definition, matchFunc);
   matchFunc->setCallingConv(llvm::CallingConv::Fast);
   llvm::StringMap<llvm::Value *> subst;
   auto val = matchFunc->arg_begin();
@@ -603,6 +621,7 @@ void makeStepFunction(KOREDefinition *definition, llvm::Module *module, Decision
   llvm::BasicBlock *stuck = llvm::BasicBlock::Create(module->getContext(), "stuck", matchFunc);
   llvm::BasicBlock *pre_stuck = llvm::BasicBlock::Create(module->getContext(), "pre_stuck", matchFunc);
   new llvm::StoreInst(llvm::BlockAddress::get(matchFunc, pre_stuck), addr, block);
+  initDebugParam(matchFunc, 0, "subject", {SortCategory::Symbol, 0});
   llvm::BranchInst::Create(stuck, pre_stuck);
   auto result = stepFunctionHeader(0, module, definition, block, stuck, {val}, {{SortCategory::Symbol, 0}});
   auto collectedVal = result.first[0];
@@ -642,9 +661,11 @@ KOREObjectPattern *makePartialTerm(KOREObjectPattern *term, std::set<std::string
 void makeStepFunction(KOREAxiomDeclaration *axiom, KOREDefinition *definition, llvm::Module *module, PartialStep res) {
   auto blockType = getValueType({SortCategory::Symbol, 0}, module);
   std::vector<llvm::Type *> argTypes;
+  std::vector<llvm::Metadata *> debugTypes;
   for (auto res : res.residuals) {
     auto argSort = dynamic_cast<KOREObjectCompositeSort *>(res.pattern->getSort());
     auto cat = argSort->getCategory(definition);
+    debugTypes.push_back(getDebugType(cat));
     switch (cat.cat) {
     case SortCategory::Map:
     case SortCategory::List:
@@ -656,10 +677,13 @@ void makeStepFunction(KOREAxiomDeclaration *axiom, KOREDefinition *definition, l
       break;
     }
   }
+  auto blockDebugType = getDebugType({SortCategory::Symbol, 0});
   llvm::FunctionType *funcType = llvm::FunctionType::get(blockType, argTypes, false);
   std::string name = "step_" + std::to_string(axiom->getOrdinal());
   llvm::Constant *func = module->getOrInsertFunction(name, funcType);
   llvm::Function *matchFunc = llvm::dyn_cast<llvm::Function>(func);
+  resetDebugLoc();
+  initDebugFunction(name, name, getDebugFunctionType(blockDebugType, debugTypes), definition, matchFunc);
   if (!matchFunc) {
     func->print(llvm::errs());
     abort();
@@ -689,6 +713,7 @@ void makeStepFunction(KOREAxiomDeclaration *axiom, KOREDefinition *definition, l
     auto sort = res.residuals[i].pattern->getSort();
     auto cat = dynamic_cast<KOREObjectCompositeSort *>(sort)->getCategory(definition);
     types.push_back(cat);
+    initDebugParam(matchFunc, i, "_" + std::to_string(i+1), cat);
   }
   auto header = stepFunctionHeader(axiom->getOrdinal(), module, definition, block, stuck, args, types);
   i = 0;

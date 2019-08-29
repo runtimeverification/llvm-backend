@@ -67,7 +67,7 @@ llvm::Value *getBlockHeader(llvm::Module *Module, KOREDefinition *definition,
 
 /* returns the llvm::Type corresponding to the type of the result of calling createTerm
    on the specified pattern. */
-llvm::Type *termType(KOREPattern *pattern, llvm::StringMap<llvm::Type *> &substitution, KOREDefinition *definition, llvm::Module *Module);
+ValueType termType(KOREPattern *pattern, llvm::StringMap<ValueType> &substitution, KOREDefinition *definition);
 
 /** creates a function that applies the specified rule once it has matched, and returns the name of the function. */
 std::string makeApplyRuleFunction(KOREAxiomDeclaration *axiom, KOREDefinition *definition, llvm::Module *Module, bool bigStep = false);

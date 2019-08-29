@@ -292,7 +292,7 @@ bool KOREAxiomDeclaration::isTopAxiom() {
       if (auto bottomPattern = dynamic_cast<KOREObjectCompositePattern *>(top->getArguments()[0])) {
         if (bottomPattern->getConstructor()->getName() == "\\bottom" && bottomPattern->getArguments().empty()) {
           return true;
-	}
+        }
       }
       return false;
     } else if (top->getConstructor()->getName() == "\\rewrites" && top->getArguments().size() == 2) {
@@ -338,7 +338,7 @@ KOREPattern *KOREAxiomDeclaration::getRightHandSide() const {
               return andPattern2->getArguments()[1];
             }
           }
-	}
+        }
       }
     } else if (top->getConstructor()->getName() == "\\and" && top->getArguments().size() == 2) {
       if (auto andPattern = dynamic_cast<KOREObjectCompositePattern *>(top->getArguments()[1])) {
@@ -508,6 +508,19 @@ void KOREDefinition::preprocess() {
       iter = axioms.erase(iter);
     } else {
       ++iter;
+    }
+  }
+  for (auto moditer = modules.begin(); moditer != modules.end(); ++moditer) {
+    auto declarations = (*moditer)->getDeclarations();
+    for (auto iter = declarations.begin(); iter != declarations.end(); ++iter) {
+      KOREObjectSymbolDeclaration * decl = dynamic_cast<KOREObjectSymbolDeclaration *>(*iter);
+      if (decl == nullptr) {
+        continue;
+      }
+      if (decl->isHooked() && decl->getObjectSortVariables().empty()) {
+        KOREObjectSymbol * symbol = decl->getSymbol();
+        symbols.emplace(symbol->getName(), std::vector<KOREObjectSymbol *>{symbol});
+      }
     }
   }
   for (auto iter = symbols.begin(); iter != symbols.end(); ++iter) {

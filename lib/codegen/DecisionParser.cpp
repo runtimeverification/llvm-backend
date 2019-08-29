@@ -130,7 +130,7 @@ public:
     } else {
       if (!get(node, "constructor")) {
         std::cerr << node << std::endl;
-	abort();
+        abort();
       }
       auto sym = syms.at(str(get(node, "constructor")));
       auto pat = KOREObjectCompositePattern::Create(sym);
