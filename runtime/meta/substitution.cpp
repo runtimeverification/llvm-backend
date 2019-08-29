@@ -13,7 +13,7 @@ static thread_local uint64_t idx;
 
 extern "C" {
   bool hook_KEQUAL_eq(block *, block *);
-  map map_map(void *, block *(block *));
+  Map map_map(void *, block *(block *));
   List list_map(void *, block *(block *));
   set set_map(void *, block *(block *));
 }
@@ -53,7 +53,7 @@ block *debruijnizeInternal(block *currBlock) {
       void *arg = ((char *)currBlock) + argData->offset;
       switch(argData->cat) {
       case MAP_LAYOUT: {
-        map newArg = map_map(arg, debruijnizeInternal);
+        Map newArg = map_map(arg, debruijnizeInternal);
         makeDirty(dirty, argData->offset, newArg, newBlock);
 	break;
       } case LIST_LAYOUT: {
@@ -123,7 +123,7 @@ block *replaceBinderInternal(block *currBlock) {
       void *arg = ((char *)currBlock) + argData->offset;
       switch(argData->cat) {
       case MAP_LAYOUT: {
-        map newArg = map_map(arg, replaceBinderInternal);
+        Map newArg = map_map(arg, replaceBinderInternal);
         makeDirty(dirty, argData->offset, newArg, newBlock);
 	break;
       } case LIST_LAYOUT: {
@@ -186,7 +186,7 @@ block *substituteInternal(block *currBlock) {
       void *arg = ((char *)currBlock) + argData->offset;
       switch(argData->cat) {
       case MAP_LAYOUT: {
-        map newArg = map_map(arg, substituteInternal);
+        Map newArg = map_map(arg, substituteInternal);
         makeDirty(dirty, argData->offset, newArg, newBlock);
 	break;
       } case LIST_LAYOUT: {
