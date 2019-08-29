@@ -434,15 +434,16 @@ void makeEvalOrAnywhereFunction(KOREObjectSymbol *function, KOREDefinition *defi
   matchFunc->setCallingConv(llvm::CallingConv::Fast);
   llvm::StringMap<llvm::Value *> subst;
   llvm::BasicBlock *block = llvm::BasicBlock::Create(module->getContext(), "entry", matchFunc);
+  llvm::AllocaInst *addr = new llvm::AllocaInst(llvm::Type::getInt8PtrTy(module->getContext()), 0, "jumpTo", block);
+  llvm::BasicBlock *stuck = llvm::BasicBlock::Create(module->getContext(), "stuck", matchFunc);
+  new llvm::StoreInst(llvm::BlockAddress::get(matchFunc, stuck), addr, block);
+
   int i = 0;
   for (auto val = matchFunc->arg_begin(); val != matchFunc->arg_end(); ++val, ++i) {
     val->setName("_" + std::to_string(i+1));
     subst.insert({val->getName(), val});
     initDebugParam(matchFunc, i, val->getName(), cats[i]);
   }
-  llvm::AllocaInst *addr = new llvm::AllocaInst(llvm::Type::getInt8PtrTy(module->getContext()), 0, "jumpTo", block);
-  llvm::BasicBlock *stuck = llvm::BasicBlock::Create(module->getContext(), "stuck", matchFunc);
-  new llvm::StoreInst(llvm::BlockAddress::get(matchFunc, stuck), addr, block);
   addStuck(stuck, module, function, subst, definition);
 
   llvm::BasicBlock *fail = llvm::BasicBlock::Create(module->getContext(), "fail", matchFunc);
