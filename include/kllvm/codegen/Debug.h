@@ -16,6 +16,7 @@ void initDebugFunction(std::string name, std::string linkageName, llvm::DISubrou
 
 void initDebugAxiom(std::map<std::string, KOREObjectCompositePattern *> const& att);
 void initDebugParam(llvm::Function *func, unsigned argNo, std::string name, ValueType type);
+void initDebugGlobal(std::string name, llvm::DIType *type, llvm::GlobalVariable *var);
 
 llvm::DIType *getDebugType(ValueType type);
 llvm::DIType *getIntDebugType(void);

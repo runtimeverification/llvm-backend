@@ -61,6 +61,13 @@ void initDebugParam(llvm::Function *func, unsigned argNo, std::string name, Valu
     &func->getEntryBlock());
 }
 
+void initDebugGlobal(std::string name, llvm::DIType *type, llvm::GlobalVariable *var) {
+	if (!Dbg) return;
+	resetDebugLoc();
+	auto DbgExp = Dbg->createGlobalVariableExpression(DbgCU, name, name, DbgFile, DbgLine, type, false);
+	var->addDebugInfo(DbgExp);
+}
+
 static std::string SOURCE_ATT = "org'Stop'kframework'Stop'attributes'Stop'Source";
 static std::string LOCATION_ATT = "org'Stop'kframework'Stop'attributes'Stop'Location";
 
