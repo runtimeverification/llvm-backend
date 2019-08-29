@@ -69,6 +69,47 @@ static std::string BUFFER_STRUCT = "stringbuffer";
 static std::string LAYOUT_STRUCT = "layout";
 static std::string LAYOUTITEM_STRUCT = "layoutitem";
 
+static void emitDataTableForSymbol(std::string name, llvm::Type *ty, llvm::DIType *dity, KOREDefinition *definition, llvm::Module *module,
+    llvm::Constant * getter(KOREDefinition *, llvm::Module *,
+        KOREObjectSymbol *)) {
+  llvm::LLVMContext &Ctx = module->getContext();
+  std::vector<llvm::Type *> argTypes;
+  argTypes.push_back(llvm::Type::getInt32Ty(Ctx));
+  auto func = llvm::dyn_cast<llvm::Function>(module->getOrInsertFunction(
+      name, llvm::FunctionType::get(ty, argTypes, false)));
+  initDebugFunction(name, name, getDebugFunctionType(dity, {getIntDebugType()}), definition, func);
+  auto EntryBlock = llvm::BasicBlock::Create(Ctx, "entry", func);
+  auto MergeBlock = llvm::BasicBlock::Create(Ctx, "exit");
+  auto stuck = llvm::BasicBlock::Create(Ctx, "stuck");
+  auto &syms = definition->getSymbols();
+  auto icmp = new llvm::ICmpInst(*EntryBlock, llvm::CmpInst::ICMP_ULE, func->arg_begin(), llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), syms.rbegin()->first));
+  llvm::BranchInst::Create(MergeBlock, stuck, icmp, EntryBlock);
+  auto tableType = llvm::ArrayType::get(ty, syms.size());
+  auto table = module->getOrInsertGlobal("table_" + name, tableType);
+  llvm::GlobalVariable *globalVar = llvm::dyn_cast<llvm::GlobalVariable>(table);
+  initDebugGlobal("table_" + name, getArrayDebugType(dity, syms.size(), llvm::DataLayout(module).getABITypeAlignment(ty)), globalVar);
+  std::vector<llvm::Constant *> values;
+  for (auto iter = syms.begin(); iter != syms.end(); ++iter) {
+    auto entry = *iter;
+    auto symbol = entry.second;
+    auto val = getter(definition, module, symbol);
+    values.push_back(val);
+  }
+  if (!globalVar->hasInitializer()) {
+    globalVar->setInitializer(llvm::ConstantArray::get(tableType, values));
+  }
+  auto offset = new llvm::ZExtInst(func->arg_begin(), llvm::Type::getInt64Ty(Ctx), "", MergeBlock);
+  llvm::Constant *zero = llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0);
+  auto retval = llvm::GetElementPtrInst::Create(
+    tableType, globalVar, {zero, offset}, "", MergeBlock);
+  auto load = new llvm::LoadInst(retval, "", MergeBlock);
+  llvm::ReturnInst::Create(Ctx, load, MergeBlock);
+  MergeBlock->insertInto(func);
+  addAbort(stuck, module);
+  stuck->insertInto(func);
+}
+
+
 static void emitDataForSymbol(std::string name, llvm::Type *ty, llvm::DIType *dity, KOREDefinition *definition, llvm::Module *module, bool isEval,
     std::pair<llvm::Value *, llvm::BasicBlock *> getter(KOREDefinition *, llvm::Module *,
         KOREObjectSymbol *, llvm::Instruction *)) {
@@ -135,17 +176,16 @@ static void emitIsSymbolAFunction(KOREDefinition *def, llvm::Module *mod) {
       def, mod, false, getFunction);
 }
 
-static std::pair<llvm::Value *, llvm::BasicBlock *> getBinder(KOREDefinition *def, llvm::Module *mod,
-    KOREObjectSymbol *symbol, llvm::Instruction *inst) {
+static llvm::Constant * getBinder(KOREDefinition *def, llvm::Module *mod,
+    KOREObjectSymbol *symbol) {
   auto decl = def->getSymbolDeclarations().at(symbol->getName());
   bool res = decl->getAttributes().count("binder");
-  return std::make_pair(llvm::ConstantInt::get(llvm::Type::getInt1Ty(mod->getContext()), res),
-      inst->getParent());
+  return llvm::ConstantInt::get(llvm::Type::getInt1Ty(mod->getContext()), res);
 }
 
 static void emitIsSymbolABinder(KOREDefinition *def, llvm::Module *mod) {
-  emitDataForSymbol("isSymbolABinder", llvm::Type::getInt1Ty(mod->getContext()), getBoolDebugType(),
-      def, mod, false, getBinder);
+  emitDataTableForSymbol("isSymbolABinder", llvm::Type::getInt1Ty(mod->getContext()), getBoolDebugType(),
+      def, mod, getBinder);
 }
 
 
@@ -577,12 +617,12 @@ static void emitStoreSymbolChildren(KOREDefinition *definition, llvm::Module *mo
   emitTraversal("storeSymbolChildren", definition, module, false, getStore);
 }
 
-static std::pair<llvm::Value *, llvm::BasicBlock *> getSymbolName(KOREDefinition *definition, llvm::Module *module, KOREObjectSymbol *symbol, llvm::Instruction *inst) {
-  return std::make_pair(getSymbolNamePtr(symbol, nullptr, module), inst->getParent());
+static llvm::Constant *getSymbolName(KOREDefinition *definition, llvm::Module *module, KOREObjectSymbol *symbol) {
+  return getSymbolNamePtr(symbol, nullptr, module);
 }
 
 static void emitGetSymbolNameForTag(KOREDefinition *def, llvm::Module *mod) {
-  emitDatFForSymbol("getSymbolNameForTag", llvm::Type::getInt8PtrTy(mod->getContext()), getCharPtrDebugType(), def, mod, false, getSymbolName);
+  emitDataTableForSymbol("getSymbolNameForTag", llvm::Type::getInt8PtrTy(mod->getContext()), getCharPtrDebugType(), def, mod, getSymbolName);
 }
 
 static void visitCollection(KOREDefinition *definition, llvm::Module *module, KOREObjectCompositeSort *compositeSort, llvm::Function *func, llvm::Value *ChildPtr, llvm::BasicBlock *CaseBlock, unsigned offset) {
