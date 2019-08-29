@@ -58,9 +58,8 @@ extern "C" {
 
   // llvm: map = type { i64, i8 *, i8 * }
   typedef struct map {
-    uint64_t a;
-    void *b;
-    void *c;
+    void *root;
+    size_t size;
   } map;
 
   // llvm: set = type { i8 *, i8 *, i64 }
