@@ -1,5 +1,6 @@
 #include "kllvm/codegen/CreateTerm.h"
 #include "kllvm/codegen/GenAlloc.h"
+#include "kllvm/codegen/Debug.h"
 
 #include <gmp.h>
 #include <iomanip>
@@ -176,10 +177,11 @@ llvm::Value *allocateTerm(llvm::Type *AllocType, llvm::BasicBlock *block, const 
 llvm::Value *allocateTerm(llvm::Type *AllocType, llvm::Value *Len, llvm::BasicBlock *block, const char *allocFn) {
   llvm::Instruction *Malloc = llvm::CallInst::CreateMalloc(block, llvm::Type::getInt64Ty(block->getContext()), AllocType, Len, nullptr, koreHeapAlloc(allocFn, block->getModule()));
   block->getInstList().push_back(Malloc);
+  setDebugLoc(Malloc);
   return Malloc;
 }
 
-llvm::Type *termType(KOREPattern *pattern, llvm::StringMap<llvm::Type *> &substitution, KOREDefinition *definition, llvm::Module *Module) {
+ValueType termType(KOREPattern *pattern, llvm::StringMap<ValueType> &substitution, KOREDefinition *definition) {
   if (auto variable = dynamic_cast<KOREObjectVariablePattern *>(pattern)) {
     return substitution.lookup(variable->getName());
   } else if (auto constructor = dynamic_cast<KOREObjectCompositePattern *>(pattern)) {
@@ -187,10 +189,10 @@ llvm::Type *termType(KOREPattern *pattern, llvm::StringMap<llvm::Type *> &substi
     assert(symbol->isConcrete() && "not supported yet: sort variables");
     if (symbol->getName() == "\\dv") {
       auto sort = dynamic_cast<KOREObjectCompositeSort *>(symbol->getFormalArguments()[0]);
-      return getValueType(sort->getCategory(definition), Module);
+      return sort->getCategory(definition);
     }
     auto sort = dynamic_cast<KOREObjectCompositeSort *>(symbol->getSort());
-    return getValueType(sort->getCategory(definition), Module);
+    return sort->getCategory(definition);
   } else {
     assert(false && "not supported yet: meta level");
     abort();
@@ -499,6 +501,7 @@ llvm::Value *CreateTerm::createFunctionCall(std::string name, ValueType returnCa
     abort();
   }
   auto call = llvm::CallInst::Create(func, args, "", CurrentBlock);
+  setDebugLoc(call);
   if (fastcc) {
     call->setCallingConv(llvm::CallingConv::Fast);
   }
@@ -537,6 +540,7 @@ llvm::Value *CreateTerm::notInjectionCase(KOREObjectCompositePattern *constructo
   auto bitcast = new llvm::BitCastInst(Block, BlockPtr, "", CurrentBlock);
   if (symbolDecl->getAttributes().count("binder")) {
     auto call = llvm::CallInst::Create(Module->getOrInsertFunction("debruijnize", BlockPtr, BlockPtr), bitcast, "withIndices", CurrentBlock);
+    setDebugLoc(call);
     return call; 
   } else {
     return bitcast;
@@ -577,7 +581,8 @@ std::pair<llvm::Value *, bool> CreateTerm::operator()(KOREPattern *pattern) {
         && dynamic_cast<KOREObjectCompositeSort *>(symbol->getArguments()[0])->getCategory(Definition).cat == SortCategory::Symbol) {
       std::pair<llvm::Value *, bool> val = (*this)(constructor->getArguments()[0]);
       if (val.second) {
-        llvm::Value *Tag = llvm::CallInst::Create(Module->getOrInsertFunction("getTag", llvm::Type::getInt32Ty(Ctx), getValueType({SortCategory::Symbol, 0}, Module)), val.first, "tag", CurrentBlock);
+        llvm::Instruction *Tag = llvm::CallInst::Create(Module->getOrInsertFunction("getTag", llvm::Type::getInt32Ty(Ctx), getValueType({SortCategory::Symbol, 0}, Module)), val.first, "tag", CurrentBlock);
+        setDebugLoc(Tag);
         auto inj = Definition->getInjSymbol();
         auto NotStringBlock = llvm::BasicBlock::Create(Ctx, "notString", CurrentBlock->getParent());
         auto GeBlock = llvm::BasicBlock::Create(Ctx, "geFirst", CurrentBlock->getParent());
@@ -626,12 +631,13 @@ void addAbort(llvm::BasicBlock *block, llvm::Module *Module) {
     new llvm::UnreachableInst(Module->getContext(), block);
 }
 
-bool makeFunction(std::string name, KOREPattern *pattern, KOREDefinition *definition, llvm::Module *Module, bool fastcc, bool bigStep) {
+bool makeFunction(std::string name, KOREPattern *pattern, KOREDefinition *definition, llvm::Module *Module, bool fastcc, bool bigStep, KOREAxiomDeclaration *axiom, std::string postfix) {
     std::map<std::string, KOREObjectVariablePattern *> vars;
     pattern->markVariables(vars);
-    llvm::StringMap<llvm::Type *> params;
+    llvm::StringMap<ValueType> params;
     std::vector<llvm::Type *> paramTypes;
     std::vector<std::string> paramNames;
+    std::vector<llvm::Metadata *> debugArgs;
     for (auto iter = vars.begin(); iter != vars.end(); ++iter) {
       auto &entry = *iter;
       auto sort = dynamic_cast<KOREObjectCompositeSort *>(entry.second->getSort());
@@ -642,6 +648,7 @@ bool makeFunction(std::string name, KOREPattern *pattern, KOREDefinition *defini
       auto cat = sort->getCategory(definition);
       llvm::Type *varType = getValueType(cat, Module);
       llvm::Type *paramType = varType;
+      debugArgs.push_back(getDebugType(cat));
       switch(cat.cat) {
       case SortCategory::Map:
       case SortCategory::List:
@@ -652,13 +659,24 @@ bool makeFunction(std::string name, KOREPattern *pattern, KOREDefinition *defini
         break;
       }
       
-      params.insert({entry.first, varType});
+      params.insert({entry.first, cat});
       paramTypes.push_back(paramType);
       paramNames.push_back(entry.first);
     }
-    llvm::FunctionType *funcType = llvm::FunctionType::get(termType(pattern, params, definition, Module), paramTypes, false);
+    ValueType returnCat = termType(pattern, params, definition);
+    llvm::FunctionType *funcType = llvm::FunctionType::get(getValueType(returnCat, Module), paramTypes, false);
     llvm::Constant *func = Module->getOrInsertFunction(name, funcType);
     llvm::Function *applyRule = llvm::dyn_cast<llvm::Function>(func);
+    initDebugAxiom(axiom->getAttributes());
+    std::string debugName = name;
+    if (axiom->getAttributes().count("label")) {
+      KOREObjectCompositePattern *labelAtt = axiom->getAttributes().at("label");
+      assert(labelAtt->getArguments().size() == 1);
+      auto strPattern = dynamic_cast<KOREMetaStringPattern *>(labelAtt->getArguments()[0]);
+      std::string label = strPattern->getContents();
+      debugName = label + postfix;
+    }
+    initDebugFunction(debugName, debugName, getDebugFunctionType(getDebugType(returnCat), debugArgs), definition, applyRule);
     if (!applyRule) {
       func->print(llvm::errs());
       abort();
@@ -671,6 +689,7 @@ bool makeFunction(std::string name, KOREPattern *pattern, KOREDefinition *defini
     int i = 0;
     for (auto val = applyRule->arg_begin(); val != applyRule->arg_end(); ++val, ++i) {
       subst.insert({paramNames[i], val});
+      initDebugParam(applyRule, i, paramNames[i], params[paramNames[i]]);
     }
     CreateTerm creator = CreateTerm(subst, definition, block, Module, false);
     llvm::Value *retval = creator(pattern).first;
@@ -681,6 +700,7 @@ bool makeFunction(std::string name, KOREPattern *pattern, KOREDefinition *defini
       llvm::Type *blockType = getValueType({SortCategory::Symbol, 0}, Module);
       llvm::Constant *step = Module->getOrInsertFunction("step", llvm::FunctionType::get(blockType, {blockType}, false));
       auto call = llvm::CallInst::Create(step, {retval}, "", creator.getCurrentBlock());
+      setDebugLoc(call);
       call->setCallingConv(llvm::CallingConv::Fast);
       retval = call;
     }
@@ -691,7 +711,7 @@ bool makeFunction(std::string name, KOREPattern *pattern, KOREDefinition *defini
 std::string makeApplyRuleFunction(KOREAxiomDeclaration *axiom, KOREDefinition *definition, llvm::Module *Module, bool bigStep) {
     KOREPattern *pattern = axiom->getRightHandSide();
     std::string name = "apply_rule_" + std::to_string(axiom->getOrdinal());
-    if (makeFunction(name, pattern, definition, Module, true, bigStep)) {
+    if (makeFunction(name, pattern, definition, Module, true, bigStep, axiom, ".rhs")) {
       return name;
     }
     return "";
@@ -702,9 +722,10 @@ std::string makeApplyRuleFunction(KOREAxiomDeclaration *axiom, KOREDefinition *d
     for (auto residual : residuals) {
       residual.pattern->markVariables(vars);
     }
-    llvm::StringMap<llvm::Type *> params;
+    llvm::StringMap<ValueType> params;
     std::vector<llvm::Type *> paramTypes;
     std::vector<std::string> paramNames;
+    std::vector<llvm::Metadata *> debugArgs;
     for (auto iter = vars.begin(); iter != vars.end(); ++iter) {
       auto &entry = *iter;
       auto sort = dynamic_cast<KOREObjectCompositeSort *>(entry.second->getSort());
@@ -715,6 +736,7 @@ std::string makeApplyRuleFunction(KOREAxiomDeclaration *axiom, KOREDefinition *d
       auto cat = sort->getCategory(definition);
       llvm::Type *varType = getValueType(cat, Module);
       llvm::Type *paramType = varType;
+      debugArgs.push_back(getDebugType(cat));
       switch(cat.cat) {
       case SortCategory::Map:
       case SortCategory::List:
@@ -724,8 +746,8 @@ std::string makeApplyRuleFunction(KOREAxiomDeclaration *axiom, KOREDefinition *d
       default:
         break;
       }
-      
-      params.insert({entry.first, varType});
+
+      params.insert({entry.first, cat});
       paramTypes.push_back(paramType);
       paramNames.push_back(entry.first);
     }
@@ -733,6 +755,8 @@ std::string makeApplyRuleFunction(KOREAxiomDeclaration *axiom, KOREDefinition *d
     std::string name = "apply_rule_" + std::to_string(axiom->getOrdinal());
     llvm::Constant *func = Module->getOrInsertFunction(name, funcType);
     llvm::Function *applyRule = llvm::dyn_cast<llvm::Function>(func);
+    initDebugAxiom(axiom->getAttributes());
+    initDebugFunction(name, name, getDebugFunctionType(getDebugType({SortCategory::Symbol, 0}), debugArgs), definition, applyRule);
     if (!applyRule) {
       printf("%lu\n", residuals.size());
       func->print(llvm::errs());
@@ -744,6 +768,7 @@ std::string makeApplyRuleFunction(KOREAxiomDeclaration *axiom, KOREDefinition *d
     int i = 0;
     for (auto val = applyRule->arg_begin(); val != applyRule->arg_end(); ++val, ++i) {
       subst.insert({paramNames[i], val});
+      initDebugParam(applyRule, i, paramNames[i], params[paramNames[i]]);
     }
     CreateTerm creator = CreateTerm(subst, definition, block, Module, false);
     std::vector<llvm::Value *> args;
@@ -771,6 +796,7 @@ std::string makeApplyRuleFunction(KOREAxiomDeclaration *axiom, KOREDefinition *d
     llvm::Type *blockType = getValueType({SortCategory::Symbol, 0}, Module);
     llvm::Constant *step = Module->getOrInsertFunction("step_" + std::to_string(axiom->getOrdinal()), llvm::FunctionType::get(blockType, types, false));
     auto retval = llvm::CallInst::Create(step, args, "", creator.getCurrentBlock());
+    setDebugLoc(retval);
     retval->setCallingConv(llvm::CallingConv::Fast);
     llvm::ReturnInst::Create(Module->getContext(), retval, creator.getCurrentBlock());
     return name;
@@ -782,7 +808,7 @@ std::string makeSideConditionFunction(KOREAxiomDeclaration *axiom, KOREDefinitio
       return "";
     }
     std::string name = "side_condition_" + std::to_string(axiom->getOrdinal());
-    if (makeFunction(name, pattern, definition, Module, false, false)) {
+    if (makeFunction(name, pattern, definition, Module, false, false, axiom, ".sc")) {
       return name;
     }
     return "";

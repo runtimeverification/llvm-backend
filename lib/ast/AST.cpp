@@ -292,7 +292,7 @@ bool KOREAxiomDeclaration::isTopAxiom() {
       if (auto bottomPattern = dynamic_cast<KOREObjectCompositePattern *>(top->getArguments()[0])) {
         if (bottomPattern->getConstructor()->getName() == "\\bottom" && bottomPattern->getArguments().empty()) {
           return true;
-	}
+        }
       }
       return false;
     } else if (top->getConstructor()->getName() == "\\rewrites" && top->getArguments().size() == 2) {
@@ -338,7 +338,7 @@ KOREPattern *KOREAxiomDeclaration::getRightHandSide() const {
               return andPattern2->getArguments()[1];
             }
           }
-	}
+        }
       }
     } else if (top->getConstructor()->getName() == "\\and" && top->getArguments().size() == 2) {
       if (auto andPattern = dynamic_cast<KOREObjectCompositePattern *>(top->getArguments()[1])) {
