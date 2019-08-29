@@ -179,6 +179,7 @@ llvm::DIType *getShortDebugType(void) {
 
 llvm::DISubroutineType *getDebugFunctionType(llvm::Metadata *returnType, std::vector<llvm::Metadata *> argTypes) {
   if (!Dbg) return nullptr;
+  argTypes.insert(argTypes.begin(), returnType);
   return Dbg->createSubroutineType(Dbg->getOrCreateTypeArray(argTypes));
 }
 
