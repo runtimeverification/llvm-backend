@@ -504,7 +504,7 @@ static void emitTraversal(std::string name, KOREDefinition *definition, llvm::Mo
   argTypes.push_back(getValueType({SortCategory::Symbol, 0}, module));
   if (isVisitor) {
     // cf runtime/configurationparser/header.h visitChildren
-    auto file = llvm::PointerType::getUnqual(llvm::StructType::create(Ctx, "FILE"));
+    auto file = llvm::PointerType::getUnqual(llvm::StructType::create(Ctx, "writer"));
     argTypes.push_back(file);
     argTypes.push_back(makeVisitorType(Ctx, file, getValueType({SortCategory::Symbol, 0}, module), 1, 1));
     argTypes.push_back(makeVisitorType(Ctx, file, llvm::PointerType::getUnqual(getValueType({SortCategory::Map, 0}, module)), 3, 0));

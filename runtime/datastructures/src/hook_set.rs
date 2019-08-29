@@ -1,13 +1,13 @@
 extern crate libc;
 
-use super::decls::{Set,SetIter,List,ListIter,Int,K,KElem,__gmpz_init_set_ui,move_int,printConfigurationInternal,list_push_back,hook_LIST_unit};
+use super::decls::{Set,SetIter,List,ListIter,Int,K,KElem,Writer,sfprintf,__gmpz_init_set_ui,move_int,printConfigurationInternal,list_push_back,hook_LIST_unit};
 use std::iter::FromIterator;
 use std::hash::Hash;
 use std::collections::hash_map::DefaultHasher;
 use std::ptr;
 use std::mem;
 use std::ffi::CString;
-use self::libc::{FILE,c_char,c_void,fprintf};
+use self::libc::{c_char,c_void};
 
 #[no_mangle]
 pub extern "C" fn size_set() -> usize {
@@ -127,10 +127,10 @@ pub unsafe extern "C" fn set_hash(s: *const Set, h: *mut c_void) {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn printSet(file: *mut FILE, set: *const Set, unit: *const c_char, element: *const c_char, concat: *const c_char) {
+pub unsafe extern "C" fn printSet(file: *mut Writer, set: *const Set, unit: *const c_char, element: *const c_char, concat: *const c_char) {
   if (*set).len() == 0 {
     let fmt = CString::new("%s()").unwrap();
-    fprintf(file, fmt.as_ptr(), unit);
+    sfprintf(file, fmt.as_ptr(), unit);
     return;
   }
   let mut i = 1;
@@ -140,18 +140,18 @@ pub unsafe extern "C" fn printSet(file: *mut FILE, set: *const Set, unit: *const
   let fmt = CString::new("%s(").unwrap();
   for KElem(value) in (*set).iter() {
     if i < (*set).len() {
-      fprintf(file, fmt.as_ptr(), concat);
+      sfprintf(file, fmt.as_ptr(), concat);
     }
-    fprintf(file, fmt.as_ptr(), element);
+    sfprintf(file, fmt.as_ptr(), element);
     printConfigurationInternal(file, *value.get(), sort.as_ptr(), false);
-    fprintf(file, parens.as_ptr());
+    sfprintf(file, parens.as_ptr());
     if i < (*set).len() {
-      fprintf(file, comma.as_ptr());
+      sfprintf(file, comma.as_ptr());
     }
     i += 1
   }
   for _ in 0..(*set).len()-1 {
-    fprintf(file, parens.as_ptr());
+    sfprintf(file, parens.as_ptr());
   }
 }
 

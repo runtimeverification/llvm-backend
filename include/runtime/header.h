@@ -131,9 +131,16 @@ extern "C" {
     void init_float2(floating *, std::string);
   }
   #endif
+
+  typedef struct {
+    FILE *file;
+    stringbuffer *buffer;
+  } writer;
+
   block *parseConfiguration(const char *filename);
   void printConfiguration(const char *filename, block *subject);
-  void printConfigurationInternal(FILE *file, block *subject, const char *sort, bool);
+  string *printConfigurationToString(block *subject);
+  void printConfigurationInternal(writer *file, block *subject, const char *sort, bool);
   mpz_ptr move_int(mpz_t);
 
   // The following functions have to be generated at kompile time
@@ -152,20 +159,26 @@ extern "C" {
 
   const char *getSymbolNameForTag(uint32_t tag);
   const char *topSort(void);
-  void printMap(FILE *, map *, const char *, const char *, const char *);
-  void printSet(FILE *, set *, const char *, const char *, const char *);
-  void printList(FILE *, list *, const char *, const char *, const char *);
-  void visitChildren(block *subject, FILE *file,
-      void visitConfig(FILE *, block *, const char *, bool), 
-      void visitMap(FILE *, map *, const char *, const char *, const char *), 
-      void visitList(FILE *, list *, const char *, const char *, const char *), 
-      void visitSet(FILE *, set *, const char *, const char *, const char *), 
-      void visitInt(FILE *, mpz_t, const char *),
-      void visitFloat(FILE *, floating *, const char *),
-      void visitBool(FILE *, bool, const char *),
-      void visitStringBuffer(FILE *, stringbuffer *, const char *),
-      void visitMInt(FILE *, void *, const char *),
-      void visitSeparator(FILE *));
+  void printMap(writer *, map *, const char *, const char *, const char *);
+  void printSet(writer *, set *, const char *, const char *, const char *);
+  void printList(writer *, list *, const char *, const char *, const char *);
+  void visitChildren(block *subject, writer *file,
+      void visitConfig(writer *, block *, const char *, bool), 
+      void visitMap(writer *, map *, const char *, const char *, const char *), 
+      void visitList(writer *, list *, const char *, const char *, const char *), 
+      void visitSet(writer *, set *, const char *, const char *, const char *), 
+      void visitInt(writer *, mpz_t, const char *),
+      void visitFloat(writer *, floating *, const char *),
+      void visitBool(writer *, bool, const char *),
+      void visitStringBuffer(writer *, stringbuffer *, const char *),
+      void visitMInt(writer *, void *, const char *),
+      void visitSeparator(writer *));
+
+  void sfprintf(writer *, const char *, ...);
+
+  stringbuffer *hook_BUFFER_empty(void);
+  stringbuffer *hook_BUFFER_concat(stringbuffer *buf, string *s);
+  string *hook_BUFFER_toString(stringbuffer *buf);
 
   block *debruijnize(block *);
 

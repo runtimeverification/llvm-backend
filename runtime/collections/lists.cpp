@@ -194,34 +194,34 @@ extern "C" {
     return list->push_back(value);
   }
 
-  void printList(FILE * file, struct list * l, const char * unit, const char * element, const char * concat) {
+  void printList(writer * file, struct list * l, const char * unit, const char * element, const char * concat) {
     List * list = (List *) l;
     size_t size = list->size();
 
     if (size == 0) {
-      fprintf(file, "%s()", unit);
+      sfprintf(file, "%s()", unit);
       return;
     }
 
     int i = 1;
     for (auto iter = list->begin(); iter != list->end(); ++iter) {
       if (i < size) {
-        fprintf(file, "%s(", concat);
+        sfprintf(file, "%s(", concat);
       }
 
-      fprintf(file, "%s(", element);
+      sfprintf(file, "%s(", element);
       printConfigurationInternal(file, iter->elem, "KItem", false);
-      fprintf(file, ")");
+      sfprintf(file, ")");
 
       if (i < size) {
-        fprintf(file, ",");
+        sfprintf(file, ",");
       }
 
       ++i;
     }
 
     for (auto j = 0; j < size - 1; ++j) {
-      fprintf(file, ")");
+      sfprintf(file, ")");
     }
 
   }

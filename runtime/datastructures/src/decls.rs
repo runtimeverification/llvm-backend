@@ -7,7 +7,7 @@ use decls::im_rc::hashmap::HashMap;
 use decls::im_rc::hashset::HashSet;
 use decls::im_rc::hashset;
 use decls::im_rc::hashmap;
-use self::libc::{FILE,c_char,c_void};
+use self::libc::{c_char,c_void};
 use std::alloc::{GlobalAlloc, Layout};
 use std::collections::hash_map::DefaultHasher;
 
@@ -132,6 +132,8 @@ impl Iterator for ListIter {
   }
 }
 
+pub enum Writer {}
+
 #[link(name="gmp")]
 extern "C" {
   pub fn __gmpz_init_set_ui(rop: *mut Int, op: usize);
@@ -150,7 +152,7 @@ extern "C" {
 
 extern "C" {
   pub fn move_int(result: *mut Int) -> *mut Int;
-  pub fn printConfigurationInternal(file: *mut FILE, subject: *const Block, sort: *const c_char, isVar: bool);
+  pub fn printConfigurationInternal(file: *mut Writer, subject: *const Block, sort: *const c_char, isVar: bool);
   pub fn hook_KEQUAL_eq(k1: K, k2: K) -> bool;
   pub fn k_hash<'a>(k1: K, h: *mut c_void) -> u64;
   pub fn hash_enter() -> bool;
@@ -159,6 +161,7 @@ extern "C" {
   pub fn during_gc() -> bool;
   pub fn malloc(size: usize) -> *mut u8;
   pub fn free(ptr: *mut u8);
+  pub fn sfprintf(writer: *mut Writer, fmt: *const c_char, ...);
 }
 
 #[cfg(test)]

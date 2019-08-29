@@ -1,13 +1,13 @@
 extern crate libc;
 
-use super::decls::{Map,MapIter,Set,List,Int,K,KElem,__gmpz_init_set_ui,move_int,printConfigurationInternal,list_push_back,hook_LIST_unit};
+use super::decls::{Map,MapIter,Set,List,Int,K,KElem,Writer,sfprintf,__gmpz_init_set_ui,move_int,printConfigurationInternal,list_push_back,hook_LIST_unit};
 use std::iter::FromIterator;
 use std::hash::Hash;
 use std::collections::hash_map::DefaultHasher;
 use std::ptr;
 use std::mem;
 use std::ffi::CString;
-use self::libc::{FILE,c_char,c_void,fprintf};
+use self::libc::{c_char,c_void};
 
 #[no_mangle]
 pub extern "C" fn size_map() -> usize {
@@ -171,10 +171,10 @@ pub unsafe extern "C" fn map_hash(m: *const Map, h: *mut c_void) {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn printMap(file: *mut FILE, map: *const Map, unit: *const c_char, element: *const c_char, concat: *const c_char) {
+pub unsafe extern "C" fn printMap(file: *mut Writer, map: *const Map, unit: *const c_char, element: *const c_char, concat: *const c_char) {
   if (*map).len() == 0 {
     let fmt = CString::new("%s()").unwrap();
-    fprintf(file, fmt.as_ptr(), unit);
+    sfprintf(file, fmt.as_ptr(), unit);
     return;
   }
   let mut i = 1;
@@ -184,20 +184,20 @@ pub unsafe extern "C" fn printMap(file: *mut FILE, map: *const Map, unit: *const
   let fmt = CString::new("%s(").unwrap();
   for (KElem(key), KElem(value)) in (*map).iter() {
     if i < (*map).len() {
-      fprintf(file, fmt.as_ptr(), concat);
+      sfprintf(file, fmt.as_ptr(), concat);
     }
-    fprintf(file, fmt.as_ptr(), element);
+    sfprintf(file, fmt.as_ptr(), element);
     printConfigurationInternal(file, *key.get(), sort.as_ptr(), false);
-    fprintf(file, comma.as_ptr());
+    sfprintf(file, comma.as_ptr());
     printConfigurationInternal(file, *value.get(), sort.as_ptr(), false);
-    fprintf(file, parens.as_ptr());
+    sfprintf(file, parens.as_ptr());
     if i < (*map).len() {
-      fprintf(file, comma.as_ptr());
+      sfprintf(file, comma.as_ptr());
     }
     i += 1
   }
   for _ in 0..(*map).len()-1 {
-    fprintf(file, parens.as_ptr());
+    sfprintf(file, parens.as_ptr());
   }
 }
 
