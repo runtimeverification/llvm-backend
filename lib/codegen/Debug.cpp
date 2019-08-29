@@ -96,7 +96,7 @@ void resetDebugLoc(void) {
   DbgFile = DbgCU->getFile();
 }
 
-static llvm::DIType *getForwardDecl(std::string name) {
+llvm::DIType *getForwardDecl(std::string name) {
   if (!Dbg) return nullptr;
   auto Unit = Dbg->createFile(DbgFile->getFilename(), DbgFile->getDirectory());
   return Dbg->createForwardDecl(llvm::dwarf::DW_TAG_structure_type, name, DbgCU, Unit, 0);
@@ -136,6 +136,38 @@ llvm::DIType *getDebugType(ValueType type) {
     abort();
 
   }
+}
+
+llvm::DIType *getIntDebugType(void) {
+  if (!Dbg) return nullptr;
+  return Dbg->createBasicType("uint32_t", 32, llvm::dwarf::DW_ATE_unsigned);
+}
+
+llvm::DIType *getBoolDebugType(void) {
+  if (!Dbg) return nullptr;
+  return Dbg->createBasicType("bool", 8, llvm::dwarf::DW_ATE_boolean);
+}
+
+llvm::DIType *getCharPtrDebugType(void) {
+  if (!Dbg) return nullptr;
+  return Dbg->createPointerType(Dbg->createBasicType("char", 8, llvm::dwarf::DW_ATE_signed_char), sizeof(size_t) * 8);
+}
+
+llvm::DIType *getPointerDebugType(llvm::DIType *ty) {
+  if (!Dbg) return nullptr;
+  return Dbg->createPointerType(ty, sizeof(size_t) * 8);
+}
+
+llvm::DIType *getArrayDebugType(llvm::DIType *ty, size_t len, size_t align) {
+  if (!Dbg) return nullptr;
+  std::vector<llvm::Metadata *> subscripts;
+  auto arr = Dbg->getOrCreateArray(subscripts);
+  return Dbg->createArrayType(len, align, ty, arr);
+}
+
+llvm::DIType *getShortDebugType(void) {
+  if (!Dbg) return nullptr;
+  return Dbg->createBasicType("uint16_t", 16, llvm::dwarf::DW_ATE_unsigned);
 }
 
 llvm::DISubroutineType *getDebugFunctionType(llvm::Metadata *returnType, std::vector<llvm::Metadata *> argTypes) {
