@@ -37,6 +37,196 @@ codes["Pipe"] = "|"
 codes["RBra"] = "}"
 codes["Tild"] = "~"
 
+MAX = 1 << 64 - 1
+BL = 5
+B = 5
+BRANCHES = 32
+MASK = 31
+
+class Relaxed:
+    def __init__(self, node, shift, relaxed, it):
+        self.node = node
+        self.shift = shift
+        self.relaxed = relaxed
+        self.it = it
+
+    def index(self, idx):
+        offset = idx >> self.shift
+        while self.relaxed.dereference()['d']['sizes'][offset] <= idx: offset += 1
+        return offset
+
+    def towards(self, idx):
+        offset = self.index(idx)
+        left_size = self.relaxed.dereference()['d']['sizes'][offset-1] if offset else 0
+        child = self.it.inner(self.node)[offset]
+        is_leaf = self.shift == BL
+        next_size = self.relaxed.dereference()['d']['sizes'][offset] - left_size
+        next_idx = idx - left_size
+        if is_leaf:
+            return self.it.visit_leaf(LeafSub(child, next_size), next_idx)
+        else:
+            return self.it.visit_maybe_relaxed_sub(child, self.shift - B, next_size, next_idx)
+
+class LeafSub:
+    def __init__(self, node, count):
+        self.node = node
+        self.count_ = count
+
+    def index(self, idx):
+        return idx & MASK
+
+    def count(self):
+        return self.count_
+
+class FullLeaf:
+    def __init__(self, node):
+        self.node = node
+
+    def index(self, idx):
+        return idx & MASK
+
+    def count(self):
+        return BRANCHES
+
+class Leaf:
+    def __init__(self, node, size):
+        self.node = node
+        self.size = size
+
+    def index(self, idx):
+        return idx & MASK
+
+    def count(self):
+        return self.index(self.size - 1) + 1
+
+class RegularSub:
+    def __init__(self, node, shift, size, it):
+        self.node = node
+        self.shift = shift
+        self.size = size
+        self.it = it
+
+    def towards(self, idx):
+        offset = self.index(idx)
+        count = self.count()
+        return self.it.towards_regular(self, idx, offset, count)
+
+    def index(self, idx):
+        return (idx >> self.shift) & MASK
+
+    def count(self):
+        return self.subindex(self.size - 1) + 1
+
+    def subindex(self, idx):
+        return idx >> self.shift
+
+class Regular:
+    def __init__(self, node, shift, size, it):
+        self.node = node
+        self.shift = shift
+        self.size = size
+        self.it = it
+
+    def index(self, idx):
+        return (idx >> self.shift) & MASK
+
+    def count(self):
+        return self.index(self.size - 1) + 1
+
+    def towards(self, idx):
+        offset = self.index(idx)
+        count = self.count()
+        return self.it.towards_regular(self, idx, offset, count)
+
+class Full:
+    def __init__(self, node, shift, it):
+        self.node = node
+        self.shift = shift
+        self.it = it
+
+    def index(self, idx):
+        return (idx >> self.shift) & MASK
+
+    def towards(self, idx):
+        offset = self.index(idx)
+        is_leaf = self.shift == BL
+        child = self.it.inner(self.node)[offset]
+        if is_leaf:
+            return self.it.visit_leaf(FullLeaf(child), idx)
+        else:
+            return Full(child, self.shift - B, it).towards(idx)
+
+class ListIter:
+    def __init__(self, val):
+        self.v = val.dereference()['impl_']
+        self.size = self.v['size']
+        self.i = 0
+        self.curr = (None, MAX, MAX)
+        self.node_ptr_ptr = gdb.lookup_type("immer::detail::rbts::node<KElem, immer::memory_policy<immer::heap_policy<kore_alloc_heap>, immer::no_refcount_policy, immer::gc_transience_policy, false, false>, " + str(B) + ", " + str(BL) + ">").pointer().pointer()
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        if self.i == self.size:
+            raise StopIteration
+        if self.i < self.curr[1] or self.i >= self.curr[2]:
+            self.curr = self.region()
+        self.i += 1
+        return self.curr[0][self.i-1-self.curr[1]]
+
+    def region(self):
+        tail_off = self.tail_offset()
+        if self.i >= tail_off:
+            return (self.leaf(self.v['tail']), tail_off, self.size)
+        else:
+            subs = self.visit_maybe_relaxed_sub(self.v['root'], self.v['shift'], tail_off, self.i)
+            first = self.i - subs[1]
+            end = first + subs[2]
+            return (subs[0], first, end)
+
+    def tail_offset(self):
+        r = self.relaxed(self.v['root'])
+        if r:
+            return r.dereference()['d']['sizes'][r.dereference()['d']['count'] - 1]
+        elif self.size:
+            return (self.size - 1) & ~MASK
+        else:
+            return 0
+
+    def relaxed(self, node):
+        return node.dereference()['impl']['d']['data']['inner']['relaxed']
+
+    def leaf(self, node):
+        return node.dereference()['impl']['d']['data']['leaf']['buffer'].address
+
+    def inner(self, node):
+        return node.dereference()['impl']['d']['data']['inner']['buffer'].address.reinterpret_cast(self.node_ptr_ptr)
+
+    def visit_maybe_relaxed_sub(self, node, shift, size, idx):
+        relaxed = self.relaxed(node)
+        if relaxed:
+            return Relaxed(node, shift, relaxed, self).towards(idx)
+        else:
+            return RegularSub(node, shift, size, self).towards(idx)
+
+    def visit_leaf(self, pos, idx):
+        return (self.leaf(pos.node), pos.index(idx), pos.count())
+
+    def towards_regular(self, pos, idx, offset, count):
+        is_leaf = pos.shift == BL
+        child = self.inner(pos.node)[offset]
+        is_full = offset + 1 != count
+        if is_full:
+            if is_leaf:
+                return self.visit_leaf(FullLeaf(child), idx)
+            else:
+                return Full(child, pos.shift - B, self).towards(idx)
+        elif is_leaf:
+            return self.visit_leaf(Leaf(child, pos.size), idx)
+        else:
+            return Regular(child, pos.shift - B, pos.size, self).towards(idx)
+
 class MapIter:
     def __init__(self, val):
         self.it = gdb.lookup_global_symbol("datastructures::hook_map::map_iterator_dbg").value()(val)
