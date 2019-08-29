@@ -62,10 +62,10 @@ target triple = "x86_64-unknown-linux-gnu"
 
 %string = type { %blockheader, [0 x i8] } ; 10-bit layout, 4-bit gc flags, 10 unused bits, 40-bit length (or buffer capacity for string pointed by stringbuffers), bytes
 %stringbuffer = type { i64, i64, %string* } ; 10-bit layout, 4-bit gc flags, 10 unused bits, 40-bit length, string length, current contents
-%map = type { i64, i8 *, i8 * } ; im::hashmap::HashMap
+%map = type { i8 *, i64 } ; immer::map
 %set = type { i8 *, i8 *, i64 } ; im::hashset::HashSet
 %iter = type { i64, { { i64 *, i64 }, i64 }, { { i64, i32 }, i8 * }, { i64, [3 x i64] } } ; im::nodes::hamt::Iter
-%list = type { i64, i32, i8 *, i8 * }
+%list = type { i64, i32, i8 *, i8 * } ; immer::flex_vector
 %mpz = type { i32, i32, i64 * } ; mpz_t
 %mpz_hdr = type { %blockheader, %mpz } ; 10-bit layout, 4-bit gc flags, 10 unused bits, 40-bit length, mpz_t
 %floating = type { i64, { i64, i32, i64, i64 * } } ; exp, mpfr_t
