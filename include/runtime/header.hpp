@@ -1,7 +1,7 @@
 #ifndef RUNTIME_HEADER_HPP
 #define RUNTIME_HEADER_HPP
 
-#include "immer/vector.hpp"
+#include "immer/flex_vector.hpp"
 #include "runtime/alloc.h"
 #include <memory>
 
@@ -16,8 +16,12 @@ public:
     this->elem = elem;
   }
 
-  bool operator==(const KElem& other) {
+  bool operator==(const KElem& other) const {
     return hook_KEQUAL_eq(this->elem, other.elem);
+  }
+
+  bool operator!=(const KElem& other) const {
+    return !(*this == other);
   }
 
   block * elem;
@@ -41,7 +45,7 @@ struct kore_alloc_heap {
   }
 };
 
-using List = immer::vector<KElem, immer::memory_policy<immer::heap_policy<kore_alloc_heap>, immer::no_refcount_policy>>;
+using List = immer::flex_vector<KElem, immer::memory_policy<immer::heap_policy<kore_alloc_heap>, immer::no_refcount_policy>>;
 
 #endif
 

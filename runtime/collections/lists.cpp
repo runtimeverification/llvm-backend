@@ -3,7 +3,7 @@
 #include "runtime/header.h"
 #include "runtime/header.hpp"
 
-#include "immer/vector_transient.hpp"
+#include "immer/flex_vector_transient.hpp"
 
 extern "C" {
   mpz_ptr move_int(mpz_t);
@@ -17,11 +17,15 @@ extern "C" {
   }
 
   List hook_LIST_concat(List * l1, List * l2) {
-    auto tmp = l1->transient();
-    for (auto iter = l2->begin(); iter != l2->end(); ++iter) {
-      tmp.push_back(*iter);
+    if (l2->size() < 32) {
+      auto tmp = l1->transient();
+      for (auto iter = l2->begin(); iter != l2->end(); ++iter) {
+        tmp.push_back(*iter);
+      }
+      return tmp.persistent();
+    } else {
+      return (*l1) + (*l2);
     }
-    return tmp.persistent();
   }
 
   bool hook_LIST_in(block * value, List * list) {
@@ -66,11 +70,9 @@ extern "C" {
       throw std::out_of_range("Index out of range range_long");
     }
 
-    auto tmp = List().transient();
-    for (int i = front; i < size - back; ++i) {
-      tmp.push_back((*list)[i]);
-    }
-
+    auto tmp = list->transient();
+    tmp.drop(front);
+    tmp.take(size-back-front);
     return tmp.persistent();
   }
 
