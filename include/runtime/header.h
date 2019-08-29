@@ -93,7 +93,7 @@ extern "C" {
   } iter;
 
   typedef struct list {
-    uint64_t size;
+    size_t size;
     uint32_t shift;
     void *root;
     void *tail;
