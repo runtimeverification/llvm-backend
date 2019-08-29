@@ -270,11 +270,12 @@ def pp_label(label):
             i += 4
     return "`" + result + "`"
 
-class blockPrinter:
-    """Print a block * object."""
+class termPrinter:
+    """Print a kore term."""
 
-    def __init__(self, val):
+    def __init__(self, val, cat):
         self.val = val
+        self.cat = cat
         self.long_int = gdb.lookup_type("long int")
         self.string_ptr = gdb.lookup_type("string").pointer()
         self.block_ptr = gdb.lookup_type("block").pointer()
@@ -297,7 +298,10 @@ class blockPrinter:
             self.bound_variables = []
             self.var_counter = 0
             self.result = ""
-            self.append(self.val, False)
+            if self.cat == "block":
+                self.append(self.val, False)
+            elif self.cat == "list":
+                self.appendList(self.val.cast(self.list_ptr))
             self.var_names = {}
             self.used_var_name = set()
             return self.result
@@ -455,6 +459,9 @@ class blockPrinter:
 
 def kllvm_lookup_function(val):
     t = gdb.types.get_basic_type(val.type)
-    if t.code == gdb.TYPE_CODE_PTR and t.target().tag and t.target().tag == "block":
-        return blockPrinter(val)
+    if t.code == gdb.TYPE_CODE_PTR and t.target().tag:
+        if t.target().tag == "block":
+            return termPrinter(val, "block")
+        elif t.target().tag == "list":
+            return termPrinter(val, "list")
     return None
