@@ -10,33 +10,61 @@
 #include "runtime/header.h"
 #include "runtime/alloc.h"
 
-void printInt(FILE *file, mpz_t i, const char *sort) {
+void printInt(writer *file, mpz_t i, const char *sort) {
   char *str = mpz_get_str(NULL, 10, i);
-  fprintf(file, "\\dv{%s}(\"%s\")", sort, str);
+  sfprintf(file, "\\dv{%s}(\"%s\")", sort, str);
 }
 
-void printFloat(FILE *file, floating *f, const char *sort) {
+void printFloat(writer *file, floating *f, const char *sort) {
   std::string str = floatToString(f);
-  fprintf(file, "\\dv{%s}(\"%s\")", sort, str.c_str());
+  sfprintf(file, "\\dv{%s}(\"%s\")", sort, str.c_str());
 }
 
-void printBool(FILE *file, bool b, const char *sort) {
+void printBool(writer *file, bool b, const char *sort) {
   const char *str = b ? "true" : "false";
-  fprintf(file, "\\dv{%s}(\"%s\")", sort, str);
+  sfprintf(file, "\\dv{%s}(\"%s\")", sort, str);
 }
 
-void printStringBuffer(FILE *file, stringbuffer *b, const char *sort) {
+void printStringBuffer(writer *file, stringbuffer *b, const char *sort) {
   std::string str(b->contents->data, b->strlen);
-  fprintf(file, "\\dv{%s}(\"%s\")", sort, str.c_str());
+  sfprintf(file, "\\dv{%s}(\"%s\")", sort, str.c_str());
 }
 
-void printMInt(FILE *file, void *i, const char *sort) {
+void printMInt(writer *file, void *i, const char *sort) {
   //TODO: print mint
   abort();
 }
 
-void printComma(FILE *file) {
-  fprintf(file, ",");
+void sfprintf(writer *file, const char *fmt, ...) {
+  va_list args;
+  va_start(args, fmt);
+  if (file->file) {
+    vfprintf(file->file, fmt, args);
+  } else {
+    char buf[8192];
+    char *finalBuf = buf;
+    int res = vsnprintf(buf + sizeof(blockheader), sizeof(buf) - sizeof(blockheader), fmt, args);
+    if (res >= sizeof(buf) - sizeof(blockheader)) {
+      size_t size = sizeof(buf)*2;
+      finalBuf = (char *)malloc(size);
+      memcpy(finalBuf, buf, sizeof(buf));
+      res = vsnprintf(finalBuf + sizeof(blockheader), size - sizeof(blockheader), fmt, args);
+      if (res >= size - sizeof(blockheader)) {
+        do {
+          size *= 2;
+	  finalBuf = (char *)realloc(finalBuf, size);
+	  res = vsnprintf(finalBuf + sizeof(blockheader), size - sizeof(blockheader), fmt, args);
+	} while (res >= size - sizeof(blockheader));
+      }
+    }
+    string *str = (string *)finalBuf;
+    set_len(str, res);
+    hook_BUFFER_concat(file->buffer, str);
+  }
+}
+
+void printComma(writer *file) {
+  sfprintf(file, ",");
 }
 
 struct StringHash {
@@ -56,7 +84,7 @@ static thread_local std::unordered_map<string *, std::string, StringHash, String
 static thread_local std::set<std::string> usedVarNames;
 static thread_local uint64_t varCounter = 0;
 
-void printConfigurationInternal(FILE *file, block *subject, const char *sort, bool isVar) {
+void printConfigurationInternal(writer *file, block *subject, const char *sort, bool isVar) {
   uint8_t isConstant = ((uintptr_t)subject) & 3;
   if (isConstant) {
     uint32_t tag = ((uintptr_t)subject) >> 32;
@@ -66,40 +94,40 @@ void printConfigurationInternal(FILE *file, block *subject, const char *sort, bo
       return;
     }
     const char *symbol = getSymbolNameForTag(tag);
-    fprintf(file, "%s()", symbol);
+    sfprintf(file, "%s()", symbol);
     return;
   }
   uint16_t layout = layout(subject);
   if (!layout) {
     string *str = (string *)subject;
     size_t len = len(subject);
-    fprintf(file, "\\dv{%s}(\"", sort);
+    sfprintf(file, "\\dv{%s}(\"", sort);
     for (size_t i = 0; i < len; ++i) {
       char c = str->data[i];
       switch(c) {
       case '\\':
-        fprintf(file, "\\\\");
+        sfprintf(file, "\\\\");
         break;
       case '"':
-        fprintf(file, "\\\"");
+        sfprintf(file, "\\\"");
         break;
       case '\n':
-        fprintf(file, "\\n");
+        sfprintf(file, "\\n");
         break;
       case '\t':
-        fprintf(file, "\\t");
+        sfprintf(file, "\\t");
         break;
       case '\r':
-        fprintf(file, "\\r");
+        sfprintf(file, "\\r");
         break;
       case '\f':
-        fprintf(file, "\\f");
+        sfprintf(file, "\\f");
         break;
       default:
         if ((unsigned char)c >= 32 && (unsigned char)c < 127) {
-          fprintf(file, "%c", c);
+          sfprintf(file, "%c", c);
         } else {
-          fprintf(file, "\\x%02x", (unsigned char)c);
+          sfprintf(file, "\\x%02x", (unsigned char)c);
         }
         break;
       }
@@ -111,13 +139,13 @@ void printConfigurationInternal(FILE *file, block *subject, const char *sort, bo
         suffix = std::to_string(varCounter++);
       }
       stdStr = stdStr + suffix;
-      fprintf(file, "%s", suffix.c_str());
+      sfprintf(file, "%s", suffix.c_str());
       usedVarNames.insert(stdStr);
       varNames[str] = suffix;
     } else if (isVar) {
-      fprintf(file, "%s", varNames[str].c_str());
+      sfprintf(file, "%s", varNames[str].c_str());
     }
-    fprintf(file, "\")");
+    sfprintf(file, "\")");
     return;
   }
   uint32_t tag = tag_hdr(subject->h.hdr);
@@ -126,22 +154,33 @@ void printConfigurationInternal(FILE *file, block *subject, const char *sort, bo
     boundVariables.push_back(*(block **)(((char *)subject) + sizeof(blockheader)));
   }
   const char *symbol = getSymbolNameForTag(tag);
-  fprintf(file, "%s(", symbol);
+  sfprintf(file, "%s(", symbol);
   visitChildren(subject, file, printConfigurationInternal, printMap, printList, printSet, printInt, printFloat,
       printBool, printStringBuffer, printMInt, printComma);
   if (isBinder) {
     boundVariables.pop_back();
   }
-  fprintf(file, ")");
+  sfprintf(file, ")");
 }
 
 void printConfiguration(const char *filename, block *subject) {
   FILE *file = fopen(filename, "w");
   boundVariables.clear();
   varCounter = 0;
-  printConfigurationInternal(file, subject, nullptr, false);
+  writer w = {file,nullptr};
+  printConfigurationInternal(&w, subject, nullptr, false);
   varNames.clear();
   usedVarNames.clear();
   fclose(file);
 }
 
+string *printConfigurationToString(block *subject) {
+  boundVariables.clear();
+  varCounter = 0;
+  stringbuffer *buf = hook_BUFFER_empty();
+  writer w = {nullptr,buf};
+  printConfigurationInternal(&w, subject, nullptr, false);
+  varNames.clear();
+  usedVarNames.clear();
+  return hook_BUFFER_toString(buf);
+}

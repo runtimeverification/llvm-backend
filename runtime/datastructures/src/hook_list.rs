@@ -1,12 +1,12 @@
 extern crate libc;
 
-use super::decls::{List,Int,K,KElem,__gmpz_fits_ulong_p,__gmpz_fits_slong_p,__gmpz_get_si,__gmpz_get_ui,__gmpz_init_set_ui,move_int,printConfigurationInternal};
+use super::decls::{List,Int,K,KElem,Writer,sfprintf,__gmpz_fits_ulong_p,__gmpz_fits_slong_p,__gmpz_get_si,__gmpz_get_ui,__gmpz_init_set_ui,move_int,printConfigurationInternal};
 use std::ptr;
 use std::mem;
 use std::hash::Hash;
 use std::collections::hash_map::DefaultHasher;
 use std::ffi::CString;
-use self::libc::{FILE,c_char,c_void,fprintf};
+use self::libc::{c_char,c_void};
 
 #[no_mangle]
 pub extern "C" fn size_list() -> usize {
@@ -197,10 +197,10 @@ pub unsafe extern "C" fn list_hash(l: *const List, h: *mut c_void) {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn printList(file: *mut FILE, list: *const List, unit: *const c_char, element: *const c_char, concat: *const c_char) {
+pub unsafe extern "C" fn printList(file: *mut Writer, list: *const List, unit: *const c_char, element: *const c_char, concat: *const c_char) {
   if (*list).len() == 0 {
     let fmt = CString::new("%s()").unwrap();
-    fprintf(file, fmt.as_ptr(), unit);
+    sfprintf(file, fmt.as_ptr(), unit);
     return;
   }
   let mut i = 1;
@@ -210,18 +210,18 @@ pub unsafe extern "C" fn printList(file: *mut FILE, list: *const List, unit: *co
   let fmt = CString::new("%s(").unwrap();
   for KElem(value) in (*list).iter() {
     if i < (*list).len() {
-      fprintf(file, fmt.as_ptr(), concat);
+      sfprintf(file, fmt.as_ptr(), concat);
     }
-    fprintf(file, fmt.as_ptr(), element);
+    sfprintf(file, fmt.as_ptr(), element);
     printConfigurationInternal(file, *value.get(), sort.as_ptr(), false);
-    fprintf(file, parens.as_ptr());
+    sfprintf(file, parens.as_ptr());
     if i < (*list).len() {
-      fprintf(file, comma.as_ptr());
+      sfprintf(file, comma.as_ptr());
     }
     i += 1
   }
   for _ in 0..(*list).len()-1 {
-    fprintf(file, parens.as_ptr());
+    sfprintf(file, parens.as_ptr());
   }
 }
 
