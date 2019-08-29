@@ -133,13 +133,23 @@ extern "C" {
       }
     }
 
-    auto tmp = l1->transient();
+    if (size2 < 32) {
+      auto tmp = l1->transient();
 
-    for (int i = idx, j = 0; j < size2; ++i, ++j) {
-      tmp.set(i, l2->at(j));
+      for (int i = idx, j = 0; j < size2; ++i, ++j) {
+        tmp.set(i, l2->at(j));
+      }
+
+      return tmp.persistent();
+    } else {
+      auto tmp = l1->transient();
+      tmp.take(idx);
+      tmp.append(l2->transient());
+      auto tmp2 = l1->transient();
+      tmp2.drop(idx + size2);
+      tmp.append(tmp2);
+      return tmp.persistent();
     }
-
-    return tmp.persistent();
   }
 
   List hook_LIST_fill(List * l, mpz_t index, mpz_t len, block * val) {
@@ -160,13 +170,24 @@ extern "C" {
       }
     }
 
-    auto tmp = l->transient();
+    if (length < 32) {
+      auto tmp = l->transient();
 
-    for (auto i = idx; i < idx + length; ++i) {
-      tmp.set(i, val);
+      for (auto i = idx; i < idx + length; ++i) {
+        tmp.set(i, val);
+      }
+
+      return tmp.persistent();
+    } else {
+      auto tmp = l->transient();
+      tmp.take(idx);
+      auto l2 = List{length, val}.transient();
+      tmp.append(l2);
+      auto tmp2 = l->transient();
+      tmp2.drop(idx + length);
+      tmp.append(tmp2);
+      return tmp.persistent();
     }
-
-    return tmp.persistent();
   }
 
   bool hook_LIST_eq(List * l1, List * l2) {
