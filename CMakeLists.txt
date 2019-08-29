@@ -171,6 +171,9 @@ set(BOOL_LAYOUT 7)
 set(SYMBOL_LAYOUT 8)
 set(VARIABLE_LAYOUT 9)
 
+get_filename_component(INSTALL_DIR_ABS_PATH "${CMAKE_INSTALL_PREFIX}"
+                       REALPATH BASE_DIR "${CMAKE_BINARY_DIR}")
+
 configure_file(config/macros.h include/config/macros.h @ONLY)
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/runtime)
