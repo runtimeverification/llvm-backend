@@ -23,19 +23,16 @@ extern "C" {
   }
 
   map hook_MAP_concat(map *m1, map *m2) {
-    if (m1->size() < 2 || m2->size() < 2) {
-      auto from = m1->size() < 2 ? m1 : m2;
-      auto to = m1->size() < 2 ? *m2 : *m1;
-      for (auto iter = from->begin(); iter != from->end(); ++iter) {
-        auto entry = *iter;
+    auto from = m1->size() < m2->size() ? m1 : m2;
+    auto to = m1->size() < m2->size() ? *m2 : *m1;
+    for (auto iter = from->begin(); iter != from->end(); ++iter) {
+      auto entry = *iter;
 	if (to.find(entry.first)) {
-          throw std::invalid_argument("Duplicate keys");
+        throw std::invalid_argument("Duplicate keys");
 	}
-        to = to.insert(*iter);
-      }
-      return to;
+      to = to.insert(*iter);
     }
-    abort(); // unimplemented
+    return to;
   }
 
   block *hook_MAP_lookup_null(map *m, block *key) {
@@ -70,20 +67,17 @@ extern "C" {
   }
 
   map hook_MAP_difference(map *m1, map *m2) {
-    if (m2->size() < 2) {
-      auto from = m2;
-      auto to = *m1;
-      for (auto iter = from->begin(); iter != from->end(); ++iter) {
-        auto entry = *iter;
+    auto from = m2;
+    auto to = *m1;
+    for (auto iter = from->begin(); iter != from->end(); ++iter) {
+      auto entry = *iter;
 	if (auto value = to.find(entry.first)) {
-          if (*value == entry.second) {
-            to = to.erase(entry.first);
+        if (*value == entry.second) {
+          to = to.erase(entry.first);
 	  }
 	}
-      }
-      return to;
     }
-    abort();
+    return to;
   }
 
   set hook_SET_unit(void);
@@ -139,7 +133,9 @@ extern "C" {
 
   bool hook_MAP_inclusion(map *m1, map *m2) {
     for (auto iter = m1->begin(); iter != m1->end(); ++iter) {
-      if (!m2->find(iter->first)) {
+      auto entry = *iter;
+      auto val = m2->find(entry.first);
+      if (!val || *val != entry.second) {
         return false;
       }
     }
@@ -147,27 +143,20 @@ extern "C" {
   }
 
   map hook_MAP_updateAll(map *m1, map *m2) {
-    if (m2->size() < 2) {
-      auto from = m2;
-      auto to = *m1;
-      for (auto iter = from->begin(); iter != from->end(); ++iter) {
-        to = to.insert(*iter);
-      }
-      return to;
+    auto from = m2;
+    auto to = *m1;
+    for (auto iter = from->begin(); iter != from->end(); ++iter) {
+      to = to.insert(*iter);
     }
-    abort(); // unimplemented
+    return to;
   }
 
   map hook_MAP_removeAll(map *map, set *set) {
-    if (hook_SET_size_long(set) < 2) {
-      setiter it = set_iterator(set);
-      auto tmp = *map;
-      while(auto elem = set_iterator_next(&it)) {
-        tmp = tmp.erase(elem);
-      }
-      return tmp;
+    auto tmp = *map;
+    for (auto iter = set->begin(); iter != set->end(); ++iter) {
+      tmp = tmp.erase(*iter);
     }
-    abort(); //unimplemented
+    return tmp;
   }
 
   bool hook_MAP_eq(map *m1, map *m2) {
