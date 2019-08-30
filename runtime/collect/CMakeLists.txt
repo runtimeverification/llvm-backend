@@ -1,7 +1,7 @@
 set(LLVM_REQUIRES_EH ON)
 
 add_library(collect STATIC
-  collect.c
+  collect.cpp
   migrate_roots.cpp
 )
 

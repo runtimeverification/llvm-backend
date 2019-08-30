@@ -8,6 +8,8 @@
 #include "runtime/header.h"
 #include "runtime/arena.h"
 
+extern "C" {
+
 char **young_alloc_ptr(void);
 char **old_alloc_ptr(void);
 char* youngspace_ptr(void);
@@ -57,9 +59,9 @@ void migrate(block** blockPtr) {
   if (!hasForwardingAddress) {
     block *newBlock;
     if (shouldPromote || (isInOldGen && collect_old)) {
-      newBlock = koreAllocOld(lenInBytes);
+      newBlock = (block *)koreAllocOld(lenInBytes);
     } else {
-      newBlock = koreAlloc(lenInBytes);
+      newBlock = (block *)koreAlloc(lenInBytes);
     }
     memcpy(newBlock, currBlock, lenInBytes);
     newBlock->h.hdr |= mask;
@@ -102,11 +104,11 @@ static void migrate_string_buffer(stringbuffer** bufferPtr) {
     stringbuffer *newBuffer;
     string *newContents;
     if (shouldPromote || (isInOldGen && collect_old)) {
-      newBuffer = koreAllocOld(sizeof(stringbuffer));
-      newContents = koreAllocTokenOld(sizeof(string) + cap);
+      newBuffer = (stringbuffer *)koreAllocOld(sizeof(stringbuffer));
+      newContents = (string *)koreAllocTokenOld(sizeof(string) + cap);
     } else {
-      newBuffer = koreAlloc(sizeof(stringbuffer));
-      newContents = koreAllocToken(sizeof(string) + cap);
+      newBuffer = (stringbuffer *)koreAlloc(sizeof(stringbuffer));
+      newContents = (string *)koreAllocToken(sizeof(string) + cap);
     }
     memcpy(newContents, buffer->contents, sizeof(string) + buffer->strlen);
     memcpy(newBuffer, buffer, sizeof(stringbuffer));
@@ -206,17 +208,17 @@ static void migrate_child(void* currBlock, layoutitem *args, unsigned i, bool pt
     set_foreach(ptr ? *(set**)arg : arg, migrate_once);
    break;
   case STRINGBUFFER_LAYOUT:
-    migrate_string_buffer(arg);
+    migrate_string_buffer((stringbuffer **)arg);
     break;
   case SYMBOL_LAYOUT:
   case VARIABLE_LAYOUT:
-    migrate(arg);
+    migrate((block **)arg);
     break;
   case INT_LAYOUT:
-    migrate_mpz(arg);
+    migrate_mpz((mpz_ptr *)arg);
     break;
   case FLOAT_LAYOUT:
-    migrate_floating(arg);
+    migrate_floating((floating **)arg);
     break;
   case BOOL_LAYOUT:
   default: //mint
@@ -275,4 +277,6 @@ void koreCollect(void** roots, uint8_t nroots, layoutitem *typeInfo) {
   }
   MEM_LOG("Finishing garbage collection\n");
   is_gc = false;
+}
+
 }

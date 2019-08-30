@@ -22,9 +22,7 @@
 #define struct_base(struct_type, member_name, member_addr) \
         ((struct_type *)((char *)(member_addr) - offsetof(struct_type, member_name)))
 
-#ifdef __cplusplus
 extern "C" {
-#endif
   // llvm: blockheader = type { i64 } 
   typedef struct blockheader {
     uint64_t hdr;
@@ -125,12 +123,10 @@ extern "C" {
   } layout;
 
   // This function is exported to be used by the interpreter 
-  #ifdef __cplusplus
   extern "C++" {
     std::string floatToString(const floating *);
     void init_float2(floating *, std::string);
   }
-  #endif
 
   typedef struct {
     FILE *file;
@@ -189,8 +185,6 @@ extern "C" {
 
   extern const uint32_t first_inj_tag, last_inj_tag;
 
-#ifdef __cplusplus
 }
-#endif
 
 #endif // RUNTIME_HEADER_H
