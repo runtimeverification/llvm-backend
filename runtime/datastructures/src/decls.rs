@@ -3,9 +3,7 @@ extern crate libc;
 
 use std::cell::UnsafeCell;
 use std::hash::{Hash,Hasher};
-use decls::im_rc::hashset::HashSet;
-use decls::im_rc::hashset;
-use self::libc::{c_char,c_void};
+use self::libc::{c_void};
 use std::alloc::{GlobalAlloc, Layout};
 use std::collections::hash_map::DefaultHasher;
 
@@ -28,16 +26,6 @@ unsafe impl GlobalAlloc for KoreAllocator {
 }
 
 pub enum Block {}
-#[allow(non_camel_case_types)]
-pub enum mp_limb_t {}
-
-#[repr(C)]
-#[allow(non_camel_case_types)]
-pub struct Int(
-  pub i32, // _mp_alloc
-  pub i32, // _mp_size
-  pub *const mp_limb_t, // _mp_d
-);
 
 pub type K = *const Block;
 
@@ -47,25 +35,11 @@ pub struct KElem(
   pub UnsafeCell<K>
 );
 
-impl Clone for KElem {
-  fn clone(&self) -> KElem {
-    unsafe { KElem(UnsafeCell::new(*self.0.get())) }
-  }
-}
-
 impl KElem {
   pub fn new(k: K) -> KElem {
     KElem(UnsafeCell::new(k))
   }
 }
-
-impl PartialEq for KElem {
-  fn eq(&self, other: &KElem) -> bool {
-    unsafe { hook_KEQUAL_eq(*self.0.get(), *other.0.get()) }
-  }
-}
-
-impl Eq for KElem {}
 
 impl Hash for KElem {
   fn hash<H: Hasher>(&self, state: &mut H) {
@@ -97,58 +71,7 @@ pub unsafe extern "C" fn hash_k(block: K) -> u64 {
   h.finish()
 }
 
-pub type Set = HashSet<KElem>;
-pub type SetIter = hashset::Iter<'static, KElem>;
-
-#[repr(C)]
-pub struct List(
-  pub i64,
-  pub i32,
-  pub *const i8,
-  pub *const i8
-);
-
-pub struct ListIter {
-  pub list: *const List,
-  pub idx: usize,
-}
-
-impl Iterator for ListIter {
-  type Item = KElem;
-
-  fn next(&mut self) -> Option<KElem> {
-    unsafe {
-      if self.idx >= hook_LIST_size_long(self.list) {
-        return None;
-      }
-      let elem = hook_LIST_get_long(self.list, self.idx as isize);
-      self.idx += 1;
-      Some(elem)
-    }
-  }
-}
-
-pub enum Writer {}
-
-#[link(name="gmp")]
 extern "C" {
-  pub fn __gmpz_init_set_ui(rop: *mut Int, op: usize);
-  pub fn __gmpz_fits_ulong_p(op: *const Int) -> i32;
-  pub fn __gmpz_fits_slong_p(op: *const Int) -> i32;
-  pub fn __gmpz_get_ui(op: *const Int) -> usize;
-  pub fn __gmpz_get_si(op: *const Int) -> isize;
-}
-
-extern "C" {
-  pub fn hook_LIST_unit() -> List;
-  pub fn hook_LIST_size_long(list: *const List) -> usize;
-  pub fn hook_LIST_get_long(list: *const List, idx: isize) -> KElem;
-  pub fn list_push_back(list: *const List, value: KElem) -> List;
-}
-
-extern "C" {
-  pub fn move_int(result: *mut Int) -> *mut Int;
-  pub fn printConfigurationInternal(file: *mut Writer, subject: *const Block, sort: *const c_char, isVar: bool);
   pub fn hook_KEQUAL_eq(k1: K, k2: K) -> bool;
   pub fn k_hash<'a>(k1: K, h: *mut c_void) -> u64;
   pub fn hash_enter() -> bool;
@@ -157,77 +80,4 @@ extern "C" {
   pub fn during_gc() -> bool;
   pub fn malloc(size: usize) -> *mut u8;
   pub fn free(ptr: *mut u8);
-  pub fn sfprintf(writer: *mut Writer, fmt: *const c_char, ...);
-}
-
-#[cfg(test)]
-pub mod testing {
-  use super::{K,Int};
-  use std::ptr;
-  use std::collections::hash_map::DefaultHasher;
-  use std::hash::{Hash,Hasher};
-
-  #[link(name="gmp")]
-  extern "C" {
-    pub fn __gmpz_clear(rop: *mut Int);
-    pub fn __gmpz_cmp_ui(op1: *const Int, op2: u64) -> i32;
-    pub fn __gmpz_init_set_si(rop: *mut Int, op: i64);
-  }
-
-  #[repr(C)]
-  pub struct DummyBlock {
-    header: u64,
-  }
-
-  pub const DUMMY0: K = &DummyBlock{header: 0} as *const DummyBlock as K;
-  pub const DUMMY1: K = &DummyBlock{header: 1} as *const DummyBlock as K;
-  pub const DUMMY2: K = &DummyBlock{header: 2} as *const DummyBlock as K;
-
-  pub fn alloc_k() -> *mut K {
-    let b = Box::new(ptr::null());
-    Box::into_raw(b)
-  }
-
-  pub unsafe fn free_k(ptr: *mut K) {
-    Box::from_raw(ptr);
-  }
-
-  pub unsafe fn alloc_int() -> *mut Int {
-    let b = Box::new(Int(0,0,ptr::null()));
-    let res = Box::into_raw(b);
-    res
-  }
-
-  #[no_mangle]
-  pub unsafe extern "C" fn move_int(result: *mut Int) -> *mut Int {
-    let ptr = alloc_int();
-    let int = ptr::replace(result, Int(0, 0, ptr::null()));
-    *ptr = int;
-    ptr
-  }
-
-  #[no_mangle]
-  pub unsafe extern "C" fn hook_KEQUAL_eq(k1: K, k2: K) -> bool {
-    k1 == k2
-  }
-
-  #[no_mangle]
-  pub unsafe extern "C" fn k_hash(k: K) -> u64 {
-    let mut hasher = DefaultHasher::new();
-    k.hash(&mut hasher);
-    hasher.finish()
-  }
-
-  #[no_mangle]
-  pub unsafe extern "C" fn hash_enter() -> bool {
-    true
-  }
-
-  #[no_mangle]
-  pub unsafe extern "C" fn hash_exit() {}
-
-  pub unsafe fn free_int(ptr: *mut Int) {
-    __gmpz_clear(ptr);
-    Box::from_raw(ptr);
-  }
 }
