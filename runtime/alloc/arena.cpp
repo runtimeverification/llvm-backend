@@ -64,7 +64,7 @@ static void* megabyte_malloc() {
       first_superblock_ptr = superblock_ptr;
     }
     if (next_superblock_ptr) {
-      *next_superblock_ptr = superblock_ptr;
+      *next_superblock_ptr = (char *)superblock_ptr;
     }
     memory_block_header *hdr = (memory_block_header *)superblock_ptr;
     next_superblock_ptr = &hdr->next_superblock;
@@ -72,14 +72,14 @@ static void* megabyte_malloc() {
   }
   blocks_left--;
   void* result = superblock_ptr;
-  superblock_ptr += BLOCK_SIZE;
+  superblock_ptr = (char *)superblock_ptr + BLOCK_SIZE;
   return result;
 }
 
 static void freshBlock(struct arena *Arena) {
     char *nextBlock;
     if (Arena->block_start == 0) {
-      nextBlock = megabyte_malloc();
+      nextBlock = (char *)megabyte_malloc();
       Arena->first_block = nextBlock;
       memory_block_header *nextHeader = (memory_block_header *)nextBlock;
       nextHeader->next_block = 0;
@@ -95,7 +95,7 @@ static void freshBlock(struct arena *Arena) {
       }
       if (!nextBlock) {
         MEM_LOG("Allocating new block for the first time in arena %d\n", Arena->allocation_semispace_id);
-        nextBlock = megabyte_malloc();
+        nextBlock = (char *)megabyte_malloc();
         *(char **)Arena->block_start = nextBlock;
         memory_block_header *nextHeader = (memory_block_header *)nextBlock;
         nextHeader->next_block = 0;
@@ -180,7 +180,7 @@ char *movePtr(char *ptr, size_t size, const char *arena_end_ptr) {
 }
 
 void freeAllMemory() {
-  memory_block_header *superblock = first_superblock_ptr;
+  memory_block_header *superblock = (memory_block_header *)first_superblock_ptr;
   while (superblock) {
     memory_block_header* next_superblock = (memory_block_header *)superblock->next_superblock;
     free(superblock);

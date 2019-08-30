@@ -1,9 +1,7 @@
 #ifndef ALLOC_H
 #define ALLOC_H
 
-#ifdef __cplusplus
 extern "C" {
-#endif
 
 // The maximum single allocation size in bytes.
 // A contiguous area larger than that size cannot be allocated in any arena.
@@ -57,8 +55,6 @@ void* koreAllocFloatingOld(size_t requested);
 #define MEM_LOG(...)
 #endif
 
-#ifdef __cplusplus
 }
-#endif
 
 #endif // ALLOC_H
