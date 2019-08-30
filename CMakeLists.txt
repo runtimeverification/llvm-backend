@@ -143,7 +143,7 @@ install(
   DESTINATION include
 )
 install(
-  DIRECTORY include/immer
+  DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/include/immer
   DESTINATION include
 )
 
