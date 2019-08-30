@@ -3,11 +3,11 @@
 #include "immer/flex_vector_transient.hpp"
 
 extern "C" {
-  iter map_iterator(map *map) {
-    return iter{map->begin(), map};
+  mapiter map_iterator(map *map) {
+    return mapiter{map->begin(), map};
   }
 
-  block *map_iterator_next(iter *iter) {
+  block *map_iterator_next(mapiter *iter) {
     if (iter->curr == iter->map->end()) {
       return nullptr;
     }
@@ -160,7 +160,7 @@ extern "C" {
 
   map hook_MAP_removeAll(map *map, set *set) {
     if (hook_SET_size_long(set) < 2) {
-      iter it = set_iterator(set);
+      setiter it = set_iterator(set);
       auto tmp = *map;
       while(auto elem = set_iterator_next(&it)) {
         tmp = tmp.erase(elem);

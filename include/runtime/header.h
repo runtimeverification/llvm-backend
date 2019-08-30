@@ -10,6 +10,7 @@
 
 #include <immer/flex_vector.hpp>
 #include <immer/map.hpp>
+#include <immer/set.hpp>
 
 // the actual length is equal to the block header with the gc bits masked out.
 
@@ -58,13 +59,6 @@ extern "C" {
     uint64_t strlen;
     string *contents;
   } stringbuffer;
-
-  // llvm: set = type { i8 *, i8 *, i64 }
-  typedef struct set {
-    void *a;
-    void *b;
-    uint64_t c;
-  } set;
 
   typedef struct mpz_hdr {
     blockheader h;
@@ -151,12 +145,17 @@ struct HashBlock {
 
 using list = immer::flex_vector<KElem, immer::memory_policy<immer::heap_policy<kore_alloc_heap>, immer::no_refcount_policy>>;
 using map = immer::map<KElem, KElem, HashBlock, std::equal_to<KElem>, immer::memory_policy<immer::heap_policy<kore_alloc_heap>, immer::no_refcount_policy>>;
+using set = immer::set<KElem, HashBlock, std::equal_to<KElem>, immer::memory_policy<immer::heap_policy<kore_alloc_heap>, immer::no_refcount_policy>>;
 
-typedef struct iter {
+typedef struct mapiter {
 	map::iterator curr;
 	map *map;
-} iter;
+} mapiter;
 
+typedef struct setiter {
+	set::iterator curr;
+	set *set;
+} setiter;
 
 
 extern "C" {
@@ -208,10 +207,10 @@ extern "C" {
 
   block *debruijnize(block *);
 
-  iter set_iterator(set *);
-  block *set_iterator_next(iter *);
-  iter map_iterator(map *);
-  block *map_iterator_next(iter *);
+  setiter set_iterator(set *);
+  block *set_iterator_next(setiter *);
+  mapiter map_iterator(map *);
+  block *map_iterator_next(mapiter *);
 
   extern const uint32_t first_inj_tag, last_inj_tag;
 
