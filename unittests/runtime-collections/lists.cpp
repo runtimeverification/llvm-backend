@@ -53,7 +53,7 @@ extern "C" {
   block * DUMMY1 = &D1;
 }
 
-BOOST_AUTO_TEST_SUITE(CollectionsTest)
+BOOST_AUTO_TEST_SUITE(ListTest)
 
   BOOST_AUTO_TEST_CASE(element) {
     list list = hook_LIST_element(DUMMY0);
