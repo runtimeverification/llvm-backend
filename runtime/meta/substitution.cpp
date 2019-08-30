@@ -1,7 +1,6 @@
 #include<cstring>
 
 #include "runtime/header.h"
-#include "runtime/header.hpp"
 #include "runtime/alloc.h"
 
 
@@ -13,8 +12,8 @@ static thread_local uint64_t idx;
 
 extern "C" {
   bool hook_KEQUAL_eq(block *, block *);
-  Map map_map(void *, block *(block *));
-  List list_map(void *, block *(block *));
+  map map_map(void *, block *(block *));
+  list list_map(void *, block *(block *));
   set set_map(void *, block *(block *));
 }
 
@@ -53,11 +52,11 @@ block *debruijnizeInternal(block *currBlock) {
       void *arg = ((char *)currBlock) + argData->offset;
       switch(argData->cat) {
       case MAP_LAYOUT: {
-        Map newArg = map_map(arg, debruijnizeInternal);
+        map newArg = map_map(arg, debruijnizeInternal);
         makeDirty(dirty, argData->offset, newArg, newBlock);
 	break;
       } case LIST_LAYOUT: {
-        List newArg = list_map(arg, debruijnizeInternal);
+        list newArg = list_map(arg, debruijnizeInternal);
         makeDirty(dirty, argData->offset, newArg, newBlock);
 	break;
       } case SET_LAYOUT: {
@@ -123,11 +122,11 @@ block *replaceBinderInternal(block *currBlock) {
       void *arg = ((char *)currBlock) + argData->offset;
       switch(argData->cat) {
       case MAP_LAYOUT: {
-        Map newArg = map_map(arg, replaceBinderInternal);
+        map newArg = map_map(arg, replaceBinderInternal);
         makeDirty(dirty, argData->offset, newArg, newBlock);
 	break;
       } case LIST_LAYOUT: {
-        List newArg = list_map(arg, replaceBinderInternal);
+        list newArg = list_map(arg, replaceBinderInternal);
         makeDirty(dirty, argData->offset, newArg, newBlock);
 	break;
       } case SET_LAYOUT: {
@@ -186,11 +185,11 @@ block *substituteInternal(block *currBlock) {
       void *arg = ((char *)currBlock) + argData->offset;
       switch(argData->cat) {
       case MAP_LAYOUT: {
-        Map newArg = map_map(arg, substituteInternal);
+        map newArg = map_map(arg, substituteInternal);
         makeDirty(dirty, argData->offset, newArg, newBlock);
 	break;
       } case LIST_LAYOUT: {
-        List newArg = list_map(arg, substituteInternal);
+        list newArg = list_map(arg, substituteInternal);
         makeDirty(dirty, argData->offset, newArg, newBlock);
 	break;
       } case SET_LAYOUT: {

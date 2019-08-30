@@ -4,7 +4,12 @@
 #include <stdint.h>
 #include <gmp.h>
 #include <mpfr.h>
+
 #include "config/macros.h"
+#include "runtime/alloc.h"
+
+#include <immer/flex_vector.hpp>
+#include <immer/map.hpp>
 
 // the actual length is equal to the block header with the gc bits masked out.
 
@@ -54,48 +59,12 @@ extern "C" {
     string *contents;
   } stringbuffer;
 
-  // llvm: map = type { i8 *, i64 }
-  typedef struct map {
-    void *root;
-    size_t size;
-  } map;
-
   // llvm: set = type { i8 *, i8 *, i64 }
   typedef struct set {
     void *a;
     void *b;
     uint64_t c;
   } set;
-
-  typedef struct iter {
-    uint64_t a;
-    struct {
-      struct {
-        uint64_t *b;
-        uint64_t c;
-      };
-      uint64_t d;
-    };
-    struct {
-      struct {
-        uint64_t e;
-        uint32_t f;
-      };
-      void *g;
-    };
-    struct {
-      uint64_t h;
-      uint64_t i[3];
-    };
-  } iter;
-
-  // llvm: list = type { i64, i32, i8 *, i8 * }
-  typedef struct list {
-    size_t size;
-    uint32_t shift;
-    void *root;
-    void *tail;
-  } list;
 
   typedef struct mpz_hdr {
     blockheader h;
@@ -122,16 +91,75 @@ extern "C" {
     layoutitem *args;
   } layout;
 
-  // This function is exported to be used by the interpreter 
-  extern "C++" {
-    std::string floatToString(const floating *);
-    void init_float2(floating *, std::string);
-  }
-
   typedef struct {
     FILE *file;
     stringbuffer *buffer;
   } writer;
+
+  bool hook_KEQUAL_eq(block *, block *);
+  bool during_gc(void);
+  size_t hash_k(block *);
+  void k_hash(block *, void *);
+  bool hash_enter(void);
+  void hash_exit(void);
+}
+
+class KElem {
+public:
+  KElem(block * elem) {
+    this->elem = elem;
+  }
+
+  bool operator==(const KElem& other) const {
+    return hook_KEQUAL_eq(this->elem, other.elem);
+  }
+
+  bool operator!=(const KElem& other) const {
+    return !(*this == other);
+  }
+
+  operator block*() const {
+    return elem;
+  }
+
+  block * elem;
+};
+
+struct kore_alloc_heap {
+
+  template <typename... Tags>
+  static void *allocate(size_t size, Tags...) {
+    if (during_gc()) {
+      return ::operator new(size);
+    } else {
+      return koreAllocNoGC(size);
+    }
+  }
+
+  static void deallocate(size_t size, void *data) {
+    if (during_gc()) {
+      ::operator delete(data);
+    }
+  }
+};
+
+struct HashBlock {
+  size_t operator()(const KElem &block) const noexcept {
+    return hash_k(block);
+  }
+};
+
+using list = immer::flex_vector<KElem, immer::memory_policy<immer::heap_policy<kore_alloc_heap>, immer::no_refcount_policy>>;
+using map = immer::map<KElem, KElem, HashBlock, std::equal_to<KElem>, immer::memory_policy<immer::heap_policy<kore_alloc_heap>, immer::no_refcount_policy>>;
+
+typedef struct iter {
+	map::iterator curr;
+	map *map;
+} iter;
+
+
+
+extern "C" {
 
   block *parseConfiguration(const char *filename);
   void printConfiguration(const char *filename, block *subject);
@@ -176,15 +204,20 @@ extern "C" {
   stringbuffer *hook_BUFFER_concat(stringbuffer *buf, string *s);
   string *hook_BUFFER_toString(stringbuffer *buf);
 
+  size_t hook_SET_size_long(set *);
+
   block *debruijnize(block *);
 
   iter set_iterator(set *);
   block *set_iterator_next(iter *);
-  iter map_iterator(set *);
+  iter map_iterator(map *);
   block *map_iterator_next(iter *);
 
   extern const uint32_t first_inj_tag, last_inj_tag;
 
 }
+
+std::string floatToString(const floating *);
+void init_float2(floating *, std::string);
 
 #endif // RUNTIME_HEADER_H

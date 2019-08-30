@@ -9,7 +9,6 @@
 #include<dlfcn.h>
 
 #include "runtime/header.h"
-#include "runtime/header.hpp"
 #include "runtime/alloc.h"
 
 #define KCHAR char
@@ -50,6 +49,14 @@ extern "C" {
     return (uint64_t) kitem;
   }
 
+  bool hash_enter(void) {
+    return true;
+  }
+
+  void hash_exit(void) {}
+
+  void k_hash(block *, void *) {}
+
   bool during_gc() {
     return false;
   }
@@ -62,8 +69,8 @@ extern "C" {
   }
 
   mpz_ptr hook_FFI_address(string * fn);
-  string * hook_FFI_call(mpz_t addr, List * args, List * types, block * ret);
-  string * hook_FFI_call_variadic(mpz_t addr, List * args, List * fixtypes, List * vartypes, block * ret);
+  string * hook_FFI_call(mpz_t addr, list * args, list * types, block * ret);
+  string * hook_FFI_call_variadic(mpz_t addr, list * args, list * fixtypes, list * vartypes, block * ret);
 
   mpz_ptr hook_FFI_bytes_address(string * bytes);
   block * hook_FFI_free(block * kitem);
@@ -73,11 +80,11 @@ extern "C" {
 
   string * makeString(const KCHAR *, int64_t len = -1);
 
-  List hook_LIST_element(block * value);
-  List hook_LIST_concat(List * l1, List * l2);
-  List hook_LIST_unit();
-  size_t hook_LIST_size_long(List * l);
-  block * hook_LIST_get_long(List * l, ssize_t idx);
+  list hook_LIST_element(block * value);
+  list hook_LIST_concat(list * l1, list * l2);
+  list hook_LIST_unit();
+  size_t hook_LIST_size_long(list * l);
+  block * hook_LIST_get_long(list * l, ssize_t idx);
 
   mpz_ptr move_int(mpz_t i) {
     mpz_ptr result = (mpz_ptr)malloc(sizeof(__mpz_struct));
@@ -136,14 +143,14 @@ BOOST_AUTO_TEST_CASE(call) {
   xarg->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("inj{SortBytes{}}"));
   memcpy(xarg->children, &xargstr, sizeof(string *));
 
-  List args = hook_LIST_element(xarg);
+  list args = hook_LIST_element(xarg);
   block * type_sint = (block *)((((uint64_t)getTagForSymbolName(TYPETAG(sint))) << 32) | 1);
 
   block * argtype = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(block *)));
   argtype->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("inj{SortFFIType{}}"));
   memcpy(argtype->children, &type_sint, sizeof(block *));
 
-  List types = hook_LIST_element(argtype);
+  list types = hook_LIST_element(argtype);
 
   string * fn = makeString("timesTwo");
   mpz_ptr addr = hook_FFI_address(fn);
@@ -189,7 +196,7 @@ BOOST_AUTO_TEST_CASE(call) {
   yarg->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("inj{SortBytes{}}"));
   memcpy(yarg->children, &yargstr, sizeof(string *));
 
-  List yargs = hook_LIST_element(yarg);
+  list yargs = hook_LIST_element(yarg);
 
   args = hook_LIST_concat(&args, &yargs);
   types = hook_LIST_concat(&types, &types);
@@ -205,12 +212,12 @@ BOOST_AUTO_TEST_CASE(call) {
   block * structType = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(block *)));
   structType->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName(TYPETAG(struct)));
 
-  List * structFields = static_cast<List *>(koreAlloc(sizeof(List)));
-  List tmp = hook_LIST_element(argtype);
+  list * structFields = static_cast<list *>(koreAlloc(sizeof(list)));
+  list tmp = hook_LIST_element(argtype);
   tmp = hook_LIST_concat(&tmp, &tmp);
-  memcpy(structFields, &tmp, sizeof(List));
+  memcpy(structFields, &tmp, sizeof(list));
 
-  memcpy(structType->children, &structFields, sizeof(List *));
+  memcpy(structType->children, &structFields, sizeof(list *));
 
   fn = makeString("constructPoint");
   addr = hook_FFI_address(fn);
@@ -288,11 +295,11 @@ BOOST_AUTO_TEST_CASE(call) {
   structArgType->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("inj{SortFFIType{}}"));
   memcpy(structArgType->children, &structType, sizeof(block *));
 
-  List * structFields2 = static_cast<List *>(koreAlloc(sizeof(List)));
-  List tmp2 = hook_LIST_element(structArgType);
-  memcpy(structFields2, &tmp2, sizeof(List));
+  list * structFields2 = static_cast<list *>(koreAlloc(sizeof(list)));
+  list tmp2 = hook_LIST_element(structArgType);
+  memcpy(structFields2, &tmp2, sizeof(list));
 
-  memcpy(structType2->children, &structFields2, sizeof(List *));
+  memcpy(structType2->children, &structFields2, sizeof(list *));
   
   memcpy(new_argtype->children, &structType2, sizeof(block *));
   types = hook_LIST_element(new_argtype);
@@ -357,7 +364,7 @@ BOOST_AUTO_TEST_CASE(call_variadic) {
   narg->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("inj{SortBytes{}}"));
   memcpy(narg->children, &nargstr, sizeof(string *));
 
-  List args = hook_LIST_element(narg);
+  list args = hook_LIST_element(narg);
 
   int arg1 = 1;
   string * arg1str = makeString((char *) &arg1, sizeof(int)); 
@@ -366,7 +373,7 @@ BOOST_AUTO_TEST_CASE(call_variadic) {
   arg1block->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("inj{SortBytes{}}"));
   memcpy(arg1block->children, &arg1str, sizeof(string *));
 
-  List arg1list = hook_LIST_element(arg1block);
+  list arg1list = hook_LIST_element(arg1block);
 
   args = hook_LIST_concat(&args, &arg1list);
 
@@ -380,8 +387,8 @@ BOOST_AUTO_TEST_CASE(call_variadic) {
   varargtype->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("inj{SortFFIType{}}"));
   memcpy(varargtype->children, &type_sint, sizeof(block *));
 
-  List fixtypes = hook_LIST_element(fixargtype);
-  List vartypes = hook_LIST_element(varargtype);
+  list fixtypes = hook_LIST_element(fixargtype);
+  list vartypes = hook_LIST_element(varargtype);
 
   string * fn = makeString("addInts");
   mpz_ptr addr = hook_FFI_address(fn);
@@ -413,7 +420,7 @@ BOOST_AUTO_TEST_CASE(call_variadic) {
   arg2block->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("inj{SortBytes{}}"));
   memcpy(arg2block->children, &arg2str, sizeof(string *));
 
-  List arg2list = hook_LIST_element(arg2block);
+  list arg2list = hook_LIST_element(arg2block);
 
   args = hook_LIST_concat(&args, &arg2list);
 

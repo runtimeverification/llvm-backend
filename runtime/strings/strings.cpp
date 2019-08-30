@@ -11,11 +11,10 @@
 #include<sstream>
 #include<stdexcept>
 
-extern "C" {
-
 #include "runtime/alloc.h"
 #include "runtime/header.h"
-#include<stdexcept>
+
+extern "C" {
 
 #define KCHAR char
 

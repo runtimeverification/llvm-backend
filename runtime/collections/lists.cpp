@@ -1,22 +1,19 @@
 #include <cstdio>
 
 #include "runtime/header.h"
-#include "runtime/header.hpp"
 
 #include "immer/flex_vector_transient.hpp"
 
 extern "C" {
-  mpz_ptr move_int(mpz_t);
-
-  List hook_LIST_unit() {
-    return List();
+  list hook_LIST_unit() {
+    return list();
   }
 
-  List hook_LIST_element(block * value) {
-    return List{value};
+  list hook_LIST_element(block * value) {
+    return list{value};
   }
 
-  List hook_LIST_concat(List * l1, List * l2) {
+  list hook_LIST_concat(list * l1, list * l2) {
     if (l2->size() < 32) {
       auto tmp = l1->transient();
       for (auto iter = l2->begin(); iter != l2->end(); ++iter) {
@@ -28,16 +25,16 @@ extern "C" {
     }
   }
 
-  bool hook_LIST_in(block * value, List * list) {
+  bool hook_LIST_in(block * value, list * list) {
     for (auto iter = list->begin(); iter != list->end(); ++iter) {
-      if (hook_KEQUAL_eq(iter->elem, value)) {
+      if (hook_KEQUAL_eq(*iter, value)) {
         return true;
       }
     }
     return false;
   }
 
-  bool hook_LIST_in_keys(mpz_t index, List * list) {
+  bool hook_LIST_in_keys(mpz_t index, list * list) {
     if (!mpz_fits_ulong_p(index)) {
       throw std::invalid_argument("Index is too large for in_keys");
     }
@@ -45,13 +42,13 @@ extern "C" {
     return idx < list->size();
   }
 
-  block * hook_LIST_get_long(List * list, ssize_t idx) {
+  block * hook_LIST_get_long(list * list, ssize_t idx) {
     size_t size = list->size();
     size_t abs_idx = idx < 0 ? (long) size + idx : idx;
-    return list->at(abs_idx).elem;
+    return list->at(abs_idx);
   }
 
-  block * hook_LIST_get(List * list, mpz_t index) {
+  block * hook_LIST_get(list * list, mpz_t index) {
     if (!mpz_fits_slong_p(index)) {
       throw std::invalid_argument("Index is too large for get");
     }
@@ -59,11 +56,11 @@ extern "C" {
     return hook_LIST_get_long(list, idx);
   }
 
-  block * hook_LIST_lookup(List * list, mpz_t index) {
+  block * hook_LIST_lookup(list * list, mpz_t index) {
     return hook_LIST_get(list, index);
   }
 
-  List hook_LIST_range_long(List * list, size_t front, size_t back) {
+  list hook_LIST_range_long(list * list, size_t front, size_t back) {
     size_t size = list->size();
 
     if (size < front + back) {
@@ -76,7 +73,7 @@ extern "C" {
     return tmp.persistent();
   }
 
-  List hook_LIST_range(List * list, mpz_t from_front, mpz_t from_back) {
+  list hook_LIST_range(list * list, mpz_t from_front, mpz_t from_back) {
     if (!mpz_fits_ulong_p(from_front) || !mpz_fits_ulong_p(from_back)) {
       throw std::invalid_argument("Range index too large for range");
     }
@@ -87,26 +84,26 @@ extern "C" {
     return hook_LIST_range_long(list, front, back);
   }
 
-  size_t hook_LIST_size_long(List * list) {
+  size_t hook_LIST_size_long(list * list) {
     return list->size();
   }
 
-  mpz_ptr hook_LIST_size(List * list) {
+  mpz_ptr hook_LIST_size(list * list) {
     mpz_t size;
     mpz_init_set_ui(size, list->size());
     return move_int(size);
   }
 
-  List hook_LIST_make(mpz_t len, block * value) {
+  list hook_LIST_make(mpz_t len, block * value) {
     if (!mpz_fits_ulong_p(len)) {
       throw std::invalid_argument("Length is too large for make");
     }
 
     size_t length = mpz_get_ui(len);
-    return List(length, value);
+    return list(length, value);
   }
 
-  List hook_LIST_update(List * list, mpz_t index, block * value) {
+  list hook_LIST_update(list * list, mpz_t index, block * value) {
     if (!mpz_fits_ulong_p(index)) {
       throw std::invalid_argument("Length is too large for update");
     }
@@ -119,7 +116,7 @@ extern "C" {
     return list->set(idx, value);
   }
 
-  List hook_LIST_updateAll(List * l1, mpz_t index, List * l2) {
+  list hook_LIST_updateAll(list * l1, mpz_t index, list * l2) {
     if (!mpz_fits_ulong_p(index)) {
       throw std::invalid_argument("Length is too large for updateAll");
     }
@@ -152,7 +149,7 @@ extern "C" {
     }
   }
 
-  List hook_LIST_fill(List * l, mpz_t index, mpz_t len, block * val) {
+  list hook_LIST_fill(list * l, mpz_t index, mpz_t len, block * val) {
     if (!mpz_fits_ulong_p(index)) {
       throw std::invalid_argument("Index is too large for fill");
     }
@@ -181,7 +178,7 @@ extern "C" {
     } else {
       auto tmp = l->transient();
       tmp.take(idx);
-      auto l2 = List{length, val}.transient();
+      auto l2 = list{length, val}.transient();
       tmp.append(l2);
       auto tmp2 = l->transient();
       tmp2.drop(idx + length);
@@ -190,35 +187,40 @@ extern "C" {
     }
   }
 
-  bool hook_LIST_eq(List * l1, List * l2) {
+  bool hook_LIST_eq(list * l1, list * l2) {
     return (*l1) == (*l2);
   }
 
-  void list_hash(List * l, void * h) {
+  void list_hash(list *l, void *hasher) {
+    if (hash_enter()) {
+      for (auto iter = l->begin(); iter != l->end(); ++iter) {
+        k_hash(*iter, hasher);
+      }
+    }
+    hash_exit();
   }
 
-  void list_foreach(List * list, void (process)(block **)) {
+  void list_foreach(list * list, void (process)(block **)) {
     for (auto iter = list->begin(); iter != list->end(); ++iter) {
-      process((block **)&iter->elem);
+      process((block **)&*iter);
     }
   }
 
-  List list_map(List * list, block * (process)(block *)) {
-    auto tmp = List().transient();
+  list list_map(list * l, block * (process)(block *)) {
+    auto tmp = list().transient();
 
-    for (auto iter = list->begin(); iter != list->end(); ++iter) {
-      tmp.push_back(process(iter->elem));
+    for (auto iter = l->begin(); iter != l->end(); ++iter) {
+      tmp.push_back(process(*iter));
     }
 
     return tmp.persistent();
   }
 
-  List list_push_back(List * list, block * value) {
+  list list_push_back(list * list, block * value) {
     return list->push_back(value);
   }
 
-  void printList(writer * file, struct list * l, const char * unit, const char * element, const char * concat) {
-    List * list = (List *) l;
+  void printList(writer * file, list * list, const char * unit, const char * element, const char * concat) {
     size_t size = list->size();
 
     if (size == 0) {
@@ -233,7 +235,7 @@ extern "C" {
       }
 
       sfprintf(file, "%s(", element);
-      printConfigurationInternal(file, iter->elem, "KItem", false);
+      printConfigurationInternal(file, *iter, "KItem", false);
       sfprintf(file, ")");
 
       if (i < size) {

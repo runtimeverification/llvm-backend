@@ -2,22 +2,21 @@
 #include<gmp.h>
 
 #include "runtime/header.h"
-#include "runtime/header.hpp"
 
 extern "C" {
-  List hook_LIST_unit();
-  List hook_LIST_element(block *);
-  List hook_LIST_concat(List *, List *);
-  List hook_LIST_range(List *, mpz_t, mpz_t);
-  List hook_LIST_range_long(List *, size_t, size_t);
-  List hook_LIST_make(mpz_t len, block * value);
-  List hook_LIST_update(List * list, mpz_t index, block * value);
-  List hook_LIST_updateAll(List * l1, mpz_t index, List * l2);
-  List hook_LIST_fill(List * l, mpz_t index, mpz_t len, block * val);
-  mpz_ptr hook_LIST_size(List *);
-  block * hook_LIST_get(List *, mpz_t);
-  bool hook_LIST_in(block *, List *);
-  bool hook_LIST_eq(List *, List *);
+  list hook_LIST_unit();
+  list hook_LIST_element(block *);
+  list hook_LIST_concat(list *, list *);
+  list hook_LIST_range(list *, mpz_t, mpz_t);
+  list hook_LIST_range_long(list *, size_t, size_t);
+  list hook_LIST_make(mpz_t len, block * value);
+  list hook_LIST_update(list * list, mpz_t index, block * value);
+  list hook_LIST_updateAll(list * l1, mpz_t index, list * l2);
+  list hook_LIST_fill(list * l, mpz_t index, mpz_t len, block * val);
+  mpz_ptr hook_LIST_size(list *);
+  block * hook_LIST_get(list *, mpz_t);
+  bool hook_LIST_in(block *, list *);
+  bool hook_LIST_eq(list *, list *);
 
   mpz_ptr move_int(mpz_t i) {
     mpz_ptr result = (mpz_ptr)malloc(sizeof(__mpz_struct));
@@ -40,6 +39,14 @@ extern "C" {
     return b1->h.hdr == b2->h.hdr;
   }
 
+  bool hash_enter(void) {
+    return true;
+  }
+
+  void hash_exit(void) {}
+
+  void k_hash(block *, void *) {}
+
   block D0 = {{0}, {}};
   block * DUMMY0 = &D0;
   block D1 = {{1}, {}};
@@ -49,7 +56,7 @@ extern "C" {
 BOOST_AUTO_TEST_SUITE(CollectionsTest)
 
   BOOST_AUTO_TEST_CASE(element) {
-    List list = hook_LIST_element(DUMMY0);
+    list list = hook_LIST_element(DUMMY0);
     mpz_t index;
     mpz_init_set_ui(index, 0);
     block * result = hook_LIST_get(&list, index);
@@ -62,15 +69,15 @@ BOOST_AUTO_TEST_SUITE(CollectionsTest)
   }
 
   BOOST_AUTO_TEST_CASE(unit) {
-    List list = hook_LIST_unit();
+    list list = hook_LIST_unit();
     mpz_ptr result = hook_LIST_size(&list);
     BOOST_CHECK_EQUAL(0, mpz_cmp_ui(result, 0));
   }
 
   BOOST_AUTO_TEST_CASE(concat) {
-    List l1 = hook_LIST_element(DUMMY0);
-    List l2 = hook_LIST_element(DUMMY1);
-    List list = hook_LIST_concat(&l1, &l2);
+    list l1 = hook_LIST_element(DUMMY0);
+    list l2 = hook_LIST_element(DUMMY1);
+    list list = hook_LIST_concat(&l1, &l2);
 
     mpz_t index;
     mpz_init_set_ui(index, 0);
@@ -88,7 +95,7 @@ BOOST_AUTO_TEST_SUITE(CollectionsTest)
   }
 
   BOOST_AUTO_TEST_CASE(in) {
-    List list = hook_LIST_element(DUMMY0);
+    list list = hook_LIST_element(DUMMY0);
     bool result = hook_LIST_in(DUMMY0, &list);
     BOOST_CHECK(result == true);
     result = hook_LIST_in(DUMMY1, &list);
@@ -98,14 +105,14 @@ BOOST_AUTO_TEST_SUITE(CollectionsTest)
   BOOST_AUTO_TEST_CASE(get_negative) {
     mpz_t index;
     mpz_init_set_si(index, -2);
-    List list = hook_LIST_element(DUMMY0);
+    list list = hook_LIST_element(DUMMY0);
     BOOST_CHECK_THROW(hook_LIST_get(&list, index), std::out_of_range);
   }
 
   BOOST_AUTO_TEST_CASE(get_out_of_range) {
     mpz_t index;
     mpz_init_set_si(index, 1);
-    List list = hook_LIST_element(DUMMY0);
+    list list = hook_LIST_element(DUMMY0);
 
     BOOST_CHECK_THROW(hook_LIST_get(&list, index), std::out_of_range);
   }
@@ -115,7 +122,7 @@ BOOST_AUTO_TEST_SUITE(CollectionsTest)
     mpz_t neg, zero;
     mpz_init_set_si(neg, -1);
     mpz_init_set_si(zero, 0);
-    List list = hook_LIST_element(DUMMY0);
+    list list = hook_LIST_element(DUMMY0);
 
     BOOST_CHECK_THROW(hook_LIST_range(&list, neg, zero), std::invalid_argument);
   }
@@ -124,7 +131,7 @@ BOOST_AUTO_TEST_SUITE(CollectionsTest)
     mpz_t neg, zero;
     mpz_init_set_si(neg, -1);
     mpz_init_set_si(zero, 0);
-    List list = hook_LIST_element(DUMMY0);
+    list list = hook_LIST_element(DUMMY0);
 
     BOOST_CHECK_THROW(hook_LIST_range(&list, zero, neg), std::invalid_argument);
   }
@@ -134,14 +141,14 @@ BOOST_AUTO_TEST_SUITE(CollectionsTest)
     mpz_init_set_ui(zero, 0);
     mpz_init_set_ui(one, 1);
 
-    List list = hook_LIST_element(DUMMY0);
-    List result = hook_LIST_range(&list, zero, one);
+    list l = hook_LIST_element(DUMMY0);
+    list result = hook_LIST_range(&l, zero, one);
 
     mpz_ptr size = hook_LIST_size(&result);
     BOOST_CHECK_EQUAL(0, mpz_cmp_ui(size, 0));
 
-    list = hook_LIST_concat(&list, &list);
-    result = hook_LIST_range(&list, one, zero);
+    l = hook_LIST_concat(&l, &l);
+    result = hook_LIST_range(&l, one, zero);
 
     size = hook_LIST_size(&result);
     BOOST_CHECK_EQUAL(0, mpz_cmp_ui(size, 1));
@@ -157,17 +164,17 @@ BOOST_AUTO_TEST_SUITE(CollectionsTest)
     mpz_t zero, ten;
     mpz_init_set_ui(zero, 0);
     mpz_init_set_ui(ten, 10);
-    List list = hook_LIST_make(ten, DUMMY0);
-    block * result = hook_LIST_get(&list, zero);
+    list l = hook_LIST_make(ten, DUMMY0);
+    block * result = hook_LIST_get(&l, zero);
 
     BOOST_CHECK_EQUAL(true, hook_KEQUAL_eq(result, DUMMY0));
-    mpz_ptr size = hook_LIST_size(&list);
+    mpz_ptr size = hook_LIST_size(&l);
 
     BOOST_CHECK_EQUAL(0, mpz_cmp_ui(size, 10));
   }
 
   BOOST_AUTO_TEST_CASE(update_neg) {
-    List list = hook_LIST_element(DUMMY0);
+    list list = hook_LIST_element(DUMMY0);
     mpz_t neg;
     mpz_init_set_si(neg, -1);
 
@@ -175,7 +182,7 @@ BOOST_AUTO_TEST_SUITE(CollectionsTest)
   }
 
   BOOST_AUTO_TEST_CASE(update_out_of_range) {
-    List list = hook_LIST_element(DUMMY0);
+    list list = hook_LIST_element(DUMMY0);
     mpz_t one;
     mpz_init_set_ui(one, 1);
 
@@ -183,7 +190,7 @@ BOOST_AUTO_TEST_SUITE(CollectionsTest)
   }
 
   BOOST_AUTO_TEST_CASE(update) {
-    List list = hook_LIST_element(DUMMY0);
+    list list = hook_LIST_element(DUMMY0);
     mpz_t index;
     mpz_init_set_ui(index, 0);
     list = hook_LIST_update(&list, index, DUMMY1);
@@ -195,8 +202,8 @@ BOOST_AUTO_TEST_SUITE(CollectionsTest)
   BOOST_AUTO_TEST_CASE(update_all_neg) {
     mpz_t neg;
     mpz_init_set_si(neg, -1);
-    List l1 = hook_LIST_element(DUMMY0);
-    List l2 = hook_LIST_unit();
+    list l1 = hook_LIST_element(DUMMY0);
+    list l2 = hook_LIST_unit();
 
     BOOST_CHECK_THROW(hook_LIST_updateAll(&l1, neg, &l2), std::invalid_argument);
   }
@@ -205,9 +212,9 @@ BOOST_AUTO_TEST_SUITE(CollectionsTest)
     mpz_t zero, one;
     mpz_init_set_ui(zero, 0);
     mpz_init_set_ui(one, 1);
-    List l1 = hook_LIST_element(DUMMY0);
-    List l2 = hook_LIST_unit();
-    List list = hook_LIST_updateAll(&l1, one, &l2);
+    list l1 = hook_LIST_element(DUMMY0);
+    list l2 = hook_LIST_unit();
+    list list = hook_LIST_updateAll(&l1, one, &l2);
     block * result = hook_LIST_get(&list, zero);
 
     BOOST_CHECK_EQUAL(true, hook_KEQUAL_eq(result, DUMMY0));
@@ -225,14 +232,14 @@ BOOST_AUTO_TEST_SUITE(CollectionsTest)
   BOOST_AUTO_TEST_CASE(update_all_out_of_range) {
     mpz_t one;
     mpz_init_set_ui(one, 1);
-    List l1 = hook_LIST_element(DUMMY0);
-    List l2 = hook_LIST_element(DUMMY1);
+    list l1 = hook_LIST_element(DUMMY0);
+    list l2 = hook_LIST_element(DUMMY1);
 
     BOOST_CHECK_THROW(hook_LIST_updateAll(&l1, one, &l2), std::invalid_argument);
   }
 
   BOOST_AUTO_TEST_CASE(fill_out_of_range) {
-    List list = hook_LIST_unit();
+    list list = hook_LIST_unit();
     mpz_t index, len;
     mpz_init_set_ui(index, 1);
     mpz_init_set_ui(len, 2);
@@ -248,8 +255,8 @@ BOOST_AUTO_TEST_SUITE(CollectionsTest)
     mpz_init_set_ui(three, 3);
     mpz_init_set_ui(four, 4);
 
-    List l1 = hook_LIST_make(four, DUMMY0);
-    List l2 = hook_LIST_fill(&l1, one, two, DUMMY1);
+    list l1 = hook_LIST_make(four, DUMMY0);
+    list l2 = hook_LIST_fill(&l1, one, two, DUMMY1);
 
     block * result = hook_LIST_get(&l2, zero);
     BOOST_CHECK_EQUAL(true, hook_KEQUAL_eq(result, DUMMY0));
@@ -265,8 +272,8 @@ BOOST_AUTO_TEST_SUITE(CollectionsTest)
   }
 
   BOOST_AUTO_TEST_CASE(eq) {
-    List l1 = hook_LIST_element(DUMMY0);
-    List l2 = hook_LIST_unit();
+    list l1 = hook_LIST_element(DUMMY0);
+    list l2 = hook_LIST_unit();
     bool result = hook_LIST_eq(&l1, &l2);
 
     BOOST_CHECK(!result);

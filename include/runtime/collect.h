@@ -15,4 +15,8 @@ typedef std::pair<block_iterator, block_iterator> (*BlockEnumerator)(void);
 // Example usage:
 void registerGCRootsEnumerator(BlockEnumerator);
 
+extern "C" {
+  bool during_gc(void);
+}
+
 #endif // RUNTIME_COLLECT_H
