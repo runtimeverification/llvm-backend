@@ -142,6 +142,10 @@ install(
   DIRECTORY include/runtime
   DESTINATION include
 )
+install(
+  DIRECTORY include/immer
+  DESTINATION include
+)
 
 install(
   DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/include/config
