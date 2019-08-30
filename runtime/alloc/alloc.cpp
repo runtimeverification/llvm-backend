@@ -9,6 +9,7 @@
 #include "runtime/header.h"
 #include "runtime/arena.h"
 
+extern "C" {
 
 REGISTER_ARENA(youngspace, YOUNGSPACE_ID);
 REGISTER_ARENA(oldspace, OLDSPACE_ID);
@@ -103,17 +104,17 @@ void* koreResizeLastAlloc(void* oldptr, size_t newrequest, size_t last_size) {
 }
 
 void* koreAllocMP(size_t requested) {
-  string* new = (string *) koreAllocToken(sizeof(string) + requested);
-  set_len(new, requested);
-  return new->data;
+  string* _new = (string *) koreAllocToken(sizeof(string) + requested);
+  set_len(_new, requested);
+  return _new->data;
 }
 
 void* koreReallocMP(void* ptr, size_t old_size, size_t new_size) {
-  string* new = (string *) koreAllocToken(sizeof(string) + new_size);
+  string* _new = (string *) koreAllocToken(sizeof(string) + new_size);
   size_t min = old_size > new_size ? new_size : old_size;
-  memcpy(new->data, ptr, min);
-  set_len(new, new_size);
-  return new->data;
+  memcpy(_new->data, ptr, min);
+  set_len(_new, new_size);
+  return _new->data;
 }
 
 void koreFree(void* ptr, size_t size) {}
@@ -140,4 +141,6 @@ __attribute__ ((always_inline)) void* koreAllocFloatingOld(size_t requested) {
   floating_hdr *result = (floating_hdr *) koreAllocOld(sizeof(floating_hdr));
   set_len(result, sizeof(floating_hdr) - sizeof(blockheader));
   return &result->f;
+}
+
 }

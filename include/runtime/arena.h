@@ -1,9 +1,7 @@
 #ifndef ARENA_H
 #define ARENA_H
 
-#ifdef __cplusplus
 extern "C" {
-#endif
 
 // An arena can be used to allocate objects that can then be deallocated all at
 // once.
@@ -83,8 +81,6 @@ char *movePtr(char *, size_t, const char *);
 // Deallocates all the memory allocated for registered arenas.
 void freeAllMemory(void);
 
-#ifdef __cplusplus
 }
-#endif
 
 #endif // ARENA_H
