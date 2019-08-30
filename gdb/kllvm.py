@@ -42,6 +42,9 @@ BL = 5
 B = 5
 BRANCHES = 32
 MASK = 31
+MAX_DEPTH=13
+
+MemoryPolicy = "immer::memory_policy<immer::heap_policy<kore_alloc_heap>, immer:::no_refcount_policy, immer::gc_transience_policy, false, false>"
 
 class Relaxed:
     def __init__(self, node, shift, relaxed, it):
@@ -162,7 +165,7 @@ class ListIter:
         self.size = self.v['size']
         self.i = 0
         self.curr = (None, MAX, MAX)
-        self.node_ptr_ptr = gdb.lookup_type("immer::detail::rbts::node<KElem, immer::memory_policy<immer::heap_policy<kore_alloc_heap>, immer::no_refcount_policy, immer::gc_transience_policy, false, false>, " + str(B) + ", " + str(BL) + ">").pointer().pointer()
+        self.node_ptr_ptr = self.v['root'].type.pointer()
 
     def __iter__(self):
         return self
@@ -227,18 +230,115 @@ class ListIter:
         else:
             return Regular(child, pos.shift - B, pos.size, self).towards(idx)
 
-class MapIter:
+def popcount(x):
+    b = 0
+    while x > 0:
+        x &= x - 1
+        b += 1
+    return b
+
+class ChampIter:
     def __init__(self, val):
-        self.it = gdb.lookup_global_symbol("datastructures::hook_map::map_iterator_dbg").value()(val)
+        self.depth = 0
+        v = val.dereference()['impl_']['root']
+        self.node_ptr_ptr = v.type.pointer()
+        m = self.datamap(v)
+        if m:
+            self.cur = self.values(v)
+            self.end = self.values(v) + popcount(m)
+        else:
+            self.cur = None
+            self.end = None
+        self.path = [v.address]
+        self.ensure_valid()
 
     def __iter__(self):
         return self
 
     def __next__(self):
-        val = gdb.lookup_global_symbol("datastructures::hook_map::map_iterator_next_dbg").value()(self.it)
-        if val:
-            return val
-        raise StopIteration
+        if self.cur == None:
+            raise StopIteration
+        result = self.cur.dereference()
+        self.cur += 1
+        self.ensure_valid()
+        return result
+
+    def ensure_valid(self):
+        while self.cur == self.end:
+            while self.step_down():
+                if self.cur != self.end:
+                    return
+            if not self.step_right():
+                self.cur = None
+                self.end = None
+                return
+
+    def step_down(self):
+        if self.depth < MAX_DEPTH:
+            parent = self.path[self.depth].dereference()
+            if self.nodemap(parent):
+                self.depth += 1
+                self.path.append(self.children(parent))
+                child = self.path[self.depth]
+                if self.depth < MAX_DEPTH:
+                    m = self.datamap(child)
+                    if m:
+                        self.cur = self.values(child)
+                        self.end = self.cur + popcount(m)
+                else:
+                    self.cur = self.collisions(child)
+                    self.end = self.cur = self.collision_count(child)
+                return True
+        return False
+
+    def step_right(self):
+        while self.depth > 0:
+            parent = self.path[self.depth - 1].dereference()
+            last = self.children(parent) + popcount(self.nodemap(parent))
+            next_ = self.path[self.depth] + 1
+            if next_ < last:
+                self.path[self.depth] = next_
+                child = self.path[self.depth].dereference()
+                if self.depth < MAX_DEPTH:
+                    m = self.datamap(child)
+                    if m:
+                        self.cur = self.values(child)
+                        self.end = self.cur + popcount(m)
+                else:
+                    self.cur = self.collisions(child)
+                    self.end = self.cur + self.collision_count(child)
+                return True
+            self.depth -= 1
+            self.path.pop()
+        return False
+
+    def values(self, node):
+        return node.dereference()['impl']['d']['data']['inner']['values'].dereference()['d']['buffer'].address.cast(self.T_ptr)
+
+    def children(self, node):
+        return node.dereference()['impl']['d']['data']['inner']['buffer'].address.cast(self.node_ptr_ptr)
+
+    def datamap(self, node):
+        return node.dereference()['impl']['d']['data']['inner']['datamap']
+
+    def nodemap(self, node):
+        return node.dereference()['impl']['d']['data']['inner']['nodemap']
+
+    def collision_count(self, node):
+        return node.dereference()['impl']['d']['data']['collision']['count']
+
+    def collisions(self, node):
+        return node.dereference()['impl']['d']['data']['collision']['buffer'].address.cast(self.T_ptr)
+
+class MapIter(ChampIter):
+    def __init__(self, val):
+        self.T_ptr = gdb.lookup_type("std::pair<KElem, KElem>").pointer()
+        ChampIter.__init__(self, val)
+
+class SetIter(ChampIter):
+    def __init__(self, val):
+        self.T_ptr = gdb.lookup_type("KElem").pointer()
+        ChampIter.__init__(self, val)
 
 
 def mapCode(code):
@@ -280,9 +380,11 @@ class termPrinter:
         self.string_ptr = gdb.lookup_type("string").pointer()
         self.block_ptr = gdb.lookup_type("block").pointer()
         self.block_ptr_ptr = gdb.lookup_type("block").pointer().pointer()
+        self.mpz_ptr = gdb.lookup_type("__mpz_struct").pointer()
         self.mpz_ptr_ptr = gdb.lookup_type("__mpz_struct").pointer().pointer()
         self.map_ptr = gdb.lookup_type("map").pointer()
-        self.list_ptr = gdb.lookup_type("List").pointer()
+        self.list_ptr = gdb.lookup_type("list").pointer()
+        self.set_ptr = gdb.lookup_type("set").pointer()
 
     def getSymbolNameForTag(self, tag):
         return gdb.lookup_global_symbol("table_getSymbolNameForTag").value()[tag]
@@ -302,6 +404,12 @@ class termPrinter:
                 self.append(self.val, False)
             elif self.cat == "list":
                 self.appendList(self.val.cast(self.list_ptr))
+            elif self.cat == "set":
+                self.appendSet(self.val.cast(self.set_ptr))
+            elif self.cat == "map":
+                self.appendMap(self.val.cast(self.map_ptr))
+            elif self.cat == "int":
+                self.appendInt(self.val.cast(self.mpz_ptr))
             self.var_names = {}
             self.used_var_name = set()
             return self.result
@@ -348,19 +456,39 @@ class termPrinter:
             self.result += ")"
 
     def appendMap(self, val):
-        length = val.dereference()['a']
+        length = val.dereference()['impl_']['size']
         if length == 0:
             self.result += "`.Map`(.KList)"
             return
         i = 1
-        for key in MapIter(val):
-            value = gdb.lookup_global_symbol("hook_MAP_lookup").value()(val, key)
+        for entry in MapIter(val):
+            key = entry['first']['elem']
+            value = entry['second']['elem']
             if i < length:
                 self.result += "`_Map_`("
             self.result += "`_|->_`("
             self.append(key.cast(self.block_ptr), False)
             self.result += ","
             self.append(value.cast(self.block_ptr), False)
+            self.result += ")"
+            if i < length:
+                self.result += ","
+            i += 1
+        for i in range(length-1):
+            self.result += ")"
+
+    def appendSet(self, val):
+        length = val.dereference()['impl_']['size']
+        if length == 0:
+            self.result += "`.Set`(.KList)"
+            return
+        i = 1
+        for entry in SetIter(val):
+            elem = entry['elem']
+            if i < length:
+                self.result += "`_Set_`("
+            self.result += "`SetItem`("
+            self.append(elem.cast(self.block_ptr), False)
             self.result += ")"
             if i < length:
                 self.result += ","
@@ -464,4 +592,10 @@ def kllvm_lookup_function(val):
             return termPrinter(val, "block")
         elif t.target().tag == "list":
             return termPrinter(val, "list")
+        elif t.target().tag == "map":
+            return termPrinter(val, "map")
+        elif t.target().tag == "set":
+            return termPrinter(val, "set")
+        elif t.target().tag == "__mpz_struct":
+            return termPrinter(val, "int")
     return None
