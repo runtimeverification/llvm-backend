@@ -378,6 +378,8 @@ class termPrinter:
         self.cat = cat
         self.long_int = gdb.lookup_type("long int")
         self.string_ptr = gdb.lookup_type("string").pointer()
+        self.stringbuffer_ptr = gdb.lookup_type("stringbuffer").pointer()
+        self.stringbuffer_ptr_ptr = gdb.lookup_type("stringbuffer").pointer().pointer()
         self.block_ptr = gdb.lookup_type("block").pointer()
         self.block_ptr_ptr = gdb.lookup_type("block").pointer().pointer()
         self.mpz_ptr = gdb.lookup_type("__mpz_struct").pointer()
@@ -410,12 +412,18 @@ class termPrinter:
                 self.appendMap(self.val.cast(self.map_ptr))
             elif self.cat == "int":
                 self.appendInt(self.val.cast(self.mpz_ptr))
+            elif self.cat == "stringbuffer":
+                self.appendStringBuffer(self.val.cast(self.stringbuffer_ptr))
             self.var_names = {}
             self.used_var_name = set()
             return self.result
         except:
              print(traceback.format_exc())
              raise
+
+    def appendStringBuffer(self, val):
+        string = val.dereference()['contents'].dereference()['data'].string()
+        self.result += "#token(\"" + string + "\",\"StringBuffer\")"
 
     def appendLimbs(self, size, ptr):
         accum = 0
@@ -596,6 +604,8 @@ def kllvm_lookup_function(val):
             return termPrinter(val, "map")
         elif t.target().tag == "set":
             return termPrinter(val, "set")
+        elif t.target().tag == "stringbuffer":
+            return termPrinter(val, "stringbuffer")
         elif t.target().tag == "__mpz_struct":
             return termPrinter(val, "int")
     return None
