@@ -11,9 +11,6 @@ RUN groupadd -g $GROUP_ID user && \
 
 USER $USER_ID:$GROUP_ID
 
-ADD install-rust rust-checksum /home/user/
-RUN cd /home/user/ && ./install-rust
-
 ADD matching/pom.xml /home/user/.tmp-maven/
 RUN    cd /home/user/.tmp-maven \
     && mvn dependency:go-offline

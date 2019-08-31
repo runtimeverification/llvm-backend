@@ -15,9 +15,7 @@ cd build
 cmake .. -DCMAKE_BUILD_TYPE=Debug
 make -j`nproc`
 make run-unittests
-cd ../runtime/datastructures
-cargo test
-cd ../../matching
+cd ../matching
 mvn verify -U
 cd ../build
 

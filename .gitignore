@@ -34,9 +34,8 @@ a.out
 build/
 bin/llvm-kompile-matching
 
-# Rust stuff
+# Maven stuff
 target/
-rustc-1.34.0-src/
 
 # Haskell tags
 TAGS

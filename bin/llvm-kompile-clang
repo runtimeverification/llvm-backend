@@ -55,19 +55,6 @@ fi
   "$LIBDIR"/libstrings.a \
   "$LIBDIR"/libio.a \
   "$LIBDIR"/libcollections.a \
-  "$LIBDIR"/rust/libdatastructures.rlib \
-  "$LIBDIR"/rust/deps/libim_rc-*.rlib \
-  "$LIBDIR"/rust/deps/liblibc-*.rlib \
-  "$LIBDIR"/rust/deps/libsized_chunks-*.rlib \
-  "$LIBDIR"/rust/deps/libtypenum-*.rlib \
-  "$LIBDIR"/rust/deps/stdlib/libstd-*.rlib \
-  "$LIBDIR"/rust/deps/stdlib/libcore-*.rlib \
-  "$LIBDIR"/rust/deps/stdlib/liballoc-*.rlib \
-  "$LIBDIR"/rust/deps/stdlib/libunwind-*.rlib \
-  "$LIBDIR"/rust/deps/stdlib/libcompiler_builtins-*.rlib \
-  "$LIBDIR"/rust/deps/stdlib/libpanic_abort-*.rlib \
-  "$LIBDIR"/rust/deps/stdlib/libbacktrace_sys-*.rlib \
-  "$LIBDIR"/rust/deps/stdlib/librustc_demangle-*.rlib \
   "$LIBDIR"/libParser.a \
   "$LIBDIR"/libAST.a \
   "$LIBDIR"/liballoc.a \
