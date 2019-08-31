@@ -183,7 +183,6 @@ configure_file(runtime/getTag.ll runtime @ONLY)
 configure_file(runtime/hash.ll runtime @ONLY)
 configure_file(runtime/move_float.ll runtime @ONLY)
 configure_file(runtime/move_int.ll runtime @ONLY)
-configure_file(runtime/rustalloc.ll runtime @ONLY)
 configure_file(runtime/string_equal.ll runtime @ONLY)
 configure_file(runtime/take_steps.ll runtime @ONLY)
 
