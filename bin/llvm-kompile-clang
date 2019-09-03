@@ -48,7 +48,7 @@ else
   done
 fi
 
-@CMAKE_CXX_COMPILER@ -Wno-override-module $lang "$modopt" "${files[@]}" -x none \
+@CMAKE_CXX_COMPILER@ -Wno-override-module -Wno-return-type-c-linkage $lang "$modopt" "${files[@]}" -x none \
   "$LIBDIR"/libarithmetic.a \
   "$MAINFILES" \
   "$LIBDIR"/libconfigurationparser.a \
