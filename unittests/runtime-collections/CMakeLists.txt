@@ -1,6 +1,7 @@
 add_kllvm_unittest(runtime-collections-tests
   lists.cpp
   maps.cpp
+  sets.cpp
   main.cpp
 )
 

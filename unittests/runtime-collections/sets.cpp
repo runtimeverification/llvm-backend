@@ -35,7 +35,6 @@ BOOST_AUTO_TEST_SUITE(SetTest)
     auto set = hook_SET_unit();
     auto result = hook_SET_size(&set);
     BOOST_CHECK_EQUAL(__gmpz_cmp_ui(result, 0), 0);
-    free_int(result);
   }
 
   BOOST_AUTO_TEST_CASE(concat) {
@@ -44,7 +43,6 @@ BOOST_AUTO_TEST_SUITE(SetTest)
     auto set = hook_SET_concat(&s1, &s2);
     auto result = hook_SET_size(&set);
     BOOST_CHECK_EQUAL(__gmpz_cmp_ui(result, 2), 0);
-    free_int(result);
   }
 
   BOOST_AUTO_TEST_CASE(difference) {
@@ -54,11 +52,10 @@ BOOST_AUTO_TEST_SUITE(SetTest)
     auto set = hook_SET_difference(&s1, &s2);
     auto result = hook_SET_size(&set);
     BOOST_CHECK_EQUAL(__gmpz_cmp_ui(result, 0), 0);
-    auto s1 = hook_SET_concat(&s1, &s3);
-    auto set = hook_SET_difference(&s1, &s3);
-    auto result = hook_SET_size(&set);
+    s1 = hook_SET_concat(&s1, &s3);
+    set = hook_SET_difference(&s1, &s3);
+    result = hook_SET_size(&set);
     BOOST_CHECK_EQUAL(__gmpz_cmp_ui(result, 1), 0);
-    free_int(result);
   }
 
   BOOST_AUTO_TEST_CASE(inclusion) {
@@ -66,8 +63,8 @@ BOOST_AUTO_TEST_SUITE(SetTest)
     auto s2 = hook_SET_element(DUMMY1);
     auto result = hook_SET_inclusion(&s1, &s2);
     BOOST_CHECK(!result);
-    auto s2 = hook_SET_concat(&s2, &s1);
-    auto result = hook_SET_inclusion(&s1, &s2);
+    s2 = hook_SET_concat(&s2, &s1);
+    result = hook_SET_inclusion(&s1, &s2);
     BOOST_CHECK(result);
   }
 
@@ -75,46 +72,42 @@ BOOST_AUTO_TEST_SUITE(SetTest)
     auto s1 = hook_SET_element(DUMMY0);
     auto s2 = hook_SET_element(DUMMY1);
     auto s3 = hook_SET_element(DUMMY2);
-    auto s3 = hook_SET_concat(&s3, &s1);
+    s3 = hook_SET_concat(&s3, &s1);
     auto set = hook_SET_intersection(&s1, &s2);
     auto result = hook_SET_size(&set);
     BOOST_CHECK_EQUAL(__gmpz_cmp_ui(result, 0), 0);
-    auto s1 = hook_SET_concat(&s1, &s2);
-    auto set = hook_SET_intersection(&s1, &s3);
-    auto result = hook_SET_size(&set);
+    s1 = hook_SET_concat(&s1, &s2);
+    set = hook_SET_intersection(&s1, &s3);
+    result = hook_SET_size(&set);
     BOOST_CHECK_EQUAL(__gmpz_cmp_ui(result, 1), 0);
-    auto set = hook_SET_intersection(&s3, &s1);
-    auto result = hook_SET_size(&set);
+    set = hook_SET_intersection(&s3, &s1);
+    result = hook_SET_size(&set);
     BOOST_CHECK_EQUAL(__gmpz_cmp_ui(result, 1), 0);
-    auto set = hook_SET_intersection(&s2, &s2);
-    auto result = hook_SET_size(&set);
+    set = hook_SET_intersection(&s2, &s2);
+    result = hook_SET_size(&set);
     BOOST_CHECK_EQUAL(__gmpz_cmp_ui(result, 1), 0);
-    free_int(result);
   }
 
   BOOST_AUTO_TEST_CASE(set2list) {
     auto set = hook_SET_element(DUMMY0);
     auto set2 = hook_SET_element(DUMMY1);
-    auto set = hook_SET_concat(&set, &set2);
-    auto set2 = hook_SET_element(DUMMY2);
-    auto set = hook_SET_concat(&set, &set2);
+    set = hook_SET_concat(&set, &set2);
+    set2 = hook_SET_element(DUMMY2);
+    set = hook_SET_concat(&set, &set2);
     auto list = hook_SET_set2list(&set);
-    BOOST_CHECK_EQUAL((list).len(), 3);
+    BOOST_CHECK_EQUAL(list.size(), 3);
   }
 
   BOOST_AUTO_TEST_CASE(list2set) {
-    auto list = list();
-    list.push_back(DUMMY0);
-    list.push_back(DUMMY1);
-    list.push_back(DUMMY2);
-    auto set = hook_SET_list2set(&list);
+    auto l = list{DUMMY0, DUMMY1, DUMMY2};
+    auto set = hook_SET_list2set(&l);
     auto result = hook_SET_size(&set);
     BOOST_CHECK_EQUAL(__gmpz_cmp_ui(result, 3), 0);
     auto contains = hook_SET_in(DUMMY0, &set);
     BOOST_CHECK(contains);
-    auto contains = hook_SET_in(DUMMY1, &set);
+    contains = hook_SET_in(DUMMY1, &set);
     BOOST_CHECK(contains);
-    auto contains = hook_SET_in(DUMMY2, &set);
+    contains = hook_SET_in(DUMMY2, &set);
     BOOST_CHECK(contains);
   }
 
@@ -123,8 +116,8 @@ BOOST_AUTO_TEST_SUITE(SetTest)
     auto set2 = hook_SET_element(DUMMY1);
     auto result = hook_SET_eq(&set, &set2);
     BOOST_CHECK(!result);
-    auto set2 = hook_SET_element(DUMMY0);
-    auto result = hook_SET_eq(&set, &set2);
+    set2 = hook_SET_element(DUMMY0);
+    result = hook_SET_eq(&set, &set2);
     BOOST_CHECK(result);
   }
 
