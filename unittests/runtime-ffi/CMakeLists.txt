@@ -10,6 +10,7 @@ link_directories(../unittests/runtime-ffi/lib)
 target_link_libraries(runtime-ffi-tests
   PUBLIC
   ffitest
+  collections
   meta
   ffi
   io

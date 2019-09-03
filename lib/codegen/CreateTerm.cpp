@@ -62,10 +62,10 @@ target triple = "x86_64-unknown-linux-gnu"
 
 %string = type { %blockheader, [0 x i8] } ; 10-bit layout, 4-bit gc flags, 10 unused bits, 40-bit length (or buffer capacity for string pointed by stringbuffers), bytes
 %stringbuffer = type { i64, i64, %string* } ; 10-bit layout, 4-bit gc flags, 10 unused bits, 40-bit length, string length, current contents
-%map = type { i64, i8 *, i8 * } ; im::hashmap::HashMap
-%set = type { i8 *, i8 *, i64 } ; im::hashset::HashSet
-%iter = type { i64, { { i64 *, i64 }, i64 }, { { i64, i32 }, i8 * }, { i64, [3 x i64] } } ; im::nodes::hamt::Iter
-%list = type { i64, [7 x i64] } ; im::vector::Vector
+%map = type { i8 *, i64 } ; immer::map
+%set = type { i8 *, i64 } ; immer::set
+%iter = type { { i8 *, i8 *, i32, [13 x i8**] }, { i8 *, i64 } } ; immer::map_iter / immer::set_iter
+%list = type { i64, i32, i8 *, i8 * } ; immer::flex_vector
 %mpz = type { i32, i32, i64 * } ; mpz_t
 %mpz_hdr = type { %blockheader, %mpz } ; 10-bit layout, 4-bit gc flags, 10 unused bits, 40-bit length, mpz_t
 %floating = type { i64, { i64, i32, i64, i64 * } } ; exp, mpfr_t
@@ -471,10 +471,12 @@ llvm::Value *CreateTerm::createFunctionCall(std::string name, KOREObjectComposit
 llvm::Value *CreateTerm::createFunctionCall(std::string name, ValueType returnCat, std::vector<llvm::Value *> &args, bool sret, bool fastcc) {
   llvm::Type *returnType = getValueType(returnCat, Module);
   std::vector<llvm::Type *> types;
+  bool collection = false;
   switch (returnCat.cat) {
   case SortCategory::Map:
   case SortCategory::List:
   case SortCategory::Set:
+    collection = true;
     break;
   default:
     sret = false; 
@@ -491,6 +493,8 @@ llvm::Value *CreateTerm::createFunctionCall(std::string name, ValueType returnCa
     args.insert(args.begin(), AllocSret);
     types.insert(types.begin(), AllocSret->getType());
     returnType = llvm::Type::getVoidTy(Ctx);
+  } else if (collection) {
+    returnType = llvm::PointerType::getUnqual(returnType);
   }
  
   llvm::FunctionType *funcType = llvm::FunctionType::get(returnType, types, false);
@@ -646,8 +650,7 @@ bool makeFunction(std::string name, KOREPattern *pattern, KOREDefinition *defini
         return false;
       }
       auto cat = sort->getCategory(definition);
-      llvm::Type *varType = getValueType(cat, Module);
-      llvm::Type *paramType = varType;
+      llvm::Type *paramType = getValueType(cat, Module);
       debugArgs.push_back(getDebugType(cat));
       switch(cat.cat) {
       case SortCategory::Map:
@@ -664,7 +667,17 @@ bool makeFunction(std::string name, KOREPattern *pattern, KOREDefinition *defini
       paramNames.push_back(entry.first);
     }
     ValueType returnCat = termType(pattern, params, definition);
-    llvm::FunctionType *funcType = llvm::FunctionType::get(getValueType(returnCat, Module), paramTypes, false);
+    auto returnType = getValueType(returnCat, Module);
+    switch(returnCat.cat) {
+    case SortCategory::Map:
+    case SortCategory::List:
+    case SortCategory::Set:
+      returnType = llvm::PointerType::getUnqual(returnType);
+      break;
+    default:
+      break;
+    }
+    llvm::FunctionType *funcType = llvm::FunctionType::get(returnType, paramTypes, false);
     llvm::Constant *func = Module->getOrInsertFunction(name, funcType);
     llvm::Function *applyRule = llvm::dyn_cast<llvm::Function>(func);
     initDebugAxiom(axiom->getAttributes());
@@ -693,8 +706,10 @@ bool makeFunction(std::string name, KOREPattern *pattern, KOREDefinition *defini
     }
     CreateTerm creator = CreateTerm(subst, definition, block, Module, false);
     llvm::Value *retval = creator(pattern).first;
-    if (retval->getType() == llvm::PointerType::getUnqual(funcType->getReturnType())) {
-      retval = new llvm::LoadInst(retval, "", creator.getCurrentBlock());
+    if (funcType->getReturnType() == llvm::PointerType::getUnqual(retval->getType())) {
+      auto tempAlloc = allocateTerm(retval->getType(), creator.getCurrentBlock(), "koreAllocAlwaysGC");
+      new llvm::StoreInst(retval, tempAlloc, creator.getCurrentBlock());
+      retval = tempAlloc;
     }
     if (bigStep) {
       llvm::Type *blockType = getValueType({SortCategory::Symbol, 0}, Module);
@@ -734,8 +749,7 @@ std::string makeApplyRuleFunction(KOREAxiomDeclaration *axiom, KOREDefinition *d
         return "";
       }
       auto cat = sort->getCategory(definition);
-      llvm::Type *varType = getValueType(cat, Module);
-      llvm::Type *paramType = varType;
+      llvm::Type *paramType = getValueType(cat, Module);
       debugArgs.push_back(getDebugType(cat));
       switch(cat.cat) {
       case SortCategory::Map:

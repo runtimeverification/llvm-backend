@@ -2,6 +2,7 @@
 #include<gmp.h>
 #include<mpfr.h>
 #include<cstdint>
+#include<cstdio>
 #include<cstdlib>
 #include<cstring>
 #include<vector>
@@ -9,8 +10,6 @@
 
 #include "runtime/header.h"
 #include "runtime/alloc.h"
-
-#include "stdio.h"
 
 #define KCHAR char
 #define TYPETAG(type) "Lbl'Hash'" #type "{}"
@@ -50,13 +49,28 @@ extern "C" {
     return (uint64_t) kitem;
   }
 
-   bool hook_KEQUAL_eq(block * lhs, block * rhs) {
-    return lhs == rhs;
+  bool hash_enter(void) {
+    return true;
+  }
+
+  void hash_exit(void) {}
+
+  void k_hash(block *, void *) {}
+
+  bool during_gc() {
+    return false;
+  }
+
+  void printConfigurationInternal(writer *file, block *subject, const char *sort, bool) {}
+  void sfprintf(writer *, const char *, ...) {}
+
+  bool hook_KEQUAL_eq(block * lhs, block * rhs) {
+    return lhs->h.hdr == rhs->h.hdr;
   }
 
   mpz_ptr hook_FFI_address(string * fn);
-  string * hook_FFI_call(mpz_t addr, struct list * args, struct list * types, block * ret);
-  string * hook_FFI_call_variadic(mpz_t addr, struct list * args, struct list * fixtypes, struct list * vartypes, block * ret);
+  string * hook_FFI_call(mpz_t addr, list * args, list * types, block * ret);
+  string * hook_FFI_call_variadic(mpz_t addr, list * args, list * fixtypes, list * vartypes, block * ret);
 
   mpz_ptr hook_FFI_bytes_address(string * bytes);
   block * hook_FFI_free(block * kitem);
@@ -66,34 +80,11 @@ extern "C" {
 
   string * makeString(const KCHAR *, int64_t len = -1);
 
-  struct list hook_LIST_element(block * value) {
-    struct list l;
-    l.a = (uint64_t)(koreAlloc(sizeof(std::vector<block *>)));
-    ((std::vector<block *> *)l.a)->push_back(value);
-    return l;
-  }
-
-  struct list hook_LIST_concat(struct list l1, struct list l2) {
-    struct list l;
-    l.a = (uint64_t)(koreAlloc(sizeof(std::vector<block *>)));
-    ((std::vector<block *> *)l.a)->insert(((std::vector<block *> *)l.a)->end(),((std::vector<block *> *)l1.a)->begin(), ((std::vector<block *> *)l1.a)->end());
-    ((std::vector<block *> *)l.a)->insert(((std::vector<block *> *)l.a)->end(),((std::vector<block *> *)l2.a)->begin(), ((std::vector<block *> *)l2.a)->end());
-    return l;
-  }
-
-  struct list hook_LIST_unit() {
-    struct list l;
-    l.a = (uint64_t)(koreAlloc(sizeof(std::vector<block *>)));
-    return l;
-  }
-
-  size_t hook_LIST_size_long(struct list * l) {
-    return ((std::vector<block *> *)l->a)->size();
-  }
-
-  block * hook_LIST_get(struct list * l, int idx) {
-    return ((std::vector<block *> *) l->a)->at(idx);
-  }
+  list hook_LIST_element(block * value);
+  list hook_LIST_concat(list * l1, list * l2);
+  list hook_LIST_unit();
+  size_t hook_LIST_size_long(list * l);
+  block * hook_LIST_get_long(list * l, ssize_t idx);
 
   mpz_ptr move_int(mpz_t i) {
     mpz_ptr result = (mpz_ptr)malloc(sizeof(__mpz_struct));
@@ -106,6 +97,9 @@ extern "C" {
     *result = *i;
     return result;
   }
+
+  block D1 = {{1}};
+  block * DUMMY1 = &D1;
 }
 
 BOOST_AUTO_TEST_SUITE(FfiTest)
@@ -149,14 +143,14 @@ BOOST_AUTO_TEST_CASE(call) {
   xarg->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("inj{SortBytes{}}"));
   memcpy(xarg->children, &xargstr, sizeof(string *));
 
-  struct list args = hook_LIST_element(xarg);
+  list args = hook_LIST_element(xarg);
   block * type_sint = (block *)((((uint64_t)getTagForSymbolName(TYPETAG(sint))) << 32) | 1);
 
   block * argtype = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(block *)));
   argtype->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("inj{SortFFIType{}}"));
   memcpy(argtype->children, &type_sint, sizeof(block *));
 
-  struct list types = hook_LIST_element(argtype);
+  list types = hook_LIST_element(argtype);
 
   string * fn = makeString("timesTwo");
   mpz_ptr addr = hook_FFI_address(fn);
@@ -202,10 +196,10 @@ BOOST_AUTO_TEST_CASE(call) {
   yarg->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("inj{SortBytes{}}"));
   memcpy(yarg->children, &yargstr, sizeof(string *));
 
-  struct list yargs = hook_LIST_element(yarg);
+  list yargs = hook_LIST_element(yarg);
 
-  args = hook_LIST_concat(args, yargs);
-  types = hook_LIST_concat(types, types);
+  args = hook_LIST_concat(&args, &yargs);
+  types = hook_LIST_concat(&types, &types);
 
   fn = makeString("times");
   addr = hook_FFI_address(fn);
@@ -218,11 +212,12 @@ BOOST_AUTO_TEST_CASE(call) {
   block * structType = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(block *)));
   structType->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName(TYPETAG(struct)));
 
-  struct list * structFields = static_cast<struct list *>(koreAlloc(sizeof(struct list)));
-  *structFields = hook_LIST_element(argtype);
-  *structFields = hook_LIST_concat(*structFields, *structFields);
+  list * structFields = static_cast<list *>(koreAlloc(sizeof(list)));
+  list tmp = hook_LIST_element(argtype);
+  tmp = hook_LIST_concat(&tmp, &tmp);
+  memcpy(structFields, &tmp, sizeof(list));
 
-  memcpy(structType->children, &structFields, sizeof(struct list *));
+  memcpy(structType->children, &structFields, sizeof(list *));
 
   fn = makeString("constructPoint");
   addr = hook_FFI_address(fn);
@@ -300,10 +295,11 @@ BOOST_AUTO_TEST_CASE(call) {
   structArgType->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("inj{SortFFIType{}}"));
   memcpy(structArgType->children, &structType, sizeof(block *));
 
-  struct list * structFields2 = static_cast<struct list *>(koreAlloc(sizeof(struct list)));
-  *structFields2 = hook_LIST_element(structArgType);
+  list * structFields2 = static_cast<list *>(koreAlloc(sizeof(list)));
+  list tmp2 = hook_LIST_element(structArgType);
+  memcpy(structFields2, &tmp2, sizeof(list));
 
-  memcpy(structType2->children, &structFields2, sizeof(struct list *));
+  memcpy(structType2->children, &structFields2, sizeof(list *));
   
   memcpy(new_argtype->children, &structType2, sizeof(block *));
   types = hook_LIST_element(new_argtype);
@@ -324,10 +320,9 @@ BOOST_AUTO_TEST_CASE(call) {
 
   /* int pointerTest(int * x) */
   x = 2;
-  block * i1 = (block *) 1;
   mpz_t s1;
   mpz_init_set_ui(s1, sizeof(int));
-  string * b1 = hook_FFI_alloc(i1, s1);
+  string * b1 = hook_FFI_alloc(DUMMY1, s1);
   memcpy(b1->data, &x, sizeof(int));
 
   mpz_ptr addr1 = hook_FFI_bytes_address(b1);
@@ -351,7 +346,7 @@ BOOST_AUTO_TEST_CASE(call) {
 
   bytes = hook_FFI_call(addr, &args, &types, type_sint);
 
-  hook_FFI_free(i1);
+  hook_FFI_free(DUMMY1);
 
   BOOST_CHECK(bytes != NULL);
 
@@ -369,7 +364,7 @@ BOOST_AUTO_TEST_CASE(call_variadic) {
   narg->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("inj{SortBytes{}}"));
   memcpy(narg->children, &nargstr, sizeof(string *));
 
-  struct list args = hook_LIST_element(narg);
+  list args = hook_LIST_element(narg);
 
   int arg1 = 1;
   string * arg1str = makeString((char *) &arg1, sizeof(int)); 
@@ -378,9 +373,9 @@ BOOST_AUTO_TEST_CASE(call_variadic) {
   arg1block->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("inj{SortBytes{}}"));
   memcpy(arg1block->children, &arg1str, sizeof(string *));
 
-  struct list arg1list = hook_LIST_element(arg1block);
+  list arg1list = hook_LIST_element(arg1block);
 
-  args = hook_LIST_concat(args, arg1list);
+  args = hook_LIST_concat(&args, &arg1list);
 
   block * type_sint = (block *)((((uint64_t)getTagForSymbolName(TYPETAG(sint))) << 32) | 1);
 
@@ -392,8 +387,8 @@ BOOST_AUTO_TEST_CASE(call_variadic) {
   varargtype->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("inj{SortFFIType{}}"));
   memcpy(varargtype->children, &type_sint, sizeof(block *));
 
-  struct list fixtypes = hook_LIST_element(fixargtype);
-  struct list vartypes = hook_LIST_element(varargtype);
+  list fixtypes = hook_LIST_element(fixargtype);
+  list vartypes = hook_LIST_element(varargtype);
 
   string * fn = makeString("addInts");
   mpz_ptr addr = hook_FFI_address(fn);
@@ -416,7 +411,7 @@ BOOST_AUTO_TEST_CASE(call_variadic) {
   arg1str = makeString((char *) &arg1, sizeof(int));
   memcpy(arg1block->children, &arg1str, sizeof(string *));
   arg1list = hook_LIST_element(arg1block);
-  args = hook_LIST_concat(args, arg1list);
+  args = hook_LIST_concat(&args, &arg1list);
 
   int arg2 = 15;
   string * arg2str = makeString((char *) &arg2, sizeof(int));
@@ -425,12 +420,12 @@ BOOST_AUTO_TEST_CASE(call_variadic) {
   arg2block->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("inj{SortBytes{}}"));
   memcpy(arg2block->children, &arg2str, sizeof(string *));
 
-  struct list arg2list = hook_LIST_element(arg2block);
+  list arg2list = hook_LIST_element(arg2block);
 
-  args = hook_LIST_concat(args, arg2list);
+  args = hook_LIST_concat(&args, &arg2list);
 
   vartypes = hook_LIST_element(varargtype);
-  vartypes = hook_LIST_concat(vartypes, vartypes);
+  vartypes = hook_LIST_concat(&vartypes, &vartypes);
 
   bytes = hook_FFI_call_variadic(addr, &args, &fixtypes, &vartypes, type_sint);
 
@@ -458,45 +453,41 @@ BOOST_AUTO_TEST_CASE(call_variadic) {
 }
 
 BOOST_AUTO_TEST_CASE(alloc) {
-  block * i1 = (block *) 1;
   mpz_t s1;
   mpz_init_set_ui(s1, 1);
 
-  string * b1 = hook_FFI_alloc(i1, s1);
+  string * b1 = hook_FFI_alloc(DUMMY1, s1);
   BOOST_CHECK(0 != b1);
 
-  string * b2 = hook_FFI_alloc(i1, s1);
+  string * b2 = hook_FFI_alloc(DUMMY1, s1);
   BOOST_CHECK_EQUAL(b1, b2);
 }
 
 BOOST_AUTO_TEST_CASE(free) {
-  block * i1 = (block *) 1;
   mpz_t s1;
   mpz_init_set_ui(s1, 1);
 
-  hook_FFI_alloc(i1, s1);
-  hook_FFI_free(i1);
+  hook_FFI_alloc(DUMMY1, s1);
+  hook_FFI_free(DUMMY1);
 }
 
 BOOST_AUTO_TEST_CASE(bytes_ref) {
-  block * i1 = (block *) 1;
   mpz_t s1;
   mpz_init_set_ui(s1, 1);
 
-  string * b1 = hook_FFI_alloc(i1, s1);
+  string * b1 = hook_FFI_alloc(DUMMY1, s1);
 
   block * i2 = hook_FFI_bytes_ref(b1);
 
-  BOOST_CHECK_EQUAL(i1, i2);
+  BOOST_CHECK_EQUAL(DUMMY1, i2);
 }
 
 BOOST_AUTO_TEST_CASE(allocated) {
-  block * i1 = (block *) 1;
   mpz_t s1;
   mpz_init_set_ui(s1, 1);
 
-  hook_FFI_alloc(i1, s1);
-  BOOST_CHECK_EQUAL(true, hook_FFI_allocated(i1));
+  hook_FFI_alloc(DUMMY1, s1);
+  BOOST_CHECK_EQUAL(true, hook_FFI_allocated(DUMMY1));
 
   block * i2 = (block *) 2;
   BOOST_CHECK_EQUAL(false, hook_FFI_allocated(i2));

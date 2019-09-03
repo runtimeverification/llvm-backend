@@ -13,7 +13,6 @@
 
 extern "C" {
 
-  uint64_t hash_k(block *);
   bool hook_KEQUAL_eq(block *, block *);
 
 #define KCHAR char
@@ -27,12 +26,6 @@ extern "C" {
   return tag; \
 }
 
-  struct KHash {
-    size_t operator() (block * const& kitem) const {
-      return hash_k(kitem);
-    }
-  };
-
   struct KEq {
     bool operator() (block * const& lhs, block * const& rhs) const {
       return hook_KEQUAL_eq(lhs, rhs);
@@ -43,7 +36,7 @@ extern "C" {
 
   thread_local static std::vector<ffi_type *> structTypes;
 
-  static std::unordered_map<block *, string *, KHash, KEq> allocatedKItemPtrs;
+  static std::unordered_map<block *, string *, HashBlock, KEq> allocatedKItemPtrs;
   static std::map<string *, block *> allocatedBytesRefs;
 
   TAG_TYPE(void)
@@ -71,8 +64,8 @@ extern "C" {
   mpz_ptr move_int(mpz_t);
   char * getTerminatedString(string * str);
 
-  size_t hook_LIST_size_long(struct list * l);
-  block * hook_LIST_get(struct list * l, int idx);
+  size_t hook_LIST_size_long(list * l);
+  block * hook_LIST_get_long(list * l, ssize_t idx);
 
   static void * so_lib_handle() {
     static void * handle = NULL;
@@ -136,7 +129,7 @@ extern "C" {
         return &ffi_type_pointer;
       }
     } else if (elem->h.hdr == (uint64_t)getTagForSymbolName(TYPETAG(struct))){
-      struct list * elements = (struct list *) *elem->children;
+      list * elements = (list *) *elem->children;
       size_t numFields = hook_LIST_size_long(elements);
       block * structField;
 
@@ -147,7 +140,7 @@ extern "C" {
       structType->elements = (ffi_type **) malloc(sizeof(ffi_type *) * (numFields + 1));
 
       for (int j = 0; j < numFields; j++) {
-        structField = hook_LIST_get(elements, j);
+        structField = hook_LIST_get_long(elements, j);
 
         if (structField->h.hdr != (uint64_t)getTagForSymbolName("inj{SortFFIType{}}")) {
           throw std::invalid_argument("Struct list contains invalid FFI type");
@@ -166,7 +159,7 @@ extern "C" {
     throw std::invalid_argument("Arg is not a supported type");
   }
 
-  string * ffiCall(bool isVariadic, mpz_t addr, struct list * args, struct list * fixtypes, struct list * vartypes, block * ret) {
+  string * ffiCall(bool isVariadic, mpz_t addr, list * args, list * fixtypes, list * vartypes, block * ret) {
     ffi_cif cif;
     ffi_type ** argtypes, * rtype;
     void (* address)(void);
@@ -193,7 +186,7 @@ extern "C" {
 
     block * elem;
     for (int i = 0; i < nfixtypes; i++) {
-        elem = hook_LIST_get(fixtypes, i);
+        elem = hook_LIST_get_long(fixtypes, i);
         if (elem->h.hdr != (uint64_t)getTagForSymbolName("inj{SortFFIType{}}")) {
           throw std::invalid_argument("Fix types list contains invalid FFI type");
         }
@@ -202,7 +195,7 @@ extern "C" {
     }
 
     for (int i = 0; i < nvartypes; i++) {
-        elem = hook_LIST_get(vartypes, i);
+        elem = hook_LIST_get_long(vartypes, i);
         if (elem->h.hdr != (uint64_t)getTagForSymbolName("inj{SortFFIType{}}")) {
           throw std::invalid_argument("Var types list contains invalid FFI type");
         }
@@ -212,7 +205,7 @@ extern "C" {
 
     void ** avalues = (void **) malloc(sizeof(void *) * nargs);
     for (int i = 0; i < nargs; i++) {
-        elem = hook_LIST_get(args, i);
+        elem = hook_LIST_get_long(args, i);
         if (elem->h.hdr != (uint64_t)getTagForSymbolName("inj{SortBytes{}}")) {
           throw std::invalid_argument("Args list contains non-bytes type");
         }
@@ -257,11 +250,11 @@ extern "C" {
     return rvalue;
   }
 
-  string * hook_FFI_call(mpz_t addr, struct list * args, struct list * types, block * ret) {
+  string * hook_FFI_call(mpz_t addr, list * args, list * types, block * ret) {
     return ffiCall(false, addr, args, types, NULL, ret);
   }
 
-  string * hook_FFI_call_variadic(mpz_t addr, struct list * args, struct list * fixtypes, struct list * vartypes, block * ret) {
+  string * hook_FFI_call_variadic(mpz_t addr, list * args, list * fixtypes, list * vartypes, block * ret) {
     return ffiCall(true, addr, args, fixtypes, vartypes, ret);
   }
 

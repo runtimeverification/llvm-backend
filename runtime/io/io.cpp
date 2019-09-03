@@ -563,7 +563,7 @@ extern "C" {
   block * hook_KREFLECTION_fresh(string * str) {
     throw std::invalid_argument("not implemented: KREFLECTION.fresh");
   }
-  struct list hook_KREFLECTION_argv() {
+  list hook_KREFLECTION_argv() {
     throw std::invalid_argument("not implemented: KREFLECTION.argv");
   }
 

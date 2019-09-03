@@ -3,6 +3,7 @@
 #include "runtime/header.h"
 #include "runtime/alloc.h"
 
+
 static thread_local string *var;
 static thread_local block *to_replace;
 static thread_local block *replacement;

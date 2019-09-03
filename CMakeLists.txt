@@ -20,7 +20,7 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 if(NOT CMAKE_BUILD_TYPE STREQUAL "DebugGcc")
-add_definitions(-Wall -Werror)
+add_definitions(-Wall -Werror -Wno-return-type-c-linkage)
 endif()
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-stack-protector")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-stack-protector")
@@ -127,13 +127,11 @@ configure_file(bin/llvm-kompile bin @ONLY)
 configure_file(bin/llvm-krun bin @ONLY)
 configure_file(bin/llvm-kompile-testing bin @ONLY)
 configure_file(bin/llvm-kompile-clang bin @ONLY)
-configure_file(bin/llvm-kompile-rust-lto bin @ONLY)
 
 install(
   PROGRAMS 
     ${CMAKE_CURRENT_BINARY_DIR}/bin/llvm-kompile
     ${CMAKE_CURRENT_BINARY_DIR}/bin/llvm-kompile-clang
-    ${CMAKE_CURRENT_BINARY_DIR}/bin/llvm-kompile-rust-lto
     ${CMAKE_CURRENT_BINARY_DIR}/bin/llvm-krun
   DESTINATION bin
 )
@@ -142,11 +140,17 @@ install(
   DIRECTORY include/runtime
   DESTINATION include
 )
+install(
+  DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/include/immer
+  DESTINATION include
+)
 
 install(
   DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/include/config
   DESTINATION include
 )
+
+file(COPY ${PROJECT_SOURCE_DIR}/deps/immer/immer DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/include)
 
 set(GC_INTERVAL 2000 CACHE STRING "Garbage collect every N steps")
 
@@ -177,7 +181,6 @@ configure_file(runtime/getTag.ll runtime @ONLY)
 configure_file(runtime/hash.ll runtime @ONLY)
 configure_file(runtime/move_float.ll runtime @ONLY)
 configure_file(runtime/move_int.ll runtime @ONLY)
-configure_file(runtime/rustalloc.ll runtime @ONLY)
 configure_file(runtime/string_equal.ll runtime @ONLY)
 configure_file(runtime/take_steps.ll runtime @ONLY)
 
