@@ -10,9 +10,10 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     export BISON_EXECUTABLE="/usr/local/opt/bison/bin/bison"
 fi
 
+rm -rf build
 mkdir -p build
 cd build
-cmake .. -DCMAKE_BUILD_TYPE=Debug
+cmake .. -DCMAKE_BUILD_TYPE=$1
 make -j`nproc`
 make run-unittests
 cd ../runtime/datastructures

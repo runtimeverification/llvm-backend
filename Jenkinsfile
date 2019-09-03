@@ -19,7 +19,9 @@ pipeline {
     stage('Build and Test') {
       steps {
         sh '''
-          ./ciscript
+          ./ciscript Debug
+          ./ciscript Release
+          ./ciscript RelWithDebInfo
         '''
       }
     }
