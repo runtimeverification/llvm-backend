@@ -61,6 +61,13 @@ void initDebugParam(llvm::Function *func, unsigned argNo, std::string name, Valu
     &func->getEntryBlock());
 }
 
+void initDebugGlobal(std::string name, llvm::DIType *type, llvm::GlobalVariable *var) {
+	if (!Dbg) return;
+	resetDebugLoc();
+	auto DbgExp = Dbg->createGlobalVariableExpression(DbgCU, name, name, DbgFile, DbgLine, type, false);
+	var->addDebugInfo(DbgExp);
+}
+
 static std::string SOURCE_ATT = "org'Stop'kframework'Stop'attributes'Stop'Source";
 static std::string LOCATION_ATT = "org'Stop'kframework'Stop'attributes'Stop'Location";
 
@@ -96,7 +103,7 @@ void resetDebugLoc(void) {
   DbgFile = DbgCU->getFile();
 }
 
-static llvm::DIType *getForwardDecl(std::string name) {
+llvm::DIType *getForwardDecl(std::string name) {
   if (!Dbg) return nullptr;
   auto Unit = Dbg->createFile(DbgFile->getFilename(), DbgFile->getDirectory());
   return Dbg->createForwardDecl(llvm::dwarf::DW_TAG_structure_type, name, DbgCU, Unit, 0);
@@ -106,40 +113,86 @@ static std::string MAP_STRUCT = "map";
 static std::string LIST_STRUCT = "list";
 static std::string SET_STRUCT = "set";
 static std::string INT_STRUCT = "__mpz_struct";
-static std::string FLOAT_STRUCT = "__mpfr_struct";
+static std::string FLOAT_STRUCT = "floating";
 static std::string BUFFER_STRUCT = "stringbuffer";
 static std::string BLOCK_STRUCT = "block";
 
 llvm::DIType *getDebugType(ValueType type) {
   if (!Dbg) return nullptr;
+  static bool init = false;
+  static llvm::DIType *map, *list, *set, *integer, *floating, *buffer, *boolean, *symbol;
+  if (!init) {
+    init = true;
+    map = getPointerDebugType(getForwardDecl(MAP_STRUCT));
+    list = getPointerDebugType(getForwardDecl(LIST_STRUCT));
+    set = getPointerDebugType(getForwardDecl(SET_STRUCT));
+    integer = getPointerDebugType(getForwardDecl(INT_STRUCT));
+    floating = getPointerDebugType(getForwardDecl(FLOAT_STRUCT));
+    buffer = getPointerDebugType(getForwardDecl(BUFFER_STRUCT));
+    boolean = Dbg->createBasicType("Bool", 8, llvm::dwarf::DW_ATE_boolean);
+    symbol = getPointerDebugType(getForwardDecl(BLOCK_STRUCT));
+  }
   switch(type.cat) {
   case SortCategory::Map:
-    return getForwardDecl(MAP_STRUCT);
+    return map;
   case SortCategory::List:
-    return getForwardDecl(LIST_STRUCT);
+    return list;
   case SortCategory::Set:
-    return getForwardDecl(SET_STRUCT);
+    return set;
   case SortCategory::Int:
-    return Dbg->createPointerType(getForwardDecl(INT_STRUCT), sizeof(size_t) * 8);
+    return integer;
   case SortCategory::Float:
-    return Dbg->createPointerType(getForwardDecl(FLOAT_STRUCT), sizeof(size_t) * 8);
+    return floating;
   case SortCategory::StringBuffer:
-    return Dbg->createPointerType(getForwardDecl(BUFFER_STRUCT), sizeof(size_t) * 8);
+    return buffer;
   case SortCategory::Bool:
-    return Dbg->createBasicType("Bool", 1, llvm::dwarf::DW_ATE_boolean);
+    return boolean;
   case SortCategory::MInt:
     return Dbg->createBasicType("MInt", type.bits, llvm::dwarf::DW_ATE_unsigned);
   case SortCategory::Symbol:
   case SortCategory::Variable:
-    return Dbg->createPointerType(getForwardDecl(BLOCK_STRUCT), sizeof(size_t) * 8);
+    return symbol;
   case SortCategory::Uncomputed:
     abort();
 
   }
 }
 
+llvm::DIType *getIntDebugType(void) {
+  if (!Dbg) return nullptr;
+  return Dbg->createBasicType("uint32_t", 32, llvm::dwarf::DW_ATE_unsigned);
+}
+
+llvm::DIType *getBoolDebugType(void) {
+  if (!Dbg) return nullptr;
+  return Dbg->createBasicType("bool", 8, llvm::dwarf::DW_ATE_boolean);
+}
+
+llvm::DIType *getCharPtrDebugType(void) {
+  if (!Dbg) return nullptr;
+  return Dbg->createPointerType(Dbg->createBasicType("char", 8, llvm::dwarf::DW_ATE_signed_char), sizeof(size_t) * 8);
+}
+
+llvm::DIType *getPointerDebugType(llvm::DIType *ty) {
+  if (!Dbg) return nullptr;
+  return Dbg->createPointerType(ty, sizeof(size_t) * 8);
+}
+
+llvm::DIType *getArrayDebugType(llvm::DIType *ty, size_t len, size_t align) {
+  if (!Dbg) return nullptr;
+  std::vector<llvm::Metadata *> subscripts;
+  auto arr = Dbg->getOrCreateArray(subscripts);
+  return Dbg->createArrayType(len, align, ty, arr);
+}
+
+llvm::DIType *getShortDebugType(void) {
+  if (!Dbg) return nullptr;
+  return Dbg->createBasicType("uint16_t", 16, llvm::dwarf::DW_ATE_unsigned);
+}
+
 llvm::DISubroutineType *getDebugFunctionType(llvm::Metadata *returnType, std::vector<llvm::Metadata *> argTypes) {
   if (!Dbg) return nullptr;
+  argTypes.insert(argTypes.begin(), returnType);
   return Dbg->createSubroutineType(Dbg->getOrCreateTypeArray(argTypes));
 }
 

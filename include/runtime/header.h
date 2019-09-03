@@ -75,12 +75,12 @@ extern "C" {
     floating f;
   } floating_hdr;
 
-  typedef struct {
+  typedef struct layoutitem {
     uint64_t offset;
     uint16_t cat;
   } layoutitem;
 
-  typedef struct {
+  typedef struct layout {
     uint8_t nargs;
     layoutitem *args;
   } layout;
