@@ -32,8 +32,8 @@ extern "C" {
   block D2 = {{1}, {}};
   block * DUMMY2 = &D2;
 
-  uint64_t hash_k(block * kitem) {
-    return (uint64_t) kitem;
+  size_t hash_k(block * kitem) {
+    return (size_t) kitem;
   }
 }
 

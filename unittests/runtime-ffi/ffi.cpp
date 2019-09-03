@@ -45,8 +45,8 @@ extern "C" {
 
   void add_hash64(void*, uint64_t) {}
 
-  uint64_t hash_k(block * kitem) {
-    return (uint64_t) kitem;
+  size_t hash_k(block * kitem) {
+    return (size_t) kitem;
   }
 
   bool hash_enter(void) {
