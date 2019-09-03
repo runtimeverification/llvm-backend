@@ -1,6 +1,6 @@
 import gdb.printing
 import traceback
-import time
+import decimal
 
 codes = {}
 codes["Spce"] = " "
@@ -44,7 +44,10 @@ BRANCHES = 32
 MASK = 31
 MAX_DEPTH=13
 
-MemoryPolicy = "immer::memory_policy<immer::heap_policy<kore_alloc_heap>, immer:::no_refcount_policy, immer::gc_transience_policy, false, false>"
+MPFR_EXP_MAX = 0x7fffffffffffffff
+MPFR_EXP_NAN = 1 - MPFR_EXP_MAX
+MPFR_EXP_ZERO = 0 - MPFR_EXP_MAX
+MPFR_EXP_INF = 2 - MPFR_EXP_MAX
 
 class Relaxed:
     def __init__(self, node, shift, relaxed, it):
@@ -384,6 +387,8 @@ class termPrinter:
         self.block_ptr_ptr = gdb.lookup_type("block").pointer().pointer()
         self.mpz_ptr = gdb.lookup_type("__mpz_struct").pointer()
         self.mpz_ptr_ptr = gdb.lookup_type("__mpz_struct").pointer().pointer()
+        self.floating_ptr = gdb.lookup_type("floating").pointer()
+        self.floating_ptr_ptr = gdb.lookup_type("floating").pointer().pointer()
         self.map_ptr = gdb.lookup_type("map").pointer()
         self.list_ptr = gdb.lookup_type("list").pointer()
         self.set_ptr = gdb.lookup_type("set").pointer()
@@ -412,6 +417,8 @@ class termPrinter:
                 self.appendMap(self.val.cast(self.map_ptr))
             elif self.cat == "int":
                 self.appendInt(self.val.cast(self.mpz_ptr))
+            elif self.cat == "floating":
+                self.appendFloat(self.val.cast(self.floating_ptr))
             elif self.cat == "stringbuffer":
                 self.appendStringBuffer(self.val.cast(self.stringbuffer_ptr))
             self.var_names = {}
@@ -421,16 +428,66 @@ class termPrinter:
              print(traceback.format_exc())
              raise
 
+    def appendFloat(self, val):
+        mpfr = val.dereference()['f'][0]
+        prec = int(mpfr['_mpfr_prec'])
+        expBits = int(val.dereference()['exp'])
+        if prec == 53 and expBits == 11:
+            suffix = ""
+        elif prec == 24 and expBits == 8:
+            suffix = "f"
+        else:
+            suffix = "p" + str(prec) + "x" + str(expBits)
+        exp = int(mpfr['_mpfr_exp'])
+        sign = mpfr['_mpfr_sign'] < 0
+        self.result += "#token(\""
+        if exp == MPFR_EXP_NAN:
+            self.result += "NaN" + suffix
+        elif exp == MPFR_EXP_INF:
+            if sign:
+                self.result += "-Infinity" + suffix
+            else:
+                self.result += "Infinity" + suffix
+        elif exp == MPFR_EXP_ZERO:
+            if sign:
+                self.result += "-0.0" + suffix
+            else:
+                self.result += "0.0" + suffix
+        else:
+            accum = 0
+            nlimbs = (prec + 63) // 64
+            ptr = mpfr['_mpfr_d']
+            for i in range(nlimbs-1,-1,-1):
+                accum <<= 64
+                limb = int(ptr[i])
+                accum |= limb
+            accum >>= 64 - prec % 64
+            numerator = accum
+            denominator = 1 << prec
+            if exp >= 0:
+                numerator <<= exp
+            else:
+                denominator <<= -exp
+            with decimal.localcontext() as ctx:
+                ctx.prec = prec
+                dec = decimal.Decimal(numerator)/denominator
+                string = str(dec).lower()
+                if not string.count('.'):
+                    string += ".0"
+                self.result += string + suffix
+        self.result += "\",\"Float\")"
+
+
     def appendStringBuffer(self, val):
         string = val.dereference()['contents'].dereference()['data'].string()
         self.result += "#token(\"" + string + "\",\"StringBuffer\")"
 
     def appendLimbs(self, size, ptr):
         accum = 0
-        for i in range(size):
-            accum *= 1 << 64
+        for i in range(size-1,-1,-1):
+            accum <<= 64
             limb = int(ptr[i])
-            accum += limb
+            accum |= limb
         self.result += str(accum)
 
     def appendInt(self, val):
@@ -579,7 +636,7 @@ class termPrinter:
             elif cat == @INT_LAYOUT@:
                 self.appendInt(arg.cast(self.mpz_ptr_ptr).dereference())
             elif cat == @FLOAT_LAYOUT@:
-                self.appendFloat(arg.cast(self.mpfr_ptr_ptr).dereference())
+                self.appendFloat(arg.cast(self.floating_ptr_ptr).dereference())
             elif cat == @BOOL_LAYOUT@:
                 string = "true" if arg.cast(self.bool_ptr).dereference() else "false"
                 self.result += "#token(\"" + string + "\",\"Bool\")"
@@ -608,4 +665,6 @@ def kllvm_lookup_function(val):
             return termPrinter(val, "stringbuffer")
         elif t.target().tag == "__mpz_struct":
             return termPrinter(val, "int")
+        elif t.target().tag == "floating":
+            return termPrinter(val, "floating")
     return None

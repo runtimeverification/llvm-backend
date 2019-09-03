@@ -113,7 +113,7 @@ static std::string MAP_STRUCT = "map";
 static std::string LIST_STRUCT = "list";
 static std::string SET_STRUCT = "set";
 static std::string INT_STRUCT = "__mpz_struct";
-static std::string FLOAT_STRUCT = "__mpfr_struct";
+static std::string FLOAT_STRUCT = "floating";
 static std::string BUFFER_STRUCT = "stringbuffer";
 static std::string BLOCK_STRUCT = "block";
 
