@@ -193,4 +193,6 @@ string *printConfigurationToString(block *subject) {
 .popsection \n\
 ");
 
+#ifndef __APPLE__
 DEFINE_GDB_PY_SCRIPT(INSTALL_PREFIX "/lib/kllvm/gdb/interpreter-gdb.py")
+#endif
