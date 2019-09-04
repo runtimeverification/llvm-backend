@@ -29,7 +29,7 @@ extern "C" {
   block *hook_LIST_get_long(list *, size_t);
   extern block *DUMMY0;
   extern block *DUMMY1;
-  block D2 = {{1}, {}};
+  block D2 = {{1}};
   block * DUMMY2 = &D2;
 
   size_t hash_k(block * kitem) {
