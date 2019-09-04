@@ -13,7 +13,7 @@ fi
 rm -rf build
 mkdir -p build
 cd build
-cmake .. -DCMAKE_BUILD_TYPE=$1
+cmake .. -DCMAKE_BUILD_TYPE=$1 -DCMAKE_INSTALL_PREFIX=install
 make -j`nproc`
 make run-unittests
 cd ../matching
