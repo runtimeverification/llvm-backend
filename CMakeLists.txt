@@ -86,8 +86,6 @@ link_directories(${LLVM_LIBRARY_DIR})
 include_directories(${LLVM_INCLUDE_DIR})
 include_directories (${PROJECT_SOURCE_DIR}/include)
 
-set(CMAKE_INSTALL_PREFIX "install" CACHE STRING "Installation path")
-
 # Find the libraries that correspond to the LLVM components
 # that we wish to use
 llvm_map_components_to_libnames(llvm_libs support core irreader)
