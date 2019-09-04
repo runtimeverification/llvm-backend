@@ -47,9 +47,9 @@ extern "C" {
 
   void k_hash(block *, void *) {}
 
-  block D0 = {{0}, {}};
+  block D0 = {{0}};
   block * DUMMY0 = &D0;
-  block D1 = {{1}, {}};
+  block D1 = {{1}};
   block * DUMMY1 = &D1;
 }
 
