@@ -252,6 +252,14 @@ static bool shouldCollectOldGen() {
 
 void migrateRoots();
 
+void initStaticObjects(void) {
+  is_gc = true;
+  map m = map();
+  list l = list();
+  set s = set();
+  is_gc = false;
+}
+
 void koreCollect(void** roots, uint8_t nroots, layoutitem *typeInfo) {
   is_gc = true;
   collect_old = shouldCollectOldGen();
