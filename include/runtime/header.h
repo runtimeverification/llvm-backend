@@ -8,8 +8,9 @@
 #include "config/macros.h"
 #include "runtime/alloc.h"
 
-#define IMMER_HAMTS_TAGGED_NODE 0
-#define IMMER_RBTS_TAGGED_NODE 0
+#ifndef IMMER_TAGGED_NODE
+#define IMMER_TAGGED_NODE 0
+#endif
 #include <immer/flex_vector.hpp>
 #include <immer/map.hpp>
 #include <immer/set.hpp>
