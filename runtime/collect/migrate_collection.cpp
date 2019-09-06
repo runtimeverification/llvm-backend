@@ -69,3 +69,50 @@ void migrate_list(void *l) {
   }
   impl.traverse(migrate_visitor{});
 }
+
+template <typename Fn, typename NodeT>
+void migrate_champ_traversal(NodeT *node, immer::detail::hamts::count_t depth, Fn&& fn) {
+  if (depth < immer::detail::hamts::max_depth<immer::default_bits>) {
+    auto datamap = node->datamap();
+    if (datamap) {
+      migrate_collection_node((void **)&node->impl.d.data.inner.values);
+      fn(node->values(), node->values() + immer::detail::hamts::popcount(datamap));
+    }
+    auto nodemap = node->nodemap();
+    if (nodemap) {
+      auto fst = node->children();
+      auto lst = fst + immer::detail::hamts::popcount(nodemap);
+      for (; fst != lst; ++fst) {
+        migrate_collection_node((void **)fst);
+        migrate_champ_traversal(*fst, depth + 1, fn);
+      }
+    }
+  } else {
+    fn(node->collisions(), node->collisions() + node->collision_count());
+  }
+}
+
+void migrate_map_leaf(std::pair<KElem, KElem> *start, std::pair<KElem, KElem> *end) {
+  for (auto it = start; it != end; ++it) {
+    migrate_once(&it->first.elem);
+    migrate_once(&it->second.elem);
+  }
+}
+
+void migrate_set_leaf(KElem *start, KElem *end) {
+  for (auto it = start; it != end; ++it) {
+    migrate_once(&it->elem);
+  }
+}
+
+void migrate_set(void *s) {
+  auto &impl = ((set *)s)->impl();
+  migrate_collection_node((void **)&impl.root);
+  migrate_champ_traversal(impl.root, 0, migrate_set_leaf);
+}
+
+void migrate_map(void *m) {
+  auto &impl = ((map *)m)->impl();
+  migrate_collection_node((void **)&impl.root);
+  migrate_champ_traversal(impl.root, 0, migrate_map_leaf);
+}

@@ -29,6 +29,8 @@ extern "C" {
   size_t get_size(uint64_t, uint16_t);
   void migrate_once(block **);
   void migrate_list(void *l);
+  void migrate_map(void *m);
+  void migrate_set(void *s);
   void migrate_collection_node(void **nodePtr);
   void setKoreMemoryFunctionsForGMP(void);
 }
