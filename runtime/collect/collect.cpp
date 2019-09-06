@@ -199,13 +199,13 @@ static void migrate_child(void* currBlock, layoutitem *args, unsigned i, bool pt
   switch(argData->cat) {
   case MAP_LAYOUT:
     map_foreach(ptr ? *(map**)arg : arg, migrate_once);
-   break;
+    break;
   case LIST_LAYOUT:
     migrate_list(ptr ? *(list**)arg : arg);
-   break;
+    break;
   case SET_LAYOUT:
     set_foreach(ptr ? *(set**)arg : arg, migrate_once);
-   break;
+    break;
   case STRINGBUFFER_LAYOUT:
     migrate_string_buffer((stringbuffer **)arg);
     break;

@@ -160,7 +160,6 @@ struct kore_alloc_heap {
   }
 };
 
-
 struct HashBlock {
   size_t operator()(const KElem &block) const noexcept {
     return hash_k(block);
