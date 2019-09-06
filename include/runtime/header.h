@@ -149,8 +149,8 @@ struct HashBlock {
 };
 
 using list = immer::flex_vector<KElem, immer::memory_policy<immer::heap_policy<kore_alloc_heap>, immer::no_refcount_policy>>;
-using map = immer::map<KElem, KElem, HashBlock, std::equal_to<KElem>, immer::memory_policy<immer::heap_policy<kore_alloc_heap>, immer::no_refcount_policy>>;
-using set = immer::set<KElem, HashBlock, std::equal_to<KElem>, immer::memory_policy<immer::heap_policy<kore_alloc_heap>, immer::no_refcount_policy>>;
+using map = immer::map<KElem, KElem, HashBlock, std::equal_to<KElem>, list::memory_policy>;
+using set = immer::set<KElem, HashBlock, std::equal_to<KElem>, list::memory_policy>;
 
 typedef struct mapiter {
 	map::iterator curr;

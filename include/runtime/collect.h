@@ -18,6 +18,10 @@ void registerGCRootsEnumerator(BlockEnumerator);
 
 using list_node = immer::detail::rbts::node<KElem, list::memory_policy, list::bits, list::bits_leaf>;
 using list_impl = immer::detail::rbts::rrbtree<KElem, list::memory_policy, list::bits, list::bits_leaf>;
+using map_node = map::iterator::node_t;
+using map_impl = map::iterator::tree_t;
+using set_node = set::iterator::node_t;
+using set_impl = set::iterator::tree_t;
 
 extern "C" {
   bool during_gc(void);
