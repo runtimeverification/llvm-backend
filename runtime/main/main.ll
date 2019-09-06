@@ -10,7 +10,7 @@ declare i64 @atol(i8*)
 declare %block* @take_steps(i64, %block*)
 declare void @finish_rewriting(%block*) #0
 
-declare void @setKoreMemoryFunctionsForGMP()
+declare void @initStaticObjects()
 
 @output_file = external global i8*
 
@@ -25,7 +25,7 @@ entry:
   %output_str = load i8*, i8** %output_ptr
   store i8* %output_str, i8** @output_file
 
-  call void @setKoreMemoryFunctionsForGMP()
+  call void @initStaticObjects()
 
   %ret = call %block* @parseConfiguration(i8* %filename)
   %result = call %block* @take_steps(i64 %depth, %block* %ret)

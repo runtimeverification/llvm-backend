@@ -11,8 +11,7 @@ extern "C" {
 
   void migrateRoots() {
     auto &l = list_impl::empty();
-    migrate_list_node((void **)&l.root);
-    migrate_list_node((void **)&l.tail);
+    migrate_list((void *)&l);
     if (blockEnumerators.empty()) {
       return;
     }

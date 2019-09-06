@@ -26,6 +26,7 @@ extern "C" {
   void migrate_once(block **);
   void migrate_list(void *l);
   void migrate_list_node(void **nodePtr);
+  void setKoreMemoryFunctionsForGMP(void);
 }
 
 #endif // RUNTIME_COLLECT_H
