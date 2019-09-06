@@ -15,9 +15,6 @@ char **young_alloc_ptr(void);
 char **old_alloc_ptr(void);
 char* youngspace_ptr(void);
 char* oldspace_ptr(void);
-void map_foreach(void *, void(block**));
-void set_foreach(void *, void(block**));
-void list_foreach(void *, void(block**));
 
 static bool is_gc = false;
 bool collect_old = false;
@@ -198,13 +195,13 @@ static void migrate_child(void* currBlock, layoutitem *args, unsigned i, bool pt
   void *arg = ((char *)currBlock) + argData->offset;
   switch(argData->cat) {
   case MAP_LAYOUT:
-    map_foreach(ptr ? *(map**)arg : arg, migrate_once);
+    migrate_map(ptr ? *(map**)arg : arg);
     break;
   case LIST_LAYOUT:
     migrate_list(ptr ? *(list**)arg : arg);
     break;
   case SET_LAYOUT:
-    set_foreach(ptr ? *(set**)arg : arg, migrate_once);
+    migrate_set(ptr ? *(set**)arg : arg);
     break;
   case STRINGBUFFER_LAYOUT:
     migrate_string_buffer((stringbuffer **)arg);
