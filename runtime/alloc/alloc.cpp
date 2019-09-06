@@ -13,7 +13,6 @@ extern "C" {
 
 REGISTER_ARENA(youngspace, YOUNGSPACE_ID);
 REGISTER_ARENA(oldspace, OLDSPACE_ID);
-REGISTER_ARENA(nogcspace, NOGCSPACE_ID);
 REGISTER_ARENA(alwaysgcspace, ALWAYSGCSPACE_ID);
 
 char *youngspace_ptr() {
@@ -52,7 +51,6 @@ void freeAllKoreMem() {
   freeAllMemory();
   arenaReset(&youngspace);
   arenaReset(&oldspace);
-  arenaReset(&nogcspace);
   arenaReset(&alwaysgcspace);
 }
 
@@ -76,10 +74,6 @@ __attribute__ ((always_inline)) void* koreAllocOld(size_t requested) {
 __attribute__ ((always_inline)) void* koreAllocTokenOld(size_t requested) {
   size_t size = (requested + 7) & ~7;
   return arenaAlloc(&oldspace, size < 16 ? 16 : size);
-}
-
-__attribute__ ((always_inline)) void* koreAllocNoGC(size_t requested) {
-  return arenaAlloc(&nogcspace, requested);
 }
 
 __attribute__ ((always_inline)) void* koreAllocAlwaysGC(size_t requested) {

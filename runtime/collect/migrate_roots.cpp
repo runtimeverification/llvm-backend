@@ -12,6 +12,10 @@ extern "C" {
   void migrateRoots() {
     auto &l = list_impl::empty();
     migrate_list((void *)&l);
+    auto &s = set_impl::empty();
+    migrate_set((void *)&s);
+    auto &m = map_impl::empty();
+    migrate_map((void *)&m);
     if (blockEnumerators.empty()) {
       return;
     }
