@@ -380,6 +380,8 @@ class termPrinter:
         self.val = val
         self.cat = cat
         self.long_int = gdb.lookup_type("long int")
+        self.bool_ptr = gdb.lookup_type("bool").pointer()
+        self.unsigned_char = gdb.lookup_type("unsigned char")
         self.string_ptr = gdb.lookup_type("string").pointer()
         self.stringbuffer_ptr = gdb.lookup_type("stringbuffer").pointer()
         self.stringbuffer_ptr_ptr = gdb.lookup_type("stringbuffer").pointer().pointer()
@@ -579,7 +581,7 @@ class termPrinter:
             length = hdr & 0xffffffffff
             self.result += "#token(\""
             for i in range(length):
-                c = chr(int(string.dereference()['data'][i]))
+                c = chr(int(string.dereference()['data'][i].cast(self.unsigned_char)))
                 if c == '\\':
                     self.result += "\\\\"
                 elif c == '"':
@@ -595,7 +597,7 @@ class termPrinter:
                 elif ord(c) >= 32 and ord(c) < 127:
                     self.result += c
                 else:
-                    self.result += "{:02x}".format(c)
+                    self.result += "{:02x}".format(ord(c))
             stdStr = string.dereference()['data'].string()
             if isVar and not stdStr in self.var_names:
                 suffix = ""
