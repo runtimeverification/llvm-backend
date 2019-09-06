@@ -9,7 +9,6 @@ extern const size_t BLOCK_SIZE;
 
 #define YOUNGSPACE_ID 0
 #define OLDSPACE_ID 1
-#define NOGCSPACE_ID 2
 #define ALWAYSGCSPACE_ID 3
 
 char youngspace_collection_id(void);
@@ -25,8 +24,6 @@ void* koreAllocOld(size_t requested);
 // allocates enough space for a string token whose raw size is requested into the old generation.
 // rounds up to the nearest 8 bytes and always allocates at least 16 bytes
 void* koreAllocTokenOld(size_t requested);
-// allocates exactly requested bytes into the not garbage-collected arena
-void* koreAllocNoGC(size_t requested);
 // allocates exactly requested bytes into the always garbage-collected arena.
 // objects that can potentially survive a collection (i.e. can be reached from the
 // root during collection) should never be allocated in this arena.

@@ -28,9 +28,6 @@ extern "C" {
     return false;
   }
 
-  void *koreAllocNoGC(size_t requested) {
-    return malloc(requested);
-  }
   void *koreAllocToken(size_t requested) {
     return malloc(requested);
   }

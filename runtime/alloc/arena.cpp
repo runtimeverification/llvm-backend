@@ -86,7 +86,7 @@ static void freshBlock(struct arena *Arena) {
       nextHeader->semispace = Arena->allocation_semispace_id;
     } else {
       nextBlock = *(char**)Arena->block_start;
-      if (Arena->block != Arena->block_end && Arena->allocation_semispace_id != NOGCSPACE_ID) {
+      if (Arena->block != Arena->block_end) {
         if (Arena->block_end - Arena->block == 8) {
           *(uint64_t *)Arena->block = NOT_YOUNG_OBJECT_BIT; // 8 bit sentinel value
         } else {
