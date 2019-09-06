@@ -122,24 +122,6 @@ public:
   block * elem;
 };
 
-struct kore_alloc_nogc_heap {
-
-  template <typename... Tags>
-  static void *allocate(size_t size, Tags...) {
-    if (during_gc()) {
-      return ::operator new(size);
-    } else {
-      return koreAllocNoGC(size);
-    }
-  }
-
-  static void deallocate(size_t size, void *data) {
-    if (during_gc()) {
-      ::operator delete(data);
-    }
-  }
-};
-
 struct kore_alloc_heap {
 
   template <typename... Tags>
@@ -167,8 +149,8 @@ struct HashBlock {
 };
 
 using list = immer::flex_vector<KElem, immer::memory_policy<immer::heap_policy<kore_alloc_heap>, immer::no_refcount_policy>>;
-using map = immer::map<KElem, KElem, HashBlock, std::equal_to<KElem>, immer::memory_policy<immer::heap_policy<kore_alloc_nogc_heap>, immer::no_refcount_policy>>;
-using set = immer::set<KElem, HashBlock, std::equal_to<KElem>, immer::memory_policy<immer::heap_policy<kore_alloc_nogc_heap>, immer::no_refcount_policy>>;
+using map = immer::map<KElem, KElem, HashBlock, std::equal_to<KElem>, immer::memory_policy<immer::heap_policy<kore_alloc_heap>, immer::no_refcount_policy>>;
+using set = immer::set<KElem, HashBlock, std::equal_to<KElem>, immer::memory_policy<immer::heap_policy<kore_alloc_heap>, immer::no_refcount_policy>>;
 
 typedef struct mapiter {
 	map::iterator curr;
