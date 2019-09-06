@@ -4,11 +4,14 @@
 
 extern std::vector<BlockEnumerator> blockEnumerators;
 
+
 extern "C" {
 
   void migrate(block** blockPtr);
 
   void migrateRoots() {
+    auto &l = list_impl::empty();
+    migrate_list((void *)&l);
     if (blockEnumerators.empty()) {
       return;
     }

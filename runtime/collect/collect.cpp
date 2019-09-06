@@ -1,12 +1,13 @@
-#include<stdbool.h>
-#include<stdint.h>
-#include<stdio.h>
-#include<stdlib.h>
-#include<string.h>
-#include<assert.h>
+#include<cstdbool>
+#include<cstdint>
+#include<cstdio>
+#include<cstdlib>
+#include<cstring>
+#include<cassert>
 #include "runtime/alloc.h"
 #include "runtime/header.h"
 #include "runtime/arena.h"
+#include "runtime/collect.h"
 
 extern "C" {
 
@@ -14,21 +15,19 @@ char **young_alloc_ptr(void);
 char **old_alloc_ptr(void);
 char* youngspace_ptr(void);
 char* oldspace_ptr(void);
-char youngspace_collection_id(void);
-char oldspace_collection_id(void);
 void map_foreach(void *, void(block**));
 void set_foreach(void *, void(block**));
 void list_foreach(void *, void(block**));
 
 static bool is_gc = false;
-static bool collect_old = false;
+bool collect_old = false;
 static uint8_t num_collection_only_young = 0;
 
 bool during_gc() {
   return is_gc;
 }
 
-static size_t get_size(uint64_t hdr, uint16_t layout) {
+size_t get_size(uint64_t hdr, uint16_t layout) {
   if (!layout) {
     size_t size = (len_hdr(hdr)  + sizeof(blockheader) + 7) & ~7;
     return hdr == NOT_YOUNG_OBJECT_BIT ? 8 : size < 16 ? 16 : size;
@@ -75,7 +74,7 @@ void migrate(block** blockPtr) {
 
 // call this function instead of migrate on objects directly referenced by shared objects (like collection nodes)
 // that are not tracked by gc
-static void migrate_once(block** blockPtr) {
+void migrate_once(block** blockPtr) {
   block* currBlock = *blockPtr;
   uintptr_t intptr = (uintptr_t)currBlock;
   if (intptr & 1) {
@@ -202,7 +201,7 @@ static void migrate_child(void* currBlock, layoutitem *args, unsigned i, bool pt
     map_foreach(ptr ? *(map**)arg : arg, migrate_once);
    break;
   case LIST_LAYOUT:
-    list_foreach(ptr ? *(list**)arg : arg, migrate_once);
+    migrate_list(ptr ? *(list**)arg : arg);
    break;
   case SET_LAYOUT:
     set_foreach(ptr ? *(set**)arg : arg, migrate_once);
@@ -253,11 +252,10 @@ static bool shouldCollectOldGen() {
 void migrateRoots();
 
 void initStaticObjects(void) {
-  is_gc = true;
   map m = map();
   list l = list();
   set s = set();
-  is_gc = false;
+  setKoreMemoryFunctionsForGMP();
 }
 
 void koreCollect(void** roots, uint8_t nroots, layoutitem *typeInfo) {

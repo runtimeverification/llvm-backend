@@ -31,6 +31,10 @@ extern "C" {
   void *koreAllocNoGC(size_t requested) {
     return malloc(requested);
   }
+  void *koreAllocToken(size_t requested) {
+    return malloc(requested);
+  }
+  const size_t BLOCK_SIZE = -1;
 
   void printConfigurationInternal(writer *file, block *subject, const char *sort, bool) {}
   void sfprintf(writer *, const char *, ...) {}
