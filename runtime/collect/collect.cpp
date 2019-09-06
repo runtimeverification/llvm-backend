@@ -282,4 +282,8 @@ void koreCollect(void** roots, uint8_t nroots, layoutitem *typeInfo) {
   is_gc = false;
 }
 
+void freeAllKoreMem() {
+  koreCollect(nullptr, 0, nullptr);
+}
+
 }
