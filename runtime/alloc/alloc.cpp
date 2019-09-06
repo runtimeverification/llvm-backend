@@ -8,6 +8,7 @@
 #include "runtime/alloc.h"
 #include "runtime/header.h"
 #include "runtime/arena.h"
+#include "runtime/collect.h"
 
 extern "C" {
 
@@ -48,10 +49,7 @@ void koreAllocSwap(bool swapOld) {
 }
 
 void freeAllKoreMem() {
-  freeAllMemory();
-  arenaReset(&youngspace);
-  arenaReset(&oldspace);
-  arenaReset(&alwaysgcspace);
+  koreCollect(nullptr, 0, nullptr);
 }
 
 void setKoreMemoryFunctionsForGMP() {
