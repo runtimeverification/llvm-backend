@@ -201,7 +201,7 @@ static void migrate_child(void* currBlock, layoutitem *args, unsigned i, bool pt
     map_foreach(ptr ? *(map**)arg : arg, migrate_once);
    break;
   case LIST_LAYOUT:
-    list_foreach(ptr ? *(list**)arg : arg, migrate_once);
+    migrate_list(ptr ? *(list**)arg : arg);
    break;
   case SET_LAYOUT:
     set_foreach(ptr ? *(set**)arg : arg, migrate_once);
@@ -252,11 +252,9 @@ static bool shouldCollectOldGen() {
 void migrateRoots();
 
 void initStaticObjects(void) {
-  is_gc = true;
   map m = map();
   list l = list();
   set s = set();
-  is_gc = false;
 }
 
 void koreCollect(void** roots, uint8_t nroots, layoutitem *typeInfo) {
