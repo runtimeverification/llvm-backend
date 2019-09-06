@@ -17,6 +17,9 @@ void registerGCRootsEnumerator(BlockEnumerator);
 
 extern "C" {
   bool during_gc(void);
+  extern bool collect_old;
+  size_t get_size(uint64_t, uint16_t);
+  void migrate_once(block **);
 }
 
 #endif // RUNTIME_COLLECT_H
