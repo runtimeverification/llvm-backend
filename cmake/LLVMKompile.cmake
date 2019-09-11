@@ -14,3 +14,6 @@ set(CMAKE_CXX_LINK_EXECUTABLE "${LLVM_KOMPILE} ${LLVM_KOMPILE_FLAGS} <FLAGS> <CM
 
 get_filename_component(K_BIN_DIR ${LLVM_KOMPILE} DIRECTORY)
 include_directories(${K_BIN_DIR}/../include)
+
+add_custom_target(definition DEPENDS "${KOMPILED_DIR}/definition.kore")
+
