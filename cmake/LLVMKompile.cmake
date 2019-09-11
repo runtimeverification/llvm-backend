@@ -18,3 +18,6 @@ include_directories(${K_BIN_DIR}/../include)
 target_compile_options(${TARGET_NAME}
 	PUBLIC -Wno-return-type-c-linkage)
 set_target_properties(${TARGET_NAME} PROPERTIES LINK_DEPENDS "${KOMPILED_DIR}/definition.kore")
+
+install(TARGETS ${TARGET_NAME}
+	RUNTIME DESTINATION bin)
