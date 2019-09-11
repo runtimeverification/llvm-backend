@@ -15,5 +15,6 @@ set(CMAKE_CXX_LINK_EXECUTABLE "${LLVM_KOMPILE} ${LLVM_KOMPILE_FLAGS} <FLAGS> <CM
 get_filename_component(K_BIN_DIR ${LLVM_KOMPILE} DIRECTORY)
 include_directories(${K_BIN_DIR}/../include)
 
-target_compile_options(${TARGET_NAME} -Wno-return-type-c-linkage)
+target_compile_options(${TARGET_NAME}
+	PUBLIC -Wno-return-type-c-linkage)
 set_target_properties(${TARGET_NAME} PROPERTIES LINK_DEPENDS "${KOMPILED_DIR}/definition.kore")
