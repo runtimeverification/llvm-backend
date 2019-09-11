@@ -15,7 +15,10 @@ set(CMAKE_CXX_LINK_EXECUTABLE "${LLVM_KOMPILE} ${LLVM_KOMPILE_FLAGS} <FLAGS> <CM
 get_filename_component(K_BIN_DIR ${LLVM_KOMPILE} DIRECTORY)
 include_directories(${K_BIN_DIR}/../include)
 
-add_custom_target(definition
-	COMMAND true
+add_custom_command(
+	OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/definition.kore"
+	COMMAND "${CMAKE_COMMAND}" -E copy "${KOMPILED_DIR}/definition.kore" "${CMAKE_CURRENT_BINARY_DIR}"
 	DEPENDS "${KOMPILED_DIR}/definition.kore")
+add_custom_target(definition
+	DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/definition.kore")
 
