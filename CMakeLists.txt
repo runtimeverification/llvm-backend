@@ -1,17 +1,7 @@
 cmake_minimum_required (VERSION 3.4)
 
-find_program(CMAKE_C_COMPILER clang-8)
-find_program(CMAKE_C_COMPILER clang-7)
-find_program(CMAKE_C_COMPILER clang)
-find_program(CMAKE_CXX_COMPILER clang++-8)
-find_program(CMAKE_CXX_COMPILER clang++-7)
-find_program(CMAKE_CXX_COMPILER clang++)
-find_program(CMAKE_C_COMPILER_AR llvm-ar-8)
-find_program(CMAKE_C_COMPILER_AR llvm-ar-7)
-find_program(CMAKE_C_COMPILER_AR llvm-ar)
-find_program(CMAKE_C_COMPILER_RANLIB llvm-ranlib-8)
-find_program(CMAKE_C_COMPILER_RANLIB llvm-ranlib-7)
-find_program(CMAKE_C_COMPILER_RANLIB llvm-ranlib)
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
+include(LLVMKompilePrelude)
 project (KLLVM CXX C)
 
 set(CMAKE_DISABLE_SOURCE_CHANGES ON)
@@ -70,8 +60,6 @@ message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
 if (${LLVM_PACKAGE_VERSION} VERSION_LESS 7.0.1)
   message(FATAL_ERROR "LLVM 7.0.1 or newer is required")
 endif()
-
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(LLVM_BUILD_TOOLS ON)
