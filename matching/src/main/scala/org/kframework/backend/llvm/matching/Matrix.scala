@@ -230,7 +230,7 @@ case class Fringe(val symlib: Parser.SymLib, val sort: Sort, val occurrence: Occ
   }
 
   def expand(ix: Constructor): Seq[Fringe] = {
-    lookup(ix).get
+    lookup(ix).getOrElse(Seq())
   }
 
   def lookup(ix: Constructor): Option[Seq[Fringe]] = {
@@ -523,7 +523,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
     // compute the variables bound more than once
     val nonlinear = grouped.filter(_._2.size > 1)
     val nonlinearPairs = nonlinear.mapValues(l => (l, l.tail).zipped)
-    val newVars = row.clause.action.rhsVars.map(v => grouped(v).head._2)
+    val newVars = row.clause.action.rhsVars.filter(v => grouped.contains(v)).map(v => grouped(v).head._2)
     val atomicLeaf = Leaf(row.clause.action.ordinal, newVars)
     // check that all occurrences of the same variable are equal
     val nonlinearLeaf = nonlinearPairs.foldRight[DecisionTree](atomicLeaf)((e, dt) => e._2.foldRight(dt)((os,dt2) => makeEquality(os._1._1, (os._1._2, os._2._2), dt2)))
