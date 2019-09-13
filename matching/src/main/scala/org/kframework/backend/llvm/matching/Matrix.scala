@@ -531,7 +531,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
       // if there is no side condition, continue
       case None => nonlinearLeaf
       case Some(cond) =>
-        val condVars = cond.map(v => grouped(v).head._2)
+        val condVars = cond.filter(v => grouped.contains(v)).map(v => grouped(v).head._2)
         val newO = SC(row.clause.action.ordinal)
         // evaluate the side condition and if it is true, continue, otherwise go to the next row
         Function("side_condition_" + row.clause.action.ordinal, newO, condVars, "BOOL.Bool",
