@@ -27,7 +27,7 @@ set(CMAKE_EXE_LINKER_FLAGS_FASTBUILD "${CMAKE_EXE_LINKER_FLAGS_RELEASE}")
 set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} -flto")
 set(CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO "${CMAKE_EXE_LINKER_FLAGS_RELEASE} -flto")
 
-if(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
+if(APPLE)
 set(BACKEND_TARGET_TRIPLE "x86_64-apple-darwin")
 include_directories(AFTER SYSTEM /usr/local/include)
 link_directories(AFTER /usr/local/lib)
@@ -83,7 +83,7 @@ macro(kllvm_add_tool name)
 
   # Link against LLVM libraries
   llvm_config(${name})
-if(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
+if(APPLE)
   target_link_libraries(${name} PUBLIC "-ljemalloc" "-Wl,-rpath /usr/local/lib" "-ldl")
 else()
   target_link_libraries(${name} PUBLIC "-ljemalloc" "-Wl,-rpath=/usr/local/lib" "-ldl")

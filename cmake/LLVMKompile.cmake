@@ -21,3 +21,8 @@ set_target_properties(${TARGET_NAME} PROPERTIES LINK_DEPENDS "${KOMPILED_DIR}/de
 
 install(TARGETS ${TARGET_NAME}
 	RUNTIME DESTINATION bin)
+
+if(APPLE)
+  include_directories(AFTER SYSTEM /usr/local/include)
+  link_directories(AFTER /usr/local/lib)
+endif()
