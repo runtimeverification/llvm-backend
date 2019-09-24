@@ -7,7 +7,7 @@
 %locations
 %parse-param {KOREScanner &scanner}
 %parse-param {KOREParserDriver &driver}
-%parse-param {KOREDefinition **definition}
+%parse-param {ptr<KOREDefinition> *definition}
 
 %code requires {
 
@@ -62,32 +62,32 @@ class KOREParserDriver;
 /* non-terminal symbols */
 %start definition
 
-%type <KOREModule *>  module
+%type <ptr<KOREModule>>  module
 %type <std::string>   module-name
 
-%type<KOREDeclaration *>                    declaration
-%type<KOREModuleImportDeclaration *>        import-declaration
-%type<KOREObjectCompositeSortDeclaration *> sort-declaration
-%type<KORESymbolDeclaration *>              symbol-declaration
-%type<KOREObjectSymbolDeclaration *>        object-symbol-declaration
-%type<KOREMetaSymbolDeclaration *>          meta-symbol-declaration
-%type<KORESymbolDeclaration *>              alias-declaration
-%type<KOREObjectAliasDeclaration *>         object-alias-declaration
-%type<KOREMetaAliasDeclaration *>           meta-alias-declaration
-%type<KOREAxiomDeclaration *>               axiom-declaration
+%type<ptr<KOREDeclaration>>                    declaration
+%type<ptr<KOREModuleImportDeclaration>>        import-declaration
+%type<ptr<KOREObjectCompositeSortDeclaration>> sort-declaration
+%type<ptr<KORESymbolDeclaration>>              symbol-declaration
+%type<ptr<KOREObjectSymbolDeclaration>>        object-symbol-declaration
+%type<ptr<KOREMetaSymbolDeclaration>>          meta-symbol-declaration
+%type<ptr<KORESymbolDeclaration>>              alias-declaration
+%type<ptr<KOREObjectAliasDeclaration>>         object-alias-declaration
+%type<ptr<KOREMetaAliasDeclaration>>           meta-alias-declaration
+%type<ptr<KOREAxiomDeclaration>>               axiom-declaration
 
-%type <KOREPattern *>               pattern
-%type <KOREObjectPattern *>         object-pattern
-%type <KOREMetaPattern *>           meta-pattern
-%type <KOREObjectVariablePattern *> object-variable
-%type <KOREMetaVariablePattern *>   meta-variable
+%type <ptr<KOREPattern>>               pattern
+%type <ptr<KOREObjectPattern>>         object-pattern
+%type <ptr<KOREMetaPattern>>           meta-pattern
+%type <ptr<KOREObjectVariablePattern>> object-variable
+%type <ptr<KOREMetaVariablePattern>>   meta-variable
 
-%type <KOREObjectSort *>          object-sort
-%type <KOREMetaSort *>            meta-sort
-%type <KOREObjectSortVariable *>  object-sort-variable
-%type <KOREMetaSortVariable *>    meta-sort-variable
-%type <KOREObjectCompositeSort *> object-non-variable-sort
-%type <KOREMetaCompositeSort *>   meta-non-variable-sort
+%type <ptr<KOREObjectSort>>          object-sort
+%type <ptr<KOREMetaSort>>            meta-sort
+%type <ptr<KOREObjectSortVariable>>  object-sort-variable
+%type <ptr<KOREMetaSortVariable>>    meta-sort-variable
+%type <ptr<KOREObjectCompositeSort>> object-non-variable-sort
+%type <ptr<KOREMetaCompositeSort>>   meta-non-variable-sort
 
 /* associativity and priority definition */
 
@@ -95,8 +95,8 @@ class KOREParserDriver;
 
 /* Sorts */
 object-sort
-  : object-sort-variable     { $$ = $1; }
-  | object-non-variable-sort { $$ = $1; }
+  : object-sort-variable     { $$ = std::move($1); }
+  | object-non-variable-sort { $$ = std::move($1); }
   ;
 
 object-sort-variable
@@ -114,13 +114,13 @@ object-sort-list
   ;
 
 object-sort-list-non-empty
-  : object-sort                                { driver.addObjectSort($1); }
-  | object-sort-list-non-empty "," object-sort { driver.addObjectSort($3); }
+  : object-sort                                { driver.addObjectSort(std::move($1)); }
+  | object-sort-list-non-empty "," object-sort { driver.addObjectSort(std::move($3)); }
   ;
 
 meta-sort
-  : meta-sort-variable     { $$ = $1; }
-  | meta-non-variable-sort { $$ = $1; }
+  : meta-sort-variable     { $$ = std::move($1); }
+  | meta-non-variable-sort { $$ = std::move($1); }
   ;
 
 meta-sort-variable
@@ -137,19 +137,19 @@ meta-sort-list
   ;
 
 meta-sort-list-non-empty
-  : meta-sort                              { driver.addMetaSort($1); }
-  | meta-sort-list-non-empty "," meta-sort { driver.addMetaSort($3); }
+  : meta-sort                              { driver.addMetaSort(std::move($1)); }
+  | meta-sort-list-non-empty "," meta-sort { driver.addMetaSort(std::move($3)); }
   ;
 
 
 /* Patterns */
 pattern
-  : object-pattern { $$ = $1; }
-  | meta-pattern   { $$ = $1; }
+  : object-pattern { $$ = std::move($1); }
+  | meta-pattern   { $$ = std::move($1); }
   ;
 
 object-pattern
-  : object-variable { $$ = $1; }
+  : object-variable { $$ = std::move($1); }
   | "object-id"
     { driver.startObjectPattern($1);     }
     "{" object-sort-list "}" "(" pattern-list ")"
@@ -158,11 +158,11 @@ object-pattern
 
 object-variable
   : "object-id" ":" object-sort
-    { $$ = KOREObjectVariablePattern::Create($1, $3); }
+    { $$ = KOREObjectVariablePattern::Create($1, std::move($3)); }
   ;
 
 meta-pattern
-  : meta-variable { $$ = $1; }
+  : meta-variable { $$ = std::move($1); }
   | "kore-string" { $$ = KOREMetaStringPattern::Create($1); }
   | "kore-char"   { $$ = KOREMetaCharPattern::Create($1);   }
   | "meta-id"
@@ -173,7 +173,7 @@ meta-pattern
 
 meta-variable
   : "meta-id" ":" meta-sort
-    { $$ = KOREMetaVariablePattern::Create($1, $3); }
+    { $$ = KOREMetaVariablePattern::Create($1, std::move($3)); }
   ;
 
 pattern-list
@@ -182,8 +182,8 @@ pattern-list
   ;
 
 pattern-list-non-empty
-  : pattern                            { driver.addPattern($1); }
-  | pattern-list-non-empty "," pattern { driver.addPattern($3); }
+  : pattern                            { driver.addPattern(std::move($1)); }
+  | pattern-list-non-empty "," pattern { driver.addPattern(std::move($3)); }
   ;
 
 
@@ -202,11 +202,11 @@ module
   ;
 
 declaration
-  : import-declaration { $$ = $1; }
-  | sort-declaration   { $$ = $1; }
-  | symbol-declaration { $$ = $1; }
-  | alias-declaration  { $$ = $1; }
-  | axiom-declaration  { $$ = $1; }
+  : import-declaration { $$ = std::move($1); }
+  | sort-declaration   { $$ = std::move($1); }
+  | symbol-declaration { $$ = std::move($1); }
+  | alias-declaration  { $$ = std::move($1); }
+  | axiom-declaration  { $$ = std::move($1); }
   ;
 
 import-declaration
@@ -228,8 +228,8 @@ sort-declaration
   ;
 
 symbol-declaration
-  : object-symbol-declaration { $$ = $1; }
-  | meta-symbol-declaration   { $$ = $1; }
+  : object-symbol-declaration { $$ = std::move($1); }
+  | meta-symbol-declaration   { $$ = std::move($1); }
   ;
 
 object-symbol-declaration
@@ -237,12 +237,12 @@ object-symbol-declaration
     { driver.startObjectSymbolDeclaration($2);       }
     "{" object-sort-variable-list "}" "(" object-sort-list ")"
     ":" object-sort attribute
-    { $$ = driver.finishObjectSymbolDeclaration($11); }
+    { $$ = driver.finishObjectSymbolDeclaration(std::move($11)); }
   | "hooked-symbol" "object-id"
     { driver.startObjectSymbolDeclaration($2, true);  }
     "{" object-sort-variable-list "}" "(" object-sort-list ")"
     ":" object-sort attribute
-    { $$ = driver.finishObjectSymbolDeclaration($11); }
+    { $$ = driver.finishObjectSymbolDeclaration(std::move($11)); }
   ;
 
 meta-symbol-declaration
@@ -250,12 +250,12 @@ meta-symbol-declaration
     { driver.startMetaSymbolDeclaration($2);        }
     "{" meta-sort-variable-list "}" "(" meta-sort-list ")"
     ":" meta-sort attribute
-    { $$ = driver.finishMetaSymbolDeclaration($11); }
+    { $$ = driver.finishMetaSymbolDeclaration(std::move($11)); }
   ;
 
 alias-declaration
-  : object-alias-declaration { $$ = $1; }
-  | meta-alias-declaration   { $$ = $1; }
+  : object-alias-declaration { $$ = std::move($1); }
+  | meta-alias-declaration   { $$ = std::move($1); }
   ;
 
 object-alias-declaration
@@ -264,7 +264,7 @@ object-alias-declaration
     "{" object-sort-variable-list "}" "(" object-sort-list ")" ":" object-sort
     "where" "object-id" "{" object-sort-variable-list "}"
     "(" object-variable-list ")" ":=" object-pattern attribute
-    { $$ = driver.finishObjectAliasDeclaration($11, $21); }
+    { $$ = driver.finishObjectAliasDeclaration(std::move($11), std::move($21)); }
   ;
 
 meta-alias-declaration
@@ -273,14 +273,14 @@ meta-alias-declaration
     "{" meta-sort-variable-list "}" "(" meta-sort-list ")" ":" meta-sort
     "where" "meta-id" "{" meta-sort-variable-list "}"
     "(" meta-variable-list ")" ":=" meta-pattern attribute
-    { $$ = driver.finishMetaAliasDeclaration($11, $21); }
+    { $$ = driver.finishMetaAliasDeclaration(std::move($11), std::move($21)); }
   ;
 
 axiom-declaration
   : "axiom"
     { driver.startAxiomDeclaration();       }
     "{" sort-variable-list "}" pattern attribute
-    { $$ = driver.finishAxiomDeclaration($6); }
+    { $$ = driver.finishAxiomDeclaration(std::move($6)); }
   ;
 
 sort-variable-list
@@ -289,12 +289,12 @@ sort-variable-list
   ;
 
 sort-variable-list-non-empty
-  : object-sort-variable { driver.addObjectSortVariable($1); }
-  | meta-sort-variable   { driver.addMetaSortVariable($1);   }
+  : object-sort-variable { driver.addObjectSortVariable(std::move($1)); }
+  | meta-sort-variable   { driver.addMetaSortVariable(std::move($1));   }
   | sort-variable-list-non-empty "," object-sort-variable
-    { driver.addObjectSortVariable($3); }
+    { driver.addObjectSortVariable(std::move($3)); }
   | sort-variable-list-non-empty "," meta-sort-variable
-    { driver.addMetaSortVariable($3); }
+    { driver.addMetaSortVariable(std::move($3)); }
   ;
 
 object-sort-variable-list
@@ -303,9 +303,9 @@ object-sort-variable-list
   ;
 
 object-sort-variable-list-non-empty
-  : object-sort-variable { driver.addObjectSortVariable($1); }
+  : object-sort-variable { driver.addObjectSortVariable(std::move($1)); }
   | object-sort-variable-list-non-empty "," object-sort-variable
-    { driver.addObjectSortVariable($3); }
+    { driver.addObjectSortVariable(std::move($3)); }
   ;
 
 meta-sort-variable-list
@@ -314,9 +314,9 @@ meta-sort-variable-list
   ;
 
 meta-sort-variable-list-non-empty
-  : meta-sort-variable { driver.addMetaSortVariable($1); }
+  : meta-sort-variable { driver.addMetaSortVariable(std::move($1)); }
   | meta-sort-variable-list-non-empty "," meta-sort-variable
-    { driver.addMetaSortVariable($3); }
+    { driver.addMetaSortVariable(std::move($3)); }
   ;
 
 object-variable-list
@@ -325,9 +325,9 @@ object-variable-list
   ;
 
 object-variable-list-non-empty
-  : object-variable { driver.addObjectVariable($1); }
+  : object-variable { driver.addObjectVariable(std::move($1)); }
   | object-variable-list-non-empty "," object-variable
-    { driver.addObjectVariable($3); }
+    { driver.addObjectVariable(std::move($3)); }
   ;
 
 meta-variable-list
@@ -336,14 +336,14 @@ meta-variable-list
   ;
 
 meta-variable-list-non-empty
-  : meta-variable { driver.addMetaVariable($1); }
+  : meta-variable { driver.addMetaVariable(std::move($1)); }
   | meta-variable-list-non-empty "," meta-variable
-    { driver.addMetaVariable($3); }
+    { driver.addMetaVariable(std::move($3)); }
   ;
 
 declaration-list
   : /* empty */
-  | declaration-list declaration { driver.addDeclaration($2); }
+  | declaration-list declaration { driver.addDeclaration(std::move($2)); }
   ;
 
 module-name
@@ -358,8 +358,8 @@ definition
   ;
 
 module-list-non-empty
-  : module                       { driver.addModule($1); }
-  | module-list-non-empty module { driver.addModule($2); }
+  : module                       { driver.addModule(std::move($1)); }
+  | module-list-non-empty module { driver.addModule(std::move($2)); }
   ;
 
 %%

@@ -11,11 +11,15 @@
 
 namespace kllvm {
 
+template<typename T>
+using ptr = std::unique_ptr<T>;
+
 
 // KORESort
 class KORESort {
 public:
   virtual void print(std::ostream &Out, unsigned indent = 0) const =0;
+  virtual ~KORESort() = default;
 };
 
 static inline std::ostream &operator<<(std::ostream &out, const KORESort &s) { s.print(out); return out; }
@@ -52,8 +56,8 @@ private:
   std::string name;
 
 public:
-  static KOREObjectSortVariable *Create(const std::string &Name) {
-    return new KOREObjectSortVariable(Name);
+  static ptr<KOREObjectSortVariable> Create(const std::string &Name) {
+    return ptr<KOREObjectSortVariable>(new KOREObjectSortVariable(Name));
   }
 
   virtual bool isConcrete() const override { return false; }
@@ -71,8 +75,8 @@ private:
   std::string name;
 
 public:
-  static KOREMetaSortVariable *Create(const std::string &Name) {
-    return new KOREMetaSortVariable(Name);
+  static ptr<KOREMetaSortVariable> Create(const std::string &Name) {
+    return ptr<KOREMetaSortVariable>(new KOREMetaSortVariable(Name));
   }
 
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
@@ -98,12 +102,12 @@ class KOREDefinition;
 class KOREObjectCompositeSort : public KOREObjectSort {
 private:
   std::string name;
-  std::vector<KOREObjectSort *> arguments;
+  std::vector<ptr<KOREObjectSort>> arguments;
   ValueType category;
 
 public:
-  static KOREObjectCompositeSort *Create(const std::string &Name, ValueType Cat = {SortCategory::Uncomputed, 0}) {
-    return new KOREObjectCompositeSort(Name, Cat);
+  static ptr<KOREObjectCompositeSort> Create(const std::string &Name, ValueType Cat = {SortCategory::Uncomputed, 0}) {
+    return ptr<KOREObjectCompositeSort>(new KOREObjectCompositeSort(Name, Cat));
   }
 
   const std::string getName() const { return name; }
@@ -127,8 +131,8 @@ private:
   std::string name; // only predefined names allowed
 
 public:
-  static KOREMetaCompositeSort *Create(const std::string &Name) {
-    return new KOREMetaCompositeSort(Name);
+  static ptr<KOREMetaCompositeSort> Create(const std::string &Name) {
+    return ptr<KOREMetaCompositeSort>(new KOREMetaCompositeSort(Name));
   }
 
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
@@ -141,6 +145,7 @@ private:
 class KORESymbol {
 public:
   virtual void print(std::ostream &Out, unsigned indent = 0) const =0;
+  virtual ~KORESymbol() = default;
 };
 
 struct HashSymbol;
@@ -156,13 +161,13 @@ private:
       part of a pattern, it changes from being empty to being
       the signature of the symbol. instantiateSymbol is called on all object
       level symbols in axioms when KOREDefinition::preprocess is called. */
-  std::vector<KOREObjectSort *> arguments;
+  std::vector<ptr<KOREObjectSort>> arguments;
   /* contains the original arguments to the symbol when parsed as parh of a pattern. */
-  std::vector<KOREObjectSort *> formalArguments;
+  std::vector<ptr<KOREObjectSort>> formalArguments;
   /** At parse time, when parsed as part of a pattern, this will be null.
       When parsed as part of a declaration, it contains the return sort of the symbol.
       See above re: the behavior of KOREObjectSymbol with respect to instantiateSymbol. */
-  KOREObjectSort *sort;
+  ptr<KOREObjectSort> sort;
   /* the first integer in a continuous range representing the tags of all the
      polymorphic instantiations of this symbol. If the symbol has no parameters
      or its parameters are fully specified, firstTag == lastTag. */
@@ -176,23 +181,23 @@ private:
   uint16_t layout;
 
 public:
-  static KOREObjectSymbol *Create(const std::string &Name) {
-    return new KOREObjectSymbol(Name);
+  static ptr<KOREObjectSymbol> Create(const std::string &Name) {
+    return ptr<KOREObjectSymbol>(new KOREObjectSymbol(Name));
   }
 
-  void addArgument(KOREObjectSort *Argument);
-  void addFormalArgument(KOREObjectSort *Argument);
-  void addSort(KOREObjectSort *Sort);
+  void addArgument(ptr<KOREObjectSort> Argument);
+  void addFormalArgument(ptr<KOREObjectSort> Argument);
+  void addSort(ptr<KOREObjectSort> Sort);
 
   const std::string &getName() const { return name; }
-  const std::vector<KOREObjectSort *> &getArguments() const {
+  const std::vector<ptr<KOREObjectSort>> &getArguments() const {
     return arguments;
   }
-  const std::vector<KOREObjectSort *> &getFormalArguments() const {
+  const std::vector<ptr<KOREObjectSort>> &getFormalArguments() const {
     return formalArguments;
   }
-  const KOREObjectSort *getSort() const { return sort; }
-  KOREObjectSort *getSort() { return sort; }
+  const KOREObjectSort *getSort() const { return sort.get(); }
+  KOREObjectSort *getSort() { return sort.get(); }
   uint32_t getTag() const { assert(firstTag == lastTag); return firstTag; }
   uint32_t getFirstTag() const { return firstTag; }
   uint32_t getLastTag() const { return lastTag; }
@@ -202,8 +207,8 @@ public:
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
   virtual void print(std::ostream &Out, unsigned indent, bool formal) const;
 
-  bool operator==(KOREObjectSymbol other) const;
-  bool operator!=(KOREObjectSymbol other) const { return !(*this == other); }
+  bool operator==(KOREObjectSymbol &other) const;
+  bool operator!=(KOREObjectSymbol &other) const { return !(*this == other); }
 
   std::string layoutString(KOREDefinition *) const;
 
@@ -231,7 +236,7 @@ struct HashSymbol {
   size_t operator()(const kllvm::KOREObjectSymbol &s) const noexcept {
     size_t hash = 0;
     boost::hash_combine(hash, s.name);
-    for (auto arg : s.arguments) {
+    for (auto &arg : s.arguments) {
       boost::hash_combine(hash, *arg);
     }
     return hash;
@@ -241,22 +246,22 @@ struct HashSymbol {
 class KOREMetaSymbol : public KORESymbol {
 private:
   std::string name;
-  std::vector<KOREMetaSort *> arguments;
-  KOREMetaSort *sort;
+  std::vector<ptr<KOREMetaSort>> arguments;
+  ptr<KOREMetaSort> sort;
 
 public:
-  static KOREMetaSymbol *Create(const std::string &Name) {
-    return new KOREMetaSymbol(Name);
+  static ptr<KOREMetaSymbol> Create(const std::string &Name) {
+    return ptr<KOREMetaSymbol>(new KOREMetaSymbol(Name));
   }
 
-  void addArgument(KOREMetaSort *Argument);
-  void addSort(KOREMetaSort *Sort);
+  void addArgument(ptr<KOREMetaSort> Argument);
+  void addSort(ptr<KOREMetaSort> Sort);
 
   const std::string &getName() const { return name; }
-  const std::vector<KOREMetaSort *> &getArguments() const {
+  const std::vector<ptr<KOREMetaSort>> &getArguments() const {
     return arguments;
   }
-  const KOREMetaSort *getSort() const { return sort; }
+  const KOREMetaSort *getSort() const { return sort.get(); }
 
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
 
@@ -268,6 +273,7 @@ private:
 class KOREVariable {
 public:
   virtual void print(std::ostream &Out, unsigned indent = 0) const =0;
+  virtual ~KOREVariable() = default;
 };
 
 class KOREObjectVariable : public KOREVariable {
@@ -275,8 +281,8 @@ private:
   std::string name;
 
 public:
-  static KOREObjectVariable *Create(const std::string &Name) {
-    return new KOREObjectVariable(Name);
+  static ptr<KOREObjectVariable> Create(const std::string &Name) {
+    return ptr<KOREObjectVariable>(new KOREObjectVariable(Name));
   }
 
   std::string getName() const;
@@ -292,8 +298,8 @@ private:
   std::string name;
 
 public:
-  static KOREMetaVariable *Create(const std::string &Name) {
-    return new KOREMetaVariable(Name);
+  static ptr<KOREMetaVariable> Create(const std::string &Name) {
+    return ptr<KOREMetaVariable>(new KOREMetaVariable(Name));
   }
 
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
@@ -330,38 +336,38 @@ class KOREMetaPattern : public KOREPattern {
 
 class KOREObjectVariablePattern : public KOREObjectPattern {
 private:
-  KOREObjectVariable *name;
-  KOREObjectSort *sort;
+  ptr<KOREObjectVariable> name;
+  ptr<KOREObjectSort> sort;
 
 public:
-  static KOREObjectVariablePattern *
-  Create(const std::string &Name, KOREObjectSort *sort) {
-    KOREObjectVariable *Var = KOREObjectVariable::Create(Name);
-    return new KOREObjectVariablePattern(Var, sort);
+  static ptr<KOREObjectVariablePattern>
+  Create(const std::string &Name, ptr<KOREObjectSort> sort) {
+    ptr<KOREObjectVariable> Var = KOREObjectVariable::Create(Name);
+    return ptr<KOREObjectVariablePattern>(new KOREObjectVariablePattern(std::move(Var), std::move(sort)));
   }
 
   std::string getName() const;
-  virtual KOREObjectSort *getSort() const override { return sort; }
+  virtual KOREObjectSort *getSort() const override { return sort.get(); }
 
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
   virtual void markSymbols(std::map<std::string, std::vector<KOREObjectSymbol *>> &) override {}
   virtual void markVariables(std::map<std::string, KOREObjectVariablePattern *> &map) override { map.insert({name->getName(), this}); }
 
 private:
-  KOREObjectVariablePattern(KOREObjectVariable *Name, KOREObjectSort *Sort)
-  : name(Name), sort(Sort) { }
+  KOREObjectVariablePattern(ptr<KOREObjectVariable> Name, ptr<KOREObjectSort> Sort)
+  : name(std::move(Name)), sort(std::move(Sort)) { }
 };
 
 class KOREMetaVariablePattern : public KOREMetaPattern {
 private:
-  KOREMetaVariable *name;
-  KOREMetaSort *sort;
+  ptr<KOREMetaVariable> name;
+  ptr<KOREMetaSort> sort;
 
 public:
-  static KOREMetaVariablePattern *
-  Create(const std::string &Name, KOREMetaSort *sort) {
-    KOREMetaVariable *Var = KOREMetaVariable::Create(Name);
-    return new KOREMetaVariablePattern(Var, sort);
+  static ptr<KOREMetaVariablePattern>
+  Create(const std::string &Name, ptr<KOREMetaSort> sort) {
+    ptr<KOREMetaVariable> Var = KOREMetaVariable::Create(Name);
+    return ptr<KOREMetaVariablePattern>(new KOREMetaVariablePattern(std::move(Var), std::move(sort)));
   }
 
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
@@ -369,60 +375,60 @@ public:
   virtual void markVariables(std::map<std::string, KOREObjectVariablePattern *> &) override {}
 
 private:
-  KOREMetaVariablePattern(KOREMetaVariable *Name, KOREMetaSort *Sort)
-  : name(Name), sort(Sort) { }
+  KOREMetaVariablePattern(ptr<KOREMetaVariable> Name, ptr<KOREMetaSort> Sort)
+  : name(std::move(Name)), sort(std::move(Sort)) { }
 };
 
 class KOREObjectCompositePattern : public KOREObjectPattern {
 private:
-  KOREObjectSymbol *constructor;
-  std::vector<KOREPattern *> arguments;
+  ptr<KOREObjectSymbol> constructor;
+  std::vector<ptr<KOREPattern>> arguments;
 
 public:
-  static KOREObjectCompositePattern *Create(const std::string &Name) {
-    KOREObjectSymbol *Sym = KOREObjectSymbol::Create(Name);
-    return new KOREObjectCompositePattern(Sym);
+  static ptr<KOREObjectCompositePattern> Create(const std::string &Name) {
+    ptr<KOREObjectSymbol> Sym = KOREObjectSymbol::Create(Name);
+    return ptr<KOREObjectCompositePattern>(new KOREObjectCompositePattern(std::move(Sym)));
   }
-  static KOREObjectCompositePattern *Create(KOREObjectSymbol *Sym) {
-    return new KOREObjectCompositePattern(Sym);
+  static ptr<KOREObjectCompositePattern> Create(ptr<KOREObjectSymbol> Sym) {
+    return ptr<KOREObjectCompositePattern>(new KOREObjectCompositePattern(std::move(Sym)));
   }
 
   KOREObjectSort *getSort() const override { return constructor->getSort(); }
 
-  KOREObjectSymbol *getConstructor() const { return constructor; }
-  const std::vector<KOREPattern *> &getArguments() const { return arguments; }
+  KOREObjectSymbol *getConstructor() const { return constructor.get(); }
+  const std::vector<ptr<KOREPattern>> &getArguments() const { return arguments; }
 
-  void addArgument(KOREPattern *Argument);
+  void addArgument(ptr<KOREPattern> Argument);
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
   virtual void markSymbols(std::map<std::string, std::vector<KOREObjectSymbol *>> &) override;
   virtual void markVariables(std::map<std::string, KOREObjectVariablePattern *> &) override;
 
 private:
-  KOREObjectCompositePattern(KOREObjectSymbol *Constructor)
-  : constructor(Constructor) { }
+  KOREObjectCompositePattern(ptr<KOREObjectSymbol> Constructor)
+  : constructor(std::move(Constructor)) { }
 };
 
 class KOREMetaCompositePattern : public KOREMetaPattern {
 private:
-  KOREMetaSymbol *constructor;
-  std::vector<KOREPattern *> arguments;
+  ptr<KOREMetaSymbol> constructor;
+  std::vector<ptr<KOREPattern>> arguments;
 
 public:
-  static KOREMetaCompositePattern *Create(const std::string &Name) {
-    KOREMetaSymbol *Sym = KOREMetaSymbol::Create(Name);
-    return new KOREMetaCompositePattern(Sym);
+  static ptr<KOREMetaCompositePattern> Create(const std::string &Name) {
+    ptr<KOREMetaSymbol> Sym = KOREMetaSymbol::Create(Name);
+    return ptr<KOREMetaCompositePattern>(new KOREMetaCompositePattern(std::move(Sym)));
   }
 
-  KOREMetaSymbol *getConstructor() const { return constructor; }
+  KOREMetaSymbol *getConstructor() const { return constructor.get(); }
 
-  void addArgument(KOREPattern *Argument);
+  void addArgument(ptr<KOREPattern> Argument);
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
   virtual void markSymbols(std::map<std::string, std::vector<KOREObjectSymbol *>> &) override;
   virtual void markVariables(std::map<std::string, KOREObjectVariablePattern *> &) override;
 
 private:
-  KOREMetaCompositePattern(KOREMetaSymbol *Constructor)
-  : constructor(Constructor) { }
+  KOREMetaCompositePattern(ptr<KOREMetaSymbol> Constructor)
+  : constructor(std::move(Constructor)) { }
 };
 
 class KOREMetaStringPattern : public KOREMetaPattern {
@@ -430,8 +436,8 @@ private:
   std::string contents;
 
 public:
-  static KOREMetaStringPattern *Create(const std::string &Contents) {
-    return new KOREMetaStringPattern(Contents);
+  static ptr<KOREMetaStringPattern> Create(const std::string &Contents) {
+    return ptr<KOREMetaStringPattern>(new KOREMetaStringPattern(Contents));
   }
 
   std::string getContents() { return contents; }
@@ -449,8 +455,8 @@ private:
   char contents;
 
 public:
-  static KOREMetaCharPattern *Create(char Contents) {
-    return new KOREMetaCharPattern(Contents);
+  static ptr<KOREMetaCharPattern> Create(char Contents) {
+    return ptr<KOREMetaCharPattern>(new KOREMetaCharPattern(Contents));
   }
 
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
@@ -464,17 +470,18 @@ private:
 // KOREDeclaration
 class KOREDeclaration {
 protected:
-  std::map<std::string, KOREObjectCompositePattern *> attributes;
-  std::vector<KOREObjectSortVariable *> objectSortVariables;
-  std::vector<KOREMetaSortVariable *> metaSortVariables;
+  std::map<std::string, ptr<KOREObjectCompositePattern>> attributes;
+  std::vector<ptr<KOREObjectSortVariable>> objectSortVariables;
+  std::vector<ptr<KOREMetaSortVariable>> metaSortVariables;
 
 public:
-  void addAttribute(KOREPattern *Attribute);
-  void addObjectSortVariable(KOREObjectSortVariable *SortVariable);
-  void addMetaSortVariable(KOREMetaSortVariable *SortVariable);
+  void addAttribute(ptr<KOREPattern> Attribute);
+  void addObjectSortVariable(ptr<KOREObjectSortVariable> SortVariable);
+  void addMetaSortVariable(ptr<KOREMetaSortVariable> SortVariable);
   virtual void print(std::ostream &Out, unsigned indent = 0) const =0;
-  const std::map<std::string, KOREObjectCompositePattern *> &getAttributes() const { return attributes; }
-  const std::vector<KOREObjectSortVariable *> &getObjectSortVariables() const { return objectSortVariables; }
+  virtual ~KOREDeclaration() = default;
+  const std::map<std::string, ptr<KOREObjectCompositePattern>> &getAttributes() const { return attributes; }
+  const std::vector<ptr<KOREObjectSortVariable>> &getObjectSortVariables() const { return objectSortVariables; }
 
 protected:
   void printSortVariables(std::ostream &Out) const;
@@ -486,9 +493,9 @@ private:
   std::string sortName;
 
 public:
-  static KOREObjectCompositeSortDeclaration *
+  static ptr<KOREObjectCompositeSortDeclaration>
   Create(const std::string &Name, bool isHooked = false) {
-    return new KOREObjectCompositeSortDeclaration(Name, isHooked);
+    return ptr<KOREObjectCompositeSortDeclaration>(new KOREObjectCompositeSortDeclaration(Name, isHooked));
   }
 
   std::string getName() const { return sortName; }
@@ -507,24 +514,24 @@ class KORESymbolDeclaration : public KOREDeclaration {
 
 class KOREObjectSymbolAliasDeclaration : public KORESymbolDeclaration {
 protected:
-  KOREObjectSymbol *symbol;
+  ptr<KOREObjectSymbol> symbol;
 
-  KOREObjectSymbolAliasDeclaration(KOREObjectSymbol *Symbol)
-  : symbol(Symbol) { }
+  KOREObjectSymbolAliasDeclaration(ptr<KOREObjectSymbol> Symbol)
+  : symbol(std::move(Symbol)) { }
 
 public:
-  KOREObjectSymbol *getSymbol() const { return symbol; }
+  KOREObjectSymbol *getSymbol() const { return symbol.get(); }
 };
 
 class KOREMetaSymbolAliasDeclaration : public KORESymbolDeclaration {
 protected:
-  KOREMetaSymbol *symbol;
+  ptr<KOREMetaSymbol> symbol;
 
-  KOREMetaSymbolAliasDeclaration(KOREMetaSymbol *Symbol)
-  : symbol(Symbol) { }
+  KOREMetaSymbolAliasDeclaration(ptr<KOREMetaSymbol> Symbol)
+  : symbol(std::move(Symbol)) { }
 
 public:
-  KOREMetaSymbol *getSymbol() const { return symbol; }
+  KOREMetaSymbol *getSymbol() const { return symbol.get(); }
 };
 
 class KOREObjectSymbolDeclaration : public KOREObjectSymbolAliasDeclaration {
@@ -532,10 +539,10 @@ private:
   bool _isHooked;
 
 public:
-  static KOREObjectSymbolDeclaration *
+  static ptr<KOREObjectSymbolDeclaration>
   Create(const std::string &Name, bool isHooked = false) {
-    KOREObjectSymbol *Sym = KOREObjectSymbol::Create(Name);
-    return new KOREObjectSymbolDeclaration(Sym, isHooked);
+    ptr<KOREObjectSymbol> Sym = KOREObjectSymbol::Create(Name);
+    return ptr<KOREObjectSymbolDeclaration>(new KOREObjectSymbolDeclaration(std::move(Sym), isHooked));
   }
 
   bool isHooked() const { return _isHooked; }
@@ -545,73 +552,73 @@ public:
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
 
 private:
-  KOREObjectSymbolDeclaration(KOREObjectSymbol *Symbol, bool _isHooked)
-  : KOREObjectSymbolAliasDeclaration(Symbol), _isHooked(_isHooked) { }
+  KOREObjectSymbolDeclaration(ptr<KOREObjectSymbol> Symbol, bool _isHooked)
+  : KOREObjectSymbolAliasDeclaration(std::move(Symbol)), _isHooked(_isHooked) { }
 };
 
 class KOREMetaSymbolDeclaration : public KOREMetaSymbolAliasDeclaration {
 public:
-  static KOREMetaSymbolDeclaration *Create(const std::string &Name) {
-    KOREMetaSymbol *Sym = KOREMetaSymbol::Create(Name);
-    return new KOREMetaSymbolDeclaration(Sym);
+  static ptr<KOREMetaSymbolDeclaration> Create(const std::string &Name) {
+    ptr<KOREMetaSymbol> Sym = KOREMetaSymbol::Create(Name);
+    return ptr<KOREMetaSymbolDeclaration>(new KOREMetaSymbolDeclaration(std::move(Sym)));
   }
 
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
 
 private:
-  KOREMetaSymbolDeclaration(KOREMetaSymbol *Symbol)
-  : KOREMetaSymbolAliasDeclaration(Symbol) { }
+  KOREMetaSymbolDeclaration(ptr<KOREMetaSymbol> Symbol)
+  : KOREMetaSymbolAliasDeclaration(std::move(Symbol)) { }
 };
 
 class KOREObjectAliasDeclaration : public KOREObjectSymbolAliasDeclaration {
 private:
-  std::vector<KOREObjectVariablePattern *> boundVariables;
-  KOREObjectPattern *pattern;
+  std::vector<ptr<KOREObjectVariablePattern>> boundVariables;
+  ptr<KOREObjectPattern> pattern;
 
 public:
-  static KOREObjectAliasDeclaration *Create(const std::string &Name) {
-    KOREObjectSymbol *Sym = KOREObjectSymbol::Create(Name);
-    return new KOREObjectAliasDeclaration(Sym);
+  static ptr<KOREObjectAliasDeclaration> Create(const std::string &Name) {
+    ptr<KOREObjectSymbol> Sym = KOREObjectSymbol::Create(Name);
+    return ptr<KOREObjectAliasDeclaration>(new KOREObjectAliasDeclaration(std::move(Sym)));
   }
 
-  void addVariable(KOREObjectVariablePattern *Variable);
-  void addPattern(KOREObjectPattern *Pattern);
+  void addVariable(ptr<KOREObjectVariablePattern> Variable);
+  void addPattern(ptr<KOREObjectPattern> Pattern);
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
 
 private:
-  KOREObjectAliasDeclaration(KOREObjectSymbol *Symbol)
-  : KOREObjectSymbolAliasDeclaration(Symbol) { }
+  KOREObjectAliasDeclaration(ptr<KOREObjectSymbol> Symbol)
+  : KOREObjectSymbolAliasDeclaration(std::move(Symbol)) { }
 };
 
 class KOREMetaAliasDeclaration : public KOREMetaSymbolAliasDeclaration {
 private:
-  std::vector<KOREMetaVariablePattern *> boundVariables;
-  KOREMetaPattern *pattern;
+  std::vector<ptr<KOREMetaVariablePattern>> boundVariables;
+  ptr<KOREMetaPattern> pattern;
 
 public:
-  static KOREMetaAliasDeclaration *Create(const std::string &Name) {
-    KOREMetaSymbol *Sym = KOREMetaSymbol::Create(Name);
-    return new KOREMetaAliasDeclaration(Sym);
+  static ptr<KOREMetaAliasDeclaration> Create(const std::string &Name) {
+    ptr<KOREMetaSymbol> Sym = KOREMetaSymbol::Create(Name);
+    return ptr<KOREMetaAliasDeclaration>(new KOREMetaAliasDeclaration(std::move(Sym)));
   }
 
-  void addVariable(KOREMetaVariablePattern *Variable);
-  void addPattern(KOREMetaPattern *Pattern);
+  void addVariable(ptr<KOREMetaVariablePattern> Variable);
+  void addPattern(ptr<KOREMetaPattern> Pattern);
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
 
 private:
-  KOREMetaAliasDeclaration(KOREMetaSymbol *Symbol)
-  : KOREMetaSymbolAliasDeclaration(Symbol) { }
+  KOREMetaAliasDeclaration(ptr<KOREMetaSymbol> Symbol)
+  : KOREMetaSymbolAliasDeclaration(std::move(Symbol)) { }
 };
 
 class KOREAxiomDeclaration : public KOREDeclaration {
 private:
-  KOREPattern *pattern;
+  ptr<KOREPattern> pattern;
   unsigned ordinal;
 
 public:
-  static KOREAxiomDeclaration *Create() { return new KOREAxiomDeclaration(); }
+  static ptr<KOREAxiomDeclaration> Create() { return ptr<KOREAxiomDeclaration>(new KOREAxiomDeclaration()); }
 
-  void addPattern(KOREPattern *Pattern);
+  void addPattern(ptr<KOREPattern> Pattern);
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
 
   /* returns true if the axiom is actually required to be translated to llvm
@@ -633,8 +640,8 @@ private:
   std::string moduleName;
 
 public:
-  static KOREModuleImportDeclaration *Create(const std::string &Name) {
-    return new KOREModuleImportDeclaration(Name);
+  static ptr<KOREModuleImportDeclaration> Create(const std::string &Name) {
+    return ptr<KOREModuleImportDeclaration>(new KOREModuleImportDeclaration(Name));
   }
 
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
@@ -647,19 +654,19 @@ private:
 class KOREModule {
 private:
   std::string name;
-  std::vector<KOREDeclaration *> declarations;
-  std::map<std::string, KOREObjectCompositePattern *> attributes;
+  std::vector<ptr<KOREDeclaration>> declarations;
+  std::map<std::string, ptr<KOREObjectCompositePattern>> attributes;
 
 public:
-  static KOREModule *Create(const std::string &Name) {
-    return new KOREModule(Name);
+  static ptr<KOREModule> Create(const std::string &Name) {
+    return ptr<KOREModule>(new KOREModule(Name));
   }
 
-  void addAttribute(KOREPattern *Attribute);
-  void addDeclaration(KOREDeclaration *Declaration);
+  void addAttribute(ptr<KOREPattern> Attribute);
+  void addDeclaration(ptr<KOREDeclaration> Declaration);
   void print(std::ostream &Out, unsigned indent = 0) const;
 
-  const std::vector<KOREDeclaration *> &getDeclarations() const { return declarations; } 
+  const std::vector<ptr<KOREDeclaration>> &getDeclarations() const { return declarations; } 
 
 private:
   KOREModule(const std::string &Name) : name(Name) { }
@@ -714,15 +721,15 @@ private:
   KOREObjectCompositeSortMapType hookedSorts;
   KOREObjectSymbolStringMapType freshFunctions;
 
-  std::vector<KOREModule *> modules;
-  std::map<std::string, KOREObjectCompositePattern *> attributes;
+  std::vector<ptr<KOREModule>> modules;
+  std::map<std::string, ptr<KOREObjectCompositePattern>> attributes;
   /* an automatically computed list of all the axioms in the definition */
   std::list<KOREAxiomDeclaration *> axioms;
 
   KOREObjectSymbol *injSymbol;
 
 public:
-  static KOREDefinition *Create() { return new KOREDefinition(); }
+  static ptr<KOREDefinition> Create() { return ptr<KOREDefinition>(new KOREDefinition()); }
 
   /* Preprocesses the definition and prepares it for translation to llvm.
      This performs the following tasks:
@@ -733,8 +740,8 @@ public:
        in the definition. */
   void preprocess();
 
-  void addModule(KOREModule *Module);
-  void addAttribute(KOREPattern *Attribute);
+  void addModule(ptr<KOREModule> Module);
+  void addAttribute(ptr<KOREPattern> Attribute);
   void print(std::ostream &Out, unsigned indent = 0) const;
 
   const KOREObjectCompositeSortDeclarationMapType &getSortDeclarations() const { return sortDeclarations; }
@@ -743,7 +750,7 @@ public:
   const KOREObjectSymbolStringMapType &getAllSymbols() const { return allObjectSymbols; }
   const KOREObjectCompositeSortMapType getHookedSorts() const { return hookedSorts; }
   const std::list<KOREAxiomDeclaration *> &getAxioms() const { return axioms; }
-  const std::map<std::string, KOREObjectCompositePattern *> &getAttributes() const {
+  const std::map<std::string, ptr<KOREObjectCompositePattern>> &getAttributes() const {
     return attributes;
   }
   const KOREObjectSymbolStringMapType &getFreshFunctions() const { return freshFunctions; }
