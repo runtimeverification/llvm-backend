@@ -24,5 +24,5 @@ install(TARGETS ${TARGET_NAME}
 
 if(APPLE)
   include_directories(AFTER SYSTEM /usr/local/include)
-  link_directories(AFTER /usr/local/lib)
+  target_link_directories(${TARGET_NAME} PUBLIC /usr/local/lib)
 endif()
