@@ -1,5 +1,7 @@
 package org.kframework.backend.llvm.matching.pattern
 
+import org.kframework.parser.kore
+import org.kframework.kore.K
 import org.kframework.parser.kore.SymbolOrAlias
 import org.kframework.parser.kore.implementation.{DefaultBuilders => B}
 import org.kframework.backend.llvm.matching._
@@ -25,6 +27,11 @@ sealed trait Pattern[T] {
   def isBound(clause: Clause): Boolean
   def isResidual(symlib: Parser.SymLib): Boolean
   def toShortString: String
+  def toKORE(f: Fringe): kore.Pattern
+  def toK(f: Fringe): K = {
+    val kore = toKORE(f)
+    f.symlib.koreToK(kore)
+  }
 }
 
 object Pattern {
@@ -73,6 +80,9 @@ case class AsP[T](name: T, sort: SortCategory, pat: Pattern[T]) extends Pattern[
   def isResidual(symlib: Parser.SymLib) = pat.isResidual(symlib)
   override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
   def toShortString: String = pat.toShortString + " #as " + name.toString
+  def toKORE(f: Fringe): kore.Pattern = {
+    B.And(f.sort, pat.toKORE(f), B.Variable(name.toString, f.sort))
+  }
 }
 
 case class ListP[T](head: Seq[Pattern[T]], frame: Option[Pattern[T]], tail: Seq[Pattern[T]], ctr: SymbolOrAlias, orig: Pattern[T]) extends Pattern[T] {
@@ -138,6 +148,7 @@ case class ListP[T](head: Seq[Pattern[T]], frame: Option[Pattern[T]], tail: Seq[
   def isResidual(symlib: Parser.SymLib) = true
   override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
   def toShortString: String = "L(" + head.size + " " + frame.isDefined + " " + tail.size + ")"
+  def toKORE(f: Fringe): kore.Pattern = orig.toKORE(f)
 }
 
 case class LiteralP[T](literal: String, sort: SortCategory) extends Pattern[T] {
@@ -162,6 +173,9 @@ case class LiteralP[T](literal: String, sort: SortCategory) extends Pattern[T] {
   def isResidual(symlib: Parser.SymLib) = false
   override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
   def toShortString: String = literal
+  def toKORE(f: Fringe): kore.Pattern = {
+    B.DomainValue(f.sort, literal)
+  }
 }
 
 case class MapP[T](keys: Seq[Pattern[T]], values: Seq[Pattern[T]], frame: Option[Pattern[T]], ctr: SymbolOrAlias, orig: Pattern[T]) extends Pattern[T] {
@@ -234,6 +248,7 @@ case class MapP[T](keys: Seq[Pattern[T]], values: Seq[Pattern[T]], frame: Option
   def isResidual(symlib: Parser.SymLib) = true
   override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
   def toShortString: String = "M(" + keys.size + " " + frame.isDefined + ")"
+  def toKORE(f: Fringe): kore.Pattern = orig.toKORE(f)
 }
 
 case class OrP[T](ps: Seq[Pattern[T]]) extends Pattern[T] {
@@ -261,6 +276,9 @@ case class OrP[T](ps: Seq[Pattern[T]]) extends Pattern[T] {
   def isResidual(symlib: Parser.SymLib) = ???
   override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
   def toShortString: String = ps.map(_.toShortString).mkString(" #Or ")
+  def toKORE(f: Fringe): kore.Pattern = {
+    ps.map(_.toKORE(f)).reduce((l, r) => B.Or(f.sort, l, r))
+  }
 }
 
 object OrP {
@@ -343,6 +361,7 @@ case class SetP[T](elements: Seq[Pattern[T]], frame: Option[Pattern[T]], ctr: Sy
   def isResidual(symlib: Parser.SymLib) = true
   override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
   def toShortString: String = "S(" + elements.size + " " + frame.isDefined + ")"
+  def toKORE(f: Fringe): kore.Pattern = orig.toKORE(f)
 }
 
 case class SymbolP[T](sym: SymbolOrAlias, ps: Seq[Pattern[T]]) extends Pattern[T] {
@@ -467,6 +486,9 @@ case class SymbolP[T](sym: SymbolOrAlias, ps: Seq[Pattern[T]]) extends Pattern[T
   }
   override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
   def toShortString: String = sym.toString
+  def toKORE(f: Fringe): kore.Pattern = {
+    B.Application(sym, (f.expand(SymbolC(sym)) zip ps).map(t => t._2.toKORE(t._1)))
+  }
 }
 
 case class VariableP[T](name: T, sort: SortCategory) extends Pattern[T] {
@@ -502,6 +524,9 @@ case class VariableP[T](name: T, sort: SortCategory) extends Pattern[T] {
   def isResidual(symlib: Parser.SymLib) = false
   override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
   def toShortString: String = name.toString
+  def toKORE(f: Fringe): kore.Pattern = {
+    B.Variable(name.toString, f.sort)
+  }
 }
 
 case class WildcardP[T]() extends Pattern[T] {
@@ -529,4 +554,7 @@ case class WildcardP[T]() extends Pattern[T] {
   def isResidual(symlib: Parser.SymLib) = false
   override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
   def toShortString: String = "_"
+  def toKORE(f: Fringe): kore.Pattern = {
+    B.Variable("_", f.sort)
+  }
 }
