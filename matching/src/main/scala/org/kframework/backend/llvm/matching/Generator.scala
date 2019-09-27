@@ -3,6 +3,7 @@ package org.kframework.backend.llvm.matching
 import org.kframework.backend.llvm.matching.dt.DecisionTree
 import org.kframework.backend.llvm.matching.pattern.{Pattern => P, SymbolP, LiteralP, VariableP, AsP, OrP, ListP, MapP, SetP, WildcardP, SortCategory}
 import org.kframework.parser.kore._
+import org.kframework.utils.errorsystem.KException
 
 object Generator {
 
@@ -135,8 +136,12 @@ object Generator {
     new Matrix(symlib, cols, actions).expand
   }
   
-  def mkDecisionTree(symlib: Parser.SymLib, mod: Definition, axioms: IndexedSeq[AxiomInfo], sorts: Seq[Sort]) : DecisionTree = {
+  def mkDecisionTree(symlib: Parser.SymLib, mod: Definition, axioms: IndexedSeq[AxiomInfo], sorts: Seq[Sort], name: SymbolOrAlias, kem: KException => scala.Unit) : DecisionTree = {
     val matrix = genClauseMatrix(symlib, mod, axioms, sorts)
+    matrix.checkUsefulness(kem)
+    if (!symlib.isHooked(name) && Parser.hasAtt(symlib.signatures(name)._3, "functional")) {
+      matrix.checkExhaustiveness(name.ctr, kem)
+    }
     matrix.compile
   }
 

@@ -3,6 +3,7 @@ package org.kframework.backend.llvm.matching
 import org.kframework.attributes.{Location,Source}
 import org.kframework.parser.kore.{Sort,CompoundSort,SymbolOrAlias}
 import org.kframework.parser.kore.implementation.{DefaultBuilders => B}
+import org.kframework.utils.errorsystem.KException
 import org.kframework.backend.llvm.matching.pattern._
 import org.kframework.backend.llvm.matching.dt._
 import java.util
@@ -754,6 +755,33 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
       }
     }
   }
+
+  def checkUsefulness(kem: KException => Unit): Unit = {
+    for (rowIx <- rows.indices) {
+      if (rowUseless(rowIx)) {
+        kem(new KException(KException.ExceptionType.WARNING, KException.KExceptionGroup.COMPILER, "Potentially useless rule detected.", clauses(rowIx).action.source.getOrElse(null), clauses(rowIx).action.location.getOrElse(null)))
+      }
+    }
+  }
+
+  def checkExhaustiveness(name: String, kem: KException => Unit): Unit = {
+    Matrix.id = 0
+    val id = Matrix.id
+    if (Matching.logging) {
+      System.out.println("-- Exhaustive --")
+      System.out.println("Matrix " + id + ": ")
+      System.out.println(this)
+      Matrix.id += 1
+    }
+    val counterexample = nonExhaustive
+    if (counterexample.isDefined) {
+      if (Matching.logging) {
+        System.out.println("Matrix " + id + " is non-exhaustive:\n" + counterexample.get.map(p => new util.Formatter().format("%12.12s", p.toShortString)).mkString(" "))
+      }
+      kem(new KException(KException.ExceptionType.WARNING, KException.KExceptionGroup.COMPILER, "Non exhaustive match detected: " ++ name ++ "{}(" ++ counterexample.get.mkString(",") ++ ")"))
+    }
+  }
+
 
   def specializeBy(ps: IndexedSeq[Pattern[String]]): (Matrix, IndexedSeq[Pattern[String]]) = {
     def expandChildren(pat: Pattern[String]): IndexedSeq[Pattern[String]] = {
