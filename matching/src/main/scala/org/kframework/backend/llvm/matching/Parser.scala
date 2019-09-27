@@ -51,6 +51,10 @@ object Parser {
       }
     }
 
+    def isHooked(symbol: SymbolOrAlias): Boolean = {
+      return symbolDecls(symbol.ctr).head.isInstanceOf[HookSymbolDeclaration]
+    }
+
     private def instantiate(s: Seq[Sort], params: Seq[Sort], args: Seq[Sort]): Seq[Sort] = s.map(instantiate(_, params, args))
 
     val signatures: Map[SymbolOrAlias, (Seq[Sort], Sort, Attributes)] = {
