@@ -687,6 +687,74 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
     result
   }
 
+  def nonExhaustive: Option[IndexedSeq[Pattern[String]]] = {
+    if (fringe.isEmpty) {
+      if (clauses.nonEmpty) {
+        None
+      } else {
+        Some(IndexedSeq())
+      }
+    } else {
+      val key = columns(0).validKeys.headOption
+      val sigma = columns(0).signatureForKey(key)
+      if (columns(0).category.hasIncompleteSignature(sigma, columns(0).fringe)) {
+        val matrixDefault = default(0, sigma)
+        if (matrixDefault.isEmpty) {
+          None
+        } else {
+          val id = Matrix.id
+          if (Matching.logging) {
+            System.out.println("-- Exhaustive --")
+            System.out.println("Matrix " + id + ": ")
+            System.out.println(this)
+            Matrix.id += 1
+          }
+          val child = matrixDefault.get.nonExhaustive
+          if (child.isEmpty) {
+            None
+          } else {
+            if (Matching.logging) {
+              System.out.println("Submatrix " + id + " is non-exhaustive:\n" + child.get.map(p => new util.Formatter().format("%12.12s", p.toShortString)).mkString(" "))
+            }
+            val ctr = defaultConstructor(0, sigma, None)
+            if (sigma.isEmpty) {
+              assert(child.get.size + 1 == fringe.size)
+              Some(WildcardP[String]() +: child.get)
+            } else if (ctr.isDefined && columns(0).fringe.sortInfo.category.isExpandDefault) {
+              val arity = ctr.get.expand(fringe(0)).get.size
+              assert(child.get.size - arity + 1 == fringe.size)
+              Some(ctr.get.contract(fringe(0), child.get.take(arity)) +: child.get.drop(arity))
+            } else {
+              assert(child.get.size + 1 == fringe.size)
+              Some(columns(0).category.missingConstructor(sigma, columns(0).fringe) +: child.get)
+            }
+          }
+        }
+      } else {
+        for (con <- sigma) {
+          val id = Matrix.id
+          if (Matching.logging) {
+            System.out.println("Testing constructor " + con);
+            System.out.println("-- Exhaustive --")
+            System.out.println("Matrix " + id + ": ")
+            System.out.println(this)
+            Matrix.id += 1
+          }
+          val child = specialize(con, 0, None)._2.nonExhaustive
+          if (child.isDefined) {
+            if (Matching.logging) {
+              System.out.println("Submatrix " + id + " is non-exhaustive:\n" + child.get.map(p => new util.Formatter().format("%12.12s", p.toShortString)).mkString(" "))
+            }
+            val arity = con.expand(fringe(0)).get.size
+            assert(child.get.size - arity + 1 == fringe.size)
+            return Some(con.contract(fringe(0), child.get.take(arity)) +: child.get.drop(arity))
+          }
+        }
+        None
+      }
+    }
+  }
+
   def specializeBy(ps: IndexedSeq[Pattern[String]]): (Matrix, IndexedSeq[Pattern[String]]) = {
     def expandChildren(pat: Pattern[String]): IndexedSeq[Pattern[String]] = {
       pat match {
@@ -777,4 +845,6 @@ object Matrix {
   def clearCache: Unit = {
     cache.clear
   }
+
+  var id = 0
 }
