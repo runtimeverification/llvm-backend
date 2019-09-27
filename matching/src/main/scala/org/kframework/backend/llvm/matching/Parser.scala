@@ -2,6 +2,7 @@ package org.kframework.backend.llvm.matching
 
 import org.kframework.attributes.{Source, Location}
 import org.kframework.parser.kore._
+import org.kframework.parser.kore.parser.KoreToK
 import org.kframework.parser.kore.implementation.{DefaultBuilders => B}
 import java.util
 
@@ -86,6 +87,10 @@ object Parser {
     def isSubsorted(less: Sort, greater: Sort): Boolean = {
       signatures.contains(B.SymbolOrAlias("inj",Seq(less,greater)))
     }
+
+    private val hookAtts: Map[String, String] = sortAtt.filter(_._1.isInstanceOf[CompoundSort]).map(t => (t._1.asInstanceOf[CompoundSort].ctr.substring(4), getStringAtt(t._2, "hook").getOrElse(""))).toMap
+
+    val koreToK = new KoreToK(hookAtts)
   }
 
   private def rulePriority(axiom: AxiomDeclaration): Int = {
