@@ -1,10 +1,11 @@
 package org.kframework.backend.llvm.matching
 
+import org.kframework.attributes.{Source, Location}
 import org.kframework.parser.kore._
 import org.kframework.parser.kore.implementation.{DefaultBuilders => B}
 import java.util
 
-case class AxiomInfo(priority: Int, ordinal: Int, rewrite: GeneralizedRewrite, sideCondition: Option[Pattern]) {}
+case class AxiomInfo(priority: Int, ordinal: Int, rewrite: GeneralizedRewrite, sideCondition: Option[Pattern], source: Option[Source], location: Option[Location]) {}
 
 object Parser {
 
@@ -87,6 +88,27 @@ object Parser {
     else 50
   }
 
+  private val SOURCE = "org'Stop'kframework'Stop'attributes'Stop'Source"
+  private val LOCATION = "org'Stop'kframework'Stop'attributes'Stop'Location"
+
+  private def source(axiom: AxiomDeclaration): Option[Source] = {
+    if (hasAtt(axiom, SOURCE)) {
+      val sourceStr = getStringAtt(axiom.att, SOURCE).get
+      return Some(Source(sourceStr.substring("Source(".length, sourceStr.length - 1)))
+    } else {
+      None
+    }
+  }
+
+  private def location(axiom: AxiomDeclaration): Option[Location] = {
+    if (hasAtt(axiom, LOCATION)) {
+      val locStr = getStringAtt(axiom.att, LOCATION).get
+      val splitted = locStr.split("[(,)]")
+      return Some(Location(splitted(1).toInt, splitted(2).toInt, splitted(3).toInt, splitted(4).toInt))
+    } else {
+      None
+    }
+  }
   private def parseAxiomSentence[T <: GeneralizedRewrite](
       split: Pattern => Option[(Option[SymbolOrAlias], T, Option[Pattern])],
       axiom: (AxiomDeclaration, Int)) :
@@ -97,7 +119,7 @@ object Parser {
       if (hasAtt(s, "comm") || hasAtt(s, "assoc") || hasAtt(s, "idem")) {
         Seq()
       } else {
-        Seq((splitted.get._1, AxiomInfo(rulePriority(s), axiom._2, splitted.get._2, splitted.get._3)))
+        Seq((splitted.get._1, AxiomInfo(rulePriority(s), axiom._2, splitted.get._2, splitted.get._3, source(s), location(s))))
       }
     } else {
       Seq()

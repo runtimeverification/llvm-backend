@@ -1,5 +1,6 @@
 package org.kframework.backend.llvm.matching
 
+import org.kframework.attributes.{Location,Source}
 import org.kframework.parser.kore.{Sort,CompoundSort,SymbolOrAlias}
 import org.kframework.parser.kore.implementation.{DefaultBuilders => B}
 import org.kframework.backend.llvm.matching.pattern._
@@ -268,7 +269,7 @@ object SortInfo {
   }
 }
 
-case class Action(val ordinal: Int, val rhsVars: Seq[String], val scVars: Option[Seq[String]], val freshConstants: Seq[(String, Sort)], val arity: Int, val priority: Int) {
+case class Action(val ordinal: Int, val rhsVars: Seq[String], val scVars: Option[Seq[String]], val freshConstants: Seq[(String, Sort)], val arity: Int, val priority: Int, source: Option[Source], location: Option[Location]) {
   override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
 }
 
