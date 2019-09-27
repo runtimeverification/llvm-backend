@@ -32,7 +32,7 @@ object SortCategory {
 
 case class SymbolS() extends SortCategory {
   def hookAtt = "STRING.String"
-  def hasIncompleteSignature(sigma: Seq[Constructor], f: Fringe): Boolean = sigma.isEmpty || sigma.contains(Empty()) || sigma.size != f.sortInfo.length
+  def hasIncompleteSignature(sigma: Seq[Constructor], f: Fringe): Boolean = sigma.isEmpty || sigma.contains(Empty()) || (!f.isExact && sigma.size != f.sortInfo.length) || (f.isExact && sigma.size != f.sortInfo.exactLength)
   def equalityFun = "hook_KEQUAL_eq"
   // not matching a builtin, therefore construct a regular switch
   // that matches the tag of the block.
