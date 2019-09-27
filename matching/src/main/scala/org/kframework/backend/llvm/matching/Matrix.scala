@@ -351,8 +351,8 @@ case class Row(val patterns: IndexedSeq[Pattern[String]], val clause: Clause) {
     Matrix.fromRows(symlib, IndexedSeq(this), fringe).specialize(ix, colIx, None)._2.rows.headOption
   }
 
-  def default(colIx: Int, sigma: Seq[Constructor], symlib: Parser.SymLib, fringe: IndexedSeq[Fringe]): Option[Row] = {
-    Matrix.fromRows(symlib, IndexedSeq(this), fringe).default(colIx, sigma).get.rows.headOption
+  def default(colIx: Int, sigma: Seq[Constructor], symlib: Parser.SymLib, fringe: IndexedSeq[Fringe], matrixColumns: IndexedSeq[Column]): Option[Row] = {
+    Matrix.fromRows(symlib, IndexedSeq(this), fringe).trueDefault(colIx, sigma, Some(matrixColumns)).rows.headOption
   }
 
   override def toString: String = patterns.map(p => new util.Formatter().format("%12.12s", p.toShortString)).mkString(" ") + " " + clause.toString
@@ -472,30 +472,40 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
     Matrix.fromRows(symlib, newRows, fringe)
   }
 
-  def default(colIx: Int, sigma: Seq[Constructor]): Option[Matrix] = {
-    if (columns(colIx).category.hasIncompleteSignature(sigma, columns(colIx).fringe)) {
-      val defaultConstructor = {
-        if (sigma.contains(Empty())) Some(NonEmpty())
-        else if (sigma.isEmpty) None
-        else {
-          lazy val (hd, tl) = columns(colIx).maxListSize
-          sigma.head match {
-            case ListC(sym,_) => Some(ListC(sym, hd + tl))
-            case _ => None
-          }
-        }
+  def defaultConstructor(colIx: Int, sigma: Seq[Constructor], matrixColumns: Option[IndexedSeq[Column]]): Option[Constructor] = {
+    if (sigma.contains(Empty())) Some(NonEmpty())
+    else if (sigma.isEmpty) None
+    else {
+      val col = matrixColumns match {
+        case None => columns(colIx)
+        case Some(cols) => cols(colIx)
       }
-      val filtered = filterMatrix(defaultConstructor, None, (_, p) => p.isDefault, colIx)
-      val expanded = if (defaultConstructor.isDefined) {
-        if (columns(colIx).fringe.sortInfo.category.isExpandDefault) {
-          Matrix.fromColumns(symlib, filtered.columns(colIx).expand(defaultConstructor.get, true) ++ filtered.notBestCol(colIx), filtered.clauses)
-        } else {
-          Matrix.fromColumns(symlib, filtered.notBestCol(colIx), filtered.clauses)
-        }
+      lazy val (hd, tl) = col.maxListSize
+      sigma.head match {
+        case ListC(sym,_) => Some(ListC(sym, hd + tl))
+        case _ => None
+      }
+    }
+  }
+
+  def trueDefault(colIx: Int, sigma: Seq[Constructor], matrixColumns: Option[IndexedSeq[Column]]): Matrix = {
+    val ctr = defaultConstructor(colIx, sigma, matrixColumns)
+    val filtered = filterMatrix(ctr, None, (_, p) => p.isDefault, colIx)
+    val expanded = if (ctr.isDefined) {
+      if (columns(colIx).fringe.sortInfo.category.isExpandDefault) {
+        Matrix.fromColumns(symlib, filtered.columns(colIx).expand(ctr.get, true) ++ filtered.notBestCol(colIx), filtered.clauses)
       } else {
         Matrix.fromColumns(symlib, filtered.notBestCol(colIx), filtered.clauses)
       }
-      Some(expanded)
+    } else {
+      Matrix.fromColumns(symlib, filtered.notBestCol(colIx), filtered.clauses)
+    }
+    expanded
+  }
+
+  def default(colIx: Int, sigma: Seq[Constructor]): Option[Matrix] = {
+    if (columns(colIx).category.hasIncompleteSignature(sigma, columns(colIx).fringe)) {
+      Some(trueDefault(colIx, sigma, None))
     } else {
       None
     }
