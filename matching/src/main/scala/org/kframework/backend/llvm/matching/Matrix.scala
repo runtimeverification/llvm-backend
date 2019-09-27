@@ -634,8 +634,8 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
       System.out.println(this)
     }
     assert(r.patterns.size == columns.size)
-    if (columns.size == 0) {
-      if (rows.size > 0) {
+    if (fringe.isEmpty) {
+      if (clauses.nonEmpty) {
         false
       } else {
         true
@@ -643,10 +643,11 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
     } else {
       val key = columns(0).validKeys.headOption
       val sigma = columns(0).signatureForKey(key)
-      if (r.patterns(0).isWildcard && columns(0).category.hasIncompleteSignature(columns(0).signature, columns(0).fringe)) {
-        val rowDefault = r.default(0, sigma, symlib, fringe)
-        default(0, sigma).isDefined && rowDefault.isDefined && default(0, sigma).get.useful(rowDefault.get)
-      } else {
+      if (r.patterns(0).isWildcard && columns(0).category.hasIncompleteSignature(sigma, columns(0).fringe)) {
+        val matrixDefault = default(0, sigma)
+        val rowDefault = r.default(0, sigma, symlib, fringe, columns)
+        matrixDefault.isDefined && rowDefault.isDefined && matrixDefault.get.useful(rowDefault.get)
+      } else if (r.patterns(0).isWildcard) {
         for (con <- sigma) {
           if (Matching.logging) {
             System.out.println("Testing constructor " + con);
@@ -657,15 +658,33 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
           }
         }
         false
+      } else {
+        val rowSigma = new Column(columns(0).fringe, IndexedSeq(r.patterns(0)), IndexedSeq(r.clause)).signatureForKey(key)
+        for (con <- rowSigma) {
+          if (Matching.logging) {
+            System.out.println("Testing constructor " + con);
+          }
+          val rowSpec = r.specialize(con, 0, symlib, fringe)
+          if (rowSpec.isDefined && specialize(con, 0, None)._2.useful(rowSpec.get)) {
+            return true
+          }
+        }
+        false
+
       }
     }
   }
 
   def rowUseless(rowIx: Int): Boolean = {
     val filteredRows = rows.take(rowIx) ++ rows.drop(rowIx + 1).takeWhile(_.clause.action.priority == rows(rowIx).clause.action.priority)
-    val matrix = Matrix.fromRows(symlib, filteredRows, fringe)
+    val withoutSC = filteredRows.filter(r => r.clause.action.scVars.isEmpty && !r.clause.action.nonlinear)
+    val matrix = Matrix.fromRows(symlib, withoutSC, fringe)
     val row = rows(rowIx)
-    !matrix.useful(row)
+    val result = !matrix.useful(row)
+    if (Matching.logging && result) {
+      System.out.println("Row " + row.clause.action.ordinal + " is useless");
+    }
+    result
   }
 
   def specializeBy(ps: IndexedSeq[Pattern[String]]): (Matrix, IndexedSeq[Pattern[String]]) = {
