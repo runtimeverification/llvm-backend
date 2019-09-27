@@ -13,6 +13,10 @@ object Parser {
     getAtt(axiom, att).isDefined
   }
 
+  def hasAtt(att: Attributes, attName: String): Boolean = {
+    att.patterns.find(isAtt(attName, _)).isDefined
+  }
+
   private def getAtt(axiom: AxiomDeclaration, att: String): Option[Pattern] = {
     axiom.att.patterns.find(isAtt(att, _))
   }
@@ -59,8 +63,8 @@ object Parser {
       }).toMap
     }
 
-    val symbolsForSort: Map[Sort, Seq[SymbolOrAlias]] = {
-      signatures.groupBy(_._2._2).mapValues(_.keys.toSeq)
+    val constructorsForSort: Map[Sort, Seq[SymbolOrAlias]] = {
+      signatures.groupBy(_._2._2).mapValues(_.keys.filter(k => !hasAtt(signatures(k)._3, "function")).toSeq)
     }
 
     val sortAtt: Map[Sort, Attributes] = {
