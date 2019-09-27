@@ -140,7 +140,7 @@ object Generator {
     val matrix = genClauseMatrix(symlib, mod, axioms, sorts)
     matrix.checkUsefulness(kem)
     if (!symlib.isHooked(name) && Parser.hasAtt(symlib.signatures(name)._3, "functional")) {
-      matrix.checkExhaustiveness(name.ctr, kem)
+      matrix.checkExhaustiveness(name, kem)
     }
     matrix.compile
   }

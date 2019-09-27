@@ -1,5 +1,7 @@
 package org.kframework.backend.llvm.matching
 
+import org.kframework.kore.KORE.{KApply,KList}
+import org.kframework.unparser.ToKast
 import org.kframework.attributes.{Location,Source}
 import org.kframework.parser.kore.{Sort,CompoundSort,SymbolOrAlias}
 import org.kframework.parser.kore.implementation.{DefaultBuilders => B}
@@ -764,7 +766,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
     }
   }
 
-  def checkExhaustiveness(name: String, kem: KException => Unit): Unit = {
+  def checkExhaustiveness(name: SymbolOrAlias, kem: KException => Unit): Unit = {
     Matrix.id = 0
     val id = Matrix.id
     if (Matching.logging) {
@@ -778,7 +780,9 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
       if (Matching.logging) {
         System.out.println("Matrix " + id + " is non-exhaustive:\n" + counterexample.get.map(p => new util.Formatter().format("%12.12s", p.toShortString)).mkString(" "))
       }
-      kem(new KException(KException.ExceptionType.WARNING, KException.KExceptionGroup.COMPILER, "Non exhaustive match detected: " ++ name ++ "{}(" ++ counterexample.get.mkString(",") ++ ")"))
+      val k = (fringe zip counterexample.get).map(t => t._2.toK(t._1))
+      val func = KApply(symlib.koreToK(name), KList(k))
+      kem(new KException(KException.ExceptionType.WARNING, KException.KExceptionGroup.COMPILER, "Non exhaustive match detected: " ++ ToKast(func)))
     }
   }
 
