@@ -269,7 +269,7 @@ object SortInfo {
   }
 }
 
-case class Action(val ordinal: Int, val rhsVars: Seq[String], val scVars: Option[Seq[String]], val freshConstants: Seq[(String, Sort)], val arity: Int, val priority: Int, source: Option[Source], location: Option[Location]) {
+case class Action(val ordinal: Int, val rhsVars: Seq[String], val scVars: Option[Seq[String]], val freshConstants: Seq[(String, Sort)], val arity: Int, val priority: Int, source: Option[Source], location: Option[Location], nonlinear: Boolean) {
   override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
 }
 
