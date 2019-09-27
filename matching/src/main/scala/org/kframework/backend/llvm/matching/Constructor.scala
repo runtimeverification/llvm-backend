@@ -62,11 +62,19 @@ case class HasNoKey(key: Option[Pattern[Option[Occurrence]]]) extends Constructo
   def expand(f: Fringe): Option[Seq[Fringe]] = Some(Seq(f))
   def contract(f: Fringe, children: Seq[Pattern[String]]): Pattern[String] = {
     val child = children(0)
+    def element(k: Pattern[String], v: Pattern[String]): Pattern[String] = {
+      SymbolP(Parser.getSymbolAtt(f.symlib.sortAtt(f.sort), "element").get, Seq(k, v))
+    }
+    val unit: Pattern[String] = SymbolP(Parser.getSymbolAtt(f.symlib.sortAtt(f.sort), "unit").get, Seq())
+    def concat(m1: Pattern[String], m2: Pattern[String]): Pattern[String] = {
+      SymbolP(Parser.getSymbolAtt(f.symlib.sortAtt(f.sort), "concat").get, Seq(m1, m2))
+    }
+    def wildcard = WildcardP[String]()
     child match {
       case MapP(keys, values, frame, ctr, orig) => 
-        MapP(WildcardP[String]() +: keys, WildcardP[String]() +: values, frame, ctr, orig)
+        MapP(wildcard +: keys, wildcard +: values, frame, ctr, concat(element(wildcard, wildcard), orig))
       case WildcardP() | VariableP(_, _) =>
-        MapP(Seq(WildcardP[String]()), Seq(WildcardP[String]()), Some(child), Parser.getSymbolAtt(f.symlib.sortAtt(f.sort), "element").get, null)
+        MapP(Seq(wildcard), Seq(wildcard), Some(child), Parser.getSymbolAtt(f.symlib.sortAtt(f.sort), "element").get, concat(element(wildcard, wildcard), child))
     }
   }
   override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
@@ -80,7 +88,14 @@ case class ListC(element: SymbolOrAlias, length: Int) extends Constructor {
     Some((0 until length).map(i => new Fringe(f.symlib, sort, Num(i, f.occurrence), false)))
   }
   def contract(f: Fringe, children: Seq[Pattern[String]]): Pattern[String] = {
-    ListP(children, None, Seq(), Parser.getSymbolAtt(f.symlib.sortAtt(f.sort), "element").get, null)
+    def element(v: Pattern[String]): Pattern[String] = {
+      SymbolP(Parser.getSymbolAtt(f.symlib.sortAtt(f.sort), "element").get, Seq(v))
+    }
+    val unit: Pattern[String] = SymbolP(Parser.getSymbolAtt(f.symlib.sortAtt(f.sort), "unit").get, Seq())
+    def concat(m1: Pattern[String], m2: Pattern[String]): Pattern[String] = {
+      SymbolP(Parser.getSymbolAtt(f.symlib.sortAtt(f.sort), "concat").get, Seq(m1, m2))
+    }
+    ListP(children, None, Seq(), Parser.getSymbolAtt(f.symlib.sortAtt(f.sort), "element").get, children.map(element).fold(unit)(concat))
   }
   override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
 }

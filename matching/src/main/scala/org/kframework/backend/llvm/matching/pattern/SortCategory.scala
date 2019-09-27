@@ -105,7 +105,14 @@ case class ListS() extends SortCategory {
   def hasIncompleteSignature(sigma: Seq[Constructor], f: Fringe): Boolean = true
   def missingConstructor(sigma: Seq[Constructor], f: Fringe): Pattern[String] = {
     val maxSize = sigma.map(_.asInstanceOf[ListC].length).max
-    ListP(Seq.fill[Pattern[String]](maxSize+1)(WildcardP()), None, Seq(), sigma.head.asInstanceOf[ListC].element, null)
+    def element(v: Pattern[String]): Pattern[String] = {
+      SymbolP(Parser.getSymbolAtt(f.symlib.sortAtt(f.sort), "element").get, Seq(v))
+    }
+    val unit: Pattern[String] = SymbolP(Parser.getSymbolAtt(f.symlib.sortAtt(f.sort), "unit").get, Seq())
+    def concat(m1: Pattern[String], m2: Pattern[String]): Pattern[String] = {
+      SymbolP(Parser.getSymbolAtt(f.symlib.sortAtt(f.sort), "concat").get, Seq(m1, m2))
+    }
+    ListP(Seq.fill[Pattern[String]](maxSize+1)(WildcardP()), None, Seq(), sigma.head.asInstanceOf[ListC].element, Seq.fill(maxSize+1)(element(WildcardP())).fold(unit)(concat))
   }
   override def isExpandDefault = true
   def equalityFun = "hook_LIST_eq"
