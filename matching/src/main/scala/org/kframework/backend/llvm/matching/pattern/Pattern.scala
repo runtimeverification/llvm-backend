@@ -24,6 +24,7 @@ sealed trait Pattern[T] {
   def category: Option[SortCategory]
   def variables: Set[T]
   def canonicalize(clause: Clause): Pattern[Option[Occurrence]]
+  def decanonicalize: Pattern[String]
   def isBound(clause: Clause): Boolean
   def isResidual(symlib: Parser.SymLib): Boolean
   def toShortString: String
@@ -76,6 +77,7 @@ case class AsP[T](name: T, sort: SortCategory, pat: Pattern[T]) extends Pattern[
   def category: Option[SortCategory] = pat.category
   lazy val variables: Set[T] = Set(name) ++ pat.variables
   def canonicalize(clause: Clause): Pattern[Option[Occurrence]] = AsP(clause.canonicalize(name.toString), sort, pat.canonicalize(clause))
+  def decanonicalize: Pattern[String] = AsP("_", sort, pat.decanonicalize)
   def isBound(clause: Clause): Boolean = clause.isBound(name) && pat.isBound(clause)
   def isResidual(symlib: Parser.SymLib) = pat.isResidual(symlib)
   override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
@@ -144,6 +146,7 @@ case class ListP[T](head: Seq[Pattern[T]], frame: Option[Pattern[T]], tail: Seq[
   def category = Some(ListS())
   lazy val variables: Set[T] = head.flatMap(_.variables).toSet ++ tail.flatMap(_.variables).toSet ++ frame.map(_.variables).getOrElse(Set())
   def canonicalize(clause: Clause): Pattern[Option[Occurrence]] = ListP(head.map(_.canonicalize(clause)), frame.map(_.canonicalize(clause)), tail.map(_.canonicalize(clause)), ctr, orig.canonicalize(clause))
+  def decanonicalize: Pattern[String] = ListP(head.map(_.decanonicalize), frame.map(_.decanonicalize), tail.map(_.decanonicalize), ctr, orig.decanonicalize)
   def isBound(clause: Clause): Boolean = head.forall(_.isBound(clause)) && frame.forall(_.isBound(clause)) && tail.forall(_.isBound(clause))
   def isResidual(symlib: Parser.SymLib) = true
   override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
@@ -169,6 +172,7 @@ case class LiteralP[T](literal: String, sort: SortCategory) extends Pattern[T] {
   def category = Some(sort)
   def variables: Set[T] = Set()
   def canonicalize(clause: Clause): Pattern[Option[Occurrence]] = LiteralP(literal, sort)
+  def decanonicalize: Pattern[String] = LiteralP(literal, sort)
   def isBound(clause: Clause): Boolean = true
   def isResidual(symlib: Parser.SymLib) = false
   override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
@@ -244,6 +248,7 @@ case class MapP[T](keys: Seq[Pattern[T]], values: Seq[Pattern[T]], frame: Option
   def category = Some(MapS())
   lazy val variables: Set[T] = keys.flatMap(_.variables).toSet ++ values.flatMap(_.variables).toSet ++ frame.map(_.variables).getOrElse(Set())
   def canonicalize(clause: Clause): MapP[Option[Occurrence]] = MapP(keys.map(_.canonicalize(clause)), values.map(_.canonicalize(clause)), frame.map(_.canonicalize(clause)), ctr, orig.canonicalize(clause))
+  def decanonicalize: MapP[String] = MapP(keys.map(_.decanonicalize), values.map(_.decanonicalize), frame.map(_.decanonicalize), ctr, orig.decanonicalize)
   def isBound(clause: Clause): Boolean = keys.forall(_.isBound(clause)) && values.forall(_.isBound(clause)) && frame.forall(_.isBound(clause))
   def isResidual(symlib: Parser.SymLib) = true
   override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
@@ -272,6 +277,7 @@ case class OrP[T](ps: Seq[Pattern[T]]) extends Pattern[T] {
   }
   lazy val variables: Set[T] = ps.flatMap(_.variables).toSet
   def canonicalize(clause: Clause): Pattern[Option[Occurrence]] = OrP(ps.map(_.canonicalize(clause)))
+  def decanonicalize: Pattern[String] = OrP(ps.map(_.decanonicalize))
   def isBound(clause: Clause): Boolean = ps.forall(_.isBound(clause))
   def isResidual(symlib: Parser.SymLib) = ???
   override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
@@ -357,6 +363,7 @@ case class SetP[T](elements: Seq[Pattern[T]], frame: Option[Pattern[T]], ctr: Sy
   def category = Some(SetS())
   lazy val variables: Set[T] = elements.flatMap(_.variables).toSet ++ frame.map(_.variables).getOrElse(Set())
   def canonicalize(clause: Clause): SetP[Option[Occurrence]] = SetP(elements.map(_.canonicalize(clause)), frame.map(_.canonicalize(clause)), ctr, orig.canonicalize(clause))
+  def decanonicalize: SetP[String] = SetP(elements.map(_.decanonicalize), frame.map(_.decanonicalize), ctr, orig.decanonicalize)
   def isBound(clause: Clause): Boolean = elements.forall(_.isBound(clause)) && frame.forall(_.isBound(clause))
   def isResidual(symlib: Parser.SymLib) = true
   override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
@@ -480,6 +487,7 @@ case class SymbolP[T](sym: SymbolOrAlias, ps: Seq[Pattern[T]]) extends Pattern[T
   def category: None.type = None
   lazy val variables: Set[T] = ps.flatMap(_.variables).toSet
   def canonicalize(clause: Clause): Pattern[Option[Occurrence]] = SymbolP(sym, ps.map(_.canonicalize(clause)))
+  def decanonicalize: Pattern[String] = SymbolP(sym, ps.map(_.decanonicalize))
   def isBound(clause: Clause): Boolean = ps.forall(_.isBound(clause))
   def isResidual(symlib: Parser.SymLib) = {
     symlib.functions.contains(sym) || Parser.getStringAtt(symlib.signatures(sym)._3, "anywhere").isDefined
@@ -520,6 +528,7 @@ case class VariableP[T](name: T, sort: SortCategory) extends Pattern[T] {
       VariableP(clause.canonicalize(name.toString), sort)
     }
   }
+  def decanonicalize: Pattern[String] = WildcardP()
   def isBound(clause: Clause): Boolean = clause.isBound(name)
   def isResidual(symlib: Parser.SymLib) = false
   override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
@@ -550,6 +559,7 @@ case class WildcardP[T]() extends Pattern[T] {
   def category: None.type = None
   def variables: Set[T] = Set()
   def canonicalize(clause: Clause): Pattern[Option[Occurrence]] = WildcardP()
+  def decanonicalize: Pattern[String] = WildcardP()
   def isBound(clause: Clause): Boolean = true
   def isResidual(symlib: Parser.SymLib) = false
   override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
