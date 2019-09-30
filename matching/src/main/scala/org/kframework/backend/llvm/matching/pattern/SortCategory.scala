@@ -345,7 +345,7 @@ case class BoolS() extends SortCategory {
   def hasIncompleteSignature(sigma: Seq[Constructor], f: Fringe): Boolean = sigma.length != 2
   def missingConstructor(sigma: Seq[Constructor], f: Fringe): Pattern[String] = {
     val strs = sigma.map(_.asInstanceOf[LiteralC].literal).toSet
-    if (strs("true")) {
+    if (strs("1")) {
       LiteralP("false", this)
     } else {
       LiteralP("true", this)
