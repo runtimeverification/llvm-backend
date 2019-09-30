@@ -761,7 +761,9 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
   def checkUsefulness(kem: KException => Unit): Unit = {
     for (rowIx <- rows.indices) {
       if (rowUseless(rowIx)) {
-        kem(new KException(KException.ExceptionType.WARNING, KException.KExceptionGroup.COMPILER, "Potentially useless rule detected.", clauses(rowIx).action.source.getOrElse(null), clauses(rowIx).action.location.getOrElse(null)))
+        if (clauses(rowIx).action.source.isDefined && clauses(rowIx).action.location.isDefined) {
+          kem(new KException(KException.ExceptionType.WARNING, KException.KExceptionGroup.COMPILER, "Potentially useless rule detected.", clauses(rowIx).action.source.get, clauses(rowIx).action.location.get))
+        }
       }
     }
   }
