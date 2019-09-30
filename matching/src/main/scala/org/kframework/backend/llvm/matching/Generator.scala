@@ -132,7 +132,7 @@ object Generator {
       new Action(a.ordinal, rhsVars.map(_.name).sorted.distinct, scVars.map(_.map(_.name).sorted.distinct), (rhsVars ++ scVars.getOrElse(Seq())).filter(_.name.startsWith("Var'Bang'")).map(v => (v.name, v.sort)), a.rewrite.getLeftHandSide.size, a.priority, a.source, a.location, lhsVars.toSet.size != lhsVars.size)
     })
     val patterns = axioms.map(a => genPatterns(mod, symlib, a.rewrite.getLeftHandSide)).transpose
-    val cols = (sorts, patterns).zipped.toIndexedSeq
+    val cols = (sorts, if (axioms.isEmpty) sorts.map(_ => IndexedSeq()) else patterns).zipped.toIndexedSeq
     new Matrix(symlib, cols, actions).expand
   }
   
