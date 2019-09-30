@@ -52,7 +52,48 @@ case class HasKey(isSet: Boolean, element: SymbolOrAlias, key: Option[Pattern[Op
         }
     }
   }
-  def contract(f: Fringe, children: Seq[Pattern[String]]): Pattern[String] = ???
+  def contract(f: Fringe, children: Seq[Pattern[String]]): Pattern[String] = {
+    val child = children.last
+    var key: Pattern[String] = null
+    var value: Pattern[String] = null
+    assert((isSet && children.size == 2) || (!isSet && children.size == 3))
+    if (this.key.isEmpty) {
+      if (isSet) {
+        key = children(0)
+      } else {
+        key = children(0)
+        value = children(1)
+      }
+    } else {
+      if (isSet) {
+        key = this.key.get.decanonicalize
+      } else {
+        key = this.key.get.decanonicalize
+        value = children(0)
+      }
+    }
+    def element(k: Pattern[String], v: Pattern[String]): Pattern[String] = {
+      SymbolP(Parser.getSymbolAtt(f.symlib.sortAtt(f.sort), "element").get, Seq(k, v))
+    }
+    def setElement(k: Pattern[String]): Pattern[String] = {
+      SymbolP(Parser.getSymbolAtt(f.symlib.sortAtt(f.sort), "element").get, Seq(k))
+    }
+    def concat(m1: Pattern[String], m2: Pattern[String]): Pattern[String] = {
+      SymbolP(Parser.getSymbolAtt(f.symlib.sortAtt(f.sort), "concat").get, Seq(m1, m2))
+    }
+    child match {
+      case MapP(keys, values, frame, ctr, orig) =>
+        MapP(key +: keys, value +: values, frame, ctr, orig)
+      case SetP(elems, frame, ctr, orig) =>
+        SetP(key +: elems, frame, ctr, orig)
+      case WildcardP() | VariableP(_, _) =>
+        if (isSet) {
+          SetP(Seq(key), Some(child), Parser.getSymbolAtt(f.symlib.sortAtt(f.sort), "element").get, concat(setElement(key), child))
+        } else {
+          MapP(Seq(key), Seq(value), Some(child), Parser.getSymbolAtt(f.symlib.sortAtt(f.sort), "element").get, concat(element(key, value), child))
+        }
+    }
+  }
   override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
 }
 
