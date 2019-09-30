@@ -3,13 +3,14 @@ package org.kframework.backend.llvm.matching
 import org.kframework.backend.llvm.matching.dt._
 import org.kframework.parser.kore._
 import org.kframework.parser.kore.parser.TextToKore
+import org.kframework.utils.errorsystem.KException
 
 import java.util.Optional
 import java.io.File
 import java.io.FileWriter
 
 object Matching {
-  def writeDecisionTreeToFile(filename: File, heuristic: String, outputFolder: File, threshold: Optional[(Int, Int)]) {
+  def writeDecisionTreeToFile(filename: File, heuristic: String, outputFolder: File, threshold: Optional[(Int, Int)], kem: KException => Unit) {
     val defn = new TextToKore().parse(filename)
     outputFolder.mkdirs()
     val allAxioms = Parser.getAxioms(defn).zipWithIndex
@@ -19,6 +20,7 @@ object Matching {
       (Failure(), null)
     } else {
       val matrix = Generator.genClauseMatrix(symlib, defn, axioms, Seq(axioms.head.rewrite.sort))
+      matrix.checkUsefulness(kem)
       (matrix.compile, matrix)
     }
     val funcAxioms = Parser.parseFunctionAxioms(allAxioms)
@@ -28,7 +30,7 @@ object Matching {
       if (logging) {
         System.out.println("Compiling " + f)
       }
-      Generator.mkDecisionTree(symlib, defn, funcAxioms.getOrElse(f, IndexedSeq()), symlib.signatures(f)._1)
+      Generator.mkDecisionTree(symlib, defn, funcAxioms.getOrElse(f, IndexedSeq()), symlib.signatures(f)._1, f, kem)
     })
     val path = new File(outputFolder, "dt.yaml")
     dt.serializeToYaml(path)
@@ -79,6 +81,6 @@ object Matching {
     val file = new File(args(0))
     val outputFolder = new File(args(2))
     logging = args.size > 4
-    writeDecisionTreeToFile(file, args(1), outputFolder, getThreshold(args(3)))
+    writeDecisionTreeToFile(file, args(1), outputFolder, getThreshold(args(3)), (e) => ())
   }
 }
