@@ -56,7 +56,7 @@ case class HasKey(isSet: Boolean, element: SymbolOrAlias, key: Option[Pattern[Op
   override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
 }
 
-case class HasNoKey(key: Option[Pattern[Option[Occurrence]]]) extends Constructor {
+case class HasNoKey(isSet: Boolean, key: Option[Pattern[Option[Occurrence]]]) extends Constructor {
   def name = "0"
   def isBest(pat: Pattern[Option[Occurrence]]): Boolean = key.isDefined && pat == key.get
   def expand(f: Fringe): Option[Seq[Fringe]] = Some(Seq(f))

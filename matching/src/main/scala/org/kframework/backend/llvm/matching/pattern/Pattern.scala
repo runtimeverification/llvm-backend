@@ -185,9 +185,9 @@ case class MapP[T](keys: Seq[Pattern[T]], values: Seq[Pattern[T]], frame: Option
     } else if (keys.isEmpty) {
       frame.get.signature(clause)
     } else if (frame.isEmpty) {
-      keys.flatMap(key => Seq(HasKey(isSet = false, ctr, clause.canonicalize(key)), HasNoKey(clause.canonicalize(key))))
+      keys.flatMap(key => Seq(HasKey(isSet = false, ctr, clause.canonicalize(key)), HasNoKey(false, clause.canonicalize(key))))
     } else {
-      keys.flatMap(key => Seq(HasKey(isSet = false, ctr, clause.canonicalize(key)), HasNoKey(clause.canonicalize(key)))) ++ frame.get.signature(clause)
+      keys.flatMap(key => Seq(HasKey(isSet = false, ctr, clause.canonicalize(key)), HasNoKey(false, clause.canonicalize(key)))) ++ frame.get.signature(clause)
     }
   }
   def isWildcard: Boolean = keys.isEmpty && values.isEmpty && frame.isDefined && frame.get.isWildcard
@@ -197,9 +197,9 @@ case class MapP[T](keys: Seq[Pattern[T]], values: Seq[Pattern[T]], frame: Option
       case (Empty(), _) => keys.isEmpty && values.isEmpty
       case (HasKey(_, _, _), Some(_)) => true
       case (HasKey(_, _, Some(p)), None) => keys.map(_.canonicalize(clause)).exists(Pattern.mightUnify(p, _))
-      case (HasNoKey(Some(p)), _) => !keys.map(_.canonicalize(clause)).contains(p)
+      case (HasNoKey(_, Some(p)), _) => !keys.map(_.canonicalize(clause)).contains(p)
       case (HasKey(_, _, None), None) => keys.nonEmpty && clause.action.priority <= maxPriority
-      case (HasNoKey(None), _) => keys.nonEmpty && clause.action.priority > maxPriority
+      case (HasNoKey(_, None), _) => keys.nonEmpty && clause.action.priority > maxPriority
     }
   }
   def score(h: Heuristic, f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double = h.scoreMap(this, f, c, key, isEmpty)
@@ -220,7 +220,7 @@ case class MapP[T](keys: Seq[Pattern[T]], values: Seq[Pattern[T]], frame: Option
           case -1 => Seq(WildcardP(), WildcardP(), this)
           case i => Seq(values(i), MapP(keys.take(i) ++ keys.takeRight(keys.size - i - 1), values.take(i) ++ values.takeRight(values.size - i - 1), frame, ctr, orig), WildcardP())
         }
-      case HasNoKey(_) | NonEmpty() => Seq(this)
+      case HasNoKey(_, _) | NonEmpty() => Seq(this)
       case HasKey(_, _, None) =>
         if (keys.isEmpty && frame.isDefined) {
           frame.get.expand(ix, isExact, fringes, f, clause, maxPriority)
@@ -299,9 +299,9 @@ case class SetP[T](elements: Seq[Pattern[T]], frame: Option[Pattern[T]], ctr: Sy
     } else if (elements.isEmpty) {
       frame.get.signature(clause)
     } else if (frame.isEmpty) {
-      elements.flatMap(elem => Seq(HasKey(isSet = true, ctr, clause.canonicalize(elem)), HasNoKey(clause.canonicalize(elem))))
+      elements.flatMap(elem => Seq(HasKey(isSet = true, ctr, clause.canonicalize(elem)), HasNoKey(true, clause.canonicalize(elem))))
     } else {
-      elements.flatMap(elem => Seq(HasKey(isSet = true, ctr, clause.canonicalize(elem)), HasNoKey(clause.canonicalize(elem)))) ++ frame.get.signature(clause)
+      elements.flatMap(elem => Seq(HasKey(isSet = true, ctr, clause.canonicalize(elem)), HasNoKey(true, clause.canonicalize(elem)))) ++ frame.get.signature(clause)
     }
   }
   def isWildcard: Boolean = elements.isEmpty && frame.isDefined && frame.get.isWildcard
@@ -311,9 +311,9 @@ case class SetP[T](elements: Seq[Pattern[T]], frame: Option[Pattern[T]], ctr: Sy
       case (Empty(), _) => elements.isEmpty
       case (HasKey(_, _, _), Some(_)) => true
       case (HasKey(_, _, Some(p)), None) => elements.map(_.canonicalize(clause)).exists(Pattern.mightUnify(p, _))
-      case (HasNoKey(Some(p)), _) => !elements.map(_.canonicalize(clause)).contains(p)
+      case (HasNoKey(_, Some(p)), _) => !elements.map(_.canonicalize(clause)).contains(p)
       case (HasKey(_, _, None), None) => elements.nonEmpty && clause.action.priority <= maxPriority
-      case (HasNoKey(None), _) => elements.nonEmpty && clause.action.priority > maxPriority
+      case (HasNoKey(_, None), _) => elements.nonEmpty && clause.action.priority > maxPriority
     }
   }
   def score(h: Heuristic, f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double = h.scoreSet(this, f, c, key, isEmpty)
@@ -334,7 +334,7 @@ case class SetP[T](elements: Seq[Pattern[T]], frame: Option[Pattern[T]], ctr: Sy
           case -1 => Seq(WildcardP(), this)
           case i => Seq(SetP(elements.take(i) ++ elements.takeRight(elements.size - i - 1), frame, ctr, orig), WildcardP())
         }
-      case HasNoKey(_) | NonEmpty() => Seq(this)
+      case HasNoKey(_, _) | NonEmpty() => Seq(this)
       case HasKey(_, _, None) =>
         if (elements.isEmpty && frame.isDefined) {
           frame.get.expand(ix, isExact, fringes, f, clause, maxPriority)
