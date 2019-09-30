@@ -662,7 +662,9 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
         }
         false
       } else {
-        val rowSigma = new Column(columns(0).fringe, IndexedSeq(r.patterns(0)), IndexedSeq(r.clause)).signatureForKey(key)
+        val rowColumn = new Column(columns(0).fringe, IndexedSeq(r.patterns(0)), IndexedSeq(r.clause))
+        val rowKey = rowColumn.validKeys.headOption
+        val rowSigma = rowColumn.signatureForKey(rowKey)
         for (con <- rowSigma) {
           if (Matching.logging) {
             System.out.println("Testing constructor " + con);
