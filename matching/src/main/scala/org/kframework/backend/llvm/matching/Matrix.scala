@@ -672,8 +672,9 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
             return true
           }
         }
-        false
-
+        val matrixDefault = default(0, rowSigma)
+        val rowDefault = r.default(0, rowSigma, symlib, fringe, columns)
+        matrixDefault.isDefined && rowDefault.isDefined && matrixDefault.get.useful(rowDefault.get)
       }
     }
   }
