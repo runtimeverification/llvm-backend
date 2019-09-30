@@ -58,6 +58,7 @@ abstract class EqualLiteral() extends SortCategory {
     val strs = sigma.map(_.asInstanceOf[LiteralC].literal).toSet
     while(true) {
       val test = fresh(idx)
+      idx += 1
       if (!strs(test))
         return LiteralP(test, this)
     }
@@ -279,6 +280,7 @@ case class IntS() extends SortCategory {
     val strs = sigma.map(_.asInstanceOf[LiteralC].literal).toSet
     while(true) {
       val test = fresh(idx)
+      idx += 1
       if (!strs(test))
         return LiteralP(test, this)
     }
