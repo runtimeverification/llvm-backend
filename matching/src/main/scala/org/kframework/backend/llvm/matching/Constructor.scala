@@ -65,6 +65,9 @@ case class HasNoKey(isSet: Boolean, key: Option[Pattern[Option[Occurrence]]]) ex
     def element(k: Pattern[String], v: Pattern[String]): Pattern[String] = {
       SymbolP(Parser.getSymbolAtt(f.symlib.sortAtt(f.sort), "element").get, Seq(k, v))
     }
+    def setElement(k: Pattern[String]): Pattern[String] = {
+      SymbolP(Parser.getSymbolAtt(f.symlib.sortAtt(f.sort), "element").get, Seq(k))
+    }
     val unit: Pattern[String] = SymbolP(Parser.getSymbolAtt(f.symlib.sortAtt(f.sort), "unit").get, Seq())
     def concat(m1: Pattern[String], m2: Pattern[String]): Pattern[String] = {
       SymbolP(Parser.getSymbolAtt(f.symlib.sortAtt(f.sort), "concat").get, Seq(m1, m2))
@@ -73,8 +76,14 @@ case class HasNoKey(isSet: Boolean, key: Option[Pattern[Option[Occurrence]]]) ex
     child match {
       case MapP(keys, values, frame, ctr, orig) => 
         MapP(wildcard +: keys, wildcard +: values, frame, ctr, concat(element(wildcard, wildcard), orig))
+      case SetP(elems, frame, ctr, orig) => 
+        SetP(wildcard +: elems, frame, ctr, concat(setElement(wildcard), orig))
       case WildcardP() | VariableP(_, _) =>
-        MapP(Seq(wildcard), Seq(wildcard), Some(child), Parser.getSymbolAtt(f.symlib.sortAtt(f.sort), "element").get, concat(element(wildcard, wildcard), child))
+        if (isSet) {
+          SetP(Seq(wildcard), Some(child), Parser.getSymbolAtt(f.symlib.sortAtt(f.sort), "element").get, concat(setElement(wildcard), child))
+        } else {
+          MapP(Seq(wildcard), Seq(wildcard), Some(child), Parser.getSymbolAtt(f.symlib.sortAtt(f.sort), "element").get, concat(element(wildcard, wildcard), child))
+        }
     }
   }
   override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
