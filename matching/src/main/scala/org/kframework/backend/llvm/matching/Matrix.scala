@@ -120,15 +120,12 @@ class Column(val fringe: Fringe, val patterns: IndexedSeq[Pattern[String]], val 
   }
 
   def signatureForUsefulness: List[Constructor] = {
-    signatureForKey(None).map(c => {
-      if (c.isInstanceOf[HasKey]) {
+    signatureForKey(None).filter(!_.isInstanceOf[HasNoKey]).map(c => {
+      if (!c.isInstanceOf[HasKey]) {
+        c
+      } else {
         val hasKey = c.asInstanceOf[HasKey]
         HasKey(hasKey.isSet, hasKey.element, None)
-      } else if (c.isInstanceOf[HasNoKey]) {
-        val hasNoKey = c.asInstanceOf[HasNoKey]
-        HasNoKey(hasNoKey.isSet, None)
-      } else {
-        c
       }
     })
   }
