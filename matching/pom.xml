@@ -41,6 +41,42 @@
       <artifactId>snakeyaml</artifactId>
       <version>1.24</version>
     </dependency>
+    <dependency>
+      <groupId>org.kframework.mpfr_java</groupId>
+      <artifactId>mpfr_java</artifactId>
+      <version>1.0.1</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.kframework.mpfr_java</groupId>
+      <artifactId>mpfr_java</artifactId>
+      <version>1.0.1</version>
+      <classifier>linux64</classifier>
+    </dependency>
+    <dependency>
+      <groupId>org.kframework.mpfr_java</groupId>
+      <artifactId>mpfr_java</artifactId>
+      <version>1.0.1</version>
+      <classifier>linux32</classifier>
+    </dependency>
+    <dependency>
+      <groupId>org.kframework.mpfr_java</groupId>
+      <artifactId>mpfr_java</artifactId>
+      <version>1.0.1</version>
+      <classifier>osx</classifier>
+    </dependency>
+    <dependency>
+      <groupId>org.kframework.mpfr_java</groupId>
+      <artifactId>mpfr_java</artifactId>
+      <version>1.0.1</version>
+      <classifier>windows64</classifier>
+    </dependency>
+    <dependency>
+      <groupId>org.kframework.mpfr_java</groupId>
+      <artifactId>mpfr_java</artifactId>
+      <version>1.0.1</version>
+      <classifier>windows32</classifier>
+    </dependency>
   </dependencies>
 
   <build>

@@ -119,6 +119,17 @@ class Column(val fringe: Fringe, val patterns: IndexedSeq[Pattern[String]], val 
     }
   }
 
+  def signatureForUsefulness: List[Constructor] = {
+    signatureForKey(None).filter(!_.isInstanceOf[HasNoKey]).map(c => {
+      if (!c.isInstanceOf[HasKey]) {
+        c
+      } else {
+        val hasKey = c.asInstanceOf[HasKey]
+        HasKey(hasKey.isSet, hasKey.element, None)
+      }
+    })
+  }
+
   lazy val signature: List[Constructor] = {
     signatureForKey(bestKey)
   }
@@ -644,8 +655,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
         true
       }
     } else {
-      val key = columns(0).validKeys.headOption
-      val sigma = columns(0).signatureForKey(key)
+      val sigma = columns(0).signatureForUsefulness
       if (r.patterns(0).isWildcard && columns(0).category.hasIncompleteSignature(sigma, columns(0).fringe)) {
         val matrixDefault = default(0, sigma)
         val rowDefault = r.default(0, sigma, symlib, fringe, columns)
@@ -662,7 +672,8 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
         }
         false
       } else {
-        val rowSigma = new Column(columns(0).fringe, IndexedSeq(r.patterns(0)), IndexedSeq(r.clause)).signatureForKey(key)
+        val rowColumn = new Column(columns(0).fringe, IndexedSeq(r.patterns(0)), IndexedSeq(r.clause))
+        val rowSigma = rowColumn.signatureForUsefulness
         for (con <- rowSigma) {
           if (Matching.logging) {
             System.out.println("Testing constructor " + con);
@@ -672,8 +683,9 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
             return true
           }
         }
-        false
-
+        val matrixDefault = default(0, rowSigma)
+        val rowDefault = r.default(0, rowSigma, symlib, fringe, columns)
+        matrixDefault.isDefined && rowDefault.isDefined && matrixDefault.get.useful(rowDefault.get)
       }
     }
   }
@@ -698,8 +710,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
         Some(IndexedSeq())
       }
     } else {
-      val key = columns(0).validKeys.headOption
-      val sigma = columns(0).signatureForKey(key)
+      val sigma = columns(0).signatureForUsefulness
       if (columns(0).category.hasIncompleteSignature(sigma, columns(0).fringe)) {
         val matrixDefault = default(0, sigma)
         if (matrixDefault.isEmpty) {

@@ -161,7 +161,7 @@ case class LiteralP[T](literal: String, sort: SortCategory) extends Pattern[T] {
   def isWildcard = false
   def isDefault = false
   def isSpecialized(ix: Constructor, isExact: Boolean, f: Fringe, c: Clause, m: Int): Boolean = {
-    ix.isInstanceOf[LiteralC] && ix.asInstanceOf[LiteralC].literal == literal
+    ix.isInstanceOf[LiteralC] && f.sortInfo.category.equal(ix.asInstanceOf[LiteralC].literal, literal)
   }
 
   def score(h: Heuristic, f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double = h.scoreLiteral(this, f, c, key, isEmpty)

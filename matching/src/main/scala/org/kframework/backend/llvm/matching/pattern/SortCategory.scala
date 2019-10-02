@@ -3,6 +3,8 @@ package org.kframework.backend.llvm.matching.pattern
 import org.kframework.backend.llvm.matching._
 import org.kframework.backend.llvm.matching.dt._
 import org.kframework.parser.kore.SymbolOrAlias
+import org.kframework.mpfr._
+import java.util.regex.{Pattern => Regex}
 
 sealed trait SortCategory {
   def hookAtt: String
@@ -12,6 +14,7 @@ sealed trait SortCategory {
   def equalityFun: String
   def tree(matrix: Matrix): DecisionTree
   def length(rawLength: Int): Int = rawLength
+  def equal(s1: String, s2: String): Boolean = s1 == s2
 }
 
 object SortCategory {
@@ -55,6 +58,7 @@ abstract class EqualLiteral() extends SortCategory {
     val strs = sigma.map(_.asInstanceOf[LiteralC].literal).toSet
     while(true) {
       val test = fresh(idx)
+      idx += 1
       if (!strs(test))
         return LiteralP(test, this)
     }
@@ -231,7 +235,42 @@ case class FloatS() extends EqualLiteral {
   def hookAtt = "FLOAT.Float"
   def equalityFun = "hook_FLOAT_trueeq"
   def fresh(idx: Int) = idx.toString + ".0"
+  override def equal(s1: String, s2: String): Boolean = {
+    parseKFloat(s1) == parseKFloat(s2)
+  }
+
+  private val precisionAndExponent = Regex.compile("(.*)[pP](\\d+)[xX](\\d+)");
+  def parseKFloat(s: String): (BigFloat, Int) = {
+    try {
+      val m = precisionAndExponent.matcher(s)
+      val (precision, exponent, value) =
+      if (m.matches) {
+        (Integer.parseInt(m.group(2)),
+        Integer.parseInt(m.group(3)),
+        m.group(1))
+      } else if (s.endsWith("f") || s.endsWith("F")) {
+        (BinaryMathContext.BINARY32.precision,
+        BinaryMathContext.BINARY32_EXPONENT_BITS,
+        s.substring(0, s.length - 1))
+      } else {
+        (BinaryMathContext.BINARY64.precision,
+        BinaryMathContext.BINARY64_EXPONENT_BITS,
+        if (s.endsWith("d") || s.endsWith("D")) {
+          s.substring(0, s.length() - 1)
+        } else {
+          s
+        })
+      }
+      val mc = new BinaryMathContext(precision, exponent)
+      val result = new BigFloat(value, mc)
+      (result, exponent)
+    } catch {
+      case _:IllegalArgumentException =>
+        throw new NumberFormatException
+    }
+  }
 }
+
 case class IntS() extends SortCategory {
   def hookAtt = "INT.Int"
   def hasIncompleteSignature(sigma: Seq[Constructor], f: Fringe): Boolean = true
@@ -241,6 +280,7 @@ case class IntS() extends SortCategory {
     val strs = sigma.map(_.asInstanceOf[LiteralC].literal).toSet
     while(true) {
       val test = fresh(idx)
+      idx += 1
       if (!strs(test))
         return LiteralP(test, this)
     }
@@ -305,7 +345,7 @@ case class BoolS() extends SortCategory {
   def hasIncompleteSignature(sigma: Seq[Constructor], f: Fringe): Boolean = sigma.length != 2
   def missingConstructor(sigma: Seq[Constructor], f: Fringe): Pattern[String] = {
     val strs = sigma.map(_.asInstanceOf[LiteralC].literal).toSet
-    if (strs("true")) {
+    if (strs("1")) {
       LiteralP("false", this)
     } else {
       LiteralP("true", this)
