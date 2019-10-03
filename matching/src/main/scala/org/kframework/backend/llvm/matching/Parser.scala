@@ -165,6 +165,10 @@ object Parser {
     defn.modules.flatMap(_.decls).filter(_.isInstanceOf[AxiomDeclaration]).map(_.asInstanceOf[AxiomDeclaration])
   }
 
+  def getSorts(defn: Definition): Seq[Sort] = {
+    defn.modules.flatMap(_.decls).filter(_.isInstanceOf[SortDeclaration]).map(_.asInstanceOf[SortDeclaration].sort)
+  }
+
   def parseTopAxioms(axioms: Seq[(AxiomDeclaration, Int)]) : IndexedSeq[AxiomInfo] = {
     val withOwise = axioms.flatMap(parseAxiomSentence(splitTop, _))
     withOwise.map(_._2).sortWith(_.priority < _.priority).toIndexedSeq
@@ -242,7 +246,7 @@ object Parser {
   def parseSymbols(defn: Definition, heuristics: String) : SymLib = {
     val axioms = getAxioms(defn)
     val symbols = axioms.flatMap(a => parsePatternForSymbols(a.pattern))
-    val allSorts = symbols.flatMap(_.params)
+    val allSorts = getSorts(defn)
     val overloads = getOverloads(axioms)
     new SymLib(symbols, allSorts, defn, overloads, parseHeuristics(heuristics))
   }
