@@ -22,7 +22,7 @@ using namespace kllvm::parser;
 %option nounput
 
 /* Flex macros */
-ident [a-zA-Z][a-zA-Z0-9'-]*
+ident @?[a-zA-Z][a-zA-Z0-9'-]*
 
 /* Flex extra states */
 %x COMM STR

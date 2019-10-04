@@ -8,10 +8,15 @@ declare fastcc %block* @step(%block*)
 declare void @koreCollect(%block **)
 
 @depth = thread_local global i64 zeroinitializer
-@INTERVAL = thread_local global i64 @GC_INTERVAL@
+@INTERVAL = internal thread_local global i64 @GC_INTERVAL@
 @current_interval = thread_local global i64 0
 
 @gc_roots = global [256 x i8 *] zeroinitializer
+
+define void @set_gc_interval(i64 %interval) {
+  store i64 %interval, i64* @INTERVAL
+  ret void
+}
 
 define i1 @finished_rewriting() {
 entry:

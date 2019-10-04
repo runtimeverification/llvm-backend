@@ -1,7 +1,11 @@
 package org.kframework.backend.llvm.matching
 
+import org.kframework.kore.KORE.{KApply,KList}
+import org.kframework.unparser.ToKast
+import org.kframework.attributes.{Location,Source}
 import org.kframework.parser.kore.{Sort,CompoundSort,SymbolOrAlias}
 import org.kframework.parser.kore.implementation.{DefaultBuilders => B}
+import org.kframework.utils.errorsystem.KException
 import org.kframework.backend.llvm.matching.pattern._
 import org.kframework.backend.llvm.matching.dt._
 import java.util
@@ -113,6 +117,17 @@ class Column(val fringe: Fringe, val patterns: IndexedSeq[Pattern[String]], val 
     } else {
       nodups.filter(_ != Empty())
     }
+  }
+
+  def signatureForUsefulness: List[Constructor] = {
+    signatureForKey(None).filter(!_.isInstanceOf[HasNoKey]).map(c => {
+      if (!c.isInstanceOf[HasKey]) {
+        c
+      } else {
+        val hasKey = c.asInstanceOf[HasKey]
+        HasKey(hasKey.isSet, hasKey.element, None)
+      }
+    })
   }
 
   lazy val signature: List[Constructor] = {
@@ -246,7 +261,8 @@ case class Fringe(val symlib: Parser.SymLib, val sort: Sort, val occurrence: Occ
 }
 
 class SortInfo private(sort: Sort, symlib: Parser.SymLib) {
-  val constructors = symlib.symbolsForSort.getOrElse(sort, Seq())
+  val constructors = symlib.constructorsForSort.getOrElse(sort, Seq())
+  val exactConstructors = constructors.filter(_.ctr != "inj")
   private val rawInjections = constructors.filter(_.ctr == "inj")
   private val injMap = rawInjections.map(b => (b, rawInjections.filter(a => symlib.isSubsorted(a.params.head, b.params.head)))).toMap
   private val rawOverloads = constructors.filter(symlib.overloads.contains)
@@ -255,6 +271,7 @@ class SortInfo private(sort: Sort, symlib: Parser.SymLib) {
   val trueInjMap = injMap ++ overloadInjMap
   val category: SortCategory = SortCategory(Parser.getStringAtt(symlib.sortAtt(sort), "hook"))
   val length: Int = category.length(constructors.size)
+  val exactLength: Int = category.length(exactConstructors.size)
   val isCollection: Boolean = {
     category match {
       case MapS() | SetS() => true
@@ -268,7 +285,7 @@ object SortInfo {
   }
 }
 
-case class Action(val ordinal: Int, val rhsVars: Seq[String], val scVars: Option[Seq[String]], val freshConstants: Seq[(String, Sort)], val arity: Int, val priority: Int) {
+case class Action(val ordinal: Int, val rhsVars: Seq[String], val scVars: Option[Seq[String]], val freshConstants: Seq[(String, Sort)], val arity: Int, val priority: Int, source: Option[Source], location: Option[Location], nonlinear: Boolean) {
   override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
 }
 
@@ -348,8 +365,8 @@ case class Row(val patterns: IndexedSeq[Pattern[String]], val clause: Clause) {
     Matrix.fromRows(symlib, IndexedSeq(this), fringe).specialize(ix, colIx, None)._2.rows.headOption
   }
 
-  def default(colIx: Int, sigma: Seq[Constructor], symlib: Parser.SymLib, fringe: IndexedSeq[Fringe]): Option[Row] = {
-    Matrix.fromRows(symlib, IndexedSeq(this), fringe).default(colIx, sigma).get.rows.headOption
+  def default(colIx: Int, sigma: Seq[Constructor], symlib: Parser.SymLib, fringe: IndexedSeq[Fringe], matrixColumns: IndexedSeq[Column]): Option[Row] = {
+    Matrix.fromRows(symlib, IndexedSeq(this), fringe).trueDefault(colIx, sigma, Some(matrixColumns)).rows.headOption
   }
 
   override def toString: String = patterns.map(p => new util.Formatter().format("%12.12s", p.toShortString)).mkString(" ") + " " + clause.toString
@@ -469,30 +486,40 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
     Matrix.fromRows(symlib, newRows, fringe)
   }
 
-  def default(colIx: Int, sigma: Seq[Constructor]): Option[Matrix] = {
-    if (columns(colIx).category.hasIncompleteSignature(sigma, columns(colIx).fringe)) {
-      val defaultConstructor = {
-        if (sigma.contains(Empty())) Some(NonEmpty())
-        else if (sigma.isEmpty) None
-        else {
-          lazy val (hd, tl) = columns(colIx).maxListSize
-          sigma.head match {
-            case ListC(sym,_) => Some(ListC(sym, hd + tl))
-            case _ => None
-          }
-        }
+  def defaultConstructor(colIx: Int, sigma: Seq[Constructor], matrixColumns: Option[IndexedSeq[Column]]): Option[Constructor] = {
+    if (sigma.contains(Empty())) Some(NonEmpty())
+    else if (sigma.isEmpty) None
+    else {
+      val col = matrixColumns match {
+        case None => columns(colIx)
+        case Some(cols) => cols(colIx)
       }
-      val filtered = filterMatrix(defaultConstructor, None, (_, p) => p.isDefault, colIx)
-      val expanded = if (defaultConstructor.isDefined) {
-        if (columns(colIx).fringe.sortInfo.category.isExpandDefault) {
-          Matrix.fromColumns(symlib, filtered.columns(colIx).expand(defaultConstructor.get, true) ++ filtered.notBestCol(colIx), filtered.clauses)
-        } else {
-          Matrix.fromColumns(symlib, filtered.notBestCol(colIx), filtered.clauses)
-        }
+      lazy val (hd, tl) = col.maxListSize
+      sigma.head match {
+        case ListC(sym,_) => Some(ListC(sym, hd + tl))
+        case _ => None
+      }
+    }
+  }
+
+  def trueDefault(colIx: Int, sigma: Seq[Constructor], matrixColumns: Option[IndexedSeq[Column]]): Matrix = {
+    val ctr = defaultConstructor(colIx, sigma, matrixColumns)
+    val filtered = filterMatrix(ctr, None, (_, p) => p.isDefault, colIx)
+    val expanded = if (ctr.isDefined) {
+      if (columns(colIx).fringe.sortInfo.category.isExpandDefault) {
+        Matrix.fromColumns(symlib, filtered.columns(colIx).expand(ctr.get, true) ++ filtered.notBestCol(colIx), filtered.clauses)
       } else {
         Matrix.fromColumns(symlib, filtered.notBestCol(colIx), filtered.clauses)
       }
-      Some(expanded)
+    } else {
+      Matrix.fromColumns(symlib, filtered.notBestCol(colIx), filtered.clauses)
+    }
+    expanded
+  }
+
+  def default(colIx: Int, sigma: Seq[Constructor]): Option[Matrix] = {
+    if (columns(colIx).category.hasIncompleteSignature(sigma, columns(colIx).fringe)) {
+      Some(trueDefault(colIx, sigma, None))
     } else {
       None
     }
@@ -621,19 +648,19 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
       System.out.println(this)
     }
     assert(r.patterns.size == columns.size)
-    if (columns.size == 0) {
-      if (rows.size > 0) {
+    if (fringe.isEmpty) {
+      if (clauses.nonEmpty) {
         false
       } else {
         true
       }
     } else {
-      val key = columns(0).validKeys.headOption
-      val sigma = columns(0).signatureForKey(key)
-      if (r.patterns(0).isWildcard && columns(0).category.hasIncompleteSignature(columns(0).signature, columns(0).fringe)) {
-        val rowDefault = r.default(0, sigma, symlib, fringe)
-        default(0, sigma).isDefined && rowDefault.isDefined && default(0, sigma).get.useful(rowDefault.get)
-      } else {
+      val sigma = columns(0).signatureForUsefulness
+      if (r.patterns(0).isWildcard && columns(0).category.hasIncompleteSignature(sigma, columns(0).fringe)) {
+        val matrixDefault = default(0, sigma)
+        val rowDefault = r.default(0, sigma, symlib, fringe, columns)
+        matrixDefault.isDefined && rowDefault.isDefined && matrixDefault.get.useful(rowDefault.get)
+      } else if (r.patterns(0).isWildcard) {
         for (con <- sigma) {
           if (Matching.logging) {
             System.out.println("Testing constructor " + con);
@@ -644,16 +671,134 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
           }
         }
         false
+      } else {
+        val rowColumn = new Column(columns(0).fringe, IndexedSeq(r.patterns(0)), IndexedSeq(r.clause))
+        val rowSigma = rowColumn.signatureForUsefulness
+        for (con <- rowSigma) {
+          if (Matching.logging) {
+            System.out.println("Testing constructor " + con);
+          }
+          val rowSpec = r.specialize(con, 0, symlib, fringe)
+          if (rowSpec.isDefined && specialize(con, 0, None)._2.useful(rowSpec.get)) {
+            return true
+          }
+        }
+        val matrixDefault = default(0, rowSigma)
+        val rowDefault = r.default(0, rowSigma, symlib, fringe, columns)
+        matrixDefault.isDefined && rowDefault.isDefined && matrixDefault.get.useful(rowDefault.get)
       }
     }
   }
 
   def rowUseless(rowIx: Int): Boolean = {
     val filteredRows = rows.take(rowIx) ++ rows.drop(rowIx + 1).takeWhile(_.clause.action.priority == rows(rowIx).clause.action.priority)
-    val matrix = Matrix.fromRows(symlib, filteredRows, fringe)
+    val withoutSC = filteredRows.filter(r => r.clause.action.scVars.isEmpty && !r.clause.action.nonlinear)
+    val matrix = Matrix.fromRows(symlib, withoutSC, fringe)
     val row = rows(rowIx)
-    !matrix.useful(row)
+    val result = !matrix.useful(row)
+    if (Matching.logging && result) {
+      System.out.println("Row " + row.clause.action.ordinal + " is useless");
+    }
+    result
   }
+
+  def nonExhaustive: Option[IndexedSeq[Pattern[String]]] = {
+    if (fringe.isEmpty) {
+      if (clauses.nonEmpty) {
+        None
+      } else {
+        Some(IndexedSeq())
+      }
+    } else {
+      val sigma = columns(0).signatureForUsefulness
+      if (columns(0).category.hasIncompleteSignature(sigma, columns(0).fringe)) {
+        val matrixDefault = default(0, sigma)
+        if (matrixDefault.isEmpty) {
+          None
+        } else {
+          val id = Matrix.id
+          if (Matching.logging) {
+            System.out.println("-- Exhaustive --")
+            System.out.println("Matrix " + id + ": ")
+            System.out.println(this)
+            Matrix.id += 1
+          }
+          val child = matrixDefault.get.nonExhaustive
+          if (child.isEmpty) {
+            None
+          } else {
+            if (Matching.logging) {
+              System.out.println("Submatrix " + id + " is non-exhaustive:\n" + child.get.map(p => new util.Formatter().format("%12.12s", p.toShortString)).mkString(" "))
+            }
+            val ctr = defaultConstructor(0, sigma, None)
+            if (sigma.isEmpty) {
+              assert(child.get.size + 1 == fringe.size)
+              Some(WildcardP[String]() +: child.get)
+            } else if (ctr.isDefined && columns(0).fringe.sortInfo.category.isExpandDefault) {
+              val arity = ctr.get.expand(fringe(0)).get.size
+              assert(child.get.size - arity + 1 == fringe.size)
+              Some(ctr.get.contract(fringe(0), child.get.take(arity)) +: child.get.drop(arity))
+            } else {
+              assert(child.get.size + 1 == fringe.size)
+              Some(columns(0).category.missingConstructor(sigma, columns(0).fringe) +: child.get)
+            }
+          }
+        }
+      } else {
+        for (con <- sigma) {
+          val id = Matrix.id
+          if (Matching.logging) {
+            System.out.println("Testing constructor " + con);
+            System.out.println("-- Exhaustive --")
+            System.out.println("Matrix " + id + ": ")
+            System.out.println(this)
+            Matrix.id += 1
+          }
+          val child = specialize(con, 0, None)._2.nonExhaustive
+          if (child.isDefined) {
+            if (Matching.logging) {
+              System.out.println("Submatrix " + id + " is non-exhaustive:\n" + child.get.map(p => new util.Formatter().format("%12.12s", p.toShortString)).mkString(" "))
+            }
+            val arity = con.expand(fringe(0)).get.size
+            assert(child.get.size - arity + 1 == fringe.size)
+            return Some(con.contract(fringe(0), child.get.take(arity)) +: child.get.drop(arity))
+          }
+        }
+        None
+      }
+    }
+  }
+
+  def checkUsefulness(kem: KException => Unit): Unit = {
+    for (rowIx <- rows.indices) {
+      if (rowUseless(rowIx)) {
+        if (clauses(rowIx).action.source.isDefined && clauses(rowIx).action.location.isDefined) {
+          kem(new KException(KException.ExceptionType.WARNING, KException.KExceptionGroup.COMPILER, "Potentially useless rule detected.", clauses(rowIx).action.source.get, clauses(rowIx).action.location.get))
+        }
+      }
+    }
+  }
+
+  def checkExhaustiveness(name: SymbolOrAlias, kem: KException => Unit): Unit = {
+    Matrix.id = 0
+    val id = Matrix.id
+    if (Matching.logging) {
+      System.out.println("-- Exhaustive --")
+      System.out.println("Matrix " + id + ": ")
+      System.out.println(this)
+      Matrix.id += 1
+    }
+    val counterexample = nonExhaustive
+    if (counterexample.isDefined) {
+      if (Matching.logging) {
+        System.out.println("Matrix " + id + " is non-exhaustive:\n" + counterexample.get.map(p => new util.Formatter().format("%12.12s", p.toShortString)).mkString(" "))
+      }
+      val k = (fringe zip counterexample.get).map(t => t._2.toK(t._1))
+      val func = KApply(symlib.koreToK(name), KList(k))
+      kem(new KException(KException.ExceptionType.WARNING, KException.KExceptionGroup.COMPILER, "Non exhaustive match detected: " ++ ToKast(func)))
+    }
+  }
+
 
   def specializeBy(ps: IndexedSeq[Pattern[String]]): (Matrix, IndexedSeq[Pattern[String]]) = {
     def expandChildren(pat: Pattern[String]): IndexedSeq[Pattern[String]] = {
@@ -745,4 +890,6 @@ object Matrix {
   def clearCache: Unit = {
     cache.clear
   }
+
+  var id = 0
 }

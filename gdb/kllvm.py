@@ -481,7 +481,7 @@ class termPrinter:
 
 
     def appendStringBuffer(self, val):
-        string = val.dereference()['contents'].dereference()['data'].string()
+        string = val.dereference()['contents'].dereference()['data'].string("iso-8859-1")
         self.result += "#token(\"" + string + "\",\"StringBuffer\")"
 
     def appendLimbs(self, size, ptr):
@@ -598,7 +598,7 @@ class termPrinter:
                     self.result += c
                 else:
                     self.result += "{:02x}".format(ord(c))
-            stdStr = string.dereference()['data'].string()
+            stdStr = string.dereference()['data'].string("iso-8859-1")
             if isVar and not stdStr in self.var_names:
                 suffix = ""
                 while stdStr + suffix in self.used_var_names:

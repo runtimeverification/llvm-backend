@@ -2,14 +2,19 @@ package org.kframework.backend.llvm.matching.pattern
 
 import org.kframework.backend.llvm.matching._
 import org.kframework.backend.llvm.matching.dt._
+import org.kframework.parser.kore.SymbolOrAlias
+import org.kframework.mpfr._
+import java.util.regex.{Pattern => Regex}
 
 sealed trait SortCategory {
   def hookAtt: String
   def hasIncompleteSignature(sigma: Seq[Constructor], f: Fringe): Boolean
+  def missingConstructor(sigma: Seq[Constructor], f: Fringe): Pattern[String]
   def isExpandDefault: Boolean = false
   def equalityFun: String
   def tree(matrix: Matrix): DecisionTree
   def length(rawLength: Int): Int = rawLength
+  def equal(s1: String, s2: String): Boolean = s1 == s2
 }
 
 object SortCategory {
@@ -32,7 +37,15 @@ object SortCategory {
 
 case class SymbolS() extends SortCategory {
   def hookAtt = "STRING.String"
-  def hasIncompleteSignature(sigma: Seq[Constructor], f: Fringe): Boolean = sigma.isEmpty || sigma.contains(Empty()) || sigma.size != f.sortInfo.length
+  def hasIncompleteSignature(sigma: Seq[Constructor], f: Fringe): Boolean = sigma.isEmpty || sigma.contains(Empty()) || (!f.isExact && sigma.size != f.sortInfo.length) || (f.isExact && sigma.size != f.sortInfo.exactLength)
+  def missingConstructor(sigma: Seq[Constructor], f: Fringe): Pattern[String] = {
+    val sym = if (f.isExact) {
+      (f.sortInfo.exactConstructors.toSet -- sigma.map(_.asInstanceOf[SymbolC].sym).toSet).head
+    } else {
+      (f.sortInfo.constructors.toSet -- sigma.map(_.asInstanceOf[SymbolC].sym).toSet).head
+    }
+    SymbolP(sym, Seq.fill[Pattern[String]](f.symlib.signatures(sym)._1.size)(WildcardP()))
+  }
   def equalityFun = "hook_KEQUAL_eq"
   // not matching a builtin, therefore construct a regular switch
   // that matches the tag of the block.
@@ -40,6 +53,19 @@ case class SymbolS() extends SortCategory {
 }
 abstract class EqualLiteral() extends SortCategory {
   def hasIncompleteSignature(sigma: Seq[Constructor], f: Fringe): Boolean = true
+  def missingConstructor(sigma: Seq[Constructor], f: Fringe): Pattern[String] = {
+    var idx = 0
+    val strs = sigma.map(_.asInstanceOf[LiteralC].literal).toSet
+    while(true) {
+      val test = fresh(idx)
+      idx += 1
+      if (!strs(test))
+        return LiteralP(test, this)
+    }
+    ???
+  }
+  def fresh(idx: Int): String
+
   // matching a string or int, so compare the value of the token against a list of constants
   // constructs a tree to test the current occurrence against each possible match in turn
   def tree(matrix: Matrix): DecisionTree = {
@@ -71,14 +97,27 @@ abstract class EqualLiteral() extends SortCategory {
 case class StringS() extends EqualLiteral {
   def hookAtt = "STRING.String"
   def equalityFun = "hook_KEQUAL_eq"
+  def fresh(idx: Int) = idx.toString
 }
 case class BytesS() extends EqualLiteral {
   def hookAtt = "BYTES.Bytes"
   def equalityFun = "hook_KEQUAL_eq"
+  def fresh(idx: Int) = idx.toString
 }
 case class ListS() extends SortCategory {
   def hookAtt = "LIST.List"
   def hasIncompleteSignature(sigma: Seq[Constructor], f: Fringe): Boolean = true
+  def missingConstructor(sigma: Seq[Constructor], f: Fringe): Pattern[String] = {
+    val maxSize = sigma.map(_.asInstanceOf[ListC].length).max
+    def element(v: Pattern[String]): Pattern[String] = {
+      SymbolP(Parser.getSymbolAtt(f.symlib.sortAtt(f.sort), "element").get, Seq(v))
+    }
+    val unit: Pattern[String] = SymbolP(Parser.getSymbolAtt(f.symlib.sortAtt(f.sort), "unit").get, Seq())
+    def concat(m1: Pattern[String], m2: Pattern[String]): Pattern[String] = {
+      SymbolP(Parser.getSymbolAtt(f.symlib.sortAtt(f.sort), "concat").get, Seq(m1, m2))
+    }
+    ListP(Seq.fill[Pattern[String]](maxSize+1)(WildcardP()), None, Seq(), sigma.head.asInstanceOf[ListC].element, Seq.fill(maxSize+1)(element(WildcardP())).fold(unit)(concat))
+  }
   override def isExpandDefault = true
   def equalityFun = "hook_LIST_eq"
 
@@ -123,6 +162,7 @@ case class ListS() extends SortCategory {
 case class MapS() extends SortCategory {
   def hookAtt = "MAP.Map"
   def hasIncompleteSignature(sigma: Seq[Constructor], f: Fringe): Boolean = sigma.isEmpty || sigma.contains(Empty())
+  def missingConstructor(sigma: Seq[Constructor], f: Fringe): Pattern[String] = ???
   override def isExpandDefault = true
   def equalityFun = "hook_MAP_eq"
   // matching a map, so construct a node to decompose the map by one of its elements
@@ -159,6 +199,7 @@ case class MapS() extends SortCategory {
 case class SetS() extends SortCategory {
   def hookAtt = "SET.Set"
   def hasIncompleteSignature(sigma: Seq[Constructor], f: Fringe): Boolean = sigma.isEmpty || sigma.contains(Empty())
+  def missingConstructor(sigma: Seq[Constructor], f: Fringe): Pattern[String] = ???
   override def isExpandDefault = true
   def equalityFun = "hook_SET_eq"
   // matching a set, so construct a node to decompose the set by one of its elements
@@ -193,11 +234,60 @@ case class SetS() extends SortCategory {
 case class FloatS() extends EqualLiteral {
   def hookAtt = "FLOAT.Float"
   def equalityFun = "hook_FLOAT_trueeq"
+  def fresh(idx: Int) = idx.toString + ".0"
+  override def equal(s1: String, s2: String): Boolean = {
+    parseKFloat(s1) == parseKFloat(s2)
+  }
+
+  private val precisionAndExponent = Regex.compile("(.*)[pP](\\d+)[xX](\\d+)");
+  def parseKFloat(s: String): (BigFloat, Int) = {
+    try {
+      val m = precisionAndExponent.matcher(s)
+      val (precision, exponent, value) =
+      if (m.matches) {
+        (Integer.parseInt(m.group(2)),
+        Integer.parseInt(m.group(3)),
+        m.group(1))
+      } else if (s.endsWith("f") || s.endsWith("F")) {
+        (BinaryMathContext.BINARY32.precision,
+        BinaryMathContext.BINARY32_EXPONENT_BITS,
+        s.substring(0, s.length - 1))
+      } else {
+        (BinaryMathContext.BINARY64.precision,
+        BinaryMathContext.BINARY64_EXPONENT_BITS,
+        if (s.endsWith("d") || s.endsWith("D")) {
+          s.substring(0, s.length() - 1)
+        } else {
+          s
+        })
+      }
+      val mc = new BinaryMathContext(precision, exponent)
+      val result = new BigFloat(value, mc)
+      (result, exponent)
+    } catch {
+      case _:IllegalArgumentException =>
+        throw new NumberFormatException
+    }
+  }
 }
+
 case class IntS() extends SortCategory {
   def hookAtt = "INT.Int"
   def hasIncompleteSignature(sigma: Seq[Constructor], f: Fringe): Boolean = true
   def equalityFun = "hook_INT_eq"
+  def missingConstructor(sigma: Seq[Constructor], f: Fringe): Pattern[String] = {
+    var idx = 0
+    val strs = sigma.map(_.asInstanceOf[LiteralC].literal).toSet
+    while(true) {
+      val test = fresh(idx)
+      idx += 1
+      if (!strs(test))
+        return LiteralP(test, this)
+    }
+    ???
+  }
+  def fresh(idx: Int): String = idx.toString
+
   def tree(matrix: Matrix): DecisionTree = {
     val litO = matrix.bestCol.fringe.occurrence
     val sizeO = Size(litO)
@@ -253,6 +343,14 @@ case class IntS() extends SortCategory {
 case class BoolS() extends SortCategory {
   def hookAtt = "BOOL.Bool"
   def hasIncompleteSignature(sigma: Seq[Constructor], f: Fringe): Boolean = sigma.length != 2
+  def missingConstructor(sigma: Seq[Constructor], f: Fringe): Pattern[String] = {
+    val strs = sigma.map(_.asInstanceOf[LiteralC].literal).toSet
+    if (strs("1")) {
+      LiteralP("false", this)
+    } else {
+      LiteralP("true", this)
+    }
+  }
   def equalityFun = "hook_BOOL_eq"
   // matching a bool, so match the integer value of the bool with a bitwidth of 1
   def tree(matrix: Matrix): DecisionTree = SwitchLit(matrix.bestCol.fringe.occurrence, 1, matrix.compiledCases, matrix.compiledDefault)
@@ -261,14 +359,24 @@ case class BoolS() extends SortCategory {
 case class VarS() extends EqualLiteral {
   def hookAtt = "KVAR.KVar"
   def equalityFun = "hook_STRING_eq"
+  def fresh(idx: Int) = "_" + idx.toString
 }
 case class BufferS() extends EqualLiteral {
   def hookAtt = "BUFFER.StringBuffer"
   def equalityFun = ???
+  def fresh(idx: Int) = idx.toString
 }
 case class MIntS(bitwidth: Int) extends SortCategory {
   def hookAtt = "MINT.MInt " + bitwidth
   def hasIncompleteSignature(sigma: Seq[Constructor], f: Fringe): Boolean = sigma.length != (1 << bitwidth)
+  def missingConstructor(sigma: Seq[Constructor], f: Fringe): Pattern[String] = {
+    val strs = sigma.map(_.asInstanceOf[LiteralC].literal).toSet
+    for (i <- 0 until 1 << bitwidth) {
+      if (!strs(i.toString))
+        return LiteralP(i.toString, this)
+    }
+    ???
+  }
   // matching an mint, so match the integer value of the mint with the specified bitwidth
   def tree(matrix: Matrix): DecisionTree = SwitchLit(matrix.bestCol.fringe.occurrence, bitwidth, matrix.compiledCases, matrix.compiledDefault)
   def equalityFun = ???
