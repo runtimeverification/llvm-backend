@@ -405,8 +405,8 @@ KOREPattern *KOREAxiomDeclaration::getRequires() const {
 
 
 void
-KOREAliasDeclaration::addVariable(KOREVariablePattern *Variable) {
-  boundVariables.push_back(Variable);
+KOREAliasDeclaration::addVariables(KORECompositePattern *Variables) {
+  boundVariables = Variables;
 }
 
 void KOREAliasDeclaration::addPattern(KOREPattern *Pattern) {
@@ -704,17 +704,9 @@ KOREAliasDeclaration::print(std::ostream &Out, unsigned indent) const {
   }
   Out << ") : ";
   symbol->getSort()->print(Out);
-  Out << " where " << symbol->getName();
-  printSortVariables(Out);
-  Out << "(";
-  isFirst = true;
-  for (const KOREVariablePattern *Variable : boundVariables) {
-    if (!isFirst)
-      Out << ",";
-    Variable->print(Out);
-    isFirst = false;
-  }
-  Out << ") := ";
+  Out << " where ";
+  boundVariables->print(Out);
+  Out << " := ";
   pattern->print(Out);
   Out << " ";
   printAttributeList(Out, attributes);
