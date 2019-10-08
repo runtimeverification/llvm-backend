@@ -75,10 +75,6 @@ do
   esac
 done
 
-cat <<HERE >> $input_file
-[initial-configuration{}(
-HERE
-
 echo "$initializer" >> $input_file
 
 cat <<HERE >> $input_file
@@ -116,10 +112,7 @@ HERE
 done
 
 cat <<HERE >> $input_file
-))]
-
-module TMP
-endmodule []
+)
 HERE
 
 set +e

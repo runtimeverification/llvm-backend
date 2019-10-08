@@ -78,10 +78,7 @@ static void *allocatePatternAsConfiguration(const KOREPattern *Pattern) {
 }
 
 block *parseConfiguration(const char *filename) {
-  // Parse configuartion definition into a KOREDefinition.
-  // A configuration definition should contain a single attribute named
-  // "initial-configuration" that contains the initial configuation as
-  // an object pattern and a single empty module with no attributes.
+  // Parse initial configuration as a KOREPattern
   KOREScanner scanner(filename);
   KOREParser parser(scanner);
   KOREPattern *InitialConfiguration = parser.pattern();
