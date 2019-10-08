@@ -1,4 +1,1 @@
-[initial-configuration{}(LblinitGeneratedTopCell{}(Lbl'Unds'Map'Unds'{}(Lbl'Stop'Map{}(),Lbl'UndsPipe'-'-GT-Unds'{}(inj{SortKConfigVar{}, SortKItem{}}(\dv{SortKConfigVar{}}("$PGM")),inj{SortBool{}, SortKItem{}}(\dv{SortBool{}}("true"))))))]
-
-module TMP
-endmodule []
+LblinitGeneratedTopCell{}(Lbl'Unds'Map'Unds'{}(Lbl'Stop'Map{}(),Lbl'UndsPipe'-'-GT-Unds'{}(inj{SortKConfigVar{}, SortKItem{}}(\dv{SortKConfigVar{}}("$PGM")),inj{SortBool{}, SortKItem{}}(\dv{SortBool{}}("true")))))
