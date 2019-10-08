@@ -4,7 +4,7 @@
 #include "kllvm/codegen/DecisionParser.h"
 #include "kllvm/codegen/EmitConfigParser.h"
 #include "kllvm/parser/KOREScanner.h"
-#include "kllvm/parser/KOREParserDriver.h"
+#include "kllvm/parser/KOREParser.h"
 
 #include "llvm/IR/Instructions.h"
 #include "llvm/IR/LLVMContext.h"
@@ -14,6 +14,7 @@
 #include <libgen.h>
 #include <sys/stat.h>
 
+#include <iostream>
 #include <fstream>
 
 using namespace kllvm;
@@ -32,10 +33,8 @@ int main (int argc, char **argv) {
   CODEGEN_DEBUG = atoi(argv[4]);
 
   KOREScanner scanner(argv[1]);
-  KOREParserDriver driver;
-  KOREDefinition *definition;
-  KOREParser parser(scanner, driver, &definition);
-  parser.parse();
+  KOREParser parser(scanner);
+  KOREDefinition *definition = parser.definition();
   definition->preprocess();
 
   llvm::LLVMContext Context;
