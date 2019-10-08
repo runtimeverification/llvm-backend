@@ -1,7 +1,7 @@
 #ifndef KORESCANNER_H
 #define KORESCANNER_H
 
-#include "kllvm/parser/KOREParser.h"
+#include "kllvm/parser/location.h"
 
 namespace kllvm {
 namespace parser {
