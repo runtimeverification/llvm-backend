@@ -1,7 +1,7 @@
 #ifndef KORESCANNER_H
 #define KORESCANNER_H
 
-#include "kllvm/parser/KOREParser.hh"
+#include "kllvm/parser/KOREParser.h"
 
 namespace kllvm {
 namespace parser {
@@ -14,8 +14,8 @@ public:
 friend class KOREParser;
 
 private:
-  int yylex(KOREParser::semantic_type *lval, KOREParser::location_type *loc);
-  void error(const KOREParser::location_type &loc, const std::string &err_message);
+  KOREParser::token yylex(std::string *lval, location *loc);
+  void error(const location &loc, const std::string &err_message);
   FILE *in;
   std::string stringBuffer;
 };

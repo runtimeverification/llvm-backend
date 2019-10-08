@@ -1,15 +1,13 @@
 %{
 
 #include "kllvm/parser/KOREScanner.h"
-#include "kllvm/parser/location.hh"
+#include <iostream>
 
 using namespace kllvm::parser;
 
 #undef  YY_DECL
 #define YY_DECL \
-  int KOREScanner::yylex(KOREParser::semantic_type *lval, location *loc)
-
-#define TOKEN_EOF 0
+  KOREParser::token KOREScanner::yylex(std::string *lval, location *loc)
 
 /* update location on matching */
 #define YY_USER_ACTION loc->step(); loc->columns(yyleng);
@@ -47,27 +45,28 @@ yyin = in;
 "where"         { return KOREParser::token::WHERE;        }
 "alias"         { return KOREParser::token::ALIAS;        }
 "axiom"         { return KOREParser::token::AXIOM;        }
+"claim"         { return KOREParser::token::CLAIM;        }
 "hooked-sort"   { return KOREParser::token::HOOKEDSORT;   }
 "hooked-symbol" { return KOREParser::token::HOOKEDSYMBOL; }
 
-":"  { return KOREParser::token::CLN;   }
-"{"  { return KOREParser::token::LCB;   }
-"}"  { return KOREParser::token::RCB;   }
-"["  { return KOREParser::token::LBR;   }
-"]"  { return KOREParser::token::RBR;   }
-"("  { return KOREParser::token::LP;    }
-")"  { return KOREParser::token::RP;    }
+":"  { return KOREParser::token::COLON;   }
+"{"  { return KOREParser::token::LEFTBRACE;   }
+"}"  { return KOREParser::token::RIGHTBRACE;   }
+"["  { return KOREParser::token::LEFTBRACKET;   }
+"]"  { return KOREParser::token::RIGHTBRACKET;   }
+"("  { return KOREParser::token::LEFTPAREN;    }
+")"  { return KOREParser::token::RIGHTPAREN;    }
 ","  { return KOREParser::token::COMMA; }
-":=" { return KOREParser::token::CLNEQ; }
+":=" { return KOREParser::token::COLONEQUAL; }
 
 {ident} {
-  lval->build<std::string>(yytext);
-  return KOREParser::token::OBJECTID;
+  *lval = std::string(yytext, yyleng);
+  return KOREParser::token::ID;
 }
 
 "\\"{ident} {
-  lval->build<std::string>(yytext);
-  return KOREParser::token::OBJECTID;
+  *lval = std::string(yytext, yyleng);
+  return KOREParser::token::ID;
 }
 
 "\""            { stringBuffer.clear(); BEGIN(STR);           }
@@ -81,7 +80,7 @@ yyin = in;
 <STR>\\[0-9]{3} { stringBuffer.push_back((yytext[1] - '0') * 64 + (yytext[2] - '0') * 8 + yytext[3] - '0'); }
 <STR>\\x[0-9a-fA-F]{2} { stringBuffer.push_back(strtol(yytext+2, NULL, 16)); }
 <STR>"\""       { BEGIN(INITIAL);
-                  lval->build<std::string>(stringBuffer);
+                  *lval = stringBuffer;
                   return KOREParser::token::STRING;           }
 
 "/*"           { BEGIN(COMM);    }
@@ -97,7 +96,7 @@ yyin = in;
   if(YYSTATE != INITIAL)
     error(*loc, "Either a comment or string haven't been closed\n");
 
-  return TOKEN_EOF;
+  return KOREParser::token::TOKEN_EOF;
 }
 
 . { error(*loc, std::string("Unknown token \"") + yytext + std::string("\"\n")); }
@@ -112,36 +111,27 @@ KOREScanner::KOREScanner(const char *filename) {
 }
 
 void KOREScanner::error(
-      const KOREParser::location_type &loc, const std::string &err_message) {
+      const location &loc, const std::string &err_message) {
   std::cerr << "Scanner error at " << loc << ": " << err_message << "\n";
   exit(-1);
 }
 
 int KOREScanner::scan() {
-  int token;
+  KOREParser::token token;
   do {
-    KOREParser::semantic_type sem;
-    KOREParser::location_type loc;
+    std::string sem;
+    location loc;
     token = yylex(&sem, &loc);
     std::string lexeme;
     switch (token) {
-    case KOREParser::token::OBJECTID:
+    case KOREParser::token::ID:
     case KOREParser::token::STRING:
-      lexeme = sem.as<std::string>();
-      sem.destroy<std::string>();
-      break;
-    case KOREParser::token::CHAR:
-      lexeme.push_back(sem.as<char>());
-      sem.destroy<char>();
+      lexeme = sem;
       break;
     default:
       lexeme = yytext;
     }
-    std::cout << "token=" << token
-              << ", lexeme=\"" << lexeme << "\""
-              << ", location=" << loc
-              << "\n";
-  } while (token != TOKEN_EOF);
+  } while (token != KOREParser::token::TOKEN_EOF);
 
   return 0;
 }
