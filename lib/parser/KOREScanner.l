@@ -103,8 +103,8 @@ yyin = in;
 
 %%
 
-KOREScanner::KOREScanner(const char *filename) {
-  if (!(in = fopen(filename, "r"))) {
+KOREScanner::KOREScanner(std::string filename) {
+  if (!(in = fopen(filename.c_str(), "r"))) {
     std::cerr << "Cannot read file: " << filename << "\n";
     exit(1);
   }
@@ -120,7 +120,7 @@ int KOREScanner::scan() {
   token token;
   do {
     std::string sem;
-    location loc;
+    location loc("");
     token = yylex(&sem, &loc);
     std::string lexeme;
     switch (token) {

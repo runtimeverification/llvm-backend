@@ -1,5 +1,6 @@
 #include "kllvm/ast/AST.h"
 #include "kllvm/parser/KOREScanner.h"
+#include "kllvm/parser/KOREParser.h"
 #include <iostream>
 
 namespace kllvm {
@@ -42,20 +43,17 @@ static std::string str(token tok) {
 
 static struct {
   std::string data;
-  location loc;
   token tok;
-} buffer = {"", location{}, token::EMPTY};
+} buffer = {"", token::EMPTY};
 
 std::string KOREParser::consume(token next) {
   std::string data;
-  location loc;
   token actual;
   if (buffer.tok == token::EMPTY) {
     actual = scanner.yylex(&data, &loc);
   } else {
     actual = buffer.tok;
     data = buffer.data;
-    loc = buffer.loc;
     buffer.tok = token::EMPTY;
   }
   if (actual == next) return data;
@@ -64,11 +62,9 @@ std::string KOREParser::consume(token next) {
 
 token KOREParser::peek(void) {
   std::string data;
-  location loc;
   if (buffer.tok == token::EMPTY) {
     buffer.tok = scanner.yylex(&data, &loc);
     buffer.data = data;
-    buffer.loc = loc;
   }
   return buffer.tok;
 }
@@ -216,7 +212,7 @@ KOREDeclaration *KOREParser::sentence() {
     consume(token::RIGHTBRACKET);
     return axiom;
   } default:
-    error(buffer.loc, "Expected: [import, sort, hooked-sort, symbol, hooked-symbol, alias, axiom, claim] Actual: " + str(current));
+    error(loc, "Expected: [import, sort, hooked-sort, symbol, hooked-symbol, alias, axiom, claim] Actual: " + str(current));
   }
 }
 
@@ -279,12 +275,12 @@ KOREPattern *KOREParser::_pattern() {
     case token::LEFTBRACE:
       return applicationPattern(name);
     default:
-      error(buffer.loc, "Expected: [:, {] Actual: " + str(current));
+      error(loc, "Expected: [:, {] Actual: " + str(current));
     }
   } case token::STRING:
     return KOREStringPattern::Create(consume(token::STRING));
   default:
-    error(buffer.loc, "Expected: [<id>, <string>] Actual: " + str(current));
+    error(loc, "Expected: [<id>, <string>] Actual: " + str(current));
   }
 }
 

@@ -32,8 +32,7 @@ int main (int argc, char **argv) {
 
   CODEGEN_DEBUG = atoi(argv[4]);
 
-  KOREScanner scanner(argv[1]);
-  KOREParser parser(scanner);
+  KOREParser parser(argv[1]);
   KOREDefinition *definition = parser.definition();
   definition->preprocess();
 

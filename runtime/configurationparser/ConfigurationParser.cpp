@@ -79,8 +79,7 @@ static void *allocatePatternAsConfiguration(const KOREPattern *Pattern) {
 
 block *parseConfiguration(const char *filename) {
   // Parse initial configuration as a KOREPattern
-  KOREScanner scanner(filename);
-  KOREParser parser(scanner);
+  KOREParser parser(filename);
   KOREPattern *InitialConfiguration = parser.pattern();
 
   //InitialConfiguration->print(std::cout);

@@ -35,7 +35,7 @@ enum class token {
 
 class KOREScanner {
 public:
-  KOREScanner(const char *filename);
+  KOREScanner(std::string filename);
   int scan();
 
 friend class KOREParser;

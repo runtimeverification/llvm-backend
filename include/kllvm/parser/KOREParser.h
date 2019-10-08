@@ -2,23 +2,22 @@
 #define KOREPARSER_H
 
 #include "kllvm/ast/AST.h"
-
-#include <string>
+#include "kllvm/parser/KOREScanner.h"
 
 namespace kllvm {
 namespace parser {
 
 class KOREParser {
 public:
-
-  KOREParser(KOREScanner &scanner) :
-	  scanner(scanner) {}
+  KOREParser(std::string filename) :
+	  scanner(KOREScanner(filename)), loc(location(filename)) {}
 
   KOREDefinition *definition(void);
   KOREPattern *pattern(void);
 
 private:
-  KOREScanner &scanner;
+  KOREScanner scanner;
+  location loc;
   [[ noreturn ]] void error(const location &loc, const std::string &err_message);
 
   std::string consume(token next);
