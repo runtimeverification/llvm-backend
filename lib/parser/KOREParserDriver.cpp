@@ -47,14 +47,14 @@ KOREModuleImportDeclaration *KOREParserDriver::finishModuleImportDeclaration() {
 void KOREParserDriver::startObjectSortDeclaration(
   const std::string &Name, bool isHooked) {
   currentDeclaration =
-    KOREObjectCompositeSortDeclaration::Create(Name, isHooked);
+    KORECompositeSortDeclaration::Create(Name, isHooked);
   pushState(ParsingDeclaration);
 }
 
-KOREObjectCompositeSortDeclaration *
+KORECompositeSortDeclaration *
 KOREParserDriver::finishObjectSortDeclaration() {
-  KOREObjectCompositeSortDeclaration *ParsedDeclaration =
-    static_cast<KOREObjectCompositeSortDeclaration *>(currentDeclaration);
+  KORECompositeSortDeclaration *ParsedDeclaration =
+    static_cast<KORECompositeSortDeclaration *>(currentDeclaration);
   currentDeclaration = nullptr;
   popState();
   return ParsedDeclaration;
@@ -78,29 +78,14 @@ KOREParserDriver::finishAxiomDeclaration(KOREPattern *Pattern) {
 void KOREParserDriver::startObjectSymbolDeclaration(
   const std::string &Name, bool isHooked) {
   currentDeclaration =
-    KOREObjectSymbolDeclaration::Create(Name, isHooked);
+    KORESymbolDeclaration::Create(Name, isHooked);
   pushState(ParsingDeclaration);
 }
 
-KOREObjectSymbolDeclaration *
-KOREParserDriver::finishObjectSymbolDeclaration(KOREObjectSort *Sort) {
-  KOREObjectSymbolDeclaration *ParsedDeclaration =
-    static_cast<KOREObjectSymbolDeclaration *>(currentDeclaration);
-  ParsedDeclaration->getSymbol()->addSort(Sort);
-  currentDeclaration = nullptr;
-  popState();
-  return ParsedDeclaration;
-}
-
-void KOREParserDriver::startMetaSymbolDeclaration(const std::string &Name) {
-  currentDeclaration = KOREMetaSymbolDeclaration::Create(Name);
-  pushState(ParsingDeclaration);
-}
-
-KOREMetaSymbolDeclaration *
-KOREParserDriver::finishMetaSymbolDeclaration(KOREMetaSort *Sort) {
-  KOREMetaSymbolDeclaration *ParsedDeclaration =
-    static_cast<KOREMetaSymbolDeclaration *>(currentDeclaration);
+KORESymbolDeclaration *
+KOREParserDriver::finishObjectSymbolDeclaration(KORESort *Sort) {
+  KORESymbolDeclaration *ParsedDeclaration =
+    static_cast<KORESymbolDeclaration *>(currentDeclaration);
   ParsedDeclaration->getSymbol()->addSort(Sort);
   currentDeclaration = nullptr;
   popState();
@@ -108,30 +93,14 @@ KOREParserDriver::finishMetaSymbolDeclaration(KOREMetaSort *Sort) {
 }
 
 void KOREParserDriver::startObjectAliasDeclaration(const std::string &Name) {
-  currentDeclaration = KOREObjectAliasDeclaration::Create(Name);
+  currentDeclaration = KOREAliasDeclaration::Create(Name);
   pushState(ParsingDeclaration);
 }
 
-KOREObjectAliasDeclaration *KOREParserDriver::finishObjectAliasDeclaration(
-  KOREObjectSort *Sort, KOREObjectPattern *Pattern) {
-  KOREObjectAliasDeclaration *ParsedDeclaration =
-    static_cast<KOREObjectAliasDeclaration *>(currentDeclaration);
-  ParsedDeclaration->getSymbol()->addSort(Sort);
-  ParsedDeclaration->addPattern(Pattern);
-  currentDeclaration = nullptr;
-  popState();
-  return ParsedDeclaration;
-}
-
-void KOREParserDriver::startMetaAliasDeclaration(const std::string &Name) {
-  currentDeclaration = KOREMetaAliasDeclaration::Create(Name);
-  pushState(ParsingDeclaration);
-}
-
-KOREMetaAliasDeclaration *KOREParserDriver::finishMetaAliasDeclaration(
-  KOREMetaSort *Sort, KOREMetaPattern *Pattern) {
-  KOREMetaAliasDeclaration *ParsedDeclaration =
-    static_cast<KOREMetaAliasDeclaration *>(currentDeclaration);
+KOREAliasDeclaration *KOREParserDriver::finishObjectAliasDeclaration(
+  KORESort *Sort, KOREPattern *Pattern) {
+  KOREAliasDeclaration *ParsedDeclaration =
+    static_cast<KOREAliasDeclaration *>(currentDeclaration);
   ParsedDeclaration->getSymbol()->addSort(Sort);
   ParsedDeclaration->addPattern(Pattern);
   currentDeclaration = nullptr;
@@ -141,44 +110,28 @@ KOREMetaAliasDeclaration *KOREParserDriver::finishMetaAliasDeclaration(
 
 void KOREParserDriver::startObjectPattern(const std::string &Name) {
   pushPattern(currentObjectPattern);
-  currentObjectPattern = KOREObjectCompositePattern::Create(Name);
+  currentObjectPattern = KORECompositePattern::Create(Name);
   pushState(ParsingObjectPattern);
 }
 
-KOREObjectCompositePattern *KOREParserDriver::finishObjectPattern() {
-  KOREObjectCompositePattern *ParsedObjectPattern = currentObjectPattern;
+KORECompositePattern *KOREParserDriver::finishObjectPattern() {
+  KORECompositePattern *ParsedObjectPattern = currentObjectPattern;
   currentObjectPattern =
-    static_cast<KOREObjectCompositePattern *>(getCurrentPattern());
+    static_cast<KORECompositePattern *>(getCurrentPattern());
   popPattern();
   popState();
 
   return ParsedObjectPattern;
 }
 
-void KOREParserDriver::startMetaPattern(const std::string &Name) {
-  pushPattern(currentMetaPattern);
-  currentMetaPattern = KOREMetaCompositePattern::Create(Name);
-  pushState(ParsingMetaPattern);
-}
-
-KOREMetaCompositePattern *KOREParserDriver::finishMetaPattern() {
-  KOREMetaCompositePattern *ParsedMetaPattern = currentMetaPattern;
-  currentMetaPattern =
-    static_cast<KOREMetaCompositePattern *>(getCurrentPattern());
-  popPattern();
-  popState();
-
-  return ParsedMetaPattern;
-}
-
 void KOREParserDriver::startObjectSort(const std::string &Name) {
   pushSort(currentObjectSort);
-  currentObjectSort = KOREObjectCompositeSort::Create(Name);
+  currentObjectSort = KORECompositeSort::Create(Name);
   pushState(ParsingObjectSort);
 }
 
-KOREObjectCompositeSort *KOREParserDriver::finishObjectSort() {
-  KOREObjectCompositeSort *ParsedObjectSort = currentObjectSort;
+KORECompositeSort *KOREParserDriver::finishObjectSort() {
+  KORECompositeSort *ParsedObjectSort = currentObjectSort;
   currentObjectSort = getCurrentSort();
   popSort();
   popState();
@@ -195,13 +148,8 @@ void KOREParserDriver::addDeclaration(KOREDeclaration *Declaration) {
 }
 
 void
-KOREParserDriver::addObjectSortVariable(KOREObjectSortVariable *SortVariable) {
+KOREParserDriver::addObjectSortVariable(KORESortVariable *SortVariable) {
   currentDeclaration->addObjectSortVariable(SortVariable);
-}
-
-void
-KOREParserDriver::addMetaSortVariable(KOREMetaSortVariable *SortVariable) {
-  currentDeclaration->addMetaSortVariable(SortVariable);
 }
 
 void KOREParserDriver::addPattern(KOREPattern *Pattern) {
@@ -218,19 +166,16 @@ void KOREParserDriver::addPattern(KOREPattern *Pattern) {
   case ParsingObjectPattern:
     currentObjectPattern->addArgument(Pattern);
     break;
-  case ParsingMetaPattern:
-    currentMetaPattern->addArgument(Pattern);
-    break;
   default:
     abort();
     break;
   }
 }
 
-void KOREParserDriver::addObjectSort(KOREObjectSort *Sort) {
+void KOREParserDriver::addObjectSort(KORESort *Sort) {
   switch (getCurrentState()) {
   case ParsingDeclaration:
-    static_cast<KOREObjectSymbolAliasDeclaration *>(currentDeclaration)->getSymbol()->addArgument(Sort);
+    static_cast<KORESymbolAliasDeclaration *>(currentDeclaration)->getSymbol()->addArgument(Sort);
     break;
   case ParsingObjectPattern:
     currentObjectPattern->getConstructor()->addFormalArgument(Sort);
@@ -244,27 +189,7 @@ void KOREParserDriver::addObjectSort(KOREObjectSort *Sort) {
   }
 }
 
-void KOREParserDriver::addMetaSort(KOREMetaSort *Sort) {
-  switch (getCurrentState()) {
-  case ParsingDeclaration:
-    static_cast<KOREMetaSymbolAliasDeclaration *>(currentDeclaration)->getSymbol()->addArgument(Sort);
-    break;
-  case ParsingMetaPattern:
-    currentMetaPattern->getConstructor()->addArgument(Sort);
-    break;
-  default:
-    abort();
-    break;
-  }
-}
-
 void
-KOREParserDriver::addObjectVariable(KOREObjectVariablePattern *Variable) {
-  static_cast<KOREObjectAliasDeclaration *>(currentDeclaration)->addVariable(Variable);
+KOREParserDriver::addObjectVariable(KOREVariablePattern *Variable) {
+  static_cast<KOREAliasDeclaration *>(currentDeclaration)->addVariable(Variable);
 }
-
-void
-KOREParserDriver::addMetaVariable(KOREMetaVariablePattern *Variable) {
-  static_cast<KOREMetaAliasDeclaration *>(currentDeclaration)->addVariable(Variable);
-}
-

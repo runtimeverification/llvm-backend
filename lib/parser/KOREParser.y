@@ -57,7 +57,6 @@ class KOREParserDriver;
 %token <char> CHAR            "kore-char"
 %token <std::string> STRING   "kore-string"
 %token <std::string> OBJECTID "object-id"
-%token <std::string> METAID   "meta-id"
 
 /* non-terminal symbols */
 %start definition
@@ -67,27 +66,20 @@ class KOREParserDriver;
 
 %type<KOREDeclaration *>                    declaration
 %type<KOREModuleImportDeclaration *>        import-declaration
-%type<KOREObjectCompositeSortDeclaration *> sort-declaration
-%type<KORESymbolDeclaration *>              symbol-declaration
-%type<KOREObjectSymbolDeclaration *>        object-symbol-declaration
-%type<KOREMetaSymbolDeclaration *>          meta-symbol-declaration
-%type<KORESymbolDeclaration *>              alias-declaration
-%type<KOREObjectAliasDeclaration *>         object-alias-declaration
-%type<KOREMetaAliasDeclaration *>           meta-alias-declaration
+%type<KORECompositeSortDeclaration *> sort-declaration
+%type<KORESymbolOrAliasDeclaration *>              symbol-declaration
+%type<KORESymbolDeclaration *>        object-symbol-declaration
+%type<KORESymbolOrAliasDeclaration *>              alias-declaration
+%type<KOREAliasDeclaration *>         object-alias-declaration
 %type<KOREAxiomDeclaration *>               axiom-declaration
 
 %type <KOREPattern *>               pattern
-%type <KOREObjectPattern *>         object-pattern
-%type <KOREMetaPattern *>           meta-pattern
-%type <KOREObjectVariablePattern *> object-variable
-%type <KOREMetaVariablePattern *>   meta-variable
+%type <KOREPattern *>         object-pattern
+%type <KOREVariablePattern *> object-variable
 
-%type <KOREObjectSort *>          object-sort
-%type <KOREMetaSort *>            meta-sort
-%type <KOREObjectSortVariable *>  object-sort-variable
-%type <KOREMetaSortVariable *>    meta-sort-variable
-%type <KOREObjectCompositeSort *> object-non-variable-sort
-%type <KOREMetaCompositeSort *>   meta-non-variable-sort
+%type <KORESort *>          object-sort
+%type <KORESortVariable *>  object-sort-variable
+%type <KORECompositeSort *> object-non-variable-sort
 
 /* associativity and priority definition */
 
@@ -100,7 +92,7 @@ object-sort
   ;
 
 object-sort-variable
-  : "object-id" { $$ = KOREObjectSortVariable::Create($1); }
+  : "object-id" { $$ = KORESortVariable::Create($1); }
   ;
 
 object-non-variable-sort
@@ -118,38 +110,14 @@ object-sort-list-non-empty
   | object-sort-list-non-empty "," object-sort { driver.addObjectSort($3); }
   ;
 
-meta-sort
-  : meta-sort-variable     { $$ = $1; }
-  | meta-non-variable-sort { $$ = $1; }
-  ;
-
-meta-sort-variable
-  : "meta-id" { $$ = KOREMetaSortVariable::Create($1); }
-  ;
-
-meta-non-variable-sort
-  : "meta-id" "{" "}" { $$ = KOREMetaCompositeSort::Create($1); }
-  ;
-
-meta-sort-list
-  : /* empty */
-  | meta-sort-list-non-empty
-  ;
-
-meta-sort-list-non-empty
-  : meta-sort                              { driver.addMetaSort($1); }
-  | meta-sort-list-non-empty "," meta-sort { driver.addMetaSort($3); }
-  ;
-
-
 /* Patterns */
 pattern
   : object-pattern { $$ = $1; }
-  | meta-pattern   { $$ = $1; }
   ;
 
 object-pattern
   : object-variable { $$ = $1; }
+  | "kore-string" { $$ = KOREStringPattern::Create($1); }
   | "object-id"
     { driver.startObjectPattern($1);     }
     "{" object-sort-list "}" "(" pattern-list ")"
@@ -158,22 +126,7 @@ object-pattern
 
 object-variable
   : "object-id" ":" object-sort
-    { $$ = KOREObjectVariablePattern::Create($1, $3); }
-  ;
-
-meta-pattern
-  : meta-variable { $$ = $1; }
-  | "kore-string" { $$ = KOREMetaStringPattern::Create($1); }
-  | "kore-char"   { $$ = KOREMetaCharPattern::Create($1);   }
-  | "meta-id"
-    { driver.startMetaPattern($1);     }
-    "{" meta-sort-list "}" "(" pattern-list ")"
-    { $$ = driver.finishMetaPattern(); }
-  ;
-
-meta-variable
-  : "meta-id" ":" meta-sort
-    { $$ = KOREMetaVariablePattern::Create($1, $3); }
+    { $$ = KOREVariablePattern::Create($1, $3); }
   ;
 
 pattern-list
@@ -229,7 +182,6 @@ sort-declaration
 
 symbol-declaration
   : object-symbol-declaration { $$ = $1; }
-  | meta-symbol-declaration   { $$ = $1; }
   ;
 
 object-symbol-declaration
@@ -245,17 +197,8 @@ object-symbol-declaration
     { $$ = driver.finishObjectSymbolDeclaration($11); }
   ;
 
-meta-symbol-declaration
-  : "symbol" "meta-id"
-    { driver.startMetaSymbolDeclaration($2);        }
-    "{" meta-sort-variable-list "}" "(" meta-sort-list ")"
-    ":" meta-sort attribute
-    { $$ = driver.finishMetaSymbolDeclaration($11); }
-  ;
-
 alias-declaration
   : object-alias-declaration { $$ = $1; }
-  | meta-alias-declaration   { $$ = $1; }
   ;
 
 object-alias-declaration
@@ -265,15 +208,6 @@ object-alias-declaration
     "where" "object-id" "{" object-sort-variable-list "}"
     "(" object-variable-list ")" ":=" object-pattern attribute
     { $$ = driver.finishObjectAliasDeclaration($11, $21); }
-  ;
-
-meta-alias-declaration
-  : "alias" "meta-id"
-    { driver.startMetaAliasDeclaration($2);             }
-    "{" meta-sort-variable-list "}" "(" meta-sort-list ")" ":" meta-sort
-    "where" "meta-id" "{" meta-sort-variable-list "}"
-    "(" meta-variable-list ")" ":=" meta-pattern attribute
-    { $$ = driver.finishMetaAliasDeclaration($11, $21); }
   ;
 
 axiom-declaration
@@ -290,11 +224,8 @@ sort-variable-list
 
 sort-variable-list-non-empty
   : object-sort-variable { driver.addObjectSortVariable($1); }
-  | meta-sort-variable   { driver.addMetaSortVariable($1);   }
   | sort-variable-list-non-empty "," object-sort-variable
     { driver.addObjectSortVariable($3); }
-  | sort-variable-list-non-empty "," meta-sort-variable
-    { driver.addMetaSortVariable($3); }
   ;
 
 object-sort-variable-list
@@ -308,17 +239,6 @@ object-sort-variable-list-non-empty
     { driver.addObjectSortVariable($3); }
   ;
 
-meta-sort-variable-list
-  : /* empty */
-  | meta-sort-variable-list-non-empty
-  ;
-
-meta-sort-variable-list-non-empty
-  : meta-sort-variable { driver.addMetaSortVariable($1); }
-  | meta-sort-variable-list-non-empty "," meta-sort-variable
-    { driver.addMetaSortVariable($3); }
-  ;
-
 object-variable-list
   : /* empty */
   | object-variable-list-non-empty
@@ -328,17 +248,6 @@ object-variable-list-non-empty
   : object-variable { driver.addObjectVariable($1); }
   | object-variable-list-non-empty "," object-variable
     { driver.addObjectVariable($3); }
-  ;
-
-meta-variable-list
-  : /* empty */
-  | meta-variable-list-non-empty
-  ;
-
-meta-variable-list-non-empty
-  : meta-variable { driver.addMetaVariable($1); }
-  | meta-variable-list-non-empty "," meta-variable
-    { driver.addMetaVariable($3); }
   ;
 
 declaration-list

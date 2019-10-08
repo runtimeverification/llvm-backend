@@ -48,7 +48,7 @@ class DecisionCase {
 private:
   /* constructor to switch on. if null, this is a wildcard match.
      if equal to \\dv, we are matching on a bool or mint literal. */
-  KOREObjectSymbol *constructor;
+  KORESymbol *constructor;
   /* the names to bind the children of this pattern to. */
   std::vector<std::string> bindings;
   /* the literal int to match on. must have a bit width equal to the
@@ -59,16 +59,16 @@ private:
 
 public:
   DecisionCase(
-    KOREObjectSymbol *constructor, 
+    KORESymbol *constructor, 
     std::vector<std::string> bindings,
     DecisionNode *child) :
       constructor(constructor),
       bindings(bindings),
       child(child) {}
-  DecisionCase(KOREObjectSymbol *dv, llvm::APInt literal, DecisionNode *child) :
+  DecisionCase(KORESymbol *dv, llvm::APInt literal, DecisionNode *child) :
     constructor(dv), literal(literal), child(child) {}
 
-  KOREObjectSymbol *getConstructor() const { return constructor; }
+  KORESymbol *getConstructor() const { return constructor; }
   const std::vector<std::string> &getBindings() const { return bindings; }
   void addBinding(std::string name) { bindings.push_back(name); }
   llvm::APInt getLiteral() const { return literal; }
@@ -128,13 +128,13 @@ public:
 class MakePatternNode : public DecisionNode {
 private:
   std::string name;
-  KOREObjectPattern *pattern;
+  KOREPattern *pattern;
   std::vector<std::string> uses;
   DecisionNode *child;
 
   MakePatternNode(
     const std::string &name,
-    KOREObjectPattern *pattern,
+    KOREPattern *pattern,
     std::vector<std::string> &uses,
     DecisionNode *child) :
       name(name),
@@ -145,7 +145,7 @@ private:
 public:
   static MakePatternNode *Create(
       const std::string &name,
-      KOREObjectPattern *pattern,
+      KOREPattern *pattern,
       std::vector<std::string> &uses,
       DecisionNode *child) {
     return new MakePatternNode(name, pattern, uses, child);
@@ -380,8 +380,8 @@ public:
 /* construct the function that evaluates the specified function symbol
    according to the specified decision tree and returns the result of the
    function. */
-void makeEvalFunction(KOREObjectSymbol *function, KOREDefinition *definition, llvm::Module *module, DecisionNode *dt);
-void makeAnywhereFunction(KOREObjectSymbol *function, KOREDefinition *definition, llvm::Module *module, DecisionNode *dt);
+void makeEvalFunction(KORESymbol *function, KOREDefinition *definition, llvm::Module *module, DecisionNode *dt);
+void makeAnywhereFunction(KORESymbol *function, KOREDefinition *definition, llvm::Module *module, DecisionNode *dt);
 
 void makeStepFunction(KOREDefinition *definition, llvm::Module *module, DecisionNode *dt);
 void makeStepFunction(KOREAxiomDeclaration *axiom, KOREDefinition *definition, llvm::Module *module, PartialStep res);

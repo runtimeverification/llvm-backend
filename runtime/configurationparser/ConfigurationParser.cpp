@@ -17,15 +17,15 @@ extern "C" {
 }
 
 static void *allocatePatternAsConfiguration(const KOREPattern *Pattern) {
-  const auto constructor = dynamic_cast<const KOREObjectCompositePattern *>(Pattern);
+  const auto constructor = dynamic_cast<const KORECompositePattern *>(Pattern);
   assert(constructor);
 
-  const KOREObjectSymbol *symbol = constructor->getConstructor();
+  const KORESymbol *symbol = constructor->getConstructor();
   assert(symbol->isConcrete() && "found sort variable in initial configuration");
   if (symbol->getName() == "\\dv") {
-    const auto sort = dynamic_cast<KOREObjectCompositeSort *>(symbol->getFormalArguments()[0]);
+    const auto sort = dynamic_cast<KORECompositeSort *>(symbol->getFormalArguments()[0]);
     const auto strPattern =
-      dynamic_cast<KOREMetaStringPattern *>(constructor->getArguments()[0]);
+      dynamic_cast<KOREStringPattern *>(constructor->getArguments()[0]);
     std::string contents = strPattern->getContents();
     return getToken(sort->getName().c_str(), contents.size(), contents.c_str());
   }
@@ -91,7 +91,7 @@ block *parseConfiguration(const char *filename) {
 
   // We expect the initial configuration as an attribute named "initial-configuration"
   assert(definition->getAttributes().count("initial-configuration"));
-  const KOREObjectCompositePattern *InitialConfigurationAttribute =
+  const KORECompositePattern *InitialConfigurationAttribute =
     definition->getAttributes().at("initial-configuration");
   assert(InitialConfigurationAttribute->getArguments().size() > 0);
   const KOREPattern *InitialConfiguration =

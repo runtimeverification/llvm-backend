@@ -146,21 +146,21 @@ llvm::Type *getValueType(ValueType sort, llvm::Module *Module) {
 }
 
 
-llvm::StructType *getBlockType(llvm::Module *Module, KOREDefinition *definition, const KOREObjectSymbol *symbol) {
+llvm::StructType *getBlockType(llvm::Module *Module, KOREDefinition *definition, const KORESymbol *symbol) {
   llvm::StructType *BlockHeaderType = Module->getTypeByName(BLOCKHEADER_STRUCT);
   llvm::ArrayType *EmptyArrayType = llvm::ArrayType::get(llvm::Type::getInt64Ty(Module->getContext()), 0);
   llvm::SmallVector<llvm::Type *, 4> Types;
   Types.push_back(BlockHeaderType);
   Types.push_back(EmptyArrayType);
-  for (KOREObjectSort *arg : symbol->getArguments()) {
-    auto sort = dynamic_cast<KOREObjectCompositeSort *>(arg);
+  for (KORESort *arg : symbol->getArguments()) {
+    auto sort = dynamic_cast<KORECompositeSort *>(arg);
     llvm::Type *type = getValueType(sort->getCategory(definition), Module);
     Types.push_back(type);
   }
   return llvm::StructType::get(Module->getContext(), Types);
 }
 
-llvm::Value *getBlockHeader(llvm::Module *Module, KOREDefinition *definition, const KOREObjectSymbol *symbol, llvm::Type *BlockType) {
+llvm::Value *getBlockHeader(llvm::Module *Module, KOREDefinition *definition, const KORESymbol *symbol, llvm::Type *BlockType) {
   llvm::StructType *BlockHeaderType = Module->getTypeByName(BLOCKHEADER_STRUCT);
   uint64_t headerVal = symbol->getTag();
   uint64_t sizeInBytes = llvm::DataLayout(Module).getTypeAllocSize(BlockType);
@@ -182,16 +182,16 @@ llvm::Value *allocateTerm(llvm::Type *AllocType, llvm::Value *Len, llvm::BasicBl
 }
 
 ValueType termType(KOREPattern *pattern, llvm::StringMap<ValueType> &substitution, KOREDefinition *definition) {
-  if (auto variable = dynamic_cast<KOREObjectVariablePattern *>(pattern)) {
+  if (auto variable = dynamic_cast<KOREVariablePattern *>(pattern)) {
     return substitution.lookup(variable->getName());
-  } else if (auto constructor = dynamic_cast<KOREObjectCompositePattern *>(pattern)) {
-    KOREObjectSymbol *symbol = constructor->getConstructor();
+  } else if (auto constructor = dynamic_cast<KORECompositePattern *>(pattern)) {
+    KORESymbol *symbol = constructor->getConstructor();
     assert(symbol->isConcrete() && "not supported yet: sort variables");
     if (symbol->getName() == "\\dv") {
-      auto sort = dynamic_cast<KOREObjectCompositeSort *>(symbol->getFormalArguments()[0]);
+      auto sort = dynamic_cast<KORECompositeSort *>(symbol->getFormalArguments()[0]);
       return sort->getCategory(definition);
     }
-    auto sort = dynamic_cast<KOREObjectCompositeSort *>(symbol->getSort());
+    auto sort = dynamic_cast<KORECompositeSort *>(symbol->getSort());
     return sort->getCategory(definition);
   } else {
     assert(false && "not supported yet: meta level");
@@ -326,9 +326,9 @@ llvm::Value *CreateTerm::createToken(ValueType sort, std::string contents) {
   }
 }
 
-llvm::Value *CreateTerm::createHook(KOREObjectCompositePattern *hookAtt, KOREObjectCompositePattern *pattern) {
+llvm::Value *CreateTerm::createHook(KORECompositePattern *hookAtt, KORECompositePattern *pattern) {
   assert(hookAtt->getArguments().size() == 1);
-  auto strPattern = dynamic_cast<KOREMetaStringPattern *>(hookAtt->getArguments()[0]);
+  auto strPattern = dynamic_cast<KOREStringPattern *>(hookAtt->getArguments()[0]);
   std::string name = strPattern->getContents();
   if (name == "BOOL.and" || name == "BOOL.andThen") {
     assert(pattern->getArguments().size() == 2);
@@ -439,13 +439,13 @@ llvm::Value *CreateTerm::createHook(KOREObjectCompositePattern *hookAtt, KOREObj
 // we use fastcc calling convention for apply_rule_* and eval_* functions so that the
 // -tailcallopt LLVM pass can be used to make K functions tail recursive when their K
 // definitions are tail recursive.
-llvm::Value *CreateTerm::createFunctionCall(std::string name, KOREObjectCompositePattern *pattern, bool sret, bool fastcc) {
+llvm::Value *CreateTerm::createFunctionCall(std::string name, KORECompositePattern *pattern, bool sret, bool fastcc) {
   std::vector<llvm::Value *> args;
-  auto returnSort = dynamic_cast<KOREObjectCompositeSort *>(pattern->getConstructor()->getSort());
+  auto returnSort = dynamic_cast<KORECompositeSort *>(pattern->getConstructor()->getSort());
   auto returnCat = returnSort->getCategory(Definition);
   int i = 0;
   for (auto sort : pattern->getConstructor()->getArguments()) {
-    auto concreteSort = dynamic_cast<KOREObjectCompositeSort *>(sort);
+    auto concreteSort = dynamic_cast<KORECompositeSort *>(sort);
     llvm::Value *arg = (*this)(pattern->getArguments()[i++]).first;
     switch(concreteSort->getCategory(Definition).cat) {
     case SortCategory::Map:
@@ -518,9 +518,9 @@ llvm::Value *CreateTerm::createFunctionCall(std::string name, ValueType returnCa
 }
 
 /* create a term, given the assumption that the created term will not be a triangle injection pair */
-llvm::Value *CreateTerm::notInjectionCase(KOREObjectCompositePattern *constructor, llvm::Value *val) {
-  const KOREObjectSymbol *symbol = constructor->getConstructor();
-  KOREObjectSymbolDeclaration *symbolDecl = Definition->getSymbolDeclarations().at(symbol->getName());
+llvm::Value *CreateTerm::notInjectionCase(KORECompositePattern *constructor, llvm::Value *val) {
+  const KORESymbol *symbol = constructor->getConstructor();
+  KORESymbolDeclaration *symbolDecl = Definition->getSymbolDeclarations().at(symbol->getName());
   llvm::StructType *BlockType = getBlockType(Module, Definition, symbol);
   llvm::Value *BlockHeader = getBlockHeader(Module, Definition, symbol, BlockType);
   llvm::Value *Block = allocateTerm(BlockType, CurrentBlock);
@@ -553,22 +553,22 @@ llvm::Value *CreateTerm::notInjectionCase(KOREObjectCompositePattern *constructo
 
 // returns a value and a boolean indicating whether that value could be an injection
 std::pair<llvm::Value *, bool> CreateTerm::operator()(KOREPattern *pattern) {
-  if (auto variable = dynamic_cast<KOREObjectVariablePattern *>(pattern)) {
+  if (auto variable = dynamic_cast<KOREVariablePattern *>(pattern)) {
     auto val = Substitution.lookup(variable->getName());
     if (!val) {
       std::cerr << variable->getName() << std::endl;
       abort();
     }
     return std::make_pair(val, true);
-  } else if (auto constructor = dynamic_cast<KOREObjectCompositePattern *>(pattern)) {
-    const KOREObjectSymbol *symbol = constructor->getConstructor();
+  } else if (auto constructor = dynamic_cast<KORECompositePattern *>(pattern)) {
+    const KORESymbol *symbol = constructor->getConstructor();
     assert(symbol->isConcrete() && "not supported yet: sort variables");
     if (symbol->getName() == "\\dv") {
-      auto sort = dynamic_cast<KOREObjectCompositeSort *>(symbol->getFormalArguments()[0]);
-      auto strPattern = dynamic_cast<KOREMetaStringPattern *>(constructor->getArguments()[0]);
+      auto sort = dynamic_cast<KORECompositeSort *>(symbol->getFormalArguments()[0]);
+      auto strPattern = dynamic_cast<KOREStringPattern *>(constructor->getArguments()[0]);
       return std::make_pair(createToken(sort->getCategory(Definition), strPattern->getContents()), false);
     }
-    KOREObjectSymbolDeclaration *symbolDecl = Definition->getSymbolDeclarations().at(symbol->getName());
+    KORESymbolDeclaration *symbolDecl = Definition->getSymbolDeclarations().at(symbol->getName());
     if (symbolDecl->getAttributes().count("function") || (symbolDecl->getAttributes().count("anywhere") && !isAnywhereOwise)) {
       if (symbolDecl->getAttributes().count("hook")) {
         return std::make_pair(createHook(symbolDecl->getAttributes().at("hook"), constructor), true);
@@ -582,7 +582,7 @@ std::pair<llvm::Value *, bool> CreateTerm::operator()(KOREPattern *pattern) {
       llvm::IntToPtrInst *Cast = new llvm::IntToPtrInst(llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), (((uint64_t)symbol->getTag()) << 32) | 1), llvm::PointerType::getUnqual(BlockType), "", CurrentBlock);
       return std::make_pair(Cast,false);
     } else if (symbolDecl->getAttributes().count("sortInjection")
-        && dynamic_cast<KOREObjectCompositeSort *>(symbol->getArguments()[0])->getCategory(Definition).cat == SortCategory::Symbol) {
+        && dynamic_cast<KORECompositeSort *>(symbol->getArguments()[0])->getCategory(Definition).cat == SortCategory::Symbol) {
       std::pair<llvm::Value *, bool> val = (*this)(constructor->getArguments()[0]);
       if (val.second) {
         llvm::Instruction *Tag = llvm::CallInst::Create(Module->getOrInsertFunction("getTag", llvm::Type::getInt32Ty(Ctx), getValueType({SortCategory::Symbol, 0}, Module)), val.first, "tag", CurrentBlock);
@@ -636,7 +636,7 @@ void addAbort(llvm::BasicBlock *block, llvm::Module *Module) {
 }
 
 bool makeFunction(std::string name, KOREPattern *pattern, KOREDefinition *definition, llvm::Module *Module, bool fastcc, bool bigStep, KOREAxiomDeclaration *axiom, std::string postfix) {
-    std::map<std::string, KOREObjectVariablePattern *> vars;
+    std::map<std::string, KOREVariablePattern *> vars;
     pattern->markVariables(vars);
     llvm::StringMap<ValueType> params;
     std::vector<llvm::Type *> paramTypes;
@@ -644,7 +644,7 @@ bool makeFunction(std::string name, KOREPattern *pattern, KOREDefinition *defini
     std::vector<llvm::Metadata *> debugArgs;
     for (auto iter = vars.begin(); iter != vars.end(); ++iter) {
       auto &entry = *iter;
-      auto sort = dynamic_cast<KOREObjectCompositeSort *>(entry.second->getSort());
+      auto sort = dynamic_cast<KORECompositeSort *>(entry.second->getSort());
       if (!sort) {
         // TODO: sort variables
         return false;
@@ -683,9 +683,9 @@ bool makeFunction(std::string name, KOREPattern *pattern, KOREDefinition *defini
     initDebugAxiom(axiom->getAttributes());
     std::string debugName = name;
     if (axiom->getAttributes().count("label")) {
-      KOREObjectCompositePattern *labelAtt = axiom->getAttributes().at("label");
+      KORECompositePattern *labelAtt = axiom->getAttributes().at("label");
       assert(labelAtt->getArguments().size() == 1);
-      auto strPattern = dynamic_cast<KOREMetaStringPattern *>(labelAtt->getArguments()[0]);
+      auto strPattern = dynamic_cast<KOREStringPattern *>(labelAtt->getArguments()[0]);
       std::string label = strPattern->getContents();
       debugName = label + postfix;
     }
@@ -733,7 +733,7 @@ std::string makeApplyRuleFunction(KOREAxiomDeclaration *axiom, KOREDefinition *d
 }
 
 std::string makeApplyRuleFunction(KOREAxiomDeclaration *axiom, KOREDefinition *definition, llvm::Module *Module, std::vector<Residual> residuals) {
-    std::map<std::string, KOREObjectVariablePattern *> vars;
+    std::map<std::string, KOREVariablePattern *> vars;
     for (auto residual : residuals) {
       residual.pattern->markVariables(vars);
     }
@@ -743,7 +743,7 @@ std::string makeApplyRuleFunction(KOREAxiomDeclaration *axiom, KOREDefinition *d
     std::vector<llvm::Metadata *> debugArgs;
     for (auto iter = vars.begin(); iter != vars.end(); ++iter) {
       auto &entry = *iter;
-      auto sort = dynamic_cast<KOREObjectCompositeSort *>(entry.second->getSort());
+      auto sort = dynamic_cast<KORECompositeSort *>(entry.second->getSort());
       if (!sort) {
         // TODO: sort variables
         return "";
@@ -789,7 +789,7 @@ std::string makeApplyRuleFunction(KOREAxiomDeclaration *axiom, KOREDefinition *d
     std::vector<llvm::Type *> types;
     for (auto residual : residuals) {
       llvm::Value *arg = creator(residual.pattern).first;
-      auto sort = dynamic_cast<KOREObjectCompositeSort *>(residual.pattern->getSort());
+      auto sort = dynamic_cast<KORECompositeSort *>(residual.pattern->getSort());
       auto cat = sort->getCategory(definition);
       switch (cat.cat) {
       case SortCategory::Map:

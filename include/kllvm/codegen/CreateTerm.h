@@ -19,9 +19,9 @@ private:
   llvm::LLVMContext &Ctx;
   bool isAnywhereOwise;
 
-  llvm::Value *createHook(KOREObjectCompositePattern *hookAtt, KOREObjectCompositePattern *pattern);
-  llvm::Value *createFunctionCall(std::string name, KOREObjectCompositePattern *pattern, bool sret, bool fastcc);
-  llvm::Value *notInjectionCase(KOREObjectCompositePattern *constructor, llvm::Value *val);
+  llvm::Value *createHook(KORECompositePattern *hookAtt, KORECompositePattern *pattern);
+  llvm::Value *createFunctionCall(std::string name, KORECompositePattern *pattern, bool sret, bool fastcc);
+  llvm::Value *notInjectionCase(KORECompositePattern *constructor, llvm::Value *val);
 public:
   CreateTerm(
     llvm::StringMap<llvm::Value *> &Substitution,
@@ -61,9 +61,9 @@ public:
    in the llvm backend. */
 std::unique_ptr<llvm::Module> newModule(std::string name, llvm::LLVMContext &Context);
 
-llvm::StructType *getBlockType(llvm::Module *Module, KOREDefinition *definition, const KOREObjectSymbol *symbol);
+llvm::StructType *getBlockType(llvm::Module *Module, KOREDefinition *definition, const KORESymbol *symbol);
 llvm::Value *getBlockHeader(llvm::Module *Module, KOREDefinition *definition,
-    const KOREObjectSymbol *symbol, llvm::Type *BlockType);
+    const KORESymbol *symbol, llvm::Type *BlockType);
 
 /* returns the llvm::Type corresponding to the type of the result of calling createTerm
    on the specified pattern. */

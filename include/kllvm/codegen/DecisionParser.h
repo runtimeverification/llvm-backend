@@ -12,7 +12,7 @@ class DecisionNode;
 
 struct Residual {
   std::string occurrence;
-  KOREObjectPattern *pattern;
+  KOREPattern *pattern;
 };
 
 struct PartialStep {
@@ -20,9 +20,9 @@ struct PartialStep {
   std::vector<Residual> residuals;
 };
 
-DecisionNode *parseYamlDecisionTreeFromString(std::string yaml, const std::map<std::string, KOREObjectSymbol *> &syms, const std::map<std::string, KOREObjectCompositeSort *> &sorts);
-DecisionNode *parseYamlDecisionTree(std::string filename, const std::map<std::string, KOREObjectSymbol *> &syms, const std::map<std::string, KOREObjectCompositeSort *> &sorts);
-PartialStep parseYamlSpecialDecisionTree(std::string filename, const std::map<std::string, KOREObjectSymbol *> &syms, const std::map<std::string, KOREObjectCompositeSort *> &sorts);
+DecisionNode *parseYamlDecisionTreeFromString(std::string yaml, const std::map<std::string, KORESymbol *> &syms, const std::map<std::string, KORECompositeSort *> &sorts);
+DecisionNode *parseYamlDecisionTree(std::string filename, const std::map<std::string, KORESymbol *> &syms, const std::map<std::string, KORECompositeSort *> &sorts);
+PartialStep parseYamlSpecialDecisionTree(std::string filename, const std::map<std::string, KORESymbol *> &syms, const std::map<std::string, KORECompositeSort *> &sorts);
 
 }
 
