@@ -143,6 +143,7 @@ public:
   void addArgument(KORESort *Argument);
   void addFormalArgument(KORESort *Argument);
   void addSort(KORESort *Sort);
+  void initPatternArguments(void) { arguments.swap(formalArguments); }
 
   const std::string &getName() const { return name; }
   const std::vector<KORESort *> &getArguments() const {

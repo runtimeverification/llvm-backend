@@ -296,6 +296,7 @@ KORECompositePattern *KOREParser::applicationPattern(std::string name) {
   consume(token::LEFTBRACE);
   auto pat = KORECompositePattern::Create(name);
   sorts(pat->getConstructor());
+  pat->getConstructor()->initPatternArguments();
   consume(token::LEFTPAREN);
   patterns(pat);
   consume(token::RIGHTPAREN);
