@@ -255,8 +255,10 @@ void KOREParser::sortsNE(Node *node) {
 KORESort *KOREParser::sort() {
   std::string name = consume(token::ID);
   if (peek() == token::LEFTBRACE) {
+    consume(token::LEFTBRACE);
     auto sort = KORECompositeSort::Create(name); 
     sorts(sort);
+    consume(token::RIGHTBRACE);
     return sort;
   } else {
     return KORESortVariable::Create(name);
@@ -271,6 +273,7 @@ KOREPattern *KOREParser::_pattern() {
     current = peek();
     switch(current) {
     case token::COLON:
+      consume(token::COLON);
       return KOREVariablePattern::Create(name, sort());
     case token::LEFTBRACE:
       return applicationPattern(name);
@@ -293,6 +296,7 @@ KORECompositePattern *KOREParser::applicationPattern(std::string name) {
   auto pat = KORECompositePattern::Create(name);
   sorts(pat->getConstructor());
   pat->getConstructor()->initPatternArguments();
+  consume(token::RIGHTBRACE);
   consume(token::LEFTPAREN);
   patterns(pat);
   consume(token::RIGHTPAREN);
