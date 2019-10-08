@@ -10,32 +10,6 @@ namespace parser {
 
 class KOREParser {
 public:
-  enum class token {
-    EMPTY,
-    MODULE,
-    ENDMODULE,
-    IMPORT,
-    SORT,
-    SYMBOL,
-    WHERE,
-    ALIAS,
-    AXIOM,
-    CLAIM,
-    HOOKEDSORT,
-    HOOKEDSYMBOL,
-    COLON,
-    LEFTBRACE,
-    RIGHTBRACE,
-    LEFTBRACKET,
-    RIGHTBRACKET,
-    LEFTPAREN,
-    RIGHTPAREN,
-    COMMA,
-    COLONEQUAL,
-    ID,
-    STRING,
-    TOKEN_EOF,
-  };
 
   KOREParser(KOREScanner &scanner) :
 	  scanner(scanner) {}

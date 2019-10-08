@@ -11,40 +11,40 @@ void KOREParser::error(
   exit(-1);
 }
 
-static std::string str(KOREParser::token tok) {
+static std::string str(token tok) {
   switch (tok) {
-  case KOREParser::token::EMPTY: abort();
-  case KOREParser::token::MODULE: return "module";
-  case KOREParser::token::ENDMODULE: return "endmodule";
-  case KOREParser::token::IMPORT: return "import";
-  case KOREParser::token::SORT: return "sort";
-  case KOREParser::token::SYMBOL: return "symbol";
-  case KOREParser::token::WHERE: return "where";
-  case KOREParser::token::ALIAS: return "alias";
-  case KOREParser::token::AXIOM: return "axiom";
-  case KOREParser::token::CLAIM: return "claim";
-  case KOREParser::token::HOOKEDSORT: return "hooked-sort";
-  case KOREParser::token::HOOKEDSYMBOL: return "hooked-symbol";
-  case KOREParser::token::COLON: return ":";
-  case KOREParser::token::LEFTBRACE: return "{";
-  case KOREParser::token::RIGHTBRACE: return "}";
-  case KOREParser::token::LEFTBRACKET: return "[";
-  case KOREParser::token::RIGHTBRACKET: return "]";
-  case KOREParser::token::LEFTPAREN: return "(";
-  case KOREParser::token::RIGHTPAREN: return ")";
-  case KOREParser::token::COMMA: return ",";
-  case KOREParser::token::COLONEQUAL: return ":=";
-  case KOREParser::token::ID: return "<identifier>";
-  case KOREParser::token::STRING: return "<string>";
-  case KOREParser::token::TOKEN_EOF: return "<EOF>";
+  case token::EMPTY: abort();
+  case token::MODULE: return "module";
+  case token::ENDMODULE: return "endmodule";
+  case token::IMPORT: return "import";
+  case token::SORT: return "sort";
+  case token::SYMBOL: return "symbol";
+  case token::WHERE: return "where";
+  case token::ALIAS: return "alias";
+  case token::AXIOM: return "axiom";
+  case token::CLAIM: return "claim";
+  case token::HOOKEDSORT: return "hooked-sort";
+  case token::HOOKEDSYMBOL: return "hooked-symbol";
+  case token::COLON: return ":";
+  case token::LEFTBRACE: return "{";
+  case token::RIGHTBRACE: return "}";
+  case token::LEFTBRACKET: return "[";
+  case token::RIGHTBRACKET: return "]";
+  case token::LEFTPAREN: return "(";
+  case token::RIGHTPAREN: return ")";
+  case token::COMMA: return ",";
+  case token::COLONEQUAL: return ":=";
+  case token::ID: return "<identifier>";
+  case token::STRING: return "<string>";
+  case token::TOKEN_EOF: return "<EOF>";
   }
 }
 
 static struct {
   std::string data;
   location loc;
-  KOREParser::token tok;
-} buffer = {"", location{}, KOREParser::token::EMPTY};
+  token tok;
+} buffer = {"", location{}, token::EMPTY};
 
 std::string KOREParser::consume(token next) {
   std::string data;
@@ -62,7 +62,7 @@ std::string KOREParser::consume(token next) {
   error(loc, "Expected: " + str(next) + " Actual: " + str(actual));
 }
 
-KOREParser::token KOREParser::peek(void) {
+token KOREParser::peek(void) {
   std::string data;
   location loc;
   if (buffer.tok == token::EMPTY) {

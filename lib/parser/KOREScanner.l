@@ -7,7 +7,7 @@ using namespace kllvm::parser;
 
 #undef  YY_DECL
 #define YY_DECL \
-  KOREParser::token KOREScanner::yylex(std::string *lval, location *loc)
+  token KOREScanner::yylex(std::string *lval, location *loc)
 
 /* update location on matching */
 #define YY_USER_ACTION loc->step(); loc->columns(yyleng);
@@ -37,36 +37,36 @@ yyin = in;
 "\n"    { loc->lines(); }
 [ \t\r] { /* nothing */ }
 
-"module"        { return KOREParser::token::MODULE;       }
-"endmodule"     { return KOREParser::token::ENDMODULE;    }
-"import"        { return KOREParser::token::IMPORT;       }
-"sort"          { return KOREParser::token::SORT;         }
-"symbol"        { return KOREParser::token::SYMBOL;       }
-"where"         { return KOREParser::token::WHERE;        }
-"alias"         { return KOREParser::token::ALIAS;        }
-"axiom"         { return KOREParser::token::AXIOM;        }
-"claim"         { return KOREParser::token::CLAIM;        }
-"hooked-sort"   { return KOREParser::token::HOOKEDSORT;   }
-"hooked-symbol" { return KOREParser::token::HOOKEDSYMBOL; }
+"module"        { return token::MODULE;       }
+"endmodule"     { return token::ENDMODULE;    }
+"import"        { return token::IMPORT;       }
+"sort"          { return token::SORT;         }
+"symbol"        { return token::SYMBOL;       }
+"where"         { return token::WHERE;        }
+"alias"         { return token::ALIAS;        }
+"axiom"         { return token::AXIOM;        }
+"claim"         { return token::CLAIM;        }
+"hooked-sort"   { return token::HOOKEDSORT;   }
+"hooked-symbol" { return token::HOOKEDSYMBOL; }
 
-":"  { return KOREParser::token::COLON;   }
-"{"  { return KOREParser::token::LEFTBRACE;   }
-"}"  { return KOREParser::token::RIGHTBRACE;   }
-"["  { return KOREParser::token::LEFTBRACKET;   }
-"]"  { return KOREParser::token::RIGHTBRACKET;   }
-"("  { return KOREParser::token::LEFTPAREN;    }
-")"  { return KOREParser::token::RIGHTPAREN;    }
-","  { return KOREParser::token::COMMA; }
-":=" { return KOREParser::token::COLONEQUAL; }
+":"  { return token::COLON;   }
+"{"  { return token::LEFTBRACE;   }
+"}"  { return token::RIGHTBRACE;   }
+"["  { return token::LEFTBRACKET;   }
+"]"  { return token::RIGHTBRACKET;   }
+"("  { return token::LEFTPAREN;    }
+")"  { return token::RIGHTPAREN;    }
+","  { return token::COMMA; }
+":=" { return token::COLONEQUAL; }
 
 {ident} {
   *lval = std::string(yytext, yyleng);
-  return KOREParser::token::ID;
+  return token::ID;
 }
 
 "\\"{ident} {
   *lval = std::string(yytext, yyleng);
-  return KOREParser::token::ID;
+  return token::ID;
 }
 
 "\""            { stringBuffer.clear(); BEGIN(STR);           }
@@ -81,7 +81,7 @@ yyin = in;
 <STR>\\x[0-9a-fA-F]{2} { stringBuffer.push_back(strtol(yytext+2, NULL, 16)); }
 <STR>"\""       { BEGIN(INITIAL);
                   *lval = stringBuffer;
-                  return KOREParser::token::STRING;           }
+                  return token::STRING;           }
 
 "/*"           { BEGIN(COMM);    }
 <COMM>[^/*\n]* { /* nothing */   }
@@ -96,7 +96,7 @@ yyin = in;
   if(YYSTATE != INITIAL)
     error(*loc, "Either a comment or string haven't been closed\n");
 
-  return KOREParser::token::TOKEN_EOF;
+  return token::TOKEN_EOF;
 }
 
 . { error(*loc, std::string("Unknown token \"") + yytext + std::string("\"\n")); }
@@ -117,21 +117,21 @@ void KOREScanner::error(
 }
 
 int KOREScanner::scan() {
-  KOREParser::token token;
+  token token;
   do {
     std::string sem;
     location loc;
     token = yylex(&sem, &loc);
     std::string lexeme;
     switch (token) {
-    case KOREParser::token::ID:
-    case KOREParser::token::STRING:
+    case token::ID:
+    case token::STRING:
       lexeme = sem;
       break;
     default:
       lexeme = yytext;
     }
-  } while (token != KOREParser::token::TOKEN_EOF);
+  } while (token != token::TOKEN_EOF);
 
   return 0;
 }
