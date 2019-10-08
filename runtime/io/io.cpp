@@ -643,10 +643,6 @@ extern "C" {
     return retBlock;
   }
 
-  block * hook_IO_mkstemp(string * filename) {
-    throw std::invalid_argument("not implemented: IO.mkstemp");
-  }
-
   block * hook_IO_stat(string * path) {
     throw std::invalid_argument("not implemented: IO.stat");
   }
