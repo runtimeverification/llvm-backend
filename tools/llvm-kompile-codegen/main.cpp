@@ -33,7 +33,7 @@ int main (int argc, char **argv) {
   CODEGEN_DEBUG = atoi(argv[4]);
 
   KOREParser parser(argv[1]);
-  KOREDefinition *definition = parser.definition();
+  ptr<KOREDefinition> definition = parser.definition();
   definition->preprocess();
 
   llvm::LLVMContext Context;
@@ -45,26 +45,26 @@ int main (int argc, char **argv) {
   }
 
   for (auto axiom : definition->getAxioms()) {
-    makeSideConditionFunction(axiom, definition, mod.get());
+    makeSideConditionFunction(axiom, definition.get(), mod.get());
     if (!axiom->isTopAxiom()) {
-      makeApplyRuleFunction(axiom, definition, mod.get());
+      makeApplyRuleFunction(axiom, definition.get(), mod.get());
     } else {
       std::string filename = argv[3] + std::string("/") + "dt_" + std::to_string(axiom->getOrdinal()) + ".yaml";
       struct stat buf;
       if (stat(filename.c_str(), &buf) == 0) {
         auto residuals = parseYamlSpecialDecisionTree(filename, definition->getAllSymbols(), definition->getHookedSorts());
-        makeApplyRuleFunction(axiom, definition, mod.get(), residuals.residuals);
-        makeStepFunction(axiom, definition, mod.get(), residuals);
+        makeApplyRuleFunction(axiom, definition.get(), mod.get(), residuals.residuals);
+        makeStepFunction(axiom, definition.get(), mod.get(), residuals);
       } else {
-        makeApplyRuleFunction(axiom, definition, mod.get(), true);
+        makeApplyRuleFunction(axiom, definition.get(), mod.get(), true);
       }
     }
   }
 
-  emitConfigParserFunctions(definition, mod.get());
+  emitConfigParserFunctions(definition.get(), mod.get());
 
   auto dt = parseYamlDecisionTree(argv[2], definition->getAllSymbols(), definition->getHookedSorts());
-  makeStepFunction(definition, mod.get(), dt);
+  makeStepFunction(definition.get(), mod.get(), dt);
 
   std::map<std::string, std::string> index;
 
@@ -84,13 +84,13 @@ int main (int argc, char **argv) {
     if ((decl->getAttributes().count("function") && !decl->isHooked())) {
       std::string filename = getFilename(index, argv, decl);
       auto funcDt = parseYamlDecisionTree(filename, definition->getAllSymbols(), definition->getHookedSorts());
-      makeEvalFunction(decl->getSymbol(), definition, mod.get(), funcDt);
+      makeEvalFunction(decl->getSymbol(), definition.get(), mod.get(), funcDt);
     } else if (decl->isAnywhere()) {
       std::string filename = getFilename(index, argv, decl);
       auto funcDt = parseYamlDecisionTree(filename, definition->getAllSymbols(), definition->getHookedSorts());
       std::ostringstream Out;
       decl->getSymbol()->print(Out);
-      makeAnywhereFunction(definition->getAllSymbols().at(Out.str()), definition, mod.get(), funcDt);
+      makeAnywhereFunction(definition->getAllSymbols().at(Out.str()), definition.get(), mod.get(), funcDt);
     }
   }
 

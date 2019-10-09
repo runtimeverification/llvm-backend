@@ -12,8 +12,8 @@ public:
   KOREParser(std::string filename) :
 	  scanner(KOREScanner(filename)), loc(location(filename)) {}
 
-  KOREDefinition *definition(void);
-  KOREPattern *pattern(void);
+  ptr<KOREDefinition> definition(void);
+  ptr<KOREPattern> pattern(void);
 
 private:
   KOREScanner scanner;
@@ -30,10 +30,10 @@ private:
   void attributesNE(Node *node);
 
   void modules(KOREDefinition *node);
-  KOREModule *module(void);
+  ptr<KOREModule> module(void);
 
   void sentences(KOREModule *node);
-  KOREDeclaration *sentence(void);
+  ptr<KOREDeclaration> sentence(void);
 
   void sortVariables(KOREDeclaration *node);
   void sortVariablesNE(KOREDeclaration *node);
@@ -42,14 +42,14 @@ private:
   void sorts(Node *node);
   template <typename Node>
   void sortsNE(Node *node);
-  KORESort *sort(void);
+  sptr<KORESort> sort(void);
 
-  KOREPattern *_pattern(void);
+  ptr<KOREPattern> _pattern(void);
   void patterns(KORECompositePattern *node);
   void patternsNE(KORECompositePattern *node);
 
-  KORECompositePattern *applicationPattern(void);
-  KORECompositePattern *applicationPattern(std::string name);
+  ptr<KORECompositePattern> applicationPattern(void);
+  ptr<KORECompositePattern> applicationPattern(std::string name);
 };
 
 } // end namespace parser

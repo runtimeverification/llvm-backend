@@ -20,9 +20,9 @@ struct PartialStep {
   std::vector<Residual> residuals;
 };
 
-DecisionNode *parseYamlDecisionTreeFromString(std::string yaml, const std::map<std::string, KORESymbol *> &syms, const std::map<std::string, KORECompositeSort *> &sorts);
-DecisionNode *parseYamlDecisionTree(std::string filename, const std::map<std::string, KORESymbol *> &syms, const std::map<std::string, KORECompositeSort *> &sorts);
-PartialStep parseYamlSpecialDecisionTree(std::string filename, const std::map<std::string, KORESymbol *> &syms, const std::map<std::string, KORECompositeSort *> &sorts);
+DecisionNode *parseYamlDecisionTreeFromString(std::string yaml, const std::map<std::string, KORESymbol *> &syms, const std::map<std::string, sptr<KORECompositeSort>> &sorts);
+DecisionNode *parseYamlDecisionTree(std::string filename, const std::map<std::string, KORESymbol *> &syms, const std::map<std::string, sptr<KORECompositeSort>> &sorts);
+PartialStep parseYamlSpecialDecisionTree(std::string filename, const std::map<std::string, KORESymbol *> &syms, const std::map<std::string, sptr<KORECompositeSort>> &sorts);
 
 }
 

@@ -7,7 +7,7 @@ using namespace kllvm;
 BOOST_AUTO_TEST_SUITE(ASTTest)
 
 BOOST_AUTO_TEST_CASE(substitute) {
-  std::unordered_map<KORESortVariable, KORESort *, HashSort> subst;
+  KORESort::substitution subst;
   auto var = KORESortVariable::Create("foo");
   auto composite = KORECompositeSort::Create("bar");
   auto poly = KORECompositeSort::Create("baz");
@@ -32,7 +32,7 @@ BOOST_AUTO_TEST_CASE(instantiate) {
   decl->getSymbol()->addSort(poly);
   auto sym = KORESymbol::Create("sym");
   sym->addFormalArgument(composite);
-  sym->instantiateSymbol(decl);
+  sym->instantiateSymbol(decl.get());
   auto expected = KORECompositeSort::Create("baz");
   expected->addArgument(composite);
   BOOST_CHECK_EQUAL(*sym->getSort(), *expected);
