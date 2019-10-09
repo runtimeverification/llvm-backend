@@ -8,15 +8,11 @@ extern "C" {
 
   block * hook_KREFLECTION_parseKORE(string *kore) {
     block * parsed = dotK;
-    char initbuf[] = "[initial-configuration{}(";
-    char endbuf[] = ")] module TMP endmodule []";
     char filename[17] = "parseKORE_XXXXXX";
 
     int fd = mkstemp(filename);
 
-    bool failed = write(fd, initbuf, sizeof(initbuf) - 1) == -1;
-    failed |= write(fd, kore->data, len(kore)) == -1;
-    failed |= write(fd, endbuf, sizeof(endbuf) - 1) == -1;
+    bool failed = write(fd, kore->data, len(kore)) == -1;
 
     close(fd);
 

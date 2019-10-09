@@ -143,6 +143,7 @@ public:
   void addArgument(KORESort *Argument);
   void addFormalArgument(KORESort *Argument);
   void addSort(KORESort *Sort);
+  void initPatternArguments(void) { arguments.swap(formalArguments); }
 
   const std::string &getName() const { return name; }
   const std::vector<KORESort *> &getArguments() const {
@@ -385,7 +386,7 @@ private:
 
 class KOREAliasDeclaration : public KORESymbolAliasDeclaration {
 private:
-  std::vector<KOREVariablePattern *> boundVariables;
+  KORECompositePattern *boundVariables;
   KOREPattern *pattern;
 
 public:
@@ -394,7 +395,7 @@ public:
     return new KOREAliasDeclaration(Sym);
   }
 
-  void addVariable(KOREVariablePattern *Variable);
+  void addVariables(KORECompositePattern *variables);
   void addPattern(KOREPattern *Pattern);
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
 
@@ -407,9 +408,12 @@ class KOREAxiomDeclaration : public KOREDeclaration {
 private:
   KOREPattern *pattern;
   unsigned ordinal;
+  bool _isClaim;
+
+  KOREAxiomDeclaration(bool isClaim): _isClaim(isClaim) {}
 
 public:
-  static KOREAxiomDeclaration *Create() { return new KOREAxiomDeclaration(); }
+  static KOREAxiomDeclaration *Create(bool isClaim = false) { return new KOREAxiomDeclaration(isClaim); }
 
   void addPattern(KOREPattern *Pattern);
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
@@ -420,6 +424,7 @@ public:
      from the definition by KOREDefinition::preprocess. */
   bool isRequired();
   bool isTopAxiom();
+  bool isClaim() { return _isClaim; }
   KOREPattern *getRightHandSide() const;
   KOREPattern *getRequires() const;
   unsigned getOrdinal() const { return ordinal; }
