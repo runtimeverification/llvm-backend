@@ -70,26 +70,6 @@ yyin = in;
   return KOREParser::token::OBJECTID;
 }
 
-"#"{ident} {
-  lval->build<std::string>(yytext + 1);
-  return KOREParser::token::METAID;
-}
-
-"#\\"{ident} {
-  lval->build<std::string>(yytext + 1);
-  return KOREParser::token::METAID;
-}
-
-"#`"{ident} {
-  lval->build<std::string>(yytext + 1);
-  return KOREParser::token::METAID;
-}
-
-"'"[[:print:]]"'" {
-  lval->build<char>(yytext[1]);
-  return KOREParser::token::CHAR;
-}
-
 "\""            { stringBuffer.clear(); BEGIN(STR);           }
 <STR>[^\"\n\\]* { stringBuffer.append(yytext);                }
 <STR>"\\n"       { stringBuffer.push_back('\n'); loc->lines(); }
@@ -146,7 +126,6 @@ int KOREScanner::scan() {
     std::string lexeme;
     switch (token) {
     case KOREParser::token::OBJECTID:
-    case KOREParser::token::METAID:
     case KOREParser::token::STRING:
       lexeme = sem.as<std::string>();
       sem.destroy<std::string>();

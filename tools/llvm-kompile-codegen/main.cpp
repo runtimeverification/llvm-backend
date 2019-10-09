@@ -19,7 +19,7 @@
 using namespace kllvm;
 using namespace kllvm::parser;
 
-std::string getFilename(std::map<std::string, std::string> index, char **argv, KOREObjectSymbolDeclaration *decl) {
+std::string getFilename(std::map<std::string, std::string> index, char **argv, KORESymbolDeclaration *decl) {
   return argv[3] + std::string("/") + index.at(decl->getSymbol()->getName());
 }
 

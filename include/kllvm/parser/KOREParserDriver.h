@@ -9,24 +9,17 @@ class KOREDefinition;
 class KOREModule;
 class KOREDeclaration;
 class KOREModuleImportDeclaration;
-class KOREObjectCompositeSortDeclaration;
+class KORECompositeSortDeclaration;
 class KOREAxiomDeclaration;
-class KOREObjectSymbolDeclaration;
-class KOREMetaSymbolDeclaration;
-class KOREObjectAliasDeclaration;
-class KOREMetaAliasDeclaration;
+class KORESymbolDeclaration;
+class KOREAliasDeclaration;
 class KOREPattern;
-class KOREObjectPattern;
-class KOREMetaPattern;
-class KOREObjectCompositePattern;
-class KOREMetaCompositePattern;
-class KOREObjectSort;
-class KOREMetaSort;
-class KOREObjectCompositeSort;
-class KOREObjectSortVariable;
-class KOREMetaSortVariable;
-class KOREObjectVariablePattern;
-class KOREMetaVariablePattern;
+class KOREPattern;
+class KORECompositePattern;
+class KORESort;
+class KORECompositeSort;
+class KORESortVariable;
+class KOREVariablePattern;
 } // end namespace kllvm
 
 namespace kllvm {
@@ -37,16 +30,14 @@ private:
   KOREDefinition *currentDefinition                = nullptr;
   KOREModule *currentModule                        = nullptr;
   KOREDeclaration *currentDeclaration              = nullptr;
-  KOREObjectCompositePattern *currentObjectPattern = nullptr;
-  KOREMetaCompositePattern *currentMetaPattern     = nullptr;
-  KOREObjectCompositeSort *currentObjectSort       = nullptr;
+  KORECompositePattern *currentObjectPattern = nullptr;
+  KORECompositeSort *currentObjectSort       = nullptr;
 
   enum State {
     ParsingDefinition,
     ParsingDeclaration,
     ParsingModule,
     ParsingObjectPattern,
-    ParsingMetaPattern,
     ParsingObjectSort,
   };
 
@@ -56,10 +47,10 @@ private:
   inline void pushState(State state) { StateStack.push(state); }
   inline void popState() { StateStack.pop(); }
 
-  std::stack<KOREObjectCompositeSort *> SortStack;
+  std::stack<KORECompositeSort *> SortStack;
 
-  inline KOREObjectCompositeSort *getCurrentSort() { return SortStack.top(); }
-  inline void pushSort(KOREObjectCompositeSort *sort) { SortStack.push(sort); }
+  inline KORECompositeSort *getCurrentSort() { return SortStack.top(); }
+  inline void pushSort(KORECompositeSort *sort) { SortStack.push(sort); }
   inline void popSort() { SortStack.pop(); }
 
   std::stack<KOREPattern *> PatternStack;
@@ -80,46 +71,32 @@ public:
 
   void
   startObjectSortDeclaration(const std::string &Name, bool isHooked = false);
-  KOREObjectCompositeSortDeclaration *finishObjectSortDeclaration();
+  KORECompositeSortDeclaration *finishObjectSortDeclaration();
 
   void startAxiomDeclaration();
   KOREAxiomDeclaration *finishAxiomDeclaration(KOREPattern *Pattern);
 
   void
   startObjectSymbolDeclaration(const std::string &Name, bool isHooked = false);
-  KOREObjectSymbolDeclaration *
-  finishObjectSymbolDeclaration(KOREObjectSort *Sort);
-
-  void startMetaSymbolDeclaration(const std::string &Name);
-  KOREMetaSymbolDeclaration *
-  finishMetaSymbolDeclaration(KOREMetaSort *Sort);
+  KORESymbolDeclaration *
+  finishObjectSymbolDeclaration(KORESort *Sort);
 
   void startObjectAliasDeclaration(const std::string &Name);
-  KOREObjectAliasDeclaration *
-  finishObjectAliasDeclaration(KOREObjectSort *Sort, KOREObjectPattern *Pattern);
-
-  void startMetaAliasDeclaration(const std::string &Name);
-  KOREMetaAliasDeclaration *
-  finishMetaAliasDeclaration(KOREMetaSort *Sort, KOREMetaPattern *Pattern);
+  KOREAliasDeclaration *
+  finishObjectAliasDeclaration(KORESort *Sort, KOREPattern *Pattern);
 
   void startObjectPattern(const std::string &Name);
-  KOREObjectCompositePattern *finishObjectPattern();
-
-  void startMetaPattern(const std::string &Name);
-  KOREMetaCompositePattern *finishMetaPattern();
+  KORECompositePattern *finishObjectPattern();
 
   void startObjectSort(const std::string &Name);
-  KOREObjectCompositeSort *finishObjectSort();
+  KORECompositeSort *finishObjectSort();
 
   void addModule(KOREModule *Module);
   void addDeclaration(KOREDeclaration *Declaration);
-  void addObjectSortVariable(KOREObjectSortVariable *SortVariable);
-  void addMetaSortVariable(KOREMetaSortVariable *SortVariable);
+  void addObjectSortVariable(KORESortVariable *SortVariable);
   void addPattern(KOREPattern *Pattern);
-  void addObjectSort(KOREObjectSort *Sort);
-  void addMetaSort(KOREMetaSort *Sort);
-  void addObjectVariable(KOREObjectVariablePattern *Variable);
-  void addMetaVariable(KOREMetaVariablePattern *Variable);
+  void addObjectSort(KORESort *Sort);
+  void addObjectVariable(KOREVariablePattern *Variable);
 };
 
 } // end namespace parser
