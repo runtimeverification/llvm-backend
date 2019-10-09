@@ -110,6 +110,10 @@ KOREScanner::KOREScanner(std::string filename) {
   }
 }
 
+KOREScanner::~KOREScanner() {
+  fclose(in);
+}
+
 void KOREScanner::error(
       const location &loc, const std::string &err_message) {
   std::cerr << "Scanner error at " << loc << ": " << err_message << "\n";
