@@ -515,8 +515,13 @@ extern "C" {
       char * path2 = (char *) malloc(sizeof(char) * (length + 1));
       strcpy(path2, pathStr.c_str());
       char * dir = dirname(path1);
+      if ( getenv("K_COVERAGEDIR") ) {
+        dir = getenv("K_COVERAGEDIR");
+      }
+      char fulldir[PATH_MAX];
+      realpath(dir, fulldir);
       char * base = basename(path2);
-      std::string fullPath = std::string(dir) + "/" + pid + "_" + std::string(base);
+      std::string fullPath = std::string(fulldir) + "/" + pid + "_" + std::string(base);
       FILE* f = fopen(fullPath.c_str(), "a+");
       fwrite(msg.c_str(), sizeof(char), msg.length(), f);
       fclose(f);
