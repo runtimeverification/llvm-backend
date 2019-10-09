@@ -7,18 +7,26 @@ extern "C" {
   static block * dotK = (block *)((((uint64_t)getTagForSymbolName("dotk{}")) << 32) | 1);
 
   block * hook_KREFLECTION_parseKORE(string *kore) {
-    char filename[17] = "parseKORE_XXXXXX";
-    int fd = mkstemp(filename);
+    block * parsed = dotK;
     char initbuf[] = "[initial-configuration{}(";
-    write(fd, initbuf, sizeof(initbuf) - 1);
-    write(fd, kore->data, len(kore));
     char endbuf[] = ")] module TMP endmodule []";
-    write(fd, endbuf, sizeof(endbuf) - 1);
+    char filename[17] = "parseKORE_XXXXXX";
+
+    int fd = mkstemp(filename);
+
+    int ret = write(fd, initbuf, sizeof(initbuf) - 1);
+    ret -= write(fd, kore->data, len(kore));
+    ret -= write(fd, endbuf, sizeof(endbuf) - 1);
+
     close(fd);
 
-    block * parsed = parseConfiguration(filename);
+    /* If ret is negative, one of the writes returned an error so return .K */
+    if (ret >= 0) {
+      parsed = parseConfiguration(filename);
+    }
 
     remove(filename);
+
     return parsed;
   }
 }
