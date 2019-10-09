@@ -12,7 +12,7 @@ extern "C" {
     char initbuf[] = "[initial-configuration{}(";
     write(fd, initbuf, sizeof(initbuf) - 1);
     write(fd, kore->data, len(kore));
-    char endbuf[] = "] module TMP endmodule []";
+    char endbuf[] = ")] module TMP endmodule []";
     write(fd, endbuf, sizeof(endbuf) - 1);
     close(fd);
 
