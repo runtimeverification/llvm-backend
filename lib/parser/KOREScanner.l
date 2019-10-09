@@ -7,7 +7,7 @@ using namespace kllvm::parser;
 
 #undef  YY_DECL
 #define YY_DECL \
-  token KOREScanner::yylex(std::string *lval, location *loc)
+  token KOREScanner::yylex(std::string *lval, location *loc, yyscan_t yyscanner)
 
 /* update location on matching */
 #define YY_USER_ACTION loc->step(); loc->columns(yyleng);
@@ -18,6 +18,7 @@ using namespace kllvm::parser;
 /* Flex options */
 %option noyywrap
 %option nounput
+%option reentrant
 
 /* Flex macros */
 ident @?[a-zA-Z][a-zA-Z0-9'-]*
@@ -108,10 +109,12 @@ KOREScanner::KOREScanner(std::string filename) {
     std::cerr << "Cannot read file: " << filename << "\n";
     exit(1);
   }
+  yylex_init(&scanner);
 }
 
 KOREScanner::~KOREScanner() {
   fclose(in);
+  yylex_destroy(scanner);
 }
 
 void KOREScanner::error(
@@ -125,7 +128,7 @@ int KOREScanner::scan() {
   do {
     std::string sem;
     location loc("");
-    token = yylex(&sem, &loc);
+    token = yylex(&sem, &loc, scanner);
     std::string lexeme;
     switch (token) {
     case token::ID:
@@ -133,7 +136,7 @@ int KOREScanner::scan() {
       lexeme = sem;
       break;
     default:
-      lexeme = yytext;
+      lexeme = yyget_text(scanner);
     }
   } while (token != token::TOKEN_EOF);
 

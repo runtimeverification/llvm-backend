@@ -41,8 +41,14 @@ public:
 
 friend class KOREParser;
 
+typedef void *yyscan_t;
+
 private:
-  token yylex(std::string *lval, location *loc);
+  yyscan_t scanner;
+  token yylex(std::string *lval, location *loc, yyscan_t yyscanner);
+  token yylex(std::string *lval, location *loc) {
+    return yylex(lval, loc, scanner);
+  }
   void error(const location &loc, const std::string &err_message);
   FILE *in;
   std::string stringBuffer;
