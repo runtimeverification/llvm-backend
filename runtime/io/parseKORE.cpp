@@ -9,14 +9,14 @@ extern "C" {
   block * hook_KREFLECTION_parseKORE(string *kore) {
     char filename[17] = "parseKORE_XXXXXX";
     int fd = mkstemp(filename);
-    int ret = write(fd, kore->data, len(kore));
+    char initbuf[] = "[initial-configuration{}(";
+    write(fd, initbuf, sizeof(initbuf) - 1);
+    write(fd, kore->data, len(kore));
+    char endbuf[] = "] module TMP endmodule []";
+    write(fd, endbuf, sizeof(endbuf) - 1);
     close(fd);
 
-    block * parsed = dotK;
-
-    if (ret != -1) {
-      parsed = parseConfiguration(filename);
-    }
+    block * parsed = parseConfiguration(filename);
 
     remove(filename);
     return parsed;
