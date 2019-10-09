@@ -14,7 +14,7 @@ void finalizeDebugInfo(void);
 
 void initDebugFunction(std::string name, std::string linkageName, llvm::DISubroutineType *type, KOREDefinition *definition, llvm::Function *func);
 
-void initDebugAxiom(std::map<std::string, KOREObjectCompositePattern *> const& att);
+void initDebugAxiom(std::map<std::string, KORECompositePattern *> const& att);
 void initDebugParam(llvm::Function *func, unsigned argNo, std::string name, ValueType type);
 void initDebugGlobal(std::string name, llvm::DIType *type, llvm::GlobalVariable *var);
 

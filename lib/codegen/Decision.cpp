@@ -193,12 +193,12 @@ void SwitchNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitutio
       int offset = 0;
       llvm::StructType *BlockType = getBlockType(d->Module, d->Definition, _case.getConstructor());
       llvm::BitCastInst *Cast = new llvm::BitCastInst(substitution.lookup(name), llvm::PointerType::getUnqual(BlockType), "", d->CurrentBlock);
-      KOREObjectSymbolDeclaration *symbolDecl = d->Definition->getSymbolDeclarations().at(_case.getConstructor()->getName());
+      KORESymbolDeclaration *symbolDecl = d->Definition->getSymbolDeclarations().at(_case.getConstructor()->getName());
       llvm::Instruction *Renamed;
       for (std::string binding : _case.getBindings()) {
         llvm::Value *ChildPtr = llvm::GetElementPtrInst::CreateInBounds(BlockType, Cast, {llvm::ConstantInt::get(llvm::Type::getInt64Ty(d->Ctx), 0), llvm::ConstantInt::get(llvm::Type::getInt32Ty(d->Ctx), offset+2)}, "", d->CurrentBlock);
         llvm::Value *Child;
-        switch (dynamic_cast<KOREObjectCompositeSort *>(_case.getConstructor()->getArguments()[offset])->getCategory(d->Definition).cat) {
+        switch (dynamic_cast<KORECompositeSort *>(_case.getConstructor()->getArguments()[offset])->getCategory(d->Definition).cat) {
         case SortCategory::Map:
         case SortCategory::List:
         case SortCategory::Set:
@@ -390,8 +390,8 @@ llvm::Value *Decision::getTag(llvm::Value *val) {
   return res;
 }
 
-void makeEvalOrAnywhereFunction(KOREObjectSymbol *function, KOREDefinition *definition, llvm::Module *module, DecisionNode *dt, void (*addStuck)(llvm::BasicBlock*, llvm::Module*, KOREObjectSymbol *, llvm::StringMap<llvm::Value *>&, KOREDefinition *)) {
-  auto returnSort = dynamic_cast<KOREObjectCompositeSort *>(function->getSort())->getCategory(definition);
+void makeEvalOrAnywhereFunction(KORESymbol *function, KOREDefinition *definition, llvm::Module *module, DecisionNode *dt, void (*addStuck)(llvm::BasicBlock*, llvm::Module*, KORESymbol *, llvm::StringMap<llvm::Value *>&, KOREDefinition *)) {
+  auto returnSort = dynamic_cast<KORECompositeSort *>(function->getSort())->getCategory(definition);
   auto returnType = getValueType(returnSort, module);
   switch(returnSort.cat) {
   case SortCategory::Map:
@@ -407,7 +407,7 @@ void makeEvalOrAnywhereFunction(KOREObjectSymbol *function, KOREDefinition *defi
   std::vector<llvm::Metadata *> debugArgs;
   std::vector<ValueType> cats;
   for (auto sort : function->getArguments()) {
-    auto cat = dynamic_cast<KOREObjectCompositeSort *>(sort)->getCategory(definition);
+    auto cat = dynamic_cast<KORECompositeSort *>(sort)->getCategory(definition);
     debugArgs.push_back(getDebugType(cat));
     switch (cat.cat) {
     case SortCategory::Map:
@@ -428,7 +428,7 @@ void makeEvalOrAnywhereFunction(KOREObjectSymbol *function, KOREDefinition *defi
   std::string name = "eval_" + Out.str();
   llvm::Constant *func = module->getOrInsertFunction(name, funcType);
   llvm::Function *matchFunc = llvm::cast<llvm::Function>(func);
-  KOREObjectSymbolDeclaration *symbolDecl = definition->getSymbolDeclarations().at(function->getName());
+  KORESymbolDeclaration *symbolDecl = definition->getSymbolDeclarations().at(function->getName());
   initDebugAxiom(symbolDecl->getAttributes());
   initDebugFunction(function->getName(), name, getDebugFunctionType(debugReturnType, debugArgs), definition, matchFunc);
   matchFunc->setCallingConv(llvm::CallingConv::Fast);
@@ -455,23 +455,23 @@ void makeEvalOrAnywhereFunction(KOREObjectSymbol *function, KOREDefinition *defi
   codegen(dt, subst);
 }
 
-void abortWhenStuck(llvm::BasicBlock *stuck, llvm::Module *module, KOREObjectSymbol *, llvm::StringMap<llvm::Value *> &, KOREDefinition *) {
+void abortWhenStuck(llvm::BasicBlock *stuck, llvm::Module *module, KORESymbol *, llvm::StringMap<llvm::Value *> &, KOREDefinition *) {
   addAbort(stuck, module);
 }
 
-void makeEvalFunction(KOREObjectSymbol *function, KOREDefinition *definition, llvm::Module *module, DecisionNode *dt) {
+void makeEvalFunction(KORESymbol *function, KOREDefinition *definition, llvm::Module *module, DecisionNode *dt) {
   makeEvalOrAnywhereFunction(function, definition, module, dt, abortWhenStuck);
 }
 
-void addOwise(llvm::BasicBlock *stuck, llvm::Module *module, KOREObjectSymbol *symbol, llvm::StringMap<llvm::Value *> &subst, KOREDefinition *d) {
+void addOwise(llvm::BasicBlock *stuck, llvm::Module *module, KORESymbol *symbol, llvm::StringMap<llvm::Value *> &subst, KOREDefinition *d) {
   CreateTerm creator = CreateTerm(subst, d, stuck, module, true);
-  KOREObjectCompositePattern *pat = KOREObjectCompositePattern::Create(symbol);
+  KORECompositePattern *pat = KORECompositePattern::Create(symbol);
   for (int i = 0; i < symbol->getArguments().size(); i++) {
-     auto var = KOREObjectVariablePattern::Create("_" + std::to_string(i+1), symbol->getArguments()[i]);
+     auto var = KOREVariablePattern::Create("_" + std::to_string(i+1), symbol->getArguments()[i]);
      pat->addArgument(var);
   }
   llvm::Value *retval = creator(pat).first;
-  auto returnSort = dynamic_cast<KOREObjectCompositeSort *>(symbol->getSort())->getCategory(d);
+  auto returnSort = dynamic_cast<KORECompositeSort *>(symbol->getSort())->getCategory(d);
   auto returnType = getValueType(returnSort, module);
   switch(returnSort.cat) {
   case SortCategory::Map:
@@ -489,7 +489,7 @@ void addOwise(llvm::BasicBlock *stuck, llvm::Module *module, KOREObjectSymbol *s
   llvm::ReturnInst::Create(module->getContext(), retval, creator.getCurrentBlock());
 }
 
-void makeAnywhereFunction(KOREObjectSymbol *function, KOREDefinition *definition, llvm::Module *module, DecisionNode *dt) {
+void makeAnywhereFunction(KORESymbol *function, KOREDefinition *definition, llvm::Module *module, DecisionNode *dt) {
   makeEvalOrAnywhereFunction(function, definition, module, dt, addOwise);
 }
 
@@ -643,17 +643,17 @@ void makeStepFunction(KOREDefinition *definition, llvm::Module *module, Decision
   codegen(dt, subst);
 }
 
-KOREObjectPattern *makePartialTerm(KOREObjectPattern *term, std::set<std::string> occurrences, std::string occurrence) {
+KOREPattern *makePartialTerm(KOREPattern *term, std::set<std::string> occurrences, std::string occurrence) {
   if (occurrences.count(occurrence)) {
-    return KOREObjectVariablePattern::Create(occurrence, term->getSort());
+    return KOREVariablePattern::Create(occurrence, term->getSort());
   }
-  if (auto pat = dynamic_cast<KOREObjectCompositePattern *>(term)) {
+  if (auto pat = dynamic_cast<KORECompositePattern *>(term)) {
     if (pat->getConstructor()->getName() == "\\dv") {
       return term;
     }
-    KOREObjectCompositePattern *result = KOREObjectCompositePattern::Create(pat->getConstructor());
+    KORECompositePattern *result = KORECompositePattern::Create(pat->getConstructor());
     for (unsigned i = 0; i < pat->getArguments().size(); i++) {
-      result->addArgument(makePartialTerm(dynamic_cast<KOREObjectPattern *>(pat->getArguments()[i]), occurrences, "_" + std::to_string(i) + occurrence));
+      result->addArgument(makePartialTerm(dynamic_cast<KOREPattern *>(pat->getArguments()[i]), occurrences, "_" + std::to_string(i) + occurrence));
     }
     return result;
   }
@@ -665,7 +665,7 @@ void makeStepFunction(KOREAxiomDeclaration *axiom, KOREDefinition *definition, l
   std::vector<llvm::Type *> argTypes;
   std::vector<llvm::Metadata *> debugTypes;
   for (auto res : res.residuals) {
-    auto argSort = dynamic_cast<KOREObjectCompositeSort *>(res.pattern->getSort());
+    auto argSort = dynamic_cast<KORECompositeSort *>(res.pattern->getSort());
     auto cat = argSort->getCategory(definition);
     debugTypes.push_back(getDebugType(cat));
     switch (cat.cat) {
@@ -713,7 +713,7 @@ void makeStepFunction(KOREAxiomDeclaration *axiom, KOREDefinition *definition, l
     phi->addIncoming(val, block);
     phis.push_back(phi);
     auto sort = res.residuals[i].pattern->getSort();
-    auto cat = dynamic_cast<KOREObjectCompositeSort *>(sort)->getCategory(definition);
+    auto cat = dynamic_cast<KORECompositeSort *>(sort)->getCategory(definition);
     types.push_back(cat);
     initDebugParam(matchFunc, i, "_" + std::to_string(i+1), cat);
   }
@@ -729,7 +729,7 @@ void makeStepFunction(KOREAxiomDeclaration *axiom, KOREDefinition *definition, l
   for (auto residual : res.residuals) {
     occurrences.insert(residual.occurrence);
   }
-  KOREObjectPattern *partialTerm = makePartialTerm(dynamic_cast<KOREObjectPattern *>(axiom->getRightHandSide()), occurrences, "_1");
+  KOREPattern *partialTerm = makePartialTerm(dynamic_cast<KOREPattern *>(axiom->getRightHandSide()), occurrences, "_1");
   CreateTerm creator(stuckSubst, definition, stuck, module, false);
   llvm::Value *retval = creator(partialTerm).first;
   llvm::ReturnInst::Create(module->getContext(), retval, creator.getCurrentBlock());

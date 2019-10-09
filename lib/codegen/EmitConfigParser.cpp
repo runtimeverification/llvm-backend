@@ -10,7 +10,7 @@
 
 namespace kllvm {
 
-static llvm::Constant *getSymbolNamePtr(KOREObjectSymbol *symbol, llvm::BasicBlock *SetBlockName, llvm::Module *module) {
+static llvm::Constant *getSymbolNamePtr(KORESymbol *symbol, llvm::BasicBlock *SetBlockName, llvm::Module *module) {
   llvm::LLVMContext &Ctx = module->getContext();
   std::ostringstream Out;
   symbol->print(Out);
@@ -71,7 +71,7 @@ static std::string LAYOUTITEM_STRUCT = "layoutitem";
 
 static void emitDataTableForSymbol(std::string name, llvm::Type *ty, llvm::DIType *dity, KOREDefinition *definition, llvm::Module *module,
     llvm::Constant * getter(KOREDefinition *, llvm::Module *,
-        KOREObjectSymbol *)) {
+        KORESymbol *)) {
   llvm::LLVMContext &Ctx = module->getContext();
   std::vector<llvm::Type *> argTypes;
   argTypes.push_back(llvm::Type::getInt32Ty(Ctx));
@@ -112,7 +112,7 @@ static void emitDataTableForSymbol(std::string name, llvm::Type *ty, llvm::DITyp
 
 static void emitDataForSymbol(std::string name, llvm::Type *ty, llvm::DIType *dity, KOREDefinition *definition, llvm::Module *module, bool isEval,
     std::pair<llvm::Value *, llvm::BasicBlock *> getter(KOREDefinition *, llvm::Module *,
-        KOREObjectSymbol *, llvm::Instruction *)) {
+        KORESymbol *, llvm::Instruction *)) {
   llvm::LLVMContext &Ctx = module->getContext();
   std::vector<llvm::Type *> argTypes;
   argTypes.push_back(llvm::Type::getInt32Ty(Ctx));
@@ -153,7 +153,7 @@ static void emitDataForSymbol(std::string name, llvm::Type *ty, llvm::DIType *di
 }
 
 static std::pair<llvm::Value *, llvm::BasicBlock *> getHeader(KOREDefinition *definition, llvm::Module *module,
-    KOREObjectSymbol *symbol, llvm::Instruction *inst) {
+    KORESymbol *symbol, llvm::Instruction *inst) {
   auto BlockType = getBlockType(module, definition, symbol);
   return std::make_pair(getBlockHeader(module, definition, symbol, BlockType), inst->getParent());
 }
@@ -164,7 +164,7 @@ static void emitGetBlockHeaderForSymbol(KOREDefinition *def, llvm::Module *mod) 
 }
 
 static std::pair<llvm::Value *, llvm::BasicBlock *> getFunction(KOREDefinition *def, llvm::Module *mod,
-    KOREObjectSymbol *symbol, llvm::Instruction *inst) {
+    KORESymbol *symbol, llvm::Instruction *inst) {
   auto decl = def->getSymbolDeclarations().at(symbol->getName());
   bool res = decl->getAttributes().count("function") || decl->getAttributes().count("anywhere");
   return std::make_pair(llvm::ConstantInt::get(llvm::Type::getInt1Ty(mod->getContext()), res),
@@ -177,7 +177,7 @@ static void emitIsSymbolAFunction(KOREDefinition *def, llvm::Module *mod) {
 }
 
 static llvm::Constant * getBinder(KOREDefinition *def, llvm::Module *mod,
-    KOREObjectSymbol *symbol) {
+    KORESymbol *symbol) {
   auto decl = def->getSymbolDeclarations().at(symbol->getName());
   bool res = decl->getAttributes().count("binder");
   return llvm::ConstantInt::get(llvm::Type::getInt1Ty(mod->getContext()), res);
@@ -190,7 +190,7 @@ static void emitIsSymbolABinder(KOREDefinition *def, llvm::Module *mod) {
 
 
 static std::pair<llvm::Value *, llvm::BasicBlock *> getInjection(KOREDefinition *def, llvm::Module *mod,
-    KOREObjectSymbol *symbol, llvm::Instruction *inst) {
+    KORESymbol *symbol, llvm::Instruction *inst) {
   llvm::Constant *tag = llvm::ConstantInt::get(llvm::Type::getInt32Ty(mod->getContext()), 0);
   for (auto sym : def->getSymbols()) {
     if (sym.second->getName() == "inj" && *sym.second->getArguments()[0] == *symbol->getSort()) {
@@ -243,7 +243,7 @@ static llvm::Value *getArgValue(llvm::Value *ArgumentsArray, int idx,
 }
 
 static std::pair<llvm::Value *, llvm::BasicBlock *> getEval(KOREDefinition *def, llvm::Module *mod,
-    KOREObjectSymbol *symbol, llvm::Instruction *inst) {
+    KORESymbol *symbol, llvm::Instruction *inst) {
   llvm::LLVMContext &Ctx = mod->getContext();
   llvm::BasicBlock *CaseBlock = inst->getParent();
   inst->removeFromParent();
@@ -251,15 +251,15 @@ static std::pair<llvm::Value *, llvm::BasicBlock *> getEval(KOREDefinition *def,
   llvm::Value *ArgumentsArray = func->arg_begin() + 1;
   int idx = 0;
   llvm::StringMap<llvm::Value *> subst;
-  auto pattern = KOREObjectCompositePattern::Create(symbol);
+  auto pattern = KORECompositePattern::Create(symbol);
   for (auto sort : symbol->getArguments()) {
-    ValueType cat = dynamic_cast<KOREObjectCompositeSort *>(sort)->getCategory(def);
+    ValueType cat = dynamic_cast<KORECompositeSort *>(sort)->getCategory(def);
     llvm::Value *arg = getArgValue(ArgumentsArray, idx, CaseBlock, cat, mod);
     std::string name = "_" + std::to_string(idx++);
     subst.insert({name, arg});
-    pattern->addArgument(KOREObjectVariablePattern::Create(name, sort));
+    pattern->addArgument(KOREVariablePattern::Create(name, sort));
   }
-  KOREObjectSymbolDeclaration *symbolDecl = def->getSymbolDeclarations().at(symbol->getName());
+  KORESymbolDeclaration *symbolDecl = def->getSymbolDeclarations().at(symbol->getName());
   CreateTerm creator(subst, def, CaseBlock, mod, false);
   llvm::Value *result = creator(pattern).first;
   for (auto arg : pattern->getArguments()) {
@@ -267,7 +267,7 @@ static std::pair<llvm::Value *, llvm::BasicBlock *> getEval(KOREDefinition *def,
   }
   delete pattern;
   llvm::Value *retval;
-  ValueType cat = dynamic_cast<KOREObjectCompositeSort *>(symbol->getSort())->getCategory(def);
+  ValueType cat = dynamic_cast<KORECompositeSort *>(symbol->getSort())->getCategory(def);
   switch(cat.cat) {
   case SortCategory::Int:
   case SortCategory::Float:
@@ -385,7 +385,7 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
   for (auto iter = sorts.begin(); iter != sorts.end(); ++iter) {
     auto &entry = *iter;
     std::string name = entry.first;
-    auto sort = KOREObjectCompositeSort::Create(name);
+    auto sort = KORECompositeSort::Create(name);
     ValueType cat = sort->getCategory(definition);
     if (cat.cat == SortCategory::Symbol || cat.cat == SortCategory::Variable) {
       continue;
@@ -541,7 +541,7 @@ static void emitTraversal(std::string name, KOREDefinition *definition, llvm::Mo
     bool isVisitor, void getter(
       KOREDefinition *, 
       llvm::Module *, 
-      KOREObjectSymbol *, 
+      KORESymbol *, 
       llvm::BasicBlock *)) {
   llvm::LLVMContext &Ctx = module->getContext();
   std::vector<llvm::Type *> argTypes;
@@ -591,7 +591,7 @@ static void emitTraversal(std::string name, KOREDefinition *definition, llvm::Mo
   stuck->insertInto(func); 
 }
 
-static void getStore(KOREDefinition *definition, llvm::Module *module, KOREObjectSymbol *symbol, 
+static void getStore(KOREDefinition *definition, llvm::Module *module, KORESymbol *symbol, 
     llvm::BasicBlock *CaseBlock) {
   llvm::LLVMContext &Ctx = module->getContext();
   llvm::Constant *zero = llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0);
@@ -602,7 +602,7 @@ static void getStore(KOREDefinition *definition, llvm::Module *module, KOREObjec
   auto cast = new llvm::BitCastInst(func->arg_begin(),
       llvm::PointerType::getUnqual(BlockType), "", CaseBlock);
   for (auto sort : symbol->getArguments()) {
-    ValueType cat = dynamic_cast<KOREObjectCompositeSort *>(sort)->getCategory(definition);
+    ValueType cat = dynamic_cast<KORECompositeSort *>(sort)->getCategory(definition);
     llvm::Value *arg = getArgValue(ArgumentsArray, idx, CaseBlock, cat, module);
     llvm::Value *ChildPtr = llvm::GetElementPtrInst::CreateInBounds(BlockType, cast,
         {zero, llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), idx++ + 2)}, "", CaseBlock);
@@ -617,7 +617,7 @@ static void emitStoreSymbolChildren(KOREDefinition *definition, llvm::Module *mo
   emitTraversal("storeSymbolChildren", definition, module, false, getStore);
 }
 
-static llvm::Constant *getSymbolName(KOREDefinition *definition, llvm::Module *module, KOREObjectSymbol *symbol) {
+static llvm::Constant *getSymbolName(KOREDefinition *definition, llvm::Module *module, KORESymbol *symbol) {
   return getSymbolNamePtr(symbol, nullptr, module);
 }
 
@@ -625,26 +625,26 @@ static void emitGetSymbolNameForTag(KOREDefinition *def, llvm::Module *mod) {
   emitDataTableForSymbol("getSymbolNameForTag", llvm::Type::getInt8PtrTy(mod->getContext()), getCharPtrDebugType(), def, mod, getSymbolName);
 }
 
-static void visitCollection(KOREDefinition *definition, llvm::Module *module, KOREObjectCompositeSort *compositeSort, llvm::Function *func, llvm::Value *ChildPtr, llvm::BasicBlock *CaseBlock, unsigned offset) {
+static void visitCollection(KOREDefinition *definition, llvm::Module *module, KORECompositeSort *compositeSort, llvm::Function *func, llvm::Value *ChildPtr, llvm::BasicBlock *CaseBlock, unsigned offset) {
   llvm::LLVMContext &Ctx = module->getContext();
   llvm::Constant *zero = llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0);
   auto indices = std::vector<llvm::Constant *>{zero, zero};
   auto sortDecl = definition->getSortDeclarations().at(compositeSort->getName());
   llvm::Constant *concatPtr;
   if (sortDecl->getAttributes().count("concat")) {
-    auto concat = (KOREObjectCompositePattern *)sortDecl->getAttributes().at("concat")->getArguments()[0];
+    auto concat = (KORECompositePattern *)sortDecl->getAttributes().at("concat")->getArguments()[0];
     concatPtr = getSymbolNamePtr(concat->getConstructor(), nullptr, module);
   } else {
     concatPtr = llvm::ConstantPointerNull::get(llvm::Type::getInt8PtrTy(Ctx));
   }
-  auto unit = (KOREObjectCompositePattern *)sortDecl->getAttributes().at("unit")->getArguments()[0];
+  auto unit = (KORECompositePattern *)sortDecl->getAttributes().at("unit")->getArguments()[0];
   auto unitPtr = getSymbolNamePtr(unit->getConstructor(), nullptr, module);
-  auto element = (KOREObjectCompositePattern *)sortDecl->getAttributes().at("element")->getArguments()[0];
+  auto element = (KORECompositePattern *)sortDecl->getAttributes().at("element")->getArguments()[0];
   auto elementPtr = getSymbolNamePtr(element->getConstructor(), nullptr, module);
   llvm::CallInst::Create(func->arg_begin()+offset, {func->arg_begin()+1, ChildPtr, unitPtr, elementPtr, concatPtr}, "", CaseBlock);
 }
 
-static void getVisitor(KOREDefinition *definition, llvm::Module *module, KOREObjectSymbol *symbol, llvm::BasicBlock *CaseBlock) {
+static void getVisitor(KOREDefinition *definition, llvm::Module *module, KORESymbol *symbol, llvm::BasicBlock *CaseBlock) {
   llvm::LLVMContext &Ctx = module->getContext();
   llvm::Constant *zero = llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0);
   auto indices = std::vector<llvm::Constant *>{zero, zero};
@@ -655,7 +655,7 @@ static void getVisitor(KOREDefinition *definition, llvm::Module *module, KOREObj
       llvm::PointerType::getUnqual(BlockType), "", CaseBlock);
   unsigned i = 0;
   for (auto sort : symbol->getArguments()) {
-    auto compositeSort = dynamic_cast<KOREObjectCompositeSort *>(sort);
+    auto compositeSort = dynamic_cast<KORECompositeSort *>(sort);
     ValueType cat = compositeSort->getCategory(definition);
     llvm::Value *ChildPtr = llvm::GetElementPtrInst::CreateInBounds(BlockType, cast,
         {zero, llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), idx++ + 2)}, "", CaseBlock);
@@ -709,14 +709,14 @@ static void getVisitor(KOREDefinition *definition, llvm::Module *module, KOREObj
   }
 }
 
-static llvm::Constant *getLayoutData(uint16_t layout, KOREObjectSymbol *symbol, llvm::Module *module, KOREDefinition *def) {
+static llvm::Constant *getLayoutData(uint16_t layout, KORESymbol *symbol, llvm::Module *module, KOREDefinition *def) {
   uint8_t len = symbol->getArguments().size();
   std::vector<llvm::Constant *> elements;
   llvm::LLVMContext &Ctx = module->getContext();
   auto BlockType = getBlockType(module, def, symbol);
   int i = 2;
   for (auto sort : symbol->getArguments()) {
-    ValueType cat = dynamic_cast<KOREObjectCompositeSort *>(sort)->getCategory(def);
+    ValueType cat = dynamic_cast<KORECompositeSort *>(sort)->getCategory(def);
     auto offset = llvm::ConstantExpr::getOffsetOf(BlockType, i++);
     elements.push_back(llvm::ConstantStruct::get(module->getTypeByName(LAYOUTITEM_STRUCT), offset, llvm::ConstantInt::get(llvm::Type::getInt16Ty(Ctx), (int)cat.cat + cat.bits)));
   }
@@ -740,7 +740,7 @@ static llvm::Constant *getLayoutData(uint16_t layout, KOREObjectSymbol *symbol, 
 }
 
 static void emitLayouts(KOREDefinition *definition, llvm::Module *module) {
-  std::map<uint16_t, KOREObjectSymbol *> layouts;
+  std::map<uint16_t, KORESymbol *> layouts;
   for (auto entry : definition->getSymbols()) {
     layouts[entry.second->getLayout()] = entry.second;
   }
