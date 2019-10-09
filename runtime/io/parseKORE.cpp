@@ -14,14 +14,13 @@ extern "C" {
 
     int fd = mkstemp(filename);
 
-    int ret = write(fd, initbuf, sizeof(initbuf) - 1);
-    ret -= write(fd, kore->data, len(kore));
-    ret -= write(fd, endbuf, sizeof(endbuf) - 1);
+    bool failed = write(fd, initbuf, sizeof(initbuf) - 1) == -1;
+    failed |= write(fd, kore->data, len(kore)) == -1;
+    failed |= write(fd, endbuf, sizeof(endbuf) - 1) == -1;
 
     close(fd);
 
-    /* If ret is negative, one of the writes returned an error so return .K */
-    if (ret >= 0) {
+    if (!failed) {
       parsed = parseConfiguration(filename);
     }
 
