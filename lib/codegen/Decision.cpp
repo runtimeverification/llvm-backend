@@ -198,7 +198,7 @@ void SwitchNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitutio
       for (std::string binding : _case.getBindings()) {
         llvm::Value *ChildPtr = llvm::GetElementPtrInst::CreateInBounds(BlockType, Cast, {llvm::ConstantInt::get(llvm::Type::getInt64Ty(d->Ctx), 0), llvm::ConstantInt::get(llvm::Type::getInt32Ty(d->Ctx), offset+2)}, "", d->CurrentBlock);
         llvm::Value *Child;
-        switch (dynamic_cast<KORECompositeSort *>(_case.getConstructor()->getArguments()[offset])->getCategory(d->Definition).cat) {
+        switch (dynamic_cast<KORECompositeSort *>(_case.getConstructor()->getArguments()[offset].get())->getCategory(d->Definition).cat) {
         case SortCategory::Map:
         case SortCategory::List:
         case SortCategory::Set:
@@ -391,7 +391,7 @@ llvm::Value *Decision::getTag(llvm::Value *val) {
 }
 
 void makeEvalOrAnywhereFunction(KORESymbol *function, KOREDefinition *definition, llvm::Module *module, DecisionNode *dt, void (*addStuck)(llvm::BasicBlock*, llvm::Module*, KORESymbol *, llvm::StringMap<llvm::Value *>&, KOREDefinition *)) {
-  auto returnSort = dynamic_cast<KORECompositeSort *>(function->getSort())->getCategory(definition);
+  auto returnSort = dynamic_cast<KORECompositeSort *>(function->getSort().get())->getCategory(definition);
   auto returnType = getValueType(returnSort, module);
   switch(returnSort.cat) {
   case SortCategory::Map:
@@ -406,8 +406,8 @@ void makeEvalOrAnywhereFunction(KORESymbol *function, KOREDefinition *definition
   std::vector<llvm::Type *> args;
   std::vector<llvm::Metadata *> debugArgs;
   std::vector<ValueType> cats;
-  for (auto sort : function->getArguments()) {
-    auto cat = dynamic_cast<KORECompositeSort *>(sort)->getCategory(definition);
+  for (auto &sort : function->getArguments()) {
+    auto cat = dynamic_cast<KORECompositeSort *>(sort.get())->getCategory(definition);
     debugArgs.push_back(getDebugType(cat));
     switch (cat.cat) {
     case SortCategory::Map:
@@ -465,13 +465,13 @@ void makeEvalFunction(KORESymbol *function, KOREDefinition *definition, llvm::Mo
 
 void addOwise(llvm::BasicBlock *stuck, llvm::Module *module, KORESymbol *symbol, llvm::StringMap<llvm::Value *> &subst, KOREDefinition *d) {
   CreateTerm creator = CreateTerm(subst, d, stuck, module, true);
-  KORECompositePattern *pat = KORECompositePattern::Create(symbol);
+  ptr<KORECompositePattern> pat = KORECompositePattern::Create(symbol);
   for (int i = 0; i < symbol->getArguments().size(); i++) {
      auto var = KOREVariablePattern::Create("_" + std::to_string(i+1), symbol->getArguments()[i]);
-     pat->addArgument(var);
+     pat->addArgument(std::move(var));
   }
-  llvm::Value *retval = creator(pat).first;
-  auto returnSort = dynamic_cast<KORECompositeSort *>(symbol->getSort())->getCategory(d);
+  llvm::Value *retval = creator(pat.get()).first;
+  auto returnSort = dynamic_cast<KORECompositeSort *>(symbol->getSort().get())->getCategory(d);
   auto returnType = getValueType(returnSort, module);
   switch(returnSort.cat) {
   case SortCategory::Map:
@@ -643,19 +643,27 @@ void makeStepFunction(KOREDefinition *definition, llvm::Module *module, Decision
   codegen(dt, subst);
 }
 
+// TODO: actually collect the return value of this function. Right now it
+// assumes that it will never be collected and constructs a unique_ptr pointing
+// to the return value of the recursive call. This is not really safe if the
+// object actually gets collected because it's possible for the return value of the
+// recursive call to actually be owned by the axiom that it is a part of. However,
+// since we then immediately call release on the pointer and never free it, it should be
+// safe, it will just leak memory. But we don't really care that much about memory leaks
+// in the compiler right now, so it's probably fine.
 KOREPattern *makePartialTerm(KOREPattern *term, std::set<std::string> occurrences, std::string occurrence) {
   if (occurrences.count(occurrence)) {
-    return KOREVariablePattern::Create(occurrence, term->getSort());
+    return KOREVariablePattern::Create(occurrence, term->getSort()).release();
   }
   if (auto pat = dynamic_cast<KORECompositePattern *>(term)) {
     if (pat->getConstructor()->getName() == "\\dv") {
       return term;
     }
-    KORECompositePattern *result = KORECompositePattern::Create(pat->getConstructor());
+    ptr<KORECompositePattern> result = KORECompositePattern::Create(pat->getConstructor());
     for (unsigned i = 0; i < pat->getArguments().size(); i++) {
-      result->addArgument(makePartialTerm(dynamic_cast<KOREPattern *>(pat->getArguments()[i]), occurrences, "_" + std::to_string(i) + occurrence));
+      result->addArgument(ptr<KOREPattern>(makePartialTerm(dynamic_cast<KOREPattern *>(pat->getArguments()[i].get()), occurrences, "_" + std::to_string(i) + occurrence)));
     }
-    return result;
+    return result.release();
   }
   abort();
 }
@@ -665,7 +673,7 @@ void makeStepFunction(KOREAxiomDeclaration *axiom, KOREDefinition *definition, l
   std::vector<llvm::Type *> argTypes;
   std::vector<llvm::Metadata *> debugTypes;
   for (auto res : res.residuals) {
-    auto argSort = dynamic_cast<KORECompositeSort *>(res.pattern->getSort());
+    auto argSort = dynamic_cast<KORECompositeSort *>(res.pattern->getSort().get());
     auto cat = argSort->getCategory(definition);
     debugTypes.push_back(getDebugType(cat));
     switch (cat.cat) {
@@ -713,7 +721,7 @@ void makeStepFunction(KOREAxiomDeclaration *axiom, KOREDefinition *definition, l
     phi->addIncoming(val, block);
     phis.push_back(phi);
     auto sort = res.residuals[i].pattern->getSort();
-    auto cat = dynamic_cast<KORECompositeSort *>(sort)->getCategory(definition);
+    auto cat = dynamic_cast<KORECompositeSort *>(sort.get())->getCategory(definition);
     types.push_back(cat);
     initDebugParam(matchFunc, i, "_" + std::to_string(i+1), cat);
   }

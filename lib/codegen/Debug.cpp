@@ -71,23 +71,23 @@ void initDebugGlobal(std::string name, llvm::DIType *type, llvm::GlobalVariable 
 static std::string SOURCE_ATT = "org'Stop'kframework'Stop'attributes'Stop'Source";
 static std::string LOCATION_ATT = "org'Stop'kframework'Stop'attributes'Stop'Location";
 
-void initDebugAxiom(std::map<std::string, KORECompositePattern *> const& att) {
+void initDebugAxiom(std::map<std::string, ptr<KORECompositePattern>> const& att) {
   if (!Dbg) return;
   if (!att.count(SOURCE_ATT)) {
     resetDebugLoc();
     return;
   }
-  KORECompositePattern *sourceAtt = att.at(SOURCE_ATT);
+  KORECompositePattern *sourceAtt = att.at(SOURCE_ATT).get();
   assert(sourceAtt->getArguments().size() == 1);
-  auto strPattern = dynamic_cast<KOREStringPattern *>(sourceAtt->getArguments()[0]);
+  auto strPattern = dynamic_cast<KOREStringPattern *>(sourceAtt->getArguments()[0].get());
   std::string source = strPattern->getContents();
   if (!att.count(LOCATION_ATT)) {
     resetDebugLoc();
     return;
   }
-  KORECompositePattern *locationAtt = att.at(LOCATION_ATT);
+  KORECompositePattern *locationAtt = att.at(LOCATION_ATT).get();
   assert(locationAtt->getArguments().size() == 1);
-  auto strPattern2 = dynamic_cast<KOREStringPattern *>(locationAtt->getArguments()[0]);
+  auto strPattern2 = dynamic_cast<KOREStringPattern *>(locationAtt->getArguments()[0].get());
   std::string location = strPattern2->getContents();
   source = source.substr(7, source.length() - 8);
   size_t first_comma = location.find_first_of(',');

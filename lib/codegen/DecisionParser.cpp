@@ -12,7 +12,7 @@ class DTPreprocessor {
 private:
   std::map<yaml_node_t *, DecisionNode *> uniqueNodes;
   const std::map<std::string, KORESymbol *> &syms;
-  const std::map<std::string, KORECompositeSort *> &sorts;
+  const std::map<std::string, sptr<KORECompositeSort>> &sorts;
   KORESymbol *dv;
   yaml_document_t *doc;
 
@@ -64,10 +64,10 @@ public:
 
   DTPreprocessor(
       const std::map<std::string, KORESymbol *> &syms,
-      const std::map<std::string, KORECompositeSort *> &sorts,
+      const std::map<std::string, sptr<KORECompositeSort>> &sorts,
       yaml_document_t *doc)
       : syms(syms), sorts(sorts), doc(doc) {
-    dv = KORESymbol::Create("\\dv");
+    dv = KORESymbol::Create("\\dv").release();
   }
 
   std::string to_string(std::vector<std::string> occurrence) {
@@ -103,7 +103,7 @@ public:
     return result;
   }
 
-  KOREPattern *parsePattern(yaml_node_t *node, std::vector<std::string> &uses) {
+  ptr<KOREPattern> parsePattern(yaml_node_t *node, std::vector<std::string> &uses) {
     if (auto o = get(node, "occurrence")) {
       std::string name;
       if (o->type == YAML_SEQUENCE_NODE) {
@@ -124,7 +124,7 @@ public:
 
       sym->addFormalArgument(sort);
       sym->addSort(sort);
-      auto pat = KORECompositePattern::Create(sym);
+      auto pat = KORECompositePattern::Create(std::move(sym));
       pat->addArgument(KOREStringPattern::Create(val));
       return pat;
     } else {
@@ -148,11 +148,11 @@ public:
 
     std::vector<std::string> uses;
 
-    KOREPattern *pat = parsePattern(get(node, "pattern"), uses);
+    ptr<KOREPattern> pat = parsePattern(get(node, "pattern"), uses);
 
     auto child = (*this)(get(node, "next"));
 
-    return MakePatternNode::Create(name, pat, uses, child);
+    return MakePatternNode::Create(name, pat.release(), uses, child);
   }
 
   DecisionNode *makeIterator(yaml_node_t *node) {
@@ -273,7 +273,7 @@ public:
       yaml_node_t *listNode = yaml_document_get_node(doc, *iter);
       r.occurrence = to_string(vec(get(listNode, 1)));
       std::vector<std::string> uses;
-      r.pattern = parsePattern(get(listNode, 0), uses);
+      r.pattern = parsePattern(get(listNode, 0), uses).release();
       res.push_back(r);
     }
     PartialStep retval;
@@ -283,7 +283,7 @@ public:
   }
 };
 
-DecisionNode *parseYamlDecisionTreeFromString(std::string yaml, const std::map<std::string, KORESymbol *> &syms, const std::map<std::string, KORECompositeSort *> &sorts) {
+DecisionNode *parseYamlDecisionTreeFromString(std::string yaml, const std::map<std::string, KORESymbol *> &syms, const std::map<std::string, sptr<KORECompositeSort>> &sorts) {
   yaml_parser_t parser;
   yaml_document_t doc;
   yaml_parser_initialize(&parser);
@@ -296,7 +296,7 @@ DecisionNode *parseYamlDecisionTreeFromString(std::string yaml, const std::map<s
   return result;
 }
 
-DecisionNode *parseYamlDecisionTree(std::string filename, const std::map<std::string, KORESymbol *> &syms, const std::map<std::string, KORECompositeSort *> &sorts) {
+DecisionNode *parseYamlDecisionTree(std::string filename, const std::map<std::string, KORESymbol *> &syms, const std::map<std::string, sptr<KORECompositeSort>> &sorts) {
   yaml_parser_t parser;
   yaml_document_t doc;
   yaml_parser_initialize(&parser);
@@ -311,7 +311,7 @@ DecisionNode *parseYamlDecisionTree(std::string filename, const std::map<std::st
   return result;
 }
 
-PartialStep parseYamlSpecialDecisionTree(std::string filename, const std::map<std::string, KORESymbol *> &syms, const std::map<std::string, KORECompositeSort *> &sorts) {
+PartialStep parseYamlSpecialDecisionTree(std::string filename, const std::map<std::string, KORESymbol *> &syms, const std::map<std::string, sptr<KORECompositeSort>> &sorts) {
   yaml_parser_t parser;
   yaml_document_t doc;
   yaml_parser_initialize(&parser);

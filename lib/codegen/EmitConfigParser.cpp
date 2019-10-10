@@ -252,8 +252,8 @@ static std::pair<llvm::Value *, llvm::BasicBlock *> getEval(KOREDefinition *def,
   int idx = 0;
   llvm::StringMap<llvm::Value *> subst;
   auto pattern = KORECompositePattern::Create(symbol);
-  for (auto sort : symbol->getArguments()) {
-    ValueType cat = dynamic_cast<KORECompositeSort *>(sort)->getCategory(def);
+  for (auto &sort : symbol->getArguments()) {
+    ValueType cat = dynamic_cast<KORECompositeSort *>(sort.get())->getCategory(def);
     llvm::Value *arg = getArgValue(ArgumentsArray, idx, CaseBlock, cat, mod);
     std::string name = "_" + std::to_string(idx++);
     subst.insert({name, arg});
@@ -261,13 +261,9 @@ static std::pair<llvm::Value *, llvm::BasicBlock *> getEval(KOREDefinition *def,
   }
   KORESymbolDeclaration *symbolDecl = def->getSymbolDeclarations().at(symbol->getName());
   CreateTerm creator(subst, def, CaseBlock, mod, false);
-  llvm::Value *result = creator(pattern).first;
-  for (auto arg : pattern->getArguments()) {
-    delete arg;
-  }
-  delete pattern;
+  llvm::Value *result = creator(pattern.get()).first;
   llvm::Value *retval;
-  ValueType cat = dynamic_cast<KORECompositeSort *>(symbol->getSort())->getCategory(def);
+  ValueType cat = dynamic_cast<KORECompositeSort *>(symbol->getSort().get())->getCategory(def);
   switch(cat.cat) {
   case SortCategory::Int:
   case SortCategory::Float:
@@ -601,8 +597,8 @@ static void getStore(KOREDefinition *definition, llvm::Module *module, KORESymbo
   auto BlockType = getBlockType(module, definition, symbol);
   auto cast = new llvm::BitCastInst(func->arg_begin(),
       llvm::PointerType::getUnqual(BlockType), "", CaseBlock);
-  for (auto sort : symbol->getArguments()) {
-    ValueType cat = dynamic_cast<KORECompositeSort *>(sort)->getCategory(definition);
+  for (auto &sort : symbol->getArguments()) {
+    ValueType cat = dynamic_cast<KORECompositeSort *>(sort.get())->getCategory(definition);
     llvm::Value *arg = getArgValue(ArgumentsArray, idx, CaseBlock, cat, module);
     llvm::Value *ChildPtr = llvm::GetElementPtrInst::CreateInBounds(BlockType, cast,
         {zero, llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), idx++ + 2)}, "", CaseBlock);
@@ -632,14 +628,14 @@ static void visitCollection(KOREDefinition *definition, llvm::Module *module, KO
   auto sortDecl = definition->getSortDeclarations().at(compositeSort->getName());
   llvm::Constant *concatPtr;
   if (sortDecl->getAttributes().count("concat")) {
-    auto concat = (KORECompositePattern *)sortDecl->getAttributes().at("concat")->getArguments()[0];
+    auto concat = (KORECompositePattern *)sortDecl->getAttributes().at("concat")->getArguments()[0].get();
     concatPtr = getSymbolNamePtr(concat->getConstructor(), nullptr, module);
   } else {
     concatPtr = llvm::ConstantPointerNull::get(llvm::Type::getInt8PtrTy(Ctx));
   }
-  auto unit = (KORECompositePattern *)sortDecl->getAttributes().at("unit")->getArguments()[0];
+  auto unit = (KORECompositePattern *)sortDecl->getAttributes().at("unit")->getArguments()[0].get();
   auto unitPtr = getSymbolNamePtr(unit->getConstructor(), nullptr, module);
-  auto element = (KORECompositePattern *)sortDecl->getAttributes().at("element")->getArguments()[0];
+  auto element = (KORECompositePattern *)sortDecl->getAttributes().at("element")->getArguments()[0].get();
   auto elementPtr = getSymbolNamePtr(element->getConstructor(), nullptr, module);
   llvm::CallInst::Create(func->arg_begin()+offset, {func->arg_begin()+1, ChildPtr, unitPtr, elementPtr, concatPtr}, "", CaseBlock);
 }
@@ -655,7 +651,7 @@ static void getVisitor(KOREDefinition *definition, llvm::Module *module, KORESym
       llvm::PointerType::getUnqual(BlockType), "", CaseBlock);
   unsigned i = 0;
   for (auto sort : symbol->getArguments()) {
-    auto compositeSort = dynamic_cast<KORECompositeSort *>(sort);
+    auto compositeSort = dynamic_cast<KORECompositeSort *>(sort.get());
     ValueType cat = compositeSort->getCategory(definition);
     llvm::Value *ChildPtr = llvm::GetElementPtrInst::CreateInBounds(BlockType, cast,
         {zero, llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), idx++ + 2)}, "", CaseBlock);
@@ -716,7 +712,7 @@ static llvm::Constant *getLayoutData(uint16_t layout, KORESymbol *symbol, llvm::
   auto BlockType = getBlockType(module, def, symbol);
   int i = 2;
   for (auto sort : symbol->getArguments()) {
-    ValueType cat = dynamic_cast<KORECompositeSort *>(sort)->getCategory(def);
+    ValueType cat = dynamic_cast<KORECompositeSort *>(sort.get())->getCategory(def);
     auto offset = llvm::ConstantExpr::getOffsetOf(BlockType, i++);
     elements.push_back(llvm::ConstantStruct::get(module->getTypeByName(LAYOUTITEM_STRUCT), offset, llvm::ConstantInt::get(llvm::Type::getInt16Ty(Ctx), (int)cat.cat + cat.bits)));
   }
