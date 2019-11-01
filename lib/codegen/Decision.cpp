@@ -1,6 +1,7 @@
 #include "kllvm/codegen/Decision.h"
 #include "kllvm/codegen/CreateTerm.h"
 #include "kllvm/codegen/Debug.h"
+#include "kllvm/codegen/GenAlloc.h"
 
 #include "llvm/IR/CFG.h"
 #include "llvm/IR/Constants.h"
@@ -293,12 +294,7 @@ void MakeIteratorNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> subst
   types.insert(types.begin(), AllocSret->getType());
 
   llvm::FunctionType *funcType = llvm::FunctionType::get(llvm::Type::getVoidTy(d->Module->getContext()), types, false);
-  llvm::Constant *constant = d->Module->getOrInsertFunction(hookName, funcType);
-  llvm::Function *func = llvm::dyn_cast<llvm::Function>(constant);
-  if (!func) {
-    constant->print(llvm::errs());
-    abort();
-  }
+  llvm::Function *func = castToFunctionOrAbort(valueFromFunctionCallee(d->Module->getOrInsertFunction(hookName, funcType)));
   auto call = llvm::CallInst::Create(func, args, "", d->CurrentBlock);
   setDebugLoc(call);
   func->arg_begin()->addAttr(llvm::Attribute::StructRet);
@@ -340,12 +336,7 @@ void IterNextNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitut
   }
 
   llvm::FunctionType *funcType = llvm::FunctionType::get(getValueType({SortCategory::Symbol, 0}, d->Module), {arg->getType()}, false);
-  llvm::Constant *constant = d->Module->getOrInsertFunction(hookName, funcType);
-  llvm::Function *func = llvm::dyn_cast<llvm::Function>(constant);
-  if (!func) {
-    constant->print(llvm::errs());
-    abort();
-  }
+  llvm::Function *func = castToFunctionOrAbort(valueFromFunctionCallee(d->Module->getOrInsertFunction(hookName, funcType)));
   auto Call = llvm::CallInst::Create(func, {arg}, binding.substr(0, max_name_length), d->CurrentBlock);
   setDebugLoc(Call);
   substitution[binding] = Call;
@@ -426,8 +417,7 @@ void makeEvalOrAnywhereFunction(KORESymbol *function, KOREDefinition *definition
   std::ostringstream Out;
   function->print(Out, 0, false);
   std::string name = "eval_" + Out.str();
-  llvm::Constant *func = module->getOrInsertFunction(name, funcType);
-  llvm::Function *matchFunc = llvm::cast<llvm::Function>(func);
+  llvm::Function *matchFunc = castToFunctionOrAbort(valueFromFunctionCallee(module->getOrInsertFunction(name, funcType)));
   KORESymbolDeclaration *symbolDecl = definition->getSymbolDeclarations().at(function->getName());
   initDebugAxiom(symbolDecl->getAttributes());
   initDebugFunction(function->getName(), name, getDebugFunctionType(debugReturnType, debugArgs), definition, matchFunc);
@@ -610,8 +600,7 @@ void makeStepFunction(KOREDefinition *definition, llvm::Module *module, Decision
   auto blockType = getValueType({SortCategory::Symbol, 0}, module);
   llvm::FunctionType *funcType = llvm::FunctionType::get(blockType, {blockType}, false);
   std::string name = "step";
-  llvm::Constant *func = module->getOrInsertFunction(name, funcType);
-  llvm::Function *matchFunc = llvm::cast<llvm::Function>(func);
+  llvm::Function *matchFunc = castToFunctionOrAbort(valueFromFunctionCallee(module->getOrInsertFunction(name, funcType)));
   auto debugType = getDebugType({SortCategory::Symbol, 0});
   resetDebugLoc();
   initDebugFunction(name, name, getDebugFunctionType(debugType, {debugType}), definition, matchFunc);
@@ -690,19 +679,11 @@ void makeStepFunction(KOREAxiomDeclaration *axiom, KOREDefinition *definition, l
   auto blockDebugType = getDebugType({SortCategory::Symbol, 0});
   llvm::FunctionType *funcType = llvm::FunctionType::get(blockType, argTypes, false);
   std::string name = "step_" + std::to_string(axiom->getOrdinal());
-  llvm::Constant *func = module->getOrInsertFunction(name, funcType);
-  llvm::Function *matchFunc = llvm::dyn_cast<llvm::Function>(func);
+  llvm::Function *matchFunc = castToFunctionOrAbort(valueFromFunctionCallee(module->getOrInsertFunction(name, funcType)));
   resetDebugLoc();
   initDebugFunction(name, name, getDebugFunctionType(blockDebugType, debugTypes), definition, matchFunc);
-  if (!matchFunc) {
-    func->print(llvm::errs());
-    abort();
-  }
   matchFunc->setCallingConv(llvm::CallingConv::Fast);
-  if (!matchFunc) {
-    func->print(llvm::errs());
-    abort();
-  }
+
   llvm::StringMap<llvm::Value *> subst;
   llvm::StringMap<llvm::Value *> stuckSubst;
   llvm::BasicBlock *block = llvm::BasicBlock::Create(module->getContext(), "entry", matchFunc);
