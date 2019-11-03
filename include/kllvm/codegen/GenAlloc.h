@@ -15,6 +15,9 @@ llvm::Function* castToFunctionOrAbort(llvm::Value* value);
 
 llvm::Value* valueFromFunctionCallee(llvm::FunctionCallee callee);
 
+// getOrInsertFunction on module, aborting on failure
+llvm::Function& getOrInsertFunction(llvm::Module& module, llvm::StringRef, llvm::Type*);
+
 }
 
 #endif // KLLVM_ALLOC_H 

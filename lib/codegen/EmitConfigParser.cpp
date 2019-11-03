@@ -29,24 +29,30 @@ static llvm::Constant *getSymbolNamePtr(KORESymbol *symbol, llvm::BasicBlock *Se
   return Ptr;
 }
 
+static llvm::Constant& getStrcmp(llvm::Module& module) {
+llvm::LLVMContext &Ctx = module.getContext();
+  auto type = llvm::FunctionType::get(llvm::Type::getInt32Ty(Ctx),
+      {llvm::Type::getInt8PtrTy(Ctx), llvm::Type::getInt8PtrTy(Ctx)}, false);
+  return getOrInsertFunction(module, "strcmp", type);
+}
+
 static void emitGetTagForSymbolName(KOREDefinition *definition, llvm::Module *module) {
   llvm::LLVMContext &Ctx = module->getContext();
-  auto func = llvm::dyn_cast<llvm::Function>(module->getOrInsertFunction(
-      "getTagForSymbolName", llvm::Type::getInt32Ty(Ctx), llvm::Type::getInt8PtrTy(Ctx)));
+  auto type = llvm::FunctionType::get(llvm::Type::getInt32Ty(Ctx), {llvm::Type::getInt8PtrTy(Ctx)}, false);
+  auto& func = getOrInsertFunction(*module, "getTagForSymbolName",
+      type);
   auto CurrentBlock = llvm::BasicBlock::Create(Ctx, "");
   auto MergeBlock = llvm::BasicBlock::Create(Ctx, "exit");
   auto Phi = llvm::PHINode::Create(llvm::Type::getInt32Ty(Ctx), definition->getSymbols().size(), "phi", MergeBlock);
   auto &syms = definition->getAllSymbols();
-  llvm::Constant *Strcmp = module->getOrInsertFunction("strcmp", 
-      llvm::Type::getInt32Ty(Ctx), llvm::Type::getInt8PtrTy(Ctx),
-      llvm::Type::getInt8PtrTy(Ctx));
+  llvm::Constant& Strcmp = getStrcmp(*module);
   for (auto iter = syms.begin(); iter != syms.end(); ++iter) {
     auto &entry = *iter;
     uint32_t tag = entry.second->getTag();
     auto symbol = entry.second;
-    CurrentBlock->insertInto(func);
+    CurrentBlock->insertInto(&func);
     auto Ptr = getSymbolNamePtr(symbol, CurrentBlock, module);
-    auto compare = llvm::CallInst::Create(Strcmp, {func->arg_begin(), Ptr}, "", CurrentBlock);
+    auto compare = llvm::CallInst::Create(&Strcmp, {func.arg_begin(), Ptr}, "", CurrentBlock);
     auto icmp = new llvm::ICmpInst(*CurrentBlock, llvm::CmpInst::ICMP_EQ, 
        compare, llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), 0));
     auto FalseBlock = llvm::BasicBlock::Create(Ctx, "");
@@ -55,10 +61,10 @@ static void emitGetTagForSymbolName(KOREDefinition *definition, llvm::Module *mo
     CurrentBlock = FalseBlock;
   }
   llvm::ReturnInst::Create(Ctx, Phi, MergeBlock);
-  MergeBlock->insertInto(func);
+  MergeBlock->insertInto(&func);
   addAbort(CurrentBlock, module);
   CurrentBlock->setName("stuck");
-  CurrentBlock->insertInto(func);
+  CurrentBlock->insertInto(&func);
 }
 
 static std::string BLOCKHEADER_STRUCT = "blockheader";
@@ -75,14 +81,13 @@ static void emitDataTableForSymbol(std::string name, llvm::Type *ty, llvm::DITyp
   llvm::LLVMContext &Ctx = module->getContext();
   std::vector<llvm::Type *> argTypes;
   argTypes.push_back(llvm::Type::getInt32Ty(Ctx));
-  auto func = llvm::dyn_cast<llvm::Function>(module->getOrInsertFunction(
-      name, llvm::FunctionType::get(ty, argTypes, false)));
-  initDebugFunction(name, name, getDebugFunctionType(dity, {getIntDebugType()}), definition, func);
-  auto EntryBlock = llvm::BasicBlock::Create(Ctx, "entry", func);
+  auto& func = getOrInsertFunction(*module, name, llvm::FunctionType::get(ty, argTypes, false));
+  initDebugFunction(name, name, getDebugFunctionType(dity, {getIntDebugType()}), definition, &func);
+  auto EntryBlock = llvm::BasicBlock::Create(Ctx, "entry", &func);
   auto MergeBlock = llvm::BasicBlock::Create(Ctx, "exit");
   auto stuck = llvm::BasicBlock::Create(Ctx, "stuck");
   auto &syms = definition->getSymbols();
-  auto icmp = new llvm::ICmpInst(*EntryBlock, llvm::CmpInst::ICMP_ULE, func->arg_begin(), llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), syms.rbegin()->first));
+  auto icmp = new llvm::ICmpInst(*EntryBlock, llvm::CmpInst::ICMP_ULE, func.arg_begin(), llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), syms.rbegin()->first));
   llvm::BranchInst::Create(MergeBlock, stuck, icmp, EntryBlock);
   auto tableType = llvm::ArrayType::get(ty, syms.size());
   auto table = module->getOrInsertGlobal("table_" + name, tableType);
@@ -98,15 +103,15 @@ static void emitDataTableForSymbol(std::string name, llvm::Type *ty, llvm::DITyp
   if (!globalVar->hasInitializer()) {
     globalVar->setInitializer(llvm::ConstantArray::get(tableType, values));
   }
-  auto offset = new llvm::ZExtInst(func->arg_begin(), llvm::Type::getInt64Ty(Ctx), "", MergeBlock);
+  auto offset = new llvm::ZExtInst(func.arg_begin(), llvm::Type::getInt64Ty(Ctx), "", MergeBlock);
   llvm::Constant *zero = llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0);
   auto retval = llvm::GetElementPtrInst::Create(
     tableType, globalVar, {zero, offset}, "", MergeBlock);
   auto load = new llvm::LoadInst(retval, "", MergeBlock);
   llvm::ReturnInst::Create(Ctx, load, MergeBlock);
-  MergeBlock->insertInto(func);
+  MergeBlock->insertInto(&func);
   addAbort(stuck, module);
-  stuck->insertInto(func);
+  stuck->insertInto(&func);
 }
 
 
@@ -120,16 +125,15 @@ static void emitDataForSymbol(std::string name, llvm::Type *ty, llvm::DIType *di
     auto ty = llvm::PointerType::getUnqual(llvm::ArrayType::get(llvm::Type::getInt8PtrTy(Ctx), 0));
     argTypes.push_back(ty);
   }
-  auto func = llvm::dyn_cast<llvm::Function>(module->getOrInsertFunction(
-      name, llvm::FunctionType::get(ty, argTypes, false)));
+  auto& func = getOrInsertFunction(*module, name, llvm::FunctionType::get(ty, argTypes, false));
   if (!isEval) {
-    initDebugFunction(name, name, getDebugFunctionType(dity, {getIntDebugType()}), definition, func);
+    initDebugFunction(name, name, getDebugFunctionType(dity, {getIntDebugType()}), definition, &func);
   }
-  auto EntryBlock = llvm::BasicBlock::Create(Ctx, "entry", func);
+  auto EntryBlock = llvm::BasicBlock::Create(Ctx, "entry", &func);
   auto MergeBlock = llvm::BasicBlock::Create(Ctx, "exit");
   auto stuck = llvm::BasicBlock::Create(Ctx, "stuck");
   auto &syms = definition->getSymbols();
-  auto Switch = llvm::SwitchInst::Create(func->arg_begin(), stuck, syms.size(), EntryBlock);
+  auto Switch = llvm::SwitchInst::Create(func.arg_begin(), stuck, syms.size(), EntryBlock);
   auto Phi = llvm::PHINode::Create(ty, definition->getSymbols().size(), "phi", MergeBlock);
   for (auto iter = syms.begin(); iter != syms.end(); ++iter) {
     auto entry = *iter;
@@ -140,16 +144,16 @@ static void emitDataForSymbol(std::string name, llvm::Type *ty, llvm::DIType *di
     if (isEval && !isFunc) {
       continue;
     }
-    auto CaseBlock = llvm::BasicBlock::Create(Ctx, "tag" + std::to_string(tag), func);
+    auto CaseBlock = llvm::BasicBlock::Create(Ctx, "tag" + std::to_string(tag), &func);
     auto Branch = llvm::BranchInst::Create(MergeBlock, CaseBlock);
     auto pair = getter(definition, module, symbol, Branch);
     Phi->addIncoming(pair.first, pair.second);
     Switch->addCase(llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), tag), CaseBlock);
   }
   llvm::ReturnInst::Create(Ctx, Phi, MergeBlock);
-  MergeBlock->insertInto(func);
+  MergeBlock->insertInto(&func);
   addAbort(stuck, module);
-  stuck->insertInto(func);
+  stuck->insertInto(&func);
 }
 
 static std::pair<llvm::Value *, llvm::BasicBlock *> getHeader(KOREDefinition *definition, llvm::Module *module,
@@ -309,15 +313,13 @@ static void emitEvaluateFunctionSymbol(KOREDefinition *def, llvm::Module *mod) {
 
 static void emitGetTagForFreshSort(KOREDefinition *definition, llvm::Module *module) {
   llvm::LLVMContext &Ctx = module->getContext();
-  auto func = llvm::dyn_cast<llvm::Function>(module->getOrInsertFunction(
-      "getTagForFreshSort", llvm::Type::getInt32Ty(Ctx), llvm::Type::getInt8PtrTy(Ctx)));
+  auto& func = getOrInsertFunction(*module,
+      "getTagForFreshSort", llvm::FunctionType::get(llvm::Type::getInt32Ty(Ctx), llvm::Type::getInt8PtrTy(Ctx)));
   auto CurrentBlock = llvm::BasicBlock::Create(Ctx, "");
   auto MergeBlock = llvm::BasicBlock::Create(Ctx, "exit");
   auto Phi = llvm::PHINode::Create(llvm::Type::getInt32Ty(Ctx), definition->getSortDeclarations().size(), "phi", MergeBlock);
   auto &sorts = definition->getSortDeclarations();
-  llvm::Constant *Strcmp = module->getOrInsertFunction("strcmp", 
-      llvm::Type::getInt32Ty(Ctx), llvm::Type::getInt8PtrTy(Ctx),
-      llvm::Type::getInt8PtrTy(Ctx));
+  llvm::Constant& Strcmp = getStrcmp(*module);
   llvm::Constant *zero = llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0);
   llvm::Constant *zero32 = llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), 0);
   bool hasCase = false;
@@ -328,21 +330,21 @@ static void emitGetTagForFreshSort(KOREDefinition *definition, llvm::Module *mod
       continue;
     }
     hasCase = true;
-    CurrentBlock->insertInto(func);
+    CurrentBlock->insertInto(&func);
     CurrentBlock->setName("is_" + name);
     auto Str = llvm::ConstantDataArray::getString(Ctx, name, true);
-    auto global = module->getOrInsertGlobal("sort_name_" + name, Str->getType());
+    auto global = valueFromFunctionCallee(module->getOrInsertGlobal("sort_name_" + name, Str->getType()));
     llvm::GlobalVariable *globalVar = llvm::dyn_cast<llvm::GlobalVariable>(global);
     if (!globalVar->hasInitializer()) {
       globalVar->setInitializer(Str);
     }
     auto indices = std::vector<llvm::Constant *>{zero, zero};
     auto Ptr = llvm::ConstantExpr::getInBoundsGetElementPtr(Str->getType(), globalVar, indices);
-    auto compare = llvm::CallInst::Create(Strcmp, {func->arg_begin(), Ptr}, "", CurrentBlock);
+    auto compare = llvm::CallInst::Create(&Strcmp, {func.arg_begin(), Ptr}, "", CurrentBlock);
     auto icmp = new llvm::ICmpInst(*CurrentBlock, llvm::CmpInst::ICMP_EQ, 
        compare, zero32);
     auto FalseBlock = llvm::BasicBlock::Create(Ctx, "");
-    auto CaseBlock = llvm::BasicBlock::Create(Ctx, name, func);
+    auto CaseBlock = llvm::BasicBlock::Create(Ctx, name, &func);
     llvm::BranchInst::Create(CaseBlock, FalseBlock, icmp, CurrentBlock);
     auto symbol = definition->getFreshFunctions().at(name);
     std::ostringstream Out;
@@ -351,27 +353,25 @@ static void emitGetTagForFreshSort(KOREDefinition *definition, llvm::Module *mod
     llvm::BranchInst::Create(MergeBlock, CaseBlock);
     CurrentBlock = FalseBlock;
   }
-  CurrentBlock->insertInto(func);
+  CurrentBlock->insertInto(&func);
   addAbort(CurrentBlock, module);
   if (hasCase) {
     llvm::ReturnInst::Create(Ctx, Phi, MergeBlock);
-    MergeBlock->insertInto(func);
+    MergeBlock->insertInto(&func);
   }
 }
 
 
 static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
   llvm::LLVMContext &Ctx = module->getContext();
-  auto func = llvm::dyn_cast<llvm::Function>(module->getOrInsertFunction(
-      "getToken", llvm::Type::getInt8PtrTy(Ctx), llvm::Type::getInt8PtrTy(Ctx),
-      llvm::Type::getInt64Ty(Ctx), llvm::Type::getInt8PtrTy(Ctx)));
+  auto getTokenType = llvm::FunctionType::get(llvm::Type::getInt8PtrTy(Ctx), { llvm::Type::getInt8PtrTy(Ctx),
+      llvm::Type::getInt64Ty(Ctx), llvm::Type::getInt8PtrTy(Ctx) }, false);
+  auto func = getOrInsertFunction(*module, "getToken", getTokenType);
   auto CurrentBlock = llvm::BasicBlock::Create(Ctx, "");
   auto MergeBlock = llvm::BasicBlock::Create(Ctx, "exit");
   auto Phi = llvm::PHINode::Create(llvm::Type::getInt8PtrTy(Ctx), definition->getSortDeclarations().size(), "phi", MergeBlock);
   auto &sorts = definition->getSortDeclarations();
-  llvm::Constant *Strcmp = module->getOrInsertFunction("strcmp", 
-      llvm::Type::getInt32Ty(Ctx), llvm::Type::getInt8PtrTy(Ctx),
-      llvm::Type::getInt8PtrTy(Ctx));
+  llvm::Constant& Strcmp = getStrcmp(*module);
   llvm::Constant *StringEqual = module->getOrInsertFunction("string_equal", 
       llvm::Type::getInt1Ty(Ctx), llvm::Type::getInt8PtrTy(Ctx),
       llvm::Type::getInt8PtrTy(Ctx), llvm::Type::getInt64Ty(Ctx),
@@ -396,7 +396,7 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
     }
     auto indices = std::vector<llvm::Constant *>{zero, zero};
     auto Ptr = llvm::ConstantExpr::getInBoundsGetElementPtr(Str->getType(), globalVar, indices);
-    auto compare = llvm::CallInst::Create(Strcmp, {func->arg_begin(), Ptr}, "", CurrentBlock);
+    auto compare = llvm::CallInst::Create(&Strcmp, {func->arg_begin(), Ptr}, "", CurrentBlock);
     auto icmp = new llvm::ICmpInst(*CurrentBlock, llvm::CmpInst::ICMP_EQ, 
        compare, zero32);
     auto FalseBlock = llvm::BasicBlock::Create(Ctx, "");

@@ -498,19 +498,14 @@ llvm::Value *CreateTerm::createFunctionCall(std::string name, ValueType returnCa
   }
  
   llvm::FunctionType *funcType = llvm::FunctionType::get(returnType, types, false);
-  llvm::Constant *constant = Module->getOrInsertFunction(name, funcType);
-  llvm::Function *func = llvm::dyn_cast<llvm::Function>(constant);
-  if (!func) {
-    constant->print(llvm::errs());
-    abort();
-  }
-  auto call = llvm::CallInst::Create(func, args, "", CurrentBlock);
+  llvm::Function& func = getOrInsertFunction(*Module, name, funcType);
+  auto call = llvm::CallInst::Create(&func, args, "", CurrentBlock);
   setDebugLoc(call);
   if (fastcc) {
     call->setCallingConv(llvm::CallingConv::Fast);
   }
   if (sret) {
-    func->arg_begin()->addAttr(llvm::Attribute::StructRet);
+    func.arg_begin()->addAttr(llvm::Attribute::StructRet);
     call->addParamAttr(0, llvm::Attribute::StructRet);
     return AllocSret;
   }
