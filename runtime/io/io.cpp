@@ -586,7 +586,7 @@ extern "C" {
     mpz_init_set_si(result, ret);
     mpz_ptr p = move_int(result);
     size_t length = len(filename);
-    string * retString = static_cast<string *>(koreAlloc(sizeof(string) + sizeof(char) * length));
+    string * retString = static_cast<string *>(koreAllocToken(sizeof(string) + sizeof(char) * length));
     memcpy(retString->data, temp, sizeof(char) * length);
     set_len(retString, length);
     memcpy(retBlock->children, &retString, sizeof(string *));
