@@ -1,5 +1,5 @@
 #include "kllvm/parser/KOREScanner.h"
-#include "kllvm/parser/KOREParserDriver.h"
+#include "kllvm/parser/KOREParser.h"
 #include "runtime/alloc.h"
 
 #include <gmp.h>
@@ -23,9 +23,9 @@ static void *allocatePatternAsConfiguration(const KOREPattern *Pattern) {
   const KORESymbol *symbol = constructor->getConstructor();
   assert(symbol->isConcrete() && "found sort variable in initial configuration");
   if (symbol->getName() == "\\dv") {
-    const auto sort = dynamic_cast<KORECompositeSort *>(symbol->getFormalArguments()[0]);
+    const auto sort = dynamic_cast<KORECompositeSort *>(symbol->getFormalArguments()[0].get());
     const auto strPattern =
-      dynamic_cast<KOREStringPattern *>(constructor->getArguments()[0]);
+      dynamic_cast<KOREStringPattern *>(constructor->getArguments()[0].get());
     std::string contents = strPattern->getContents();
     return getToken(sort->getName().c_str(), contents.size(), contents.c_str());
   }
@@ -35,8 +35,8 @@ static void *allocatePatternAsConfiguration(const KOREPattern *Pattern) {
 
   if (isSymbolAFunction(tag)) {
     std::vector<void *> arguments;
-    for (const auto child : constructor->getArguments()) {
-      arguments.push_back(allocatePatternAsConfiguration(child));
+    for (const auto &child : constructor->getArguments()) {
+      arguments.push_back(allocatePatternAsConfiguration(child.get()));
     }
     return evaluateFunctionSymbol(tag, &arguments[0]);
   }
@@ -49,8 +49,8 @@ static void *allocatePatternAsConfiguration(const KOREPattern *Pattern) {
   }
 
   std::vector<void *> children;
-  for (const auto child : constructor->getArguments()) {
-    children.push_back(allocatePatternAsConfiguration(child));
+  for (const auto &child : constructor->getArguments()) {
+    children.push_back(allocatePatternAsConfiguration(child.get()));
   }
 
   if (symbol->getName() == "inj") {
@@ -78,27 +78,12 @@ static void *allocatePatternAsConfiguration(const KOREPattern *Pattern) {
 }
 
 block *parseConfiguration(const char *filename) {
-  // Parse configuartion definition into a KOREDefinition.
-  // A configuration definition should contain a single attribute named
-  // "initial-configuration" that contains the initial configuation as
-  // an object pattern and a single empty module with no attributes.
-  KOREScanner scanner(filename);
-  KOREParserDriver driver;
-  KOREDefinition *definition;
-  KOREParser parser(scanner, driver, &definition);
-  parser.parse();
-  definition->preprocess();
-
-  // We expect the initial configuration as an attribute named "initial-configuration"
-  assert(definition->getAttributes().count("initial-configuration"));
-  const KORECompositePattern *InitialConfigurationAttribute =
-    definition->getAttributes().at("initial-configuration");
-  assert(InitialConfigurationAttribute->getArguments().size() > 0);
-  const KOREPattern *InitialConfiguration =
-    InitialConfigurationAttribute->getArguments()[0];
+  // Parse initial configuration as a KOREPattern
+  KOREParser parser(filename);
+  ptr<KOREPattern> InitialConfiguration = parser.pattern();
 
   //InitialConfiguration->print(std::cout);
 
   // Allocate the llvm KORE datastructures for the configuration
-  return (block *) allocatePatternAsConfiguration(InitialConfiguration);
+  return (block *) allocatePatternAsConfiguration(InitialConfiguration.get());
 }

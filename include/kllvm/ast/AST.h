@@ -8,6 +8,7 @@
 #include <list>
 #include <map>
 #include <unordered_map>
+#include <utility>
 
 namespace kllvm {
 
@@ -16,18 +17,25 @@ class KORESortVariable;
 
 struct HashSort;
 
+template <typename T>
+using ptr = std::unique_ptr<T>;
+
+template <typename T>
+using sptr = std::shared_ptr<T>;
+
 // KORESort
-class KORESort {
+class KORESort : public std::enable_shared_from_this<KORESort> {
 public:
-  using substitution = std::unordered_map<KORESortVariable, KORESort *, HashSort>;
+  using substitution = std::unordered_map<KORESortVariable, sptr<KORESort>, HashSort>;
 
   virtual bool isConcrete() const = 0;
-  virtual KORESort *substitute(const substitution &) = 0;
+  virtual sptr<KORESort> substitute(const substitution &) = 0;
 
   virtual bool operator==(const KORESort &other) const = 0;
   bool operator!=(const KORESort &other) const { return !(*this == other); }
 
   virtual void print(std::ostream &Out, unsigned indent = 0) const =0;
+  virtual ~KORESort() = default;
 };
 
 static inline std::ostream &operator<<(std::ostream &out, const KORESort &s) { s.print(out); return out; }
@@ -47,12 +55,12 @@ private:
   std::string name;
 
 public:
-  static KORESortVariable *Create(const std::string &Name) {
-    return new KORESortVariable(Name);
+  static sptr<KORESortVariable> Create(const std::string &Name) {
+    return sptr<KORESortVariable>(new KORESortVariable(Name));
   }
 
   virtual bool isConcrete() const override { return false; }
-  virtual KORESort *substitute(const substitution &subst) override { return subst.at(*this); }
+  virtual sptr<KORESort> substitute(const substitution &subst) override { return subst.at(*this); }
 
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
   virtual bool operator==(const KORESort &other) const override;
@@ -78,12 +86,12 @@ class KOREDefinition;
 class KORECompositeSort : public KORESort {
 private:
   std::string name;
-  std::vector<KORESort *> arguments;
+  std::vector<sptr<KORESort>> arguments;
   ValueType category;
 
 public:
-  static KORECompositeSort *Create(const std::string &Name, ValueType Cat = {SortCategory::Uncomputed, 0}) {
-    return new KORECompositeSort(Name, Cat);
+  static sptr<KORECompositeSort> Create(const std::string &Name, ValueType Cat = {SortCategory::Uncomputed, 0}) {
+    return sptr<KORECompositeSort>(new KORECompositeSort(Name, Cat));
   }
 
   const std::string getName() const { return name; }
@@ -92,9 +100,9 @@ public:
   static ValueType getCategory(std::string hook);
 
   virtual bool isConcrete() const override { return true; }
-  virtual KORESort *substitute(const substitution &subst) override;
+  virtual sptr<KORESort> substitute(const substitution &subst) override;
 
-  void addArgument(KORESort *Argument);
+  void addArgument(sptr<KORESort> Argument);
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
   virtual bool operator==(const KORESort &other) const override;
 
@@ -116,13 +124,13 @@ private:
       part of a pattern, it changes from being empty to being
       the signature of the symbol. instantiateSymbol is called on all object
       level symbols in axioms when KOREDefinition::preprocess is called. */
-  std::vector<KORESort *> arguments;
+  std::vector<sptr<KORESort>> arguments;
   /* contains the original arguments to the symbol when parsed as parh of a pattern. */
-  std::vector<KORESort *> formalArguments;
+  std::vector<sptr<KORESort>> formalArguments;
   /** At parse time, when parsed as part of a pattern, this will be null.
       When parsed as part of a declaration, it contains the return sort of the symbol.
       See above re: the behavior of KORESymbol with respect to instantiateSymbol. */
-  KORESort *sort;
+  sptr<KORESort> sort;
   /* the first integer in a continuous range representing the tags of all the
      polymorphic instantiations of this symbol. If the symbol has no parameters
      or its parameters are fully specified, firstTag == lastTag. */
@@ -136,34 +144,35 @@ private:
   uint16_t layout;
 
 public:
-  static KORESymbol *Create(const std::string &Name) {
-    return new KORESymbol(Name);
+  static ptr<KORESymbol> Create(const std::string &Name) {
+    return ptr<KORESymbol>(new KORESymbol(Name));
   }
 
-  void addArgument(KORESort *Argument);
-  void addFormalArgument(KORESort *Argument);
-  void addSort(KORESort *Sort);
+  void addArgument(sptr<KORESort> Argument);
+  void addFormalArgument(sptr<KORESort> Argument);
+  void addSort(sptr<KORESort> Sort);
+  void initPatternArguments(void) { arguments.swap(formalArguments); }
 
   const std::string &getName() const { return name; }
-  const std::vector<KORESort *> &getArguments() const {
+  const std::vector<sptr<KORESort>> &getArguments() const {
     return arguments;
   }
-  const std::vector<KORESort *> &getFormalArguments() const {
+  const std::vector<sptr<KORESort>> &getFormalArguments() const {
     return formalArguments;
   }
-  const KORESort *getSort() const { return sort; }
-  KORESort *getSort() { return sort; }
+  const sptr<KORESort> getSort() const { return sort; }
+  sptr<KORESort> getSort() { return sort; }
   uint32_t getTag() const { assert(firstTag == lastTag); return firstTag; }
   uint32_t getFirstTag() const { return firstTag; }
   uint32_t getLastTag() const { return lastTag; }
   void setTag(uint32_t val) { firstTag = lastTag = val; }
   uint16_t getLayout() const { return layout; }
 
-  virtual void print(std::ostream &Out, unsigned indent = 0) const;
-  virtual void print(std::ostream &Out, unsigned indent, bool formal) const;
+  void print(std::ostream &Out, unsigned indent = 0) const;
+  void print(std::ostream &Out, unsigned indent, bool formal) const;
 
-  bool operator==(KORESymbol other) const;
-  bool operator!=(KORESymbol other) const { return !(*this == other); }
+  bool operator==(const KORESymbol &other) const;
+  bool operator!=(const KORESymbol &other) const { return !(*this == other); }
 
   std::string layoutString(KOREDefinition *) const;
 
@@ -191,7 +200,7 @@ struct HashSymbol {
   size_t operator()(const kllvm::KORESymbol &s) const noexcept {
     size_t hash = 0;
     boost::hash_combine(hash, s.name);
-    for (auto arg : s.arguments) {
+    for (auto &arg : s.arguments) {
       boost::hash_combine(hash, *arg);
     }
     return hash;
@@ -204,13 +213,14 @@ private:
   std::string name;
 
 public:
-  static KOREVariable *Create(const std::string &Name) {
-    return new KOREVariable(Name);
+  static ptr<KOREVariable> Create(const std::string &Name) {
+    return ptr<KOREVariable>(new KOREVariable(Name));
   }
 
   std::string getName() const;
 
   virtual void print(std::ostream &Out, unsigned indent = 0) const;
+  virtual ~KOREVariable() = default;
 
 private:
   KOREVariable(const std::string &Name) : name(Name) { }
@@ -232,60 +242,65 @@ public:
      to the specified map, mapping their variable name to the variable itself. */
   virtual void markVariables(std::map<std::string, KOREVariablePattern *> &) = 0;
 
-  virtual KORESort *getSort(void) const = 0;
+  virtual sptr<KORESort> getSort(void) const = 0;
 };
 
 class KOREVariablePattern : public KOREPattern {
 private:
-  KOREVariable *name;
-  KORESort *sort;
+  ptr<KOREVariable> name;
+  sptr<KORESort> sort;
 
 public:
-  static KOREVariablePattern *
-  Create(const std::string &Name, KORESort *sort) {
-    KOREVariable *Var = KOREVariable::Create(Name);
-    return new KOREVariablePattern(Var, sort);
+  static ptr<KOREVariablePattern>
+  Create(const std::string &Name, sptr<KORESort> sort) {
+    ptr<KOREVariable> Var = KOREVariable::Create(Name);
+    return ptr<KOREVariablePattern>(new KOREVariablePattern(std::move(Var), sort));
   }
 
   std::string getName() const;
-  virtual KORESort *getSort() const override { return sort; }
+  virtual sptr<KORESort> getSort() const override { return sort; }
 
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
   virtual void markSymbols(std::map<std::string, std::vector<KORESymbol *>> &) override {}
   virtual void markVariables(std::map<std::string, KOREVariablePattern *> &map) override { map.insert({name->getName(), this}); }
 
 private:
-  KOREVariablePattern(KOREVariable *Name, KORESort *Sort)
-  : name(Name), sort(Sort) { }
+  KOREVariablePattern(ptr<KOREVariable> Name, sptr<KORESort> Sort)
+  : name(std::move(Name)), sort(Sort) { }
 };
 
 class KORECompositePattern : public KOREPattern {
 private:
-  KORESymbol *constructor;
-  std::vector<KOREPattern *> arguments;
+  ptr<KORESymbol> constructor;
+  std::vector<ptr<KOREPattern>> arguments;
 
 public:
-  static KORECompositePattern *Create(const std::string &Name) {
-    KORESymbol *Sym = KORESymbol::Create(Name);
-    return new KORECompositePattern(Sym);
+  static ptr<KORECompositePattern> Create(const std::string &Name) {
+    ptr<KORESymbol> Sym = KORESymbol::Create(Name);
+    return ptr<KORECompositePattern>(new KORECompositePattern(std::move(Sym)));
   }
-  static KORECompositePattern *Create(KORESymbol *Sym) {
-    return new KORECompositePattern(Sym);
+  static ptr<KORECompositePattern> Create(ptr<KORESymbol> Sym) {
+    return ptr<KORECompositePattern>(new KORECompositePattern(std::move(Sym)));
+  }
+  static ptr<KORECompositePattern> Create(KORESymbol *Sym) {
+    ptr<KORESymbol> newSym = KORESymbol::Create(Sym->getName());
+    *newSym = *Sym;
+    return ptr<KORECompositePattern>(new KORECompositePattern(std::move(newSym)));
   }
 
-  KORESort *getSort() const override { return constructor->getSort(); }
+  sptr<KORESort> getSort() const override { return constructor->getSort(); }
 
-  KORESymbol *getConstructor() const { return constructor; }
-  const std::vector<KOREPattern *> &getArguments() const { return arguments; }
+  KORESymbol *getConstructor() const { return constructor.get(); }
+  const std::vector<ptr<KOREPattern>> &getArguments() const { return arguments; }
 
-  void addArgument(KOREPattern *Argument);
+  void addArgument(ptr<KOREPattern> Argument);
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
   virtual void markSymbols(std::map<std::string, std::vector<KORESymbol *>> &) override;
   virtual void markVariables(std::map<std::string, KOREVariablePattern *> &) override;
 
 private:
-  KORECompositePattern(KORESymbol *Constructor)
-  : constructor(Constructor) { }
+  KORECompositePattern(ptr<KORESymbol> Constructor)
+  : constructor(std::move(Constructor)) { }
 };
 
 class KOREStringPattern : public KOREPattern {
@@ -293,8 +308,8 @@ private:
   std::string contents;
 
 public:
-  static KOREStringPattern *Create(const std::string &Contents) {
-    return new KOREStringPattern(Contents);
+  static ptr<KOREStringPattern> Create(const std::string &Contents) {
+    return ptr<KOREStringPattern>(new KOREStringPattern(Contents));
   }
 
   std::string getContents() { return contents; }
@@ -302,7 +317,7 @@ public:
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
   virtual void markSymbols(std::map<std::string, std::vector<KORESymbol *>> &) override {}
   virtual void markVariables(std::map<std::string, KOREVariablePattern *> &) override {}
-  virtual KORESort *getSort(void) const override { abort(); }
+  virtual sptr<KORESort> getSort(void) const override { abort(); }
 
 private:
   KOREStringPattern(const std::string &Contents) : contents(Contents) { }
@@ -311,15 +326,16 @@ private:
 // KOREDeclaration
 class KOREDeclaration {
 protected:
-  std::map<std::string, KORECompositePattern *> attributes;
-  std::vector<KORESortVariable *> objectSortVariables;
+  std::map<std::string, ptr<KORECompositePattern>> attributes;
+  std::vector<sptr<KORESortVariable>> objectSortVariables;
 
 public:
-  void addAttribute(KOREPattern *Attribute);
-  void addObjectSortVariable(KORESortVariable *SortVariable);
+  void addAttribute(ptr<KORECompositePattern> Attribute);
+  void addObjectSortVariable(sptr<KORESortVariable> SortVariable);
   virtual void print(std::ostream &Out, unsigned indent = 0) const =0;
-  const std::map<std::string, KORECompositePattern *> &getAttributes() const { return attributes; }
-  const std::vector<KORESortVariable *> &getObjectSortVariables() const { return objectSortVariables; }
+  const std::map<std::string, ptr<KORECompositePattern>> &getAttributes() const { return attributes; }
+  const std::vector<sptr<KORESortVariable>> &getObjectSortVariables() const { return objectSortVariables; }
+  virtual ~KOREDeclaration() = default;
 
 protected:
   void printSortVariables(std::ostream &Out) const;
@@ -331,9 +347,9 @@ private:
   std::string sortName;
 
 public:
-  static KORECompositeSortDeclaration *
+  static ptr<KORECompositeSortDeclaration>
   Create(const std::string &Name, bool isHooked = false) {
-    return new KORECompositeSortDeclaration(Name, isHooked);
+    return ptr<KORECompositeSortDeclaration>(new KORECompositeSortDeclaration(Name, isHooked));
   }
 
   std::string getName() const { return sortName; }
@@ -352,13 +368,13 @@ class KORESymbolOrAliasDeclaration : public KOREDeclaration {
 
 class KORESymbolAliasDeclaration : public KORESymbolOrAliasDeclaration {
 protected:
-  KORESymbol *symbol;
+  ptr<KORESymbol> symbol;
 
-  KORESymbolAliasDeclaration(KORESymbol *Symbol)
-  : symbol(Symbol) { }
+  KORESymbolAliasDeclaration(ptr<KORESymbol> Symbol)
+  : symbol(std::move(Symbol)) { }
 
 public:
-  KORESymbol *getSymbol() const { return symbol; }
+  KORESymbol *getSymbol() const { return symbol.get(); }
 };
 
 class KORESymbolDeclaration : public KORESymbolAliasDeclaration {
@@ -366,10 +382,10 @@ private:
   bool _isHooked;
 
 public:
-  static KORESymbolDeclaration *
+  static ptr<KORESymbolDeclaration>
   Create(const std::string &Name, bool isHooked = false) {
-    KORESymbol *Sym = KORESymbol::Create(Name);
-    return new KORESymbolDeclaration(Sym, isHooked);
+    ptr<KORESymbol> Sym = KORESymbol::Create(Name);
+    return ptr<KORESymbolDeclaration>(new KORESymbolDeclaration(std::move(Sym), isHooked));
   }
 
   bool isHooked() const { return _isHooked; }
@@ -379,39 +395,44 @@ public:
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
 
 private:
-  KORESymbolDeclaration(KORESymbol *Symbol, bool _isHooked)
-  : KORESymbolAliasDeclaration(Symbol), _isHooked(_isHooked) { }
+  KORESymbolDeclaration(ptr<KORESymbol> Symbol, bool _isHooked)
+  : KORESymbolAliasDeclaration(std::move(Symbol)), _isHooked(_isHooked) { }
 };
 
 class KOREAliasDeclaration : public KORESymbolAliasDeclaration {
 private:
-  std::vector<KOREVariablePattern *> boundVariables;
-  KOREPattern *pattern;
+  ptr<KORECompositePattern> boundVariables;
+  ptr<KOREPattern> pattern;
 
 public:
-  static KOREAliasDeclaration *Create(const std::string &Name) {
-    KORESymbol *Sym = KORESymbol::Create(Name);
-    return new KOREAliasDeclaration(Sym);
+  static ptr<KOREAliasDeclaration> Create(const std::string &Name) {
+    ptr<KORESymbol> Sym = KORESymbol::Create(Name);
+    return ptr<KOREAliasDeclaration>(new KOREAliasDeclaration(std::move(Sym)));
   }
 
-  void addVariable(KOREVariablePattern *Variable);
-  void addPattern(KOREPattern *Pattern);
+  void addVariables(ptr<KORECompositePattern> variables);
+  void addPattern(ptr<KOREPattern> Pattern);
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
 
 private:
-  KOREAliasDeclaration(KORESymbol *Symbol)
-  : KORESymbolAliasDeclaration(Symbol) { }
+  KOREAliasDeclaration(ptr<KORESymbol> Symbol)
+  : KORESymbolAliasDeclaration(std::move(Symbol)) { }
 };
 
 class KOREAxiomDeclaration : public KOREDeclaration {
 private:
-  KOREPattern *pattern;
+  ptr<KOREPattern> pattern;
   unsigned ordinal;
+  bool _isClaim;
+
+  KOREAxiomDeclaration(bool isClaim): _isClaim(isClaim) {}
 
 public:
-  static KOREAxiomDeclaration *Create() { return new KOREAxiomDeclaration(); }
+  static ptr<KOREAxiomDeclaration> Create(bool isClaim = false) { 
+    return ptr<KOREAxiomDeclaration>(new KOREAxiomDeclaration(isClaim));
+  }
 
-  void addPattern(KOREPattern *Pattern);
+  void addPattern(ptr<KOREPattern> Pattern);
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
 
   /* returns true if the axiom is actually required to be translated to llvm
@@ -420,6 +441,7 @@ public:
      from the definition by KOREDefinition::preprocess. */
   bool isRequired();
   bool isTopAxiom();
+  bool isClaim() { return _isClaim; }
   KOREPattern *getRightHandSide() const;
   KOREPattern *getRequires() const;
   unsigned getOrdinal() const { return ordinal; }
@@ -433,8 +455,8 @@ private:
   std::string moduleName;
 
 public:
-  static KOREModuleImportDeclaration *Create(const std::string &Name) {
-    return new KOREModuleImportDeclaration(Name);
+  static ptr<KOREModuleImportDeclaration> Create(const std::string &Name) {
+    return ptr<KOREModuleImportDeclaration>(new KOREModuleImportDeclaration(Name));
   }
 
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
@@ -447,19 +469,19 @@ private:
 class KOREModule {
 private:
   std::string name;
-  std::vector<KOREDeclaration *> declarations;
-  std::map<std::string, KORECompositePattern *> attributes;
+  std::vector<ptr<KOREDeclaration>> declarations;
+  std::map<std::string, ptr<KORECompositePattern>> attributes;
 
 public:
-  static KOREModule *Create(const std::string &Name) {
-    return new KOREModule(Name);
+  static ptr<KOREModule> Create(const std::string &Name) {
+    return ptr<KOREModule>(new KOREModule(Name));
   }
 
-  void addAttribute(KOREPattern *Attribute);
-  void addDeclaration(KOREDeclaration *Declaration);
+  void addAttribute(ptr<KORECompositePattern> Attribute);
+  void addDeclaration(ptr<KOREDeclaration> Declaration);
   void print(std::ostream &Out, unsigned indent = 0) const;
 
-  const std::vector<KOREDeclaration *> &getDeclarations() const { return declarations; } 
+  const std::vector<ptr<KOREDeclaration>> &getDeclarations() const { return declarations; } 
 
 private:
   KOREModule(const std::string &Name) : name(Name) { }
@@ -484,7 +506,7 @@ public:
   using KOREVariableMapType = std::map<std::string, KOREVariable *>;
 
   using KORECompositeSortDeclarationMapType = std::map<std::string, KORECompositeSortDeclaration *>;
-  using KORECompositeSortMapType = std::map<std::string, KORECompositeSort *>;
+  using KORECompositeSortMapType = std::map<std::string, sptr<KORECompositeSort>>;
 
   using KORESymbolDeclarationMapType = std::map<std::string, KORESymbolDeclaration *>;
 
@@ -501,15 +523,15 @@ private:
   KORECompositeSortMapType hookedSorts;
   KORESymbolStringMapType freshFunctions;
 
-  std::vector<KOREModule *> modules;
-  std::map<std::string, KORECompositePattern *> attributes;
+  std::vector<ptr<KOREModule>> modules;
+  std::map<std::string, ptr<KORECompositePattern>> attributes;
   /* an automatically computed list of all the axioms in the definition */
   std::list<KOREAxiomDeclaration *> axioms;
 
   KORESymbol *injSymbol;
 
 public:
-  static KOREDefinition *Create() { return new KOREDefinition(); }
+  static ptr<KOREDefinition> Create() { return ptr<KOREDefinition>(new KOREDefinition()); }
 
   /* Preprocesses the definition and prepares it for translation to llvm.
      This performs the following tasks:
@@ -520,8 +542,8 @@ public:
        in the definition. */
   void preprocess();
 
-  void addModule(KOREModule *Module);
-  void addAttribute(KOREPattern *Attribute);
+  void addModule(ptr<KOREModule> Module);
+  void addAttribute(ptr<KORECompositePattern> Attribute);
   void print(std::ostream &Out, unsigned indent = 0) const;
 
   const KORECompositeSortDeclarationMapType &getSortDeclarations() const { return sortDeclarations; }
@@ -530,7 +552,7 @@ public:
   const KORESymbolStringMapType &getAllSymbols() const { return allObjectSymbols; }
   const KORECompositeSortMapType getHookedSorts() const { return hookedSorts; }
   const std::list<KOREAxiomDeclaration *> &getAxioms() const { return axioms; }
-  const std::map<std::string, KORECompositePattern *> &getAttributes() const {
+  const std::map<std::string, ptr<KORECompositePattern>> &getAttributes() const {
     return attributes;
   }
   const KORESymbolStringMapType &getFreshFunctions() const { return freshFunctions; }
