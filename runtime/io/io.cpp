@@ -572,6 +572,30 @@ extern "C" {
     throw std::invalid_argument("not implemented: KREFLECTION.argv");
   }
 
+  block * hook_IO_mkstemp(string * filename) {
+    char * temp = getTerminatedString(filename);
+    int ret = mkstemp(temp);
+
+    if (ret == -1) {
+      return getInjErrorBlock();
+    }
+
+    block * retBlock = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(string *) + sizeof(mpz_ptr)));
+
+    mpz_t result;
+    mpz_init_set_si(result, ret);
+    mpz_ptr p = move_int(result);
+    size_t length = len(filename);
+    string * retString = static_cast<string *>(koreAllocToken(sizeof(string) + sizeof(char) * length));
+    memcpy(retString->data, temp, sizeof(char) * length);
+    set_len(retString, length);
+    memcpy(retBlock->children, &retString, sizeof(string *));
+    memcpy(retBlock->children + 1, &p, sizeof(mpz_ptr));
+    retBlock->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName(GETTAG(tempFile)));
+
+    return retBlock;
+  }
+
   block * hook_IO_system(string * cmd) {
     pid_t pid;
     int ret = 0, out[2], err[2];
@@ -622,10 +646,6 @@ extern "C" {
     memcpy(retBlock->children + 2, &errBuffer, sizeof(string *));
 
     return retBlock;
-  }
-
-  block * hook_IO_mkstemp(string * filename) {
-    throw std::invalid_argument("not implemented: IO.mkstemp");
   }
 
   block * hook_IO_stat(string * path) {
