@@ -5,7 +5,6 @@ target triple = "x86_64-unknown-linux-gnu"
 %block = type { %blockheader, [0 x i64 *] } ; 16-bit layout, 8-bit length, 32-bit tag, children
 
 declare fastcc %block* @step(%block*)
-declare void @koreCollect(%block **)
 
 @depth = thread_local global i64 zeroinitializer
 @INTERVAL = internal thread_local global i64 @GC_INTERVAL@
