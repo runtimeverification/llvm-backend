@@ -26,5 +26,11 @@ pipeline {
         '''
       }
     }
+    stage('Update K Submodule') {
+      when { branch 'master' }
+      steps {
+        build job: 'rv-devops/master', parameters: [string(name: 'PR_REVIEWER', value: 'dwightguth'), booleanParam(name: 'UPDATE_DEPS_K_LLVM', value: true)], propagate: false, wait: false
+      }
+    }
   }
 }
