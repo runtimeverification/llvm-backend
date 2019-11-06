@@ -560,8 +560,9 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> stepFunctionHeader(uns
   if (!globalVar->hasInitializer()) {
     globalVar->setInitializer(layoutArr);
   }
-  auto koreCollect = module->getOrInsertFunction("koreCollect", llvm::FunctionType::get(llvm::Type::getVoidTy(module->getContext()), {arr->getType(), llvm::Type::getInt8Ty(module->getContext()), layout->getType()}, false));
-  auto call = llvm::CallInst::Create(koreCollect, {arr, llvm::ConstantInt::get(llvm::Type::getInt8Ty(module->getContext()), nroots), layout}, "", collect);
+  auto ptrTy = llvm::PointerType::getUnqual(llvm::ArrayType::get(module->getTypeByName(LAYOUTITEM_STRUCT), 0));
+  auto koreCollect = getOrInsertFunction(module, "koreCollect", llvm::FunctionType::get(llvm::Type::getVoidTy(module->getContext()), {arr->getType(), llvm::Type::getInt8Ty(module->getContext()), ptrTy}, false));
+  auto call = llvm::CallInst::Create(koreCollect, {arr, llvm::ConstantInt::get(llvm::Type::getInt8Ty(module->getContext()), nroots), llvm::ConstantExpr::getBitCast(layout, ptrTy)}, "", collect);
   setDebugLoc(call);
   i = 0;
   std::vector<llvm::Value *> phis;
