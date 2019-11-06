@@ -13,10 +13,8 @@ llvm::Function* koreHeapAlloc(std::string name, llvm::Module *module);
 llvm::Function* castToFunctionOrAbort(llvm::Value* value);
 
 
-llvm::Value* valueFromFunctionCallee(llvm::FunctionCallee callee);
-
 // getOrInsertFunction on module, aborting on failure
-llvm::Function& getOrInsertFunction(llvm::Module& module, llvm::StringRef, llvm::Type*);
+llvm::Function* getOrInsertFunction(llvm::Module *module, std::string, llvm::Type*);
 
 }
 

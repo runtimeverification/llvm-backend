@@ -89,9 +89,11 @@ install(
   DESTINATION lib/kllvm/llvm/main
 )
 
+find_program(OPT opt-9)
 find_program(OPT opt-8)
 find_program(OPT opt-7)
 find_program(OPT opt)
+find_program(LLC llc-9)
 find_program(LLC llc-8)
 find_program(LLC llc-7)
 find_program(LLC llc)
