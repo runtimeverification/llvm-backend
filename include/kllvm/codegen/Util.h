@@ -1,5 +1,5 @@
-#ifndef KLLVM_ALLOC_H
-#define KLLVM_ALLOC_H
+#ifndef KLLVM_UTIL_H
+#define KLLVM_UTIL_H
 
 #include "llvm/IR/Module.h"
 
@@ -18,4 +18,4 @@ llvm::Function* getOrInsertFunction(llvm::Module *module, std::string, llvm::Typ
 
 }
 
-#endif // KLLVM_ALLOC_H 
+#endif // KLLVM_UTIL_H 

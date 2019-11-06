@@ -1,7 +1,7 @@
 #include "kllvm/codegen/Decision.h"
 #include "kllvm/codegen/CreateTerm.h"
 #include "kllvm/codegen/Debug.h"
-#include "kllvm/codegen/GenAlloc.h"
+#include "kllvm/codegen/Util.h"
 
 #include "llvm/IR/CFG.h"
 #include "llvm/IR/Constants.h"

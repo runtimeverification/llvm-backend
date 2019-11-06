@@ -7,7 +7,7 @@ add_library(Codegen
   Decision.cpp
   DecisionParser.cpp
   EmitConfigParser.cpp
-  GenAlloc.cpp
+  Util.cpp
 )
 
 target_link_libraries(Codegen PUBLIC AST)

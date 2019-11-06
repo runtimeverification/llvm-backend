@@ -1,5 +1,5 @@
 #include "kllvm/codegen/CreateTerm.h"
-#include "kllvm/codegen/GenAlloc.h"
+#include "kllvm/codegen/Util.h"
 #include "kllvm/codegen/Debug.h"
 
 #include <gmp.h>
