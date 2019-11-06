@@ -14,7 +14,17 @@ llvm::Function* castToFunctionOrAbort(llvm::Value* value);
 
 
 // getOrInsertFunction on module, aborting on failure
-llvm::Function* getOrInsertFunction(llvm::Module *module, std::string, llvm::Type*);
+template<class...Ts>
+static llvm::Function* getOrInsertFunction(llvm::Module *module, Ts... Args) {
+  llvm::Value *callee;
+  auto ret = module->getOrInsertFunction(Args...);
+#if __clang_major__ >= 9
+  callee = ret.getCallee();
+#else
+  callee = ret;
+#endif
+  return castToFunctionOrAbort(callee);
+}
 
 }
 

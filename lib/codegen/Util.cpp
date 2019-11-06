@@ -18,16 +18,4 @@ llvm::Function *castToFunctionOrAbort(llvm::Value* value) {
   return func;
 }
 
-llvm::Function *getOrInsertFunction(llvm::Module *module, std::string name, llvm::Type *ty) {
-  llvm::Value *callee;
-  auto ret = module->getOrInsertFunction(name, ty);
-#if __clang_major__ >= 9
-  callee = ret.getCallee();
-#else
-  callee = ret;
-#endif
-  return castToFunctionOrAbort(callee);
-}
-
-
 }
