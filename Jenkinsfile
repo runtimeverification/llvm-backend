@@ -17,6 +17,7 @@ pipeline {
       }
     }
     stage('Build and Test') {
+      options { timeout(time: 10, unit: 'MINUTES') }
       steps {
         sh '''
           ./ciscript Debug
