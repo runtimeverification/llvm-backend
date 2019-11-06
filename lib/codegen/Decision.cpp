@@ -212,11 +212,11 @@ void SwitchNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitutio
         auto BlockPtr = llvm::PointerType::getUnqual(d->Module->getTypeByName(BLOCK_STRUCT));
         if (symbolDecl->getAttributes().count("binder")) {
           if (offset == 0) {
-            Renamed = llvm::CallInst::Create(d->Module->getOrInsertFunction("alphaRename", BlockPtr, BlockPtr), Child, "renamedVar", d->CurrentBlock);
+            Renamed = llvm::CallInst::Create(getOrInsertFunction(d->Module, "alphaRename", BlockPtr, BlockPtr), Child, "renamedVar", d->CurrentBlock);
             setDebugLoc(Renamed);
             substitution[binding] = Renamed;
           } else if (offset == _case.getBindings().size() - 1) {
-            llvm::Instruction *Replaced = llvm::CallInst::Create(d->Module->getOrInsertFunction("replaceBinderIndex", BlockPtr, BlockPtr, BlockPtr), {Child, Renamed}, "withUnboundIndex", d->CurrentBlock);
+            llvm::Instruction *Replaced = llvm::CallInst::Create(getOrInsertFunction(d->Module, "replaceBinderIndex", BlockPtr, BlockPtr, BlockPtr), {Child, Renamed}, "withUnboundIndex", d->CurrentBlock);
             setDebugLoc(Replaced);
             substitution[binding] = Replaced;
           } else {
@@ -368,7 +368,7 @@ void LeafNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution)
   default:
     break;
   }
-  auto Call = llvm::CallInst::Create(d->Module->getOrInsertFunction(name, llvm::FunctionType::get(type, types, false)), args, "", d->CurrentBlock);
+  auto Call = llvm::CallInst::Create(getOrInsertFunction(d->Module, name, llvm::FunctionType::get(type, types, false)), args, "", d->CurrentBlock);
   setDebugLoc(Call);
   Call->setCallingConv(llvm::CallingConv::Fast);
   llvm::ReturnInst::Create(d->Ctx, Call, d->CurrentBlock);
@@ -376,7 +376,7 @@ void LeafNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution)
 }
 
 llvm::Value *Decision::getTag(llvm::Value *val) {
-  auto res = llvm::CallInst::Create(Module->getOrInsertFunction("getTag", llvm::Type::getInt32Ty(Ctx), getValueType({SortCategory::Symbol, 0}, Module)), val, "tag", CurrentBlock);
+  auto res = llvm::CallInst::Create(getOrInsertFunction(Module, "getTag", llvm::Type::getInt32Ty(Ctx), getValueType({SortCategory::Symbol, 0}, Module)), val, "tag", CurrentBlock);
   setDebugLoc(res);
   return res;
 }
@@ -484,12 +484,12 @@ void makeAnywhereFunction(KORESymbol *function, KOREDefinition *definition, llvm
 }
 
 std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> stepFunctionHeader(unsigned ordinal, llvm::Module *module, KOREDefinition *definition, llvm::BasicBlock *block, llvm::BasicBlock *stuck, std::vector<llvm::Value *> args, std::vector<ValueType> types) {
-  auto finished = module->getOrInsertFunction("finished_rewriting", llvm::FunctionType::get(llvm::Type::getInt1Ty(module->getContext()), {}, false));
+  auto finished = getOrInsertFunction(module, "finished_rewriting", llvm::FunctionType::get(llvm::Type::getInt1Ty(module->getContext()), {}, false));
   auto isFinished = llvm::CallInst::Create(finished, {}, "", block);
   auto checkCollect = llvm::BasicBlock::Create(module->getContext(), "checkCollect", block->getParent());
   llvm::BranchInst::Create(stuck, checkCollect, isFinished, block);
 
-  auto collection = module->getOrInsertFunction("is_collection", llvm::FunctionType::get(llvm::Type::getInt1Ty(module->getContext()), {}, false));
+  auto collection = getOrInsertFunction(module, "is_collection", llvm::FunctionType::get(llvm::Type::getInt1Ty(module->getContext()), {}, false));
   auto isCollection = llvm::CallInst::Create(collection, {}, "", checkCollect);
   auto collect = llvm::BasicBlock::Create(module->getContext(), "isCollect", block->getParent());
   auto merge = llvm::BasicBlock::Create(module->getContext(), "step", block->getParent());

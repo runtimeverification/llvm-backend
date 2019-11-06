@@ -314,7 +314,7 @@ static void emitEvaluateFunctionSymbol(KOREDefinition *def, llvm::Module *mod) {
 static void emitGetTagForFreshSort(KOREDefinition *definition, llvm::Module *module) {
   llvm::LLVMContext &Ctx = module->getContext();
   auto func = getOrInsertFunction(module,
-      "getTagForFreshSort", llvm::FunctionType::get(llvm::Type::getInt32Ty(Ctx), llvm::Type::getInt8PtrTy(Ctx)));
+      "getTagForFreshSort", llvm::Type::getInt32Ty(Ctx), llvm::Type::getInt8PtrTy(Ctx));
   auto CurrentBlock = llvm::BasicBlock::Create(Ctx, "");
   auto MergeBlock = llvm::BasicBlock::Create(Ctx, "exit");
   auto Phi = llvm::PHINode::Create(llvm::Type::getInt32Ty(Ctx), definition->getSortDeclarations().size(), "phi", MergeBlock);
@@ -372,7 +372,7 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
   auto Phi = llvm::PHINode::Create(llvm::Type::getInt8PtrTy(Ctx), definition->getSortDeclarations().size(), "phi", MergeBlock);
   auto &sorts = definition->getSortDeclarations();
   llvm::Constant *Strcmp = getStrcmp(module);
-  llvm::Constant *StringEqual = module->getOrInsertFunction("string_equal", 
+  llvm::Constant *StringEqual = getOrInsertFunction(module, "string_equal", 
       llvm::Type::getInt1Ty(Ctx), llvm::Type::getInt8PtrTy(Ctx),
       llvm::Type::getInt8PtrTy(Ctx), llvm::Type::getInt64Ty(Ctx),
       llvm::Type::getInt64Ty(Ctx));
@@ -437,7 +437,7 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
     case SortCategory::Float: {
       llvm::Type *Float = module->getTypeByName(FLOAT_STRUCT);
       llvm::Value *Term = allocateTerm(Float, CaseBlock, "koreAllocFloating");
-      llvm::Constant *InitFloat = module->getOrInsertFunction("init_float",
+      llvm::Constant *InitFloat = getOrInsertFunction(module, "init_float",
           llvm::Type::getVoidTy(Ctx), llvm::PointerType::getUnqual(Float), 
           llvm::Type::getInt8PtrTy(Ctx));
       llvm::CallInst::Create(InitFloat, {Term, func->arg_begin()+2}, "", CaseBlock);
@@ -464,7 +464,7 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
       CaseBlock = ElseNoPlus;
       llvm::Type *Int = module->getTypeByName(INT_STRUCT);
       llvm::Value *Term = allocateTerm(Int, CaseBlock, "koreAllocInteger");
-      llvm::Constant *MpzInitSet = module->getOrInsertFunction("__gmpz_init_set_str",
+      llvm::Constant *MpzInitSet = getOrInsertFunction(module, "__gmpz_init_set_str",
           llvm::Type::getInt32Ty(Ctx), llvm::PointerType::getUnqual(Int), 
           llvm::Type::getInt8PtrTy(Ctx), llvm::Type::getInt32Ty(Ctx));
       auto Call = llvm::CallInst::Create(MpzInitSet, {Term, phiStr,
@@ -505,7 +505,7 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
   auto HdrOred = llvm::BinaryOperator::Create(llvm::Instruction::Or,
       func->arg_begin()+1, Mask, "", CurrentBlock);
   new llvm::StoreInst(HdrOred, HdrPtr, CurrentBlock);
-  llvm::Constant *Memcpy = module->getOrInsertFunction("memcpy", 
+  llvm::Constant *Memcpy = getOrInsertFunction(module, "memcpy", 
       llvm::Type::getInt8PtrTy(Ctx), llvm::Type::getInt8PtrTy(Ctx),
       llvm::Type::getInt8PtrTy(Ctx), llvm::Type::getInt64Ty(Ctx));
   auto StrPtr = llvm::GetElementPtrInst::CreateInBounds(Block,
@@ -559,7 +559,7 @@ static void emitTraversal(std::string name, KOREDefinition *definition, llvm::Mo
   } else {
     argTypes.push_back(llvm::PointerType::getUnqual(llvm::ArrayType::get(llvm::Type::getInt8PtrTy(Ctx), 0)));
   }
-  auto func = llvm::dyn_cast<llvm::Function>(module->getOrInsertFunction(
+  auto func = llvm::dyn_cast<llvm::Function>(getOrInsertFunction(module,
       name, llvm::FunctionType::get(llvm::Type::getVoidTy(Ctx), argTypes, false)));
   llvm::Constant *zero = llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0);
   llvm::Constant *zero32 = llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), 0);
@@ -743,7 +743,7 @@ static void emitLayouts(KOREDefinition *definition, llvm::Module *module) {
   llvm::LLVMContext &Ctx = module->getContext();
   std::vector<llvm::Type *> argTypes;
   argTypes.push_back(llvm::Type::getInt16Ty(Ctx));
-  auto func = llvm::dyn_cast<llvm::Function>(module->getOrInsertFunction(
+  auto func = llvm::dyn_cast<llvm::Function>(getOrInsertFunction(module,
       "getLayoutData", llvm::FunctionType::get(llvm::PointerType::getUnqual(module->getTypeByName(LAYOUT_STRUCT)), argTypes, false)));
   initDebugFunction("getLayoutData", "getLayoutData", getDebugFunctionType(getPointerDebugType(getForwardDecl(LAYOUT_STRUCT)), {getShortDebugType()}), definition, func);
   auto EntryBlock = llvm::BasicBlock::Create(Ctx, "entry", func);
