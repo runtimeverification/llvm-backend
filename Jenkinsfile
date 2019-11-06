@@ -33,4 +33,15 @@ pipeline {
       }
     }
   }
+  post {
+    unsuccessful {
+      script {
+        if (env.BRANCH_NAME == 'master') {
+          slackSend color: '#cb2431'                                    \
+                    , channel: '#llvm-backend'                          \
+                    , message: "Master build failure: ${env.BUILD_URL}"
+        }
+      }
+    }
+  }
 }
