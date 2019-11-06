@@ -139,7 +139,7 @@ object Generator {
   def mkDecisionTree(symlib: Parser.SymLib, mod: Definition, axioms: IndexedSeq[AxiomInfo], sorts: Seq[Sort], name: SymbolOrAlias, kem: KException => scala.Unit) : DecisionTree = {
     val matrix = genClauseMatrix(symlib, mod, axioms, sorts)
     matrix.checkUsefulness(kem)
-    if (!symlib.isHooked(name) && Parser.hasAtt(symlib.signatures(name)._3, "functional")) {
+    if (!symlib.isHooked(name) && Parser.hasAtt(symlib.signatures(name)._3, "functional") && Parser.hasAtt(symlib.signatures(name)._3, "function")) {
       matrix.checkExhaustiveness(name, kem)
     }
     matrix.compile

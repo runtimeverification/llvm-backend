@@ -10,7 +10,7 @@ import java.io.File
 import java.io.FileWriter
 
 object Matching {
-  def writeDecisionTreeToFile(filename: File, heuristic: String, outputFolder: File, threshold: Optional[(Int, Int)], kem: KException => Unit) {
+  def writeDecisionTreeToFile(filename: File, heuristic: String, outputFolder: File, threshold: Optional[(Int, Int)], warn: Boolean, kem: KException => Unit) {
     val defn = new TextToKore().parse(filename)
     outputFolder.mkdirs()
     val allAxioms = Parser.getAxioms(defn).zipWithIndex
@@ -20,7 +20,9 @@ object Matching {
       (Failure(), null)
     } else {
       val matrix = Generator.genClauseMatrix(symlib, defn, axioms, Seq(axioms.head.rewrite.sort))
-      matrix.checkUsefulness(kem)
+      if (warn) {
+        matrix.checkUsefulness(kem)
+      }
       (matrix.compile, matrix)
     }
     val funcAxioms = Parser.parseFunctionAxioms(allAxioms)
@@ -81,6 +83,6 @@ object Matching {
     val file = new File(args(0))
     val outputFolder = new File(args(2))
     logging = args.size > 4
-    writeDecisionTreeToFile(file, args(1), outputFolder, getThreshold(args(3)), (e) => ())
+    writeDecisionTreeToFile(file, args(1), outputFolder, getThreshold(args(3)), true, (e) => ())
   }
 }
