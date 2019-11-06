@@ -50,12 +50,7 @@ endif()
 set(CMAKE_AR "${CMAKE_C_COMPILER_AR}")
 set(CMAKE_RANLIB "${CMAKE_C_COMPILER_RANLIB}")
 
-find_package(LLVM 8 QUIET CONFIG)
-
-if (NOT LLVM_FOUND)
-  find_package(LLVM 7 REQUIRED CONFIG)
-endif()
-
+find_package(LLVM REQUIRED CONFIG)
 message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
 if (${LLVM_PACKAGE_VERSION} VERSION_LESS 7.0.1)
   message(FATAL_ERROR "LLVM 7.0.1 or newer is required")
@@ -94,9 +89,11 @@ install(
   DESTINATION lib/kllvm/llvm/main
 )
 
+find_program(OPT opt-9)
 find_program(OPT opt-8)
 find_program(OPT opt-7)
 find_program(OPT opt)
+find_program(LLC llc-9)
 find_program(LLC llc-8)
 find_program(LLC llc-7)
 find_program(LLC llc)

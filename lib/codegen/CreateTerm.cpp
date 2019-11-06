@@ -1,5 +1,5 @@
 #include "kllvm/codegen/CreateTerm.h"
-#include "kllvm/codegen/GenAlloc.h"
+#include "kllvm/codegen/Util.h"
 #include "kllvm/codegen/Debug.h"
 
 #include <gmp.h>
@@ -498,12 +498,7 @@ llvm::Value *CreateTerm::createFunctionCall(std::string name, ValueType returnCa
   }
  
   llvm::FunctionType *funcType = llvm::FunctionType::get(returnType, types, false);
-  llvm::Constant *constant = Module->getOrInsertFunction(name, funcType);
-  llvm::Function *func = llvm::dyn_cast<llvm::Function>(constant);
-  if (!func) {
-    constant->print(llvm::errs());
-    abort();
-  }
+  llvm::Function *func = getOrInsertFunction(Module, name, funcType);
   auto call = llvm::CallInst::Create(func, args, "", CurrentBlock);
   setDebugLoc(call);
   if (fastcc) {
@@ -543,7 +538,7 @@ llvm::Value *CreateTerm::notInjectionCase(KORECompositePattern *constructor, llv
   auto BlockPtr = llvm::PointerType::getUnqual(Module->getTypeByName(BLOCK_STRUCT));
   auto bitcast = new llvm::BitCastInst(Block, BlockPtr, "", CurrentBlock);
   if (symbolDecl->getAttributes().count("binder")) {
-    auto call = llvm::CallInst::Create(Module->getOrInsertFunction("debruijnize", BlockPtr, BlockPtr), bitcast, "withIndices", CurrentBlock);
+    auto call = llvm::CallInst::Create(getOrInsertFunction(Module, "debruijnize", BlockPtr, BlockPtr), bitcast, "withIndices", CurrentBlock);
     setDebugLoc(call);
     return call; 
   } else {
@@ -585,7 +580,7 @@ std::pair<llvm::Value *, bool> CreateTerm::operator()(KOREPattern *pattern) {
         && dynamic_cast<KORECompositeSort *>(symbol->getArguments()[0].get())->getCategory(Definition).cat == SortCategory::Symbol) {
       std::pair<llvm::Value *, bool> val = (*this)(constructor->getArguments()[0].get());
       if (val.second) {
-        llvm::Instruction *Tag = llvm::CallInst::Create(Module->getOrInsertFunction("getTag", llvm::Type::getInt32Ty(Ctx), getValueType({SortCategory::Symbol, 0}, Module)), val.first, "tag", CurrentBlock);
+        llvm::Instruction *Tag = llvm::CallInst::Create(getOrInsertFunction(Module, "getTag", llvm::Type::getInt32Ty(Ctx), getValueType({SortCategory::Symbol, 0}, Module)), val.first, "tag", CurrentBlock);
         setDebugLoc(Tag);
         auto inj = Definition->getInjSymbol();
         auto NotStringBlock = llvm::BasicBlock::Create(Ctx, "notString", CurrentBlock->getParent());
@@ -629,7 +624,7 @@ std::pair<llvm::Value *, bool> CreateTerm::operator()(KOREPattern *pattern) {
 
 void addAbort(llvm::BasicBlock *block, llvm::Module *Module) {
     llvm::FunctionType *AbortType = llvm::FunctionType::get(llvm::Type::getVoidTy(Module->getContext()), false);
-    llvm::Function *AbortFunc = llvm::dyn_cast<llvm::Function>(Module->getOrInsertFunction("abort", AbortType));
+    llvm::Function *AbortFunc = getOrInsertFunction(Module, "abort", AbortType);
     AbortFunc->addFnAttr(llvm::Attribute::NoReturn);
     llvm::CallInst::Create(AbortFunc, "", block);
     new llvm::UnreachableInst(Module->getContext(), block);
@@ -678,8 +673,7 @@ bool makeFunction(std::string name, KOREPattern *pattern, KOREDefinition *defini
       break;
     }
     llvm::FunctionType *funcType = llvm::FunctionType::get(returnType, paramTypes, false);
-    llvm::Constant *func = Module->getOrInsertFunction(name, funcType);
-    llvm::Function *applyRule = llvm::dyn_cast<llvm::Function>(func);
+    llvm::Function *applyRule = getOrInsertFunction(Module, name, funcType);
     initDebugAxiom(axiom->getAttributes());
     std::string debugName = name;
     if (axiom->getAttributes().count("label")) {
@@ -690,10 +684,6 @@ bool makeFunction(std::string name, KOREPattern *pattern, KOREDefinition *defini
       debugName = label + postfix;
     }
     initDebugFunction(debugName, debugName, getDebugFunctionType(getDebugType(returnCat), debugArgs), definition, applyRule);
-    if (!applyRule) {
-      func->print(llvm::errs());
-      abort();
-    }
     if (fastcc) {
       applyRule->setCallingConv(llvm::CallingConv::Fast);
     }
@@ -713,7 +703,7 @@ bool makeFunction(std::string name, KOREPattern *pattern, KOREDefinition *defini
     }
     if (bigStep) {
       llvm::Type *blockType = getValueType({SortCategory::Symbol, 0}, Module);
-      llvm::Constant *step = Module->getOrInsertFunction("step", llvm::FunctionType::get(blockType, {blockType}, false));
+      llvm::Function *step = getOrInsertFunction(Module, "step", llvm::FunctionType::get(blockType, {blockType}, false));
       auto call = llvm::CallInst::Create(step, {retval}, "", creator.getCurrentBlock());
       setDebugLoc(call);
       call->setCallingConv(llvm::CallingConv::Fast);
@@ -767,15 +757,9 @@ std::string makeApplyRuleFunction(KOREAxiomDeclaration *axiom, KOREDefinition *d
     }
     llvm::FunctionType *funcType = llvm::FunctionType::get(getValueType({SortCategory::Symbol, 0}, Module), paramTypes, false);
     std::string name = "apply_rule_" + std::to_string(axiom->getOrdinal());
-    llvm::Constant *func = Module->getOrInsertFunction(name, funcType);
-    llvm::Function *applyRule = llvm::dyn_cast<llvm::Function>(func);
+    llvm::Function *applyRule = getOrInsertFunction(Module, name, funcType);
     initDebugAxiom(axiom->getAttributes());
     initDebugFunction(name, name, getDebugFunctionType(getDebugType({SortCategory::Symbol, 0}), debugArgs), definition, applyRule);
-    if (!applyRule) {
-      printf("%lu\n", residuals.size());
-      func->print(llvm::errs());
-      abort();
-    }
     applyRule->setCallingConv(llvm::CallingConv::Fast);
     llvm::StringMap<llvm::Value *> subst;
     llvm::BasicBlock *block = llvm::BasicBlock::Create(Module->getContext(), "entry", applyRule);
@@ -808,7 +792,7 @@ std::string makeApplyRuleFunction(KOREAxiomDeclaration *axiom, KOREDefinition *d
       types.push_back(arg->getType());
     }
     llvm::Type *blockType = getValueType({SortCategory::Symbol, 0}, Module);
-    llvm::Constant *step = Module->getOrInsertFunction("step_" + std::to_string(axiom->getOrdinal()), llvm::FunctionType::get(blockType, types, false));
+    llvm::Function *step = getOrInsertFunction(Module, "step_" + std::to_string(axiom->getOrdinal()), llvm::FunctionType::get(blockType, types, false));
     auto retval = llvm::CallInst::Create(step, args, "", creator.getCurrentBlock());
     setDebugLoc(retval);
     retval->setCallingConv(llvm::CallingConv::Fast);

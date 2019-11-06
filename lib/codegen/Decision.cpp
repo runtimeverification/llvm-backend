@@ -1,6 +1,7 @@
 #include "kllvm/codegen/Decision.h"
 #include "kllvm/codegen/CreateTerm.h"
 #include "kllvm/codegen/Debug.h"
+#include "kllvm/codegen/Util.h"
 
 #include "llvm/IR/CFG.h"
 #include "llvm/IR/Constants.h"
@@ -211,11 +212,11 @@ void SwitchNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitutio
         auto BlockPtr = llvm::PointerType::getUnqual(d->Module->getTypeByName(BLOCK_STRUCT));
         if (symbolDecl->getAttributes().count("binder")) {
           if (offset == 0) {
-            Renamed = llvm::CallInst::Create(d->Module->getOrInsertFunction("alphaRename", BlockPtr, BlockPtr), Child, "renamedVar", d->CurrentBlock);
+            Renamed = llvm::CallInst::Create(getOrInsertFunction(d->Module, "alphaRename", BlockPtr, BlockPtr), Child, "renamedVar", d->CurrentBlock);
             setDebugLoc(Renamed);
             substitution[binding] = Renamed;
           } else if (offset == _case.getBindings().size() - 1) {
-            llvm::Instruction *Replaced = llvm::CallInst::Create(d->Module->getOrInsertFunction("replaceBinderIndex", BlockPtr, BlockPtr, BlockPtr), {Child, Renamed}, "withUnboundIndex", d->CurrentBlock);
+            llvm::Instruction *Replaced = llvm::CallInst::Create(getOrInsertFunction(d->Module, "replaceBinderIndex", BlockPtr, BlockPtr, BlockPtr), {Child, Renamed}, "withUnboundIndex", d->CurrentBlock);
             setDebugLoc(Replaced);
             substitution[binding] = Replaced;
           } else {
@@ -293,12 +294,7 @@ void MakeIteratorNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> subst
   types.insert(types.begin(), AllocSret->getType());
 
   llvm::FunctionType *funcType = llvm::FunctionType::get(llvm::Type::getVoidTy(d->Module->getContext()), types, false);
-  llvm::Constant *constant = d->Module->getOrInsertFunction(hookName, funcType);
-  llvm::Function *func = llvm::dyn_cast<llvm::Function>(constant);
-  if (!func) {
-    constant->print(llvm::errs());
-    abort();
-  }
+  llvm::Function *func = getOrInsertFunction(d->Module, hookName, funcType);
   auto call = llvm::CallInst::Create(func, args, "", d->CurrentBlock);
   setDebugLoc(call);
   func->arg_begin()->addAttr(llvm::Attribute::StructRet);
@@ -340,12 +336,7 @@ void IterNextNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitut
   }
 
   llvm::FunctionType *funcType = llvm::FunctionType::get(getValueType({SortCategory::Symbol, 0}, d->Module), {arg->getType()}, false);
-  llvm::Constant *constant = d->Module->getOrInsertFunction(hookName, funcType);
-  llvm::Function *func = llvm::dyn_cast<llvm::Function>(constant);
-  if (!func) {
-    constant->print(llvm::errs());
-    abort();
-  }
+  llvm::Function *func = getOrInsertFunction(d->Module, hookName, funcType);
   auto Call = llvm::CallInst::Create(func, {arg}, binding.substr(0, max_name_length), d->CurrentBlock);
   setDebugLoc(Call);
   substitution[binding] = Call;
@@ -377,7 +368,7 @@ void LeafNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution)
   default:
     break;
   }
-  auto Call = llvm::CallInst::Create(d->Module->getOrInsertFunction(name, llvm::FunctionType::get(type, types, false)), args, "", d->CurrentBlock);
+  auto Call = llvm::CallInst::Create(getOrInsertFunction(d->Module, name, llvm::FunctionType::get(type, types, false)), args, "", d->CurrentBlock);
   setDebugLoc(Call);
   Call->setCallingConv(llvm::CallingConv::Fast);
   llvm::ReturnInst::Create(d->Ctx, Call, d->CurrentBlock);
@@ -385,7 +376,7 @@ void LeafNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitution)
 }
 
 llvm::Value *Decision::getTag(llvm::Value *val) {
-  auto res = llvm::CallInst::Create(Module->getOrInsertFunction("getTag", llvm::Type::getInt32Ty(Ctx), getValueType({SortCategory::Symbol, 0}, Module)), val, "tag", CurrentBlock);
+  auto res = llvm::CallInst::Create(getOrInsertFunction(Module, "getTag", llvm::Type::getInt32Ty(Ctx), getValueType({SortCategory::Symbol, 0}, Module)), val, "tag", CurrentBlock);
   setDebugLoc(res);
   return res;
 }
@@ -426,8 +417,7 @@ void makeEvalOrAnywhereFunction(KORESymbol *function, KOREDefinition *definition
   std::ostringstream Out;
   function->print(Out, 0, false);
   std::string name = "eval_" + Out.str();
-  llvm::Constant *func = module->getOrInsertFunction(name, funcType);
-  llvm::Function *matchFunc = llvm::cast<llvm::Function>(func);
+  llvm::Function *matchFunc = getOrInsertFunction(module, name, funcType);
   KORESymbolDeclaration *symbolDecl = definition->getSymbolDeclarations().at(function->getName());
   initDebugAxiom(symbolDecl->getAttributes());
   initDebugFunction(function->getName(), name, getDebugFunctionType(debugReturnType, debugArgs), definition, matchFunc);
@@ -494,12 +484,12 @@ void makeAnywhereFunction(KORESymbol *function, KOREDefinition *definition, llvm
 }
 
 std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> stepFunctionHeader(unsigned ordinal, llvm::Module *module, KOREDefinition *definition, llvm::BasicBlock *block, llvm::BasicBlock *stuck, std::vector<llvm::Value *> args, std::vector<ValueType> types) {
-  auto finished = module->getOrInsertFunction("finished_rewriting", llvm::FunctionType::get(llvm::Type::getInt1Ty(module->getContext()), {}, false));
+  auto finished = getOrInsertFunction(module, "finished_rewriting", llvm::FunctionType::get(llvm::Type::getInt1Ty(module->getContext()), {}, false));
   auto isFinished = llvm::CallInst::Create(finished, {}, "", block);
   auto checkCollect = llvm::BasicBlock::Create(module->getContext(), "checkCollect", block->getParent());
   llvm::BranchInst::Create(stuck, checkCollect, isFinished, block);
 
-  auto collection = module->getOrInsertFunction("is_collection", llvm::FunctionType::get(llvm::Type::getInt1Ty(module->getContext()), {}, false));
+  auto collection = getOrInsertFunction(module, "is_collection", llvm::FunctionType::get(llvm::Type::getInt1Ty(module->getContext()), {}, false));
   auto isCollection = llvm::CallInst::Create(collection, {}, "", checkCollect);
   auto collect = llvm::BasicBlock::Create(module->getContext(), "isCollect", block->getParent());
   auto merge = llvm::BasicBlock::Create(module->getContext(), "step", block->getParent());
@@ -570,8 +560,9 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> stepFunctionHeader(uns
   if (!globalVar->hasInitializer()) {
     globalVar->setInitializer(layoutArr);
   }
-  auto koreCollect = module->getOrInsertFunction("koreCollect", llvm::FunctionType::get(llvm::Type::getVoidTy(module->getContext()), {arr->getType(), llvm::Type::getInt8Ty(module->getContext()), layout->getType()}, false));
-  auto call = llvm::CallInst::Create(koreCollect, {arr, llvm::ConstantInt::get(llvm::Type::getInt8Ty(module->getContext()), nroots), layout}, "", collect);
+  auto ptrTy = llvm::PointerType::getUnqual(llvm::ArrayType::get(module->getTypeByName(LAYOUTITEM_STRUCT), 0));
+  auto koreCollect = getOrInsertFunction(module, "koreCollect", llvm::FunctionType::get(llvm::Type::getVoidTy(module->getContext()), {arr->getType(), llvm::Type::getInt8Ty(module->getContext()), ptrTy}, false));
+  auto call = llvm::CallInst::Create(koreCollect, {arr, llvm::ConstantInt::get(llvm::Type::getInt8Ty(module->getContext()), nroots), llvm::ConstantExpr::getBitCast(layout, ptrTy)}, "", collect);
   setDebugLoc(call);
   i = 0;
   std::vector<llvm::Value *> phis;
@@ -610,8 +601,7 @@ void makeStepFunction(KOREDefinition *definition, llvm::Module *module, Decision
   auto blockType = getValueType({SortCategory::Symbol, 0}, module);
   llvm::FunctionType *funcType = llvm::FunctionType::get(blockType, {blockType}, false);
   std::string name = "step";
-  llvm::Constant *func = module->getOrInsertFunction(name, funcType);
-  llvm::Function *matchFunc = llvm::cast<llvm::Function>(func);
+  llvm::Function *matchFunc = getOrInsertFunction(module, name, funcType);
   auto debugType = getDebugType({SortCategory::Symbol, 0});
   resetDebugLoc();
   initDebugFunction(name, name, getDebugFunctionType(debugType, {debugType}), definition, matchFunc);
@@ -690,19 +680,11 @@ void makeStepFunction(KOREAxiomDeclaration *axiom, KOREDefinition *definition, l
   auto blockDebugType = getDebugType({SortCategory::Symbol, 0});
   llvm::FunctionType *funcType = llvm::FunctionType::get(blockType, argTypes, false);
   std::string name = "step_" + std::to_string(axiom->getOrdinal());
-  llvm::Constant *func = module->getOrInsertFunction(name, funcType);
-  llvm::Function *matchFunc = llvm::dyn_cast<llvm::Function>(func);
+  llvm::Function *matchFunc = getOrInsertFunction(module, name, funcType);
   resetDebugLoc();
   initDebugFunction(name, name, getDebugFunctionType(blockDebugType, debugTypes), definition, matchFunc);
-  if (!matchFunc) {
-    func->print(llvm::errs());
-    abort();
-  }
   matchFunc->setCallingConv(llvm::CallingConv::Fast);
-  if (!matchFunc) {
-    func->print(llvm::errs());
-    abort();
-  }
+
   llvm::StringMap<llvm::Value *> subst;
   llvm::StringMap<llvm::Value *> stuckSubst;
   llvm::BasicBlock *block = llvm::BasicBlock::Create(module->getContext(), "entry", matchFunc);
