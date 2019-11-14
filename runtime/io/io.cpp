@@ -10,6 +10,7 @@
 #include <cerrno>
 #include <sys/wait.h>
 #include <sys/socket.h>
+#include <time.h>
 
 #include "runtime/alloc.h"
 #include "runtime/header.h"
@@ -658,5 +659,11 @@ extern "C" {
 
   block * hook_IO_opendir(string * path) {
     throw std::invalid_argument("not implemented: IO.opendir");
+  }
+
+  mpz_ptr hook_IO_time() {
+    mpz_t result;
+    mpz_init_set_si(result, time(NULL));
+    return move_int(result);
   }
 }
