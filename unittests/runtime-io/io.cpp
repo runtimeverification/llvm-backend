@@ -4,6 +4,7 @@
 #include<cstdint>
 #include<cstdlib>
 #include<cstring>
+#include<time.h>
 
 #include "runtime/header.h"
 #include "runtime/alloc.h"
@@ -51,6 +52,7 @@ extern "C" {
   block * hook_IO_unlock(mpz_t i, mpz_t len);
   block * hook_IO_log(string * path, string * msg);
   block * hook_IO_system(string * cmd);
+  mpz_ptr hook_IO_time(void);
 
   mpz_ptr move_int(mpz_t i) {
     mpz_ptr result = (mpz_ptr)malloc(sizeof(__mpz_struct));
@@ -446,6 +448,15 @@ BOOST_AUTO_TEST_CASE(system) {
 
   string * err = (string *) *(ret->children + 2);
   BOOST_CHECK_EQUAL(0, strncmp(err->data, "Error", 5));
+}
+
+BOOST_AUTO_TEST_CASE(time) {
+  auto mpz = hook_IO_time();
+  time_t tt = mpz_get_si(mpz);
+  time_t time2 = ::time(NULL);
+  BOOST_CHECK(time2 >= tt);
+  BOOST_CHECK(time2 - tt < 5);
+  BOOST_CHECK(tt >= 1573756117);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
