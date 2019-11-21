@@ -50,7 +50,11 @@ endif()
 set(CMAKE_AR "${CMAKE_C_COMPILER_AR}")
 set(CMAKE_RANLIB "${CMAKE_C_COMPILER_RANLIB}")
 
-find_package(LLVM 8 QUIET CONFIG)
+find_package(LLVM 9 QUIET CONFIG)
+
+if (NOT LLVM_FOUND)
+  find_package(LLVM 8 QUIET CONFIG)
+endif()
 
 if (NOT LLVM_FOUND)
   find_package(LLVM 7 REQUIRED CONFIG)
