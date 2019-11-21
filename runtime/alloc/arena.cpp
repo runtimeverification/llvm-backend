@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include "jemalloc/jemalloc.h"
 
 #include "runtime/arena.h"
 #include "runtime/header.h"
