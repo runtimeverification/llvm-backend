@@ -50,7 +50,12 @@ endif()
 set(CMAKE_AR "${CMAKE_C_COMPILER_AR}")
 set(CMAKE_RANLIB "${CMAKE_C_COMPILER_RANLIB}")
 
-find_package(LLVM REQUIRED CONFIG)
+find_package(LLVM 8 QUIET CONFIG)
+
+if (NOT LLVM_FOUND)
+  find_package(LLVM 7 REQUIRED CONFIG)
+endif()
+
 message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
 if (${LLVM_PACKAGE_VERSION} VERSION_LESS 7.0.1)
   message(FATAL_ERROR "LLVM 7.0.1 or newer is required")
