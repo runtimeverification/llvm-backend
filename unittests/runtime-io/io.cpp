@@ -408,7 +408,8 @@ BOOST_AUTO_TEST_CASE(system) {
   BOOST_CHECK_EQUAL(0, mpz_cmp_si((mpz_ptr) *(ret->children), 0));
 
   string * out = (string *) *(ret->children + 1);
-  BOOST_CHECK_EQUAL(0, strncmp(out->data, "hello", 5));
+  BOOST_CHECK_EQUAL(0, strncmp(out->data, "hello\n", 6));
+  BOOST_CHECK_EQUAL(6, len(out));
 
   /* Check if shell is available */
   command = "";
@@ -448,6 +449,7 @@ BOOST_AUTO_TEST_CASE(system) {
 
   string * err = (string *) *(ret->children + 2);
   BOOST_CHECK_EQUAL(0, strncmp(err->data, "Error", 5));
+  BOOST_CHECK_EQUAL(5, len(err));
 }
 
 BOOST_AUTO_TEST_CASE(time) {
