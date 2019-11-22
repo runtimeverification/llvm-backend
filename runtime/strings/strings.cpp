@@ -330,8 +330,12 @@ extern "C" {
   }
 
   stringbuffer *hook_BUFFER_concat(stringbuffer *buf, string *s) {
+    return hook_BUFFER_concat_raw(buf, s->data, len(s));
+  }
+
+  stringbuffer *hook_BUFFER_concat_raw(stringbuffer *buf, char *data, uint64_t n) {
     uint64_t newCapacity = len(buf->contents);
-    uint64_t minCapacity = buf->strlen + len(s);
+    uint64_t minCapacity = buf->strlen + n;
     uint64_t notYoungObjectBit = buf->h.hdr & NOT_YOUNG_OBJECT_BIT;
     if (newCapacity < minCapacity) {
       newCapacity = len(buf->contents) * 2 + 2;
@@ -348,8 +352,8 @@ extern "C" {
       memcpy(new_contents->data, buf->contents->data, buf->strlen);
       buf->contents = new_contents;
     }
-    memcpy(buf->contents->data + buf->strlen, s->data, len(s));
-    buf->strlen += len(s);
+    memcpy(buf->contents->data + buf->strlen, data, n);
+    buf->strlen += n;
     set_len(buf->contents, newCapacity);
     return buf;
   }

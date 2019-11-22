@@ -206,6 +206,7 @@ extern "C" {
 
   stringbuffer *hook_BUFFER_empty(void);
   stringbuffer *hook_BUFFER_concat(stringbuffer *buf, string *s);
+  stringbuffer *hook_BUFFER_concat_raw(stringbuffer *buf, char *data, uint64_t n);
   string *hook_BUFFER_toString(stringbuffer *buf);
 
   size_t hook_SET_size_long(set *);

@@ -19,7 +19,7 @@ extern "C" {
 
 #define KCHAR char
 #define GETTAG(symbol) "Lbl'Hash'" #symbol "{}"
-#define IOBUFSIZE 256
+#define IOBUFSIZE 1024
 
   mpz_ptr move_int(mpz_t);
 
@@ -600,10 +600,9 @@ extern "C" {
   block * hook_IO_system(string * cmd) {
     pid_t pid;
     int ret = 0, out[2], err[2];
-    string * outBuffer = static_cast<string *>(koreAlloc(sizeof(string) + sizeof(char) * IOBUFSIZE));
-    string * errBuffer = static_cast<string *>(koreAlloc(sizeof(string) + sizeof(char) * IOBUFSIZE));
-    set_len(outBuffer, IOBUFSIZE);
-    set_len(errBuffer, IOBUFSIZE);
+    stringbuffer *outBuffer = hook_BUFFER_empty();
+    stringbuffer *errBuffer = hook_BUFFER_empty();
+    char buf[IOBUFSIZE];
 
     if (pipe(out) == -1 || pipe(err) == -1 || (pid = fork()) == -1) {
       return getKSeqErrorBlock();
@@ -629,8 +628,42 @@ extern "C" {
 
     close(out[1]);
     close(err[1]);
-    read(out[0], outBuffer->data, sizeof(char) * IOBUFSIZE);
-    read(err[0], errBuffer->data, sizeof(char) * IOBUFSIZE);
+
+    fd_set read_fds, ready_fds;
+    FD_ZERO(&read_fds);
+    FD_SET(out[0], &read_fds);
+    FD_SET(err[0], &read_fds);
+
+    int done = 0;
+
+    while(done < 2) {
+      ready_fds = read_fds;
+      if (select(FD_SETSIZE, &ready_fds, NULL, NULL, NULL) == -1) {
+        return getKSeqErrorBlock();
+      }
+      if (FD_ISSET(out[0], &ready_fds)) {
+        int nread = read(out[0], buf, IOBUFSIZE);
+        if (nread == -1) {
+          return getKSeqErrorBlock();
+        } else if (nread == 0) {
+          FD_CLR(out[0], &read_fds);
+	  done++;
+        } else {
+          hook_BUFFER_concat_raw(outBuffer, buf, nread);
+        }
+      }
+      if (FD_ISSET(err[0], &ready_fds)) {
+        int nread = read(err[0], buf, IOBUFSIZE);
+        if (nread == -1) {
+          return getKSeqErrorBlock();
+        } else if (nread == 0) {
+          FD_CLR(err[0], &read_fds);
+          done++;
+        } else {
+          hook_BUFFER_concat_raw(errBuffer, buf, nread);
+        }
+      }
+    }
 
     waitpid(pid, &ret, 0);
     ret = WEXITSTATUS(ret);
@@ -643,8 +676,11 @@ extern "C" {
     memcpy(retBlock->children, &p, sizeof(mpz_ptr));
     
     retBlock->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName(GETTAG(systemResult)));
-    memcpy(retBlock->children + 1, &outBuffer, sizeof(string *));
-    memcpy(retBlock->children + 2, &errBuffer, sizeof(string *));
+    string *outStr, *errStr;
+    outStr = hook_BUFFER_toString(outBuffer);
+    errStr = hook_BUFFER_toString(errBuffer);
+    memcpy(retBlock->children + 1, &outStr, sizeof(string *));
+    memcpy(retBlock->children + 2, &errStr, sizeof(string *));
 
     return retBlock;
   }
