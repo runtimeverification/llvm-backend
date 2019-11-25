@@ -160,11 +160,6 @@ void SwitchNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitutio
     val = cmp;
     isInt = true;
   }
-  if (d->ChoiceBlock) {
-    new llvm::StoreInst(llvm::BlockAddress::get(d->CurrentBlock->getParent(), d->ChoiceBlock), d->FailAddress, d->CurrentBlock);
-    d->FailJump->addDestination(d->ChoiceBlock);
-    d->ChoiceBlock = nullptr;
-  }
   if (isInt) {
     auto _switch = llvm::SwitchInst::Create(val, _default, cases.size(), d->CurrentBlock);
     for (auto &_case : caseData) {
@@ -226,6 +221,12 @@ void SwitchNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitutio
           substitution[binding] = Child;
         }
         offset++;
+      }
+    } else {
+      if (d->ChoiceBlock && _case.getLiteral() == 1) {
+        new llvm::StoreInst(llvm::BlockAddress::get(d->CurrentBlock->getParent(), d->ChoiceBlock), d->FailAddress, d->CurrentBlock);
+        d->FailJump->addDestination(d->ChoiceBlock);
+        d->ChoiceBlock = nullptr;
       }
     }
     _case.getChild()->codegen(d, substitution);
@@ -310,6 +311,11 @@ void IterNextNode::codegen(Decision *d, llvm::StringMap<llvm::Value *> substitut
   d->ChoiceVars = vars;
   if (beginNode(d, "choice" + binding, substitution)) {
     return;
+  }
+  if (d->ChoiceNode) {
+    new llvm::StoreInst(llvm::BlockAddress::get(d->CurrentBlock->getParent(), d->ChoiceNode->cachedCode), d->FailAddress, d->CurrentBlock);
+  } else {
+    new llvm::StoreInst(llvm::BlockAddress::get(d->CurrentBlock->getParent(), d->StuckBlock), d->FailAddress, d->CurrentBlock);
   }
   d->ChoiceBlock = d->CurrentBlock;
   auto oldNode = d->ChoiceNode;
