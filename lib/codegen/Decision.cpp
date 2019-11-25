@@ -441,7 +441,7 @@ void makeEvalOrAnywhereFunction(KORESymbol *function, KOREDefinition *definition
   llvm::IndirectBrInst *jump = llvm::IndirectBrInst::Create(load, 1, fail);
   jump->addDestination(stuck);
 
-  Decision codegen(definition, block, fail, jump, addr, module, returnSort);
+  Decision codegen(definition, block, fail, stuck, jump, addr, module, returnSort);
   codegen(dt, subst);
 }
 
@@ -629,7 +629,7 @@ void makeStepFunction(KOREDefinition *definition, llvm::Module *module, Decision
   llvm::IndirectBrInst *jump = llvm::IndirectBrInst::Create(load, 1, fail);
   jump->addDestination(pre_stuck);
 
-  Decision codegen(definition, result.second, fail, jump, addr, module, {SortCategory::Symbol, 0});
+  Decision codegen(definition, result.second, fail, pre_stuck, jump, addr, module, {SortCategory::Symbol, 0});
   codegen(dt, subst);
 }
 
@@ -729,7 +729,7 @@ void makeStepFunction(KOREAxiomDeclaration *axiom, KOREDefinition *definition, l
   llvm::IndirectBrInst *jump = llvm::IndirectBrInst::Create(load, 1, fail);
   jump->addDestination(pre_stuck);
 
-  Decision codegen(definition, header.second, fail, jump, addr, module, {SortCategory::Symbol, 0});
+  Decision codegen(definition, header.second, fail, pre_stuck, jump, addr, module, {SortCategory::Symbol, 0});
   codegen(res.dt, subst);
 }
 }

@@ -330,6 +330,7 @@ private:
   KOREDefinition *Definition;
   llvm::BasicBlock *CurrentBlock;
   llvm::BasicBlock *FailureBlock;
+  llvm::BasicBlock *StuckBlock;
   llvm::IndirectBrInst *FailJump;
   llvm::AllocaInst *FailAddress;
   llvm::BasicBlock *ChoiceBlock;
@@ -348,6 +349,7 @@ public:
     KOREDefinition *Definition,
     llvm::BasicBlock *EntryBlock,
     llvm::BasicBlock *FailureBlock,
+    llvm::BasicBlock *StuckBlock,
     llvm::IndirectBrInst *FailJump,
     llvm::AllocaInst *FailAddress,
     llvm::Module *Module,
@@ -355,6 +357,7 @@ public:
       Definition(Definition),
       CurrentBlock(EntryBlock),
       FailureBlock(FailureBlock),
+      StuckBlock(StuckBlock),
       FailJump(FailJump),
       FailAddress(FailAddress),
       ChoiceBlock(nullptr),
