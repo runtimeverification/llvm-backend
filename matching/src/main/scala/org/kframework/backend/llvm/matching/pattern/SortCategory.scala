@@ -3,6 +3,8 @@ package org.kframework.backend.llvm.matching.pattern
 import org.kframework.backend.llvm.matching._
 import org.kframework.backend.llvm.matching.dt._
 import org.kframework.parser.kore.SymbolOrAlias
+import org.kframework.parser.kore.Sort
+import org.kframework.parser.kore.CompoundSort
 import org.kframework.mpfr._
 import java.util.regex.{Pattern => Regex}
 
@@ -18,7 +20,8 @@ sealed trait SortCategory {
 }
 
 object SortCategory {
-  def apply(hookAtt: Option[String]): SortCategory = {
+  def apply(hookAtt: Option[String], s: Sort, symlib: Parser.SymLib): SortCategory = {
+
     hookAtt match {
       case None => SymbolS()
       case Some("STRING.String") => StringS()
@@ -31,7 +34,12 @@ object SortCategory {
       case Some("BOOL.Bool") =>BoolS()
       case Some("KVAR.KVar") => VarS()
       case Some("BUFFER.StringBuffer") => BufferS()
+      case Some("MINT.MInt") => MIntS(getBitwidth(s.asInstanceOf[CompoundSort].params(0), symlib))
     }
+  }
+
+  private def getBitwidth(s: Sort, symlib: Parser.SymLib): Int = {
+    Parser.getStringAtt(symlib.sortAtt(s), "nat").get.toInt
   }
 }
 
