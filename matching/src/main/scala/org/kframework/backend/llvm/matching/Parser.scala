@@ -72,8 +72,12 @@ object Parser {
       signatures.groupBy(_._2._2).mapValues(_.keys.filter(k => !hasAtt(signatures(k)._3, "function")).toSeq)
     }
 
-    val sortAtt: Map[Sort, Attributes] = {
-      sorts.filter(_.isInstanceOf[CompoundSort]).map(sort => (sort, sortDecls(sort.asInstanceOf[CompoundSort].ctr).head.att)).toMap
+    private val sortAttData: Map[String, Attributes] = {
+      sorts.filter(_.isInstanceOf[CompoundSort]).map(sort => (sort.asInstanceOf[CompoundSort].ctr, sortDecls(sort.asInstanceOf[CompoundSort].ctr).head.att)).toMap
+    }
+
+    def sortAtt(s: Sort): Attributes = {
+      sortAttData(s.asInstanceOf[CompoundSort].ctr)
     }
 
     val functions: Seq[SymbolOrAlias] = {
@@ -88,7 +92,7 @@ object Parser {
       signatures.contains(B.SymbolOrAlias("inj",Seq(less,greater)))
     }
 
-    private val hookAtts: Map[String, String] = sortAtt.filter(_._1.isInstanceOf[CompoundSort]).map(t => (t._1.asInstanceOf[CompoundSort].ctr.substring(4), getStringAtt(t._2, "hook").getOrElse(""))).toMap
+    private val hookAtts: Map[String, String] = sortAttData.map(t => (t._1.substring(4), getStringAtt(t._2, "hook").getOrElse(""))).toMap
 
     val koreToK = new KoreToK(hookAtts)
   }
