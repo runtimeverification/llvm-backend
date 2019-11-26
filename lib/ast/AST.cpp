@@ -2,6 +2,7 @@
 
 #include <unordered_set>
 #include <unordered_map>
+#include <iostream>
 
 using namespace kllvm;
 
@@ -55,6 +56,18 @@ ValueType KORECompositeSort::getCategory(KOREDefinition *definition) {
   if (category.cat != SortCategory::Uncomputed)
     return category;
   std::string name = getHook(definition);
+  if (name == "MINT.MInt") {
+    if (auto param = dynamic_cast<KORECompositeSort *>(arguments[0].get())) {
+      auto &att = definition->getSortDeclarations().at(param->getName())->getAttributes();
+      auto &natAtt = att.at("nat");
+      assert(natAtt->getArguments().size() == 1);
+      auto strPattern = dynamic_cast<KOREStringPattern *>(natAtt->getArguments()[0].get());
+      name = name + " " + strPattern->getContents();
+    } else {
+      print(std::cerr);
+      abort();
+    }
+  }
   category = getCategory(name);
   return category;
 }
@@ -83,7 +96,7 @@ ValueType KORECompositeSort::getCategory(std::string name) {
   else if (name == "BOOL.Bool") category = SortCategory::Bool;
   else if (name == "KVAR.KVar") category = SortCategory::Variable;
   // we expect the "hook" of a MInt to be of the form "MINT.MInt N" for some bitwidth N
-  else if (name.substr(0, 9) == "MINT.MInt") {
+  else if (name.substr(0, 10) == "MINT.MInt ") {
     category = SortCategory::MInt;
     bits = std::stoi(name.substr(10));
   }
