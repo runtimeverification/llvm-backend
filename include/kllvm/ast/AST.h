@@ -79,6 +79,10 @@ struct ValueType {
   SortCategory cat;
   // if this is an MInt, the number of bits in the MInt
   uint64_t bits;
+
+  bool operator<(const ValueType &that) const {
+    return std::make_tuple(this->cat, this->bits) < std::make_tuple(that.cat, that.bits);
+  }
 };
 
 class KOREDefinition;
