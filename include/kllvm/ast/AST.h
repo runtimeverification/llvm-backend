@@ -510,7 +510,7 @@ public:
   using KOREVariableMapType = std::map<std::string, KOREVariable *>;
 
   using KORECompositeSortDeclarationMapType = std::map<std::string, KORECompositeSortDeclaration *>;
-  using KORECompositeSortMapType = std::map<std::string, sptr<KORECompositeSort>>;
+  using KORECompositeSortMapType = std::map<ValueType, sptr<KORECompositeSort>>;
 
   using KORESymbolDeclarationMapType = std::map<std::string, KORESymbolDeclaration *>;
 

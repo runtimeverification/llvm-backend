@@ -12,7 +12,7 @@ class DTPreprocessor {
 private:
   std::map<yaml_node_t *, DecisionNode *> uniqueNodes;
   const std::map<std::string, KORESymbol *> &syms;
-  const std::map<std::string, sptr<KORECompositeSort>> &sorts;
+  const std::map<ValueType, sptr<KORECompositeSort>> &sorts;
   KORESymbol *dv;
   yaml_document_t *doc;
 
@@ -64,7 +64,7 @@ public:
 
   DTPreprocessor(
       const std::map<std::string, KORESymbol *> &syms,
-      const std::map<std::string, sptr<KORECompositeSort>> &sorts,
+      const std::map<ValueType, sptr<KORECompositeSort>> &sorts,
       yaml_document_t *doc)
       : syms(syms), sorts(sorts), doc(doc) {
     dv = KORESymbol::Create("\\dv").release();
@@ -112,11 +112,11 @@ public:
         name = str(o);
       }
       uses.push_back(name);
-      return KOREVariablePattern::Create(name, sorts.at(str(get(node, "hook"))));
+      return KOREVariablePattern::Create(name, sorts.at(KORECompositeSort::getCategory(str(get(node, "hook")))));
     } else if (get(node, "literal")) {
       auto sym = KORESymbol::Create("\\dv");
       auto hook = str(get(node, "hook"));
-      auto sort = sorts.at(hook);
+      auto sort = sorts.at(KORECompositeSort::getCategory(hook));
       auto val = str(get(node, "literal"));
       if (hook == "BOOL.Bool") {
         val = val == "1" ? "true" : "false";
@@ -283,7 +283,7 @@ public:
   }
 };
 
-DecisionNode *parseYamlDecisionTreeFromString(std::string yaml, const std::map<std::string, KORESymbol *> &syms, const std::map<std::string, sptr<KORECompositeSort>> &sorts) {
+DecisionNode *parseYamlDecisionTreeFromString(std::string yaml, const std::map<std::string, KORESymbol *> &syms, const std::map<ValueType, sptr<KORECompositeSort>> &sorts) {
   yaml_parser_t parser;
   yaml_document_t doc;
   yaml_parser_initialize(&parser);
@@ -296,7 +296,7 @@ DecisionNode *parseYamlDecisionTreeFromString(std::string yaml, const std::map<s
   return result;
 }
 
-DecisionNode *parseYamlDecisionTree(std::string filename, const std::map<std::string, KORESymbol *> &syms, const std::map<std::string, sptr<KORECompositeSort>> &sorts) {
+DecisionNode *parseYamlDecisionTree(std::string filename, const std::map<std::string, KORESymbol *> &syms, const std::map<ValueType, sptr<KORECompositeSort>> &sorts) {
   yaml_parser_t parser;
   yaml_document_t doc;
   yaml_parser_initialize(&parser);
@@ -311,7 +311,7 @@ DecisionNode *parseYamlDecisionTree(std::string filename, const std::map<std::st
   return result;
 }
 
-PartialStep parseYamlSpecialDecisionTree(std::string filename, const std::map<std::string, KORESymbol *> &syms, const std::map<std::string, sptr<KORECompositeSort>> &sorts) {
+PartialStep parseYamlSpecialDecisionTree(std::string filename, const std::map<std::string, KORESymbol *> &syms, const std::map<ValueType, sptr<KORECompositeSort>> &sorts) {
   yaml_parser_t parser;
   yaml_document_t doc;
   yaml_parser_initialize(&parser);
