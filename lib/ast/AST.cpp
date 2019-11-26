@@ -155,6 +155,15 @@ std::string KORESymbol::layoutString(KOREDefinition *definition) const {
   return result;
 }
 
+bool KORECompositeSort::isConcrete() const {
+  for (auto sort : arguments) {
+    if (!sort->isConcrete()) {
+      return false;
+    }
+  }
+  return true;
+}
+
 bool KORESymbol::isConcrete() const {
   for (auto sort : arguments) {
     if (!sort->isConcrete()) {

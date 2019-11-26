@@ -99,7 +99,7 @@ public:
   std::string getHook(KOREDefinition *definition);
   static ValueType getCategory(std::string hook);
 
-  virtual bool isConcrete() const override { return true; }
+  virtual bool isConcrete() const override;
   virtual sptr<KORESort> substitute(const substitution &subst) override;
 
   void addArgument(sptr<KORESort> Argument);
