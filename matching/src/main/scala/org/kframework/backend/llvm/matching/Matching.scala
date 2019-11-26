@@ -32,7 +32,11 @@ object Matching {
       if (logging) {
         System.out.println("Compiling " + f)
       }
-      Generator.mkDecisionTree(symlib, defn, funcAxioms.getOrElse(f, IndexedSeq()), symlib.signatures(f)._1, f, kem)
+      if (symlib.isHooked(f)) {
+        Failure()
+      } else {
+        Generator.mkDecisionTree(symlib, defn, funcAxioms.getOrElse(f, IndexedSeq()), symlib.signatures(f)._1, f, kem)
+      }
     })
     val path = new File(outputFolder, "dt.yaml")
     dt.serializeToYaml(path)
