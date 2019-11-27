@@ -554,7 +554,7 @@ static void emitTraversal(std::string name, KOREDefinition *definition, llvm::Mo
     argTypes.push_back(makeVisitorType(Ctx, file, getValueType({SortCategory::Float, 0}, module), 1, 0));
     argTypes.push_back(makeVisitorType(Ctx, file, getValueType({SortCategory::Bool, 0}, module), 1, 0));
     argTypes.push_back(makeVisitorType(Ctx, file, getValueType({SortCategory::StringBuffer, 0}, module), 1, 0));
-    argTypes.push_back(makeVisitorType(Ctx, file, llvm::Type::getInt8PtrTy(Ctx), 1, 0));
+    argTypes.push_back(llvm::PointerType::getUnqual(llvm::FunctionType::get(llvm::Type::getVoidTy(Ctx), {file, llvm::Type::getInt64PtrTy(Ctx), llvm::Type::getInt64Ty(Ctx), llvm::Type::getInt8PtrTy(Ctx)}, false)));
     argTypes.push_back(llvm::PointerType::getUnqual(llvm::FunctionType::get(llvm::Type::getVoidTy(Ctx), {file}, false)));
   } else {
     argTypes.push_back(llvm::PointerType::getUnqual(llvm::ArrayType::get(llvm::Type::getInt8PtrTy(Ctx), 0)));
@@ -682,11 +682,36 @@ static void getVisitor(KOREDefinition *definition, llvm::Module *module, KORESym
     case SortCategory::StringBuffer:
       llvm::CallInst::Create(func->arg_begin()+9, {func->arg_begin()+1, Child, CharPtr}, "", CaseBlock);
       break;
-    case SortCategory::MInt:
-      ChildPtr = new llvm::BitCastInst(ChildPtr, llvm::Type::getInt8PtrTy(Ctx), "", CaseBlock);
-      llvm::CallInst::Create(func->arg_begin()+10, {func->arg_begin()+1, ChildPtr, CharPtr}, "", CaseBlock);
+    case SortCategory::MInt: {
+      llvm::Value *mint = new llvm::LoadInst(ChildPtr, "mint", CaseBlock);
+      size_t nwords = (cat.bits + 63) / 64;
+      auto nbits = llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), cat.bits);
+      if (nwords == 0) {
+        llvm::CallInst::Create(func->arg_begin()+10, {func->arg_begin()+1, llvm::ConstantPointerNull::get(llvm::Type::getInt64PtrTy(Ctx)), nbits, CharPtr}, "", CaseBlock);
+      } else {
+        auto Ptr = allocateTerm(llvm::Type::getInt64Ty(Ctx), llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), nwords * 8), CaseBlock, "koreAllocAlwaysGC");
+        if (nwords == 1) {
+          llvm::Value *Word;
+          if (cat.bits == 64) {
+            Word = mint;
+          } else {
+            Word = new llvm::ZExtInst(mint, llvm::Type::getInt64Ty(Ctx), "word", CaseBlock);
+          }
+          new llvm::StoreInst(Word, Ptr, CaseBlock);
+        } else { //nwords >= 2
+          llvm::Value *Ptr2 = Ptr;
+          llvm::Value *accum = mint;
+          for (size_t i = 0; i < nwords; i++) {
+            auto Word = new llvm::TruncInst(accum, llvm::Type::getInt64Ty(Ctx), "word", CaseBlock);
+	    new llvm::StoreInst(Word, Ptr2, CaseBlock);
+  	  Ptr2 = llvm::GetElementPtrInst::Create(llvm::Type::getInt64Ty(Ctx), Ptr2, {llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 1)}, "ptr", CaseBlock);
+  	  accum = llvm::BinaryOperator::Create(llvm::Instruction::LShr, accum, llvm::ConstantInt::get(mint->getType(), 64), "shift", CaseBlock);
+          }
+        }
+        llvm::CallInst::Create(func->arg_begin()+10, {func->arg_begin()+1, Ptr, nbits, CharPtr}, "", CaseBlock);
+      }
       break;
-    case SortCategory::Map:
+    } case SortCategory::Map:
       visitCollection(definition, module, compositeSort, func, ChildPtr, CaseBlock, 3);
       break;
     case SortCategory::Set:

@@ -199,7 +199,7 @@ extern "C" {
       void visitFloat(writer *, floating *, const char *),
       void visitBool(writer *, bool, const char *),
       void visitStringBuffer(writer *, stringbuffer *, const char *),
-      void visitMInt(writer *, void *, const char *),
+      void visitMInt(writer *, size_t *, size_t, const char *),
       void visitSeparator(writer *));
 
   void sfprintf(writer *, const char *, ...);

@@ -30,9 +30,14 @@ void printStringBuffer(writer *file, stringbuffer *b, const char *sort) {
   sfprintf(file, "\\dv{%s}(\"%s\")", sort, str.c_str());
 }
 
-void printMInt(writer *file, void *i, const char *sort) {
-  //TODO: print mint
-  abort();
+void printMInt(writer *file, size_t *i, size_t bits, const char *sort) {
+  if (i == nullptr) {
+    sfprintf(file, "\\dv{%s}(\"0p%zd\")", sort, bits);
+  } else {
+    mpz_ptr z = hook_MINT_import(i, bits, false);
+    char *str = mpz_get_str(NULL, 10, z);
+    sfprintf(file, "\\dv{%s}(\"%sp%zd\")", sort, str, bits);
+  }
 }
 
 void sfprintf(writer *file, const char *fmt, ...) {
