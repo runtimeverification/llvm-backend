@@ -381,6 +381,10 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
   for (auto iter = sorts.begin(); iter != sorts.end(); ++iter) {
     auto &entry = *iter;
     std::string name = entry.first;
+    if (!entry.second->getObjectSortVariables().empty()) {
+      // TODO: MINT in initial configuration
+      continue;
+    }
     auto sort = KORECompositeSort::Create(name);
     ValueType cat = sort->getCategory(definition);
     if (cat.cat == SortCategory::Symbol || cat.cat == SortCategory::Variable) {
