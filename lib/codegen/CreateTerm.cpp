@@ -425,7 +425,188 @@ llvm::Value *CreateTerm::createHook(KORECompositePattern *hookAtt, KOREComposite
     Phi->addIncoming(falseArg, CurrentBlock);
     CurrentBlock = MergeBlock;
     return Phi;
+  } else if (name == "MINT.uvalue") {
+    llvm::Value *mint = (*this)(pattern->getArguments()[0].get()).first;
+    ValueType cat = dynamic_cast<KORECompositeSort *>(pattern->getConstructor()->getArguments()[0].get())->getCategory(Definition);
+    auto Type = getValueType(cat, Module);
+    size_t nwords = (cat.bits + 63) / 64;
+    if (nwords == 0) {
+      return createToken({SortCategory::Int, 0}, "0");
+    }
+    auto Ptr = allocateTerm(llvm::Type::getInt64Ty(Ctx), llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), nwords * 8), CurrentBlock, "koreAllocAlwaysGC");
+    if (nwords == 1) {
+      llvm::Value *Word;
+      if (cat.bits == 64) {
+        Word = mint;
+      } else {
+        Word = new llvm::ZExtInst(mint, llvm::Type::getInt64Ty(Ctx), "word", CurrentBlock);
+      }
+      new llvm::StoreInst(Word, Ptr, CurrentBlock);
+    } else { //nwords >= 2
+      llvm::Value *Ptr2 = Ptr;
+      llvm::Value *accum = mint;
+      for (size_t i = 0; i < nwords; i++) {
+        auto Word = new llvm::TruncInst(accum, llvm::Type::getInt64Ty(Ctx), "word", CurrentBlock);
+	new llvm::StoreInst(Word, Ptr2, CurrentBlock);
+	Ptr2 = llvm::GetElementPtrInst::Create(llvm::Type::getInt64Ty(Ctx), Ptr2, {llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 1)}, "ptr", CurrentBlock);
+	accum = llvm::BinaryOperator::Create(llvm::Instruction::LShr, accum, llvm::ConstantInt::get(Type, 64), "shift", CurrentBlock);
+      }
+    }
+    return llvm::CallInst::Create(getOrInsertFunction(Module, "hook_MINT_import", getValueType({SortCategory::Int, 0}, Module), llvm::Type::getInt64PtrTy(Ctx), llvm::Type::getInt1Ty(Ctx)), {Ptr, llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), cat.bits), llvm::ConstantInt::getFalse(Ctx)}, "hook_MINT_uvalue", CurrentBlock);
+  } else if (name == "MINT.svalue") {
+    llvm::Value *mint = (*this)(pattern->getArguments()[0].get()).first;
+    ValueType cat = dynamic_cast<KORECompositeSort *>(pattern->getConstructor()->getArguments()[0].get())->getCategory(Definition);
+    auto Type = getValueType(cat, Module);
+    size_t nwords = (cat.bits + 63) / 64;
+    if (nwords == 0) {
+      return createToken({SortCategory::Int, 0}, "0");
+    }
+    auto Ptr = allocateTerm(llvm::Type::getInt64Ty(Ctx), llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), nwords * 8), CurrentBlock, "koreAllocAlwaysGC");
+    if (nwords == 1) {
+      llvm::Value *Word;
+      if (cat.bits == 64) {
+        Word = mint;
+      } else {
+        Word = new llvm::SExtInst(mint, llvm::Type::getInt64Ty(Ctx), "word", CurrentBlock);
+      }
+      new llvm::StoreInst(Word, Ptr, CurrentBlock);
+    } else { //nwords >= 2
+      llvm::Value *Ptr2 = Ptr;
+      llvm::Value *accum = mint;
+      for (size_t i = 0; i < nwords; i++) {
+        auto Word = new llvm::TruncInst(accum, llvm::Type::getInt64Ty(Ctx), "word", CurrentBlock);
+	new llvm::StoreInst(Word, Ptr2, CurrentBlock);
+	Ptr2 = llvm::GetElementPtrInst::Create(llvm::Type::getInt64Ty(Ctx), Ptr2, {llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 1)}, "ptr", CurrentBlock);
+	accum = llvm::BinaryOperator::Create(llvm::Instruction::AShr, accum, llvm::ConstantInt::get(Type, 64), "shift", CurrentBlock);
+      }
+    }
+    return llvm::CallInst::Create(getOrInsertFunction(Module, "hook_MINT_import", getValueType({SortCategory::Int, 0}, Module), llvm::Type::getInt64PtrTy(Ctx), llvm::Type::getInt1Ty(Ctx)), {Ptr, llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), cat.bits), llvm::ConstantInt::getTrue(Ctx)}, "hook_MINT_svalue", CurrentBlock);
+  } else if (name == "MINT.integer") {
+    llvm::Value *mpz = (*this)(pattern->getArguments()[0].get()).first;
+    ValueType cat = dynamic_cast<KORECompositeSort *>(pattern->getConstructor()->getSort().get())->getCategory(Definition);
+    auto Type = getValueType(cat, Module);
+    llvm::Value *Ptr = llvm::CallInst::Create(getOrInsertFunction(Module, "hook_MINT_export", llvm::Type::getInt64PtrTy(Ctx), getValueType({SortCategory::Int, 0}, Module), llvm::Type::getInt64Ty(Ctx)), {mpz, llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), cat.bits)}, "ptr", CurrentBlock);
+    size_t nwords = (cat.bits + 63) / 64;
+    llvm::Value *result = llvm::ConstantInt::get(Type, 0);
+    if (nwords == 0) {
+      return result;
+    } else if (nwords == 1) {
+      auto Word = new llvm::LoadInst(Ptr, "word", CurrentBlock);
+      if (cat.bits == 64) {
+        return Word;
+      } else {
+        return new llvm::TruncInst(Word, Type, "hook_MINT_integer", CurrentBlock);
+      }
+    } else { //nwords >= 2
+      for (size_t i = 0; i < nwords; i++) {
+        auto Word = new llvm::LoadInst(Ptr, "word", CurrentBlock);
+	auto Zext = new llvm::ZExtInst(Word, Type, "extended", CurrentBlock);
+        auto Shl = llvm::BinaryOperator::Create(llvm::Instruction::Shl, result, llvm::ConstantInt::get(Type, 64), "shift", CurrentBlock);
+	result = llvm::BinaryOperator::Create(llvm::Instruction::Or, Shl, Zext, "or", CurrentBlock);
+	Ptr = llvm::GetElementPtrInst::Create(llvm::Type::getInt64Ty(Ctx), Ptr, {llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 1)}, "ptr", CurrentBlock);
+      }
+      return result;
+    }
+  } else if (name == "MINT.neg") {
+    llvm::Value *in = (*this)(pattern->getArguments()[0].get()).first;
+    return llvm::BinaryOperator::CreateNeg(in, "hook_MINT_neg", CurrentBlock);
+  } else if (name == "MINT.not") {
+    llvm::Value *in = (*this)(pattern->getArguments()[0].get()).first;
+    return llvm::BinaryOperator::CreateNot(in, "hook_MINT_not", CurrentBlock);
+  } else if (name == "MINT.eq") {
+    llvm::Value *first = (*this)(pattern->getArguments()[0].get()).first;
+    llvm::Value *second = (*this)(pattern->getArguments()[1].get()).first;
+    return new llvm::ICmpInst(*CurrentBlock, llvm::CmpInst::ICMP_EQ, first, second, "hook_MINT_eq");
+  } else if (name == "MINT.ne") {
+    llvm::Value *first = (*this)(pattern->getArguments()[0].get()).first;
+    llvm::Value *second = (*this)(pattern->getArguments()[1].get()).first;
+    return new llvm::ICmpInst(*CurrentBlock, llvm::CmpInst::ICMP_NE, first, second, "hook_MINT_ne");
+  } else if (name == "MINT.ult") {
+    llvm::Value *first = (*this)(pattern->getArguments()[0].get()).first;
+    llvm::Value *second = (*this)(pattern->getArguments()[1].get()).first;
+    return new llvm::ICmpInst(*CurrentBlock, llvm::CmpInst::ICMP_ULT, first, second, "hook_MINT_ult");
+  } else if (name == "MINT.ule") {
+    llvm::Value *first = (*this)(pattern->getArguments()[0].get()).first;
+    llvm::Value *second = (*this)(pattern->getArguments()[1].get()).first;
+    return new llvm::ICmpInst(*CurrentBlock, llvm::CmpInst::ICMP_ULE, first, second, "hook_MINT_ule");
+  } else if (name == "MINT.ugt") {
+    llvm::Value *first = (*this)(pattern->getArguments()[0].get()).first;
+    llvm::Value *second = (*this)(pattern->getArguments()[1].get()).first;
+    return new llvm::ICmpInst(*CurrentBlock, llvm::CmpInst::ICMP_UGT, first, second, "hook_MINT_ugt");
+  } else if (name == "MINT.uge") {
+    llvm::Value *first = (*this)(pattern->getArguments()[0].get()).first;
+    llvm::Value *second = (*this)(pattern->getArguments()[1].get()).first;
+    return new llvm::ICmpInst(*CurrentBlock, llvm::CmpInst::ICMP_UGE, first, second, "hook_MINT_uge");
+  } else if (name == "MINT.slt") {
+    llvm::Value *first = (*this)(pattern->getArguments()[0].get()).first;
+    llvm::Value *second = (*this)(pattern->getArguments()[1].get()).first;
+    return new llvm::ICmpInst(*CurrentBlock, llvm::CmpInst::ICMP_SLT, first, second, "hook_MINT_slt");
+  } else if (name == "MINT.sle") {
+    llvm::Value *first = (*this)(pattern->getArguments()[0].get()).first;
+    llvm::Value *second = (*this)(pattern->getArguments()[1].get()).first;
+    return new llvm::ICmpInst(*CurrentBlock, llvm::CmpInst::ICMP_SLE, first, second, "hook_MINT_sle");
+  } else if (name == "MINT.sgt") {
+    llvm::Value *first = (*this)(pattern->getArguments()[0].get()).first;
+    llvm::Value *second = (*this)(pattern->getArguments()[1].get()).first;
+    return new llvm::ICmpInst(*CurrentBlock, llvm::CmpInst::ICMP_SGT, first, second, "hook_MINT_sgt");
+  } else if (name == "MINT.sge") {
+    llvm::Value *first = (*this)(pattern->getArguments()[0].get()).first;
+    llvm::Value *second = (*this)(pattern->getArguments()[1].get()).first;
+    return new llvm::ICmpInst(*CurrentBlock, llvm::CmpInst::ICMP_SGE, first, second, "hook_MINT_sge");
+  } else if (name == "MINT.xor") {
+    llvm::Value *first = (*this)(pattern->getArguments()[0].get()).first;
+    llvm::Value *second = (*this)(pattern->getArguments()[1].get()).first;
+    return llvm::BinaryOperator::Create(llvm::Instruction::Xor, first, second, "hook_MINT_xor", CurrentBlock);
+  } else if (name == "MINT.or") {
+    llvm::Value *first = (*this)(pattern->getArguments()[0].get()).first;
+    llvm::Value *second = (*this)(pattern->getArguments()[1].get()).first;
+    return llvm::BinaryOperator::Create(llvm::Instruction::Or, first, second, "hook_MINT_or", CurrentBlock);
+  } else if (name == "MINT.and") {
+    llvm::Value *first = (*this)(pattern->getArguments()[0].get()).first;
+    llvm::Value *second = (*this)(pattern->getArguments()[1].get()).first;
+    return llvm::BinaryOperator::Create(llvm::Instruction::And, first, second, "hook_MINT_and", CurrentBlock);
+  } else if (name == "MINT.shl") {
+    llvm::Value *first = (*this)(pattern->getArguments()[0].get()).first;
+    llvm::Value *second = (*this)(pattern->getArguments()[1].get()).first;
+    return llvm::BinaryOperator::Create(llvm::Instruction::Shl, first, second, "hook_MINT_shl", CurrentBlock);
+  } else if (name == "MINT.lshr") {
+    llvm::Value *first = (*this)(pattern->getArguments()[0].get()).first;
+    llvm::Value *second = (*this)(pattern->getArguments()[1].get()).first;
+    return llvm::BinaryOperator::Create(llvm::Instruction::LShr, first, second, "hook_MINT_lshr", CurrentBlock);
+  } else if (name == "MINT.ashr") {
+    llvm::Value *first = (*this)(pattern->getArguments()[0].get()).first;
+    llvm::Value *second = (*this)(pattern->getArguments()[1].get()).first;
+    return llvm::BinaryOperator::Create(llvm::Instruction::AShr, first, second, "hook_MINT_ashr", CurrentBlock);
+  } else if (name == "MINT.add") {
+    llvm::Value *first = (*this)(pattern->getArguments()[0].get()).first;
+    llvm::Value *second = (*this)(pattern->getArguments()[1].get()).first;
+    return llvm::BinaryOperator::Create(llvm::Instruction::Add, first, second, "hook_MINT_add", CurrentBlock);
+  } else if (name == "MINT.sub") {
+    llvm::Value *first = (*this)(pattern->getArguments()[0].get()).first;
+    llvm::Value *second = (*this)(pattern->getArguments()[1].get()).first;
+    return llvm::BinaryOperator::Create(llvm::Instruction::Sub, first, second, "hook_MINT_sub", CurrentBlock);
+  } else if (name == "MINT.mul") {
+    llvm::Value *first = (*this)(pattern->getArguments()[0].get()).first;
+    llvm::Value *second = (*this)(pattern->getArguments()[1].get()).first;
+    return llvm::BinaryOperator::Create(llvm::Instruction::Mul, first, second, "hook_MINT_mul", CurrentBlock);
+  } else if (name == "MINT.sdiv") {
+    llvm::Value *first = (*this)(pattern->getArguments()[0].get()).first;
+    llvm::Value *second = (*this)(pattern->getArguments()[1].get()).first;
+    return llvm::BinaryOperator::Create(llvm::Instruction::SDiv, first, second, "hook_MINT_sdiv", CurrentBlock);
+  } else if (name == "MINT.udiv") {
+    llvm::Value *first = (*this)(pattern->getArguments()[0].get()).first;
+    llvm::Value *second = (*this)(pattern->getArguments()[1].get()).first;
+    return llvm::BinaryOperator::Create(llvm::Instruction::UDiv, first, second, "hook_MINT_udiv", CurrentBlock);
+  } else if (name == "MINT.srem") {
+    llvm::Value *first = (*this)(pattern->getArguments()[0].get()).first;
+    llvm::Value *second = (*this)(pattern->getArguments()[1].get()).first;
+    return llvm::BinaryOperator::Create(llvm::Instruction::SRem, first, second, "hook_MINT_srem", CurrentBlock);
+  } else if (name == "MINT.urem") {
+    llvm::Value *first = (*this)(pattern->getArguments()[0].get()).first;
+    llvm::Value *second = (*this)(pattern->getArguments()[1].get()).first;
+    return llvm::BinaryOperator::Create(llvm::Instruction::URem, first, second, "hook_MINT_urem", CurrentBlock);
   } else if (!name.compare(0, 5, "MINT.")) {
+    std::cerr << name << std::endl;
     assert(false && "not implemented yet: MInt");
     abort();
   } else {
