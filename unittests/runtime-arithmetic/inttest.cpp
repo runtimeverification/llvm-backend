@@ -45,6 +45,10 @@ extern "C" {
   uint32_t getTagForSymbolName(const char *) {
     return 0;
   }
+
+  void *koreAllocAlwaysGC(size_t size) {
+    return malloc(size);
+  }
 }
 
 BOOST_AUTO_TEST_SUITE(IntTest)

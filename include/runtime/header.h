@@ -211,6 +211,8 @@ extern "C" {
 
   size_t hook_SET_size_long(set *);
 
+  mpz_ptr hook_MINT_import(size_t *i, uint64_t bits, bool isSigned);
+
   block *debruijnize(block *);
 
   setiter set_iterator(set *);
