@@ -452,7 +452,9 @@ llvm::Value *CreateTerm::createHook(KORECompositePattern *hookAtt, KOREComposite
 	accum = llvm::BinaryOperator::Create(llvm::Instruction::LShr, accum, llvm::ConstantInt::get(Type, 64), "shift", CurrentBlock);
       }
     }
-    return llvm::CallInst::Create(getOrInsertFunction(Module, "hook_MINT_import", getValueType({SortCategory::Int, 0}, Module), llvm::Type::getInt64PtrTy(Ctx), llvm::Type::getInt64Ty(Ctx), llvm::Type::getInt1Ty(Ctx)), {Ptr, llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), cat.bits), llvm::ConstantInt::getFalse(Ctx)}, "hook_MINT_uvalue", CurrentBlock);
+    auto result = llvm::CallInst::Create(getOrInsertFunction(Module, "hook_MINT_import", getValueType({SortCategory::Int, 0}, Module), llvm::Type::getInt64PtrTy(Ctx), llvm::Type::getInt64Ty(Ctx), llvm::Type::getInt1Ty(Ctx)), {Ptr, llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), cat.bits), llvm::ConstantInt::getFalse(Ctx)}, "hook_MINT_uvalue", CurrentBlock);
+    setDebugLoc(result);
+    return result;
   } else if (name == "MINT.svalue") {
     llvm::Value *mint = (*this)(pattern->getArguments()[0].get()).first;
     ValueType cat = dynamic_cast<KORECompositeSort *>(pattern->getConstructor()->getArguments()[0].get())->getCategory(Definition);
@@ -480,12 +482,15 @@ llvm::Value *CreateTerm::createHook(KORECompositePattern *hookAtt, KOREComposite
 	accum = llvm::BinaryOperator::Create(llvm::Instruction::AShr, accum, llvm::ConstantInt::get(Type, 64), "shift", CurrentBlock);
       }
     }
-    return llvm::CallInst::Create(getOrInsertFunction(Module, "hook_MINT_import", getValueType({SortCategory::Int, 0}, Module), llvm::Type::getInt64PtrTy(Ctx), llvm::Type::getInt64Ty(Ctx), llvm::Type::getInt1Ty(Ctx)), {Ptr, llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), cat.bits), llvm::ConstantInt::getTrue(Ctx)}, "hook_MINT_svalue", CurrentBlock);
+    auto result = llvm::CallInst::Create(getOrInsertFunction(Module, "hook_MINT_import", getValueType({SortCategory::Int, 0}, Module), llvm::Type::getInt64PtrTy(Ctx), llvm::Type::getInt64Ty(Ctx), llvm::Type::getInt1Ty(Ctx)), {Ptr, llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), cat.bits), llvm::ConstantInt::getTrue(Ctx)}, "hook_MINT_svalue", CurrentBlock);
+    setDebugLoc(result);
+    return result;
   } else if (name == "MINT.integer") {
     llvm::Value *mpz = (*this)(pattern->getArguments()[0].get()).first;
     ValueType cat = dynamic_cast<KORECompositeSort *>(pattern->getConstructor()->getSort().get())->getCategory(Definition);
     auto Type = getValueType(cat, Module);
-    llvm::Value *Ptr = llvm::CallInst::Create(getOrInsertFunction(Module, "hook_MINT_export", llvm::Type::getInt64PtrTy(Ctx), getValueType({SortCategory::Int, 0}, Module), llvm::Type::getInt64Ty(Ctx)), {mpz, llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), cat.bits)}, "ptr", CurrentBlock);
+    llvm::Instruction *Ptr = llvm::CallInst::Create(getOrInsertFunction(Module, "hook_MINT_export", llvm::Type::getInt64PtrTy(Ctx), getValueType({SortCategory::Int, 0}, Module), llvm::Type::getInt64Ty(Ctx)), {mpz, llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), cat.bits)}, "ptr", CurrentBlock);
+    setDebugLoc(Ptr);
     size_t nwords = (cat.bits + 63) / 64;
     llvm::Value *result = llvm::ConstantInt::get(Type, 0);
     if (nwords == 0) {
