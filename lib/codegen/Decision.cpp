@@ -451,8 +451,33 @@ void makeEvalOrAnywhereFunction(KORESymbol *function, KOREDefinition *definition
   codegen(dt, subst);
 }
 
-void abortWhenStuck(llvm::BasicBlock *stuck, llvm::Module *module, KORESymbol *, llvm::StringMap<llvm::Value *> &, KOREDefinition *) {
-  addAbort(stuck, module);
+void abortWhenStuck(llvm::BasicBlock *CurrentBlock, llvm::Module *Module, KORESymbol *symbol, llvm::StringMap<llvm::Value *> &subst, KOREDefinition *d) {
+  auto &Ctx = Module->getContext();
+  std::ostringstream Out;
+  symbol->print(Out);
+  symbol = d->getAllSymbols().at(Out.str());
+  auto BlockType = getBlockType(Module, d, symbol);
+  llvm::Value *Ptr;
+  auto BlockPtr = llvm::PointerType::getUnqual(Module->getTypeByName(BLOCK_STRUCT));
+  if (symbol->getArguments().empty()) {
+    Ptr = llvm::ConstantExpr::getIntToPtr(llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), ((uint64_t)symbol->getTag() << 32 | 1)), getValueType({SortCategory::Symbol, 0}, Module));
+  } else {
+    llvm::Value *BlockHeader = getBlockHeader(Module, d, symbol, BlockType);
+    llvm::Value *Block = allocateTerm(BlockType, CurrentBlock);
+    llvm::Value *BlockHeaderPtr = llvm::GetElementPtrInst::CreateInBounds(BlockType, Block, {llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0), llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), 0)}, symbol->getName(), CurrentBlock);
+    new llvm::StoreInst(BlockHeader, BlockHeaderPtr, CurrentBlock);
+    for (int idx = 0; idx < symbol->getArguments().size(); idx++) {
+      llvm::Value *ChildValue = subst.lookup("_" + std::to_string(idx+1));
+      llvm::Value *ChildPtr = llvm::GetElementPtrInst::CreateInBounds(BlockType, Block, {llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0), llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), idx++ + 2)}, "", CurrentBlock);
+      if (ChildValue->getType() == ChildPtr->getType()) {
+        ChildValue = new llvm::LoadInst(ChildValue, "", CurrentBlock);
+      }
+      new llvm::StoreInst(ChildValue, ChildPtr, CurrentBlock);
+    }
+    Ptr = new llvm::BitCastInst(Block, BlockPtr, "", CurrentBlock);
+  }
+  llvm::CallInst::Create(getOrInsertFunction(Module, "finish_rewriting", llvm::Type::getVoidTy(Ctx), BlockPtr), {Ptr}, "", CurrentBlock);
+  new llvm::UnreachableInst(Ctx, CurrentBlock);
 }
 
 void makeEvalFunction(KORESymbol *function, KOREDefinition *definition, llvm::Module *module, DecisionNode *dt) {

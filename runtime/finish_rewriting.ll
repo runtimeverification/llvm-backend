@@ -7,6 +7,7 @@ target triple = "x86_64-unknown-linux-gnu"
 
 declare void @printConfiguration(i8*, %block*)
 declare void @exit(i32) #0
+declare void @abort() #0
 declare i64 @__gmpz_get_ui(%mpz*)
 
 @exit_int_0 = global %mpz { i32 0, i32 0, i64* getelementptr inbounds ([0 x i64], [0 x i64]* @exit_int_0_limbs, i32 0, i32 0) }
@@ -20,6 +21,13 @@ define weak fastcc %mpz* @"eval_LblgetExitCode{SortGeneratedTopCell{}}"(%block*)
 
 define void @finish_rewriting(%block* %subject) #0 {
   %output = load i8*, i8** @output_file
+  %outputintptr = ptrtoint i8* %output to i64
+  %isnull = icmp eq i64 %outputintptr, 0
+  br i1 %isnull, label %abort, label %print
+abort:
+  call void @abort()
+  unreachable
+print:
   call void @printConfiguration(i8* %output, %block* %subject)
   %exit_z = call fastcc %mpz* @"eval_LblgetExitCode{SortGeneratedTopCell{}}"(%block* %subject)
   %exit_ul = call i64 @__gmpz_get_ui(%mpz* %exit_z)
