@@ -79,6 +79,10 @@ struct ValueType {
   SortCategory cat;
   // if this is an MInt, the number of bits in the MInt
   uint64_t bits;
+
+  bool operator<(const ValueType &that) const {
+    return std::make_tuple(this->cat, this->bits) < std::make_tuple(that.cat, that.bits);
+  }
 };
 
 class KOREDefinition;
@@ -99,7 +103,7 @@ public:
   std::string getHook(KOREDefinition *definition);
   static ValueType getCategory(std::string hook);
 
-  virtual bool isConcrete() const override { return true; }
+  virtual bool isConcrete() const override;
   virtual sptr<KORESort> substitute(const substitution &subst) override;
 
   void addArgument(sptr<KORESort> Argument);
@@ -506,7 +510,7 @@ public:
   using KOREVariableMapType = std::map<std::string, KOREVariable *>;
 
   using KORECompositeSortDeclarationMapType = std::map<std::string, KORECompositeSortDeclaration *>;
-  using KORECompositeSortMapType = std::map<std::string, sptr<KORECompositeSort>>;
+  using KORECompositeSortMapType = std::map<ValueType, sptr<KORECompositeSort>>;
 
   using KORESymbolDeclarationMapType = std::map<std::string, KORESymbolDeclaration *>;
 

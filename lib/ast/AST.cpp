@@ -2,6 +2,7 @@
 
 #include <unordered_set>
 #include <unordered_map>
+#include <iostream>
 
 using namespace kllvm;
 
@@ -55,6 +56,18 @@ ValueType KORECompositeSort::getCategory(KOREDefinition *definition) {
   if (category.cat != SortCategory::Uncomputed)
     return category;
   std::string name = getHook(definition);
+  if (name == "MINT.MInt") {
+    if (auto param = dynamic_cast<KORECompositeSort *>(arguments[0].get())) {
+      auto &att = definition->getSortDeclarations().at(param->getName())->getAttributes();
+      auto &natAtt = att.at("nat");
+      assert(natAtt->getArguments().size() == 1);
+      auto strPattern = dynamic_cast<KOREStringPattern *>(natAtt->getArguments()[0].get());
+      name = name + " " + strPattern->getContents();
+    } else {
+      print(std::cerr);
+      abort();
+    }
+  }
   category = getCategory(name);
   return category;
 }
@@ -83,7 +96,7 @@ ValueType KORECompositeSort::getCategory(std::string name) {
   else if (name == "BOOL.Bool") category = SortCategory::Bool;
   else if (name == "KVAR.KVar") category = SortCategory::Variable;
   // we expect the "hook" of a MInt to be of the form "MINT.MInt N" for some bitwidth N
-  else if (name.substr(0, 9) == "MINT.MInt") {
+  else if (name.substr(0, 10) == "MINT.MInt ") {
     category = SortCategory::MInt;
     bits = std::stoi(name.substr(10));
   }
@@ -153,6 +166,15 @@ std::string KORESymbol::layoutString(KOREDefinition *definition) const {
     }
   }
   return result;
+}
+
+bool KORECompositeSort::isConcrete() const {
+  for (auto sort : arguments) {
+    if (!sort->isConcrete()) {
+      return false;
+    }
+  }
+  return true;
 }
 
 bool KORESymbol::isConcrete() const {
@@ -428,7 +450,6 @@ void KOREDefinition::addModule(ptr<KOREModule> Module) {
     if (auto sortDecl = dynamic_cast<KORECompositeSortDeclaration *>(decl.get())) {
       sortDeclarations.insert({sortDecl->getName(), sortDecl});
       auto sort = KORECompositeSort::Create(sortDecl->getName());
-      hookedSorts[sort->getHook(this)] = sort;
     } else if (auto symbolDecl = dynamic_cast<KORESymbolDeclaration *>(decl.get())) {
       symbolDeclarations.insert({symbolDecl->getSymbol()->getName(), symbolDecl});
     } else if (auto axiom = dynamic_cast<KOREAxiomDeclaration *>(decl.get())) {
@@ -522,6 +543,14 @@ void KOREDefinition::preprocess() {
     auto range = variables.at(entry.first);
     for (auto iter = entry.second.begin(); iter != entry.second.end(); ++iter) {
       KORESymbol *symbol = *iter;
+      for (auto &sort : symbol->getArguments()) {
+        if (sort->isConcrete()) {
+          hookedSorts[dynamic_cast<KORECompositeSort *>(sort.get())->getCategory(this)] = std::dynamic_pointer_cast<KORECompositeSort>(sort);
+        }
+      }
+      if (symbol->getSort()->isConcrete()) {
+        hookedSorts[dynamic_cast<KORECompositeSort *>(symbol->getSort().get())->getCategory(this)] = std::dynamic_pointer_cast<KORECompositeSort>(symbol->getSort());
+      }
       if (!symbol->isConcrete()) {
         if (symbol->isPolymorphic()) {
           symbol->firstTag = range.first;

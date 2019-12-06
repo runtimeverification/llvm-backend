@@ -199,7 +199,7 @@ extern "C" {
       void visitFloat(writer *, floating *, const char *),
       void visitBool(writer *, bool, const char *),
       void visitStringBuffer(writer *, stringbuffer *, const char *),
-      void visitMInt(writer *, void *, const char *),
+      void visitMInt(writer *, size_t *, size_t, const char *),
       void visitSeparator(writer *));
 
   void sfprintf(writer *, const char *, ...);
@@ -210,6 +210,8 @@ extern "C" {
   string *hook_BUFFER_toString(stringbuffer *buf);
 
   size_t hook_SET_size_long(set *);
+
+  mpz_ptr hook_MINT_import(size_t *i, uint64_t bits, bool isSigned);
 
   block *debruijnize(block *);
 

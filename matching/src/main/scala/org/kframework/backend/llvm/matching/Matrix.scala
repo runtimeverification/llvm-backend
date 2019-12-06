@@ -269,7 +269,7 @@ class SortInfo private(sort: Sort, symlib: Parser.SymLib) {
   private val overloadMap = rawOverloads.map(s => (s, symlib.overloads(s))).toMap
   private val overloadInjMap = overloadMap.map(e => (e._1, e._2.map(g => B.SymbolOrAlias("inj", Seq(symlib.signatures(g)._2, symlib.signatures(e._1)._2)))))
   val trueInjMap = injMap ++ overloadInjMap
-  val category: SortCategory = SortCategory(Parser.getStringAtt(symlib.sortAtt(sort), "hook"))
+  val category: SortCategory = SortCategory(Parser.getStringAtt(symlib.sortAtt(sort), "hook"), sort, symlib)
   val length: Int = category.length(constructors.size)
   val exactLength: Int = category.length(exactConstructors.size)
   val isCollection: Boolean = {
@@ -538,7 +538,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
         SwitchLit(Equal(os._1, os._2), 1, Seq(("1", dt), ("0", child)), None))
     }
     def sortCat(sort: Sort): SortCategory = {
-      SortCategory(Parser.getStringAtt(symlib.sortAtt(sort), "hook").orElse(Some("STRING.String")))
+      SortCategory(Parser.getStringAtt(symlib.sortAtt(sort), "hook").orElse(Some("STRING.String")), sort, symlib)
     }
     // first, add all remaining variable bindings to the clause
     val vars = row.clause.bindings ++ (fringe, row.patterns).zipped.toSeq.flatMap(t => t._2.bindings(None, None, t._1.occurrence, symlib))

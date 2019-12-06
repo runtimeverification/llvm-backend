@@ -85,11 +85,11 @@ object Generator {
               case "false" => "0"
               case _ => str
             }
-          } else str, SortCategory(hookAtt.orElse(Some("STRING.String"))))
+          } else str, SortCategory(hookAtt.orElse(Some("STRING.String")), sort, symlib))
         case Variable(name, sort) =>
           val att = symlib.sortAtt(sort)
           val hookAtt = Parser.getStringAtt(att, "hook")
-          VariableP(name, SortCategory(hookAtt.orElse(Some("STRING.String"))))
+          VariableP(name, SortCategory(hookAtt.orElse(Some("STRING.String")), sort, symlib))
         case And(_, p, v @ Variable(_, _)) =>
           val _var = genPattern(v).asInstanceOf[VariableP[String]]
           AsP(_var.name, _var.sort, genPattern(p))
