@@ -447,9 +447,9 @@ llvm::Value *CreateTerm::createHook(KORECompositePattern *hookAtt, KOREComposite
       llvm::Value *accum = mint;
       for (size_t i = 0; i < nwords; i++) {
         auto Word = new llvm::TruncInst(accum, llvm::Type::getInt64Ty(Ctx), "word", CurrentBlock);
-	new llvm::StoreInst(Word, Ptr2, CurrentBlock);
-	Ptr2 = llvm::GetElementPtrInst::Create(llvm::Type::getInt64Ty(Ctx), Ptr2, {llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 1)}, "ptr", CurrentBlock);
-	accum = llvm::BinaryOperator::Create(llvm::Instruction::LShr, accum, llvm::ConstantInt::get(Type, 64), "shift", CurrentBlock);
+        new llvm::StoreInst(Word, Ptr2, CurrentBlock);
+        Ptr2 = llvm::GetElementPtrInst::Create(llvm::Type::getInt64Ty(Ctx), Ptr2, {llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 1)}, "ptr", CurrentBlock);
+        accum = llvm::BinaryOperator::Create(llvm::Instruction::LShr, accum, llvm::ConstantInt::get(Type, 64), "shift", CurrentBlock);
       }
     }
     auto result = llvm::CallInst::Create(getOrInsertFunction(Module, "hook_MINT_import", getValueType({SortCategory::Int, 0}, Module), llvm::Type::getInt64PtrTy(Ctx), llvm::Type::getInt64Ty(Ctx), llvm::Type::getInt1Ty(Ctx)), {Ptr, llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), cat.bits), llvm::ConstantInt::getFalse(Ctx)}, "hook_MINT_uvalue", CurrentBlock);
@@ -477,9 +477,9 @@ llvm::Value *CreateTerm::createHook(KORECompositePattern *hookAtt, KOREComposite
       llvm::Value *accum = mint;
       for (size_t i = 0; i < nwords; i++) {
         auto Word = new llvm::TruncInst(accum, llvm::Type::getInt64Ty(Ctx), "word", CurrentBlock);
-	new llvm::StoreInst(Word, Ptr2, CurrentBlock);
-	Ptr2 = llvm::GetElementPtrInst::Create(llvm::Type::getInt64Ty(Ctx), Ptr2, {llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 1)}, "ptr", CurrentBlock);
-	accum = llvm::BinaryOperator::Create(llvm::Instruction::AShr, accum, llvm::ConstantInt::get(Type, 64), "shift", CurrentBlock);
+        new llvm::StoreInst(Word, Ptr2, CurrentBlock);
+        Ptr2 = llvm::GetElementPtrInst::Create(llvm::Type::getInt64Ty(Ctx), Ptr2, {llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 1)}, "ptr", CurrentBlock);
+        accum = llvm::BinaryOperator::Create(llvm::Instruction::AShr, accum, llvm::ConstantInt::get(Type, 64), "shift", CurrentBlock);
       }
     }
     auto result = llvm::CallInst::Create(getOrInsertFunction(Module, "hook_MINT_import", getValueType({SortCategory::Int, 0}, Module), llvm::Type::getInt64PtrTy(Ctx), llvm::Type::getInt64Ty(Ctx), llvm::Type::getInt1Ty(Ctx)), {Ptr, llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), cat.bits), llvm::ConstantInt::getTrue(Ctx)}, "hook_MINT_svalue", CurrentBlock);
@@ -505,10 +505,10 @@ llvm::Value *CreateTerm::createHook(KORECompositePattern *hookAtt, KOREComposite
     } else { //nwords >= 2
       for (size_t i = 0; i < nwords; i++) {
         auto Word = new llvm::LoadInst(Ptr, "word", CurrentBlock);
-	auto Zext = new llvm::ZExtInst(Word, Type, "extended", CurrentBlock);
+        auto Zext = new llvm::ZExtInst(Word, Type, "extended", CurrentBlock);
         auto Shl = llvm::BinaryOperator::Create(llvm::Instruction::Shl, result, llvm::ConstantInt::get(Type, 64), "shift", CurrentBlock);
-	result = llvm::BinaryOperator::Create(llvm::Instruction::Or, Shl, Zext, "or", CurrentBlock);
-	Ptr = llvm::GetElementPtrInst::Create(llvm::Type::getInt64Ty(Ctx), Ptr, {llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 1)}, "ptr", CurrentBlock);
+        result = llvm::BinaryOperator::Create(llvm::Instruction::Or, Shl, Zext, "or", CurrentBlock);
+        Ptr = llvm::GetElementPtrInst::Create(llvm::Type::getInt64Ty(Ctx), Ptr, {llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 1)}, "ptr", CurrentBlock);
       }
       return result;
     }

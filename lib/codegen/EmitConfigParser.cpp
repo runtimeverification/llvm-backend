@@ -707,9 +707,9 @@ static void getVisitor(KOREDefinition *definition, llvm::Module *module, KORESym
           llvm::Value *accum = mint;
           for (size_t i = 0; i < nwords; i++) {
             auto Word = new llvm::TruncInst(accum, llvm::Type::getInt64Ty(Ctx), "word", CaseBlock);
-	    new llvm::StoreInst(Word, Ptr2, CaseBlock);
-  	  Ptr2 = llvm::GetElementPtrInst::Create(llvm::Type::getInt64Ty(Ctx), Ptr2, {llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 1)}, "ptr", CaseBlock);
-  	  accum = llvm::BinaryOperator::Create(llvm::Instruction::LShr, accum, llvm::ConstantInt::get(mint->getType(), 64), "shift", CaseBlock);
+            new llvm::StoreInst(Word, Ptr2, CaseBlock);
+            Ptr2 = llvm::GetElementPtrInst::Create(llvm::Type::getInt64Ty(Ctx), Ptr2, {llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 1)}, "ptr", CaseBlock);
+            accum = llvm::BinaryOperator::Create(llvm::Instruction::LShr, accum, llvm::ConstantInt::get(mint->getType(), 64), "shift", CaseBlock);
           }
         }
         llvm::CallInst::Create(func->arg_begin()+10, {func->arg_begin()+1, Ptr, nbits, CharPtr}, "", CaseBlock);
