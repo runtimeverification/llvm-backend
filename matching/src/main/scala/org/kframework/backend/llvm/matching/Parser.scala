@@ -165,8 +165,66 @@ object Parser {
     }
   }
 
+  private def getSubstitution(pat: Pattern, subject: Seq[Pattern]): Map[String, Pattern] = {
+    val pattern = pat.asInstanceOf[Application]
+    (pattern.args.map(_.asInstanceOf[Variable].name) zip subject).toMap
+  }
+
+  private def substitute(pat: Pattern, subst: Map[String, Pattern]): Pattern = {
+    pat match {
+      case Variable(name, _) => subst(name)
+      case Application(head, args) => B.Application(head, args.map(substitute(_, subst)))
+      case And(s, l, r) => B.And(s, substitute(l, subst), substitute(r, subst))
+      case Or(s, l, r) => B.Or(s, substitute(l, subst), substitute(r, subst))
+      case Not(s, p) => B.Not(s, substitute(p, subst))
+      case Implies(s, l, r) => B.Implies(s, substitute(l, subst), substitute(r, subst))
+      case Iff(s, l, r) => B.Iff(s, substitute(l, subst), substitute(r, subst))
+      case Exists(s, v, p) => B.Exists(s, v, substitute(p, subst))
+      case Forall(s, v, p) => B.Forall(s, v, substitute(p, subst))
+      case Ceil(s1, s2, p) => B.Ceil(s1, s2, substitute(p, subst))
+      case Floor(s1, s2, p) => B.Floor(s1, s2, substitute(p, subst))
+      case Rewrites(s, l, r) => B.Rewrites(s, substitute(l, subst), substitute(r, subst))
+      case Equals(s1, s2, l, r) => B.Equals(s1, s2, substitute(l, subst), substitute(r, subst))
+      case Mem(s1, s2, l, r) => B.Mem(s1, s2, substitute(l, subst), substitute(r, subst))
+      case _ => pat
+    }
+  }
+
+  private def expandAliases(pat: Pattern, aliases: Map[String, AliasDeclaration]): Pattern = {
+    pat match {
+      case Application(head, args) =>
+        if (aliases.contains(head.ctr)) {
+          val alias = aliases(head.ctr)
+          val subst = getSubstitution(alias.leftPattern, args)
+          substitute(alias.rightPattern, subst)
+        } else if (args.isEmpty) {
+          pat
+        } else {
+          B.Application(head, args.map(expandAliases(_, aliases)))
+        }
+      case And(s, l, r) => B.And(s, expandAliases(l, aliases), expandAliases(r, aliases))
+      case Or(s, l, r) => B.Or(s, expandAliases(l, aliases), expandAliases(r, aliases))
+      case Not(s, p) => B.Not(s, expandAliases(p, aliases))
+      case Implies(s, l, r) => B.Implies(s, expandAliases(l, aliases), expandAliases(r, aliases))
+      case Iff(s, l, r) => B.Iff(s, expandAliases(l, aliases), expandAliases(r, aliases))
+      case Exists(s, v, p) => B.Exists(s, v, expandAliases(p, aliases))
+      case Forall(s, v, p) => B.Forall(s, v, expandAliases(p, aliases))
+      case Ceil(s1, s2, p) => B.Ceil(s1, s2, expandAliases(p, aliases))
+      case Floor(s1, s2, p) => B.Floor(s1, s2, expandAliases(p, aliases))
+      case Rewrites(s, l, r) => B.Rewrites(s, expandAliases(l, aliases), expandAliases(r, aliases))
+      case Equals(s1, s2, l, r) => B.Equals(s1, s2, expandAliases(l, aliases), expandAliases(r, aliases))
+      case Mem(s1, s2, l, r) => B.Mem(s1, s2, expandAliases(l, aliases), expandAliases(r, aliases))
+      case _ => pat
+    }
+  }
+
+  private def expandAliases(axiom: AxiomDeclaration, defn: Definition) : AxiomDeclaration = { 
+    val aliases = defn.modules.flatMap(_.decls).filter(_.isInstanceOf[AliasDeclaration]).map(_.asInstanceOf[AliasDeclaration]).map(al => (al.alias.ctr, al)).toMap
+    B.AxiomDeclaration(axiom.params, expandAliases(axiom.pattern, aliases), axiom.att).asInstanceOf[AxiomDeclaration]
+  }
+
   def getAxioms(defn: Definition) : Seq[AxiomDeclaration] = {
-    defn.modules.flatMap(_.decls).filter(_.isInstanceOf[AxiomDeclaration]).map(_.asInstanceOf[AxiomDeclaration])
+    defn.modules.flatMap(_.decls).filter(_.isInstanceOf[AxiomDeclaration]).map(_.asInstanceOf[AxiomDeclaration]).map(expandAliases(_, defn))
   }
 
   def getSorts(defn: Definition): Seq[Sort] = {
