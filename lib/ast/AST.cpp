@@ -228,8 +228,8 @@ std::string KOREVariablePattern::getName() const {
   return name->getName();
 }
 
-void KORECompositePattern::addArgument(ptr<KOREPattern> Argument) {
-  arguments.push_back(std::move(Argument));
+void KORECompositePattern::addArgument(sptr<KOREPattern> Argument) {
+  arguments.push_back(Argument);
 }
 
 void KORECompositePattern::markSymbols(std::map<std::string, std::vector<KORESymbol *>> &map) {
@@ -248,6 +248,33 @@ void KORECompositePattern::markVariables(std::map<std::string, KOREVariablePatte
   for (auto &arg : arguments) {
     arg->markVariables(map);
   }
+}
+
+sptr<KOREPattern> KORECompositePattern::substitute(const substitution &subst) {
+  if (arguments.empty()) {
+    return shared_from_this();
+  }
+  auto ptr = KORECompositePattern::Create(constructor.get());
+  for (auto &arg : arguments) {
+    ptr->addArgument(arg->substitute(subst));
+  }
+  return ptr;
+}
+
+sptr<KOREPattern> KORECompositePattern::expandAliases(KOREDefinition *def) {
+  if (def->getAliasDeclarations().count(constructor->getName())) {
+    auto alias = def->getAliasDeclarations().at(constructor->getName());
+    auto subst = alias->getSubstitution(this);
+    return alias->getPattern()->substitute(subst);
+  }
+  if (arguments.empty()) {
+    return shared_from_this();
+  }
+  auto ptr = KORECompositePattern::Create(constructor.get());
+  for (auto &arg : arguments) {
+    ptr->addArgument(arg->expandAliases(def));
+  }
+  return ptr;
 }
 
 void KOREDeclaration::addAttribute(ptr<KORECompositePattern> Attribute) {
@@ -432,6 +459,19 @@ void KOREAliasDeclaration::addPattern(ptr<KOREPattern> Pattern) {
   pattern = std::move(Pattern);
 }
 
+KOREPattern::substitution KOREAliasDeclaration::getSubstitution(KORECompositePattern *subject) {
+  int i = 0;
+  KOREPattern::substitution result;
+  for (auto &arg : boundVariables->getArguments()) {
+    KOREVariablePattern *var = dynamic_cast<KOREVariablePattern *>(arg.get());
+    if (!var) {
+      abort();
+    }
+    result[var->getName()] = subject->getArguments()[i++];
+  }
+  return result;
+}
+
 bool KORESymbolDeclaration::isAnywhere() {
   return getAttributes().count("anywhere");
 }
@@ -452,6 +492,8 @@ void KOREDefinition::addModule(ptr<KOREModule> Module) {
       auto sort = KORECompositeSort::Create(sortDecl->getName());
     } else if (auto symbolDecl = dynamic_cast<KORESymbolDeclaration *>(decl.get())) {
       symbolDeclarations.insert({symbolDecl->getSymbol()->getName(), symbolDecl});
+    } else if (auto aliasDecl = dynamic_cast<KOREAliasDeclaration *>(decl.get())) {
+      aliasDeclarations.insert({aliasDecl->getSymbol()->getName(), aliasDecl});
     } else if (auto axiom = dynamic_cast<KOREAxiomDeclaration *>(decl.get())) {
       axioms.push_back(axiom);
     }
@@ -465,6 +507,10 @@ void KOREDefinition::addAttribute(ptr<KORECompositePattern> Attribute) {
 }
 
 void KOREDefinition::preprocess() {
+  for (auto iter = axioms.begin(); iter != axioms.end(); ++iter) {
+    auto axiom = *iter;
+    axiom->pattern = axiom->pattern->expandAliases(this);
+  }
   auto symbols = std::map<std::string, std::vector<KORESymbol *>>{};
   unsigned nextOrdinal = 0;
   for (auto iter = symbolDeclarations.begin(); iter != symbolDeclarations.end(); ++iter) {

@@ -233,7 +233,7 @@ private:
 class KOREVariablePattern;
 
 // KOREPattern
-class KOREPattern {
+class KOREPattern : public std::enable_shared_from_this<KOREPattern> {
 public:
   virtual ~KOREPattern() = default;
 
@@ -247,6 +247,11 @@ public:
   virtual void markVariables(std::map<std::string, KOREVariablePattern *> &) = 0;
 
   virtual sptr<KORESort> getSort(void) const = 0;
+
+  using substitution = std::unordered_map<std::string, sptr<KOREPattern>>;
+
+  virtual sptr<KOREPattern> substitute(const substitution &) = 0;
+  virtual sptr<KOREPattern> expandAliases(KOREDefinition *) = 0;
 };
 
 class KOREVariablePattern : public KOREPattern {
@@ -267,6 +272,8 @@ public:
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
   virtual void markSymbols(std::map<std::string, std::vector<KORESymbol *>> &) override {}
   virtual void markVariables(std::map<std::string, KOREVariablePattern *> &map) override { map.insert({name->getName(), this}); }
+  virtual sptr<KOREPattern> substitute(const substitution &subst) override { return subst.at(name->getName()); }
+  virtual sptr<KOREPattern> expandAliases(KOREDefinition *) override { return shared_from_this(); }
 
 private:
   KOREVariablePattern(ptr<KOREVariable> Name, sptr<KORESort> Sort)
@@ -276,7 +283,7 @@ private:
 class KORECompositePattern : public KOREPattern {
 private:
   ptr<KORESymbol> constructor;
-  std::vector<ptr<KOREPattern>> arguments;
+  std::vector<sptr<KOREPattern>> arguments;
 
 public:
   static ptr<KORECompositePattern> Create(const std::string &Name) {
@@ -295,12 +302,14 @@ public:
   sptr<KORESort> getSort() const override { return constructor->getSort(); }
 
   KORESymbol *getConstructor() const { return constructor.get(); }
-  const std::vector<ptr<KOREPattern>> &getArguments() const { return arguments; }
+  const std::vector<sptr<KOREPattern>> &getArguments() const { return arguments; }
 
-  void addArgument(ptr<KOREPattern> Argument);
+  void addArgument(sptr<KOREPattern> Argument);
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
   virtual void markSymbols(std::map<std::string, std::vector<KORESymbol *>> &) override;
   virtual void markVariables(std::map<std::string, KOREVariablePattern *> &) override;
+  virtual sptr<KOREPattern> substitute(const substitution &) override;
+  virtual sptr<KOREPattern> expandAliases(KOREDefinition *) override;
 
 private:
   KORECompositePattern(ptr<KORESymbol> Constructor)
@@ -322,6 +331,8 @@ public:
   virtual void markSymbols(std::map<std::string, std::vector<KORESymbol *>> &) override {}
   virtual void markVariables(std::map<std::string, KOREVariablePattern *> &) override {}
   virtual sptr<KORESort> getSort(void) const override { abort(); }
+  virtual sptr<KOREPattern> substitute(const substitution &) override { return shared_from_this(); }
+  virtual sptr<KOREPattern> expandAliases(KOREDefinition *) override { return shared_from_this(); }
 
 private:
   KOREStringPattern(const std::string &Contents) : contents(Contents) { }
@@ -416,6 +427,8 @@ public:
 
   void addVariables(ptr<KORECompositePattern> variables);
   void addPattern(ptr<KOREPattern> Pattern);
+  KOREPattern::substitution getSubstitution(KORECompositePattern *subject);
+  ptr<KOREPattern> &getPattern() { return pattern; }
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
 
 private:
@@ -425,7 +438,7 @@ private:
 
 class KOREAxiomDeclaration : public KOREDeclaration {
 private:
-  ptr<KOREPattern> pattern;
+  sptr<KOREPattern> pattern;
   unsigned ordinal;
   bool _isClaim;
 
@@ -513,6 +526,7 @@ public:
   using KORECompositeSortMapType = std::map<ValueType, sptr<KORECompositeSort>>;
 
   using KORESymbolDeclarationMapType = std::map<std::string, KORESymbolDeclaration *>;
+  using KOREAliasDeclarationMapType = std::map<std::string, KOREAliasDeclaration *>;
 
 private:
   // Symbol tables
@@ -524,6 +538,7 @@ private:
   KOREModuleMapType moduleNames;
   KORECompositeSortDeclarationMapType sortDeclarations;
   KORESymbolDeclarationMapType symbolDeclarations;
+  KOREAliasDeclarationMapType aliasDeclarations;
   KORECompositeSortMapType hookedSorts;
   KORESymbolStringMapType freshFunctions;
 
@@ -552,6 +567,7 @@ public:
 
   const KORECompositeSortDeclarationMapType &getSortDeclarations() const { return sortDeclarations; }
   const KORESymbolDeclarationMapType &getSymbolDeclarations() const { return symbolDeclarations; }
+  const KOREAliasDeclarationMapType &getAliasDeclarations() const { return aliasDeclarations; }
   const KORESymbolMapType &getSymbols() const { return objectSymbols; }
   const KORESymbolStringMapType &getAllSymbols() const { return allObjectSymbols; }
   const KORECompositeSortMapType getHookedSorts() const { return hookedSorts; }
