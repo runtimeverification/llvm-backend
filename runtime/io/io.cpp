@@ -516,13 +516,17 @@ extern "C" {
       char * path2 = (char *) malloc(sizeof(char) * (length + 1));
       strcpy(path2, pathStr.c_str());
       char * dir = dirname(path1);
-      if ( getenv("K_COVERAGEDIR") ) {
-        dir = getenv("K_COVERAGEDIR");
+      if ( getenv("K_LOG_DIR") ) {
+        dir = getenv("K_LOG_DIR");
       }
       char fulldir[PATH_MAX];
       realpath(dir, fulldir);
       char * base = basename(path2);
-      std::string fullPath = std::string(fulldir) + "/" + pid + "_" + std::string(base);
+      std::string prefix = "";
+      if ( getenv("K_LOG_PREFIX") ) {
+        prefix = getenv("K_LOG_PREFIX");
+      }
+      std::string fullPath = std::string(fulldir) + "/" + prefix + pid + "_" + std::string(base);
       FILE* f = fopen(fullPath.c_str(), "a+");
       fwrite(msg.c_str(), sizeof(char), msg.length(), f);
       fclose(f);
