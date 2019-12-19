@@ -29,7 +29,12 @@ pipeline {
     stage('Update K Submodule') {
       when { branch 'master' }
       steps {
-        build job: 'rv-devops/master', parameters: [string(name: 'PR_REVIEWER', value: 'dwightguth'), booleanParam(name: 'UPDATE_DEPS_K_LLVM', value: true)], propagate: false, wait: false
+        build job: 'rv-devops/master', propagate: false, wait: false                                                      \
+            , parameters: [ booleanParam(name: 'UPDATE_DEPS_SUBMODULE', value: true)                                      \
+                          , string(name: 'PR_REVIEWER', value: 'dwightguth')                                              \
+                          , string(name: 'UPDATE_DEPS_REPOSITORY', value: 'kframework/k')                                 \
+                          , string(name: 'UPDATE_DEPS_SUBMODULE_DIR', value: 'llvm-backend/src/main/native/llvm-backend') \
+                          ]
       }
     }
   }
