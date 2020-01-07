@@ -190,6 +190,16 @@ string *printConfigurationToString(block *subject) {
   return hook_BUFFER_toString(buf);
 }
 
+void printConfigurationToFile(FILE *file, block *subject) {
+  boundVariables.clear();
+  varCounter = 0;
+  writer w = {file,nullptr};
+  printConfigurationInternal(&w, subject, nullptr, false);
+  varNames.clear();
+  usedVarNames.clear();
+}
+
+
 #define DEFINE_GDB_PY_SCRIPT(script_name) \
   asm("\
 .pushsection \".debug_gdb_scripts\", \"MS\",@progbits,1\n\
