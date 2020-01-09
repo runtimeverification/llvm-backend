@@ -147,7 +147,7 @@ extern "C" {
 
       sfprintf(file, "%s(", element);
       auto elem = *iter;
-      printConfigurationInternal(file, elem, "KItem", false);
+      printConfigurationInternal(file, elem, "SortKItem{}", false);
       sfprintf(file, ")");
 
       if (i < size) {
