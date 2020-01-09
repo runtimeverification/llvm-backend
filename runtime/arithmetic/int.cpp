@@ -358,17 +358,28 @@ void int_hash(mpz_t i, void *hasher) {
 
 static block * dotK = (block *)((((uint64_t)getTagForSymbolName("dotk{}")) << 32) | 1);
 
+static gmp_randstate_t randState;
+static bool randStateInitialized = false;
+
 block *hook_INT_srand(mpz_t seed) {
-  if (!mpz_fits_uint_p(seed)) {
-    throw std::invalid_argument("Invalid seed");
+  if (!randStateInitialized) {
+    gmp_randinit_default(randState);
   }
-  srand(mpz_get_ui(seed));
+  gmp_randseed(randState, seed);
+  randStateInitialized = true;
   return dotK;
 }
 
-mpz_ptr hook_INT_rand(void) {
+mpz_ptr hook_INT_rand(mpz_t upperBound) {
   mpz_t result;
-  mpz_init_set_si(result, rand());
+  mpz_init(result);
+  if (!randStateInitialized) {
+    gmp_randinit_default(randState);
+    mpz_set_si(result, time(NULL));
+    gmp_randseed(randState, result);
+    randStateInitialized = true;
+  }
+  mpz_urandomm(result, randState, upperBound);
   return move_int(result);
 }
 
