@@ -25,7 +25,7 @@ extern "C" {
   mpz_ptr hook_INT_not(mpz_t);
   mpz_ptr hook_INT_abs(mpz_t);
   mpz_ptr hook_INT_log2(mpz_t);
-  mpz_ptr hook_INT_rand(void);
+  mpz_ptr hook_INT_rand(mpz_t);
   bool hook_INT_le(mpz_t, mpz_t);
   bool hook_INT_lt(mpz_t, mpz_t);
   bool hook_INT_eq(mpz_t, mpz_t);
@@ -610,10 +610,12 @@ BOOST_AUTO_TEST_CASE(signExtendBitRange) {
 
 BOOST_AUTO_TEST_CASE(rand) {
   mpz_t seed;
-  mpz_init_set_ui(seed, 0);
+  mpz_init_set_ui(seed, 1);
+  mpz_t upperBound;
+  mpz_init_set_ui(upperBound, 100);
   BOOST_CHECK_EQUAL((uintptr_t)hook_INT_srand(seed), 1);
-  mpz_ptr result = hook_INT_rand();
-  BOOST_CHECK_EQUAL(mpz_cmp_ui(result, 1804289383), 0);
+  mpz_ptr result = hook_INT_rand(upperBound);
+  BOOST_CHECK_EQUAL(mpz_cmp_ui(result, 59), 0);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
