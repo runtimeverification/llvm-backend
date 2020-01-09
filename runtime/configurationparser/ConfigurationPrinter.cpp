@@ -159,7 +159,13 @@ void printConfigurationInternal(writer *file, block *subject, const char *sort, 
     boundVariables.push_back(*(block **)(((char *)subject) + sizeof(blockheader)));
   }
   const char *symbol = getSymbolNameForTag(tag);
-  sfprintf(file, "%s(", symbol);
+  std::string symbolStr(symbol);
+  if (symbolStr.rfind("inj{", 0) == 0) {	
+    std::string prefix = symbolStr.substr(0, symbolStr.find_first_of(','));
+    sfprintf(file, "%s, %s}(", prefix.c_str(), sort);
+  } else {
+    sfprintf(file, "%s(", symbol);
+  }
   visitChildren(subject, file, printConfigurationInternal, printMap, printList, printSet, printInt, printFloat,
       printBool, printStringBuffer, printMInt, printComma);
   if (isBinder) {
