@@ -50,9 +50,9 @@ void initDebugFunction(std::string name, std::string linkageName, llvm::DISubrou
   func->setSubprogram(DbgSP);
 }
 
-void initDebugParam(llvm::Function *func, unsigned argNo, std::string name, ValueType type) {
+void initDebugParam(llvm::Function *func, unsigned argNo, std::string name, ValueType type, std::string typeName) {
   if(!Dbg) return;
-  llvm::DILocalVariable *DbgVar = Dbg->createParameterVariable(DbgSP, name, argNo+1, DbgFile, DbgLine, getDebugType(type), true);
+  llvm::DILocalVariable *DbgVar = Dbg->createParameterVariable(DbgSP, name, argNo+1, DbgFile, DbgLine, getDebugType(type, typeName), true);
   Dbg->insertDbgValueIntrinsic(
     func->arg_begin()+argNo,
     DbgVar,
@@ -117,40 +117,51 @@ static std::string FLOAT_STRUCT = "floating";
 static std::string BUFFER_STRUCT = "stringbuffer";
 static std::string BLOCK_STRUCT = "block";
 
-llvm::DIType *getDebugType(ValueType type) {
+
+llvm::DIType *getDebugType(ValueType type, std::string typeName) {
   if (!Dbg) return nullptr;
-  static bool init = false;
-  static llvm::DIType *map, *list, *set, *integer, *floating, *buffer, *boolean, *symbol;
-  if (!init) {
-    init = true;
-    map = getPointerDebugType(getForwardDecl(MAP_STRUCT));
-    list = getPointerDebugType(getForwardDecl(LIST_STRUCT));
-    set = getPointerDebugType(getForwardDecl(SET_STRUCT));
-    integer = getPointerDebugType(getForwardDecl(INT_STRUCT));
-    floating = getPointerDebugType(getForwardDecl(FLOAT_STRUCT));
-    buffer = getPointerDebugType(getForwardDecl(BUFFER_STRUCT));
-    boolean = Dbg->createBasicType("Bool", 8, llvm::dwarf::DW_ATE_boolean);
-    symbol = getPointerDebugType(getForwardDecl(BLOCK_STRUCT));
+  static std::map<std::string, llvm::DIType *> types;
+  llvm::DIType *map, *list, *set, *integer, *floating, *buffer, *boolean, *mint, *symbol;
+  if (types[typeName]) {
+    return types[typeName];
   }
   switch(type.cat) {
   case SortCategory::Map:
+    map = getPointerDebugType(getForwardDecl(MAP_STRUCT), typeName);
+    types[typeName] = map;
     return map;
   case SortCategory::List:
+    list = getPointerDebugType(getForwardDecl(LIST_STRUCT), typeName);
+    types[typeName] = list;
     return list;
   case SortCategory::Set:
+    set = getPointerDebugType(getForwardDecl(SET_STRUCT), typeName);
+    types[typeName] = set;
     return set;
   case SortCategory::Int:
+    integer = getPointerDebugType(getForwardDecl(INT_STRUCT), typeName);
+    types[typeName] = integer;
     return integer;
   case SortCategory::Float:
+    floating = getPointerDebugType(getForwardDecl(FLOAT_STRUCT), typeName);
+    types[typeName] = floating;
     return floating;
   case SortCategory::StringBuffer:
+    buffer = getPointerDebugType(getForwardDecl(BUFFER_STRUCT), typeName);
+    types[typeName] = buffer;
     return buffer;
   case SortCategory::Bool:
+    boolean = Dbg->createBasicType(typeName, 8, llvm::dwarf::DW_ATE_boolean);
+    types[typeName] = boolean;
     return boolean;
   case SortCategory::MInt:
-    return Dbg->createBasicType("MInt", type.bits, llvm::dwarf::DW_ATE_unsigned);
+    mint = Dbg->createBasicType(typeName, type.bits, llvm::dwarf::DW_ATE_unsigned);
+    types[typeName] = mint;
+    return mint;
   case SortCategory::Symbol:
   case SortCategory::Variable:
+    symbol = getPointerDebugType(getForwardDecl(BLOCK_STRUCT), typeName);
+    types[typeName] = symbol;
     return symbol;
   case SortCategory::Uncomputed:
     abort();
@@ -173,9 +184,10 @@ llvm::DIType *getCharPtrDebugType(void) {
   return Dbg->createPointerType(Dbg->createBasicType("char", 8, llvm::dwarf::DW_ATE_signed_char), sizeof(size_t) * 8);
 }
 
-llvm::DIType *getPointerDebugType(llvm::DIType *ty) {
+llvm::DIType *getPointerDebugType(llvm::DIType *ty, std::string typeName) {
   if (!Dbg) return nullptr;
-  return Dbg->createPointerType(ty, sizeof(size_t) * 8);
+  auto ptrType = Dbg->createPointerType(ty, sizeof(size_t) * 8);
+  return Dbg->createTypedef(ptrType, typeName, DbgFile, 0, DbgCU);
 }
 
 llvm::DIType *getArrayDebugType(llvm::DIType *ty, size_t len, size_t align) {
