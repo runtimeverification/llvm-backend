@@ -619,6 +619,9 @@ class termPrinter:
         if isBinder:
             self.bound_variables.append((subject.cast(self.long_int) + 8).cast(self.block_ptr_ptr).dereference())
         symbol = self.getSymbolNameForTag(tag).string()
+        if symbol[0:4] == "inj{":
+            prefix = symbol[0:symbol.index(",")]
+            symbol = prefix + ", " + sort[4:] + "}"
         self.result += pp_label(symbol) + "("
         layoutData = self.getLayoutData(layout)
         nargs = int(layoutData['nargs'])
