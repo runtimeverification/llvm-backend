@@ -376,9 +376,10 @@ def pp_label(label):
 class termPrinter:
     """Print a kore term."""
 
-    def __init__(self, val, cat):
+    def __init__(self, val, cat, sortName):
         self.val = val
         self.cat = cat
+        self.sortName = sortName
         self.long_int = gdb.lookup_type("long int")
         self.bool_ptr = gdb.lookup_type("bool").pointer()
         self.unsigned_char = gdb.lookup_type("unsigned char")
@@ -410,19 +411,19 @@ class termPrinter:
             self.var_counter = 0
             self.result = ""
             if self.cat == "block":
-                self.append(self.val, False)
+                self.append(self.val, False, self.sortName)
             elif self.cat == "list":
-                self.appendList(self.val.cast(self.list_ptr))
+                self.appendList(self.val.cast(self.list_ptr), self.sortName)
             elif self.cat == "set":
-                self.appendSet(self.val.cast(self.set_ptr))
+                self.appendSet(self.val.cast(self.set_ptr), self.sortName)
             elif self.cat == "map":
-                self.appendMap(self.val.cast(self.map_ptr))
+                self.appendMap(self.val.cast(self.map_ptr), self.sortName)
             elif self.cat == "int":
-                self.appendInt(self.val.cast(self.mpz_ptr))
+                self.appendInt(self.val.cast(self.mpz_ptr), self.sortName)
             elif self.cat == "floating":
-                self.appendFloat(self.val.cast(self.floating_ptr))
+                self.appendFloat(self.val.cast(self.floating_ptr), self.sortName)
             elif self.cat == "stringbuffer":
-                self.appendStringBuffer(self.val.cast(self.stringbuffer_ptr))
+                self.appendStringBuffer(self.val.cast(self.stringbuffer_ptr), self.sortName)
             self.var_names = {}
             self.used_var_name = set()
             return self.result
@@ -430,7 +431,7 @@ class termPrinter:
              print(traceback.format_exc())
              raise
 
-    def appendFloat(self, val):
+    def appendFloat(self, val, sort):
         mpfr = val.dereference()['f'][0]
         prec = int(mpfr['_mpfr_prec'])
         expBits = int(val.dereference()['exp'])
@@ -477,12 +478,12 @@ class termPrinter:
                 if not string.count('.'):
                     string += ".0"
                 self.result += string + suffix
-        self.result += "\",\"Float\")"
+        self.result += "\",\"" + sort[4:] + "\")"
 
 
-    def appendStringBuffer(self, val):
+    def appendStringBuffer(self, val, sort):
         string = val.dereference()['contents'].dereference()['data'].string("iso-8859-1")
-        self.result += "#token(\"" + string + "\",\"StringBuffer\")"
+        self.result += "#token(\"" + string + "\",\"" + sort[4:] + "\")"
 
     def appendLimbs(self, size, ptr):
         accum = 0
@@ -492,7 +493,7 @@ class termPrinter:
             accum |= limb
         self.result += str(accum)
 
-    def appendInt(self, val):
+    def appendInt(self, val, sort):
         self.result += "#token(\""
         size = int(val.dereference()['_mp_size'])
         if size == 0:
@@ -502,9 +503,9 @@ class termPrinter:
             self.appendLimbs(-size, val.dereference()['_mp_d'])
         else:
             self.appendLimbs(size, val.dereference()['_mp_d'])
-        self.result += "\", \"Int\")"
+        self.result += "\", \"" + sort[4:] + "\")"
 
-    def appendList(self, val):
+    def appendList(self, val, sort):
         length = val.dereference()['impl_']['size']
         if length == 0:
             self.result += "`.List`(.KList)"
@@ -514,7 +515,7 @@ class termPrinter:
             if i < length:
                 self.result += "`_List_`("
             self.result += "`ListItem`("
-            self.append(elem.cast(self.block_ptr), False)
+            self.append(elem.cast(self.block_ptr), False, "SortKItem{}")
             self.result += ")"
             if i < length:
                 self.result += ","
@@ -522,7 +523,7 @@ class termPrinter:
         for i in range(length-1):
             self.result += ")"
 
-    def appendMap(self, val):
+    def appendMap(self, val, sort):
         length = val.dereference()['impl_']['size']
         if length == 0:
             self.result += "`.Map`(.KList)"
@@ -534,9 +535,9 @@ class termPrinter:
             if i < length:
                 self.result += "`_Map_`("
             self.result += "`_|->_`("
-            self.append(key.cast(self.block_ptr), False)
+            self.append(key.cast(self.block_ptr), False, "SortKItem{}")
             self.result += ","
-            self.append(value.cast(self.block_ptr), False)
+            self.append(value.cast(self.block_ptr), False, "SortKItem{}")
             self.result += ")"
             if i < length:
                 self.result += ","
@@ -544,7 +545,7 @@ class termPrinter:
         for i in range(length-1):
             self.result += ")"
 
-    def appendSet(self, val):
+    def appendSet(self, val, sort):
         length = val.dereference()['impl_']['size']
         if length == 0:
             self.result += "`.Set`(.KList)"
@@ -555,7 +556,7 @@ class termPrinter:
             if i < length:
                 self.result += "`_Set_`("
             self.result += "`SetItem`("
-            self.append(elem.cast(self.block_ptr), False)
+            self.append(elem.cast(self.block_ptr), False, "SortKItem{}")
             self.result += ")"
             if i < length:
                 self.result += ","
@@ -563,7 +564,7 @@ class termPrinter:
         for i in range(length-1):
             self.result += ")"
 
-    def append(self, subject, isVar):
+    def append(self, subject, isVar, sort):
         address = int(subject.cast(self.long_int))
         isConstant = address & 3
         if isConstant:
@@ -611,7 +612,7 @@ class termPrinter:
                 self.var_names[oldStdStr] = suffix
             elif isVar:
                 self.result += self.var_names[stdStr]
-            self.result += "\",\"Id\")"
+            self.result += "\",\"" + sort[4:] + "\")"
             return
         tag = hdr & 0xffffffff
         isBinder = self.isSymbolABinder(tag)
@@ -625,25 +626,26 @@ class termPrinter:
             argData = layoutData['args'] + i
             arg = subject.cast(self.long_int) + int(argData.dereference()['offset'])
             cat = argData.dereference()['cat']
+            sort = gdb.lookup_global_symbol("sort_table").value()[tag][i].string("iso-8859-1")
             if cat == @MAP_LAYOUT@:
-                self.appendMap(arg.cast(self.map_ptr))
+                self.appendMap(arg.cast(self.map_ptr), sort)
             elif cat == @LIST_LAYOUT@:
-                self.appendList(arg.cast(self.list_ptr))
+                self.appendList(arg.cast(self.list_ptr), sort)
             elif cat == @SET_LAYOUT@:
-                self.appendSet(arg.cast(self.set_ptr))
+                self.appendSet(arg.cast(self.set_ptr), sort)
             elif cat == @SYMBOL_LAYOUT@:
-                self.append(arg.cast(self.block_ptr_ptr).dereference(), False)
+                self.append(arg.cast(self.block_ptr_ptr).dereference(), False, sort)
             elif cat == @VARIABLE_LAYOUT@:
-                self.append(arg.cast(self.block_ptr_ptr).dereference(), True)
+                self.append(arg.cast(self.block_ptr_ptr).dereference(), True, sort)
             elif cat == @INT_LAYOUT@:
-                self.appendInt(arg.cast(self.mpz_ptr_ptr).dereference())
+                self.appendInt(arg.cast(self.mpz_ptr_ptr).dereference(), sort)
             elif cat == @FLOAT_LAYOUT@:
-                self.appendFloat(arg.cast(self.floating_ptr_ptr).dereference())
+                self.appendFloat(arg.cast(self.floating_ptr_ptr).dereference(), sort)
             elif cat == @BOOL_LAYOUT@:
                 string = "true" if arg.cast(self.bool_ptr).dereference() else "false"
-                self.result += "#token(\"" + string + "\",\"Bool\")"
+                self.result += "#token(\"" + string + "\",\"" + sort[4:] + "\")"
             elif cat == @STRINGBUFFER_LAYOUT@:
-                self.appendStringBuffer(arg.cast(self.stringbuffer_ptr_ptr).dereference())
+                self.appendStringBuffer(arg.cast(self.stringbuffer_ptr_ptr).dereference(), sort)
             else:
                 raise ValueError()
             if i != nargs - 1:
@@ -656,17 +658,17 @@ def kllvm_lookup_function(val):
     t = gdb.types.get_basic_type(val.type)
     if t.code == gdb.TYPE_CODE_PTR and t.target().tag:
         if t.target().tag == "block":
-            return termPrinter(val, "block")
+            return termPrinter(val, "block", val.type.name)
         elif t.target().tag == "list":
-            return termPrinter(val, "list")
+            return termPrinter(val, "list", val.type.name)
         elif t.target().tag == "map":
-            return termPrinter(val, "map")
+            return termPrinter(val, "map", val.type.name)
         elif t.target().tag == "set":
-            return termPrinter(val, "set")
+            return termPrinter(val, "set", val.type.name)
         elif t.target().tag == "stringbuffer":
-            return termPrinter(val, "stringbuffer")
+            return termPrinter(val, "stringbuffer", val.type.name)
         elif t.target().tag == "__mpz_struct":
-            return termPrinter(val, "int")
+            return termPrinter(val, "int", val.type.name)
         elif t.target().tag == "floating":
-            return termPrinter(val, "floating")
+            return termPrinter(val, "floating", val.type.name)
     return None
