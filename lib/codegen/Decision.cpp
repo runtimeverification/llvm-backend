@@ -399,13 +399,17 @@ void makeEvalOrAnywhereFunction(KORESymbol *function, KOREDefinition *definition
   default:
     break;
   }
-  auto debugReturnType = getDebugType(returnSort);
+  std::ostringstream Out;
+  function->getSort()->print(Out);
+  auto debugReturnType = getDebugType(returnSort, Out.str());
   std::vector<llvm::Type *> args;
   std::vector<llvm::Metadata *> debugArgs;
   std::vector<ValueType> cats;
   for (auto &sort : function->getArguments()) {
     auto cat = dynamic_cast<KORECompositeSort *>(sort.get())->getCategory(definition);
-    debugArgs.push_back(getDebugType(cat));
+    std::ostringstream Out;
+    sort->print(Out);
+    debugArgs.push_back(getDebugType(cat, Out.str()));
     switch (cat.cat) {
     case SortCategory::Map:
     case SortCategory::List:
@@ -420,9 +424,9 @@ void makeEvalOrAnywhereFunction(KORESymbol *function, KOREDefinition *definition
     }
   }
   llvm::FunctionType *funcType = llvm::FunctionType::get(returnType, args, false);
-  std::ostringstream Out;
-  function->print(Out, 0, false);
-  std::string name = "eval_" + Out.str();
+  std::ostringstream Out2;
+  function->print(Out2, 0, false);
+  std::string name = "eval_" + Out2.str();
   llvm::Function *matchFunc = getOrInsertFunction(module, name, funcType);
   KORESymbolDeclaration *symbolDecl = definition->getSymbolDeclarations().at(function->getName());
   initDebugAxiom(symbolDecl->getAttributes());
@@ -438,7 +442,9 @@ void makeEvalOrAnywhereFunction(KORESymbol *function, KOREDefinition *definition
   for (auto val = matchFunc->arg_begin(); val != matchFunc->arg_end(); ++val, ++i) {
     val->setName("_" + std::to_string(i+1));
     subst.insert({val->getName(), val});
-    initDebugParam(matchFunc, i, val->getName(), cats[i]);
+    std::ostringstream Out;
+    function->getArguments()[i]->print(Out);
+    initDebugParam(matchFunc, i, val->getName(), cats[i], Out.str());
   }
   addStuck(stuck, module, function, subst, definition);
 
@@ -633,7 +639,7 @@ void makeStepFunction(KOREDefinition *definition, llvm::Module *module, Decision
   llvm::FunctionType *funcType = llvm::FunctionType::get(blockType, {blockType}, false);
   std::string name = "step";
   llvm::Function *matchFunc = getOrInsertFunction(module, name, funcType);
-  auto debugType = getDebugType({SortCategory::Symbol, 0});
+  auto debugType = getDebugType({SortCategory::Symbol, 0}, "SortGeneratedTopCell{}");
   resetDebugLoc();
   initDebugFunction(name, name, getDebugFunctionType(debugType, {debugType}), definition, matchFunc);
   matchFunc->setCallingConv(llvm::CallingConv::Fast);
@@ -644,7 +650,7 @@ void makeStepFunction(KOREDefinition *definition, llvm::Module *module, Decision
   llvm::BasicBlock *stuck = llvm::BasicBlock::Create(module->getContext(), "stuck", matchFunc);
   llvm::BasicBlock *pre_stuck = llvm::BasicBlock::Create(module->getContext(), "pre_stuck", matchFunc);
   new llvm::StoreInst(llvm::BlockAddress::get(matchFunc, pre_stuck), addr, block);
-  initDebugParam(matchFunc, 0, "subject", {SortCategory::Symbol, 0});
+  initDebugParam(matchFunc, 0, "subject", {SortCategory::Symbol, 0}, "SortGeneratedTopCell{}");
   llvm::BranchInst::Create(stuck, pre_stuck);
   auto result = stepFunctionHeader(0, module, definition, block, stuck, {val}, {{SortCategory::Symbol, 0}});
   auto collectedVal = result.first[0];
@@ -696,7 +702,9 @@ void makeStepFunction(KOREAxiomDeclaration *axiom, KOREDefinition *definition, l
   for (auto res : res.residuals) {
     auto argSort = dynamic_cast<KORECompositeSort *>(res.pattern->getSort().get());
     auto cat = argSort->getCategory(definition);
-    debugTypes.push_back(getDebugType(cat));
+    std::ostringstream Out;
+    argSort->print(Out);
+    debugTypes.push_back(getDebugType(cat, Out.str()));
     switch (cat.cat) {
     case SortCategory::Map:
     case SortCategory::List:
@@ -708,7 +716,7 @@ void makeStepFunction(KOREAxiomDeclaration *axiom, KOREDefinition *definition, l
       break;
     }
   }
-  auto blockDebugType = getDebugType({SortCategory::Symbol, 0});
+  auto blockDebugType = getDebugType({SortCategory::Symbol, 0}, "SortGeneratedTopCell{}");
   llvm::FunctionType *funcType = llvm::FunctionType::get(blockType, argTypes, false);
   std::string name = "step_" + std::to_string(axiom->getOrdinal());
   llvm::Function *matchFunc = getOrInsertFunction(module, name, funcType);
@@ -736,7 +744,9 @@ void makeStepFunction(KOREAxiomDeclaration *axiom, KOREDefinition *definition, l
     auto sort = res.residuals[i].pattern->getSort();
     auto cat = dynamic_cast<KORECompositeSort *>(sort.get())->getCategory(definition);
     types.push_back(cat);
-    initDebugParam(matchFunc, i, "_" + std::to_string(i+1), cat);
+    std::ostringstream Out;
+    sort->print(Out);
+    initDebugParam(matchFunc, i, "_" + std::to_string(i+1), cat, Out.str());
   }
   auto header = stepFunctionHeader(axiom->getOrdinal(), module, definition, block, stuck, args, types);
   i = 0;

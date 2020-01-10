@@ -199,6 +199,23 @@ ValueType termType(KOREPattern *pattern, llvm::StringMap<ValueType> &substitutio
   }
 }
 
+sptr<KORESort> termSort(KOREPattern *pattern) {
+  if (auto variable = dynamic_cast<KOREVariablePattern *>(pattern)) {
+    return variable->getSort();
+  } else if (auto constructor = dynamic_cast<KORECompositePattern *>(pattern)) {
+    KORESymbol *symbol = constructor->getConstructor();
+    assert(symbol->isConcrete() && "not supported yet: sort variables");
+    if (symbol->getName() == "\\dv") {
+      return symbol->getFormalArguments()[0];
+    }
+    return symbol->getSort();
+  } else {
+    assert(false && "not supported yet: meta level");
+    abort();
+  }
+
+}
+
 std::string escape(std::string str) {
   std::stringstream os;
   os << std::setfill('0') << std::setw(2) << std::hex;
@@ -836,8 +853,10 @@ bool makeFunction(std::string name, KOREPattern *pattern, KOREDefinition *defini
         return false;
       }
       auto cat = sort->getCategory(definition);
+      std::ostringstream Out;
+      sort->print(Out);
       llvm::Type *paramType = getValueType(cat, Module);
-      debugArgs.push_back(getDebugType(cat));
+      debugArgs.push_back(getDebugType(cat, Out.str()));
       switch(cat.cat) {
       case SortCategory::Map:
       case SortCategory::List:
@@ -874,7 +893,9 @@ bool makeFunction(std::string name, KOREPattern *pattern, KOREDefinition *defini
       std::string label = strPattern->getContents();
       debugName = label + postfix;
     }
-    initDebugFunction(debugName, debugName, getDebugFunctionType(getDebugType(returnCat), debugArgs), definition, applyRule);
+    std::ostringstream Out;
+    termSort(pattern)->print(Out);
+    initDebugFunction(debugName, debugName, getDebugFunctionType(getDebugType(returnCat, Out.str()), debugArgs), definition, applyRule);
     if (fastcc) {
       applyRule->setCallingConv(llvm::CallingConv::Fast);
     }
@@ -883,7 +904,9 @@ bool makeFunction(std::string name, KOREPattern *pattern, KOREDefinition *defini
     int i = 0;
     for (auto val = applyRule->arg_begin(); val != applyRule->arg_end(); ++val, ++i) {
       subst.insert({paramNames[i], val});
-      initDebugParam(applyRule, i, paramNames[i], params[paramNames[i]]);
+      if (debugArgs[i]) {
+        initDebugParam(applyRule, i, paramNames[i], params[paramNames[i]], llvm::dyn_cast<llvm::DIType>(debugArgs[i])->getName());
+      }
     }
     CreateTerm creator = CreateTerm(subst, definition, block, Module, false);
     llvm::Value *retval = creator(pattern).first;
@@ -930,8 +953,10 @@ std::string makeApplyRuleFunction(KOREAxiomDeclaration *axiom, KOREDefinition *d
         return "";
       }
       auto cat = sort->getCategory(definition);
+      std::ostringstream Out;
+      sort->print(Out);
       llvm::Type *paramType = getValueType(cat, Module);
-      debugArgs.push_back(getDebugType(cat));
+      debugArgs.push_back(getDebugType(cat, Out.str()));
       switch(cat.cat) {
       case SortCategory::Map:
       case SortCategory::List:
@@ -950,14 +975,14 @@ std::string makeApplyRuleFunction(KOREAxiomDeclaration *axiom, KOREDefinition *d
     std::string name = "apply_rule_" + std::to_string(axiom->getOrdinal());
     llvm::Function *applyRule = getOrInsertFunction(Module, name, funcType);
     initDebugAxiom(axiom->getAttributes());
-    initDebugFunction(name, name, getDebugFunctionType(getDebugType({SortCategory::Symbol, 0}), debugArgs), definition, applyRule);
+    initDebugFunction(name, name, getDebugFunctionType(getDebugType({SortCategory::Symbol, 0}, "SortGeneratedTopCell{}"), debugArgs), definition, applyRule);
     applyRule->setCallingConv(llvm::CallingConv::Fast);
     llvm::StringMap<llvm::Value *> subst;
     llvm::BasicBlock *block = llvm::BasicBlock::Create(Module->getContext(), "entry", applyRule);
     int i = 0;
     for (auto val = applyRule->arg_begin(); val != applyRule->arg_end(); ++val, ++i) {
       subst.insert({paramNames[i], val});
-      initDebugParam(applyRule, i, paramNames[i], params[paramNames[i]]);
+      initDebugParam(applyRule, i, paramNames[i], params[paramNames[i]], llvm::dyn_cast<llvm::DIType>(debugArgs[i])->getName());
     }
     CreateTerm creator = CreateTerm(subst, definition, block, Module, false);
     std::vector<llvm::Value *> args;
