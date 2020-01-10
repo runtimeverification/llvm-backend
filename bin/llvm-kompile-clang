@@ -30,6 +30,10 @@ else
   flags=-ltinfo
 fi
 
+if [ -f "/etc/arch-release" ]; then
+  llc_flags="$llc_flags --relocation-model=pic"
+fi
+
 lang="-x ir"
 if [ "$lto" = "lto" ]; then
   flags="$flags -flto -Wl,-mllvm,-tailcallopt"
