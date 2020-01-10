@@ -774,7 +774,7 @@ static void emitLayouts(KOREDefinition *definition, llvm::Module *module) {
   argTypes.push_back(llvm::Type::getInt16Ty(Ctx));
   auto func = llvm::dyn_cast<llvm::Function>(getOrInsertFunction(module,
       "getLayoutData", llvm::FunctionType::get(llvm::PointerType::getUnqual(module->getTypeByName(LAYOUT_STRUCT)), argTypes, false)));
-  initDebugFunction("getLayoutData", "getLayoutData", getDebugFunctionType(getPointerDebugType(getForwardDecl(LAYOUT_STRUCT)), {getShortDebugType()}), definition, func);
+  initDebugFunction("getLayoutData", "getLayoutData", getDebugFunctionType(getPointerDebugType(getForwardDecl(LAYOUT_STRUCT), "layout *"), {getShortDebugType()}), definition, func);
   auto EntryBlock = llvm::BasicBlock::Create(Ctx, "entry", func);
   auto MergeBlock = llvm::BasicBlock::Create(Ctx, "exit");
   auto stuck = llvm::BasicBlock::Create(Ctx, "stuck");
