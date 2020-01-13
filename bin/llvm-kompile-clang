@@ -68,4 +68,5 @@ fi
   $flags \
   -ljemalloc \
   -I "$(dirname "$0")"/../include \
+  -Wl,-u,sort_table \
   "$@"
