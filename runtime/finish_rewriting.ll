@@ -22,7 +22,7 @@ define weak fastcc %mpz* @"eval_LblgetExitCode{SortGeneratedTopCell{}}"(%block*)
 
 @output_file = global i8* zeroinitializer
 
-define void @finish_rewriting(%block* %subject) #0 {
+define void @finish_rewriting(%block* %subject, i1 %error) #0 {
   %output = load i8*, i8** @output_file
   %outputintptr = ptrtoint i8* %output to i64
   %isnull = icmp eq i64 %outputintptr, 0
@@ -34,10 +34,15 @@ abort:
   unreachable
 print:
   call void @printConfiguration(i8* %output, %block* %subject)
+  br i1 %error, label %exit, label %exitCode
+exitCode:
   %exit_z = call fastcc %mpz* @"eval_LblgetExitCode{SortGeneratedTopCell{}}"(%block* %subject)
   %exit_ul = call i64 @__gmpz_get_ui(%mpz* %exit_z)
-  %exit = trunc i64 %exit_ul to i32
-  call void @exit(i32 %exit)
+  %exit_trunc = trunc i64 %exit_ul to i32
+  br label %exit
+exit:
+  %exit_ui = phi i32 [ %exit_trunc, %exitCode ], [ 113, %print ]
+  call void @exit(i32 %exit_ui)
   unreachable
 }
 

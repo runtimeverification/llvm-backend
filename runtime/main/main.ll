@@ -8,7 +8,7 @@ declare %block* @parseConfiguration(i8*)
 declare i64 @atol(i8*)
 
 declare %block* @take_steps(i64, %block*)
-declare void @finish_rewriting(%block*) #0
+declare void @finish_rewriting(%block*, i1) #0
 
 declare void @initStaticObjects()
 
@@ -29,7 +29,7 @@ entry:
 
   %ret = call %block* @parseConfiguration(i8* %filename)
   %result = call %block* @take_steps(i64 %depth, %block* %ret)
-  call void @finish_rewriting(%block* %result)
+  call void @finish_rewriting(%block* %result, i1 0)
   unreachable
 }
 
