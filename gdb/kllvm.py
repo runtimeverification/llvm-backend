@@ -380,6 +380,8 @@ class termPrinter:
         self.val = val
         self.cat = cat
         self.sortName = sortName
+        self.var_names = {}
+        self.used_var_names = set()
         self.long_int = gdb.lookup_type("long int")
         self.bool_ptr = gdb.lookup_type("bool").pointer()
         self.unsigned_char = gdb.lookup_type("unsigned char")
@@ -570,7 +572,7 @@ class termPrinter:
         if isConstant:
             tag = address >> 32
             if isConstant == 3:
-                self.append(self.bound_variables[len(self.bound_variables)-1-tag], True)
+                self.append(self.bound_variables[len(self.bound_variables)-1-tag], True, sort)
                 return
             symbol = self.getSymbolNameForTag(tag).string()
             self.result += symbol + "(.KList)"
@@ -608,7 +610,7 @@ class termPrinter:
                 oldStdStr = stdStr
                 stdStr = stdStr + suffix
                 self.result += suffix
-                self.used_var_names.append(stdStr)
+                self.used_var_names.add(stdStr)
                 self.var_names[oldStdStr] = suffix
             elif isVar:
                 self.result += self.var_names[stdStr]
