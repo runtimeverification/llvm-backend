@@ -218,13 +218,13 @@ object Parser {
     }
   }
 
-  private def expandAliases(axiom: AxiomDeclaration, defn: Definition) : AxiomDeclaration = { 
-    val aliases = defn.modules.flatMap(_.decls).filter(_.isInstanceOf[AliasDeclaration]).map(_.asInstanceOf[AliasDeclaration]).map(al => (al.alias.ctr, al)).toMap
+  private def expandAliases(axiom: AxiomDeclaration, aliases: Map[String, AliasDeclaration]) : AxiomDeclaration = { 
     B.AxiomDeclaration(axiom.params, expandAliases(axiom.pattern, aliases), axiom.att).asInstanceOf[AxiomDeclaration]
   }
 
   def getAxioms(defn: Definition) : Seq[AxiomDeclaration] = {
-    defn.modules.flatMap(_.decls).filter(_.isInstanceOf[AxiomDeclaration]).map(_.asInstanceOf[AxiomDeclaration]).map(expandAliases(_, defn))
+    val aliases = defn.modules.flatMap(_.decls).filter(_.isInstanceOf[AliasDeclaration]).map(_.asInstanceOf[AliasDeclaration]).map(al => (al.alias.ctr, al)).toMap
+    defn.modules.flatMap(_.decls).filter(_.isInstanceOf[AxiomDeclaration]).map(_.asInstanceOf[AxiomDeclaration]).map(expandAliases(_, aliases))
   }
 
   def getSorts(defn: Definition): Seq[Sort] = {
