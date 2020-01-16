@@ -10,6 +10,7 @@ static thread_local block *to_replace;
 static thread_local block *replacement;
 static thread_local block *replacementInj;
 static thread_local uint64_t idx;
+static thread_local uint64_t idx2;
 
 extern "C" {
   bool hook_KEQUAL_eq(block *, block *);
@@ -168,14 +169,15 @@ block *substituteInternal(block *currBlock) {
   const uint64_t hdr = currBlock->h.hdr;
   uint16_t layoutInt = layout_hdr(hdr);
   if (hook_KEQUAL_eq(currBlock, to_replace)) {
+    idx2 = 0;
     if (layoutInt) {
       uint32_t tag = tag_hdr(hdr);
       uint32_t injTag = getInjectionForSortOfTag(tag);
       if (tag_hdr(replacementInj->h.hdr) != injTag) {
-        return replacementInj;
+        return incrementDebruijn(replacementInj);
       }
     }
-    return replacement;
+    return incrementDebruijn(replacement);
   }
   if (layoutInt) {
     layout *layoutData = getLayoutData(layoutInt);
@@ -183,6 +185,10 @@ block *substituteInternal(block *currBlock) {
     block *newBlock = currBlock;
     uint32_t tag = tag_hdr(hdr);
     std::vector<void *> arguments;
+    bool isBinder = isSymbolABinder(tag);
+    if(isBinder) {
+      idx++;
+    }
     for (unsigned i = 0; i < layoutData->nargs; i++) {
       layoutitem *argData = layoutData->args + i;
       void *arg = ((char *)currBlock) + argData->offset;
@@ -223,7 +229,11 @@ block *substituteInternal(block *currBlock) {
         break;
       }
     }
+    if (isBinder) {
+      idx--;
+    }
     if (isSymbolAFunction(tag)) {
+      uint64_t idx_stack = idx;
       block *to_replace_stack = to_replace;
       block *replacement_stack = replacement;
       block *replacementInj_stack = replacementInj;
@@ -231,6 +241,7 @@ block *substituteInternal(block *currBlock) {
       to_replace = to_replace_stack;
       replacement = replacement_stack;
       replacementInj = replacementInj_stack;
+      idx = idx_stack;
       return result;
     }
     return newBlock;
@@ -260,6 +271,78 @@ block *debruijnize(block *term) {
   return newBlock;
 }
 
+block *incrementDebruijn(block *currBlock) {
+  uintptr_t ptr = (uintptr_t)currBlock;
+  if ((ptr & 3) == 3) {
+    uint64_t varIdx = ptr >> 32;
+    if (varIdx >= idx2) {
+      varIdx += idx;
+      return (block *)((varIdx << 32) | 3);
+    } else {
+      return currBlock;
+    }
+  } else if (ptr & 1) {
+    return currBlock;
+  }
+  const uint64_t hdr = currBlock->h.hdr;
+  uint16_t layoutInt = layout_hdr(hdr);
+  if (layoutInt) {
+    layout *layoutData = getLayoutData(layoutInt);
+    bool dirty = false;
+    block *newBlock = currBlock;
+    uint32_t tag = tag_hdr(hdr);
+    bool isBinder = isSymbolABinder(tag);
+    if(isBinder) {
+      idx2++;
+    }
+    for (unsigned i = 0; i < layoutData->nargs; i++) {
+      layoutitem *argData = layoutData->args + i;
+      void *arg = ((char *)currBlock) + argData->offset;
+      switch(argData->cat) {
+      case MAP_LAYOUT: {
+        map newArg = map_map(arg, incrementDebruijn);
+        makeDirty(dirty, argData->offset, newArg, newBlock);
+	break;
+      } case LIST_LAYOUT: {
+        list newArg = list_map(arg, incrementDebruijn);
+        makeDirty(dirty, argData->offset, newArg, newBlock);
+	break;
+      } case SET_LAYOUT: {
+        set newArg = set_map(arg, incrementDebruijn);
+        makeDirty(dirty, argData->offset, newArg, newBlock);
+	break;
+      } case VARIABLE_LAYOUT:
+        case SYMBOL_LAYOUT: {
+        block *oldArg = *(block **)arg;
+	block *newArg;
+	if (i == 0 && isBinder) {
+          newArg = alphaRename(oldArg);
+	} else {
+	  newArg = incrementDebruijn(oldArg);
+	}
+        if (oldArg != newArg || dirty) {
+          makeDirty(dirty, argData->offset, newArg, newBlock);
+        }
+        break;
+      }
+      case STRINGBUFFER_LAYOUT:
+      case INT_LAYOUT:
+      case FLOAT_LAYOUT:
+      case BOOL_LAYOUT:
+      default: //mint
+        break;
+      }
+    }
+    if (isBinder) {
+      idx2--;
+    }
+    return newBlock;
+  } else {
+    return currBlock;
+  }
+
+}
+
 block *alphaRename(block *term) {
   string *var = (string *)term;
   size_t len = len(var);
@@ -278,6 +361,7 @@ block *replaceBinderIndex(block *term, block *variable) {
 
 block *hook_SUBSTITUTION_substOne(block *body, block *newVal, block *varInj) {
   bool isSameSort = tag_hdr(newVal->h.hdr) == tag_hdr(varInj->h.hdr);
+  idx = 0;
   replacement = *(block **)(((char *)newVal) + sizeof(blockheader));
   if (isSameSort) {
     to_replace = *(block **)(((char *)varInj) + sizeof(blockheader));

@@ -215,6 +215,8 @@ extern "C" {
   mpz_ptr hook_MINT_import(size_t *i, uint64_t bits, bool isSigned);
 
   block *debruijnize(block *);
+  block *incrementDebruijn(block *);
+  block *alphaRename(block *);
 
   setiter set_iterator(set *);
   block *set_iterator_next(setiter *);
