@@ -1,4 +1,5 @@
 #include<cstring>
+#include<vector>
 
 #include "runtime/header.h"
 #include "runtime/alloc.h"
@@ -180,6 +181,8 @@ block *substituteInternal(block *currBlock) {
     layout *layoutData = getLayoutData(layoutInt);
     bool dirty = false;
     block *newBlock = currBlock;
+    uint32_t tag = tag_hdr(hdr);
+    std::vector<void *> arguments;
     for (unsigned i = 0; i < layoutData->nargs; i++) {
       layoutitem *argData = layoutData->args + i;
       void *arg = ((char *)currBlock) + argData->offset;
@@ -187,14 +190,17 @@ block *substituteInternal(block *currBlock) {
       case MAP_LAYOUT: {
         map newArg = map_map(arg, substituteInternal);
         makeDirty(dirty, argData->offset, newArg, newBlock);
+	arguments.push_back(((char *)newBlock) + argData->offset);
 	break;
       } case LIST_LAYOUT: {
         list newArg = list_map(arg, substituteInternal);
         makeDirty(dirty, argData->offset, newArg, newBlock);
+	arguments.push_back(((char *)newBlock) + argData->offset);
 	break;
       } case SET_LAYOUT: {
         set newArg = set_map(arg, substituteInternal);
         makeDirty(dirty, argData->offset, newArg, newBlock);
+	arguments.push_back(((char *)newBlock) + argData->offset);
 	break;
       } case VARIABLE_LAYOUT:
         case SYMBOL_LAYOUT: {
@@ -203,15 +209,29 @@ block *substituteInternal(block *currBlock) {
         if (oldArg != newArg || dirty) {
           makeDirty(dirty, argData->offset, newArg, newBlock);
         }
+	arguments.push_back(newArg);
         break;
       }
       case STRINGBUFFER_LAYOUT:
       case INT_LAYOUT:
       case FLOAT_LAYOUT:
+        arguments.push_back(*(void **)arg);
+	break;
       case BOOL_LAYOUT:
       default: //mint
+	arguments.push_back(arg);
         break;
       }
+    }
+    if (isSymbolAFunction(tag)) {
+      block *to_replace_stack = to_replace;
+      block *replacement_stack = replacement;
+      block *replacementInj_stack = replacementInj;
+      block *result = (block *)evaluateFunctionSymbol(tag, &arguments[0]);
+      to_replace = to_replace_stack;
+      replacement = replacement_stack;
+      replacementInj = replacementInj_stack;
+      return result;
     }
     return newBlock;
   } else {
