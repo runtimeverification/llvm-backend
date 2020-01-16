@@ -56,15 +56,15 @@ block *debruijnizeInternal(block *currBlock) {
       case MAP_LAYOUT: {
         map newArg = map_map(arg, debruijnizeInternal);
         makeDirty(dirty, argData->offset, newArg, newBlock);
-	break;
+        break;
       } case LIST_LAYOUT: {
         list newArg = list_map(arg, debruijnizeInternal);
         makeDirty(dirty, argData->offset, newArg, newBlock);
-	break;
+        break;
       } case SET_LAYOUT: {
         set newArg = set_map(arg, debruijnizeInternal);
         makeDirty(dirty, argData->offset, newArg, newBlock);
-	break;
+        break;
       } case SYMBOL_LAYOUT: {
         block *oldArg = *(block **)arg;
         block *newArg = debruijnizeInternal(oldArg);
@@ -75,7 +75,7 @@ block *debruijnizeInternal(block *currBlock) {
       } case VARIABLE_LAYOUT: {
         if (!(i == 0 && isBinder) && hook_STRING_eq(var, *(string **)arg)) {
           block *newArg = (block *)((idx << 32) | 3LL);
-	  makeDirty(dirty, argData->offset, newArg, newBlock);
+          makeDirty(dirty, argData->offset, newArg, newBlock);
         }
         break;
       }
@@ -126,15 +126,15 @@ block *replaceBinderInternal(block *currBlock) {
       case MAP_LAYOUT: {
         map newArg = map_map(arg, replaceBinderInternal);
         makeDirty(dirty, argData->offset, newArg, newBlock);
-	break;
+        break;
       } case LIST_LAYOUT: {
         list newArg = list_map(arg, replaceBinderInternal);
         makeDirty(dirty, argData->offset, newArg, newBlock);
-	break;
+        break;
       } case SET_LAYOUT: {
         set newArg = set_map(arg, replaceBinderInternal);
         makeDirty(dirty, argData->offset, newArg, newBlock);
-	break;
+        break;
       } case VARIABLE_LAYOUT:
         case SYMBOL_LAYOUT: {
         block *oldArg = *(block **)arg;
@@ -196,36 +196,36 @@ block *substituteInternal(block *currBlock) {
       case MAP_LAYOUT: {
         map newArg = map_map(arg, substituteInternal);
         makeDirty(dirty, argData->offset, newArg, newBlock);
-	arguments.push_back(((char *)newBlock) + argData->offset);
-	break;
+        arguments.push_back(((char *)newBlock) + argData->offset);
+        break;
       } case LIST_LAYOUT: {
         list newArg = list_map(arg, substituteInternal);
         makeDirty(dirty, argData->offset, newArg, newBlock);
-	arguments.push_back(((char *)newBlock) + argData->offset);
-	break;
+        arguments.push_back(((char *)newBlock) + argData->offset);
+        break;
       } case SET_LAYOUT: {
         set newArg = set_map(arg, substituteInternal);
         makeDirty(dirty, argData->offset, newArg, newBlock);
-	arguments.push_back(((char *)newBlock) + argData->offset);
-	break;
+        arguments.push_back(((char *)newBlock) + argData->offset);
+        break;
       } case VARIABLE_LAYOUT:
         case SYMBOL_LAYOUT: {
         block *oldArg = *(block **)arg;
-	block *newArg = substituteInternal(oldArg);
+        block *newArg = substituteInternal(oldArg);
         if (oldArg != newArg || dirty) {
           makeDirty(dirty, argData->offset, newArg, newBlock);
         }
-	arguments.push_back(newArg);
+        arguments.push_back(newArg);
         break;
       }
       case STRINGBUFFER_LAYOUT:
       case INT_LAYOUT:
       case FLOAT_LAYOUT:
         arguments.push_back(*(void **)arg);
-	break;
+        break;
       case BOOL_LAYOUT:
       default: //mint
-	arguments.push_back(arg);
+        arguments.push_back(arg);
         break;
       }
     }
@@ -302,24 +302,24 @@ block *incrementDebruijn(block *currBlock) {
       case MAP_LAYOUT: {
         map newArg = map_map(arg, incrementDebruijn);
         makeDirty(dirty, argData->offset, newArg, newBlock);
-	break;
+        break;
       } case LIST_LAYOUT: {
         list newArg = list_map(arg, incrementDebruijn);
         makeDirty(dirty, argData->offset, newArg, newBlock);
-	break;
+        break;
       } case SET_LAYOUT: {
         set newArg = set_map(arg, incrementDebruijn);
         makeDirty(dirty, argData->offset, newArg, newBlock);
-	break;
+        break;
       } case VARIABLE_LAYOUT:
         case SYMBOL_LAYOUT: {
         block *oldArg = *(block **)arg;
-	block *newArg;
-	if (i == 0 && isBinder) {
+        block *newArg;
+        if (i == 0 && isBinder) {
           newArg = alphaRename(oldArg);
-	} else {
-	  newArg = incrementDebruijn(oldArg);
-	}
+        } else {
+          newArg = incrementDebruijn(oldArg);
+        }
         if (oldArg != newArg || dirty) {
           makeDirty(dirty, argData->offset, newArg, newBlock);
         }

@@ -153,13 +153,13 @@ using map = immer::map<KElem, KElem, HashBlock, std::equal_to<KElem>, list::memo
 using set = immer::set<KElem, HashBlock, std::equal_to<KElem>, list::memory_policy>;
 
 typedef struct mapiter {
-	map::iterator curr;
-	map *map;
+  map::iterator curr;
+  map *map;
 } mapiter;
 
 typedef struct setiter {
-	set::iterator curr;
-	set *set;
+  set::iterator curr;
+  set *set;
 } setiter;
 
 
