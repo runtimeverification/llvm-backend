@@ -228,6 +228,9 @@ extern "C" {
   }
 
   const string * hook_STRING_token2string(const string * input) {
+    if (layout(input) != 0) {
+      throw std::invalid_argument("token2string: input is not a string token");
+    }
     return input;
   }
 
