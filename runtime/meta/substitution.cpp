@@ -99,9 +99,12 @@ block *debruijnizeInternal(block *currBlock) {
 block *replaceBinderInternal(block *currBlock) {
   uintptr_t ptr = (uintptr_t)currBlock;
   if ((ptr & 3) == 3) {
-    uint32_t varIdx = ptr >> 32;
+    uint64_t varIdx = ptr >> 32;
     if (idx == varIdx) {
       return (block *)var;
+    } else if (idx < varIdx) {
+      varIdx--;
+      return (block *)((varIdx << 32) | 3);
     } else {
       return currBlock;
     }
