@@ -25,9 +25,9 @@ else
 fi
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
-  flags="-lncurses -L/usr/local/opt/libffi/lib -L/usr/local/lib -Wl,-u,sort_table"
+  flags="-lncurses -L/usr/local/opt/libffi/lib -L/usr/local/lib -Wl,-u,_sort_table"
 else
-  flags="-ltinfo -Wl,-u,_sort_table"
+  flags="-ltinfo -Wl,-u,sort_table"
 fi
 
 if [ -f "/etc/arch-release" ]; then
