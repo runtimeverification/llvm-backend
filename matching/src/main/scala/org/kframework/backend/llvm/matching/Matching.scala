@@ -89,6 +89,6 @@ object Matching {
     val file = new File(args(0))
     val outputFolder = new File(args(2))
     logging = args.size > 4
-    writeDecisionTreeToFile(file, args(1), outputFolder, getThreshold(args(3)), false, (e) => ())
+    writeDecisionTreeToFile(file, args(1), outputFolder, getThreshold(args(3)), true, (e) => ())
   }
 }
