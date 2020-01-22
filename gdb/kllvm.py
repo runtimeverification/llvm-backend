@@ -373,6 +373,23 @@ def pp_label(label):
             i += 4
     return "`" + result + "`"
 
+class Variable:
+    def __init__(self, val):
+        self.stdStr = val.dereference()['data'].string("iso-8859-1")
+        self.var_bit = int(val.dereference()['h']['hdr'] & 0x4000000000000)
+        self.address = int(val)
+
+    def __eq__(self, other):
+        if self.var_bit and other.var_bit:
+            return self.address == other.address
+        return self.stdStr == other.stdStr
+
+    def __hash__(self):
+        return hash(self.stdStr)
+
+    def __str__(self):
+        return "Variable" + repr((self.stdStr, self.var_bit, self.address))
+
 class termPrinter:
     """Print a kore term."""
 
@@ -380,6 +397,8 @@ class termPrinter:
         self.val = val
         self.cat = cat
         self.sortName = sortName
+        self.var_names = {}
+        self.used_var_names = set()
         self.long_int = gdb.lookup_type("long int")
         self.bool_ptr = gdb.lookup_type("bool").pointer()
         self.unsigned_char = gdb.lookup_type("unsigned char")
@@ -570,7 +589,7 @@ class termPrinter:
         if isConstant:
             tag = address >> 32
             if isConstant == 3:
-                self.append(self.bound_variables[len(self.bound_variables)-1-tag], True)
+                self.append(self.bound_variables[len(self.bound_variables)-1-tag], True, sort)
                 return
             symbol = self.getSymbolNameForTag(tag).string()
             self.result += symbol + "(.KList)"
@@ -599,19 +618,19 @@ class termPrinter:
                     self.result += c
                 else:
                     self.result += "{:02x}".format(ord(c))
-            stdStr = string.dereference()['data'].string("iso-8859-1")
-            if isVar and not stdStr in self.var_names:
+            var = Variable(string)
+            stdStr = var.stdStr
+            if isVar and not var in self.var_names:
                 suffix = ""
                 while stdStr + suffix in self.used_var_names:
                     suffix = str(self.var_counter)
                     self.var_counter += 1
-                oldStdStr = stdStr
                 stdStr = stdStr + suffix
                 self.result += suffix
-                self.used_var_names.append(stdStr)
-                self.var_names[oldStdStr] = suffix
+                self.used_var_names.add(stdStr)
+                self.var_names[var] = suffix
             elif isVar:
-                self.result += self.var_names[stdStr]
+                self.result += self.var_names[var]
             self.result += "\",\"" + sort[4:] + "\")"
             return
         tag = hdr & 0xffffffff

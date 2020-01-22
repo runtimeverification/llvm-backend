@@ -153,13 +153,13 @@ using map = immer::map<KElem, KElem, HashBlock, std::equal_to<KElem>, list::memo
 using set = immer::set<KElem, HashBlock, std::equal_to<KElem>, list::memory_policy>;
 
 typedef struct mapiter {
-	map::iterator curr;
-	map *map;
+  map::iterator curr;
+  map *map;
 } mapiter;
 
 typedef struct setiter {
-	set::iterator curr;
-	set *set;
+  set::iterator curr;
+  set *set;
 } setiter;
 
 
@@ -215,6 +215,8 @@ extern "C" {
   mpz_ptr hook_MINT_import(size_t *i, uint64_t bits, bool isSigned);
 
   block *debruijnize(block *);
+  block *incrementDebruijn(block *);
+  block *alphaRename(block *);
 
   setiter set_iterator(set *);
   block *set_iterator_next(setiter *);
