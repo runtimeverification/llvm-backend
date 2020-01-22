@@ -205,6 +205,10 @@ void printConfigurationToFile(FILE *file, block *subject) {
   usedVarNames.clear();
 }
 
+extern "C" void* getStderr(void) {
+  return stderr;
+}
+
 
 #define DEFINE_GDB_PY_SCRIPT(script_name) \
   asm("\
