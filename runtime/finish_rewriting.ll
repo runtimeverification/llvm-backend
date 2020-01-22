@@ -11,6 +11,8 @@ declare void @exit(i32) #0
 declare void @abort() #0
 declare i64 @__gmpz_get_ui(%mpz*)
 
+declare i8* @getStderr()
+
 @stderr = external global i8*
 
 @exit_int_0 = global %mpz { i32 0, i32 0, i64* getelementptr inbounds ([0 x i64], [0 x i64]* @exit_int_0_limbs, i32 0, i32 0) }
@@ -28,7 +30,7 @@ define void @finish_rewriting(%block* %subject, i1 %error) #0 {
   %isnull = icmp eq i64 %outputintptr, 0
   br i1 %isnull, label %abort, label %print
 abort:
-  %stderr = load i8*, i8** @stderr
+  %stderr = call i8* @getStderr()
   call void @printConfigurationToFile(i8* %stderr, %block* %subject)
   call void @abort()
   unreachable

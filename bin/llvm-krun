@@ -2,7 +2,7 @@
 set -e
 
 ARGV=()
-declare -A params
+params=()
 output_file="$(mktemp tmp.out.XXXXXXXXXX)"
 input_file="$(mktemp tmp.in.XXXXXXXXXX)"
 trap "rm -rf $input_file $output_file" INT TERM EXIT
@@ -18,21 +18,23 @@ do
     -c)
     name="$2"
     value="$3"
+    var_name="params_$name"
+    params+=("$name")
     sort="$4"
     type="$5"
     case $type in
       kore)
-      params[$name]="$value"
+      printf -v "$var_name" %s "$value"
       ;;
       korefile)
-      params[$name]=`cat "$value"`
+      printf -v "$var_name" %s `cat "$value"`
       ;;
     esac
     case $sort in
       KItem)
       ;;
       *)
-      params[$name]="inj{Sort$sort{}, SortKItem{}}(${params[$name]})"
+      printf -v "$var_name" %s "inj{Sort$sort{}, SortKItem{}}(${!var_name})"
       ;;
     esac
     shift; shift; shift; shift; shift
@@ -81,7 +83,7 @@ cat <<HERE >> $input_file
 (
 HERE
 
-for param in "${!params[@]}"; do
+for param in "${params[@]}"; do
   cat <<HERE >> $input_file
 Lbl'Unds'Map'Unds'{}(
 HERE
@@ -91,7 +93,7 @@ cat <<HERE >> $input_file
 Lbl'Stop'Map{}()
 HERE
 
-for param in "${!params[@]}"; do
+for param in "${params[@]}"; do
   cat <<HERE >> $input_file
 , Lbl'UndsPipe'-'-GT-Unds'{}(inj{SortKConfigVar{}, SortKItem{}}(\dv{SortKConfigVar{}}(
 HERE
@@ -102,8 +104,8 @@ HERE
   cat <<HERE >> $input_file
 )),
 HERE
-
-  echo "${params[$param]}" >> $input_file
+  var_name="params_$param"
+  echo "${!var_name}" >> $input_file
 
   cat <<HERE >> $input_file
 ))
