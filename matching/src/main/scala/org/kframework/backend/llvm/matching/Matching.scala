@@ -57,11 +57,13 @@ object Matching {
     val files = (symlib.functions, dts).zipped.toIterable
     val index = new File(outputFolder, "index.txt")
     val writer = new FileWriter(index)
+    var idx = 0
     for (pair <- files) {
       val sym = pair._1.ctr
-      val filename = (if (sym.length > 250) sym.substring(0, 250) else sym) + ".yaml"
+      val filename = (if (sym.length > 240) sym.substring(0, 240) + idx else sym) + ".yaml"
       pair._2.serializeToYaml(new File(outputFolder, filename))
       writer.write(pair._1.ctr + "\t" + filename + "\n")
+      idx+=1
     }
     writer.close
   }
@@ -87,6 +89,6 @@ object Matching {
     val file = new File(args(0))
     val outputFolder = new File(args(2))
     logging = args.size > 4
-    writeDecisionTreeToFile(file, args(1), outputFolder, getThreshold(args(3)), true, (e) => ())
+    writeDecisionTreeToFile(file, args(1), outputFolder, getThreshold(args(3)), false, (e) => ())
   }
 }
