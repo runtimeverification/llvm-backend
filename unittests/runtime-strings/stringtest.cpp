@@ -304,6 +304,18 @@ BOOST_AUTO_TEST_CASE(find) {
   BOOST_CHECK_EQUAL(mpz_cmp_si(hook_STRING_find(haystack, needle2, d), -1), 0);
 }
 
+BOOST_AUTO_TEST_CASE(findChar) {
+  auto haystack = makeString("Hello world");
+  auto needle = makeString("Hd");
+
+  mpz_t a, b;
+  mpz_init_set_si(a, 0);
+  mpz_init_set_si(b, 1);
+
+  BOOST_CHECK_EQUAL(mpz_cmp_si(hook_STRING_findChar(haystack, needle, a), 0), 0);
+  BOOST_CHECK_EQUAL(mpz_cmp_si(hook_STRING_findChar(haystack, needle, b), 10), 0);
+}
+
 BOOST_AUTO_TEST_CASE(rfind) {
   auto haystack = makeString("hellollo");
   auto needle = makeString("llo");
@@ -331,6 +343,19 @@ BOOST_AUTO_TEST_CASE(rfind) {
   BOOST_CHECK_EQUAL(mpz_cmp_si(hook_STRING_rfind(haystack, needle3, a), 0), 0);
   BOOST_CHECK_EQUAL(mpz_cmp_si(hook_STRING_rfind(haystack, needle4, g), 3), 0);
 }
+
+BOOST_AUTO_TEST_CASE(rfindChar) {
+  auto haystack = makeString("Hello world");
+  auto needle = makeString("Hd");
+
+  mpz_t a, b;
+  mpz_init_set_si(a, 10);
+  mpz_init_set_si(b, 9);
+
+  BOOST_CHECK_EQUAL(mpz_cmp_si(hook_STRING_rfindChar(haystack, needle, a), 10), 0);
+  BOOST_CHECK_EQUAL(mpz_cmp_si(hook_STRING_rfindChar(haystack, needle, b), 0), 0);
+}
+
 
 BOOST_AUTO_TEST_CASE(int2string) {
   mpz_t a;

@@ -136,21 +136,35 @@ extern "C" {
   }
 
   mpz_ptr hook_STRING_findChar(const string * haystack, const string * needle, mpz_t pos) {
-    if (len(needle) > 1) {
-      mpz_t result;
+    mpz_t result;
+    uint64_t upos = gs(pos);
+    if (upos >= len(haystack)) {
       mpz_init_set_si(result, -1);
       return move_int(result);
     }
-    return hook_STRING_find(haystack, needle, pos);
+    auto out = std::find_first_of(haystack->data + upos * sizeof(KCHAR), haystack->data + len(haystack) * sizeof(KCHAR),
+        needle->data,   needle->data   + len(needle) * sizeof(KCHAR));
+    int64_t ret = (out - haystack->data) / sizeof(KCHAR);
+    // search returns the end of the range if it is not found, but we want -1 in such a case.
+    auto res = (ret < len(haystack))?ret:-1;
+    mpz_init_set_si(result, res);
+    return move_int(result);
   }
 
   mpz_ptr hook_STRING_rfindChar(const string * haystack, const string * needle, mpz_ptr pos) {
-    if (len(needle) > 1) {
-      mpz_t result;
-      mpz_init_set_si(result, -1);
-      return move_int(result);
-    }
-    return hook_STRING_rfind(haystack, needle, pos);
+    // The semantics of rfind uposition are strange, it is the last position at which
+    // the match can _start_, which means the end of the haystack needs to be upos + len(needle),
+    // or the end of the haystack, if that's less.
+    mpz_t result;
+    uint64_t upos = gs(pos);
+    upos += 1;
+    auto end = (upos < len(haystack))?upos:len(haystack);
+    auto out = std::find_first_of(std::reverse_iterator<const char *>(&haystack->data[end]), std::reverse_iterator<const char *>(&haystack->data[0]),
+        &needle->data[0], &needle->data[len(needle)]);
+    auto ret = &*out - &haystack->data[0];
+    auto res = (ret < end)?ret:-1;
+    mpz_init_set_si(result, res);
+    return move_int(result);
   }
 
   string * makeString(const KCHAR * input, ssize_t len = -1) {
