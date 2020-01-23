@@ -15,6 +15,7 @@ for arg in "$@"; do
       ;;
     -fno-omit-frame-pointer)
       llc_flags="$llc_flags -frame-pointer=all"
+      ;;
     *)
       ;;
   esac
