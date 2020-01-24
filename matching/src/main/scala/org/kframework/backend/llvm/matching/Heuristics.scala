@@ -166,7 +166,7 @@ object LHeuristic extends Heuristic {
 
     val sigma = matrix.columns(colIx).signatureForKey(key)
     for (con <- sigma) {
-      val spec = matrix.specialize(con, colIx, None)._2
+      val spec = matrix.specialize(con, colIx, None)._3
       if (spec.bestRowIx != -1) {
         result += 1.0
       }

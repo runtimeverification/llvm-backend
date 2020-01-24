@@ -299,8 +299,8 @@ case class Clause(
   val listRanges: Vector[(Occurrence, Int, Int)],
   // variable bindings to injections that need to be constructed
   // since they do not actually exist in the original subject term
-  val overloadChildren: Vector[(Constructor, VariableBinding[String])],
-  val specializedVars: Map[Occurrence, Pattern[Option[Occurrence]]]) {
+  val overloadChildren: Vector[(Constructor, Fringe, VariableBinding[String])],
+  val specializedVars: Map[Occurrence, (SortCategory, Pattern[Option[Occurrence]])]) {
 
   lazy val bindingsMap: Map[String, VariableBinding[String]] = bindings.groupBy(_.name).mapValues(_.head)
   lazy val boundOccurrences: Set[Occurrence] = bindings.map(_.occurrence).toSet
@@ -327,7 +327,7 @@ case class Clause(
     new Clause(action, bindings ++ pat.bindings(ix, residual, f.occurrence, f.symlib), listRanges ++ pat.listRange(ix, f.occurrence), overloadChildren ++ pat.overloadChildren(f, ix, residual, Num(0, f.occurrence)), specializedVars)
   }
 
-  private def translateVars(residuals: Seq[(Pattern[String], Occurrence)], allVars: Vector[VariableBinding[String]], symlib: Parser.SymLib): Map[Occurrence, Pattern[Option[Occurrence]]] = {
+  private def translateVars(residuals: Seq[(Pattern[String], Occurrence)], allVars: Vector[VariableBinding[String]], symlib: Parser.SymLib): Map[Occurrence, (SortCategory, Pattern[Option[Occurrence]])] = {
     val residualMap = residuals.toMap
     def substituteBy(pat: Pattern[String], category: SortCategory): Pattern[Option[Occurrence]] = {
       residualMap.get(pat) match {
@@ -339,11 +339,11 @@ case class Clause(
         }
       }
     }
-    allVars.filter(_.pattern.isDefined).map(v => v.occurrence -> substituteBy(v.pattern.get, v.category)).toMap
+    allVars.filter(_.pattern.isDefined).map(v => v.occurrence -> (v.category, substituteBy(v.pattern.get, v.category))).toMap
   }
 
   def specializeBy(residualMap: Seq[(Pattern[String], Occurrence)], symlib: Parser.SymLib): Clause = {
-    val overloadVars = overloadChildren.map(_._2)
+    val overloadVars = overloadChildren.map(_._3)
     val allVars = bindings ++ overloadVars
     Clause(action, allVars, listRanges, Vector(), specializedVars ++ translateVars(residualMap, allVars, symlib))
   }
@@ -362,7 +362,7 @@ case class Row(val patterns: IndexedSeq[Pattern[String]], val clause: Clause) {
   }
 
   def specialize(ix: Constructor, colIx: Int, symlib: Parser.SymLib, fringe: IndexedSeq[Fringe]): Option[Row] = {
-    Matrix.fromRows(symlib, IndexedSeq(this), fringe).specialize(ix, colIx, None)._2.rows.headOption
+    Matrix.fromRows(symlib, IndexedSeq(this), fringe).specialize(ix, colIx, None)._3.rows.headOption
   }
 
   def default(colIx: Int, sigma: Seq[Constructor], symlib: Parser.SymLib, fringe: IndexedSeq[Fringe], matrixColumns: IndexedSeq[Column]): Option[Row] = {
@@ -461,21 +461,22 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
 
   lazy val sigma: List[Constructor] = bestCol.signature
 
-  def specialize(ix: Constructor, colIx: Int, residual: Option[Pattern[String]]): (String, Matrix) = {
+  def specialize(ix: Constructor, colIx: Int, residual: Option[Pattern[String]]): (String, Seq[String], Matrix) = {
     val filtered = filterMatrix(Some(ix), residual, (c, p) => p.isSpecialized(ix, residual.isEmpty, columns(colIx).fringe, c, columns(colIx).maxPriority), colIx)
-    val expanded = Matrix.fromColumns(symlib, filtered.columns(colIx).expand(ix, residual.isEmpty) ++ filtered.notBestCol(colIx), filtered.clauses)
-    (ix.name, expanded)
+    val justExpanded = filtered.columns(colIx).expand(ix, residual.isEmpty)
+    val expanded = Matrix.fromColumns(symlib, justExpanded ++ filtered.notBestCol(colIx), filtered.clauses)
+    (ix.name, justExpanded.map(_.fringe.sortInfo.category.hookAtt), expanded)
   }
 
-  def cases: List[(String, Matrix)] = sigma.map(specialize(_, bestColIx, None))
+  def cases: List[(String, Seq[String], Matrix)] = sigma.map(specialize(_, bestColIx, None))
 
-  lazy val compiledCases: Seq[(String, DecisionTree)] = {
+  lazy val compiledCases: Seq[(String, Seq[String], DecisionTree)] = {
     Matrix.remaining += sigma.length
     val result = cases.map(l => {
       if (Matching.logging) {
         System.out.println("Specializing by " + l._1);
       }
-      (l._1, l._2.compile)
+      (l._1, l._2, l._3.compile)
     })
     Matrix.remaining -= sigma.length
     result
@@ -534,15 +535,15 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
 
   def getLeaf(row: Row, child: DecisionTree): DecisionTree = {
     def makeEquality(category: SortCategory, os: (Occurrence, Occurrence), dt: DecisionTree): DecisionTree = {
-      Function(category.equalityFun, Equal(os._1, os._2), Seq(os._1, os._2), "BOOL.Bool",
-        SwitchLit(Equal(os._1, os._2), 1, Seq(("1", dt), ("0", child)), None))
+      Function(category.equalityFun, Equal(os._1, os._2), Seq((os._1, category.hookAtt), (os._2, category.hookAtt)), "BOOL.Bool",
+        SwitchLit(Equal(os._1, os._2), "BOOL.Bool", 1, Seq(("1", Seq(), dt), ("0", Seq(), child)), None))
     }
     def sortCat(sort: Sort): SortCategory = {
       SortCategory(Parser.getStringAtt(symlib.sortAtt(sort), "hook").orElse(Some("STRING.String")), sort, symlib)
     }
     // first, add all remaining variable bindings to the clause
     val vars = row.clause.bindings ++ (fringe, row.patterns).zipped.toSeq.flatMap(t => t._2.bindings(None, None, t._1.occurrence, symlib))
-    val overloadVars = row.clause.overloadChildren.map(_._2)
+    val overloadVars = row.clause.overloadChildren.map(_._3)
     val freshVars = row.clause.action.freshConstants.map(t => VariableBinding(t._1, sortCat(t._2), Fresh(t._1), None))
     val allVars = vars ++ overloadVars ++ freshVars
     // then group the bound variables by their name
@@ -550,7 +551,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
     // compute the variables bound more than once
     val nonlinear = grouped.filter(_._2.size > 1)
     val nonlinearPairs = nonlinear.mapValues(l => (l, l.tail).zipped)
-    val newVars = row.clause.action.rhsVars.map(v => grouped(v).head._2)
+    val newVars = row.clause.action.rhsVars.map(v => (grouped(v).head._2, grouped(v).head._1.hookAtt))
     val atomicLeaf = Leaf(row.clause.action.ordinal, newVars)
     // check that all occurrences of the same variable are equal
     val nonlinearLeaf = nonlinearPairs.foldRight[DecisionTree](atomicLeaf)((e, dt) => e._2.foldRight(dt)((os,dt2) => makeEquality(os._1._1, (os._1._2, os._2._2), dt2)))
@@ -558,28 +559,28 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
       // if there is no side condition, continue
       case None => nonlinearLeaf
       case Some(cond) =>
-        val condVars = cond.map(v => grouped(v).head._2)
+        val condVars = cond.map(v => (grouped(v).head._2, grouped(v).head._1.hookAtt))
         val newO = SC(row.clause.action.ordinal)
         // evaluate the side condition and if it is true, continue, otherwise go to the next row
         Function("side_condition_" + row.clause.action.ordinal, newO, condVars, "BOOL.Bool",
-          SwitchLit(newO, 1, Seq(("1", nonlinearLeaf), ("0", child)), None))
+          SwitchLit(newO, "BOOL.Bool", 1, Seq(("1", Seq(), nonlinearLeaf), ("0", Seq(), child)), None))
     }
     // fill out the bindings for list range variables
     val withRanges = row.clause.listRanges.foldRight(sc)({
-      case ((o @ Num(_, o2), hd, tl), dt) => Function("hook_LIST_range_long", o, Seq(o2, Lit(hd.toString, "MINT.MInt 64"), Lit(tl.toString, "MINT.MInt 64")), "LIST.List", dt)
+      case ((o @ Num(_, o2), hd, tl), dt) => Function("hook_LIST_range_long", o, Seq((o2, "LIST.List"), (Lit(hd.toString, "MINT.MInt 64"), "MINT.MInt 64"), (Lit(tl.toString, "MINT.MInt 64"), "MINT.MInt 64")), "LIST.List", dt)
     })
     val withOverloads = row.clause.overloadChildren.foldRight(withRanges)({
-      case ((SymbolC(inj), v),dt) => MakePattern(v.occurrence, SymbolP(inj, Seq(VariableP(Some(v.occurrence.asInstanceOf[Inj].rest), v.category))), dt)
+      case ((SymbolC(inj), f, v),dt) => MakePattern(v.occurrence, v.category.hookAtt, SymbolP(inj, Seq(VariableP(Some(v.occurrence.asInstanceOf[Inj].rest), f.expand(SymbolC(inj))(0).sortInfo.category))), dt)
     })
     val withSpecials = row.clause.specializedVars.foldRight(withOverloads)({
-      case ((o, p),dt) => MakePattern(o, p, dt)
+      case ((o, p),dt) => MakePattern(o, p._1.hookAtt, p._2, dt)
     })
     row.clause.action.freshConstants.foldRight(withSpecials)({
       case ((name, sort),dt) => 
         val sortName = sort.asInstanceOf[CompoundSort].ctr
         val litO = Lit(sortName, "STRING.String")
-        MakePattern(litO, LiteralP(sortName, StringS()),
-          Function("get_fresh_constant", Fresh(name), Seq(litO, Num(row.clause.action.arity, Base())), sortCat(sort).hookAtt, dt))
+        MakePattern(litO, "STRING.String", LiteralP(sortName, StringS()),
+          Function("get_fresh_constant", Fresh(name), Seq((litO, "STRING.String"), (Num(row.clause.action.arity, Base()), "STRING.String")), sortCat(sort).hookAtt, dt))
     })
   }
 
@@ -666,7 +667,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
             System.out.println("Testing constructor " + con);
           }
           val rowSpec = r.specialize(con, 0, symlib, fringe)
-          if (rowSpec.isDefined && specialize(con, 0, None)._2.useful(rowSpec.get)) {
+          if (rowSpec.isDefined && specialize(con, 0, None)._3.useful(rowSpec.get)) {
             return true
           }
         }
@@ -679,7 +680,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
             System.out.println("Testing constructor " + con);
           }
           val rowSpec = r.specialize(con, 0, symlib, fringe)
-          if (rowSpec.isDefined && specialize(con, 0, None)._2.useful(rowSpec.get)) {
+          if (rowSpec.isDefined && specialize(con, 0, None)._3.useful(rowSpec.get)) {
             return true
           }
         }
@@ -754,7 +755,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
             System.out.println(this)
             Matrix.id += 1
           }
-          val child = specialize(con, 0, None)._2.nonExhaustive
+          val child = specialize(con, 0, None)._3.nonExhaustive
           if (child.isDefined) {
             if (Matching.logging) {
               System.out.println("Submatrix " + id + " is non-exhaustive:\n" + child.get.map(p => new util.Formatter().format("%12.12s", p.toShortString)).mkString(" "))
@@ -831,7 +832,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
       val constructor = getConstructor(residual)
       val specialized = specialize(constructor, bestColIx, Some(residual))
       val args = expandChildren(residual)
-      specialized._2.specializeBy(args ++ ps.patch(bestColIx, Nil, 1))
+      specialized._3.specializeBy(args ++ ps.patch(bestColIx, Nil, 1))
     }
   }
 
