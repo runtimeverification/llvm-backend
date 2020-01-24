@@ -5,6 +5,7 @@
 
 #include "kllvm/ast/AST.h"
 #include "llvm/ADT/StringMap.h"
+#include "llvm/IR/Module.h"
 
 namespace kllvm {
 
@@ -20,9 +21,9 @@ struct PartialStep {
   std::vector<Residual> residuals;
 };
 
-DecisionNode *parseYamlDecisionTreeFromString(std::string yaml, const std::map<std::string, KORESymbol *> &syms, const std::map<ValueType, sptr<KORECompositeSort>> &sorts);
-DecisionNode *parseYamlDecisionTree(std::string filename, const std::map<std::string, KORESymbol *> &syms, const std::map<ValueType, sptr<KORECompositeSort>> &sorts);
-PartialStep parseYamlSpecialDecisionTree(std::string filename, const std::map<std::string, KORESymbol *> &syms, const std::map<ValueType, sptr<KORECompositeSort>> &sorts);
+DecisionNode *parseYamlDecisionTreeFromString(llvm::Module *, std::string yaml, const std::map<std::string, KORESymbol *> &syms, const std::map<ValueType, sptr<KORECompositeSort>> &sorts);
+DecisionNode *parseYamlDecisionTree(llvm::Module *, std::string filename, const std::map<std::string, KORESymbol *> &syms, const std::map<ValueType, sptr<KORECompositeSort>> &sorts);
+PartialStep parseYamlSpecialDecisionTree(llvm::Module *, std::string filename, const std::map<std::string, KORESymbol *> &syms, const std::map<ValueType, sptr<KORECompositeSort>> &sorts);
 
 }
 

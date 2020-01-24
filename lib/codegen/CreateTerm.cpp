@@ -119,6 +119,20 @@ static std::string BUFFER_STRUCT = "stringbuffer";
 static std::string BLOCK_STRUCT = "block";
 static std::string BLOCKHEADER_STRUCT = "blockheader";
 
+llvm::Type *getParamType(ValueType sort, llvm::Module *Module) {
+  llvm::Type *type = getValueType(sort, Module);
+  switch(sort.cat) {
+  case SortCategory::Map:
+  case SortCategory::List:
+  case SortCategory::Set:
+    type = llvm::PointerType::getUnqual(type);
+    break;
+  default:
+    break;
+  }
+  return type;
+}
+
 llvm::Type *getValueType(ValueType sort, llvm::Module *Module) {
   switch(sort.cat) {
   case SortCategory::Map:
