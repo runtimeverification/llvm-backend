@@ -14,27 +14,35 @@ namespace kllvm {
 
 class Decision;
 class DecisionCase;
+class LeafNode;
+class IterNextNode;
 
 class DecisionNode {
 public:
   llvm::BasicBlock * cachedCode = nullptr;
   std::map<std::pair<std::string, llvm::Type *>, llvm::PHINode *> phis;
-  std::vector<llvm::BasicBlock *> predecessors;
+  std::set<DecisionNode *> predecessors;
+  std::set<DecisionNode *> successors;
+  std::set<IterNextNode *> choiceAncestors;
   /* completed tracks whether codegen for this DecisionNode has concluded */
   bool completed = false;
 
   virtual void codegen(Decision *d, std::map<std::pair<std::string, llvm::Type *>, llvm::Value *> substitution) = 0;
-  virtual void collectVars(void) = 0;
-  virtual void collectFail(void) = 0;
+  virtual void preprocess(std::set<LeafNode *> &) = 0;
+  virtual void eraseDefsAndAddUses(std::set<std::pair<std::string, llvm::Type *>> &vars) = 0;
+  void computeLiveness(std::set<LeafNode *> &);
   void sharedNode(Decision *d, std::map<std::pair<std::string, llvm::Type *>, llvm::Value *> &oldSubst, std::map<std::pair<std::string, llvm::Type *>, llvm::Value *> &substitution, llvm::BasicBlock *Block);
   bool beginNode(Decision *d, std::string name, std::map<std::pair<std::string, llvm::Type *>, llvm::Value *> &substitution);
 
   void setCompleted() { completed = true; }
   bool isCompleted() const { return completed; }
+  uint64_t getChoiceDepth() const { return choiceDepth; }
 
 private:
-  bool hasVars = false, hasContainsFail = false, containsFailNode = false;
+  bool preprocessed = false, containsFailNode = false;
+  uint64_t choiceDepth = 0;
   std::set<std::pair<std::string, llvm::Type *>> vars;
+  friend class Decision;
   friend class SwitchNode;
   friend class MakePatternNode;
   friend class FunctionNode;
@@ -99,10 +107,8 @@ public:
   const std::vector<DecisionCase> &getCases() const { return cases; }
   
   virtual void codegen(Decision *d, std::map<std::pair<std::string, llvm::Type *>, llvm::Value *> substitution);
-  virtual void collectVars() { 
-    if(hasVars) return;
-    for (auto _case : cases) { 
-      _case.getChild()->collectVars();
+  virtual void eraseDefsAndAddUses(std::set<std::pair<std::string, llvm::Type *>> &vars) {
+    for (auto _case : cases) {
       auto caseVars = _case.getChild()->vars;
       for (auto var : _case.getBindings()) {
         caseVars.erase(var);
@@ -110,20 +116,23 @@ public:
       vars.insert(caseVars.begin(), caseVars.end());
     }
     if(cases.size() != 1 || cases[0].getConstructor()) vars.insert(std::make_pair(name, type)); 
-    hasVars = true;
   }
-  virtual void collectFail() {
-    if(hasContainsFail) return;
+  virtual void preprocess(std::set<LeafNode *> &leaves) {
+    if(preprocessed) return;
     bool hasDefault = false;
     for (auto _case : cases) {
-      _case.getChild()->collectFail();
+      _case.getChild()->choiceAncestors.insert(choiceAncestors.begin(), choiceAncestors.end());
+      _case.getChild()->preprocess(leaves);
+      _case.getChild()->predecessors.insert(this);
+      this->successors.insert(_case.getChild());
       containsFailNode = containsFailNode || _case.getChild()->containsFailNode;
       hasDefault = hasDefault || _case.getConstructor() == nullptr;
+      choiceDepth = std::max(choiceDepth, _case.getChild()->choiceDepth);
     }
     if (!hasDefault) {
       containsFailNode = true;
     }
-    hasContainsFail = true;
+    preprocessed = true;
   }
 };
 
@@ -158,18 +167,19 @@ public:
   }
 
   virtual void codegen(Decision *d, std::map<std::pair<std::string, llvm::Type *>, llvm::Value *> substitution);
-  virtual void collectVars() {
-    if(hasVars) return;
-    child->collectVars();
-    vars = child->vars;
+  virtual void eraseDefsAndAddUses(std::set<std::pair<std::string, llvm::Type *>> &vars) {
     vars.erase(std::make_pair(name, type));
     vars.insert(uses.begin(), uses.end());
-    hasVars = true;
   }
-  virtual void collectFail() {
-    if (hasContainsFail) return;
-    child->collectFail();
+  virtual void preprocess(std::set<LeafNode *> &leaves) {
+    if (preprocessed) return;
+    child->choiceAncestors.insert(choiceAncestors.begin(), choiceAncestors.end());
+    child->preprocess(leaves);
+    child->predecessors.insert(this);
+    this->successors.insert(child);
     containsFailNode = containsFailNode || child->containsFailNode;
+    choiceDepth = child->choiceDepth;
+    preprocessed = true;
   }
 };
 
@@ -214,22 +224,23 @@ public:
   void addBinding(std::string name, llvm::Type *type) { bindings.push_back(std::make_pair(name, type)); }
   
   virtual void codegen(Decision *d, std::map<std::pair<std::string, llvm::Type *>, llvm::Value *> substitution);
-  virtual void collectVars() { 
-    if (hasVars) return;
-    child->collectVars();
-    vars = child->vars;
+  virtual void eraseDefsAndAddUses(std::set<std::pair<std::string, llvm::Type *>> &vars) {
     vars.erase(std::make_pair(name, type));
     for (auto var : bindings) { 
       if (var.first.find_first_not_of("-0123456789") != std::string::npos) {
         vars.insert(var);
       }
     }
-    hasVars = true;
   }
-  virtual void collectFail() {
-    if (hasContainsFail) return;
-    child->collectFail();
+  virtual void preprocess(std::set<LeafNode *> &leaves) {
+    if (preprocessed) return;
+    child->choiceAncestors.insert(choiceAncestors.begin(), choiceAncestors.end());
+    child->preprocess(leaves);
+    child->predecessors.insert(this);
+    this->successors.insert(child);
     containsFailNode = containsFailNode || child->containsFailNode;
+    choiceDepth = child->choiceDepth;
+    preprocessed = true;
   }
 };
 
@@ -253,12 +264,12 @@ public:
   void addBinding(std::string name, llvm::Type *type) { bindings.push_back(std::make_pair(name, type)); }
   
   virtual void codegen(Decision *d, std::map<std::pair<std::string, llvm::Type *>, llvm::Value *> substitution);
-  virtual void collectVars() {
-    if (hasVars) return;
+  virtual void eraseDefsAndAddUses(std::set<std::pair<std::string, llvm::Type *>> &vars) {
     vars.insert(bindings.begin(), bindings.end());
-    hasVars = true;
   }
-  virtual void collectFail() {}
+  virtual void preprocess(std::set<LeafNode *> &leaves) {
+    leaves.insert(this);
+  }
 };
 
 class MakeIteratorNode : public DecisionNode {
@@ -278,19 +289,33 @@ public:
   }
 
   virtual void codegen(Decision *d, std::map<std::pair<std::string, llvm::Type *>, llvm::Value *> substitution);
-  virtual void collectVars() {
-    if (hasVars) return;
-    child->collectVars();
-    vars = child->vars;
+  virtual void eraseDefsAndAddUses(std::set<std::pair<std::string, llvm::Type *>> &vars) {
     vars.erase(std::make_pair(name, type));
     vars.insert(std::make_pair(collection, collectionType));
-    hasVars = true;
   }
-  virtual void collectFail() {
-    if (hasContainsFail) return;
-    child->collectFail();
+  virtual void preprocess(std::set<LeafNode *> &leaves) {
+    if (preprocessed) return;
+    child->choiceAncestors.insert(choiceAncestors.begin(), choiceAncestors.end());
+    child->preprocess(leaves);
+    child->predecessors.insert(this);
+    this->successors.insert(child);
     containsFailNode = containsFailNode || child->containsFailNode;
+    choiceDepth = child->choiceDepth;
+    preprocessed = true;
   }
+};
+
+class FailNode : public DecisionNode {
+private:
+  FailNode() {}
+
+  static FailNode instance;
+public:
+  static FailNode *get() { return &instance; }
+
+  virtual void codegen(Decision *d, std::map<std::pair<std::string, llvm::Type *>, llvm::Value *> substitution) { abort(); }
+  virtual void preprocess(std::set<LeafNode *> &) { containsFailNode = true; }
+  virtual void eraseDefsAndAddUses(std::set<std::pair<std::string, llvm::Type *>> &vars) {}
 };
 
 class IterNextNode : public DecisionNode {
@@ -310,32 +335,25 @@ public:
   }
 
   virtual void codegen(Decision *d, std::map<std::pair<std::string, llvm::Type *>, llvm::Value *> substitution);
-  virtual void collectVars() {
-    if (hasVars) return;
-    child->collectVars();
-    vars = child->vars;
+  virtual void eraseDefsAndAddUses(std::set<std::pair<std::string, llvm::Type *>> &vars) {
     vars.erase(std::make_pair(binding, bindingType));
     vars.insert(std::make_pair(iterator, iteratorType));
-    hasVars = true;
   }
-  virtual void collectFail() {
-    if (hasContainsFail) return;
-    child->collectFail();
+  virtual void preprocess(std::set<LeafNode *> &leaves) {
+    if (preprocessed) return;
+    child->choiceAncestors.insert(choiceAncestors.begin(), choiceAncestors.end());
+    child->choiceAncestors.insert(this);
+    child->preprocess(leaves);
+    child->predecessors.insert(this);
+    this->successors.insert(child);
     containsFailNode = containsFailNode || child->containsFailNode;
+    choiceDepth = child->choiceDepth + 1;
+    if (containsFailNode) {
+      predecessors.insert(FailNode::get());
+      FailNode::get()->successors.insert(this);
+    }
+    preprocessed = true;
   }
-};
-
-class FailNode : public DecisionNode {
-private:
-  FailNode() {}
-
-  static FailNode instance;
-public:
-  static FailNode *get() { return &instance; }
-
-  virtual void codegen(Decision *d, std::map<std::pair<std::string, llvm::Type *>, llvm::Value *> substitution) { abort(); }
-  virtual void collectVars() {}
-  virtual void collectFail() { containsFailNode = true; }
 };
 
 class Decision {
@@ -343,12 +361,10 @@ private:
   KOREDefinition *Definition;
   llvm::BasicBlock *CurrentBlock;
   llvm::BasicBlock *FailureBlock;
-  llvm::BasicBlock *StuckBlock;
   llvm::IndirectBrInst *FailJump;
-  llvm::AllocaInst *FailAddress;
+  llvm::AllocaInst *ChoiceBuffer;
+  llvm::AllocaInst *ChoiceDepth;
   llvm::BasicBlock *ChoiceBlock;
-  DecisionNode *ChoiceNode;
-  std::set<std::pair<std::string, llvm::Type *>> ChoiceVars;
   llvm::Module *Module;
   llvm::LLVMContext &Ctx;
   ValueType Cat;
@@ -362,20 +378,18 @@ public:
     KOREDefinition *Definition,
     llvm::BasicBlock *EntryBlock,
     llvm::BasicBlock *FailureBlock,
-    llvm::BasicBlock *StuckBlock,
     llvm::IndirectBrInst *FailJump,
-    llvm::AllocaInst *FailAddress,
+    llvm::AllocaInst *ChoiceBuffer,
+    llvm::AllocaInst *ChoiceDepth,
     llvm::Module *Module,
     ValueType Cat) :
       Definition(Definition),
       CurrentBlock(EntryBlock),
       FailureBlock(FailureBlock),
-      StuckBlock(StuckBlock),
       FailJump(FailJump),
-      FailAddress(FailAddress),
+      ChoiceBuffer(ChoiceBuffer),
+      ChoiceDepth(ChoiceDepth),
       ChoiceBlock(nullptr),
-      ChoiceNode(nullptr),
-      ChoiceVars(),
       Module(Module),
       Ctx(Module->getContext()),
       Cat(Cat) {}

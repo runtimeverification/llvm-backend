@@ -24,6 +24,12 @@ void Decision::operator()(DecisionNode *entry, std::map<std::pair<std::string, l
   if (entry == FailNode::get()) {
     llvm::BranchInst::Create(this->FailureBlock, this->CurrentBlock);
   } else {
+    if (entry->containsFailNode) {
+      for (auto var : FailNode::get()->vars) {
+        llvm::PHINode *failPhi = llvm::PHINode::Create(var.second, FailNode::get()->predecessors.size(), "phi" + var.first.substr(0, max_name_length), FailureBlock->getFirstNonPHI());
+	failPhis[var] = failPhi;
+      }
+    }
     entry->codegen(this, substitution);
   }
   for (auto &entry : failPhis) {
@@ -48,26 +54,41 @@ void Decision::operator()(DecisionNode *entry, std::map<std::pair<std::string, l
   }
 }
 
-void DecisionNode::sharedNode(Decision *d, std::map<std::pair<std::string, llvm::Type *>, llvm::Value *> &oldSubst, std::map<std::pair<std::string, llvm::Type *>, llvm::Value *> &substitution, llvm::BasicBlock *Block) {
-  collectVars();
-  auto vars = this->vars;
-  collectFail();
+void DecisionNode::computeLiveness(std::set<LeafNode *> &leaves) {
+  std::set<DecisionNode *> workList;
+  workList.insert(leaves.begin(), leaves.end());
   if (containsFailNode) {
-    vars.insert(d->ChoiceVars.begin(), d->ChoiceVars.end());
+    workList.insert(FailNode::get());
   }
+  while (!workList.empty()) {
+    DecisionNode *node = *workList.begin();
+    workList.erase(node);
+    std::set<std::pair<std::string, llvm::Type *>> newVars;
+    for (DecisionNode *succ : node->successors) {
+      if (succ == FailNode::get()) {
+        for (DecisionNode *trueSucc : succ->successors) {
+          if (node->choiceAncestors.count(dynamic_cast<IterNextNode *>(trueSucc))) {
+            newVars.insert(trueSucc->vars.begin(), trueSucc->vars.end());
+	  }
+	}
+      } else if (!dynamic_cast<SwitchNode *>(node)) {
+        newVars.insert(succ->vars.begin(), succ->vars.end());
+      }
+    }
+    node->eraseDefsAndAddUses(newVars);
+    if (newVars != node->vars || node->vars.empty()) {
+      node->vars = newVars;
+      workList.insert(node->predecessors.begin(), node->predecessors.end());
+    }
+  }
+}
+
+void DecisionNode::sharedNode(Decision *d, std::map<std::pair<std::string, llvm::Type *>, llvm::Value *> &oldSubst, std::map<std::pair<std::string, llvm::Type *>, llvm::Value *> &substitution, llvm::BasicBlock *Block) {
   for (auto var : vars) {
     auto Phi = phis[var];
-    if (!Phi) {
-      Phi = llvm::PHINode::Create(var.second, 1, "aux_phi" + var.first.substr(0, max_name_length), cachedCode->getFirstNonPHI());
-      for (llvm::BasicBlock *pred : predecessors) {
-        Phi->addIncoming(llvm::UndefValue::get(Phi->getType()), pred);
-      }
-      phis[var] = Phi;
-    }
     Phi->addIncoming(oldSubst[var], Block);
     substitution[var] = Phi;
   }
-  predecessors.push_back(Block);
   for (auto &entry : phis) {
     auto var = entry.first;
     auto Phi = entry.second;
@@ -84,12 +105,6 @@ bool DecisionNode::beginNode(Decision *d, std::string name, std::map<std::pair<s
     sharedNode(d, substitution, substitution, d->CurrentBlock);
     return true;
   }
-  collectVars();
-  auto vars = this->vars;
-  collectFail();
-  if (containsFailNode) {
-    vars.insert(d->ChoiceVars.begin(), d->ChoiceVars.end());
-  }
   auto Block = llvm::BasicBlock::Create(d->Ctx,
       name.substr(0, max_name_length),
       d->CurrentBlock->getParent());
@@ -98,27 +113,24 @@ bool DecisionNode::beginNode(Decision *d, std::string name, std::map<std::pair<s
   for (auto var : vars) {
     auto val = substitution[var];
     if (!val) {
-      std::cerr << var.first << std::endl;
-      for (auto entry : substitution) {
-        std::cerr << entry.first.first << std::endl;
-      }
-      abort();
+      val = llvm::UndefValue::get(var.second);
     }
     auto Phi = llvm::PHINode::Create(var.second, 1, "phi" + var.first.substr(0, max_name_length), Block);
-    Phi->addIncoming(substitution[var], d->CurrentBlock);
+    Phi->addIncoming(val, d->CurrentBlock);
     phis[var] = Phi;
     substitution[var] = Phi;
   }
-  predecessors.push_back(d->CurrentBlock);
   d->CurrentBlock = Block;
   return false;
 }
 
 void Decision::addFailPhiIncoming(std::map<std::pair<std::string, llvm::Type *>, llvm::Value *> oldSubst, llvm::BasicBlock *switchBlock) {
-  if (ChoiceNode != nullptr) {
-    for (auto var : ChoiceVars) {
-      failPhis[var]->addIncoming(oldSubst[var], switchBlock);
+  for (auto var : FailNode::get()->vars) {
+    auto val = oldSubst[var];
+    if (!val) {
+      val = llvm::UndefValue::get(var.second);
     }
+    failPhis[var]->addIncoming(val, switchBlock);
   }
 }
 
@@ -173,11 +185,13 @@ void SwitchNode::codegen(Decision *d, std::map<std::pair<std::string, llvm::Type
     }
   }
   auto switchBlock = d->CurrentBlock;
-  auto oldSubst = substitution;
+  auto currChoiceBlock = d->ChoiceBlock;
+  d->ChoiceBlock = nullptr;
   for (auto &entry : caseData) {
+    auto newSubst = substitution;
     auto &_case = *entry.second;
     if (entry.first == d->FailureBlock) {
-      d->addFailPhiIncoming(oldSubst, switchBlock);
+      d->addFailPhiIncoming(substitution, switchBlock);
       continue;
     }
     d->CurrentBlock = entry.first;
@@ -205,27 +219,33 @@ void SwitchNode::codegen(Decision *d, std::map<std::pair<std::string, llvm::Type
           if (offset == 0) {
             Renamed = llvm::CallInst::Create(getOrInsertFunction(d->Module, "alphaRename", BlockPtr, BlockPtr), Child, "renamedVar", d->CurrentBlock);
             setDebugLoc(Renamed);
-            substitution[binding] = Renamed;
+            newSubst[binding] = Renamed;
           } else if (offset == _case.getBindings().size() - 1) {
             llvm::Instruction *Replaced = llvm::CallInst::Create(getOrInsertFunction(d->Module, "replaceBinderIndex", BlockPtr, BlockPtr, BlockPtr), {Child, Renamed}, "withUnboundIndex", d->CurrentBlock);
             setDebugLoc(Replaced);
-            substitution[binding] = Replaced;
+            newSubst[binding] = Replaced;
           } else {
-            substitution[binding] = Child;
+            newSubst[binding] = Child;
           }
         } else {
-          substitution[binding] = Child;
+          newSubst[binding] = Child;
         }
         offset++;
       }
     } else {
-      if (d->ChoiceBlock && _case.getLiteral() == 1) {
-        new llvm::StoreInst(llvm::BlockAddress::get(d->CurrentBlock->getParent(), d->ChoiceBlock), d->FailAddress, d->CurrentBlock);
-        d->FailJump->addDestination(d->ChoiceBlock);
-        d->ChoiceBlock = nullptr;
+      if (currChoiceBlock && _case.getLiteral() == 1) {
+        auto PrevDepth = new llvm::LoadInst(d->ChoiceDepth, "", d->CurrentBlock);
+	auto CurrDepth = llvm::BinaryOperator::Create(llvm::Instruction::Add, PrevDepth, llvm::ConstantInt::get(llvm::Type::getInt64Ty(d->Ctx), 1), "", d->CurrentBlock);
+	new llvm::StoreInst(CurrDepth, d->ChoiceDepth, d->CurrentBlock);
+
+	auto ty = d->ChoiceBuffer->getType()->getElementType();
+        auto zero = llvm::ConstantInt::get(llvm::Type::getInt64Ty(d->Ctx), 0);
+        auto currentElt = llvm::GetElementPtrInst::CreateInBounds(ty, d->ChoiceBuffer, {zero, CurrDepth}, "", d->CurrentBlock);
+        new llvm::StoreInst(llvm::BlockAddress::get(d->CurrentBlock->getParent(), currChoiceBlock), currentElt, d->CurrentBlock);
+        d->FailJump->addDestination(currChoiceBlock);
       }
     }
-    _case.getChild()->codegen(d, substitution);
+    _case.getChild()->codegen(d, newSubst);
   }
   if (defaultCase) {
     if (_default != d->FailureBlock) {
@@ -233,10 +253,10 @@ void SwitchNode::codegen(Decision *d, std::map<std::pair<std::string, llvm::Type
       d->CurrentBlock = _default;
       defaultCase->getChild()->codegen(d, substitution);
     } else {
-      d->addFailPhiIncoming(oldSubst, switchBlock);
+      d->addFailPhiIncoming(substitution, switchBlock);
     }
   } else {
-    d->addFailPhiIncoming(oldSubst, switchBlock);
+    d->addFailPhiIncoming(substitution, switchBlock);
   }
 
   setCompleted();
@@ -308,25 +328,14 @@ void MakeIteratorNode::codegen(Decision *d, std::map<std::pair<std::string, llvm
 }
 
 void IterNextNode::codegen(Decision *d, std::map<std::pair<std::string, llvm::Type *>, llvm::Value *> substitution) {
-  collectVars();
-  auto oldVars = d->ChoiceVars;
-  d->ChoiceVars = vars;
   if (beginNode(d, "choice" + binding, substitution)) {
     return;
   }
-  if (d->ChoiceNode) {
-    new llvm::StoreInst(llvm::BlockAddress::get(d->CurrentBlock->getParent(), d->ChoiceNode->cachedCode), d->FailAddress, d->CurrentBlock);
-  } else {
-    new llvm::StoreInst(llvm::BlockAddress::get(d->CurrentBlock->getParent(), d->StuckBlock), d->FailAddress, d->CurrentBlock);
-  }
   d->ChoiceBlock = d->CurrentBlock;
-  auto oldNode = d->ChoiceNode;
-  d->ChoiceNode = this;
   llvm::Value *arg = substitution[std::make_pair(iterator, iteratorType)];
 
-  collectFail();
   if (containsFailNode) {
-    for (auto var : d->ChoiceVars) {
+    for (auto var : vars) {
       auto Phi = phis[var];
       if (!Phi) {
         for (auto v : vars) {
@@ -335,10 +344,6 @@ void IterNextNode::codegen(Decision *d, std::map<std::pair<std::string, llvm::Ty
         abort();
       }
       auto failPhi = d->failPhis[var];
-      if (!failPhi) {
-        failPhi = llvm::PHINode::Create(var.second, 0, "phi" + var.first.substr(0, max_name_length), d->FailureBlock->getFirstNonPHI());
-        d->failPhis[var] = failPhi;
-      }
       Phi->addIncoming(failPhi, d->FailureBlock);
     }
   }
@@ -350,8 +355,6 @@ void IterNextNode::codegen(Decision *d, std::map<std::pair<std::string, llvm::Ty
   substitution[std::make_pair(binding, bindingType)] = Call;
   child->codegen(d, substitution);
   d->ChoiceBlock = nullptr;
-  d->ChoiceNode = oldNode;
-  d->ChoiceVars = oldVars;
   setCompleted();
 }
 
@@ -379,6 +382,33 @@ llvm::Value *Decision::getTag(llvm::Value *val) {
   setDebugLoc(res);
   return res;
 }
+
+static void initChoiceBuffer(DecisionNode *dt, llvm::Module *module, llvm::BasicBlock *block, llvm::BasicBlock *stuck, llvm::BasicBlock *fail, llvm::AllocaInst **choiceBufferOut, llvm::AllocaInst **choiceDepthOut, llvm::IndirectBrInst **jumpOut) {
+  FailNode::get()->predecessors.clear();
+  FailNode::get()->successors.clear();
+  std::set<LeafNode *> leaves;
+  dt->preprocess(leaves);
+  dt->computeLiveness(leaves);
+  auto ty = llvm::ArrayType::get(llvm::Type::getInt8PtrTy(module->getContext()), dt->getChoiceDepth() + 1);
+  llvm::AllocaInst *choiceBuffer = new llvm::AllocaInst(ty, 0, "choiceBuffer", block);
+  llvm::AllocaInst *choiceDepth = new llvm::AllocaInst(llvm::Type::getInt64Ty(module->getContext()), 0, "choiceDepth", block);
+  new llvm::StoreInst(llvm::ConstantInt::get(llvm::Type::getInt64Ty(module->getContext()), 0), choiceDepth, block);
+  auto zero = llvm::ConstantInt::get(llvm::Type::getInt64Ty(module->getContext()), 0);
+  auto firstElt = llvm::GetElementPtrInst::CreateInBounds(ty, choiceBuffer, {zero, zero}, "", block);
+  new llvm::StoreInst(llvm::BlockAddress::get(block->getParent(), stuck), firstElt, block);
+
+  llvm::LoadInst *currDepth = new llvm::LoadInst(choiceDepth, "", fail);
+  auto currentElt = llvm::GetElementPtrInst::CreateInBounds(ty, choiceBuffer, {zero, currDepth}, "", fail);
+  llvm::LoadInst *failAddress = new llvm::LoadInst(currentElt, "", fail);
+  auto newDepth = llvm::BinaryOperator::Create(llvm::Instruction::Sub, currDepth, llvm::ConstantInt::get(llvm::Type::getInt64Ty(module->getContext()), 1), "", fail);
+  new llvm::StoreInst(newDepth, choiceDepth, fail);
+  llvm::IndirectBrInst *jump = llvm::IndirectBrInst::Create(failAddress, 1, fail);
+  jump->addDestination(stuck);
+  *choiceBufferOut = choiceBuffer;
+  *choiceDepthOut = choiceDepth;
+  *jumpOut = jump;
+}
+
 
 void makeEvalOrAnywhereFunction(KORESymbol *function, KOREDefinition *definition, llvm::Module *module, DecisionNode *dt, void (*addStuck)(llvm::BasicBlock*, llvm::Module*, KORESymbol *, std::map<std::pair<std::string, llvm::Type *>, llvm::Value *>&, KOREDefinition *)) {
   auto returnSort = dynamic_cast<KORECompositeSort *>(function->getSort().get())->getCategory(definition);
@@ -418,9 +448,12 @@ void makeEvalOrAnywhereFunction(KORESymbol *function, KOREDefinition *definition
   matchFunc->setCallingConv(llvm::CallingConv::Fast);
   std::map<std::pair<std::string, llvm::Type *>, llvm::Value *> subst;
   llvm::BasicBlock *block = llvm::BasicBlock::Create(module->getContext(), "entry", matchFunc);
-  llvm::AllocaInst *addr = new llvm::AllocaInst(llvm::Type::getInt8PtrTy(module->getContext()), 0, "jumpTo", block);
   llvm::BasicBlock *stuck = llvm::BasicBlock::Create(module->getContext(), "stuck", matchFunc);
-  new llvm::StoreInst(llvm::BlockAddress::get(matchFunc, stuck), addr, block);
+  llvm::BasicBlock *fail = llvm::BasicBlock::Create(module->getContext(), "fail", matchFunc);
+
+  llvm::AllocaInst *choiceBuffer, *choiceDepth;
+  llvm::IndirectBrInst *jump;
+  initChoiceBuffer(dt, module, block, stuck, fail, &choiceBuffer, &choiceDepth, &jump);
 
   int i = 0;
   for (auto val = matchFunc->arg_begin(); val != matchFunc->arg_end(); ++val, ++i) {
@@ -432,12 +465,7 @@ void makeEvalOrAnywhereFunction(KORESymbol *function, KOREDefinition *definition
   }
   addStuck(stuck, module, function, subst, definition);
 
-  llvm::BasicBlock *fail = llvm::BasicBlock::Create(module->getContext(), "fail", matchFunc);
-  llvm::LoadInst *load = new llvm::LoadInst(addr, "", fail);
-  llvm::IndirectBrInst *jump = llvm::IndirectBrInst::Create(load, 1, fail);
-  jump->addDestination(stuck);
-
-  Decision codegen(definition, block, fail, stuck, jump, addr, module, returnSort);
+  Decision codegen(definition, block, fail, jump, choiceBuffer, choiceDepth, module, returnSort);
   codegen(dt, subst);
 }
 
@@ -639,10 +667,14 @@ void makeStepFunction(KOREDefinition *definition, llvm::Module *module, Decision
   std::map<std::pair<std::string, llvm::Type *>, llvm::Value *> subst;
   auto val = matchFunc->arg_begin();
   llvm::BasicBlock *block = llvm::BasicBlock::Create(module->getContext(), "entry", matchFunc);
-  llvm::AllocaInst *addr = new llvm::AllocaInst(llvm::Type::getInt8PtrTy(module->getContext()), 0, "jumpTo", block);
   llvm::BasicBlock *stuck = llvm::BasicBlock::Create(module->getContext(), "stuck", matchFunc);
   llvm::BasicBlock *pre_stuck = llvm::BasicBlock::Create(module->getContext(), "pre_stuck", matchFunc);
-  new llvm::StoreInst(llvm::BlockAddress::get(matchFunc, pre_stuck), addr, block);
+  llvm::BasicBlock *fail = llvm::BasicBlock::Create(module->getContext(), "fail", matchFunc);
+
+  llvm::AllocaInst *choiceBuffer, *choiceDepth;
+  llvm::IndirectBrInst *jump;
+  initChoiceBuffer(dt, module, block, pre_stuck, fail, &choiceBuffer, &choiceDepth, &jump);
+
   initDebugParam(matchFunc, 0, "subject", {SortCategory::Symbol, 0}, "SortGeneratedTopCell{}");
   llvm::BranchInst::Create(stuck, pre_stuck);
   auto result = stepFunctionHeader(0, module, definition, block, stuck, {val}, {{SortCategory::Symbol, 0}});
@@ -654,12 +686,7 @@ void makeStepFunction(KOREDefinition *definition, llvm::Module *module, Decision
   phi->addIncoming(collectedVal, pre_stuck);
   llvm::ReturnInst::Create(module->getContext(), phi, stuck);
 
-  llvm::BasicBlock *fail = llvm::BasicBlock::Create(module->getContext(), "fail", matchFunc);
-  llvm::LoadInst *load = new llvm::LoadInst(addr, "", fail);
-  llvm::IndirectBrInst *jump = llvm::IndirectBrInst::Create(load, 1, fail);
-  jump->addDestination(pre_stuck);
-
-  Decision codegen(definition, result.second, fail, pre_stuck, jump, addr, module, {SortCategory::Symbol, 0});
+  Decision codegen(definition, result.second, fail, jump, choiceBuffer, choiceDepth, module, {SortCategory::Symbol, 0});
   codegen(dt, subst);
 }
 
@@ -720,10 +747,14 @@ void makeStepFunction(KOREAxiomDeclaration *axiom, KOREDefinition *definition, l
   std::map<std::pair<std::string, llvm::Type *>, llvm::Value *> subst;
   llvm::StringMap<llvm::Value *> stuckSubst;
   llvm::BasicBlock *block = llvm::BasicBlock::Create(module->getContext(), "entry", matchFunc);
-  llvm::AllocaInst *addr = new llvm::AllocaInst(llvm::Type::getInt8PtrTy(module->getContext()), 0, "jumpTo", block);
   llvm::BasicBlock *stuck = llvm::BasicBlock::Create(module->getContext(), "stuck", matchFunc);
   llvm::BasicBlock *pre_stuck = llvm::BasicBlock::Create(module->getContext(), "pre_stuck", matchFunc);
-  new llvm::StoreInst(llvm::BlockAddress::get(matchFunc, pre_stuck), addr, block);
+  llvm::BasicBlock *fail = llvm::BasicBlock::Create(module->getContext(), "fail", matchFunc);
+
+  llvm::AllocaInst *choiceBuffer, *choiceDepth;
+  llvm::IndirectBrInst *jump;
+  initChoiceBuffer(res.dt, module, block, pre_stuck, fail, &choiceBuffer, &choiceDepth, &jump);
+
   llvm::BranchInst::Create(stuck, pre_stuck);
   std::vector<llvm::PHINode *> phis;
   int i = 0;
@@ -758,12 +789,7 @@ void makeStepFunction(KOREAxiomDeclaration *axiom, KOREDefinition *definition, l
   llvm::Value *retval = creator(partialTerm).first;
   llvm::ReturnInst::Create(module->getContext(), retval, creator.getCurrentBlock());
 
-  llvm::BasicBlock *fail = llvm::BasicBlock::Create(module->getContext(), "fail", matchFunc);
-  llvm::LoadInst *load = new llvm::LoadInst(addr, "", fail);
-  llvm::IndirectBrInst *jump = llvm::IndirectBrInst::Create(load, 1, fail);
-  jump->addDestination(pre_stuck);
-
-  Decision codegen(definition, header.second, fail, pre_stuck, jump, addr, module, {SortCategory::Symbol, 0});
+  Decision codegen(definition, header.second, fail, jump, choiceBuffer, choiceDepth, module, {SortCategory::Symbol, 0});
   codegen(res.dt, subst);
 }
 }
