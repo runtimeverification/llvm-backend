@@ -52,7 +52,7 @@ int main (int argc, char **argv) {
       std::string filename = argv[3] + std::string("/") + "dt_" + std::to_string(axiom->getOrdinal()) + ".yaml";
       struct stat buf;
       if (stat(filename.c_str(), &buf) == 0) {
-        auto residuals = parseYamlSpecialDecisionTree(filename, definition->getAllSymbols(), definition->getHookedSorts());
+        auto residuals = parseYamlSpecialDecisionTree(mod.get(), filename, definition->getAllSymbols(), definition->getHookedSorts());
         makeApplyRuleFunction(axiom, definition.get(), mod.get(), residuals.residuals);
         makeStepFunction(axiom, definition.get(), mod.get(), residuals);
       } else {
@@ -63,7 +63,7 @@ int main (int argc, char **argv) {
 
   emitConfigParserFunctions(definition.get(), mod.get());
 
-  auto dt = parseYamlDecisionTree(argv[2], definition->getAllSymbols(), definition->getHookedSorts());
+  auto dt = parseYamlDecisionTree(mod.get(), argv[2], definition->getAllSymbols(), definition->getHookedSorts());
   makeStepFunction(definition.get(), mod.get(), dt);
 
   std::map<std::string, std::string> index;
@@ -83,11 +83,11 @@ int main (int argc, char **argv) {
     auto decl = definition->getSymbolDeclarations().at(symbol->getName());
     if ((decl->getAttributes().count("function") && !decl->isHooked())) {
       std::string filename = getFilename(index, argv, decl);
-      auto funcDt = parseYamlDecisionTree(filename, definition->getAllSymbols(), definition->getHookedSorts());
+      auto funcDt = parseYamlDecisionTree(mod.get(), filename, definition->getAllSymbols(), definition->getHookedSorts());
       makeEvalFunction(decl->getSymbol(), definition.get(), mod.get(), funcDt);
     } else if (decl->isAnywhere()) {
       std::string filename = getFilename(index, argv, decl);
-      auto funcDt = parseYamlDecisionTree(filename, definition->getAllSymbols(), definition->getHookedSorts());
+      auto funcDt = parseYamlDecisionTree(mod.get(), filename, definition->getAllSymbols(), definition->getHookedSorts());
       std::ostringstream Out;
       decl->getSymbol()->print(Out);
       makeAnywhereFunction(definition->getAllSymbols().at(Out.str()), definition.get(), mod.get(), funcDt);

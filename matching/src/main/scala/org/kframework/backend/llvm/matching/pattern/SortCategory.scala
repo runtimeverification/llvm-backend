@@ -57,7 +57,7 @@ case class SymbolS() extends SortCategory {
   def equalityFun = "hook_KEQUAL_eq"
   // not matching a builtin, therefore construct a regular switch
   // that matches the tag of the block.
-  def tree(matrix: Matrix): DecisionTree = Switch(matrix.bestCol.fringe.occurrence, matrix.compiledCases, matrix.compiledDefault)
+  def tree(matrix: Matrix): DecisionTree = Switch(matrix.bestCol.fringe.occurrence, hookAtt, matrix.compiledCases, matrix.compiledDefault)
 }
 abstract class EqualLiteral() extends SortCategory {
   def hasIncompleteSignature(sigma: Seq[Constructor], f: Fringe): Boolean = true
@@ -80,12 +80,12 @@ abstract class EqualLiteral() extends SortCategory {
     tree(matrix, matrix.cases)
   }
 
-  private def tree(matrix: Matrix, ls: Seq[(String, Matrix)]): DecisionTree = {
+  private def tree(matrix: Matrix, ls: Seq[(String, Seq[String], Matrix)]): DecisionTree = {
     val litO = matrix.bestCol.fringe.occurrence
     val defaultMatrix = matrix.default(matrix.bestColIx, matrix.sigma)
     if (defaultMatrix.isDefined && ls.isEmpty) {
       // if no specializations remain and a default exists, consume the occurrence and continue with the default
-      Switch(litO, Seq(), Some(defaultMatrix.get.compile))
+      Switch(litO, hookAtt, Seq(), Some(defaultMatrix.get.compile))
     } else if (ls.isEmpty) {
       // if no specializations remain and no default exists, fail the match
       Failure()
@@ -95,10 +95,10 @@ abstract class EqualLiteral() extends SortCategory {
       // otherweise, test the next literal
       val newO = Lit(ls.head._1, hookAtt)
       val eqO = Equal(litO, newO)
-      MakePattern(newO, LiteralP(ls.head._1, this),
-        Function(equalityFun, eqO, Seq(litO, newO), "BOOL.Bool",
-          SwitchLit(eqO, 1, Seq(("1", Switch(litO, Seq(), Some(ls.head._2.compile))),
-                                ("0", tree(matrix, ls.tail))), None)))
+      MakePattern(newO, hookAtt, LiteralP(ls.head._1, this),
+        Function(equalityFun, eqO, Seq((litO, hookAtt), (newO, hookAtt)), "BOOL.Bool",
+          SwitchLit(eqO, "BOOL.Bool", 1, Seq(("1", Seq(), Switch(litO, hookAtt, Seq(), Some(ls.head._3.compile))),
+                                ("0", Seq(), tree(matrix, ls.tail))), None)))
     }
   }
 }
@@ -140,9 +140,9 @@ case class ListS() extends SortCategory {
     if (dt.isInstanceOf[Failure]) {
       dt
     } else {
-      Function("hook_LIST_get_long", Num(i, listO), Seq(listO, len match {
-        case None => Lit(i.toString, "MINT.MInt 64")
-        case Some((hd, tl)) => Lit((i-tl-hd).toString, "MINT.MInt 64")
+      Function("hook_LIST_get_long", Num(i, listO), Seq((listO, hookAtt), len match {
+        case None => (Lit(i.toString, "MINT.MInt 64"), "MINT.MInt 64")
+        case Some((hd, tl)) => (Lit((i-tl-hd).toString, "MINT.MInt 64"), "MINT.MInt 64")
       }), "STRING.String", dt)
     }
   }
@@ -163,8 +163,8 @@ case class ListS() extends SortCategory {
     // test the length of the list against the specializations of the matrix
     // if it succeeds, bind the occurrences and continue with the specialized matrix
     // otherwise, try the default case
-    Function("hook_LIST_size_long", newO, Seq(listO), "MINT.MInt 64",
-      SwitchLit(newO, 64, matrix.cases.zipWithIndex.map(l => (l._1._1, expandListPattern(l._1._2, listO, matrix.sigma(l._2).asInstanceOf[ListC]))), matrix.default(matrix.bestColIx, matrix.sigma).map(expandListPatternDefault(_, listO, maxList))))
+    Function("hook_LIST_size_long", newO, Seq((listO, hookAtt)), "MINT.MInt 64",
+      SwitchLit(newO, "MINT.MInt 64", 64, matrix.cases.zipWithIndex.map(l => (l._1._1, l._1._2, expandListPattern(l._1._3, listO, matrix.sigma(l._2).asInstanceOf[ListC]))), matrix.default(matrix.bestColIx, matrix.sigma).map(expandListPatternDefault(_, listO, maxList))))
   }
 }
 case class MapS() extends SortCategory {
@@ -179,27 +179,27 @@ case class MapS() extends SortCategory {
     val newO = Size(mapO)
     // if Empty is in the signature, test whether the map is empty or not.
     if (matrix.sigma.contains(Empty())) {
-      Function("hook_MAP_size_long", newO, Seq(mapO), "MINT.MInt 64",
-        SwitchLit(newO, 64, matrix.compiledCases, matrix.compiledDefault))
+      Function("hook_MAP_size_long", newO, Seq((mapO, hookAtt)), "MINT.MInt 64",
+        SwitchLit(newO, "MINT.MInt 64", 64, matrix.compiledCases, matrix.compiledDefault))
     } else if (matrix.bestCol.isChoice) {
-      val m = matrix.compiledCases.toMap
+      val m = matrix.compiledCases.map(t => (t._1, (t._2, t._3))).toMap
       MakeIterator("map_iterator", mapO,
         IterNext("map_iterator_next", mapO, Choice(mapO),
-          CheckNull(Choice(mapO), Seq(("0", m("0")), ("1", 
-            Function("hook_MAP_lookup", ChoiceValue(mapO), Seq(mapO, Choice(mapO)), "STRING.String",
-              Function("hook_MAP_remove", ChoiceRem(mapO), Seq(mapO, Choice(mapO)), "MAP.Map",
-                m("1"))))), None)))
+          CheckNull(Choice(mapO), "STRING.String", Seq(("0", m("0")._1, m("0")._2), ("1", m("1")._1,
+            Function("hook_MAP_lookup", ChoiceValue(mapO), Seq((mapO, hookAtt), (Choice(mapO), "STRING.String")), "STRING.String",
+              Function("hook_MAP_remove", ChoiceRem(mapO), Seq((mapO, hookAtt), (Choice(mapO), "STRING.String")), hookAtt,
+                m("1")._2)))), None)))
 
     } else {
       // otherwise, get the best key and test whether the best key is in the map or not
       val key = matrix.bestCol.bestKey
       key match {
-        case None => Switch(mapO, matrix.compiledCases, matrix.compiledDefault)
+        case None => Switch(mapO, hookAtt, matrix.compiledCases, matrix.compiledDefault)
         case Some(k) =>
-          MakePattern(newO, k,
-            Function("hook_MAP_lookup_null", Value(k, mapO), Seq(mapO, newO), "STRING.String",
-              Function("hook_MAP_remove", Rem(k, mapO), Seq(mapO, newO), "MAP.Map",
-                CheckNull(Value(k, mapO), matrix.compiledCases, matrix.compiledDefault))))
+          MakePattern(newO, "STRING.String", k,
+            Function("hook_MAP_lookup_null", Value(k, mapO), Seq((mapO, hookAtt), (newO, "STRING.String")), "STRING.String",
+              Function("hook_MAP_remove", Rem(k, mapO), Seq((mapO, hookAtt), (newO, "STRING.String")), "MAP.Map",
+                CheckNull(Value(k, mapO), "STRING.String", matrix.compiledCases, matrix.compiledDefault))))
       }
     }
   }
@@ -216,25 +216,25 @@ case class SetS() extends SortCategory {
     val newO = Size(setO)
     // if Empty is in the signature, test whether the set is empty or not.
     if (matrix.sigma.contains(Empty())) {
-      Function("hook_SET_size_long", newO, Seq(setO), "MINT.MInt 64",
-        SwitchLit(newO, 64, matrix.compiledCases, matrix.compiledDefault))
+      Function("hook_SET_size_long", newO, Seq((setO, hookAtt)), "MINT.MInt 64",
+        SwitchLit(newO, "MINT.MInt 64", 64, matrix.compiledCases, matrix.compiledDefault))
     } else if (matrix.bestCol.isChoice) {
-      val m = matrix.compiledCases.toMap
+      val m = matrix.compiledCases.map(t => (t._1, (t._2, t._3))).toMap
       MakeIterator("set_iterator", setO,
         IterNext("set_iterator_next", setO, Choice(setO),
-          CheckNull(Choice(setO), Seq(("0", m("0")), ("1", 
-            Function("hook_SET_remove", ChoiceRem(setO), Seq(setO, Choice(setO)), "SET.Set",
-              m("1")))), None)))
+          CheckNull(Choice(setO), "STRING.String", Seq(("0", m("0")._1, m("0")._2), ("1", m("1")._1,
+            Function("hook_SET_remove", ChoiceRem(setO), Seq((setO, hookAtt), (Choice(setO), "STRING.String")), hookAtt,
+              m("1")._2))), None)))
     } else {
       // otherwise, get the best element and test whether the best element is in the set or not
       val key = matrix.bestCol.bestKey
       key match {
-        case None => Switch(setO, matrix.compiledCases, matrix.compiledDefault)
+        case None => Switch(setO, hookAtt, matrix.compiledCases, matrix.compiledDefault)
         case Some(k) =>
-          MakePattern(newO, k,
-            Function("hook_SET_in", Value(k, setO), Seq(newO, setO), "BOOL.Bool",
-              Function("hook_SET_remove", Rem(k, setO), Seq(setO, newO), "SET.Set",
-                SwitchLit(Value(k, setO), 1, matrix.compiledCases, matrix.compiledDefault))))
+          MakePattern(newO, "STRING.String", k,
+            Function("hook_SET_in", Value(k, setO), Seq((newO, "STRING.String"), (setO, hookAtt)), "BOOL.Bool",
+              Function("hook_SET_remove", Rem(k, setO), Seq((setO, hookAtt), (newO, "STRING.String")), "SET.Set",
+                SwitchLit(Value(k, setO), "BOOL.Bool", 1, matrix.compiledCases, matrix.compiledDefault))))
       }
     }
   }
@@ -306,30 +306,30 @@ case class IntS() extends SortCategory {
         Failure()
       }
     } else {
-      Function("hook_INT_size_int", sizeO, Seq(litO), "MINT.MInt 32",
-        SwitchLit(sizeO, 32, sizeCases(litO, matrix.compiledCases, matrix.compiledDefault), matrix.compiledDefault))
+      Function("hook_INT_size_int", sizeO, Seq((litO, hookAtt)), "MINT.MInt 32",
+        SwitchLit(sizeO, "MINT.MInt 32", 32, sizeCases(litO, matrix.compiledCases, matrix.compiledDefault), matrix.compiledDefault))
     }
   }
 
-  def sizeCases(litO: Occurrence, cases: Seq[(String, DecisionTree)], default: Option[DecisionTree]): Seq[(String, DecisionTree)] = {
-    cases.groupBy(t => sizeOf(t._1)).toSeq.map(t => (t._1.toString, limbSwitch(litO, t._1.abs, t._2, default, 0)))
+  def sizeCases(litO: Occurrence, cases: Seq[(String, Seq[String], DecisionTree)], default: Option[DecisionTree]): Seq[(String, Seq[String], DecisionTree)] = {
+    cases.groupBy(t => sizeOf(t._1)).toSeq.map(t => (t._1.toString, Seq(), limbSwitch(litO, t._1.abs, t._2, default, 0)))
   }
 
-  def limbSwitch(litO: Occurrence, size: Int, cases: Seq[(String, DecisionTree)], default: Option[DecisionTree], i: Int): DecisionTree = {
+  def limbSwitch(litO: Occurrence, size: Int, cases: Seq[(String, Seq[String], DecisionTree)], default: Option[DecisionTree], i: Int): DecisionTree = {
     if (cases.isEmpty) {
       Failure()
     } else if (size == i) {
       assert(cases.size == 1)
-      cases(0)._2
+      cases(0)._3
     } else {
       val limbO = Num(i, litO)
-      Function("hook_INT_limb", limbO, Seq(litO, Lit(i.toString, "MINT.MInt 64")), "MINT.MInt 64",
-        SwitchLit(limbO, 64, limbCases(litO, size, cases, default, i), default))
+      Function("hook_INT_limb", limbO, Seq((litO, hookAtt), (Lit(i.toString, "MINT.MInt 64"), "MINT.MInt 64")), "MINT.MInt 64",
+        SwitchLit(limbO, "MINT.MInt 64", 64, limbCases(litO, size, cases, default, i), default))
     }
   }
 
-  def limbCases(litO: Occurrence, size: Int, cases: Seq[(String, DecisionTree)], default: Option[DecisionTree], i: Int): Seq[(String, DecisionTree)] = {
-    cases.groupBy(t => getLimb(t._1, i)).toSeq.map(t => (t._1, limbSwitch(litO, size, t._2, default, i+1)))
+  def limbCases(litO: Occurrence, size: Int, cases: Seq[(String, Seq[String], DecisionTree)], default: Option[DecisionTree], i: Int): Seq[(String, Seq[String], DecisionTree)] = {
+    cases.groupBy(t => getLimb(t._1, i)).toSeq.map(t => (t._1, Seq(), limbSwitch(litO, size, t._2, default, i+1)))
   }
 
   def sizeOf(str: String): Int = {
@@ -361,7 +361,7 @@ case class BoolS() extends SortCategory {
   }
   def equalityFun = "hook_BOOL_eq"
   // matching a bool, so match the integer value of the bool with a bitwidth of 1
-  def tree(matrix: Matrix): DecisionTree = SwitchLit(matrix.bestCol.fringe.occurrence, 1, matrix.compiledCases, matrix.compiledDefault)
+  def tree(matrix: Matrix): DecisionTree = SwitchLit(matrix.bestCol.fringe.occurrence, hookAtt, 1, matrix.compiledCases, matrix.compiledDefault)
   override def length(rawLength: Int) = 2
 }
 case class VarS() extends EqualLiteral {
@@ -386,7 +386,7 @@ case class MIntS(bitwidth: Int) extends SortCategory {
     ???
   }
   // matching an mint, so match the integer value of the mint with the specified bitwidth
-  def tree(matrix: Matrix): DecisionTree = SwitchLit(matrix.bestCol.fringe.occurrence, bitwidth, matrix.compiledCases, matrix.compiledDefault)
+  def tree(matrix: Matrix): DecisionTree = SwitchLit(matrix.bestCol.fringe.occurrence, hookAtt, bitwidth, matrix.compiledCases, matrix.compiledDefault)
   def equalityFun = ???
   override def length(rawLength: Int) = 1 << bitwidth
 }

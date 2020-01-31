@@ -77,6 +77,7 @@ std::string makeSideConditionFunction(KOREAxiomDeclaration *axiom, KOREDefinitio
 
 /* returns the llvm::Type corresponding to the specified KORE sort category */
 llvm::Type *getValueType(ValueType sort, llvm::Module *Module);
+llvm::Type *getParamType(ValueType sort, llvm::Module *Module);
 
 void addAbort(llvm::BasicBlock *block, llvm::Module *Module);
 

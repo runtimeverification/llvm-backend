@@ -20,7 +20,7 @@ sealed trait Pattern[T] {
   def isChoice: Boolean = false
   def mapOrSetKeys: Seq[Pattern[T]] = Seq()
   def listRange(ix: Option[Constructor], o: Occurrence): Seq[(Occurrence, Int, Int)] = Seq()
-  def overloadChildren(f: Fringe, ix: Option[Constructor], residual: Option[Pattern[String]], o: Occurrence): Seq[(Constructor, VariableBinding[T])] = Seq()
+  def overloadChildren(f: Fringe, ix: Option[Constructor], residual: Option[Pattern[String]], o: Occurrence): Seq[(Constructor, Fringe, VariableBinding[T])] = Seq()
   def category: Option[SortCategory]
   def variables: Set[T]
   def canonicalize(clause: Clause): Pattern[Option[Occurrence]]
@@ -73,7 +73,7 @@ case class AsP[T](name: T, sort: SortCategory, pat: Pattern[T]) extends Pattern[
   }
   def expandOr: Seq[AsP[T]] = pat.expandOr.map(AsP(name, sort, _))
 
-  override def overloadChildren(f: Fringe, ix: Option[Constructor], residual: Option[Pattern[String]], o: Occurrence): Seq[(Constructor, VariableBinding[T])] = pat.overloadChildren(f, ix, residual, o)
+  override def overloadChildren(f: Fringe, ix: Option[Constructor], residual: Option[Pattern[String]], o: Occurrence): Seq[(Constructor, Fringe, VariableBinding[T])] = pat.overloadChildren(f, ix, residual, o)
   def category: Option[SortCategory] = pat.category
   lazy val variables: Set[T] = Set(name) ++ pat.variables
   def canonicalize(clause: Clause): Pattern[Option[Occurrence]] = AsP(clause.canonicalize(name.toString), sort, pat.canonicalize(clause))
@@ -451,15 +451,15 @@ case class SymbolP[T](sym: SymbolOrAlias, ps: Seq[Pattern[T]]) extends Pattern[T
   // computes the list of injections that are bound to variables in the current pattern as a result of matching on an overload of the current
   // pattern. these injections are bound to variables despite not existing in the current term, so they need to be tracked so they can be
   // created later
-  override def overloadChildren(f: Fringe, ix: Option[Constructor], residual: Option[Pattern[String]], o: Occurrence): Seq[(Constructor, VariableBinding[T])] = {
-    def getVar(fringeP: Fringe, fringeT: Fringe, pat: Pattern[T], i: Int): Seq[(Constructor, VariableBinding[T])] = {
+  override def overloadChildren(f: Fringe, ix: Option[Constructor], residual: Option[Pattern[String]], o: Occurrence): Seq[(Constructor, Fringe, VariableBinding[T])] = {
+    def getVar(fringeP: Fringe, fringeT: Fringe, pat: Pattern[T], i: Int): Seq[(Constructor, Fringe, VariableBinding[T])] = {
       val vars = pat.bindings(None, residual, Inj(Num(i, o)), f.symlib) // compute variable bindings for this pattern
       val child = SymbolC(B.SymbolOrAlias("inj", Seq(fringeT.sort, fringeP.sort)))
       if (fringeP.sort == fringeT.sort) {
         Seq() // exact match, so no bindings
       } else {
         val childOverloads = pat.overloadChildren(fringeP, Some(child), residual, Num(i, o)) // recurse into child term
-        vars.map(v => (child, v)) ++ childOverloads
+        vars.map(v => (child, fringeP, v)) ++ childOverloads
       }
     }
     (ix, sym) match {
@@ -521,7 +521,7 @@ case class VariableP[T](name: T, sort: SortCategory) extends Pattern[T] {
   def category: None.type = None
   lazy val variables: Set[T] = Set(name)
   def canonicalize(clause: Clause): Pattern[Option[Occurrence]] = {
-    val subst = clause.canonicalize(name.toString).flatMap(clause.specializedVars.get(_))
+    val subst = clause.canonicalize(name.toString).flatMap(clause.specializedVars.get(_).map(_._2))
     if (subst.isDefined) {
       subst.get
     } else {
