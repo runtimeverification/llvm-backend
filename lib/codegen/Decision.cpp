@@ -27,7 +27,7 @@ void Decision::operator()(DecisionNode *entry, std::map<std::pair<std::string, l
     if (entry->containsFailNode) {
       for (auto var : FailNode::get()->vars) {
         llvm::PHINode *failPhi = llvm::PHINode::Create(var.second, FailNode::get()->predecessors.size(), "phi" + var.first.substr(0, max_name_length), FailureBlock->getFirstNonPHI());
-	failPhis[var] = failPhi;
+        failPhis[var] = failPhi;
       }
     }
     entry->codegen(this, substitution);
@@ -73,8 +73,8 @@ void DecisionNode::computeLiveness(std::unordered_set<LeafNode *> &leaves) {
         for (DecisionNode *trueSucc : succ->successors) {
           if (node->choiceAncestors.count(dynamic_cast<IterNextNode *>(trueSucc))) {
             newVars.insert(trueSucc->vars.begin(), trueSucc->vars.end());
-	  }
-	}
+          }
+        }
       } else if (!dynamic_cast<SwitchNode *>(node)) {
         newVars.insert(succ->vars.begin(), succ->vars.end());
       }
@@ -85,8 +85,8 @@ void DecisionNode::computeLiveness(std::unordered_set<LeafNode *> &leaves) {
       for (DecisionNode *pred : node->predecessors) {
         if (!workListSet.count(pred)) {
           workListSet.insert(pred);
-	  workList.push_back(pred);
-	}
+          workList.push_back(pred);
+        }
       }
     }
     node->livenessVisited = true;
@@ -245,10 +245,10 @@ void SwitchNode::codegen(Decision *d, std::map<std::pair<std::string, llvm::Type
     } else {
       if (currChoiceBlock && _case.getLiteral() == 1) {
         auto PrevDepth = new llvm::LoadInst(d->ChoiceDepth, "", d->CurrentBlock);
-	auto CurrDepth = llvm::BinaryOperator::Create(llvm::Instruction::Add, PrevDepth, llvm::ConstantInt::get(llvm::Type::getInt64Ty(d->Ctx), 1), "", d->CurrentBlock);
-	new llvm::StoreInst(CurrDepth, d->ChoiceDepth, d->CurrentBlock);
+        auto CurrDepth = llvm::BinaryOperator::Create(llvm::Instruction::Add, PrevDepth, llvm::ConstantInt::get(llvm::Type::getInt64Ty(d->Ctx), 1), "", d->CurrentBlock);
+        new llvm::StoreInst(CurrDepth, d->ChoiceDepth, d->CurrentBlock);
 
-	auto ty = d->ChoiceBuffer->getType()->getElementType();
+        auto ty = d->ChoiceBuffer->getType()->getElementType();
         auto zero = llvm::ConstantInt::get(llvm::Type::getInt64Ty(d->Ctx), 0);
         auto currentElt = llvm::GetElementPtrInst::CreateInBounds(ty, d->ChoiceBuffer, {zero, CurrDepth}, "", d->CurrentBlock);
         new llvm::StoreInst(llvm::BlockAddress::get(d->CurrentBlock->getParent(), currChoiceBlock), currentElt, d->CurrentBlock);
