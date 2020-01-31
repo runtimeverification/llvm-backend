@@ -498,7 +498,7 @@ void abortWhenStuck(llvm::BasicBlock *CurrentBlock, llvm::Module *Module, KORESy
       auto cat = dynamic_cast<KORECompositeSort *>(symbol->getArguments()[idx].get())->getCategory(d);
       auto type = getParamType(cat, Module);
       llvm::Value *ChildValue = subst[std::make_pair("_" + std::to_string(idx+1), type)];
-      llvm::Value *ChildPtr = llvm::GetElementPtrInst::CreateInBounds(BlockType, Block, {llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0), llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), idx++ + 2)}, "", CurrentBlock);
+      llvm::Value *ChildPtr = llvm::GetElementPtrInst::CreateInBounds(BlockType, Block, {llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0), llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), idx + 2)}, "", CurrentBlock);
       if (ChildValue->getType() == ChildPtr->getType()) {
         ChildValue = new llvm::LoadInst(ChildValue, "", CurrentBlock);
       }
