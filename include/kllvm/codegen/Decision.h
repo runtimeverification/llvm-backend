@@ -10,6 +10,8 @@
 
 #include "kllvm/codegen/DecisionParser.h"
 
+#include <unordered_set>
+
 namespace kllvm {
 
 class Decision;
@@ -17,22 +19,32 @@ class DecisionCase;
 class LeafNode;
 class IterNextNode;
 
+struct HashVar {
+  size_t operator()(const std::pair<std::string, llvm::Type *> &s) const noexcept {
+    return std::hash<std::string>()(s.first) ^ std::hash<llvm::Type *>()(s.second);
+  }
+};
+
+
+using var_type = std::pair<std::string, llvm::Type *>;
+using var_set_type = std::unordered_set<var_type, HashVar>;
+
 class DecisionNode {
 public:
   llvm::BasicBlock * cachedCode = nullptr;
-  std::map<std::pair<std::string, llvm::Type *>, llvm::PHINode *> phis;
-  std::set<DecisionNode *> predecessors;
-  std::set<DecisionNode *> successors;
-  std::set<IterNextNode *> choiceAncestors;
+  std::map<var_type, llvm::PHINode *> phis;
+  std::unordered_set<DecisionNode *> predecessors;
+  std::unordered_set<DecisionNode *> successors;
+  std::unordered_set<IterNextNode *> choiceAncestors;
   /* completed tracks whether codegen for this DecisionNode has concluded */
   bool completed = false;
 
-  virtual void codegen(Decision *d, std::map<std::pair<std::string, llvm::Type *>, llvm::Value *> substitution) = 0;
-  virtual void preprocess(std::set<LeafNode *> &) = 0;
-  virtual void eraseDefsAndAddUses(std::set<std::pair<std::string, llvm::Type *>> &vars) = 0;
-  void computeLiveness(std::set<LeafNode *> &);
-  void sharedNode(Decision *d, std::map<std::pair<std::string, llvm::Type *>, llvm::Value *> &oldSubst, std::map<std::pair<std::string, llvm::Type *>, llvm::Value *> &substitution, llvm::BasicBlock *Block);
-  bool beginNode(Decision *d, std::string name, std::map<std::pair<std::string, llvm::Type *>, llvm::Value *> &substitution);
+  virtual void codegen(Decision *d, std::map<var_type, llvm::Value *> substitution) = 0;
+  virtual void preprocess(std::unordered_set<LeafNode *> &) = 0;
+  virtual void eraseDefsAndAddUses(var_set_type &vars) = 0;
+  void computeLiveness(std::unordered_set<LeafNode *> &);
+  void sharedNode(Decision *d, std::map<var_type, llvm::Value *> &oldSubst, std::map<var_type, llvm::Value *> &substitution, llvm::BasicBlock *Block);
+  bool beginNode(Decision *d, std::string name, std::map<var_type, llvm::Value *> &substitution);
 
   void setCompleted() { completed = true; }
   bool isCompleted() const { return completed; }
@@ -41,7 +53,7 @@ public:
 private:
   bool preprocessed = false, containsFailNode = false;
   uint64_t choiceDepth = 0;
-  std::set<std::pair<std::string, llvm::Type *>> vars;
+  var_set_type vars;
   friend class Decision;
   friend class SwitchNode;
   friend class MakePatternNode;
@@ -58,7 +70,7 @@ private:
      if equal to \\dv, we are matching on a bool or mint literal. */
   KORESymbol *constructor;
   /* the names to bind the children of this pattern to. */
-  std::vector<std::pair<std::string, llvm::Type *>> bindings;
+  std::vector<var_type> bindings;
   /* the literal int to match on. must have a bit width equal to the
      size of the sort being matched. */
   llvm::APInt literal;
@@ -68,7 +80,7 @@ private:
 public:
   DecisionCase(
     KORESymbol *constructor, 
-    std::vector<std::pair<std::string, llvm::Type *>> bindings,
+    std::vector<var_type> bindings,
     DecisionNode *child) :
       constructor(constructor),
       bindings(bindings),
@@ -77,7 +89,7 @@ public:
     constructor(dv), literal(literal), child(child) {}
 
   KORESymbol *getConstructor() const { return constructor; }
-  const std::vector<std::pair<std::string, llvm::Type *>> &getBindings() const { return bindings; }
+  const std::vector<var_type> &getBindings() const { return bindings; }
   void addBinding(std::string name, llvm::Type *type) { bindings.push_back(std::make_pair(name, type)); }
   llvm::APInt getLiteral() const { return literal; }
   DecisionNode *getChild() const { return child; }
@@ -106,8 +118,8 @@ public:
   llvm::Type *getType() const { return type; }
   const std::vector<DecisionCase> &getCases() const { return cases; }
   
-  virtual void codegen(Decision *d, std::map<std::pair<std::string, llvm::Type *>, llvm::Value *> substitution);
-  virtual void eraseDefsAndAddUses(std::set<std::pair<std::string, llvm::Type *>> &vars) {
+  virtual void codegen(Decision *d, std::map<var_type, llvm::Value *> substitution);
+  virtual void eraseDefsAndAddUses(var_set_type &vars) {
     for (auto _case : cases) {
       auto caseVars = _case.getChild()->vars;
       for (auto var : _case.getBindings()) {
@@ -117,7 +129,7 @@ public:
     }
     if(cases.size() != 1 || cases[0].getConstructor()) vars.insert(std::make_pair(name, type)); 
   }
-  virtual void preprocess(std::set<LeafNode *> &leaves) {
+  virtual void preprocess(std::unordered_set<LeafNode *> &leaves) {
     if(preprocessed) return;
     bool hasDefault = false;
     for (auto _case : cases) {
@@ -141,14 +153,14 @@ private:
   std::string name;
   llvm::Type *type;
   KOREPattern *pattern;
-  std::vector<std::pair<std::string, llvm::Type *>> uses;
+  std::vector<var_type> uses;
   DecisionNode *child;
 
   MakePatternNode(
     const std::string &name,
     llvm::Type *type,
     KOREPattern *pattern,
-    std::vector<std::pair<std::string, llvm::Type *>> &uses,
+    std::vector<var_type> &uses,
     DecisionNode *child) :
       name(name),
       type(type),
@@ -161,17 +173,17 @@ public:
       const std::string &name,
       llvm::Type *type,
       KOREPattern *pattern,
-      std::vector<std::pair<std::string, llvm::Type *>> &uses,
+      std::vector<var_type> &uses,
       DecisionNode *child) {
     return new MakePatternNode(name, type, pattern, uses, child);
   }
 
-  virtual void codegen(Decision *d, std::map<std::pair<std::string, llvm::Type *>, llvm::Value *> substitution);
-  virtual void eraseDefsAndAddUses(std::set<std::pair<std::string, llvm::Type *>> &vars) {
+  virtual void codegen(Decision *d, std::map<var_type, llvm::Value *> substitution);
+  virtual void eraseDefsAndAddUses(var_set_type &vars) {
     vars.erase(std::make_pair(name, type));
     vars.insert(uses.begin(), uses.end());
   }
-  virtual void preprocess(std::set<LeafNode *> &leaves) {
+  virtual void preprocess(std::unordered_set<LeafNode *> &leaves) {
     if (preprocessed) return;
     child->choiceAncestors.insert(choiceAncestors.begin(), choiceAncestors.end());
     child->preprocess(leaves);
@@ -188,7 +200,7 @@ public:
 class FunctionNode : public DecisionNode {
 private:
   /* the list of arguments to the function. */
-  std::vector<std::pair<std::string, llvm::Type *>> bindings;
+  std::vector<var_type> bindings;
   /* the name of the variable to bind to the result of the function. */
   std::string name;
   /* the name of the function to call */
@@ -220,11 +232,11 @@ public:
     return new FunctionNode(name, function, child, cat, type);
   }
 
-  const std::vector<std::pair<std::string, llvm::Type *>> &getBindings() const { return bindings; }
+  const std::vector<var_type> &getBindings() const { return bindings; }
   void addBinding(std::string name, llvm::Type *type) { bindings.push_back(std::make_pair(name, type)); }
   
-  virtual void codegen(Decision *d, std::map<std::pair<std::string, llvm::Type *>, llvm::Value *> substitution);
-  virtual void eraseDefsAndAddUses(std::set<std::pair<std::string, llvm::Type *>> &vars) {
+  virtual void codegen(Decision *d, std::map<var_type, llvm::Value *> substitution);
+  virtual void eraseDefsAndAddUses(var_set_type &vars) {
     vars.erase(std::make_pair(name, type));
     for (auto var : bindings) { 
       if (var.first.find_first_not_of("-0123456789") != std::string::npos) {
@@ -232,7 +244,7 @@ public:
       }
     }
   }
-  virtual void preprocess(std::set<LeafNode *> &leaves) {
+  virtual void preprocess(std::unordered_set<LeafNode *> &leaves) {
     if (preprocessed) return;
     child->choiceAncestors.insert(choiceAncestors.begin(), choiceAncestors.end());
     child->preprocess(leaves);
@@ -248,7 +260,7 @@ class LeafNode : public DecisionNode {
 private:
   /* the names in the decision tree of the variables used in the rhs of
      this rule, in alphabetical order of their names in the rule. */
-  std::vector<std::pair<std::string, llvm::Type *>> bindings;
+  std::vector<var_type> bindings;
   /* the name of the function that constructs the rhs of this rule from
      the substitution */
   std::string name;
@@ -260,14 +272,14 @@ public:
     return new LeafNode(name);
   }
 
-  const std::vector<std::pair<std::string, llvm::Type *>> &getBindings() const { return bindings; }
+  const std::vector<var_type> &getBindings() const { return bindings; }
   void addBinding(std::string name, llvm::Type *type) { bindings.push_back(std::make_pair(name, type)); }
   
-  virtual void codegen(Decision *d, std::map<std::pair<std::string, llvm::Type *>, llvm::Value *> substitution);
-  virtual void eraseDefsAndAddUses(std::set<std::pair<std::string, llvm::Type *>> &vars) {
+  virtual void codegen(Decision *d, std::map<var_type, llvm::Value *> substitution);
+  virtual void eraseDefsAndAddUses(var_set_type &vars) {
     vars.insert(bindings.begin(), bindings.end());
   }
-  virtual void preprocess(std::set<LeafNode *> &leaves) {
+  virtual void preprocess(std::unordered_set<LeafNode *> &leaves) {
     leaves.insert(this);
   }
 };
@@ -288,12 +300,12 @@ public:
     return new MakeIteratorNode(collection, collectionType, name, type, hookName, child);
   }
 
-  virtual void codegen(Decision *d, std::map<std::pair<std::string, llvm::Type *>, llvm::Value *> substitution);
-  virtual void eraseDefsAndAddUses(std::set<std::pair<std::string, llvm::Type *>> &vars) {
+  virtual void codegen(Decision *d, std::map<var_type, llvm::Value *> substitution);
+  virtual void eraseDefsAndAddUses(var_set_type &vars) {
     vars.erase(std::make_pair(name, type));
     vars.insert(std::make_pair(collection, collectionType));
   }
-  virtual void preprocess(std::set<LeafNode *> &leaves) {
+  virtual void preprocess(std::unordered_set<LeafNode *> &leaves) {
     if (preprocessed) return;
     child->choiceAncestors.insert(choiceAncestors.begin(), choiceAncestors.end());
     child->preprocess(leaves);
@@ -313,9 +325,9 @@ private:
 public:
   static FailNode *get() { return &instance; }
 
-  virtual void codegen(Decision *d, std::map<std::pair<std::string, llvm::Type *>, llvm::Value *> substitution) { abort(); }
-  virtual void preprocess(std::set<LeafNode *> &) { containsFailNode = true; }
-  virtual void eraseDefsAndAddUses(std::set<std::pair<std::string, llvm::Type *>> &vars) {}
+  virtual void codegen(Decision *d, std::map<var_type, llvm::Value *> substitution) { abort(); }
+  virtual void preprocess(std::unordered_set<LeafNode *> &) { containsFailNode = true; }
+  virtual void eraseDefsAndAddUses(var_set_type &vars) {}
 };
 
 class IterNextNode : public DecisionNode {
@@ -334,12 +346,12 @@ public:
     return new IterNextNode(iterator, iteratorType, binding, bindingType, hookName, child);
   }
 
-  virtual void codegen(Decision *d, std::map<std::pair<std::string, llvm::Type *>, llvm::Value *> substitution);
-  virtual void eraseDefsAndAddUses(std::set<std::pair<std::string, llvm::Type *>> &vars) {
+  virtual void codegen(Decision *d, std::map<var_type, llvm::Value *> substitution);
+  virtual void eraseDefsAndAddUses(var_set_type &vars) {
     vars.erase(std::make_pair(binding, bindingType));
     vars.insert(std::make_pair(iterator, iteratorType));
   }
-  virtual void preprocess(std::set<LeafNode *> &leaves) {
+  virtual void preprocess(std::unordered_set<LeafNode *> &leaves) {
     if (preprocessed) return;
     child->choiceAncestors.insert(choiceAncestors.begin(), choiceAncestors.end());
     child->choiceAncestors.insert(this);
@@ -369,10 +381,10 @@ private:
   llvm::LLVMContext &Ctx;
   ValueType Cat;
 
-  std::map<std::pair<std::string, llvm::Type *>, llvm::PHINode *> failPhis;
+  std::map<var_type, llvm::PHINode *> failPhis;
 
   llvm::Value *getTag(llvm::Value *);
-  void addFailPhiIncoming(std::map<std::pair<std::string, llvm::Type *>, llvm::Value *> oldSubst, llvm::BasicBlock *switchBlock);
+  void addFailPhiIncoming(std::map<var_type, llvm::Value *> oldSubst, llvm::BasicBlock *switchBlock);
 public:
   Decision(
     KOREDefinition *Definition,
@@ -396,7 +408,7 @@ public:
 
   /* adds code to the specified basic block to take a single step based on
      the specified decision tree and return the result of taking that step. */
-  void operator()(DecisionNode *entry, std::map<std::pair<std::string, llvm::Type *>, llvm::Value *> substitution);
+  void operator()(DecisionNode *entry, std::map<var_type, llvm::Value *> substitution);
 
   friend class SwitchNode;
   friend class MakePatternNode;

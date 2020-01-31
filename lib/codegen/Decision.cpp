@@ -54,7 +54,7 @@ void Decision::operator()(DecisionNode *entry, std::map<std::pair<std::string, l
   }
 }
 
-void DecisionNode::computeLiveness(std::set<LeafNode *> &leaves) {
+void DecisionNode::computeLiveness(std::unordered_set<LeafNode *> &leaves) {
   std::set<DecisionNode *> workList;
   workList.insert(leaves.begin(), leaves.end());
   if (containsFailNode) {
@@ -63,7 +63,7 @@ void DecisionNode::computeLiveness(std::set<LeafNode *> &leaves) {
   while (!workList.empty()) {
     DecisionNode *node = *workList.begin();
     workList.erase(node);
-    std::set<std::pair<std::string, llvm::Type *>> newVars;
+    var_set_type newVars;
     for (DecisionNode *succ : node->successors) {
       if (succ == FailNode::get()) {
         for (DecisionNode *trueSucc : succ->successors) {
@@ -386,7 +386,7 @@ llvm::Value *Decision::getTag(llvm::Value *val) {
 static void initChoiceBuffer(DecisionNode *dt, llvm::Module *module, llvm::BasicBlock *block, llvm::BasicBlock *stuck, llvm::BasicBlock *fail, llvm::AllocaInst **choiceBufferOut, llvm::AllocaInst **choiceDepthOut, llvm::IndirectBrInst **jumpOut) {
   FailNode::get()->predecessors.clear();
   FailNode::get()->successors.clear();
-  std::set<LeafNode *> leaves;
+  std::unordered_set<LeafNode *> leaves;
   dt->preprocess(leaves);
   dt->computeLiveness(leaves);
   auto ty = llvm::ArrayType::get(llvm::Type::getInt8PtrTy(module->getContext()), dt->getChoiceDepth() + 1);
