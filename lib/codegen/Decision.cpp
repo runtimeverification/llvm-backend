@@ -76,10 +76,11 @@ void DecisionNode::computeLiveness(std::unordered_set<LeafNode *> &leaves) {
       }
     }
     node->eraseDefsAndAddUses(newVars);
-    if (newVars != node->vars || node->vars.empty()) {
+    if (newVars != node->vars || !livenessVisited) {
       node->vars = newVars;
       workList.insert(node->predecessors.begin(), node->predecessors.end());
     }
+    node->livenessVisited = true;
   }
 }
 

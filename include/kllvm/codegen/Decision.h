@@ -51,7 +51,7 @@ public:
   uint64_t getChoiceDepth() const { return choiceDepth; }
 
 private:
-  bool preprocessed = false, containsFailNode = false;
+  bool preprocessed = false, containsFailNode = false, livenessVisited = false;
   uint64_t choiceDepth = 0;
   var_set_type vars;
   friend class Decision;
