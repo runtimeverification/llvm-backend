@@ -55,14 +55,18 @@ void Decision::operator()(DecisionNode *entry, std::map<std::pair<std::string, l
 }
 
 void DecisionNode::computeLiveness(std::unordered_set<LeafNode *> &leaves) {
-  std::set<DecisionNode *> workList;
-  workList.insert(leaves.begin(), leaves.end());
+  std::deque<DecisionNode *> workList;
+  std::unordered_set<DecisionNode *> workListSet;
+  workList.insert(workList.end(), leaves.begin(), leaves.end());
+  workListSet.insert(leaves.begin(), leaves.end());
   if (containsFailNode) {
-    workList.insert(FailNode::get());
+    workList.push_back(FailNode::get());
+    workListSet.insert(FailNode::get());
   }
   while (!workList.empty()) {
-    DecisionNode *node = *workList.begin();
-    workList.erase(node);
+    DecisionNode *node = workList.front();
+    workList.pop_front();
+    workListSet.erase(node);
     var_set_type newVars;
     for (DecisionNode *succ : node->successors) {
       if (succ == FailNode::get()) {
@@ -78,7 +82,12 @@ void DecisionNode::computeLiveness(std::unordered_set<LeafNode *> &leaves) {
     node->eraseDefsAndAddUses(newVars);
     if (newVars != node->vars || !livenessVisited) {
       node->vars = newVars;
-      workList.insert(node->predecessors.begin(), node->predecessors.end());
+      for (DecisionNode *pred : node->predecessors) {
+        if (!workListSet.count(pred)) {
+          workListSet.insert(pred);
+	  workList.push_back(pred);
+	}
+      }
     }
     node->livenessVisited = true;
   }
