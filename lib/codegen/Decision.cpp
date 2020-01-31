@@ -402,8 +402,8 @@ static void initChoiceBuffer(DecisionNode *dt, llvm::Module *module, llvm::Basic
   auto ty = llvm::ArrayType::get(llvm::Type::getInt8PtrTy(module->getContext()), dt->getChoiceDepth() + 1);
   llvm::AllocaInst *choiceBuffer = new llvm::AllocaInst(ty, 0, "choiceBuffer", block);
   llvm::AllocaInst *choiceDepth = new llvm::AllocaInst(llvm::Type::getInt64Ty(module->getContext()), 0, "choiceDepth", block);
-  new llvm::StoreInst(llvm::ConstantInt::get(llvm::Type::getInt64Ty(module->getContext()), 0), choiceDepth, block);
   auto zero = llvm::ConstantInt::get(llvm::Type::getInt64Ty(module->getContext()), 0);
+  new llvm::StoreInst(zero, choiceDepth, block);
   auto firstElt = llvm::GetElementPtrInst::CreateInBounds(ty, choiceBuffer, {zero, zero}, "", block);
   new llvm::StoreInst(llvm::BlockAddress::get(block->getParent(), stuck), firstElt, block);
 
