@@ -54,6 +54,26 @@ void Decision::operator()(DecisionNode *entry, std::map<std::pair<std::string, l
   }
 }
 
+void SwitchNode::eraseDefsAndAddUses(var_set_type &vars) {
+  for (auto _case : cases) {
+    var_set_type caseVars;
+    if (_case.getChild() == FailNode::get()) {
+      for (DecisionNode *trueSucc : _case.getChild()->successors) {
+        if (choiceAncestors.count(dynamic_cast<IterNextNode *>(trueSucc))) {
+          caseVars.insert(trueSucc->vars.begin(), trueSucc->vars.end());
+        }
+      }
+    } else {
+      caseVars = _case.getChild()->vars;
+    }
+    for (auto var : _case.getBindings()) {
+      caseVars.erase(var);
+    }
+    vars.insert(caseVars.begin(), caseVars.end());
+  }
+  if(cases.size() != 1 || cases[0].getConstructor()) vars.insert(std::make_pair(name, type)); 
+}
+
 void DecisionNode::computeLiveness(std::unordered_set<LeafNode *> &leaves) {
   std::deque<DecisionNode *> workList;
   std::unordered_set<DecisionNode *> workListSet;

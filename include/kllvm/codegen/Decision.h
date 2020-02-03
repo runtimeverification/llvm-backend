@@ -64,6 +64,19 @@ private:
   friend class IterNextNode;
 };
 
+class FailNode : public DecisionNode {
+private:
+  FailNode() {}
+
+  static FailNode instance;
+public:
+  static FailNode *get() { return &instance; }
+
+  virtual void codegen(Decision *d, std::map<var_type, llvm::Value *> substitution) { abort(); }
+  virtual void preprocess(std::unordered_set<LeafNode *> &) { containsFailNode = true; }
+  virtual void eraseDefsAndAddUses(var_set_type &vars) {}
+};
+
 class DecisionCase {
 private:
   /* constructor to switch on. if null, this is a wildcard match.
@@ -119,16 +132,7 @@ public:
   const std::vector<DecisionCase> &getCases() const { return cases; }
   
   virtual void codegen(Decision *d, std::map<var_type, llvm::Value *> substitution);
-  virtual void eraseDefsAndAddUses(var_set_type &vars) {
-    for (auto _case : cases) {
-      auto caseVars = _case.getChild()->vars;
-      for (auto var : _case.getBindings()) {
-        caseVars.erase(var);
-      }
-      vars.insert(caseVars.begin(), caseVars.end());
-    }
-    if(cases.size() != 1 || cases[0].getConstructor()) vars.insert(std::make_pair(name, type)); 
-  }
+  virtual void eraseDefsAndAddUses(var_set_type &vars);
   virtual void preprocess(std::unordered_set<LeafNode *> &leaves) {
     if(preprocessed) return;
     bool hasDefault = false;
@@ -315,19 +319,6 @@ public:
     choiceDepth = child->choiceDepth;
     preprocessed = true;
   }
-};
-
-class FailNode : public DecisionNode {
-private:
-  FailNode() {}
-
-  static FailNode instance;
-public:
-  static FailNode *get() { return &instance; }
-
-  virtual void codegen(Decision *d, std::map<var_type, llvm::Value *> substitution) { abort(); }
-  virtual void preprocess(std::unordered_set<LeafNode *> &) { containsFailNode = true; }
-  virtual void eraseDefsAndAddUses(var_set_type &vars) {}
 };
 
 class IterNextNode : public DecisionNode {
