@@ -88,15 +88,17 @@ void DecisionNode::computeLiveness(std::unordered_set<LeafNode *> &leaves) {
     workList.pop_front();
     workListSet.erase(node);
     var_set_type newVars;
-    for (DecisionNode *succ : node->successors) {
-      if (succ == FailNode::get()) {
-        for (DecisionNode *trueSucc : succ->successors) {
-          if (node->choiceAncestors.count(dynamic_cast<IterNextNode *>(trueSucc))) {
-            newVars.insert(trueSucc->vars.begin(), trueSucc->vars.end());
+    if (!dynamic_cast<SwitchNode *>(node)) {
+      for (DecisionNode *succ : node->successors) {
+        if (succ == FailNode::get()) {
+          for (DecisionNode *trueSucc : succ->successors) {
+            if (node->choiceAncestors.count(dynamic_cast<IterNextNode *>(trueSucc))) {
+              newVars.insert(trueSucc->vars.begin(), trueSucc->vars.end());
+            }
           }
+	} else {
+          newVars.insert(succ->vars.begin(), succ->vars.end());
         }
-      } else if (!dynamic_cast<SwitchNode *>(node)) {
-        newVars.insert(succ->vars.begin(), succ->vars.end());
       }
     }
     node->eraseDefsAndAddUses(newVars);
@@ -154,13 +156,15 @@ bool DecisionNode::beginNode(Decision *d, std::string name, std::map<std::pair<s
   return false;
 }
 
-void Decision::addFailPhiIncoming(std::map<std::pair<std::string, llvm::Type *>, llvm::Value *> oldSubst, llvm::BasicBlock *switchBlock) {
+void Decision::addFailPhiIncoming(std::map<std::pair<std::string, llvm::Type *>, llvm::Value *> oldSubst, llvm::BasicBlock *switchBlock, var_set_type &vars) {
   for (auto var : FailNode::get()->vars) {
-    auto val = oldSubst[var];
-    if (!val) {
-      val = llvm::UndefValue::get(var.second);
+    if (vars.count(var)) {
+      auto val = oldSubst[var];
+      if (!val) {
+        val = llvm::UndefValue::get(var.second);
+      }
+      failPhis[var]->addIncoming(val, switchBlock);
     }
-    failPhis[var]->addIncoming(val, switchBlock);
   }
 }
 
@@ -221,7 +225,7 @@ void SwitchNode::codegen(Decision *d, std::map<std::pair<std::string, llvm::Type
     auto newSubst = substitution;
     auto &_case = *entry.second;
     if (entry.first == d->FailureBlock) {
-      d->addFailPhiIncoming(substitution, switchBlock);
+      d->addFailPhiIncoming(substitution, switchBlock, this->vars);
       continue;
     }
     d->CurrentBlock = entry.first;
@@ -283,10 +287,10 @@ void SwitchNode::codegen(Decision *d, std::map<std::pair<std::string, llvm::Type
       d->CurrentBlock = _default;
       defaultCase->getChild()->codegen(d, substitution);
     } else {
-      d->addFailPhiIncoming(substitution, switchBlock);
+      d->addFailPhiIncoming(substitution, switchBlock, this->vars);
     }
   } else {
-    d->addFailPhiIncoming(substitution, switchBlock);
+    d->addFailPhiIncoming(substitution, switchBlock, this->vars);
   }
 
   setCompleted();

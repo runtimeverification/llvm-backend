@@ -375,7 +375,7 @@ private:
   std::map<var_type, llvm::PHINode *> failPhis;
 
   llvm::Value *getTag(llvm::Value *);
-  void addFailPhiIncoming(std::map<var_type, llvm::Value *> oldSubst, llvm::BasicBlock *switchBlock);
+  void addFailPhiIncoming(std::map<var_type, llvm::Value *> oldSubst, llvm::BasicBlock *switchBlock, var_set_type &vars);
 public:
   Decision(
     KOREDefinition *Definition,
