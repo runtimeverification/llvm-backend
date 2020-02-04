@@ -27,7 +27,7 @@ struct HashVar {
 
 
 using var_type = std::pair<std::string, llvm::Type *>;
-using var_set_type = std::unordered_set<var_type, HashVar>;
+using var_set_type = std::unordered_map<var_type, std::unordered_set<IterNextNode *>, HashVar>;
 
 class DecisionNode {
 public:
@@ -185,7 +185,9 @@ public:
   virtual void codegen(Decision *d, std::map<var_type, llvm::Value *> substitution);
   virtual void eraseDefsAndAddUses(var_set_type &vars) {
     vars.erase(std::make_pair(name, type));
-    vars.insert(uses.begin(), uses.end());
+    for (auto &use : uses) {
+      vars[use] = {};
+    }
   }
   virtual void preprocess(std::unordered_set<LeafNode *> &leaves) {
     if (preprocessed) return;
@@ -244,7 +246,7 @@ public:
     vars.erase(std::make_pair(name, type));
     for (auto var : bindings) { 
       if (var.first.find_first_not_of("-0123456789") != std::string::npos) {
-        vars.insert(var);
+        vars[var] = {};
       }
     }
   }
@@ -281,7 +283,9 @@ public:
   
   virtual void codegen(Decision *d, std::map<var_type, llvm::Value *> substitution);
   virtual void eraseDefsAndAddUses(var_set_type &vars) {
-    vars.insert(bindings.begin(), bindings.end());
+    for (auto &binding : bindings) {
+      vars[binding] = {};
+    }
   }
   virtual void preprocess(std::unordered_set<LeafNode *> &leaves) {
     leaves.insert(this);
@@ -307,7 +311,7 @@ public:
   virtual void codegen(Decision *d, std::map<var_type, llvm::Value *> substitution);
   virtual void eraseDefsAndAddUses(var_set_type &vars) {
     vars.erase(std::make_pair(name, type));
-    vars.insert(std::make_pair(collection, collectionType));
+    vars[std::make_pair(collection, collectionType)] = {};
   }
   virtual void preprocess(std::unordered_set<LeafNode *> &leaves) {
     if (preprocessed) return;
@@ -340,7 +344,7 @@ public:
   virtual void codegen(Decision *d, std::map<var_type, llvm::Value *> substitution);
   virtual void eraseDefsAndAddUses(var_set_type &vars) {
     vars.erase(std::make_pair(binding, bindingType));
-    vars.insert(std::make_pair(iterator, iteratorType));
+    vars[std::make_pair(iterator, iteratorType)] = {};
   }
   virtual void preprocess(std::unordered_set<LeafNode *> &leaves) {
     if (preprocessed) return;
