@@ -273,7 +273,7 @@ sptr<KOREPattern> KORECompositePattern::expandAliases(KOREDefinition *def) {
   if (def->getAliasDeclarations().count(constructor->getName())) {
     auto alias = def->getAliasDeclarations().at(constructor->getName());
     auto subst = alias->getSubstitution(this);
-    return alias->getPattern()->substitute(subst);
+    return alias->getPattern()->substitute(subst)->expandAliases(def);
   }
   if (arguments.empty()) {
     return shared_from_this();
