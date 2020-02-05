@@ -272,7 +272,13 @@ public:
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
   virtual void markSymbols(std::map<std::string, std::vector<KORESymbol *>> &) override {}
   virtual void markVariables(std::map<std::string, KOREVariablePattern *> &map) override { map.insert({name->getName(), this}); }
-  virtual sptr<KOREPattern> substitute(const substitution &subst) override { return subst.at(name->getName()); }
+  virtual sptr<KOREPattern> substitute(const substitution &subst) override {
+    auto val = subst.find(name->getName());
+    if (val == subst.end()) {
+      return shared_from_this();
+    }
+    return val->second;
+  }
   virtual sptr<KOREPattern> expandAliases(KOREDefinition *) override { return shared_from_this(); }
 
 private:

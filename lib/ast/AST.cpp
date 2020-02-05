@@ -255,6 +255,14 @@ sptr<KOREPattern> KORECompositePattern::substitute(const substitution &subst) {
     return shared_from_this();
   }
   auto ptr = KORECompositePattern::Create(constructor.get());
+  auto name = constructor->getName();
+  if (name == "\\forall" || name == "\\exists") {
+    ptr->addArgument(arguments[0]);
+    auto newSubst = subst;
+    newSubst.erase(dynamic_cast<KOREVariablePattern *>(arguments[0].get())->getName());
+    ptr->addArgument(arguments[1]->substitute(newSubst));
+    return ptr;
+  }
   for (auto &arg : arguments) {
     ptr->addArgument(arg->substitute(subst));
   }
@@ -265,7 +273,7 @@ sptr<KOREPattern> KORECompositePattern::expandAliases(KOREDefinition *def) {
   if (def->getAliasDeclarations().count(constructor->getName())) {
     auto alias = def->getAliasDeclarations().at(constructor->getName());
     auto subst = alias->getSubstitution(this);
-    return alias->getPattern()->substitute(subst);
+    return alias->getPattern()->substitute(subst)->expandAliases(def);
   }
   if (arguments.empty()) {
     return shared_from_this();
@@ -439,7 +447,19 @@ KOREPattern *KOREAxiomDeclaration::getRequires() const {
               return equals->getArguments()[0].get();
             } else if (equals->getConstructor()->getName() == "\\top" && equals->getArguments().empty()) {
               return nullptr;
-            }
+            } else if (equals->getConstructor()->getName() == "\\not" && equals->getArguments().size() == 1) {
+              if (auto andPattern2 = dynamic_cast<KORECompositePattern *>(andPattern->getArguments()[1].get())) {
+                if (andPattern2->getConstructor()->getName() == "\\and" && andPattern2->getArguments().size() == 2) {
+                  if (auto equals2 = dynamic_cast<KORECompositePattern *>(andPattern2->getArguments()[0].get())) {
+                    if (equals2->getConstructor()->getName() == "\\equals" && equals2->getArguments().size() == 2) {
+                      return equals2->getArguments()[0].get();
+                    } else if (equals2->getConstructor()->getName() == "\\top" && equals2->getArguments().empty()) {
+                      return nullptr;
+		    }
+		  }
+		}
+	      }
+	    }
           }
         }
       }
