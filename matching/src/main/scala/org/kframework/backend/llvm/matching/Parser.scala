@@ -172,15 +172,15 @@ object Parser {
 
   private def substitute(pat: Pattern, subst: Map[String, Pattern]): Pattern = {
     pat match {
-      case Variable(name, _) => subst(name)
+      case Variable(name, _) => subst.getOrElse(name, pat)
       case Application(head, args) => B.Application(head, args.map(substitute(_, subst)))
       case And(s, l, r) => B.And(s, substitute(l, subst), substitute(r, subst))
       case Or(s, l, r) => B.Or(s, substitute(l, subst), substitute(r, subst))
       case Not(s, p) => B.Not(s, substitute(p, subst))
       case Implies(s, l, r) => B.Implies(s, substitute(l, subst), substitute(r, subst))
       case Iff(s, l, r) => B.Iff(s, substitute(l, subst), substitute(r, subst))
-      case Exists(s, v, p) => B.Exists(s, v, substitute(p, subst))
-      case Forall(s, v, p) => B.Forall(s, v, substitute(p, subst))
+      case Exists(s, v, p) => B.Exists(s, v, substitute(p, subst - v.name))
+      case Forall(s, v, p) => B.Forall(s, v, substitute(p, subst - v.name))
       case Ceil(s1, s2, p) => B.Ceil(s1, s2, substitute(p, subst))
       case Floor(s1, s2, p) => B.Floor(s1, s2, substitute(p, subst))
       case Rewrites(s, l, r) => B.Rewrites(s, substitute(l, subst), substitute(r, subst))

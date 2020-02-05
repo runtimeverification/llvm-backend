@@ -255,6 +255,14 @@ sptr<KOREPattern> KORECompositePattern::substitute(const substitution &subst) {
     return shared_from_this();
   }
   auto ptr = KORECompositePattern::Create(constructor.get());
+  auto name = constructor->getName();
+  if (name == "\\forall" || name == "\\exists") {
+    ptr->addArgument(arguments[0]);
+    auto newSubst = subst;
+    newSubst.erase(dynamic_cast<KOREVariablePattern *>(arguments[0].get())->getName());
+    ptr->addArgument(arguments[1]->substitute(newSubst));
+    return ptr;
+  }
   for (auto &arg : arguments) {
     ptr->addArgument(arg->substitute(subst));
   }
