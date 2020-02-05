@@ -996,7 +996,9 @@ std::string makeApplyRuleFunction(KOREAxiomDeclaration *axiom, KOREDefinition *d
     int i = 0;
     for (auto val = applyRule->arg_begin(); val != applyRule->arg_end(); ++val, ++i) {
       subst.insert({paramNames[i], val});
-      initDebugParam(applyRule, i, paramNames[i], params[paramNames[i]], llvm::dyn_cast<llvm::DIType>(debugArgs[i])->getName());
+      if (debugArgs[i]) {
+        initDebugParam(applyRule, i, paramNames[i], params[paramNames[i]], llvm::dyn_cast<llvm::DIType>(debugArgs[i])->getName());
+      }
     }
     CreateTerm creator = CreateTerm(subst, definition, block, Module, false);
     std::vector<llvm::Value *> args;
