@@ -196,7 +196,7 @@ object Parser {
         if (aliases.contains(head.ctr)) {
           val alias = aliases(head.ctr)
           val subst = getSubstitution(alias.leftPattern, args)
-          substitute(alias.rightPattern, subst)
+          expandAliases(substitute(alias.rightPattern, subst), aliases)
         } else if (args.isEmpty) {
           pat
         } else {
