@@ -27,7 +27,7 @@ struct HashVar {
 
 
 using var_type = std::pair<std::string, llvm::Type *>;
-using var_set_type = std::unordered_set<var_type, HashVar>;
+using var_set_type = std::unordered_map<var_type, std::unordered_set<IterNextNode *>, HashVar>;
 
 class DecisionNode {
 public:
@@ -62,6 +62,19 @@ private:
   friend class FailNode;
   friend class MakeIteratorNode;
   friend class IterNextNode;
+};
+
+class FailNode : public DecisionNode {
+private:
+  FailNode() {}
+
+  static FailNode instance;
+public:
+  static FailNode *get() { return &instance; }
+
+  virtual void codegen(Decision *d, std::map<var_type, llvm::Value *> substitution) { abort(); }
+  virtual void preprocess(std::unordered_set<LeafNode *> &) { containsFailNode = true; }
+  virtual void eraseDefsAndAddUses(var_set_type &vars) {}
 };
 
 class DecisionCase {
@@ -119,16 +132,7 @@ public:
   const std::vector<DecisionCase> &getCases() const { return cases; }
   
   virtual void codegen(Decision *d, std::map<var_type, llvm::Value *> substitution);
-  virtual void eraseDefsAndAddUses(var_set_type &vars) {
-    for (auto _case : cases) {
-      auto caseVars = _case.getChild()->vars;
-      for (auto var : _case.getBindings()) {
-        caseVars.erase(var);
-      }
-      vars.insert(caseVars.begin(), caseVars.end());
-    }
-    if(cases.size() != 1 || cases[0].getConstructor()) vars.insert(std::make_pair(name, type)); 
-  }
+  virtual void eraseDefsAndAddUses(var_set_type &vars);
   virtual void preprocess(std::unordered_set<LeafNode *> &leaves) {
     if(preprocessed) return;
     bool hasDefault = false;
@@ -181,7 +185,9 @@ public:
   virtual void codegen(Decision *d, std::map<var_type, llvm::Value *> substitution);
   virtual void eraseDefsAndAddUses(var_set_type &vars) {
     vars.erase(std::make_pair(name, type));
-    vars.insert(uses.begin(), uses.end());
+    for (auto &use : uses) {
+      vars[use] = {};
+    }
   }
   virtual void preprocess(std::unordered_set<LeafNode *> &leaves) {
     if (preprocessed) return;
@@ -240,7 +246,7 @@ public:
     vars.erase(std::make_pair(name, type));
     for (auto var : bindings) { 
       if (var.first.find_first_not_of("-0123456789") != std::string::npos) {
-        vars.insert(var);
+        vars[var] = {};
       }
     }
   }
@@ -277,7 +283,9 @@ public:
   
   virtual void codegen(Decision *d, std::map<var_type, llvm::Value *> substitution);
   virtual void eraseDefsAndAddUses(var_set_type &vars) {
-    vars.insert(bindings.begin(), bindings.end());
+    for (auto &binding : bindings) {
+      vars[binding] = {};
+    }
   }
   virtual void preprocess(std::unordered_set<LeafNode *> &leaves) {
     leaves.insert(this);
@@ -303,7 +311,7 @@ public:
   virtual void codegen(Decision *d, std::map<var_type, llvm::Value *> substitution);
   virtual void eraseDefsAndAddUses(var_set_type &vars) {
     vars.erase(std::make_pair(name, type));
-    vars.insert(std::make_pair(collection, collectionType));
+    vars[std::make_pair(collection, collectionType)] = {};
   }
   virtual void preprocess(std::unordered_set<LeafNode *> &leaves) {
     if (preprocessed) return;
@@ -315,19 +323,6 @@ public:
     choiceDepth = child->choiceDepth;
     preprocessed = true;
   }
-};
-
-class FailNode : public DecisionNode {
-private:
-  FailNode() {}
-
-  static FailNode instance;
-public:
-  static FailNode *get() { return &instance; }
-
-  virtual void codegen(Decision *d, std::map<var_type, llvm::Value *> substitution) { abort(); }
-  virtual void preprocess(std::unordered_set<LeafNode *> &) { containsFailNode = true; }
-  virtual void eraseDefsAndAddUses(var_set_type &vars) {}
 };
 
 class IterNextNode : public DecisionNode {
@@ -349,7 +344,7 @@ public:
   virtual void codegen(Decision *d, std::map<var_type, llvm::Value *> substitution);
   virtual void eraseDefsAndAddUses(var_set_type &vars) {
     vars.erase(std::make_pair(binding, bindingType));
-    vars.insert(std::make_pair(iterator, iteratorType));
+    vars[std::make_pair(iterator, iteratorType)] = {};
   }
   virtual void preprocess(std::unordered_set<LeafNode *> &leaves) {
     if (preprocessed) return;
@@ -384,7 +379,7 @@ private:
   std::map<var_type, llvm::PHINode *> failPhis;
 
   llvm::Value *getTag(llvm::Value *);
-  void addFailPhiIncoming(std::map<var_type, llvm::Value *> oldSubst, llvm::BasicBlock *switchBlock);
+  void addFailPhiIncoming(std::map<var_type, llvm::Value *> oldSubst, llvm::BasicBlock *switchBlock, var_set_type &vars);
 public:
   Decision(
     KOREDefinition *Definition,

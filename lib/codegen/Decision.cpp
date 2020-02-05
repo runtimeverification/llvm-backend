@@ -25,7 +25,8 @@ void Decision::operator()(DecisionNode *entry, std::map<std::pair<std::string, l
     llvm::BranchInst::Create(this->FailureBlock, this->CurrentBlock);
   } else {
     if (entry->containsFailNode) {
-      for (auto var : FailNode::get()->vars) {
+      for (auto &entry : FailNode::get()->vars) {
+        auto &var = entry.first;
         llvm::PHINode *failPhi = llvm::PHINode::Create(var.second, FailNode::get()->predecessors.size(), "phi" + var.first.substr(0, max_name_length), FailureBlock->getFirstNonPHI());
         failPhis[var] = failPhi;
       }
@@ -54,6 +55,56 @@ void Decision::operator()(DecisionNode *entry, std::map<std::pair<std::string, l
   }
 }
 
+static void insertVia(var_set_type &dest, var_set_type src, IterNextNode *choice) {
+  for (auto &entry : src) {
+    auto &var = entry.first;
+    if (dest.count(var)) {
+      auto &via = dest[var];
+      if (!via.empty()) {
+        via.insert(choice);
+      }
+    } else {
+      dest.insert({var, {choice}});
+    }
+  }
+}
+
+static void insertVia(DecisionNode *node, var_set_type &dest, var_set_type src) {
+  for (auto &entry : src) {
+    if (entry.second.empty()) {
+      dest[entry.first] = entry.second;
+    } else {
+      for (auto &choice : entry.second) {
+        if (node->choiceAncestors.count(choice)) {
+          insertVia(dest, {entry}, choice);
+        }
+      }
+    }
+  }
+}
+
+void SwitchNode::eraseDefsAndAddUses(var_set_type &vars) {
+  for (auto _case : cases) {
+    var_set_type caseVars;
+    if (_case.getChild() == FailNode::get()) {
+      for (DecisionNode *trueSucc : _case.getChild()->successors) {
+        if (auto choice = dynamic_cast<IterNextNode *>(trueSucc)) {
+          if (choiceAncestors.count(choice)) {
+            insertVia(caseVars, trueSucc->vars, choice);
+	  }
+        }
+      }
+    } else {
+      insertVia(this, caseVars, _case.getChild()->vars);
+    }
+    for (auto var : _case.getBindings()) {
+      caseVars.erase(var);
+    }
+    insertVia(this, vars, caseVars);
+  }
+  if(cases.size() != 1 || cases[0].getConstructor()) vars[std::make_pair(name, type)] = {}; 
+}
+
 void DecisionNode::computeLiveness(std::unordered_set<LeafNode *> &leaves) {
   std::deque<DecisionNode *> workList;
   std::unordered_set<DecisionNode *> workListSet;
@@ -68,15 +119,19 @@ void DecisionNode::computeLiveness(std::unordered_set<LeafNode *> &leaves) {
     workList.pop_front();
     workListSet.erase(node);
     var_set_type newVars;
-    for (DecisionNode *succ : node->successors) {
-      if (succ == FailNode::get()) {
-        for (DecisionNode *trueSucc : succ->successors) {
-          if (node->choiceAncestors.count(dynamic_cast<IterNextNode *>(trueSucc))) {
-            newVars.insert(trueSucc->vars.begin(), trueSucc->vars.end());
+    if (!dynamic_cast<SwitchNode *>(node)) {
+      for (DecisionNode *succ : node->successors) {
+        if (succ == FailNode::get()) {
+          for (DecisionNode *trueSucc : succ->successors) {
+            if (auto choice = dynamic_cast<IterNextNode *>(trueSucc)) {
+              if (node->choiceAncestors.count(choice)) {
+                insertVia(newVars, trueSucc->vars, choice);
+              }
+            }
           }
+        } else {
+          insertVia(node, newVars, succ->vars);
         }
-      } else if (!dynamic_cast<SwitchNode *>(node)) {
-        newVars.insert(succ->vars.begin(), succ->vars.end());
       }
     }
     node->eraseDefsAndAddUses(newVars);
@@ -94,9 +149,14 @@ void DecisionNode::computeLiveness(std::unordered_set<LeafNode *> &leaves) {
 }
 
 void DecisionNode::sharedNode(Decision *d, std::map<std::pair<std::string, llvm::Type *>, llvm::Value *> &oldSubst, std::map<std::pair<std::string, llvm::Type *>, llvm::Value *> &substitution, llvm::BasicBlock *Block) {
-  for (auto var : vars) {
+  for (auto &entry : vars) {
+    auto &var = entry.first;
     auto Phi = phis[var];
-    Phi->addIncoming(oldSubst[var], Block);
+    auto val = oldSubst[var];
+    if (!val) {
+      val = llvm::UndefValue::get(Phi->getType());
+    }
+    Phi->addIncoming(val, Block);
     substitution[var] = Phi;
   }
   for (auto &entry : phis) {
@@ -110,6 +170,14 @@ void DecisionNode::sharedNode(Decision *d, std::map<std::pair<std::string, llvm:
  
 
 bool DecisionNode::beginNode(Decision *d, std::string name, std::map<std::pair<std::string, llvm::Type *>, llvm::Value *> &substitution) {
+  auto it = substitution.begin();
+  while (it != substitution.end()) {
+    if (!vars.count(it->first)) {
+      it = substitution.erase(it);
+    } else {
+      ++it;
+    }
+  }
   if (isCompleted()) {
     llvm::BranchInst::Create(cachedCode, d->CurrentBlock);
     sharedNode(d, substitution, substitution, d->CurrentBlock);
@@ -120,7 +188,8 @@ bool DecisionNode::beginNode(Decision *d, std::string name, std::map<std::pair<s
       d->CurrentBlock->getParent());
   cachedCode = Block;
   llvm::BranchInst::Create(Block, d->CurrentBlock);
-  for (auto var : vars) {
+  for (auto &entry : vars) {
+    auto &var = entry.first;
     auto val = substitution[var];
     if (!val) {
       val = llvm::UndefValue::get(var.second);
@@ -134,13 +203,16 @@ bool DecisionNode::beginNode(Decision *d, std::string name, std::map<std::pair<s
   return false;
 }
 
-void Decision::addFailPhiIncoming(std::map<std::pair<std::string, llvm::Type *>, llvm::Value *> oldSubst, llvm::BasicBlock *switchBlock) {
-  for (auto var : FailNode::get()->vars) {
-    auto val = oldSubst[var];
-    if (!val) {
-      val = llvm::UndefValue::get(var.second);
+void Decision::addFailPhiIncoming(std::map<std::pair<std::string, llvm::Type *>, llvm::Value *> oldSubst, llvm::BasicBlock *switchBlock, var_set_type &vars) {
+  for (auto &entry : FailNode::get()->vars) {
+    auto &var = entry.first;
+    if (vars.count(var)) {
+      auto val = oldSubst[var];
+      if (!val) {
+        val = llvm::UndefValue::get(var.second);
+      }
+      failPhis[var]->addIncoming(val, switchBlock);
     }
-    failPhis[var]->addIncoming(val, switchBlock);
   }
 }
 
@@ -201,7 +273,7 @@ void SwitchNode::codegen(Decision *d, std::map<std::pair<std::string, llvm::Type
     auto newSubst = substitution;
     auto &_case = *entry.second;
     if (entry.first == d->FailureBlock) {
-      d->addFailPhiIncoming(substitution, switchBlock);
+      d->addFailPhiIncoming(substitution, switchBlock, this->vars);
       continue;
     }
     d->CurrentBlock = entry.first;
@@ -263,10 +335,10 @@ void SwitchNode::codegen(Decision *d, std::map<std::pair<std::string, llvm::Type
       d->CurrentBlock = _default;
       defaultCase->getChild()->codegen(d, substitution);
     } else {
-      d->addFailPhiIncoming(substitution, switchBlock);
+      d->addFailPhiIncoming(substitution, switchBlock, this->vars);
     }
   } else {
-    d->addFailPhiIncoming(substitution, switchBlock);
+    d->addFailPhiIncoming(substitution, switchBlock, this->vars);
   }
 
   setCompleted();
@@ -345,11 +417,12 @@ void IterNextNode::codegen(Decision *d, std::map<std::pair<std::string, llvm::Ty
   llvm::Value *arg = substitution[std::make_pair(iterator, iteratorType)];
 
   if (containsFailNode) {
-    for (auto var : vars) {
+    for (auto &entry : vars) {
+      auto &var = entry.first;
       auto Phi = phis[var];
       if (!Phi) {
         for (auto v : vars) {
-          std::cerr << v.first << std::endl;
+          std::cerr << v.first.first << std::endl;
         }
         abort();
       }
@@ -396,6 +469,7 @@ llvm::Value *Decision::getTag(llvm::Value *val) {
 static void initChoiceBuffer(DecisionNode *dt, llvm::Module *module, llvm::BasicBlock *block, llvm::BasicBlock *stuck, llvm::BasicBlock *fail, llvm::AllocaInst **choiceBufferOut, llvm::AllocaInst **choiceDepthOut, llvm::IndirectBrInst **jumpOut) {
   FailNode::get()->predecessors.clear();
   FailNode::get()->successors.clear();
+  FailNode::get()->choiceAncestors.clear();
   std::unordered_set<LeafNode *> leaves;
   dt->preprocess(leaves);
   dt->computeLiveness(leaves);
