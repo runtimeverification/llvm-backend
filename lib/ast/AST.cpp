@@ -447,7 +447,19 @@ KOREPattern *KOREAxiomDeclaration::getRequires() const {
               return equals->getArguments()[0].get();
             } else if (equals->getConstructor()->getName() == "\\top" && equals->getArguments().empty()) {
               return nullptr;
-            }
+            } else if (equals->getConstructor()->getName() == "\\not" && equals->getArguments().size() == 1) {
+              if (auto andPattern2 = dynamic_cast<KORECompositePattern *>(andPattern->getArguments()[1].get())) {
+                if (andPattern2->getConstructor()->getName() == "\\and" && andPattern2->getArguments().size() == 2) {
+                  if (auto equals2 = dynamic_cast<KORECompositePattern *>(andPattern2->getArguments()[0].get())) {
+                    if (equals2->getConstructor()->getName() == "\\equals" && equals2->getArguments().size() == 2) {
+                      return equals2->getArguments()[0].get();
+                    } else if (equals2->getConstructor()->getName() == "\\top" && equals2->getArguments().empty()) {
+                      return nullptr;
+		    }
+		  }
+		}
+	      }
+	    }
           }
         }
       }
