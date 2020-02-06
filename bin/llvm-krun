@@ -27,7 +27,7 @@ do
       printf -v "$var_name" %s "$value"
       ;;
       korefile)
-      printf -v "$var_name" %s `cat "$value"`
+      printf -v "$var_name" %s "`cat "$value"`"
       ;;
     esac
     case $sort in
