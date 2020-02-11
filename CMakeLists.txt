@@ -57,7 +57,11 @@ if (NOT LLVM_FOUND)
 endif()
 
 if (NOT LLVM_FOUND)
-  find_package(LLVM 7 REQUIRED CONFIG)
+          find_package(LLVM 7.1 QUIET CONFIG)
+endif()
+
+if (NOT LLVM_FOUND)
+ find_package(LLVM 7 REQUIRED CONFIG)
 endif()
 
 message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
