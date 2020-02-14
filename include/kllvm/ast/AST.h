@@ -434,7 +434,7 @@ public:
   void addVariables(ptr<KORECompositePattern> variables);
   void addPattern(ptr<KOREPattern> Pattern);
   KOREPattern::substitution getSubstitution(KORECompositePattern *subject);
-  ptr<KOREPattern> &getPattern() { return pattern; }
+  sptr<KOREPattern> &getPattern() { return pattern; }
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
 
 private:
