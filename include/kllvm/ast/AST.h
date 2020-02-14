@@ -423,7 +423,7 @@ private:
 class KOREAliasDeclaration : public KORESymbolAliasDeclaration {
 private:
   ptr<KORECompositePattern> boundVariables;
-  ptr<KOREPattern> pattern;
+  sptr<KOREPattern> pattern;
 
 public:
   static ptr<KOREAliasDeclaration> Create(const std::string &Name) {
