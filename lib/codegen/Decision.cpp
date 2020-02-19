@@ -488,6 +488,20 @@ llvm::Value *Decision::getTag(llvm::Value *val) {
   return res;
 }
 
+void DecisionNode::computeChoiceAncestors(std::vector<DecisionNode *> sorted) {
+  for (DecisionNode *node : sorted) {
+    for (DecisionNode *pred : node->predecessors) {
+      if (pred == FailNode::get()) {
+        continue;
+      }
+      node->choiceAncestors.insert(pred->choiceAncestors.begin(), pred->choiceAncestors.end());
+      if (auto choice = dynamic_cast<IterNextNode *>(pred)) {
+        node->choiceAncestors.insert(choice);
+      }
+    }
+  }
+}
+
 static void initChoiceBuffer(DecisionNode *dt, llvm::Module *module, llvm::BasicBlock *block, llvm::BasicBlock *stuck, llvm::BasicBlock *fail, llvm::AllocaInst **choiceBufferOut, llvm::AllocaInst **choiceDepthOut, llvm::IndirectBrInst **jumpOut) {
   FailNode::get()->predecessors.clear();
   FailNode::get()->successors.clear();
@@ -496,6 +510,8 @@ static void initChoiceBuffer(DecisionNode *dt, llvm::Module *module, llvm::Basic
   FailNode::get()->choiceAncestors.clear();
   std::unordered_set<LeafNode *> leaves;
   dt->preprocess(leaves);
+  auto sorted = dt->topologicalSort();
+  DecisionNode::computeChoiceAncestors(sorted);
   dt->computeLiveness(leaves);
   auto ty = llvm::ArrayType::get(llvm::Type::getInt8PtrTy(module->getContext()), dt->getChoiceDepth() + 1);
   llvm::AllocaInst *choiceBuffer = new llvm::AllocaInst(ty, 0, "choiceBuffer", block);

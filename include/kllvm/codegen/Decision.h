@@ -50,6 +50,8 @@ public:
   bool beginNode(Decision *d, std::string name, std::map<var_type, llvm::Value *> &substitution);
   std::vector<DecisionNode *> topologicalSort(void);
 
+  static void computeChoiceAncestors(std::vector<DecisionNode *> sorted);
+
   void setCompleted() { completed = true; }
   bool isCompleted() const { return completed; }
   uint64_t getChoiceDepth() const { return choiceDepth; }
@@ -141,7 +143,6 @@ public:
     if(preprocessed) return;
     bool hasDefault = false;
     for (auto _case : cases) {
-      _case.getChild()->choiceAncestors.insert(choiceAncestors.begin(), choiceAncestors.end());
       _case.getChild()->preprocess(leaves);
       _case.getChild()->predecessors.insert(this);
       _case.getChild()->predecessors2.insert(this);
@@ -197,7 +198,6 @@ public:
   }
   virtual void preprocess(std::unordered_set<LeafNode *> &leaves) {
     if (preprocessed) return;
-    child->choiceAncestors.insert(choiceAncestors.begin(), choiceAncestors.end());
     child->preprocess(leaves);
     child->predecessors.insert(this);
     child->predecessors2.insert(this);
@@ -260,7 +260,6 @@ public:
   }
   virtual void preprocess(std::unordered_set<LeafNode *> &leaves) {
     if (preprocessed) return;
-    child->choiceAncestors.insert(choiceAncestors.begin(), choiceAncestors.end());
     child->preprocess(leaves);
     child->predecessors.insert(this);
     child->predecessors2.insert(this);
@@ -325,7 +324,6 @@ public:
   }
   virtual void preprocess(std::unordered_set<LeafNode *> &leaves) {
     if (preprocessed) return;
-    child->choiceAncestors.insert(choiceAncestors.begin(), choiceAncestors.end());
     child->preprocess(leaves);
     child->predecessors.insert(this);
     child->predecessors2.insert(this);
@@ -360,8 +358,6 @@ public:
   }
   virtual void preprocess(std::unordered_set<LeafNode *> &leaves) {
     if (preprocessed) return;
-    child->choiceAncestors.insert(choiceAncestors.begin(), choiceAncestors.end());
-    child->choiceAncestors.insert(this);
     child->preprocess(leaves);
     child->predecessors.insert(this);
     child->predecessors2.insert(this);
