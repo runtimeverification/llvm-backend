@@ -50,7 +50,7 @@ public:
   bool beginNode(Decision *d, std::string name, std::map<var_type, llvm::Value *> &substitution);
   std::vector<DecisionNode *> topologicalSort(void);
 
-  static void computeChoiceAncestors(std::vector<DecisionNode *> sorted);
+  static void computeChoiceAncestors(std::vector<DecisionNode *> const& sorted);
 
   void setCompleted() { completed = true; }
   bool isCompleted() const { return completed; }

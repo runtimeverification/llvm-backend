@@ -488,7 +488,7 @@ llvm::Value *Decision::getTag(llvm::Value *val) {
   return res;
 }
 
-void DecisionNode::computeChoiceAncestors(std::vector<DecisionNode *> sorted) {
+void DecisionNode::computeChoiceAncestors(std::vector<DecisionNode *> const& sorted) {
   for (DecisionNode *node : sorted) {
     for (DecisionNode *pred : node->predecessors) {
       if (pred == FailNode::get()) {
