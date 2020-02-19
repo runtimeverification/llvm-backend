@@ -148,6 +148,28 @@ void DecisionNode::computeLiveness(std::unordered_set<LeafNode *> &leaves) {
   }
 }
 
+std::vector<DecisionNode *> DecisionNode::topologicalSort(void) {
+  std::vector<DecisionNode *> result;
+  std::vector<DecisionNode *> workList;
+  workList.push_back(this);
+  while (!workList.empty()) {
+    DecisionNode *node = workList.back();
+    workList.pop_back();
+    result.push_back(node);
+    auto it = node->successors2.begin();
+    while (it != node->successors2.end()) {
+      auto succ = *it;
+      it = node->successors2.erase(it);
+      succ->predecessors2.erase(node);
+      if (succ->predecessors2.empty()) {
+        workList.push_back(succ);
+      }
+    }
+  }
+
+  return result;
+}
+
 void DecisionNode::sharedNode(Decision *d, std::map<std::pair<std::string, llvm::Type *>, llvm::Value *> &oldSubst, std::map<std::pair<std::string, llvm::Type *>, llvm::Value *> &substitution, llvm::BasicBlock *Block) {
   for (auto &entry : vars) {
     auto &var = entry.first;
@@ -469,6 +491,8 @@ llvm::Value *Decision::getTag(llvm::Value *val) {
 static void initChoiceBuffer(DecisionNode *dt, llvm::Module *module, llvm::BasicBlock *block, llvm::BasicBlock *stuck, llvm::BasicBlock *fail, llvm::AllocaInst **choiceBufferOut, llvm::AllocaInst **choiceDepthOut, llvm::IndirectBrInst **jumpOut) {
   FailNode::get()->predecessors.clear();
   FailNode::get()->successors.clear();
+  FailNode::get()->predecessors2.clear();
+  FailNode::get()->successors2.clear();
   FailNode::get()->choiceAncestors.clear();
   std::unordered_set<LeafNode *> leaves;
   dt->preprocess(leaves);
