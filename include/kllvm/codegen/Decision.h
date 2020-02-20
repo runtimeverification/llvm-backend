@@ -36,8 +36,8 @@ public:
   std::unordered_set<DecisionNode *> predecessors;
   std::unordered_set<DecisionNode *> successors;
   // destructive set used to compute choiceAncestors. Becomes empty after calling topologicalSort()
-  std::unordered_set<DecisionNode *> predecessors2;
-  std::unordered_set<DecisionNode *> successors2;
+  size_t dagPredecessorCount = 0;
+  std::unordered_set<DecisionNode *> dagSuccessors;
   std::unordered_set<IterNextNode *> choiceAncestors;
   /* completed tracks whether codegen for this DecisionNode has concluded */
   bool completed = false;
@@ -145,9 +145,9 @@ public:
     for (auto _case : cases) {
       _case.getChild()->preprocess(leaves);
       _case.getChild()->predecessors.insert(this);
-      _case.getChild()->predecessors2.insert(this);
+      _case.getChild()->dagPredecessorsCount++;
       this->successors.insert(_case.getChild());
-      this->successors2.insert(_case.getChild());
+      this->dagSuccessors.insert(_case.getChild());
       containsFailNode = containsFailNode || _case.getChild()->containsFailNode;
       hasDefault = hasDefault || _case.getConstructor() == nullptr;
       choiceDepth = std::max(choiceDepth, _case.getChild()->choiceDepth);
@@ -200,9 +200,9 @@ public:
     if (preprocessed) return;
     child->preprocess(leaves);
     child->predecessors.insert(this);
-    child->predecessors2.insert(this);
+    child->dagPredecessorsCount++;
     this->successors.insert(child);
-    this->successors2.insert(child);
+    this->dagSuccessors.insert(child);
     containsFailNode = containsFailNode || child->containsFailNode;
     choiceDepth = child->choiceDepth;
     preprocessed = true;
@@ -262,9 +262,9 @@ public:
     if (preprocessed) return;
     child->preprocess(leaves);
     child->predecessors.insert(this);
-    child->predecessors2.insert(this);
+    child->dagPredecessorsCount++;
     this->successors.insert(child);
-    this->successors2.insert(child);
+    this->dagSuccessors.insert(child);
     containsFailNode = containsFailNode || child->containsFailNode;
     choiceDepth = child->choiceDepth;
     preprocessed = true;
@@ -326,9 +326,9 @@ public:
     if (preprocessed) return;
     child->preprocess(leaves);
     child->predecessors.insert(this);
-    child->predecessors2.insert(this);
+    child->dagPredecessorsCount++;
     this->successors.insert(child);
-    this->successors2.insert(child);
+    this->dagSuccessors.insert(child);
     containsFailNode = containsFailNode || child->containsFailNode;
     choiceDepth = child->choiceDepth;
     preprocessed = true;
@@ -360,9 +360,9 @@ public:
     if (preprocessed) return;
     child->preprocess(leaves);
     child->predecessors.insert(this);
-    child->predecessors2.insert(this);
+    child->dagPredecessorsCount++;
     this->successors.insert(child);
-    this->successors2.insert(child);
+    this->dagSuccessors.insert(child);
     containsFailNode = containsFailNode || child->containsFailNode;
     choiceDepth = child->choiceDepth + 1;
     if (containsFailNode) {

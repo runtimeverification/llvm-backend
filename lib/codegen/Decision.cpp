@@ -156,12 +156,12 @@ std::vector<DecisionNode *> DecisionNode::topologicalSort(void) {
     DecisionNode *node = workList.back();
     workList.pop_back();
     result.push_back(node);
-    auto it = node->successors2.begin();
-    while (it != node->successors2.end()) {
+    auto it = node->dagSuccessors.begin();
+    while (it != node->dagSuccessors.end()) {
       auto succ = *it;
-      it = node->successors2.erase(it);
-      succ->predecessors2.erase(node);
-      if (succ->predecessors2.empty()) {
+      it = node->dagSuccessors.erase(it);
+      succ->dagPredecessorsCount--;
+      if (succ->dagPredecessorsCount == 0) {
         workList.push_back(succ);
       }
     }
@@ -505,8 +505,8 @@ void DecisionNode::computeChoiceAncestors(std::vector<DecisionNode *> const& sor
 static void initChoiceBuffer(DecisionNode *dt, llvm::Module *module, llvm::BasicBlock *block, llvm::BasicBlock *stuck, llvm::BasicBlock *fail, llvm::AllocaInst **choiceBufferOut, llvm::AllocaInst **choiceDepthOut, llvm::IndirectBrInst **jumpOut) {
   FailNode::get()->predecessors.clear();
   FailNode::get()->successors.clear();
-  FailNode::get()->predecessors2.clear();
-  FailNode::get()->successors2.clear();
+  FailNode::get()->dagPredecessorsCount = 0;
+  FailNode::get()->dagSuccessors.clear();
   FailNode::get()->choiceAncestors.clear();
   std::unordered_set<LeafNode *> leaves;
   dt->preprocess(leaves);
