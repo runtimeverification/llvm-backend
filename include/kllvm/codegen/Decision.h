@@ -145,7 +145,7 @@ public:
     for (auto _case : cases) {
       _case.getChild()->preprocess(leaves);
       _case.getChild()->predecessors.insert(this);
-      _case.getChild()->dagPredecessorsCount++;
+      _case.getChild()->dagPredecessorCount++;
       this->successors.insert(_case.getChild());
       this->dagSuccessors.insert(_case.getChild());
       containsFailNode = containsFailNode || _case.getChild()->containsFailNode;
@@ -200,7 +200,7 @@ public:
     if (preprocessed) return;
     child->preprocess(leaves);
     child->predecessors.insert(this);
-    child->dagPredecessorsCount++;
+    child->dagPredecessorCount++;
     this->successors.insert(child);
     this->dagSuccessors.insert(child);
     containsFailNode = containsFailNode || child->containsFailNode;
@@ -262,7 +262,7 @@ public:
     if (preprocessed) return;
     child->preprocess(leaves);
     child->predecessors.insert(this);
-    child->dagPredecessorsCount++;
+    child->dagPredecessorCount++;
     this->successors.insert(child);
     this->dagSuccessors.insert(child);
     containsFailNode = containsFailNode || child->containsFailNode;
@@ -326,7 +326,7 @@ public:
     if (preprocessed) return;
     child->preprocess(leaves);
     child->predecessors.insert(this);
-    child->dagPredecessorsCount++;
+    child->dagPredecessorCount++;
     this->successors.insert(child);
     this->dagSuccessors.insert(child);
     containsFailNode = containsFailNode || child->containsFailNode;
@@ -360,7 +360,7 @@ public:
     if (preprocessed) return;
     child->preprocess(leaves);
     child->predecessors.insert(this);
-    child->dagPredecessorsCount++;
+    child->dagPredecessorCount++;
     this->successors.insert(child);
     this->dagSuccessors.insert(child);
     containsFailNode = containsFailNode || child->containsFailNode;

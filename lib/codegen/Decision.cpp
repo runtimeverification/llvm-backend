@@ -160,8 +160,8 @@ std::vector<DecisionNode *> DecisionNode::topologicalSort(void) {
     while (it != node->dagSuccessors.end()) {
       auto succ = *it;
       it = node->dagSuccessors.erase(it);
-      succ->dagPredecessorsCount--;
-      if (succ->dagPredecessorsCount == 0) {
+      succ->dagPredecessorCount--;
+      if (succ->dagPredecessorCount == 0) {
         workList.push_back(succ);
       }
     }
@@ -505,7 +505,7 @@ void DecisionNode::computeChoiceAncestors(std::vector<DecisionNode *> const& sor
 static void initChoiceBuffer(DecisionNode *dt, llvm::Module *module, llvm::BasicBlock *block, llvm::BasicBlock *stuck, llvm::BasicBlock *fail, llvm::AllocaInst **choiceBufferOut, llvm::AllocaInst **choiceDepthOut, llvm::IndirectBrInst **jumpOut) {
   FailNode::get()->predecessors.clear();
   FailNode::get()->successors.clear();
-  FailNode::get()->dagPredecessorsCount = 0;
+  FailNode::get()->dagPredecessorCount = 0;
   FailNode::get()->dagSuccessors.clear();
   FailNode::get()->choiceAncestors.clear();
   std::unordered_set<LeafNode *> leaves;
