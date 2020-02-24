@@ -36,7 +36,7 @@ public:
   std::unordered_set<DecisionNode *> predecessors;
   std::unordered_set<DecisionNode *> successors;
   // destructive set used to compute choiceAncestors. Becomes empty after calling topologicalSort()
-  size_t dagPredecessorCount = 0;
+  std::unordered_set<DecisionNode *> dagPredecessors;
   std::unordered_set<DecisionNode *> dagSuccessors;
   std::unordered_set<IterNextNode *> choiceAncestors;
   /* completed tracks whether codegen for this DecisionNode has concluded */
@@ -145,7 +145,7 @@ public:
     for (auto _case : cases) {
       _case.getChild()->preprocess(leaves);
       _case.getChild()->predecessors.insert(this);
-      _case.getChild()->dagPredecessorCount++;
+      _case.getChild()->dagPredecessors.insert(this);
       this->successors.insert(_case.getChild());
       this->dagSuccessors.insert(_case.getChild());
       containsFailNode = containsFailNode || _case.getChild()->containsFailNode;
@@ -200,7 +200,7 @@ public:
     if (preprocessed) return;
     child->preprocess(leaves);
     child->predecessors.insert(this);
-    child->dagPredecessorCount++;
+    child->dagPredecessors.insert(this);
     this->successors.insert(child);
     this->dagSuccessors.insert(child);
     containsFailNode = containsFailNode || child->containsFailNode;
@@ -262,7 +262,7 @@ public:
     if (preprocessed) return;
     child->preprocess(leaves);
     child->predecessors.insert(this);
-    child->dagPredecessorCount++;
+    child->dagPredecessors.insert(this);
     this->successors.insert(child);
     this->dagSuccessors.insert(child);
     containsFailNode = containsFailNode || child->containsFailNode;
@@ -326,7 +326,7 @@ public:
     if (preprocessed) return;
     child->preprocess(leaves);
     child->predecessors.insert(this);
-    child->dagPredecessorCount++;
+    child->dagPredecessors.insert(this);
     this->successors.insert(child);
     this->dagSuccessors.insert(child);
     containsFailNode = containsFailNode || child->containsFailNode;
@@ -360,7 +360,7 @@ public:
     if (preprocessed) return;
     child->preprocess(leaves);
     child->predecessors.insert(this);
-    child->dagPredecessorCount++;
+    child->dagPredecessors.insert(this);
     this->successors.insert(child);
     this->dagSuccessors.insert(child);
     containsFailNode = containsFailNode || child->containsFailNode;

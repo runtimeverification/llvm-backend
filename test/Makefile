@@ -5,11 +5,13 @@ OUTPUTDIR = ../test/output
 INTDIR = ../test/int
 
 SUFINKORE = .in.kore
+SUFSTDIN = .stdin.txt
 SUFOUTDIFF = .out.diff.kore
 SUFOUTGREP = .out.grep.kore
 
 DEFN = $(wildcard $(DEFNDIR)/*.kore)
 INPUT = $(wildcard $(INPUTDIR)/*$(SUFINKORE))
+STDINPUT = $(wildcard $(INPUTDIR)/*$(SUFSTDIN))
 DOUTPUT= $(wildcard $(OUTPUTDIR)/*$(SUFOUTDIFF))
 GOUTPUT= $(wildcard $(OUTPUTDIR)/*$(SUFOUTGREP))
 INT = $(patsubst $(DEFNDIR)/%.kore, $(INTDIR)/%.interpreter, $(DEFN))
@@ -35,10 +37,10 @@ $(INTDIR)/%.interpreter: $(DEFNDIR)/%.kore
 	$(KOMPILE) $< main -o $@
 
 $(DEFNDIR)/%.test: $(INTDIR)/%.interpreter $(INPUTDIR)/%$(SUFINKORE) $(OUTPUTDIR)/%$(SUFOUTDIFF)
-	$< $(word 2, $^) -1 /dev/stdout | diff - $(word 3, $^)
+	cat $(INPUTDIR)/$*$(SUFSTDIN) 2>/dev/null | $< $(word 2, $^) -1 /dev/stdout | diff - $(word 3, $^)
 
 $(DEFNDIR)/%.test: $(INTDIR)/%.interpreter $(INPUTDIR)/%$(SUFINKORE) $(OUTPUTDIR)/%$(SUFOUTGREP)
-	$< $(word 2, $^) -1 /dev/stdout | grep -f $(word 3, $^) -q
+	cat $(INPUTDIR)/$*$(SUFSTDIN) 2>/dev/null | $< $(word 2, $^) -1 /dev/stdout | grep -f $(word 3, $^) -q
 
 $(DEFNDIR)/%.testd: $(INTDIR)/%.interpreter $(INPUTDIR)/%/ $(OUTPUTDIR)/%/
 	$(eval TMP_DIFF_OUT := $(wildcard $(word 3, $^)/*$(SUFOUTDIFF)))
