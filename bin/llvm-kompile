@@ -25,7 +25,7 @@ for arg in "$@"; do
   esac
 done
 "$(dirname "$0")"/llvm-kompile-codegen "$definition" "$dt_dir"/dt.yaml "$dt_dir" $debug > "$mod"
-@OPT@ -tailcallelim -tailcallopt -instcombine "$mod" -o "$modopt"
+@OPT@ -mem2reg -tailcallelim -tailcallopt -instcombine "$mod" -o "$modopt"
 if [[ "$OSTYPE" != "darwin"* ]]; then
   flags=-fuse-ld=lld
 fi

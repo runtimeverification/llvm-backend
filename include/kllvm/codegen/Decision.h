@@ -32,34 +32,20 @@ using var_set_type = std::unordered_map<var_type, std::unordered_set<IterNextNod
 class DecisionNode {
 public:
   llvm::BasicBlock * cachedCode = nullptr;
-  std::map<var_type, llvm::PHINode *> phis;
-  std::unordered_set<DecisionNode *> predecessors;
-  std::unordered_set<DecisionNode *> successors;
-  // destructive set used to compute choiceAncestors. Becomes empty after calling topologicalSort()
-  std::unordered_set<DecisionNode *> dagPredecessors;
-  std::unordered_set<DecisionNode *> dagSuccessors;
-  std::unordered_set<IterNextNode *> choiceAncestors;
   /* completed tracks whether codegen for this DecisionNode has concluded */
   bool completed = false;
 
-  virtual void codegen(Decision *d, std::map<var_type, llvm::Value *> substitution) = 0;
+  virtual void codegen(Decision *d) = 0;
   virtual void preprocess(std::unordered_set<LeafNode *> &) = 0;
-  virtual void eraseDefsAndAddUses(var_set_type &vars) = 0;
-  void computeLiveness(std::unordered_set<LeafNode *> &);
-  void sharedNode(Decision *d, std::map<var_type, llvm::Value *> &oldSubst, std::map<var_type, llvm::Value *> &substitution, llvm::BasicBlock *Block);
-  bool beginNode(Decision *d, std::string name, std::map<var_type, llvm::Value *> &substitution);
-  std::vector<DecisionNode *> topologicalSort(void);
-
-  static void computeChoiceAncestors(std::vector<DecisionNode *> const& sorted);
+  bool beginNode(Decision *d, std::string name);
 
   void setCompleted() { completed = true; }
   bool isCompleted() const { return completed; }
   uint64_t getChoiceDepth() const { return choiceDepth; }
 
 private:
-  bool preprocessed = false, containsFailNode = false, livenessVisited = false;
+  bool preprocessed = false, containsFailNode = false;
   uint64_t choiceDepth = 0;
-  var_set_type vars;
   friend class Decision;
   friend class SwitchNode;
   friend class MakePatternNode;
@@ -78,9 +64,8 @@ private:
 public:
   static FailNode *get() { return &instance; }
 
-  virtual void codegen(Decision *d, std::map<var_type, llvm::Value *> substitution) { abort(); }
+  virtual void codegen(Decision *d) { abort(); }
   virtual void preprocess(std::unordered_set<LeafNode *> &) { containsFailNode = true; }
-  virtual void eraseDefsAndAddUses(var_set_type &vars) {}
 };
 
 class DecisionCase {
@@ -137,17 +122,12 @@ public:
   llvm::Type *getType() const { return type; }
   const std::vector<DecisionCase> &getCases() const { return cases; }
   
-  virtual void codegen(Decision *d, std::map<var_type, llvm::Value *> substitution);
-  virtual void eraseDefsAndAddUses(var_set_type &vars);
+  virtual void codegen(Decision *d);
   virtual void preprocess(std::unordered_set<LeafNode *> &leaves) {
     if(preprocessed) return;
     bool hasDefault = false;
     for (auto _case : cases) {
       _case.getChild()->preprocess(leaves);
-      _case.getChild()->predecessors.insert(this);
-      _case.getChild()->dagPredecessors.insert(this);
-      this->successors.insert(_case.getChild());
-      this->dagSuccessors.insert(_case.getChild());
       containsFailNode = containsFailNode || _case.getChild()->containsFailNode;
       hasDefault = hasDefault || _case.getConstructor() == nullptr;
       choiceDepth = std::max(choiceDepth, _case.getChild()->choiceDepth);
@@ -189,20 +169,10 @@ public:
     return new MakePatternNode(name, type, pattern, uses, child);
   }
 
-  virtual void codegen(Decision *d, std::map<var_type, llvm::Value *> substitution);
-  virtual void eraseDefsAndAddUses(var_set_type &vars) {
-    vars.erase(std::make_pair(name, type));
-    for (auto &use : uses) {
-      vars[use] = {};
-    }
-  }
+  virtual void codegen(Decision *d);
   virtual void preprocess(std::unordered_set<LeafNode *> &leaves) {
     if (preprocessed) return;
     child->preprocess(leaves);
-    child->predecessors.insert(this);
-    child->dagPredecessors.insert(this);
-    this->successors.insert(child);
-    this->dagSuccessors.insert(child);
     containsFailNode = containsFailNode || child->containsFailNode;
     choiceDepth = child->choiceDepth;
     preprocessed = true;
@@ -249,22 +219,10 @@ public:
   const std::vector<var_type> &getBindings() const { return bindings; }
   void addBinding(std::string name, llvm::Type *type) { bindings.push_back(std::make_pair(name, type)); }
   
-  virtual void codegen(Decision *d, std::map<var_type, llvm::Value *> substitution);
-  virtual void eraseDefsAndAddUses(var_set_type &vars) {
-    vars.erase(std::make_pair(name, type));
-    for (auto var : bindings) { 
-      if (var.first.find_first_not_of("-0123456789") != std::string::npos) {
-        vars[var] = {};
-      }
-    }
-  }
+  virtual void codegen(Decision *d);
   virtual void preprocess(std::unordered_set<LeafNode *> &leaves) {
     if (preprocessed) return;
     child->preprocess(leaves);
-    child->predecessors.insert(this);
-    child->dagPredecessors.insert(this);
-    this->successors.insert(child);
-    this->dagSuccessors.insert(child);
     containsFailNode = containsFailNode || child->containsFailNode;
     choiceDepth = child->choiceDepth;
     preprocessed = true;
@@ -290,12 +248,7 @@ public:
   const std::vector<var_type> &getBindings() const { return bindings; }
   void addBinding(std::string name, llvm::Type *type) { bindings.push_back(std::make_pair(name, type)); }
   
-  virtual void codegen(Decision *d, std::map<var_type, llvm::Value *> substitution);
-  virtual void eraseDefsAndAddUses(var_set_type &vars) {
-    for (auto &binding : bindings) {
-      vars[binding] = {};
-    }
-  }
+  virtual void codegen(Decision *d);
   virtual void preprocess(std::unordered_set<LeafNode *> &leaves) {
     leaves.insert(this);
   }
@@ -317,18 +270,10 @@ public:
     return new MakeIteratorNode(collection, collectionType, name, type, hookName, child);
   }
 
-  virtual void codegen(Decision *d, std::map<var_type, llvm::Value *> substitution);
-  virtual void eraseDefsAndAddUses(var_set_type &vars) {
-    vars.erase(std::make_pair(name, type));
-    vars[std::make_pair(collection, collectionType)] = {};
-  }
+  virtual void codegen(Decision *d);
   virtual void preprocess(std::unordered_set<LeafNode *> &leaves) {
     if (preprocessed) return;
     child->preprocess(leaves);
-    child->predecessors.insert(this);
-    child->dagPredecessors.insert(this);
-    this->successors.insert(child);
-    this->dagSuccessors.insert(child);
     containsFailNode = containsFailNode || child->containsFailNode;
     choiceDepth = child->choiceDepth;
     preprocessed = true;
@@ -351,24 +296,12 @@ public:
     return new IterNextNode(iterator, iteratorType, binding, bindingType, hookName, child);
   }
 
-  virtual void codegen(Decision *d, std::map<var_type, llvm::Value *> substitution);
-  virtual void eraseDefsAndAddUses(var_set_type &vars) {
-    vars.erase(std::make_pair(binding, bindingType));
-    vars[std::make_pair(iterator, iteratorType)] = {};
-  }
+  virtual void codegen(Decision *d);
   virtual void preprocess(std::unordered_set<LeafNode *> &leaves) {
     if (preprocessed) return;
     child->preprocess(leaves);
-    child->predecessors.insert(this);
-    child->dagPredecessors.insert(this);
-    this->successors.insert(child);
-    this->dagSuccessors.insert(child);
     containsFailNode = containsFailNode || child->containsFailNode;
     choiceDepth = child->choiceDepth + 1;
-    if (containsFailNode) {
-      predecessors.insert(FailNode::get());
-      FailNode::get()->successors.insert(this);
-    }
     preprocessed = true;
   }
 };
@@ -386,10 +319,12 @@ private:
   llvm::LLVMContext &Ctx;
   ValueType Cat;
 
-  std::map<var_type, llvm::PHINode *> failPhis;
+  std::map<var_type, llvm::AllocaInst *> symbols;
 
   llvm::Value *getTag(llvm::Value *);
-  void addFailPhiIncoming(std::map<var_type, llvm::Value *> oldSubst, llvm::BasicBlock *switchBlock, var_set_type &vars);
+
+  llvm::AllocaInst *decl(var_type name);
+
 public:
   Decision(
     KOREDefinition *Definition,
@@ -413,7 +348,9 @@ public:
 
   /* adds code to the specified basic block to take a single step based on
      the specified decision tree and return the result of taking that step. */
-  void operator()(DecisionNode *entry, std::map<var_type, llvm::Value *> substitution);
+  void operator()(DecisionNode *entry);
+  void store(var_type name, llvm::Value *val);
+  llvm::Value *load(var_type name);
 
   friend class SwitchNode;
   friend class MakePatternNode;
