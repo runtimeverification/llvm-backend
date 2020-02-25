@@ -20,189 +20,17 @@ FailNode FailNode::instance;
 
 static unsigned max_name_length = 1024 - std::to_string(std::numeric_limits<unsigned long long>::max()).length();
 
-void Decision::operator()(DecisionNode *entry, std::map<std::pair<std::string, llvm::Type *>, llvm::Value *> substitution) {
+void Decision::operator()(DecisionNode *entry) {
   if (entry == FailNode::get()) {
     llvm::BranchInst::Create(this->FailureBlock, this->CurrentBlock);
   } else {
-    if (entry->containsFailNode) {
-      for (auto &entry : FailNode::get()->vars) {
-        auto &var = entry.first;
-        llvm::PHINode *failPhi = llvm::PHINode::Create(var.second, FailNode::get()->predecessors.size(), "phi" + var.first.substr(0, max_name_length), FailureBlock->getFirstNonPHI());
-        failPhis[var] = failPhi;
-      }
-    }
-    entry->codegen(this, substitution);
-  }
-  for (auto &entry : failPhis) {
-    llvm::PHINode *Phi = entry.second;
-    std::vector<llvm::BasicBlock *> undefBlocks;
-    for (llvm::BasicBlock *block : llvm::predecessors(Phi->getParent())) {
-      if (Phi->getBasicBlockIndex(block) == -1) {
-        undefBlocks.push_back(block);
-      }
-    }
-    for (llvm::BasicBlock *block : undefBlocks) {
-      Phi->addIncoming(llvm::UndefValue::get(Phi->getType()), block);
-    }
-  }
-  for (auto block = this->CurrentBlock->getParent()->begin(); block != this->CurrentBlock->getParent()->end(); ++block) {
-    if (block->getUniquePredecessor()) {
-      for (auto phi = block->phis().begin(); phi != block->phis().end(); phi = block->phis().begin()) {
-        phi->replaceAllUsesWith(phi->getIncomingValue(0));
-        phi->removeFromParent();
-      }
-    }
+    entry->codegen(this);
   }
 }
 
-static void insertVia(var_set_type &dest, var_set_type src, IterNextNode *choice) {
-  for (auto &entry : src) {
-    auto &var = entry.first;
-    if (dest.count(var)) {
-      auto &via = dest[var];
-      if (!via.empty()) {
-        via.insert(choice);
-      }
-    } else {
-      dest.insert({var, {choice}});
-    }
-  }
-}
-
-static void insertVia(DecisionNode *node, var_set_type &dest, var_set_type src) {
-  for (auto &entry : src) {
-    if (entry.second.empty()) {
-      dest[entry.first] = entry.second;
-    } else {
-      for (auto &choice : entry.second) {
-        if (node->choiceAncestors.count(choice)) {
-          insertVia(dest, {entry}, choice);
-        }
-      }
-    }
-  }
-}
-
-void SwitchNode::eraseDefsAndAddUses(var_set_type &vars) {
-  for (auto _case : cases) {
-    var_set_type caseVars;
-    if (_case.getChild() == FailNode::get()) {
-      for (DecisionNode *trueSucc : _case.getChild()->successors) {
-        if (auto choice = dynamic_cast<IterNextNode *>(trueSucc)) {
-          if (choiceAncestors.count(choice)) {
-            insertVia(caseVars, trueSucc->vars, choice);
-	  }
-        }
-      }
-    } else {
-      insertVia(this, caseVars, _case.getChild()->vars);
-    }
-    for (auto var : _case.getBindings()) {
-      caseVars.erase(var);
-    }
-    insertVia(this, vars, caseVars);
-  }
-  if(cases.size() != 1 || cases[0].getConstructor()) vars[std::make_pair(name, type)] = {}; 
-}
-
-void DecisionNode::computeLiveness(std::unordered_set<LeafNode *> &leaves) {
-  std::deque<DecisionNode *> workList;
-  std::unordered_set<DecisionNode *> workListSet;
-  workList.insert(workList.end(), leaves.begin(), leaves.end());
-  workListSet.insert(leaves.begin(), leaves.end());
-  if (containsFailNode) {
-    workList.push_back(FailNode::get());
-    workListSet.insert(FailNode::get());
-  }
-  while (!workList.empty()) {
-    DecisionNode *node = workList.front();
-    workList.pop_front();
-    workListSet.erase(node);
-    var_set_type newVars;
-    if (!dynamic_cast<SwitchNode *>(node)) {
-      for (DecisionNode *succ : node->successors) {
-        if (succ == FailNode::get()) {
-          for (DecisionNode *trueSucc : succ->successors) {
-            if (auto choice = dynamic_cast<IterNextNode *>(trueSucc)) {
-              if (node->choiceAncestors.count(choice)) {
-                insertVia(newVars, trueSucc->vars, choice);
-              }
-            }
-          }
-        } else {
-          insertVia(node, newVars, succ->vars);
-        }
-      }
-    }
-    node->eraseDefsAndAddUses(newVars);
-    if (newVars != node->vars || !livenessVisited) {
-      node->vars = newVars;
-      for (DecisionNode *pred : node->predecessors) {
-        if (!workListSet.count(pred)) {
-          workListSet.insert(pred);
-          workList.push_back(pred);
-        }
-      }
-    }
-    node->livenessVisited = true;
-  }
-}
-
-std::vector<DecisionNode *> DecisionNode::topologicalSort(void) {
-  std::vector<DecisionNode *> result;
-  std::vector<DecisionNode *> workList;
-  workList.push_back(this);
-  while (!workList.empty()) {
-    DecisionNode *node = workList.back();
-    workList.pop_back();
-    result.push_back(node);
-    auto it = node->dagSuccessors.begin();
-    while (it != node->dagSuccessors.end()) {
-      auto succ = *it;
-      it = node->dagSuccessors.erase(it);
-      succ->dagPredecessors.erase(node);
-      if (succ->dagPredecessors.empty()) {
-        workList.push_back(succ);
-      }
-    }
-  }
-
-  return result;
-}
-
-void DecisionNode::sharedNode(Decision *d, std::map<std::pair<std::string, llvm::Type *>, llvm::Value *> &oldSubst, std::map<std::pair<std::string, llvm::Type *>, llvm::Value *> &substitution, llvm::BasicBlock *Block) {
-  for (auto &entry : vars) {
-    auto &var = entry.first;
-    auto Phi = phis[var];
-    auto val = oldSubst[var];
-    if (!val) {
-      val = llvm::UndefValue::get(Phi->getType());
-    }
-    Phi->addIncoming(val, Block);
-    substitution[var] = Phi;
-  }
-  for (auto &entry : phis) {
-    auto var = entry.first;
-    auto Phi = entry.second;
-    if (!vars.count(var)) {
-      Phi->addIncoming(llvm::UndefValue::get(Phi->getType()), Block);
-    }
-  }
-}
- 
-
-bool DecisionNode::beginNode(Decision *d, std::string name, std::map<std::pair<std::string, llvm::Type *>, llvm::Value *> &substitution) {
-  auto it = substitution.begin();
-  while (it != substitution.end()) {
-    if (!vars.count(it->first)) {
-      it = substitution.erase(it);
-    } else {
-      ++it;
-    }
-  }
+bool DecisionNode::beginNode(Decision *d, std::string name) {
   if (isCompleted()) {
     llvm::BranchInst::Create(cachedCode, d->CurrentBlock);
-    sharedNode(d, substitution, substitution, d->CurrentBlock);
     return true;
   }
   auto Block = llvm::BasicBlock::Create(d->Ctx,
@@ -210,39 +38,15 @@ bool DecisionNode::beginNode(Decision *d, std::string name, std::map<std::pair<s
       d->CurrentBlock->getParent());
   cachedCode = Block;
   llvm::BranchInst::Create(Block, d->CurrentBlock);
-  for (auto &entry : vars) {
-    auto &var = entry.first;
-    auto val = substitution[var];
-    if (!val) {
-      val = llvm::UndefValue::get(var.second);
-    }
-    auto Phi = llvm::PHINode::Create(var.second, 1, "phi" + var.first.substr(0, max_name_length), Block);
-    Phi->addIncoming(val, d->CurrentBlock);
-    phis[var] = Phi;
-    substitution[var] = Phi;
-  }
   d->CurrentBlock = Block;
   return false;
 }
 
-void Decision::addFailPhiIncoming(std::map<std::pair<std::string, llvm::Type *>, llvm::Value *> oldSubst, llvm::BasicBlock *switchBlock, var_set_type &vars) {
-  for (auto &entry : FailNode::get()->vars) {
-    auto &var = entry.first;
-    if (vars.count(var)) {
-      auto val = oldSubst[var];
-      if (!val) {
-        val = llvm::UndefValue::get(var.second);
-      }
-      failPhis[var]->addIncoming(val, switchBlock);
-    }
-  }
-}
-
-void SwitchNode::codegen(Decision *d, std::map<std::pair<std::string, llvm::Type *>, llvm::Value *> substitution) {
-  if (beginNode(d, "switch" + name, substitution)) {
+void SwitchNode::codegen(Decision *d) {
+  if (beginNode(d, "switch" + name)) {
     return;
   }
-  llvm::Value *val = substitution[std::make_pair(name, type)];
+  llvm::Value *val = d->load(std::make_pair(name, type));
   llvm::BasicBlock *_default = d->FailureBlock;
   const DecisionCase *defaultCase = nullptr;
   std::vector<std::pair<llvm::BasicBlock *, const DecisionCase *>> caseData;
@@ -288,14 +92,11 @@ void SwitchNode::codegen(Decision *d, std::map<std::pair<std::string, llvm::Type
       }
     }
   }
-  auto switchBlock = d->CurrentBlock;
   auto currChoiceBlock = d->ChoiceBlock;
   d->ChoiceBlock = nullptr;
   for (auto &entry : caseData) {
-    auto newSubst = substitution;
     auto &_case = *entry.second;
     if (entry.first == d->FailureBlock) {
-      d->addFailPhiIncoming(substitution, switchBlock, this->vars);
       continue;
     }
     d->CurrentBlock = entry.first;
@@ -323,16 +124,16 @@ void SwitchNode::codegen(Decision *d, std::map<std::pair<std::string, llvm::Type
           if (offset == 0) {
             Renamed = llvm::CallInst::Create(getOrInsertFunction(d->Module, "alphaRename", BlockPtr, BlockPtr), Child, "renamedVar", d->CurrentBlock);
             setDebugLoc(Renamed);
-            newSubst[binding] = Renamed;
+            d->store(binding, Renamed);
           } else if (offset == _case.getBindings().size() - 1) {
             llvm::Instruction *Replaced = llvm::CallInst::Create(getOrInsertFunction(d->Module, "replaceBinderIndex", BlockPtr, BlockPtr, BlockPtr), {Child, Renamed}, "withUnboundIndex", d->CurrentBlock);
             setDebugLoc(Replaced);
-            newSubst[binding] = Replaced;
+            d->store(binding, Replaced);
           } else {
-            newSubst[binding] = Child;
+            d->store(binding, Child);
           }
         } else {
-          newSubst[binding] = Child;
+          d->store(binding, Child);
         }
         offset++;
       }
@@ -349,41 +150,37 @@ void SwitchNode::codegen(Decision *d, std::map<std::pair<std::string, llvm::Type
         d->FailJump->addDestination(currChoiceBlock);
       }
     }
-    _case.getChild()->codegen(d, newSubst);
+    _case.getChild()->codegen(d);
   }
   if (defaultCase) {
     if (_default != d->FailureBlock) {
       // process default also
       d->CurrentBlock = _default;
-      defaultCase->getChild()->codegen(d, substitution);
-    } else {
-      d->addFailPhiIncoming(substitution, switchBlock, this->vars);
+      defaultCase->getChild()->codegen(d);
     }
-  } else {
-    d->addFailPhiIncoming(substitution, switchBlock, this->vars);
   }
 
   setCompleted();
 }
 
-void MakePatternNode::codegen(Decision *d, std::map<std::pair<std::string, llvm::Type *>, llvm::Value *> substitution) {
-  if (beginNode(d, "pattern" + name, substitution)) {
+void MakePatternNode::codegen(Decision *d) {
+  if (beginNode(d, "pattern" + name)) {
     return;
   }
   llvm::StringMap<llvm::Value *> finalSubst;
   for (auto use : uses) {
-    finalSubst[use.first] = substitution[use];
+    finalSubst[use.first] = d->load(use);
   }
   CreateTerm creator(finalSubst, d->Definition, d->CurrentBlock, d->Module, false);
   llvm::Value *val = creator(pattern).first;
   d->CurrentBlock = creator.getCurrentBlock();
-  substitution[std::make_pair(name, type)] = val;
-  child->codegen(d, substitution);
+  d->store(std::make_pair(name, type), val);
+  child->codegen(d);
   setCompleted();
 }
 
-void FunctionNode::codegen(Decision *d, std::map<std::pair<std::string, llvm::Type *>, llvm::Value *> substitution) {
-  if (beginNode(d, "function" + name, substitution)) {
+void FunctionNode::codegen(Decision *d) {
+  if (beginNode(d, "function" + name)) {
     return;
   }
   std::vector<llvm::Value *> args;
@@ -393,7 +190,7 @@ void FunctionNode::codegen(Decision *d, std::map<std::pair<std::string, llvm::Ty
     if (arg.first.find_first_not_of("-0123456789") == std::string::npos) {
       val = llvm::ConstantInt::get(llvm::Type::getInt64Ty(d->Ctx), std::stoi(arg.first));
     } else {
-      val = substitution[arg];
+      val = d->load(arg);
     }
     args.push_back(val);
     finalSubst[arg.first] = val;
@@ -401,18 +198,18 @@ void FunctionNode::codegen(Decision *d, std::map<std::pair<std::string, llvm::Ty
   CreateTerm creator(finalSubst, d->Definition, d->CurrentBlock, d->Module, false);
   auto Call = creator.createFunctionCall(function, cat, args, function.substr(0, 5) == "hook_", false);
   Call->setName(name.substr(0, max_name_length));
-  substitution[std::make_pair(name, type)] = Call;
-  child->codegen(d, substitution);
+  d->store(std::make_pair(name, type), Call);
+  child->codegen(d);
   setCompleted();
 }
 
-void MakeIteratorNode::codegen(Decision *d, std::map<std::pair<std::string, llvm::Type *>, llvm::Value *> substitution) {
-  if (beginNode(d, "new_iterator" + name, substitution)) {
+void MakeIteratorNode::codegen(Decision *d) {
+  if (beginNode(d, "new_iterator" + name)) {
     return;
   }
   std::vector<llvm::Value *> args;
   std::vector<llvm::Type *> types;
-  llvm::Value *arg = substitution[std::make_pair(collection, collectionType)];
+  llvm::Value *arg = d->load(std::make_pair(collection, collectionType));
   args.push_back(arg);
   types.push_back(arg->getType());
   llvm::Value *AllocSret = allocateTerm(d->Module->getTypeByName("iter"), d->CurrentBlock, "koreAllocAlwaysGC");
@@ -426,51 +223,36 @@ void MakeIteratorNode::codegen(Decision *d, std::map<std::pair<std::string, llvm
   setDebugLoc(call);
   func->arg_begin()->addAttr(llvm::Attribute::StructRet);
   call->addParamAttr(0, llvm::Attribute::StructRet);
-  substitution[std::make_pair(name, type)] = AllocSret;
-  child->codegen(d, substitution);
+  d->store(std::make_pair(name, type), AllocSret);
+  child->codegen(d);
   setCompleted();
 }
 
-void IterNextNode::codegen(Decision *d, std::map<std::pair<std::string, llvm::Type *>, llvm::Value *> substitution) {
-  if (beginNode(d, "choice" + binding, substitution)) {
+void IterNextNode::codegen(Decision *d) {
+  if (beginNode(d, "choice" + binding)) {
     return;
   }
   d->ChoiceBlock = d->CurrentBlock;
-  llvm::Value *arg = substitution[std::make_pair(iterator, iteratorType)];
-
-  if (containsFailNode) {
-    for (auto &entry : vars) {
-      auto &var = entry.first;
-      auto Phi = phis[var];
-      if (!Phi) {
-        for (auto v : vars) {
-          std::cerr << v.first.first << std::endl;
-        }
-        abort();
-      }
-      auto failPhi = d->failPhis[var];
-      Phi->addIncoming(failPhi, d->FailureBlock);
-    }
-  }
+  llvm::Value *arg = d->load(std::make_pair(iterator, iteratorType));
 
   llvm::FunctionType *funcType = llvm::FunctionType::get(getValueType({SortCategory::Symbol, 0}, d->Module), {arg->getType()}, false);
   llvm::Function *func = getOrInsertFunction(d->Module, hookName, funcType);
   auto Call = llvm::CallInst::Create(func, {arg}, binding.substr(0, max_name_length), d->CurrentBlock);
   setDebugLoc(Call);
-  substitution[std::make_pair(binding, bindingType)] = Call;
-  child->codegen(d, substitution);
+  d->store(std::make_pair(binding, bindingType), Call);
+  child->codegen(d);
   d->ChoiceBlock = nullptr;
   setCompleted();
 }
 
-void LeafNode::codegen(Decision *d, std::map<std::pair<std::string, llvm::Type *>, llvm::Value *> substitution) {
-  if (beginNode(d, name, substitution)) {
+void LeafNode::codegen(Decision *d) {
+  if (beginNode(d, name)) {
     return;
   }
   std::vector<llvm::Value *> args;
   std::vector<llvm::Type *> types;
   for (auto arg : bindings) {
-    auto val = substitution[arg];
+    auto val = d->load(arg);
     args.push_back(val);
     types.push_back(val->getType());
   }
@@ -488,31 +270,31 @@ llvm::Value *Decision::getTag(llvm::Value *val) {
   return res;
 }
 
-void DecisionNode::computeChoiceAncestors(std::vector<DecisionNode *> const& sorted) {
-  for (DecisionNode *node : sorted) {
-    for (DecisionNode *pred : node->predecessors) {
-      if (pred == FailNode::get()) {
-        continue;
-      }
-      node->choiceAncestors.insert(pred->choiceAncestors.begin(), pred->choiceAncestors.end());
-      if (auto choice = dynamic_cast<IterNextNode *>(pred)) {
-        node->choiceAncestors.insert(choice);
-      }
-    }
+llvm::AllocaInst *Decision::decl(var_type name) {
+  auto sym = new llvm::AllocaInst(name.second, 0, "", this->CurrentBlock->getParent()->getEntryBlock().getFirstNonPHI());
+  this->symbols[name] = sym;
+  return sym;
+}
+
+llvm::Value *Decision::load(var_type name) {
+  auto sym = this->symbols[name];
+  if (!sym) {
+    sym = this->decl(name);
   }
+  return new llvm::LoadInst(sym, name.first.substr(0, max_name_length), this->CurrentBlock);
+}
+
+void Decision::store(var_type name, llvm::Value *val) {
+  auto sym = this->symbols[name];
+  if (!sym) {
+    sym = this->decl(name);
+  }
+  new llvm::StoreInst(val, sym, this->CurrentBlock);
 }
 
 static void initChoiceBuffer(DecisionNode *dt, llvm::Module *module, llvm::BasicBlock *block, llvm::BasicBlock *stuck, llvm::BasicBlock *fail, llvm::AllocaInst **choiceBufferOut, llvm::AllocaInst **choiceDepthOut, llvm::IndirectBrInst **jumpOut) {
-  FailNode::get()->predecessors.clear();
-  FailNode::get()->successors.clear();
-  FailNode::get()->dagPredecessors.clear();
-  FailNode::get()->dagSuccessors.clear();
-  FailNode::get()->choiceAncestors.clear();
   std::unordered_set<LeafNode *> leaves;
   dt->preprocess(leaves);
-  auto sorted = dt->topologicalSort();
-  DecisionNode::computeChoiceAncestors(sorted);
-  dt->computeLiveness(leaves);
   auto ty = llvm::ArrayType::get(llvm::Type::getInt8PtrTy(module->getContext()), dt->getChoiceDepth() + 1);
   llvm::AllocaInst *choiceBuffer = new llvm::AllocaInst(ty, 0, "choiceBuffer", block);
   llvm::AllocaInst *choiceDepth = new llvm::AllocaInst(llvm::Type::getInt64Ty(module->getContext()), 0, "choiceDepth", block);
@@ -534,7 +316,7 @@ static void initChoiceBuffer(DecisionNode *dt, llvm::Module *module, llvm::Basic
 }
 
 
-void makeEvalOrAnywhereFunction(KORESymbol *function, KOREDefinition *definition, llvm::Module *module, DecisionNode *dt, void (*addStuck)(llvm::BasicBlock*, llvm::Module*, KORESymbol *, std::map<std::pair<std::string, llvm::Type *>, llvm::Value *>&, KOREDefinition *)) {
+void makeEvalOrAnywhereFunction(KORESymbol *function, KOREDefinition *definition, llvm::Module *module, DecisionNode *dt, void (*addStuck)(llvm::BasicBlock*, llvm::Module*, KORESymbol *, Decision&, KOREDefinition *)) {
   auto returnSort = dynamic_cast<KORECompositeSort *>(function->getSort().get())->getCategory(definition);
   auto returnType = getParamType(returnSort, module);
   std::ostringstream Out;
@@ -570,7 +352,6 @@ void makeEvalOrAnywhereFunction(KORESymbol *function, KOREDefinition *definition
   initDebugAxiom(symbolDecl->getAttributes());
   initDebugFunction(function->getName(), name, getDebugFunctionType(debugReturnType, debugArgs), definition, matchFunc);
   matchFunc->setCallingConv(llvm::CallingConv::Fast);
-  std::map<std::pair<std::string, llvm::Type *>, llvm::Value *> subst;
   llvm::BasicBlock *block = llvm::BasicBlock::Create(module->getContext(), "entry", matchFunc);
   llvm::BasicBlock *stuck = llvm::BasicBlock::Create(module->getContext(), "stuck", matchFunc);
   llvm::BasicBlock *fail = llvm::BasicBlock::Create(module->getContext(), "fail", matchFunc);
@@ -580,20 +361,20 @@ void makeEvalOrAnywhereFunction(KORESymbol *function, KOREDefinition *definition
   initChoiceBuffer(dt, module, block, stuck, fail, &choiceBuffer, &choiceDepth, &jump);
 
   int i = 0;
+  Decision codegen(definition, block, fail, jump, choiceBuffer, choiceDepth, module, returnSort);
   for (auto val = matchFunc->arg_begin(); val != matchFunc->arg_end(); ++val, ++i) {
     val->setName("_" + std::to_string(i+1));
-    subst[std::make_pair(val->getName(), val->getType())] = val;
+    codegen.store(std::make_pair(val->getName(), val->getType()), val);
     std::ostringstream Out;
     function->getArguments()[i]->print(Out);
     initDebugParam(matchFunc, i, val->getName(), cats[i], Out.str());
   }
-  addStuck(stuck, module, function, subst, definition);
+  addStuck(stuck, module, function, codegen, definition);
 
-  Decision codegen(definition, block, fail, jump, choiceBuffer, choiceDepth, module, returnSort);
-  codegen(dt, subst);
+  codegen(dt);
 }
 
-void abortWhenStuck(llvm::BasicBlock *CurrentBlock, llvm::Module *Module, KORESymbol *symbol, std::map<std::pair<std::string, llvm::Type *>, llvm::Value *> &subst, KOREDefinition *d) {
+void abortWhenStuck(llvm::BasicBlock *CurrentBlock, llvm::Module *Module, KORESymbol *symbol, Decision &codegen, KOREDefinition *d) {
   auto &Ctx = Module->getContext();
   std::ostringstream Out;
   symbol->print(Out);
@@ -611,7 +392,7 @@ void abortWhenStuck(llvm::BasicBlock *CurrentBlock, llvm::Module *Module, KORESy
     for (int idx = 0; idx < symbol->getArguments().size(); idx++) {
       auto cat = dynamic_cast<KORECompositeSort *>(symbol->getArguments()[idx].get())->getCategory(d);
       auto type = getParamType(cat, Module);
-      llvm::Value *ChildValue = subst[std::make_pair("_" + std::to_string(idx+1), type)];
+      llvm::Value *ChildValue = codegen.load(std::make_pair("_" + std::to_string(idx+1), type));
       llvm::Value *ChildPtr = llvm::GetElementPtrInst::CreateInBounds(BlockType, Block, {llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0), llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), idx + 2)}, "", CurrentBlock);
       if (ChildValue->getType() == ChildPtr->getType()) {
         ChildValue = new llvm::LoadInst(ChildValue, "", CurrentBlock);
@@ -628,7 +409,7 @@ void makeEvalFunction(KORESymbol *function, KOREDefinition *definition, llvm::Mo
   makeEvalOrAnywhereFunction(function, definition, module, dt, abortWhenStuck);
 }
 
-void addOwise(llvm::BasicBlock *stuck, llvm::Module *module, KORESymbol *symbol, std::map<std::pair<std::string, llvm::Type *>, llvm::Value *> &subst, KOREDefinition *d) {
+void addOwise(llvm::BasicBlock *stuck, llvm::Module *module, KORESymbol *symbol, Decision &codegen, KOREDefinition *d) {
   llvm::StringMap<llvm::Value *> finalSubst;
   ptr<KORECompositePattern> pat = KORECompositePattern::Create(symbol);
   for (int i = 0; i < symbol->getArguments().size(); i++) {
@@ -636,7 +417,7 @@ void addOwise(llvm::BasicBlock *stuck, llvm::Module *module, KORESymbol *symbol,
     auto type = getParamType(cat, module);
 
     std::string name = "_" + std::to_string(i+1);
-    finalSubst[name] = subst[std::make_pair(name, type)];
+    finalSubst[name] = codegen.load(std::make_pair(name, type));
  
     auto var = KOREVariablePattern::Create(name, symbol->getArguments()[i]);
     pat->addArgument(std::move(var));
@@ -788,7 +569,6 @@ void makeStepFunction(KOREDefinition *definition, llvm::Module *module, Decision
   resetDebugLoc();
   initDebugFunction(name, name, getDebugFunctionType(debugType, {debugType}), definition, matchFunc);
   matchFunc->setCallingConv(llvm::CallingConv::Fast);
-  std::map<std::pair<std::string, llvm::Type *>, llvm::Value *> subst;
   auto val = matchFunc->arg_begin();
   llvm::BasicBlock *block = llvm::BasicBlock::Create(module->getContext(), "entry", matchFunc);
   llvm::BasicBlock *stuck = llvm::BasicBlock::Create(module->getContext(), "stuck", matchFunc);
@@ -804,14 +584,14 @@ void makeStepFunction(KOREDefinition *definition, llvm::Module *module, Decision
   auto result = stepFunctionHeader(0, module, definition, block, stuck, {val}, {{SortCategory::Symbol, 0}});
   auto collectedVal = result.first[0];
   collectedVal->setName("_1");
-  subst[std::make_pair(collectedVal->getName(), collectedVal->getType())] = collectedVal;
+  Decision codegen(definition, result.second, fail, jump, choiceBuffer, choiceDepth, module, {SortCategory::Symbol, 0});
+  codegen.store(std::make_pair(collectedVal->getName(), collectedVal->getType()), collectedVal);
   auto phi = llvm::PHINode::Create(collectedVal->getType(), 2, "phi_1", stuck);
   phi->addIncoming(val, block);
   phi->addIncoming(collectedVal, pre_stuck);
   llvm::ReturnInst::Create(module->getContext(), phi, stuck);
 
-  Decision codegen(definition, result.second, fail, jump, choiceBuffer, choiceDepth, module, {SortCategory::Symbol, 0});
-  codegen(dt, subst);
+  codegen(dt);
 }
 
 // TODO: actually collect the return value of this function. Right now it
@@ -868,7 +648,6 @@ void makeStepFunction(KOREAxiomDeclaration *axiom, KOREDefinition *definition, l
   initDebugFunction(name, name, getDebugFunctionType(blockDebugType, debugTypes), definition, matchFunc);
   matchFunc->setCallingConv(llvm::CallingConv::Fast);
 
-  std::map<std::pair<std::string, llvm::Type *>, llvm::Value *> subst;
   llvm::StringMap<llvm::Value *> stuckSubst;
   llvm::BasicBlock *block = llvm::BasicBlock::Create(module->getContext(), "entry", matchFunc);
   llvm::BasicBlock *stuck = llvm::BasicBlock::Create(module->getContext(), "stuck", matchFunc);
@@ -898,9 +677,10 @@ void makeStepFunction(KOREAxiomDeclaration *axiom, KOREDefinition *definition, l
   }
   auto header = stepFunctionHeader(axiom->getOrdinal(), module, definition, block, stuck, args, types);
   i = 0;
+  Decision codegen(definition, header.second, fail, jump, choiceBuffer, choiceDepth, module, {SortCategory::Symbol, 0});
   for (auto val : header.first) {
     val->setName(res.residuals[i].occurrence.substr(0, max_name_length));
-    subst[std::make_pair(val->getName(), val->getType())] = val;
+    codegen.store(std::make_pair(val->getName(), val->getType()), val);
     stuckSubst.insert({val->getName(), phis[i]});
     phis[i++]->addIncoming(val, pre_stuck);
   }
@@ -913,7 +693,6 @@ void makeStepFunction(KOREAxiomDeclaration *axiom, KOREDefinition *definition, l
   llvm::Value *retval = creator(partialTerm).first;
   llvm::ReturnInst::Create(module->getContext(), retval, creator.getCurrentBlock());
 
-  Decision codegen(definition, header.second, fail, jump, choiceBuffer, choiceDepth, module, {SortCategory::Symbol, 0});
-  codegen(res.dt, subst);
+  codegen(res.dt);
 }
 }
