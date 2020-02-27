@@ -147,10 +147,10 @@ static void migrate_mpz(mpz_ptr *mpzPtr) {
     memcpy(newIntgr, intgr, sizeof(mpz_hdr));
     newIntgr->h.hdr |= mask;
     newIntgr->i->_mp_d = (mp_limb_t *)newLimbs->data;
-    *(mpz_ptr *)(intgr->i->_mp_d) = newIntgr->i;
+    *(mpz_ptr *)(&intgr->i->_mp_d) = newIntgr->i;
     intgr->h.hdr |= FWD_PTR_BIT;
   }
-  *mpzPtr = *(mpz_ptr *)(intgr->i->_mp_d);
+  *mpzPtr = *(mpz_ptr *)(&intgr->i->_mp_d);
 }
 
 static void migrate_floating(floating **floatingPtr) {
