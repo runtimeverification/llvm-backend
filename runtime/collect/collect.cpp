@@ -131,22 +131,33 @@ static void migrate_mpz(mpz_ptr *mpzPtr) {
   if (!hasForwardingAddress) {
     mpz_hdr *newIntgr;
     string *newLimbs;
-    string *limbs = struct_base(string, data, intgr->i->_mp_d);
-    size_t lenLimbs = len(limbs);
+    bool hasLimbs = intgr->i->_mp_alloc > 0;
+    if (hasLimbs) {
+      string *limbs = struct_base(string, data, intgr->i->_mp_d);
+      size_t lenLimbs = len(limbs);
 
-    assert(intgr->i->_mp_alloc * sizeof(mp_limb_t) == lenLimbs);
+      assert(intgr->i->_mp_alloc * sizeof(mp_limb_t) == lenLimbs);
 
-    if (shouldPromote || (isInOldGen && collect_old)) {
-      newIntgr = struct_base(mpz_hdr, i, koreAllocIntegerOld(0));
-      newLimbs = (string *) koreAllocTokenOld(sizeof(string) + lenLimbs);
+      if (shouldPromote || (isInOldGen && collect_old)) {
+        newIntgr = struct_base(mpz_hdr, i, koreAllocIntegerOld(0));
+        newLimbs = (string *) koreAllocTokenOld(sizeof(string) + lenLimbs);
+      } else {
+        newIntgr = struct_base(mpz_hdr, i, koreAllocInteger(0));
+        newLimbs = (string *) koreAllocToken(sizeof(string) + lenLimbs);
+      }
+      memcpy(newLimbs, limbs, sizeof(string) + lenLimbs);
     } else {
-      newIntgr = struct_base(mpz_hdr, i, koreAllocInteger(0));
-      newLimbs = (string *) koreAllocToken(sizeof(string) + lenLimbs);
+      if (shouldPromote || (isInOldGen && collect_old)) {
+        newIntgr = struct_base(mpz_hdr, i, koreAllocIntegerOld(0));
+      } else {
+        newIntgr = struct_base(mpz_hdr, i, koreAllocInteger(0));
+      }
     }
-    memcpy(newLimbs, limbs, sizeof(string) + lenLimbs);
     memcpy(newIntgr, intgr, sizeof(mpz_hdr));
     newIntgr->h.hdr |= mask;
-    newIntgr->i->_mp_d = (mp_limb_t *)newLimbs->data;
+    if (hasLimbs) {
+      newIntgr->i->_mp_d = (mp_limb_t *)newLimbs->data;
+    }
     *(mpz_ptr *)(&intgr->i->_mp_d) = newIntgr->i;
     intgr->h.hdr |= FWD_PTR_BIT;
   }
