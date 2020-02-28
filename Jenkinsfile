@@ -1,9 +1,5 @@
 pipeline {
-  agent {
-    dockerfile {
-      additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)'
-    }
-  }
+  agent none
   options {
     ansiColor('xterm')
   }
@@ -16,8 +12,13 @@ pipeline {
         }
       }
     }
-    stage('Build and Test') {
+    stage('Build and Test on Ubuntu') {
       options { timeout(time: 15, unit: 'MINUTES') }
+      agent {
+        dockerfile {
+          additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)'
+        }
+      }
       steps {
         sh '''
           ./ciscript Debug
@@ -26,6 +27,23 @@ pipeline {
         '''
       }
     }
+    stage('Build and Test on Arch Linux') {
+      options { timeout(time: 15, unit: 'MINUTES') }
+      agent {
+        dockerfile {
+          filename 'Dockerfile.arch'
+          additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)'
+        }
+      }
+      steps {
+        sh '''
+          ./ciscript Debug
+          ./ciscript Release
+          ./ciscript RelWithDebInfo
+        '''
+      }
+    }
+ 
     stage('Update K Submodule') {
       when { branch 'master' }
       steps {
