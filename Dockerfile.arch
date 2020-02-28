@@ -1,7 +1,7 @@
 FROM archlinux/base
 
 RUN pacman -Syyu --noconfirm && \
-    pacman -S --noconfirm base git cmake clang llvm-libs lld flex boost gmp mpfr libyaml jemalloc curl maven pkg-config
+    pacman -S --noconfirm base-devel git cmake clang llvm-libs lld flex boost gmp mpfr libyaml jemalloc curl maven pkg-config
 
 ARG USER_ID=1000
 ARG GROUP_ID=1000
