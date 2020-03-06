@@ -139,6 +139,10 @@ install(
   DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/include/immer
   DESTINATION include
 )
+install(
+  DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/include/rapidjson
+  DESTINATION include
+)
 
 install(
   DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/include/config
@@ -146,6 +150,7 @@ install(
 )
 
 file(COPY ${PROJECT_SOURCE_DIR}/deps/immer/immer DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/include)
+file(COPY ${PROJECT_SOURCE_DIR}/deps/rapidjson/include/rapidjson DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/include)
 
 set(GC_INTERVAL 2000 CACHE STRING "Garbage collect every N steps")
 
