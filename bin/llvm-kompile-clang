@@ -67,6 +67,7 @@ fi
   "$LIBDIR"/liballoc.a \
   "$LIBDIR"/libcollect.a \
   "$LIBDIR"/libmeta.a \
+  "$LIBDIR"/libjson.a \
   -lgmp -lmpfr -lpthread -ldl -lffi \
   $flags \
   -ljemalloc \
