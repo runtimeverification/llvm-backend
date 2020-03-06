@@ -414,18 +414,7 @@ void init_float2(floating *result, std::string contents) {
   }
 }
 
-std::string floatToString(const floating *f) {
-  uint64_t prec = mpfr_get_prec(f->f);
-  uint64_t exp = f->exp;
-  char suffix[41]; // 19 chars per long + p and x and null byte
-  if (prec == 53 && exp == 11) {
-    suffix[0] = 0;
-  } else if (prec == 24 && exp == 8) {
-    suffix[0] = 'f';
-    suffix[1] = 0;
-  } else {
-    sprintf(suffix, "p%" PRIu64 "x%" PRIu64, prec, exp);
-  }
+std::string floatToString(const floating *f, const char *suffix) {
   if (mpfr_nan_p(f->f)) {
     return "NaN" + std::string(suffix);
   } else if (mpfr_inf_p(f->f)) {
@@ -450,4 +439,19 @@ std::string floatToString(const floating *f) {
     strcpy(newstr->data + idx + 2, str + idx);
     return std::string(newstr->data) + "e" + std::to_string(printed_exp) + suffix;
   }
+}
+
+std::string floatToString(const floating *f) {
+  uint64_t prec = mpfr_get_prec(f->f);
+  uint64_t exp = f->exp;
+  char suffix[41]; // 19 chars per long + p and x and null byte
+  if (prec == 53 && exp == 11) {
+    suffix[0] = 0;
+  } else if (prec == 24 && exp == 8) {
+    suffix[0] = 'f';
+    suffix[1] = 0;
+  } else {
+    sprintf(suffix, "p%" PRIu64 "x%" PRIu64, prec, exp);
+  }
+  return floatToString(f, suffix);
 }

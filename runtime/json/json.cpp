@@ -16,6 +16,8 @@ extern "C" {
   char *getTerminatedString(string *);
 }
 
+std::string floatToString(const floating *f, const char *suffix);
+
 struct zinj {
   blockheader h;
   mpz_ptr data;
@@ -210,6 +212,10 @@ static bool write_json(KoreWriter<Stream> &writer, block *data) {
       zinj *inj = (zinj *)data;
       string *str = hook_STRING_int2string(inj->data);
       writer.RawNumber(str->data, len(str), false);
+    } else if (data->h.hdr == floatHdr().hdr) {
+      floatinj *inj = (floatinj *)data;
+      std::string str = floatToString(inj->data, "");
+      writer.RawNumber(str.c_str(), str.length(), false);
     } else if (data->h.hdr == strHdr().hdr) {
       stringinj *inj = (stringinj *)data;
       writer.String(inj->data->data, len(inj->data), false);
