@@ -433,7 +433,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
   }
 
   private lazy val validCols: Seq[MatrixColumn] = {
-    matrixColumns.filter(col => col.column.isValid || columns.forall(c => c == col.column || !c.needed(col.column.keyVars)))
+    matrixColumns.filter(col => col.column.isValid || columns.forall(c => c == col.column || !c.needed(col.column.keyVars) || col.column.needed(c.keyVars)))
   }
 
   private var specializing: Option[IndexedSeq[Pattern[String]]] = None
