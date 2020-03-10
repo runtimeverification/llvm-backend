@@ -7,6 +7,7 @@ target triple = "x86_64-unknown-linux-gnu"
 declare fastcc %block* @step(%block*)
 
 @depth = thread_local global i64 zeroinitializer
+@steps = thread_local global i64 zeroinitializer
 @INTERVAL = internal thread_local global i64 @GC_INTERVAL@
 @current_interval = thread_local global i64 0
 
@@ -21,6 +22,9 @@ define i1 @finished_rewriting() {
 entry:
   %depth = load i64, i64* @depth
   %hasDepth = icmp sge i64 %depth, 0
+  %steps = load i64, i64* @steps
+  %stepsPlusOne = add i64 %steps, 1
+  store i64 %stepsPlusOne, i64* @steps
   br i1 %hasDepth, label %if, label %else
 if:
   %depthMinusOne = sub i64 %depth, 1

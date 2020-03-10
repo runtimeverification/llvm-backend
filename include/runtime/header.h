@@ -167,6 +167,7 @@ extern "C" {
 
   block *parseConfiguration(const char *filename);
   void printConfiguration(const char *filename, block *subject);
+  void printStatistics(const char *filename, uint64_t steps);
   string *printConfigurationToString(block *subject);
   void printConfigurationToFile(FILE *, block *subject);
   void printConfigurationInternal(writer *file, block *subject, const char *sort, bool);

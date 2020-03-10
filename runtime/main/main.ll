@@ -13,6 +13,7 @@ declare void @finish_rewriting(%block*, i1) #0
 declare void @initStaticObjects()
 
 @output_file = external global i8*
+@statistics = external global i1
 
 define i32 @main(i32 %argc, i8** %argv) {
 entry:
@@ -24,6 +25,8 @@ entry:
   %output_ptr = getelementptr inbounds i8*, i8** %argv, i64 3
   %output_str = load i8*, i8** %output_ptr
   store i8* %output_str, i8** @output_file
+  %hasStatistics = icmp ne i32 %argc, 4
+  store i1 %hasStatistics, i1* @statistics
 
   call void @initStaticObjects()
 
