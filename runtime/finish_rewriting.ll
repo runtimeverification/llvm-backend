@@ -5,6 +5,7 @@ target triple = "x86_64-unknown-linux-gnu"
 %block = type { %blockheader, [0 x i64 *] } ; 16-bit layout, 8-bit length, 32-bit tag, children
 %mpz = type { i32, i32, i64* }
 
+declare void @printStatistics(i8*, i64)
 declare void @printConfiguration(i8*, %block*)
 declare void @printConfigurationToFile(i8*, %block*)
 declare void @exit(i32) #0
@@ -23,6 +24,8 @@ define weak fastcc %mpz* @"eval_LblgetExitCode{SortGeneratedTopCell{}}"(%block*)
 }
 
 @output_file = global i8* zeroinitializer
+@statistics = global i1 zeroinitializer
+@steps = external thread_local global i64
 
 define void @finish_rewriting(%block* %subject, i1 %error) #0 {
   %output = load i8*, i8** @output_file
@@ -35,6 +38,13 @@ abort:
   call void @abort()
   unreachable
 print:
+  %hasStatistics = load i1, i1* @statistics
+  br i1 %hasStatistics, label %printStatistics, label %printConfig
+printStatistics:
+  %steps = load i64, i64* @steps
+  call void @printStatistics(i8* %output, i64 %steps)
+  br label %printConfig
+printConfig:
   call void @printConfiguration(i8* %output, %block* %subject)
   br i1 %error, label %exit, label %exitCode
 exitCode:
@@ -43,7 +53,7 @@ exitCode:
   %exit_trunc = trunc i64 %exit_ul to i32
   br label %exit
 exit:
-  %exit_ui = phi i32 [ %exit_trunc, %exitCode ], [ 113, %print ]
+  %exit_ui = phi i32 [ %exit_trunc, %exitCode ], [ 113, %printConfig ]
   call void @exit(i32 %exit_ui)
   unreachable
 }

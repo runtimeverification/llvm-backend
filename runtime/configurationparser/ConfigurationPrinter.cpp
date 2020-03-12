@@ -1,3 +1,4 @@
+#include <cinttypes>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -174,8 +175,14 @@ void printConfigurationInternal(writer *file, block *subject, const char *sort, 
   sfprintf(file, ")");
 }
 
-void printConfiguration(const char *filename, block *subject) {
+void printStatistics(const char *filename, uint64_t steps) {
   FILE *file = fopen(filename, "w");
+  fprintf(file, "%" PRIu64 "\n", steps-1); //off by one adjustment
+  fclose(file);
+}
+
+void printConfiguration(const char *filename, block *subject) {
+  FILE *file = fopen(filename, "a");
   boundVariables.clear();
   varCounter = 0;
   writer w = {file,nullptr};
