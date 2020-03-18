@@ -36,4 +36,32 @@ extern "C" {
   void koreCollect(void**, uint8_t, layoutitem *);
 }
 
+#ifdef GC_DBG
+# define initialize_age() \
+  uint64_t age = (hdr & YOUNG_AGE_BIT) >> AGE_OFFSET;
+# define increment_age() \
+  if (age < ((1 << AGE_WIDTH) - 1)) age++;
+# define migrate_header(block) \
+  block->h.hdr |= shouldPromote ? NOT_YOUNG_OBJECT_BIT : 0; \
+  block->h.hdr &= ~YOUNG_AGE_BIT; \
+  block->h.hdr |= age << AGE_OFFSET
+#else
+# define initialize_age() \
+  bool age = hdr & YOUNG_AGE_BIT;
+# define increment_age()
+# define migrate_header(block) \
+  block->h.hdr |= shouldPromote ? NOT_YOUNG_OBJECT_BIT : YOUNG_AGE_BIT
+#endif
+
+#define initialize_migrate() \
+  bool isInYoungGen = is_in_young_gen_hdr(hdr); \
+  initialize_age() \
+  bool isInOldGen = is_in_old_gen_hdr(hdr); \
+  if (!(isInYoungGen || (isInOldGen && collect_old))) { \
+    return; \
+  } \
+  bool shouldPromote = isInYoungGen && age; \
+  increment_age() \
+  bool hasForwardingAddress = hdr & FWD_PTR_BIT
+
 #endif // RUNTIME_COLLECT_H

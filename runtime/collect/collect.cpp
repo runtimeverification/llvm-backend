@@ -40,15 +40,7 @@ void migrate(block** blockPtr) {
     return;
   }
   const uint64_t hdr = currBlock->h.hdr;
-  bool isInYoungGen = is_in_young_gen_hdr(hdr);
-  bool hasAged = hdr & YOUNG_AGE_BIT;
-  bool isInOldGen = is_in_old_gen_hdr(hdr);
-  if (!(isInYoungGen || (isInOldGen && collect_old))) {
-    return;
-  }
-  bool shouldPromote = isInYoungGen && hasAged;
-  uint64_t mask = shouldPromote ? NOT_YOUNG_OBJECT_BIT : YOUNG_AGE_BIT;
-  bool hasForwardingAddress = hdr & FWD_PTR_BIT;
+  initialize_migrate();
   uint16_t layout = layout_hdr(hdr);
   size_t lenInBytes = get_size(hdr, layout);
   block** forwardingAddress = (block**)(currBlock + 1);
@@ -60,7 +52,7 @@ void migrate(block** blockPtr) {
       newBlock = (block *)koreAlloc(lenInBytes);
     }
     memcpy(newBlock, currBlock, lenInBytes);
-    newBlock->h.hdr |= mask;
+    migrate_header(newBlock);
     *forwardingAddress = newBlock;
     currBlock->h.hdr |= FWD_PTR_BIT;
     *blockPtr = newBlock;
@@ -87,15 +79,7 @@ static void migrate_string_buffer(stringbuffer** bufferPtr) {
   stringbuffer* buffer = *bufferPtr;
   const uint64_t hdr = buffer->h.hdr;
   const uint64_t cap = len(buffer->contents);
-  bool isInYoungGen = is_in_young_gen_hdr(hdr);
-  bool hasAged = hdr & YOUNG_AGE_BIT;
-  bool isInOldGen = is_in_old_gen_hdr(hdr);
-  if (!(isInYoungGen || (isInOldGen && collect_old))) {
-    return;
-  }
-  bool shouldPromote = isInYoungGen && hasAged;
-  uint64_t mask = shouldPromote ? NOT_YOUNG_OBJECT_BIT : YOUNG_AGE_BIT;
-  bool hasForwardingAddress = hdr & FWD_PTR_BIT;
+  initialize_migrate();
   if (!hasForwardingAddress) {
     stringbuffer *newBuffer;
     string *newContents;
@@ -108,7 +92,7 @@ static void migrate_string_buffer(stringbuffer** bufferPtr) {
     }
     memcpy(newContents, buffer->contents, sizeof(string) + buffer->strlen);
     memcpy(newBuffer, buffer, sizeof(stringbuffer));
-    newBuffer->h.hdr |= mask;
+    migrate_header(newBuffer);
     newBuffer->contents = newContents;
     *(stringbuffer **)(buffer->contents) = newBuffer;
     buffer->h.hdr |= FWD_PTR_BIT;
@@ -119,15 +103,7 @@ static void migrate_string_buffer(stringbuffer** bufferPtr) {
 static void migrate_mpz(mpz_ptr *mpzPtr) {
   mpz_hdr *intgr = struct_base(mpz_hdr, i, *mpzPtr);
   const uint64_t hdr = intgr->h.hdr;
-  bool isInYoungGen = is_in_young_gen_hdr(hdr);
-  bool hasAged = hdr & YOUNG_AGE_BIT;
-  bool isInOldGen = is_in_old_gen_hdr(hdr);
-  if (!(isInYoungGen || (isInOldGen && collect_old))) {
-    return;
-  }
-  bool shouldPromote = isInYoungGen && hasAged;
-  uint64_t mask = shouldPromote ? NOT_YOUNG_OBJECT_BIT : YOUNG_AGE_BIT;
-  bool hasForwardingAddress = hdr & FWD_PTR_BIT;
+  initialize_migrate();
   if (!hasForwardingAddress) {
     mpz_hdr *newIntgr;
     string *newLimbs;
@@ -154,7 +130,7 @@ static void migrate_mpz(mpz_ptr *mpzPtr) {
       }
     }
     memcpy(newIntgr, intgr, sizeof(mpz_hdr));
-    newIntgr->h.hdr |= mask;
+    migrate_header(newIntgr);
     if (hasLimbs) {
       newIntgr->i->_mp_d = (mp_limb_t *)newLimbs->data;
     }
@@ -167,15 +143,7 @@ static void migrate_mpz(mpz_ptr *mpzPtr) {
 static void migrate_floating(floating **floatingPtr) {
   floating_hdr *flt = struct_base(floating_hdr, f, *floatingPtr);
   const uint64_t hdr = flt->h.hdr;
-  bool isInYoungGen = is_in_young_gen_hdr(hdr);
-  bool hasAged = hdr & YOUNG_AGE_BIT;
-  bool isInOldGen = is_in_old_gen_hdr(hdr);
-  if (!(isInYoungGen || (isInOldGen && collect_old))) {
-    return;
-  }
-  bool shouldPromote = isInYoungGen && hasAged;
-  uint64_t mask = shouldPromote ? NOT_YOUNG_OBJECT_BIT : YOUNG_AGE_BIT;
-  bool hasForwardingAddress = hdr & FWD_PTR_BIT;
+  initialize_migrate();
   if (!hasForwardingAddress) {
     floating_hdr *newFlt;
     string *newLimbs;
@@ -193,7 +161,7 @@ static void migrate_floating(floating **floatingPtr) {
     }
     memcpy(newLimbs, limbs, sizeof(string) + lenLimbs);
     memcpy(newFlt, flt, sizeof(floating_hdr));
-    newFlt->h.hdr |= mask;
+    migrate_header(newFlt);
     newFlt->f.f->_mpfr_d = (mp_limb_t *)newLimbs->data+1;
     *(floating **)(flt->f.f->_mpfr_d) = &newFlt->f;
     flt->h.hdr |= FWD_PTR_BIT;
