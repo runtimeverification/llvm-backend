@@ -55,6 +55,12 @@ void* koreAllocFloatingOld(size_t requested);
 #define MEM_LOG(...)
 #endif
 
+#ifdef GC_DBG
+#define GC_LOG(...) fprintf(stderr, __VA_ARGS__)
+#else
+#define GC_LOG(...)
+#endif
+
 }
 
 #endif // ALLOC_H
