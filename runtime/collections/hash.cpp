@@ -7,6 +7,9 @@ extern "C" {
   void int_hash(mpz_ptr, void *);
   void float_hash(floating *, void *);
 
+  static thread_local uint32_t hash_depth;
+  static constexpr uint32_t HASH_THRESHOLD = 5;
+
   __attribute__((always_inline)) void add_hash8(void *h, uint8_t data) {
     size_t *hash = (size_t *)h;
     *hash = ((*hash) ^ ((size_t)data)) * 1099511628211UL;
@@ -24,21 +27,18 @@ extern "C" {
     add_hash8(h, buf[7]);
   }
 
-  size_t hash_k(block *term) {
-    size_t hash = 14695981039346656037ULL;
-    k_hash(term, &hash);
-
-    return hash;
-  }
-
   __attribute__((always_inline)) void add_hash_str(void *h, char *data, size_t len) {
     for (size_t i = 0; i < len; i++) {
       add_hash8(h, data[i]);
     }
   }
 
-  static thread_local uint32_t hash_depth;
-  static constexpr uint32_t HASH_THRESHOLD = 5;
+  size_t hash_k(block *term) {
+    size_t hash = 14695981039346656037ULL;
+    k_hash(term, &hash);
+
+    return hash;
+  }
 
   bool hash_enter() {
     bool result = hash_depth < HASH_THRESHOLD;
