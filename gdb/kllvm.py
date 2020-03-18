@@ -376,7 +376,7 @@ def pp_label(label):
 class Variable:
     def __init__(self, val):
         self.stdStr = val.dereference()['data'].string("iso-8859-1")
-        self.var_bit = int(val.dereference()['h']['hdr'] & 0x4000000000000)
+        self.var_bit = int(val.dereference()['h']['hdr'] & @VARIABLE_BIT@)
         self.address = int(val)
 
     def __eq__(self, other):
@@ -598,7 +598,7 @@ class termPrinter:
         layout = hdr >> @LAYOUT_OFFSET@
         if not layout:
             string = subject.cast(self.string_ptr)
-            length = hdr & 0xffffffffff
+            length = hdr & @LENGTH_MASK@
             self.result += "#token(\""
             for i in range(length):
                 c = chr(int(string.dereference()['data'][i].cast(self.unsigned_char)))
@@ -633,7 +633,7 @@ class termPrinter:
                 self.result += self.var_names[var]
             self.result += "\",\"" + sort[4:] + "\")"
             return
-        tag = hdr & 0xffffffff
+        tag = hdr & @TAG_MASK@
         isBinder = self.isSymbolABinder(tag)
         if isBinder:
             self.bound_variables.append((subject.cast(self.long_int) + 8).cast(self.block_ptr_ptr).dereference())
