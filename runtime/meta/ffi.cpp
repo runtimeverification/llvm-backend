@@ -271,6 +271,8 @@ extern "C" {
   static std::pair<std::vector<block **>::iterator, std::vector<block **>::iterator> firstBlockEnumerator() {
     static std::vector<block **> blocks;
 
+    blocks.clear();
+
     for (auto &keyVal : allocatedKItemPtrs) {
       blocks.push_back(const_cast<block**>(&(keyVal.first)));
     }
@@ -280,6 +282,8 @@ extern "C" {
 
   static std::pair<std::vector<block **>::iterator, std::vector<block **>::iterator> secondBlockEnumerator() {
     static std::vector<block **> blocks;
+
+    blocks.clear();
 
     for (auto &keyVal : allocatedBytesRefs) {
       blocks.push_back(const_cast<block**>(&(keyVal.second)));
