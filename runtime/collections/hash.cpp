@@ -63,59 +63,59 @@ extern "C" {
       if (argintptr & 1) {
         add_hash64(h, argintptr);
       } else {
-	uint64_t arghdrcanon = arg->h.hdr & HDR_MASK;
-	if (uint16_t arglayout = layout(arg)) {
+        uint64_t arghdrcanon = arg->h.hdr & HDR_MASK;
+        if (uint16_t arglayout = layout(arg)) {
           add_hash64(h, arghdrcanon);
-	  layout *layoutPtr = getLayoutData(arglayout);
-	  uint8_t length = layoutPtr->nargs;
-	  for (uint8_t i = 0; i < length; i++) {
+          layout *layoutPtr = getLayoutData(arglayout);
+          uint8_t length = layoutPtr->nargs;
+          for (uint8_t i = 0; i < length; i++) {
             uint64_t offset = layoutPtr->args[i].offset;
-	    uint16_t cat = layoutPtr->args[i].cat;
-	    switch(cat) {
+            uint16_t cat = layoutPtr->args[i].cat;
+            switch(cat) {
             case MAP_LAYOUT: {
               map *mapptr = (map *)(argintptr+offset);
-	      map_hash(mapptr, h);
-	      break;
+              map_hash(mapptr, h);
+              break;
             }
             case LIST_LAYOUT: {
               list *listptr = (list *)(argintptr+offset);
-	      list_hash(listptr, h);
-	      break;
+              list_hash(listptr, h);
+              break;
             }
             case SET_LAYOUT: {
               set *setptr = (set *)(argintptr+offset);
-	      set_hash(setptr, h);
-	      break;
+              set_hash(setptr, h);
+              break;
             }
             case INT_LAYOUT: {
               mpz_ptr *intptrptr = (mpz_ptr *)(argintptr+offset);
-	      int_hash(*intptrptr, h);
-	      break;
+              int_hash(*intptrptr, h);
+              break;
             }
             case FLOAT_LAYOUT: {
               floating **floatptrptr = (floating **)(argintptr+offset);
-	      float_hash(*floatptrptr, h);
-	      break;
+              float_hash(*floatptrptr, h);
+              break;
             }
             case BOOL_LAYOUT: {
-	      bool *boolptr = (bool *)(argintptr+offset);
-	      add_hash8(h, *boolptr);
-	      break;
+              bool *boolptr = (bool *)(argintptr+offset);
+              add_hash8(h, *boolptr);
+              break;
             }
             case SYMBOL_LAYOUT:
             case VARIABLE_LAYOUT: {
-	      block **childptrptr = (block **)(argintptr+offset);
-	      k_hash(*childptrptr, h);
-	      break;
+              block **childptrptr = (block **)(argintptr+offset);
+              k_hash(*childptrptr, h);
+              break;
             }
-	    default:
+            default:
               abort();
-	    }
-	  }
-	} else {
+            }
+          }
+        } else {
           string *str = (string *)arg;
           add_hash_str(h, str->data, len(arg));
-	}
+        }
       }
     }
     hash_exit();
