@@ -21,6 +21,7 @@ bool collect_old = false;
 static uint8_t num_collection_only_young = 0;
 
 size_t numBytesLiveAtCollection[1 << AGE_WIDTH];
+static char *last_alloc_ptr;
 
 bool during_gc() {
   return is_gc;
@@ -257,6 +258,12 @@ void koreCollect(void** roots, uint8_t nroots, layoutitem *typeInfo) {
   is_gc = true;
   collect_old = shouldCollectOldGen();
   MEM_LOG("Starting garbage collection\n");
+#ifdef GC_DBG
+  if (!last_alloc_ptr) {
+    last_alloc_ptr = youngspace_ptr();
+  }
+  char *current_alloc_ptr = *young_alloc_ptr();
+#endif
   koreAllocSwap(collect_old);
 #ifdef GC_DBG
   for (int i = 0; i < 2048; i++) {
@@ -281,6 +288,16 @@ void koreCollect(void** roots, uint8_t nroots, layoutitem *typeInfo) {
       scan_ptr = evacuate(scan_ptr, old_alloc_ptr());
     }
   }
+#ifdef GC_DBG
+  ssize_t numBytesAllocedSinceLastCollection = ptrDiff(current_alloc_ptr, last_alloc_ptr);
+  assert(numBytesAllocedSinceLastCollection >= 0);
+  fwrite(&numBytesAllocedSinceLastCollection, sizeof(ssize_t), 1, stderr);
+  last_alloc_ptr = *young_alloc_ptr();
+  fwrite(numBytesLiveAtCollection, 
+      sizeof(numBytesLiveAtCollection[0]),
+      sizeof(numBytesLiveAtCollection) / sizeof(numBytesLiveAtCollection[0]),
+      stderr);
+#endif
   MEM_LOG("Finishing garbage collection\n");
   is_gc = false;
 }
