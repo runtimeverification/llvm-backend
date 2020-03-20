@@ -18,7 +18,9 @@ char* oldspace_ptr(void);
 
 static bool is_gc = false;
 bool collect_old = false;
+#ifndef GC_DBG
 static uint8_t num_collection_only_young = 0;
+#endif
 
 size_t numBytesLiveAtCollection[1 << AGE_WIDTH];
 static char *last_alloc_ptr;
@@ -237,12 +239,16 @@ static char* evacuate(char* scan_ptr, char** alloc_ptr) {
 // Contains the decision logic for collecting the old generation.
 // For now, we collect the old generation every 50 young generation collections.
 static bool shouldCollectOldGen() {
+#ifdef GC_DBG
+  return true;
+#else
   if (++num_collection_only_young == 50) {
     num_collection_only_young = 0;
     return true;
   }
 
   return false;
+#endif
 }
 
 void migrateRoots();
