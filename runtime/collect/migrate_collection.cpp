@@ -20,6 +20,9 @@ void migrate_collection_node(void **nodePtr) {
     } else {
       newBlock = (string *)koreAlloc(lenInBytes);
     }
+#ifdef GC_DBG
+    numBytesLiveAtCollection[oldAge] += lenInBytes;
+#endif
     memcpy(newBlock, currBlock, lenInBytes);
     migrate_header(newBlock);
     *(void **)(currBlock+1) = newBlock + 1;

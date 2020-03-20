@@ -24,6 +24,7 @@ using set_node = set::iterator::node_t;
 using set_impl = set::iterator::tree_t;
 
 extern "C" {
+  extern size_t numBytesLiveAtCollection[1 << AGE_WIDTH];
   bool during_gc(void);
   extern bool collect_old;
   size_t get_size(uint64_t, uint16_t);
@@ -38,7 +39,8 @@ extern "C" {
 
 #ifdef GC_DBG
 # define initialize_age() \
-  uint64_t age = (hdr & YOUNG_AGE_BIT) >> AGE_OFFSET;
+  uint64_t age = (hdr & YOUNG_AGE_BIT) >> AGE_OFFSET; \
+  uint64_t oldAge = age;
 # define increment_age() \
   if (age < ((1 << AGE_WIDTH) - 1)) age++;
 # define migrate_header(block) \

@@ -20,6 +20,8 @@ static bool is_gc = false;
 bool collect_old = false;
 static uint8_t num_collection_only_young = 0;
 
+size_t numBytesLiveAtCollection[1 << AGE_WIDTH];
+
 bool during_gc() {
   return is_gc;
 }
@@ -51,6 +53,9 @@ void migrate(block** blockPtr) {
     } else {
       newBlock = (block *)koreAlloc(lenInBytes);
     }
+#ifdef GC_DBG
+    numBytesLiveAtCollection[oldAge] += lenInBytes;
+#endif
     memcpy(newBlock, currBlock, lenInBytes);
     migrate_header(newBlock);
     *forwardingAddress = newBlock;
@@ -90,6 +95,9 @@ static void migrate_string_buffer(stringbuffer** bufferPtr) {
       newBuffer = (stringbuffer *)koreAlloc(sizeof(stringbuffer));
       newContents = (string *)koreAllocToken(sizeof(string) + cap);
     }
+#ifdef GC_DBG
+    numBytesLiveAtCollection[oldAge] += cap + sizeof(stringbuffer) + sizeof(string);
+#endif
     memcpy(newContents, buffer->contents, sizeof(string) + buffer->strlen);
     memcpy(newBuffer, buffer, sizeof(stringbuffer));
     migrate_header(newBuffer);
@@ -108,9 +116,16 @@ static void migrate_mpz(mpz_ptr *mpzPtr) {
     mpz_hdr *newIntgr;
     string *newLimbs;
     bool hasLimbs = intgr->i->_mp_alloc > 0;
+#ifdef GC_DBG
+    numBytesLiveAtCollection[oldAge] += sizeof(mpz_hdr);
+#endif
     if (hasLimbs) {
       string *limbs = struct_base(string, data, intgr->i->_mp_d);
       size_t lenLimbs = len(limbs);
+
+#ifdef GC_DBG
+      numBytesLiveAtCollection[oldAge] += lenLimbs + sizeof(string);
+#endif
 
       assert(intgr->i->_mp_alloc * sizeof(mp_limb_t) == lenLimbs);
 
@@ -149,6 +164,10 @@ static void migrate_floating(floating **floatingPtr) {
     string *newLimbs;
     string *limbs = struct_base(string, data, flt->f.f->_mpfr_d-1);
     size_t lenLimbs = len(limbs);
+
+#ifdef GC_DBG
+    numBytesLiveAtCollection[oldAge] += sizeof(floating_hdr) + sizeof(string) + lenLimbs;
+#endif
 
     assert(((flt->f.f->_mpfr_prec + mp_bits_per_limb - 1) / mp_bits_per_limb) * sizeof(mp_limb_t) <= lenLimbs);
 
@@ -239,6 +258,11 @@ void koreCollect(void** roots, uint8_t nroots, layoutitem *typeInfo) {
   collect_old = shouldCollectOldGen();
   MEM_LOG("Starting garbage collection\n");
   koreAllocSwap(collect_old);
+#ifdef GC_DBG
+  for (int i = 0; i < 2048; i++) {
+    numBytesLiveAtCollection[i] = 0;
+  }
+#endif
   for (int i = 0; i < nroots; i++) {
     migrate_child(roots, typeInfo, i, true);
   }
