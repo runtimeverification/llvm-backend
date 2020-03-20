@@ -25,6 +25,8 @@ pipeline {
           ./ciscript Debug
           ./ciscript Release
           ./ciscript RelWithDebInfo
+          ./ciscript GcStats
+
         '''
       }
     }
