@@ -178,6 +178,36 @@ char *movePtr(char *ptr, size_t size, const char *arena_end_ptr) {
   return next_block + sizeof(memory_block_header);
 }
 
+ssize_t ptrDiff(char *ptr1, char *ptr2) {
+  if (mem_block_start(ptr1) == mem_block_start(ptr2)) {
+    return ptr1 - ptr2;
+  }
+  memory_block_header *hdr = mem_block_header(ptr2);
+  ssize_t result = 0;
+  while (hdr != mem_block_header(ptr1) && hdr->next_block) {
+    if (ptr2) {
+      result += ((char *)hdr + BLOCK_SIZE) - ptr2;
+      ptr2 = NULL;
+    } else {
+      result += (BLOCK_SIZE - sizeof(memory_block_header));
+    }
+    hdr = (memory_block_header *)hdr->next_block;
+  }
+  if (hdr == mem_block_header(ptr1)) {
+    result += ptr1 - (char *)(hdr+1);
+    return result;
+  } else {
+    // reached the end of the arena and didn't find the block
+    // it's possible that the result should be negative, in which
+    // case the block will have been prior to the block we started
+    // at. To handle this, we recurse with reversed arguments and
+    // negate the result. This means that the code might not
+    // terminate if the two pointers do not belong to the same 
+    // arena.
+    return -ptrDiff(ptr2, ptr1);
+  }
+}
+
 void freeAllMemory() {
   memory_block_header *superblock = (memory_block_header *)first_superblock_ptr;
   while (superblock) {

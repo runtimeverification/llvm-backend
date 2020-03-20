@@ -78,6 +78,9 @@ char **arenaEndPtr(struct arena *);
 //               starting pointer, or 0 if this is equal to the 3rd argument.
 char *movePtr(char *, size_t, const char *);
 
+// Given two pointers to objects allocated in the same arena, return the number of bytes they are separated by within the virtual block of memory represented by the blocks of that arena. This difference will include blocks containing sentinel bytes. Undefined behavior will result if the pointers belong to different arenas.
+ssize_t ptrDiff(char *, char *);
+
 // Deallocates all the memory allocated for registered arenas.
 void freeAllMemory(void);
 
