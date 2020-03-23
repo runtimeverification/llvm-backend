@@ -20,10 +20,11 @@ static bool is_gc = false;
 bool collect_old = false;
 #ifndef GC_DBG
 static uint8_t num_collection_only_young = 0;
+#else
+static char *last_alloc_ptr;
 #endif
 
 size_t numBytesLiveAtCollection[1 << AGE_WIDTH];
-static char *last_alloc_ptr;
 
 bool during_gc() {
   return is_gc;
