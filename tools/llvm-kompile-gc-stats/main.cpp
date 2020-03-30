@@ -28,6 +28,10 @@ int main (int argc, char **argv) {
   bool generation = strcmp(argv[1], "generation") == 0;
   // `llvm-kompile-gc-stats count` emits the number of collections in the log.
   bool count = strcmp(argv[1], "count") == 0;
+  // `llvm-kompile-gc-stats alloc` emits the number of bytes allocated
+  // after each collection. This can be used to graph the allocation behavior
+  // over time.
+  bool alloc = strcmp(argv[1], "alloc") == 0;
   if (analyze) {
     for (int i = 0; i < 2048; i++) {
       mpz_init(total[i]);
@@ -69,6 +73,8 @@ int main (int argc, char **argv) {
         }
       }
       gmp_printf("%zd: %Zd\n", step, size);
+    } else if (alloc) {
+      printf("%zd: %zd\n", step, frame[0]);
     } else if (!count) {
       fprintf(stderr, usage, argv[0]);
       return 1;
