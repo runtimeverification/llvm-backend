@@ -5,7 +5,8 @@
 #include <gmp.h>
 
 int main (int argc, char **argv) {
-  const char *usage = "usage: %s [dump|analyze|generation|count] <file> [<lower_bound> <upper_bound>]\n";
+  const char *usage = "usage: %s [dump|analyze|generation|count] <file>"
+   " [<lower_bound> <upper_bound>]\n";
   if (argc < 3) {
     fprintf(stderr, usage, argv[0]);
     return 1;
