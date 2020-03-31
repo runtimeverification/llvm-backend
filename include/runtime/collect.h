@@ -39,20 +39,20 @@ extern "C" {
 
 #ifdef GC_DBG
 # define initialize_age() \
-  uint64_t age = (hdr & YOUNG_AGE_BIT) >> AGE_OFFSET; \
+  uint64_t age = (hdr & AGE_MASK) >> AGE_OFFSET; \
   uint64_t oldAge = age;
 # define increment_age() \
   if (age < ((1 << AGE_WIDTH) - 1)) age++;
 # define migrate_header(block) \
   block->h.hdr |= shouldPromote ? NOT_YOUNG_OBJECT_BIT : 0; \
-  block->h.hdr &= ~YOUNG_AGE_BIT; \
+  block->h.hdr &= ~AGE_MASK; \
   block->h.hdr |= age << AGE_OFFSET
 #else
 # define initialize_age() \
-  bool age = hdr & YOUNG_AGE_BIT;
+  bool age = hdr & AGE_MASK;
 # define increment_age()
 # define migrate_header(block) \
-  block->h.hdr |= shouldPromote ? NOT_YOUNG_OBJECT_BIT : YOUNG_AGE_BIT
+  block->h.hdr |= shouldPromote ? NOT_YOUNG_OBJECT_BIT : AGE_MASK
 #endif
 
 #define initialize_migrate() \
