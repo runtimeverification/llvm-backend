@@ -48,6 +48,17 @@ int main (int argc, char **argv) {
   }
   while(true) {
     int ret = fread(frame, sizeof(size_t), 2049, f);
+    // the frame contains 2049 integers:
+    //
+    // frame[0] contains the total number of bytes allocated since the last
+    // collection cycle
+    //
+    // frame[i] for i in [1..2047] contains the total number of bytes that
+    // survived exactly i collection cycles that are alive at that point in
+    // time.
+    //
+    // frame[2048] contains the total number of bytes that survived
+    // at least 2048 collection cycles that are alive at that point in time.
     if (ret < 2049) break;
     if (dump) {
       printf("Collection %zd\n", step);
