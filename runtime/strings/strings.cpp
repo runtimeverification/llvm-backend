@@ -361,7 +361,7 @@ extern "C" {
       }
       string* new_contents;
       if (notYoungObjectBit) {
-        assert(buf->h.hdr & YOUNG_AGE_BIT);
+        assert(buf->h.hdr & AGE_MASK);
         new_contents = static_cast<string *>(koreAllocTokenOld(sizeof(string) + newCapacity));
       } else {
         new_contents = static_cast<string *>(koreAllocToken(sizeof(string) + newCapacity));

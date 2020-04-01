@@ -18,16 +18,16 @@
 // the actual length is equal to the block header with the gc bits masked out.
 
 #define len(s) len_hdr((s)->h.hdr)
-#define len_hdr(s) ((s) & 0xffffffffff)
+#define len_hdr(s) ((s) & LENGTH_MASK)
 #define set_len(s, l) ((s)->h.hdr = (l) | (l > BLOCK_SIZE - sizeof(char *) ? NOT_YOUNG_OBJECT_BIT : 0))
 #define size_hdr(s) ((((s) >> 32) & 0xff) * 8)
 #define layout(s) layout_hdr((s)->h.hdr)
 #define layout_hdr(s) ((s) >> LAYOUT_OFFSET)
-#define tag_hdr(s) (s & 0xffffffffLL)
+#define tag_hdr(s) (s & TAG_MASK)
 #define is_in_young_gen_hdr(s) (!((s) & NOT_YOUNG_OBJECT_BIT))
 #define is_in_old_gen_hdr(s) \
-        (((s) & NOT_YOUNG_OBJECT_BIT) && ((s) & YOUNG_AGE_BIT))
-#define reset_gc(s) ((s)->h.hdr = (s)->h.hdr & ~(NOT_YOUNG_OBJECT_BIT | YOUNG_AGE_BIT | FWD_PTR_BIT))
+        (((s) & NOT_YOUNG_OBJECT_BIT) && ((s) & AGE_MASK))
+#define reset_gc(s) ((s)->h.hdr = (s)->h.hdr & ~(NOT_YOUNG_OBJECT_BIT | AGE_MASK | FWD_PTR_BIT))
 #define struct_base(struct_type, member_name, member_addr) \
         ((struct_type *)((char *)(member_addr) - offsetof(struct_type, member_name)))
 

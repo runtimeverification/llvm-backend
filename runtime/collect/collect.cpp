@@ -18,7 +18,13 @@ char* oldspace_ptr(void);
 
 static bool is_gc = false;
 bool collect_old = false;
+#ifndef GC_DBG
 static uint8_t num_collection_only_young = 0;
+#else
+static char *last_alloc_ptr;
+#endif
+
+size_t numBytesLiveAtCollection[1 << AGE_WIDTH];
 
 bool during_gc() {
   return is_gc;
@@ -40,15 +46,7 @@ void migrate(block** blockPtr) {
     return;
   }
   const uint64_t hdr = currBlock->h.hdr;
-  bool isInYoungGen = is_in_young_gen_hdr(hdr);
-  bool hasAged = hdr & YOUNG_AGE_BIT;
-  bool isInOldGen = is_in_old_gen_hdr(hdr);
-  if (!(isInYoungGen || (isInOldGen && collect_old))) {
-    return;
-  }
-  bool shouldPromote = isInYoungGen && hasAged;
-  uint64_t mask = shouldPromote ? NOT_YOUNG_OBJECT_BIT : YOUNG_AGE_BIT;
-  bool hasForwardingAddress = hdr & FWD_PTR_BIT;
+  initialize_migrate();
   uint16_t layout = layout_hdr(hdr);
   size_t lenInBytes = get_size(hdr, layout);
   block** forwardingAddress = (block**)(currBlock + 1);
@@ -59,8 +57,11 @@ void migrate(block** blockPtr) {
     } else {
       newBlock = (block *)koreAlloc(lenInBytes);
     }
+#ifdef GC_DBG
+    numBytesLiveAtCollection[oldAge] += lenInBytes;
+#endif
     memcpy(newBlock, currBlock, lenInBytes);
-    newBlock->h.hdr |= mask;
+    migrate_header(newBlock);
     *forwardingAddress = newBlock;
     currBlock->h.hdr |= FWD_PTR_BIT;
     *blockPtr = newBlock;
@@ -87,15 +88,7 @@ static void migrate_string_buffer(stringbuffer** bufferPtr) {
   stringbuffer* buffer = *bufferPtr;
   const uint64_t hdr = buffer->h.hdr;
   const uint64_t cap = len(buffer->contents);
-  bool isInYoungGen = is_in_young_gen_hdr(hdr);
-  bool hasAged = hdr & YOUNG_AGE_BIT;
-  bool isInOldGen = is_in_old_gen_hdr(hdr);
-  if (!(isInYoungGen || (isInOldGen && collect_old))) {
-    return;
-  }
-  bool shouldPromote = isInYoungGen && hasAged;
-  uint64_t mask = shouldPromote ? NOT_YOUNG_OBJECT_BIT : YOUNG_AGE_BIT;
-  bool hasForwardingAddress = hdr & FWD_PTR_BIT;
+  initialize_migrate();
   if (!hasForwardingAddress) {
     stringbuffer *newBuffer;
     string *newContents;
@@ -106,9 +99,12 @@ static void migrate_string_buffer(stringbuffer** bufferPtr) {
       newBuffer = (stringbuffer *)koreAlloc(sizeof(stringbuffer));
       newContents = (string *)koreAllocToken(sizeof(string) + cap);
     }
+#ifdef GC_DBG
+    numBytesLiveAtCollection[oldAge] += cap + sizeof(stringbuffer) + sizeof(string);
+#endif
     memcpy(newContents, buffer->contents, sizeof(string) + buffer->strlen);
     memcpy(newBuffer, buffer, sizeof(stringbuffer));
-    newBuffer->h.hdr |= mask;
+    migrate_header(newBuffer);
     newBuffer->contents = newContents;
     *(stringbuffer **)(buffer->contents) = newBuffer;
     buffer->h.hdr |= FWD_PTR_BIT;
@@ -119,22 +115,21 @@ static void migrate_string_buffer(stringbuffer** bufferPtr) {
 static void migrate_mpz(mpz_ptr *mpzPtr) {
   mpz_hdr *intgr = struct_base(mpz_hdr, i, *mpzPtr);
   const uint64_t hdr = intgr->h.hdr;
-  bool isInYoungGen = is_in_young_gen_hdr(hdr);
-  bool hasAged = hdr & YOUNG_AGE_BIT;
-  bool isInOldGen = is_in_old_gen_hdr(hdr);
-  if (!(isInYoungGen || (isInOldGen && collect_old))) {
-    return;
-  }
-  bool shouldPromote = isInYoungGen && hasAged;
-  uint64_t mask = shouldPromote ? NOT_YOUNG_OBJECT_BIT : YOUNG_AGE_BIT;
-  bool hasForwardingAddress = hdr & FWD_PTR_BIT;
+  initialize_migrate();
   if (!hasForwardingAddress) {
     mpz_hdr *newIntgr;
     string *newLimbs;
     bool hasLimbs = intgr->i->_mp_alloc > 0;
+#ifdef GC_DBG
+    numBytesLiveAtCollection[oldAge] += sizeof(mpz_hdr);
+#endif
     if (hasLimbs) {
       string *limbs = struct_base(string, data, intgr->i->_mp_d);
       size_t lenLimbs = len(limbs);
+
+#ifdef GC_DBG
+      numBytesLiveAtCollection[oldAge] += lenLimbs + sizeof(string);
+#endif
 
       assert(intgr->i->_mp_alloc * sizeof(mp_limb_t) == lenLimbs);
 
@@ -154,7 +149,7 @@ static void migrate_mpz(mpz_ptr *mpzPtr) {
       }
     }
     memcpy(newIntgr, intgr, sizeof(mpz_hdr));
-    newIntgr->h.hdr |= mask;
+    migrate_header(newIntgr);
     if (hasLimbs) {
       newIntgr->i->_mp_d = (mp_limb_t *)newLimbs->data;
     }
@@ -167,20 +162,16 @@ static void migrate_mpz(mpz_ptr *mpzPtr) {
 static void migrate_floating(floating **floatingPtr) {
   floating_hdr *flt = struct_base(floating_hdr, f, *floatingPtr);
   const uint64_t hdr = flt->h.hdr;
-  bool isInYoungGen = is_in_young_gen_hdr(hdr);
-  bool hasAged = hdr & YOUNG_AGE_BIT;
-  bool isInOldGen = is_in_old_gen_hdr(hdr);
-  if (!(isInYoungGen || (isInOldGen && collect_old))) {
-    return;
-  }
-  bool shouldPromote = isInYoungGen && hasAged;
-  uint64_t mask = shouldPromote ? NOT_YOUNG_OBJECT_BIT : YOUNG_AGE_BIT;
-  bool hasForwardingAddress = hdr & FWD_PTR_BIT;
+  initialize_migrate();
   if (!hasForwardingAddress) {
     floating_hdr *newFlt;
     string *newLimbs;
     string *limbs = struct_base(string, data, flt->f.f->_mpfr_d-1);
     size_t lenLimbs = len(limbs);
+
+#ifdef GC_DBG
+    numBytesLiveAtCollection[oldAge] += sizeof(floating_hdr) + sizeof(string) + lenLimbs;
+#endif
 
     assert(((flt->f.f->_mpfr_prec + mp_bits_per_limb - 1) / mp_bits_per_limb) * sizeof(mp_limb_t) <= lenLimbs);
 
@@ -193,7 +184,7 @@ static void migrate_floating(floating **floatingPtr) {
     }
     memcpy(newLimbs, limbs, sizeof(string) + lenLimbs);
     memcpy(newFlt, flt, sizeof(floating_hdr));
-    newFlt->h.hdr |= mask;
+    migrate_header(newFlt);
     newFlt->f.f->_mpfr_d = (mp_limb_t *)newLimbs->data+1;
     *(floating **)(flt->f.f->_mpfr_d) = &newFlt->f;
     flt->h.hdr |= FWD_PTR_BIT;
@@ -249,12 +240,16 @@ static char* evacuate(char* scan_ptr, char** alloc_ptr) {
 // Contains the decision logic for collecting the old generation.
 // For now, we collect the old generation every 50 young generation collections.
 static bool shouldCollectOldGen() {
+#ifdef GC_DBG
+  return true;
+#else
   if (++num_collection_only_young == 50) {
     num_collection_only_young = 0;
     return true;
   }
 
   return false;
+#endif
 }
 
 void migrateRoots();
@@ -270,7 +265,18 @@ void koreCollect(void** roots, uint8_t nroots, layoutitem *typeInfo) {
   is_gc = true;
   collect_old = shouldCollectOldGen();
   MEM_LOG("Starting garbage collection\n");
+#ifdef GC_DBG
+  if (!last_alloc_ptr) {
+    last_alloc_ptr = youngspace_ptr();
+  }
+  char *current_alloc_ptr = *young_alloc_ptr();
+#endif
   koreAllocSwap(collect_old);
+#ifdef GC_DBG
+  for (int i = 0; i < 2048; i++) {
+    numBytesLiveAtCollection[i] = 0;
+  }
+#endif
   for (int i = 0; i < nroots; i++) {
     migrate_child(roots, typeInfo, i, true);
   }
@@ -289,6 +295,16 @@ void koreCollect(void** roots, uint8_t nroots, layoutitem *typeInfo) {
       scan_ptr = evacuate(scan_ptr, old_alloc_ptr());
     }
   }
+#ifdef GC_DBG
+  ssize_t numBytesAllocedSinceLastCollection = ptrDiff(current_alloc_ptr, last_alloc_ptr);
+  assert(numBytesAllocedSinceLastCollection >= 0);
+  fwrite(&numBytesAllocedSinceLastCollection, sizeof(ssize_t), 1, stderr);
+  last_alloc_ptr = *young_alloc_ptr();
+  fwrite(numBytesLiveAtCollection, 
+      sizeof(numBytesLiveAtCollection[0]),
+      sizeof(numBytesLiveAtCollection) / sizeof(numBytesLiveAtCollection[0]),
+      stderr);
+#endif
   MEM_LOG("Finishing garbage collection\n");
   is_gc = false;
 }
