@@ -13,7 +13,7 @@ pipeline {
       }
     }
     stage('Build and Test on Arch Linux') {
-      options { timeout(time: 15, unit: 'MINUTES') }
+      options { timeout(time: 20, unit: 'MINUTES') }
       agent {
         dockerfile {
           filename 'Dockerfile.arch'
@@ -31,7 +31,7 @@ pipeline {
       }
     }
     stage('Build and Test on Ubuntu') {
-      options { timeout(time: 15, unit: 'MINUTES') }
+      options { timeout(time: 20, unit: 'MINUTES') }
       agent {
         dockerfile {
           additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)'
@@ -42,6 +42,7 @@ pipeline {
           ./ciscript Debug
           ./ciscript Release
           ./ciscript RelWithDebInfo
+          ./ciscript GcStats
         '''
       }
     }
