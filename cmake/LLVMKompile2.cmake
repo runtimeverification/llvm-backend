@@ -17,6 +17,7 @@ add_custom_command(
 
 target_compile_options(${TARGET_NAME}
 	PUBLIC -Wno-return-type-c-linkage)
+set_target_properties(${TARGET_NAME} PROPERTIES LINK_DEPENDS "${KOMPILED_DIR}/definition.o")
 
 install(TARGETS ${TARGET_NAME}
 	RUNTIME DESTINATION bin)
