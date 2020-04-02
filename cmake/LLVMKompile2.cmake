@@ -15,9 +15,12 @@ add_custom_command(
 	COMMAND ${LLVM_KOMPILE} ${KOMPILED_DIR}/definition.kore ${KOMPILED_DIR}/dt ${KOMPILE_USE_MAIN} ${LLVM_KOMPILE_FLAGS} -o ${KOMPILED_DIR}/definition.o -c
 	DEPENDS ${KOMPILED_DIR}/definition.kore)
 
+add_custom_target(definition
+	DEPENDS "${KOMPILED_DIR}/definition.o")
+add_dependencies(${TARGET_NAME} definition)
+
 target_compile_options(${TARGET_NAME}
 	PUBLIC -Wno-return-type-c-linkage)
-set_target_properties(${TARGET_NAME} PROPERTIES LINK_DEPENDS "${KOMPILED_DIR}/definition.o")
 
 install(TARGETS ${TARGET_NAME}
 	RUNTIME DESTINATION bin)
