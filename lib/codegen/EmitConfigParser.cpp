@@ -273,9 +273,6 @@ static std::pair<llvm::Value *, llvm::BasicBlock *> getEval(KOREDefinition *def,
   case SortCategory::StringBuffer:
   case SortCategory::Symbol:
   case SortCategory::Variable:
-    retval = new llvm::BitCastInst(result, llvm::Type::getInt8PtrTy(Ctx), "",
-        creator.getCurrentBlock());
-    break;
   case SortCategory::Map:
   case SortCategory::List:
   case SortCategory::Set:
