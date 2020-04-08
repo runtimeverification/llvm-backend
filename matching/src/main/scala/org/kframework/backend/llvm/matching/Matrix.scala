@@ -611,8 +611,9 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
 
   def compileInternal: DecisionTree = {
     if (Matching.logging) {
+      val s = toString
       System.out.println("-- Compile --")
-      System.out.println(toString)
+      System.out.println(s)
       System.out.println("remaining: " + Matrix.remaining)
     }
     if (clauses.isEmpty)
@@ -637,7 +638,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
   }
 
   def necessary(rowIx: Int, colIx: Int): Boolean = {
-    !columns(colIx).patterns(rowIx).isWildcard || !notCol(colIx).rowUseless(rowIx)
+    !columns(colIx).patterns(rowIx).isWildcard || notCol(colIx).rowUseless(rowIx)
   }
 
   private def useful(r: Row): Boolean = {
