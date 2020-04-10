@@ -3,13 +3,16 @@ set -e
 
 ARGV=()
 params=()
+pretty=()
 output_file="$(mktemp tmp.out.XXXXXXXXXX)"
 input_file="$(mktemp tmp.in.XXXXXXXXXX)"
-trap "rm -rf $input_file $output_file" INT TERM EXIT
+parser_file="$(mktemp tmp.parse.XXXXXXXXXX)"
+trap 'rm -rf "$input_file" "$output_file" "$parser_file"' INT TERM EXIT
 initializer="LblinitGeneratedTopCell{}"
 dir=.
 debug=
 depth=-1
+pretty_print=false
 
 while [[ $# -gt 0 ]]
 do
@@ -19,9 +22,12 @@ do
     name="$2"
     value="$3"
     var_name="params_$name"
+    pretty_name="pretty_$name"
+    sort_name="sort_$name"
     params+=("$name")
     sort="$4"
     type="$5"
+    printf -v "$sort_name" %s "$sort"
     case $type in
       kore)
       printf -v "$var_name" %s "$value"
@@ -29,12 +35,13 @@ do
       korefile)
       printf -v "$var_name" %s "`cat "$value"`"
       ;;
-    esac
-    case $sort in
-      KItem)
+      pretty)
+      printf -v "$pretty_name" %s "$value"
+      pretty+=("$name")
       ;;
-      *)
-      printf -v "$var_name" %s "inj{Sort$sort{}, SortKItem{}}(${!var_name})"
+      prettyfile)
+      printf -v "$pretty_name" %s "`cat "$value"`"
+      pretty+=("$name")
       ;;
     esac
     shift; shift; shift; shift; shift
@@ -43,6 +50,11 @@ do
     -o|--output-file)
     real_output_file="$2"
     shift; shift
+    ;;
+
+    -p)
+    pretty_print=true
+    shift
     ;;
 
     -i|--initializer)
@@ -73,6 +85,26 @@ do
     -save-temps)
     trap - INT TERM EXIT
     shift;
+    ;;
+  esac
+done
+
+for name in "${pretty[@]}"; do
+  var_name="params_$name"
+  pretty_name="pretty_$name"
+  printf %s "${!pretty_name}" | "$dir/parser_$name" /dev/stdin > "$parser_file"
+  printf -v "$var_name" %s "`cat $parser_file`"
+done
+
+for name in "${params[@]}"; do
+  sort_name="sort_$name"
+  var_name="params_$name"
+  sort="${!sort_name}"
+  case $sort in
+    KItem)
+    ;;
+    *)
+    printf -v "$var_name" %s "inj{Sort$sort{}, SortKItem{}}(${!var_name})"
     ;;
   esac
 done
@@ -122,13 +154,21 @@ set +e
 if [ -n "$verbose" ]; then
   set -x
 fi
-$debug "$dir"/interpreter $input_file $depth $output_file
+$debug "$dir"/interpreter "$input_file" $depth "$output_file"
 )
 EXIT=$?
 set -e
 
 if [ -n "${real_output_file}" ]; then
-  mv -f $output_file "$real_output_file"
+  if $pretty_print; then
+  "$(dirname "$0")/kprint" "$dir" "$output_file" > "$real_output_file"
+  else
+    mv -f "$output_file" "$real_output_file"
+  fi
+elif $pretty_print; then
+  "$(dirname "$0")/kprint" "$dir" "$output_file"
+else
+  cat "$output_file"
 fi
 
 exit $EXIT
