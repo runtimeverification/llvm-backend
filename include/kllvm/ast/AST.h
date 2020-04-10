@@ -35,7 +35,7 @@ public:
   virtual bool operator==(const KORESort &other) const = 0;
   bool operator!=(const KORESort &other) const { return !(*this == other); }
 
-  virtual void print(std::ostream &Out, unsigned indent = 0) const =0;
+  virtual void print(std::ostream &Out, unsigned indent = 0) const = 0;
   virtual void prettyPrint(std::ostream &Out) const = 0;
 
   virtual ~KORESort() = default;
