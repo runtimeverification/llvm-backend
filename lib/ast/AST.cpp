@@ -748,6 +748,50 @@ static void flatten(KORECompositePattern *pat, std::string name, std::vector<spt
   }
 }
 
+sptr<KOREPattern> KORECompositePattern::sortCollections(PrettyPrintData const& data) {
+  if (arguments.empty()) {
+    return shared_from_this();
+  }
+  std::string name = getConstructor()->getName();
+  if (data.comm.count(name) && data.assoc.count(name)) {
+    std::vector<sptr<KOREPattern>> items;
+    flatten(this, name, items);
+    std::vector<std::pair<std::string, sptr<KOREPattern>>> printed;
+    int oldIndent = indent;
+    bool oldAtNewLine = atNewLine;
+    bool oldHasColor = hasColor;
+    atNewLine = true;
+    indent = 0;
+    hasColor = false;
+    for (auto &item : items) {
+      std::ostringstream Out;
+      item->prettyPrint(Out, data);
+      printed.push_back({Out.str(), item});
+    }
+    indent = oldIndent;
+    atNewLine = oldAtNewLine;
+    hasColor = oldHasColor;
+    std::sort(printed.begin(), printed.end(), CompareFirst{});
+    items.clear();
+    for (auto &item : printed) {
+      items.push_back(item.second);
+    }
+    sptr<KOREPattern> result = items[0];
+    for (int i = 1; i < items.size(); ++i) {
+      sptr<KORECompositePattern> tmp = KORECompositePattern::Create(constructor.get());
+      tmp->addArgument(result);
+      tmp->addArgument(items[i]);
+      result = tmp;
+    }
+    return result;
+  }
+  sptr<KORECompositePattern> result = KORECompositePattern::Create(constructor.get());
+  for (auto &arg : arguments) {
+    result->addArgument(arg->sortCollections(data));
+  }
+  return result;
+}
+
 void KOREDeclaration::addAttribute(ptr<KORECompositePattern> Attribute) {
   std::string name = Attribute->getConstructor()->getName();
   attributes.insert({name, std::move(Attribute)});
