@@ -14,6 +14,43 @@ debug=
 depth=-1
 pretty_print=false
 
+print_usage () {
+cat <<HERE
+Usage: $0 -d DIR [-c NAME VALUE SORT TYPE]... [-o OUTPUT] [-p]
+Invoke llvm backend without calling java krun frontend. Functionality for
+parsing and unparsing is limited, and the user interface is lower level, but
+overhead is dramatically reduced.
+
+Mandatory arguments to long options are mandatory for short options too.
+
+  -d, --directory DIR      DIR is the kompiled directory of the definition to
+                           run
+  -c NAME VALUE SORT TYPE  Specify configuration variable. NAME is the name
+                           of the configuration variable without the '$'.
+                           VALUE is the value of the configuration variable
+                           (see below). SORT is the sort of the term passed
+                           as the value. TYPE is one of:
+                             * kore: VALUE is a literal kore string
+                             * korefile: VALUE is a filename containing kore
+                             * pretty: VALUE is parsed using a bison parser
+                                       and is a literal string in concrete
+                                       syntax
+                             * prettyfile: VALUE is a filename containing
+                                           concrete syntax, pasred like
+                                           'pretty'
+  -o, --output-file FILE   Write resulting configuration to FILE. Defaults to
+                           standard output
+  -p, --pretty-print       Pretty print output configuration. By default,
+                           output is in kore syntax
+      --debug              Use GDB to debug program
+      --depth INT          Execute up to INT steps
+  -i, --initializer INIT   Use INIT as the top cell initializer 
+  -v, --verbose            Print commands executed to standazd error
+      -save-temps          Do not delete temporary files on exit
+  -h, --help               Display this help and exit
+HERE
+}
+
 while [[ $# -gt 0 ]]
 do
   arg="$1"
@@ -52,7 +89,7 @@ do
     shift; shift
     ;;
 
-    -p)
+    -p|--pretty-print)
     pretty_print=true
     shift
     ;;
@@ -62,7 +99,7 @@ do
     shift; shift
     ;;
 
-    -d)
+    -d|--directory)
     dir="$2"
     shift; shift
     ;;
@@ -86,13 +123,29 @@ do
     trap - INT TERM EXIT
     shift;
     ;;
+
+    -h|--help)
+    print_usage
+    exit 0
+    ;;
+
+    *)
+    print_usage
+    exit 1
+    ;;
   esac
 done
 
 for name in "${pretty[@]}"; do
   var_name="params_$name"
   pretty_name="pretty_$name"
+  set +e
+  (
+  if [ -n "$verbose" ]; then
+    set -x
+  fi
   printf %s "${!pretty_name}" | "$dir/parser_$name" /dev/stdin > "$parser_file"
+  )
   printf -v "$var_name" %s "`cat $parser_file`"
 done
 
@@ -161,12 +214,24 @@ set -e
 
 if [ -n "${real_output_file}" ]; then
   if $pretty_print; then
+  set +e
+  (
+  if [ -n "$verbose" ]; then
+    set -x
+  fi
   "$(dirname "$0")/kprint" "$dir" "$output_file" > "$real_output_file"
+  )
   else
     mv -f "$output_file" "$real_output_file"
   fi
 elif $pretty_print; then
+  set +e
+  (
+  if [ -n "$verbose" ]; then
+    set -x
+  fi
   "$(dirname "$0")/kprint" "$dir" "$output_file"
+  )
 else
   cat "$output_file"
 fi
