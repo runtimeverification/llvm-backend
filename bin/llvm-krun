@@ -36,7 +36,7 @@ Mandatory arguments to long options are mandatory for short options too.
                                        and is a literal string in concrete
                                        syntax
                              * prettyfile: VALUE is a filename containing
-                                           concrete syntax, pasred like
+                                           concrete syntax, parsed like
                                            'pretty'
   -o, --output-file FILE   Write resulting configuration to FILE. Defaults to
                            standard output
