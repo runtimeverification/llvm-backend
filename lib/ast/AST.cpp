@@ -525,6 +525,8 @@ static void color(std::ostream &out, std::string color) {
   }
 }
 
+#define RESET_COLOR "\x1b[0m"
+
 std::string enquote(std::string str) {
   std::string result;
   for (size_t i = 0; i < str.length(); ++i) {
@@ -613,7 +615,7 @@ void KORECompositePattern::prettyPrint(std::ostream &out, PrettyPrintData const&
             break;
           case 'r':
             if (hasColor) {
-              append(out, "\x1b[0m");
+              append(out, RESET_COLOR);
             }
             break;
           case '0':
