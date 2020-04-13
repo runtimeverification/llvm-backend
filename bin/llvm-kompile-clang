@@ -4,7 +4,17 @@ main="$2"
 lto="$3"
 shift; shift; shift
 llc_opt_flags="-O0"
+link=true
+verbose=false
+save_temps=false
+output=false
+output_file="definition.o"
+compile=true
 for arg in "$@"; do
+  if $output; then
+    output=false
+    output_file="$arg"
+  fi
   case "$arg" in
     -O[0-3])
       llc_opt_flags="$arg"
@@ -16,10 +26,29 @@ for arg in "$@"; do
     -fno-omit-frame-pointer)
       llc_flags="$llc_flags -frame-pointer=all"
       ;;
+    -c)
+      link=false
+      ;;
+    -v)
+      verbose=true
+      ;;
+    -save-temps)
+      save_temps=true	    
+      ;;
+    -o)
+      output=true
+      ;;
     *)
       ;;
   esac
 done
+case "$modopt" in
+  *.o)
+    compile=false
+    ;;
+  *)
+    ;;
+esac
 LIBDIR="$(dirname "$0")"/../lib/kllvm/
 if [ "$main" = "main" ]; then
   MAINFILES="$LIBDIR"/llvm/main/main.ll
@@ -37,25 +66,46 @@ if [ -f "/etc/arch-release" ]; then
   llc_flags="$llc_flags --relocation-model=pic"
 fi
 
-lang="-x ir"
+run () {
+  if $verbose; then
+    set -x
+  fi
+  "$@"
+  { set +x; } 2>/dev/null
+}
+
+tmpdir="$(mktemp -d tmp.XXXXXXXXXX)"
+if ! $save_temps; then
+  trap 'rm -rf "$tmpdir"' INT TERM EXIT
+fi
+
 if [ "$lto" = "lto" ]; then
   flags="$flags -flto -Wl,-mllvm,-tailcallopt"
   files=("$LIBDIR"/llvm/*.ll)
+  if ! $link; then
+    mv "$modopt" "$output_file"
+  fi
 else
   files=()
-  modasm="$(mktemp tmp.XXXXXXXXXX)"
-  trap "rm -f $modasm" INT TERM EXIT
-  @LLC@ -tailcallopt "$modopt" -mtriple=@BACKEND_TARGET_TRIPLE@ -filetype=obj $llc_opt_flags $llc_flags -o "$modasm"
-  modopt="$modasm"
-  lang="-x none"
-  for file in "$LIBDIR"/llvm/*.ll; do
-    tmp="$(mktemp tmp.XXXXXXXXXX)"
-    @LLC@ -tailcallopt "$file" -mtriple=@BACKEND_TARGET_TRIPLE@ -filetype=obj $llc_opt_flags $llc_flags -o "$tmp"
-    files+=("$tmp")
-  done
+  if $compile; then
+    modasm="$tmpdir/asm.o"
+    if ! $link; then
+      modasm="$output_file"
+    fi
+    run @LLC@ -tailcallopt "$modopt" -mtriple=@BACKEND_TARGET_TRIPLE@ -filetype=obj $llc_opt_flags $llc_flags -o "$modasm"
+    modopt="$modasm"
+  fi
+  if $link; then
+    for file in "$LIBDIR"/llvm/*.ll; do
+      tmp="$tmpdir/`basename "$file"`.o"
+      run @LLC@ -tailcallopt "$file" -mtriple=@BACKEND_TARGET_TRIPLE@ -filetype=obj $llc_opt_flags $llc_flags -o "$tmp"
+      files+=("$tmp")
+    done
+  fi
 fi
 
-@CMAKE_CXX_COMPILER@ -Wno-override-module -Wno-return-type-c-linkage $lang "$modopt" "${files[@]}" -x none \
+if $link; then
+run @CMAKE_CXX_COMPILER@ -Wno-override-module -Wno-return-type-c-linkage "$modopt" "${files[@]}" \
   "$LIBDIR"/libarithmetic.a \
   "$MAINFILES" \
   "$LIBDIR"/libconfigurationparser.a \
@@ -73,3 +123,4 @@ fi
   -ljemalloc \
   -I "$(dirname "$0")"/../include \
   "$@"
+fi

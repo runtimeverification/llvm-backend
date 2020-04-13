@@ -11,21 +11,37 @@ mod="$(mktemp tmp.XXXXXXXXXX)"
 modopt="$(mktemp tmp.XXXXXXXXXX)"
 trap "rm -rf $dt_dir $mod $modopt" INT TERM EXIT
 definition="$1"
-dt_dir="$2"
-main="$3"
-shift; shift; shift
-debug=0
-for arg in "$@"; do
-  case "$arg" in
-    -g)
-      debug=1
-      ;;
-    *)
-      ;;
-  esac
-done
-"$(dirname "$0")"/llvm-kompile-codegen "$definition" "$dt_dir"/dt.yaml "$dt_dir" $debug > "$mod"
-@OPT@ -mem2reg -tailcallelim -tailcallopt "$mod" -o "$modopt"
+shift
+compile=true
+case "$definition" in
+  *.o)
+    compile=false
+    ;;
+  *)
+    ;;
+esac
+
+if $compile; then
+  dt_dir="$1"
+  main="$2"
+  shift; shift
+  debug=0
+  for arg in "$@"; do
+    case "$arg" in
+      -g)
+        debug=1
+        ;;
+      *)
+        ;;
+    esac
+  done
+  "$(dirname "$0")"/llvm-kompile-codegen "$definition" "$dt_dir"/dt.yaml "$dt_dir" $debug > "$mod"
+  @OPT@ -mem2reg -tailcallelim -tailcallopt "$mod" -o "$modopt"
+else
+  main="$1"
+  shift
+  modopt="$definition"
+fi
 if [[ "$OSTYPE" != "darwin"* ]]; then
   flags=-fuse-ld=lld
 fi
