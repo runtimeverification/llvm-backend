@@ -3,6 +3,7 @@
 #include <unordered_set>
 #include <unordered_map>
 #include <iostream>
+#include <algorithm>
 
 using namespace kllvm;
 
@@ -283,6 +284,520 @@ sptr<KOREPattern> KORECompositePattern::expandAliases(KOREDefinition *def) {
     ptr->addArgument(arg->expandAliases(def));
   }
   return ptr;
+}
+
+static int indent = 0;
+static bool atNewLine = true;
+static bool hasColor = isatty(1);
+
+#define INDENT_SIZE 2
+
+static void newline() {
+  std::cout << std::endl;
+  atNewLine = true;
+}
+
+static void printIndent() {
+  if (atNewLine) {
+    for (int i = 0; i < INDENT_SIZE * indent; i++) {
+      std::cout << ' ';
+    }
+    atNewLine = false;
+  }
+}
+
+static void append(std::ostream &out, char c) {
+  printIndent();
+  out << c;
+}
+
+static void append(std::ostream &out, std::string str) {
+  printIndent();
+  out << str;
+}
+
+static void color(std::ostream &out, std::string color) {
+  if (hasColor) {
+    static bool once = true;
+    static std::map<std::string, std::string> colors;
+    if (once) {
+      colors["MediumOrchid"] = "\x1b[38;5;134m";
+      colors["Black"] = "\x1b[38;5;16m";
+      colors["DarkSeaGreen"] = "\x1b[38;5;108m";
+      colors["Sienna"] = "\x1b[38;5;130m";
+      colors["Gainsboro"] = "\x1b[38;5;188m";
+      colors["LightCoral"] = "\x1b[38;5;210m";
+      colors["DarkGrey"] = "\x1b[38;5;145m";
+      colors["DodgerBlue"] = "\x1b[38;5;33m";
+      colors["CarnationPink"] = "\x1b[38;5;211m";
+      colors["Aquamarine"] = "\x1b[38;5;122m";
+      colors["Beige"] = "\x1b[38;5;230m";
+      colors["OliveDrab"] = "\x1b[38;5;64m";
+      colors["YellowOrange"] = "\x1b[38;5;214m";
+      colors["Mulberry"] = "\x1b[38;5;126m";
+      colors["Violet"] = "\x1b[38;5;213m";
+      colors["LimeGreen"] = "\x1b[38;5;40m";
+      colors["PaleGoldenrod"] = "\x1b[38;5;187m";
+      colors["Magenta"] = "\x1b[38;5;201m";
+      colors["PowderBlue"] = "\x1b[38;5;152m";
+      colors["DarkTurquoise"] = "\x1b[38;5;44m";
+      colors["IndianRed"] = "\x1b[38;5;167m";
+      colors["LightGray"] = "\x1b[38;5;188m";
+      colors["PeachPuff"] = "\x1b[38;5;223m";
+      colors["LightBlue"] = "\x1b[38;5;152m";
+      colors["ProcessBlue"] = "\x1b[38;5;39m";
+      colors["SpringGreen"] = "\x1b[38;5;48m";
+      colors["Indigo"] = "\x1b[38;5;54m";
+      colors["RedViolet"] = "\x1b[38;5;125m";
+      colors["DarkRed"] = "\x1b[38;5;88m";
+      colors["Wheat"] = "\x1b[38;5;223m";
+      colors["DarkCyan"] = "\x1b[38;5;30m";
+      colors["yellow"] = "\x1b[38;5;226m";
+      colors["LawnGreen"] = "\x1b[38;5;118m";
+      colors["gray"] = "\x1b[38;5;102m";
+      colors["DarkOrange"] = "\x1b[38;5;208m";
+      colors["Teal"] = "\x1b[38;5;30m";
+      colors["Maroon"] = "\x1b[38;5;88m";
+      colors["JungleGreen"] = "\x1b[38;5;37m";
+      colors["Blue"] = "\x1b[38;5;21m";
+      colors["Periwinkle"] = "\x1b[38;5;104m";
+      colors["Moccasin"] = "\x1b[38;5;223m";
+      colors["black"] = "\x1b[38;5;16m";
+      colors["Chocolate"] = "\x1b[38;5;166m";
+      colors["teal"] = "\x1b[38;5;30m";
+      colors["SeaGreen"] = "\x1b[38;5;29m";
+      colors["Thistle"] = "\x1b[38;5;182m";
+      colors["Red"] = "\x1b[38;5;196m";
+      colors["blue"] = "\x1b[38;5;21m";
+      colors["MistyRose"] = "\x1b[38;5;224m";
+      colors["purple"] = "\x1b[38;5;161m";
+      colors["Crimson"] = "\x1b[38;5;197m";
+      colors["DarkGray"] = "\x1b[38;5;145m";
+      colors["Fuchsia"] = "\x1b[38;5;201m";
+      colors["DarkBlue"] = "\x1b[38;5;18m";
+      colors["red"] = "\x1b[38;5;196m";
+      colors["Cornsilk"] = "\x1b[38;5;230m";
+      colors["white"] = "\x1b[38;5;231m";
+      colors["DarkSlateGrey"] = "\x1b[38;5;23m";
+      colors["PaleGreen"] = "\x1b[38;5;120m";
+      colors["DimGray"] = "\x1b[38;5;59m";
+      colors["lightgray"] = "\x1b[38;5;145m";
+      colors["Gold"] = "\x1b[38;5;220m";
+      colors["Gray"] = "\x1b[38;5;102m";
+      colors["DarkOliveGreen"] = "\x1b[38;5;58m";
+      colors["LemonChiffon"] = "\x1b[38;5;230m";
+      colors["brown"] = "\x1b[38;5;137m";
+      colors["NavyBlue"] = "\x1b[38;5;18m";
+      colors["FloralWhite"] = "\x1b[38;5;231m";
+      colors["LightGoldenrod"] = "\x1b[38;5;186m";
+      colors["GreenYellow"] = "\x1b[38;5;154m";
+      colors["Silver"] = "\x1b[38;5;145m";
+      colors["Khaki"] = "\x1b[38;5;186m";
+      colors["Ivory"] = "\x1b[38;5;231m";
+      colors["LightSkyBlue"] = "\x1b[38;5;117m";
+      colors["DarkGreen"] = "\x1b[38;5;22m";
+      colors["DarkSalmon"] = "\x1b[38;5;173m";
+      colors["TealBlue"] = "\x1b[38;5;37m";
+      colors["Linen"] = "\x1b[38;5;231m";
+      colors["LightGoldenrodYellow"] = "\x1b[38;5;230m";
+      colors["LightGreen"] = "\x1b[38;5;120m";
+      colors["LightGrey"] = "\x1b[38;5;188m";
+      colors["Brown"] = "\x1b[38;5;124m";
+      colors["Aqua"] = "\x1b[38;5;51m";
+      colors["Cerulean"] = "\x1b[38;5;39m";
+      colors["Peach"] = "\x1b[38;5;209m";
+      colors["Bisque"] = "\x1b[38;5;223m";
+      colors["MediumBlue"] = "\x1b[38;5;20m";
+      colors["BlueViolet"] = "\x1b[38;5;93m";
+      colors["RubineRed"] = "\x1b[38;5;198m";
+      colors["Lavender"] = "\x1b[38;5;189m";
+      colors["CornflowerBlue"] = "\x1b[38;5;68m";
+      colors["Goldenrod"] = "\x1b[38;5;178m";
+      colors["Grey"] = "\x1b[38;5;102m";
+      colors["MediumSpringGreen"] = "\x1b[38;5;49m";
+      colors["DarkKhaki"] = "\x1b[38;5;143m";
+      colors["green"] = "\x1b[38;5;46m";
+      colors["ForestGreen"] = "\x1b[38;5;28m";
+      colors["DarkOrchid"] = "\x1b[38;5;128m";
+      colors["White"] = "\x1b[38;5;231m";
+      colors["Purple"] = "\x1b[38;5;90m";
+      colors["DarkMagenta"] = "\x1b[38;5;90m";
+      colors["BlueGreen"] = "\x1b[38;5;37m";
+      colors["Green"] = "\x1b[38;5;28m";
+      colors["Melon"] = "\x1b[38;5;216m";
+      colors["SkyBlue"] = "\x1b[38;5;117m";
+      colors["Rhodamine"] = "\x1b[38;5;205m";
+      colors["Apricot"] = "\x1b[38;5;216m";
+      colors["RedOrange"] = "\x1b[38;5;202m";
+      colors["LightSlateGray"] = "\x1b[38;5;102m";
+      colors["cyan"] = "\x1b[38;5;51m";
+      colors["Orange"] = "\x1b[38;5;214m";
+      colors["DarkSlateGray"] = "\x1b[38;5;23m";
+      colors["DimGrey"] = "\x1b[38;5;59m";
+      colors["LightSeaGreen"] = "\x1b[38;5;37m";
+      colors["RoyalBlue"] = "\x1b[38;5;62m";
+      colors["darkgray"] = "\x1b[38;5;59m";
+      colors["Sepia"] = "\x1b[38;5;52m";
+      colors["DarkViolet"] = "\x1b[38;5;92m";
+      colors["MediumAquamarine"] = "\x1b[38;5;79m";
+      colors["MediumSlateBlue"] = "\x1b[38;5;99m";
+      colors["Dandelion"] = "\x1b[38;5;214m";
+      colors["MidnightBlue"] = "\x1b[38;5;18m";
+      colors["SandyBrown"] = "\x1b[38;5;215m";
+      colors["violet"] = "\x1b[38;5;90m";
+      colors["DarkSlateBlue"] = "\x1b[38;5;61m";
+      colors["DeepSkyBlue"] = "\x1b[38;5;74m";
+      colors["Chartreuse"] = "\x1b[38;5;118m";
+      colors["Olive"] = "\x1b[38;5;100m";
+      colors["MediumPurple"] = "\x1b[38;5;98m";
+      colors["Yellow"] = "\x1b[38;5;226m";
+      colors["Peru"] = "\x1b[38;5;173m";
+      colors["RosyBrown"] = "\x1b[38;5;138m";
+      colors["pink"] = "\x1b[38;5;217m";
+      colors["FireBrick"] = "\x1b[38;5;124m";
+      colors["RawSienna"] = "\x1b[38;5;124m";
+      colors["VioletRed"] = "\x1b[38;5;162m";
+      colors["OrangeRed"] = "\x1b[38;5;202m";
+      colors["Bittersweet"] = "\x1b[38;5;130m";
+      colors["Turquoise"] = "\x1b[38;5;80m";
+      colors["Cyan"] = "\x1b[38;5;51m";
+      colors["WhiteSmoke"] = "\x1b[38;5;231m";
+      colors["MediumSeaGreen"] = "\x1b[38;5;35m";
+      colors["LavenderBlush"] = "\x1b[38;5;231m";
+      colors["LightCyan"] = "\x1b[38;5;195m";
+      colors["PineGreen"] = "\x1b[38;5;29m";
+      colors["OliveGreen"] = "\x1b[38;5;28m";
+      colors["SlateGray"] = "\x1b[38;5;102m";
+      colors["LightSlateBlue"] = "\x1b[38;5;99m";
+      colors["NavajoWhite"] = "\x1b[38;5;223m";
+      colors["SlateBlue"] = "\x1b[38;5;62m";
+      colors["Orchid"] = "\x1b[38;5;170m";
+      colors["Tan"] = "\x1b[38;5;180m";
+      colors["LightSalmon"] = "\x1b[38;5;216m";
+      colors["Seashell"] = "\x1b[38;5;231m";
+      colors["Snow"] = "\x1b[38;5;231m";
+      colors["WildStrawberry"] = "\x1b[38;5;197m";
+      colors["Tomato"] = "\x1b[38;5;203m";
+      colors["RoyalPurple"] = "\x1b[38;5;61m";
+      colors["LightSlateGrey"] = "\x1b[38;5;102m";
+      colors["Plum"] = "\x1b[38;5;182m";
+      colors["YellowGreen"] = "\x1b[38;5;112m";
+      colors["olive"] = "\x1b[38;5;100m";
+      colors["MintCream"] = "\x1b[38;5;231m";
+      colors["PaleVioletRed"] = "\x1b[38;5;168m";
+      colors["Azure"] = "\x1b[38;5;231m";
+      colors["BurntOrange"] = "\x1b[38;5;208m";
+      colors["Salmon"] = "\x1b[38;5;210m";
+      colors["BlanchedAlmond"] = "\x1b[38;5;223m";
+      colors["Pink"] = "\x1b[38;5;217m";
+      colors["AliceBlue"] = "\x1b[38;5;231m";
+      colors["PapayaWhip"] = "\x1b[38;5;230m";
+      colors["Honeydew"] = "\x1b[38;5;231m";
+      colors["MediumTurquoise"] = "\x1b[38;5;44m";
+      colors["AntiqueWhite"] = "\x1b[38;5;231m";
+      colors["magenta"] = "\x1b[38;5;201m";
+      colors["LightPink"] = "\x1b[38;5;217m";
+      colors["OldLace"] = "\x1b[38;5;231m";
+      colors["CadetBlue"] = "\x1b[38;5;73m";
+      colors["BurlyWood"] = "\x1b[38;5;180m";
+      colors["Lime"] = "\x1b[38;5;46m";
+      colors["BrickRed"] = "\x1b[38;5;124m";
+      colors["Emerald"] = "\x1b[38;5;37m";
+      colors["LightSteelBlue"] = "\x1b[38;5;153m";
+      colors["Mahogany"] = "\x1b[38;5;124m";
+      colors["GhostWhite"] = "\x1b[38;5;231m";
+      colors["SteelBlue"] = "\x1b[38;5;67m";
+      colors["PaleTurquoise"] = "\x1b[38;5;159m";
+      colors["DarkGoldenrod"] = "\x1b[38;5;136m";
+      colors["lime"] = "\x1b[38;5;154m";
+      colors["DeepPink"] = "\x1b[38;5;198m";
+      colors["MediumVioletRed"] = "\x1b[38;5;162m";
+      colors["orange"] = "\x1b[38;5;220m";
+      colors["HotPink"] = "\x1b[38;5;205m";
+      colors["LightYellow"] = "\x1b[38;5;230m";
+      colors["Navy"] = "\x1b[38;5;18m";
+      colors["SaddleBrown"] = "\x1b[38;5;94m";
+      colors["Coral"] = "\x1b[38;5;209m";
+      colors["SlateGrey"] = "\x1b[38;5;102m";
+      once = false;
+    }
+    append(out, colors[color]);
+  }
+}
+
+#define RESET_COLOR "\x1b[0m"
+
+std::string enquote(std::string str) {
+  std::string result;
+  for (size_t i = 0; i < str.length(); ++i) {
+    char c = str[i];
+    switch(c) {
+    case '\\':
+      result.append("\\\\");
+      break;
+    case '"':
+      result.append("\\\"");
+      break;
+    case '\n':
+      result.append("\\n");
+      break;
+    case '\t':
+      result.append("\\t");
+      break;
+    case '\r':
+      result.append("\\r");
+      break;
+    case '\f':
+      result.append("\\f");
+      break;
+    default:
+      if ((unsigned char)c >= 32 && (unsigned char)c < 127) {
+        result.push_back(c);
+      } else {
+        char buf[3];
+        buf[2] = 0;
+        snprintf(buf, 3, "%02x", (unsigned char)c);
+        result.append("\\x");
+        result.append(buf);
+      }
+      break;
+    }
+  }
+  return result;
+}
+
+void KORECompositePattern::prettyPrint(std::ostream &out, PrettyPrintData const& data) const {
+  std::string name = getConstructor()->getName();
+  if (name == "\\dv") {
+    KORECompositeSort *s = dynamic_cast<KORECompositeSort *>(getConstructor()->getFormalArguments()[0].get()); 
+    bool hasHook = data.hook.count(s->getName());
+    auto str = dynamic_cast<KOREStringPattern *>(arguments[0].get());
+    if (hasHook) {
+      auto hook = data.hook.at(s->getName());
+      if (hook == "STRING.String") {
+        append(out, enquote(str->getContents()));
+      } else if (hook == "BYTES.Bytes") {
+        append(out, 'b');
+        append(out, enquote(str->getContents()));
+      } else {
+        append(out, str->getContents());
+      }
+    } else {
+      append(out, str->getContents());
+    }
+    return;
+  }
+  if (data.format.count(name)) {
+    auto format = data.format.at(name);
+    int localIndent = 0;
+    int localColor = 0;
+    for (int i = 0; i < format.length(); ++i) {
+      char c = format[i];
+      if (c == '%') {
+        if (i == format.length() - 1) {
+          abort();
+        }
+        char c2 = format[i+1];
+        ++i;
+        switch(c2) {
+          case 'n':
+            newline();
+            break;
+          case 'i':
+            indent++;
+            localIndent++;
+            break;
+          case 'd':
+            indent--;
+            localIndent--;
+            break;
+          case 'c':
+            if (data.colors.count(name)) {
+              if (localColor >= data.colors.at(name).size() ) {
+                abort();
+              }
+              color(out, data.colors.at(name)[localColor++]);
+            }
+            break;
+          case 'r':
+            if (hasColor) {
+              append(out, RESET_COLOR);
+            }
+            break;
+          case '0':
+          case '1':
+          case '2':
+          case '3':
+          case '4':
+          case '5':
+          case '6':
+          case '7':
+          case '8':
+          case '9': {
+            std::string buf;
+            for(; i < format.length() && format[i] >= '0' && format[i] < '9'; i++) {
+              buf.push_back(format[i]);
+            }
+            i--;
+            int idx = std::stoi(buf);
+            if (idx == 0 || idx > arguments.size()) {
+              abort();
+            }
+            KOREPattern *inner = arguments[idx-1].get();
+            bool assoc = false;
+            if (auto app = dynamic_cast<KORECompositePattern *>(inner)) {
+              if (app->getConstructor()->getName() == constructor->getName() && data.assoc.count(name)) {
+                assoc = true;
+              }
+              if (assoc) {
+                for (int j = 0; j < localIndent; j++) {
+                  indent--;
+                }
+              }
+              inner->prettyPrint(out, data);
+              if (assoc) {
+                for (int j = 0; j < localIndent; j++) {
+                  indent++;
+                }
+              }
+            }
+            break;
+          } default:
+            append(out, c2);
+        }
+      } else {
+        append(out, c);
+      }
+    }
+  } else {
+    abort();
+  }
+}
+
+struct CompareFirst {
+  bool isDigit(char c) {
+    return c >= '0' && c <= '9';
+  }
+
+  std::string getChunk(std::string s, size_t slength, size_t marker) {
+    std::string chunk;
+    char c = s[marker];
+    chunk.push_back(c);
+    marker++;
+    if (isDigit(c)) {
+      while (marker < slength) {
+        c = s[marker];
+        if (!isDigit(c)) {
+          break;
+        }
+        chunk.push_back(c);
+        marker++;
+      }
+    } else {
+      while (marker < slength) {
+        c = s[marker];
+        if (isDigit(c)) {
+          break;
+        }
+        chunk.push_back(c);
+        marker++;
+      }
+    }
+    return chunk;
+  }
+
+  template <typename T>
+  bool operator()(std::pair<std::string, T> a, std::pair<std::string, T> b) {
+    std::string s1 = a.first;
+    std::string s2 = b.first;
+    size_t thisMarker = 0;
+    size_t thatMarker = 0;
+    size_t s1length = s1.length();
+    size_t s2length = s2.length();
+    while (thisMarker < s1length && thatMarker < s2length) {
+      std::string thisChunk = getChunk(s1, s1length, thisMarker);
+      thisMarker += thisChunk.length();
+      std::string thatChunk = getChunk(s2, s2length, thatMarker);
+      thatMarker += thatChunk.length();
+      int result = 0;
+      if (isDigit(thisChunk[0]) && isDigit(thatChunk[0])) {
+        size_t thisChunkLength = thisChunk.length();
+        result = thisChunkLength - thatChunk.length();
+        if (result == 0) {
+          for (int i = 0; i < thisChunkLength; i++) {
+            result = thisChunk[i] - thatChunk[i];
+            if (result != 0) {
+              return result < 0;
+            }
+          }
+        }
+      } else {
+        result = thisChunk.compare(thatChunk);
+      }
+      if (result != 0) {
+        return result < 0;
+      }
+    }
+    return s1length < s2length;
+  }
+};
+
+static void flatten(KORECompositePattern *pat, std::string name, std::vector<sptr<KOREPattern>> &result) {
+  for (auto &arg : pat->getArguments()) {
+    if (auto pat2 = dynamic_cast<KORECompositePattern *>(arg.get())) {
+      if (pat2->getConstructor()->getName() == name) {
+        flatten(pat2, name, result);
+      } else {
+        result.push_back(arg);
+      }
+    } else {
+      result.push_back(arg);
+    }
+  }
+}
+
+sptr<KOREPattern> KORECompositePattern::sortCollections(PrettyPrintData const& data) {
+  if (arguments.empty()) {
+    return shared_from_this();
+  }
+  std::string name = getConstructor()->getName();
+  if (data.comm.count(name) && data.assoc.count(name)) {
+    std::vector<sptr<KOREPattern>> items;
+    flatten(this, name, items);
+    std::vector<std::pair<std::string, sptr<KOREPattern>>> printed;
+    int oldIndent = indent;
+    bool oldAtNewLine = atNewLine;
+    bool oldHasColor = hasColor;
+    atNewLine = true;
+    indent = 0;
+    hasColor = false;
+    for (auto &item : items) {
+      std::ostringstream Out;
+      item->prettyPrint(Out, data);
+      printed.push_back({Out.str(), item});
+    }
+    indent = oldIndent;
+    atNewLine = oldAtNewLine;
+    hasColor = oldHasColor;
+    std::sort(printed.begin(), printed.end(), CompareFirst{});
+    items.clear();
+    for (auto &item : printed) {
+      items.push_back(item.second);
+    }
+    sptr<KOREPattern> result = items[0];
+    for (int i = 1; i < items.size(); ++i) {
+      sptr<KORECompositePattern> tmp = KORECompositePattern::Create(constructor.get());
+      tmp->addArgument(result);
+      tmp->addArgument(items[i]);
+      result = tmp;
+    }
+    return result;
+  }
+  sptr<KORECompositePattern> result = KORECompositePattern::Create(constructor.get());
+  for (auto &arg : arguments) {
+    result->addArgument(arg->sortCollections(data));
+  }
+  return result;
 }
 
 void KOREDeclaration::addAttribute(ptr<KORECompositePattern> Attribute) {
