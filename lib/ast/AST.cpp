@@ -613,7 +613,7 @@ void KORECompositePattern::prettyPrint(std::ostream &out, PrettyPrintData const&
             break;
           case 'c':
             if (data.colors.count(name)) {
-              if (localColor >= data.colors.at(name).length() ) {
+              if (localColor >= data.colors.at(name).size() ) {
                 abort();
               }
               color(out, data.colors.at(name)[localColor++]);
