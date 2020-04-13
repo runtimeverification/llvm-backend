@@ -250,10 +250,15 @@ private:
 class KOREVariablePattern;
 
 struct PrettyPrintData {
+  // map from symbol name to format attribute specifying how to print that symbol
   std::map<std::string, std::string> format;
+  // map from symbol name to vector of colors for that symbol
   std::map<std::string, std::vector<std::string>> colors;
+  // map from sort name to hook attribute for that symbol
   std::map<std::string, std::string> hook;
+  // set of associative symbols
   std::set<std::string> assoc;
+  // set of commutative symbols
   std::set<std::string> comm;
 };
 

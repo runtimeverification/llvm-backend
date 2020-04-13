@@ -33,6 +33,7 @@ int main (int argc, char **argv) {
   std::set<std::string> comms;
   std::map<std::string, std::vector<std::string>> colors;
 
+  // load information about definition written by k frontend
   std::ifstream iformats(argv[1] + std::string("/format-att.txt"));
   std::ifstream ihooks(argv[1] + std::string("/hook-att.txt"));
   std::ifstream iassocs(argv[1] + std::string("/assoc-att.txt"));
