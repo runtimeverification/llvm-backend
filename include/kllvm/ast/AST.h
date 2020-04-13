@@ -9,6 +9,7 @@
 #include <map>
 #include <unordered_map>
 #include <utility>
+#include <iostream>
 
 namespace kllvm {
 
@@ -34,7 +35,9 @@ public:
   virtual bool operator==(const KORESort &other) const = 0;
   bool operator!=(const KORESort &other) const { return !(*this == other); }
 
-  virtual void print(std::ostream &Out, unsigned indent = 0) const =0;
+  virtual void print(std::ostream &Out, unsigned indent = 0) const = 0;
+  virtual void prettyPrint(std::ostream &Out) const = 0;
+
   virtual ~KORESort() = default;
 };
 
@@ -63,6 +66,7 @@ public:
   virtual sptr<KORESort> substitute(const substitution &subst) override { return subst.at(*this); }
 
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
+  virtual void prettyPrint(std::ostream &Out) const override { std::cout << name; }
   virtual bool operator==(const KORESort &other) const override;
 
 private:
@@ -108,6 +112,19 @@ public:
 
   void addArgument(sptr<KORESort> Argument);
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
+  virtual void prettyPrint(std::ostream &out) const override {
+    out << name.substr(4);
+    if (!arguments.empty()) {
+      out << "{";
+      std::string conn = "";
+      for (auto &sort : arguments) {
+        out << conn;
+        sort->prettyPrint(out);
+        conn = ",";
+      }
+      out << "}";
+    }
+  }
   virtual bool operator==(const KORESort &other) const override;
 
 private:
@@ -232,6 +249,19 @@ private:
 
 class KOREVariablePattern;
 
+struct PrettyPrintData {
+  // map from symbol name to format attribute specifying how to print that symbol
+  std::map<std::string, std::string> format;
+  // map from symbol name to vector of colors for that symbol
+  std::map<std::string, std::vector<std::string>> colors;
+  // map from sort name to hook attribute for that symbol
+  std::map<std::string, std::string> hook;
+  // set of associative symbols
+  std::set<std::string> assoc;
+  // set of commutative symbols
+  std::set<std::string> comm;
+};
+
 // KOREPattern
 class KOREPattern : public std::enable_shared_from_this<KOREPattern> {
 public:
@@ -252,6 +282,9 @@ public:
 
   virtual sptr<KOREPattern> substitute(const substitution &) = 0;
   virtual sptr<KOREPattern> expandAliases(KOREDefinition *) = 0;
+
+  virtual void prettyPrint(std::ostream &, PrettyPrintData const& data) const = 0;
+  virtual sptr<KOREPattern> sortCollections(PrettyPrintData const& data) = 0;
 };
 
 class KOREVariablePattern : public KOREPattern {
@@ -280,6 +313,11 @@ public:
     return val->second;
   }
   virtual sptr<KOREPattern> expandAliases(KOREDefinition *) override { return shared_from_this(); }
+  virtual sptr<KOREPattern> sortCollections(PrettyPrintData const& data) override { return shared_from_this(); }
+  virtual void prettyPrint(std::ostream &out, PrettyPrintData const& data) const override {
+    out << getName() << ":";
+    sort->prettyPrint(out);
+  }
 
 private:
   KOREVariablePattern(ptr<KOREVariable> Name, sptr<KORESort> Sort)
@@ -312,10 +350,12 @@ public:
 
   void addArgument(sptr<KOREPattern> Argument);
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
+  virtual void prettyPrint(std::ostream &out, PrettyPrintData const& data) const override;
   virtual void markSymbols(std::map<std::string, std::vector<KORESymbol *>> &) override;
   virtual void markVariables(std::map<std::string, KOREVariablePattern *> &) override;
   virtual sptr<KOREPattern> substitute(const substitution &) override;
   virtual sptr<KOREPattern> expandAliases(KOREDefinition *) override;
+  virtual sptr<KOREPattern> sortCollections(PrettyPrintData const& data) override;
 
 private:
   KORECompositePattern(ptr<KORESymbol> Constructor)
@@ -334,11 +374,13 @@ public:
   std::string getContents() { return contents; }
 
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
+  virtual void prettyPrint(std::ostream &out, PrettyPrintData const& data) const override { abort(); }
   virtual void markSymbols(std::map<std::string, std::vector<KORESymbol *>> &) override {}
   virtual void markVariables(std::map<std::string, KOREVariablePattern *> &) override {}
   virtual sptr<KORESort> getSort(void) const override { abort(); }
   virtual sptr<KOREPattern> substitute(const substitution &) override { return shared_from_this(); }
   virtual sptr<KOREPattern> expandAliases(KOREDefinition *) override { return shared_from_this(); }
+  virtual sptr<KOREPattern> sortCollections(PrettyPrintData const& data) override { return shared_from_this(); }
 
 private:
   KOREStringPattern(const std::string &Contents) : contents(Contents) { }
