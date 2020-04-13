@@ -594,6 +594,9 @@ void KORECompositePattern::prettyPrint(std::ostream &out, PrettyPrintData const&
     for (int i = 0; i < format.length(); ++i) {
       char c = format[i];
       if (c == '%') {
+        if (i == format.length() - 1) {
+          abort();
+        }
         char c2 = format[i+1];
         ++i;
         switch(c2) {
@@ -610,6 +613,9 @@ void KORECompositePattern::prettyPrint(std::ostream &out, PrettyPrintData const&
             break;
           case 'c':
             if (data.colors.count(name)) {
+              if (localColor >= data.colors.at(name).length() ) {
+                abort();
+              }
               color(out, data.colors.at(name)[localColor++]);
             }
             break;
