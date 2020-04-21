@@ -38,10 +38,13 @@ int main (int argc, char **argv) {
 
   llvm::LLVMContext Context;
 
+  char *realPath = realpath(argv[1], NULL);
+
   std::unique_ptr<llvm::Module> mod = newModule("definition", Context);
 
   if (CODEGEN_DEBUG) {
     initDebugInfo(mod.get(), argv[1]);
+    addKompiledDirSymbol(Context, dirname(realPath), mod.get());
   }
 
   for (auto axiom : definition->getAxioms()) {
