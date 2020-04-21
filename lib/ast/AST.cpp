@@ -1067,7 +1067,8 @@ void KOREDefinition::preprocess() {
   }
   for (auto iter = axioms.begin(); iter != axioms.end();) {
     auto axiom = *iter;
-    axiom->ordinal = nextOrdinal++;
+    axiom->ordinal = nextOrdinal;
+    ordinals[nextOrdinal++] = axiom;
     axiom->pattern->markSymbols(symbols);
     if (!axiom->isRequired()) {
       iter = axioms.erase(iter);

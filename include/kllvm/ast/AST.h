@@ -578,6 +578,8 @@ public:
   using KORESymbolDeclarationMapType = std::map<std::string, KORESymbolDeclaration *>;
   using KOREAliasDeclarationMapType = std::map<std::string, KOREAliasDeclaration *>;
 
+  using KOREAxiomMapType = std::map<size_t, KOREAxiomDeclaration *>;
+
 private:
   // Symbol tables
   KORESortConstructorMapType objectSortConstructors;
@@ -591,6 +593,7 @@ private:
   KOREAliasDeclarationMapType aliasDeclarations;
   KORECompositeSortMapType hookedSorts;
   KORESymbolStringMapType freshFunctions;
+  KOREAxiomMapType ordinals;
 
   std::vector<ptr<KOREModule>> modules;
   std::map<std::string, ptr<KORECompositePattern>> attributes;
@@ -622,6 +625,7 @@ public:
   const KORESymbolStringMapType &getAllSymbols() const { return allObjectSymbols; }
   const KORECompositeSortMapType getHookedSorts() const { return hookedSorts; }
   const std::list<KOREAxiomDeclaration *> &getAxioms() const { return axioms; }
+  KOREAxiomDeclaration *getAxiomByOrdinal(size_t ordinal) const { return ordinals.at(ordinal); }
   const std::map<std::string, ptr<KORECompositePattern>> &getAttributes() const {
     return attributes;
   }
