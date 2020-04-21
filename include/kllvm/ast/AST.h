@@ -260,6 +260,8 @@ struct PrettyPrintData {
   std::set<std::string> assoc;
   // set of commutative symbols
   std::set<std::string> comm;
+  // enable coloring
+  bool hasColor;
 };
 
 // KOREPattern

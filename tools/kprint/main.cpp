@@ -20,8 +20,16 @@ void readMap(std::map<std::string, std::string> &result, std::ifstream &is) {
 
 
 int main (int argc, char **argv) {
-  if (argc != 3) {
-    std::cerr << "usage: " << argv[0] << " <kompiled-dir> <pattern.kore>" << std::endl;
+  if (argc != 3 && argc != 4) {
+    std::cerr << "usage: " << argv[0] << " <kompiled-dir> <pattern.kore> [true|false]" << std::endl;
+  }
+
+  bool hasColor;
+  if (argc == 4) {
+    std::string arg = argv[3];
+    hasColor = arg == "true";
+  } else {
+    hasColor = isatty(1);
   }
 
   std::map<std::string, std::string> formats;
@@ -64,7 +72,7 @@ int main (int argc, char **argv) {
   KOREParser parser2(argv[2]);
   ptr<KOREPattern> config = parser2.pattern();
 
-  PrettyPrintData data = {formats, colors, hooks, assocs, comms};
+  PrettyPrintData data = {formats, colors, hooks, assocs, comms, hasColor};
 
   sptr<KOREPattern> sorted = config->sortCollections(data);
   sorted->prettyPrint(std::cout, data);
