@@ -901,11 +901,7 @@ bool makeFunction(std::string name, KOREPattern *pattern, KOREDefinition *defini
     initDebugAxiom(axiom->getAttributes());
     std::string debugName = name;
     if (axiom->getAttributes().count("label")) {
-      KORECompositePattern *labelAtt = axiom->getAttributes().at("label").get();
-      assert(labelAtt->getArguments().size() == 1);
-      auto strPattern = dynamic_cast<KOREStringPattern *>(labelAtt->getArguments()[0].get());
-      std::string label = strPattern->getContents();
-      debugName = label + postfix;
+      debugName = axiom->getStringAttribute("label") + postfix;
     }
     std::ostringstream Out;
     termSort(pattern)->print(Out);

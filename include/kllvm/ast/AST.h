@@ -400,6 +400,8 @@ public:
   const std::vector<sptr<KORESortVariable>> &getObjectSortVariables() const { return objectSortVariables; }
   virtual ~KOREDeclaration() = default;
 
+  std::string getStringAttribute(std::string name) const;
+
 protected:
   void printSortVariables(std::ostream &Out) const;
 };
