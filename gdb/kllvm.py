@@ -2,41 +2,6 @@ import gdb.printing
 import traceback
 import decimal
 
-codes = {}
-codes["Spce"] = " "
-codes["Bang"] = "!"
-codes["Quot"] = "\""
-codes["Hash"] = "#"
-codes["Dolr"] = "$"
-codes["Perc"] = "%"
-codes["And-"] = "&"
-codes["Apos"] = "'"
-codes["LPar"] = "("
-codes["RPar"] = ")"
-codes["Star"] = "*"
-codes["Plus"] = "+"
-codes["Comm"] = ","
-codes["Hyph"] = "-"
-codes["Stop"] = "."
-codes["Slsh"] = "/"
-codes["Coln"] = ":"
-codes["SCln"] = "l"
-codes["-LT-"] = "<"
-codes["Eqls"] = "="
-codes["-GT-"] = ">"
-codes["Ques"] = "?"
-codes["-AT-"] = "@"
-codes["LSqB"] = "["
-codes["RSqB"] = "]"
-codes["Bash"] = "\\"
-codes["Xor-"] = "^"
-codes["Unds"] = "_"
-codes["BQuo"] = "`"
-codes["LBra"] = "{"
-codes["Pipe"] = "|"
-codes["RBra"] = "}"
-codes["Tild"] = "~"
-
 MAX = 1 << 64 - 1
 BL = 5
 B = 5
@@ -344,35 +309,6 @@ class SetIter(ChampIter):
         ChampIter.__init__(self, val)
 
 
-def mapCode(code):
-    try:
-        i = int(code, 16)
-        return "\\u" + code
-    except ValueError:
-        return codes[code]
-
-def pp_label(label):
-    if label.startswith('Lbl'):
-        label = label[3:]
-    literal = True
-    result = ""
-    i = 0
-    while i < len(label):
-        if label[i] == '\'':
-            literal = not literal
-            i += 1
-        elif literal and label[i] == '{':
-            result += label[i:].replace('{Sort','{').replace(' Sort',' ')
-            break
-        elif literal:
-            result += label[i]
-            i += 1
-        else:
-            code = label[i:i+4]
-            result += mapCode(code)
-            i += 4
-    return "`" + result + "`"
-
 class Variable:
     def __init__(self, val):
         self.stdStr = val.dereference()['data'].string("iso-8859-1")
@@ -462,7 +398,7 @@ class termPrinter:
             suffix = "p" + str(prec) + "x" + str(expBits)
         exp = int(mpfr['_mpfr_exp'])
         sign = mpfr['_mpfr_sign'] < 0
-        self.result += "#token(\""
+        self.result += "\\dv{" + sort + "}(\""
         if exp == MPFR_EXP_NAN:
             self.result += "NaN" + suffix
         elif exp == MPFR_EXP_INF:
@@ -497,12 +433,12 @@ class termPrinter:
                 if not string.count('.'):
                     string += ".0"
                 self.result += string + suffix
-        self.result += "\",\"" + sort[4:] + "\")"
+        self.result += "\")"
 
 
     def appendStringBuffer(self, val, sort):
         string = val.dereference()['contents'].dereference()['data'].string("iso-8859-1")
-        self.result += "#token(\"" + string + "\",\"" + sort[4:] + "\")"
+        self.result += "\\dv{" + sort + "}(\"" + string + "\")"
 
     def appendLimbs(self, size, ptr):
         accum = 0
@@ -513,7 +449,7 @@ class termPrinter:
         self.result += str(accum)
 
     def appendInt(self, val, sort):
-        self.result += "#token(\""
+        self.result += "\\dv{" + sort + "}(\""
         size = int(val.dereference()['_mp_size'])
         if size == 0:
             self.result += "0"
@@ -522,18 +458,18 @@ class termPrinter:
             self.appendLimbs(-size, val.dereference()['_mp_d'])
         else:
             self.appendLimbs(size, val.dereference()['_mp_d'])
-        self.result += "\", \"" + sort[4:] + "\")"
+        self.result += "\")"
 
     def appendList(self, val, sort):
         length = val.dereference()['impl_']['size']
         if length == 0:
-            self.result += "`.List`(.KList)"
+            self.result += "Lbl'Stop'List{}()"
             return
         i = 1
         for elem in ListIter(val):
             if i < length:
-                self.result += "`_List_`("
-            self.result += "`ListItem`("
+                self.result += "Lbl'Unds'List'Unds'{}("
+            self.result += "LblListItem{}("
             self.append(elem.cast(self.block_ptr), False, "SortKItem{}")
             self.result += ")"
             if i < length:
@@ -545,15 +481,15 @@ class termPrinter:
     def appendMap(self, val, sort):
         length = val.dereference()['impl_']['size']
         if length == 0:
-            self.result += "`.Map`(.KList)"
+            self.result += "Lbl'Stop'Map{}()"
             return
         i = 1
         for entry in MapIter(val):
             key = entry['first']['elem']
             value = entry['second']['elem']
             if i < length:
-                self.result += "`_Map_`("
-            self.result += "`_|->_`("
+                self.result += "Lbl'Unds'Map'Unds'{}("
+            self.result += "Lbl'UndsPipe'-'-GT-Unds'{}("
             self.append(key.cast(self.block_ptr), False, "SortKItem{}")
             self.result += ","
             self.append(value.cast(self.block_ptr), False, "SortKItem{}")
@@ -567,14 +503,14 @@ class termPrinter:
     def appendSet(self, val, sort):
         length = val.dereference()['impl_']['size']
         if length == 0:
-            self.result += "`.Set`(.KList)"
+            self.result += "Lbl'Stop'Set{}()"
             return
         i = 1
         for entry in SetIter(val):
             elem = entry['elem']
             if i < length:
-                self.result += "`_Set_`("
-            self.result += "`SetItem`("
+                self.result += "Lbl'Unds'Set'Unds'{}("
+            self.result += "LblSetItem{}("
             self.append(elem.cast(self.block_ptr), False, "SortKItem{}")
             self.result += ")"
             if i < length:
@@ -592,14 +528,14 @@ class termPrinter:
                 self.append(self.bound_variables[len(self.bound_variables)-1-tag], True, sort)
                 return
             symbol = self.getSymbolNameForTag(tag).string()
-            self.result += symbol + "(.KList)"
+            self.result += symbol + "()"
             return
         hdr = int(subject.dereference()['h']['hdr'])
         layout = hdr >> @LAYOUT_OFFSET@
         if not layout:
             string = subject.cast(self.string_ptr)
             length = hdr & @LENGTH_MASK@
-            self.result += "#token(\""
+            self.result += "\\dv{" + sort + "}(\""
             for i in range(length):
                 c = chr(int(string.dereference()['data'][i].cast(self.unsigned_char)))
                 if c == '\\':
@@ -631,7 +567,7 @@ class termPrinter:
                 self.var_names[var] = suffix
             elif isVar:
                 self.result += self.var_names[var]
-            self.result += "\",\"" + sort[4:] + "\")"
+            self.result += "\")"
             return
         tag = hdr & @TAG_MASK@
         isBinder = self.isSymbolABinder(tag)
@@ -640,8 +576,8 @@ class termPrinter:
         symbol = self.getSymbolNameForTag(tag).string()
         if symbol[0:4] == "inj{":
             prefix = symbol[0:symbol.index(",")]
-            symbol = prefix + ", " + sort[4:] + "}"
-        self.result += pp_label(symbol) + "("
+            symbol = prefix + ", " + sort + "}"
+        self.result += symbol + "("
         layoutData = self.getLayoutData(layout)
         nargs = int(layoutData['nargs'])
         for i in range(nargs):
@@ -665,7 +601,7 @@ class termPrinter:
                 self.appendFloat(arg.cast(self.floating_ptr_ptr).dereference(), sort)
             elif cat == @BOOL_LAYOUT@:
                 string = "true" if arg.cast(self.bool_ptr).dereference() else "false"
-                self.result += "#token(\"" + string + "\",\"" + sort[4:] + "\")"
+                self.result += "\\dv{" + sort + "}(\"" + string + "\")"
             elif cat == @STRINGBUFFER_LAYOUT@:
                 self.appendStringBuffer(arg.cast(self.stringbuffer_ptr_ptr).dereference(), sort)
             else:
