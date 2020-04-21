@@ -70,7 +70,7 @@ int main (int argc, char **argv) {
   }
 
   KOREParser parser2(argv[2]);
-  ptr<KOREPattern> config = parser2.pattern();
+  sptr<KOREPattern> config = parser2.pattern();
 
   PrettyPrintData data = {formats, colors, hooks, assocs, comms, hasColor};
 
