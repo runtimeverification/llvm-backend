@@ -343,7 +343,7 @@ def getKompiledDir():
 
 def printKore(string, kompiledDir): 
     if prettyPrint.value:
-        return str(subprocess.check_output(["kprint", kompiledDir, "/dev/stdin", "true" if hasColor.value else "false"], input=bytes(string, "iso-8859-1")), "iso-8859-1")
+        return str(subprocess.check_output(["kprint", kompiledDir, "/dev/stdin", "true" if hasColor.value else "false"], input=bytes(string, "iso-8859-1")), "iso-8859-1")[:-1]
     else:
         return string
  
@@ -724,9 +724,9 @@ Does not actually take a step if matching succeeds.
                     sort = entry['sort'].string("iso-8859-1")
                     subject = kllvm_lookup_function(entry['subject'].cast(gdb.lookup_type(sort))).to_string()
                     print("Subject:")
-                    print(subject, end='')
+                    print(subject)
                     print("does not match pattern:")
-                    print(printKore(pattern, getKompiledDir()), end='')
+                    print(printKore(pattern, getKompiledDir()))
         except:
              print(traceback.format_exc())
              raise
