@@ -7,6 +7,64 @@
 
 using namespace kllvm;
 
+std::string kllvm::decodeKore(std::string kore) {
+  static std::unordered_map<std::string, char> codes;
+  static bool once = true;
+  if (once) {
+    codes["Spce"] = ' ';
+    codes["Bang"] = '!';
+    codes["Quot"] = '"';
+    codes["Hash"] = '#';
+    codes["Dolr"] = '$';
+    codes["Perc"] = '%';
+    codes["And-"] = '&';
+    codes["Apos"] = '\'';
+    codes["LPar"] = '(';
+    codes["RPar"] = ')';
+    codes["Star"] = '*';
+    codes["Plus"] = '+';
+    codes["Comm"] = ',';
+    codes["Hyph"] = '-';
+    codes["Stop"] = '.';
+    codes["Slsh"] = '/';
+    codes["Coln"] = ':';
+    codes["SCln"] = 'l';
+    codes["-LT-"] = '<';
+    codes["Eqls"] = '=';
+    codes["-GT-"] = '>';
+    codes["Ques"] = '?';
+    codes["-AT-"] = '@';
+    codes["LSqB"] = '[';
+    codes["RSqB"] = ']';
+    codes["Bash"] = '\\';
+    codes["Xor-"] = '^';
+    codes["Unds"] = '_';
+    codes["BQuo"] = '`';
+    codes["LBra"] = '{';
+    codes["Pipe"] = '|';
+    codes["RBra"] = '}';
+    codes["Tild"] = '~';
+    once = false;
+  }
+  bool literal = true;
+  std::string result;
+  size_t i = 0;
+  while(i < kore.length()) {
+    if (kore[i] == '\'') {
+      literal = !literal;
+      i++;
+    } else if (literal) {
+      result.push_back(kore[i]);
+      i++;
+    } else {  
+      auto code = kore.substr(i, 4);
+      result.push_back(codes[code]);
+      i += 4;
+    }
+  }
+  return result;
+}
+
 size_t kllvm::hash_value(const kllvm::KORESort &s) {
   return HashSort{}(s);
 }
