@@ -637,21 +637,42 @@ class termPrinter:
 
 def kllvm_lookup_function(val):
     t = gdb.types.get_basic_type(val.type)
-    if t.code == gdb.TYPE_CODE_PTR and t.target().tag:
-        if t.target().tag == "block":
-            return termPrinter(val, "block", val.type.name)
-        elif t.target().tag == "list":
-            return termPrinter(val, "list", val.type.name)
-        elif t.target().tag == "map":
-            return termPrinter(val, "map", val.type.name)
-        elif t.target().tag == "set":
-            return termPrinter(val, "set", val.type.name)
-        elif t.target().tag == "stringbuffer":
-            return termPrinter(val, "stringbuffer", val.type.name)
-        elif t.target().tag == "__mpz_struct":
-            return termPrinter(val, "int", val.type.name)
-        elif t.target().tag == "floating":
-            return termPrinter(val, "floating", val.type.name)
+    if t.code != gdb.TYPE_CODE_PTR:
+        if t.tag:
+            kind = t.tag
+        else:
+            kind = t.name
+        if kind[0:11] == 'immer::list':
+            return termPrinter(val.address, "list", "SortList{}")
+        elif kind[0:10] == 'immer::set':
+            return termPrinter(val.address, "set", "SortSet{}")
+        elif kind[0:10] == 'immer::map':
+            return termPrinter(val.address, "map", "SortMap{}")
+        return None
+    s = t.target()
+    if s.tag:
+        kind = s.tag
+        sort = val.type.name
+    else:
+        if val.type.name is None:
+            return None
+        kind = s.name
+        sort = val.type.name + '{}'
+
+    if kind == "block" or kind == "string":
+        return termPrinter(val, "block", sort)
+    elif kind == "list":
+        return termPrinter(val, "list", sort)
+    elif kind == "map":
+        return termPrinter(val, "map", sort)
+    elif kind == "set":
+        return termPrinter(val, "set", sort)
+    elif kind == "stringbuffer":
+        return termPrinter(val, "stringbuffer", sort)
+    elif kind == "__mpz_struct":
+        return termPrinter(val, "int", sort)
+    elif kind == "floating":
+        return termPrinter(val, "floating", sort)
     return None
 
 class KPrefix(gdb.Command):
