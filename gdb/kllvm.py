@@ -544,6 +544,9 @@ class termPrinter:
 
     def append(self, subject, isVar, sort):
         address = int(subject.cast(self.long_int))
+        if address == 0:
+            self.result += "\\bottom{" + sort + "}()"
+            return
         isConstant = address & 3
         if isConstant:
             tag = address >> 32
