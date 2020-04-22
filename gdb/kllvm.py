@@ -338,6 +338,16 @@ class KParam(gdb.Parameter):
 hasColor = KParam("print k-color", True, "Coloring of pretty-printed k terms is", "Set coloring of pretty-printed k terms")
 prettyPrint = KParam("print k-pretty", True, "Pretty-printing of k terms is", "Set pretty-printing of k terms")
 
+def getKompiledDir():
+  return gdb.lookup_global_symbol("kompiled_directory").value().address.string("iso-8859-1")
+
+def printKore(string, kompiledDir): 
+    if prettyPrint.value:
+        return str(subprocess.check_output(["kprint", kompiledDir, "/dev/stdin", "true" if hasColor.value else "false"], input=bytes(string, "iso-8859-1")), "iso-8859-1")
+    else:
+        return string
+ 
+
 class termPrinter:
     """Print a kore term."""
 
@@ -362,7 +372,7 @@ class termPrinter:
         self.map_ptr = gdb.lookup_type("map").pointer()
         self.list_ptr = gdb.lookup_type("list").pointer()
         self.set_ptr = gdb.lookup_type("set").pointer()
-        self.kompiled_dir = gdb.lookup_global_symbol("kompiled_directory").value().address.string("iso-8859-1")
+        self.kompiled_dir = getKompiledDir()
 
     def getSymbolNameForTag(self, tag):
         return gdb.lookup_global_symbol("table_getSymbolNameForTag").value()[tag]
@@ -394,10 +404,7 @@ class termPrinter:
                 self.appendStringBuffer(self.val.cast(self.stringbuffer_ptr), self.sortName)
             self.var_names = {}
             self.used_var_name = set()
-            if prettyPrint.value:
-                return str(subprocess.check_output(["kprint", self.kompiled_dir, "/dev/stdin", "true" if hasColor.value else "false"], input=bytes(self.result, "iso-8859-1")), "iso-8859-1")
-            else:
-                return self.result
+            return printKore(self.result, self.kompiled_dir)
         except:
              print(traceback.format_exc())
              raise
