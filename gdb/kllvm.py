@@ -673,3 +673,23 @@ class KStart(gdb.Command):
         gdb.execute("advance definition.kore:step", from_tty)
 
 start = KStart()
+
+class KStep(gdb.Command):
+    "Take a specified number of rewrite steps."
+
+    def __init__(self, name, cat):
+        super(KStep, self).__init__(name, cat, gdb.COMPLETE_NONE)
+
+    def invoke(self, arg, from_tty):
+        times = 1
+        if arg != "":
+            times = int(arg)
+        if times > 0:
+            bp = gdb.Breakpoint("definition.kore:step", internal=True, temporary=True)
+            bp.ignore_count = times-1
+            gdb.execute("c", from_tty)
+        else:
+            gdb.execute("step 0", from_tty)
+
+step = KStep("k step", gdb.COMMAND_RUNNING)
+step2 = KStep("k s", gdb.COMMAND_NONE)
