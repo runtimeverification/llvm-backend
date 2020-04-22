@@ -722,7 +722,7 @@ Does not actually take a step if matching succeeds.
                 elif entry['kind'] == 2:
                     pattern = entry['pattern'].string("iso-8859-1")
                     sort = entry['sort'].string("iso-8859-1")
-                    subject = kllvm_lookup_function(entry['subject'].cast(gdb.lookup_type(sort))).to_string()
+                    subject = str(entry['subject'].cast(gdb.lookup_type(sort)))
                     print("Subject:")
                     print(subject)
                     print("does not match pattern:")
