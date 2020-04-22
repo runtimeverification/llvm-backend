@@ -288,7 +288,6 @@ sptr<KOREPattern> KORECompositePattern::expandAliases(KOREDefinition *def) {
 
 static int indent = 0;
 static bool atNewLine = true;
-static bool hasColor = isatty(1);
 
 #define INDENT_SIZE 2
 
@@ -316,8 +315,8 @@ static void append(std::ostream &out, std::string str) {
   out << str;
 }
 
-static void color(std::ostream &out, std::string color) {
-  if (hasColor) {
+static void color(std::ostream &out, std::string color, PrettyPrintData const& data) {
+  if (data.hasColor) {
     static bool once = true;
     static std::map<std::string, std::string> colors;
     if (once) {
@@ -616,11 +615,11 @@ void KORECompositePattern::prettyPrint(std::ostream &out, PrettyPrintData const&
               if (localColor >= data.colors.at(name).size() ) {
                 abort();
               }
-              color(out, data.colors.at(name)[localColor++]);
+              color(out, data.colors.at(name)[localColor++], data);
             }
             break;
           case 'r':
-            if (hasColor) {
+            if (data.hasColor) {
               append(out, RESET_COLOR);
             }
             break;
@@ -767,18 +766,17 @@ sptr<KOREPattern> KORECompositePattern::sortCollections(PrettyPrintData const& d
     std::vector<std::pair<std::string, sptr<KOREPattern>>> printed;
     int oldIndent = indent;
     bool oldAtNewLine = atNewLine;
-    bool oldHasColor = hasColor;
     atNewLine = true;
     indent = 0;
-    hasColor = false;
+    PrettyPrintData newData = data;
+    newData.hasColor = false;
     for (auto &item : items) {
       std::ostringstream Out;
-      item->prettyPrint(Out, data);
+      item->prettyPrint(Out, newData);
       printed.push_back({Out.str(), item});
     }
     indent = oldIndent;
     atNewLine = oldAtNewLine;
-    hasColor = oldHasColor;
     std::sort(printed.begin(), printed.end(), CompareFirst{});
     items.clear();
     for (auto &item : printed) {
@@ -809,6 +807,14 @@ void
 KOREDeclaration::addObjectSortVariable(sptr<KORESortVariable> SortVariable) {
   objectSortVariables.push_back(SortVariable);
 }
+
+std::string KOREDeclaration::getStringAttribute(std::string name) const { 
+  KORECompositePattern *attr = attributes.at(name).get();
+  assert(attr->getArguments().size() == 1);
+  auto strPattern = dynamic_cast<KOREStringPattern *>(attr->getArguments()[0].get());
+  return strPattern->getContents();
+}
+ 
 
 void KOREAxiomDeclaration::addPattern(ptr<KOREPattern> Pattern) {
   pattern = std::move(Pattern);
@@ -1059,7 +1065,8 @@ void KOREDefinition::preprocess() {
   }
   for (auto iter = axioms.begin(); iter != axioms.end();) {
     auto axiom = *iter;
-    axiom->ordinal = nextOrdinal++;
+    axiom->ordinal = nextOrdinal;
+    ordinals[nextOrdinal++] = axiom;
     axiom->pattern->markSymbols(symbols);
     if (!axiom->isRequired()) {
       iter = axioms.erase(iter);

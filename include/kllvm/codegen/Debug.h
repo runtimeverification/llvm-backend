@@ -20,11 +20,13 @@ void initDebugGlobal(std::string name, llvm::DIType *type, llvm::GlobalVariable 
 
 llvm::DIType *getDebugType(ValueType type, std::string typeName);
 llvm::DIType *getIntDebugType(void);
+llvm::DIType *getVoidDebugType(void);
 llvm::DIType *getBoolDebugType(void);
 llvm::DIType *getShortDebugType(void);
 llvm::DIType *getPointerDebugType(llvm::DIType *, std::string typeName);
 llvm::DIType *getArrayDebugType(llvm::DIType *ty, size_t len, size_t align);
 llvm::DIType *getCharPtrDebugType(void);
+llvm::DIType *getCharDebugType(void);
 llvm::DIType *getForwardDecl(std::string name);
 
 llvm::DISubroutineType *getDebugFunctionType(llvm::Metadata *, std::vector<llvm::Metadata *>);

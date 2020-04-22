@@ -179,9 +179,18 @@ llvm::DIType *getBoolDebugType(void) {
   return Dbg->createBasicType("bool", 8, llvm::dwarf::DW_ATE_boolean);
 }
 
+llvm::DIType *getVoidDebugType(void) {
+  return nullptr;
+}
+
 llvm::DIType *getCharPtrDebugType(void) {
   if (!Dbg) return nullptr;
   return Dbg->createPointerType(Dbg->createBasicType("char", 8, llvm::dwarf::DW_ATE_signed_char), sizeof(size_t) * 8);
+}
+
+llvm::DIType *getCharDebugType(void) {
+  if (!Dbg) return nullptr;
+  return Dbg->createBasicType("char", 8, llvm::dwarf::DW_ATE_signed_char);
 }
 
 llvm::DIType *getPointerDebugType(llvm::DIType *ty, std::string typeName) {

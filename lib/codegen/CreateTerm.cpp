@@ -108,6 +108,16 @@ std::unique_ptr<llvm::Module> newModule(std::string name, llvm::LLVMContext &Con
   return mod;
 }
 
+void addKompiledDirSymbol(llvm::LLVMContext &Context, std::string dir, llvm::Module *mod) {
+  auto Str = llvm::ConstantDataArray::getString(Context, dir, true);
+  auto global = mod->getOrInsertGlobal("kompiled_directory", Str->getType());
+  llvm::GlobalVariable *globalVar = llvm::dyn_cast<llvm::GlobalVariable>(global);
+  if (!globalVar->hasInitializer()) {
+    globalVar->setInitializer(Str);
+  }
+  initDebugGlobal("kompiled_directory", getCharDebugType(), globalVar);
+}
+
 static std::string MAP_STRUCT = "map";
 static std::string LIST_STRUCT = "list";
 static std::string SET_STRUCT = "set";
@@ -901,11 +911,7 @@ bool makeFunction(std::string name, KOREPattern *pattern, KOREDefinition *defini
     initDebugAxiom(axiom->getAttributes());
     std::string debugName = name;
     if (axiom->getAttributes().count("label")) {
-      KORECompositePattern *labelAtt = axiom->getAttributes().at("label").get();
-      assert(labelAtt->getArguments().size() == 1);
-      auto strPattern = dynamic_cast<KOREStringPattern *>(labelAtt->getArguments()[0].get());
-      std::string label = strPattern->getContents();
-      debugName = label + postfix;
+      debugName = axiom->getStringAttribute("label") + postfix;
     }
     std::ostringstream Out;
     termSort(pattern)->print(Out);
