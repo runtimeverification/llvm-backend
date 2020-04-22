@@ -717,6 +717,8 @@ void KORECompositePattern::prettyPrint(std::ostream &out, PrettyPrintData const&
                   indent++;
                 }
               }
+            } else {
+              inner->prettyPrint(out, data);
             }
             break;
           } default:
