@@ -719,6 +719,31 @@ Does not actually take a step if matching succeeds.
                 entry = entries[i]
                 if entry['kind'] == 0:
                     print('Match succeeds')
+                elif entry['kind'] == 1:
+                    print(entry['debugName'].string("iso-8859-1") + '(', end='')
+                    function = gdb.lookup_global_symbol(entry['function'].string("iso-8859-1")).value().type
+                    front = gdb.lookup_global_symbol("getMatchFnArgs").value()(entry.address)
+                    conn = ""
+                    for i in range(len(function.fields())):
+                        arg = front[i]
+                        argType = function.fields()[i].type
+                        t = gdb.types.get_basic_type(argType)
+                        if t.code != gdb.TYPE_CODE_PTR:
+                            argStr = str(arg.cast(argType.pointer()).dereference())
+                        else:
+                            argStr = str(arg.cast(argType))
+                        print(conn, end='')
+                        print(argStr, end='')
+                        conn = ', '
+
+                    print(') => ', end='')
+                    returnType = function.target()
+                    t = gdb.types.get_basic_type(returnType)
+                    if t.code != gdb.TYPE_CODE_PTR:
+                        result = str(entry['result'].cast(returnType.pointer()).dereference())
+                    else:
+                        result = str(entry['result'].cast(returnType))
+                    print(result)
                 elif entry['kind'] == 2:
                     pattern = entry['pattern'].string("iso-8859-1")
                     sort = entry['sort'].string("iso-8859-1")
