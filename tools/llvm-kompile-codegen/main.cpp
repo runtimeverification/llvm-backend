@@ -61,6 +61,11 @@ int main (int argc, char **argv) {
       } else {
         makeApplyRuleFunction(axiom, definition.get(), mod.get(), true);
       }
+      filename = argv[3] + std::string("/") + "match_" + std::to_string(axiom->getOrdinal()) + ".yaml";
+      if (stat(filename.c_str(), &buf) == 0) {
+        auto dt = parseYamlDecisionTree(mod.get(), filename, definition->getAllSymbols(), definition->getHookedSorts());
+        makeMatchReasonFunction(definition.get(), mod.get(), axiom, dt);
+      }
     }
   }
 

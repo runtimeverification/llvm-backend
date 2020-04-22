@@ -216,6 +216,61 @@ extern "C" void* getStderr(void) {
   return stderr;
 }
 
+struct MatchLog {
+  enum {
+    SUCCESS=0, FUNCTION, FAIL
+  } kind;
+
+  char *function;
+  char *debugName;
+  std::vector<void *> args;
+
+  char *pattern;
+  void *subject;
+  char *sort;
+};
+
+static std::vector<MatchLog> matchLog;
+
+void resetMatchReason(void) {
+  matchLog.clear();
+}
+
+MatchLog *getMatchLog(void) {
+  return &matchLog[0];
+}
+
+size_t getMatchLogSize(void) {
+  return matchLog.size();
+}
+
+extern "C" {
+  
+void addMatchSuccess(void) {
+  matchLog.push_back({MatchLog::SUCCESS, NULL, NULL, {}, NULL, NULL, NULL});
+}
+
+void addMatchFailReason(void *subject, char *pattern, char *sort) {
+  matchLog.push_back({MatchLog::FAIL, NULL, NULL, {}, pattern, subject, sort});
+}
+
+void addMatchFunction(char *debugName, char *function, void *result, ...) {
+  va_list ap;
+  va_start(ap, result);
+
+  std::vector<void *> args;
+  while (true) {
+    void *arg = va_arg(ap, void *);
+    if (!arg) break;
+    args.push_back(arg);
+  }
+
+  matchLog.push_back({MatchLog::FUNCTION, function, debugName, args, NULL, NULL, NULL});
+
+  va_end(ap);
+}
+
+}
 
 #define DEFINE_GDB_PY_SCRIPT(script_name) \
   asm("\
