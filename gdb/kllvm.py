@@ -693,3 +693,42 @@ class KStep(gdb.Command):
 
 step = KStep("k step", gdb.COMMAND_RUNNING)
 step2 = KStep("k s", gdb.COMMAND_NONE)
+
+class KMatch(gdb.Command):
+    """Attempt to match a particular rule against a particular configuration.
+
+Takes two arguments: The first is a top-level rule label.
+The second is a term of sort GeneratedTopCell. For example, from the "step"
+function, you could say something like "k match MODULE.LABEL subject"
+to try to match the specified rule against the current configuration.
+
+Does not actually take a step if matching succeeds.
+    """
+
+    def __init__(self):
+        super(KMatch, self).__init__("k match", gdb.COMMAND_RUNNING, gdb.COMPLETE_SYMBOL)
+
+    def invoke(self, arg, from_tty):
+        try:
+            argv = gdb.string_to_argv(arg)
+            gdb.lookup_global_symbol("resetMatchReason").value()()
+            gdb.lookup_global_symbol(argv[0] + '.match').value()(gdb.parse_and_eval(argv[1]))
+            entries = gdb.lookup_global_symbol("getMatchLog").value()()
+            size = int(gdb.lookup_global_symbol("getMatchLogSize").value()())
+            for i in range(size):
+                entry = entries[i]
+                if entry['kind'] == 0:
+                    print('Match succeeds')
+                elif entry['kind'] == 2:
+                    pattern = entry['pattern'].string("iso-8859-1")
+                    sort = entry['sort'].string("iso-8859-1")
+                    subject = kllvm_lookup_function(entry['subject'].cast(gdb.lookup_type(sort))).to_string()
+                    print("Subject:")
+                    print(subject, end='')
+                    print("does not match pattern:")
+                    print(printKore(pattern, getKompiledDir()), end='')
+        except:
+             print(traceback.format_exc())
+             raise
+
+match = KMatch()
