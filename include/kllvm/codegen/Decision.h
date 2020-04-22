@@ -325,6 +325,8 @@ private:
 
   llvm::AllocaInst *decl(var_type name);
 
+  llvm::Constant *stringLiteral(std::string name);
+
 public:
   Decision(
     KOREDefinition *Definition,

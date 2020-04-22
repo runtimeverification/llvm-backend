@@ -292,6 +292,19 @@ void Decision::store(var_type name, llvm::Value *val) {
   new llvm::StoreInst(val, sym, this->CurrentBlock);
 }
 
+llvm::Constant *Decision::stringLiteral(std::string str) {
+  auto Str = llvm::ConstantDataArray::getString(Ctx, str, true);
+  auto global = Module->getOrInsertGlobal("str_lit_" + str, Str->getType());
+  llvm::GlobalVariable *globalVar = llvm::dyn_cast<llvm::GlobalVariable>(global);
+  if (!globalVar->hasInitializer()) {
+    globalVar->setInitializer(Str);
+  }
+  llvm::Constant *zero = llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0);
+  auto indices = std::vector<llvm::Constant *>{zero, zero};
+  auto Ptr = llvm::ConstantExpr::getInBoundsGetElementPtr(Str->getType(), globalVar, indices);
+  return Ptr;
+}
+
 static void initChoiceBuffer(DecisionNode *dt, llvm::Module *module, llvm::BasicBlock *block, llvm::BasicBlock *stuck, llvm::BasicBlock *fail, llvm::AllocaInst **choiceBufferOut, llvm::AllocaInst **choiceDepthOut, llvm::IndirectBrInst **jumpOut) {
   std::unordered_set<LeafNode *> leaves;
   dt->preprocess(leaves);
