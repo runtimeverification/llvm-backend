@@ -653,3 +653,23 @@ def kllvm_lookup_function(val):
         elif t.target().tag == "floating":
             return termPrinter(val, "floating", val.type.name)
     return None
+
+class KPrefix(gdb.Command):
+    "Generic command for stepping through a K framework semantics."
+
+    def __init__(self):
+        super(KPrefix, self).__init__("k", gdb.COMMAND_NONE, gdb.COMPLETE_COMMAND, True)
+
+prefix = KPrefix()
+
+class KStart(gdb.Command):
+    "Start the program but do not take any steps."
+
+    def __init__(self):
+        super(KStart, self).__init__("k start", gdb.COMMAND_RUNNING, gdb.COMPLETE_NONE)
+
+    def invoke(self, arg, from_tty):
+        gdb.execute("start", from_tty)
+        gdb.execute("advance definition.kore:step", from_tty)
+
+start = KStart()
