@@ -700,7 +700,7 @@ llvm::Value *CreateTerm::createFunctionCall(std::string name, KORECompositePatte
   return createFunctionCall(name, returnCat, args, sret, fastcc);
 }
 
-llvm::Value *CreateTerm::createFunctionCall(std::string name, ValueType returnCat, std::vector<llvm::Value *> &args, bool sret, bool fastcc) {
+llvm::Value *CreateTerm::createFunctionCall(std::string name, ValueType returnCat, const std::vector<llvm::Value *> &args, bool sret, bool fastcc) {
   llvm::Type *returnType = getValueType(returnCat, Module);
   std::vector<llvm::Type *> types;
   bool collection = false;
@@ -719,10 +719,11 @@ llvm::Value *CreateTerm::createFunctionCall(std::string name, ValueType returnCa
     llvm::Value *arg = args[i];
     types.push_back(arg->getType());
   }
+  std::vector<llvm::Value *> realArgs = args;
   if (sret) {
     // we don't use alloca here because the tail call optimization pass for llvm doesn't handle correctly functions with alloca
     AllocSret = allocateTerm(returnType, CurrentBlock, "koreAllocAlwaysGC");
-    args.insert(args.begin(), AllocSret);
+    realArgs.insert(realArgs.begin(), AllocSret);
     types.insert(types.begin(), AllocSret->getType());
     returnType = llvm::Type::getVoidTy(Ctx);
   } else if (collection) {
@@ -731,7 +732,7 @@ llvm::Value *CreateTerm::createFunctionCall(std::string name, ValueType returnCa
  
   llvm::FunctionType *funcType = llvm::FunctionType::get(returnType, types, false);
   llvm::Function *func = getOrInsertFunction(Module, name, funcType);
-  auto call = llvm::CallInst::Create(func, args, "", CurrentBlock);
+  auto call = llvm::CallInst::Create(func, realArgs, "", CurrentBlock);
   setDebugLoc(call);
   if (fastcc) {
     call->setCallingConv(llvm::CallingConv::Fast);
