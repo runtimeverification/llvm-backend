@@ -1,5 +1,6 @@
 #include "kllvm/codegen/Util.h"
 #include "llvm/Support/Casting.h"
+#include "llvm/Support/raw_ostream.h"
 
 namespace kllvm {
 
