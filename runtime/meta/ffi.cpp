@@ -250,15 +250,15 @@ extern "C" {
     return rvalue;
   }
 
-  string * hook_FFI_call(mpz_t addr, list * args, list * types, block * ret) {
+  SortBytes hook_FFI_call(SortInt addr, SortList args, SortList types, SortFFIType ret) {
     return ffiCall(false, addr, args, types, NULL, ret);
   }
 
-  string * hook_FFI_call_variadic(mpz_t addr, list * args, list * fixtypes, list * vartypes, block * ret) {
+  SortBytes hook_FFI_call_variadic(SortInt addr, SortList args, SortList fixtypes, SortList vartypes, SortFFIType ret) {
     return ffiCall(true, addr, args, fixtypes, vartypes, ret);
   }
 
-  mpz_ptr hook_FFI_address(string * fn) {
+  SortInt hook_FFI_address(SortString fn) {
     char * func = getTerminatedString(fn);
     void * handle = so_lib_handle();
     void * address = dlsym(handle, func);

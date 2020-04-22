@@ -56,7 +56,7 @@ void *move_mint(mpz_t, uint64_t) {
   throw std::invalid_argument("not yet implemented");
 }
 
-floating *hook_FLOAT_ceil(floating *a) {
+SortFloat hook_FLOAT_ceil(SortFloat a) {
   floating result[1];
   mpfr_enter(a, result);
   int t = mpfr_ceil(result->f, a->f);
@@ -64,7 +64,7 @@ floating *hook_FLOAT_ceil(floating *a) {
   return move_float(result); 
 }
 
-floating *hook_FLOAT_floor(floating *a) {
+SortFloat hook_FLOAT_floor(SortFloat a) {
   floating result[1];
   mpfr_enter(a, result);
   int t = mpfr_floor(result->f, a->f);
@@ -72,7 +72,7 @@ floating *hook_FLOAT_floor(floating *a) {
   return move_float(result);
 }
 
-floating *hook_FLOAT_round(floating *a, mpz_t prec, mpz_t exp) {
+SortFloat hook_FLOAT_round(SortFloat a, SortInt prec, SortInt exp) {
   if (!mpz_fits_ulong_p(prec)) {
     throw std::invalid_argument("Precision out of range");
   }
@@ -88,7 +88,7 @@ floating *hook_FLOAT_round(floating *a, mpz_t prec, mpz_t exp) {
   return move_float(result);
 }
 
-mpz_ptr hook_FLOAT_float2int(floating *a) {
+mpz_ptr hook_FLOAT_float2int(SortFloat a) {
   if (!mpfr_number_p(a->f)) {
     throw std::invalid_argument("Not a finite number");
   }
@@ -98,7 +98,7 @@ mpz_ptr hook_FLOAT_float2int(floating *a) {
   return move_int(result);
 }
 
-floating *hook_FLOAT_int2float(mpz_t a, mpz_t prec, mpz_t exp) {
+SortFloat hook_FLOAT_int2float(SortInt a, SortInt prec, SortInt exp) {
   if (!mpz_fits_ulong_p(prec)) {
     throw std::invalid_argument("Precision out of range");
   }
@@ -114,7 +114,7 @@ floating *hook_FLOAT_int2float(mpz_t a, mpz_t prec, mpz_t exp) {
   return move_float(result);
 }
 
-floating *hook_FLOAT_sin(floating *a) {
+SortFloat hook_FLOAT_sin(SortFloat a) {
   floating result[1];
   mpfr_enter(a, result);
   int t = mpfr_sin(result->f, a->f, MPFR_RNDN);
@@ -122,7 +122,7 @@ floating *hook_FLOAT_sin(floating *a) {
   return move_float(result);
 }
 
-floating *hook_FLOAT_cos(floating *a) {
+SortFloat hook_FLOAT_cos(SortFloat a) {
   floating result[1];
   mpfr_enter(a, result);
   int t = mpfr_cos(result->f, a->f, MPFR_RNDN);
@@ -130,7 +130,7 @@ floating *hook_FLOAT_cos(floating *a) {
   return move_float(result);
 }
 
-floating *hook_FLOAT_tan(floating *a) {
+SortFloat hook_FLOAT_tan(SortFloat a) {
   floating result[1];
   mpfr_enter(a, result);
   int t = mpfr_tan(result->f, a->f, MPFR_RNDN);
@@ -138,7 +138,7 @@ floating *hook_FLOAT_tan(floating *a) {
   return move_float(result);
 }
 
-floating *hook_FLOAT_sec(floating *a) {
+SortFloat hook_FLOAT_sec(SortFloat a) {
   floating result[1];
   mpfr_enter(a, result);
   int t = mpfr_sec(result->f, a->f, MPFR_RNDN);
@@ -146,7 +146,7 @@ floating *hook_FLOAT_sec(floating *a) {
   return move_float(result);
 }
 
-floating *hook_FLOAT_csc(floating *a) {
+SortFloat hook_FLOAT_csc(SortFloat a) {
   floating result[1];
   mpfr_enter(a, result);
   int t = mpfr_csc(result->f, a->f, MPFR_RNDN);
@@ -154,7 +154,7 @@ floating *hook_FLOAT_csc(floating *a) {
   return move_float(result);
 }
 
-floating *hook_FLOAT_cot(floating *a) {
+SortFloat hook_FLOAT_cot(SortFloat a) {
   floating result[1];
   mpfr_enter(a, result);
   int t = mpfr_cot(result->f, a->f, MPFR_RNDN);
@@ -162,7 +162,7 @@ floating *hook_FLOAT_cot(floating *a) {
   return move_float(result);
 }
 
-floating *hook_FLOAT_asin(floating *a) {
+SortFloat hook_FLOAT_asin(SortFloat a) {
   floating result[1];
   mpfr_enter(a, result);
   int t = mpfr_asin(result->f, a->f, MPFR_RNDN);
@@ -170,7 +170,7 @@ floating *hook_FLOAT_asin(floating *a) {
   return move_float(result);
 }
 
-floating *hook_FLOAT_acos(floating *a) {
+SortFloat hook_FLOAT_acos(SortFloat a) {
   floating result[1];
   mpfr_enter(a, result);
   int t = mpfr_acos(result->f, a->f, MPFR_RNDN);
@@ -178,7 +178,7 @@ floating *hook_FLOAT_acos(floating *a) {
   return move_float(result);
 }
 
-floating *hook_FLOAT_atan(floating *a) {
+SortFloat hook_FLOAT_atan(SortFloat a) {
   floating result[1];
   mpfr_enter(a, result);
   int t = mpfr_atan(result->f, a->f, MPFR_RNDN);
@@ -186,7 +186,7 @@ floating *hook_FLOAT_atan(floating *a) {
   return move_float(result);
 }
 
-floating *hook_FLOAT_atan2(floating *a, floating *b) {
+SortFloat hook_FLOAT_atan2(SortFloat a, SortFloat b) {
   floating result[1];
   mpfr_enter(a, result);
   int t = mpfr_atan2(result->f, a->f, b->f, MPFR_RNDN);
@@ -194,19 +194,19 @@ floating *hook_FLOAT_atan2(floating *a, floating *b) {
   return move_float(result);
 }
 
-mpz_ptr hook_FLOAT_precision(floating *a) {
+mpz_ptr hook_FLOAT_precision(SortFloat a) {
   mpz_t result;
   mpz_init_set_ui(result, mpfr_get_prec(a->f));
   return move_int(result);
 }
 
-mpz_ptr hook_FLOAT_exponentBits(floating *a) {
+mpz_ptr hook_FLOAT_exponentBits(SortFloat a) {
   mpz_t result;
   mpz_init_set_ui(result, a->exp);
   return move_int(result);
 }
 
-mpz_ptr hook_FLOAT_exponent(floating *a) {
+mpz_ptr hook_FLOAT_exponent(SortFloat a) {
   mpz_t result;
   mpz_init(result);
   mpfr_exp_t min = emin(a->exp, mpfr_get_prec(a->f));
@@ -225,7 +225,7 @@ mpz_ptr hook_FLOAT_exponent(floating *a) {
   return move_int(result);
 }
 
-void *hook_FLOAT_significand(floating *a) {
+void *hook_FLOAT_significand(SortFloat a) {
   if (mpfr_nan_p(a->f)) {
     throw std::invalid_argument("NaN payload is undefined");
   }
@@ -247,11 +247,11 @@ void *hook_FLOAT_significand(floating *a) {
   return move_mint(z, len);
 }
 
-bool hook_FLOAT_isNaN(floating *a) {
+bool hook_FLOAT_isNaN(SortFloat a) {
   return mpfr_nan_p(a->f);
 }
 
-floating *hook_FLOAT_maxValue(mpz_t prec, mpz_t exp) {
+SortFloat hook_FLOAT_maxValue(SortInt prec, SortInt exp) {
   if (!mpz_fits_ulong_p(prec)) {
     throw std::invalid_argument("Precision out of range");
   }
@@ -268,7 +268,7 @@ floating *hook_FLOAT_maxValue(mpz_t prec, mpz_t exp) {
   return move_float(result);
 }
 
-floating *hook_FLOAT_minValue(mpz_t prec, mpz_t exp) {
+SortFloat hook_FLOAT_minValue(SortInt prec, SortInt exp) {
   if (!mpz_fits_ulong_p(prec)) {
     throw std::invalid_argument("Precision out of range");
   }
@@ -285,31 +285,31 @@ floating *hook_FLOAT_minValue(mpz_t prec, mpz_t exp) {
   return move_float(result);
 }
 
-bool hook_FLOAT_gt(floating *a, floating *b) {
+bool hook_FLOAT_gt(SortFloat a, SortFloat b) {
   return mpfr_greater_p(a->f, b->f);
 }
 
-bool hook_FLOAT_ge(floating *a, floating *b) {
+bool hook_FLOAT_ge(SortFloat a, SortFloat b) {
   return mpfr_greaterequal_p(a->f, b->f);
 }
 
-bool hook_FLOAT_lt(floating *a, floating *b) {
+bool hook_FLOAT_lt(SortFloat a, SortFloat b) {
   return mpfr_less_p(a->f, b->f);
 }
 
-bool hook_FLOAT_le(floating *a, floating *b) {
+bool hook_FLOAT_le(SortFloat a, SortFloat b) {
   return mpfr_lessequal_p(a->f, b->f);
 }
 
-bool hook_FLOAT_eq(floating *a, floating *b) {
+bool hook_FLOAT_eq(SortFloat a, SortFloat b) {
   return mpfr_equal_p(a->f, b->f);
 }
 
-bool hook_FLOAT_ne(floating *a, floating *b) {
+bool hook_FLOAT_ne(SortFloat a, SortFloat b) {
   return !mpfr_equal_p(a->f, b->f);
 }
 
-bool hook_FLOAT_trueeq(floating *a, floating *b) {
+bool hook_FLOAT_trueeq(SortFloat a, SortFloat b) {
   if (a->exp != b->exp) {
     return false;
   }
@@ -331,7 +331,7 @@ bool hook_FLOAT_trueeq(floating *a, floating *b) {
   return false;
 }
 
-floating *hook_FLOAT_abs(floating *a) {
+SortFloat hook_FLOAT_abs(SortFloat a) {
   floating result[1];
   mpfr_enter(a, result);
   int t = mpfr_abs(result->f, a->f, MPFR_RNDN);
@@ -339,7 +339,7 @@ floating *hook_FLOAT_abs(floating *a) {
   return move_float(result); 
 }
 
-floating *hook_FLOAT_neg(floating *a) {
+SortFloat hook_FLOAT_neg(SortFloat a) {
   floating result[1];
   mpfr_enter(a, result);
   int t = mpfr_neg(result->f, a->f, MPFR_RNDN);
@@ -347,7 +347,7 @@ floating *hook_FLOAT_neg(floating *a) {
   return move_float(result); 
 }
 
-floating *hook_FLOAT_min(floating *a, floating *b) {
+SortFloat hook_FLOAT_min(SortFloat a, SortFloat b) {
   floating result[1];
   mpfr_enter(a, result);
   int t = mpfr_min(result->f, a->f, b->f, MPFR_RNDN);
@@ -355,7 +355,7 @@ floating *hook_FLOAT_min(floating *a, floating *b) {
   return move_float(result);
 }
 
-floating *hook_FLOAT_max(floating *a, floating *b) {
+SortFloat hook_FLOAT_max(SortFloat a, SortFloat b) {
   floating result[1];
   mpfr_enter(a, result);
   int t = mpfr_max(result->f, a->f, b->f, MPFR_RNDN);
@@ -363,7 +363,7 @@ floating *hook_FLOAT_max(floating *a, floating *b) {
   return move_float(result);
 }
 
-floating *hook_FLOAT_add(floating *a, floating *b) {
+SortFloat hook_FLOAT_add(SortFloat a, SortFloat b) {
   floating result[1];
   mpfr_enter(a, result);
   int t = mpfr_add(result->f, a->f, b->f, MPFR_RNDN);
@@ -371,7 +371,7 @@ floating *hook_FLOAT_add(floating *a, floating *b) {
   return move_float(result);
 }
 
-floating *hook_FLOAT_sub(floating *a, floating *b) {
+SortFloat hook_FLOAT_sub(SortFloat a, SortFloat b) {
   floating result[1];
   mpfr_enter(a, result);
   int t = mpfr_sub(result->f, a->f, b->f, MPFR_RNDN);
@@ -379,7 +379,7 @@ floating *hook_FLOAT_sub(floating *a, floating *b) {
   return move_float(result);
 }
 
-floating *hook_FLOAT_mul(floating *a, floating *b) {
+SortFloat hook_FLOAT_mul(SortFloat a, SortFloat b) {
   floating result[1];
   mpfr_enter(a, result);
   int t = mpfr_mul(result->f, a->f, b->f, MPFR_RNDN);
@@ -387,7 +387,7 @@ floating *hook_FLOAT_mul(floating *a, floating *b) {
   return move_float(result);
 }
 
-floating *hook_FLOAT_div(floating *a, floating *b) {
+SortFloat hook_FLOAT_div(SortFloat a, SortFloat b) {
   floating result[1];
   mpfr_enter(a, result);
   int t = mpfr_div(result->f, a->f, b->f, MPFR_RNDN);
@@ -395,7 +395,7 @@ floating *hook_FLOAT_div(floating *a, floating *b) {
   return move_float(result);
 }
 
-floating *hook_FLOAT_rem(floating *a, floating *b) {
+SortFloat hook_FLOAT_rem(SortFloat a, SortFloat b) {
   floating result[1];
   mpfr_enter(a, result);
   int t = mpfr_remainder(result->f, a->f, b->f, MPFR_RNDN);
@@ -403,7 +403,7 @@ floating *hook_FLOAT_rem(floating *a, floating *b) {
   return move_float(result);
 }
 
-floating *hook_FLOAT_pow(floating *a, floating *b) {
+SortFloat hook_FLOAT_pow(SortFloat a, SortFloat b) {
   floating result[1];
   mpfr_enter(a, result);
   int t = mpfr_pow(result->f, a->f, b->f, MPFR_RNDN);
@@ -411,7 +411,7 @@ floating *hook_FLOAT_pow(floating *a, floating *b) {
   return move_float(result);
 }
 
-floating *hook_FLOAT_root(floating *a, mpz_t b) {
+SortFloat hook_FLOAT_root(SortFloat a, SortInt b) {
   if (!mpz_fits_ulong_p(b)) {
     throw std::invalid_argument("Root out of range");
   }
@@ -423,7 +423,7 @@ floating *hook_FLOAT_root(floating *a, mpz_t b) {
   return move_float(result); 
 }
 
-floating *hook_FLOAT_log(floating *a) {
+SortFloat hook_FLOAT_log(SortFloat a) {
   floating result[1];
   mpfr_enter(a, result);
   int t = mpfr_log(result->f, a->f, MPFR_RNDN);
@@ -431,7 +431,7 @@ floating *hook_FLOAT_log(floating *a) {
   return move_float(result); 
 }
 
-floating *hook_FLOAT_exp(floating *a) {
+SortFloat hook_FLOAT_exp(SortFloat a) {
   floating result[1];
   mpfr_enter(a, result);
   int t = mpfr_exp(result->f, a->f, MPFR_RNDN);
@@ -439,11 +439,11 @@ floating *hook_FLOAT_exp(floating *a) {
   return move_float(result); 
 }
 
-bool hook_FLOAT_sign(floating *a) {
+bool hook_FLOAT_sign(SortFloat a) {
   return mpfr_signbit(a->f);
 }
 
-void float_hash(floating *f, void *hasher) {
+void float_hash(SortFloat f, void *hasher) {
   int nlimbs = (mpfr_get_prec(f->f) + 63) / 64;
   for (int i = 0; i < nlimbs; i++) {
     add_hash64(hasher, f->f[0]._mpfr_d[i]);

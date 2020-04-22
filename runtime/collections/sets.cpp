@@ -14,7 +14,7 @@ extern "C" {
     return *(iter->curr++);
   }
 
-  set hook_SET_element(block *elem) {
+  set hook_SET_element(SortKItem elem) {
     return set().insert(elem);
   }
 
@@ -22,11 +22,11 @@ extern "C" {
     return set();
   }
 
-  bool hook_SET_in(block *elem, set *set) {
+  bool hook_SET_in(SortKItem elem, SortSet set) {
     return set->count(elem);
   }
 
-  set hook_SET_concat(set *s1, set *s2) {
+  set hook_SET_concat(SortSet s1, SortSet s2) {
     auto from = s1->size() < s2->size() ? s1 : s2;
     auto to = s1->size() < s2->size() ? *s2 : *s1;
     for (auto iter = from->begin(); iter != from->end(); ++iter) {
@@ -35,7 +35,7 @@ extern "C" {
     return to;
   }
 
-  set hook_SET_difference(set *s1, set *s2) {
+  set hook_SET_difference(SortSet s1, SortSet s2) {
     auto from = s2;
     auto to = *s1;
     for (auto iter = from->begin(); iter != from->end(); ++iter) {
@@ -44,11 +44,11 @@ extern "C" {
     return to;
   }
 
-  set hook_SET_remove(set *s, block *elem) {
+  set hook_SET_remove(SortSet s, SortKItem elem) {
     return s->erase(elem);
   }
 
-  bool hook_SET_inclusion(set *s1, set *s2) {
+  bool hook_SET_inclusion(SortSet s1, SortSet s2) {
     for (auto iter = s1->begin(); iter != s1->end(); ++iter) {
       if (!s2->count(*iter)) {
 	return false;
@@ -57,7 +57,7 @@ extern "C" {
     return true;
   }
 
-  set hook_SET_intersection(set *s1, set *s2) {
+  set hook_SET_intersection(SortSet s1, SortSet s2) {
     auto from = s1->size() < s2->size() ? s1 : s2;
     auto to = s1->size() < s2->size() ? s2 : s1;
     auto result = set();
@@ -70,25 +70,25 @@ extern "C" {
     return result;
   }
 
-  block *hook_SET_choice(set *s) {
+  SortKItem hook_SET_choice(SortSet s) {
     if (s->empty()) {
       throw std::invalid_argument("Set is empty");
     }
     return *s->begin();
   }
 
-  size_t hook_SET_size_long(set *s) {
+  size_t hook_SET_size_long(SortSet s) {
     return s->size();
   }
 
-  mpz_ptr hook_SET_size(set *s) {
+  SortInt hook_SET_size(SortSet s) {
     auto size = hook_SET_size_long(s);
     mpz_t result;
     mpz_init_set_ui(result, size);
     return move_int(result);
   }
 
-  list hook_SET_set2list(set *s) {
+  list hook_SET_set2list(SortSet s) {
     auto res = list().transient();
     for (auto iter = s->begin(); iter != s->end(); ++iter) {
       res.push_back(*iter);
@@ -96,7 +96,7 @@ extern "C" {
     return res.persistent();
   }
 
-  set hook_SET_list2set(list *l) {
+  set hook_SET_list2set(SortList l) {
     auto res = set();
     for (auto iter = l->begin(); iter != l->end(); ++iter) {
       res = res.insert(*iter);
@@ -104,7 +104,7 @@ extern "C" {
     return res;
   }
 
-  bool hook_SET_eq(set *s1, set *s2) {
+  bool hook_SET_eq(SortSet s1, SortSet s2) {
     return (*s1) == (*s2);
   }
 

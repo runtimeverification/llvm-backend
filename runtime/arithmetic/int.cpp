@@ -10,7 +10,7 @@ extern "C" {
 mpz_ptr move_int(mpz_t);
 void add_hash64(void *, uint64_t);
 
-mpz_ptr hook_INT_tmod(mpz_t a, mpz_t b) {
+SortInt hook_INT_tmod(SortInt a, SortInt b) {
   mpz_t result;
   if (mpz_sgn(b) == 0) {
     throw std::invalid_argument("Modulus by zero");
@@ -20,7 +20,7 @@ mpz_ptr hook_INT_tmod(mpz_t a, mpz_t b) {
   return move_int(result);
 }
 
-mpz_ptr hook_INT_emod(mpz_t a, mpz_t b) {
+SortInt hook_INT_emod(SortInt a, SortInt b) {
   mpz_t result;
   if (mpz_sgn(b) == 0) {
     throw std::invalid_argument("Modulus by zero");
@@ -38,47 +38,47 @@ mpz_ptr hook_INT_emod(mpz_t a, mpz_t b) {
   return move_int(result);
 }
 
-mpz_ptr hook_INT_add(mpz_t a, mpz_t b) {
+SortInt hook_INT_add(SortInt a, SortInt b) {
   mpz_t result;
   mpz_init(result);
   mpz_add(result, a, b);
   return move_int(result);
 }
 
-bool hook_INT_le(mpz_t a, mpz_t b) {
+bool hook_INT_le(SortInt a, SortInt b) {
   return mpz_cmp(a, b) <= 0;
 }
 
-bool hook_INT_eq(mpz_t a, mpz_t b) {
+bool hook_INT_eq(SortInt a, SortInt b) {
   return mpz_cmp(a, b) == 0;
 }
 
-bool hook_INT_ne(mpz_t a, mpz_t b) {
+bool hook_INT_ne(SortInt a, SortInt b) {
   return mpz_cmp(a, b) != 0;
 }
 
-mpz_ptr hook_INT_and(mpz_t a, mpz_t b) {
+SortInt hook_INT_and(SortInt a, SortInt b) {
   mpz_t result;
   mpz_init(result);
   mpz_and(result, a, b);
   return move_int(result);
 }
 
-mpz_ptr hook_INT_mul(mpz_t a, mpz_t b) {
+SortInt hook_INT_mul(SortInt a, SortInt b) {
   mpz_t result;
   mpz_init(result);
   mpz_mul(result, a, b);
   return move_int(result);
 }
 
-mpz_ptr hook_INT_sub(mpz_t a, mpz_t b) {
+SortInt hook_INT_sub(SortInt a, SortInt b) {
   mpz_t result;
   mpz_init(result);
   mpz_sub(result, a, b);
   return move_int(result);
 }
 
-mpz_ptr hook_INT_tdiv(mpz_t a, mpz_t b) {
+SortInt hook_INT_tdiv(SortInt a, SortInt b) {
   mpz_t result;
   if (mpz_sgn(b) == 0) {
     throw std::invalid_argument("Division by zero");
@@ -88,7 +88,7 @@ mpz_ptr hook_INT_tdiv(mpz_t a, mpz_t b) {
   return move_int(result);
 }
 
-mpz_ptr hook_INT_ediv(mpz_t a, mpz_t b) {
+SortInt hook_INT_ediv(SortInt a, SortInt b) {
   mpz_t result;
   if (mpz_sgn(b) == 0) {
     throw std::invalid_argument("Division by zero");
@@ -102,7 +102,7 @@ mpz_ptr hook_INT_ediv(mpz_t a, mpz_t b) {
   return move_int(result);
 }
 
-mpz_ptr hook_INT_shl(mpz_t a, mpz_t b) {
+SortInt hook_INT_shl(SortInt a, SortInt b) {
   mpz_t result;
   if (!mpz_fits_ulong_p(b)) {
     throw std::invalid_argument("Shift amount out of range");
@@ -113,15 +113,15 @@ mpz_ptr hook_INT_shl(mpz_t a, mpz_t b) {
   return move_int(result);
 }
 
-bool hook_INT_lt(mpz_t a, mpz_t b) {
+bool hook_INT_lt(SortInt a, SortInt b) {
   return mpz_cmp(a, b) < 0;
 }
 
-bool hook_INT_ge(mpz_t a, mpz_t b) {
+bool hook_INT_ge(SortInt a, SortInt b) {
   return mpz_cmp(a, b) >= 0;
 }
 
-mpz_ptr hook_INT_shr(mpz_t a, mpz_t b) {
+SortInt hook_INT_shr(SortInt a, SortInt b) {
   mpz_t result;
   mpz_init(result);
   if (!mpz_fits_ulong_p(b)) {
@@ -138,11 +138,11 @@ mpz_ptr hook_INT_shr(mpz_t a, mpz_t b) {
   return move_int(result);
 }
 
-bool hook_INT_gt(mpz_t a, mpz_t b) {
+bool hook_INT_gt(SortInt a, SortInt b) {
   return mpz_cmp(a, b) > 0;
 }
 
-mpz_ptr hook_INT_pow(mpz_t a, mpz_t b) {
+SortInt hook_INT_pow(SortInt a, SortInt b) {
   mpz_t result;
   if (!mpz_fits_ulong_p(b)) {
     throw std::invalid_argument("Exponent out of range");
@@ -153,7 +153,7 @@ mpz_ptr hook_INT_pow(mpz_t a, mpz_t b) {
   return move_int(result);
 }
 
-mpz_ptr hook_INT_powmod(mpz_t a, mpz_t b, mpz_t mod) {
+SortInt hook_INT_powmod(SortInt a, SortInt b, SortInt mod) {
   mpz_t result;
   mpz_init(result);
   if (mpz_sgn(b) < 0) {
@@ -167,35 +167,35 @@ mpz_ptr hook_INT_powmod(mpz_t a, mpz_t b, mpz_t mod) {
   return move_int(result);
 }
 
-mpz_ptr hook_INT_xor(mpz_t a, mpz_t b) {
+SortInt hook_INT_xor(SortInt a, SortInt b) {
   mpz_t result;
   mpz_init(result);
   mpz_xor(result, a, b);
   return move_int(result);
 }
 
-mpz_ptr hook_INT_or(mpz_t a, mpz_t b) {
+SortInt hook_INT_or(SortInt a, SortInt b) {
   mpz_t result;
   mpz_init(result);
   mpz_ior(result, a, b);
   return move_int(result);
 }
 
-mpz_ptr hook_INT_not(mpz_t a) {
+SortInt hook_INT_not(SortInt a) {
   mpz_t result;
   mpz_init(result);
   mpz_com(result, a);
   return move_int(result);
 }
 
-mpz_ptr hook_INT_abs(mpz_t a) {
+SortInt hook_INT_abs(SortInt a) {
   mpz_t result;
   mpz_init(result);
   mpz_abs(result, a);
   return move_int(result);
 }
 
-mpz_ptr hook_INT_max(mpz_t a, mpz_t b) {
+SortInt hook_INT_max(SortInt a, SortInt b) {
   mpz_t result;
   mpz_init(result);
   if (mpz_cmp(a, b) >= 0) {
@@ -206,7 +206,7 @@ mpz_ptr hook_INT_max(mpz_t a, mpz_t b) {
   return move_int(result);
 }
 
-mpz_ptr hook_INT_min(mpz_t a, mpz_t b) {
+SortInt hook_INT_min(SortInt a, SortInt b) {
   mpz_t result;
   mpz_init(result);
   if (mpz_cmp(a, b) <= 0) {
@@ -217,7 +217,7 @@ mpz_ptr hook_INT_min(mpz_t a, mpz_t b) {
   return move_int(result);
 }
 
-mpz_ptr hook_INT_log2(mpz_t a) {
+SortInt hook_INT_log2(SortInt a) {
   mpz_t result;
   if (mpz_sgn(a) <= 0) {
     throw std::invalid_argument("Logarithm of nonpositive integer");
@@ -271,7 +271,7 @@ void extract(mpz_t result, mpz_t i, size_t off, size_t len) {
   result->_mp_size = size;
 }
 
-mpz_ptr hook_INT_bitRange(mpz_t i, mpz_t off, mpz_t len) {
+SortInt hook_INT_bitRange(SortInt i, SortInt off, SortInt len) {
   mpz_t result;
   if (mpz_sgn(len) == 0) {
     mpz_init(result);
@@ -320,7 +320,7 @@ void signed_extract(mpz_t result, mpz_t i, size_t off, size_t len) {
   }
 }
 
-mpz_ptr hook_INT_signExtendBitRange(mpz_t i, mpz_t off, mpz_t len) {
+SortInt hook_INT_signExtendBitRange(SortInt i, SortInt off, SortInt len) {
   mpz_t result;
   if (!mpz_fits_ulong_p(off)) {
     if (mpz_sgn(off) < 0) {
@@ -341,11 +341,11 @@ mpz_ptr hook_INT_signExtendBitRange(mpz_t i, mpz_t off, mpz_t len) {
   return move_int(result);
 }
 
-int32_t hook_INT_size_int(mpz_t t) {
+int32_t hook_INT_size_int(SortInt t) {
   return (int32_t)t->_mp_size;
 }
 
-uint64_t hook_INT_limb(mpz_t t, uint64_t i) {
+uint64_t hook_INT_limb(SortInt t, uint64_t i) {
   return (uint64_t)t->_mp_d[i];
 }
 
@@ -361,7 +361,7 @@ static block * dotK = (block *)((((uint64_t)getTagForSymbolName("dotk{}")) << 32
 static gmp_randstate_t randState;
 static bool randStateInitialized = false;
 
-block *hook_INT_srand(mpz_t seed) {
+SortK hook_INT_srand(SortInt seed) {
   if (!randStateInitialized) {
     gmp_randinit_default(randState);
   }
@@ -370,7 +370,7 @@ block *hook_INT_srand(mpz_t seed) {
   return dotK;
 }
 
-mpz_ptr hook_INT_rand(mpz_t upperBound) {
+SortInt hook_INT_rand(SortInt upperBound) {
   mpz_t result;
   mpz_init(result);
   if (!randStateInitialized) {

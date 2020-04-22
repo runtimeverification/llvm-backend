@@ -362,7 +362,7 @@ block *replaceBinderIndex(block *term, block *variable) {
   return replaceBinderInternal(term);
 }
 
-block *hook_SUBSTITUTION_substOne(block *body, block *newVal, block *varInj) {
+block *hook_SUBSTITUTION_substOne(block *body, SortKItem newVal, SortKItem varInj) {
   bool isSameSort = tag_hdr(newVal->h.hdr) == tag_hdr(varInj->h.hdr);
   idx = 0;
   replacement = *(block **)(((char *)newVal) + sizeof(blockheader));

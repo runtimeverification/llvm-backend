@@ -246,7 +246,7 @@ static bool write_json(KoreWriter<Stream> &writer, block *data) {
 
 extern "C" {
 
-string *hook_JSON_json2string(block *json) {
+SortString hook_JSON_json2string(SortJSON json) {
   StringBuffer buffer;
   KoreWriter<StringBuffer> writer(buffer);
   if (! write_json(writer, json)) {
@@ -255,7 +255,7 @@ string *hook_JSON_json2string(block *json) {
   return makeString(buffer.GetString());
 }
 
-block *hook_JSON_string2json(string *str) {
+SortJSON hook_JSON_string2json(SortString str) {
   char *cstr = getTerminatedString(str);
   StringStream s(cstr);
   KoreHandler handler;

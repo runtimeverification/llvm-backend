@@ -26,27 +26,27 @@ extern "C" {
   mpz_ptr hook_BYTES_length(string *a);
   string *hook_BYTES_substr(string *a, mpz_t start, mpz_t end);
 
-  bool hook_STRING_gt(const string * a, const string * b) {
+  bool hook_STRING_gt(SortString a, SortString b) {
     auto res = memcmp(a->data, b->data, std::min(len(a), len(b)));
     return res > 0 || (res == 0 && len(a) > len(b));
   }
 
-  bool hook_STRING_ge(const string * a, const string * b) {
+  bool hook_STRING_ge(SortString a, SortString b) {
     auto res = memcmp(a->data, b->data, std::min(len(a), len(b)));
     return (res > 0 || (res == 0 && len(a) >= len(b)));
   }
 
-  bool hook_STRING_lt(const string * a, const string * b) {
+  bool hook_STRING_lt(SortString a, SortString b) {
     auto res = memcmp(a->data, b->data, std::min(len(a), len(b)));
     return res < 0 || (res == 0 && len(a) < len(b));
   }
 
-  bool hook_STRING_le(const string * a, const string * b) {
+  bool hook_STRING_le(SortString a, SortString b) {
     auto res = memcmp(a->data, b->data, std::min(len(a), len(b)));
     return (res < 0 || (res == 0 && len(a) <= len(b)));
   }
 
-  bool hook_STRING_eq(const string * a, const string * b) {
+  bool hook_STRING_eq(SortString a, SortString b) {
     uintptr_t aint = (uintptr_t) a;
     uintptr_t bint = (uintptr_t) b;
     if ((aint & 3) == 3 || (bint & 3) == 3) {
@@ -59,16 +59,16 @@ extern "C" {
     return (res == 0 && len(a) == len(b));
   }
 
-  bool hook_STRING_ne(const string * a, const string * b) {
+  bool hook_STRING_ne(SortString a, SortString b) {
     auto res = memcmp(a->data, b->data, std::min(len(a), len(b)));
     return (res != 0 || len(a) != len(b));
   }
 
-  string * hook_STRING_concat(string * a, string * b) {
+  SortString hook_STRING_concat(SortString a, SortString b) {
     return hook_BYTES_concat(a, b);
   }
 
-  mpz_ptr hook_STRING_length(string * a) {
+  SortInt hook_STRING_length(SortString a) {
     return hook_BYTES_length(a);
   }
 
@@ -79,7 +79,7 @@ extern "C" {
     return mpz_get_ui(i);
   }
 
-  const string * hook_STRING_chr(mpz_t ord) {
+  SortString hook_STRING_chr(SortInt ord) {
     uint64_t uord = gs(ord);
     if (uord > 255) {
       throw std::invalid_argument("Ord must be <= 255");
@@ -90,7 +90,7 @@ extern "C" {
     return ret;
   }
 
-  const mpz_ptr hook_STRING_ord(const string * input) {
+  SortInt hook_STRING_ord(SortString input) {
     mpz_t result;
     if (len(input) != 1) {
       throw std::invalid_argument("Input must a string of length 1");
@@ -99,11 +99,11 @@ extern "C" {
     return move_int(result);
   }
 
-  string * hook_STRING_substr(string * input, mpz_t start, mpz_t end) {
+  SortString hook_STRING_substr(SortString input, SortInt start, SortInt end) {
     return hook_BYTES_substr(input, start, end);
   }
 
-  mpz_ptr hook_STRING_find(const string * haystack, const string * needle, mpz_t pos) {
+  SortInt hook_STRING_find(SortString haystack, SortString needle, SortInt pos) {
     mpz_t result;
     uint64_t upos = gs(pos);
     if (upos >= len(haystack)) {
@@ -119,7 +119,7 @@ extern "C" {
     return move_int(result);
   }
 
-  mpz_ptr hook_STRING_rfind(const string * haystack, const string * needle, mpz_t pos) {
+  SortInt hook_STRING_rfind(SortString haystack, SortString needle, SortInt pos) {
     // The semantics of rfind uposition are strange, it is the last position at which
     // the match can _start_, which means the end of the haystack needs to be upos + len(needle),
     // or the end of the haystack, if that's less.
@@ -135,7 +135,7 @@ extern "C" {
     return move_int(result);
   }
 
-  mpz_ptr hook_STRING_findChar(const string * haystack, const string * needle, mpz_t pos) {
+  SortInt hook_STRING_findChar(SortString haystack, SortString needle, SortInt pos) {
     mpz_t result;
     uint64_t upos = gs(pos);
     if (upos >= len(haystack)) {
@@ -151,7 +151,7 @@ extern "C" {
     return move_int(result);
   }
 
-  mpz_ptr hook_STRING_rfindChar(const string * haystack, const string * needle, mpz_ptr pos) {
+  SortInt hook_STRING_rfindChar(SortString haystack, SortString needle, SortInt pos) {
     // The semantics of rfind uposition are strange, it is the last position at which
     // the match can _start_, which means the end of the haystack needs to be upos + len(needle),
     // or the end of the haystack, if that's less.
@@ -177,7 +177,7 @@ extern "C" {
     return ret;
   }
 
-  const string *hook_STRING_base2string_long(const mpz_t input, uint64_t base) {
+  SortString hook_STRING_base2string_long(SortInt input, uint64_t base) {
     size_t len = mpz_sizeinbase(input, base) + 2;
     // +1 for null terminator needed by mpz_get_str, +1 for minus sign
     auto result = static_cast<string *>(koreAllocToken(sizeof(string) + len));
@@ -186,7 +186,7 @@ extern "C" {
     return static_cast<string *>(koreResizeLastAlloc(result, sizeof(string) + len(result), sizeof(string) + len));
   }
 
-  const mpz_ptr hook_STRING_string2base_long(const string *input, uint64_t base) {
+  SortInt hook_STRING_string2base_long(SortString input, uint64_t base) {
     mpz_t result;
     size_t length;
     const char * dataStart;
@@ -208,47 +208,47 @@ extern "C" {
     return move_int(result);
   }
 
-  const string * hook_STRING_int2string(const mpz_t input) {
+  SortString hook_STRING_int2string(SortInt input) {
     return hook_STRING_base2string_long(input, 10);
   }
 
-  const mpz_ptr hook_STRING_string2int(const string *input) {
+  SortInt hook_STRING_string2int(SortString input) {
     return hook_STRING_string2base_long(input, 10);
   }
 
-  const mpz_ptr hook_STRING_string2base(const string *input, mpz_t base) {
+  SortInt hook_STRING_string2base(SortString input, SortInt base) {
     uint64_t ubase = gs(base);
     return hook_STRING_string2base_long(input, ubase);
   }
 
-  const string *hook_STRING_base2string(mpz_t input, mpz_t base) {
+  SortString hook_STRING_base2string(SortInt input, SortInt base) {
     uint64_t ubase = gs(base);
     return hook_STRING_base2string_long(input, ubase);
   }
 
-  const string * hook_STRING_float2string(const floating *input) {
+  SortString hook_STRING_float2string(SortFloat input) {
     std::string result = floatToString(input);
     return makeString(result.c_str());
   }
 
-  floating *hook_STRING_string2float(const string * input) {
+  SortFloat hook_STRING_string2float(SortString input) {
     floating result[1];
     init_float2(result, std::string(input->data, len(input)));
     return move_float(result);
   }
 
-  const string * hook_STRING_string2token(const string * input) {
+  string * hook_STRING_string2token(SortString input) {
     return input;
   }
 
-  const string * hook_STRING_token2string(const string * input) {
+  SortString hook_STRING_token2string(string * input) {
     if (layout(input) != 0) {
       throw std::invalid_argument("token2string: input is not a string token");
     }
     return input;
   }
 
-  inline const string * hook_STRING_replace(const string * haystack, const string * needle, const string * replacer, mpz_t occurences) {
+  inline SortString hook_STRING_replace(SortString haystack, SortString needle, SortString replacer, SortInt occurences) {
     uint64_t uoccurences = gs(occurences);
     auto start = &haystack->data[0];
     auto pos = start;
@@ -290,7 +290,7 @@ extern "C" {
     return ret;
   }
 
-  const string * hook_STRING_replaceAll(const string * haystack, const string * needle, const string * replacer) {
+  SortString hook_STRING_replaceAll(SortString haystack, SortString needle, SortString replacer) {
     // It's guaranteed that there can be no more replacements than the length of the haystack, so this
     // gives us the functionality of replaceAll.
     mpz_t arg;
@@ -298,13 +298,13 @@ extern "C" {
     return hook_STRING_replace(haystack, needle, replacer, arg);
   }
 
-  const string * hook_STRING_replaceFirst(const string * haystack, const string * needle, const string * replacer) {
+  SortString hook_STRING_replaceFirst(SortString haystack, SortString needle, SortString replacer) {
     mpz_t arg;
     mpz_init_set_si(arg, 1);
     return hook_STRING_replace(haystack, needle, replacer, arg);
   }
 
-  mpz_ptr hook_STRING_countAllOccurrences(const string * haystack, const string * needle) {
+  SortInt hook_STRING_countAllOccurrences(SortString haystack, SortString needle) {
     auto pos = &haystack->data[0];
     auto end = &haystack->data[len(haystack)];
     int i = 0;
@@ -336,7 +336,7 @@ extern "C" {
     throw std::invalid_argument("not implemented: STRING.floatFormat");
   }
 
-  stringbuffer *hook_BUFFER_empty() {
+  SortStringBuffer hook_BUFFER_empty() {
     auto result = static_cast<stringbuffer *>(koreAlloc(sizeof(stringbuffer)));
     set_len(result, sizeof(stringbuffer) - sizeof(blockheader));
     result->strlen = 0;
@@ -346,7 +346,7 @@ extern "C" {
     return result;
   }
 
-  stringbuffer *hook_BUFFER_concat(stringbuffer *buf, string *s) {
+  SortStringBuffer hook_BUFFER_concat(SortStringBuffer buf, SortString s) {
     return hook_BUFFER_concat_raw(buf, s->data, len(s));
   }
 
@@ -375,7 +375,7 @@ extern "C" {
     return buf;
   }
 
-  string *hook_BUFFER_toString(stringbuffer *buf) {
+  SortString hook_BUFFER_toString(SortStringBuffer buf) {
     return bytes2string(buf->contents, buf->strlen);
   }
 }
