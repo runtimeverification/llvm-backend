@@ -299,7 +299,8 @@ void FunctionNode::codegen(Decision *d) {
     }
     functionArgs.push_back(llvm::ConstantPointerNull::get(llvm::Type::getInt8PtrTy(d->Ctx)));
 
-    llvm::CallInst::Create(getOrInsertFunction(d->Module, "addMatchFunction", llvm::FunctionType::get(llvm::Type::getVoidTy(d->Ctx), {llvm::Type::getInt8PtrTy(d->Ctx), llvm::Type::getInt8PtrTy(d->Ctx), llvm::Type::getInt8PtrTy(d->Ctx)}, true)), functionArgs, "", d->CurrentBlock);
+    auto call = llvm::CallInst::Create(getOrInsertFunction(d->Module, "addMatchFunction", llvm::FunctionType::get(llvm::Type::getVoidTy(d->Ctx), {llvm::Type::getInt8PtrTy(d->Ctx), llvm::Type::getInt8PtrTy(d->Ctx), llvm::Type::getInt8PtrTy(d->Ctx)}, true)), functionArgs, "", d->CurrentBlock);
+    setDebugLoc(call);
   }
   child->codegen(d);
   setCompleted();
@@ -352,7 +353,8 @@ void LeafNode::codegen(Decision *d) {
     return;
   }
   if (d->FailPattern) {
-    llvm::CallInst::Create(getOrInsertFunction(d->Module, "addMatchSuccess", llvm::Type::getVoidTy(d->Ctx)), {}, "", d->CurrentBlock);
+    auto call = llvm::CallInst::Create(getOrInsertFunction(d->Module, "addMatchSuccess", llvm::Type::getVoidTy(d->Ctx)), {}, "", d->CurrentBlock);
+    setDebugLoc(call);
     llvm::ReturnInst::Create(d->Ctx, d->CurrentBlock);
     setCompleted();
     return;
@@ -736,7 +738,8 @@ void makeMatchReasonFunction(KOREDefinition *definition, llvm::Module *module, K
   llvm::PHINode *FailSubject = llvm::PHINode::Create(llvm::Type::getInt8PtrTy(module->getContext()), 0, "subject", fail);
   llvm::PHINode *FailPattern = llvm::PHINode::Create(llvm::Type::getInt8PtrTy(module->getContext()), 0, "pattern", fail);
   llvm::PHINode *FailSort = llvm::PHINode::Create(llvm::Type::getInt8PtrTy(module->getContext()), 0, "sort", fail);
-  llvm::CallInst::Create(getOrInsertFunction(module, "addMatchFailReason", llvm::FunctionType::get(llvm::Type::getVoidTy(module->getContext()), {FailSubject->getType(), FailPattern->getType(), FailSort->getType()}, false)), {FailSubject, FailPattern, FailSort}, "", fail);
+  auto call = llvm::CallInst::Create(getOrInsertFunction(module, "addMatchFailReason", llvm::FunctionType::get(llvm::Type::getVoidTy(module->getContext()), {FailSubject->getType(), FailPattern->getType(), FailSort->getType()}, false)), {FailSubject, FailPattern, FailSort}, "", fail);
+  setDebugLoc(call);
 
   llvm::AllocaInst *choiceBuffer, *choiceDepth;
   llvm::IndirectBrInst *jump;
