@@ -159,7 +159,7 @@ BOOST_AUTO_TEST_CASE(getc) {
   b = hook_IO_getc(f);
   BOOST_CHECK_EQUAL(b->h.hdr, getBlockHeaderForSymbol(getTagForSymbolName("inj{SortIOError{}, SortKItem{}}")).hdr);
   const char * temp = GETTAG(EOF);
-  BOOST_CHECK(temp != "");
+  BOOST_CHECK(std::string(temp) != "");
   BOOST_CHECK_EQUAL((uint64_t)*(b->children), ERRBLOCK(getTagForSymbolName(GETTAG(EOF))));
 
   ::close(fd);
