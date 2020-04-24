@@ -242,7 +242,7 @@ MatchLog *getMatchLog(void) {
 }
 
 void **getMatchFnArgs(MatchLog *log) {
-  return &log->args[0];;;;
+  return &log->args[0];
 }
 
 size_t getMatchLogSize(void) {
