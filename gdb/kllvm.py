@@ -731,6 +731,9 @@ Does not actually take a step if matching succeeds.
 
     def __init__(self):
         super(KMatch, self).__init__("k match", gdb.COMMAND_RUNNING, gdb.COMPLETE_SYMBOL)
+        self.SUCCESS = 0
+        self.FUNCTION = 1
+        self.FAIL = 2
 
     def invoke(self, arg, from_tty):
         try:
@@ -741,9 +744,9 @@ Does not actually take a step if matching succeeds.
             size = int(gdb.lookup_global_symbol("getMatchLogSize").value()())
             for i in range(size):
                 entry = entries[i]
-                if entry['kind'] == 0:
+                if entry['kind'] == self.SUCCESS:
                     print('Match succeeds')
-                elif entry['kind'] == 1:
+                elif entry['kind'] == self.FUNCTION:
                     print(entry['debugName'].string("iso-8859-1") + '(', end='')
                     function = gdb.lookup_global_symbol(entry['function'].string("iso-8859-1")).value().type
                     front = gdb.lookup_global_symbol("getMatchFnArgs").value()(entry.address)
@@ -768,7 +771,7 @@ Does not actually take a step if matching succeeds.
                     else:
                         result = str(entry['result'].cast(returnType))
                     print(result)
-                elif entry['kind'] == 2:
+                elif entry['kind'] == self.FAIL:
                     pattern = entry['pattern'].string("iso-8859-1")
                     sort = entry['sort'].string("iso-8859-1")
                     subject = str(entry['subject'].cast(gdb.lookup_type(sort)))
