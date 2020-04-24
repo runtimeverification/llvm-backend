@@ -705,6 +705,8 @@ class KStep(gdb.Command):
         super(KStep, self).__init__(name, cat, gdb.COMPLETE_NONE)
 
     def invoke(self, arg, from_tty):
+        if gdb.selected_inferior().pid == 0:
+            raise gdb.GdbError("The program is not being run.")
         times = 1
         if arg != "":
             times = int(arg)
@@ -738,8 +740,19 @@ Does not actually take a step if matching succeeds.
     def invoke(self, arg, from_tty):
         try:
             argv = gdb.string_to_argv(arg)
+            if gdb.selected_inferior().pid == 0:
+                raise gdb.GdbError("You can't do that without a process to debug.")
             gdb.lookup_global_symbol("resetMatchReason").value()()
-            gdb.lookup_global_symbol(argv[0] + '.match').value()(gdb.parse_and_eval(argv[1]))
+            if (len(argv) != 2):
+                raise gdb.GdbError("k match takes two arguments.")
+            fun = gdb.lookup_global_symbol(argv[0] + '.match')
+            if fun is None:
+                raise gdb.GdbError("Rule with label " + argv[0] + " does not exist.")
+            try:
+                subject = gdb.parse_and_eval(argv[1])
+            except gdb.error as err:
+                raise gdb.GdbError(*err.args)
+            fun.value()(subject)
             entries = gdb.lookup_global_symbol("getMatchLog").value()()
             size = int(gdb.lookup_global_symbol("getMatchLogSize").value()())
             for i in range(size):
@@ -779,8 +792,10 @@ Does not actually take a step if matching succeeds.
                     print(subject)
                     print("does not match pattern:")
                     print(printKore(pattern, getKompiledDir()))
+        except gdb.GdbError:
+            raise
         except:
-             print(traceback.format_exc())
-             raise
+            print(traceback.format_exc())
+            raise
 
 match = KMatch()
