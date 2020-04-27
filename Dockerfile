@@ -1,7 +1,10 @@
-FROM ubuntu:bionic
+FROM ubuntu:focal
+
+ENV TZ America/Chicago
+ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && \
-    apt-get install -y git cmake clang-8 llvm-8-tools lld-8 zlib1g-dev flex libboost-test-dev libgmp-dev libmpfr-dev libyaml-dev libjemalloc-dev curl maven pkg-config
+    apt-get install -y git cmake clang-10 llvm-10-tools lld-10 zlib1g-dev flex libboost-test-dev libgmp-dev libmpfr-dev libyaml-dev libjemalloc-dev curl maven pkg-config
 
 ARG USER_ID=1000
 ARG GROUP_ID=1000
