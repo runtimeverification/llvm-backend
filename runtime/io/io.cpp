@@ -218,7 +218,7 @@ extern "C" {
     return (flags < 0) ? -1 : flags;
   }
 
-  block * hook_IO_open(string * filename, string * control) {
+  SortIOInt hook_IO_open(SortString filename, SortString control) {
     int flags = 0;
     int access = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;
     int modes = getFileModes(control);
@@ -270,7 +270,7 @@ extern "C" {
     return retBlock;
   }
 
-  block * hook_IO_tell(mpz_t i) {
+  SortIOInt hook_IO_tell(SortInt i) {
     if (!mpz_fits_sint_p(i)) {
       throw std::invalid_argument("Arg too large for int");
     }
@@ -291,7 +291,7 @@ extern "C" {
     return retBlock;
   }
 
-  block * hook_IO_getc(mpz_t i) {
+  SortIOInt hook_IO_getc(SortInt i) {
     if (!mpz_fits_sint_p(i)) {
       throw std::invalid_argument("Arg too large for int");
     }
@@ -320,7 +320,7 @@ extern "C" {
     return retBlock;
   }
 
-  block * hook_IO_read(mpz_t i, mpz_t len) {
+  SortIOString hook_IO_read(SortInt i, SortInt len) {
     if (!mpz_fits_sint_p(i) || !mpz_fits_ulong_p(len)) {
       throw std::invalid_argument("Arg too large");
     }
@@ -343,7 +343,7 @@ extern "C" {
     return retBlock;
   }
 
-  block * hook_IO_close(mpz_t i) {
+  SortK hook_IO_close(SortInt i) {
     if (!mpz_fits_sint_p(i)) {
       throw std::invalid_argument("Arg too large for int");
     }
@@ -358,7 +358,7 @@ extern "C" {
     return dotK;
   }
 
-  block * hook_IO_seek(mpz_t i, mpz_t loc) {
+  SortK hook_IO_seek(SortInt i, SortInt loc) {
     if (!mpz_fits_sint_p(i) || !mpz_fits_slong_p(loc)) {
       throw std::invalid_argument("Arg too large");
     }
@@ -374,7 +374,7 @@ extern "C" {
     return dotK;
   }
 
-  block * hook_IO_seekEnd(mpz_t i, mpz_t loc) {
+  SortK hook_IO_seekEnd(SortInt i, SortInt loc) {
     if (!mpz_fits_sint_p(i) || !mpz_fits_slong_p(loc)) {
       throw std::invalid_argument("Arg too large");
     }
@@ -390,7 +390,7 @@ extern "C" {
     return dotK;
   }
 
-  block * hook_IO_putc(mpz_t i, mpz_t c) {
+  SortK hook_IO_putc(SortInt i, SortInt c) {
     if (!mpz_fits_sint_p(i) || !mpz_fits_sint_p(c)) {
       throw std::invalid_argument("Arg too large");
     }
@@ -406,7 +406,7 @@ extern "C" {
     return dotK;
   }
 
-  block * hook_IO_write(mpz_t i, string * str) {
+  SortK hook_IO_write(SortInt i, SortString str) {
     if (!mpz_fits_sint_p(i)) {
       throw std::invalid_argument("Arg too large for int");
     }
@@ -421,7 +421,7 @@ extern "C" {
     return dotK;
   }
 
-  block * hook_IO_lock(mpz_t i, mpz_t len) {
+  SortK hook_IO_lock(SortInt i, SortInt len) {
     if (!mpz_fits_sint_p(i) || !mpz_fits_slong_p(len)) {
       throw std::invalid_argument("Arg too large");
     }
@@ -439,7 +439,7 @@ extern "C" {
     return dotK;
   }
 
-  block * hook_IO_unlock(mpz_t i, mpz_t len) {
+  SortK hook_IO_unlock(SortInt i, SortInt len) {
     if (!mpz_fits_sint_p(i) || !mpz_fits_slong_p(len)) {
       throw std::invalid_argument("Arg too large");
     }
@@ -457,7 +457,7 @@ extern "C" {
     return dotK;
   }
 
-  block * hook_IO_remove(string * path) {
+  SortK hook_IO_remove(SortString path) {
     char * p = getTerminatedString(path);
 
     int ret = unlink(p);
@@ -468,7 +468,7 @@ extern "C" {
     return dotK;
   }
 
-  block *hook_IO_accept(mpz_t sock) {
+  SortIOInt hook_IO_accept(SortInt sock) {
     if (!mpz_fits_sint_p(sock)) {
       throw std::invalid_argument("Arg too large");
     }
@@ -490,7 +490,7 @@ extern "C" {
     return retBlock;
   }
 
-  block *hook_IO_shutdownWrite(mpz_t sock) {
+  SortK hook_IO_shutdownWrite(SortInt sock) {
     if (!mpz_fits_sint_p(sock)) {
       throw std::invalid_argument("Arg too large");
     }
@@ -535,7 +535,7 @@ extern "C" {
     }
   }
 
-  block * hook_IO_log(string * path, string * msg) {
+  SortK hook_IO_log(SortString path, SortString msg) {
     char * p = getTerminatedString(path);
     char * m = getTerminatedString(msg);
 
@@ -577,7 +577,7 @@ extern "C" {
     throw std::invalid_argument("not implemented: KREFLECTION.argv");
   }
 
-  block * hook_IO_mkstemp(string * filename) {
+  SortIOFile hook_IO_mkstemp(SortString filename) {
     char * temp = getTerminatedString(filename);
     int ret = mkstemp(temp);
 
@@ -601,7 +601,7 @@ extern "C" {
     return retBlock;
   }
 
-  block * hook_IO_system(string * cmd) {
+  SortKItem hook_IO_system(SortString cmd) {
     pid_t pid;
     int ret = 0, out[2], err[2];
     stringbuffer *outBuffer = hook_BUFFER_empty();
@@ -701,7 +701,7 @@ extern "C" {
     throw std::invalid_argument("not implemented: IO.opendir");
   }
 
-  mpz_ptr hook_IO_time() {
+  SortInt hook_IO_time() {
     mpz_t result;
     mpz_init_set_si(result, time(NULL));
     return move_int(result);

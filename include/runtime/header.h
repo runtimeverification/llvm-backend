@@ -162,6 +162,24 @@ typedef struct setiter {
   set *set;
 } setiter;
 
+typedef floating *SortFloat;
+typedef mpz_ptr SortInt;
+typedef string *SortString;
+typedef string *SortBytes;
+typedef stringbuffer *SortStringBuffer;
+typedef block *SortK;
+typedef block *SortKItem;
+typedef block *SortIOInt;
+typedef block *SortIOFile;
+typedef block *SortIOString;
+typedef block *SortJSON;
+typedef block *SortEndianness;
+typedef block *SortSignedness;
+typedef block *SortFFIType;
+typedef list *SortList;
+typedef map *SortMap;
+typedef set *SortSet;
+
 
 extern "C" {
 
@@ -185,7 +203,7 @@ extern "C" {
   layout *getLayoutData(uint16_t);
   uint32_t getInjectionForSortOfTag(uint32_t tag);
 
-  bool hook_STRING_eq(const string *, const string *);
+  bool hook_STRING_eq(SortString, SortString);
 
   const char *getSymbolNameForTag(uint32_t tag);
   const char *topSort(void);

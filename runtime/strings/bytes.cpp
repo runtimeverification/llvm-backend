@@ -14,7 +14,7 @@ extern "C" {
 
   mpz_ptr move_int(mpz_t);
 
-  string *hook_BYTES_empty() {
+  SortBytes hook_BYTES_empty() {
     static string empty;
     empty.h.hdr = NOT_YOUNG_OBJECT_BIT;
     return &empty;
@@ -43,7 +43,9 @@ extern "C" {
   }
 
   // syntax Int ::= Bytes2Int(Bytes, Endianness, Signedness)
-  mpz_ptr hook_BYTES_bytes2int(string *b, uint64_t endianness, uint64_t signedness) {
+  SortInt hook_BYTES_bytes2int(SortBytes b, SortEndianness endianness_ptr, SortSignedness signedness_ptr) {
+    uint64_t endianness = (uint64_t)endianness_ptr;
+    uint64_t signedness = (uint64_t)signedness_ptr;
     mpz_t result;
     mpz_init(result);
     int order = endianness == tag_big_endian() ? 1 : -1;
@@ -76,7 +78,8 @@ extern "C" {
   void extract(mpz_t, mpz_t, size_t, size_t);
 
   // syntax Bytes ::= Int2Bytes(Int, Int, Endianness)
-  string *hook_BYTES_int2bytes(mpz_t len, mpz_t i, uint64_t endianness) {
+  SortBytes hook_BYTES_int2bytes(SortInt len, SortInt i, SortEndianness endianness_ptr) {
+    uint64_t endianness = (uint64_t)endianness_ptr;
     unsigned long len_long = mpz_get_ui(len);
     if (len_long == 0) {
       return hook_BYTES_empty();
@@ -103,15 +106,15 @@ extern "C" {
     return result;
   }
 
-  string *hook_BYTES_bytes2string(string *b) {
+  SortString hook_BYTES_bytes2string(SortBytes b) {
     return bytes2string(b, len(b));
   }
 
-  string *hook_BYTES_string2bytes(string *s) {
+  SortBytes hook_BYTES_string2bytes(SortString s) {
     return hook_BYTES_bytes2string(s);
   }
 
-  string *hook_BYTES_substr(string *input, mpz_t start, mpz_t end) {
+  SortBytes hook_BYTES_substr(SortBytes input, SortInt start, SortInt end) {
     uint64_t ustart = get_ui(start);
     uint64_t uend = get_ui(end);
     if (uend < ustart) {
@@ -127,7 +130,7 @@ extern "C" {
     return ret;
   }
 
-  mpz_ptr hook_BYTES_get(string *b, mpz_t off) {
+  SortInt hook_BYTES_get(SortBytes b, SortInt off) {
     unsigned long off_long = get_ui(off);
     if (off_long >= len(b)) {
       throw std::invalid_argument("Buffer overflow on get");
@@ -137,7 +140,7 @@ extern "C" {
     return move_int(result);
   }
 
-  string *hook_BYTES_update(string *b, mpz_t off, mpz_t val) {
+  SortBytes hook_BYTES_update(SortBytes b, SortInt off, SortInt val) {
     unsigned long off_long = get_ui(off);
     if (off_long >= len(b)) {
       throw std::invalid_argument("Buffer overflow on update");
@@ -150,7 +153,7 @@ extern "C" {
     return b;
   }
 
-  string *hook_BYTES_replaceAt(string *b, mpz_t start, string *b2) {
+  SortBytes hook_BYTES_replaceAt(SortBytes b, SortInt start, SortBytes b2) {
     unsigned long start_long = get_ui(start);
     if (start_long + len(b2) > len(b)) {
       throw std::invalid_argument("Buffer overflow on replaceAt");
@@ -159,13 +162,13 @@ extern "C" {
     return b;
   }
 
-  mpz_ptr hook_BYTES_length(string *a) {
+  SortInt hook_BYTES_length(SortBytes a) {
     mpz_t result;
     mpz_init_set_ui(result, len(a));
     return move_int(result);
   }
 
-  string *hook_BYTES_padRight(string *b, mpz_t len, mpz_t v) {
+  SortBytes hook_BYTES_padRight(SortBytes b, SortInt len, SortInt v) {
     unsigned long ulen = get_ui(len);
     if (ulen <= len(b)) {
       return b;
@@ -181,7 +184,7 @@ extern "C" {
     return result;
   }
 
-  string *hook_BYTES_padLeft(string *b, mpz_t len, mpz_t v) {
+  SortBytes hook_BYTES_padLeft(SortBytes b, SortInt len, SortInt v) {
     unsigned long ulen = get_ui(len);
     if (ulen <= len(b)) {
       return b;
@@ -197,12 +200,12 @@ extern "C" {
     return result;
   }
 
-  string *hook_BYTES_reverse(string *b) {
+  SortBytes hook_BYTES_reverse(SortBytes b) {
     std::reverse(b->data, b->data + len(b));
     return b;
   }
 
-  string *hook_BYTES_concat(string *a, string *b) {
+  SortBytes hook_BYTES_concat(SortBytes a, SortBytes b) {
     auto len_a = len(a);
     auto len_b = len(b);
     auto newlen = len_a  + len_b;

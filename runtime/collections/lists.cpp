@@ -9,11 +9,11 @@ extern "C" {
     return list();
   }
 
-  list hook_LIST_element(block * value) {
+  list hook_LIST_element(SortKItem value) {
     return list{value};
   }
 
-  list hook_LIST_concat(list * l1, list * l2) {
+  list hook_LIST_concat(SortList l1, SortList l2) {
     if (l2->size() < 32) {
       auto tmp = l1->transient();
       for (auto iter = l2->begin(); iter != l2->end(); ++iter) {
@@ -25,7 +25,7 @@ extern "C" {
     }
   }
 
-  bool hook_LIST_in(block * value, list * list) {
+  bool hook_LIST_in(SortKItem value, SortList list) {
     for (auto iter = list->begin(); iter != list->end(); ++iter) {
       if (hook_KEQUAL_eq(*iter, value)) {
         return true;
@@ -34,7 +34,7 @@ extern "C" {
     return false;
   }
 
-  bool hook_LIST_in_keys(mpz_t index, list * list) {
+  bool hook_LIST_in_keys(SortInt index, SortList list) {
     if (!mpz_fits_ulong_p(index)) {
       throw std::invalid_argument("Index is too large for in_keys");
     }
@@ -42,13 +42,13 @@ extern "C" {
     return idx < list->size();
   }
 
-  block * hook_LIST_get_long(list * list, ssize_t idx) {
+  SortKItem hook_LIST_get_long(SortList list, ssize_t idx) {
     size_t size = list->size();
     size_t abs_idx = idx < 0 ? (long) size + idx : idx;
     return list->at(abs_idx);
   }
 
-  block * hook_LIST_get(list * list, mpz_t index) {
+  SortKItem hook_LIST_get(SortList list, SortInt index) {
     if (!mpz_fits_slong_p(index)) {
       throw std::invalid_argument("Index is too large for get");
     }
@@ -56,11 +56,11 @@ extern "C" {
     return hook_LIST_get_long(list, idx);
   }
 
-  block * hook_LIST_lookup(list * list, mpz_t index) {
+  SortKItem hook_LIST_lookup(SortList list, SortInt index) {
     return hook_LIST_get(list, index);
   }
 
-  list hook_LIST_range_long(list * list, size_t front, size_t back) {
+  list hook_LIST_range_long(SortList list, size_t front, size_t back) {
     size_t size = list->size();
 
     if (size < front + back) {
@@ -73,7 +73,7 @@ extern "C" {
     return tmp.persistent();
   }
 
-  list hook_LIST_range(list * list, mpz_t from_front, mpz_t from_back) {
+  list hook_LIST_range(SortList list, SortInt from_front, SortInt from_back) {
     if (!mpz_fits_ulong_p(from_front) || !mpz_fits_ulong_p(from_back)) {
       throw std::invalid_argument("Range index too large for range");
     }
@@ -84,17 +84,17 @@ extern "C" {
     return hook_LIST_range_long(list, front, back);
   }
 
-  size_t hook_LIST_size_long(list * list) {
+  size_t hook_LIST_size_long(SortList list) {
     return list->size();
   }
 
-  mpz_ptr hook_LIST_size(list * list) {
+  SortInt hook_LIST_size(SortList list) {
     mpz_t size;
     mpz_init_set_ui(size, list->size());
     return move_int(size);
   }
 
-  list hook_LIST_make(mpz_t len, block * value) {
+  list hook_LIST_make(SortInt len, SortKItem value) {
     if (!mpz_fits_ulong_p(len)) {
       throw std::invalid_argument("Length is too large for make");
     }
@@ -103,7 +103,7 @@ extern "C" {
     return list(length, value);
   }
 
-  list hook_LIST_update(list * list, mpz_t index, block * value) {
+  list hook_LIST_update(SortList list, SortInt index, SortKItem value) {
     if (!mpz_fits_ulong_p(index)) {
       throw std::invalid_argument("Length is too large for update");
     }
@@ -116,7 +116,7 @@ extern "C" {
     return list->set(idx, value);
   }
 
-  list hook_LIST_updateAll(list * l1, mpz_t index, list * l2) {
+  list hook_LIST_updateAll(SortList l1, SortInt index, SortList l2) {
     if (!mpz_fits_ulong_p(index)) {
       throw std::invalid_argument("Length is too large for updateAll");
     }
@@ -149,7 +149,7 @@ extern "C" {
     }
   }
 
-  list hook_LIST_fill(list * l, mpz_t index, mpz_t len, block * val) {
+  list hook_LIST_fill(SortList l, SortInt index, SortInt len, SortKItem val) {
     if (!mpz_fits_ulong_p(index)) {
       throw std::invalid_argument("Index is too large for fill");
     }
@@ -187,7 +187,7 @@ extern "C" {
     }
   }
 
-  bool hook_LIST_eq(list * l1, list * l2) {
+  bool hook_LIST_eq(SortList l1, SortList l2) {
     return (*l1) == (*l2);
   }
 

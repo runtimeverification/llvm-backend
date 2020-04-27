@@ -24,6 +24,8 @@ using ptr = std::unique_ptr<T>;
 template <typename T>
 using sptr = std::shared_ptr<T>;
 
+std::string decodeKore(std::string);
+
 // KORESort
 class KORESort : public std::enable_shared_from_this<KORESort> {
 public:
@@ -317,7 +319,7 @@ public:
   virtual sptr<KOREPattern> expandAliases(KOREDefinition *) override { return shared_from_this(); }
   virtual sptr<KOREPattern> sortCollections(PrettyPrintData const& data) override { return shared_from_this(); }
   virtual void prettyPrint(std::ostream &out, PrettyPrintData const& data) const override {
-    out << getName() << ":";
+    out << decodeKore(getName().substr(3)) << ":";
     sort->prettyPrint(out);
   }
 

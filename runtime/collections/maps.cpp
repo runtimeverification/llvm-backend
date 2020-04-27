@@ -14,7 +14,7 @@ extern "C" {
     return (iter->curr++)->first;
   }
 
-  map hook_MAP_element(block *key, block *value) {
+  map hook_MAP_element(SortKItem key, SortKItem value) {
     return map().set(key, value);
   }
 
@@ -22,7 +22,7 @@ extern "C" {
     return map();
   }
 
-  map hook_MAP_concat(map *m1, map *m2) {
+  map hook_MAP_concat(SortMap m1, SortMap m2) {
     auto from = m1->size() < m2->size() ? m1 : m2;
     auto to = m1->size() < m2->size() ? *m2 : *m1;
     for (auto iter = from->begin(); iter != from->end(); ++iter) {
@@ -35,14 +35,14 @@ extern "C" {
     return to;
   }
 
-  block *hook_MAP_lookup_null(map *m, block *key) {
+  SortKItem hook_MAP_lookup_null(SortMap m, SortKItem key) {
     if (auto val = m->find(key)) {
       return *val;
     }
     return nullptr;
   }
 
-  block *hook_MAP_lookup(map *m, block *key) {
+  SortKItem hook_MAP_lookup(SortMap m, SortKItem key) {
     auto res = hook_MAP_lookup_null(m, key);
     if(!res) {
       throw std::invalid_argument("key not found");
@@ -50,7 +50,7 @@ extern "C" {
     return res;
   }
 
-  block *hook_MAP_lookupOrDefault(map *m, block *key, block *_default) {
+  SortKItem hook_MAP_lookupOrDefault(SortMap m, SortKItem key, SortKItem _default) {
     auto res = hook_MAP_lookup_null(m, key);
     if (!res) {
       return _default;
@@ -58,15 +58,15 @@ extern "C" {
     return res;
   }
 
-  map hook_MAP_update(map *m, block *key, block *value) {
+  map hook_MAP_update(SortMap m, SortKItem key, SortKItem value) {
     return m->set(key, value);
   }
 
-  map hook_MAP_remove(map *m, block *key) {
+  map hook_MAP_remove(SortMap m, SortKItem key) {
     return m->erase(key);
   }
 
-  map hook_MAP_difference(map *m1, map *m2) {
+  map hook_MAP_difference(SortMap m1, SortMap m2) {
     auto from = m2;
     auto to = *m1;
     for (auto iter = from->begin(); iter != from->end(); ++iter) {
@@ -84,7 +84,7 @@ extern "C" {
   set hook_SET_element(block *);
   set hook_SET_concat(set *, set *);
 
-  set hook_MAP_keys(map *m) {
+  set hook_MAP_keys(SortMap m) {
     auto tmp = hook_SET_unit();
     for (auto iter = m->begin(); iter != m->end(); ++iter) {
       auto elem = hook_SET_element(iter->first);
@@ -93,7 +93,7 @@ extern "C" {
     return tmp;
   }
 
-  list hook_MAP_keys_list(map *m) {
+  list hook_MAP_keys_list(SortMap m) {
     auto tmp = list().transient();
     for (auto iter = m->begin(); iter != m->end(); ++iter) {
       tmp.push_back(iter->first);
@@ -101,11 +101,11 @@ extern "C" {
     return tmp.persistent();
   }
 
-  bool hook_MAP_in_keys(block *key, map *m) {
+  bool hook_MAP_in_keys(SortKItem key, SortMap m) {
     return m->find(key);
   }
 
-  list hook_MAP_values(map *m) {
+  list hook_MAP_values(SortMap m) {
     auto tmp = list().transient();
     for (auto iter = m->begin(); iter != m->end(); ++iter) {
       tmp.push_back(iter->second);
@@ -113,25 +113,25 @@ extern "C" {
     return tmp.persistent();
   }
 
-  block *hook_MAP_choice(map *m) {
+  SortKItem hook_MAP_choice(SortMap m) {
     if (m->empty()) {
       throw std::invalid_argument("Map is empty");
     }
     return m->begin()->first;
   }
 
-  size_t hook_MAP_size_long(map *m) {
+  size_t hook_MAP_size_long(SortMap m) {
     return m->size();
   }
 
-  mpz_ptr hook_MAP_size(map *m) {
+  SortInt hook_MAP_size(SortMap m) {
     auto size = hook_MAP_size_long(m);
     mpz_t result;
     mpz_init_set_ui(result, size);
     return move_int(result);
   }
 
-  bool hook_MAP_inclusion(map *m1, map *m2) {
+  bool hook_MAP_inclusion(SortMap m1, SortMap m2) {
     for (auto iter = m1->begin(); iter != m1->end(); ++iter) {
       auto entry = *iter;
       auto val = m2->find(entry.first);
@@ -142,7 +142,7 @@ extern "C" {
     return true;
   }
 
-  map hook_MAP_updateAll(map *m1, map *m2) {
+  map hook_MAP_updateAll(SortMap m1, SortMap m2) {
     auto from = m2;
     auto to = *m1;
     for (auto iter = from->begin(); iter != from->end(); ++iter) {
@@ -151,7 +151,7 @@ extern "C" {
     return to;
   }
 
-  map hook_MAP_removeAll(map *map, set *set) {
+  map hook_MAP_removeAll(SortMap map, SortSet set) {
     auto tmp = *map;
     for (auto iter = set->begin(); iter != set->end(); ++iter) {
       tmp = tmp.erase(*iter);
@@ -159,7 +159,7 @@ extern "C" {
     return tmp;
   }
 
-  bool hook_MAP_eq(map *m1, map *m2) {
+  bool hook_MAP_eq(SortMap m1, SortMap m2) {
     return (*m1) == (*m2);
   }
 

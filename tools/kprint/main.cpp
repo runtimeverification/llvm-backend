@@ -36,6 +36,8 @@ int main (int argc, char **argv) {
   formats["kseq"] = "%1 ~> %2";
   formats["dotk"] = ".";
   formats["inj"] = "%1";
+  formats["\\bottom"] = "#False";
+  formats["\\top"] = "#True";
   std::map<std::string, std::string> hooks;
   std::set<std::string> assocs;
   std::set<std::string> comms;

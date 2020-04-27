@@ -338,6 +338,16 @@ class KParam(gdb.Parameter):
 hasColor = KParam("print k-color", True, "Coloring of pretty-printed k terms is", "Set coloring of pretty-printed k terms")
 prettyPrint = KParam("print k-pretty", True, "Pretty-printing of k terms is", "Set pretty-printing of k terms")
 
+def getKompiledDir():
+  return gdb.lookup_global_symbol("kompiled_directory").value().address.string("iso-8859-1")
+
+def printKore(string, kompiledDir): 
+    if prettyPrint.value:
+        return str(subprocess.check_output(["kprint", kompiledDir, "/dev/stdin", "true" if hasColor.value else "false"], input=bytes(string, "iso-8859-1")), "iso-8859-1")[:-1]
+    else:
+        return string
+ 
+
 class termPrinter:
     """Print a kore term."""
 
@@ -362,7 +372,7 @@ class termPrinter:
         self.map_ptr = gdb.lookup_type("map").pointer()
         self.list_ptr = gdb.lookup_type("list").pointer()
         self.set_ptr = gdb.lookup_type("set").pointer()
-        self.kompiled_dir = gdb.lookup_global_symbol("kompiled_directory").value().address.string("iso-8859-1")
+        self.kompiled_dir = getKompiledDir()
 
     def getSymbolNameForTag(self, tag):
         return gdb.lookup_global_symbol("table_getSymbolNameForTag").value()[tag]
@@ -394,10 +404,7 @@ class termPrinter:
                 self.appendStringBuffer(self.val.cast(self.stringbuffer_ptr), self.sortName)
             self.var_names = {}
             self.used_var_name = set()
-            if prettyPrint.value:
-                return str(subprocess.check_output(["kprint", self.kompiled_dir, "/dev/stdin", "true" if hasColor.value else "false"], input=bytes(self.result, "iso-8859-1")), "iso-8859-1")
-            else:
-                return self.result
+            return printKore(self.result, self.kompiled_dir)
         except:
              print(traceback.format_exc())
              raise
@@ -537,6 +544,9 @@ class termPrinter:
 
     def append(self, subject, isVar, sort):
         address = int(subject.cast(self.long_int))
+        if address == 0:
+            self.result += "\\bottom{" + sort + "}()"
+            return
         isConstant = address & 3
         if isConstant:
             tag = address >> 32
@@ -630,19 +640,162 @@ class termPrinter:
 
 def kllvm_lookup_function(val):
     t = gdb.types.get_basic_type(val.type)
-    if t.code == gdb.TYPE_CODE_PTR and t.target().tag:
-        if t.target().tag == "block":
-            return termPrinter(val, "block", val.type.name)
-        elif t.target().tag == "list":
-            return termPrinter(val, "list", val.type.name)
-        elif t.target().tag == "map":
-            return termPrinter(val, "map", val.type.name)
-        elif t.target().tag == "set":
-            return termPrinter(val, "set", val.type.name)
-        elif t.target().tag == "stringbuffer":
-            return termPrinter(val, "stringbuffer", val.type.name)
-        elif t.target().tag == "__mpz_struct":
-            return termPrinter(val, "int", val.type.name)
-        elif t.target().tag == "floating":
-            return termPrinter(val, "floating", val.type.name)
+    if t.code != gdb.TYPE_CODE_PTR:
+        if t.tag:
+            kind = t.tag
+        else:
+            kind = t.name
+        if kind[0:11] == 'immer::list':
+            return termPrinter(val.address, "list", "SortList{}")
+        elif kind[0:10] == 'immer::set':
+            return termPrinter(val.address, "set", "SortSet{}")
+        elif kind[0:10] == 'immer::map':
+            return termPrinter(val.address, "map", "SortMap{}")
+        return None
+    s = t.target()
+    if s.tag:
+        kind = s.tag
+        sort = val.type.name
+    else:
+        if val.type.name is None:
+            return None
+        kind = s.name
+        sort = val.type.name + '{}'
+
+    if kind == "block" or kind == "string":
+        return termPrinter(val, "block", sort)
+    elif kind == "list":
+        return termPrinter(val, "list", sort)
+    elif kind == "map":
+        return termPrinter(val, "map", sort)
+    elif kind == "set":
+        return termPrinter(val, "set", sort)
+    elif kind == "stringbuffer":
+        return termPrinter(val, "stringbuffer", sort)
+    elif kind == "__mpz_struct":
+        return termPrinter(val, "int", sort)
+    elif kind == "floating":
+        return termPrinter(val, "floating", sort)
     return None
+
+class KPrefix(gdb.Command):
+    "Generic command for stepping through a K framework semantics."
+
+    def __init__(self):
+        super(KPrefix, self).__init__("k", gdb.COMMAND_NONE, gdb.COMPLETE_COMMAND, True)
+
+prefix = KPrefix()
+
+class KStart(gdb.Command):
+    "Start the program but do not take any steps."
+
+    def __init__(self):
+        super(KStart, self).__init__("k start", gdb.COMMAND_RUNNING, gdb.COMPLETE_NONE)
+
+    def invoke(self, arg, from_tty):
+        gdb.execute("start", from_tty)
+        gdb.execute("advance definition.kore:step", from_tty)
+
+start = KStart()
+
+class KStep(gdb.Command):
+    "Take a specified number of rewrite steps."
+
+    def __init__(self, name, cat):
+        super(KStep, self).__init__(name, cat, gdb.COMPLETE_NONE)
+
+    def invoke(self, arg, from_tty):
+        if gdb.selected_inferior().pid == 0:
+            raise gdb.GdbError("The program is not being run.")
+        times = 1
+        if arg != "":
+            times = int(arg)
+        if times > 0:
+            bp = gdb.Breakpoint("definition.kore:step", internal=True, temporary=True)
+            bp.ignore_count = times-1
+            gdb.execute("c", from_tty)
+        else:
+            gdb.execute("step 0", from_tty)
+
+step = KStep("k step", gdb.COMMAND_RUNNING)
+step2 = KStep("k s", gdb.COMMAND_NONE)
+
+class KMatch(gdb.Command):
+    """Attempt to match a particular rule against a particular configuration.
+
+Takes two arguments: The first is a top-level rule label.
+The second is a term of sort GeneratedTopCell. For example, from the "step"
+function, you could say something like "k match MODULE.LABEL subject"
+to try to match the specified rule against the current configuration.
+
+Does not actually take a step if matching succeeds.
+    """
+
+    def __init__(self):
+        super(KMatch, self).__init__("k match", gdb.COMMAND_RUNNING, gdb.COMPLETE_SYMBOL)
+        self.SUCCESS = 0
+        self.FUNCTION = 1
+        self.FAIL = 2
+
+    def invoke(self, arg, from_tty):
+        try:
+            argv = gdb.string_to_argv(arg)
+            if gdb.selected_inferior().pid == 0:
+                raise gdb.GdbError("You can't do that without a process to debug.")
+            gdb.lookup_global_symbol("resetMatchReason").value()()
+            if (len(argv) != 2):
+                raise gdb.GdbError("k match takes two arguments.")
+            fun = gdb.lookup_global_symbol(argv[0] + '.match')
+            if fun is None:
+                raise gdb.GdbError("Rule with label " + argv[0] + " does not exist.")
+            try:
+                subject = gdb.parse_and_eval(argv[1])
+            except gdb.error as err:
+                raise gdb.GdbError(*err.args)
+            fun.value()(subject)
+            entries = gdb.lookup_global_symbol("getMatchLog").value()()
+            size = int(gdb.lookup_global_symbol("getMatchLogSize").value()())
+            for i in range(size):
+                entry = entries[i]
+                if entry['kind'] == self.SUCCESS:
+                    print('Match succeeds')
+                elif entry['kind'] == self.FUNCTION:
+                    print(entry['debugName'].string("iso-8859-1") + '(', end='')
+                    function = gdb.lookup_global_symbol(entry['function'].string("iso-8859-1")).value().type
+                    front = gdb.lookup_global_symbol("getMatchFnArgs").value()(entry.address)
+                    conn = ""
+                    for i in range(len(function.fields())):
+                        arg = front[i]
+                        argType = function.fields()[i].type
+                        t = gdb.types.get_basic_type(argType)
+                        if t.code != gdb.TYPE_CODE_PTR:
+                            argStr = str(arg.cast(argType.pointer()).dereference())
+                        else:
+                            argStr = str(arg.cast(argType))
+                        print(conn, end='')
+                        print(argStr, end='')
+                        conn = ', '
+
+                    print(') => ', end='')
+                    returnType = function.target()
+                    t = gdb.types.get_basic_type(returnType)
+                    if t.code != gdb.TYPE_CODE_PTR:
+                        result = str(entry['result'].cast(returnType.pointer()).dereference())
+                    else:
+                        result = str(entry['result'].cast(returnType))
+                    print(result)
+                elif entry['kind'] == self.FAIL:
+                    pattern = entry['pattern'].string("iso-8859-1")
+                    sort = entry['sort'].string("iso-8859-1")
+                    subject = str(entry['subject'].cast(gdb.lookup_type(sort)))
+                    print("Subject:")
+                    print(subject)
+                    print("does not match pattern:")
+                    print(printKore(pattern, getKompiledDir()))
+        except gdb.GdbError:
+            raise
+        except:
+            print(traceback.format_exc())
+            raise
+
+match = KMatch()

@@ -318,12 +318,16 @@ private:
   llvm::Module *Module;
   llvm::LLVMContext &Ctx;
   ValueType Cat;
+  llvm::PHINode *FailSubject, *FailPattern, *FailSort;
 
   std::map<var_type, llvm::AllocaInst *> symbols;
 
   llvm::Value *getTag(llvm::Value *);
 
   llvm::AllocaInst *decl(var_type name);
+
+  llvm::Constant *stringLiteral(std::string name);
+  llvm::Value *ptrTerm(llvm::Value *val);
 
 public:
   Decision(
@@ -334,7 +338,10 @@ public:
     llvm::AllocaInst *ChoiceBuffer,
     llvm::AllocaInst *ChoiceDepth,
     llvm::Module *Module,
-    ValueType Cat) :
+    ValueType Cat,
+    llvm::PHINode *FailSubject,
+    llvm::PHINode *FailPattern,
+    llvm::PHINode *FailSort) :
       Definition(Definition),
       CurrentBlock(EntryBlock),
       FailureBlock(FailureBlock),
@@ -344,7 +351,11 @@ public:
       ChoiceBlock(nullptr),
       Module(Module),
       Ctx(Module->getContext()),
-      Cat(Cat) {}
+      Cat(Cat),
+      FailSubject(FailSubject),
+      FailPattern(FailPattern),
+      FailSort(FailSort)
+       {}
 
   /* adds code to the specified basic block to take a single step based on
      the specified decision tree and return the result of taking that step. */
@@ -369,6 +380,7 @@ void makeAnywhereFunction(KORESymbol *function, KOREDefinition *definition, llvm
 
 void makeStepFunction(KOREDefinition *definition, llvm::Module *module, DecisionNode *dt);
 void makeStepFunction(KOREAxiomDeclaration *axiom, KOREDefinition *definition, llvm::Module *module, PartialStep res);
+void makeMatchReasonFunction(KOREDefinition *definition, llvm::Module *module, KOREAxiomDeclaration *axiom, DecisionNode *dt);
 
 }
 #endif // DECISION_H

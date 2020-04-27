@@ -52,7 +52,7 @@ public:
    * load: if the function returns a struct via sret, then if load is true, we load the value 
    * fastcc: true if we should use the fastcc calling convention
    * returned from the function before returning it. */
-  llvm::Value *createFunctionCall(std::string name, ValueType returnCat, std::vector<llvm::Value *> &args, bool sret, bool fastcc);
+  llvm::Value *createFunctionCall(std::string name, ValueType returnCat, const std::vector<llvm::Value *> &args, bool sret, bool fastcc);
 
   llvm::BasicBlock *getCurrentBlock() const { return CurrentBlock; }
 };
