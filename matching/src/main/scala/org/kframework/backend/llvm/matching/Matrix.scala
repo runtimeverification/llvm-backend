@@ -659,7 +659,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
       }
     } else {
       val sigma = columns(0).signatureForUsefulness
-      if (r.patterns(0).isWildcard && columns(0).category.hasIncompleteSignature(sigma, columns(0).fringe)) {
+      if (r.patterns(0).isWildcard && columns(0).fringe.sortInfo.category.hasIncompleteSignature(sigma, columns(0).fringe)) {
         val matrixDefault = default(0, sigma)
         val rowDefault = r.default(0, sigma, symlib, fringe, columns)
         matrixDefault.isDefined && rowDefault.isDefined && matrixDefault.get.useful(rowDefault.get)
