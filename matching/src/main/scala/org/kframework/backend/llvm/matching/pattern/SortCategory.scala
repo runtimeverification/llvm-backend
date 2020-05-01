@@ -11,7 +11,8 @@ import java.util.regex.{Pattern => Regex}
 
 sealed trait SortCategory {
   def hookAtt: String
-  def hasIncompleteSignature(sigma: Seq[Constructor], f: Fringe): Boolean
+  def hasIncompleteSignature(sigma: Seq[Constructor], isExact: Boolean, sortInfo: SortInfo): Boolean
+  def hasIncompleteSignature(sigma: Seq[Constructor], f: Fringe): Boolean = hasIncompleteSignature(sigma, f.isExact, f.sortInfo)
   def missingConstructor(sigma: Seq[Constructor], f: Fringe): Pattern[String]
   def isExpandDefault: Boolean = false
   def equalityFun: String
@@ -47,7 +48,7 @@ object SortCategory {
 
 case class SymbolS() extends SortCategory {
   def hookAtt = "STRING.String"
-  def hasIncompleteSignature(sigma: Seq[Constructor], f: Fringe): Boolean = sigma.isEmpty || sigma.contains(Empty()) || (!f.isExact && sigma.size != f.sortInfo.length) || (f.isExact && sigma.size != f.sortInfo.exactLength)
+  def hasIncompleteSignature(sigma: Seq[Constructor], isExact: Boolean, sortInfo: SortInfo): Boolean = sigma.isEmpty || sigma.contains(Empty()) || (!isExact && sigma.size != sortInfo.length) || (isExact && sigma.size != sortInfo.exactLength)
   def missingConstructor(sigma: Seq[Constructor], f: Fringe): Pattern[String] = {
     val sym = if (f.isExact) {
       (f.sortInfo.exactConstructors.toSet -- sigma.map(_.asInstanceOf[SymbolC].sym).toSet).head
@@ -62,7 +63,7 @@ case class SymbolS() extends SortCategory {
   def tree(matrix: Matrix): DecisionTree = Switch(matrix.bestCol.fringe.occurrence, hookAtt, matrix.compiledCases, matrix.compiledDefault)
 }
 abstract class EqualLiteral() extends SortCategory {
-  def hasIncompleteSignature(sigma: Seq[Constructor], f: Fringe): Boolean = true
+  def hasIncompleteSignature(sigma: Seq[Constructor], isExact: Boolean, sortInfo: SortInfo): Boolean = true
   def missingConstructor(sigma: Seq[Constructor], f: Fringe): Pattern[String] = {
     var idx = 0
     val strs = sigma.map(_.asInstanceOf[LiteralC].literal).toSet
@@ -116,7 +117,7 @@ case class BytesS() extends EqualLiteral {
 }
 case class ListS() extends SortCategory {
   def hookAtt = "LIST.List"
-  def hasIncompleteSignature(sigma: Seq[Constructor], f: Fringe): Boolean = true
+  def hasIncompleteSignature(sigma: Seq[Constructor], isExact: Boolean, sortInfo: SortInfo): Boolean = true
   def missingConstructor(sigma: Seq[Constructor], f: Fringe): Pattern[String] = {
     val maxSize = sigma.map(_.asInstanceOf[ListC].length).max
     def element(v: Pattern[String]): Pattern[String] = {
@@ -171,7 +172,7 @@ case class ListS() extends SortCategory {
 }
 case class MapS() extends SortCategory {
   def hookAtt = "MAP.Map"
-  def hasIncompleteSignature(sigma: Seq[Constructor], f: Fringe): Boolean = sigma.isEmpty || sigma.contains(Empty())
+  def hasIncompleteSignature(sigma: Seq[Constructor], isExact: Boolean, sortInfo: SortInfo): Boolean = sigma.isEmpty || sigma.contains(Empty())
   def missingConstructor(sigma: Seq[Constructor], f: Fringe): Pattern[String] = ???
   override def isExpandDefault = true
   def equalityFun = "hook_MAP_eq"
@@ -208,7 +209,7 @@ case class MapS() extends SortCategory {
 }
 case class SetS() extends SortCategory {
   def hookAtt = "SET.Set"
-  def hasIncompleteSignature(sigma: Seq[Constructor], f: Fringe): Boolean = sigma.isEmpty || sigma.contains(Empty())
+  def hasIncompleteSignature(sigma: Seq[Constructor], isExact: Boolean, sortInfo: SortInfo): Boolean = sigma.isEmpty || sigma.contains(Empty())
   def missingConstructor(sigma: Seq[Constructor], f: Fringe): Pattern[String] = ???
   override def isExpandDefault = true
   def equalityFun = "hook_SET_eq"
@@ -283,7 +284,7 @@ case class FloatS() extends EqualLiteral {
 
 case class IntS() extends SortCategory {
   def hookAtt = "INT.Int"
-  def hasIncompleteSignature(sigma: Seq[Constructor], f: Fringe): Boolean = true
+  def hasIncompleteSignature(sigma: Seq[Constructor], isExact: Boolean, sortInfo: SortInfo): Boolean = true
   def equalityFun = "hook_INT_eq"
   def missingConstructor(sigma: Seq[Constructor], f: Fringe): Pattern[String] = {
     var idx = 0
@@ -352,7 +353,7 @@ case class IntS() extends SortCategory {
 }
 case class BoolS() extends SortCategory {
   def hookAtt = "BOOL.Bool"
-  def hasIncompleteSignature(sigma: Seq[Constructor], f: Fringe): Boolean = sigma.length != 2
+  def hasIncompleteSignature(sigma: Seq[Constructor], isExact: Boolean, sortInfo: SortInfo): Boolean = sigma.length != 2
   def missingConstructor(sigma: Seq[Constructor], f: Fringe): Pattern[String] = {
     val strs = sigma.map(_.asInstanceOf[LiteralC].literal).toSet
     if (strs("1")) {
@@ -378,7 +379,7 @@ case class BufferS() extends EqualLiteral {
 }
 case class MIntS(bitwidth: Int) extends SortCategory {
   def hookAtt = "MINT.MInt " + bitwidth
-  def hasIncompleteSignature(sigma: Seq[Constructor], f: Fringe): Boolean = sigma.length != (1 << bitwidth)
+  def hasIncompleteSignature(sigma: Seq[Constructor], isExact: Boolean, sortInfo: SortInfo): Boolean = sigma.length != (1 << bitwidth)
   def missingConstructor(sigma: Seq[Constructor], f: Fringe): Pattern[String] = {
     val strs = sigma.map(_.asInstanceOf[LiteralC].literal).toSet
     for (i <- 0 until 1 << bitwidth) {
