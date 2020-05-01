@@ -520,7 +520,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
   }
 
   def default(colIx: Int, sigma: Seq[Constructor]): Option[Matrix] = {
-    if (columns(colIx).category.hasIncompleteSignature(sigma, columns(colIx).fringe)) {
+    if (columns(colIx).fringe.sortInfo.category.hasIncompleteSignature(sigma, columns(colIx).fringe)) {
       Some(trueDefault(colIx, sigma, None))
     } else {
       None
@@ -714,7 +714,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
       }
     } else {
       val sigma = columns(0).signatureForUsefulness
-      if (columns(0).category.hasIncompleteSignature(sigma, columns(0).fringe)) {
+      if (columns(0).fringe.sortInfo.category.hasIncompleteSignature(sigma, columns(0).fringe)) {
         val matrixDefault = default(0, sigma)
         if (matrixDefault.isEmpty) {
           None
