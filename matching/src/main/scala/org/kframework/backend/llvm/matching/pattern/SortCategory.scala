@@ -48,7 +48,7 @@ object SortCategory {
 
 case class SymbolS() extends SortCategory {
   def hookAtt = "STRING.String"
-  def hasIncompleteSignature(sigma: Seq[Constructor], isExact: Boolean, sortInfo: SortInfo): Boolean = sigma.isEmpty || sigma.contains(Empty()) || (!isExact && sigma.size != sortInfo.length) || (isExact && sigma.size != sortInfo.exactLength)
+  def hasIncompleteSignature(sigma: Seq[Constructor], isExact: Boolean, sortInfo: SortInfo): Boolean = sigma.contains(Empty()) || (!isExact && sigma.size != sortInfo.length) || (isExact && sigma.size != sortInfo.exactLength)
   def missingConstructor(sigma: Seq[Constructor], f: Fringe): Pattern[String] = {
     val sym = if (f.isExact) {
       (f.sortInfo.exactConstructors.toSet -- sigma.map(_.asInstanceOf[SymbolC].sym).toSet).head
