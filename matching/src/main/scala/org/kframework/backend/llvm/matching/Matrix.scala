@@ -262,6 +262,7 @@ case class Fringe(val symlib: Parser.SymLib, val sort: Sort, val occurrence: Occ
 
 class SortInfo private(sort: Sort, symlib: Parser.SymLib) {
   val constructors = symlib.constructorsForSort.getOrElse(sort, Seq())
+  lazy val nonEmptyConstructors: Seq[SymbolOrAlias] = constructors.filter(c => c.ctr != "inj" || SortInfo(c.params(0), symlib).exactConstructors.nonEmpty)
   val exactConstructors = constructors.filter(_.ctr != "inj")
   private val rawInjections = constructors.filter(_.ctr == "inj")
   private val injMap = rawInjections.map(b => (b, rawInjections.filter(a => symlib.isSubsorted(a.params.head, b.params.head)))).toMap
@@ -270,7 +271,7 @@ class SortInfo private(sort: Sort, symlib: Parser.SymLib) {
   private val overloadInjMap = overloadMap.map(e => (e._1, e._2.map(g => B.SymbolOrAlias("inj", Seq(symlib.signatures(g)._2, symlib.signatures(e._1)._2)))))
   val trueInjMap = injMap ++ overloadInjMap
   val category: SortCategory = SortCategory(Parser.getStringAtt(symlib.sortAtt(sort), "hook"), sort, symlib)
-  val length: Int = category.length(constructors.size)
+  lazy val length: Int = category.length(nonEmptyConstructors.size)
   val exactLength: Int = category.length(exactConstructors.size)
   val isCollection: Boolean = {
     category match {
