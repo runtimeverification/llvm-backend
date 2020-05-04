@@ -692,7 +692,7 @@ void KORECompositePattern::prettyPrint(std::ostream &out, PrettyPrintData const&
           case '8':
           case '9': {
             std::string buf;
-            for(; i < format.length() && format[i] >= '0' && format[i] < '9'; i++) {
+            for(; i < format.length() && format[i] >= '0' && format[i] <= '9'; i++) {
               buf.push_back(format[i]);
             }
             i--;
