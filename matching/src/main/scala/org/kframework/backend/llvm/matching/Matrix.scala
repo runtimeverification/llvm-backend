@@ -262,6 +262,7 @@ case class Fringe(val symlib: Parser.SymLib, val sort: Sort, val occurrence: Occ
 
 class SortInfo private(sort: Sort, symlib: Parser.SymLib) {
   val constructors = symlib.constructorsForSort.getOrElse(sort, Seq())
+  lazy val nonEmptyConstructors: Seq[SymbolOrAlias] = constructors.filter(c => c.ctr != "inj" || SortInfo(c.params(0), symlib).category.hasIncompleteSignature(Seq(), true, SortInfo(c.params(0), symlib)))
   val exactConstructors = constructors.filter(_.ctr != "inj")
   private val rawInjections = constructors.filter(_.ctr == "inj")
   private val injMap = rawInjections.map(b => (b, rawInjections.filter(a => symlib.isSubsorted(a.params.head, b.params.head)))).toMap
@@ -270,7 +271,7 @@ class SortInfo private(sort: Sort, symlib: Parser.SymLib) {
   private val overloadInjMap = overloadMap.map(e => (e._1, e._2.map(g => B.SymbolOrAlias("inj", Seq(symlib.signatures(g)._2, symlib.signatures(e._1)._2)))))
   val trueInjMap = injMap ++ overloadInjMap
   val category: SortCategory = SortCategory(Parser.getStringAtt(symlib.sortAtt(sort), "hook"), sort, symlib)
-  val length: Int = category.length(constructors.size)
+  lazy val length: Int = category.length(nonEmptyConstructors.size)
   val exactLength: Int = category.length(exactConstructors.size)
   val isCollection: Boolean = {
     category match {
@@ -519,7 +520,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
   }
 
   def default(colIx: Int, sigma: Seq[Constructor]): Option[Matrix] = {
-    if (columns(colIx).category.hasIncompleteSignature(sigma, columns(colIx).fringe)) {
+    if (columns(colIx).fringe.sortInfo.category.hasIncompleteSignature(sigma, columns(colIx).fringe)) {
       Some(trueDefault(colIx, sigma, None))
     } else {
       None
@@ -658,7 +659,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
       }
     } else {
       val sigma = columns(0).signatureForUsefulness
-      if (r.patterns(0).isWildcard && columns(0).category.hasIncompleteSignature(sigma, columns(0).fringe)) {
+      if (r.patterns(0).isWildcard && columns(0).fringe.sortInfo.category.hasIncompleteSignature(sigma, columns(0).fringe)) {
         val matrixDefault = default(0, sigma)
         val rowDefault = r.default(0, sigma, symlib, fringe, columns)
         matrixDefault.isDefined && rowDefault.isDefined && matrixDefault.get.useful(rowDefault.get)
@@ -713,7 +714,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
       }
     } else {
       val sigma = columns(0).signatureForUsefulness
-      if (columns(0).category.hasIncompleteSignature(sigma, columns(0).fringe)) {
+      if (columns(0).fringe.sortInfo.category.hasIncompleteSignature(sigma, columns(0).fringe)) {
         val matrixDefault = default(0, sigma)
         if (matrixDefault.isEmpty) {
           None
