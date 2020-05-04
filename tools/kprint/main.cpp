@@ -34,13 +34,32 @@ int main (int argc, char **argv) {
 
   std::map<std::string, std::string> formats;
   formats["kseq"] = "%1 ~> %2";
+  formats["append"] = "%1 ~> %2";
   formats["dotk"] = ".";
   formats["inj"] = "%1";
   formats["\\bottom"] = "#False";
   formats["\\top"] = "#True";
+  formats["\\not"] = "#Not ( %1 )";
+  formats["\\ceil"] = "#Ceil ( %1 )";
+  formats["\\floor"] = "#Floor ( %1 )";
+  formats["\\equals"] = "{%i%n%1%d%n#Equals%i%n%2%d%n}";
+  formats["\\and"] = "%i%1%d%n#And%n%i%2%d";
+  formats["\\or"] = "%i%1%d%n#Or%n%i%2%d";
+  formats["\\implies"] = "%i%1%d%n#Implies%n%i%2%d";
+  formats["\\exists"] = "#Exists %1 . %2";
+  formats["\\forall"] = "#Forall %1 . %2";
+  formats["\\rewrites"] = "%1 => %2";
+  formats["\\weakExistsFinally"] = "#wEF ( %1 )";
+  formats["\\allPathGlobally"] = "#AG ( %1 )";
+
   std::map<std::string, std::string> hooks;
   std::set<std::string> assocs;
+  assocs.insert("kseq");
+  assocs.insert("\\and");
+  assocs.insert("\\or");
   std::set<std::string> comms;
+  comms.insert("\\and");
+  comms.insert("\\or");
   std::map<std::string, std::vector<std::string>> colors;
 
   // load information about definition written by k frontend
