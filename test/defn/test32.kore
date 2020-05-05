@@ -161,7 +161,7 @@ module KINK
   sort SortDeclCell{} []
   sort SortAttr{} [org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k-in-k/bug/ekore.k)"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(265,3,265,13)")]
   sort SortIOInt{} []
-  sort SortAny{} [org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(31,3,31,12)"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k-in-k/bug/./kink.k)")]
+  sort SortAny{} [org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(31,3,31,12)"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/k-in-k/bug/./kink.k)"), hasDomainValues{}()]
   sort SortId{} [org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(833,3,833,19)"), token{}(), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/kframework-5.0.0/k-distribution/target/release/k/include/builtin/domains.k)"), hasDomainValues{}()]
   sort SortSCellOpt{} []
   sort SortIOFile{} []
