@@ -349,27 +349,27 @@ static bool atNewLine = true;
 
 #define INDENT_SIZE 2
 
-static void newline() {
-  std::cout << std::endl;
+static void newline(std::ostream &out) {
+  out << std::endl;
   atNewLine = true;
 }
 
-static void printIndent() {
+static void printIndent(std::ostream &out) {
   if (atNewLine) {
     for (int i = 0; i < INDENT_SIZE * indent; i++) {
-      std::cout << ' ';
+      out << ' ';
     }
     atNewLine = false;
   }
 }
 
 static void append(std::ostream &out, char c) {
-  printIndent();
+  printIndent(out);
   out << c;
 }
 
 static void append(std::ostream &out, std::string str) {
-  printIndent();
+  printIndent(out);
   out << str;
 }
 
@@ -623,6 +623,30 @@ std::string enquote(std::string str) {
   return result;
 }
 
+void KORESortVariable::prettyPrint(std::ostream &out) const {
+  append(out, name);
+}
+
+void KORECompositeSort::prettyPrint(std::ostream &out) const {
+  append(out, name.substr(4));
+  if (!arguments.empty()) {
+    append(out, '{');
+    std::string conn = "";
+    for (auto &sort : arguments) {
+      append(out, conn);
+      sort->prettyPrint(out);
+      conn = ",";
+    }
+    append(out, '}');
+  }
+}
+
+void KOREVariablePattern::prettyPrint(std::ostream &out, PrettyPrintData const& data) const {
+  append(out, decodeKore(getName().substr(3)));
+  append(out, ':');
+  sort->prettyPrint(out);
+}
+
 void KORECompositePattern::prettyPrint(std::ostream &out, PrettyPrintData const& data) const {
   std::string name = getConstructor()->getName();
   if (name == "\\dv") {
@@ -658,7 +682,7 @@ void KORECompositePattern::prettyPrint(std::ostream &out, PrettyPrintData const&
         ++i;
         switch(c2) {
           case 'n':
-            newline();
+            newline(out);
             break;
           case 'i':
             indent++;

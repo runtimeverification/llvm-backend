@@ -68,7 +68,7 @@ public:
   virtual sptr<KORESort> substitute(const substitution &subst) override { return subst.at(*this); }
 
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
-  virtual void prettyPrint(std::ostream &Out) const override { std::cout << name; }
+  virtual void prettyPrint(std::ostream &Out) const override;
   virtual bool operator==(const KORESort &other) const override;
 
 private:
@@ -114,19 +114,7 @@ public:
 
   void addArgument(sptr<KORESort> Argument);
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
-  virtual void prettyPrint(std::ostream &out) const override {
-    out << name.substr(4);
-    if (!arguments.empty()) {
-      out << "{";
-      std::string conn = "";
-      for (auto &sort : arguments) {
-        out << conn;
-        sort->prettyPrint(out);
-        conn = ",";
-      }
-      out << "}";
-    }
-  }
+  virtual void prettyPrint(std::ostream &out) const override;
   virtual bool operator==(const KORESort &other) const override;
 
 private:
@@ -318,10 +306,7 @@ public:
   }
   virtual sptr<KOREPattern> expandAliases(KOREDefinition *) override { return shared_from_this(); }
   virtual sptr<KOREPattern> sortCollections(PrettyPrintData const& data) override { return shared_from_this(); }
-  virtual void prettyPrint(std::ostream &out, PrettyPrintData const& data) const override {
-    out << decodeKore(getName().substr(3)) << ":";
-    sort->prettyPrint(out);
-  }
+  virtual void prettyPrint(std::ostream &out, PrettyPrintData const& data) const override;
 
 private:
   KOREVariablePattern(ptr<KOREVariable> Name, sptr<KORESort> Sort)
