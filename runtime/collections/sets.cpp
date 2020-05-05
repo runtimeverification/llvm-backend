@@ -35,6 +35,11 @@ extern "C" {
     return to;
   }
 
+  set hook_SET_union(SortSet s1, SortSet s2) {
+    // TODO: make concat nilpotent
+    return hook_SET_concat(s1, s2);
+  }
+
   set hook_SET_difference(SortSet s1, SortSet s2) {
     auto from = s2;
     auto to = *s1;
