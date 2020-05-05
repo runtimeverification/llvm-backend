@@ -473,9 +473,13 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
 
   lazy val compiledCases: Seq[(String, Seq[String], DecisionTree)] = {
     Matrix.remaining += sigma.length
+    if (Matching.logging) {
+      System.out.println("Signature:")
+      System.out.println(sigma.map(_.toString).mkString("\n"))
+    }
     val result = cases.map(l => {
       if (Matching.logging) {
-        System.out.println("Specializing by " + l._1);
+        System.out.println("Specializing by " + l._1)
       }
       (l._1, l._2, l._3.compile)
     })
