@@ -111,7 +111,7 @@ class Column(val fringe: Fringe, val patterns: IndexedSeq[Pattern[String]], val 
     }
     val usedInjs = bestUsed.flatMap(fringe.injections)
     val dups = if (fringe.isExact) bestUsed else bestUsed ++ usedInjs
-    val nodups = dups.distinct.toList
+    val nodups = dups.distinct.filter(c => !c.isInstanceOf[SymbolC] || fringe.sortInfo.nonEmptyConstructors.contains(c.asInstanceOf[SymbolC].sym)).toList
     if (nodups.contains(Empty())) {
       List(Empty())
     } else {
