@@ -1000,8 +1000,12 @@ KOREPattern *KOREAxiomDeclaration::getRequires() const {
     if (top->getConstructor()->getName() == "\\implies" && top->getArguments().size() == 2) {
       if (auto equals = dynamic_cast<KORECompositePattern *>(top->getArguments()[0].get())) {
         if (equals->getConstructor()->getName() == "\\and" && equals->getArguments().size() == 2) {
-          equals = dynamic_cast<KORECompositePattern *>(equals->getArguments()[1].get());
-          assert(equals);
+          if (auto _not = dynamic_cast<KORECompositePattern *>(equals->getArguments()[0].get())) {
+            if (_not->getConstructor()->getName() == "\\not" && _not->getArguments().size() == 1) {
+              equals = dynamic_cast<KORECompositePattern *>(equals->getArguments()[1].get());
+              assert(equals);
+            }
+          }
         }
         if (equals->getConstructor()->getName() == "\\equals" && equals->getArguments().size() == 2) {
           return equals->getArguments()[0].get();
@@ -1030,6 +1034,14 @@ KOREPattern *KOREAxiomDeclaration::getRequires() const {
                   }
                 }
               }
+            }
+          }
+        } else if (equals->getConstructor()->getName() == "\\and" && equals->getArguments().size() == 2) {
+          if (auto inner = dynamic_cast<KORECompositePattern *>(equals->getArguments()[0].get())) {
+            if (inner->getConstructor()->getName() == "\\top" && inner->getArguments().empty()) {
+              return nullptr;
+            } else if (inner->getConstructor()->getName() == "\\equals" && inner->getArguments().size() == 2) {
+              return inner->getArguments()[0].get();
             }
           }
         }
