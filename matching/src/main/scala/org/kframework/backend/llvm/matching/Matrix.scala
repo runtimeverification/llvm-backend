@@ -111,7 +111,7 @@ class Column(val fringe: Fringe, val patterns: IndexedSeq[Pattern[String]], val 
     }
     val usedInjs = bestUsed.flatMap(fringe.injections)
     val dups = if (fringe.isExact) bestUsed else bestUsed ++ usedInjs
-    val nodups = dups.distinct.toList
+    val nodups = dups.distinct.filter(c => !c.isInstanceOf[SymbolC] || fringe.sortInfo.nonEmptyConstructors.contains(c.asInstanceOf[SymbolC].sym)).toList
     if (nodups.contains(Empty())) {
       List(Empty())
     } else {
@@ -473,9 +473,13 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
 
   lazy val compiledCases: Seq[(String, Seq[String], DecisionTree)] = {
     Matrix.remaining += sigma.length
+    if (Matching.logging) {
+      System.out.println("Signature:")
+      System.out.println(sigma.map(_.toString).mkString("\n"))
+    }
     val result = cases.map(l => {
       if (Matching.logging) {
-        System.out.println("Specializing by " + l._1);
+        System.out.println("Specializing by " + l._1)
       }
       (l._1, l._2, l._3.compile)
     })

@@ -25,7 +25,7 @@ object SortCategory {
   def apply(hookAtt: Option[String], s: Sort, symlib: Parser.SymLib): SortCategory = {
 
     hookAtt match {
-      case None => SymbolS()
+      case None => if (Parser.hasAtt(symlib.sortAtt(s), "hasDomainValues") || Parser.hasAtt(symlib.sortAtt(s), "token")) StringS() else SymbolS()
       case Some("STRING.String") => StringS()
       case Some("BYTES.Bytes") => BytesS()
       case Some("LIST.List") => ListS()

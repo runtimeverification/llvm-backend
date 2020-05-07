@@ -18,7 +18,7 @@ INT = $(patsubst $(DEFNDIR)/%.kore, $(INTDIR)/%.interpreter, $(DEFN))
 
 # For definitions that don't compare to an output file
 NOOUTS = test7
-NOTEST = test11 test17
+NOTEST = test11 test17 wasm
 
 # For definitions that have multiple tests associated with them
 DIRTESTNAMES = $(notdir $(shell find $(INPUTDIR) -maxdepth 1 -mindepth 1 -type d))
