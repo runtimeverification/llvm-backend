@@ -140,20 +140,20 @@ install(
 
 install(
   DIRECTORY include/runtime
-  DESTINATION include
+  DESTINATION include/kllvm
 )
 install(
   DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/include/immer
-  DESTINATION include
+  DESTINATION include/kllvm
 )
 install(
   DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/include/rapidjson
-  DESTINATION include
+  DESTINATION include/kllvm
 )
 
 install(
   DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/include/config
-  DESTINATION include
+  DESTINATION include/kllvm
 )
 
 file(COPY ${PROJECT_SOURCE_DIR}/deps/immer/immer DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/include)
