@@ -48,8 +48,8 @@ $(DEFNDIR)/%.testd: $(INTDIR)/%.interpreter $(INPUTDIR)/%/ $(OUTPUTDIR)/%/
 	$(eval TMP_DIFF_NAME := $(subst $(SUFOUTDIFF),,$(notdir $(TMP_DIFF_OUT))))
 	$(eval TMP_GREP_NAME := $(subst $(SUFOUTGREP),, $(notdir $(TMP_GREP_OUT))))
 	$(eval TMP_DIR_NAME := $(basename $(notdir $@)))
-	$(foreach file, $(TMP_DIFF_NAME), $< $(INPUTDIR)/$(TMP_DIR_NAME)/$(file)$(SUFINKORE) -1 /dev/stdout | diff - $(OUTPUTDIR)/$(TMP_DIR_NAME)/$(file)$(SUFOUTDIFF) &&) true
-	$(foreach file, $(TMP_GREP_NAME), $< $(INPUTDIR)/$(TMP_DIR_NAME)/$(file)$(SUFINKORE) -1 /dev/stdout | grep -f $(OUTPUTDIR)/$(TMP_DIR_NAME)/$(file)$(SUFOUTGREP) -q &&) true
+	$(foreach file, $(TMP_DIFF_NAME), cat $(INPUTDIR)/$(TMP_DIR_NAME)/$(file)$(SUFSTDIN) 2>/dev/null | $< $(INPUTDIR)/$(TMP_DIR_NAME)/$(file)$(SUFINKORE) -1 /dev/stdout | diff - $(OUTPUTDIR)/$(TMP_DIR_NAME)/$(file)$(SUFOUTDIFF) &&) true
+	$(foreach file, $(TMP_GREP_NAME), cat $(INPUTDIR)/$(TMP_DIR_NAME)/$(file)$(SUFSTDIN) 2>/dev/null | $< $(INPUTDIR)/$(TMP_DIR_NAME)/$(file)$(SUFINKORE) -1 /dev/stdout | grep -f $(OUTPUTDIR)/$(TMP_DIR_NAME)/$(file)$(SUFOUTGREP) -q &&) true
 
 $(DEFNDIR)/%.testn: $(INTDIR)/%.interpreter $(INPUTDIR)/%$(SUFINKORE)
 	$< $(word 2, $^) -1 /dev/null
