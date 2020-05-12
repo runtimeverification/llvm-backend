@@ -2,26 +2,13 @@
 #include "kllvm/parser/KOREParser.h"
 
 #include <iostream>
-#include <fstream>
 
 using namespace kllvm;
 using namespace kllvm::parser;
 
-void readMap(std::map<std::string, std::string> &result, std::ifstream &is) {
-  std::string line;
-  while(std::getline(is, line)) {
-    std::string att;
-    if (!std::getline(is, att)) {
-      break;
-    }
-    result[line] = att;
-  }
-}
-
-
 int main (int argc, char **argv) {
   if (argc != 3 && argc != 4) {
-    std::cerr << "usage: " << argv[0] << " <kompiled-dir> <pattern.kore> [true|false]" << std::endl;
+    std::cerr << "usage: " << argv[0] << " <definition.kore> <pattern.kore> [true|false]" << std::endl;
   }
 
   bool hasColor;
@@ -62,31 +49,45 @@ int main (int argc, char **argv) {
   comms.insert("\\or");
   std::map<std::string, std::vector<std::string>> colors;
 
-  // load information about definition written by k frontend
-  std::ifstream iformats(argv[1] + std::string("/format-att.txt"));
-  std::ifstream ihooks(argv[1] + std::string("/hook-att.txt"));
-  std::ifstream iassocs(argv[1] + std::string("/assoc-att.txt"));
-  std::ifstream icomms(argv[1] + std::string("/comm-att.txt"));
-  std::ifstream icolors(argv[1] + std::string("/color-att.txt"));
+  KOREParser parser(argv[1]);
+  ptr<KOREDefinition> def = parser.definition();
 
-  readMap(formats, iformats);
-  readMap(hooks, ihooks);
+  for (auto &entry : def->getSymbolDeclarations()) {
+    std::string name = entry.first;
 
-  std::string line;
-  while(std::getline(iassocs, line)) {
-    assocs.insert(line);
-  }
-  while(std::getline(icomms, line)) {
-    comms.insert(line);
-  }
+    if (entry.second->getAttributes().count("format")) {
+      formats[name] = entry.second->getStringAttribute("format");
 
-  while(std::getline(icolors, line)) {
-    std::string color;
-    while(std::getline(icolors, color)) {
-      if (color.empty()) {
-        break;
+      if (entry.second->getAttributes().count("assoc")) {
+        assocs.insert(name);
       }
-      colors[line].push_back(color);
+      if (entry.second->getAttributes().count("comm")) {
+        comms.insert(name);
+      }
+
+      if (entry.second->getAttributes().count("colors")) {
+        std::string colorAtt = entry.second->getStringAttribute("colors");
+        std::vector<std::string> color;
+        size_t idx = 0;
+        do {
+          size_t pos = colorAtt.find_first_of(',', idx);
+          if (pos == std::string::npos) {
+            color.push_back(colorAtt.substr(idx));
+            break;
+          } else {
+            color.push_back(colorAtt.substr(idx, pos));
+            idx = pos + 1;
+          }
+        } while (true);
+        colors[name] = color;
+      }
+    }
+  }
+
+  for (auto &entry : def->getSortDeclarations()) {
+    std::string name = entry.first;
+    if (entry.second->getAttributes().count("hook")) {
+      hooks[name] = entry.second->getStringAttribute("hook");
     }
   }
 
@@ -98,4 +99,6 @@ int main (int argc, char **argv) {
   sptr<KOREPattern> sorted = config->sortCollections(data);
   sorted->prettyPrint(std::cout, data);
   std::cout << std::endl;
+
+  def.release(); // so we don't waste time calling delete a bunch of times
 }
