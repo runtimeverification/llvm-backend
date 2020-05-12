@@ -277,6 +277,7 @@ void koreCollect(void** roots, uint8_t nroots, layoutitem *typeInfo) {
     numBytesLiveAtCollection[i] = 0;
   }
 #endif
+  char *previous_oldspace_alloc_ptr = *old_alloc_ptr();
   for (int i = 0; i < nroots; i++) {
     migrate_child(roots, typeInfo, i, true);
   }
@@ -288,7 +289,11 @@ void koreCollect(void** roots, uint8_t nroots, layoutitem *typeInfo) {
       scan_ptr = evacuate(scan_ptr, young_alloc_ptr());
     }
   }
-  scan_ptr = oldspace_ptr();
+  if (collect_old || !previous_oldspace_alloc_ptr) {
+    scan_ptr = oldspace_ptr();
+  } else {
+    scan_ptr = previous_oldspace_alloc_ptr;
+  }
   if (scan_ptr != *old_alloc_ptr()) {
     MEM_LOG("Evacuating old generation\n");
     while(scan_ptr) {
