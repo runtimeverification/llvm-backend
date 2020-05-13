@@ -6,6 +6,8 @@
 using namespace kllvm;
 using namespace kllvm::parser;
 
+sptr<KOREPattern> addBrackets(sptr<KOREPattern>, PrettyPrintData const&);
+
 void readMultimap(std::string name, KORESymbolDeclaration *decl, std::map<std::string, std::set<std::string>> &output, std::string attName) {
   if (decl->getAttributes().count(attName)) {
     KORECompositePattern *att = decl->getAttributes().at(attName).get();
@@ -234,7 +236,8 @@ int main (int argc, char **argv) {
 
   PrettyPrintData data = {formats, colors, terminals, priorities, leftAssoc, rightAssoc, hooks, brackets, assocs, comms, subsorts, hasColor};
 
-  sptr<KOREPattern> sorted = config->sortCollections(data);
+  sptr<KOREPattern> withBrackets = addBrackets(config, data);
+  sptr<KOREPattern> sorted = withBrackets->sortCollections(data);
   sorted->prettyPrint(std::cout, data);
   std::cout << std::endl;
 
