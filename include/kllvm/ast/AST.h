@@ -257,6 +257,7 @@ class KOREVariablePattern;
 
 using SortSet = std::unordered_set<KORESort *, HashSortPtr, EqualSortPtr>;
 using SubsortMap = std::unordered_map<KORESort *, SortSet, HashSortPtr, EqualSortPtr>;
+using BracketMap = std::unordered_map<KORESort *, std::vector<KORESymbol *>, HashSortPtr, EqualSortPtr>;
 
 struct PrettyPrintData {
   // map from symbol name to format attribute specifying how to print that symbol
@@ -271,7 +272,7 @@ struct PrettyPrintData {
   // map from sort name to hook attribute for that symbol
   std::map<std::string, std::string> hook;
   // map from sort name to bracket for that sort
-  std::map<std::string, KORESymbol *> brackets;
+  BracketMap brackets;
   // set of associative symbols
   std::set<std::string> assoc;
   // set of commutative symbols

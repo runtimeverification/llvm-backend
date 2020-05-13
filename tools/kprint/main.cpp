@@ -90,7 +90,7 @@ int main (int argc, char **argv) {
   terminals["\\allPathGlobally"] = "101";
   terminals["bracket"] = "101";
 
-  std::map<std::string, KORESymbol *> brackets;
+  BracketMap brackets;
 
   std::map<std::string, std::string> hooks;
   std::set<std::string> assocs;
@@ -191,9 +191,7 @@ int main (int argc, char **argv) {
       }
 
       if (entry.second->getAttributes().count("bracket")) {
-        if (auto compositeSort = dynamic_cast<KORECompositeSort *>(entry.second->getSymbol()->getSort().get())) {
-          brackets[compositeSort->getName()] = entry.second->getSymbol();
-        }
+        brackets[entry.second->getSymbol()->getSort().get()].push_back(entry.second->getSymbol());
       }
 
       readMultimap(name, entry.second, leftAssoc, "left");
