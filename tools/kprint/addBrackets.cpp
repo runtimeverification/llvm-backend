@@ -146,16 +146,24 @@ bool requiresBracketWithSimpleAlgorithm(KORECompositePattern *outer, KOREComposi
 
 sptr<KOREPattern> addBrackets(sptr<KOREPattern> inner, KORECompositePattern *outer, KORECompositePattern *leftCapture, KORECompositePattern *rightCapture, int position, PrettyPrintData const& data) {
   if (requiresBracketWithSimpleAlgorithm(outer, leftCapture, rightCapture, inner.get(), position, data)) {
+    sptr<KORESort> outerSort = outer->getConstructor()->getArguments()[position];
     sptr<KORESort> innerSort = inner->getSort();
-    if (auto s = dynamic_cast<KORECompositeSort *>(innerSort.get())) {
-      if (data.brackets.count(s->getName())) {
-        sptr<KORECompositePattern> result = KORECompositePattern::Create(data.brackets.at(s->getName()));
-        result->addArgument(inner);
-        return result;
+    for (auto &entry : data.brackets) {
+      bool isCorrectOuterSort = lessThanEq(data, entry.first, outerSort.get());
+      if (isCorrectOuterSort) {
+        for (KORESymbol *s : entry.second) {
+          bool isCorrectInnerSort = lessThanEq(data, innerSort.get(), s->getArguments()[0].get());
+          if (isCorrectInnerSort) {
+            sptr<KORECompositePattern> result = KORECompositePattern::Create(s);
+            result->addArgument(inner);
+            return result;
+          }
+        }
       }
     }
     sptr<KORECompositePattern> result = KORECompositePattern::Create("bracket");
     result->addArgument(inner);
+    result->getConstructor()->addSort(innerSort);
     return result;
   }
   return inner;
