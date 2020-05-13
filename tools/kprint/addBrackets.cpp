@@ -145,6 +145,11 @@ bool requiresBracketWithSimpleAlgorithm(KORECompositePattern *outer, KOREComposi
 }
 
 sptr<KOREPattern> addBrackets(sptr<KOREPattern> inner, KORECompositePattern *outer, KORECompositePattern *leftCapture, KORECompositePattern *rightCapture, int position, PrettyPrintData const& data) {
+  if (auto innerComposite = dynamic_cast<KORECompositePattern *>(inner.get())) {
+    if (innerComposite->getConstructor()->getName() == "inj") {
+      return addBrackets(innerComposite->getArguments()[0], outer, leftCapture, rightCapture, position, data);
+    }
+  }
   if (requiresBracketWithSimpleAlgorithm(outer, leftCapture, rightCapture, inner.get(), position, data)) {
     sptr<KORESort> outerSort = outer->getConstructor()->getArguments()[position];
     sptr<KORESort> innerSort = inner->getSort();
