@@ -154,7 +154,7 @@ int main (int argc, char **argv) {
 
   SubsortMap subsorts;
 
-  KOREParser parser(argv[1]);
+  KOREParser parser(argv[1] + std::string("/syntaxDefinition.kore"));
   ptr<KOREDefinition> def = parser.definition();
 
   for (auto &entry : def->getSymbolDeclarations()) {
