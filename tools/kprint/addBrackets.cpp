@@ -75,12 +75,16 @@ KORECompositePattern *getRightCapture(KORECompositePattern *previousRightCapture
   }
 }
 
+bool lessThanEq(PrettyPrintData const& data, KORESort *s1, KORESort *s2) {
+  return *s1 == *s2 || (data.subsorts.count(s1) && data.subsorts.at(s1).count(s2));
+}
+
 bool isPriorityWrong(KORECompositePattern *outer, KORECompositePattern *inner, int position, PrettyPrintData const& data) {
   std::string outerName = outer->getConstructor()->getName();
   std::string innerName = inner->getConstructor()->getName();
   KORESort *innerSort = inner->getSort().get();
   KORESort *outerSort = outer->getConstructor()->getArguments()[position].get();
-  if (!(*innerSort == *outerSort || (data.subsorts.count(innerSort) && data.subsorts.at(innerSort).count(outerSort)))) {
+  if (!lessThanEq(data, innerSort, outerSort)) {
     return true;
   }
   if (data.priorities.count(outerName) && data.priorities.at(outerName).count(innerName)) {
