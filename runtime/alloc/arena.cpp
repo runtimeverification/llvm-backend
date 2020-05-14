@@ -58,7 +58,7 @@ static unsigned blocks_left = 0;
 static void* megabyte_malloc() {
   if (blocks_left == 0) {
     blocks_left = 15;
-    if(int result = posix_memalign(&superblock_ptr, BLOCK_SIZE, BLOCK_SIZE * 15)) {
+    if (int result = posix_memalign(&superblock_ptr, BLOCK_SIZE, BLOCK_SIZE * 15)) {
       errno = result;
       perror("posix_memalign");
     }
