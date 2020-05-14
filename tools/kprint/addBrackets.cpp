@@ -65,7 +65,7 @@ bool hasTerminalAtIdx(std::string terminals, int position) {
  *
  * returns: EMPTY if there are terminals on both sides of this nonterminal
  *          BARE_LEFT if there is a terminal only on the right of this nonterminal
- *          BARE_LEFT if there is a terminal only on the left of this nonterminal
+ *          BARE_RIGHT if there is a terminal only on the left of this nonterminal
  *          BARE_BOTH if there are not terminals on either side of this nonterminal
  */
 Fixity getFixity(int position, KORESymbol *sym, PrettyPrintData const& data) {
