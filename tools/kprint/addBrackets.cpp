@@ -257,6 +257,13 @@ bool isPriorityWrong(KORECompositePattern *outer, KORECompositePattern *inner, i
  * approximation of the general problem which performs very well in most
  * real-world grammars, especially the common expression-grammar category of
  * grammar where parentheses are most often required in practice.
+ *
+ * As an example, consider the following simple grammar:
+ *
+ * syntax Exp ::= Exp "++" | "++" Exp | Exp Exp | "(" Exp ")" [bracket]
+ *
+ * The terms `(1 ++) 1` and `1 (++ 1)` will not have brackets inserted
+ * into them by this algorithm, even though they are required.
  */
 bool requiresBracketWithSimpleAlgorithm(KORECompositePattern *outer, KORECompositePattern *leftCapture, KORECompositePattern *rightCapture, KOREPattern *inner, int position, PrettyPrintData const& data) {
   if (auto innerComposite = dynamic_cast<KORECompositePattern *>(inner)) {
