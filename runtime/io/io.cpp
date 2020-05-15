@@ -520,7 +520,9 @@ extern "C" {
         dir = getenv("K_LOG_DIR");
       }
       char fulldir[PATH_MAX];
-      realpath(dir, fulldir);
+      if (!realpath(dir, fulldir)) {
+        abort();
+      }
       char * base = basename(path2);
       std::string prefix = "";
       if ( getenv("K_LOG_PREFIX") ) {
