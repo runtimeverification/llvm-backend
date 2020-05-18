@@ -2,26 +2,42 @@
 #include "kllvm/parser/KOREParser.h"
 
 #include <iostream>
-#include <fstream>
 
 using namespace kllvm;
 using namespace kllvm::parser;
 
-void readMap(std::map<std::string, std::string> &result, std::ifstream &is) {
-  std::string line;
-  while(std::getline(is, line)) {
-    std::string att;
-    if (!std::getline(is, att)) {
-      break;
+sptr<KOREPattern> addBrackets(sptr<KOREPattern>, PrettyPrintData const&);
+
+void readMultimap(std::string name, KORESymbolDeclaration *decl, std::map<std::string, std::set<std::string>> &output, std::string attName) {
+  if (decl->getAttributes().count(attName)) {
+    KORECompositePattern *att = decl->getAttributes().at(attName).get();
+    for (auto &pat : att->getArguments()) {
+      auto child = dynamic_cast<KORECompositePattern *>(pat.get());
+      output[name].insert(child->getConstructor()->getName());
     }
-    result[line] = att;
   }
 }
 
+SubsortMap transitiveClosure(SubsortMap relations) {
+  bool dirty = false;
+  for (auto &entry : relations) {
+    SortSet newSucc;
+    for (auto &elem : entry.second) {
+      auto &relation = relations[elem];
+      for (auto elem2 : relation) {
+        dirty |= relations[entry.first].insert(elem2).second;
+      }
+    }
+  }
+  if (dirty)
+    return transitiveClosure(relations);
+  else
+    return relations;
+}
 
 int main (int argc, char **argv) {
   if (argc != 3 && argc != 4) {
-    std::cerr << "usage: " << argv[0] << " <kompiled-dir> <pattern.kore> [true|false]" << std::endl;
+    std::cerr << "usage: " << argv[0] << " <definition.kore> <pattern.kore> [true|false]" << std::endl;
   }
 
   bool hasColor;
@@ -51,6 +67,30 @@ int main (int argc, char **argv) {
   formats["\\rewrites"] = "%1 => %2";
   formats["\\weakExistsFinally"] = "#wEF ( %1 )";
   formats["\\allPathGlobally"] = "#AG ( %1 )";
+  formats["bracket"] = "(%1)";
+
+  std::map<std::string, std::string> terminals;
+  terminals["kseq"] = "010";
+  terminals["append"] = "010";
+  terminals["dotk"] = "1";
+  terminals["inj"] = "0";
+  terminals["\\bottom"] = "1";
+  terminals["\\top"] = "1";
+  terminals["\\not"] = "101";
+  terminals["\\ceil"] = "101";
+  terminals["\\floor"] = "101";
+  terminals["\\equals"] = "10101";
+  terminals["\\and"] = "010";
+  terminals["\\or"] = "010";
+  terminals["\\implies"] = "010";
+  terminals["\\exists"] = "1010";
+  terminals["\\forall"] = "1010";
+  terminals["\\rewrites"] = "010";
+  terminals["\\weakExistsFinally"] = "101";
+  terminals["\\allPathGlobally"] = "101";
+  terminals["bracket"] = "101";
+
+  BracketMap brackets;
 
   std::map<std::string, std::string> hooks;
   std::set<std::string> assocs;
@@ -62,40 +102,142 @@ int main (int argc, char **argv) {
   comms.insert("\\or");
   std::map<std::string, std::vector<std::string>> colors;
 
-  // load information about definition written by k frontend
-  std::ifstream iformats(argv[1] + std::string("/format-att.txt"));
-  std::ifstream ihooks(argv[1] + std::string("/hook-att.txt"));
-  std::ifstream iassocs(argv[1] + std::string("/assoc-att.txt"));
-  std::ifstream icomms(argv[1] + std::string("/comm-att.txt"));
-  std::ifstream icolors(argv[1] + std::string("/color-att.txt"));
+  std::map<std::string, std::set<std::string>> priorities, leftAssoc, rightAssoc;
+  leftAssoc["kseq"].insert("kseq");
+  leftAssoc["append"].insert("append");
+  leftAssoc["\\and"].insert("\\and");
+  leftAssoc["\\or"].insert("\\or");
+  leftAssoc["\\rewrites"].insert("\\rewrites");
+  rightAssoc["\\rewrites"].insert("\\rewrites");
+  priorities["\\exists"].insert("\\implies");
+  priorities["\\exists"].insert("\\or");
+  priorities["\\exists"].insert("\\and");
+  priorities["\\exists"].insert("\\equals");
+  priorities["\\exists"].insert("\\floor");
+  priorities["\\exists"].insert("\\ceil");
+  priorities["\\exists"].insert("\\not");
+  priorities["\\exists"].insert("\\bottom");
+  priorities["\\exists"].insert("\\top");
+  priorities["\\forall"].insert("\\implies");
+  priorities["\\forall"].insert("\\or");
+  priorities["\\forall"].insert("\\and");
+  priorities["\\forall"].insert("\\equals");
+  priorities["\\forall"].insert("\\floor");
+  priorities["\\forall"].insert("\\ceil");
+  priorities["\\forall"].insert("\\not");
+  priorities["\\forall"].insert("\\bottom");
+  priorities["\\forall"].insert("\\top");
+  priorities["\\implies"].insert("\\or");
+  priorities["\\implies"].insert("\\and");
+  priorities["\\implies"].insert("\\equals");
+  priorities["\\implies"].insert("\\floor");
+  priorities["\\implies"].insert("\\ceil");
+  priorities["\\implies"].insert("\\not");
+  priorities["\\implies"].insert("\\bottom");
+  priorities["\\implies"].insert("\\top");
+  priorities["\\or"].insert("\\and");
+  priorities["\\or"].insert("\\equals");
+  priorities["\\or"].insert("\\floor");
+  priorities["\\or"].insert("\\ceil");
+  priorities["\\or"].insert("\\not");
+  priorities["\\or"].insert("\\bottom");
+  priorities["\\or"].insert("\\top");
+  priorities["\\and"].insert("\\equals");
+  priorities["\\and"].insert("\\floor");
+  priorities["\\and"].insert("\\ceil");
+  priorities["\\and"].insert("\\not");
+  priorities["\\and"].insert("\\bottom");
+  priorities["\\and"].insert("\\top");
+  priorities["\\equals"].insert("\\floor");
+  priorities["\\equals"].insert("\\ceil");
+  priorities["\\equals"].insert("\\not");
+  priorities["\\equals"].insert("\\bottom");
+  priorities["\\equals"].insert("\\top");
 
-  readMap(formats, iformats);
-  readMap(hooks, ihooks);
+  SubsortMap subsorts;
 
-  std::string line;
-  while(std::getline(iassocs, line)) {
-    assocs.insert(line);
-  }
-  while(std::getline(icomms, line)) {
-    comms.insert(line);
-  }
+  KOREParser parser(argv[1] + std::string("/syntaxDefinition.kore"));
+  ptr<KOREDefinition> def = parser.definition();
 
-  while(std::getline(icolors, line)) {
-    std::string color;
-    while(std::getline(icolors, color)) {
-      if (color.empty()) {
-        break;
+  for (auto &entry : def->getSymbolDeclarations()) {
+    std::string name = entry.first;
+
+    if (entry.second->getAttributes().count("format")) {
+      formats[name] = entry.second->getStringAttribute("format");
+      terminals[name] = entry.second->getStringAttribute("terminals");
+
+      if (entry.second->getAttributes().count("assoc")) {
+        assocs.insert(name);
       }
-      colors[line].push_back(color);
+      if (entry.second->getAttributes().count("comm")) {
+        comms.insert(name);
+      }
+
+      if (entry.second->getAttributes().count("colors")) {
+        std::string colorAtt = entry.second->getStringAttribute("colors");
+        std::vector<std::string> color;
+        size_t idx = 0;
+        do {
+          size_t pos = colorAtt.find_first_of(',', idx);
+          if (pos == std::string::npos) {
+            color.push_back(colorAtt.substr(idx));
+            break;
+          } else {
+            color.push_back(colorAtt.substr(idx, pos));
+            idx = pos + 1;
+          }
+        } while (true);
+        colors[name] = color;
+      }
+
+      if (entry.second->getAttributes().count("bracket")) {
+        brackets[entry.second->getSymbol()->getSort().get()].push_back(entry.second->getSymbol());
+      }
+
+      readMultimap(name, entry.second, leftAssoc, "left");
+      readMultimap(name, entry.second, rightAssoc, "right");
+      readMultimap(name, entry.second, priorities, "priorities");
     }
   }
 
+  for (auto &entry : def->getSortDeclarations()) {
+    std::string name = entry.first;
+    if (entry.second->getAttributes().count("hook")) {
+      hooks[name] = entry.second->getStringAttribute("hook");
+    }
+  }
+
+  for (auto axiom : def->getAxioms()) {
+    if (axiom->getAttributes().count("subsort")) {
+      KORECompositePattern *att = axiom->getAttributes().at("subsort").get();
+      KORESort *innerSort = att->getConstructor()->getFormalArguments()[0].get();
+      KORESort *outerSort = att->getConstructor()->getFormalArguments()[1].get();
+      subsorts[innerSort].insert(outerSort);
+    }
+  }
+
+  subsorts = transitiveClosure(subsorts);
+
   KOREParser parser2(argv[2]);
   sptr<KOREPattern> config = parser2.pattern();
+  std::map<std::string, std::vector<KORESymbol *>> symbols;
+  config->markSymbols(symbols);
 
-  PrettyPrintData data = {formats, colors, hooks, assocs, comms, hasColor};
+  for (auto iter = symbols.begin(); iter != symbols.end(); ++iter) {
+    auto &entry = *iter;
+    for (auto iter = entry.second.begin(); iter != entry.second.end(); ++iter) {
+      KORESymbol *symbol = *iter;
+      auto decl = def->getSymbolDeclarations().at(symbol->getName());
+      symbol->instantiateSymbol(decl);
+    }
+  }
 
-  sptr<KOREPattern> sorted = config->sortCollections(data);
+  PrettyPrintData data = {formats, colors, terminals, priorities, leftAssoc, rightAssoc, hooks, brackets, assocs, comms, subsorts, hasColor};
+
+  sptr<KOREPattern> withBrackets = addBrackets(config, data);
+  sptr<KOREPattern> sorted = withBrackets->sortCollections(data);
   sorted->prettyPrint(std::cout, data);
   std::cout << std::endl;
+
+  def.release(); // so we don't waste time calling delete a bunch of times
 }
