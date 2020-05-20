@@ -1,7 +1,6 @@
 set(LLVM_REQUIRES_RTTI ON)
 set(LLVM_REQUIRES_EH ON)
 kllvm_add_tool(kprint
-  addBrackets.cpp
   main.cpp
 )
 
