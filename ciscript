@@ -38,3 +38,5 @@ rm `ls | grep test-foo`
 make -f TestMakefile clean
 
 rm -f configparser configparser.ll
+
+make -C ../test/unparse -j`nproc`
