@@ -74,6 +74,7 @@ extern "C" {
 
   mpz_ptr hook_FFI_bytes_address(string * bytes);
   block * hook_FFI_free(block * kitem);
+  block * hook_FFI_freeAll(void);
   block * hook_FFI_bytes_ref(string * bytes);
   string * hook_FFI_alloc(block * kitem, mpz_t size, mpz_t align);
   bool hook_FFI_allocated(block * kitem);
@@ -102,7 +103,14 @@ extern "C" {
   block * DUMMY1 = &D1;
 }
 
-BOOST_AUTO_TEST_SUITE(FfiTest)
+struct FfiTestFixture {
+
+  ~FfiTestFixture() {
+    hook_FFI_freeAll();
+  }
+};
+
+BOOST_FIXTURE_TEST_SUITE(FfiTest, FfiTestFixture)
 
 BOOST_AUTO_TEST_CASE(address) {
   string * fn = makeString("timesTwo");
