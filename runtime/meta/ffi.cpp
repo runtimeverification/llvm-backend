@@ -308,12 +308,17 @@ extern "C" {
       throw std::invalid_argument("Alignment is too large");
     }
 
+    size_t a = mpz_get_ui(align);
+
     if (allocatedKItemPtrs.find(kitem) != allocatedKItemPtrs.end()) {
+      string *result = allocatedKItemPtrs[kitem];
+      if ((((uintptr_t)result) & (a-1)) != 0) {
+        throw std::invalid_argument("Memory is not aligned");
+      }
       return allocatedKItemPtrs[kitem];
     }
 
     size_t s = mpz_get_ui(size);
-    size_t a = mpz_get_ui(align);
 
     string * ret;
     int result = posix_memalign((void **)&ret, a < sizeof(void *) ? sizeof(void *) : a, sizeof(string *) + s);
