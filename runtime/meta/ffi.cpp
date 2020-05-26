@@ -352,6 +352,14 @@ extern "C" {
     return dotK;
   }
 
+  block *hook_FFI_freeAll(void) {
+    for (auto iter = allocatedKItemPtrs.begin(); iter != allocatedKItemPtrs.end(); ++iter) {
+      hook_FFI_free(iter->first);
+    }
+
+    return dotK;
+  }
+
   block * hook_FFI_bytes_ref(string * bytes) {
     auto refIter = allocatedBytesRefs.find(bytes);
 
