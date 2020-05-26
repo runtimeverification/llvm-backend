@@ -506,4 +506,12 @@ BOOST_AUTO_TEST_CASE(allocated) {
   BOOST_CHECK_EQUAL(false, hook_FFI_allocated(i2));
 }
 
+BOOST_AUTO_TEST_CASE(alignment) {
+  mpz_t s1, s2;
+  mpz_init_set_ui(s1, 1);
+  mpz_init_set_ui(s2, 32768);
+  string *b1 = hook_FFI_alloc(DUMMY1, s1, s2);
+  BOOST_CHECK_EQUAL(((uintptr_t)b1) % 32768, 0);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
