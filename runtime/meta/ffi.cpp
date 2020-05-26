@@ -292,7 +292,7 @@ extern "C" {
     return std::make_pair(blocks.begin(), blocks.end());
   }
 
-  string * hook_FFI_alloc(block * kitem, mpz_t size) {
+  string * hook_FFI_alloc(block * kitem, mpz_t size, mpz_t align) {
     static int registered = -1;
 
     if (registered == -1) {
@@ -304,14 +304,23 @@ extern "C" {
     if (!mpz_fits_ulong_p(size)) {
       throw std::invalid_argument("Size is too large");
     }
+    if (!mpz_fits_ulong_p(align)) {
+      throw std::invalid_argument("Alignment is too large");
+    }
 
     if (allocatedKItemPtrs.find(kitem) != allocatedKItemPtrs.end()) {
       return allocatedKItemPtrs[kitem];
     }
 
     size_t s = mpz_get_ui(size);
+    size_t a = mpz_get_ui(align);
 
-    string * ret = (string *) calloc(sizeof(string *) + s, 1);
+    string * ret;
+    int result = posix_memalign((void **)&ret, a < sizeof(void *) ? sizeof(void *) : a, sizeof(string *) + s);
+    if (result) {
+      throw std::invalid_argument("Could not allocate");
+    }
+    memset(ret, 0, sizeof(string *) + s);
     set_len(ret, s);
 
     allocatedKItemPtrs[kitem] = ret;

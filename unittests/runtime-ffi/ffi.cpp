@@ -75,7 +75,7 @@ extern "C" {
   mpz_ptr hook_FFI_bytes_address(string * bytes);
   block * hook_FFI_free(block * kitem);
   block * hook_FFI_bytes_ref(string * bytes);
-  string * hook_FFI_alloc(block * kitem, mpz_t size);
+  string * hook_FFI_alloc(block * kitem, mpz_t size, mpz_t align);
   bool hook_FFI_allocated(block * kitem);
 
   string * makeString(const KCHAR *, int64_t len = -1);
@@ -320,9 +320,10 @@ BOOST_AUTO_TEST_CASE(call) {
 
   /* int pointerTest(int * x) */
   x = 2;
-  mpz_t s1;
+  mpz_t s1, align;
   mpz_init_set_ui(s1, sizeof(int));
-  string * b1 = hook_FFI_alloc(DUMMY1, s1);
+  mpz_init_set_ui(align, 16);
+  string * b1 = hook_FFI_alloc(DUMMY1, s1, align);
   memcpy(b1->data, &x, sizeof(int));
 
   mpz_ptr addr1 = hook_FFI_bytes_address(b1);
@@ -453,29 +454,32 @@ BOOST_AUTO_TEST_CASE(call_variadic) {
 }
 
 BOOST_AUTO_TEST_CASE(alloc) {
-  mpz_t s1;
+  mpz_t s1, s2;
   mpz_init_set_ui(s1, 1);
+  mpz_init_set_ui(s2, 16);
 
-  string * b1 = hook_FFI_alloc(DUMMY1, s1);
+  string * b1 = hook_FFI_alloc(DUMMY1, s1, s2);
   BOOST_CHECK(0 != b1);
 
-  string * b2 = hook_FFI_alloc(DUMMY1, s1);
+  string * b2 = hook_FFI_alloc(DUMMY1, s1, s2);
   BOOST_CHECK_EQUAL(b1, b2);
 }
 
 BOOST_AUTO_TEST_CASE(free) {
-  mpz_t s1;
+  mpz_t s1, s2;
   mpz_init_set_ui(s1, 1);
+  mpz_init_set_ui(s2, 16);
 
-  hook_FFI_alloc(DUMMY1, s1);
+  hook_FFI_alloc(DUMMY1, s1, s2);
   hook_FFI_free(DUMMY1);
 }
 
 BOOST_AUTO_TEST_CASE(bytes_ref) {
-  mpz_t s1;
+  mpz_t s1, s2;
   mpz_init_set_ui(s1, 1);
+  mpz_init_set_ui(s2, 16);
 
-  string * b1 = hook_FFI_alloc(DUMMY1, s1);
+  string * b1 = hook_FFI_alloc(DUMMY1, s1, s2);
 
   block * i2 = hook_FFI_bytes_ref(b1);
 
@@ -483,10 +487,11 @@ BOOST_AUTO_TEST_CASE(bytes_ref) {
 }
 
 BOOST_AUTO_TEST_CASE(allocated) {
-  mpz_t s1;
+  mpz_t s1, s2;
   mpz_init_set_ui(s1, 1);
+  mpz_init_set_ui(s2, 16);
 
-  hook_FFI_alloc(DUMMY1, s1);
+  hook_FFI_alloc(DUMMY1, s1, s2);
   BOOST_CHECK_EQUAL(true, hook_FFI_allocated(DUMMY1));
 
   block * i2 = (block *) 2;
