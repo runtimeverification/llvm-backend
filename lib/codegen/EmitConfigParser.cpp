@@ -36,6 +36,14 @@ llvm::LLVMContext &Ctx = module->getContext();
   return getOrInsertFunction(module, "strcmp", type);
 }
 
+static llvm::Constant *getPuts(llvm::Module *module) {
+llvm::LLVMContext &Ctx = module->getContext();
+  auto type = llvm::FunctionType::get(llvm::Type::getInt32Ty(Ctx),
+      {llvm::Type::getInt8PtrTy(Ctx)}, false);
+  return getOrInsertFunction(module, "puts", type);
+}
+
+
 static void emitGetTagForSymbolName(KOREDefinition *definition, llvm::Module *module) {
   llvm::LLVMContext &Ctx = module->getContext();
   auto type = llvm::FunctionType::get(llvm::Type::getInt32Ty(Ctx), {llvm::Type::getInt8PtrTy(Ctx)}, false);
@@ -62,6 +70,8 @@ static void emitGetTagForSymbolName(KOREDefinition *definition, llvm::Module *mo
   }
   llvm::ReturnInst::Create(Ctx, Phi, MergeBlock);
   MergeBlock->insertInto(func);
+  llvm::Constant *Puts = getPuts(module);
+  llvm::CallInst::Create(Puts, {func->arg_begin()}, "", CurrentBlock);
   addAbort(CurrentBlock, module);
   CurrentBlock->setName("stuck");
   CurrentBlock->insertInto(func);
