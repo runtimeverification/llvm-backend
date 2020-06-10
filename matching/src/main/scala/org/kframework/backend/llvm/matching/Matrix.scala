@@ -2,13 +2,15 @@ package org.kframework.backend.llvm.matching
 
 import org.kframework.kore.KORE.{KApply,KList}
 import org.kframework.unparser.ToKast
-import org.kframework.attributes.{Location,Source}
+import org.kframework.attributes.{Location,Source,HasLocation}
 import org.kframework.parser.kore.{Sort,CompoundSort,SymbolOrAlias}
 import org.kframework.parser.kore.implementation.{DefaultBuilders => B}
 import org.kframework.utils.errorsystem.KException
+import org.kframework.utils.errorsystem.KEMException
 import org.kframework.backend.llvm.matching.pattern._
 import org.kframework.backend.llvm.matching.dt._
 import java.util
+import java.util.Optional
 import java.util.concurrent.ConcurrentHashMap
 
 trait AbstractColumn {
@@ -286,7 +288,7 @@ object SortInfo {
   }
 }
 
-case class Action(val ordinal: Int, val rhsVars: Seq[String], val scVars: Option[Seq[String]], val freshConstants: Seq[(String, Sort)], val arity: Int, val priority: Int, source: Option[Source], location: Option[Location], nonlinear: Boolean) {
+case class Action(val ordinal: Int, val rhsVars: Seq[String], val scVars: Option[Seq[String]], val freshConstants: Seq[(String, Sort)], val arity: Int, val priority: Int, source: Optional[Source], location: Optional[Location], nonlinear: Boolean) extends HasLocation {
   override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
 }
 
@@ -556,7 +558,11 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
     // compute the variables bound more than once
     val nonlinear = grouped.filter(_._2.size > 1)
     val nonlinearPairs = nonlinear.mapValues(l => (l, l.tail).zipped)
-    val newVars = row.clause.action.rhsVars.map(v => (grouped(v).head._2, grouped(v).head._1.hookAtt))
+    val newVars = try {
+      row.clause.action.rhsVars.map(v => (grouped(v).head._2, grouped(v).head._1.hookAtt))
+    } catch {
+      case e: NoSuchElementException => throw KEMException.internalError("Could not find binding for variable while compiling pattern matching.", e, row.clause.action)
+    }
     val atomicLeaf = Leaf(row.clause.action.ordinal, newVars)
     // check that all occurrences of the same variable are equal
     val nonlinearLeaf = nonlinearPairs.foldRight[DecisionTree](atomicLeaf)((e, dt) => e._2.foldRight(dt)((os,dt2) => makeEquality(os._1._1, (os._1._2, os._2._2), dt2)))
@@ -779,7 +785,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
   def checkUsefulness(kem: KException => Unit): Unit = {
     for (rowIx <- rows.indices) {
       if (rowUseless(rowIx)) {
-        if (clauses(rowIx).action.source.isDefined && clauses(rowIx).action.location.isDefined) {
+        if (clauses(rowIx).action.source.isPresent && clauses(rowIx).action.location.isPresent) {
           kem(new KException(KException.ExceptionType.WARNING, KException.KExceptionGroup.COMPILER, "Potentially useless rule detected.", clauses(rowIx).action.source.get, clauses(rowIx).action.location.get))
         }
       }
