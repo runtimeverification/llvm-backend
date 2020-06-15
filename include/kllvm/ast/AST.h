@@ -269,7 +269,7 @@ struct PrettyPrintData {
   std::map<std::string, std::set<std::string>> priorities;
   std::map<std::string, std::set<std::string>> leftAssoc;
   std::map<std::string, std::set<std::string>> rightAssoc;
-  // map from sort name to hook attribute for that symbol
+  // map from sort name to hook attribute for that sort
   std::map<std::string, std::string> hook;
   // map from sort name to bracket for that sort
   BracketMap brackets;

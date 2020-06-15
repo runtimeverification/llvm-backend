@@ -1,4 +1,4 @@
-initGeneratedTopCell[0m ([0m $IO |->[0m on
+initGeneratedTopCell[0m ([0m $IO |->[0m "on"
 $PGM |->[0m [38;5;226mint[0m m,[0m n,[0m q,[0m r,[0m s,[0m .Ids[0m[38;5;217m;[0m
 m [38;5;217m=[0m 10[38;5;217m;[0m
 [38;5;226mwhile[0m ([0m[38;5;217m![0m m [38;5;217m<=[0m 2[38;5;231m)[0m {[0m
@@ -15,5 +15,5 @@ m [38;5;217m=[0m 10[38;5;217m;[0m
     }[0m
   }[0m
 }[0m
-$STDIN |->[0m 
+$STDIN |->[0m ""
 .Map[0m )[0m
