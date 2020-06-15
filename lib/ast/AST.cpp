@@ -586,6 +586,7 @@ static void color(std::ostream &out, std::string color, PrettyPrintData const& d
 
 std::string enquote(std::string str) {
   std::string result;
+  result.push_back('"');
   for (size_t i = 0; i < str.length(); ++i) {
     char c = str[i];
     switch(c) {
@@ -620,6 +621,7 @@ std::string enquote(std::string str) {
       break;
     }
   }
+  result.push_back('"');
   return result;
 }
 
