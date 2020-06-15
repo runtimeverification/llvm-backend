@@ -25,6 +25,7 @@ pipeline {
           ./ciscript Debug
           ./ciscript Release
           ./ciscript RelWithDebInfo
+          ./ciscript FastBuild
           ./ciscript GcStats
 
         '''
@@ -42,6 +43,7 @@ pipeline {
           ./ciscript Debug
           ./ciscript Release
           ./ciscript RelWithDebInfo
+          ./ciscript FastBuild
           ./ciscript GcStats
         '''
       }
