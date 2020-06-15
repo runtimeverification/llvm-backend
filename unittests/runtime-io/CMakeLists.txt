@@ -15,4 +15,3 @@ target_link_libraries(runtime-io-tests
 )
 
 add_executable(IOTest iotest.cpp)
-target_compile_options(IOTest PUBLIC -O0)
