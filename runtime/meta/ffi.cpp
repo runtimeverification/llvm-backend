@@ -292,7 +292,7 @@ extern "C" {
     return std::make_pair(blocks.begin(), blocks.end());
   }
 
-  string * hook_FFI_alloc(block * kitem, mpz_t size) {
+  string * hook_FFI_alloc(block * kitem, mpz_t size, mpz_t align) {
     static int registered = -1;
 
     if (registered == -1) {
@@ -304,14 +304,28 @@ extern "C" {
     if (!mpz_fits_ulong_p(size)) {
       throw std::invalid_argument("Size is too large");
     }
+    if (!mpz_fits_ulong_p(align)) {
+      throw std::invalid_argument("Alignment is too large");
+    }
+
+    size_t a = mpz_get_ui(align);
 
     if (allocatedKItemPtrs.find(kitem) != allocatedKItemPtrs.end()) {
+      string *result = allocatedKItemPtrs[kitem];
+      if ((((uintptr_t)result) & (a-1)) != 0) {
+        throw std::invalid_argument("Memory is not aligned");
+      }
       return allocatedKItemPtrs[kitem];
     }
 
     size_t s = mpz_get_ui(size);
 
-    string * ret = (string *) calloc(sizeof(string *) + s, 1);
+    string * ret;
+    int result = posix_memalign((void **)&ret, a < sizeof(void *) ? sizeof(void *) : a, sizeof(string *) + s);
+    if (result) {
+      throw std::invalid_argument("Could not allocate");
+    }
+    memset(ret, 0, sizeof(string *) + s);
     set_len(ret, s);
 
     allocatedKItemPtrs[kitem] = ret;
@@ -333,6 +347,14 @@ extern "C" {
       } else {
         throw std::runtime_error("Internal memory map is out of sync");
       }
+    }
+
+    return dotK;
+  }
+
+  block *hook_FFI_freeAll(void) {
+    for (auto iter = allocatedKItemPtrs.begin(); iter != allocatedKItemPtrs.end(); ++iter) {
+      hook_FFI_free(iter->first);
     }
 
     return dotK;

@@ -69,7 +69,7 @@ extern "C" {
 
 int overwriteTestFile() {
   int fd = ::open("test.txt", O_RDWR | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH);
-  ::write(fd, "hello world!", 12);
+  BOOST_CHECK_EQUAL(::write(fd, "hello world!", 12), 12);
   ::lseek(fd, 0, SEEK_SET);
   return fd;
 }
@@ -251,7 +251,7 @@ BOOST_AUTO_TEST_CASE(putc) {
   char ret[5];
 
   lseek(fd, 0, SEEK_SET);
-  ::read(fd, ret, 5);
+  BOOST_CHECK_EQUAL(::read(fd, ret, 5), 5);
 
   BOOST_CHECK_EQUAL(0, strncmp("howdy", ret, 2));
 
@@ -321,7 +321,7 @@ BOOST_AUTO_TEST_CASE(write) {
 
   FILE * file = fopen("test.txt", "r");
   char buf[23];
-  fread(buf, sizeof(char), 23, file);
+  BOOST_CHECK_EQUAL(fread(buf, sizeof(char), 23, file), 23);
   fclose(file);
 
   BOOST_CHECK_EQUAL(0, strncmp(buf, "This is a test message\n", 23));
@@ -387,7 +387,7 @@ BOOST_AUTO_TEST_CASE(log) {
   std::string PID = std::to_string(getpid());
   FILE* f = fopen((PID + "_" + strPath).c_str(), "r");
   char buf[15];
-  fread(buf, sizeof(char), 15, f);
+  BOOST_CHECK_EQUAL(fread(buf, sizeof(char), 15, f), 15);
   fclose(f);
 
   BOOST_CHECK_EQUAL(0, strncmp(buf, (strMsg + "Log3\n").c_str(), 10));

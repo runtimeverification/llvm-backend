@@ -5,8 +5,9 @@ import org.kframework.parser.kore._
 import org.kframework.parser.kore.parser.KoreToK
 import org.kframework.parser.kore.implementation.{DefaultBuilders => B}
 import java.util
+import java.util.Optional
 
-case class AxiomInfo(priority: Int, ordinal: Int, rewrite: GeneralizedRewrite, sideCondition: Option[Pattern], source: Option[Source], location: Option[Location]) {}
+case class AxiomInfo(priority: Int, ordinal: Int, rewrite: GeneralizedRewrite, sideCondition: Option[Pattern], source: Optional[Source], location: Optional[Location]) {}
 
 object Parser {
 
@@ -108,22 +109,22 @@ object Parser {
   private val SOURCE = "org'Stop'kframework'Stop'attributes'Stop'Source"
   private val LOCATION = "org'Stop'kframework'Stop'attributes'Stop'Location"
 
-  private def source(axiom: AxiomDeclaration): Option[Source] = {
+  private def source(axiom: AxiomDeclaration): Optional[Source] = {
     if (hasAtt(axiom, SOURCE)) {
       val sourceStr = getStringAtt(axiom.att, SOURCE).get
-      return Some(Source(sourceStr.substring("Source(".length, sourceStr.length - 1)))
+      return Optional.of(Source(sourceStr.substring("Source(".length, sourceStr.length - 1)))
     } else {
-      None
+      Optional.empty()
     }
   }
 
-  private def location(axiom: AxiomDeclaration): Option[Location] = {
+  private def location(axiom: AxiomDeclaration): Optional[Location] = {
     if (hasAtt(axiom, LOCATION)) {
       val locStr = getStringAtt(axiom.att, LOCATION).get
       val splitted = locStr.split("[(,)]")
-      return Some(Location(splitted(1).toInt, splitted(2).toInt, splitted(3).toInt, splitted(4).toInt))
+      return Optional.of(Location(splitted(1).toInt, splitted(2).toInt, splitted(3).toInt, splitted(4).toInt))
     } else {
-      None
+      Optional.empty()
     }
   }
   private def parseAxiomSentence[T <: GeneralizedRewrite](

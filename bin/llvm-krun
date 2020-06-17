@@ -13,6 +13,7 @@ dir=.
 debug=
 depth=-1
 pretty_print=false
+dryRun=false
 
 print_usage () {
 cat <<HERE
@@ -124,6 +125,11 @@ do
     shift;
     ;;
 
+    --dry-run)
+    dryRun=true
+    shift;
+    ;;
+
     -h|--help)
     print_usage
     exit 0
@@ -201,6 +207,15 @@ done
 cat <<HERE >> $input_file
 )
 HERE
+
+if $dryRun; then
+  if [ -n "$real_output_file" ]; then
+    cat "$input_file" > "$real_output_file"
+  else
+    cat "$input_file"
+  fi
+  exit 0
+fi
 
 set +e
 (

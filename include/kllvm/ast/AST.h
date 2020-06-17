@@ -8,6 +8,7 @@
 #include <list>
 #include <map>
 #include <unordered_map>
+#include <unordered_set>
 #include <utility>
 #include <iostream>
 
@@ -52,6 +53,21 @@ struct HashSort {
     return std::hash<std::string>{}(Out.str());
   }
 };
+
+struct EqualSortPtr {
+  bool operator()(KORESort * const & first, KORESort * const & second) const {
+    return *first == *second;
+  }
+};
+
+struct HashSortPtr {
+  size_t operator()(kllvm::KORESort * const &s) const noexcept {
+    std::ostringstream Out;
+    s->print(Out);
+    return std::hash<std::string>{}(Out.str());
+  }
+};
+
 
 size_t hash_value(const kllvm::KORESort &s);
 
@@ -239,17 +255,29 @@ private:
 
 class KOREVariablePattern;
 
+using SortSet = std::unordered_set<KORESort *, HashSortPtr, EqualSortPtr>;
+using SubsortMap = std::unordered_map<KORESort *, SortSet, HashSortPtr, EqualSortPtr>;
+using BracketMap = std::unordered_map<KORESort *, std::vector<KORESymbol *>, HashSortPtr, EqualSortPtr>;
+
 struct PrettyPrintData {
   // map from symbol name to format attribute specifying how to print that symbol
   std::map<std::string, std::string> format;
   // map from symbol name to vector of colors for that symbol
   std::map<std::string, std::vector<std::string>> colors;
-  // map from sort name to hook attribute for that symbol
+  // map from symbol name to terminal pattern
+  std::map<std::string, std::string> terminals;
+  std::map<std::string, std::set<std::string>> priorities;
+  std::map<std::string, std::set<std::string>> leftAssoc;
+  std::map<std::string, std::set<std::string>> rightAssoc;
+  // map from sort name to hook attribute for that sort
   std::map<std::string, std::string> hook;
+  // map from sort name to bracket for that sort
+  BracketMap brackets;
   // set of associative symbols
   std::set<std::string> assoc;
   // set of commutative symbols
   std::set<std::string> comm;
+  SubsortMap subsorts;
   // enable coloring
   bool hasColor;
 };
