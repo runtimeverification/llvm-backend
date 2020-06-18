@@ -443,6 +443,27 @@ bool hook_FLOAT_sign(SortFloat a) {
   return mpfr_signbit(a->f);
 }
 
+SortFloat hook_FLOAT_rat2float(SortInt numerator, SortInt denominator, SortInt prec, SortInt exp) {
+  if (!mpz_fits_ulong_p(prec)) {
+    throw std::invalid_argument("Precision out of range");
+  }
+  unsigned long uprec = mpz_get_ui(prec);
+  if (!mpz_fits_ulong_p(exp)) {
+    throw std::invalid_argument("Exponent out of range");
+  }
+  unsigned long uexp = mpz_get_ui(exp);
+  floating result[1];
+  mpfr_enter(uprec, uexp, result);
+  mpq_t rat;
+  mpq_init(rat);
+  mpz_set(mpq_numref(rat), numerator);
+  mpz_set(mpq_denref(rat), denominator);
+  mpq_canonicalize(rat);
+  int t = mpfr_set_q(result->f, rat, MPFR_RNDN);
+  mpfr_leave(t, result);
+  return move_float(result);
+}
+
 void float_hash(SortFloat f, void *hasher) {
   int nlimbs = (mpfr_get_prec(f->f) + 63) / 64;
   for (int i = 0; i < nlimbs; i++) {
