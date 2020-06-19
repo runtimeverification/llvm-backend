@@ -452,15 +452,19 @@ SortFloat hook_FLOAT_rat2float(SortInt numerator, SortInt denominator, SortInt p
     throw std::invalid_argument("Exponent out of range");
   }
   unsigned long uexp = mpz_get_ui(exp);
-  floating result[1];
-  mpfr_enter(uprec, uexp, result);
+
   mpq_t rat;
   mpq_init(rat);
   mpz_set(mpq_numref(rat), numerator);
   mpz_set(mpq_denref(rat), denominator);
   mpq_canonicalize(rat);
+
+  floating result[1];
+  mpfr_enter(uprec, uexp, result);
   int t = mpfr_set_q(result->f, rat, MPFR_RNDN);
   mpfr_leave(t, result);
+
+  mpq_clear(rat);
   return move_float(result);
 }
 
