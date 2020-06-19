@@ -47,6 +47,7 @@ extern "C" {
   floating *hook_FLOAT_root(floating *, mpz_t);
   floating *hook_FLOAT_log(floating *);
   floating *hook_FLOAT_exp(floating *);
+  floating *hook_FLOAT_rat2float(mpz_t, mpz_t, mpz_t, mpz_t);
   bool hook_FLOAT_sign(floating *);
 
   floating *move_float(floating *i) {
@@ -879,6 +880,19 @@ BOOST_AUTO_TEST_CASE(sign) {
   BOOST_CHECK(!hook_FLOAT_sign(arr+6));
   BOOST_CHECK(!hook_FLOAT_sign(arr+7));
   BOOST_CHECK(!hook_FLOAT_sign(arr+8));
+}
+
+BOOST_AUTO_TEST_CASE(rat2float) {
+  mpz_t num, den, prec, exp;
+  mpz_init_set_ui(num, 1);
+  mpz_init_set_ui(den, 3);
+  mpz_init_set_ui(prec, 53);
+  mpz_init_set_ui(exp, 11);
+  floating *result = hook_FLOAT_rat2float(num, den, prec, exp);
+  mpfr_t ref;
+  mpfr_init2(ref, 53);
+  mpfr_set_d(ref, 0.33333333333333333333333333333333333, MPFR_RNDN);
+  BOOST_CHECK_EQUAL(mpfr_cmp(ref, result->f), 0);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
