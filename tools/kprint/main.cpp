@@ -67,7 +67,7 @@ int main (int argc, char **argv) {
   formats["\\rewrites"] = "%1 => %2";
   formats["\\weakExistsFinally"] = "#wEF ( %1 )";
   formats["\\allPathGlobally"] = "#AG ( %1 )";
-  formats["bracket"] = "(%1)";
+  formats["bracket"] = "( %1 )";
 
   std::map<std::string, std::string> terminals;
   terminals["kseq"] = "010";
