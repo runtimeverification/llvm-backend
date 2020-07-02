@@ -429,7 +429,8 @@ extern "C" {
     int fd = mpz_get_si(i);
     off_t l = mpz_get_si(len);
 
-    struct flock lockp = {.l_type = F_WRLCK, .l_whence = SEEK_CUR, .l_start = 0, .l_len = l};
+    struct flock lockp = {0};
+    lockp.l_type = F_WRLCK; lockp.l_whence = SEEK_CUR; lockp.l_start = 0; lockp.l_len = l;
     int ret = fcntl(fd, F_SETLKW, &lockp);
 
     if (ret == -1) {
@@ -447,7 +448,8 @@ extern "C" {
     int fd = mpz_get_si(i);
     off_t l = mpz_get_si(len);
 
-    struct flock lockp = {.l_type = F_UNLCK, .l_whence = SEEK_CUR, .l_start = 0, .l_len = l};
+    struct flock lockp = {0};
+    lockp.l_type = F_UNLCK; lockp.l_whence = SEEK_CUR; lockp.l_start = 0; lockp.l_len = l;
     int ret = fcntl(fd, F_SETLKW, &lockp);
 
     if (ret == -1) {
