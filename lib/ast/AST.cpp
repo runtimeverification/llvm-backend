@@ -257,7 +257,7 @@ bool KORESymbol::isPolymorphic() const {
 static std::unordered_set<std::string> BUILTINS{
   "\\and", "\\not", "\\or", "\\implies", "\\iff", "\\forall", "\\exists",
   "\\ceil", "\\floor", "\\equals", "\\in", "\\top", "\\bottom", "\\dv",
-  "\\rewrites", "\\next"};
+  "\\rewrites", "\\next", "\\mu", "\\nu"};
 
 bool KORESymbol::isBuiltin() const {
   return BUILTINS.count(name);
