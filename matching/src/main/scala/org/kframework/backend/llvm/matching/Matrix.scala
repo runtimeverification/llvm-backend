@@ -786,7 +786,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
     for (rowIx <- rows.indices) {
       if (rowUseless(rowIx)) {
         if (clauses(rowIx).action.source.isPresent && clauses(rowIx).action.location.isPresent) {
-          kem(new KException(KException.ExceptionType.WARNING, KException.KExceptionGroup.COMPILER, "Potentially useless rule detected.", clauses(rowIx).action.source.get, clauses(rowIx).action.location.get))
+          kem(new KException(KException.ExceptionType.USELESS_RULE, KException.KExceptionGroup.COMPILER, "Potentially useless rule detected.", clauses(rowIx).action.source.get, clauses(rowIx).action.location.get))
         }
       }
     }
@@ -808,7 +808,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
       }
       val k = (fringe zip counterexample.get).map(t => t._2.toK(t._1))
       val func = KApply(symlib.koreToK(name), KList(k))
-      kem(new KException(KException.ExceptionType.WARNING, KException.KExceptionGroup.COMPILER, "Non exhaustive match detected: " ++ ToKast(func)))
+      kem(new KException(KException.ExceptionType.NON_EXHAUSTIVE_MATCH, KException.KExceptionGroup.COMPILER, "Non exhaustive match detected: " ++ ToKast(func)))
     }
   }
 
