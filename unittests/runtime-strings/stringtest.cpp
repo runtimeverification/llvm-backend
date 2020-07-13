@@ -433,15 +433,15 @@ BOOST_AUTO_TEST_CASE(string2float) {
   _float = makeString("+Infinity");
   result = hook_STRING_string2float(_float);
 
-  BOOST_CHECK_EQUAL(24, mpfr_get_prec(result->f));
-  BOOST_CHECK_EQUAL(8, result->exp);
+  BOOST_CHECK_EQUAL(53, mpfr_get_prec(result->f));
+  BOOST_CHECK_EQUAL(11, result->exp);
   BOOST_CHECK_EQUAL(mpfr_cmp_d(result->f, INFINITY), 0);
 
   _float = makeString("-Infinity");
   result = hook_STRING_string2float(_float);
 
-  BOOST_CHECK_EQUAL(24, mpfr_get_prec(result->f));
-  BOOST_CHECK_EQUAL(8, result->exp);
+  BOOST_CHECK_EQUAL(53, mpfr_get_prec(result->f));
+  BOOST_CHECK_EQUAL(11, result->exp);
   BOOST_CHECK_EQUAL(mpfr_cmp_d(result->f, -INFINITY), 0);
 
   _float = makeString("Infinityf");
