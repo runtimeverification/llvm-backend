@@ -290,7 +290,7 @@ llvm::Value *CreateTerm::createToken(ValueType sort, std::string contents) {
     if (!globalVar->hasInitializer()) {
       size_t prec, exp;
       const char last = contents.back();
-      if (last == 'f' || last == 'F' || last == 'y') {
+      if (last == 'f' || last == 'F') {
         prec = 24;
         exp = 8;
       } else {
@@ -309,7 +309,7 @@ llvm::Value *CreateTerm::createToken(ValueType sort, std::string contents) {
       mpfr_t value;
       mpfr_init2(value, prec);
       int retValue;
-      if (contents == "+Infinity" || contents == "-Infinity") {
+      if (contents == "+Infinity" || contents == "-Infinity" || contents == "Infinity") {
         retValue = mpfr_set_str(value, contents.c_str(), 10, MPFR_RNDN);
       } else {
         size_t last = contents.find_last_of("fFdDpP");
