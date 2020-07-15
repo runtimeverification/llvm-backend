@@ -37,15 +37,21 @@ SubsortMap transitiveClosure(SubsortMap relations) {
 
 int main (int argc, char **argv) {
   if (argc != 3 && argc != 4) {
-    std::cerr << "usage: " << argv[0] << " <definition.kore> <pattern.kore> [true|false]" << std::endl;
+    std::cerr << "usage: " << argv[0] << " <definition.kore> <pattern.kore> [true|false|auto] [true|false]" << std::endl;
   }
 
-  bool hasColor;
-  if (argc == 4) {
+  bool hasColor, filterSubst;
+  if (argc >= 4) {
     std::string arg = argv[3];
-    hasColor = arg == "true";
+    hasColor = arg == "true" || (arg == "auto" && isatty(1));
   } else {
     hasColor = isatty(1);
+  }
+  if (argc >= 5) {
+    std::string arg = argv[4];
+    filterSubst = arg == "true";
+  } else {
+    filterSubst = true;
   }
 
   std::map<std::string, std::string> formats;
@@ -234,9 +240,15 @@ int main (int argc, char **argv) {
 
   PrettyPrintData data = {formats, colors, terminals, priorities, leftAssoc, rightAssoc, hooks, brackets, assocs, comms, subsorts, hasColor};
 
-  sptr<KOREPattern> withBrackets = addBrackets(config, data);
-  sptr<KOREPattern> sorted = withBrackets->sortCollections(data);
-  sorted->prettyPrint(std::cout, data);
+  sptr<KOREPattern> sorted = config->sortCollections(data);
+  sptr<KOREPattern> filtered;
+  if (filterSubst) {
+    filtered = sorted->filterSubstitution(data);
+  } else {
+    filtered = sorted;
+  }
+  sptr<KOREPattern> withBrackets = addBrackets(filtered, data);
+  withBrackets->prettyPrint(std::cout, data);
   std::cout << std::endl;
 
   def.release(); // so we don't waste time calling delete a bunch of times
