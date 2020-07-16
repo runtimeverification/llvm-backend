@@ -1,0 +1,41 @@
+  {
+    Result:GeneratedTopCell
+  #Equals
+    [38;5;226m<T>[0m
+      [38;5;46m<k>[0m
+        ++[0m x ~> #freezer_/__IMP-SYNTAX_AExp_AExp_AExp0_[0m ([0m 1 ~> . )[0m ~> #freezer_/__IMP-SYNTAX_AExp_AExp_AExp1_[0m ([0m ++[0m x ~> . )[0m ~> #freezer_=_;_IMP-SYNTAX_Stmt_Id_AExp1_[0m ([0m y ~> . )[0m ~> .
+      [38;5;46m</k>[0m
+      [38;5;196m<state>[0m
+        x |->[0m 1
+        y |->[0m 0
+      [38;5;196m</state>[0m
+    [38;5;226m</T>[0m
+  }
+#Or
+  {
+    Result:GeneratedTopCell
+  #Equals
+    [38;5;226m<T>[0m
+      [38;5;46m<k>[0m
+        ++[0m x ~> #freezer_/__IMP-SYNTAX_AExp_AExp_AExp0_[0m ([0m ++[0m x /[0m x ~> . )[0m ~> #freezer_=_;_IMP-SYNTAX_Stmt_Id_AExp1_[0m ([0m y ~> . )[0m ~> .
+      [38;5;46m</k>[0m
+      [38;5;196m<state>[0m
+        x |->[0m 1
+        y |->[0m 0
+      [38;5;196m</state>[0m
+    [38;5;226m</T>[0m
+  }
+#Or
+  {
+    Result:GeneratedTopCell
+  #Equals
+    [38;5;226m<T>[0m
+      [38;5;46m<k>[0m
+        ++[0m x ~> #freezer_/__IMP-SYNTAX_AExp_AExp_AExp0_[0m ([0m x ~> . )[0m ~> #freezer_/__IMP-SYNTAX_AExp_AExp_AExp1_[0m ([0m ++[0m x ~> . )[0m ~> #freezer_=_;_IMP-SYNTAX_Stmt_Id_AExp1_[0m ([0m y ~> . )[0m ~> .
+      [38;5;46m</k>[0m
+      [38;5;196m<state>[0m
+        x |->[0m 1
+        y |->[0m 0
+      [38;5;196m</state>[0m
+    [38;5;226m</T>[0m
+  }

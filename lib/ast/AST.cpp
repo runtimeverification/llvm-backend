@@ -257,7 +257,7 @@ bool KORESymbol::isPolymorphic() const {
 static std::unordered_set<std::string> BUILTINS{
   "\\and", "\\not", "\\or", "\\implies", "\\iff", "\\forall", "\\exists",
   "\\ceil", "\\floor", "\\equals", "\\in", "\\top", "\\bottom", "\\dv",
-  "\\rewrites", "\\next"};
+  "\\rewrites", "\\next", "\\mu", "\\nu"};
 
 bool KORESymbol::isBuiltin() const {
   return BUILTINS.count(name);
@@ -882,6 +882,50 @@ sptr<KOREPattern> KORECompositePattern::sortCollections(PrettyPrintData const& d
     result->addArgument(arg->sortCollections(data));
   }
   return result;
+}
+
+sptr<KOREPattern> KORECompositePattern::filterSubstitution(PrettyPrintData const& data) {
+  if (constructor->getName() == "\\equals") {
+    if (auto var = dynamic_cast<KOREVariablePattern *>(arguments[0].get())) {
+      std::ostringstream ss;
+      int oldIndent = indent;
+      bool oldAtNewLine = atNewLine;
+      atNewLine = true;
+      indent = 0;
+      var->prettyPrint(ss, data);
+      indent = oldIndent;
+      atNewLine = oldAtNewLine;
+      std::string name = ss.str();
+      if (name[0] == '_' || (name.size() > 1 && (name[0] == '@' || name[0] == '!' || name[0] == '?') && name[1] == '_')) {
+        std::map<std::string, KOREVariablePattern *> vars;
+        sptr<KORECompositePattern> unit = KORECompositePattern::Create("\\top");
+        unit->getConstructor()->addFormalArgument(constructor->getFormalArguments()[1]);
+        return unit;
+      } else {
+        return shared_from_this();
+      }
+    } else {
+      return shared_from_this();
+    }
+  } else {
+    sptr<KORECompositePattern> result = KORECompositePattern::Create(constructor.get());
+    for (auto &arg : arguments) {
+      result->addArgument(arg->filterSubstitution(data));
+    }
+    if (constructor->getName() == "\\and") {
+     if (auto composite = dynamic_cast<KORECompositePattern *>(result->getArguments()[0].get())) {
+        if (composite->getConstructor()->getName() == "\\top") {
+          return result->getArguments()[1];
+        }
+      }
+      if (auto composite = dynamic_cast<KORECompositePattern *>(result->getArguments()[1].get())) {
+        if (composite->getConstructor()->getName() == "\\top") {
+          return result->getArguments()[0];
+        }
+      }
+    }
+    return result;
+  }
 }
 
 void KOREDeclaration::addAttribute(ptr<KORECompositePattern> Attribute) {
