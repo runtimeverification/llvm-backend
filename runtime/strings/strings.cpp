@@ -343,7 +343,7 @@ extern "C" {
         throw std::invalid_argument("transcoding failed: STRING.transcode");
     }
     *outbuf = 0;
-    return makeString(buf);
+    return makeString(buf, len(input) * 4 - outbytesleft);
   }
 
   string *hook_STRING_uuid() {
