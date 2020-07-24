@@ -1,5 +1,6 @@
 #include<gmp.h>
 #include<mpfr.h>
+#include<iconv.h>
 #include<algorithm>
 #include<cassert>
 #include<cinttypes>
@@ -25,6 +26,7 @@ extern "C" {
   string *hook_BYTES_concat(string *a, string *b);
   mpz_ptr hook_BYTES_length(string *a);
   string *hook_BYTES_substr(string *a, mpz_t start, mpz_t end);
+  char *getTerminatedString(string *str);
 
   bool hook_STRING_gt(SortString a, SortString b) {
     auto res = memcmp(a->data, b->data, std::min(len(a), len(b)));
@@ -177,6 +179,15 @@ extern "C" {
     return ret;
   }
 
+  char * getTerminatedString(string * str) {
+    int length = len(str);
+    string * buf = static_cast<string *>(koreAllocToken(sizeof(string) + (length + 1)));
+    memcpy(buf->data, str->data, length);
+    set_len(buf, length + 1);
+    buf->data[length] = '\0';
+    return buf->data;
+  }
+
   SortString hook_STRING_base2string_long(SortInt input, uint64_t base) {
     size_t len = mpz_sizeinbase(input, base) + 2;
     // +1 for null terminator needed by mpz_get_str, +1 for minus sign
@@ -318,6 +329,21 @@ extern "C" {
     mpz_t result;
     mpz_init_set_ui(result, i);
     return move_int(result);
+  }
+
+  SortString hook_STRING_transcode(SortString input, SortString inputCharset, SortString outputCharset) {
+    iconv_t converter = iconv_open(getTerminatedString(outputCharset), getTerminatedString(inputCharset));
+    char *inbuf = input->data;
+    size_t inbytesleft = len(input);
+    size_t outbytesleft = inbytesleft * 4;
+    char *buf = (char *)malloc(outbytesleft);
+    char *outbuf = buf;
+    size_t result = iconv(converter, &inbuf, &inbytesleft, &outbuf, &outbytesleft);
+    if (result < 0) {
+        throw std::invalid_argument("transcoding failed: STRING.transcode");
+    }
+    *outbuf = 0;
+    return makeString(buf);
   }
 
   string *hook_STRING_uuid() {
