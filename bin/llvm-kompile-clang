@@ -57,7 +57,7 @@ else
 fi
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
-  flags="-lncurses -L/usr/local/opt/libffi/lib -L/usr/local/lib -Wl,-u,_sort_table"
+  flags="-liconv -lncurses -L/usr/local/opt/libffi/lib -L/usr/local/lib -Wl,-u,_sort_table"
 else
   flags="-ltinfo -Wl,-u,sort_table"
 fi
