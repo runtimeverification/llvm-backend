@@ -15,7 +15,7 @@ target_link_libraries(runtime-strings-tests
 )
 
 if(APPLE)
-target_link_libraries(runtime-io-tests
+target_link_libraries(runtime-strings-tests
   PUBLIC
   iconv
 )
