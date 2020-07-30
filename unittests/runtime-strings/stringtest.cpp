@@ -540,11 +540,11 @@ BOOST_AUTO_TEST_CASE(transcode) {
   auto fooUTF16BE = makeString("\0f\0o\0o", 6);
   auto fooUTF32LE = makeString("f\0\0\0o\0\0\0o\0\0\0", 12);
   auto fooUTF32BE = makeString("\0\0\0f\0\0\0o\0\0\0o", 12);
-  auto UTF8 = makeString("UTF8");
-  auto UTF16LE = makeString("UTF16LE");
-  auto UTF16BE = makeString("UTF16BE");
-  auto UTF32LE = makeString("UTF32LE");
-  auto UTF32BE = makeString("UTF32BE");
+  auto UTF8 = makeString("UTF-8");
+  auto UTF16LE = makeString("UTF-16LE");
+  auto UTF16BE = makeString("UTF-16BE");
+  auto UTF32LE = makeString("UTF-32LE");
+  auto UTF32BE = makeString("UTF-32BE");
   auto result = hook_STRING_transcode(foo, UTF8, UTF16LE);
   BOOST_CHECK_EQUAL(1, hook_STRING_eq(result, fooUTF16LE));
   result = hook_STRING_transcode(foo, UTF8, UTF16BE);

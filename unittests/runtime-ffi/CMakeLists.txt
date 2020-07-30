@@ -22,3 +22,10 @@ target_link_libraries(runtime-ffi-tests
   dl
   ${Boost_UNIT_TEST_FRAMEWORK_LIBRARIES}
 )
+
+if(APPLE)
+target_link_libraries(runtime-ffi-tests
+  PUBLIC
+  iconv
+)
+endif()

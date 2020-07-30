@@ -13,3 +13,10 @@ target_link_libraries(runtime-strings-tests
   mpfr
   ${Boost_UNIT_TEST_FRAMEWORK_LIBRARIES}
 )
+
+if(APPLE)
+target_link_libraries(runtime-strings-tests
+  PUBLIC
+  iconv
+)
+endif()
