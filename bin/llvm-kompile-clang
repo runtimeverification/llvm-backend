@@ -121,6 +121,6 @@ run @CMAKE_CXX_COMPILER@ -Wno-override-module -Wno-return-type-c-linkage "$modop
   -lgmp -lmpfr -lpthread -ldl -lffi \
   $flags \
   -ljemalloc \
-  -I "$(dirname "$0")"/../include \
+  -I "$(dirname "$0")"/../include/kllvm \
   "$@"
 fi
