@@ -3,9 +3,6 @@ pipeline {
   options {
     ansiColor('xterm')
   }
-  environment {
-    LONG_REV = """${sh(returnStdout: true, script: 'git rev-parse HEAD').trim()}"""
-  }
   stages {
     stage("Init title") {
       when { changeRequest() }
@@ -36,6 +33,7 @@ pipeline {
     }
     stage('Build and Test on Ubuntu') {
       options { timeout(time: 25, unit: 'MINUTES') }
+      environment { LONG_REV = """${sh(returnStdout: true, script: 'git rev-parse HEAD').trim()}""" }
       agent {
         dockerfile {
           additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)'
