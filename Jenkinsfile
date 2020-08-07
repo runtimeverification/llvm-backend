@@ -3,6 +3,9 @@ pipeline {
   options {
     ansiColor('xterm')
   }
+  environment {
+    LONG_REV = """${sh(returnStdout: true, script: 'git rev-parse HEAD').trim()}"""
+  }
   stages {
     stage("Init title") {
       when { changeRequest() }
@@ -51,11 +54,10 @@ pipeline {
     stage('Update K Submodule') {
       when { branch 'master' }
       steps {
-        build job: 'rv-devops/master', propagate: false, wait: false                                                      \
-            , parameters: [ booleanParam(name: 'UPDATE_DEPS_SUBMODULE', value: true)                                      \
-                          , string(name: 'PR_REVIEWER', value: 'dwightguth')                                              \
-                          , string(name: 'UPDATE_DEPS_REPOSITORY', value: 'kframework/k')                                 \
-                          , string(name: 'UPDATE_DEPS_SUBMODULE_DIR', value: 'llvm-backend/src/main/native/llvm-backend') \
+        build job: 'rv-devops/master', propagate: false, wait: false                                        \
+            , parameters: [ booleanParam ( name: 'UPDATE_DEPS'         , value: true                      ) \
+                          , string       ( name: 'UPDATE_DEPS_REPO'    , value: 'kframework/llvm-backend' ) \
+                          , string       ( name: 'UPDATE_DEPS_VERSION' , value: "${env.LONG_REV}"         ) \
                           ]
       }
     }
