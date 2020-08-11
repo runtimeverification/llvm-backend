@@ -305,6 +305,7 @@ public:
 
   virtual void prettyPrint(std::ostream &, PrettyPrintData const& data) const = 0;
   virtual sptr<KOREPattern> sortCollections(PrettyPrintData const& data) = 0;
+  virtual sptr<KOREPattern> filterSubstitution(PrettyPrintData const& data) = 0;
 };
 
 class KOREVariablePattern : public KOREPattern {
@@ -334,6 +335,7 @@ public:
   }
   virtual sptr<KOREPattern> expandAliases(KOREDefinition *) override { return shared_from_this(); }
   virtual sptr<KOREPattern> sortCollections(PrettyPrintData const& data) override { return shared_from_this(); }
+  virtual sptr<KOREPattern> filterSubstitution(PrettyPrintData const& data) override { return shared_from_this(); }
   virtual void prettyPrint(std::ostream &out, PrettyPrintData const& data) const override;
 
 private:
@@ -373,6 +375,7 @@ public:
   virtual sptr<KOREPattern> substitute(const substitution &) override;
   virtual sptr<KOREPattern> expandAliases(KOREDefinition *) override;
   virtual sptr<KOREPattern> sortCollections(PrettyPrintData const& data) override;
+  virtual sptr<KOREPattern> filterSubstitution(PrettyPrintData const& data) override;
 
 private:
   KORECompositePattern(ptr<KORESymbol> Constructor)
@@ -398,6 +401,7 @@ public:
   virtual sptr<KOREPattern> substitute(const substitution &) override { return shared_from_this(); }
   virtual sptr<KOREPattern> expandAliases(KOREDefinition *) override { return shared_from_this(); }
   virtual sptr<KOREPattern> sortCollections(PrettyPrintData const& data) override { return shared_from_this(); }
+  virtual sptr<KOREPattern> filterSubstitution(PrettyPrintData const& data) override { return shared_from_this(); }
 
 private:
   KOREStringPattern(const std::string &Contents) : contents(Contents) { }

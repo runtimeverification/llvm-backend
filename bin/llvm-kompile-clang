@@ -57,7 +57,7 @@ else
 fi
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
-  flags="-lncurses -L/usr/local/opt/libffi/lib -L/usr/local/lib -Wl,-u,_sort_table"
+  flags="-liconv -lncurses -L/usr/local/opt/libffi/lib -L/usr/local/lib -Wl,-u,_sort_table"
 else
   flags="-ltinfo -Wl,-u,sort_table"
 fi
@@ -121,6 +121,6 @@ run @CMAKE_CXX_COMPILER@ -Wno-override-module -Wno-return-type-c-linkage "$modop
   -lgmp -lmpfr -lpthread -ldl -lffi \
   $flags \
   -ljemalloc \
-  -I "$(dirname "$0")"/../include \
+  -I "$(dirname "$0")"/../include/kllvm \
   "$@"
 fi

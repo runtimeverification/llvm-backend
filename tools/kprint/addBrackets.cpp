@@ -185,6 +185,71 @@ bool lessThanEq(PrettyPrintData const& data, KORESort *s1, KORESort *s2) {
   return *s1 == *s2 || (data.subsorts.count(s1) && data.subsorts.at(s1).count(s2));
 }
 
+sptr<KORESort> getArgSort(KORESymbol *symbol, int position, sptr<KORESort> firstArgSort) {
+  if (!symbol->isBuiltin()) {
+    return symbol->getArguments()[position];
+  } else if (symbol->getName() == "\\and" ||
+      symbol->getName() == "\\not" ||
+      symbol->getName() == "\\or" ||
+      symbol->getName() == "\\implies" ||
+      symbol->getName() == "\\iff" ||
+      symbol->getName() == "\\ceil" ||
+      symbol->getName() == "\\floor" ||
+      symbol->getName() == "\\equals" ||
+      symbol->getName() == "\\in" ||
+      symbol->getName() == "\\next" ||
+      symbol->getName() == "\\rewrites") {
+    return symbol->getFormalArguments()[0];
+  } else if (symbol->getName() == "\\forall" ||
+      symbol->getName() == "\\exists") {
+    if (position == 0) {
+      assert(firstArgSort != nullptr);
+      return firstArgSort;
+    } else {
+      return symbol->getFormalArguments()[0];
+    }
+  } else if (symbol->getName() == "\\mu" ||
+      symbol->getName() == "\\nu") {
+    assert(firstArgSort != nullptr);
+    return firstArgSort;
+  } else {
+    abort();
+  }
+}
+
+sptr<KORESort> getReturnSort(KOREPattern *pat) {
+  if (auto composite = dynamic_cast<KORECompositePattern *>(pat)) {
+    auto symbol = composite->getConstructor();
+    if (!symbol->isBuiltin()) {
+      return pat->getSort();
+    } else if (symbol->getName() == "\\top" ||
+        symbol->getName() == "\\bottom" ||
+        symbol->getName() == "\\and" ||
+        symbol->getName() == "\\not" ||
+        symbol->getName() == "\\or" ||
+        symbol->getName() == "\\implies" ||
+        symbol->getName() == "\\iff" ||
+        symbol->getName() == "\\exists" ||
+        symbol->getName() == "\\forall" ||
+        symbol->getName() == "\\next" ||
+        symbol->getName() == "\\rewrites") {
+      return symbol->getFormalArguments()[0];
+    } else if (symbol->getName() == "\\ceil" ||
+        symbol->getName() == "\\floor" ||
+        symbol->getName() == "\\equals" ||
+        symbol->getName() == "\\in") {
+      return symbol->getFormalArguments()[1];
+    } else if (symbol->getName() == "\\mu" ||
+        symbol->getName() == "\\nu") {
+      return composite->getArguments()[0]->getSort();
+    } else {
+      abort();
+    }
+  } else {
+    return pat->getSort();
+  }
+}
+
 /**
  * Computes whether `inner` can appear at position `position` inside `outer`
  * according to the rules of subsorting, priority, and associativity. The
@@ -205,8 +270,8 @@ bool lessThanEq(PrettyPrintData const& data, KORESort *s1, KORESort *s2) {
 bool isPriorityWrong(KORECompositePattern *outer, KORECompositePattern *inner, int position, PrettyPrintData const& data) {
   std::string outerName = outer->getConstructor()->getName();
   std::string innerName = inner->getConstructor()->getName();
-  KORESort *innerSort = inner->getSort().get();
-  KORESort *outerSort = outer->getConstructor()->getArguments()[position].get();
+  KORESort *innerSort = getReturnSort(inner).get();
+  KORESort *outerSort = getArgSort(outer->getConstructor(), position, outer->getArguments()[0]->getSort()).get();
   if (!lessThanEq(data, innerSort, outerSort)) {
     return true;
   }
@@ -315,13 +380,13 @@ sptr<KOREPattern> addBrackets(sptr<KOREPattern> inner, KORECompositePattern *out
     }
   }
   if (requiresBracketWithSimpleAlgorithm(outer, leftCapture, rightCapture, inner.get(), position, data)) {
-    sptr<KORESort> outerSort = outer->getConstructor()->getArguments()[position];
-    sptr<KORESort> innerSort = inner->getSort();
+    sptr<KORESort> outerSort = getArgSort(outer->getConstructor(), position, outer->getArguments()[0]->getSort());
+    sptr<KORESort> innerSort = getReturnSort(inner.get());
     for (auto &entry : data.brackets) {
       bool isCorrectOuterSort = lessThanEq(data, entry.first, outerSort.get());
       if (isCorrectOuterSort) {
         for (KORESymbol *s : entry.second) {
-          bool isCorrectInnerSort = lessThanEq(data, innerSort.get(), s->getArguments()[0].get());
+          bool isCorrectInnerSort = lessThanEq(data, innerSort.get(), getArgSort(s, 0, nullptr).get());
           if (isCorrectInnerSort) {
             sptr<KORECompositePattern> result = KORECompositePattern::Create(s);
             result->addArgument(inner);

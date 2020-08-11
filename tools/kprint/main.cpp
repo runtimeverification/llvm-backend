@@ -37,15 +37,21 @@ SubsortMap transitiveClosure(SubsortMap relations) {
 
 int main (int argc, char **argv) {
   if (argc != 3 && argc != 4) {
-    std::cerr << "usage: " << argv[0] << " <definition.kore> <pattern.kore> [true|false]" << std::endl;
+    std::cerr << "usage: " << argv[0] << " <definition.kore> <pattern.kore> [true|false|auto] [true|false]" << std::endl;
   }
 
-  bool hasColor;
-  if (argc == 4) {
+  bool hasColor, filterSubst;
+  if (argc >= 4) {
     std::string arg = argv[3];
-    hasColor = arg == "true";
+    hasColor = arg == "true" || (arg == "auto" && isatty(1));
   } else {
     hasColor = isatty(1);
+  }
+  if (argc >= 5) {
+    std::string arg = argv[4];
+    filterSubst = arg == "true";
+  } else {
+    filterSubst = true;
   }
 
   std::map<std::string, std::string> formats;
@@ -67,7 +73,7 @@ int main (int argc, char **argv) {
   formats["\\rewrites"] = "%1 => %2";
   formats["\\weakExistsFinally"] = "#wEF ( %1 )";
   formats["\\allPathGlobally"] = "#AG ( %1 )";
-  formats["bracket"] = "(%1)";
+  formats["bracket"] = "( %1 )";
 
   std::map<std::string, std::string> terminals;
   terminals["kseq"] = "010";
@@ -109,50 +115,50 @@ int main (int argc, char **argv) {
   leftAssoc["\\or"].insert("\\or");
   leftAssoc["\\rewrites"].insert("\\rewrites");
   rightAssoc["\\rewrites"].insert("\\rewrites");
-  priorities["\\exists"].insert("\\implies");
-  priorities["\\exists"].insert("\\or");
-  priorities["\\exists"].insert("\\and");
-  priorities["\\exists"].insert("\\equals");
-  priorities["\\exists"].insert("\\floor");
-  priorities["\\exists"].insert("\\ceil");
-  priorities["\\exists"].insert("\\not");
-  priorities["\\exists"].insert("\\bottom");
-  priorities["\\exists"].insert("\\top");
-  priorities["\\forall"].insert("\\implies");
-  priorities["\\forall"].insert("\\or");
-  priorities["\\forall"].insert("\\and");
-  priorities["\\forall"].insert("\\equals");
-  priorities["\\forall"].insert("\\floor");
-  priorities["\\forall"].insert("\\ceil");
-  priorities["\\forall"].insert("\\not");
-  priorities["\\forall"].insert("\\bottom");
-  priorities["\\forall"].insert("\\top");
-  priorities["\\implies"].insert("\\or");
-  priorities["\\implies"].insert("\\and");
-  priorities["\\implies"].insert("\\equals");
-  priorities["\\implies"].insert("\\floor");
-  priorities["\\implies"].insert("\\ceil");
-  priorities["\\implies"].insert("\\not");
-  priorities["\\implies"].insert("\\bottom");
-  priorities["\\implies"].insert("\\top");
-  priorities["\\or"].insert("\\and");
-  priorities["\\or"].insert("\\equals");
-  priorities["\\or"].insert("\\floor");
-  priorities["\\or"].insert("\\ceil");
-  priorities["\\or"].insert("\\not");
-  priorities["\\or"].insert("\\bottom");
-  priorities["\\or"].insert("\\top");
-  priorities["\\and"].insert("\\equals");
-  priorities["\\and"].insert("\\floor");
-  priorities["\\and"].insert("\\ceil");
-  priorities["\\and"].insert("\\not");
-  priorities["\\and"].insert("\\bottom");
-  priorities["\\and"].insert("\\top");
-  priorities["\\equals"].insert("\\floor");
-  priorities["\\equals"].insert("\\ceil");
-  priorities["\\equals"].insert("\\not");
-  priorities["\\equals"].insert("\\bottom");
-  priorities["\\equals"].insert("\\top");
+  priorities["\\implies"].insert("\\exists");
+  priorities["\\or"].insert("\\exists");
+  priorities["\\and"].insert("\\exists");
+  priorities["\\equals"].insert("\\exists");
+  priorities["\\floor"].insert("\\exists");
+  priorities["\\ceil"].insert("\\exists");
+  priorities["\\not"].insert("\\exists");
+  priorities["\\bottom"].insert("\\exists");
+  priorities["\\top"].insert("\\exists");
+  priorities["\\implies"].insert("\\forall");
+  priorities["\\or"].insert("\\forall");
+  priorities["\\and"].insert("\\forall");
+  priorities["\\equals"].insert("\\forall");
+  priorities["\\floor"].insert("\\forall");
+  priorities["\\ceil"].insert("\\forall");
+  priorities["\\not"].insert("\\forall");
+  priorities["\\bottom"].insert("\\forall");
+  priorities["\\top"].insert("\\forall");
+  priorities["\\or"].insert("\\implies");
+  priorities["\\and"].insert("\\implies");
+  priorities["\\equals"].insert("\\implies");
+  priorities["\\floor"].insert("\\implies");
+  priorities["\\ceil"].insert("\\implies");
+  priorities["\\not"].insert("\\implies");
+  priorities["\\bottom"].insert("\\implies");
+  priorities["\\top"].insert("\\implies");
+  priorities["\\and"].insert("\\or");
+  priorities["\\equals"].insert("\\or");
+  priorities["\\floor"].insert("\\or");
+  priorities["\\ceil"].insert("\\or");
+  priorities["\\not"].insert("\\or");
+  priorities["\\bottom"].insert("\\or");
+  priorities["\\top"].insert("\\or");
+  priorities["\\equals"].insert("\\and");
+  priorities["\\floor"].insert("\\and");
+  priorities["\\ceil"].insert("\\and");
+  priorities["\\not"].insert("\\and");
+  priorities["\\bottom"].insert("\\and");
+  priorities["\\top"].insert("\\and");
+  priorities["\\floor"].insert("\\equals");
+  priorities["\\ceil"].insert("\\equals");
+  priorities["\\not"].insert("\\equals");
+  priorities["\\bottom"].insert("\\equals");
+  priorities["\\top"].insert("\\equals");
 
   SubsortMap subsorts;
 
@@ -234,9 +240,15 @@ int main (int argc, char **argv) {
 
   PrettyPrintData data = {formats, colors, terminals, priorities, leftAssoc, rightAssoc, hooks, brackets, assocs, comms, subsorts, hasColor};
 
-  sptr<KOREPattern> withBrackets = addBrackets(config, data);
-  sptr<KOREPattern> sorted = withBrackets->sortCollections(data);
-  sorted->prettyPrint(std::cout, data);
+  sptr<KOREPattern> sorted = config->sortCollections(data);
+  sptr<KOREPattern> filtered;
+  if (filterSubst) {
+    filtered = sorted->filterSubstitution(data);
+  } else {
+    filtered = sorted;
+  }
+  sptr<KOREPattern> withBrackets = addBrackets(filtered, data);
+  withBrackets->prettyPrint(std::cout, data);
   std::cout << std::endl;
 
   def.release(); // so we don't waste time calling delete a bunch of times

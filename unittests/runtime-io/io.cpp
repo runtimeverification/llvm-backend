@@ -341,7 +341,8 @@ BOOST_AUTO_TEST_CASE(lock) {
 
   block * b = hook_IO_lock(f, len);
 
-  struct flock lockp = {.l_type = F_WRLCK, .l_whence = SEEK_CUR, .l_start = 0, .l_len = 12};
+  struct flock lockp = {0};
+  lockp.l_type = F_WRLCK; lockp.l_whence = SEEK_CUR; lockp.l_start = 0; lockp.l_len = 12;
   fcntl(fd, F_SETLK, &lockp);
 
   BOOST_CHECK(lockp.l_type != F_UNLCK);
@@ -361,7 +362,8 @@ BOOST_AUTO_TEST_CASE(unlock) {
 
   block * b = hook_IO_unlock(f, len);
 
-  struct flock lockp = {.l_type = F_WRLCK, .l_whence = SEEK_CUR, .l_start = 0, .l_len = 12};
+  struct flock lockp = {0};
+  lockp.l_type = F_WRLCK; lockp.l_whence = SEEK_CUR; lockp.l_start = 0; lockp.l_len = 12;
   fcntl(fd, F_SETLK, &lockp);
 
   BOOST_CHECK(lockp.l_type != F_UNLCK);

@@ -22,6 +22,7 @@ extern "C" {
 #define IOBUFSIZE 1024
 
   mpz_ptr move_int(mpz_t);
+  char * getTerminatedString(string * str);
 
   static block * dotK = (block *)((((uint64_t)getTagForSymbolName("dotk{}")) << 32) | 1);
   static blockheader kseqHeader = {getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("kseq{}"))};
@@ -163,15 +164,6 @@ extern "C" {
     retBlock->h = header_err();
     memcpy(retBlock->children, &p, sizeof(block *));
     return retBlock;
-  }
-
-  char * getTerminatedString(string * str) {
-    int length = len(str);
-    string * buf = static_cast<string *>(koreAllocToken(sizeof(string) + (length + 1)));
-    memcpy(buf->data, str->data, length);
-    set_len(buf, length + 1);
-    buf->data[length] = '\0';
-    return buf->data;
   }
 
 #define MODE_R 1
@@ -429,7 +421,8 @@ extern "C" {
     int fd = mpz_get_si(i);
     off_t l = mpz_get_si(len);
 
-    struct flock lockp = {.l_type = F_WRLCK, .l_whence = SEEK_CUR, .l_start = 0, .l_len = l};
+    struct flock lockp = {0};
+    lockp.l_type = F_WRLCK; lockp.l_whence = SEEK_CUR; lockp.l_start = 0; lockp.l_len = l;
     int ret = fcntl(fd, F_SETLKW, &lockp);
 
     if (ret == -1) {
@@ -447,7 +440,8 @@ extern "C" {
     int fd = mpz_get_si(i);
     off_t l = mpz_get_si(len);
 
-    struct flock lockp = {.l_type = F_UNLCK, .l_whence = SEEK_CUR, .l_start = 0, .l_len = l};
+    struct flock lockp = {0};
+    lockp.l_type = F_UNLCK; lockp.l_whence = SEEK_CUR; lockp.l_start = 0; lockp.l_len = l;
     int ret = fcntl(fd, F_SETLKW, &lockp);
 
     if (ret == -1) {

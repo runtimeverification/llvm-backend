@@ -1,5 +1,6 @@
 #include<gmp.h>
 #include<mpfr.h>
+#include<iconv.h>
 #include<algorithm>
 #include<cassert>
 #include<cinttypes>
@@ -25,6 +26,7 @@ extern "C" {
   string *hook_BYTES_concat(string *a, string *b);
   mpz_ptr hook_BYTES_length(string *a);
   string *hook_BYTES_substr(string *a, mpz_t start, mpz_t end);
+  char *getTerminatedString(string *str);
 
   bool hook_STRING_gt(SortString a, SortString b) {
     auto res = memcmp(a->data, b->data, std::min(len(a), len(b)));
@@ -177,6 +179,15 @@ extern "C" {
     return ret;
   }
 
+  char * getTerminatedString(string * str) {
+    int length = len(str);
+    string * buf = static_cast<string *>(koreAllocToken(sizeof(string) + (length + 1)));
+    memcpy(buf->data, str->data, length);
+    set_len(buf, length + 1);
+    buf->data[length] = '\0';
+    return buf->data;
+  }
+
   SortString hook_STRING_base2string_long(SortInt input, uint64_t base) {
     size_t len = mpz_sizeinbase(input, base) + 2;
     // +1 for null terminator needed by mpz_get_str, +1 for minus sign
@@ -320,6 +331,21 @@ extern "C" {
     return move_int(result);
   }
 
+  SortString hook_STRING_transcode(SortString input, SortString inputCharset, SortString outputCharset) {
+    iconv_t converter = iconv_open(getTerminatedString(outputCharset), getTerminatedString(inputCharset));
+    char *inbuf = input->data;
+    size_t inbytesleft = len(input);
+    size_t outbytesleft = inbytesleft * 4;
+    char *buf = (char *)malloc(outbytesleft);
+    char *outbuf = buf;
+    size_t result = iconv(converter, &inbuf, &inbytesleft, &outbuf, &outbytesleft);
+    if (result < 0) {
+        throw std::invalid_argument("transcoding failed: STRING.transcode");
+    }
+    *outbuf = 0;
+    return makeString(buf, len(input) * 4 - outbytesleft);
+  }
+
   string *hook_STRING_uuid() {
     throw std::invalid_argument("not implemented: STRING.uuid");
   }
@@ -383,7 +409,7 @@ extern "C" {
 void init_float2(floating *result, std::string contents) {
   size_t prec, exp;
   const char last = contents.back();
-  if (last == 'f' || last == 'F' || last == 'y') {
+  if (last == 'f' || last == 'F') {
     prec = 24;
     exp = 8;
   } else {
@@ -402,7 +428,7 @@ void init_float2(floating *result, std::string contents) {
   result->exp = exp;
   mpfr_init2(result->f, prec);
   int retValue;
-  if (contents == "+Infinity" || contents == "-Infinity") {
+  if (contents == "+Infinity" || contents == "-Infinity" || contents == "Infinity") {
     retValue = mpfr_set_str(result->f, contents.c_str(), 10, MPFR_RNDN);
   } else {
     size_t last = contents.find_last_of("fFdDpP");

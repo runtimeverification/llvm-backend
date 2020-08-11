@@ -34,6 +34,7 @@ extern "C" {
   string * hook_STRING_replace(string *, string *, string *, mpz_t);
   string * hook_STRING_replaceFirst(string *, string *, string *);
   mpz_ptr hook_STRING_countAllOccurrences(string *, string *);
+  string * hook_STRING_transcode(string *, string *, string *);
   string * makeString(const KCHAR *, int64_t len = -1);
   stringbuffer *hook_BUFFER_empty();
   stringbuffer *hook_BUFFER_concat(stringbuffer *, string *);
@@ -433,15 +434,15 @@ BOOST_AUTO_TEST_CASE(string2float) {
   _float = makeString("+Infinity");
   result = hook_STRING_string2float(_float);
 
-  BOOST_CHECK_EQUAL(24, mpfr_get_prec(result->f));
-  BOOST_CHECK_EQUAL(8, result->exp);
+  BOOST_CHECK_EQUAL(53, mpfr_get_prec(result->f));
+  BOOST_CHECK_EQUAL(11, result->exp);
   BOOST_CHECK_EQUAL(mpfr_cmp_d(result->f, INFINITY), 0);
 
   _float = makeString("-Infinity");
   result = hook_STRING_string2float(_float);
 
-  BOOST_CHECK_EQUAL(24, mpfr_get_prec(result->f));
-  BOOST_CHECK_EQUAL(8, result->exp);
+  BOOST_CHECK_EQUAL(53, mpfr_get_prec(result->f));
+  BOOST_CHECK_EQUAL(11, result->exp);
   BOOST_CHECK_EQUAL(mpfr_cmp_d(result->f, -INFINITY), 0);
 
   _float = makeString("Infinityf");
@@ -531,6 +532,27 @@ BOOST_AUTO_TEST_CASE(buffer_concat) {
   memset(expected->data, 'a', totalLen);
   BOOST_CHECK_EQUAL(totalLen, len(result));
   BOOST_CHECK_EQUAL(0, memcmp(result->data, expected->data, totalLen));
+}
+
+BOOST_AUTO_TEST_CASE(transcode) {
+  auto foo = makeString("foo");
+  auto fooUTF16LE = makeString("f\0o\0o\0", 6);
+  auto fooUTF16BE = makeString("\0f\0o\0o", 6);
+  auto fooUTF32LE = makeString("f\0\0\0o\0\0\0o\0\0\0", 12);
+  auto fooUTF32BE = makeString("\0\0\0f\0\0\0o\0\0\0o", 12);
+  auto UTF8 = makeString("UTF-8");
+  auto UTF16LE = makeString("UTF-16LE");
+  auto UTF16BE = makeString("UTF-16BE");
+  auto UTF32LE = makeString("UTF-32LE");
+  auto UTF32BE = makeString("UTF-32BE");
+  auto result = hook_STRING_transcode(foo, UTF8, UTF16LE);
+  BOOST_CHECK_EQUAL(1, hook_STRING_eq(result, fooUTF16LE));
+  result = hook_STRING_transcode(foo, UTF8, UTF16BE);
+  BOOST_CHECK_EQUAL(1, hook_STRING_eq(result, fooUTF16BE));
+  result = hook_STRING_transcode(foo, UTF8, UTF32LE);
+  BOOST_CHECK_EQUAL(1, hook_STRING_eq(result, fooUTF32LE));
+  result = hook_STRING_transcode(foo, UTF8, UTF32BE);
+  BOOST_CHECK_EQUAL(1, hook_STRING_eq(result, fooUTF32BE));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
