@@ -73,6 +73,7 @@ case class AsP[T](name: T, sort: SortCategory, pat: Pattern[T]) extends Pattern[
   }
   def expandOr: Seq[AsP[T]] = pat.expandOr.map(AsP(name, sort, _))
 
+  override def listRange(ix: Option[Constructor], o: Occurrence): Seq[(Occurrence, Int, Int)] = pat.listRange(ix, o)
   override def overloadChildren(f: Fringe, ix: Option[Constructor], residual: Option[Pattern[String]], o: Occurrence): Seq[(Constructor, Fringe, VariableBinding[T])] = pat.overloadChildren(f, ix, residual, o)
   def category: Option[SortCategory] = pat.category
   lazy val variables: Set[T] = Set(name) ++ pat.variables
