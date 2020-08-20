@@ -49,7 +49,7 @@ pipeline {
       }
     }
     stage('Update K Submodule') {
-      when { branch 'master' }
+      // when { branch 'master' }
       environment { LONG_REV = """${sh(returnStdout: true, script: 'git rev-parse HEAD').trim()}""" }
       steps {
         build job: 'rv-devops/master', propagate: false, wait: false                                        \
