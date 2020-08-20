@@ -33,7 +33,6 @@ pipeline {
     }
     stage('Build and Test on Ubuntu') {
       options { timeout(time: 25, unit: 'MINUTES') }
-      environment { LONG_REV = """${sh(returnStdout: true, script: 'git rev-parse HEAD').trim()}""" }
       agent {
         dockerfile {
           additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)'
@@ -51,6 +50,7 @@ pipeline {
     }
     stage('Update K Submodule') {
       when { branch 'master' }
+      environment { LONG_REV = """${sh(returnStdout: true, script: 'git rev-parse HEAD').trim()}""" }
       steps {
         build job: 'rv-devops/master', propagate: false, wait: false                                        \
             , parameters: [ booleanParam ( name: 'UPDATE_DEPS'         , value: true                      ) \
