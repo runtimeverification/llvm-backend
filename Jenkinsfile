@@ -6,11 +6,7 @@ pipeline {
   stages {
     stage("Init title") {
       when { changeRequest() }
-      steps {
-        script {
-          currentBuild.displayName = "PR ${env.CHANGE_ID}: ${env.CHANGE_TITLE}"
-        }
-      }
+      steps { script { currentBuild.displayName = "PR ${env.CHANGE_ID}: ${env.CHANGE_TITLE}" } }
     }
     stage('Build and Test on Arch Linux') {
       options { timeout(time: 25, unit: 'MINUTES') }
@@ -33,10 +29,10 @@ pipeline {
     }
     stage('Build and Test on Ubuntu') {
       options { timeout(time: 25, unit: 'MINUTES') }
-      environment { LONG_REV = """${sh(returnStdout: true, script: 'git rev-parse HEAD').trim()}""" }
       agent {
         dockerfile {
           additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)'
+          reuseNode true
         }
       }
       steps {
@@ -51,6 +47,13 @@ pipeline {
     }
     stage('Update K Submodule') {
       when { branch 'master' }
+      agent {
+        dockerfile {
+          additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)'
+          reuseNode true
+        }
+      }
+      environment { LONG_REV = """${sh(returnStdout: true, script: 'git rev-parse HEAD').trim()}""" }
       steps {
         build job: 'rv-devops/master', propagate: false, wait: false                                        \
             , parameters: [ booleanParam ( name: 'UPDATE_DEPS'         , value: true                      ) \
