@@ -144,26 +144,20 @@ extern "C" {
       return;
     }
 
-    int i = 1;
+    sfprintf(file, "\\left-assoc{}(%s(", concat); 
+
+    bool once = true;
     for (auto iter = set->begin(); iter != set->end(); ++iter) {
-      if (i < size) {
-        sfprintf(file, "%s(", concat);
-      }
-
-      sfprintf(file, "%s(", element);
-      auto elem = *iter;
-      printConfigurationInternal(file, elem, "SortKItem{}", false);
-      sfprintf(file, ")");
-
-      if (i < size) {
+      if (once) {
+        once = false;
+      } else {
         sfprintf(file, ",");
       }
 
-      ++i;
-    }
-
-    for (auto j = 0; j < size - 1; ++j) {
+      sfprintf(file, "%s(", element);
+      printConfigurationInternal(file, *iter, "SortKItem{}", false);
       sfprintf(file, ")");
     }
+    sfprintf(file, "))");
   }
 }
