@@ -1044,16 +1044,20 @@ KOREPattern *KOREAxiomDeclaration::getRightHandSide() const {
 KOREPattern *KOREAxiomDeclaration::getRequires() const {
   if (auto top = dynamic_cast<KORECompositePattern *>(pattern.get())) {
     if (top->getConstructor()->getName() == "\\implies" && top->getArguments().size() == 2) {
-      if (auto equals = dynamic_cast<KORECompositePattern *>(top->getArguments()[0].get())) {
-        if (equals->getConstructor()->getName() == "\\and" && equals->getArguments().size() == 2) {
-          equals = dynamic_cast<KORECompositePattern *>(equals->getArguments()[1].get());
-          assert(equals);
+      if (auto outer = dynamic_cast<KORECompositePattern *>(top->getArguments()[0].get())) {
+        if (outer->getConstructor()->getName() == "\\and" && outer->getArguments().size() == 2) {
+          if (auto _not = dynamic_cast<KORECompositePattern *>(outer->getArguments()[0].get())) {
+            if (_not->getConstructor()->getName() == "\\not" && _not->getArguments().size() == 1) {
+              outer = dynamic_cast<KORECompositePattern *>(outer->getArguments()[1].get());
+              assert(outer);
+            }
+          }
         }
-        if (equals->getConstructor()->getName() == "\\equals" && equals->getArguments().size() == 2) {
-          return equals->getArguments()[0].get();
-        } else if (equals->getConstructor()->getName() == "\\top" && equals->getArguments().empty()) {
+        if (outer->getConstructor()->getName() == "\\equals" && outer->getArguments().size() == 2) {
+          return outer->getArguments()[0].get();
+        } else if (outer->getConstructor()->getName() == "\\top" && outer->getArguments().empty()) {
           return nullptr;
-        } else if (equals->getConstructor()->getName() == "\\bottom" && equals->getArguments().empty()) {
+        } else if (outer->getConstructor()->getName() == "\\bottom" && outer->getArguments().empty()) {
           // strategy axiom hack
           if (auto trueTop = dynamic_cast<KORECompositePattern *>(top->getArguments()[1].get())) {
             if (trueTop->getConstructor()->getName() == "\\and" && trueTop->getArguments().size() == 2) {
@@ -1076,6 +1080,14 @@ KOREPattern *KOREAxiomDeclaration::getRequires() const {
                   }
                 }
               }
+            }
+          }
+        } else if (outer->getConstructor()->getName() == "\\and" && outer->getArguments().size() == 2) {
+          if (auto inner = dynamic_cast<KORECompositePattern *>(outer->getArguments()[0].get())) {
+            if (inner->getConstructor()->getName() == "\\top" && inner->getArguments().empty()) {
+              return nullptr;
+            } else if (inner->getConstructor()->getName() == "\\equals" && inner->getArguments().size() == 2) {
+              return inner->getArguments()[0].get();
             }
           }
         }

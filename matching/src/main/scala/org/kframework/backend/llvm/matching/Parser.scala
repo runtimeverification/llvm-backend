@@ -157,12 +157,23 @@ object Parser {
     }
   }
 
+  private def getPatterns(pat: Pattern): List[Pattern] = {
+    pat match {
+      case And(_, Mem(_, _, _, pat), pats) => pat :: getPatterns(pats)
+      case Top(_) => Nil
+    }
+  }
+
   private def splitFunction(topPattern: Pattern): Option[(Option[SymbolOrAlias], Equals, Option[Pattern])] = {
     topPattern match {
       case Implies(_, Equals(_, _, pat, _), And(_, eq @ Equals(_, _, Application(symbol, _), _), _)) => Some(Some(symbol), eq, Some(pat))
       case Implies(_, Top(_), And(_, eq @ Equals(_, _, Application(symbol, _), _), _)) => Some(Some(symbol), eq, None)
-      case Implies(_, And(_, _, Equals(_, _, pat, _)), And(_, eq @ Equals(_, _, Application(symbol, _), _), _)) => Some(Some(symbol), eq, Some(pat))
-      case Implies(_, And(_, _, Top(_)), And(_, eq @ Equals(_, _, Application(symbol, _), _), _)) => Some(Some(symbol), eq, None)
+      case Implies(_, And(_, Not(_, _), Equals(_, _, pat, _)), And(_, eq @ Equals(_, _, Application(symbol, _), _), _)) => Some(Some(symbol), eq, Some(pat))
+      case Implies(_, And(_, Not(_, _), Top(_)), And(_, eq @ Equals(_, _, Application(symbol, _), _), _)) => Some(Some(symbol), eq, None)
+      case Implies(_, And(_, Top(_), args), And(_, Equals(i, o, Application(symbol, _), rhs), _)) => Some(Some(symbol), B.Equals(i, o, B.Application(symbol, getPatterns(args)), rhs), None)
+      case Implies(_, And(_, Equals(_, _, pat, _), args), And(_, Equals(i, o, Application(symbol, _), rhs), _)) => Some(Some(symbol), B.Equals(i, o, B.Application(symbol, getPatterns(args)), rhs), Some(pat))
+      case Implies(_, And(_, Not(_, _), And(_, Top(_), args)), And(_, Equals(i, o, Application(symbol, _), rhs), _)) => Some(Some(symbol), B.Equals(i, o, B.Application(symbol, getPatterns(args)), rhs), None)
+      case Implies(_, And(_, Not(_, _), And(_, Equals(_, _, pat, _), args)), And(_, Equals(i, o, Application(symbol, _), rhs), _)) => Some(Some(symbol), B.Equals(i, o, B.Application(symbol, getPatterns(args)), rhs), Some(pat))
       case eq @ Equals(_, _, Application(symbol, _), _) => Some(Some(symbol), eq, None)
       case _ => None
     }
