@@ -81,12 +81,12 @@ static void *constructInitialConfiguration(const KOREPattern *initial) {
           block *child = (block *)arguments[0];
           if (!((uint64_t)child & 1) && layout(child) != 0) {
             uint32_t tag = tag_hdr(child->h.hdr);
-	    if (tag >= first_inj_tag && tag <= last_inj_tag) {
+            if (tag >= first_inj_tag && tag <= last_inj_tag) {
               output.push_back(child);
               continue;
             }
           }
-	}
+        }
       }
 
       block *Block = (block *) koreAlloc(size);
