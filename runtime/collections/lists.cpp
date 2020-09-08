@@ -222,32 +222,24 @@ extern "C" {
 
   void printList(writer * file, list * list, const char * unit, const char * element, const char * concat) {
     size_t size = list->size();
-
     if (size == 0) {
       sfprintf(file, "%s()", unit);
       return;
     }
 
-    int i = 1;
-    for (auto iter = list->begin(); iter != list->end(); ++iter) {
-      if (i < size) {
-        sfprintf(file, "%s(", concat);
-      }
+    sfprintf(file, "\\left-assoc{}(%s(", concat);
 
+    bool once = true;
+    for (auto iter = list->begin(); iter != list->end(); ++iter) {
+      if (once) {
+        once = false;
+      } else {
+        sfprintf(file, ",");
+      }
       sfprintf(file, "%s(", element);
       printConfigurationInternal(file, *iter, "SortKItem{}", false);
       sfprintf(file, ")");
-
-      if (i < size) {
-        sfprintf(file, ",");
-      }
-
-      ++i;
     }
-
-    for (auto j = 0; j < size - 1; ++j) {
-      sfprintf(file, ")");
-    }
-
+    sfprintf(file, "))");
   }
 }

@@ -49,9 +49,7 @@ extern "C" {
   }
 
   bool hook_STRING_eq(SortString a, SortString b) {
-    uintptr_t aint = (uintptr_t) a;
-    uintptr_t bint = (uintptr_t) b;
-    if ((aint & 3) == 3 || (bint & 3) == 3) {
+    if (is_variable_block(a) || is_variable_block(b)) {
       return a == b;
     }
     if (a->h.hdr & VARIABLE_BIT || b->h.hdr & VARIABLE_BIT) {

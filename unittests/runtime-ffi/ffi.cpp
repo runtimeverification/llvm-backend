@@ -152,7 +152,7 @@ BOOST_AUTO_TEST_CASE(call) {
   memcpy(xarg->children, &xargstr, sizeof(string *));
 
   list args = hook_LIST_element(xarg);
-  block * type_sint = (block *)((((uint64_t)getTagForSymbolName(TYPETAG(sint))) << 32) | 1);
+  block * type_sint = leaf_block(getTagForSymbolName(TYPETAG(sint)));
 
   block * argtype = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(block *)));
   argtype->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("inj{SortFFIType{}}"));
@@ -178,7 +178,7 @@ BOOST_AUTO_TEST_CASE(call) {
   memcpy(xarg->children, &xargstr, sizeof(string *));
 
   args = hook_LIST_element(xarg);
-  block * type_uint = (block *)((((uint64_t)getTagForSymbolName(TYPETAG(uint))) << 32) | 1);
+  block * type_uint = leaf_block(getTagForSymbolName(TYPETAG(uint)));
   memcpy(argtype->children, &type_uint, sizeof(block *));
 
   types = hook_LIST_element(argtype);
@@ -344,7 +344,7 @@ BOOST_AUTO_TEST_CASE(call) {
   memcpy(ptrarg->children, &ptrargstr, sizeof(string *));
 
   args = hook_LIST_element(ptrarg);
-  block * type_pointer = (block *)((((uint64_t)getTagForSymbolName(TYPETAG(pointer))) << 32) | 1);
+  block * type_pointer = leaf_block(getTagForSymbolName(TYPETAG(pointer)));
 
   memcpy(argtype->children, &type_pointer, sizeof(block *));
 
@@ -386,7 +386,7 @@ BOOST_AUTO_TEST_CASE(call_variadic) {
 
   args = hook_LIST_concat(&args, &arg1list);
 
-  block * type_sint = (block *)((((uint64_t)getTagForSymbolName(TYPETAG(sint))) << 32) | 1);
+  block * type_sint = leaf_block(getTagForSymbolName(TYPETAG(sint)));
 
   block * fixargtype = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(block *)));
   fixargtype->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("inj{SortFFIType{}}"));

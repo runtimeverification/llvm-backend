@@ -41,8 +41,7 @@ size_t get_size(uint64_t hdr, uint16_t layout) {
 
 void migrate(block** blockPtr) {
   block* currBlock = *blockPtr;
-  uintptr_t intptr = (uintptr_t)currBlock;
-  if (intptr & 1) {
+  if (is_leaf_block(currBlock)) {
     return;
   }
   const uint64_t hdr = currBlock->h.hdr;
@@ -74,8 +73,7 @@ void migrate(block** blockPtr) {
 // that are not tracked by gc
 void migrate_once(block** blockPtr) {
   block* currBlock = *blockPtr;
-  uintptr_t intptr = (uintptr_t)currBlock;
-  if (intptr & 1) {
+  if (is_leaf_block(currBlock)) {
     return;
   }
   if (youngspace_collection_id() == getArenaSemispaceIDOfObject((void *)currBlock) ||

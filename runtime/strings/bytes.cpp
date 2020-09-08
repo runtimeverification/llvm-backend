@@ -27,7 +27,7 @@ extern "C" {
   uint64_t tag_big_endian() {
     static uint64_t tag = (uint64_t)-1;
     if (tag == -1) {
-      tag = (((uint64_t)getTagForSymbolName("LblbigEndianBytes{}")) << 32) | 1;
+      tag = (uint64_t)leaf_block(getTagForSymbolName("LblbigEndianBytes{}"));
     }
     return tag;
   }
@@ -37,7 +37,7 @@ extern "C" {
   uint64_t tag_unsigned() {
     static uint64_t tag = (uint64_t)-1;
     if (tag == -1) {
-      tag = (((uint64_t)getTagForSymbolName("LblunsignedBytes{}")) << 32) | 1;
+      tag = (uint64_t)leaf_block(getTagForSymbolName("LblunsignedBytes{}"));
     }
     return tag;
   }

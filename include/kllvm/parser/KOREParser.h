@@ -47,9 +47,13 @@ private:
   ptr<KOREPattern> _pattern(void);
   void patterns(KORECompositePattern *node);
   void patternsNE(KORECompositePattern *node);
+  void patterns(std::vector<ptr<KOREPattern>> &node);
+  void patternsNE(std::vector<ptr<KOREPattern>> &node);
 
-  ptr<KORECompositePattern> applicationPattern(void);
-  ptr<KORECompositePattern> applicationPattern(std::string name);
+  ptr<KOREPattern> applicationPattern(void);
+  ptr<KOREPattern> applicationPattern(std::string name);
+  ptr<KORECompositePattern> _applicationPattern(void);
+  ptr<KORECompositePattern> _applicationPattern(std::string name);
 };
 
 } // end namespace parser

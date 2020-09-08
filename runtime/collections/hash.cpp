@@ -60,7 +60,7 @@ extern "C" {
   void k_hash(block *arg, void *h) {
     if (hash_enter()) {
       uint64_t argintptr = (uint64_t)arg;
-      if (argintptr & 1) {
+      if (is_leaf_block(argintptr)) {
         add_hash64(h, argintptr);
       } else {
         uint64_t arghdrcanon = arg->h.hdr & HDR_MASK;

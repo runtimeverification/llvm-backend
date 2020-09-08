@@ -197,10 +197,14 @@ extern "C" {
       return;
     }
 
-    int i = 1;
+    sfprintf(file, "\\left-assoc{}(%s(", concat); 
+
+    bool once = true;
     for (auto iter = map->begin(); iter != map->end(); ++iter) {
-      if (i < size) {
-        sfprintf(file, "%s(", concat);
+      if (once) {
+        once = false;
+      } else {
+        sfprintf(file, ",");
       }
 
       sfprintf(file, "%s(", element);
@@ -209,16 +213,7 @@ extern "C" {
       sfprintf(file, ",");
       printConfigurationInternal(file, entry.second, "SortKItem{}", false);
       sfprintf(file, ")");
-
-      if (i < size) {
-        sfprintf(file, ",");
-      }
-
-      ++i;
     }
-
-    for (auto j = 0; j < size - 1; ++j) {
-      sfprintf(file, ")");
-    }
+    sfprintf(file, "))");
   }
 }
