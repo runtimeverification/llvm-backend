@@ -55,7 +55,7 @@ struct jsonmember {
   block *val;
 };
 
-static block * dotK = (block *)((((uint64_t)getTagForSymbolName("dotk{}")) << 32) | 1);
+static block * dotK = leaf_block(getTagForSymbolName("dotk{}"));
 static blockheader kseqHeader = {getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("kseq{}"))};
 
 #define get_header(name, symbol) \
@@ -80,7 +80,7 @@ get_header(listWrapHdr, "LblJSONList{}")
 static block *name() {\
   static uint64_t tag = (uint64_t)-1; \
   if (tag == -1) { \
-    tag = (((uint64_t)getTagForSymbolName(symbol)) << 32) | 1; \
+    tag = (uint64_t)leaf_block(getTagForSymbolName(symbol)); \
   } \
   return (block *)tag; \
 }

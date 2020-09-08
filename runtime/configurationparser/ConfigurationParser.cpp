@@ -50,7 +50,7 @@ static void *constructInitialConfiguration(const KOREPattern *initial) {
         output.push_back(evaluateFunctionSymbol(tag, nullptr));
         continue;
       } else if (constructor->getArguments().empty()) {
-        output.push_back((block *) ((uint64_t)tag << 32 | 1));
+        output.push_back(leaf_block(tag));
         continue;
       }
       construction term{tag, constructor->getArguments().size()};

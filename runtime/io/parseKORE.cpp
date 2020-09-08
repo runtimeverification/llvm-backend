@@ -4,7 +4,7 @@
 #include "runtime/header.h"
 
 extern "C" {
-  static block * dotK = (block *)((((uint64_t)getTagForSymbolName("dotk{}")) << 32) | 1);
+  static block * dotK = leaf_block(getTagForSymbolName("dotk{}"));
 
   block * hook_KREFLECTION_parseKORE(SortString kore) {
     block * parsed = dotK;

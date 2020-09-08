@@ -74,7 +74,7 @@ block *debruijnizeInternal(block *currBlock) {
         break;
       } case VARIABLE_LAYOUT: {
         if (!(i == 0 && isBinder) && hook_STRING_eq(var, *(string **)arg)) {
-          block *newArg = (block *)((idx << 32) | 3LL);
+          block *newArg = variable_block(idx);
           makeDirty(dirty, argData->offset, newArg, newBlock);
         }
         break;
@@ -104,7 +104,7 @@ block *replaceBinderInternal(block *currBlock) {
       return (block *)var;
     } else if (idx < varIdx) {
       varIdx--;
-      return (block *)((varIdx << 32) | 3);
+      return variable_block(varIdx);
     } else {
       return currBlock;
     }
@@ -280,7 +280,7 @@ block *incrementDebruijn(block *currBlock) {
     uint64_t varIdx = ptr >> 32;
     if (varIdx >= idx2) {
       varIdx += idx;
-      return (block *)((varIdx << 32) | 3);
+      return variable_block(varIdx);
     } else {
       return currBlock;
     }

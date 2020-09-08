@@ -21,7 +21,7 @@ extern "C" {
 #define TAG_TYPE(NAME) static uint64_t tag_type_##NAME() {\
   static uint64_t tag = -1; \
   if (tag == -1) { \
-    tag = ((uint64_t)getTagForSymbolName(TYPETAG(NAME)) << 32) | 1; \
+    tag = (uint64_t)leaf_block(getTagForSymbolName(TYPETAG(NAME))); \
   } \
   return tag; \
 }
@@ -32,7 +32,7 @@ extern "C" {
     }
   };
 
-  static block * dotK = (block *)((((uint64_t)getTagForSymbolName("dotk{}")) << 32) | 1);
+  static block * dotK = leaf_block(getTagForSymbolName("dotk{}"));
 
   thread_local static std::vector<ffi_type *> structTypes;
 

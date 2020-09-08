@@ -356,7 +356,7 @@ void int_hash(mpz_t i, void *hasher) {
   }
 }
 
-static block * dotK = (block *)((((uint64_t)getTagForSymbolName("dotk{}")) << 32) | 1);
+static block * dotK = leaf_block(getTagForSymbolName("dotk{}"));
 
 static gmp_randstate_t randState;
 static bool randStateInitialized = false;

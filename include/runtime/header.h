@@ -30,6 +30,8 @@
 #define reset_gc(s) ((s)->h.hdr = (s)->h.hdr & ~(NOT_YOUNG_OBJECT_BIT | AGE_MASK | FWD_PTR_BIT))
 #define struct_base(struct_type, member_name, member_addr) \
         ((struct_type *)((char *)(member_addr) - offsetof(struct_type, member_name)))
+#define leaf_block(tag) (block *)((((uint64_t)(tag)) << 32) | 1)
+#define variable_block(tag) (block *)((((uint64_t)(tag)) << 32) | 3)
 
 extern "C" {
   // llvm: blockheader = type { i64 } 

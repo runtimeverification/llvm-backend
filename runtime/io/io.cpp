@@ -24,7 +24,7 @@ extern "C" {
   mpz_ptr move_int(mpz_t);
   char * getTerminatedString(string * str);
 
-  static block * dotK = (block *)((((uint64_t)getTagForSymbolName("dotk{}")) << 32) | 1);
+  static block * dotK = leaf_block(getTagForSymbolName("dotk{}"));
   static blockheader kseqHeader = {getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("kseq{}"))};
 
   static std::map<std::string, std::string> logFiles;
@@ -113,7 +113,7 @@ extern "C" {
       return retBlock;
     }
 
-    return (block *)((((uint64_t)getTagForSymbolName(errStr)) << 32) | 1);
+    return leaf_block(getTagForSymbolName(errStr));
   }
 
   static blockheader header_int() {
@@ -294,7 +294,7 @@ extern "C" {
 
 
     if (0 == ret) {
-      block * p = (block *)((((uint64_t)getTagForSymbolName(GETTAG(EOF))) << 32) | 1);
+      block * p = leaf_block(getTagForSymbolName(GETTAG(EOF)));
       block * retBlock = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(block *)));
       retBlock->h = header_err();
       memcpy(retBlock->children, &p, sizeof(block *));

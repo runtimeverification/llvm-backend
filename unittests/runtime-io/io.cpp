@@ -16,7 +16,7 @@
 extern "C" {
 
 #define GETTAG(symbol) "Lbl'Hash'" #symbol "{}"
-#define ERRBLOCK(tag) (((uint64_t)tag << 32) | 1)
+#define ERRBLOCK(tag) (uint64_t)(leaf_block(tag))
 #define NUM_SYMBOLS 7
   const char * symbols[NUM_SYMBOLS] = {GETTAG(EOF), GETTAG(ENOENT), GETTAG(EBADF), "inj{SortInt{}, SortIOInt{}}", "inj{SortIOError{}, SortKItem{}}", "kseq{}", GETTAG(systemResult)};
 
