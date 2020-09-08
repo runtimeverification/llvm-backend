@@ -34,8 +34,7 @@ void makeDirty(bool &dirty, uint64_t offset, New newArg, block *&newBlock) {
 }
 
 block *debruijnizeInternal(block *currBlock) {
-  uintptr_t ptr = (uintptr_t)currBlock;
-  if (ptr & 1) {
+  if (is_leaf_block(currBlock)) {
     return currBlock;
   }
   const uint64_t hdr = currBlock->h.hdr;
@@ -98,7 +97,7 @@ block *debruijnizeInternal(block *currBlock) {
 
 block *replaceBinderInternal(block *currBlock) {
   uintptr_t ptr = (uintptr_t)currBlock;
-  if ((ptr & 3) == 3) {
+  if (is_variable_block(ptr)) {
     uint64_t varIdx = ptr >> 32;
     if (idx == varIdx) {
       return (block *)var;
@@ -108,7 +107,7 @@ block *replaceBinderInternal(block *currBlock) {
     } else {
       return currBlock;
     }
-  } else if (ptr & 1) {
+  } else if (is_leaf_block(ptr)) {
     return currBlock;
   }
   const uint64_t hdr = currBlock->h.hdr;
@@ -165,8 +164,7 @@ block *replaceBinderInternal(block *currBlock) {
 }
 
 block *substituteInternal(block *currBlock) {
-  uintptr_t ptr = (uintptr_t)currBlock;
-  if (ptr & 1) {
+  if (is_leaf_block(currBlock)) {
     return currBlock;
   }
   const uint64_t hdr = currBlock->h.hdr;
@@ -276,7 +274,7 @@ block *debruijnize(block *term) {
 
 block *incrementDebruijn(block *currBlock) {
   uintptr_t ptr = (uintptr_t)currBlock;
-  if ((ptr & 3) == 3) {
+  if (is_variable_block(ptr)) {
     uint64_t varIdx = ptr >> 32;
     if (varIdx >= idx2) {
       varIdx += idx;
@@ -284,7 +282,7 @@ block *incrementDebruijn(block *currBlock) {
     } else {
       return currBlock;
     }
-  } else if (ptr & 1) {
+  } else if (is_leaf_block(ptr)) {
     return currBlock;
   }
   const uint64_t hdr = currBlock->h.hdr;

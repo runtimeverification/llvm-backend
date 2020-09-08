@@ -79,7 +79,7 @@ static void *constructInitialConfiguration(const KOREPattern *initial) {
         layout *data = getLayoutData(layout_code);
         if (data->args[0].cat == SYMBOL_LAYOUT) {
           block *child = (block *)arguments[0];
-          if (!((uint64_t)child & 1) && layout(child) != 0) {
+          if (!is_leaf_block(child) && layout(child) != 0) {
             uint32_t tag = tag_hdr(child->h.hdr);
             if (tag >= first_inj_tag && tag <= last_inj_tag) {
               output.push_back(child);

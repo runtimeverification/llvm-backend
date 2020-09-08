@@ -82,7 +82,7 @@ extern "C" {
   }
 
   static ffi_type * getTypeFromBlock(block * elem) {
-    if ((uint64_t) elem & 1) {
+    if (is_leaf_block(elem)) {
       uint64_t symbol = (uint64_t) elem;
 
       if (symbol == tag_type_void()) {
