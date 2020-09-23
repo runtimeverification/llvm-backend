@@ -142,7 +142,7 @@ extern "C" {
       for (int j = 0; j < numFields; j++) {
         structField = hook_LIST_get_long(elements, j);
 
-        if (structField->h.hdr != (uint64_t)getTagForSymbolName("inj{SortFFIType{}}")) {
+        if (structField->h.hdr != (uint64_t)getTagForSymbolName("inj{SortFFIType{}, SortKItem{}}")) {
           throw std::invalid_argument("Struct list contains invalid FFI type");
         }
 
@@ -187,7 +187,7 @@ extern "C" {
     block * elem;
     for (int i = 0; i < nfixtypes; i++) {
         elem = hook_LIST_get_long(fixtypes, i);
-        if (elem->h.hdr != (uint64_t)getTagForSymbolName("inj{SortFFIType{}}")) {
+        if (elem->h.hdr != (uint64_t)getTagForSymbolName("inj{SortFFIType{}, SortKItem{}}")) {
           throw std::invalid_argument("Fix types list contains invalid FFI type");
         }
 
@@ -196,7 +196,7 @@ extern "C" {
 
     for (int i = 0; i < nvartypes; i++) {
         elem = hook_LIST_get_long(vartypes, i);
-        if (elem->h.hdr != (uint64_t)getTagForSymbolName("inj{SortFFIType{}}")) {
+        if (elem->h.hdr != (uint64_t)getTagForSymbolName("inj{SortFFIType{}, SortKItem{}}")) {
           throw std::invalid_argument("Var types list contains invalid FFI type");
         }
 
@@ -206,7 +206,7 @@ extern "C" {
     void ** avalues = (void **) malloc(sizeof(void *) * nargs);
     for (int i = 0; i < nargs; i++) {
         elem = hook_LIST_get_long(args, i);
-        if (elem->h.hdr != (uint64_t)getTagForSymbolName("inj{SortBytes{}}")) {
+        if (elem->h.hdr != (uint64_t)getTagForSymbolName("inj{SortBytes{}, SortKItem{}}")) {
           throw std::invalid_argument("Args list contains non-bytes type");
         }
         avalues[i] = ((string *) *elem->children)->data;

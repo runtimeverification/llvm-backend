@@ -25,7 +25,7 @@ extern "C" {
   };
 
 #define NUM_SYMBOLS 6
-  const char * symbols[NUM_SYMBOLS] = {TYPETAG(struct), TYPETAG(uint), TYPETAG(sint), TYPETAG(pointer), "inj{SortBytes{}}", "inj{SortFFIType{}}"};
+  const char * symbols[NUM_SYMBOLS] = {TYPETAG(struct), TYPETAG(uint), TYPETAG(sint), TYPETAG(pointer), "inj{SortBytes{}, SortKItem{}}", "inj{SortFFIType{}, SortKItem{}}"};
 
   char * getTerminatedString(string * str);
 
