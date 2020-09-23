@@ -57,9 +57,11 @@ else
 fi
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
-  flags="-liconv -lncurses -L/usr/local/opt/libffi/lib -L/usr/local/lib -Wl,-u,_sort_table"
+  libraries="-liconv -lncurses"
+  flags="-L/usr/local/opt/libffi/lib -L/usr/local/lib -Wl,-u,_sort_table"
 else
-  flags="-ltinfo -Wl,-u,sort_table"
+  libraries="-ltinfo"
+  flags="-Wl,-u,sort_table"
 fi
 
 if [ -f "/etc/arch-release" ]; then
@@ -104,6 +106,12 @@ else
   fi
 fi
 
+if [ "$main" = "static" ]; then
+  all_libraries=
+else
+  all_libraries="$libraries -lgmp -lmpfr -lpthread -ldl -lffi -ljemalloc"
+fi
+
 if $link; then
 run @CMAKE_CXX_COMPILER@ -Wno-override-module -Wno-return-type-c-linkage "$modopt" "${files[@]}" \
   "$LIBDIR"/libarithmetic.a \
@@ -118,9 +126,8 @@ run @CMAKE_CXX_COMPILER@ -Wno-override-module -Wno-return-type-c-linkage "$modop
   "$LIBDIR"/libcollect.a \
   "$LIBDIR"/libmeta.a \
   "$LIBDIR"/libjson.a \
-  -lgmp -lmpfr -lpthread -ldl -lffi \
   $flags \
-  -ljemalloc \
+  $all_libraries \
   -I "$(dirname "$0")"/../include/kllvm \
   "$@"
 fi
