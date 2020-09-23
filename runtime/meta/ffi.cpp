@@ -232,7 +232,7 @@ extern "C" {
         break;
     }
 
-    string * rvalue = static_cast<string *>(koreAlloc(rtype->size));
+    string * rvalue = static_cast<string *>(koreAllocToken(sizeof(string) + rtype->size));
     ffi_call(&cif, address, (void *)(rvalue->data), avalues);
 
     free(argtypes);
