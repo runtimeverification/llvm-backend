@@ -221,8 +221,6 @@ extern "C" {
       status = ffi_prep_cif(&cif, FFI_DEFAULT_ABI, nargs, rtype, argtypes);
     }
 
-    free(argtypes);
-
     switch (status) {
       case FFI_OK:
         break;
@@ -237,6 +235,7 @@ extern "C" {
     string * rvalue = static_cast<string *>(koreAlloc(rtype->size));
     ffi_call(&cif, address, (void *)(rvalue->data), avalues);
 
+    free(argtypes);
     set_len(rvalue, rtype->size);
     free(avalues);
 
