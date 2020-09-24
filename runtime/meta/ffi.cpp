@@ -16,7 +16,7 @@ extern "C" {
   bool hook_KEQUAL_eq(block *, block *);
 
 #define KCHAR char
-#define TYPETAG(type) "Lbl'Hash'" #type "{}"
+#define TYPETAG(type) "Lbl'Hash'ffi'Unds'" #type "{}"
 
 #define TAG_TYPE(NAME) static uint64_t tag_type_##NAME() {\
   static uint64_t tag = -1; \
