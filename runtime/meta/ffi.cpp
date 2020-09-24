@@ -60,6 +60,9 @@ extern "C" {
   TAG_TYPE(slong)
   TAG_TYPE(longdouble)
   TAG_TYPE(pointer)
+  TAG_TYPE(complexfloat)
+  TAG_TYPE(complexdouble)
+  TAG_TYPE(complexlongdouble)
 
   mpz_ptr move_int(mpz_t);
   char * getTerminatedString(string * str);
@@ -127,6 +130,12 @@ extern "C" {
         return &ffi_type_longdouble;
       } else if (symbol == tag_type_pointer()) {
         return &ffi_type_pointer;
+      } else if (symbol == tag_type_complexfloat()) {
+        return &ffi_type_complex_float;
+      } else if (symbol == tag_type_complexdouble()) {
+        return &ffi_type_complex_double;
+      } else if (symbol == tag_type_complexlongdouble()) {
+        return &ffi_type_complex_longdouble;
       }
     } else if (tag_hdr(elem->h.hdr) == (uint64_t)getTagForSymbolName(TYPETAG(struct))){
       list * elements = (list *) *elem->children;
