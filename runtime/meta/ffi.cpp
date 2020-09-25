@@ -387,5 +387,25 @@ extern "C" {
   bool hook_FFI_allocated(block * kitem) {
     return allocatedKItemPtrs.find(kitem) != allocatedKItemPtrs.end();
   }
+
+  SortK hook_FFI_read(SortInt addr, SortBytes mem) {
+    unsigned long l = mpz_get_ui(addr);
+    uintptr_t intptr = (uintptr_t)l;
+    char *ptr = (char *)intptr;
+    memcpy(mem->data, ptr, len(mem));
+    return dotK;
+  }
+
+  SortK hook_FFI_write(SortInt addr, SortBytes mem) {
+    unsigned long l = mpz_get_ui(addr);
+    uintptr_t intptr = (uintptr_t)l;
+    char *ptr = (char *)intptr;
+    for (size_t i = 0; i < len(mem); ++i) {
+      if (ptr[i] != mem->data[i]) {
+        ptr[i] = mem->data[i];
+      }
+    }
+    return dotK;
+  }
 }
 
