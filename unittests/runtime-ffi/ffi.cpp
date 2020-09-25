@@ -12,7 +12,7 @@
 #include "runtime/alloc.h"
 
 #define KCHAR char
-#define TYPETAG(type) "Lbl'Hash'" #type "{}"
+#define TYPETAG(type) "Lbl'Hash'ffi'Unds'" #type "{}"
 extern "C" {
 
   struct point {
@@ -148,14 +148,14 @@ BOOST_AUTO_TEST_CASE(call) {
   string * xargstr = makeString((char *) &x, sizeof(int)); 
 
   block * xarg = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(string *)));
-  xarg->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("inj{SortBytes{}}"));
+  xarg->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("inj{SortBytes{}, SortKItem{}}"));
   memcpy(xarg->children, &xargstr, sizeof(string *));
 
   list args = hook_LIST_element(xarg);
   block * type_sint = leaf_block(getTagForSymbolName(TYPETAG(sint)));
 
   block * argtype = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(block *)));
-  argtype->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("inj{SortFFIType{}}"));
+  argtype->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("inj{SortFFIType{}, SortKItem{}}"));
   memcpy(argtype->children, &type_sint, sizeof(block *));
 
   list types = hook_LIST_element(argtype);
@@ -201,7 +201,7 @@ BOOST_AUTO_TEST_CASE(call) {
   memcpy(argtype->children, &type_sint, sizeof(block *));
 
   block * yarg = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(string *)));
-  yarg->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("inj{SortBytes{}}"));
+  yarg->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("inj{SortBytes{}, SortKItem{}}"));
   memcpy(yarg->children, &yargstr, sizeof(string *));
 
   list yargs = hook_LIST_element(yarg);
@@ -266,13 +266,13 @@ BOOST_AUTO_TEST_CASE(call) {
   string * pargstr = makeString((char *) &p, sizeof(struct point));
 
   block * parg = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(string *)));
-  parg->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("inj{SortBytes{}}"));
+  parg->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("inj{SortBytes{}, SortKItem{}}"));
   memcpy(parg->children, &pargstr, sizeof(string *));
 
   args = hook_LIST_element(parg);
 
   block * new_argtype = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(block *)));
-  new_argtype->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("inj{SortFFIType{}}"));
+  new_argtype->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("inj{SortFFIType{}, SortKItem{}}"));
   memcpy(new_argtype->children, &structType, sizeof(block *));
   types = hook_LIST_element(new_argtype);
 
@@ -300,7 +300,7 @@ BOOST_AUTO_TEST_CASE(call) {
   structType2->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName(TYPETAG(struct)));
 
   block * structArgType = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(block *)));
-  structArgType->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("inj{SortFFIType{}}"));
+  structArgType->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("inj{SortFFIType{}, SortKItem{}}"));
   memcpy(structArgType->children, &structType, sizeof(block *));
 
   list * structFields2 = static_cast<list *>(koreAlloc(sizeof(list)));
@@ -340,7 +340,7 @@ BOOST_AUTO_TEST_CASE(call) {
   string * ptrargstr = makeString((char *) &address1, sizeof(uintptr_t *));
 
   block * ptrarg = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(string *)));
-  ptrarg->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("inj{SortBytes{}}"));
+  ptrarg->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("inj{SortBytes{}, SortKItem{}}"));
   memcpy(ptrarg->children, &ptrargstr, sizeof(string *));
 
   args = hook_LIST_element(ptrarg);
@@ -370,7 +370,7 @@ BOOST_AUTO_TEST_CASE(call_variadic) {
   string * nargstr = makeString((char *) &n, sizeof(int)); 
 
   block * narg = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(string *)));
-  narg->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("inj{SortBytes{}}"));
+  narg->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("inj{SortBytes{}, SortKItem{}}"));
   memcpy(narg->children, &nargstr, sizeof(string *));
 
   list args = hook_LIST_element(narg);
@@ -379,7 +379,7 @@ BOOST_AUTO_TEST_CASE(call_variadic) {
   string * arg1str = makeString((char *) &arg1, sizeof(int)); 
 
   block * arg1block = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(string *)));
-  arg1block->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("inj{SortBytes{}}"));
+  arg1block->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("inj{SortBytes{}, SortKItem{}}"));
   memcpy(arg1block->children, &arg1str, sizeof(string *));
 
   list arg1list = hook_LIST_element(arg1block);
@@ -389,11 +389,11 @@ BOOST_AUTO_TEST_CASE(call_variadic) {
   block * type_sint = leaf_block(getTagForSymbolName(TYPETAG(sint)));
 
   block * fixargtype = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(block *)));
-  fixargtype->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("inj{SortFFIType{}}"));
+  fixargtype->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("inj{SortFFIType{}, SortKItem{}}"));
   memcpy(fixargtype->children, &type_sint, sizeof(block *));
 
   block * varargtype = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(block *)));
-  varargtype->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("inj{SortFFIType{}}"));
+  varargtype->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("inj{SortFFIType{}, SortKItem{}}"));
   memcpy(varargtype->children, &type_sint, sizeof(block *));
 
   list fixtypes = hook_LIST_element(fixargtype);
@@ -426,7 +426,7 @@ BOOST_AUTO_TEST_CASE(call_variadic) {
   string * arg2str = makeString((char *) &arg2, sizeof(int));
 
   block * arg2block = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(string *)));
-  arg2block->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("inj{SortBytes{}}"));
+  arg2block->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("inj{SortBytes{}, SortKItem{}}"));
   memcpy(arg2block->children, &arg2str, sizeof(string *));
 
   list arg2list = hook_LIST_element(arg2block);
