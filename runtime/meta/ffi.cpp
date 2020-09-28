@@ -266,10 +266,22 @@ extern "C" {
     return ffiCall(true, addr, args, fixtypes, vartypes, ret);
   }
 
+
   SortInt hook_FFI_address(SortString fn) {
     char * func = getTerminatedString(fn);
-    void * handle = so_lib_handle();
-    void * address = dlsym(handle, func);
+
+    std::string funcStr = func;
+    std::map<std::string, void *> privateSymbols;
+    privateSymbols["atexit"] = (void *)atexit;
+    privateSymbols["at_quick_exit"] = (void *)at_quick_exit;
+
+    void *address;
+    if (auto ptr = privateSymbols.at(funcStr)) {
+      address = ptr;
+    } else {
+      void * handle = so_lib_handle();
+      address = dlsym(handle, func);
+    }
 
     mpz_t result;
     mpz_init_set_ui(result, (uintptr_t)address);
