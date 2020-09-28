@@ -276,7 +276,7 @@ extern "C" {
     privateSymbols["at_quick_exit"] = (void *)at_quick_exit;
 
     void *address;
-    if (auto ptr = privateSymbols.at(funcStr)) {
+    if (auto ptr = privateSymbols[funcStr]) {
       address = ptr;
     } else {
       void * handle = so_lib_handle();
