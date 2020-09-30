@@ -16,7 +16,7 @@ extern "C" {
   bool hook_KEQUAL_eq(block *, block *);
 
 #define KCHAR char
-#define TYPETAG(type) "Lbl'Hash'" #type "{}"
+#define TYPETAG(type) "Lbl'Hash'ffi'Unds'" #type "{}"
 
 #define TAG_TYPE(NAME) static uint64_t tag_type_##NAME() {\
   static uint64_t tag = -1; \
@@ -60,6 +60,9 @@ extern "C" {
   TAG_TYPE(slong)
   TAG_TYPE(longdouble)
   TAG_TYPE(pointer)
+  TAG_TYPE(complexfloat)
+  TAG_TYPE(complexdouble)
+  TAG_TYPE(complexlongdouble)
 
   mpz_ptr move_int(mpz_t);
   char * getTerminatedString(string * str);
@@ -127,8 +130,14 @@ extern "C" {
         return &ffi_type_longdouble;
       } else if (symbol == tag_type_pointer()) {
         return &ffi_type_pointer;
+      } else if (symbol == tag_type_complexfloat()) {
+        return &ffi_type_complex_float;
+      } else if (symbol == tag_type_complexdouble()) {
+        return &ffi_type_complex_double;
+      } else if (symbol == tag_type_complexlongdouble()) {
+        return &ffi_type_complex_longdouble;
       }
-    } else if (elem->h.hdr == (uint64_t)getTagForSymbolName(TYPETAG(struct))){
+    } else if (tag_hdr(elem->h.hdr) == (uint64_t)getTagForSymbolName(TYPETAG(struct))){
       list * elements = (list *) *elem->children;
       size_t numFields = hook_LIST_size_long(elements);
       block * structField;
@@ -142,7 +151,7 @@ extern "C" {
       for (int j = 0; j < numFields; j++) {
         structField = hook_LIST_get_long(elements, j);
 
-        if (structField->h.hdr != (uint64_t)getTagForSymbolName("inj{SortFFIType{}}")) {
+        if (tag_hdr(structField->h.hdr) != (uint64_t)getTagForSymbolName("inj{SortFFIType{}, SortKItem{}}")) {
           throw std::invalid_argument("Struct list contains invalid FFI type");
         }
 
@@ -187,7 +196,7 @@ extern "C" {
     block * elem;
     for (int i = 0; i < nfixtypes; i++) {
         elem = hook_LIST_get_long(fixtypes, i);
-        if (elem->h.hdr != (uint64_t)getTagForSymbolName("inj{SortFFIType{}}")) {
+        if (tag_hdr(elem->h.hdr) != (uint64_t)getTagForSymbolName("inj{SortFFIType{}, SortKItem{}}")) {
           throw std::invalid_argument("Fix types list contains invalid FFI type");
         }
 
@@ -196,7 +205,7 @@ extern "C" {
 
     for (int i = 0; i < nvartypes; i++) {
         elem = hook_LIST_get_long(vartypes, i);
-        if (elem->h.hdr != (uint64_t)getTagForSymbolName("inj{SortFFIType{}}")) {
+        if (tag_hdr(elem->h.hdr) != (uint64_t)getTagForSymbolName("inj{SortFFIType{}, SortKItem{}}")) {
           throw std::invalid_argument("Var types list contains invalid FFI type");
         }
 
@@ -206,7 +215,7 @@ extern "C" {
     void ** avalues = (void **) malloc(sizeof(void *) * nargs);
     for (int i = 0; i < nargs; i++) {
         elem = hook_LIST_get_long(args, i);
-        if (elem->h.hdr != (uint64_t)getTagForSymbolName("inj{SortBytes{}}")) {
+        if (tag_hdr(elem->h.hdr) != (uint64_t)getTagForSymbolName("inj{SortBytes{}, SortKItem{}}")) {
           throw std::invalid_argument("Args list contains non-bytes type");
         }
         avalues[i] = ((string *) *elem->children)->data;
@@ -221,8 +230,6 @@ extern "C" {
       status = ffi_prep_cif(&cif, FFI_DEFAULT_ABI, nargs, rtype, argtypes);
     }
 
-    free(argtypes);
-
     switch (status) {
       case FFI_OK:
         break;
@@ -234,9 +241,10 @@ extern "C" {
         break;
     }
 
-    string * rvalue = static_cast<string *>(koreAlloc(rtype->size));
+    string * rvalue = static_cast<string *>(koreAllocToken(sizeof(string) + rtype->size));
     ffi_call(&cif, address, (void *)(rvalue->data), avalues);
 
+    free(argtypes);
     set_len(rvalue, rtype->size);
     free(avalues);
 
@@ -258,10 +266,22 @@ extern "C" {
     return ffiCall(true, addr, args, fixtypes, vartypes, ret);
   }
 
+
   SortInt hook_FFI_address(SortString fn) {
     char * func = getTerminatedString(fn);
-    void * handle = so_lib_handle();
-    void * address = dlsym(handle, func);
+
+    std::string funcStr = func;
+    std::map<std::string, void *> privateSymbols;
+    privateSymbols["atexit"] = (void *)atexit;
+    privateSymbols["at_quick_exit"] = (void *)at_quick_exit;
+
+    void *address;
+    if (auto ptr = privateSymbols[funcStr]) {
+      address = ptr;
+    } else {
+      void * handle = so_lib_handle();
+      address = dlsym(handle, func);
+    }
 
     mpz_t result;
     mpz_init_set_ui(result, (uintptr_t)address);
@@ -378,6 +398,26 @@ extern "C" {
 
   bool hook_FFI_allocated(block * kitem) {
     return allocatedKItemPtrs.find(kitem) != allocatedKItemPtrs.end();
+  }
+
+  SortK hook_FFI_read(SortInt addr, SortBytes mem) {
+    unsigned long l = mpz_get_ui(addr);
+    uintptr_t intptr = (uintptr_t)l;
+    char *ptr = (char *)intptr;
+    memcpy(mem->data, ptr, len(mem));
+    return dotK;
+  }
+
+  SortK hook_FFI_write(SortInt addr, SortBytes mem) {
+    unsigned long l = mpz_get_ui(addr);
+    uintptr_t intptr = (uintptr_t)l;
+    char *ptr = (char *)intptr;
+    for (size_t i = 0; i < len(mem); ++i) {
+      if (ptr[i] != mem->data[i]) {
+        ptr[i] = mem->data[i];
+      }
+    }
+    return dotK;
   }
 }
 
