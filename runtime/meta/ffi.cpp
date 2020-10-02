@@ -273,7 +273,9 @@ extern "C" {
     std::string funcStr = func;
     std::map<std::string, void *> privateSymbols;
     privateSymbols["atexit"] = (void *)atexit;
+#ifndef __APPLE__
     privateSymbols["at_quick_exit"] = (void *)at_quick_exit;
+#endif
 
     void *address;
     if (auto ptr = privateSymbols[funcStr]) {
