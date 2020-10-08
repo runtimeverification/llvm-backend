@@ -34,6 +34,8 @@ extern "C" {
     return blockheader {tag};
   }
 
+  bool during_gc() { return false; }
+
   void add_hash64(void*, uint64_t) {}
 
   void flush_IO_logs();

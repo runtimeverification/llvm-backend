@@ -569,8 +569,24 @@ extern "C" {
   block * hook_KREFLECTION_fresh(string * str) {
     throw std::invalid_argument("not implemented: KREFLECTION.fresh");
   }
+
+  int llvm_backend_argc = 0;
+  char ** llvm_backend_argv = nullptr;
+
   list hook_KREFLECTION_argv() {
-    throw std::invalid_argument("not implemented: KREFLECTION.argv");
+    if (!llvm_backend_argv)
+      throw std::invalid_argument("KREFLECTION.argv: no arguments given");
+
+    list l{};
+
+    for (int i = 0; i < llvm_backend_argc; i++) {
+      stringbuffer * buf = hook_BUFFER_empty();
+      buf = hook_BUFFER_concat_raw(buf, llvm_backend_argv[i], strlen(llvm_backend_argv[i]));
+      SortString str = hook_BUFFER_toString(buf);
+      l = l.push_back(KElem(static_cast<block *>(static_cast<void *>(str))));
+    }
+
+    return l;
   }
 
   SortIOFile hook_IO_mkstemp(SortString filename) {
