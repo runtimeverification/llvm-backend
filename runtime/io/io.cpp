@@ -571,7 +571,7 @@ extern "C" {
   }
 
   int llvm_backend_argc = 0;
-  char ** llvm_backend_argv = nullptr;
+  char const ** llvm_backend_argv = nullptr;
 
   list hook_KREFLECTION_argv() {
     if (!llvm_backend_argv)
@@ -583,7 +583,10 @@ extern "C" {
       stringbuffer * buf = hook_BUFFER_empty();
       buf = hook_BUFFER_concat_raw(buf, llvm_backend_argv[i], strlen(llvm_backend_argv[i]));
       SortString str = hook_BUFFER_toString(buf);
-      l = l.push_back(KElem(static_cast<block *>(static_cast<void *>(str))));
+      block * b = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(str)));
+      b->h = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("inj{SortString{}, SortKItem{}}"));
+      memcpy(b->children, &str, sizeof(str));
+      l = l.push_back(KElem(b));
     }
 
     return l;
