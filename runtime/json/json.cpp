@@ -148,7 +148,7 @@ struct KoreHandler : BaseReaderHandler<UTF8<>, KoreHandler> {
 
   bool EndObject(SizeType memberCount) {
     result = dotList();
-    for (int i = 0; i < memberCount; i++) {
+    for (SizeType i = 0; i < memberCount; i++) {
       jsonmember *member = (jsonmember *)koreAlloc(sizeof(jsonmember));
       member->h = membHdr();
       member->val = stack.back();
@@ -172,7 +172,7 @@ struct KoreHandler : BaseReaderHandler<UTF8<>, KoreHandler> {
 
   bool EndArray(SizeType elementCount) {
     result = dotList();
-    for (int i = 0; i < elementCount; i++) {
+    for (SizeType i = 0; i < elementCount; i++) {
       jsonlist *list = (jsonlist *)koreAlloc(sizeof(jsonlist));
       list->h = listHdr();
       list->hd = stack.back();

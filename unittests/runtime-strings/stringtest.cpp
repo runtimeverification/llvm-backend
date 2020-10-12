@@ -4,6 +4,7 @@
 #include<cstdint>
 #include<cstdlib>
 #include<cstring>
+#include<cmath>
 
 #include "runtime/header.h"
 #include "runtime/alloc.h"

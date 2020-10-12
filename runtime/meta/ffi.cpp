@@ -60,10 +60,11 @@ extern "C" {
   TAG_TYPE(slong)
   TAG_TYPE(longdouble)
   TAG_TYPE(pointer)
+#ifdef FFI_TARGET_HAS_COMPLEX_TYPE
   TAG_TYPE(complexfloat)
   TAG_TYPE(complexdouble)
   TAG_TYPE(complexlongdouble)
-
+#endif
   mpz_ptr move_int(mpz_t);
   char * getTerminatedString(string * str);
 
@@ -130,12 +131,14 @@ extern "C" {
         return &ffi_type_longdouble;
       } else if (symbol == tag_type_pointer()) {
         return &ffi_type_pointer;
+#ifdef FFI_TARGET_HAS_COMPLEX_TYPE
       } else if (symbol == tag_type_complexfloat()) {
         return &ffi_type_complex_float;
       } else if (symbol == tag_type_complexdouble()) {
         return &ffi_type_complex_double;
       } else if (symbol == tag_type_complexlongdouble()) {
         return &ffi_type_complex_longdouble;
+#endif
       }
     } else if (tag_hdr(elem->h.hdr) == (uint64_t)getTagForSymbolName(TYPETAG(struct))){
       list * elements = (list *) *elem->children;
@@ -148,7 +151,7 @@ extern "C" {
       structType->type = FFI_TYPE_STRUCT;
       structType->elements = (ffi_type **) malloc(sizeof(ffi_type *) * (numFields + 1));
 
-      for (int j = 0; j < numFields; j++) {
+      for (size_t j = 0; j < numFields; j++) {
         structField = hook_LIST_get_long(elements, j);
 
         if (tag_hdr(structField->h.hdr) != (uint64_t)getTagForSymbolName("inj{SortFFIType{}, SortKItem{}}")) {
@@ -194,7 +197,7 @@ extern "C" {
     argtypes = (ffi_type **) malloc(sizeof(ffi_type *) * nargs);
 
     block * elem;
-    for (int i = 0; i < nfixtypes; i++) {
+    for (size_t i = 0; i < nfixtypes; i++) {
         elem = hook_LIST_get_long(fixtypes, i);
         if (tag_hdr(elem->h.hdr) != (uint64_t)getTagForSymbolName("inj{SortFFIType{}, SortKItem{}}")) {
           throw std::invalid_argument("Fix types list contains invalid FFI type");
@@ -203,7 +206,7 @@ extern "C" {
         argtypes[i] = getTypeFromBlock((block *) *elem->children);
     }
 
-    for (int i = 0; i < nvartypes; i++) {
+    for (size_t i = 0; i < nvartypes; i++) {
         elem = hook_LIST_get_long(vartypes, i);
         if (tag_hdr(elem->h.hdr) != (uint64_t)getTagForSymbolName("inj{SortFFIType{}, SortKItem{}}")) {
           throw std::invalid_argument("Var types list contains invalid FFI type");
@@ -213,7 +216,7 @@ extern "C" {
     }
 
     void ** avalues = (void **) malloc(sizeof(void *) * nargs);
-    for (int i = 0; i < nargs; i++) {
+    for (size_t i = 0; i < nargs; i++) {
         elem = hook_LIST_get_long(args, i);
         if (tag_hdr(elem->h.hdr) != (uint64_t)getTagForSymbolName("inj{SortBytes{}, SortKItem{}}")) {
           throw std::invalid_argument("Args list contains non-bytes type");

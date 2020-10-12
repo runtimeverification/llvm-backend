@@ -267,8 +267,8 @@ BOOST_AUTO_TEST_CASE(lt) {
   set_float(arr+4, 24, 8, 1.0);
   set_float(arr+5, 24, 8, 1.0/0.0);
   set_float(nan, 24, 8, 0.0/0.0);
-  for (int i = 0; i < sizeof(arr)/sizeof(arr[0]); i++) {
-    for (int j = 0; j < sizeof(arr)/sizeof(arr[0]); j++) {
+  for (size_t i = 0; i < sizeof(arr)/sizeof(arr[0]); i++) {
+    for (size_t j = 0; j < sizeof(arr)/sizeof(arr[0]); j++) {
       bool result = hook_FLOAT_lt(arr+i, arr+j);
       if ((i == 2 && j == 3) || (i == 3 && j == 2)) {
         BOOST_CHECK(!result);
@@ -279,7 +279,7 @@ BOOST_AUTO_TEST_CASE(lt) {
       }
     }
   }
-  for (int i = 0; i < sizeof(arr)/sizeof(arr[0]); i++) {
+  for (size_t i = 0; i < sizeof(arr)/sizeof(arr[0]); i++) {
     BOOST_CHECK(!hook_FLOAT_lt(arr+i, nan));
     BOOST_CHECK(!hook_FLOAT_lt(nan, arr+i));
   }
@@ -295,8 +295,8 @@ BOOST_AUTO_TEST_CASE(le) {
   set_float(arr+4, 24, 8, 1.0);
   set_float(arr+5, 24, 8, 1.0/0.0);
   set_float(nan, 24, 8, 0.0/0.0);
-  for (int i = 0; i < sizeof(arr)/sizeof(arr[0]); i++) {
-    for (int j = 0; j < sizeof(arr)/sizeof(arr[0]); j++) {
+  for (size_t i = 0; i < sizeof(arr)/sizeof(arr[0]); i++) {
+    for (size_t j = 0; j < sizeof(arr)/sizeof(arr[0]); j++) {
       bool result = hook_FLOAT_le(arr+i, arr+j);
       if ((i == 2 && j == 3) || (i == 3 && j == 2)) {
         BOOST_CHECK(result);
@@ -307,7 +307,7 @@ BOOST_AUTO_TEST_CASE(le) {
       }
     }
   }
-  for (int i = 0; i < sizeof(arr)/sizeof(arr[0]); i++) {
+  for (size_t i = 0; i < sizeof(arr)/sizeof(arr[0]); i++) {
     BOOST_CHECK(!hook_FLOAT_le(arr+i, nan));
     BOOST_CHECK(!hook_FLOAT_le(nan, arr+i));
   }
@@ -323,8 +323,8 @@ BOOST_AUTO_TEST_CASE(gt) {
   set_float(arr+4, 24, 8, 1.0);
   set_float(arr+5, 24, 8, 1.0/0.0);
   set_float(nan, 24, 8, 0.0/0.0);
-  for (int i = 0; i < sizeof(arr)/sizeof(arr[0]); i++) {
-    for (int j = 0; j < sizeof(arr)/sizeof(arr[0]); j++) {
+  for (size_t i = 0; i < sizeof(arr)/sizeof(arr[0]); i++) {
+    for (size_t j = 0; j < sizeof(arr)/sizeof(arr[0]); j++) {
       bool result = hook_FLOAT_gt(arr+i, arr+j);
       if ((i == 2 && j == 3) || (i == 3 && j == 2)) {
         BOOST_CHECK(!result);
@@ -335,7 +335,7 @@ BOOST_AUTO_TEST_CASE(gt) {
       }
     }
   }
-  for (int i = 0; i < sizeof(arr)/sizeof(arr[0]); i++) {
+  for (size_t i = 0; i < sizeof(arr)/sizeof(arr[0]); i++) {
     BOOST_CHECK(!hook_FLOAT_gt(arr+i, nan));
     BOOST_CHECK(!hook_FLOAT_gt(nan, arr+i));
   }
@@ -351,8 +351,8 @@ BOOST_AUTO_TEST_CASE(ge) {
   set_float(arr+4, 24, 8, 1.0);
   set_float(arr+5, 24, 8, 1.0/0.0);
   set_float(nan, 24, 8, 0.0/0.0);
-  for (int i = 0; i < sizeof(arr)/sizeof(arr[0]); i++) {
-    for (int j = 0; j < sizeof(arr)/sizeof(arr[0]); j++) {
+  for (size_t i = 0; i < sizeof(arr)/sizeof(arr[0]); i++) {
+    for (size_t j = 0; j < sizeof(arr)/sizeof(arr[0]); j++) {
       bool result = hook_FLOAT_ge(arr+i, arr+j);
       if ((i == 2 && j == 3) || (i == 3 && j == 2)) {
         BOOST_CHECK(result);
@@ -363,7 +363,7 @@ BOOST_AUTO_TEST_CASE(ge) {
       }
     }
   }
-  for (int i = 0; i < sizeof(arr)/sizeof(arr[0]); i++) {
+  for (size_t i = 0; i < sizeof(arr)/sizeof(arr[0]); i++) {
     BOOST_CHECK(!hook_FLOAT_ge(arr+i, nan));
     BOOST_CHECK(!hook_FLOAT_ge(nan, arr+i));
   }
@@ -379,8 +379,8 @@ BOOST_AUTO_TEST_CASE(eq) {
   set_float(arr+4, 24, 8, 1.0);
   set_float(arr+5, 24, 8, 1.0/0.0);
   set_float(nan, 24, 8, 0.0/0.0);
-  for (int i = 0; i < sizeof(arr)/sizeof(arr[0]); i++) {
-    for (int j = 0; j < sizeof(arr)/sizeof(arr[0]); j++) {
+  for (size_t i = 0; i < sizeof(arr)/sizeof(arr[0]); i++) {
+    for (size_t j = 0; j < sizeof(arr)/sizeof(arr[0]); j++) {
       bool result = hook_FLOAT_eq(arr+i, arr+j);
       if ((i == 2 && j == 3) || (i == 3 && j == 2)) {
         BOOST_CHECK(result);
@@ -391,7 +391,7 @@ BOOST_AUTO_TEST_CASE(eq) {
       }
     }
   }
-  for (int i = 0; i < sizeof(arr)/sizeof(arr[0]); i++) {
+  for (size_t i = 0; i < sizeof(arr)/sizeof(arr[0]); i++) {
     BOOST_CHECK(!hook_FLOAT_eq(arr+i, nan));
     BOOST_CHECK(!hook_FLOAT_eq(nan, arr+i));
   }
