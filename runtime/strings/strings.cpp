@@ -112,7 +112,8 @@ extern "C" {
     }
     auto out = std::search(haystack->data + upos * sizeof(KCHAR), haystack->data + len(haystack) * sizeof(KCHAR),
         needle->data,   needle->data   + len(needle) * sizeof(KCHAR));
-    int64_t ret = (out - haystack->data) / sizeof(KCHAR);
+    assert(out >= haystack->data);
+    uint64_t ret = (out - haystack->data) / sizeof(KCHAR);
     // search returns the end of the range if it is not found, but we want -1 in such a case.
     auto res = (ret < len(haystack))?ret:-1;
     mpz_init_set_si(result, res);
@@ -129,7 +130,8 @@ extern "C" {
     auto end = (upos < len(haystack))?upos:len(haystack);
     auto out = std::find_end(&haystack->data[0], &haystack->data[end],
         &needle->data[0], &needle->data[len(needle)]);
-    auto ret = &*out - &haystack->data[0];
+    assert(&*out >= &haystack->data[0]);
+    uint64_t ret = &*out - &haystack->data[0];
     auto res = (ret < end)?ret:-1;
     mpz_init_set_si(result, res);
     return move_int(result);

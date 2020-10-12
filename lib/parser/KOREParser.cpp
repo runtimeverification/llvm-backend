@@ -39,6 +39,7 @@ static std::string str(token tok) {
   case token::STRING: return "<string>";
   case token::TOKEN_EOF: return "<EOF>";
   }
+  abort();
 }
 
 static struct {
@@ -310,7 +311,7 @@ ptr<KOREPattern> KOREParser::applicationPattern(std::string name) {
     consume(token::RIGHTPAREN);
     if (name == "\\left-assoc") {
       ptr<KOREPattern> accum = std::move(pats[0]);
-      for (int i = 1; i < pats.size(); i++) {
+      for (size_t i = 1; i < pats.size(); i++) {
         auto newAccum = KORECompositePattern::Create(pat->getConstructor());
         newAccum->addArgument(std::move(accum));
         newAccum->addArgument(std::move(pats[i]));
@@ -319,7 +320,7 @@ ptr<KOREPattern> KOREParser::applicationPattern(std::string name) {
       return accum;
     } else {
       ptr<KOREPattern> accum = std::move(pats[pats.size()-1]);
-      for (int i = pats.size() - 2; i >= 0; i--) {
+      for (size_t i = pats.size() - 2; i >= 0; i--) {
         auto newAccum = KORECompositePattern::Create(pat->getConstructor());
         newAccum->addArgument(std::move(pats[i]));
         newAccum->addArgument(std::move(accum));

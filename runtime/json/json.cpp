@@ -61,7 +61,7 @@ static blockheader kseqHeader = {getBlockHeaderForSymbol((uint64_t)getTagForSymb
 #define get_header(name, symbol) \
 static struct blockheader name() {\
   static struct blockheader hdr = {(uint64_t)-1}; \
-  if (hdr.hdr == -1) { \
+  if (hdr.hdr == (uint64_t)-1) { \
     hdr = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName(symbol)); \
   } \
   return hdr; \
@@ -79,7 +79,7 @@ get_header(listWrapHdr, "LblJSONList{}")
 #define get_block(name, symbol) \
 static block *name() {\
   static uint64_t tag = (uint64_t)-1; \
-  if (tag == -1) { \
+  if (tag == (uint64_t)-1) { \
     tag = (uint64_t)leaf_block(getTagForSymbolName(symbol)); \
   } \
   return (block *)tag; \

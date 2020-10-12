@@ -20,7 +20,7 @@ extern "C" {
 
 #define TAG_TYPE(NAME) static uint64_t tag_type_##NAME() {\
   static uint64_t tag = -1; \
-  if (tag == -1) { \
+  if (tag == (uint64_t)-1) { \
     tag = (uint64_t)leaf_block(getTagForSymbolName(TYPETAG(NAME))); \
   } \
   return tag; \

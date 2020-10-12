@@ -22,7 +22,13 @@ const size_t BLOCK_SIZE = 1024 * 1024;
 #define mem_block_start(ptr) \
   ((char *)(((uintptr_t)(ptr)) & ~(BLOCK_SIZE-1)))
 
-__attribute__ ((always_inline))
+#ifdef __clang__
+#define ALWAYS_INLINE __attribute__ ((always_inline))
+#else
+#define ALWAYS_INLINE
+#endif
+
+ALWAYS_INLINE
 void arenaReset(struct arena *Arena) {
   char id = Arena->allocation_semispace_id;
   if (id < 0) {
@@ -36,17 +42,17 @@ void arenaReset(struct arena *Arena) {
   Arena->allocation_semispace_id = id;
 }
 
-__attribute__ ((always_inline))
+ALWAYS_INLINE
 char getArenaAllocationSemispaceID(const struct arena *Arena) {
   return Arena->allocation_semispace_id;
 }
 
-__attribute__ ((always_inline))
+ALWAYS_INLINE
 char getArenaCollectionSemispaceID(const struct arena *Arena) {
   return ~Arena->allocation_semispace_id;
 }
 
-__attribute__ ((always_inline)) char getArenaSemispaceIDOfObject(void *ptr) {
+ALWAYS_INLINE char getArenaSemispaceIDOfObject(void *ptr) {
   return mem_block_header(ptr)->semispace;
 }
 
@@ -124,7 +130,7 @@ void *doAllocSlow(size_t requested, struct arena *Arena) {
   }
 }
 
-__attribute__ ((always_inline))
+ALWAYS_INLINE
 void *arenaAlloc(struct arena *Arena, size_t requested) {
   if (Arena->block + requested > Arena->block_end) {
     return doAllocSlow(requested, Arena);
@@ -135,7 +141,7 @@ void *arenaAlloc(struct arena *Arena, size_t requested) {
   return result;
 }
 
-__attribute__ ((always_inline))
+ALWAYS_INLINE
 void *arenaResizeLastAlloc(struct arena *Arena, ssize_t increase) {
   if (Arena->block + increase <= Arena->block_end) {
     Arena->block += increase;
@@ -144,7 +150,7 @@ void *arenaResizeLastAlloc(struct arena *Arena, ssize_t increase) {
   return 0;
 }
 
-__attribute__ ((always_inline)) void arenaSwapAndClear(struct arena *Arena) {
+ALWAYS_INLINE void arenaSwapAndClear(struct arena *Arena) {
   char *tmp = Arena->first_block;
   Arena->first_block = Arena->first_collection_block;
   Arena->first_collection_block = tmp;
@@ -152,17 +158,17 @@ __attribute__ ((always_inline)) void arenaSwapAndClear(struct arena *Arena) {
   arenaClear(Arena);
 }
 
-__attribute__ ((always_inline)) void arenaClear(struct arena *Arena) {
+ALWAYS_INLINE void arenaClear(struct arena *Arena) {
   Arena->block = Arena->first_block ? Arena->first_block + sizeof(memory_block_header) : 0;
   Arena->block_start = Arena->first_block;
   Arena->block_end = Arena->first_block ? Arena->first_block + BLOCK_SIZE : 0;
 }
 
-__attribute__ ((always_inline)) char *arenaStartPtr(const struct arena *Arena) {
+ALWAYS_INLINE char *arenaStartPtr(const struct arena *Arena) {
   return Arena->first_block ? Arena->first_block + sizeof(memory_block_header) : 0;
 }
 
-__attribute__ ((always_inline)) char **arenaEndPtr(struct arena *Arena) {
+ALWAYS_INLINE char **arenaEndPtr(struct arena *Arena) {
   return &Arena->block;
 }
 

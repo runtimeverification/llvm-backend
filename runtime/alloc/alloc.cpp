@@ -51,25 +51,31 @@ void setKoreMemoryFunctionsForGMP() {
    mp_set_memory_functions(koreAllocMP, koreReallocMP, koreFree);
 }
 
-__attribute__ ((always_inline)) void* koreAlloc(size_t requested) {
+#ifdef __clang__
+#define ALWAYS_INLINE __attribute__ ((always_inline))
+#else
+#define ALWAYS_INLINE
+#endif
+
+ALWAYS_INLINE void* koreAlloc(size_t requested) {
   return arenaAlloc(&youngspace, requested);
 }
 
-__attribute__ ((always_inline)) void* koreAllocToken(size_t requested) {
+ALWAYS_INLINE void* koreAllocToken(size_t requested) {
   size_t size = (requested + 7) & ~7;
   return arenaAlloc(&youngspace, size < 16 ? 16 : size);
 }
 
-__attribute__ ((always_inline)) void* koreAllocOld(size_t requested) {
+ALWAYS_INLINE void* koreAllocOld(size_t requested) {
   return arenaAlloc(&oldspace, requested);
 }
 
-__attribute__ ((always_inline)) void* koreAllocTokenOld(size_t requested) {
+ALWAYS_INLINE void* koreAllocTokenOld(size_t requested) {
   size_t size = (requested + 7) & ~7;
   return arenaAlloc(&oldspace, size < 16 ? 16 : size);
 }
 
-__attribute__ ((always_inline)) void* koreAllocAlwaysGC(size_t requested) {
+ALWAYS_INLINE void* koreAllocAlwaysGC(size_t requested) {
   return arenaAlloc(&alwaysgcspace, requested);
 }
 
@@ -106,25 +112,25 @@ void* koreReallocMP(void* ptr, size_t old_size, size_t new_size) {
 
 void koreFree(void* ptr, size_t size) {}
 
-__attribute__ ((always_inline)) void* koreAllocInteger(size_t requested) {
+ALWAYS_INLINE void* koreAllocInteger(size_t requested) {
   mpz_hdr *result = (mpz_hdr *) koreAlloc(sizeof(mpz_hdr));
   set_len(result, sizeof(mpz_hdr) - sizeof(blockheader));
   return &result->i;
 }
 
-__attribute__ ((always_inline)) void* koreAllocFloating(size_t requested) {
+ALWAYS_INLINE void* koreAllocFloating(size_t requested) {
   floating_hdr *result = (floating_hdr *) koreAlloc(sizeof(floating_hdr));
   set_len(result, sizeof(floating_hdr) - sizeof(blockheader));
   return &result->f;
 }
 
-__attribute__ ((always_inline)) void* koreAllocIntegerOld(size_t requested) {
+ALWAYS_INLINE void* koreAllocIntegerOld(size_t requested) {
   mpz_hdr *result = (mpz_hdr *) koreAllocOld(sizeof(mpz_hdr));
   set_len(result, sizeof(mpz_hdr) - sizeof(blockheader));
   return &result->i;
 }
 
-__attribute__ ((always_inline)) void* koreAllocFloatingOld(size_t requested) {
+ALWAYS_INLINE void* koreAllocFloatingOld(size_t requested) {
   floating_hdr *result = (floating_hdr *) koreAllocOld(sizeof(floating_hdr));
   set_len(result, sizeof(floating_hdr) - sizeof(blockheader));
   return &result->f;
