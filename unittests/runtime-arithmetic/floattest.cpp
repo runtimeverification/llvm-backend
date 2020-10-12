@@ -407,8 +407,8 @@ BOOST_AUTO_TEST_CASE(ne) {
   set_float(arr+4, 24, 8, 1.0);
   set_float(arr+5, 24, 8, 1.0/0.0);
   set_float(nan, 24, 8, 0.0/0.0);
-  for (int i = 0; i < sizeof(arr)/sizeof(arr[0]); i++) {
-    for (int j = 0; j < sizeof(arr)/sizeof(arr[0]); j++) {
+  for (size_t i = 0; i < sizeof(arr)/sizeof(arr[0]); i++) {
+    for (size_t j = 0; j < sizeof(arr)/sizeof(arr[0]); j++) {
       bool result = hook_FLOAT_ne(arr+i, arr+j);
       if ((i == 2 && j == 3) || (i == 3 && j == 2)) {
         BOOST_CHECK(!result);
@@ -419,7 +419,7 @@ BOOST_AUTO_TEST_CASE(ne) {
       }
     }
   }
-  for (int i = 0; i < sizeof(arr)/sizeof(arr[0]); i++) {
+  for (size_t i = 0; i < sizeof(arr)/sizeof(arr[0]); i++) {
     BOOST_CHECK(hook_FLOAT_ne(arr+i, nan));
     BOOST_CHECK(hook_FLOAT_ne(nan, arr+i));
   }
@@ -447,7 +447,7 @@ BOOST_AUTO_TEST_CASE(abs) {
   ref[6] = 3.0f;
   ref[7] = 0.5f;
   ref[8] = 0.0f/0.0f;
-  for (int i = 0; i < sizeof(ref)/sizeof(ref[0]); i++) {
+  for (size_t i = 0; i < sizeof(ref)/sizeof(ref[0]); i++) {
     floating *result = hook_FLOAT_abs(arr+i);
     float f = fabsf(ref[i]);
     if (f!=f) {
@@ -479,7 +479,7 @@ BOOST_AUTO_TEST_CASE(log) {
   ref[6] = 3.0f;
   ref[7] = 0.5f;
   ref[8] = 0.0f/0.0f;
-  for (int i = 0; i < sizeof(ref)/sizeof(ref[0]); i++) {
+  for (size_t i = 0; i < sizeof(ref)/sizeof(ref[0]); i++) {
     floating *result = hook_FLOAT_log(arr+i);
     float f = logf(ref[i]);
     if (f!=f) {
@@ -511,7 +511,7 @@ BOOST_AUTO_TEST_CASE(exp) {
   ref[6] = 3.0f;
   ref[7] = 0.5f;
   ref[8] = 0.0f/0.0f;
-  for (int i = 0; i < sizeof(ref)/sizeof(ref[0]); i++) {
+  for (size_t i = 0; i < sizeof(ref)/sizeof(ref[0]); i++) {
     floating *result = hook_FLOAT_exp(arr+i);
     float f = expf(ref[i]);
     if (f!=f) {
@@ -543,7 +543,7 @@ BOOST_AUTO_TEST_CASE(neg) {
   ref[6] = 3.0f;
   ref[7] = 0.5f;
   ref[8] = 0.0f/0.0f;
-  for (int i = 0; i < sizeof(ref)/sizeof(ref[0]); i++) {
+  for (size_t i = 0; i < sizeof(ref)/sizeof(ref[0]); i++) {
     floating *result = hook_FLOAT_neg(arr+i);
     float f = -ref[i];
     if (f!=f) {
@@ -575,8 +575,8 @@ BOOST_AUTO_TEST_CASE(min) {
   ref[6] = 3.0f;
   ref[7] = 0.5f;
   ref[8] = 0.0f/0.0f;
-  for (int i = 0; i < sizeof(ref)/sizeof(ref[0]); i++) {
-    for (int j = 0; j < sizeof(ref)/sizeof(ref[0]); j++) {
+  for (size_t i = 0; i < sizeof(ref)/sizeof(ref[0]); i++) {
+    for (size_t j = 0; j < sizeof(ref)/sizeof(ref[0]); j++) {
       floating *result = hook_FLOAT_min(arr+i, arr+j);
       float f = fminf(ref[i], ref[j]);
       if (f!=f) {
@@ -609,8 +609,8 @@ BOOST_AUTO_TEST_CASE(max) {
   ref[6] = 3.0f;
   ref[7] = 0.5f;
   ref[8] = 0.0f/0.0f;
-  for (int i = 0; i < sizeof(ref)/sizeof(ref[0]); i++) {
-    for (int j = 0; j < sizeof(ref)/sizeof(ref[0]); j++) {
+  for (size_t i = 0; i < sizeof(ref)/sizeof(ref[0]); i++) {
+    for (size_t j = 0; j < sizeof(ref)/sizeof(ref[0]); j++) {
       floating *result = hook_FLOAT_max(arr+i, arr+j);
       float f = fmaxf(ref[i], ref[j]);
       if (f!=f) {
@@ -643,8 +643,8 @@ BOOST_AUTO_TEST_CASE(add) {
   ref[6] = 3.0f;
   ref[7] = 0.5f;
   ref[8] = 0.0f/0.0f;
-  for (int i = 0; i < sizeof(ref)/sizeof(ref[0]); i++) {
-    for (int j = 0; j < sizeof(ref)/sizeof(ref[0]); j++) {
+  for (size_t i = 0; i < sizeof(ref)/sizeof(ref[0]); i++) {
+    for (size_t j = 0; j < sizeof(ref)/sizeof(ref[0]); j++) {
       floating *result = hook_FLOAT_add(arr+i, arr+j);
       float f = ref[i] + ref[j];
       if (f!=f) {
@@ -677,8 +677,8 @@ BOOST_AUTO_TEST_CASE(sub) {
   ref[6] = 3.0f;
   ref[7] = 0.5f;
   ref[8] = 0.0f/0.0f;
-  for (int i = 0; i < sizeof(ref)/sizeof(ref[0]); i++) {
-    for (int j = 0; j < sizeof(ref)/sizeof(ref[0]); j++) {
+  for (size_t i = 0; i < sizeof(ref)/sizeof(ref[0]); i++) {
+    for (size_t j = 0; j < sizeof(ref)/sizeof(ref[0]); j++) {
       floating *result = hook_FLOAT_sub(arr+i, arr+j);
       float f = ref[i] - ref[j];
       if (f!=f) {
@@ -711,8 +711,8 @@ BOOST_AUTO_TEST_CASE(mul) {
   ref[6] = 3.0f;
   ref[7] = 0.5f;
   ref[8] = 0.0f/0.0f;
-  for (int i = 0; i < sizeof(ref)/sizeof(ref[0]); i++) {
-    for (int j = 0; j < sizeof(ref)/sizeof(ref[0]); j++) {
+  for (size_t i = 0; i < sizeof(ref)/sizeof(ref[0]); i++) {
+    for (size_t j = 0; j < sizeof(ref)/sizeof(ref[0]); j++) {
       floating *result = hook_FLOAT_mul(arr+i, arr+j);
       float f = ref[i] * ref[j];
       if (f!=f) {
@@ -745,8 +745,8 @@ BOOST_AUTO_TEST_CASE(div) {
   ref[6] = 3.0f;
   ref[7] = 0.5f;
   ref[8] = 0.0f/0.0f;
-  for (int i = 0; i < sizeof(ref)/sizeof(ref[0]); i++) {
-    for (int j = 0; j < sizeof(ref)/sizeof(ref[0]); j++) {
+  for (size_t i = 0; i < sizeof(ref)/sizeof(ref[0]); i++) {
+    for (size_t j = 0; j < sizeof(ref)/sizeof(ref[0]); j++) {
       floating *result = hook_FLOAT_div(arr+i, arr+j);
       float f = ref[i] / ref[j];
       if (f!=f) {
@@ -779,8 +779,8 @@ BOOST_AUTO_TEST_CASE(rem) {
   ref[6] = 3.0f;
   ref[7] = 0.5f;
   ref[8] = 0.0f/0.0f;
-  for (int i = 0; i < sizeof(ref)/sizeof(ref[0]); i++) {
-    for (int j = 0; j < sizeof(ref)/sizeof(ref[0]); j++) {
+  for (size_t i = 0; i < sizeof(ref)/sizeof(ref[0]); i++) {
+    for (size_t j = 0; j < sizeof(ref)/sizeof(ref[0]); j++) {
       floating *result = hook_FLOAT_rem(arr+i, arr+j);
       float f = fmodf(ref[i], ref[j]);
       if (f!=f) {
@@ -813,8 +813,8 @@ BOOST_AUTO_TEST_CASE(pow) {
   ref[6] = 3.0f;
   ref[7] = 0.5f;
   ref[8] = 0.0f/0.0f;
-  for (int i = 0; i < sizeof(ref)/sizeof(ref[0]); i++) {
-    for (int j = 0; j < sizeof(ref)/sizeof(ref[0]); j++) {
+  for (size_t i = 0; i < sizeof(ref)/sizeof(ref[0]); i++) {
+    for (size_t j = 0; j < sizeof(ref)/sizeof(ref[0]); j++) {
       floating *result = hook_FLOAT_pow(arr+i, arr+j);
       float f = powf(ref[i], ref[j]);
       if (f!=f) {
@@ -849,7 +849,7 @@ BOOST_AUTO_TEST_CASE(root) {
   ref[8] = 0.0f/0.0f;
   mpz_t k;
   mpz_init_set_ui(k, 2);
-  for (int i = 0; i < sizeof(ref)/sizeof(ref[0]); i++) {
+  for (size_t i = 0; i < sizeof(ref)/sizeof(ref[0]); i++) {
     floating *result = hook_FLOAT_root(arr+i, k);
     float f = sqrt(ref[i]);
     if (f!=f) {
