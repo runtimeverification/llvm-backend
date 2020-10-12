@@ -167,6 +167,7 @@ llvm::DIType *getDebugType(ValueType type, std::string typeName) {
     abort();
 
   }
+  return nullptr;
 }
 
 llvm::DIType *getIntDebugType(void) {
