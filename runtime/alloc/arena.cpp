@@ -22,13 +22,11 @@ const size_t BLOCK_SIZE = 1024 * 1024;
 #define mem_block_start(ptr) \
   ((char *)(((uintptr_t)(ptr)) & ~(BLOCK_SIZE-1)))
 
-#ifdef __clang__
-#define ALWAYS_INLINE __attribute__ ((always_inline))
-#else
-#define ALWAYS_INLINE
-#endif
 
-ALWAYS_INLINE
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wattributes"
+
+__attribute__ ((always_inline))
 void arenaReset(struct arena *Arena) {
   char id = Arena->allocation_semispace_id;
   if (id < 0) {
@@ -42,17 +40,17 @@ void arenaReset(struct arena *Arena) {
   Arena->allocation_semispace_id = id;
 }
 
-ALWAYS_INLINE
+__attribute__ ((always_inline))
 char getArenaAllocationSemispaceID(const struct arena *Arena) {
   return Arena->allocation_semispace_id;
 }
 
-ALWAYS_INLINE
+__attribute__ ((always_inline))
 char getArenaCollectionSemispaceID(const struct arena *Arena) {
   return ~Arena->allocation_semispace_id;
 }
 
-ALWAYS_INLINE char getArenaSemispaceIDOfObject(void *ptr) {
+__attribute__ ((always_inline)) char getArenaSemispaceIDOfObject(void *ptr) {
   return mem_block_header(ptr)->semispace;
 }
 
@@ -130,7 +128,7 @@ void *doAllocSlow(size_t requested, struct arena *Arena) {
   }
 }
 
-ALWAYS_INLINE
+__attribute__ ((always_inline))
 void *arenaAlloc(struct arena *Arena, size_t requested) {
   if (Arena->block + requested > Arena->block_end) {
     return doAllocSlow(requested, Arena);
@@ -141,7 +139,7 @@ void *arenaAlloc(struct arena *Arena, size_t requested) {
   return result;
 }
 
-ALWAYS_INLINE
+__attribute__ ((always_inline))
 void *arenaResizeLastAlloc(struct arena *Arena, ssize_t increase) {
   if (Arena->block + increase <= Arena->block_end) {
     Arena->block += increase;
@@ -150,7 +148,7 @@ void *arenaResizeLastAlloc(struct arena *Arena, ssize_t increase) {
   return 0;
 }
 
-ALWAYS_INLINE void arenaSwapAndClear(struct arena *Arena) {
+__attribute__ ((always_inline)) void arenaSwapAndClear(struct arena *Arena) {
   char *tmp = Arena->first_block;
   Arena->first_block = Arena->first_collection_block;
   Arena->first_collection_block = tmp;
@@ -158,17 +156,17 @@ ALWAYS_INLINE void arenaSwapAndClear(struct arena *Arena) {
   arenaClear(Arena);
 }
 
-ALWAYS_INLINE void arenaClear(struct arena *Arena) {
+__attribute__ ((always_inline)) void arenaClear(struct arena *Arena) {
   Arena->block = Arena->first_block ? Arena->first_block + sizeof(memory_block_header) : 0;
   Arena->block_start = Arena->first_block;
   Arena->block_end = Arena->first_block ? Arena->first_block + BLOCK_SIZE : 0;
 }
 
-ALWAYS_INLINE char *arenaStartPtr(const struct arena *Arena) {
+__attribute__ ((always_inline)) char *arenaStartPtr(const struct arena *Arena) {
   return Arena->first_block ? Arena->first_block + sizeof(memory_block_header) : 0;
 }
 
-ALWAYS_INLINE char **arenaEndPtr(struct arena *Arena) {
+__attribute__ ((always_inline)) char **arenaEndPtr(struct arena *Arena) {
   return &Arena->block;
 }
 
@@ -229,3 +227,5 @@ void freeAllMemory() {
   next_superblock_ptr = 0;
   blocks_left = 0;
 }
+
+#pragma GCC diagnostic pop

@@ -12,20 +12,16 @@ extern "C" {
   static constexpr uint32_t HASH_THRESHOLD = 5;
   static constexpr uint32_t HASH_LENGTH_THRESHOLD = 1024;
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wattributes"
 
-#ifdef __clang__
-#define ALWAYS_INLINE __attribute__ ((always_inline))
-#else
-#define ALWAYS_INLINE
-#endif
-
-  ALWAYS_INLINE void add_hash8(void *h, uint8_t data) {
+__attribute__ ((always_inline)) void add_hash8(void *h, uint8_t data) {
     size_t *hash = (size_t *)h;
     *hash = ((*hash) ^ ((size_t)data)) * 1099511628211UL;
     hash_length++;
   }
 
-  ALWAYS_INLINE void add_hash64(void *h, uint64_t data) {
+  __attribute__ ((always_inline)) void add_hash64(void *h, uint64_t data) {
     uint8_t *buf = (uint8_t *)&data;
     add_hash8(h, buf[0]);
     add_hash8(h, buf[1]);
@@ -37,7 +33,7 @@ extern "C" {
     add_hash8(h, buf[7]);
   }
 
-  ALWAYS_INLINE void add_hash_str(void *h, char *data, size_t len) {
+  __attribute__ ((always_inline)) void add_hash_str(void *h, char *data, size_t len) {
     if (len + hash_length > HASH_LENGTH_THRESHOLD) {
       len = HASH_LENGTH_THRESHOLD - hash_length;
     }
@@ -45,6 +41,8 @@ extern "C" {
       add_hash8(h, data[i]);
     }
   }
+
+#pragma GCC diagnostic pop
 
   size_t hash_k(block *term) {
     size_t hash = 14695981039346656037ULL;
