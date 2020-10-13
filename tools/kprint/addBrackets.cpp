@@ -128,7 +128,7 @@ Fixity getFixity(KORESymbol *sym, PrettyPrintData const& data) {
  *
  * returns: the left capture of the term, or NULL if no such term exists
  */ 
-KORECompositePattern *getLeftCapture(KORECompositePattern *previousLeftCapture, KORECompositePattern *outer, size_t position, PrettyPrintData const& data) {
+KORECompositePattern *getLeftCapture(KORECompositePattern *previousLeftCapture, KORECompositePattern *outer, int position, PrettyPrintData const& data) {
   Fixity fixity = getFixity(outer->getConstructor(), data);
   if (position == 0 && (fixity & BARE_LEFT)) {
     return previousLeftCapture;
@@ -160,9 +160,9 @@ KORECompositePattern *getLeftCapture(KORECompositePattern *previousLeftCapture, 
  * returns: the right capture of the term, or NULL if no such term exists
  */ 
 
-KORECompositePattern *getRightCapture(KORECompositePattern *previousRightCapture, KORECompositePattern *outer, size_t position, PrettyPrintData const& data) {
+KORECompositePattern *getRightCapture(KORECompositePattern *previousRightCapture, KORECompositePattern *outer, int position, PrettyPrintData const& data) {
   Fixity fixity = getFixity(outer->getConstructor(), data);
-  if (position + 1 == outer->getArguments().size() && (fixity & BARE_RIGHT)) {
+  if (position == (int)outer->getArguments().size() - 1 && (fixity & BARE_RIGHT)) {
     return previousRightCapture;
   } else {
     return outer;
