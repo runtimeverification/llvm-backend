@@ -17,8 +17,8 @@ extern "C" {
 
 #define GETTAG(symbol) "Lbl'Hash'" #symbol "{}"
 #define ERRBLOCK(tag) (uint64_t)(leaf_block(tag))
-#define NUM_SYMBOLS 7
-  const char * symbols[NUM_SYMBOLS] = {GETTAG(EOF), GETTAG(ENOENT), GETTAG(EBADF), "inj{SortInt{}, SortIOInt{}}", "inj{SortIOError{}, SortKItem{}}", "kseq{}", GETTAG(systemResult)};
+#define NUM_SYMBOLS 8
+  const char * symbols[NUM_SYMBOLS] = {GETTAG(EOF), GETTAG(ENOENT), GETTAG(EBADF), "inj{SortInt{}, SortIOInt{}}", "inj{SortIOError{}, SortKItem{}}", "inj{SortString{}, SortKItem{}}", "kseq{}", GETTAG(systemResult)};
 
   uint32_t getTagForSymbolName(const char *s) {
     for (int i = 0; i < NUM_SYMBOLS; i++) {
@@ -33,6 +33,8 @@ extern "C" {
   struct blockheader getBlockHeaderForSymbol(uint32_t tag) {
     return blockheader {tag};
   }
+
+  bool during_gc() { return false; }
 
   void add_hash64(void*, uint64_t) {}
 
@@ -53,6 +55,10 @@ extern "C" {
   block * hook_IO_log(string * path, string * msg);
   block * hook_IO_system(string * cmd);
   mpz_ptr hook_IO_time(void);
+  list hook_KREFLECTION_argv();
+
+  extern int llvm_backend_argc;
+  extern char const ** llvm_backend_argv;
 
   mpz_ptr move_int(mpz_t i) {
     mpz_ptr result = (mpz_ptr)malloc(sizeof(__mpz_struct));
@@ -462,6 +468,26 @@ BOOST_AUTO_TEST_CASE(time) {
   BOOST_CHECK(time2 >= tt);
   BOOST_CHECK(time2 - tt < 5);
   BOOST_CHECK(tt >= 1573756117);
+}
+
+BOOST_AUTO_TEST_CASE(argv) {
+    char const *argv[] = {"./a.out", "--help", nullptr};
+    llvm_backend_argv = argv;
+    llvm_backend_argc = 2;
+    list ret = hook_KREFLECTION_argv();
+    BOOST_CHECK(ret.size() == 2);
+
+    BOOST_CHECK(ret[0].elem != nullptr);
+    BOOST_CHECK_EQUAL(ret[0].elem->h.hdr, getBlockHeaderForSymbol(getTagForSymbolName("inj{SortString{}, SortKItem{}}")).hdr);
+    string * arg0 = (string *) *(ret[0].elem->children);
+    BOOST_CHECK_EQUAL(0, strncmp(arg0->data, argv[0], strlen(argv[0])));
+    BOOST_CHECK_EQUAL(strlen(argv[0]), len(arg0));
+
+    BOOST_CHECK(ret[1].elem != nullptr);
+    BOOST_CHECK_EQUAL(ret[1].elem->h.hdr, getBlockHeaderForSymbol(getTagForSymbolName("inj{SortString{}, SortKItem{}}")).hdr);
+    string * arg1 = (string *) *(ret[1].elem->children);
+    BOOST_CHECK_EQUAL(0, strncmp(arg1->data, argv[1], strlen(argv[1])));
+    BOOST_CHECK_EQUAL(strlen(argv[1]), len(arg1));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
