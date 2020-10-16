@@ -20,7 +20,7 @@ struct arena {
   static struct arena name = { 0, 0, 0, 0, 0, id }
 
 #define mem_block_start(ptr) \
-  ((char *)(((uintptr_t)(ptr)) & ~(BLOCK_SIZE-1)))
+  ((char *)(((uintptr_t)(ptr) - 1) & ~(BLOCK_SIZE-1)))
 
 // Resets the given arena.
 void arenaReset(struct arena *);

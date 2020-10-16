@@ -290,7 +290,7 @@ void koreCollect(void** roots, uint8_t nroots, layoutitem *typeInfo) {
   if (collect_old || !previous_oldspace_alloc_ptr) {
     scan_ptr = oldspace_ptr();
   } else {
-    if (mem_block_start(previous_oldspace_alloc_ptr) == previous_oldspace_alloc_ptr) {
+    if (mem_block_start(previous_oldspace_alloc_ptr+1) == previous_oldspace_alloc_ptr) {
       // this means that the previous oldspace allocation pointer points to an
       // address that is megabyte-aligned. This can only happen if we have just
       // filled up a block but have not yet allocated the next block in the
