@@ -1,5 +1,5 @@
 {
-  lib, stdenv, fetchgit,
+  lib, stdenv, gitignoreSource,
   cmake, flex, pkgconfig,
   llvmPackages,
   boost, gmp, jemalloc, libffi, libyaml, mpfr,
@@ -13,7 +13,7 @@ in
 
 stdenv.mkDerivation {
   inherit pname version;
-  src = ../.;
+  src = gitignoreSource [ "/nix" "*.nix" ] ../.;
 
   nativeBuildInputs = [ cmake clang flex llvm pkgconfig ];
   buildInputs = [ boost gmp libffi libyaml jemalloc mpfr ];

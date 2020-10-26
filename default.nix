@@ -6,9 +6,10 @@ in
 { pkgs ? pinned }:
 
 let
-  inherit (pkgs) callPackage;
+  inherit (pkgs) callPackage nix-gitignore;
 
   llvm-backend = callPackage ./nix/llvm-backend.nix {
+    inherit (nix-gitignore) gitignoreSource;
     llvmPackages = pkgs.llvmPackages_10;
   };
 
