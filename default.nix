@@ -13,8 +13,15 @@ let
     llvmPackages = pkgs.llvmPackages_10;
   };
 
+  mavenix = import sources."mavenix" { inherit pkgs; };
+
+  llvm-backend-matching = import ./nix/llvm-backend-matching.nix {
+    inherit mavenix;
+  };
+
   self = {
-    inherit llvm-backend;
+    inherit llvm-backend llvm-backend-matching;
+    inherit mavenix;
   };
 
 in self
