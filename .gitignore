@@ -44,3 +44,4 @@ TAGS
 .idea
 *.iml
 /result*
+test/int/*.interpreter
