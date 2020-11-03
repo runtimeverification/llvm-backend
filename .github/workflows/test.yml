@@ -6,7 +6,9 @@ jobs:
   tests:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2.3.1
+    - uses: actions/checkout@v2.3.4
+      with:
+        submodules: recursive
     - uses: cachix/install-nix-action@v11
     - run: nix-build -A llvm-backend -A llvm-backend-matching
     - run: nix-shell --run "echo OK"
