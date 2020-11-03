@@ -36,7 +36,7 @@ let
       '' + mkExtraBuildCommands cc;
     };
 
-  inherit (pkgs) diffutils ncurses gmp mpfr libffi jemalloc;
+  inherit (pkgs) coreutils diffutils git ncurses gmp mpfr libffi jemalloc;
 
   default = import ./. { inherit pkgs; };
   inherit (default) llvm-backend llvm-backend-matching;
@@ -47,9 +47,8 @@ in mkShell {
   ];
 
   buildInputs = [
-    diffutils
-    llvm-backend
+    coreutils diffutils git ncurses gmp mpfr libffi jemalloc
     clang
-    ncurses gmp mpfr libffi jemalloc
+    llvm-backend
   ];
 }

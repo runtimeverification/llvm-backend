@@ -13,7 +13,7 @@ in
 
 stdenv.mkDerivation {
   inherit pname version;
-  src = gitignoreSource [ "/nix" "*.nix" ] ../.;
+  src = gitignoreSource [ "/nix" "*.nix" "*.nix.sh" ] ../.;
 
   nativeBuildInputs = [ cmake clang flex llvm pkgconfig ];
   buildInputs = [ boost gmp libffi libyaml jemalloc mpfr ];
