@@ -14,7 +14,7 @@ mkdir -p build; cd build
 cp ../test/Makefile .
 
 sed ../bin/llvm-kompile-testing \
-  -e "s,/bin/bash,$SHELL," \
+  -e "s,/bin/bash,/usr/bin/env bash," \
   -e "s,@PROJECT_SOURCE_DIR@,$src," \
   > llvm-kompile-testing
 chmod +x llvm-kompile-testing
