@@ -10,6 +10,10 @@ jobs:
       with:
         submodules: recursive
     - uses: cachix/install-nix-action@v11
+    - uses: cachix/cachix-action@v7
+      with:
+        name: runtimeverification
+        signingKey: '${{ secrets.CACHIX_SIGNING_KEY }}'
     - run: nix-build -A llvm-backend -A llvm-backend-matching
     - run: nix-shell --run "echo OK"
     - run: nix-build test.nix
