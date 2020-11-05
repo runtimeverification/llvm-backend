@@ -9,6 +9,10 @@ let self = mavenix.buildMaven {
     jar = "${self}/share/java/llvm-backend-matching-1.0-SNAPSHOT-jar-with-dependencies.jar";
   };
 
+  postInstall = ''
+    test -f "$out/share/java/llvm-backend-matching-1.0-SNAPSHOT-jar-with-dependencies.jar"
+  '';
+
   # Add build dependencies
   #
   #buildInputs = with pkgs; [ git makeWrapper ];
@@ -26,12 +30,18 @@ let self = mavenix.buildMaven {
   #'';
 
   # Add extra maven dependencies which might not have been picked up
-  #   automatically
+  # automatically. Update the mavenix lock file after changing `deps`.
   #
-  #deps = [
-  #  { path = "org/group-id/artifactId/version/file.jar"; sha1 = "0123456789abcdef"; }
-  #  { path = "org/group-id/artifactId/version/file.pom"; sha1 = "123456789abcdef0"; }
-  #];
+  deps = [
+    {
+      path = "org/scala-lang/scala-compiler/2.12.4/scala-compiler-2.12.4.jar";
+      sha1 = "s0xw0c4d71qh8jgy1jipy385jzihx766";
+    }
+    {
+      path = "org/scala-lang/scala-compiler/2.12.4/scala-compiler-2.12.4.pom";
+      sha1 = "nx34986x5284ggylf3bg8yd36hilsn5i";
+    }
+  ];
 
   # Add dependencies on other mavenix derivations
   #
