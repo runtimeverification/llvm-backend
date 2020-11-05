@@ -114,11 +114,11 @@
       </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
-	<artifactId>exec-maven-plugin</artifactId>
-	<version>1.6.0</version>
-	<configuration>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>1.6.0</version>
+        <configuration>
           <mainClass>org.kframework.backend.llvm.matching.Matching</mainClass>
-	</configuration>
+        </configuration>
       </plugin>
     </plugins>
   </build>
