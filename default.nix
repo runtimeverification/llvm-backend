@@ -8,9 +8,11 @@ in
 let
   inherit (pkgs) callPackage nix-gitignore;
 
+  llvmPackages = pkgs.llvmPackages_10;
+
   llvm-backend = callPackage ./nix/llvm-backend.nix {
     inherit (nix-gitignore) gitignoreSource;
-    llvmPackages = pkgs.llvmPackages_10;
+    inherit llvmPackages;
   };
 
   mavenix = import sources."mavenix" { inherit pkgs; };
@@ -24,7 +26,6 @@ let
   # library. We override that configuration to inherit libstdc++ from stdenv.
   clang =
     let
-      llvmPackages = pkgs.llvmPackages_10;
       override = attrs: {
         extraBuildCommands = ''
           ${attrs.extraBuildCommands}
