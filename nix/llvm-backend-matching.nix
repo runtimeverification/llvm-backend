@@ -1,9 +1,13 @@
 { mavenix }:
 
-mavenix.buildMaven {
+let self = mavenix.buildMaven {
   src = ../matching;
   doCheck = false;
   infoFile = ./llvm-backend-matching.mavenix.lock;
+
+  passthru = {
+    jar = "${self}/share/java/llvm-backend-matching-1.0-SNAPSHOT-jar-with-dependencies.jar";
+  };
 
   # Add build dependencies
   #
@@ -41,4 +45,4 @@ mavenix.buildMaven {
   #
   #remotes = { central = "https://repo.maven.apache.org/maven2"; };
   #settings = ./settings.xml;
-}
+}; in self
