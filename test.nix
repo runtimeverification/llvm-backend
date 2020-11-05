@@ -7,7 +7,7 @@ in
 
 let
   inherit (pkgs) stdenv;
-  inherit (pkgs) coreutils diffutils git ncurses gmp mpfr libffi jemalloc;
+  inherit (pkgs) diffutils ncurses gmp mpfr libffi jemalloc;
 
   default = import ./. { inherit pkgs; };
   inherit (default) clang llvm-backend llvm-backend-matching llvm-kompile-testing;
@@ -19,7 +19,7 @@ stdenv.mkDerivation {
   src = llvm-backend.src;
   preferLocalBuild = true;
   buildInputs = [
-    diffutils git ncurses gmp mpfr libffi jemalloc
+    diffutils ncurses gmp mpfr libffi jemalloc
     clang llvm-backend llvm-kompile-testing
   ];
   configurePhase = "true";
