@@ -12,4 +12,4 @@ jobs:
     - uses: cachix/install-nix-action@v11
     - run: nix-build -A llvm-backend -A llvm-backend-matching
     - run: nix-shell --run "echo OK"
-    - run: ./test.nix.sh
+    - run: nix-build test.nix
