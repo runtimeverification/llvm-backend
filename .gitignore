@@ -43,3 +43,5 @@ TAGS
 # Java stuff
 .idea
 *.iml
+/result*
+test/int/*.interpreter

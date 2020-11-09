@@ -57,4 +57,4 @@ $(DEFNDIR)/%.testn: $(INTDIR)/%.interpreter $(INPUTDIR)/%$(SUFINKORE)
 .PHONY: clean
 
 clean:
-	rm $(INT)
+	rm -f $(INT)

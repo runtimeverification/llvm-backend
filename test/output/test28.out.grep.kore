@@ -1,1 +1,1 @@
-Lbl'-LT-'k'-GT-'{}(kseq{}(inj{SortIOFile{}, SortKItem{}}(Lbl'Hash'tempFile{}(\\dv{SortString{}}("test-foo-[a-zA-Z0-9]*"),\\dv{SortInt{}}("3"))),dotk{}()))
+Lbl'-LT-'k'-GT-'{}(kseq{}(inj{SortIOFile{}, SortKItem{}}(Lbl'Hash'tempFile{}(\\dv{SortString{}}("test-foo-[a-zA-Z0-9]*"),\\dv{SortInt{}}("[0-9]\+"))),dotk{}()))
