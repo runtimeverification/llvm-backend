@@ -192,7 +192,7 @@ void SwitchNode::codegen(Decision *d) {
           Child = ChildPtr;
           break;
         default:
-          Child = new llvm::LoadInst(ChildPtr, binding.first.substr(0, max_name_length), d->CurrentBlock);
+          Child = new llvm::LoadInst(ChildPtr->getType()->getPointerElementType(), ChildPtr, binding.first.substr(0, max_name_length), d->CurrentBlock);
           break;
         }
         auto BlockPtr = llvm::PointerType::getUnqual(d->Module->getTypeByName(BLOCK_STRUCT));
@@ -215,7 +215,7 @@ void SwitchNode::codegen(Decision *d) {
       }
     } else {
       if (currChoiceBlock && _case.getLiteral() == 1) {
-        auto PrevDepth = new llvm::LoadInst(d->ChoiceDepth, "", d->CurrentBlock);
+        auto PrevDepth = new llvm::LoadInst(d->ChoiceDepth->getType()->getPointerElementType(), d->ChoiceDepth, "", d->CurrentBlock);
         auto CurrDepth = llvm::BinaryOperator::Create(llvm::Instruction::Add, PrevDepth, llvm::ConstantInt::get(llvm::Type::getInt64Ty(d->Ctx), 1), "", d->CurrentBlock);
         new llvm::StoreInst(CurrDepth, d->ChoiceDepth, d->CurrentBlock);
 
@@ -391,7 +391,7 @@ llvm::Value *Decision::load(var_type name) {
   if (!sym) {
     sym = this->decl(name);
   }
-  return new llvm::LoadInst(sym, name.first.substr(0, max_name_length), this->CurrentBlock);
+  return new llvm::LoadInst(sym->getType()->getPointerElementType(), sym, name.first.substr(0, max_name_length), this->CurrentBlock);
 }
 
 void Decision::store(var_type name, llvm::Value *val) {
@@ -426,9 +426,9 @@ static void initChoiceBuffer(DecisionNode *dt, llvm::Module *module, llvm::Basic
   auto firstElt = llvm::GetElementPtrInst::CreateInBounds(ty, choiceBuffer, {zero, zero}, "", block);
   new llvm::StoreInst(llvm::BlockAddress::get(block->getParent(), stuck), firstElt, block);
 
-  llvm::LoadInst *currDepth = new llvm::LoadInst(choiceDepth, "", fail);
+  llvm::LoadInst *currDepth = new llvm::LoadInst(choiceDepth->getType()->getPointerElementType(), choiceDepth, "", fail);
   auto currentElt = llvm::GetElementPtrInst::CreateInBounds(ty, choiceBuffer, {zero, currDepth}, "", fail);
-  llvm::LoadInst *failAddress = new llvm::LoadInst(currentElt, "", fail);
+  llvm::LoadInst *failAddress = new llvm::LoadInst(currentElt->getType()->getPointerElementType(), currentElt, "", fail);
   auto newDepth = llvm::BinaryOperator::Create(llvm::Instruction::Sub, currDepth, llvm::ConstantInt::get(llvm::Type::getInt64Ty(module->getContext()), 1), "", fail);
   new llvm::StoreInst(newDepth, choiceDepth, fail);
   llvm::IndirectBrInst *jump = llvm::IndirectBrInst::Create(failAddress, 1, fail);
@@ -518,7 +518,7 @@ void abortWhenStuck(llvm::BasicBlock *CurrentBlock, llvm::Module *Module, KORESy
       llvm::Value *ChildValue = codegen.load(std::make_pair("_" + std::to_string(idx+1), type));
       llvm::Value *ChildPtr = llvm::GetElementPtrInst::CreateInBounds(BlockType, Block, {llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0), llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), idx + 2)}, "", CurrentBlock);
       if (ChildValue->getType() == ChildPtr->getType()) {
-        ChildValue = new llvm::LoadInst(ChildValue, "", CurrentBlock);
+        ChildValue = new llvm::LoadInst(ChildValue->getType()->getPointerElementType(), ChildValue, "", CurrentBlock);
       }
       new llvm::StoreInst(ChildValue, ChildPtr, CurrentBlock);
     }
@@ -653,7 +653,7 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> stepFunctionHeader(uns
   i = 0;
   std::vector<llvm::Value *> phis;
   for (auto ptr : rootPtrs) {
-    auto loaded = new llvm::LoadInst(ptr, "", collect);
+    auto loaded = new llvm::LoadInst(ptr->getType()->getPointerElementType(), ptr, "", collect);
     auto phi = llvm::PHINode::Create(loaded->getType(), 2, "phi", merge);
     phi->addIncoming(loaded, collect);
     phi->addIncoming(roots[i++], checkCollect);
