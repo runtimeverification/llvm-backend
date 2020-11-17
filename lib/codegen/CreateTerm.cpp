@@ -926,7 +926,7 @@ bool makeFunction(std::string name, KOREPattern *pattern, KOREDefinition *defini
     for (auto val = applyRule->arg_begin(); val != applyRule->arg_end(); ++val, ++i) {
       subst.insert({paramNames[i], val});
       if (debugArgs[i]) {
-        initDebugParam(applyRule, i, paramNames[i], params[paramNames[i]], llvm::dyn_cast<llvm::DIType>(debugArgs[i])->getName());
+        initDebugParam(applyRule, i, paramNames[i], params[paramNames[i]], llvm::dyn_cast<llvm::DIType>(debugArgs[i])->getName().str());
       }
     }
     CreateTerm creator = CreateTerm(subst, definition, block, Module, false);
@@ -1004,7 +1004,7 @@ std::string makeApplyRuleFunction(KOREAxiomDeclaration *axiom, KOREDefinition *d
     for (auto val = applyRule->arg_begin(); val != applyRule->arg_end(); ++val, ++i) {
       subst.insert({paramNames[i], val});
       if (debugArgs[i]) {
-        initDebugParam(applyRule, i, paramNames[i], params[paramNames[i]], llvm::dyn_cast<llvm::DIType>(debugArgs[i])->getName());
+        initDebugParam(applyRule, i, paramNames[i], params[paramNames[i]], llvm::dyn_cast<llvm::DIType>(debugArgs[i])->getName().str());
       }
     }
     CreateTerm creator = CreateTerm(subst, definition, block, Module, false);

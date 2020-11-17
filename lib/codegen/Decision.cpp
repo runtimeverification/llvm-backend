@@ -487,10 +487,10 @@ void makeEvalOrAnywhereFunction(KORESymbol *function, KOREDefinition *definition
   Decision codegen(definition, block, fail, jump, choiceBuffer, choiceDepth, module, returnSort, nullptr, nullptr, nullptr);
   for (auto val = matchFunc->arg_begin(); val != matchFunc->arg_end(); ++val, ++i) {
     val->setName("_" + std::to_string(i+1));
-    codegen.store(std::make_pair(val->getName(), val->getType()), val);
+    codegen.store(std::make_pair(val->getName().str(), val->getType()), val);
     std::ostringstream Out;
     function->getArguments()[i]->print(Out);
-    initDebugParam(matchFunc, i, val->getName(), cats[i], Out.str());
+    initDebugParam(matchFunc, i, val->getName().str(), cats[i], Out.str());
   }
   addStuck(stuck, module, function, codegen, definition);
 
@@ -708,7 +708,7 @@ void makeStepFunction(KOREDefinition *definition, llvm::Module *module, Decision
   auto collectedVal = result.first[0];
   collectedVal->setName("_1");
   Decision codegen(definition, result.second, fail, jump, choiceBuffer, choiceDepth, module, {SortCategory::Symbol, 0}, nullptr, nullptr, nullptr);
-  codegen.store(std::make_pair(collectedVal->getName(), collectedVal->getType()), collectedVal);
+  codegen.store(std::make_pair(collectedVal->getName().str(), collectedVal->getType()), collectedVal);
   auto phi = llvm::PHINode::Create(collectedVal->getType(), 2, "phi_1", stuck);
   phi->addIncoming(val, block);
   phi->addIncoming(collectedVal, pre_stuck);
@@ -749,7 +749,7 @@ void makeMatchReasonFunction(KOREDefinition *definition, llvm::Module *module, K
   llvm::BranchInst::Create(stuck, pre_stuck);
   val->setName("_1");
   Decision codegen(definition, block, fail, jump, choiceBuffer, choiceDepth, module, {SortCategory::Symbol, 0}, FailSubject, FailPattern, FailSort);
-  codegen.store(std::make_pair(val->getName(), val->getType()), val);
+  codegen.store(std::make_pair(val->getName().str(), val->getType()), val);
   llvm::ReturnInst::Create(module->getContext(), stuck);
 
   codegen(dt);
@@ -843,7 +843,7 @@ void makeStepFunction(KOREAxiomDeclaration *axiom, KOREDefinition *definition, l
   Decision codegen(definition, header.second, fail, jump, choiceBuffer, choiceDepth, module, {SortCategory::Symbol, 0}, nullptr, nullptr, nullptr);
   for (auto val : header.first) {
     val->setName(res.residuals[i].occurrence.substr(0, max_name_length));
-    codegen.store(std::make_pair(val->getName(), val->getType()), val);
+    codegen.store(std::make_pair(val->getName().str(), val->getType()), val);
     stuckSubst.insert({val->getName(), phis[i]});
     phis[i++]->addIncoming(val, pre_stuck);
   }
