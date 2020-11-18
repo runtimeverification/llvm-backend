@@ -17,7 +17,7 @@ typedef struct {
 const size_t BLOCK_SIZE = 1024 * 1024;
 
 #define mem_block_header(ptr) \
-  ((memory_block_header *)(((uintptr_t)(ptr)) & ~(BLOCK_SIZE-1)))
+  ((memory_block_header *)(((uintptr_t)(ptr) - 1) & ~(BLOCK_SIZE-1)))
 
 __attribute__ ((always_inline))
 void arenaReset(struct arena *Arena) {
