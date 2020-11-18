@@ -117,9 +117,9 @@ static void emitDataTableForSymbol(std::string name, llvm::Type *ty, llvm::DITyp
   llvm::Constant *zero = llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0);
   auto retval = llvm::GetElementPtrInst::Create(
     tableType, globalVar, {zero, offset}, "", MergeBlock);
+  MergeBlock->insertInto(func);
   auto load = new llvm::LoadInst(retval->getType()->getPointerElementType(), retval, "", MergeBlock);
   llvm::ReturnInst::Create(Ctx, load, MergeBlock);
-  MergeBlock->insertInto(func);
   addAbort(stuck, module);
   stuck->insertInto(func);
 }
