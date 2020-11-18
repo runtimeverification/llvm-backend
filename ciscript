@@ -11,7 +11,7 @@ fi
 rm -rf build
 mkdir -p build
 cd build
-cmake .. -DCMAKE_BUILD_TYPE=$1 -DCMAKE_INSTALL_PREFIX=install -DGC_INTERVAL=1
+cmake .. -DCMAKE_BUILD_TYPE=$1 -DCMAKE_INSTALL_PREFIX=install -DGC_THRESHOLD=1
 make -j`nproc`
 if [[ "$1" == "GcStats"* ]]; then
   make install

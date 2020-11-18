@@ -25,6 +25,7 @@ static char *last_alloc_ptr;
 #endif
 
 size_t numBytesLiveAtCollection[1 << AGE_WIDTH];
+void set_gc_threshold(size_t);
 
 bool during_gc() {
   return is_gc;
@@ -323,6 +324,7 @@ void koreCollect(void** roots, uint8_t nroots, layoutitem *typeInfo) {
 #endif
   MEM_LOG("Finishing garbage collection\n");
   is_gc = false;
+  set_gc_threshold(youngspace_size());
 }
 
 void freeAllKoreMem() {

@@ -165,7 +165,7 @@ install(
 file(COPY ${PROJECT_SOURCE_DIR}/deps/immer/immer DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/include)
 file(COPY ${PROJECT_SOURCE_DIR}/deps/rapidjson/include/rapidjson DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/include)
 
-set(GC_INTERVAL 2000 CACHE STRING "Garbage collect every N steps")
+set(GC_THRESHOLD 2097152 CACHE STRING "Initial Young Generation Size")
 
 set(NOT_YOUNG_OBJECT_BIT 0x10000000000000)
 if(CMAKE_BUILD_TYPE STREQUAL "GcStats")

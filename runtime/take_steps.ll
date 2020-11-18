@@ -5,16 +5,19 @@ target triple = "x86_64-unknown-linux-gnu"
 %block = type { %blockheader, [0 x i64 *] } ; 16-bit layout, 8-bit length, 32-bit tag, children
 
 declare fastcc %block* @step(%block*)
+declare i8* @youngspace_ptr()
+declare i8** @young_alloc_ptr()
+declare i64 @ptrDiff(i8*, i8*)
 
 @depth = thread_local global i64 zeroinitializer
 @steps = thread_local global i64 zeroinitializer
-@INTERVAL = internal thread_local global i64 @GC_INTERVAL@
 @current_interval = thread_local global i64 0
+@GC_THRESHOLD = thread_local global i64 @GC_THRESHOLD@
 
 @gc_roots = global [256 x i8 *] zeroinitializer
 
-define void @set_gc_interval(i64 %interval) {
-  store i64 %interval, i64* @INTERVAL
+define void @set_gc_threshold(i64 %threshold) {
+  store i64 %threshold, i64* @GC_THRESHOLD
   ret void
 }
 
@@ -37,13 +40,15 @@ else:
 
 define i1 @is_collection() {
 entry:
-  %currInterval = load i64, i64* @current_interval
-  %interval = load i64, i64* @INTERVAL
-  %isCollect = icmp eq i64 %interval, %currInterval
-  %currIntervalPlusOne = add i64 %currInterval, 1
-  %newInterval = select i1 %isCollect, i64 0, i64 %currIntervalPlusOne
-  store i64 %newInterval, i64* @current_interval
-  ret i1 %isCollect
+  %threshold = load i64, i64* @GC_THRESHOLD
+  %youngspaceStart = call i8* @youngspace_ptr()
+  %youngspaceEndPtr = call i8** @young_alloc_ptr()
+  %youngspaceEnd = load i8*, i8** %youngspaceEndPtr
+  %youngspaceAllocatedBytes = call i64 @ptrDiff(i8* %youngspaceEnd, i8* %youngspaceStart)
+  %allocatedTimes100 = mul i64 %youngspaceAllocatedBytes, 100
+  %thresholdTimes95 = mul i64 %threshold, 95
+  %collection = icmp ugt i64 %allocatedTimes100, %thresholdTimes95
+  ret i1 %collection
 }
 
 define %block* @take_steps(i64 %depth, %block* %subject) {
