@@ -192,7 +192,7 @@ void SwitchNode::codegen(Decision *d) {
           Child = ChildPtr;
           break;
         default:
-          Child = new llvm::LoadInst(ChildPtr, binding.first.substr(0, max_name_length), d->CurrentBlock);
+          Child = new llvm::LoadInst(ChildPtr->getType()->getPointerElementType(), ChildPtr, binding.first.substr(0, max_name_length), d->CurrentBlock);
           break;
         }
         auto BlockPtr = llvm::PointerType::getUnqual(d->Module->getTypeByName(BLOCK_STRUCT));
@@ -215,7 +215,7 @@ void SwitchNode::codegen(Decision *d) {
       }
     } else {
       if (currChoiceBlock && _case.getLiteral() == 1) {
-        auto PrevDepth = new llvm::LoadInst(d->ChoiceDepth, "", d->CurrentBlock);
+        auto PrevDepth = new llvm::LoadInst(d->ChoiceDepth->getType()->getPointerElementType(), d->ChoiceDepth, "", d->CurrentBlock);
         auto CurrDepth = llvm::BinaryOperator::Create(llvm::Instruction::Add, PrevDepth, llvm::ConstantInt::get(llvm::Type::getInt64Ty(d->Ctx), 1), "", d->CurrentBlock);
         new llvm::StoreInst(CurrDepth, d->ChoiceDepth, d->CurrentBlock);
 
@@ -391,7 +391,7 @@ llvm::Value *Decision::load(var_type name) {
   if (!sym) {
     sym = this->decl(name);
   }
-  return new llvm::LoadInst(sym, name.first.substr(0, max_name_length), this->CurrentBlock);
+  return new llvm::LoadInst(sym->getType()->getPointerElementType(), sym, name.first.substr(0, max_name_length), this->CurrentBlock);
 }
 
 void Decision::store(var_type name, llvm::Value *val) {
@@ -426,9 +426,9 @@ static void initChoiceBuffer(DecisionNode *dt, llvm::Module *module, llvm::Basic
   auto firstElt = llvm::GetElementPtrInst::CreateInBounds(ty, choiceBuffer, {zero, zero}, "", block);
   new llvm::StoreInst(llvm::BlockAddress::get(block->getParent(), stuck), firstElt, block);
 
-  llvm::LoadInst *currDepth = new llvm::LoadInst(choiceDepth, "", fail);
+  llvm::LoadInst *currDepth = new llvm::LoadInst(choiceDepth->getType()->getPointerElementType(), choiceDepth, "", fail);
   auto currentElt = llvm::GetElementPtrInst::CreateInBounds(ty, choiceBuffer, {zero, currDepth}, "", fail);
-  llvm::LoadInst *failAddress = new llvm::LoadInst(currentElt, "", fail);
+  llvm::LoadInst *failAddress = new llvm::LoadInst(currentElt->getType()->getPointerElementType(), currentElt, "", fail);
   auto newDepth = llvm::BinaryOperator::Create(llvm::Instruction::Sub, currDepth, llvm::ConstantInt::get(llvm::Type::getInt64Ty(module->getContext()), 1), "", fail);
   new llvm::StoreInst(newDepth, choiceDepth, fail);
   llvm::IndirectBrInst *jump = llvm::IndirectBrInst::Create(failAddress, 1, fail);
@@ -487,10 +487,10 @@ void makeEvalOrAnywhereFunction(KORESymbol *function, KOREDefinition *definition
   Decision codegen(definition, block, fail, jump, choiceBuffer, choiceDepth, module, returnSort, nullptr, nullptr, nullptr);
   for (auto val = matchFunc->arg_begin(); val != matchFunc->arg_end(); ++val, ++i) {
     val->setName("_" + std::to_string(i+1));
-    codegen.store(std::make_pair(val->getName(), val->getType()), val);
+    codegen.store(std::make_pair(val->getName().str(), val->getType()), val);
     std::ostringstream Out;
     function->getArguments()[i]->print(Out);
-    initDebugParam(matchFunc, i, val->getName(), cats[i], Out.str());
+    initDebugParam(matchFunc, i, val->getName().str(), cats[i], Out.str());
   }
   addStuck(stuck, module, function, codegen, definition);
 
@@ -518,7 +518,7 @@ void abortWhenStuck(llvm::BasicBlock *CurrentBlock, llvm::Module *Module, KORESy
       llvm::Value *ChildValue = codegen.load(std::make_pair("_" + std::to_string(idx+1), type));
       llvm::Value *ChildPtr = llvm::GetElementPtrInst::CreateInBounds(BlockType, Block, {llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0), llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), idx + 2)}, "", CurrentBlock);
       if (ChildValue->getType() == ChildPtr->getType()) {
-        ChildValue = new llvm::LoadInst(ChildValue, "", CurrentBlock);
+        ChildValue = new llvm::LoadInst(ChildValue->getType()->getPointerElementType(), ChildValue, "", CurrentBlock);
       }
       new llvm::StoreInst(ChildValue, ChildPtr, CurrentBlock);
     }
@@ -653,7 +653,7 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> stepFunctionHeader(uns
   i = 0;
   std::vector<llvm::Value *> phis;
   for (auto ptr : rootPtrs) {
-    auto loaded = new llvm::LoadInst(ptr, "", collect);
+    auto loaded = new llvm::LoadInst(ptr->getType()->getPointerElementType(), ptr, "", collect);
     auto phi = llvm::PHINode::Create(loaded->getType(), 2, "phi", merge);
     phi->addIncoming(loaded, collect);
     phi->addIncoming(roots[i++], checkCollect);
@@ -708,7 +708,7 @@ void makeStepFunction(KOREDefinition *definition, llvm::Module *module, Decision
   auto collectedVal = result.first[0];
   collectedVal->setName("_1");
   Decision codegen(definition, result.second, fail, jump, choiceBuffer, choiceDepth, module, {SortCategory::Symbol, 0}, nullptr, nullptr, nullptr);
-  codegen.store(std::make_pair(collectedVal->getName(), collectedVal->getType()), collectedVal);
+  codegen.store(std::make_pair(collectedVal->getName().str(), collectedVal->getType()), collectedVal);
   auto phi = llvm::PHINode::Create(collectedVal->getType(), 2, "phi_1", stuck);
   phi->addIncoming(val, block);
   phi->addIncoming(collectedVal, pre_stuck);
@@ -749,7 +749,7 @@ void makeMatchReasonFunction(KOREDefinition *definition, llvm::Module *module, K
   llvm::BranchInst::Create(stuck, pre_stuck);
   val->setName("_1");
   Decision codegen(definition, block, fail, jump, choiceBuffer, choiceDepth, module, {SortCategory::Symbol, 0}, FailSubject, FailPattern, FailSort);
-  codegen.store(std::make_pair(val->getName(), val->getType()), val);
+  codegen.store(std::make_pair(val->getName().str(), val->getType()), val);
   llvm::ReturnInst::Create(module->getContext(), stuck);
 
   codegen(dt);
@@ -843,7 +843,7 @@ void makeStepFunction(KOREAxiomDeclaration *axiom, KOREDefinition *definition, l
   Decision codegen(definition, header.second, fail, jump, choiceBuffer, choiceDepth, module, {SortCategory::Symbol, 0}, nullptr, nullptr, nullptr);
   for (auto val : header.first) {
     val->setName(res.residuals[i].occurrence.substr(0, max_name_length));
-    codegen.store(std::make_pair(val->getName(), val->getType()), val);
+    codegen.store(std::make_pair(val->getName().str(), val->getType()), val);
     stuckSubst.insert({val->getName(), phis[i]});
     phis[i++]->addIncoming(val, pre_stuck);
   }

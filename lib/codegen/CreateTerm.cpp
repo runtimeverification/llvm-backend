@@ -537,7 +537,7 @@ llvm::Value *CreateTerm::createHook(KORECompositePattern *hookAtt, KOREComposite
     if (nwords == 0) {
       return result;
     } else if (nwords == 1) {
-      auto Word = new llvm::LoadInst(Ptr, "word", CurrentBlock);
+      auto Word = new llvm::LoadInst(Ptr->getType()->getPointerElementType(), Ptr, "word", CurrentBlock);
       if (cat.bits == 64) {
         return Word;
       } else {
@@ -545,7 +545,7 @@ llvm::Value *CreateTerm::createHook(KORECompositePattern *hookAtt, KOREComposite
       }
     } else { //nwords >= 2
       for (size_t i = 0; i < nwords; i++) {
-        auto Word = new llvm::LoadInst(Ptr, "word", CurrentBlock);
+        auto Word = new llvm::LoadInst(Ptr->getType()->getPointerElementType(), Ptr, "word", CurrentBlock);
         auto Zext = new llvm::ZExtInst(Word, Type, "extended", CurrentBlock);
         auto Shl = llvm::BinaryOperator::Create(llvm::Instruction::Shl, result, llvm::ConstantInt::get(Type, 64), "shift", CurrentBlock);
         result = llvm::BinaryOperator::Create(llvm::Instruction::Or, Shl, Zext, "or", CurrentBlock);
@@ -764,7 +764,7 @@ llvm::Value *CreateTerm::notInjectionCase(KORECompositePattern *constructor, llv
     }
     llvm::Value *ChildPtr = llvm::GetElementPtrInst::CreateInBounds(BlockType, Block, {llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0), llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), idx++)}, "", CurrentBlock);
     if (ChildValue->getType() == ChildPtr->getType()) {
-      ChildValue = new llvm::LoadInst(ChildValue, "", CurrentBlock);
+      ChildValue = new llvm::LoadInst(ChildValue->getType()->getPointerElementType(), ChildValue, "", CurrentBlock);
     }
     new llvm::StoreInst(ChildValue, ChildPtr, CurrentBlock);
   }
@@ -926,7 +926,7 @@ bool makeFunction(std::string name, KOREPattern *pattern, KOREDefinition *defini
     for (auto val = applyRule->arg_begin(); val != applyRule->arg_end(); ++val, ++i) {
       subst.insert({paramNames[i], val});
       if (debugArgs[i]) {
-        initDebugParam(applyRule, i, paramNames[i], params[paramNames[i]], llvm::dyn_cast<llvm::DIType>(debugArgs[i])->getName());
+        initDebugParam(applyRule, i, paramNames[i], params[paramNames[i]], llvm::dyn_cast<llvm::DIType>(debugArgs[i])->getName().str());
       }
     }
     CreateTerm creator = CreateTerm(subst, definition, block, Module, false);
@@ -1004,7 +1004,7 @@ std::string makeApplyRuleFunction(KOREAxiomDeclaration *axiom, KOREDefinition *d
     for (auto val = applyRule->arg_begin(); val != applyRule->arg_end(); ++val, ++i) {
       subst.insert({paramNames[i], val});
       if (debugArgs[i]) {
-        initDebugParam(applyRule, i, paramNames[i], params[paramNames[i]], llvm::dyn_cast<llvm::DIType>(debugArgs[i])->getName());
+        initDebugParam(applyRule, i, paramNames[i], params[paramNames[i]], llvm::dyn_cast<llvm::DIType>(debugArgs[i])->getName().str());
       }
     }
     CreateTerm creator = CreateTerm(subst, definition, block, Module, false);
