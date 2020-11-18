@@ -214,6 +214,10 @@ ssize_t ptrDiff(char *ptr1, char *ptr2) {
   }
 }
 
+size_t arenaSize(const struct arena *Arena) {
+  return Arena->num_blocks * (BLOCK_SIZE - sizeof(memory_block_header));
+}
+
 void freeAllMemory() {
   memory_block_header *superblock = (memory_block_header *)first_superblock_ptr;
   while (superblock) {

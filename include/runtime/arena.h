@@ -86,6 +86,9 @@ char *movePtr(char *, size_t, const char *);
 // Given two pointers to objects allocated in the same arena, return the number of bytes they are separated by within the virtual block of memory represented by the blocks of that arena. This difference will include blocks containing sentinel bytes. Undefined behavior will result if the pointers belong to different arenas.
 ssize_t ptrDiff(char *, char *);
 
+// return the total number of allocatable bytes currently in the arena in its active semispace.
+size_t arenaSize(const struct arena *);
+
 // Deallocates all the memory allocated for registered arenas.
 void freeAllMemory(void);
 
