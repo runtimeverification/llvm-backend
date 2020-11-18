@@ -85,6 +85,7 @@ static void freshBlock(struct arena *Arena) {
       memory_block_header *nextHeader = (memory_block_header *)nextBlock;
       nextHeader->next_block = 0;
       nextHeader->semispace = Arena->allocation_semispace_id;
+      Arena->num_blocks++;
     } else {
       nextBlock = *(char**)Arena->block_start;
       if (Arena->block != Arena->block_end) {
@@ -101,12 +102,12 @@ static void freshBlock(struct arena *Arena) {
         memory_block_header *nextHeader = (memory_block_header *)nextBlock;
         nextHeader->next_block = 0;
         nextHeader->semispace = Arena->allocation_semispace_id;
+        Arena->num_blocks++;
       }
     }
     Arena->block = nextBlock + sizeof(memory_block_header);
     Arena->block_start = nextBlock;
     Arena->block_end = nextBlock + BLOCK_SIZE;
-    Arena->num_blocks++;
     MEM_LOG("New block at %p (remaining %zd)\n", Arena->block, BLOCK_SIZE - sizeof(memory_block_header));
 }
 
