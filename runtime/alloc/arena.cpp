@@ -215,7 +215,7 @@ ssize_t ptrDiff(char *ptr1, char *ptr2) {
 }
 
 size_t arenaSize(const struct arena *Arena) {
-  return Arena->num_blocks * (BLOCK_SIZE - sizeof(memory_block_header));
+  return (Arena->num_blocks > Arena->num_collection_blocks ? Arena->num_blocks : Arena->num_collection_blocks) * (BLOCK_SIZE - sizeof(memory_block_header));
 }
 
 void freeAllMemory() {
