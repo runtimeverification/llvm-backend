@@ -11,7 +11,6 @@ let
   llvmPackages = pkgs.llvmPackages_10;
 
   llvm-backend = callPackage ./nix/llvm-backend.nix {
-    inherit (nix-gitignore) gitignoreSource;
     inherit llvmPackages;
   };
 
