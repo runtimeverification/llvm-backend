@@ -358,28 +358,28 @@ void int_hash(mpz_t i, void *hasher) {
 
 static block * dotK = leaf_block(getTagForSymbolName("dotk{}"));
 
-static gmp_randstate_t randState;
-static bool randStateInitialized = false;
+gmp_randstate_t kllvm_randState;
+bool kllvm_randStateInitialized = false;
 
 SortK hook_INT_srand(SortInt seed) {
-  if (!randStateInitialized) {
-    gmp_randinit_default(randState);
+  if (!kllvm_randStateInitialized) {
+    gmp_randinit_default(kllvm_randState);
   }
-  gmp_randseed(randState, seed);
-  randStateInitialized = true;
+  gmp_randseed(kllvm_randState, seed);
+  kllvm_randStateInitialized = true;
   return dotK;
 }
 
 SortInt hook_INT_rand(SortInt upperBound) {
   mpz_t result;
   mpz_init(result);
-  if (!randStateInitialized) {
-    gmp_randinit_default(randState);
+  if (!kllvm_randStateInitialized) {
+    gmp_randinit_default(kllvm_randState);
     mpz_set_si(result, time(NULL));
-    gmp_randseed(randState, result);
-    randStateInitialized = true;
+    gmp_randseed(kllvm_randState, result);
+    kllvm_randStateInitialized = true;
   }
-  mpz_urandomm(result, randState, upperBound);
+  mpz_urandomm(result, kllvm_randState, upperBound);
   return move_int(result);
 }
 
