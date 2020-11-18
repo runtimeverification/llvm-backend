@@ -643,7 +643,9 @@ static void visitCollection(KOREDefinition *definition, llvm::Module *module, KO
   auto unitPtr = getSymbolNamePtr(unit->getConstructor(), nullptr, module);
   auto element = (KORECompositePattern *)sortDecl->getAttributes().at("element")->getArguments()[0].get();
   auto elementPtr = getSymbolNamePtr(element->getConstructor(), nullptr, module);
-  llvm::CallInst::Create(func->arg_begin()+offset, {func->arg_begin()+1, ChildPtr, unitPtr, elementPtr, concatPtr}, "", CaseBlock);
+  auto file = llvm::PointerType::getUnqual(llvm::StructType::create(Ctx, "writer"));
+  auto fnType = llvm::FunctionType::get(llvm::Type::getVoidTy(Ctx), {file, ChildPtr->getType(), llvm::Type::getInt8PtrTy(Ctx), llvm::Type::getInt8PtrTy(Ctx), llvm::Type::getInt8PtrTy(Ctx)}, false);
+  llvm::CallInst::Create(fnType, func->arg_begin()+offset, {func->arg_begin()+1, ChildPtr, unitPtr, elementPtr, concatPtr}, "", CaseBlock);
 }
 
 static void getVisitor(KOREDefinition *definition, llvm::Module *module, KORESymbol *symbol, llvm::BasicBlock *CaseBlock) {
@@ -656,6 +658,7 @@ static void getVisitor(KOREDefinition *definition, llvm::Module *module, KORESym
   auto cast = new llvm::BitCastInst(func->arg_begin(),
       llvm::PointerType::getUnqual(BlockType), "", CaseBlock);
   unsigned i = 0;
+  auto file = llvm::PointerType::getUnqual(llvm::StructType::create(Ctx, "writer"));
   for (auto sort : symbol->getArguments()) {
     auto compositeSort = dynamic_cast<KORECompositeSort *>(sort.get());
     ValueType cat = compositeSort->getCategory(definition);
@@ -674,26 +677,27 @@ static void getVisitor(KOREDefinition *definition, llvm::Module *module, KORESym
     switch(cat.cat) {
     case SortCategory::Variable:
     case SortCategory::Symbol:
-      llvm::CallInst::Create(func->arg_begin()+2, {func->arg_begin()+1, Child, CharPtr, llvm::ConstantInt::get(llvm::Type::getInt1Ty(Ctx), cat.cat == SortCategory::Variable)}, "", CaseBlock);
+      llvm::CallInst::Create(llvm::FunctionType::get(llvm::Type::getVoidTy(Ctx), {file, Child->getType(), llvm::Type::getInt8PtrTy(Ctx), llvm::Type::getInt1Ty(Ctx)}, false), func->arg_begin()+2, {func->arg_begin()+1, Child, CharPtr, llvm::ConstantInt::get(llvm::Type::getInt1Ty(Ctx), cat.cat == SortCategory::Variable)}, "", CaseBlock);
       break;
     case SortCategory::Int:
-      llvm::CallInst::Create(func->arg_begin()+6, {func->arg_begin()+1, Child, CharPtr}, "", CaseBlock);
+      llvm::CallInst::Create(llvm::FunctionType::get(llvm::Type::getVoidTy(Ctx), {file, Child->getType(), llvm::Type::getInt8PtrTy(Ctx)}, false), func->arg_begin()+6, {func->arg_begin()+1, Child, CharPtr}, "", CaseBlock);
       break;
     case SortCategory::Float:
-      llvm::CallInst::Create(func->arg_begin()+7, {func->arg_begin()+1, Child, CharPtr}, "", CaseBlock);
+      llvm::CallInst::Create(llvm::FunctionType::get(llvm::Type::getVoidTy(Ctx), {file, Child->getType(), llvm::Type::getInt8PtrTy(Ctx)}, false), func->arg_begin()+7, {func->arg_begin()+1, Child, CharPtr}, "", CaseBlock);
       break;
     case SortCategory::Bool:
-      llvm::CallInst::Create(func->arg_begin()+8, {func->arg_begin()+1, Child, CharPtr}, "", CaseBlock);
+      llvm::CallInst::Create(llvm::FunctionType::get(llvm::Type::getVoidTy(Ctx), {file, Child->getType(), llvm::Type::getInt8PtrTy(Ctx)}, false), func->arg_begin()+8, {func->arg_begin()+1, Child, CharPtr}, "", CaseBlock);
       break;
     case SortCategory::StringBuffer:
-      llvm::CallInst::Create(func->arg_begin()+9, {func->arg_begin()+1, Child, CharPtr}, "", CaseBlock);
+      llvm::CallInst::Create(llvm::FunctionType::get(llvm::Type::getVoidTy(Ctx), {file, Child->getType(), llvm::Type::getInt8PtrTy(Ctx)}, false), func->arg_begin()+9, {func->arg_begin()+1, Child, CharPtr}, "", CaseBlock);
       break;
     case SortCategory::MInt: {
       llvm::Value *mint = new llvm::LoadInst(ChildPtr->getType()->getPointerElementType(), ChildPtr, "mint", CaseBlock);
       size_t nwords = (cat.bits + 63) / 64;
       auto nbits = llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), cat.bits);
+      auto fnType = llvm::FunctionType::get(llvm::Type::getVoidTy(Ctx), {file, llvm::Type::getInt64PtrTy(Ctx), llvm::Type::getInt64Ty(Ctx), llvm::Type::getInt8PtrTy(Ctx)}, false);
       if (nwords == 0) {
-        llvm::CallInst::Create(func->arg_begin()+10, {func->arg_begin()+1, llvm::ConstantPointerNull::get(llvm::Type::getInt64PtrTy(Ctx)), nbits, CharPtr}, "", CaseBlock);
+        llvm::CallInst::Create(fnType, func->arg_begin()+10, {func->arg_begin()+1, llvm::ConstantPointerNull::get(llvm::Type::getInt64PtrTy(Ctx)), nbits, CharPtr}, "", CaseBlock);
       } else {
         auto Ptr = allocateTerm(llvm::Type::getInt64Ty(Ctx), llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), nwords * 8), CaseBlock, "koreAllocAlwaysGC");
         if (nwords == 1) {
@@ -714,7 +718,7 @@ static void getVisitor(KOREDefinition *definition, llvm::Module *module, KORESym
             accum = llvm::BinaryOperator::Create(llvm::Instruction::LShr, accum, llvm::ConstantInt::get(mint->getType(), 64), "shift", CaseBlock);
           }
         }
-        llvm::CallInst::Create(func->arg_begin()+10, {func->arg_begin()+1, Ptr, nbits, CharPtr}, "", CaseBlock);
+        llvm::CallInst::Create(fnType, func->arg_begin()+10, {func->arg_begin()+1, Ptr, nbits, CharPtr}, "", CaseBlock);
       }
       break;
     } case SortCategory::Map:
@@ -730,7 +734,7 @@ static void getVisitor(KOREDefinition *definition, llvm::Module *module, KORESym
       abort();
     }
     if (i != symbol->getArguments().size() - 1) {
-      llvm::CallInst::Create(func->arg_begin()+11, {func->arg_begin()+1}, "", CaseBlock);
+      llvm::CallInst::Create(llvm::FunctionType::get(llvm::Type::getVoidTy(Ctx), {file}, false), func->arg_begin()+11, {func->arg_begin()+1}, "", CaseBlock);
     }
     i++;
   }
