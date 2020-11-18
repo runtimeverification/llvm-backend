@@ -11,6 +11,8 @@ struct arena {
   char* block_start;
   char* block_end;
   char *first_collection_block;
+  size_t num_blocks;
+  size_t num_collection_blocks;
   char allocation_semispace_id;
 };
 

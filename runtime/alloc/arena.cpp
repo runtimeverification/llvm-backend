@@ -30,6 +30,8 @@ void arenaReset(struct arena *Arena) {
   Arena->block_start = 0;
   Arena->block_end = 0;
   Arena->first_collection_block = 0;
+  Arena->num_blocks = 0;
+  Arena->num_collection_blocks = 0;
   Arena->allocation_semispace_id = id;
 }
 
@@ -104,6 +106,7 @@ static void freshBlock(struct arena *Arena) {
     Arena->block = nextBlock + sizeof(memory_block_header);
     Arena->block_start = nextBlock;
     Arena->block_end = nextBlock + BLOCK_SIZE;
+    Arena->num_blocks++;
     MEM_LOG("New block at %p (remaining %zd)\n", Arena->block, BLOCK_SIZE - sizeof(memory_block_header));
 }
 
@@ -145,6 +148,9 @@ __attribute__ ((always_inline)) void arenaSwapAndClear(struct arena *Arena) {
   char *tmp = Arena->first_block;
   Arena->first_block = Arena->first_collection_block;
   Arena->first_collection_block = tmp;
+  size_t tmp2 = Arena->num_blocks;
+  Arena->num_blocks = Arena->num_collection_blocks;
+  Arena->num_collection_blocks = tmp2;
   Arena->allocation_semispace_id = ~Arena->allocation_semispace_id;
   arenaClear(Arena);
 }
