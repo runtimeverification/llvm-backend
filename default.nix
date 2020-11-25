@@ -10,6 +10,20 @@ let
 
   llvmPackages = pkgs.llvmPackages_10;
 
+  # The backend requires clang/lld/libstdc++ at runtime.
+  # The closest configuration in Nixpkgs is clang/lld without any C++ standard
+  # library. We override that configuration to inherit libstdc++ from stdenv.
+  clang =
+    let
+      override = attrs: {
+        extraBuildCommands = ''
+          ${attrs.extraBuildCommands}
+          sed -i $out/nix-support/cc-cflags -e '/^-nostdlib/ d'
+        '';
+      };
+    in
+      llvmPackages.lldClangNoLibcxx.override override;
+
   llvm-backend = callPackage ./nix/llvm-backend.nix {
     inherit llvmPackages;
   };
@@ -32,20 +46,6 @@ let
       chmod +x "$out/bin/llvm-kompile-testing"
       patchShebangs "$out/bin/llvm-kompile-testing"
     '';
-
-  # The backend requires clang/lld/libstdc++ at runtime.
-  # The closest configuration in Nixpkgs is clang/lld without any C++ standard
-  # library. We override that configuration to inherit libstdc++ from stdenv.
-  clang =
-    let
-      override = attrs: {
-        extraBuildCommands = ''
-          ${attrs.extraBuildCommands}
-          sed -i $out/nix-support/cc-cflags -e '/^-nostdlib/ d'
-        '';
-      };
-    in
-      llvmPackages.lldClangNoLibcxx.override override;
 
   self = {
     inherit clang llvm-backend llvm-backend-matching llvm-kompile-testing;

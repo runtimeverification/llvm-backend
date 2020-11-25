@@ -1,14 +1,14 @@
 {
-  lib, stdenv, nix-gitignore,
+  lib, nix-gitignore,
   cmake, flex, pkgconfig,
   llvmPackages,
   boost, gmp, jemalloc, libffi, libyaml, mpfr,
 }:
 
 let inherit (nix-gitignore) gitignoreSourcePure; in
+let inherit (llvmPackages) stdenv llvm; in
 
 let
-  inherit (llvmPackages) llvm clang;
   pname = "llvm-backend";
   version = "0";
 in
@@ -32,12 +32,12 @@ stdenv.mkDerivation {
       ]
       ./..;
 
-  nativeBuildInputs = [ cmake clang flex llvm pkgconfig ];
+  nativeBuildInputs = [ cmake flex llvm pkgconfig ];
   buildInputs = [ boost gmp libffi libyaml jemalloc mpfr ];
 
   cmakeFlags = [
-    ''-DCMAKE_C_COMPILER=${lib.getBin clang}/bin/cc''
-    ''-DCMAKE_CXX_COMPILER=${lib.getBin clang}/bin/c++''
+    ''-DCMAKE_C_COMPILER=${lib.getBin stdenv.cc}/bin/cc''
+    ''-DCMAKE_CXX_COMPILER=${lib.getBin stdenv.cc}/bin/c++''
   ];
   NIX_CFLAGS_COMPILE = [ "-Wno-error" ];
 
