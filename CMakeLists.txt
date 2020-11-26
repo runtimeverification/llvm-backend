@@ -100,10 +100,18 @@ macro(kllvm_add_tool name)
   # Link against LLVM libraries
   llvm_config(${name})
 if(APPLE)
+if(NOT USE_NIX)
   target_link_libraries(${name} PUBLIC "-ljemalloc" "-Wl,-rpath /usr/local/lib" "-ldl")
 else()
-  target_link_libraries(${name} PUBLIC "-ljemalloc" "-Wl,-rpath=/usr/local/lib" "-ldl")
-endif()
+  target_link_libraries(${name} PUBLIC "-ljemalloc" "-ldl")
+endif() # NOT USE_NIX
+else()
+if(NOT USE_NIX)
+  target_link_libraries(${name} PUBLIC "-ljemalloc" "-Wl,-rpath /usr/local/lib" "-ldl")
+else()
+  target_link_libraries(${name} PUBLIC "-ljemalloc" "-ldl")
+endif() # NOT USE_NIX
+endif() # APPLE
 endmacro(kllvm_add_tool)
 
 install(
