@@ -35,11 +35,13 @@ stdenv.mkDerivation {
   nativeBuildInputs = [ cmake flex llvm pkgconfig ];
   buildInputs = [ boost gmp libffi libyaml jemalloc mpfr ];
 
-  cmakeFlags = [
-    ''-DCMAKE_C_COMPILER=${lib.getBin stdenv.cc}/bin/cc''
-    ''-DCMAKE_CXX_COMPILER=${lib.getBin stdenv.cc}/bin/c++''
-    ''-DUSE_NIX=TRUE''
-  ];
+  cmakeFlags =
+    [
+      ''-DCMAKE_C_COMPILER=${lib.getBin stdenv.cc}/bin/cc''
+      ''-DCMAKE_CXX_COMPILER=${lib.getBin stdenv.cc}/bin/c++''
+      ''-DUSE_NIX=TRUE''
+      ''-DUSE_LTO=${if stdenv.isDarwin then "FALSE" else "TRUE"}''
+    ];
   NIX_CFLAGS_COMPILE = [ "-Wno-error" ];
 
   doCheck = true;
