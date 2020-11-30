@@ -43,6 +43,16 @@ size_t youngspace_size(void) {
   return arenaSize(&youngspace);
 }
 
+bool youngspaceAlmostFull(size_t threshold) {
+  char *nextBlock = *(char **)youngspace.block_start;
+  if (nextBlock) {
+    // not on the last block, so short circuit and assume that we can keep allocating for now.
+    return false;
+  }
+  ptrdiff_t freeBytes = youngspace.block_end - youngspace.block;
+  return freeBytes * 100 < threshold * 5;
+}
+
 void koreAllocSwap(bool swapOld) {
   arenaSwapAndClear(&youngspace);
   arenaClear(&alwaysgcspace);

@@ -7,7 +7,7 @@ target triple = "x86_64-unknown-linux-gnu"
 declare fastcc %block* @step(%block*)
 declare i8* @youngspace_ptr()
 declare i8** @young_alloc_ptr()
-declare i64 @ptrDiff(i8*, i8*)
+declare i1 @youngspaceAlmostFull(i64)
 
 @depth = thread_local global i64 zeroinitializer
 @steps = thread_local global i64 zeroinitializer
@@ -41,13 +41,7 @@ else:
 define i1 @is_collection() {
 entry:
   %threshold = load i64, i64* @GC_THRESHOLD
-  %youngspaceStart = call i8* @youngspace_ptr()
-  %youngspaceEndPtr = call i8** @young_alloc_ptr()
-  %youngspaceEnd = load i8*, i8** %youngspaceEndPtr
-  %youngspaceAllocatedBytes = call i64 @ptrDiff(i8* %youngspaceEnd, i8* %youngspaceStart)
-  %allocatedTimes100 = mul i64 %youngspaceAllocatedBytes, 100
-  %thresholdTimes95 = mul i64 %threshold, 95
-  %collection = icmp ugt i64 %allocatedTimes100, %thresholdTimes95
+  %collection = call i1 @youngspaceAlmostFull(i64 %threshold)
   ret i1 %collection
 }
 
