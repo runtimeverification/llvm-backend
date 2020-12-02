@@ -1,3 +1,6 @@
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 #include <cstring>
 #include <dlfcn.h>
 #include <ffi.h>
@@ -266,20 +269,36 @@ extern "C" {
     return ffiCall(true, addr, args, fixtypes, vartypes, ret);
   }
 
+  static std::map<std::string, void *> getPrivateSymbols() {
+      std::map<std::string, void *> m;
+      m["atexit"] = (void *)atexit;
+#ifndef __APPLE__
+      m["at_quick_exit"] = (void *)at_quick_exit;
+#endif
+      m["pthread_atfork"] = (void *)pthread_atfork;
+      m["stat"] = (void *)stat;
+      m["fstat"] = (void *)fstat;
+      m["lstat"] = (void *)lstat;
+      m["stat64"] = (void *)stat64;
+      m["fstat64"] = (void *)fstat64;
+      m["lstat64"] = (void *)lstat64;
+      m["fstatat"] = (void *)fstatat;
+      m["fstatat64"] = (void *)fstatat64;
+      m["mknod"] = (void *)mknod;
+      m["mknodat"] = (void *)mknodat;
+
+      return m;
+  }
 
   SortInt hook_FFI_address(SortString fn) {
     char * func = getTerminatedString(fn);
 
     std::string funcStr = func;
-    std::map<std::string, void *> privateSymbols;
-    privateSymbols["atexit"] = (void *)atexit;
-#ifndef __APPLE__
-    privateSymbols["at_quick_exit"] = (void *)at_quick_exit;
-#endif
+    static const std::map<std::string, void *> privateSymbols = getPrivateSymbols();
 
     void *address;
-    if (auto ptr = privateSymbols[funcStr]) {
-      address = ptr;
+    if (auto it = privateSymbols.find(funcStr); it != privateSymbols.end()) {
+      address = it->second;
     } else {
       void * handle = so_lib_handle();
       address = dlsym(handle, func);
