@@ -274,18 +274,18 @@ extern "C" {
       m["atexit"] = (void *)atexit;
 #ifndef __APPLE__
       m["at_quick_exit"] = (void *)at_quick_exit;
+      m["stat64"] = (void *)stat64;
+      m["fstat64"] = (void *)fstat64;
+      m["lstat64"] = (void *)lstat64;
+      m["fstatat64"] = (void *)fstatat64;
+      m["mknodat"] = (void *)mknodat;
 #endif
       m["pthread_atfork"] = (void *)pthread_atfork;
       m["stat"] = (void *)stat;
       m["fstat"] = (void *)fstat;
       m["lstat"] = (void *)lstat;
-      m["stat64"] = (void *)stat64;
-      m["fstat64"] = (void *)fstat64;
-      m["lstat64"] = (void *)lstat64;
       m["fstatat"] = (void *)fstatat;
-      m["fstatat64"] = (void *)fstatat64;
       m["mknod"] = (void *)mknod;
-      m["mknodat"] = (void *)mknodat;
 
       return m;
   }
