@@ -280,7 +280,8 @@ extern "C" {
       m["fstatat64"] = (void *)fstatat64;
       m["mknodat"] = (void *)mknodat;
 #endif
-      m["pthread_atfork"] = (void *)pthread_atfork;
+      // Disabled: not present on Ubuntu Bionic
+      //m["pthread_atfork"] = (void *)pthread_atfork;
       m["stat"] = (void *)stat;
       m["fstat"] = (void *)fstat;
       m["lstat"] = (void *)lstat;
