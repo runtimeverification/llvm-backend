@@ -8,12 +8,6 @@
 #include "runtime/header.h"
 #include "runtime/alloc.h"
  
-typedef struct {
-  char* next_block;
-  char* next_superblock;
-  char semispace;
-} memory_block_header;
-
 const size_t BLOCK_SIZE = 1024 * 1024;
 
 #define mem_block_header(ptr) \

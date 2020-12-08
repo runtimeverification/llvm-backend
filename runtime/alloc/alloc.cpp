@@ -50,7 +50,8 @@ bool youngspaceAlmostFull(size_t threshold) {
     return false;
   }
   ptrdiff_t freeBytes = youngspace.block_end - youngspace.block;
-  return freeBytes * 100 < threshold * 5;
+  size_t totalBytes = youngspace.num_blocks * (BLOCK_SIZE - sizeof(memory_block_header));
+  return (totalBytes - freeBytes) * 100 > threshold * 95;
 }
 
 void koreAllocSwap(bool swapOld) {
