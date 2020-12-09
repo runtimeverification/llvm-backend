@@ -26,6 +26,8 @@ static char *last_alloc_ptr;
 
 size_t numBytesLiveAtCollection[1 << AGE_WIDTH];
 void set_gc_threshold(size_t);
+size_t get_gc_threshold(void);
+bool youngspaceAlmostFull(size_t);
 
 bool during_gc() {
   return is_gc;
@@ -329,6 +331,11 @@ void koreCollect(void** roots, uint8_t nroots, layoutitem *typeInfo) {
 
 void freeAllKoreMem() {
   koreCollect(nullptr, 0, nullptr);
+}
+
+bool is_collection() {
+  size_t threshold = get_gc_threshold();
+  return youngspaceAlmostFull(threshold);
 }
 
 }

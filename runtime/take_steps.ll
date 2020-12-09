@@ -5,9 +5,6 @@ target triple = "x86_64-unknown-linux-gnu"
 %block = type { %blockheader, [0 x i64 *] } ; 16-bit layout, 8-bit length, 32-bit tag, children
 
 declare fastcc %block* @step(%block*)
-declare i8* @youngspace_ptr()
-declare i8** @young_alloc_ptr()
-declare i1 @youngspaceAlmostFull(i64)
 
 @depth = thread_local global i64 zeroinitializer
 @steps = thread_local global i64 zeroinitializer
@@ -19,6 +16,11 @@ declare i1 @youngspaceAlmostFull(i64)
 define void @set_gc_threshold(i64 %threshold) {
   store i64 %threshold, i64* @GC_THRESHOLD
   ret void
+}
+
+define i64 @get_gc_threshold() {
+  %threshold = load i64, i64* @GC_THRESHOLD
+  ret i64 %threshold
 }
 
 define i1 @finished_rewriting() {
@@ -36,13 +38,6 @@ if:
   ret i1 %finished
 else:
   ret i1 false
-}
-
-define i1 @is_collection() {
-entry:
-  %threshold = load i64, i64* @GC_THRESHOLD
-  %collection = call i1 @youngspaceAlmostFull(i64 %threshold)
-  ret i1 %collection
 }
 
 define %block* @take_steps(i64 %depth, %block* %subject) {

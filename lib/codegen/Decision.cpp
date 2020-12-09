@@ -577,6 +577,7 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> stepFunctionHeader(uns
 
   auto collection = getOrInsertFunction(module, "is_collection", llvm::FunctionType::get(llvm::Type::getInt1Ty(module->getContext()), {}, false));
   auto isCollection = llvm::CallInst::Create(collection, {}, "", checkCollect);
+  setDebugLoc(isCollection);
   auto collect = llvm::BasicBlock::Create(module->getContext(), "isCollect", block->getParent());
   auto merge = llvm::BasicBlock::Create(module->getContext(), "step", block->getParent());
   llvm::BranchInst::Create(collect, merge, isCollection, checkCollect);
