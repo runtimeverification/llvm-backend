@@ -8,14 +8,19 @@ declare fastcc %block* @step(%block*)
 
 @depth = thread_local global i64 zeroinitializer
 @steps = thread_local global i64 zeroinitializer
-@INTERVAL = internal thread_local global i64 @GC_INTERVAL@
 @current_interval = thread_local global i64 0
+@GC_THRESHOLD = thread_local global i64 @GC_THRESHOLD@
 
 @gc_roots = global [256 x i8 *] zeroinitializer
 
-define void @set_gc_interval(i64 %interval) {
-  store i64 %interval, i64* @INTERVAL
+define void @set_gc_threshold(i64 %threshold) {
+  store i64 %threshold, i64* @GC_THRESHOLD
   ret void
+}
+
+define i64 @get_gc_threshold() {
+  %threshold = load i64, i64* @GC_THRESHOLD
+  ret i64 %threshold
 }
 
 define i1 @finished_rewriting() {
@@ -33,17 +38,6 @@ if:
   ret i1 %finished
 else:
   ret i1 false
-}
-
-define i1 @is_collection() {
-entry:
-  %currInterval = load i64, i64* @current_interval
-  %interval = load i64, i64* @INTERVAL
-  %isCollect = icmp eq i64 %interval, %currInterval
-  %currIntervalPlusOne = add i64 %currInterval, 1
-  %newInterval = select i1 %isCollect, i64 0, i64 %currIntervalPlusOne
-  store i64 %newInterval, i64* @current_interval
-  ret i1 %isCollect
 }
 
 define %block* @take_steps(i64 %depth, %block* %subject) {

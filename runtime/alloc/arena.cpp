@@ -8,16 +8,10 @@
 #include "runtime/header.h"
 #include "runtime/alloc.h"
  
-typedef struct {
-  char* next_block;
-  char* next_superblock;
-  char semispace;
-} memory_block_header;
-
 const size_t BLOCK_SIZE = 1024 * 1024;
 
 #define mem_block_header(ptr) \
-  ((memory_block_header *)(((uintptr_t)(ptr)) & ~(BLOCK_SIZE-1)))
+  ((memory_block_header *)(((uintptr_t)(ptr) - 1) & ~(BLOCK_SIZE-1)))
 
 __attribute__ ((always_inline))
 void arenaReset(struct arena *Arena) {
@@ -30,6 +24,8 @@ void arenaReset(struct arena *Arena) {
   Arena->block_start = 0;
   Arena->block_end = 0;
   Arena->first_collection_block = 0;
+  Arena->num_blocks = 0;
+  Arena->num_collection_blocks = 0;
   Arena->allocation_semispace_id = id;
 }
 
@@ -83,6 +79,7 @@ static void freshBlock(struct arena *Arena) {
       memory_block_header *nextHeader = (memory_block_header *)nextBlock;
       nextHeader->next_block = 0;
       nextHeader->semispace = Arena->allocation_semispace_id;
+      Arena->num_blocks++;
     } else {
       nextBlock = *(char**)Arena->block_start;
       if (Arena->block != Arena->block_end) {
@@ -99,6 +96,7 @@ static void freshBlock(struct arena *Arena) {
         memory_block_header *nextHeader = (memory_block_header *)nextBlock;
         nextHeader->next_block = 0;
         nextHeader->semispace = Arena->allocation_semispace_id;
+        Arena->num_blocks++;
       }
     }
     Arena->block = nextBlock + sizeof(memory_block_header);
@@ -145,6 +143,9 @@ __attribute__ ((always_inline)) void arenaSwapAndClear(struct arena *Arena) {
   char *tmp = Arena->first_block;
   Arena->first_block = Arena->first_collection_block;
   Arena->first_collection_block = tmp;
+  size_t tmp2 = Arena->num_blocks;
+  Arena->num_blocks = Arena->num_collection_blocks;
+  Arena->num_collection_blocks = tmp2;
   Arena->allocation_semispace_id = ~Arena->allocation_semispace_id;
   arenaClear(Arena);
 }
@@ -206,6 +207,10 @@ ssize_t ptrDiff(char *ptr1, char *ptr2) {
     // arena.
     return -ptrDiff(ptr2, ptr1);
   }
+}
+
+size_t arenaSize(const struct arena *Arena) {
+  return (Arena->num_blocks > Arena->num_collection_blocks ? Arena->num_blocks : Arena->num_collection_blocks) * (BLOCK_SIZE - sizeof(memory_block_header));
 }
 
 void freeAllMemory() {

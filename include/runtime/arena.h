@@ -11,13 +11,21 @@ struct arena {
   char* block_start;
   char* block_end;
   char *first_collection_block;
+  size_t num_blocks;
+  size_t num_collection_blocks;
   char allocation_semispace_id;
 };
+
+typedef struct {
+  char* next_block;
+  char* next_superblock;
+  char semispace;
+} memory_block_header;
 
 // Macro to define a new arena with the given ID. Supports IDs ranging from 0 to
 // 127.
 #define REGISTER_ARENA(name, id) \
-  static struct arena name = { 0, 0, 0, 0, 0, id }
+  static struct arena name = { .allocation_semispace_id = id }
 
 #define mem_block_start(ptr) \
   ((char *)(((uintptr_t)(ptr) - 1) & ~(BLOCK_SIZE-1)))
@@ -83,6 +91,9 @@ char *movePtr(char *, size_t, const char *);
 
 // Given two pointers to objects allocated in the same arena, return the number of bytes they are separated by within the virtual block of memory represented by the blocks of that arena. This difference will include blocks containing sentinel bytes. Undefined behavior will result if the pointers belong to different arenas.
 ssize_t ptrDiff(char *, char *);
+
+// return the total number of allocatable bytes currently in the arena in its active semispace.
+size_t arenaSize(const struct arena *);
 
 // Deallocates all the memory allocated for registered arenas.
 void freeAllMemory(void);
