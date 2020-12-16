@@ -68,7 +68,6 @@ struct HashSortPtr {
   }
 };
 
-
 size_t hash_value(const kllvm::KORESort &s);
 
 class KORESortVariable : public KORESort {
