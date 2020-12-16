@@ -15,6 +15,7 @@ debug=
 depth=-1
 pretty_print=false
 dryRun=false
+expandMacros=true
 
 print_usage () {
 cat <<HERE
@@ -47,6 +48,7 @@ Mandatory arguments to long options are mandatory for short options too.
       --debug              Use GDB to debug program
       --depth INT          Execute up to INT steps
   -i, --initializer INIT   Use INIT as the top cell initializer 
+  -nm, --no-expand-macros  Don't expand macros in initial configuration
   -v, --verbose            Print commands executed to standazd error
       -save-temps          Do not delete temporary files on exit
   -h, --help               Display this help and exit
@@ -99,6 +101,11 @@ do
     -i|--initializer)
     initializer="$2"
     shift; shift
+    ;;
+
+    -nm|--no-expand-macros)
+    expandMacros=false
+    shift;
     ;;
 
     -d|--directory)
@@ -209,7 +216,11 @@ cat <<HERE >> $input_file
 )
 HERE
 
-"$(dirname "$0")/kore-expand-macros" "$dir" "$input_file" > "$expanded_input_file"
+if $expandMacros; then
+  "$(dirname "$0")/kore-expand-macros" "$dir" "$input_file" > "$expanded_input_file"
+else
+  cp "$input_file" "$expanded_input_file"
+fi
 
 if $dryRun; then
   if [ -n "$real_output_file" ]; then
