@@ -8,33 +8,6 @@ using namespace kllvm::parser;
 
 sptr<KOREPattern> addBrackets(sptr<KOREPattern>, PrettyPrintData const&);
 
-void readMultimap(std::string name, KORESymbolDeclaration *decl, std::map<std::string, std::set<std::string>> &output, std::string attName) {
-  if (decl->getAttributes().count(attName)) {
-    KORECompositePattern *att = decl->getAttributes().at(attName).get();
-    for (auto &pat : att->getArguments()) {
-      auto child = dynamic_cast<KORECompositePattern *>(pat.get());
-      output[name].insert(child->getConstructor()->getName());
-    }
-  }
-}
-
-SubsortMap transitiveClosure(SubsortMap relations) {
-  bool dirty = false;
-  for (auto &entry : relations) {
-    SortSet newSucc;
-    for (auto &elem : entry.second) {
-      auto &relation = relations[elem];
-      for (auto elem2 : relation) {
-        dirty |= relations[entry.first].insert(elem2).second;
-      }
-    }
-  }
-  if (dirty)
-    return transitiveClosure(relations);
-  else
-    return relations;
-}
-
 int main (int argc, char **argv) {
   if (argc != 3 && argc != 4) {
     std::cerr << "usage: " << argv[0] << " <definition.kore> <pattern.kore> [true|false|auto] [true|false]" << std::endl;

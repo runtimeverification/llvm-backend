@@ -671,6 +671,26 @@ public:
   KORESymbol *getInjSymbol() { return injSymbol; }
 };
 
+void readMultimap(std::string, KORESymbolDeclaration *, std::map<std::string, std::set<std::string>> &, std::string);
+
+template<typename Elem, typename Hash, typename Equal>
+std::unordered_map<Elem*, std::unordered_set<Elem*, Hash, Equal>, Hash, Equal> transitiveClosure(std::unordered_map<Elem*, std::unordered_set<Elem*, Hash, Equal>, Hash, Equal> relations) {
+  bool dirty = false;
+  for (auto &entry : relations) {
+    SortSet newSucc;
+    for (auto &elem : entry.second) {
+      auto &relation = relations[elem];
+      for (auto elem2 : relation) {
+        dirty |= relations[entry.first].insert(elem2).second;
+      }
+    }
+  }
+  if (dirty)
+    return transitiveClosure(relations);
+  else
+    return relations;
+}
+
 } // end namespace kllvm
 
 #endif // AST_H

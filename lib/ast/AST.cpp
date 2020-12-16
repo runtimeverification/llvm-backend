@@ -1503,3 +1503,13 @@ void KOREDefinition::print(std::ostream &Out, unsigned indent) const {
     Out << "\n";
   }
 }
+
+void kllvm::readMultimap(std::string name, KORESymbolDeclaration *decl, std::map<std::string, std::set<std::string>> &output, std::string attName) {
+  if (decl->getAttributes().count(attName)) {
+    KORECompositePattern *att = decl->getAttributes().at(attName).get();
+    for (auto &pat : att->getArguments()) {
+      auto child = dynamic_cast<KORECompositePattern *>(pat.get());
+      output[name].insert(child->getConstructor()->getName());
+    }
+  }
+}
