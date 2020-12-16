@@ -983,8 +983,29 @@ bool KORECompositePattern::matches(substitution &subst, SubsortMap const& subsor
       } else {
         return false;
       }
-    } else if (subj->getConstructor()->getName() == "inj") {
-      return false;
+    } else if (subj->getConstructor()->getName() == "inj") { 
+      sptr<KOREPattern> child = subj->getArguments()[0];
+      if (auto composite = dynamic_cast<KORECompositePattern *>(child.get())) {
+        if (overloads.count(composite->getConstructor()) && overloads.at(composite->getConstructor()).count(getConstructor())) {
+          sptr<KORECompositePattern> greater = KORECompositePattern::Create(getConstructor());
+          for (int i = 0; i < arguments.size(); i++) {
+            if (*getConstructor()->getArguments()[i] != *subj->getConstructor()->getArguments()[i]) {
+              sptr<KORECompositePattern> inj = KORECompositePattern::Create("inj");
+              inj->getConstructor()->addArgument(subj->getConstructor()->getArguments()[i]);
+              inj->getConstructor()->addArgument(composite->getConstructor()->getArguments()[i]);
+              inj->addArgument(composite->getArguments()[i]);
+              greater->addArgument(inj);
+            } else {
+              greater->addArgument(composite->getArguments()[i]);
+            }
+          }
+          return this->matches(subst, subsorts, overloads, greater);
+        } else {
+          return false;
+        }
+      } else {
+        return false;
+      }
     } else {
       return false;
     }
