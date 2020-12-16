@@ -548,6 +548,7 @@ public:
   bool isClaim() { return _isClaim; }
   KOREPattern *getRightHandSide() const;
   KOREPattern *getRequires() const;
+  sptr<KOREPattern> getPattern() const { return pattern; }
   unsigned getOrdinal() const { return ordinal; }
 
   friend KOREDefinition;
