@@ -14,6 +14,7 @@ public:
 
   ptr<KOREDefinition> definition(void);
   ptr<KOREPattern> pattern(void);
+  std::vector<ptr<KOREDeclaration>> declarations(void);
 
 private:
   KOREScanner scanner;

@@ -131,6 +131,15 @@ void KOREParser::sentences(KOREModule *node) {
   }
 }
 
+std::vector<ptr<KOREDeclaration>> KOREParser::declarations(void) {
+  std::vector<ptr<KOREDeclaration>> decls;
+  while (peek() != token::TOKEN_EOF) {
+    auto decl = sentence();
+    decls.push_back(std::move(decl));
+  }
+  return decls;
+}
+
 ptr<KOREDeclaration> KOREParser::sentence() {
   std::string name;
   token current = peek();
