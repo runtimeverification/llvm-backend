@@ -41,11 +41,6 @@ static std::string str(token tok) {
   }
 }
 
-static struct {
-  std::string data;
-  token tok;
-} buffer = {"", token::EMPTY};
-
 std::string KOREParser::consume(token next) {
   std::string data;
   token actual;
