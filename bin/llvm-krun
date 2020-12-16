@@ -6,8 +6,9 @@ params=()
 pretty=()
 output_file="$(mktemp tmp.out.XXXXXXXXXX)"
 input_file="$(mktemp tmp.in.XXXXXXXXXX)"
+expanded_input_file="$(mktemp tmp.in.XXXXXXXXXX)"
 parser_file="$(mktemp tmp.parse.XXXXXXXXXX)"
-trap 'rm -rf "$input_file" "$output_file" "$parser_file"' INT TERM EXIT
+trap 'rm -rf "$input_file" "$expanded_input_file" "$output_file" "$parser_file"' INT TERM EXIT
 initializer="LblinitGeneratedTopCell{}"
 dir=.
 debug=
@@ -208,11 +209,13 @@ cat <<HERE >> $input_file
 )
 HERE
 
+"$(dirname "$0")/kore-expand-macros" "$dir" "$input_file" > "$expanded_input_file"
+
 if $dryRun; then
   if [ -n "$real_output_file" ]; then
-    cat "$input_file" > "$real_output_file"
+    cat "$expanded_input_file" > "$real_output_file"
   else
-    cat "$input_file"
+    cat "$expanded_input_file"
   fi
   exit 0
 fi
@@ -222,7 +225,7 @@ set +e
 if [ -n "$verbose" ]; then
   set -x
 fi
-$debug "$dir"/interpreter "$input_file" $depth "$output_file"
+$debug "$dir"/interpreter "$expanded_input_file" $depth "$output_file"
 )
 EXIT=$?
 set -e
