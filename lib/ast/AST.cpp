@@ -1466,6 +1466,7 @@ static std::string escapeString(const std::string &str) {
   for (char c : str) {
     if (c == '"' || c == '\\' || !isprint(c)) {
       result.push_back('\\');
+      result.push_back('x');
       char code[3];
       snprintf(code, 3, "%02x", (unsigned char)c);
       result.push_back(code[0]);
