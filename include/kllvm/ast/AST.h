@@ -234,6 +234,20 @@ struct HashSymbol {
   }
 };
 
+struct EqualSymbolPtr {
+  bool operator()(KORESymbol * const & first, KORESymbol * const & second) const {
+    return *first == *second;
+  }
+};
+
+struct HashSymbolPtr {
+  size_t operator()(kllvm::KORESymbol * const &s) const noexcept {
+    std::ostringstream Out;
+    s->print(Out);
+    return std::hash<std::string>{}(Out.str());
+  }
+};
+
 // KOREVariable
 class KOREVariable {
 private:
@@ -256,7 +270,9 @@ private:
 class KOREVariablePattern;
 
 using SortSet = std::unordered_set<KORESort *, HashSortPtr, EqualSortPtr>;
+using SymbolSet = std::unordered_set<KORESymbol *, HashSymbolPtr, EqualSymbolPtr>;
 using SubsortMap = std::unordered_map<KORESort *, SortSet, HashSortPtr, EqualSortPtr>;
+using SymbolMap = std::unordered_map<KORESymbol *, SymbolSet, HashSymbolPtr, EqualSymbolPtr>;
 using BracketMap = std::unordered_map<KORESort *, std::vector<KORESymbol *>, HashSortPtr, EqualSortPtr>;
 
 struct PrettyPrintData {
