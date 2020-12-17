@@ -972,13 +972,13 @@ bool KORECompositePattern::matches(substitution &subst, SubsortMap const& subsor
       }
       sptr<KORESort> a = subj->getConstructor()->getFormalArguments()[0];
       sptr<KORESort> b = getConstructor()->getFormalArguments()[0];
-      sptr<KORECompositePattern> ab = KORECompositePattern::Create("inj");
-      ab->getConstructor()->addArgument(a);
-      ab->getConstructor()->addArgument(b);
-      ab->addArgument(subj->getArguments()[0]);
       if (subsorts.count(b.get()) && subsorts.at(b.get()).count(a.get())) {
         //pass
       } else if (subsorts.count(a.get()) && subsorts.at(a.get()).count(b.get())) {
+        sptr<KORECompositePattern> ab = KORECompositePattern::Create("inj");
+        ab->getConstructor()->addArgument(a);
+        ab->getConstructor()->addArgument(b);
+        ab->addArgument(subj->getArguments()[0]);
         return arguments[0]->matches(subst, subsorts, overloads, ab);
       } else {
         return false;
