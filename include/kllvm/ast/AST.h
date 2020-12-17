@@ -695,8 +695,9 @@ void readMultimap(std::string, KORESymbolDeclaration *, std::map<std::string, st
 
 template<typename Elem, typename Hash, typename Equal>
 std::unordered_map<Elem*, std::unordered_set<Elem*, Hash, Equal>, Hash, Equal> transitiveClosure(std::unordered_map<Elem*, std::unordered_set<Elem*, Hash, Equal>, Hash, Equal> relations) {
-  bool dirty = false;
+  bool dirty;
   do {
+    dirty = false;
     for (auto &entry : relations) {
       SortSet newSucc;
       for (auto &elem : entry.second) {
