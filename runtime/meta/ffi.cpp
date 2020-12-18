@@ -369,6 +369,7 @@ extern "C" {
     }
     memset(ret, 0, sizeof(string *) + s);
     set_len(ret, s);
+    ret->h.hdr |= NOT_YOUNG_OBJECT_BIT;
 
     allocatedKItemPtrs[kitem] = ret;
     allocatedBytesRefs[ret] = kitem;
