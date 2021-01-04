@@ -928,6 +928,110 @@ sptr<KOREPattern> KORECompositePattern::filterSubstitution(PrettyPrintData const
   }
 }
 
+sptr<KOREPattern> KORECompositePattern::expandMacros(SubsortMap const& subsorts, SymbolMap const& overloads, std::vector<ptr<KOREDeclaration>> const& macros, bool reverse, std::set<size_t> &appliedRules) {
+  size_t i = 0;
+  for (auto &decl : macros) {
+    if ((decl->getAttributes().count("macro") || decl->getAttributes().count("macro-rec")) && reverse) {
+      i++;
+      continue;
+    }
+    auto axiom = dynamic_cast<KOREAxiomDeclaration *>(decl.get());
+    auto equals = dynamic_cast<KORECompositePattern *>(axiom->getPattern().get());
+    auto lhs = equals->arguments[reverse ? 1 : 0];
+    auto rhs = equals->arguments[reverse ? 0 : 1];
+    substitution subst;
+    bool matches = lhs->matches(subst, subsorts, overloads, shared_from_this());
+    if (matches && (decl->getAttributes().count("macro-rec") || decl->getAttributes().count("alias-rec") || !appliedRules.count(i))) {
+      std::set<size_t> oldAppliedRules = appliedRules;
+      appliedRules.insert(i);
+      auto result = rhs->substitute(subst)->expandMacros(subsorts, overloads, macros, reverse, appliedRules);
+      appliedRules = oldAppliedRules;
+      return result;
+    }
+    i++;
+  }
+  if (arguments.empty()) {
+    return shared_from_this();
+  }
+  sptr<KORECompositePattern> result = KORECompositePattern::Create(constructor.get());
+  for (auto &arg : arguments) {
+    result->addArgument(arg->expandMacros(subsorts, overloads, macros, reverse));
+  }
+  return result;
+}
+
+bool KORECompositePattern::matches(substitution &subst, SubsortMap const& subsorts, SymbolMap const& overloads, sptr<KOREPattern> subject) {
+  auto subj = dynamic_cast<KORECompositePattern *>(subject.get());
+  if (!subj) {
+    return false;
+  }
+  if (*subj->getConstructor() != *getConstructor()) {
+    if (subj->getConstructor()->getName() == "inj" && getConstructor()->getName() == "inj") {
+      if (*subj->getConstructor()->getFormalArguments()[1] != *getConstructor()->getFormalArguments()[1]) {
+        return false;
+      }
+      sptr<KORESort> a = subj->getConstructor()->getFormalArguments()[0];
+      sptr<KORESort> b = getConstructor()->getFormalArguments()[0];
+      if (subsorts.count(b.get()) && subsorts.at(b.get()).count(a.get())) {
+        sptr<KORECompositePattern> ba = KORECompositePattern::Create("inj");
+        ba->getConstructor()->addArgument(b);
+        ba->getConstructor()->addArgument(a);
+        ba->addArgument(arguments[0]);
+        return ba->matches(subst, subsorts, overloads, subj->getArguments()[0]);
+      } else if (subsorts.count(a.get()) && subsorts.at(a.get()).count(b.get())) {
+        sptr<KORECompositePattern> ab = KORECompositePattern::Create("inj");
+        ab->getConstructor()->addArgument(a);
+        ab->getConstructor()->addArgument(b);
+        ab->addArgument(subj->getArguments()[0]);
+        return arguments[0]->matches(subst, subsorts, overloads, ab);
+      } else {
+        return false;
+      }
+    } else if (subj->getConstructor()->getName() == "inj") { 
+      sptr<KOREPattern> child = subj->getArguments()[0];
+      if (auto composite = dynamic_cast<KORECompositePattern *>(child.get())) {
+        if (overloads.count(composite->getConstructor()) && overloads.at(composite->getConstructor()).count(getConstructor())) {
+          sptr<KORECompositePattern> greater = KORECompositePattern::Create(getConstructor());
+          for (int i = 0; i < arguments.size(); i++) {
+            if (*getConstructor()->getArguments()[i] != *subj->getConstructor()->getArguments()[i]) {
+              sptr<KORECompositePattern> inj = KORECompositePattern::Create("inj");
+              inj->getConstructor()->addArgument(subj->getConstructor()->getArguments()[i]);
+              inj->getConstructor()->addArgument(composite->getConstructor()->getArguments()[i]);
+              inj->addArgument(composite->getArguments()[i]);
+              greater->addArgument(inj);
+            } else {
+              greater->addArgument(composite->getArguments()[i]);
+            }
+          }
+          return this->matches(subst, subsorts, overloads, greater);
+        } else {
+          return false;
+        }
+      } else {
+        return false;
+      }
+    } else {
+      return false;
+    }
+  }
+  if (subj->arguments.size() != arguments.size()) {
+    return false;
+  }
+  bool match = true;
+  for (int i = 0; i < subj->arguments.size(); i++) {
+    match = match && arguments[i]->matches(subst, subsorts, overloads, subj->arguments[i]);
+  }
+  return match;
+}
+
+bool KOREStringPattern::matches(substitution &subst, SubsortMap const& subsorts, SymbolMap const& overloads, sptr<KOREPattern> subject) {
+  auto subj = dynamic_cast<KOREStringPattern *>(subject.get());
+  if (!subj) {
+    return false;
+  }
+  return subj->contents == contents;
+}
+
 void KOREDeclaration::addAttribute(ptr<KORECompositePattern> Attribute) {
   std::string name = Attribute->getConstructor()->getName();
   attributes.insert({name, std::move(Attribute)});
@@ -1366,6 +1470,7 @@ static std::string escapeString(const std::string &str) {
   for (char c : str) {
     if (c == '"' || c == '\\' || !isprint(c)) {
       result.push_back('\\');
+      result.push_back('x');
       char code[3];
       snprintf(code, 3, "%02x", (unsigned char)c);
       result.push_back(code[0]);
@@ -1501,5 +1606,15 @@ void KOREDefinition::print(std::ostream &Out, unsigned indent) const {
     Out << "\n";
     Module->print(Out, indent);
     Out << "\n";
+  }
+}
+
+void kllvm::readMultimap(std::string name, KORESymbolDeclaration *decl, std::map<std::string, std::set<std::string>> &output, std::string attName) {
+  if (decl->getAttributes().count(attName)) {
+    KORECompositePattern *att = decl->getAttributes().at(attName).get();
+    for (auto &pat : att->getArguments()) {
+      auto child = dynamic_cast<KORECompositePattern *>(pat.get());
+      output[name].insert(child->getConstructor()->getName());
+    }
   }
 }

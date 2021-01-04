@@ -14,6 +14,7 @@ public:
 
   ptr<KOREDefinition> definition(void);
   ptr<KOREPattern> pattern(void);
+  std::vector<ptr<KOREDeclaration>> declarations(void);
 
 private:
   KOREScanner scanner;
@@ -54,6 +55,11 @@ private:
   ptr<KOREPattern> applicationPattern(std::string name);
   ptr<KORECompositePattern> _applicationPattern(void);
   ptr<KORECompositePattern> _applicationPattern(std::string name);
+
+  struct {
+    std::string data;
+    token tok;
+  } buffer = {"", token::EMPTY};
 };
 
 } // end namespace parser

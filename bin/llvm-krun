@@ -6,14 +6,16 @@ params=()
 pretty=()
 output_file="$(mktemp tmp.out.XXXXXXXXXX)"
 input_file="$(mktemp tmp.in.XXXXXXXXXX)"
+expanded_input_file="$(mktemp tmp.in.XXXXXXXXXX)"
 parser_file="$(mktemp tmp.parse.XXXXXXXXXX)"
-trap 'rm -rf "$input_file" "$output_file" "$parser_file"' INT TERM EXIT
+trap 'rm -rf "$input_file" "$expanded_input_file" "$output_file" "$parser_file"' INT TERM EXIT
 initializer="LblinitGeneratedTopCell{}"
 dir=.
 debug=
 depth=-1
 pretty_print=false
 dryRun=false
+expandMacros=true
 
 print_usage () {
 cat <<HERE
@@ -46,6 +48,7 @@ Mandatory arguments to long options are mandatory for short options too.
       --debug              Use GDB to debug program
       --depth INT          Execute up to INT steps
   -i, --initializer INIT   Use INIT as the top cell initializer 
+  -nm, --no-expand-macros  Don't expand macros in initial configuration
   -v, --verbose            Print commands executed to standazd error
       -save-temps          Do not delete temporary files on exit
   -h, --help               Display this help and exit
@@ -98,6 +101,11 @@ do
     -i|--initializer)
     initializer="$2"
     shift; shift
+    ;;
+
+    -nm|--no-expand-macros)
+    expandMacros=false
+    shift;
     ;;
 
     -d|--directory)
@@ -208,11 +216,17 @@ cat <<HERE >> $input_file
 )
 HERE
 
+if $expandMacros; then
+  "$(dirname "$0")/kore-expand-macros" "$dir" "$input_file" > "$expanded_input_file"
+else
+  cp "$input_file" "$expanded_input_file"
+fi
+
 if $dryRun; then
   if [ -n "$real_output_file" ]; then
-    cat "$input_file" > "$real_output_file"
+    cat "$expanded_input_file" > "$real_output_file"
   else
-    cat "$input_file"
+    cat "$expanded_input_file"
   fi
   exit 0
 fi
@@ -222,7 +236,7 @@ set +e
 if [ -n "$verbose" ]; then
   set -x
 fi
-$debug "$dir"/interpreter "$input_file" $depth "$output_file"
+$debug "$dir"/interpreter "$expanded_input_file" $depth "$output_file"
 )
 EXIT=$?
 set -e

@@ -41,11 +41,6 @@ static std::string str(token tok) {
   }
 }
 
-static struct {
-  std::string data;
-  token tok;
-} buffer = {"", token::EMPTY};
-
 std::string KOREParser::consume(token next) {
   std::string data;
   token actual;
@@ -129,6 +124,15 @@ void KOREParser::sentences(KOREModule *node) {
     auto decl = sentence();
     node->addDeclaration(std::move(decl));
   }
+}
+
+std::vector<ptr<KOREDeclaration>> KOREParser::declarations(void) {
+  std::vector<ptr<KOREDeclaration>> decls;
+  while (peek() != token::TOKEN_EOF) {
+    auto decl = sentence();
+    decls.push_back(std::move(decl));
+  }
+  return decls;
 }
 
 ptr<KOREDeclaration> KOREParser::sentence() {
