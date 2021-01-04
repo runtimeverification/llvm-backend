@@ -8,33 +8,6 @@ using namespace kllvm::parser;
 
 sptr<KOREPattern> addBrackets(sptr<KOREPattern>, PrettyPrintData const&);
 
-void readMultimap(std::string name, KORESymbolDeclaration *decl, std::map<std::string, std::set<std::string>> &output, std::string attName) {
-  if (decl->getAttributes().count(attName)) {
-    KORECompositePattern *att = decl->getAttributes().at(attName).get();
-    for (auto &pat : att->getArguments()) {
-      auto child = dynamic_cast<KORECompositePattern *>(pat.get());
-      output[name].insert(child->getConstructor()->getName());
-    }
-  }
-}
-
-SubsortMap transitiveClosure(SubsortMap relations) {
-  bool dirty = false;
-  for (auto &entry : relations) {
-    SortSet newSucc;
-    for (auto &elem : entry.second) {
-      auto &relation = relations[elem];
-      for (auto elem2 : relation) {
-        dirty |= relations[entry.first].insert(elem2).second;
-      }
-    }
-  }
-  if (dirty)
-    return transitiveClosure(relations);
-  else
-    return relations;
-}
-
 int main (int argc, char **argv) {
   if (argc != 3 && argc != 4) {
     std::cerr << "usage: " << argv[0] << " <definition.kore> <pattern.kore> [true|false|auto] [true|false]" << std::endl;
@@ -161,6 +134,7 @@ int main (int argc, char **argv) {
   priorities["\\top"].insert("\\equals");
 
   SubsortMap subsorts;
+  SymbolMap overloads;
 
   KOREParser parser(argv[1] + std::string("/syntaxDefinition.kore"));
   ptr<KOREDefinition> def = parser.definition();
@@ -220,14 +194,28 @@ int main (int argc, char **argv) {
       KORESort *outerSort = att->getConstructor()->getFormalArguments()[1].get();
       subsorts[innerSort].insert(outerSort);
     }
+    if (axiom->getAttributes().count("overload")) {
+      KORECompositePattern *att = axiom->getAttributes().at("overload").get();
+      KORESymbol *innerSymbol = att->getConstructor();
+      KORESymbol *outerSymbol = att->getConstructor();
+      overloads[innerSymbol].insert(outerSymbol);
+    }
   }
 
   subsorts = transitiveClosure(subsorts);
+  overloads = transitiveClosure(overloads);
 
-  KOREParser parser2(argv[2]);
-  sptr<KOREPattern> config = parser2.pattern();
+  KOREParser parser2(argv[1] + std::string("/macros.kore"));
+  std::vector<ptr<KOREDeclaration>> axioms = parser2.declarations();
+
+  KOREParser parser3(argv[2]);
+  sptr<KOREPattern> config = parser3.pattern();
   std::map<std::string, std::vector<KORESymbol *>> symbols;
   config->markSymbols(symbols);
+  for (auto &decl : axioms) {
+    auto axiom = dynamic_cast<KOREAxiomDeclaration *>(decl.get());
+    axiom->getPattern()->markSymbols(symbols);
+  }
 
   for (auto iter = symbols.begin(); iter != symbols.end(); ++iter) {
     auto &entry = *iter;
@@ -240,7 +228,8 @@ int main (int argc, char **argv) {
 
   PrettyPrintData data = {formats, colors, terminals, priorities, leftAssoc, rightAssoc, hooks, brackets, assocs, comms, subsorts, hasColor};
 
-  sptr<KOREPattern> sorted = config->sortCollections(data);
+  sptr<KOREPattern> expanded = config->expandMacros(subsorts, overloads, axioms, true);
+  sptr<KOREPattern> sorted = expanded->sortCollections(data);
   sptr<KOREPattern> filtered;
   if (filterSubst) {
     filtered = sorted->filterSubstitution(data);

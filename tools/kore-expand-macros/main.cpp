@@ -1,0 +1,65 @@
+#include "kllvm/parser/KOREScanner.h"
+#include "kllvm/parser/KOREParser.h"
+
+#include <iostream>
+
+using namespace kllvm;
+using namespace kllvm::parser;
+
+int main (int argc, char **argv) {
+  if (argc != 3) {
+    std::cerr << "usage: " << argv[0] << " <kompiled-dir> <pattern.kore>" << std::endl;
+    return 1;
+  }
+
+  SubsortMap subsorts;
+  SymbolMap overloads;
+
+  KOREParser parser(argv[1] + std::string("/syntaxDefinition.kore"));
+  ptr<KOREDefinition> def = parser.definition();
+
+  for (auto axiom : def->getAxioms()) {
+    if (axiom->getAttributes().count("subsort")) {
+      KORECompositePattern *att = axiom->getAttributes().at("subsort").get();
+      KORESort *innerSort = att->getConstructor()->getFormalArguments()[0].get();
+      KORESort *outerSort = att->getConstructor()->getFormalArguments()[1].get();
+      subsorts[innerSort].insert(outerSort);
+    }
+    if (axiom->getAttributes().count("overload")) {
+      KORECompositePattern *att = axiom->getAttributes().at("overload").get();
+      KORESymbol *innerSymbol = att->getConstructor();
+      KORESymbol *outerSymbol = att->getConstructor();
+      overloads[innerSymbol].insert(outerSymbol);
+    }
+  }
+
+  subsorts = transitiveClosure(subsorts);
+  overloads = transitiveClosure(overloads);
+
+  KOREParser parser2(argv[1] + std::string("/macros.kore"));
+  std::vector<ptr<KOREDeclaration>> axioms = parser2.declarations();
+
+  KOREParser parser3(argv[2]);
+  sptr<KOREPattern> config = parser3.pattern();
+  std::map<std::string, std::vector<KORESymbol *>> symbols;
+  config->markSymbols(symbols);
+  for (auto &decl : axioms) {
+    auto axiom = dynamic_cast<KOREAxiomDeclaration *>(decl.get());
+    axiom->getPattern()->markSymbols(symbols);
+  }
+
+  for (auto iter = symbols.begin(); iter != symbols.end(); ++iter) {
+    auto &entry = *iter;
+    for (auto iter = entry.second.begin(); iter != entry.second.end(); ++iter) {
+      KORESymbol *symbol = *iter;
+      auto decl = def->getSymbolDeclarations().at(symbol->getName());
+      symbol->instantiateSymbol(decl);
+    }
+  }
+
+  sptr<KOREPattern> expanded = config->expandMacros(subsorts, overloads, axioms, false);
+  expanded->print(std::cout);
+  std::cout << std::endl;
+
+  def.release(); // so we don't waste time calling delete a bunch of times
+}

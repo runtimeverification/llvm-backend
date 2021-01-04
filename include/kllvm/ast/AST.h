@@ -68,7 +68,6 @@ struct HashSortPtr {
   }
 };
 
-
 size_t hash_value(const kllvm::KORESort &s);
 
 class KORESortVariable : public KORESort {
@@ -234,6 +233,20 @@ struct HashSymbol {
   }
 };
 
+struct EqualSymbolPtr {
+  bool operator()(KORESymbol * const & first, KORESymbol * const & second) const {
+    return *first == *second;
+  }
+};
+
+struct HashSymbolPtr {
+  size_t operator()(kllvm::KORESymbol * const &s) const noexcept {
+    std::ostringstream Out;
+    s->print(Out);
+    return std::hash<std::string>{}(Out.str());
+  }
+};
+
 // KOREVariable
 class KOREVariable {
 private:
@@ -256,7 +269,9 @@ private:
 class KOREVariablePattern;
 
 using SortSet = std::unordered_set<KORESort *, HashSortPtr, EqualSortPtr>;
+using SymbolSet = std::unordered_set<KORESymbol *, HashSymbolPtr, EqualSymbolPtr>;
 using SubsortMap = std::unordered_map<KORESort *, SortSet, HashSortPtr, EqualSortPtr>;
+using SymbolMap = std::unordered_map<KORESymbol *, SymbolSet, HashSymbolPtr, EqualSymbolPtr>;
 using BracketMap = std::unordered_map<KORESort *, std::vector<KORESymbol *>, HashSortPtr, EqualSortPtr>;
 
 struct PrettyPrintData {
@@ -282,6 +297,9 @@ struct PrettyPrintData {
   bool hasColor;
 };
 
+class KOREDeclaration;
+class KORECompositePattern;
+
 // KOREPattern
 class KOREPattern : public std::enable_shared_from_this<KOREPattern> {
 public:
@@ -306,6 +324,12 @@ public:
   virtual void prettyPrint(std::ostream &, PrettyPrintData const& data) const = 0;
   virtual sptr<KOREPattern> sortCollections(PrettyPrintData const& data) = 0;
   virtual sptr<KOREPattern> filterSubstitution(PrettyPrintData const& data) = 0;
+  virtual bool matches(substitution &subst, SubsortMap const& subsorts, SymbolMap const& overloads, sptr<KOREPattern> subject) = 0;
+  sptr<KOREPattern> expandMacros(SubsortMap const& subsorts, SymbolMap const& overloads, std::vector<ptr<KOREDeclaration>> const& axioms, bool reverse) { std::set<size_t> appliedRules; return expandMacros(subsorts, overloads, axioms, reverse, appliedRules); }
+
+  friend KORECompositePattern;
+private:
+  virtual sptr<KOREPattern> expandMacros(SubsortMap const& subsorts, SymbolMap const& overloads, std::vector<ptr<KOREDeclaration>> const& axioms, bool reverse, std::set<size_t> &appliedRules) = 0;
 };
 
 class KOREVariablePattern : public KOREPattern {
@@ -336,7 +360,11 @@ public:
   virtual sptr<KOREPattern> expandAliases(KOREDefinition *) override { return shared_from_this(); }
   virtual sptr<KOREPattern> sortCollections(PrettyPrintData const& data) override { return shared_from_this(); }
   virtual sptr<KOREPattern> filterSubstitution(PrettyPrintData const& data) override { return shared_from_this(); }
+  virtual bool matches(substitution &subst, SubsortMap const&, SymbolMap const&, sptr<KOREPattern> subject) override { subst[name->getName()] = subject; return true; }
   virtual void prettyPrint(std::ostream &out, PrettyPrintData const& data) const override;
+
+private:
+  virtual sptr<KOREPattern> expandMacros(SubsortMap const&, SymbolMap const&, std::vector<ptr<KOREDeclaration>> const& macros, bool reverse, std::set<size_t> &appliedRules) override { return shared_from_this(); }  
 
 private:
   KOREVariablePattern(ptr<KOREVariable> Name, sptr<KORESort> Sort)
@@ -376,6 +404,10 @@ public:
   virtual sptr<KOREPattern> expandAliases(KOREDefinition *) override;
   virtual sptr<KOREPattern> sortCollections(PrettyPrintData const& data) override;
   virtual sptr<KOREPattern> filterSubstitution(PrettyPrintData const& data) override;
+  virtual bool matches(substitution &, SubsortMap const&, SymbolMap const&, sptr<KOREPattern>) override;
+
+private:
+  virtual sptr<KOREPattern> expandMacros(SubsortMap const&, SymbolMap const&, std::vector<ptr<KOREDeclaration>> const& macros, bool reverse, std::set<size_t> &appliedRules) override;
 
 private:
   KORECompositePattern(ptr<KORESymbol> Constructor)
@@ -402,6 +434,10 @@ public:
   virtual sptr<KOREPattern> expandAliases(KOREDefinition *) override { return shared_from_this(); }
   virtual sptr<KOREPattern> sortCollections(PrettyPrintData const& data) override { return shared_from_this(); }
   virtual sptr<KOREPattern> filterSubstitution(PrettyPrintData const& data) override { return shared_from_this(); }
+  virtual bool matches(substitution &, SubsortMap const&, SymbolMap const&, sptr<KOREPattern> subject) override;
+
+private:
+  virtual sptr<KOREPattern> expandMacros(SubsortMap const&, SymbolMap const&, std::vector<ptr<KOREDeclaration>> const& macros, bool reverse, std::set<size_t> &appliedRules) override { return shared_from_this(); }
 
 private:
   KOREStringPattern(const std::string &Contents) : contents(Contents) { }
@@ -532,6 +568,7 @@ public:
   bool isClaim() { return _isClaim; }
   KOREPattern *getRightHandSide() const;
   KOREPattern *getRequires() const;
+  sptr<KOREPattern> getPattern() const { return pattern; }
   unsigned getOrdinal() const { return ordinal; }
 
   friend KOREDefinition;
@@ -653,6 +690,26 @@ public:
   const KORESymbolStringMapType &getFreshFunctions() const { return freshFunctions; }
   KORESymbol *getInjSymbol() { return injSymbol; }
 };
+
+void readMultimap(std::string, KORESymbolDeclaration *, std::map<std::string, std::set<std::string>> &, std::string);
+
+template<typename Elem, typename Hash, typename Equal>
+std::unordered_map<Elem*, std::unordered_set<Elem*, Hash, Equal>, Hash, Equal> transitiveClosure(std::unordered_map<Elem*, std::unordered_set<Elem*, Hash, Equal>, Hash, Equal> relations) {
+  bool dirty;
+  do {
+    dirty = false;
+    for (auto &entry : relations) {
+      SortSet newSucc;
+      for (auto &elem : entry.second) {
+        auto &relation = relations[elem];
+        for (auto elem2 : relation) {
+          dirty |= relations[entry.first].insert(elem2).second;
+        }
+      }
+    }
+  } while (dirty);
+  return relations;
+}
 
 } // end namespace kllvm
 
