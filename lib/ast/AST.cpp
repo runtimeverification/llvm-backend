@@ -974,14 +974,14 @@ bool KORECompositePattern::matches(substitution &subst, SubsortMap const& subsor
       sptr<KORESort> b = getConstructor()->getFormalArguments()[0];
       if (subsorts.count(b.get()) && subsorts.at(b.get()).count(a.get())) {
         sptr<KORECompositePattern> ba = KORECompositePattern::Create("inj");
-        ba->getConstructor()->addArgument(b);
-        ba->getConstructor()->addArgument(a);
+        ba->getConstructor()->addFormalArgument(b);
+        ba->getConstructor()->addFormalArgument(a);
         ba->addArgument(arguments[0]);
         return ba->matches(subst, subsorts, overloads, subj->getArguments()[0]);
       } else if (subsorts.count(a.get()) && subsorts.at(a.get()).count(b.get())) {
         sptr<KORECompositePattern> ab = KORECompositePattern::Create("inj");
-        ab->getConstructor()->addArgument(a);
-        ab->getConstructor()->addArgument(b);
+        ab->getConstructor()->addFormalArgument(a);
+        ab->getConstructor()->addFormalArgument(b);
         ab->addArgument(subj->getArguments()[0]);
         return arguments[0]->matches(subst, subsorts, overloads, ab);
       } else {
@@ -995,8 +995,8 @@ bool KORECompositePattern::matches(substitution &subst, SubsortMap const& subsor
           for (int i = 0; i < arguments.size(); i++) {
             if (*getConstructor()->getArguments()[i] != *subj->getConstructor()->getArguments()[i]) {
               sptr<KORECompositePattern> inj = KORECompositePattern::Create("inj");
-              inj->getConstructor()->addArgument(subj->getConstructor()->getArguments()[i]);
-              inj->getConstructor()->addArgument(composite->getConstructor()->getArguments()[i]);
+              inj->getConstructor()->addFormalArgument(subj->getConstructor()->getArguments()[i]);
+              inj->getConstructor()->addFormalArgument(composite->getConstructor()->getArguments()[i]);
               inj->addArgument(composite->getArguments()[i]);
               greater->addArgument(inj);
             } else {
