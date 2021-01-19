@@ -960,6 +960,18 @@ sptr<KOREPattern> KORECompositePattern::expandMacros(SubsortMap const& subsorts,
   return result;
 }
 
+bool KOREVariablePattern::matches(substitution &subst, SubsortMap const& subsorts, SymbolMap const& overloads, sptr<KOREPattern> subject) {
+  if (subst[name->getName()]) {
+    std::ostringstream Out1, Out2;
+    subst[name->getName()]->print(Out1);
+    subject->print(Out2);
+    return Out1.str() == Out2.str();
+  } else {
+    subst[name->getName()] = subject;
+    return true;
+  }
+}
+
 bool KORECompositePattern::matches(substitution &subst, SubsortMap const& subsorts, SymbolMap const& overloads, sptr<KOREPattern> subject) {
   auto subj = dynamic_cast<KORECompositePattern *>(subject.get());
   if (!subj) {

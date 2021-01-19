@@ -360,7 +360,7 @@ public:
   virtual sptr<KOREPattern> expandAliases(KOREDefinition *) override { return shared_from_this(); }
   virtual sptr<KOREPattern> sortCollections(PrettyPrintData const& data) override { return shared_from_this(); }
   virtual sptr<KOREPattern> filterSubstitution(PrettyPrintData const& data) override { return shared_from_this(); }
-  virtual bool matches(substitution &subst, SubsortMap const&, SymbolMap const&, sptr<KOREPattern> subject) override { subst[name->getName()] = subject; return true; }
+  virtual bool matches(substitution &subst, SubsortMap const&, SymbolMap const&, sptr<KOREPattern> subject) override;
   virtual void prettyPrint(std::ostream &out, PrettyPrintData const& data) const override;
 
 private:
