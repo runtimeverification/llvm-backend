@@ -929,6 +929,11 @@ sptr<KOREPattern> KORECompositePattern::filterSubstitution(PrettyPrintData const
 }
 
 sptr<KOREPattern> KORECompositePattern::expandMacros(SubsortMap const& subsorts, SymbolMap const& overloads, std::vector<ptr<KOREDeclaration>> const& macros, bool reverse, std::set<size_t> &appliedRules) {
+  sptr<KORECompositePattern> applied = KORECompositePattern::Create(constructor.get());
+  for (auto &arg : arguments) {
+    applied->addArgument(arg->expandMacros(subsorts, overloads, macros, reverse));
+  }
+
   size_t i = 0;
   for (auto &decl : macros) {
     if ((decl->getAttributes().count("macro") || decl->getAttributes().count("macro-rec")) && reverse) {
@@ -940,7 +945,7 @@ sptr<KOREPattern> KORECompositePattern::expandMacros(SubsortMap const& subsorts,
     auto lhs = equals->arguments[reverse ? 1 : 0];
     auto rhs = equals->arguments[reverse ? 0 : 1];
     substitution subst;
-    bool matches = lhs->matches(subst, subsorts, overloads, shared_from_this());
+    bool matches = lhs->matches(subst, subsorts, overloads, applied);
     if (matches && (decl->getAttributes().count("macro-rec") || decl->getAttributes().count("alias-rec") || !appliedRules.count(i))) {
       std::set<size_t> oldAppliedRules = appliedRules;
       appliedRules.insert(i);
@@ -950,14 +955,7 @@ sptr<KOREPattern> KORECompositePattern::expandMacros(SubsortMap const& subsorts,
     }
     i++;
   }
-  if (arguments.empty()) {
-    return shared_from_this();
-  }
-  sptr<KORECompositePattern> result = KORECompositePattern::Create(constructor.get());
-  for (auto &arg : arguments) {
-    result->addArgument(arg->expandMacros(subsorts, overloads, macros, reverse));
-  }
-  return result;
+  return applied;
 }
 
 bool KOREVariablePattern::matches(substitution &subst, SubsortMap const& subsorts, SymbolMap const& overloads, sptr<KOREPattern> subject) {
