@@ -38,6 +38,13 @@ int main (int argc, char **argv) {
 
   KOREParser parser2(argv[1] + std::string("/macros.kore"));
   std::vector<ptr<KOREDeclaration>> axioms = parser2.declarations();
+  std::sort(axioms.begin(), axioms.end(), [](const ptr<KOREDeclaration> &l, const ptr<KOREDeclaration> &r) {
+      std::string lStr = l->getStringAttribute("priority");
+      std::string rStr = r->getStringAttribute("priority");
+      int lInt = std::stoi(lStr);
+      int rInt = std::stoi(rStr);
+      return lInt < rInt;
+  });
 
   KOREParser parser3(argv[2]);
   sptr<KOREPattern> config = parser3.pattern();
