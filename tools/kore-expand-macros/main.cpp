@@ -27,8 +27,8 @@ int main (int argc, char **argv) {
     }
     if (axiom->getAttributes().count("overload")) {
       KORECompositePattern *att = axiom->getAttributes().at("overload").get();
-      KORESymbol *innerSymbol = att->getConstructor();
-      KORESymbol *outerSymbol = att->getConstructor();
+      KORESymbol *innerSymbol = dynamic_cast<KORECompositePattern *>(att->getArguments()[1].get())->getConstructor();
+      KORESymbol *outerSymbol = dynamic_cast<KORECompositePattern *>(att->getArguments()[0].get())->getConstructor();
       overloads[innerSymbol].insert(outerSymbol);
     }
   }
