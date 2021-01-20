@@ -1003,10 +1003,10 @@ bool KORECompositePattern::matches(substitution &subst, SubsortMap const& subsor
         if (overloads.count(composite->getConstructor()) && overloads.at(composite->getConstructor()).count(getConstructor())) {
           sptr<KORECompositePattern> greater = KORECompositePattern::Create(getConstructor());
           for (int i = 0; i < arguments.size(); i++) {
-            if (*getConstructor()->getArguments()[i] != *subj->getConstructor()->getArguments()[i]) {
+            if (*getConstructor()->getArguments()[i] != *composite->getConstructor()->getArguments()[i]) {
               sptr<KORECompositePattern> inj = KORECompositePattern::Create("inj");
-              inj->getConstructor()->addFormalArgument(subj->getConstructor()->getArguments()[i]);
               inj->getConstructor()->addFormalArgument(composite->getConstructor()->getArguments()[i]);
+              inj->getConstructor()->addFormalArgument(getConstructor()->getArguments()[i]);
               inj->addArgument(composite->getArguments()[i]);
               greater->addArgument(inj);
             } else {
