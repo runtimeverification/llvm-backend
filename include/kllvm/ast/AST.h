@@ -235,7 +235,10 @@ struct HashSymbol {
 
 struct EqualSymbolPtr {
   bool operator()(KORESymbol * const & first, KORESymbol * const & second) const {
-    return *first == *second;
+    std::ostringstream Out1, Out2;
+    first->print(Out1);
+    second->print(Out2);
+    return Out1.str() == Out2.str();
   }
 };
 
