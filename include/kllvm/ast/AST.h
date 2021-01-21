@@ -235,7 +235,10 @@ struct HashSymbol {
 
 struct EqualSymbolPtr {
   bool operator()(KORESymbol * const & first, KORESymbol * const & second) const {
-    return *first == *second;
+    std::ostringstream Out1, Out2;
+    first->print(Out1);
+    second->print(Out2);
+    return Out1.str() == Out2.str();
   }
 };
 
@@ -360,7 +363,7 @@ public:
   virtual sptr<KOREPattern> expandAliases(KOREDefinition *) override { return shared_from_this(); }
   virtual sptr<KOREPattern> sortCollections(PrettyPrintData const& data) override { return shared_from_this(); }
   virtual sptr<KOREPattern> filterSubstitution(PrettyPrintData const& data) override { return shared_from_this(); }
-  virtual bool matches(substitution &subst, SubsortMap const&, SymbolMap const&, sptr<KOREPattern> subject) override { subst[name->getName()] = subject; return true; }
+  virtual bool matches(substitution &subst, SubsortMap const&, SymbolMap const&, sptr<KOREPattern> subject) override;
   virtual void prettyPrint(std::ostream &out, PrettyPrintData const& data) const override;
 
 private:

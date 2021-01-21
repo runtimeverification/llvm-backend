@@ -929,6 +929,11 @@ sptr<KOREPattern> KORECompositePattern::filterSubstitution(PrettyPrintData const
 }
 
 sptr<KOREPattern> KORECompositePattern::expandMacros(SubsortMap const& subsorts, SymbolMap const& overloads, std::vector<ptr<KOREDeclaration>> const& macros, bool reverse, std::set<size_t> &appliedRules) {
+  sptr<KORECompositePattern> applied = KORECompositePattern::Create(constructor.get());
+  for (auto &arg : arguments) {
+    applied->addArgument(arg->expandMacros(subsorts, overloads, macros, reverse));
+  }
+
   size_t i = 0;
   for (auto &decl : macros) {
     if ((decl->getAttributes().count("macro") || decl->getAttributes().count("macro-rec")) && reverse) {
@@ -940,7 +945,7 @@ sptr<KOREPattern> KORECompositePattern::expandMacros(SubsortMap const& subsorts,
     auto lhs = equals->arguments[reverse ? 1 : 0];
     auto rhs = equals->arguments[reverse ? 0 : 1];
     substitution subst;
-    bool matches = lhs->matches(subst, subsorts, overloads, shared_from_this());
+    bool matches = lhs->matches(subst, subsorts, overloads, applied);
     if (matches && (decl->getAttributes().count("macro-rec") || decl->getAttributes().count("alias-rec") || !appliedRules.count(i))) {
       std::set<size_t> oldAppliedRules = appliedRules;
       appliedRules.insert(i);
@@ -950,14 +955,19 @@ sptr<KOREPattern> KORECompositePattern::expandMacros(SubsortMap const& subsorts,
     }
     i++;
   }
-  if (arguments.empty()) {
-    return shared_from_this();
+  return applied;
+}
+
+bool KOREVariablePattern::matches(substitution &subst, SubsortMap const& subsorts, SymbolMap const& overloads, sptr<KOREPattern> subject) {
+  if (subst[name->getName()]) {
+    std::ostringstream Out1, Out2;
+    subst[name->getName()]->print(Out1);
+    subject->print(Out2);
+    return Out1.str() == Out2.str();
+  } else {
+    subst[name->getName()] = subject;
+    return true;
   }
-  sptr<KORECompositePattern> result = KORECompositePattern::Create(constructor.get());
-  for (auto &arg : arguments) {
-    result->addArgument(arg->expandMacros(subsorts, overloads, macros, reverse));
-  }
-  return result;
 }
 
 bool KORECompositePattern::matches(substitution &subst, SubsortMap const& subsorts, SymbolMap const& overloads, sptr<KOREPattern> subject) {
@@ -976,12 +986,14 @@ bool KORECompositePattern::matches(substitution &subst, SubsortMap const& subsor
         sptr<KORECompositePattern> ba = KORECompositePattern::Create("inj");
         ba->getConstructor()->addFormalArgument(b);
         ba->getConstructor()->addFormalArgument(a);
+        ba->getConstructor()->addArgument(b);
         ba->addArgument(arguments[0]);
         return ba->matches(subst, subsorts, overloads, subj->getArguments()[0]);
       } else if (subsorts.count(a.get()) && subsorts.at(a.get()).count(b.get())) {
         sptr<KORECompositePattern> ab = KORECompositePattern::Create("inj");
         ab->getConstructor()->addFormalArgument(a);
         ab->getConstructor()->addFormalArgument(b);
+        ab->getConstructor()->addArgument(a);
         ab->addArgument(subj->getArguments()[0]);
         return arguments[0]->matches(subst, subsorts, overloads, ab);
       } else {
@@ -993,10 +1005,11 @@ bool KORECompositePattern::matches(substitution &subst, SubsortMap const& subsor
         if (overloads.count(composite->getConstructor()) && overloads.at(composite->getConstructor()).count(getConstructor())) {
           sptr<KORECompositePattern> greater = KORECompositePattern::Create(getConstructor());
           for (int i = 0; i < arguments.size(); i++) {
-            if (*getConstructor()->getArguments()[i] != *subj->getConstructor()->getArguments()[i]) {
+            if (*getConstructor()->getArguments()[i] != *composite->getConstructor()->getArguments()[i]) {
               sptr<KORECompositePattern> inj = KORECompositePattern::Create("inj");
-              inj->getConstructor()->addFormalArgument(subj->getConstructor()->getArguments()[i]);
               inj->getConstructor()->addFormalArgument(composite->getConstructor()->getArguments()[i]);
+              inj->getConstructor()->addFormalArgument(getConstructor()->getArguments()[i]);
+              inj->getConstructor()->addArgument(composite->getConstructor()->getArguments()[i]);
               inj->addArgument(composite->getArguments()[i]);
               greater->addArgument(inj);
             } else {
