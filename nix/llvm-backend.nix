@@ -40,6 +40,9 @@ stdenv.mkDerivation {
     ''-DCMAKE_CXX_COMPILER=${lib.getBin stdenv.cc}/bin/c++''
     ''-DUSE_NIX=TRUE''
   ];
+
+  cmakeBuildType = "FastBuild";
+
   NIX_CFLAGS_COMPILE = [ "-Wno-error" ];
 
   doCheck = true;
