@@ -38,6 +38,7 @@ stdenv.mkDerivation {
   cmakeFlags = [
     ''-DCMAKE_C_COMPILER=${lib.getBin stdenv.cc}/bin/cc''
     ''-DCMAKE_CXX_COMPILER=${lib.getBin stdenv.cc}/bin/c++''
+    ''-DUSE_NIX=TRUE''
   ];
   NIX_CFLAGS_COMPILE = [ "-Wno-error" ];
 
