@@ -272,6 +272,25 @@ object QHeuristic extends Heuristic {
   }
 }
 
+/**
+ * One branch heuristic. Essentially, o is to b as f is to q. Where b measures
+ * the total number of branches resulting from choosing a particular column,
+ * and picks the column with the least branches, o only measures whether
+ * choosing a particular column has a branching factor of 1, ie, no branching.
+ * As a result, you can use the 'o' heuristic before the 'q' heuristic as
+ * a way of reducing the cost of generating the decision tree at the expense
+ * of greater path length.
+ */
+@NamedHeuristic(name='o')
+object OHeuristic extends Heuristic {
+  val needsMatrix: Boolean = false
+
+  def computeScoreForKey(c: AbstractColumn, key: Option[Pattern[Option[Occurrence]]]): Double = {
+    //-c.column.bf
+    if (BHeuristic.bf(c, key) == 1) 1 else 0
+  }
+}
+
 sealed trait PseudoHeuristic extends Heuristic {
   val needsMatrix: Boolean = false
 
