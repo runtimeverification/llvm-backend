@@ -131,13 +131,17 @@ object DHeuristic extends Heuristic {
 object BHeuristic extends Heuristic {
   val needsMatrix: Boolean = false
 
-  def computeScoreForKey(c: AbstractColumn, key: Option[Pattern[Option[Occurrence]]]): Double = {
+  def bf(c: AbstractColumn, key: Option[Pattern[Option[Occurrence]]]): Int = {
     val sigma = c.column.signatureForKey(key)
     if (c.column.category.hasIncompleteSignature(sigma, c.column.fringe)) {
-      -sigma.size-1
+      sigma.size+1
     } else {
-      -sigma.size
+      sigma.size
     }
+  }
+
+  def computeScoreForKey(c: AbstractColumn, key: Option[Pattern[Option[Occurrence]]]): Double = {
+    -bf(c, key)
   }
 }
 
