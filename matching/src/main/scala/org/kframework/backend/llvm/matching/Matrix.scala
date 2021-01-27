@@ -136,7 +136,9 @@ class Column(val fringe: Fringe, val patterns: IndexedSeq[Pattern[String]], val 
     signatureForKey(bestKey)
   }
 
-  def isChoice: Boolean = fringe.sortInfo.isCollection && bestKey == None
+  def isChoice: Boolean = isChoiceForKey(bestKey)
+
+  def isChoiceForKey(key: Option[Pattern[Option[Occurrence]]]) = fringe.sortInfo.isCollection && key == None
 
   private def asListP(p: Pattern[String]): Seq[ListP[String]] = {
     p match {
@@ -182,8 +184,10 @@ class Column(val fringe: Fringe, val patterns: IndexedSeq[Pattern[String]], val 
     }
   }
 
-  def maxPriority: Int = {
-    if (isChoice) {
+  def maxPriority: Int = maxPriorityForKey(bestKey)
+
+  def maxPriorityForKey(key: Option[Pattern[Option[Occurrence]]]) = {
+    if (isChoiceForKey(key)) {
       clauses(0).action.priority
     } else {
       Int.MaxValue
