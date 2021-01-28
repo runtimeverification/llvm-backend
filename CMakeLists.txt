@@ -30,17 +30,24 @@ set(CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO "${CMAKE_EXE_LINKER_FLAGS_RELEASE} -fl
 
 if(APPLE)
 set(BACKEND_TARGET_TRIPLE "x86_64-apple-darwin")
+if(NOT USE_NIX)
 include_directories(AFTER SYSTEM /usr/local/include)
 link_directories(AFTER /usr/local/lib)
 set(ENV{PKG_CONFIG_PATH} "/usr/local/opt/libffi/lib/pkgconfig")
+endif() # USE_NIX
 else()
 set(BACKEND_TARGET_TRIPLE "x86_64-unknown-linux-gnu")
 endif()
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(FFI REQUIRED libffi)
+if(USE_NIX)
+include_directories(AFTER ${FFI_INCLUDE_DIRS})
+link_directories(AFTER ${FFI_LIBRARY_DIRS})
+else() # USE_NIX
 include_directories(AFTER SYSTEM ${FFI_INCLUDE_DIRS})
 link_directories(AFTER SYSTEM ${FFI_LIBRARY_DIRS})
+endif() # USE_NIX
 
 if (CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
 set(LLVM_KOMPILE_LTO "lto")
@@ -100,10 +107,18 @@ macro(kllvm_add_tool name)
   # Link against LLVM libraries
   llvm_config(${name})
 if(APPLE)
+if(NOT USE_NIX)
   target_link_libraries(${name} PUBLIC "-ljemalloc" "-Wl,-rpath /usr/local/lib" "-ldl")
 else()
-  target_link_libraries(${name} PUBLIC "-ljemalloc" "-Wl,-rpath=/usr/local/lib" "-ldl")
-endif()
+  target_link_libraries(${name} PUBLIC "-ljemalloc" "-ldl")
+endif() # NOT USE_NIX
+else()
+if(NOT USE_NIX)
+  target_link_libraries(${name} PUBLIC "-ljemalloc" "-Wl,-rpath /usr/local/lib" "-ldl")
+else()
+  target_link_libraries(${name} PUBLIC "-ljemalloc" "-ldl")
+endif() # NOT USE_NIX
+endif() # APPLE
 endmacro(kllvm_add_tool)
 
 install(
