@@ -131,13 +131,17 @@ object DHeuristic extends Heuristic {
 object BHeuristic extends Heuristic {
   val needsMatrix: Boolean = false
 
-  def computeScoreForKey(c: AbstractColumn, key: Option[Pattern[Option[Occurrence]]]): Double = {
+  def bf(c: AbstractColumn, key: Option[Pattern[Option[Occurrence]]]): Int = {
     val sigma = c.column.signatureForKey(key)
     if (c.column.category.hasIncompleteSignature(sigma, c.column.fringe)) {
-      -sigma.size-1
+      sigma.size+1
     } else {
-      -sigma.size
+      sigma.size
     }
+  }
+
+  def computeScoreForKey(c: AbstractColumn, key: Option[Pattern[Option[Occurrence]]]): Double = {
+    -bf(c, key)
   }
 }
 
@@ -191,7 +195,7 @@ object RHeuristic extends Heuristic {
     val signature = c.column.signatureForKey(key)
     for (con <- signature) {
       for (i <- c.column.patterns.indices) {
-        if (c.column.patterns(i).isSpecialized(con, false, c.column.fringe, c.column.clauses(i), c.column.maxPriority)) {
+        if (c.column.patterns(i).isSpecialized(con, false, c.column.fringe, c.column.clauses(i), c.column.maxPriorityForKey(key))) {
           result += 1.0
         }
       }
@@ -265,6 +269,25 @@ object QHeuristic extends Heuristic {
       }
     }
     result
+  }
+}
+
+/**
+ * One branch heuristic. Essentially, o is to b as f is to q. Where b measures
+ * the total number of branches resulting from choosing a particular column,
+ * and picks the column with the least branches, o only measures whether
+ * choosing a particular column has a branching factor of 1, ie, no branching.
+ * As a result, you can use the 'o' heuristic before the 'q' heuristic as
+ * a way of reducing the cost of generating the decision tree at the expense
+ * of greater path length.
+ */
+@NamedHeuristic(name='o')
+object OHeuristic extends Heuristic {
+  val needsMatrix: Boolean = false
+
+  def computeScoreForKey(c: AbstractColumn, key: Option[Pattern[Option[Occurrence]]]): Double = {
+    //-c.column.bf
+    if (BHeuristic.bf(c, key) == 1) 1 else 0
   }
 }
 
