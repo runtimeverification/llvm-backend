@@ -1846,6 +1846,10 @@
       "sha1": "419d0d7f80d7d00f8155bd45de15e7cf5d889f0a"
     },
     {
+      "path": "jline/jline/2.14.5/jline-2.14.5.pom",
+      "sha1": "9eb9ceeea01a5668165055f317af43db1a834c4f"
+    },
+    {
       "path": "joda-time/joda-time/2.8.1/joda-time-2.8.1.jar",
       "sha1": "f5bfc718c95a7b1d3c371bb02a188a4df18361a9"
     },
@@ -5882,6 +5886,14 @@
       "sha1": "5ada4f90b1651ae7b89766df379740215570fec7"
     },
     {
+      "path": "org/scala-lang/modules/scala-xml_2.12/1.0.6/scala-xml_2.12-1.0.6.jar",
+      "sha1": "e22de3366a698a9f744106fb6dda4335838cf6a7"
+    },
+    {
+      "path": "org/scala-lang/modules/scala-xml_2.12/1.0.6/scala-xml_2.12-1.0.6.pom",
+      "sha1": "be1e909cee8fcaa2aba20438ffb7e2f7462e3e7d"
+    },
+    {
       "path": "org/scala-lang/scala-compiler/2.10.5/scala-compiler-2.10.5.jar",
       "sha1": "f0f5bb444ca26a6e489af3dd35e24f7e2d2d118e"
     },
@@ -5890,12 +5902,28 @@
       "sha1": "c3e0b6cf2f45a5a7cb052ef9e00f8fdac55e71b7"
     },
     {
+      "path": "org/scala-lang/scala-compiler/2.12.4/scala-compiler-2.12.4.jar",
+      "sha1": "c69c0ee397050d7fa30cfe490471388d30c03bd0"
+    },
+    {
+      "path": "org/scala-lang/scala-compiler/2.12.4/scala-compiler-2.12.4.pom",
+      "sha1": "b1584d2334a379f4d670d4bf479028dda04446b7"
+    },
+    {
       "path": "org/scala-lang/scala-library/2.10.5/scala-library-2.10.5.jar",
       "sha1": "57ac67a6cf6fd591e235c62f8893438e8d10431d"
     },
     {
       "path": "org/scala-lang/scala-library/2.10.5/scala-library-2.10.5.pom",
       "sha1": "4e8b721680f2defb491fe90447302658d464d5c0"
+    },
+    {
+      "path": "org/scala-lang/scala-library/2.12.0/scala-library-2.12.0.jar",
+      "sha1": "270fc1cda47bc255f3cd03152ec8c2ed7d224e2b"
+    },
+    {
+      "path": "org/scala-lang/scala-library/2.12.0/scala-library-2.12.0.pom",
+      "sha1": "ec47a11a9a60cd7c33d3fb68d6e5bb81a92b973e"
     },
     {
       "path": "org/scala-lang/scala-library/2.12.4/scala-library-2.12.4.jar",
