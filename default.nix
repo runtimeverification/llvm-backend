@@ -3,7 +3,34 @@ let
   pinned = import sources."nixpkgs" { config = {}; overlays = []; };
 in
 
-{ pkgs ? pinned }:
+{ pkgs ? pinned
+
+# Override `src` when this project is imported as a Git submodule:
+#
+# > ttuegel.cleanGitSubtree {
+# >   name = "llvm-backend";
+# >   src = ./parent/repo;
+# >   subDir = "path/to/submodule";
+# > };
+#
+# Use `cleanGitSubtree` whenever possible to preserve the same source code
+# layout as the kframework/llvm-backend repository (to enable cache re-use).
+#
+, src ? null
+}:
+
+let
+  ttuegel =
+    let
+      src = builtins.fetchGit {
+        url = "https://github.com/ttuegel/nix-lib";
+        rev = "66bb0ab890ff4d828a2dcfc7d5968465d0c7084f";
+      };
+    in import src { inherit pkgs; };
+in
+
+let _src = src; in
+let src = ttuegel.orElse _src (ttuegel.cleanGitSubtree { src = ./.; }); in
 
 let
   inherit (pkgs) callPackage nix-gitignore;
@@ -25,13 +52,15 @@ let
       llvmPackages.lldClangNoLibcxx.override override;
 
   llvm-backend = callPackage ./nix/llvm-backend.nix {
-    inherit llvmPackages;
+    inherit llvmPackages src;
+    inherit (ttuegel) cleanSourceWith;
   };
 
   mavenix = import sources."mavenix" { inherit pkgs; };
 
   llvm-backend-matching = import ./nix/llvm-backend-matching.nix {
-    inherit mavenix;
+    inherit mavenix src;
+    inherit (ttuegel) cleanSourceWith;
   };
 
   llvm-kompile-testing =
