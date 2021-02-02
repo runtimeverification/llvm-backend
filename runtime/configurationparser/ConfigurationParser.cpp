@@ -29,7 +29,7 @@ static void *constructInitialConfiguration(const KOREPattern *initial) {
     std::variant<const KOREPattern *, construction> current = workList.back();
     workList.pop_back();
     if (current.index() == 0) {
-      const auto constructor = dynamic_cast<const KORECompositePattern *>(std::get<const KOREPattern *>(current));
+      const auto constructor = dynamic_cast<const KORECompositePattern *>(*std::get_if<const KOREPattern *>(&current));
       assert(constructor);
 
       const KORESymbol *symbol = constructor->getConstructor();
@@ -59,8 +59,8 @@ static void *constructInitialConfiguration(const KOREPattern *initial) {
         workList.push_back(child.get());
       }
     } else {
-      uint32_t tag = std::get<construction>(current).tag;
-      size_t nchildren = std::get<construction>(current).nchildren;
+      uint32_t tag = std::get_if<construction>(&current)->tag;
+      size_t nchildren = std::get_if<construction>(&current)->nchildren;
       std::vector<void *> arguments;
       for (size_t i = 0; i < nchildren; i++) {
         arguments.push_back(output.back());
