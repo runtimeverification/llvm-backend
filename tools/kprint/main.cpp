@@ -32,8 +32,8 @@ int main (int argc, char **argv) {
   formats["append"] = "%1 ~> %2";
   formats["dotk"] = ".";
   formats["inj"] = "%1";
-  formats["\\bottom"] = "#False";
-  formats["\\top"] = "#True";
+  formats["\\bottom"] = "#Bottom";
+  formats["\\top"] = "#Top";
   formats["\\not"] = "#Not ( %1 )";
   formats["\\ceil"] = "#Ceil ( %1 )";
   formats["\\floor"] = "#Floor ( %1 )";
