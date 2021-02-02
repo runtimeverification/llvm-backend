@@ -30,7 +30,7 @@ let
 in
 
 let _src = src; in
-let src = ttuegel.orElse _src (ttuegel.cleanGitSubtree { src = ./.; }); in
+let src = ttuegel.orElse _src (ttuegel.cleanGitSubtree { name = "llvm-backend"; src = ./.; }); in
 
 let
   inherit (pkgs) callPackage nix-gitignore;
@@ -82,4 +82,3 @@ let
   };
 
 in self
-
