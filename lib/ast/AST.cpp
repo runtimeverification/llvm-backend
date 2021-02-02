@@ -884,6 +884,28 @@ sptr<KOREPattern> KORECompositePattern::sortCollections(PrettyPrintData const& d
   return result;
 }
 
+std::set<std::string> KOREPattern::gatherSingletonVars(void) {
+  auto counts = gatherVarCounts(); 
+  std::set<std::string> result;
+  for (auto entry : counts) {
+    if (entry.second == 1) {
+      result.insert(entry.first);
+    }
+  }
+  return result;
+}
+
+std::map<std::string, int> KORECompositePattern::gatherVarCounts(void) {
+  std::map<std::string, int> result;
+  for (auto &arg : arguments) {
+    auto childResult = arg->gatherVarCounts();
+    for (auto entry : childResult) {
+      result[entry.first] += entry.second;
+    }
+  }
+  return result;
+}
+
 sptr<KOREPattern> KORECompositePattern::filterSubstitution(PrettyPrintData const& data) {
   if (constructor->getName() == "\\equals") {
     if (auto var = dynamic_cast<KOREVariablePattern *>(arguments[0].get())) {
