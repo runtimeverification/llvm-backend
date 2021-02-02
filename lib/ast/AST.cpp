@@ -884,7 +884,29 @@ sptr<KOREPattern> KORECompositePattern::sortCollections(PrettyPrintData const& d
   return result;
 }
 
-sptr<KOREPattern> KORECompositePattern::filterSubstitution(PrettyPrintData const& data) {
+std::set<std::string> KOREPattern::gatherSingletonVars(void) {
+  auto counts = gatherVarCounts(); 
+  std::set<std::string> result;
+  for (auto entry : counts) {
+    if (entry.second == 1) {
+      result.insert(entry.first);
+    }
+  }
+  return result;
+}
+
+std::map<std::string, int> KORECompositePattern::gatherVarCounts(void) {
+  std::map<std::string, int> result;
+  for (auto &arg : arguments) {
+    auto childResult = arg->gatherVarCounts();
+    for (auto entry : childResult) {
+      result[entry.first] += entry.second;
+    }
+  }
+  return result;
+}
+
+sptr<KOREPattern> KORECompositePattern::filterSubstitution(PrettyPrintData const& data, std::set<std::string> const& vars) {
   if (constructor->getName() == "\\equals") {
     if (auto var = dynamic_cast<KOREVariablePattern *>(arguments[0].get())) {
       std::ostringstream ss;
@@ -896,8 +918,7 @@ sptr<KOREPattern> KORECompositePattern::filterSubstitution(PrettyPrintData const
       indent = oldIndent;
       atNewLine = oldAtNewLine;
       std::string name = ss.str();
-      if (name[0] == '_' || (name.size() > 1 && (name[0] == '@' || name[0] == '!' || name[0] == '?') && name[1] == '_')) {
-        std::map<std::string, KOREVariablePattern *> vars;
+      if (vars.count(var->getName()) && (name[0] == '_' || (name.size() > 1 && (name[0] == '@' || name[0] == '!' || name[0] == '?') && name[1] == '_'))) {
         sptr<KORECompositePattern> unit = KORECompositePattern::Create("\\top");
         unit->getConstructor()->addFormalArgument(constructor->getFormalArguments()[1]);
         return unit;
@@ -907,10 +928,15 @@ sptr<KOREPattern> KORECompositePattern::filterSubstitution(PrettyPrintData const
     } else {
       return shared_from_this();
     }
-  } else {
+  } else if (constructor->getName() == "\\and" || constructor->getName() == "\\or") {
     sptr<KORECompositePattern> result = KORECompositePattern::Create(constructor.get());
     for (auto &arg : arguments) {
-      result->addArgument(arg->filterSubstitution(data));
+      if (constructor->getName() == "\\or") {
+        std::set<std::string> vars = arg->gatherSingletonVars();
+        result->addArgument(arg->filterSubstitution(data, vars));
+      } else {
+        result->addArgument(arg->filterSubstitution(data, vars));
+      }
     }
     if (constructor->getName() == "\\and") {
      if (auto composite = dynamic_cast<KORECompositePattern *>(result->getArguments()[0].get())) {
@@ -926,6 +952,7 @@ sptr<KOREPattern> KORECompositePattern::filterSubstitution(PrettyPrintData const
     }
     return result;
   }
+  return shared_from_this();
 }
 
 sptr<KOREPattern> KORECompositePattern::expandMacros(SubsortMap const& subsorts, SymbolMap const& overloads, std::vector<ptr<KOREDeclaration>> const& macros, bool reverse, std::set<size_t> &appliedRules) {
