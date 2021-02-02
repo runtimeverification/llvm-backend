@@ -328,7 +328,7 @@ public:
   virtual sptr<KOREPattern> sortCollections(PrettyPrintData const& data) = 0;
   std::set<std::string> gatherSingletonVars(void);
   virtual std::map<std::string, int> gatherVarCounts(void) = 0;
-  virtual sptr<KOREPattern> filterSubstitution(PrettyPrintData const& data) = 0;
+  virtual sptr<KOREPattern> filterSubstitution(PrettyPrintData const& data, std::set<std::string> const& vars) = 0;
   virtual bool matches(substitution &subst, SubsortMap const& subsorts, SymbolMap const& overloads, sptr<KOREPattern> subject) = 0;
   sptr<KOREPattern> expandMacros(SubsortMap const& subsorts, SymbolMap const& overloads, std::vector<ptr<KOREDeclaration>> const& axioms, bool reverse) { std::set<size_t> appliedRules; return expandMacros(subsorts, overloads, axioms, reverse, appliedRules); }
 
@@ -365,7 +365,7 @@ public:
   virtual sptr<KOREPattern> expandAliases(KOREDefinition *) override { return shared_from_this(); }
   virtual sptr<KOREPattern> sortCollections(PrettyPrintData const& data) override { return shared_from_this(); }
   virtual std::map<std::string, int> gatherVarCounts(void) override { return std::map<std::string, int>{{name->getName(), 1}}; }
-  virtual sptr<KOREPattern> filterSubstitution(PrettyPrintData const& data) override { return shared_from_this(); }
+  virtual sptr<KOREPattern> filterSubstitution(PrettyPrintData const& data, std::set<std::string> const& vars) override { return shared_from_this(); }
   virtual bool matches(substitution &subst, SubsortMap const&, SymbolMap const&, sptr<KOREPattern> subject) override;
   virtual void prettyPrint(std::ostream &out, PrettyPrintData const& data) const override;
 
@@ -410,7 +410,7 @@ public:
   virtual sptr<KOREPattern> expandAliases(KOREDefinition *) override;
   virtual sptr<KOREPattern> sortCollections(PrettyPrintData const& data) override;
   virtual std::map<std::string, int> gatherVarCounts(void) override;
-  virtual sptr<KOREPattern> filterSubstitution(PrettyPrintData const& data) override;
+  virtual sptr<KOREPattern> filterSubstitution(PrettyPrintData const& data, std::set<std::string> const& vars) override;
   virtual bool matches(substitution &, SubsortMap const&, SymbolMap const&, sptr<KOREPattern>) override;
 
 private:
@@ -441,7 +441,7 @@ public:
   virtual sptr<KOREPattern> expandAliases(KOREDefinition *) override { return shared_from_this(); }
   virtual sptr<KOREPattern> sortCollections(PrettyPrintData const& data) override { return shared_from_this(); }
   virtual std::map<std::string, int> gatherVarCounts(void) override { return std::map<std::string, int>{}; }
-  virtual sptr<KOREPattern> filterSubstitution(PrettyPrintData const& data) override { return shared_from_this(); }
+  virtual sptr<KOREPattern> filterSubstitution(PrettyPrintData const& data, std::set<std::string> const& var) override { return shared_from_this(); }
   virtual bool matches(substitution &, SubsortMap const&, SymbolMap const&, sptr<KOREPattern> subject) override;
 
 private:

@@ -232,7 +232,8 @@ int main (int argc, char **argv) {
   sptr<KOREPattern> sorted = expanded->sortCollections(data);
   sptr<KOREPattern> filtered;
   if (filterSubst) {
-    filtered = sorted->filterSubstitution(data);
+    std::set<std::string> vars = sorted->gatherSingletonVars();
+    filtered = sorted->filterSubstitution(data, vars);
   } else {
     filtered = sorted;
   }
