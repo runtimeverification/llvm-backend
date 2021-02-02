@@ -928,7 +928,7 @@ sptr<KOREPattern> KORECompositePattern::filterSubstitution(PrettyPrintData const
     } else {
       return shared_from_this();
     }
-  } else {
+  } else if (constructor->getName() == "\\and" || constructor->getName() == "\\or") {
     sptr<KORECompositePattern> result = KORECompositePattern::Create(constructor.get());
     for (auto &arg : arguments) {
       if (constructor->getName() == "\\or") {
@@ -949,12 +949,10 @@ sptr<KOREPattern> KORECompositePattern::filterSubstitution(PrettyPrintData const
           return result->getArguments()[0];
         }
       }
-      return result;
-    } else if (constructor->getName() == "\\or") {
-      return result;
     }
-    return shared_from_this();
+    return result;
   }
+  return shared_from_this();
 }
 
 sptr<KOREPattern> KORECompositePattern::expandMacros(SubsortMap const& subsorts, SymbolMap const& overloads, std::vector<ptr<KOREDeclaration>> const& macros, bool reverse, std::set<size_t> &appliedRules) {
