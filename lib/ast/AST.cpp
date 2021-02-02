@@ -945,8 +945,11 @@ sptr<KOREPattern> KORECompositePattern::filterSubstitution(PrettyPrintData const
           return result->getArguments()[0];
         }
       }
+      return result;
+    } else if (constructor->getName() == "\\or") {
+      return result;
     }
-    return result;
+    return shared_from_this();
   }
 }
 
