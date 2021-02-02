@@ -1,0 +1,55 @@
+/* Spc */
+\or{SortGeneratedTopCell{}}(
+    /* Created: Kore.Internal.OrPattern.toTermLike */
+    /* Spa */
+    \and{SortGeneratedTopCell{}}(
+        /* Fl Fn D Sfa Cl */
+        Lbl'-LT-'generatedTop'-GT-'{}(
+            /* Fl Fn D Sfa Cl */
+            Lbl'-LT-'k'-GT-'{}(
+                /* Fl Fn D Sfa Cl */
+                kseq{}(
+                    /* Fl Fn D Sfa Cl */ Lblone'Unds'TEST'Unds'KItem{}(),
+                    /* Fl Fn D Sfa Cl */ dotk{}()
+                )
+            ),
+            /* Fl Fn D Sfa Cl */
+            Lbl'-LT-'generatedCounter'-GT-'{}(
+                /* Fl Fn D Sfa Cl */ \dv{SortInt{}}("0")
+            )
+        ),
+        /* Spa */
+        \equals{SortInt{}, SortGeneratedTopCell{}}(
+            /* Fl Fn D Sfa */ Var'QuesUnds'0:SortInt{},
+            /* Fl Fn D Sfa Cl */ \dv{SortInt{}}("1")
+        )
+    ),
+    /* Created: Kore.Internal.OrPattern.toTermLike */
+    /* Spc */
+    \and{SortGeneratedTopCell{}}(
+        /* Fl Fn D Sfc */
+        Lbl'-LT-'generatedTop'-GT-'{}(
+            /* Fl Fn D Sfc */
+            Lbl'-LT-'k'-GT-'{}(
+                /* Fl Fn D Sfc */
+                kseq{}(
+                    /* Fl Fn D Sfc */
+                    /* Inj: */ inj{SortInt{}, SortKItem{}}(
+                        /* Fl Fn D Sfa */ Var'QuesUnds'0:SortInt{}
+                    ),
+                    /* Fl Fn D Sfa Cl */ dotk{}()
+                )
+            ),
+            /* Fl Fn D Sfa Cl */
+            Lbl'-LT-'generatedCounter'-GT-'{}(
+                /* Fl Fn D Sfa Cl */ \dv{SortInt{}}("0")
+            )
+        ),
+        /* Sfa */
+            /* Spa */
+            \equals{SortInt{}, SortGeneratedTopCell{}}(
+                /* Fl Fn D Sfa */ Var'QuesUnds'0:SortInt{},
+                /* Fl Fn D Sfa Cl */ \dv{SortInt{}}("1")
+            )
+    )
+)
