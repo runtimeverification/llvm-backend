@@ -4,6 +4,7 @@ add_kllvm_unittest(runtime-ffi-tests
   ffi.cpp
   main.cpp
 )
+add_dependencies(runtime-ffi-tests ffitest)
 
 link_directories(../unittests/runtime-ffi/lib)
 

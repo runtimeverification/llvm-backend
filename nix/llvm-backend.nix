@@ -39,6 +39,7 @@ stdenv.mkDerivation {
     ''-DCMAKE_C_COMPILER=${lib.getBin stdenv.cc}/bin/cc''
     ''-DCMAKE_CXX_COMPILER=${lib.getBin stdenv.cc}/bin/c++''
     ''-DUSE_NIX=TRUE''
+    ''-DCMAKE_SKIP_BUILD_RPATH=FALSE''
   ];
 
   cmakeBuildType = "FastBuild";
@@ -49,11 +50,12 @@ stdenv.mkDerivation {
   checkPhase = ''
     runHook preCheck
 
-    # Find local test libraries. Nixpkgs' linker script filters paths outside
-    # the Nix store, so the build-local libraries are not linked.
     (
-        export LD_LIBRARY_PATH="''${LD_LIBRARY_PATH:+:}"'$ORIGIN/lib'
-        make run-unittests
+      # Allow linking to paths outside the Nix store.
+      # Primarily, this allows linking to paths in the build tree.
+      # The setting is only applied to the unit tests, which are not installed.
+      export NIX_ENFORCE_PURITY=0
+      make run-unittests
     )
 
     runHook postCheck
