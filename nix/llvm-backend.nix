@@ -33,8 +33,9 @@ stdenv.mkDerivation {
       ./..;
 
   nativeBuildInputs = [ cmake flex llvm pkgconfig ];
-  buildInputs =
-    [ boost gmp libffi libyaml jemalloc mpfr ]
+  buildInputs = [ boost libyaml ];
+  propagatedBuildInputs =
+    [ gmp jemalloc libffi mpfr ]
     ++ lib.optional stdenv.isDarwin libiconv;
 
   cmakeFlags = [
