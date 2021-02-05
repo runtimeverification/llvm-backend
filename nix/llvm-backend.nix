@@ -2,7 +2,7 @@
   lib, nix-gitignore,
   cmake, flex, pkgconfig,
   llvmPackages,
-  boost, gmp, jemalloc, libffi, libyaml, mpfr,
+  boost, gmp, jemalloc, libffi, libiconv, libyaml, mpfr,
 }:
 
 let inherit (nix-gitignore) gitignoreSourcePure; in
@@ -33,7 +33,10 @@ stdenv.mkDerivation {
       ./..;
 
   nativeBuildInputs = [ cmake flex llvm pkgconfig ];
-  buildInputs = [ boost gmp libffi libyaml jemalloc mpfr ];
+  buildInputs = [ boost libyaml ];
+  propagatedBuildInputs =
+    [ gmp jemalloc libffi mpfr ]
+    ++ lib.optional stdenv.isDarwin libiconv;
 
   cmakeFlags = [
     ''-DCMAKE_C_COMPILER=${lib.getBin stdenv.cc}/bin/cc''
