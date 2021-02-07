@@ -22,3 +22,5 @@ target_link_libraries(runtime-io-tests
 endif()
 
 add_executable(IOTest iotest.cpp)
+set_target_properties(IOTest PROPERTIES EXCLUDE_FROM_ALL TRUE)
+add_dependencies(runtime-io-tests IOTest)

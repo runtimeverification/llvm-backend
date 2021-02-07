@@ -32,8 +32,8 @@ int main (int argc, char **argv) {
   formats["append"] = "%1 ~> %2";
   formats["dotk"] = ".";
   formats["inj"] = "%1";
-  formats["\\bottom"] = "#False";
-  formats["\\top"] = "#True";
+  formats["\\bottom"] = "#Bottom";
+  formats["\\top"] = "#Top";
   formats["\\not"] = "#Not ( %1 )";
   formats["\\ceil"] = "#Ceil ( %1 )";
   formats["\\floor"] = "#Floor ( %1 )";
@@ -232,7 +232,8 @@ int main (int argc, char **argv) {
   sptr<KOREPattern> sorted = expanded->sortCollections(data);
   sptr<KOREPattern> filtered;
   if (filterSubst) {
-    filtered = sorted->filterSubstitution(data);
+    std::set<std::string> vars = sorted->gatherSingletonVars();
+    filtered = sorted->filterSubstitution(data, vars);
   } else {
     filtered = sorted;
   }

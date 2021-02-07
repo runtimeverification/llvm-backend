@@ -5,6 +5,9 @@ macro(add_kllvm_unittest test_name)
   # add target for building the test
   kllvm_add_tool(${test_name} ${ARGN})
 
+  # exclude unit tests from the default target
+  set_target_properties(${test_name} PROPERTIES EXCLUDE_FROM_ALL TRUE)
+
   # add a dependency to the global unit test build target
   add_dependencies(unittests ${test_name})
 

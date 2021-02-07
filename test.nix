@@ -19,7 +19,7 @@ stdenv.mkDerivation {
   src = llvm-backend.src;
   preferLocalBuild = true;
   buildInputs = [
-    diffutils ncurses gmp mpfr libffi jemalloc
+    diffutils ncurses
     clang llvm-backend llvm-kompile-testing
   ];
   configurePhase = "true";

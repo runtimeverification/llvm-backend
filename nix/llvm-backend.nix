@@ -2,7 +2,7 @@
   lib, cleanSourceWith, src,
   cmake, flex, pkgconfig,
   llvmPackages,
-  boost, gmp, jemalloc, libffi, libyaml, mpfr,
+  boost, gmp, jemalloc, libffi, libiconv, libyaml, mpfr,
 }:
 
 let inherit (llvmPackages) stdenv llvm; in
@@ -28,12 +28,16 @@ stdenv.mkDerivation {
     };
 
   nativeBuildInputs = [ cmake flex llvm pkgconfig ];
-  buildInputs = [ boost gmp libffi libyaml jemalloc mpfr ];
+  buildInputs = [ boost libyaml ];
+  propagatedBuildInputs =
+    [ gmp jemalloc libffi mpfr ]
+    ++ lib.optional stdenv.isDarwin libiconv;
 
   cmakeFlags = [
     ''-DCMAKE_C_COMPILER=${lib.getBin stdenv.cc}/bin/cc''
     ''-DCMAKE_CXX_COMPILER=${lib.getBin stdenv.cc}/bin/c++''
     ''-DUSE_NIX=TRUE''
+    ''-DCMAKE_SKIP_BUILD_RPATH=FALSE''
   ];
 
   cmakeBuildType = "FastBuild";
@@ -44,11 +48,12 @@ stdenv.mkDerivation {
   checkPhase = ''
     runHook preCheck
 
-    # Find local test libraries. Nixpkgs' linker script filters paths outside
-    # the Nix store, so the build-local libraries are not linked.
     (
-        export LD_LIBRARY_PATH="''${LD_LIBRARY_PATH:+:}"'$ORIGIN/lib'
-        make run-unittests
+      # Allow linking to paths outside the Nix store.
+      # Primarily, this allows linking to paths in the build tree.
+      # The setting is only applied to the unit tests, which are not installed.
+      export NIX_ENFORCE_PURITY=0
+      make run-unittests
     )
 
     runHook postCheck
