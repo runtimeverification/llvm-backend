@@ -6,7 +6,7 @@
 
 # Ensure the source is loaded into the Nix store.
 # This command will fail, but only after loading the source.
-# mavenix will not do this automatically because we it uses restrict-eval,
+# mavenix will not do this automatically because it uses restrict-eval,
 # and we are using filterSource, which is disabled under restrict-eval.
 nix-build --no-out-link \
     -E '(import ./default.nix {}).llvm-backend-matching.src' \
