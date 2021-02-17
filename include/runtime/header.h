@@ -2,6 +2,7 @@
 #define RUNTIME_HEADER_H
 
 #include <stdint.h>
+#include <stddef.h>
 #include <gmp.h>
 #include <mpfr.h>
 
