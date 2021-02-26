@@ -1669,12 +1669,7 @@ void kllvm::deallocateSPtrKorePattern(sptr<KOREPattern> pattern) {
         sptr<KOREPattern> curr = std::move(vec.back());
         vec.pop_back();
         if (auto composite = std::dynamic_pointer_cast<KORECompositePattern>(curr)) {
-            vec.reserve(vec.size() + composite->arguments.size());
-            // move all the arguments to vec
-            while(!composite->arguments.empty()) {
-                vec.push_back(std::move(composite->arguments.back()));
-                composite->arguments.pop_back();
-            }
+            vec.insert(vec.end(), std::make_move_iterator(composite->arguments.begin()), std::make_move_iterator(composite->arguments.end()));
         }
     }
 }
