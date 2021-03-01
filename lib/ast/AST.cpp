@@ -1658,3 +1658,18 @@ void kllvm::readMultimap(std::string name, KORESymbolDeclaration *decl, std::map
     }
   }
 }
+
+// Normally, destruction of KOREPattern would call destructor
+// of all its subpatterns. This can sometimes exhaust all the stack space.
+// This function deallocates a pattern iteratively, without recursion.
+void kllvm::deallocateSPtrKorePattern(sptr<KOREPattern> pattern) {
+    std::vector<sptr<KOREPattern>> vec;
+    vec.push_back(std::move(pattern));
+    while(!vec.empty()) {
+        sptr<KOREPattern> curr = std::move(vec.back());
+        vec.pop_back();
+        if (auto composite = std::dynamic_pointer_cast<KORECompositePattern>(curr)) {
+            vec.insert(vec.end(), std::make_move_iterator(composite->arguments.begin()), std::make_move_iterator(composite->arguments.end()));
+        }
+    }
+}

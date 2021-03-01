@@ -377,6 +377,9 @@ private:
   : name(std::move(Name)), sort(Sort) { }
 };
 
+class KOREPattern;
+void deallocateSPtrKorePattern(sptr<KOREPattern> pattern);
+
 class KORECompositePattern : public KOREPattern {
 private:
   ptr<KORESymbol> constructor;
@@ -415,6 +418,8 @@ public:
 
 private:
   virtual sptr<KOREPattern> expandMacros(SubsortMap const&, SymbolMap const&, std::vector<ptr<KOREDeclaration>> const& macros, bool reverse, std::set<size_t> &appliedRules) override;
+
+  friend void ::kllvm::deallocateSPtrKorePattern(sptr<KOREPattern> pattern);
 
 private:
   KORECompositePattern(ptr<KORESymbol> Constructor)

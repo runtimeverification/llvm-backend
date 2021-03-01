@@ -110,5 +110,7 @@ block *parseConfiguration(const char *filename) {
   //InitialConfiguration->print(std::cout);
 
   // Allocate the llvm KORE datastructures for the configuration
-  return (block *) constructInitialConfiguration(InitialConfiguration.get());
+  auto b = (block *) constructInitialConfiguration(InitialConfiguration.get());
+  deallocateSPtrKorePattern(std::move(InitialConfiguration));
+  return b;
 }
