@@ -4,6 +4,8 @@
 
 #include <gmp.h>
 #include <variant>
+#include <cstdlib>
+#include <map>
 
 #include "runtime/header.h"
 
@@ -22,7 +24,35 @@ struct construction {
   size_t nchildren;
 };
 
+class CachedGTFSN{
+public:
+    explicit CachedGTFSN()
+    : use_cache{std::getenv("USE_SYMBOL_CACHE") != nullptr}
+    {}
+
+    // TODO test with string_view - it might be faster
+    uint32_t getTagForSymbolName(std::string const &s) {
+        if (!use_cache)
+            return ::getTagForSymbolName(s.c_str());
+
+        // https://stackoverflow.com/a/101980/6209703
+        Cache::iterator lb = cache.lower_bound(s);
+        // key exists
+        if (lb != cache.end() && !(cache.key_comp()(s, lb->first))) {
+            return lb->second;
+        }
+        uint32_t const tag = ::getTagForSymbolName(s.c_str());
+        cache.insert(lb, Cache::value_type{s, tag});
+        return tag;
+    }
+private:
+    bool const use_cache;
+    using Cache = std::map<std::string, uint32_t>;
+    Cache cache;
+};
+
 static void *constructInitialConfiguration(const KOREPattern *initial) {
+    CachedGTFSN cachedGtfsn;
   std::vector<std::variant<const KOREPattern *, construction>> workList{initial};
   std::vector<void *> output;
   while (!workList.empty()) {
@@ -45,7 +75,8 @@ static void *constructInitialConfiguration(const KOREPattern *initial) {
 
       std::ostringstream Out;
       symbol->print(Out);
-      uint32_t tag = getTagForSymbolName(Out.str().c_str());
+      // TODO: test whether with string view would it be faster
+      uint32_t tag = cachedGtfsn.getTagForSymbolName(Out.str());
       if (isSymbolAFunction(tag) && constructor->getArguments().empty()) {
         output.push_back(evaluateFunctionSymbol(tag, nullptr));
         continue;
