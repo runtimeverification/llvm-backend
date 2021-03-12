@@ -188,9 +188,11 @@ Lbl'Unds'Map'Unds'{}(
 HERE
 done
 
-cat <<HERE >> $input_file
+if [ ${#params[@]} -ne 0 ]; then
+  cat <<HERE >> $input_file
 Lbl'Stop'Map{}()
 HERE
+fi
 
 for param in "${params[@]}"; do
   cat <<HERE >> $input_file
