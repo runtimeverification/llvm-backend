@@ -47,7 +47,7 @@ llvm::LLVMContext &Ctx = module->getContext();
 static void emitGetTagForSymbolName(KOREDefinition *definition, llvm::Module *module) {
   llvm::LLVMContext &Ctx = module->getContext();
   auto type = llvm::FunctionType::get(llvm::Type::getInt32Ty(Ctx), {llvm::Type::getInt8PtrTy(Ctx)}, false);
-  auto func = getOrInsertFunction(module, "getTagForSymbolName",
+  auto func = getOrInsertFunction(module, "getTagForSymbolNameInternal",
       type);
   auto CurrentBlock = llvm::BasicBlock::Create(Ctx, "");
   auto MergeBlock = llvm::BasicBlock::Create(Ctx, "exit");

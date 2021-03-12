@@ -11,10 +11,28 @@
 using namespace kllvm;
 using namespace kllvm::parser;
 
+using Cache = std::map<std::string, uint32_t>;
+static thread_local Cache cache;
+
 extern "C" {
+  uint32_t getTagForSymbolNameInternal(const char *);
+  
   void init_float(floating *result, const char *c_str) {
     std::string contents = std::string(c_str);
     init_float2(result, contents);
+  }
+
+  uint32_t getTagForSymbolName(const char *name) {
+    std::string s = name;
+    // https://stackoverflow.com/a/101980/6209703
+    Cache::iterator lb = cache.lower_bound(s);
+    // key exists
+    if (lb != cache.end() && !(cache.key_comp()(s, lb->first))) {
+      return lb->second;
+    }
+    uint32_t const tag = getTagForSymbolNameInternal(s.c_str());
+    cache.insert(lb, Cache::value_type{s, tag});
+    return tag;
   }
 }
 
@@ -23,26 +41,7 @@ struct construction {
   size_t nchildren;
 };
 
-class CachedGTFSN{
-public:
-  uint32_t getTagForSymbolName(std::string const &s) {
-    // https://stackoverflow.com/a/101980/6209703
-    Cache::iterator lb = cache.lower_bound(s);
-    // key exists
-    if (lb != cache.end() && !(cache.key_comp()(s, lb->first))) {
-      return lb->second;
-    }
-    uint32_t const tag = ::getTagForSymbolName(s.c_str());
-    cache.insert(lb, Cache::value_type{s, tag});
-    return tag;
-  }
-private:
-  using Cache = std::map<std::string, uint32_t>;
-  Cache cache;
-};
-
 static void *constructInitialConfiguration(const KOREPattern *initial) {
-  CachedGTFSN cachedGtfsn;
   std::vector<std::variant<const KOREPattern *, construction>> workList{initial};
   std::vector<void *> output;
   while (!workList.empty()) {
@@ -65,7 +64,7 @@ static void *constructInitialConfiguration(const KOREPattern *initial) {
 
       std::ostringstream Out;
       symbol->print(Out);
-      uint32_t tag = cachedGtfsn.getTagForSymbolName(Out.str());
+      uint32_t tag = getTagForSymbolName(Out.str().c_str());
       if (isSymbolAFunction(tag) && constructor->getArguments().empty()) {
         output.push_back(evaluateFunctionSymbol(tag, nullptr));
         continue;
