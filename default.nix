@@ -55,6 +55,7 @@ let
   llvm-backend = callPackage ./nix/llvm-backend.nix {
     inherit llvmPackages src;
     inherit (ttuegel) cleanSourceWith;
+    host.clang = clang;
   };
 
   mavenix = import sources."mavenix" { inherit pkgs; };
@@ -78,8 +79,9 @@ let
     '';
 
   self = {
-    inherit clang llvm-backend llvm-backend-matching llvm-kompile-testing;
-    inherit mavenix;
+    inherit llvm-backend llvm-backend-matching llvm-kompile-testing;
+    inherit clang; # for compatibility
+    inherit mavenix; # for CI
   };
 
 in self

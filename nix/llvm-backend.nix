@@ -3,6 +3,8 @@
   cmake, flex, pkgconfig,
   llvmPackages,
   boost, gmp, jemalloc, libffi, libiconv, libyaml, mpfr,
+  # Runtime dependencies:
+  host,
 }:
 
 let inherit (llvmPackages) stdenv llvm; in
@@ -19,7 +21,7 @@ stdenv.mkDerivation {
     cleanSourceWith {
       name = "llvm-backend-src";
       inherit src;
-      ignore = 
+      ignore =
         [
           "/nix" "*.nix" "*.nix.sh"
           "/.github"
@@ -58,4 +60,8 @@ stdenv.mkDerivation {
 
     runHook postCheck
   '';
+
+  passthru = {
+    inherit (host) clang;
+  };
 }
