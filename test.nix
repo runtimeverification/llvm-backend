@@ -7,7 +7,7 @@ in
 
 let
   inherit (pkgs) stdenv;
-  inherit (pkgs) diffutils ncurses;
+  inherit (pkgs) diffutils;
 
   default = import ./. { inherit pkgs; };
   inherit (default) llvm-backend llvm-kompile-testing;
@@ -19,7 +19,7 @@ stdenv.mkDerivation {
   src = llvm-backend.src;
   preferLocalBuild = true;
   buildInputs = [
-    diffutils ncurses
+    diffutils
     llvm-backend llvm-kompile-testing
   ];
   configurePhase = "true";

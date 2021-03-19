@@ -2,7 +2,7 @@
   lib, cleanSourceWith, src,
   cmake, flex, pkgconfig,
   llvmPackages,
-  boost, gmp, jemalloc, libffi, libiconv, libyaml, mpfr,
+  boost, gmp, jemalloc, libffi, libiconv, libyaml, mpfr, ncurses,
   # Runtime dependencies:
   host,
 }:
@@ -32,7 +32,7 @@ stdenv.mkDerivation {
   nativeBuildInputs = [ cmake flex llvm pkgconfig ];
   buildInputs = [ boost libyaml ];
   propagatedBuildInputs =
-    [ gmp jemalloc libffi mpfr ]
+    [ gmp jemalloc libffi mpfr ncurses ]
     ++ lib.optional stdenv.isDarwin libiconv;
 
   postPatch = ''
