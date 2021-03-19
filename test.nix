@@ -19,8 +19,9 @@ stdenv.mkDerivation {
   src = llvm-backend.src;
   preferLocalBuild = true;
   buildInputs = [
-    diffutils
-    llvm-backend llvm-kompile-testing
+    diffutils  # for golden testing
+    llvm-kompile-testing  # for constructing test input without the frontend
+    llvm-backend  # the system under test
   ];
   configurePhase = "true";
   buildPhase = ''
