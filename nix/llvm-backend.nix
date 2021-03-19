@@ -35,6 +35,11 @@ stdenv.mkDerivation {
     [ gmp jemalloc libffi mpfr ]
     ++ lib.optional stdenv.isDarwin libiconv;
 
+  postPatch = ''
+    sed -i bin/llvm-kompile \
+      -e '2a export PATH="${lib.getBin host.clang}/bin:''${PATH}"'
+  '';
+
   cmakeFlags = [
     ''-DCMAKE_C_COMPILER=${lib.getBin stdenv.cc}/bin/cc''
     ''-DCMAKE_CXX_COMPILER=${lib.getBin stdenv.cc}/bin/c++''

@@ -20,7 +20,7 @@ stdenv.mkDerivation {
   preferLocalBuild = true;
   buildInputs = [
     diffutils ncurses
-    clang llvm-backend llvm-kompile-testing
+    llvm-backend llvm-kompile-testing
   ];
   configurePhase = "true";
   buildPhase = ''
