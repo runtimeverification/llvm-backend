@@ -7,10 +7,10 @@ in
 
 let
   inherit (pkgs) stdenv;
-  inherit (pkgs) diffutils ncurses gmp mpfr libffi jemalloc;
+  inherit (pkgs) diffutils ncurses;
 
   default = import ./. { inherit pkgs; };
-  inherit (default) clang llvm-backend llvm-backend-matching llvm-kompile-testing;
+  inherit (default) llvm-backend llvm-kompile-testing;
 
 in
 
