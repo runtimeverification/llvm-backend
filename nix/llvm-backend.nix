@@ -2,7 +2,9 @@
   lib, cleanSourceWith, src,
   cmake, flex, pkgconfig,
   llvmPackages,
-  boost, gmp, jemalloc, libffi, libiconv, libyaml, mpfr,
+  boost, gmp, jemalloc, libffi, libiconv, libyaml, mpfr, ncurses,
+  # Runtime dependencies:
+  host,
 }:
 
 let inherit (llvmPackages) stdenv llvm; in
@@ -19,7 +21,7 @@ stdenv.mkDerivation {
     cleanSourceWith {
       name = "llvm-backend-src";
       inherit src;
-      ignore = 
+      ignore =
         [
           "/nix" "*.nix" "*.nix.sh"
           "/.github"
@@ -30,8 +32,13 @@ stdenv.mkDerivation {
   nativeBuildInputs = [ cmake flex llvm pkgconfig ];
   buildInputs = [ boost libyaml ];
   propagatedBuildInputs =
-    [ gmp jemalloc libffi mpfr ]
+    [ gmp jemalloc libffi mpfr ncurses ]
     ++ lib.optional stdenv.isDarwin libiconv;
+
+  postPatch = ''
+    sed -i bin/llvm-kompile \
+      -e '2a export PATH="${lib.getBin host.clang}/bin:''${PATH}"'
+  '';
 
   cmakeFlags = [
     ''-DCMAKE_C_COMPILER=${lib.getBin stdenv.cc}/bin/cc''
@@ -58,4 +65,8 @@ stdenv.mkDerivation {
 
     runHook postCheck
   '';
+
+  passthru = {
+    inherit (host) clang;
+  };
 }

@@ -7,10 +7,10 @@ in
 
 let
   inherit (pkgs) stdenv;
-  inherit (pkgs) diffutils ncurses gmp mpfr libffi jemalloc;
+  inherit (pkgs) diffutils;
 
   default = import ./. { inherit pkgs; };
-  inherit (default) clang llvm-backend llvm-backend-matching llvm-kompile-testing;
+  inherit (default) llvm-backend llvm-kompile-testing;
 
 in
 
@@ -19,8 +19,9 @@ stdenv.mkDerivation {
   src = llvm-backend.src;
   preferLocalBuild = true;
   buildInputs = [
-    diffutils ncurses
-    clang llvm-backend llvm-kompile-testing
+    diffutils  # for golden testing
+    llvm-kompile-testing  # for constructing test input without the frontend
+    llvm-backend  # the system under test
   ];
   configurePhase = "true";
   buildPhase = ''
