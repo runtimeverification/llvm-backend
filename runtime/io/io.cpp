@@ -531,6 +531,10 @@ extern "C" {
     }
   }
 
+  block *hook_IO_logWrapper(SortK sideEffect, block *arg) {
+    return arg;
+  }
+
   SortK hook_IO_log(SortString path, SortString msg) {
     char * p = getTerminatedString(path);
     char * m = getTerminatedString(msg);
