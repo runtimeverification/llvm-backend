@@ -720,9 +720,11 @@ llvm::Value *CreateTerm::createFunctionCall(std::string name, ValueType returnCa
     types.push_back(arg->getType());
   }
   std::vector<llvm::Value *> realArgs = args;
+  llvm::Type *sretType;
   if (sret) {
     // we don't use alloca here because the tail call optimization pass for llvm doesn't handle correctly functions with alloca
     AllocSret = allocateTerm(returnType, CurrentBlock, "koreAllocAlwaysGC");
+    sretType = returnType;
     realArgs.insert(realArgs.begin(), AllocSret);
     types.insert(types.begin(), AllocSret->getType());
     returnType = llvm::Type::getVoidTy(Ctx);
@@ -738,8 +740,9 @@ llvm::Value *CreateTerm::createFunctionCall(std::string name, ValueType returnCa
     call->setCallingConv(llvm::CallingConv::Fast);
   }
   if (sret) {
-    func->arg_begin()->addAttr(llvm::Attribute::StructRet);
-    call->addParamAttr(0, llvm::Attribute::StructRet);
+    llvm::Attribute sretAttr = llvm::Attribute::get(Ctx, llvm::Attribute::StructRet, sretType);
+    func->arg_begin()->addAttr(sretAttr);
+    call->addParamAttr(0, sretAttr);
     return AllocSret;
   }
   return call;

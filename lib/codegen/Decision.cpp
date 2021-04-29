@@ -315,7 +315,8 @@ void MakeIteratorNode::codegen(Decision *d) {
   llvm::Value *arg = d->load(std::make_pair(collection, collectionType));
   args.push_back(arg);
   types.push_back(arg->getType());
-  llvm::Value *AllocSret = allocateTerm(getTypeByName(d->Module, "iter"), d->CurrentBlock, "koreAllocAlwaysGC");
+  llvm::Type *sretType = getTypeByName(d->Module, "iter");
+  llvm::Value *AllocSret = allocateTerm(sretType, d->CurrentBlock, "koreAllocAlwaysGC");
   AllocSret->setName(name.substr(0, max_name_length));
   args.insert(args.begin(), AllocSret);
   types.insert(types.begin(), AllocSret->getType());
@@ -324,8 +325,9 @@ void MakeIteratorNode::codegen(Decision *d) {
   llvm::Function *func = getOrInsertFunction(d->Module, hookName, funcType);
   auto call = llvm::CallInst::Create(func, args, "", d->CurrentBlock);
   setDebugLoc(call);
-  func->arg_begin()->addAttr(llvm::Attribute::StructRet);
-  call->addParamAttr(0, llvm::Attribute::StructRet);
+  llvm::Attribute sretAttr = llvm::Attribute::get(d->Ctx, llvm::Attribute::StructRet, sretType);
+  func->arg_begin()->addAttr(sretAttr);
+  call->addParamAttr(0, sretAttr);
   d->store(std::make_pair(name, type), AllocSret);
   child->codegen(d);
   setCompleted();
