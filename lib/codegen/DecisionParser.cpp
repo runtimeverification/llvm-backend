@@ -1,6 +1,7 @@
 #include "kllvm/codegen/DecisionParser.h"
 #include "kllvm/codegen/Decision.h"
 #include "kllvm/codegen/CreateTerm.h"
+#include "kllvm/codegen/Util.h"
 
 #include <yaml.h>
 
@@ -167,7 +168,7 @@ public:
     std::string function = str(get(node, "function"));
     auto child = (*this)(get(node, "next"));
 
-    return MakeIteratorNode::Create(name, type, name + "_iter", llvm::PointerType::getUnqual(mod->getTypeByName("iter")), function, child);
+    return MakeIteratorNode::Create(name, type, name + "_iter", llvm::PointerType::getUnqual(getTypeByName(mod, "iter")), function, child);
   }
 
   DecisionNode *iterNext(yaml_node_t *node) {
@@ -177,7 +178,7 @@ public:
     std::string function = str(get(node, "function"));
     auto child = (*this)(get(node, "next"));
 
-    return IterNextNode::Create(iterator, llvm::PointerType::getUnqual(mod->getTypeByName("iter")), name, type, function, child);
+    return IterNextNode::Create(iterator, llvm::PointerType::getUnqual(getTypeByName(mod, "iter")), name, type, function, child);
   }
 
 

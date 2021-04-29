@@ -57,7 +57,7 @@ void initDebugParam(llvm::Function *func, unsigned argNo, std::string name, Valu
     func->arg_begin()+argNo,
     DbgVar,
     Dbg->createExpression(),
-    llvm::DebugLoc::get(DbgLine, DbgColumn, DbgSP),
+    llvm::DILocation::get(func->getContext(), DbgLine, DbgColumn, DbgSP),
     &func->getEntryBlock());
 }
 
@@ -219,6 +219,6 @@ llvm::DISubroutineType *getDebugFunctionType(llvm::Metadata *returnType, std::ve
 
 void setDebugLoc(llvm::Instruction *instr) {
   if (!Dbg) return;
-  instr->setDebugLoc(llvm::DebugLoc::get(DbgLine, DbgColumn, instr->getParent()->getParent()->getSubprogram()));
+  instr->setDebugLoc(llvm::DebugLoc(llvm::DILocation::get(instr->getContext(), DbgLine, DbgColumn, DbgSP)));
 }
 }

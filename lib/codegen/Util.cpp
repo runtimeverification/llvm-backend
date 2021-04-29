@@ -19,4 +19,16 @@ llvm::Function *castToFunctionOrAbort(llvm::Value* value) {
   return func;
 }
 
+llvm::StructType *getTypeByName(llvm::Module *module, std::string name) {
+  llvm::StructType *t;
+#if __clang_major__ >= 12
+  t = llvm::StructType::getTypeByName(module->getContext(), name);
+#else
+  t = module->getTypeByName(name);
+#endif
+  return t;
+}
+
+
+
 }
