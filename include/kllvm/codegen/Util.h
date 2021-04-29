@@ -26,6 +26,8 @@ static llvm::Function* getOrInsertFunction(llvm::Module *module, Ts... Args) {
   return castToFunctionOrAbort(callee);
 }
 
+llvm::StructType *getTypeByName(llvm::Module *module, std::string name);
+
 }
 
 #endif // KLLVM_UTIL_H 

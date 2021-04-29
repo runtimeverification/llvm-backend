@@ -173,7 +173,7 @@ static std::pair<llvm::Value *, llvm::BasicBlock *> getHeader(KOREDefinition *de
 }
 
 static void emitGetBlockHeaderForSymbol(KOREDefinition *def, llvm::Module *mod) {
-  emitDataForSymbol("getBlockHeaderForSymbol", mod->getTypeByName(BLOCKHEADER_STRUCT), getForwardDecl(BLOCKHEADER_STRUCT),
+  emitDataForSymbol("getBlockHeaderForSymbol", getTypeByName(mod, BLOCKHEADER_STRUCT), getForwardDecl(BLOCKHEADER_STRUCT),
       def, mod, false, getHeader);
 }
 
@@ -440,7 +440,7 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
       break;
     }
     case SortCategory::Float: {
-      llvm::Type *Float = module->getTypeByName(FLOAT_STRUCT);
+      llvm::Type *Float = getTypeByName(module, FLOAT_STRUCT);
       llvm::Value *Term = allocateTerm(Float, CaseBlock, "koreAllocFloating");
       llvm::Function *InitFloat = getOrInsertFunction(module, "init_float",
           llvm::Type::getVoidTy(Ctx), llvm::PointerType::getUnqual(Float), 
@@ -468,7 +468,7 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
       phiStr->addIncoming(func->arg_begin()+2, CaseBlock);
       phiStr->addIncoming(Pruned, IfIsPlus);
       CaseBlock = ElseNoPlus;
-      llvm::Type *Int = module->getTypeByName(INT_STRUCT);
+      llvm::Type *Int = getTypeByName(module, INT_STRUCT);
       llvm::Value *Term = allocateTerm(Int, CaseBlock, "koreAllocInteger");
       llvm::Function *MpzInitSet = getOrInsertFunction(module, "__gmpz_init_set_str",
           llvm::Type::getInt32Ty(Ctx), llvm::PointerType::getUnqual(Int), 
@@ -495,7 +495,7 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
   }
   CurrentBlock->setName("symbol");
   CurrentBlock->insertInto(func);
-  auto StringType = module->getTypeByName(STRING_STRUCT);
+  auto StringType = getTypeByName(module, STRING_STRUCT);
   auto Len = llvm::BinaryOperator::Create(llvm::Instruction::Add,
       func->arg_begin()+1, llvm::ConstantExpr::getSizeOf(StringType), "", CurrentBlock);
   llvm::Value *Block = allocateTerm(StringType, Len, CurrentBlock, "koreAllocToken");
@@ -749,9 +749,9 @@ static llvm::Constant *getLayoutData(uint16_t layout, KORESymbol *symbol, llvm::
   for (auto sort : symbol->getArguments()) {
     ValueType cat = dynamic_cast<KORECompositeSort *>(sort.get())->getCategory(def);
     auto offset = llvm::ConstantExpr::getOffsetOf(BlockType, i++);
-    elements.push_back(llvm::ConstantStruct::get(module->getTypeByName(LAYOUTITEM_STRUCT), offset, llvm::ConstantInt::get(llvm::Type::getInt16Ty(Ctx), (int)cat.cat + cat.bits)));
+    elements.push_back(llvm::ConstantStruct::get(getTypeByName(module, LAYOUTITEM_STRUCT), offset, llvm::ConstantInt::get(llvm::Type::getInt16Ty(Ctx), (int)cat.cat + cat.bits)));
   }
-  auto Arr = llvm::ConstantArray::get(llvm::ArrayType::get(module->getTypeByName(LAYOUTITEM_STRUCT), len), elements);
+  auto Arr = llvm::ConstantArray::get(llvm::ArrayType::get(getTypeByName(module, LAYOUTITEM_STRUCT), len), elements);
   auto global = module->getOrInsertGlobal("layout_item_" + std::to_string(layout), Arr->getType());
   llvm::GlobalVariable *globalVar = llvm::dyn_cast<llvm::GlobalVariable>(global);
   if (!globalVar->hasInitializer()) {
@@ -761,11 +761,11 @@ static llvm::Constant *getLayoutData(uint16_t layout, KORESymbol *symbol, llvm::
   auto indices = std::vector<llvm::Constant *>{zero, zero};
   auto Ptr = llvm::ConstantExpr::getInBoundsGetElementPtr(Arr->getType(), globalVar, indices);
   std::string name = "layout_" + std::to_string(layout);
-  auto global2 = module->getOrInsertGlobal(name, module->getTypeByName(LAYOUT_STRUCT));
+  auto global2 = module->getOrInsertGlobal(name, getTypeByName(module, LAYOUT_STRUCT));
   llvm::GlobalVariable *globalVar2 = llvm::dyn_cast<llvm::GlobalVariable>(global2);
   initDebugGlobal(name, getForwardDecl(LAYOUT_STRUCT), globalVar2);
   if (!globalVar2->hasInitializer()) {
-    globalVar2->setInitializer(llvm::ConstantStruct::get(module->getTypeByName(LAYOUT_STRUCT), llvm::ConstantInt::get(llvm::Type::getInt8Ty(Ctx), len), Ptr));
+    globalVar2->setInitializer(llvm::ConstantStruct::get(getTypeByName(module, LAYOUT_STRUCT), llvm::ConstantInt::get(llvm::Type::getInt8Ty(Ctx), len), Ptr));
   }
   return globalVar2;
 }
@@ -779,13 +779,13 @@ static void emitLayouts(KOREDefinition *definition, llvm::Module *module) {
   std::vector<llvm::Type *> argTypes;
   argTypes.push_back(llvm::Type::getInt16Ty(Ctx));
   auto func = llvm::dyn_cast<llvm::Function>(getOrInsertFunction(module,
-      "getLayoutData", llvm::FunctionType::get(llvm::PointerType::getUnqual(module->getTypeByName(LAYOUT_STRUCT)), argTypes, false)));
+      "getLayoutData", llvm::FunctionType::get(llvm::PointerType::getUnqual(getTypeByName(module, LAYOUT_STRUCT)), argTypes, false)));
   initDebugFunction("getLayoutData", "getLayoutData", getDebugFunctionType(getPointerDebugType(getForwardDecl(LAYOUT_STRUCT), "layout *"), {getShortDebugType()}), definition, func);
   auto EntryBlock = llvm::BasicBlock::Create(Ctx, "entry", func);
   auto MergeBlock = llvm::BasicBlock::Create(Ctx, "exit");
   auto stuck = llvm::BasicBlock::Create(Ctx, "stuck");
   auto Switch = llvm::SwitchInst::Create(func->arg_begin(), stuck, layouts.size(), EntryBlock);
-  auto Phi = llvm::PHINode::Create(llvm::PointerType::getUnqual(module->getTypeByName(LAYOUT_STRUCT)), layouts.size(), "phi", MergeBlock);
+  auto Phi = llvm::PHINode::Create(llvm::PointerType::getUnqual(getTypeByName(module, LAYOUT_STRUCT)), layouts.size(), "phi", MergeBlock);
   for (auto iter = layouts.begin(); iter != layouts.end(); ++iter) {
     auto entry = *iter;
     uint16_t layout = entry.first;
