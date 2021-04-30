@@ -740,7 +740,11 @@ llvm::Value *CreateTerm::createFunctionCall(std::string name, ValueType returnCa
     call->setCallingConv(llvm::CallingConv::Fast);
   }
   if (sret) {
+#if __clang_major__ >= 12
     llvm::Attribute sretAttr = llvm::Attribute::get(Ctx, llvm::Attribute::StructRet, sretType);
+#else
+    llvm::Attribute sretAttr = llvm::Attribute::get(Ctx, llvm::Attribute::StructRet);
+#endif
     func->arg_begin()->addAttr(sretAttr);
     call->addParamAttr(0, sretAttr);
     return AllocSret;
