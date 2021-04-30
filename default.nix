@@ -17,6 +17,10 @@ in
 # layout as the kframework/llvm-backend repository (to enable cache re-use).
 #
 , src ? null
+
+# Build an optimized release package.
+# Currently requires dependents to use LTO. Use sparingly.
+, release ? false
 }:
 
 let
@@ -55,6 +59,7 @@ let
   llvm-backend = callPackage ./nix/llvm-backend.nix {
     inherit llvmPackages src;
     inherit (ttuegel) cleanSourceWith;
+    inherit release;
     host.clang = clang;
   };
 
