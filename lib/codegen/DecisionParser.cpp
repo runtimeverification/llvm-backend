@@ -247,6 +247,10 @@ public:
       ValueType cat = KORECompositeSort::getCategory(hook);
       result->addBinding(to_string(occurrence), getParamType(cat, mod));
     }
+    if (auto next = get(node, "next")) {
+      auto child = (*this)(next);
+      result->setChild(child);
+    }
     return result;
   }
 
