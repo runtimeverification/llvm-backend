@@ -152,6 +152,12 @@ struct HashBlock {
     return hash_k(block);
   }
 };
+ 
+struct KEq {
+  bool operator() (block * const& lhs, block * const& rhs) const {
+    return hook_KEQUAL_eq(lhs, rhs);
+  }
+};
 
 using list = immer::flex_vector<KElem, immer::memory_policy<immer::heap_policy<kore_alloc_heap>, immer::no_refcount_policy>>;
 using map = immer::map<KElem, KElem, HashBlock, std::equal_to<KElem>, list::memory_policy>;
