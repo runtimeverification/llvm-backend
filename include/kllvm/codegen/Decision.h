@@ -238,6 +238,8 @@ private:
      the substitution */
   std::string name;
 
+  DecisionNode *child = nullptr;
+
   LeafNode(const std::string &name) : name(name) {}
 
 public:
@@ -247,10 +249,20 @@ public:
 
   const std::vector<var_type> &getBindings() const { return bindings; }
   void addBinding(std::string name, llvm::Type *type) { bindings.push_back(std::make_pair(name, type)); }
+  void setChild(DecisionNode *child) { this->child = child; }
   
   virtual void codegen(Decision *d);
   virtual void preprocess(std::unordered_set<LeafNode *> &leaves) {
-    leaves.insert(this);
+    if (child != nullptr) {
+      if (preprocessed) return;
+      leaves.insert(this);
+      child->preprocess(leaves);
+      containsFailNode = containsFailNode || child->containsFailNode;
+      choiceDepth = child->choiceDepth;
+      preprocessed = true;
+    } else {
+      leaves.insert(this);
+    }
   }
 };
 
