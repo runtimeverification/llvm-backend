@@ -52,6 +52,8 @@ esac
 LIBDIR="$(dirname "$0")"/../lib/kllvm/
 if [ "$main" = "main" ]; then
   MAINFILES="$LIBDIR"/llvm/main/main.ll
+elif [ "$main" = "search" ]; then
+  MAINFILES="$LIBDIR"/llvm/main/search.cpp
 else
   MAINFILES=""
 fi

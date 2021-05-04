@@ -130,7 +130,7 @@ endif() # APPLE
 endmacro(kllvm_add_tool)
 
 install(
-  FILES runtime/main/main.ll
+  FILES runtime/main/main.ll runtime/main/search.cpp
   DESTINATION lib/kllvm/llvm/main
 )
 
