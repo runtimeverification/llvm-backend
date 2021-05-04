@@ -71,7 +71,7 @@ llvm::Value *getBlockHeader(llvm::Module *Module, KOREDefinition *definition,
 ValueType termType(KOREPattern *pattern, llvm::StringMap<ValueType> &substitution, KOREDefinition *definition);
 
 /** creates a function that applies the specified rule once it has matched, and returns the name of the function. */
-std::string makeApplyRuleFunction(KOREAxiomDeclaration *axiom, KOREDefinition *definition, llvm::Module *Module, bool bigStep = false);
+void makeApplyRuleFunction(KOREAxiomDeclaration *axiom, KOREDefinition *definition, llvm::Module *Module, bool bigStep = false);
 std::string makeApplyRuleFunction(KOREAxiomDeclaration *axiom, KOREDefinition *definition, llvm::Module *Module, std::vector<Residual> residuals);
 /** creates a function that evaluates the side condition of the specified rule, and returns the name of the function. Returns empty string if function has no side condition. */
 std::string makeSideConditionFunction(KOREAxiomDeclaration *axiom, KOREDefinition *definition, llvm::Module *Module);
