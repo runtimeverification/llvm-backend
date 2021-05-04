@@ -4,6 +4,7 @@ set(LLVM_REQUIRES_EH ON)
 add_library(util STATIC
   ConfigurationParser.cpp
   ConfigurationPrinter.cpp
+  search.cpp
 )
 
 install(
