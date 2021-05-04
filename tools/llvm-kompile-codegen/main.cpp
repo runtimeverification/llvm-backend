@@ -72,7 +72,9 @@ int main (int argc, char **argv) {
   emitConfigParserFunctions(definition.get(), mod.get());
 
   auto dt = parseYamlDecisionTree(mod.get(), argv[2], definition->getAllSymbols(), definition->getHookedSorts());
-  makeStepFunction(definition.get(), mod.get(), dt);
+  makeStepFunction(definition.get(), mod.get(), dt, false);
+  auto dtSearch = parseYamlDecisionTree(mod.get(), argv[3] + std::string("/") + "dt-search.yaml", definition->getAllSymbols(), definition->getHookedSorts());
+  makeStepFunction(definition.get(), mod.get(), dtSearch, true);
 
   std::map<std::string, std::string> index;
 

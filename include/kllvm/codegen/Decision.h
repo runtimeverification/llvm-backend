@@ -331,6 +331,7 @@ private:
   llvm::LLVMContext &Ctx;
   ValueType Cat;
   llvm::PHINode *FailSubject, *FailPattern, *FailSort;
+  llvm::Value *ResultBuffer, *ResultCount, *ResultCapacity;
 
   std::map<var_type, llvm::AllocaInst *> symbols;
 
@@ -353,7 +354,10 @@ public:
     ValueType Cat,
     llvm::PHINode *FailSubject,
     llvm::PHINode *FailPattern,
-    llvm::PHINode *FailSort) :
+    llvm::PHINode *FailSort,
+    llvm::Value *ResultBuffer,
+    llvm::Value *ResultCount,
+    llvm::Value *ResultCapacity) :
       Definition(Definition),
       CurrentBlock(EntryBlock),
       FailureBlock(FailureBlock),
@@ -366,7 +370,10 @@ public:
       Cat(Cat),
       FailSubject(FailSubject),
       FailPattern(FailPattern),
-      FailSort(FailSort)
+      FailSort(FailSort),
+      ResultBuffer(ResultBuffer),
+      ResultCount(ResultCount),
+      ResultCapacity(ResultCapacity)
        {}
 
   /* adds code to the specified basic block to take a single step based on
@@ -390,7 +397,7 @@ public:
 void makeEvalFunction(KORESymbol *function, KOREDefinition *definition, llvm::Module *module, DecisionNode *dt);
 void makeAnywhereFunction(KORESymbol *function, KOREDefinition *definition, llvm::Module *module, DecisionNode *dt);
 
-void makeStepFunction(KOREDefinition *definition, llvm::Module *module, DecisionNode *dt);
+void makeStepFunction(KOREDefinition *definition, llvm::Module *module, DecisionNode *dt, bool search);
 void makeStepFunction(KOREAxiomDeclaration *axiom, KOREDefinition *definition, llvm::Module *module, PartialStep res);
 void makeMatchReasonFunction(KOREDefinition *definition, llvm::Module *module, KOREAxiomDeclaration *axiom, DecisionNode *dt);
 
