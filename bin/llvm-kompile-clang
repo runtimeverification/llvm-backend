@@ -116,7 +116,7 @@ if $link; then
 run @CMAKE_CXX_COMPILER@ -Wno-override-module -Wno-return-type-c-linkage "$modopt" "${files[@]}" \
   "$LIBDIR"/libarithmetic.a \
   "$MAINFILES" \
-  "$LIBDIR"/libconfigurationparser.a \
+  "$LIBDIR"/libutil.a \
   "$LIBDIR"/libstrings.a \
   "$LIBDIR"/libio.a \
   "$LIBDIR"/libcollections.a \
