@@ -162,7 +162,7 @@ object Generator {
       System.out.println("Residuals: " + residualMap.toList)
     }
     val newClauses = specialized.clauses.map(_.specializeBy(residualMap, symlib))
-    val finalMatrix = Matrix.fromColumns(symlib, specialized.columns.map(c => new Column(c.fringe.inexact, c.patterns, newClauses)), newClauses)
+    val finalMatrix = Matrix.fromColumns(symlib, specialized.columns.map(c => new Column(c.fringe.inexact, c.patterns, newClauses)), newClauses, false)
     if (isPoorlySpecialized(finalMatrix, matrix, threshold)) {
       None
     } else {

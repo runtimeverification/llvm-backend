@@ -16,14 +16,14 @@ object Matching {
     val allAxioms = Parser.getAxioms(defn).zipWithIndex
     val axioms = Parser.parseTopAxioms(allAxioms)
     val symlib = Parser.parseSymbols(defn, heuristic)
-    val (dt, matrix) = if (axioms.isEmpty) {
-      (Failure(), null)
+    val (dt, dtSearch, matrix) = if (axioms.isEmpty) {
+      (Failure(), Failure(), null)
     } else {
       val matrix = Generator.genClauseMatrix(symlib, defn, axioms, Seq(axioms.head.rewrite.sort))
       if (warn) {
         matrix.checkUsefulness(kem)
       }
-      (matrix.compile, matrix)
+      (matrix.compile, matrix.compileSearch, matrix)
     }
     if (genSingleRuleTrees) {
       for (axiom <- axioms) {
@@ -47,7 +47,9 @@ object Matching {
       }
     })
     val path = new File(outputFolder, "dt.yaml")
+    val pathSearch = new File(outputFolder, "dt-search.yaml")
     dt.serializeToYaml(path)
+    dtSearch.serializeToYaml(pathSearch)
     if (threshold.isPresent) {
       axioms.foreach(a => {
         if (logging) {

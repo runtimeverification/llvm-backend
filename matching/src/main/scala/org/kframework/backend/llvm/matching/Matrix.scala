@@ -369,18 +369,18 @@ case class Row(val patterns: IndexedSeq[Pattern[String]], val clause: Clause) {
   }
 
   def specialize(ix: Constructor, colIx: Int, symlib: Parser.SymLib, fringe: IndexedSeq[Fringe]): Option[Row] = {
-    Matrix.fromRows(symlib, IndexedSeq(this), fringe).specialize(ix, colIx, None)._3.rows.headOption
+    Matrix.fromRows(symlib, IndexedSeq(this), fringe, false).specialize(ix, colIx, None)._3.rows.headOption
   }
 
   def default(colIx: Int, sigma: Seq[Constructor], symlib: Parser.SymLib, fringe: IndexedSeq[Fringe], matrixColumns: IndexedSeq[Column]): Option[Row] = {
-    Matrix.fromRows(symlib, IndexedSeq(this), fringe).trueDefault(colIx, sigma, Some(matrixColumns)).rows.headOption
+    Matrix.fromRows(symlib, IndexedSeq(this), fringe, false).trueDefault(colIx, sigma, Some(matrixColumns)).rows.headOption
   }
 
   override def toString: String = patterns.map(p => new util.Formatter().format("%12.12s", p.toShortString)).mkString(" ") + " " + clause.toString
   override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
 }
 
-class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedSeq[Column], private val rawRows: IndexedSeq[Row], private val rawClauses: IndexedSeq[Clause], private val rawFringe: IndexedSeq[Fringe]) {
+class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedSeq[Column], private val rawRows: IndexedSeq[Row], private val rawClauses: IndexedSeq[Clause], private val rawFringe: IndexedSeq[Fringe], val search: Boolean) {
   lazy val clauses: IndexedSeq[Clause] = {
     if (rawClauses != null) {
       rawClauses
@@ -428,7 +428,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
   }
 
   def this(symlib: Parser.SymLib, cols: IndexedSeq[(Sort, IndexedSeq[Pattern[String]])], actions: IndexedSeq[Action]) {
-    this(symlib, (cols, (1 to cols.size).map(i => new Fringe(symlib, cols(i - 1)._1, Num(i, Base()), false))).zipped.toIndexedSeq.map(pair => new Column(pair._2, pair._1._2, actions.map(new Clause(_, Vector(), Vector(), Vector(), Map())))), null, actions.map(new Clause(_, Vector(), Vector(), Vector(), Map())), null)
+    this(symlib, (cols, (1 to cols.size).map(i => new Fringe(symlib, cols(i - 1)._1, Num(i, Base()), false))).zipped.toIndexedSeq.map(pair => new Column(pair._2, pair._1._2, actions.map(new Clause(_, Vector(), Vector(), Vector(), Map())))), null, actions.map(new Clause(_, Vector(), Vector(), Vector(), Map())), null, false)
   }
 
   private def isWildcardOrResidual(pat: Pattern[String]): Boolean = {
@@ -471,7 +471,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
   def specialize(ix: Constructor, colIx: Int, residual: Option[Pattern[String]]): (String, Seq[String], Matrix) = {
     val filtered = filterMatrix(Some(ix), residual, (c, p) => p.isSpecialized(ix, residual.isEmpty, columns(colIx).fringe, c, columns(colIx).maxPriority), colIx)
     val justExpanded = filtered.columns(colIx).expand(ix, residual.isEmpty)
-    val expanded = Matrix.fromColumns(symlib, justExpanded ++ filtered.notBestCol(colIx), filtered.clauses)
+    val expanded = Matrix.fromColumns(symlib, justExpanded ++ filtered.notBestCol(colIx), filtered.clauses, search)
     (ix.name, justExpanded.map(_.fringe.sortInfo.category.hookAtt), expanded)
   }
 
@@ -495,7 +495,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
 
   def filterMatrix(ix: Option[Constructor], residual: Option[Pattern[String]], checkPattern: (Clause, Pattern[String]) => Boolean, colIx: Int): Matrix = {
     val newRows = rows.filter(row => checkPattern(row.clause, row.patterns(colIx))).map(row => new Row(row.patterns, row.clause.addVars(ix, residual, row.patterns(colIx), fringe(colIx))))
-    Matrix.fromRows(symlib, newRows, fringe)
+    Matrix.fromRows(symlib, newRows, fringe, search)
   }
 
   def defaultConstructor(colIx: Int, sigma: Seq[Constructor], matrixColumns: Option[IndexedSeq[Column]]): Option[Constructor] = {
@@ -519,12 +519,12 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
     val filtered = filterMatrix(ctr, None, (_, p) => p.isDefault, colIx)
     val expanded = if (ctr.isDefined) {
       if (columns(colIx).fringe.sortInfo.category.isExpandDefault) {
-        Matrix.fromColumns(symlib, filtered.columns(colIx).expand(ctr.get, true) ++ filtered.notBestCol(colIx), filtered.clauses)
+        Matrix.fromColumns(symlib, filtered.columns(colIx).expand(ctr.get, true) ++ filtered.notBestCol(colIx), filtered.clauses, search)
       } else {
-        Matrix.fromColumns(symlib, filtered.notBestCol(colIx), filtered.clauses)
+        Matrix.fromColumns(symlib, filtered.notBestCol(colIx), filtered.clauses, search)
       }
     } else {
-      Matrix.fromColumns(symlib, filtered.notBestCol(colIx), filtered.clauses)
+      Matrix.fromColumns(symlib, filtered.notBestCol(colIx), filtered.clauses, search)
     }
     expanded
   }
@@ -567,7 +567,11 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
     } catch {
       case e: NoSuchElementException => throw KEMException.internalError("Could not find binding for variable while compiling pattern matching.", e, row.clause.action)
     }
-    val atomicLeaf = Leaf(row.clause.action.ordinal, newVars)
+    val atomicLeaf = if (search) {
+      SearchLeaf(row.clause.action.ordinal, newVars, child)
+    } else {
+      Leaf(row.clause.action.ordinal, newVars)
+    }
     // check that all occurrences of the same variable are equal
     val nonlinearLeaf = nonlinearPairs.foldRight[DecisionTree](atomicLeaf)((e, dt) => e._2.foldRight(dt)((os,dt2) => makeEquality(os._1._1, (os._1._2, os._2._2), dt2)))
     val sc = row.clause.action.scVars match {
@@ -601,9 +605,9 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
 
   def expand: Matrix = {
     if (fringe.isEmpty) {
-      new Matrix(symlib, rawColumns, rawRows, rawClauses, rawFringe)
+      new Matrix(symlib, rawColumns, rawRows, rawClauses, rawFringe, search)
     } else {
-      fringe.indices.foldLeft(this)((accum, colIx) => Matrix.fromRows(symlib, accum.rows.flatMap(_.expand(colIx)), fringe))
+      fringe.indices.foldLeft(this)((accum, colIx) => Matrix.fromRows(symlib, accum.rows.flatMap(_.expand(colIx)), fringe, search))
     }
   }
 
@@ -624,6 +628,10 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
     }
   }
 
+  def compileSearch: DecisionTree = {
+    new Matrix(symlib, rawColumns, rawRows, rawClauses, rawFringe, true).compile
+  }
+
   def compileInternal: DecisionTree = {
     if (Matching.logging) {
       val s = toString
@@ -639,7 +647,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
           if (matrixColumns(bestColIx).score(0).isPosInfinity) {
             // decompose this column as it contains only wildcards
             val newClauses = (bestCol.clauses, bestCol.patterns).zipped.toIndexedSeq.map(t => t._1.addVars(None, None, t._2, bestCol.fringe))
-            Matrix.fromColumns(symlib, notBestCol(bestColIx).map(c => new Column(c.fringe, c.patterns, newClauses)), newClauses).compile
+            Matrix.fromColumns(symlib, notBestCol(bestColIx).map(c => new Column(c.fringe, c.patterns, newClauses)), newClauses, search).compile
           } else {
             // compute the sort category of the best column
             bestCol.category.tree(this)
@@ -710,7 +718,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
   def rowUseless(rowIx: Int): Boolean = {
     val filteredRows = rows.take(rowIx) ++ rows.drop(rowIx + 1).takeWhile(_.clause.action.priority == rows(rowIx).clause.action.priority)
     val withoutSC = filteredRows.filter(r => r.clause.action.scVars.isEmpty && !r.clause.action.nonlinear)
-    val matrix = Matrix.fromRows(symlib, withoutSC, fringe)
+    val matrix = Matrix.fromRows(symlib, withoutSC, fringe, search)
     val row = rows(rowIx)
     val result = !matrix.useful(row)
     if (Matching.logging && result) {
@@ -853,7 +861,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
   }
 
   def notBestRow: Matrix = {
-    Matrix.fromRows(symlib, rows.patch(bestRowIx, Nil, 1), fringe)
+    Matrix.fromRows(symlib, rows.patch(bestRowIx, Nil, 1), fringe, search)
   }
 
   def notBestCol(colIx: Int): IndexedSeq[Column] = {
@@ -861,7 +869,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
   }
 
   def notCol(colIx: Int): Matrix = {
-    Matrix.fromColumns(symlib, notBestCol(colIx), clauses)
+    Matrix.fromColumns(symlib, notBestCol(colIx), clauses, search)
   }
 
   def colScoreString: String = {
@@ -881,12 +889,13 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
       (that canEqual this) &&
         symlib == that.symlib &&
         fringe == that.fringe &&
-        rows == that.rows
+        rows == that.rows &&
+        search == that.search
     case _ => false
   }
 
   override lazy val hashCode: Int = {
-    val state = Seq(symlib, rows)
+    val state = Seq(symlib, rows, search)
     state.map(_.hashCode()).foldLeft(0)((a, b) => 31 * a + b)
   }
 }
@@ -894,12 +903,12 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
 object Matrix {
   var remaining = 0
 
-  def fromRows(symlib: Parser.SymLib, rows: IndexedSeq[Row], fringe: IndexedSeq[Fringe]): Matrix = {
-    new Matrix(symlib, null, rows, null, fringe)
+  def fromRows(symlib: Parser.SymLib, rows: IndexedSeq[Row], fringe: IndexedSeq[Fringe], search: Boolean): Matrix = {
+    new Matrix(symlib, null, rows, null, fringe, search)
   }
 
-  def fromColumns(symlib: Parser.SymLib, cols: IndexedSeq[Column], clauses: IndexedSeq[Clause]): Matrix = {
-    new Matrix(symlib, cols, null, clauses, null)
+  def fromColumns(symlib: Parser.SymLib, cols: IndexedSeq[Column], clauses: IndexedSeq[Clause], search: Boolean): Matrix = {
+    new Matrix(symlib, cols, null, clauses, null, search)
   }
 
   private val cache = new ConcurrentHashMap[Matrix, DecisionTree]()

@@ -58,6 +58,25 @@ case class Leaf private(ordinal: Int, occurrences: Seq[(Occurrence, String)]) ex
   override def equals(that: Any): Boolean = that.isInstanceOf[AnyRef] && (this eq that.asInstanceOf[AnyRef])
 }
 
+case class SearchLeaf private(ordinal: Int, occurrences: Seq[(Occurrence, String)], child: DecisionTree) extends DecisionTree {
+  val representation = new util.HashMap[String, AnyRef]()
+  val action = new util.ArrayList[AnyRef]()
+  representation.put("action", action)
+  action.add(ordinal.asInstanceOf[AnyRef])
+  private val os = new util.ArrayList[AnyRef]()
+  action.add(os)
+  for (occurrence <- occurrences) {
+    val _var = new util.ArrayList[AnyRef]()
+    _var.add(occurrence._1.representation)
+    _var.add(occurrence._2)
+    os.add(_var)
+  }
+  representation.put("next", child.representation)
+  override lazy val hashCode: Int = super.hashCode
+  override def equals(that: Any): Boolean = that.isInstanceOf[AnyRef] && (this eq that.asInstanceOf[AnyRef])
+}
+
+
 case class Switch private(occurrence: Occurrence, hook: String, cases: Seq[(String, Seq[String], DecisionTree)], default: Option[DecisionTree]) extends DecisionTree {
   val representation = new util.HashMap[String, AnyRef]()
   val specs = new util.ArrayList[AnyRef]()
@@ -185,6 +204,13 @@ object Leaf {
   private val cache = new ConcurrentHashMap[(Int, Seq[(Occurrence, String)]), Leaf]()
   def apply(ordinal: Int, occurrences: Seq[(Occurrence, String)]): Leaf = {
     cache.computeIfAbsent((ordinal, occurrences), k => new Leaf(k._1, k._2))
+  }
+}
+
+object SearchLeaf {
+  private val cache = new ConcurrentHashMap[(Int, Seq[(Occurrence, String)], DecisionTree), SearchLeaf]()
+  def apply(ordinal: Int, occurrences: Seq[(Occurrence, String)], child: DecisionTree): SearchLeaf = {
+    cache.computeIfAbsent((ordinal, occurrences, child), k => new SearchLeaf(k._1, k._2, k._3))
   }
 }
 
