@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
+#include <unordered_set>
 #include <set>
 #include <functional>
 
@@ -187,6 +188,30 @@ void printConfiguration(const char *filename, block *subject) {
   varCounter = 0;
   writer w = {file,nullptr};
   printConfigurationInternal(&w, subject, nullptr, false);
+  varNames.clear();
+  usedVarNames.clear();
+  fclose(file);
+}
+
+void printConfigurations(const char *filename, std::unordered_set<block *, HashBlock, KEq> results) {
+  FILE *file = fopen(filename, "a");
+  boundVariables.clear();
+  varCounter = 0;
+  writer w = {file,nullptr};
+  for (size_t i = 0; i < results.size() - 1; i++) {
+    sfprintf(&w, "\\or{SortGeneratedTopCell{}}(");
+  }
+  while (!results.empty()) {
+    block *subject = *results.begin();
+    results.erase(subject);
+    printConfigurationInternal(&w, subject, nullptr, false);
+    if (!results.empty()) {
+      sfprintf(&w, ",");
+    }
+  }
+  for (ssize_t i = 0; i < (ssize_t)results.size() - 1; i++) {
+    sfprintf(&w, ")");
+  }
   varNames.clear();
   usedVarNames.clear();
   fclose(file);
