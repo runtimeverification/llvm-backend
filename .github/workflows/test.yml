@@ -18,6 +18,8 @@ jobs:
         name: runtimeverification
         signingKey: '${{ secrets.CACHIX_SIGNING_KEY }}'
     - run: nix-build -A llvm-backend
+    - run: nix-build -A llvm-backend --arg release true
+      if: ${{ !startsWith(matrix.os, 'macos') }}
     - run: nix-build -A llvm-backend-matching
     - run: nix-shell --run "echo OK"
     - run: nix-build test.nix

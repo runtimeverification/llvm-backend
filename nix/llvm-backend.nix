@@ -5,6 +5,8 @@
   boost, gmp, jemalloc, libffi, libiconv, libyaml, mpfr, ncurses,
   # Runtime dependencies:
   host,
+  # Options:
+  release ? false  # optimized release build, currently: LTO
 }:
 
 let inherit (llvmPackages) stdenv llvm; in
@@ -47,7 +49,7 @@ stdenv.mkDerivation {
     ''-DCMAKE_SKIP_BUILD_RPATH=FALSE''
   ];
 
-  cmakeBuildType = "FastBuild";
+  cmakeBuildType = if release then "Release" else "FastBuild";
 
   NIX_CFLAGS_COMPILE = [ "-Wno-error" ];
 
