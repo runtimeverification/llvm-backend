@@ -198,7 +198,8 @@ void printConfigurations(const char *filename, std::unordered_set<block *, HashB
   boundVariables.clear();
   varCounter = 0;
   writer w = {file,nullptr};
-  for (size_t i = 0; i < results.size() - 1; i++) {
+  ssize_t size = results.size();
+  for (size_t i = 0; i < size - 1; i++) {
     sfprintf(&w, "\\or{SortGeneratedTopCell{}}(");
   }
   while (!results.empty()) {
@@ -209,7 +210,7 @@ void printConfigurations(const char *filename, std::unordered_set<block *, HashB
       sfprintf(&w, ",");
     }
   }
-  for (ssize_t i = 0; i < (ssize_t)results.size() - 1; i++) {
+  for (size_t i = 0; i < size - 1; i++) {
     sfprintf(&w, ")");
   }
   varNames.clear();
