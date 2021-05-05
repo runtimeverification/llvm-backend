@@ -199,19 +199,23 @@ void printConfigurations(const char *filename, std::unordered_set<block *, HashB
   varCounter = 0;
   writer w = {file,nullptr};
   ssize_t size = results.size();
-  for (size_t i = 0; i < size - 1; i++) {
-    sfprintf(&w, "\\or{SortGeneratedTopCell{}}(");
-  }
-  while (!results.empty()) {
-    block *subject = *results.begin();
-    results.erase(subject);
-    printConfigurationInternal(&w, subject, nullptr, false);
-    if (!results.empty()) {
-      sfprintf(&w, ",");
+  if (size == 0) {
+    sfprintf(&w, "\\bottom{SortGeneratedTopCell{}}()");
+  } else {
+    for (size_t i = 0; i < size - 1; i++) {
+      sfprintf(&w, "\\or{SortGeneratedTopCell{}}(");
     }
-  }
-  for (size_t i = 0; i < size - 1; i++) {
-    sfprintf(&w, ")");
+    while (!results.empty()) {
+      block *subject = *results.begin();
+      results.erase(subject);
+      printConfigurationInternal(&w, subject, nullptr, false);
+      if (!results.empty()) {
+        sfprintf(&w, ",");
+      }
+    }
+    for (size_t i = 0; i < size - 1; i++) {
+      sfprintf(&w, ")");
+    }
   }
   varNames.clear();
   usedVarNames.clear();
