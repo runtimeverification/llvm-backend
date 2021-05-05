@@ -10,7 +10,7 @@ import java.io.File
 import java.io.FileWriter
 
 object Matching {
-  def writeDecisionTreeToFile(filename: File, heuristic: String, outputFolder: File, threshold: Optional[(Int, Int)], genSingleRuleTrees: Boolean, warn: Boolean, kem: KException => Unit) {
+  def writeDecisionTreeToFile(filename: File, heuristic: String, outputFolder: File, threshold: Optional[(Int, Int)], genSingleRuleTrees: Boolean, warn: Boolean, genSearch: Boolean, kem: KException => Unit) {
     val defn = new TextToKore().parse(filename)
     outputFolder.mkdirs()
     val allAxioms = Parser.getAxioms(defn).zipWithIndex
@@ -23,7 +23,11 @@ object Matching {
       if (warn) {
         matrix.checkUsefulness(kem)
       }
-      (matrix.compile, matrix.compileSearch, matrix)
+      if (genSearch) {
+        (matrix.compile, matrix.compileSearch, matrix)
+      } else {
+        (matrix.compile, Failure(), matrix)
+      }
     }
     if (genSingleRuleTrees) {
       for (axiom <- axioms) {
@@ -99,6 +103,6 @@ object Matching {
     val file = new File(args(0))
     val outputFolder = new File(args(2))
     logging = args.size > 4
-    writeDecisionTreeToFile(file, args(1), outputFolder, getThreshold(args(3)), true, true, (e) => ())
+    writeDecisionTreeToFile(file, args(1), outputFolder, getThreshold(args(3)), true, true, true, (e) => ())
   }
 }
