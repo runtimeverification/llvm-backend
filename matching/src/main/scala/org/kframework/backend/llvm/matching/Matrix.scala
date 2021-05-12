@@ -568,7 +568,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
       case e: NoSuchElementException => throw KEMException.internalError("Could not find binding for variable while compiling pattern matching.", e, row.clause.action)
     }
     val atomicLeaf = if (search) {
-      SearchLeaf(row.clause.action.ordinal, newVars, child)
+      SearchLeaf(row.clause.action.ordinal, newVars, Matrix.fromRows(symlib, firstGroup.patch(bestRowIx, Nil, 1), fringe, true).compile)
     } else {
       Leaf(row.clause.action.ordinal, newVars)
     }
