@@ -205,11 +205,10 @@ void printConfigurations(const char *filename, std::unordered_set<block *, HashB
     for (size_t i = 0; i < size - 1; i++) {
       sfprintf(&w, "\\or{SortGeneratedTopCell{}}(");
     }
-    while (!results.empty()) {
-      block *subject = *results.begin();
-      results.erase(subject);
+    size_t j = 0;
+    for (const auto& subject : results) {
       printConfigurationInternal(&w, subject, nullptr, false);
-      if (!results.empty()) {
+      if (++j != results.size()) {
         sfprintf(&w, ",");
       }
     }
