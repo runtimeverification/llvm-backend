@@ -1001,6 +1001,9 @@ std::string makeApplyRuleFunction(KOREAxiomDeclaration *axiom, KOREDefinition *d
     }
     llvm::FunctionType *funcType = llvm::FunctionType::get(getValueType({SortCategory::Symbol, 0}, Module), paramTypes, false);
     std::string name = "apply_rule_" + std::to_string(axiom->getOrdinal());
+
+    makeFunction(name + "_search", axiom->getRightHandSide(), definition, Module, true, false, axiom, ".rhs");
+
     llvm::Function *applyRule = getOrInsertFunction(Module, name, funcType);
     initDebugAxiom(axiom->getAttributes());
     initDebugFunction(name, name, getDebugFunctionType(getDebugType({SortCategory::Symbol, 0}, "SortGeneratedTopCell{}"), debugArgs), definition, applyRule);
