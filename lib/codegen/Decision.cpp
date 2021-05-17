@@ -379,7 +379,8 @@ void LeafNode::codegen(Decision *d) {
   if (child == nullptr) {
     llvm::ReturnInst::Create(d->Ctx, Call, d->CurrentBlock);
   } else {  
-    llvm::CallInst::Create(getOrInsertFunction(d->Module, "addSearchResult", llvm::FunctionType::get(llvm::Type::getVoidTy(d->Ctx), {type, llvm::PointerType::getUnqual(llvm::PointerType::getUnqual(type)), llvm::Type::getInt64PtrTy(d->Ctx), llvm::Type::getInt64PtrTy(d->Ctx)}, false)), {Call, d->ResultBuffer, d->ResultCount, d->ResultCapacity}, "", d->CurrentBlock);
+    auto Call2 = llvm::CallInst::Create(getOrInsertFunction(d->Module, "addSearchResult", llvm::FunctionType::get(llvm::Type::getVoidTy(d->Ctx), {type, llvm::PointerType::getUnqual(llvm::PointerType::getUnqual(type)), llvm::Type::getInt64PtrTy(d->Ctx), llvm::Type::getInt64PtrTy(d->Ctx)}, false)), {Call, d->ResultBuffer, d->ResultCount, d->ResultCapacity}, "", d->CurrentBlock);
+    setDebugLoc(Call2);
     if (child != FailNode::get()) {
       child->codegen(d);
     } else {
