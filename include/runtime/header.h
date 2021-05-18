@@ -1,8 +1,10 @@
 #ifndef RUNTIME_HEADER_H
 #define RUNTIME_HEADER_H
 
-#include <stdint.h>
-#include <stddef.h>
+#include <cstdint>
+#include <cstddef>
+#include <limits>
+
 #include <gmp.h>
 #include <mpfr.h>
 
