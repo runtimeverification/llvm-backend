@@ -238,6 +238,9 @@ public:
   DecisionNode *leaf(yaml_node_t *node) {
     int action = stoi(str(get(get(node, "action"), 0)));
     std::string name = "apply_rule_" + std::to_string(action);
+    if (auto next = get(node, "next")) {
+      name = name + "_search";
+    }
     auto result = LeafNode::Create(name);
     yaml_node_t *vars = get(get(node, "action"), 1);
     for (auto iter = vars->data.sequence.items.start; iter < vars->data.sequence.items.top; ++iter) {
@@ -246,6 +249,10 @@ public:
       auto hook = str(get(var, 1));
       ValueType cat = KORECompositeSort::getCategory(hook);
       result->addBinding(to_string(occurrence), getParamType(cat, mod));
+    }
+    if (auto next = get(node, "next")) {
+      auto child = (*this)(next);
+      result->setChild(child);
     }
     return result;
   }

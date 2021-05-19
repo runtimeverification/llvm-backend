@@ -5,6 +5,7 @@ target triple = "x86_64-unknown-linux-gnu"
 %block = type { %blockheader, [0 x i64 *] } ; 16-bit layout, 8-bit length, 32-bit tag, children
 
 declare fastcc %block* @step(%block*)
+declare fastcc %block** @stepAll(%block*, i64*)
 
 @depth = thread_local global i64 zeroinitializer
 @steps = thread_local global i64 zeroinitializer
@@ -44,4 +45,16 @@ define %block* @take_steps(i64 %depth, %block* %subject) {
   store i64 %depth, i64* @depth
   %result = call fastcc %block* @step(%block* %subject)
   ret %block* %result
+}
+
+define %block** @take_search_step(%block* %subject, i64* %count) {
+  store i64 -1, i64* @depth
+  %result = call fastcc %block** @stepAll(%block* %subject, i64* %count)
+  ret %block** %result
+}
+
+define i64 @get_steps() {
+entry:
+  %steps = load i64, i64* @steps
+  ret i64 %steps
 }

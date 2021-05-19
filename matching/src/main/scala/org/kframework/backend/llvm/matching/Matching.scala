@@ -10,20 +10,24 @@ import java.io.File
 import java.io.FileWriter
 
 object Matching {
-  def writeDecisionTreeToFile(filename: File, heuristic: String, outputFolder: File, threshold: Optional[(Int, Int)], genSingleRuleTrees: Boolean, warn: Boolean, kem: KException => Unit) {
+  def writeDecisionTreeToFile(filename: File, heuristic: String, outputFolder: File, threshold: Optional[(Int, Int)], genSingleRuleTrees: Boolean, warn: Boolean, genSearch: Boolean, kem: KException => Unit) {
     val defn = new TextToKore().parse(filename)
     outputFolder.mkdirs()
     val allAxioms = Parser.getAxioms(defn).zipWithIndex
     val axioms = Parser.parseTopAxioms(allAxioms)
     val symlib = Parser.parseSymbols(defn, heuristic)
-    val (dt, matrix) = if (axioms.isEmpty) {
-      (Failure(), null)
+    val (dt, dtSearch, matrix) = if (axioms.isEmpty) {
+      (Failure(), Failure(), null)
     } else {
       val matrix = Generator.genClauseMatrix(symlib, defn, axioms, Seq(axioms.head.rewrite.sort))
       if (warn) {
         matrix.checkUsefulness(kem)
       }
-      (matrix.compile, matrix)
+      if (genSearch) {
+        (matrix.compile, matrix.compileSearch, matrix)
+      } else {
+        (matrix.compile, Failure(), matrix)
+      }
     }
     if (genSingleRuleTrees) {
       for (axiom <- axioms) {
@@ -47,7 +51,9 @@ object Matching {
       }
     })
     val path = new File(outputFolder, "dt.yaml")
+    val pathSearch = new File(outputFolder, "dt-search.yaml")
     dt.serializeToYaml(path)
+    dtSearch.serializeToYaml(pathSearch)
     if (threshold.isPresent) {
       axioms.foreach(a => {
         if (logging) {
@@ -97,6 +103,6 @@ object Matching {
     val file = new File(args(0))
     val outputFolder = new File(args(2))
     logging = args.size > 4
-    writeDecisionTreeToFile(file, args(1), outputFolder, getThreshold(args(3)), true, true, (e) => ())
+    writeDecisionTreeToFile(file, args(1), outputFolder, getThreshold(args(3)), true, true, true, (e) => ())
   }
 }

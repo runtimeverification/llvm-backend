@@ -20,6 +20,7 @@ void initDebugGlobal(std::string name, llvm::DIType *type, llvm::GlobalVariable 
 
 llvm::DIType *getDebugType(ValueType type, std::string typeName);
 llvm::DIType *getIntDebugType(void);
+llvm::DIType *getLongDebugType(void);
 llvm::DIType *getVoidDebugType(void);
 llvm::DIType *getBoolDebugType(void);
 llvm::DIType *getShortDebugType(void);

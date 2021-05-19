@@ -1,8 +1,10 @@
 #ifndef RUNTIME_HEADER_H
 #define RUNTIME_HEADER_H
 
-#include <stdint.h>
-#include <stddef.h>
+#include <cstdint>
+#include <cstddef>
+#include <limits>
+
 #include <gmp.h>
 #include <mpfr.h>
 
@@ -150,6 +152,12 @@ struct kore_alloc_heap {
 struct HashBlock {
   size_t operator()(const KElem &block) const noexcept {
     return hash_k(block);
+  }
+};
+ 
+struct KEq {
+  bool operator() (block * const& lhs, block * const& rhs) const {
+    return hook_KEQUAL_eq(lhs, rhs);
   }
 };
 

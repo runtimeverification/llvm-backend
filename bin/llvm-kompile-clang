@@ -52,6 +52,8 @@ esac
 LIBDIR="$(dirname "$0")"/../lib/kllvm/
 if [ "$main" = "main" ]; then
   MAINFILES="$LIBDIR"/llvm/main/main.ll
+elif [ "$main" = "search" ]; then
+  MAINFILES="$LIBDIR"/llvm/main/search.cpp
 else
   MAINFILES=""
 fi
@@ -116,7 +118,7 @@ if $link; then
 run @CMAKE_CXX_COMPILER@ -Wno-override-module -Wno-return-type-c-linkage "$modopt" "${files[@]}" \
   "$LIBDIR"/libarithmetic.a \
   "$MAINFILES" \
-  "$LIBDIR"/libconfigurationparser.a \
+  "$LIBDIR"/libutil.a \
   "$LIBDIR"/libstrings.a \
   "$LIBDIR"/libio.a \
   "$LIBDIR"/libcollections.a \

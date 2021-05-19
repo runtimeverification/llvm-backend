@@ -29,12 +29,6 @@ extern "C" {
   return tag; \
 }
 
-  struct KEq {
-    bool operator() (block * const& lhs, block * const& rhs) const {
-      return hook_KEQUAL_eq(lhs, rhs);
-    }
-  };
-
   static block * dotK = leaf_block(getTagForSymbolName("dotk{}"));
 
   thread_local static std::vector<ffi_type *> structTypes;

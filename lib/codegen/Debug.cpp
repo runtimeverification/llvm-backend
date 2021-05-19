@@ -174,6 +174,11 @@ llvm::DIType *getIntDebugType(void) {
   return Dbg->createBasicType("uint32_t", 32, llvm::dwarf::DW_ATE_unsigned);
 }
 
+llvm::DIType *getLongDebugType(void) {
+  if (!Dbg) return nullptr;
+  return Dbg->createBasicType("uint64_t", 64, llvm::dwarf::DW_ATE_unsigned);
+}
+
 llvm::DIType *getBoolDebugType(void) {
   if (!Dbg) return nullptr;
   return Dbg->createBasicType("bool", 8, llvm::dwarf::DW_ATE_boolean);
