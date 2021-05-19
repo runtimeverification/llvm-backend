@@ -47,11 +47,14 @@ std::unordered_set<block *, HashBlock, KEq> take_search_steps(int64_t depth, blo
   }
 
   std::unordered_set<block *, HashBlock, KEq> results;
+  std::unordered_set<block *, HashBlock, KEq> states_set;
   states.clear();
+  states_set.insert(subject);
   states.push_back(subject);
   while(!states.empty() && depth != 0) {
     state = states.front();
     states.pop_front();
+    states_set.erase(state);
     if (depth > 0) depth--;
     uint64_t count;
     block **stepResults = take_search_step(state, &count);
@@ -59,7 +62,10 @@ std::unordered_set<block *, HashBlock, KEq> take_search_steps(int64_t depth, blo
       results.insert(state);
     } else {
       for (uint64_t i = 0; i < count; i++) {
-        states.push_back(stepResults[i]);
+        auto dirty = states_set.insert(stepResults[i]);
+        if (dirty.second) {
+          states.push_back(stepResults[i]);
+        }
       }
     }
   }
