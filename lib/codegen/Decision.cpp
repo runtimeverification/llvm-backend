@@ -748,7 +748,7 @@ void makeStepFunction(KOREDefinition *definition, llvm::Module *module, Decision
   auto result = stepFunctionHeader(0, module, definition, block, stuck, {val}, {{SortCategory::Symbol, 0}});
   auto collectedVal = result.first[0];
   collectedVal->setName("_1");
- Decision codegen(definition, result.second, fail, jump, choiceBuffer, choiceDepth, module, {SortCategory::Symbol, 0}, nullptr, nullptr, nullptr, resultBuffer, resultCount, resultCapacity);
+  Decision codegen(definition, result.second, fail, jump, choiceBuffer, choiceDepth, module, {SortCategory::Symbol, 0}, nullptr, nullptr, nullptr, resultBuffer, resultCount, resultCapacity);
   codegen.store(std::make_pair(collectedVal->getName().str(), collectedVal->getType()), collectedVal);
   if (search) {
     auto result = new llvm::LoadInst(bufType, resultBuffer, "", stuck);
