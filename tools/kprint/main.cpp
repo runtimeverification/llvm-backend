@@ -9,7 +9,7 @@ using namespace kllvm::parser;
 sptr<KOREPattern> addBrackets(sptr<KOREPattern>, PrettyPrintData const&);
 
 int main (int argc, char **argv) {
-  if (argc != 3 && argc != 4) {
+  if (argc != 3 && argc != 4 && argv != 5) {
     std::cerr << "usage: " << argv[0] << " <definition.kore> <pattern.kore> [true|false|auto] [true|false]" << std::endl;
   }
 
