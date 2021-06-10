@@ -18,11 +18,11 @@ pipeline {
       }
       steps {
         sh '''
-          ./ciscript Debug
-          ./ciscript Release
-          ./ciscript RelWithDebInfo
-          ./ciscript FastBuild
-          ./ciscript GcStats
+          #./ciscript Debug
+          #./ciscript Release
+          #./ciscript RelWithDebInfo
+          #./ciscript FastBuild
+          #./ciscript GcStats
 
         '''
       }
