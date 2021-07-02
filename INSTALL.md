@@ -13,3 +13,5 @@ make install
 ```
 
 Then add `llvm-backend/build/install/bin` to your $PATH.
+
+You can run the test suite with `./ciscript Debug`. You can also run it with a different CMake profile by replacing `Debug` with `RelWithDebInfo`, `Release`, `FastBuild`, or `GcStats`.
