@@ -181,7 +181,7 @@ int main (int argc, char **argv) {
             color.push_back(trim(colorAtt.substr(idx)));
             break;
           } else {
-            color.push_back(trim(colorAtt.substr(idx, pos)));
+            color.push_back(trim(colorAtt.substr(idx, pos-idx)));
             idx = pos + 1;
           }
         } while (true);
