@@ -58,7 +58,7 @@ else
   MAINFILES=""
 fi
 
-if [[ "$OSTYPE" == "Darwin"* ]]; then
+if [[ "$OSTYPE" == "darwin"* ]]; then
   libraries="-liconv -lncurses"
   flags="-L${BREW_HOME}/opt/libffi/lib -L${BREW_HOME}/lib -Wl,-u,_sort_table"
 else
