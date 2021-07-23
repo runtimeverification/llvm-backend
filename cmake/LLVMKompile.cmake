@@ -23,6 +23,6 @@ install(TARGETS ${TARGET_NAME}
 	RUNTIME DESTINATION bin)
 
 if(APPLE)
-	include_directories(AFTER SYSTEM ${BREW_HOME}/include)
-	target_link_directories(${TARGET_NAME} PUBLIC ${BREW_HOME}/lib)
+  include_directories(AFTER SYSTEM ${BREW_HOME}/include)
+  target_link_directories(${TARGET_NAME} PUBLIC ${BREW_HOME}/lib)
 endif()
