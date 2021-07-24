@@ -60,7 +60,7 @@ fi
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
   libraries="-liconv -lncurses"
-  flags="-L${BREW_HOME}/opt/libffi/lib -L${BREW_HOME}/lib -Wl,-u,_sort_table"
+  flags="-L@BREW_HOME@/opt/libffi/lib -L@BREW_HOME@/lib -Wl,-u,_sort_table"
 else
   libraries="-ltinfo"
   flags="-Wl,-u,sort_table"
