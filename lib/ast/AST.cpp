@@ -1159,6 +1159,12 @@ KOREPattern *KOREAxiomDeclaration::getRightHandSide() const {
               return andPattern2->getArguments()[1].get();
             }
           }
+        } else if (andPattern->getConstructor()->getName() == "\\equals" && andPattern->getArguments().size() == 2) {
+          if (auto andPattern2 = dynamic_cast<KORECompositePattern *>(andPattern->getArguments()[1].get())) {
+            if (andPattern2->getConstructor()->getName() == "\\and" && andPattern2->getArguments().size() == 2) {
+              return andPattern2->getArguments()[0].get();
+            }
+          }
         }
       }
     } else if (top->getConstructor()->getName() == "\\and" && top->getArguments().size() == 2) {
