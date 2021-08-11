@@ -1,6 +1,8 @@
 #include "kllvm/codegen/Debug.h"
+#include "kllvm/codegen/CreateTerm.h"
 
 #include "llvm/IR/DIBuilder.h"
+#include "llvm/IR/Instructions.h"
 
 namespace kllvm {
 
@@ -53,10 +55,12 @@ void initDebugFunction(std::string name, std::string linkageName, llvm::DISubrou
 void initDebugParam(llvm::Function *func, unsigned argNo, std::string name, ValueType type, std::string typeName) {
   if(!Dbg) return;
   llvm::DILocalVariable *DbgVar = Dbg->createParameterVariable(DbgSP, name, argNo+1, DbgFile, DbgLine, getDebugType(type, typeName), true);
-  Dbg->insertDbgValueIntrinsic(
-    func->arg_begin()+argNo,
-    DbgVar,
-    Dbg->createExpression(),
+  auto alloca = new llvm::AllocaInst(getParamType(type, func->getParent()), 0, "", &func->getEntryBlock());
+  new llvm::StoreInst(func->arg_begin()+argNo, alloca, &func->getEntryBlock());
+  Dbg->insertDeclare(
+    alloca, 
+    DbgVar, 
+    Dbg->createExpression(), 
     llvm::DILocation::get(func->getContext(), DbgLine, DbgColumn, DbgSP),
     &func->getEntryBlock());
 }
