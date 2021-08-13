@@ -951,7 +951,8 @@ bool makeFunction(std::string name, KOREPattern *pattern, KOREDefinition *defini
       call->setCallingConv(llvm::CallingConv::Fast);
       retval = call;
     }
-    llvm::ReturnInst::Create(Module->getContext(), retval, creator.getCurrentBlock());
+    auto ret = llvm::ReturnInst::Create(Module->getContext(), retval, creator.getCurrentBlock());
+    setDebugLoc(ret);
     return true;
 }
 
