@@ -70,7 +70,7 @@ object Parser {
     }
 
     val constructorsForSort: Map[Sort, Seq[SymbolOrAlias]] = {
-      signatures.groupBy(_._2._2).mapValues(_.keys.filter(k => !hasAtt(signatures(k)._3, "function")).toSeq)
+      signatures.groupBy(_._2._2).view.mapValues(_.keys.filter(k => !hasAtt(signatures(k)._3, "function")).toSeq).toMap
     }
 
     private val sortAttData: Map[String, Attributes] = {
@@ -86,7 +86,7 @@ object Parser {
     }
 
     val overloads: Map[SymbolOrAlias, Seq[SymbolOrAlias]] = {
-      overloadSeq.groupBy(_._1).mapValues(_.map(_._2).toSeq)
+      overloadSeq.groupBy(_._1).view.mapValues(_.map(_._2).toSeq).toMap
     }
 
     def isSubsorted(less: Sort, greater: Sort): Boolean = {
@@ -256,7 +256,7 @@ object Parser {
 
   def parseFunctionAxioms(axioms: Seq[(AxiomDeclaration, Int)]) : Map[SymbolOrAlias, IndexedSeq[AxiomInfo]] = {
     val withOwise = axioms.flatMap(parseAxiomSentence(a => splitFunction(a), _))
-    withOwise.sortWith(_._2.priority < _._2.priority).toIndexedSeq.filter(_._1.isDefined).map(t => (t._1.get, t._2)).groupBy(_._1).mapValues(_.map(_._2))
+    withOwise.sortWith(_._2.priority < _._2.priority).toIndexedSeq.filter(_._1.isDefined).map(t => (t._1.get, t._2)).groupBy(_._1).view.mapValues(_.map(_._2)).toMap
   }
 
   private def isConcrete(symbol: SymbolOrAlias) : Boolean = {

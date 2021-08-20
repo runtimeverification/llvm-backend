@@ -309,7 +309,7 @@ case class Clause(
   val overloadChildren: Vector[(Constructor, Fringe, VariableBinding[String])],
   val specializedVars: Map[Occurrence, (SortCategory, Pattern[Option[Occurrence]])]) {
 
-  lazy val bindingsMap: Map[String, VariableBinding[String]] = bindings.groupBy(_.name).mapValues(_.head)
+  lazy val bindingsMap: Map[String, VariableBinding[String]] = bindings.groupBy(_.name).view.mapValues(_.head).toMap
   lazy val boundOccurrences: Set[Occurrence] = bindings.map(_.occurrence).toSet
 
   def isBound(binding: Any) = {
@@ -427,7 +427,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
     rawClauses.indices.map(row => new Row(ps(row), rawClauses(row)))
   }
 
-  def this(symlib: Parser.SymLib, cols: IndexedSeq[(Sort, IndexedSeq[Pattern[String]])], actions: IndexedSeq[Action]) {
+  def this(symlib: Parser.SymLib, cols: IndexedSeq[(Sort, IndexedSeq[Pattern[String]])], actions: IndexedSeq[Action]) = {
     this(symlib, (cols, (1 to cols.size).map(i => new Fringe(symlib, cols(i - 1)._1, Num(i, Base()), false))).zipped.toIndexedSeq.map(pair => new Column(pair._2, pair._1._2, actions.map(new Clause(_, Vector(), Vector(), Vector(), Map())))), null, actions.map(new Clause(_, Vector(), Vector(), Vector(), Map())), null, false)
   }
 
