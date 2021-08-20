@@ -132,7 +132,7 @@ object Generator {
       new Action(a.ordinal, rhsVars.map(_.name).sorted.distinct, scVars.map(_.map(_.name).sorted.distinct), (rhsVars ++ scVars.getOrElse(Seq())).filter(_.name.startsWith("Var'Bang")).map(v => (v.name, v.sort)), a.rewrite.getLeftHandSide.size, a.priority, a.source, a.location, lhsVars.toSet.size != lhsVars.size)
     })
     val patterns = axioms.map(a => genPatterns(mod, symlib, a.rewrite.getLeftHandSide)).transpose
-    val cols = (sorts, if (axioms.isEmpty) sorts.map(_ => IndexedSeq()) else patterns).zipped.toIndexedSeq
+    val cols = sorts.lazyZip(if (axioms.isEmpty) sorts.map(_ => IndexedSeq()) else patterns).toIndexedSeq
     new Matrix(symlib, cols, actions).expand
   }
   
@@ -157,7 +157,7 @@ object Generator {
   def mkSpecialDecisionTree(symlib: Parser.SymLib, mod: Definition, matrix: Matrix, axiom: AxiomInfo, threshold: (Int, Int)) : Option[(DecisionTree, Seq[(P[String], Occurrence)])] = {
     val rhs = genPatterns(mod, symlib, Seq(axiom.rewrite.getRightHandSide))
     val (specialized,residuals) = matrix.specializeBy(rhs.toIndexedSeq)
-    val residualMap = (residuals, specialized.fringe.map(_.occurrence)).zipped.toSeq
+    val residualMap = residuals.lazyZip(specialized.fringe.map(_.occurrence)).toSeq
     if (Matching.logging) {
       System.out.println("Residuals: " + residualMap.toList)
     }

@@ -96,7 +96,7 @@ class Column(val fringe: Fringe, val patterns: IndexedSeq[Pattern[String]], val 
   }
   private lazy val boundVars: Seq[Set[String]] = patterns.map(_.variables)
   def needed(vars: Seq[Set[String]]): Boolean = {
-    val intersection = (vars, boundVars).zipped.map(_.intersect(_))
+    val intersection = vars.lazyZip(boundVars).map(_.intersect(_))
     intersection.exists(_.nonEmpty)
   }
 
@@ -196,9 +196,9 @@ class Column(val fringe: Fringe, val patterns: IndexedSeq[Pattern[String]], val 
 
   def expand(ix: Constructor, isExact: Boolean): IndexedSeq[Column] = {
     val fringes = fringe.expand(ix)
-    val ps = (patterns, clauses).zipped.toIterable.map(t => t._1.expand(ix, isExact, fringes, fringe, t._2, maxPriority))
+    val ps = patterns.lazyZip(clauses).toIterable.map(t => t._1.expand(ix, isExact, fringes, fringe, t._2, maxPriority))
     val transposed = if (ps.isEmpty) fringes.map(_ => IndexedSeq()) else ps.transpose
-    (fringes, transposed).zipped.toIndexedSeq.map(t => new Column(t._1, t._2.toIndexedSeq, clauses))
+    fringes.lazyZip(transposed).toIndexedSeq.map(t => new Column(t._1, t._2.toIndexedSeq, clauses))
   }
 
   lazy val isWildcard: Boolean = patterns.forall(_.isWildcard)
@@ -428,7 +428,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
   }
 
   def this(symlib: Parser.SymLib, cols: IndexedSeq[(Sort, IndexedSeq[Pattern[String]])], actions: IndexedSeq[Action]) = {
-    this(symlib, (cols, (1 to cols.size).map(i => new Fringe(symlib, cols(i - 1)._1, Num(i, Base()), false))).zipped.toIndexedSeq.map(pair => new Column(pair._2, pair._1._2, actions.map(new Clause(_, Vector(), Vector(), Vector(), Map())))), null, actions.map(new Clause(_, Vector(), Vector(), Vector(), Map())), null, false)
+    this(symlib, cols.lazyZip((1 to cols.size).map(i => new Fringe(symlib, cols(i - 1)._1, Num(i, Base()), false))).toIndexedSeq.map(pair => new Column(pair._2, pair._1._2, actions.map(new Clause(_, Vector(), Vector(), Vector(), Map())))), null, actions.map(new Clause(_, Vector(), Vector(), Vector(), Map())), null, false)
   }
 
   private def isWildcardOrResidual(pat: Pattern[String]): Boolean = {
@@ -553,7 +553,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
       SortCategory(Parser.getStringAtt(symlib.sortAtt(sort), "hook").orElse(Some("STRING.String")), sort, symlib)
     }
     // first, add all remaining variable bindings to the clause
-    val vars = row.clause.bindings ++ (fringe, row.patterns).zipped.toSeq.flatMap(t => t._2.bindings(None, None, t._1.occurrence, symlib))
+    val vars = row.clause.bindings ++ fringe.lazyZip(row.patterns).toSeq.flatMap(t => t._2.bindings(None, None, t._1.occurrence, symlib))
     val overloadVars = row.clause.overloadChildren.map(_._3)
     val freshVars = row.clause.action.freshConstants.map(t => VariableBinding(t._1, sortCat(t._2), Fresh(t._1), None))
     val allVars = vars ++ overloadVars ++ freshVars
@@ -561,7 +561,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
     val grouped = allVars.groupBy(v => v.name).mapValues(_.map(v => (v.category, v.occurrence)))
     // compute the variables bound more than once
     val nonlinear = grouped.filter(_._2.size > 1)
-    val nonlinearPairs = nonlinear.mapValues(l => (l, l.tail).zipped)
+    val nonlinearPairs = nonlinear.mapValues(l => l.lazyZip(l.tail))
     val newVars = try {
       row.clause.action.rhsVars.map(v => (grouped(v).head._2, grouped(v).head._1.hookAtt))
     } catch {
@@ -646,7 +646,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
         case -1 => 
           if (matrixColumns(bestColIx).score(0).isPosInfinity) {
             // decompose this column as it contains only wildcards
-            val newClauses = (bestCol.clauses, bestCol.patterns).zipped.toIndexedSeq.map(t => t._1.addVars(None, None, t._2, bestCol.fringe))
+            val newClauses = bestCol.clauses.lazyZip(bestCol.patterns).toIndexedSeq.map(t => t._1.addVars(None, None, t._2, bestCol.fringe))
             Matrix.fromColumns(symlib, notBestCol(bestColIx).map(c => new Column(c.fringe, c.patterns, newClauses)), newClauses, search).compile
           } else {
             // compute the sort category of the best column

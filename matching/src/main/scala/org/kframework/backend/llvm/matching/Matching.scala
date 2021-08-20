@@ -68,7 +68,7 @@ object Matching {
         }
       })
     }
-    val files = (symlib.functions, dts).zipped.toIterable
+    val files = symlib.functions.lazyZip(dts).toIterable
     val index = new File(outputFolder, "index.txt")
     val writer = new FileWriter(index)
     var idx = 0

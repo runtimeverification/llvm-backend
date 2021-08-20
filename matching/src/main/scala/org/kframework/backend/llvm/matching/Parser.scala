@@ -46,7 +46,7 @@ object Parser {
     private val sortDecls = mod.modules.flatMap(_.decls).filter(_.isInstanceOf[SortDeclaration]).map(_.asInstanceOf[SortDeclaration]).groupBy(_.sort.asInstanceOf[CompoundSort].ctr)
 
     private def instantiate(s: Sort, params: Seq[Sort], args: Seq[Sort]): Sort = {
-      val map = (params, args).zipped.toMap
+      val map = params.lazyZip(args).toMap
       s match {
         case v @ SortVariable(_) => map(v)
         case _ => s

@@ -44,7 +44,7 @@ object Pattern {
       case (AsP(_, _, pat), _) => Pattern.mightUnify(pat, p2)
       case (_, AsP(_, _, pat)) => Pattern.mightUnify(p1, pat)
       case (LiteralP(c1, _), LiteralP(c2, _)) => c1 == c2
-      case (SymbolP(c1, ps1), SymbolP(c2, ps2)) => c1 == c2 && (ps1, ps2).zipped.toIterable.forall(t => Pattern.mightUnify(t._1, t._2))
+      case (SymbolP(c1, ps1), SymbolP(c2, ps2)) => c1 == c2 && ps1.lazyZip(ps2).toIterable.forall(t => Pattern.mightUnify(t._1, t._2))
       case (ListP(_, _, _, _, _), ListP(_, _, _, _, _)) => true
       case (MapP(_, _, _, _, _), MapP(_, _, _, _, _)) => true
       case (SetP(_, _, _, _), SetP(_, _, _, _)) => true
@@ -418,7 +418,7 @@ case class SymbolP[T](sym: SymbolOrAlias, ps: Seq[Pattern[T]]) extends Pattern[T
           case Seq(head) => head
         }
         val fringeTs = f2.expand(SymbolC(validLess))
-        val newPs = (ps, fringePs, fringeTs).zipped.map({
+        val newPs = ps.lazyZip(fringePs).lazyZip(fringeTs).map({
           case (p, fringeP, fringeT) =>
             if (fringeP.sort == fringeT.sort) {
               p
@@ -443,7 +443,7 @@ case class SymbolP[T](sym: SymbolOrAlias, ps: Seq[Pattern[T]]) extends Pattern[T
     val cons = SymbolC(less)
     if (f.contains(cons)) {
       val fringeTs = f.expand(cons)
-      (ps, fringePs, fringeTs).zipped.toIterable.map(t => isValidChild(t._1, t._2, t._3)).forall(identity)
+      ps.lazyZip(fringePs).lazyZip(fringeTs).toIterable.map(t => isValidChild(t._1, t._2, t._3)).forall(identity)
     } else {
       false
     }
@@ -479,7 +479,7 @@ case class SymbolP[T](sym: SymbolOrAlias, ps: Seq[Pattern[T]]) extends Pattern[T
         val child = less.find(c => f2.contains(SymbolC(c))).map(c => f2.expand(SymbolC(c)))
         child match {
           case None => Seq() // no overloads exist
-          case Some(fringeTs) => (fringePs, fringeTs, ps).zipped.toSeq.zipWithIndex.flatMap(t => getVar(t._1._1, t._1._2, t._1._3, t._2)) // compute variable bindings
+          case Some(fringeTs) => fringePs.lazyZip(fringeTs).lazyZip(ps).toSeq.zipWithIndex.flatMap(t => getVar(t._1._1, t._1._2, t._1._3, t._2)) // compute variable bindings
         }
       case _ => Seq()
     }
