@@ -60,7 +60,7 @@ fi
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
   libraries="-liconv -lncurses"
-  flags="-L/usr/local/opt/libffi/lib -L/usr/local/lib -Wl,-u,_sort_table"
+  flags="-L/usr/local/opt/libffi/lib -L/usr/local/lib -Wl,-u,_sort_table -I /usr/local/include"
 else
   libraries="-ltinfo"
   flags="-Wl,-u,sort_table"
