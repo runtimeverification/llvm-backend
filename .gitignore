@@ -45,3 +45,5 @@ TAGS
 *.iml
 /result*
 test/int/*.interpreter
+
+*.dSYM
