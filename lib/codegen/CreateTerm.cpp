@@ -129,16 +129,16 @@ void addKompiledDirSymbol(
   }
 }
 
-static std::string MAP_STRUCT = "map";
-static std::string LIST_STRUCT = "list";
-static std::string SET_STRUCT = "set";
-static std::string INT_WRAPPER_STRUCT = "mpz_hdr";
-static std::string INT_STRUCT = "mpz";
-static std::string FLOAT_WRAPPER_STRUCT = "floating_hdr";
-static std::string FLOAT_STRUCT = "floating";
-static std::string BUFFER_STRUCT = "stringbuffer";
-static std::string BLOCK_STRUCT = "block";
-static std::string BLOCKHEADER_STRUCT = "blockheader";
+std::string MAP_STRUCT = "map";
+std::string LIST_STRUCT = "list";
+std::string SET_STRUCT = "set";
+std::string INT_WRAPPER_STRUCT = "mpz_hdr";
+std::string INT_STRUCT = "mpz";
+std::string FLOAT_WRAPPER_STRUCT = "floating_hdr";
+std::string FLOAT_STRUCT = "floating";
+std::string BUFFER_STRUCT = "stringbuffer";
+std::string BLOCK_STRUCT = "block";
+std::string BLOCKHEADER_STRUCT = "blockheader";
 
 llvm::Type *getParamType(ValueType sort, llvm::Module *Module) {
   llvm::Type *type = getValueType(sort, Module);

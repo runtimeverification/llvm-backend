@@ -100,6 +100,17 @@ std::string makeSideConditionFunction(
     KOREAxiomDeclaration *axiom, KOREDefinition *definition,
     llvm::Module *Module);
 
+extern std::string MAP_STRUCT;
+extern std::string LIST_STRUCT;
+extern std::string SET_STRUCT;
+extern std::string INT_WRAPPER_STRUCT;
+extern std::string INT_STRUCT;
+extern std::string FLOAT_WRAPPER_STRUCT;
+extern std::string FLOAT_STRUCT;
+extern std::string BUFFER_STRUCT;
+extern std::string BLOCK_STRUCT;
+extern std::string BLOCKHEADER_STRUCT;
+
 /* returns the llvm::Type corresponding to the specified KORE sort category */
 llvm::Type *getValueType(ValueType sort, llvm::Module *Module);
 llvm::Type *getParamType(ValueType sort, llvm::Module *Module);

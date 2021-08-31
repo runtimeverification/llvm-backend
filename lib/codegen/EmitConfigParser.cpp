@@ -87,11 +87,7 @@ emitGetTagForSymbolName(KOREDefinition *definition, llvm::Module *module) {
   CurrentBlock->insertInto(func);
 }
 
-static std::string BLOCKHEADER_STRUCT = "blockheader";
-static std::string INT_STRUCT = "mpz";
-static std::string FLOAT_STRUCT = "floating";
 static std::string STRING_STRUCT = "string";
-static std::string BUFFER_STRUCT = "stringbuffer";
 static std::string LAYOUT_STRUCT = "layout";
 static std::string LAYOUTITEM_STRUCT = "layoutitem";
 

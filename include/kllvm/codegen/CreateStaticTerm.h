@@ -2,6 +2,7 @@
 #define CREATE_STATIC_TERM_H
 
 #include "kllvm/ast/AST.h"
+#include "kllvm/codegen/CreateTerm.h"
 #include "kllvm/codegen/DecisionParser.h"
 
 #include "llvm/ADT/StringMap.h"

@@ -15,17 +15,6 @@
 
 namespace kllvm {
 
-static std::string MAP_STRUCT = "map";
-static std::string LIST_STRUCT = "list";
-static std::string SET_STRUCT = "set";
-static std::string INT_WRAPPER_STRUCT = "mpz_hdr";
-static std::string INT_STRUCT = "mpz";
-static std::string FLOAT_WRAPPER_STRUCT = "floating_hdr";
-static std::string FLOAT_STRUCT = "floating";
-static std::string BUFFER_STRUCT = "stringbuffer";
-static std::string BLOCK_STRUCT = "block";
-static std::string BLOCKHEADER_STRUCT = "blockheader";
-
 extern std::string escape(std::string str);
 
 std::pair<llvm::Value *, bool>
