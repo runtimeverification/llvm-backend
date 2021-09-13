@@ -1,20 +1,20 @@
 #include "kllvm/codegen/CreateTerm.h"
-#include "kllvm/codegen/Util.h"
 #include "kllvm/codegen/Debug.h"
+#include "kllvm/codegen/Util.h"
 
 #include <gmp.h>
 #include <iomanip>
 #include <iostream>
 
-#include "llvm/IRReader/IRReader.h"
+#include "runtime/header.h" //for macros
 #include "llvm/IR/BasicBlock.h"
 #include "llvm/IR/Constants.h"
 #include "llvm/IR/DerivedTypes.h"
 #include "llvm/IR/Instructions.h"
+#include "llvm/IRReader/IRReader.h"
 #include "llvm/Support/MemoryBuffer.h"
 #include "llvm/Support/SourceMgr.h"
 #include "llvm/Support/raw_ostream.h"
-#include "runtime/header.h" //for macros
 
 namespace kllvm {
 
@@ -108,14 +108,17 @@ std::unique_ptr<llvm::Module> newModule(std::string name, llvm::LLVMContext &Con
   return mod;
 }
 
-void addKompiledDirSymbol(llvm::LLVMContext &Context, std::string dir, llvm::Module *mod) {
+void addKompiledDirSymbol(llvm::LLVMContext &Context, std::string dir, llvm::Module *mod, bool debug) {
   auto Str = llvm::ConstantDataArray::getString(Context, dir, true);
   auto global = mod->getOrInsertGlobal("kompiled_directory", Str->getType());
   llvm::GlobalVariable *globalVar = llvm::dyn_cast<llvm::GlobalVariable>(global);
   if (!globalVar->hasInitializer()) {
     globalVar->setInitializer(Str);
   }
-  initDebugGlobal("kompiled_directory", getCharDebugType(), globalVar);
+
+  if (debug) {
+    initDebugGlobal("kompiled_directory", getCharDebugType(), globalVar);
+  }
 }
 
 static std::string MAP_STRUCT = "map";
