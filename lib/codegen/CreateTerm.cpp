@@ -1,20 +1,20 @@
 #include "kllvm/codegen/CreateTerm.h"
-#include "kllvm/codegen/Debug.h"
 #include "kllvm/codegen/Util.h"
+#include "kllvm/codegen/Debug.h"
 
 #include <gmp.h>
 #include <iomanip>
 #include <iostream>
 
-#include "runtime/header.h" //for macros
+#include "llvm/IRReader/IRReader.h"
 #include "llvm/IR/BasicBlock.h"
 #include "llvm/IR/Constants.h"
 #include "llvm/IR/DerivedTypes.h"
 #include "llvm/IR/Instructions.h"
-#include "llvm/IRReader/IRReader.h"
 #include "llvm/Support/MemoryBuffer.h"
 #include "llvm/Support/SourceMgr.h"
 #include "llvm/Support/raw_ostream.h"
+#include "runtime/header.h" //for macros
 
 namespace kllvm {
 
@@ -108,16 +108,18 @@ std::unique_ptr<llvm::Module> newModule(std::string name, llvm::LLVMContext &Con
   return mod;
 }
 
+static std::string KOMPILED_DIR = "kompiled_directory";
+
 void addKompiledDirSymbol(llvm::LLVMContext &Context, std::string dir, llvm::Module *mod, bool debug) {
   auto Str = llvm::ConstantDataArray::getString(Context, dir, true);
-  auto global = mod->getOrInsertGlobal("kompiled_directory", Str->getType());
+  auto global = mod->getOrInsertGlobal(KOMPILED_DIR, Str->getType());
   llvm::GlobalVariable *globalVar = llvm::dyn_cast<llvm::GlobalVariable>(global);
   if (!globalVar->hasInitializer()) {
     globalVar->setInitializer(Str);
   }
 
   if (debug) {
-    initDebugGlobal("kompiled_directory", getCharDebugType(), globalVar);
+    initDebugGlobal(KOMPILED_DIR, getCharDebugType(), globalVar);
   }
 }
 
@@ -654,6 +656,21 @@ llvm::Value *CreateTerm::createHook(KORECompositePattern *hookAtt, KOREComposite
     llvm::Value *first = (*this)(pattern->getArguments()[0].get()).first;
     llvm::Value *second = (*this)(pattern->getArguments()[1].get()).first;
     return llvm::BinaryOperator::Create(llvm::Instruction::URem, first, second, "hook_MINT_urem", CurrentBlock);
+  } else if (name == "KREFLECTION.kompiledDir") {
+    auto dirString = Module->getGlobalVariable(KOMPILED_DIR);
+    auto zero = llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), 0);
+
+    auto ptr = llvm::GetElementPtrInst::Create(
+        dirString->getValueType(), dirString, {zero, zero},
+        "hook_KREFLECTION_kompiledDir", CurrentBlock);
+
+    if (auto arrayTy = llvm::dyn_cast<llvm::ArrayType>(dirString->getValueType())) {
+      auto len = llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), arrayTy->getNumElements() - 1);
+      return createFunctionCall("makeString", {SortCategory::Symbol, 0}, {ptr, len}, false, false);
+    } else {
+      assert(false && "Kompiled directory global is not a string");
+      abort();
+    }
   } else if (!name.compare(0, 5, "MINT.")) {
     std::cerr << name << std::endl;
     assert(false && "not implemented yet: MInt");

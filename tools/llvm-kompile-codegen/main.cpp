@@ -1,10 +1,10 @@
 #include "kllvm/codegen/CreateTerm.h"
-#include "kllvm/codegen/Debug.h"
 #include "kllvm/codegen/Decision.h"
+#include "kllvm/codegen/Debug.h"
 #include "kllvm/codegen/DecisionParser.h"
 #include "kllvm/codegen/EmitConfigParser.h"
-#include "kllvm/parser/KOREParser.h"
 #include "kllvm/parser/KOREScanner.h"
+#include "kllvm/parser/KOREParser.h"
 
 #include "llvm/IR/Instructions.h"
 #include "llvm/IR/LLVMContext.h"
@@ -14,8 +14,8 @@
 #include <libgen.h>
 #include <sys/stat.h>
 
-#include <fstream>
 #include <iostream>
+#include <fstream>
 
 using namespace kllvm;
 using namespace kllvm::parser;
@@ -45,7 +45,7 @@ int main (int argc, char **argv) {
   if (CODEGEN_DEBUG) {
     initDebugInfo(mod.get(), argv[1]);
   }
-
+  
   addKompiledDirSymbol(Context, dirname(realPath), mod.get(), CODEGEN_DEBUG);
 
   for (auto axiom : definition->getAxioms()) {
