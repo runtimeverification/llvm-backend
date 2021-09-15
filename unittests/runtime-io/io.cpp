@@ -15,6 +15,8 @@
 #define KCHAR char
 extern "C" {
 
+char kompiled_directory[] = "some/test/directory/path";
+
 #define GETTAG(symbol) "Lbl'Hash'" #symbol "{}"
 #define ERRBLOCK(tag) (uint64_t)(leaf_block(tag))
 #define NUM_SYMBOLS 8
@@ -55,6 +57,7 @@ extern "C" {
   block * hook_IO_log(string * path, string * msg);
   block * hook_IO_system(string * cmd);
   mpz_ptr hook_IO_time(void);
+  string * hook_KREFLECTION_kompiledDir(void);
   list hook_KREFLECTION_argv();
 
   extern int llvm_backend_argc;
@@ -468,6 +471,11 @@ BOOST_AUTO_TEST_CASE(time) {
   BOOST_CHECK(time2 >= tt);
   BOOST_CHECK(time2 - tt < 5);
   BOOST_CHECK(tt >= 1573756117);
+}
+
+BOOST_AUTO_TEST_CASE(kompiledDir) {
+  auto dir = hook_KREFLECTION_kompiledDir();
+  BOOST_CHECK_EQUAL(0, strcmp(dir->data, kompiled_directory));
 }
 
 BOOST_AUTO_TEST_CASE(argv) {

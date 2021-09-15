@@ -572,7 +572,7 @@ extern "C" {
     throw std::invalid_argument("not implemented: KREFLECTION.fresh");
   }
 
-  string * hook_KREFLECTION_kompiledDir() {
+  string * hook_KREFLECTION_kompiledDir(void) {
     auto str_ptr = &kompiled_directory;
     auto len = strlen(str_ptr);
     auto ret = static_cast<string *>(koreAllocToken(sizeof(string) + len));
