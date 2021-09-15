@@ -656,21 +656,6 @@ llvm::Value *CreateTerm::createHook(KORECompositePattern *hookAtt, KOREComposite
     llvm::Value *first = (*this)(pattern->getArguments()[0].get()).first;
     llvm::Value *second = (*this)(pattern->getArguments()[1].get()).first;
     return llvm::BinaryOperator::Create(llvm::Instruction::URem, first, second, "hook_MINT_urem", CurrentBlock);
-  } else if (name == "KREFLECTION.kompiledDir") {
-    auto dirString = Module->getGlobalVariable(KOMPILED_DIR);
-    auto zero = llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), 0);
-
-    auto ptr = llvm::GetElementPtrInst::Create(
-        dirString->getValueType(), dirString, {zero, zero},
-        "hook_KREFLECTION_kompiledDir", CurrentBlock);
-
-    if (auto arrayTy = llvm::dyn_cast<llvm::ArrayType>(dirString->getValueType())) {
-      auto len = llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), arrayTy->getNumElements() - 1);
-      return createFunctionCall("makeString", {SortCategory::Symbol, 0}, {ptr, len}, false, false);
-    } else {
-      assert(false && "Kompiled directory global is not a string");
-      abort();
-    }
   } else if (!name.compare(0, 5, "MINT.")) {
     std::cerr << name << std::endl;
     assert(false && "not implemented yet: MInt");

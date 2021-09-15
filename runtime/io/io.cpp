@@ -21,6 +21,8 @@ extern "C" {
 #define GETTAG(symbol) "Lbl'Hash'" #symbol "{}"
 #define IOBUFSIZE 1024
 
+  extern char kompiled_directory;
+
   mpz_ptr move_int(mpz_t);
   char * getTerminatedString(string * str);
 
@@ -568,6 +570,15 @@ extern "C" {
 
   block * hook_KREFLECTION_fresh(string * str) {
     throw std::invalid_argument("not implemented: KREFLECTION.fresh");
+  }
+
+  string * hook_KREFLECTION_kompiledDir() {
+    auto str_ptr = &kompiled_directory;
+    auto len = strlen(str_ptr);
+    auto ret = static_cast<string *>(koreAllocToken(sizeof(string) + len));
+    memcpy(ret->data, str_ptr, len);
+    set_len(ret, len);
+    return ret;
   }
 
   int llvm_backend_argc = 0;
