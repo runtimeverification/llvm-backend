@@ -475,7 +475,8 @@ BOOST_AUTO_TEST_CASE(time) {
 
 BOOST_AUTO_TEST_CASE(kompiledDir) {
   auto dir = hook_KREFLECTION_kompiledDir();
-  BOOST_CHECK_EQUAL(0, strcmp(dir->data, kompiled_directory));
+  auto len = strlen(kompiled_directory);
+  BOOST_CHECK_EQUAL(0, memcmp(dir->data, kompiled_directory, len));
 }
 
 BOOST_AUTO_TEST_CASE(argv) {
