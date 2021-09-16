@@ -541,7 +541,9 @@ void abortWhenStuck(llvm::BasicBlock *CurrentBlock, llvm::Module *Module, KORESy
     }
     Ptr = new llvm::BitCastInst(Block, BlockPtr, "", CurrentBlock);
   }
-  llvm::CallInst::Create(getOrInsertFunction(Module, "finish_rewriting", llvm::Type::getVoidTy(Ctx), BlockPtr, llvm::Type::getInt1Ty(Ctx)), {Ptr, llvm::ConstantInt::getTrue(Ctx)}, "", CurrentBlock);
+  auto FinishRewriting = getOrInsertFunction(Module, "finish_rewriting", llvm::Type::getVoidTy(Ctx), BlockPtr, llvm::Type::getInt1Ty(Ctx));
+  FinishRewriting->setDoesNotReturn();
+  llvm::CallInst::Create(FinishRewriting, {Ptr, llvm::ConstantInt::getTrue(Ctx)}, "", CurrentBlock);
   new llvm::UnreachableInst(Ctx, CurrentBlock);
 }
 
