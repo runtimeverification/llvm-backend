@@ -31,12 +31,23 @@ if $compile; then
       -g)
         debug=1
         ;;
+      -O[0-3])
+        opt_flags="$arg"
+        ;;
+      -O.)
+        echo "$0: invalid optimization level"
+        exit 1
+        ;;
       *)
         ;;
     esac
   done
+
+  # code generation
   "$(dirname "$0")"/llvm-kompile-codegen "$definition" "$dt_dir"/dt.yaml "$dt_dir" $debug > "$mod"
-  @OPT@ -mem2reg -tailcallelim -tailcallopt "$mod" -o "$modopt"
+
+  # optimization
+  @OPT@ -load "$(dirname "$0")"/../lib/kllvm/libLLVMPass.so -mem2reg -tailcallelim $opt_flags -rewrite-statepoints-for-gc -dce -emit-gc-layout-info "$mod" -o "$modopt"
 else
   main="$1"
   shift
