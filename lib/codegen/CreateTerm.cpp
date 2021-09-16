@@ -97,6 +97,12 @@ target triple = "x86_64-unknown-linux-gnu"
 ; Interface to the configuration parser
 declare %block* @parseConfiguration(i8*)
 declare void @printConfiguration(i32, %block *)
+
+@__LLVM_StackMaps = external dso_local global i8, align 8
+
+define i8* @getStackMap() {
+  ret i8* @__LLVM_StackMaps
+}
 )LLVM";
 
 std::unique_ptr<llvm::Module> newModule(std::string name, llvm::LLVMContext &Context) {
