@@ -28,6 +28,8 @@ static llvm::Function* getOrInsertFunction(llvm::Module *module, Ts... Args) {
 
 llvm::StructType *getTypeByName(llvm::Module *module, std::string name);
 
+std::string getMangledTypeStr(llvm::Type *Ty, bool &HasUnnamedType);
+
 }
 
 #endif // KLLVM_UTIL_H 
