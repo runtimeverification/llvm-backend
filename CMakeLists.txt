@@ -202,6 +202,7 @@ get_filename_component(INSTALL_DIR_ABS_PATH "${CMAKE_INSTALL_PREFIX}"
 configure_file(config/macros.h include/config/macros.h @ONLY)
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/runtime)
+configure_file(runtime/opaque.ll runtime @ONLY)
 configure_file(runtime/equality.ll runtime @ONLY)
 configure_file(runtime/finish_rewriting.ll runtime @ONLY)
 configure_file(runtime/fresh.ll runtime @ONLY)
