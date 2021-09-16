@@ -260,6 +260,7 @@ void initStaticObjects(void) {
   list l = list();
   set s = set();
   setKoreMemoryFunctionsForGMP();
+  parseStackMap();
 }
 
 void koreCollect(void** roots, uint8_t nroots, layoutitem *typeInfo) {

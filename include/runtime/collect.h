@@ -23,6 +23,8 @@ using map_impl = map::iterator::tree_t;
 using set_node = set::iterator::node_t;
 using set_impl = set::iterator::tree_t;
 
+void parseStackMap(void);
+
 extern "C" {
   extern size_t numBytesLiveAtCollection[1 << AGE_WIDTH];
   bool during_gc(void);
