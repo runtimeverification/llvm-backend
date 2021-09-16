@@ -601,106 +601,12 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> stepFunctionHeader(uns
   auto merge = llvm::BasicBlock::Create(module->getContext(), "step", block->getParent());
   llvm::BranchInst::Create(collect, merge, isCollection, checkCollect);
 
-  unsigned nroots = 0;
-  unsigned i = 0;
-  std::vector<llvm::Type *> ptrTypes;
-  std::vector<llvm::Value *> roots;
-  for (auto type : types) {
-    switch(type.cat) {
-      case SortCategory::Map:
-      case SortCategory::List:
-      case SortCategory::Set:
-        nroots++;
-        ptrTypes.push_back(llvm::PointerType::get(getValueType(type, module), 1));
-        roots.push_back(args[i]);
-        break;
-      case SortCategory::Int:
-      case SortCategory::Float:
-      case SortCategory::StringBuffer:
-      case SortCategory::Symbol:
-      case SortCategory::Variable:
-        nroots++;
-        ptrTypes.push_back(getValueType(type, module));
-        roots.push_back(args[i]);
-        break;
-      case SortCategory::Bool:
-      case SortCategory::MInt:
-        break;
-      case SortCategory::Uncomputed:
-        abort();
-    }
-    i++;
-  }
-  auto arr = module->getOrInsertGlobal("gc_roots", llvm::ArrayType::get(llvm::Type::getInt8PtrTy(module->getContext()), 256));
-  std::vector<llvm::Value *> rootPtrs;
-  for (unsigned i = 0; i < nroots; i++) {
-    auto ptr = llvm::GetElementPtrInst::CreateInBounds(llvm::dyn_cast<llvm::PointerType>(arr->getType())->getElementType(), arr, {llvm::ConstantInt::get(llvm::Type::getInt64Ty(module->getContext()), 0), llvm::ConstantInt::get(llvm::Type::getInt64Ty(module->getContext()), i)}, "", collect);
-    auto casted = new llvm::BitCastInst(ptr, llvm::PointerType::getUnqual(ptrTypes[i]), "", collect);
-    new llvm::StoreInst(roots[i], casted, collect);
-    rootPtrs.push_back(casted);
-  }
-  std::vector<llvm::Constant *> elements;
-  i = 0;
-  for (auto cat : types) {
-    switch(cat.cat) {
-      case SortCategory::Map:
-      case SortCategory::List:
-      case SortCategory::Set:
-      case SortCategory::StringBuffer:
-      case SortCategory::Symbol:
-      case SortCategory::Variable:
-      case SortCategory::Int:
-      case SortCategory::Float:
-        elements.push_back(llvm::ConstantStruct::get(getTypeByName(module, LAYOUTITEM_STRUCT), llvm::ConstantInt::get(llvm::Type::getInt64Ty(module->getContext()), i++ * 8), llvm::ConstantInt::get(llvm::Type::getInt16Ty(module->getContext()), (int)cat.cat + cat.bits)));
-        break;
-      case SortCategory::Bool:
-      case SortCategory::MInt:
-        break;
-      case SortCategory::Uncomputed:
-        abort();
-    }
-  }
-  auto layoutArr = llvm::ConstantArray::get(llvm::ArrayType::get(getTypeByName(module, LAYOUTITEM_STRUCT), elements.size()), elements);
-  auto layout = module->getOrInsertGlobal("layout_item_rule_" + std::to_string(ordinal), layoutArr->getType());
-  llvm::GlobalVariable *globalVar = llvm::dyn_cast<llvm::GlobalVariable>(layout);
-  if (!globalVar->hasInitializer()) {
-    globalVar->setInitializer(layoutArr);
-  }
-  auto ptrTy = llvm::PointerType::getUnqual(llvm::ArrayType::get(getTypeByName(module, LAYOUTITEM_STRUCT), 0));
-  auto koreCollect = getOrInsertFunction(module, "koreCollect", llvm::FunctionType::get(llvm::Type::getVoidTy(module->getContext()), {arr->getType(), llvm::Type::getInt8Ty(module->getContext()), ptrTy}, false));
-  auto call = llvm::CallInst::Create(koreCollect, {arr, llvm::ConstantInt::get(llvm::Type::getInt8Ty(module->getContext()), nroots), llvm::ConstantExpr::getBitCast(layout, ptrTy)}, "", collect);
+  auto koreCollect = getOrInsertFunction(module, "koreCollect", llvm::FunctionType::get(llvm::Type::getVoidTy(module->getContext()), {}, false));
+  auto call = llvm::CallInst::Create(koreCollect, {}, "", collect);
   setDebugLoc(call);
-  i = 0;
-  std::vector<llvm::Value *> phis;
-  for (auto ptr : rootPtrs) {
-    auto loaded = new llvm::LoadInst(ptr->getType()->getPointerElementType(), ptr, "", collect);
-    auto phi = llvm::PHINode::Create(loaded->getType(), 2, "phi", merge);
-    phi->addIncoming(loaded, collect);
-    phi->addIncoming(roots[i++], checkCollect);
-    phis.push_back(phi);
-  }
   llvm::BranchInst::Create(merge, collect);
-  i = 0;
-  unsigned rootIdx = 0;
   std::vector<llvm::Value *> results;
-  for (auto type : types) {
-    switch(type.cat) {
-      case SortCategory::Map:
-      case SortCategory::List:
-      case SortCategory::Set:
-      case SortCategory::StringBuffer:
-      case SortCategory::Symbol:
-      case SortCategory::Variable:
-      case SortCategory::Int:
-      case SortCategory::Float:
-        results.push_back(phis[rootIdx++]);
-        break;
-      default:
-        results.push_back(args[i]);
-    }
-    i++;
-  }
-  return std::make_pair(results, merge);
+  return std::make_pair(args, merge);
 }
 
 void makeStepFunction(KOREDefinition *definition, llvm::Module *module, DecisionNode *dt, bool search) {

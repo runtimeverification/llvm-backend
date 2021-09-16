@@ -263,10 +263,18 @@ void initStaticObjects(void) {
   parseStackMap();
 }
 
-void koreCollect(void** roots, uint8_t nroots, layoutitem *typeInfo) {
+struct gc_root {
+  void *bp;
+  layoutitem layout;
+};
+
+void koreCollect(void) {
   is_gc = true;
   collect_old = shouldCollectOldGen();
   MEM_LOG("Starting garbage collection\n");
+
+  std::vector<gc_root> roots = scanStackRoots();
+
 #ifdef GC_DBG
   if (!last_alloc_ptr) {
     last_alloc_ptr = youngspace_ptr();
@@ -280,9 +288,11 @@ void koreCollect(void** roots, uint8_t nroots, layoutitem *typeInfo) {
   }
 #endif
   char *previous_oldspace_alloc_ptr = *old_alloc_ptr();
-  for (int i = 0; i < nroots; i++) {
-    migrate_child(roots, typeInfo, i, true);
+  // migrate stack roots
+  for (int i = 0; i < roots.size(); i++) {
+    migrate_child(roots[i].bp, &roots[i].layout, 0, true);
   }
+  // migrate global variable roots
   migrateRoots();
   char *scan_ptr = youngspace_ptr();
   if (scan_ptr != *young_alloc_ptr()) {
@@ -331,7 +341,7 @@ void koreCollect(void** roots, uint8_t nroots, layoutitem *typeInfo) {
 }
 
 void freeAllKoreMem() {
-  koreCollect(nullptr, 0, nullptr);
+  koreCollect();
 }
 
 bool is_collection() {

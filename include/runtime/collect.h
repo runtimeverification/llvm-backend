@@ -36,7 +36,7 @@ extern "C" {
   void migrate_set(void *s);
   void migrate_collection_node(void **nodePtr);
   void setKoreMemoryFunctionsForGMP(void);
-  void koreCollect(void**, uint8_t, layoutitem *);
+  void koreCollect(void);
 }
 
 #ifdef GC_DBG
