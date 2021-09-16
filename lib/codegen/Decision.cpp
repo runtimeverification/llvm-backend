@@ -375,7 +375,7 @@ void LeafNode::codegen(Decision *d) {
   auto type = getParamType(d->Cat, d->Module);
   auto Call = llvm::CallInst::Create(getOrInsertFunction(d->Module, name, llvm::FunctionType::get(type, types, false)), args, "", d->CurrentBlock);
   setDebugLoc(Call);
-  Call->setCallingConv(llvm::CallingConv::Fast);
+  Call->setCallingConv(llvm::CallingConv::Tail);
   if (child == nullptr) {
     llvm::ReturnInst::Create(d->Ctx, Call, d->CurrentBlock);
   } else {  
@@ -491,7 +491,7 @@ void makeEvalOrAnywhereFunction(KORESymbol *function, KOREDefinition *definition
   KORESymbolDeclaration *symbolDecl = definition->getSymbolDeclarations().at(function->getName());
   initDebugAxiom(symbolDecl->getAttributes());
   initDebugFunction(function->getName(), name, getDebugFunctionType(debugReturnType, debugArgs), definition, matchFunc);
-  matchFunc->setCallingConv(llvm::CallingConv::Fast);
+  matchFunc->setCallingConv(llvm::CallingConv::Tail);
   llvm::BasicBlock *block = llvm::BasicBlock::Create(module->getContext(), "entry", matchFunc);
   llvm::BasicBlock *stuck = llvm::BasicBlock::Create(module->getContext(), "stuck", matchFunc);
   llvm::BasicBlock *fail = llvm::BasicBlock::Create(module->getContext(), "fail", matchFunc);
@@ -630,7 +630,7 @@ void makeStepFunction(KOREDefinition *definition, llvm::Module *module, Decision
   } else {
     initDebugFunction(name, name, getDebugFunctionType(debugType, {debugType}), definition, matchFunc);
   }
-  matchFunc->setCallingConv(llvm::CallingConv::Fast);
+  matchFunc->setCallingConv(llvm::CallingConv::Tail);
   auto val = matchFunc->arg_begin();
   llvm::BasicBlock *block = llvm::BasicBlock::Create(module->getContext(), "entry", matchFunc);
   llvm::BasicBlock *stuck = llvm::BasicBlock::Create(module->getContext(), "stuck", matchFunc);
@@ -686,7 +686,7 @@ void makeMatchReasonFunction(KOREDefinition *definition, llvm::Module *module, K
   auto debugType = getDebugType({SortCategory::Symbol, 0}, "SortGeneratedTopCell{}");
   resetDebugLoc();
   initDebugFunction(debugName, debugName, getDebugFunctionType(getVoidDebugType(), {debugType}), definition, matchFunc);
-  matchFunc->setCallingConv(llvm::CallingConv::Fast);
+  matchFunc->setCallingConv(llvm::CallingConv::Tail);
   auto val = matchFunc->arg_begin();
   llvm::BasicBlock *block = llvm::BasicBlock::Create(module->getContext(), "entry", matchFunc);
   llvm::BasicBlock *stuck = llvm::BasicBlock::Create(module->getContext(), "stuck", matchFunc);
@@ -767,7 +767,7 @@ void makeStepFunction(KOREAxiomDeclaration *axiom, KOREDefinition *definition, l
   matchFunc->setGC("statepoint-example");
   resetDebugLoc();
   initDebugFunction(name, name, getDebugFunctionType(blockDebugType, debugTypes), definition, matchFunc);
-  matchFunc->setCallingConv(llvm::CallingConv::Fast);
+  matchFunc->setCallingConv(llvm::CallingConv::Tail);
 
   llvm::StringMap<llvm::Value *> stuckSubst;
   llvm::BasicBlock *block = llvm::BasicBlock::Create(module->getContext(), "entry", matchFunc);

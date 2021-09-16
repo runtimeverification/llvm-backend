@@ -20,7 +20,7 @@ private:
   bool isAnywhereOwise;
 
   llvm::Value *createHook(KORECompositePattern *hookAtt, KORECompositePattern *pattern);
-  llvm::Value *createFunctionCall(std::string name, KORECompositePattern *pattern, bool sret, bool fastcc);
+  llvm::Value *createFunctionCall(std::string name, KORECompositePattern *pattern, bool sret, bool tailcc);
   llvm::Value *notInjectionCase(KORECompositePattern *constructor, llvm::Value *val);
 public:
   CreateTerm(
@@ -50,9 +50,9 @@ public:
    * can be set to true even if the function does not return a struct, in which case its value
    * is ignored.
    * load: if the function returns a struct via sret, then if load is true, we load the value 
-   * fastcc: true if we should use the fastcc calling convention
+   * tailcc: true if we should use the tailcc calling convention
    * returned from the function before returning it. */
-  llvm::Value *createFunctionCall(std::string name, ValueType returnCat, const std::vector<llvm::Value *> &args, bool sret, bool fastcc);
+  llvm::Value *createFunctionCall(std::string name, ValueType returnCat, const std::vector<llvm::Value *> &args, bool sret, bool tailcc);
 
   llvm::BasicBlock *getCurrentBlock() const { return CurrentBlock; }
 };

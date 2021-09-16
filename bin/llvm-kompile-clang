@@ -84,7 +84,7 @@ if ! $save_temps; then
 fi
 
 if [ "$lto" = "lto" ]; then
-  flags="$flags -flto -Wl,-mllvm,-tailcallopt"
+  flags="$flags -flto"
   files=("$LIBDIR"/llvm/*.ll)
   if ! $link; then
     mv "$modopt" "$output_file"
@@ -96,13 +96,13 @@ else
     if ! $link; then
       modasm="$output_file"
     fi
-    run @LLC@ -tailcallopt "$modopt" -mtriple=@BACKEND_TARGET_TRIPLE@ -filetype=obj $llc_opt_flags $llc_flags -o "$modasm"
+    run @LLC@ "$modopt" -mtriple=@BACKEND_TARGET_TRIPLE@ -filetype=obj $llc_opt_flags $llc_flags -o "$modasm"
     modopt="$modasm"
   fi
   if $link; then
     for file in "$LIBDIR"/llvm/*.ll; do
       tmp="$tmpdir/`basename "$file"`.o"
-      run @LLC@ -tailcallopt "$file" -mtriple=@BACKEND_TARGET_TRIPLE@ -filetype=obj $llc_opt_flags $llc_flags -o "$tmp"
+      run @LLC@ "$file" -mtriple=@BACKEND_TARGET_TRIPLE@ -filetype=obj $llc_opt_flags $llc_flags -o "$tmp"
       files+=("$tmp")
     done
   fi
