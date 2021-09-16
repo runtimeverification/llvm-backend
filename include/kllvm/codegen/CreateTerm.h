@@ -60,7 +60,7 @@ public:
 /* Creates a new llvm::Module with the predefined declarations common to all llvm modules
    in the llvm backend. */
 std::unique_ptr<llvm::Module> newModule(std::string name, llvm::LLVMContext &Context);
-void addKompiledDirSymbol(llvm::LLVMContext &Context, std::string dir, llvm::Module *mod);
+void addKompiledDirSymbol(llvm::LLVMContext &Context, std::string dir, llvm::Module *mod, bool debug);
 
 llvm::StructType *getBlockType(llvm::Module *Module, KOREDefinition *definition, const KORESymbol *symbol);
 llvm::Value *getBlockHeader(llvm::Module *Module, KOREDefinition *definition,

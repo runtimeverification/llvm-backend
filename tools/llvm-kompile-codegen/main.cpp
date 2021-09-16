@@ -44,8 +44,9 @@ int main (int argc, char **argv) {
 
   if (CODEGEN_DEBUG) {
     initDebugInfo(mod.get(), argv[1]);
-    addKompiledDirSymbol(Context, dirname(realPath), mod.get());
   }
+  
+  addKompiledDirSymbol(Context, dirname(realPath), mod.get(), CODEGEN_DEBUG);
 
   for (auto axiom : definition->getAxioms()) {
     makeSideConditionFunction(axiom, definition.get(), mod.get());

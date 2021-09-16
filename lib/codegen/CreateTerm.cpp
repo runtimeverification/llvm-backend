@@ -108,14 +108,19 @@ std::unique_ptr<llvm::Module> newModule(std::string name, llvm::LLVMContext &Con
   return mod;
 }
 
-void addKompiledDirSymbol(llvm::LLVMContext &Context, std::string dir, llvm::Module *mod) {
+static std::string KOMPILED_DIR = "kompiled_directory";
+
+void addKompiledDirSymbol(llvm::LLVMContext &Context, std::string dir, llvm::Module *mod, bool debug) {
   auto Str = llvm::ConstantDataArray::getString(Context, dir, true);
-  auto global = mod->getOrInsertGlobal("kompiled_directory", Str->getType());
+  auto global = mod->getOrInsertGlobal(KOMPILED_DIR, Str->getType());
   llvm::GlobalVariable *globalVar = llvm::dyn_cast<llvm::GlobalVariable>(global);
   if (!globalVar->hasInitializer()) {
     globalVar->setInitializer(Str);
   }
-  initDebugGlobal("kompiled_directory", getCharDebugType(), globalVar);
+
+  if (debug) {
+    initDebugGlobal(KOMPILED_DIR, getCharDebugType(), globalVar);
+  }
 }
 
 static std::string MAP_STRUCT = "map";
