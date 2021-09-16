@@ -4,10 +4,15 @@
 #include<cstdlib>
 #include<cstring>
 #include<cassert>
+#include<map>
+
 #include "runtime/alloc.h"
 #include "runtime/header.h"
 #include "runtime/arena.h"
 #include "runtime/collect.h"
+
+#define UNW_LOCAL_ONLY
+#include <libunwind.h>
 
 extern "C" {
 
@@ -267,6 +272,37 @@ struct gc_root {
   void *bp;
   layoutitem layout;
 };
+
+extern std::map<void *, std::vector<layoutitem>> StackMap;
+
+static std::vector<gc_root> scanStackRoots(void) {
+  unw_cursor_t cursor;
+  unw_context_t context;
+
+  unw_getcontext(&context);
+  unw_init_local(&cursor, &context);
+
+  std::vector<gc_root> gc_roots;
+
+  while (unw_step(&cursor)) {
+    unw_word_t ip_word, sp_word;
+
+    unw_get_reg(&cursor, UNW_REG_IP, &ip_word);
+    unw_get_reg(&cursor, UNW_REG_SP, &sp_word);
+
+    void *ip, *sp;
+    ip = (void *)ip_word;
+    sp = (void *)sp_word;
+
+    if (StackMap.count(ip)) {
+      std::vector<layoutitem> &Relocs = StackMap[ip];
+      for (auto &Reloc : Relocs) {
+        gc_roots.push_back({sp, Reloc});
+      }
+    }
+  }
+  return gc_roots;
+}
 
 void koreCollect(void) {
   is_gc = true;
