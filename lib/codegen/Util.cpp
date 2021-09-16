@@ -1,4 +1,5 @@
 #include "kllvm/codegen/Util.h"
+#include "kllvm/codegen/CreateTerm.h"
 #include "llvm/Support/Casting.h"
 #include "llvm/Support/raw_ostream.h"
 
@@ -67,10 +68,22 @@ std::string getMangledTypeStr(llvm::Type *Ty, bool &HasUnnamedType) {
   return Result;
 }
 
+llvm::Function* koreHeapAlloc(ValueType Cat, std::string name, llvm::Module *module) {
+  llvm::Type *size_type = llvm::Type::getInt64Ty(module->getContext());
+  llvm::Type *Ty = getParamType(Cat, module);
+  auto allocType = llvm::FunctionType::get(Ty, llvm::ArrayRef<llvm::Type*>(size_type), false);
+  bool hasUnnamed = false;
+  auto result = getOrInsertFunction(module, name + "_" + getMangledTypeStr(Ty, hasUnnamed), allocType);
+  result->setReturnDoesNotAlias();
+  return result;
+}
+
 llvm::Function* koreHeapAlloc(std::string name, llvm::Module *module) {
-  llvm::Type* size_type = llvm::Type::getInt64Ty(module->getContext());
+  llvm::Type *size_type = llvm::Type::getInt64Ty(module->getContext());
   auto allocType = llvm::FunctionType::get(llvm::Type::getInt8PtrTy(module->getContext()), llvm::ArrayRef<llvm::Type*>(size_type), false);
-  return getOrInsertFunction(module, name, allocType);
+  auto result = getOrInsertFunction(module, name, allocType);
+  result->setReturnDoesNotAlias();
+  return result;
 }
 
 llvm::Function *castToFunctionOrAbort(llvm::Value* value) {

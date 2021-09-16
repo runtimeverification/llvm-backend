@@ -441,7 +441,7 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
     }
     case SortCategory::Float: {
       llvm::Type *Float = getTypeByName(module, FLOAT_STRUCT);
-      llvm::Value *Term = allocateTerm(Float, CaseBlock, "koreAllocFloating");
+      llvm::Value *Term = allocateTerm(cat, Float, CaseBlock, "koreAllocFloating");
       llvm::Function *InitFloat = getOrInsertFunction(module, "init_float",
           llvm::Type::getVoidTy(Ctx), llvm::PointerType::get(Float, 1), 
           llvm::Type::getInt8PtrTy(Ctx));
@@ -469,7 +469,7 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
       phiStr->addIncoming(Pruned, IfIsPlus);
       CaseBlock = ElseNoPlus;
       llvm::Type *Int = getTypeByName(module, INT_STRUCT);
-      llvm::Value *Term = allocateTerm(Int, CaseBlock, "koreAllocInteger");
+      llvm::Value *Term = allocateTerm(cat, Int, CaseBlock, "koreAllocInteger");
       llvm::Function *MpzInitSet = getOrInsertFunction(module, "__gmpz_init_set_str",
           llvm::Type::getInt32Ty(Ctx), llvm::PointerType::get(Int, 1), 
           llvm::Type::getInt8PtrTy(Ctx), llvm::Type::getInt32Ty(Ctx));
@@ -498,7 +498,7 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
   auto StringType = getTypeByName(module, STRING_STRUCT);
   auto Len = llvm::BinaryOperator::Create(llvm::Instruction::Add,
       func->arg_begin()+1, llvm::ConstantExpr::getSizeOf(StringType), "", CurrentBlock);
-  llvm::Value *Block = allocateTerm(StringType, Len, CurrentBlock, "koreAllocToken");
+  llvm::Value *Block = allocateTerm({SortCategory::Symbol, 0}, StringType, Len, CurrentBlock, "koreAllocToken");
   auto HdrPtr = llvm::GetElementPtrInst::CreateInBounds(Block,
       {zero, zero32, zero32}, "", CurrentBlock);
   auto BlockSize = module->getOrInsertGlobal("BLOCK_SIZE", llvm::Type::getInt64Ty(Ctx));
@@ -699,7 +699,7 @@ static void getVisitor(KOREDefinition *definition, llvm::Module *module, KORESym
       if (nwords == 0) {
         llvm::CallInst::Create(fnType, func->arg_begin()+10, {func->arg_begin()+1, llvm::ConstantPointerNull::get(llvm::Type::getInt64PtrTy(Ctx)), nbits, CharPtr}, "", CaseBlock);
       } else {
-        auto Ptr = allocateTerm(llvm::Type::getInt64Ty(Ctx), llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), nwords * 8), CaseBlock, "koreAllocAlwaysGC");
+        auto Ptr = allocateTermNoReloc(llvm::Type::getInt64Ty(Ctx), llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), nwords * 8), CaseBlock);
         if (nwords == 1) {
           llvm::Value *Word;
           if (cat.bits == 64) {

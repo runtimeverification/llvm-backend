@@ -222,15 +222,30 @@ llvm::Value *ptrToInt(llvm::Value *val, llvm::BasicBlock *block) {
   return ptr;
 }
 
-llvm::Value *allocateTerm(llvm::Type *AllocType, llvm::BasicBlock *block, const char *allocFn) {
-  return allocateTerm(AllocType, llvm::ConstantExpr::getSizeOf(AllocType), block, allocFn);
+llvm::Value *allocateTerm(ValueType Cat, llvm::Type *AllocType, llvm::BasicBlock *block, const char *allocFn) {
+  return allocateTerm(Cat, AllocType, llvm::ConstantExpr::getSizeOf(AllocType), block, allocFn);
 }
 
-llvm::Value *allocateTerm(llvm::Type *AllocType, llvm::Value *Len, llvm::BasicBlock *block, const char *allocFn) {
-  llvm::Instruction *Malloc = llvm::CallInst::CreateMalloc(block, llvm::Type::getInt64Ty(block->getContext()), AllocType, Len, nullptr, koreHeapAlloc(allocFn, block->getModule()));
-  setDebugLoc(&block->getInstList().back());
-  block->getInstList().push_back(Malloc);
-  return Malloc;
+llvm::Value *allocateTerm(ValueType Cat, llvm::Type *AllocType, llvm::Value *Len, llvm::BasicBlock *block, const char *allocFn) {
+  auto malloc = llvm::CallInst::Create(koreHeapAlloc(Cat, allocFn, block->getModule()), Len, "malloccall", block);
+  if (malloc->getType()->getPointerElementType() == AllocType) {
+    return malloc;
+  }
+  auto cast = new llvm::BitCastInst(malloc, llvm::PointerType::get(AllocType, 1), "", block);
+  return cast;
+}
+
+llvm::Value *allocateTermNoReloc(llvm::Type *AllocType, llvm::BasicBlock *block, const char *allocFn) {
+  return allocateTermNoReloc(AllocType, llvm::ConstantExpr::getSizeOf(AllocType), block, allocFn);
+}
+
+llvm::Value *allocateTermNoReloc(llvm::Type *AllocType, llvm::Value *Len, llvm::BasicBlock *block, const char *allocFn) {
+  auto malloc = llvm::CallInst::Create(koreHeapAlloc(allocFn, block->getModule()), llvm::ConstantExpr::getPtrToInt(llvm::ConstantExpr::getGetElementPtr(AllocType, llvm::ConstantPointerNull::get(llvm::PointerType::get(AllocType, 1)), llvm::ConstantInt::get(llvm::Type::getInt32Ty(block->getContext()), 1)), llvm::Type::getInt64Ty(block->getContext())), "malloccall", block);
+  if (malloc->getType()->getPointerElementType() == AllocType) {
+    return malloc;
+  }
+  auto cast = new llvm::BitCastInst(malloc, llvm::PointerType::get(AllocType, 0), "", block);
+  return cast;
 }
 
 ValueType termType(KOREPattern *pattern, llvm::StringMap<ValueType> &substitution, KOREDefinition *definition) {
@@ -502,7 +517,7 @@ llvm::Value *CreateTerm::createHook(KORECompositePattern *hookAtt, KOREComposite
     if (nwords == 0) {
       return createToken({SortCategory::Int, 0}, "0");
     }
-    auto Ptr = allocateTerm(llvm::Type::getInt64Ty(Ctx), llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), nwords * 8), CurrentBlock, "koreAllocAlwaysGC");
+    auto Ptr = allocateTermNoReloc(llvm::Type::getInt64Ty(Ctx), llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), nwords * 8), CurrentBlock);
     if (nwords == 1) {
       llvm::Value *Word;
       if (cat.bits == 64) {
@@ -532,7 +547,7 @@ llvm::Value *CreateTerm::createHook(KORECompositePattern *hookAtt, KOREComposite
     if (nwords == 0) {
       return createToken({SortCategory::Int, 0}, "0");
     }
-    auto Ptr = allocateTerm(llvm::Type::getInt64Ty(Ctx), llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), nwords * 8), CurrentBlock, "koreAllocAlwaysGC");
+    auto Ptr = allocateTermNoReloc(llvm::Type::getInt64Ty(Ctx), llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), nwords * 8), CurrentBlock);
     if (nwords == 1) {
       llvm::Value *Word;
       if (cat.bits == 64) {
@@ -751,7 +766,7 @@ llvm::Value *CreateTerm::createFunctionCall(std::string name, ValueType returnCa
   llvm::Type *sretType;
   if (sret) {
     // we don't use alloca here because the tail call optimization pass for llvm doesn't handle correctly functions with alloca
-    AllocSret = allocateTerm(returnType, CurrentBlock, "koreAllocAlwaysGC");
+    AllocSret = allocateTerm(returnCat, returnType, CurrentBlock, "koreAllocAlwaysGC");
     sretType = returnType;
     realArgs.insert(realArgs.begin(), AllocSret);
     types.insert(types.begin(), AllocSret->getType());
@@ -786,7 +801,7 @@ llvm::Value *CreateTerm::notInjectionCase(KORECompositePattern *constructor, llv
   KORESymbolDeclaration *symbolDecl = Definition->getSymbolDeclarations().at(symbol->getName());
   llvm::StructType *BlockType = getBlockType(Module, Definition, symbol);
   llvm::Value *BlockHeader = getBlockHeader(Module, Definition, symbol, BlockType);
-  llvm::Value *Block = allocateTerm(BlockType, CurrentBlock);
+  llvm::Value *Block = allocateTerm({SortCategory::Symbol, 0}, BlockType, CurrentBlock);
   llvm::Value *BlockHeaderPtr = llvm::GetElementPtrInst::CreateInBounds(BlockType, Block, {llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0), llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), 0)}, symbol->getName(), CurrentBlock);
   new llvm::StoreInst(BlockHeader, BlockHeaderPtr, CurrentBlock);
   int idx = 2;
@@ -966,8 +981,8 @@ bool makeFunction(std::string name, KOREPattern *pattern, KOREDefinition *defini
     }
     CreateTerm creator = CreateTerm(subst, definition, block, Module, false);
     llvm::Value *retval = creator(pattern).first;
-    if (funcType->getReturnType() == llvm::PointerType::getUnqual(retval->getType())) {
-      auto tempAlloc = allocateTerm(retval->getType(), creator.getCurrentBlock(), "koreAllocAlwaysGC");
+    if (funcType->getReturnType() == llvm::PointerType::get(retval->getType(), 1)) {
+      auto tempAlloc = allocateTerm(returnCat, retval->getType(), creator.getCurrentBlock(), "koreAllocAlwaysGC");
       new llvm::StoreInst(retval, tempAlloc, creator.getCurrentBlock());
       retval = tempAlloc;
     }
@@ -1058,7 +1073,7 @@ std::string makeApplyRuleFunction(KOREAxiomDeclaration *axiom, KOREDefinition *d
       case SortCategory::List:
       case SortCategory::Set:
         if (!arg->getType()->isPointerTy()) {
-          auto ptr = allocateTerm(arg->getType(), creator.getCurrentBlock(), "koreAllocAlwaysGC");
+          auto ptr = allocateTerm(cat, arg->getType(), creator.getCurrentBlock(), "koreAllocAlwaysGC");
           new llvm::StoreInst(arg, ptr, creator.getCurrentBlock());
           arg = ptr;
         }

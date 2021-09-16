@@ -82,8 +82,10 @@ llvm::Type *getParamType(ValueType sort, llvm::Module *Module);
 
 void addAbort(llvm::BasicBlock *block, llvm::Module *Module);
 
-llvm::Value *allocateTerm(llvm::Type *AllocType, llvm::BasicBlock *block, const char *allocFn = "koreAlloc");
-llvm::Value *allocateTerm(llvm::Type *AllocType, llvm::Value *Len, llvm::BasicBlock *block, const char *allocFn = "koreAlloc");
+llvm::Value *allocateTerm(ValueType Cat, llvm::Type *AllocType, llvm::BasicBlock *block, const char *allocFn = "koreAlloc");
+llvm::Value *allocateTerm(ValueType Cat, llvm::Type *AllocType, llvm::Value *Len, llvm::BasicBlock *block, const char *allocFn = "koreAlloc");
+llvm::Value *allocateTermNoReloc(llvm::Type *AllocType, llvm::BasicBlock *block, const char *allocFn = "koreAllocAlwaysGC");
+llvm::Value *allocateTermNoReloc(llvm::Type *AllocType, llvm::Value *Len, llvm::BasicBlock *block, const char *allocFn = "koreAllocAlwaysGC");
 llvm::Value *addrspaceCast0to1(llvm::Value *val, llvm::BasicBlock *block);
 llvm::Value *addrspaceCast1to0(llvm::Value *val, llvm::BasicBlock *block);
 llvm::Value *ptrToInt(llvm::Value *val, llvm::BasicBlock *block);

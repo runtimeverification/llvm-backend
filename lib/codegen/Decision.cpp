@@ -36,7 +36,7 @@ void Decision::operator()(DecisionNode *entry) {
 
 llvm::Value *Decision::ptrTerm(llvm::Value *val) {
   if (val->getType()->isIntegerTy()) {
-    val = allocateTerm(val->getType(), CurrentBlock, "koreAllocAlwaysGC");
+    val = allocateTermNoReloc(val->getType(), CurrentBlock);
   }
   return new llvm::BitCastInst(val, llvm::Type::getInt8PtrTy(Ctx, 1), "", CurrentBlock);
 }
@@ -316,7 +316,7 @@ void MakeIteratorNode::codegen(Decision *d) {
   args.push_back(arg);
   types.push_back(arg->getType());
   llvm::Type *sretType = getTypeByName(d->Module, "iter");
-  llvm::Value *AllocSret = allocateTerm(sretType, d->CurrentBlock, "koreAllocAlwaysGC");
+  llvm::Value *AllocSret = allocateTermNoReloc(sretType, d->CurrentBlock);
   AllocSret->setName(name.substr(0, max_name_length));
   args.insert(args.begin(), AllocSret);
   types.insert(types.begin(), AllocSret->getType());
@@ -525,7 +525,7 @@ void abortWhenStuck(llvm::BasicBlock *CurrentBlock, llvm::Module *Module, KORESy
     Ptr = llvm::CallInst::Create(getOrInsertFunction(Module, "inttoptr_i64.p1s_blocks", getValueType({SortCategory::Symbol, 0}, Module), llvm::Type::getInt64Ty(Ctx)), {llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), (((uint64_t)symbol->getTag()) << 32) | 1)}, "", CurrentBlock);
   } else {
     llvm::Value *BlockHeader = getBlockHeader(Module, d, symbol, BlockType);
-    llvm::Value *Block = allocateTerm(BlockType, CurrentBlock);
+    llvm::Value *Block = allocateTerm({SortCategory::Symbol, 0}, BlockType, CurrentBlock);
     llvm::Value *BlockHeaderPtr = llvm::GetElementPtrInst::CreateInBounds(BlockType, Block, {llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0), llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), 0)}, symbol->getName(), CurrentBlock);
     new llvm::StoreInst(BlockHeader, BlockHeaderPtr, CurrentBlock);
     for (int idx = 0; idx < symbol->getArguments().size(); idx++) {
@@ -570,7 +570,7 @@ void addOwise(llvm::BasicBlock *stuck, llvm::Module *module, KORESymbol *symbol,
   case SortCategory::List:
   case SortCategory::Set:
     if (retval->getType() == returnType) {
-      auto tempAlloc = allocateTerm(retval->getType(), creator.getCurrentBlock(), "koreAllocAlwaysGC");
+      auto tempAlloc = allocateTerm(returnSort, retval->getType(), creator.getCurrentBlock(), "koreAllocAlwaysGC");
       new llvm::StoreInst(retval, tempAlloc, creator.getCurrentBlock());
       retval = tempAlloc;
     }
@@ -735,7 +735,7 @@ void makeStepFunction(KOREDefinition *definition, llvm::Module *module, Decision
     resultBuffer = new llvm::AllocaInst(bufType, 0, "resultBuffer", block);
     resultCount = matchFunc->arg_begin() + 1;
     resultCapacity = new llvm::AllocaInst(llvm::Type::getInt64Ty(module->getContext()), 0, "resultCapacity", block);
-    llvm::Value *initialBuffer = allocateTerm(blockType, block, "koreAllocAlwaysGC");
+    llvm::Value *initialBuffer = allocateTerm({SortCategory::Symbol, 0}, blockType, block, "koreAllocAlwaysGC");
     new llvm::StoreInst(initialBuffer, resultBuffer, block);
     new llvm::StoreInst(llvm::ConstantInt::get(llvm::Type::getInt64Ty(module->getContext()), 0), resultCount, block);
     new llvm::StoreInst(llvm::ConstantInt::get(llvm::Type::getInt64Ty(module->getContext()), 1), resultCapacity, block);
