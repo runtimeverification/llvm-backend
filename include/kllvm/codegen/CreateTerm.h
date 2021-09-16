@@ -84,6 +84,9 @@ void addAbort(llvm::BasicBlock *block, llvm::Module *Module);
 
 llvm::Value *allocateTerm(llvm::Type *AllocType, llvm::BasicBlock *block, const char *allocFn = "koreAlloc");
 llvm::Value *allocateTerm(llvm::Type *AllocType, llvm::Value *Len, llvm::BasicBlock *block, const char *allocFn = "koreAlloc");
+llvm::Value *addrspaceCast0to1(llvm::Value *val, llvm::BasicBlock *block);
+llvm::Value *addrspaceCast1to0(llvm::Value *val, llvm::BasicBlock *block);
+llvm::Value *ptrToInt(llvm::Value *val, llvm::BasicBlock *block);
 }
 
 #endif // CREATE_TERM_H

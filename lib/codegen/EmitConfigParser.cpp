@@ -232,8 +232,8 @@ static llvm::Value *getArgValue(llvm::Value *ArgumentsArray, int idx,
   switch(cat.cat) {
   case SortCategory::Bool:
   case SortCategory::MInt: {
-    auto cast = new llvm::BitCastInst(arg,
-        llvm::PointerType::getUnqual(getValueType(cat, mod)), "", CaseBlock);
+    auto cast = new llvm::BitCastInst(addrspaceCast0to1(arg, CaseBlock),
+        llvm::PointerType::get(getValueType(cat, mod), 1), "", CaseBlock);
     auto load = new llvm::LoadInst(cast->getType()->getPointerElementType(), cast, "", CaseBlock);
     arg = load;
     break;
@@ -241,14 +241,14 @@ static llvm::Value *getArgValue(llvm::Value *ArgumentsArray, int idx,
   case SortCategory::Map:
   case SortCategory::List:
   case SortCategory::Set:
-    arg = new llvm::BitCastInst(arg, llvm::PointerType::getUnqual(getValueType(cat, mod)), "", CaseBlock);
+    arg = new llvm::BitCastInst(addrspaceCast0to1(arg, CaseBlock), llvm::PointerType::get(getValueType(cat, mod), 1), "", CaseBlock);
     break;
   case SortCategory::Int:
   case SortCategory::Float:
   case SortCategory::StringBuffer:
   case SortCategory::Symbol:
   case SortCategory::Variable:
-    arg = new llvm::BitCastInst(arg, getValueType(cat, mod), "", CaseBlock);
+    arg = new llvm::BitCastInst(addrspaceCast0to1(arg, CaseBlock), getValueType(cat, mod), "", CaseBlock);
     break;
   case SortCategory::Uncomputed:
     abort();
@@ -286,8 +286,8 @@ static std::pair<llvm::Value *, llvm::BasicBlock *> getEval(KOREDefinition *def,
   case SortCategory::Map:
   case SortCategory::List:
   case SortCategory::Set:
-    retval = new llvm::BitCastInst(result, llvm::Type::getInt8PtrTy(Ctx), "",
-        creator.getCurrentBlock());
+    retval = addrspaceCast1to0(new llvm::BitCastInst(result, llvm::Type::getInt8PtrTy(Ctx, 1), "",
+        creator.getCurrentBlock()), creator.getCurrentBlock());
     break;
   case SortCategory::Bool:
   case SortCategory::MInt: {
@@ -443,11 +443,11 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
       llvm::Type *Float = getTypeByName(module, FLOAT_STRUCT);
       llvm::Value *Term = allocateTerm(Float, CaseBlock, "koreAllocFloating");
       llvm::Function *InitFloat = getOrInsertFunction(module, "init_float",
-          llvm::Type::getVoidTy(Ctx), llvm::PointerType::getUnqual(Float), 
+          llvm::Type::getVoidTy(Ctx), llvm::PointerType::get(Float, 1), 
           llvm::Type::getInt8PtrTy(Ctx));
       llvm::CallInst::Create(InitFloat, {Term, func->arg_begin()+2}, "", CaseBlock);
-      auto cast = new llvm::BitCastInst(Term,
-          llvm::Type::getInt8PtrTy(Ctx), "", CaseBlock);
+      auto cast = addrspaceCast1to0(new llvm::BitCastInst(Term,
+          llvm::Type::getInt8PtrTy(Ctx, 1), "", CaseBlock), CaseBlock);
       Phi->addIncoming(cast, CaseBlock);
       llvm::BranchInst::Create(MergeBlock, CaseBlock);
       break;
@@ -471,7 +471,7 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
       llvm::Type *Int = getTypeByName(module, INT_STRUCT);
       llvm::Value *Term = allocateTerm(Int, CaseBlock, "koreAllocInteger");
       llvm::Function *MpzInitSet = getOrInsertFunction(module, "__gmpz_init_set_str",
-          llvm::Type::getInt32Ty(Ctx), llvm::PointerType::getUnqual(Int), 
+          llvm::Type::getInt32Ty(Ctx), llvm::PointerType::get(Int, 1), 
           llvm::Type::getInt8PtrTy(Ctx), llvm::Type::getInt32Ty(Ctx));
       auto Call = llvm::CallInst::Create(MpzInitSet, {Term, phiStr,
           llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), 10)}, "", CaseBlock);
@@ -479,8 +479,8 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
           Call, zero32);
       auto AbortBlock = llvm::BasicBlock::Create(Ctx, "invalid_int", func);
       addAbort(AbortBlock, module);
-      auto cast = new llvm::BitCastInst(Term,
-          llvm::Type::getInt8PtrTy(Ctx), "", CaseBlock);
+      auto cast = addrspaceCast1to0(new llvm::BitCastInst(Term,
+          llvm::Type::getInt8PtrTy(Ctx, 1), "", CaseBlock), CaseBlock);
       llvm::BranchInst::Create(MergeBlock, AbortBlock, icmp, CaseBlock);
       Phi->addIncoming(cast, CaseBlock);
       break;
@@ -516,10 +516,10 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
       llvm::Type::getInt8PtrTy(Ctx), llvm::Type::getInt64Ty(Ctx));
   auto StrPtr = llvm::GetElementPtrInst::CreateInBounds(Block,
       {zero, llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), 1), zero}, "", CurrentBlock);
-  llvm::CallInst::Create(Memcpy, {StrPtr, func->arg_begin()+2, func->arg_begin()+1},
+  llvm::CallInst::Create(Memcpy, {addrspaceCast1to0(StrPtr, CurrentBlock), func->arg_begin()+2, func->arg_begin()+1},
       "", CurrentBlock);
-  auto cast = new llvm::BitCastInst(Block,
-      llvm::Type::getInt8PtrTy(Ctx), "", CurrentBlock);
+  auto cast = addrspaceCast1to0(new llvm::BitCastInst(Block,
+      llvm::Type::getInt8PtrTy(Ctx, 1), "", CurrentBlock), CurrentBlock);
   llvm::BranchInst::Create(MergeBlock, CurrentBlock);
   Phi->addIncoming(cast, CurrentBlock);
   llvm::ReturnInst::Create(Ctx, Phi, MergeBlock);
@@ -553,9 +553,9 @@ static void emitTraversal(std::string name, KOREDefinition *definition, llvm::Mo
     auto file = llvm::PointerType::getUnqual(llvm::StructType::create(Ctx, "writer"));
     argTypes.push_back(file);
     argTypes.push_back(makeVisitorType(Ctx, file, getValueType({SortCategory::Symbol, 0}, module), 1, 1));
-    argTypes.push_back(makeVisitorType(Ctx, file, llvm::PointerType::getUnqual(getValueType({SortCategory::Map, 0}, module)), 3, 0));
-    argTypes.push_back(makeVisitorType(Ctx, file, llvm::PointerType::getUnqual(getValueType({SortCategory::List, 0}, module)), 3, 0));
-    argTypes.push_back(makeVisitorType(Ctx, file, llvm::PointerType::getUnqual(getValueType({SortCategory::Set, 0}, module)), 3, 0));
+    argTypes.push_back(makeVisitorType(Ctx, file, llvm::PointerType::get(getValueType({SortCategory::Map, 0}, module), 1), 3, 0));
+    argTypes.push_back(makeVisitorType(Ctx, file, llvm::PointerType::get(getValueType({SortCategory::List, 0}, module), 1), 3, 0));
+    argTypes.push_back(makeVisitorType(Ctx, file, llvm::PointerType::get(getValueType({SortCategory::Set, 0}, module), 1), 3, 0));
     argTypes.push_back(makeVisitorType(Ctx, file, getValueType({SortCategory::Int, 0}, module), 1, 0));
     argTypes.push_back(makeVisitorType(Ctx, file, getValueType({SortCategory::Float, 0}, module), 1, 0));
     argTypes.push_back(makeVisitorType(Ctx, file, getValueType({SortCategory::Bool, 0}, module), 1, 0));
@@ -602,7 +602,7 @@ static void getStore(KOREDefinition *definition, llvm::Module *module, KORESymbo
   int idx = 0;
   auto BlockType = getBlockType(module, definition, symbol);
   auto cast = new llvm::BitCastInst(func->arg_begin(),
-      llvm::PointerType::getUnqual(BlockType), "", CaseBlock);
+      llvm::PointerType::get(BlockType, 1), "", CaseBlock);
   for (auto &sort : symbol->getArguments()) {
     ValueType cat = dynamic_cast<KORECompositeSort *>(sort.get())->getCategory(definition);
     llvm::Value *arg = getArgValue(ArgumentsArray, idx, CaseBlock, cat, module);
@@ -656,7 +656,7 @@ static void getVisitor(KOREDefinition *definition, llvm::Module *module, KORESym
   int idx = 0;
   auto BlockType = getBlockType(module, definition, symbol);
   auto cast = new llvm::BitCastInst(func->arg_begin(),
-      llvm::PointerType::getUnqual(BlockType), "", CaseBlock);
+      llvm::PointerType::get(BlockType, 1), "", CaseBlock);
   unsigned i = 0;
   auto file = llvm::PointerType::getUnqual(llvm::StructType::create(Ctx, "writer"));
   for (auto sort : symbol->getArguments()) {
