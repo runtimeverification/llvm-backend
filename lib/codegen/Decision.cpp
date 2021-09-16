@@ -487,6 +487,7 @@ void makeEvalOrAnywhereFunction(KORESymbol *function, KOREDefinition *definition
   function->print(Out2, 0, false);
   std::string name = "eval_" + Out2.str();
   llvm::Function *matchFunc = getOrInsertFunction(module, name, funcType);
+  matchFunc->setGC("statepoint-example");
   KORESymbolDeclaration *symbolDecl = definition->getSymbolDeclarations().at(function->getName());
   initDebugAxiom(symbolDecl->getAttributes());
   initDebugFunction(function->getName(), name, getDebugFunctionType(debugReturnType, debugArgs), definition, matchFunc);
@@ -714,6 +715,7 @@ void makeStepFunction(KOREDefinition *definition, llvm::Module *module, Decision
     funcType = llvm::FunctionType::get(blockType, {blockType}, false);
   }
   llvm::Function *matchFunc = getOrInsertFunction(module, name, funcType);
+  matchFunc->setGC("statepoint-example");
   resetDebugLoc();
   if (search) {
     initDebugFunction(name, name, getDebugFunctionType(getPointerDebugType(debugType, "block **"), {debugType, getPointerDebugType(getLongDebugType(), "uint64_t *")}), definition, matchFunc);
@@ -768,6 +770,7 @@ void makeMatchReasonFunction(KOREDefinition *definition, llvm::Module *module, K
   llvm::FunctionType *funcType = llvm::FunctionType::get(llvm::Type::getVoidTy(module->getContext()), {blockType}, false);
   std::string name = "match_" + std::to_string(axiom->getOrdinal());
   llvm::Function *matchFunc = getOrInsertFunction(module, name, funcType);
+  matchFunc->setGC("statepoint-example");
   std::string debugName = name;
   if (axiom->getAttributes().count("label")) {
     debugName = axiom->getStringAttribute("label") + ".match";
@@ -853,6 +856,7 @@ void makeStepFunction(KOREAxiomDeclaration *axiom, KOREDefinition *definition, l
   llvm::FunctionType *funcType = llvm::FunctionType::get(blockType, argTypes, false);
   std::string name = "step_" + std::to_string(axiom->getOrdinal());
   llvm::Function *matchFunc = getOrInsertFunction(module, name, funcType);
+  matchFunc->setGC("statepoint-example");
   resetDebugLoc();
   initDebugFunction(name, name, getDebugFunctionType(blockDebugType, debugTypes), definition, matchFunc);
   matchFunc->setCallingConv(llvm::CallingConv::Fast);

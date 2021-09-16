@@ -959,6 +959,7 @@ bool makeFunction(std::string name, KOREPattern *pattern, KOREDefinition *defini
     }
     llvm::FunctionType *funcType = llvm::FunctionType::get(returnType, paramTypes, false);
     llvm::Function *applyRule = getOrInsertFunction(Module, name, funcType);
+    applyRule->setGC("statepoint-example");
     initDebugAxiom(axiom->getAttributes());
     std::string debugName = name;
     if (axiom->getAttributes().count("label")) {
@@ -1049,6 +1050,7 @@ std::string makeApplyRuleFunction(KOREAxiomDeclaration *axiom, KOREDefinition *d
     makeFunction(name + "_search", axiom->getRightHandSide(), definition, Module, true, false, axiom, ".rhs");
 
     llvm::Function *applyRule = getOrInsertFunction(Module, name, funcType);
+    applyRule->setGC("statepoint-example");
     initDebugAxiom(axiom->getAttributes());
     initDebugFunction(name, name, getDebugFunctionType(getDebugType({SortCategory::Symbol, 0}, "SortGeneratedTopCell{}"), debugArgs), definition, applyRule);
     applyRule->setCallingConv(llvm::CallingConv::Fast);
