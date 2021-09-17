@@ -998,6 +998,7 @@ bool makeFunction(std::string name, KOREPattern *pattern, KOREDefinition *defini
       auto call = llvm::CallInst::Create(step, {retval}, "", creator.getCurrentBlock());
       setDebugLoc(call);
       call->setCallingConv(llvm::CallingConv::Tail);
+      call->setAttributes(call->getAttributes().addAttribute(Module->getContext(), llvm::AttributeList::FunctionIndex, "gc-leaf-function"));
       retval = call;
     }
     auto ret = llvm::ReturnInst::Create(Module->getContext(), retval, creator.getCurrentBlock());
@@ -1096,6 +1097,7 @@ std::string makeApplyRuleFunction(KOREAxiomDeclaration *axiom, KOREDefinition *d
     auto retval = llvm::CallInst::Create(step, args, "", creator.getCurrentBlock());
     setDebugLoc(retval);
     retval->setCallingConv(llvm::CallingConv::Tail);
+    retval->setAttributes(retval->getAttributes().addAttribute(Module->getContext(), llvm::AttributeList::FunctionIndex, "gc-leaf-function"));
     llvm::ReturnInst::Create(Module->getContext(), retval, creator.getCurrentBlock());
     return name;
 }
