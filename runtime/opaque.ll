@@ -60,6 +60,16 @@ define i1 addrspace(1)* @addrspace_0_to_1_i1(i1* %in) {
   ret i1 addrspace(1)* %out
 }
 
+define i32 addrspace(1)* @addrspace_0_to_1_i32(i32* %in) {
+  %out = addrspacecast i32* %in to i32 addrspace(1)*
+  ret i32 addrspace(1)* %out
+}
+
+define i64 addrspace(1)* @addrspace_0_to_1_i64(i64* %in) {
+  %out = addrspacecast i64* %in to i64 addrspace(1)*
+  ret i64 addrspace(1)* %out
+}
+
 define i8* @addrspace_1_to_0_i8(i8 addrspace(1)* %in) {
   %out = addrspacecast i8 addrspace(1)* %in to i8*
   ret i8* %out

@@ -37,6 +37,7 @@ void Decision::operator()(DecisionNode *entry) {
 llvm::Value *Decision::ptrTerm(llvm::Value *val) {
   if (val->getType()->isIntegerTy()) {
     val = allocateTermNoReloc(val->getType(), CurrentBlock);
+    val = addrspaceCast0to1(val, CurrentBlock);
   }
   return new llvm::BitCastInst(val, llvm::Type::getInt8PtrTy(Ctx, 1), "", CurrentBlock);
 }

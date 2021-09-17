@@ -36,7 +36,7 @@ namespace {
               unsigned int i = 0;
               for (auto &Arg : GCSI->gc_args()) {
                 auto *Ty = Arg->getType()->getPointerElementType();
-                if (Ty->isIntegerTy(8)) {
+                if (Ty->isIntegerTy()) {
                   i++;
                   continue;
                 }
