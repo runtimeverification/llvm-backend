@@ -24,4 +24,8 @@ extern "C" {
 
     return parsed;
   }
+
+  SortString hook_KREFLECTION_printKORE(block * subject) {
+    return printConfigurationToString(subject);
+  }
 }
