@@ -1,5 +1,3 @@
-set(LLVM_REQUIRES_EH ON)
-
 add_library(alloc STATIC
   alloc.cpp
   arena.cpp

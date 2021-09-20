@@ -69,51 +69,30 @@ if (NOT LLVM_FOUND)
 endif()
 
 if (NOT LLVM_FOUND)
-  find_package(LLVM 10 QUIET CONFIG)
-endif()
-
-if (NOT LLVM_FOUND)
-  find_package(LLVM 9 QUIET CONFIG)
-endif()
-
-if (NOT LLVM_FOUND)
-  find_package(LLVM 8 QUIET CONFIG)
-endif()
-
-if (NOT LLVM_FOUND)
-          find_package(LLVM 7.1 QUIET CONFIG)
-endif()
-
-if (NOT LLVM_FOUND)
- find_package(LLVM 7 REQUIRED CONFIG)
+  find_package(LLVM 10 REQUIRED CONFIG)
 endif()
 
 message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
-if (${LLVM_PACKAGE_VERSION} VERSION_LESS 7.0.1)
-  message(FATAL_ERROR "LLVM 7.0.1 or newer is required")
+if (${LLVM_PACKAGE_VERSION} VERSION_LESS 10)
+  message(FATAL_ERROR "LLVM 10 or newer is required")
 endif()
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-set(LLVM_BUILD_TOOLS ON)
 
 find_package(ZLIB REQUIRED)
 find_package(FLEX REQUIRED)
 find_package(GMP REQUIRED)
 find_package(Boost REQUIRED COMPONENTS unit_test_framework)
 
-link_directories(${LLVM_LIBRARY_DIR})
-include_directories(${LLVM_INCLUDE_DIR})
+include_directories(${LLVM_INCLUDE_DIRS})
 include_directories (${PROJECT_SOURCE_DIR}/include)
 
 # Find the libraries that correspond to the LLVM components
 # that we wish to use
-llvm_map_components_to_libnames(llvm_libs support core irreader)
+llvm_map_components_to_libnames(llvm_libs core irreader)
 
 macro(kllvm_add_tool name)
   add_executable(${name} ${ARGN})
-
-  # Link against LLVM libraries
-  llvm_config(${name})
 if(APPLE)
 if(NOT USE_NIX)
   target_link_libraries(${name} PUBLIC "-ljemalloc" "-Wl,-rpath /usr/local/lib" "-ldl")
@@ -137,16 +116,10 @@ install(
 find_program(OPT opt-12)
 find_program(OPT opt-11)
 find_program(OPT opt-10)
-find_program(OPT opt-9)
-find_program(OPT opt-8)
-find_program(OPT opt-7)
 find_program(OPT opt)
 find_program(LLC llc-12)
 find_program(LLC llc-11)
 find_program(LLC llc-10)
-find_program(LLC llc-9)
-find_program(LLC llc-8)
-find_program(LLC llc-7)
 find_program(LLC llc)
 if(${OPT} STREQUAL "OPT-NOTFOUND")
   message(FATAL_ERROR "Could not find an opt binary. Is llvm installed on your PATH?")
