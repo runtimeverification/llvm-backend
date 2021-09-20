@@ -78,26 +78,21 @@ if (${LLVM_PACKAGE_VERSION} VERSION_LESS 10)
 endif()
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-set(LLVM_BUILD_TOOLS ON)
 
 find_package(ZLIB REQUIRED)
 find_package(FLEX REQUIRED)
 find_package(GMP REQUIRED)
 find_package(Boost REQUIRED COMPONENTS unit_test_framework)
 
-link_directories(${LLVM_LIBRARY_DIR})
-include_directories(${LLVM_INCLUDE_DIR})
+include_directories(${LLVM_INCLUDE_DIRS})
 include_directories (${PROJECT_SOURCE_DIR}/include)
 
 # Find the libraries that correspond to the LLVM components
 # that we wish to use
-llvm_map_components_to_libnames(llvm_libs support core irreader)
+llvm_map_components_to_libnames(llvm_libs core irreader)
 
 macro(kllvm_add_tool name)
   add_executable(${name} ${ARGN})
-
-  # Link against LLVM libraries
-  llvm_config(${name})
 if(APPLE)
 if(NOT USE_NIX)
   target_link_libraries(${name} PUBLIC "-ljemalloc" "-Wl,-rpath /usr/local/lib" "-ldl")

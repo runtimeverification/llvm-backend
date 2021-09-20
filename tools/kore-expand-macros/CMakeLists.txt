@@ -1,5 +1,3 @@
-set(LLVM_REQUIRES_RTTI ON)
-set(LLVM_REQUIRES_EH ON)
 kllvm_add_tool(kore-expand-macros
   main.cpp
 )
