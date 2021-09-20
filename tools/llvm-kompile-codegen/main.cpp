@@ -105,6 +105,13 @@ int main (int argc, char **argv) {
     }
   }
 
+#ifdef __APPLE__
+  // apple symbols are mangled slightly with an underscore in front, so we need to adjust the name of the __LLVM_StackMaps symbol slightly
+  auto StackMap = mod->getOrInsertGlobal("__LLVM_StackMaps", llvm::Type::getInt8Ty(Context));
+  auto StackMapGlobal = llvm::cast<llvm::GlobalVariable>(StackMap);
+  StackMapGlobal->setName("_LLVM_StackMaps");
+#endif
+
   if (CODEGEN_DEBUG) {
     finalizeDebugInfo();
   }
