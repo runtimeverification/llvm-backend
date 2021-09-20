@@ -7,6 +7,10 @@ add_library(LLVMPass SHARED
 
 target_link_libraries(LLVMPass PUBLIC AST)
 
+llvm_config(LLVMPass
+  ${LLVM_TARGETS_TO_BUILD}
+)
+
 install(
   TARGETS LLVMPass
   LIBRARY DESTINATION lib/kllvm
