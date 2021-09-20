@@ -33,11 +33,12 @@ namespace {
             if (auto *GCSI = dyn_cast<GCStatepointInst>(&I)) {
               unsigned int id = nextID++;
               GCSI->setArgOperand(GCStatepointInst::IDPos, ConstantInt::get(GCSI->getArgOperand(GCStatepointInst::IDPos)->getType(), id));
-              unsigned int i = 0;
+              unsigned int nrelocs = GCSI->gc_args_end() - GCSI->gc_args_begin();
+              unsigned int i = nrelocs - 1;
               for (auto &Arg : GCSI->gc_args()) {
                 auto *Ty = Arg->getType()->getPointerElementType();
                 if (Ty->isIntegerTy()) {
-                  i++;
+                  i--;
                   continue;
                 }
                 if (!Ty->isStructTy()) {
@@ -68,10 +69,10 @@ namespace {
                   error(StructTy);
                 }
                 cats[std::make_pair(id, i)] = cat;
-                i++;
+                i--;
               }
-              if (i > numRelocations) {
-                numRelocations = i;
+              if (nrelocs > numRelocations) {
+                numRelocations = nrelocs;
               }
             }
           }
