@@ -111,7 +111,7 @@ fi
 if [ "$main" = "static" ]; then
   all_libraries=
 else
-  all_libraries="$libraries -lgmp -lmpfr -lpthread -ldl -lffi -ljemalloc"
+  all_libraries="$libraries -lgmp -lmpfr -lpthread -ldl -lffi -ljemalloc -lunwind"
 fi
 
 if $link; then
