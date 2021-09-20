@@ -3,6 +3,9 @@ add_library(LLVMPass MODULE
 )
 
 target_link_libraries(LLVMPass PUBLIC AST)
+if (APPLE)
+  target_link_libraries(LLVMPass PUBLIC "-undefined dynamic_lookup")
+endif()
 
 install(
   TARGETS LLVMPass
