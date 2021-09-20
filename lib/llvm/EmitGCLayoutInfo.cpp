@@ -31,7 +31,7 @@ namespace {
       for (Function &F : M.functions()) {
         for (BasicBlock &BB : F.getBasicBlockList()) {
           for (Instruction &I : BB.getInstList()) {
-#if __clang_major__ >= 11
+#if LLVM_VERSION_MAJOR >= 11
             if (auto *GCSI = dyn_cast<GCStatepointInst>(&I)) {
               auto S = GCSI;
               constexpr auto IDPos = GCStatepointInst::IDPos;
