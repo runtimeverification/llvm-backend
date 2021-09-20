@@ -31,12 +31,22 @@ namespace {
       for (Function &F : M.functions()) {
         for (BasicBlock &BB : F.getBasicBlockList()) {
           for (Instruction &I : BB.getInstList()) {
+#if __clang_major__ >= 11
             if (auto *GCSI = dyn_cast<GCStatepointInst>(&I)) {
+              auto S = GCSI;
+              constexpr auto IDPos = GCStatepointInst::IDPos;
+#else
+            auto SImpl = Statepoint(&I);
+            if (SImpl) {
+              auto GCSI = SImpl.getCall();
+              auto S = &SImpl;
+              constexpr auto IDPos = Statepoint::IDPos;
+#endif
               unsigned int id = nextID++;
-              GCSI->setArgOperand(GCStatepointInst::IDPos, ConstantInt::get(GCSI->getArgOperand(GCStatepointInst::IDPos)->getType(), id));
-              unsigned int nrelocs = GCSI->gc_args_end() - GCSI->gc_args_begin();
+              GCSI->setArgOperand(IDPos, ConstantInt::get(GCSI->getArgOperand(IDPos)->getType(), id));
+              unsigned int nrelocs = S->gc_args_end() - S->gc_args_begin();
               unsigned int i = nrelocs - 1;
-              for (auto &Arg : GCSI->gc_args()) {
+              for (auto &Arg : S->gc_args()) {
                 auto *Ty = Arg->getType()->getPointerElementType();
                 if (Ty->isIntegerTy()) {
                   i--;
