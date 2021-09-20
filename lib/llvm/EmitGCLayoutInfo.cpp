@@ -2,6 +2,7 @@
 #include "llvm/IR/LegacyPassManager.h"
 #include "llvm/IR/Module.h"
 #include "llvm/IR/Statepoint.h"
+#include "llvm/Support/raw_ostream.h"
 #include "kllvm/ast/AST.h"
 #include <cstdlib>
 #include <vector>

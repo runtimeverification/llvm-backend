@@ -40,26 +40,18 @@ std::string getMangledTypeStr(llvm::Type *Ty, bool &HasUnnamedType) {
       Result += "vararg";
     // Ensure nested function types are distinguishable.
     Result += "f";
-  } else if (VectorType* VTy = dyn_cast<VectorType>(Ty)) {
-    ElementCount EC = VTy->getElementCount();
-    if (EC.isScalable())
-      Result += "nx";
-    Result += "v" + std::to_string(EC.getKnownMinValue()) +
-              getMangledTypeStr(VTy->getElementType(), HasUnnamedType);
   } else if (Ty) {
     switch (Ty->getTypeID()) {
     default: llvm_unreachable("Unhandled type");
     case Type::VoidTyID:      Result += "isVoid";   break;
     case Type::MetadataTyID:  Result += "Metadata"; break;
     case Type::HalfTyID:      Result += "f16";      break;
-    case Type::BFloatTyID:    Result += "bf16";     break;
     case Type::FloatTyID:     Result += "f32";      break;
     case Type::DoubleTyID:    Result += "f64";      break;
     case Type::X86_FP80TyID:  Result += "f80";      break;
     case Type::FP128TyID:     Result += "f128";     break;
     case Type::PPC_FP128TyID: Result += "ppcf128";  break;
     case Type::X86_MMXTyID:   Result += "x86mmx";   break;
-    case Type::X86_AMXTyID:   Result += "x86amx";   break;
     case Type::IntegerTyID:
       Result += "i" + std::to_string(cast<IntegerType>(Ty)->getBitWidth());
       break;
