@@ -34,7 +34,7 @@ stdenv.mkDerivation {
   nativeBuildInputs = [ cmake flex llvm pkgconfig ];
   buildInputs = [ boost libyaml ];
   propagatedBuildInputs =
-    [ gmp jemalloc libffi libunwind mpfr ncurses ]
+    [ gmp jemalloc libffi libunwind llvmPackages.libunwind mpfr ncurses ]
     ++ lib.optional stdenv.isDarwin libiconv;
 
   postPatch = ''
