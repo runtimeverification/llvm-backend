@@ -9,6 +9,7 @@
 extern "C" {
   floating *hook_FLOAT_ceil(floating *);
   floating *hook_FLOAT_floor(floating *);
+  floating *hook_FLOAT_trunc(floating *);
   floating *hook_FLOAT_round(floating *, mpz_t, mpz_t);
   mpz_ptr hook_FLOAT_float2int(floating *);
   floating *hook_FLOAT_int2float(mpz_t, mpz_t, mpz_t);
@@ -79,6 +80,27 @@ BOOST_AUTO_TEST_CASE(floor) {
   set_float(a, 24, 8, 10.5);
   result = hook_FLOAT_floor(a);
   BOOST_CHECK_EQUAL(mpfr_cmp_d(result->f, 10.0), 0);
+}
+
+BOOST_AUTO_TEST_CASE(trunc) {
+  floating a[1];
+  floating *result;
+
+  set_float(a, 24, 8, 145.23);
+  result = hook_FLOAT_trunc(a);
+  BOOST_CHECK_EQUAL(mpfr_cmp_d(result->f, 145.0), 0);
+
+  set_float(a, 53, 11, -0.5345);
+  result = hook_FLOAT_trunc(a);
+  BOOST_CHECK_EQUAL(mpfr_cmp_d(result->f, 0.0), 0);
+
+  set_float(a, 24, 8, -2342.99);
+  result = hook_FLOAT_trunc(a);
+  BOOST_CHECK_EQUAL(mpfr_cmp_d(result->f, -2342.0), 0);
+
+  set_float(a, 53, 11, 54.34);
+  result = hook_FLOAT_trunc(a);
+  BOOST_CHECK_EQUAL(mpfr_cmp_d(result->f, 54.0), 0);
 }
 
 BOOST_AUTO_TEST_CASE(round) {
