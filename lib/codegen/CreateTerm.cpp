@@ -209,7 +209,11 @@ static llvm::Value *addrspaceCast(llvm::Value *val, llvm::BasicBlock *block, int
   auto AllocType = val->getType()->getPointerElementType();
   bool hasUnnamed = false;
   std::string name = "addrspace_" + std::to_string(from) + "_to_" + std::to_string(to) + "_" + getMangledTypeStr(AllocType, hasUnnamed);
-  auto addrspace = llvm::CallInst::Create(getOrInsertFunction(block->getModule(), name, llvm::PointerType::get(AllocType, to), llvm::PointerType::get(AllocType, from)), {val}, "", block);
+  auto C = getOrInsertFunction(block->getModule(), name, llvm::PointerType::get(AllocType, to), llvm::PointerType::get(AllocType, from));
+  auto F = llvm::cast<llvm::Function>(C);
+  F->addFnAttr(llvm::Attribute::AlwaysInline);
+  F->addFnAttr("gc-leaf-function");
+  auto addrspace = llvm::CallInst::Create(F, {val}, "", block);
   return addrspace;
 }
 
@@ -224,7 +228,11 @@ llvm::Value *addrspaceCast1to0(llvm::Value *val, llvm::BasicBlock *block) {
 llvm::Value *ptrToInt(llvm::Value *val, llvm::BasicBlock *block) {
   bool hasUnnamed = false;
   std::string name = "ptrtoint_i64." + getMangledTypeStr(val->getType(), hasUnnamed);
-  auto ptr = llvm::CallInst::Create(getOrInsertFunction(block->getModule(), name, llvm::Type::getInt64Ty(block->getModule()->getContext()), val->getType()), {val}, "", block);
+  auto C = getOrInsertFunction(block->getModule(), name, llvm::Type::getInt64Ty(block->getModule()->getContext()), val->getType());
+  auto F = llvm::cast<llvm::Function>(C);
+  F->addFnAttr(llvm::Attribute::AlwaysInline);
+  F->addFnAttr("gc-leaf-function");
+  auto ptr = llvm::CallInst::Create(F, {val}, "", block);
   return ptr;
 }
 

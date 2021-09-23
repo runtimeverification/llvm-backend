@@ -525,7 +525,11 @@ void abortWhenStuck(llvm::BasicBlock *CurrentBlock, llvm::Module *Module, KORESy
   llvm::Value *Ptr;
   auto BlockPtr = llvm::PointerType::get(getTypeByName(Module, BLOCK_STRUCT), 1);
   if (symbol->getArguments().empty()) {
-    Ptr = llvm::CallInst::Create(getOrInsertFunction(Module, "inttoptr_i64.p1s_blocks", getValueType({SortCategory::Symbol, 0}, Module), llvm::Type::getInt64Ty(Ctx)), {llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), (((uint64_t)symbol->getTag()) << 32) | 1)}, "", CurrentBlock);
+    auto C = getOrInsertFunction(Module, "inttoptr_i64.p1s_blocks", getValueType({SortCategory::Symbol, 0}, Module), llvm::Type::getInt64Ty(Ctx));
+    auto F = llvm::cast<llvm::Function>(C);
+    F->addFnAttr(llvm::Attribute::AlwaysInline);
+    F->addFnAttr("gc-leaf-function");
+    Ptr = llvm::CallInst::Create(F, {llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), (((uint64_t)symbol->getTag()) << 32) | 1)}, "", CurrentBlock);
   } else {
     llvm::Value *BlockHeader = getBlockHeader(Module, d, symbol, BlockType);
     llvm::Value *Block = allocateTerm({SortCategory::Symbol, 0}, BlockType, CurrentBlock);
