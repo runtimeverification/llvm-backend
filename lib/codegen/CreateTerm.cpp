@@ -254,7 +254,16 @@ llvm::Value *allocateTermNoReloc(llvm::Type *AllocType, llvm::BasicBlock *block,
 }
 
 llvm::Value *allocateTermNoReloc(llvm::Type *AllocType, llvm::Value *Len, llvm::BasicBlock *block, const char *allocFn) {
-  auto malloc = llvm::CallInst::Create(koreHeapAlloc(allocFn, block->getModule()), llvm::ConstantExpr::getPtrToInt(llvm::ConstantExpr::getGetElementPtr(AllocType, llvm::ConstantPointerNull::get(llvm::PointerType::get(AllocType, 1)), llvm::ConstantInt::get(llvm::Type::getInt32Ty(block->getContext()), 1)), llvm::Type::getInt64Ty(block->getContext())), "malloccall", block);
+  auto malloc = llvm::CallInst::Create(
+      koreHeapAlloc(allocFn, block->getModule()),
+      llvm::ConstantExpr::getPtrToInt(
+        llvm::ConstantExpr::getGetElementPtr(
+          AllocType, 
+          llvm::ConstantPointerNull::get(llvm::PointerType::get(AllocType, 1)), 
+          llvm::ConstantInt::get(llvm::Type::getInt32Ty(block->getContext()), 1)),
+        llvm::Type::getInt64Ty(block->getContext())),
+      "malloccall",
+      block);
   if (malloc->getType()->getPointerElementType() == AllocType) {
     return malloc;
   }
