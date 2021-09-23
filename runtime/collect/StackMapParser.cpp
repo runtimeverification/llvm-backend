@@ -41,6 +41,14 @@ void parseStackMap() {
       uint16_t RelocationOffset = 0;
       for (uint16_t j = 4 + NumDeopts; j < NumLocations; j+= 2) {
         uint8_t type = *(uint8_t *)(stackMapRecord+16+j*12);
+        if (type == 5) {
+          // a ConstantOffset gc root is one which corresponds to something the
+          // compiler was able to statically determine was a constructor with
+          // zero children. Such terms do not actually live on the heap and
+          // thus do not need to be relocated.
+          RelocationOffset++;
+          continue;
+        }
         if (type != 3) {
           abort();
         }
