@@ -4,51 +4,51 @@
 #include "runtime/header.h"
 
 extern "C" {
-  mpz_ptr hook_INT_tmod(mpz_t, mpz_t);
-  mpz_ptr hook_INT_emod(mpz_t, mpz_t);
-  mpz_ptr hook_INT_add(mpz_t, mpz_t);
-  mpz_ptr hook_INT_and(mpz_t, mpz_t);
-  mpz_ptr hook_INT_mul(mpz_t, mpz_t);
-  mpz_ptr hook_INT_sub(mpz_t, mpz_t);
-  mpz_ptr hook_INT_tdiv(mpz_t, mpz_t);
-  mpz_ptr hook_INT_ediv(mpz_t, mpz_t);
-  mpz_ptr hook_INT_shl(mpz_t, mpz_t);
-  mpz_ptr hook_INT_shr(mpz_t, mpz_t);
-  mpz_ptr hook_INT_pow(mpz_t, mpz_t);
-  mpz_ptr hook_INT_xor(mpz_t, mpz_t);
-  mpz_ptr hook_INT_or(mpz_t, mpz_t);
-  mpz_ptr hook_INT_max(mpz_t, mpz_t);
-  mpz_ptr hook_INT_min(mpz_t, mpz_t);
-  mpz_ptr hook_INT_powmod(mpz_t, mpz_t, mpz_t);
-  mpz_ptr hook_INT_bitRange(mpz_t, mpz_t, mpz_t);
-  mpz_ptr hook_INT_signExtendBitRange(mpz_t, mpz_t, mpz_t);
-  mpz_ptr hook_INT_not(mpz_t);
-  mpz_ptr hook_INT_abs(mpz_t);
-  mpz_ptr hook_INT_log2(mpz_t);
-  mpz_ptr hook_INT_rand(mpz_t);
-  bool hook_INT_le(mpz_t, mpz_t);
-  bool hook_INT_lt(mpz_t, mpz_t);
-  bool hook_INT_eq(mpz_t, mpz_t);
-  bool hook_INT_ne(mpz_t, mpz_t);
-  bool hook_INT_ge(mpz_t, mpz_t);
-  bool hook_INT_gt(mpz_t, mpz_t);
-  block *hook_INT_srand(mpz_t);
+mpz_ptr hook_INT_tmod(mpz_t, mpz_t);
+mpz_ptr hook_INT_emod(mpz_t, mpz_t);
+mpz_ptr hook_INT_add(mpz_t, mpz_t);
+mpz_ptr hook_INT_and(mpz_t, mpz_t);
+mpz_ptr hook_INT_mul(mpz_t, mpz_t);
+mpz_ptr hook_INT_sub(mpz_t, mpz_t);
+mpz_ptr hook_INT_tdiv(mpz_t, mpz_t);
+mpz_ptr hook_INT_ediv(mpz_t, mpz_t);
+mpz_ptr hook_INT_shl(mpz_t, mpz_t);
+mpz_ptr hook_INT_shr(mpz_t, mpz_t);
+mpz_ptr hook_INT_pow(mpz_t, mpz_t);
+mpz_ptr hook_INT_xor(mpz_t, mpz_t);
+mpz_ptr hook_INT_or(mpz_t, mpz_t);
+mpz_ptr hook_INT_max(mpz_t, mpz_t);
+mpz_ptr hook_INT_min(mpz_t, mpz_t);
+mpz_ptr hook_INT_powmod(mpz_t, mpz_t, mpz_t);
+mpz_ptr hook_INT_bitRange(mpz_t, mpz_t, mpz_t);
+mpz_ptr hook_INT_signExtendBitRange(mpz_t, mpz_t, mpz_t);
+mpz_ptr hook_INT_not(mpz_t);
+mpz_ptr hook_INT_abs(mpz_t);
+mpz_ptr hook_INT_log2(mpz_t);
+mpz_ptr hook_INT_rand(mpz_t);
+bool hook_INT_le(mpz_t, mpz_t);
+bool hook_INT_lt(mpz_t, mpz_t);
+bool hook_INT_eq(mpz_t, mpz_t);
+bool hook_INT_ne(mpz_t, mpz_t);
+bool hook_INT_ge(mpz_t, mpz_t);
+bool hook_INT_gt(mpz_t, mpz_t);
+block *hook_INT_srand(mpz_t);
 
-  mpz_ptr move_int(mpz_t i) {
-    mpz_ptr result = (mpz_ptr)malloc(sizeof(__mpz_struct));
-    *result = *i;
-    return result;
-  }
-  
-  void add_hash64(void*, uint64_t) {}
+mpz_ptr move_int(mpz_t i) {
+  mpz_ptr result = (mpz_ptr)malloc(sizeof(__mpz_struct));
+  *result = *i;
+  return result;
+}
 
-  uint32_t getTagForSymbolName(const char *) {
-    return 0;
-  }
+void add_hash64(void *, uint64_t) { }
 
-  void *koreAllocAlwaysGC(size_t size) {
-    return malloc(size);
-  }
+uint32_t getTagForSymbolName(const char *) {
+  return 0;
+}
+
+void *koreAllocAlwaysGC(size_t size) {
+  return malloc(size);
+}
 }
 
 BOOST_AUTO_TEST_SUITE(IntTest)
@@ -523,14 +523,24 @@ BOOST_AUTO_TEST_CASE(bitRange) {
   BOOST_CHECK_EQUAL(mpz_cmp_ui(result, 0), 0);
   mpz_clear(result);
   free(result);
-  mpz_set_str(i, "-710567042938717889665411037832208781722350888143921263584927239275773573551204588944105336352942349727184887589413944684473529682801526123805453895275517072855048781056", 10);
+  mpz_set_str(
+      i,
+      "-71056704293871788966541103783220878172235088814392126358492723927577357"
+      "355120458894410533635294234972718488758941394468447352968280152612380545"
+      "3895275517072855048781056",
+      10);
   mpz_set_ui(off, 32);
   mpz_set_ui(len, 8);
   result = hook_INT_bitRange(i, off, len);
   BOOST_CHECK_EQUAL(mpz_cmp_ui(result, 12), 0);
   mpz_clear(result);
   free(result);
-  mpz_set_str(i, "697754608693466068295273213726275558775348389513141500672185545754018175722916164768735179047222610843044264325669307777729891642448846794142000", 10);
+  mpz_set_str(
+      i,
+      "697754608693466068295273213726275558775348389513141500672185545754018175"
+      "72291616476873517904722261084304426432566930777772989164244884679414200"
+      "0",
+      10);
   mpz_set_ui(off, 64);
   mpz_set_ui(len, 8);
   result = hook_INT_bitRange(i, off, len);
@@ -588,10 +598,12 @@ BOOST_AUTO_TEST_CASE(signExtendBitRange) {
   mpz_clear(result);
   free(result);
   mpz_set_si(len, -1);
-  BOOST_CHECK_THROW(hook_INT_signExtendBitRange(i, off, len), std::invalid_argument);
+  BOOST_CHECK_THROW(
+      hook_INT_signExtendBitRange(i, off, len), std::invalid_argument);
   mpz_set_ui(len, 8);
   mpz_set_si(off, -1);
-  BOOST_CHECK_THROW(hook_INT_signExtendBitRange(i, off, len), std::invalid_argument);
+  BOOST_CHECK_THROW(
+      hook_INT_signExtendBitRange(i, off, len), std::invalid_argument);
   mpz_set_ui(off, 1);
   mpz_mul_2exp(off, off, 64);
   result = hook_INT_signExtendBitRange(i, off, len);
