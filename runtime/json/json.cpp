@@ -1,19 +1,19 @@
 #include "runtime/header.h"
 
-#include "rapidjson/reader.h"
-#include "rapidjson/writer.h"
 #include "rapidjson/filereadstream.h"
 #include "rapidjson/filewritestream.h"
+#include "rapidjson/reader.h"
+#include "rapidjson/writer.h"
 
 #include <vector>
 
 using namespace rapidjson;
 
 extern "C" {
-  floating *move_float(floating *);
-  string *hook_STRING_int2string(mpz_t);
-  string * makeString(const char * input, ssize_t len = -1);
-  char *getTerminatedString(string *);
+floating *move_float(floating *);
+string *hook_STRING_int2string(mpz_t);
+string *makeString(const char *input, ssize_t len = -1);
+char *getTerminatedString(string *);
 }
 
 std::string floatToString(const floating *f, const char *suffix);
@@ -41,7 +41,7 @@ typedef struct boolinj {
 struct jsonlist {
   blockheader h;
   block *hd;
-  jsonlist* tl;
+  jsonlist *tl;
 };
 
 struct json {
@@ -55,44 +55,50 @@ struct jsonmember {
   block *val;
 };
 
-static block * dotK = leaf_block(getTagForSymbolName("dotk{}"));
-static blockheader kseqHeader = {getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("kseq{}"))};
+static block *dotK = leaf_block(getTagForSymbolName("dotk{}"));
+static blockheader kseqHeader
+    = {getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("kseq{}"))};
 
-#define get_header(name, symbol) \
-static struct blockheader name() {\
-  static struct blockheader hdr = {(uint64_t)-1}; \
-  if (hdr.hdr == -1) { \
-    hdr = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName(symbol)); \
-  } \
-  return hdr; \
-}
+#define get_header(name, symbol)                                               \
+  static struct blockheader name() {                                           \
+    static struct blockheader hdr = {(uint64_t)-1};                            \
+    if (hdr.hdr == -1) {                                                       \
+      hdr = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName(symbol));    \
+    }                                                                          \
+    return hdr;                                                                \
+  }
 
 get_header(boolHdr, "inj{SortBool{}, SortJSON{}}")
-get_header(intHdr, "inj{SortInt{}, SortJSON{}}")
-get_header(floatHdr, "inj{SortFloat{}, SortJSON{}}")
-get_header(strHdr, "inj{SortString{}, SortJSON{}}")
-get_header(listHdr, "LblJSONs{}")
-get_header(membHdr, "LblJSONEntry{}")
-get_header(objHdr, "LblJSONObject{}")
-get_header(listWrapHdr, "LblJSONList{}")
+    get_header(intHdr, "inj{SortInt{}, SortJSON{}}")
+        get_header(floatHdr, "inj{SortFloat{}, SortJSON{}}")
+            get_header(strHdr, "inj{SortString{}, SortJSON{}}") get_header(
+                listHdr, "LblJSONs{}") get_header(membHdr, "LblJSONEntry{}")
+                get_header(objHdr, "LblJSONObject{}")
+                    get_header(listWrapHdr, "LblJSONList{}")
 
-#define get_block(name, symbol) \
-static block *name() {\
-  static uint64_t tag = (uint64_t)-1; \
-  if (tag == -1) { \
-    tag = (uint64_t)leaf_block(getTagForSymbolName(symbol)); \
-  } \
-  return (block *)tag; \
-}
+#define get_block(name, symbol)                                                \
+  static block *name() {                                                       \
+    static uint64_t tag = (uint64_t)-1;                                        \
+    if (tag == -1) {                                                           \
+      tag = (uint64_t)leaf_block(getTagForSymbolName(symbol));                 \
+    }                                                                          \
+    return (block *)tag;                                                       \
+  }
 
-get_block(dotList, "Lbl'Stop'List'LBraQuot'JSONs'QuotRBraUnds'JSONs{}")
-get_block(null, "LblJSONnull{}")
+                        get_block(
+                            dotList,
+                            "Lbl'Stop'List'LBraQuot'JSONs'QuotRBraUnds'JSONs{}")
+                            get_block(null, "LblJSONnull{}")
 
-struct KoreHandler : BaseReaderHandler<UTF8<>, KoreHandler> {
+                                struct KoreHandler
+    : BaseReaderHandler<UTF8<>, KoreHandler> {
   block *result;
   std::vector<block *> stack;
 
-  bool Null() { stack.push_back(null()); return true; }
+  bool Null() {
+    stack.push_back(null());
+    return true;
+  }
   bool Bool(bool b) {
     boolinj *inj = (boolinj *)koreAlloc(sizeof(boolinj));
     inj->h = boolHdr();
@@ -140,11 +146,10 @@ struct KoreHandler : BaseReaderHandler<UTF8<>, KoreHandler> {
   }
 
   bool StartObject() { return true; }
-  
+
   bool Key(const char *str, SizeType len, bool copy) {
     return String(str, len, copy);
   }
-
 
   bool EndObject(SizeType memberCount) {
     result = dotList();
@@ -190,13 +195,16 @@ struct KoreHandler : BaseReaderHandler<UTF8<>, KoreHandler> {
 
 template <typename Stream>
 struct KoreWriter : Writer<Stream> {
-  bool RawNumber(const typename Writer<Stream>::Ch* str, rapidjson::SizeType length, bool copy = false) {
+  bool RawNumber(
+      const typename Writer<Stream>::Ch *str, rapidjson::SizeType length,
+      bool copy = false) {
     (void)copy;
     Writer<Stream>::Prefix(rapidjson::kNumberType);
     return Writer<Stream>::EndValue(Writer<Stream>::WriteRawValue(str, length));
   }
 
-  KoreWriter(Stream &os) : Writer<Stream>(os) {}
+  KoreWriter(Stream &os)
+      : Writer<Stream>(os) { }
 };
 
 template <typename Stream>
@@ -231,7 +239,8 @@ static bool write_json(KoreWriter<Stream> &writer, block *data) {
       writer.EndArray();
     } else if (data->h.hdr == listHdr().hdr) {
       jsonlist *list = (jsonlist *)data;
-      return_value = write_json(writer, list->hd) && write_json(writer, (block *)list->tl);
+      return_value = write_json(writer, list->hd)
+                     && write_json(writer, (block *)list->tl);
     } else if (data->h.hdr == membHdr().hdr) {
       jsonmember *memb = (jsonmember *)data;
       stringinj *inj = (stringinj *)memb->key;
@@ -249,7 +258,7 @@ extern "C" {
 SortString hook_JSON_json2string(SortJSON json) {
   StringBuffer buffer;
   KoreWriter<StringBuffer> writer(buffer);
-  if (! write_json(writer, json)) {
+  if (!write_json(writer, json)) {
     abort();
   }
   return makeString(buffer.GetString());
@@ -267,5 +276,4 @@ SortJSON hook_JSON_string2json(SortString str) {
     abort();
   }
 }
-
 }

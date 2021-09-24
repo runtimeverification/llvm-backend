@@ -2,15 +2,15 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <functional>
+#include <set>
 #include <string>
-#include <vector>
 #include <unordered_map>
 #include <unordered_set>
-#include <set>
-#include <functional>
+#include <vector>
 
-#include "runtime/header.h"
 #include "runtime/alloc.h"
+#include "runtime/header.h"
 
 void printInt(writer *file, mpz_t i, const char *sort) {
   char *str = mpz_get_str(NULL, 10, i);
@@ -50,18 +50,24 @@ void sfprintf(writer *file, const char *fmt, ...) {
   } else {
     char buf[8192];
     char *finalBuf = buf;
-    int res = vsnprintf(buf + sizeof(blockheader), sizeof(buf) - sizeof(blockheader), fmt, args);
+    int res = vsnprintf(
+        buf + sizeof(blockheader), sizeof(buf) - sizeof(blockheader), fmt,
+        args);
     if (res >= sizeof(buf) - sizeof(blockheader)) {
-      size_t size = sizeof(buf)*2;
+      size_t size = sizeof(buf) * 2;
       finalBuf = (char *)malloc(size);
       memcpy(finalBuf, buf, sizeof(buf));
-      res = vsnprintf(finalBuf + sizeof(blockheader), size - sizeof(blockheader), fmt, args);
+      res = vsnprintf(
+          finalBuf + sizeof(blockheader), size - sizeof(blockheader), fmt,
+          args);
       if (res >= size - sizeof(blockheader)) {
         do {
           size *= 2;
-	  finalBuf = (char *)realloc(finalBuf, size);
-	  res = vsnprintf(finalBuf + sizeof(blockheader), size - sizeof(blockheader), fmt, args);
-	} while (res >= size - sizeof(blockheader));
+          finalBuf = (char *)realloc(finalBuf, size);
+          res = vsnprintf(
+              finalBuf + sizeof(blockheader), size - sizeof(blockheader), fmt,
+              args);
+        } while (res >= size - sizeof(blockheader));
       }
     }
     string *str = (string *)finalBuf;
@@ -75,29 +81,33 @@ void printComma(writer *file) {
 }
 
 struct StringHash {
-  size_t operator() (string * const& k) const {
+  size_t operator()(string *const &k) const {
     return std::hash<std::string>{}(std::string(k->data, len(k)));
   }
 };
 
 struct StringEq {
-  bool operator() (string * const& lhs, string * const& rhs) const {
+  bool operator()(string *const &lhs, string *const &rhs) const {
     return hook_STRING_eq(lhs, rhs);
   }
 };
 
 static thread_local std::vector<block *> boundVariables;
-static thread_local std::unordered_map<string *, std::string, StringHash, StringEq> varNames;
+static thread_local std::unordered_map<
+    string *, std::string, StringHash, StringEq>
+    varNames;
 static thread_local std::set<std::string> usedVarNames;
 static thread_local uint64_t varCounter = 0;
 
-void printConfigurationInternal(writer *file, block *subject, const char *sort, bool isVar) {
+void printConfigurationInternal(
+    writer *file, block *subject, const char *sort, bool isVar) {
   uint8_t isConstant = ((uintptr_t)subject) & 3;
   if (isConstant) {
     uint32_t tag = ((uintptr_t)subject) >> 32;
     if (isConstant == 3) {
       // bound variable
-      printConfigurationInternal(file, boundVariables[boundVariables.size()-1-tag], sort, true);
+      printConfigurationInternal(
+          file, boundVariables[boundVariables.size() - 1 - tag], sort, true);
       return;
     }
     const char *symbol = getSymbolNameForTag(tag);
@@ -111,25 +121,13 @@ void printConfigurationInternal(writer *file, block *subject, const char *sort, 
     sfprintf(file, "\\dv{%s}(\"", sort);
     for (size_t i = 0; i < len; ++i) {
       char c = str->data[i];
-      switch(c) {
-      case '\\':
-        sfprintf(file, "\\\\");
-        break;
-      case '"':
-        sfprintf(file, "\\\"");
-        break;
-      case '\n':
-        sfprintf(file, "\\n");
-        break;
-      case '\t':
-        sfprintf(file, "\\t");
-        break;
-      case '\r':
-        sfprintf(file, "\\r");
-        break;
-      case '\f':
-        sfprintf(file, "\\f");
-        break;
+      switch (c) {
+      case '\\': sfprintf(file, "\\\\"); break;
+      case '"': sfprintf(file, "\\\""); break;
+      case '\n': sfprintf(file, "\\n"); break;
+      case '\t': sfprintf(file, "\\t"); break;
+      case '\r': sfprintf(file, "\\r"); break;
+      case '\f': sfprintf(file, "\\f"); break;
       default:
         if ((unsigned char)c >= 32 && (unsigned char)c < 127) {
           sfprintf(file, "%c", c);
@@ -158,18 +156,21 @@ void printConfigurationInternal(writer *file, block *subject, const char *sort, 
   uint32_t tag = tag_hdr(subject->h.hdr);
   bool isBinder = isSymbolABinder(tag);
   if (isBinder) {
-    boundVariables.push_back(*(block **)(((char *)subject) + sizeof(blockheader)));
+    boundVariables.push_back(
+        *(block **)(((char *)subject) + sizeof(blockheader)));
   }
   const char *symbol = getSymbolNameForTag(tag);
   std::string symbolStr(symbol);
-  if (symbolStr.rfind("inj{", 0) == 0) {	
+  if (symbolStr.rfind("inj{", 0) == 0) {
     std::string prefix = symbolStr.substr(0, symbolStr.find_first_of(','));
     sfprintf(file, "%s, %s}(", prefix.c_str(), sort);
   } else {
     sfprintf(file, "%s(", symbol);
   }
-  visitChildren(subject, file, printConfigurationInternal, printMap, printList, printSet, printInt, printFloat,
-      printBool, printStringBuffer, printMInt, printComma);
+  visitChildren(
+      subject, file, printConfigurationInternal, printMap, printList, printSet,
+      printInt, printFloat, printBool, printStringBuffer, printMInt,
+      printComma);
   if (isBinder) {
     boundVariables.pop_back();
   }
@@ -178,7 +179,7 @@ void printConfigurationInternal(writer *file, block *subject, const char *sort, 
 
 void printStatistics(const char *filename, uint64_t steps) {
   FILE *file = fopen(filename, "w");
-  fprintf(file, "%" PRIu64 "\n", steps-1); //off by one adjustment
+  fprintf(file, "%" PRIu64 "\n", steps - 1); // off by one adjustment
   fclose(file);
 }
 
@@ -186,18 +187,19 @@ void printConfiguration(const char *filename, block *subject) {
   FILE *file = fopen(filename, "a");
   boundVariables.clear();
   varCounter = 0;
-  writer w = {file,nullptr};
+  writer w = {file, nullptr};
   printConfigurationInternal(&w, subject, nullptr, false);
   varNames.clear();
   usedVarNames.clear();
   fclose(file);
 }
 
-void printConfigurations(const char *filename, std::unordered_set<block *, HashBlock, KEq> results) {
+void printConfigurations(
+    const char *filename, std::unordered_set<block *, HashBlock, KEq> results) {
   FILE *file = fopen(filename, "a");
   boundVariables.clear();
   varCounter = 0;
-  writer w = {file,nullptr};
+  writer w = {file, nullptr};
   ssize_t size = results.size();
   if (size == 0) {
     sfprintf(&w, "\\bottom{SortGeneratedTopCell{}}()");
@@ -206,7 +208,7 @@ void printConfigurations(const char *filename, std::unordered_set<block *, HashB
       sfprintf(&w, "\\or{SortGeneratedTopCell{}}(");
     }
     size_t j = 0;
-    for (const auto& subject : results) {
+    for (const auto &subject : results) {
       printConfigurationInternal(&w, subject, nullptr, false);
       if (++j != results.size()) {
         sfprintf(&w, ",");
@@ -225,7 +227,7 @@ string *printConfigurationToString(block *subject) {
   boundVariables.clear();
   varCounter = 0;
   stringbuffer *buf = hook_BUFFER_empty();
-  writer w = {nullptr,buf};
+  writer w = {nullptr, buf};
   printConfigurationInternal(&w, subject, nullptr, false);
   varNames.clear();
   usedVarNames.clear();
@@ -235,20 +237,18 @@ string *printConfigurationToString(block *subject) {
 void printConfigurationToFile(FILE *file, block *subject) {
   boundVariables.clear();
   varCounter = 0;
-  writer w = {file,nullptr};
+  writer w = {file, nullptr};
   printConfigurationInternal(&w, subject, nullptr, false);
   varNames.clear();
   usedVarNames.clear();
 }
 
-extern "C" void* getStderr(void) {
+extern "C" void *getStderr(void) {
   return stderr;
 }
 
 struct MatchLog {
-  enum {
-    SUCCESS=0, FUNCTION, FAIL
-  } kind;
+  enum { SUCCESS = 0, FUNCTION, FAIL } kind;
 
   char *function;
   char *debugName;
@@ -279,13 +279,15 @@ size_t getMatchLogSize(void) {
 }
 
 extern "C" {
-  
+
 void addMatchSuccess(void) {
-  matchLog.push_back({MatchLog::SUCCESS, NULL, NULL, NULL, {}, NULL, NULL, NULL});
+  matchLog.push_back(
+      {MatchLog::SUCCESS, NULL, NULL, NULL, {}, NULL, NULL, NULL});
 }
 
 void addMatchFailReason(void *subject, char *pattern, char *sort) {
-  matchLog.push_back({MatchLog::FAIL, NULL, NULL, NULL, {}, pattern, subject, sort});
+  matchLog.push_back(
+      {MatchLog::FAIL, NULL, NULL, NULL, {}, pattern, subject, sort});
 }
 
 void addMatchFunction(char *debugName, char *function, void *result, ...) {
@@ -295,18 +297,20 @@ void addMatchFunction(char *debugName, char *function, void *result, ...) {
   std::vector<void *> args;
   while (true) {
     void *arg = va_arg(ap, void *);
-    if (!arg) break;
+    if (!arg)
+      break;
     args.push_back(arg);
   }
 
-  matchLog.push_back({MatchLog::FUNCTION, function, debugName, result, args, NULL, NULL, NULL});
+  matchLog.push_back(
+      {MatchLog::FUNCTION, function, debugName, result, args, NULL, NULL,
+       NULL});
 
   va_end(ap);
 }
-
 }
 
-#define DEFINE_GDB_PY_SCRIPT(script_name) \
+#define DEFINE_GDB_PY_SCRIPT(script_name)                                      \
   asm("\
 .pushsection \".debug_gdb_scripts\", \"MS\",@progbits,1\n\
 .byte 1 /* Python */\n\
