@@ -377,7 +377,6 @@ void LeafNode::codegen(Decision *d) {
   auto Call = llvm::CallInst::Create(getOrInsertFunction(d->Module, name, llvm::FunctionType::get(type, types, false)), args, "", d->CurrentBlock);
   setDebugLoc(Call);
   Call->setCallingConv(llvm::CallingConv::Tail);
-  Call->setAttributes(Call->getAttributes().addAttribute(d->Ctx, llvm::AttributeList::FunctionIndex, "gc-leaf-function"));
   if (child == nullptr) {
     llvm::ReturnInst::Create(d->Ctx, Call, d->CurrentBlock);
   } else {  
