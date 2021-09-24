@@ -372,9 +372,11 @@ void koreCollect(bool afterStep) {
   set_gc_threshold(youngspace_size());
 }
 
+bool gc_enabled;
+
 void tryKoreCollect(bool afterStep) {
   size_t threshold = get_gc_threshold();
-  if (youngspaceAlmostFull(threshold)) {
+  if (youngspaceAlmostFull(threshold) && gc_enabled) {
     koreCollect(afterStep);
   }
 }
