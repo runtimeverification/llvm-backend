@@ -1,6 +1,9 @@
 #ifndef ARENA_H
 #define ARENA_H
 
+#include <cstddef>
+#include <sys/types.h>
+
 extern "C" {
 
 // An arena can be used to allocate objects that can then be deallocated all at
