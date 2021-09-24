@@ -372,12 +372,14 @@ void koreCollect(bool afterStep) {
   set_gc_threshold(youngspace_size());
 }
 
-void freeAllKoreMem() {
-  koreCollect();
+void tryKoreCollect(bool afterStep) {
+  size_t threshold = get_gc_threshold();
+  if (youngspaceAlmostFull(threshold)) {
+    koreCollect(afterStep);
+  }
 }
 
-bool is_collection() {
-  size_t threshold = get_gc_threshold();
-  return youngspaceAlmostFull(threshold);
+void freeAllKoreMem() {
+  koreCollect(true);
 }
 }
