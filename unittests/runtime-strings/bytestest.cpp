@@ -1,58 +1,72 @@
-#include<boost/test/unit_test.hpp>
-#include<gmp.h>
-#include<cstdint>
-#include<cstring>
+#include <boost/test/unit_test.hpp>
+#include <cstdint>
+#include <cstring>
+#include <gmp.h>
 
-#include "runtime/header.h"
 #include "runtime/alloc.h"
+#include "runtime/header.h"
 
 #define KCHAR char
 extern "C" {
-  uint32_t getTagForSymbolName(const char *s) {
-    return 0;
-  }
+uint32_t getTagForSymbolName(const char *s) {
+  return 0;
+}
 
-  uint64_t tag_big_endian();
-  uint64_t tag_unsigned();
+uint64_t tag_big_endian();
+uint64_t tag_unsigned();
 
-  mpz_ptr hook_BYTES_bytes2int(string *b, uint64_t endianness, uint64_t signedness);
-  string *hook_BYTES_int2bytes(mpz_t len, mpz_t i, uint64_t endianness);
-  string *hook_BYTES_bytes2string(string *b);
-  string *hook_BYTES_string2bytes(string *s);
-  string *hook_BYTES_substr(string *b, mpz_t start, mpz_t end);
-  string *hook_BYTES_replaceAt(string *b, mpz_t start, string *b2);
-  string *hook_BYTES_update(string *b, mpz_t off, mpz_t val);
-  mpz_ptr hook_BYTES_get(string *b, mpz_t off);
-  mpz_ptr hook_BYTES_length(string *b);
-  string *hook_BYTES_padRight(string *b, mpz_t len, mpz_t v);
-  string *hook_BYTES_padLeft(string *b, mpz_t len, mpz_t v);
-  string *hook_BYTES_reverse(string *b);
-  string *hook_BYTES_concat(string *b1, string *);
-  string * makeString(const KCHAR *, int64_t len = -1);
+mpz_ptr
+hook_BYTES_bytes2int(string *b, uint64_t endianness, uint64_t signedness);
+string *hook_BYTES_int2bytes(mpz_t len, mpz_t i, uint64_t endianness);
+string *hook_BYTES_bytes2string(string *b);
+string *hook_BYTES_string2bytes(string *s);
+string *hook_BYTES_substr(string *b, mpz_t start, mpz_t end);
+string *hook_BYTES_replaceAt(string *b, mpz_t start, string *b2);
+string *hook_BYTES_update(string *b, mpz_t off, mpz_t val);
+mpz_ptr hook_BYTES_get(string *b, mpz_t off);
+mpz_ptr hook_BYTES_length(string *b);
+string *hook_BYTES_padRight(string *b, mpz_t len, mpz_t v);
+string *hook_BYTES_padLeft(string *b, mpz_t len, mpz_t v);
+string *hook_BYTES_reverse(string *b);
+string *hook_BYTES_concat(string *b1, string *);
+string *makeString(const KCHAR *, int64_t len = -1);
 }
 
 BOOST_AUTO_TEST_SUITE(BytesTest)
 
 BOOST_AUTO_TEST_CASE(bytes2int) {
   auto empty = makeString("");
-  BOOST_CHECK_EQUAL(0, mpz_cmp_si(hook_BYTES_bytes2int(empty, tag_big_endian(), tag_unsigned()), 0));
-  BOOST_CHECK_EQUAL(0, mpz_cmp_si(hook_BYTES_bytes2int(empty, 2, tag_unsigned()), 0));
-  BOOST_CHECK_EQUAL(0, mpz_cmp_si(hook_BYTES_bytes2int(empty, tag_big_endian(), 2), 0));
+  BOOST_CHECK_EQUAL(
+      0, mpz_cmp_si(
+             hook_BYTES_bytes2int(empty, tag_big_endian(), tag_unsigned()), 0));
+  BOOST_CHECK_EQUAL(
+      0, mpz_cmp_si(hook_BYTES_bytes2int(empty, 2, tag_unsigned()), 0));
+  BOOST_CHECK_EQUAL(
+      0, mpz_cmp_si(hook_BYTES_bytes2int(empty, tag_big_endian(), 2), 0));
   BOOST_CHECK_EQUAL(0, mpz_cmp_si(hook_BYTES_bytes2int(empty, 2, 2), 0));
 
   auto ff = makeString("\xff");
-  BOOST_CHECK_EQUAL(0, mpz_cmp_si(hook_BYTES_bytes2int(ff, tag_big_endian(), tag_unsigned()), 255));
-  BOOST_CHECK_EQUAL(0, mpz_cmp_si(hook_BYTES_bytes2int(ff, tag_big_endian(), 2), -1));
-  BOOST_CHECK_EQUAL(0, mpz_cmp_si(hook_BYTES_bytes2int(ff, 2, tag_unsigned()), 255));
+  BOOST_CHECK_EQUAL(
+      0, mpz_cmp_si(
+             hook_BYTES_bytes2int(ff, tag_big_endian(), tag_unsigned()), 255));
+  BOOST_CHECK_EQUAL(
+      0, mpz_cmp_si(hook_BYTES_bytes2int(ff, tag_big_endian(), 2), -1));
+  BOOST_CHECK_EQUAL(
+      0, mpz_cmp_si(hook_BYTES_bytes2int(ff, 2, tag_unsigned()), 255));
   BOOST_CHECK_EQUAL(0, mpz_cmp_si(hook_BYTES_bytes2int(ff, 2, 2), -1));
 
   auto _00ff = makeString("\x00\xff", 2);
-  BOOST_CHECK_EQUAL(0, mpz_cmp_si(hook_BYTES_bytes2int(_00ff, tag_big_endian(), tag_unsigned()), 255));
-  BOOST_CHECK_EQUAL(0, mpz_cmp_si(hook_BYTES_bytes2int(_00ff, tag_big_endian(), 2), 255));
+  BOOST_CHECK_EQUAL(
+      0,
+      mpz_cmp_si(
+          hook_BYTES_bytes2int(_00ff, tag_big_endian(), tag_unsigned()), 255));
+  BOOST_CHECK_EQUAL(
+      0, mpz_cmp_si(hook_BYTES_bytes2int(_00ff, tag_big_endian(), 2), 255));
 
   auto ff00 = makeString("\xff\x00", 2);
   BOOST_CHECK_EQUAL(0, mpz_cmp_si(hook_BYTES_bytes2int(ff00, 2, 2), 255));
-  BOOST_CHECK_EQUAL(0, mpz_cmp_si(hook_BYTES_bytes2int(ff00, 2, tag_unsigned()), 255));
+  BOOST_CHECK_EQUAL(
+      0, mpz_cmp_si(hook_BYTES_bytes2int(ff00, 2, tag_unsigned()), 255));
 }
 
 BOOST_AUTO_TEST_CASE(int2bytes) {
@@ -134,7 +148,12 @@ BOOST_AUTO_TEST_CASE(int2bytes) {
 
   res = hook_BYTES_int2bytes(_17, num, tag_big_endian());
   BOOST_CHECK_EQUAL(17, len(res));
-  BOOST_CHECK_EQUAL(0, memcmp(res->data, "\xff\x00\x08\x00\x06\xFF\xFE\xFF\xF0\x00\x08\xFF\xFF\xFF\xFF\x08\x01", 17));
+  BOOST_CHECK_EQUAL(
+      0, memcmp(
+             res->data,
+             "\xff\x00\x08\x00\x06\xFF\xFE\xFF\xF0\x00\x08\xFF\xFF\xFF\xFF\x08"
+             "\x01",
+             17));
 }
 
 BOOST_AUTO_TEST_CASE(bytes2string) {
@@ -178,17 +197,22 @@ BOOST_AUTO_TEST_CASE(substr) {
   mpz_init_set_si(_10, 10);
   mpz_init_set_si(_1024, 1024);
   mpz_init_set_si(_4096, 4096);
-  BOOST_CHECK_EQUAL(memcmp(hook_BYTES_substr(catAll, _2, _9)->data, "llohehf", 7), 0);
-  BOOST_CHECK_EQUAL(memcmp(hook_BYTES_substr(catAll, _2, _6)->data, "lloh", 4), 0);
-  BOOST_CHECK_EQUAL(memcmp(hook_BYTES_substr(catAll, _0, _4)->data, "hell", 4), 0);
-  BOOST_CHECK_EQUAL(memcmp(hook_BYTES_substr(catAll, _6, _9)->data, "ehf", 3), 0);
+  BOOST_CHECK_EQUAL(
+      memcmp(hook_BYTES_substr(catAll, _2, _9)->data, "llohehf", 7), 0);
+  BOOST_CHECK_EQUAL(
+      memcmp(hook_BYTES_substr(catAll, _2, _6)->data, "lloh", 4), 0);
+  BOOST_CHECK_EQUAL(
+      memcmp(hook_BYTES_substr(catAll, _0, _4)->data, "hell", 4), 0);
+  BOOST_CHECK_EQUAL(
+      memcmp(hook_BYTES_substr(catAll, _6, _9)->data, "ehf", 3), 0);
   BOOST_CHECK_THROW(hook_BYTES_substr(catAll, _7, _40), std::invalid_argument);
   BOOST_CHECK_THROW(hook_BYTES_substr(catAll, _8, _40), std::invalid_argument);
   BOOST_CHECK_EQUAL(memcmp(hook_BYTES_substr(catAll, _8, _9)->data, "f", 1), 0);
   BOOST_CHECK_EQUAL(len(hook_BYTES_substr(catAll, _9, _9)), 0);
   BOOST_CHECK_THROW(hook_BYTES_substr(catAll, _8, _7), std::invalid_argument);
   BOOST_CHECK_THROW(hook_BYTES_substr(catAll, _7, _10), std::invalid_argument);
-  BOOST_CHECK_THROW(hook_BYTES_substr(catAll, _1024, _4096), std::invalid_argument);
+  BOOST_CHECK_THROW(
+      hook_BYTES_substr(catAll, _1024, _4096), std::invalid_argument);
 }
 
 BOOST_AUTO_TEST_CASE(update) {
@@ -211,8 +235,6 @@ BOOST_AUTO_TEST_CASE(get) {
   auto res = hook_BYTES_get(_1234, _0);
   BOOST_CHECK_EQUAL(0, mpz_cmp_ui(res, '1'));
 }
-
-
 
 BOOST_AUTO_TEST_CASE(replaceAt) {
   auto _1234 = makeString("1234");
@@ -338,7 +360,7 @@ BOOST_AUTO_TEST_CASE(concat) {
   BOOST_CHECK_EQUAL(0, memcmp(emptyCatL->data, a->data, len(emptyCatL)));
   BOOST_CHECK_EQUAL(len(emptyCatL), len(a));
 
-  auto catAll = hook_BYTES_concat(hook_BYTES_concat(a,b), c);
+  auto catAll = hook_BYTES_concat(hook_BYTES_concat(a, b), c);
   auto expected = makeString("hellohehf");
   BOOST_CHECK_EQUAL(0, memcmp(catAll->data, expected->data, len(catAll)));
   BOOST_CHECK_EQUAL(len(catAll), len(expected));
