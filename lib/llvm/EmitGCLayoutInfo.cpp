@@ -46,7 +46,12 @@ namespace {
               GCSI->setArgOperand(IDPos, ConstantInt::get(GCSI->getArgOperand(IDPos)->getType(), id));
               unsigned int nrelocs = S->gc_args_end() - S->gc_args_begin();
               unsigned int i = nrelocs - 1;
-              for (auto &Arg : S->gc_args()) {
+#if LLVM_VERSION_MAJOR >= 11
+              for (auto &R : S->getGCRelocates()) {
+#else
+              for (auto &R : S->getRelocates()) {
+#endif
+                auto &Arg = S->gc_args_begin()[R->getBasePtrIndex()];
                 auto *Ty = Arg->getType()->getPointerElementType();
                 if (Ty->isIntegerTy()) {
                   i--;
