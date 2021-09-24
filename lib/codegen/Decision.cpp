@@ -643,6 +643,15 @@ void makeEvalOrAnywhereFunction(
   initChoiceBuffer(
       dt, module, block, stuck, fail, &choiceBuffer, &choiceDepth, &jump);
 
+  auto koreCollect = getOrInsertFunction(
+      module, "tryKoreCollect",
+      llvm::FunctionType::get(
+          llvm::Type::getVoidTy(module->getContext()),
+          {llvm::Type::getInt1Ty(module->getContext())}, false));
+  llvm::CallInst::Create(
+      koreCollect, {llvm::ConstantInt::getFalse(module->getContext())}, "",
+      block);
+
   int i = 0;
   Decision codegen(
       definition, block, fail, jump, choiceBuffer, choiceDepth, module,
