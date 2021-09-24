@@ -38,7 +38,7 @@ void migrate_map(void *m);
 void migrate_set(void *s);
 void migrate_collection_node(void **nodePtr);
 void setKoreMemoryFunctionsForGMP(void);
-void koreCollect(void);
+void koreCollect(bool afterStep);
 }
 
 #ifdef GC_DBG

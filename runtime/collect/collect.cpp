@@ -298,7 +298,7 @@ static std::vector<gc_root> scanStackRoots(void) {
   return gc_roots;
 }
 
-void koreCollect(void) {
+void koreCollect(bool afterStep) {
   is_gc = true;
   collect_old = shouldCollectOldGen();
   MEM_LOG("Starting garbage collection\n");
@@ -311,7 +311,7 @@ void koreCollect(void) {
   }
   char *current_alloc_ptr = *young_alloc_ptr();
 #endif
-  koreAllocSwap(collect_old);
+  koreAllocSwap(collect_old, afterStep);
 #ifdef GC_DBG
   for (int i = 0; i < 2048; i++) {
     numBytesLiveAtCollection[i] = 0;
