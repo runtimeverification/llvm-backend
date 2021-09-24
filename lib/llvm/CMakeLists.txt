@@ -1,5 +1,6 @@
 add_library(LLVMPass MODULE
   EmitGCLayoutInfo.cpp
+  MarkTailCallsAsGCLeaf.cpp
 )
 
 target_link_libraries(LLVMPass PUBLIC AST)
