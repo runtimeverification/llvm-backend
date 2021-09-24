@@ -35,6 +35,8 @@ void *koreAllocAlwaysGC(size_t requested);
 // if the swapOld flag is set, it also swaps the two semispaces of the old
 // generation
 void koreAllocSwap(bool swapOld, bool resetAlwaysGC);
+// resets the alwaysgcspace
+void koreClear(void);
 // resizes the last allocation into the young generation
 void *koreResizeLastAlloc(void *oldptr, size_t newrequest, size_t oldrequest);
 // allocator hook for the GMP library

@@ -66,6 +66,10 @@ void koreAllocSwap(bool swapOld, bool resetAlwaysGC) {
   }
 }
 
+void koreClear() {
+  arenaClear(&alwaysgcspace);
+}
+
 void setKoreMemoryFunctionsForGMP() {
   mp_set_memory_functions(koreAllocMP, koreReallocMP, koreFree);
 }
