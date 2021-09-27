@@ -1038,7 +1038,7 @@ llvm::Value *CreateTerm::notInjectionCase(
       ChildValue = (*this)(child.get()).first;
     }
     llvm::Type *ChildPtrType
-        = llvm::PointerType::get(BlockType->elements()[idx], 0);
+        = llvm::PointerType::get(BlockType->elements()[idx], 1);
     if (ChildValue->getType() == ChildPtrType) {
       ChildValue = new llvm::LoadInst(
           ChildValue->getType()->getPointerElementType(), ChildValue, "",
