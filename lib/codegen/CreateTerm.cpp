@@ -973,6 +973,7 @@ llvm::Value *CreateTerm::notInjectionCase(
           CurrentBlock);
     }
     children.push_back(ChildValue);
+    idx++;
   }
   llvm::Value *Block = allocateTerm(BlockType, CurrentBlock);
   llvm::Value *BlockHeaderPtr = llvm::GetElementPtrInst::CreateInBounds(
@@ -981,6 +982,7 @@ llvm::Value *CreateTerm::notInjectionCase(
        llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), 0)},
       symbol->getName(), CurrentBlock);
   new llvm::StoreInst(BlockHeader, BlockHeaderPtr, CurrentBlock);
+  idx = 2;
   for (auto &ChildValue : children) {
     llvm::Value *ChildPtr = llvm::GetElementPtrInst::CreateInBounds(
         BlockType, Block,
