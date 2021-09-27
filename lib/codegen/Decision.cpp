@@ -810,7 +810,6 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> stepFunctionHeader(
   auto call = llvm::CallInst::Create(koreCollect, {}, "", collect);
   setDebugLoc(call);
   llvm::BranchInst::Create(merge, collect);
-  std::vector<llvm::Value *> results;
   return std::make_pair(args, merge);
 }
 
