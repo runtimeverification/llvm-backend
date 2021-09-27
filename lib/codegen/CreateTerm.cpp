@@ -1028,6 +1028,25 @@ llvm::Value *CreateTerm::notInjectionCase(
   llvm::StructType *BlockType = getBlockType(Module, Definition, symbol);
   llvm::Value *BlockHeader
       = getBlockHeader(Module, Definition, symbol, BlockType);
+  int idx = 2;
+  std::vector<llvm::Value *> children;
+  for (auto &child : constructor->getArguments()) {
+    llvm::Value *ChildValue;
+    if (idx == 2 && val != nullptr) {
+      ChildValue = val;
+    } else {
+      ChildValue = (*this)(child.get()).first;
+    }
+    llvm::Type *ChildPtrType
+        = llvm::PointerType::get(BlockType->elements()[idx], 0);
+    if (ChildValue->getType() == ChildPtrType) {
+      ChildValue = new llvm::LoadInst(
+          ChildValue->getType()->getPointerElementType(), ChildValue, "",
+          CurrentBlock);
+    }
+    children.push_back(ChildValue);
+    idx++;
+  }
   llvm::Value *Block
       = allocateTerm({SortCategory::Symbol, 0}, BlockType, CurrentBlock);
   llvm::Value *BlockHeaderPtr = llvm::GetElementPtrInst::CreateInBounds(
@@ -1036,26 +1055,16 @@ llvm::Value *CreateTerm::notInjectionCase(
        llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), 0)},
       symbol->getName(), CurrentBlock);
   new llvm::StoreInst(BlockHeader, BlockHeaderPtr, CurrentBlock);
-  int idx = 2;
-  for (auto &child : constructor->getArguments()) {
-    llvm::Value *ChildValue;
-    if (idx == 2 && val != nullptr) {
-      ChildValue = val;
-    } else {
-      ChildValue = (*this)(child.get()).first;
-    }
+  idx = 2;
+  for (auto &ChildValue : children) {
     llvm::Value *ChildPtr = llvm::GetElementPtrInst::CreateInBounds(
         BlockType, Block,
         {llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0),
          llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), idx++)},
         "", CurrentBlock);
-    if (ChildValue->getType() == ChildPtr->getType()) {
-      ChildValue = new llvm::LoadInst(
-          ChildValue->getType()->getPointerElementType(), ChildValue, "",
-          CurrentBlock);
-    }
     new llvm::StoreInst(ChildValue, ChildPtr, CurrentBlock);
   }
+
   auto BlockPtr
       = llvm::PointerType::get(getTypeByName(Module, BLOCK_STRUCT), 1);
   auto bitcast = new llvm::BitCastInst(Block, BlockPtr, "", CurrentBlock);
