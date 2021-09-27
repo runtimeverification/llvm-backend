@@ -1,85 +1,85 @@
-#include<boost/test/unit_test.hpp>
-#include<gmp.h>
-#include<mpfr.h>
-#include<cstdint>
-#include<cstdlib>
-#include<cstring>
+#include <boost/test/unit_test.hpp>
+#include <cstdint>
+#include <cstdlib>
+#include <cstring>
+#include <gmp.h>
+#include <mpfr.h>
 
-#include "runtime/header.h"
 #include "runtime/alloc.h"
+#include "runtime/header.h"
 
 #define KCHAR char
 extern "C" {
-  bool hook_STRING_gt(string *, string *);
-  bool hook_STRING_ge(string *, string *);
-  bool hook_STRING_lt(string *, string *);
-  bool hook_STRING_le(string *, string *);
-  bool hook_STRING_eq(string *, string *);
-  bool hook_STRING_ne(string *, string *);
-  string * hook_STRING_concat(string *, string *);
-  mpz_ptr hook_STRING_length(string *);
-  string * hook_STRING_chr(mpz_t);
-  mpz_ptr hook_STRING_ord(string *);
-  string * hook_STRING_substr(string *, mpz_t, mpz_t);
-  mpz_ptr hook_STRING_find(string *, string *, mpz_ptr);
-  mpz_ptr hook_STRING_rfind(string *, string *, mpz_ptr);
-  mpz_ptr hook_STRING_findChar(string *, string *, mpz_ptr);
-  mpz_ptr hook_STRING_rfindChar(string *, string *, mpz_ptr);
-  mpz_ptr hook_STRING_string2int(string *);
-  floating *hook_STRING_string2float(string *);
-  mpz_ptr hook_STRING_string2base(string *, mpz_t);
-  string * hook_STRING_float2string(floating *);
-  string * hook_STRING_int2string(mpz_t);
-  string * hook_STRING_replaceAll(string *, string *, string *);
-  string * hook_STRING_replace(string *, string *, string *, mpz_t);
-  string * hook_STRING_replaceFirst(string *, string *, string *);
-  mpz_ptr hook_STRING_countAllOccurrences(string *, string *);
-  string * hook_STRING_transcode(string *, string *, string *);
-  string * makeString(const KCHAR *, int64_t len = -1);
-  stringbuffer *hook_BUFFER_empty();
-  stringbuffer *hook_BUFFER_concat(stringbuffer *, string *);
-  string *hook_BUFFER_toString(stringbuffer *);
+bool hook_STRING_gt(string *, string *);
+bool hook_STRING_ge(string *, string *);
+bool hook_STRING_lt(string *, string *);
+bool hook_STRING_le(string *, string *);
+bool hook_STRING_eq(string *, string *);
+bool hook_STRING_ne(string *, string *);
+string *hook_STRING_concat(string *, string *);
+mpz_ptr hook_STRING_length(string *);
+string *hook_STRING_chr(mpz_t);
+mpz_ptr hook_STRING_ord(string *);
+string *hook_STRING_substr(string *, mpz_t, mpz_t);
+mpz_ptr hook_STRING_find(string *, string *, mpz_ptr);
+mpz_ptr hook_STRING_rfind(string *, string *, mpz_ptr);
+mpz_ptr hook_STRING_findChar(string *, string *, mpz_ptr);
+mpz_ptr hook_STRING_rfindChar(string *, string *, mpz_ptr);
+mpz_ptr hook_STRING_string2int(string *);
+floating *hook_STRING_string2float(string *);
+mpz_ptr hook_STRING_string2base(string *, mpz_t);
+string *hook_STRING_float2string(floating *);
+string *hook_STRING_int2string(mpz_t);
+string *hook_STRING_replaceAll(string *, string *, string *);
+string *hook_STRING_replace(string *, string *, string *, mpz_t);
+string *hook_STRING_replaceFirst(string *, string *, string *);
+mpz_ptr hook_STRING_countAllOccurrences(string *, string *);
+string *hook_STRING_transcode(string *, string *, string *);
+string *makeString(const KCHAR *, int64_t len = -1);
+stringbuffer *hook_BUFFER_empty();
+stringbuffer *hook_BUFFER_concat(stringbuffer *, string *);
+string *hook_BUFFER_toString(stringbuffer *);
 
-  mpz_ptr move_int(mpz_t i) {
-    mpz_ptr result = (mpz_ptr)malloc(sizeof(__mpz_struct));
-    *result = *i;
-    return result;
-  }
+mpz_ptr move_int(mpz_t i) {
+  mpz_ptr result = (mpz_ptr)malloc(sizeof(__mpz_struct));
+  *result = *i;
+  return result;
+}
 
-  floating *move_float(floating *i) {
-    floating *result = (floating *)malloc(sizeof(floating));
-    *result = *i;
-    return result;
-  }
+floating *move_float(floating *i) {
+  floating *result = (floating *)malloc(sizeof(floating));
+  *result = *i;
+  return result;
+}
 
-  void add_hash64(void*, uint64_t) {}
+void add_hash64(void *, uint64_t) { }
 }
 
 BOOST_AUTO_TEST_SUITE(StringTest)
 
-  BOOST_AUTO_TEST_CASE(gt) {
-    auto a = makeString("hello");
-    auto b = makeString("he");
-    auto c = makeString("hf");
-    auto d = makeString("");
+BOOST_AUTO_TEST_CASE(gt) {
+  auto a = makeString("hello");
+  auto b = makeString("he");
+  auto c = makeString("hf");
+  auto d = makeString("");
 
-    BOOST_CHECK_EQUAL(false, hook_STRING_gt(a,a));
-    BOOST_CHECK_EQUAL(true,  hook_STRING_gt(a,b));
-    BOOST_CHECK_EQUAL(false, hook_STRING_gt(a,c));
-    BOOST_CHECK_EQUAL(true,  hook_STRING_gt(a,d));
-    BOOST_CHECK_EQUAL(false, hook_STRING_gt(b,a));
-    BOOST_CHECK_EQUAL(false, hook_STRING_gt(b,b));
-    BOOST_CHECK_EQUAL(false, hook_STRING_gt(b,c));
-    BOOST_CHECK_EQUAL(true,  hook_STRING_gt(b,d));
-    BOOST_CHECK_EQUAL(true,  hook_STRING_gt(c,a));
-    BOOST_CHECK_EQUAL(true,  hook_STRING_gt(c,b));
-    BOOST_CHECK_EQUAL(false, hook_STRING_gt(c,c));
-    BOOST_CHECK_EQUAL(true,  hook_STRING_gt(c,d));
-    BOOST_CHECK_EQUAL(false, hook_STRING_gt(d,a));
-    BOOST_CHECK_EQUAL(false, hook_STRING_gt(d,b));
-    BOOST_CHECK_EQUAL(false, hook_STRING_gt(d,c));
-    BOOST_CHECK_EQUAL(false, hook_STRING_gt(d,d));
-  }
+  BOOST_CHECK_EQUAL(false, hook_STRING_gt(a, a));
+  BOOST_CHECK_EQUAL(true, hook_STRING_gt(a, b));
+  BOOST_CHECK_EQUAL(false, hook_STRING_gt(a, c));
+  BOOST_CHECK_EQUAL(true, hook_STRING_gt(a, d));
+  BOOST_CHECK_EQUAL(false, hook_STRING_gt(b, a));
+  BOOST_CHECK_EQUAL(false, hook_STRING_gt(b, b));
+  BOOST_CHECK_EQUAL(false, hook_STRING_gt(b, c));
+  BOOST_CHECK_EQUAL(true, hook_STRING_gt(b, d));
+  BOOST_CHECK_EQUAL(true, hook_STRING_gt(c, a));
+  BOOST_CHECK_EQUAL(true, hook_STRING_gt(c, b));
+  BOOST_CHECK_EQUAL(false, hook_STRING_gt(c, c));
+  BOOST_CHECK_EQUAL(true, hook_STRING_gt(c, d));
+  BOOST_CHECK_EQUAL(false, hook_STRING_gt(d, a));
+  BOOST_CHECK_EQUAL(false, hook_STRING_gt(d, b));
+  BOOST_CHECK_EQUAL(false, hook_STRING_gt(d, c));
+  BOOST_CHECK_EQUAL(false, hook_STRING_gt(d, d));
+}
 
 BOOST_AUTO_TEST_CASE(ge) {
   auto a = makeString("hello");
@@ -87,22 +87,22 @@ BOOST_AUTO_TEST_CASE(ge) {
   auto c = makeString("hf");
   auto d = makeString("");
 
-  BOOST_CHECK_EQUAL(true,  hook_STRING_ge(a,a));
-  BOOST_CHECK_EQUAL(true,  hook_STRING_ge(a,b));
-  BOOST_CHECK_EQUAL(false, hook_STRING_ge(a,c));
-  BOOST_CHECK_EQUAL(true,  hook_STRING_ge(a,d));
-  BOOST_CHECK_EQUAL(false, hook_STRING_ge(b,a));
-  BOOST_CHECK_EQUAL(true,  hook_STRING_ge(b,b));
-  BOOST_CHECK_EQUAL(false, hook_STRING_ge(b,c));
-  BOOST_CHECK_EQUAL(true,  hook_STRING_ge(b,d));
-  BOOST_CHECK_EQUAL(true,  hook_STRING_ge(c,a));
-  BOOST_CHECK_EQUAL(true,  hook_STRING_ge(c,b));
-  BOOST_CHECK_EQUAL(true,  hook_STRING_ge(c,c));
-  BOOST_CHECK_EQUAL(true,  hook_STRING_ge(c,d));
-  BOOST_CHECK_EQUAL(false, hook_STRING_ge(d,a));
-  BOOST_CHECK_EQUAL(false, hook_STRING_ge(d,b));
-  BOOST_CHECK_EQUAL(false, hook_STRING_ge(d,c));
-  BOOST_CHECK_EQUAL(true,  hook_STRING_ge(d,d));
+  BOOST_CHECK_EQUAL(true, hook_STRING_ge(a, a));
+  BOOST_CHECK_EQUAL(true, hook_STRING_ge(a, b));
+  BOOST_CHECK_EQUAL(false, hook_STRING_ge(a, c));
+  BOOST_CHECK_EQUAL(true, hook_STRING_ge(a, d));
+  BOOST_CHECK_EQUAL(false, hook_STRING_ge(b, a));
+  BOOST_CHECK_EQUAL(true, hook_STRING_ge(b, b));
+  BOOST_CHECK_EQUAL(false, hook_STRING_ge(b, c));
+  BOOST_CHECK_EQUAL(true, hook_STRING_ge(b, d));
+  BOOST_CHECK_EQUAL(true, hook_STRING_ge(c, a));
+  BOOST_CHECK_EQUAL(true, hook_STRING_ge(c, b));
+  BOOST_CHECK_EQUAL(true, hook_STRING_ge(c, c));
+  BOOST_CHECK_EQUAL(true, hook_STRING_ge(c, d));
+  BOOST_CHECK_EQUAL(false, hook_STRING_ge(d, a));
+  BOOST_CHECK_EQUAL(false, hook_STRING_ge(d, b));
+  BOOST_CHECK_EQUAL(false, hook_STRING_ge(d, c));
+  BOOST_CHECK_EQUAL(true, hook_STRING_ge(d, d));
 }
 
 BOOST_AUTO_TEST_CASE(lt) {
@@ -111,22 +111,22 @@ BOOST_AUTO_TEST_CASE(lt) {
   auto c = makeString("hf");
   auto d = makeString("");
 
-  BOOST_CHECK_EQUAL(false, hook_STRING_lt(a,a));
-  BOOST_CHECK_EQUAL(false, hook_STRING_lt(a,b));
-  BOOST_CHECK_EQUAL(true,  hook_STRING_lt(a,c));
-  BOOST_CHECK_EQUAL(false, hook_STRING_lt(a,d));
-  BOOST_CHECK_EQUAL(true,  hook_STRING_lt(b,a));
-  BOOST_CHECK_EQUAL(false, hook_STRING_lt(b,b));
-  BOOST_CHECK_EQUAL(true,  hook_STRING_lt(b,c));
-  BOOST_CHECK_EQUAL(false, hook_STRING_lt(b,d));
-  BOOST_CHECK_EQUAL(false, hook_STRING_lt(c,a));
-  BOOST_CHECK_EQUAL(false, hook_STRING_lt(c,b));
-  BOOST_CHECK_EQUAL(false, hook_STRING_lt(c,c));
-  BOOST_CHECK_EQUAL(false, hook_STRING_lt(c,d));
-  BOOST_CHECK_EQUAL(true,  hook_STRING_lt(d,a));
-  BOOST_CHECK_EQUAL(true,  hook_STRING_lt(d,b));
-  BOOST_CHECK_EQUAL(true,  hook_STRING_lt(d,c));
-  BOOST_CHECK_EQUAL(false, hook_STRING_lt(d,d));
+  BOOST_CHECK_EQUAL(false, hook_STRING_lt(a, a));
+  BOOST_CHECK_EQUAL(false, hook_STRING_lt(a, b));
+  BOOST_CHECK_EQUAL(true, hook_STRING_lt(a, c));
+  BOOST_CHECK_EQUAL(false, hook_STRING_lt(a, d));
+  BOOST_CHECK_EQUAL(true, hook_STRING_lt(b, a));
+  BOOST_CHECK_EQUAL(false, hook_STRING_lt(b, b));
+  BOOST_CHECK_EQUAL(true, hook_STRING_lt(b, c));
+  BOOST_CHECK_EQUAL(false, hook_STRING_lt(b, d));
+  BOOST_CHECK_EQUAL(false, hook_STRING_lt(c, a));
+  BOOST_CHECK_EQUAL(false, hook_STRING_lt(c, b));
+  BOOST_CHECK_EQUAL(false, hook_STRING_lt(c, c));
+  BOOST_CHECK_EQUAL(false, hook_STRING_lt(c, d));
+  BOOST_CHECK_EQUAL(true, hook_STRING_lt(d, a));
+  BOOST_CHECK_EQUAL(true, hook_STRING_lt(d, b));
+  BOOST_CHECK_EQUAL(true, hook_STRING_lt(d, c));
+  BOOST_CHECK_EQUAL(false, hook_STRING_lt(d, d));
 }
 
 BOOST_AUTO_TEST_CASE(le) {
@@ -135,22 +135,22 @@ BOOST_AUTO_TEST_CASE(le) {
   auto c = makeString("hf");
   auto d = makeString("");
 
-  BOOST_CHECK_EQUAL(true,  hook_STRING_le(a,a));
-  BOOST_CHECK_EQUAL(false, hook_STRING_le(a,b));
-  BOOST_CHECK_EQUAL(true,  hook_STRING_le(a,c));
-  BOOST_CHECK_EQUAL(false, hook_STRING_le(a,d));
-  BOOST_CHECK_EQUAL(true,  hook_STRING_le(b,a));
-  BOOST_CHECK_EQUAL(true,  hook_STRING_le(b,b));
-  BOOST_CHECK_EQUAL(true,  hook_STRING_le(b,c));
-  BOOST_CHECK_EQUAL(false, hook_STRING_le(b,d));
-  BOOST_CHECK_EQUAL(false, hook_STRING_le(c,a));
-  BOOST_CHECK_EQUAL(false, hook_STRING_le(c,b));
-  BOOST_CHECK_EQUAL(true,  hook_STRING_le(c,c));
-  BOOST_CHECK_EQUAL(false, hook_STRING_le(c,d));
-  BOOST_CHECK_EQUAL(true,  hook_STRING_le(d,a));
-  BOOST_CHECK_EQUAL(true,  hook_STRING_le(d,b));
-  BOOST_CHECK_EQUAL(true,  hook_STRING_le(d,c));
-  BOOST_CHECK_EQUAL(true,  hook_STRING_le(d,d));
+  BOOST_CHECK_EQUAL(true, hook_STRING_le(a, a));
+  BOOST_CHECK_EQUAL(false, hook_STRING_le(a, b));
+  BOOST_CHECK_EQUAL(true, hook_STRING_le(a, c));
+  BOOST_CHECK_EQUAL(false, hook_STRING_le(a, d));
+  BOOST_CHECK_EQUAL(true, hook_STRING_le(b, a));
+  BOOST_CHECK_EQUAL(true, hook_STRING_le(b, b));
+  BOOST_CHECK_EQUAL(true, hook_STRING_le(b, c));
+  BOOST_CHECK_EQUAL(false, hook_STRING_le(b, d));
+  BOOST_CHECK_EQUAL(false, hook_STRING_le(c, a));
+  BOOST_CHECK_EQUAL(false, hook_STRING_le(c, b));
+  BOOST_CHECK_EQUAL(true, hook_STRING_le(c, c));
+  BOOST_CHECK_EQUAL(false, hook_STRING_le(c, d));
+  BOOST_CHECK_EQUAL(true, hook_STRING_le(d, a));
+  BOOST_CHECK_EQUAL(true, hook_STRING_le(d, b));
+  BOOST_CHECK_EQUAL(true, hook_STRING_le(d, c));
+  BOOST_CHECK_EQUAL(true, hook_STRING_le(d, d));
 }
 
 BOOST_AUTO_TEST_CASE(eq) {
@@ -159,22 +159,22 @@ BOOST_AUTO_TEST_CASE(eq) {
   auto c = makeString("hf");
   auto d = makeString("");
 
-  BOOST_CHECK_EQUAL(true,  hook_STRING_eq(a,a));
-  BOOST_CHECK_EQUAL(false, hook_STRING_eq(a,b));
-  BOOST_CHECK_EQUAL(false, hook_STRING_eq(a,c));
-  BOOST_CHECK_EQUAL(false, hook_STRING_eq(a,d));
-  BOOST_CHECK_EQUAL(false, hook_STRING_eq(b,a));
-  BOOST_CHECK_EQUAL(true,  hook_STRING_eq(b,b));
-  BOOST_CHECK_EQUAL(false, hook_STRING_eq(b,c));
-  BOOST_CHECK_EQUAL(false, hook_STRING_eq(b,d));
-  BOOST_CHECK_EQUAL(false, hook_STRING_eq(c,a));
-  BOOST_CHECK_EQUAL(false, hook_STRING_eq(c,b));
-  BOOST_CHECK_EQUAL(true,  hook_STRING_eq(c,c));
-  BOOST_CHECK_EQUAL(false, hook_STRING_eq(c,d));
-  BOOST_CHECK_EQUAL(false, hook_STRING_eq(d,a));
-  BOOST_CHECK_EQUAL(false, hook_STRING_eq(d,b));
-  BOOST_CHECK_EQUAL(false, hook_STRING_eq(d,c));
-  BOOST_CHECK_EQUAL(true,  hook_STRING_eq(d,d));
+  BOOST_CHECK_EQUAL(true, hook_STRING_eq(a, a));
+  BOOST_CHECK_EQUAL(false, hook_STRING_eq(a, b));
+  BOOST_CHECK_EQUAL(false, hook_STRING_eq(a, c));
+  BOOST_CHECK_EQUAL(false, hook_STRING_eq(a, d));
+  BOOST_CHECK_EQUAL(false, hook_STRING_eq(b, a));
+  BOOST_CHECK_EQUAL(true, hook_STRING_eq(b, b));
+  BOOST_CHECK_EQUAL(false, hook_STRING_eq(b, c));
+  BOOST_CHECK_EQUAL(false, hook_STRING_eq(b, d));
+  BOOST_CHECK_EQUAL(false, hook_STRING_eq(c, a));
+  BOOST_CHECK_EQUAL(false, hook_STRING_eq(c, b));
+  BOOST_CHECK_EQUAL(true, hook_STRING_eq(c, c));
+  BOOST_CHECK_EQUAL(false, hook_STRING_eq(c, d));
+  BOOST_CHECK_EQUAL(false, hook_STRING_eq(d, a));
+  BOOST_CHECK_EQUAL(false, hook_STRING_eq(d, b));
+  BOOST_CHECK_EQUAL(false, hook_STRING_eq(d, c));
+  BOOST_CHECK_EQUAL(true, hook_STRING_eq(d, d));
 }
 
 BOOST_AUTO_TEST_CASE(ne) {
@@ -183,22 +183,22 @@ BOOST_AUTO_TEST_CASE(ne) {
   auto c = makeString("hf");
   auto d = makeString("");
 
-  BOOST_CHECK_EQUAL(false, hook_STRING_ne(a,a));
-  BOOST_CHECK_EQUAL(true,  hook_STRING_ne(a,b));
-  BOOST_CHECK_EQUAL(true,  hook_STRING_ne(a,c));
-  BOOST_CHECK_EQUAL(true,  hook_STRING_ne(a,d));
-  BOOST_CHECK_EQUAL(true,  hook_STRING_ne(b,a));
-  BOOST_CHECK_EQUAL(false, hook_STRING_ne(b,b));
-  BOOST_CHECK_EQUAL(true,  hook_STRING_ne(b,c));
-  BOOST_CHECK_EQUAL(true,  hook_STRING_ne(b,d));
-  BOOST_CHECK_EQUAL(true,  hook_STRING_ne(c,a));
-  BOOST_CHECK_EQUAL(true,  hook_STRING_ne(c,b));
-  BOOST_CHECK_EQUAL(false, hook_STRING_ne(c,c));
-  BOOST_CHECK_EQUAL(true,  hook_STRING_ne(c,d));
-  BOOST_CHECK_EQUAL(true,  hook_STRING_ne(d,a));
-  BOOST_CHECK_EQUAL(true,  hook_STRING_ne(d,b));
-  BOOST_CHECK_EQUAL(true,  hook_STRING_ne(d,c));
-  BOOST_CHECK_EQUAL(false, hook_STRING_ne(d,d));
+  BOOST_CHECK_EQUAL(false, hook_STRING_ne(a, a));
+  BOOST_CHECK_EQUAL(true, hook_STRING_ne(a, b));
+  BOOST_CHECK_EQUAL(true, hook_STRING_ne(a, c));
+  BOOST_CHECK_EQUAL(true, hook_STRING_ne(a, d));
+  BOOST_CHECK_EQUAL(true, hook_STRING_ne(b, a));
+  BOOST_CHECK_EQUAL(false, hook_STRING_ne(b, b));
+  BOOST_CHECK_EQUAL(true, hook_STRING_ne(b, c));
+  BOOST_CHECK_EQUAL(true, hook_STRING_ne(b, d));
+  BOOST_CHECK_EQUAL(true, hook_STRING_ne(c, a));
+  BOOST_CHECK_EQUAL(true, hook_STRING_ne(c, b));
+  BOOST_CHECK_EQUAL(false, hook_STRING_ne(c, c));
+  BOOST_CHECK_EQUAL(true, hook_STRING_ne(c, d));
+  BOOST_CHECK_EQUAL(true, hook_STRING_ne(d, a));
+  BOOST_CHECK_EQUAL(true, hook_STRING_ne(d, b));
+  BOOST_CHECK_EQUAL(true, hook_STRING_ne(d, c));
+  BOOST_CHECK_EQUAL(false, hook_STRING_ne(d, d));
 }
 
 BOOST_AUTO_TEST_CASE(concat) {
@@ -215,20 +215,19 @@ BOOST_AUTO_TEST_CASE(concat) {
   BOOST_CHECK_EQUAL(0, memcmp(emptyCatL->data, a->data, len(emptyCatL)));
   BOOST_CHECK_EQUAL(len(emptyCatL), len(a));
 
-  auto catAll = hook_STRING_concat(hook_STRING_concat(a,b), c);
+  auto catAll = hook_STRING_concat(hook_STRING_concat(a, b), c);
   auto expected = makeString("hellohehf");
   BOOST_CHECK_EQUAL(0, memcmp(catAll->data, expected->data, len(catAll)));
   BOOST_CHECK_EQUAL(len(catAll), len(expected));
 }
-
 
 BOOST_AUTO_TEST_CASE(chr) {
   mpz_t a, b;
   mpz_init_set_ui(a, 65);
   mpz_init_set_ui(b, 32);
 
-  const string * A = hook_STRING_chr(a);
-  const string * space = hook_STRING_chr(b);
+  const string *A = hook_STRING_chr(a);
+  const string *space = hook_STRING_chr(b);
 
   BOOST_CHECK_EQUAL(A->data[0], 'A');
   BOOST_CHECK_EQUAL(len(A), 1);
@@ -268,17 +267,23 @@ BOOST_AUTO_TEST_CASE(substr) {
   mpz_init_set_si(_10, 10);
   mpz_init_set_si(_1024, 1024);
   mpz_init_set_si(_4096, 4096);
-  BOOST_CHECK_EQUAL(memcmp(hook_STRING_substr(catAll, _2, _9)->data, "llohehf", 7), 0);
-  BOOST_CHECK_EQUAL(memcmp(hook_STRING_substr(catAll, _2, _6)->data, "lloh", 4), 0);
-  BOOST_CHECK_EQUAL(memcmp(hook_STRING_substr(catAll, _0, _4)->data, "hell", 4), 0);
-  BOOST_CHECK_EQUAL(memcmp(hook_STRING_substr(catAll, _6, _9)->data, "ehf", 3), 0);
+  BOOST_CHECK_EQUAL(
+      memcmp(hook_STRING_substr(catAll, _2, _9)->data, "llohehf", 7), 0);
+  BOOST_CHECK_EQUAL(
+      memcmp(hook_STRING_substr(catAll, _2, _6)->data, "lloh", 4), 0);
+  BOOST_CHECK_EQUAL(
+      memcmp(hook_STRING_substr(catAll, _0, _4)->data, "hell", 4), 0);
+  BOOST_CHECK_EQUAL(
+      memcmp(hook_STRING_substr(catAll, _6, _9)->data, "ehf", 3), 0);
   BOOST_CHECK_THROW(hook_STRING_substr(catAll, _7, _40), std::invalid_argument);
   BOOST_CHECK_THROW(hook_STRING_substr(catAll, _8, _40), std::invalid_argument);
-  BOOST_CHECK_EQUAL(memcmp(hook_STRING_substr(catAll, _8, _9)->data, "f", 1), 0);
+  BOOST_CHECK_EQUAL(
+      memcmp(hook_STRING_substr(catAll, _8, _9)->data, "f", 1), 0);
   BOOST_CHECK_EQUAL(len(hook_STRING_substr(catAll, _9, _9)), 0);
-BOOST_CHECK_THROW(hook_STRING_substr(catAll, _8, _7), std::invalid_argument);
+  BOOST_CHECK_THROW(hook_STRING_substr(catAll, _8, _7), std::invalid_argument);
   BOOST_CHECK_THROW(hook_STRING_substr(catAll, _7, _10), std::invalid_argument);
-  BOOST_CHECK_THROW(hook_STRING_substr(catAll, _1024, _4096), std::invalid_argument);
+  BOOST_CHECK_THROW(
+      hook_STRING_substr(catAll, _1024, _4096), std::invalid_argument);
 }
 
 BOOST_AUTO_TEST_CASE(find) {
@@ -313,8 +318,10 @@ BOOST_AUTO_TEST_CASE(findChar) {
   mpz_init_set_si(a, 0);
   mpz_init_set_si(b, 1);
 
-  BOOST_CHECK_EQUAL(mpz_cmp_si(hook_STRING_findChar(haystack, needle, a), 0), 0);
-  BOOST_CHECK_EQUAL(mpz_cmp_si(hook_STRING_findChar(haystack, needle, b), 10), 0);
+  BOOST_CHECK_EQUAL(
+      mpz_cmp_si(hook_STRING_findChar(haystack, needle, a), 0), 0);
+  BOOST_CHECK_EQUAL(
+      mpz_cmp_si(hook_STRING_findChar(haystack, needle, b), 10), 0);
 }
 
 BOOST_AUTO_TEST_CASE(rfind) {
@@ -353,10 +360,11 @@ BOOST_AUTO_TEST_CASE(rfindChar) {
   mpz_init_set_si(a, 10);
   mpz_init_set_si(b, 9);
 
-  BOOST_CHECK_EQUAL(mpz_cmp_si(hook_STRING_rfindChar(haystack, needle, a), 10), 0);
-  BOOST_CHECK_EQUAL(mpz_cmp_si(hook_STRING_rfindChar(haystack, needle, b), 0), 0);
+  BOOST_CHECK_EQUAL(
+      mpz_cmp_si(hook_STRING_rfindChar(haystack, needle, a), 10), 0);
+  BOOST_CHECK_EQUAL(
+      mpz_cmp_si(hook_STRING_rfindChar(haystack, needle, b), 0), 0);
 }
-
 
 BOOST_AUTO_TEST_CASE(int2string) {
   mpz_t a;
@@ -422,7 +430,7 @@ BOOST_AUTO_TEST_CASE(string2float) {
   auto _float = makeString("8.0f");
   floating *result;
   result = hook_STRING_string2float(_float);
-  
+
   BOOST_CHECK_EQUAL(24, mpfr_get_prec(result->f));
   BOOST_CHECK_EQUAL(8, result->exp);
   BOOST_CHECK_EQUAL(mpfr_cmp_d(result->f, 8.0), 0);
@@ -472,41 +480,54 @@ BOOST_AUTO_TEST_CASE(replace) {
   mpz_init_set_si(d, 3);
   mpz_init_set_si(e, 4);
 
-  BOOST_CHECK_EQUAL(true,
-      hook_STRING_eq(hook_STRING_replaceAll(replacee, matcher, replacer),
-        makeString("goodbye world goodbye world goodbye world he worl")));
-  BOOST_CHECK_EQUAL(true,
-      hook_STRING_eq(hook_STRING_replace(replacee, matcher, replacer, a),
-        makeString("hello world hello world hello world he worl")));
-  BOOST_CHECK_EQUAL(true,
-      hook_STRING_eq(hook_STRING_replace(replacee, matcher, replacer, b),
-        makeString("goodbye world hello world hello world he worl")));
-  BOOST_CHECK_EQUAL(true,
-      hook_STRING_eq(hook_STRING_replace(replacee, matcher, replacer, c),
-        makeString("goodbye world goodbye world hello world he worl")));
-  BOOST_CHECK_EQUAL(true,
-      hook_STRING_eq(hook_STRING_replace(replacee, matcher, replacer, d),
-        makeString("goodbye world goodbye world goodbye world he worl")));
-  BOOST_CHECK_EQUAL(true,
-      hook_STRING_eq(hook_STRING_replace(replacee, matcher, replacer, e),
-        makeString("goodbye world goodbye world goodbye world he worl")));
-  BOOST_CHECK_EQUAL(true,
-      hook_STRING_eq(hook_STRING_replaceFirst(replacee, matcher, replacer),
-        makeString("goodbye world hello world hello world he worl")));
+  BOOST_CHECK_EQUAL(
+      true,
+      hook_STRING_eq(
+          hook_STRING_replaceAll(replacee, matcher, replacer),
+          makeString("goodbye world goodbye world goodbye world he worl")));
+  BOOST_CHECK_EQUAL(
+      true, hook_STRING_eq(
+                hook_STRING_replace(replacee, matcher, replacer, a),
+                makeString("hello world hello world hello world he worl")));
+  BOOST_CHECK_EQUAL(
+      true, hook_STRING_eq(
+                hook_STRING_replace(replacee, matcher, replacer, b),
+                makeString("goodbye world hello world hello world he worl")));
+  BOOST_CHECK_EQUAL(
+      true, hook_STRING_eq(
+                hook_STRING_replace(replacee, matcher, replacer, c),
+                makeString("goodbye world goodbye world hello world he worl")));
+  BOOST_CHECK_EQUAL(
+      true,
+      hook_STRING_eq(
+          hook_STRING_replace(replacee, matcher, replacer, d),
+          makeString("goodbye world goodbye world goodbye world he worl")));
+  BOOST_CHECK_EQUAL(
+      true,
+      hook_STRING_eq(
+          hook_STRING_replace(replacee, matcher, replacer, e),
+          makeString("goodbye world goodbye world goodbye world he worl")));
+  BOOST_CHECK_EQUAL(
+      true, hook_STRING_eq(
+                hook_STRING_replaceFirst(replacee, matcher, replacer),
+                makeString("goodbye world hello world hello world he worl")));
 }
 
 BOOST_AUTO_TEST_CASE(countAllOccurrences) {
   auto replacee = makeString("hello world hello world hello world he worl");
   auto matcher = makeString("hello");
-  BOOST_CHECK_EQUAL(mpz_cmp_ui(hook_STRING_countAllOccurrences(replacee, matcher), 3), 0);
+  BOOST_CHECK_EQUAL(
+      mpz_cmp_ui(hook_STRING_countAllOccurrences(replacee, matcher), 3), 0);
 
   replacee = makeString("hel world hel world heo world he worl");
   matcher = makeString("hello");
-  BOOST_CHECK_EQUAL(mpz_cmp_ui(hook_STRING_countAllOccurrences(replacee, matcher), 0), 0);
+  BOOST_CHECK_EQUAL(
+      mpz_cmp_ui(hook_STRING_countAllOccurrences(replacee, matcher), 0), 0);
 
   replacee = makeString("hel world hel world hello world he worl");
   matcher = makeString("hello");
-  BOOST_CHECK_EQUAL(mpz_cmp_ui(hook_STRING_countAllOccurrences(replacee, matcher), 1), 0);
+  BOOST_CHECK_EQUAL(
+      mpz_cmp_ui(hook_STRING_countAllOccurrences(replacee, matcher), 1), 0);
 }
 
 BOOST_AUTO_TEST_CASE(buffer_empty) {

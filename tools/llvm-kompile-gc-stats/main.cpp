@@ -4,9 +4,9 @@
 #include <cstring>
 #include <gmp.h>
 
-int main (int argc, char **argv) {
+int main(int argc, char **argv) {
   const char *usage = "usage: %s [dump|analyze|generation|count] <file>"
-   " [<lower_bound> <upper_bound>]\n";
+                      " [<lower_bound> <upper_bound>]\n";
   if (argc < 3) {
     fprintf(stderr, usage, argv[0]);
     return 1;
@@ -46,7 +46,7 @@ int main (int argc, char **argv) {
     upperBound = atoi(argv[4]);
     mpz_init(size);
   }
-  while(true) {
+  while (true) {
     int ret = fread(frame, sizeof(size_t), 2049, f);
     // the frame contains 2049 integers:
     //
@@ -59,7 +59,8 @@ int main (int argc, char **argv) {
     //
     // frame[2048] contains the total number of bytes that survived
     // at least 2048 collection cycles that are alive at that point in time.
-    if (ret < 2049) break;
+    if (ret < 2049)
+      break;
     if (dump) {
       printf("Collection %zd\n", step);
       for (int i = 0; i < 2048; i++) {
@@ -70,8 +71,8 @@ int main (int argc, char **argv) {
       for (int i = 0; i < 2048; i++) {
         mpz_add_ui(total[i], total[i], frame[i]);
         if (i > 0) {
-          assert(mpz_cmp_ui(total[i-1], frame[i]) >= 0);
-          mpz_sub_ui(total[i-1], total[i-1], frame[i]);
+          assert(mpz_cmp_ui(total[i - 1], frame[i]) >= 0);
+          mpz_sub_ui(total[i - 1], total[i - 1], frame[i]);
         }
       }
     } else if (generation) {
@@ -94,7 +95,7 @@ int main (int argc, char **argv) {
     step++;
   }
   if (analyze) {
-    for (int i = 0; i < 2047; i++) { 
+    for (int i = 0; i < 2047; i++) {
       gmp_printf("%d: %Zd\n", i, total[i]);
     }
     gmp_printf("saturated: %Zd\n", total[2047]);
@@ -103,5 +104,3 @@ int main (int argc, char **argv) {
   }
   return 0;
 }
-
-

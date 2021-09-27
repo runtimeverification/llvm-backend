@@ -1,7 +1,7 @@
-#include<gmp.h>
-#include<cstdlib>
-#include<cstring>
-#include<stdexcept>
+#include <cstdlib>
+#include <cstring>
+#include <gmp.h>
+#include <stdexcept>
 
 #include "runtime/header.h"
 
@@ -232,8 +232,8 @@ SortInt hook_INT_log2(SortInt a) {
 
 void extract(mpz_t result, mpz_t i, size_t off, size_t len) {
   ssize_t size = (len + LIMB_BITS - 1) / LIMB_BITS;
-  mpz_init2(result, len+LIMB_BITS);
-  memset(result->_mp_d, 0, result->_mp_alloc*sizeof(mp_limb_t));
+  mpz_init2(result, len + LIMB_BITS);
+  memset(result->_mp_d, 0, result->_mp_alloc * sizeof(mp_limb_t));
   size_t off_words = off / LIMB_BITS;
   size_t off_bits = off % LIMB_BITS;
   size_t num_limbs = mpz_size(i);
@@ -244,9 +244,9 @@ void extract(mpz_t result, mpz_t i, size_t off, size_t len) {
   mp_limb_t carry = 0;
   if (copy_size > 0) {
     if (off_bits) {
-      carry = mpn_rshift(result->_mp_d, i->_mp_d + off_words, copy_size, off_bits);
-    }
-    else {
+      carry = mpn_rshift(
+          result->_mp_d, i->_mp_d + off_words, copy_size, off_bits);
+    } else {
       mpn_copyi(result->_mp_d, i->_mp_d + off_words, copy_size);
     }
   } else {
@@ -263,9 +263,9 @@ void extract(mpz_t result, mpz_t i, size_t off, size_t len) {
   }
   len %= LIMB_BITS;
   if (len) {
-    result->_mp_d[size-1] &= ((mp_limb_t)-1) >> (LIMB_BITS - len);
+    result->_mp_d[size - 1] &= ((mp_limb_t)-1) >> (LIMB_BITS - len);
   }
-  while (size > 0 && result->_mp_d[size-1] == 0) {
+  while (size > 0 && result->_mp_d[size - 1] == 0) {
     size--;
   }
   result->_mp_size = size;
@@ -308,7 +308,7 @@ void signed_extract(mpz_t result, mpz_t i, size_t off, size_t len) {
     mpz_init(max);
     mpz_init(tmp);
     mpz_set_ui(max, 1);
-    mpz_mul_2exp(max, max, len-1);
+    mpz_mul_2exp(max, max, len - 1);
     extract(result, i, off, len);
     mpz_add(result, result, max);
     extract(tmp, result, 0, len);
@@ -356,7 +356,7 @@ void int_hash(mpz_t i, void *hasher) {
   }
 }
 
-static block * dotK = leaf_block(getTagForSymbolName("dotk{}"));
+static block *dotK = leaf_block(getTagForSymbolName("dotk{}"));
 
 gmp_randstate_t kllvm_randState;
 bool kllvm_randStateInitialized = false;
@@ -388,10 +388,12 @@ size_t *hook_MINT_export(mpz_t in, uint64_t bits) {
   mpz_t twos;
   mpz_init(twos);
   extract(twos, in, 0, nwords * 64);
-  if (nwords == 0) return nullptr;
-  uint64_t numb = 8*sizeof(size_t);
-  uint64_t count = (mpz_sizeinbase (twos, 2) + numb-1) / numb;
-  if (mpz_sgn(twos) == 0) count = 0;
+  if (nwords == 0)
+    return nullptr;
+  uint64_t numb = 8 * sizeof(size_t);
+  uint64_t count = (mpz_sizeinbase(twos, 2) + numb - 1) / numb;
+  if (mpz_sgn(twos) == 0)
+    count = 0;
   uint64_t alloccount = nwords > count ? nwords : count;
   size_t allocsize = alloccount * sizeof(size_t);
   size_t *allocptr = (size_t *)koreAllocAlwaysGC(allocsize);
@@ -400,13 +402,14 @@ size_t *hook_MINT_export(mpz_t in, uint64_t bits) {
   size_t actualcount;
   mpz_export(exportptr, &actualcount, 1, sizeof(size_t), 0, 0, twos);
   assert(count == actualcount);
-  if (count == 0) return allocptr;
+  if (count == 0)
+    return allocptr;
   size_t *resultptr = nwords > count ? allocptr : allocptr + count - nwords;
   return resultptr;
 }
 
 mpz_ptr hook_MINT_import(size_t *i, uint64_t bits, bool isSigned) {
-  mpz_t result, twos;	
+  mpz_t result, twos;
   mpz_init(twos);
   mpz_init(result);
   uint64_t nwords = (bits + 63) / 64;
@@ -418,5 +421,4 @@ mpz_ptr hook_MINT_import(size_t *i, uint64_t bits, bool isSigned) {
     return move_int(twos);
   }
 }
-
 }

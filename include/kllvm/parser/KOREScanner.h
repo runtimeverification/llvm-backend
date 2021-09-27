@@ -39,9 +39,9 @@ public:
   ~KOREScanner();
   int scan();
 
-friend class KOREParser;
+  friend class KOREParser;
 
-typedef void *yyscan_t;
+  typedef void *yyscan_t;
 
 private:
   yyscan_t scanner;

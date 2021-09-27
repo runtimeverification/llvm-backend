@@ -1,34 +1,35 @@
-#include "kllvm/parser/KOREScanner.h"
 #include "kllvm/parser/KOREParser.h"
+#include "kllvm/parser/KOREScanner.h"
 
 #include <iostream>
 
 using namespace kllvm;
 using namespace kllvm::parser;
 
-sptr<KOREPattern> addBrackets(sptr<KOREPattern>, PrettyPrintData const&);
+sptr<KOREPattern> addBrackets(sptr<KOREPattern>, PrettyPrintData const &);
 
 const std::string WHITESPACE = " \n\r\t\f\v";
 
-static std::string ltrim(const std::string &s)
-{
-    size_t start = s.find_first_not_of(WHITESPACE);
-    return (start == std::string::npos) ? "" : s.substr(start);
+static std::string ltrim(const std::string &s) {
+  size_t start = s.find_first_not_of(WHITESPACE);
+  return (start == std::string::npos) ? "" : s.substr(start);
 }
 
-static std::string rtrim(const std::string &s)
-{
-    size_t end = s.find_last_not_of(WHITESPACE);
-    return (end == std::string::npos) ? "" : s.substr(0, end + 1);
+static std::string rtrim(const std::string &s) {
+  size_t end = s.find_last_not_of(WHITESPACE);
+  return (end == std::string::npos) ? "" : s.substr(0, end + 1);
 }
 
 static std::string trim(const std::string &s) {
-    return rtrim(ltrim(s));
+  return rtrim(ltrim(s));
 }
 
-int main (int argc, char **argv) {
+int main(int argc, char **argv) {
   if (argc != 3 && argc != 4 && argc != 5) {
-    std::cerr << "usage: " << argv[0] << " <definition.kore> <pattern.kore> [true|false|auto] [true|false]" << std::endl;
+    std::cerr
+        << "usage: " << argv[0]
+        << " <definition.kore> <pattern.kore> [true|false|auto] [true|false]"
+        << std::endl;
   }
 
   bool hasColor, filterSubst;
@@ -99,7 +100,8 @@ int main (int argc, char **argv) {
   comms.insert("\\or");
   std::map<std::string, std::vector<std::string>> colors;
 
-  std::map<std::string, std::set<std::string>> priorities, leftAssoc, rightAssoc;
+  std::map<std::string, std::set<std::string>> priorities, leftAssoc,
+      rightAssoc;
   leftAssoc["kseq"].insert("kseq");
   leftAssoc["append"].insert("append");
   leftAssoc["\\and"].insert("\\and");
@@ -181,7 +183,7 @@ int main (int argc, char **argv) {
             color.push_back(trim(colorAtt.substr(idx)));
             break;
           } else {
-            color.push_back(trim(colorAtt.substr(idx, pos-idx)));
+            color.push_back(trim(colorAtt.substr(idx, pos - idx)));
             idx = pos + 1;
           }
         } while (true);
@@ -189,7 +191,8 @@ int main (int argc, char **argv) {
       }
 
       if (entry.second->getAttributes().count("bracket")) {
-        brackets[entry.second->getSymbol()->getSort().get()].push_back(entry.second->getSymbol());
+        brackets[entry.second->getSymbol()->getSort().get()].push_back(
+            entry.second->getSymbol());
       }
 
       readMultimap(name, entry.second, leftAssoc, "left");
@@ -208,14 +211,20 @@ int main (int argc, char **argv) {
   for (auto axiom : def->getAxioms()) {
     if (axiom->getAttributes().count("subsort")) {
       KORECompositePattern *att = axiom->getAttributes().at("subsort").get();
-      KORESort *innerSort = att->getConstructor()->getFormalArguments()[0].get();
-      KORESort *outerSort = att->getConstructor()->getFormalArguments()[1].get();
+      KORESort *innerSort
+          = att->getConstructor()->getFormalArguments()[0].get();
+      KORESort *outerSort
+          = att->getConstructor()->getFormalArguments()[1].get();
       subsorts[innerSort].insert(outerSort);
     }
     if (axiom->getAttributes().count("overload")) {
       KORECompositePattern *att = axiom->getAttributes().at("overload").get();
-      KORESymbol *innerSymbol = dynamic_cast<KORECompositePattern *>(att->getArguments()[1].get())->getConstructor();
-      KORESymbol *outerSymbol = dynamic_cast<KORECompositePattern *>(att->getArguments()[0].get())->getConstructor();
+      KORESymbol *innerSymbol
+          = dynamic_cast<KORECompositePattern *>(att->getArguments()[1].get())
+                ->getConstructor();
+      KORESymbol *outerSymbol
+          = dynamic_cast<KORECompositePattern *>(att->getArguments()[0].get())
+                ->getConstructor();
       overloads[innerSymbol].insert(outerSymbol);
     }
   }
@@ -244,9 +253,12 @@ int main (int argc, char **argv) {
     }
   }
 
-  PrettyPrintData data = {formats, colors, terminals, priorities, leftAssoc, rightAssoc, hooks, brackets, assocs, comms, subsorts, hasColor};
+  PrettyPrintData data
+      = {formats, colors,   terminals, priorities, leftAssoc, rightAssoc,
+         hooks,   brackets, assocs,    comms,      subsorts,  hasColor};
 
-  sptr<KOREPattern> expanded = config->expandMacros(subsorts, overloads, axioms, true);
+  sptr<KOREPattern> expanded
+      = config->expandMacros(subsorts, overloads, axioms, true);
   sptr<KOREPattern> sorted = expanded->sortCollections(data);
   sptr<KOREPattern> filtered;
   if (filterSubst) {

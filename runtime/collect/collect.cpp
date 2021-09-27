@@ -1,15 +1,15 @@
-#include<cstdbool>
-#include<cstdint>
-#include<cstdio>
-#include<cstdlib>
-#include<cstring>
-#include<cassert>
-#include<map>
+#include <cassert>
+#include <cstdbool>
+#include <cstdint>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <map>
 
 #include "runtime/alloc.h"
-#include "runtime/header.h"
 #include "runtime/arena.h"
 #include "runtime/collect.h"
+#include "runtime/header.h"
 
 #define UNW_LOCAL_ONLY
 #include <libunwind.h>
@@ -18,8 +18,8 @@ extern "C" {
 
 char **young_alloc_ptr(void);
 char **old_alloc_ptr(void);
-char* youngspace_ptr(void);
-char* oldspace_ptr(void);
+char *youngspace_ptr(void);
+char *oldspace_ptr(void);
 
 static bool is_gc = false;
 bool collect_old = false;
@@ -40,15 +40,15 @@ bool during_gc() {
 
 size_t get_size(uint64_t hdr, uint16_t layout) {
   if (!layout) {
-    size_t size = (len_hdr(hdr)  + sizeof(blockheader) + 7) & ~7;
+    size_t size = (len_hdr(hdr) + sizeof(blockheader) + 7) & ~7;
     return hdr == NOT_YOUNG_OBJECT_BIT ? 8 : size < 16 ? 16 : size;
   } else {
     return size_hdr(hdr);
   }
 }
 
-void migrate(block** blockPtr) {
-  block* currBlock = *blockPtr;
+void migrate(block **blockPtr) {
+  block *currBlock = *blockPtr;
   if (is_leaf_block(currBlock)) {
     return;
   }
@@ -56,7 +56,7 @@ void migrate(block** blockPtr) {
   initialize_migrate();
   uint16_t layout = layout_hdr(hdr);
   size_t lenInBytes = get_size(hdr, layout);
-  block** forwardingAddress = (block**)(currBlock + 1);
+  block **forwardingAddress = (block **)(currBlock + 1);
   if (!hasForwardingAddress) {
     block *newBlock;
     if (shouldPromote || (isInOldGen && collect_old)) {
@@ -77,21 +77,23 @@ void migrate(block** blockPtr) {
   }
 }
 
-// call this function instead of migrate on objects directly referenced by shared objects (like collection nodes)
-// that are not tracked by gc
-void migrate_once(block** blockPtr) {
-  block* currBlock = *blockPtr;
+// call this function instead of migrate on objects directly referenced by
+// shared objects (like collection nodes) that are not tracked by gc
+void migrate_once(block **blockPtr) {
+  block *currBlock = *blockPtr;
   if (is_leaf_block(currBlock)) {
     return;
   }
-  if (youngspace_collection_id() == getArenaSemispaceIDOfObject((void *)currBlock) ||
-      oldspace_collection_id() == getArenaSemispaceIDOfObject((void *)currBlock)) {
+  if (youngspace_collection_id()
+          == getArenaSemispaceIDOfObject((void *)currBlock)
+      || oldspace_collection_id()
+             == getArenaSemispaceIDOfObject((void *)currBlock)) {
     migrate(blockPtr);
   }
 }
 
-static void migrate_string_buffer(stringbuffer** bufferPtr) {
-  stringbuffer* buffer = *bufferPtr;
+static void migrate_string_buffer(stringbuffer **bufferPtr) {
+  stringbuffer *buffer = *bufferPtr;
   const uint64_t hdr = buffer->h.hdr;
   const uint64_t cap = len(buffer->contents);
   initialize_migrate();
@@ -106,7 +108,8 @@ static void migrate_string_buffer(stringbuffer** bufferPtr) {
       newContents = (string *)koreAllocToken(sizeof(string) + cap);
     }
 #ifdef GC_DBG
-    numBytesLiveAtCollection[oldAge] += cap + sizeof(stringbuffer) + sizeof(string);
+    numBytesLiveAtCollection[oldAge]
+        += cap + sizeof(stringbuffer) + sizeof(string);
 #endif
     memcpy(newContents, buffer->contents, sizeof(string) + buffer->strlen);
     memcpy(newBuffer, buffer, sizeof(stringbuffer));
@@ -141,10 +144,10 @@ static void migrate_mpz(mpz_ptr *mpzPtr) {
 
       if (shouldPromote || (isInOldGen && collect_old)) {
         newIntgr = struct_base(mpz_hdr, i, koreAllocIntegerOld(0));
-        newLimbs = (string *) koreAllocTokenOld(sizeof(string) + lenLimbs);
+        newLimbs = (string *)koreAllocTokenOld(sizeof(string) + lenLimbs);
       } else {
         newIntgr = struct_base(mpz_hdr, i, koreAllocInteger(0));
-        newLimbs = (string *) koreAllocToken(sizeof(string) + lenLimbs);
+        newLimbs = (string *)koreAllocToken(sizeof(string) + lenLimbs);
       }
       memcpy(newLimbs, limbs, sizeof(string) + lenLimbs);
     } else {
@@ -172,65 +175,56 @@ static void migrate_floating(floating **floatingPtr) {
   if (!hasForwardingAddress) {
     floating_hdr *newFlt;
     string *newLimbs;
-    string *limbs = struct_base(string, data, flt->f.f->_mpfr_d-1);
+    string *limbs = struct_base(string, data, flt->f.f->_mpfr_d - 1);
     size_t lenLimbs = len(limbs);
 
 #ifdef GC_DBG
-    numBytesLiveAtCollection[oldAge] += sizeof(floating_hdr) + sizeof(string) + lenLimbs;
+    numBytesLiveAtCollection[oldAge]
+        += sizeof(floating_hdr) + sizeof(string) + lenLimbs;
 #endif
 
-    assert(((flt->f.f->_mpfr_prec + mp_bits_per_limb - 1) / mp_bits_per_limb) * sizeof(mp_limb_t) <= lenLimbs);
+    assert(
+        ((flt->f.f->_mpfr_prec + mp_bits_per_limb - 1) / mp_bits_per_limb)
+            * sizeof(mp_limb_t)
+        <= lenLimbs);
 
     if (shouldPromote || (isInOldGen && collect_old)) {
       newFlt = struct_base(floating_hdr, f, koreAllocFloatingOld(0));
-      newLimbs = (string *) koreAllocTokenOld(sizeof(string) + lenLimbs);
+      newLimbs = (string *)koreAllocTokenOld(sizeof(string) + lenLimbs);
     } else {
       newFlt = struct_base(floating_hdr, f, koreAllocFloating(0));
-      newLimbs = (string *) koreAllocToken(sizeof(string) + lenLimbs);
+      newLimbs = (string *)koreAllocToken(sizeof(string) + lenLimbs);
     }
     memcpy(newLimbs, limbs, sizeof(string) + lenLimbs);
     memcpy(newFlt, flt, sizeof(floating_hdr));
     migrate_header(newFlt);
-    newFlt->f.f->_mpfr_d = (mp_limb_t *)newLimbs->data+1;
+    newFlt->f.f->_mpfr_d = (mp_limb_t *)newLimbs->data + 1;
     *(floating **)(flt->f.f->_mpfr_d) = &newFlt->f;
     flt->h.hdr |= FWD_PTR_BIT;
   }
   *floatingPtr = *(floating **)(flt->f.f->_mpfr_d);
 }
 
-static void migrate_child(void* currBlock, layoutitem *args, unsigned i, bool ptr) {
+static void
+migrate_child(void *currBlock, layoutitem *args, unsigned i, bool ptr) {
   layoutitem *argData = args + i;
   void *arg = ((char *)currBlock) + argData->offset;
-  switch(argData->cat) {
-  case MAP_LAYOUT:
-    migrate_map(ptr ? *(map**)arg : arg);
-    break;
-  case LIST_LAYOUT:
-    migrate_list(ptr ? *(list**)arg : arg);
-    break;
-  case SET_LAYOUT:
-    migrate_set(ptr ? *(set**)arg : arg);
-    break;
-  case STRINGBUFFER_LAYOUT:
-    migrate_string_buffer((stringbuffer **)arg);
-    break;
+  switch (argData->cat) {
+  case MAP_LAYOUT: migrate_map(ptr ? *(map **)arg : arg); break;
+  case LIST_LAYOUT: migrate_list(ptr ? *(list **)arg : arg); break;
+  case SET_LAYOUT: migrate_set(ptr ? *(set **)arg : arg); break;
+  case STRINGBUFFER_LAYOUT: migrate_string_buffer((stringbuffer **)arg); break;
   case SYMBOL_LAYOUT:
-  case VARIABLE_LAYOUT:
-    migrate((block **)arg);
-    break;
-  case INT_LAYOUT:
-    migrate_mpz((mpz_ptr *)arg);
-    break;
-  case FLOAT_LAYOUT:
-    migrate_floating((floating **)arg);
-    break;
+  case VARIABLE_LAYOUT: migrate((block **)arg); break;
+  case INT_LAYOUT: migrate_mpz((mpz_ptr *)arg); break;
+  case FLOAT_LAYOUT: migrate_floating((floating **)arg); break;
   case BOOL_LAYOUT:
-  default: //mint
+  default: // mint
     break;
   }
 }
 
-static char* evacuate(char* scan_ptr, char** alloc_ptr) {
+static char *evacuate(char *scan_ptr, char **alloc_ptr) {
   block *currBlock = (block *)scan_ptr;
   const uint64_t hdr = currBlock->h.hdr;
   uint16_t layoutInt = layout_hdr(hdr);
@@ -333,14 +327,15 @@ void koreCollect(void) {
   char *scan_ptr = youngspace_ptr();
   if (scan_ptr != *young_alloc_ptr()) {
     MEM_LOG("Evacuating young generation\n");
-    while(scan_ptr) {
+    while (scan_ptr) {
       scan_ptr = evacuate(scan_ptr, young_alloc_ptr());
     }
   }
   if (collect_old || !previous_oldspace_alloc_ptr) {
     scan_ptr = oldspace_ptr();
   } else {
-    if (mem_block_start(previous_oldspace_alloc_ptr+1) == previous_oldspace_alloc_ptr) {
+    if (mem_block_start(previous_oldspace_alloc_ptr + 1)
+        == previous_oldspace_alloc_ptr) {
       // this means that the previous oldspace allocation pointer points to an
       // address that is megabyte-aligned. This can only happen if we have just
       // filled up a block but have not yet allocated the next block in the
@@ -357,17 +352,18 @@ void koreCollect(void) {
   }
   if (scan_ptr != *old_alloc_ptr()) {
     MEM_LOG("Evacuating old generation\n");
-    while(scan_ptr) {
+    while (scan_ptr) {
       scan_ptr = evacuate(scan_ptr, old_alloc_ptr());
     }
   }
 #ifdef GC_DBG
-  ssize_t numBytesAllocedSinceLastCollection = ptrDiff(current_alloc_ptr, last_alloc_ptr);
+  ssize_t numBytesAllocedSinceLastCollection
+      = ptrDiff(current_alloc_ptr, last_alloc_ptr);
   assert(numBytesAllocedSinceLastCollection >= 0);
   fwrite(&numBytesAllocedSinceLastCollection, sizeof(ssize_t), 1, stderr);
   last_alloc_ptr = *young_alloc_ptr();
-  fwrite(numBytesLiveAtCollection, 
-      sizeof(numBytesLiveAtCollection[0]),
+  fwrite(
+      numBytesLiveAtCollection, sizeof(numBytesLiveAtCollection[0]),
       sizeof(numBytesLiveAtCollection) / sizeof(numBytesLiveAtCollection[0]),
       stderr);
 #endif
@@ -384,5 +380,4 @@ bool is_collection() {
   size_t threshold = get_gc_threshold();
   return youngspaceAlmostFull(threshold);
 }
-
 }

@@ -1,15 +1,18 @@
 #ifndef ARENA_H
 #define ARENA_H
 
+#include <cstddef>
+#include <sys/types.h>
+
 extern "C" {
 
 // An arena can be used to allocate objects that can then be deallocated all at
 // once.
 struct arena {
-  char* first_block;
-  char* block;
-  char* block_start;
-  char* block_end;
+  char *first_block;
+  char *block;
+  char *block_start;
+  char *block_end;
   char *first_collection_block;
   size_t num_blocks;
   size_t num_collection_blocks;
@@ -17,18 +20,18 @@ struct arena {
 };
 
 typedef struct {
-  char* next_block;
-  char* next_superblock;
+  char *next_block;
+  char *next_superblock;
   char semispace;
 } memory_block_header;
 
 // Macro to define a new arena with the given ID. Supports IDs ranging from 0 to
 // 127.
-#define REGISTER_ARENA(name, id) \
-  static struct arena name = { .allocation_semispace_id = id }
+#define REGISTER_ARENA(name, id)                                               \
+  static struct arena name = {.allocation_semispace_id = id}
 
-#define mem_block_start(ptr) \
-  ((char *)(((uintptr_t)(ptr) - 1) & ~(BLOCK_SIZE-1)))
+#define mem_block_start(ptr)                                                   \
+  ((char *)(((uintptr_t)(ptr)-1) & ~(BLOCK_SIZE - 1)))
 
 // Resets the given arena.
 void arenaReset(struct arena *);
@@ -44,14 +47,14 @@ char getArenaAllocationSemispaceID(const struct arena *);
 char getArenaCollectionSemispaceID(const struct arena *);
 
 // Returns the ID of the semispace where the given address was allocated.
-// The behavior is undefined if called with an address that has not been allocated
-// within an arena.
+// The behavior is undefined if called with an address that has not been
+// allocated within an arena.
 char getArenaSemispaceIDOfObject(void *);
 
 // Allocates the requested number of bytes as a contiguous region and returns a
 // pointer to the first allocated byte.
-// If called with requested size greater than the maximun single allocation size,
-// the space is allocated in a general (not garbage collected pool).
+// If called with requested size greater than the maximun single allocation
+// size, the space is allocated in a general (not garbage collected pool).
 void *arenaAlloc(struct arena *, size_t);
 
 // Resizes the last allocation as long as the resize does not require a new
@@ -65,8 +68,9 @@ void *arenaResizeLastAlloc(struct arena *, ssize_t);
 // It is used before garbage collection.
 void arenaSwapAndClear(struct arena *);
 
-// Clears the current allocation space by setting its start back to its first block.
-// It is used during garbage collection to effectively collect all of the arena.
+// Clears the current allocation space by setting its start back to its first
+// block. It is used during garbage collection to effectively collect all of the
+// arena.
 void arenaClear(struct arena *);
 
 // Returns the address of the first byte that belongs in the given arena.
@@ -89,15 +93,19 @@ char **arenaEndPtr(struct arena *);
 //               starting pointer, or 0 if this is equal to the 3rd argument.
 char *movePtr(char *, size_t, const char *);
 
-// Given two pointers to objects allocated in the same arena, return the number of bytes they are separated by within the virtual block of memory represented by the blocks of that arena. This difference will include blocks containing sentinel bytes. Undefined behavior will result if the pointers belong to different arenas.
+// Given two pointers to objects allocated in the same arena, return the number
+// of bytes they are separated by within the virtual block of memory represented
+// by the blocks of that arena. This difference will include blocks containing
+// sentinel bytes. Undefined behavior will result if the pointers belong to
+// different arenas.
 ssize_t ptrDiff(char *, char *);
 
-// return the total number of allocatable bytes currently in the arena in its active semispace.
+// return the total number of allocatable bytes currently in the arena in its
+// active semispace.
 size_t arenaSize(const struct arena *);
 
 // Deallocates all the memory allocated for registered arenas.
 void freeAllMemory(void);
-
 }
 
 #endif // ARENA_H

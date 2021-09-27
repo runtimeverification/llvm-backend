@@ -1,13 +1,15 @@
-#include "runtime/header.h"
-#include "runtime/collect.h"
 #include "runtime/arena.h"
+#include "runtime/collect.h"
+#include "runtime/header.h"
 
 #include <cstring>
 
 void migrate_collection_node(void **nodePtr) {
   string *currBlock = struct_base(string, data, *nodePtr);
-  if (youngspace_collection_id() != getArenaSemispaceIDOfObject((void *)currBlock) &&
-      oldspace_collection_id() != getArenaSemispaceIDOfObject((void *)currBlock)) {
+  if (youngspace_collection_id()
+          != getArenaSemispaceIDOfObject((void *)currBlock)
+      && oldspace_collection_id()
+             != getArenaSemispaceIDOfObject((void *)currBlock)) {
     return;
   }
   const uint64_t hdr = currBlock->h.hdr;
@@ -25,17 +27,17 @@ void migrate_collection_node(void **nodePtr) {
 #endif
     memcpy(newBlock, currBlock, lenInBytes);
     migrate_header(newBlock);
-    *(void **)(currBlock+1) = newBlock + 1;
+    *(void **)(currBlock + 1) = newBlock + 1;
     currBlock->h.hdr |= FWD_PTR_BIT;
   }
-  *nodePtr = *(void **)(currBlock+1);
+  *nodePtr = *(void **)(currBlock + 1);
 }
 
 struct migrate_visitor : immer::detail::rbts::visitor_base<migrate_visitor> {
   using this_t = migrate_visitor;
 
   template <typename Pos>
-  static void visit_inner(Pos&& pos) {
+  static void visit_inner(Pos &&pos) {
     for (size_t i = 0; i < pos.count(); i++) {
       void **node = (void **)pos.node()->inner() + i;
       migrate_collection_node(node);
@@ -47,7 +49,7 @@ struct migrate_visitor : immer::detail::rbts::visitor_base<migrate_visitor> {
   }
 
   template <typename Pos>
-  static void visit_leaf(Pos&& pos) {
+  static void visit_leaf(Pos &&pos) {
     for (size_t i = 0; i < pos.count(); i++) {
       block **element = (block **)pos.node()->leaf() + i;
       migrate_once(element);
@@ -66,12 +68,14 @@ void migrate_list(void *l) {
 }
 
 template <typename Fn, typename NodeT>
-void migrate_champ_traversal(NodeT *node, immer::detail::hamts::count_t depth, Fn&& fn) {
+void migrate_champ_traversal(
+    NodeT *node, immer::detail::hamts::count_t depth, Fn &&fn) {
   if (depth < immer::detail::hamts::max_depth<immer::default_bits>) {
     auto datamap = node->datamap();
     if (datamap) {
       migrate_collection_node((void **)&node->impl.d.data.inner.values);
-      fn(node->values(), node->values() + immer::detail::hamts::popcount(datamap));
+      fn(node->values(),
+         node->values() + immer::detail::hamts::popcount(datamap));
     }
     auto nodemap = node->nodemap();
     if (nodemap) {
@@ -87,7 +91,8 @@ void migrate_champ_traversal(NodeT *node, immer::detail::hamts::count_t depth, F
   }
 }
 
-void migrate_map_leaf(std::pair<KElem, KElem> *start, std::pair<KElem, KElem> *end) {
+void migrate_map_leaf(
+    std::pair<KElem, KElem> *start, std::pair<KElem, KElem> *end) {
   for (auto it = start; it != end; ++it) {
     migrate_once(&it->first.elem);
     migrate_once(&it->second.elem);

@@ -1,35 +1,37 @@
-#include<gmp.h>
-#include<mpfr.h>
-#include<stdexcept>
+#include <gmp.h>
+#include <mpfr.h>
+#include <stdexcept>
 
 #include "runtime/header.h"
 
 #if MPFR_VERSION_MAJOR < 4
-  #define mpfr_rootn_ui mpfr_root
+#define mpfr_rootn_ui mpfr_root
 #endif
 
 static mpfr_exp_t emin(mpfr_exp_t e, mpfr_prec_t p) {
-  return (- (1 << (e-1))) + 2;
+  return (-(1 << (e - 1))) + 2;
 }
 
 static mpfr_exp_t emax(mpfr_exp_t e) {
-  return (1 << (e-1)) - 1;
+  return (1 << (e - 1)) - 1;
 }
 
 static mpfr_exp_t default_emax, default_emin;
 
 /* Each floating point number contains a number of exponent bits (here e) and
- * a precision (p). Here we initialize the result of a floating point computation
- * with that exponent range and precision and then prepare mpfr to perform the calculation
- * by transferring ourselves to that exponent range. An overload also exists to
- * get the value from a floating * if one already exists in the arguments to the function. */
+ * a precision (p). Here we initialize the result of a floating point
+ * computation with that exponent range and precision and then prepare mpfr to
+ * perform the calculation by transferring ourselves to that exponent range. An
+ * overload also exists to
+ * get the value from a floating * if one already exists in the arguments to the
+ * function. */
 static void mpfr_enter(mpfr_prec_t p, mpfr_exp_t e, floating *result) {
   mpfr_init2(result->f, p);
   result->exp = e;
   default_emax = mpfr_get_emax();
   default_emin = mpfr_get_emin();
-  mpfr_set_emin(emin(e, p)-p+2);
-  mpfr_set_emax(emax(e)+1);
+  mpfr_set_emin(emin(e, p) - p + 2);
+  mpfr_set_emax(emax(e) + 1);
 }
 
 static void mpfr_enter(floating *arg, floating *result) {
@@ -37,9 +39,9 @@ static void mpfr_enter(floating *arg, floating *result) {
   mpfr_enter(p, arg->exp, result);
 }
 
-/* Here we finalize the computation by ensuring that the value is correctly rounded into
- * The result exponent range, including subnormal arithmetic, and then restore the previous
- * values for emin and emax within mpfr. */
+/* Here we finalize the computation by ensuring that the value is correctly
+ * rounded into The result exponent range, including subnormal arithmetic, and
+ * then restore the previous values for emin and emax within mpfr. */
 static void mpfr_leave(int t, floating *result) {
   t = mpfr_check_range(result->f, t, MPFR_RNDN);
   mpfr_subnormalize(result->f, t, MPFR_RNDN);
@@ -61,7 +63,7 @@ SortFloat hook_FLOAT_ceil(SortFloat a) {
   mpfr_enter(a, result);
   int t = mpfr_ceil(result->f, a->f);
   mpfr_leave(t, result);
-  return move_float(result); 
+  return move_float(result);
 }
 
 SortFloat hook_FLOAT_floor(SortFloat a) {
@@ -220,15 +222,15 @@ mpz_ptr hook_FLOAT_exponent(SortFloat a) {
   mpfr_exp_t min = emin(a->exp, mpfr_get_prec(a->f));
   if (mpfr_regular_p(a->f)) {
     if (mpfr_get_exp(a->f) - 1 < min) {
-      //subnormal
-      mpz_set_si(result, min-1);
+      // subnormal
+      mpz_set_si(result, min - 1);
     } else {
-      mpz_set_si(result, mpfr_get_exp(a->f)-1);
+      mpz_set_si(result, mpfr_get_exp(a->f) - 1);
     }
   } else if (mpfr_zero_p(a->f)) {
-    mpz_set_si(result, min-1);
+    mpz_set_si(result, min - 1);
   } else { // nan or infinity
-    mpz_set_si(result, emax(a->exp)+1);
+    mpz_set_si(result, emax(a->exp) + 1);
   }
   return move_int(result);
 }
@@ -249,7 +251,7 @@ void *hook_FLOAT_significand(SortFloat a) {
   mpfr_exp_t exp = mpfr_get_exp(a->f);
   mpfr_exp_t min = emin(a->exp, prec);
   if (exp - 1 < min) {
-    //subnormal
+    // subnormal
     mpz_fdiv_q_2exp(z, z, min - (exp - 1));
   }
   return move_mint(z, len);
@@ -344,7 +346,7 @@ SortFloat hook_FLOAT_abs(SortFloat a) {
   mpfr_enter(a, result);
   int t = mpfr_abs(result->f, a->f, MPFR_RNDN);
   mpfr_leave(t, result);
-  return move_float(result); 
+  return move_float(result);
 }
 
 SortFloat hook_FLOAT_neg(SortFloat a) {
@@ -352,7 +354,7 @@ SortFloat hook_FLOAT_neg(SortFloat a) {
   mpfr_enter(a, result);
   int t = mpfr_neg(result->f, a->f, MPFR_RNDN);
   mpfr_leave(t, result);
-  return move_float(result); 
+  return move_float(result);
 }
 
 SortFloat hook_FLOAT_min(SortFloat a, SortFloat b) {
@@ -428,7 +430,7 @@ SortFloat hook_FLOAT_root(SortFloat a, SortInt b) {
   mpfr_enter(a, result);
   int t = mpfr_rootn_ui(result->f, a->f, root, MPFR_RNDN);
   mpfr_leave(t, result);
-  return move_float(result); 
+  return move_float(result);
 }
 
 SortFloat hook_FLOAT_log(SortFloat a) {
@@ -436,7 +438,7 @@ SortFloat hook_FLOAT_log(SortFloat a) {
   mpfr_enter(a, result);
   int t = mpfr_log(result->f, a->f, MPFR_RNDN);
   mpfr_leave(t, result);
-  return move_float(result); 
+  return move_float(result);
 }
 
 SortFloat hook_FLOAT_exp(SortFloat a) {
@@ -444,14 +446,15 @@ SortFloat hook_FLOAT_exp(SortFloat a) {
   mpfr_enter(a, result);
   int t = mpfr_exp(result->f, a->f, MPFR_RNDN);
   mpfr_leave(t, result);
-  return move_float(result); 
+  return move_float(result);
 }
 
 bool hook_FLOAT_sign(SortFloat a) {
   return mpfr_signbit(a->f);
 }
 
-SortFloat hook_FLOAT_rat2float(SortInt numerator, SortInt denominator, SortInt prec, SortInt exp) {
+SortFloat hook_FLOAT_rat2float(
+    SortInt numerator, SortInt denominator, SortInt prec, SortInt exp) {
   if (!mpz_fits_ulong_p(prec)) {
     throw std::invalid_argument("Precision out of range");
   }
@@ -482,5 +485,4 @@ void float_hash(SortFloat f, void *hasher) {
     add_hash64(hasher, f->f[0]._mpfr_d[i]);
   }
 }
-
 }

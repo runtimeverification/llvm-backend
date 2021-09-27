@@ -9,8 +9,9 @@ namespace parser {
 
 class KOREParser {
 public:
-  KOREParser(std::string filename) :
-	  scanner(KOREScanner(filename)), loc(location(filename)) {}
+  KOREParser(std::string filename)
+      : scanner(KOREScanner(filename))
+      , loc(location(filename)) { }
 
   ptr<KOREDefinition> definition(void);
   ptr<KOREPattern> pattern(void);
@@ -19,7 +20,7 @@ public:
 private:
   KOREScanner scanner;
   location loc;
-  [[ noreturn ]] void error(const location &loc, const std::string &err_message);
+  [[noreturn]] void error(const location &loc, const std::string &err_message);
 
   std::string consume(token next);
   token peek(void);

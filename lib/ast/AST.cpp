@@ -1,9 +1,9 @@
 #include "kllvm/ast/AST.h"
 
-#include <unordered_set>
-#include <unordered_map>
-#include <iostream>
 #include <algorithm>
+#include <iostream>
+#include <unordered_map>
+#include <unordered_set>
 
 using namespace kllvm;
 
@@ -49,14 +49,14 @@ std::string kllvm::decodeKore(std::string kore) {
   bool literal = true;
   std::string result;
   size_t i = 0;
-  while(i < kore.length()) {
+  while (i < kore.length()) {
     if (kore[i] == '\'') {
       literal = !literal;
       i++;
     } else if (literal) {
       result.push_back(kore[i]);
       i++;
-    } else {  
+    } else {
       auto code = kore.substr(i, 4);
       result.push_back(codes[code]);
       i += 4;
@@ -86,7 +86,8 @@ bool KORECompositeSort::operator==(const KORESort &other) const {
       return false;
     }
     for (int i = 0; i < arguments.size(); ++i) {
-      if (*sort->arguments[i] != *arguments[i]) return false;
+      if (*sort->arguments[i] != *arguments[i])
+        return false;
     }
     return true;
   }
@@ -117,10 +118,13 @@ ValueType KORECompositeSort::getCategory(KOREDefinition *definition) {
   std::string name = getHook(definition);
   if (name == "MINT.MInt") {
     if (auto param = dynamic_cast<KORECompositeSort *>(arguments[0].get())) {
-      auto &att = definition->getSortDeclarations().at(param->getName())->getAttributes();
+      auto &att = definition->getSortDeclarations()
+                      .at(param->getName())
+                      ->getAttributes();
       auto &natAtt = att.at("nat");
       assert(natAtt->getArguments().size() == 1);
-      auto strPattern = dynamic_cast<KOREStringPattern *>(natAtt->getArguments()[0].get());
+      auto strPattern
+          = dynamic_cast<KOREStringPattern *>(natAtt->getArguments()[0].get());
       name = name + " " + strPattern->getContents();
     } else {
       print(std::cerr);
@@ -132,34 +136,46 @@ ValueType KORECompositeSort::getCategory(KOREDefinition *definition) {
 }
 
 std::string KORECompositeSort::getHook(KOREDefinition *definition) {
-  auto &att = definition->getSortDeclarations().at(this->getName())->getAttributes();
+  auto &att
+      = definition->getSortDeclarations().at(this->getName())->getAttributes();
   if (!att.count("hook")) {
     return "STRING.String";
   }
   auto &hookAtt = att.at("hook");
   assert(hookAtt->getArguments().size() == 1);
-  auto strPattern = dynamic_cast<KOREStringPattern *>(hookAtt->getArguments()[0].get());
+  auto strPattern
+      = dynamic_cast<KOREStringPattern *>(hookAtt->getArguments()[0].get());
   return strPattern->getContents();
 }
 
 ValueType KORECompositeSort::getCategory(std::string name) {
   SortCategory category;
   uint64_t bits = 0;
-  if (name == "MAP.Map") category = SortCategory::Map;
-  else if (name == "LIST.List") category = SortCategory::List;
-  else if (name == "SET.Set") category = SortCategory::Set;
-  else if (name == "ARRAY.Array") category = SortCategory::Symbol; // ARRAY is implemented in K
-  else if (name == "INT.Int") category = SortCategory::Int;
-  else if (name == "FLOAT.Float") category = SortCategory::Float;
-  else if (name == "BUFFER.StringBuffer") category = SortCategory::StringBuffer;
-  else if (name == "BOOL.Bool") category = SortCategory::Bool;
-  else if (name == "KVAR.KVar") category = SortCategory::Variable;
-  // we expect the "hook" of a MInt to be of the form "MINT.MInt N" for some bitwidth N
+  if (name == "MAP.Map")
+    category = SortCategory::Map;
+  else if (name == "LIST.List")
+    category = SortCategory::List;
+  else if (name == "SET.Set")
+    category = SortCategory::Set;
+  else if (name == "ARRAY.Array")
+    category = SortCategory::Symbol; // ARRAY is implemented in K
+  else if (name == "INT.Int")
+    category = SortCategory::Int;
+  else if (name == "FLOAT.Float")
+    category = SortCategory::Float;
+  else if (name == "BUFFER.StringBuffer")
+    category = SortCategory::StringBuffer;
+  else if (name == "BOOL.Bool")
+    category = SortCategory::Bool;
+  else if (name == "KVAR.KVar")
+    category = SortCategory::Variable;
+  // we expect the "hook" of a MInt to be of the form "MINT.MInt N" for some
+  // bitwidth N
   else if (name.substr(0, 10) == "MINT.MInt ") {
     category = SortCategory::MInt;
     bits = std::stoi(name.substr(10));
-  }
-  else category = SortCategory::Symbol;
+  } else
+    category = SortCategory::Symbol;
   return {category, bits};
 }
 
@@ -180,7 +196,8 @@ bool KORESymbol::operator==(const KORESymbol &other) const {
     return false;
   }
   for (int i = 0; i < arguments.size(); ++i) {
-    if (*arguments[i] != *other.arguments[i]) return false;
+    if (*arguments[i] != *other.arguments[i])
+      return false;
   }
   return true;
 }
@@ -190,38 +207,19 @@ std::string KORESymbol::layoutString(KOREDefinition *definition) const {
   for (auto arg : arguments) {
     auto sort = dynamic_cast<KORECompositeSort *>(arg.get());
     ValueType cat = sort->getCategory(definition);
-    switch(cat.cat) {
-    case SortCategory::Map:
-      result.push_back('1');
-      break;
-    case SortCategory::List:
-      result.push_back('2');
-      break;
-    case SortCategory::Set:
-      result.push_back('3');
-      break;
-    case SortCategory::Int:
-      result.push_back('4');
-      break;
-    case SortCategory::Float:
-      result.push_back('5');
-      break;
-    case SortCategory::StringBuffer:
-      result.push_back('6');
-      break;
-    case SortCategory::Bool:
-      result.push_back('7');
-      break;
-    case SortCategory::Variable:
-      result.push_back('8');
-      break;
+    switch (cat.cat) {
+    case SortCategory::Map: result.push_back('1'); break;
+    case SortCategory::List: result.push_back('2'); break;
+    case SortCategory::Set: result.push_back('3'); break;
+    case SortCategory::Int: result.push_back('4'); break;
+    case SortCategory::Float: result.push_back('5'); break;
+    case SortCategory::StringBuffer: result.push_back('6'); break;
+    case SortCategory::Bool: result.push_back('7'); break;
+    case SortCategory::Variable: result.push_back('8'); break;
     case SortCategory::MInt:
       result.append("_" + std::to_string(cat.bits) + "_");
-    case SortCategory::Symbol:
-      result.push_back('0');
-      break;
-    case SortCategory::Uncomputed:
-      abort();
+    case SortCategory::Symbol: result.push_back('0'); break;
+    case SortCategory::Uncomputed: abort();
     }
   }
   return result;
@@ -255,9 +253,9 @@ bool KORESymbol::isPolymorphic() const {
 }
 
 static std::unordered_set<std::string> BUILTINS{
-  "\\and", "\\not", "\\or", "\\implies", "\\iff", "\\forall", "\\exists",
-  "\\ceil", "\\floor", "\\equals", "\\in", "\\top", "\\bottom", "\\dv",
-  "\\rewrites", "\\next", "\\mu", "\\nu"};
+    "\\and",    "\\not",  "\\or",       "\\implies", "\\iff", "\\forall",
+    "\\exists", "\\ceil", "\\floor",    "\\equals",  "\\in",  "\\top",
+    "\\bottom", "\\dv",   "\\rewrites", "\\next",    "\\mu",  "\\nu"};
 
 bool KORESymbol::isBuiltin() const {
   return BUILTINS.count(name);
@@ -291,7 +289,8 @@ void KORECompositePattern::addArgument(sptr<KOREPattern> Argument) {
   arguments.push_back(Argument);
 }
 
-void KORECompositePattern::markSymbols(std::map<std::string, std::vector<KORESymbol *>> &map) {
+void KORECompositePattern::markSymbols(
+    std::map<std::string, std::vector<KORESymbol *>> &map) {
   if (!constructor->isBuiltin()) {
     if (!map.count(constructor->getName())) {
       map.emplace(constructor->getName(), std::vector<KORESymbol *>{});
@@ -303,7 +302,8 @@ void KORECompositePattern::markSymbols(std::map<std::string, std::vector<KORESym
   }
 }
 
-void KORECompositePattern::markVariables(std::map<std::string, KOREVariablePattern *> &map) {
+void KORECompositePattern::markVariables(
+    std::map<std::string, KOREVariablePattern *> &map) {
   for (auto &arg : arguments) {
     arg->markVariables(map);
   }
@@ -318,7 +318,8 @@ sptr<KOREPattern> KORECompositePattern::substitute(const substitution &subst) {
   if (name == "\\forall" || name == "\\exists") {
     ptr->addArgument(arguments[0]);
     auto newSubst = subst;
-    newSubst.erase(dynamic_cast<KOREVariablePattern *>(arguments[0].get())->getName());
+    newSubst.erase(
+        dynamic_cast<KOREVariablePattern *>(arguments[0].get())->getName());
     ptr->addArgument(arguments[1]->substitute(newSubst));
     return ptr;
   }
@@ -373,7 +374,8 @@ static void append(std::ostream &out, std::string str) {
   out << str;
 }
 
-static void color(std::ostream &out, std::string color, PrettyPrintData const& data) {
+static void
+color(std::ostream &out, std::string color, PrettyPrintData const &data) {
   if (data.hasColor) {
     static bool once = true;
     static std::map<std::string, std::string> colors;
@@ -589,25 +591,13 @@ std::string enquote(std::string str) {
   result.push_back('"');
   for (size_t i = 0; i < str.length(); ++i) {
     char c = str[i];
-    switch(c) {
-    case '\\':
-      result.append("\\\\");
-      break;
-    case '"':
-      result.append("\\\"");
-      break;
-    case '\n':
-      result.append("\\n");
-      break;
-    case '\t':
-      result.append("\\t");
-      break;
-    case '\r':
-      result.append("\\r");
-      break;
-    case '\f':
-      result.append("\\f");
-      break;
+    switch (c) {
+    case '\\': result.append("\\\\"); break;
+    case '"': result.append("\\\""); break;
+    case '\n': result.append("\\n"); break;
+    case '\t': result.append("\\t"); break;
+    case '\r': result.append("\\r"); break;
+    case '\f': result.append("\\f"); break;
     default:
       if ((unsigned char)c >= 32 && (unsigned char)c < 127) {
         result.push_back(c);
@@ -643,16 +633,19 @@ void KORECompositeSort::prettyPrint(std::ostream &out) const {
   }
 }
 
-void KOREVariablePattern::prettyPrint(std::ostream &out, PrettyPrintData const& data) const {
+void KOREVariablePattern::prettyPrint(
+    std::ostream &out, PrettyPrintData const &data) const {
   append(out, decodeKore(getName().substr(3)));
   append(out, ':');
   sort->prettyPrint(out);
 }
 
-void KORECompositePattern::prettyPrint(std::ostream &out, PrettyPrintData const& data) const {
+void KORECompositePattern::prettyPrint(
+    std::ostream &out, PrettyPrintData const &data) const {
   std::string name = getConstructor()->getName();
   if (name == "\\dv") {
-    KORECompositeSort *s = dynamic_cast<KORECompositeSort *>(getConstructor()->getFormalArguments()[0].get()); 
+    KORECompositeSort *s = dynamic_cast<KORECompositeSort *>(
+        getConstructor()->getFormalArguments()[0].get());
     bool hasHook = data.hook.count(s->getName());
     auto str = dynamic_cast<KOREStringPattern *>(arguments[0].get());
     if (hasHook) {
@@ -680,75 +673,75 @@ void KORECompositePattern::prettyPrint(std::ostream &out, PrettyPrintData const&
         if (i == format.length() - 1) {
           abort();
         }
-        char c2 = format[i+1];
+        char c2 = format[i + 1];
         ++i;
-        switch(c2) {
-          case 'n':
-            newline(out);
-            break;
-          case 'i':
-            indent++;
-            localIndent++;
-            break;
-          case 'd':
-            indent--;
-            localIndent--;
-            break;
-          case 'c':
-            if (data.colors.count(name)) {
-              if (localColor >= data.colors.at(name).size() ) {
-                abort();
-              }
-              color(out, data.colors.at(name)[localColor++], data);
-            }
-            break;
-          case 'r':
-            if (data.hasColor) {
-              append(out, RESET_COLOR);
-            }
-            break;
-          case '0':
-          case '1':
-          case '2':
-          case '3':
-          case '4':
-          case '5':
-          case '6':
-          case '7':
-          case '8':
-          case '9': {
-            std::string buf;
-            for(; i < format.length() && format[i] >= '0' && format[i] <= '9'; i++) {
-              buf.push_back(format[i]);
-            }
-            i--;
-            int idx = std::stoi(buf);
-            if (idx == 0 || idx > arguments.size()) {
+        switch (c2) {
+        case 'n': newline(out); break;
+        case 'i':
+          indent++;
+          localIndent++;
+          break;
+        case 'd':
+          indent--;
+          localIndent--;
+          break;
+        case 'c':
+          if (data.colors.count(name)) {
+            if (localColor >= data.colors.at(name).size()) {
               abort();
             }
-            KOREPattern *inner = arguments[idx-1].get();
-            bool assoc = false;
-            if (auto app = dynamic_cast<KORECompositePattern *>(inner)) {
-              if (app->getConstructor()->getName() == constructor->getName() && data.assoc.count(name)) {
-                assoc = true;
-              }
-              if (assoc) {
-                for (int j = 0; j < localIndent; j++) {
-                  indent--;
-                }
-              }
-              inner->prettyPrint(out, data);
-              if (assoc) {
-                for (int j = 0; j < localIndent; j++) {
-                  indent++;
-                }
-              }
-            } else {
-              inner->prettyPrint(out, data);
+            color(out, data.colors.at(name)[localColor++], data);
+          }
+          break;
+        case 'r':
+          if (data.hasColor) {
+            append(out, RESET_COLOR);
+          }
+          break;
+        case '0':
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9': {
+          std::string buf;
+          for (; i < format.length() && format[i] >= '0' && format[i] <= '9';
+               i++) {
+            buf.push_back(format[i]);
+          }
+          i--;
+          int idx = std::stoi(buf);
+          if (idx == 0 || idx > arguments.size()) {
+            abort();
+          }
+          KOREPattern *inner = arguments[idx - 1].get();
+          bool assoc = false;
+          if (auto app = dynamic_cast<KORECompositePattern *>(inner)) {
+            if (app->getConstructor()->getName() == constructor->getName()
+                && data.assoc.count(name)) {
+              assoc = true;
             }
-            break;
-          } default:
-            append(out, c2);
+            if (assoc) {
+              for (int j = 0; j < localIndent; j++) {
+                indent--;
+              }
+            }
+            inner->prettyPrint(out, data);
+            if (assoc) {
+              for (int j = 0; j < localIndent; j++) {
+                indent++;
+              }
+            }
+          } else {
+            inner->prettyPrint(out, data);
+          }
+          break;
+        }
+        default: append(out, c2);
         }
       } else {
         append(out, c);
@@ -760,9 +753,7 @@ void KORECompositePattern::prettyPrint(std::ostream &out, PrettyPrintData const&
 }
 
 struct CompareFirst {
-  bool isDigit(char c) {
-    return c >= '0' && c <= '9';
-  }
+  bool isDigit(char c) { return c >= '0' && c <= '9'; }
 
   std::string getChunk(std::string s, size_t slength, size_t marker) {
     std::string chunk;
@@ -827,7 +818,9 @@ struct CompareFirst {
   }
 };
 
-static void flatten(KORECompositePattern *pat, std::string name, std::vector<sptr<KOREPattern>> &result) {
+static void flatten(
+    KORECompositePattern *pat, std::string name,
+    std::vector<sptr<KOREPattern>> &result) {
   for (auto &arg : pat->getArguments()) {
     if (auto pat2 = dynamic_cast<KORECompositePattern *>(arg.get())) {
       if (pat2->getConstructor()->getName() == name) {
@@ -841,7 +834,8 @@ static void flatten(KORECompositePattern *pat, std::string name, std::vector<spt
   }
 }
 
-sptr<KOREPattern> KORECompositePattern::sortCollections(PrettyPrintData const& data) {
+sptr<KOREPattern>
+KORECompositePattern::sortCollections(PrettyPrintData const &data) {
   if (arguments.empty()) {
     return shared_from_this();
   }
@@ -870,14 +864,16 @@ sptr<KOREPattern> KORECompositePattern::sortCollections(PrettyPrintData const& d
     }
     sptr<KOREPattern> result = items[0];
     for (int i = 1; i < items.size(); ++i) {
-      sptr<KORECompositePattern> tmp = KORECompositePattern::Create(constructor.get());
+      sptr<KORECompositePattern> tmp
+          = KORECompositePattern::Create(constructor.get());
       tmp->addArgument(result);
       tmp->addArgument(items[i]);
       result = tmp;
     }
     return result;
   }
-  sptr<KORECompositePattern> result = KORECompositePattern::Create(constructor.get());
+  sptr<KORECompositePattern> result
+      = KORECompositePattern::Create(constructor.get());
   for (auto &arg : arguments) {
     result->addArgument(arg->sortCollections(data));
   }
@@ -885,7 +881,7 @@ sptr<KOREPattern> KORECompositePattern::sortCollections(PrettyPrintData const& d
 }
 
 std::set<std::string> KOREPattern::gatherSingletonVars(void) {
-  auto counts = gatherVarCounts(); 
+  auto counts = gatherVarCounts();
   std::set<std::string> result;
   for (auto entry : counts) {
     if (entry.second == 1) {
@@ -906,7 +902,8 @@ std::map<std::string, int> KORECompositePattern::gatherVarCounts(void) {
   return result;
 }
 
-sptr<KOREPattern> KORECompositePattern::filterSubstitution(PrettyPrintData const& data, std::set<std::string> const& vars) {
+sptr<KOREPattern> KORECompositePattern::filterSubstitution(
+    PrettyPrintData const &data, std::set<std::string> const &vars) {
   if (constructor->getName() == "\\equals") {
     if (auto var = dynamic_cast<KOREVariablePattern *>(arguments[0].get())) {
       std::ostringstream ss;
@@ -918,9 +915,14 @@ sptr<KOREPattern> KORECompositePattern::filterSubstitution(PrettyPrintData const
       indent = oldIndent;
       atNewLine = oldAtNewLine;
       std::string name = ss.str();
-      if (vars.count(var->getName()) && (name[0] == '_' || (name.size() > 1 && (name[0] == '@' || name[0] == '!' || name[0] == '?') && name[1] == '_'))) {
+      if (vars.count(var->getName())
+          && (name[0] == '_'
+              || (name.size() > 1
+                  && (name[0] == '@' || name[0] == '!' || name[0] == '?')
+                  && name[1] == '_'))) {
         sptr<KORECompositePattern> unit = KORECompositePattern::Create("\\top");
-        unit->getConstructor()->addFormalArgument(constructor->getFormalArguments()[1]);
+        unit->getConstructor()->addFormalArgument(
+            constructor->getFormalArguments()[1]);
         return unit;
       } else {
         return shared_from_this();
@@ -928,8 +930,10 @@ sptr<KOREPattern> KORECompositePattern::filterSubstitution(PrettyPrintData const
     } else {
       return shared_from_this();
     }
-  } else if (constructor->getName() == "\\and" || constructor->getName() == "\\or") {
-    sptr<KORECompositePattern> result = KORECompositePattern::Create(constructor.get());
+  } else if (
+      constructor->getName() == "\\and" || constructor->getName() == "\\or") {
+    sptr<KORECompositePattern> result
+        = KORECompositePattern::Create(constructor.get());
     for (auto &arg : arguments) {
       if (constructor->getName() == "\\or") {
         std::set<std::string> vars = arg->gatherSingletonVars();
@@ -939,12 +943,14 @@ sptr<KOREPattern> KORECompositePattern::filterSubstitution(PrettyPrintData const
       }
     }
     if (constructor->getName() == "\\and") {
-     if (auto composite = dynamic_cast<KORECompositePattern *>(result->getArguments()[0].get())) {
+      if (auto composite = dynamic_cast<KORECompositePattern *>(
+              result->getArguments()[0].get())) {
         if (composite->getConstructor()->getName() == "\\top") {
           return result->getArguments()[1];
         }
       }
-      if (auto composite = dynamic_cast<KORECompositePattern *>(result->getArguments()[1].get())) {
+      if (auto composite = dynamic_cast<KORECompositePattern *>(
+              result->getArguments()[1].get())) {
         if (composite->getConstructor()->getName() == "\\top") {
           return result->getArguments()[0];
         }
@@ -955,28 +961,40 @@ sptr<KOREPattern> KORECompositePattern::filterSubstitution(PrettyPrintData const
   return shared_from_this();
 }
 
-sptr<KOREPattern> KORECompositePattern::expandMacros(SubsortMap const& subsorts, SymbolMap const& overloads, std::vector<ptr<KOREDeclaration>> const& macros, bool reverse, std::set<size_t> &appliedRules) {
-  sptr<KORECompositePattern> applied = KORECompositePattern::Create(constructor.get());
+sptr<KOREPattern> KORECompositePattern::expandMacros(
+    SubsortMap const &subsorts, SymbolMap const &overloads,
+    std::vector<ptr<KOREDeclaration>> const &macros, bool reverse,
+    std::set<size_t> &appliedRules) {
+  sptr<KORECompositePattern> applied
+      = KORECompositePattern::Create(constructor.get());
   for (auto &arg : arguments) {
-    applied->addArgument(arg->expandMacros(subsorts, overloads, macros, reverse));
+    applied->addArgument(
+        arg->expandMacros(subsorts, overloads, macros, reverse));
   }
 
   size_t i = 0;
   for (auto &decl : macros) {
-    if ((decl->getAttributes().count("macro") || decl->getAttributes().count("macro-rec")) && reverse) {
+    if ((decl->getAttributes().count("macro")
+         || decl->getAttributes().count("macro-rec"))
+        && reverse) {
       i++;
       continue;
     }
     auto axiom = dynamic_cast<KOREAxiomDeclaration *>(decl.get());
-    auto equals = dynamic_cast<KORECompositePattern *>(axiom->getPattern().get());
+    auto equals
+        = dynamic_cast<KORECompositePattern *>(axiom->getPattern().get());
     auto lhs = equals->arguments[reverse ? 1 : 0];
     auto rhs = equals->arguments[reverse ? 0 : 1];
     substitution subst;
     bool matches = lhs->matches(subst, subsorts, overloads, applied);
-    if (matches && (decl->getAttributes().count("macro-rec") || decl->getAttributes().count("alias-rec") || !appliedRules.count(i))) {
+    if (matches
+        && (decl->getAttributes().count("macro-rec")
+            || decl->getAttributes().count("alias-rec")
+            || !appliedRules.count(i))) {
       std::set<size_t> oldAppliedRules = appliedRules;
       appliedRules.insert(i);
-      auto result = rhs->substitute(subst)->expandMacros(subsorts, overloads, macros, reverse, appliedRules);
+      auto result = rhs->substitute(subst)->expandMacros(
+          subsorts, overloads, macros, reverse, appliedRules);
       appliedRules = oldAppliedRules;
       return result;
     }
@@ -985,7 +1003,9 @@ sptr<KOREPattern> KORECompositePattern::expandMacros(SubsortMap const& subsorts,
   return applied;
 }
 
-bool KOREVariablePattern::matches(substitution &subst, SubsortMap const& subsorts, SymbolMap const& overloads, sptr<KOREPattern> subject) {
+bool KOREVariablePattern::matches(
+    substitution &subst, SubsortMap const &subsorts, SymbolMap const &overloads,
+    sptr<KOREPattern> subject) {
   if (subst[name->getName()]) {
     std::ostringstream Out1, Out2;
     subst[name->getName()]->print(Out1);
@@ -997,14 +1017,18 @@ bool KOREVariablePattern::matches(substitution &subst, SubsortMap const& subsort
   }
 }
 
-bool KORECompositePattern::matches(substitution &subst, SubsortMap const& subsorts, SymbolMap const& overloads, sptr<KOREPattern> subject) {
+bool KORECompositePattern::matches(
+    substitution &subst, SubsortMap const &subsorts, SymbolMap const &overloads,
+    sptr<KOREPattern> subject) {
   auto subj = dynamic_cast<KORECompositePattern *>(subject.get());
   if (!subj) {
     return false;
   }
   if (*subj->getConstructor() != *getConstructor()) {
-    if (subj->getConstructor()->getName() == "inj" && getConstructor()->getName() == "inj") {
-      if (*subj->getConstructor()->getFormalArguments()[1] != *getConstructor()->getFormalArguments()[1]) {
+    if (subj->getConstructor()->getName() == "inj"
+        && getConstructor()->getName() == "inj") {
+      if (*subj->getConstructor()->getFormalArguments()[1]
+          != *getConstructor()->getFormalArguments()[1]) {
         return false;
       }
       sptr<KORESort> a = subj->getConstructor()->getFormalArguments()[0];
@@ -1016,7 +1040,8 @@ bool KORECompositePattern::matches(substitution &subst, SubsortMap const& subsor
         ba->getConstructor()->addArgument(b);
         ba->addArgument(arguments[0]);
         return ba->matches(subst, subsorts, overloads, subj->getArguments()[0]);
-      } else if (subsorts.count(a.get()) && subsorts.at(a.get()).count(b.get())) {
+      } else if (
+          subsorts.count(a.get()) && subsorts.at(a.get()).count(b.get())) {
         sptr<KORECompositePattern> ab = KORECompositePattern::Create("inj");
         ab->getConstructor()->addFormalArgument(a);
         ab->getConstructor()->addFormalArgument(b);
@@ -1026,17 +1051,25 @@ bool KORECompositePattern::matches(substitution &subst, SubsortMap const& subsor
       } else {
         return false;
       }
-    } else if (subj->getConstructor()->getName() == "inj") { 
+    } else if (subj->getConstructor()->getName() == "inj") {
       sptr<KOREPattern> child = subj->getArguments()[0];
       if (auto composite = dynamic_cast<KORECompositePattern *>(child.get())) {
-        if (overloads.count(composite->getConstructor()) && overloads.at(composite->getConstructor()).count(getConstructor())) {
-          sptr<KORECompositePattern> greater = KORECompositePattern::Create(getConstructor());
+        if (overloads.count(composite->getConstructor())
+            && overloads.at(composite->getConstructor())
+                   .count(getConstructor())) {
+          sptr<KORECompositePattern> greater
+              = KORECompositePattern::Create(getConstructor());
           for (int i = 0; i < arguments.size(); i++) {
-            if (*getConstructor()->getArguments()[i] != *composite->getConstructor()->getArguments()[i]) {
-              sptr<KORECompositePattern> inj = KORECompositePattern::Create("inj");
-              inj->getConstructor()->addFormalArgument(composite->getConstructor()->getArguments()[i]);
-              inj->getConstructor()->addFormalArgument(getConstructor()->getArguments()[i]);
-              inj->getConstructor()->addArgument(composite->getConstructor()->getArguments()[i]);
+            if (*getConstructor()->getArguments()[i]
+                != *composite->getConstructor()->getArguments()[i]) {
+              sptr<KORECompositePattern> inj
+                  = KORECompositePattern::Create("inj");
+              inj->getConstructor()->addFormalArgument(
+                  composite->getConstructor()->getArguments()[i]);
+              inj->getConstructor()->addFormalArgument(
+                  getConstructor()->getArguments()[i]);
+              inj->getConstructor()->addArgument(
+                  composite->getConstructor()->getArguments()[i]);
               inj->addArgument(composite->getArguments()[i]);
               greater->addArgument(inj);
             } else {
@@ -1059,12 +1092,16 @@ bool KORECompositePattern::matches(substitution &subst, SubsortMap const& subsor
   }
   bool match = true;
   for (int i = 0; i < subj->arguments.size(); i++) {
-    match = match && arguments[i]->matches(subst, subsorts, overloads, subj->arguments[i]);
+    match = match
+            && arguments[i]->matches(
+                subst, subsorts, overloads, subj->arguments[i]);
   }
   return match;
 }
 
-bool KOREStringPattern::matches(substitution &subst, SubsortMap const& subsorts, SymbolMap const& overloads, sptr<KOREPattern> subject) {
+bool KOREStringPattern::matches(
+    substitution &subst, SubsortMap const &subsorts, SymbolMap const &overloads,
+    sptr<KOREPattern> subject) {
   auto subj = dynamic_cast<KOREStringPattern *>(subject.get());
   if (!subj) {
     return false;
@@ -1077,18 +1114,18 @@ void KOREDeclaration::addAttribute(ptr<KORECompositePattern> Attribute) {
   attributes.insert({name, std::move(Attribute)});
 }
 
-void
-KOREDeclaration::addObjectSortVariable(sptr<KORESortVariable> SortVariable) {
+void KOREDeclaration::addObjectSortVariable(
+    sptr<KORESortVariable> SortVariable) {
   objectSortVariables.push_back(SortVariable);
 }
 
-std::string KOREDeclaration::getStringAttribute(std::string name) const { 
+std::string KOREDeclaration::getStringAttribute(std::string name) const {
   KORECompositePattern *attr = attributes.at(name).get();
   assert(attr->getArguments().size() == 1);
-  auto strPattern = dynamic_cast<KOREStringPattern *>(attr->getArguments()[0].get());
+  auto strPattern
+      = dynamic_cast<KOREStringPattern *>(attr->getArguments()[0].get());
   return strPattern->getContents();
 }
- 
 
 void KOREAxiomDeclaration::addPattern(ptr<KOREPattern> Pattern) {
   pattern = std::move(Pattern);
@@ -1104,21 +1141,31 @@ static const std::string CONSTRUCTOR = "constructor";
 static const std::string CEIL = "ceil";
 
 bool KOREAxiomDeclaration::isRequired() {
-  return !attributes.count(ASSOC) && !attributes.count(COMM) && !attributes.count(IDEM) && !attributes.count(UNIT) && !attributes.count(FUNCTIONAL) && !attributes.count(CONSTRUCTOR) && !attributes.count(SUBSORT) && !attributes.count(CEIL);
+  return !attributes.count(ASSOC) && !attributes.count(COMM)
+         && !attributes.count(IDEM) && !attributes.count(UNIT)
+         && !attributes.count(FUNCTIONAL) && !attributes.count(CONSTRUCTOR)
+         && !attributes.count(SUBSORT) && !attributes.count(CEIL);
 }
 
 bool KOREAxiomDeclaration::isTopAxiom() {
   if (auto top = dynamic_cast<KORECompositePattern *>(pattern.get())) {
-    if (top->getConstructor()->getName() == "\\implies" && top->getArguments().size() == 2) {
-      if (auto bottomPattern = dynamic_cast<KORECompositePattern *>(top->getArguments()[0].get())) {
-        if (bottomPattern->getConstructor()->getName() == "\\bottom" && bottomPattern->getArguments().empty()) {
+    if (top->getConstructor()->getName() == "\\implies"
+        && top->getArguments().size() == 2) {
+      if (auto bottomPattern = dynamic_cast<KORECompositePattern *>(
+              top->getArguments()[0].get())) {
+        if (bottomPattern->getConstructor()->getName() == "\\bottom"
+            && bottomPattern->getArguments().empty()) {
           return true;
         }
       }
       return false;
-    } else if (top->getConstructor()->getName() == "\\rewrites" && top->getArguments().size() == 2) {
+    } else if (
+        top->getConstructor()->getName() == "\\rewrites"
+        && top->getArguments().size() == 2) {
       return true;
-    } else if (top->getConstructor()->getName() == "\\and" && top->getArguments().size() == 2) {
+    } else if (
+        top->getConstructor()->getName() == "\\and"
+        && top->getArguments().size() == 2) {
       return true;
     }
   }
@@ -1127,61 +1174,97 @@ bool KOREAxiomDeclaration::isTopAxiom() {
 
 KOREPattern *KOREAxiomDeclaration::getRightHandSide() const {
   if (auto top = dynamic_cast<KORECompositePattern *>(pattern.get())) {
-    if (top->getConstructor()->getName() == "\\implies" && top->getArguments().size() == 2) {
-      if (auto andPattern = dynamic_cast<KORECompositePattern *>(top->getArguments()[1].get())) {
-        if (andPattern->getConstructor()->getName() == "\\and" && andPattern->getArguments().size() == 2) {
-          if (auto bottomPattern = dynamic_cast<KORECompositePattern *>(top->getArguments()[0].get())) {
-            if (bottomPattern->getConstructor()->getName() == "\\bottom" && bottomPattern->getArguments().empty()) {
-              if (auto andPattern2 = dynamic_cast<KORECompositePattern *>(andPattern->getArguments()[1].get())) {
-                if (andPattern2->getConstructor()->getName() == "\\and" && andPattern2->getArguments().size() == 2) {
-                  if (auto rewrites = dynamic_cast<KORECompositePattern *>(andPattern2->getArguments()[1].get())) {
-                    if (rewrites->getConstructor()->getName() == "\\rewrites" && rewrites->getArguments().size() == 2) {
+    if (top->getConstructor()->getName() == "\\implies"
+        && top->getArguments().size() == 2) {
+      if (auto andPattern = dynamic_cast<KORECompositePattern *>(
+              top->getArguments()[1].get())) {
+        if (andPattern->getConstructor()->getName() == "\\and"
+            && andPattern->getArguments().size() == 2) {
+          if (auto bottomPattern = dynamic_cast<KORECompositePattern *>(
+                  top->getArguments()[0].get())) {
+            if (bottomPattern->getConstructor()->getName() == "\\bottom"
+                && bottomPattern->getArguments().empty()) {
+              if (auto andPattern2 = dynamic_cast<KORECompositePattern *>(
+                      andPattern->getArguments()[1].get())) {
+                if (andPattern2->getConstructor()->getName() == "\\and"
+                    && andPattern2->getArguments().size() == 2) {
+                  if (auto rewrites = dynamic_cast<KORECompositePattern *>(
+                          andPattern2->getArguments()[1].get())) {
+                    if (rewrites->getConstructor()->getName() == "\\rewrites"
+                        && rewrites->getArguments().size() == 2) {
                       return rewrites->getArguments()[1].get();
                     }
                   }
-                } else if (andPattern2->getConstructor()->getName() == "\\rewrites" && andPattern2->getArguments().size() == 2) {
-                  if (auto andPattern3 = dynamic_cast<KORECompositePattern *>(andPattern2->getArguments()[1].get())) {
-                    if (andPattern3->getConstructor()->getName() == "\\and" && andPattern3->getArguments().size() == 2) {
+                } else if (
+                    andPattern2->getConstructor()->getName() == "\\rewrites"
+                    && andPattern2->getArguments().size() == 2) {
+                  if (auto andPattern3 = dynamic_cast<KORECompositePattern *>(
+                          andPattern2->getArguments()[1].get())) {
+                    if (andPattern3->getConstructor()->getName() == "\\and"
+                        && andPattern3->getArguments().size() == 2) {
                       return andPattern3->getArguments()[1].get();
                     }
                   }
                 }
               }
-            } else if (auto equals = dynamic_cast<KORECompositePattern *>(andPattern->getArguments()[0].get())) {
-              if (equals->getConstructor()->getName() == "\\equals" && equals->getArguments().size() == 2) {
+            } else if (
+                auto equals = dynamic_cast<KORECompositePattern *>(
+                    andPattern->getArguments()[0].get())) {
+              if (equals->getConstructor()->getName() == "\\equals"
+                  && equals->getArguments().size() == 2) {
                 return equals->getArguments()[1].get();
               }
             }
           }
-        } else if (andPattern->getConstructor()->getName() == "\\rewrites" && andPattern->getArguments().size() == 2) {
-          if (auto andPattern2 = dynamic_cast<KORECompositePattern *>(andPattern->getArguments()[1].get())) {
-            if (andPattern2->getConstructor()->getName() == "\\and" && andPattern2->getArguments().size() == 2) {
+        } else if (
+            andPattern->getConstructor()->getName() == "\\rewrites"
+            && andPattern->getArguments().size() == 2) {
+          if (auto andPattern2 = dynamic_cast<KORECompositePattern *>(
+                  andPattern->getArguments()[1].get())) {
+            if (andPattern2->getConstructor()->getName() == "\\and"
+                && andPattern2->getArguments().size() == 2) {
               return andPattern2->getArguments()[1].get();
             }
           }
-        } else if (andPattern->getConstructor()->getName() == "\\equals" && andPattern->getArguments().size() == 2) {
-          if (auto andPattern2 = dynamic_cast<KORECompositePattern *>(andPattern->getArguments()[1].get())) {
-            if (andPattern2->getConstructor()->getName() == "\\and" && andPattern2->getArguments().size() == 2) {
+        } else if (
+            andPattern->getConstructor()->getName() == "\\equals"
+            && andPattern->getArguments().size() == 2) {
+          if (auto andPattern2 = dynamic_cast<KORECompositePattern *>(
+                  andPattern->getArguments()[1].get())) {
+            if (andPattern2->getConstructor()->getName() == "\\and"
+                && andPattern2->getArguments().size() == 2) {
               return andPattern2->getArguments()[0].get();
             }
           }
         }
       }
-    } else if (top->getConstructor()->getName() == "\\and" && top->getArguments().size() == 2) {
-      if (auto andPattern = dynamic_cast<KORECompositePattern *>(top->getArguments()[1].get())) {
-        if (andPattern->getConstructor()->getName() == "\\and" && andPattern->getArguments().size() == 2) {
-          if (auto rewrites = dynamic_cast<KORECompositePattern *>(andPattern->getArguments()[1].get())) {
-            if (rewrites->getConstructor()->getName() == "\\rewrites" && rewrites->getArguments().size() == 2) {
+    } else if (
+        top->getConstructor()->getName() == "\\and"
+        && top->getArguments().size() == 2) {
+      if (auto andPattern = dynamic_cast<KORECompositePattern *>(
+              top->getArguments()[1].get())) {
+        if (andPattern->getConstructor()->getName() == "\\and"
+            && andPattern->getArguments().size() == 2) {
+          if (auto rewrites = dynamic_cast<KORECompositePattern *>(
+                  andPattern->getArguments()[1].get())) {
+            if (rewrites->getConstructor()->getName() == "\\rewrites"
+                && rewrites->getArguments().size() == 2) {
               return rewrites->getArguments()[1].get();
             }
           }
         }
       }
-    } else if (top->getConstructor()->getName() == "\\equals" && top->getArguments().size() == 2) {
+    } else if (
+        top->getConstructor()->getName() == "\\equals"
+        && top->getArguments().size() == 2) {
       return top->getArguments()[1].get();
-    } else if (top->getConstructor()->getName() == "\\rewrites" && top->getArguments().size() == 2) {
-      if (auto andPattern = dynamic_cast<KORECompositePattern *>(top->getArguments()[1].get())) {
-        if (andPattern->getConstructor()->getName() == "\\and" && andPattern->getArguments().size() == 2) {
+    } else if (
+        top->getConstructor()->getName() == "\\rewrites"
+        && top->getArguments().size() == 2) {
+      if (auto andPattern = dynamic_cast<KORECompositePattern *>(
+              top->getArguments()[1].get())) {
+        if (andPattern->getConstructor()->getName() == "\\and"
+            && andPattern->getArguments().size() == 2) {
           return andPattern->getArguments()[1].get();
         }
       }
@@ -1193,38 +1276,63 @@ KOREPattern *KOREAxiomDeclaration::getRightHandSide() const {
 
 KOREPattern *KOREAxiomDeclaration::getRequires() const {
   if (auto top = dynamic_cast<KORECompositePattern *>(pattern.get())) {
-    if (top->getConstructor()->getName() == "\\implies" && top->getArguments().size() == 2) {
-      if (auto outer = dynamic_cast<KORECompositePattern *>(top->getArguments()[0].get())) {
-        if (outer->getConstructor()->getName() == "\\and" && outer->getArguments().size() == 2) {
-          if (auto _not = dynamic_cast<KORECompositePattern *>(outer->getArguments()[0].get())) {
-            if (_not->getConstructor()->getName() == "\\not" && _not->getArguments().size() == 1) {
-              outer = dynamic_cast<KORECompositePattern *>(outer->getArguments()[1].get());
+    if (top->getConstructor()->getName() == "\\implies"
+        && top->getArguments().size() == 2) {
+      if (auto outer = dynamic_cast<KORECompositePattern *>(
+              top->getArguments()[0].get())) {
+        if (outer->getConstructor()->getName() == "\\and"
+            && outer->getArguments().size() == 2) {
+          if (auto _not = dynamic_cast<KORECompositePattern *>(
+                  outer->getArguments()[0].get())) {
+            if (_not->getConstructor()->getName() == "\\not"
+                && _not->getArguments().size() == 1) {
+              outer = dynamic_cast<KORECompositePattern *>(
+                  outer->getArguments()[1].get());
               assert(outer);
             }
           }
         }
-        if (outer->getConstructor()->getName() == "\\equals" && outer->getArguments().size() == 2) {
+        if (outer->getConstructor()->getName() == "\\equals"
+            && outer->getArguments().size() == 2) {
           return outer->getArguments()[0].get();
-        } else if (outer->getConstructor()->getName() == "\\top" && outer->getArguments().empty()) {
+        } else if (
+            outer->getConstructor()->getName() == "\\top"
+            && outer->getArguments().empty()) {
           return nullptr;
-        } else if (outer->getConstructor()->getName() == "\\bottom" && outer->getArguments().empty()) {
+        } else if (
+            outer->getConstructor()->getName() == "\\bottom"
+            && outer->getArguments().empty()) {
           // strategy axiom hack
-          if (auto trueTop = dynamic_cast<KORECompositePattern *>(top->getArguments()[1].get())) {
-            if (trueTop->getConstructor()->getName() == "\\and" && trueTop->getArguments().size() == 2) {
-              if (auto equals = dynamic_cast<KORECompositePattern *>(trueTop->getArguments()[0].get())) {
-                if (equals->getConstructor()->getName() == "\\equals" && equals->getArguments().size() == 2) {
+          if (auto trueTop = dynamic_cast<KORECompositePattern *>(
+                  top->getArguments()[1].get())) {
+            if (trueTop->getConstructor()->getName() == "\\and"
+                && trueTop->getArguments().size() == 2) {
+              if (auto equals = dynamic_cast<KORECompositePattern *>(
+                      trueTop->getArguments()[0].get())) {
+                if (equals->getConstructor()->getName() == "\\equals"
+                    && equals->getArguments().size() == 2) {
                   return equals->getArguments()[0].get();
-                } else if (equals->getConstructor()->getName() == "\\top" && equals->getArguments().empty()) {
+                } else if (
+                    equals->getConstructor()->getName() == "\\top"
+                    && equals->getArguments().empty()) {
                   return nullptr;
                 }
               }
-            } else if (trueTop->getConstructor()->getName() == "\\rewrites" && trueTop->getArguments().size() == 2) {
-              if (auto andPattern = dynamic_cast<KORECompositePattern *>(trueTop->getArguments()[0].get())) {
-                if (andPattern->getConstructor()->getName() == "\\and" && andPattern->getArguments().size() == 2) {
-                  if (auto equals = dynamic_cast<KORECompositePattern *>(andPattern->getArguments()[0].get())) {
-                    if (equals->getConstructor()->getName() == "\\equals" && equals->getArguments().size() == 2) {
+            } else if (
+                trueTop->getConstructor()->getName() == "\\rewrites"
+                && trueTop->getArguments().size() == 2) {
+              if (auto andPattern = dynamic_cast<KORECompositePattern *>(
+                      trueTop->getArguments()[0].get())) {
+                if (andPattern->getConstructor()->getName() == "\\and"
+                    && andPattern->getArguments().size() == 2) {
+                  if (auto equals = dynamic_cast<KORECompositePattern *>(
+                          andPattern->getArguments()[0].get())) {
+                    if (equals->getConstructor()->getName() == "\\equals"
+                        && equals->getArguments().size() == 2) {
                       return equals->getArguments()[0].get();
-                    } else if (equals->getConstructor()->getName() == "\\top" && equals->getArguments().empty()) {
+                    } else if (
+                        equals->getConstructor()->getName() == "\\top"
+                        && equals->getArguments().empty()) {
                       return nullptr;
                     }
                   }
@@ -1232,47 +1340,77 @@ KOREPattern *KOREAxiomDeclaration::getRequires() const {
               }
             }
           }
-        } else if (outer->getConstructor()->getName() == "\\and" && outer->getArguments().size() == 2) {
-          if (auto inner = dynamic_cast<KORECompositePattern *>(outer->getArguments()[0].get())) {
-            if (inner->getConstructor()->getName() == "\\top" && inner->getArguments().empty()) {
+        } else if (
+            outer->getConstructor()->getName() == "\\and"
+            && outer->getArguments().size() == 2) {
+          if (auto inner = dynamic_cast<KORECompositePattern *>(
+                  outer->getArguments()[0].get())) {
+            if (inner->getConstructor()->getName() == "\\top"
+                && inner->getArguments().empty()) {
               return nullptr;
-            } else if (inner->getConstructor()->getName() == "\\equals" && inner->getArguments().size() == 2) {
+            } else if (
+                inner->getConstructor()->getName() == "\\equals"
+                && inner->getArguments().size() == 2) {
               return inner->getArguments()[0].get();
             }
           }
         }
       }
-    } else if (top->getConstructor()->getName() == "\\and" && top->getArguments().size() == 2) {
-      if (auto equals = dynamic_cast<KORECompositePattern *>(top->getArguments()[0].get())) {
-        if (equals->getConstructor()->getName() == "\\equals" && equals->getArguments().size() == 2) {
+    } else if (
+        top->getConstructor()->getName() == "\\and"
+        && top->getArguments().size() == 2) {
+      if (auto equals = dynamic_cast<KORECompositePattern *>(
+              top->getArguments()[0].get())) {
+        if (equals->getConstructor()->getName() == "\\equals"
+            && equals->getArguments().size() == 2) {
           return equals->getArguments()[0].get();
-        } else if (equals->getConstructor()->getName() == "\\top" && equals->getArguments().empty()) {
+        } else if (
+            equals->getConstructor()->getName() == "\\top"
+            && equals->getArguments().empty()) {
           return nullptr;
         }
       }
-    } else if (top->getConstructor()->getName() == "\\equals" && top->getArguments().size() == 2) {
+    } else if (
+        top->getConstructor()->getName() == "\\equals"
+        && top->getArguments().size() == 2) {
       return nullptr;
-    } else if (top->getConstructor()->getName() == "\\rewrites" && top->getArguments().size() == 2) {
-      if (auto andPattern = dynamic_cast<KORECompositePattern *>(top->getArguments()[0].get())) {
-        if (andPattern->getConstructor()->getName() == "\\and" && andPattern->getArguments().size() == 2) {
-          if (auto equals = dynamic_cast<KORECompositePattern *>(andPattern->getArguments()[0].get())) {
-            if (equals->getConstructor()->getName() == "\\equals" && equals->getArguments().size() == 2) {
+    } else if (
+        top->getConstructor()->getName() == "\\rewrites"
+        && top->getArguments().size() == 2) {
+      if (auto andPattern = dynamic_cast<KORECompositePattern *>(
+              top->getArguments()[0].get())) {
+        if (andPattern->getConstructor()->getName() == "\\and"
+            && andPattern->getArguments().size() == 2) {
+          if (auto equals = dynamic_cast<KORECompositePattern *>(
+                  andPattern->getArguments()[0].get())) {
+            if (equals->getConstructor()->getName() == "\\equals"
+                && equals->getArguments().size() == 2) {
               return equals->getArguments()[0].get();
-            } else if (equals->getConstructor()->getName() == "\\top" && equals->getArguments().empty()) {
+            } else if (
+                equals->getConstructor()->getName() == "\\top"
+                && equals->getArguments().empty()) {
               return nullptr;
-            } else if (equals->getConstructor()->getName() == "\\not" && equals->getArguments().size() == 1) {
-              if (auto andPattern2 = dynamic_cast<KORECompositePattern *>(andPattern->getArguments()[1].get())) {
-                if (andPattern2->getConstructor()->getName() == "\\and" && andPattern2->getArguments().size() == 2) {
-                  if (auto equals2 = dynamic_cast<KORECompositePattern *>(andPattern2->getArguments()[0].get())) {
-                    if (equals2->getConstructor()->getName() == "\\equals" && equals2->getArguments().size() == 2) {
+            } else if (
+                equals->getConstructor()->getName() == "\\not"
+                && equals->getArguments().size() == 1) {
+              if (auto andPattern2 = dynamic_cast<KORECompositePattern *>(
+                      andPattern->getArguments()[1].get())) {
+                if (andPattern2->getConstructor()->getName() == "\\and"
+                    && andPattern2->getArguments().size() == 2) {
+                  if (auto equals2 = dynamic_cast<KORECompositePattern *>(
+                          andPattern2->getArguments()[0].get())) {
+                    if (equals2->getConstructor()->getName() == "\\equals"
+                        && equals2->getArguments().size() == 2) {
                       return equals2->getArguments()[0].get();
-                    } else if (equals2->getConstructor()->getName() == "\\top" && equals2->getArguments().empty()) {
+                    } else if (
+                        equals2->getConstructor()->getName() == "\\top"
+                        && equals2->getArguments().empty()) {
                       return nullptr;
-		    }
-		  }
-		}
-	      }
-	    }
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -1282,9 +1420,7 @@ KOREPattern *KOREAxiomDeclaration::getRequires() const {
   abort();
 }
 
-
-void
-KOREAliasDeclaration::addVariables(ptr<KORECompositePattern> Variables) {
+void KOREAliasDeclaration::addVariables(ptr<KORECompositePattern> Variables) {
   boundVariables = std::move(Variables);
 }
 
@@ -1292,7 +1428,8 @@ void KOREAliasDeclaration::addPattern(ptr<KOREPattern> Pattern) {
   pattern = std::move(Pattern);
 }
 
-KOREPattern::substitution KOREAliasDeclaration::getSubstitution(KORECompositePattern *subject) {
+KOREPattern::substitution
+KOREAliasDeclaration::getSubstitution(KORECompositePattern *subject) {
   int i = 0;
   KOREPattern::substitution result;
   for (auto &arg : boundVariables->getArguments()) {
@@ -1320,12 +1457,16 @@ void KOREModule::addDeclaration(ptr<KOREDeclaration> Declaration) {
 
 void KOREDefinition::addModule(ptr<KOREModule> Module) {
   for (auto &decl : Module->getDeclarations()) {
-    if (auto sortDecl = dynamic_cast<KORECompositeSortDeclaration *>(decl.get())) {
+    if (auto sortDecl
+        = dynamic_cast<KORECompositeSortDeclaration *>(decl.get())) {
       sortDeclarations.insert({sortDecl->getName(), sortDecl});
       auto sort = KORECompositeSort::Create(sortDecl->getName());
-    } else if (auto symbolDecl = dynamic_cast<KORESymbolDeclaration *>(decl.get())) {
-      symbolDeclarations.insert({symbolDecl->getSymbol()->getName(), symbolDecl});
-    } else if (auto aliasDecl = dynamic_cast<KOREAliasDeclaration *>(decl.get())) {
+    } else if (
+        auto symbolDecl = dynamic_cast<KORESymbolDeclaration *>(decl.get())) {
+      symbolDeclarations.insert(
+          {symbolDecl->getSymbol()->getName(), symbolDecl});
+    } else if (
+        auto aliasDecl = dynamic_cast<KOREAliasDeclaration *>(decl.get())) {
       aliasDeclarations.insert({aliasDecl->getSymbol()->getName(), aliasDecl});
     } else if (auto axiom = dynamic_cast<KOREAxiomDeclaration *>(decl.get())) {
       axioms.push_back(axiom);
@@ -1346,12 +1487,14 @@ void KOREDefinition::preprocess() {
   }
   auto symbols = std::map<std::string, std::vector<KORESymbol *>>{};
   unsigned nextOrdinal = 0;
-  for (auto iter = symbolDeclarations.begin(); iter != symbolDeclarations.end(); ++iter) {
+  for (auto iter = symbolDeclarations.begin(); iter != symbolDeclarations.end();
+       ++iter) {
     auto decl = *iter;
     if (decl.second->getAttributes().count("freshGenerator")) {
       auto sort = decl.second->getSymbol()->getSort();
       if (sort->isConcrete()) {
-        freshFunctions[dynamic_cast<KORECompositeSort *>(sort.get())->getName()] = decl.second->getSymbol();
+        freshFunctions[dynamic_cast<KORECompositeSort *>(sort.get())->getName()]
+            = decl.second->getSymbol();
       }
     }
   }
@@ -1369,12 +1512,13 @@ void KOREDefinition::preprocess() {
   for (auto moditer = modules.begin(); moditer != modules.end(); ++moditer) {
     auto &declarations = (*moditer)->getDeclarations();
     for (auto iter = declarations.begin(); iter != declarations.end(); ++iter) {
-      KORESymbolDeclaration * decl = dynamic_cast<KORESymbolDeclaration *>(iter->get());
+      KORESymbolDeclaration *decl
+          = dynamic_cast<KORESymbolDeclaration *>(iter->get());
       if (decl == nullptr) {
         continue;
       }
       if (decl->isHooked() && decl->getObjectSortVariables().empty()) {
-        KORESymbol * symbol = decl->getSymbol();
+        KORESymbol *symbol = decl->getSymbol();
         symbols.emplace(symbol->getName(), std::vector<KORESymbol *>{symbol});
       }
     }
@@ -1391,7 +1535,8 @@ void KOREDefinition::preprocess() {
   uint16_t nextLayout = 1;
   auto instantiations = std::unordered_map<KORESymbol, uint32_t, HashSymbol>{};
   auto layouts = std::unordered_map<std::string, uint16_t>{};
-  auto variables = std::unordered_map<std::string, std::pair<uint32_t, uint32_t>>{};
+  auto variables
+      = std::unordered_map<std::string, std::pair<uint32_t, uint32_t>>{};
   for (auto iter = symbols.begin(); iter != symbols.end(); ++iter) {
     auto entry = *iter;
     uint32_t firstTag = nextSymbol;
@@ -1413,9 +1558,10 @@ void KOREDefinition::preprocess() {
         allObjectSymbols[Out.str()] = symbol;
       }
     }
-    uint32_t lastTag = nextSymbol-1;
+    uint32_t lastTag = nextSymbol - 1;
     if (!entry.second.empty()) {
-      variables.emplace(entry.first, std::pair<uint32_t, uint32_t>{firstTag, lastTag});
+      variables.emplace(
+          entry.first, std::pair<uint32_t, uint32_t>{firstTag, lastTag});
     }
   }
   for (auto iter = symbols.begin(); iter != symbols.end(); ++iter) {
@@ -1425,11 +1571,15 @@ void KOREDefinition::preprocess() {
       KORESymbol *symbol = *iter;
       for (auto &sort : symbol->getArguments()) {
         if (sort->isConcrete()) {
-          hookedSorts[dynamic_cast<KORECompositeSort *>(sort.get())->getCategory(this)] = std::dynamic_pointer_cast<KORECompositeSort>(sort);
+          hookedSorts[dynamic_cast<KORECompositeSort *>(sort.get())
+                          ->getCategory(this)]
+              = std::dynamic_pointer_cast<KORECompositeSort>(sort);
         }
       }
       if (symbol->getSort()->isConcrete()) {
-        hookedSorts[dynamic_cast<KORECompositeSort *>(symbol->getSort().get())->getCategory(this)] = std::dynamic_pointer_cast<KORECompositeSort>(symbol->getSort());
+        hookedSorts[dynamic_cast<KORECompositeSort *>(symbol->getSort().get())
+                        ->getCategory(this)]
+            = std::dynamic_pointer_cast<KORECompositeSort>(symbol->getSort());
       }
       if (!symbol->isConcrete()) {
         if (symbol->isPolymorphic()) {
@@ -1486,8 +1636,7 @@ void KOREVariable::print(std::ostream &Out, unsigned indent) const {
   Out << Indent << name;
 }
 
-void
-KOREVariablePattern::print(std::ostream &Out, unsigned indent) const {
+void KOREVariablePattern::print(std::ostream &Out, unsigned indent) const {
   std::string Indent(indent, ' ');
   Out << Indent;
   name->print(Out);
@@ -1495,8 +1644,7 @@ KOREVariablePattern::print(std::ostream &Out, unsigned indent) const {
   sort->print(Out);
 }
 
-void
-KORECompositePattern::print(std::ostream &Out, unsigned indent) const {
+void KORECompositePattern::print(std::ostream &Out, unsigned indent) const {
   std::string Indent(indent, ' ');
   Out << Indent;
   constructor->print(Out);
@@ -1534,8 +1682,9 @@ void KOREStringPattern::print(std::ostream &Out, unsigned indent) const {
 }
 
 static void printAttributeList(
-  std::ostream &Out, const std::map<std::string, ptr<KORECompositePattern>> &attributes,
-  unsigned indent = 0) {
+    std::ostream &Out,
+    const std::map<std::string, ptr<KORECompositePattern>> &attributes,
+    unsigned indent = 0) {
 
   std::string Indent(indent, ' ');
   Out << Indent << "[";
@@ -1562,7 +1711,7 @@ void KOREDeclaration::printSortVariables(std::ostream &Out) const {
 }
 
 void KORECompositeSortDeclaration::print(
-  std::ostream &Out, unsigned indent) const {
+    std::ostream &Out, unsigned indent) const {
   std::string Indent(indent, ' ');
   Out << Indent << (_isHooked ? "hooked-sort " : "sort ") << sortName;
   printSortVariables(Out);
@@ -1570,8 +1719,7 @@ void KORECompositeSortDeclaration::print(
   printAttributeList(Out, attributes);
 }
 
-void
-KORESymbolDeclaration::print(std::ostream &Out, unsigned indent) const {
+void KORESymbolDeclaration::print(std::ostream &Out, unsigned indent) const {
   std::string Indent(indent, ' ');
   Out << Indent << (_isHooked ? "hooked-symbol " : "symbol ")
       << symbol->getName();
@@ -1590,8 +1738,7 @@ KORESymbolDeclaration::print(std::ostream &Out, unsigned indent) const {
   printAttributeList(Out, attributes);
 }
 
-void
-KOREAliasDeclaration::print(std::ostream &Out, unsigned indent) const {
+void KOREAliasDeclaration::print(std::ostream &Out, unsigned indent) const {
   std::string Indent(indent, ' ');
   Out << Indent << "alias " << symbol->getName();
   printSortVariables(Out);
@@ -1622,8 +1769,8 @@ void KOREAxiomDeclaration::print(std::ostream &Out, unsigned indent) const {
   printAttributeList(Out, attributes);
 }
 
-void
-KOREModuleImportDeclaration::print(std::ostream &Out, unsigned indent) const {
+void KOREModuleImportDeclaration::print(
+    std::ostream &Out, unsigned indent) const {
   std::string Indent(indent, ' ');
   Out << Indent << "import " << moduleName;
   Out << " ";
@@ -1655,7 +1802,9 @@ void KOREDefinition::print(std::ostream &Out, unsigned indent) const {
   }
 }
 
-void kllvm::readMultimap(std::string name, KORESymbolDeclaration *decl, std::map<std::string, std::set<std::string>> &output, std::string attName) {
+void kllvm::readMultimap(
+    std::string name, KORESymbolDeclaration *decl,
+    std::map<std::string, std::set<std::string>> &output, std::string attName) {
   if (decl->getAttributes().count(attName)) {
     KORECompositePattern *att = decl->getAttributes().at(attName).get();
     for (auto &pat : att->getArguments()) {
@@ -1669,13 +1818,16 @@ void kllvm::readMultimap(std::string name, KORESymbolDeclaration *decl, std::map
 // of all its subpatterns. This can sometimes exhaust all the stack space.
 // This function deallocates a pattern iteratively, without recursion.
 void kllvm::deallocateSPtrKorePattern(sptr<KOREPattern> pattern) {
-    std::vector<sptr<KOREPattern>> vec;
-    vec.push_back(std::move(pattern));
-    while(!vec.empty()) {
-        sptr<KOREPattern> curr = std::move(vec.back());
-        vec.pop_back();
-        if (auto composite = std::dynamic_pointer_cast<KORECompositePattern>(curr)) {
-            vec.insert(vec.end(), std::make_move_iterator(composite->arguments.begin()), std::make_move_iterator(composite->arguments.end()));
-        }
+  std::vector<sptr<KOREPattern>> vec;
+  vec.push_back(std::move(pattern));
+  while (!vec.empty()) {
+    sptr<KOREPattern> curr = std::move(vec.back());
+    vec.pop_back();
+    if (auto composite
+        = std::dynamic_pointer_cast<KORECompositePattern>(curr)) {
+      vec.insert(
+          vec.end(), std::make_move_iterator(composite->arguments.begin()),
+          std::make_move_iterator(composite->arguments.end()));
     }
+  }
 }

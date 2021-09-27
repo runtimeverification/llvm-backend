@@ -1,13 +1,12 @@
+#include "kllvm/parser/KOREParser.h"
 #include "kllvm/ast/AST.h"
 #include "kllvm/parser/KOREScanner.h"
-#include "kllvm/parser/KOREParser.h"
 #include <iostream>
 
 namespace kllvm {
 namespace parser {
 
-void KOREParser::error(
-      const location &loc, const std::string &err_message) {
+void KOREParser::error(const location &loc, const std::string &err_message) {
   std::cerr << "Syntax error at " << loc << ": " << err_message << "\n";
   exit(-1);
 }
@@ -51,7 +50,8 @@ std::string KOREParser::consume(token next) {
     data = buffer.data;
     buffer.tok = token::EMPTY;
   }
-  if (actual == next) return data;
+  if (actual == next)
+    return data;
   error(loc, "Expected: " + str(next) + " Actual: " + str(actual));
 }
 
@@ -138,7 +138,7 @@ std::vector<ptr<KOREDeclaration>> KOREParser::declarations(void) {
 ptr<KOREDeclaration> KOREParser::sentence() {
   std::string name;
   token current = peek();
-  switch(current) {
+  switch (current) {
   case token::IMPORT: {
     consume(token::IMPORT);
     name = consume(token::ID);
@@ -147,24 +147,28 @@ ptr<KOREDeclaration> KOREParser::sentence() {
     attributes(import.get());
     consume(token::RIGHTBRACKET);
     return import;
-  } case token::SORT:
+  }
+  case token::SORT:
   case token::HOOKEDSORT: {
     consume(current);
     name = consume(token::ID);
     consume(token::LEFTBRACE);
-    auto sortDecl = KORECompositeSortDeclaration::Create(name, current == token::HOOKEDSORT);
+    auto sortDecl = KORECompositeSortDeclaration::Create(
+        name, current == token::HOOKEDSORT);
     sortVariables(sortDecl.get());
     consume(token::RIGHTBRACE);
     consume(token::LEFTBRACKET);
     attributes(sortDecl.get());
     consume(token::RIGHTBRACKET);
     return sortDecl;
-  } case token::SYMBOL:
+  }
+  case token::SYMBOL:
   case token::HOOKEDSYMBOL: {
     consume(current);
     name = consume(token::ID);
     consume(token::LEFTBRACE);
-    auto symbol = KORESymbolDeclaration::Create(name, current == token::HOOKEDSYMBOL);
+    auto symbol
+        = KORESymbolDeclaration::Create(name, current == token::HOOKEDSYMBOL);
     sortVariables(symbol.get());
     consume(token::RIGHTBRACE);
     consume(token::LEFTPAREN);
@@ -177,7 +181,8 @@ ptr<KOREDeclaration> KOREParser::sentence() {
     attributes(symbol.get());
     consume(token::RIGHTBRACKET);
     return symbol;
-  } case token::ALIAS: {
+  }
+  case token::ALIAS: {
     consume(token::ALIAS);
     name = consume(token::ID);
     consume(token::LEFTBRACE);
@@ -200,7 +205,8 @@ ptr<KOREDeclaration> KOREParser::sentence() {
     attributes(alias.get());
     consume(token::RIGHTBRACKET);
     return alias;
-  } case token::AXIOM:
+  }
+  case token::AXIOM:
   case token::CLAIM: {
     consume(current);
     consume(token::LEFTBRACE);
@@ -213,8 +219,12 @@ ptr<KOREDeclaration> KOREParser::sentence() {
     attributes(axiom.get());
     consume(token::RIGHTBRACKET);
     return axiom;
-  } default:
-    error(loc, "Expected: [import, sort, hooked-sort, symbol, hooked-symbol, alias, axiom, claim] Actual: " + str(current));
+  }
+  default:
+    error(
+        loc, "Expected: [import, sort, hooked-sort, symbol, hooked-symbol, "
+             "alias, axiom, claim] Actual: "
+                 + str(current));
   }
 }
 
@@ -258,7 +268,7 @@ sptr<KORESort> KOREParser::sort() {
   std::string name = consume(token::ID);
   if (peek() == token::LEFTBRACE) {
     consume(token::LEFTBRACE);
-    auto sort = KORECompositeSort::Create(name); 
+    auto sort = KORECompositeSort::Create(name);
     sorts(sort.get());
     consume(token::RIGHTBRACE);
     return sort;
@@ -269,23 +279,20 @@ sptr<KORESort> KOREParser::sort() {
 
 ptr<KOREPattern> KOREParser::_pattern() {
   token current = peek();
-  switch(current) {
+  switch (current) {
   case token::ID: {
     std::string name = consume(token::ID);
     current = peek();
-    switch(current) {
+    switch (current) {
     case token::COLON:
       consume(token::COLON);
       return KOREVariablePattern::Create(name, sort());
-    case token::LEFTBRACE:
-      return applicationPattern(name);
-    default:
-      error(loc, "Expected: [:, {] Actual: " + str(current));
+    case token::LEFTBRACE: return applicationPattern(name);
+    default: error(loc, "Expected: [:, {] Actual: " + str(current));
     }
-  } case token::STRING:
-    return KOREStringPattern::Create(consume(token::STRING));
-  default:
-    error(loc, "Expected: [<id>, <string>] Actual: " + str(current));
+  }
+  case token::STRING: return KOREStringPattern::Create(consume(token::STRING));
+  default: error(loc, "Expected: [<id>, <string>] Actual: " + str(current));
   }
 }
 
@@ -322,7 +329,7 @@ ptr<KOREPattern> KOREParser::applicationPattern(std::string name) {
       }
       return accum;
     } else {
-      ptr<KOREPattern> accum = std::move(pats[pats.size()-1]);
+      ptr<KOREPattern> accum = std::move(pats[pats.size() - 1]);
       for (int i = pats.size() - 2; i >= 0; i--) {
         auto newAccum = KORECompositePattern::Create(pat->getConstructor());
         newAccum->addArgument(std::move(pats[i]));
@@ -348,7 +355,8 @@ ptr<KORECompositePattern> KOREParser::_applicationPattern(std::string name) {
 }
 
 void KOREParser::patterns(KORECompositePattern *node) {
-  if (peek() == token::RIGHTPAREN) return;
+  if (peek() == token::RIGHTPAREN)
+    return;
   patternsNE(node);
 }
 
@@ -363,7 +371,8 @@ void KOREParser::patternsNE(KORECompositePattern *node) {
 }
 
 void KOREParser::patterns(std::vector<ptr<KOREPattern>> &node) {
-  if (peek() == token::RIGHTPAREN) return;
+  if (peek() == token::RIGHTPAREN)
+    return;
   patternsNE(node);
 }
 
@@ -377,5 +386,5 @@ void KOREParser::patternsNE(std::vector<ptr<KOREPattern>> &node) {
   }
 }
 
-}
-}
+} // namespace parser
+} // namespace kllvm
