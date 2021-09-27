@@ -49,16 +49,19 @@ struct EmitGCLayoutInfo : public ModulePass {
                 IDPos,
                 ConstantInt::get(GCSI->getArgOperand(IDPos)->getType(), id));
             unsigned int nrelocs = S->gc_args_end() - S->gc_args_begin();
-            unsigned int i = nrelocs - 1;
 #if LLVM_VERSION_MAJOR >= 11
+            unsigned int i = nrelocs - 1;
             for (auto &R : S->getGCRelocates()) {
+#define increment i--
 #else
+            unsigned int i = 0;
             for (auto &R : S->getRelocates()) {
+#define increment i++
 #endif
               auto Arg = R->getBasePtr();
               auto *Ty = Arg->getType()->getPointerElementType();
               if (Ty->isIntegerTy()) {
-                i--;
+                increment;
                 continue;
               }
               if (!Ty->isStructTy()) {
@@ -89,7 +92,7 @@ struct EmitGCLayoutInfo : public ModulePass {
                 error(StructTy);
               }
               cats[std::make_pair(id, i)] = cat;
-              i--;
+              increment;
             }
             if (nrelocs > numRelocations) {
               numRelocations = nrelocs;
