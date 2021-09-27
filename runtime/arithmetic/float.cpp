@@ -72,6 +72,14 @@ SortFloat hook_FLOAT_floor(SortFloat a) {
   return move_float(result);
 }
 
+SortFloat hook_FLOAT_trunc(SortFloat a) {
+  floating result[1];
+  mpfr_enter(a, result);
+  int t = mpfr_trunc(result->f, a->f);
+  mpfr_leave(t, result);
+  return move_float(result);
+}
+
 SortFloat hook_FLOAT_round(SortFloat a, SortInt prec, SortInt exp) {
   if (!mpz_fits_ulong_p(prec)) {
     throw std::invalid_argument("Precision out of range");
