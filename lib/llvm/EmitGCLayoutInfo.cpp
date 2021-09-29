@@ -30,9 +30,9 @@ struct EmitGCLayoutInfo : public ModulePass {
     unsigned int numRelocations = 0;
     std::map<std::pair<unsigned int, unsigned int>, ValueType> cats;
     auto &Ctx = M.getContext();
-    for (Function &F : M.functions()) {
-      for (BasicBlock &BB : F.getBasicBlockList()) {
-        for (Instruction &I : BB.getInstList()) {
+    for (Function &F : M) {
+      for (BasicBlock &BB : F) {
+        for (Instruction &I : BB) {
 #if LLVM_VERSION_MAJOR >= 11
           if (auto *GCSI = dyn_cast<GCStatepointInst>(&I)) {
             auto S = GCSI;
