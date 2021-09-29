@@ -348,14 +348,14 @@ void koreCollect(bool afterStep) {
     if (mem_block_start(previous_oldspace_alloc_ptr + 1)
         == previous_oldspace_alloc_ptr) {
       // this means that the previous oldspace allocation pointer points to an
-      // address that is megabyte-aligned. This can only happen if we have just
-      // filled up a block but have not yet allocated the next block in the
-      // sequence at the start of the collection cycle. This means that the
-      // allocation pointer is invalid and does not actually point to the next
-      // address that would have been allocated at, according to the logic of
-      // arenaAlloc, which will have allocated a fresh memory block and put
-      // the allocation at the start of it. Thus, we use movePtr with a size
-      // of zero to adjust and get the true address of the allocation.
+      // address that is megabyte-aligned. This can only happen if we have
+      // just filled up a block but have not yet allocated the next block in
+      // the sequence at the start of the collection cycle. This means that
+      // the allocation pointer is invalid and does not actually point to the
+      // next address that would have been allocated at, according to the
+      // logic of arenaAlloc, which will have allocated a fresh memory block
+      // and put the allocation at the start of it. Thus, we use movePtr with
+      // a size of zero to adjust and get the true address of the allocation.
       scan_ptr = movePtr(previous_oldspace_alloc_ptr, 0, *old_alloc_ptr());
     } else {
       scan_ptr = previous_oldspace_alloc_ptr;
