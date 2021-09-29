@@ -323,7 +323,15 @@ void koreCollect(bool afterStep) {
   char *previous_oldspace_alloc_ptr = *old_alloc_ptr();
   // migrate stack roots
   for (int i = 0; i < roots.size(); i++) {
-    migrate_child(roots[i].bp, &roots[i].layout, 0, true);
+    char **base_ptr
+        = (char **)(((char *)roots[i].bp) + roots[i].layout.base.offset);
+    char **derived_ptr
+        = (char **)(((char *)roots[i].bp) + roots[i].layout.derived_offset);
+    ptrdiff_t derived_offset = *derived_ptr - *base_ptr;
+    migrate_child(roots[i].bp, &roots[i].layout.base, 0, true);
+    if (base_ptr != derived_ptr) {
+      *derived_ptr = *base_ptr + derived_offset;
+    }
   }
   // migrate global variable roots
   migrateRoots();
