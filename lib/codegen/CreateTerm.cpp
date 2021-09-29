@@ -97,6 +97,12 @@ target triple = "x86_64-unknown-linux-gnu"
 ; Interface to the configuration parser
 declare %block* @parseConfiguration(i8*)
 declare void @printConfiguration(i32, %block *)
+
+@__LLVM_StackMaps = external dso_local global i8, align 8
+
+define i8* @getStackMap() {
+  ret i8* @__LLVM_StackMaps
+}
 )LLVM";
 
 std::unique_ptr<llvm::Module>
@@ -144,7 +150,7 @@ llvm::Type *getParamType(ValueType sort, llvm::Module *Module) {
   switch (sort.cat) {
   case SortCategory::Map:
   case SortCategory::List:
-  case SortCategory::Set: type = llvm::PointerType::getUnqual(type); break;
+  case SortCategory::Set: type = llvm::PointerType::get(type, 1); break;
   default: break;
   }
   return type;
@@ -156,17 +162,17 @@ llvm::Type *getValueType(ValueType sort, llvm::Module *Module) {
   case SortCategory::List: return getTypeByName(Module, LIST_STRUCT);
   case SortCategory::Set: return getTypeByName(Module, SET_STRUCT);
   case SortCategory::Int:
-    return llvm::PointerType::getUnqual(getTypeByName(Module, INT_STRUCT));
+    return llvm::PointerType::get(getTypeByName(Module, INT_STRUCT), 1);
   case SortCategory::Float:
-    return llvm::PointerType::getUnqual(getTypeByName(Module, FLOAT_STRUCT));
+    return llvm::PointerType::get(getTypeByName(Module, FLOAT_STRUCT), 1);
   case SortCategory::StringBuffer:
-    return llvm::PointerType::getUnqual(getTypeByName(Module, BUFFER_STRUCT));
+    return llvm::PointerType::get(getTypeByName(Module, BUFFER_STRUCT), 1);
   case SortCategory::Bool: return llvm::Type::getInt1Ty(Module->getContext());
   case SortCategory::MInt:
     return llvm::IntegerType::get(Module->getContext(), sort.bits);
   case SortCategory::Symbol:
   case SortCategory::Variable:
-    return llvm::PointerType::getUnqual(getTypeByName(Module, BLOCK_STRUCT));
+    return llvm::PointerType::get(getTypeByName(Module, BLOCK_STRUCT), 1);
   case SortCategory::Uncomputed: abort();
   }
 }
@@ -203,21 +209,83 @@ llvm::Value *getBlockHeader(
           llvm::Type::getInt64Ty(Module->getContext()), headerVal));
 }
 
-llvm::Value *allocateTerm(
-    llvm::Type *AllocType, llvm::BasicBlock *block, const char *allocFn) {
-  return allocateTerm(
-      AllocType, llvm::ConstantExpr::getSizeOf(AllocType), block, allocFn);
+static llvm::Value *
+addrspaceCast(llvm::Value *val, llvm::BasicBlock *block, int from, int to) {
+  auto AllocType = val->getType()->getPointerElementType();
+  bool hasUnnamed = false;
+  std::string name = "addrspace_" + std::to_string(from) + "_to_"
+                     + std::to_string(to) + "_"
+                     + getMangledTypeStr(AllocType, hasUnnamed);
+  auto C = getOrInsertFunction(
+      block->getModule(), name, llvm::PointerType::get(AllocType, to),
+      llvm::PointerType::get(AllocType, from));
+  auto F = llvm::cast<llvm::Function>(C);
+  F->addFnAttr(llvm::Attribute::AlwaysInline);
+  F->addFnAttr("gc-leaf-function");
+  auto addrspace = llvm::CallInst::Create(F, {val}, "", block);
+  return addrspace;
+}
+
+llvm::Value *addrspaceCast0to1(llvm::Value *val, llvm::BasicBlock *block) {
+  return addrspaceCast(val, block, 0, 1);
+}
+
+llvm::Value *addrspaceCast1to0(llvm::Value *val, llvm::BasicBlock *block) {
+  return addrspaceCast(val, block, 1, 0);
+}
+
+llvm::Value *ptrToInt(llvm::Value *val, llvm::BasicBlock *block) {
+  bool hasUnnamed = false;
+  std::string name
+      = "ptrtoint_i64." + getMangledTypeStr(val->getType(), hasUnnamed);
+  auto C = getOrInsertFunction(
+      block->getModule(), name,
+      llvm::Type::getInt64Ty(block->getModule()->getContext()), val->getType());
+  auto F = llvm::cast<llvm::Function>(C);
+  F->addFnAttr(llvm::Attribute::AlwaysInline);
+  F->addFnAttr("gc-leaf-function");
+  auto ptr = llvm::CallInst::Create(F, {val}, "", block);
+  return ptr;
 }
 
 llvm::Value *allocateTerm(
+    ValueType Cat, llvm::Type *AllocType, llvm::BasicBlock *block,
+    const char *allocFn) {
+  return allocateTerm(
+      Cat, AllocType, llvm::ConstantExpr::getSizeOf(AllocType), block, allocFn);
+}
+
+llvm::Value *allocateTerm(
+    ValueType Cat, llvm::Type *AllocType, llvm::Value *Len,
+    llvm::BasicBlock *block, const char *allocFn) {
+  auto malloc = llvm::CallInst::Create(
+      koreHeapAlloc(Cat, allocFn, block->getModule()), Len, "malloccall",
+      block);
+  if (malloc->getType()->getPointerElementType() == AllocType) {
+    return malloc;
+  }
+  auto cast = new llvm::BitCastInst(
+      malloc, llvm::PointerType::get(AllocType, 1), "", block);
+  return cast;
+}
+
+llvm::Value *allocateTermNoReloc(
+    llvm::Type *AllocType, llvm::BasicBlock *block, const char *allocFn) {
+  return allocateTermNoReloc(
+      AllocType, llvm::ConstantExpr::getSizeOf(AllocType), block, allocFn);
+}
+
+llvm::Value *allocateTermNoReloc(
     llvm::Type *AllocType, llvm::Value *Len, llvm::BasicBlock *block,
     const char *allocFn) {
-  llvm::Instruction *Malloc = llvm::CallInst::CreateMalloc(
-      block, llvm::Type::getInt64Ty(block->getContext()), AllocType, Len,
-      nullptr, koreHeapAlloc(allocFn, block->getModule()));
-  setDebugLoc(&block->getInstList().back());
-  block->getInstList().push_back(Malloc);
-  return Malloc;
+  auto malloc = llvm::CallInst::Create(
+      koreHeapAlloc(allocFn, block->getModule()), Len, "malloccall", block);
+  if (malloc->getType()->getPointerElementType() == AllocType) {
+    return malloc;
+  }
+  auto cast = new llvm::BitCastInst(
+      malloc, llvm::PointerType::get(AllocType, 0), "", block);
+  return cast;
 }
 
 ValueType termType(
@@ -319,8 +387,10 @@ llvm::Value *CreateTerm::createToken(ValueType sort, std::string contents) {
     std::vector<llvm::Constant *> Idxs
         = {llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0),
            llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), 1)};
-    return llvm::ConstantExpr::getInBoundsGetElementPtr(
-        getTypeByName(Module, INT_WRAPPER_STRUCT), globalVar, Idxs);
+    return addrspaceCast0to1(
+        llvm::ConstantExpr::getInBoundsGetElementPtr(
+            getTypeByName(Module, INT_WRAPPER_STRUCT), globalVar, Idxs),
+        CurrentBlock);
   }
   case SortCategory::Float: {
     llvm::Constant *global = Module->getOrInsertGlobal(
@@ -408,8 +478,10 @@ llvm::Value *CreateTerm::createToken(ValueType sort, std::string contents) {
     std::vector<llvm::Constant *> Idxs
         = {llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0),
            llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), 1)};
-    return llvm::ConstantExpr::getInBoundsGetElementPtr(
-        getTypeByName(Module, FLOAT_WRAPPER_STRUCT), globalVar, Idxs);
+    return addrspaceCast0to1(
+        llvm::ConstantExpr::getInBoundsGetElementPtr(
+            getTypeByName(Module, FLOAT_WRAPPER_STRUCT), globalVar, Idxs),
+        CurrentBlock);
   }
   case SortCategory::StringBuffer:
     assert(false && "not implemented yet: tokens");
@@ -447,8 +519,7 @@ llvm::Value *CreateTerm::createToken(ValueType sort, std::string contents) {
           llvm::ConstantDataArray::getString(Ctx, contents, false)));
     }
     return llvm::ConstantExpr::getPointerCast(
-        global,
-        llvm::PointerType::getUnqual(getTypeByName(Module, BLOCK_STRUCT)));
+        global, llvm::PointerType::get(getTypeByName(Module, BLOCK_STRUCT), 1));
   }
   case SortCategory::Uncomputed: abort();
   }
@@ -586,10 +657,10 @@ llvm::Value *CreateTerm::createHook(
     if (nwords == 0) {
       return createToken({SortCategory::Int, 0}, "0");
     }
-    auto Ptr = allocateTerm(
+    auto Ptr = allocateTermNoReloc(
         llvm::Type::getInt64Ty(Ctx),
         llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), nwords * 8),
-        CurrentBlock, "koreAllocAlwaysGC");
+        CurrentBlock);
     if (nwords == 1) {
       llvm::Value *Word;
       if (cat.bits == 64) {
@@ -636,10 +707,10 @@ llvm::Value *CreateTerm::createHook(
     if (nwords == 0) {
       return createToken({SortCategory::Int, 0}, "0");
     }
-    auto Ptr = allocateTerm(
+    auto Ptr = allocateTermNoReloc(
         llvm::Type::getInt64Ty(Ctx),
         llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), nwords * 8),
-        CurrentBlock, "koreAllocAlwaysGC");
+        CurrentBlock);
     if (nwords == 1) {
       llvm::Value *Word;
       if (cat.bits == 64) {
@@ -859,11 +930,11 @@ llvm::Value *CreateTerm::createHook(
   }
 }
 
-// we use fastcc calling convention for apply_rule_* and eval_* functions so
-// that the -tailcallopt LLVM pass can be used to make K functions tail
-// recursive when their K definitions are tail recursive.
+// we use tailcc calling convention for apply_rule_* and eval_* functions so
+// that we can add the musttail marker to these calls so the calls become tail
+// calls
 llvm::Value *CreateTerm::createFunctionCall(
-    std::string name, KORECompositePattern *pattern, bool sret, bool fastcc) {
+    std::string name, KORECompositePattern *pattern, bool sret, bool tailcc) {
   std::vector<llvm::Value *> args;
   auto returnSort = dynamic_cast<KORECompositeSort *>(
       pattern->getConstructor()->getSort().get());
@@ -889,12 +960,12 @@ llvm::Value *CreateTerm::createFunctionCall(
     default: args.push_back(arg); break;
     }
   }
-  return createFunctionCall(name, returnCat, args, sret, fastcc);
+  return createFunctionCall(name, returnCat, args, sret, tailcc);
 }
 
 llvm::Value *CreateTerm::createFunctionCall(
     std::string name, ValueType returnCat,
-    const std::vector<llvm::Value *> &args, bool sret, bool fastcc) {
+    const std::vector<llvm::Value *> &args, bool sret, bool tailcc) {
   llvm::Type *returnType = getValueType(returnCat, Module);
   std::vector<llvm::Type *> types;
   bool collection = false;
@@ -914,13 +985,14 @@ llvm::Value *CreateTerm::createFunctionCall(
   if (sret) {
     // we don't use alloca here because the tail call optimization pass for llvm
     // doesn't handle correctly functions with alloca
-    AllocSret = allocateTerm(returnType, CurrentBlock, "koreAllocAlwaysGC");
+    AllocSret = allocateTerm(
+        returnCat, returnType, CurrentBlock, "koreAllocAlwaysGC");
     sretType = returnType;
     realArgs.insert(realArgs.begin(), AllocSret);
     types.insert(types.begin(), AllocSret->getType());
     returnType = llvm::Type::getVoidTy(Ctx);
   } else if (collection) {
-    returnType = llvm::PointerType::getUnqual(returnType);
+    returnType = llvm::PointerType::get(returnType, 1);
   }
 
   llvm::FunctionType *funcType
@@ -928,8 +1000,8 @@ llvm::Value *CreateTerm::createFunctionCall(
   llvm::Function *func = getOrInsertFunction(Module, name, funcType);
   auto call = llvm::CallInst::Create(func, realArgs, "", CurrentBlock);
   setDebugLoc(call);
-  if (fastcc) {
-    call->setCallingConv(llvm::CallingConv::Fast);
+  if (tailcc) {
+    call->setCallingConv(llvm::CallingConv::Tail);
   }
   if (sret) {
 #if LLVM_VERSION_MAJOR >= 12
@@ -966,7 +1038,7 @@ llvm::Value *CreateTerm::notInjectionCase(
       ChildValue = (*this)(child.get()).first;
     }
     llvm::Type *ChildPtrType
-        = llvm::PointerType::get(BlockType->elements()[idx], 0);
+        = llvm::PointerType::get(BlockType->elements()[idx], 1);
     if (ChildValue->getType() == ChildPtrType) {
       ChildValue = new llvm::LoadInst(
           ChildValue->getType()->getPointerElementType(), ChildValue, "",
@@ -975,7 +1047,8 @@ llvm::Value *CreateTerm::notInjectionCase(
     children.push_back(ChildValue);
     idx++;
   }
-  llvm::Value *Block = allocateTerm(BlockType, CurrentBlock);
+  llvm::Value *Block
+      = allocateTerm({SortCategory::Symbol, 0}, BlockType, CurrentBlock);
   llvm::Value *BlockHeaderPtr = llvm::GetElementPtrInst::CreateInBounds(
       BlockType, Block,
       {llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0),
@@ -993,7 +1066,7 @@ llvm::Value *CreateTerm::notInjectionCase(
   }
 
   auto BlockPtr
-      = llvm::PointerType::getUnqual(getTypeByName(Module, BLOCK_STRUCT));
+      = llvm::PointerType::get(getTypeByName(Module, BLOCK_STRUCT), 1);
   auto bitcast = new llvm::BitCastInst(Block, BlockPtr, "", CurrentBlock);
   if (symbolDecl->getAttributes().count("binder")) {
     auto call = llvm::CallInst::Create(
@@ -1047,11 +1120,15 @@ std::pair<llvm::Value *, bool> CreateTerm::operator()(KOREPattern *pattern) {
       }
     } else if (symbol->getArguments().empty()) {
       llvm::StructType *BlockType = getTypeByName(Module, BLOCK_STRUCT);
-      llvm::IntToPtrInst *Cast = new llvm::IntToPtrInst(
-          llvm::ConstantInt::get(
+      llvm::Value *Cast = llvm::CallInst::Create(
+          getOrInsertFunction(
+              Module, "inttoptr_i64.p1s_blocks",
+              llvm::PointerType::get(BlockType, 1),
+              llvm::Type::getInt64Ty(Ctx)),
+          {llvm::ConstantInt::get(
               llvm::Type::getInt64Ty(Ctx),
-              (((uint64_t)symbol->getTag()) << 32) | 1),
-          llvm::PointerType::getUnqual(BlockType), "", CurrentBlock);
+              (((uint64_t)symbol->getTag()) << 32) | 1)},
+          "", CurrentBlock);
       return std::make_pair(Cast, false);
     } else if (
         symbolDecl->getAttributes().count("sortInjection")
@@ -1129,7 +1206,7 @@ void addAbort(llvm::BasicBlock *block, llvm::Module *Module) {
 
 bool makeFunction(
     std::string name, KOREPattern *pattern, KOREDefinition *definition,
-    llvm::Module *Module, bool fastcc, bool bigStep,
+    llvm::Module *Module, bool tailcc, bool bigStep,
     KOREAxiomDeclaration *axiom, std::string postfix) {
   std::map<std::string, KOREVariablePattern *> vars;
   pattern->markVariables(vars);
@@ -1154,7 +1231,7 @@ bool makeFunction(
     case SortCategory::Map:
     case SortCategory::List:
     case SortCategory::Set:
-      paramType = llvm::PointerType::getUnqual(paramType);
+      paramType = llvm::PointerType::get(paramType, 1);
       break;
     default: break;
     }
@@ -1169,13 +1246,14 @@ bool makeFunction(
   case SortCategory::Map:
   case SortCategory::List:
   case SortCategory::Set:
-    returnType = llvm::PointerType::getUnqual(returnType);
+    returnType = llvm::PointerType::get(returnType, 1);
     break;
   default: break;
   }
   llvm::FunctionType *funcType
       = llvm::FunctionType::get(returnType, paramTypes, false);
   llvm::Function *applyRule = getOrInsertFunction(Module, name, funcType);
+  applyRule->setGC("statepoint-example");
   initDebugAxiom(axiom->getAttributes());
   std::string debugName = name;
   if (axiom->getAttributes().count("label")) {
@@ -1187,8 +1265,8 @@ bool makeFunction(
       debugName, debugName,
       getDebugFunctionType(getDebugType(returnCat, Out.str()), debugArgs),
       definition, applyRule);
-  if (fastcc) {
-    applyRule->setCallingConv(llvm::CallingConv::Fast);
+  if (tailcc) {
+    applyRule->setCallingConv(llvm::CallingConv::Tail);
   }
   llvm::StringMap<llvm::Value *> subst;
   llvm::BasicBlock *block
@@ -1206,9 +1284,10 @@ bool makeFunction(
   CreateTerm creator = CreateTerm(subst, definition, block, Module, false);
   llvm::Value *retval = creator(pattern).first;
   if (funcType->getReturnType()
-      == llvm::PointerType::getUnqual(retval->getType())) {
+      == llvm::PointerType::get(retval->getType(), 1)) {
     auto tempAlloc = allocateTerm(
-        retval->getType(), creator.getCurrentBlock(), "koreAllocAlwaysGC");
+        returnCat, retval->getType(), creator.getCurrentBlock(),
+        "koreAllocAlwaysGC");
     new llvm::StoreInst(retval, tempAlloc, creator.getCurrentBlock());
     retval = tempAlloc;
   }
@@ -1219,7 +1298,7 @@ bool makeFunction(
     auto call
         = llvm::CallInst::Create(step, {retval}, "", creator.getCurrentBlock());
     setDebugLoc(call);
-    call->setCallingConv(llvm::CallingConv::Fast);
+    call->setCallingConv(llvm::CallingConv::Tail);
     retval = call;
   }
   auto ret = llvm::ReturnInst::Create(
@@ -1269,7 +1348,7 @@ std::string makeApplyRuleFunction(
     case SortCategory::Map:
     case SortCategory::List:
     case SortCategory::Set:
-      paramType = llvm::PointerType::getUnqual(paramType);
+      paramType = llvm::PointerType::get(paramType, 1);
       break;
     default: break;
     }
@@ -1287,6 +1366,7 @@ std::string makeApplyRuleFunction(
       false, axiom, ".rhs");
 
   llvm::Function *applyRule = getOrInsertFunction(Module, name, funcType);
+  applyRule->setGC("statepoint-example");
   initDebugAxiom(axiom->getAttributes());
   initDebugFunction(
       name, name,
@@ -1294,7 +1374,7 @@ std::string makeApplyRuleFunction(
           getDebugType({SortCategory::Symbol, 0}, "SortGeneratedTopCell{}"),
           debugArgs),
       definition, applyRule);
-  applyRule->setCallingConv(llvm::CallingConv::Fast);
+  applyRule->setCallingConv(llvm::CallingConv::Tail);
   llvm::StringMap<llvm::Value *> subst;
   llvm::BasicBlock *block
       = llvm::BasicBlock::Create(Module->getContext(), "entry", applyRule);
@@ -1322,7 +1402,8 @@ std::string makeApplyRuleFunction(
     case SortCategory::Set:
       if (!arg->getType()->isPointerTy()) {
         auto ptr = allocateTerm(
-            arg->getType(), creator.getCurrentBlock(), "koreAllocAlwaysGC");
+            cat, arg->getType(), creator.getCurrentBlock(),
+            "koreAllocAlwaysGC");
         new llvm::StoreInst(arg, ptr, creator.getCurrentBlock());
         arg = ptr;
       }
@@ -1339,7 +1420,7 @@ std::string makeApplyRuleFunction(
   auto retval
       = llvm::CallInst::Create(step, args, "", creator.getCurrentBlock());
   setDebugLoc(retval);
-  retval->setCallingConv(llvm::CallingConv::Fast);
+  retval->setCallingConv(llvm::CallingConv::Tail);
   llvm::ReturnInst::Create(
       Module->getContext(), retval, creator.getCurrentBlock());
   return name;

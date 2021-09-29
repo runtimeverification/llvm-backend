@@ -8,7 +8,7 @@ target triple = "x86_64-unknown-linux-gnu"
 
 declare void @abort() #0
 
-define weak fastcc %block* @"eval_LblgetGeneratedCounterCell{SortGeneratedTopCell{}}"(%block*) {
+define weak tailcc %block* @"eval_LblgetGeneratedCounterCell{SortGeneratedTopCell{}}"(%block*) {
   call void @abort()
   unreachable
 }
@@ -23,7 +23,7 @@ declare i8* @getTerminatedString(%string*)
 
 define i8* @get_fresh_constant(%string* %sort, %block* %top) {
 entry:
-  %counterCell = call fastcc %block* @"eval_LblgetGeneratedCounterCell{SortGeneratedTopCell{}}"(%block* %top)
+  %counterCell = call tailcc %block* @"eval_LblgetGeneratedCounterCell{SortGeneratedTopCell{}}"(%block* %top)
   %counterCellPointer = getelementptr %block, %block* %counterCell, i64 0, i32 1, i64 0
   %mpzPtrPtr = bitcast i64** %counterCellPointer to %mpz**
   %currCounter = load %mpz*, %mpz** %mpzPtrPtr

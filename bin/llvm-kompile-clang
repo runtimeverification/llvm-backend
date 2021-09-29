@@ -60,7 +60,7 @@ fi
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
   libraries="-liconv -lncurses"
-  flags="-L/usr/local/opt/libffi/lib -L/usr/local/lib -Wl,-u,_sort_table -I /usr/local/include"
+  flags="-L/usr/local/opt/libffi/lib -L/usr/local/lib -L$(dirname "@LLC@")/../lib -Wl,-u,_sort_table -I /usr/local/include"
 else
   libraries="-ltinfo"
   flags="-Wl,-u,sort_table"
@@ -84,7 +84,7 @@ if ! $save_temps; then
 fi
 
 if [ "$lto" = "lto" ]; then
-  flags="$flags -flto -Wl,-mllvm,-tailcallopt"
+  flags="$flags -flto"
   files=("$LIBDIR"/llvm/*.ll)
   if ! $link; then
     mv "$modopt" "$output_file"
@@ -96,13 +96,13 @@ else
     if ! $link; then
       modasm="$output_file"
     fi
-    run @LLC@ -tailcallopt "$modopt" -mtriple=@BACKEND_TARGET_TRIPLE@ -filetype=obj $llc_opt_flags $llc_flags -o "$modasm"
+    run @LLC@ "$modopt" -mtriple=@BACKEND_TARGET_TRIPLE@ -filetype=obj $llc_opt_flags $llc_flags -o "$modasm"
     modopt="$modasm"
   fi
   if $link; then
     for file in "$LIBDIR"/llvm/*.ll; do
       tmp="$tmpdir/`basename "$file"`.o"
-      run @LLC@ -tailcallopt "$file" -mtriple=@BACKEND_TARGET_TRIPLE@ -filetype=obj $llc_opt_flags $llc_flags -o "$tmp"
+      run @LLC@ "$file" -mtriple=@BACKEND_TARGET_TRIPLE@ -filetype=obj $llc_opt_flags $llc_flags -o "$tmp"
       files+=("$tmp")
     done
   fi
@@ -111,7 +111,7 @@ fi
 if [ "$main" = "static" ]; then
   all_libraries=
 else
-  all_libraries="$libraries -lgmp -lmpfr -lpthread -ldl -lffi -ljemalloc"
+  all_libraries="$libraries -lgmp -lmpfr -lpthread -ldl -lffi -ljemalloc -lunwind"
 fi
 
 if $link; then
