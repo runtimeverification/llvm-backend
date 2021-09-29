@@ -328,6 +328,14 @@ void koreCollect(bool afterStep) {
     char **derived_ptr
         = (char **)(((char *)roots[i].bp) + roots[i].layout.derived_offset);
     ptrdiff_t derived_offset = *derived_ptr - *base_ptr;
+    if (*base_ptr == nullptr) {
+      // this can happen because RewriteStatepointsForGC treats the base pointer
+      // of undef as equal to null. As a result, the case where the base pointer
+      // is null is a case when the stack map contains a particular entry, but
+      // it is dynamically dead on this particular loop iteration. We can thus
+      // skip this relocation since there is no live object here.
+      continue;
+    }
     migrate_child(roots[i].bp, &roots[i].layout.base, 0, true);
     if (base_ptr != derived_ptr) {
       *derived_ptr = *base_ptr + derived_offset;
