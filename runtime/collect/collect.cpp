@@ -1,13 +1,18 @@
-#include "runtime/collect.h"
-#include "runtime/alloc.h"
-#include "runtime/arena.h"
-#include "runtime/header.h"
 #include <cassert>
 #include <cstdbool>
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <map>
+
+#include "runtime/alloc.h"
+#include "runtime/arena.h"
+#include "runtime/collect.h"
+#include "runtime/header.h"
+
+#define UNW_LOCAL_ONLY
+#include <libunwind.h>
 
 extern "C" {
 
@@ -254,12 +259,52 @@ void initStaticObjects(void) {
   list l = list();
   set s = set();
   setKoreMemoryFunctionsForGMP();
+  parseStackMap();
 }
 
-void koreCollect(void **roots, uint8_t nroots, layoutitem *typeInfo) {
+struct gc_root {
+  void *bp;
+  layoutitem layout;
+};
+
+extern std::map<void *, std::vector<layoutitem>> StackMap;
+
+static std::vector<gc_root> scanStackRoots(void) {
+  unw_cursor_t cursor;
+  unw_context_t context;
+
+  unw_getcontext(&context);
+  unw_init_local(&cursor, &context);
+
+  std::vector<gc_root> gc_roots;
+
+  while (unw_step(&cursor)) {
+    unw_word_t ip_word, sp_word;
+
+    unw_get_reg(&cursor, UNW_REG_IP, &ip_word);
+    unw_get_reg(&cursor, UNW_REG_SP, &sp_word);
+
+    void *ip, *sp;
+    ip = (void *)ip_word;
+    sp = (void *)sp_word;
+
+    if (StackMap.count(ip)) {
+      std::vector<layoutitem> &Relocs = StackMap[ip];
+      for (auto &Reloc : Relocs) {
+        gc_roots.push_back({sp, Reloc});
+      }
+    }
+  }
+  return gc_roots;
+}
+
+void koreCollect(void) {
   is_gc = true;
   collect_old = shouldCollectOldGen();
   MEM_LOG("Starting garbage collection\n");
+
+  std::vector<gc_root> roots = scanStackRoots();
+
 #ifdef GC_DBG
   if (!last_alloc_ptr) {
     last_alloc_ptr = youngspace_ptr();
@@ -273,9 +318,11 @@ void koreCollect(void **roots, uint8_t nroots, layoutitem *typeInfo) {
   }
 #endif
   char *previous_oldspace_alloc_ptr = *old_alloc_ptr();
-  for (int i = 0; i < nroots; i++) {
-    migrate_child(roots, typeInfo, i, true);
+  // migrate stack roots
+  for (int i = 0; i < roots.size(); i++) {
+    migrate_child(roots[i].bp, &roots[i].layout, 0, true);
   }
+  // migrate global variable roots
   migrateRoots();
   char *scan_ptr = youngspace_ptr();
   if (scan_ptr != *young_alloc_ptr()) {
@@ -326,7 +373,7 @@ void koreCollect(void **roots, uint8_t nroots, layoutitem *typeInfo) {
 }
 
 void freeAllKoreMem() {
-  koreCollect(nullptr, 0, nullptr);
+  koreCollect();
 }
 
 bool is_collection() {

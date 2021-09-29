@@ -2,9 +2,9 @@
 export PATH=$HOME/.cargo/bin:$HOME/.local/bin:$PATH
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
-    export PATH="/usr/local/opt/flex/bin:/usr/local/opt/llvm@6/bin:$PATH"
-    export LDFLAGS="-L/usr/local/opt/llvm@6/lib -L/usr/local/opt/flex/lib"
-    export CPPFLAGS="-I/usr/local/opt/llvm@6/include -I/usr/local/opt/flex/include"
+    export PATH="/usr/local/opt/flex/bin:/usr/local/opt/llvm@12/bin:$PATH"
+    export LDFLAGS="-L/usr/local/opt/llvm@12/lib -L/usr/local/opt/flex/lib"
+    export CPPFLAGS="-I/usr/local/opt/llvm@12/include -I/usr/local/opt/flex/include"
     export FLEX_EXECUTABLE="/usr/local/opt/flex/bin/flex"
 fi
 

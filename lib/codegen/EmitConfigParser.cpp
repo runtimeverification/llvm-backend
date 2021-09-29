@@ -282,8 +282,8 @@ static llvm::Value *getArgValue(
   case SortCategory::Bool:
   case SortCategory::MInt: {
     auto cast = new llvm::BitCastInst(
-        arg, llvm::PointerType::getUnqual(getValueType(cat, mod)), "",
-        CaseBlock);
+        addrspaceCast0to1(arg, CaseBlock),
+        llvm::PointerType::get(getValueType(cat, mod), 1), "", CaseBlock);
     auto load = new llvm::LoadInst(
         cast->getType()->getPointerElementType(), cast, "", CaseBlock);
     arg = load;
@@ -293,15 +293,17 @@ static llvm::Value *getArgValue(
   case SortCategory::List:
   case SortCategory::Set:
     arg = new llvm::BitCastInst(
-        arg, llvm::PointerType::getUnqual(getValueType(cat, mod)), "",
-        CaseBlock);
+        addrspaceCast0to1(arg, CaseBlock),
+        llvm::PointerType::get(getValueType(cat, mod), 1), "", CaseBlock);
     break;
   case SortCategory::Int:
   case SortCategory::Float:
   case SortCategory::StringBuffer:
   case SortCategory::Symbol:
   case SortCategory::Variable:
-    arg = new llvm::BitCastInst(arg, getValueType(cat, mod), "", CaseBlock);
+    arg = new llvm::BitCastInst(
+        addrspaceCast0to1(arg, CaseBlock), getValueType(cat, mod), "",
+        CaseBlock);
     break;
   case SortCategory::Uncomputed: abort();
   }
@@ -341,8 +343,11 @@ static std::pair<llvm::Value *, llvm::BasicBlock *> getEval(
   case SortCategory::Map:
   case SortCategory::List:
   case SortCategory::Set:
-    retval = new llvm::BitCastInst(
-        result, llvm::Type::getInt8PtrTy(Ctx), "", creator.getCurrentBlock());
+    retval = addrspaceCast1to0(
+        new llvm::BitCastInst(
+            result, llvm::Type::getInt8PtrTy(Ctx, 1), "",
+            creator.getCurrentBlock()),
+        creator.getCurrentBlock());
     break;
   case SortCategory::Bool:
   case SortCategory::MInt: {
@@ -521,14 +526,17 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
     }
     case SortCategory::Float: {
       llvm::Type *Float = getTypeByName(module, FLOAT_STRUCT);
-      llvm::Value *Term = allocateTerm(Float, CaseBlock, "koreAllocFloating");
+      llvm::Value *Term
+          = allocateTerm(cat, Float, CaseBlock, "koreAllocFloating");
       llvm::Function *InitFloat = getOrInsertFunction(
           module, "init_float", llvm::Type::getVoidTy(Ctx),
-          llvm::PointerType::getUnqual(Float), llvm::Type::getInt8PtrTy(Ctx));
+          llvm::PointerType::get(Float, 1), llvm::Type::getInt8PtrTy(Ctx));
       llvm::CallInst::Create(
           InitFloat, {Term, func->arg_begin() + 2}, "", CaseBlock);
-      auto cast = new llvm::BitCastInst(
-          Term, llvm::Type::getInt8PtrTy(Ctx), "", CaseBlock);
+      auto cast = addrspaceCast1to0(
+          new llvm::BitCastInst(
+              Term, llvm::Type::getInt8PtrTy(Ctx, 1), "", CaseBlock),
+          CaseBlock);
       Phi->addIncoming(cast, CaseBlock);
       llvm::BranchInst::Create(MergeBlock, CaseBlock);
       break;
@@ -557,10 +565,10 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
       phiStr->addIncoming(Pruned, IfIsPlus);
       CaseBlock = ElseNoPlus;
       llvm::Type *Int = getTypeByName(module, INT_STRUCT);
-      llvm::Value *Term = allocateTerm(Int, CaseBlock, "koreAllocInteger");
+      llvm::Value *Term = allocateTerm(cat, Int, CaseBlock, "koreAllocInteger");
       llvm::Function *MpzInitSet = getOrInsertFunction(
           module, "__gmpz_init_set_str", llvm::Type::getInt32Ty(Ctx),
-          llvm::PointerType::getUnqual(Int), llvm::Type::getInt8PtrTy(Ctx),
+          llvm::PointerType::get(Int, 1), llvm::Type::getInt8PtrTy(Ctx),
           llvm::Type::getInt32Ty(Ctx));
       auto Call = llvm::CallInst::Create(
           MpzInitSet,
@@ -571,8 +579,10 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
           *CaseBlock, llvm::CmpInst::ICMP_EQ, Call, zero32);
       auto AbortBlock = llvm::BasicBlock::Create(Ctx, "invalid_int", func);
       addAbort(AbortBlock, module);
-      auto cast = new llvm::BitCastInst(
-          Term, llvm::Type::getInt8PtrTy(Ctx), "", CaseBlock);
+      auto cast = addrspaceCast1to0(
+          new llvm::BitCastInst(
+              Term, llvm::Type::getInt8PtrTy(Ctx, 1), "", CaseBlock),
+          CaseBlock);
       llvm::BranchInst::Create(MergeBlock, AbortBlock, icmp, CaseBlock);
       Phi->addIncoming(cast, CaseBlock);
       break;
@@ -589,8 +599,9 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
   auto Len = llvm::BinaryOperator::Create(
       llvm::Instruction::Add, func->arg_begin() + 1,
       llvm::ConstantExpr::getSizeOf(StringType), "", CurrentBlock);
-  llvm::Value *Block
-      = allocateTerm(StringType, Len, CurrentBlock, "koreAllocToken");
+  llvm::Value *Block = allocateTerm(
+      {SortCategory::Symbol, 0}, StringType, Len, CurrentBlock,
+      "koreAllocToken");
   auto HdrPtr = llvm::GetElementPtrInst::CreateInBounds(
       Block, {zero, zero32, zero32}, "", CurrentBlock);
   auto BlockSize
@@ -620,10 +631,14 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
       {zero, llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), 1), zero}, "",
       CurrentBlock);
   llvm::CallInst::Create(
-      Memcpy, {StrPtr, func->arg_begin() + 2, func->arg_begin() + 1}, "",
+      Memcpy,
+      {addrspaceCast1to0(StrPtr, CurrentBlock), func->arg_begin() + 2,
+       func->arg_begin() + 1},
+      "", CurrentBlock);
+  auto cast = addrspaceCast1to0(
+      new llvm::BitCastInst(
+          Block, llvm::Type::getInt8PtrTy(Ctx, 1), "", CurrentBlock),
       CurrentBlock);
-  auto cast = new llvm::BitCastInst(
-      Block, llvm::Type::getInt8PtrTy(Ctx), "", CurrentBlock);
   llvm::BranchInst::Create(MergeBlock, CurrentBlock);
   Phi->addIncoming(cast, CurrentBlock);
   llvm::ReturnInst::Create(Ctx, Phi, MergeBlock);
@@ -663,18 +678,16 @@ static void emitTraversal(
         Ctx, file, getValueType({SortCategory::Symbol, 0}, module), 1, 1));
     argTypes.push_back(makeVisitorType(
         Ctx, file,
-        llvm::PointerType::getUnqual(
-            getValueType({SortCategory::Map, 0}, module)),
+        llvm::PointerType::get(getValueType({SortCategory::Map, 0}, module), 1),
         3, 0));
     argTypes.push_back(makeVisitorType(
         Ctx, file,
-        llvm::PointerType::getUnqual(
-            getValueType({SortCategory::List, 0}, module)),
+        llvm::PointerType::get(
+            getValueType({SortCategory::List, 0}, module), 1),
         3, 0));
     argTypes.push_back(makeVisitorType(
         Ctx, file,
-        llvm::PointerType::getUnqual(
-            getValueType({SortCategory::Set, 0}, module)),
+        llvm::PointerType::get(getValueType({SortCategory::Set, 0}, module), 1),
         3, 0));
     argTypes.push_back(makeVisitorType(
         Ctx, file, getValueType({SortCategory::Int, 0}, module), 1, 0));
@@ -740,8 +753,7 @@ static void getStore(
   int idx = 0;
   auto BlockType = getBlockType(module, definition, symbol);
   auto cast = new llvm::BitCastInst(
-      func->arg_begin(), llvm::PointerType::getUnqual(BlockType), "",
-      CaseBlock);
+      func->arg_begin(), llvm::PointerType::get(BlockType, 1), "", CaseBlock);
   for (auto &sort : symbol->getArguments()) {
     ValueType cat = dynamic_cast<KORECompositeSort *>(sort.get())
                         ->getCategory(definition);
@@ -827,8 +839,7 @@ static void getVisitor(
   int idx = 0;
   auto BlockType = getBlockType(module, definition, symbol);
   auto cast = new llvm::BitCastInst(
-      func->arg_begin(), llvm::PointerType::getUnqual(BlockType), "",
-      CaseBlock);
+      func->arg_begin(), llvm::PointerType::get(BlockType, 1), "", CaseBlock);
   unsigned i = 0;
   auto file
       = llvm::PointerType::getUnqual(llvm::StructType::create(Ctx, "writer"));
@@ -920,10 +931,10 @@ static void getVisitor(
              nbits, CharPtr},
             "", CaseBlock);
       } else {
-        auto Ptr = allocateTerm(
+        auto Ptr = allocateTermNoReloc(
             llvm::Type::getInt64Ty(Ctx),
             llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), nwords * 8),
-            CaseBlock, "koreAllocAlwaysGC");
+            CaseBlock);
         if (nwords == 1) {
           llvm::Value *Word;
           if (cat.bits == 64) {
