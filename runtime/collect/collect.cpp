@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <map>
+#include <set>
 
 #include "runtime/alloc.h"
 #include "runtime/arena.h"
@@ -287,9 +288,13 @@ static std::vector<gc_root> scanStackRoots(void) {
     sp = (void *)sp_word;
 
     if (StackMap.count(ip)) {
-      std::vector<layoutitem> &Relocs = StackMap[ip];
+      std::vector<gc_relocation> &Relocs = StackMap[ip];
+      std::set<uint64_t> seen;
       for (auto &Reloc : Relocs) {
-        gc_roots.push_back({sp, Reloc});
+        if (seen.insert(Reloc.base.offset).second
+            || Reloc.derived_offset != Reloc.base.offset) {
+          gc_roots.push_back({sp, Reloc});
+        }
       }
     }
   }
