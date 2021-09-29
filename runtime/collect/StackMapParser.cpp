@@ -39,9 +39,9 @@ void parseStackMap() {
       void *ip = (void *)(func.FunctionAddress + InstructionOffset);
       int32_t NumDeopts = *(int32_t *)(stackMapRecord + 24 + 2 * 12);
       uint16_t RelocationOffset = 0;
-      for (uint16_t j = 4 + NumDeopts; j < NumLocations; j += 2) {
-        uint8_t type = *(uint8_t *)(stackMapRecord + 16 + j * 12);
-        if (type == 5) {
+      for (uint16_t j = 3 + NumDeopts; j < NumLocations; j += 2) {
+        uint8_t base_type = *(uint8_t *)(stackMapRecord + 16 + j * 12);
+        if (base_type == 5) {
           // a ConstantOffset gc root is one which corresponds to something the
           // compiler was able to statically determine was a constructor with
           // zero children. Such terms do not actually live on the heap and
@@ -49,16 +49,25 @@ void parseStackMap() {
           RelocationOffset++;
           continue;
         }
-        if (type != 3) {
+        if (base_type != 3) {
           abort();
         }
-        int32_t offset = *(int32_t *)(stackMapRecord + 24 + j * 12);
+        uint8_t derived_type = *(uint8_t *)(stackMapRecord + 16 + (j + 1) * 12);
+        if (derived_type != base_type) {
+          abort();
+        }
+        int32_t base_offset = *(int32_t *)(stackMapRecord + 24 + j * 12);
+        int32_t derived_offset
+            = *(int32_t *)(stackMapRecord + 24 + (j + 1) * 12);
         layoutitem layout;
-        layout.offset = offset;
+        layout.offset = base_offset;
         size_t layout_offset
             = gc_stackmap_num_relocations * StatepointId + RelocationOffset;
         layout.cat = gc_stackmap_layoutinfo[layout_offset];
-        StackMap[ip].push_back(layout);
+        gc_relocation reloc;
+        reloc.base = layout;
+        reloc.derived_offset = derived_offset;
+        StackMap[ip].push_back(reloc);
         RelocationOffset++;
       }
       stackMapRecord += 16 + NumLocations * 12;
