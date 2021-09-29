@@ -24,7 +24,7 @@ struct MarkTailCallsAsGCLeaf : public FunctionPass {
       return false;
     }
     bool dirty = false;
-    for (BasicBlock &BB : F.getBasicBlockList()) {
+    for (BasicBlock &BB : F) {
       Instruction *TI = BB.getTerminator();
       if (auto R = dyn_cast<ReturnInst>(TI)) {
         if (&BB.front() == TI) {
