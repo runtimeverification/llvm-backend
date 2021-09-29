@@ -8,7 +8,7 @@ extern char gc_stackmap_layoutinfo[];
 extern unsigned int gc_stackmap_num_relocations;
 }
 
-std::map<void *, std::vector<layoutitem>> StackMap;
+std::map<void *, std::vector<gc_relocation>> StackMap;
 
 struct StackMapFunction {
   uint64_t FunctionAddress;

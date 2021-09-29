@@ -264,10 +264,8 @@ void initStaticObjects(void) {
 
 struct gc_root {
   void *bp;
-  layoutitem layout;
+  gc_relocation layout;
 };
-
-extern std::map<void *, std::vector<layoutitem>> StackMap;
 
 static std::vector<gc_root> scanStackRoots(void) {
   unw_cursor_t cursor;
