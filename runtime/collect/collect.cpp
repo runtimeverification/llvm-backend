@@ -264,8 +264,10 @@ void initStaticObjects(void) {
 }
 
 struct gc_root {
-  void *bp;
-  gc_relocation layout;
+  char **base_ptr;
+  char **derived_ptr;
+  uint16_t cat;
+  ptrdiff_t derived_offset;
 };
 
 static std::vector<gc_root> scanStackRoots(void) {
@@ -293,7 +295,11 @@ static std::vector<gc_root> scanStackRoots(void) {
       for (auto &Reloc : Relocs) {
         if (seen.insert(Reloc.base.offset).second
             || Reloc.derived_offset != Reloc.base.offset) {
-          gc_roots.push_back({sp, Reloc});
+          char **base_ptr = (char **)(((char *)sp) + Reloc.base.offset);
+          char **derived_ptr = (char **)(((char *)sp) + Reloc.derived_offset);
+          ptrdiff_t derived_offset = *derived_ptr - *base_ptr;
+          gc_roots.push_back(
+              {base_ptr, derived_ptr, Reloc.base.cat, derived_offset});
         }
       }
     }
@@ -323,12 +329,7 @@ void koreCollect(bool afterStep) {
   char *previous_oldspace_alloc_ptr = *old_alloc_ptr();
   // migrate stack roots
   for (int i = 0; i < roots.size(); i++) {
-    char **base_ptr
-        = (char **)(((char *)roots[i].bp) + roots[i].layout.base.offset);
-    char **derived_ptr
-        = (char **)(((char *)roots[i].bp) + roots[i].layout.derived_offset);
-    ptrdiff_t derived_offset = *derived_ptr - *base_ptr;
-    if (*base_ptr == nullptr) {
+    if (*roots[i].base_ptr == nullptr) {
       // this can happen because RewriteStatepointsForGC treats the base pointer
       // of undef as equal to null. As a result, the case where the base pointer
       // is null is a case when the stack map contains a particular entry, but
@@ -336,9 +337,10 @@ void koreCollect(bool afterStep) {
       // skip this relocation since there is no live object here.
       continue;
     }
-    migrate_child(roots[i].bp, &roots[i].layout.base, 0, true);
-    if (base_ptr != derived_ptr) {
-      *derived_ptr = *base_ptr + derived_offset;
+    layoutitem layout{0, roots[i].cat};
+    migrate_child(roots[i].base_ptr, &layout, 0, true);
+    if (roots[i].base_ptr != roots[i].derived_ptr) {
+      *roots[i].derived_ptr = *roots[i].base_ptr + roots[i].derived_offset;
     }
   }
   // migrate global variable roots
