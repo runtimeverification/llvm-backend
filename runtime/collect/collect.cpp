@@ -268,6 +268,7 @@ struct gc_root {
   char **derived_ptr;
   uint16_t cat;
   ptrdiff_t derived_offset;
+  bool isNewBasePtr;
 };
 
 static std::vector<gc_root> scanStackRoots(void) {
@@ -293,13 +294,14 @@ static std::vector<gc_root> scanStackRoots(void) {
       std::vector<gc_relocation> &Relocs = StackMap[ip];
       std::set<uint64_t> seen;
       for (auto &Reloc : Relocs) {
-        if (seen.insert(Reloc.base.offset).second
-            || Reloc.derived_offset != Reloc.base.offset) {
+        bool newBasePtr = seen.insert(Reloc.base.offset).second;
+        if (newBasePtr || Reloc.derived_offset != Reloc.base.offset) {
           char **base_ptr = (char **)(((char *)sp) + Reloc.base.offset);
           char **derived_ptr = (char **)(((char *)sp) + Reloc.derived_offset);
           ptrdiff_t derived_offset = *derived_ptr - *base_ptr;
           gc_roots.push_back(
-              {base_ptr, derived_ptr, Reloc.base.cat, derived_offset});
+              {base_ptr, derived_ptr, Reloc.base.cat, derived_offset,
+               newBasePtr});
         }
       }
     }
@@ -338,7 +340,9 @@ void koreCollect(bool afterStep) {
       continue;
     }
     layoutitem layout{0, roots[i].cat};
-    migrate_child(roots[i].base_ptr, &layout, 0, true);
+    if (roots[i].isNewBasePtr) {
+      migrate_child(roots[i].base_ptr, &layout, 0, true);
+    }
     if (roots[i].base_ptr != roots[i].derived_ptr) {
       *roots[i].derived_ptr = *roots[i].base_ptr + roots[i].derived_offset;
     }
