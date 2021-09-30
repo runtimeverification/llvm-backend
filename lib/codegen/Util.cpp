@@ -113,7 +113,9 @@ void insertCallToGC(llvm::BasicBlock *block, bool afterStep) {
           {llvm::Type::getInt1Ty(Module->getContext())}, false));
   llvm::CallInst::Create(
       koreCollect,
-      {llvm::ConstantInt::getBool(Module->getContext(), afterStep)}, "", block);
+      {llvm::ConstantInt::get(
+          llvm::Type::getInt1Ty(Module->getContext()), afterStep)},
+      "", block);
 }
 
 } // namespace kllvm
