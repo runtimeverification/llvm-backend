@@ -882,10 +882,7 @@ void makeStepFunction(
     auto result = new llvm::LoadInst(bufType, resultBuffer, "", stuck);
     llvm::ReturnInst::Create(module->getContext(), result, stuck);
   } else {
-    auto phi = llvm::PHINode::Create(val->getType(), 2, "phi_1", stuck);
-    phi->addIncoming(val, block);
-    phi->addIncoming(val, pre_stuck);
-    llvm::ReturnInst::Create(module->getContext(), phi, stuck);
+    llvm::ReturnInst::Create(module->getContext(), val, stuck);
   }
 
   codegen(dt);
