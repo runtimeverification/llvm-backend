@@ -1282,14 +1282,7 @@ bool makeFunction(
     }
   }
 
-  auto koreCollect = getOrInsertFunction(
-      Module, "tryKoreCollect",
-      llvm::FunctionType::get(
-          llvm::Type::getVoidTy(Module->getContext()),
-          {llvm::Type::getInt1Ty(Module->getContext())}, false));
-  llvm::CallInst::Create(
-      koreCollect, {llvm::ConstantInt::getFalse(Module->getContext())}, "",
-      block);
+  insertCallToGC(block, false);
 
   CreateTerm creator = CreateTerm(subst, definition, block, Module, false);
   llvm::Value *retval = creator(pattern).first;
@@ -1399,14 +1392,7 @@ std::string makeApplyRuleFunction(
     }
   }
 
-  auto koreCollect = getOrInsertFunction(
-      Module, "tryKoreCollect",
-      llvm::FunctionType::get(
-          llvm::Type::getVoidTy(Module->getContext()),
-          {llvm::Type::getInt1Ty(Module->getContext())}, false));
-  llvm::CallInst::Create(
-      koreCollect, {llvm::ConstantInt::getFalse(Module->getContext())}, "",
-      block);
+  insertCallToGC(block, false);
 
   CreateTerm creator = CreateTerm(subst, definition, block, Module, false);
   std::vector<llvm::Value *> args;

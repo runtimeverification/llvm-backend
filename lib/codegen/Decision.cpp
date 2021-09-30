@@ -643,14 +643,7 @@ void makeEvalOrAnywhereFunction(
   initChoiceBuffer(
       dt, module, block, stuck, fail, &choiceBuffer, &choiceDepth, &jump);
 
-  auto koreCollect = getOrInsertFunction(
-      module, "tryKoreCollect",
-      llvm::FunctionType::get(
-          llvm::Type::getVoidTy(module->getContext()),
-          {llvm::Type::getInt1Ty(module->getContext())}, false));
-  llvm::CallInst::Create(
-      koreCollect, {llvm::ConstantInt::getFalse(module->getContext())}, "",
-      block);
+  insertCallToGC(block, false);
 
   int i = 0;
   Decision codegen(
@@ -800,15 +793,7 @@ llvm::BasicBlock *stepFunctionHeader(
       module->getContext(), "step", block->getParent());
   llvm::BranchInst::Create(stuck, merge, isFinished, block);
 
-  auto koreCollect = getOrInsertFunction(
-      module, "tryKoreCollect",
-      llvm::FunctionType::get(
-          llvm::Type::getVoidTy(module->getContext()),
-          {llvm::Type::getInt1Ty(module->getContext())}, false));
-  auto call = llvm::CallInst::Create(
-      koreCollect, {llvm::ConstantInt::getTrue(module->getContext())}, "",
-      merge);
-  setDebugLoc(call);
+  insertCallToGC(merge, true);
   return merge;
 }
 

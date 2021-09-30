@@ -1,5 +1,6 @@
 #include "kllvm/codegen/Util.h"
 #include "kllvm/codegen/CreateTerm.h"
+#include "llvm/IR/Instructions.h"
 #include "llvm/Support/Casting.h"
 #include "llvm/Support/raw_ostream.h"
 
@@ -101,6 +102,18 @@ llvm::StructType *getTypeByName(llvm::Module *module, std::string name) {
   t = module->getTypeByName(name);
 #endif
   return t;
+}
+
+void insertCallToGC(llvm::BasicBlock *block, bool afterStep) {
+  llvm::Module *Module = block->getParent()->getParent();
+  auto koreCollect = getOrInsertFunction(
+      Module, "tryKoreCollect",
+      llvm::FunctionType::get(
+          llvm::Type::getVoidTy(Module->getContext()),
+          {llvm::Type::getInt1Ty(Module->getContext())}, false));
+  llvm::CallInst::Create(
+      koreCollect,
+      {llvm::ConstantInt::getBool(Module->getContext(), afterStep)}, "", block);
 }
 
 } // namespace kllvm
