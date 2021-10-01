@@ -1280,8 +1280,6 @@ bool makeFunction(
     }
   }
 
-  insertCallToGC(block, false);
-
   CreateTerm creator = CreateTerm(subst, definition, block, Module, false);
   llvm::Value *retval = creator(pattern).first;
   if (funcType->getReturnType()
@@ -1389,8 +1387,6 @@ std::string makeApplyRuleFunction(
           llvm::dyn_cast<llvm::DIType>(debugArgs[i])->getName().str());
     }
   }
-
-  insertCallToGC(block, false);
 
   CreateTerm creator = CreateTerm(subst, definition, block, Module, false);
   std::vector<llvm::Value *> args;

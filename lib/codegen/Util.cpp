@@ -104,18 +104,13 @@ llvm::StructType *getTypeByName(llvm::Module *module, std::string name) {
   return t;
 }
 
-void insertCallToGC(llvm::BasicBlock *block, bool afterStep) {
+void insertCallToClear(llvm::BasicBlock *block) {
   llvm::Module *Module = block->getParent()->getParent();
-  auto koreCollect = getOrInsertFunction(
-      Module, "tryKoreCollect",
+  auto koreClear = getOrInsertFunction(
+      Module, "koreClear",
       llvm::FunctionType::get(
-          llvm::Type::getVoidTy(Module->getContext()),
-          {llvm::Type::getInt1Ty(Module->getContext())}, false));
-  llvm::CallInst::Create(
-      koreCollect,
-      {llvm::ConstantInt::get(
-          llvm::Type::getInt1Ty(Module->getContext()), afterStep)},
-      "", block);
+          llvm::Type::getVoidTy(Module->getContext()), {}, false));
+  llvm::CallInst::Create(koreClear, {}, "", block);
 }
 
 } // namespace kllvm

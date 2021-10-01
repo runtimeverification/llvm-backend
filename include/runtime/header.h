@@ -126,7 +126,6 @@ public:
 };
 
 extern bool gc_enabled;
-extern bool deferred_collection;
 
 struct kore_alloc_heap {
 

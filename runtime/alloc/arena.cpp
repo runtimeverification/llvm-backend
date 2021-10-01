@@ -113,7 +113,6 @@ static void freshBlock(struct arena *Arena) {
 }
 
 bool gc_enabled;
-bool deferred_collection;
 
 static __attribute__((noinline)) void *
 doAllocSlow(size_t requested, struct arena *Arena) {
@@ -125,8 +124,6 @@ doAllocSlow(size_t requested, struct arena *Arena) {
   } else {
     if (gc_enabled && !during_gc()) {
       koreCollect();
-    } else if (!during_gc()) {
-      deferred_collection = true;
     }
     if (Arena->block + requested <= Arena->block_end) {
       void *result = Arena->block;

@@ -34,7 +34,7 @@ llvm::StructType *getTypeByName(llvm::Module *module, std::string name);
 
 std::string getMangledTypeStr(llvm::Type *Ty, bool &HasUnnamedType);
 
-void insertCallToGC(llvm::BasicBlock *BB, bool afterStep);
+void insertCallToClear(llvm::BasicBlock *BB);
 
 } // namespace kllvm
 

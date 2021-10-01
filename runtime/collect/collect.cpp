@@ -394,16 +394,6 @@ void koreCollect(void) {
   is_gc = false;
 }
 
-void tryKoreCollect(bool afterStep) {
-  if (deferred_collection && gc_enabled) {
-    koreCollect();
-    deferred_collection = false;
-  }
-  if (afterStep) {
-    koreClear();
-  }
-}
-
 void freeAllKoreMem() {
   koreCollect();
   koreClear();

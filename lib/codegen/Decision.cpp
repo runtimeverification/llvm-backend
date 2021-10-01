@@ -643,8 +643,6 @@ void makeEvalOrAnywhereFunction(
   initChoiceBuffer(
       dt, module, block, stuck, fail, &choiceBuffer, &choiceDepth, &jump);
 
-  insertCallToGC(block, false);
-
   int i = 0;
   Decision codegen(
       definition, block, fail, jump, choiceBuffer, choiceDepth, module,
@@ -793,7 +791,7 @@ llvm::BasicBlock *stepFunctionHeader(
       module->getContext(), "step", block->getParent());
   llvm::BranchInst::Create(stuck, merge, isFinished, block);
 
-  insertCallToGC(merge, true);
+  insertCallToClear(merge);
   return merge;
 }
 
