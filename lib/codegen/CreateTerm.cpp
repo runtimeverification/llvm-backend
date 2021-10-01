@@ -1037,13 +1037,6 @@ llvm::Value *CreateTerm::notInjectionCase(
     } else {
       ChildValue = (*this)(child.get()).first;
     }
-    llvm::Type *ChildPtrType
-        = llvm::PointerType::get(BlockType->elements()[idx], 1);
-    if (ChildValue->getType() == ChildPtrType) {
-      ChildValue = new llvm::LoadInst(
-          ChildValue->getType()->getPointerElementType(), ChildValue, "",
-          CurrentBlock);
-    }
     children.push_back(ChildValue);
     idx++;
   }
@@ -1062,6 +1055,11 @@ llvm::Value *CreateTerm::notInjectionCase(
         {llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0),
          llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), idx++)},
         "", CurrentBlock);
+    if (ChildValue->getType() == ChildPtr->getType()) {
+      ChildValue = new llvm::LoadInst(
+          ChildValue->getType()->getPointerElementType(), ChildValue, "",
+          CurrentBlock);
+    }
     new llvm::StoreInst(ChildValue, ChildPtr, CurrentBlock);
   }
 
