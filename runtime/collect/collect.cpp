@@ -395,7 +395,7 @@ void koreCollect(void) {
 }
 
 void tryKoreCollect(bool afterStep) {
-  if (deferred_collection) {
+  if (deferred_collection && gc_enabled) {
     koreCollect();
     deferred_collection = false;
   }
