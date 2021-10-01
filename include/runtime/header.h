@@ -103,6 +103,7 @@ typedef struct {
 
 bool hook_KEQUAL_eq(block *, block *);
 bool during_gc(void);
+void koreCollect(void);
 size_t hash_k(block *);
 void k_hash(block *, void *);
 bool hash_enter(void);
