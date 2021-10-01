@@ -33,7 +33,7 @@ void *koreAllocAlwaysGC(size_t requested);
 // swaps the two semispace of the young generation as part of garbage collection
 // if the swapOld flag is set, it also swaps the two semispaces of the old
 // generation
-void koreAllocSwap(bool swapOld, bool resetAlwaysGC);
+void koreAllocSwap(bool swapOld);
 // resets the alwaysgcspace
 void koreClear(void);
 // resizes the last allocation into the young generation

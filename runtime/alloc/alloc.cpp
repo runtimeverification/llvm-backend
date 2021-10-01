@@ -39,11 +39,8 @@ char oldspace_collection_id() {
   return getArenaCollectionSemispaceID(&oldspace);
 }
 
-void koreAllocSwap(bool swapOld, bool resetAlwaysGC) {
+void koreAllocSwap(bool swapOld) {
   arenaSwapAndClear(&youngspace);
-  if (resetAlwaysGC) {
-    arenaClear(&alwaysgcspace);
-  }
   if (swapOld) {
     arenaSwapAndClear(&oldspace);
   }
