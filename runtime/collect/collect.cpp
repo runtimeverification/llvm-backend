@@ -394,13 +394,12 @@ void koreCollect(void) {
   is_gc = false;
 }
 
-bool gc_enabled;
-
 void tryKoreCollect(bool afterStep) {
-  size_t threshold = get_gc_threshold();
-  if (youngspaceAlmostFull(threshold) && gc_enabled) {
-    koreCollect(afterStep);
-  } else if (afterStep) {
+  if (deferred_collection) {
+    koreCollect();
+    deferred_collection = false;
+  }
+  if (afterStep) {
     koreClear();
   }
 }

@@ -41,8 +41,6 @@ struct construction {
   size_t nchildren;
 };
 
-extern bool gc_enabled;
-
 static void *constructInitialConfiguration(const KOREPattern *initial) {
   gc_enabled = false;
   std::vector<std::variant<const KOREPattern *, construction>> workList{
