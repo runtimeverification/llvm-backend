@@ -297,9 +297,14 @@ static std::vector<gc_root> scanStackRoots(void) {
           char **base_ptr = (char **)(((char *)sp) + Reloc.base.offset);
           char **derived_ptr = (char **)(((char *)sp) + Reloc.derived_offset);
           ptrdiff_t derived_offset = *derived_ptr - *base_ptr;
-          gc_roots.push_back(
-              {base_ptr, derived_ptr, Reloc.base.cat, derived_offset,
-               newBasePtr});
+          if (derived_offset != 0) {
+            gc_roots.push_back(
+                {base_ptr, derived_ptr, SYMBOL_LAYOUT, derived_offset,
+                 newBasePtr});
+          } else {
+            gc_roots.push_back(
+                {base_ptr, derived_ptr, Reloc.base.cat, 0, newBasePtr});
+          }
         }
       }
     }
