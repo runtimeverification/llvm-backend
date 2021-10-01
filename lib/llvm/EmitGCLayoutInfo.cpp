@@ -55,28 +55,20 @@ struct EmitGCLayoutInfo : public ModulePass {
 #else
             for (auto &R : S->getRelocates()) {
 #endif
-              auto BaseArg = R->getBasePtr();
-              auto DerivedArg = R->getDerivedPtr();
-              std::string name;
-              StructType *StructTy;
-              if (BaseArg != DerivedArg) {
-                name = "block";
-                StructTy = nullptr;
-              } else {
-                auto *Ty = BaseArg->getType()->getPointerElementType();
-                if (Ty->isIntegerTy()) {
-                  i++;
-                  continue;
-                }
-                if (!Ty->isStructTy()) {
-                  error(Ty);
-                }
-                StructTy = cast<StructType>(Ty);
-                if (!StructTy->hasName()) {
-                  error(StructTy);
-                }
-                name = StructTy->getName().str();
+              auto Arg = R->getBasePtr();
+              auto *Ty = Arg->getType()->getPointerElementType();
+              if (Ty->isIntegerTy()) {
+                i++;
+                continue;
               }
+              if (!Ty->isStructTy()) {
+                error(Ty);
+              }
+              auto StructTy = cast<StructType>(Ty);
+              if (!StructTy->hasName()) {
+                error(StructTy);
+              }
+              std::string name = StructTy->getName().str();
               ValueType cat;
               cat.bits = 0;
               if (name == "map") {
