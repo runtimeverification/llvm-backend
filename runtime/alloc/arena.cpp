@@ -143,9 +143,11 @@ doAllocSlow(size_t requested, struct arena *Arena) {
   }
 }
 
+#define COLLECT_BUFFER_SIZE 1024
+
 __attribute__((always_inline)) void *
 arenaAlloc(struct arena *Arena, size_t requested) {
-  if (Arena->block + requested > Arena->block_end) {
+  if (Arena->block + requested + COLLECT_BUFFER_SIZE > Arena->block_end) {
     return doAllocSlow(requested, Arena);
   }
   void *result = Arena->block;
