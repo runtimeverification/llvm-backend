@@ -125,13 +125,19 @@ void *koreResizeLastAlloc(void *oldptr, size_t newrequest, size_t last_size) {
 }
 
 void *koreAllocMP(size_t requested) {
+  bool enabled = gc_enabled;
+  gc_enabled = false;
   string *_new = (string *)koreAllocToken(sizeof(string) + requested);
+  gc_enabled = enabled;
   set_len(_new, requested);
   return _new->data;
 }
 
 void *koreReallocMP(void *ptr, size_t old_size, size_t new_size) {
+  bool enabled = gc_enabled;
+  gc_enabled = false;
   string *_new = (string *)koreAllocToken(sizeof(string) + new_size);
+  gc_enabled = enabled;
   size_t min = old_size > new_size ? new_size : old_size;
   memcpy(_new->data, ptr, min);
   set_len(_new, new_size);
