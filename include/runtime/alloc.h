@@ -13,7 +13,6 @@ extern const size_t BLOCK_SIZE;
 
 char youngspace_collection_id(void);
 char oldspace_collection_id(void);
-size_t youngspace_size(void);
 
 // allocates exactly requested bytes into the young generation
 void *koreAlloc(size_t requested);

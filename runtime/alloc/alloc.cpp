@@ -39,23 +39,6 @@ char oldspace_collection_id() {
   return getArenaCollectionSemispaceID(&oldspace);
 }
 
-size_t youngspace_size(void) {
-  return arenaSize(&youngspace);
-}
-
-bool youngspaceAlmostFull(size_t threshold) {
-  char *nextBlock = *(char **)youngspace.block_start;
-  if (nextBlock) {
-    // not on the last block, so short circuit and assume that we can keep
-    // allocating for now.
-    return false;
-  }
-  ptrdiff_t freeBytes = youngspace.block_end - youngspace.block;
-  size_t totalBytes
-      = youngspace.num_blocks * (BLOCK_SIZE - sizeof(memory_block_header));
-  return (totalBytes - freeBytes) * 100 > threshold * 95;
-}
-
 void koreAllocSwap(bool swapOld, bool resetAlwaysGC) {
   arenaSwapAndClear(&youngspace);
   if (resetAlwaysGC) {
