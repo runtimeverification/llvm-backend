@@ -3,6 +3,7 @@
 
 #include "runtime/header.h"
 #include <iterator>
+#include <map>
 #include <type_traits>
 #include <vector>
 
@@ -26,6 +27,13 @@ using set_node = set::iterator::node_t;
 using set_impl = set::iterator::tree_t;
 
 void parseStackMap(void);
+
+struct gc_relocation {
+  layoutitem base;
+  uint64_t derived_offset;
+};
+
+extern std::map<void *, std::vector<gc_relocation>> StackMap;
 
 extern "C" {
 extern size_t numBytesLiveAtCollection[1 << AGE_WIDTH];
