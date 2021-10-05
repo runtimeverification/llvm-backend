@@ -78,7 +78,7 @@ let
       mkdir -p "$out/bin"
       cp ${llvm-backend.src}/bin/llvm-kompile-testing "$out/bin"
       sed -i "$out/bin/llvm-kompile-testing" \
-          -e '/@PROJECT_SOURCE_DIR@/ c ${java} -jar ${jar} $definition qbaL $dt_dir 1'
+          -e '/@PROJECT_SOURCE_DIR@/ c ${java} -jar ${jar} $definition qbaL $dt_dir 9/10'
       chmod +x "$out/bin/llvm-kompile-testing"
       patchShebangs "$out/bin/llvm-kompile-testing"
     '';

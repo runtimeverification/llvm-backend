@@ -22,7 +22,7 @@ private:
   llvm::Value *
   createHook(KORECompositePattern *hookAtt, KORECompositePattern *pattern);
   llvm::Value *createFunctionCall(
-      std::string name, KORECompositePattern *pattern, bool sret, bool fastcc);
+      std::string name, KORECompositePattern *pattern, bool sret, bool tailcc);
   llvm::Value *
   notInjectionCase(KORECompositePattern *constructor, llvm::Value *val);
 
@@ -52,12 +52,12 @@ public:
    * function actually returns void and the return value is via a pointe. Note
    * that this can be set to true even if the function does not return a struct,
    * in which case its value is ignored. load: if the function returns a struct
-   * via sret, then if load is true, we load the value fastcc: true if we should
-   * use the fastcc calling convention returned from the function before
+   * via sret, then if load is true, we load the value tailcc: true if we should
+   * use the tailcc calling convention returned from the function before
    * returning it. */
   llvm::Value *createFunctionCall(
       std::string name, ValueType returnCat,
-      const std::vector<llvm::Value *> &args, bool sret, bool fastcc);
+      const std::vector<llvm::Value *> &args, bool sret, bool tailcc);
 
   llvm::BasicBlock *getCurrentBlock() const { return CurrentBlock; }
 };
@@ -103,11 +103,23 @@ llvm::Type *getParamType(ValueType sort, llvm::Module *Module);
 void addAbort(llvm::BasicBlock *block, llvm::Module *Module);
 
 llvm::Value *allocateTerm(
-    llvm::Type *AllocType, llvm::BasicBlock *block,
+    ValueType Cat, llvm::Type *AllocType, llvm::BasicBlock *block,
     const char *allocFn = "koreAlloc");
 llvm::Value *allocateTerm(
+    ValueType Cat, llvm::Type *AllocType, llvm::Value *Len,
+    llvm::BasicBlock *block, const char *allocFn = "koreAlloc");
+llvm::Value *allocateTermNoReloc(
+    llvm::Type *AllocType, llvm::BasicBlock *block,
+    const char *allocFn = "koreAllocAlwaysGC");
+llvm::Value *allocateTermNoReloc(
     llvm::Type *AllocType, llvm::Value *Len, llvm::BasicBlock *block,
-    const char *allocFn = "koreAlloc");
+    const char *allocFn = "koreAllocAlwaysGC");
+
+// see comment on runtime/opaque/opaque.ll for explanation about why these
+// functions exist
+llvm::Value *addrspaceCast0to1(llvm::Value *val, llvm::BasicBlock *block);
+llvm::Value *addrspaceCast1to0(llvm::Value *val, llvm::BasicBlock *block);
+llvm::Value *ptrToInt(llvm::Value *val, llvm::BasicBlock *block);
 } // namespace kllvm
 
 #endif // CREATE_TERM_H
