@@ -55,6 +55,8 @@ block D1 = {{1}};
 block *DUMMY1 = &D1;
 }
 
+bool gc_enabled;
+
 BOOST_AUTO_TEST_SUITE(ListTest)
 
 BOOST_AUTO_TEST_CASE(element) {

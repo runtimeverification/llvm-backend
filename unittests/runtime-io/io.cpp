@@ -48,6 +48,8 @@ bool during_gc() {
   return false;
 }
 
+void koreCollect() { }
+
 void add_hash64(void *, uint64_t) { }
 
 void flush_IO_logs();

@@ -39,29 +39,15 @@ char oldspace_collection_id() {
   return getArenaCollectionSemispaceID(&oldspace);
 }
 
-size_t youngspace_size(void) {
-  return arenaSize(&youngspace);
-}
-
-bool youngspaceAlmostFull(size_t threshold) {
-  char *nextBlock = *(char **)youngspace.block_start;
-  if (nextBlock) {
-    // not on the last block, so short circuit and assume that we can keep
-    // allocating for now.
-    return false;
-  }
-  ptrdiff_t freeBytes = youngspace.block_end - youngspace.block;
-  size_t totalBytes
-      = youngspace.num_blocks * (BLOCK_SIZE - sizeof(memory_block_header));
-  return (totalBytes - freeBytes) * 100 > threshold * 95;
-}
-
 void koreAllocSwap(bool swapOld) {
   arenaSwapAndClear(&youngspace);
-  arenaClear(&alwaysgcspace);
   if (swapOld) {
     arenaSwapAndClear(&oldspace);
   }
+}
+
+void koreClear() {
+  arenaClear(&alwaysgcspace);
 }
 
 void setKoreMemoryFunctionsForGMP() {
@@ -139,13 +125,19 @@ void *koreResizeLastAlloc(void *oldptr, size_t newrequest, size_t last_size) {
 }
 
 void *koreAllocMP(size_t requested) {
+  bool enabled = gc_enabled;
+  gc_enabled = false;
   string *_new = (string *)koreAllocToken(sizeof(string) + requested);
+  gc_enabled = enabled;
   set_len(_new, requested);
   return _new->data;
 }
 
 void *koreReallocMP(void *ptr, size_t old_size, size_t new_size) {
+  bool enabled = gc_enabled;
+  gc_enabled = false;
   string *_new = (string *)koreAllocToken(sizeof(string) + new_size);
+  gc_enabled = enabled;
   size_t min = old_size > new_size ? new_size : old_size;
   memcpy(_new->data, ptr, min);
   set_len(_new, new_size);
