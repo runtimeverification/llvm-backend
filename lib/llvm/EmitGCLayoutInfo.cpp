@@ -61,12 +61,9 @@ struct EmitGCLayoutInfo : public ModulePass {
                 i++;
                 continue;
               }
-              if (!Ty->isStructTy()) {
+              auto StructTy = dyn_cast<StructType>(Ty);
+              if (!StructTy || !StructTy->hasName()) {
                 error(Ty);
-              }
-              auto StructTy = cast<StructType>(Ty);
-              if (!StructTy->hasName()) {
-                error(StructTy);
               }
               std::string name = StructTy->getName().str();
               ValueType cat;
