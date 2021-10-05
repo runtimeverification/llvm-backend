@@ -5,10 +5,10 @@
         "homepage": "",
         "owner": "icetan",
         "repo": "mavenix",
-        "rev": "3ac30863abb9a8986560ed4dfa5e6288434b73e1",
-        "sha256": "1n22mqmym6vf6r39g425splhpnfsacdpdgp581amq5n640dfzqgr",
+        "rev": "7416dbd2861520d44a4d6ecee9d94f89737412dc",
+        "sha256": "0gkn29q63y2l700vravfl8nqjvd0zx7nvfcb3vj64fal3prh1l7y",
         "type": "tarball",
-        "url": "https://github.com/icetan/mavenix/archive/3ac30863abb9a8986560ed4dfa5e6288434b73e1.tar.gz",
+        "url": "https://github.com/icetan/mavenix/archive/7416dbd2861520d44a4d6ecee9d94f89737412dc.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "niv": {
@@ -17,22 +17,22 @@
         "homepage": "https://github.com/nmattia/niv",
         "owner": "nmattia",
         "repo": "niv",
-        "rev": "9d35b9e4837ab88517210b1701127612c260eccf",
-        "sha256": "0q50xhnm8g2yfyakrh0nly4swyygxpi0a8cb9gp65wcakcgvzvdh",
+        "rev": "65a61b147f307d24bfd0a5cd56ce7d7b7cc61d2e",
+        "sha256": "17mirpsx5wyw262fpsd6n6m47jcgw8k2bwcp1iwdnrlzy4dhcgqh",
         "type": "tarball",
-        "url": "https://github.com/nmattia/niv/archive/9d35b9e4837ab88517210b1701127612c260eccf.tar.gz",
+        "url": "https://github.com/nmattia/niv/archive/65a61b147f307d24bfd0a5cd56ce7d7b7cc61d2e.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "nixpkgs": {
-        "branch": "nixos-20.03",
+        "branch": "nixos-21.05",
         "description": "Nix Packages collection",
         "homepage": "",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "a26e92a67d884db696792d25dcc44c466a1bc8b4",
-        "sha256": "0w4sp4cgncr62vgzknny76whlansab94dq2lx27if77ir3zpfiia",
+        "rev": "7daf35532d2d8bf5e6f7f962e6cd13a66d01a71d",
+        "sha256": "0ycyns4vhcd4alnrq5kc813vhxvd1ykwbmd59i1zfmr6j1ksyll0",
         "type": "tarball",
-        "url": "https://github.com/nixos/nixpkgs/archive/a26e92a67d884db696792d25dcc44c466a1bc8b4.tar.gz",
+        "url": "https://github.com/nixos/nixpkgs/archive/7daf35532d2d8bf5e6f7f962e6cd13a66d01a71d.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     }
 }
