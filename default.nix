@@ -54,7 +54,7 @@ let
         '';
       };
     in
-      llvmPackages.lldClangNoLibcxx.override override;
+      llvmPackages.clangNoLibcxx.override override;
 
   llvm-backend = callPackage ./nix/llvm-backend.nix {
     inherit llvmPackages src;
