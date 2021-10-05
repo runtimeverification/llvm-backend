@@ -40,7 +40,10 @@ let src = ttuegel.orElse _src (ttuegel.cleanGitSubtree { name = "llvm-backend"; 
 let
   inherit (pkgs) callPackage nix-gitignore;
 
-  llvmPackages = pkgs.llvmPackages_10;
+  llvmPackages = pkgs.llvmPackages_10.override {
+    bootBintoolsNoLibc = null;
+    bootBintools = null;
+  };
 
   # The backend requires clang/lld/libstdc++ at runtime.
   # The closest configuration in Nixpkgs is clang/lld without any C++ standard
