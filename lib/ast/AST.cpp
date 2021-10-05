@@ -862,12 +862,12 @@ KORECompositePattern::sortCollections(PrettyPrintData const &data) {
     for (auto &item : printed) {
       items.push_back(item.second);
     }
-    sptr<KOREPattern> result = items[0];
+    sptr<KOREPattern> result = items[0]->sortCollections(data);
     for (int i = 1; i < items.size(); ++i) {
       sptr<KORECompositePattern> tmp
           = KORECompositePattern::Create(constructor.get());
       tmp->addArgument(result);
-      tmp->addArgument(items[i]);
+      tmp->addArgument(items[i]->sortCollections(data));
       result = tmp;
     }
     return result;

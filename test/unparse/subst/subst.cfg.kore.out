@@ -2,12 +2,12 @@
     one[0m ~> .
   </k>[0m
 #Or
-    <k>[0m
-      ?_0:Int ~> .
-    </k>[0m
-  #And
     #Not ( {
       ?_0:Int
     #Equals
       1
     } )
+  #And
+    <k>[0m
+      ?_0:Int ~> .
+    </k>[0m
