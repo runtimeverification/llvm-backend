@@ -55,11 +55,6 @@ floating *move_float(floating *i) {
 void add_hash64(void *, uint64_t) { }
 }
 
-bool during_gc() {
-  return false;
-}
-void koreCollect() { }
-
 BOOST_AUTO_TEST_SUITE(StringTest)
 
 BOOST_AUTO_TEST_CASE(gt) {
