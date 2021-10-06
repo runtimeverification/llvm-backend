@@ -72,18 +72,9 @@ __attribute__((always_inline)) void *koreAlloc(size_t requested) {
   return arenaAlloc(&youngspace, requested);
 }
 
-__attribute__((always_inline)) block *koreAlloc_p1s_blocks(size_t requested) {
-  return (block *)koreAlloc(requested);
-}
-
 __attribute__((always_inline)) void *koreAllocToken(size_t requested) {
   size_t size = (requested + 7) & ~7;
   return arenaAlloc(&youngspace, size < 16 ? 16 : size);
-}
-
-__attribute__((always_inline)) block *
-koreAllocToken_p1s_blocks(size_t requested) {
-  return (block *)koreAllocToken(requested);
 }
 
 __attribute__((always_inline)) void *koreAllocOld(size_t requested) {
@@ -97,26 +88,6 @@ __attribute__((always_inline)) void *koreAllocTokenOld(size_t requested) {
 
 __attribute__((always_inline)) void *koreAllocAlwaysGC(size_t requested) {
   return arenaAlloc(&alwaysgcspace, requested);
-}
-
-__attribute__((always_inline)) map *
-koreAllocAlwaysGC_p1s_maps(size_t requested) {
-  return (map *)koreAllocAlwaysGC(requested);
-}
-
-__attribute__((always_inline)) set *
-koreAllocAlwaysGC_p1s_sets(size_t requested) {
-  return (set *)koreAllocAlwaysGC(requested);
-}
-
-__attribute__((always_inline)) list *
-koreAllocAlwaysGC_p1s_lists(size_t requested) {
-  return (list *)koreAllocAlwaysGC(requested);
-}
-
-__attribute__((always_inline)) block *
-koreAllocAlwaysGC_p1s_blocks(size_t requested) {
-  return (block *)koreAllocAlwaysGC(requested);
 }
 
 void *koreResizeLastAlloc(void *oldptr, size_t newrequest, size_t last_size) {
@@ -160,20 +131,10 @@ __attribute__((always_inline)) void *koreAllocInteger(size_t requested) {
   return &result->i;
 }
 
-__attribute__((always_inline)) mpz_ptr
-koreAllocInteger_p1s_mpzs(size_t requested) {
-  return (mpz_ptr)koreAllocInteger(requested);
-}
-
 __attribute__((always_inline)) void *koreAllocFloating(size_t requested) {
   floating_hdr *result = (floating_hdr *)koreAlloc(sizeof(floating_hdr));
   set_len(result, sizeof(floating_hdr) - sizeof(blockheader));
   return &result->f;
-}
-
-__attribute__((always_inline)) floating *
-koreAllocFloating_p1s_floatings(size_t requested) {
-  return (floating *)koreAllocFloating(requested);
 }
 
 __attribute__((always_inline)) void *koreAllocIntegerOld(size_t requested) {

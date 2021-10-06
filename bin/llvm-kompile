@@ -9,9 +9,7 @@ if [ $# -lt 3 ]; then
 fi
 mod="$(mktemp tmp.XXXXXXXXXX)"
 modopt="$(mktemp tmp.XXXXXXXXXX)"
-modcombined="$(mktemp tmp.XXXXXXXXXX)"
-modcombinedopt="$(mktemp tmp.XXXXXXXXXX)"
-trap "rm -rf $dt_dir $mod $modopt $modcombined $modcombinedopt" INT TERM EXIT
+trap "rm -rf $dt_dir $mod $modopt" INT TERM EXIT
 definition="$1"
 shift
 compile=true
@@ -33,25 +31,12 @@ if $compile; then
       -g)
         debug=1
         ;;
-      -O[0-3])
-        opt_flags="$arg"
-        ;;
-      -O.)
-        echo "$0: invalid optimization level"
-        exit 1
-        ;;
       *)
         ;;
     esac
   done
-
-  # code generation
   "$(dirname "$0")"/llvm-kompile-codegen "$definition" "$dt_dir"/dt.yaml "$dt_dir" $debug > "$mod"
-
-  # optimization
-  @OPT@ -load "$(dirname "$0")"/../lib/kllvm/libLLVMPass.so -mem2reg -tailcallelim $opt_flags -mark-tail-calls-as-gc-leaf -rewrite-statepoints-for-gc -dce -emit-gc-layout-info "$mod" -o "$modopt"
-  @LLVM_LINK@ "$modopt" "$(dirname "$0")"/../lib/kllvm/llvm/opaque/opaque.ll -o "$modcombined"
-  @OPT@ "$modcombined" -always-inline -o "$modcombinedopt"
+  @OPT@ -mem2reg -tailcallelim -tailcallopt "$mod" -o "$modopt"
 else
   main="$1"
   shift
@@ -60,4 +45,4 @@ fi
 if [[ "$OSTYPE" != "darwin"* ]]; then
   flags=-fuse-ld=lld
 fi
-"$(dirname "$0")"/llvm-kompile-clang "$modcombinedopt" "$main" @LLVM_KOMPILE_LTO@ -fno-stack-protector $flags "$@"
+"$(dirname "$0")"/llvm-kompile-clang "$modopt" "$main" @LLVM_KOMPILE_LTO@ -fno-stack-protector $flags "$@"
