@@ -778,7 +778,7 @@ void makeAnywhereFunction(
   makeEvalOrAnywhereFunction(function, definition, module, dt, addOwise);
 }
 
-llvm::BasicBlock *stepFunctionHeader(
+std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> stepFunctionHeader(
     unsigned ordinal, llvm::Module *module, KOREDefinition *definition,
     llvm::BasicBlock *block, llvm::BasicBlock *stuck,
     std::vector<llvm::Value *> args, std::vector<ValueType> types) {
@@ -787,12 +787,30 @@ llvm::BasicBlock *stepFunctionHeader(
       llvm::FunctionType::get(
           llvm::Type::getInt1Ty(module->getContext()), {}, false));
   auto isFinished = llvm::CallInst::Create(finished, {}, "", block);
+  auto checkCollect = llvm::BasicBlock::Create(
+      module->getContext(), "checkCollect", block->getParent());
+  llvm::BranchInst::Create(stuck, checkCollect, isFinished, block);
+
+  auto collection = getOrInsertFunction(
+      module, "is_collection",
+      llvm::FunctionType::get(
+          llvm::Type::getInt1Ty(module->getContext()), {}, false));
+  auto isCollection = llvm::CallInst::Create(collection, {}, "", checkCollect);
+  setDebugLoc(isCollection);
+  auto collect = llvm::BasicBlock::Create(
+      module->getContext(), "isCollect", block->getParent());
   auto merge = llvm::BasicBlock::Create(
       module->getContext(), "step", block->getParent());
-  llvm::BranchInst::Create(stuck, merge, isFinished, block);
+  llvm::BranchInst::Create(collect, merge, isCollection, checkCollect);
 
-  insertCallToClear(merge);
-  return merge;
+  auto koreCollect = getOrInsertFunction(
+      module, "koreCollect",
+      llvm::FunctionType::get(
+          llvm::Type::getVoidTy(module->getContext()), {}, false));
+  auto call = llvm::CallInst::Create(koreCollect, {}, "", collect);
+  setDebugLoc(call);
+  llvm::BranchInst::Create(merge, collect);
+  return std::make_pair(args, merge);
 }
 
 void makeStepFunction(
@@ -870,17 +888,24 @@ void makeStepFunction(
   llvm::BranchInst::Create(stuck, pre_stuck);
   auto result = stepFunctionHeader(
       0, module, definition, block, stuck, {val}, {{SortCategory::Symbol, 0}});
-  val->setName("_1");
+  auto collectedVal = result.first[0];
+  collectedVal->setName("_1");
   Decision codegen(
-      definition, result, fail, jump, choiceBuffer, choiceDepth, module,
+      definition, result.second, fail, jump, choiceBuffer, choiceDepth, module,
       {SortCategory::Symbol, 0}, nullptr, nullptr, nullptr, resultBuffer,
       resultCount, resultCapacity);
-  codegen.store(std::make_pair(val->getName().str(), val->getType()), val);
+  codegen.store(
+      std::make_pair(collectedVal->getName().str(), collectedVal->getType()),
+      collectedVal);
   if (search) {
     auto result = new llvm::LoadInst(bufType, resultBuffer, "", stuck);
     llvm::ReturnInst::Create(module->getContext(), result, stuck);
   } else {
-    llvm::ReturnInst::Create(module->getContext(), val, stuck);
+    auto phi
+        = llvm::PHINode::Create(collectedVal->getType(), 2, "phi_1", stuck);
+    phi->addIncoming(val, block);
+    phi->addIncoming(collectedVal, pre_stuck);
+    llvm::ReturnInst::Create(module->getContext(), phi, stuck);
   }
 
   codegen(dt);
@@ -1059,10 +1084,10 @@ void makeStepFunction(
       axiom->getOrdinal(), module, definition, block, stuck, args, types);
   i = 0;
   Decision codegen(
-      definition, header, fail, jump, choiceBuffer, choiceDepth, module,
+      definition, header.second, fail, jump, choiceBuffer, choiceDepth, module,
       {SortCategory::Symbol, 0}, nullptr, nullptr, nullptr, nullptr, nullptr,
       nullptr);
-  for (auto val : args) {
+  for (auto val : header.first) {
     val->setName(res.residuals[i].occurrence.substr(0, max_name_length));
     codegen.store(std::make_pair(val->getName().str(), val->getType()), val);
     stuckSubst.insert({val->getName(), phis[i]});

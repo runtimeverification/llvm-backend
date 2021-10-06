@@ -13,6 +13,7 @@ extern const size_t BLOCK_SIZE;
 
 char youngspace_collection_id(void);
 char oldspace_collection_id(void);
+size_t youngspace_size(void);
 
 // allocates exactly requested bytes into the young generation
 void *koreAlloc(size_t requested);
@@ -34,8 +35,6 @@ void *koreAllocAlwaysGC(size_t requested);
 // if the swapOld flag is set, it also swaps the two semispaces of the old
 // generation
 void koreAllocSwap(bool swapOld);
-// resets the alwaysgcspace
-void koreClear(void);
 // resizes the last allocation into the young generation
 void *koreResizeLastAlloc(void *oldptr, size_t newrequest, size_t oldrequest);
 // allocator hook for the GMP library
