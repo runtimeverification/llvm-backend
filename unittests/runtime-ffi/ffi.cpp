@@ -67,6 +67,8 @@ bool during_gc() {
   return false;
 }
 
+void koreCollect() { }
+
 void printConfigurationInternal(
     writer *file, block *subject, const char *sort, bool) { }
 void sfprintf(writer *, const char *, ...) { }

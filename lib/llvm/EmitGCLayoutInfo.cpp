@@ -19,9 +19,9 @@ struct EmitGCLayoutInfo : public ModulePass {
       : ModulePass(ID) { }
 
   void error(Type *Ty) {
-    llvm::errs() << "Could not identify garbage collection information! This "
-                    "is a bug in the llvm backend of K\n";
-    Ty->print(llvm::errs());
+    errs() << "Could not identify garbage collection information! This "
+              "is a bug in the llvm backend of K\n";
+    Ty->print(errs());
     abort();
   }
 
@@ -61,12 +61,9 @@ struct EmitGCLayoutInfo : public ModulePass {
                 i++;
                 continue;
               }
-              if (!Ty->isStructTy()) {
+              auto StructTy = dyn_cast<StructType>(Ty);
+              if (!StructTy || !StructTy->hasName()) {
                 error(Ty);
-              }
-              auto StructTy = llvm::cast<StructType>(Ty);
-              if (!StructTy->hasName()) {
-                error(StructTy);
               }
               std::string name = StructTy->getName().str();
               ValueType cat;
