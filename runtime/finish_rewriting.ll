@@ -19,7 +19,7 @@ declare i8* @getStderr()
 @exit_int_0 = global %mpz { i32 0, i32 0, i64* getelementptr inbounds ([0 x i64], [0 x i64]* @exit_int_0_limbs, i32 0, i32 0) }
 @exit_int_0_limbs = global [0 x i64] zeroinitializer
 
-define weak fastcc %mpz* @"eval_LblgetExitCode{SortGeneratedTopCell{}}"(%block*) {
+define weak tailcc %mpz* @"eval_LblgetExitCode{SortGeneratedTopCell{}}"(%block*) {
   ret %mpz* @exit_int_0
 }
 
@@ -48,7 +48,7 @@ printConfig:
   call void @printConfiguration(i8* %output, %block* %subject)
   br i1 %error, label %exit, label %exitCode
 exitCode:
-  %exit_z = call fastcc %mpz* @"eval_LblgetExitCode{SortGeneratedTopCell{}}"(%block* %subject)
+  %exit_z = call tailcc %mpz* @"eval_LblgetExitCode{SortGeneratedTopCell{}}"(%block* %subject)
   %exit_ul = call i64 @__gmpz_get_ui(%mpz* %exit_z)
   %exit_trunc = trunc i64 %exit_ul to i32
   br label %exit
