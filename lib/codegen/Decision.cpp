@@ -791,6 +791,7 @@ llvm::BasicBlock *stepFunctionHeader(
       module->getContext(), "step", block->getParent());
   llvm::BranchInst::Create(stuck, merge, isFinished, block);
 
+  insertCallToClear(merge);
   return merge;
 }
 
@@ -849,11 +850,6 @@ void makeStepFunction(
     resultCapacity = new llvm::AllocaInst(
         llvm::Type::getInt64Ty(module->getContext()), 0, "resultCapacity",
         block);
-  }
-
-  insertCallToClear(block);
-
-  if (search) {
     llvm::Value *initialBuffer = allocateTerm(
         {SortCategory::Symbol, 0}, blockType, block, "koreAllocAlwaysGC");
     new llvm::StoreInst(initialBuffer, resultBuffer, block);
@@ -1061,7 +1057,6 @@ void makeStepFunction(
   }
   auto header = stepFunctionHeader(
       axiom->getOrdinal(), module, definition, block, stuck, args, types);
-  insertCallToClear(header);
   i = 0;
   Decision codegen(
       definition, header, fail, jump, choiceBuffer, choiceDepth, module,
