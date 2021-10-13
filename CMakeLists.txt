@@ -113,19 +113,10 @@ install(
   DESTINATION lib/kllvm/llvm/main
 )
 
-install(
-  FILES runtime/opaque/opaque.ll
-  DESTINATION lib/kllvm/llvm/opaque
-)
-
 find_program(OPT opt-12)
 find_program(OPT opt-11)
 find_program(OPT opt-10)
 find_program(OPT opt)
-find_program(LLVM_LINK llvm-link-12)
-find_program(LLVM_LINK llvm-link-11)
-find_program(LLVM_LINK llvm-link-10)
-find_program(LLVM_LINK llvm-link)
 find_program(LLC llc-12)
 find_program(LLC llc-11)
 find_program(LLC llc-10)
@@ -133,11 +124,8 @@ find_program(LLC llc)
 if(${OPT} STREQUAL "OPT-NOTFOUND")
   message(FATAL_ERROR "Could not find an opt binary. Is llvm installed on your PATH?")
 endif()
-if(${LLC} STREQUAL "LLC-NOTFOUND")
-  message(FATAL_ERROR "Could not find an llc binary. Is llvm installed on your PATH?")
-endif()
-if(${LLVM_LINK} STREQUAL "LLVM_LINK-NOTFOUND")
-  message(FATAL_ERROR "Could not find an llvm-link binary. Is llvm installed on your PATH?")
+if(${LLC} STREQUAL "OPT-NOTFOUND")
+  message(FATAL_ERROR "Could not find an llvm binary. Is llvm installed on your PATH?")
 endif()
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin)

@@ -39,15 +39,29 @@ char oldspace_collection_id() {
   return getArenaCollectionSemispaceID(&oldspace);
 }
 
+size_t youngspace_size(void) {
+  return arenaSize(&youngspace);
+}
+
+bool youngspaceAlmostFull(size_t threshold) {
+  char *nextBlock = *(char **)youngspace.block_start;
+  if (nextBlock) {
+    // not on the last block, so short circuit and assume that we can keep
+    // allocating for now.
+    return false;
+  }
+  ptrdiff_t freeBytes = youngspace.block_end - youngspace.block;
+  size_t totalBytes
+      = youngspace.num_blocks * (BLOCK_SIZE - sizeof(memory_block_header));
+  return (totalBytes - freeBytes) * 100 > threshold * 95;
+}
+
 void koreAllocSwap(bool swapOld) {
   arenaSwapAndClear(&youngspace);
+  arenaClear(&alwaysgcspace);
   if (swapOld) {
     arenaSwapAndClear(&oldspace);
   }
-}
-
-void koreClear() {
-  arenaClear(&alwaysgcspace);
 }
 
 void setKoreMemoryFunctionsForGMP() {
@@ -58,18 +72,9 @@ __attribute__((always_inline)) void *koreAlloc(size_t requested) {
   return arenaAlloc(&youngspace, requested);
 }
 
-__attribute__((always_inline)) block *koreAlloc_p1s_blocks(size_t requested) {
-  return (block *)koreAlloc(requested);
-}
-
 __attribute__((always_inline)) void *koreAllocToken(size_t requested) {
   size_t size = (requested + 7) & ~7;
   return arenaAlloc(&youngspace, size < 16 ? 16 : size);
-}
-
-__attribute__((always_inline)) block *
-koreAllocToken_p1s_blocks(size_t requested) {
-  return (block *)koreAllocToken(requested);
 }
 
 __attribute__((always_inline)) void *koreAllocOld(size_t requested) {
@@ -83,26 +88,6 @@ __attribute__((always_inline)) void *koreAllocTokenOld(size_t requested) {
 
 __attribute__((always_inline)) void *koreAllocAlwaysGC(size_t requested) {
   return arenaAlloc(&alwaysgcspace, requested);
-}
-
-__attribute__((always_inline)) map *
-koreAllocAlwaysGC_p1s_maps(size_t requested) {
-  return (map *)koreAllocAlwaysGC(requested);
-}
-
-__attribute__((always_inline)) set *
-koreAllocAlwaysGC_p1s_sets(size_t requested) {
-  return (set *)koreAllocAlwaysGC(requested);
-}
-
-__attribute__((always_inline)) list *
-koreAllocAlwaysGC_p1s_lists(size_t requested) {
-  return (list *)koreAllocAlwaysGC(requested);
-}
-
-__attribute__((always_inline)) block *
-koreAllocAlwaysGC_p1s_blocks(size_t requested) {
-  return (block *)koreAllocAlwaysGC(requested);
 }
 
 void *koreResizeLastAlloc(void *oldptr, size_t newrequest, size_t last_size) {
@@ -125,19 +110,13 @@ void *koreResizeLastAlloc(void *oldptr, size_t newrequest, size_t last_size) {
 }
 
 void *koreAllocMP(size_t requested) {
-  bool enabled = gc_enabled;
-  gc_enabled = false;
   string *_new = (string *)koreAllocToken(sizeof(string) + requested);
-  gc_enabled = enabled;
   set_len(_new, requested);
   return _new->data;
 }
 
 void *koreReallocMP(void *ptr, size_t old_size, size_t new_size) {
-  bool enabled = gc_enabled;
-  gc_enabled = false;
   string *_new = (string *)koreAllocToken(sizeof(string) + new_size);
-  gc_enabled = enabled;
   size_t min = old_size > new_size ? new_size : old_size;
   memcpy(_new->data, ptr, min);
   set_len(_new, new_size);
@@ -152,20 +131,10 @@ __attribute__((always_inline)) void *koreAllocInteger(size_t requested) {
   return &result->i;
 }
 
-__attribute__((always_inline)) mpz_ptr
-koreAllocInteger_p1s_mpzs(size_t requested) {
-  return (mpz_ptr)koreAllocInteger(requested);
-}
-
 __attribute__((always_inline)) void *koreAllocFloating(size_t requested) {
   floating_hdr *result = (floating_hdr *)koreAlloc(sizeof(floating_hdr));
   set_len(result, sizeof(floating_hdr) - sizeof(blockheader));
   return &result->f;
-}
-
-__attribute__((always_inline)) floating *
-koreAllocFloating_p1s_floatings(size_t requested) {
-  return (floating *)koreAllocFloating(requested);
 }
 
 __attribute__((always_inline)) void *koreAllocIntegerOld(size_t requested) {

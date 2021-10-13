@@ -1,19 +1,13 @@
+#include "runtime/collect.h"
+#include "runtime/alloc.h"
+#include "runtime/arena.h"
+#include "runtime/header.h"
 #include <cassert>
 #include <cstdbool>
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <map>
-#include <set>
-
-#include "runtime/alloc.h"
-#include "runtime/arena.h"
-#include "runtime/collect.h"
-#include "runtime/header.h"
-
-#define UNW_LOCAL_ONLY
-#include <libunwind.h>
 
 extern "C" {
 
@@ -31,6 +25,8 @@ static char *last_alloc_ptr;
 #endif
 
 size_t numBytesLiveAtCollection[1 << AGE_WIDTH];
+void set_gc_threshold(size_t);
+size_t get_gc_threshold(void);
 bool youngspaceAlmostFull(size_t);
 
 bool during_gc() {
@@ -258,67 +254,12 @@ void initStaticObjects(void) {
   list l = list();
   set s = set();
   setKoreMemoryFunctionsForGMP();
-  parseStackMap();
 }
 
-struct gc_root {
-  char **base_ptr;
-  char **derived_ptr;
-  uint16_t cat;
-  ptrdiff_t derived_offset;
-  bool isNewBasePtr;
-};
-
-static std::vector<gc_root> scanStackRoots(void) {
-  unw_cursor_t cursor;
-  unw_context_t context;
-
-  unw_getcontext(&context);
-  unw_init_local(&cursor, &context);
-
-  std::vector<gc_root> gc_roots;
-
-  while (unw_step(&cursor)) {
-    unw_word_t ip_word, sp_word;
-
-    unw_get_reg(&cursor, UNW_REG_IP, &ip_word);
-    unw_get_reg(&cursor, UNW_REG_SP, &sp_word);
-
-    void *ip, *sp;
-    ip = (void *)ip_word;
-    sp = (void *)sp_word;
-
-    if (StackMap.count(ip)) {
-      std::vector<gc_relocation> &Relocs = StackMap[ip];
-      std::set<uint64_t> seen;
-      for (auto &Reloc : Relocs) {
-        bool newBasePtr = seen.insert(Reloc.base.offset).second;
-        if (newBasePtr || Reloc.derived_offset != Reloc.base.offset) {
-          char **base_ptr = (char **)(((char *)sp) + Reloc.base.offset);
-          char **derived_ptr = (char **)(((char *)sp) + Reloc.derived_offset);
-          ptrdiff_t derived_offset = *derived_ptr - *base_ptr;
-          if (derived_offset != 0) {
-            gc_roots.push_back(
-                {base_ptr, derived_ptr, SYMBOL_LAYOUT, derived_offset,
-                 newBasePtr});
-          } else {
-            gc_roots.push_back(
-                {base_ptr, derived_ptr, Reloc.base.cat, 0, newBasePtr});
-          }
-        }
-      }
-    }
-  }
-  return gc_roots;
-}
-
-void koreCollect(void) {
+void koreCollect(void **roots, uint8_t nroots, layoutitem *typeInfo) {
   is_gc = true;
   collect_old = shouldCollectOldGen();
   MEM_LOG("Starting garbage collection\n");
-
-  std::vector<gc_root> roots = scanStackRoots();
-
 #ifdef GC_DBG
   if (!last_alloc_ptr) {
     last_alloc_ptr = youngspace_ptr();
@@ -332,25 +273,9 @@ void koreCollect(void) {
   }
 #endif
   char *previous_oldspace_alloc_ptr = *old_alloc_ptr();
-  // migrate stack roots
-  for (int i = 0; i < roots.size(); i++) {
-    if (*roots[i].base_ptr == nullptr) {
-      // this can happen because RewriteStatepointsForGC treats the base pointer
-      // of undef as equal to null. As a result, the case where the base pointer
-      // is null is a case when the stack map contains a particular entry, but
-      // it is dynamically dead on this particular loop iteration. We can thus
-      // skip this relocation since there is no live object here.
-      continue;
-    }
-    layoutitem layout{0, roots[i].cat};
-    if (roots[i].isNewBasePtr) {
-      migrate_child(roots[i].base_ptr, &layout, 0, true);
-    }
-    if (roots[i].base_ptr != roots[i].derived_ptr) {
-      *roots[i].derived_ptr = *roots[i].base_ptr + roots[i].derived_offset;
-    }
+  for (int i = 0; i < nroots; i++) {
+    migrate_child(roots, typeInfo, i, true);
   }
-  // migrate global variable roots
   migrateRoots();
   char *scan_ptr = youngspace_ptr();
   if (scan_ptr != *young_alloc_ptr()) {
@@ -365,14 +290,14 @@ void koreCollect(void) {
     if (mem_block_start(previous_oldspace_alloc_ptr + 1)
         == previous_oldspace_alloc_ptr) {
       // this means that the previous oldspace allocation pointer points to an
-      // address that is megabyte-aligned. This can only happen if we have
-      // just filled up a block but have not yet allocated the next block in
-      // the sequence at the start of the collection cycle. This means that
-      // the allocation pointer is invalid and does not actually point to the
-      // next address that would have been allocated at, according to the
-      // logic of arenaAlloc, which will have allocated a fresh memory block
-      // and put the allocation at the start of it. Thus, we use movePtr with
-      // a size of zero to adjust and get the true address of the allocation.
+      // address that is megabyte-aligned. This can only happen if we have just
+      // filled up a block but have not yet allocated the next block in the
+      // sequence at the start of the collection cycle. This means that the
+      // allocation pointer is invalid and does not actually point to the next
+      // address that would have been allocated at, according to the logic of
+      // arenaAlloc, which will have allocated a fresh memory block and put
+      // the allocation at the start of it. Thus, we use movePtr with a size
+      // of zero to adjust and get the true address of the allocation.
       scan_ptr = movePtr(previous_oldspace_alloc_ptr, 0, *old_alloc_ptr());
     } else {
       scan_ptr = previous_oldspace_alloc_ptr;
@@ -397,10 +322,15 @@ void koreCollect(void) {
 #endif
   MEM_LOG("Finishing garbage collection\n");
   is_gc = false;
+  set_gc_threshold(youngspace_size());
 }
 
 void freeAllKoreMem() {
-  koreCollect();
-  koreClear();
+  koreCollect(nullptr, 0, nullptr);
+}
+
+bool is_collection() {
+  size_t threshold = get_gc_threshold();
+  return youngspaceAlmostFull(threshold);
 }
 }

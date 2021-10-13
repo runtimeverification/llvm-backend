@@ -6,7 +6,6 @@
 
 #include "runtime/alloc.h"
 #include "runtime/arena.h"
-#include "runtime/collect.h"
 #include "runtime/header.h"
 
 const size_t BLOCK_SIZE = 1024 * 1024;
@@ -112,8 +111,6 @@ static void freshBlock(struct arena *Arena) {
       BLOCK_SIZE - sizeof(memory_block_header));
 }
 
-bool gc_enabled;
-
 static __attribute__((noinline)) void *
 doAllocSlow(size_t requested, struct arena *Arena) {
   MEM_LOG(
@@ -122,17 +119,6 @@ doAllocSlow(size_t requested, struct arena *Arena) {
   if (requested > BLOCK_SIZE - sizeof(memory_block_header)) {
     return malloc(requested);
   } else {
-    if (gc_enabled && !during_gc()) {
-      koreCollect();
-    }
-    if (Arena->block + requested <= Arena->block_end) {
-      void *result = Arena->block;
-      Arena->block += requested;
-      MEM_LOG(
-          "Allocation at %p (size %zd), next alloc at %p (if it fits)\n",
-          result, requested, Arena->block);
-      return result;
-    }
     freshBlock(Arena);
     void *result = Arena->block;
     Arena->block += requested;
@@ -143,11 +129,9 @@ doAllocSlow(size_t requested, struct arena *Arena) {
   }
 }
 
-#define COLLECT_BUFFER_SIZE 1024
-
 __attribute__((always_inline)) void *
 arenaAlloc(struct arena *Arena, size_t requested) {
-  if (Arena->block + requested + COLLECT_BUFFER_SIZE > Arena->block_end) {
+  if (Arena->block + requested > Arena->block_end) {
     return doAllocSlow(requested, Arena);
   }
   void *result = Arena->block;

@@ -103,7 +103,6 @@ typedef struct {
 
 bool hook_KEQUAL_eq(block *, block *);
 bool during_gc(void);
-void koreCollect(void);
 size_t hash_k(block *);
 void k_hash(block *, void *);
 bool hash_enter(void);
@@ -125,8 +124,6 @@ public:
   block *elem;
 };
 
-extern bool gc_enabled;
-
 struct kore_alloc_heap {
 
   template <typename... Tags>
@@ -134,10 +131,7 @@ struct kore_alloc_heap {
     if (during_gc()) {
       return ::operator new(size);
     } else {
-      bool enabled = gc_enabled;
-      gc_enabled = false;
       string *result = (string *)koreAllocToken(size + sizeof(blockheader));
-      gc_enabled = enabled;
       set_len(result, size);
       return result->data;
     }
