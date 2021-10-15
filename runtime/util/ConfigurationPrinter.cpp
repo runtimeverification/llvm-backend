@@ -204,9 +204,7 @@ void printConfigurations(
   if (size == 0) {
     sfprintf(&w, "\\bottom{SortGeneratedTopCell{}}()");
   } else {
-    for (size_t i = 0; i < size - 1; i++) {
-      sfprintf(&w, "\\or{SortGeneratedTopCell{}}(");
-    }
+    sfprintf(&w, "\\left-assoc{}(\\or{SortGeneratedTopCell{}}(");
     size_t j = 0;
     for (const auto &subject : results) {
       printConfigurationInternal(&w, subject, nullptr, false);
@@ -214,9 +212,7 @@ void printConfigurations(
         sfprintf(&w, ",");
       }
     }
-    for (size_t i = 0; i < size - 1; i++) {
-      sfprintf(&w, ")");
-    }
+    sfprintf(&w, "))");
   }
   varNames.clear();
   usedVarNames.clear();
