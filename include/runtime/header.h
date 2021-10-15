@@ -156,7 +156,8 @@ struct KEq {
 
 using list = immer::flex_vector<
     KElem, immer::memory_policy<
-               immer::heap_policy<kore_alloc_heap>, immer::no_refcount_policy>>;
+               immer::heap_policy<kore_alloc_heap>, immer::no_refcount_policy,
+               immer::no_lock_policy>>;
 using map = immer::map<
     KElem, KElem, HashBlock, std::equal_to<KElem>, list::memory_policy>;
 using set
