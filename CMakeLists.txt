@@ -58,8 +58,11 @@ endif()
 set(CMAKE_AR "${CMAKE_C_COMPILER_AR}")
 set(CMAKE_RANLIB "${CMAKE_C_COMPILER_RANLIB}")
 
-find_package(LLVM 12 QUIET CONFIG)
+find_package(LLVM 13 QUIET CONFIG)
 
+if (NOT LLVM_FOUND)
+  find_package(LLVM 12 QUIET CONFIG)
+endif()
 if (NOT LLVM_FOUND)
   find_package(LLVM 11.1 QUIET CONFIG)
 endif()
@@ -113,10 +116,12 @@ install(
   DESTINATION lib/kllvm/llvm/main
 )
 
+find_program(OPT opt-13)
 find_program(OPT opt-12)
 find_program(OPT opt-11)
 find_program(OPT opt-10)
 find_program(OPT opt)
+find_program(LLC llc-13)
 find_program(LLC llc-12)
 find_program(LLC llc-11)
 find_program(LLC llc-10)
