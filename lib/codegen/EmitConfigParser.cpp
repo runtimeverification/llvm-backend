@@ -592,7 +592,7 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
   llvm::Value *Block
       = allocateTerm(StringType, Len, CurrentBlock, "koreAllocToken");
   auto HdrPtr = llvm::GetElementPtrInst::CreateInBounds(
-      Block, {zero, zero32, zero32}, "", CurrentBlock);
+      StringType, Block, {zero, zero32, zero32}, "", CurrentBlock);
   auto BlockSize
       = module->getOrInsertGlobal("BLOCK_SIZE", llvm::Type::getInt64Ty(Ctx));
   auto BlockSizeVal = new llvm::LoadInst(
@@ -616,7 +616,7 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
       llvm::Type::getInt8PtrTy(Ctx), llvm::Type::getInt8PtrTy(Ctx),
       llvm::Type::getInt64Ty(Ctx));
   auto StrPtr = llvm::GetElementPtrInst::CreateInBounds(
-      Block,
+      StringType, Block,
       {zero, llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), 1), zero}, "",
       CurrentBlock);
   llvm::CallInst::Create(
@@ -704,7 +704,8 @@ static void emitTraversal(
       = llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), 0);
   auto EntryBlock = llvm::BasicBlock::Create(Ctx, "entry", func);
   auto HdrPtr = llvm::GetElementPtrInst::CreateInBounds(
-      func->arg_begin(), {zero, zero32, zero32}, "", EntryBlock);
+      argTypes[0]->getPointerElementType(), func->arg_begin(),
+      {zero, zero32, zero32}, "", EntryBlock);
   auto Hdr = new llvm::LoadInst(
       HdrPtr->getType()->getPointerElementType(), HdrPtr, "", EntryBlock);
   auto Tag
