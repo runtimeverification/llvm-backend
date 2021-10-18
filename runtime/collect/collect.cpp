@@ -227,6 +227,8 @@ static void migrate_floating(floating **floatingPtr) {
   *floatingPtr = *(floating **)(flt->f.f->_mpfr_d);
 }
 
+static std::vector<void *> setiter_evacuations, mapiter_evacuations;
+
 static void
 migrate_child(void *currBlock, layoutitem *args, unsigned i, bool ptr) {
   layoutitem *argData = args + i;
@@ -240,6 +242,8 @@ migrate_child(void *currBlock, layoutitem *args, unsigned i, bool ptr) {
   case VARIABLE_LAYOUT: migrate((block **)arg); break;
   case INT_LAYOUT: migrate_mpz((mpz_ptr *)arg); break;
   case FLOAT_LAYOUT: migrate_floating((floating **)arg); break;
+  case SETITER_LAYOUT: setiter_evacuations.push_back(currBlock); break;
+  case MAPITER_LAYOUT: mapiter_evacuations.push_back(currBlock); break;
   case BOOL_LAYOUT:
   default: // mint
     break;
@@ -341,6 +345,8 @@ void koreCollect(void) {
   MEM_LOG("Starting garbage collection\n");
 
   std::vector<gc_root> roots = scanStackRoots();
+  setiter_evacuations.clear();
+  mapiter_evacuations.clear();
 
 #ifdef GC_DBG
   if (!last_alloc_ptr) {
