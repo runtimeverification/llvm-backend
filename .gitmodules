@@ -1,6 +1,6 @@
 [submodule "deps/immer"]
 	path = deps/immer
-	url = https://github.com/arximboldi/immer.git
+	url = https://github.com/runtimeverification/immer.git
 [submodule "deps/rapidjson"]
 	path = deps/rapidjson
 	url = https://github.com/Tencent/rapidjson
