@@ -474,14 +474,8 @@ void LeafNode::codegen(Decision *d) {
         getOrInsertFunction(
             d->Module, "addSearchResult",
             llvm::FunctionType::get(
-                llvm::Type::getVoidTy(d->Ctx),
-                {type,
-                 llvm::PointerType::getUnqual(llvm::PointerType::get(type, 1)),
-                 llvm::Type::getInt64PtrTy(d->Ctx),
-                 llvm::Type::getInt64PtrTy(d->Ctx)},
-                false)),
-        {Call, d->ResultBuffer, d->ResultCount, d->ResultCapacity}, "",
-        d->CurrentBlock);
+                llvm::Type::getVoidTy(d->Ctx), {type}, false)),
+        {Call}, "", d->CurrentBlock);
     setDebugLoc(Call2);
     if (child != FailNode::get()) {
       child->codegen(d);
@@ -646,7 +640,7 @@ void makeEvalOrAnywhereFunction(
   int i = 0;
   Decision codegen(
       definition, block, fail, jump, choiceBuffer, choiceDepth, module,
-      returnSort, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
+      returnSort, nullptr, nullptr, nullptr);
   for (auto val = matchFunc->arg_begin(); val != matchFunc->arg_end();
        ++val, ++i) {
     val->setName("_" + std::to_string(i + 1));
@@ -798,7 +792,6 @@ void makeStepFunction(
     KOREDefinition *definition, llvm::Module *module, DecisionNode *dt,
     bool search) {
   auto blockType = getValueType({SortCategory::Symbol, 0}, module);
-  auto bufType = llvm::PointerType::get(blockType, 1);
   auto debugType
       = getDebugType({SortCategory::Symbol, 0}, "SortGeneratedTopCell{}");
   llvm::FunctionType *funcType;
@@ -806,8 +799,7 @@ void makeStepFunction(
   if (search) {
     name = "stepAll";
     funcType = llvm::FunctionType::get(
-        bufType, {blockType, llvm::Type::getInt64PtrTy(module->getContext())},
-        false);
+        llvm::Type::getVoidTy(module->getContext()), {blockType}, false);
   } else {
     name = "step";
     funcType = llvm::FunctionType::get(blockType, {blockType}, false);
@@ -817,10 +809,7 @@ void makeStepFunction(
   resetDebugLoc();
   if (search) {
     initDebugFunction(
-        name, name,
-        getDebugFunctionType(
-            getPointerDebugType(debugType, "block **"),
-            {debugType, getPointerDebugType(getLongDebugType(), "uint64_t *")}),
+        name, name, getDebugFunctionType(getVoidDebugType(), {debugType}),
         definition, matchFunc);
   } else {
     initDebugFunction(
@@ -841,29 +830,7 @@ void makeStepFunction(
   llvm::AllocaInst *choiceBuffer, *choiceDepth;
   llvm::IndirectBrInst *jump;
 
-  llvm::Value *resultBuffer = nullptr, *resultCount = nullptr,
-              *resultCapacity = nullptr;
-  if (search) {
-    resultBuffer = new llvm::AllocaInst(bufType, 0, "resultBuffer", block);
-    resultCount = matchFunc->arg_begin() + 1;
-    resultCapacity = new llvm::AllocaInst(
-        llvm::Type::getInt64Ty(module->getContext()), 0, "resultCapacity",
-        block);
-  }
-
   insertCallToClear(block);
-
-  if (search) {
-    llvm::Value *initialBuffer = allocateTerm(
-        {SortCategory::Symbol, 0}, blockType, block, "koreAllocAlwaysGC");
-    new llvm::StoreInst(initialBuffer, resultBuffer, block);
-    new llvm::StoreInst(
-        llvm::ConstantInt::get(llvm::Type::getInt64Ty(module->getContext()), 0),
-        resultCount, block);
-    new llvm::StoreInst(
-        llvm::ConstantInt::get(llvm::Type::getInt64Ty(module->getContext()), 1),
-        resultCapacity, block);
-  }
 
   initChoiceBuffer(
       dt, module, block, pre_stuck, fail, &choiceBuffer, &choiceDepth, &jump);
@@ -877,12 +844,10 @@ void makeStepFunction(
   val->setName("_1");
   Decision codegen(
       definition, result, fail, jump, choiceBuffer, choiceDepth, module,
-      {SortCategory::Symbol, 0}, nullptr, nullptr, nullptr, resultBuffer,
-      resultCount, resultCapacity);
+      {SortCategory::Symbol, 0}, nullptr, nullptr, nullptr);
   codegen.store(std::make_pair(val->getName().str(), val->getType()), val);
   if (search) {
-    auto result = new llvm::LoadInst(bufType, resultBuffer, "", stuck);
-    llvm::ReturnInst::Create(module->getContext(), result, stuck);
+    llvm::ReturnInst::Create(module->getContext(), stuck);
   } else {
     llvm::ReturnInst::Create(module->getContext(), val, stuck);
   }
@@ -949,8 +914,7 @@ void makeMatchReasonFunction(
   val->setName("_1");
   Decision codegen(
       definition, block, fail, jump, choiceBuffer, choiceDepth, module,
-      {SortCategory::Symbol, 0}, FailSubject, FailPattern, FailSort, nullptr,
-      nullptr, nullptr);
+      {SortCategory::Symbol, 0}, FailSubject, FailPattern, FailSort);
   codegen.store(std::make_pair(val->getName().str(), val->getType()), val);
   llvm::ReturnInst::Create(module->getContext(), stuck);
 
@@ -1065,8 +1029,7 @@ void makeStepFunction(
   i = 0;
   Decision codegen(
       definition, header, fail, jump, choiceBuffer, choiceDepth, module,
-      {SortCategory::Symbol, 0}, nullptr, nullptr, nullptr, nullptr, nullptr,
-      nullptr);
+      {SortCategory::Symbol, 0}, nullptr, nullptr, nullptr);
   for (auto val : args) {
     val->setName(res.residuals[i].occurrence.substr(0, max_name_length));
     codegen.store(std::make_pair(val->getName().str(), val->getType()), val);
