@@ -138,6 +138,8 @@ void addKompiledDirSymbol(
 static std::string MAP_STRUCT = "map";
 static std::string LIST_STRUCT = "list";
 static std::string SET_STRUCT = "set";
+static std::string SETITER_STRUCT = "setiter";
+static std::string MAPITER_STRUCT = "mapiter";
 static std::string INT_WRAPPER_STRUCT = "mpz_hdr";
 static std::string INT_STRUCT = "mpz";
 static std::string FLOAT_WRAPPER_STRUCT = "floating_hdr";
@@ -149,6 +151,8 @@ static std::string BLOCKHEADER_STRUCT = "blockheader";
 llvm::Type *getParamType(ValueType sort, llvm::Module *Module) {
   llvm::Type *type = getValueType(sort, Module);
   switch (sort.cat) {
+  case SortCategory::SetIterator:
+  case SortCategory::MapIterator:
   case SortCategory::Map:
   case SortCategory::List:
   case SortCategory::Set: type = llvm::PointerType::get(type, 1); break;
@@ -162,6 +166,8 @@ llvm::Type *getValueType(ValueType sort, llvm::Module *Module) {
   case SortCategory::Map: return getTypeByName(Module, MAP_STRUCT);
   case SortCategory::List: return getTypeByName(Module, LIST_STRUCT);
   case SortCategory::Set: return getTypeByName(Module, SET_STRUCT);
+  case SortCategory::SetIterator: return getTypeByName(Module, SETITER_STRUCT);
+  case SortCategory::MapIterator: return getTypeByName(Module, MAPITER_STRUCT);
   case SortCategory::Int:
     return llvm::PointerType::get(getTypeByName(Module, INT_STRUCT), 1);
   case SortCategory::Float:
@@ -341,6 +347,8 @@ llvm::Value *CreateTerm::createToken(ValueType sort, std::string contents) {
   case SortCategory::Map:
   case SortCategory::List:
   case SortCategory::Set:
+  case SortCategory::SetIterator:
+  case SortCategory::MapIterator:
     assert(false && "cannot create tokens of collection category");
   case SortCategory::Int: {
     llvm::Constant *global = Module->getOrInsertGlobal(

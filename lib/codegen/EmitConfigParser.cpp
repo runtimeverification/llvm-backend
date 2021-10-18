@@ -306,6 +306,8 @@ static llvm::Value *getArgValue(
         CaseBlock);
     break;
   case SortCategory::Uncomputed: abort();
+  case SortCategory::MapIterator: abort();
+  case SortCategory::SetIterator: abort();
   }
   return arg;
 }
@@ -362,6 +364,8 @@ static std::pair<llvm::Value *, llvm::BasicBlock *> getEval(
     break;
   }
   case SortCategory::Uncomputed: abort();
+  case SortCategory::MapIterator: abort();
+  case SortCategory::SetIterator: abort();
   }
   creator.getCurrentBlock()->getInstList().push_back(inst);
   return std::make_pair(retval, creator.getCurrentBlock());
@@ -590,6 +594,8 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
     case SortCategory::Variable:
     case SortCategory::Symbol: break;
     case SortCategory::Uncomputed: abort();
+    case SortCategory::MapIterator: abort();
+    case SortCategory::SetIterator: abort();
     }
     CurrentBlock = FalseBlock;
   }
@@ -981,6 +987,8 @@ static void getVisitor(
       break;
     }
     case SortCategory::Uncomputed: abort();
+    case SortCategory::MapIterator: abort();
+    case SortCategory::SetIterator: abort();
     }
     if (i != symbol->getArguments().size() - 1) {
       llvm::CallInst::Create(
