@@ -424,6 +424,13 @@ void koreCollect(void) {
       sizeof(numBytesLiveAtCollection) / sizeof(numBytesLiveAtCollection[0]),
       stderr);
 #endif
+  MEM_LOG("Evacuating alwaysgc space\n");
+  for (void *ptr : setiter_evacuations) {
+    evacuate_setiter(*(setiter **)ptr);
+  }
+  for (void *ptr : mapiter_evacuations) {
+    evacuate_mapiter(*(mapiter **)ptr);
+  }
   MEM_LOG("Finishing garbage collection\n");
   is_gc = false;
 }

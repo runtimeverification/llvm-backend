@@ -116,3 +116,71 @@ void migrate_map(void *m) {
   migrate_collection_node((void **)&impl.root);
   migrate_champ_traversal(impl.root, 0, migrate_map_leaf);
 }
+
+template <typename Iter, typename Elem, typename Node>
+void evacuate_iter(void *i) {
+  auto it = (Iter *)i;
+  struct iter {
+    Elem *cur_;
+    Elem *end_;
+    immer::detail::hamts::count_t depth_;
+    immer::detail::hamts::count_t cur_off_;
+    Node *const
+        *path_[immer::detail::hamts::max_depth<immer::default_bits> + 1];
+    std::uint8_t
+        path_off_[immer::detail::hamts::max_depth<immer::default_bits>];
+  };
+  auto impl = (iter *)&it->curr;
+  // impl->path_[0] always points to the same address at which the root of the
+  // map or set is located. This is because impl->path_[0] is always taken to be
+  // equal to a pointer to the pointer to the root of the collection. Because
+  // this map/list/set is always allocated in the kore heap inline to the block
+  // that it is a child of, and because of the particular behavior of the
+  // migrate function when migrating regular blocks, we know that
+  // *impl->path_[0] can be used in order to compute the base pointer and the
+  // derived offset of the map pointer within its parent block
+  block **root_ptr = (block **)impl->path_[0];
+  if ((uintptr_t)*root_ptr >= 256) {
+    impl->path_[0] = (Node *const *)(*root_ptr + 1);
+  } else {
+    // in words
+    auto derived_offset = (size_t)*root_ptr;
+    auto relocated_base_ptr = *(root_ptr - derived_offset - 1);
+    impl->path_[0] = (Node *const *)(relocated_base_ptr + derived_offset);
+  }
+  for (size_t i = 1; i <= impl->depth_; i++) {
+    auto derived_ptr = impl->path_[i];
+    auto buffer_ptr = derived_ptr - impl->path_off_[i - 1];
+    auto base_ptr = struct_base(Node, impl.d.data.inner.buffer, buffer_ptr);
+    auto derived_offset = (char *)derived_ptr - (char *)base_ptr;
+    migrate_collection_node((void **)&base_ptr);
+    auto relocated_derived_ptr
+        = (Node *const *)((char *)base_ptr + derived_offset);
+    impl->path_[i] = relocated_derived_ptr;
+  }
+  auto derived_ptr = impl->cur_;
+  if (derived_ptr) {
+    auto base_ptr = derived_ptr - impl->cur_off_;
+    auto derived_offset = (char *)derived_ptr - (char *)base_ptr;
+    auto end_offset = impl->end_ - impl->cur_;
+    auto child = *impl->path_[impl->depth_];
+    Elem *relocated_base_ptr;
+    if (impl->depth_ < immer::detail::hamts::max_depth<immer::default_bits>) {
+      relocated_base_ptr = child->values();
+    } else {
+      relocated_base_ptr = child->collisions();
+    }
+    auto relocated_derived_ptr
+        = (Elem *)((char *)relocated_base_ptr + derived_offset);
+    impl->cur_ = relocated_derived_ptr;
+    impl->end_ = impl->cur_ + end_offset;
+  }
+}
+
+void evacuate_setiter(void *i) {
+  evacuate_iter<setiter, KElem, set::iterator::node_t>(i);
+}
+
+void evacuate_mapiter(void *i) {
+  evacuate_iter<mapiter, std::pair<KElem, KElem>, map::iterator::node_t>(i);
+}
