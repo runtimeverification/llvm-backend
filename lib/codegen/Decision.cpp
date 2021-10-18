@@ -394,8 +394,12 @@ void MakeIteratorNode::codegen(Decision *d) {
   llvm::Value *arg = d->load(std::make_pair(collection, collectionType));
   args.push_back(arg);
   types.push_back(arg->getType());
-  llvm::Type *sretType = getTypeByName(d->Module, "iter");
-  llvm::Value *AllocSret = allocateTermNoReloc(sretType, d->CurrentBlock);
+  llvm::Type *sretType = type->getPointerElementType();
+  llvm::Value *AllocSret = allocateTerm(
+      {hookName == "set_iterator" ? SortCategory::SetIterator
+                                  : SortCategory::MapIterator,
+       0},
+      sretType, d->CurrentBlock, "koreAllocAlwaysGC");
   AllocSret->setName(name.substr(0, max_name_length));
   args.insert(args.begin(), AllocSret);
   types.insert(types.begin(), AllocSret->getType());
