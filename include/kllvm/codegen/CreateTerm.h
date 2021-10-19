@@ -117,6 +117,9 @@ llvm::Value *allocateTermNoReloc(
     llvm::Type *AllocType, llvm::Value *Len, llvm::BasicBlock *block,
     const char *allocFn = "koreAllocAlwaysGC");
 
+llvm::Value *adjustChildPtr(
+    llvm::Value *, llvm::StructType *, size_t, llvm::BasicBlock *, bool);
+
 // see comment on runtime/opaque/opaque.ll for explanation about why these
 // functions exist
 llvm::Value *addrspaceCast0to1(llvm::Value *val, llvm::BasicBlock *block);

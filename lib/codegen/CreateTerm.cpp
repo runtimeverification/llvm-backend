@@ -184,6 +184,21 @@ llvm::Type *getValueType(ValueType sort, llvm::Module *Module) {
   }
 }
 
+llvm::Type *getBlockType(ValueType sort, llvm::Module *Module) {
+  llvm::Type *type = getValueType(sort, Module);
+  switch (sort.cat) {
+  case SortCategory::Map:
+  case SortCategory::List:
+  case SortCategory::Set:
+    type = llvm::StructType::get(
+        Module->getContext(),
+        {llvm::Type::getInt64Ty(Module->getContext()), type});
+    break;
+  default: break;
+  }
+  return type;
+}
+
 llvm::StructType *getBlockType(
     llvm::Module *Module, KOREDefinition *definition,
     const KORESymbol *symbol) {
@@ -195,7 +210,7 @@ llvm::StructType *getBlockType(
   Types.push_back(EmptyArrayType);
   for (auto &arg : symbol->getArguments()) {
     auto sort = dynamic_cast<KORECompositeSort *>(arg.get());
-    llvm::Type *type = getValueType(sort->getCategory(definition), Module);
+    llvm::Type *type = getBlockType(sort->getCategory(definition), Module);
     Types.push_back(type);
   }
   return llvm::StructType::get(Module->getContext(), Types);
@@ -1048,6 +1063,32 @@ llvm::Value *CreateTerm::createFunctionCall(
   return call;
 }
 
+llvm::Value *adjustChildPtr(
+    llvm::Value *ChildPtr, llvm::StructType *BlockType, size_t offset,
+    llvm::BasicBlock *CurrentBlock, bool ReadOnly) {
+  auto ChildType = BlockType->elements()[offset];
+  if (!ChildType->isStructTy()) {
+    return ChildPtr;
+  }
+  auto &Ctx = CurrentBlock->getContext();
+  auto adjustedPtr = llvm::GetElementPtrInst::CreateInBounds(
+      ChildType, ChildPtr,
+      {llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0),
+       llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), 1)},
+      "child_ptr", CurrentBlock);
+  if (!ReadOnly) {
+    llvm::Value *OffsetPtr = llvm::GetElementPtrInst::CreateInBounds(
+        ChildType, ChildPtr,
+        {llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0),
+         llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), 0)},
+        "base_offset", CurrentBlock);
+    new llvm::StoreInst(
+        llvm::ConstantExpr::getOffsetOf(BlockType, offset), OffsetPtr,
+        CurrentBlock);
+  }
+  return adjustedPtr;
+}
+
 /* create a term, given the assumption that the created term will not be a
  * triangle injection pair */
 llvm::Value *CreateTerm::notInjectionCase(
@@ -1083,14 +1124,16 @@ llvm::Value *CreateTerm::notInjectionCase(
     llvm::Value *ChildPtr = llvm::GetElementPtrInst::CreateInBounds(
         BlockType, Block,
         {llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0),
-         llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), idx++)},
+         llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), idx)},
         "", CurrentBlock);
+    ChildPtr = adjustChildPtr(ChildPtr, BlockType, idx, CurrentBlock, false);
     if (ChildValue->getType() == ChildPtr->getType()) {
       ChildValue = new llvm::LoadInst(
           ChildValue->getType()->getPointerElementType(), ChildValue, "",
           CurrentBlock);
     }
     new llvm::StoreInst(ChildValue, ChildPtr, CurrentBlock);
+    idx++;
   }
 
   auto BlockPtr

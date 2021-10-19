@@ -766,13 +766,15 @@ static void getStore(
     llvm::Value *arg = getArgValue(ArgumentsArray, idx, CaseBlock, cat, module);
     llvm::Value *ChildPtr = llvm::GetElementPtrInst::CreateInBounds(
         BlockType, cast,
-        {zero, llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), idx++ + 2)},
+        {zero, llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), idx + 2)},
         "", CaseBlock);
+    ChildPtr = adjustChildPtr(ChildPtr, BlockType, idx + 2, CaseBlock, false);
     if (arg->getType() == ChildPtr->getType()) {
       arg = new llvm::LoadInst(
           arg->getType()->getPointerElementType(), arg, "", CaseBlock);
     }
     new llvm::StoreInst(arg, ChildPtr, CaseBlock);
+    idx++;
   }
 }
 
@@ -854,8 +856,10 @@ static void getVisitor(
     ValueType cat = compositeSort->getCategory(definition);
     llvm::Value *ChildPtr = llvm::GetElementPtrInst::CreateInBounds(
         BlockType, cast,
-        {zero, llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), idx++ + 2)},
+        {zero, llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), idx + 2)},
         "", CaseBlock);
+    ChildPtr = adjustChildPtr(ChildPtr, BlockType, idx + 2, CaseBlock, true);
+    idx++;
     llvm::Value *Child = new llvm::LoadInst(
         ChildPtr->getType()->getPointerElementType(), ChildPtr, "", CaseBlock);
     std::ostringstream Out;

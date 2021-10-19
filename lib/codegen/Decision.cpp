@@ -233,7 +233,10 @@ void SwitchNode::codegen(Decision *d) {
                     .cat) {
         case SortCategory::Map:
         case SortCategory::List:
-        case SortCategory::Set: Child = ChildPtr; break;
+        case SortCategory::Set:
+          Child = adjustChildPtr(
+              ChildPtr, BlockType, offset + 2, d->CurrentBlock, true);
+          break;
         default:
           Child = new llvm::LoadInst(
               ChildPtr->getType()->getPointerElementType(), ChildPtr,
@@ -706,6 +709,8 @@ void abortWhenStuck(
           {llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0),
            llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), idx + 2)},
           "", CurrentBlock);
+      ChildPtr
+          = adjustChildPtr(ChildPtr, BlockType, idx + 2, CurrentBlock, false);
       if (ChildValue->getType() == ChildPtr->getType()) {
         ChildValue = new llvm::LoadInst(
             ChildValue->getType()->getPointerElementType(), ChildValue, "",
