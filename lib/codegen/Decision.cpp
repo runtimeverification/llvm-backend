@@ -395,6 +395,7 @@ void MakeIteratorNode::codegen(Decision *d) {
   args.push_back(arg);
   types.push_back(arg->getType());
   llvm::Type *sretType = type->getPointerElementType();
+  assert(hookName == "set_iterator" || hookName == "map_iterator");
   llvm::Value *AllocSret = allocateTerm(
       {hookName == "set_iterator" ? SortCategory::SetIterator
                                   : SortCategory::MapIterator,

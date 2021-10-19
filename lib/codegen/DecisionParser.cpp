@@ -217,6 +217,8 @@ public:
     std::string function = str(get(node, "function"));
     auto child = (*this)(get(node, "next"));
 
+    assert(function == "set_iterator_next" || function == "map_iterator_next");
+
     return IterNextNode::Create(
         iterator,
         llvm::PointerType::get(
