@@ -935,8 +935,29 @@ llvm::Value *CreateTerm::createHook(
     }
     std::string hookName
         = "hook_" + domain + "_" + name.substr(name.find('.') + 1);
-    return createFunctionCall(hookName, pattern, true, false);
+    auto oldVal = disableGC();
+    auto result = createFunctionCall(hookName, pattern, true, false);
+    enableGC(oldVal);
+    return result;
   }
+}
+
+llvm::Value *CreateTerm::disableGC(void) {
+  llvm::Constant *global
+      = Module->getOrInsertGlobal("gc_enabled", llvm::Type::getInt1Ty(Ctx));
+  llvm::GlobalVariable *globalVar = llvm::cast<llvm::GlobalVariable>(global);
+  auto oldVal = new llvm::LoadInst(
+      llvm::Type::getInt1Ty(Ctx), globalVar, "was_enabled", CurrentBlock);
+  new llvm::StoreInst(
+      llvm::ConstantInt::getFalse(Ctx), globalVar, CurrentBlock);
+  return oldVal;
+}
+
+void CreateTerm::enableGC(llvm::Value *val) {
+  llvm::Constant *global
+      = Module->getOrInsertGlobal("gc_enabled", llvm::Type::getInt1Ty(Ctx));
+  llvm::GlobalVariable *globalVar = llvm::cast<llvm::GlobalVariable>(global);
+  new llvm::StoreInst(val, globalVar, CurrentBlock);
 }
 
 // we use tailcc calling convention for apply_rule_* and eval_* functions so
