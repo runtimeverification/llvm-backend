@@ -107,7 +107,9 @@ enum class SortCategory {
   Bool,
   Symbol,
   Variable,
-  MInt
+  MInt,
+  SetIterator,
+  MapIterator,
 };
 
 // represents the syntactic category of an LLVM backend term at runtime

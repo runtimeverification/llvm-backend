@@ -180,6 +180,8 @@ llvm::DIType *getDebugType(ValueType type, std::string typeName) {
     types[typeName] = symbol;
     return symbol;
   case SortCategory::Uncomputed: abort();
+  case SortCategory::SetIterator: abort();
+  case SortCategory::MapIterator: abort();
   }
 }
 

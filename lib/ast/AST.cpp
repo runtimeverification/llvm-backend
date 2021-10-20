@@ -220,6 +220,8 @@ std::string KORESymbol::layoutString(KOREDefinition *definition) const {
       result.append("_" + std::to_string(cat.bits) + "_");
     case SortCategory::Symbol: result.push_back('0'); break;
     case SortCategory::Uncomputed: abort();
+    case SortCategory::SetIterator: abort();
+    case SortCategory::MapIterator: abort();
     }
   }
   return result;

@@ -74,6 +74,10 @@ struct EmitGCLayoutInfo : public ModulePass {
                 cat.cat = SortCategory::List;
               } else if (name == "set") {
                 cat.cat = SortCategory::Set;
+              } else if (name == "setiter") {
+                cat.cat = SortCategory::SetIterator;
+              } else if (name == "mapiter") {
+                cat.cat = SortCategory::SetIterator;
               } else if (name == "mpz") {
                 cat.cat = SortCategory::Int;
               } else if (name == "floating") {

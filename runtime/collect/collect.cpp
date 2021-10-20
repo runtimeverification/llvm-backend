@@ -69,6 +69,29 @@ void migrate(block **blockPtr) {
     memcpy(newBlock, currBlock, lenInBytes);
     migrate_header(newBlock);
     *forwardingAddress = newBlock;
+
+    // if this is a regular block (not a string), then we know the size is a
+    // multiple of 8. The first word is the block header, and the next word (we
+    // always know it is at least 16 bytes in length) is the forwarding address.
+    // However, in order to be able to evacuate set or map iterators, it is
+    // helpful that we need to know the offset of a particular map or set
+    // pointer within its parent block. Since blocks in the llvm backend can be
+    // at most 256 words long, and since a number less than 256 is never a valid
+    // heap pointer, we can simply write the number of words since the base of
+    // the object to every word in the block after the forwarding pointer. To
+    // find the base of the object, then, from the pointer to the root of the
+    // collection, we first compare the value located at that root to 256. If it
+    // is greater or equal, we interpret it as the forwarding address and know
+    // that the offset is precisely 8 bytes. If it is less, we interpret it as
+    // the offset and subtract offset-1 in order to get the address of the
+    // forwarding pointer.
+    if (layout) {
+      size_t lenInWords = lenInBytes / sizeof(size_t);
+      for (size_t i = 2; i < lenInWords; i++) {
+        size_t *word = (size_t *)(currBlock + i);
+        *word = i;
+      }
+    }
     currBlock->h.hdr |= FWD_PTR_BIT;
     *blockPtr = newBlock;
   } else {
@@ -204,6 +227,8 @@ static void migrate_floating(floating **floatingPtr) {
   *floatingPtr = *(floating **)(flt->f.f->_mpfr_d);
 }
 
+static std::vector<void *> setiter_evacuations, mapiter_evacuations;
+
 static void
 migrate_child(void *currBlock, layoutitem *args, unsigned i, bool ptr) {
   layoutitem *argData = args + i;
@@ -217,6 +242,8 @@ migrate_child(void *currBlock, layoutitem *args, unsigned i, bool ptr) {
   case VARIABLE_LAYOUT: migrate((block **)arg); break;
   case INT_LAYOUT: migrate_mpz((mpz_ptr *)arg); break;
   case FLOAT_LAYOUT: migrate_floating((floating **)arg); break;
+  case SETITER_LAYOUT: setiter_evacuations.push_back(currBlock); break;
+  case MAPITER_LAYOUT: mapiter_evacuations.push_back(currBlock); break;
   case BOOL_LAYOUT:
   default: // mint
     break;
@@ -318,6 +345,8 @@ void koreCollect(void) {
   MEM_LOG("Starting garbage collection\n");
 
   std::vector<gc_root> roots = scanStackRoots();
+  setiter_evacuations.clear();
+  mapiter_evacuations.clear();
 
 #ifdef GC_DBG
   if (!last_alloc_ptr) {
@@ -395,6 +424,13 @@ void koreCollect(void) {
       sizeof(numBytesLiveAtCollection) / sizeof(numBytesLiveAtCollection[0]),
       stderr);
 #endif
+  MEM_LOG("Evacuating alwaysgc space\n");
+  for (void *ptr : setiter_evacuations) {
+    evacuate_setiter(*(setiter **)ptr);
+  }
+  for (void *ptr : mapiter_evacuations) {
+    evacuate_mapiter(*(mapiter **)ptr);
+  }
   MEM_LOG("Finishing garbage collection\n");
   is_gc = false;
 }

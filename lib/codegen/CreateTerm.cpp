@@ -64,7 +64,8 @@ target triple = "x86_64-unknown-linux-gnu"
 %stringbuffer = type { i64, i64, %string* } ; 10-bit layout, 4-bit gc flags, 10 unused bits, 40-bit length, string length, current contents
 %map = type { { i8 *, i64 } } ; immer::map
 %set = type { { i8 *, i64 } } ; immer::set
-%iter = type { { i8 *, i8 *, i32, [14 x i8**] }, { { i8 *, i64 } } } ; immer::map_iter / immer::set_iter
+%setiter = type { { i8 *, i8 *, i32, [14 x i8**] }, { { i8 *, i64 } } } ; immer::set_iter
+%mapiter = type { { i8 *, i8 *, i32, [14 x i8**] }, { { i8 *, i64 } } } ; immer::map_iter
 %list = type { { i64, i32, i8 *, i8 * } } ; immer::flex_vector
 %mpz = type { i32, i32, i64 * } ; mpz_t
 %mpz_hdr = type { %blockheader, %mpz } ; 10-bit layout, 4-bit gc flags, 10 unused bits, 40-bit length, mpz_t
@@ -137,6 +138,8 @@ void addKompiledDirSymbol(
 static std::string MAP_STRUCT = "map";
 static std::string LIST_STRUCT = "list";
 static std::string SET_STRUCT = "set";
+static std::string SETITER_STRUCT = "setiter";
+static std::string MAPITER_STRUCT = "mapiter";
 static std::string INT_WRAPPER_STRUCT = "mpz_hdr";
 static std::string INT_STRUCT = "mpz";
 static std::string FLOAT_WRAPPER_STRUCT = "floating_hdr";
@@ -148,6 +151,8 @@ static std::string BLOCKHEADER_STRUCT = "blockheader";
 llvm::Type *getParamType(ValueType sort, llvm::Module *Module) {
   llvm::Type *type = getValueType(sort, Module);
   switch (sort.cat) {
+  case SortCategory::SetIterator:
+  case SortCategory::MapIterator:
   case SortCategory::Map:
   case SortCategory::List:
   case SortCategory::Set: type = llvm::PointerType::get(type, 1); break;
@@ -161,6 +166,8 @@ llvm::Type *getValueType(ValueType sort, llvm::Module *Module) {
   case SortCategory::Map: return getTypeByName(Module, MAP_STRUCT);
   case SortCategory::List: return getTypeByName(Module, LIST_STRUCT);
   case SortCategory::Set: return getTypeByName(Module, SET_STRUCT);
+  case SortCategory::SetIterator: return getTypeByName(Module, SETITER_STRUCT);
+  case SortCategory::MapIterator: return getTypeByName(Module, MAPITER_STRUCT);
   case SortCategory::Int:
     return llvm::PointerType::get(getTypeByName(Module, INT_STRUCT), 1);
   case SortCategory::Float:
@@ -340,6 +347,8 @@ llvm::Value *CreateTerm::createToken(ValueType sort, std::string contents) {
   case SortCategory::Map:
   case SortCategory::List:
   case SortCategory::Set:
+  case SortCategory::SetIterator:
+  case SortCategory::MapIterator:
     assert(false && "cannot create tokens of collection category");
   case SortCategory::Int: {
     llvm::Constant *global = Module->getOrInsertGlobal(

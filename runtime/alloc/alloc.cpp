@@ -100,6 +100,16 @@ koreAllocAlwaysGC_p1s_lists(size_t requested) {
   return (list *)koreAllocAlwaysGC(requested);
 }
 
+__attribute__((always_inline)) setiter *
+koreAllocAlwaysGC_p1s_setiters(size_t requested) {
+  return (setiter *)koreAllocAlwaysGC(requested);
+}
+
+__attribute__((always_inline)) mapiter *
+koreAllocAlwaysGC_p1s_mapiters(size_t requested) {
+  return (mapiter *)koreAllocAlwaysGC(requested);
+}
+
 __attribute__((always_inline)) block *
 koreAllocAlwaysGC_p1s_blocks(size_t requested) {
   return (block *)koreAllocAlwaysGC(requested);
