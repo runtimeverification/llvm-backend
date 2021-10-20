@@ -230,13 +230,13 @@ static void migrate_floating(floating **floatingPtr) {
 static std::vector<void *> setiter_evacuations, mapiter_evacuations;
 
 static void
-migrate_child(void *currBlock, layoutitem *args, unsigned i, bool ptr) {
+migrate_child(void *currBlock, layoutitem *args, unsigned i, bool root) {
   layoutitem *argData = args + i;
   void *arg = ((char *)currBlock) + argData->offset;
   switch (argData->cat) {
-  case MAP_LAYOUT: migrate_map(ptr ? *(map **)arg : arg); break;
-  case LIST_LAYOUT: migrate_list(ptr ? *(list **)arg : arg); break;
-  case SET_LAYOUT: migrate_set(ptr ? *(set **)arg : arg); break;
+  case MAP_LAYOUT: migrate_map(arg, root); break;
+  case LIST_LAYOUT: migrate_list(arg, root); break;
+  case SET_LAYOUT: migrate_set(arg, root); break;
   case STRINGBUFFER_LAYOUT: migrate_string_buffer((stringbuffer **)arg); break;
   case SYMBOL_LAYOUT:
   case VARIABLE_LAYOUT: migrate((block **)arg); break;

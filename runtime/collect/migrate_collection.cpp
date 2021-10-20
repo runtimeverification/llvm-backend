@@ -57,14 +57,34 @@ struct migrate_visitor : immer::detail::rbts::visitor_base<migrate_visitor> {
   }
 };
 
-void migrate_list(void *l) {
-  auto &impl = ((list *)l)->impl();
+static void migrateCollectionRoot(bool root, void *c, void **ptr) {
+  if (root) {
+    uint64_t *off_ptr = (uint64_t *)((char *)c - sizeof(uint64_t *));
+    uint64_t off = *off_ptr;
+    if (off != 0) {
+      block *base = (block *)((char *)off_ptr - off);
+      migrate(&base);
+      void *newL = (void *)((char *)base + off + 8);
+      *ptr = newL;
+    }
+  }
+}
+
+void migrate_list(void *ptr, bool root) {
+  list *l;
+  if (root) {
+    l = *(list **)ptr;
+  } else {
+    l = (list *)ptr;
+  }
+  auto &impl = l->impl();
   migrate_collection_node((void **)&impl.root);
   migrate_collection_node((void **)&impl.tail);
   if (auto &relaxed = impl.root->impl.d.data.inner.relaxed) {
     migrate_collection_node((void **)&relaxed);
   }
   impl.traverse(migrate_visitor{});
+  migrateCollectionRoot(root, l, (void **)ptr);
 }
 
 template <typename Fn, typename NodeT>
@@ -105,16 +125,30 @@ void migrate_set_leaf(KElem *start, KElem *end) {
   }
 }
 
-void migrate_set(void *s) {
-  auto &impl = ((set *)s)->impl();
+void migrate_set(void *ptr, bool root) {
+  set *s;
+  if (root) {
+    s = *(set **)ptr;
+  } else {
+    s = (set *)ptr;
+  }
+  auto &impl = s->impl();
   migrate_collection_node((void **)&impl.root);
   migrate_champ_traversal(impl.root, 0, migrate_set_leaf);
+  migrateCollectionRoot(root, s, (void **)ptr);
 }
 
-void migrate_map(void *m) {
+void migrate_map(void *ptr, bool root) {
+  map *m;
+  if (root) {
+    m = *(map **)ptr;
+  } else {
+    m = (map *)ptr;
+  }
   auto &impl = ((map *)m)->impl();
   migrate_collection_node((void **)&impl.root);
   migrate_champ_traversal(impl.root, 0, migrate_map_leaf);
+  migrateCollectionRoot(root, m, (void **)ptr);
 }
 
 template <typename Iter, typename Elem, typename Node>
@@ -132,11 +166,11 @@ void evacuate_iter(void *i) {
   };
   auto impl = (iter *)&it->curr;
   // impl->path_[0] always points to the same address at which the root of the
-  // map or set is located. This is because impl->path_[0] is always taken to be
-  // equal to a pointer to the pointer to the root of the collection. Because
-  // this map/list/set is always allocated in the kore heap inline to the block
-  // that it is a child of, and because of the particular behavior of the
-  // migrate function when migrating regular blocks, we know that
+  // map or set is located. This is because impl->path_[0] is always taken to
+  // be equal to a pointer to the pointer to the root of the collection.
+  // Because this map/list/set is always allocated in the kore heap inline to
+  // the block that it is a child of, and because of the particular behavior
+  // of the migrate function when migrating regular blocks, we know that
   // *impl->path_[0] can be used in order to compute the base pointer and the
   // derived offset of the map pointer within its parent block
   block **root_ptr = (block **)impl->path_[0];
