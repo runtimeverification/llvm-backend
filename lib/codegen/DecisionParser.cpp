@@ -202,6 +202,8 @@ public:
     std::string function = str(get(node, "function"));
     auto child = (*this)(get(node, "next"));
 
+    assert(cat == "SET.Set" || cat == "MAP.Map");
+
     return MakeIteratorNode::Create(
         name, type, name + "_iter",
         llvm::PointerType::get(
