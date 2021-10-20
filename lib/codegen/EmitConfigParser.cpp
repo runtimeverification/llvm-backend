@@ -1015,6 +1015,15 @@ static llvm::Constant *getLayoutData(
     ValueType cat
         = dynamic_cast<KORECompositeSort *>(sort.get())->getCategory(def);
     auto offset = llvm::ConstantExpr::getOffsetOf(BlockType, i++);
+    switch (cat.cat) {
+    case SortCategory::Map:
+    case SortCategory::Set:
+    case SortCategory::List:
+      offset = llvm::ConstantExpr::getAdd(
+          offset, llvm::ConstantInt::get(offset->getType(), 8));
+      break;
+    default: break;
+    }
     elements.push_back(llvm::ConstantStruct::get(
         getTypeByName(module, LAYOUTITEM_STRUCT), offset,
         llvm::ConstantInt::get(
