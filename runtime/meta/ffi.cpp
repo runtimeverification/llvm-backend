@@ -244,6 +244,7 @@ string *ffiCall(
     throw std::invalid_argument("Types list contains invalid FFI type");
     break;
   case FFI_BAD_ABI: throw std::invalid_argument("Invalid ABI mode"); break;
+  case FFI_BAD_ARGTYPE: throw std::invalid_argument("Bad argument type"); break;
   }
 
   string *rvalue
