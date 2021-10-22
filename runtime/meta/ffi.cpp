@@ -243,8 +243,15 @@ string *ffiCall(
   case FFI_BAD_TYPEDEF:
     throw std::invalid_argument("Types list contains invalid FFI type");
     break;
-  case FFI_BAD_ABI: throw std::invalid_argument("Invalid ABI mode"); break;
-  case FFI_BAD_ARGTYPE: throw std::invalid_argument("Bad argument type"); break;
+  case FFI_BAD_ABI:
+    throw std::invalid_argument("Invalid ABI mode");
+    break;
+    // The default case here is a hack to allow us to support
+    // two different versions of libffi. From version 3.4
+    // onwards, an enum variant FFI_BAD_ARGTYPE is defined. Our
+    // CI doesn't yet use this version, so we use the default
+    // instead.
+  default: throw std::invalid_argument("Bad FFI argument type"); break;
   }
 
   string *rvalue
