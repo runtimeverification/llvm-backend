@@ -167,10 +167,21 @@ void printConfigurationInternal(
   } else {
     sfprintf(file, "%s(", symbol);
   }
-  visitChildren(
-      subject, file, printConfigurationInternal, printMap, printList, printSet,
-      printInt, printFloat, printBool, printStringBuffer, printMInt,
-      printComma);
+
+  visitor callbacks
+      = {printConfigurationInternal,
+         printMap,
+         printList,
+         printSet,
+         printInt,
+         printFloat,
+         printBool,
+         printStringBuffer,
+         printMInt,
+         printComma};
+
+  visitChildren(subject, file, &callbacks);
+
   if (isBinder) {
     boundVariables.pop_back();
   }
