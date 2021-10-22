@@ -20,4 +20,5 @@ SpaceBeforeCpp11BracedList: false
 DerivePointerAlignment: false
 PointerAlignment: Right
 AllowShortCaseLabelsOnASingleLine: true
+ReflowComments: false
 ...
