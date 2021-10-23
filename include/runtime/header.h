@@ -108,6 +108,8 @@ size_t hash_k(block *);
 void k_hash(block *, void *);
 bool hash_enter(void);
 void hash_exit(void);
+
+extern bool gc_enabled;
 }
 
 class KElem {
@@ -124,8 +126,6 @@ public:
 
   block *elem;
 };
-
-extern bool gc_enabled;
 
 struct kore_alloc_heap {
 

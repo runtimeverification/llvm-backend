@@ -25,6 +25,8 @@ private:
       std::string name, KORECompositePattern *pattern, bool sret, bool tailcc);
   llvm::Value *
   notInjectionCase(KORECompositePattern *constructor, llvm::Value *val);
+  llvm::Value *disableGC(void);
+  void enableGC(llvm::Value *was_enabled);
 
 public:
   CreateTerm(
