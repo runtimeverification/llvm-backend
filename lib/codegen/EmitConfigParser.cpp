@@ -631,13 +631,15 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
 }
 
 static llvm::PointerType *makeWriterType(llvm::LLVMContext &Ctx) {
-  constexpr std::string_view name = "writer";
+  const std::string name = "writer";
+  static auto types = std::map<llvm::LLVMContext *, llvm::PointerType *>{};
 
-  if (auto existing = llvm::StructType::getTypeByName(Ctx, name)) {
-    return llvm::PointerType::getUnqual(existing);
-  } else {
-    return llvm::PointerType::getUnqual(llvm::StructType::create(Ctx, name));
+  if (types.find(&Ctx) == types.end()) {
+    types[&Ctx]
+        = llvm::PointerType::getUnqual(llvm::StructType::create(Ctx, name));
   }
+
+  return types.at(&Ctx);
 }
 
 static llvm::PointerType *makeVisitorType(
@@ -658,13 +660,12 @@ static llvm::PointerType *makeVisitorType(
 
 static llvm::PointerType *
 makePackedVisitorStructureType(llvm::LLVMContext &Ctx, llvm::Module *module) {
-  constexpr std::string_view name = "visitor";
+  const std::string name = "visitor";
+  static auto types = std::map<llvm::LLVMContext *, llvm::PointerType *>{};
 
   auto file = makeWriterType(Ctx);
 
-  if (auto existing = llvm::StructType::getTypeByName(Ctx, name)) {
-    return existing->getPointerTo();
-  } else {
+  if (types.find(&Ctx) == types.end()) {
     auto elementTypes = std::vector<llvm::Type *>{
         {makeVisitorType(
              Ctx, file, getValueType({SortCategory::Symbol, 0}, module), 1, 1),
@@ -701,8 +702,10 @@ makePackedVisitorStructureType(llvm::LLVMContext &Ctx, llvm::Module *module) {
              llvm::Type::getVoidTy(Ctx), {file}, false))}};
 
     auto structTy = llvm::StructType::create(Ctx, elementTypes, name);
-    return structTy->getPointerTo();
+    types[&Ctx] = structTy->getPointerTo();
   }
+
+  return types.at(&Ctx);
 }
 
 static void emitTraversal(
