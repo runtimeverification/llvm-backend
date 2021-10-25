@@ -1,5 +1,7 @@
+configure_file(CreateTerm.cpp CreateTerm.cpp @ONLY)
+
 add_library(Codegen
-  CreateTerm.cpp
+  ${CMAKE_CURRENT_BINARY_DIR}/CreateTerm.cpp
   Debug.cpp
   Decision.cpp
   DecisionParser.cpp

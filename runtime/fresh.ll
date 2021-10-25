@@ -1,4 +1,5 @@
-target datalayout = "e-m:o-i64:64-f80:128-n8:16:32:64-S128"
+target datalayout = "@LLVM_BACKEND_DATALAYOUT@"
+target triple = "@LLVM_BACKEND_TRIPLE@"
 
 %string = type { %blockheader, [0 x i8] } ; 10-bit layout, 4-bit gc flags, 10 unused bits, 40-bit length (or buffer capacity for string pointed by stringbuffers), bytes
 %blockheader = type { i64 } 

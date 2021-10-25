@@ -1,4 +1,5 @@
-target datalayout = "e-m:o-i64:64-f80:128-n8:16:32:64-S128"
+target datalayout = "@LLVM_BACKEND_DATALAYOUT@"
+target triple = "@LLVM_BACKEND_TRIPLE@"
 
 %mpz = type { i32, i32, i64 * } ; mpz_t
 

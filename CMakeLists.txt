@@ -28,6 +28,8 @@ set(CMAKE_EXE_LINKER_FLAGS_GCSTATS "${CMAKE_EXE_LINKER_FLAGS_DEBUG}")
 set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} -flto")
 set(CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO "${CMAKE_EXE_LINKER_FLAGS_RELEASE} -flto")
 
+include(SetTriple)
+
 execute_process(
   COMMAND llvm-config --host-target
   OUTPUT_VARIABLE BACKEND_TARGET_TRIPLE
@@ -125,8 +127,9 @@ macro(kllvm_add_tool name)
   endif() # APPLE
 endmacro(kllvm_add_tool)
 
+configure_file(runtime/main/main.ll ${CMAKE_CURRENT_BINARY_DIR} @ONLY)
 install(
-  FILES runtime/main/main.ll runtime/main/search.cpp
+  FILES ${CMAKE_CURRENT_BINARY_DIR}/main.ll runtime/main/search.cpp
   DESTINATION lib/kllvm/llvm/main
 )
 
