@@ -14,7 +14,7 @@ make install
 On macos 11 (Big Sur), using Homebrew:
 ```shell
 brew update
-brew install boost cmake coreutils flex git gmp jemalloc libyaml llvm@12 maven mpfr pkg-config z3
+brew install boost cmake coreutils flex git gmp jemalloc libyaml llvm@13 maven mpfr pkg-config z3
 
 git clone https://github.com/kframework/llvm-backend --recursive
 cd llvm-backend
@@ -28,7 +28,7 @@ cmake .. \
   -DCMAKE_BUILD_TYPE=Release \
   -DCMAKE_INSTALL_PREFIX=install \
   -DFLEX_EXECUTABLE=$(brew --prefix flex)/bin/flex \
-  -DLLVM_DIR=$($(brew --prefix llvm@12)/bin/llvm-config --cmakedir)
+  -DLLVM_DIR=$($(brew --prefix llvm@13)/bin/llvm-config --cmakedir)
 
 make -j16
 make install

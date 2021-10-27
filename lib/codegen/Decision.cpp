@@ -3,6 +3,7 @@
 #include "kllvm/codegen/Debug.h"
 #include "kllvm/codegen/Util.h"
 
+#include "llvm/ADT/SmallString.h"
 #include "llvm/IR/CFG.h"
 #include "llvm/IR/Constants.h"
 #include "llvm/IR/Instructions.h"
@@ -76,9 +77,11 @@ getFailPattern(DecisionCase const &_case, bool isInt) {
                             + "\")");
     } else {
       std::string sort = "SortMInt{Sort" + std::to_string(bitwidth) + "{}}";
+      llvm::SmallString<25> vec;
+      _case.getLiteral().toString(vec, 10, false);
       return std::make_pair(
-          sort, "\\dv{" + sort + "}(\"" + _case.getLiteral().toString(10, false)
-                    + "p" + std::to_string(bitwidth) + "\")");
+          sort, "\\dv{" + sort + "}(\"" + std::string(vec.c_str()) + "p"
+                    + std::to_string(bitwidth) + "\")");
     }
   } else {
     std::ostringstream symbol;
