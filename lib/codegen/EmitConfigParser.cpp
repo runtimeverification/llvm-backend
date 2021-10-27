@@ -658,10 +658,10 @@ static llvm::PointerType *makeVisitorType(
       llvm::FunctionType::get(llvm::Type::getVoidTy(Ctx), types, false));
 }
 
-static llvm::PointerType *
+static llvm::StructType *
 makePackedVisitorStructureType(llvm::LLVMContext &Ctx, llvm::Module *module) {
   const std::string name = "visitor";
-  static auto types = std::map<llvm::LLVMContext *, llvm::PointerType *>{};
+  static auto types = std::map<llvm::LLVMContext *, llvm::StructType *>{};
 
   auto file = makeWriterType(Ctx);
 
@@ -702,7 +702,7 @@ makePackedVisitorStructureType(llvm::LLVMContext &Ctx, llvm::Module *module) {
              llvm::Type::getVoidTy(Ctx), {file}, false))}};
 
     auto structTy = llvm::StructType::create(Ctx, elementTypes, name);
-    types[&Ctx] = structTy->getPointerTo();
+    types[&Ctx] = structTy;
   }
 
   return types.at(&Ctx);
@@ -721,7 +721,8 @@ static void emitTraversal(
     // cf runtime/util/header.h visitChildren
     auto file = makeWriterType(Ctx);
     argTypes.push_back(file);
-    argTypes.push_back(makePackedVisitorStructureType(Ctx, module));
+    argTypes.push_back(
+        makePackedVisitorStructureType(Ctx, module)->getPointerTo());
   } else {
     argTypes.push_back(llvm::PointerType::getUnqual(
         llvm::ArrayType::get(llvm::Type::getInt8PtrTy(Ctx), 0)));
@@ -745,12 +746,11 @@ static void emitTraversal(
   auto callbacks = std::vector<llvm::Value *>{};
   if (isVisitor) {
     auto visitorStruct = func->getArg(2);
-    auto visitorType = llvm::dyn_cast<llvm::StructType>(
-        makePackedVisitorStructureType(Ctx, module)->getElementType());
+    auto visitorType = makePackedVisitorStructureType(Ctx, module);
 
     for (auto i = 0; i < visitorType->getNumElements(); ++i) {
       auto ptr = llvm::GetElementPtrInst::CreateInBounds(
-          visitorStruct->getType()->getPointerElementType(), visitorStruct,
+          visitorType, visitorStruct,
           {zero, llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), i)}, "",
           EntryBlock);
 
