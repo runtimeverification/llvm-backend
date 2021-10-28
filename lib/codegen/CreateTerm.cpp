@@ -936,6 +936,7 @@ llvm::Value *CreateTerm::createFunctionCall(
     llvm::Attribute sretAttr
         = llvm::Attribute::get(Ctx, llvm::Attribute::StructRet, sretType);
 #else
+    (void)sretType;
     llvm::Attribute sretAttr
         = llvm::Attribute::get(Ctx, llvm::Attribute::StructRet);
 #endif
