@@ -58,13 +58,13 @@
       <groupId>org.kframework.mpfr_java</groupId>
       <artifactId>mpfr_java</artifactId>
       <version>1.2</version>
-      <classifier>osx-arm</classifier>
+      <classifier>osx</classifier>
     </dependency>
     <dependency>
       <groupId>org.kframework.mpfr_java</groupId>
       <artifactId>mpfr_java</artifactId>
       <version>1.2</version>
-      <classifier>osx</classifier>
+      <classifier>osx-arm</classifier>
     </dependency>
   </dependencies>
 
