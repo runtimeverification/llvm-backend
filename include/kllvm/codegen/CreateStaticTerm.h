@@ -16,8 +16,6 @@ private:
   llvm::Module *Module;
   llvm::LLVMContext &Ctx;
 
-  llvm::Value *createToken(ValueType sort, std::string contents);
-
 public:
   CreateStaticTerm(KOREDefinition *Definition, llvm::Module *Module)
       : Definition(Definition)
@@ -25,6 +23,7 @@ public:
       , Ctx(Module->getContext()) { }
 
   std::pair<llvm::Value *, bool> operator()(KOREPattern *pattern);
+  llvm::Value *createToken(ValueType sort, std::string contents);
 };
 
 } // namespace kllvm

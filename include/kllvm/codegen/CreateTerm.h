@@ -48,7 +48,6 @@ public:
      specified definition, and returns the value itself, along with a boolean
      indicating whether the resulting term could be an injection. */
   std::pair<llvm::Value *, bool> operator()(KOREPattern *pattern);
-  llvm::Value *createToken(ValueType sort, std::string contents);
   /* creates a call instructin calling a particular llvm function, abstracting
    * certain abi and calling convention details. name: the nmae of the function
    * to call in llvm returnCat: the value category of the return type of the
