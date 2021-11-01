@@ -1072,7 +1072,38 @@ llvm::Value *CreateTerm::notInjectionCase(
 // returns a value and a boolean indicating whether that value could be an
 // injection
 std::pair<llvm::Value *, bool> CreateTerm::operator()(KOREPattern *pattern) {
+  populateStaticSet(pattern);
+
   return createAllocation(pattern);
+}
+
+bool CreateTerm::populateStaticSet(KOREPattern *pattern) {
+  bool can_be_static = true;
+
+  if (auto variable = dynamic_cast<KOREVariablePattern *>(pattern)) {
+    can_be_static = false;
+  } else if (auto constructor = dynamic_cast<KORECompositePattern *>(pattern)) {
+    const KORESymbol *symbol = constructor->getConstructor();
+    if (symbol->getName() != "\\dv") {
+      KORESymbolDeclaration *symbolDecl
+          = Definition->getSymbolDeclarations().at(symbol->getName());
+      if (symbolDecl->getAttributes().count("function")
+          || (symbolDecl->getAttributes().count("anywhere")
+              && !isAnywhereOwise)) {
+        can_be_static = false;
+      }
+      for (auto sptr_nextPattern : constructor->getArguments()) {
+        KOREPattern *nextPattern = sptr_nextPattern.get();
+        can_be_static &= populateStaticSet(nextPattern);
+      }
+    }
+  }
+
+  if (can_be_static) {
+    staticTerms.insert(pattern);
+  }
+
+  return can_be_static;
 }
 
 std::pair<llvm::Value *, bool>
