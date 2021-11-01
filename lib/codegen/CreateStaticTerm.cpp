@@ -21,14 +21,14 @@ extern std::string escape(std::string str);
 
 /* create a term, given the assumption that the created term will not be a
  * triangle injection pair */
-llvm::Value *CreateStaticTerm::notInjectionCase(
-    KORECompositePattern *constructor, llvm::Value *val) {
+llvm::Constant *CreateStaticTerm::notInjectionCase(
+    KORECompositePattern *constructor, llvm::Constant *val) {
   const KORESymbol *symbol = constructor->getConstructor();
   llvm::StructType *BlockType = getBlockType(Module, Definition, symbol);
 
   std::stringstream koreString;
   constructor->print(koreString);
-  llvm::Value *Block
+  llvm::Constant *Block
       = Module->getOrInsertGlobal(koreString.str().c_str(), BlockType);
   llvm::GlobalVariable *globalVar = llvm::dyn_cast<llvm::GlobalVariable>(Block);
 
@@ -57,9 +57,9 @@ llvm::Value *CreateStaticTerm::notInjectionCase(
     for (auto &child : constructor->getArguments()) {
       llvm::Constant *ChildValue;
       if (idx++ == 2 && val != nullptr) {
-        ChildValue = llvm::cast<llvm::Constant>(val);
+        ChildValue = val;
       } else {
-        ChildValue = llvm::cast<llvm::Constant>((*this)(child.get()).first);
+        ChildValue = (*this)(child.get()).first;
       }
       blockVals.push_back(ChildValue);
     }
@@ -75,7 +75,7 @@ llvm::Value *CreateStaticTerm::notInjectionCase(
       llvm::PointerType::getUnqual(getTypeByName(Module, BLOCK_STRUCT)));
 }
 
-std::pair<llvm::Value *, bool>
+std::pair<llvm::Constant *, bool>
 CreateStaticTerm::operator()(KOREPattern *pattern) {
   if (auto constructor = dynamic_cast<KORECompositePattern *>(pattern)) {
     const KORESymbol *symbol = constructor->getConstructor();
@@ -105,7 +105,7 @@ CreateStaticTerm::operator()(KOREPattern *pattern) {
                    ->getCategory(Definition)
                    .cat
                == SortCategory::Symbol) {
-      std::pair<llvm::Value *, bool> val
+      std::pair<llvm::Constant *, bool> val
           = (*this)(constructor->getArguments()[0].get());
       if (val.second) {
         uint32_t tag = symbol->getTag();
@@ -127,7 +127,7 @@ CreateStaticTerm::operator()(KOREPattern *pattern) {
   abort();
 }
 
-llvm::Value *
+llvm::Constant *
 CreateStaticTerm::createToken(ValueType sort, std::string contents) {
   switch (sort.cat) {
   case SortCategory::Map:
