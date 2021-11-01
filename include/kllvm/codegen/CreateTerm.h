@@ -25,6 +25,7 @@ private:
       std::string name, KORECompositePattern *pattern, bool sret, bool fastcc);
   llvm::Value *
   notInjectionCase(KORECompositePattern *constructor, llvm::Value *val);
+  std::pair<llvm::Value *, bool> createAllocation(KOREPattern *pattern);
 
 public:
   CreateTerm(
