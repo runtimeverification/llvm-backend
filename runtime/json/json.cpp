@@ -213,35 +213,35 @@ static bool write_json(KoreWriter<Stream> &writer, block *data) {
   if (data != dotList()) {
     if (data == null()) {
       writer.Null();
-    } else if (data->h.hdr == boolHdr().hdr) {
+    } else if (tag_hdr(data->h.hdr) == tag_hdr(boolHdr().hdr)) {
       boolinj *inj = (boolinj *)data;
       writer.Bool(inj->data);
-    } else if (data->h.hdr == intHdr().hdr) {
+    } else if (tag_hdr(data->h.hdr) == tag_hdr(intHdr().hdr)) {
       zinj *inj = (zinj *)data;
       string *str = hook_STRING_int2string(inj->data);
       writer.RawNumber(str->data, len(str), false);
-    } else if (data->h.hdr == floatHdr().hdr) {
+    } else if (tag_hdr(data->h.hdr) == tag_hdr(floatHdr().hdr)) {
       floatinj *inj = (floatinj *)data;
       std::string str = floatToString(inj->data, "");
       writer.RawNumber(str.c_str(), str.length(), false);
-    } else if (data->h.hdr == strHdr().hdr) {
+    } else if (tag_hdr(data->h.hdr) == tag_hdr(strHdr().hdr)) {
       stringinj *inj = (stringinj *)data;
       writer.String(inj->data->data, len(inj->data), false);
-    } else if (data->h.hdr == objHdr().hdr) {
+    } else if (tag_hdr(data->h.hdr) == tag_hdr(objHdr().hdr)) {
       writer.StartObject();
       json *obj = (json *)data;
       return_value = write_json(writer, (block *)obj->data);
       writer.EndObject();
-    } else if (data->h.hdr == listWrapHdr().hdr) {
+    } else if (tag_hdr(data->h.hdr) == tag_hdr(listWrapHdr().hdr)) {
       writer.StartArray();
       json *obj = (json *)data;
       return_value = write_json(writer, (block *)obj->data);
       writer.EndArray();
-    } else if (data->h.hdr == listHdr().hdr) {
+    } else if (tag_hdr(data->h.hdr) == tag_hdr(listHdr().hdr)) {
       jsonlist *list = (jsonlist *)data;
       return_value = write_json(writer, list->hd)
                      && write_json(writer, (block *)list->tl);
-    } else if (data->h.hdr == membHdr().hdr) {
+    } else if (tag_hdr(data->h.hdr) == tag_hdr(membHdr().hdr)) {
       jsonmember *memb = (jsonmember *)data;
       stringinj *inj = (stringinj *)memb->key;
       writer.Key(inj->data->data, len(inj->data), false);
