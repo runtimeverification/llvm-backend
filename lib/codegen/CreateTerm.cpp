@@ -1,4 +1,5 @@
 #include "kllvm/codegen/CreateTerm.h"
+#include "kllvm/codegen/CreateStaticTerm.h"
 #include "kllvm/codegen/Debug.h"
 #include "kllvm/codegen/Util.h"
 
@@ -1108,6 +1109,17 @@ bool CreateTerm::populateStaticSet(KOREPattern *pattern) {
 
 std::pair<llvm::Value *, bool>
 CreateTerm::createAllocation(KOREPattern *pattern) {
+  if (staticTerms.count(pattern)) {
+    auto staticTerm = new CreateStaticTerm(Definition, Module);
+    if (auto constructor = dynamic_cast<KORECompositePattern *>(pattern)) {
+      const KORESymbol *symbol = constructor->getConstructor();
+      assert(symbol->isConcrete() && "not supported yet: sort variables");
+      if (symbol->getName() == "\\dv") {
+        return (*staticTerm)(pattern);
+      }
+    }
+  }
+
   if (auto variable = dynamic_cast<KOREVariablePattern *>(pattern)) {
     auto val = Substitution.lookup(variable->getName());
     if (!val) {
@@ -1119,13 +1131,8 @@ CreateTerm::createAllocation(KOREPattern *pattern) {
     const KORESymbol *symbol = constructor->getConstructor();
     assert(symbol->isConcrete() && "not supported yet: sort variables");
     if (symbol->getName() == "\\dv") {
-      auto sort = dynamic_cast<KORECompositeSort *>(
-          symbol->getFormalArguments()[0].get());
-      auto strPattern = dynamic_cast<KOREStringPattern *>(
-          constructor->getArguments()[0].get());
-      return std::make_pair(
-          createToken(sort->getCategory(Definition), strPattern->getContents()),
-          false);
+      std::cerr << "Should have already allocated the token!" << std::endl;
+      abort();
     }
     KORESymbolDeclaration *symbolDecl
         = Definition->getSymbolDeclarations().at(symbol->getName());

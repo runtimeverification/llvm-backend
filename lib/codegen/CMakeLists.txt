@@ -1,5 +1,6 @@
 add_library(Codegen
   CreateTerm.cpp
+  CreateStaticTerm.cpp
   Debug.cpp
   Decision.cpp
   DecisionParser.cpp
