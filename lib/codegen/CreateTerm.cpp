@@ -939,10 +939,6 @@ CreateTerm::createAllocation(KOREPattern *pattern) {
   } else if (auto constructor = dynamic_cast<KORECompositePattern *>(pattern)) {
     const KORESymbol *symbol = constructor->getConstructor();
     assert(symbol->isConcrete() && "not supported yet: sort variables");
-    if (symbol->getName() == "\\dv") {
-      std::cerr << "Should have already allocated the token!" << std::endl;
-      abort();
-    }
     KORESymbolDeclaration *symbolDecl
         = Definition->getSymbolDeclarations().at(symbol->getName());
     if (symbolDecl->getAttributes().count("function")
@@ -960,9 +956,6 @@ CreateTerm::createAllocation(KOREPattern *pattern) {
             createFunctionCall("eval_" + Out.str(), constructor, false, true),
             true);
       }
-    } else if (symbol->getArguments().empty()) {
-      std::cerr << "Should have already allocated a header tag!" << std::endl;
-      abort();
     } else if (
         symbolDecl->getAttributes().count("sortInjection")
         && dynamic_cast<KORECompositeSort *>(symbol->getArguments()[0].get())
