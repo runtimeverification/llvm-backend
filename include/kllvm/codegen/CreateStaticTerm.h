@@ -17,6 +17,9 @@ private:
   llvm::Module *Module;
   llvm::LLVMContext &Ctx;
 
+  llvm::Value *
+  notInjectionCase(KORECompositePattern *constructor, llvm::Value *val);
+
 public:
   CreateStaticTerm(KOREDefinition *Definition, llvm::Module *Module)
       : Definition(Definition)

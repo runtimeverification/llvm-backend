@@ -1,7 +1,9 @@
 #include "kllvm/codegen/CreateStaticTerm.h"
+#include "kllvm/codegen/Debug.h"
 #include "kllvm/codegen/Util.h"
 
 #include <iomanip>
+#include <sstream>
 
 #include "runtime/header.h"
 #include "llvm/IR/BasicBlock.h"
@@ -16,6 +18,62 @@
 namespace kllvm {
 
 extern std::string escape(std::string str);
+
+/* create a term, given the assumption that the created term will not be a
+ * triangle injection pair */
+llvm::Value *CreateStaticTerm::notInjectionCase(
+    KORECompositePattern *constructor, llvm::Value *val) {
+  const KORESymbol *symbol = constructor->getConstructor();
+  llvm::StructType *BlockType = getBlockType(Module, Definition, symbol);
+
+  std::stringstream koreString;
+  constructor->print(koreString);
+  llvm::Value *Block
+      = Module->getOrInsertGlobal(koreString.str().c_str(), BlockType);
+  llvm::GlobalVariable *globalVar = llvm::dyn_cast<llvm::GlobalVariable>(Block);
+
+  if (!globalVar->hasInitializer()) {
+    std::vector<llvm::Constant *> blockVals;
+
+    llvm::StructType *BlockHeaderType
+        = getTypeByName(Module, BLOCKHEADER_STRUCT);
+    uint64_t headerVal = symbol->getTag();
+    uint64_t sizeInBytes = llvm::DataLayout(Module).getTypeAllocSize(BlockType);
+    assert(sizeInBytes % 8 == 0);
+    headerVal |= (sizeInBytes / 8) << 32;
+    headerVal |= (uint64_t)symbol->getLayout() << LAYOUT_OFFSET;
+    llvm::Constant *BlockHeader = llvm::ConstantStruct::get(
+        BlockHeaderType, llvm::ConstantInt::get(
+                             llvm::Type::getInt64Ty(Module->getContext()),
+                             headerVal | NOT_YOUNG_OBJECT_BIT));
+    blockVals.push_back(BlockHeader);
+
+    llvm::ArrayType *EmptyArrayType
+        = llvm::ArrayType::get(llvm::Type::getInt64Ty(Module->getContext()), 0);
+    blockVals.push_back(llvm::ConstantArray::get(
+        EmptyArrayType, llvm::ArrayRef<llvm::Constant *>()));
+
+    int idx = 2;
+    for (auto &child : constructor->getArguments()) {
+      llvm::Constant *ChildValue;
+      if (idx++ == 2 && val != nullptr) {
+        ChildValue = llvm::cast<llvm::Constant>(val);
+      } else {
+        ChildValue = llvm::cast<llvm::Constant>((*this)(child.get()).first);
+      }
+      blockVals.push_back(ChildValue);
+    }
+
+    globalVar->setInitializer(llvm::ConstantExpr::getBitCast(
+        llvm::ConstantStruct::get(BlockType, blockVals), BlockType));
+  }
+
+  std::vector<llvm::Constant *> Idxs
+      = {llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0)};
+  return llvm::ConstantExpr::getBitCast(
+      llvm::ConstantExpr::getInBoundsGetElementPtr(BlockType, globalVar, Idxs),
+      llvm::PointerType::getUnqual(getTypeByName(Module, BLOCK_STRUCT)));
+}
 
 std::pair<llvm::Value *, bool>
 CreateStaticTerm::operator()(KOREPattern *pattern) {
@@ -39,6 +97,30 @@ CreateStaticTerm::operator()(KOREPattern *pattern) {
               (((uint64_t)symbol->getTag()) << 32) | 1),
           llvm::PointerType::getUnqual(BlockType));
       return std::make_pair(Cast, false);
+    }
+    KORESymbolDeclaration *symbolDecl
+        = Definition->getSymbolDeclarations().at(symbol->getName());
+    if (symbolDecl->getAttributes().count("sortInjection")
+        && dynamic_cast<KORECompositeSort *>(symbol->getArguments()[0].get())
+                   ->getCategory(Definition)
+                   .cat
+               == SortCategory::Symbol) {
+      std::pair<llvm::Value *, bool> val
+          = (*this)(constructor->getArguments()[0].get());
+      if (val.second) {
+        uint32_t tag = symbol->getTag();
+        KORESymbol *inj = Definition->getInjSymbol();
+        if (tag != (uint32_t)-1 && tag >= inj->getFirstTag()
+            && tag <= inj->getLastTag()) {
+          return std::make_pair(val.first, true);
+        } else {
+          return std::make_pair(notInjectionCase(constructor, val.first), true);
+        }
+      } else {
+        return std::make_pair(notInjectionCase(constructor, val.first), true);
+      }
+    } else {
+      return std::make_pair(notInjectionCase(constructor, nullptr), false);
     }
   }
   assert(false && "Something went wrong when trying to allocate a static term");

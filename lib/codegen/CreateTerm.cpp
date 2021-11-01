@@ -926,13 +926,7 @@ std::pair<llvm::Value *, bool>
 CreateTerm::createAllocation(KOREPattern *pattern) {
   if (staticTerms.count(pattern)) {
     auto staticTerm = new CreateStaticTerm(Definition, Module);
-    if (auto constructor = dynamic_cast<KORECompositePattern *>(pattern)) {
-      const KORESymbol *symbol = constructor->getConstructor();
-      assert(symbol->isConcrete() && "not supported yet: sort variables");
-      if (symbol->getName() == "\\dv" || symbol->getArguments().empty()) {
-        return (*staticTerm)(pattern);
-      }
-    }
+    return (*staticTerm)(pattern);
   }
 
   if (auto variable = dynamic_cast<KOREVariablePattern *>(pattern)) {
