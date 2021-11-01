@@ -929,7 +929,7 @@ CreateTerm::createAllocation(KOREPattern *pattern) {
     if (auto constructor = dynamic_cast<KORECompositePattern *>(pattern)) {
       const KORESymbol *symbol = constructor->getConstructor();
       assert(symbol->isConcrete() && "not supported yet: sort variables");
-      if (symbol->getName() == "\\dv") {
+      if (symbol->getName() == "\\dv" || symbol->getArguments().empty()) {
         return (*staticTerm)(pattern);
       }
     }
@@ -967,13 +967,8 @@ CreateTerm::createAllocation(KOREPattern *pattern) {
             true);
       }
     } else if (symbol->getArguments().empty()) {
-      llvm::StructType *BlockType = getTypeByName(Module, BLOCK_STRUCT);
-      llvm::IntToPtrInst *Cast = new llvm::IntToPtrInst(
-          llvm::ConstantInt::get(
-              llvm::Type::getInt64Ty(Ctx),
-              (((uint64_t)symbol->getTag()) << 32) | 1),
-          llvm::PointerType::getUnqual(BlockType), "", CurrentBlock);
-      return std::make_pair(Cast, false);
+      std::cerr << "Should have already allocated a header tag!" << std::endl;
+      abort();
     } else if (
         symbolDecl->getAttributes().count("sortInjection")
         && dynamic_cast<KORECompositeSort *>(symbol->getArguments()[0].get())

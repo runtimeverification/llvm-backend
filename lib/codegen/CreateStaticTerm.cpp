@@ -31,6 +31,15 @@ CreateStaticTerm::operator()(KOREPattern *pattern) {
           createToken(sort->getCategory(Definition), strPattern->getContents()),
           false);
     }
+    if (symbol->getArguments().empty()) {
+      llvm::StructType *BlockType = getTypeByName(Module, BLOCK_STRUCT);
+      llvm::Constant *Cast = llvm::ConstantExpr::getIntToPtr(
+          llvm::ConstantInt::get(
+              llvm::Type::getInt64Ty(Ctx),
+              (((uint64_t)symbol->getTag()) << 32) | 1),
+          llvm::PointerType::getUnqual(BlockType));
+      return std::make_pair(Cast, false);
+    }
   }
   assert(false && "Something went wrong when trying to allocate a static term");
   abort();
