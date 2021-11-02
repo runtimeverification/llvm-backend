@@ -1,20 +1,24 @@
-if (APPLE)
-  if (CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "arm64")
-    SET(LLVM_BACKEND_DATALAYOUT "e-m:o-i64:64-i128:128-n32:64-S128")
-  elseif (CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "x86_64")
-    SET(LLVM_BACKEND_DATALAYOUT "e-m:o-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16:32:64-S128")
-  else()
-    message(SEND_ERROR "Unsupported host processor for macOS target: ${CMAKE_HOST_SYSTEM_PROCESSOR}")
-  endif()
-elseif (UNIX)
-  if (CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "x86_64")
-    SET(LLVM_BACKEND_DATALAYOUT "e-m:e-i64:64-f80:128-n8:16:32:64-S128")
-  else()
-    message(SEND_ERROR "Unsupported host processor for generic Unix target: ${CMAKE_HOST_SYSTEM_PROCESSOR}")
-  endif()
-else()
-  message(SEND_ERROR "Unsupported target platform; cannot determine target triple. Compilation may not succeed")
-endif()
+execute_process(
+  COMMAND llvm-config --host-target
+  OUTPUT_VARIABLE BACKEND_TARGET_TRIPLE
+  OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-message(STATUS "Using LLVM datalayout: ${LLVM_BACKEND_DATALAYOUT}")
+execute_process(
+  COMMAND llvm-config --bindir
+  OUTPUT_VARIABLE LLVM_BIN_DIR
+  OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+# This is the best way I can figure out to get a _working_ default datalayout
+# for the host platform. If it's left blank (and the LLVM internals supply one),
+# something breaks the ARM/macOS ABI and produces crashes.
+#
+# The pipeline here generates an empty module using the appropriate version of
+# clang, and figures out what the _frontend_ thinks the datalayout should be by
+# scraping it from the generated LLVM.
+execute_process(
+  COMMAND "${CMAKE_SOURCE_DIR}/cmake/guess-triple.sh" "${LLVM_BIN_DIR}/clang"
+  OUTPUT_VARIABLE BACKEND_TARGET_DATALAYOUT
+  OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+message(STATUS "Using LLVM datalayout: ${BACKEND_TARGET_DATALAYOUT}")
 message(STATUS "Using LLVM triple    : ${BACKEND_TARGET_TRIPLE}")

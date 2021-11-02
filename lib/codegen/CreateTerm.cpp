@@ -20,7 +20,7 @@ namespace kllvm {
 
 std::string LLVM_HEADER = R"LLVM(
 ; Target determined during CMake build
-target datalayout = "@LLVM_BACKEND_DATALAYOUT@"
+target datalayout = "@BACKEND_TARGET_DATALAYOUT@"
 target triple = "@BACKEND_TARGET_TRIPLE@"
 
 ; K types in LLVM
