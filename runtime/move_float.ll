@@ -1,5 +1,5 @@
 target datalayout = "@LLVM_BACKEND_DATALAYOUT@"
-target triple = "@LLVM_BACKEND_TRIPLE@"
+target triple = "@BACKEND_TARGET_TRIPLE@"
 
 %blockheader = type { i64 }
 %floating = type { i64, { i64, i32, i64, i64 * } } ; exp, mpfr_t

@@ -1,5 +1,5 @@
 target datalayout = "@LLVM_BACKEND_DATALAYOUT@"
-target triple = "@LLVM_BACKEND_TRIPLE@"
+target triple = "@BACKEND_TARGET_TRIPLE@"
 
 declare i32 @memcmp(i8*, i8*, i64);
 

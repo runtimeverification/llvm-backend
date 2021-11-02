@@ -1,5 +1,5 @@
 target datalayout = "@LLVM_BACKEND_DATALAYOUT@"
-target triple = "@LLVM_BACKEND_TRIPLE@"
+target triple = "@BACKEND_TARGET_TRIPLE@"
 
 %blockheader = type { i64 } 
 %block = type { %blockheader, [0 x i64 *] } ; 16-bit layout, 8-bit length, 32-bit tag, children
