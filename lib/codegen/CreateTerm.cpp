@@ -189,15 +189,21 @@ llvm::StructType *getBlockType(
   return llvm::StructType::get(Module->getContext(), Types);
 }
 
-llvm::Value *getBlockHeader(
-    llvm::Module *Module, KOREDefinition *definition, const KORESymbol *symbol,
-    llvm::Type *BlockType) {
-  llvm::StructType *BlockHeaderType = getTypeByName(Module, BLOCKHEADER_STRUCT);
+uint64_t getBlockHeaderVal(
+    llvm::Module *Module, const KORESymbol *symbol, llvm::Type *BlockType) {
   uint64_t headerVal = symbol->getTag();
   uint64_t sizeInBytes = llvm::DataLayout(Module).getTypeAllocSize(BlockType);
   assert(sizeInBytes % 8 == 0);
   headerVal |= (sizeInBytes / 8) << 32;
   headerVal |= (uint64_t)symbol->getLayout() << LAYOUT_OFFSET;
+  return headerVal;
+}
+
+llvm::Value *getBlockHeader(
+    llvm::Module *Module, KOREDefinition *definition, const KORESymbol *symbol,
+    llvm::Type *BlockType) {
+  llvm::StructType *BlockHeaderType = getTypeByName(Module, BLOCKHEADER_STRUCT);
+  uint64_t headerVal = getBlockHeaderVal(Module, symbol, BlockType);
   return llvm::ConstantStruct::get(
       BlockHeaderType,
       llvm::ConstantInt::get(

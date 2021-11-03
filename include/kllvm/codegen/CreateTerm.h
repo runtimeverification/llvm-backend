@@ -38,9 +38,8 @@ public:
       , CurrentBlock(EntryBlock)
       , Module(Module)
       , Ctx(Module->getContext())
-      , isAnywhereOwise(isAnywhereOwise) {
-    staticTerms = std::set<KOREPattern *>();
-  }
+      , isAnywhereOwise(isAnywhereOwise)
+      , staticTerms(std::set<KOREPattern *>()) { }
 
   /* adds code to the specified basic block in the specified module which
      constructs an llvm value corresponding to the specified KORE RHS pattern
@@ -75,6 +74,8 @@ void addKompiledDirSymbol(
 
 llvm::StructType *getBlockType(
     llvm::Module *Module, KOREDefinition *definition, const KORESymbol *symbol);
+uint64_t getBlockHeaderVal(
+    llvm::Module *Module, const KORESymbol *symbol, llvm::Type *BlockType);
 llvm::Value *getBlockHeader(
     llvm::Module *Module, KOREDefinition *definition, const KORESymbol *symbol,
     llvm::Type *BlockType);

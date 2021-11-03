@@ -37,15 +37,12 @@ llvm::Constant *CreateStaticTerm::notInjectionCase(
 
     llvm::StructType *BlockHeaderType
         = getTypeByName(Module, BLOCKHEADER_STRUCT);
-    uint64_t headerVal = symbol->getTag();
-    uint64_t sizeInBytes = llvm::DataLayout(Module).getTypeAllocSize(BlockType);
-    assert(sizeInBytes % 8 == 0);
-    headerVal |= (sizeInBytes / 8) << 32;
-    headerVal |= (uint64_t)symbol->getLayout() << LAYOUT_OFFSET;
+    uint64_t headerVal
+        = getBlockHeaderVal(Module, symbol, BlockType) | NOT_YOUNG_OBJECT_BIT;
     llvm::Constant *BlockHeader = llvm::ConstantStruct::get(
         BlockHeaderType, llvm::ConstantInt::get(
                              llvm::Type::getInt64Ty(Module->getContext()),
-                             headerVal | NOT_YOUNG_OBJECT_BIT));
+                             headerVal));
     blockVals.push_back(BlockHeader);
 
     llvm::ArrayType *EmptyArrayType
