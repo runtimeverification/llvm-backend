@@ -567,11 +567,11 @@ static void initChoiceBuffer(
       llvm::BlockAddress::get(block->getParent(), stuck), firstElt, block);
 
   llvm::LoadInst *currDepth = new llvm::LoadInst(
-      choiceDepth->getType()->getPointerElementType(), choiceDepth, "", fail);
+      llvm::Type::getInt64Ty(module->getContext()), choiceDepth, "", fail);
   auto currentElt = llvm::GetElementPtrInst::CreateInBounds(
       ty, choiceBuffer, {zero, currDepth}, "", fail);
   llvm::LoadInst *failAddress = new llvm::LoadInst(
-      currentElt->getType()->getPointerElementType(), currentElt, "", fail);
+      llvm::Type::getInt8PtrTy(module->getContext()) , currentElt, "", fail);
   auto newDepth = llvm::BinaryOperator::Create(
       llvm::Instruction::Sub, currDepth,
       llvm::ConstantInt::get(llvm::Type::getInt64Ty(module->getContext()), 1),

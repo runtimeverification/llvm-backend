@@ -141,7 +141,7 @@ static void emitDataTableForSymbol(
       tableType, globalVar, {zero, offset}, "", MergeBlock);
   MergeBlock->insertInto(func);
   auto load = new llvm::LoadInst(
-      retval->getType()->getPointerElementType(), retval, "", MergeBlock);
+      ty, retval, "", MergeBlock);
   llvm::ReturnInst::Create(Ctx, load, MergeBlock);
   addAbort(stuck, module);
   stuck->insertInto(func);
@@ -277,7 +277,7 @@ static llvm::Value *getArgValue(
       {zero, llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), idx)}, "",
       CaseBlock);
   llvm::Value *arg = new llvm::LoadInst(
-      addr->getType()->getPointerElementType(), addr, "", CaseBlock);
+      llvm::Type::getInt8PtrTy(Ctx), addr, "", CaseBlock);
   switch (cat.cat) {
   case SortCategory::Bool:
   case SortCategory::MInt: {
@@ -548,7 +548,7 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
     case SortCategory::Int: {
       const auto &thirdArg = func->arg_begin() + 2;
       llvm::Value *FirstChar = new llvm::LoadInst(
-          thirdArg->getType()->getPointerElementType(), thirdArg, "",
+          llvm::Type::getInt8Ty(Ctx), thirdArg, "",
           CaseBlock);
       llvm::Constant *asciiPlus
           = llvm::ConstantInt::get(llvm::Type::getInt8Ty(Ctx), 43);
@@ -613,7 +613,7 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
   auto BlockSize
       = module->getOrInsertGlobal("BLOCK_SIZE", llvm::Type::getInt64Ty(Ctx));
   auto BlockSizeVal = new llvm::LoadInst(
-      BlockSize->getType()->getPointerElementType(), BlockSize, "",
+      llvm::Type::getInt64Ty(Ctx), BlockSize, "",
       CurrentBlock);
   auto BlockAllocSize = llvm::BinaryOperator::Create(
       llvm::Instruction::Sub, BlockSizeVal,
