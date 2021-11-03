@@ -20,9 +20,9 @@
 namespace kllvm {
 
 std::string LLVM_HEADER = R"LLVM(
-; Linux target
-target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
-target triple = "x86_64-unknown-linux-gnu"
+; Target determined during CMake build
+target datalayout = "@BACKEND_TARGET_DATALAYOUT@"
+target triple = "@BACKEND_TARGET_TRIPLE@"
 
 ; K types in LLVM
 
