@@ -40,9 +40,9 @@ llvm::Constant *CreateStaticTerm::notInjectionCase(
     uint64_t headerVal
         = getBlockHeaderVal(Module, symbol, BlockType) | NOT_YOUNG_OBJECT_BIT;
     llvm::Constant *BlockHeader = llvm::ConstantStruct::get(
-        BlockHeaderType, llvm::ConstantInt::get(
-                             llvm::Type::getInt64Ty(Module->getContext()),
-                             headerVal));
+        BlockHeaderType,
+        llvm::ConstantInt::get(
+            llvm::Type::getInt64Ty(Module->getContext()), headerVal));
     blockVals.push_back(BlockHeader);
 
     llvm::ArrayType *EmptyArrayType
