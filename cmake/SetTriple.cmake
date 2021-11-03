@@ -20,9 +20,7 @@ endif()
 # scraping it from the generated LLVM.
 execute_process(
   COMMAND "sh" "${CMAKE_SOURCE_DIR}/cmake/guess-triple.sh" "${LLVM_CLANG_PATH}"
-  COMMAND_ECHO STDOUT
   OUTPUT_VARIABLE BACKEND_TARGET_DATALAYOUT
-  COMMAND_ERROR_IS_FATAL ANY
   OUTPUT_STRIP_TRAILING_WHITESPACE)
 
 message(STATUS "Using LLVM datalayout: ${BACKEND_TARGET_DATALAYOUT}")
