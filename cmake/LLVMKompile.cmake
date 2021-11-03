@@ -23,6 +23,19 @@ install(TARGETS ${TARGET_NAME}
 	RUNTIME DESTINATION bin)
 
 if(APPLE)
-  include_directories(AFTER SYSTEM /usr/local/include)
-  target_link_directories(${TARGET_NAME} PUBLIC /usr/local/lib)
-endif()
+  execute_process(
+    COMMAND brew --prefix
+    OUTPUT_VARIABLE BREW_PREFIX
+    ERROR_VARIABLE BREW_ERROR
+    RESULT_VARIABLE BREW_RESULT
+    OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+  if(BREW_RESULT EQUAL 0)
+    include_directories(AFTER SYSTEM "${BREW_PREFIX}/include")
+    target_link_directories(${TARGET_NAME} PUBLIC "${BREW_PREFIX}/lib")
+    set(ENV{PKG_CONFIG_PATH} "${BREW_PREFIX}/opt/libffi/lib/pkgconfig")
+  else()
+    message(WARNING "Error running brew --prefix; you may need to manually configure package search paths.")
+    set(BREW_PREFIX "/usr/local")
+  endif()
+endif() # APPLE

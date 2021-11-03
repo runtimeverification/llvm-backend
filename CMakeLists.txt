@@ -29,15 +29,24 @@ set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} -flto")
 set(CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO "${CMAKE_EXE_LINKER_FLAGS_RELEASE} -flto")
 
 if(APPLE)
-set(BACKEND_TARGET_TRIPLE "x86_64-apple-darwin")
-if(NOT USE_NIX)
-include_directories(AFTER SYSTEM /usr/local/include)
-link_directories(AFTER /usr/local/lib)
-set(ENV{PKG_CONFIG_PATH} "/usr/local/opt/libffi/lib/pkgconfig")
-endif() # USE_NIX
-else()
-set(BACKEND_TARGET_TRIPLE "x86_64-unknown-linux-gnu")
-endif()
+  if(NOT USE_NIX)
+    execute_process(
+      COMMAND brew --prefix
+      OUTPUT_VARIABLE BREW_PREFIX
+      ERROR_VARIABLE BREW_ERROR
+      RESULT_VARIABLE BREW_RESULT
+      OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+    if(BREW_RESULT EQUAL 0)
+      include_directories(AFTER SYSTEM "${BREW_PREFIX}/include")
+      link_directories(AFTER "${BREW_PREFIX}/lib")
+      set(ENV{PKG_CONFIG_PATH} "${BREW_PREFIX}/opt/libffi/lib/pkgconfig")
+    else()
+      message(WARNING "Error running brew --prefix; you may need to manually configure package search paths.")
+      set(BREW_PREFIX "/usr/local")
+    endif()
+  endif() # USE_NIX
+endif() # APPLE
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(FFI REQUIRED libffi)
@@ -46,7 +55,7 @@ include_directories(AFTER ${FFI_INCLUDE_DIRS})
 link_directories(AFTER ${FFI_LIBRARY_DIRS})
 else() # USE_NIX
 include_directories(AFTER SYSTEM ${FFI_INCLUDE_DIRS})
-link_directories(AFTER SYSTEM ${FFI_LIBRARY_DIRS})
+link_directories(AFTER ${FFI_LIBRARY_DIRS})
 endif() # USE_NIX
 
 if (CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
@@ -80,6 +89,8 @@ if (${LLVM_PACKAGE_VERSION} VERSION_LESS 10)
   message(FATAL_ERROR "LLVM 10 or newer is required")
 endif()
 
+include(SetTriple)
+
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 find_package(ZLIB REQUIRED)
@@ -96,23 +107,24 @@ llvm_map_components_to_libnames(llvm_libs core irreader)
 
 macro(kllvm_add_tool name)
   add_executable(${name} ${ARGN})
-if(APPLE)
-if(NOT USE_NIX)
-  target_link_libraries(${name} PUBLIC "-ljemalloc" "-Wl,-rpath /usr/local/lib" "-ldl")
-else()
-  target_link_libraries(${name} PUBLIC "-ljemalloc" "-ldl")
-endif() # NOT USE_NIX
-else()
-if(NOT USE_NIX)
-  target_link_libraries(${name} PUBLIC "-ljemalloc" "-Wl,-rpath /usr/local/lib" "-ldl")
-else()
-  target_link_libraries(${name} PUBLIC "-ljemalloc" "-ldl")
-endif() # NOT USE_NIX
-endif() # APPLE
+  if(APPLE)
+    if(NOT USE_NIX)
+      target_link_libraries(${name} PUBLIC "-ljemalloc" "-Wl,-rpath ${BREW_PREFIX}/lib" "-ldl")
+    else()
+      target_link_libraries(${name} PUBLIC "-ljemalloc" "-ldl")
+    endif() # NOT USE_NIX
+  else()
+    if(NOT USE_NIX)
+      target_link_libraries(${name} PUBLIC "-ljemalloc" "-Wl,-rpath /usr/local/lib" "-ldl")
+    else()
+      target_link_libraries(${name} PUBLIC "-ljemalloc" "-ldl")
+    endif() # NOT USE_NIX
+  endif() # APPLE
 endmacro(kllvm_add_tool)
 
+configure_file(runtime/main/main.ll ${CMAKE_CURRENT_BINARY_DIR} @ONLY)
 install(
-  FILES runtime/main/main.ll runtime/main/search.cpp
+  FILES ${CMAKE_CURRENT_BINARY_DIR}/main.ll runtime/main/search.cpp
   DESTINATION lib/kllvm/llvm/main
 )
 
