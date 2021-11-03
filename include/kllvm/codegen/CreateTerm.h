@@ -18,6 +18,7 @@ private:
   llvm::Module *Module;
   llvm::LLVMContext &Ctx;
   bool isAnywhereOwise;
+  std::set<KOREPattern *> staticTerms;
 
   llvm::Value *
   createHook(KORECompositePattern *hookAtt, KORECompositePattern *pattern);
@@ -25,6 +26,8 @@ private:
       std::string name, KORECompositePattern *pattern, bool sret, bool fastcc);
   llvm::Value *
   notInjectionCase(KORECompositePattern *constructor, llvm::Value *val);
+  bool populateStaticSet(KOREPattern *pattern);
+  std::pair<llvm::Value *, bool> createAllocation(KOREPattern *pattern);
 
 public:
   CreateTerm(
@@ -35,7 +38,8 @@ public:
       , CurrentBlock(EntryBlock)
       , Module(Module)
       , Ctx(Module->getContext())
-      , isAnywhereOwise(isAnywhereOwise) { }
+      , isAnywhereOwise(isAnywhereOwise)
+      , staticTerms(std::set<KOREPattern *>()) { }
 
   /* adds code to the specified basic block in the specified module which
      constructs an llvm value corresponding to the specified KORE RHS pattern
@@ -43,7 +47,6 @@ public:
      specified definition, and returns the value itself, along with a boolean
      indicating whether the resulting term could be an injection. */
   std::pair<llvm::Value *, bool> operator()(KOREPattern *pattern);
-  llvm::Value *createToken(ValueType sort, std::string contents);
   /* creates a call instructin calling a particular llvm function, abstracting
    * certain abi and calling convention details. name: the nmae of the function
    * to call in llvm returnCat: the value category of the return type of the
@@ -71,6 +74,8 @@ void addKompiledDirSymbol(
 
 llvm::StructType *getBlockType(
     llvm::Module *Module, KOREDefinition *definition, const KORESymbol *symbol);
+uint64_t getBlockHeaderVal(
+    llvm::Module *Module, const KORESymbol *symbol, llvm::Type *BlockType);
 llvm::Value *getBlockHeader(
     llvm::Module *Module, KOREDefinition *definition, const KORESymbol *symbol,
     llvm::Type *BlockType);
@@ -95,6 +100,17 @@ std::string makeApplyRuleFunction(
 std::string makeSideConditionFunction(
     KOREAxiomDeclaration *axiom, KOREDefinition *definition,
     llvm::Module *Module);
+
+extern std::string MAP_STRUCT;
+extern std::string LIST_STRUCT;
+extern std::string SET_STRUCT;
+extern std::string INT_WRAPPER_STRUCT;
+extern std::string INT_STRUCT;
+extern std::string FLOAT_WRAPPER_STRUCT;
+extern std::string FLOAT_STRUCT;
+extern std::string BUFFER_STRUCT;
+extern std::string BLOCK_STRUCT;
+extern std::string BLOCKHEADER_STRUCT;
 
 /* returns the llvm::Type corresponding to the specified KORE sort category */
 llvm::Type *getValueType(ValueType sort, llvm::Module *Module);

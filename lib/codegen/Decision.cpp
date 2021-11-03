@@ -14,7 +14,6 @@
 
 namespace kllvm {
 
-static std::string BLOCK_STRUCT = "block";
 static std::string LAYOUTITEM_STRUCT = "layoutitem";
 
 FailNode FailNode::instance;
