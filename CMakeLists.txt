@@ -30,21 +30,25 @@ set(CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO "${CMAKE_EXE_LINKER_FLAGS_RELEASE} -fl
 
 if(APPLE)
   if(NOT USE_NIX)
-    execute_process(
-      COMMAND brew --prefix
-      OUTPUT_VARIABLE BREW_PREFIX
-      ERROR_VARIABLE BREW_ERROR
-      RESULT_VARIABLE BREW_RESULT
-      OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-    if(BREW_RESULT EQUAL 0)
-      include_directories(AFTER SYSTEM "${BREW_PREFIX}/include")
-      link_directories(AFTER "${BREW_PREFIX}/lib")
-      set(ENV{PKG_CONFIG_PATH} "${BREW_PREFIX}/opt/libffi/lib/pkgconfig")
+    if(DEFINED ENV{PREFIX})
+      set(BREW_PREFIX $ENV{PREFIX})
     else()
-      message(WARNING "Error running brew --prefix; you may need to manually configure package search paths.")
-      set(BREW_PREFIX "/usr/local")
-    endif()
+      execute_process(
+        COMMAND brew --prefix
+        OUTPUT_VARIABLE BREW_PREFIX
+        ERROR_VARIABLE BREW_ERROR
+        RESULT_VARIABLE BREW_RESULT
+        OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+      if(BREW_RESULT NOT EQUAL 0)
+        message(WARNING "Error running brew --prefix; you may need to manually configure package search paths.")
+        message(WARNING "  : ${BREW_ERROR}")
+      endif() # BREW_RESULT
+    endif() # ENV{PREFIX}
+
+    include_directories(AFTER SYSTEM "${BREW_PREFIX}/include")
+    link_directories(AFTER "${BREW_PREFIX}/lib")
+    set(ENV{PKG_CONFIG_PATH} "${BREW_PREFIX}/opt/libffi/lib/pkgconfig")
   endif() # USE_NIX
 endif() # APPLE
 
