@@ -40,7 +40,7 @@ if(APPLE)
         RESULT_VARIABLE BREW_RESULT
         OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-      if(BREW_RESULT NOT EQUAL 0)
+      if(NOT BREW_RESULT EQUAL 0)
         message(WARNING "Error running brew --prefix; you may need to manually configure package search paths.")
         message(WARNING "  : ${BREW_ERROR}")
       endif() # BREW_RESULT
