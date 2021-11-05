@@ -45,6 +45,8 @@ stdenv.mkDerivation {
   cmakeFlags = [
     ''-DCMAKE_C_COMPILER=${lib.getBin stdenv.cc}/bin/cc''
     ''-DCMAKE_CXX_COMPILER=${lib.getBin stdenv.cc}/bin/c++''
+    ''-DLLVM_CLANG_PATH=${lib.getBin host.clang}/bin/clang''
+    ''-DLLVM_CONFIG_PATH=${lib.getBin llvmPackages.libllvm.dev}/bin/llvm-config''
     ''-DUSE_NIX=TRUE''
     ''-DCMAKE_SKIP_BUILD_RPATH=FALSE''
   ];
