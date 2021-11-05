@@ -124,11 +124,11 @@ void evacuate_iter(void *i) {
     Elem *cur_;
     Elem *end_;
     immer::detail::hamts::count_t depth_;
-    immer::detail::hamts::count_t cur_off_;
     Node *const
         *path_[immer::detail::hamts::max_depth<immer::default_bits> + 1];
-    std::uint8_t
-        path_off_[immer::detail::hamts::max_depth<immer::default_bits>];
+    immer::detail::hamts::relocation_info_t<
+        immer::gc_relocation_policy, immer::default_bits>
+        relocation_info_;
   };
   auto impl = (iter *)&it->curr;
   // impl->path_[0] always points to the same address at which the root of the
@@ -150,7 +150,7 @@ void evacuate_iter(void *i) {
   }
   for (size_t i = 1; i <= impl->depth_; i++) {
     auto derived_ptr = impl->path_[i];
-    auto buffer_ptr = derived_ptr - impl->path_off_[i - 1];
+    auto buffer_ptr = derived_ptr - impl->relocation_info_.path_off_[i - 1];
     auto base_ptr = struct_base(Node, impl.d.data.inner.buffer, buffer_ptr);
     auto derived_offset = (char *)derived_ptr - (char *)base_ptr;
     migrate_collection_node((void **)&base_ptr);
@@ -160,7 +160,7 @@ void evacuate_iter(void *i) {
   }
   auto derived_ptr = impl->cur_;
   if (derived_ptr) {
-    auto base_ptr = derived_ptr - impl->cur_off_;
+    auto base_ptr = derived_ptr - impl->relocation_info_.cur_off_;
     auto derived_offset = (char *)derived_ptr - (char *)base_ptr;
     auto end_offset = impl->end_ - impl->cur_;
     auto child = *impl->path_[impl->depth_];
