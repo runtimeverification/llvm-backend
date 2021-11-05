@@ -46,6 +46,7 @@ if(APPLE)
       endif() # BREW_RESULT
     endif() # ENV{PREFIX}
 
+    message(STATUS "Looking for Homebrew dependencies in ${BREW_PREFIX}")
     include_directories(AFTER SYSTEM "${BREW_PREFIX}/include")
     link_directories(AFTER "${BREW_PREFIX}/lib")
     set(ENV{PKG_CONFIG_PATH} "${BREW_PREFIX}/opt/libffi/lib/pkgconfig")
