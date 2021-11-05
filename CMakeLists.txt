@@ -30,7 +30,7 @@ set(CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO "${CMAKE_EXE_LINKER_FLAGS_RELEASE} -fl
 
 if(APPLE)
   if(NOT USE_NIX)
-    if(DEFINED ENV{PREFIX})
+    if(DEFINED ENV{HOMEBREW_PREFIX})
       set(BREW_PREFIX $ENV{HOMEBREW_PREFIX})
     else()
       execute_process(
@@ -44,7 +44,7 @@ if(APPLE)
         message(WARNING "Error running brew --prefix; you may need to manually configure package search paths.")
         message(WARNING "  : ${BREW_ERROR}")
       endif() # BREW_RESULT
-    endif() # ENV{PREFIX}
+    endif() # ENV{HOMEBREW_PREFIX}
 
     message(STATUS "Looking for Homebrew dependencies in ${BREW_PREFIX}")
     include_directories(AFTER SYSTEM "${BREW_PREFIX}/include")
