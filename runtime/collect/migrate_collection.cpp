@@ -126,8 +126,7 @@ void evacuate_iter(void *i) {
     immer::detail::hamts::count_t depth_;
     Node *const
         *path_[immer::detail::hamts::max_depth<immer::default_bits> + 1];
-    immer::detail::hamts::relocation_info_t<
-        immer::gc_relocation_policy, immer::default_bits>
+    immer::detail::hamts::relocation_info_t<true, immer::default_bits>
         relocation_info_;
   };
   auto impl = (iter *)&it->curr;
