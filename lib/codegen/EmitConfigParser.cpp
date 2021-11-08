@@ -909,7 +909,7 @@ static void getVisitor(
         {zero, llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), idx++ + 2)},
         "", CaseBlock);
     llvm::Value *Child = new llvm::LoadInst(
-        ChildPtr->getType()->getPointerElementType(), ChildPtr, "", CaseBlock);
+        getValueType(cat, module), ChildPtr, "", CaseBlock);
     std::ostringstream Out;
     sort->print(Out);
     auto Str = llvm::ConstantDataArray::getString(Ctx, Out.str(), true);
@@ -971,8 +971,7 @@ static void getVisitor(
       break;
     case SortCategory::MInt: {
       llvm::Value *mint = new llvm::LoadInst(
-          ChildPtr->getType()->getPointerElementType(), ChildPtr, "mint",
-          CaseBlock);
+          getValueType(cat, module), ChildPtr, "mint", CaseBlock);
       size_t nwords = (cat.bits + 63) / 64;
       auto nbits
           = llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), cat.bits);
