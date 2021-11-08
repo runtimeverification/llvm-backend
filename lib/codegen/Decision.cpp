@@ -230,9 +230,10 @@ void SwitchNode::codegen(Decision *d) {
                  llvm::Type::getInt32Ty(d->Ctx), offset + 2)},
             "", d->CurrentBlock);
         llvm::Value *Child;
-        ValueType cat = dynamic_cast<KORECompositeSort *>(
-                _case.getConstructor()->getArguments()[offset].get())
-                ->getCategory(d->Definition);
+        ValueType cat
+            = dynamic_cast<KORECompositeSort *>(
+                  _case.getConstructor()->getArguments()[offset].get())
+                  ->getCategory(d->Definition);
         switch (cat.cat) {
         case SortCategory::Map:
         case SortCategory::List:
@@ -571,7 +572,7 @@ static void initChoiceBuffer(
   auto currentElt = llvm::GetElementPtrInst::CreateInBounds(
       ty, choiceBuffer, {zero, currDepth}, "", fail);
   llvm::LoadInst *failAddress = new llvm::LoadInst(
-      llvm::Type::getInt8PtrTy(module->getContext()) , currentElt, "", fail);
+      llvm::Type::getInt8PtrTy(module->getContext()), currentElt, "", fail);
   auto newDepth = llvm::BinaryOperator::Create(
       llvm::Instruction::Sub, currDepth,
       llvm::ConstantInt::get(llvm::Type::getInt64Ty(module->getContext()), 1),
