@@ -230,16 +230,16 @@ void SwitchNode::codegen(Decision *d) {
                  llvm::Type::getInt32Ty(d->Ctx), offset + 2)},
             "", d->CurrentBlock);
         llvm::Value *Child;
-        switch (dynamic_cast<KORECompositeSort *>(
-                    _case.getConstructor()->getArguments()[offset].get())
-                    ->getCategory(d->Definition)
-                    .cat) {
+        ValueType cat = dynamic_cast<KORECompositeSort *>(
+                _case.getConstructor()->getArguments()[offset].get())
+                ->getCategory(d->Definition);
+        switch (cat.cat) {
         case SortCategory::Map:
         case SortCategory::List:
         case SortCategory::Set: Child = ChildPtr; break;
         default:
           Child = new llvm::LoadInst(
-              ChildPtr->getType()->getPointerElementType(), ChildPtr,
+              getValueType(cat, d->Module), ChildPtr,
               binding.first.substr(0, max_name_length), d->CurrentBlock);
           break;
         }
