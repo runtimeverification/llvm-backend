@@ -19,6 +19,15 @@ namespace kllvm {
 
 extern std::string escape(std::string str);
 
+llvm::Constant *CreateStaticTerm::getOrInsertGlobalInAddrSpace1(
+    llvm::StringRef Name, llvm::Type *Ty) {
+  return Module->getOrInsertGlobal(Name, Ty, [&] {
+    return new llvm::GlobalVariable(
+        *Module, Ty, false, llvm::GlobalVariable::ExternalLinkage, nullptr,
+        Name, nullptr, llvm::GlobalVariable::NotThreadLocal, 1);
+  });
+}
+
 /* create a term, given the assumption that the created term will not be a
  * triangle injection pair */
 llvm::Constant *CreateStaticTerm::notInjectionCase(
@@ -29,7 +38,7 @@ llvm::Constant *CreateStaticTerm::notInjectionCase(
   std::stringstream koreString;
   constructor->print(koreString);
   llvm::Constant *Block
-      = Module->getOrInsertGlobal(koreString.str().c_str(), BlockType);
+      = getOrInsertGlobalInAddrSpace1(koreString.str().c_str(), BlockType);
   llvm::GlobalVariable *globalVar = llvm::dyn_cast<llvm::GlobalVariable>(Block);
 
   if (!globalVar->hasInitializer()) {
@@ -69,7 +78,7 @@ llvm::Constant *CreateStaticTerm::notInjectionCase(
       = {llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0)};
   return llvm::ConstantExpr::getBitCast(
       llvm::ConstantExpr::getInBoundsGetElementPtr(BlockType, globalVar, Idxs),
-      llvm::PointerType::getUnqual(getTypeByName(Module, BLOCK_STRUCT)));
+      llvm::PointerType::get(getTypeByName(Module, BLOCK_STRUCT), 1));
 }
 
 std::pair<llvm::Constant *, bool>
@@ -92,7 +101,7 @@ CreateStaticTerm::operator()(KOREPattern *pattern) {
           llvm::ConstantInt::get(
               llvm::Type::getInt64Ty(Ctx),
               (((uint64_t)symbol->getTag()) << 32) | 1),
-          llvm::PointerType::getUnqual(BlockType));
+          llvm::PointerType::get(BlockType, 1));
       return std::make_pair(Cast, false);
     }
     KORESymbolDeclaration *symbolDecl
@@ -134,7 +143,7 @@ CreateStaticTerm::createToken(ValueType sort, std::string contents) {
   case SortCategory::MapIterator:
     assert(false && "cannot create tokens of collection category");
   case SortCategory::Int: {
-    llvm::Constant *global = Module->getOrInsertGlobal(
+    llvm::Constant *global = getOrInsertGlobalInAddrSpace1(
         "int_" + contents, getTypeByName(Module, INT_WRAPPER_STRUCT));
     llvm::GlobalVariable *globalVar
         = llvm::dyn_cast<llvm::GlobalVariable>(global);
@@ -183,7 +192,7 @@ CreateStaticTerm::createToken(ValueType sort, std::string contents) {
         getTypeByName(Module, INT_WRAPPER_STRUCT), globalVar, Idxs);
   }
   case SortCategory::Float: {
-    llvm::Constant *global = Module->getOrInsertGlobal(
+    llvm::Constant *global = getOrInsertGlobalInAddrSpace1(
         "float_" + contents, getTypeByName(Module, FLOAT_WRAPPER_STRUCT));
     llvm::GlobalVariable *globalVar
         = llvm::dyn_cast<llvm::GlobalVariable>(global);
@@ -289,8 +298,8 @@ CreateStaticTerm::createToken(ValueType sort, std::string contents) {
         Ctx,
         {getTypeByName(Module, BLOCKHEADER_STRUCT),
          llvm::ArrayType::get(llvm::Type::getInt8Ty(Ctx), contents.size())});
-    llvm::Constant *global
-        = Module->getOrInsertGlobal("token_" + escape(contents), StringType);
+    llvm::Constant *global = getOrInsertGlobalInAddrSpace1(
+        "token_" + escape(contents), StringType);
     llvm::GlobalVariable *globalVar
         = llvm::dyn_cast<llvm::GlobalVariable>(global);
     if (!globalVar->hasInitializer()) {
@@ -307,8 +316,7 @@ CreateStaticTerm::createToken(ValueType sort, std::string contents) {
           llvm::ConstantDataArray::getString(Ctx, contents, false)));
     }
     return llvm::ConstantExpr::getPointerCast(
-        global,
-        llvm::PointerType::getUnqual(getTypeByName(Module, BLOCK_STRUCT)));
+        global, llvm::PointerType::get(getTypeByName(Module, BLOCK_STRUCT), 1));
   }
   case SortCategory::Uncomputed: abort();
   }
