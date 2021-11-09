@@ -140,8 +140,7 @@ static void emitDataTableForSymbol(
   auto retval = llvm::GetElementPtrInst::Create(
       tableType, globalVar, {zero, offset}, "", MergeBlock);
   MergeBlock->insertInto(func);
-  auto load = new llvm::LoadInst(
-      retval->getType()->getPointerElementType(), retval, "", MergeBlock);
+  auto load = new llvm::LoadInst(ty, retval, "", MergeBlock);
   llvm::ReturnInst::Create(Ctx, load, MergeBlock);
   addAbort(stuck, module);
   stuck->insertInto(func);
@@ -276,8 +275,8 @@ static llvm::Value *getArgValue(
       llvm::ArrayType::get(llvm::Type::getInt8PtrTy(Ctx), 0), ArgumentsArray,
       {zero, llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), idx)}, "",
       CaseBlock);
-  llvm::Value *arg = new llvm::LoadInst(
-      addr->getType()->getPointerElementType(), addr, "", CaseBlock);
+  llvm::Value *arg
+      = new llvm::LoadInst(llvm::Type::getInt8PtrTy(Ctx), addr, "", CaseBlock);
   switch (cat.cat) {
   case SortCategory::Bool:
   case SortCategory::MInt: {
@@ -548,8 +547,7 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
     case SortCategory::Int: {
       const auto &thirdArg = func->arg_begin() + 2;
       llvm::Value *FirstChar = new llvm::LoadInst(
-          thirdArg->getType()->getPointerElementType(), thirdArg, "",
-          CaseBlock);
+          llvm::Type::getInt8Ty(Ctx), thirdArg, "", CaseBlock);
       llvm::Constant *asciiPlus
           = llvm::ConstantInt::get(llvm::Type::getInt8Ty(Ctx), 43);
       auto icmpFirst = new llvm::ICmpInst(
@@ -613,8 +611,7 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
   auto BlockSize
       = module->getOrInsertGlobal("BLOCK_SIZE", llvm::Type::getInt64Ty(Ctx));
   auto BlockSizeVal = new llvm::LoadInst(
-      BlockSize->getType()->getPointerElementType(), BlockSize, "",
-      CurrentBlock);
+      llvm::Type::getInt64Ty(Ctx), BlockSize, "", CurrentBlock);
   auto BlockAllocSize = llvm::BinaryOperator::Create(
       llvm::Instruction::Sub, BlockSizeVal,
       llvm::ConstantExpr::getSizeOf(llvm::Type::getInt8PtrTy(Ctx)), "",
@@ -909,7 +906,7 @@ static void getVisitor(
         {zero, llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), idx++ + 2)},
         "", CaseBlock);
     llvm::Value *Child = new llvm::LoadInst(
-        ChildPtr->getType()->getPointerElementType(), ChildPtr, "", CaseBlock);
+        getValueType(cat, module), ChildPtr, "", CaseBlock);
     std::ostringstream Out;
     sort->print(Out);
     auto Str = llvm::ConstantDataArray::getString(Ctx, Out.str(), true);
@@ -971,8 +968,7 @@ static void getVisitor(
       break;
     case SortCategory::MInt: {
       llvm::Value *mint = new llvm::LoadInst(
-          ChildPtr->getType()->getPointerElementType(), ChildPtr, "mint",
-          CaseBlock);
+          getValueType(cat, module), ChildPtr, "mint", CaseBlock);
       size_t nwords = (cat.bits + 63) / 64;
       auto nbits
           = llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), cat.bits);

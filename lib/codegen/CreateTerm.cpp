@@ -776,7 +776,7 @@ llvm::Value *CreateTerm::createHook(
       return result;
     } else if (nwords == 1) {
       auto Word = new llvm::LoadInst(
-          Ptr->getType()->getPointerElementType(), Ptr, "word", CurrentBlock);
+          llvm::Type::getInt64Ty(Ctx), Ptr, "word", CurrentBlock);
       if (cat.bits == 64) {
         return Word;
       } else {
@@ -786,7 +786,7 @@ llvm::Value *CreateTerm::createHook(
     } else { // nwords >= 2
       for (size_t i = 0; i < nwords; i++) {
         auto Word = new llvm::LoadInst(
-            Ptr->getType()->getPointerElementType(), Ptr, "word", CurrentBlock);
+            llvm::Type::getInt64Ty(Ctx), Ptr, "word", CurrentBlock);
         auto Zext = new llvm::ZExtInst(Word, Type, "extended", CurrentBlock);
         auto Shl = llvm::BinaryOperator::Create(
             llvm::Instruction::Shl, result, llvm::ConstantInt::get(Type, 64),
