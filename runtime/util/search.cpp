@@ -10,8 +10,7 @@ static std::vector<block *> stepResults;
 
 extern "C" {
 
-void addSearchResult(
-    block *result, block ***bufPtr, uint64_t *count, uint64_t *capacity) {
+void addSearchResult(block *result) {
   stepResults.push_back(result);
 }
 
