@@ -6,22 +6,15 @@
 #include "runtime/collect.h"
 #include "runtime/header.h"
 
+static std::vector<block *> stepResults;
+
 extern "C" {
 
-void addSearchResult(
-    block *result, block ***bufPtr, uint64_t *count, uint64_t *capacity) {
-  if (*count == *capacity) {
-    size_t len = *count * sizeof(block *) * 2;
-    block **newBuf = (block **)koreAllocAlwaysGC(len);
-    memcpy(newBuf, *bufPtr, len);
-    *bufPtr = newBuf;
-    *capacity = *capacity * 2;
-  }
-  (*bufPtr)[*count] = result;
-  (*count)++;
+void addSearchResult(block *result) {
+  stepResults.push_back(result);
 }
 
-block **take_search_step(block *, uint64_t *);
+void take_search_step(block *);
 }
 
 static std::list<block *> states;
@@ -38,6 +31,9 @@ blockEnumerator() {
     blocks.push_back(const_cast<block **>(&(keyVal)));
   }
   blocks.push_back(&state);
+  for (auto &keyVal : stepResults) {
+    blocks.push_back(const_cast<block **>(&(keyVal)));
+  }
 
   return std::make_pair(blocks.begin(), blocks.end());
 }
@@ -60,15 +56,15 @@ take_search_steps(int64_t depth, block *subject) {
     states_set.erase(state);
     if (depth > 0)
       depth--;
-    uint64_t count;
-    block **stepResults = take_search_step(state, &count);
-    if (count == 0) {
+    stepResults.clear();
+    take_search_step(state);
+    if (stepResults.size() == 0) {
       results.insert(state);
     } else {
-      for (uint64_t i = 0; i < count; i++) {
-        auto dirty = states_set.insert(stepResults[i]);
+      for (block *result : stepResults) {
+        auto dirty = states_set.insert(result);
         if (dirty.second) {
-          states.push_back(stepResults[i]);
+          states.push_back(result);
         }
       }
     }
