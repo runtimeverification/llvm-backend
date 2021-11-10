@@ -366,7 +366,6 @@ private:
   llvm::LLVMContext &Ctx;
   ValueType Cat;
   llvm::PHINode *FailSubject, *FailPattern, *FailSort;
-  llvm::Value *ResultBuffer, *ResultCount, *ResultCapacity;
 
   std::map<var_type, llvm::AllocaInst *> symbols;
 
@@ -383,9 +382,7 @@ public:
       llvm::BasicBlock *FailureBlock, llvm::IndirectBrInst *FailJump,
       llvm::AllocaInst *ChoiceBuffer, llvm::AllocaInst *ChoiceDepth,
       llvm::Module *Module, ValueType Cat, llvm::PHINode *FailSubject,
-      llvm::PHINode *FailPattern, llvm::PHINode *FailSort,
-      llvm::Value *ResultBuffer, llvm::Value *ResultCount,
-      llvm::Value *ResultCapacity)
+      llvm::PHINode *FailPattern, llvm::PHINode *FailSort)
       : Definition(Definition)
       , CurrentBlock(EntryBlock)
       , FailureBlock(FailureBlock)
@@ -398,10 +395,7 @@ public:
       , Cat(Cat)
       , FailSubject(FailSubject)
       , FailPattern(FailPattern)
-      , FailSort(FailSort)
-      , ResultBuffer(ResultBuffer)
-      , ResultCount(ResultCount)
-      , ResultCapacity(ResultCapacity) { }
+      , FailSort(FailSort) { }
 
   /* adds code to the specified basic block to take a single step based on
      the specified decision tree and return the result of taking that step. */
