@@ -6,6 +6,7 @@ let self = mavenix.buildMaven {
     inherit src;
     subDir = "matching";
   };
+
   doCheck = false;
   infoFile = ./llvm-backend-matching.mavenix.lock;
 

@@ -32,12 +32,9 @@ let
         ref = "main";
       };
     in import src { inherit pkgs; };
-in
 
-let _src = src; in
-let src = ttuegel.orElse _src (ttuegel.cleanGitSubtree { name = "llvm-backend"; src = ./.; }); in
+  cleanedSrc = ttuegel.orElse src (ttuegel.cleanGitSubtree { name = "llvm-backend"; src = ./.; });
 
-let
   inherit (pkgs) callPackage nix-gitignore;
 
   llvmPackages = pkgs.llvmPackages_10.override {
@@ -60,16 +57,18 @@ let
       llvmPackages.clangNoLibcxx.override override;
 
   llvm-backend = callPackage ./nix/llvm-backend.nix {
-    inherit llvmPackages src;
+    inherit llvmPackages;
     inherit (ttuegel) cleanSourceWith;
     inherit release;
     host.clang = clang;
+    src = cleanedSrc;
   };
 
   mavenix = import sources."mavenix" { inherit pkgs; };
 
   llvm-backend-matching = import ./nix/llvm-backend-matching.nix {
-    inherit mavenix src;
+    inherit mavenix;
+    src = cleanedSrc;
     inherit (ttuegel) cleanSourceWith;
   };
 
