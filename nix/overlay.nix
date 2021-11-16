@@ -57,7 +57,9 @@ let
       patchShebangs "$out/bin/llvm-kompile-testing"
     '';
 
+  devShell = final.callPackage ./devShell.nix { };
 in {
     inherit llvm-backend llvm-backend-matching llvm-kompile-testing;
     inherit clang; # for compatibility
+    inherit devShell; # for CI
 }

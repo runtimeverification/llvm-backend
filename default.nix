@@ -39,6 +39,6 @@ in {
   inherit (localPkgs)
     llvm-backend llvm-backend-matching llvm-kompile-testing;
   inherit (localPkgs) clang; # for compatibility
-  inherit (localPkgs) mavenix; # for CI
+  inherit (localPkgs) mavenix devShell; # for CI
 }
 
