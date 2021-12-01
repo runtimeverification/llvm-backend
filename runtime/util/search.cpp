@@ -19,6 +19,7 @@ void take_search_step(block *);
 
 static std::list<block *> states;
 static block *state;
+static std::unordered_set<block *, HashBlock, KEq> states_set;
 
 static std::pair<
     std::vector<block **>::iterator, std::vector<block **>::iterator>
@@ -35,6 +36,10 @@ blockEnumerator() {
     blocks.push_back(const_cast<block **>(&(keyVal)));
   }
 
+  for (auto &keyVal : states_set) {
+    blocks.push_back(const_cast<block **>(&(keyVal)));
+  }
+
   return std::make_pair(blocks.begin(), blocks.end());
 }
 
@@ -46,18 +51,25 @@ take_search_steps(int64_t depth, block *subject) {
   }
 
   std::unordered_set<block *, HashBlock, KEq> results;
-  std::unordered_set<block *, HashBlock, KEq> states_set;
+
   states.clear();
+  states_set.clear();
+
   states_set.insert(subject);
   states.push_back(subject);
+
   while (!states.empty() && depth != 0) {
     state = states.front();
     states.pop_front();
     states_set.erase(state);
-    if (depth > 0)
+
+    if (depth > 0) {
       depth--;
+    }
+
     stepResults.clear();
     take_search_step(state);
+
     if (stepResults.size() == 0) {
       results.insert(state);
     } else {
@@ -69,10 +81,12 @@ take_search_steps(int64_t depth, block *subject) {
       }
     }
   }
+
   if (depth == 0) {
     for (auto state : states) {
       results.insert(state);
     }
   }
+
   return results;
 }
