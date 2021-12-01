@@ -20,6 +20,7 @@ void take_search_step(block *);
 static std::list<block *> states;
 static block *state;
 static std::unordered_set<block *, HashBlock, KEq> states_set;
+static std::unordered_set<block *, HashBlock, KEq> results;
 
 static std::pair<
     std::vector<block **>::iterator, std::vector<block **>::iterator>
@@ -40,6 +41,10 @@ blockEnumerator() {
     blocks.push_back(const_cast<block **>(&(keyVal)));
   }
 
+  for (auto &keyVal : results) {
+    blocks.push_back(const_cast<block **>(&(keyVal)));
+  }
+
   return std::make_pair(blocks.begin(), blocks.end());
 }
 
@@ -50,10 +55,9 @@ take_search_steps(int64_t depth, block *subject) {
     registerGCRootsEnumerator(blockEnumerator);
   }
 
-  std::unordered_set<block *, HashBlock, KEq> results;
-
   states.clear();
   states_set.clear();
+  results.clear();
 
   states_set.insert(subject);
   states.push_back(subject);
