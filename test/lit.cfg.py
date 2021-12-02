@@ -22,7 +22,7 @@ config.substitutions.extend([
     ('%kompile', 'llvm-kompile-testing'),
     ('%interpreter', '%kompile %s main -o %t.interpreter'),
 
-    ('%run-grep', '%t.interpreter %test-input -1 /dev/stdout | grep -f %test-grep-out -q'),
+    ('%check-grep', '%t.interpreter %test-input -1 /dev/stdout | grep -f %test-grep-out -q'),
 
     ('%test-input', os.path.join(ROOT_PATH, 'test', 'input', '%test-basename.in')),
     ('%test-grep-out', os.path.join(ROOT_PATH, 'test', 'output', '%test-basename.out.grep')),

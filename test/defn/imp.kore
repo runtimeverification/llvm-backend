@@ -1,5 +1,5 @@
 // RUN: %interpreter
-// RUN: %run-grep
+// RUN: %check-grep
 
 [topCellInitializer{}(LblinitGeneratedTopCell{}()), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/erik/k/k-distribution/pl-tutorial/1_k/2_imp/lesson_5/imp.md)")]
 
