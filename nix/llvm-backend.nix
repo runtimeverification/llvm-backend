@@ -49,6 +49,7 @@ stdenv.mkDerivation {
     ''-DLLVM_CONFIG_PATH=${lib.getBin llvmPackages.libllvm.dev}/bin/llvm-config''
     ''-DUSE_NIX=TRUE''
     ''-DCMAKE_SKIP_BUILD_RPATH=FALSE''
+    ''-DBUILD_TESTS=True''
   ];
 
   cmakeBuildType = if release then "Release" else "FastBuild";
