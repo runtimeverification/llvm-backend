@@ -1,3 +1,7 @@
+// RUN: %interpreter
+// RUN: cat %test-dir-in/matrix.stdin.txt | %t.interpreter %test-dir-in/matrix.in -1 /dev/stdout | diff - %test-dir-out/matrix.out.diff
+// RUN: %t.interpreter %test-dir-in/factorial.in -1 /dev/stdout | diff - %test-dir-out/factorial.out.diff
+
 [topCellInitializer{}(LblinitGeneratedTopCell{}()), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/erik/k/k-distribution/pl-tutorial/2_languages/2_kool/1_untyped/kool-untyped.md)")]
 
 module BASIC-K

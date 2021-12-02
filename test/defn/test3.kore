@@ -1,3 +1,5 @@
+// RUN: %interpreter
+// RUN: %check-grep
 [topCellInitializer{}(LblinitKCell{}()),
  initial-configuration{}(
 LblinitKCell{}(Lbl'UndsLSqBUnds-LT-'-'UndsRSqBUnds'MAP'UndsUnds'Map'Unds'K'Unds'K{}(Lbl'Stop'Map{}(), kseq{}(inj{SortKConfigVar{}, SortKItem{}}(\dv{SortKConfigVar{}}("$PGM")), dotk{}()), kseq{}(Lblbar'LParRParUnds'TEST'Unds'{}(), dotk{}())))

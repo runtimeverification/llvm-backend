@@ -1,3 +1,5 @@
+// RUN: %interpreter
+// RUN: %check-diff
 [topCellInitializer{}(LblinitGeneratedTopCell{}()),
  initial-configuration{}(
 LblinitGeneratedTopCell{}(Lbl'UndsLSqBUnds-LT-'-'UndsRSqBUnds'MAP'UndsUnds'Map'Unds'K'Unds'K{}(Lbl'Stop'Map{}(), kseq{}(inj{SortKConfigVar{}, SortKItem{}}(\dv{SortKConfigVar{}}("$PGM")), dotk{}()), kseq{}(

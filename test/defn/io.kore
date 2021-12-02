@@ -1,3 +1,5 @@
+// RUN: %interpreter
+// RUN: %check-dir-grep
 [topCellInitializer{}(LblinitGeneratedTopCell{}())]
 
 module BASIC-K

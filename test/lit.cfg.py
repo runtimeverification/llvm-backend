@@ -22,10 +22,30 @@ config.substitutions.extend([
     ('%kompile', 'llvm-kompile-testing'),
     ('%interpreter', '%kompile %s main -o %t.interpreter'),
 
-    ('%check-grep', '%t.interpreter %test-input -1 /dev/stdout | grep -f %test-grep-out -q'),
+    ('%check-grep', '%run | grep -f %test-grep-out -q'),
+    ('%check-diff', '%run | diff - %test-diff-out'),
+
+    ('%check-dir-grep', '''
+        for out in %test-dir-out/*.out.grep; do
+            in=%test-dir-in/`basename $out .out.grep`.in
+            %t.interpreter $in -1 /dev/stdout | grep -f $out -q || (echo $in && exit 1)
+        done
+    '''),
+
+    ('%check-dir-diff', '''
+        for out in %test-dir-out/*.out.diff; do
+            in=%test-dir-in/`basename $out .out.diff`.in
+            %t.interpreter $in -1 /dev/stdout | diff - $out || (echo $in && exit 1)
+        done
+    '''),
+
+    ('%run', '%t.interpreter %test-input -1 /dev/stdout'),
 
     ('%test-input', os.path.join(ROOT_PATH, 'test', 'input', '%test-basename.in')),
     ('%test-grep-out', os.path.join(ROOT_PATH, 'test', 'output', '%test-basename.out.grep')),
+    ('%test-diff-out', os.path.join(ROOT_PATH, 'test', 'output', '%test-basename.out.diff')),
+    ('%test-dir-out', os.path.join(ROOT_PATH, 'test', 'output', '%test-basename')),
+    ('%test-dir-in', os.path.join(ROOT_PATH, 'test', 'input', '%test-basename')),
     ('%test-basename', '`basename %s .kore`'),
 
     # ('%kcc', os.path.join(ROOT_PATH, ".build", "dist", "bin", "kcc")),
