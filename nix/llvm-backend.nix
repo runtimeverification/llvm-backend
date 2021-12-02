@@ -65,7 +65,7 @@ stdenv.mkDerivation {
       # Primarily, this allows linking to paths in the build tree.
       # The setting is only applied to the unit tests, which are not installed.
       export NIX_ENFORCE_PURITY=0
-      make run-unittests
+      make test
     )
 
     runHook postCheck
