@@ -47,3 +47,4 @@ TAGS
 test/int/*.interpreter
 
 *.dSYM
+.envrc
