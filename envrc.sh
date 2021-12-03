@@ -20,3 +20,6 @@ PATH_add "/usr/lib/llvm-12/bin"
 
 PATH_add "$(pwd)/build/bin"
 PATH_add "$(pwd)/build/install/bin"
+
+# If you installed lit using pip locally, set your PATH to find it
+PATH_add "$HOME/.local/bin"
