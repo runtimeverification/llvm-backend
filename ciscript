@@ -37,5 +37,8 @@ lit $TEST_DIR
 cd $TEST_DIR/defn
 diff io_output1.txt ../ioTest1.output
 diff `ls | grep io_log` ../ioTest3.output
+rm `ls | grep io_log`
+ls test-foo*
+rm `ls | grep test-foo`
 
 make -C ../test/unparse -j`nproc`

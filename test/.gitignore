@@ -5,3 +5,4 @@ Output/
 defn/io_output*
 defn/*_foo
 defn/test-foo*
+defn/*io_log*
