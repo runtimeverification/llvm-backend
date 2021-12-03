@@ -49,6 +49,7 @@ stdenv.mkDerivation {
     ''-DLLVM_CONFIG_PATH=${lib.getBin llvmPackages.libllvm.dev}/bin/llvm-config''
     ''-DUSE_NIX=TRUE''
     ''-DCMAKE_SKIP_BUILD_RPATH=FALSE''
+    ''-DBUILD_TESTS=True''
   ];
 
   cmakeBuildType = if release then "Release" else "FastBuild";
@@ -64,7 +65,7 @@ stdenv.mkDerivation {
       # Primarily, this allows linking to paths in the build tree.
       # The setting is only applied to the unit tests, which are not installed.
       export NIX_ENFORCE_PURITY=0
-      make run-unittests
+      make test
     )
 
     runHook postCheck

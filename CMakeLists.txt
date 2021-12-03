@@ -4,6 +4,8 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 include(LLVMKompilePrelude)
 project (KLLVM CXX C)
 
+include(CTest)
+
 set(CMAKE_DISABLE_SOURCE_CHANGES ON)
 set(CMAKE_DISABLE_IN_SOURCE_BUILD ON)
 set(CMAKE_CXX_STANDARD 17)
@@ -260,5 +262,9 @@ include_directories(${KLLVM_AUTOGEN_INCLUDE_DIR})
 add_subdirectory(lib)
 add_subdirectory(tools)
 add_subdirectory(runtime)
-add_subdirectory(unittests)
+
+if(BUILD_TESTS)
+  add_subdirectory(unittests)
+endif()
+
 #add_subdirectory(test)
