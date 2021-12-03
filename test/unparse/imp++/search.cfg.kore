@@ -1,3 +1,4 @@
+// RUN: %kprint-check
 /* Spa */
 \or{SortGeneratedTopCell{}}(
     /* Spa */

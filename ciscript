@@ -41,5 +41,3 @@ rm `ls | grep io_log`
 ls test-foo*
 rm `ls | grep test-foo`
 cd ../../build
-
-make -C ../test/unparse -j`nproc`

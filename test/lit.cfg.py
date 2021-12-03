@@ -14,7 +14,6 @@ config.suffixes = ['.kore']
 config.excludes = [
     'input',
     'int',
-    'unparse',
     'output'
 ]
 
@@ -40,6 +39,8 @@ config.substitutions.extend([
     '''),
 
     ('%run', '%t.interpreter %test-input -1 /dev/stdout'),
+
+    ('%kprint-check', 'kprint %S %s true | diff - %s.out'),
 
     ('%test-input', os.path.join(ROOT_PATH, 'test', 'input', '%test-basename.in')),
     ('%test-grep-out', os.path.join(ROOT_PATH, 'test', 'output', '%test-basename.out.grep')),
