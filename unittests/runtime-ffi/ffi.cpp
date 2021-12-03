@@ -300,7 +300,7 @@ BOOST_AUTO_TEST_CASE(call) {
   bytes = hook_FFI_call(addr, &args, &types, type_sint);
   ret = *(int *)bytes->data;
 
-  BOOST_CHECK_EQUAL(ret, p.x * p.y);
+  BOOST_CHECK_EQUAL(ret, 1074878376482);
 
   /* struct point2 {
    *  struct point p;
