@@ -13,6 +13,12 @@ config.suffixes = ['.kore']
 
 config.excludes = []
 
+if os.getenv('LIT_USE_NIX'):
+    config.environment.update({
+        k : v for k, v in os.environ.items()
+        if k.startswith('NIX')
+    })
+
 config.substitutions.extend([
     ('%kompile', 'llvm-kompile-testing'),
     ('%interpreter', '%kompile %s main -o %t.interpreter'),
