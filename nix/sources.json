@@ -27,7 +27,7 @@
         "branch": "master",
         "description": "Nix Packages collection",
         "homepage": "",
-        "owner": "baltoli",
+        "owner": "nixos",
         "repo": "nixpkgs",
         "rev": "19aee6bfb2ae0bd12aa022c7df094ce15b031ede",
         "sha256": "0drxwhfnfc54pcq2myjc25cblxdhp4qg0ya2c9s6njkwk1vc3jjq",
