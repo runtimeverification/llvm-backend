@@ -16,13 +16,20 @@ fi
 rm -rf build
 mkdir -p build
 cd build
-cmake .. -DCMAKE_BUILD_TYPE=$1 -DCMAKE_INSTALL_PREFIX=install -DGC_THRESHOLD=1
+
+cmake .. \
+  -DCMAKE_BUILD_TYPE=$1 \
+  -DCMAKE_INSTALL_PREFIX=install \
+  -DGC_THRESHOLD=1 \
+  -DBUILD_TESTS=On
+
 make -j`nproc`
 if [[ "$1" == "GcStats"* ]]; then
   make install
   exit 0
 fi
-make run-unittests
+
+make test
 cd ../matching
 mvn verify -U
 cd ../build
