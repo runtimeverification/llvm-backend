@@ -902,6 +902,30 @@ std::map<std::string, int> KORECompositePattern::gatherVarCounts(void) {
   return result;
 }
 
+sptr<KOREPattern> KORECompositePattern::dedupeDisjuncts(void) {
+  if (constructor->getName() != "\\or") {
+    return shared_from_this();
+  }
+  std::vector<sptr<KOREPattern>> items, dedupedItems;
+  flatten(this, "\\or", items);
+  std::set<std::string> printed;
+  for (sptr<KOREPattern> item : items) {
+    std::ostringstream Out;
+    item->print(Out);
+    if (printed.insert(Out.str()).second) {
+      dedupedItems.push_back(item);
+    }
+  }
+  sptr<KOREPattern> result = dedupedItems[0];
+  for (int i = 1; i < dedupedItems.size(); ++i) {
+    sptr<KORECompositePattern> tmp = KORECompositePattern::Create("\\or");
+    tmp->addArgument(result);
+    tmp->addArgument(dedupedItems[i]);
+    result = tmp;
+  }
+  return result;
+}
+
 sptr<KOREPattern> KORECompositePattern::filterSubstitution(
     PrettyPrintData const &data, std::set<std::string> const &vars) {
   if (constructor->getName() == "\\equals") {
