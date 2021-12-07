@@ -1,1 +1,2 @@
+// RUN: %kprint-check
 \top{SortGeneratedTopCell{}}()

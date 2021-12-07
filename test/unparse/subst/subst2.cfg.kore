@@ -1,3 +1,4 @@
+// RUN: %kprint-check
 /* Spc */
 \or{SortGeneratedTopCell{}}(
     /* Created: Kore.Internal.OrPattern.toTermLike */
