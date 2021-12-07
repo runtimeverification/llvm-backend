@@ -13,6 +13,13 @@ config.suffixes = ['.kore']
 
 config.excludes = []
 
+# When lit is launched, it doesn't inherit any environment variables from the
+# parent process' environment. This breaks the Nix derivations for the host
+# compiler and linker, as they depend on NIX_* environment variables being set.
+#
+# The solution is to manually add every NIX_* enviroment variable to the test
+# runner's environment if the LIT_USE_NIX variable is set (see test.nix for
+# where this gets used).
 if os.getenv('LIT_USE_NIX'):
     config.environment.update({
         k : v for k, v in os.environ.items()
