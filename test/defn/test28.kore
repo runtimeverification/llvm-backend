@@ -1,5 +1,6 @@
 // RUN: %interpreter
 // RUN: %check-grep
+// RUN: (ls %S/test-foo* && rm `ls %S | grep test-foo`) || true
 [topCellInitializer{}(LblinitGeneratedTopCell{}())]
 
 module BASIC-K

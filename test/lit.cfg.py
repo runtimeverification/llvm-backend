@@ -55,11 +55,14 @@ config.substitutions.extend([
 
     ('%kprint-check', 'kprint %S %s true | diff - %s.out'),
 
-    ('%test-input', os.path.join(ROOT_PATH, 'test', 'input', '%test-basename.in')),
-    ('%test-grep-out', os.path.join(ROOT_PATH, 'test', 'output', '%test-basename.out.grep')),
-    ('%test-diff-out', os.path.join(ROOT_PATH, 'test', 'output', '%test-basename.out.diff')),
-    ('%test-dir-out', os.path.join(ROOT_PATH, 'test', 'output', '%test-basename')),
-    ('%test-dir-in', os.path.join(ROOT_PATH, 'test', 'input', '%test-basename')),
+    ('%input-dir', os.path.join(ROOT_PATH, 'test', 'input')),
+    ('%output-dir', os.path.join(ROOT_PATH, 'test', 'output')),
+
+    ('%test-input', os.path.join('%input-dir', '%test-basename.in')),
+    ('%test-grep-out', os.path.join('%output-dir', '%test-basename.out.grep')),
+    ('%test-diff-out', os.path.join('%output-dir', '%test-basename.out.diff')),
+    ('%test-dir-out', os.path.join('%output-dir', '%test-basename')),
+    ('%test-dir-in', os.path.join('%input-dir', '%test-basename')),
     ('%test-basename', '`basename %s .kore`'),
 
     ('%allow-pipefail', 'set +o pipefail'),

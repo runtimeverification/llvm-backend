@@ -1,5 +1,8 @@
 // RUN: %interpreter
 // RUN: %check-dir-grep
+// RUN: diff %S/io_output1.txt %output-dir/ioTest1.output
+// RUN: diff %S/`ls %S | grep io_log` %output-dir/ioTest3.output
+// RUN: (ls %S | grep io_log && rm %S/`ls %S | grep io_log`) || true
 [topCellInitializer{}(LblinitGeneratedTopCell{}())]
 
 module BASIC-K
