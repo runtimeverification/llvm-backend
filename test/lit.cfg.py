@@ -1,3 +1,4 @@
+import glob
 import os
 
 from lit import formats
@@ -11,7 +12,10 @@ config.test_format = formats.ShTest(True)
 
 config.suffixes = ['.kore']
 
-config.excludes = []
+config.excludes = [
+    'macros.kore',
+    'syntaxDefinition.kore',
+]
 
 # When lit is launched, it doesn't inherit any environment variables from the
 # parent process' environment. This breaks the Nix derivations for the host
