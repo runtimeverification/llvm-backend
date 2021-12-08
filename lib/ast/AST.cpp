@@ -918,7 +918,8 @@ sptr<KOREPattern> KORECompositePattern::dedupeDisjuncts(void) {
   }
   sptr<KOREPattern> result = dedupedItems[0];
   for (int i = 1; i < dedupedItems.size(); ++i) {
-    sptr<KORECompositePattern> tmp = KORECompositePattern::Create("\\or");
+    sptr<KORECompositePattern> tmp
+        = KORECompositePattern::Create(constructor.get());
     tmp->addArgument(result);
     tmp->addArgument(dedupedItems[i]);
     result = tmp;
