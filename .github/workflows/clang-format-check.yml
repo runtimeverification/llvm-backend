@@ -10,4 +10,4 @@ jobs:
       uses: jidicula/clang-format-action@v4.0.0
       with:
         clang-format-version: '12'
-        exclude-regex: '(build|config|deps)'
+        exclude-regex: '(build|config|deps|base64)'
