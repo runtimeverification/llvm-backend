@@ -1,4 +1,5 @@
 #include "kllvm/codegen/DecisionParser.h"
+#include "base64.h"
 #include "kllvm/codegen/CreateTerm.h"
 #include "kllvm/codegen/Decision.h"
 #include "kllvm/codegen/Util.h"
@@ -154,9 +155,13 @@ public:
       auto sym = KORESymbol::Create("\\dv");
       auto hook = str(get(node, "hook"));
       auto sort = sorts.at(KORECompositeSort::getCategory(hook));
-      auto val = str(get(node, "literal"));
+      auto lit = get(node, "literal");
+      auto val = str(lit);
       if (hook == "BOOL.Bool") {
         val = val == "1" ? "true" : "false";
+      }
+      if (std::string((char *)lit->tag) == "tag:yaml.org,2002:binary") {
+        val = base64_decode(val);
       }
 
       sym->addFormalArgument(sort);
