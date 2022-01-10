@@ -135,16 +135,8 @@ install(
   DESTINATION lib/kllvm/llvm/main
 )
 
-find_program(OPT opt-13)
-find_program(OPT opt-12)
-find_program(OPT opt-11)
-find_program(OPT opt-10)
-find_program(OPT opt)
-find_program(LLC llc-13)
-find_program(LLC llc-12)
-find_program(LLC llc-11)
-find_program(LLC llc-10)
-find_program(LLC llc)
+find_program(OPT NAMES opt-13 opt-12 opt-11 opt-10 opt)
+find_program(LLC NAMES llc-13 llc-12 llc-11 llc-10 llc)
 if(${OPT} STREQUAL "OPT-NOTFOUND")
   message(FATAL_ERROR "Could not find an opt binary. Is llvm installed on your PATH?")
 endif()
@@ -159,7 +151,7 @@ configure_file(bin/llvm-kompile-testing bin @ONLY)
 configure_file(bin/llvm-kompile-clang bin @ONLY)
 
 install(
-  PROGRAMS 
+  PROGRAMS
     ${CMAKE_CURRENT_BINARY_DIR}/bin/llvm-kompile
     ${CMAKE_CURRENT_BINARY_DIR}/bin/llvm-kompile-clang
     ${CMAKE_CURRENT_BINARY_DIR}/bin/llvm-krun

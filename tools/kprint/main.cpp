@@ -264,6 +264,8 @@ int main(int argc, char **argv) {
   if (filterSubst) {
     std::set<std::string> vars = sorted->gatherSingletonVars();
     filtered = sorted->filterSubstitution(data, vars);
+    filtered = filtered->dedupeDisjuncts();
+    filtered = filtered->sortCollections(data);
   } else {
     filtered = sorted;
   }

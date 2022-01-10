@@ -10,6 +10,10 @@ pipeline {
     }
     stage('Build and Test on Arch Linux') {
       options { timeout(time: 25, unit: 'MINUTES') }
+      when {
+        expression { return false }
+        beforeAgent true
+      }
       agent {
         dockerfile {
           filename 'Dockerfile.arch'
@@ -18,12 +22,11 @@ pipeline {
       }
       steps {
         sh '''
-          #./ciscript Debug
-          #./ciscript Release
-          #./ciscript RelWithDebInfo
-          #./ciscript FastBuild
-          #./ciscript GcStats
-
+          ./ciscript Debug
+          ./ciscript Release
+          ./ciscript RelWithDebInfo
+          ./ciscript FastBuild
+          ./ciscript GcStats
         '''
       }
     }

@@ -20,6 +20,7 @@ stdenv.mkDerivation {
   preferLocalBuild = true;
   buildInputs = [
     diffutils  # for golden testing
+    pkgs.lit
     llvm-kompile-testing  # for constructing test input without the frontend
     llvm-backend  # the system under test
   ];
@@ -27,10 +28,7 @@ stdenv.mkDerivation {
   buildPhase = ''
     runHook preBuild
 
-    mkdir -p build; cd build
-    cp ../test/Makefile .
-    make KOMPILE=llvm-kompile-testing clean
-    make KOMPILE=llvm-kompile-testing -O -j$NIX_MAX_JOBS
+    LIT_USE_NIX=1 lit -v test
 
     runHook postBuild
   '';
