@@ -1,8 +1,9 @@
 #include "kllvm/codegen/DecisionParser.h"
-#include "base64.h"
 #include "kllvm/codegen/CreateTerm.h"
 #include "kllvm/codegen/Decision.h"
 #include "kllvm/codegen/Util.h"
+
+#include <base64/base64.h>
 
 #include <yaml.h>
 

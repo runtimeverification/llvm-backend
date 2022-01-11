@@ -8,7 +8,7 @@ add_library(Codegen
   DecisionParser.cpp
   EmitConfigParser.cpp
   Util.cpp
-  base64/base64.cpp
 )
 
-target_link_libraries(Codegen PUBLIC AST)
+target_link_libraries(Codegen
+  PUBLIC base64 AST)
