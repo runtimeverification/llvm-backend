@@ -11,4 +11,5 @@ add_library(Codegen
 )
 
 target_link_libraries(Codegen
-  PUBLIC base64 AST)
+  PUBLIC  AST
+  PRIVATE base64)
