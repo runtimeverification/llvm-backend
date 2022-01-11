@@ -44,7 +44,7 @@ size_t get_size(uint64_t hdr, uint16_t layout) {
 
 void migrate(block **blockPtr) {
   block *currBlock = *blockPtr;
-  if (is_leaf_block(currBlock)) {
+  if (is_leaf_block(currBlock) || !is_heap_block(currBlock)) {
     return;
   }
   const uint64_t hdr = currBlock->h.hdr;
@@ -76,7 +76,7 @@ void migrate(block **blockPtr) {
 // shared objects (like collection nodes) that are not tracked by gc
 void migrate_once(block **blockPtr) {
   block *currBlock = *blockPtr;
-  if (is_leaf_block(currBlock)) {
+  if (is_leaf_block(currBlock) || !is_heap_block(currBlock)) {
     return;
   }
   if (youngspace_collection_id()
