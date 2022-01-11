@@ -39,9 +39,7 @@
 #define variable_block(tag) ((block *)((((uint64_t)(tag)) << 32) | 3))
 #define is_leaf_block(block) (((uintptr_t)block) & 1)
 #define is_variable_block(block) ((((uintptr_t)block) & 3) == 3)
-#define is_heap_block(s)                                                       \
-  ((((s)->h.hdr) & AGE_MASK) || (!(((s)->h.hdr) & NOT_YOUNG_OBJECT_BIT))       \
-   || (((s)->h.hdr) & FWD_PTR_BIT))
+#define is_heap_block(s) (!(((s)->h.hdr) & NOT_YOUNG_OBJECT_BIT))
 
 extern "C" {
 // llvm: blockheader = type { i64 }
