@@ -251,6 +251,7 @@ FILE(GLOB_RECURSE HaskellSources matching/src/*.hs matching/app/Main.hs)
 set(KLLVM_AUTOGEN_INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR}/include)
 include_directories(${KLLVM_AUTOGEN_INCLUDE_DIR})
 
+add_subdirectory(deps)
 add_subdirectory(lib)
 add_subdirectory(tools)
 add_subdirectory(runtime)
