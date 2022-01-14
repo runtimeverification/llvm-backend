@@ -148,7 +148,7 @@ module EXAMPLE
   hooked-symbol LblbitRangeInt'LParUndsCommUndsCommUndsRParUnds'INT-COMMON'Unds'Int'Unds'Int'Unds'Int'Unds'Int{}(SortInt{}, SortInt{}, SortInt{}) : SortInt{} [org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/bruce/code/k/k-distribution/target/release/k/include/kframework/builtin/domains.md)"), priorities{}(), right{}(), terminals{}("11010101"), klabel{}("bitRangeInt"), hook{}("INT.bitRange"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(997,18,997,102)"), left{}(), format{}("%cbitRangeInt%r %c(%r %1 %c,%r %2 %c,%r %3 %c)%r"), function{}()]
   hooked-symbol Lblchoice'LParUndsRParUnds'MAP'Unds'KItem'Unds'Map{}(SortMap{}) : SortKItem{} [org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/bruce/code/k/k-distribution/target/release/k/include/kframework/builtin/domains.md)"), priorities{}(), right{}(), terminals{}("1101"), klabel{}("Map:choice"), hook{}("MAP.choice"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(404,20,404,100)"), left{}(), format{}("%cchoice%r %c(%r %1 %c)%r"), function{}()]
   hooked-symbol Lblchoice'LParUndsRParUnds'SET'Unds'KItem'Unds'Set{}(SortSet{}) : SortKItem{} [org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/bruce/code/k/k-distribution/target/release/k/include/kframework/builtin/domains.md)"), priorities{}(), right{}(), terminals{}("1101"), klabel{}("Set:choice"), hook{}("SET.choice"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(614,20,614,94)"), left{}(), format{}("%cchoice%r %c(%r %1 %c)%r"), function{}()]
-  symbol Lblf'LParUndsRParUnds'EXAMPLE'Unds'Int'Unds'Int{}(SortInt{}) : SortInt{} [org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/bruce/code/llvm-backend/example.k)"), priorities{}(), right{}(), terminals{}("1101"), klabel{}("f"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(5,18,5,34)"), left{}(), format{}("%cf%r %c(%r %1 %c)%r"), function{}()]
+  symbol Lblf'LParUndsRParUnds'EXAMPLE'Unds'Int'Unds'Int{}(SortInt{}) : SortInt{} [org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/bruce/code/llvm-backend/example.k)"), priorities{}(), right{}(), terminals{}("1101"), klabel{}("f"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(4,18,4,34)"), left{}(), format{}("%cf%r %c(%r %1 %c)%r"), function{}()]
   hooked-symbol LblfillList'LParUndsCommUndsCommUndsCommUndsRParUnds'LIST'Unds'List'Unds'List'Unds'Int'Unds'Int'Unds'KItem{}(SortList{}, SortInt{}, SortInt{}, SortKItem{}) : SortList{} [org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/bruce/code/k/k-distribution/target/release/k/include/kframework/builtin/domains.md)"), priorities{}(), right{}(), terminals{}("1101010101"), klabel{}("fillList"), hook{}("LIST.fill"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(715,19,715,99)"), left{}(), format{}("%cfillList%r %c(%r %1 %c,%r %2 %c,%r %3 %c,%r %4 %c)%r"), function{}()]
   symbol LblfreshInt'LParUndsRParUnds'INT'Unds'Int'Unds'Int{}(SortInt{}) : SortInt{} [functional{}(), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/bruce/code/k/k-distribution/target/release/k/include/kframework/builtin/domains.md)"), priorities{}(), right{}(), terminals{}("1101"), freshGenerator{}(), klabel{}("freshInt"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(1137,18,1137,81)"), left{}(), format{}("%cfreshInt%r %c(%r %1 %c)%r"), private{}(), function{}()]
   symbol LblgetGeneratedCounterCell{}(SortGeneratedTopCell{}) : SortGeneratedCounterCell{} [priorities{}(), right{}(), terminals{}("1101"), left{}(), format{}("%cgetGeneratedCounterCell%r %c(%r %1 %c)%r"), function{}()]
@@ -1103,7 +1103,7 @@ module EXAMPLE
         \top{SortInt{}}())))
   [org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(1119,8,1119,85)"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/bruce/code/k/k-distribution/target/release/k/include/kframework/builtin/domains.md)"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol]"), UNIQUE'Unds'ID{}("147fc15c2ec6c36de1a9c0cad6212b8acd8b224f21c0aeabd36726e9c8a06119")]
 
-// rule `f(_)_EXAMPLE_Int_Int`(X)=>`_+Int_`(#token("20","Int"),X) requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(a64bc40e1d57b3e3220bcd5e6c2647eae876c2598f198bd9b843f68521049e6d), org.kframework.attributes.Location(Location(8,8,8,25)), org.kframework.attributes.Source(Source(/home/bruce/code/llvm-backend/example.k)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol]), priority(199)]
+// rule `f(_)_EXAMPLE_Int_Int`(X)=>`_+Int_`(X,#token("1","Int")) requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(6ad10a10964b5968bdc4e0e4fe93675e373c992fbd2a57d5e8215419277123be), non-executable, org.kframework.attributes.Location(Location(5,8,5,24)), org.kframework.attributes.Source(Source(/home/bruce/code/llvm-backend/example.k)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol]), priority(1)]
   axiom{R} \implies{R} (
     \and{R}(
       \top{R}(),
@@ -1117,16 +1117,14 @@ module EXAMPLE
     \equals{SortInt{},R} (
       Lblf'LParUndsRParUnds'EXAMPLE'Unds'Int'Unds'Int{}(X0:SortInt{}),
      \and{SortInt{}} (
-       Lbl'UndsPlus'Int'Unds'{}(\dv{SortInt{}}("20"),VarX:SortInt{}),
+       Lbl'UndsPlus'Int'Unds'{}(VarX:SortInt{},\dv{SortInt{}}("1")),
         \top{SortInt{}}())))
-  [org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/bruce/code/llvm-backend/example.k)"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol]"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(8,8,8,25)"), priority{}("199"), UNIQUE'Unds'ID{}("a64bc40e1d57b3e3220bcd5e6c2647eae876c2598f198bd9b843f68521049e6d")]
+  [org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/bruce/code/llvm-backend/example.k)"), non-executable{}(), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol]"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(5,8,5,24)"), priority{}("1"), UNIQUE'Unds'ID{}("6ad10a10964b5968bdc4e0e4fe93675e373c992fbd2a57d5e8215419277123be")]
 
-// rule `f(_)_EXAMPLE_Int_Int`(X)=>`_+Int_`(#token("40","Int"),X) requires #token("false","Bool") ensures #token("true","Bool") [UNIQUE_ID(41d53e4b56afa18874583796a9bb9a3a99e3b73ce9fd7f4b8bb13b3d39e5190a), non-executable, org.kframework.attributes.Location(Location(7,8,7,25)), org.kframework.attributes.Source(Source(/home/bruce/code/llvm-backend/example.k)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol]), priority(1)]
+// rule `f(_)_EXAMPLE_Int_Int`(X)=>`_+Int_`(X,#token("100","Int")) requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(25c9f2b9cf6bc1783ed3df96f395508eaa3ddf643048e23f8870d84b54be025a), org.kframework.attributes.Location(Location(6,8,6,26)), org.kframework.attributes.Source(Source(/home/bruce/code/llvm-backend/example.k)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol]), priority(199)]
   axiom{R} \implies{R} (
     \and{R}(
-      \equals{SortBool{},R}(
-        \dv{SortBool{}}("false"),
-        \dv{SortBool{}}("true")),
+      \top{R}(),
       \and{R} (
           \in{SortInt{}, R} (
             X0:SortInt{},
@@ -1137,9 +1135,9 @@ module EXAMPLE
     \equals{SortInt{},R} (
       Lblf'LParUndsRParUnds'EXAMPLE'Unds'Int'Unds'Int{}(X0:SortInt{}),
      \and{SortInt{}} (
-       Lbl'UndsPlus'Int'Unds'{}(\dv{SortInt{}}("40"),VarX:SortInt{}),
+       Lbl'UndsPlus'Int'Unds'{}(VarX:SortInt{},\dv{SortInt{}}("100")),
         \top{SortInt{}}())))
-  [org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/bruce/code/llvm-backend/example.k)"), non-executable{}(), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol]"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(7,8,7,25)"), priority{}("1"), UNIQUE'Unds'ID{}("41d53e4b56afa18874583796a9bb9a3a99e3b73ce9fd7f4b8bb13b3d39e5190a")]
+  [org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/bruce/code/llvm-backend/example.k)"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol]"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(6,8,6,26)"), priority{}("199"), UNIQUE'Unds'ID{}("25c9f2b9cf6bc1783ed3df96f395508eaa3ddf643048e23f8870d84b54be025a")]
 
 // rule `freshInt(_)_INT_Int_Int`(I)=>I requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(cf2cb8f038b4bdc4edb1334a3b8ced9cd296a7af43f0a1916e082a4e1aefa08b), org.kframework.attributes.Location(Location(1138,8,1138,28)), org.kframework.attributes.Source(Source(/home/bruce/code/k/k-distribution/target/release/k/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
   axiom{R} \implies{R} (
@@ -2293,4 +2291,4 @@ module EXAMPLE
 
 
 // priority groups
-endmodule [org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(1,1,9,9)"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/bruce/code/llvm-backend/example.k)")]
+endmodule [org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(1,1,7,9)"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/bruce/code/llvm-backend/example.k)")]
