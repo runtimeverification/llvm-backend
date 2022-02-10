@@ -14,7 +14,7 @@ in
 # > };
 #
 # Use `cleanGitSubtree` whenever possible to preserve the same source code
-# layout as the kframework/llvm-backend repository (to enable cache re-use).
+# layout as the runtimeverification/llvm-backend repository (to enable cache re-use).
 #
 , src ? null
 
