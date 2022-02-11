@@ -799,3 +799,7 @@ Does not actually take a step if matching succeeds.
             raise
 
 match = KMatch()
+
+gdb.printing.register_pretty_printer(
+    gdb.current_objfile(),
+    kllvm_lookup_function)
