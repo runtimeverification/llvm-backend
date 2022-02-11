@@ -228,9 +228,10 @@ configure_file(runtime/string_equal.ll runtime @ONLY)
 configure_file(runtime/take_steps.ll runtime @ONLY)
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/gdb)
-configure_file(gdb/interpreter-gdb.py gdb @ONLY)
 configure_file(gdb/kllvm.py gdb @ONLY)
-configure_file(gdb/__init__.py gdb @ONLY)
+configure_file(gdb/print_gdb_section.sh gdb @ONLY)
+
+set(PRINT_GDB_SECTION ${CMAKE_CURRENT_BINARY_DIR}/gdb/print_gdb_section.sh)
 
 FILE(GLOB LLVMFiles ${CMAKE_CURRENT_BINARY_DIR}/runtime/*.ll)
 FILE(GLOB GDBFiles ${CMAKE_CURRENT_BINARY_DIR}/gdb/*.py)
@@ -238,11 +239,6 @@ FILE(GLOB GDBFiles ${CMAKE_CURRENT_BINARY_DIR}/gdb/*.py)
 install(
   FILES ${LLVMFiles}
   DESTINATION lib/kllvm/llvm
-)
-
-install(
-  FILES ${GDBFiles}
-  DESTINATION lib/kllvm/gdb
 )
 
 FILE(GLOB_RECURSE HaskellSources matching/src/*.hs matching/app/Main.hs)
