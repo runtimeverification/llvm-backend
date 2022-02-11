@@ -2,7 +2,7 @@ On Ubuntu 20.04:
 ```shell
 sudo apt-get update
 sudo apt-get install git cmake clang-10 llvm-10-tools lld-10 zlib1g-dev flex libboost-test-dev libgmp-dev libmpfr-dev libyaml-dev libjemalloc-dev libunwind-dev curl maven pkg-config
-git clone https://github.com/kframework/llvm-backend --recursive
+git clone https://github.com/runtimeverification/llvm-backend --recursive
 cd llvm-backend
 mkdir build
 cd build
@@ -16,7 +16,7 @@ On macos 11 (Big Sur), using Homebrew:
 brew update
 brew install boost cmake coreutils flex git gmp jemalloc libyaml llvm@13 maven mpfr pkg-config z3
 
-git clone https://github.com/kframework/llvm-backend --recursive
+git clone https://github.com/runtimeverification/llvm-backend --recursive
 cd llvm-backend
 
 mkdir build

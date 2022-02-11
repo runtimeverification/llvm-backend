@@ -904,6 +904,31 @@ std::map<std::string, int> KORECompositePattern::gatherVarCounts(void) {
   return result;
 }
 
+sptr<KOREPattern> KORECompositePattern::dedupeDisjuncts(void) {
+  if (constructor->getName() != "\\or") {
+    return shared_from_this();
+  }
+  std::vector<sptr<KOREPattern>> items, dedupedItems;
+  flatten(this, "\\or", items);
+  std::set<std::string> printed;
+  for (sptr<KOREPattern> item : items) {
+    std::ostringstream Out;
+    item->print(Out);
+    if (printed.insert(Out.str()).second) {
+      dedupedItems.push_back(item);
+    }
+  }
+  sptr<KOREPattern> result = dedupedItems[0];
+  for (int i = 1; i < dedupedItems.size(); ++i) {
+    sptr<KORECompositePattern> tmp
+        = KORECompositePattern::Create(constructor.get());
+    tmp->addArgument(result);
+    tmp->addArgument(dedupedItems[i]);
+    result = tmp;
+  }
+  return result;
+}
+
 sptr<KOREPattern> KORECompositePattern::filterSubstitution(
     PrettyPrintData const &data, std::set<std::string> const &vars) {
   if (constructor->getName() == "\\equals") {
@@ -1141,12 +1166,14 @@ static const std::string FUNCTIONAL = "functional";
 static const std::string SUBSORT = "subsort";
 static const std::string CONSTRUCTOR = "constructor";
 static const std::string CEIL = "ceil";
+static const std::string NON_EXECUTABLE = "non-executable";
 
 bool KOREAxiomDeclaration::isRequired() {
   return !attributes.count(ASSOC) && !attributes.count(COMM)
          && !attributes.count(IDEM) && !attributes.count(UNIT)
          && !attributes.count(FUNCTIONAL) && !attributes.count(CONSTRUCTOR)
-         && !attributes.count(SUBSORT) && !attributes.count(CEIL);
+         && !attributes.count(SUBSORT) && !attributes.count(CEIL)
+         && !attributes.count(NON_EXECUTABLE);
 }
 
 bool KOREAxiomDeclaration::isTopAxiom() {

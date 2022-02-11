@@ -10,6 +10,10 @@ pipeline {
     }
     stage('Build and Test on Arch Linux') {
       options { timeout(time: 25, unit: 'MINUTES') }
+      when {
+        expression { return false }
+        beforeAgent true
+      }
       agent {
         dockerfile {
           filename 'Dockerfile.arch'
@@ -18,12 +22,11 @@ pipeline {
       }
       steps {
         sh '''
-          #./ciscript Debug
-          #./ciscript Release
-          #./ciscript RelWithDebInfo
-          #./ciscript FastBuild
-          #./ciscript GcStats
-
+          ./ciscript Debug
+          ./ciscript Release
+          ./ciscript RelWithDebInfo
+          ./ciscript FastBuild
+          ./ciscript GcStats
         '''
       }
     }
@@ -55,10 +58,10 @@ pipeline {
       }
       environment { LONG_REV = """${sh(returnStdout: true, script: 'git rev-parse HEAD').trim()}""" }
       steps {
-        build job: 'DevOps/master', propagate: false, wait: false                                           \
-            , parameters: [ booleanParam ( name: 'UPDATE_DEPS'         , value: true                      ) \
-                          , string       ( name: 'UPDATE_DEPS_REPO'    , value: 'kframework/llvm-backend' ) \
-                          , string       ( name: 'UPDATE_DEPS_VERSION' , value: "${env.LONG_REV}"         ) \
+        build job: 'DevOps/master', propagate: false, wait: false                                                    \
+            , parameters: [ booleanParam ( name: 'UPDATE_DEPS'         , value: true                               ) \
+                          , string       ( name: 'UPDATE_DEPS_REPO'    , value: 'runtimeverification/llvm-backend' ) \
+                          , string       ( name: 'UPDATE_DEPS_VERSION' , value: "${env.LONG_REV}"                  ) \
                           ]
       }
     }

@@ -1,3 +1,5 @@
+// RUN: %interpreter
+
 [topCellInitializer{}(LblinitGeneratedTopCell{}())]
 
 module BASIC-K

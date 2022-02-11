@@ -10,4 +10,6 @@ add_library(Codegen
   Util.cpp
 )
 
-target_link_libraries(Codegen PUBLIC AST)
+target_link_libraries(Codegen
+  PUBLIC  AST
+  PRIVATE base64)

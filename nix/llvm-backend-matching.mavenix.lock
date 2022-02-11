@@ -5686,20 +5686,16 @@
       "sha1": "34346a37a2ae0397ece7a64bb61c5618f32a91c6"
     },
     {
-      "path": "org/kframework/mpfr_java/mpfr_java/1.2/mpfr_java-1.2.jar",
-      "sha1": "77eadc5127adf6144cbb52fdb383c3dc9c02838d"
-    },
-    {
-      "path": "org/kframework/mpfr_java/mpfr_java/1.2/mpfr_java-1.2.pom",
-      "sha1": "5dd43a87e562c333d89d692e7438d34640d2e2d8"
-    },
-    {
       "path": "org/kframework/mpfr_java/mpfr_java/1.4/mpfr_java-1.4-linux64.jar",
       "sha1": "78c13578c9052e9f9dcb6723a267fb183e5ebdac"
     },
     {
       "path": "org/kframework/mpfr_java/mpfr_java/1.4/mpfr_java-1.4-osx.jar",
       "sha1": "e9b757d86b6777dafc45d5fda43151483ed553d3"
+    },
+    {
+      "path": "org/kframework/mpfr_java/mpfr_java/1.4/mpfr_java-1.4.jar",
+      "sha1": "326d809a7d7ebd9b648e10ab2e3ec17fa8bab20d"
     },
     {
       "path": "org/kframework/mpfr_java/mpfr_java/1.4/mpfr_java-1.4.pom",
@@ -6330,12 +6326,12 @@
       "sha1": "83c041bde1965b281cf4e6b31ab11bcf4b68a649"
     },
     {
-      "path": "org/yaml/snakeyaml/1.24/snakeyaml-1.24.jar",
-      "sha1": "13a9c0d6776483c3876e3ff9384f9bb55b17001b"
+      "path": "org/yaml/snakeyaml/1.30/snakeyaml-1.30.jar",
+      "sha1": "8fde7fe2586328ac3c68db92045e1c8759125000"
     },
     {
-      "path": "org/yaml/snakeyaml/1.24/snakeyaml-1.24.pom",
-      "sha1": "605d93a1f7549eb22a18cb85dc8970bd4123e234"
+      "path": "org/yaml/snakeyaml/1.30/snakeyaml-1.30.pom",
+      "sha1": "767ab0a7a346f60dad0acebe318e335a5d27fe55"
     },
     {
       "path": "oro/oro/2.0.8/oro-2.0.8.jar",

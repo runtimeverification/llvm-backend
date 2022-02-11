@@ -4,6 +4,8 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 include(LLVMKompilePrelude)
 project (KLLVM CXX C)
 
+include(CTest)
+
 set(CMAKE_DISABLE_SOURCE_CHANGES ON)
 set(CMAKE_DISABLE_IN_SOURCE_BUILD ON)
 set(CMAKE_CXX_STANDARD 17)
@@ -30,21 +32,26 @@ set(CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO "${CMAKE_EXE_LINKER_FLAGS_RELEASE} -fl
 
 if(APPLE)
   if(NOT USE_NIX)
-    execute_process(
-      COMMAND brew --prefix
-      OUTPUT_VARIABLE BREW_PREFIX
-      ERROR_VARIABLE BREW_ERROR
-      RESULT_VARIABLE BREW_RESULT
-      OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-    if(BREW_RESULT EQUAL 0)
-      include_directories(AFTER SYSTEM "${BREW_PREFIX}/include")
-      link_directories(AFTER "${BREW_PREFIX}/lib")
-      set(ENV{PKG_CONFIG_PATH} "${BREW_PREFIX}/opt/libffi/lib/pkgconfig")
+    if(DEFINED ENV{HOMEBREW_PREFIX})
+      set(BREW_PREFIX $ENV{HOMEBREW_PREFIX})
     else()
-      message(WARNING "Error running brew --prefix; you may need to manually configure package search paths.")
-      set(BREW_PREFIX "/usr/local")
-    endif()
+      execute_process(
+        COMMAND brew --prefix
+        OUTPUT_VARIABLE BREW_PREFIX
+        ERROR_VARIABLE BREW_ERROR
+        RESULT_VARIABLE BREW_RESULT
+        OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+      if(NOT BREW_RESULT EQUAL 0)
+        message(WARNING "Error running brew --prefix; you may need to manually configure package search paths.")
+        message(WARNING "  : ${BREW_ERROR}")
+      endif() # BREW_RESULT
+    endif() # ENV{HOMEBREW_PREFIX}
+
+    message(STATUS "Looking for Homebrew dependencies in ${BREW_PREFIX}")
+    include_directories(AFTER SYSTEM "${BREW_PREFIX}/include")
+    link_directories(AFTER "${BREW_PREFIX}/lib")
+    set(ENV{PKG_CONFIG_PATH} "${BREW_PREFIX}/opt/libffi/lib/pkgconfig")
   endif() # USE_NIX
 endif() # APPLE
 
@@ -133,21 +140,9 @@ install(
   DESTINATION lib/kllvm/llvm/opaque
 )
 
-find_program(OPT opt-13)
-find_program(OPT opt-12)
-find_program(OPT opt-11)
-find_program(OPT opt-10)
-find_program(OPT opt)
-find_program(LLVM_LINK llvm-link-13)
-find_program(LLVM_LINK llvm-link-12)
-find_program(LLVM_LINK llvm-link-11)
-find_program(LLVM_LINK llvm-link-10)
-find_program(LLVM_LINK llvm-link)
-find_program(LLC llc-13)
-find_program(LLC llc-12)
-find_program(LLC llc-11)
-find_program(LLC llc-10)
-find_program(LLC llc)
+find_program(OPT NAMES opt-13 opt-12 opt-11 opt-10 opt)
+find_program(LLVM_LINK NAMES llvm-link-13 llvm-link-12 llvm-link-11 llvm-link-10 llvm-link)
+find_program(LLC NAMES llc-13 llc-12 llc-11 llc-10 llc)
 if(${OPT} STREQUAL "OPT-NOTFOUND")
   message(FATAL_ERROR "Could not find an opt binary. Is llvm installed on your PATH?")
 endif()
@@ -165,7 +160,7 @@ configure_file(bin/llvm-kompile-testing bin @ONLY)
 configure_file(bin/llvm-kompile-clang bin @ONLY)
 
 install(
-  PROGRAMS 
+  PROGRAMS
     ${CMAKE_CURRENT_BINARY_DIR}/bin/llvm-kompile
     ${CMAKE_CURRENT_BINARY_DIR}/bin/llvm-kompile-clang
     ${CMAKE_CURRENT_BINARY_DIR}/bin/llvm-krun
@@ -267,8 +262,13 @@ FILE(GLOB_RECURSE HaskellSources matching/src/*.hs matching/app/Main.hs)
 set(KLLVM_AUTOGEN_INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR}/include)
 include_directories(${KLLVM_AUTOGEN_INCLUDE_DIR})
 
+add_subdirectory(deps)
 add_subdirectory(lib)
 add_subdirectory(tools)
 add_subdirectory(runtime)
-add_subdirectory(unittests)
+
+if(BUILD_TESTS)
+  add_subdirectory(unittests)
+endif()
+
 #add_subdirectory(test)
