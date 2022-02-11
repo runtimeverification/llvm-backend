@@ -1,6 +1,8 @@
 #ifndef AST_H
 #define AST_H
 
+#include "serializer.h"
+
 #include <boost/functional/hash.hpp>
 
 #include <iostream>
