@@ -226,6 +226,12 @@ set(MAPITER_LAYOUT 12)
 get_filename_component(INSTALL_DIR_ABS_PATH "${CMAKE_INSTALL_PREFIX}"
                        REALPATH BASE_DIR "${CMAKE_BINARY_DIR}")
 
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/gdb)
+configure_file(gdb/kllvm.py gdb @ONLY)
+
+set(GDB_SCRIPT_PATH ${CMAKE_CURRENT_BINARY_DIR}/gdb)
+set(GDB_SCRIPT_NAME kllvm.py)
+
 configure_file(config/macros.h include/config/macros.h @ONLY)
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/runtime)
@@ -238,22 +244,11 @@ configure_file(runtime/move_int.ll runtime @ONLY)
 configure_file(runtime/string_equal.ll runtime @ONLY)
 configure_file(runtime/take_steps.ll runtime @ONLY)
 
-file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/gdb)
-configure_file(gdb/interpreter-gdb.py gdb @ONLY)
-configure_file(gdb/kllvm.py gdb @ONLY)
-configure_file(gdb/__init__.py gdb @ONLY)
-
 FILE(GLOB LLVMFiles ${CMAKE_CURRENT_BINARY_DIR}/runtime/*.ll)
-FILE(GLOB GDBFiles ${CMAKE_CURRENT_BINARY_DIR}/gdb/*.py)
 
 install(
   FILES ${LLVMFiles}
   DESTINATION lib/kllvm/llvm
-)
-
-install(
-  FILES ${GDBFiles}
-  DESTINATION lib/kllvm/gdb
 )
 
 FILE(GLOB_RECURSE HaskellSources matching/src/*.hs matching/app/Main.hs)
