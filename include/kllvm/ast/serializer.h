@@ -14,7 +14,7 @@ namespace kllvm {
 namespace detail {
 
 template <typename T>
-auto to_bytes(T val) -> std::array<std::byte, sizeof(T)> {
+constexpr std::array<std::byte, sizeof(T)> to_bytes(T val) {
   auto bytes = std::array<std::byte, sizeof(T)>{};
   std::memcpy(bytes.data(), &val, sizeof(T));
   return bytes;

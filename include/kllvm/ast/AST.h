@@ -1,8 +1,6 @@
 #ifndef AST_H
 #define AST_H
 
-#include "serializer.h"
-
 #include <boost/functional/hash.hpp>
 
 #include <iostream>
@@ -15,6 +13,8 @@
 #include <vector>
 
 namespace kllvm {
+
+class serializer;
 
 class KORESortVariable;
 
@@ -899,6 +899,8 @@ transitiveClosure(std::unordered_map<
   return relations;
 }
 
+struct KORECompositeSortStart { };
+struct KORECompositePatternStart { };
 struct KORESymbolArguments { };
 struct KORESymbolFormals { };
 struct KORESymbolReturn { };
@@ -924,6 +926,8 @@ VARIANT_HEADER(KORESymbolArguments, 0x9);
 VARIANT_HEADER(KORESymbolFormals, 0xA);
 VARIANT_HEADER(KORESymbolReturn, 0xB);
 VARIANT_HEADER(KOREVariable, 0xC);
+VARIANT_HEADER(KORECompositeSortStart, 0xD);
+VARIANT_HEADER(KORECompositePatternStart, 0xE);
 
 #undef VARIANT_HEADER
 

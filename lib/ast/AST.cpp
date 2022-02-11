@@ -1,4 +1,5 @@
 #include "kllvm/ast/AST.h"
+#include "kllvm/ast/serializer.h"
 
 #include <algorithm>
 #include <iostream>
@@ -1838,6 +1839,8 @@ void KOREVariablePattern::serialize_to(serializer &s) const {
 }
 
 void KORECompositePattern::serialize_to(serializer &s) const {
+  s.emit(header_byte<KORECompositePatternStart>);
+
   for (auto const &arg : arguments) {
     arg->serialize_to(s);
   }
@@ -1859,6 +1862,8 @@ void KORESortVariable::serialize_to(serializer &s) const {
 }
 
 void KORECompositeSort::serialize_to(serializer &s) const {
+  s.emit(header_byte<KORECompositeSortStart>);
+
   for (auto const &arg : arguments) {
     arg->serialize_to(s);
   }
