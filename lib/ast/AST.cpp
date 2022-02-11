@@ -1831,11 +1831,71 @@ void KOREDefinition::print(std::ostream &Out, unsigned indent) const {
 
 // Binary serialization
 
-void KOREVariablePattern::serialize_to(serializer &s) const { }
+void KOREVariablePattern::serialize_to(serializer &s) const {
+  s.emit(header_byte<KOREVariablePattern>);
+  name->serialize_to(s);
+  sort->serialize_to(s);
+}
 
-void KORECompositePattern::serialize_to(serializer &s) const { }
+void KORECompositePattern::serialize_to(serializer &s) const {
+  for (auto const &arg : arguments) {
+    arg->serialize_to(s);
+  }
 
-void KOREStringPattern::serialize_to(serializer &s) const { }
+  s.emit(header_byte<KORECompositePattern>);
+  /* s.emit(int32_t(arguments.size())); */
+
+  constructor->serialize_to(s);
+}
+
+void KOREStringPattern::serialize_to(serializer &s) const {
+  s.emit(header_byte<KOREStringPattern>);
+  s.emit_string(contents);
+}
+
+void KORESortVariable::serialize_to(serializer &s) const {
+  s.emit(header_byte<KORESortVariable>);
+  s.emit_string(name);
+}
+
+void KORECompositeSort::serialize_to(serializer &s) const {
+  for (auto const &arg : arguments) {
+    arg->serialize_to(s);
+  }
+
+  s.emit(header_byte<KORECompositeSort>);
+  /* s.emit(int32_t(arguments.size())); */
+  s.emit_string(name);
+}
+
+void KORESymbol::serialize_to(serializer &s) const {
+  for (auto const &arg : arguments) {
+    arg->serialize_to(s);
+  }
+  s.emit(header_byte<KORESymbolArguments>);
+  /* s.emit(int32_t(arguments.size())); */
+
+  for (auto const &arg : formalArguments) {
+    arg->serialize_to(s);
+  }
+
+  s.emit(header_byte<KORESymbolFormals>);
+  /* s.emit(int32_t(formalArguments.size())); */
+
+  if (sort) {
+    sort->serialize_to(s);
+  }
+  s.emit(header_byte<KORESymbolReturn>);
+  /* s.emit(sort ? int32_t(1) : int32_t(0)); */
+
+  s.emit(header_byte<KORESymbol>);
+  s.emit_string(name);
+}
+
+void KOREVariable::serialize_to(serializer &s) const {
+  s.emit(header_byte<KOREVariable>);
+  s.emit_string(name);
+}
 
 void kllvm::readMultimap(
     std::string name, KORESymbolDeclaration *decl,
