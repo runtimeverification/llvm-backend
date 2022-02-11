@@ -15,9 +15,10 @@ int main(int argc, char **argv) {
   KOREParser parser(argv[1]);
   auto pat = parser.pattern();
 
-  /* pat->print(std::cout); */
+  pat->print(std::cerr);
 
   auto s = serializer();
+  pat->serialize_to(s);
 
   for (auto byte : s.data()) {
     std::cout << uint8_t(byte);

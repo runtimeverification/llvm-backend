@@ -1829,6 +1829,14 @@ void KOREDefinition::print(std::ostream &Out, unsigned indent) const {
   }
 }
 
+// Binary serialization
+
+void KOREVariablePattern::serialize_to(serializer &s) const { }
+
+void KORECompositePattern::serialize_to(serializer &s) const { }
+
+void KOREStringPattern::serialize_to(serializer &s) const { }
+
 void kllvm::readMultimap(
     std::string name, KORESymbolDeclaration *decl,
     std::map<std::string, std::set<std::string>> &output, std::string attName) {

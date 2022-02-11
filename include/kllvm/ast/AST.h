@@ -343,6 +343,9 @@ public:
   virtual ~KOREPattern() = default;
 
   virtual void print(std::ostream &Out, unsigned indent = 0) const = 0;
+
+  virtual void serialize_to(serializer &s) const = 0;
+
   /* adds all the object level symbols contained recursively in the current
      pattern to the specified map, mapping their symbol name to the list of all
      instances of that symbol. */
@@ -408,6 +411,8 @@ public:
   virtual sptr<KORESort> getSort() const override { return sort; }
 
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
+  virtual void serialize_to(serializer &s) const override;
+
   virtual void
   markSymbols(std::map<std::string, std::vector<KORESymbol *>> &) override { }
   virtual void
@@ -489,7 +494,10 @@ public:
   }
 
   void addArgument(sptr<KOREPattern> Argument);
+
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
+  virtual void serialize_to(serializer &s) const override;
+
   virtual void
   prettyPrint(std::ostream &out, PrettyPrintData const &data) const override;
   virtual void
@@ -533,10 +541,12 @@ public:
   std::string getContents() { return contents; }
 
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
+  virtual void serialize_to(serializer &s) const override;
   virtual void
   prettyPrint(std::ostream &out, PrettyPrintData const &data) const override {
     abort();
   }
+
   virtual void
   markSymbols(std::map<std::string, std::vector<KORESymbol *>> &) override { }
   virtual void
