@@ -317,14 +317,16 @@ void addMatchFunction(char *debugName, char *function, void *result, ...) {
 }
 }
 
-#define DEFINE_GDB_PY_SCRIPT(script_name)                                      \
+#define DEFINE_GDB_PY_SCRIPT(script_path, script_name)                         \
   asm("\
 .pushsection \".debug_gdb_scripts\", \"MS\",@progbits,1\n\
-.byte 1 /* Python */\n\
-.asciz \"" script_name "\"\n\
+.byte 4 /* Python inlined */\n\
+.ascii \"" script_name "\\n\"\n\
+.incbin \"" script_path "/" script_name "\"\n\
+.byte 0 \n\
 .popsection \n\
 ");
 
 #ifndef __APPLE__
-DEFINE_GDB_PY_SCRIPT(INSTALL_PREFIX "/lib/kllvm/gdb/interpreter-gdb.py")
+DEFINE_GDB_PY_SCRIPT(GDB_SCRIPT_PATH, GDB_SCRIPT_NAME)
 #endif
