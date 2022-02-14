@@ -28,6 +28,8 @@ constexpr std::array<std::byte, sizeof(T)> to_bytes(T val) {
  */
 class serializer {
 public:
+  static constexpr auto magic_header = std::array{'K', 'O', 'R', 'E'};
+
   serializer();
 
   /**

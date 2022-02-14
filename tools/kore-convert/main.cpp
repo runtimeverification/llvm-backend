@@ -43,7 +43,7 @@ cl::opt<kore_file_format> OutputFormat(
 cl::opt<bool> ForceBinary("F", cl::desc("Force binary output on stdout"));
 
 bool is_binary_kore_header(std::string const &data) {
-  constexpr auto reference = std::array{'K', 'O', 'R', 'E'};
+  auto const &reference = serializer::magic_header;
   return std::equal(reference.begin(), reference.end(), data.begin());
 }
 
@@ -98,6 +98,7 @@ void dump_text(sptr<KOREPattern> pat) {
   } else {
     auto os = std::ofstream(OutputFilename);
     pat->print(os);
+    os << '\n';
   }
 }
 

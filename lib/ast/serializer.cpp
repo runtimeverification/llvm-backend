@@ -7,7 +7,11 @@ serializer::serializer()
     , direct_string_prefix_{0x01}
     , backref_string_prefix_{0x02}
     , next_idx_(0)
-    , intern_table_{} { }
+    , intern_table_{} {
+  for (auto b : magic_header) {
+    emit(std::byte(b));
+  }
+}
 
 void serializer::emit(std::byte b) {
   buffer_.push_back(b);

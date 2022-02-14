@@ -66,6 +66,8 @@ config.substitutions.extend([
     ('%test-basename', '`basename %s .kore`'),
 
     ('%allow-pipefail', 'set +o pipefail'),
+
+    ('%kore-convert', 'kore-convert'),
 ])
 
 config.recursiveExpansionLimit = 10
