@@ -899,12 +899,6 @@ transitiveClosure(std::unordered_map<
   return relations;
 }
 
-struct KORECompositeSortStart { };
-struct KORECompositePatternStart { };
-struct KORESymbolArguments { };
-struct KORESymbolFormals { };
-struct KORESymbolReturn { };
-
 namespace detail {
 
 template <typename T>
@@ -916,18 +910,13 @@ struct header_byte_t;
     static constexpr std::byte value = std::byte(V);                           \
   }
 
-VARIANT_HEADER(KOREVariablePattern, 0x3);
 VARIANT_HEADER(KORECompositePattern, 0x4);
 VARIANT_HEADER(KOREStringPattern, 0x5);
 VARIANT_HEADER(KORECompositeSort, 0x6);
 VARIANT_HEADER(KORESortVariable, 0x7);
 VARIANT_HEADER(KORESymbol, 0x8);
-VARIANT_HEADER(KORESymbolArguments, 0x9);
-VARIANT_HEADER(KORESymbolFormals, 0xA);
-VARIANT_HEADER(KORESymbolReturn, 0xB);
-VARIANT_HEADER(KOREVariable, 0xC);
-VARIANT_HEADER(KORECompositeSortStart, 0xD);
-VARIANT_HEADER(KORECompositePatternStart, 0xE);
+VARIANT_HEADER(KOREVariablePattern, 0x9);
+VARIANT_HEADER(KOREVariable, 0xD);
 
 #undef VARIANT_HEADER
 

@@ -62,6 +62,7 @@ private:
   std::vector<std::byte> buffer_;
   std::byte direct_string_prefix_;
   std::byte backref_string_prefix_;
+  std::byte terminated_string_prefix_;
 
   int32_t next_idx_;
   std::unordered_map<std::string, int32_t> intern_table_;

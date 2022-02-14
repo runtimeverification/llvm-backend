@@ -1,5 +1,5 @@
 // RUN: %kore-convert %s -o %t.binary
+// RUN: %kore-convert %s -o %t.ref --to=text
 // RUN: %kore-convert %t.binary --o %t.kore
-// RUN: tail -1 %s > %t.ref
 // RUN: diff %t.kore %t.ref
 Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(inj{SortFoo{}, SortKItem{}}(Lblfoo'LParUndsRParUnds'TEST'UndsUnds'K{}(kseq{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("2")),kseq{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("3")),kseq{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("4")),kseq{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("5")),kseq{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("6")),kseq{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("7")),kseq{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("8")),kseq{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("9")),kseq{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("10")),kseq{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("11")),kseq{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("12")),kseq{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("13")),kseq{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("14")),kseq{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("13")),kseq{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("13")),kseq{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("14")),dotk{}())))))))))))))))))),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))
