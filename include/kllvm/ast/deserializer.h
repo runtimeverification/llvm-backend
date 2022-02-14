@@ -13,6 +13,11 @@ namespace kllvm {
 
 namespace detail {
 
+template <typename It>
+std::byte peek(It const &it) {
+  return std::byte(*it);
+}
+
 template <typename T>
 constexpr T from_bytes(std::byte const *ptr) {
   auto ret = T{};
@@ -22,14 +27,14 @@ constexpr T from_bytes(std::byte const *ptr) {
 
 template <typename T, typename It>
 T read(It &ptr) {
-  auto val = from_bytes<T>(&*ptr);
+  auto val = from_bytes<T>(reinterpret_cast<std::byte const *>(&*ptr));
   ptr += sizeof(T);
   return val;
 }
 
 template <typename It>
 std::string read_string(It &ptr) {
-  switch (uint8_t(*ptr)) {
+  switch (uint8_t(peek(ptr))) {
 
   case 0x01: {
     ++ptr;
@@ -54,7 +59,7 @@ std::string read_string(It &ptr) {
 
 template <typename It>
 sptr<KOREVariable> read_variable(It &ptr) {
-  if (*ptr == header_byte<KOREVariable>) {
+  if (peek(ptr) == header_byte<KOREVariable>) {
     ++ptr;
     return KOREVariable::Create(read_string(ptr));
   }
@@ -64,15 +69,15 @@ sptr<KOREVariable> read_variable(It &ptr) {
 
 template <typename It>
 sptr<KORESort> read_sort(It &ptr) {
-  if (*ptr == header_byte<KORESortVariable>) {
+  if (peek(ptr) == header_byte<KORESortVariable>) {
     ++ptr;
     return KORESortVariable::Create(read_string(ptr));
-  } else if (*ptr == header_byte<KORECompositeSortStart>) {
+  } else if (peek(ptr) == header_byte<KORECompositeSortStart>) {
     ++ptr;
 
     auto args = std::vector<sptr<KORESort>>{};
 
-    while (*ptr != header_byte<KORECompositeSort>) {
+    while (peek(ptr) != header_byte<KORECompositeSort>) {
       args.push_back(read_sort(ptr));
     }
 
@@ -95,17 +100,17 @@ ptr<KORESymbol> read_symbol(It &ptr) {
   auto formals = std::vector<sptr<KORESort>>{};
   auto return_sort = sptr<KORESort>{nullptr};
 
-  while (*ptr != header_byte<KORESymbolArguments>) {
+  while (peek(ptr) != header_byte<KORESymbolArguments>) {
     args.push_back(read_sort(ptr));
   }
   ++ptr;
 
-  while (*ptr != header_byte<KORESymbolFormals>) {
+  while (peek(ptr) != header_byte<KORESymbolFormals>) {
     formals.push_back(read_sort(ptr));
   }
   ++ptr;
 
-  if (*ptr != header_byte<KORESymbolReturn>) {
+  if (peek(ptr) != header_byte<KORESymbolReturn>) {
     return_sort = read_sort(ptr);
   }
   ++ptr;
@@ -131,21 +136,21 @@ ptr<KORESymbol> read_symbol(It &ptr) {
 
 template <typename It>
 sptr<KOREPattern> read_pattern(It &ptr) {
-  if (*ptr == header_byte<KOREStringPattern>) {
+  if (peek(ptr) == header_byte<KOREStringPattern>) {
     ++ptr;
     return KOREStringPattern::Create(read_string(ptr));
-  } else if (*ptr == header_byte<KOREVariablePattern>) {
+  } else if (peek(ptr) == header_byte<KOREVariablePattern>) {
     ++ptr;
     auto var = read_variable(ptr);
     auto sort = read_sort(ptr);
 
     return KOREVariablePattern::Create(var->getName(), sort);
-  } else if (*ptr == header_byte<KORECompositePatternStart>) {
+  } else if (peek(ptr) == header_byte<KORECompositePatternStart>) {
     ++ptr;
 
     auto args = std::vector<sptr<KOREPattern>>{};
 
-    while (*ptr != header_byte<KORECompositePattern>) {
+    while (peek(ptr) != header_byte<KORECompositePattern>) {
       args.push_back(read_pattern(ptr));
     }
 
@@ -168,6 +173,7 @@ sptr<KOREPattern> read_pattern(It &ptr) {
 
 template <typename It>
 sptr<KOREPattern> deserialize_pattern(It begin, It end) {
+  begin += 4;
   return detail::read_pattern(begin);
 }
 
