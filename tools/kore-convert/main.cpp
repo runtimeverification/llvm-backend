@@ -76,7 +76,8 @@ sptr<KOREPattern> get_input_pattern() {
   case binary: return get_binary();
 
   case detect: {
-    auto first_bytes = file_contents(InputFilename, 4);
+    auto first_bytes
+        = file_contents(InputFilename, serializer::magic_header.size());
 
     if (is_binary_kore_header(first_bytes)) {
       InputFormat = binary;
