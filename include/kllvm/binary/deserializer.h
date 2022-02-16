@@ -38,9 +38,8 @@ std::string read_string(It &ptr) {
 
   case 0x01: {
     ++ptr;
-    auto len = read<int32_t>(ptr);
-    auto ret = std::string((char *)(&*ptr), (char *)(&*(ptr + len)));
-    ptr += len;
+    auto ret = std::string((char *)&*ptr);
+    ptr += ret.size() + 1;
     return ret;
   }
 
@@ -49,15 +48,7 @@ std::string read_string(It &ptr) {
     auto backref = read<int32_t>(ptr);
     auto begin = ptr - backref;
 
-    auto len = read<int32_t>(begin);
-    return std::string((char *)(&*begin), (char *)(&*(begin + len)));
-  }
-
-  case 0x03: {
-    ++ptr;
-    auto ret = std::string((char *)(&*ptr));
-    ptr += ret.size() + 1;
-    return ret;
+    return std::string((char *)&*begin);
   }
 
   default: throw std::runtime_error("Internal parsing exception");
@@ -143,6 +134,14 @@ sptr<KOREPattern> read_v2(It &ptr, It end) {
         sort_stack.pop_back();
       }
 
+      break;
+    }
+
+    case header_byte<KORESortVariable>: {
+      ++ptr;
+
+      auto name = read_string(ptr);
+      sort_stack.push_back(KORESortVariable::Create(name));
       break;
     }
 
