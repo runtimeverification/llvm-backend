@@ -1,5 +1,6 @@
 #include "kllvm/ast/AST.h"
-#include "kllvm/ast/serializer.h"
+
+#include "kllvm/binary/serializer.h"
 
 #include <algorithm>
 #include <iostream>

@@ -1,4 +1,4 @@
-#include <kllvm/ast/serializer.h>
+#include <kllvm/binary/serializer.h>
 
 namespace kllvm {
 
