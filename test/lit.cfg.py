@@ -15,6 +15,7 @@ config.suffixes = ['.kore']
 config.excludes = [
     'macros.kore',
     'syntaxDefinition.kore',
+    'Inputs'
 ]
 
 # When lit is launched, it doesn't inherit any environment variables from the
