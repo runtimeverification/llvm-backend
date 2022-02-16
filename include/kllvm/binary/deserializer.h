@@ -178,7 +178,21 @@ sptr<KOREPattern> read_v2(It &ptr, It end) {
 
 template <typename It>
 sptr<KOREPattern> deserialize_pattern(It begin, It end) {
-  begin += 4;
+  // Try to parse the file even if the magic header isn't correct; by the time
+  // we're here we already know that we're trying to parse a binary KORE file.
+  // The header itself gets used by the application when detecting binary vs.
+  // textual.
+  for (auto i = 0; i < 4; ++i) {
+    detail::read<char>(begin);
+  }
+
+  // When we end up with multiple versions of the format, we'll need to dispatch
+  // on these version components. For now, just skip over the values and ignore
+  // them.
+  /* auto v_major = */ detail::read<int16_t>(begin);
+  /* auto v_minor = */ detail::read<int16_t>(begin);
+  /* auto v_patch = */ detail::read<int16_t>(begin);
+
   return detail::read_v2(begin, end);
 }
 

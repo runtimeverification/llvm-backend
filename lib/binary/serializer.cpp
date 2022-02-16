@@ -12,6 +12,10 @@ serializer::serializer()
   for (auto b : magic_header) {
     emit(std::byte(b));
   }
+
+  for (auto version_part : version) {
+    emit(int16_t(version_part));
+  }
 }
 
 void serializer::emit(std::byte b) {
