@@ -1,0 +1,5 @@
+// RUN: %kore-convert %s -o %t.binary
+// RUN: %kore-convert %s -o %t.ref --to=text
+// RUN: %kore-convert %t.binary --o %t.kore
+// RUN: diff %t.kore %t.ref
+Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(inj{SortVal{}, SortKItem{}}(Lbllambda'UndsStopUndsUnds'LAMBDA'Unds'Val'Unds'KVar'Unds'Exp{}(\dv{SortKVar{}}("y"),Lbl'UndsUndsUnds'LAMBDA'Unds'Exp'Unds'Exp'Unds'Exp{}(inj{SortKVar{}, SortExp{}}(\dv{SortKVar{}}("y0")),inj{SortKVar{}, SortExp{}}(\dv{SortKVar{}}("y"))))),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))

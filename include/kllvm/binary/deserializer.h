@@ -38,8 +38,10 @@ std::string read_string(It &ptr) {
 
   case 0x01: {
     ++ptr;
-    auto ret = std::string((char *)&*ptr);
-    ptr += ret.size() + 1;
+    auto len = read<int32_t>(ptr);
+    auto ret = std::string((char *)&*ptr, (char *)(&*ptr + len));
+
+    ptr += len;
     return ret;
   }
 
@@ -47,8 +49,9 @@ std::string read_string(It &ptr) {
     ++ptr;
     auto backref = read<int32_t>(ptr);
     auto begin = ptr - backref;
+    auto len = read<int32_t>(begin);
 
-    return std::string((char *)&*begin);
+    return std::string((char *)&*begin, (char *)(&*begin + len));
   }
 
   default: throw std::runtime_error("Internal parsing exception");

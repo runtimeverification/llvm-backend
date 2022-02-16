@@ -1,0 +1,5 @@
+// RUN: %kore-convert %s -o %t.binary
+// RUN: %kore-convert %s -o %t.ref --to=text
+// RUN: %kore-convert %t.binary --o %t.kore
+// RUN: diff %t.kore %t.ref
+Lblfoo'LParUndsRParUnds'TEST'Unds'Int'Unds'Int{}(\dv{SortInt{}}("1"))

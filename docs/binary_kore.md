@@ -28,23 +28,24 @@ For example, a file of version `1.0.0` should begin:
 
 Two representations for strings are available: direct and interned.
 
-Directly-encoded strings are the byte `01`, followed by the bytes of the string,
-then terminated by the byte `00`.
+Directly-encoded strings are the byte `01`, followed by a 4-byte length, then
+the bytes of the string.
 
 Interned strings are the byte `02`, followed by a 4-byte integer value. This
 value represents the number of bytes to count _backwards_ in the buffer (from
 the byte immediately following the backreference count) to find the _first
-character_ of a directly-encoded string.
+byte of the length_ of a directly-encoded string.
 
 For example, consider the following sequence of bytes:
 ```
-0156 7856 7800 020a 0000 00ff
+0104 0000 0056 7856 7802 0d00 0000 ff
 ```
 
-First, the string `wVwV` is encoded directly (splitting the prefix and suffix
-from the characters, `01 5678 5678 00`). Then, a backreference of 10 bytes is
-encoded (`02 0a00 0000`). This backreference is counted from the byte `ff`, and
-therefore points to the first `56` byte at the start of the character sequence.
+First, the string `wVwV` is encoded directly with its length (splitting the
+prefix and length from the characters, `01 0400 0000 5678 5678`). Then, a
+backreference of 13 bytes is encoded (`02 0d00 0000`). This backreference is
+counted from the byte `ff`, and therefore points to the `04` byte at the start
+of the directly-encoded string's length.
 
 ## KORE
 

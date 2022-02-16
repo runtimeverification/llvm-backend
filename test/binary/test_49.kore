@@ -1,0 +1,5 @@
+// RUN: %kore-convert %s -o %t.binary
+// RUN: %kore-convert %s -o %t.ref --to=text
+// RUN: %kore-convert %t.binary --o %t.kore
+// RUN: diff %t.kore %t.ref
+Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(inj{SortJSON{}, SortKItem{}}(LblJSONList{}(LblJSONs{}(LblJSONObject{}(LblJSONs{}(LblJSONEntry{}(inj{SortString{}, SortJSONKey{}}(\dv{SortString{}}("foo")),inj{SortInt{}, SortJSON{}}(\dv{SortInt{}}("0"))),LblJSONs{}(LblJSONEntry{}(inj{SortString{}, SortJSONKey{}}(\dv{SortString{}}("bar")),inj{SortFloat{}, SortJSON{}}(\dv{SortFloat{}}("0.00000000000000000e0"))),LblJSONs{}(LblJSONEntry{}(inj{SortString{}, SortJSONKey{}}(\dv{SortString{}}("baz")),inj{SortBool{}, SortJSON{}}(\dv{SortBool{}}("true"))),LblJSONs{}(LblJSONEntry{}(inj{SortString{}, SortJSONKey{}}(\dv{SortString{}}("qux")),inj{SortString{}, SortJSON{}}(\dv{SortString{}}("foo"))),LblJSONs{}(LblJSONEntry{}(inj{SortString{}, SortJSONKey{}}(\dv{SortString{}}("null")),LblJSONnull{}()),Lbl'Stop'List'LBraQuot'JSONs'QuotRBraUnds'JSONs{}())))))),Lbl'Stop'List'LBraQuot'JSONs'QuotRBraUnds'JSONs{}()))),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))

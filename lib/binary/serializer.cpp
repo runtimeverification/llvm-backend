@@ -28,11 +28,11 @@ void serializer::emit_string(std::string const &s) {
 
     intern_table_[s] = next_idx_;
 
+    emit(int32_t(s.size()));
+
     for (auto c : s) {
       emit(std::byte(c));
     }
-
-    emit(std::byte(0));
   } else {
     emit(backref_string_prefix_);
 
