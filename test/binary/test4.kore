@@ -1,0 +1,26 @@
+// RUN: split-file %s %t
+// RUN: %kore-convert %t/a.kore -o %t/a
+// RUN: %kore-convert %t/b.kore -o %t/b
+// RUN: %kore-convert %t/ctor.kore -o %t/ctor
+// RUN: tail -c +11 %t/b >> %t/a
+// RUN: tail -c +11 %t/ctor >> %t/a
+// RUN: head -c -2  %t/a > %t/term
+// RUN: echo -ne '\x02\x00' >> %t/term
+// RUN: %kore-convert %t/term -o %t/term.kore
+// RUN: %kore-convert %t/ref.kore --to=text -o %t/ref-printed.kore
+// RUN: diff %t/term.kore %t/ref-printed.kore
+
+//--- ctor.kore
+inj{SortKItem{}, SortFoo{}}()
+
+//--- a.kore
+Lblfoo'LParUndsRParUnds'TEST'UndsUnds'K{}()
+
+//--- b.kore
+\dv{SortInt{}}("11")
+
+//--- ref.kore
+inj{SortKItem{}, SortFoo{}}(
+  Lblfoo'LParUndsRParUnds'TEST'UndsUnds'K{}(),
+  \dv{SortInt{}}("11")
+)
