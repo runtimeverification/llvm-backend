@@ -40,11 +40,16 @@ abort:
   unreachable
 print:
   %hasStatistics = load i1, i1* @statistics
-  br i1 %hasStatistics, label %printStatistics, label %printConfig
+  br i1 %hasStatistics, label %printStatistics, label %printEntry
 printStatistics:
   %steps = load i64, i64* @steps
   call void @printStatistics(i8* %output, i64 %steps)
-  br label %printConfig
+  br label %printEntry
+printEntry:
+  %useBinary = load i1, i1* @binary_output
+  br i1 %useBinary, label %printBinary, label %printConfig
+printBinary:
+  br i1 %error, label %exit, label %exitCode
 printConfig:
   call void @printConfiguration(i8* %output, %block* %subject)
   br i1 %error, label %exit, label %exitCode
@@ -54,7 +59,7 @@ exitCode:
   %exit_trunc = trunc i64 %exit_ul to i32
   br label %exit
 exit:
-  %exit_ui = phi i32 [ %exit_trunc, %exitCode ], [ 113, %printConfig ]
+  %exit_ui = phi i32 [ %exit_trunc, %exitCode ], [ 113, %printConfig ], [ 113, %printBinary ]
   call void @exit(i32 %exit_ui)
   unreachable
 }

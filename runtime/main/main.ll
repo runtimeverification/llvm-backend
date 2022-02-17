@@ -49,7 +49,7 @@ stats.set:
 binary.body:
   %binary.cmp = call i32 @strcmp(i8* %arg, i8* getelementptr inbounds ([16 x i8], [16 x i8]* @binary_out.flag, i64 0, i64 0))
   %binary.eq = icmp eq i32 %binary.cmp, 0
-  br i1 %binary.eq, label %binary.set, label %binary.body
+  br i1 %binary.eq, label %binary.set, label %body.tail
 
 binary.set:
   store i1 1, i1* @binary_output
