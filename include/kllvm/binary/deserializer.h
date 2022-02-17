@@ -199,6 +199,9 @@ sptr<KOREPattern> deserialize_pattern(It begin, It end) {
   return detail::read_v2(begin, end);
 }
 
+bool has_binary_kore_header(std::string const &filename);
+sptr<KOREPattern> deserialize_pattern(std::string const &filename);
+
 } // namespace kllvm
 
 #endif

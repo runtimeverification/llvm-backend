@@ -1,6 +1,8 @@
 #include "kllvm/ast/AST.h"
 
+#include "kllvm/binary/deserializer.h"
 #include "kllvm/binary/serializer.h"
+#include "kllvm/parser/KOREParser.h"
 
 #include <algorithm>
 #include <iostream>
@@ -8,6 +10,14 @@
 #include <unordered_set>
 
 using namespace kllvm;
+
+sptr<KOREPattern> KOREPattern::load(std::string const &filename) {
+  if (has_binary_kore_header(filename)) {
+    return deserialize_pattern(filename);
+  } else {
+    return parser::KOREParser(filename).pattern();
+  }
+}
 
 std::string kllvm::decodeKore(std::string kore) {
   static std::unordered_map<std::string, char> codes;

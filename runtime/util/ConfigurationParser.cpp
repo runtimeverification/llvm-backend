@@ -128,9 +128,7 @@ static void *constructInitialConfiguration(const KOREPattern *initial) {
 }
 
 block *parseConfiguration(const char *filename) {
-  // Parse initial configuration as a KOREPattern
-  KOREParser parser(filename);
-  ptr<KOREPattern> InitialConfiguration = parser.pattern();
+  auto InitialConfiguration = KOREPattern::load(filename);
 
   // InitialConfiguration->print(std::cout);
 

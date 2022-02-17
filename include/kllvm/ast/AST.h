@@ -347,6 +347,12 @@ class KORECompositePattern;
 // KOREPattern
 class KOREPattern : public std::enable_shared_from_this<KOREPattern> {
 public:
+  /*
+   * Load a pattern from disk, examining the first 4 bytes to see if it's a
+   * binary file or a textual KORE file.
+   */
+  static sptr<KOREPattern> load(std::string const &filename);
+
   virtual ~KOREPattern() = default;
 
   virtual void print(std::ostream &Out, unsigned indent = 0) const = 0;
