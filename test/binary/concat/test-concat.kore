@@ -1,8 +1,8 @@
 // RUN: %kore-convert %S/Inputs/a.kore -o %t_a
 // RUN: %kore-convert %S/Inputs/b.kore -o %t_b
 // RUN: %kore-convert %S/Inputs/ctor.kore -o %t_ctor
-// RUN: tail -c +11 %t_b >> %t_a
-// RUN: tail -c +11 %t_ctor >> %t_a
+// RUN: tail -c +12 %t_b >> %t_a
+// RUN: tail -c +12 %t_ctor >> %t_a
 // RUN: head -c -2  %t_a > %t_term
 // RUN: echo -ne '\x02\x00' >> %t_term
 // RUN: %kore-convert %t_term -o %t_term.kore

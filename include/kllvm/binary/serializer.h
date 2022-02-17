@@ -28,7 +28,7 @@ std::array<std::byte, sizeof(T)> to_bytes(T val) {
  */
 class serializer {
 public:
-  static constexpr auto magic_header = std::array{'K', 'O', 'R', 'E'};
+  static constexpr auto magic_header = std::array{'\x7f', 'K', 'O', 'R', 'E'};
   static constexpr auto version = std::array{1, 0, 0};
 
   serializer();

@@ -2,6 +2,7 @@
 #define AST_DESERIALIZER_H
 
 #include <kllvm/ast/AST.h>
+#include <kllvm/binary/serializer.h>
 
 #include <cstddef>
 #include <cstring>
@@ -184,7 +185,7 @@ sptr<KOREPattern> deserialize_pattern(It begin, It end) {
   // we're here we already know that we're trying to parse a binary KORE file.
   // The header itself gets used by the application when detecting binary vs.
   // textual.
-  for (auto i = 0; i < 4; ++i) {
+  for (auto i = 0; i < serializer::magic_header.size(); ++i) {
     detail::read<char>(begin);
   }
 

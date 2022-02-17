@@ -15,13 +15,13 @@ The serialization format assumes little-endianness throughout. For example, the
 
 ## Header
 
-Binary KORE terms should begin with the byte sequence `4b4f 5245`, followed by
+Binary KORE terms should begin with the byte sequence `7f4b 4f52 45`, followed by
 three 16-bit values representing the major, minor and patch versions of the
 format used.
 
 For example, a file of version `1.0.0` should begin:
 ```
-4b4f 5245 0100 0000 0000
+7f4b 4f52 4501 0000 0000 00
 ```
 
 ## Strings
