@@ -13,15 +13,18 @@ declare void @finish_rewriting(%block*, i1) #0
 declare void @initStaticObjects()
 
 @statistics.flag = private constant [13 x i8] c"--statistics\00"
+@binary_out.flag = private constant [16 x i8] c"--binary-output\00"
 
 @output_file = external global i8*
 @statistics = external global i1
+@binary_output = external global i1
 
 declare i32 @strcmp(i8* %a, i8* %b)
 
 define void @parse_flags(i32 %argc, i8** %argv) {
 entry:
   store i1 0, i1* @statistics
+  store i1 0, i1* @binary_output
   br label %header
 
 header:
@@ -32,15 +35,24 @@ header:
 body:
   %argv.idx = getelementptr inbounds i8*, i8** %argv, i32 %idx
   %arg = load i8*, i8** %argv.idx
-  br label %body.stats
+  br label %stats.body
 
-body.stats:
+stats.body:
   %stats.cmp = call i32 @strcmp(i8* %arg, i8* getelementptr inbounds ([13 x i8], [13 x i8]* @statistics.flag, i64 0, i64 0))
   %stats.eq = icmp eq i32 %stats.cmp, 0
-  br i1 %stats.eq, label %set.stats, label %body.tail
+  br i1 %stats.eq, label %stats.set, label %binary.body
 
-set.stats:
+stats.set:
   store i1 1, i1* @statistics
+  br label %binary.body
+
+binary.body:
+  %binary.cmp = call i32 @strcmp(i8* %arg, i8* getelementptr inbounds ([16 x i8], [16 x i8]* @binary_out.flag, i64 0, i64 0))
+  %binary.eq = icmp eq i32 %binary.cmp, 0
+  br i1 %binary.eq, label %binary.set, label %binary.body
+
+binary.set:
+  store i1 1, i1* @binary_output
   br label %body.tail
 
 body.tail:
