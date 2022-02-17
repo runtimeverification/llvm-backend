@@ -1,6 +1,7 @@
 add_library(util STATIC
   ConfigurationParser.cpp
   ConfigurationPrinter.cpp
+  ConfigurationSerializer.cpp
   search.cpp
 )
 
