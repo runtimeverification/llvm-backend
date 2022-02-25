@@ -172,7 +172,15 @@ for name in "${params[@]}"; do
     KItem)
     ;;
     *)
-    printf -v "$var_name" %s "inj{Sort$sort{}, SortKItem{}}(${!var_name})"
+    if [ -z "${!file_name}" ]; then
+      printf -v "$var_name" %s "inj{Sort$sort{}, SortKItem{}}(${!var_name})"
+    else
+      temp_file="$(mktemp tmp.interpolate.XXXXXXXXXX)"
+      echo "inj{Sort$sort{}, SortKItem{}}(" >> "$temp_file"
+      cat "${!file_name}" >> "$temp_file"
+      echo ")" >> "$temp_file"
+      mv "$temp_file" "${!file_name}"
+    fi
     ;;
   esac
 done
