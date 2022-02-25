@@ -1,3 +1,4 @@
+#include <cstring>
 #include <unordered_set>
 
 #include "runtime/header.h"
@@ -16,7 +17,7 @@ static bool hasStatistics = false;
 
 void parse_flags(int argc, char **argv) {
   for (int i = 4; i < argc; ++i) {
-    if (str_eq(argv[i], "--statistics")) {
+    if (strcmp(argv[i], "--statistics") == 0) {
       hasStatistics = true;
     }
   }
