@@ -63,6 +63,7 @@ do
     name="$2"
     value="$3"
     var_name="params_$name"
+    file_name="file_$name"
     pretty_name="pretty_$name"
     sort_name="sort_$name"
     params+=("$name")
@@ -74,7 +75,7 @@ do
       printf -v "$var_name" %s "$value"
       ;;
       korefile)
-      printf -v "$var_name" %s "`cat "$value"`"
+      printf -v "$file_name" %s "$value"
       ;;
       pretty)
       printf -v "$pretty_name" %s "$value"
@@ -206,7 +207,13 @@ HERE
 )),
 HERE
   var_name="params_$param"
-  echo "${!var_name}" >> $input_file
+  file_name="file_$param"
+
+  if [ -z "${!file_name}" ]; then
+    echo "${!var_name}" >> $input_file
+  else
+    cat "${!file_name}" >> $input_file
+  fi
 
   cat <<HERE >> $input_file
 ))
