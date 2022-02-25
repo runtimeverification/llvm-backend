@@ -167,6 +167,7 @@ done
 for name in "${params[@]}"; do
   sort_name="sort_$name"
   var_name="params_$name"
+  file_name="file_$name"
   sort="${!sort_name}"
   case $sort in
     KItem)
