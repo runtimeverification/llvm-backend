@@ -1,3 +1,4 @@
+#include "kllvm/binary/deserializer.h"
 #include "kllvm/parser/KOREParser.h"
 #include "kllvm/parser/KOREScanner.h"
 #include "runtime/alloc.h"
@@ -127,13 +128,22 @@ static void *constructInitialConfiguration(const KOREPattern *initial) {
   return output[0];
 }
 
+template <typename It>
+static void *deserializeInitialConfiguration(It begin, It end) {
+  return nullptr;
+}
+
 block *parseConfiguration(const char *filename) {
-  auto InitialConfiguration = KOREPattern::load(filename);
+  if (has_binary_kore_header(filename)) {
+    auto data = file_contents(filename);
+    return (block *)deserializeInitialConfiguration(data.begin(), data.end());
+  } else {
+    auto InitialConfiguration = parser::KOREParser(filename).pattern();
+    // InitialConfiguration->print(std::cout);
 
-  // InitialConfiguration->print(std::cout);
-
-  // Allocate the llvm KORE datastructures for the configuration
-  auto b = (block *)constructInitialConfiguration(InitialConfiguration.get());
-  deallocateSPtrKorePattern(std::move(InitialConfiguration));
-  return b;
+    // Allocate the llvm KORE datastructures for the configuration
+    auto b = (block *)constructInitialConfiguration(InitialConfiguration.get());
+    deallocateSPtrKorePattern(std::move(InitialConfiguration));
+    return b;
+  }
 }

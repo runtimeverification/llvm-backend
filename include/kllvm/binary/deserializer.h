@@ -179,6 +179,8 @@ sptr<KOREPattern> read_v2(It &ptr, It end) {
 
 } // namespace detail
 
+std::string file_contents(std::string const &fn, int max_bytes = -1);
+
 template <typename It>
 sptr<KOREPattern> deserialize_pattern(It begin, It end) {
   // Try to parse the file even if the magic header isn't correct; by the time

@@ -5,7 +5,9 @@
 #include <fstream>
 #include <string>
 
-static std::string file_contents(std::string const &fn, int max_bytes = -1) {
+namespace kllvm {
+
+std::string file_contents(std::string const &fn, int max_bytes) {
   auto ifs = std::ifstream(fn, std::ios_base::binary);
   auto ret = std::string{};
 
@@ -20,8 +22,6 @@ static std::string file_contents(std::string const &fn, int max_bytes = -1) {
 
   return ret;
 }
-
-namespace kllvm {
 
 bool has_binary_kore_header(std::string const &filename) {
   auto const &reference = serializer::magic_header;
