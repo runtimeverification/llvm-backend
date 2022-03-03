@@ -118,10 +118,6 @@ object Parser {
     }
   }
 
-  private def source(axiom: AxiomDeclaration): Optional[Source] = {
-    source(axiom.att)
-  }
-
   def location(att: Attributes): Optional[Location] = {
     if (hasAtt(att, LOCATION)) {
       val locStr = getStringAtt(att, LOCATION).get
@@ -132,9 +128,9 @@ object Parser {
     }
   }
 
-  private def location(axiom: AxiomDeclaration): Optional[Location] = {
-    location(axiom.att)
-  }
+  private def source(axiom: AxiomDeclaration): Optional[Source] = source(axiom.att)
+  private def location(axiom: AxiomDeclaration): Optional[Location] = location(axiom.att)
+
   private def parseAxiomSentence[T <: GeneralizedRewrite](
       split: Pattern => Option[(Option[SymbolOrAlias], T, Option[Pattern])],
       axiom: (AxiomDeclaration, Int)) :
