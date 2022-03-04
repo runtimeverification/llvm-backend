@@ -1,5 +1,8 @@
 #include <kllvm/binary/serializer.h>
 
+#include <cassert>
+#include <limits>
+
 namespace kllvm {
 
 serializer::serializer()
@@ -24,22 +27,32 @@ void serializer::emit(std::byte b) {
 
 void serializer::emit_string(std::string const &s) {
   if (intern_table_.find(s) == intern_table_.end()) {
-    emit(direct_string_prefix_);
-
-    intern_table_[s] = next_idx_;
-
-    emit(int32_t(s.size()));
-
-    for (auto c : s) {
-      emit(std::byte(c));
-    }
+    emit_direct_string(s);
   } else {
-    emit(backref_string_prefix_);
+    int64_t previous = intern_table_.at(s);
+    int64_t diff = (next_idx_ + 5) - previous;
 
-    int32_t previous = intern_table_.at(s);
-    int32_t diff = (next_idx_ + 4) - previous;
+    if (diff <= std::numeric_limits<int32_t>::max()) {
+      emit(backref_string_prefix_);
+      emit(int32_t(diff));
+    } else {
+      emit_direct_string(s);
+    }
+  }
+}
 
-    emit(diff);
+void serializer::emit_direct_string(std::string const &s) {
+  emit(direct_string_prefix_);
+
+  intern_table_[s] = next_idx_;
+
+  assert(
+      s.size() <= std::numeric_limits<int32_t>::max()
+      && "String too large to be serialized");
+  emit(int32_t(s.size()));
+
+  for (auto c : s) {
+    emit(std::byte(c));
   }
 }
 

@@ -64,8 +64,14 @@ private:
   std::byte direct_string_prefix_;
   std::byte backref_string_prefix_;
 
-  int32_t next_idx_;
-  std::unordered_map<std::string, int32_t> intern_table_;
+  int64_t next_idx_;
+  std::unordered_map<std::string, int64_t> intern_table_;
+
+  /**
+   * Emit a string directly to the output buffer and update the interning table,
+   * regardless of whether the string has already been interned or not.
+   */
+  void emit_direct_string(std::string const &s);
 };
 
 template <typename It>

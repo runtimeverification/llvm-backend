@@ -5,7 +5,9 @@
 #include "kllvm/parser/KOREParser.h"
 
 #include <algorithm>
+#include <cassert>
 #include <iostream>
+#include <limits>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -1850,6 +1852,10 @@ void KOREVariablePattern::serialize_to(serializer &s) const {
 }
 
 void KORECompositePattern::serialize_to(serializer &s) const {
+  assert(
+      arguments.size() <= std::numeric_limits<int16_t>::max()
+      && "Composite pattern has too many arguments to serialize");
+
   for (auto const &arg : arguments) {
     arg->serialize_to(s);
   }
@@ -1871,6 +1877,10 @@ void KORESortVariable::serialize_to(serializer &s) const {
 }
 
 void KORECompositeSort::serialize_to(serializer &s) const {
+  assert(
+      arguments.size() <= std::numeric_limits<int16_t>::max()
+      && "Composite sort has too many arguments to serialize");
+
   for (auto const &arg : arguments) {
     arg->serialize_to(s);
   }
@@ -1881,6 +1891,10 @@ void KORECompositeSort::serialize_to(serializer &s) const {
 }
 
 void KORESymbol::serialize_to(serializer &s) const {
+  assert(
+      formalArguments.size() <= std::numeric_limits<int16_t>::max()
+      && "Symbol has too many arguments to serialize");
+
   for (auto const &arg : formalArguments) {
     arg->serialize_to(s);
   }
