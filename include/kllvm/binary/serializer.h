@@ -13,10 +13,20 @@ namespace kllvm {
 
 namespace detail {
 
+bool is_big_endian();
+
 template <typename T>
 std::array<std::byte, sizeof(T)> to_bytes(T val) {
   auto bytes = std::array<std::byte, sizeof(T)>{};
-  std::memcpy(bytes.data(), &val, sizeof(T));
+
+  if (is_big_endian()) {
+    for (auto i = 0; i < sizeof(T); ++i) {
+      bytes[i] = reinterpret_cast<std::byte *>(&val)[sizeof(T) - i - 1];
+    }
+  } else {
+    std::memcpy(bytes.data(), &val, sizeof(T));
+  }
+
   return bytes;
 }
 

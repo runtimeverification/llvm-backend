@@ -1,9 +1,16 @@
 #include <kllvm/binary/serializer.h>
 
+#include <arpa/inet.h>
 #include <cassert>
 #include <limits>
 
 namespace kllvm {
+
+namespace detail {
+bool is_big_endian() {
+  return htonl(365) == 365;
+}
+} // namespace detail
 
 serializer::serializer()
     : buffer_{}

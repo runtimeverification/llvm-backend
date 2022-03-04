@@ -22,7 +22,15 @@ std::byte peek(It const &it) {
 template <typename T>
 constexpr T from_bytes(std::byte const *ptr) {
   auto ret = T{};
-  std::memcpy(&ret, ptr, sizeof(T));
+
+  if (is_big_endian()) {
+    for (auto i = 0; i < sizeof(T); ++i) {
+      reinterpret_cast<std::byte *>(&ret)[sizeof(T) - i - 1] = ptr[i];
+    }
+  } else {
+    std::memcpy(&ret, ptr, sizeof(T));
+  }
+
   return ret;
 }
 
