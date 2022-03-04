@@ -1,5 +1,5 @@
 // RUN: %kore-convert %s -o %t.binary
 // RUN: %kore-convert %s -o %t.ref --to=text
-// RUN: %kore-convert %t.binary --o %t.kore
+// RUN: %kore-convert %t.binary -o %t.kore
 // RUN: diff %t.kore %t.ref
 Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("0")),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")),Lbl'-LT-'state'-GT-'{}(\left-assoc{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(inj{SortId{}, SortKItem{}}(\dv{SortId{}}("x")),inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("0")))))))

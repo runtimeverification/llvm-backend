@@ -28,6 +28,8 @@ constexpr T from_bytes(std::byte const *ptr) {
 
 template <typename T, typename It>
 T read(It &ptr, It end) {
+  assert(ptr + sizeof(T) <= end);
+
   auto val = from_bytes<T>(reinterpret_cast<std::byte const *>(&*ptr));
   ptr += sizeof(T);
   return val;
