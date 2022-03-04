@@ -71,29 +71,17 @@ sptr<KOREVariable> read_variable(It &ptr) {
 
 template <typename It>
 ptr<KORESymbol> read_symbol(It &ptr, std::vector<sptr<KORESort>> &sort_stack) {
-  auto args_arity = read<int16_t>(ptr);
-  auto formal_arity = read<int16_t>(ptr);
-  auto return_arity = read<int16_t>(ptr);
+  auto arity = read<int16_t>(ptr);
 
   auto name = read_string(ptr);
   auto symbol = KORESymbol::Create(name);
 
-  auto total_arity = args_arity + formal_arity + return_arity;
-  auto start_idx = sort_stack.size() - total_arity;
-
-  for (auto i = 0; i < args_arity; ++i) {
-    symbol->addArgument(sort_stack[start_idx + i]);
+  auto start_idx = sort_stack.size() - arity;
+  for (auto i = start_idx; i < sort_stack.size(); ++i) {
+    symbol->addFormalArgument(sort_stack[i]);
   }
 
-  for (auto i = 0; i < formal_arity; ++i) {
-    symbol->addFormalArgument(sort_stack[start_idx + args_arity + i]);
-  }
-
-  if (return_arity > 0) {
-    symbol->addSort(sort_stack[sort_stack.size() - 1]);
-  }
-
-  for (auto i = 0; i < total_arity; ++i) {
+  for (auto i = 0; i < arity; ++i) {
     sort_stack.pop_back();
   }
 

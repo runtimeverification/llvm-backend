@@ -62,15 +62,11 @@ sort name as a string.
 
 ### Symbols
 
-The serialized format for KORE symbols is redundant. Currently, only symbols as
-part of a pattern are representable. Parts of this representation are reserved
-for future extensions.
-
 First, the formal sort arguments to the symbol are serialized in sequence
 following the sort schema above.
 
-Then, the byte sequence `08 0000` is emitted, followed by the number of formal
-arguments (as a 16-bit integer), then by `0000`.
+Then, the byte `08` is emitted, followed by the number of formal arguments (as a
+16-bit integer).
 
 Finally, the name of the symbol is emitted as a string following the
 representation above.

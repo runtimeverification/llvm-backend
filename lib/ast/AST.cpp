@@ -1881,24 +1881,12 @@ void KORECompositeSort::serialize_to(serializer &s) const {
 }
 
 void KORESymbol::serialize_to(serializer &s) const {
-  for (auto const &arg : arguments) {
-    arg->serialize_to(s);
-  }
-
   for (auto const &arg : formalArguments) {
     arg->serialize_to(s);
   }
 
-  if (sort) {
-    sort->serialize_to(s);
-  }
-
   s.emit(header_byte<KORESymbol>);
-
-  s.emit(int16_t(arguments.size()));
   s.emit(int16_t(formalArguments.size()));
-  s.emit(sort ? int16_t(1) : int16_t(0));
-
   s.emit_string(name);
 }
 
