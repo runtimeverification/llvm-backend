@@ -34,9 +34,16 @@ if os.getenv('LIT_USE_NIX'):
 config.substitutions.extend([
     ('%kompile', 'llvm-kompile-testing'),
     ('%interpreter', '%kompile %s main -o %t.interpreter'),
+    ('%convert-input', '%kore-convert %test-input -o %test-input.bin'),
 
-    ('%check-grep', '%run | grep -f %test-grep-out -q'),
-    ('%check-diff', '%run | diff - %test-diff-out'),
+    ('%check-grep', '''
+        %run | grep -f %test-grep-out -q
+        %run-binary | grep -f %test-grep-out -q
+    '''),
+    ('%check-diff', '''
+        %run | diff - %test-diff-out
+        %run-binary | diff - %test-diff-out
+    '''),
 
     ('%check-dir-grep', '''
         for out in %test-dir-out/*.out.grep; do
@@ -52,6 +59,7 @@ config.substitutions.extend([
         done
     '''),
 
+    ('%run-binary', '%convert-input && %t.interpreter %test-input.bin -1 /dev/stdout'),
     ('%run', '%t.interpreter %test-input -1 /dev/stdout'),
 
     ('%kprint-check', 'kprint %S %s true | diff - %s.out'),

@@ -42,44 +42,16 @@ cl::opt<kore_file_format> OutputFormat(
 
 cl::opt<bool> ForceBinary("F", cl::desc("Force binary output on stdout"));
 
-bool is_binary_kore_header(std::string const &data) {
-  auto const &reference = serializer::magic_header;
-  return std::equal(reference.begin(), reference.end(), data.begin());
-}
-
-std::string file_contents(std::string const &fn, int max_bytes = -1) {
-  auto ifs = std::ifstream(fn, std::ios_base::binary);
-  auto ret = std::string{};
-
-  if (max_bytes == -1) {
-    ifs.seekg(0, std::ios::end);
-    max_bytes = ifs.tellg();
-  }
-
-  ret.resize(max_bytes);
-  ifs.seekg(0, std::ios::beg);
-  ifs.read(&ret[0], max_bytes);
-
-  return ret;
-}
-
 sptr<KOREPattern> get_input_pattern() {
   auto get_text = [&]() { return KOREParser(InputFilename).pattern(); };
-
-  auto get_binary = [&]() {
-    auto data = file_contents(InputFilename);
-    return deserialize_pattern(data.begin(), data.end());
-  };
+  auto get_binary = [&]() { return deserialize_pattern(InputFilename); };
 
   switch (InputFormat) {
   case text: return get_text();
   case binary: return get_binary();
 
   case detect: {
-    auto first_bytes
-        = file_contents(InputFilename, serializer::magic_header.size());
-
-    if (is_binary_kore_header(first_bytes)) {
+    if (has_binary_kore_header(InputFilename)) {
       InputFormat = binary;
       return get_binary();
     } else {

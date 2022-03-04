@@ -70,6 +70,54 @@ sptr<KOREVariable> read_variable(It &ptr) {
 }
 
 template <typename It>
+ptr<KORESymbol> read_symbol(It &ptr, std::vector<sptr<KORESort>> &sort_stack) {
+  auto args_arity = read<int16_t>(ptr);
+  auto formal_arity = read<int16_t>(ptr);
+  auto return_arity = read<int16_t>(ptr);
+
+  auto name = read_string(ptr);
+  auto symbol = KORESymbol::Create(name);
+
+  auto total_arity = args_arity + formal_arity + return_arity;
+  auto start_idx = sort_stack.size() - total_arity;
+
+  for (auto i = 0; i < args_arity; ++i) {
+    symbol->addArgument(sort_stack[start_idx + i]);
+  }
+
+  for (auto i = 0; i < formal_arity; ++i) {
+    symbol->addFormalArgument(sort_stack[start_idx + args_arity + i]);
+  }
+
+  if (return_arity > 0) {
+    symbol->addSort(sort_stack[sort_stack.size() - 1]);
+  }
+
+  for (auto i = 0; i < total_arity; ++i) {
+    sort_stack.pop_back();
+  }
+
+  return symbol;
+}
+
+template <typename It>
+sptr<KORESort>
+read_composite_sort(It &ptr, std::vector<sptr<KORESort>> &sort_stack) {
+  auto arity = read<int16_t>(ptr);
+  auto new_sort = KORECompositeSort::Create(read_string(ptr));
+
+  for (auto i = sort_stack.size() - arity; i < sort_stack.size(); ++i) {
+    new_sort->addArgument(sort_stack[i]);
+  }
+
+  for (auto i = 0; i < arity; ++i) {
+    sort_stack.pop_back();
+  }
+
+  return new_sort;
+}
+
+template <typename It>
 sptr<KOREPattern> read_v2(It &ptr, It end) {
   auto term_stack = std::vector<sptr<KOREPattern>>{};
   auto sort_stack = std::vector<sptr<KORESort>>{};
@@ -82,16 +130,6 @@ sptr<KOREPattern> read_v2(It &ptr, It end) {
       ++ptr;
       term_stack.push_back(KOREStringPattern::Create(read_string(ptr)));
       break;
-
-    case header_byte<KOREVariablePattern>: {
-      ++ptr;
-      assert(sort_stack.size() == 0);
-      auto sort = sort_stack[0];
-      sort_stack.clear();
-      term_stack.push_back(
-          KOREVariablePattern::Create(read_variable(ptr)->getName(), sort));
-      break;
-    }
 
     case header_byte<KORECompositePattern>: {
       ++ptr;
@@ -112,32 +150,7 @@ sptr<KOREPattern> read_v2(It &ptr, It end) {
 
     case header_byte<KORESymbol>: {
       ++ptr;
-      auto args_arity = read<int16_t>(ptr);
-      auto formal_arity = read<int16_t>(ptr);
-      auto return_arity = read<int16_t>(ptr);
-
-      auto name = read_string(ptr);
-      symbol = KORESymbol::Create(name);
-
-      auto total_arity = args_arity + formal_arity + return_arity;
-      auto start_idx = sort_stack.size() - total_arity;
-
-      for (auto i = 0; i < args_arity; ++i) {
-        symbol->addArgument(sort_stack[start_idx + i]);
-      }
-
-      for (auto i = 0; i < formal_arity; ++i) {
-        symbol->addFormalArgument(sort_stack[start_idx + args_arity + i]);
-      }
-
-      if (return_arity > 0) {
-        symbol->addSort(sort_stack[sort_stack.size() - 1]);
-      }
-
-      for (auto i = 0; i < total_arity; ++i) {
-        sort_stack.pop_back();
-      }
-
+      symbol = read_symbol(ptr, sort_stack);
       break;
     }
 
@@ -151,18 +164,7 @@ sptr<KOREPattern> read_v2(It &ptr, It end) {
 
     case header_byte<KORECompositeSort>: {
       ++ptr;
-
-      auto arity = read<int16_t>(ptr);
-      auto new_sort = KORECompositeSort::Create(read_string(ptr));
-
-      for (auto i = sort_stack.size() - arity; i < sort_stack.size(); ++i) {
-        new_sort->addArgument(sort_stack[i]);
-      }
-
-      for (auto i = 0; i < arity; ++i) {
-        sort_stack.pop_back();
-      }
-      sort_stack.push_back(new_sort);
+      sort_stack.push_back(read_composite_sort(ptr, sort_stack));
       break;
     }
 
@@ -178,6 +180,8 @@ sptr<KOREPattern> read_v2(It &ptr, It end) {
 }
 
 } // namespace detail
+
+std::string file_contents(std::string const &fn, int max_bytes = -1);
 
 template <typename It>
 sptr<KOREPattern> deserialize_pattern(It begin, It end) {
@@ -198,6 +202,9 @@ sptr<KOREPattern> deserialize_pattern(It begin, It end) {
 
   return detail::read_v2(begin, end);
 }
+
+bool has_binary_kore_header(std::string const &filename);
+sptr<KOREPattern> deserialize_pattern(std::string const &filename);
 
 } // namespace kllvm
 

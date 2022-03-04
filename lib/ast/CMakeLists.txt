@@ -6,7 +6,7 @@ add_library(AST
 )
 
 target_link_libraries(AST
-  PUBLIC BinaryKore)
+  PUBLIC Parser BinaryKore)
 
 install(
   TARGETS AST
