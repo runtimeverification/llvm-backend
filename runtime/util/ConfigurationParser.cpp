@@ -93,7 +93,7 @@ static void *constructInitialConfiguration(const KOREPattern *initial) {
 
     if (std::holds_alternative<const KOREPattern *>(current)) {
       auto constructor = dynamic_cast<const KORECompositePattern *>(
-          std::get<const KOREPattern *>(current));
+          *std::get_if<const KOREPattern *>(&current));
       assert(constructor && "Pattern in worklist is not composite");
 
       const KORESymbol *symbol = constructor->getConstructor();
