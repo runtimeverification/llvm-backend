@@ -159,7 +159,7 @@ static void *deserializeInitialConfiguration(It ptr, It end) {
 
     case header_byte<KORECompositePattern>: {
       ++ptr;
-      auto arity = read<int16_t>(ptr);
+      auto arity = read<int16_t>(ptr, end);
 
       assert(symbol && "No symbol set when reaching composite pattern");
       assert(
@@ -205,24 +205,24 @@ static void *deserializeInitialConfiguration(It ptr, It end) {
 
     case header_byte<KOREStringPattern>:
       ++ptr;
-      token_stack.push_back(read_string(ptr));
+      token_stack.push_back(read_string(ptr, end));
       break;
 
     case header_byte<KORESymbol>: {
       ++ptr;
-      symbol = read_symbol(ptr, sort_stack);
+      symbol = read_symbol(ptr, end, sort_stack);
       break;
     }
 
     case header_byte<KORESortVariable>: {
       ++ptr;
-      sort_stack.push_back(KORESortVariable::Create(read_string(ptr)));
+      sort_stack.push_back(KORESortVariable::Create(read_string(ptr, end)));
       break;
     }
 
     case header_byte<KORECompositeSort>: {
       ++ptr;
-      sort_stack.push_back(read_composite_sort(ptr, sort_stack));
+      sort_stack.push_back(read_composite_sort(ptr, end, sort_stack));
       break;
     }
 
@@ -240,15 +240,17 @@ static void *deserializeInitialConfiguration(It ptr, It end) {
 block *parseConfiguration(const char *filename) {
   if (has_binary_kore_header(filename)) {
     auto data = file_contents(filename);
+
     auto ptr = data.begin();
+    auto end = data.end();
 
     for (auto i = 0; i < serializer::magic_header.size(); ++i) {
-      detail::read<char>(ptr);
+      detail::read<char>(ptr, end);
     }
 
-    detail::read<int16_t>(ptr);
-    detail::read<int16_t>(ptr);
-    detail::read<int16_t>(ptr);
+    detail::read<int16_t>(ptr, end);
+    detail::read<int16_t>(ptr, end);
+    detail::read<int16_t>(ptr, end);
 
     auto ret = (block *)deserializeInitialConfiguration(ptr, data.end());
     return ret;

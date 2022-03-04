@@ -27,19 +27,19 @@ constexpr T from_bytes(std::byte const *ptr) {
 }
 
 template <typename T, typename It>
-T read(It &ptr) {
+T read(It &ptr, It end) {
   auto val = from_bytes<T>(reinterpret_cast<std::byte const *>(&*ptr));
   ptr += sizeof(T);
   return val;
 }
 
 template <typename It>
-std::string read_string(It &ptr) {
+std::string read_string(It &ptr, It end) {
   switch (uint8_t(peek(ptr))) {
 
   case 0x01: {
     ++ptr;
-    auto len = read<int32_t>(ptr);
+    auto len = read<int32_t>(ptr, end);
     auto ret = std::string((char *)&*ptr, (char *)(&*ptr + len));
 
     ptr += len;
@@ -48,9 +48,9 @@ std::string read_string(It &ptr) {
 
   case 0x02: {
     ++ptr;
-    auto backref = read<int32_t>(ptr);
+    auto backref = read<int32_t>(ptr, end);
     auto begin = ptr - backref;
-    auto len = read<int32_t>(begin);
+    auto len = read<int32_t>(begin, end);
 
     return std::string((char *)&*begin, (char *)(&*begin + len));
   }
@@ -60,20 +60,21 @@ std::string read_string(It &ptr) {
 }
 
 template <typename It>
-sptr<KOREVariable> read_variable(It &ptr) {
+sptr<KOREVariable> read_variable(It &ptr, It end) {
   if (peek(ptr) == header_byte<KOREVariable>) {
     ++ptr;
-    return KOREVariable::Create(read_string(ptr));
+    return KOREVariable::Create(read_string(ptr, end));
   }
 
   return nullptr;
 }
 
 template <typename It>
-ptr<KORESymbol> read_symbol(It &ptr, std::vector<sptr<KORESort>> &sort_stack) {
-  auto arity = read<int16_t>(ptr);
+ptr<KORESymbol>
+read_symbol(It &ptr, It end, std::vector<sptr<KORESort>> &sort_stack) {
+  auto arity = read<int16_t>(ptr, end);
 
-  auto name = read_string(ptr);
+  auto name = read_string(ptr, end);
   auto symbol = KORESymbol::Create(name);
 
   auto start_idx = sort_stack.size() - arity;
@@ -90,9 +91,9 @@ ptr<KORESymbol> read_symbol(It &ptr, std::vector<sptr<KORESort>> &sort_stack) {
 
 template <typename It>
 sptr<KORESort>
-read_composite_sort(It &ptr, std::vector<sptr<KORESort>> &sort_stack) {
-  auto arity = read<int16_t>(ptr);
-  auto new_sort = KORECompositeSort::Create(read_string(ptr));
+read_composite_sort(It &ptr, It end, std::vector<sptr<KORESort>> &sort_stack) {
+  auto arity = read<int16_t>(ptr, end);
+  auto new_sort = KORECompositeSort::Create(read_string(ptr, end));
 
   for (auto i = sort_stack.size() - arity; i < sort_stack.size(); ++i) {
     new_sort->addArgument(sort_stack[i]);
@@ -116,7 +117,7 @@ sptr<KOREPattern> read_v2(It &ptr, It end) {
 
     case header_byte<KOREStringPattern>:
       ++ptr;
-      term_stack.push_back(KOREStringPattern::Create(read_string(ptr)));
+      term_stack.push_back(KOREStringPattern::Create(read_string(ptr, end)));
       break;
 
     case header_byte<KORECompositePattern>: {
@@ -124,7 +125,7 @@ sptr<KOREPattern> read_v2(It &ptr, It end) {
       auto new_pattern = KORECompositePattern::Create(std::move(symbol));
       symbol = nullptr;
 
-      auto arity = read<int16_t>(ptr);
+      auto arity = read<int16_t>(ptr, end);
       for (auto i = term_stack.size() - arity; i < term_stack.size(); ++i) {
         new_pattern->addArgument(term_stack[i]);
       }
@@ -138,21 +139,21 @@ sptr<KOREPattern> read_v2(It &ptr, It end) {
 
     case header_byte<KORESymbol>: {
       ++ptr;
-      symbol = read_symbol(ptr, sort_stack);
+      symbol = read_symbol(ptr, end, sort_stack);
       break;
     }
 
     case header_byte<KORESortVariable>: {
       ++ptr;
 
-      auto name = read_string(ptr);
+      auto name = read_string(ptr, end);
       sort_stack.push_back(KORESortVariable::Create(name));
       break;
     }
 
     case header_byte<KORECompositeSort>: {
       ++ptr;
-      sort_stack.push_back(read_composite_sort(ptr, sort_stack));
+      sort_stack.push_back(read_composite_sort(ptr, end, sort_stack));
       break;
     }
 
@@ -178,15 +179,15 @@ sptr<KOREPattern> deserialize_pattern(It begin, It end) {
   // The header itself gets used by the application when detecting binary vs.
   // textual.
   for (auto i = 0; i < serializer::magic_header.size(); ++i) {
-    detail::read<char>(begin);
+    detail::read<char>(begin, end);
   }
 
   // When we end up with multiple versions of the format, we'll need to dispatch
   // on these version components. For now, just skip over the values and ignore
   // them.
-  /* auto v_major = */ detail::read<int16_t>(begin);
-  /* auto v_minor = */ detail::read<int16_t>(begin);
-  /* auto v_patch = */ detail::read<int16_t>(begin);
+  /* auto v_major = */ detail::read<int16_t>(begin, end);
+  /* auto v_minor = */ detail::read<int16_t>(begin, end);
+  /* auto v_patch = */ detail::read<int16_t>(begin, end);
 
   return detail::read_v2(begin, end);
 }
