@@ -312,7 +312,6 @@ block *parseConfiguration(const char *filename) {
     detail::read<int16_t>(ptr);
 
     auto ret = (block *)deserializeInitialConfiguration(ptr, data.end());
-    printConfiguration("/dev/stderr", ret);
     return ret;
   } else {
     auto InitialConfiguration = parser::KOREParser(filename).pattern();
