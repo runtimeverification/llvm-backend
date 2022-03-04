@@ -37,6 +37,46 @@ uint32_t getTagForSymbolName(const char *name) {
 }
 }
 
+static uint32_t getTagForSymbol(KORESymbol const &symbol) {
+  std::ostringstream out;
+  symbol.print(out);
+  return getTagForSymbolName(out.str().c_str());
+}
+
+static void *
+constructCompositePattern(uint32_t tag, std::vector<void *> &arguments) {
+  if (isSymbolAFunction(tag)) {
+    return evaluateFunctionSymbol(tag, &arguments[0]);
+  }
+
+  struct blockheader headerVal = getBlockHeaderForSymbol(tag);
+  size_t size = size_hdr(headerVal.hdr);
+
+  if (tag >= first_inj_tag && tag <= last_inj_tag) {
+    uint16_t layout_code = layout_hdr(headerVal.hdr);
+    layout *data = getLayoutData(layout_code);
+    if (data->args[0].cat == SYMBOL_LAYOUT) {
+      block *child = (block *)arguments[0];
+      if (!is_leaf_block(child) && layout(child) != 0) {
+        uint32_t tag = tag_hdr(child->h.hdr);
+        if (tag >= first_inj_tag && tag <= last_inj_tag) {
+          return child;
+        }
+      }
+    }
+  }
+
+  block *Block = (block *)koreAlloc(size);
+  Block->h = headerVal;
+
+  storeSymbolChildren(Block, &arguments[0]);
+  if (isSymbolABinder(tag)) {
+    Block = debruijnize(Block);
+  }
+
+  return Block;
+}
+
 struct construction {
   uint32_t tag;
   size_t nchildren;
@@ -46,13 +86,15 @@ static void *constructInitialConfiguration(const KOREPattern *initial) {
   std::vector<std::variant<const KOREPattern *, construction>> workList{
       initial};
   std::vector<void *> output;
+
   while (!workList.empty()) {
     std::variant<const KOREPattern *, construction> current = workList.back();
     workList.pop_back();
-    if (current.index() == 0) {
-      const auto constructor = dynamic_cast<const KORECompositePattern *>(
-          *std::get_if<const KOREPattern *>(&current));
-      assert(constructor);
+
+    if (std::holds_alternative<const KOREPattern *>(current)) {
+      auto constructor = dynamic_cast<const KORECompositePattern *>(
+          std::get<const KOREPattern *>(current));
+      assert(constructor && "Pattern in worklist is not composite");
 
       const KORESymbol *symbol = constructor->getConstructor();
       assert(
@@ -69,9 +111,8 @@ static void *constructInitialConfiguration(const KOREPattern *initial) {
         continue;
       }
 
-      std::ostringstream Out;
-      symbol->print(Out);
-      uint32_t tag = getTagForSymbolName(Out.str().c_str());
+      uint32_t tag = getTagForSymbol(*symbol);
+
       if (isSymbolAFunction(tag) && constructor->getArguments().empty()) {
         output.push_back(evaluateFunctionSymbol(tag, nullptr));
         continue;
@@ -79,6 +120,7 @@ static void *constructInitialConfiguration(const KOREPattern *initial) {
         output.push_back(leaf_block(tag));
         continue;
       }
+
       construction term{tag, constructor->getArguments().size()};
       workList.push_back(term);
       for (const auto &child : constructor->getArguments()) {
@@ -87,44 +129,17 @@ static void *constructInitialConfiguration(const KOREPattern *initial) {
     } else {
       uint32_t tag = std::get_if<construction>(&current)->tag;
       size_t nchildren = std::get_if<construction>(&current)->nchildren;
+
       std::vector<void *> arguments;
       for (size_t i = 0; i < nchildren; i++) {
         arguments.push_back(output.back());
         output.pop_back();
       }
-      if (isSymbolAFunction(tag)) {
-        output.push_back(evaluateFunctionSymbol(tag, &arguments[0]));
-        continue;
-      }
 
-      struct blockheader headerVal = getBlockHeaderForSymbol(tag);
-      size_t size = size_hdr(headerVal.hdr);
-
-      if (tag >= first_inj_tag && tag <= last_inj_tag) {
-        uint16_t layout_code = layout_hdr(headerVal.hdr);
-        layout *data = getLayoutData(layout_code);
-        if (data->args[0].cat == SYMBOL_LAYOUT) {
-          block *child = (block *)arguments[0];
-          if (!is_leaf_block(child) && layout(child) != 0) {
-            uint32_t tag = tag_hdr(child->h.hdr);
-            if (tag >= first_inj_tag && tag <= last_inj_tag) {
-              output.push_back(child);
-              continue;
-            }
-          }
-        }
-      }
-
-      block *Block = (block *)koreAlloc(size);
-      Block->h = headerVal;
-
-      storeSymbolChildren(Block, &arguments[0]);
-      if (isSymbolABinder(tag)) {
-        Block = debruijnize(Block);
-      }
-      output.push_back(Block);
+      output.push_back(constructCompositePattern(tag, arguments));
     }
   }
+
   return output[0];
 }
 
@@ -142,16 +157,6 @@ static void *deserializeInitialConfiguration(It ptr, It end) {
   while (ptr < end) {
     switch (peek(ptr)) {
 
-    case header_byte<KOREStringPattern>:
-      ++ptr;
-      token_stack.push_back(read_string(ptr));
-      break;
-
-    case header_byte<KOREVariablePattern>:
-      ++ptr;
-      assert(false && "Bad input pattern");
-      break;
-
     case header_byte<KORECompositePattern>: {
       ++ptr;
       auto arity = read<int16_t>(ptr);
@@ -160,6 +165,7 @@ static void *deserializeInitialConfiguration(It ptr, It end) {
       assert(
           symbol->isConcrete()
           && "found sort variable in initial configuration");
+
       if (symbol->getName() == "\\dv") {
         auto sort = dynamic_cast<KORECompositeSort *>(
             symbol->getFormalArguments()[0].get());
@@ -173,9 +179,7 @@ static void *deserializeInitialConfiguration(It ptr, It end) {
         break;
       }
 
-      std::ostringstream Out;
-      symbol->print(Out);
-      uint32_t tag = getTagForSymbolName(Out.str().c_str());
+      uint32_t tag = getTagForSymbol(*symbol);
       symbol = nullptr;
 
       if (isSymbolAFunction(tag) && arity == 0) {
@@ -195,95 +199,30 @@ static void *deserializeInitialConfiguration(It ptr, It end) {
       }
       std::reverse(arguments.begin(), arguments.end());
 
-      if (isSymbolAFunction(tag)) {
-        output.push_back(evaluateFunctionSymbol(tag, &arguments[0]));
-        break;
-      }
-
-      struct blockheader headerVal = getBlockHeaderForSymbol(tag);
-      size_t size = size_hdr(headerVal.hdr);
-
-      if (tag >= first_inj_tag && tag <= last_inj_tag) {
-        uint16_t layout_code = layout_hdr(headerVal.hdr);
-        layout *data = getLayoutData(layout_code);
-        if (data->args[0].cat == SYMBOL_LAYOUT) {
-          block *child = (block *)arguments[0];
-          if (!is_leaf_block(child) && layout(child) != 0) {
-            uint32_t tag = tag_hdr(child->h.hdr);
-            if (tag >= first_inj_tag && tag <= last_inj_tag) {
-              output.push_back(child);
-              break;
-            }
-          }
-        }
-      }
-
-      block *Block = (block *)koreAlloc(size);
-      Block->h = headerVal;
-
-      storeSymbolChildren(Block, &arguments[0]);
-      if (isSymbolABinder(tag)) {
-        Block = debruijnize(Block);
-      }
-      output.push_back(Block);
-
+      output.push_back(constructCompositePattern(tag, arguments));
       break;
     }
 
-      // TODO: factor out - needs sort stack?
+    case header_byte<KOREStringPattern>:
+      ++ptr;
+      token_stack.push_back(read_string(ptr));
+      break;
+
     case header_byte<KORESymbol>: {
       ++ptr;
-      auto args_arity = read<int16_t>(ptr);
-      auto formal_arity = read<int16_t>(ptr);
-      auto return_arity = read<int16_t>(ptr);
-
-      auto name = read_string(ptr);
-      symbol = KORESymbol::Create(name);
-
-      auto total_arity = args_arity + formal_arity + return_arity;
-      auto start_idx = sort_stack.size() - total_arity;
-
-      for (auto i = 0; i < args_arity; ++i) {
-        symbol->addArgument(sort_stack[start_idx + i]);
-      }
-
-      for (auto i = 0; i < formal_arity; ++i) {
-        symbol->addFormalArgument(sort_stack[start_idx + args_arity + i]);
-      }
-
-      if (return_arity > 0) {
-        symbol->addSort(sort_stack[sort_stack.size() - 1]);
-      }
-
-      for (auto i = 0; i < total_arity; ++i) {
-        sort_stack.pop_back();
-      }
-
+      symbol = read_symbol(ptr, sort_stack);
       break;
     }
 
     case header_byte<KORESortVariable>: {
       ++ptr;
-
-      auto name = read_string(ptr);
-      sort_stack.push_back(KORESortVariable::Create(name));
+      sort_stack.push_back(KORESortVariable::Create(read_string(ptr)));
       break;
     }
 
     case header_byte<KORECompositeSort>: {
       ++ptr;
-
-      auto arity = read<int16_t>(ptr);
-      auto new_sort = KORECompositeSort::Create(read_string(ptr));
-
-      for (auto i = sort_stack.size() - arity; i < sort_stack.size(); ++i) {
-        new_sort->addArgument(sort_stack[i]);
-      }
-
-      for (auto i = 0; i < arity; ++i) {
-        sort_stack.pop_back();
-      }
-      sort_stack.push_back(new_sort);
+      sort_stack.push_back(read_composite_sort(ptr, sort_stack));
       break;
     }
 
@@ -294,7 +233,7 @@ static void *deserializeInitialConfiguration(It ptr, It end) {
     }
   }
 
-  assert(output.size() == 1);
+  assert(output.size() == 1 && "Output stack left in invalid state");
   return output.front();
 }
 
