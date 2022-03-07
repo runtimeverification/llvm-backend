@@ -69,6 +69,12 @@ public:
 
   std::vector<std::byte> const &data() { return buffer_; }
 
+  /**
+   * Reset the state of the serializer back to its newly-constructed state, with
+   * only the KORE header and version number in its buffer.
+   */
+  void reset();
+
 private:
   std::vector<std::byte> buffer_;
   std::byte direct_string_prefix_;
@@ -76,6 +82,11 @@ private:
 
   int64_t next_idx_;
   std::unordered_map<std::string, int64_t> intern_table_;
+
+  /**
+   * Emit the standard \xf7KORE prefix and version number to the buffer.
+   */
+  void emit_header_and_version();
 
   /**
    * Emit a string directly to the output buffer and update the interning table,
