@@ -8,6 +8,7 @@ target triple = "@BACKEND_TARGET_TRIPLE@"
 declare void @printStatistics(i8*, i64)
 declare void @printConfiguration(i8*, %block*)
 declare void @printConfigurationToFile(i8*, %block*)
+declare void @serializeConfiguration(i8*, %block*)
 declare void @exit(i32) #0
 declare void @abort() #0
 declare i64 @__gmpz_get_ui(%mpz*)
@@ -49,6 +50,7 @@ printEntry:
   %useBinary = load i1, i1* @binary_output
   br i1 %useBinary, label %printBinary, label %printConfig
 printBinary:
+  call void @serializeConfiguration(i8* %output, %block* %subject)
   br i1 %error, label %exit, label %exitCode
 printConfig:
   call void @printConfiguration(i8* %output, %block* %subject)
