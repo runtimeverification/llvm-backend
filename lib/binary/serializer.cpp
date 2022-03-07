@@ -1,15 +1,18 @@
 #include <kllvm/binary/serializer.h>
 
-#include <arpa/inet.h>
 #include <cassert>
 #include <limits>
 
 namespace kllvm {
 
 namespace detail {
+
 bool is_big_endian() {
-  return htonl(365) == 365;
+  uint32_t i = 1;
+  uint8_t *c = reinterpret_cast<uint8_t *>(&i);
+  return *c == 0x00;
 }
+
 } // namespace detail
 
 serializer::serializer()
@@ -37,6 +40,12 @@ void serializer::emit_string(std::string const &s) {
     emit_direct_string(s);
   } else {
     int64_t previous = intern_table_.at(s);
+
+    // The 5 byte offset here is the string prefix byte and 4-byte
+    // backreference distance: PP BBBB BBBB. Setting the distance to be computed
+    // _after_ these bytes makes the deserialization code much simpler (a single
+    // subtraction from the current pointer after reading the backref.
+    // distance). See `read_string` in deserializer.h.
     int64_t diff = (next_idx_ + 5) - previous;
 
     if (diff <= std::numeric_limits<int32_t>::max()) {
