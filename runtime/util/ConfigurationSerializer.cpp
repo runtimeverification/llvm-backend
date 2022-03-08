@@ -1,3 +1,4 @@
+#include <kllvm/ast/AST.h>
 #include <kllvm/binary/serializer.h>
 
 #include "runtime/header.h"
@@ -28,6 +29,36 @@ static thread_local std::unordered_map<
     varNames;
 static thread_local std::set<std::string> usedVarNames;
 static thread_local uint64_t varCounter = 0;
+
+/**
+ * Emit a constant symbol of the form ctor{}().
+ */
+static void emitConstantSymbol(char const *name) {
+  instance.emit(header_byte<KORESymbol>);
+  instance.emit(int16_t{0});
+  instance.emit_string(name);
+
+  instance.emit(header_byte<KORECompositePattern>);
+  instance.emit(int16_t{0});
+}
+
+/**
+ * Emit a symbol of the form \dv{Sort}("string")
+ */
+static void emitToken(char const *sort, char const *string) {
+  instance.emit(header_byte<KOREStringPattern>);
+  instance.emit_string(string);
+
+  instance.emit(header_byte<KORESortVariable>);
+  instance.emit_string(sort);
+
+  instance.emit(header_byte<KORESymbol>);
+  instance.emit(int16_t{1});
+  instance.emit_string("\\dv");
+
+  instance.emit(header_byte<KORECompositePattern>);
+  instance.emit(int16_t{1});
+}
 
 void serializeMap(
     writer *file, map *map, const char *unit, const char *element,
@@ -145,66 +176,55 @@ void serializeComma(writer *file) {
 
 void serializeConfigurationInternal(
     writer *file, block *subject, const char *sort, bool isVar) {
-  /* uint8_t isConstant = ((uintptr_t)subject) & 3; */
-  /* if (isConstant) { */
-  /*   uint32_t tag = ((uintptr_t)subject) >> 32; */
-  /*   if (isConstant == 3) { */
-  /*     // bound variable */
-  /*     printConfigurationInternal( */
-  /*         file, boundVariables[boundVariables.size() - 1 - tag], sort, true); */
-  /*     return; */
-  /*   } */
-  /*   const char *symbol = getSymbolNameForTag(tag); */
-  /*   sfprintf(file, "%s()", symbol); */
-  /*   return; */
-  /* } */
-  /* uint16_t layout = layout(subject); */
-  /* if (!layout) { */
-  /*   string *str = (string *)subject; */
-  /*   size_t len = len(subject); */
-  /*   sfprintf(file, "\\dv{%s}(\"", sort); */
-  /*   for (size_t i = 0; i < len; ++i) { */
-  /*     char c = str->data[i]; */
-  /*     switch (c) { */
-  /*     case '\\': sfprintf(file, "\\\\"); break; */
-  /*     case '"': sfprintf(file, "\\\""); break; */
-  /*     case '\n': sfprintf(file, "\\n"); break; */
-  /*     case '\t': sfprintf(file, "\\t"); break; */
-  /*     case '\r': sfprintf(file, "\\r"); break; */
-  /*     case '\f': sfprintf(file, "\\f"); break; */
-  /*     default: */
-  /*       if ((unsigned char)c >= 32 && (unsigned char)c < 127) { */
-  /*         sfprintf(file, "%c", c); */
-  /*       } else { */
-  /*         sfprintf(file, "\\x%02x", (unsigned char)c); */
-  /*       } */
-  /*       break; */
-  /*     } */
-  /*   } */
-  /*   if (isVar && !varNames.count(str)) { */
-  /*     std::string stdStr = std::string(str->data, len(str)); */
-  /*     std::string suffix = ""; */
-  /*     while (usedVarNames.count(stdStr + suffix)) { */
-  /*       suffix = std::to_string(varCounter++); */
-  /*     } */
-  /*     stdStr = stdStr + suffix; */
-  /*     sfprintf(file, "%s", suffix.c_str()); */
-  /*     usedVarNames.insert(stdStr); */
-  /*     varNames[str] = suffix; */
-  /*   } else if (isVar) { */
-  /*     sfprintf(file, "%s", varNames[str].c_str()); */
-  /*   } */
-  /*   sfprintf(file, "\")"); */
-  /*   return; */
-  /* } */
+  uint8_t isConstant = ((uintptr_t)subject) & 3;
+
+  if (isConstant) {
+    uint32_t tag = ((uintptr_t)subject) >> 32;
+    if (isConstant == 3) {
+      // bound variable
+      printConfigurationInternal(
+          file, boundVariables[boundVariables.size() - 1 - tag], sort, true);
+      return;
+    }
+    const char *symbol = getSymbolNameForTag(tag);
+    emitConstantSymbol(symbol);
+    return;
+  }
+
+  uint16_t layout = layout(subject);
+  if (!layout) {
+    string *str = (string *)subject;
+    size_t len = len(subject);
+
+    if (len > 0) {
+      emitToken(sort, str->data);
+    } else if (isVar && !varNames.count(str)) {
+      std::string stdStr = std::string(str->data, len(str));
+      std::string suffix = "";
+      while (usedVarNames.count(stdStr + suffix)) {
+        suffix = std::to_string(varCounter++);
+      }
+      stdStr = stdStr + suffix;
+      emitToken(sort, suffix.c_str());
+      usedVarNames.insert(stdStr);
+      varNames[str] = suffix;
+    } else if (isVar) {
+      emitToken(sort, varNames[str].c_str());
+    }
+
+    return;
+  }
+
   /* uint32_t tag = tag_hdr(subject->h.hdr); */
   /* bool isBinder = isSymbolABinder(tag); */
   /* if (isBinder) { */
   /*   boundVariables.push_back( */
   /*       *(block **)(((char *)subject) + sizeof(blockheader))); */
   /* } */
+
   /* const char *symbol = getSymbolNameForTag(tag); */
   /* std::string symbolStr(symbol); */
+
   /* if (symbolStr.rfind("inj{", 0) == 0) { */
   /*   std::string prefix = symbolStr.substr(0, symbolStr.find_first_of(',')); */
   /*   sfprintf(file, "%s, %s}(", prefix.c_str(), sort); */
@@ -229,7 +249,6 @@ void serializeConfigurationInternal(
   /* if (isBinder) { */
   /*   boundVariables.pop_back(); */
   /* } */
-  /* sfprintf(file, ")"); */
 }
 
 void serializeConfiguration(const char *filename, block *subject) {
