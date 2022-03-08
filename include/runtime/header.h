@@ -212,6 +212,7 @@ uint32_t getTagForSymbolName(const char *symbolname);
 struct blockheader getBlockHeaderForSymbol(uint32_t tag);
 bool isSymbolAFunction(uint32_t tag);
 bool isSymbolABinder(uint32_t tag);
+uint32_t getSymbolArity(uint32_t tag);
 void storeSymbolChildren(block *symbol, void *children[]);
 void *evaluateFunctionSymbol(uint32_t tag, void *arguments[]);
 void *getToken(const char *sortname, uint64_t len, const char *tokencontents);
