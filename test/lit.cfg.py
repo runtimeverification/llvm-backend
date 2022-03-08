@@ -39,10 +39,12 @@ config.substitutions.extend([
     ('%check-grep', '''
         %run | grep -f %test-grep-out -q
         %run-binary | grep -f %test-grep-out -q
+        %run-binary-out ; %kore-convert %test-input.out.bin | tr -d '\n' | grep -f %test-grep-out -q
     '''),
     ('%check-diff', '''
         %run | diff - %test-diff-out
         %run-binary | diff - %test-diff-out
+        %run-binary-out ; %kore-convert %test-input.out.bin | tr -d '\n' | diff - %test-diff-out
     '''),
 
     ('%check-dir-grep', '''
@@ -59,6 +61,7 @@ config.substitutions.extend([
         done
     '''),
 
+    ('%run-binary-out', '%t.interpreter %test-input -1 %test-input.out.bin --binary-output'),
     ('%run-binary', '%convert-input && %t.interpreter %test-input.bin -1 /dev/stdout'),
     ('%run', '%t.interpreter %test-input -1 /dev/stdout'),
 
