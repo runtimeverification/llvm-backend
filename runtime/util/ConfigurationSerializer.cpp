@@ -9,6 +9,10 @@
 
 using namespace kllvm;
 
+static std::string drop_back(std::string s, int n) {
+  return s.substr(0, s.size() - n);
+}
+
 static thread_local serializer instance = serializer();
 
 struct StringHash {
@@ -36,7 +40,7 @@ static thread_local uint64_t varCounter = 0;
 static void emitConstantSymbol(char const *name) {
   instance.emit(header_byte<KORESymbol>);
   instance.emit(int16_t{0});
-  instance.emit_string(name);
+  instance.emit_string(drop_back(name, 2));
 
   instance.emit(header_byte<KORECompositePattern>);
   instance.emit(int16_t{0});
@@ -50,7 +54,7 @@ static void emitToken(char const *sort, char const *string) {
   instance.emit_string(string);
 
   instance.emit(header_byte<KORESortVariable>);
-  instance.emit_string(sort);
+  instance.emit_string(drop_back(sort, 2));
 
   instance.emit(header_byte<KORESymbol>);
   instance.emit(int16_t{1});
@@ -141,22 +145,23 @@ void serializeSet(
 }
 
 void serializeInt(writer *file, mpz_t i, const char *sort) {
-  /* char *str = mpz_get_str(NULL, 10, i); */
-  /* sfprintf(file, "\\dv{%s}(\"%s\")", sort, str); */
+  char *str = mpz_get_str(NULL, 10, i);
+  emitToken(sort, str);
 }
 
 void serializeFloat(writer *file, floating *f, const char *sort) {
-  /* std::string str = floatToString(f); */
-  /* sfprintf(file, "\\dv{%s}(\"%s\")", sort, str.c_str()); */
+  std::string str = floatToString(f);
+  emitToken(sort, str.c_str());
 }
 
 void serializeBool(writer *file, bool b, const char *sort) {
-  /* const char *str = b ? "true" : "false"; */
-  /* sfprintf(file, "\\dv{%s}(\"%s\")", sort, str); */
+  const char *str = b ? "true" : "false";
+  emitToken(sort, str);
 }
 
 void serializeStringBuffer(writer *file, stringbuffer *b, const char *sort) {
-  /* std::string str(b->contents->data, b->strlen); */
+  std::string str(b->contents->data, b->strlen);
+  emitToken(sort, str.c_str());
   /* sfprintf(file, "\\dv{%s}(\"%s\")", sort, str.c_str()); */
 }
 
@@ -170,9 +175,7 @@ void serializeMInt(writer *file, size_t *i, size_t bits, const char *sort) {
   /* } */
 }
 
-void serializeComma(writer *file) {
-  /* sfprintf(file, ","); */
-}
+void serializeComma(writer *file) { }
 
 void serializeConfigurationInternal(
     writer *file, block *subject, const char *sort, bool isVar) {
@@ -215,22 +218,12 @@ void serializeConfigurationInternal(
     return;
   }
 
-  /* uint32_t tag = tag_hdr(subject->h.hdr); */
-  /* bool isBinder = isSymbolABinder(tag); */
-  /* if (isBinder) { */
-  /*   boundVariables.push_back( */
-  /*       *(block **)(((char *)subject) + sizeof(blockheader))); */
-  /* } */
-
-  /* const char *symbol = getSymbolNameForTag(tag); */
-  /* std::string symbolStr(symbol); */
-
-  /* if (symbolStr.rfind("inj{", 0) == 0) { */
-  /*   std::string prefix = symbolStr.substr(0, symbolStr.find_first_of(',')); */
-  /*   sfprintf(file, "%s, %s}(", prefix.c_str(), sort); */
-  /* } else { */
-  /*   sfprintf(file, "%s(", symbol); */
-  /* } */
+  uint32_t tag = tag_hdr(subject->h.hdr);
+  bool isBinder = isSymbolABinder(tag);
+  if (isBinder) {
+    boundVariables.push_back(
+        *(block **)(((char *)subject) + sizeof(blockheader)));
+  }
 
   visitor callbacks
       = {serializeConfigurationInternal,
@@ -246,9 +239,33 @@ void serializeConfigurationInternal(
 
   visitChildren(subject, file, &callbacks);
 
-  /* if (isBinder) { */
-  /*   boundVariables.pop_back(); */
-  /* } */
+  const char *symbol = getSymbolNameForTag(tag);
+  std::string symbolStr(symbol);
+
+  if (symbolStr.rfind("inj{", 0) == 0) {
+    std::string prefix = symbolStr.substr(4, symbolStr.find_first_of(',') - 4);
+
+    instance.emit(header_byte<KORESortVariable>);
+    instance.emit_string(drop_back(prefix, 2));
+
+    instance.emit(header_byte<KORESortVariable>);
+    instance.emit_string(drop_back(sort, 2));
+
+    instance.emit(header_byte<KORESymbol>);
+    instance.emit(int16_t{2});
+    instance.emit_string("inj");
+  } else {
+    instance.emit(header_byte<KORESymbol>);
+    instance.emit(int16_t{0});
+    instance.emit_string(symbolStr.substr(0, symbolStr.size() - 2));
+  }
+
+  instance.emit(header_byte<KORECompositePattern>);
+  instance.emit(static_cast<int16_t>(getSymbolArity(tag)));
+
+  if (isBinder) {
+    boundVariables.pop_back();
+  }
 }
 
 void serializeConfiguration(const char *filename, block *subject) {
