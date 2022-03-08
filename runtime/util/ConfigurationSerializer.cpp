@@ -29,6 +29,120 @@ static thread_local std::unordered_map<
 static thread_local std::set<std::string> usedVarNames;
 static thread_local uint64_t varCounter = 0;
 
+void serializeMap(
+    writer *file, map *map, const char *unit, const char *element,
+    const char *concat) {
+  /* size_t size = map->size(); */
+  /* if (size == 0) { */
+  /*   sfprintf(file, "%s()", unit); */
+  /*   return; */
+  /* } */
+
+  /* sfprintf(file, "\\left-assoc{}(%s(", concat); */
+
+  /* bool once = true; */
+  /* for (auto iter = map->begin(); iter != map->end(); ++iter) { */
+  /*   if (once) { */
+  /*     once = false; */
+  /*   } else { */
+  /*     sfprintf(file, ","); */
+  /*   } */
+
+  /*   sfprintf(file, "%s(", element); */
+  /*   auto entry = *iter; */
+  /*   printConfigurationInternal(file, entry.first, "SortKItem{}", false); */
+  /*   sfprintf(file, ","); */
+  /*   printConfigurationInternal(file, entry.second, "SortKItem{}", false); */
+  /*   sfprintf(file, ")"); */
+  /* } */
+  /* sfprintf(file, "))"); */
+}
+
+void serializeList(
+    writer *file, list *list, const char *unit, const char *element,
+    const char *concat) {
+  /* size_t size = list->size(); */
+  /* if (size == 0) { */
+  /*   sfprintf(file, "%s()", unit); */
+  /*   return; */
+  /* } */
+
+  /* sfprintf(file, "\\left-assoc{}(%s(", concat); */
+
+  /* bool once = true; */
+  /* for (auto iter = list->begin(); iter != list->end(); ++iter) { */
+  /*   if (once) { */
+  /*     once = false; */
+  /*   } else { */
+  /*     sfprintf(file, ","); */
+  /*   } */
+  /*   sfprintf(file, "%s(", element); */
+  /*   printConfigurationInternal(file, *iter, "SortKItem{}", false); */
+  /*   sfprintf(file, ")"); */
+  /* } */
+  /* sfprintf(file, "))"); */
+}
+
+void serializeSet(
+    writer *file, set *set, const char *unit, const char *element,
+    const char *concat) {
+  /* size_t size = set->size(); */
+  /* if (size == 0) { */
+  /*   sfprintf(file, "%s()", unit); */
+  /*   return; */
+  /* } */
+
+  /* sfprintf(file, "\\left-assoc{}(%s(", concat); */
+
+  /* bool once = true; */
+  /* for (auto iter = set->begin(); iter != set->end(); ++iter) { */
+  /*   if (once) { */
+  /*     once = false; */
+  /*   } else { */
+  /*     sfprintf(file, ","); */
+  /*   } */
+
+  /*   sfprintf(file, "%s(", element); */
+  /*   printConfigurationInternal(file, *iter, "SortKItem{}", false); */
+  /*   sfprintf(file, ")"); */
+  /* } */
+  /* sfprintf(file, "))"); */
+}
+
+void serializeInt(writer *file, mpz_t i, const char *sort) {
+  /* char *str = mpz_get_str(NULL, 10, i); */
+  /* sfprintf(file, "\\dv{%s}(\"%s\")", sort, str); */
+}
+
+void serializeFloat(writer *file, floating *f, const char *sort) {
+  /* std::string str = floatToString(f); */
+  /* sfprintf(file, "\\dv{%s}(\"%s\")", sort, str.c_str()); */
+}
+
+void serializeBool(writer *file, bool b, const char *sort) {
+  /* const char *str = b ? "true" : "false"; */
+  /* sfprintf(file, "\\dv{%s}(\"%s\")", sort, str); */
+}
+
+void serializeStringBuffer(writer *file, stringbuffer *b, const char *sort) {
+  /* std::string str(b->contents->data, b->strlen); */
+  /* sfprintf(file, "\\dv{%s}(\"%s\")", sort, str.c_str()); */
+}
+
+void serializeMInt(writer *file, size_t *i, size_t bits, const char *sort) {
+  /* if (i == nullptr) { */
+  /*   sfprintf(file, "\\dv{%s}(\"0p%zd\")", sort, bits); */
+  /* } else { */
+  /*   mpz_ptr z = hook_MINT_import(i, bits, false); */
+  /*   char *str = mpz_get_str(NULL, 10, z); */
+  /*   sfprintf(file, "\\dv{%s}(\"%sp%zd\")", sort, str, bits); */
+  /* } */
+}
+
+void serializeComma(writer *file) {
+  /* sfprintf(file, ","); */
+}
+
 void serializeConfigurationInternal(
     writer *file, block *subject, const char *sort, bool isVar) {
   /* uint8_t isConstant = ((uintptr_t)subject) & 3; */
@@ -98,19 +212,19 @@ void serializeConfigurationInternal(
   /*   sfprintf(file, "%s(", symbol); */
   /* } */
 
-  /* visitor callbacks */
-  /*     = {printConfigurationInternal, */
-  /*        printMap, */
-  /*        printList, */
-  /*        printSet, */
-  /*        printInt, */
-  /*        printFloat, */
-  /*        printBool, */
-  /*        printStringBuffer, */
-  /*        printMInt, */
-  /*        printComma}; */
+  visitor callbacks
+      = {serializeConfigurationInternal,
+         serializeMap,
+         serializeList,
+         serializeSet,
+         serializeInt,
+         serializeFloat,
+         serializeBool,
+         serializeStringBuffer,
+         serializeMInt,
+         serializeComma};
 
-  /* visitChildren(subject, file, &callbacks); */
+  visitChildren(subject, file, &callbacks);
 
   /* if (isBinder) { */
   /*   boundVariables.pop_back(); */
