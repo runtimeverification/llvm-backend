@@ -13,6 +13,7 @@ initializer="LblinitGeneratedTopCell{}"
 dir=.
 debug=
 depth=-1
+binary_input=false
 pretty_print=false
 dryRun=false
 expandMacros=true
@@ -43,6 +44,8 @@ Mandatory arguments to long options are mandatory for short options too.
                                            'pretty'
   -o, --output-file FILE   Write resulting configuration to FILE. Defaults to
                            standard output
+  -b, --binary-input       Construct the input configuration using the binary
+                           KORE format, rather than the textual syntax.
   -p, --pretty-print       Pretty print output configuration. By default,
                            output is in kore syntax
       --debug              Use GDB to debug program
@@ -92,6 +95,11 @@ do
     -o|--output-file)
     real_output_file="$2"
     shift; shift
+    ;;
+
+    -b|--binary-input)
+    binary_input=true
+    shift
     ;;
 
     -p|--pretty-print)
