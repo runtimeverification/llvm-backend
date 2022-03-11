@@ -52,7 +52,7 @@ Mandatory arguments to long options are mandatory for short options too.
       --depth INT          Execute up to INT steps
   -i, --initializer INIT   Use INIT as the top cell initializer 
   -nm, --no-expand-macros  Don't expand macros in initial configuration
-  -v, --verbose            Print commands executed to standazd error
+  -v, --verbose            Print commands executed to standard error
       -save-temps          Do not delete temporary files on exit
   -h, --help               Display this help and exit
 HERE
@@ -194,7 +194,7 @@ for name in "${params[@]}"; do
   esac
 done
 
-function construct_text_input() {
+construct_text_input() {
   echo "$initializer" >> $input_file
 
   cat <<HERE >> $input_file
@@ -244,7 +244,7 @@ HERE
 HERE
 }
 
-function construct_binary_input()
+construct_binary_input()
 {
   echo 'not implemented'
   exit 45
