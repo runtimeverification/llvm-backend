@@ -5,6 +5,7 @@
 
 #include <cassert>
 #include <cstdio>
+#include <limits>
 #include <set>
 
 using namespace kllvm;
@@ -89,6 +90,10 @@ void serializeMap(
     writer *file, map *map, const char *unit, const char *element,
     const char *concat) {
   size_t size = map->size();
+  assert(
+      size <= std::numeric_limits<int16_t>::max()
+      && "Map too large to serialize");
+
   if (size == 0) {
     emitSymbol(unit);
     return;
@@ -109,6 +114,10 @@ void serializeList(
     writer *file, list *list, const char *unit, const char *element,
     const char *concat) {
   size_t size = list->size();
+  assert(
+      size <= std::numeric_limits<int16_t>::max()
+      && "List too large to serialize");
+
   if (size == 0) {
     emitSymbol(unit);
     return;
@@ -127,6 +136,10 @@ void serializeSet(
     writer *file, set *set, const char *unit, const char *element,
     const char *concat) {
   size_t size = set->size();
+  assert(
+      size <= std::numeric_limits<int16_t>::max()
+      && "Set too large to serialize");
+
   if (size == 0) {
     emitSymbol(unit);
     return;
@@ -263,7 +276,12 @@ void serializeConfigurationInternal(
   }
 
   instance.emit(header_byte<KORECompositePattern>);
-  instance.emit(static_cast<int16_t>(getSymbolArity(tag)));
+
+  auto arity = static_cast<int16_t>(getSymbolArity(tag));
+  assert(
+      arity <= std::numeric_limits<int16_t>::max()
+      && "Composite pattern too large to serialize");
+  instance.emit(arity);
 
   if (isBinder) {
     boundVariables.pop_back();
