@@ -194,53 +194,67 @@ for name in "${params[@]}"; do
   esac
 done
 
-echo "$initializer" >> $input_file
+function construct_text_input() {
+  echo "$initializer" >> $input_file
 
-cat <<HERE >> $input_file
+  cat <<HERE >> $input_file
 (
 HERE
 
-for param in "${params[@]}"; do
-  cat <<HERE >> $input_file
+  for param in "${params[@]}"; do
+    cat <<HERE >> $input_file
 Lbl'Unds'Map'Unds'{}(
 HERE
-done
+  done
 
-if [ ${#params[@]} -ne 0 ]; then
-  cat <<HERE >> $input_file
+  if [ ${#params[@]} -ne 0 ]; then
+    cat <<HERE >> $input_file
 Lbl'Stop'Map{}()
 HERE
-fi
-
-for param in "${params[@]}"; do
-  cat <<HERE >> $input_file
-, Lbl'UndsPipe'-'-GT-Unds'{}(inj{SortKConfigVar{}, SortKItem{}}(\dv{SortKConfigVar{}}(
-HERE
-  echo -n '"$' >> $input_file
-  echo -n "$param" >> $input_file
-  echo '"' >> $input_file
-
-  cat <<HERE >> $input_file
-)),
-HERE
-  var_name="params_$param"
-  file_name="file_$param"
-
-  if [ -z "${!file_name}" ]; then
-    echo "${!var_name}" >> $input_file
-  else
-    cat "${!file_name}" >> $input_file
   fi
 
-  cat <<HERE >> $input_file
+  for param in "${params[@]}"; do
+    cat <<HERE >> $input_file
+, Lbl'UndsPipe'-'-GT-Unds'{}(inj{SortKConfigVar{}, SortKItem{}}(\dv{SortKConfigVar{}}(
+HERE
+    echo -n '"$' >> $input_file
+    echo -n "$param" >> $input_file
+    echo '"' >> $input_file
+
+    cat <<HERE >> $input_file
+)),
+HERE
+    var_name="params_$param"
+    file_name="file_$param"
+
+    if [ -z "${!file_name}" ]; then
+      echo "${!var_name}" >> $input_file
+    else
+      cat "${!file_name}" >> $input_file
+    fi
+
+    cat <<HERE >> $input_file
 ))
 HERE
 
-done
+  done
 
-cat <<HERE >> $input_file
+  cat <<HERE >> $input_file
 )
 HERE
+}
+
+function construct_binary_input()
+{
+  echo 'not implemented'
+  exit 45
+}
+
+if $binary_input; then
+  construct_binary_input
+else
+  construct_text_input
+fi
 
 if $expandMacros; then
   "$(dirname "$0")/kore-expand-macros" "$dir" "$input_file" > "$expanded_input_file"
