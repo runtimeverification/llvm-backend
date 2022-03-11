@@ -20,7 +20,8 @@ being stripped do in fact represent the correct information.
                           the file by dropping the first 11 bytes.
   -a, --arity             Remove the arity of a KORE term by dropping the final two
                           bytes.
-  -o, --output-file FILE  Write resulting binary term to FILE.
+  -o, --output-file FILE  Write resulting binary term to FILE. If not specified,
+                          modify the input file in place.
   -v, --verbose           Print commands executed 
   -h, --help              Display this help and exit.
 HERE
@@ -82,7 +83,7 @@ if [ "$arity" = "true" ]; then
 fi
 
 if [ -z "$real_output_file" ]; then
-  cat "$output_file"
-else
-  mv "$output_file" "$real_output_file"
+  real_output_file="$input_file"
 fi
+
+mv "$output_file" "$real_output_file"
