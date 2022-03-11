@@ -67,11 +67,6 @@ do
   esac
 done
 
-if [ -z "$real_output_file" ]; then
-  echo 'Must specify output file with -o' >&2
-  exit 1
-fi
-
 if [ "$verbose" = "true" ]; then
   set -x
 fi
@@ -86,4 +81,8 @@ if [ "$arity" = "true" ]; then
   truncate -s -2 "$output_file"
 fi
 
-mv "$output_file" "$real_output_file"
+if [ -z "$real_output_file" ]; then
+  cat "$output_file"
+else
+  mv "$output_file" "$real_output_file"
+fi
