@@ -90,68 +90,112 @@ void serializeMap(
     writer *file, map *map, const char *unit, const char *element,
     const char *concat) {
   size_t size = map->size();
-  assert(
-      size <= std::numeric_limits<int16_t>::max()
-      && "Map too large to serialize");
-
   if (size == 0) {
     emitSymbol(unit);
     return;
   }
 
-  for (auto iter = map->begin(); iter != map->end(); ++iter) {
-    serializeConfigurationInternal(file, iter->first, "SortKItem{}", false);
-    serializeConfigurationInternal(file, iter->second, "SortKItem{}", false);
+  auto remaining = size;
+  auto chunks = 0;
 
-    emitSymbol(element, 2);
+  while (remaining > 0) {
+    auto chunk_size
+        = std::min(remaining, size_t{std::numeric_limits<int16_t>::max()});
+
+    remaining -= chunk_size;
+
+    for (auto iter = map->begin();
+         iter != std::next(map->begin(), chunk_size) && iter != map->end();
+         ++iter) {
+      serializeConfigurationInternal(file, iter->first, "SortKItem{}", false);
+      serializeConfigurationInternal(file, iter->second, "SortKItem{}", false);
+      emitSymbol(element, 2);
+    }
+
+    emitSymbol(concat, chunk_size);
+    emitSymbol("\\left-assoc{}", 1);
+
+    ++chunks;
   }
 
-  emitSymbol(concat, map->size());
-  emitSymbol("\\left-assoc{}", 1);
+  if (chunks > 1) {
+    emitSymbol(concat, chunks);
+    emitSymbol("\\left-assoc{}", 1);
+  }
 }
 
 void serializeList(
     writer *file, list *list, const char *unit, const char *element,
     const char *concat) {
   size_t size = list->size();
-  assert(
-      size <= std::numeric_limits<int16_t>::max()
-      && "List too large to serialize");
-
   if (size == 0) {
     emitSymbol(unit);
     return;
   }
 
-  for (auto iter = list->begin(); iter != list->end(); ++iter) {
-    serializeConfigurationInternal(file, *iter, "SortKItem{}", false);
-    emitSymbol(element, 1);
+  auto remaining = size;
+  auto chunks = 0;
+
+  while (remaining > 0) {
+    auto chunk_size
+        = std::min(remaining, size_t{std::numeric_limits<int16_t>::max()});
+
+    remaining -= chunk_size;
+
+    for (auto iter = list->begin();
+         iter != std::next(list->begin(), chunk_size) && iter != list->end();
+         ++iter) {
+      serializeConfigurationInternal(file, *iter, "SortKItem{}", false);
+      emitSymbol(element, 1);
+    }
+
+    emitSymbol(concat, chunk_size);
+    emitSymbol("\\left-assoc{}", 1);
+
+    ++chunks;
   }
 
-  emitSymbol(concat, list->size());
-  emitSymbol("\\left-assoc{}", 1);
+  if (chunks > 1) {
+    emitSymbol(concat, chunks);
+    emitSymbol("\\left-assoc{}", 1);
+  }
 }
 
 void serializeSet(
     writer *file, set *set, const char *unit, const char *element,
     const char *concat) {
   size_t size = set->size();
-  assert(
-      size <= std::numeric_limits<int16_t>::max()
-      && "Set too large to serialize");
-
   if (size == 0) {
     emitSymbol(unit);
     return;
   }
 
-  for (auto iter = set->begin(); iter != set->end(); ++iter) {
-    serializeConfigurationInternal(file, *iter, "SortKItem{}", false);
-    emitSymbol(element, 1);
+  auto remaining = size;
+  auto chunks = 0;
+
+  while (remaining > 0) {
+    auto chunk_size
+        = std::min(remaining, size_t{std::numeric_limits<int16_t>::max()});
+
+    remaining -= chunk_size;
+
+    for (auto iter = set->begin();
+         iter != std::next(set->begin(), chunk_size) && iter != set->end();
+         ++iter) {
+      serializeConfigurationInternal(file, *iter, "SortKItem{}", false);
+      emitSymbol(element, 1);
+    }
+
+    emitSymbol(concat, chunk_size);
+    emitSymbol("\\left-assoc{}", 1);
+
+    ++chunks;
   }
 
-  emitSymbol(concat, set->size());
-  emitSymbol("\\left-assoc{}", 1);
+  if (chunks > 1) {
+    emitSymbol(concat, chunks);
+    emitSymbol("\\left-assoc{}", 1);
+  }
 }
 
 void serializeInt(writer *file, mpz_t i, const char *sort) {
