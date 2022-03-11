@@ -204,9 +204,7 @@ void serializeConfigurationInternal(
     string *str = (string *)subject;
     size_t len = len(subject);
 
-    if (len > 0) {
-      emitToken(sort, str->data, len);
-    } else if (isVar && !varNames.count(str)) {
+    if (isVar && !varNames.count(str)) {
       std::string stdStr = std::string(str->data, len(str));
       std::string suffix = "";
       while (usedVarNames.count(stdStr + suffix)) {
@@ -218,6 +216,8 @@ void serializeConfigurationInternal(
       varNames[str] = suffix;
     } else if (isVar) {
       emitToken(sort, varNames[str].c_str());
+    } else {
+      emitToken(sort, str->data, len);
     }
 
     return;
