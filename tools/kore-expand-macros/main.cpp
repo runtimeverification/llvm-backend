@@ -55,8 +55,7 @@ int main(int argc, char **argv) {
         return lInt < rInt;
       });
 
-  KOREParser parser3(argv[2]);
-  sptr<KOREPattern> config = parser3.pattern();
+  auto config = KOREPattern::load(argv[2]);
   std::map<std::string, std::vector<KORESymbol *>> symbols;
   config->markSymbols(symbols);
   for (auto &decl : axioms) {
