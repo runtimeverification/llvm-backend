@@ -62,9 +62,18 @@ static void emitConstantSort(char const *name) {
 /**
  * Emit a symbol of the form \dv{Sort}("string")
  */
-static void emitToken(char const *sort, char const *string) {
+static void emitToken(char const *sort, char const *string, int len = 0) {
   instance.emit(header_byte<KOREStringPattern>);
-  instance.emit_string(string);
+
+  // Allow the length of the token to be passed in explicitly to handle the
+  // Bytes sort, which can include null characters in the middle of a string.
+  // Otherwise, assume that the string is null-terminated and that its length
+  // can be worked out implicitly.
+  if (len == 0) {
+    instance.emit_string(string);
+  } else {
+    instance.emit_string(std::string(string, len));
+  }
 
   emitConstantSort(drop_back(sort, 2).c_str());
 
@@ -196,7 +205,7 @@ void serializeConfigurationInternal(
     size_t len = len(subject);
 
     if (len > 0) {
-      emitToken(sort, str->data);
+      emitToken(sort, str->data, len);
     } else if (isVar && !varNames.count(str)) {
       std::string stdStr = std::string(str->data, len(str));
       std::string suffix = "";
