@@ -31,10 +31,10 @@ no more to follow
 another   byte follows
 ```
 
-The first represents a length of 1, while the second represents `(3 << 7) + 1`,
-or 385. Because the continuation bit in the first byte is set, its data value
-(low 7 bits of value 3) should be shifted left by 7 places, and the following
-byte's value considered additionally.
+The first represents a length of 1, while the second represents `3 + (1 << 7)`,
+or 131. Because the continuation bit in the first byte is set, the data value of
+the next byte (low 7 bits of value 1) should be shifted left by 7 places, and
+its continuation bit considered additionally.
 
 The maximum value that can be encoded using this scheme is `2^63`, which
 corresponds to 9 bytes with all possible data bits set. Sequences of more than 9

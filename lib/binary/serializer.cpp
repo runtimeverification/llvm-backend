@@ -39,22 +39,46 @@ void serializer::emit_string(std::string const &s) {
   if (intern_table_.find(s) == intern_table_.end()) {
     emit_direct_string(s);
   } else {
-    int64_t previous = intern_table_.at(s);
+    emit(backref_string_prefix_);
 
-    // The 5 byte offset here is the string prefix byte and 4-byte
-    // backreference distance: PP BBBB BBBB. Setting the distance to be computed
-    // _after_ these bytes makes the deserialization code much simpler (a single
-    // subtraction from the current pointer after reading the backref.
-    // distance). See `read_string` in deserializer.h.
-    int64_t diff = (next_idx_ + 5) - previous;
+    uint64_t previous = intern_table_.at(s);
 
-    if (diff <= std::numeric_limits<int32_t>::max()) {
-      emit(backref_string_prefix_);
-      emit(int32_t(diff));
-    } else {
-      emit_direct_string(s);
-    }
+    // This iteration makes sure that the diff field correctly encodes the
+    // offset relative to _itself_ as well as to the prefix.
+    uint64_t base_diff = next_idx_ - previous;
+    auto chunks = required_chunks(base_diff + required_chunks(base_diff));
+
+    emit_length(base_diff + chunks);
   }
+}
+
+int serializer::emit_length(uint64_t len) {
+  auto emitted = 0;
+
+  do {
+    uint8_t chunk = len & 0x7F;
+    len >>= 7;
+
+    if (len > 0) {
+      chunk = chunk & 0x80;
+    }
+
+    emit(std::byte(chunk));
+    emitted++;
+  } while (len > 0);
+
+  assert(
+      emitted == required_chunks(len)
+      && "Internal error when emitting length fields");
+  return emitted;
+}
+
+int serializer::required_chunks(uint64_t len) const {
+  auto ret = 0;
+  while (len >>= 7) {
+    ++ret;
+  }
+  return ret;
 }
 
 void serializer::emit_direct_string(std::string const &s) {
@@ -62,10 +86,7 @@ void serializer::emit_direct_string(std::string const &s) {
 
   intern_table_[s] = next_idx_;
 
-  assert(
-      s.size() <= std::numeric_limits<int32_t>::max()
-      && "String too large to be serialized");
-  emit(int32_t(s.size()));
+  emit_length(s.size());
 
   for (auto c : s) {
     emit(std::byte(c));

@@ -39,7 +39,7 @@ std::array<std::byte, sizeof(T)> to_bytes(T val) {
 class serializer {
 public:
   static constexpr auto magic_header = std::array{'\x7f', 'K', 'O', 'R', 'E'};
-  static constexpr auto version = std::array{1, 0, 0};
+  static constexpr auto version = std::array{1, 1, 0};
 
   serializer();
 
@@ -67,6 +67,14 @@ public:
    */
   void emit_string(std::string const &s);
 
+  /**
+   * Emit a variable-length length field to the buffer as a sequence of
+   * continued bytes.
+   *
+   * Returns the number of bytes emitted.
+   */
+  int emit_length(uint64_t len);
+
   std::vector<std::byte> const &data() { return buffer_; }
 
 private:
@@ -74,14 +82,20 @@ private:
   std::byte direct_string_prefix_;
   std::byte backref_string_prefix_;
 
-  int64_t next_idx_;
-  std::unordered_map<std::string, int64_t> intern_table_;
+  uint64_t next_idx_;
+  std::unordered_map<std::string, uint64_t> intern_table_;
 
   /**
    * Emit a string directly to the output buffer and update the interning table,
    * regardless of whether the string has already been interned or not.
    */
   void emit_direct_string(std::string const &s);
+
+  /**
+   * Calculate the number of continued bytes required to serialize this value as
+   * a length field, without actually doing so.
+   */
+  int required_chunks(uint64_t len) const;
 };
 
 template <typename It>
