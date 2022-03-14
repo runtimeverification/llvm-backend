@@ -42,6 +42,7 @@ public:
   static constexpr auto version = std::array{1, 1, 0};
 
   serializer();
+  serializer(bool use_h);
 
   /**
    * Emit a single byte or sequence of bytes to the output buffer.
@@ -84,6 +85,8 @@ public:
   void reset();
 
 private:
+  bool use_header_;
+
   std::vector<std::byte> buffer_;
   std::byte direct_string_prefix_;
   std::byte backref_string_prefix_;

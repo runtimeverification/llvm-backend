@@ -4,13 +4,12 @@
 
 // RUN_: %strip-binary -i %t_b    -k    >> %t_a
 // RUN_: %strip-binary -i %t_ctor -k -a >> %t_a
-// RUN_: %arity 2 >> %t_a
 // RUN_: %kore-convert %t_a -o %t_term.kore
 
 // RUN: tail -c +12 %t_b >> %t_a
 // RUN: tail -c +12 %t_ctor >> %t_a
 // RUN: head -c -1  %t_a > %t_term
-// RUN: echo -ne '\x02' >> %t_term
+// RUN: %arity 2 >> %t_term
 // RUN: %kore-convert %t_term -o %t_term.kore
 
 // RUN: %kore-convert %s --to=text -o %t_ref
