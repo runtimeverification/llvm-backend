@@ -55,7 +55,6 @@ void serializer::emit_string(std::string const &s) {
 
 int serializer::emit_length(uint64_t len) {
   auto emitted = 0;
-  auto req = required_chunks(len);
 
   do {
     uint8_t chunk = len & 0x7F;
@@ -69,7 +68,6 @@ int serializer::emit_length(uint64_t len) {
     emitted++;
   } while (len > 0);
 
-  assert(emitted == req && "Internal error when emitting length fields");
   return emitted;
 }
 
