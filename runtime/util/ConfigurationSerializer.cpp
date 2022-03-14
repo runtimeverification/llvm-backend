@@ -42,13 +42,13 @@ void serializeConfigurationInternal(
  * Emit a symbol of the form ctor{}(...); this should be preceded by the
  * appropriate pattern arguments in the buffer.
  */
-static void emitSymbol(char const *name, int16_t arity = 0) {
+static void emitSymbol(char const *name, uint64_t arity = 0) {
   instance.emit(header_byte<KORESymbol>);
-  instance.emit(int16_t{0});
+  instance.emit_length(0);
   instance.emit_string(drop_back(name, 2));
 
   instance.emit(header_byte<KORECompositePattern>);
-  instance.emit(arity);
+  instance.emit_length(arity);
 }
 
 /**
@@ -56,7 +56,7 @@ static void emitSymbol(char const *name, int16_t arity = 0) {
  */
 static void emitConstantSort(char const *name) {
   instance.emit(header_byte<KORECompositeSort>);
-  instance.emit(int16_t{0});
+  instance.emit_length(0);
   instance.emit_string(name);
 }
 
@@ -79,11 +79,11 @@ static void emitToken(char const *sort, char const *string, int len = 0) {
   emitConstantSort(drop_back(sort, 2).c_str());
 
   instance.emit(header_byte<KORESymbol>);
-  instance.emit(int16_t{1});
+  instance.emit_length(1);
   instance.emit_string("\\dv");
 
   instance.emit(header_byte<KORECompositePattern>);
-  instance.emit(int16_t{1});
+  instance.emit_length(1);
 }
 
 void serializeMap(
@@ -95,33 +95,15 @@ void serializeMap(
     return;
   }
 
-  auto remaining = size;
-  auto chunks = 0;
+  for (auto iter = map->begin(); iter != map->end(); ++iter) {
+    serializeConfigurationInternal(file, iter->first, "SortKItem{}", false);
+    serializeConfigurationInternal(file, iter->second, "SortKItem{}", false);
 
-  while (remaining > 0) {
-    auto chunk_size
-        = std::min(remaining, size_t{std::numeric_limits<int16_t>::max()});
-
-    remaining -= chunk_size;
-
-    for (auto iter = map->begin();
-         iter != std::next(map->begin(), chunk_size) && iter != map->end();
-         ++iter) {
-      serializeConfigurationInternal(file, iter->first, "SortKItem{}", false);
-      serializeConfigurationInternal(file, iter->second, "SortKItem{}", false);
-      emitSymbol(element, 2);
-    }
-
-    emitSymbol(concat, chunk_size);
-    emitSymbol("\\left-assoc{}", 1);
-
-    ++chunks;
+    emitSymbol(element, 2);
   }
 
-  if (chunks > 1) {
-    emitSymbol(concat, chunks);
-    emitSymbol("\\left-assoc{}", 1);
-  }
+  emitSymbol(concat, map->size());
+  emitSymbol("\\left-assoc{}", 1);
 }
 
 void serializeList(
@@ -133,32 +115,13 @@ void serializeList(
     return;
   }
 
-  auto remaining = size;
-  auto chunks = 0;
-
-  while (remaining > 0) {
-    auto chunk_size
-        = std::min(remaining, size_t{std::numeric_limits<int16_t>::max()});
-
-    remaining -= chunk_size;
-
-    for (auto iter = list->begin();
-         iter != std::next(list->begin(), chunk_size) && iter != list->end();
-         ++iter) {
-      serializeConfigurationInternal(file, *iter, "SortKItem{}", false);
-      emitSymbol(element, 1);
-    }
-
-    emitSymbol(concat, chunk_size);
-    emitSymbol("\\left-assoc{}", 1);
-
-    ++chunks;
+  for (auto iter = list->begin(); iter != list->end(); ++iter) {
+    serializeConfigurationInternal(file, *iter, "SortKItem{}", false);
+    emitSymbol(element, 1);
   }
 
-  if (chunks > 1) {
-    emitSymbol(concat, chunks);
-    emitSymbol("\\left-assoc{}", 1);
-  }
+  emitSymbol(concat, list->size());
+  emitSymbol("\\left-assoc{}", 1);
 }
 
 void serializeSet(
@@ -170,32 +133,13 @@ void serializeSet(
     return;
   }
 
-  auto remaining = size;
-  auto chunks = 0;
-
-  while (remaining > 0) {
-    auto chunk_size
-        = std::min(remaining, size_t{std::numeric_limits<int16_t>::max()});
-
-    remaining -= chunk_size;
-
-    for (auto iter = set->begin();
-         iter != std::next(set->begin(), chunk_size) && iter != set->end();
-         ++iter) {
-      serializeConfigurationInternal(file, *iter, "SortKItem{}", false);
-      emitSymbol(element, 1);
-    }
-
-    emitSymbol(concat, chunk_size);
-    emitSymbol("\\left-assoc{}", 1);
-
-    ++chunks;
+  for (auto iter = set->begin(); iter != set->end(); ++iter) {
+    serializeConfigurationInternal(file, *iter, "SortKItem{}", false);
+    emitSymbol(element, 1);
   }
 
-  if (chunks > 1) {
-    emitSymbol(concat, chunks);
-    emitSymbol("\\left-assoc{}", 1);
-  }
+  emitSymbol(concat, set->size());
+  emitSymbol("\\left-assoc{}", 1);
 }
 
 void serializeInt(writer *file, mpz_t i, const char *sort) {
@@ -311,21 +255,17 @@ void serializeConfigurationInternal(
     emitConstantSort(drop_back(sort, 2).c_str());
 
     instance.emit(header_byte<KORESymbol>);
-    instance.emit(int16_t{2});
+    instance.emit_length(2);
     instance.emit_string("inj");
   } else {
     instance.emit(header_byte<KORESymbol>);
-    instance.emit(int16_t{0});
+    instance.emit_length(0);
     instance.emit_string(symbolStr.substr(0, symbolStr.size() - 2));
   }
 
   instance.emit(header_byte<KORECompositePattern>);
 
-  auto arity = static_cast<int16_t>(getSymbolArity(tag));
-  assert(
-      arity <= std::numeric_limits<int16_t>::max()
-      && "Composite pattern too large to serialize");
-  instance.emit(arity);
+  instance.emit_length(getSymbolArity(tag));
 
   if (isBinder) {
     boundVariables.pop_back();
