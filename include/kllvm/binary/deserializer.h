@@ -44,12 +44,35 @@ T read(It &ptr, It end) {
 }
 
 template <typename It>
+uint64_t read_length(It &ptr, It end) {
+  uint64_t ret = 0;
+  auto should_continue = true;
+  auto steps = 0;
+
+  while (should_continue) {
+    assert(ptr != end && "Invalid variable-length field");
+
+    auto chunk = peek(ptr);
+    auto cont_bit = std::byte(0x80);
+    should_continue = static_cast<bool>(chunk & cont_bit);
+
+    chunk = chunk & ~cont_bit;
+    ret = ret | (uint64_t(chunk) << (7 * steps));
+
+    ++steps;
+    ++ptr;
+  }
+
+  return ret;
+}
+
+template <typename It>
 std::string read_string(It &ptr, It end) {
   switch (uint8_t(peek(ptr))) {
 
   case 0x01: {
     ++ptr;
-    auto len = read<int32_t>(ptr, end);
+    auto len = read_length(ptr, end);
     auto ret = std::string((char *)&*ptr, (char *)(&*ptr + len));
 
     ptr += len;
@@ -58,9 +81,9 @@ std::string read_string(It &ptr, It end) {
 
   case 0x02: {
     ++ptr;
-    auto backref = read<int32_t>(ptr, end);
+    auto backref = read_length(ptr, end);
     auto begin = ptr - backref;
-    auto len = read<int32_t>(begin, end);
+    auto len = read_length(begin, end);
 
     return std::string((char *)&*begin, (char *)(&*begin + len));
   }
@@ -82,7 +105,7 @@ sptr<KOREVariable> read_variable(It &ptr, It end) {
 template <typename It>
 ptr<KORESymbol>
 read_symbol(It &ptr, It end, std::vector<sptr<KORESort>> &sort_stack) {
-  auto arity = read<int16_t>(ptr, end);
+  auto arity = read_length(ptr, end);
 
   auto name = read_string(ptr, end);
   auto symbol = KORESymbol::Create(name);
@@ -102,7 +125,7 @@ read_symbol(It &ptr, It end, std::vector<sptr<KORESort>> &sort_stack) {
 template <typename It>
 sptr<KORESort>
 read_composite_sort(It &ptr, It end, std::vector<sptr<KORESort>> &sort_stack) {
-  auto arity = read<int16_t>(ptr, end);
+  auto arity = read_length(ptr, end);
   auto new_sort = KORECompositeSort::Create(read_string(ptr, end));
 
   for (auto i = sort_stack.size() - arity; i < sort_stack.size(); ++i) {
@@ -135,7 +158,7 @@ sptr<KOREPattern> read_v2(It &ptr, It end) {
       auto new_pattern = KORECompositePattern::Create(std::move(symbol));
       symbol = nullptr;
 
-      auto arity = read<int16_t>(ptr, end);
+      auto arity = read_length(ptr, end);
       for (auto i = term_stack.size() - arity; i < term_stack.size(); ++i) {
         new_pattern->addArgument(term_stack[i]);
       }

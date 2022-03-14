@@ -1,6 +1,7 @@
 #include <kllvm/binary/serializer.h>
 
 #include <cassert>
+#include <iostream>
 #include <limits>
 
 namespace kllvm {
@@ -54,30 +55,30 @@ void serializer::emit_string(std::string const &s) {
 
 int serializer::emit_length(uint64_t len) {
   auto emitted = 0;
+  auto req = required_chunks(len);
 
   do {
     uint8_t chunk = len & 0x7F;
     len >>= 7;
 
     if (len > 0) {
-      chunk = chunk & 0x80;
+      std::cerr << "len " << len << '\n';
+      chunk = chunk | 0x80;
     }
 
-    emit(std::byte(chunk));
+    emit(chunk);
     emitted++;
   } while (len > 0);
 
-  assert(
-      emitted == required_chunks(len)
-      && "Internal error when emitting length fields");
+  assert(emitted == req && "Internal error when emitting length fields");
   return emitted;
 }
 
 int serializer::required_chunks(uint64_t len) const {
   auto ret = 0;
-  while (len >>= 7) {
+  do {
     ++ret;
-  }
+  } while (len >>= 7);
   return ret;
 }
 
