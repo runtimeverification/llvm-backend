@@ -1,11 +1,25 @@
 #include "kllvm/ast/AST.h"
 
+#include "kllvm/binary/deserializer.h"
+#include "kllvm/binary/serializer.h"
+#include "kllvm/parser/KOREParser.h"
+
 #include <algorithm>
+#include <cassert>
 #include <iostream>
+#include <limits>
 #include <unordered_map>
 #include <unordered_set>
 
 using namespace kllvm;
+
+sptr<KOREPattern> KOREPattern::load(std::string const &filename) {
+  if (has_binary_kore_header(filename)) {
+    return deserialize_pattern(filename);
+  } else {
+    return parser::KOREParser(filename).pattern();
+  }
+}
 
 std::string kllvm::decodeKore(std::string kore) {
   static std::unordered_map<std::string, char> codes;
@@ -1827,6 +1841,72 @@ void KOREDefinition::print(std::ostream &Out, unsigned indent) const {
     Module->print(Out, indent);
     Out << "\n";
   }
+}
+
+// Binary serialization
+
+void KOREVariablePattern::serialize_to(serializer &s) const {
+  sort->serialize_to(s);
+  s.emit(header_byte<KOREVariablePattern>);
+  name->serialize_to(s);
+}
+
+void KORECompositePattern::serialize_to(serializer &s) const {
+  assert(
+      arguments.size() <= std::numeric_limits<int16_t>::max()
+      && "Composite pattern has too many arguments to serialize");
+
+  for (auto const &arg : arguments) {
+    arg->serialize_to(s);
+  }
+
+  constructor->serialize_to(s);
+
+  s.emit(header_byte<KORECompositePattern>);
+  s.emit(int16_t(arguments.size()));
+}
+
+void KOREStringPattern::serialize_to(serializer &s) const {
+  s.emit(header_byte<KOREStringPattern>);
+  s.emit_string(contents);
+}
+
+void KORESortVariable::serialize_to(serializer &s) const {
+  s.emit(header_byte<KORESortVariable>);
+  s.emit_string(name);
+}
+
+void KORECompositeSort::serialize_to(serializer &s) const {
+  assert(
+      arguments.size() <= std::numeric_limits<int16_t>::max()
+      && "Composite sort has too many arguments to serialize");
+
+  for (auto const &arg : arguments) {
+    arg->serialize_to(s);
+  }
+
+  s.emit(header_byte<KORECompositeSort>);
+  s.emit(int16_t(arguments.size()));
+  s.emit_string(name);
+}
+
+void KORESymbol::serialize_to(serializer &s) const {
+  assert(
+      formalArguments.size() <= std::numeric_limits<int16_t>::max()
+      && "Symbol has too many arguments to serialize");
+
+  for (auto const &arg : formalArguments) {
+    arg->serialize_to(s);
+  }
+
+  s.emit(header_byte<KORESymbol>);
+  s.emit(int16_t(formalArguments.size()));
+  s.emit_string(name);
+}
+
+void KOREVariable::serialize_to(serializer &s) const {
+  s.emit(header_byte<KOREVariable>);
+  s.emit_string(name);
 }
 
 void kllvm::readMultimap(

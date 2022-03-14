@@ -63,6 +63,7 @@ do
     name="$2"
     value="$3"
     var_name="params_$name"
+    file_name="file_$name"
     pretty_name="pretty_$name"
     sort_name="sort_$name"
     params+=("$name")
@@ -74,7 +75,7 @@ do
       printf -v "$var_name" %s "$value"
       ;;
       korefile)
-      printf -v "$var_name" %s "`cat "$value"`"
+      printf -v "$file_name" %s "$value"
       ;;
       pretty)
       printf -v "$pretty_name" %s "$value"
@@ -166,12 +167,21 @@ done
 for name in "${params[@]}"; do
   sort_name="sort_$name"
   var_name="params_$name"
+  file_name="file_$name"
   sort="${!sort_name}"
   case $sort in
     KItem)
     ;;
     *)
-    printf -v "$var_name" %s "inj{Sort$sort{}, SortKItem{}}(${!var_name})"
+    if [ -z "${!file_name}" ]; then
+      printf -v "$var_name" %s "inj{Sort$sort{}, SortKItem{}}(${!var_name})"
+    else
+      temp_file="$(mktemp tmp.interpolate.XXXXXXXXXX)"
+      echo "inj{Sort$sort{}, SortKItem{}}(" >> "$temp_file"
+      cat "${!file_name}" >> "$temp_file"
+      echo ")" >> "$temp_file"
+      mv "$temp_file" "${!file_name}"
+    fi
     ;;
   esac
 done
@@ -206,7 +216,13 @@ HERE
 )),
 HERE
   var_name="params_$param"
-  echo "${!var_name}" >> $input_file
+  file_name="file_$param"
+
+  if [ -z "${!file_name}" ]; then
+    echo "${!var_name}" >> $input_file
+  else
+    cat "${!file_name}" >> $input_file
+  fi
 
   cat <<HERE >> $input_file
 ))

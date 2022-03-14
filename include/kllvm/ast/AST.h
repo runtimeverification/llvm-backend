@@ -14,6 +14,8 @@
 
 namespace kllvm {
 
+class serializer;
+
 class KORESortVariable;
 
 struct HashSort;
@@ -40,6 +42,7 @@ public:
 
   virtual void print(std::ostream &Out, unsigned indent = 0) const = 0;
   virtual void prettyPrint(std::ostream &Out) const = 0;
+  virtual void serialize_to(serializer &s) const = 0;
 
   virtual ~KORESort() = default;
 };
@@ -89,6 +92,8 @@ public:
 
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
   virtual void prettyPrint(std::ostream &Out) const override;
+  virtual void serialize_to(serializer &s) const override;
+
   virtual bool operator==(const KORESort &other) const override;
 
 private:
@@ -148,6 +153,7 @@ public:
   void addArgument(sptr<KORESort> Argument);
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
   virtual void prettyPrint(std::ostream &out) const override;
+  virtual void serialize_to(serializer &s) const override;
   virtual bool operator==(const KORESort &other) const override;
 
 private:
@@ -219,6 +225,7 @@ public:
 
   void print(std::ostream &Out, unsigned indent = 0) const;
   void print(std::ostream &Out, unsigned indent, bool formal) const;
+  void serialize_to(serializer &s) const;
 
   bool operator==(const KORESymbol &other) const;
   bool operator!=(const KORESymbol &other) const { return !(*this == other); }
@@ -289,6 +296,8 @@ public:
   std::string getName() const;
 
   virtual void print(std::ostream &Out, unsigned indent = 0) const;
+  virtual void serialize_to(serializer &s) const;
+
   virtual ~KOREVariable() = default;
 
 private:
@@ -338,9 +347,18 @@ class KORECompositePattern;
 // KOREPattern
 class KOREPattern : public std::enable_shared_from_this<KOREPattern> {
 public:
+  /*
+   * Load a pattern from disk, examining the first 4 bytes to see if it's a
+   * binary file or a textual KORE file.
+   */
+  static sptr<KOREPattern> load(std::string const &filename);
+
   virtual ~KOREPattern() = default;
 
   virtual void print(std::ostream &Out, unsigned indent = 0) const = 0;
+
+  virtual void serialize_to(serializer &s) const = 0;
+
   /* adds all the object level symbols contained recursively in the current
      pattern to the specified map, mapping their symbol name to the list of all
      instances of that symbol. */
@@ -406,6 +424,8 @@ public:
   virtual sptr<KORESort> getSort() const override { return sort; }
 
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
+  virtual void serialize_to(serializer &s) const override;
+
   virtual void
   markSymbols(std::map<std::string, std::vector<KORESymbol *>> &) override { }
   virtual void
@@ -487,7 +507,10 @@ public:
   }
 
   void addArgument(sptr<KOREPattern> Argument);
+
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
+  virtual void serialize_to(serializer &s) const override;
+
   virtual void
   prettyPrint(std::ostream &out, PrettyPrintData const &data) const override;
   virtual void
@@ -531,10 +554,12 @@ public:
   std::string getContents() { return contents; }
 
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
+  virtual void serialize_to(serializer &s) const override;
   virtual void
   prettyPrint(std::ostream &out, PrettyPrintData const &data) const override {
     abort();
   }
+
   virtual void
   markSymbols(std::map<std::string, std::vector<KORESymbol *>> &) override { }
   virtual void
@@ -879,6 +904,36 @@ transitiveClosure(std::unordered_map<
   } while (dirty);
   return relations;
 }
+
+namespace detail {
+
+template <typename T>
+struct header_byte_t;
+
+#define VARIANT_HEADER(C, V)                                                   \
+  template <>                                                                  \
+  struct header_byte_t<C> {                                                    \
+    static constexpr std::byte value = std::byte(V);                           \
+  }
+
+VARIANT_HEADER(KORECompositePattern, 0x4);
+VARIANT_HEADER(KOREStringPattern, 0x5);
+VARIANT_HEADER(KORECompositeSort, 0x6);
+VARIANT_HEADER(KORESortVariable, 0x7);
+VARIANT_HEADER(KORESymbol, 0x8);
+VARIANT_HEADER(KOREVariablePattern, 0x9);
+VARIANT_HEADER(KOREVariable, 0xD);
+
+#undef VARIANT_HEADER
+
+} // namespace detail
+
+/**
+ * Helps to make sure that different AST variants don't end up with conflicting
+ * header bytes.
+ */
+template <typename T>
+constexpr inline std::byte header_byte = detail::header_byte_t<T>::value;
 
 } // end namespace kllvm
 
