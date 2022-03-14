@@ -62,7 +62,6 @@ int serializer::emit_length(uint64_t len) {
     len >>= 7;
 
     if (len > 0) {
-      std::cerr << "len " << len << '\n';
       chunk = chunk | 0x80;
     }
 
