@@ -42,13 +42,13 @@ void serializeConfigurationInternal(
  * Emit a symbol of the form ctor{}(...); this should be preceded by the
  * appropriate pattern arguments in the buffer.
  */
-static void emitSymbol(char const *name, int16_t arity = 0) {
+static void emitSymbol(char const *name, uint64_t arity = 0) {
   instance.emit(header_byte<KORESymbol>);
-  instance.emit(int16_t{0});
+  instance.emit_length(0);
   instance.emit_string(drop_back(name, 2));
 
   instance.emit(header_byte<KORECompositePattern>);
-  instance.emit(arity);
+  instance.emit_length(arity);
 }
 
 /**
@@ -56,7 +56,7 @@ static void emitSymbol(char const *name, int16_t arity = 0) {
  */
 static void emitConstantSort(char const *name) {
   instance.emit(header_byte<KORECompositeSort>);
-  instance.emit(int16_t{0});
+  instance.emit_length(0);
   instance.emit_string(name);
 }
 
@@ -79,21 +79,17 @@ static void emitToken(char const *sort, char const *string, int len = 0) {
   emitConstantSort(drop_back(sort, 2).c_str());
 
   instance.emit(header_byte<KORESymbol>);
-  instance.emit(int16_t{1});
+  instance.emit_length(1);
   instance.emit_string("\\dv");
 
   instance.emit(header_byte<KORECompositePattern>);
-  instance.emit(int16_t{1});
+  instance.emit_length(1);
 }
 
 void serializeMap(
     writer *file, map *map, const char *unit, const char *element,
     const char *concat) {
   size_t size = map->size();
-  assert(
-      size <= std::numeric_limits<int16_t>::max()
-      && "Map too large to serialize");
-
   if (size == 0) {
     emitSymbol(unit);
     return;
@@ -114,10 +110,6 @@ void serializeList(
     writer *file, list *list, const char *unit, const char *element,
     const char *concat) {
   size_t size = list->size();
-  assert(
-      size <= std::numeric_limits<int16_t>::max()
-      && "List too large to serialize");
-
   if (size == 0) {
     emitSymbol(unit);
     return;
@@ -136,10 +128,6 @@ void serializeSet(
     writer *file, set *set, const char *unit, const char *element,
     const char *concat) {
   size_t size = set->size();
-  assert(
-      size <= std::numeric_limits<int16_t>::max()
-      && "Set too large to serialize");
-
   if (size == 0) {
     emitSymbol(unit);
     return;
@@ -267,21 +255,17 @@ void serializeConfigurationInternal(
     emitConstantSort(drop_back(sort, 2).c_str());
 
     instance.emit(header_byte<KORESymbol>);
-    instance.emit(int16_t{2});
+    instance.emit_length(2);
     instance.emit_string("inj");
   } else {
     instance.emit(header_byte<KORESymbol>);
-    instance.emit(int16_t{0});
+    instance.emit_length(0);
     instance.emit_string(symbolStr.substr(0, symbolStr.size() - 2));
   }
 
   instance.emit(header_byte<KORECompositePattern>);
 
-  auto arity = static_cast<int16_t>(getSymbolArity(tag));
-  assert(
-      arity <= std::numeric_limits<int16_t>::max()
-      && "Composite pattern too large to serialize");
-  instance.emit(arity);
+  instance.emit_length(getSymbolArity(tag));
 
   if (isBinder) {
     boundVariables.pop_back();
