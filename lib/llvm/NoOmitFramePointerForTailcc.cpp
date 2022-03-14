@@ -17,7 +17,7 @@ struct NoOmitFramePointerForTailcc : public FunctionPass {
       return false;
     }
 
-    F.addFnAttr("frame-pointer", "all");
+    F.addFnAttr("frame-pointer", "non-leaf");
     return true;
   }
 };
