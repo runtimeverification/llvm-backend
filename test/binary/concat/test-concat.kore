@@ -2,10 +2,10 @@
 // RUN: %kore-convert %S/Inputs/b.kore -o %t_b
 // RUN: %kore-convert %S/Inputs/ctor.kore -o %t_ctor
 
-// _RUN: %strip-binary -i %t_b    -k    >> %t_a
-// _RUN: %strip-binary -i %t_ctor -k -a >> %t_a
-// _RUN: %arity 2 >> %t_a
-// _RUN: %kore-convert %t_a -o %t_term.kore
+// RUN_: %strip-binary -i %t_b    -k    >> %t_a
+// RUN_: %strip-binary -i %t_ctor -k -a >> %t_a
+// RUN_: %arity 2 >> %t_a
+// RUN_: %kore-convert %t_a -o %t_term.kore
 
 // RUN: tail -c +12 %t_b >> %t_a
 // RUN: tail -c +12 %t_ctor >> %t_a
