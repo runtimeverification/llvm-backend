@@ -149,14 +149,12 @@ configure_file(bin/llvm-kompile bin @ONLY)
 configure_file(bin/llvm-krun bin @ONLY)
 configure_file(bin/llvm-kompile-testing bin @ONLY)
 configure_file(bin/llvm-kompile-clang bin @ONLY)
-configure_file(bin/strip-binary-kore bin @ONLY)
 
 install(
   PROGRAMS
     ${CMAKE_CURRENT_BINARY_DIR}/bin/llvm-kompile
     ${CMAKE_CURRENT_BINARY_DIR}/bin/llvm-kompile-clang
     ${CMAKE_CURRENT_BINARY_DIR}/bin/llvm-krun
-    ${CMAKE_CURRENT_BINARY_DIR}/bin/strip-binary-kore
   DESTINATION bin
 )
 
