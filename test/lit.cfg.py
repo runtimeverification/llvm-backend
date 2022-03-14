@@ -36,7 +36,7 @@ config.substitutions.extend([
     ('%interpreter', '%kompile %s main -o %t.interpreter'),
     ('%convert-input', '%kore-convert %test-input -o %test-input.bin'),
 
-    ('%strip-binary', 'strip-binary-kore'),
+    ('%strip-binary', 'kore-strip'),
     ('%arity', 'kore-arity'),
 
     ('%check-grep', '''

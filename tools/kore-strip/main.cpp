@@ -26,23 +26,22 @@ cl::opt<std::string> OutputFilename(
     "o", cl::desc("Specify output filename"), cl::value_desc("filename"),
     cl::init("-"));
 
-void check_file_open(std::FILE *f, char const *name) {
+std::FILE *check_fopen(char const *name, char const *mode) {
+  auto f = std::fopen(name, mode);
   if (!f) {
     auto str = std::stringstream{};
     str << "Could not open file " << name;
     std::perror(str.str().c_str());
     std::exit(1);
   }
+
+  return f;
 }
 
 int main(int argc, char **argv) {
   cl::ParseCommandLineOptions(argc, argv);
 
-  auto input = std::fopen(InputFilename.c_str(), "rb");
-
-  if (OutputFilename == "-") {
-    OutputFilename = InputFilename.getValue();
-  }
+  auto input = check_fopen(InputFilename.c_str(), "rb");
 
   std::fseek(input, 0, SEEK_END);
   auto file_size = std::ftell(input);
@@ -72,9 +71,14 @@ int main(int argc, char **argv) {
 
   auto temp_file_name = std::array<char, L_tmpnam>{};
   std::tmpnam(temp_file_name.data());
-  auto output = std::fopen(temp_file_name.data(), "wb");
-  if (!output) {
-  }
+
+  std::FILE *output = [&] {
+    if (OutputFilename == "-") {
+      return stdout;
+    } else {
+      return check_fopen(temp_file_name.data(), "wb");
+    }
+  }();
 
   auto result_size = file_size - (begin_skip_length + end_skip_length);
   auto buffer = std::vector<uint8_t>(result_size);
@@ -84,7 +88,9 @@ int main(int argc, char **argv) {
   std::fwrite(buffer.data(), sizeof(uint8_t), result_size, output);
 
   std::fclose(input);
-  std::fclose(output);
 
-  std::rename(temp_file_name.data(), OutputFilename.c_str());
+  if (OutputFilename != "-") {
+    std::fclose(output);
+    std::rename(temp_file_name.data(), OutputFilename.c_str());
+  }
 }
