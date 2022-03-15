@@ -20,6 +20,8 @@ interpreter_flags=()
 dryRun=false
 expandMacros=true
 
+convert_term="$(dirname $0)/kore-convert --from=text --to=binary /dev/stdin -F"
+
 print_usage () {
 cat <<HERE
 Usage: $0 -d DIR [-c NAME VALUE SORT TYPE]... [-o OUTPUT] [-p]
@@ -44,6 +46,9 @@ Mandatory arguments to long options are mandatory for short options too.
                              * prettyfile: VALUE is a filename containing
                                            concrete syntax, parsed like
                                            'pretty'
+                             * binaryfile: VALUE is a filename containing a
+                                           binary KORE term with a valid
+                                           header.
   -o, --output-file FILE   Write resulting configuration to FILE. Defaults to
                            standard output
       --binary-input       Construct the input configuration using the binary
@@ -71,6 +76,7 @@ do
     value="$3"
     var_name="params_$name"
     file_name="file_$name"
+    binary_file_name="binary_$name"
     pretty_name="pretty_$name"
     sort_name="sort_$name"
     params+=("$name")
@@ -91,6 +97,9 @@ do
       prettyfile)
       printf -v "$pretty_name" %s "`cat "$value"`"
       pretty+=("$name")
+      ;;
+      binaryfile)
+      printf -v "$binary_file_name" %s "$value"
       ;;
     esac
     shift; shift; shift; shift; shift
@@ -189,19 +198,24 @@ for name in "${params[@]}"; do
   sort_name="sort_$name"
   var_name="params_$name"
   file_name="file_$name"
+  binary_file_name="binary_$name"
   sort="${!sort_name}"
   case $sort in
     KItem)
     ;;
     *)
-    if [ -z "${!file_name}" ]; then
-      printf -v "$var_name" %s "inj{Sort$sort{}, SortKItem{}}(${!var_name})"
-    else
+    if [ -n "${!file_name}" ]; then
+      # TODO: don't modify inputs
       temp_file="$(mktemp tmp.interpolate.XXXXXXXXXX)"
       echo "inj{Sort$sort{}, SortKItem{}}(" >> "$temp_file"
       cat "${!file_name}" >> "$temp_file"
       echo ")" >> "$temp_file"
       mv "$temp_file" "${!file_name}"
+    elif [ -n "${!binary_file_name}" ]; then
+      echo "inj{Sort$sort{}, SortKItem{}}()" | $convert_term -ka >> "${!binary_file_name}"
+      "$(dirname $0)"/kore-arity 1 >> "${!binary_file_name}"
+    else
+      printf -v "$var_name" %s "inj{Sort$sort{}, SortKItem{}}(${!var_name})"
     fi
     ;;
   esac
@@ -239,28 +253,29 @@ HERE
 HERE
     var_name="params_$param"
     file_name="file_$param"
+    binary_file_name="binary_$name"
 
-    if [ -z "${!file_name}" ]; then
-      echo "${!var_name}" >> $input_file
+    if [ -n "${!file_name}" ]; then
+      cat "${!file_name}" >> "$input_file"
+    elif [ -n "${!binary_file_name}" ]; then
+      "$(dirname $0)/kore-convert" "${!binary_file_name}" >> "$input_file"
     else
-      cat "${!file_name}" >> $input_file
+      echo "${!var_name}" >> "$input_file"
     fi
 
-    cat <<HERE >> $input_file
+    cat <<HERE >> "$input_file"
 ))
 HERE
 
   done
 
-  cat <<HERE >> $input_file
+  cat <<HERE >> "$input_file"
 )
 HERE
 }
 
 construct_binary_input()
 {
-  convert_term="$(dirname $0)/kore-convert --from=text --to=binary /dev/stdin -F"
-
   if [ ${#params[@]} -ne 0 ]; then
     echo "Lbl'Stop'Map{}()" | $convert_term >> "$input_file"
   fi
@@ -268,14 +283,20 @@ construct_binary_input()
   for param in "${params[@]}"; do
     var_name="params_$param"
     file_name="file_$param"
+    binary_file_name="binary_$name"
 
     echo "inj{SortKConfigVar{},SortKItem{}}(\dv{SortKConfigVar{}}(\"\$${param}\"))" \
       | $convert_term -k >> "$input_file"
 
-    if [ -z "${!file_name}" ]; then
-      echo "${!var_name}" | $convert_term -k >> $input_file
-    else
+    if [ -n "${!file_name}" ]; then
       cat "${!file_name}" | $convert_term -k >> $input_file
+    elif [ -n "${!binary_file_name}" ]; then
+      temp_file="$(mktemp tmp.bin.XXXXXXXXXX)"
+      "$(dirname $0)/kore-strip" -k -i "${!binary_file_name}" -o "$temp_file"
+      cat "$temp_file" >> "$input_file"
+      rm "$temp_file"
+    else
+      echo "${!var_name}" | $convert_term -k >> $input_file
     fi
 
     echo "Lbl'UndsPipe'-'-GT-Unds'{}()" | $convert_term -ka >> "$input_file"
