@@ -231,11 +231,11 @@ sptr<KOREPattern> deserialize_pattern(It begin, It end) {
     detail::read<char>(begin, end);
   }
 
-  auto major = detail::read<int16_t>(begin, end);
-  auto minor = detail::read<int16_t>(begin, end);
-  auto patch = detail::read<int16_t>(begin, end);
+  auto v_major = detail::read<int16_t>(begin, end);
+  auto v_minor = detail::read<int16_t>(begin, end);
+  auto v_patch = detail::read<int16_t>(begin, end);
 
-  return detail::read(begin, end, binary_version(major, minor, patch));
+  return detail::read(begin, end, binary_version(v_major, v_minor, v_patch));
 }
 
 bool has_binary_kore_header(std::string const &filename);
