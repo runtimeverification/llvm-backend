@@ -14,7 +14,9 @@ dir=.
 debug=
 depth=-1
 binary_input=false
+binary_output=false
 pretty_print=false
+interpreter_flags=()
 dryRun=false
 expandMacros=true
 
@@ -44,9 +46,9 @@ Mandatory arguments to long options are mandatory for short options too.
                                            'pretty'
   -o, --output-file FILE   Write resulting configuration to FILE. Defaults to
                            standard output
-  -b, --binary-input       Construct the input configuration using the binary
+      --binary-input       Construct the input configuration using the binary
                            KORE format, rather than the textual syntax.
-  -s, --binary-output      Serialize the output configuration using the binary
+      --binary-output      Serialize the output configuration using the binary
                            KORE format, rather than the textual syntax;
   -p, --pretty-print       Pretty print output configuration. By default,
                            output is in kore syntax
@@ -99,8 +101,13 @@ do
     shift; shift
     ;;
 
-    -b|--binary-input)
+    --binary-input)
     binary_input=true
+    shift
+    ;;
+
+    --binary-output)
+    binary_output=true
     shift
     ;;
 
@@ -160,6 +167,10 @@ do
     ;;
   esac
 done
+
+if $binary_output; then
+  interpreter_flags+=("--binary-output")
+fi
 
 for name in "${pretty[@]}"; do
   var_name="params_$name"
@@ -304,7 +315,7 @@ set +e
 if [ -n "$verbose" ]; then
   set -x
 fi
-$debug "$dir"/interpreter "$expanded_input_file" $depth "$output_file"
+$debug "$dir"/interpreter "$expanded_input_file" $depth "$output_file" ${interpreter_flags[@]}
 )
 EXIT=$?
 set -e
