@@ -1,4 +1,5 @@
 #include "kllvm/binary/deserializer.h"
+#include "kllvm/binary/version.h"
 #include "kllvm/parser/KOREParser.h"
 #include "kllvm/parser/KOREScanner.h"
 #include "runtime/alloc.h"
@@ -144,7 +145,8 @@ static void *constructInitialConfiguration(const KOREPattern *initial) {
 }
 
 template <typename It>
-static void *deserializeInitialConfiguration(It ptr, It end) {
+static void *
+deserializeInitialConfiguration(It ptr, It end, binary_version version) {
   using namespace kllvm::detail;
   auto begin = ptr;
 
@@ -159,7 +161,7 @@ static void *deserializeInitialConfiguration(It ptr, It end) {
 
     case header_byte<KORECompositePattern>: {
       ++ptr;
-      auto arity = read<int16_t>(ptr, end);
+      auto arity = read_length(ptr, end, version, 2);
 
       assert(symbol && "No symbol set when reaching composite pattern");
       assert(
@@ -205,24 +207,25 @@ static void *deserializeInitialConfiguration(It ptr, It end) {
 
     case header_byte<KOREStringPattern>:
       ++ptr;
-      token_stack.push_back(read_string(ptr, end));
+      token_stack.push_back(read_string(ptr, end, version));
       break;
 
     case header_byte<KORESymbol>: {
       ++ptr;
-      symbol = read_symbol(ptr, end, sort_stack);
+      symbol = read_symbol(ptr, end, sort_stack, version);
       break;
     }
 
     case header_byte<KORESortVariable>: {
       ++ptr;
-      sort_stack.push_back(KORESortVariable::Create(read_string(ptr, end)));
+      sort_stack.push_back(
+          KORESortVariable::Create(read_string(ptr, end, version)));
       break;
     }
 
     case header_byte<KORECompositeSort>: {
       ++ptr;
-      sort_stack.push_back(read_composite_sort(ptr, end, sort_stack));
+      sort_stack.push_back(read_composite_sort(ptr, end, sort_stack, version));
       break;
     }
 
@@ -248,12 +251,12 @@ block *parseConfiguration(const char *filename) {
       detail::read<char>(ptr, end);
     }
 
-    detail::read<int16_t>(ptr, end);
-    detail::read<int16_t>(ptr, end);
-    detail::read<int16_t>(ptr, end);
+    auto major = detail::read<int16_t>(ptr, end);
+    auto minor = detail::read<int16_t>(ptr, end);
+    auto patch = detail::read<int16_t>(ptr, end);
 
-    auto ret = (block *)deserializeInitialConfiguration(ptr, data.end());
-    return ret;
+    return reinterpret_cast<block *>(deserializeInitialConfiguration(
+        ptr, data.end(), binary_version(major, minor, patch)));
   } else {
     auto InitialConfiguration = parser::KOREParser(filename).pattern();
     // InitialConfiguration->print(std::cout);

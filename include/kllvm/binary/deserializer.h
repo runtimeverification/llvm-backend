@@ -3,6 +3,7 @@
 
 #include <kllvm/ast/AST.h>
 #include <kllvm/binary/serializer.h>
+#include <kllvm/binary/version.h>
 
 #include <cstddef>
 #include <cstring>
@@ -44,12 +45,47 @@ T read(It &ptr, It end) {
 }
 
 template <typename It>
-std::string read_string(It &ptr, It end) {
+uint64_t read_length(It &ptr, It end, binary_version version, int v1_bytes) {
+  if (are_compatible(version, binary_version(1, 0, 0))) {
+    uint64_t ret = 0;
+
+    for (auto i = 0; i < v1_bytes; ++i) {
+      ret <<= 8;
+      ret = ret | read<uint8_t>(ptr, end);
+    }
+
+    return ret;
+  } else {
+    uint64_t ret = 0;
+    auto should_continue = true;
+    auto steps = 0;
+
+    while (should_continue) {
+      assert(ptr != end && "Invalid variable-length field");
+      assert(steps < 9 && "No terminating byte in variable-length field");
+
+      auto chunk = peek(ptr);
+      auto cont_bit = std::byte(0x80);
+      should_continue = static_cast<bool>(chunk & cont_bit);
+
+      chunk = chunk & ~cont_bit;
+      ret = ret | (uint64_t(chunk) << (7 * steps));
+
+      ++steps;
+      ++ptr;
+    }
+
+    return ret;
+  }
+}
+
+template <typename It>
+std::string read_string(It &ptr, It end, binary_version version) {
   switch (uint8_t(peek(ptr))) {
 
   case 0x01: {
     ++ptr;
-    auto len = read<int32_t>(ptr, end);
+    auto len = read_length(ptr, end, version, 4);
     auto ret = std::string((char *)&*ptr, (char *)(&*ptr + len));
 
     ptr += len;
@@ -58,9 +94,9 @@ std::string read_string(It &ptr, It end) {
 
   case 0x02: {
     ++ptr;
-    auto backref = read<int32_t>(ptr, end);
+    auto backref = read_length(ptr, end, version, 4);
     auto begin = ptr - backref;
-    auto len = read<int32_t>(begin, end);
+    auto len = read_length(begin, end, version, 4);
 
     return std::string((char *)&*begin, (char *)(&*begin + len));
   }
@@ -70,21 +106,22 @@ std::string read_string(It &ptr, It end) {
 }
 
 template <typename It>
-sptr<KOREVariable> read_variable(It &ptr, It end) {
+sptr<KOREVariable> read_variable(It &ptr, It end, binary_version version) {
   if (peek(ptr) == header_byte<KOREVariable>) {
     ++ptr;
-    return KOREVariable::Create(read_string(ptr, end));
+    return KOREVariable::Create(read_string(ptr, end, version));
   }
 
   return nullptr;
 }
 
 template <typename It>
-ptr<KORESymbol>
-read_symbol(It &ptr, It end, std::vector<sptr<KORESort>> &sort_stack) {
-  auto arity = read<int16_t>(ptr, end);
+ptr<KORESymbol> read_symbol(
+    It &ptr, It end, std::vector<sptr<KORESort>> &sort_stack,
+    binary_version version) {
+  auto arity = read_length(ptr, end, version, 2);
 
-  auto name = read_string(ptr, end);
+  auto name = read_string(ptr, end, version);
   auto symbol = KORESymbol::Create(name);
 
   auto start_idx = sort_stack.size() - arity;
@@ -100,10 +137,11 @@ read_symbol(It &ptr, It end, std::vector<sptr<KORESort>> &sort_stack) {
 }
 
 template <typename It>
-sptr<KORESort>
-read_composite_sort(It &ptr, It end, std::vector<sptr<KORESort>> &sort_stack) {
-  auto arity = read<int16_t>(ptr, end);
-  auto new_sort = KORECompositeSort::Create(read_string(ptr, end));
+sptr<KORESort> read_composite_sort(
+    It &ptr, It end, std::vector<sptr<KORESort>> &sort_stack,
+    binary_version version) {
+  auto arity = read_length(ptr, end, version, 2);
+  auto new_sort = KORECompositeSort::Create(read_string(ptr, end, version));
 
   for (auto i = sort_stack.size() - arity; i < sort_stack.size(); ++i) {
     new_sort->addArgument(sort_stack[i]);
@@ -117,7 +155,7 @@ read_composite_sort(It &ptr, It end, std::vector<sptr<KORESort>> &sort_stack) {
 }
 
 template <typename It>
-sptr<KOREPattern> read_v2(It &ptr, It end) {
+sptr<KOREPattern> read(It &ptr, It end, binary_version version) {
   auto term_stack = std::vector<sptr<KOREPattern>>{};
   auto sort_stack = std::vector<sptr<KORESort>>{};
   auto symbol = kllvm::ptr<KORESymbol>{};
@@ -127,7 +165,8 @@ sptr<KOREPattern> read_v2(It &ptr, It end) {
 
     case header_byte<KOREStringPattern>:
       ++ptr;
-      term_stack.push_back(KOREStringPattern::Create(read_string(ptr, end)));
+      term_stack.push_back(
+          KOREStringPattern::Create(read_string(ptr, end, version)));
       break;
 
     case header_byte<KORECompositePattern>: {
@@ -135,7 +174,7 @@ sptr<KOREPattern> read_v2(It &ptr, It end) {
       auto new_pattern = KORECompositePattern::Create(std::move(symbol));
       symbol = nullptr;
 
-      auto arity = read<int16_t>(ptr, end);
+      auto arity = read_length(ptr, end, version, 2);
       for (auto i = term_stack.size() - arity; i < term_stack.size(); ++i) {
         new_pattern->addArgument(term_stack[i]);
       }
@@ -149,21 +188,21 @@ sptr<KOREPattern> read_v2(It &ptr, It end) {
 
     case header_byte<KORESymbol>: {
       ++ptr;
-      symbol = read_symbol(ptr, end, sort_stack);
+      symbol = read_symbol(ptr, end, sort_stack, version);
       break;
     }
 
     case header_byte<KORESortVariable>: {
       ++ptr;
 
-      auto name = read_string(ptr, end);
+      auto name = read_string(ptr, end, version);
       sort_stack.push_back(KORESortVariable::Create(name));
       break;
     }
 
     case header_byte<KORECompositeSort>: {
       ++ptr;
-      sort_stack.push_back(read_composite_sort(ptr, end, sort_stack));
+      sort_stack.push_back(read_composite_sort(ptr, end, sort_stack, version));
       break;
     }
 
@@ -192,14 +231,11 @@ sptr<KOREPattern> deserialize_pattern(It begin, It end) {
     detail::read<char>(begin, end);
   }
 
-  // When we end up with multiple versions of the format, we'll need to dispatch
-  // on these version components. For now, just skip over the values and ignore
-  // them.
-  /* auto v_major = */ detail::read<int16_t>(begin, end);
-  /* auto v_minor = */ detail::read<int16_t>(begin, end);
-  /* auto v_patch = */ detail::read<int16_t>(begin, end);
+  auto major = detail::read<int16_t>(begin, end);
+  auto minor = detail::read<int16_t>(begin, end);
+  auto patch = detail::read<int16_t>(begin, end);
 
-  return detail::read_v2(begin, end);
+  return detail::read(begin, end, binary_version(major, minor, patch));
 }
 
 bool has_binary_kore_header(std::string const &filename);
