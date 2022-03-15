@@ -1852,10 +1852,6 @@ void KOREVariablePattern::serialize_to(serializer &s) const {
 }
 
 void KORECompositePattern::serialize_to(serializer &s) const {
-  assert(
-      arguments.size() <= std::numeric_limits<int16_t>::max()
-      && "Composite pattern has too many arguments to serialize");
-
   for (auto const &arg : arguments) {
     arg->serialize_to(s);
   }
@@ -1863,7 +1859,7 @@ void KORECompositePattern::serialize_to(serializer &s) const {
   constructor->serialize_to(s);
 
   s.emit(header_byte<KORECompositePattern>);
-  s.emit(int16_t(arguments.size()));
+  s.emit_length(arguments.size());
 }
 
 void KOREStringPattern::serialize_to(serializer &s) const {
@@ -1877,30 +1873,22 @@ void KORESortVariable::serialize_to(serializer &s) const {
 }
 
 void KORECompositeSort::serialize_to(serializer &s) const {
-  assert(
-      arguments.size() <= std::numeric_limits<int16_t>::max()
-      && "Composite sort has too many arguments to serialize");
-
   for (auto const &arg : arguments) {
     arg->serialize_to(s);
   }
 
   s.emit(header_byte<KORECompositeSort>);
-  s.emit(int16_t(arguments.size()));
+  s.emit_length(arguments.size());
   s.emit_string(name);
 }
 
 void KORESymbol::serialize_to(serializer &s) const {
-  assert(
-      formalArguments.size() <= std::numeric_limits<int16_t>::max()
-      && "Symbol has too many arguments to serialize");
-
   for (auto const &arg : formalArguments) {
     arg->serialize_to(s);
   }
 
   s.emit(header_byte<KORESymbol>);
-  s.emit(int16_t(formalArguments.size()));
+  s.emit_length(formalArguments.size());
   s.emit_string(name);
 }
 
