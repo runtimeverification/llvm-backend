@@ -49,7 +49,7 @@ if $compile; then
   "$(dirname "$0")"/llvm-kompile-codegen "$definition" "$dt_dir"/dt.yaml "$dt_dir" $debug > "$mod"
 
   # optimization
-  @OPT@ -load "$(dirname "$0")"/../lib/kllvm/libLLVMPass.so -mem2reg -tailcallelim $opt_flags -mark-tail-calls-as-gc-leaf -rewrite-statepoints-for-gc -dce -emit-gc-layout-info "$mod" -o "$modopt"
+  @OPT@ -load "$(dirname "$0")"/../lib/kllvm/libLLVMPass.so -mem2reg -tailcallelim $opt_flags -mark-tail-calls-as-gc-leaf -no-omit-frame-pointer-for-tailcc -rewrite-statepoints-for-gc -dce -emit-gc-layout-info "$mod" -o "$modopt"
   @LLVM_LINK@ "$modopt" "$(dirname "$0")"/../lib/kllvm/llvm/opaque/opaque.ll -o "$modcombined"
   @OPT@ "$modcombined" -always-inline -o "$modcombinedopt"
 else
