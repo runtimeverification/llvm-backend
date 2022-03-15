@@ -253,33 +253,30 @@ construct_binary_input()
   fi
 
   for param in "${params[@]}"; do
+    var_name="params_$param"
+    file_name="file_$param"
+
     echo "inj{SortKConfigVar{},SortKItem{}}(\dv{SortKConfigVar{}}(\"\$${param}\"))" \
       | $convert_term >> "$input_file"
 
-    # cat <<HERE >> $input_file
-# , Lbl'UndsPipe'-'-GT-Unds'{}(inj{SortKConfigVar{}, SortKItem{}}(\dv{SortKConfigVar{}}(
-# HERE
-    # echo -n '"$' >> $input_file
-    # echo -n "$param" >> $input_file
-    # echo '"' >> $input_file
+    # convert these
+    if [ -z "${!file_name}" ]; then
+      # echo "${!var_name}" >> $input_file
+    else
+      # cat "${!file_name}" >> $input_file
+    fi
 
-    # cat <<HERE >> $input_file
-# )),
-# HERE
-    # var_name="params_$param"
-    # file_name="file_$param"
+    echo "Lbl'UndsPipe'-'-GT-Unds'{}()" | $convert_term >> "$input_file"
+    # fix arity
 
-    # if [ -z "${!file_name}" ]; then
-    #   echo "${!var_name}" >> $input_file
-    # else
-    #   cat "${!file_name}" >> $input_file
-    # fi
+    echo "Lbl'Unds'Map'Unds'{}()" | $convert_term >> "$input_file"
+    # fix arity
   done
 
   echo "$initializer()" | $convert_term >> "$input_file"
 
   "$(dirname $0)"/strip-binary-kore -a -i "$input_file"
-  "$(dirname $0)"/kore-arity "${#params[@]}" >> "$input_file"
+  "$(dirname $0)"/kore-arity "${#params[@]}" >> "$input_file" # actually 1 arity
 
   xxd $input_file
   exit 0
