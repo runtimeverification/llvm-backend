@@ -11,19 +11,19 @@ namespace kllvm {
  * format.
  */
 struct binary_version {
-  constexpr binary_version(int16_t maj, int16_t min, int16_t patch)
-      : major(maj)
-      , minor(min)
-      , patch(patch) { }
+  constexpr binary_version(int16_t maj, int16_t min, int16_t v_patch)
+      : v_major(maj)
+      , v_minor(min)
+      , v_patch(v_patch) { }
 
-  int16_t major;
-  int16_t minor;
-  int16_t patch;
+  int16_t v_major;
+  int16_t v_minor;
+  int16_t v_patch;
 };
 
 constexpr bool operator==(binary_version a, binary_version b) {
-  return std::tie(a.major, a.minor, a.patch)
-         == std::tie(b.major, b.minor, b.patch);
+  return std::tie(a.v_major, a.v_minor, a.v_patch)
+         == std::tie(b.v_major, b.v_minor, b.v_patch);
 }
 
 constexpr bool operator!=(binary_version a, binary_version b) {
@@ -31,11 +31,11 @@ constexpr bool operator!=(binary_version a, binary_version b) {
 }
 
 /**
- * Two versions are compatible if they have identical major and minor
- * components; they may differ in the patch component.
+ * Two versions are compatible if they have identical v_major and v_minor
+ * components; they may differ in the v_patch component.
  */
 constexpr bool are_compatible(binary_version a, binary_version b) {
-  return std::tie(a.major, a.minor) == std::tie(b.major, b.minor);
+  return std::tie(a.v_major, a.v_minor) == std::tie(b.v_major, b.v_minor);
 }
 
 } // namespace kllvm
