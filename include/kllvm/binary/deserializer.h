@@ -62,6 +62,7 @@ uint64_t read_length(It &ptr, It end, binary_version version, int v1_bytes) {
 
     while (should_continue) {
       assert(ptr != end && "Invalid variable-length field");
+      assert(steps < 9 && "No terminating byte in variable-length field");
 
       auto chunk = peek(ptr);
       auto cont_bit = std::byte(0x80);
