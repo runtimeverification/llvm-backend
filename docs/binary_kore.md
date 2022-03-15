@@ -122,3 +122,21 @@ To apply a constructor to a list of arguments (after stripping their prefixes):
 This representation may be less compact than if it had been constructed from the
 equivalent textual KORE (due to missed opportunities for string interning across
 multiple terms).
+
+# Previous Versions
+
+## `1.0.0`
+
+Version `1.0.0` of this format used _fixed length_ fields for string lengths,
+backreferences and constructor arities. The lengths of these fields are as
+follows; each is encoded directly as a little-endian integer value:
+
+| Data                  | Bytes |
+| :--                   |   --: |
+| String length         |     4 |
+| String backreference  |     4 |
+| Sort arity            |     2 |
+| Term arity            |     2 |
+| Symbol argument count |     2 |
+
+The deserializer supports terms encoded using version `1.0.0`.

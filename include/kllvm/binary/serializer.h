@@ -1,6 +1,8 @@
 #ifndef AST_SERIALIZER_H
 #define AST_SERIALIZER_H
 
+#include <kllvm/binary/version.h>
+
 #include <array>
 #include <cstddef>
 #include <cstring>
@@ -39,7 +41,7 @@ std::array<std::byte, sizeof(T)> to_bytes(T val) {
 class serializer {
 public:
   static constexpr auto magic_header = std::array{'\x7f', 'K', 'O', 'R', 'E'};
-  static constexpr auto version = std::array{1, 1, 0};
+  static constexpr auto version = binary_version(1, 1, 0);
 
   serializer();
   serializer(bool use_h);
