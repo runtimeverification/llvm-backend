@@ -42,6 +42,11 @@ cl::opt<kore_file_format> OutputFormat(
 
 cl::opt<bool> ForceBinary("F", cl::desc("Force binary output on stdout"));
 
+cl::opt<bool> NoHeader(
+    "k",
+    cl::desc(
+        "Don't add the KORE header and version at the start of binary output"));
+
 sptr<KOREPattern> get_input_pattern() {
   auto get_text = [&]() { return KOREParser(InputFilename).pattern(); };
   auto get_binary = [&]() { return deserialize_pattern(InputFilename); };
@@ -88,10 +93,16 @@ int main(int argc, char **argv) {
     OutputFormat = InputFormat == text ? binary : text;
   }
 
+  if (OutputFormat == text && NoHeader) {
+    std::cerr << "-k only applies to binary output\n"
+              << "use --to=binary for binary input\n";
+    return 2;
+  }
+
   if (OutputFormat == binary && OutputFilename == "-" && !ForceBinary) {
     std::cerr << "Not outputting binary KORE to stdout\n"
               << "use -o to specify output file, or -F to force stdout\n";
-    return 2;
+    return 3;
   }
 
   if (OutputFormat == text) {
@@ -100,7 +111,7 @@ int main(int argc, char **argv) {
   }
 
   if (OutputFormat == binary) {
-    auto s = serializer();
+    auto s = serializer(!NoHeader);
     input->serialize_to(s);
 
     auto output = [&](std::ostream &os) {
