@@ -1,5 +1,5 @@
 #!/bin/bash
-set -ex
+set -e
 
 ARGV=()
 params=()
@@ -257,30 +257,23 @@ construct_binary_input()
     file_name="file_$param"
 
     echo "inj{SortKConfigVar{},SortKItem{}}(\dv{SortKConfigVar{}}(\"\$${param}\"))" \
-      | $convert_term >> "$input_file"
+      | $convert_term -k >> "$input_file"
 
     if [ -z "${!file_name}" ]; then
-      echo "${!var_name}" | $convert_term >> $input_file
+      echo "${!var_name}" | $convert_term -k >> $input_file
     else
-      cat "${!file_name}" | $convert_term >> $input_file
+      cat "${!file_name}" | $convert_term -k >> $input_file
     fi
 
-    echo "Lbl'UndsPipe'-'-GT-Unds'{}()" | $convert_term >> "$input_file"
-    "$(dirname $0)"/kore-strip -a -i "$input_file" -o "$input_file"
+    echo "Lbl'UndsPipe'-'-GT-Unds'{}()" | $convert_term -ka >> "$input_file"
     "$(dirname $0)"/kore-arity 2 >> "$input_file"
 
-    echo "Lbl'Unds'Map'Unds'{}()" | $convert_term >> "$input_file"
-    "$(dirname $0)"/kore-strip -a -i "$input_file" -o "$input_file"
+    echo "Lbl'Unds'Map'Unds'{}()" | $convert_term -ka >> "$input_file"
     "$(dirname $0)"/kore-arity 2 >> "$input_file"
   done
 
-  echo "$initializer()" | $convert_term >> "$input_file"
-
-  # "$(dirname $0)"/strip-binary-kore -a -i "$input_file"
-  # "$(dirname $0)"/kore-arity 1 >> "$input_file" # actually 1 arity
-
-  xxd $input_file
-  exit 0
+  echo "$initializer()" | $convert_term -ka >> "$input_file"
+  "$(dirname $0)"/kore-arity 1 >> "$input_file"
 }
 
 if $binary_input; then
