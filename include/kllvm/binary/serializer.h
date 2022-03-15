@@ -40,11 +40,17 @@ std::array<std::byte, sizeof(T)> to_bytes(T val) {
  */
 class serializer {
 public:
+  enum flags {
+    NONE = 0,
+    DROP_HEADER = 1,
+    DROP_ARITY = 2,
+  };
+
   static constexpr auto magic_header = std::array{'\x7f', 'K', 'O', 'R', 'E'};
   static constexpr auto version = binary_version(1, 1, 0);
 
   serializer();
-  serializer(bool use_h);
+  serializer(flags f);
 
   /**
    * Emit a single byte or sequence of bytes to the output buffer.
@@ -86,8 +92,16 @@ public:
    */
   void reset();
 
+  /**
+   * Call when recursing into child nodes of a composite pattern so that only
+   * the topmost arity is dropped.
+   */
+  void reset_arity_flag();
+  bool use_arity() const { return use_arity_; }
+
 private:
   bool use_header_;
+  bool use_arity_;
 
   std::vector<std::byte> buffer_;
   std::byte direct_string_prefix_;

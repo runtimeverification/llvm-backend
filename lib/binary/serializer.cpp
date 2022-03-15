@@ -17,10 +17,11 @@ bool is_big_endian() {
 } // namespace detail
 
 serializer::serializer()
-    : serializer(true) { }
+    : serializer(NONE) { }
 
-serializer::serializer(bool use_h)
-    : use_header_(use_h)
+serializer::serializer(flags f)
+    : use_header_(!(f & DROP_HEADER))
+    , use_arity_(!(f & DROP_ARITY))
     , buffer_{}
     , direct_string_prefix_{0x01}
     , backref_string_prefix_{0x02}
@@ -39,6 +40,10 @@ void serializer::reset() {
   if (use_header_) {
     emit_header_and_version();
   }
+}
+
+void serializer::reset_arity_flag() {
+  use_arity_ = true;
 }
 
 void serializer::emit_header_and_version() {

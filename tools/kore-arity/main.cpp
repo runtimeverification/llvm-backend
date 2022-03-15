@@ -11,7 +11,7 @@ cl::opt<uint64_t> Arity(cl::Positional, cl::desc("<arity>"), cl::Required);
 int main(int argc, char **argv) {
   cl::ParseCommandLineOptions(argc, argv);
 
-  auto s = kllvm::serializer(false);
+  auto s = kllvm::serializer(kllvm::serializer::DROP_HEADER);
   s.emit_length(Arity);
 
   for (auto b : s.data()) {
