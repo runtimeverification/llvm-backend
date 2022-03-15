@@ -161,7 +161,7 @@ deserializeInitialConfiguration(It ptr, It end, binary_version version) {
 
     case header_byte<KORECompositePattern>: {
       ++ptr;
-      auto arity = read_length(ptr, end, version);
+      auto arity = read_length(ptr, end, version, 2);
 
       assert(symbol && "No symbol set when reaching composite pattern");
       assert(

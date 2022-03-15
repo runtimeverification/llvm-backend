@@ -45,26 +45,37 @@ T read(It &ptr, It end) {
 }
 
 template <typename It>
-uint64_t read_length(It &ptr, It end, binary_version version) {
-  uint64_t ret = 0;
-  auto should_continue = true;
-  auto steps = 0;
+uint64_t read_length(It &ptr, It end, binary_version version, int v1_bytes) {
+  if (are_compatible(version, binary_version(1, 0, 0))) {
+    uint64_t ret = 0;
 
-  while (should_continue) {
-    assert(ptr != end && "Invalid variable-length field");
+    for (auto i = 0; i < v1_bytes; ++i) {
+      ret <<= 8;
+      ret = ret | read<uint8_t>(ptr, end);
+    }
 
-    auto chunk = peek(ptr);
-    auto cont_bit = std::byte(0x80);
-    should_continue = static_cast<bool>(chunk & cont_bit);
+    return ret;
+  } else {
+    uint64_t ret = 0;
+    auto should_continue = true;
+    auto steps = 0;
 
-    chunk = chunk & ~cont_bit;
-    ret = ret | (uint64_t(chunk) << (7 * steps));
+    while (should_continue) {
+      assert(ptr != end && "Invalid variable-length field");
 
-    ++steps;
-    ++ptr;
+      auto chunk = peek(ptr);
+      auto cont_bit = std::byte(0x80);
+      should_continue = static_cast<bool>(chunk & cont_bit);
+
+      chunk = chunk & ~cont_bit;
+      ret = ret | (uint64_t(chunk) << (7 * steps));
+
+      ++steps;
+      ++ptr;
+    }
+
+    return ret;
   }
-
-  return ret;
 }
 
 template <typename It>
@@ -73,7 +84,7 @@ std::string read_string(It &ptr, It end, binary_version version) {
 
   case 0x01: {
     ++ptr;
-    auto len = read_length(ptr, end, version);
+    auto len = read_length(ptr, end, version, 4);
     auto ret = std::string((char *)&*ptr, (char *)(&*ptr + len));
 
     ptr += len;
@@ -82,9 +93,9 @@ std::string read_string(It &ptr, It end, binary_version version) {
 
   case 0x02: {
     ++ptr;
-    auto backref = read_length(ptr, end, version);
+    auto backref = read_length(ptr, end, version, 4);
     auto begin = ptr - backref;
-    auto len = read_length(begin, end, version);
+    auto len = read_length(begin, end, version, 4);
 
     return std::string((char *)&*begin, (char *)(&*begin + len));
   }
@@ -107,7 +118,7 @@ template <typename It>
 ptr<KORESymbol> read_symbol(
     It &ptr, It end, std::vector<sptr<KORESort>> &sort_stack,
     binary_version version) {
-  auto arity = read_length(ptr, end, version);
+  auto arity = read_length(ptr, end, version, 2);
 
   auto name = read_string(ptr, end, version);
   auto symbol = KORESymbol::Create(name);
@@ -128,7 +139,7 @@ template <typename It>
 sptr<KORESort> read_composite_sort(
     It &ptr, It end, std::vector<sptr<KORESort>> &sort_stack,
     binary_version version) {
-  auto arity = read_length(ptr, end, version);
+  auto arity = read_length(ptr, end, version, 2);
   auto new_sort = KORECompositeSort::Create(read_string(ptr, end, version));
 
   for (auto i = sort_stack.size() - arity; i < sort_stack.size(); ++i) {
@@ -162,7 +173,7 @@ sptr<KOREPattern> read(It &ptr, It end, binary_version version) {
       auto new_pattern = KORECompositePattern::Create(std::move(symbol));
       symbol = nullptr;
 
-      auto arity = read_length(ptr, end, version);
+      auto arity = read_length(ptr, end, version, 2);
       for (auto i = term_stack.size() - arity; i < term_stack.size(); ++i) {
         new_pattern->addArgument(term_stack[i]);
       }
