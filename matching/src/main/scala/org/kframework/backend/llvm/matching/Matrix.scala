@@ -820,7 +820,11 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
       }
       val k = (fringe zip counterexample.get).map(t => t._2.toK(t._1))
       val func = KApply(symlib.koreToK(name), KList(k))
-      kem(new KException(KException.ExceptionType.NON_EXHAUSTIVE_MATCH, KException.KExceptionGroup.COMPILER, "Non exhaustive match detected: " ++ ToKast(func)))
+      val attributes = symlib.signatures(name)._3
+      val location = Parser.location(attributes) orElse null
+      val source = Parser.source(attributes) orElse null
+
+      kem(new KException(KException.ExceptionType.NON_EXHAUSTIVE_MATCH, KException.KExceptionGroup.COMPILER, "Non exhaustive match detected: " ++ ToKast(func), source, location))
     }
   }
 
