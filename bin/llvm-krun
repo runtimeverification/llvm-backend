@@ -46,6 +46,8 @@ Mandatory arguments to long options are mandatory for short options too.
                            standard output
   -b, --binary-input       Construct the input configuration using the binary
                            KORE format, rather than the textual syntax.
+  -s, --binary-output      Serialize the output configuration using the binary
+                           KORE format, rather than the textual syntax;
   -p, --pretty-print       Pretty print output configuration. By default,
                            output is in kore syntax
       --debug              Use GDB to debug program
