@@ -2,6 +2,7 @@
 
 #include <array>
 #include <cstdio>
+#include <cstdlib>
 #include <iostream>
 #include <sstream>
 #include <vector>
@@ -69,14 +70,14 @@ int main(int argc, char **argv) {
     begin_skip_length = 11;
   }
 
-  auto temp_file_name = std::array<char, L_tmpnam>{};
-  std::tmpnam(temp_file_name.data());
+  char temp_file_name[] = "tmp.strip.XXXXXXXXXX";
+  mkstemp(temp_file_name);
 
   std::FILE *output = [&] {
     if (OutputFilename == "-") {
       return stdout;
     } else {
-      return check_fopen(temp_file_name.data(), "wb");
+      return check_fopen(temp_file_name, "wb");
     }
   }();
 
@@ -91,6 +92,6 @@ int main(int argc, char **argv) {
 
   if (OutputFilename != "-") {
     std::fclose(output);
-    std::rename(temp_file_name.data(), OutputFilename.c_str());
+    std::rename(temp_file_name, OutputFilename.c_str());
   }
 }
