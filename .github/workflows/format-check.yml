@@ -1,8 +1,8 @@
-name: clang-format Check
+name: Code Checks
 on: [push, pull_request]
 jobs:
   formatting-check:
-    name: Formatting Check
+    name: Clang format check
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -11,3 +11,13 @@ jobs:
       with:
         clang-format-version: '12'
         exclude-regex: '(build|config|deps)'
+
+  shell-check:
+    name: Shell check
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: ludeeus/action-shellcheck@1.1.0
+      name: Check that shell scripts follow best practices
+      with:
+        scandir: './bin'
