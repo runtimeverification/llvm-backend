@@ -8,7 +8,14 @@ output_file="$(mktemp tmp.out.XXXXXXXXXX)"
 input_file="$(mktemp tmp.in.XXXXXXXXXX)"
 expanded_input_file="$(mktemp tmp.in.XXXXXXXXXX)"
 parser_file="$(mktemp tmp.parse.XXXXXXXXXX)"
-trap 'rm -rf "$input_file" "$expanded_input_file" "$output_file" "$parser_file"' INT TERM EXIT
+temp_inputs=()
+
+cleanup () {
+  rm -rf "$input_file" "$expanded_input_file" "$output_file" "$parser_file"
+  rm -rf "${temp_inputs[@]}"
+}
+trap 'cleanup' INT TERM EXIT
+
 initializer="LblinitGeneratedTopCell{}"
 dir=.
 debug=
@@ -205,15 +212,23 @@ for name in "${params[@]}"; do
     ;;
     *)
     if [ -n "${!file_name}" ]; then
-      # TODO: don't modify inputs
       temp_file="$(mktemp tmp.interpolate.XXXXXXXXXX)"
+      temp_inputs+=("$temp_file")
+
       echo "inj{Sort$sort{}, SortKItem{}}(" >> "$temp_file"
       cat "${!file_name}" >> "$temp_file"
       echo ")" >> "$temp_file"
-      mv "$temp_file" "${!file_name}"
+
+      printf -v "$file_name" %s "$temp_file"
     elif [ -n "${!binary_file_name}" ]; then
-      echo "inj{Sort$sort{}, SortKItem{}}()" | $convert_term -ka >> "${!binary_file_name}"
-      "$(dirname $0)"/kore-arity 1 >> "${!binary_file_name}"
+      temp_file="$(mktemp tmp.binary.XXXXXXXXXX)"
+      temp_inputs+=("$temp_file")
+
+      cat "${!binary_file_name}" > "$temp_file"
+      echo "inj{Sort$sort{}, SortKItem{}}()" | $convert_term -ka >> "${temp_file}"
+      "$(dirname $0)"/kore-arity 1 >> "${temp_file}"
+
+      printf -v "$binary_file_name" %s "$temp_file"
     else
       printf -v "$var_name" %s "inj{Sort$sort{}, SortKItem{}}(${!var_name})"
     fi
@@ -291,10 +306,11 @@ construct_binary_input()
     if [ -n "${!file_name}" ]; then
       cat "${!file_name}" | $convert_term -k >> $input_file
     elif [ -n "${!binary_file_name}" ]; then
-      temp_file="$(mktemp tmp.bin.XXXXXXXXXX)"
+      temp_file="$(mktemp tmp.concat.XXXXXXXXXX)"
+      temp_inputs+=("$temp_file")
+
       "$(dirname $0)/kore-strip" -k -i "${!binary_file_name}" -o "$temp_file"
       cat "$temp_file" >> "$input_file"
-      rm "$temp_file"
     else
       echo "${!var_name}" | $convert_term -k >> $input_file
     fi
