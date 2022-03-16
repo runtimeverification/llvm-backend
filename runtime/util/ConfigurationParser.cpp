@@ -251,12 +251,12 @@ block *parseConfiguration(const char *filename) {
       detail::read<char>(ptr, end);
     }
 
-    auto major = detail::read<int16_t>(ptr, end);
-    auto minor = detail::read<int16_t>(ptr, end);
-    auto patch = detail::read<int16_t>(ptr, end);
+    auto v_major = detail::read<int16_t>(ptr, end);
+    auto v_minor = detail::read<int16_t>(ptr, end);
+    auto v_patch = detail::read<int16_t>(ptr, end);
 
     return reinterpret_cast<block *>(deserializeInitialConfiguration(
-        ptr, data.end(), binary_version(major, minor, patch)));
+        ptr, data.end(), binary_version(v_major, v_minor, v_patch)));
   } else {
     auto InitialConfiguration = parser::KOREParser(filename).pattern();
     // InitialConfiguration->print(std::cout);

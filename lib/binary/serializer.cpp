@@ -51,9 +51,9 @@ void serializer::emit_header_and_version() {
     emit(std::byte(b));
   }
 
-  emit(version.major);
-  emit(version.minor);
-  emit(version.patch);
+  emit(version.v_major);
+  emit(version.v_minor);
+  emit(version.v_patch);
 }
 
 void serializer::emit(std::byte b) {
