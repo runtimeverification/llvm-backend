@@ -3,6 +3,8 @@ modopt="$1"
 main="$2"
 lto="$3"
 shift; shift; shift
+flags=()
+llc_flags=()
 llc_opt_flags="-O0"
 link=true
 verbose=false
@@ -24,7 +26,7 @@ for arg in "$@"; do
       exit 1
       ;;
     -fno-omit-frame-pointer)
-      llc_flags="$llc_flags -frame-pointer=all"
+      llc_flags+=("-frame-pointer=all")
       ;;
     -c)
       link=false
@@ -59,15 +61,20 @@ else
 fi
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
-  libraries="-liconv -lncurses"
-  flags="-L@BREW_PREFIX@/opt/libffi/lib -L@BREW_PREFIX@/lib -Wl,-u,_sort_table -I @BREW_PREFIX@/include"
+  libraries=("-liconv" "-lncurses")
+  flags=(
+    "-L@BREW_PREFIX@/opt/libffi/lib"
+    "-L@BREW_PREFIX@/lib"
+    "-Wl,-u,_sort_table"
+    "-I" "@BREW_PREFIX@/include"
+  )
 else
-  libraries="-ltinfo"
-  flags="-Wl,-u,sort_table"
+  libraries=("-ltinfo")
+  flags=("-Wl,-u,sort_table")
 fi
 
 if [ -f "/etc/arch-release" ]; then
-  llc_flags="$llc_flags --relocation-model=pic"
+  llc_flags+=("--relocation-model=pic")
 fi
 
 run () {
@@ -84,7 +91,7 @@ if ! $save_temps; then
 fi
 
 if [ "$lto" = "lto" ]; then
-  flags="$flags -flto -Wl,-mllvm,-tailcallopt"
+  flags+=("-flto" "-Wl,-mllvm,-tailcallopt")
   files=("$LIBDIR"/llvm/*.ll)
   if ! $link; then
     mv "$modopt" "$output_file"
@@ -96,22 +103,26 @@ else
     if ! $link; then
       modasm="$output_file"
     fi
-    run @LLC@ -tailcallopt "$modopt" -mtriple=@BACKEND_TARGET_TRIPLE@ -filetype=obj $llc_opt_flags $llc_flags -o "$modasm"
+    run @LLC@ \
+      -tailcallopt "$modopt" -mtriple=@BACKEND_TARGET_TRIPLE@ \
+      -filetype=obj "$llc_opt_flags" "${llc_flags[@]}" -o "$modasm"
     modopt="$modasm"
   fi
   if $link; then
     for file in "$LIBDIR"/llvm/*.ll; do
-      tmp="$tmpdir/`basename "$file"`.o"
-      run @LLC@ -tailcallopt "$file" -mtriple=@BACKEND_TARGET_TRIPLE@ -filetype=obj $llc_opt_flags $llc_flags -o "$tmp"
+      tmp="$tmpdir/$(basename "$file").o"
+      run @LLC@ \
+        -tailcallopt "$file" -mtriple=@BACKEND_TARGET_TRIPLE@ \
+        -filetype=obj "$llc_opt_flags" "${llc_flags[@]}" -o "$tmp"
       files+=("$tmp")
     done
   fi
 fi
 
 if [ "$main" = "static" ]; then
-  all_libraries=
+  all_libraries=()
 else
-  all_libraries="$libraries -lgmp -lmpfr -lpthread -ldl -lffi -ljemalloc"
+  all_libraries=("${libraries[@]}" "-lgmp" "-lmpfr" "-lpthread" "-ldl" "-lffi" "-ljemalloc")
 fi
 
 if $link; then
@@ -129,8 +140,8 @@ run @CMAKE_CXX_COMPILER@ -Wno-override-module -Wno-return-type-c-linkage "$modop
   "$LIBDIR"/libcollect.a \
   "$LIBDIR"/libmeta.a \
   "$LIBDIR"/libjson.a \
-  $flags \
-  $all_libraries \
+  "${flags[@]}" \
+  "${all_libraries[@]}" \
   -I "$(dirname "$0")"/../include/kllvm \
   "$@"
 fi
