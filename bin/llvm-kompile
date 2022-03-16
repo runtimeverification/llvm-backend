@@ -9,7 +9,7 @@ if [ $# -lt 3 ]; then
 fi
 mod="$(mktemp tmp.XXXXXXXXXX)"
 modopt="$(mktemp tmp.XXXXXXXXXX)"
-trap "rm -rf $dt_dir $mod $modopt" INT TERM EXIT
+trap 'rm -rf "$dt_dir" "$mod" "$modopt"' INT TERM EXIT
 definition="$1"
 shift
 compile=true
