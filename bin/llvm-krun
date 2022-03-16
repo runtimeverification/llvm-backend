@@ -51,9 +51,9 @@ Mandatory arguments to long options are mandatory for short options too.
                                            header.
   -o, --output-file FILE   Write resulting configuration to FILE. Defaults to
                            standard output
-      --binary-input       Construct the input configuration using the binary
+  -bi,--binary-input       Construct the input configuration using the binary
                            KORE format, rather than the textual syntax.
-      --binary-output      Serialize the output configuration using the binary
+  -bo,--binary-output      Serialize the output configuration using the binary
                            KORE format, rather than the textual syntax;
   -p, --pretty-print       Pretty print output configuration. By default,
                            output is in kore syntax
@@ -110,12 +110,12 @@ do
     shift; shift
     ;;
 
-    --binary-input)
+    -bi|--binary-input)
     binary_input=true
     shift
     ;;
 
-    --binary-output)
+    -bo|--binary-output)
     binary_output=true
     shift
     ;;
