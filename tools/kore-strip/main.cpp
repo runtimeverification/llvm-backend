@@ -55,14 +55,28 @@ int main(int argc, char **argv) {
     auto buffer = std::vector<uint8_t>(9);
     std::fread(buffer.data(), sizeof(uint8_t), buffer.size(), input);
 
-    for (auto it = buffer.rbegin(); it != buffer.rend(); ++it) {
-      auto cont = *it & 0x80;
+    // Find the first prefix of the last 9 bytes such that the high bits form
+    // a valid continued arity representation. That is, they must satisfy the
+    // regex (1*)0.
+    auto valid_at = [&buffer](int i) -> bool {
+      auto all = true;
 
-      if (!cont && it != buffer.rbegin()) {
-        break;
+      for (auto j = i; j < buffer.size() - 1; ++j) {
+        all = all && (buffer[j] & 0x80);
       }
 
-      ++end_skip_length;
+      return all && !(buffer.back() & 0x80);
+    };
+
+    for (auto i = 0; i < buffer.size(); ++i) {
+      if (valid_at(i)) {
+        end_skip_length = 9 - i;
+        break;
+      }
+    }
+
+    if (end_skip_length == 0) {
+      std::cerr << "No arity found at end of file; not stripping\n";
     }
   }
 
