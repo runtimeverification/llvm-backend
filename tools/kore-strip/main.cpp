@@ -85,12 +85,12 @@ int main(int argc, char **argv) {
   }
 
   char temp_file_name[] = "tmp.strip.XXXXXXXXXX";
-  mkstemp(temp_file_name);
 
   std::FILE *output = [&] {
     if (OutputFilename == "-") {
       return stdout;
     } else {
+      mkstemp(temp_file_name);
       return check_fopen(temp_file_name, "wb");
     }
   }();
