@@ -26,7 +26,7 @@ interpreter_flags=()
 dryRun=false
 expandMacros=true
 
-convert_term="$(dirname $0)/kore-convert --from=text --to=binary /dev/stdin -F"
+convert_term="$(dirname "$0")/kore-convert --from=text --to=binary /dev/stdin -F"
 
 print_usage () {
 cat <<HERE
@@ -214,18 +214,22 @@ for name in "${params[@]}"; do
       temp_file="$(mktemp tmp.interpolate.XXXXXXXXXX)"
       temp_inputs+=("$temp_file")
 
-      echo "inj{Sort$sort{}, SortKItem{}}(" >> "$temp_file"
-      cat "${!file_name}" >> "$temp_file"
-      echo ")" >> "$temp_file"
+      {
+        echo "inj{Sort$sort{}, SortKItem{}}("
+        cat "${!file_name}"
+        echo ")"
+      } >> "$temp_file"
 
       printf -v "$file_name" %s "$temp_file"
     elif [ -n "${!binary_file_name}" ]; then
       temp_file="$(mktemp tmp.binary.XXXXXXXXXX)"
       temp_inputs+=("$temp_file")
 
-      cat "${!binary_file_name}" > "$temp_file"
-      echo "inj{Sort$sort{}, SortKItem{}}()" | $convert_term -ka >> "${temp_file}"
-      "$(dirname $0)"/kore-arity 1 >> "${temp_file}"
+      {
+        cat "${!binary_file_name}"
+        echo "inj{Sort$sort{}, SortKItem{}}()" | $convert_term -ka
+        "$(dirname "$0")/kore-arity" 1
+      } >> "$temp_file"
 
       printf -v "$binary_file_name" %s "$temp_file"
     else
@@ -236,35 +240,38 @@ for name in "${params[@]}"; do
 done
 
 construct_text_input() {
-  echo "$initializer" >> $input_file
+  echo "$initializer" >> "$input_file"
 
-  cat <<HERE >> $input_file
+  cat <<HERE >> "$input_file"
 (
 HERE
 
   for param in "${params[@]}"; do
-    cat <<HERE >> $input_file
+    cat <<HERE >> "$input_file"
 Lbl'Unds'Map'Unds'{}(
 HERE
   done
 
   if [ ${#params[@]} -ne 0 ]; then
-    cat <<HERE >> $input_file
+    cat <<HERE >> "$input_file"
 Lbl'Stop'Map{}()
 HERE
   fi
 
   for param in "${params[@]}"; do
-    cat <<HERE >> $input_file
+    {
+      cat <<HERE
 , Lbl'UndsPipe'-'-GT-Unds'{}(inj{SortKConfigVar{}, SortKItem{}}(\dv{SortKConfigVar{}}(
 HERE
-    echo -n '"$' >> $input_file
-    echo -n "$param" >> $input_file
-    echo '"' >> $input_file
+      echo -n '"$'
+      echo -n "$param"
+      echo '"'
 
-    cat <<HERE >> $input_file
+      cat <<HERE
 )),
 HERE
+    } >> "$input_file"
+
     var_name="params_$param"
     file_name="file_$param"
     binary_file_name="binary_$name"
@@ -272,7 +279,7 @@ HERE
     if [ -n "${!file_name}" ]; then
       cat "${!file_name}" >> "$input_file"
     elif [ -n "${!binary_file_name}" ]; then
-      "$(dirname $0)/kore-convert" "${!binary_file_name}" >> "$input_file"
+      "$(dirname "$0")/kore-convert" "${!binary_file_name}" >> "$input_file"
     else
       echo "${!var_name}" >> "$input_file"
     fi
@@ -303,26 +310,28 @@ construct_binary_input()
       | $convert_term -k >> "$input_file"
 
     if [ -n "${!file_name}" ]; then
-      cat "${!file_name}" | $convert_term -k >> $input_file
+      cat "${!file_name}" | $convert_term -k >> "$input_file"
     elif [ -n "${!binary_file_name}" ]; then
       temp_file="$(mktemp tmp.concat.XXXXXXXXXX)"
       temp_inputs+=("$temp_file")
 
-      "$(dirname $0)/kore-strip" -k -i "${!binary_file_name}" -o "$temp_file"
+      "$(dirname "$0")/kore-strip" -k -i "${!binary_file_name}" -o "$temp_file"
       cat "$temp_file" >> "$input_file"
     else
-      echo "${!var_name}" | $convert_term -k >> $input_file
+      echo "${!var_name}" | $convert_term -k >> "$input_file"
     fi
 
-    echo "Lbl'UndsPipe'-'-GT-Unds'{}()" | $convert_term -ka >> "$input_file"
-    "$(dirname $0)"/kore-arity 2 >> "$input_file"
+    {
+      echo "Lbl'UndsPipe'-'-GT-Unds'{}()" | $convert_term -ka
+      "$(dirname "$0")/kore-arity" 2
 
-    echo "Lbl'Unds'Map'Unds'{}()" | $convert_term -ka >> "$input_file"
-    "$(dirname $0)"/kore-arity 2 >> "$input_file"
+      echo "Lbl'Unds'Map'Unds'{}()" | $convert_term -ka
+      "$(dirname "$0")/kore-arity" 2
+    } >> "$input_file"
   done
 
   echo "$initializer()" | $convert_term -ka >> "$input_file"
-  "$(dirname $0)"/kore-arity 1 >> "$input_file"
+  "$(dirname "$0")/kore-arity" 1 >> "$input_file"
 }
 
 if $binary_input; then
@@ -351,7 +360,7 @@ set +e
 if [ -n "$verbose" ]; then
   set -x
 fi
-$debug "$dir"/interpreter "$expanded_input_file" $depth "$output_file" ${interpreter_flags[@]}
+$debug "$dir"/interpreter "$expanded_input_file" "$depth" "$output_file" "${interpreter_flags[@]}"
 )
 EXIT=$?
 set -e
