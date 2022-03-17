@@ -274,7 +274,7 @@ HERE
 
     var_name="params_$param"
     file_name="file_$param"
-    binary_file_name="binary_$name"
+    binary_file_name="binary_$param"
 
     if [ -n "${!file_name}" ]; then
       cat "${!file_name}" >> "$input_file"
@@ -304,7 +304,7 @@ construct_binary_input()
   for param in "${params[@]}"; do
     var_name="params_$param"
     file_name="file_$param"
-    binary_file_name="binary_$name"
+    binary_file_name="binary_$param"
 
     echo "inj{SortKConfigVar{},SortKItem{}}(\dv{SortKConfigVar{}}(\"\$${param}\"))" \
       | $convert_term -k >> "$input_file"
