@@ -89,9 +89,11 @@ static void emitToken(char const *sort, char const *string, int len = 0) {
 void serializeMap(
     writer *file, map *map, const char *unit, const char *element,
     const char *concat) {
-  emitSymbol(unit);
-
   size_t size = map->size();
+  if (size != 1) {
+    emitSymbol(unit);
+  }
+
   if (size == 0) {
     return;
   }
@@ -99,45 +101,57 @@ void serializeMap(
   for (auto iter = map->begin(); iter != map->end(); ++iter) {
     serializeConfigurationInternal(file, iter->first, "SortKItem{}", false);
     serializeConfigurationInternal(file, iter->second, "SortKItem{}", false);
-
     emitSymbol(element, 2);
-    emitSymbol(concat, 2);
+
+    if (size > 1) {
+      emitSymbol(concat, 2);
+    }
   }
 }
 
 void serializeList(
     writer *file, list *list, const char *unit, const char *element,
     const char *concat) {
-  emitSymbol(unit);
-
   size_t size = list->size();
+
+  if (size != 1) {
+    emitSymbol(unit);
+  }
+
   if (size == 0) {
     return;
   }
 
   for (auto iter = list->begin(); iter != list->end(); ++iter) {
     serializeConfigurationInternal(file, *iter, "SortKItem{}", false);
-
     emitSymbol(element, 1);
-    emitSymbol(concat, 2);
+
+    if (size > 1) {
+      emitSymbol(concat, 2);
+    }
   }
 }
 
 void serializeSet(
     writer *file, set *set, const char *unit, const char *element,
     const char *concat) {
-  emitSymbol(unit);
-
   size_t size = set->size();
+
+  if (size != 1) {
+    emitSymbol(unit);
+  }
+
   if (size == 0) {
     return;
   }
 
   for (auto iter = set->begin(); iter != set->end(); ++iter) {
     serializeConfigurationInternal(file, *iter, "SortKItem{}", false);
-
     emitSymbol(element, 1);
-    emitSymbol(concat, 2);
+
+    if (size > 1) {
+      emitSymbol(concat, 2);
+    }
   }
 }
 
