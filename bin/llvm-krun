@@ -1,7 +1,6 @@
 #!/bin/bash
 set -e
 
-ARGV=()
 params=()
 pretty=()
 output_file="$(mktemp tmp.out.XXXXXXXXXX)"
@@ -102,7 +101,7 @@ do
       pretty+=("$name")
       ;;
       prettyfile)
-      printf -v "$pretty_name" %s "`cat "$value"`"
+      printf -v "$pretty_name" %s "$(cat "$value")"
       pretty+=("$name")
       ;;
       binaryfile)
@@ -198,7 +197,7 @@ for name in "${pretty[@]}"; do
   fi
   printf %s "${!pretty_name}" | "$dir/parser_$name" /dev/stdin > "$parser_file"
   )
-  printf -v "$var_name" %s "`cat $parser_file`"
+  printf -v "$var_name" %s "$(cat "$parser_file")"
 done
 
 for name in "${params[@]}"; do
