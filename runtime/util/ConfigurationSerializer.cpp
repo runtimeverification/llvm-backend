@@ -98,12 +98,12 @@ void serializeMap(
   for (auto iter = map->begin(); iter != map->end(); ++iter) {
     serializeConfigurationInternal(file, iter->first, "SortKItem{}", false);
     serializeConfigurationInternal(file, iter->second, "SortKItem{}", false);
-
     emitSymbol(element, 2);
-  }
 
-  emitSymbol(concat, map->size());
-  emitSymbol("\\left-assoc{}", 1);
+    if (iter != map->begin()) {
+      emitSymbol(concat, 2);
+    }
+  }
 }
 
 void serializeList(
@@ -118,10 +118,11 @@ void serializeList(
   for (auto iter = list->begin(); iter != list->end(); ++iter) {
     serializeConfigurationInternal(file, *iter, "SortKItem{}", false);
     emitSymbol(element, 1);
-  }
 
-  emitSymbol(concat, list->size());
-  emitSymbol("\\left-assoc{}", 1);
+    if (iter != list->begin()) {
+      emitSymbol(concat, 2);
+    }
+  }
 }
 
 void serializeSet(
@@ -136,10 +137,11 @@ void serializeSet(
   for (auto iter = set->begin(); iter != set->end(); ++iter) {
     serializeConfigurationInternal(file, *iter, "SortKItem{}", false);
     emitSymbol(element, 1);
-  }
 
-  emitSymbol(concat, set->size());
-  emitSymbol("\\left-assoc{}", 1);
+    if (iter != set->begin()) {
+      emitSymbol(concat, 2);
+    }
+  }
 }
 
 void serializeInt(writer *file, mpz_t i, const char *sort) {
