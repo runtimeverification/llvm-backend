@@ -39,7 +39,7 @@ config.substitutions.extend([
     ('%check-grep', '''
         %run | grep -f %test-grep-out -q
         %run-binary | grep -f %test-grep-out -q
-        %run-binary-out ; %kore-convert %test-input.out.bin | tr -d '\n' | grep -f %test-grep-out -q
+        %run-binary-out ; %kore-convert %t.out.bin | tr -d '\n' | grep -f %test-grep-out -q
     '''),
     ('%check-diff', '''
         %run | diff - %test-diff-out
