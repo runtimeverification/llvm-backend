@@ -34,7 +34,7 @@ if os.getenv('LIT_USE_NIX'):
 config.substitutions.extend([
     ('%kompile', 'llvm-kompile-testing'),
     ('%interpreter', '%kompile %s main -o %t.interpreter'),
-    ('%convert-input', '%kore-convert %test-input -o %test-input.bin'),
+    ('%convert-input', '%kore-convert %test-input -o %t.bin'),
 
     ('%check-grep', '''
         %run | grep -f %test-grep-out -q
@@ -44,7 +44,9 @@ config.substitutions.extend([
     ('%check-diff', '''
         %run | diff - %test-diff-out
         %run-binary | diff - %test-diff-out
-        %run-binary-out ; %kore-convert %test-input.out.bin | tr -d '\n' | diff - %test-diff-out
+        %run-binary-out
+        %kore-convert %t.out.bin -o %t.out.kore
+        %kore-convert %test-diff-out --to=text | diff - %t.out.kore
     '''),
 
     ('%check-dir-grep', '''
@@ -61,8 +63,8 @@ config.substitutions.extend([
         done
     '''),
 
-    ('%run-binary-out', '%t.interpreter %test-input -1 %test-input.out.bin --binary-output'),
-    ('%run-binary', '%convert-input && %t.interpreter %test-input.bin -1 /dev/stdout'),
+    ('%run-binary-out', '%t.interpreter %test-input -1 %t.out.bin --binary-output'),
+    ('%run-binary', '%convert-input && %t.interpreter %t.bin -1 /dev/stdout'),
     ('%run', '%t.interpreter %test-input -1 /dev/stdout'),
 
     ('%kprint-check', 'kprint %S %s true | diff - %s.out'),

@@ -90,11 +90,8 @@ void serializeMap(
     writer *file, map *map, const char *unit, const char *element,
     const char *concat) {
   size_t size = map->size();
-  if (size != 1) {
-    emitSymbol(unit);
-  }
-
   if (size == 0) {
+    emitSymbol(unit);
     return;
   }
 
@@ -103,7 +100,7 @@ void serializeMap(
     serializeConfigurationInternal(file, iter->second, "SortKItem{}", false);
     emitSymbol(element, 2);
 
-    if (size > 1) {
+    if (iter != map->begin()) {
       emitSymbol(concat, 2);
     }
   }
@@ -113,12 +110,8 @@ void serializeList(
     writer *file, list *list, const char *unit, const char *element,
     const char *concat) {
   size_t size = list->size();
-
-  if (size != 1) {
-    emitSymbol(unit);
-  }
-
   if (size == 0) {
+    emitSymbol(unit);
     return;
   }
 
@@ -126,7 +119,7 @@ void serializeList(
     serializeConfigurationInternal(file, *iter, "SortKItem{}", false);
     emitSymbol(element, 1);
 
-    if (size > 1) {
+    if (iter != list->begin()) {
       emitSymbol(concat, 2);
     }
   }
@@ -136,12 +129,8 @@ void serializeSet(
     writer *file, set *set, const char *unit, const char *element,
     const char *concat) {
   size_t size = set->size();
-
-  if (size != 1) {
-    emitSymbol(unit);
-  }
-
   if (size == 0) {
+    emitSymbol(unit);
     return;
   }
 
@@ -149,7 +138,7 @@ void serializeSet(
     serializeConfigurationInternal(file, *iter, "SortKItem{}", false);
     emitSymbol(element, 1);
 
-    if (size > 1) {
+    if (iter != set->begin()) {
       emitSymbol(concat, 2);
     }
   }
