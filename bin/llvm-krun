@@ -1,7 +1,6 @@
 #!/bin/bash
 set -e
 
-ARGV=()
 params=()
 pretty=()
 output_file="$(mktemp tmp.out.XXXXXXXXXX)"
@@ -63,6 +62,7 @@ do
     name="$2"
     value="$3"
     var_name="params_$name"
+    file_name="file_$name"
     pretty_name="pretty_$name"
     sort_name="sort_$name"
     params+=("$name")
@@ -74,14 +74,14 @@ do
       printf -v "$var_name" %s "$value"
       ;;
       korefile)
-      printf -v "$var_name" %s "`cat "$value"`"
+      printf -v "$file_name" %s "$value"
       ;;
       pretty)
       printf -v "$pretty_name" %s "$value"
       pretty+=("$name")
       ;;
       prettyfile)
-      printf -v "$pretty_name" %s "`cat "$value"`"
+      printf -v "$pretty_name" %s "$(cat "$value")"
       pretty+=("$name")
       ;;
     esac
@@ -160,61 +160,81 @@ for name in "${pretty[@]}"; do
   fi
   printf %s "${!pretty_name}" | "$dir/parser_$name" /dev/stdin > "$parser_file"
   )
-  printf -v "$var_name" %s "`cat $parser_file`"
+  printf -v "$var_name" %s "$(cat "$parser_file")"
 done
 
 for name in "${params[@]}"; do
   sort_name="sort_$name"
   var_name="params_$name"
+  file_name="file_$name"
   sort="${!sort_name}"
   case $sort in
     KItem)
     ;;
     *)
-    printf -v "$var_name" %s "inj{Sort$sort{}, SortKItem{}}(${!var_name})"
+    if [ -z "${!file_name}" ]; then
+      printf -v "$var_name" %s "inj{Sort$sort{}, SortKItem{}}(${!var_name})"
+    else
+      temp_file="$(mktemp tmp.interpolate.XXXXXXXXXX)"
+      {
+        echo "inj{Sort$sort{}, SortKItem{}}("
+        cat "${!file_name}"
+        echo ")"
+      } >> "$temp_file"
+      mv "$temp_file" "${!file_name}"
+    fi
     ;;
   esac
 done
 
-echo "$initializer" >> $input_file
+echo "$initializer" >> "$input_file"
 
-cat <<HERE >> $input_file
+cat <<HERE >> "$input_file"
 (
 HERE
 
 for param in "${params[@]}"; do
-  cat <<HERE >> $input_file
+  cat <<HERE >> "$input_file"
 Lbl'Unds'Map'Unds'{}(
 HERE
 done
 
 if [ ${#params[@]} -ne 0 ]; then
-  cat <<HERE >> $input_file
+  cat <<HERE >> "$input_file"
 Lbl'Stop'Map{}()
 HERE
 fi
 
 for param in "${params[@]}"; do
-  cat <<HERE >> $input_file
+  {
+    cat <<HERE
 , Lbl'UndsPipe'-'-GT-Unds'{}(inj{SortKConfigVar{}, SortKItem{}}(\dv{SortKConfigVar{}}(
 HERE
-  echo -n '"$' >> $input_file
-  echo -n "$param" >> $input_file
-  echo '"' >> $input_file
+    echo -n '"$'
+    echo -n "$param"
+    echo '"'
 
-  cat <<HERE >> $input_file
+    cat <<HERE
 )),
 HERE
-  var_name="params_$param"
-  echo "${!var_name}" >> $input_file
+  } >> "$input_file"
 
-  cat <<HERE >> $input_file
+  var_name="params_$param"
+  file_name="file_$param"
+
+  if [ -z "${!file_name}" ]; then
+    echo "${!var_name}" >> "$input_file"
+  else
+    cat "${!file_name}" >> "$input_file"
+  fi
+
+  cat <<HERE >> "$input_file"
 ))
 HERE
 
 done
 
-cat <<HERE >> $input_file
+cat <<HERE >> "$input_file"
 )
 HERE
 
@@ -238,7 +258,7 @@ set +e
 if [ -n "$verbose" ]; then
   set -x
 fi
-$debug "$dir"/interpreter "$expanded_input_file" $depth "$output_file"
+$debug "$dir"/interpreter "$expanded_input_file" "$depth" "$output_file"
 )
 EXIT=$?
 set -e

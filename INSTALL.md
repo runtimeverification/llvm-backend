@@ -1,7 +1,7 @@
 On Ubuntu 20.04:
 ```shell
 sudo apt-get update
-sudo apt-get install git cmake clang-10 llvm-10-tools lld-10 zlib1g-dev flex libboost-test-dev libgmp-dev libmpfr-dev libyaml-dev libjemalloc-dev libunwind-dev curl maven pkg-config
+sudo apt-get install git cmake clang-12 llvm-12-tools lld-12 zlib1g-dev flex libboost-test-dev libgmp-dev libmpfr-dev libyaml-dev libjemalloc-dev libunwind-dev curl maven pkg-config
 git clone https://github.com/runtimeverification/llvm-backend --recursive
 cd llvm-backend
 mkdir build
@@ -37,3 +37,18 @@ make install
 Then add `llvm-backend/build/install/bin` to your $PATH.
 
 You can run the test suite with `./ciscript Debug`. You can also run it with a different CMake profile by replacing `Debug` with `RelWithDebInfo`, `Release`, `FastBuild`, or `GcStats`.
+
+If you are developing the backend, it is useful to also install
+[`clang-format`](clang-format) and [`shellcheck`](shellcheck) to ensure that
+your changes match the project style and conform to best practices.
+
+```shell
+# Ubuntu
+apt install shellcheck clang-format-12
+
+# macOS
+brew install shellcheck clang-format
+```
+
+[clang-format]: https://clang.llvm.org/docs/ClangFormat.html
+[shellcheck]: https://www.shellcheck.net/

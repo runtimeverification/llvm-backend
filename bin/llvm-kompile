@@ -11,7 +11,7 @@ mod="$(mktemp tmp.XXXXXXXXXX)"
 modopt="$(mktemp tmp.XXXXXXXXXX)"
 modcombined="$(mktemp tmp.XXXXXXXXXX)"
 modcombinedopt="$(mktemp tmp.XXXXXXXXXX)"
-trap "rm -rf $dt_dir $mod $modopt $modcombined $modcombinedopt" INT TERM EXIT
+trap 'rm -rf "$dt_dir" "$mod" "$modopt" "$modcombined" "$modcombinedopt"' INT TERM EXIT
 definition="$1"
 shift
 compile=true

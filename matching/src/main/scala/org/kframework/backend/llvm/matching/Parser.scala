@@ -109,24 +109,28 @@ object Parser {
   private val SOURCE = "org'Stop'kframework'Stop'attributes'Stop'Source"
   private val LOCATION = "org'Stop'kframework'Stop'attributes'Stop'Location"
 
-  private def source(axiom: AxiomDeclaration): Optional[Source] = {
-    if (hasAtt(axiom, SOURCE)) {
-      val sourceStr = getStringAtt(axiom.att, SOURCE).get
+  def source(att: Attributes): Optional[Source] = {
+    if (hasAtt(att, SOURCE)) {
+      val sourceStr = getStringAtt(att, SOURCE).get
       return Optional.of(Source(sourceStr.substring("Source(".length, sourceStr.length - 1)))
     } else {
       Optional.empty()
     }
   }
 
-  private def location(axiom: AxiomDeclaration): Optional[Location] = {
-    if (hasAtt(axiom, LOCATION)) {
-      val locStr = getStringAtt(axiom.att, LOCATION).get
+  def location(att: Attributes): Optional[Location] = {
+    if (hasAtt(att, LOCATION)) {
+      val locStr = getStringAtt(att, LOCATION).get
       val splitted = locStr.split("[(,)]")
       return Optional.of(Location(splitted(1).toInt, splitted(2).toInt, splitted(3).toInt, splitted(4).toInt))
     } else {
       Optional.empty()
     }
   }
+
+  private def source(axiom: AxiomDeclaration): Optional[Source] = source(axiom.att)
+  private def location(axiom: AxiomDeclaration): Optional[Location] = location(axiom.att)
+
   private def parseAxiomSentence[T <: GeneralizedRewrite](
       split: Pattern => Option[(Option[SymbolOrAlias], T, Option[Pattern])],
       axiom: (AxiomDeclaration, Int)) :

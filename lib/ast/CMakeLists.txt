@@ -5,6 +5,9 @@ add_library(AST
   AST.cpp
 )
 
+target_link_libraries(AST
+  PUBLIC Parser BinaryKore)
+
 install(
   TARGETS AST
   ARCHIVE DESTINATION lib/kllvm

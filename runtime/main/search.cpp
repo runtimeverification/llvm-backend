@@ -1,3 +1,4 @@
+#include <cstring>
 #include <unordered_set>
 
 #include "runtime/header.h"
@@ -12,11 +13,22 @@ take_search_steps(int64_t depth, block *subject);
 void printConfigurations(
     const char *filename, std::unordered_set<block *, HashBlock, KEq> results);
 
+static bool hasStatistics = false;
+
+void parse_flags(int argc, char **argv) {
+  for (int i = 4; i < argc; ++i) {
+    if (strcmp(argv[i], "--statistics") == 0) {
+      hasStatistics = true;
+    }
+  }
+}
+
 int main(int argc, char **argv) {
   char *filename = argv[1];
   int64_t depth = atol(argv[2]);
   char *output = argv[3];
-  bool hasStatistics = argc != 4;
+
+  parse_flags(argc, argv);
 
   initStaticObjects();
 

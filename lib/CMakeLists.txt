@@ -1,5 +1,6 @@
 add_subdirectory(parser)
 add_subdirectory(ast)
+add_subdirectory(binary)
 add_subdirectory(codegen)
 add_subdirectory(llvm)
 
