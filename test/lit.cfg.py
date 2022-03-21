@@ -35,7 +35,6 @@ config.substitutions.extend([
     ('%kompile', 'llvm-kompile-testing'),
     ('%interpreter', '%kompile %s main -o %t.interpreter'),
     ('%convert-input', '%kore-convert %test-input -o %t.bin'),
-
     ('%strip-binary', 'kore-strip'),
     ('%arity', 'kore-arity'),
 
