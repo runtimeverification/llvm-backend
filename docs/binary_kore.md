@@ -123,6 +123,18 @@ This representation may be less compact than if it had been constructed from the
 equivalent textual KORE (due to missed opportunities for string interning across
 multiple terms).
 
+# Caveats
+
+The textual KORE format supports the `\{left,right}-assoc` symbols, which are
+implemented as syntactic sugar to allow associative lists to be written in a
+flat format. These symbols do not exist in the parsed AST corresponding to a
+textual KORE pattern, only in the textual representation.
+
+Because the binary KORE format uses a postfix representation for constructor
+symbols, supporting this sugared format would require a complex pre-processing
+step. Consequently, binary KORE files should _not_ contain uses of `\left-assoc`
+or `\right-assoc`. This does not affect the existing textual KORE format.
+
 # Previous Versions
 
 ## `1.0.0`

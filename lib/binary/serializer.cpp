@@ -22,6 +22,17 @@ serializer::serializer()
     , backref_string_prefix_{0x02}
     , next_idx_(0)
     , intern_table_{} {
+  emit_header_and_version();
+}
+
+void serializer::reset() {
+  buffer_.clear();
+  next_idx_ = 0;
+  intern_table_.clear();
+  emit_header_and_version();
+}
+
+void serializer::emit_header_and_version() {
   for (auto b : magic_header) {
     emit(std::byte(b));
   }
