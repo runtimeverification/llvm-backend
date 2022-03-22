@@ -235,8 +235,7 @@ int main(int argc, char **argv) {
   KOREParser parser2(argv[1] + std::string("/macros.kore"));
   std::vector<ptr<KOREDeclaration>> axioms = parser2.declarations();
 
-  KOREParser parser3(argv[2]);
-  sptr<KOREPattern> config = parser3.pattern();
+  auto config = KOREPattern::load(argv[2]);
   std::map<std::string, std::vector<KORESymbol *>> symbols;
   config->markSymbols(symbols);
   for (auto &decl : axioms) {

@@ -1,5 +1,8 @@
 add_subdirectory(llvm-kompile-codegen)
 add_subdirectory(llvm-kompile-gc-stats)
 add_subdirectory(kprint)
+add_subdirectory(kore-arity)
 add_subdirectory(kore-convert)
 add_subdirectory(kore-expand-macros)
+add_subdirectory(kore-header)
+add_subdirectory(kore-strip)
