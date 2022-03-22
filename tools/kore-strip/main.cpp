@@ -53,7 +53,12 @@ int main(int argc, char **argv) {
   if (StripArity) {
     std::fseek(input, file_size - 9, SEEK_SET);
     auto buffer = std::vector<uint8_t>(9);
-    std::fread(buffer.data(), sizeof(uint8_t), buffer.size(), input);
+    auto read
+        = std::fread(buffer.data(), sizeof(uint8_t), buffer.size(), input);
+    if (read != buffer.size()) {
+      std::cerr << "Failed to read last 9 bytes into buffer\n";
+      return 1;
+    }
 
     // Find the first prefix of the last 9 bytes such that the high bits form
     // a valid continued arity representation. That is, they must satisfy the
@@ -90,7 +95,11 @@ int main(int argc, char **argv) {
     if (OutputFilename == "-") {
       return stdout;
     } else {
-      mkstemp(temp_file_name);
+      if (mkstemp(temp_file_name) == -1) {
+        std::perror("Could not create temporary file: ");
+        std::exit(1);
+      }
+
       return check_fopen(temp_file_name, "wb");
     }
   }();
@@ -99,7 +108,12 @@ int main(int argc, char **argv) {
   auto buffer = std::vector<uint8_t>(result_size);
 
   std::fseek(input, begin_skip_length, SEEK_SET);
-  std::fread(buffer.data(), sizeof(uint8_t), result_size, input);
+  auto read = std::fread(buffer.data(), sizeof(uint8_t), result_size, input);
+  if (read != result_size) {
+    std::cerr << "Failed to read from temporary file\n";
+    return 1;
+  }
+
   std::fwrite(buffer.data(), sizeof(uint8_t), result_size, output);
 
   std::fclose(input);
