@@ -8,8 +8,9 @@ if [ $# -lt 3 ]; then
   exit 1
 fi
 mod="$(mktemp tmp.XXXXXXXXXX)"
-modopt="$(mktemp tmp.XXXXXXXXXX)"
-trap 'rm -rf "$mod" "$modopt"' INT TERM EXIT
+modopt_tmp="$(mktemp tmp.XXXXXXXXXX)"
+modopt="$modopt_tmp"
+trap 'rm -rf "$mod" "$modopt_tmp"' INT TERM EXIT
 definition="$1"
 shift
 compile=true
