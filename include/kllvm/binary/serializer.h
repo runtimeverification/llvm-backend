@@ -44,6 +44,7 @@ public:
     NONE = 0,
     DROP_HEADER = 1,
     DROP_ARITY = 2,
+    DROP_BOTH = 3,
   };
 
   static constexpr auto magic_header = std::array{'\x7f', 'K', 'O', 'R', 'E'};
