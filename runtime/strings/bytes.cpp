@@ -1,5 +1,4 @@
 #include <algorithm>
-#include <cinttypes>
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
@@ -8,18 +7,6 @@
 
 #include "runtime/alloc.h"
 #include "runtime/header.h"
-
-template <typename... Args>
-std::string string_format(const std::string &format, Args... args) {
-  int size_s = std::snprintf(nullptr, 0, format.c_str(), args...) + 1;
-  if (size_s <= 0) {
-    throw std::runtime_error("Error during formatting.");
-  }
-  size_t size = static_cast<size_t>(size_s);
-  std::unique_ptr<char[]> buf(new char[size]);
-  std::snprintf(buf.get(), size, format.c_str(), args...);
-  return std::string(buf.get(), buf.get() + size - 1); // skip the trailing '\0'
-}
 
 extern "C" {
 
@@ -135,18 +122,21 @@ SortBytes hook_BYTES_substr(SortBytes input, SortInt start, SortInt end) {
   uint64_t ustart = get_ui(start);
   uint64_t uend = get_ui(end);
   if (uend < ustart) {
-    throw std::invalid_argument(string_format(
-        "Invalid string slice for string \"%s\": Requested start index %" PRIu64
-        " is greater than requested end index %" PRIu64 ".",
-        input->data, ustart, uend));
+    throw std::invalid_argument(
+        std::string("Invalid string slice for string \"") +
+        std::string(input->data) +
+        std::string("\": Requested start index ") + std::to_string(ustart) +
+        std::string(" is greater than requested end index ") +
+        std::to_string(uend) + std::string("."));
   }
   uint64_t input_len = len(input);
   if (uend > input_len) {
-    throw std::invalid_argument(string_format(
-        "Invalid string slice for string \"%s\": Requested end index %" PRIu64
-        " is greater than the total length of the string which is %" PRIu64
-        " bytes.",
-        input->data, uend, input_len));
+    throw std::invalid_argument(
+        std::string("Invalid string slice for string \"") +
+        std::string(input->data) +
+        std::string("\": Requested end index ") + std::to_string(uend) +
+        std::string(" is greater than the total length of the string which is ") +
+        std::to_string(input_len) + std::string(" bytes."));
   }
   uint64_t len = uend - ustart;
   auto ret = static_cast<string *>(
