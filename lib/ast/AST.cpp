@@ -1852,6 +1852,9 @@ void KOREVariablePattern::serialize_to(serializer &s) const {
 }
 
 void KORECompositePattern::serialize_to(serializer &s) const {
+  auto emit_this_arity = s.use_arity();
+  s.reset_arity_flag();
+
   for (auto const &arg : arguments) {
     arg->serialize_to(s);
   }
@@ -1859,7 +1862,10 @@ void KORECompositePattern::serialize_to(serializer &s) const {
   constructor->serialize_to(s);
 
   s.emit(header_byte<KORECompositePattern>);
-  s.emit_length(arguments.size());
+
+  if (emit_this_arity) {
+    s.emit_length(arguments.size());
+  }
 }
 
 void KOREStringPattern::serialize_to(serializer &s) const {
