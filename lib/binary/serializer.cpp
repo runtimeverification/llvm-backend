@@ -17,11 +17,36 @@ bool is_big_endian() {
 } // namespace detail
 
 serializer::serializer()
-    : buffer_{}
+    : serializer(NONE) { }
+
+serializer::serializer(flags f)
+    : use_header_(!(f & DROP_HEADER))
+    , use_arity_(!(f & DROP_ARITY))
+    , buffer_{}
     , direct_string_prefix_{0x01}
     , backref_string_prefix_{0x02}
     , next_idx_(0)
     , intern_table_{} {
+  if (use_header_) {
+    emit_header_and_version();
+  }
+}
+
+void serializer::reset() {
+  buffer_.clear();
+  next_idx_ = 0;
+  intern_table_.clear();
+
+  if (use_header_) {
+    emit_header_and_version();
+  }
+}
+
+void serializer::reset_arity_flag() {
+  use_arity_ = true;
+}
+
+void serializer::emit_header_and_version() {
   for (auto b : magic_header) {
     emit(std::byte(b));
   }

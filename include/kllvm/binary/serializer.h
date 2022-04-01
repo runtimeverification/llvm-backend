@@ -40,10 +40,18 @@ std::array<std::byte, sizeof(T)> to_bytes(T val) {
  */
 class serializer {
 public:
+  enum flags {
+    NONE = 0,
+    DROP_HEADER = 1,
+    DROP_ARITY = 2,
+    DROP_BOTH = 3,
+  };
+
   static constexpr auto magic_header = std::array{'\x7f', 'K', 'O', 'R', 'E'};
   static constexpr auto version = binary_version(1, 1, 0);
 
   serializer();
+  serializer(flags f);
 
   /**
    * Emit a single byte or sequence of bytes to the output buffer.
@@ -79,13 +87,34 @@ public:
 
   std::vector<std::byte> const &data() { return buffer_; }
 
+  /**
+   * Reset the state of the serializer back to its newly-constructed state, with
+   * only the KORE header and version number in its buffer.
+   */
+  void reset();
+
+  /**
+   * Call when recursing into child nodes of a composite pattern so that only
+   * the topmost arity is dropped.
+   */
+  void reset_arity_flag();
+  bool use_arity() const { return use_arity_; }
+
 private:
+  bool use_header_;
+  bool use_arity_;
+
   std::vector<std::byte> buffer_;
   std::byte direct_string_prefix_;
   std::byte backref_string_prefix_;
 
   uint64_t next_idx_;
   std::unordered_map<std::string, uint64_t> intern_table_;
+
+  /**
+   * Emit the standard \xf7KORE prefix and version number to the buffer.
+   */
+  void emit_header_and_version();
 
   /**
    * Emit a string directly to the output buffer and update the interning table,

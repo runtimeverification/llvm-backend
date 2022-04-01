@@ -262,6 +262,18 @@ emitGetInjectionForSortOfTag(KOREDefinition *def, llvm::Module *mod) {
       getIntDebugType(), def, mod, false, getInjection);
 }
 
+static llvm::Constant *
+getArity(KOREDefinition *, llvm::Module *mod, KORESymbol *symbol) {
+  return llvm::ConstantInt::get(
+      llvm::Type::getInt32Ty(mod->getContext()), symbol->getArguments().size());
+}
+
+static void emitGetSymbolArity(KOREDefinition *def, llvm::Module *mod) {
+  emitDataTableForSymbol(
+      "getSymbolArity", llvm::Type::getInt32Ty(mod->getContext()),
+      getIntDebugType(), def, mod, getArity);
+}
+
 static llvm::Value *getArgValue(
     llvm::Value *ArgumentsArray, int idx, llvm::BasicBlock *CaseBlock,
     ValueType cat, llvm::Module *mod) {
@@ -1229,6 +1241,7 @@ void emitConfigParserFunctions(
   emitGetToken(definition, module);
   emitGetTagForFreshSort(definition, module);
   emitGetInjectionForSortOfTag(definition, module);
+  emitGetSymbolArity(definition, module);
 
   emitGetSymbolNameForTag(definition, module);
   emitVisitChildren(definition, module);

@@ -122,10 +122,20 @@ SortBytes hook_BYTES_substr(SortBytes input, SortInt start, SortInt end) {
   uint64_t ustart = get_ui(start);
   uint64_t uend = get_ui(end);
   if (uend < ustart) {
-    throw std::invalid_argument("Invalid string slice");
+    throw std::invalid_argument(
+        std::string("Invalid string slice: Requested start index ")
+        + std::to_string(ustart)
+        + std::string(" is greater than requested end index ")
+        + std::to_string(uend) + std::string("."));
   }
-  if (uend > len(input)) {
-    throw std::invalid_argument("Invalid string slice");
+  uint64_t input_len = len(input);
+  if (uend > input_len) {
+    throw std::invalid_argument(
+        std::string("Invalid string slice for string: Requested end index ")
+        + std::to_string(uend)
+        + std::string(
+            " is greater than the total length of the string which is ")
+        + std::to_string(input_len) + std::string(" bytes."));
   }
   uint64_t len = uend - ustart;
   auto ret = static_cast<string *>(

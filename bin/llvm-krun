@@ -7,14 +7,26 @@ output_file="$(mktemp tmp.out.XXXXXXXXXX)"
 input_file="$(mktemp tmp.in.XXXXXXXXXX)"
 expanded_input_file="$(mktemp tmp.in.XXXXXXXXXX)"
 parser_file="$(mktemp tmp.parse.XXXXXXXXXX)"
-trap 'rm -rf "$input_file" "$expanded_input_file" "$output_file" "$parser_file"' INT TERM EXIT
+temp_inputs=()
+
+cleanup () {
+  rm -rf "$input_file" "$expanded_input_file" "$output_file" "$parser_file"
+  rm -rf "${temp_inputs[@]}"
+}
+trap 'cleanup' INT TERM EXIT
+
 initializer="LblinitGeneratedTopCell{}"
 dir=.
 debug=
 depth=-1
+binary_input=false
+binary_output=false
 pretty_print=false
+interpreter_flags=()
 dryRun=false
 expandMacros=true
+
+convert_term="$(dirname "$0")/kore-convert --from=text --to=binary /dev/stdin -F"
 
 print_usage () {
 cat <<HERE
@@ -40,15 +52,22 @@ Mandatory arguments to long options are mandatory for short options too.
                              * prettyfile: VALUE is a filename containing
                                            concrete syntax, parsed like
                                            'pretty'
+                             * binaryfile: VALUE is a filename containing a
+                                           binary KORE term with a valid
+                                           header.
   -o, --output-file FILE   Write resulting configuration to FILE. Defaults to
                            standard output
+  -bi,--binary-input       Construct the input configuration using the binary
+                           KORE format, rather than the textual syntax.
+  -bo,--binary-output      Serialize the output configuration using the binary
+                           KORE format, rather than the textual syntax;
   -p, --pretty-print       Pretty print output configuration. By default,
                            output is in kore syntax
       --debug              Use GDB to debug program
       --depth INT          Execute up to INT steps
   -i, --initializer INIT   Use INIT as the top cell initializer 
   -nm, --no-expand-macros  Don't expand macros in initial configuration
-  -v, --verbose            Print commands executed to standazd error
+  -v, --verbose            Print commands executed to standard error
       -save-temps          Do not delete temporary files on exit
   -h, --help               Display this help and exit
 HERE
@@ -63,6 +82,7 @@ do
     value="$3"
     var_name="params_$name"
     file_name="file_$name"
+    binary_file_name="binary_$name"
     pretty_name="pretty_$name"
     sort_name="sort_$name"
     params+=("$name")
@@ -84,6 +104,9 @@ do
       printf -v "$pretty_name" %s "$(cat "$value")"
       pretty+=("$name")
       ;;
+      binaryfile)
+      printf -v "$binary_file_name" %s "$value"
+      ;;
     esac
     shift; shift; shift; shift; shift
     ;;
@@ -91,6 +114,16 @@ do
     -o|--output-file)
     real_output_file="$2"
     shift; shift
+    ;;
+
+    -bi|--binary-input)
+    binary_input=true
+    shift
+    ;;
+
+    -bo|--binary-output)
+    binary_output=true
+    shift
     ;;
 
     -p|--pretty-print)
@@ -150,6 +183,10 @@ do
   esac
 done
 
+if $binary_output; then
+  interpreter_flags+=("--binary-output")
+fi
+
 for name in "${pretty[@]}"; do
   var_name="params_$name"
   pretty_name="pretty_$name"
@@ -167,76 +204,141 @@ for name in "${params[@]}"; do
   sort_name="sort_$name"
   var_name="params_$name"
   file_name="file_$name"
+  binary_file_name="binary_$name"
   sort="${!sort_name}"
   case $sort in
     KItem)
     ;;
     *)
-    if [ -z "${!file_name}" ]; then
-      printf -v "$var_name" %s "inj{Sort$sort{}, SortKItem{}}(${!var_name})"
-    else
+    if [ -n "${!file_name}" ]; then
       temp_file="$(mktemp tmp.interpolate.XXXXXXXXXX)"
+      temp_inputs+=("$temp_file")
+
       {
         echo "inj{Sort$sort{}, SortKItem{}}("
         cat "${!file_name}"
         echo ")"
       } >> "$temp_file"
-      mv "$temp_file" "${!file_name}"
+
+      printf -v "$file_name" %s "$temp_file"
+    elif [ -n "${!binary_file_name}" ]; then
+      temp_file="$(mktemp tmp.binary.XXXXXXXXXX)"
+      temp_inputs+=("$temp_file")
+
+      {
+        cat "${!binary_file_name}"
+        echo "inj{Sort$sort{}, SortKItem{}}()" | $convert_term -ka
+        "$(dirname "$0")/kore-arity" 1
+      } >> "$temp_file"
+
+      printf -v "$binary_file_name" %s "$temp_file"
+    else
+      printf -v "$var_name" %s "inj{Sort$sort{}, SortKItem{}}(${!var_name})"
     fi
     ;;
   esac
 done
 
-echo "$initializer" >> "$input_file"
+construct_text_input() {
+  echo "$initializer" >> "$input_file"
 
-cat <<HERE >> "$input_file"
+  cat <<HERE >> "$input_file"
 (
 HERE
 
-for param in "${params[@]}"; do
-  cat <<HERE >> "$input_file"
+  for param in "${params[@]}"; do
+    cat <<HERE >> "$input_file"
 Lbl'Unds'Map'Unds'{}(
 HERE
-done
+  done
 
-if [ ${#params[@]} -ne 0 ]; then
-  cat <<HERE >> "$input_file"
+  if [ ${#params[@]} -ne 0 ]; then
+    cat <<HERE >> "$input_file"
 Lbl'Stop'Map{}()
 HERE
-fi
-
-for param in "${params[@]}"; do
-  {
-    cat <<HERE
-, Lbl'UndsPipe'-'-GT-Unds'{}(inj{SortKConfigVar{}, SortKItem{}}(\dv{SortKConfigVar{}}(
-HERE
-    echo -n '"$'
-    echo -n "$param"
-    echo '"'
-
-    cat <<HERE
-)),
-HERE
-  } >> "$input_file"
-
-  var_name="params_$param"
-  file_name="file_$param"
-
-  if [ -z "${!file_name}" ]; then
-    echo "${!var_name}" >> "$input_file"
-  else
-    cat "${!file_name}" >> "$input_file"
   fi
 
-  cat <<HERE >> "$input_file"
+  for param in "${params[@]}"; do
+    {
+      cat <<HERE
+, Lbl'UndsPipe'-'-GT-Unds'{}(inj{SortKConfigVar{}, SortKItem{}}(\dv{SortKConfigVar{}}(
+HERE
+      echo -n '"$'
+      echo -n "$param"
+      echo '"'
+
+      cat <<HERE
+)),
+HERE
+    } >> "$input_file"
+
+    var_name="params_$param"
+    file_name="file_$param"
+    binary_file_name="binary_$param"
+
+    if [ -n "${!file_name}" ]; then
+      cat "${!file_name}" >> "$input_file"
+    elif [ -n "${!binary_file_name}" ]; then
+      "$(dirname "$0")/kore-convert" "${!binary_file_name}" >> "$input_file"
+    else
+      echo "${!var_name}" >> "$input_file"
+    fi
+
+    cat <<HERE >> "$input_file"
 ))
 HERE
 
-done
+  done
 
-cat <<HERE >> "$input_file"
+  cat <<HERE >> "$input_file"
 )
 HERE
+}
+
+construct_binary_input()
+{
+  if [ ${#params[@]} -ne 0 ]; then
+    echo "Lbl'Stop'Map{}()" | $convert_term >> "$input_file"
+  fi
+
+  for param in "${params[@]}"; do
+    var_name="params_$param"
+    file_name="file_$param"
+    binary_file_name="binary_$param"
+
+    echo "inj{SortKConfigVar{},SortKItem{}}(\dv{SortKConfigVar{}}(\"\$${param}\"))" \
+      | $convert_term -k >> "$input_file"
+
+    if [ -n "${!file_name}" ]; then
+      cat "${!file_name}" | $convert_term -k >> "$input_file"
+    elif [ -n "${!binary_file_name}" ]; then
+      temp_file="$(mktemp tmp.concat.XXXXXXXXXX)"
+      temp_inputs+=("$temp_file")
+
+      "$(dirname "$0")/kore-strip" -k -i "${!binary_file_name}" -o "$temp_file"
+      cat "$temp_file" >> "$input_file"
+    else
+      echo "${!var_name}" | $convert_term -k >> "$input_file"
+    fi
+
+    {
+      echo "Lbl'UndsPipe'-'-GT-Unds'{}()" | $convert_term -ka
+      "$(dirname "$0")/kore-arity" 2
+
+      echo "Lbl'Unds'Map'Unds'{}()" | $convert_term -ka
+      "$(dirname "$0")/kore-arity" 2
+    } >> "$input_file"
+  done
+
+  echo "$initializer()" | $convert_term -ka >> "$input_file"
+  "$(dirname "$0")/kore-arity" 1 >> "$input_file"
+}
+
+if $binary_input; then
+  construct_binary_input
+else
+  construct_text_input
+fi
 
 if $expandMacros; then
   "$(dirname "$0")/kore-expand-macros" "$dir" "$input_file" > "$expanded_input_file"
@@ -258,7 +360,7 @@ set +e
 if [ -n "$verbose" ]; then
   set -x
 fi
-$debug "$dir"/interpreter "$expanded_input_file" "$depth" "$output_file"
+$debug "$dir"/interpreter "$expanded_input_file" "$depth" "$output_file" "${interpreter_flags[@]}"
 )
 EXIT=$?
 set -e
