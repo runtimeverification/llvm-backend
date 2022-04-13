@@ -359,7 +359,7 @@ if $dryRun; then
     if [ -n "$verbose" ]; then
       set -x
     fi
-    "$(dirname "$0")/kore-convert" "$expanded_input_file"
+    "$(dirname "$0")/kore-convert" -F "$expanded_input_file"
     )
   elif [ -n "$real_output_file" ]; then
     cat "$expanded_input_file" > "$real_output_file"
