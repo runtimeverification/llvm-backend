@@ -8,11 +8,11 @@ if [ $# -lt 3 ]; then
   exit 1
 fi
 mod="$(mktemp tmp.XXXXXXXXXX)"
-modopt_tmp="$(mktemp tmp.XXXXXXXXXX)"
-modopt="$modopt_tmp"
+modopt="$(mktemp tmp.XXXXXXXXXX)"
 modcombined="$(mktemp tmp.XXXXXXXXXX)"
-modcombinedopt="$(mktemp tmp.XXXXXXXXXX)"
-trap 'rm -rf "$mod" "$modopt_tmp" "$modcombined" "$modcombinedopt"' INT TERM EXIT
+modcombinedopt_tmp="$(mktemp tmp.XXXXXXXXXX)"
+modcombinedopt="$modcombinedopt_tmp"
+trap 'rm -rf "$mod" "$modopt" "$modcombined" "$modcombinedopt_tmp"' INT TERM EXIT
 definition="$1"
 shift
 compile=true
@@ -56,7 +56,7 @@ if $compile; then
 else
   main="$1"
   shift
-  modopt="$definition"
+  modcombinedopt="$definition"
 fi
 if [[ "$OSTYPE" != "darwin"* ]]; then
   flags=-fuse-ld=lld
