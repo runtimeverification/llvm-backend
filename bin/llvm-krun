@@ -347,7 +347,21 @@ else
 fi
 
 if $dryRun; then
-  if [ -n "$real_output_file" ]; then
+  if [ $binary_input != $binary_output ] && [ -n "$real_output_file" ]; then
+    (
+    if [ -n "$verbose" ]; then
+      set -x
+    fi
+    "$(dirname "$0")/kore-convert" "$expanded_input_file" -o "$real_output_file"
+    )
+  elif [ $binary_input != $binary_output ]; then
+    (
+    if [ -n "$verbose" ]; then
+      set -x
+    fi
+    "$(dirname "$0")/kore-convert" -F "$expanded_input_file"
+    )
+  elif [ -n "$real_output_file" ]; then
     cat "$expanded_input_file" > "$real_output_file"
   else
     cat "$expanded_input_file"
