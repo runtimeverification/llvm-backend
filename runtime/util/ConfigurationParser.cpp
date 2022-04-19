@@ -142,12 +142,14 @@ static void *constructInitialConfiguration(const KOREPattern *initial) {
     }
   }
 
+  gc_enabled = true;
   return output[0];
 }
 
 template <typename It>
 static void *
 deserializeInitialConfiguration(It ptr, It end, binary_version version) {
+  gc_enabled = false;
   using namespace kllvm::detail;
   auto begin = ptr;
 
@@ -233,6 +235,7 @@ deserializeInitialConfiguration(It ptr, It end, binary_version version) {
     default:
       std::cerr << "Bad term " << int(*ptr) << ' '
                 << (std::distance(begin, ptr) + 11) << '\n';
+      gc_enabled = true;
       return nullptr;
     }
   }

@@ -193,7 +193,7 @@ void serializeConfigurationInternal(
 
     if (isConstant == 3) {
       // bound variable
-      printConfigurationInternal(
+      serializeConfigurationInternal(
           file, boundVariables[boundVariables.size() - 1 - tag], sort, true);
       return;
     }
