@@ -1,9 +1,8 @@
 kllvm_add_tool(kprint
-  addBrackets.cpp
   main.cpp
 )
 
-target_link_libraries(kprint PUBLIC Parser AST)
+target_link_libraries(kprint PUBLIC KOREPrinter)
 target_compile_options(kprint PUBLIC -O3)
 
 install(
