@@ -26,7 +26,9 @@ SortK hook_IO_traceTerm(block *term) {
 
   FILE *fp = fdopen(fd, "w");
   printConfigurationToFile(fp, term);
+  fflush(fp);
 
+  std::cerr << std::string(&kompiled_directory) << '\n';
   kllvm::printKORE(std::cerr, &kompiled_directory, filename, false, true);
 
   close(fd);
