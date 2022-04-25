@@ -136,6 +136,7 @@ run @CMAKE_CXX_COMPILER@ -Wno-override-module -Wno-return-type-c-linkage "$modop
   "$LIBDIR"/libParser.a \
   "$LIBDIR"/libAST.a \
   "$LIBDIR"/libBinaryKore.a \
+  "$LIBDIR"/libKOREPrinter.a \
   "$LIBDIR"/liballoc.a \
   "$LIBDIR"/libcollect.a \
   "$LIBDIR"/libmeta.a \
