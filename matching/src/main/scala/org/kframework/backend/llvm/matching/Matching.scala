@@ -30,7 +30,7 @@ object Matching {
       }
     }
     if (genSingleRuleTrees) {
-      for (axiom <- axioms) {
+      for (axiom <- axioms.par) {
         val matrix = Generator.genClauseMatrix(symlib, defn, IndexedSeq(axiom), Seq(axiom.rewrite.sort))
         val dt = matrix.compile
         val filename = "match_" + axiom.ordinal + ".yaml"
@@ -55,7 +55,7 @@ object Matching {
     dt.serializeToYaml(path)
     dtSearch.serializeToYaml(pathSearch)
     if (threshold.isPresent) {
-      axioms.foreach(a => {
+      axioms.par.foreach(a => {
         if (logging) {
           System.out.println("Compiling decision tree for axiom " + a.ordinal)
         }
@@ -72,7 +72,7 @@ object Matching {
     val index = new File(outputFolder, "index.txt")
     val writer = new FileWriter(index)
     var idx = 0
-    for (pair <- files) {
+    for (pair <- files.par) {
       val sym = pair._1.ctr
       val filename = (if (sym.length > 240) sym.substring(0, 240) + idx else sym) + ".yaml"
       pair._2.serializeToYaml(new File(outputFolder, filename))
