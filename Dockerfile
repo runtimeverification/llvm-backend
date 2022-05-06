@@ -1,27 +1,30 @@
-FROM ubuntu:focal
+ARG BASE_IMAGE=ubuntu:focal
+FROM ${BASE_IMAGE}
+
+ARG LLVM_VERSION=10
 
 ENV TZ America/Chicago
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN     apt-get update      \
-    &&  apt-get upgrade -y  \
-    &&  apt-get install -y  \
-          git               \
-          cmake             \
-          clang-10          \
-          llvm-10-tools     \
-          lld-10            \
-          zlib1g-dev        \
-          flex              \
-          libboost-test-dev \
-          libgmp-dev        \
-          libmpfr-dev       \
-          libyaml-dev       \
-          libjemalloc-dev   \
-          curl              \
-          maven             \
-          pkg-config        \
-          python3           \
+RUN     apt-get update                    \
+    &&  apt-get upgrade -y                \
+    &&  apt-get install -y                \
+          git                             \
+          cmake                           \
+          clang-${LLVM_VERSION}           \
+          llvm-${LLVM_VERSION}-tools      \
+          lld-${LLVM_VERSION}             \
+          zlib1g-dev                      \
+          flex                            \
+          libboost-test-dev               \
+          libgmp-dev                      \
+          libmpfr-dev                     \
+          libyaml-dev                     \
+          libjemalloc-dev                 \
+          curl                            \
+          maven                           \
+          pkg-config                      \
+          python3                         \
           python3-pip
 
 ARG USER_ID=1000
