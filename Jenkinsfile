@@ -30,11 +30,11 @@ pipeline {
         '''
       }
     }
-    stage('Build and Test on Ubuntu Focal') {
+    stage('Build and Test on Ubuntu Jammy') {
       options { timeout(time: 25, unit: 'MINUTES') }
       agent {
         dockerfile {
-          additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg BASE_IMAGE=ubuntu:focal --build-arg LLVM_VERSION=10'
+          additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg BASE_IMAGE=ubuntu:jammy --build-arg LLVM_VERSION=14'
           reuseNode true
         }
       }
@@ -48,11 +48,11 @@ pipeline {
         '''
       }
     }
-    stage('Build and Test on Ubuntu Jammy') {
+    stage('Build and Test on Ubuntu Focal') {
       options { timeout(time: 25, unit: 'MINUTES') }
       agent {
         dockerfile {
-          additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg BASE_IMAGE=ubuntu:jammy --build-arg LLVM_VERSION=14'
+          additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg BASE_IMAGE=ubuntu:focal --build-arg LLVM_VERSION=10'
           reuseNode true
         }
       }
