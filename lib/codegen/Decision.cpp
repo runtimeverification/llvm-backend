@@ -279,7 +279,7 @@ void SwitchNode::codegen(Decision *d) {
             d->CurrentBlock);
         new llvm::StoreInst(CurrDepth, d->ChoiceDepth, d->CurrentBlock);
 
-        auto ty = d->ChoiceBuffer->getType()->getElementType();
+        auto ty = d->ChoiceBuffer->getType()->getPointerElementType();
         auto zero = llvm::ConstantInt::get(llvm::Type::getInt64Ty(d->Ctx), 0);
         auto currentElt = llvm::GetElementPtrInst::CreateInBounds(
             ty, d->ChoiceBuffer, {zero, CurrDepth}, "", d->CurrentBlock);
@@ -820,7 +820,8 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> stepFunctionHeader(
   std::vector<llvm::Value *> rootPtrs;
   for (unsigned i = 0; i < nroots; i++) {
     auto ptr = llvm::GetElementPtrInst::CreateInBounds(
-        llvm::dyn_cast<llvm::PointerType>(arr->getType())->getElementType(),
+        llvm::dyn_cast<llvm::PointerType>(arr->getType())
+            ->getPointerElementType(),
         arr,
         {llvm::ConstantInt::get(
              llvm::Type::getInt64Ty(module->getContext()), 0),
