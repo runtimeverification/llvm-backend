@@ -73,9 +73,7 @@ else
   flags=("-Wl,-u,sort_table")
 fi
 
-if [ -f "/etc/arch-release" ]; then
-  llc_flags+=("--relocation-model=pic")
-fi
+llc_flags+=("--relocation-model=pic")
 
 run () {
   if $verbose; then

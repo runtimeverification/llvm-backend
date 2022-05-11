@@ -9,9 +9,9 @@ pipeline {
       steps { script { currentBuild.displayName = "PR ${env.CHANGE_ID}: ${env.CHANGE_TITLE}" } }
     }
     stage('Build and test') {
+      options { timeout(time: 30, unit: 'MINUTES') }
       parallel {
         stage('Arch Linux') {
-          options { timeout(time: 25, unit: 'MINUTES') }
           agent {
             dockerfile {
               filename 'Dockerfile.arch'
@@ -28,11 +28,27 @@ pipeline {
             '''
           }
         }
-        stage('Ubuntu') {
-          options { timeout(time: 25, unit: 'MINUTES') }
+        stage('Ubuntu Focal') {
           agent {
             dockerfile {
-              additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)'
+              additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg BASE_IMAGE=ubuntu:focal --build-arg LLVM_VERSION=10'
+              reuseNode true
+            }
+          }
+          steps {
+            sh '''
+              ./ciscript Debug
+              ./ciscript Release
+              ./ciscript RelWithDebInfo
+              ./ciscript FastBuild
+              ./ciscript GcStats
+            '''
+          }
+        }
+        stage('Ubuntu Jammy') {
+          agent {
+            dockerfile {
+              additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg BASE_IMAGE=ubuntu:jammy --build-arg LLVM_VERSION=14'
               reuseNode true
             }
           }
