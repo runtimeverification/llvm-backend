@@ -11,7 +11,7 @@ set(CMAKE_DISABLE_IN_SOURCE_BUILD ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
-add_definitions(-Wall -Werror -Wno-return-type-c-linkage)
+add_definitions(-Wall -Werror -Wno-return-type-c-linkage -Wno-sign-compare)
 if (CMAKE_BUILD_TYPE STREQUAL "GcStats")
   add_definitions(-DGC_DBG)
 endif()
@@ -74,11 +74,16 @@ endif()
 set(CMAKE_AR "${CMAKE_C_COMPILER_AR}")
 set(CMAKE_RANLIB "${CMAKE_C_COMPILER_RANLIB}")
 
-find_package(LLVM 13 QUIET CONFIG)
+find_package(LLVM 14 QUIET CONFIG)
+
+if (NOT LLVM_FOUND)
+  find_package(LLVM 13 QUIET CONFIG)
+endif()
 
 if (NOT LLVM_FOUND)
   find_package(LLVM 12 QUIET CONFIG)
 endif()
+
 if (NOT LLVM_FOUND)
   find_package(LLVM 11.1 QUIET CONFIG)
 endif()
@@ -135,8 +140,8 @@ install(
   DESTINATION lib/kllvm/llvm/main
 )
 
-find_program(OPT NAMES opt-13 opt-12 opt-11 opt-10 opt)
-find_program(LLC NAMES llc-13 llc-12 llc-11 llc-10 llc)
+find_program(OPT NAMES opt-14 opt-13 opt-12 opt-11 opt-10 opt)
+find_program(LLC NAMES llc-14 llc-13 llc-12 llc-11 llc-10 llc)
 if(${OPT} STREQUAL "OPT-NOTFOUND")
   message(FATAL_ERROR "Could not find an opt binary. Is llvm installed on your PATH?")
 endif()

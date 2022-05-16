@@ -13,6 +13,12 @@ static llvm::DISubprogram *DbgSP;
 static unsigned DbgLine;
 static unsigned DbgColumn;
 
+#if LLVM_VERSION_MAJOR >= 14
+#define DWARF_VERSION 5
+#else
+#define DWARF_VERSION 4
+#endif
+
 void initDebugInfo(llvm::Module *module, std::string filename) {
   Dbg = new llvm::DIBuilder(*module);
   DbgFile = Dbg->createFile(filename, ".");
@@ -20,7 +26,7 @@ void initDebugInfo(llvm::Module *module, std::string filename) {
   module->addModuleFlag(
       llvm::Module::Warning, "Debug Info Version",
       (uint32_t)llvm::DEBUG_METADATA_VERSION);
-  module->addModuleFlag(llvm::Module::Warning, "Dwarf Version", 4);
+  module->addModuleFlag(llvm::Module::Warning, "Dwarf Version", DWARF_VERSION);
   DbgCU = Dbg->createCompileUnit(
       llvm::dwarf::DW_LANG_C, DbgFile, "llvm-kompile-codegen", 0, "", 0);
 }
