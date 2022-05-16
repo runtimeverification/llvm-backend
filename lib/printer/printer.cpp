@@ -4,141 +4,243 @@
 
 #include <map>
 
+namespace {
+
+using namespace kllvm;
+using namespace kllvm::parser;
+
 const std::string WHITESPACE = " \n\r\t\f\v";
 
-static std::string ltrim(const std::string &s) {
+std::string ltrim(const std::string &s) {
   size_t start = s.find_first_not_of(WHITESPACE);
   return (start == std::string::npos) ? "" : s.substr(start);
 }
 
-static std::string rtrim(const std::string &s) {
+std::string rtrim(const std::string &s) {
   size_t end = s.find_last_not_of(WHITESPACE);
   return (end == std::string::npos) ? "" : s.substr(0, end + 1);
 }
 
-static std::string trim(const std::string &s) {
+std::string trim(const std::string &s) {
   return rtrim(ltrim(s));
 }
 
-namespace kllvm {
+std::map<std::string, std::string> getFormats() {
+  static std::map<std::string, std::string> formats;
+  static bool once = false;
 
-using namespace parser;
+  if (!once) {
+    formats["kseq"] = "%1 ~> %2";
+    formats["append"] = "%1 ~> %2";
+    formats["dotk"] = ".";
+    formats["inj"] = "%1";
+    formats["\\bottom"] = "#Bottom";
+    formats["\\top"] = "#Top";
+    formats["\\not"] = "#Not ( %1 )";
+    formats["\\ceil"] = "#Ceil ( %1 )";
+    formats["\\floor"] = "#Floor ( %1 )";
+    formats["\\equals"] = "{%i%n%1%d%n#Equals%i%n%2%d%n}";
+    formats["\\and"] = "%i%1%d%n#And%n%i%2%d";
+    formats["\\or"] = "%i%1%d%n#Or%n%i%2%d";
+    formats["\\implies"] = "%i%1%d%n#Implies%n%i%2%d";
+    formats["\\exists"] = "#Exists %1 . %2";
+    formats["\\forall"] = "#Forall %1 . %2";
+    formats["\\rewrites"] = "%1 => %2";
+    formats["\\weakExistsFinally"] = "#wEF ( %1 )";
+    formats["\\allPathGlobally"] = "#AG ( %1 )";
+    formats["bracket"] = "( %1 )";
+    once = true;
+  }
 
-std::ostream &printKORE(
-    std::ostream &os, std::string const &definitionPath,
-    std::string const &patternPath, bool hasColor, bool filterSubst) {
-  std::map<std::string, std::string> formats;
-  formats["kseq"] = "%1 ~> %2";
-  formats["append"] = "%1 ~> %2";
-  formats["dotk"] = ".";
-  formats["inj"] = "%1";
-  formats["\\bottom"] = "#Bottom";
-  formats["\\top"] = "#Top";
-  formats["\\not"] = "#Not ( %1 )";
-  formats["\\ceil"] = "#Ceil ( %1 )";
-  formats["\\floor"] = "#Floor ( %1 )";
-  formats["\\equals"] = "{%i%n%1%d%n#Equals%i%n%2%d%n}";
-  formats["\\and"] = "%i%1%d%n#And%n%i%2%d";
-  formats["\\or"] = "%i%1%d%n#Or%n%i%2%d";
-  formats["\\implies"] = "%i%1%d%n#Implies%n%i%2%d";
-  formats["\\exists"] = "#Exists %1 . %2";
-  formats["\\forall"] = "#Forall %1 . %2";
-  formats["\\rewrites"] = "%1 => %2";
-  formats["\\weakExistsFinally"] = "#wEF ( %1 )";
-  formats["\\allPathGlobally"] = "#AG ( %1 )";
-  formats["bracket"] = "( %1 )";
+  return formats;
+}
 
-  std::map<std::string, std::string> terminals;
-  terminals["kseq"] = "010";
-  terminals["append"] = "010";
-  terminals["dotk"] = "1";
-  terminals["inj"] = "0";
-  terminals["\\bottom"] = "1";
-  terminals["\\top"] = "1";
-  terminals["\\not"] = "101";
-  terminals["\\ceil"] = "101";
-  terminals["\\floor"] = "101";
-  terminals["\\equals"] = "10101";
-  terminals["\\and"] = "010";
-  terminals["\\or"] = "010";
-  terminals["\\implies"] = "010";
-  terminals["\\exists"] = "1010";
-  terminals["\\forall"] = "1010";
-  terminals["\\rewrites"] = "010";
-  terminals["\\weakExistsFinally"] = "101";
-  terminals["\\allPathGlobally"] = "101";
-  terminals["bracket"] = "101";
+std::map<std::string, std::string> getTerminals() {
+  static std::map<std::string, std::string> terminals;
+  static bool once = false;
+
+  if (!once) {
+    terminals["kseq"] = "010";
+    terminals["append"] = "010";
+    terminals["dotk"] = "1";
+    terminals["inj"] = "0";
+    terminals["\\bottom"] = "1";
+    terminals["\\top"] = "1";
+    terminals["\\not"] = "101";
+    terminals["\\ceil"] = "101";
+    terminals["\\floor"] = "101";
+    terminals["\\equals"] = "10101";
+    terminals["\\and"] = "010";
+    terminals["\\or"] = "010";
+    terminals["\\implies"] = "010";
+    terminals["\\exists"] = "1010";
+    terminals["\\forall"] = "1010";
+    terminals["\\rewrites"] = "010";
+    terminals["\\weakExistsFinally"] = "101";
+    terminals["\\allPathGlobally"] = "101";
+    terminals["bracket"] = "101";
+    once = true;
+  }
+
+  return terminals;
+}
+
+std::set<std::string> getAssocs() {
+  static std::set<std::string> assocs;
+  static bool once = false;
+
+  if (!once) {
+    assocs.insert("kseq");
+    assocs.insert("\\and");
+    assocs.insert("\\or");
+    once = true;
+  }
+
+  return assocs;
+}
+
+std::set<std::string> getComms() {
+  static std::set<std::string> comms;
+  static bool once = false;
+
+  if (!once) {
+    comms.insert("\\and");
+    comms.insert("\\or");
+    once = true;
+  }
+
+  return comms;
+}
+
+std::map<std::string, std::set<std::string>> getLeftAssocs() {
+  static std::map<std::string, std::set<std::string>> leftAssocs;
+  static bool once = false;
+
+  if (!once) {
+    leftAssocs["kseq"].insert("kseq");
+    leftAssocs["append"].insert("append");
+    leftAssocs["\\and"].insert("\\and");
+    leftAssocs["\\or"].insert("\\or");
+    leftAssocs["\\rewrites"].insert("\\rewrites");
+    once = true;
+  }
+
+  return leftAssocs;
+}
+
+std::map<std::string, std::set<std::string>> getRightAssocs() {
+  static std::map<std::string, std::set<std::string>> rightAssocs;
+  static bool once = false;
+
+  if (!once) {
+    rightAssocs["\\rewrites"].insert("\\rewrites");
+    once = true;
+  }
+
+  return rightAssocs;
+}
+
+std::map<std::string, std::set<std::string>> getPriorities() {
+  static std::map<std::string, std::set<std::string>> priorities;
+  static bool once = false;
+
+  if (!once) {
+    priorities["\\implies"].insert("\\exists");
+    priorities["\\or"].insert("\\exists");
+    priorities["\\and"].insert("\\exists");
+    priorities["\\equals"].insert("\\exists");
+    priorities["\\floor"].insert("\\exists");
+    priorities["\\ceil"].insert("\\exists");
+    priorities["\\not"].insert("\\exists");
+    priorities["\\bottom"].insert("\\exists");
+    priorities["\\top"].insert("\\exists");
+    priorities["\\implies"].insert("\\forall");
+    priorities["\\or"].insert("\\forall");
+    priorities["\\and"].insert("\\forall");
+    priorities["\\equals"].insert("\\forall");
+    priorities["\\floor"].insert("\\forall");
+    priorities["\\ceil"].insert("\\forall");
+    priorities["\\not"].insert("\\forall");
+    priorities["\\bottom"].insert("\\forall");
+    priorities["\\top"].insert("\\forall");
+    priorities["\\or"].insert("\\implies");
+    priorities["\\and"].insert("\\implies");
+    priorities["\\equals"].insert("\\implies");
+    priorities["\\floor"].insert("\\implies");
+    priorities["\\ceil"].insert("\\implies");
+    priorities["\\not"].insert("\\implies");
+    priorities["\\bottom"].insert("\\implies");
+    priorities["\\top"].insert("\\implies");
+    priorities["\\and"].insert("\\or");
+    priorities["\\equals"].insert("\\or");
+    priorities["\\floor"].insert("\\or");
+    priorities["\\ceil"].insert("\\or");
+    priorities["\\not"].insert("\\or");
+    priorities["\\bottom"].insert("\\or");
+    priorities["\\top"].insert("\\or");
+    priorities["\\equals"].insert("\\and");
+    priorities["\\floor"].insert("\\and");
+    priorities["\\ceil"].insert("\\and");
+    priorities["\\not"].insert("\\and");
+    priorities["\\bottom"].insert("\\and");
+    priorities["\\top"].insert("\\and");
+    priorities["\\floor"].insert("\\equals");
+    priorities["\\ceil"].insert("\\equals");
+    priorities["\\not"].insert("\\equals");
+    priorities["\\bottom"].insert("\\equals");
+    priorities["\\top"].insert("\\equals");
+    once = true;
+  }
+
+  return priorities;
+}
+
+ptr<KOREDefinition> const &getDefinition(std::string const &kompiledDir) {
+  static std::map<std::string, ptr<KOREDefinition>> cache;
+
+  if (cache.find(kompiledDir) == cache.end()) {
+    KOREParser parser(kompiledDir + std::string("/syntaxDefinition.kore"));
+    cache[kompiledDir] = parser.definition();
+  }
+
+  return cache.at(kompiledDir);
+}
+
+std::vector<ptr<KOREDeclaration>> const &
+getAxioms(std::string const &kompiledDir) {
+  static std::map<std::string, std::vector<ptr<KOREDeclaration>>> cache;
+
+  if (cache.find(kompiledDir) == cache.end()) {
+    KOREParser parser(kompiledDir + std::string("/macros.kore"));
+    cache[kompiledDir] = parser.declarations();
+  }
+
+  return cache.at(kompiledDir);
+}
+
+struct PreprocessedPrintData {
+  PrettyPrintData data;
+  SymbolMap overloads;
+};
+
+PreprocessedPrintData getPrintData(
+    ptr<KOREDefinition> const &def,
+    std::vector<ptr<KOREDeclaration>> const &axioms, bool hasColor) {
+  auto formats = getFormats();
+  auto terminals = getTerminals();
+  auto assocs = getAssocs();
+  auto comms = getComms();
+  auto leftAssoc = getLeftAssocs();
+  auto rightAssoc = getRightAssocs();
+  auto priorities = getPriorities();
 
   BracketMap brackets;
 
   std::map<std::string, std::string> hooks;
-  std::set<std::string> assocs;
-  assocs.insert("kseq");
-  assocs.insert("\\and");
-  assocs.insert("\\or");
-  std::set<std::string> comms;
-  comms.insert("\\and");
-  comms.insert("\\or");
   std::map<std::string, std::vector<std::string>> colors;
-
-  std::map<std::string, std::set<std::string>> priorities, leftAssoc,
-      rightAssoc;
-  leftAssoc["kseq"].insert("kseq");
-  leftAssoc["append"].insert("append");
-  leftAssoc["\\and"].insert("\\and");
-  leftAssoc["\\or"].insert("\\or");
-  leftAssoc["\\rewrites"].insert("\\rewrites");
-  rightAssoc["\\rewrites"].insert("\\rewrites");
-  priorities["\\implies"].insert("\\exists");
-  priorities["\\or"].insert("\\exists");
-  priorities["\\and"].insert("\\exists");
-  priorities["\\equals"].insert("\\exists");
-  priorities["\\floor"].insert("\\exists");
-  priorities["\\ceil"].insert("\\exists");
-  priorities["\\not"].insert("\\exists");
-  priorities["\\bottom"].insert("\\exists");
-  priorities["\\top"].insert("\\exists");
-  priorities["\\implies"].insert("\\forall");
-  priorities["\\or"].insert("\\forall");
-  priorities["\\and"].insert("\\forall");
-  priorities["\\equals"].insert("\\forall");
-  priorities["\\floor"].insert("\\forall");
-  priorities["\\ceil"].insert("\\forall");
-  priorities["\\not"].insert("\\forall");
-  priorities["\\bottom"].insert("\\forall");
-  priorities["\\top"].insert("\\forall");
-  priorities["\\or"].insert("\\implies");
-  priorities["\\and"].insert("\\implies");
-  priorities["\\equals"].insert("\\implies");
-  priorities["\\floor"].insert("\\implies");
-  priorities["\\ceil"].insert("\\implies");
-  priorities["\\not"].insert("\\implies");
-  priorities["\\bottom"].insert("\\implies");
-  priorities["\\top"].insert("\\implies");
-  priorities["\\and"].insert("\\or");
-  priorities["\\equals"].insert("\\or");
-  priorities["\\floor"].insert("\\or");
-  priorities["\\ceil"].insert("\\or");
-  priorities["\\not"].insert("\\or");
-  priorities["\\bottom"].insert("\\or");
-  priorities["\\top"].insert("\\or");
-  priorities["\\equals"].insert("\\and");
-  priorities["\\floor"].insert("\\and");
-  priorities["\\ceil"].insert("\\and");
-  priorities["\\not"].insert("\\and");
-  priorities["\\bottom"].insert("\\and");
-  priorities["\\top"].insert("\\and");
-  priorities["\\floor"].insert("\\equals");
-  priorities["\\ceil"].insert("\\equals");
-  priorities["\\not"].insert("\\equals");
-  priorities["\\bottom"].insert("\\equals");
-  priorities["\\top"].insert("\\equals");
 
   SubsortMap subsorts;
   SymbolMap overloads;
-
-  KOREParser parser(definitionPath + std::string("/syntaxDefinition.kore"));
-  ptr<KOREDefinition> def = parser.definition();
 
   for (auto &entry : def->getSymbolDeclarations()) {
     std::string name = entry.first;
@@ -213,12 +315,38 @@ std::ostream &printKORE(
   subsorts = transitiveClosure(subsorts);
   overloads = transitiveClosure(overloads);
 
-  KOREParser parser2(definitionPath + std::string("/macros.kore"));
-  std::vector<ptr<KOREDeclaration>> axioms = parser2.declarations();
+  PrettyPrintData data
+      = {formats, colors,   terminals, priorities, leftAssoc, rightAssoc,
+         hooks,   brackets, assocs,    comms,      subsorts,  hasColor};
+
+  return {data, overloads};
+}
+
+} // namespace
+
+namespace kllvm {
+
+using namespace parser;
+
+std::ostream &printKORE(
+    std::ostream &os, std::string const &definitionPath,
+    std::string const &patternPath, bool hasColor, bool filterSubst) {
+  static std::map<std::string, PreprocessedPrintData> cache;
+
+  auto const &def = getDefinition(definitionPath);
+  auto const &axioms = getAxioms(definitionPath);
+
+  auto getPrintDataOrCached = [&] {
+    if (cache.find(definitionPath) == cache.end()) {
+      cache[definitionPath] = getPrintData(def, axioms, hasColor);
+    }
+    return cache.at(definitionPath);
+  };
 
   auto config = KOREPattern::load(patternPath);
   std::map<std::string, std::vector<KORESymbol *>> symbols;
   config->markSymbols(symbols);
+
   for (auto &decl : axioms) {
     auto axiom = dynamic_cast<KOREAxiomDeclaration *>(decl.get());
     axiom->getPattern()->markSymbols(symbols);
@@ -233,14 +361,13 @@ std::ostream &printKORE(
     }
   }
 
-  PrettyPrintData data
-      = {formats, colors,   terminals, priorities, leftAssoc, rightAssoc,
-         hooks,   brackets, assocs,    comms,      subsorts,  hasColor};
+  auto [data, overloads] = getPrintDataOrCached();
 
   sptr<KOREPattern> expanded
-      = config->expandMacros(subsorts, overloads, axioms, true);
+      = config->expandMacros(data.subsorts, overloads, axioms, true);
   sptr<KOREPattern> sorted = expanded->sortCollections(data);
   sptr<KOREPattern> filtered;
+
   if (filterSubst) {
     std::set<std::string> vars = sorted->gatherSingletonVars();
     filtered = sorted->filterSubstitution(data, vars);
@@ -249,11 +376,10 @@ std::ostream &printKORE(
   } else {
     filtered = sorted;
   }
+
   sptr<KOREPattern> withBrackets = addBrackets(filtered, data);
   withBrackets->prettyPrint(os, data);
   os << std::endl;
-
-  def.release(); // so we don't waste time calling delete a bunch of times
 
   return os;
 }
