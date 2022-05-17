@@ -27,9 +27,9 @@ std::string trim(const std::string &s) {
 
 std::map<std::string, std::string> getFormats() {
   static std::map<std::string, std::string> formats;
-  static bool once = false;
+  static bool once = true;
 
-  if (!once) {
+  if (once) {
     formats["kseq"] = "%1 ~> %2";
     formats["append"] = "%1 ~> %2";
     formats["dotk"] = ".";
@@ -49,7 +49,7 @@ std::map<std::string, std::string> getFormats() {
     formats["\\weakExistsFinally"] = "#wEF ( %1 )";
     formats["\\allPathGlobally"] = "#AG ( %1 )";
     formats["bracket"] = "( %1 )";
-    once = true;
+    once = false;
   }
 
   return formats;
@@ -57,9 +57,9 @@ std::map<std::string, std::string> getFormats() {
 
 std::map<std::string, std::string> getTerminals() {
   static std::map<std::string, std::string> terminals;
-  static bool once = false;
+  static bool once = true;
 
-  if (!once) {
+  if (once) {
     terminals["kseq"] = "010";
     terminals["append"] = "010";
     terminals["dotk"] = "1";
@@ -79,7 +79,7 @@ std::map<std::string, std::string> getTerminals() {
     terminals["\\weakExistsFinally"] = "101";
     terminals["\\allPathGlobally"] = "101";
     terminals["bracket"] = "101";
-    once = true;
+    once = false;
   }
 
   return terminals;
@@ -87,13 +87,13 @@ std::map<std::string, std::string> getTerminals() {
 
 std::set<std::string> getAssocs() {
   static std::set<std::string> assocs;
-  static bool once = false;
+  static bool once = true;
 
-  if (!once) {
+  if (once) {
     assocs.insert("kseq");
     assocs.insert("\\and");
     assocs.insert("\\or");
-    once = true;
+    once = false;
   }
 
   return assocs;
@@ -101,12 +101,12 @@ std::set<std::string> getAssocs() {
 
 std::set<std::string> getComms() {
   static std::set<std::string> comms;
-  static bool once = false;
+  static bool once = true;
 
-  if (!once) {
+  if (once) {
     comms.insert("\\and");
     comms.insert("\\or");
-    once = true;
+    once = false;
   }
 
   return comms;
@@ -114,15 +114,15 @@ std::set<std::string> getComms() {
 
 std::map<std::string, std::set<std::string>> getLeftAssocs() {
   static std::map<std::string, std::set<std::string>> leftAssocs;
-  static bool once = false;
+  static bool once = true;
 
-  if (!once) {
+  if (once) {
     leftAssocs["kseq"].insert("kseq");
     leftAssocs["append"].insert("append");
     leftAssocs["\\and"].insert("\\and");
     leftAssocs["\\or"].insert("\\or");
     leftAssocs["\\rewrites"].insert("\\rewrites");
-    once = true;
+    once = false;
   }
 
   return leftAssocs;
@@ -130,11 +130,11 @@ std::map<std::string, std::set<std::string>> getLeftAssocs() {
 
 std::map<std::string, std::set<std::string>> getRightAssocs() {
   static std::map<std::string, std::set<std::string>> rightAssocs;
-  static bool once = false;
+  static bool once = true;
 
-  if (!once) {
+  if (once) {
     rightAssocs["\\rewrites"].insert("\\rewrites");
-    once = true;
+    once = false;
   }
 
   return rightAssocs;
@@ -142,9 +142,9 @@ std::map<std::string, std::set<std::string>> getRightAssocs() {
 
 std::map<std::string, std::set<std::string>> getPriorities() {
   static std::map<std::string, std::set<std::string>> priorities;
-  static bool once = false;
+  static bool once = true;
 
-  if (!once) {
+  if (once) {
     priorities["\\implies"].insert("\\exists");
     priorities["\\or"].insert("\\exists");
     priorities["\\and"].insert("\\exists");
@@ -189,7 +189,7 @@ std::map<std::string, std::set<std::string>> getPriorities() {
     priorities["\\not"].insert("\\equals");
     priorities["\\bottom"].insert("\\equals");
     priorities["\\top"].insert("\\equals");
-    once = true;
+    once = false;
   }
 
   return priorities;
