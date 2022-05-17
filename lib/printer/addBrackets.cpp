@@ -2,7 +2,7 @@
 
 #include <memory>
 
-using namespace kllvm;
+namespace kllvm {
 
 enum Fixity { EMPTY = 0, BARE_LEFT = 1, BARE_RIGHT = 2, BARE_BOTH = 3 };
 
@@ -452,3 +452,5 @@ sptr<KOREPattern>
 addBrackets(sptr<KOREPattern> t, PrettyPrintData const &data) {
   return addBrackets(t, nullptr, nullptr, data);
 }
+
+} // namespace kllvm
