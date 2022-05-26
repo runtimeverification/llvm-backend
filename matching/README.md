@@ -1,8 +1,8 @@
 # LLVM Backend Pattern Matching
 
 The LLVM backend pattern matching algorithm is heavily based on the paper
-"Compiling Pattern Matching to Good Decision Trees" by Luc Maranget. We will
-assume for the purposes of this documentation that the reader has read and
+"Compiling Pattern Matching to Good Decision Trees" by Luc Maranget [1]. We
+will assume for the purposes of this documentation that the reader has read and
 understands that paper in detail, and focus instead primarily on the
 differences between that paper and the final algorithm used by the LLVM
 backend. We will, however, exhaustively cover the preliminary concepts as they
@@ -58,9 +58,18 @@ syntax Pattern ::= Variable // variable patterns
                  | "Map" [(Pattern, Pattern)] Variable // map patterns with a variable
 ```
 
+Variables come in two varieties: anonymous variables, which do not get
+added to the substitution, and named variables, which do get added to the
+substitution. Named variables, when matched, are bound to a particular
+occurrence, which corresponds to a term at runtime. Anonymous variables match
+any pattern, like a named variable, but are not bound to anything.
+
 Note that one restriction not captured by the above grammar is that List, Set,
 and Map patterns with a Variable must have at least one element Pattern.
-Otherwise, they would simply be a variable pattern.
+Otherwise, they would simply be a variable pattern. The reason that `Set [] V`
+is equal to `V` is that it can appear only in a context that expects a set
+sort, which means that `List`, `Map`, or regular constructors cannot appear.
+The same, obviously, is true respectively for lists and maps.
 
 ### Actions
 
@@ -80,21 +89,37 @@ syntax OccurrenceItem ::= Int | "size" | "key" | "value"
                         | "rem" | "iter" | fresh(Int) | pat(Pattern)
 ```
 
+Integers are used to refer to indices within lists and regular terms. `size` is
+used to refer to the output of functions called to compute the size of a
+collection. `key`, `value`, and `rem` are used in the context of map/set
+matching in order to refer to the key and value of maps, the element of sets,
+and the remainder after an element that has been matched has been removed from
+the set. `iter` is used to refer to an iterator for a map or a set. `fresh` is
+used to refer to the output of a side condition on a rule. `pat` is used to
+identify *which* key or value a particular set or map occurrence is in relation
+to.
+
 ### Matrices
 
 A matrix represents an n-row by m-column grid of patterns, plus a *fringe* and
 a *clause list*. The fringe consists of m occurrences and m sorts, one for each
-column. The clause list consists of n clauses, one for each row. A clause C
+column. We call these occurrences for convenience o_1, ..., o_m and the sorts
+s_1, ..., s_m. What actual occurrence corresponds to o_1 depends on what
+occurrence is in the first column of the matrix and will change as the matrix
+transforms. The clause list consists of n clauses, one for each row. A clause C
 consists of an action a, a substitution S (mapping variables to occurrences and
 sorts), a boolean expression Cond (representing the side condition), and a list
-R of type [(Occurrence, Sort, Int, Int)], used to compile list patterns.
+R of type [(Occurrence, Sort, Int, Int)], used to compile list patterns. We
+call R the set of `list ranges` bound by a particular row. This corresponds
+to each variable `L` in a pattern of the form `List ps; L; qs`. We use this
+information to ensure that the correct substitution for L is bound.
 Conceptually, rows of a matrix are sorted into groups, which represent a set of
 rows of equal priority. The notion of priority generalizes the concept from
 Maranget's paper that rows at the top of the matrix apply first if they can,
 and lower rows only apply if the upper rows cannot. Instead, any row in the
 topmost group can apply if it matches, and rows in lower groups only apply if
 no row in an upper group applies. This allows us to improve pattern matching
-efficiency since K does not, for the most part, case what order rules are tried
+efficiency since K does not, for the most part, care what order rules are tried
 in.
 
 Matrices are first simplified to remove or-patterns by replacing each row
@@ -108,8 +133,8 @@ process and whose leaves identify which rewrite rule, if any, applies to the
 term being matched. It has the following BNF-style syntax:
 
 ```
-syntax DT ::= "Failure"
-            | Success(Int, [(Occurrence, Sort)])
+syntax DT ::= "Failure" // Fail in Maranget's paper
+            | Success(Int, [(Occurrence, Sort)]) // Leaf in Maranget's paper
             | Switch(Occurrence, Sort, [(Constructor, DT)], DT?)
             | CheckNull(Occurrence, Sort, DT, DT)
             | Function(Occurrence, Function, [(Occurrence, Sort)], Sort, DT)
@@ -117,11 +142,25 @@ syntax DT ::= "Failure"
             | IterHasNext(Occurrence, Sort, DT, DT)
 ```
 
+We will describe how each decision tree node is used later, but essentially,
+Failure corresponds to the leaf case where no rule is matched, Success
+corresponds to the leaf case where one particular rule is matched, Switch
+corresponds to testing the constructor of a particular pattern, CheckNull
+corresponds to testing whether a particular value is None, Function corresponds
+to calling a particular function and binding the return value into the
+substitution, `Pattern` corresponds to constructing a particular pattern and
+binding it to an occurrence, and `IterHasNext` is very similar to `CheckNull`
+except that it will be used to implement the behavior that backtracks to the
+next element in a map or set in the case where we are iterating through a
+collection testing whether each element will make matching succeed.
+
 ### Heuristics
 
 The only heuristics regularly used by the LLVM backend are `q`, `b`, `a`, and
 the `L` pseudo-heuristic. We will discuss in a later section how these
-heuristics are adapted to the new features of the algorithm.
+heuristics are adapted to the new features of the algorithm. We also discuss
+how we extend the notion of heuristics to deal with the problem of choosing
+in what order to decompose the keys of maps and sets.
 
 ## Compilation
 
@@ -137,6 +176,8 @@ optionally a boolean condition Cond, we compute the initial matrix as follows:
 P starts with one column and n rows. P_i1 = LHS[i]. o_1 = []. s_1 = s.
 C_i = (a_i = i, S_i = empty, Cond_i = Cond[i], R_i = []).
 
+Note that while 
+
 The rows of P are sorted in increasing priority order, where each set of rows
 with the same priority forms a group.
 
@@ -144,7 +185,12 @@ with the same priority forms a group.
 
 `Compile` is a function that takes a Matrix and returns a Decision Tree.
 
-Described below is pseudocode for the function:
+Described below is pseudocode for the function. This essentially corresponds
+exactly to the `CC` function in Maranget's paper, except that rows are grouped
+into groups with equal priority rather than totally ordered, and we explicitly
+handle variables and side conditions. the `decomposeBestCol` function
+essentially corresponds exactly to Maranget's algorithm in the case where the
+sort of the chosen column is a regular sort.
 
 ```
 def compile(Matrix m): DT
@@ -173,10 +219,10 @@ def getLeaf(Row i, DT dt): DT
   val atomicLeaf = Success(a_i, vars)
   if Cond_i is not None:
     val f = a function that evaluates Cond_i
-    val sc = Function(Fresh(a_i), f, vars, Bool, dt)
+    val sc = Function(fresh(a_i), f, vars, Bool, atomicLeaf)
   else:
     val sc = atomicLeaf
-  return foldRanges(R_i, dt)
+  return foldRanges(R_i, sc)
 
 def decomposeBestCol(Matrix m): DT
   choose a column j that is best according to the heuristics
@@ -199,8 +245,11 @@ def compiledDefault(Matrix m, Column j): DT?
   return compile(m')
 ```
 
-Note that we define a wildcard pattern as a variable pattern, or an as pattern
-whose child pattern is a wildcard pattern.
+Here is the definition, inductively, of a wildcard pattern:
+
+* isWildcard(X) = true
+* isWildcard(p as X) = isWildcard(p)
+* isWildcard(_) = false otherwise
 
 `foldRanges`, `decomposeList`, `decomposeMap`, and `decomposeSet` are described
 as part of the sections on list, map, and set matching below.
@@ -209,7 +258,7 @@ as part of the sections on list, map, and set matching below.
 
 `Signature` is a function that takes a column j of a matrix and a sort and
 returns the set of constructors that must be considered when pattern matching
-examines the term correpsonding to o_j.
+examines the term corresponding to o_j.
 
 First we define `Signature` on patterns:
 
@@ -253,7 +302,12 @@ having determined that the term at position o_j has constructor c.
 or transforming it into a new row i', depending on the structure of the pattern
 P_ij.
 
-We define specialize first on rows. We denote `a` as the arity of `c`.
+We define specialize first on rows. We denote `a` as the arity of `c`. Note
+that the cases for variables and regular constructors are essentially
+identical to Maranget's definition of specialize except that we explicitly
+define specialization to occur over any column instead of specifically the
+first column. We also more thoroughly describe the behavior with respect to
+variable bindings.
 
 * specialize(c, i, X) = 
   [P_i1, ..., P_i(j-1), Y_1, ..., Y_a, P_i(j+1), ..., P_im] -> C
@@ -302,7 +356,10 @@ signature(s_j, column j of m).
 or transforming it into a new row i', depending on the structure of the pattern
 P_ij.
 
-We define default first on rows.
+We define default first on rows. Once again, this corresponds more or less
+exactly to Maranget's algorithm except for the inclusion of variable bindings,
+as patterns, and the generalization to any column.
+
 
 * default(i, X) = [P_i1, ..., P_i(j-1), P_i(j+1), ..., P_im] -> C
   where C is the clause of row i except S_i is updated with the binding
@@ -468,7 +525,16 @@ previously, so we also must define this now:
   if s_j is a list sort
   where s_1, ..., s_l are all equal to the element sort of s_j
 
-Now we have to define `decomposeList`:
+Now we have to define `decomposeList`. Roughly speaking, `decomposeList`
+behaves similarly to the default Switch case except it switches over the
+runtime length of the list and makes sure to add bindings for each list element
+being matched on to the substitution. Note that in the case of the default, we
+know that the list must be greater in length than any list pattern in the
+column being decomposed, so we only must decompose maxHead elements from the
+front of the list and maxTail elements from the end, since we can guarantee any
+elements in between will never be referenced by any submatrix. This is the
+reason why we treat the default operation as equivalent to specializing on
+`maxHead + maxTail` elements.
 
 ```
 def decomposeList(Matrix m, Column j): DT
@@ -498,16 +564,6 @@ def listGetEnd(DT dt, Int maxHead, Int len, Occurrence o, Sort s): DT
   val f = the function that returns the lenth element from the end of a list
   return listGetEnd(Function(len+maxHead, f, [(o, s)], s', dt), maxHead, len-1, o, s)
 ```
-
-Roughly speaking, `decomposeList` behaves similarly to the default Switch case
-except it switches over the runtime length of the list and makes sure to add
-bindings for each list element being matched on to the substitution. Note that
-in the case of the default, we know that the list must be greater in length
-than any list pattern in the column being decomposed, so we only must decompose
-maxHead elements from the front of the list and maxTail elements from the end,
-since we can guarantee any elements in between will never be referenced by any
-submatrix. This is the reason why we treat the default operation as equivalent
-to specializing on `maxHead + maxTail` elements.
 
 Finally, we must define `foldRanges`, which handles the R_i sections of a
 clause C. This ensures that a binding for the L variable in list patterns with
@@ -573,7 +629,7 @@ matching fails, at which point we backtrack to the next map element. In the
 worst case, if matching a rule requires n map choices on a map of size m, then
 the complexity of this algorithm is `O(m^n)`. This is, of course, worse than
 the complexity of linear AC matching, which is `O(s*t^3)` where s is the size
-of the pattern and t is the size of the term being matched. However, in
+of the pattern and t is the size of the term being matched [2]. However, in
 practice the algorithm we will describe is quite fast for the vast majority of
 rules written in real-world K semantics, and thus, we have not had much need to
 try to optimize it further. This is generally because most matching either only
@@ -638,11 +694,11 @@ Intuitively, specializing on Empty creates no new columns. Specializing on
 Key(k) creates 3 new columns corresponding to the value bound to key k, the
 remaining map pattern after removing key k, and the original map itself. The
 third category is required because we may test for membership of a key that
-is only present in some rows of the matrix, and thus, for rows that may or maya
-contain that key, we are doing no work and must still specialize on the entire
-remaining map. Finally, specializing on Choice creates 3 new columns as well,
-corresponding to the key patttern, the value pattern, and the remainder of the
-map.
+is only present in some rows of the matrix, and thus, for rows that may or may
+not contain that key, we are doing no work and must still specialize on the
+entire remaining map. Finally, specializing on Choice creates 3 new columns as
+well, corresponding to the key patttern, the value pattern, and the remainder
+of the map.
 
 The reason why specializing on a choice requires the row to be in the topmost
 group is that otherwise, we might fail to match the first key we try when
@@ -791,20 +847,20 @@ the `bestKey` function.
 
 First, we start from the assumption we want to avoid set and map choices
 whenever possible, as these are very expensive. Thus, we define the concept of
-a *valid* or *invalid* column. A column over list or regular sorts is always
-valid. A column over map or set sorts is valid if all of its map patterns are
-of the form Map [], or if there exists a key k in a map pattern in the column
-such that k is bound.
+a *low-cost* or *high-cost* column. A column over list or regular sorts is
+always low-cst. A column over map or set sorts is low-cost if all of its map
+patterns are of the form Map [], or if there exists a key k in a map pattern in
+the column such that k is bound.
 
 We now ought to be able to define the `bestKey` function:
 
 ```
 def bestKey(column j):
-  val validKeys = all keys in column j that are bound
-  if validKeys is empty: 
+  val lowCostKeys = all keys in column j that are bound
+  if lowCostKeys is empty: 
     return Choice
   else:
-    for each key k in validKeys:
+    for each key k in lowCostKeys:
       compute the score of column j according to key k
     return the key with the highest score
 ```
@@ -832,28 +888,50 @@ pattern iff its pattern is not a wildcard pattern in the sense defined in the
 `Compile` section above.
 
 Having defined this, it would seem we will have completely defined the scoring
-mechanism: if any columns are valid, pick the valid column with the highest
-score according to the combined heuristics as applied to the best key of each
-column. Otherwise, pick the invalid column with the higest score in the same
-manner. This minimizes set/map choices while otherwise picking the columns with
-the higest scores.
+mechanism: if any columns are low-cost, pick the low-cost column with the
+highest score according to the combined heuristics as applied to the best key
+of each column. Otherwise, pick the high-cost column with the higest score in
+the same manner. This minimizes set/map choices while otherwise picking the
+columns with the higest scores.
 
-However, we actually soon realize there is a problem. A column may be invalid
+However, we actually soon realize there is a problem. A column may be high-cost
 due to its lack of any keys that are bound, and yet it may still be better for
 the final size of the shared decision tree to pick that column first, before
-some other column which is currently valid. We realize that the case when this
-occurs can actually be very neatly understood using the concept of priority
-inversion. We can think of the columns as tasks with priorities equal to their
-scores, and dependencies such that each invalid column depends on those columns
-which contain variables present in the keys of the first column in the same row
-(ie, decomposing the second column and the columns created by doing so repeatedly
-would eventually add the bindings to S which make the first column valid). It
-then becomes natural to think of the case when a higher priority column depends
-on a lower priority column as a priority inversion. The natural solution to
-priority inversion problems becomes to assign the effective priority of the low
-priority column equal to the highest priority of all the columns that depend on
-it. When we do this, we see that the decision tree algorithm will naturally
-chose columns in the correct order in order to minimize decision tree size.
+some other column which is currently low-cost. We realize that the case when
+this occurs can actually be very neatly understood using the concept of
+priority inversion. We can think of the columns as tasks with priorities equal
+to their scores, and dependencies such that each high-cost column depends on
+those columns which contain variables present in the keys of the first column
+in the same row (ie, decomposing the second column and the columns created by
+doing so repeatedly would eventually add the bindings to S which make the first
+column low-cost). It then becomes natural to think of the case when a higher
+priority column depends on a lower priority column as a priority inversion. The
+natural solution to priority inversion problems becomes to assign the effective
+priority of the low priority column equal to the highest priority of all the
+columns that depend on it. When we do this, we see that the decision tree
+algorithm will naturally chose columns in the correct order in order to
+minimize decision tree size.
+
+Provided below is a simple pseudo-code which can be used to compute the effective score of a column:
+
+```
+def effectiveScore(Column j, Matrix m):
+  bestInvalid = None
+  for column c in m:
+    if c is low-cost:
+      continue
+    if column c needs column j:
+      if bestInvalid is None:
+        bestInvalid = c
+      else if c's score is higher than bestInvalid's score:
+        bestInvalid = c
+  if bestInvalid is None:
+    return j's score
+  else:
+    return bestInvalid's score
+```
+
+A column j needs another column k if there exists a row i in m and a variable X such that X is mentioned in P_ik and X is mentioned in the key of a map or set pattern in P_ij.
 
 ## Iterated Optimization
 
@@ -989,3 +1067,33 @@ Key(k). Care would have to be taken that if the signature of a column in m was
 `[Empty]`, but the signature of the corresponding pattern in `rhs` was
 `Key(k)`, that the matrix first be transformed via the `default` function to 
 remove rows containing empty collections.
+
+One final thing to note is that by itself, the above algorithm generally
+increases the code size of the interpreter binary quite substantially. A 
+large part of this is that some rules, when you call `specializeBy` on them,
+return a matrix that is not much smaller than the original matrix. This leads
+to the property that instead of a linear size in the total decision trees,
+the size is closer to `O(n*m)` where n is the size of the original decision tree
+and m is the number of rules.
+
+The solution we applied to deal with this is to set a threshold heuristic as
+a number between 0 and 1. We then compare the number of rows in the specialized
+matrix to the number of rows in the original matrix, as a fraction. If the
+fraction is larger than the threshold, we say that the matrix does not
+specialize well for this rule, and we simply discard that matrix and the
+resulting decision tree and fall back on constructing the original RHS of the
+rule and using the original decision tree at runtime. We have found that a
+threshold of 1/2 works quite well for us, but this can be increased in order
+to improve the execution speed somewhat, or decreased to decrease the code
+size somewhat. Of course, in either direction you will eventually see
+diminishing returns.
+
+## Citations
+
+[1] Maranget, Luc.
+    "Compiling pattern matching to good decision trees."
+    Proceedings of the 2008 ACM SIGPLAN workshop on ML. 2008.
+
+[2] Benanav, Dan, Deepak Kapur, and Paliath Narendran.
+    "Complexity of matching problems."
+    Journal of symbolic computation 3.1-2 (1987): 203-216.
