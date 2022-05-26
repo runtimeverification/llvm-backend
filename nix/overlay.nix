@@ -15,7 +15,7 @@ let
     '';
   };
 
-  llvmPackages = prev.llvmPackages_10.override {
+  llvmPackages = prev.llvmPackages_12.override {
     bootBintoolsNoLibc = null;
     bootBintools = null;
   };
