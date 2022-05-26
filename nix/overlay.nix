@@ -1,15 +1,19 @@
 final: prev:
 let
-  ttuegel =
-    let
-      src = builtins.fetchGit {
-        url = "https://github.com/ttuegel/nix-lib";
-        rev = "66bb0ab890ff4d828a2dcfc7d5968465d0c7084f";
-        ref = "main";
-      };
-    in import src { inherit (prev) pkgs; };
-
-  cleanedSrc = ttuegel.orElse prev.src (ttuegel.cleanGitSubtree { name = "llvm-backend"; src = ../.; });
+  cleanedSrc = prev.stdenv.mkDerivation {
+    name = "llvm-source";
+    src = prev.lib.cleanSource (prev.nix-gitignore.gitignoreSourcePure [] ../.);
+    dontBuild = true;
+    installPhase = ''
+      mkdir $out
+      cp -rv $src/* $out
+      chmod -R u+w $out
+      mkdir -p $out/deps/immer
+      mkdir -p $out/deps/rapidjson
+      cp -rv ${final.immer-src}/* $out/deps/immer
+      cp -rv ${final.rapidjson-src}/* $out/deps/rapidjson
+    '';
+  };
 
   llvmPackages = prev.llvmPackages_10.override {
     bootBintoolsNoLibc = null;
@@ -32,7 +36,6 @@ let
 
   llvm-backend = prev.callPackage ./llvm-backend.nix {
     inherit llvmPackages;
-    inherit (ttuegel) cleanSourceWith;
     inherit (prev) release;
     host.clang = clang;
     src = cleanedSrc;
@@ -41,7 +44,6 @@ let
   llvm-backend-matching = import ./llvm-backend-matching.nix {
     inherit (prev) mavenix;
     src = cleanedSrc;
-    inherit (ttuegel) cleanSourceWith;
   };
 
   llvm-kompile-testing =
@@ -57,7 +59,7 @@ let
       patchShebangs "$out/bin/llvm-kompile-testing"
     '';
 
-  devShell = final.callPackage ./devShell.nix { };
+  devShell = final.callPackage ./devShell.nix { inherit (prev) mavenix; };
 in {
     inherit llvm-backend llvm-backend-matching llvm-kompile-testing;
     inherit clang; # for compatibility

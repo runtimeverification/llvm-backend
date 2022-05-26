@@ -1,5 +1,5 @@
 {
-  lib, cleanSourceWith, src,
+  lib, src,
   cmake, flex, pkgconfig,
   llvmPackages,
   boost, gmp, jemalloc, libffi, libiconv, libyaml, mpfr, ncurses,
@@ -17,20 +17,7 @@ let
 in
 
 stdenv.mkDerivation {
-  inherit pname version;
-  src =
-    # Avoid spurious rebuilds by ignoring files that don't affect the build.
-    cleanSourceWith {
-      name = "llvm-backend-src";
-      inherit src;
-      ignore =
-        [
-          "/nix" "*.nix" "*.nix.sh"
-          "/.github"
-          "/matching"
-        ];
-    };
-
+  inherit pname version src;
   nativeBuildInputs = [ cmake flex llvm pkgconfig ];
   buildInputs = [ boost libyaml ];
   propagatedBuildInputs =

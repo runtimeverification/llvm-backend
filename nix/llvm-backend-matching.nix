@@ -1,11 +1,7 @@
-{ mavenix, cleanSourceWith, src }:
+{ mavenix, src }:
 
 let self = mavenix.buildMaven {
-  src = cleanSourceWith {
-    name = "llvm-backend-matching-src";
-    inherit src;
-    subDir = "matching";
-  };
+  inherit src;
 
   doCheck = false;
   infoFile = ./llvm-backend-matching.mavenix.lock;
