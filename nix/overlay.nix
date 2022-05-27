@@ -1,20 +1,5 @@
 final: prev:
 let
-  cleanedSrc = prev.stdenv.mkDerivation {
-    name = "llvm-source";
-    src = prev.lib.cleanSource (prev.nix-gitignore.gitignoreSourcePure [] ../.);
-    dontBuild = true;
-    installPhase = ''
-      mkdir $out
-      cp -rv $src/* $out
-      chmod -R u+w $out
-      mkdir -p $out/deps/immer
-      mkdir -p $out/deps/rapidjson
-      cp -rv ${final.immer-src}/* $out/deps/immer
-      cp -rv ${final.rapidjson-src}/* $out/deps/rapidjson
-    '';
-  };
-
   llvmPackages = prev.llvmPackages_12.override {
     bootBintoolsNoLibc = null;
     bootBintools = null;
@@ -37,13 +22,13 @@ let
   llvm-backend = prev.callPackage ./llvm-backend.nix {
     inherit llvmPackages;
     inherit (prev) release;
+    src = prev.llvm-backend-src;
     host.clang = clang;
-    src = cleanedSrc;
   };
 
   llvm-backend-matching = import ./llvm-backend-matching.nix {
     inherit (prev) mavenix;
-    src = cleanedSrc;
+    src = prev.llvm-backend-src;
   };
 
   llvm-kompile-testing =
