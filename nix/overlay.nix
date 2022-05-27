@@ -27,8 +27,8 @@ let
   };
 
   llvm-backend-matching = import ./llvm-backend-matching.nix {
-    inherit (prev) mavenix;
-    src = prev.llvm-backend-src;
+    inherit (prev) buildMaven;
+    src = prev.llvm-backend-matching-src;
   };
 
   llvm-kompile-testing =
@@ -44,9 +44,37 @@ let
       patchShebangs "$out/bin/llvm-kompile-testing"
     '';
 
-  devShell = final.callPackage ./devShell.nix { inherit (prev) mavenix; };
+  llvm-backend-test = prev.stdenv.mkDerivation {
+    name = "llvm-backend-test";
+    src = llvm-backend.src;
+    preferLocalBuild = true;
+    buildInputs = [
+      prev.diffutils # for golden testing
+      prev.lit
+      llvm-kompile-testing # for constructing test input without the frontend
+      llvm-backend # the system under test
+    ];
+    configurePhase = "true";
+    buildPhase = ''
+      runHook preBuild
+
+      LIT_USE_NIX=1 lit -v test
+
+      runHook postBuild
+    '';
+    installPhase = ''
+      runHook preInstall
+
+      mkdir -p "$out"
+      cp -a -t "$out" .
+
+      runHook postInstall
+    '';
+  };
+
+  devShell = prev.callPackage ./devShell.nix { inherit (prev) mavenix-cli; };
 in {
-    inherit llvm-backend llvm-backend-matching llvm-kompile-testing;
+    inherit llvm-backend llvm-backend-matching llvm-backend-test;
     inherit clang; # for compatibility
     inherit devShell; # for CI
 }

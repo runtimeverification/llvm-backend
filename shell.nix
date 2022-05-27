@@ -8,4 +8,7 @@ let
 in { pkgs ? pinned }:
 
 let default = import ./. { inherit pkgs; };
-in default.devShell
+in import ./nix/devShell.nix {
+  inherit (pkgs) mkShell;
+  inherit (default) llvm-backend llvm-backend-matching mavenix-cli;
+}

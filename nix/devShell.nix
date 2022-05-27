@@ -1,7 +1,7 @@
 { mkShell
 , llvm-backend
 , llvm-backend-matching
-, mavenix
+, mavenix-cli
 }:
 
 mkShell {
@@ -11,6 +11,6 @@ mkShell {
   ];
 
   nativeBuildInputs = [
-    mavenix.cli
+    mavenix-cli
   ];
 }

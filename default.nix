@@ -33,23 +33,35 @@ let
       (final: prev:
         let
           ttuegel = import sources."ttuegel" { inherit (prev) pkgs; };
+          # Avoid spurious rebuilds by ignoring files that don't affect the build.
+          mavenix = import sources."mavenix" { inherit (prev) pkgs; };
         in {
           inherit release;
-          mavenix = import sources."mavenix" { inherit (prev) pkgs; };
+          inherit (mavenix) buildMaven;
+          mavenix-cli = mavenix.cli;
 
-          # Avoid spurious rebuilds by ignoring files that don't affect the build.
           llvm-backend-src = ttuegel.orElse src ttuegel.cleanSourceWith {
             name = "llvm-backend-src";
             src = ./.;
             ignore = [ "/nix" "*.nix" "*.nix.sh" "/.github" ];
           };
+
+          llvm-backend-matching-src = ttuegel.cleanSourceWith {
+            name = "llvm-backend-matching-src";
+            src = ttuegel.orElse src (ttuegel.cleanGitSubtree {
+              name = "llvm-backend-src";
+              src = ./.;
+            });
+            subDir = "matching";
+          };
+
         })
       localOverlay
     ];
   };
 in {
-  inherit (localPkgs) llvm-backend llvm-backend-matching llvm-kompile-testing;
+  inherit (localPkgs) llvm-backend llvm-backend-matching llvm-backend-test;
   inherit (localPkgs) clang; # for compatibility
-  inherit (localPkgs) mavenix devShell; # for CI
+  inherit (localPkgs) mavenix-cli; # for CI
 }
 

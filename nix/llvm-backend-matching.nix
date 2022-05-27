@@ -1,6 +1,6 @@
-{ mavenix, src }:
+{ buildMaven, src }:
 
-let self = mavenix.buildMaven {
+let self = buildMaven {
   inherit src;
 
   doCheck = false;
