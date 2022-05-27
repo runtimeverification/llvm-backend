@@ -38,9 +38,9 @@ let
           mavenix = import sources."mavenix" { inherit (prev) pkgs; };
 
           # Avoid spurious rebuilds by ignoring files that don't affect the build.
-          llvm-backend-src = ttuegel.cleanSourceWith {
+          llvm-backend-src = ttuegel.orElse src ttuegel.cleanSourceWith {
             name = "llvm-backend-src";
-            inherit src;
+            src = ./.;
             ignore = [ "/nix" "*.nix" "*.nix.sh" "/.github" ];
           };
         })

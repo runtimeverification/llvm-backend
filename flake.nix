@@ -23,7 +23,7 @@
         llvm-backend-src = prev.stdenv.mkDerivation {
           name = "llvm-backend-src";
           src = prev.lib.cleanSource
-            (prev.nix-gitignore.gitignoreSourcePure [ ] ../.);
+            (prev.nix-gitignore.gitignoreSourcePure [ ] ./.);
           dontBuild = true;
           installPhase = ''
             mkdir $out
