@@ -176,8 +176,6 @@ optionally a boolean condition Cond, we compute the initial matrix as follows:
 P starts with one column and n rows. P_i1 = LHS[i]. o_1 = []. s_1 = s.
 C_i = (a_i = i, S_i = empty, Cond_i = Cond[i], R_i = []).
 
-Note that while 
-
 The rows of P are sorted in increasing priority order, where each set of rows
 with the same priority forms a group.
 
