@@ -1,11 +1,11 @@
 let
   sources = import ./nix/sources.nix;
-  pinned = import sources."nixpkgs" { config = {}; overlays = []; };
-in
+  pinned = import sources."nixpkgs" {
+    config = { };
+    overlays = [ ];
+  };
 
-{ pkgs ? pinned }:
+in { pkgs ? pinned }:
 
-let
-  default = import ./. { inherit pkgs; };
-in
-  default.devShell
+let default = import ./. { inherit pkgs; };
+in default.devShell
