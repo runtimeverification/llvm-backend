@@ -60,7 +60,7 @@ let
     ];
   };
 in {
-  inherit (localPkgs) llvm-backend llvm-backend-matching llvm-backend-test;
+  inherit (localPkgs) llvm-backend llvm-backend-matching integration-tests;
   inherit (localPkgs) clang; # for compatibility
   inherit (localPkgs) mavenix-cli; # for CI
 }

@@ -13,5 +13,5 @@ let
 
   default = import ./. { inherit pkgs; };
 
-in default.llvm-backend-test
+in default.integration-tests
 
