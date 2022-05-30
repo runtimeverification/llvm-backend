@@ -1,35 +1,41 @@
 final: prev:
 let
-
   llvmPackages = prev.llvmPackages_13.override {
     bootBintoolsNoLibc = null;
     bootBintools = null;
   };
 
-  clang = llvmPackages.libcxxClang.overrideAttrs (old: {
-      # Hack from https://github.com/NixOS/nixpkgs/issues/166205 for macOS
-      postFixup = old.postFixup + ''
-        echo "-lc++abi" >> $out/nix-support/libcxx-ldflags
-      '';
-    });
+  clang = if !llvmPackages.stdenv.targetPlatform.isDarwin 
+    then 
+      llvmPackages.clangNoLibcxx.override (attrs: {
+        extraBuildCommands = ''
+          ${attrs.extraBuildCommands}
+          sed -i $out/nix-support/cc-cflags -e '/^-nostdlib/ d'
+        '';
+      })
+    else
+      llvmPackages.libcxxClang.overrideAttrs (old: {
+        # Hack from https://github.com/NixOS/nixpkgs/issues/166205 for macOS
+        postFixup = old.postFixup + ''
+          echo "-lc++abi" >> $out/nix-support/libcxx-ldflags
+        '';
+      });
 
   jemalloc = prev.jemalloc.overrideDerivation (oldAttrs: rec {
-    # Some for jemalloc fail on the M1! Our tests seem to pass but this may be flaky
+    # Some tests for jemalloc fail on the M1! Our tests seem to pass but this may be flaky
     doCheck = false;
     stdenv = prev.stdenv;
   });
 
-
   llvm-backend = prev.callPackage ./llvm-backend.nix {
     inherit (llvmPackages) llvm libllvm;
-    # Needed for compiling on M1 Mac
     stdenv = if !llvmPackages.stdenv.targetPlatform.isDarwin 
       then llvmPackages.stdenv
       else prev.overrideCC llvmPackages.stdenv clang;
     inherit (prev) release;
     src = prev.llvm-backend-src;
     inherit jemalloc;
-    host.clang = prev.clang;
+    host.clang = clang;
   };
 
   llvm-backend-matching = import ./llvm-backend-matching.nix {
