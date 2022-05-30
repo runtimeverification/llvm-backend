@@ -1,29 +1,35 @@
 final: prev:
 let
-  llvmPackages = prev.llvmPackages_10.override {
+
+  llvmPackages = prev.llvmPackages_13.override {
     bootBintoolsNoLibc = null;
     bootBintools = null;
   };
 
-  # The backend requires clang/lld/libstdc++ at runtime.
-  # The closest configuration in Nixpkgs is clang/lld without any C++ standard
-  # library. We override that configuration to inherit libstdc++ from stdenv.
-  clang =
-    let
-      override = attrs: {
-        extraBuildCommands = ''
-          ${attrs.extraBuildCommands}
-          sed -i $out/nix-support/cc-cflags -e '/^-nostdlib/ d'
-        '';
-      };
-    in
-      llvmPackages.clangNoLibcxx.override override;
+  clang = llvmPackages.libcxxClang.overrideAttrs (old: {
+      # Hack from https://github.com/NixOS/nixpkgs/issues/166205 for macOS
+      postFixup = old.postFixup + ''
+        echo "-lc++abi" >> $out/nix-support/libcxx-ldflags
+      '';
+    });
+
+  jemalloc = prev.jemalloc.overrideDerivation (oldAttrs: rec {
+    # Some for jemalloc fail on the M1! Our tests seem to pass but this may be flaky
+    doCheck = false;
+    stdenv = prev.stdenv;
+  });
+
 
   llvm-backend = prev.callPackage ./llvm-backend.nix {
-    inherit llvmPackages;
+    inherit (llvmPackages) llvm libllvm;
+    # Needed for compiling on M1 Mac
+    stdenv = if !llvmPackages.stdenv.targetPlatform.isDarwin 
+      then llvmPackages.stdenv
+      else prev.overrideCC llvmPackages.stdenv clang;
     inherit (prev) release;
     src = prev.llvm-backend-src;
-    host.clang = clang;
+    inherit jemalloc;
+    host.clang = prev.clang;
   };
 
   llvm-backend-matching = import ./llvm-backend-matching.nix {
@@ -44,8 +50,8 @@ let
       patchShebangs "$out/bin/llvm-kompile-testing"
     '';
 
-  llvm-backend-test = prev.stdenv.mkDerivation {
-    name = "llvm-backend-test";
+  integration-tests = prev.stdenv.mkDerivation {
+    name = "llvm-backend-integration-tests";
     src = llvm-backend.src;
     preferLocalBuild = true;
     buildInputs = [
@@ -71,10 +77,9 @@ let
       runHook postInstall
     '';
   };
-
-  devShell = prev.callPackage ./devShell.nix { inherit (prev) mavenix-cli; };
+  devShell = prev.callPackage ./devShell.nix { };
 in {
-    inherit llvm-backend llvm-backend-matching llvm-backend-test;
-    inherit clang; # for compatibility
+    inherit llvm-backend llvm-backend-matching integration-tests;
+    inherit (prev) clang; # for compatibility
     inherit devShell; # for CI
 }

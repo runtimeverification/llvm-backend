@@ -1,15 +1,13 @@
 {
   lib, src,
   cmake, flex, pkgconfig,
-  llvmPackages,
+  llvm, libllvm, stdenv,
   boost, gmp, jemalloc, libffi, libiconv, libyaml, mpfr, ncurses,
   # Runtime dependencies:
   host,
   # Options:
   release ? false  # optimized release build, currently: LTO
 }:
-
-let inherit (llvmPackages) stdenv llvm; in
 
 let
   pname = "llvm-backend";
@@ -33,7 +31,7 @@ stdenv.mkDerivation {
     ''-DCMAKE_C_COMPILER=${lib.getBin stdenv.cc}/bin/cc''
     ''-DCMAKE_CXX_COMPILER=${lib.getBin stdenv.cc}/bin/c++''
     ''-DLLVM_CLANG_PATH=${lib.getBin host.clang}/bin/clang''
-    ''-DLLVM_CONFIG_PATH=${lib.getBin llvmPackages.libllvm.dev}/bin/llvm-config''
+    ''-DLLVM_CONFIG_PATH=${lib.getBin libllvm.dev}/bin/llvm-config''
     ''-DUSE_NIX=TRUE''
     ''-DCMAKE_SKIP_BUILD_RPATH=FALSE''
     ''-DBUILD_TESTS=True''
