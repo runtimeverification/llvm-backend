@@ -1,9 +1,11 @@
 let
   sources = import ./nix/sources.nix;
-  pinned = import sources."nixpkgs" { config = {}; overlays = []; };
-in
+  pinned = import sources."nixpkgs" {
+    config = { };
+    overlays = [ ];
+  };
 
-{ pkgs ? pinned }:
+in { pkgs ? pinned }:
 
 let
   inherit (pkgs) stdenv;
@@ -12,17 +14,15 @@ let
   default = import ./. { inherit pkgs; };
   inherit (default) llvm-backend llvm-kompile-testing;
 
-in
-
-stdenv.mkDerivation {
+in stdenv.mkDerivation {
   name = "llvm-backend-test";
   src = llvm-backend.src;
   preferLocalBuild = true;
   buildInputs = [
-    diffutils  # for golden testing
+    diffutils # for golden testing
     pkgs.lit
-    llvm-kompile-testing  # for constructing test input without the frontend
-    llvm-backend  # the system under test
+    llvm-kompile-testing # for constructing test input without the frontend
+    llvm-backend # the system under test
   ];
   configurePhase = "true";
   buildPhase = ''
