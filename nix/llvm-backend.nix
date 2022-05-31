@@ -1,25 +1,40 @@
-{ lib, src, git, cmake, flex, pkgconfig, llvm, libllvm, stdenv, boost, gmp, jemalloc
+{ lib, src, makeWrapper, cmake, flex, pkgconfig, llvm, libllvm, stdenv, boost, gmp, jemalloc
 , libffi, libiconv, libyaml, mpfr, ncurses,
 # Runtime dependencies:
 host,
 # Options:
 release ? false # optimized release build, currently: LTO
 }:
-
+let
+    propagatedBuildInputs = [ gmp jemalloc libffi mpfr ncurses ]
+    ++ lib.optional stdenv.isDarwin libiconv;
+  in
 stdenv.mkDerivation {
   pname = "llvm-backend";
   version = "0";
-  inherit src;
+  inherit src propagatedBuildInputs;
   
-  nativeBuildInputs = [ cmake flex llvm pkgconfig ];
+  nativeBuildInputs = [ cmake flex llvm pkgconfig makeWrapper ];
   buildInputs = [ boost libyaml ];
-  propagatedBuildInputs = [ gmp jemalloc libffi mpfr ncurses ]
-    ++ lib.optional stdenv.isDarwin libiconv;
+  
 
   postPatch = ''
     sed -i bin/llvm-kompile \
       -e '2a export PATH="${lib.getBin host.clang}/bin:''${PATH}"'
+
+    substituteInPlace bin/llvm-kompile-clang \
+      --replace '"-lgmp"' '"-L${gmp}/lib" "-lgmp"' \
+      --replace '"-lmpfr"' '"-L${mpfr}/lib" "-lmpfr"' \
+      --replace '"-lffi"' '"-L${libffi}/lib" "-lffi"' \
+      --replace '"-ljemalloc"' '"-L${jemalloc}/lib" "-ljemalloc"' \
+      --replace '"-liconv"' '"-L${libiconv}/lib" "-liconv"' \
+      --replace '"-lncurses"' '"-L${ncurses}/lib" "-lncurses"' \
+      --replace '"-ltinfo"' '"-L${ncurses}/lib" "-ltinfo"'
   '';
+
+  # sed -i bin/llvm-kompile-clang \
+  #     -e 's/all_libraries=("''${libraries\[@\]}"/all_libraries=("''${libraries[@]}" ${lib.concatMapStringsSep " " (pth: "\"-L${pth}/lib\"")  propagatedBuildInputs}/g'
+
 
   cmakeFlags = [
     "-DCMAKE_C_COMPILER=${lib.getBin stdenv.cc}/bin/cc"
