@@ -1,25 +1,19 @@
-{
-  lib, src,
-  cmake, flex, pkgconfig,
-  llvm, libllvm, stdenv,
-  boost, gmp, jemalloc, libffi, libiconv, libyaml, mpfr, ncurses,
-  # Runtime dependencies:
-  host,
-  # Options:
-  release ? false  # optimized release build, currently: LTO
+{ lib, src, git, cmake, flex, pkgconfig, llvm, libllvm, stdenv, boost, gmp, jemalloc
+, libffi, libiconv, libyaml, mpfr, ncurses,
+# Runtime dependencies:
+host,
+# Options:
+release ? false # optimized release build, currently: LTO
 }:
 
-let
+stdenv.mkDerivation {
   pname = "llvm-backend";
   version = "0";
-in
-
-stdenv.mkDerivation {
-  inherit pname version src;
+  inherit src;
+  
   nativeBuildInputs = [ cmake flex llvm pkgconfig ];
   buildInputs = [ boost libyaml ];
-  propagatedBuildInputs =
-    [ gmp jemalloc libffi mpfr ncurses ]
+  propagatedBuildInputs = [ gmp jemalloc libffi mpfr ncurses ]
     ++ lib.optional stdenv.isDarwin libiconv;
 
   postPatch = ''
@@ -28,13 +22,13 @@ stdenv.mkDerivation {
   '';
 
   cmakeFlags = [
-    ''-DCMAKE_C_COMPILER=${lib.getBin stdenv.cc}/bin/cc''
-    ''-DCMAKE_CXX_COMPILER=${lib.getBin stdenv.cc}/bin/c++''
-    ''-DLLVM_CLANG_PATH=${lib.getBin host.clang}/bin/clang''
-    ''-DLLVM_CONFIG_PATH=${lib.getBin libllvm.dev}/bin/llvm-config''
-    ''-DUSE_NIX=TRUE''
-    ''-DCMAKE_SKIP_BUILD_RPATH=FALSE''
-    ''-DBUILD_TESTS=True''
+    "-DCMAKE_C_COMPILER=${lib.getBin stdenv.cc}/bin/cc"
+    "-DCMAKE_CXX_COMPILER=${lib.getBin stdenv.cc}/bin/c++"
+    "-DLLVM_CLANG_PATH=${lib.getBin host.clang}/bin/clang"
+    "-DLLVM_CONFIG_PATH=${lib.getBin libllvm.dev}/bin/llvm-config"
+    "-DUSE_NIX=TRUE"
+    "-DCMAKE_SKIP_BUILD_RPATH=FALSE"
+    "-DBUILD_TESTS=True"
   ];
 
   cmakeBuildType = if release then "Release" else "FastBuild";
@@ -56,7 +50,5 @@ stdenv.mkDerivation {
     runHook postCheck
   '';
 
-  passthru = {
-    inherit (host) clang;
-  };
+  passthru = { inherit (host) clang; };
 }

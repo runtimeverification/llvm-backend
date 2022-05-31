@@ -46,10 +46,10 @@
       llvm-backend-overlay =
         nixpkgs.lib.composeManyExtensions [ depsOverlay localOverlay ];
 
-      pkgsForSystem = system: release:
+      pkgsForSystem = system: llvm-backend-release:
         import nixpkgs {
           overlays = [
-            (_: _: { inherit release; })
+            (_: _: { inherit llvm-backend-release; })
             mavenix.overlay
             llvm-backend-overlay
           ];
@@ -61,18 +61,17 @@
       "x86_64-darwin"
       "aarch64-darwin"
     ] (system:
-      let legacyPackagesRelease = pkgsForSystem system true;
-      in rec {
-        legacyPackages = pkgsForSystem system false;
-
+      let
+        packagesRelease = pkgsForSystem system true;
+        packages = pkgsForSystem system false;
+      in {
         packages = utils.lib.flattenTree {
-          inherit (legacyPackages)
-            llvm-backend llvm-backend-matching mavenix-cli;
-          llvm-backend-release = legacyPackagesRelease.llvm-backend;
-          default = legacyPackagesRelease.llvm-backend;
+          inherit (packages) llvm-backend llvm-backend-matching;
+          llvm-backend-release = packagesRelease.llvm-backend;
+          default = packagesRelease.llvm-backend;
         };
-        checks = { inherit (legacyPackages) integration-tests; };
-        devShells.default = legacyPackages.devShell;
+        checks = { inherit (packages) integration-tests; };
+        devShells.default = packages.devShell;
       }) // {
         # non-system suffixed items should go here
         overlays.default = llvm-backend-overlay;

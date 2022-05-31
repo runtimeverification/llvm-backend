@@ -32,7 +32,7 @@ let
       llvmPackages.stdenv
     else
       prev.overrideCC llvmPackages.stdenv clang;
-    inherit (prev) release;
+    release = prev.llvm-backend-release;
     src = prev.llvm-backend-src;
     inherit jemalloc;
     host.clang = clang;
