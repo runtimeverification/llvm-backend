@@ -1,4 +1,4 @@
-{ lib, src, makeWrapper, cmake, flex, pkgconfig, llvm, libllvm, stdenv, boost, gmp, jemalloc
+{ lib, src, cmake, flex, pkgconfig, llvm, libllvm, stdenv, boost, gmp, jemalloc
 , libffi, libiconv, libyaml, mpfr, ncurses,
 # Runtime dependencies:
 host,
@@ -14,7 +14,7 @@ stdenv.mkDerivation {
   version = "0";
   inherit src propagatedBuildInputs;
   
-  nativeBuildInputs = [ cmake flex llvm pkgconfig makeWrapper ];
+  nativeBuildInputs = [ cmake flex llvm pkgconfig ];
   buildInputs = [ boost libyaml ];
   
 
