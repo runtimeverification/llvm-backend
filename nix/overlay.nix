@@ -5,21 +5,20 @@ let
     bootBintools = null;
   };
 
-  clang = if !llvmPackages.stdenv.targetPlatform.isDarwin 
-    then 
-      llvmPackages.clangNoLibcxx.override (attrs: {
-        extraBuildCommands = ''
-          ${attrs.extraBuildCommands}
-          sed -i $out/nix-support/cc-cflags -e '/^-nostdlib/ d'
-        '';
-      })
-    else
-      llvmPackages.libcxxClang.overrideAttrs (old: {
-        # Hack from https://github.com/NixOS/nixpkgs/issues/166205 for macOS
-        postFixup = old.postFixup + ''
-          echo "-lc++abi" >> $out/nix-support/libcxx-ldflags
-        '';
-      });
+  clang = if !llvmPackages.stdenv.targetPlatform.isDarwin then
+    llvmPackages.clangNoLibcxx.override (attrs: {
+      extraBuildCommands = ''
+        ${attrs.extraBuildCommands}
+        sed -i $out/nix-support/cc-cflags -e '/^-nostdlib/ d'
+      '';
+    })
+  else
+    llvmPackages.libcxxClang.overrideAttrs (old: {
+      # Hack from https://github.com/NixOS/nixpkgs/issues/166205 for macOS
+      postFixup = old.postFixup + ''
+        echo "-lc++abi" >> $out/nix-support/libcxx-ldflags
+      '';
+    });
 
   jemalloc = prev.jemalloc.overrideDerivation (oldAttrs: rec {
     # Some tests for jemalloc fail on the M1! Our tests seem to pass but this may be flaky
@@ -29,9 +28,10 @@ let
 
   llvm-backend = prev.callPackage ./llvm-backend.nix {
     inherit (llvmPackages) llvm libllvm;
-    stdenv = if !llvmPackages.stdenv.targetPlatform.isDarwin 
-      then llvmPackages.stdenv
-      else prev.overrideCC llvmPackages.stdenv clang;
+    stdenv = if !llvmPackages.stdenv.targetPlatform.isDarwin then
+      llvmPackages.stdenv
+    else
+      prev.overrideCC llvmPackages.stdenv clang;
     inherit (prev) release;
     src = prev.llvm-backend-src;
     inherit jemalloc;
@@ -43,18 +43,18 @@ let
     src = prev.llvm-backend-matching-src;
   };
 
-  llvm-kompile-testing =
-    let inherit (prev.pkgs) runCommandNoCC jre;
-        java = "${jre}/bin/java";
-        inherit (llvm-backend-matching) jar;
-    in runCommandNoCC "llvm-kompile-testing" { } ''
-      mkdir -p "$out/bin"
-      cp ${llvm-backend.src}/bin/llvm-kompile-testing "$out/bin"
-      sed -i "$out/bin/llvm-kompile-testing" \
-          -e '/@PROJECT_SOURCE_DIR@/ c ${java} -jar ${jar} $definition qbaL $dt_dir 1'
-      chmod +x "$out/bin/llvm-kompile-testing"
-      patchShebangs "$out/bin/llvm-kompile-testing"
-    '';
+  llvm-kompile-testing = let
+    inherit (prev.pkgs) runCommandNoCC jre;
+    java = "${jre}/bin/java";
+    inherit (llvm-backend-matching) jar;
+  in runCommandNoCC "llvm-kompile-testing" { } ''
+    mkdir -p "$out/bin"
+    cp ${llvm-backend.src}/bin/llvm-kompile-testing "$out/bin"
+    sed -i "$out/bin/llvm-kompile-testing" \
+        -e '/@PROJECT_SOURCE_DIR@/ c ${java} -jar ${jar} $definition qbaL $dt_dir 1'
+    chmod +x "$out/bin/llvm-kompile-testing"
+    patchShebangs "$out/bin/llvm-kompile-testing"
+  '';
 
   integration-tests = prev.stdenv.mkDerivation {
     name = "llvm-backend-integration-tests";
@@ -85,7 +85,7 @@ let
   };
   devShell = prev.callPackage ./devShell.nix { };
 in {
-    inherit llvm-backend llvm-backend-matching integration-tests;
-    inherit (prev) clang; # for compatibility
-    inherit devShell; # for CI
+  inherit llvm-backend llvm-backend-matching integration-tests;
+  inherit (prev) clang; # for compatibility
+  inherit devShell; # for CI
 }
