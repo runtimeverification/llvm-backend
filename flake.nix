@@ -68,7 +68,7 @@
         packages = utils.lib.flattenTree {
           inherit (packages) llvm-backend llvm-backend-matching;
           llvm-backend-release = packagesRelease.llvm-backend;
-          default = packagesRelease.llvm-backend;
+          default = packages.llvm-backend;
         };
         checks = { inherit (packages) integration-tests; };
         devShells.default = packages.devShell;

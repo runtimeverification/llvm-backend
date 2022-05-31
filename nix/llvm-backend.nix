@@ -1,22 +1,19 @@
-{ lib, src, cmake, flex, pkgconfig, llvm, libllvm, libcxxabi, stdenv, boost, gmp, jemalloc
-, libffi, libiconv, libyaml, mpfr, ncurses,
+{ lib, src, cmake, flex, pkgconfig, llvm, libllvm, libcxxabi, stdenv, boost, gmp
+, jemalloc, libffi, libiconv, libyaml, mpfr, ncurses,
 # Runtime dependencies:
 host,
 # Options:
 release ? false # optimized release build, currently: LTO
 }:
-let
-    propagatedBuildInputs = [ gmp jemalloc libffi mpfr ncurses ]
-    ++ lib.optional stdenv.isDarwin libiconv;
-  in
 stdenv.mkDerivation {
   pname = "llvm-backend";
   version = "0";
-  inherit src propagatedBuildInputs;
-  
+  inherit src;
+
   nativeBuildInputs = [ cmake flex llvm pkgconfig ];
   buildInputs = [ boost libyaml ];
-  
+  propagatedBuildInputs = [ gmp jemalloc libffi mpfr ncurses ]
+    ++ lib.optional stdenv.isDarwin libiconv;
 
   postPatch = ''
     sed -i bin/llvm-kompile \
@@ -33,8 +30,6 @@ stdenv.mkDerivation {
       --replace '"-L@BREW_PREFIX@/opt/libffi/lib"' ' ' \
       --replace '-L@BREW_PREFIX@/lib' '-L${libcxxabi}/lib'
   '';
-
-
 
   cmakeFlags = [
     "-DCMAKE_C_COMPILER=${lib.getBin stdenv.cc}/bin/cc"
