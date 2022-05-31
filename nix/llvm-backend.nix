@@ -1,4 +1,4 @@
-{ lib, src, cmake, flex, pkgconfig, llvm, libllvm, stdenv, boost, gmp, jemalloc
+{ lib, src, cmake, flex, pkgconfig, llvm, libllvm, libcxxabi, stdenv, boost, gmp, jemalloc
 , libffi, libiconv, libyaml, mpfr, ncurses,
 # Runtime dependencies:
 host,
@@ -29,11 +29,11 @@ stdenv.mkDerivation {
       --replace '"-ljemalloc"' '"-L${jemalloc}/lib" "-ljemalloc"' \
       --replace '"-liconv"' '"-L${libiconv}/lib" "-liconv"' \
       --replace '"-lncurses"' '"-L${ncurses}/lib" "-lncurses"' \
-      --replace '"-ltinfo"' '"-L${ncurses}/lib" "-ltinfo"'
+      --replace '"-ltinfo"' '"-L${ncurses}/lib" "-ltinfo"' \
+      --replace '"-L@BREW_PREFIX@/opt/libffi/lib"' ' ' \
+      --replace '-L@BREW_PREFIX@/lib' '-L${libcxxabi}/lib'
   '';
 
-  # sed -i bin/llvm-kompile-clang \
-  #     -e 's/all_libraries=("''${libraries\[@\]}"/all_libraries=("''${libraries[@]}" ${lib.concatMapStringsSep " " (pth: "\"-L${pth}/lib\"")  propagatedBuildInputs}/g'
 
 
   cmakeFlags = [

@@ -27,7 +27,7 @@ let
   });
 
   llvm-backend = prev.callPackage ./llvm-backend.nix {
-    inherit (llvmPackages) llvm libllvm;
+    inherit (llvmPackages) llvm libllvm libcxxabi;
     stdenv = if !llvmPackages.stdenv.targetPlatform.isDarwin then
       llvmPackages.stdenv
     else
