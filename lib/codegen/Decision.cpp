@@ -625,7 +625,7 @@ void makeEvalOrAnywhereFunction(
   function->print(Out2, 0, false);
   std::string name = "eval_" + Out2.str();
   llvm::Function *matchFunc = getOrInsertFunction(module, name, funcType);
-  matchFunc->setGC("statepoint-example");
+  matchFunc->setGC("koregc");
   KORESymbolDeclaration *symbolDecl
       = definition->getSymbolDeclarations().at(function->getName());
   initDebugAxiom(symbolDecl->getAttributes());
@@ -813,7 +813,7 @@ void makeStepFunction(
     funcType = llvm::FunctionType::get(blockType, {blockType}, false);
   }
   llvm::Function *matchFunc = getOrInsertFunction(module, name, funcType);
-  matchFunc->setGC("statepoint-example");
+  matchFunc->setGC("koregc");
   resetDebugLoc();
   if (search) {
     initDebugFunction(
@@ -871,7 +871,7 @@ void makeMatchReasonFunction(
       llvm::Type::getVoidTy(module->getContext()), {blockType}, false);
   std::string name = "match_" + std::to_string(axiom->getOrdinal());
   llvm::Function *matchFunc = getOrInsertFunction(module, name, funcType);
-  matchFunc->setGC("statepoint-example");
+  matchFunc->setGC("koregc");
   std::string debugName = name;
   if (axiom->getAttributes().count("label")) {
     debugName = axiom->getStringAttribute("label") + ".match";
@@ -988,7 +988,7 @@ void makeStepFunction(
       = llvm::FunctionType::get(blockType, argTypes, false);
   std::string name = "step_" + std::to_string(axiom->getOrdinal());
   llvm::Function *matchFunc = getOrInsertFunction(module, name, funcType);
-  matchFunc->setGC("statepoint-example");
+  matchFunc->setGC("koregc");
   resetDebugLoc();
   initDebugFunction(
       name, name, getDebugFunctionType(blockDebugType, debugTypes), definition,

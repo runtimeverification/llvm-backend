@@ -1181,7 +1181,7 @@ bool makeFunction(
   llvm::FunctionType *funcType
       = llvm::FunctionType::get(returnType, paramTypes, false);
   llvm::Function *applyRule = getOrInsertFunction(Module, name, funcType);
-  applyRule->setGC("statepoint-example");
+  applyRule->setGC("koregc");
   initDebugAxiom(axiom->getAttributes());
   std::string debugName = name;
   if (axiom->getAttributes().count("label")) {
@@ -1295,7 +1295,7 @@ std::string makeApplyRuleFunction(
       false, axiom, ".rhs");
 
   llvm::Function *applyRule = getOrInsertFunction(Module, name, funcType);
-  applyRule->setGC("statepoint-example");
+  applyRule->setGC("koregc");
   initDebugAxiom(axiom->getAttributes());
   initDebugFunction(
       name, name,

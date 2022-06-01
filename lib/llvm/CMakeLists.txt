@@ -1,5 +1,6 @@
 add_library(LLVMPass MODULE
   EmitGCLayoutInfo.cpp
+  KoreGC.cpp
   MarkTailCallsAsGCLeaf.cpp
   NoOmitFramePointerForTailcc.cpp
 )
