@@ -31,6 +31,7 @@ void parseStackMap(void);
 struct gc_relocation {
   layoutitem base;
   uint64_t derived_offset;
+  uint16_t dwarf_regnum;
 };
 
 extern std::map<void *, std::vector<gc_relocation>> StackMap;

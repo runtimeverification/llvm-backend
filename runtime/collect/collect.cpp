@@ -306,25 +306,31 @@ static std::vector<gc_root> scanStackRoots(void) {
   std::vector<gc_root> gc_roots;
 
   while (unw_step(&cursor)) {
-    unw_word_t ip_word, sp_word;
+    unw_word_t ip_word, sp_word, bp_word;
 
     unw_get_reg(&cursor, UNW_REG_IP, &ip_word);
     unw_get_reg(&cursor, UNW_REG_SP, &sp_word);
+    unw_get_reg(&cursor, UNW_X86_64_RBP, &bp_word);
 
-    void *ip, *sp;
+    void *ip, *sp, *bp;
     ip = (void *)ip_word;
     sp = (void *)sp_word;
+    bp = (void *)bp_word;
 
     if (StackMap.count(ip)) {
       std::vector<gc_relocation> &Relocs = StackMap[ip];
-      std::set<uint64_t> seen;
+      std::set<std::pair<uint16_t, uint64_t>> seen;
+      //std::set<uint64_t> seen;
       for (auto &Reloc : Relocs) {
-        bool newBasePtr = seen.insert(Reloc.base.offset).second;
+        bool newBasePtr = seen.insert(std::make_pair(Reloc.dwarf_regnum, Reloc.base.offset)).second;
+        //bool newBasePtr = seen.insert(Reloc.base.offset).second;
         if (newBasePtr || Reloc.derived_offset != Reloc.base.offset) {
-          char **base_ptr = (char **)(((char *)sp) + Reloc.base.offset);
-          char **derived_ptr = (char **)(((char *)sp) + Reloc.derived_offset);
+          void *frame_reg = Reloc.dwarf_regnum == UNW_REG_SP ? sp : bp;
+          char **base_ptr = (char **)(((char *)frame_reg) + Reloc.base.offset);
+          char **derived_ptr = (char **)(((char *)frame_reg) + Reloc.derived_offset);
           ptrdiff_t derived_offset = *derived_ptr - *base_ptr;
           if (derived_offset != 0) {
+            //assert(Reloc.base.cat == SYMBOL_LAYOUT);
             gc_roots.push_back(
                 {base_ptr, derived_ptr, SYMBOL_LAYOUT, derived_offset,
                  newBasePtr});

@@ -1,6 +1,10 @@
 #include <map>
+//#include <iostream>
 
 #include "runtime/collect.h"
+
+#define UNW_LOCAL_ONLY
+#include <libunwind.h>
 
 extern "C" {
 char *getStackMap();
@@ -77,6 +81,14 @@ void parseStackMap() {
         // StkMapRecord[i].Location[j+1].Offset
         int32_t derived_offset
             = *(int32_t *)(stackMapRecord + 24 + (j + 1) * 12);
+        // StkMapRecord[i].Location[j].DwarfRegNum
+        uint16_t base_dwarf_regnum
+            = *(uint16_t *)(stackMapRecord + 20 + j * 12);
+        // StkMapRecord[i].Location[j+1].DwarfRegNum
+        uint16_t derived_dwarf_regnum
+            = *(uint16_t *)(stackMapRecord + 20 + (j + 1) * 12);
+        assert(base_dwarf_regnum == derived_dwarf_regnum);
+        assert(base_dwarf_regnum == UNW_X86_64_RBP || base_dwarf_regnum == UNW_REG_SP);
         layoutitem layout;
         layout.offset = base_offset;
         size_t layout_offset
@@ -85,7 +97,40 @@ void parseStackMap() {
         gc_relocation reloc;
         reloc.base = layout;
         reloc.derived_offset = derived_offset;
+        reloc.dwarf_regnum = base_dwarf_regnum;
         StackMap[ip].push_back(reloc);
+//uint16_t base_location_size = *(uint16_t *)(stackMapRecord + 16 + j * 12 + 2);
+//uint16_t derived_location_size = *(uint16_t *)(stackMapRecord + 16 + (j + 1) * 12 + 2);
+//uint16_t base_dwarf_regnum = *(uint16_t *)(stackMapRecord + 16 + j * 12 + 4);
+//uint16_t derived_dwarf_regnum = *(uint16_t *)(stackMapRecord + 16 + (j + 1) * 12 + 4);
+//assert(base_location_size == 8);
+//assert(derived_location_size == 8);
+//assert(base_dwarf_regnum == 7);
+//assert(derived_dwarf_regnum == 7);
+//bool printline = false;
+//if (base_location_size != derived_location_size) {
+//std::cout << "Location sizes differ:\n";
+//std::cout << "Base location size: "<< base_location_size << "\n";
+//std::cout << "Derived location size: "<< derived_location_size << "\n";
+//printline = true;
+//}
+//if (base_dwarf_regnum != derived_dwarf_regnum) {
+//std::cout << "Dwarf registers differ:\n";
+//std::cout << "Base DWARF RegNum: "<< base_dwarf_regnum << "\n";
+//std::cout << "Derived DWARF RegNum: "<< derived_dwarf_regnum << "\n";
+//printline = true;
+//}
+//if (base_dwarf_regnum != 7) {
+//std::cout << "Base DWARF RegNum was not 7: "<< base_dwarf_regnum << "\n";
+//printline = true;
+//}
+//if (derived_dwarf_regnum != 7) {
+//std::cout << "Derived DWARF RegNum was not 7: "<< derived_dwarf_regnum << "\n";
+//printline = true;
+//}
+//if (printline) {
+//std::cout << "=============================================================\n";
+//}
         RelocationOffset++;
       }
       // StkMapRecord[i].Location[NumLocations] (ie, end of Locations)
@@ -105,4 +150,5 @@ void parseStackMap() {
       // stackMapRecord is now at StkMapRecord[i+1]
     }
   }
+//assert(false);
 }

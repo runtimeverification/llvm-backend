@@ -27,7 +27,7 @@ void migrate_collection_node(void **nodePtr) {
 #endif
     memcpy(newBlock, currBlock, lenInBytes);
     migrate_header(newBlock);
-    *(void **)(currBlock + 1) = newBlock + 1;
+    *(void **)(currBlock + 1) = newBlock->data;
     currBlock->h.hdr |= FWD_PTR_BIT;
   }
   *nodePtr = *(void **)(currBlock + 1);

@@ -4,7 +4,7 @@ main="$2"
 lto="$3"
 shift; shift; shift
 flags=()
-llc_flags=()
+llc_flags=("-load="$(dirname "$0")"/../lib/kllvm/libLLVMPass.so")
 llc_opt_flags="-O0"
 link=true
 verbose=false
