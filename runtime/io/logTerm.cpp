@@ -22,18 +22,15 @@ SortKItem hook_IO_logTerm(SortString path, SortKItem term) {
 }
 
 SortK hook_IO_traceTerm(block *term) {
-  if ((((uintptr_t)term) & 1) == 0) {
-    auto tag = getTag(term);
-    if (tag >= first_inj_tag && tag <= last_inj_tag) {
-      term = (block *)(term->children[0]);
-    }
-  }
-
   char filename[17] = "traceKORE_XXXXXX";
   int fd = mkstemp(filename);
 
   FILE *fp = fdopen(fd, "w");
-  printConfigurationToFile(fp, term);
+
+  // Ensure that the term is injected into KItem correctly; if we don't do this
+  // then the unparsed KORE ends up with a (null) in it which breaks the
+  // printing below.
+  printSortedConfigurationToFile(fp, term, "SortKItem{}");
   fflush(fp);
 
   kllvm::printKORE(std::cerr, &kompiled_directory, filename, false, true);
