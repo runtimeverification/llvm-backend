@@ -13,6 +13,7 @@ extern "C" {
 extern char kompiled_directory;
 
 block *hook_IO_log(string *path, string *msg);
+int getTag(block *term);
 
 SortKItem hook_IO_logTerm(SortString path, SortKItem term) {
   string *msg = printConfigurationToString(term);
@@ -21,6 +22,13 @@ SortKItem hook_IO_logTerm(SortString path, SortKItem term) {
 }
 
 SortK hook_IO_traceTerm(block *term) {
+  if (((uintptr_t)term) & 1 == 0) {
+    auto tag = getTag(term);
+    if (tag >= first_inj_tag && tag <= last_inj_tag) {
+      term = (block *)(term->children[0]);
+    }
+  }
+
   char filename[17] = "traceKORE_XXXXXX";
   int fd = mkstemp(filename);
 
