@@ -167,12 +167,12 @@ using set
 
 typedef struct mapiter {
   map::iterator curr;
-  map *map;
+  map *map_item;
 } mapiter;
 
 typedef struct setiter {
   set::iterator curr;
-  set *set;
+  set *set_item;
 } setiter;
 
 typedef floating *SortFloat;

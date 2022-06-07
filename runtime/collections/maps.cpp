@@ -8,7 +8,7 @@ mapiter map_iterator(map *map) {
 }
 
 block *map_iterator_next(mapiter *iter) {
-  if (iter->curr == iter->map->end()) {
+  if (iter->curr == iter->map_item->end()) {
     return nullptr;
   }
   return (iter->curr++)->first;
