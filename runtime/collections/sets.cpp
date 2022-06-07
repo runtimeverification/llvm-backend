@@ -8,7 +8,7 @@ setiter set_iterator(set *set) {
 }
 
 block *set_iterator_next(setiter *iter) {
-  if (iter->curr == iter->set->end()) {
+  if (iter->curr == iter->set_item->end()) {
     return nullptr;
   }
   return *(iter->curr++);
