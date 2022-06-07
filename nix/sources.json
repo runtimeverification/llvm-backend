@@ -5,10 +5,10 @@
         "homepage": "",
         "owner": "icetan",
         "repo": "mavenix",
-        "rev": "7416dbd2861520d44a4d6ecee9d94f89737412dc",
-        "sha256": "0gkn29q63y2l700vravfl8nqjvd0zx7nvfcb3vj64fal3prh1l7y",
+        "rev": "ce9ddfd7f361190e8e8dcfaf6b8282eebbb3c7cb",
+        "sha256": "07fwqfilf19rzwvj7ic8vsyg3l15inl1xp1a2xvzk9xhk3dwqa87",
         "type": "tarball",
-        "url": "https://github.com/icetan/mavenix/archive/7416dbd2861520d44a4d6ecee9d94f89737412dc.tar.gz",
+        "url": "https://github.com/icetan/mavenix/archive/ce9ddfd7f361190e8e8dcfaf6b8282eebbb3c7cb.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "niv": {
@@ -17,22 +17,34 @@
         "homepage": "https://github.com/nmattia/niv",
         "owner": "nmattia",
         "repo": "niv",
-        "rev": "65a61b147f307d24bfd0a5cd56ce7d7b7cc61d2e",
-        "sha256": "17mirpsx5wyw262fpsd6n6m47jcgw8k2bwcp1iwdnrlzy4dhcgqh",
+        "rev": "82e5cd1ad3c387863f0545d7591512e76ab0fc41",
+        "sha256": "090l219mzc0gi33i3psgph6s2pwsc8qy4lyrqjdj4qzkvmaj65a7",
         "type": "tarball",
-        "url": "https://github.com/nmattia/niv/archive/65a61b147f307d24bfd0a5cd56ce7d7b7cc61d2e.tar.gz",
+        "url": "https://github.com/nmattia/niv/archive/82e5cd1ad3c387863f0545d7591512e76ab0fc41.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "nixpkgs": {
-        "branch": "master",
+        "branch": "a923e194a3f21ed8a31367c96530a06756ed993e",
         "description": "Nix Packages collection",
         "homepage": "",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "19aee6bfb2ae0bd12aa022c7df094ce15b031ede",
-        "sha256": "0drxwhfnfc54pcq2myjc25cblxdhp4qg0ya2c9s6njkwk1vc3jjq",
+        "rev": "a923e194a3f21ed8a31367c96530a06756ed993e",
+        "sha256": "0s0w72szbhwghhckbsyir9i1yggs1984n12ryylvs5q53bysda89",
         "type": "tarball",
-        "url": "https://github.com/nixos/nixpkgs/archive/19aee6bfb2ae0bd12aa022c7df094ce15b031ede.tar.gz",
+        "url": "https://github.com/nixos/nixpkgs/archive/a923e194a3f21ed8a31367c96530a06756ed993e.tar.gz",
+        "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
+    },
+    "ttuegel": {
+        "branch": "main",
+        "description": "A library of useful Nix functions",
+        "homepage": null,
+        "owner": "ttuegel",
+        "repo": "nix-lib",
+        "rev": "66bb0ab890ff4d828a2dcfc7d5968465d0c7084f",
+        "sha256": "03828qxfxc1xv44jj6y2ar5h58lcppg0admn0smqzm3s1gk6rbnc",
+        "type": "tarball",
+        "url": "https://github.com/ttuegel/nix-lib/archive/66bb0ab890ff4d828a2dcfc7d5968465d0c7084f.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     }
 }

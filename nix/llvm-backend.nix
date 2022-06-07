@@ -1,26 +1,14 @@
-{ lib, cleanSourceWith, src, cmake, flex, pkgconfig, llvmPackages, boost, gmp
+{ lib, src, cmake, flex, pkgconfig, llvm, libllvm, libcxxabi, stdenv, boost, gmp
 , jemalloc, libffi, libiconv, libyaml, mpfr, ncurses,
 # Runtime dependencies:
 host,
 # Options:
 release ? false # optimized release build, currently: LTO
 }:
-
-let inherit (llvmPackages) stdenv llvm;
-
-in let
+stdenv.mkDerivation {
   pname = "llvm-backend";
   version = "0";
-
-in stdenv.mkDerivation {
-  inherit pname version;
-  src =
-    # Avoid spurious rebuilds by ignoring files that don't affect the build.
-    cleanSourceWith {
-      name = "llvm-backend-src";
-      inherit src;
-      ignore = [ "/nix" "*.nix" "*.nix.sh" "/.github" "/matching" ];
-    };
+  inherit src;
 
   nativeBuildInputs = [ cmake flex llvm pkgconfig ];
   buildInputs = [ boost libyaml ];
@@ -30,13 +18,24 @@ in stdenv.mkDerivation {
   postPatch = ''
     sed -i bin/llvm-kompile \
       -e '2a export PATH="${lib.getBin host.clang}/bin:''${PATH}"'
+
+    substituteInPlace bin/llvm-kompile-clang \
+      --replace '"-lgmp"' '"-L${gmp}/lib" "-lgmp"' \
+      --replace '"-lmpfr"' '"-L${mpfr}/lib" "-lmpfr"' \
+      --replace '"-lffi"' '"-L${libffi}/lib" "-lffi"' \
+      --replace '"-ljemalloc"' '"-L${jemalloc}/lib" "-ljemalloc"' \
+      --replace '"-liconv"' '"-L${libiconv}/lib" "-liconv"' \
+      --replace '"-lncurses"' '"-L${ncurses}/lib" "-lncurses"' \
+      --replace '"-ltinfo"' '"-L${ncurses}/lib" "-ltinfo"' \
+      --replace '"-L@BREW_PREFIX@/opt/libffi/lib"' ' ' \
+      --replace '-L@BREW_PREFIX@/lib' '-L${libcxxabi}/lib'
   '';
 
   cmakeFlags = [
     "-DCMAKE_C_COMPILER=${lib.getBin stdenv.cc}/bin/cc"
     "-DCMAKE_CXX_COMPILER=${lib.getBin stdenv.cc}/bin/c++"
     "-DLLVM_CLANG_PATH=${lib.getBin host.clang}/bin/clang"
-    "-DLLVM_CONFIG_PATH=${lib.getBin llvmPackages.libllvm.dev}/bin/llvm-config"
+    "-DLLVM_CONFIG_PATH=${lib.getBin libllvm.dev}/bin/llvm-config"
     "-DUSE_NIX=TRUE"
     "-DCMAKE_SKIP_BUILD_RPATH=FALSE"
     "-DBUILD_TESTS=True"

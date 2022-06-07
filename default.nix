@@ -26,19 +26,42 @@ in { pkgs ? pinned
 
 let
   localOverlay = import ./nix/overlay.nix;
+
   localPkgs = import sources."nixpkgs" {
     config = { };
     overlays = [
-      (final: prev: {
-        inherit release src;
-        mavenix = import sources."mavenix" { inherit (prev) pkgs; };
-      })
+      (final: prev:
+        let
+          ttuegel = import sources."ttuegel" { inherit (prev) pkgs; };
+          # Avoid spurious rebuilds by ignoring files that don't affect the build.
+          mavenix = import sources."mavenix" { inherit (prev) pkgs; };
+        in {
+          llvm-backend-release = release;
+          inherit (mavenix) buildMaven;
+          mavenix-cli = mavenix.cli;
+
+          llvm-backend-src = ttuegel.orElse src ttuegel.cleanSourceWith {
+            name = "llvm-backend-src";
+            src = ./.;
+            ignore = [ "/nix" "*.nix" "*.nix.sh" "/.github" ];
+          };
+
+          llvm-backend-matching-src = ttuegel.cleanSourceWith {
+            name = "llvm-backend-matching-src";
+            src = ttuegel.orElse src (ttuegel.cleanGitSubtree {
+              name = "llvm-backend-src";
+              src = ./.;
+            });
+            subDir = "matching";
+          };
+
+        })
       localOverlay
     ];
   };
 in {
-  inherit (localPkgs) llvm-backend llvm-backend-matching llvm-kompile-testing;
+  inherit (localPkgs) llvm-backend llvm-backend-matching integration-tests;
   inherit (localPkgs) clang; # for compatibility
-  inherit (localPkgs) mavenix devShell; # for CI
+  inherit (localPkgs) mavenix-cli; # for CI
 }
 

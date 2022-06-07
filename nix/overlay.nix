@@ -1,47 +1,46 @@
 final: prev:
 let
-  ttuegel = let
-    src = builtins.fetchGit {
-      url = "https://github.com/ttuegel/nix-lib";
-      rev = "66bb0ab890ff4d828a2dcfc7d5968465d0c7084f";
-      ref = "main";
-    };
-  in import src { inherit (prev) pkgs; };
-
-  cleanedSrc = ttuegel.orElse prev.src (ttuegel.cleanGitSubtree {
-    name = "llvm-backend";
-    src = ../.;
-  });
-
-  llvmPackages = prev.llvmPackages_10.override {
+  llvmPackages = prev.llvmPackages_13.override {
     bootBintoolsNoLibc = null;
     bootBintools = null;
   };
 
-  # The backend requires clang/lld/libstdc++ at runtime.
-  # The closest configuration in Nixpkgs is clang/lld without any C++ standard
-  # library. We override that configuration to inherit libstdc++ from stdenv.
-  clang = let
-    override = attrs: {
+  clang = if !llvmPackages.stdenv.targetPlatform.isDarwin then
+    llvmPackages.clangNoLibcxx.override (attrs: {
       extraBuildCommands = ''
         ${attrs.extraBuildCommands}
         sed -i $out/nix-support/cc-cflags -e '/^-nostdlib/ d'
       '';
-    };
-  in llvmPackages.clangNoLibcxx.override override;
+    })
+  else
+    llvmPackages.libcxxClang.overrideAttrs (old: {
+      # Hack from https://github.com/NixOS/nixpkgs/issues/166205 for macOS
+      postFixup = old.postFixup + ''
+        echo "-lc++abi" >> $out/nix-support/libcxx-ldflags
+      '';
+    });
+
+  jemalloc = prev.jemalloc.overrideDerivation (oldAttrs: rec {
+    # Some tests for jemalloc fail on the M1! Our tests seem to pass but this may be flaky
+    doCheck = false;
+    stdenv = prev.stdenv;
+  });
 
   llvm-backend = prev.callPackage ./llvm-backend.nix {
-    inherit llvmPackages;
-    inherit (ttuegel) cleanSourceWith;
-    inherit (prev) release;
+    inherit (llvmPackages) llvm libllvm libcxxabi;
+    stdenv = if !llvmPackages.stdenv.targetPlatform.isDarwin then
+      llvmPackages.stdenv
+    else
+      prev.overrideCC llvmPackages.stdenv clang;
+    release = prev.llvm-backend-release;
+    src = prev.llvm-backend-src;
+    inherit jemalloc;
     host.clang = clang;
-    src = cleanedSrc;
   };
 
   llvm-backend-matching = import ./llvm-backend-matching.nix {
-    inherit (prev) mavenix;
-    src = cleanedSrc;
-    inherit (ttuegel) cleanSourceWith;
+    inherit (prev) buildMaven;
+    src = prev.llvm-backend-matching-src;
   };
 
   llvm-kompile-testing = let
@@ -57,9 +56,36 @@ let
     patchShebangs "$out/bin/llvm-kompile-testing"
   '';
 
-  devShell = final.callPackage ./devShell.nix { };
+  integration-tests = prev.stdenv.mkDerivation {
+    name = "llvm-backend-integration-tests";
+    src = llvm-backend.src;
+    preferLocalBuild = true;
+    buildInputs = [
+      prev.diffutils # for golden testing
+      prev.lit
+      llvm-kompile-testing # for constructing test input without the frontend
+      llvm-backend # the system under test
+    ];
+    configurePhase = "true";
+    buildPhase = ''
+      runHook preBuild
+
+      LIT_USE_NIX=1 lit -v test
+
+      runHook postBuild
+    '';
+    installPhase = ''
+      runHook preInstall
+
+      mkdir -p "$out"
+      cp -a -t "$out" .
+
+      runHook postInstall
+    '';
+  };
+  devShell = prev.callPackage ./devShell.nix { };
 in {
-  inherit llvm-backend llvm-backend-matching llvm-kompile-testing;
-  inherit clang; # for compatibility
+  inherit llvm-backend llvm-backend-matching integration-tests;
+  inherit (prev) clang; # for compatibility
   inherit devShell; # for CI
 }
