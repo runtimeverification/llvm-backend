@@ -18,7 +18,7 @@ private:
   llvm::LLVMContext &Ctx;
 
   llvm::Constant *
-  getOrInsertGlobalInAddrSpace1(llvm::StringRef Name, llvm::Type *Ty);
+  getOrInsertGlobalInAddrSpace(llvm::StringRef Name, llvm::Type *Ty, unsigned addrspace);
   llvm::Constant *
   notInjectionCase(KORECompositePattern *constructor, llvm::Constant *val);
 

@@ -28,8 +28,10 @@ void Decision::operator()(DecisionNode *entry) {
       llvm::Value *val = load(std::make_pair(
           "_1", getValueType({SortCategory::Symbol, 0}, Module)));
       FailSubject->addIncoming(
-          new llvm::BitCastInst(
-              val, llvm::Type::getInt8PtrTy(Ctx, 1), "", CurrentBlock),
+          addrspaceCast(
+              new llvm::BitCastInst(
+                  val, llvm::Type::getInt8PtrTy(Ctx, (unsigned)SortCategory::Symbol), "", CurrentBlock),
+              CurrentBlock, (unsigned)SortCategory::Symbol, 0),
           CurrentBlock);
       FailPattern->addIncoming(
           stringLiteral("\\bottom{SortGeneratedTopCell{}}()"), CurrentBlock);
@@ -45,10 +47,10 @@ void Decision::operator()(DecisionNode *entry) {
 llvm::Value *Decision::ptrTerm(llvm::Value *val) {
   if (val->getType()->isIntegerTy()) {
     val = allocateTermNoReloc(val->getType(), CurrentBlock);
-    val = addrspaceCast0to1(val, CurrentBlock);
+    val = addrspaceCast(val, CurrentBlock, 0, (unsigned)SortCategory::Int);
   }
   return new llvm::BitCastInst(
-      val, llvm::Type::getInt8PtrTy(Ctx, 1), "", CurrentBlock);
+      val, llvm::Type::getInt8PtrTy(Ctx, val->getType()->getPointerAddressSpace()), "", CurrentBlock);
 }
 
 bool DecisionNode::beginNode(Decision *d, std::string name) {
@@ -131,6 +133,8 @@ void SwitchNode::codegen(Decision *d) {
   llvm::Value *ptrVal;
   if (d->FailPattern) {
     ptrVal = d->ptrTerm(val);
+    ptrVal = addrspaceCast(
+        ptrVal, d->CurrentBlock, ptrVal->getType()->getPointerAddressSpace(), 0);
   }
   llvm::BasicBlock *_default = d->FailureBlock;
   const DecisionCase *defaultCase = nullptr;
@@ -216,7 +220,7 @@ void SwitchNode::codegen(Decision *d) {
       llvm::StructType *BlockType
           = getBlockType(d->Module, d->Definition, _case.getConstructor());
       llvm::BitCastInst *Cast = new llvm::BitCastInst(
-          val, llvm::PointerType::get(BlockType, 1), "", d->CurrentBlock);
+          val, llvm::PointerType::get(BlockType, (unsigned)SortCategory::Symbol), "", d->CurrentBlock);
       KORESymbolDeclaration *symbolDecl
           = d->Definition->getSymbolDeclarations().at(
               _case.getConstructor()->getName());
@@ -244,7 +248,7 @@ void SwitchNode::codegen(Decision *d) {
           break;
         }
         auto BlockPtr
-            = llvm::PointerType::get(getTypeByName(d->Module, BLOCK_STRUCT), 1);
+            = llvm::PointerType::get(getTypeByName(d->Module, BLOCK_STRUCT), (unsigned)SortCategory::Symbol);
         if (symbolDecl->getAttributes().count("binder")) {
           if (offset == 0) {
             Renamed = llvm::CallInst::Create(
@@ -363,11 +367,13 @@ void FunctionNode::codegen(Decision *d) {
     std::vector<llvm::Value *> functionArgs;
     functionArgs.push_back(d->stringLiteral(debugName));
     functionArgs.push_back(d->stringLiteral(function));
+    llvm::Value *CallPtrVal = d->ptrTerm(Call);
     functionArgs.push_back(
-        addrspaceCast1to0(d->ptrTerm(Call), d->CurrentBlock));
+        addrspaceCast(CallPtrVal, d->CurrentBlock, CallPtrVal->getType()->getPointerAddressSpace(), 0));
     for (auto arg : args) {
+      llvm::Value *ArgPtrVal = d->ptrTerm(arg);
       functionArgs.push_back(
-          addrspaceCast1to0(d->ptrTerm(arg), d->CurrentBlock));
+          addrspaceCast(ArgPtrVal, d->CurrentBlock, ArgPtrVal->getType()->getPointerAddressSpace(), 0));
     }
     functionArgs.push_back(
         llvm::ConstantPointerNull::get(llvm::Type::getInt8PtrTy(d->Ctx)));
@@ -527,7 +533,12 @@ void Decision::store(var_type name, llvm::Value *val) {
   if (!sym) {
     sym = this->decl(name);
   }
-  new llvm::StoreInst(val, sym, this->CurrentBlock);
+  auto v = new llvm::StoreInst(val, sym, this->CurrentBlock);
+  if (val->getType()->isPointerTy())
+    if (val->getType() != sym->getType()->getPointerElementType()) {
+      llvm::errs() << "AAAAAAAAAAAA: " << *v << "\n";
+      assert(false);
+    } 
 }
 
 llvm::Constant *Decision::stringLiteral(std::string str) {
@@ -610,7 +621,7 @@ void makeEvalOrAnywhereFunction(
     case SortCategory::Map:
     case SortCategory::List:
     case SortCategory::Set:
-      args.push_back(llvm::PointerType::get(getValueType(cat, module), 1));
+      args.push_back(llvm::PointerType::get(getValueType(cat, module), (unsigned)cat.cat));
       cats.push_back(cat);
       break;
     default:
@@ -672,10 +683,10 @@ void abortWhenStuck(
   auto BlockType = getBlockType(Module, d, symbol);
   llvm::Value *Ptr;
   auto BlockPtr
-      = llvm::PointerType::get(getTypeByName(Module, BLOCK_STRUCT), 1);
+      = llvm::PointerType::get(getTypeByName(Module, BLOCK_STRUCT), (unsigned)SortCategory::Symbol);
   if (symbol->getArguments().empty()) {
     auto C = getOrInsertFunction(
-        Module, "inttoptr_i64.p1s_blocks",
+        Module, "inttoptr_i64.p8s_blocks",
         getValueType({SortCategory::Symbol, 0}, Module),
         llvm::Type::getInt64Ty(Ctx));
     auto F = llvm::cast<llvm::Function>(C);
@@ -709,10 +720,12 @@ void abortWhenStuck(
           {llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0),
            llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), idx + 2)},
           "", CurrentBlock);
-      if (ChildValue->getType() == ChildPtr->getType()) {
-        ChildValue = new llvm::LoadInst(
-            ChildValue->getType()->getPointerElementType(), ChildValue, "",
-            CurrentBlock);
+      if (ChildValue->getType()->isPointerTy()) {
+        if (ChildValue->getType()->getPointerElementType() == ChildPtr->getType()->getPointerElementType()) {
+          ChildValue = new llvm::LoadInst(
+              ChildValue->getType()->getPointerElementType(), ChildValue, "",
+              CurrentBlock);
+        }
       }
       new llvm::StoreInst(ChildValue, ChildPtr, CurrentBlock);
     }
@@ -894,7 +907,7 @@ void makeMatchReasonFunction(
   llvm::BasicBlock *fail
       = llvm::BasicBlock::Create(module->getContext(), "fail", matchFunc);
   llvm::PHINode *FailSubject = llvm::PHINode::Create(
-      llvm::Type::getInt8PtrTy(module->getContext(), 1), 0, "subject", fail);
+      llvm::Type::getInt8PtrTy(module->getContext(), 0), 0, "subject", fail);
   llvm::PHINode *FailPattern = llvm::PHINode::Create(
       llvm::Type::getInt8PtrTy(module->getContext()), 0, "pattern", fail);
   llvm::PHINode *FailSort = llvm::PHINode::Create(
@@ -907,7 +920,7 @@ void makeMatchReasonFunction(
               {llvm::Type::getInt8PtrTy(module->getContext()),
                FailPattern->getType(), FailSort->getType()},
               false)),
-      {addrspaceCast1to0(FailSubject, fail), FailPattern, FailSort}, "", fail);
+      {FailSubject, FailPattern, FailSort}, "", fail);
   setDebugLoc(call);
 
   llvm::AllocaInst *choiceBuffer, *choiceDepth;
@@ -977,7 +990,7 @@ void makeStepFunction(
     case SortCategory::Map:
     case SortCategory::List:
     case SortCategory::Set:
-      argTypes.push_back(llvm::PointerType::get(getValueType(cat, module), 1));
+      argTypes.push_back(llvm::PointerType::get(getValueType(cat, module), (unsigned)cat.cat));
       break;
     default: argTypes.push_back(getValueType(cat, module)); break;
     }
