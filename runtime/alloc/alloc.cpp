@@ -58,7 +58,7 @@ __attribute__((always_inline)) void *koreAlloc(size_t requested) {
   return arenaAlloc(&youngspace, requested);
 }
 
-__attribute__((always_inline)) block *koreAlloc_p1s_blocks(size_t requested) {
+__attribute__((always_inline)) block *koreAlloc_p8s_blocks(size_t requested) {
   return (block *)koreAlloc(requested);
 }
 
@@ -68,7 +68,7 @@ __attribute__((always_inline)) void *koreAllocToken(size_t requested) {
 }
 
 __attribute__((always_inline)) block *
-koreAllocToken_p1s_blocks(size_t requested) {
+koreAllocToken_p8s_blocks(size_t requested) {
   return (block *)koreAllocToken(requested);
 }
 
@@ -91,27 +91,27 @@ koreAllocAlwaysGC_p1s_maps(size_t requested) {
 }
 
 __attribute__((always_inline)) set *
-koreAllocAlwaysGC_p1s_sets(size_t requested) {
+koreAllocAlwaysGC_p3s_sets(size_t requested) {
   return (set *)koreAllocAlwaysGC(requested);
 }
 
 __attribute__((always_inline)) list *
-koreAllocAlwaysGC_p1s_lists(size_t requested) {
+koreAllocAlwaysGC_p2s_lists(size_t requested) {
   return (list *)koreAllocAlwaysGC(requested);
 }
 
 __attribute__((always_inline)) setiter *
-koreAllocAlwaysGC_p1s_setiters(size_t requested) {
+koreAllocAlwaysGC_p11s_setiters(size_t requested) {
   return (setiter *)koreAllocAlwaysGC(requested);
 }
 
 __attribute__((always_inline)) mapiter *
-koreAllocAlwaysGC_p1s_mapiters(size_t requested) {
+koreAllocAlwaysGC_p12s_mapiters(size_t requested) {
   return (mapiter *)koreAllocAlwaysGC(requested);
 }
 
 __attribute__((always_inline)) block *
-koreAllocAlwaysGC_p1s_blocks(size_t requested) {
+koreAllocAlwaysGC_p8s_blocks(size_t requested) {
   return (block *)koreAllocAlwaysGC(requested);
 }
 
@@ -163,7 +163,7 @@ __attribute__((always_inline)) void *koreAllocInteger(size_t requested) {
 }
 
 __attribute__((always_inline)) mpz_ptr
-koreAllocInteger_p1s_mpzs(size_t requested) {
+koreAllocInteger_p4s_mpzs(size_t requested) {
   return (mpz_ptr)koreAllocInteger(requested);
 }
 
@@ -174,7 +174,7 @@ __attribute__((always_inline)) void *koreAllocFloating(size_t requested) {
 }
 
 __attribute__((always_inline)) floating *
-koreAllocFloating_p1s_floatings(size_t requested) {
+koreAllocFloating_p5s_floatings(size_t requested) {
   return (floating *)koreAllocFloating(requested);
 }
 

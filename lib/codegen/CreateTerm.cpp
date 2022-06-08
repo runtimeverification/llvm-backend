@@ -156,7 +156,7 @@ llvm::Type *getParamType(ValueType sort, llvm::Module *Module) {
   case SortCategory::MapIterator:
   case SortCategory::Map:
   case SortCategory::List:
-  case SortCategory::Set: type = llvm::PointerType::get(type, 1); break;
+  case SortCategory::Set: type = llvm::PointerType::get(type, (unsigned)sort.cat); break;
   default: break;
   }
   return type;
@@ -170,17 +170,17 @@ llvm::Type *getValueType(ValueType sort, llvm::Module *Module) {
   case SortCategory::SetIterator: return getTypeByName(Module, SETITER_STRUCT);
   case SortCategory::MapIterator: return getTypeByName(Module, MAPITER_STRUCT);
   case SortCategory::Int:
-    return llvm::PointerType::get(getTypeByName(Module, INT_STRUCT), 1);
+    return llvm::PointerType::get(getTypeByName(Module, INT_STRUCT), (unsigned)sort.cat);
   case SortCategory::Float:
-    return llvm::PointerType::get(getTypeByName(Module, FLOAT_STRUCT), 1);
+    return llvm::PointerType::get(getTypeByName(Module, FLOAT_STRUCT), (unsigned)sort.cat);
   case SortCategory::StringBuffer:
-    return llvm::PointerType::get(getTypeByName(Module, BUFFER_STRUCT), 1);
+    return llvm::PointerType::get(getTypeByName(Module, BUFFER_STRUCT), (unsigned)sort.cat);
   case SortCategory::Bool: return llvm::Type::getInt1Ty(Module->getContext());
   case SortCategory::MInt:
     return llvm::IntegerType::get(Module->getContext(), sort.bits);
   case SortCategory::Symbol:
   case SortCategory::Variable:
-    return llvm::PointerType::get(getTypeByName(Module, BLOCK_STRUCT), 1);
+    return llvm::PointerType::get(getTypeByName(Module, BLOCK_STRUCT), (unsigned)SortCategory::Symbol);
   case SortCategory::Uncomputed: abort();
   }
 }
@@ -223,8 +223,13 @@ llvm::Value *getBlockHeader(
           llvm::Type::getInt64Ty(Module->getContext()), headerVal));
 }
 
-static llvm::Value *
+llvm::Value *
 addrspaceCast(llvm::Value *val, llvm::BasicBlock *block, int from, int to) {
+if (from == to) {
+llvm::errs() << "AAAAAAAAAAAAAA: from = to = " << from << ", val: " << *val << "\n";
+assert(false);
+}
+
   auto AllocType = val->getType()->getPointerElementType();
   bool hasUnnamed = false;
   std::string name = "addrspace_" + std::to_string(from) + "_to_"
@@ -279,7 +284,7 @@ llvm::Value *allocateTerm(
     return malloc;
   }
   auto cast = new llvm::BitCastInst(
-      malloc, llvm::PointerType::get(AllocType, 1), "", block);
+      malloc, llvm::PointerType::get(AllocType, (unsigned)Cat.cat), "", block);
   return cast;
 }
 
@@ -901,7 +906,7 @@ llvm::Value *CreateTerm::createFunctionCall(
     types.insert(types.begin(), AllocSret->getType());
     returnType = llvm::Type::getVoidTy(Ctx);
   } else if (collection) {
-    returnType = llvm::PointerType::get(returnType, 1);
+    returnType = llvm::PointerType::get(returnType, (unsigned)returnCat.cat);
   }
 
   llvm::FunctionType *funcType
@@ -965,16 +970,18 @@ llvm::Value *CreateTerm::notInjectionCase(
         {llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0),
          llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), idx++)},
         "", CurrentBlock);
-    if (ChildValue->getType() == ChildPtr->getType()) {
-      ChildValue = new llvm::LoadInst(
-          ChildValue->getType()->getPointerElementType(), ChildValue, "",
-          CurrentBlock);
+    if (ChildValue->getType()->isPointerTy()) {
+      if (ChildValue->getType()->getPointerElementType() == ChildPtr->getType()->getPointerElementType()) {
+        ChildValue = new llvm::LoadInst(
+            ChildValue->getType()->getPointerElementType(), ChildValue, "",
+            CurrentBlock);
+      }
     }
     new llvm::StoreInst(ChildValue, ChildPtr, CurrentBlock);
   }
 
   auto BlockPtr
-      = llvm::PointerType::get(getTypeByName(Module, BLOCK_STRUCT), 1);
+      = llvm::PointerType::get(getTypeByName(Module, BLOCK_STRUCT), (unsigned)SortCategory::Symbol);
   auto bitcast = new llvm::BitCastInst(Block, BlockPtr, "", CurrentBlock);
   if (symbolDecl->getAttributes().count("binder")) {
     auto call = llvm::CallInst::Create(
@@ -1159,7 +1166,7 @@ bool makeFunction(
     case SortCategory::Map:
     case SortCategory::List:
     case SortCategory::Set:
-      paramType = llvm::PointerType::get(paramType, 1);
+      paramType = llvm::PointerType::get(paramType, (unsigned)cat.cat);
       break;
     default: break;
     }
@@ -1174,7 +1181,7 @@ bool makeFunction(
   case SortCategory::Map:
   case SortCategory::List:
   case SortCategory::Set:
-    returnType = llvm::PointerType::get(returnType, 1);
+    returnType = llvm::PointerType::get(returnType, (unsigned)returnCat.cat);
     break;
   default: break;
   }
@@ -1213,7 +1220,7 @@ bool makeFunction(
   CreateTerm creator = CreateTerm(subst, definition, block, Module, false);
   llvm::Value *retval = creator(pattern).first;
   if (funcType->getReturnType()
-      == llvm::PointerType::get(retval->getType(), 1)) {
+      == llvm::PointerType::get(retval->getType(), (unsigned)returnCat.cat)) {
     auto tempAlloc = allocateTerm(
         returnCat, retval->getType(), creator.getCurrentBlock(),
         "koreAllocAlwaysGC");
@@ -1277,7 +1284,7 @@ std::string makeApplyRuleFunction(
     case SortCategory::Map:
     case SortCategory::List:
     case SortCategory::Set:
-      paramType = llvm::PointerType::get(paramType, 1);
+      paramType = llvm::PointerType::get(paramType, (unsigned)cat.cat);
       break;
     default: break;
     }

@@ -28,19 +28,19 @@ define %block addrspace(1)* addrspace(1)* @addrspace_0_to_1_p1s_blocks(%block ad
   ret %block addrspace(1)* addrspace(1)* %out
 }
 
-define %block addrspace(1)* @addrspace_0_to_1_s_blocks(%block* %in) #0 {
-  %out = addrspacecast %block* %in to %block addrspace(1)*
-  ret %block addrspace(1)* %out
+define %block addrspace(8)* @addrspace_0_to_8_s_blocks(%block* %in) #0 {
+  %out = addrspacecast %block* %in to %block addrspace(8)*
+  ret %block addrspace(8)* %out
 }
 
-define %mpz addrspace(1)* @addrspace_0_to_1_s_mpzs(%mpz* %in) #0 {
-  %out = addrspacecast %mpz* %in to %mpz addrspace(1)*
-  ret %mpz addrspace(1)* %out
+define %mpz addrspace(4)* @addrspace_0_to_4_s_mpzs(%mpz* %in) #0 {
+  %out = addrspacecast %mpz* %in to %mpz addrspace(4)*
+  ret %mpz addrspace(4)* %out
 }
 
-define %floating addrspace(1)* @addrspace_0_to_1_s_floatings(%floating* %in) #0 {
-  %out = addrspacecast %floating* %in to %floating addrspace(1)*
-  ret %floating addrspace(1)* %out
+define %floating addrspace(5)* @addrspace_0_to_5_s_floatings(%floating* %in) #0 {
+  %out = addrspacecast %floating* %in to %floating addrspace(5)*
+  ret %floating addrspace(5)* %out
 }
 
 define %map addrspace(1)* @addrspace_0_to_1_s_maps(%map* %in) #0 {
@@ -48,14 +48,14 @@ define %map addrspace(1)* @addrspace_0_to_1_s_maps(%map* %in) #0 {
   ret %map addrspace(1)* %out
 }
 
-define %list addrspace(1)* @addrspace_0_to_1_s_lists(%list* %in) #0 {
-  %out = addrspacecast %list* %in to %list addrspace(1)*
-  ret %list addrspace(1)* %out
+define %list addrspace(2)* @addrspace_0_to_2_s_lists(%list* %in) #0 {
+  %out = addrspacecast %list* %in to %list addrspace(2)*
+  ret %list addrspace(2)* %out
 }
 
-define %set addrspace(1)* @addrspace_0_to_1_s_sets(%set* %in) #0 {
-  %out = addrspacecast %set* %in to %set addrspace(1)*
-  ret %set addrspace(1)* %out
+define %set addrspace(3)* @addrspace_0_to_3_s_sets(%set* %in) #0 {
+  %out = addrspacecast %set* %in to %set addrspace(3)*
+  ret %set addrspace(3)* %out
 }
 
 define %string addrspace(1)* @addrspace_0_to_1_s_strings(%string* %in) #0 {
@@ -88,13 +88,13 @@ define i8* @addrspace_1_to_0_i8(i8 addrspace(1)* %in) #0 {
   ret i8* %out
 }
 
-define %block addrspace(1)* @inttoptr_i64.p1s_blocks(i64 %in) #0 {
-  %out = inttoptr i64 %in to %block addrspace(1)*
-  ret %block addrspace(1)* %out
+define %block addrspace(8)* @inttoptr_i64.p8s_blocks(i64 %in) #0 {
+  %out = inttoptr i64 %in to %block addrspace(8)*
+  ret %block addrspace(8)* %out
 }
 
-define i64 @ptrtoint_i64.p1s_blocks(%block addrspace(1)* %in) #0 {
-  %out = ptrtoint %block addrspace(1)* %in to i64
+define i64 @ptrtoint_i64.p8s_blocks(%block addrspace(8)* %in) #0 {
+  %out = ptrtoint %block addrspace(8)* %in to i64
   ret i64 %out
 }
 

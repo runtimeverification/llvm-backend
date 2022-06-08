@@ -137,6 +137,8 @@ llvm::Value *allocateTermNoReloc(
 
 // see comment on runtime/opaque/opaque.ll for explanation about why these
 // functions exist
+llvm::Value *
+addrspaceCast(llvm::Value *val, llvm::BasicBlock *block, int from, int to);
 llvm::Value *addrspaceCast0to1(llvm::Value *val, llvm::BasicBlock *block);
 llvm::Value *addrspaceCast1to0(llvm::Value *val, llvm::BasicBlock *block);
 llvm::Value *ptrToInt(llvm::Value *val, llvm::BasicBlock *block);
