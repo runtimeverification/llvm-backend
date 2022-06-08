@@ -40,11 +40,11 @@ let
           inherit (mavenix) buildMaven;
           mavenix-cli = mavenix.cli;
 
-          llvm-backend-src = ttuegel.orElse src ttuegel.cleanSourceWith {
+          llvm-backend-src = ttuegel.orElse src (ttuegel.cleanSourceWith {
             name = "llvm-backend-src";
             src = ./.;
             ignore = [ "/nix" "*.nix" "*.nix.sh" "/.github" ];
-          };
+          });
 
           llvm-backend-matching-src = ttuegel.cleanSourceWith {
             name = "llvm-backend-matching-src";
