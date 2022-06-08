@@ -1,0 +1,3 @@
+<k>
+  stop ( ) ~> ( bar ( foo ( ) , bar ( bar ( baz ( ) , foo ( ) ) , bar ( foo ( ) , baz ( ) ) ) ) ) ~> .
+</k>
