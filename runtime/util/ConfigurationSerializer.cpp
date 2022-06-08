@@ -250,6 +250,8 @@ void serializeConfigurationInternal(
   auto symbol = getSymbolNameForTag(tag);
   auto symbolStr = std::string(symbol);
 
+  auto location_symbol = std::string("Lbl'Hash'location");
+
   if (symbolStr.rfind("inj{", 0) == 0) {
     std::string prefix = symbolStr.substr(4, symbolStr.find_first_of(',') - 4);
 
@@ -259,6 +261,15 @@ void serializeConfigurationInternal(
     instance.emit(header_byte<KORESymbol>);
     instance.emit_length(2);
     instance.emit_string("inj");
+  } else if (symbolStr.rfind(location_symbol, 0) == 0) {
+    auto inner_sort
+        = drop_back(symbolStr.substr(location_symbol.size() + 1), 1);
+
+    emitConstantSort(inner_sort.c_str());
+
+    instance.emit(header_byte<KORESymbol>);
+    instance.emit_length(1);
+    instance.emit_string(location_symbol);
   } else {
     instance.emit(header_byte<KORESymbol>);
     instance.emit_length(0);
