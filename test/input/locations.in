@@ -1,0 +1,10 @@
+LblinitGeneratedTopCell{}
+(
+Lbl'Unds'Map'Unds'{}(
+Lbl'Stop'Map{}()
+, Lbl'UndsPipe'-'-GT-Unds'{}(inj{SortKConfigVar{}, SortKItem{}}(\dv{SortKConfigVar{}}(
+"$PGM"
+)),
+inj{SortPgm{}, SortKItem{}}(inj{SortFoo{}, SortKItem{}}(Lbl'Hash'location{SortFoo{}}(Lblbar'LParUndsCommUndsRParUnds'TEST'Unds'Foo'Unds'Foo'Unds'Foo{}(Lbl'Hash'location{SortFoo{}}(Lblfoo'LParRParUnds'TEST'Unds'Foo{}(), \dv{SortString{}}("/dev/stdin"), \dv{SortInt{}}("2"), \dv{SortInt{}}("3"), \dv{SortInt{}}("2"), \dv{SortInt{}}("7")),Lbl'Hash'location{SortFoo{}}(Lblbar'LParUndsCommUndsRParUnds'TEST'Unds'Foo'Unds'Foo'Unds'Foo{}(Lbl'Hash'location{SortFoo{}}(Lblbar'LParUndsCommUndsRParUnds'TEST'Unds'Foo'Unds'Foo'Unds'Foo{}(Lbl'Hash'location{SortFoo{}}(Lblbaz'LParRParUnds'TEST'Unds'Foo{}(), \dv{SortString{}}("/dev/stdin"), \dv{SortInt{}}("4"), \dv{SortInt{}}("9"), \dv{SortInt{}}("4"), \dv{SortInt{}}("13")),Lbl'Hash'location{SortFoo{}}(Lblfoo'LParRParUnds'TEST'Unds'Foo{}(), \dv{SortString{}}("/dev/stdin"), \dv{SortInt{}}("4"), \dv{SortInt{}}("16"), \dv{SortInt{}}("4"), \dv{SortInt{}}("20"))), \dv{SortString{}}("/dev/stdin"), \dv{SortInt{}}("4"), \dv{SortInt{}}("5"), \dv{SortInt{}}("4"), \dv{SortInt{}}("21")),Lbl'Hash'location{SortFoo{}}(Lblbar'LParUndsCommUndsRParUnds'TEST'Unds'Foo'Unds'Foo'Unds'Foo{}(Lbl'Hash'location{SortFoo{}}(Lblfoo'LParRParUnds'TEST'Unds'Foo{}(), \dv{SortString{}}("/dev/stdin"), \dv{SortInt{}}("5"), \dv{SortInt{}}("9"), \dv{SortInt{}}("5"), \dv{SortInt{}}("13")),Lbl'Hash'location{SortFoo{}}(Lblbaz'LParRParUnds'TEST'Unds'Foo{}(), \dv{SortString{}}("/dev/stdin"), \dv{SortInt{}}("5"), \dv{SortInt{}}("16"), \dv{SortInt{}}("5"), \dv{SortInt{}}("20"))), \dv{SortString{}}("/dev/stdin"), \dv{SortInt{}}("5"), \dv{SortInt{}}("5"), \dv{SortInt{}}("5"), \dv{SortInt{}}("21"))), \dv{SortString{}}("/dev/stdin"), \dv{SortInt{}}("3"), \dv{SortInt{}}("3"), \dv{SortInt{}}("6"), \dv{SortInt{}}("3"))), \dv{SortString{}}("/dev/stdin"), \dv{SortInt{}}("1"), \dv{SortInt{}}("0"), \dv{SortInt{}}("7"), \dv{SortInt{}}("1"))))
+))
+)
