@@ -226,6 +226,8 @@ configure_file(gdb/kllvm.py gdb @ONLY)
 set(GDB_SCRIPT_PATH ${CMAKE_CURRENT_BINARY_DIR}/gdb)
 set(GDB_SCRIPT_NAME kllvm.py)
 
+set(ERROR_TAG 4294967294) # 2^32-2
+
 configure_file(config/macros.h include/config/macros.h @ONLY)
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/runtime)
