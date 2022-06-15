@@ -1179,13 +1179,15 @@ static const std::string SUBSORT = "subsort";
 static const std::string CONSTRUCTOR = "constructor";
 static const std::string CEIL = "ceil";
 static const std::string NON_EXECUTABLE = "non-executable";
+static const std::string SIMPLIFICATION = "simplification";
 
 bool KOREAxiomDeclaration::isRequired() {
   return !attributes.count(ASSOC) && !attributes.count(COMM)
          && !attributes.count(IDEM) && !attributes.count(UNIT)
          && !attributes.count(FUNCTIONAL) && !attributes.count(CONSTRUCTOR)
          && !attributes.count(SUBSORT) && !attributes.count(CEIL)
-         && !attributes.count(NON_EXECUTABLE);
+         && !attributes.count(NON_EXECUTABLE)
+         && !attributes.count(SIMPLIFICATION);
 }
 
 bool KOREAxiomDeclaration::isTopAxiom() {
