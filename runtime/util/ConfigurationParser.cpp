@@ -33,6 +33,11 @@ uint32_t getTagForSymbolName(const char *name) {
     return lb->second;
   }
   uint32_t const tag = getTagForSymbolNameInternal(s.c_str());
+  if (tag == ERROR_TAG) {
+    std::cerr << "No tag found for symbol " << name << ". Maybe attempted to "
+              << "evaluate a symbol with no rules?\n";
+    abort();
+  }
   cache.insert(lb, Cache::value_type{s, tag});
   return tag;
 }
