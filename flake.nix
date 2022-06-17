@@ -25,8 +25,14 @@
 
         llvm-backend-src = prev.stdenv.mkDerivation {
           name = "llvm-backend-src";
-          src = prev.lib.cleanSource
-            (prev.nix-gitignore.gitignoreSourcePure [ ] ./.);
+          src = prev.lib.cleanSource (prev.nix-gitignore.gitignoreSourcePure [
+            "/nix"
+            "*.nix"
+            "*.nix.sh"
+            "/.github"
+            "flake.lock"
+            ./.gitignore
+          ] ./.);
           dontBuild = true;
           installPhase = ''
             mkdir $out
@@ -40,7 +46,14 @@
         };
 
         llvm-backend-matching-src = prev.lib.cleanSource
-          (prev.nix-gitignore.gitignoreSourcePure [ ] ./matching);
+          (prev.nix-gitignore.gitignoreSourcePure [
+            "/nix"
+            "*.nix"
+            "*.nix.sh"
+            "/.github"
+            "flake.lock"
+            ./.gitignore
+          ] ./matching);
       });
 
       llvm-backend-overlay =
