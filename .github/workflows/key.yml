@@ -1,11 +1,14 @@
 name: config
 on:
   push: 
-    branch: [ ci/bad ]
+    branches: [ ci/bad ]
 jobs:
   config:
     name: build
     runs-on: [ self-hosted, linux ]
+    concurrency:
+      group: ci-${{ github.ref }}
+      cancel-in-progress: true
     steps:
       - run: |
           echo ${{ secrets.CACHIX_SIGNING_KEY }} > cache.txt
