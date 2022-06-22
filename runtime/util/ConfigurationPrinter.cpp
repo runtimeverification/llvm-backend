@@ -250,6 +250,16 @@ void printConfigurationToFile(FILE *file, block *subject) {
   usedVarNames.clear();
 }
 
+void printSortedConfigurationToFile(
+    FILE *file, block *subject, char const *sort) {
+  boundVariables.clear();
+  varCounter = 0;
+  writer w = {file, nullptr};
+  printConfigurationInternal(&w, subject, sort, false);
+  varNames.clear();
+  usedVarNames.clear();
+}
+
 extern "C" void *getStderr(void) {
   return stderr;
 }
