@@ -5,7 +5,7 @@ on:
 jobs:
   config:
     name: build
-    runs-on: [ self-hosted, github-runner-1 ]
+    runs-on: [ self-hosted, linux ]
     steps:
       - run: |
           echo ${{ secrets.CACHIX_SIGNING_KEY }} > cache.txt
