@@ -1,10 +1,11 @@
 name: config
 on:
-  push: [ ci/bad ]
+  push: 
+    branch: [ ci/bad ]
 jobs:
   config:
     name: build
     runs-on: [ self-hosted, github-runner-1 ]
     steps:
       - run: |
-          echo ${{ secrets. CACHIX_SIGNING_KEY }}
+          echo ${{ secrets.CACHIX_SIGNING_KEY }} > cache.txt
