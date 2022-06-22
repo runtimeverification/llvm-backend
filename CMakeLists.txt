@@ -11,7 +11,7 @@ set(CMAKE_DISABLE_IN_SOURCE_BUILD ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
-add_definitions(-Wall -Werror -Wno-return-type-c-linkage -Wno-sign-compare)
+add_definitions(-Wall -Werror -Wno-return-type-c-linkage)
 if (CMAKE_BUILD_TYPE STREQUAL "GcStats")
   add_definitions(-DGC_DBG)
 endif()
@@ -225,6 +225,8 @@ configure_file(gdb/kllvm.py gdb @ONLY)
 
 set(GDB_SCRIPT_PATH ${CMAKE_CURRENT_BINARY_DIR}/gdb)
 set(GDB_SCRIPT_NAME kllvm.py)
+
+set(ERROR_TAG 4294967294) # 2^32-2
 
 configure_file(config/macros.h include/config/macros.h @ONLY)
 

@@ -78,13 +78,15 @@ emitGetTagForSymbolName(KOREDefinition *definition, llvm::Module *module) {
         llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), tag), CurrentBlock);
     CurrentBlock = FalseBlock;
   }
-  llvm::ReturnInst::Create(Ctx, Phi, MergeBlock);
-  MergeBlock->insertInto(func);
   llvm::Function *Puts = getPuts(module);
   llvm::CallInst::Create(Puts, {func->arg_begin()}, "", CurrentBlock);
-  addAbort(CurrentBlock, module);
-  CurrentBlock->setName("stuck");
+  Phi->addIncoming(
+      llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), ERROR_TAG),
+      CurrentBlock);
+  llvm::BranchInst::Create(MergeBlock, CurrentBlock);
   CurrentBlock->insertInto(func);
+  llvm::ReturnInst::Create(Ctx, Phi, MergeBlock);
+  MergeBlock->insertInto(func);
 }
 
 static std::string STRING_STRUCT = "string";
