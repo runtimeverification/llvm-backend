@@ -31,6 +31,12 @@ if os.getenv('LIT_USE_NIX'):
         if k.startswith('NIX')
     })
 
+# An interaction between lit and the shell on macOS means that we can't have
+# multiline substitutions natively. This function sanitizes them so that we can
+# use them cross-platform while retaining nice source code.
+def one_line(s):
+    return s.strip().replace('\n', ' ; ').replace('do ;', 'do').replace("' ; '", r"'\\n'")
+
 config.substitutions.extend([
     ('%kompile', 'llvm-kompile-testing'),
     ('%interpreter', '%kompile %s main -o %t.interpreter'),
@@ -38,32 +44,32 @@ config.substitutions.extend([
     ('%strip-binary', 'kore-strip'),
     ('%arity', 'kore-arity'),
 
-    ('%check-grep', '''
+    ('%check-grep', one_line('''
         %run | grep -f %test-grep-out -q
         %run-binary | grep -f %test-grep-out -q
         %run-binary-out ; %kore-convert %t.out.bin | tr -d '\n' | grep -f %test-grep-out -q
-    '''),
-    ('%check-diff', '''
+    ''')),
+    ('%check-diff', one_line('''
         %run | diff - %test-diff-out
         %run-binary | diff - %test-diff-out
         %run-binary-out
         %kore-convert %t.out.bin -o %t.out.kore
         %kore-convert %test-diff-out --to=text | diff - %t.out.kore
-    '''),
+    ''')),
 
-    ('%check-dir-grep', '''
+    ('%check-dir-grep', one_line('''
         for out in %test-dir-out/*.out.grep; do
             in=%test-dir-in/`basename $out .out.grep`.in
             %t.interpreter $in -1 /dev/stdout | grep -f $out -q || (echo $in && exit 1)
         done
-    '''),
+    ''')),
 
-    ('%check-dir-diff', '''
+    ('%check-dir-diff', one_line('''
         for out in %test-dir-out/*.out.diff; do
             in=%test-dir-in/`basename $out .out.diff`.in
             %t.interpreter $in -1 /dev/stdout | diff - $out || (echo $in && exit 1)
         done
-    '''),
+    ''')),
 
     ('%run-binary-out', '%t.interpreter %test-input -1 %t.out.bin --binary-output'),
     ('%run-binary', '%convert-input && %t.interpreter %t.bin -1 /dev/stdout'),
