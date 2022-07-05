@@ -20,7 +20,7 @@ jobs:
         submodules: recursive
     # - run: brew install bash
     #   if: ${{ startsWith(matrix.os, 'macos') }}
-    - uses: cachix/install-nix-action@v17
+    - uses: cachix/baltoli@master
       with:
         install_url: "https://releases.nixos.org/nix/nix-2.3.16/install"
     - uses: cachix/cachix-action@v10
