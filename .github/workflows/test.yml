@@ -9,6 +9,7 @@ jobs:
         include:
           - os: ubuntu-latest
           - os: macos-latest
+          - os: [self-hosted, m1]
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v2.3.4
