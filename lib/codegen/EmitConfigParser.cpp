@@ -300,8 +300,8 @@ static llvm::Value *getArgValue(
   case SortCategory::List:
   case SortCategory::Set:
     arg = new llvm::BitCastInst(
-        addrspaceCast(arg, CaseBlock, 0, (unsigned)cat.cat),
-        llvm::PointerType::get(getValueType(cat, mod), (unsigned)cat.cat), "", CaseBlock);
+        addrspaceCast(arg, CaseBlock, 0, (unsigned)SortCategory::Symbol),
+        llvm::PointerType::get(getValueType(cat, mod), (unsigned)SortCategory::Symbol), "", CaseBlock);
     break;
   case SortCategory::Int:
   case SortCategory::Float:
@@ -351,17 +351,17 @@ static std::pair<llvm::Value *, llvm::BasicBlock *> getEval(
   case SortCategory::Int:
   case SortCategory::Float:
   case SortCategory::StringBuffer:
-  case SortCategory::Symbol:
-  case SortCategory::Map:
-  case SortCategory::List:
-  case SortCategory::Set:
     retval = addrspaceCast(
         new llvm::BitCastInst(
             result, llvm::Type::getInt8PtrTy(Ctx, (unsigned)cat.cat), "",
             creator.getCurrentBlock()),
         creator.getCurrentBlock(), (unsigned)cat.cat, 0);
     break;
+  case SortCategory::Symbol:
   case SortCategory::Variable:
+  case SortCategory::Map:
+  case SortCategory::List:
+  case SortCategory::Set:
     retval = addrspaceCast(
         new llvm::BitCastInst(
             result, llvm::Type::getInt8PtrTy(Ctx, (unsigned)SortCategory::Symbol), "",
@@ -708,17 +708,17 @@ makePackedVisitorStructureType(llvm::LLVMContext &Ctx, llvm::Module *module) {
          makeVisitorType(
              Ctx, file,
              llvm::PointerType::get(
-                 getValueType({SortCategory::Map, 0}, module), (unsigned)SortCategory::Map),
+                 getValueType({SortCategory::Map, 0}, module), (unsigned)SortCategory::Symbol),
              3, 0),
          makeVisitorType(
              Ctx, file,
              llvm::PointerType::get(
-                 getValueType({SortCategory::List, 0}, module), (unsigned)SortCategory::List),
+                 getValueType({SortCategory::List, 0}, module), (unsigned)SortCategory::Symbol),
              3, 0),
          makeVisitorType(
              Ctx, file,
              llvm::PointerType::get(
-                 getValueType({SortCategory::Set, 0}, module), (unsigned)SortCategory::Set),
+                 getValueType({SortCategory::Set, 0}, module), (unsigned)SortCategory::Symbol),
              3, 0),
          makeVisitorType(
              Ctx, file, getValueType({SortCategory::Int, 0}, module), 1, 0),

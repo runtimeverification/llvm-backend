@@ -43,19 +43,19 @@ define %floating addrspace(5)* @addrspace_0_to_5_s_floatings(%floating* %in) #0 
   ret %floating addrspace(5)* %out
 }
 
-define %map addrspace(1)* @addrspace_0_to_1_s_maps(%map* %in) #0 {
-  %out = addrspacecast %map* %in to %map addrspace(1)*
-  ret %map addrspace(1)* %out
+define %map addrspace(8)* @addrspace_0_to_8_s_maps(%map* %in) #0 {
+  %out = addrspacecast %map* %in to %map addrspace(8)*
+  ret %map addrspace(8)* %out
 }
 
-define %list addrspace(2)* @addrspace_0_to_2_s_lists(%list* %in) #0 {
-  %out = addrspacecast %list* %in to %list addrspace(2)*
-  ret %list addrspace(2)* %out
+define %list addrspace(8)* @addrspace_0_to_2_s_lists(%list* %in) #0 {
+  %out = addrspacecast %list* %in to %list addrspace(8)*
+  ret %list addrspace(8)* %out
 }
 
-define %set addrspace(3)* @addrspace_0_to_3_s_sets(%set* %in) #0 {
-  %out = addrspacecast %set* %in to %set addrspace(3)*
-  ret %set addrspace(3)* %out
+define %set addrspace(8)* @addrspace_0_to_3_s_sets(%set* %in) #0 {
+  %out = addrspacecast %set* %in to %set addrspace(8)*
+  ret %set addrspace(8)* %out
 }
 
 define %string addrspace(1)* @addrspace_0_to_1_s_strings(%string* %in) #0 {
@@ -63,28 +63,83 @@ define %string addrspace(1)* @addrspace_0_to_1_s_strings(%string* %in) #0 {
   ret %string addrspace(1)* %out
 }
 
-define i8 addrspace(1)* @addrspace_0_to_1_i8(i8* %in) #0 {
-  %out = addrspacecast i8* %in to i8 addrspace(1)*
-  ret i8 addrspace(1)* %out
+define i8 addrspace(4)* @addrspace_0_to_4_i8(i8* %in) #0 {
+  %out = addrspacecast i8* %in to i8 addrspace(4)*
+  ret i8 addrspace(4)* %out
 }
 
-define i1 addrspace(1)* @addrspace_0_to_1_i1(i1* %in) #0 {
-  %out = addrspacecast i1* %in to i1 addrspace(1)*
-  ret i1 addrspace(1)* %out
+define i8 addrspace(5)* @addrspace_0_to_5_i8(i8* %in) #0 {
+  %out = addrspacecast i8* %in to i8 addrspace(5)*
+  ret i8 addrspace(5)* %out
 }
 
-define i32 addrspace(1)* @addrspace_0_to_1_i32(i32* %in) #0 {
-  %out = addrspacecast i32* %in to i32 addrspace(1)*
-  ret i32 addrspace(1)* %out
+define i8 addrspace(6)* @addrspace_0_to_6_i8(i8* %in) #0 {
+  %out = addrspacecast i8* %in to i8 addrspace(6)*
+  ret i8 addrspace(6)* %out
 }
 
-define i64 addrspace(1)* @addrspace_0_to_1_i64(i64* %in) #0 {
-  %out = addrspacecast i64* %in to i64 addrspace(1)*
-  ret i64 addrspace(1)* %out
+define i8 addrspace(7)* @addrspace_0_to_7_i8(i8* %in) #0 {
+  %out = addrspacecast i8* %in to i8 addrspace(7)*
+  ret i8 addrspace(7)* %out
 }
 
-define i8* @addrspace_1_to_0_i8(i8 addrspace(1)* %in) #0 {
-  %out = addrspacecast i8 addrspace(1)* %in to i8*
+define i8 addrspace(8)* @addrspace_0_to_8_i8(i8* %in) #0 {
+  %out = addrspacecast i8* %in to i8 addrspace(8)*
+  ret i8 addrspace(8)* %out
+}
+
+define i8 addrspace(10)* @addrspace_0_to_10_i8(i8* %in) #0 {
+  %out = addrspacecast i8* %in to i8 addrspace(10)*
+  ret i8 addrspace(10)* %out
+}
+
+define i1 addrspace(4)* @addrspace_0_to_4_i1(i1* %in) #0 {
+  %out = addrspacecast i1* %in to i1 addrspace(4)*
+  ret i1 addrspace(4)* %out
+}
+
+define i1 addrspace(5)* @addrspace_0_to_5_i1(i1* %in) #0 {
+  %out = addrspacecast i1* %in to i1 addrspace(5)*
+  ret i1 addrspace(5)* %out
+}
+
+define i32 addrspace(4)* @addrspace_0_to_4_i32(i32* %in) #0 {
+  %out = addrspacecast i32* %in to i32 addrspace(4)*
+  ret i32 addrspace(4)* %out
+}
+
+define i32 addrspace(5)* @addrspace_0_to_5_i32(i32* %in) #0 {
+  %out = addrspacecast i32* %in to i32 addrspace(5)*
+  ret i32 addrspace(5)* %out
+}
+
+define i64 addrspace(4)* @addrspace_0_to_4_i64(i64* %in) #0 {
+  %out = addrspacecast i64* %in to i64 addrspace(4)*
+  ret i64 addrspace(4)* %out
+}
+
+define i64 addrspace(5)* @addrspace_0_to_5_i64(i64* %in) #0 {
+  %out = addrspacecast i64* %in to i64 addrspace(5)*
+  ret i64 addrspace(5)* %out
+}
+
+define i8* @addrspace_4_to_0_i8(i8 addrspace(4)* %in) #0 {
+  %out = addrspacecast i8 addrspace(4)* %in to i8*
+  ret i8* %out
+}
+
+define i8* @addrspace_5_to_0_i8(i8 addrspace(5)* %in) #0 {
+  %out = addrspacecast i8 addrspace(5)* %in to i8*
+  ret i8* %out
+}
+
+define i8* @addrspace_6_to_0_i8(i8 addrspace(6)* %in) #0 {
+  %out = addrspacecast i8 addrspace(6)* %in to i8*
+  ret i8* %out
+}
+
+define i8* @addrspace_8_to_0_i8(i8 addrspace(8)* %in) #0 {
+  %out = addrspacecast i8 addrspace(8)* %in to i8*
   ret i8* %out
 }
 

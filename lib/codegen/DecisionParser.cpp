@@ -209,14 +209,14 @@ public:
     auto child = (*this)(get(node, "next"));
 
     assert(cat == "SET.Set" || cat == "MAP.Map");
-    unsigned addrspace =
-        (unsigned)(cat == "SET.Set" ? SortCategory::SetIterator
-                                    : SortCategory::MapIterator);
+//    unsigned addrspace =
+//        (unsigned)(cat == "SET.Set" ? SortCategory::SetIterator
+//                                    : SortCategory::MapIterator);
 
     return MakeIteratorNode::Create(
         name, type, name + "_iter",
         llvm::PointerType::get(
-            getTypeByName(mod, cat == "SET.Set" ? "setiter" : "mapiter"), addrspace),
+            getTypeByName(mod, cat == "SET.Set" ? "setiter" : "mapiter"), (unsigned)SortCategory::Symbol),
         function, child);
   }
 
@@ -229,16 +229,16 @@ public:
     auto child = (*this)(get(node, "next"));
 
     assert(function == "set_iterator_next" || function == "map_iterator_next");
-    unsigned addrspace =
-        (unsigned)(function == "set_iterator_next" ? SortCategory::SetIterator
-                                                   : SortCategory::MapIterator);
+//    unsigned addrspace =
+//        (unsigned)(function == "set_iterator_next" ? SortCategory::SetIterator
+//                                                   : SortCategory::MapIterator);
 
     return IterNextNode::Create(
         iterator,
         llvm::PointerType::get(
             getTypeByName(
                 mod, function == "set_iterator_next" ? "setiter" : "mapiter"),
-            addrspace),
+            (unsigned)SortCategory::Symbol),
         name, type, function, child);
   }
 
