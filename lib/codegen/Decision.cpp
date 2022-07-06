@@ -621,7 +621,7 @@ void makeEvalOrAnywhereFunction(
     case SortCategory::Map:
     case SortCategory::List:
     case SortCategory::Set:
-      args.push_back(llvm::PointerType::get(getValueType(cat, module), (unsigned)cat.cat));
+      args.push_back(llvm::PointerType::get(getValueType(cat, module), (unsigned)SortCategory::Symbol));
       cats.push_back(cat);
       break;
     default:
@@ -990,7 +990,7 @@ void makeStepFunction(
     case SortCategory::Map:
     case SortCategory::List:
     case SortCategory::Set:
-      argTypes.push_back(llvm::PointerType::get(getValueType(cat, module), (unsigned)cat.cat));
+      argTypes.push_back(llvm::PointerType::get(getValueType(cat, module), (unsigned)SortCategory::Symbol));
       break;
     default: argTypes.push_back(getValueType(cat, module)); break;
     }

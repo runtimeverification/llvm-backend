@@ -156,7 +156,7 @@ llvm::Type *getParamType(ValueType sort, llvm::Module *Module) {
   case SortCategory::MapIterator:
   case SortCategory::Map:
   case SortCategory::List:
-  case SortCategory::Set: type = llvm::PointerType::get(type, (unsigned)sort.cat); break;
+  case SortCategory::Set: type = llvm::PointerType::get(type, (unsigned)SortCategory::Symbol); break;
   default: break;
   }
   return type;
@@ -284,7 +284,7 @@ llvm::Value *allocateTerm(
     return malloc;
   }
   auto cast = new llvm::BitCastInst(
-      malloc, llvm::PointerType::get(AllocType, (unsigned)Cat.cat), "", block);
+      malloc, llvm::PointerType::get(AllocType, malloc->getType()->getPointerAddressSpace()), "", block);
   return cast;
 }
 
@@ -906,7 +906,7 @@ llvm::Value *CreateTerm::createFunctionCall(
     types.insert(types.begin(), AllocSret->getType());
     returnType = llvm::Type::getVoidTy(Ctx);
   } else if (collection) {
-    returnType = llvm::PointerType::get(returnType, (unsigned)returnCat.cat);
+    returnType = llvm::PointerType::get(returnType, (unsigned)SortCategory::Symbol);
   }
 
   llvm::FunctionType *funcType
@@ -1166,7 +1166,7 @@ bool makeFunction(
     case SortCategory::Map:
     case SortCategory::List:
     case SortCategory::Set:
-      paramType = llvm::PointerType::get(paramType, (unsigned)cat.cat);
+      paramType = llvm::PointerType::get(paramType, (unsigned)SortCategory::Symbol);
       break;
     default: break;
     }
@@ -1181,7 +1181,7 @@ bool makeFunction(
   case SortCategory::Map:
   case SortCategory::List:
   case SortCategory::Set:
-    returnType = llvm::PointerType::get(returnType, (unsigned)returnCat.cat);
+    returnType = llvm::PointerType::get(returnType, (unsigned)SortCategory::Symbol);
     break;
   default: break;
   }
@@ -1219,13 +1219,13 @@ bool makeFunction(
 
   CreateTerm creator = CreateTerm(subst, definition, block, Module, false);
   llvm::Value *retval = creator(pattern).first;
-  if (funcType->getReturnType()
-      == llvm::PointerType::get(retval->getType(), (unsigned)returnCat.cat)) {
-    auto tempAlloc = allocateTerm(
-        returnCat, retval->getType(), creator.getCurrentBlock(),
-        "koreAllocAlwaysGC");
-    new llvm::StoreInst(retval, tempAlloc, creator.getCurrentBlock());
-    retval = tempAlloc;
+  if (funcType->getReturnType()->isPointerTy())
+    if (funcType->getReturnType()->getPointerElementType() == retval->getType()) {
+      auto tempAlloc = allocateTerm(
+          returnCat, retval->getType(), creator.getCurrentBlock(),
+          "koreAllocAlwaysGC");
+      new llvm::StoreInst(retval, tempAlloc, creator.getCurrentBlock());
+      retval = tempAlloc;
   }
   if (bigStep) {
     llvm::Type *blockType = getValueType({SortCategory::Symbol, 0}, Module);
@@ -1284,7 +1284,7 @@ std::string makeApplyRuleFunction(
     case SortCategory::Map:
     case SortCategory::List:
     case SortCategory::Set:
-      paramType = llvm::PointerType::get(paramType, (unsigned)cat.cat);
+      paramType = llvm::PointerType::get(paramType, (unsigned)SortCategory::Symbol);
       break;
     default: break;
     }

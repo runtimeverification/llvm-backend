@@ -86,27 +86,27 @@ __attribute__((always_inline)) void *koreAllocAlwaysGC(size_t requested) {
 }
 
 __attribute__((always_inline)) map *
-koreAllocAlwaysGC_p1s_maps(size_t requested) {
+koreAllocAlwaysGC_p8s_maps(size_t requested) {
   return (map *)koreAllocAlwaysGC(requested);
 }
 
 __attribute__((always_inline)) set *
-koreAllocAlwaysGC_p3s_sets(size_t requested) {
+koreAllocAlwaysGC_p8s_sets(size_t requested) {
   return (set *)koreAllocAlwaysGC(requested);
 }
 
 __attribute__((always_inline)) list *
-koreAllocAlwaysGC_p2s_lists(size_t requested) {
+koreAllocAlwaysGC_p8s_lists(size_t requested) {
   return (list *)koreAllocAlwaysGC(requested);
 }
 
 __attribute__((always_inline)) setiter *
-koreAllocAlwaysGC_p11s_setiters(size_t requested) {
+koreAllocAlwaysGC_p8s_setiters(size_t requested) {
   return (setiter *)koreAllocAlwaysGC(requested);
 }
 
 __attribute__((always_inline)) mapiter *
-koreAllocAlwaysGC_p12s_mapiters(size_t requested) {
+koreAllocAlwaysGC_p8s_mapiters(size_t requested) {
   return (mapiter *)koreAllocAlwaysGC(requested);
 }
 

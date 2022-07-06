@@ -300,16 +300,20 @@ static llvm::Value *getArgValue(
   case SortCategory::List:
   case SortCategory::Set:
     arg = new llvm::BitCastInst(
-        addrspaceCast(arg, CaseBlock, 0, (unsigned)cat.cat),
-        llvm::PointerType::get(getValueType(cat, mod), (unsigned)cat.cat), "", CaseBlock);
+        addrspaceCast(arg, CaseBlock, 0, (unsigned)SortCategory::Symbol),
+        llvm::PointerType::get(getValueType(cat, mod), (unsigned)SortCategory::Symbol), "", CaseBlock);
     break;
   case SortCategory::Int:
   case SortCategory::Float:
   case SortCategory::StringBuffer:
   case SortCategory::Symbol:
-  case SortCategory::Variable:
     arg = new llvm::BitCastInst(
         addrspaceCast(arg, CaseBlock, 0, (unsigned)cat.cat), getValueType(cat, mod), "",
+        CaseBlock);
+    break;
+  case SortCategory::Variable:
+    arg = new llvm::BitCastInst(
+        addrspaceCast(arg, CaseBlock, 0, (unsigned)SortCategory::Symbol), getValueType(cat, mod), "",
         CaseBlock);
     break;
   case SortCategory::Uncomputed: abort();
@@ -348,15 +352,21 @@ static std::pair<llvm::Value *, llvm::BasicBlock *> getEval(
   case SortCategory::Float:
   case SortCategory::StringBuffer:
   case SortCategory::Symbol:
+    retval = addrspaceCast(
+        new llvm::BitCastInst(
+            result, llvm::Type::getInt8PtrTy(Ctx, (unsigned)cat.cat), "",
+            creator.getCurrentBlock()),
+        creator.getCurrentBlock(), (unsigned)cat.cat, 0);
+    break;
   case SortCategory::Variable:
   case SortCategory::Map:
   case SortCategory::List:
   case SortCategory::Set:
     retval = addrspaceCast(
         new llvm::BitCastInst(
-            result, llvm::Type::getInt8PtrTy(Ctx, (unsigned)cat.cat), "",
+            result, llvm::Type::getInt8PtrTy(Ctx, (unsigned)SortCategory::Symbol), "",
             creator.getCurrentBlock()),
-        creator.getCurrentBlock(), (unsigned)cat.cat, 0);
+        creator.getCurrentBlock(), (unsigned)SortCategory::Symbol, 0);
     break;
   case SortCategory::Bool:
   case SortCategory::MInt: {
@@ -698,17 +708,17 @@ makePackedVisitorStructureType(llvm::LLVMContext &Ctx, llvm::Module *module) {
          makeVisitorType(
              Ctx, file,
              llvm::PointerType::get(
-                 getValueType({SortCategory::Map, 0}, module), (unsigned)SortCategory::Map),
+                 getValueType({SortCategory::Map, 0}, module), (unsigned)SortCategory::Symbol),
              3, 0),
          makeVisitorType(
              Ctx, file,
              llvm::PointerType::get(
-                 getValueType({SortCategory::List, 0}, module), (unsigned)SortCategory::List),
+                 getValueType({SortCategory::List, 0}, module), (unsigned)SortCategory::Symbol),
              3, 0),
          makeVisitorType(
              Ctx, file,
              llvm::PointerType::get(
-                 getValueType({SortCategory::Set, 0}, module), (unsigned)SortCategory::Set),
+                 getValueType({SortCategory::Set, 0}, module), (unsigned)SortCategory::Symbol),
              3, 0),
          makeVisitorType(
              Ctx, file, getValueType({SortCategory::Int, 0}, module), 1, 0),
