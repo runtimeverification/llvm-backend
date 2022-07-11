@@ -1,5 +1,6 @@
 #include <kllvm/ast/AST.h>
 #include <kllvm/binary/serializer.h>
+#include <kllvm/parser/KOREParser.h>
 
 #include "runtime/header.h"
 
@@ -9,6 +10,7 @@
 #include <set>
 
 using namespace kllvm;
+using namespace kllvm::parser;
 
 static std::string drop_back(std::string s, int n) {
   return s.substr(0, s.size() - n);
@@ -184,6 +186,18 @@ void serializeMInt(writer *file, size_t *i, size_t bits, const char *sort) {
 
 void serializeComma(writer *file) { }
 
+static std::pair<std::string, std::vector<sptr<KORESort>>>
+cached_symbol_sort_list(std::string const &symbol) {
+  static auto cache = std::unordered_map<
+      std::string, std::pair<std::string, std::vector<sptr<KORESort>>>>{};
+
+  if (cache.find(symbol) == cache.end()) {
+    cache[symbol] = KOREParser::from_string(symbol).symbol_sort_list();
+  }
+
+  return cache.at(symbol);
+}
+
 void serializeConfigurationInternal(
     writer *file, block *subject, const char *sort, bool isVar) {
   uint8_t isConstant = ((uintptr_t)subject) & 3;
@@ -250,43 +264,26 @@ void serializeConfigurationInternal(
   auto symbol = getSymbolNameForTag(tag);
   auto symbolStr = std::string(symbol);
 
-  auto location_symbol = std::string("Lbl'Hash'location");
-  auto amb_symbol = std::string("Lblamb");
+  auto [name, sorts] = cached_symbol_sort_list(symbolStr);
 
-  if (symbolStr.rfind("inj{", 0) == 0) {
-    std::string prefix = symbolStr.substr(4, symbolStr.find_first_of(',') - 4);
+  if (name == "inj") {
+    if (sorts.size() != 2) {
+      abort();
+    }
 
-    emitConstantSort(drop_back(prefix, 2).c_str());
+    sorts[0]->serialize_to(instance);
     emitConstantSort(drop_back(sort, 2).c_str());
-
-    instance.emit(header_byte<KORESymbol>);
-    instance.emit_length(2);
-    instance.emit_string("inj");
-  } else if (symbolStr.rfind(location_symbol, 0) == 0) {
-    auto inner_sort
-        = drop_back(symbolStr.substr(location_symbol.size() + 1), 1);
-
-    emitConstantSort(inner_sort.c_str());
-
-    instance.emit(header_byte<KORESymbol>);
-    instance.emit_length(1);
-    instance.emit_string(location_symbol);
-  } else if (symbolStr.rfind(amb_symbol, 0) == 0) {
-    auto inner_sort = drop_back(symbolStr.substr(amb_symbol.size() + 1), 1);
-
-    emitConstantSort(inner_sort.c_str());
-
-    instance.emit(header_byte<KORESymbol>);
-    instance.emit_length(1);
-    instance.emit_string(amb_symbol);
   } else {
-    instance.emit(header_byte<KORESymbol>);
-    instance.emit_length(0);
-    instance.emit_string(symbolStr.substr(0, symbolStr.size() - 2));
+    for (auto const &s : sorts) {
+      s->serialize_to(instance);
+    }
   }
 
-  instance.emit(header_byte<KORECompositePattern>);
+  instance.emit(header_byte<KORESymbol>);
+  instance.emit_length(sorts.size());
+  instance.emit_string(name);
 
+  instance.emit(header_byte<KORECompositePattern>);
   instance.emit_length(getSymbolArity(tag));
 
   if (isBinder) {
