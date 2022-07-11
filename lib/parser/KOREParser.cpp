@@ -1,10 +1,30 @@
 #include "kllvm/parser/KOREParser.h"
 #include "kllvm/ast/AST.h"
 #include "kllvm/parser/KOREScanner.h"
+
+#include <cstdio>
+#include <fstream>
 #include <iostream>
 
 namespace kllvm {
 namespace parser {
+
+KOREParser KOREParser::from_string(std::string text) {
+  char temp_file_name[] = "tmp.parse.XXXXXXXXXX";
+
+  if (mkstemp(temp_file_name) == -1) {
+    std::perror("Could not create temporary parsing file: ");
+    std::exit(1);
+  }
+
+  auto os = std::ofstream(temp_file_name);
+  os << text;
+  os.close();
+
+  auto parser = KOREParser(temp_file_name);
+  std::remove(temp_file_name);
+  return parser;
+}
 
 void KOREParser::error(const location &loc, const std::string &err_message) {
   std::cerr << "Syntax error at " << loc << ": " << err_message << "\n";

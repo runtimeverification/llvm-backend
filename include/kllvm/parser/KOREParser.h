@@ -13,6 +13,8 @@ public:
       : scanner(KOREScanner(filename))
       , loc(location(filename)) { }
 
+  static KOREParser from_string(std::string text);
+
   ptr<KOREDefinition> definition(void);
   ptr<KOREPattern> pattern(void);
   std::vector<ptr<KOREDeclaration>> declarations(void);
