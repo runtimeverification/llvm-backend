@@ -1,4 +1,8 @@
 // RUN: %interpreter
+// RUN: rm -f %t.out
+// RUN: %t.interpreter %test-input -1 %t.out
+// RUN: kprint %input-dir/amb %t.out     | diff - %test-diff-out
+// RUN: rm -f %t.out.bin
 // RUN: %t.interpreter %test-input -1 %t.out.bin --binary-output
 // RUN: kprint %input-dir/amb %t.out.bin | diff - %test-diff-out
 
