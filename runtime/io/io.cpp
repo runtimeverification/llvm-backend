@@ -599,7 +599,7 @@ list hook_KREFLECTION_argv() {
   if (!llvm_backend_argv)
     throw std::invalid_argument("KREFLECTION.argv: no arguments given");
 
-  list l{};
+  list_internal l{};
 
   for (int i = 0; i < llvm_backend_argc; i++) {
     stringbuffer *buf = hook_BUFFER_empty();
@@ -613,7 +613,7 @@ list hook_KREFLECTION_argv() {
     l = l.push_back(KElem(b));
   }
 
-  return l;
+  return list(std::move(l));
 }
 
 SortIOFile hook_IO_mkstemp(SortString filename) {

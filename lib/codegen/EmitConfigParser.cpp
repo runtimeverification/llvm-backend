@@ -827,8 +827,25 @@ static void getStore(
         {zero, llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), idx++ + 2)},
         "", CaseBlock);
     if (arg->getType() == ChildPtr->getType()) {
-      arg = new llvm::LoadInst(
-          arg->getType()->getPointerElementType(), arg, "", CaseBlock);
+      llvm::Type *ArgType = arg->getType()->getPointerElementType();
+      if (auto StructTy = llvm::dyn_cast<llvm::StructType>(ArgType)) {
+        assert(StructTy->hasName());
+        std::string name = StructTy->getName().str();
+        if (name == "map" || name == "set" || name == "list") {
+          llvm::Value *BaseBlockPtr = llvm::GetElementPtrInst::CreateInBounds(
+              ArgType, arg,
+              {llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0),
+               llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), 1)},
+              "", CaseBlock);
+          new llvm::StoreInst(
+              new llvm::AddrSpaceCastInst(
+                  cast,
+                  llvm::PointerType::get(getTypeByName(module, BLOCK_STRUCT), 0),
+                  "", CaseBlock),
+              BaseBlockPtr, CaseBlock);
+        }
+      }
+      arg = new llvm::LoadInst(ArgType, arg, "", CaseBlock);
     }
     new llvm::StoreInst(arg, ChildPtr, CaseBlock);
   }

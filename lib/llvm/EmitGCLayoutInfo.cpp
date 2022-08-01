@@ -55,7 +55,7 @@ struct EmitGCLayoutInfo : public ModulePass {
 #else
             for (auto &R : S->getRelocates()) {
 #endif
-              auto Arg = R->getBasePtr();
+              auto Arg = R->getDerivedPtr();
               auto *Ty = Arg->getType()->getPointerElementType();
               if (Ty->isIntegerTy()) {
                 i++;

@@ -95,11 +95,11 @@ BOOST_AUTO_TEST_CASE(set2list) {
   set2 = hook_SET_element(DUMMY2);
   set = hook_SET_concat(&set, &set2);
   auto list = hook_SET_set2list(&set);
-  BOOST_CHECK_EQUAL(list.size(), 3);
+  BOOST_CHECK_EQUAL(list.impl.size(), 3);
 }
 
 BOOST_AUTO_TEST_CASE(list2set) {
-  auto l = list{DUMMY0, DUMMY1, DUMMY2};
+  auto l = list(list_internal{DUMMY0, DUMMY1, DUMMY2});
   auto set = hook_SET_list2set(&l);
   auto result = hook_SET_size(&set);
   BOOST_CHECK_EQUAL(__gmpz_cmp_ui(result, 3), 0);

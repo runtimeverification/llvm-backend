@@ -162,22 +162,43 @@ struct KEq {
   }
 };
 
-using list = immer::flex_vector<
+using list_internal = immer::flex_vector<
     KElem, immer::memory_policy<
                immer::heap_policy<kore_alloc_heap>, immer::no_refcount_policy,
                immer::no_lock_policy>>;
-using map = immer::map<
-    KElem, KElem, HashBlock, std::equal_to<KElem>, list::memory_policy>;
-using set
-    = immer::set<KElem, HashBlock, std::equal_to<KElem>, list::memory_policy>;
+using map_internal = immer::map<
+    KElem, KElem, HashBlock, std::equal_to<KElem>, list_internal::memory_policy>;
+using set_internal
+    = immer::set<KElem, HashBlock, std::equal_to<KElem>, list_internal::memory_policy>;
+
+struct list {
+  list(list_internal &&impl, block *base_ptr = nullptr) : impl(impl), base_ptr(base_ptr) { }
+  list() : list(list_internal()) { }
+  list_internal impl;
+  block *base_ptr;
+};
+
+struct map {
+  map(map_internal &&impl, block *base_ptr = nullptr) : impl(impl), base_ptr(base_ptr) { }
+  map() : map(map_internal()) { }
+  map_internal impl;
+  block *base_ptr;
+};
+
+struct set {
+  set(set_internal &&impl, block *base_ptr = nullptr) : impl(impl), base_ptr(base_ptr) { }
+  set() : set(set_internal()) { }
+  set_internal impl;
+  block *base_ptr;
+};
 
 typedef struct mapiter {
-  map::iterator curr;
+  map_internal::iterator curr;
   map *map;
 } mapiter;
 
 typedef struct setiter {
-  set::iterator curr;
+  set_internal::iterator curr;
   set *set;
 } setiter;
 

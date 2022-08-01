@@ -89,18 +89,18 @@ static void emitToken(char const *sort, char const *string, int len = 0) {
 void serializeMap(
     writer *file, map *map, const char *unit, const char *element,
     const char *concat) {
-  size_t size = map->size();
+  size_t size = map->impl.size();
   if (size == 0) {
     emitSymbol(unit);
     return;
   }
 
-  for (auto iter = map->begin(); iter != map->end(); ++iter) {
+  for (auto iter = map->impl.begin(); iter != map->impl.end(); ++iter) {
     serializeConfigurationInternal(file, iter->first, "SortKItem{}", false);
     serializeConfigurationInternal(file, iter->second, "SortKItem{}", false);
     emitSymbol(element, 2);
 
-    if (iter != map->begin()) {
+    if (iter != map->impl.begin()) {
       emitSymbol(concat, 2);
     }
   }
@@ -109,17 +109,17 @@ void serializeMap(
 void serializeList(
     writer *file, list *list, const char *unit, const char *element,
     const char *concat) {
-  size_t size = list->size();
+  size_t size = list->impl.size();
   if (size == 0) {
     emitSymbol(unit);
     return;
   }
 
-  for (auto iter = list->begin(); iter != list->end(); ++iter) {
+  for (auto iter = list->impl.begin(); iter != list->impl.end(); ++iter) {
     serializeConfigurationInternal(file, *iter, "SortKItem{}", false);
     emitSymbol(element, 1);
 
-    if (iter != list->begin()) {
+    if (iter != list->impl.begin()) {
       emitSymbol(concat, 2);
     }
   }
@@ -128,17 +128,17 @@ void serializeList(
 void serializeSet(
     writer *file, set *set, const char *unit, const char *element,
     const char *concat) {
-  size_t size = set->size();
+  size_t size = set->impl.size();
   if (size == 0) {
     emitSymbol(unit);
     return;
   }
 
-  for (auto iter = set->begin(); iter != set->end(); ++iter) {
+  for (auto iter = set->impl.begin(); iter != set->impl.end(); ++iter) {
     serializeConfigurationInternal(file, *iter, "SortKItem{}", false);
     emitSymbol(element, 1);
 
-    if (iter != set->begin()) {
+    if (iter != set->impl.begin()) {
       emitSymbol(concat, 2);
     }
   }

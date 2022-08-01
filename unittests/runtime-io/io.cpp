@@ -640,25 +640,25 @@ BOOST_AUTO_TEST_CASE(argv) {
   llvm_backend_argv = argv;
   llvm_backend_argc = 2;
   list ret = hook_KREFLECTION_argv();
-  BOOST_CHECK(ret.size() == 2);
+  BOOST_CHECK(ret.impl.size() == 2);
 
-  BOOST_CHECK(ret[0].elem != nullptr);
+  BOOST_CHECK(ret.impl[0].elem != nullptr);
   BOOST_CHECK_EQUAL(
-      ret[0].elem->h.hdr,
+      ret.impl[0].elem->h.hdr,
       getBlockHeaderForSymbol(
           getTagForSymbolName("inj{SortString{}, SortKItem{}}"))
           .hdr);
-  string *arg0 = (string *)*(ret[0].elem->children);
+  string *arg0 = (string *)*(ret.impl[0].elem->children);
   BOOST_CHECK_EQUAL(0, strncmp(arg0->data, argv[0], strlen(argv[0])));
   BOOST_CHECK_EQUAL(strlen(argv[0]), len(arg0));
 
-  BOOST_CHECK(ret[1].elem != nullptr);
+  BOOST_CHECK(ret.impl[1].elem != nullptr);
   BOOST_CHECK_EQUAL(
-      ret[1].elem->h.hdr,
+      ret.impl[1].elem->h.hdr,
       getBlockHeaderForSymbol(
           getTagForSymbolName("inj{SortString{}, SortKItem{}}"))
           .hdr);
-  string *arg1 = (string *)*(ret[1].elem->children);
+  string *arg1 = (string *)*(ret.impl[1].elem->children);
   BOOST_CHECK_EQUAL(0, strncmp(arg1->data, argv[1], strlen(argv[1])));
   BOOST_CHECK_EQUAL(strlen(argv[1]), len(arg1));
 }

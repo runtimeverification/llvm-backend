@@ -63,11 +63,11 @@ target triple = "@BACKEND_TARGET_TRIPLE@"
 
 %string = type { %blockheader, [0 x i8] } ; 10-bit layout, 4-bit gc flags, 10 unused bits, 40-bit length (or buffer capacity for string pointed by stringbuffers), bytes
 %stringbuffer = type { i64, i64, %string* } ; 10-bit layout, 4-bit gc flags, 10 unused bits, 40-bit length, string length, current contents
-%map = type { { i8 *, i64 } } ; immer::map
-%set = type { { i8 *, i64 } } ; immer::set
+%map = type { { { i8 *, i64 } }, %block * } ; { immer::map, base pointer }
+%set = type { { { i8 *, i64 } }, %block * } ; { immer::set, base pointer }
 %setiter = type { { i8 *, i8 *, i32, [14 x i8**] }, { { i8 *, i64 } } } ; immer::set_iter
 %mapiter = type { { i8 *, i8 *, i32, [14 x i8**] }, { { i8 *, i64 } } } ; immer::map_iter
-%list = type { { i64, i32, i8 *, i8 * } } ; immer::flex_vector
+%list = type { { { i64, i32, i8 *, i8 * } }, %block * } ; { immer::flex_vector, base pointer }
 %mpz = type { i32, i32, i64 * } ; mpz_t
 %mpz_hdr = type { %blockheader, %mpz } ; 10-bit layout, 4-bit gc flags, 10 unused bits, 40-bit length, mpz_t
 %floating = type { i64, { i64, i32, i64, i64 * } } ; exp, mpfr_t
@@ -966,8 +966,26 @@ llvm::Value *CreateTerm::notInjectionCase(
          llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), idx++)},
         "", CurrentBlock);
     if (ChildValue->getType() == ChildPtr->getType()) {
+      llvm::Type *ChildValueType = ChildValue->getType()->getPointerElementType();
+      if (auto StructTy = llvm::dyn_cast<llvm::StructType>(ChildValueType)) {
+        assert(StructTy->hasName());
+        std::string name = StructTy->getName().str();
+        if (name == "map" || name == "set" || name == "list") {
+          llvm::Value *BaseBlockPtr = llvm::GetElementPtrInst::CreateInBounds(
+              ChildValueType, ChildValue,
+              {llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0),
+               llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), 1)},
+              "", CurrentBlock);
+          new llvm::StoreInst(
+              new llvm::AddrSpaceCastInst(
+                  Block,
+                  llvm::PointerType::get(getTypeByName(Module, BLOCK_STRUCT), 0),
+                  "", CurrentBlock),
+              BaseBlockPtr, CurrentBlock);
+        }
+      }
       ChildValue = new llvm::LoadInst(
-          ChildValue->getType()->getPointerElementType(), ChildValue, "",
+          ChildValueType, ChildValue, "",
           CurrentBlock);
     }
     new llvm::StoreInst(ChildValue, ChildPtr, CurrentBlock);

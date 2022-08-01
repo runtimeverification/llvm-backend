@@ -4,9 +4,9 @@ target triple = "x86_64-unknown-linux-gnu"
 %blockheader = type { i64 }
 %mpz = type { i32, i32, i64* }
 %block = type { %blockheader, [0 x i64*] }
-%map = type { { i8*, i64 } }
-%list = type { { i64, i32, i8*, i8* } }
-%set = type { { i8*, i64 } }
+%map = type { { { i8 *, i64 } }, %block * }
+%list = type { { { i64, i32, i8 *, i8 * } }, %block * }
+%set = type { { { i8 *, i64 } }, %block * }
 %floating = type { i64, { i64, i32, i64, i64* } }
 %string = type { %blockheader, [0 x i8] }
 
