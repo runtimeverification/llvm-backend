@@ -605,14 +605,14 @@ private:
 // KOREDeclaration
 class KOREDeclaration {
 protected:
-  std::map<std::string, ptr<KORECompositePattern>> attributes;
+  std::unordered_map<std::string, ptr<KORECompositePattern>> attributes;
   std::vector<sptr<KORESortVariable>> objectSortVariables;
 
 public:
   void addAttribute(ptr<KORECompositePattern> Attribute);
   void addObjectSortVariable(sptr<KORESortVariable> SortVariable);
   virtual void print(std::ostream &Out, unsigned indent = 0) const = 0;
-  const std::map<std::string, ptr<KORECompositePattern>> &
+  const std::unordered_map<std::string, ptr<KORECompositePattern>> &
   getAttributes() const {
     return attributes;
   }
@@ -764,7 +764,7 @@ class KOREModule {
 private:
   std::string name;
   std::vector<ptr<KOREDeclaration>> declarations;
-  std::map<std::string, ptr<KORECompositePattern>> attributes;
+  std::unordered_map<std::string, ptr<KORECompositePattern>> attributes;
 
 public:
   static ptr<KOREModule> Create(const std::string &Name) {
@@ -827,7 +827,7 @@ private:
   KOREAxiomMapType ordinals;
 
   std::vector<ptr<KOREModule>> modules;
-  std::map<std::string, ptr<KORECompositePattern>> attributes;
+  std::unordered_map<std::string, ptr<KORECompositePattern>> attributes;
   /* an automatically computed list of all the axioms in the definition */
   std::list<KOREAxiomDeclaration *> axioms;
 
@@ -870,7 +870,7 @@ public:
   KOREAxiomDeclaration *getAxiomByOrdinal(size_t ordinal) const {
     return ordinals.at(ordinal);
   }
-  const std::map<std::string, ptr<KORECompositePattern>> &
+  const std::unordered_map<std::string, ptr<KORECompositePattern>> &
   getAttributes() const {
     return attributes;
   }

@@ -83,7 +83,7 @@ static std::string LOCATION_ATT
     = "org'Stop'kframework'Stop'attributes'Stop'Location";
 
 void initDebugAxiom(
-    std::map<std::string, ptr<KORECompositePattern>> const &att) {
+    std::unordered_map<std::string, ptr<KORECompositePattern>> const &att) {
   if (!Dbg)
     return;
   if (!att.count(SOURCE_ATT)) {
