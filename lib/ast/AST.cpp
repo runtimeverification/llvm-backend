@@ -1726,7 +1726,8 @@ void KOREStringPattern::print(std::ostream &Out, unsigned indent) const {
 
 static void printAttributeList(
     std::ostream &Out,
-    const std::map<std::string, ptr<KORECompositePattern>> &attributes,
+    const std::unordered_map<std::string, ptr<KORECompositePattern>>
+        &attributes,
     unsigned indent = 0) {
 
   std::string Indent(indent, ' ');

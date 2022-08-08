@@ -17,7 +17,7 @@ void initDebugFunction(
     KOREDefinition *definition, llvm::Function *func);
 
 void initDebugAxiom(
-    std::map<std::string, ptr<KORECompositePattern>> const &att);
+    std::unordered_map<std::string, ptr<KORECompositePattern>> const &att);
 void initDebugParam(
     llvm::Function *func, unsigned argNo, std::string name, ValueType type,
     std::string typeName);
