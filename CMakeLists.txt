@@ -101,27 +101,6 @@ if (${LLVM_PACKAGE_VERSION} VERSION_LESS 10)
   message(FATAL_ERROR "LLVM 10 or newer is required")
 endif()
 
-if(APPLE)
-  find_program(LLDB lldb)
-
-  if(LLDB)
-    execute_process(
-      COMMAND "${LLDB}"
-      ARGUMENTS "-P"
-      OUTPUT_VARIABLE LLDB_PYTHONPATH
-      OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-    file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/gdb)
-    configure_file(gdb/k-lldb gdb @ONLY)
-
-    install(
-      PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/gdb/k-lldb
-      DESTINATION bin)
-  else()
-    message(WARNING "No LLDB installation found")
-  endif()
-endif()
-
 include(SetTriple)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -241,12 +220,6 @@ set(VARIABLE_LAYOUT 9)
 get_filename_component(INSTALL_DIR_ABS_PATH "${CMAKE_INSTALL_PREFIX}"
                        REALPATH BASE_DIR "${CMAKE_BINARY_DIR}")
 
-file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/gdb)
-configure_file(gdb/kllvm.py gdb @ONLY)
-
-set(GDB_SCRIPT_PATH ${CMAKE_CURRENT_BINARY_DIR}/gdb)
-set(GDB_SCRIPT_NAME kllvm.py)
-
 set(ERROR_TAG 4294967294) # 2^32-2
 
 configure_file(config/macros.h include/config/macros.h @ONLY)
@@ -274,6 +247,7 @@ FILE(GLOB_RECURSE HaskellSources matching/src/*.hs matching/app/Main.hs)
 set(KLLVM_AUTOGEN_INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR}/include)
 include_directories(${KLLVM_AUTOGEN_INCLUDE_DIR})
 
+add_subdirectory(debug)
 add_subdirectory(deps)
 add_subdirectory(lib)
 add_subdirectory(tools)
