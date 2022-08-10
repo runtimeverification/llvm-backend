@@ -112,7 +112,11 @@ if(APPLE)
       OUTPUT_STRIP_TRAILING_WHITESPACE)
 
     file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/gdb)
-    configure_file(gdb/k-lldb.py gdb @ONLY)
+    configure_file(gdb/k-lldb gdb @ONLY)
+
+    install(
+      PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/gdb/k-lldb
+      DESTINATION bin)
   else()
     message(WARNING "No LLDB installation found")
   endif()
@@ -177,7 +181,6 @@ install(
     ${CMAKE_CURRENT_BINARY_DIR}/bin/llvm-kompile
     ${CMAKE_CURRENT_BINARY_DIR}/bin/llvm-kompile-clang
     ${CMAKE_CURRENT_BINARY_DIR}/bin/llvm-krun
-    ${CMAKE_CURRENT_BINARY_DIR}/gdb/k-lldb.py
   DESTINATION bin
 )
 
