@@ -2,6 +2,6 @@
 
 echo | \
   "$1" -S -emit-llvm -xc -o- - | \
-  grep datalayout | \
+  grep "target $2" | \
   cut -d' ' -f4 | \
   tr -d \"

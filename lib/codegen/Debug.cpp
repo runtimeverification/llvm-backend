@@ -27,8 +27,20 @@ void initDebugInfo(llvm::Module *module, std::string filename) {
       llvm::Module::Warning, "Debug Info Version",
       (uint32_t)llvm::DEBUG_METADATA_VERSION);
   module->addModuleFlag(llvm::Module::Warning, "Dwarf Version", DWARF_VERSION);
+
+  // There are no overloads for this method in DIBuilder, so we need to
+  // re-specify lots of the default arguments to get to the DebugNameTableKind
+  // one; for DWARFv5 objects, we don't emit a global name table to avoid
+  // trampling the existing one.
+  //
+  // See these links for the original issue context and a reference for the
+  // arguments to createCompileUnit:
+  //   https://github.com/runtimeverification/k/issues/2637
+  //   https://llvm.org/doxygen/classllvm_1_1DIBuilder.html
   DbgCU = Dbg->createCompileUnit(
-      llvm::dwarf::DW_LANG_C, DbgFile, "llvm-kompile-codegen", 0, "", 0);
+      llvm::dwarf::DW_LANG_C, DbgFile, "llvm-kompile-codegen", false, "", 0, "",
+      llvm::DICompileUnit::DebugEmissionKind::FullDebug, 0, false, false,
+      llvm::DICompileUnit::DebugNameTableKind::None);
 }
 
 void finalizeDebugInfo(void) {
@@ -83,7 +95,7 @@ static std::string LOCATION_ATT
     = "org'Stop'kframework'Stop'attributes'Stop'Location";
 
 void initDebugAxiom(
-    std::map<std::string, ptr<KORECompositePattern>> const &att) {
+    std::unordered_map<std::string, ptr<KORECompositePattern>> const &att) {
   if (!Dbg)
     return;
   if (!att.count(SOURCE_ATT)) {

@@ -39,7 +39,7 @@ RUN    pip3 install --user --upgrade pip  \
 
 ADD matching/pom.xml /home/user/.tmp-maven/
 RUN    cd /home/user/.tmp-maven \
-    && mvn dependency:go-offline
+    && mvn -B dependency:go-offline
 
 # Set $PATH to refer to LLVM's lit correctly
 ENV PATH "$PATH:/home/user/.local/bin"

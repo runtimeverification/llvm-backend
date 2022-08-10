@@ -4,6 +4,8 @@
 #include "kllvm/ast/AST.h"
 #include "kllvm/parser/KOREScanner.h"
 
+#include <utility>
+
 namespace kllvm {
 namespace parser {
 
@@ -13,9 +15,13 @@ public:
       : scanner(KOREScanner(filename))
       , loc(location(filename)) { }
 
+  static KOREParser from_string(std::string text);
+
   ptr<KOREDefinition> definition(void);
   ptr<KOREPattern> pattern(void);
   std::vector<ptr<KOREDeclaration>> declarations(void);
+
+  std::pair<std::string, std::vector<sptr<KORESort>>> symbol_sort_list();
 
 private:
   KOREScanner scanner;

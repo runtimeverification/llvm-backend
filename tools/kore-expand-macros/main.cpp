@@ -72,8 +72,11 @@ int main(int argc, char **argv) {
     }
   }
 
-  sptr<KOREPattern> expanded
-      = config->expandMacros(subsorts, overloads, axioms, false);
+  auto expanded
+      = axioms.empty()
+            ? config
+            : config->expandMacros(subsorts, overloads, axioms, false);
+
   expanded->print(std::cout);
   std::cout << std::endl;
 

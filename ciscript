@@ -1,5 +1,5 @@
 #!/bin/bash -ex
-ulimit -s 400000
+ulimit -s 50000
 
 export PATH=$HOME/.cargo/bin:$HOME/.local/bin:$PATH
 
