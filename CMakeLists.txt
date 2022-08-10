@@ -101,6 +101,23 @@ if (${LLVM_PACKAGE_VERSION} VERSION_LESS 10)
   message(FATAL_ERROR "LLVM 10 or newer is required")
 endif()
 
+if(APPLE)
+  find_program(LLDB lldb)
+
+  if(LLDB)
+    execute_process(
+      COMMAND "${LLDB}"
+      ARGUMENTS "-P"
+      OUTPUT_VARIABLE LLDB_PYTHONPATH
+      OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+    file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/gdb)
+    configure_file(gdb/k-lldb.py gdb @ONLY)
+  else()
+    message(WARNING "No LLDB installation found")
+  endif()
+endif()
+
 include(SetTriple)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -160,6 +177,7 @@ install(
     ${CMAKE_CURRENT_BINARY_DIR}/bin/llvm-kompile
     ${CMAKE_CURRENT_BINARY_DIR}/bin/llvm-kompile-clang
     ${CMAKE_CURRENT_BINARY_DIR}/bin/llvm-krun
+    ${CMAKE_CURRENT_BINARY_DIR}/gdb/k-lldb.py
   DESTINATION bin
 )
 
