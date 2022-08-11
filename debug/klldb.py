@@ -39,7 +39,7 @@ if __name__ == "__main__":
     main_bp = target.BreakpointCreateByName(
         "main", target.GetExecutable().GetFilename())
 
-    process = target.LaunchSimple(None, None, os.getcwd())
+    process = target.LaunchSimple([args.input, args.depth, args.output], None, os.getcwd())
 
     n_errors, quit_requested, has_crashed = debugger.RunCommandInterpreter(
         True, False, lldb.SBCommandInterpreterRunOptions(), 0, False, False)

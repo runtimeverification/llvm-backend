@@ -12,7 +12,7 @@ if(APPLE)
 
     install(
       PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/klldb.py
-      DESTINATION bin)
+      DESTINATION lib/lldb)
   else()
     message(WARNING "No LLDB installation found")
   endif()
