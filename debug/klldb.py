@@ -6,6 +6,11 @@ sys.path.append("@LLDB_PYTHONPATH@")  # noqa
 import argparse
 import lldb
 import os
+import pathlib
+
+
+def dispatch_k(debugger, command, result, internal_dict):
+    print('K-specific support for LLDB is not yet implemented')
 
 
 def parse_args():
@@ -25,6 +30,9 @@ if __name__ == "__main__":
     debugger = lldb.SBDebugger.Create()
     debugger.SetAsync(False)
 
+    debugger.HandleCommand(
+        f"command script import {pathlib.Path(__file__).resolve()}")
+
     target = debugger.CreateTargetWithFileAndArch(
         args.interpreter, lldb.LLDB_ARCH_DEFAULT)
 
@@ -35,3 +43,7 @@ if __name__ == "__main__":
 
     n_errors, quit_requested, has_crashed = debugger.RunCommandInterpreter(
         True, False, lldb.SBCommandInterpreterRunOptions(), 0, False, False)
+
+
+def __lldb_init_module(debugger, internal_dict):
+    debugger.HandleCommand("command script add -f klldb.dispatch_k k")

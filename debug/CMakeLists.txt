@@ -8,10 +8,10 @@ if(APPLE)
       OUTPUT_VARIABLE LLDB_PYTHONPATH
       OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-    configure_file(k-lldb ${CMAKE_CURRENT_BINARY_DIR} @ONLY)
+    configure_file(klldb.py ${CMAKE_CURRENT_BINARY_DIR} @ONLY)
 
     install(
-      PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/k-lldb
+      PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/klldb.py
       DESTINATION bin)
   else()
     message(WARNING "No LLDB installation found")
