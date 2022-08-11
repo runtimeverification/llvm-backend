@@ -19,9 +19,9 @@ if(APPLE)
 endif()
 
 set(GDB_SCRIPT_PATH ${CMAKE_CURRENT_BINARY_DIR})
-set(GDB_SCRIPT_NAME kllvm.py)
+set(GDB_SCRIPT_NAME kgdb.py)
 
-configure_file(kllvm.py ${CMAKE_CURRENT_BINARY_DIR} @ONLY)
+configure_file(kgdb.py ${CMAKE_CURRENT_BINARY_DIR} @ONLY)
 
 configure_file(
   ${CMAKE_SOURCE_DIR}/config/macros.h
