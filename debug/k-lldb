@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 
-import argparse
 import sys
+sys.path.append("@LLDB_PYTHONPATH@")  # noqa
 
-# This import needs to be at the end so that we can add it to sys.path - the
-# noqa comment is autopep8 magic to keep it unsorted
-import lldb  # noqa
-sys.path.append("@LLDB_PYTHONPATH@")
+import lldb
+import argparse
