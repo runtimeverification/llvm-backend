@@ -14,8 +14,7 @@ def parse_args():
     parser.add_argument(
         'interpreter', help='Path to the compiled K interpreter to run')
     parser.add_argument('input', help='Path to input KORE term')
-    parser.add_argument('depth', type=int,
-                        help='Number of rewriting steps to take')
+    parser.add_argument('depth', help='Number of rewriting steps to take')
     parser.add_argument('output', help='Path to write output KORE term to')
     return parser.parse_args()
 
