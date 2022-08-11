@@ -1,9 +1,12 @@
 if(APPLE)
-  find_program(LLDB lldb)
+  # We need to hard-code the path to the system (i.e. XCode) installation of
+  # lldb here because a Homebrew version is likely to want a different version
+  # of Python 3 than the default macOS version.
+  set(LLDB_PATH "/usr/local/bin/lldb")
 
-  if(LLDB)
+  if(EXISTS ${LLDB_PATH})
     execute_process(
-      COMMAND "${LLDB}"
+      COMMAND ${LLDB_PATH}
       ARGUMENTS "-P"
       OUTPUT_VARIABLE LLDB_PYTHONPATH
       OUTPUT_STRIP_TRAILING_WHITESPACE)
@@ -14,7 +17,7 @@ if(APPLE)
       PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/klldb.py
       DESTINATION lib/lldb)
   else()
-    message(WARNING "No LLDB installation found")
+    message(WARNING "No compatible LLDB installation found")
   endif()
 endif()
 
