@@ -3,5 +3,36 @@
 import sys
 sys.path.append("@LLDB_PYTHONPATH@")  # noqa
 
-import lldb
 import argparse
+import lldb
+import os
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description="Run a K definition under LLDB")
+    parser.add_argument(
+        'interpreter', help='Path to the compiled K interpreter to run')
+    parser.add_argument('input', help='Path to input KORE term')
+    parser.add_argument('depth', type=int,
+                        help='Number of rewriting steps to take')
+    parser.add_argument('output', help='Path to write output KORE term to')
+    return parser.parse_args()
+
+
+if __name__ == "__main__":
+    args = parse_args()
+
+    debugger = lldb.SBDebugger.Create()
+    debugger.SetAsync(False)
+
+    target = debugger.CreateTargetWithFileAndArch(
+        args.interpreter, lldb.LLDB_ARCH_DEFAULT)
+
+    main_bp = target.BreakpointCreateByName(
+        "main", target.GetExecutable().GetFilename())
+
+    process = target.LaunchSimple(None, None, os.getcwd())
+
+    n_errors, quit_requested, has_crashed = debugger.RunCommandInterpreter(
+        True, False, lldb.SBCommandInterpreterRunOptions(), 0, False, False)
