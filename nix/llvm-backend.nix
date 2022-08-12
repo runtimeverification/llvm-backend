@@ -1,5 +1,5 @@
 { lib, src, cmake, flex, pkgconfig, llvm, libllvm, libcxxabi, stdenv, boost, gmp
-, jemalloc, libffi, libiconv, libyaml, mpfr, ncurses,
+, jemalloc, libffi, libiconv, libyaml, mpfr, ncurses, python3,
 # Runtime dependencies:
 host,
 # Options:
@@ -10,7 +10,7 @@ stdenv.mkDerivation {
   version = "0";
   inherit src;
 
-  nativeBuildInputs = [ cmake flex llvm pkgconfig ];
+  nativeBuildInputs = [ cmake flex llvm pkgconfig python3 ];
   buildInputs = [ boost libyaml ];
   propagatedBuildInputs = [ gmp jemalloc libffi mpfr ncurses ]
     ++ lib.optional stdenv.isDarwin libiconv;
