@@ -4,6 +4,8 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 include(LLVMKompilePrelude)
 project (KLLVM CXX C)
 
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 include(CTest)
 
 set(CMAKE_DISABLE_SOURCE_CHANGES ON)
