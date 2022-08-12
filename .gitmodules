@@ -4,3 +4,7 @@
 [submodule "deps/rapidjson"]
 	path = deps/rapidjson
 	url = https://github.com/Tencent/rapidjson
+[submodule "deps/pybind11"]
+	path = deps/pybind11
+	url = ../../pybind/pybind11
+	branch = stable
