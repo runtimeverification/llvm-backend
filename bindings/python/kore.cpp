@@ -60,9 +60,45 @@ void bind_ast(py::module_ &mod) {
 
   /* Symbols */
 
+  py::class_<KORESymbol>(ast, "Symbol").def(py::init(&KORESymbol::Create));
+
   py::class_<KOREVariable>(ast, "Variable")
       .def(py::init(&KOREVariable::Create))
       .def_property_readonly("name", &KOREVariable::getName);
+
+  /* Patterns */
+
+  auto pattern_base
+      = py::class_<KOREPattern, std::shared_ptr<KOREPattern>>(ast, "Pattern")
+            .def(py::init(&KOREPattern::load))
+            .def(
+                "print",
+                [](KOREPattern const &p) {
+                  p.print(std::cout);
+                  std::cout << '\n';
+                })
+            .def_property_readonly("sort", &KOREPattern::getSort);
+
+  py::class_<KOREVariablePattern, std::shared_ptr<KOREVariablePattern>>(
+      ast, "VariablePattern", pattern_base)
+      .def(py::init(&KOREVariablePattern::Create))
+      .def("dump", [](KOREVariablePattern const &p) {
+        p.print(std::cout);
+        std::cout << '\n';
+      });
+
+  py::class_<KORECompositePattern, std::shared_ptr<KORECompositePattern>>(
+      ast, "CompositePattern", pattern_base)
+      .def(py::init(py::overload_cast<std::string const &>(
+          &KORECompositePattern::Create)))
+      .def(py::init(
+          py::overload_cast<KORESymbol *>(&KORECompositePattern::Create)));
+
+  py::class_<KOREStringPattern, std::shared_ptr<KOREStringPattern>>(
+      ast, "StringPattern", pattern_base)
+      .def(py::init(&KOREStringPattern::Create));
+
+  /* Top-level */
 
   py::class_<KOREModule>(ast, "Module");
 
@@ -76,9 +112,12 @@ void bind_parser(py::module_ &mod) {
 
   py::class_<KOREParser>(parser, "Parser")
       .def(py::init<std::string>())
-      .def("pattern", &KOREParser::pattern)
-      .def("definition", &KOREParser::definition);
-  /* .def_static("from_string", &KOREParser::from_string) */
+      .def(
+          "pattern",
+          [](KOREParser &parser) { return std::shared_ptr(parser.pattern()); })
+      .def("definition", &KOREParser::definition)
+      .def_static("from_string", &KOREParser::from_string);
+
   /* .def("declarations", &KOREParser::declarations) */
   /* .def("symbol_sort_list", &KOREParser::symbol_sort_list) */
 }
