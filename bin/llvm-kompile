@@ -2,7 +2,7 @@
 set -e
 
 if [ $# -lt 3 ]; then
-  echo "Usage: $0 <definition.kore> <dt_dir> [main|library] <clang flags>"
+  echo "Usage: $0 <definition.kore> <dt_dir> [main|library|python] <clang flags>"
   echo '"main" means that a main function will be generated that matches the signature "interpreter <input.kore> <depth> <output.kore>"'
   echo '"library" means that no main function is generated and must be passed via <clang flags>'
   exit 1

@@ -119,6 +119,9 @@ fi
 
 if [ "$main" = "static" ]; then
   all_libraries=()
+elif [ "$main" = "python" ]; then
+  all_libraries=("${libraries[@]}" "-lgmp" "-lmpfr" "-lpthread" "-ldl" "-lffi")
+  flags+=("-fPIC" "-shared" "-Wl,--whole-archive" "$LIBDIR/libpykore.a" "-Wl,--no-whole-archive")
 else
   all_libraries=("${libraries[@]}" "-lgmp" "-lmpfr" "-lpthread" "-ldl" "-lffi" "-ljemalloc")
 fi
