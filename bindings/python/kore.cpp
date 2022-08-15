@@ -92,7 +92,8 @@ void bind_ast(py::module_ &mod) {
       .def(py::init(py::overload_cast<std::string const &>(
           &KORECompositePattern::Create)))
       .def(py::init(
-          py::overload_cast<KORESymbol *>(&KORECompositePattern::Create)));
+          py::overload_cast<KORESymbol *>(&KORECompositePattern::Create)))
+      .def("add_argument", &KORECompositePattern::addArgument);
 
   py::class_<KOREStringPattern, std::shared_ptr<KOREStringPattern>>(
       ast, "StringPattern", pattern_base)
