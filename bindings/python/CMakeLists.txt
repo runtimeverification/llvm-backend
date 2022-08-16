@@ -1,4 +1,4 @@
-pybind11_add_module(kore STATIC kore.cpp)
+pybind11_add_module(kore STATIC NO_EXTRAS kore.cpp)
 
 target_link_libraries(kore
   PUBLIC AST Parser util)
