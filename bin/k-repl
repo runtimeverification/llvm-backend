@@ -37,7 +37,7 @@ def load_kore_module(kompiled_dir):
 
 def parse_to_kore(kompiled_dir, src):
     echo = subprocess.run(
-        ["kparse", "-", "--definition", kompiled_dir],
+        ["kparse", "-", "--definition", kompiled_dir, "-s", "KItem"],
         input=src.encode("utf-8"), capture_output=True, check=True)
     return echo.stdout
 
