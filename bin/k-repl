@@ -5,6 +5,7 @@ import sys
 import os
 import subprocess
 import tempfile
+import readline
 
 
 def get_args():
@@ -33,7 +34,8 @@ def load_kore_module(kompiled_dir):
 
 def parse_to_kore(kompiled_dir, src):
     echo = subprocess.run(
-        ["kparse", "-", "--definition", kompiled_dir], input=src.encode("utf-8"), capture_output=True)
+        ["kparse", "-", "--definition", kompiled_dir],
+        input=src.encode("utf-8"), capture_output=True, check=True)
     return echo.stdout
 
 
@@ -85,9 +87,40 @@ def construct_interpreter_input(term):
     return top_cell
 
 
+def unparse(kompiled_dir, block):
+    with tempfile.NamedTemporaryFile() as fp:
+        kore.print_configuration(fp.name, block)
+        kast = subprocess.run(["kast", "--definition", kompiled_dir,
+                              "-i", "kore", "-o", "pretty", fp.name], capture_output=True)
+        return kast.stdout.decode("utf-8")
+
+
+def launch_kserver():
+    return subprocess.Popen(["kserver"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+
 if __name__ == "__main__":
     args = get_args()
     load_kore_module(args.directory)
-    term = parse_term(args.directory, "foo()")
-    inp = construct_interpreter_input(term)
-    inp.print()
+
+    server = launch_kserver()
+
+    try:
+        while True:
+            try:
+                src = input("$ ")
+                if src:
+                    term = parse_term(args.directory, src)
+                    inp = construct_interpreter_input(term)
+
+                    block = inp.construct()
+                    block = kore.take_steps(-1, block)
+                    print(unparse(args.directory, block))
+            except subprocess.CalledProcessError as e:
+                err = e.stderr.decode("utf-8")
+                print(f"Syntax error:\n  {err}")
+            except (EOFError, KeyboardInterrupt):
+                print()
+                break
+    finally:
+        server.terminate()

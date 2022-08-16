@@ -10,6 +10,53 @@ namespace py = pybind11;
 using namespace kllvm;
 using namespace kllvm::parser;
 
+/*
+ * We can't use the pybind default holders because they'll try to take ownership
+ * of the runtime's objects. This is the minimum viable holder that does _not_
+ * express ownership of the underlying object.
+ */
+template <typename T>
+struct raw_ptr {
+  T *ptr_;
+  T *get() { return ptr_; }
+  raw_ptr(T *ptr)
+      : ptr_(ptr) { }
+};
+PYBIND11_DECLARE_HOLDER_TYPE(T, raw_ptr<T>, true);
+
+// TODO:  fix name clashes with macros in header.h so that we don't need to slice
+//        these ones out.
+extern "C" {
+typedef struct blockheader {
+  uint64_t hdr;
+} blockheader;
+
+typedef struct block {
+  blockheader h;
+  uint64_t *children[];
+} block;
+
+block *parseConfiguration(const char *filename);
+
+block *take_steps(int64_t, block *);
+void finish_rewriting(block *, bool);
+void printConfiguration(const char *filename, block *subject);
+void initStaticObjects();
+}
+
+void *constructInitialConfiguration(const KOREPattern *initial);
+static block *construct_stub(const KOREPattern *initial) {
+  return static_cast<block *>(constructInitialConfiguration(initial));
+}
+
+void bind_runtime(py::module_ &mod) {
+  py::class_<block, raw_ptr<block>>(mod, "Block");
+
+  mod.def("parse_configuration", &parseConfiguration);
+  mod.def("take_steps", &take_steps);
+  mod.def("print_configuration", &printConfiguration);
+}
+
 void bind_ast(py::module_ &mod) {
   auto ast = mod.def_submodule("ast", "KORE AST submodule");
 
@@ -85,7 +132,10 @@ void bind_ast(py::module_ &mod) {
                   p.print(std::cout);
                   std::cout << '\n';
                 })
-            .def_property_readonly("sort", &KOREPattern::getSort);
+            .def_property_readonly("sort", &KOREPattern::getSort)
+            .def("construct", [](KOREPattern const &pat) {
+              return construct_stub(&pat);
+            });
 
   py::class_<KOREVariablePattern, std::shared_ptr<KOREVariablePattern>>(
       ast, "VariablePattern", pattern_base)
@@ -129,48 +179,6 @@ void bind_parser(py::module_ &mod) {
 
   /* .def("declarations", &KOREParser::declarations) */
   /* .def("symbol_sort_list", &KOREParser::symbol_sort_list) */
-}
-
-/*
- * We can't use the pybind default holders because they'll try to take ownership
- * of the runtime's objects. This is the minimum viable holder that does _not_
- * express ownership of the underlying object.
- */
-template <typename T>
-struct raw_ptr {
-  T *ptr_;
-  T *get() { return ptr_; }
-  raw_ptr(T *ptr)
-      : ptr_(ptr) { }
-};
-PYBIND11_DECLARE_HOLDER_TYPE(T, raw_ptr<T>, true);
-
-// TODO:  fix name clashes with macros in header.h so that we don't need to slice
-//        these ones out.
-extern "C" {
-typedef struct blockheader {
-  uint64_t hdr;
-} blockheader;
-
-typedef struct block {
-  blockheader h;
-  uint64_t *children[];
-} block;
-
-block *parseConfiguration(const char *filename);
-
-block *take_steps(int64_t, block *);
-void finish_rewriting(block *, bool);
-void printConfiguration(const char *filename, block *subject);
-void initStaticObjects();
-}
-
-void bind_runtime(py::module_ &mod) {
-  py::class_<block, raw_ptr<block>>(mod, "Block");
-
-  mod.def("parse_configuration", &parseConfiguration);
-  mod.def("take_steps", &take_steps);
-  mod.def("print_configuration", &printConfiguration);
 }
 
 PYBIND11_MODULE(kore, mod) {

@@ -88,7 +88,7 @@ struct construction {
   size_t nchildren;
 };
 
-static void *constructInitialConfiguration(const KOREPattern *initial) {
+void *constructInitialConfiguration(const KOREPattern *initial) {
   std::vector<std::variant<const KOREPattern *, construction>> workList{
       initial};
   std::vector<void *> output;
