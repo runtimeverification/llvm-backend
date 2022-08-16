@@ -60,7 +60,15 @@ void bind_ast(py::module_ &mod) {
 
   /* Symbols */
 
-  py::class_<KORESymbol>(ast, "Symbol").def(py::init(&KORESymbol::Create));
+  py::class_<KORESymbol>(ast, "Symbol")
+      .def(py::init(&KORESymbol::Create))
+      .def(
+          "print",
+          [](KORESymbol const &sym) {
+            sym.print(std::cout);
+            std::cout << '\n';
+          })
+      .def("add_formal_argument", &KORESymbol::addFormalArgument);
 
   py::class_<KOREVariable>(ast, "Variable")
       .def(py::init(&KOREVariable::Create))
