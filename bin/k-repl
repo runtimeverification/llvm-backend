@@ -12,6 +12,9 @@ def get_args():
     parser = argparse.ArgumentParser(
         description="Run a REPL for a language defined in K")
     parser.add_argument("directory", help="Path to kompiled directory")
+    parser.add_argument("--compile", action="store_true",
+                        help="Compile an extension module")
+    parser.add_argument("--verbose", action="store_true")
     return parser.parse_args()
 
 
@@ -99,8 +102,28 @@ def launch_kserver():
     return subprocess.Popen(["kserver"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 
+def compile_module(kompiled_dir, verbose=False):
+    defn = os.path.join(kompiled_dir, "definition.kore")
+    dt_dir = os.path.join(kompiled_dir, "dt")
+
+    suffix = subprocess.run(
+        ["python3-config", "--extension-suffix"],
+        capture_output=True).stdout.decode("utf-8").strip()
+
+    output = os.path.join(kompiled_dir, f"kore{suffix}")
+
+    args = ["llvm-kompile", defn, dt_dir, "python", "-o", output]
+    if verbose:
+        print(f"Compiling python extension:\n  {' '.join(args)}", file=sys.stderr)
+    subprocess.run(args)
+
+
 if __name__ == "__main__":
     args = get_args()
+
+    if args.compile:
+        compile_module(args.directory, args.verbose)
+
     load_kore_module(args.directory)
 
     server = launch_kserver()
