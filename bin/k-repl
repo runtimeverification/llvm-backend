@@ -114,7 +114,8 @@ def compile_module(kompiled_dir, verbose=False):
 
     args = ["llvm-kompile", defn, dt_dir, "python", "-o", output]
     if verbose:
-        print(f"Compiling python extension:\n  {' '.join(args)}", file=sys.stderr)
+        print(
+            f"Compiling python extension:\n  {' '.join(args)}", file=sys.stderr)
     subprocess.run(args)
 
 
