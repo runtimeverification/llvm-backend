@@ -1,6 +1,7 @@
 #include <kllvm/ast/AST.h>
 #include <kllvm/parser/KOREParser.h>
 
+#include <pybind11/operators.h>
 #include <pybind11/pybind11.h>
 
 #include <sstream>
@@ -12,8 +13,19 @@ namespace py = pybind11;
 using namespace kllvm;
 using namespace kllvm::parser;
 
+/**
+ * Adapt an AST node's print method to return a string for use with Python's
+ * __repr__ method.
+ */
+template <typename T>
+std::string print_repr_adapter(T &node) {
+  auto ss = std::stringstream{};
+  node.print(ss);
+  return ss.str();
+}
+
 void bind_ast(py::module_ &m) {
-  auto ast = m.def_submodule("ast", "KLLVM AST submodule");
+  auto ast = m.def_submodule("ast", "K LLVM backend KORE AST");
 
   /* Data Types */
 
@@ -43,11 +55,9 @@ void bind_ast(py::module_ &m) {
   auto sort_base
       = py::class_<KORESort, std::shared_ptr<KORESort>>(ast, "Sort")
             .def_property_readonly("is_concrete", &KORESort::isConcrete)
-            .def("__repr__", [](KORESort &sort) {
-              auto ss = std::stringstream{};
-              sort.print(ss);
-              return ss.str();
-            });
+            .def("__repr__", print_repr_adapter<KORESort>)
+            .def(py::self == py::self)
+            .def(py::self != py::self);
 
   py::class_<KORESortVariable, std::shared_ptr<KORESortVariable>>(
       ast, "SortVariable", sort_base)
