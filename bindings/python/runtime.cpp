@@ -2,4 +2,4 @@
 
 namespace py = pybind11;
 
-PYBIND11_MODULE(example, m) { }
+void bind_runtime(py::module_ &mod) { }
