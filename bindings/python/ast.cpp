@@ -3,6 +3,7 @@
 
 #include <pybind11/operators.h>
 #include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 
 #include <sstream>
 
@@ -55,7 +56,11 @@ void bind_ast(py::module_ &m) {
   auto sort_base
       = py::class_<KORESort, std::shared_ptr<KORESort>>(ast, "Sort")
             .def_property_readonly("is_concrete", &KORESort::isConcrete)
+            .def("substitute", &KORESort::substitute)
             .def("__repr__", print_repr_adapter<KORESort>)
+            .def(
+                "__hash__",
+                [](KORESort const &sort) { return HashSort{}(sort); })
             .def(py::self == py::self)
             .def(py::self != py::self);
 
