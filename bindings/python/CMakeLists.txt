@@ -9,7 +9,7 @@
 # The static library is designed to be linked with a generated interpreter by
 # llvm-kompile to produce a shared library that Python can dynamically load.
 
-pybind11_add_module(kllvm-static STATIC
+pybind11_add_module(kllvm-static STATIC NO_EXTRAS
   ast.cpp
   runtime.cpp
 )
