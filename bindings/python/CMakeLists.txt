@@ -18,6 +18,17 @@ pybind11_add_module(kllvm        SHARED
   ast.cpp
 )
 
+target_link_libraries(kllvm PUBLIC
+  AST
+  Parser
+)
+
+target_link_libraries(kllvm-static PUBLIC
+  Ast
+  Parser
+  Util
+)
+
 target_compile_definitions(kllvm-static
   PRIVATE KLLVM_BUILD_RUNTIME)
 
