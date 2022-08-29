@@ -11,7 +11,7 @@ jobs:
             os: ubuntu-latest
           - runner: macos-latest
             os: macos-12
-          - runner: [self-hosted, m1]
+          - runner: MacM1
             os: macos-12
     runs-on: ${{ matrix.runner }}
     steps:
