@@ -2,6 +2,7 @@ name: "Test"
 on:
   pull_request:
   push:
+  workflow_dispatch:
 jobs:
   tests:
     strategy:
@@ -24,10 +25,10 @@ jobs:
 #     - uses: baltoli/install-nix-action@master
 #       with:
 #         install_url: "https://releases.nixos.org/nix/nix-2.3.16/install"
-    - uses: cachix/cachix-action@v10
-      with:
-        name: runtimeverification
-        signingKey: '${{ secrets.CACHIX_SIGNING_KEY }}'
+#     - uses: cachix/cachix-action@v10
+#       with:
+#         name: runtimeverification
+#         signingKey: '${{ secrets.CACHIX_SIGNING_KEY }}'
     - run: nix-build -A llvm-backend
     - run: nix-build -A llvm-backend --arg release true
       if: ${{ !startsWith(matrix.os, 'macos') }}
