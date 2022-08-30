@@ -8,9 +8,9 @@ pipeline {
       when { changeRequest() }
       steps { script { currentBuild.displayName = "PR ${env.CHANGE_ID}: ${env.CHANGE_TITLE}" } }
     }
-    stage('Build and test') {
+    stages {
       options { timeout(time: 30, unit: 'MINUTES') }
-      stage('Arch Linux') {
+      stage('Build and test Arch Linux') {
         agent {
           dockerfile {
             filename 'Dockerfile.arch'
@@ -27,7 +27,7 @@ pipeline {
           '''
         }
       }
-      stage('Ubuntu Focal') {
+      stage('Build and test Ubuntu Focal') {
         agent {
           dockerfile {
             additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg BASE_IMAGE=ubuntu:focal --build-arg LLVM_VERSION=10'
@@ -44,7 +44,7 @@ pipeline {
           '''
         }
       }
-      stage('Ubuntu Jammy') {
+      stage('Build and test Ubuntu Jammy') {
         agent {
           dockerfile {
             additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg BASE_IMAGE=ubuntu:jammy --build-arg LLVM_VERSION=14'
