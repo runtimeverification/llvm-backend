@@ -9,7 +9,6 @@ pipeline {
       steps { script { currentBuild.displayName = "PR ${env.CHANGE_ID}: ${env.CHANGE_TITLE}" } }
     }
     stages {
-      options { timeout(time: 30, unit: 'MINUTES') }
       stage('Build and test Arch Linux') {
         agent {
           dockerfile {
@@ -17,6 +16,7 @@ pipeline {
             additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --pull'
           }
         }
+        options { timeout(time: 30, unit: 'MINUTES') }
         steps {
           sh '''
             ./ciscript Debug
@@ -34,6 +34,7 @@ pipeline {
             reuseNode true
           }
         }
+        options { timeout(time: 30, unit: 'MINUTES') }
         steps {
           sh '''
             ./ciscript Debug
@@ -51,6 +52,7 @@ pipeline {
             reuseNode true
           }
         }
+        options { timeout(time: 30, unit: 'MINUTES') }
         steps {
           sh '''
             ./ciscript Debug
