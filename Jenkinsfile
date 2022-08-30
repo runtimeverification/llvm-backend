@@ -8,60 +8,58 @@ pipeline {
       when { changeRequest() }
       steps { script { currentBuild.displayName = "PR ${env.CHANGE_ID}: ${env.CHANGE_TITLE}" } }
     }
-    stage('Build and test') {
+    stage('Build and test Arch Linux') {
+      agent {
+        dockerfile {
+          filename 'Dockerfile.arch'
+          additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --pull'
+        }
+      }
       options { timeout(time: 30, unit: 'MINUTES') }
-      parallel {
-        stage('Arch Linux') {
-          agent {
-            dockerfile {
-              filename 'Dockerfile.arch'
-              additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --pull'
-            }
-          }
-          steps {
-            sh '''
-              ./ciscript Debug
-              ./ciscript Release
-              ./ciscript RelWithDebInfo
-              ./ciscript FastBuild
-              ./ciscript GcStats
-            '''
-          }
+      steps {
+        sh '''
+          ./ciscript Debug
+          ./ciscript Release
+          ./ciscript RelWithDebInfo
+          ./ciscript FastBuild
+          ./ciscript GcStats
+        '''
+      }
+    }
+    stage('Build and test Ubuntu Focal') {
+      agent {
+        dockerfile {
+          additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg BASE_IMAGE=ubuntu:focal --build-arg LLVM_VERSION=10'
+          reuseNode true
         }
-        stage('Ubuntu Focal') {
-          agent {
-            dockerfile {
-              additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg BASE_IMAGE=ubuntu:focal --build-arg LLVM_VERSION=10'
-              reuseNode true
-            }
-          }
-          steps {
-            sh '''
-              ./ciscript Debug
-              ./ciscript Release
-              ./ciscript RelWithDebInfo
-              ./ciscript FastBuild
-              ./ciscript GcStats
-            '''
-          }
+      }
+      options { timeout(time: 30, unit: 'MINUTES') }
+      steps {
+        sh '''
+          ./ciscript Debug
+          ./ciscript Release
+          ./ciscript RelWithDebInfo
+          ./ciscript FastBuild
+          ./ciscript GcStats
+        '''
+      }
+    }
+    stage('Build and test Ubuntu Jammy') {
+      agent {
+        dockerfile {
+          additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg BASE_IMAGE=ubuntu:jammy --build-arg LLVM_VERSION=14'
+          reuseNode true
         }
-        stage('Ubuntu Jammy') {
-          agent {
-            dockerfile {
-              additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg BASE_IMAGE=ubuntu:jammy --build-arg LLVM_VERSION=14'
-              reuseNode true
-            }
-          }
-          steps {
-            sh '''
-              ./ciscript Debug
-              ./ciscript Release
-              ./ciscript RelWithDebInfo
-              ./ciscript FastBuild
-              ./ciscript GcStats
-            '''
-          }
-        }
+      }
+      options { timeout(time: 30, unit: 'MINUTES') }
+      steps {
+        sh '''
+          ./ciscript Debug
+          ./ciscript Release
+          ./ciscript RelWithDebInfo
+          ./ciscript FastBuild
+          ./ciscript GcStats
+        '''
       }
     }
     stage('Update K Submodule') {
