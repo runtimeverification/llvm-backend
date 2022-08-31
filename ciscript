@@ -40,3 +40,6 @@ export PATH="`pwd`/install/bin:`pwd`/bin:$PATH"
 make install
 
 lit -v ../test
+
+cd ..
+python3 -m pip wheel -w dist .
