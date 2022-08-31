@@ -14,7 +14,7 @@ pybind11_add_module(kllvm-static STATIC NO_EXTRAS
   runtime.cpp
 )
 
-pybind11_add_module(kllvm        SHARED
+pybind11_add_module(kllvm        SHARED NO_EXTRAS
   ast.cpp
 )
 
