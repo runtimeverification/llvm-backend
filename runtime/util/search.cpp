@@ -49,7 +49,7 @@ blockEnumerator() {
 }
 
 std::unordered_set<block *, HashBlock, KEq>
-take_search_steps(int64_t depth, block *subject) {
+take_search_steps(int64_t depth, int64_t bound, block *subject) {
   static int registered = -1;
   if (registered == -1) {
     registerGCRootsEnumerator(blockEnumerator);
@@ -58,6 +58,10 @@ take_search_steps(int64_t depth, block *subject) {
   states.clear();
   states_set.clear();
   results.clear();
+
+  if (bound == 0) {
+    return results;
+  }
 
   states_set.insert(subject);
   states.push_back(subject);
@@ -76,6 +80,9 @@ take_search_steps(int64_t depth, block *subject) {
 
     if (stepResults.size() == 0) {
       results.insert(state);
+      if (results.size() == bound) {
+        return results;
+      }
     } else {
       for (block *result : stepResults) {
         auto dirty = states_set.insert(result);
@@ -89,6 +96,9 @@ take_search_steps(int64_t depth, block *subject) {
   if (depth == 0) {
     for (auto state : states) {
       results.insert(state);
+      if (results.size() == bound) {
+        return results;
+      }
     }
   }
 

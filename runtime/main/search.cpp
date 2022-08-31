@@ -9,16 +9,21 @@ uint64_t get_steps(void);
 }
 
 std::unordered_set<block *, HashBlock, KEq>
-take_search_steps(int64_t depth, block *subject);
+take_search_steps(int64_t depth, int64_t bound, block *subject);
 void printConfigurations(
     const char *filename, std::unordered_set<block *, HashBlock, KEq> results);
 
 static bool hasStatistics = false;
+static int64_t bound = -1;
 
 void parse_flags(int argc, char **argv) {
   for (int i = 4; i < argc; ++i) {
     if (strcmp(argv[i], "--statistics") == 0) {
       hasStatistics = true;
+    }
+    if (strcmp(argv[i], "--bound") == 0) {
+      bound = std::stoll(argv[i + 1]);
+      ++i;
     }
   }
 }
@@ -34,7 +39,7 @@ int main(int argc, char **argv) {
 
   block *input = parseConfiguration(filename);
   std::unordered_set<block *, HashBlock, KEq> results
-      = take_search_steps(depth, input);
+      = take_search_steps(depth, bound, input);
   if (hasStatistics) {
     printStatistics(output, get_steps());
   }
