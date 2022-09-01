@@ -77,7 +77,7 @@ void bind_ast(py::module_ &m) {
       .def_property_readonly("name", &KORECompositeSort::getName);
 }
 
-PYBIND11_MODULE(kllvm, m) {
+PYBIND11_MODULE(_kllvm, m) {
 #ifdef KLLVM_BUILD_RUNTIME
   bind_runtime(m);
 #endif
