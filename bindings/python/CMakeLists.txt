@@ -36,7 +36,7 @@ install(FILES $<TARGET_FILE:kllvm-static>
   DESTINATION lib/kllvm
   RENAME libkllvm.a)
 
-install(DIRECTORY kllvm
+install(DIRECTORY package/
   DESTINATION lib/python)
 
 install(TARGETS _kllvm
