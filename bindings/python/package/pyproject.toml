@@ -1,8 +1,10 @@
 [tool.poetry]
 name = "kllvm"
 version = "0.1.0"
-description = ""
-authors = ["Bruce Collie <brucecollie82@gmail.com>"]
+description = "Python bindings for the K LLVM backend"
+authors = [
+    "Runtime Verification, Inc. <contact@runtimeverification.com>",
+]
 readme = "README.md"
 include = ["kllvm/*"]
 
