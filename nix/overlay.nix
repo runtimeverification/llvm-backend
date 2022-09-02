@@ -43,6 +43,10 @@ let
     src = prev.llvm-backend-matching-src;
   };
 
+  # This code is a bit of a hack to get Nix to accept the binding library being
+  # defined in terms of the output of the LLVM backend. Using the backend's
+  # lib/python directory directly causes a provenance error when reading the
+  # pyproject file.
   kllvm = prev.poetry2nix.mkPoetryApplication {
     python = prev.python39;
     projectDir = ../bindings/python/package;
