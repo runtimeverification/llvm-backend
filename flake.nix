@@ -12,16 +12,19 @@
     rapidjson-src.url =
       "github:Tencent/rapidjson/f54b0e47a08782a6131cc3d60f94d038fa6e0a51";
     rapidjson-src.flake = false;
+    pybind11-src.url =
+      "github:pybind/pybind11/0ba639d6177659c5dc2955ac06ad7b5b0d22e05c";
+    pybind11-src.flake = false;
     mavenix.url = "github:nix-community/mavenix";
   };
 
-  outputs = { self, nixpkgs, utils, immer-src, rapidjson-src, mavenix }:
+  outputs = { self, nixpkgs, utils, immer-src, rapidjson-src, pybind11-src, mavenix }:
     let
       # put devShell and any other required packages into local overlay
       # if you have additional overlays, you may add them here
       localOverlay = import ./nix/overlay.nix; # this should expose devShell
       depsOverlay = (final: prev: {
-        inherit immer-src rapidjson-src;
+        inherit immer-src rapidjson-src pybind11-src;
 
         llvm-backend-src = prev.stdenv.mkDerivation {
           name = "llvm-backend-src";
@@ -40,8 +43,10 @@
             chmod -R u+w $out
             mkdir -p $out/deps/immer
             mkdir -p $out/deps/rapidjson
+            mkdir -p $out/deps/pybind11
             cp -rv ${final.immer-src}/* $out/deps/immer
             cp -rv ${final.rapidjson-src}/* $out/deps/rapidjson
+            cp -rv ${final.pybind11-src}/* $out/deps/pybind11
           '';
         };
 
