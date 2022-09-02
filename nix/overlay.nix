@@ -26,11 +26,6 @@ let
     stdenv = prev.stdenv;
   });
 
-  kllvm = prev.poetry2nix.mkPoetryApplication {
-    python = prev.python39;
-    projectDir = "${prev.llvm-backend}/lib/python";
-  };
-
   llvm-backend = prev.callPackage ./llvm-backend.nix {
     inherit (llvmPackages) llvm libllvm libcxxabi;
     stdenv = if !llvmPackages.stdenv.targetPlatform.isDarwin then
@@ -46,6 +41,11 @@ let
   llvm-backend-matching = import ./llvm-backend-matching.nix {
     inherit (prev) buildMaven;
     src = prev.llvm-backend-matching-src;
+  };
+
+  kllvm = prev.poetry2nix.mkPoetryApplication {
+    python = prev.python39;
+    projectDir = "${prev.llvm-backend}/lib/python";
   };
 
   llvm-kompile-testing = let
