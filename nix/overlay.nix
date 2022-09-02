@@ -45,7 +45,7 @@ let
 
   kllvm = prev.poetry2nix.mkPoetryApplication {
     python = prev.python39;
-    projectDir = "${prev.llvm-backend}/lib/python";
+    projectDir = ../lib/python;
   };
 
   llvm-kompile-testing = let
