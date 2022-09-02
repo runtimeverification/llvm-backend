@@ -45,7 +45,10 @@ let
 
   kllvm = prev.poetry2nix.mkPoetryApplication {
     python = prev.python39;
-    projectDir = ../lib/python;
+    projectDir = ../bindings/python/package;
+    postInstall = "
+      cp ${llvm-backend}/lib/python/kllvm/* $out/lib/python3.9/site-packages/kllvm/
+    ";
   };
 
   llvm-kompile-testing = let
