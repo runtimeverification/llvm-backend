@@ -27,3 +27,4 @@ jobs:
     - run: nix-build -A llvm-backend-matching
     - run: nix-shell --run "echo OK"
     - run: nix-build test.nix
+    - run: nix build .#llvm-backend
