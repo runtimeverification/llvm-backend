@@ -43,6 +43,18 @@ let
     src = prev.llvm-backend-matching-src;
   };
 
+  # This code is a bit of a hack to get Nix to accept the binding library being
+  # defined in terms of the output of the LLVM backend. Using the backend's
+  # lib/python directory directly causes a provenance error when reading the
+  # pyproject file.
+  kllvm = prev.poetry2nix.mkPoetryApplication {
+    python = prev.python39;
+    projectDir = ../bindings/python/package;
+    postInstall = "
+      cp ${llvm-backend}/lib/python/kllvm/* $out/lib/python3.9/site-packages/kllvm/
+    ";
+  };
+
   llvm-kompile-testing = let
     inherit (prev.pkgs) runCommandNoCC jre;
     java = "${jre}/bin/java";
@@ -85,7 +97,7 @@ let
   };
   devShell = prev.callPackage ./devShell.nix { };
 in {
-  inherit llvm-backend llvm-backend-matching integration-tests;
+  inherit kllvm llvm-backend llvm-backend-matching integration-tests;
   inherit (prev) clang; # for compatibility
   inherit devShell; # for CI
 }
