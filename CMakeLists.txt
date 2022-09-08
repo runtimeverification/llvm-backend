@@ -76,7 +76,8 @@ include_directories(AFTER SYSTEM ${FFI_INCLUDE_DIRS})
 link_directories(AFTER ${FFI_LIBRARY_DIRS})
 endif() # USE_NIX
 
-if (CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
+if ((CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
+     AND K_LLVM_BACKEND_LTO)
 set(LLVM_KOMPILE_LTO "lto")
 else()
 set(LLVM_KOMPILE_LTO "nolto")
