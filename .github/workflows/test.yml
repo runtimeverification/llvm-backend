@@ -6,6 +6,7 @@ on:
 jobs:
   tests:
     strategy:
+      fail-fast: false
       matrix:
         include:
           - runner: ubuntu-latest
@@ -15,7 +16,6 @@ jobs:
           - runner: MacM1
             os: self-macos-12
     runs-on: ${{ matrix.runner }}
-    fail-fast: false
     steps:
     - uses: actions/checkout@v3
       with:
