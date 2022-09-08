@@ -31,7 +31,9 @@ stdenv.mkDerivation {
       --replace '-L@BREW_PREFIX@/lib' '-L${libcxxabi}/lib'
   '';
 
-  cmakeFlags = [
+  cmakeFlags =
+    let isArmMac = stdenv.isDarwin && stdenv.hostPlatform.isAarch64;
+    in [
     "-DCMAKE_C_COMPILER=${lib.getBin stdenv.cc}/bin/cc"
     "-DCMAKE_CXX_COMPILER=${lib.getBin stdenv.cc}/bin/c++"
     "-DLLVM_CLANG_PATH=${lib.getBin host.clang}/bin/clang"
@@ -39,6 +41,7 @@ stdenv.mkDerivation {
     "-DUSE_NIX=TRUE"
     "-DCMAKE_SKIP_BUILD_RPATH=FALSE"
     "-DBUILD_TESTS=True"
+    "-DK_LLVM_BACKEND_LTO=${if isArmMac then "OFF" else "ON"}"
   ];
 
   cmakeBuildType = if release then "Release" else "FastBuild";
