@@ -5,6 +5,7 @@ jobs:
   compile-nix-flake:
     name: 'Nix flake'
     strategy:
+      fail-fast: false
       matrix:
         include:
           - runner: ubuntu-latest
