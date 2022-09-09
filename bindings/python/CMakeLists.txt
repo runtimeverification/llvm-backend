@@ -10,11 +10,10 @@
 # llvm-kompile to produce a shared library that Python can dynamically load.
 
 pybind11_add_module(kllvm-static STATIC NO_EXTRAS
-  ast.cpp
   runtime.cpp
 )
 
-pybind11_add_module(_kllvm       SHARED
+pybind11_add_module(_kllvm       SHARED NO_EXTRAS
   ast.cpp
 )
 
@@ -23,18 +22,9 @@ target_link_libraries(_kllvm PUBLIC
   Parser
 )
 
-target_link_libraries(kllvm-static PUBLIC
-  Ast
-  Parser
-  Util
-)
-
-target_compile_definitions(kllvm-static
-  PRIVATE KLLVM_BUILD_RUNTIME)
-
 install(FILES $<TARGET_FILE:kllvm-static>
   DESTINATION lib/kllvm
-  RENAME libkllvm.a)
+  RENAME libkllvmruntime.a)
 
 install(DIRECTORY package/
   DESTINATION lib/python)
