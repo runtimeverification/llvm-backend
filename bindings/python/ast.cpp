@@ -78,9 +78,5 @@ void bind_ast(py::module_ &m) {
 }
 
 PYBIND11_MODULE(_kllvm, m) {
-#ifdef KLLVM_BUILD_RUNTIME
-  bind_runtime(m);
-#endif
-
   bind_ast(m);
 }
