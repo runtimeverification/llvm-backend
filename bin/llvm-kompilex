@@ -1,0 +1,129 @@
+#!/bin/bash
+set -e
+
+usage() {
+  cat << HERE
+Usage: $0 <definition.kore> <dt_dir> <object type> [options] -- [clang flags]
+   or: $0 <interpreter.o>            <object type> [options] -- [clang flags]
+
+Options:
+  -h, --help      Print this message and exit.
+  -v, --verbose   Print commands executed to stderr.
+  --save-temps    Do not delete temporary files on exit.
+
+Valid values for a KLLVM object type are:
+  main:     a main function will be generated. The resulting executable has the
+            signature "interpreter <input.kore> <depth> <output.kore>"
+
+  search:   as "main", but the resulting executable has collects all possible
+            results at each rewrite step.
+
+  static:   as "main", but do not link the resulting binary against the
+            necessary shared libraries. This must be done manually later.
+HERE
+}
+
+run () {
+  if [ "$verbose" = true ]; then
+    set -x
+  fi
+  "$@"
+  { set +x; } 2>/dev/null
+}
+
+positional_args=()
+reading_clang_args=false
+kompile_clang_flags=()
+clang_args=()
+
+verbose=false
+save_temps=false
+
+while [[ $# -gt 0 ]]; do
+  if [ "$reading_clang_args" = true ]; then
+    clang_args+=("$1")
+    shift
+    continue
+  fi
+
+  case $1 in
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    -v|--verbose)
+      verbose=true
+      kompile_clang_flags+=("-v")
+      shift
+      ;;
+    --save-temps)
+      save_temps=true	    
+      kompile_clang_flags+=("-save-temps")
+      shift
+      ;;
+    --)
+      reading_clang_args=true
+      shift
+      ;;
+    -*)
+      usage
+      exit 1
+      ;;
+    *)
+      positional_args+=("$1")
+      shift
+      ;;
+  esac
+done
+
+if [ "${#positional_args[@]}" -lt 3 ]; then
+  usage
+  exit 1
+fi
+
+mod="$(mktemp tmp.XXXXXXXXXX)"
+modopt_tmp="$(mktemp tmp.XXXXXXXXXX)"
+modopt="$modopt_tmp"
+if [ "$save_temps" = false ]; then
+  trap 'rm -rf "$mod" "$modopt_tmp"' INT TERM EXIT
+fi
+
+definition="${positional_args[0]}"
+compile=true
+case "$definition" in
+  *.o)
+    compile=false
+    ;;
+  *)
+    ;;
+esac
+
+if [ "$compile" = true ]; then
+  dt_dir="${positional_args[1]}"
+  main="${positional_args[2]}"
+  debug=0
+
+  for arg in "$@"; do
+    case "$arg" in
+      -g)
+        debug=1
+        ;;
+      *)
+        ;;
+    esac
+  done
+  run "$(dirname "$0")"/llvm-kompile-codegen "$definition" "$dt_dir"/dt.yaml "$dt_dir" $debug > "$mod"
+  run @OPT@ -mem2reg -tailcallelim -tailcallopt "$mod" -o "$modopt"
+else
+  main="${positional_args[1]}"
+  modopt="$definition"
+fi
+
+if [[ "$OSTYPE" != "darwin"* ]]; then
+  kompile_clang_flags+=("-fuse-ld=lld")
+fi
+
+run "$(dirname "$0")"/llvm-kompile-clang          \
+  "$modopt" "$main"                               \
+  @LLVM_KOMPILE_LTO@ -fno-stack-protector         \
+  "${kompile_clang_flags[@]}" "${clang_args[@]}"
