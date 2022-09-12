@@ -119,6 +119,17 @@ fi
 
 if [ "$main" = "static" ]; then
   all_libraries=()
+elif [ "$main" = "python" ]; then
+  # Don't link jemalloc when building a python library; it clashes with the
+  # pymalloc implementation that Python expects you to use.
+  all_libraries=("${libraries[@]}" "-lgmp" "-lmpfr" "-lpthread" "-ldl" "-lffi")
+  flags+=("-fPIC" "-shared" "-Wl,--whole-archive" "$LIBDIR/libkllvmruntime.a" "-Wl,--no-whole-archive")
+
+  # If we didn't pass a filename explicitly as output, then we enforce the
+  # blessed filename format that Python can understand.
+  if [ "$output_file" = "definition.o" ]; then
+    flags+=("-o" "kllvm_static$(python3-config --extension-suffix)")
+  fi
 else
   all_libraries=("${libraries[@]}" "-lgmp" "-lmpfr" "-lpthread" "-ldl" "-lffi" "-ljemalloc")
 fi
