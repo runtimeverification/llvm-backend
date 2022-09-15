@@ -1026,16 +1026,16 @@ sptr<KOREPattern> KORECompositePattern::expandMacros(
     SubsortMap const &subsorts, SymbolMap const &overloads,
     std::vector<ptr<KOREDeclaration>> const &macros, bool reverse,
     std::set<size_t> &appliedRules, std::set<std::string> const &macroSymbols) {
-  if (macroSymbols.find(constructor->getName()) == macroSymbols.end()) {
-    return shared_from_this();
-  }
-
   sptr<KORECompositePattern> applied
       = KORECompositePattern::Create(constructor.get());
   for (auto &arg : arguments) {
     std::set<size_t> dummyApplied;
     applied->addArgument(arg->expandMacros(
         subsorts, overloads, macros, reverse, dummyApplied, macroSymbols));
+  }
+
+  if (macroSymbols.find(constructor->getName()) == macroSymbols.end()) {
+    return applied;
   }
 
   size_t i = 0;
