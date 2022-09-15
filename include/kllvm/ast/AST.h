@@ -463,7 +463,8 @@ private:
   virtual sptr<KOREPattern> expandMacros(
       SubsortMap const &, SymbolMap const &,
       std::vector<ptr<KOREDeclaration>> const &macros, bool reverse,
-      std::set<size_t> &appliedRules, std::set<std::string> const &) override {
+      std::set<size_t> &appliedRules,
+      std::set<std::string> const &macroSymbols) override {
     return shared_from_this();
   }
 
