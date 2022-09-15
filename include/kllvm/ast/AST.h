@@ -392,12 +392,7 @@ public:
       = 0;
   sptr<KOREPattern> expandMacros(
       SubsortMap const &subsorts, SymbolMap const &overloads,
-      std::vector<ptr<KOREDeclaration>> const &axioms, bool reverse) {
-    std::set<size_t> appliedRules;
-    std::set<std::string> macroSymbols;
-    return expandMacros(
-        subsorts, overloads, axioms, reverse, appliedRules, macroSymbols);
-  }
+      std::vector<ptr<KOREDeclaration>> const &axioms, bool reverse);
 
   friend KORECompositePattern;
 

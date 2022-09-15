@@ -83,6 +83,28 @@ size_t kllvm::hash_value(const kllvm::KORESort &s) {
   return HashSort{}(s);
 }
 
+sptr<KOREPattern> KOREPattern::expandMacros(
+    SubsortMap const &subsorts, SymbolMap const &overloads,
+    std::vector<ptr<KOREDeclaration>> const &axioms, bool reverse) {
+  std::set<size_t> appliedRules;
+
+  std::set<std::string> macroSymbols;
+
+  for (auto const &decl : axioms) {
+    auto axiom = dynamic_cast<KOREAxiomDeclaration *>(decl.get());
+    auto equals
+        = dynamic_cast<KORECompositePattern *>(axiom->getPattern().get());
+    auto lhs = equals->getArguments()[reverse ? 1 : 0];
+
+    if (auto lhs_comp = dynamic_cast<KORECompositePattern *>(lhs.get())) {
+      macroSymbols.insert(lhs_comp->getConstructor()->getName());
+    }
+  }
+
+  return expandMacros(
+      subsorts, overloads, axioms, reverse, appliedRules, macroSymbols);
+}
+
 bool KORESortVariable::operator==(const KORESort &other) const {
   if (auto var = dynamic_cast<const KORESortVariable *>(&other)) {
     return var->name == name;
@@ -1004,6 +1026,10 @@ sptr<KOREPattern> KORECompositePattern::expandMacros(
     SubsortMap const &subsorts, SymbolMap const &overloads,
     std::vector<ptr<KOREDeclaration>> const &macros, bool reverse,
     std::set<size_t> &appliedRules, std::set<std::string> const &macroSymbols) {
+  if (macroSymbols.find(constructor->getName()) == macroSymbols.end()) {
+    return shared_from_this();
+  }
+
   sptr<KORECompositePattern> applied
       = KORECompositePattern::Create(constructor.get());
   for (auto &arg : arguments) {
