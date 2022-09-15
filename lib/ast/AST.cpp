@@ -1003,12 +1003,13 @@ sptr<KOREPattern> KORECompositePattern::filterSubstitution(
 sptr<KOREPattern> KORECompositePattern::expandMacros(
     SubsortMap const &subsorts, SymbolMap const &overloads,
     std::vector<ptr<KOREDeclaration>> const &macros, bool reverse,
-    std::set<size_t> &appliedRules) {
+    std::set<size_t> &appliedRules, std::set<std::string> const &macroSymbols) {
   sptr<KORECompositePattern> applied
       = KORECompositePattern::Create(constructor.get());
   for (auto &arg : arguments) {
-    applied->addArgument(
-        arg->expandMacros(subsorts, overloads, macros, reverse));
+    std::set<size_t> dummyApplied;
+    applied->addArgument(arg->expandMacros(
+        subsorts, overloads, macros, reverse, dummyApplied, macroSymbols));
   }
 
   size_t i = 0;
@@ -1033,7 +1034,7 @@ sptr<KOREPattern> KORECompositePattern::expandMacros(
       std::set<size_t> oldAppliedRules = appliedRules;
       appliedRules.insert(i);
       auto result = rhs->substitute(subst)->expandMacros(
-          subsorts, overloads, macros, reverse, appliedRules);
+          subsorts, overloads, macros, reverse, appliedRules, macroSymbols);
       appliedRules = oldAppliedRules;
       return result;
     }
