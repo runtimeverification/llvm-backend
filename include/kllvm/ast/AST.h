@@ -392,10 +392,7 @@ public:
       = 0;
   sptr<KOREPattern> expandMacros(
       SubsortMap const &subsorts, SymbolMap const &overloads,
-      std::vector<ptr<KOREDeclaration>> const &axioms, bool reverse) {
-    std::set<size_t> appliedRules;
-    return expandMacros(subsorts, overloads, axioms, reverse, appliedRules);
-  }
+      std::vector<ptr<KOREDeclaration>> const &axioms, bool reverse);
 
   friend KORECompositePattern;
 
@@ -403,7 +400,7 @@ private:
   virtual sptr<KOREPattern> expandMacros(
       SubsortMap const &subsorts, SymbolMap const &overloads,
       std::vector<ptr<KOREDeclaration>> const &axioms, bool reverse,
-      std::set<size_t> &appliedRules)
+      std::set<size_t> &appliedRules, std::set<std::string> const &macroSymbols)
       = 0;
 };
 
@@ -466,7 +463,8 @@ private:
   virtual sptr<KOREPattern> expandMacros(
       SubsortMap const &, SymbolMap const &,
       std::vector<ptr<KOREDeclaration>> const &macros, bool reverse,
-      std::set<size_t> &appliedRules) override {
+      std::set<size_t> &appliedRules,
+      std::set<std::string> const &macroSymbols) override {
     return shared_from_this();
   }
 
@@ -533,7 +531,8 @@ private:
   virtual sptr<KOREPattern> expandMacros(
       SubsortMap const &, SymbolMap const &,
       std::vector<ptr<KOREDeclaration>> const &macros, bool reverse,
-      std::set<size_t> &appliedRules) override;
+      std::set<size_t> &appliedRules,
+      std::set<std::string> const &macroSymbols) override;
 
   friend void ::kllvm::deallocateSPtrKorePattern(sptr<KOREPattern> pattern);
 
@@ -593,7 +592,8 @@ private:
   virtual sptr<KOREPattern> expandMacros(
       SubsortMap const &, SymbolMap const &,
       std::vector<ptr<KOREDeclaration>> const &macros, bool reverse,
-      std::set<size_t> &appliedRules) override {
+      std::set<size_t> &appliedRules,
+      std::set<std::string> const &macroSymbols) override {
     return shared_from_this();
   }
 
