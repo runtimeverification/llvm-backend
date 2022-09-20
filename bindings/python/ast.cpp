@@ -75,6 +75,17 @@ void bind_ast(py::module_ &m) {
           py::arg("cat") = ValueType{SortCategory::Uncomputed, 0})
       .def("add_argument", &KORECompositeSort::addArgument)
       .def_property_readonly("name", &KORECompositeSort::getName);
+
+  /* Symbols */
+
+  py::class_<KORESymbol>(ast, "Symbol")
+      .def(py::init(&KORESymbol::Create))
+      .def("print", print_repr_adapter<KORESymbol>)
+      .def("add_formal_argument", &KORESymbol::addFormalArgument);
+
+  py::class_<KOREVariable>(ast, "Variable")
+      .def(py::init(&KOREVariable::Create))
+      .def_property_readonly("name", &KOREVariable::getName);
 }
 
 PYBIND11_MODULE(_kllvm, m) {
