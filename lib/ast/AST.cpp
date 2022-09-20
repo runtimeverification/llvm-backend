@@ -83,6 +83,28 @@ size_t kllvm::hash_value(const kllvm::KORESort &s) {
   return HashSort{}(s);
 }
 
+sptr<KOREPattern> KOREPattern::expandMacros(
+    SubsortMap const &subsorts, SymbolMap const &overloads,
+    std::vector<ptr<KOREDeclaration>> const &axioms, bool reverse) {
+  std::set<size_t> appliedRules;
+
+  std::set<std::string> macroSymbols;
+
+  for (auto const &decl : axioms) {
+    auto axiom = dynamic_cast<KOREAxiomDeclaration *>(decl.get());
+    auto equals
+        = dynamic_cast<KORECompositePattern *>(axiom->getPattern().get());
+    auto lhs = equals->getArguments()[reverse ? 1 : 0];
+
+    if (auto lhs_comp = dynamic_cast<KORECompositePattern *>(lhs.get())) {
+      macroSymbols.insert(lhs_comp->getConstructor()->getName());
+    }
+  }
+
+  return expandMacros(
+      subsorts, overloads, axioms, reverse, appliedRules, macroSymbols);
+}
+
 bool KORESortVariable::operator==(const KORESort &other) const {
   if (auto var = dynamic_cast<const KORESortVariable *>(&other)) {
     return var->name == name;
@@ -1003,12 +1025,17 @@ sptr<KOREPattern> KORECompositePattern::filterSubstitution(
 sptr<KOREPattern> KORECompositePattern::expandMacros(
     SubsortMap const &subsorts, SymbolMap const &overloads,
     std::vector<ptr<KOREDeclaration>> const &macros, bool reverse,
-    std::set<size_t> &appliedRules) {
+    std::set<size_t> &appliedRules, std::set<std::string> const &macroSymbols) {
   sptr<KORECompositePattern> applied
       = KORECompositePattern::Create(constructor.get());
   for (auto &arg : arguments) {
-    applied->addArgument(
-        arg->expandMacros(subsorts, overloads, macros, reverse));
+    std::set<size_t> dummyApplied;
+    applied->addArgument(arg->expandMacros(
+        subsorts, overloads, macros, reverse, dummyApplied, macroSymbols));
+  }
+
+  if (macroSymbols.find(constructor->getName()) == macroSymbols.end()) {
+    return applied;
   }
 
   size_t i = 0;
@@ -1033,7 +1060,7 @@ sptr<KOREPattern> KORECompositePattern::expandMacros(
       std::set<size_t> oldAppliedRules = appliedRules;
       appliedRules.insert(i);
       auto result = rhs->substitute(subst)->expandMacros(
-          subsorts, overloads, macros, reverse, appliedRules);
+          subsorts, overloads, macros, reverse, appliedRules, macroSymbols);
       appliedRules = oldAppliedRules;
       return result;
     }

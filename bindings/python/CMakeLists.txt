@@ -27,8 +27,8 @@ install(FILES $<TARGET_FILE:kllvm-static>
   RENAME libkllvmruntime.a)
 
 install(DIRECTORY package/
-  DESTINATION lib/python)
+  DESTINATION bindings/python)
 
 install(TARGETS _kllvm
-  DESTINATION lib/python/kllvm
+  DESTINATION bindings/python/kllvm
   LIBRARY)
