@@ -6,6 +6,7 @@
 #include <pybind11/stl.h>
 
 #include <sstream>
+#include <tuple>
 
 #include "runtime.h"
 
@@ -14,15 +15,47 @@ namespace py = pybind11;
 using namespace kllvm;
 using namespace kllvm::parser;
 
+namespace detail {
+
+template <typename T>
+struct type_identity {
+  using type = T;
+};
+
 /**
  * Adapt an AST node's print method to return a string for use with Python's
  * __repr__ method.
  */
-template <typename T>
-std::string print_repr_adapter(T &node) {
-  auto ss = std::stringstream{};
-  node.print(ss);
-  return ss.str();
+template <typename T, typename... Args>
+struct print_repr_adapter_st {
+  print_repr_adapter_st(type_identity<T>, Args &&...args)
+      : args_(std::forward<Args>(args)...) { }
+
+  std::string operator()(T &node) {
+    auto ss = std::stringstream{};
+
+    std::apply(
+        [&](auto &&...args) { return node.print(args...); },
+        std::tuple_cat(
+            std::tuple{std::ref(ss)}, std::forward<decltype(args_)>(args_)));
+
+    return ss.str();
+  }
+
+private:
+  std::tuple<Args...> args_;
+};
+
+template <typename T, typename... Args>
+print_repr_adapter_st(type_identity<T>, Args &&...)
+    -> print_repr_adapter_st<T, Args...>;
+
+} // namespace detail
+
+template <typename T, typename... Args>
+auto print_repr_adapter(Args &&...args) {
+  return ::detail::print_repr_adapter_st(
+      ::detail::type_identity<T>{}, std::forward<Args>(args)...);
 }
 
 void bind_ast(py::module_ &m) {
@@ -57,7 +90,7 @@ void bind_ast(py::module_ &m) {
       = py::class_<KORESort, std::shared_ptr<KORESort>>(ast, "Sort")
             .def_property_readonly("is_concrete", &KORESort::isConcrete)
             .def("substitute", &KORESort::substitute)
-            .def("__repr__", print_repr_adapter<KORESort>)
+            .def("__repr__", print_repr_adapter<KORESort>())
             .def(
                 "__hash__",
                 [](KORESort const &sort) { return HashSort{}(sort); })
@@ -80,11 +113,13 @@ void bind_ast(py::module_ &m) {
 
   py::class_<KORESymbol>(ast, "Symbol")
       .def(py::init(&KORESymbol::Create))
-      .def("print", print_repr_adapter<KORESymbol>)
+      .def("__repr__", print_repr_adapter<KORESymbol>())
+      .def("add_argument", &KORESymbol::addArgument)
       .def("add_formal_argument", &KORESymbol::addFormalArgument);
 
   py::class_<KOREVariable>(ast, "Variable")
       .def(py::init(&KOREVariable::Create))
+      .def("__repr__", print_repr_adapter<KOREVariable>())
       .def_property_readonly("name", &KOREVariable::getName);
 }
 
