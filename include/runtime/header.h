@@ -8,8 +8,6 @@
 #include <gmp.h>
 #include <mpfr.h>
 
-#include <kllvm/ast/AST.h>
-
 #include "config/macros.h"
 #include "runtime/alloc.h"
 
@@ -210,6 +208,8 @@ mpz_ptr move_int(mpz_t);
 
 void serializeConfiguration(const char *filename, block *subject);
 
+void *configuration_to_ast(block *);
+
 // The following functions have to be generated at kompile time
 // and linked with the interpreter.
 uint32_t getTagForSymbolName(const char *symbolname);
@@ -272,7 +272,5 @@ extern const uint32_t first_inj_tag, last_inj_tag;
 
 std::string floatToString(const floating *);
 void init_float2(floating *, std::string);
-
-kllvm::sptr<kllvm::KOREPattern> configuration_to_ast(block *);
 
 #endif // RUNTIME_HEADER_H
