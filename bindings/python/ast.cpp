@@ -114,6 +114,8 @@ void bind_ast(py::module_ &m) {
   py::class_<KORESymbol>(ast, "Symbol")
       .def(py::init(&KORESymbol::Create))
       .def("__repr__", print_repr_adapter<KORESymbol>())
+      .def("to_str", print_repr_adapter<KORESymbol>())
+      .def("to_str_params", print_repr_adapter<KORESymbol>(0, false))
       .def("add_argument", &KORESymbol::addArgument)
       .def("add_formal_argument", &KORESymbol::addFormalArgument);
 
