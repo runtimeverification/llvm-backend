@@ -3,19 +3,30 @@ import os
 
 from lit import formats
 
-ROOT_PATH = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), ".."))
+ROOT_PATH = os.path.realpath(os.path.join(
+    os.path.dirname(os.path.realpath(__file__)), ".."))
+
+# We already implicitly expect the installation structure to be set up such that
+# llvm-kompile-testing etc. are under build/install/bin, so this path is fine to
+# hard-code for our testing setup. The build directory (i.e. before
+# installation) doesn't work the same because the python package structure for
+# kllvm hasn't been set up yet (no __init__.py).
+PYTHON_BINDINGS_PATH = os.path.join(
+    ROOT_PATH, "build", "install", "bindings", "python")
 
 config.name = 'llvm-backend'
 config.test_source_root = os.path.join(ROOT_PATH, "test")
 
 config.test_format = formats.ShTest(True)
 
-config.suffixes = ['.kore']
+config.suffixes = ['.kore', '.py']
 
 config.excludes = [
     'macros.kore',
     'syntaxDefinition.kore',
-    'Inputs'
+    'Inputs',
+    'lit.cfg.py',
+    'test_bindings.py'
 ]
 
 # When lit is launched, it doesn't inherit any environment variables from the
@@ -27,15 +38,18 @@ config.excludes = [
 # where this gets used).
 if os.getenv('LIT_USE_NIX'):
     config.environment.update({
-        k : v for k, v in os.environ.items()
+        k: v for k, v in os.environ.items()
         if k.startswith('NIX')
     })
 
 # An interaction between lit and the shell on macOS means that we can't have
 # multiline substitutions natively. This function sanitizes them so that we can
 # use them cross-platform while retaining nice source code.
+
+
 def one_line(s):
     return s.strip().replace('\n', ' ; ').replace('do ;', 'do').replace("' ; '", r"'\\n'")
+
 
 config.substitutions.extend([
     ('%kompile', 'llvm-kompile-testing'),
@@ -43,6 +57,9 @@ config.substitutions.extend([
     ('%convert-input', '%kore-convert %test-input -o %t.bin'),
     ('%strip-binary', 'kore-strip'),
     ('%arity', 'kore-arity'),
+
+    ('%bindings-path', PYTHON_BINDINGS_PATH),
+    ('%python', 'BINDINGS_PATH=%bindings-path python3'),
 
     ('%check-grep', one_line('''
         %run | grep -f %test-grep-out -q
