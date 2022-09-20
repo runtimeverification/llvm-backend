@@ -11,8 +11,12 @@ ROOT_PATH = os.path.realpath(os.path.join(
 # hard-code for our testing setup. The build directory (i.e. before
 # installation) doesn't work the same because the python package structure for
 # kllvm hasn't been set up yet (no __init__.py).
-PYTHON_BINDINGS_PATH = os.path.join(
-    ROOT_PATH, "build", "install", "bindings", "python")
+#
+# There are some cases (e.g. in Nix) where we need to override this path, so we
+# allow it to be set in the environment as an option.
+BINDINGS_INSTALL_PATH = os.environ.get(
+    'BINDINGS_INSTALL_PATH',
+    os.path.join(ROOT_PATH, "build", "install", "bindings", "python"))
 
 config.name = 'llvm-backend'
 config.test_source_root = os.path.join(ROOT_PATH, "test")
@@ -58,8 +62,8 @@ config.substitutions.extend([
     ('%strip-binary', 'kore-strip'),
     ('%arity', 'kore-arity'),
 
-    ('%bindings-path', PYTHON_BINDINGS_PATH),
-    ('%python', 'BINDINGS_PATH=%bindings-path python3'),
+    ('%bindings-path', BINDINGS_INSTALL_PATH),
+    ('%python', 'BINDINGS_INSTALL_PATH=%bindings-path python3'),
 
     ('%check-grep', one_line('''
         %run | grep -f %test-grep-out -q

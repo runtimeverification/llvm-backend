@@ -12,4 +12,4 @@ def __load_bindings(path):
     return kllvm
 
 
-kllvm = __load_bindings(os.environ['BINDINGS_PATH'])
+kllvm = __load_bindings(os.environ['BINDINGS_INSTALL_PATH'])
