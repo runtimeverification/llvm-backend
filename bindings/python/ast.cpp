@@ -117,7 +117,8 @@ void bind_ast(py::module_ &m) {
       .def("to_str", print_repr_adapter<KORESymbol>())
       .def("to_str_params", print_repr_adapter<KORESymbol>(0, false))
       .def("add_argument", &KORESymbol::addArgument)
-      .def("add_formal_argument", &KORESymbol::addFormalArgument);
+      .def("add_formal_argument", &KORESymbol::addFormalArgument)
+      .def("add_sort", &KORESymbol::addSort);
 
   py::class_<KOREVariable>(ast, "Variable")
       .def(py::init(&KOREVariable::Create))
