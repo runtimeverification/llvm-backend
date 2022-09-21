@@ -11,7 +11,7 @@ Options:
   -v, --verbose   Print commands executed to stderr.
   --save-temps    Do not delete temporary files on exit.
 
-Any option not listed above will be passed through to clang; use `--` to
+Any option not listed above will be passed through to clang; use '--' to
 separate additional positional arguments to clang from those for $0.
 
 Valid values for a KLLVM object type are:
