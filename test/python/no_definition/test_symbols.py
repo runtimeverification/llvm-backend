@@ -11,8 +11,17 @@ class TestSymbols(unittest.TestCase):
         sym = kllvm.ast.Symbol("Lbl'Plus")
         self.assertEqual(str(sym), "Lbl'Plus{}")
 
-        sym.add_argument(kllvm.ast.CompositeSort("X"))
-        self.assertEqual(str(sym), "Lbl'Plus{}")
+        sym.add_formal_argument(kllvm.ast.CompositeSort("A"))
+        self.assertEqual(str(sym), "Lbl'Plus{A{}}")
+
+    def test_equal(self):
+        a1 = kllvm.ast.Symbol("A")
+        a2 = kllvm.ast.Symbol("A")
+        self.assertEqual(a1, a2)
+        self.assertIsNot(a1, a2)
+
+        b1 = kllvm.ast.Symbol("B")
+        self.assertNotEqual(a1, b1)
 
 
 class TestVariables(unittest.TestCase):

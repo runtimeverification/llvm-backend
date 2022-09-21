@@ -15,6 +15,8 @@ namespace py = pybind11;
 using namespace kllvm;
 using namespace kllvm::parser;
 
+// Metaprogramming support for the adapter function between AST print() methods
+// and Python's __repr__.
 namespace detail {
 
 template <typename T>
@@ -22,10 +24,6 @@ struct type_identity {
   using type = T;
 };
 
-/**
- * Adapt an AST node's print method to return a string for use with Python's
- * __repr__ method.
- */
 template <typename T, typename... Args>
 struct print_repr_adapter_st {
   print_repr_adapter_st(type_identity<T>, Args &&...args)
@@ -52,6 +50,10 @@ print_repr_adapter_st(type_identity<T>, Args &&...)
 
 } // namespace detail
 
+/**
+ * Adapt an AST node's print method to return a string for use with Python's
+ * __repr__ method.
+ */
 template <typename T, typename... Args>
 auto print_repr_adapter(Args &&...args) {
   return ::detail::print_repr_adapter_st(
@@ -114,11 +116,9 @@ void bind_ast(py::module_ &m) {
   py::class_<KORESymbol>(ast, "Symbol")
       .def(py::init(&KORESymbol::Create))
       .def("__repr__", print_repr_adapter<KORESymbol>())
-      .def("to_str", print_repr_adapter<KORESymbol>())
-      .def("to_str_params", print_repr_adapter<KORESymbol>(0, false))
-      .def("add_argument", &KORESymbol::addArgument)
       .def("add_formal_argument", &KORESymbol::addFormalArgument)
-      .def("add_sort", &KORESymbol::addSort);
+      .def(py::self == py::self)
+      .def(py::self != py::self);
 
   py::class_<KOREVariable>(ast, "Variable")
       .def(py::init(&KOREVariable::Create))
