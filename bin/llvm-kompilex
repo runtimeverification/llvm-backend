@@ -3,13 +3,16 @@ set -e
 
 usage() {
   cat << HERE
-Usage: $0 <definition.kore> <dt_dir> <object type> [options] -- [clang flags]
-   or: $0 <interpreter.o>            <object type> [options] -- [clang flags]
+Usage: $0 <definition.kore> <dt_dir> <object type> [options] [clang flags]
+   or: $0 <interpreter.o>            <object type> [options] [clang flags]
 
 Options:
   -h, --help      Print this message and exit.
   -v, --verbose   Print commands executed to stderr.
   --save-temps    Do not delete temporary files on exit.
+
+Any option not listed above will be passed through to clang; use `--` to
+separate additional positional arguments to clang from those for $0.
 
 Valid values for a KLLVM object type are:
   main:     a main function will be generated. The resulting executable has the
@@ -66,8 +69,8 @@ while [[ $# -gt 0 ]]; do
       shift
       ;;
     -*)
-      usage
-      exit 1
+      kompile_clang_flags+=("$1")
+      shift
       ;;
     *)
       positional_args+=("$1")
@@ -76,7 +79,7 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-if [ "${#positional_args[@]}" -lt 3 ]; then
+if [ "${#positional_args[@]}" -ne 3 ]; then
   usage
   exit 1
 fi
