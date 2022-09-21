@@ -130,7 +130,8 @@ void bind_ast(py::module_ &m) {
   auto pattern_base
       = py::class_<KOREPattern, std::shared_ptr<KOREPattern>>(ast, "Pattern")
             .def(py::init(&KOREPattern::load))
-            .def("__repr__", print_repr_adapter<KOREPattern>());
+            .def("__repr__", print_repr_adapter<KOREPattern>())
+            .def("substitute", &KOREPattern::substitute);
 
   py::class_<KORECompositePattern, std::shared_ptr<KORECompositePattern>>(
       ast, "CompositePattern", pattern_base)
@@ -142,11 +143,14 @@ void bind_ast(py::module_ &m) {
 
   py::class_<KOREVariablePattern, std::shared_ptr<KOREVariablePattern>>(
       ast, "VariablePattern", pattern_base)
-      .def(py::init(&KOREVariablePattern::Create));
+      .def(py::init(&KOREVariablePattern::Create))
+      .def_property_readonly("name", &KOREVariablePattern::getName)
+      .def_property_readonly("sort", &KOREVariablePattern::getSort);
 
   py::class_<KOREStringPattern, std::shared_ptr<KOREStringPattern>>(
       ast, "StringPattern", pattern_base)
-      .def(py::init(&KOREStringPattern::Create));
+      .def(py::init(&KOREStringPattern::Create))
+      .def_property_readonly("contents", &KOREStringPattern::getContents);
 }
 
 PYBIND11_MODULE(_kllvm, m) {
