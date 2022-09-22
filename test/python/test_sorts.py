@@ -81,5 +81,6 @@ class TestSorts(unittest.TestCase):
         self.assertNotEqual(a1, b1)
         self.assertNotEqual(a2, b2)
 
+
 if __name__ == "__main__":
     unittest.main()
