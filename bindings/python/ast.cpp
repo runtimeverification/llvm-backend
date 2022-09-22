@@ -153,6 +153,18 @@ void bind_ast(py::module_ &m) {
       .def_property_readonly("contents", &KOREStringPattern::getContents);
 }
 
+void bind_parser(py::module_ &mod) {
+  auto parser = mod.def_submodule("parser", "KORE Parser");
+
+  py::class_<KOREParser, std::unique_ptr<KOREParser>>(parser, "Parser")
+      .def(py::init<std::string>())
+      .def(
+          "pattern",
+          [](KOREParser &parser) { return std::shared_ptr(parser.pattern()); })
+      .def_static("from_string", &KOREParser::from_string);
+}
+
 PYBIND11_MODULE(_kllvm, m) {
   bind_ast(m);
+  bind_parser(m);
 }

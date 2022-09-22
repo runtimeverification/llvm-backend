@@ -1,15 +1,8 @@
 # RUN: %python %s
 
-from test_bindings import kllvm
+from test_bindings import kllvm, input_path
 
-import os
 import unittest
-
-INPUTS = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Inputs")
-
-
-def input_path(name):
-    return os.path.join(INPUTS, name)
 
 
 class TestPatterns(unittest.TestCase):
@@ -35,7 +28,7 @@ class TestPatterns(unittest.TestCase):
             "Z", kllvm.ast.CompositeSort("S")))
         self.assertEqual(str(pat), "ABC{}(X{}(),Z : S{})")
 
-        subbed = pat.substitute({"Z" : kllvm.ast.CompositePattern("Target")})
+        subbed = pat.substitute({"Z": kllvm.ast.CompositePattern("Target")})
         self.assertEqual(str(subbed), "ABC{}(X{}(),Target{}())")
 
     def test_string(self):
