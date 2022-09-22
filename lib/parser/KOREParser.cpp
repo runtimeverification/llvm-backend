@@ -9,7 +9,7 @@
 namespace kllvm {
 namespace parser {
 
-KOREParser KOREParser::from_string(std::string text) {
+std::unique_ptr<KOREParser> KOREParser::from_string(std::string text) {
   char temp_file_name[] = "tmp.parse.XXXXXX";
 
   if (mkstemp(temp_file_name) == -1) {
@@ -21,7 +21,7 @@ KOREParser KOREParser::from_string(std::string text) {
   os << text;
   os.close();
 
-  auto parser = KOREParser(temp_file_name);
+  auto parser = std::make_unique<KOREParser>(temp_file_name);
   std::remove(temp_file_name);
   return parser;
 }

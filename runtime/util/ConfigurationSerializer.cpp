@@ -192,7 +192,7 @@ cached_symbol_sort_list(std::string const &symbol) {
       std::string, std::pair<std::string, std::vector<sptr<KORESort>>>>{};
 
   if (cache.find(symbol) == cache.end()) {
-    cache[symbol] = KOREParser::from_string(symbol).symbol_sort_list();
+    cache[symbol] = KOREParser::from_string(symbol)->symbol_sort_list();
   }
 
   return cache.at(symbol);
