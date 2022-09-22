@@ -21,7 +21,7 @@ class TestTermConstruct(unittest.TestCase):
         for ctor in ["one", "two", "three"]:
             pat = kllvm.ast.CompositePattern(make_label(ctor))
             term = kllvm.runtime.Term(pat)
-            self.assertIsNotNone(term)
+            self.assertEqual(str(pat), str(term))
 
 
 if __name__ == "__main__":

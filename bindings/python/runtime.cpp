@@ -32,12 +32,19 @@ typedef struct block {
   uint64_t *children[];
 } block;
 
+typedef struct string {
+  blockheader h;
+  char data[];
+} string;
+
 /* block *parseConfiguration(const char *filename); */
 
 /* block *take_steps(int64_t, block *); */
 /* void finish_rewriting(block *, bool); */
 /* void printConfiguration(const char *filename, block *subject); */
-/* void initStaticObjects(); */
+/* void printConfigurationToFile(FILE *file, block *subject); */
+void initStaticObjects();
+string *printConfigurationToString(block *subject);
 }
 
 void *constructInitialConfiguration(const KOREPattern *initial);
@@ -48,10 +55,16 @@ static block *construct_stub(const KOREPattern *initial) {
 void bind_runtime(py::module_ &m) {
   auto runtime = m.def_submodule("runtime", "K LLVM backend runtime");
 
-  py::class_<block, raw_ptr<block>>(m, "Term").def(
-      py::init([](KOREPattern const *init) { return construct_stub(init); }));
+  py::class_<block, raw_ptr<block>>(m, "Term")
+      .def(py::init(
+          [](KOREPattern const *init) { return construct_stub(init); }))
+      .def("__str__", [](block *term) {
+        return printConfigurationToString(term)->data;
+      });
 }
 
 PYBIND11_MODULE(_kllvm_runtime, m) {
+  initStaticObjects();
+
   bind_runtime(m);
 }
