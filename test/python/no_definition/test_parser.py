@@ -13,8 +13,9 @@ class TestParser(unittest.TestCase):
         self.assertEqual(str(pat), "A{}(B{}(),C{}())")
 
     def test_string(self):
-        pat = kllvm.parser.Parser.from_string("A{}(X:S, Y:Z, Int{}()")
-        print(pat)
+        pat = kllvm.parser.Parser.from_string(
+            "A{}(X:S, Y:Z, Int{}())").pattern()
+        self.assertEqual(str(pat), "A{}(X : S,Y : Z,Int{}())")
 
 
 if __name__ == "__main__":

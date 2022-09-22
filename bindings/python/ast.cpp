@@ -158,10 +158,10 @@ void bind_parser(py::module_ &mod) {
 
   py::class_<KOREParser, std::unique_ptr<KOREParser>>(parser, "Parser")
       .def(py::init<std::string>())
-      .def(
-          "pattern",
-          [](KOREParser &parser) { return std::shared_ptr(parser.pattern()); })
-      .def_static("from_string", &KOREParser::from_string);
+      .def_static("from_string", &KOREParser::from_string)
+      .def("pattern", [](KOREParser &parser) {
+        return std::shared_ptr(parser.pattern());
+      });
 }
 
 PYBIND11_MODULE(_kllvm, m) {
