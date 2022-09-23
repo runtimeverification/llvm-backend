@@ -2,6 +2,10 @@
 
 #include <pybind11/pybind11.h>
 
+// This header needs to be included last because it pollutes a number of macro
+// definitions into the global namespace.
+#include <runtime/header.h>
+
 namespace py = pybind11;
 
 using namespace kllvm;
@@ -28,33 +32,17 @@ private:
 
 PYBIND11_DECLARE_HOLDER_TYPE(T, raw_ptr<T>, true);
 
-// TODO:  fix name clashes with macros in header.h so that we don't need to slice
-//        these ones out.
+/*
+ * These declarations are internal to the backend and aren't exposed explicitly
+ * through any header files, so we pull them in manually here.
+ */
+
 extern "C" {
-typedef struct blockheader {
-  uint64_t hdr;
-} blockheader;
-
-typedef struct block {
-  blockheader h;
-  uint64_t *children[];
-} block;
-
-typedef struct string {
-  blockheader h;
-  char data[];
-} string;
-
 void initStaticObjects();
-
 block *take_steps(int64_t, block *);
-string *printConfigurationToString(block *subject);
 }
 
 void *constructInitialConfiguration(const KOREPattern *initial);
-static block *construct_stub(const KOREPattern *initial) {
-  return static_cast<block *>(constructInitialConfiguration(initial));
-}
 
 void bind_runtime(py::module_ &m) {
   auto runtime = m.def_submodule("runtime", "K LLVM backend runtime");
@@ -64,8 +52,9 @@ void bind_runtime(py::module_ &m) {
   // We therefore have to wrap it up in some external Python code; see
   // package/kllvm/__init__.py for the details of the external class.
   py::class_<block, raw_ptr<block>>(m, "InternalTerm")
-      .def(py::init(
-          [](KOREPattern const *init) { return construct_stub(init); }))
+      .def(py::init([](KOREPattern const *init) {
+        return static_cast<block *>(constructInitialConfiguration(init));
+      }))
       .def(
           "__str__",
           [](block *term) { return printConfigurationToString(term)->data; })
