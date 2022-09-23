@@ -12,12 +12,20 @@ using namespace kllvm;
  * express ownership of the underlying object.
  */
 template <typename T>
-struct raw_ptr {
-  T *ptr_;
-  T *get() { return ptr_; }
-  raw_ptr(T *ptr)
+class raw_ptr {
+public:
+  explicit raw_ptr(T *ptr)
       : ptr_(ptr) { }
+
+  raw_ptr()
+      : raw_ptr(nullptr) { }
+
+  T *get() { return ptr_; }
+
+private:
+  T *ptr_;
 };
+
 PYBIND11_DECLARE_HOLDER_TYPE(T, raw_ptr<T>, true);
 
 // TODO:  fix name clashes with macros in header.h so that we don't need to slice
@@ -37,13 +45,9 @@ typedef struct string {
   char data[];
 } string;
 
-/* block *parseConfiguration(const char *filename); */
-
-/* block *take_steps(int64_t, block *); */
-/* void finish_rewriting(block *, bool); */
-/* void printConfiguration(const char *filename, block *subject); */
-/* void printConfigurationToFile(FILE *file, block *subject); */
 void initStaticObjects();
+
+block *take_steps(int64_t, block *);
 string *printConfigurationToString(block *subject);
 }
 
@@ -55,12 +59,17 @@ static block *construct_stub(const KOREPattern *initial) {
 void bind_runtime(py::module_ &m) {
   auto runtime = m.def_submodule("runtime", "K LLVM backend runtime");
 
-  py::class_<block, raw_ptr<block>>(m, "Term")
+  // This class can't be used directly from Python; the mutability semantics
+  // that we get from the Pybind wrappers make it really easy to break things.
+  // We therefore have to wrap it up in some external Python code; see
+  // package/kllvm/__init__.py for the details of the external class.
+  py::class_<block, raw_ptr<block>>(m, "InternalTerm")
       .def(py::init(
           [](KOREPattern const *init) { return construct_stub(init); }))
-      .def("__str__", [](block *term) {
-        return printConfigurationToString(term)->data;
-      });
+      .def(
+          "__str__",
+          [](block *term) { return printConfigurationToString(term)->data; })
+      .def("step", [](block *term, int64_t n) { return take_steps(n, term); });
 }
 
 PYBIND11_MODULE(_kllvm_runtime, m) {
