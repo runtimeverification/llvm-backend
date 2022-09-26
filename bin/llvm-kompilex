@@ -81,7 +81,7 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-if [ "${#positional_args[@]}" -ne 3 ]; then
+if ! [[ "${#positional_args[@]}" -eq 2 || "${#positional_args[@]}" -eq 3 ]]; then
   usage
   exit 1
 fi
