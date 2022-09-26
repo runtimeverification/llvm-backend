@@ -117,8 +117,29 @@ else
   fi
 fi
 
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  start_whole_archive="-force_load"
+  end_whole_archive=""
+
+  flags+=("-Wl,-flat_namespace" "-Wl,-undefined" "-Wl,dynamic_lookup")
+else
+  start_whole_archive="-Wl,--whole-archive"
+  end_whole_archive="-Wl,--no-whole-archive"
+fi
+
 if [ "$main" = "static" ]; then
   all_libraries=()
+elif [ "$main" = "python" ]; then
+  # Don't link jemalloc when building a python library; it clashes with the
+  # pymalloc implementation that Python expects you to use.
+  all_libraries=("${libraries[@]}" "-lgmp" "-lmpfr" "-lpthread" "-ldl" "-lffi")
+  flags+=("-fPIC" "-shared" "$start_whole_archive" "$LIBDIR/libkllvmruntime.a" "$end_whole_archive")
+
+  # If we didn't pass a filename explicitly as output, then we enforce the
+  # blessed filename format that Python can understand.
+  if [ "$output_file" = "definition.o" ]; then
+    flags+=("-o" "kllvm_runtime$(python3-config --extension-suffix)")
+  fi
 else
   all_libraries=("${libraries[@]}" "-lgmp" "-lmpfr" "-lpthread" "-ldl" "-lffi" "-ljemalloc")
 fi
