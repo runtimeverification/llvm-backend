@@ -4,7 +4,7 @@ target triple = "@BACKEND_TARGET_TRIPLE@"
 %blockheader = type { i64 } 
 %block = type { %blockheader, [0 x i64 *] } ; 16-bit layout, 8-bit length, 32-bit tag, children
 
-declare fastcc %block* @step(%block*)
+declare fastcc %block* @k_step(%block*)
 declare fastcc %block** @stepAll(%block*, i64*)
 
 @depth = thread_local global i64 zeroinitializer
@@ -43,7 +43,7 @@ else:
 
 define %block* @take_steps(i64 %depth, %block* %subject) {
   store i64 %depth, i64* @depth
-  %result = call fastcc %block* @step(%block* %subject)
+  %result = call fastcc %block* @k_step(%block* %subject)
   ret %block* %result
 }
 

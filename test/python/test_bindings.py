@@ -14,6 +14,9 @@ def __load_bindings(path):
 
 kllvm = __load_bindings(os.environ['BINDINGS_INSTALL_PATH'])
 
+if 'KLLVM_DEFINITION' in os.environ:
+    kllvm.load_definition(os.environ['KLLVM_DEFINITION'])
+
 __INPUTS = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Inputs")
 
 

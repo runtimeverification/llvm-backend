@@ -929,7 +929,7 @@ void makeStepFunction(
     funcType = llvm::FunctionType::get(
         llvm::Type::getVoidTy(module->getContext()), {blockType}, false);
   } else {
-    name = "step";
+    name = "k_step";
     funcType = llvm::FunctionType::get(blockType, {blockType}, false);
   }
   llvm::Function *matchFunc = getOrInsertFunction(module, name, funcType);

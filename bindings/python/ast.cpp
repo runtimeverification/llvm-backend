@@ -8,8 +8,6 @@
 #include <sstream>
 #include <tuple>
 
-#include "runtime.h"
-
 namespace py = pybind11;
 
 using namespace kllvm;
