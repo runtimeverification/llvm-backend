@@ -1,10 +1,9 @@
 #!/bin/bash
 set -e
 
-if [ $# -lt 3 ]; then
-  echo "Usage: $0 <definition.kore> <MODULE-NAME> [main|library] <clang flags>"
-  echo '"main" means that a main function will be generated that matches the signature "interpreter <input.kore> <depth> <output.kore>"'
-  echo '"library" means that no main function is generated and must be passed via <clang flags>'
+if [ $# -lt 2 ]; then
+  echo "Usage: $0 <definition.kore> [main|search|static|python] <clang flags>"
+  echo "See llvm-kompilex -h for help"
   exit 1
 fi
 dt_dir="$(mktemp -d)"

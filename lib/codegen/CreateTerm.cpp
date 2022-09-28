@@ -1124,7 +1124,8 @@ bool makeFunction(
   if (bigStep) {
     llvm::Type *blockType = getValueType({SortCategory::Symbol, 0}, Module);
     llvm::Function *step = getOrInsertFunction(
-        Module, "step", llvm::FunctionType::get(blockType, {blockType}, false));
+        Module, "k_step",
+        llvm::FunctionType::get(blockType, {blockType}, false));
     auto call
         = llvm::CallInst::Create(step, {retval}, "", creator.getCurrentBlock());
     setDebugLoc(call);

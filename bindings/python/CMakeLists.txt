@@ -22,6 +22,11 @@ target_link_libraries(_kllvm PUBLIC
   Parser
 )
 
+target_link_libraries(kllvm-static PUBLIC
+  AST
+  util
+)
+
 install(FILES $<TARGET_FILE:kllvm-static>
   DESTINATION lib/kllvm
   RENAME libkllvmruntime.a)
