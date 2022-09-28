@@ -2,6 +2,7 @@
 #include <cstring>
 #include <fcntl.h>
 #include <gmp.h>
+#include <iostream>
 #include <libgen.h>
 #include <map>
 #include <stdexcept>
@@ -556,6 +557,12 @@ SortK hook_IO_log(SortString path, SortString msg) {
 
   logFiles[p].append(m);
 
+  return dotK;
+}
+
+SortK hook_IO_logString(SortString msg) {
+  char *m = getTerminatedString(msg);
+  std::cerr << m << std::endl;
   return dotK;
 }
 
