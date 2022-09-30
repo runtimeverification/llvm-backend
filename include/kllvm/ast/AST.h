@@ -404,6 +404,10 @@ private:
       = 0;
 };
 
+void flatten(
+    KORECompositePattern *pat, std::string name,
+    std::vector<sptr<KOREPattern>> &result);
+
 class KOREVariablePattern : public KOREPattern {
 private:
   ptr<KOREVariable> name;
