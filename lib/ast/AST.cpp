@@ -854,7 +854,7 @@ struct CompareFirst {
   }
 };
 
-static void flatten(
+void kllvm::flatten(
     KORECompositePattern *pat, std::string name,
     std::vector<sptr<KOREPattern>> &result) {
   for (auto &arg : pat->getArguments()) {
