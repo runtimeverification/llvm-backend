@@ -118,7 +118,6 @@ def compile_module(kompiled_dir, verbose=False):
             f"Compiling python extension:\n  {' '.join(args)}", file=sys.stderr)
     subprocess.run(args)
 
-
 if __name__ == "__main__":
     args = get_args()
 
@@ -129,17 +128,41 @@ if __name__ == "__main__":
 
     server = launch_kserver()
 
+    block = None
+
     try:
         while True:
             try:
-                src = input("$ ")
-                if src:
+                user_input = input("> ").split(' ')
+                command = user_input[0]
+
+                if command == "load":
+                    filename = user_input[1]
+                    with open(filename, 'r') as f:
+                        src = f.read()
                     term = parse_term(args.directory, src)
                     inp = construct_interpreter_input(term)
 
                     block = inp.construct()
+
+                elif command == "show":
+                    if block is not None:
+                        print(unparse(args.directory, block))
+
+                elif command == "step":
+                    if len(user_input) == 1:
+                        steps = 1
+                    else:
+                        steps = int(user_input[1])
+
+                    block = kore.take_steps(steps, block)
+
+                elif command == "run":
                     block = kore.take_steps(-1, block)
-                    print(unparse(args.directory, block))
+
+                else:
+                    print(f"Unknown command: {command}")
+
             except subprocess.CalledProcessError as e:
                 err = e.stderr.decode("utf-8")
                 print(f"Syntax error:\n  {err}")
