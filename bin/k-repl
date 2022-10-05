@@ -6,6 +6,7 @@ import os
 import subprocess
 import tempfile
 import readline
+import time
 
 
 def get_args():
@@ -118,6 +119,21 @@ def compile_module(kompiled_dir, verbose=False):
             f"Compiling python extension:\n  {' '.join(args)}", file=sys.stderr)
     subprocess.run(args)
 
+class Profiler:
+    on = False
+
+    def __init__(self, name):
+        self.name = name
+
+    def __enter__(self):
+        self.start = time.perf_counter()
+        return self
+
+    def __exit__(self, ty, val, tb):
+        self.end = time.perf_counter()
+        if Profiler.on:
+            print(f"{self.name}: {self.end - self.start:0.4f}s")
+
 if __name__ == "__main__":
     args = get_args()
 
@@ -142,19 +158,21 @@ if __name__ == "__main__":
 
                     if command == "load":
                         if len(user_input) > 1:
-                            filename = user_input[1]
-                            with open(filename, 'r') as f:
-                                src = f.read()
-                            term = parse_term(args.directory, src)
-                            inp = construct_interpreter_input(term)
+                            with Profiler("load"):
+                                filename = user_input[1]
+                                with open(filename, 'r') as f:
+                                    src = f.read()
+                                term = parse_term(args.directory, src)
+                                inp = construct_interpreter_input(term)
 
-                            block = inp.construct()
+                                block = inp.construct()
                         else:
                             print("No filename")
 
                     elif command == "show":
                         if block is not None:
-                            print(unparse(args.directory, block))
+                            with Profiler("show"):
+                                print(unparse(args.directory, block))
 
                     elif command == "step":
                         if len(user_input) == 1:
@@ -162,10 +180,18 @@ if __name__ == "__main__":
                         else:
                             steps = int(user_input[1])
 
-                        block = kore.take_steps(steps, block)
+                        with Profiler("step"):
+                            block = kore.take_steps(steps, block)
 
                     elif command == "run":
-                        block = kore.take_steps(-1, block)
+                        with Profiler("run"):
+                            block = kore.take_steps(-1, block)
+
+                    elif command == "time-on":
+                        Profiler.on = True
+
+                    elif command == "time-off":
+                        Profiler.on = False
 
                     else:
                         print(f"Unknown command: {command}")
