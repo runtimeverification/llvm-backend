@@ -133,35 +133,42 @@ if __name__ == "__main__":
     try:
         while True:
             try:
-                user_input = input("> ").split(' ')
-                command = user_input[0]
+                line = input("> ")
+                parts = map(lambda s: s.strip(), line.split(";"))
 
-                if command == "load":
-                    filename = user_input[1]
-                    with open(filename, 'r') as f:
-                        src = f.read()
-                    term = parse_term(args.directory, src)
-                    inp = construct_interpreter_input(term)
+                for part in parts:
+                    user_input = part.split(" ")
+                    command = user_input[0]
 
-                    block = inp.construct()
+                    if command == "load":
+                        if len(user_input) > 1:
+                            filename = user_input[1]
+                            with open(filename, 'r') as f:
+                                src = f.read()
+                            term = parse_term(args.directory, src)
+                            inp = construct_interpreter_input(term)
 
-                elif command == "show":
-                    if block is not None:
-                        print(unparse(args.directory, block))
+                            block = inp.construct()
+                        else:
+                            print("No filename")
 
-                elif command == "step":
-                    if len(user_input) == 1:
-                        steps = 1
+                    elif command == "show":
+                        if block is not None:
+                            print(unparse(args.directory, block))
+
+                    elif command == "step":
+                        if len(user_input) == 1:
+                            steps = 1
+                        else:
+                            steps = int(user_input[1])
+
+                        block = kore.take_steps(steps, block)
+
+                    elif command == "run":
+                        block = kore.take_steps(-1, block)
+
                     else:
-                        steps = int(user_input[1])
-
-                    block = kore.take_steps(steps, block)
-
-                elif command == "run":
-                    block = kore.take_steps(-1, block)
-
-                else:
-                    print(f"Unknown command: {command}")
+                        print(f"Unknown command: {command}")
 
             except subprocess.CalledProcessError as e:
                 err = e.stderr.decode("utf-8")
