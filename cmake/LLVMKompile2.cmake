@@ -19,7 +19,7 @@ endif()
 
 add_custom_command(
 	OUTPUT "${KOMPILED_DIR}/definition.o"
-	COMMAND ${LLVM_KOMPILE} ${KOMPILED_DIR}/definition.kore ${KOMPILED_DIR}/dt ${KOMPILE_USE_MAIN} ${LLVM_KOMPILE_FLAGS} -o ${KOMPILED_DIR}/definition.o -c
+	COMMAND ${LLVM_KOMPILE} ${KOMPILED_DIR}/definition.kore ${KOMPILED_DIR}/dt ${KOMPILE_USE_MAIN} -- ${LLVM_KOMPILE_FLAGS} -o ${KOMPILED_DIR}/definition.o -c
 	DEPENDS ${KOMPILED_DIR}/definition.kore)
 
 add_custom_target(definition
