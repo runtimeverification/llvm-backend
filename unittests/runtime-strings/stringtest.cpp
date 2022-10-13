@@ -2,6 +2,8 @@
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
+#include <limits>
+
 #include <gmp.h>
 #include <mpfr.h>
 
@@ -39,6 +41,9 @@ string *makeString(const KCHAR *, int64_t len = -1);
 stringbuffer *hook_BUFFER_empty();
 stringbuffer *hook_BUFFER_concat(stringbuffer *, string *);
 string *hook_BUFFER_toString(stringbuffer *);
+
+const uint32_t first_inj_tag = std::numeric_limits<uint32_t>::max();
+const uint32_t last_inj_tag = std::numeric_limits<uint32_t>::min();
 
 mpz_ptr move_int(mpz_t i) {
   mpz_ptr result = (mpz_ptr)malloc(sizeof(__mpz_struct));

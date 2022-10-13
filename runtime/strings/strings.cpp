@@ -265,6 +265,11 @@ string *hook_STRING_string2token(SortString input) {
 }
 
 SortString hook_STRING_token2string(string *input) {
+  auto in_block = (block *)input;
+  if (is_injection(in_block)) {
+    input = (string *)strip_injection(in_block);
+  }
+
   if (layout(input) != 0) {
     throw std::invalid_argument("token2string: input is not a string token");
   }

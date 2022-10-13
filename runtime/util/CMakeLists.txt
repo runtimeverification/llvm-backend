@@ -3,6 +3,7 @@ add_library(util STATIC
   ConfigurationPrinter.cpp
   ConfigurationSerializer.cpp
   search.cpp
+  util.cpp
 )
 
 install(
