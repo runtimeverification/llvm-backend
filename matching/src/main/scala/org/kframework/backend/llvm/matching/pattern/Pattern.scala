@@ -200,7 +200,7 @@ case class MapP[T](keys: Seq[Pattern[T]], values: Seq[Pattern[T]], frame: Option
   def isSpecialized(ix: Constructor, isExact: Boolean, fringe: Fringe, clause: Clause, maxPriority: Int): Boolean = {
     (ix, frame) match {
       case (Empty(), _) => keys.isEmpty && values.isEmpty
-      case (HasKey(_, _, _), Some(_)) => true
+      case (HasKey(_, _, _), Some(_)) => clause.action.priority <= maxPriority
       case (HasKey(_, _, Some(p)), None) => keys.map(_.canonicalize(clause)).exists(Pattern.mightUnify(p, _))
       case (HasNoKey(_, Some(p)), _) => !keys.map(_.canonicalize(clause)).contains(p)
       case (HasKey(_, _, None), None) => keys.nonEmpty && clause.action.priority <= maxPriority
@@ -316,7 +316,7 @@ case class SetP[T](elements: Seq[Pattern[T]], frame: Option[Pattern[T]], ctr: Sy
   def isSpecialized(ix: Constructor, isExact: Boolean, fringe: Fringe, clause: Clause, maxPriority: Int): Boolean = {
     (ix, frame) match {
       case (Empty(), _) => elements.isEmpty
-      case (HasKey(_, _, _), Some(_)) => true
+      case (HasKey(_, _, _), Some(_)) => clause.action.priority <= maxPriority
       case (HasKey(_, _, Some(p)), None) => elements.map(_.canonicalize(clause)).exists(Pattern.mightUnify(p, _))
       case (HasNoKey(_, Some(p)), _) => !elements.map(_.canonicalize(clause)).contains(p)
       case (HasKey(_, _, None), None) => elements.nonEmpty && clause.action.priority <= maxPriority
