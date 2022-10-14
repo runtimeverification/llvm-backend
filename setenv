@@ -1,0 +1,13 @@
+export PATH=$HOME/.cargo/bin:$HOME/.local/bin:$PATH
+
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    BREW_PREFIX=$(brew --prefix || true)
+    if [ -z "${BREW_PREFIX}" ]; then
+      BREW_PREFIX="/usr/local"
+    fi
+
+    export PATH="${BREW_PREFIX}/opt/flex/bin:${BREW_PREFIX}/opt/llvm@15/bin:$PATH"
+    export LDFLAGS="-L${BREW_PREFIX}/opt/llvm@15/lib -L${BREW_PREFIX}/opt/flex/lib"
+    export CPPFLAGS="-I${BREW_PREFIX}/opt/llvm@15/include -I${BREW_PREFIX}/opt/flex/include"
+    export FLEX_EXECUTABLE="${BREW_PREFIX}/opt/flex/bin/flex"
+fi
