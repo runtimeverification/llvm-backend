@@ -266,6 +266,8 @@ mapiter map_iterator(map *);
 block *map_iterator_next(mapiter *);
 
 extern const uint32_t first_inj_tag, last_inj_tag;
+bool is_injection(block *);
+block *strip_injection(block *);
 }
 
 std::string floatToString(const floating *);

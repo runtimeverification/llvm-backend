@@ -3,6 +3,9 @@ add_library(strings STATIC
   bytes.cpp
 )
 
+target_link_libraries(strings
+  util)
+
 install(
   TARGETS strings
   ARCHIVE DESTINATION lib/kllvm

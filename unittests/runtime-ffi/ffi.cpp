@@ -33,6 +33,9 @@ const char *symbols[NUM_SYMBOLS]
        "inj{SortBytes{}, SortKItem{}}",
        "inj{SortFFIType{}, SortKItem{}}"};
 
+const uint32_t first_inj_tag = 4;
+const uint32_t last_inj_tag = 5;
+
 char *getTerminatedString(string *str);
 
 uint32_t getTagForSymbolName(const char *s) {
