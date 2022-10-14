@@ -63,11 +63,6 @@ else
   MAINFILES=""
 fi
 
-if [ "$LLVM_MAJOR_VERSION" -ge 14 ]; then
-  llc_flags+=("--opaque-pointers")
-  flags+=("-mllvm" "--opaque-pointers")
-fi
-
 if [[ "$OSTYPE" == "darwin"* ]]; then
   libraries=("-liconv" "-lncurses")
   flags=(
@@ -79,6 +74,11 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
 else
   libraries=("-ltinfo")
   flags=("-Wl,-u,sort_table")
+fi
+
+if [ "$LLVM_MAJOR_VERSION" -ge 14 ]; then
+  llc_flags+=("--opaque-pointers")
+  flags+=("-mllvm" "--opaque-pointers")
 fi
 
 llc_flags+=("--relocation-model=pic")
