@@ -12,4 +12,4 @@ definition="$1"
 main="$2"
 shift; shift
 ( cd "@PROJECT_SOURCE_DIR@"/matching && mvn exec:java -Dexec.args="$definition qbaL $dt_dir 1" -q )
-llvm-kompilex "$definition" "$dt_dir" "$main" -- "$@" -g
+llvm-kompile "$definition" "$dt_dir" "$main" -- "$@" -g
