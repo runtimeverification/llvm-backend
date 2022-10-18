@@ -19,9 +19,6 @@ stdenv.mkDerivation {
     sed -i bin/llvm-kompile \
       -e '2a export PATH="${lib.getBin host.clang}/bin:''${PATH}"'
 
-    sed -i bin/llvm-kompilex \
-      -e '2a export PATH="${lib.getBin host.clang}/bin:''${PATH}"'
-
     substituteInPlace bin/llvm-kompile-clang \
       --replace '"-lgmp"' '"-L${gmp}/lib" "-lgmp"' \
       --replace '"-lmpfr"' '"-L${mpfr}/lib" "-lmpfr"' \
