@@ -20,8 +20,8 @@ stdenv.mkDerivation {
       -e '2a export PATH="${lib.getBin host.clang}/bin:''${PATH}"'
 
     substituteInPlace bin/llvm-kompile-clang \
-      --replace '"-lgmp"' '"-L${gmp}/lib" "-lgmp"' \
-      --replace '"-lmpfr"' '"-L${mpfr}/lib" "-lmpfr"' \
+      --replace '"-lgmp"' '"-I${gmp.dev}/include" "-L${gmp}/lib" "-lgmp"' \
+      --replace '"-lmpfr"' '-I${mpfr.dev}/include "-L${mpfr}/lib" "-lmpfr"' \
       --replace '"-lffi"' '"-L${libffi}/lib" "-lffi"' \
       --replace '"-ljemalloc"' '"-L${jemalloc}/lib" "-ljemalloc"' \
       --replace '"-liconv"' '"-L${libiconv}/lib" "-liconv"' \
