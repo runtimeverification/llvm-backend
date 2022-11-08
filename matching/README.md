@@ -738,7 +738,7 @@ We now define `default` on map columns:
 * default(i, Map ps |-> qs) =
   [P_i1, ..., P_im] -> C_i
   if Key(k) is in signature(s_j, j) and the canonicalized ps does not contain k
-* default(
+* default(i, Map ps |-> qs M) =
   [P_i1, ..., P_im] -> C_i
   if Key(k) is in signature(s_j, j) and the canonicalized ps does not contain k
 * default(i, Map ps |-> qs) =
