@@ -38,8 +38,8 @@ jobs:
         if: ${{ !startsWith(matrix.os, 'self') }}
         uses: cachix/cachix-action@v10
         with:
-          name: runtimeverification
-          signingKey: '${{ secrets.CACHIX_SIGNING_KEY }}'
+          name: k-framework
+          signingKey: '${{ secrets.CACHIX_PUBLIC_KEY }}'
 
       - name: 'Build LLVM backend'
         run: GC_DONT_GC=1 nix build .
