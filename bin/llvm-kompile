@@ -10,6 +10,8 @@ Options:
   -h, --help      Print this message and exit.
   -v, --verbose   Print commands executed to stderr.
   --save-temps    Do not delete temporary files on exit.
+  --bindings-path Print the absolute path of the compiled Python bindings for
+                  the LLVM backend, then exit.
 
 Any option not listed above will be passed through to clang; use '--' to
 separate additional positional arguments to clang from those for $0.
@@ -34,6 +36,13 @@ run () {
   fi
   "$@"
   { set +x; } 2>/dev/null
+}
+
+print_bindings_path () {
+  bin_dir=$(dirname "$0")
+  bindings_dir=$(realpath "$bin_dir/../bindings/python")
+  echo "$bindings_dir"
+  exit 0
 }
 
 positional_args=()
@@ -65,6 +74,9 @@ while [[ $# -gt 0 ]]; do
       save_temps=true	    
       kompile_clang_flags+=("-save-temps")
       shift
+      ;;
+    --bindings-path)
+      print_bindings_path
       ;;
     --)
       reading_clang_args=true
