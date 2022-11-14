@@ -42,7 +42,6 @@ print_bindings_path () {
   bin_dir=$(dirname "$0")
   bindings_dir=$(realpath "$bin_dir/../bindings/python")
   echo "$bindings_dir"
-  exit 0
 }
 
 positional_args=()
@@ -77,6 +76,7 @@ while [[ $# -gt 0 ]]; do
       ;;
     --bindings-path)
       print_bindings_path
+      exit 0
       ;;
     --)
       reading_clang_args=true
