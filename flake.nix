@@ -3,9 +3,7 @@
 
   inputs = {
     utils.url = "github:numtide/flake-utils";
-    # locked due to https://github.com/NixOS/nixpkgs/pull/172397/files
-    nixpkgs.url =
-      "github:nixos/nixpkgs/a923e194a3f21ed8a31367c96530a06756ed993e";
+    nixpkgs.url = "github:nixos/nixpkgs";
     immer-src.url =
       "github:runtimeverification/immer/198c2ae260d49ef1800a2fe4433e07d7dec20059";
     immer-src.flake = false;
@@ -20,6 +18,8 @@
 
   outputs = { self, nixpkgs, utils, immer-src, rapidjson-src, pybind11-src, mavenix }:
     let
+      inherit (nixpkgs) lib;
+
       # put devShell and any other required packages into local overlay
       # if you have additional overlays, you may add them here
       localOverlay = import ./nix/overlay.nix; # this should expose devShell
@@ -64,10 +64,13 @@
       llvm-backend-overlay =
         nixpkgs.lib.composeManyExtensions [ depsOverlay localOverlay ];
 
-      pkgsForSystem = system: llvm-backend-release:
+      pkgsForSystem = system: llvm-version: llvm-backend-release:
         import nixpkgs {
           overlays = [
-            (_: _: { inherit llvm-backend-release; })
+            (_: _: {
+              inherit llvm-version;
+              inherit llvm-backend-release;
+            })
             mavenix.overlay
             llvm-backend-overlay
           ];
@@ -80,15 +83,25 @@
       "aarch64-darwin"
     ] (system:
       let
-        packagesRelease = pkgsForSystem system true;
-        packages = pkgsForSystem system false;
+        packagesRelease = pkgsForSystem system 13 true;
+        packages = pkgsForSystem system 13 false;
       in {
         packages = utils.lib.flattenTree {
           inherit (packages) llvm-backend llvm-backend-matching;
           llvm-backend-release = packagesRelease.llvm-backend;
           default = packages.llvm-backend;
         };
-        checks = { inherit (packages) integration-tests; };
+        checks = let matrix = (lib.forEach (lib.cartesianProductOfSets {
+          llvm-version = [12 13 14];
+          release = [true false];
+        }) (
+          args:
+            let pkgs = pkgsForSystem system args.llvm-version args.release; in
+            {
+              name = "tests_${toString args.llvm-version}_${toString args.release}";
+              value = pkgs.integration-tests;
+            }
+        )); in builtins.listToAttrs matrix;
         devShells.default = packages.devShell;
       }) // {
         # non-system suffixed items should go here

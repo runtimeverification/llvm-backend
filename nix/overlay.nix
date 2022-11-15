@@ -1,6 +1,6 @@
 final: prev:
 let
-  llvmPackages = prev.llvmPackages_13.override {
+  llvmPackages = prev."llvmPackages_${toString prev.llvm-version}".override {
     bootBintoolsNoLibc = null;
     bootBintools = null;
   };
