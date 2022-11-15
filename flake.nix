@@ -64,12 +64,12 @@
       llvm-backend-overlay =
         nixpkgs.lib.composeManyExtensions [ depsOverlay localOverlay ];
 
-      pkgsForSystem = system: llvm-version: llvm-backend-release:
+      pkgsForSystem = system: llvm-version: llvm-backend-build-type:
         import nixpkgs {
           overlays = [
             (_: _: {
               inherit llvm-version;
-              inherit llvm-backend-release;
+              inherit llvm-backend-build-type;
             })
             mavenix.overlay
             llvm-backend-overlay
@@ -83,8 +83,8 @@
       "aarch64-darwin"
     ] (system:
       let
-        packagesRelease = pkgsForSystem system 13 true;
-        packages = pkgsForSystem system 13 false;
+        packagesRelease = pkgsForSystem system 13 "Release";
+        packages = pkgsForSystem system 13 "FastBuild";
       in {
         packages = utils.lib.flattenTree {
           inherit (packages) llvm-backend llvm-backend-matching;
@@ -93,12 +93,12 @@
         };
         checks = let matrix = (lib.forEach (lib.cartesianProductOfSets {
           llvm-version = [12 13 14];
-          release = [true false];
+          build-type = ["Debug" "Release" "RelWithDebInfo" "FastBuild" "GcStats"];
         }) (
           args:
-            let pkgs = pkgsForSystem system args.llvm-version args.release; in
+            let pkgs = pkgsForSystem system args.llvm-version args.build-type; in
             {
-              name = "tests_${toString args.llvm-version}_${toString args.release}";
+              name = "tests_${toString args.llvm-version}_${args.build-type}";
               value = pkgs.integration-tests;
             }
         )); in builtins.listToAttrs matrix;

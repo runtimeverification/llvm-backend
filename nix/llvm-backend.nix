@@ -3,12 +3,12 @@
 # Runtime dependencies:
 host,
 # Options:
-release ? false # optimized release build, currently: LTO
+cmakeBuildType ? "FastBuild" # optimized release build, currently: LTO
 }:
 stdenv.mkDerivation {
   pname = "llvm-backend";
   version = "0";
-  inherit src;
+  inherit src cmakeBuildType;
 
   nativeBuildInputs = [ cmake flex llvm pkgconfig python3 ];
   buildInputs = [ boost libyaml ];
@@ -43,8 +43,6 @@ stdenv.mkDerivation {
     "-DBUILD_TESTS=True"
     "-DK_LLVM_BACKEND_LTO=OFF"
   ];
-
-  cmakeBuildType = if release then "Release" else "FastBuild";
 
   NIX_CFLAGS_COMPILE = [ "-Wno-error" ];
 
