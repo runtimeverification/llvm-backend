@@ -16,7 +16,7 @@ ROOT_PATH = os.path.realpath(os.path.join(
 # allow it to be set in the environment as an option.
 BINDINGS_INSTALL_PATH = os.environ.get(
     'BINDINGS_INSTALL_PATH',
-    os.path.join(ROOT_PATH, "build", "install", "bindings", "python"))
+    os.path.join(ROOT_PATH, "build", "install", "lib", "kllvm", "python"))
 
 config.name = 'llvm-backend'
 config.test_source_root = os.path.join(ROOT_PATH, "test")
