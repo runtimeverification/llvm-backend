@@ -12,8 +12,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - runner: [self-hosted, linux, normal]
-            os: self-ubuntu-latest
+          - runner: ubuntu-latest
+            os: ubuntu-latest
           - runner: macos-12
             os: macos-12
           - runner: MacM1
