@@ -114,11 +114,11 @@
           llvm-backend-13-Debug.llvm-backend
           llvm-backend-13-Release.llvm-backend
 
-          llvm-backend-14-Debug.integration-tests
-          llvm-backend-14-Release.integration-tests
-          llvm-backend-14-RelWithDebInfo.integration-tests
-          llvm-backend-14-FastBuild.integration-tests
-          llvm-backend-14-GcStats.integration-tests
+#           llvm-backend-14-Debug.integration-tests
+#           llvm-backend-14-Release.integration-tests
+#           llvm-backend-14-RelWithDebInfo.integration-tests
+#           llvm-backend-14-FastBuild.integration-tests
+#           llvm-backend-14-GcStats.integration-tests
         ];
         devShells.default = llvm-backend-14-FastBuild.devShell;
       }) // {
