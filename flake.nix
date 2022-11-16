@@ -83,26 +83,44 @@
       "aarch64-darwin"
     ] (system:
       let
-        packagesRelease = pkgsForSystem system 13 "Release";
-        packages = pkgsForSystem system 13 "FastBuild";
-      in {
-        packages = utils.lib.flattenTree {
-          inherit (packages) llvm-backend llvm-backend-matching;
-          llvm-backend-release = packagesRelease.llvm-backend;
-          default = packages.llvm-backend;
-        };
-        checks = let matrix = (lib.forEach (lib.cartesianProductOfSets {
+        listToChecks = checks:
+          builtins.listToAttrs (lib.imap0 (i: v: { name = "check_${toString i}"; value = v; }) checks);
+
+        matrix = builtins.listToAttrs (lib.forEach (lib.cartesianProductOfSets {
           llvm-version = [12 13 14];
           build-type = ["Debug" "Release" "RelWithDebInfo" "FastBuild" "GcStats"];
         }) (
           args:
             let pkgs = pkgsForSystem system args.llvm-version args.build-type; in
             {
-              name = "tests_${toString args.llvm-version}_${args.build-type}";
-              value = pkgs.integration-tests;
+              name = "llvm-backend-${toString args.llvm-version}-${args.build-type}";
+              value = {
+                inherit (pkgs) llvm-backend llvm-backend-matching integration-tests devShell;
+              };
             }
-        )); in builtins.listToAttrs matrix;
-        devShells.default = packages.devShell;
+        ));
+      in with matrix; {
+        packages = utils.lib.flattenTree {
+          inherit (llvm-backend-14-FastBuild) llvm-backend llvm-backend-matching;
+          default = llvm-backend-14-FastBuild.llvm-backend;
+          llvm-backend-release = llvm-backend-14-Release.llvm-backend;
+        };
+        checks = listToChecks [
+          # Check that the backend compiles on each supported version of LLVM,
+          # but don't run the test suite on all 15 configurations.
+          llvm-backend-12-Debug.llvm-backend
+          llvm-backend-12-Release.llvm-backend
+
+          llvm-backend-13-Debug.llvm-backend
+          llvm-backend-13-Release.llvm-backend
+
+          llvm-backend-14-Debug.integration-tests
+          llvm-backend-14-Release.integration-tests
+          llvm-backend-14-RelWithDebInfo.integration-tests
+          llvm-backend-14-FastBuild.integration-tests
+          llvm-backend-14-GcStats.integration-tests
+        ];
+        devShells.default = llvm-backend-14-FastBuild.devShell;
       }) // {
         # non-system suffixed items should go here
         overlays.default = llvm-backend-overlay;
