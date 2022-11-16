@@ -13,7 +13,7 @@ jobs:
       matrix:
         include:
           - runner: [self-hosted, linux, normal]
-            os: ubuntu-latest
+            os: self-ubuntu-latest
           - runner: macos-12
             os: macos-12
           - runner: MacM1
