@@ -12,7 +12,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - runner: ubuntu-latest
+          - runner: [self-hosted, linux, normal]
             os: ubuntu-latest
           - runner: macos-12
             os: macos-12
@@ -44,12 +44,5 @@ jobs:
       - name: 'Build LLVM backend'
         run: GC_DONT_GC=1 nix build .
 
-      # Selectively disable the nix GC for the integration tests, as they take a
-      # lot of memory and tend to get killed on the github-hosted runners.
       - name: 'Test LLVM backend'
-        if: ${{  startsWith(matrix.os, 'self') }}
         run: GC_DONT_GC=1 nix flake check
-
-      - name: 'Test LLVM backend'
-        if: ${{ !startsWith(matrix.os, 'self') }}
-        run: nix flake check
