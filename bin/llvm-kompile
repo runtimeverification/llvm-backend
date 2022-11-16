@@ -40,7 +40,7 @@ run () {
 
 print_bindings_path () {
   bin_dir=$(dirname "$0")
-  bindings_dir=$(realpath "$bin_dir/../bindings/python")
+  bindings_dir=$(realpath "$bin_dir/../lib/kllvm/python")
   echo "$bindings_dir"
 }
 
