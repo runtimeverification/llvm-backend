@@ -10,6 +10,9 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     steps:
+      - name: 'Check out code'
+        uses: actions/checkout@v3
+
       - name: 'Update dependents'
         env:
           JENKINS_DEVOPS_TOKEN: ${{ secrets.JENKINS_DEVOPS_TOKEN }}
