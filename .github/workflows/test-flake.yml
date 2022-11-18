@@ -43,3 +43,6 @@ jobs:
 
       - name: 'Build LLVM backend'
         run: GC_DONT_GC=1 nix build .
+
+      - name: 'Test LLVM backend'
+        run: GC_DONT_GC=1 nix flake check --print-build-logs

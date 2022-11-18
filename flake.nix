@@ -3,9 +3,7 @@
 
   inputs = {
     utils.url = "github:numtide/flake-utils";
-    # locked due to https://github.com/NixOS/nixpkgs/pull/172397/files
-    nixpkgs.url =
-      "github:nixos/nixpkgs/a923e194a3f21ed8a31367c96530a06756ed993e";
+    nixpkgs.url = "github:nixos/nixpkgs";
     immer-src.url =
       "github:runtimeverification/immer/198c2ae260d49ef1800a2fe4433e07d7dec20059";
     immer-src.flake = false;
@@ -20,6 +18,8 @@
 
   outputs = { self, nixpkgs, utils, immer-src, rapidjson-src, pybind11-src, mavenix }:
     let
+      inherit (nixpkgs) lib;
+
       # put devShell and any other required packages into local overlay
       # if you have additional overlays, you may add them here
       localOverlay = import ./nix/overlay.nix; # this should expose devShell
@@ -64,10 +64,13 @@
       llvm-backend-overlay =
         nixpkgs.lib.composeManyExtensions [ depsOverlay localOverlay ];
 
-      pkgsForSystem = system: llvm-backend-release:
+      pkgsForSystem = system: llvm-version: llvm-backend-build-type:
         import nixpkgs {
           overlays = [
-            (_: _: { inherit llvm-backend-release; })
+            (_: _: {
+              inherit llvm-version;
+              inherit llvm-backend-build-type;
+            })
             mavenix.overlay
             llvm-backend-overlay
           ];
@@ -80,16 +83,50 @@
       "aarch64-darwin"
     ] (system:
       let
-        packagesRelease = pkgsForSystem system true;
-        packages = pkgsForSystem system false;
-      in {
+        listToChecks = checks:
+          builtins.listToAttrs (lib.imap0 (i: v: { name = "check_${toString i}"; value = v; }) checks);
+
+        matrix = builtins.listToAttrs (lib.forEach (lib.cartesianProductOfSets {
+          llvm-version = [12 13 14];
+          build-type = ["Debug" "Release" "RelWithDebInfo" "FastBuild" "GcStats"];
+        }) (
+          args:
+            let pkgs = pkgsForSystem system args.llvm-version args.build-type; in
+            {
+              name = "llvm-backend-${toString args.llvm-version}-${args.build-type}";
+              value = {
+                inherit (pkgs) llvm-backend llvm-backend-matching integration-tests devShell;
+              };
+            }
+        ));
+      in with matrix; {
         packages = utils.lib.flattenTree {
-          inherit (packages) llvm-backend llvm-backend-matching;
-          llvm-backend-release = packagesRelease.llvm-backend;
-          default = packages.llvm-backend;
+          inherit (llvm-backend-14-FastBuild) llvm-backend llvm-backend-matching;
+          default = llvm-backend-14-FastBuild.llvm-backend;
+          llvm-backend-release = llvm-backend-14-Release.llvm-backend;
         };
-        checks = { inherit (packages) integration-tests; };
-        devShells.default = packages.devShell;
+        checks = listToChecks [
+          # Check that the backend compiles on each supported version of LLVM,
+          # but don't run the test suite on all 15 configurations.
+
+          # Disable the full set temporarily while the checks run on a hosted
+          # runner.
+          # llvm-backend-12-Debug.llvm-backend
+          llvm-backend-12-FastBuild.llvm-backend
+
+          # llvm-backend-13-Debug.llvm-backend
+          llvm-backend-13-FastBuild.llvm-backend
+
+          # llvm-backend-14-Debug.integration-tests
+          # llvm-backend-14-Release.integration-tests
+
+          # llvm-backend-14-RelWithDebInfo.integration-tests
+          # llvm-backend-14-FastBuild.integration-tests
+          # llvm-backend-14-GcStats.integration-tests
+
+          llvm-backend-14-FastBuild.integration-tests
+        ];
+        devShells.default = llvm-backend-14-FastBuild.devShell;
       }) // {
         # non-system suffixed items should go here
         overlays.default = llvm-backend-overlay;
