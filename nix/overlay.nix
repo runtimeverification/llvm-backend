@@ -82,7 +82,7 @@ let
     buildPhase = ''
       runHook preBuild
 
-      BINDINGS_INSTALL_PATH=${llvm-backend}/bindings/python \
+      BINDINGS_INSTALL_PATH=${llvm-backend}/lib/kllvm/python \
         LIT_USE_NIX=1 lit -v test
 
       runHook postBuild
