@@ -5,8 +5,6 @@
 #include <cstdint>
 #include <limits>
 
-#include <iostream>
-
 #include <gmp.h>
 #include <mpfr.h>
 
