@@ -5,6 +5,8 @@
 #include <cstdint>
 #include <limits>
 
+#include <iostream>
+
 #include <gmp.h>
 #include <mpfr.h>
 
@@ -272,5 +274,12 @@ block *strip_injection(block *);
 
 std::string floatToString(const floating *);
 void init_float2(floating *, std::string);
+
+#define KLLVM_HOOK_INVALID_ARGUMENT(msg)                                       \
+  do {                                                                         \
+    auto err_msg = std::string("[") + std::string(__func__)                    \
+                   + std::string("]: ") + std::string(msg);                    \
+    throw std::invalid_argument(err_msg);                                      \
+  } while (false)
 
 #endif // RUNTIME_HEADER_H

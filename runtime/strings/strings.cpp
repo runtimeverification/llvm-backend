@@ -74,7 +74,7 @@ SortInt hook_STRING_length(SortString a) {
 
 static inline uint64_t gs(mpz_t i) {
   if (!mpz_fits_ulong_p(i)) {
-    throw std::invalid_argument("Arg too large for int64_t");
+    KLLVM_HOOK_INVALID_ARGUMENT("Arg too large for int64_t");
   }
   return mpz_get_ui(i);
 }
@@ -82,7 +82,7 @@ static inline uint64_t gs(mpz_t i) {
 SortString hook_STRING_chr(SortInt ord) {
   uint64_t uord = gs(ord);
   if (uord > 255) {
-    throw std::invalid_argument("Ord must be <= 255");
+    KLLVM_HOOK_INVALID_ARGUMENT("Ord must be <= 255");
   }
   auto ret
       = static_cast<string *>(koreAllocToken(sizeof(string) + sizeof(KCHAR)));
@@ -94,7 +94,7 @@ SortString hook_STRING_chr(SortInt ord) {
 SortInt hook_STRING_ord(SortString input) {
   mpz_t result;
   if (len(input) != 1) {
-    throw std::invalid_argument("Input must a string of length 1");
+    KLLVM_HOOK_INVALID_ARGUMENT("Input must a string of length 1");
   }
   mpz_init_set_ui(result, static_cast<unsigned char>(input->data[0]));
   return move_int(result);
@@ -226,7 +226,7 @@ SortInt hook_STRING_string2base_long(SortString input, uint64_t base) {
   memcpy(copy, dataStart, length);
   copy[length] = 0;
   if (mpz_init_set_str(result, copy, base)) {
-    throw std::invalid_argument("Not a valid integer");
+    KLLVM_HOOK_INVALID_ARGUMENT("Not a valid integer");
   }
   return move_int(result);
 }
@@ -271,7 +271,7 @@ SortString hook_STRING_token2string(string *input) {
   }
 
   if (layout(input) != 0) {
-    throw std::invalid_argument("token2string: input is not a string token");
+    KLLVM_HOOK_INVALID_ARGUMENT("token2string: input is not a string token");
   }
   return input;
 }
@@ -368,26 +368,26 @@ SortString hook_STRING_transcode(
   size_t result
       = iconv(converter, &inbuf, &inbytesleft, &outbuf, &outbytesleft);
   if (result < 0) {
-    throw std::invalid_argument("transcoding failed: STRING.transcode");
+    KLLVM_HOOK_INVALID_ARGUMENT("transcoding failed: STRING.transcode");
   }
   *outbuf = 0;
   return makeString(buf, len(input) * 4 - outbytesleft);
 }
 
 string *hook_STRING_uuid() {
-  throw std::invalid_argument("not implemented: STRING.uuid");
+  KLLVM_HOOK_INVALID_ARGUMENT("not implemented: STRING.uuid");
 }
 
 string *hook_STRING_category(string *str) {
-  throw std::invalid_argument("not implemented: STRING.category");
+  KLLVM_HOOK_INVALID_ARGUMENT("not implemented: STRING.category");
 }
 
 string *hook_STRING_directionality(string *str) {
-  throw std::invalid_argument("not implemented: STRING.directionality");
+  KLLVM_HOOK_INVALID_ARGUMENT("not implemented: STRING.directionality");
 }
 
 string *hook_STRING_floatFormat(string *str, string *fmt) {
-  throw std::invalid_argument("not implemented: STRING.floatFormat");
+  KLLVM_HOOK_INVALID_ARGUMENT("not implemented: STRING.floatFormat");
 }
 
 SortStringBuffer hook_BUFFER_empty() {
@@ -468,7 +468,7 @@ void init_float2(floating *result, std::string contents) {
     retValue = mpfr_set_str(result->f, str_value.c_str(), 10, MPFR_RNDN);
   }
   if (retValue != 0) {
-    throw std::invalid_argument("Can't convert to float");
+    KLLVM_HOOK_INVALID_ARGUMENT("Can't convert to float");
   }
 }
 

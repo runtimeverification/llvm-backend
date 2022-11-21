@@ -266,7 +266,7 @@ SortIOInt hook_IO_open(SortString filename, SortString control) {
 
 SortIOInt hook_IO_tell(SortInt i) {
   if (!mpz_fits_sint_p(i)) {
-    throw std::invalid_argument("Arg too large for int");
+    KLLVM_HOOK_INVALID_ARGUMENT("Arg too large for int");
   }
 
   int fd = mpz_get_si(i);
@@ -288,7 +288,7 @@ SortIOInt hook_IO_tell(SortInt i) {
 
 SortIOInt hook_IO_getc(SortInt i) {
   if (!mpz_fits_sint_p(i)) {
-    throw std::invalid_argument("Arg too large for int");
+    KLLVM_HOOK_INVALID_ARGUMENT("Arg too large for int");
   }
 
   int fd = mpz_get_si(i);
@@ -318,7 +318,7 @@ SortIOInt hook_IO_getc(SortInt i) {
 
 SortIOString hook_IO_read(SortInt i, SortInt len) {
   if (!mpz_fits_sint_p(i) || !mpz_fits_ulong_p(len)) {
-    throw std::invalid_argument("Arg too large");
+    KLLVM_HOOK_INVALID_ARGUMENT("Arg too large");
   }
 
   int fd = mpz_get_si(i);
@@ -343,7 +343,7 @@ SortIOString hook_IO_read(SortInt i, SortInt len) {
 
 SortK hook_IO_close(SortInt i) {
   if (!mpz_fits_sint_p(i)) {
-    throw std::invalid_argument("Arg too large for int");
+    KLLVM_HOOK_INVALID_ARGUMENT("Arg too large for int");
   }
 
   int fd = mpz_get_si(i);
@@ -358,7 +358,7 @@ SortK hook_IO_close(SortInt i) {
 
 SortK hook_IO_seek(SortInt i, SortInt loc) {
   if (!mpz_fits_sint_p(i) || !mpz_fits_slong_p(loc)) {
-    throw std::invalid_argument("Arg too large");
+    KLLVM_HOOK_INVALID_ARGUMENT("Arg too large");
   }
 
   int fd = mpz_get_si(i);
@@ -374,7 +374,7 @@ SortK hook_IO_seek(SortInt i, SortInt loc) {
 
 SortK hook_IO_seekEnd(SortInt i, SortInt loc) {
   if (!mpz_fits_sint_p(i) || !mpz_fits_slong_p(loc)) {
-    throw std::invalid_argument("Arg too large");
+    KLLVM_HOOK_INVALID_ARGUMENT("Arg too large");
   }
 
   int fd = mpz_get_si(i);
@@ -390,7 +390,7 @@ SortK hook_IO_seekEnd(SortInt i, SortInt loc) {
 
 SortK hook_IO_putc(SortInt i, SortInt c) {
   if (!mpz_fits_sint_p(i) || !mpz_fits_sint_p(c)) {
-    throw std::invalid_argument("Arg too large");
+    KLLVM_HOOK_INVALID_ARGUMENT("Arg too large");
   }
 
   int fd = mpz_get_si(i);
@@ -406,7 +406,7 @@ SortK hook_IO_putc(SortInt i, SortInt c) {
 
 SortK hook_IO_write(SortInt i, SortString str) {
   if (!mpz_fits_sint_p(i)) {
-    throw std::invalid_argument("Arg too large for int");
+    KLLVM_HOOK_INVALID_ARGUMENT("Arg too large for int");
   }
 
   int fd = mpz_get_si(i);
@@ -421,7 +421,7 @@ SortK hook_IO_write(SortInt i, SortString str) {
 
 SortK hook_IO_lock(SortInt i, SortInt len) {
   if (!mpz_fits_sint_p(i) || !mpz_fits_slong_p(len)) {
-    throw std::invalid_argument("Arg too large");
+    KLLVM_HOOK_INVALID_ARGUMENT("Arg too large");
   }
 
   int fd = mpz_get_si(i);
@@ -443,7 +443,7 @@ SortK hook_IO_lock(SortInt i, SortInt len) {
 
 SortK hook_IO_unlock(SortInt i, SortInt len) {
   if (!mpz_fits_sint_p(i) || !mpz_fits_slong_p(len)) {
-    throw std::invalid_argument("Arg too large");
+    KLLVM_HOOK_INVALID_ARGUMENT("Arg too large");
   }
 
   int fd = mpz_get_si(i);
@@ -476,7 +476,7 @@ SortK hook_IO_remove(SortString path) {
 
 SortIOInt hook_IO_accept(SortInt sock) {
   if (!mpz_fits_sint_p(sock)) {
-    throw std::invalid_argument("Arg too large");
+    KLLVM_HOOK_INVALID_ARGUMENT("Arg too large");
   }
 
   int fd = mpz_get_si(sock);
@@ -499,7 +499,7 @@ SortIOInt hook_IO_accept(SortInt sock) {
 
 SortK hook_IO_shutdownWrite(SortInt sock) {
   if (!mpz_fits_sint_p(sock)) {
-    throw std::invalid_argument("Arg too large");
+    KLLVM_HOOK_INVALID_ARGUMENT("Arg too large");
   }
 
   int fd = mpz_get_si(sock);
@@ -567,27 +567,27 @@ SortK hook_IO_logString(SortString msg) {
 }
 
 block *hook_KREFLECTION_parseKAST(string *kast) {
-  throw std::invalid_argument("not implemented: KREFLECTION.parseKast");
+  KLLVM_HOOK_INVALID_ARGUMENT("not implemented: KREFLECTION.parseKast");
 }
 
 block *hook_KREFLECTION_configuration() {
-  throw std::invalid_argument("not implemented: KREFLECTION.configuration");
+  KLLVM_HOOK_INVALID_ARGUMENT("not implemented: KREFLECTION.configuration");
 }
 
 string *hook_KREFLECTION_getenv(string *str) {
-  throw std::invalid_argument("not implemented: KREFLECTION.getenv");
+  KLLVM_HOOK_INVALID_ARGUMENT("not implemented: KREFLECTION.getenv");
 }
 
 string *hook_KREFLECTION_sort(block *K) {
-  throw std::invalid_argument("not implemented: KREFLECTION.sort");
+  KLLVM_HOOK_INVALID_ARGUMENT("not implemented: KREFLECTION.sort");
 }
 
 block *hook_KREFLECTION_getKLabel(block *K) {
-  throw std::invalid_argument("not implemented: KREFLECTION.getKLabel");
+  KLLVM_HOOK_INVALID_ARGUMENT("not implemented: KREFLECTION.getKLabel");
 }
 
 block *hook_KREFLECTION_fresh(string *str) {
-  throw std::invalid_argument("not implemented: KREFLECTION.fresh");
+  KLLVM_HOOK_INVALID_ARGUMENT("not implemented: KREFLECTION.fresh");
 }
 
 string *hook_KREFLECTION_kompiledDir(void) {
@@ -604,7 +604,7 @@ char const **llvm_backend_argv = nullptr;
 
 list hook_KREFLECTION_argv() {
   if (!llvm_backend_argv)
-    throw std::invalid_argument("KREFLECTION.argv: no arguments given");
+    KLLVM_HOOK_INVALID_ARGUMENT("KREFLECTION.argv: no arguments given");
 
   list l{};
 
@@ -741,15 +741,15 @@ SortKItem hook_IO_system(SortString cmd) {
 }
 
 block *hook_IO_stat(string *path) {
-  throw std::invalid_argument("not implemented: IO.stat");
+  KLLVM_HOOK_INVALID_ARGUMENT("not implemented: IO.stat");
 }
 
 block *hook_IO_lstat(string *path) {
-  throw std::invalid_argument("not implemented: IO.lstat");
+  KLLVM_HOOK_INVALID_ARGUMENT("not implemented: IO.lstat");
 }
 
 block *hook_IO_opendir(string *path) {
-  throw std::invalid_argument("not implemented: IO.opendir");
+  KLLVM_HOOK_INVALID_ARGUMENT("not implemented: IO.opendir");
 }
 
 SortInt hook_IO_time() {
