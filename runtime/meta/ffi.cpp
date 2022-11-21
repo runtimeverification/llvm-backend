@@ -77,7 +77,7 @@ static void *so_lib_handle() {
     handle = dlopen(NULL, RTLD_LAZY);
 
     if (handle == NULL) {
-      throw std::invalid_argument("dlopen returned NULL");
+      KLLVM_HOOK_INVALID_ARGUMENT("dlopen returned NULL");
     }
   }
 
@@ -158,7 +158,7 @@ static ffi_type *getTypeFromBlock(block *elem) {
 
       if (tag_hdr(structField->h.hdr)
           != (uint64_t)getTagForSymbolName("inj{SortFFIType{}, SortKItem{}}")) {
-        throw std::invalid_argument("Struct list contains invalid FFI type");
+        KLLVM_HOOK_INVALID_ARGUMENT("Struct list contains invalid FFI type");
       }
 
       structType->elements[j]
@@ -172,7 +172,7 @@ static ffi_type *getTypeFromBlock(block *elem) {
     return structType;
   }
 
-  throw std::invalid_argument("Arg is not a supported type");
+  KLLVM_HOOK_INVALID_ARGUMENT("Arg is not a supported type");
 }
 
 string *ffiCall(
@@ -183,7 +183,7 @@ string *ffiCall(
   void (*address)(void);
 
   if (!mpz_fits_ulong_p(addr)) {
-    throw std::invalid_argument("Addr is too large");
+    KLLVM_HOOK_INVALID_ARGUMENT("Addr is too large");
   }
 
   address = (void (*)(void))mpz_get_ui(addr);
@@ -197,7 +197,7 @@ string *ffiCall(
   }
 
   if (nargs != (nfixtypes + nvartypes)) {
-    throw std::invalid_argument("Args size does not match types size");
+    KLLVM_HOOK_INVALID_ARGUMENT("Args size does not match types size");
   }
 
   argtypes = (ffi_type **)malloc(sizeof(ffi_type *) * nargs);
@@ -207,7 +207,7 @@ string *ffiCall(
     elem = hook_LIST_get_long(fixtypes, i);
     if (tag_hdr(elem->h.hdr)
         != (uint64_t)getTagForSymbolName("inj{SortFFIType{}, SortKItem{}}")) {
-      throw std::invalid_argument("Fix types list contains invalid FFI type");
+      KLLVM_HOOK_INVALID_ARGUMENT("Fix types list contains invalid FFI type");
     }
 
     argtypes[i] = getTypeFromBlock((block *)*elem->children);
@@ -217,7 +217,7 @@ string *ffiCall(
     elem = hook_LIST_get_long(vartypes, i);
     if (tag_hdr(elem->h.hdr)
         != (uint64_t)getTagForSymbolName("inj{SortFFIType{}, SortKItem{}}")) {
-      throw std::invalid_argument("Var types list contains invalid FFI type");
+      KLLVM_HOOK_INVALID_ARGUMENT("Var types list contains invalid FFI type");
     }
 
     argtypes[i + nfixtypes] = getTypeFromBlock((block *)*elem->children);
@@ -228,7 +228,7 @@ string *ffiCall(
     elem = hook_LIST_get_long(args, i);
     if (tag_hdr(elem->h.hdr)
         != (uint64_t)getTagForSymbolName("inj{SortBytes{}, SortKItem{}}")) {
-      throw std::invalid_argument("Args list contains non-bytes type");
+      KLLVM_HOOK_INVALID_ARGUMENT("Args list contains non-bytes type");
     }
     avalues[i] = ((string *)*elem->children)->data;
   }
@@ -246,17 +246,17 @@ string *ffiCall(
   switch (status) {
   case FFI_OK: break;
   case FFI_BAD_TYPEDEF:
-    throw std::invalid_argument("Types list contains invalid FFI type");
+    KLLVM_HOOK_INVALID_ARGUMENT("Types list contains invalid FFI type");
     break;
   case FFI_BAD_ABI:
-    throw std::invalid_argument("Invalid ABI mode");
+    KLLVM_HOOK_INVALID_ARGUMENT("Invalid ABI mode");
     break;
     // The default case here is a hack to allow us to support
     // two different versions of libffi. From version 3.4
     // onwards, an enum variant FFI_BAD_ARGTYPE is defined. Our
     // CI doesn't yet use this version, so we use the default
     // instead.
-  default: throw std::invalid_argument("Bad FFI argument type"); break;
+  default: KLLVM_HOOK_INVALID_ARGUMENT("Bad FFI argument type"); break;
   }
 
   string *rvalue
@@ -368,10 +368,10 @@ string *hook_FFI_alloc(block *kitem, mpz_t size, mpz_t align) {
   }
 
   if (!mpz_fits_ulong_p(size)) {
-    throw std::invalid_argument("Size is too large");
+    KLLVM_HOOK_INVALID_ARGUMENT("Size is too large");
   }
   if (!mpz_fits_ulong_p(align)) {
-    throw std::invalid_argument("Alignment is too large");
+    KLLVM_HOOK_INVALID_ARGUMENT("Alignment is too large");
   }
 
   size_t a = mpz_get_ui(align);
@@ -379,7 +379,7 @@ string *hook_FFI_alloc(block *kitem, mpz_t size, mpz_t align) {
   if (allocatedKItemPtrs.find(kitem) != allocatedKItemPtrs.end()) {
     string *result = allocatedKItemPtrs[kitem];
     if ((((uintptr_t)result) & (a - 1)) != 0) {
-      throw std::invalid_argument("Memory is not aligned");
+      KLLVM_HOOK_INVALID_ARGUMENT("Memory is not aligned");
     }
     return allocatedKItemPtrs[kitem];
   }
@@ -391,7 +391,7 @@ string *hook_FFI_alloc(block *kitem, mpz_t size, mpz_t align) {
       (void **)&ret, a < sizeof(void *) ? sizeof(void *) : a,
       sizeof(string *) + s);
   if (result) {
-    throw std::invalid_argument("Could not allocate");
+    KLLVM_HOOK_INVALID_ARGUMENT("Could not allocate");
   }
   memset(ret, 0, sizeof(string *) + s);
   set_len(ret, s);
@@ -434,7 +434,7 @@ block *hook_FFI_bytes_ref(string *bytes) {
   auto refIter = allocatedBytesRefs.find(bytes);
 
   if (refIter == allocatedBytesRefs.end()) {
-    throw std::invalid_argument("Bytes have no reference");
+    KLLVM_HOOK_INVALID_ARGUMENT("Bytes have no reference");
   }
 
   return allocatedBytesRefs[bytes];

@@ -71,7 +71,7 @@ SortInt hook_BYTES_bytes2int(
 
 unsigned long get_ui(mpz_t i) {
   if (!mpz_fits_ulong_p(i)) {
-    throw std::invalid_argument("Integer overflow");
+    KLLVM_HOOK_INVALID_ARGUMENT("Integer overflow");
   }
   return mpz_get_ui(i);
 }
@@ -148,7 +148,7 @@ SortBytes hook_BYTES_substr(SortBytes input, SortInt start, SortInt end) {
 SortInt hook_BYTES_get(SortBytes b, SortInt off) {
   unsigned long off_long = get_ui(off);
   if (off_long >= len(b)) {
-    throw std::invalid_argument("Buffer overflow on get");
+    KLLVM_HOOK_INVALID_ARGUMENT("Buffer overflow on get");
   }
   mpz_t result;
   mpz_init_set_ui(result, (unsigned char)b->data[off_long]);
@@ -158,11 +158,11 @@ SortInt hook_BYTES_get(SortBytes b, SortInt off) {
 SortBytes hook_BYTES_update(SortBytes b, SortInt off, SortInt val) {
   unsigned long off_long = get_ui(off);
   if (off_long >= len(b)) {
-    throw std::invalid_argument("Buffer overflow on update");
+    KLLVM_HOOK_INVALID_ARGUMENT("Buffer overflow on update");
   }
   unsigned long val_long = get_ui(val);
   if (val_long >= 256) {
-    throw std::invalid_argument("Not a valid value for a byte in update");
+    KLLVM_HOOK_INVALID_ARGUMENT("Not a valid value for a byte in update");
   }
   b->data[off_long] = (unsigned char)val_long;
   return b;
@@ -171,7 +171,7 @@ SortBytes hook_BYTES_update(SortBytes b, SortInt off, SortInt val) {
 SortBytes hook_BYTES_replaceAt(SortBytes b, SortInt start, SortBytes b2) {
   unsigned long start_long = get_ui(start);
   if (start_long + len(b2) > len(b)) {
-    throw std::invalid_argument("Buffer overflow on replaceAt");
+    KLLVM_HOOK_INVALID_ARGUMENT("Buffer overflow on replaceAt");
   }
   memcpy(b->data + start_long, b2->data, len(b2));
   return b;
@@ -190,7 +190,7 @@ SortBytes hook_BYTES_padRight(SortBytes b, SortInt len, SortInt v) {
   }
   unsigned long uv = get_ui(v);
   if (uv > 255) {
-    throw std::invalid_argument("Integer overflow on value");
+    KLLVM_HOOK_INVALID_ARGUMENT("Integer overflow on value");
   }
   string *result = static_cast<string *>(koreAllocToken(sizeof(string) + ulen));
   set_len(result, ulen);
@@ -206,7 +206,7 @@ SortBytes hook_BYTES_padLeft(SortBytes b, SortInt len, SortInt v) {
   }
   unsigned long uv = get_ui(v);
   if (uv > 255) {
-    throw std::invalid_argument("Integer overflow on value");
+    KLLVM_HOOK_INVALID_ARGUMENT("Integer overflow on value");
   }
   string *result = static_cast<string *>(koreAllocToken(sizeof(string) + ulen));
   set_len(result, ulen);

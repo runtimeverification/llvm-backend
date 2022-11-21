@@ -55,7 +55,7 @@ floating *move_float(floating *);
 mpz_ptr move_int(mpz_t);
 void add_hash64(void *, uint64_t);
 void *move_mint(mpz_t, uint64_t) {
-  throw std::invalid_argument("not yet implemented");
+  KLLVM_HOOK_INVALID_ARGUMENT("not yet implemented");
 }
 
 SortFloat hook_FLOAT_ceil(SortFloat a) {
@@ -84,11 +84,11 @@ SortFloat hook_FLOAT_trunc(SortFloat a) {
 
 SortFloat hook_FLOAT_round(SortFloat a, SortInt prec, SortInt exp) {
   if (!mpz_fits_ulong_p(prec)) {
-    throw std::invalid_argument("Precision out of range");
+    KLLVM_HOOK_INVALID_ARGUMENT("Precision out of range");
   }
   unsigned long uprec = mpz_get_ui(prec);
   if (!mpz_fits_ulong_p(exp)) {
-    throw std::invalid_argument("Exponent out of range");
+    KLLVM_HOOK_INVALID_ARGUMENT("Exponent out of range");
   }
   unsigned long uexp = mpz_get_ui(exp);
   floating result[1];
@@ -100,7 +100,7 @@ SortFloat hook_FLOAT_round(SortFloat a, SortInt prec, SortInt exp) {
 
 mpz_ptr hook_FLOAT_float2int(SortFloat a) {
   if (!mpfr_number_p(a->f)) {
-    throw std::invalid_argument("Not a finite number");
+    KLLVM_HOOK_INVALID_ARGUMENT("Not a finite number");
   }
   mpz_t result;
   mpz_init(result);
@@ -110,11 +110,11 @@ mpz_ptr hook_FLOAT_float2int(SortFloat a) {
 
 SortFloat hook_FLOAT_int2float(SortInt a, SortInt prec, SortInt exp) {
   if (!mpz_fits_ulong_p(prec)) {
-    throw std::invalid_argument("Precision out of range");
+    KLLVM_HOOK_INVALID_ARGUMENT("Precision out of range");
   }
   unsigned long uprec = mpz_get_ui(prec);
   if (!mpz_fits_ulong_p(exp)) {
-    throw std::invalid_argument("Exponent out of range");
+    KLLVM_HOOK_INVALID_ARGUMENT("Exponent out of range");
   }
   unsigned long uexp = mpz_get_ui(exp);
   floating result[1];
@@ -237,7 +237,7 @@ mpz_ptr hook_FLOAT_exponent(SortFloat a) {
 
 void *hook_FLOAT_significand(SortFloat a) {
   if (mpfr_nan_p(a->f)) {
-    throw std::invalid_argument("NaN payload is undefined");
+    KLLVM_HOOK_INVALID_ARGUMENT("NaN payload is undefined");
   }
   mpfr_prec_t prec = mpfr_get_prec(a->f);
   uint64_t len = (prec + 7) / 8;
@@ -263,11 +263,11 @@ bool hook_FLOAT_isNaN(SortFloat a) {
 
 SortFloat hook_FLOAT_maxValue(SortInt prec, SortInt exp) {
   if (!mpz_fits_ulong_p(prec)) {
-    throw std::invalid_argument("Precision out of range");
+    KLLVM_HOOK_INVALID_ARGUMENT("Precision out of range");
   }
   unsigned long uprec = mpz_get_ui(prec);
   if (!mpz_fits_ulong_p(exp)) {
-    throw std::invalid_argument("Exponent out of range");
+    KLLVM_HOOK_INVALID_ARGUMENT("Exponent out of range");
   }
   unsigned long uexp = mpz_get_ui(exp);
   floating result[1];
@@ -280,11 +280,11 @@ SortFloat hook_FLOAT_maxValue(SortInt prec, SortInt exp) {
 
 SortFloat hook_FLOAT_minValue(SortInt prec, SortInt exp) {
   if (!mpz_fits_ulong_p(prec)) {
-    throw std::invalid_argument("Precision out of range");
+    KLLVM_HOOK_INVALID_ARGUMENT("Precision out of range");
   }
   unsigned long uprec = mpz_get_ui(prec);
   if (!mpz_fits_ulong_p(exp)) {
-    throw std::invalid_argument("Exponent out of range");
+    KLLVM_HOOK_INVALID_ARGUMENT("Exponent out of range");
   }
   unsigned long uexp = mpz_get_ui(exp);
   floating result[1];
@@ -423,7 +423,7 @@ SortFloat hook_FLOAT_pow(SortFloat a, SortFloat b) {
 
 SortFloat hook_FLOAT_root(SortFloat a, SortInt b) {
   if (!mpz_fits_ulong_p(b)) {
-    throw std::invalid_argument("Root out of range");
+    KLLVM_HOOK_INVALID_ARGUMENT("Root out of range");
   }
   unsigned long root = mpz_get_ui(b);
   floating result[1];
@@ -456,11 +456,11 @@ bool hook_FLOAT_sign(SortFloat a) {
 SortFloat hook_FLOAT_rat2float(
     SortInt numerator, SortInt denominator, SortInt prec, SortInt exp) {
   if (!mpz_fits_ulong_p(prec)) {
-    throw std::invalid_argument("Precision out of range");
+    KLLVM_HOOK_INVALID_ARGUMENT("Precision out of range");
   }
   unsigned long uprec = mpz_get_ui(prec);
   if (!mpz_fits_ulong_p(exp)) {
-    throw std::invalid_argument("Exponent out of range");
+    KLLVM_HOOK_INVALID_ARGUMENT("Exponent out of range");
   }
   unsigned long uexp = mpz_get_ui(exp);
 
