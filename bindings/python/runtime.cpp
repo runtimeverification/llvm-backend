@@ -51,7 +51,7 @@ void bind_runtime(py::module_ &m) {
   // that we get from the Pybind wrappers make it really easy to break things.
   // We therefore have to wrap it up in some external Python code; see
   // package/kllvm/__init__.py for the details of the external class.
-  py::class_<block, raw_ptr<block>>(m, "InternalTerm")
+  py::class_<block, raw_ptr<block>>(m, "InternalTerm", py::module_local())
       .def(py::init([](KOREPattern const *init) {
         return static_cast<block *>(constructInitialConfiguration(init));
       }))
