@@ -20,6 +20,8 @@ Valid values for a KLLVM object type are:
   main:     a main function will be generated. The resulting executable has the
             signature "interpreter <input.kore> <depth> <output.kore>"
 
+  library:  generate an interpreter with no main function linked.
+
   search:   as "main", but the resulting executable has collects all possible
             results at each rewrite step.
 
