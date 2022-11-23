@@ -5,6 +5,20 @@
 
 #include "runtime/header.h"
 
+namespace {
+std::string mpz_to_string(mpz_t i) {
+  char *tmp = mpz_get_str(NULL, 10, i);
+  auto ret = tmp;
+
+  void (*mpz_free)(void *, size_t);
+  mp_get_memory_functions(NULL, NULL, &mpz_free);
+
+  mpz_free(tmp, strlen(tmp) + 1);
+
+  return ret;
+}
+} // namespace
+
 extern "C" {
 
 mpz_ptr move_int(mpz_t);
@@ -13,7 +27,8 @@ void add_hash64(void *, uint64_t);
 SortInt hook_INT_tmod(SortInt a, SortInt b) {
   mpz_t result;
   if (mpz_sgn(b) == 0) {
-    KLLVM_HOOK_INVALID_ARGUMENT("Modulus by zero");
+    KLLVM_HOOK_INVALID_ARGUMENT(
+        "Modulus by zero: {} % {}", mpz_to_string(a), mpz_to_string(b));
   }
   mpz_init(result);
   mpz_tdiv_r(result, a, b);
@@ -23,7 +38,8 @@ SortInt hook_INT_tmod(SortInt a, SortInt b) {
 SortInt hook_INT_emod(SortInt a, SortInt b) {
   mpz_t result;
   if (mpz_sgn(b) == 0) {
-    KLLVM_HOOK_INVALID_ARGUMENT("Modulus by zero");
+    KLLVM_HOOK_INVALID_ARGUMENT(
+        "Modulus by zero: {} % {}", mpz_to_string(a), mpz_to_string(b));
   }
   mpz_init(result);
   mpz_tdiv_r(result, a, b);
@@ -81,7 +97,8 @@ SortInt hook_INT_sub(SortInt a, SortInt b) {
 SortInt hook_INT_tdiv(SortInt a, SortInt b) {
   mpz_t result;
   if (mpz_sgn(b) == 0) {
-    KLLVM_HOOK_INVALID_ARGUMENT("Division by zero");
+    KLLVM_HOOK_INVALID_ARGUMENT(
+        "Division by zero: {} / {}", mpz_to_string(a), mpz_to_string(b));
   }
   mpz_init(result);
   mpz_tdiv_q(result, a, b);
@@ -91,7 +108,8 @@ SortInt hook_INT_tdiv(SortInt a, SortInt b) {
 SortInt hook_INT_ediv(SortInt a, SortInt b) {
   mpz_t result;
   if (mpz_sgn(b) == 0) {
-    KLLVM_HOOK_INVALID_ARGUMENT("Division by zero");
+    KLLVM_HOOK_INVALID_ARGUMENT(
+        "Division by zero: {} / {}", mpz_to_string(a), mpz_to_string(b));
   }
   mpz_init(result);
   if (mpz_sgn(b) >= 0) {
@@ -105,7 +123,9 @@ SortInt hook_INT_ediv(SortInt a, SortInt b) {
 SortInt hook_INT_shl(SortInt a, SortInt b) {
   mpz_t result;
   if (!mpz_fits_ulong_p(b)) {
-    KLLVM_HOOK_INVALID_ARGUMENT("Shift amount out of range");
+    KLLVM_HOOK_INVALID_ARGUMENT(
+        "Left shift amount out of range: {} << {}", mpz_to_string(a),
+        mpz_to_string(b));
   }
   mpz_init(result);
   unsigned long blong = mpz_get_ui(b);

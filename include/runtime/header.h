@@ -276,8 +276,8 @@ void init_float2(floating *, std::string);
 
 #define KLLVM_HOOK_INVALID_ARGUMENT(...)                                       \
   do {                                                                         \
-    auto err_msg = kllvm::fmt::format(                                         \
-        "[{}]: {}", __func__, kllvm::fmt::format(__VA_ARGS__));                \
+    auto err_msg = ::kllvm::fmt::format(                                       \
+        "[{}]: {}", __func__, ::kllvm::fmt::format(__VA_ARGS__));              \
     throw std::invalid_argument(err_msg);                                      \
   } while (false)
 
