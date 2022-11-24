@@ -22,7 +22,7 @@ in { pkgs ? pinned
 
   # Build an optimized release package.
   # Currently requires dependents to use LTO. Use sparingly.
-, release ? false }:
+, cmakeBuildType ? "FastBuild" }:
 
 let
   localOverlay = import ./nix/overlay.nix;
@@ -36,7 +36,8 @@ let
           # Avoid spurious rebuilds by ignoring files that don't affect the build.
           mavenix = import sources."mavenix" { inherit (prev) pkgs; };
         in {
-          llvm-backend-release = release;
+          llvm-version = 13;
+          llvm-backend-build-type = cmakeBuildType;
           inherit (mavenix) buildMaven;
           mavenix-cli = mavenix.cli;
 

@@ -28,7 +28,7 @@ map hook_MAP_concat(SortMap m1, SortMap m2) {
   for (auto iter = from->begin(); iter != from->end(); ++iter) {
     auto entry = *iter;
     if (to.find(entry.first)) {
-      throw std::invalid_argument("Duplicate keys in map concatenation");
+      KLLVM_HOOK_INVALID_ARGUMENT("Duplicate keys in map concatenation");
     }
     to = to.insert(*iter);
   }
@@ -45,7 +45,7 @@ SortKItem hook_MAP_lookup_null(SortMap m, SortKItem key) {
 SortKItem hook_MAP_lookup(SortMap m, SortKItem key) {
   auto res = hook_MAP_lookup_null(m, key);
   if (!res) {
-    throw std::invalid_argument("Key not found for map lookup");
+    KLLVM_HOOK_INVALID_ARGUMENT("Key not found for map lookup");
   }
   return res;
 }
@@ -116,7 +116,7 @@ list hook_MAP_values(SortMap m) {
 
 SortKItem hook_MAP_choice(SortMap m) {
   if (m->empty()) {
-    throw std::invalid_argument("Cannot choose from an empty map");
+    KLLVM_HOOK_INVALID_ARGUMENT("Cannot choose from an empty map");
   }
   return m->begin()->first;
 }

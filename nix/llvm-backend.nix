@@ -3,12 +3,12 @@
 # Runtime dependencies:
 host,
 # Options:
-release ? false # optimized release build, currently: LTO
+cmakeBuildType ? "FastBuild" # optimized release build, currently: LTO
 }:
 stdenv.mkDerivation {
   pname = "llvm-backend";
   version = "0";
-  inherit src;
+  inherit src cmakeBuildType;
 
   nativeBuildInputs = [ cmake flex llvm pkgconfig python3 ];
   buildInputs = [ boost libyaml ];
@@ -19,12 +19,9 @@ stdenv.mkDerivation {
     sed -i bin/llvm-kompile \
       -e '2a export PATH="${lib.getBin host.clang}/bin:''${PATH}"'
 
-    sed -i bin/llvm-kompilex \
-      -e '2a export PATH="${lib.getBin host.clang}/bin:''${PATH}"'
-
     substituteInPlace bin/llvm-kompile-clang \
-      --replace '"-lgmp"' '"-L${gmp}/lib" "-lgmp"' \
-      --replace '"-lmpfr"' '"-L${mpfr}/lib" "-lmpfr"' \
+      --replace '"-lgmp"' '"-I${gmp.dev}/include" "-L${gmp}/lib" "-lgmp"' \
+      --replace '"-lmpfr"' '-I${mpfr.dev}/include "-L${mpfr}/lib" "-lmpfr"' \
       --replace '"-lffi"' '"-L${libffi}/lib" "-lffi"' \
       --replace '"-ljemalloc"' '"-L${jemalloc}/lib" "-ljemalloc"' \
       --replace '"-liconv"' '"-L${libiconv}/lib" "-liconv"' \
@@ -44,10 +41,8 @@ stdenv.mkDerivation {
     "-DUSE_NIX=TRUE"
     "-DCMAKE_SKIP_BUILD_RPATH=FALSE"
     "-DBUILD_TESTS=True"
-    "-DK_LLVM_BACKEND_LTO=${if isArmMac then "OFF" else "ON"}"
+    "-DK_LLVM_BACKEND_LTO=OFF"
   ];
-
-  cmakeBuildType = if release then "Release" else "FastBuild";
 
   NIX_CFLAGS_COMPILE = [ "-Wno-error" ];
 

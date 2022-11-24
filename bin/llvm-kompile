@@ -12,6 +12,8 @@ Options:
   -h, --help      Print this message and exit.
   -v, --verbose   Print commands executed to stderr.
   --save-temps    Do not delete temporary files on exit.
+  --bindings-path Print the absolute path of the compiled Python bindings for
+                  the LLVM backend, then exit.
 
 Any option not listed above will be passed through to clang; use '--' to
 separate additional positional arguments to clang from those for $0.
@@ -19,6 +21,8 @@ separate additional positional arguments to clang from those for $0.
 Valid values for a KLLVM object type are:
   main:     a main function will be generated. The resulting executable has the
             signature "interpreter <input.kore> <depth> <output.kore>"
+
+  library:  generate an interpreter with no main function linked.
 
   search:   as "main", but the resulting executable has collects all possible
             results at each rewrite step.
@@ -36,6 +40,12 @@ run () {
   fi
   "$@"
   { set +x; } 2>/dev/null
+}
+
+print_bindings_path () {
+  bin_dir=$(dirname "$0")
+  bindings_dir=$(realpath "$bin_dir/../lib/kllvm/python")
+  echo "$bindings_dir"
 }
 
 positional_args=()
@@ -67,6 +77,10 @@ while [[ $# -gt 0 ]]; do
       save_temps=true	    
       kompile_clang_flags+=("-save-temps")
       shift
+      ;;
+    --bindings-path)
+      print_bindings_path
+      exit 0
       ;;
     --)
       reading_clang_args=true

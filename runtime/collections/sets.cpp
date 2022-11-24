@@ -77,7 +77,7 @@ set hook_SET_intersection(SortSet s1, SortSet s2) {
 
 SortKItem hook_SET_choice(SortSet s) {
   if (s->empty()) {
-    throw std::invalid_argument("Set is empty");
+    KLLVM_HOOK_INVALID_ARGUMENT("Set is empty");
   }
   return *s->begin();
 }

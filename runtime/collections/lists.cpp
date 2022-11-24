@@ -36,7 +36,7 @@ bool hook_LIST_in(SortKItem value, SortList list) {
 
 bool hook_LIST_in_keys(SortInt index, SortList list) {
   if (!mpz_fits_ulong_p(index)) {
-    throw std::invalid_argument("Index is too large for in_keys");
+    KLLVM_HOOK_INVALID_ARGUMENT("Index is too large for in_keys");
   }
   size_t idx = mpz_get_ui(index);
   return idx < list->size();
@@ -50,7 +50,7 @@ SortKItem hook_LIST_get_long(SortList list, ssize_t idx) {
 
 SortKItem hook_LIST_get(SortList list, SortInt index) {
   if (!mpz_fits_slong_p(index)) {
-    throw std::invalid_argument("Index is too large for get");
+    KLLVM_HOOK_INVALID_ARGUMENT("Index is too large for get");
   }
   ssize_t idx = mpz_get_si(index);
   return hook_LIST_get_long(list, idx);
@@ -75,7 +75,7 @@ list hook_LIST_range_long(SortList list, size_t front, size_t back) {
 
 list hook_LIST_range(SortList list, SortInt from_front, SortInt from_back) {
   if (!mpz_fits_ulong_p(from_front) || !mpz_fits_ulong_p(from_back)) {
-    throw std::invalid_argument("Range index too large for range");
+    KLLVM_HOOK_INVALID_ARGUMENT("Range index too large for range");
   }
 
   size_t front = mpz_get_ui(from_front);
@@ -96,7 +96,7 @@ SortInt hook_LIST_size(SortList list) {
 
 list hook_LIST_make(SortInt len, SortKItem value) {
   if (!mpz_fits_ulong_p(len)) {
-    throw std::invalid_argument("Length is too large for make");
+    KLLVM_HOOK_INVALID_ARGUMENT("Length is too large for make");
   }
 
   size_t length = mpz_get_ui(len);
@@ -105,12 +105,12 @@ list hook_LIST_make(SortInt len, SortKItem value) {
 
 list hook_LIST_update(SortList list, SortInt index, SortKItem value) {
   if (!mpz_fits_ulong_p(index)) {
-    throw std::invalid_argument("Length is too large for update");
+    KLLVM_HOOK_INVALID_ARGUMENT("Length is too large for update");
   }
 
   size_t idx = mpz_get_ui(index);
   if (idx >= list->size()) {
-    throw std::invalid_argument("Index out of range for update");
+    KLLVM_HOOK_INVALID_ARGUMENT("Index out of range for update");
   }
 
   return list->set(idx, value);
@@ -118,7 +118,7 @@ list hook_LIST_update(SortList list, SortInt index, SortKItem value) {
 
 list hook_LIST_updateAll(SortList l1, SortInt index, SortList l2) {
   if (!mpz_fits_ulong_p(index)) {
-    throw std::invalid_argument("Length is too large for updateAll");
+    KLLVM_HOOK_INVALID_ARGUMENT("Length is too large for updateAll");
   }
 
   size_t idx = mpz_get_ui(index);
@@ -126,7 +126,7 @@ list hook_LIST_updateAll(SortList l1, SortInt index, SortList l2) {
   size_t size2 = l2->size();
   if (idx != 0 && size2 != 0) {
     if (idx + size2 - 1 >= size) {
-      throw std::invalid_argument("Index out of range for updateAll");
+      KLLVM_HOOK_INVALID_ARGUMENT("Index out of range for updateAll");
     }
   }
 
@@ -151,11 +151,11 @@ list hook_LIST_updateAll(SortList l1, SortInt index, SortList l2) {
 
 list hook_LIST_fill(SortList l, SortInt index, SortInt len, SortKItem val) {
   if (!mpz_fits_ulong_p(index)) {
-    throw std::invalid_argument("Index is too large for fill");
+    KLLVM_HOOK_INVALID_ARGUMENT("Index is too large for fill");
   }
 
   if (!mpz_fits_ulong_p(len)) {
-    throw std::invalid_argument("Length is too large for fill");
+    KLLVM_HOOK_INVALID_ARGUMENT("Length is too large for fill");
   }
 
   size_t idx = mpz_get_ui(index);

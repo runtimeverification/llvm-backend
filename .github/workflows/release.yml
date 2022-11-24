@@ -1,0 +1,25 @@
+name: "Master Push"
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  release:
+    name: 'Publish Release'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: 'Check out code'
+        uses: actions/checkout@v3
+
+      - name: 'Update dependents'
+        env:
+          JENKINS_DEVOPS_TOKEN: ${{ secrets.JENKINS_DEVOPS_TOKEN }}
+        run: |
+          curl --fail 'https://ci.runtimeverification.com/jenkins/buildByToken/buildWithParameters' \
+            --data job=Devops/master \
+            --data token=$JENKINS_DEVOPS_TOKEN \
+            --data UPDATE_DEPS=true \
+            --data UPDATE_DEPS_REPO=runtimeverification/llvm-backend \
+            --data UPDATE_DEPS_VERSION="$(git rev-parse HEAD)"
