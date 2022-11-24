@@ -82,7 +82,7 @@ static inline uint64_t gs(mpz_t i) {
 SortString hook_STRING_chr(SortInt ord) {
   uint64_t uord = gs(ord);
   if (uord > 255) {
-    KLLVM_HOOK_INVALID_ARGUMENT("Ord must be <= 255");
+    KLLVM_HOOK_INVALID_ARGUMENT("Ord must be <= 255: {}", uord);
   }
   auto ret
       = static_cast<string *>(koreAllocToken(sizeof(string) + sizeof(KCHAR)));
@@ -94,7 +94,8 @@ SortString hook_STRING_chr(SortInt ord) {
 SortInt hook_STRING_ord(SortString input) {
   mpz_t result;
   if (len(input) != 1) {
-    KLLVM_HOOK_INVALID_ARGUMENT("Input must a string of length 1");
+    KLLVM_HOOK_INVALID_ARGUMENT(
+        "Input must be a string of length 1: {}", std::string(input->data));
   }
   mpz_init_set_ui(result, static_cast<unsigned char>(input->data[0]));
   return move_int(result);
@@ -226,7 +227,8 @@ SortInt hook_STRING_string2base_long(SortString input, uint64_t base) {
   memcpy(copy, dataStart, length);
   copy[length] = 0;
   if (mpz_init_set_str(result, copy, base)) {
-    KLLVM_HOOK_INVALID_ARGUMENT("Not a valid integer");
+    KLLVM_HOOK_INVALID_ARGUMENT(
+        "Not a valid integer: {}", std::string(input->data));
   }
   return move_int(result);
 }
@@ -271,7 +273,9 @@ SortString hook_STRING_token2string(string *input) {
   }
 
   if (layout(input) != 0) {
-    KLLVM_HOOK_INVALID_ARGUMENT("token2string: input is not a string token");
+    KLLVM_HOOK_INVALID_ARGUMENT(
+        "token2string: input is not a string token: {}",
+        std::string(input->data));
   }
   return input;
 }
@@ -468,6 +472,6 @@ void init_float2(floating *result, std::string contents) {
     retValue = mpfr_set_str(result->f, str_value.c_str(), 10, MPFR_RNDN);
   }
   if (retValue != 0) {
-    KLLVM_HOOK_INVALID_ARGUMENT("Can't convert to float");
+    KLLVM_HOOK_INVALID_ARGUMENT("Can't convert to float: {}", contents);
   }
 }

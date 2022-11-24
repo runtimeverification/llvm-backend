@@ -266,7 +266,7 @@ SortIOInt hook_IO_open(SortString filename, SortString control) {
 
 SortIOInt hook_IO_tell(SortInt i) {
   if (!mpz_fits_sint_p(i)) {
-    KLLVM_HOOK_INVALID_ARGUMENT("Arg too large for int");
+    KLLVM_HOOK_INVALID_ARGUMENT("Arg too large for int: {}", intToString(i));
   }
 
   int fd = mpz_get_si(i);
@@ -288,7 +288,7 @@ SortIOInt hook_IO_tell(SortInt i) {
 
 SortIOInt hook_IO_getc(SortInt i) {
   if (!mpz_fits_sint_p(i)) {
-    KLLVM_HOOK_INVALID_ARGUMENT("Arg too large for int");
+    KLLVM_HOOK_INVALID_ARGUMENT("Arg too large for int: {}", intToString(i));
   }
 
   int fd = mpz_get_si(i);
@@ -318,7 +318,8 @@ SortIOInt hook_IO_getc(SortInt i) {
 
 SortIOString hook_IO_read(SortInt i, SortInt len) {
   if (!mpz_fits_sint_p(i) || !mpz_fits_ulong_p(len)) {
-    KLLVM_HOOK_INVALID_ARGUMENT("Arg too large");
+    KLLVM_HOOK_INVALID_ARGUMENT(
+        "Arg too large: i={}, len={}", intToString(i), intToString(len));
   }
 
   int fd = mpz_get_si(i);
@@ -343,7 +344,7 @@ SortIOString hook_IO_read(SortInt i, SortInt len) {
 
 SortK hook_IO_close(SortInt i) {
   if (!mpz_fits_sint_p(i)) {
-    KLLVM_HOOK_INVALID_ARGUMENT("Arg too large for int");
+    KLLVM_HOOK_INVALID_ARGUMENT("Arg too large for int: {}", intToString(i));
   }
 
   int fd = mpz_get_si(i);
@@ -358,7 +359,8 @@ SortK hook_IO_close(SortInt i) {
 
 SortK hook_IO_seek(SortInt i, SortInt loc) {
   if (!mpz_fits_sint_p(i) || !mpz_fits_slong_p(loc)) {
-    KLLVM_HOOK_INVALID_ARGUMENT("Arg too large");
+    KLLVM_HOOK_INVALID_ARGUMENT(
+        "Arg too large: i={}, loc={}", intToString(i), intToString(loc));
   }
 
   int fd = mpz_get_si(i);
@@ -374,7 +376,8 @@ SortK hook_IO_seek(SortInt i, SortInt loc) {
 
 SortK hook_IO_seekEnd(SortInt i, SortInt loc) {
   if (!mpz_fits_sint_p(i) || !mpz_fits_slong_p(loc)) {
-    KLLVM_HOOK_INVALID_ARGUMENT("Arg too large");
+    KLLVM_HOOK_INVALID_ARGUMENT(
+        "Arg too large: i={}, loc={}", intToString(i), intToString(loc));
   }
 
   int fd = mpz_get_si(i);
@@ -390,7 +393,8 @@ SortK hook_IO_seekEnd(SortInt i, SortInt loc) {
 
 SortK hook_IO_putc(SortInt i, SortInt c) {
   if (!mpz_fits_sint_p(i) || !mpz_fits_sint_p(c)) {
-    KLLVM_HOOK_INVALID_ARGUMENT("Arg too large");
+    KLLVM_HOOK_INVALID_ARGUMENT(
+        "Arg too large: i={}, c={}", intToString(i), intToString(c));
   }
 
   int fd = mpz_get_si(i);
@@ -406,7 +410,7 @@ SortK hook_IO_putc(SortInt i, SortInt c) {
 
 SortK hook_IO_write(SortInt i, SortString str) {
   if (!mpz_fits_sint_p(i)) {
-    KLLVM_HOOK_INVALID_ARGUMENT("Arg too large for int");
+    KLLVM_HOOK_INVALID_ARGUMENT("Arg too large for int: {}", intToString(i));
   }
 
   int fd = mpz_get_si(i);
@@ -421,7 +425,8 @@ SortK hook_IO_write(SortInt i, SortString str) {
 
 SortK hook_IO_lock(SortInt i, SortInt len) {
   if (!mpz_fits_sint_p(i) || !mpz_fits_slong_p(len)) {
-    KLLVM_HOOK_INVALID_ARGUMENT("Arg too large");
+    KLLVM_HOOK_INVALID_ARGUMENT(
+        "Arg too large: i={}, len={}", intToString(i), intToString(len));
   }
 
   int fd = mpz_get_si(i);
@@ -443,7 +448,8 @@ SortK hook_IO_lock(SortInt i, SortInt len) {
 
 SortK hook_IO_unlock(SortInt i, SortInt len) {
   if (!mpz_fits_sint_p(i) || !mpz_fits_slong_p(len)) {
-    KLLVM_HOOK_INVALID_ARGUMENT("Arg too large");
+    KLLVM_HOOK_INVALID_ARGUMENT(
+        "Arg too large: i={}, len={}", intToString(i), intToString(len));
   }
 
   int fd = mpz_get_si(i);
@@ -476,7 +482,7 @@ SortK hook_IO_remove(SortString path) {
 
 SortIOInt hook_IO_accept(SortInt sock) {
   if (!mpz_fits_sint_p(sock)) {
-    KLLVM_HOOK_INVALID_ARGUMENT("Arg too large");
+    KLLVM_HOOK_INVALID_ARGUMENT("Arg too large: {}", intToString(sock));
   }
 
   int fd = mpz_get_si(sock);
@@ -499,7 +505,7 @@ SortIOInt hook_IO_accept(SortInt sock) {
 
 SortK hook_IO_shutdownWrite(SortInt sock) {
   if (!mpz_fits_sint_p(sock)) {
-    KLLVM_HOOK_INVALID_ARGUMENT("Arg too large");
+    KLLVM_HOOK_INVALID_ARGUMENT("Arg too large: {}", intToString(sock));
   }
 
   int fd = mpz_get_si(sock);
