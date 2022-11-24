@@ -11,4 +11,4 @@ install(
   ARCHIVE DESTINATION lib/kllvm
 )
 
-target_link_libraries(util PUBLIC Parser AST)
+target_link_libraries(util PUBLIC numeric_strings Parser AST)
