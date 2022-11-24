@@ -44,7 +44,7 @@ std::string floatToString(const floating *f) {
     suffix[0] = 'f';
     suffix[1] = 0;
   } else {
-    sprintf(suffix, "p%" PRIu64 "x%" PRIu64, prec, exp);
+    snprintf(suffix, sizeof(suffix), "p%" PRIu64 "x%" PRIu64, prec, exp);
   }
   return floatToString(f, suffix);
 }
