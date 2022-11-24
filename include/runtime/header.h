@@ -274,6 +274,8 @@ block *strip_injection(block *);
 std::string floatToString(const floating *);
 void init_float2(floating *, std::string);
 
+std::string intToString(mpz_t i);
+
 #define KLLVM_HOOK_INVALID_ARGUMENT(...)                                       \
   do {                                                                         \
     auto err_msg = ::kllvm::fmt::format(                                       \

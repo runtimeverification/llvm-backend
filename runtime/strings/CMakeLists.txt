@@ -4,9 +4,14 @@ add_library(strings STATIC
 )
 
 target_link_libraries(strings
+  numeric_strings
   util)
 
+add_library(numeric_strings STATIC
+  numeric.cpp
+)
+
 install(
-  TARGETS strings
+  TARGETS strings numeric_strings
   ARCHIVE DESTINATION lib/kllvm
 )

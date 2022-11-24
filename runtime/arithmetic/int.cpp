@@ -5,20 +5,6 @@
 
 #include "runtime/header.h"
 
-namespace {
-std::string mpz_to_string(mpz_t i) {
-  char *tmp = mpz_get_str(NULL, 10, i);
-  auto ret = tmp;
-
-  void (*mpz_free)(void *, size_t);
-  mp_get_memory_functions(NULL, NULL, &mpz_free);
-
-  mpz_free(tmp, strlen(tmp) + 1);
-
-  return ret;
-}
-} // namespace
-
 extern "C" {
 
 mpz_ptr move_int(mpz_t);
@@ -28,7 +14,7 @@ SortInt hook_INT_tmod(SortInt a, SortInt b) {
   mpz_t result;
   if (mpz_sgn(b) == 0) {
     KLLVM_HOOK_INVALID_ARGUMENT(
-        "Modulus by zero: {} % {}", mpz_to_string(a), mpz_to_string(b));
+        "Modulus by zero: {} % {}", intToString(a), intToString(b));
   }
   mpz_init(result);
   mpz_tdiv_r(result, a, b);
@@ -39,7 +25,7 @@ SortInt hook_INT_emod(SortInt a, SortInt b) {
   mpz_t result;
   if (mpz_sgn(b) == 0) {
     KLLVM_HOOK_INVALID_ARGUMENT(
-        "Modulus by zero: {} % {}", mpz_to_string(a), mpz_to_string(b));
+        "Modulus by zero: {} % {}", intToString(a), intToString(b));
   }
   mpz_init(result);
   mpz_tdiv_r(result, a, b);
@@ -98,7 +84,7 @@ SortInt hook_INT_tdiv(SortInt a, SortInt b) {
   mpz_t result;
   if (mpz_sgn(b) == 0) {
     KLLVM_HOOK_INVALID_ARGUMENT(
-        "Division by zero: {} / {}", mpz_to_string(a), mpz_to_string(b));
+        "Division by zero: {} / {}", intToString(a), intToString(b));
   }
   mpz_init(result);
   mpz_tdiv_q(result, a, b);
@@ -109,7 +95,7 @@ SortInt hook_INT_ediv(SortInt a, SortInt b) {
   mpz_t result;
   if (mpz_sgn(b) == 0) {
     KLLVM_HOOK_INVALID_ARGUMENT(
-        "Division by zero: {} / {}", mpz_to_string(a), mpz_to_string(b));
+        "Division by zero: {} / {}", intToString(a), intToString(b));
   }
   mpz_init(result);
   if (mpz_sgn(b) >= 0) {
@@ -124,8 +110,8 @@ SortInt hook_INT_shl(SortInt a, SortInt b) {
   mpz_t result;
   if (!mpz_fits_ulong_p(b)) {
     KLLVM_HOOK_INVALID_ARGUMENT(
-        "Left shift amount out of range: {} << {}", mpz_to_string(a),
-        mpz_to_string(b));
+        "Left shift amount out of range: {} << {}", intToString(a),
+        intToString(b));
   }
   mpz_init(result);
   unsigned long blong = mpz_get_ui(b);
@@ -147,8 +133,8 @@ SortInt hook_INT_shr(SortInt a, SortInt b) {
   if (!mpz_fits_ulong_p(b)) {
     if (mpz_sgn(b) < 0) {
       KLLVM_HOOK_INVALID_ARGUMENT(
-          "Negative right shift amount: {} >> {}", mpz_to_string(a),
-          mpz_to_string(b));
+          "Negative right shift amount: {} >> {}", intToString(a),
+          intToString(b));
     }
     if (mpz_sgn(a) < 0) {
       mpz_set_si(result, -1);
@@ -168,7 +154,7 @@ SortInt hook_INT_pow(SortInt a, SortInt b) {
   mpz_t result;
   if (!mpz_fits_ulong_p(b)) {
     KLLVM_HOOK_INVALID_ARGUMENT(
-        "Exponent out of range: {} ^ {}", mpz_to_string(a), mpz_to_string(b));
+        "Exponent out of range: {} ^ {}", intToString(a), intToString(b));
   }
   mpz_init(result);
   unsigned long blong = mpz_get_ui(b);
@@ -184,8 +170,8 @@ SortInt hook_INT_powmod(SortInt a, SortInt b, SortInt mod) {
     if (mpz_cmp_ui(result, 1) != 0) {
       mpz_clear(result);
       KLLVM_HOOK_INVALID_ARGUMENT(
-          "Modular inverse not defined: {} ^ {} % {}", mpz_to_string(a),
-          mpz_to_string(b), mpz_to_string(mod));
+          "Modular inverse not defined: {} ^ {} % {}", intToString(a),
+          intToString(b), intToString(mod));
     }
   }
   mpz_powm(result, a, b, mod);
@@ -246,7 +232,7 @@ SortInt hook_INT_log2(SortInt a) {
   mpz_t result;
   if (mpz_sgn(a) <= 0) {
     KLLVM_HOOK_INVALID_ARGUMENT(
-        "Logarithm of nonpositive integer: log2({})", mpz_to_string(a));
+        "Logarithm of nonpositive integer: log2({})", intToString(a));
   }
   mpz_init(result);
   size_t log = mpz_sizeinbase(a, 2) - 1;
@@ -304,12 +290,12 @@ SortInt hook_INT_bitRange(SortInt i, SortInt off, SortInt len) {
     return move_int(result);
   }
   if (!mpz_fits_ulong_p(len)) {
-    KLLVM_HOOK_INVALID_ARGUMENT("Length out of range: {}", mpz_to_string(len));
+    KLLVM_HOOK_INVALID_ARGUMENT("Length out of range: {}", intToString(len));
   }
   unsigned long lenlong = mpz_get_ui(len);
   if (!mpz_fits_ulong_p(off)) {
     if (mpz_sgn(off) < 0) {
-      KLLVM_HOOK_INVALID_ARGUMENT("Negative offset: {}", mpz_to_string(off));
+      KLLVM_HOOK_INVALID_ARGUMENT("Negative offset: {}", intToString(off));
     }
     mpz_init(result);
     if (mpz_sgn(i) < 0) {
@@ -350,7 +336,7 @@ SortInt hook_INT_signExtendBitRange(SortInt i, SortInt off, SortInt len) {
   mpz_t result;
   if (!mpz_fits_ulong_p(off)) {
     if (mpz_sgn(off) < 0) {
-      KLLVM_HOOK_INVALID_ARGUMENT("Negative offset: {}", mpz_to_string(off));
+      KLLVM_HOOK_INVALID_ARGUMENT("Negative offset: {}", intToString(off));
     }
     mpz_init(result);
     if (mpz_sgn(i) < 0) {
@@ -359,7 +345,7 @@ SortInt hook_INT_signExtendBitRange(SortInt i, SortInt off, SortInt len) {
     return move_int(result);
   }
   if (!mpz_fits_ulong_p(len)) {
-    KLLVM_HOOK_INVALID_ARGUMENT("Length out of range: {}", mpz_to_string(len));
+    KLLVM_HOOK_INVALID_ARGUMENT("Length out of range: {}", intToString(len));
   }
   unsigned long offlong = mpz_get_ui(off);
   unsigned long lenlong = mpz_get_ui(len);
