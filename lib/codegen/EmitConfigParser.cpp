@@ -138,8 +138,7 @@ static void emitDataTableForSymbol(
   auto retval = llvm::GetElementPtrInst::Create(
       tableType, globalVar, {zero, offset}, "", MergeBlock);
   MergeBlock->insertInto(func);
-  auto load = new llvm::LoadInst(
-      retval->getType()->getPointerElementType(), retval, "", MergeBlock);
+  auto load = new llvm::LoadInst(ty, retval, "", MergeBlock);
   llvm::ReturnInst::Create(Ctx, load, MergeBlock);
   addAbort(stuck, module);
   stuck->insertInto(func);
@@ -282,20 +281,22 @@ static llvm::Value *getArgValue(
     ValueType cat, llvm::Module *mod) {
   llvm::LLVMContext &Ctx = mod->getContext();
   llvm::Constant *zero = llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0);
+
+  auto i8_ptr_ty = llvm::Type::getInt8PtrTy(Ctx);
+
   auto addr = llvm::GetElementPtrInst::Create(
-      llvm::ArrayType::get(llvm::Type::getInt8PtrTy(Ctx), 0), ArgumentsArray,
+      llvm::ArrayType::get(i8_ptr_ty, 0), ArgumentsArray,
       {zero, llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), idx)}, "",
       CaseBlock);
-  llvm::Value *arg = new llvm::LoadInst(
-      addr->getType()->getPointerElementType(), addr, "", CaseBlock);
+  llvm::Value *arg = new llvm::LoadInst(i8_ptr_ty, addr, "", CaseBlock);
+
   switch (cat.cat) {
   case SortCategory::Bool:
   case SortCategory::MInt: {
+    auto val_ty = getValueType(cat, mod);
     auto cast = new llvm::BitCastInst(
-        arg, llvm::PointerType::getUnqual(getValueType(cat, mod)), "",
-        CaseBlock);
-    auto load = new llvm::LoadInst(
-        cast->getType()->getPointerElementType(), cast, "", CaseBlock);
+        arg, llvm::PointerType::getUnqual(val_ty), "", CaseBlock);
+    auto load = new llvm::LoadInst(val_ty, cast, "", CaseBlock);
     arg = load;
     break;
   }
