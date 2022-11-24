@@ -547,8 +547,7 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
     case SortCategory::Int: {
       const auto &thirdArg = func->arg_begin() + 2;
       llvm::Value *FirstChar = new llvm::LoadInst(
-          thirdArg->getType()->getPointerElementType(), thirdArg, "",
-          CaseBlock);
+          llvm::Type::getInt8Ty(Ctx), thirdArg, "", CaseBlock);
       llvm::Constant *asciiPlus
           = llvm::ConstantInt::get(llvm::Type::getInt8Ty(Ctx), 43);
       auto icmpFirst = new llvm::ICmpInst(
@@ -607,8 +606,7 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
   auto BlockSize
       = module->getOrInsertGlobal("BLOCK_SIZE", llvm::Type::getInt64Ty(Ctx));
   auto BlockSizeVal = new llvm::LoadInst(
-      BlockSize->getType()->getPointerElementType(), BlockSize, "",
-      CurrentBlock);
+      llvm::Type::getInt64Ty(Ctx), BlockSize, "", CurrentBlock);
   auto BlockAllocSize = llvm::BinaryOperator::Create(
       llvm::Instruction::Sub, BlockSizeVal,
       llvm::ConstantExpr::getSizeOf(llvm::Type::getInt8PtrTy(Ctx)), "",
@@ -727,7 +725,10 @@ static void emitTraversal(
         std::vector<llvm::Value *> const &callbacks)) {
   llvm::LLVMContext &Ctx = module->getContext();
   std::vector<llvm::Type *> argTypes;
-  argTypes.push_back(getValueType({SortCategory::Symbol, 0}, module));
+
+  auto block_ty = getBlockType(module);
+  argTypes.push_back(block_ty->getPointerTo());
+
   if (isVisitor) {
     // cf runtime/util/header.h visitChildren
     auto file = makeWriterType(Ctx);
@@ -746,11 +747,11 @@ static void emitTraversal(
   llvm::Constant *zero32
       = llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), 0);
   auto EntryBlock = llvm::BasicBlock::Create(Ctx, "entry", func);
+
   auto HdrPtr = llvm::GetElementPtrInst::CreateInBounds(
-      argTypes[0]->getPointerElementType(), func->arg_begin(),
-      {zero, zero32, zero32}, "", EntryBlock);
-  auto Hdr = new llvm::LoadInst(
-      HdrPtr->getType()->getPointerElementType(), HdrPtr, "", EntryBlock);
+      block_ty, func->arg_begin(), {zero, zero32, zero32}, "", EntryBlock);
+  auto Hdr
+      = new llvm::LoadInst(llvm::Type::getInt64Ty(Ctx), HdrPtr, "", EntryBlock);
   auto Tag
       = new llvm::TruncInst(Hdr, llvm::Type::getInt32Ty(Ctx), "", EntryBlock);
 

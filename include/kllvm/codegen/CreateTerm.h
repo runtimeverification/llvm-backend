@@ -112,6 +112,8 @@ extern std::string BUFFER_STRUCT;
 extern std::string BLOCK_STRUCT;
 extern std::string BLOCKHEADER_STRUCT;
 
+llvm::StructType *getBlockType(llvm::Module *Module);
+
 /* returns the llvm::Type corresponding to the specified KORE sort category */
 llvm::Type *getValueType(ValueType sort, llvm::Module *Module);
 llvm::Type *getParamType(ValueType sort, llvm::Module *Module);

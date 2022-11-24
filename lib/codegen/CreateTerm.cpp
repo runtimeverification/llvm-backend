@@ -151,6 +151,10 @@ llvm::Type *getParamType(ValueType sort, llvm::Module *Module) {
   return type;
 }
 
+llvm::StructType *getBlockType(llvm::Module *Module) {
+  return getTypeByName(Module, BLOCK_STRUCT);
+}
+
 llvm::Type *getValueType(ValueType sort, llvm::Module *Module) {
   switch (sort.cat) {
   case SortCategory::Map: return getTypeByName(Module, MAP_STRUCT);
