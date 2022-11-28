@@ -276,6 +276,29 @@ static void emitGetSymbolArity(KOREDefinition *def, llvm::Module *mod) {
       getIntDebugType(), def, mod, getArity);
 }
 
+static llvm::Type *getArgType(ValueType cat, llvm::Module *mod) {
+  switch (cat.cat) {
+  case SortCategory::Bool:
+  case SortCategory::MInt:
+  case SortCategory::Map:
+  case SortCategory::List:
+  case SortCategory::Set: {
+    return getValueType(cat, mod);
+  }
+  case SortCategory::Int:
+  case SortCategory::Float:
+  case SortCategory::StringBuffer:
+  case SortCategory::Symbol:
+  case SortCategory::Variable: {
+    return getBlockType(mod);
+  }
+  case SortCategory::Uncomputed:
+  default: {
+    abort();
+  }
+  }
+}
+
 static llvm::Value *getArgValue(
     llvm::Value *ArgumentsArray, int idx, llvm::BasicBlock *CaseBlock,
     ValueType cat, llvm::Module *mod) {
@@ -809,13 +832,14 @@ static void getStore(
     ValueType cat = dynamic_cast<KORECompositeSort *>(sort.get())
                         ->getCategory(definition);
     llvm::Value *arg = getArgValue(ArgumentsArray, idx, CaseBlock, cat, module);
+    // TODO: revisit this logic - does it get duplicated?
+    llvm::Type *arg_ty = getArgType(cat, module);
     llvm::Value *ChildPtr = llvm::GetElementPtrInst::CreateInBounds(
         BlockType, cast,
         {zero, llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), idx++ + 2)},
         "", CaseBlock);
     if (arg->getType() == ChildPtr->getType()) {
-      arg = new llvm::LoadInst(
-          arg->getType()->getPointerElementType(), arg, "", CaseBlock);
+      arg = new llvm::LoadInst(arg_ty, arg, "", CaseBlock);
     }
     new llvm::StoreInst(arg, ChildPtr, CaseBlock);
   }
@@ -901,8 +925,8 @@ static void getVisitor(
         BlockType, cast,
         {zero, llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), idx++ + 2)},
         "", CaseBlock);
-    llvm::Value *Child = new llvm::LoadInst(
-        ChildPtr->getType()->getPointerElementType(), ChildPtr, "", CaseBlock);
+    llvm::Value *Child
+        = new llvm::LoadInst(getArgType(cat, module), ChildPtr, "", CaseBlock);
     std::ostringstream Out;
     sort->print(Out);
     auto Str = llvm::ConstantDataArray::getString(Ctx, Out.str(), true);
@@ -964,8 +988,7 @@ static void getVisitor(
       break;
     case SortCategory::MInt: {
       llvm::Value *mint = new llvm::LoadInst(
-          ChildPtr->getType()->getPointerElementType(), ChildPtr, "mint",
-          CaseBlock);
+          getArgType(cat, module), ChildPtr, "mint", CaseBlock);
       size_t nwords = (cat.bits + 63) / 64;
       auto nbits
           = llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), cat.bits);
