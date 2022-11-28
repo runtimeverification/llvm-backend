@@ -568,8 +568,8 @@ static void initChoiceBuffer(
       llvm::Type::getInt64Ty(module->getContext()), choiceDepth, "", fail);
   auto currentElt = llvm::GetElementPtrInst::CreateInBounds(
       ty, choiceBuffer, {zero, currDepth}, "", fail);
-  llvm::LoadInst *failAddress = new llvm::LoadInst(
-      currentElt->getType()->getPointerElementType(), currentElt, "", fail);
+  llvm::LoadInst *failAddress
+      = new llvm::LoadInst(ty->getElementType(), currentElt, "", fail);
   auto newDepth = llvm::BinaryOperator::Create(
       llvm::Instruction::Sub, currDepth,
       llvm::ConstantInt::get(llvm::Type::getInt64Ty(module->getContext()), 1),
@@ -699,8 +699,7 @@ void abortWhenStuck(
           "", CurrentBlock);
       if (ChildValue->getType() == ChildPtr->getType()) {
         ChildValue = new llvm::LoadInst(
-            ChildValue->getType()->getPointerElementType(), ChildValue, "",
-            CurrentBlock);
+            getArgType(cat, Module), ChildValue, "", CurrentBlock);
       }
       new llvm::StoreInst(ChildValue, ChildPtr, CurrentBlock);
     }
@@ -819,15 +818,13 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> stepFunctionHeader(
     }
     i++;
   }
-  auto arr = module->getOrInsertGlobal(
-      "gc_roots", llvm::ArrayType::get(
-                      llvm::Type::getInt8PtrTy(module->getContext()), 256));
-  std::vector<llvm::Value *> rootPtrs;
+  auto root_ty = llvm::ArrayType::get(
+      llvm::Type::getInt8PtrTy(module->getContext()), 256);
+  auto arr = module->getOrInsertGlobal("gc_roots", root_ty);
+  std::vector<std::pair<llvm::Value *, llvm::Type *>> rootPtrs;
   for (unsigned i = 0; i < nroots; i++) {
     auto ptr = llvm::GetElementPtrInst::CreateInBounds(
-        llvm::dyn_cast<llvm::PointerType>(arr->getType())
-            ->getPointerElementType(),
-        arr,
+        root_ty, arr,
         {llvm::ConstantInt::get(
              llvm::Type::getInt64Ty(module->getContext()), 0),
          llvm::ConstantInt::get(
@@ -836,7 +833,7 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> stepFunctionHeader(
     auto casted = new llvm::BitCastInst(
         ptr, llvm::PointerType::getUnqual(ptrTypes[i]), "", collect);
     new llvm::StoreInst(roots[i], casted, collect);
-    rootPtrs.push_back(casted);
+    rootPtrs.emplace_back(casted, ptrTypes[i]);
   }
   std::vector<llvm::Constant *> elements;
   i = 0;
@@ -892,9 +889,8 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> stepFunctionHeader(
   setDebugLoc(call);
   i = 0;
   std::vector<llvm::Value *> phis;
-  for (auto ptr : rootPtrs) {
-    auto loaded = new llvm::LoadInst(
-        ptr->getType()->getPointerElementType(), ptr, "", collect);
+  for (auto [ptr, pointee_ty] : rootPtrs) {
+    auto loaded = new llvm::LoadInst(pointee_ty, ptr, "", collect);
     auto phi = llvm::PHINode::Create(loaded->getType(), 2, "phi", merge);
     phi->addIncoming(loaded, collect);
     phi->addIncoming(roots[i++], checkCollect);
