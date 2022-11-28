@@ -228,17 +228,19 @@ void SwitchNode::codegen(Decision *d) {
              llvm::ConstantInt::get(
                  llvm::Type::getInt32Ty(d->Ctx), offset + 2)},
             "", d->CurrentBlock);
+
         llvm::Value *Child;
-        switch (dynamic_cast<KORECompositeSort *>(
-                    _case.getConstructor()->getArguments()[offset].get())
-                    ->getCategory(d->Definition)
-                    .cat) {
+        auto cat = dynamic_cast<KORECompositeSort *>(
+                       _case.getConstructor()->getArguments()[offset].get())
+                       ->getCategory(d->Definition);
+
+        switch (cat.cat) {
         case SortCategory::Map:
         case SortCategory::List:
         case SortCategory::Set: Child = ChildPtr; break;
         default:
           Child = new llvm::LoadInst(
-              ChildPtr->getType()->getPointerElementType(), ChildPtr,
+              getArgType(cat, d->Module), ChildPtr,
               binding.first.substr(0, max_name_length), d->CurrentBlock);
           break;
         }
@@ -271,15 +273,17 @@ void SwitchNode::codegen(Decision *d) {
     } else {
       if (currChoiceBlock && _case.getLiteral() == 1) {
         auto PrevDepth = new llvm::LoadInst(
-            d->ChoiceDepth->getType()->getPointerElementType(), d->ChoiceDepth,
-            "", d->CurrentBlock);
+            llvm::Type::getInt64Ty(d->Ctx), d->ChoiceDepth, "",
+            d->CurrentBlock);
         auto CurrDepth = llvm::BinaryOperator::Create(
             llvm::Instruction::Add, PrevDepth,
             llvm::ConstantInt::get(llvm::Type::getInt64Ty(d->Ctx), 1), "",
             d->CurrentBlock);
         new llvm::StoreInst(CurrDepth, d->ChoiceDepth, d->CurrentBlock);
 
-        auto ty = d->ChoiceBuffer->getType()->getPointerElementType();
+        auto alloc = llvm::dyn_cast<llvm::AllocaInst>(d->ChoiceBuffer);
+        auto ty = alloc->getAllocatedType();
+
         auto zero = llvm::ConstantInt::get(llvm::Type::getInt64Ty(d->Ctx), 0);
         auto currentElt = llvm::GetElementPtrInst::CreateInBounds(
             ty, d->ChoiceBuffer, {zero, CurrDepth}, "", d->CurrentBlock);
@@ -510,9 +514,10 @@ llvm::Value *Decision::load(var_type name) {
   if (!sym) {
     sym = this->decl(name);
   }
+  auto alloc = llvm::dyn_cast<llvm::AllocaInst>(sym);
+  auto ty = alloc->getAllocatedType();
   return new llvm::LoadInst(
-      sym->getType()->getPointerElementType(), sym,
-      name.first.substr(0, max_name_length), this->CurrentBlock);
+      ty, sym, name.first.substr(0, max_name_length), this->CurrentBlock);
 }
 
 void Decision::store(var_type name, llvm::Value *val) {
@@ -560,7 +565,7 @@ static void initChoiceBuffer(
       llvm::BlockAddress::get(block->getParent(), stuck), firstElt, block);
 
   llvm::LoadInst *currDepth = new llvm::LoadInst(
-      choiceDepth->getType()->getPointerElementType(), choiceDepth, "", fail);
+      llvm::Type::getInt64Ty(module->getContext()), choiceDepth, "", fail);
   auto currentElt = llvm::GetElementPtrInst::CreateInBounds(
       ty, choiceBuffer, {zero, currDepth}, "", fail);
   llvm::LoadInst *failAddress = new llvm::LoadInst(

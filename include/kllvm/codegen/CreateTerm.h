@@ -114,6 +114,8 @@ extern std::string BLOCKHEADER_STRUCT;
 
 llvm::StructType *getBlockType(llvm::Module *Module);
 
+llvm::Type *getArgType(ValueType cat, llvm::Module *mod);
+
 /* returns the llvm::Type corresponding to the specified KORE sort category */
 llvm::Type *getValueType(ValueType sort, llvm::Module *Module);
 llvm::Type *getParamType(ValueType sort, llvm::Module *Module);

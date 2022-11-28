@@ -1273,4 +1273,27 @@ std::string makeSideConditionFunction(
   return "";
 }
 
+llvm::Type *getArgType(ValueType cat, llvm::Module *mod) {
+  switch (cat.cat) {
+  case SortCategory::Bool:
+  case SortCategory::MInt:
+  case SortCategory::Map:
+  case SortCategory::List:
+  case SortCategory::Set: {
+    return getValueType(cat, mod);
+  }
+  case SortCategory::Int:
+  case SortCategory::Float:
+  case SortCategory::StringBuffer:
+  case SortCategory::Symbol:
+  case SortCategory::Variable: {
+    return getBlockType(mod);
+  }
+  case SortCategory::Uncomputed:
+  default: {
+    abort();
+  }
+  }
+}
+
 } // namespace kllvm
