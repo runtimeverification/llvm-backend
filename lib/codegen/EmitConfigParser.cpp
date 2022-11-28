@@ -809,7 +809,6 @@ static void getStore(
     ValueType cat = dynamic_cast<KORECompositeSort *>(sort.get())
                         ->getCategory(definition);
     llvm::Value *arg = getArgValue(ArgumentsArray, idx, CaseBlock, cat, module);
-    // TODO: revisit this logic - does it get duplicated?
     llvm::Type *arg_ty = getArgType(cat, module);
     llvm::Value *ChildPtr = llvm::GetElementPtrInst::CreateInBounds(
         BlockType, cast,
