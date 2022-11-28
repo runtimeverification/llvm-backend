@@ -141,6 +141,7 @@ elif [ "$main" = "python" ]; then
     flags+=("-o" "_kllvm_runtime$(python3-config --extension-suffix)")
   fi
 elif [ "$main" = "c" ]; then
+  all_libraries=("${libraries[@]}" "-lgmp" "-lmpfr" "-lpthread" "-ldl" "-lffi" "-ljemalloc")
   flags+=("-fPIC" "-shared" "$start_whole_archive" "$LIBDIR/libkllvmcruntime.a" "$end_whole_archive")
 else
   all_libraries=("${libraries[@]}" "-lgmp" "-lmpfr" "-lpthread" "-ldl" "-lffi" "-ljemalloc")
