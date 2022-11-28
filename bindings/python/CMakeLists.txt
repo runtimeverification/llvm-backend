@@ -13,11 +13,11 @@ pybind11_add_module(kllvm-python-static STATIC NO_EXTRAS
   runtime.cpp
 )
 
-pybind11_add_module(_kllvm-python       SHARED NO_EXTRAS
+pybind11_add_module(_kllvm       SHARED NO_EXTRAS
   ast.cpp
 )
 
-target_link_libraries(_kllvm-python PUBLIC
+target_link_libraries(_kllvm PUBLIC
   AST
   Parser
 )
@@ -34,6 +34,6 @@ install(FILES $<TARGET_FILE:kllvm-python-static>
 install(DIRECTORY package/
   DESTINATION lib/kllvm/python)
 
-install(TARGETS _kllvm-python
+install(TARGETS _kllvm
   DESTINATION lib/kllvm/python/kllvm
   LIBRARY)
