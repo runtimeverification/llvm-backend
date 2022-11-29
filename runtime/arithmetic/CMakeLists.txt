@@ -4,7 +4,7 @@ add_library(arithmetic STATIC
 )
 
 target_link_libraries(arithmetic
-  numeric_strings
+  numeric_strings fmt::fmt-header-only
 )
 
 install(

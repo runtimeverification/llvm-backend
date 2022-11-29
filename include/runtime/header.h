@@ -5,12 +5,12 @@
 #include <cstdint>
 #include <limits>
 
+#include <fmt/format.h>
 #include <gmp.h>
 #include <mpfr.h>
 
 #include "config/macros.h"
 #include "runtime/alloc.h"
-#include "runtime/format.h"
 
 #ifndef IMMER_TAGGED_NODE
 #define IMMER_TAGGED_NODE 0
@@ -278,8 +278,8 @@ std::string intToString(mpz_t i);
 
 #define KLLVM_HOOK_INVALID_ARGUMENT(...)                                       \
   do {                                                                         \
-    auto err_msg = ::kllvm::fmt::format(                                       \
-        "[{}]: {}", __func__, ::kllvm::fmt::format(__VA_ARGS__));              \
+    auto err_msg                                                               \
+        = ::fmt::format("[{}]: {}", __func__, ::fmt::format(__VA_ARGS__));     \
     throw std::invalid_argument(err_msg);                                      \
   } while (false)
 

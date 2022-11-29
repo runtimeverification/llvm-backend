@@ -9,4 +9,4 @@ install(
   ARCHIVE DESTINATION lib/kllvm
 )
 
-target_link_libraries(io PUBLIC KOREPrinter)
+target_link_libraries(io PUBLIC KOREPrinter fmt::fmt-header-only)

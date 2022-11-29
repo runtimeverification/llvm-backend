@@ -11,4 +11,4 @@ install(
 )
 
 target_link_libraries(collections
-  numeric_strings)
+  numeric_strings fmt::fmt-header-only)

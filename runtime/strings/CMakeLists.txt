@@ -4,6 +4,7 @@ add_library(strings STATIC
 )
 
 target_link_libraries(strings
+  fmt::fmt-header-only
   numeric_strings
   util)
 
