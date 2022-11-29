@@ -39,7 +39,7 @@ jobs:
         uses: cachix/cachix-action@v10
         with:
           name: k-framework
-          signingKey: '${{ secrets.CACHIX_PUBLIC_KEY }}'
+          authToken: '${{ secrets.CACHIX_PUBLIC_TOKEN }}'
 
       - name: 'Build LLVM backend'
         run: GC_DONT_GC=1 nix build .
