@@ -1,4 +1,7 @@
 #!/bin/bash -e
+
+LLVM_MAJOR_VERSION=$(echo "@LLVM_PACKAGE_VERSION@" | cut -d'.' -f1)
+
 modopt="$1"
 main="$2"
 lto="$3"
@@ -71,6 +74,11 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
 else
   libraries=("-ltinfo")
   flags=("-Wl,-u,sort_table")
+fi
+
+if [ "$LLVM_MAJOR_VERSION" -ge 14 ]; then
+  llc_flags+=("--opaque-pointers")
+  flags+=("-mllvm" "--opaque-pointers")
 fi
 
 llc_flags+=("--relocation-model=pic")
