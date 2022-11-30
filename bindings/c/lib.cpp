@@ -21,6 +21,12 @@ void kore_composite_pattern_dump(kore_composite_pattern const *pat) {
   pat->ptr_->print(std::cout);
 }
 
+void kore_composite_pattern_add_argument(
+    kore_composite_pattern *pat, kore_composite_pattern *arg) {
+  pat->ptr_->addArgument(
+      std::shared_ptr<kllvm::KOREPattern>(arg->ptr_.release()));
+}
+
 void kore_composite_pattern_free(kore_composite_pattern const *pat) {
   delete pat;
 }
