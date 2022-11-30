@@ -42,7 +42,7 @@ jobs:
           authToken: '${{ secrets.CACHIX_PUBLIC_TOKEN }}'
 
       - name: 'Build LLVM backend'
-        run: GC_DONT_GC=1 nix build .
+        run: GC_DONT_GC=1 nix build --print-build-logs .
 
       - name: 'Test LLVM backend'
         run: GC_DONT_GC=1 nix flake check --print-build-logs
