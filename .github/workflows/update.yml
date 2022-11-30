@@ -13,15 +13,21 @@ jobs:
     name: 'Nix: Maven'
     runs-on: ubuntu-latest
     steps:
-      - name: 'Check out code'
+      - name: 'Check out code, set up Git'
         uses: actions/checkout@v2.3.4
         with:
           submodules: recursive
+          fetch-depth: 0
+      - run: |
+          git config user.name devops
+          git config user.email devops@runtimeverification.com
 
       - name: 'Install Nix'
         uses: cachix/install-nix-action@master
         with:
           install_url: "https://releases.nixos.org/nix/nix-2.3.16/install"
+          extra_nix_config: |
+            access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
 
       - name: 'Install Cachix'
         uses: cachix/cachix-action@v10
@@ -31,10 +37,13 @@ jobs:
           skipPush: true
 
       - name: 'Update Maven dependencies'
-        run: ./nix/update-maven.sh
-
-      - name: 'Commit changes'
-        uses: stefanzweifel/git-auto-commit-action@v4.7.2
-        with:
-          commit_message: 'Update Maven dependencies'
-          file_pattern: 'nix/'
+        run: |
+          set -x
+          if ! git diff --exit-code origin/${GITHUB_BASE_REF} origin/${GITHUB_HEAD_REF} \
+                -- $(find . -name pom.xml)                                              \
+                   $(find nix -name '*.nix'); then
+            ./nix/update-maven.sh
+          fi
+          if git add nix/ && git commit -m 'Update Maven dependencies'; then
+            git push
+          fi
