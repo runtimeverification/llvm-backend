@@ -13,8 +13,13 @@ struct kore_pattern {
 
 /* KOREPattern */
 
-void kore_pattern_dump(kore_pattern const *pat) {
-  pat->ptr_->print(std::cout);
+char *kore_pattern_dump(kore_pattern const *pat) {
+  std::ostringstream out;
+  pat->ptr_->print(out);
+  auto str = out.str();
+  char * cstr = new char [str.length()+1];
+  std::strcpy (cstr, str.c_str());
+  return cstr;
 }
 
 void kore_pattern_free(kore_pattern const *pat) {
