@@ -17,7 +17,7 @@ char *kore_pattern_dump(kore_pattern const *pat) {
   std::ostringstream out;
   pat->ptr_->print(out);
   auto str = out.str();
-  char * cstr = new char [str.length()+1];
+  char * cstr = (char*) malloc((str.length()+1)*sizeof(char));
   std::strcpy (cstr, str.c_str());
   return cstr;
 }
