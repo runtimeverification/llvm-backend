@@ -133,6 +133,19 @@ public:
             return true;
     }
 
+    V lookup(T x) const
+    {
+        if (isEmpty())
+            assert(false); // Key not found for map lookup
+        T y = root();
+        if (x < y)
+            return left().lookup(x);
+        else if (y < x)
+            return right().lookup(x);
+        else
+            return rootVal();
+    }
+
     RBTree inserted(T x, V v) const
     {
         return ins(x, v).blacken();
@@ -532,7 +545,7 @@ RBTree<T, V> mapConcat(RBTree<T, V> const & a, RBTree<T, V> const & b)
         if (!a.member(x))
             res.inserted(x, v);
         else
-           assert(false); // maps are not disjoint
+           assert(false); // Duplicate keys in map concatenation
     });
     return res;
 }

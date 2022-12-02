@@ -44,6 +44,7 @@ void hugeTest(std::vector<int> &v)
     for (int i: v)
     {
         trees.push_back(trees.back().inserted(i, i+1));
+        trees.push_back(trees.back().inserted(i, i+2));
     }
     for (int i: v)
     {
@@ -51,12 +52,19 @@ void hugeTest(std::vector<int> &v)
     }
     for (int i = 0; i < v.size(); i++ )
     {
-        int idxI = 1 + i;
-        assert(trees[idxI].member(v[i]));
-        trees[idxI].assert1();
-        trees[idxI].countB();
-        trees[idxI].assertBST();
-        int idxD = 1 + v.size() + i;
+        int idxI1 = 1 + 2*i;
+        assert(trees[idxI1].member(v[i]));
+        assert(trees[idxI1].lookup(v[i]) == v[i]+1);
+        trees[idxI1].assert1();
+        trees[idxI1].countB();
+        trees[idxI1].assertBST();
+        int idxI2 = 1 + 2*i+1;
+        assert(trees[idxI2].member(v[i]));
+        assert(trees[idxI2].lookup(v[i]) == v[i]+2);
+        trees[idxI2].assert1();
+        trees[idxI2].countB();
+        trees[idxI2].assertBST();
+        int idxD = 1 + 2*v.size() + i;
         assert(!trees[idxD].member(v[i]));
         trees[idxD].assert1();
         trees[idxD].countB();
