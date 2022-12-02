@@ -7,29 +7,43 @@
 #include <cstdlib>
 #include <ctime>
 
-template<class T>
-void print(RBTree<T> const & t)
+template<class T, class V>
+void print(RBTree<T, V> const & t)
 {
-    forEach(t, [](T v)
+    forEach(t, [](T x, V v)
     {
-        std::cout << v << " ";
+        std::cout << "[ " << x << " -> " << v << " ] ";
     });
     std::cout << std::endl;
 }
 
 void testInit()
 {
-    RBTree<int> t{ 50, 40, 30, 10, 20, 30, 100, 0, 45, 55, 25, 15 };
+    std::vector<std::pair<int, int> > v = 
+        { std::pair<int, int>( 50, 51 ),
+          std::pair<int, int>( 40, 41 ),
+          std::pair<int, int>( 30, 31 ),
+          std::pair<int, int>( 10, 11 ),
+          std::pair<int, int>( 20, 21 ),
+          std::pair<int, int>( 30, 32 ),
+          std::pair<int, int>( 100, 101),
+          std::pair<int, int>( 0, 1 ),
+          std::pair<int, int>( 45, 46),
+          std::pair<int, int>( 55, 56),
+          std::pair<int, int>( 25, 26),
+          std::pair<int, int>( 15, 16)
+        };
+    RBTree<int, int> t(v.begin(), v.end());
     print(t);
 }
 
 void hugeTest(std::vector<int> &v)
 {
-    std::vector<RBTree<int> > trees;
-    trees.push_back(RBTree<int>());
+    std::vector<RBTree<int, int> > trees;
+    trees.push_back(RBTree<int, int>());
     for (int i: v)
     {
-        trees.push_back(trees.back().inserted(i));
+        trees.push_back(trees.back().inserted(i, i+1));
     }
     for (int i: v)
     {
@@ -69,51 +83,6 @@ void makeTestVectors(int n, std::vector<int> &asc, std::vector<int> &desc, std::
 int main()
 {
     testInit();
-    std::string init =  "a red black tree walks into a bar "
-                        "has johnny walker on the rocks "
-                        "and quickly rebalances itself."
-                        "A RED BLACK TREE WALKS INTO A BAR "
-                        "HAS JOHNNY WALKER ON THE ROCKS "
-                        "AND QUICKLY REBALANCES ITSELF.";
-    auto t = inserted(RBTree<char>(), init.begin(), init.end());
-    auto t1 = t.deleted('A');
-    auto t2 = t1.deleted('Z');
-    auto t3 = t2.deleted('.');
-    auto t4 = t3.deleted('h');
-    print(t);
-    t.assert1();
-    t.assertBST();
-    std::cout << "Black depth: " << t.countB() << std::endl;
-    std::cout << "Member z: " << t.member('z') << std::endl;
-    std::for_each(init.begin(), init.end(), [t](char c) 
-    {
-        if (!t.member(c))
-            std::cout << "Error: " << c << " not found\n";
-    });
-    std::cout << "--- Tree t1 ---" << std::endl;
-    print(t1);
-    t1.assert1();
-    t1.assertBST();
-    std::cout << "Black depth: " << t1.countB() << std::endl;
-    std::cout << "Member A: " << t1.member('A') << std::endl;
-    std::cout << "--- Tree t2 ---" << std::endl;
-    print(t2);
-    t2.assert1();
-    t2.assertBST();
-    std::cout << "Black depth: " << t2.countB() << std::endl;
-    std::cout << "Member Z: " << t2.member('Z') << std::endl;
-    std::cout << "--- Tree t3 ---" << std::endl;
-    print(t3);
-    t3.assert1();
-    t3.assertBST();
-    std::cout << "Black depth: " << t3.countB() << std::endl;
-    std::cout << "Member .: " << t3.member('.') << std::endl;
-    std::cout << "--- Tree t4 ---" << std::endl;
-    print(t4);
-    t4.assert1();
-    t4.assertBST();
-    std::cout << "Black depth: " << t4.countB() << std::endl;
-    std::cout << "Member h: " << t4.member('h') << std::endl;
     std::vector<int> a, d, r;
     makeTestVectors(10000, a, d, r);
     std::cout << "--- Begin Asc test ---" << std::endl;
