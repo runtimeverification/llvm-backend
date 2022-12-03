@@ -533,8 +533,8 @@ RBTree<T, V> inserted(RBTree<T, V> t, Beg it, End end)
         return t;
     T key = it->first;
     V val = it->second;
-    auto t1 = inserted(t, ++it, end);
-    return t1.inserted(key, val);
+    auto t1 = t.inserted(key, val);
+    return inserted(t1, ++it, end);
 }
 
 template<class T, class V>
@@ -543,7 +543,7 @@ RBTree<T, V> mapConcat(RBTree<T, V> const & a, RBTree<T, V> const & b)
     RBTree<T, V> res = a;
     forEach(b, [&res, &a](T const & x, V const & v){
         if (!a.member(x))
-            res.inserted(x, v);
+            res = res.inserted(x, v);
         else
            assert(false); // Duplicate keys in map concatenation
     });
