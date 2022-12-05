@@ -9,3 +9,5 @@ install(
   TARGETS collections
   ARCHIVE DESTINATION lib/kllvm
 )
+
+add_subdirectory(treemap)

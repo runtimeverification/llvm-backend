@@ -29,12 +29,14 @@ class RBTree
         Color _c;
 
         virtual bool isLeaf() const =0;
+        virtual ~Node() {};
     };
 
     struct Leaf : public Node
     {
         Leaf(Color c) : Node(c) { assert(c == B || c == BB); }
-        virtual bool isLeaf() const { return true; }
+        virtual bool isLeaf() const override { return true; }
+        virtual ~Leaf() {};
     };
 
     struct InternalNode : public Node
@@ -51,7 +53,8 @@ class RBTree
         V _val;
         std::shared_ptr<const Node> _rgt;
 
-        virtual bool isLeaf() const { return false; }
+        virtual bool isLeaf() const override { return false; }
+        virtual ~InternalNode() {};
     };
 
     explicit RBTree(std::shared_ptr<const Node> const & node) : _root(node) {} 
