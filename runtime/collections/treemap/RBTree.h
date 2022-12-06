@@ -3,10 +3,22 @@
 
 #include <cassert>
 #include <memory>
+#include <string>
+#include <stdexcept>
 
 // 1. No red node has a red child.
 // 2. Every path from root to empty node contains the same
 // number of black nodes.
+
+#define CONSTRUCT_MSG_AND_THROW(msg)                                          \
+    do {                                                                      \
+        std::string emsg = std::string("[")                                   \
+                           + std::string(__func__)                            \
+                           + std::string("] ")                               \
+                           + std::string(msg);                                \
+        throw std::invalid_argument(emsg);                                    \
+        } while (false)
+
 
 template<class T, class V>
 class RBTree
@@ -147,7 +159,7 @@ public:
     V lookup(T x) const
     {
         if (isEmpty())
-            assert(false); // Key not found for map lookup
+            CONSTRUCT_MSG_AND_THROW("Key not found for map lookup");
         T y = root();
         if (x < y)
             return left().lookup(x);
@@ -556,12 +568,10 @@ RBTree<T, V> mapConcat(RBTree<T, V> const & a, RBTree<T, V> const & b)
         if (!a.member(x))
             res = res.inserted(x, v);
         else
-           assert(false); // Duplicate keys in map concatenation
+           CONSTRUCT_MSG_AND_THROW("Duplicate keys in map concatenation");
     });
     return res;
 }
-
-
 
 
 
