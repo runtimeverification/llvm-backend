@@ -25,8 +25,9 @@ class RBTree
 
     struct Node
     {
-        Node(Color c) : _c(c) {}
+        Node(Color c) : _c(c), _s(0) {}
         Color _c;
+        size_t _s;
 
         virtual bool isLeaf() const =0;
         virtual ~Node() {};
@@ -47,7 +48,9 @@ class RBTree
             V val,
             std::shared_ptr<const Node> const & rgt)
             : Node(c), _lft(lft), _key(key), _val(val), _rgt(rgt)
-        {}
+        {
+            this->_s = 1 + _lft->_s + _rgt->_s;
+        }
         std::shared_ptr<const Node> _lft;
         T _key;
         V _val;
@@ -121,6 +124,11 @@ public:
         assert(!isEmpty());
         const InternalNode *r = static_cast<const InternalNode *>(_root.get());
         return RBTree(r->_rgt);
+    }
+
+    size_t size() const
+    {
+        return _root->_s;
     }
 
     bool member(T x) const
