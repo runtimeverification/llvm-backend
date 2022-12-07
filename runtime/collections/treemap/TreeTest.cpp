@@ -35,9 +35,10 @@ void testInit()
         };
     RBTree<int, int> t(v.begin(), v.end());
     print(t);
+    assert(t.size() == 11);
 }
 
-void hugeTest(std::vector<int> &v)
+void hugeTest(std::vector<int> &v, bool r)
 {
     std::vector<RBTree<int, int> > trees;
     trees.push_back(RBTree<int, int>());
@@ -53,24 +54,31 @@ void hugeTest(std::vector<int> &v)
     for (int i = 0; i < v.size(); i++ )
     {
         int idxI1 = 1 + 2*i;
+        if (r)
+            assert(trees[idxI1].size() == i+1);
         assert(trees[idxI1].member(v[i]));
         assert(trees[idxI1].lookup(v[i]) == v[i]+1);
         trees[idxI1].assert1();
         trees[idxI1].countB();
         trees[idxI1].assertBST();
         int idxI2 = 1 + 2*i+1;
+        if (r)
+            assert(trees[idxI2].size() == i+1);
         assert(trees[idxI2].member(v[i]));
         assert(trees[idxI2].lookup(v[i]) == v[i]+2);
         trees[idxI2].assert1();
         trees[idxI2].countB();
         trees[idxI2].assertBST();
         int idxD = 1 + 2*v.size() + i;
+        if (r)
+            assert(trees[idxD].size() == v.size() - i - 1);
         assert(!trees[idxD].member(v[i]));
         trees[idxD].assert1();
         trees[idxD].countB();
         trees[idxD].assertBST();
     }
     assert(trees[0].isEmpty());
+    assert(trees[0].size() == 0);
     trees[0].assert1();
     trees[0].countB();
     trees[0].assertBST();
@@ -213,13 +221,13 @@ int main()
     std::vector<int> a, d, r;
     makeTestVectors(20, a, d, r);
     std::cout << "--- Begin Asc test ---" << std::endl;
-    hugeTest(a);
+    hugeTest(a, true);
     std::cout << "--- End Asc test ---" << std::endl;
     std::cout << "--- Begin Desc test ---" << std::endl;
-    hugeTest(d);
+    hugeTest(d, true);
     std::cout << "--- End Desc test ---" << std::endl;
     std::cout << "--- Begin Rand test ---" << std::endl;
-    hugeTest(r);
+    hugeTest(r, false);
     std::cout << "--- End Rand test ---" << std::endl;
     std::cout << "--- Begin Concat test ---" << std::endl;
     testConcat();
