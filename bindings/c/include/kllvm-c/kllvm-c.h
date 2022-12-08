@@ -5,22 +5,25 @@
 extern "C" {
 #endif
 
-/* KOREPattern */
+/* Opaque types */
 
 typedef struct kore_pattern kore_pattern;
+typedef struct kore_sort kore_sort;
+typedef struct kore_symbol kore_symbol;
+
+/* KOREPattern */
 
 char *kore_pattern_dump(kore_pattern const *);
 
 void kore_pattern_free(kore_pattern const *);
 
 kore_pattern *kore_composite_pattern_new(char const *);
+kore_pattern *kore_composite_pattern_from_symbol(kore_symbol *);
 void kore_composite_pattern_add_argument(kore_pattern *, kore_pattern *);
 
 kore_pattern *kore_string_pattern_new(char const *);
 
 /* KORESort */
-
-typedef struct kore_sort kore_sort;
 
 char *kore_sort_dump(kore_sort const *);
 
@@ -33,11 +36,11 @@ void kore_composite_sort_add_argument(kore_sort *, kore_sort *);
 
 /* KORESymbol */
 
-typedef struct kore_symbol kore_symbol;
-
 kore_symbol *kore_symbol_new(char const *);
 
 void kore_symbol_free(kore_symbol const *);
+
+void kore_symbol_add_formal_argument(kore_symbol *, kore_sort const *);
 
 #ifdef __cplusplus
 }

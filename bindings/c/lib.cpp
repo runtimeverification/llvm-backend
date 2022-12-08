@@ -22,11 +22,21 @@ char *get_c_string(OS const &os) {
 
 extern "C" {
 
-/* KOREPattern */
+/* Completed types */
 
 struct kore_pattern {
   std::unique_ptr<kllvm::KOREPattern> ptr_;
 };
+
+struct kore_sort {
+  std::shared_ptr<kllvm::KORESort> ptr_;
+};
+
+struct kore_symbol {
+  std::unique_ptr<kllvm::KORESymbol> ptr_;
+};
+
+/* KOREPattern */
 
 char *kore_pattern_dump(kore_pattern const *pat) {
   auto os = std::ostringstream{};
@@ -38,11 +48,27 @@ void kore_pattern_free(kore_pattern const *pat) {
   delete pat;
 }
 
+kore_pattern *kore_pattern_new_token(kore_sort const *sort, char const *value) {
+  auto sym = kore_symbol_new("\\dv");
+  kore_symbol_add_formal_argument(sym, sort);
+
+  auto pat = kore_composite_pattern_from_symbol(sym);
+  kore_composite_pattern_add_argument(pat, kore_string_pattern_new(value));
+
+  return pat;
+}
+
 /* KORECompositePattern */
 
 kore_pattern *kore_composite_pattern_new(char const *name) {
   auto pat = new kore_pattern;
   pat->ptr_ = kllvm::KORECompositePattern::Create(std::string(name));
+  return pat;
+}
+
+kore_pattern *kore_composite_pattern_from_symbol(kore_symbol *sym) {
+  auto pat = new kore_pattern;
+  pat->ptr_ = kllvm::KORECompositePattern::Create(std::move(sym->ptr_));
   return pat;
 }
 
@@ -65,10 +91,6 @@ kore_pattern *kore_string_pattern_new(char const *contents) {
 }
 
 /* KORESort */
-
-struct kore_sort {
-  std::shared_ptr<kllvm::KORESort> ptr_;
-};
 
 char *kore_sort_dump(kore_sort const *sort) {
   auto os = std::ostringstream{};
@@ -103,10 +125,6 @@ void kore_composite_sort_add_argument(kore_sort *sort, kore_sort *arg) {
 
 /* KORESymbol */
 
-struct kore_symbol {
-  std::unique_ptr<kllvm::KORESymbol> ptr_;
-};
-
 kore_symbol *kore_symbol_new(char const *name) {
   auto sym = new kore_symbol;
   sym->ptr_ = kllvm::KORESymbol::Create(std::string(name));
@@ -121,5 +139,9 @@ char *kore_symbol_dump(kore_symbol const *sym) {
   auto os = std::ostringstream{};
   sym->ptr_->print(os);
   return get_c_string(os);
+}
+
+void kore_symbol_add_formal_argument(kore_symbol *sym, kore_sort const *sort) {
+  sym->ptr_->addFormalArgument(sort->ptr_);
 }
 }
