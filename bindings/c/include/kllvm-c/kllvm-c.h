@@ -10,6 +10,7 @@ extern "C" {
 typedef struct kore_pattern kore_pattern;
 typedef struct kore_sort kore_sort;
 typedef struct kore_symbol kore_symbol;
+typedef struct block block;
 
 /* KOREPattern */
 
@@ -22,6 +23,8 @@ kore_pattern *kore_composite_pattern_from_symbol(kore_symbol *);
 void kore_composite_pattern_add_argument(kore_pattern *, kore_pattern *);
 
 kore_pattern *kore_string_pattern_new(char const *);
+
+block *kore_pattern_construct(kore_pattern const *);
 
 /* KORESort */
 

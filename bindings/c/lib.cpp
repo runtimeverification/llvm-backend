@@ -5,6 +5,10 @@
 
 #include <kllvm-c/kllvm-c.h>
 
+// This header needs to be included last because it pollutes a number of macro
+// definitions into the global namespace.
+#include <runtime/header.h>
+
 namespace {
 template <typename OS>
 char *get_c_string(OS const &os) {
@@ -19,6 +23,8 @@ char *get_c_string(OS const &os) {
   return c_str;
 }
 } // namespace
+
+void *constructInitialConfiguration(const kllvm::KOREPattern *);
 
 extern "C" {
 
@@ -56,6 +62,10 @@ kore_pattern *kore_pattern_new_token(kore_sort const *sort, char const *value) {
   kore_composite_pattern_add_argument(pat, kore_string_pattern_new(value));
 
   return pat;
+}
+
+block *kore_pattern_construct(kore_pattern const *pat) {
+  return static_cast<block *>(constructInitialConfiguration(pat->ptr_.get()));
 }
 
 /* KORECompositePattern */
