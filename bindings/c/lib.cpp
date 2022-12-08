@@ -71,7 +71,7 @@ struct kore_sort {
 };
 
 char *kore_sort_dump(kore_sort const *sort) {
-  auto os = std::stringstream{};
+  auto os = std::ostringstream{};
   sort->ptr_->print(os);
   return get_c_string(os);
 }
@@ -99,5 +99,27 @@ void kore_composite_sort_add_argument(kore_sort *sort, kore_sort *arg) {
   } else {
     abort();
   }
+}
+
+/* KORESymbol */
+
+struct kore_symbol {
+  std::unique_ptr<kllvm::KORESymbol> ptr_;
+};
+
+kore_symbol *kore_symbol_new(char const *name) {
+  auto sym = new kore_symbol;
+  sym->ptr_ = kllvm::KORESymbol::Create(std::string(name));
+  return sym;
+}
+
+void kore_symbol_free(kore_symbol const *sym) {
+  delete sym;
+}
+
+char *kore_symbol_dump(kore_symbol const *sym) {
+  auto os = std::ostringstream{};
+  sym->ptr_->print(os);
+  return get_c_string(os);
 }
 }

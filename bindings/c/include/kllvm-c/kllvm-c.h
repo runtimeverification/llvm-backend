@@ -31,6 +31,14 @@ bool kore_sort_is_concrete(kore_sort const *);
 kore_sort *kore_composite_sort_new(char const *);
 void kore_composite_sort_add_argument(kore_sort *, kore_sort *);
 
+/* KORESymbol */
+
+typedef struct kore_symbol kore_symbol;
+
+kore_symbol *kore_symbol_new(char const *);
+
+void kore_symbol_free(kore_symbol const *);
+
 #ifdef __cplusplus
 }
 #endif
