@@ -1,6 +1,6 @@
 #include <boost/test/unit_test.hpp>
 
-#include "../../runtime/collections/treemap/RBTree.h"
+#include "../../runtime/collections/RBTree.h"
 
 #include <iostream>
 #include <cstdlib>
