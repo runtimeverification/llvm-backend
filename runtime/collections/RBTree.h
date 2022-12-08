@@ -1,3 +1,6 @@
+#ifndef RBTREE_HEADER_H
+#define RBTREE_HEADER_H
+
 //***---  Adapted from https://github.com/BartoszMilewski/Okasaki/tree/master/RBTree  ---***//
 // Implementing algorithms from https://matt.might.net/papers/germane2014deletion.pdf
 
@@ -574,4 +577,4 @@ RBTree<T, V> mapConcat(RBTree<T, V> const & a, RBTree<T, V> const & b)
 }
 
 
-
+#endif // RBTREE_HEADER_H
