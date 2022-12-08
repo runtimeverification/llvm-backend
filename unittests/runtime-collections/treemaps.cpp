@@ -73,13 +73,13 @@ BOOST_AUTO_TEST_CASE(hugetest) {
     hugeTest(r);
 }
 
-BOOST_AUTO_TEST_CASE(element) {
+BOOST_AUTO_TEST_CASE(treemap_test_element) {
   auto map = (RBTree<int, int>()).inserted(0, 0);
   auto result = map.lookup(0);
   BOOST_CHECK_EQUAL(result, 0);
 }
 
-BOOST_AUTO_TEST_CASE(size) {
+BOOST_AUTO_TEST_CASE(treemap_test_size) {
   auto map = RBTree<int, int>();
   auto result = map.size();
   BOOST_CHECK_EQUAL(result, 0);
@@ -90,7 +90,7 @@ BOOST_AUTO_TEST_CASE(size) {
   BOOST_CHECK_EQUAL(result, 1);
 }
 
-BOOST_AUTO_TEST_CASE(concat_success) {
+BOOST_AUTO_TEST_CASE(treemap_test_concat_success) {
   auto m1 = (RBTree<int, int>()).inserted(0, 1);
   auto m2 = (RBTree<int, int>()).inserted(1, 2);
   auto map = mapConcat(m1, m2);
@@ -106,20 +106,20 @@ BOOST_AUTO_TEST_CASE(concat_success) {
   BOOST_CHECK_EQUAL(result, 2);
 }
 
-BOOST_AUTO_TEST_CASE(concat_failure) {
+BOOST_AUTO_TEST_CASE(treemap_test_concat_failure) {
   auto m1 = (RBTree<int, int>()).inserted(0, 1);
   auto m2 = (RBTree<int, int>()).inserted(0, 2);
   BOOST_CHECK_THROW(mapConcat(m1, m2), std::invalid_argument);
 }
 
-BOOST_AUTO_TEST_CASE(lookup) {
+BOOST_AUTO_TEST_CASE(treemap_test_lookup) {
   auto map = (RBTree<int, int>()).inserted(0, 1);
   auto result = map.lookup(0);
   BOOST_CHECK_EQUAL(result, 1);
   BOOST_CHECK_THROW(map.lookup(2), std::invalid_argument);
 }
 
-BOOST_AUTO_TEST_CASE(member) {
+BOOST_AUTO_TEST_CASE(treemap_test_member) {
   auto map = (RBTree<int, int>()).inserted(0, 1);
   auto result = map.member(0);
   BOOST_CHECK_EQUAL(result, true);
@@ -127,7 +127,18 @@ BOOST_AUTO_TEST_CASE(member) {
   BOOST_CHECK_EQUAL(result, false);
 }
 
-BOOST_AUTO_TEST_CASE(update) {
+BOOST_AUTO_TEST_CASE(treemap_test_inserted) {
+  auto map = (RBTree<int, int>());
+  auto result = map.size();
+  BOOST_CHECK_EQUAL(result, 0);
+  auto map2 = map.inserted(0, 0);
+  result = map.size();
+  BOOST_CHECK_EQUAL(result, 0);
+  result = map2.size();
+  BOOST_CHECK_EQUAL(result, 1);
+}
+
+BOOST_AUTO_TEST_CASE(treemap_test_update) {
   auto map = (RBTree<int, int>()).inserted(0, 0);
   auto result = map.lookup(0);
   BOOST_CHECK_EQUAL(result, 0);
@@ -138,13 +149,39 @@ BOOST_AUTO_TEST_CASE(update) {
   BOOST_CHECK_EQUAL(result, 1);
 }
 
-BOOST_AUTO_TEST_CASE(remove) {
+BOOST_AUTO_TEST_CASE(treemap_test_remove) {
   auto map = (RBTree<int, int>()).inserted(0, 0);
   auto map2 = map.deleted(0);
   auto result = map.size();
   BOOST_CHECK_EQUAL(result, 1);
   result = map2.size();
   BOOST_CHECK_EQUAL(result, 0);
+}
+
+BOOST_AUTO_TEST_CASE(treemap_test_inserted_multiple) {
+  auto map = (RBTree<int, int>()).inserted(0, 0);
+  auto results = map.size();
+  BOOST_CHECK_EQUAL(results, 1);
+  auto resultv = map.lookup(0);
+  BOOST_CHECK_EQUAL(resultv, 0);
+  auto v = {std::pair<int, int>(1, 1), std::pair<int, int>(2, 2)};
+  auto map2 = inserted(map, v.begin(), v.end());
+  results = map.size();
+  BOOST_CHECK_EQUAL(results, 1);
+  results = map2.size();
+  BOOST_CHECK_EQUAL(results, 3);
+  auto u = {std::pair<int, int>(1, 1), std::pair<int, int>(1, 2)};
+  auto map3 = inserted(map, u.begin(), u.end());
+  results = map3.size();
+  BOOST_CHECK_EQUAL(results, 2);
+  resultv = map3.lookup(1);
+  BOOST_CHECK_EQUAL(resultv, 2);
+  auto w = {std::pair<int, int>(0, 1)};
+  auto map4 = inserted(map, w.begin(), w.end());
+  results = map4.size();
+  BOOST_CHECK_EQUAL(results, 1);
+  resultv = map4.lookup(0);
+  BOOST_CHECK_EQUAL(resultv, 1);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
