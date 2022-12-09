@@ -18,6 +18,10 @@ BINDINGS_INSTALL_PATH = os.environ.get(
     'BINDINGS_INSTALL_PATH',
     os.path.join(ROOT_PATH, "build", "install", "lib", "kllvm", "python"))
 
+INCLUDE_INSTALL_PATH = os.environ.get(
+    'INCLUDE_INSTALL_PATH',
+    os.path.join(ROOT_PATH, 'build', 'install', 'include'))
+
 config.name = 'llvm-backend'
 config.test_source_root = os.path.join(ROOT_PATH, "test")
 
@@ -63,6 +67,7 @@ config.substitutions.extend([
     ('%arity', 'kore-arity'),
 
     ('%bindings-path', BINDINGS_INSTALL_PATH),
+    ('%include-path', INCLUDE_INSTALL_PATH),
     ('%python', 'BINDINGS_INSTALL_PATH=%bindings-path python3'),
 
     ('%check-grep', one_line('''
