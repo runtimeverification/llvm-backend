@@ -11,7 +11,7 @@ jobs:
   # pull request branch from a fork.
   nix-maven:
     name: 'Nix: Maven'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - name: 'Check out code'
         uses: actions/checkout@v2.3.4
