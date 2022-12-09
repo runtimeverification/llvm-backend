@@ -1,6 +1,10 @@
 #ifndef KLLVM_C_H
 #define KLLVM_C_H
 
+#ifndef __cplusplus
+#include <stdbool.h>
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif

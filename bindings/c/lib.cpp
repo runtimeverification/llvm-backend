@@ -93,7 +93,7 @@ kore_pattern *kore_pattern_make_interpreter_input(kore_pattern *pgm) {
 
   auto map_unit = kore_composite_pattern_new("Lbl'Stop'Map");
 
-  auto map_concat = kore_composite_pattern_new("Lbl'Unds'Map'Unds");
+  auto map_concat = kore_composite_pattern_new("Lbl'Unds'Map'Unds'");
   kore_composite_pattern_add_argument(map_concat, map_unit);
   kore_composite_pattern_add_argument(map_concat, map_item);
 
