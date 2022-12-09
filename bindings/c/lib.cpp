@@ -107,6 +107,17 @@ block *kore_pattern_construct(kore_pattern const *pat) {
   return static_cast<block *>(constructInitialConfiguration(pat->ptr_.get()));
 }
 
+char *kore_block_dump(block *term) {
+  auto hooked_str = printConfigurationToString(term)->data;
+  auto len = std::strlen(hooked_str);
+
+  auto new_str = static_cast<char *>(malloc(len * sizeof(char)));
+  std::strncpy(new_str, hooked_str, len);
+  new_str[len] = '\0';
+
+  return new_str;
+}
+
 /* KORECompositePattern */
 
 kore_pattern *kore_composite_pattern_new(char const *name) {
