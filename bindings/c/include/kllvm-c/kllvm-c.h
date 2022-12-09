@@ -18,6 +18,9 @@ char *kore_pattern_dump(kore_pattern const *);
 
 void kore_pattern_free(kore_pattern const *);
 
+kore_pattern *kore_pattern_new_token(kore_sort const *, char const *);
+kore_pattern *kore_pattern_make_interpreter_input(kore_pattern *);
+
 kore_pattern *kore_composite_pattern_new(char const *);
 kore_pattern *kore_composite_pattern_from_symbol(kore_symbol *);
 void kore_composite_pattern_add_argument(kore_pattern *, kore_pattern *);

@@ -24,7 +24,12 @@ char *get_c_string(OS const &os) {
 }
 } // namespace
 
+/*
+ * These declarations are internal to the backend and aren't exposed explicitly
+ * through any header files, so we pull them in manually here.
+ */
 void *constructInitialConfiguration(const kllvm::KOREPattern *);
+extern "C" block *take_steps(int64_t, block *);
 
 extern "C" {
 
@@ -62,6 +67,10 @@ kore_pattern *kore_pattern_new_token(kore_sort const *sort, char const *value) {
   kore_composite_pattern_add_argument(pat, kore_string_pattern_new(value));
 
   return pat;
+}
+
+kore_pattern *kore_pattern_make_interpreter_input(kore_pattern *pgm) {
+  return pgm;
 }
 
 block *kore_pattern_construct(kore_pattern const *pat) {
