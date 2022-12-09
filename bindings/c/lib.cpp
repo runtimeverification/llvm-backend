@@ -59,7 +59,7 @@ void kore_pattern_free(kore_pattern const *pat) {
   delete pat;
 }
 
-kore_pattern *kore_pattern_new_token(kore_sort const *sort, char const *value) {
+kore_pattern *kore_pattern_new_token(char const *value, kore_sort const *sort) {
   auto sym = kore_symbol_new("\\dv");
   kore_symbol_add_formal_argument(sym, sort);
 
@@ -69,8 +69,38 @@ kore_pattern *kore_pattern_new_token(kore_sort const *sort, char const *value) {
   return pat;
 }
 
+kore_pattern *kore_pattern_new_injection(
+    kore_pattern *term, kore_sort const *from, kore_sort const *to) {
+  auto inj_sym = kore_symbol_new("inj");
+  kore_symbol_add_formal_argument(inj_sym, from);
+  kore_symbol_add_formal_argument(inj_sym, to);
+
+  auto inj = kore_composite_pattern_from_symbol(inj_sym);
+  kore_composite_pattern_add_argument(inj, term);
+  return inj;
+}
+
 kore_pattern *kore_pattern_make_interpreter_input(kore_pattern *pgm) {
-  return pgm;
+  auto config_sort = kore_composite_sort_new("SortKConfigVar");
+  auto kitem_sort = kore_composite_sort_new("SortKItem");
+
+  auto key = kore_pattern_new_injection(
+      kore_pattern_new_token("$PGM", config_sort), config_sort, kitem_sort);
+
+  auto map_item = kore_composite_pattern_new("Lbl'UndsPipe'-'-GT-Unds'");
+  kore_composite_pattern_add_argument(map_item, key);
+  kore_composite_pattern_add_argument(map_item, pgm);
+
+  auto map_unit = kore_composite_pattern_new("Lbl'Stop'Map");
+
+  auto map_concat = kore_composite_pattern_new("Lbl'Unds'Map'Unds");
+  kore_composite_pattern_add_argument(map_concat, map_unit);
+  kore_composite_pattern_add_argument(map_concat, map_item);
+
+  auto top_cell = kore_composite_pattern_new("LblinitGeneratedTopCell");
+  kore_composite_pattern_add_argument(top_cell, map_concat);
+
+  return top_cell;
 }
 
 block *kore_pattern_construct(kore_pattern const *pat) {
