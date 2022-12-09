@@ -36,7 +36,11 @@ kore_pattern *kore_string_pattern_new(char const *);
 block *kore_pattern_construct(kore_pattern const *);
 char *kore_block_dump(block *);
 
+// Expects the argument term to be of the form:
+//   sym{}(BOOL)
 bool kore_block_get_bool(block *);
+
+bool kore_simplify_bool(kore_pattern *);
 
 /* KORESort */
 

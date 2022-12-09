@@ -123,6 +123,15 @@ bool kore_block_get_bool(block *term) {
   return (bool)(term->children[0]);
 }
 
+bool kore_simplify_bool(kore_pattern *pattern) {
+  auto bool_sort = kore_composite_sort_new("SortBool");
+  auto kitem_sort = kore_composite_sort_new("SortKItem");
+
+  auto inj = kore_pattern_new_injection(pattern, bool_sort, kitem_sort);
+
+  return kore_block_get_bool(kore_pattern_construct(inj));
+}
+
 /* KORECompositePattern */
 
 kore_pattern *kore_composite_pattern_new(char const *name) {
