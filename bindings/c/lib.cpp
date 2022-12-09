@@ -118,6 +118,11 @@ char *kore_block_dump(block *term) {
   return new_str;
 }
 
+bool kore_block_get_bool(block *term) {
+  assert((((uintptr_t)term) & 1) == 0);
+  return (bool)(term->children[0]);
+}
+
 /* KORECompositePattern */
 
 kore_pattern *kore_composite_pattern_new(char const *name) {

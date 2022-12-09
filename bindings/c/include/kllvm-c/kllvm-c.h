@@ -36,6 +36,8 @@ kore_pattern *kore_string_pattern_new(char const *);
 block *kore_pattern_construct(kore_pattern const *);
 char *kore_block_dump(block *);
 
+bool kore_block_get_bool(block *);
+
 /* KORESort */
 
 char *kore_sort_dump(kore_sort const *);
