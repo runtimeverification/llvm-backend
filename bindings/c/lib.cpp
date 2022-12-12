@@ -188,7 +188,8 @@ kore_sort *kore_composite_sort_new(char const *name) {
   return sort;
 }
 
-void kore_composite_sort_add_argument(kore_sort *sort, kore_sort *arg) {
+void kore_composite_sort_add_argument(
+    kore_sort const *sort, kore_sort const *arg) {
   if (auto cast_ptr
       = dynamic_cast<kllvm::KORECompositeSort *>(sort->ptr_.get())) {
     cast_ptr->addArgument(arg->ptr_);
