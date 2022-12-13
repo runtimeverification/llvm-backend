@@ -10,8 +10,8 @@ parser_file="$(mktemp tmp.parse.XXXXXXXXXX)"
 temp_inputs=()
 
 cleanup () {
-  rm -rf "$input_file" "$expanded_input_file" "$output_file" "$parser_file"
-  rm -rf "${temp_inputs[@]}"
+  # shellcheck disable=SC2317
+  rm -rf "$input_file" "$expanded_input_file" "$output_file" "$parser_file" "${temp_inputs[@]}"
 }
 trap 'cleanup' INT TERM EXIT
 
