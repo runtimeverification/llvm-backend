@@ -9,6 +9,31 @@
 extern "C" {
 #endif
 
+/*
+ * Memory management in KLLVM-C
+ * ============================
+ *
+ * The underlying C++ AST library manages Pattern and Sort objects differently;
+ * Patterns have a *unique* ownership model, while Sorts are *shared*. This
+ * means that a composite pattern object owns its arguments, and will delete
+ * them when it is destructed. Conversely, the same sort object could be an
+ * argument to two different composite sorts, and would only be destroyed when
+ * both of those owners are (via reference-counting from std::shared_ptr).
+ *
+ * These differences are exposed in the C API essentially unmodified; functions
+ * that take an opaque pattern object will modify the opaque holder such that it
+ * is not usable after the call (i.e. the underlying unique_ptr has been
+ * moved-from). This is not true for the analogous functions on sorts. The C API
+ * reflects this difference by const-qualification of pointer arguments.
+ *
+ * Note that these different models *do not* apply to the opaque holder objects
+ * allocated by the C *_new functions; the holder should be deallocated with the
+ * corresponding *_free function when it is no longer required. Doing so will
+ * handle calling the appropriate destructor of the held object (e.g. freeing a
+ * kore_pattern will destroy the underlying object held by the
+ * std::unique_ptr<KOREPattern> inside it).
+ */
+
 /* Opaque types */
 
 typedef struct kore_pattern kore_pattern;
