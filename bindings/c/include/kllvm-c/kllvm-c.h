@@ -67,3 +67,4 @@ void kore_symbol_add_formal_argument(kore_symbol *, kore_sort const *);
 }
 #endif
 
+#endif
