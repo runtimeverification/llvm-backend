@@ -17,8 +17,9 @@ BOOST_AUTO_TEST_CASE(rangemap_test_ins) {
   auto result = map.size();
   BOOST_CHECK_EQUAL(result, 0);
   auto map2 = map.inserted(std::make_pair(0,1), 1);
+  map2.print();
   result = map2.size();
-  BOOST_CHECK_EQUAL(result, 0);
+  BOOST_CHECK_EQUAL(result, 1);
 }
 
 BOOST_AUTO_TEST_CASE(rangemap_test_del) {
