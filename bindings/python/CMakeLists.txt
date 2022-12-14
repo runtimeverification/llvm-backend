@@ -9,7 +9,7 @@
 # The static library is designed to be linked with a generated interpreter by
 # llvm-kompile to produce a shared library that Python can dynamically load.
 
-pybind11_add_module(kllvm-static STATIC NO_EXTRAS
+pybind11_add_module(kllvm-python-static STATIC NO_EXTRAS
   runtime.cpp
 )
 
@@ -22,14 +22,14 @@ target_link_libraries(_kllvm PUBLIC
   Parser
 )
 
-target_link_libraries(kllvm-static PUBLIC
+target_link_libraries(kllvm-python-static PUBLIC
   AST
   util
 )
 
-install(FILES $<TARGET_FILE:kllvm-static>
+install(FILES $<TARGET_FILE:kllvm-python-static>
   DESTINATION lib/kllvm
-  RENAME libkllvmruntime.a)
+  RENAME libkllvmpythonruntime.a)
 
 install(DIRECTORY package/
   DESTINATION lib/kllvm/python)

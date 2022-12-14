@@ -8,7 +8,7 @@ concurrency:
 jobs:
   formatting-check:
     name: Formatting Check
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v3
     - name: Check that C and C++ code is correctly formatted
@@ -18,7 +18,7 @@ jobs:
 
   shell-check:
     name: Shell check
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v2
     - uses: ludeeus/action-shellcheck@1.1.0
