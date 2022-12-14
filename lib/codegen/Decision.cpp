@@ -240,7 +240,7 @@ void SwitchNode::codegen(Decision *d) {
         case SortCategory::Set: Child = ChildPtr; break;
         default:
           Child = new llvm::LoadInst(
-              getArgType(cat, d->Module), ChildPtr,
+              getValueType(cat, d->Module), ChildPtr,
               binding.first.substr(0, max_name_length), d->CurrentBlock);
           break;
         }

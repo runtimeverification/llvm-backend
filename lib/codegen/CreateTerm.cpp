@@ -1282,13 +1282,14 @@ llvm::Type *getArgType(ValueType cat, llvm::Module *mod) {
   case SortCategory::Set: {
     return getValueType(cat, mod);
   }
-  case SortCategory::Int:
-  case SortCategory::Float:
-  case SortCategory::StringBuffer:
+  case SortCategory::Int: return getTypeByName(mod, INT_STRUCT);
+  case SortCategory::Float: return getTypeByName(mod, FLOAT_STRUCT);
+  case SortCategory::StringBuffer: return getTypeByName(mod, BUFFER_STRUCT);
   case SortCategory::Symbol:
   case SortCategory::Variable: {
     return getBlockType(mod);
   }
+
   case SortCategory::Uncomputed:
   default: {
     abort();

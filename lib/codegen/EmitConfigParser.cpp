@@ -901,8 +901,8 @@ static void getVisitor(
         BlockType, cast,
         {zero, llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), idx++ + 2)},
         "", CaseBlock);
-    llvm::Value *Child
-        = new llvm::LoadInst(getArgType(cat, module), ChildPtr, "", CaseBlock);
+    llvm::Value *Child = new llvm::LoadInst(
+        getValueType(cat, module), ChildPtr, "", CaseBlock);
     std::ostringstream Out;
     sort->print(Out);
     auto Str = llvm::ConstantDataArray::getString(Ctx, Out.str(), true);
