@@ -1,8 +1,6 @@
 #!/bin/bash
 set -e
 
-LLVM_MAJOR_VERSION=$(echo "@LLVM_PACKAGE_VERSION@" | cut -d'.' -f1)
-
 usage() {
   cat << HERE
 Usage: $0 <definition.kore> <dt_dir> <object type> [options] [clang flags]
@@ -133,14 +131,8 @@ if [ "$compile" = true ]; then
         ;;
     esac
   done
-
-  opt_flags=("-mem2reg" "-tailcallelim" "-tailcallopt")
-  if [ "$LLVM_MAJOR_VERSION" -ge 14 ]; then
-    opt_flags+=("--opaque-pointers")
-  fi
-
   run "$(dirname "$0")"/llvm-kompile-codegen "$definition" "$dt_dir"/dt.yaml "$dt_dir" $debug > "$mod"
-  run @OPT@ "${opt_flags[@]}" "$mod" -o "$modopt"
+  run @OPT@ -mem2reg -tailcallelim -tailcallopt "$mod" -o "$modopt"
 else
   main="${positional_args[1]}"
   modopt="$definition"
