@@ -61,7 +61,9 @@ private:
         assert(false);
     }
 
-    void getRelevantRanges(RBTree<Range, V> t, Range r, std::vector<std::pair<Range, V> > &v)
+    // Gather all <Range, V> pairs in t that are overlapping or directly
+    // adjacent (share a bound) with range r, in v.
+    void getInsertionRelevantRanges(RBTree<Range, V> t, Range r, std::vector<std::pair<Range, V> > &v)
     {
         if (t.isEmpty())
             return;
@@ -70,14 +72,14 @@ private:
         T rstart = t.root().first;
         T rend = t.root().second;
         if (rend < start)
-            getRelevantRanges(t.right(), r, v);
+            getInsertionRelevantRanges(t.right(), r, v);
         else if (end < rstart)
-            getRelevantRanges(t.left(), r, v);
+            getInsertionRelevantRanges(t.left(), r, v);
         else if (start <= rstart && rend <= end)
         {
-            getRelevantRanges(t.left(), r, v);
+            getInsertionRelevantRanges(t.left(), r, v);
             v.push_back(std::make_pair(t.root(), t.rootVal()));
-            getRelevantRanges(t.right(), r, v);
+            getInsertionRelevantRanges(t.right(), r, v);
         }
         else if (rstart < start && end < rend)
         {
@@ -86,16 +88,17 @@ private:
         else if (rstart < start)
         {
             v.push_back(std::make_pair(t.root(), t.rootVal()));
-            getRelevantRanges(t.right(), r, v);
+            getInsertionRelevantRanges(t.right(), r, v);
         }
         else if (end < rend)
         {
-            getRelevantRanges(t.left(), r, v);
+            getInsertionRelevantRanges(t.left(), r, v);
             v.push_back(std::make_pair(t.root(), t.rootVal()));
         }
     }
 
-    void getRelevantRanges(RBTree<Range, V> t, Range r, std::vector<Range> &v)
+    // Gather all <Range, V> pairs in t that are overlapping with range r, in v.
+    void getDeletionRelevantRanges(RBTree<Range, V> t, Range r, std::vector<std::pair<Range, V> > &v)
     {
         if (t.isEmpty())
             return;
@@ -103,29 +106,29 @@ private:
         T end = r.second;
         T rstart = t.root().first;
         T rend = t.root().second;
-        if (rend < start)
-            getRelevantRanges(t.right(), r, v);
-        else if (end < rstart)
-            getRelevantRanges(t.left(), r, v);
-        else if (start <= rstart && rend <= end)
+        if (rend <= start)
+            getDeletionRelevantRanges(t.right(), r, v);
+        else if (end <= rstart)
+            getDeletionRelevantRanges(t.left(), r, v);
+        else if (start < rstart && rend < end)
         {
-            getRelevantRanges(t.left(), r, v);
-            v.push_back(t.root());
-            getRelevantRanges(t.right(), r, v);
+            getDeletionRelevantRanges(t.left(), r, v);
+            v.push_back(std::make_pair(t.root(), t.rootVal()));
+            getDeletionRelevantRanges(t.right(), r, v);
         }
-        else if (rstart < start && end < rend)
+        else if (rstart <= start && end <= rend)
         {
-            v.push_back(t.root());
+            v.push_back(std::make_pair(t.root(), t.rootVal()));
         }
-        else if (rstart < start)
+        else if (rstart <= start)
         {
-            v.push_back(t.root());
-            getRelevantRanges(t.right(), r, v);
+            v.push_back(std::make_pair(t.root(), t.rootVal()));
+            getDeletionRelevantRanges(t.right(), r, v);
         }
-        else if (end < rend)
+        else if (end <= rend)
         {
-            getRelevantRanges(t.left(), r, v);
-            v.push_back(t.root());
+            getDeletionRelevantRanges(t.left(), r, v);
+            v.push_back(std::make_pair(t.root(), t.rootVal()));
         }
     }
 public:
@@ -175,7 +178,7 @@ public:
             CONSTRUCT_MSG_AND_THROW("Insert empty range in range map");
 
         std::vector<std::pair<Range, V> > ranges;
-        getRelevantRanges(_map, r, ranges);
+        getInsertionRelevantRanges(_map, r, ranges);
 
         // Each relevant range may lead to changes to the existing underlying
         // treemap data structure, as well as the bounds of the target inserted
@@ -283,7 +286,38 @@ public:
 
     RangeMap deleted(Range r)
     {
-        return RangeMap();
+        // Empty ranges do not make sense here.
+        if (range_is_empty(r))
+            CONSTRUCT_MSG_AND_THROW("Delete empty range from range map");
+
+        std::vector<std::pair<Range, V> > ranges;
+        getInsertionRelevantRanges(_map, r, ranges);
+
+        // Each relevant range may lead to changes to the existing underlying
+        // treemap data structure.
+        // We iterate over the collected relevant ranges to collect and apply
+        // these changes.
+        T ds = r.first;
+        T de = r.second;
+        RBTree<Range, V> tmpmap = _map;
+        for (auto & p: ranges)
+        {
+            Range rr = p.first;
+            V rv = p.second;
+            assert(range_is_relevant(r, rr));
+            T rrs = rr.first;
+            T rre = rr.second;
+            tmpmap = tmpmap.deleted(rr);
+            if (rrs < ds)
+            {
+                tmpmap = tmpmap.inserted(std::make_pair(rrs, ds), rv);
+            }
+            if (rre > de)
+            {
+                tmpmap = tmpmap.inserted(std::make_pair(de, rre), rv);
+            }
+        }
+        return RangeMap(tmpmap);
     }
 
     void print()
