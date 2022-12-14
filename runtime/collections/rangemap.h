@@ -30,6 +30,20 @@ private:
         return start >= end;
     }
 
+    // Returns true if range c overlaps with range r.
+    bool ranges_overlap(Range r, Range c) const
+    {
+        T start = r.first;
+        T end = r.second;
+        T cstart = c.first;
+        T cend = c.second;
+        if (cend <= start) return false;
+        else if (end <= cstart) return false;
+        assert(start < cend);
+        assert(cstart < end);
+        return true;
+    }
+
     // Returns true if range c overlaps or is adjacent, i.e., shares a bound
     // either inclusive or exclusive with range r.
     bool range_is_relevant(Range r, Range c) const
@@ -195,85 +209,39 @@ public:
             T rrs = rr.first;
             T rre = rr.second;
 
-            if (rrs < is && rre > ie)
+            if (v == rv)
             {
-                // Relevant range is larger than the inserted range.
-                // In this case, there should be only one relevant range.
-                if (v == rv)
-                {
-                    // The inserted value is the same as the value stored in
-                    // the relevant range.
-                    // Extend the inserted range to the bounds of the relevant
-                    // range and delete the relevant range.
-                    is = rrs;
-                    ie = rre;
-                    tmpmap = tmpmap.deleted(rr);
-                }
-                else
-                {
-                    // The inserted value is different from the value stored
-                    // in the relevant range.
-                    // Delete the relevant range, and insert two new ranges
-                    // accounting for the difference between the relevant and
-                    // the inserted range, containing the value of the relevant
-                    // range.
-                    tmpmap = tmpmap.deleted(rr);
-                    tmpmap = tmpmap.inserted(std::make_pair(rrs, is), rv);
-                    tmpmap = tmpmap.inserted(std::make_pair(ie, rre), rv);
-                }
-            }
-            else if (rrs >= is && rre <= ie)
-            {
-                // Relevant range is contained within the inserted range.
-                // Delete relevant range. The value is not important.
+                // The inserted value is the same as the value stored in
+                // the relevant range.
+                // Adjust the bounds of the inserted range as needed, and delete
+                // the relevant range.
+                is = rrs < is ? rrs : is;
+                ie = rre > ie ? rre : ie;
                 tmpmap = tmpmap.deleted(rr);
             }
-            else if (rrs < is && rre <= ie)
+            else
             {
-                // Relevant range is overlapping with or adjacent to the
-                // inserted range on the left side.
-                if (v == rv)
+                // The inserted value is different from the value stored
+                // in the relevant range.
+                if (ranges_overlap(r, rr))
                 {
-                    // The inserted value is the same as the value stored in
-                    // the relevant range.
-                    // Extend the inserted range left-wise to the start of the
-                    // relevant range and delete the relevant range.
-                    is = rrs;
+                    // The ranges overlap.
+                    // Delete the relevant range, and insert up to two ranges to
+                    // the left/right of the inserted range, as needed to
+                    // account for the bounds of the relevant range.
                     tmpmap = tmpmap.deleted(rr);
+                    if (rrs < is)
+                    {
+                        tmpmap = tmpmap.inserted(std::make_pair(rrs, is), rv);
+                    }
+                    if (rre > ie)
+                    {
+                        tmpmap = tmpmap.inserted(std::make_pair(ie, rre), rv);
+                    }
                 }
                 else
                 {
-                    // The inserted value is different from the value stored
-                    // in the relevant range.
-                    // Delete the relevant range, and insert a new range from
-                    // the start of the relevant range to the start of the
-                    // inserted range, with the value of the relevant range.
-                    tmpmap = tmpmap.deleted(rr);
-                    tmpmap = tmpmap.inserted(std::make_pair(rrs, is), rv);
-                }
-            }
-            else if (rrs <= is && rre > ie)
-            {
-                // Relevant range is overlapping with or adjacent to the
-                // inserted range on the right side.
-                if (v == rv)
-                {
-                    // The inserted value is the same as the value stored in
-                    // the relevant range.
-                    // Extend the inserted range right-wise to the end of the
-                    // relevant range and delete the relevant range.
-                    ie = rre;
-                    tmpmap = tmpmap.deleted(rr);
-                }
-                else
-                {
-                    // The inserted value is different from the value stored
-                    // in the relevant range.
-                    // Delete the relevant range, and insert a new range from
-                    // the end of the inserted range to the end of the
-                    // relevant range, with the value of the relevant range.
-                    tmpmap = tmpmap.deleted(rr);
-                    tmpmap = tmpmap.inserted(std::make_pair(ie, rre), rv);
+                    // The ranges do not overlap. NOOP.
                 }
             }
         }
@@ -322,12 +290,14 @@ public:
 
     void print()
     {
+        std::cout << "--------------------------" << std::endl;
         forEach(_map, [](Range x, V v)
         {
             std::cout << "[ " << x.first
                       << ".." << x.second
                       << " ) -> " << v << std::endl;
         });
+        std::cout << "--------------------------" << std::endl;
     }
 };
 
