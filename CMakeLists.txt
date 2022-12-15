@@ -86,7 +86,11 @@ endif()
 set(CMAKE_AR "${CMAKE_C_COMPILER_AR}")
 set(CMAKE_RANLIB "${CMAKE_C_COMPILER_RANLIB}")
 
-find_package(LLVM 14 QUIET CONFIG)
+find_package(LLVM 15 QUIET CONFIG)
+
+if (NOT LLVM_FOUND)
+  find_package(LLVM 14 QUIET CONFIG)
+endif()
 
 if (NOT LLVM_FOUND)
   find_package(LLVM 13 QUIET CONFIG)
@@ -96,21 +100,9 @@ if (NOT LLVM_FOUND)
   find_package(LLVM 12 QUIET CONFIG)
 endif()
 
-if (NOT LLVM_FOUND)
-  find_package(LLVM 11.1 QUIET CONFIG)
-endif()
-
-if (NOT LLVM_FOUND)
-  find_package(LLVM 11 QUIET CONFIG)
-endif()
-
-if (NOT LLVM_FOUND)
-  find_package(LLVM 10 REQUIRED CONFIG)
-endif()
-
 message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
-if (${LLVM_PACKAGE_VERSION} VERSION_LESS 10)
-  message(FATAL_ERROR "LLVM 10 or newer is required")
+if (${LLVM_PACKAGE_VERSION} VERSION_LESS 12)
+  message(FATAL_ERROR "LLVM 12 or newer is required")
 endif()
 
 include(SetTriple)
