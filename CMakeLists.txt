@@ -97,7 +97,7 @@ if (NOT LLVM_FOUND)
 endif()
 
 if (NOT LLVM_FOUND)
-  find_package(LLVM 12 QUIET CONFIG)
+  find_package(LLVM 12 REQUIRED CONFIG)
 endif()
 
 message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
