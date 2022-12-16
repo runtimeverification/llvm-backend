@@ -30,32 +30,32 @@ private:
         return start >= end;
     }
 
-    // Returns true if range c overlaps with range r.
-    bool ranges_overlap(Range r, Range c) const
+    // Returns true if ranges r1 and r2 overlap.
+    bool ranges_overlap(Range r1, Range r2) const
     {
-        T start = r.first;
-        T end = r.second;
-        T cstart = c.first;
-        T cend = c.second;
-        if (cend <= start) return false;
-        else if (end <= cstart) return false;
-        assert(start < cend);
-        assert(cstart < end);
+        T r1start = r1.first;
+        T r1end = r1.second;
+        T r2start = r2.first;
+        T r2end = r2.second;
+        if (r2end <= r1start) return false;
+        else if (r1end <= r2start) return false;
+        assert(r1start < r2end);
+        assert(r2start < r1end);
         return true;
     }
 
-    // Returns true if range c overlaps or is adjacent, i.e., shares a bound
-    // either inclusive or exclusive with range r.
-    bool range_is_relevant(Range r, Range c) const
+    // Returns true if ranges r1 and r2 overlap or are adjacent, i.e., share a
+    // bound, either inclusive or exclusive.
+    bool ranges_are_relevant(Range r1, Range r2) const
     {
-        T start = r.first;
-        T end = r.second;
-        T cstart = c.first;
-        T cend = c.second;
-        if (cend < start) return false;
-        else if (end < cstart) return false;
-        assert(start <= cend);
-        assert(cstart <= end);
+        T r1start = r1.first;
+        T r1end = r1.second;
+        T r2start = r2.first;
+        T r2end = r2.second;
+        if (r2end < r1start) return false;
+        else if (r1end < r2start) return false;
+        assert(r1start <= r2end);
+        assert(r2start <= r1end);
         return true;
     }
 
@@ -76,7 +76,7 @@ private:
     }
 
     // Gather all <Range, V> pairs in t that are overlapping or directly
-    // adjacent (share a bound) with range r, in v.
+    // adjacent (share a boundary) with range r, in v.
     void getInsertionRelevantRanges(RBTree<Range, V> t, Range r, std::vector<std::pair<Range, V> > &v)
     {
         if (t.isEmpty())
@@ -86,26 +86,50 @@ private:
         T rstart = t.root().first;
         T rend = t.root().second;
         if (rend < start)
+        {
+            // The candidate range is to the left of our target range, and does
+            // not share a boundary. It is not relevant. Continue looking for
+            // relevant ranges to the right of the candidate range.
             getInsertionRelevantRanges(t.right(), r, v);
+        }
         else if (end < rstart)
+        {
+            // The candidate range is to the right of our target range, and
+            // does not share a boundary. It is not relevant. Continue looking
+            // for relevant ranges to the left of the candidate range.
             getInsertionRelevantRanges(t.left(), r, v);
+        }
         else if (start <= rstart && rend <= end)
         {
+            // Our target range contains the candidate range, and may share its
+            // boundaries (i.e. equal or larger). The candidate range is
+            // relevant, and there may be relevant ranges in both left and
+            // right directions.
             getInsertionRelevantRanges(t.left(), r, v);
             v.push_back(std::make_pair(t.root(), t.rootVal()));
             getInsertionRelevantRanges(t.right(), r, v);
         }
         else if (rstart < start && end < rend)
         {
+            // The candidate range fully contains the target range, i.e. is
+            // larger. It is the only relevant range, no need to look for more.
             v.push_back(std::make_pair(t.root(), t.rootVal()));
         }
         else if (rstart < start)
         {
+            // The candidate range overlapps with the target range on the left
+            // side, but does not fully contain it. It is relevant, and we need
+            // to continue looking for relevant ranges to the right of the
+            // candidate range.
             v.push_back(std::make_pair(t.root(), t.rootVal()));
             getInsertionRelevantRanges(t.right(), r, v);
         }
         else if (end < rend)
         {
+            // The candidate range overlapps with the target range on the right
+            // side, but does not fully contain it. It is relevant, and we need
+            // to continue looking for relevant ranges to the left of the
+            // candidate range.
             getInsertionRelevantRanges(t.left(), r, v);
             v.push_back(std::make_pair(t.root(), t.rootVal()));
         }
@@ -121,26 +145,49 @@ private:
         T rstart = t.root().first;
         T rend = t.root().second;
         if (rend <= start)
+        {
+            // The candidate range is to the left of our target range, and may
+            // share a boundary. It is not relevant. Continue looking for
+            // relevant ranges to the right of the candidate range.
             getDeletionRelevantRanges(t.right(), r, v);
+        }
         else if (end <= rstart)
+        {
+            // The candidate range is to the right of our target range, and
+            // may share a boundary. It is not relevant. Continue looking for
+            // relevant ranges to the left of the candidate range.
             getDeletionRelevantRanges(t.left(), r, v);
+        }
         else if (start < rstart && rend < end)
         {
+            // Our target range fully contains the candidate range, i.e. is
+            // larger. The candidate range is relevant, and there may be
+            // relevant ranges in both left and right directions.
             getDeletionRelevantRanges(t.left(), r, v);
             v.push_back(std::make_pair(t.root(), t.rootVal()));
             getDeletionRelevantRanges(t.right(), r, v);
         }
         else if (rstart <= start && end <= rend)
+            // The candidate range contains the target range, i.e. is equal or
+            // larger. It is the only relevant range, no need to look for more.
         {
             v.push_back(std::make_pair(t.root(), t.rootVal()));
         }
         else if (rstart <= start)
         {
+            // The candidate range overlapps with the target range on the left
+            // side, but does not fully contain it. It is relevant, and we need
+            // to continue looking for relevant ranges to the right of the
+            // candidate range.
             v.push_back(std::make_pair(t.root(), t.rootVal()));
             getDeletionRelevantRanges(t.right(), r, v);
         }
         else if (end <= rend)
         {
+            // The candidate range overlapps with the target range on the right
+            // side, but does not fully contain it. It is relevant, and we need
+            // to continue looking for relevant ranges to the left of the
+            // candidate range.
             getDeletionRelevantRanges(t.left(), r, v);
             v.push_back(std::make_pair(t.root(), t.rootVal()));
         }
@@ -193,7 +240,6 @@ public:
 
         std::vector<std::pair<Range, V> > ranges;
         getInsertionRelevantRanges(_map, r, ranges);
-
         // Each relevant range may lead to changes to the existing underlying
         // treemap data structure, as well as the bounds of the target inserted
         // range. We iterate over the collected relevant ranges to collect
@@ -205,7 +251,7 @@ public:
         {
             Range rr = p.first;
             V rv = p.second;
-            assert(range_is_relevant(r, rr));
+            assert(ranges_are_relevant(r, rr));
             T rrs = rr.first;
             T rre = rr.second;
 
@@ -259,8 +305,7 @@ public:
             CONSTRUCT_MSG_AND_THROW("Delete empty range from range map");
 
         std::vector<std::pair<Range, V> > ranges;
-        getInsertionRelevantRanges(_map, r, ranges);
-
+        getDeletionRelevantRanges(_map, r, ranges);
         // Each relevant range may lead to changes to the existing underlying
         // treemap data structure.
         // We iterate over the collected relevant ranges to collect and apply
@@ -272,7 +317,7 @@ public:
         {
             Range rr = p.first;
             V rv = p.second;
-            assert(range_is_relevant(r, rr));
+            assert(ranges_are_relevant(r, rr));
             T rrs = rr.first;
             T rre = rr.second;
             tmpmap = tmpmap.deleted(rr);
