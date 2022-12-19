@@ -294,20 +294,21 @@ void serializeConfigurationInternal(
 void serializeConfigurationToFile(const char *filename, block *subject) {
   char *data;
   size_t size;
-  serializeConfiguration(subject, &data, &size);
+  serializeConfiguration(subject, nullptr, &data, &size);
 
   FILE *file = fopen(filename, "w");
   fwrite(data, 1, size, file);
   fclose(file);
 }
 
-void serializeConfiguration(block *subject, char **data_out, size_t *size_out) {
+void serializeConfiguration(
+    block *subject, char const *sort, char **data_out, size_t *size_out) {
   instance.reset();
   boundVariables.clear();
   varCounter = 0;
 
   writer w = {nullptr, nullptr};
-  serializeConfigurationInternal(&w, subject, nullptr, false);
+  serializeConfigurationInternal(&w, subject, sort, false);
 
   varNames.clear();
   usedVarNames.clear();
