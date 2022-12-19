@@ -38,10 +38,13 @@ jobs:
           authToken: '${{ secrets.CACHIX_PUBLIC_TOKEN }}'
 
       - name: 'Update Maven dependencies'
-        run: ./nix/update-maven.sh
-
-      - name: 'Commit changes'
-        uses: stefanzweifel/git-auto-commit-action@v4.7.2
-        with:
-          commit_message: 'Update Maven dependencies'
-          file_pattern: 'nix/'
+        run: |
+          set -x
+          if ! git diff --exit-code origin/${GITHUB_BASE_REF} origin/${GITHUB_HEAD_REF} \
+                -- $(find . -name pom.xml)                                              \
+                   $(find nix -name '*.nix'); then
+            ./nix/update-maven.sh
+          fi
+          if git add nix/ && git commit -m 'Update Maven dependencies'; then
+            git push
+          fi
