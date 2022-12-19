@@ -291,7 +291,7 @@ void serializeConfigurationInternal(
   }
 }
 
-void serializeConfiguration(const char *filename, block *subject) {
+void serializeConfigurationToFile(const char *filename, block *subject) {
   FILE *file = fopen(filename, "w");
   instance.reset();
   boundVariables.clear();

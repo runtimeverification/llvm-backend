@@ -3,6 +3,9 @@
 
 #ifndef __cplusplus
 #include <stdbool.h>
+#include <stddef.h>
+#else
+#include <cstddef>
 #endif
 
 #ifdef __cplusplus
