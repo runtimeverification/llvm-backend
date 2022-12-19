@@ -134,7 +134,12 @@ bool kore_simplify_bool(kore_pattern *pattern) {
 
 void kore_simplify(
     kore_pattern *pattern, kore_sort *sort, char **data_out, size_t *size_out) {
-  assert(false && "Not implemented!");
+  auto kitem_sort = kore_composite_sort_new("SortKItem");
+
+  auto inj = kore_pattern_new_injection(pattern, sort, kitem_sort);
+  auto block = kore_pattern_construct(inj);
+
+  serializeConfiguration(block, data_out, size_out);
 }
 
 /* KORECompositePattern */
