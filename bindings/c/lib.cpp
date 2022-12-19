@@ -132,6 +132,11 @@ bool kore_simplify_bool(kore_pattern *pattern) {
   return kore_block_get_bool(kore_pattern_construct(inj));
 }
 
+void kore_simplify(
+    kore_pattern *pattern, kore_sort *sort, char **data_out, size_t *size_out) {
+  assert(false && "Not implemented!");
+}
+
 /* KORECompositePattern */
 
 kore_pattern *kore_composite_pattern_new(char const *name) {
