@@ -13,8 +13,8 @@
 #include "runtime/header.h"
 
 void printInt(writer *file, mpz_t i, const char *sort) {
-  char *str = mpz_get_str(NULL, 10, i);
-  sfprintf(file, "\\dv{%s}(\"%s\")", sort, str);
+  auto str = intToString(i);
+  sfprintf(file, "\\dv{%s}(\"%s\")", sort, str.c_str());
 }
 
 void printFloat(writer *file, floating *f, const char *sort) {
@@ -37,8 +37,8 @@ void printMInt(writer *file, size_t *i, size_t bits, const char *sort) {
     sfprintf(file, "\\dv{%s}(\"0p%zd\")", sort, bits);
   } else {
     mpz_ptr z = hook_MINT_import(i, bits, false);
-    char *str = mpz_get_str(NULL, 10, z);
-    sfprintf(file, "\\dv{%s}(\"%sp%zd\")", sort, str, bits);
+    auto str = intToString(z);
+    sfprintf(file, "\\dv{%s}(\"%sp%zd\")", sort, str.c_str(), bits);
   }
 }
 

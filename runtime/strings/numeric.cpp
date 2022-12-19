@@ -49,14 +49,17 @@ std::string floatToString(const floating *f) {
   return floatToString(f, suffix);
 }
 
-std::string intToString(mpz_t i) {
-  char *tmp = mpz_get_str(NULL, 10, i);
-  auto ret = tmp;
+std::string intToStringInBase(mpz_t i, uint64_t base) {
+  char *tmp = mpz_get_str(NULL, base, i);
+  auto ret = std::string(tmp);
 
   void (*mpz_free)(void *, size_t);
   mp_get_memory_functions(NULL, NULL, &mpz_free);
-
   mpz_free(tmp, strlen(tmp) + 1);
 
   return ret;
+}
+
+std::string intToString(mpz_t i) {
+  return intToStringInBase(i, 10);
 }

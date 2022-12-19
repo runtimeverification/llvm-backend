@@ -201,11 +201,16 @@ char *getTerminatedString(string *str) {
 }
 
 SortString hook_STRING_base2string_long(SortInt input, uint64_t base) {
-  size_t len = mpz_sizeinbase(input, base) + 2;
-  // +1 for null terminator needed by mpz_get_str, +1 for minus sign
+  auto str = intToStringInBase(input, base);
+
+  // Include the null terminator in size calculations relating to allocation,
+  // but not when setting the length of the string object itself. Any minus
+  // signs will have been accounted for already by the intToString call.
+  auto len = str.size() + 1;
   auto result = static_cast<string *>(koreAllocToken(sizeof(string) + len));
-  mpz_get_str(result->data, base, input);
-  set_len(result, strlen(result->data));
+  strncpy(result->data, str.c_str(), len);
+  set_len(result, str.size());
+
   return static_cast<string *>(koreResizeLastAlloc(
       result, sizeof(string) + len(result), sizeof(string) + len));
 }

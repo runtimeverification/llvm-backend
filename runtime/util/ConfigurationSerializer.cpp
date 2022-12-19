@@ -147,8 +147,8 @@ void serializeSet(
 }
 
 void serializeInt(writer *file, mpz_t i, const char *sort) {
-  char *str = mpz_get_str(NULL, 10, i);
-  emitToken(sort, str);
+  auto str = intToString(i);
+  emitToken(sort, str.c_str());
 }
 
 void serializeFloat(writer *file, floating *f, const char *sort) {
@@ -168,19 +168,19 @@ void serializeStringBuffer(writer *file, stringbuffer *b, const char *sort) {
 
 void serializeMInt(writer *file, size_t *i, size_t bits, const char *sort) {
   auto fmt = "%sp%zd";
-  char const *str = nullptr;
+  auto str = std::string{};
 
   if (i == nullptr) {
     str = "0";
   } else {
     mpz_ptr z = hook_MINT_import(i, bits, false);
-    str = mpz_get_str(NULL, 10, z);
+    str = intToString(z);
   }
 
-  auto buf_len = snprintf(NULL, 0, fmt, str, bits);
+  auto buf_len = snprintf(NULL, 0, fmt, str.c_str(), bits);
   auto buffer = std::make_unique<char[]>(buf_len + 1);
 
-  snprintf(buffer.get(), buf_len + 1, fmt, str, bits);
+  snprintf(buffer.get(), buf_len + 1, fmt, str.c_str(), bits);
   emitToken(sort, buffer.get());
 }
 

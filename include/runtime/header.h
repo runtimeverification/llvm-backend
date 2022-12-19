@@ -274,7 +274,8 @@ block *strip_injection(block *);
 std::string floatToString(const floating *);
 void init_float2(floating *, std::string);
 
-std::string intToString(mpz_t i);
+std::string intToStringInBase(mpz_t, uint64_t);
+std::string intToString(mpz_t);
 
 #define KLLVM_HOOK_INVALID_ARGUMENT(...)                                       \
   do {                                                                         \
