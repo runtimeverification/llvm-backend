@@ -133,13 +133,18 @@ elif [ "$main" = "python" ]; then
   # Don't link jemalloc when building a python library; it clashes with the
   # pymalloc implementation that Python expects you to use.
   all_libraries=("${libraries[@]}" "-lgmp" "-lmpfr" "-lpthread" "-ldl" "-lffi")
-  flags+=("-fPIC" "-shared" "$start_whole_archive" "$LIBDIR/libkllvmruntime.a" "$end_whole_archive")
+  flags+=("-fPIC" "-shared" "$start_whole_archive" "$LIBDIR/libkllvmpythonruntime.a" "$end_whole_archive")
 
   # If we didn't pass a filename explicitly as output, then we enforce the
   # blessed filename format that Python can understand.
   if [ "$output_file" = "definition.o" ]; then
     flags+=("-o" "_kllvm_runtime$(python3-config --extension-suffix)")
   fi
+elif [ "$main" = "c" ]; then
+  # Avoid jemalloc for similar reasons as Python; we don't know who is loading
+  # this library so don't want to impose it.
+  all_libraries=("${libraries[@]}" "-lgmp" "-lmpfr" "-lpthread" "-ldl" "-lffi")
+  flags+=("-fPIC" "-shared" "$start_whole_archive" "$LIBDIR/libkllvmcruntime.a" "$end_whole_archive")
 else
   all_libraries=("${libraries[@]}" "-lgmp" "-lmpfr" "-lpthread" "-ldl" "-lffi" "-ljemalloc")
 fi

@@ -151,6 +151,10 @@ llvm::Type *getParamType(ValueType sort, llvm::Module *Module) {
   return type;
 }
 
+llvm::StructType *getBlockType(llvm::Module *Module) {
+  return getTypeByName(Module, BLOCK_STRUCT);
+}
+
 llvm::Type *getValueType(ValueType sort, llvm::Module *Module) {
   switch (sort.cat) {
   case SortCategory::Map: return getTypeByName(Module, MAP_STRUCT);
@@ -533,7 +537,7 @@ llvm::Value *CreateTerm::createHook(
       return result;
     } else if (nwords == 1) {
       auto Word = new llvm::LoadInst(
-          Ptr->getType()->getPointerElementType(), Ptr, "word", CurrentBlock);
+          llvm::Type::getInt64Ty(Ctx), Ptr, "word", CurrentBlock);
       if (cat.bits == 64) {
         return Word;
       } else {
@@ -543,7 +547,7 @@ llvm::Value *CreateTerm::createHook(
     } else { // nwords >= 2
       for (size_t i = 0; i < nwords; i++) {
         auto Word = new llvm::LoadInst(
-            Ptr->getType()->getPointerElementType(), Ptr, "word", CurrentBlock);
+            llvm::Type::getInt64Ty(Ctx), Ptr, "word", CurrentBlock);
         auto Zext = new llvm::ZExtInst(Word, Type, "extended", CurrentBlock);
         auto Shl = llvm::BinaryOperator::Create(
             llvm::Instruction::Shl, result, llvm::ConstantInt::get(Type, 64),
@@ -854,8 +858,7 @@ llvm::Value *CreateTerm::notInjectionCase(
         = llvm::PointerType::get(BlockType->elements()[idx], 0);
     if (ChildValue->getType() == ChildPtrType) {
       ChildValue = new llvm::LoadInst(
-          ChildValue->getType()->getPointerElementType(), ChildValue, "",
-          CurrentBlock);
+          BlockType->elements()[idx], ChildValue, "", CurrentBlock);
     }
     children.push_back(ChildValue);
     idx++;
@@ -1268,6 +1271,30 @@ std::string makeSideConditionFunction(
     return name;
   }
   return "";
+}
+
+llvm::Type *getArgType(ValueType cat, llvm::Module *mod) {
+  switch (cat.cat) {
+  case SortCategory::Bool:
+  case SortCategory::MInt:
+  case SortCategory::Map:
+  case SortCategory::List:
+  case SortCategory::Set: {
+    return getValueType(cat, mod);
+  }
+  case SortCategory::Int: return getTypeByName(mod, INT_STRUCT);
+  case SortCategory::Float: return getTypeByName(mod, FLOAT_STRUCT);
+  case SortCategory::StringBuffer: return getTypeByName(mod, BUFFER_STRUCT);
+  case SortCategory::Symbol:
+  case SortCategory::Variable: {
+    return getBlockType(mod);
+  }
+
+  case SortCategory::Uncomputed:
+  default: {
+    abort();
+  }
+  }
 }
 
 } // namespace kllvm

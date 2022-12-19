@@ -29,6 +29,8 @@ Valid values for a KLLVM object type are:
             necessary shared libraries. This must be done manually later.
 
   python:   build a Python bindings module rather than a standalone executable.
+
+  c:        build a C bindings module rather than a standalone executable.
 HERE
 }
 
