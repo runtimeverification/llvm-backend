@@ -292,7 +292,16 @@ void serializeConfigurationInternal(
 }
 
 void serializeConfigurationToFile(const char *filename, block *subject) {
+  char *data;
+  size_t size;
+  serializeConfiguration(subject, &data, &size);
+
   FILE *file = fopen(filename, "w");
+  fwrite(data, 1, size, file);
+  fclose(file);
+}
+
+void serializeConfiguration(block *subject, char **data_out, size_t *size_out) {
   instance.reset();
   boundVariables.clear();
   varCounter = 0;
@@ -302,6 +311,7 @@ void serializeConfigurationToFile(const char *filename, block *subject) {
 
   varNames.clear();
   usedVarNames.clear();
-  fwrite(instance.data().data(), 1, instance.data().size(), file);
-  fclose(file);
+
+  *data_out = (char *)instance.data().data();
+  *size_out = instance.data().size();
 }
