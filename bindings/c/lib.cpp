@@ -141,6 +141,7 @@ void kore_simplify(
   auto block = kore_pattern_construct(inj);
 
   serializeConfiguration(block, kitem_sort_str, data_out, size_out);
+  free(kitem_sort_str);
 }
 
 /* KORECompositePattern */
