@@ -75,6 +75,7 @@ let
     buildInputs = [
       prev.diffutils # for golden testing
       prev.lit
+      prev.clang
       llvm-kompile-testing # for constructing test input without the frontend
       llvm-backend # the system under test
     ];
@@ -83,6 +84,7 @@ let
       runHook preBuild
 
       BINDINGS_INSTALL_PATH=${llvm-backend}/lib/kllvm/python \
+      INCLUDE_INSTALL_PATH=${llvm-backend}/include \
         LIT_USE_NIX=1 lit -v test
 
       runHook postBuild
