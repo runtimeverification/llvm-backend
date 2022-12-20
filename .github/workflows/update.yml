@@ -16,13 +16,18 @@ jobs:
       - name: 'Check out code'
         uses: actions/checkout@v3
         with:
+          token: ${{ secrets.JENKINS_GITHUB_PAT }}
           submodules: recursive
+      - run: |
+          git config --global user.name rv-jenkins
+          git config --global user.email devops@runtimeverification.com
 
       - name: 'Install Nix'
         uses: cachix/install-nix-action@v15
         with:
           install_url: "https://releases.nixos.org/nix/nix-2.7.0/install"
           extra_nix_config: |
+            access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
             substituters = http://cache.nixos.org https://cache.iog.io
             trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ=
 
@@ -31,13 +36,15 @@ jobs:
         with:
           name: k-framework
           authToken: '${{ secrets.CACHIX_PUBLIC_TOKEN }}'
-          skipPush: true
 
       - name: 'Update Maven dependencies'
-        run: ./nix/update-maven.sh
-
-      - name: 'Commit changes'
-        uses: stefanzweifel/git-auto-commit-action@v4.7.2
-        with:
-          commit_message: 'Update Maven dependencies'
-          file_pattern: 'nix/'
+        run: |
+          set -x
+          if ! git diff --exit-code origin/${GITHUB_BASE_REF} origin/${GITHUB_HEAD_REF} \
+                -- $(find . -name pom.xml)                                              \
+                   $(find nix -name '*.nix'); then
+            ./nix/update-maven.sh
+          fi
+          if git add nix/ && git commit -m 'Update Maven dependencies'; then
+            git push
+          fi
