@@ -1,27 +1,29 @@
 #ifndef RBTREE_HEADER_H
 #define RBTREE_HEADER_H
 
-//***---  Adapted from https://github.com/BartoszMilewski/Okasaki/tree/master/RBTree  ---***//
-// Implementing algorithms from https://matt.might.net/papers/germane2014deletion.pdf
+/* Adapted from https://github.com/BartoszMilewski/Okasaki/tree/master/RBTree */
+/* Implementing algorithms from                                               *
+ * https://matt.might.net/papers/germane2014deletion.pdf                      */
 
 #include <cassert>
 #include <memory>
 #include <string>
 #include <stdexcept>
 
+#define CONSTRUCT_MSG_AND_THROW(msg)                                           \
+    do {                                                                       \
+        std::string emsg = std::string("[")                                    \
+                           + std::string(__func__)                             \
+                           + std::string("] ")                                 \
+                           + std::string(msg);                                 \
+        throw std::invalid_argument(emsg);                                     \
+        } while (false)
+
+//---               Ordered map on top of a red-black tree.                ---//
+
 // 1. No red node has a red child.
 // 2. Every path from root to empty node contains the same
 // number of black nodes.
-
-#define CONSTRUCT_MSG_AND_THROW(msg)                                          \
-    do {                                                                      \
-        std::string emsg = std::string("[")                                   \
-                           + std::string(__func__)                            \
-                           + std::string("] ")                               \
-                           + std::string(msg);                                \
-        throw std::invalid_argument(emsg);                                    \
-        } while (false)
-
 
 template<class T, class V>
 class RBTree
@@ -552,8 +554,8 @@ void forEach(RBTree<T, V> const & t, F f) {
     }
 }
 
-template<class T, class V, class Beg, class End>
-RBTree<T, V> inserted(RBTree<T, V> t, Beg it, End end)
+template<class T, class V, class I>
+RBTree<T, V> inserted(RBTree<T, V> t, I it, I end)
 {
     if (it == end)
         return t;
