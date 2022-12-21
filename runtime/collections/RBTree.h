@@ -232,7 +232,6 @@ private:
     RBTree ins(T x, V v) const
     {
         assert(!isEmpty(BB));
-        assert1();
  
         if (isEmpty(B))
             return RBTree(R, RBTree(), x, v, RBTree());
