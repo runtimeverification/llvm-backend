@@ -2,7 +2,7 @@
 
 #include "../../runtime/collections/rangemap.h"
 
-BOOST_AUTO_TEST_SUITE(TreeMapTest)
+BOOST_AUTO_TEST_SUITE(RangeMapTest)
 
 BOOST_AUTO_TEST_CASE(rangemap_test_empty) {
   auto map = RangeMap<int, int>();
@@ -541,5 +541,27 @@ BOOST_AUTO_TEST_CASE(rangemap_test_del) {
   BOOST_CHECK_EQUAL(result2.value().first.second, 10);
 }
 
+BOOST_AUTO_TEST_CASE(rangemap_test_constr_mult) {
+  auto v = {std::pair<std::pair<int, int>, int>(std::pair<int, int>(0, 2), 1),
+            std::pair<std::pair<int, int>, int>(std::pair<int, int>(1, 3), 2)};
+  auto map = RangeMap<int, int>(v.begin(), v.end());
+  auto result = map.size();
+  BOOST_CHECK_EQUAL(result, 2);
+  auto result2 = map.getValue(1);
+  BOOST_CHECK_EQUAL(result2.has_value(), true);
+  BOOST_CHECK_EQUAL(result2.value(), 2);
+}
+
+BOOST_AUTO_TEST_CASE(rangemap_test_ins_mult) {
+  auto v = {std::pair<std::pair<int, int>, int>(std::pair<int, int>(0, 2), 1),
+            std::pair<std::pair<int, int>, int>(std::pair<int, int>(1, 3), 2)};
+  auto m1 = RangeMap<int, int>();
+  auto map = inserted(m1, v.begin(), v.end());
+  auto result = map.size();
+  BOOST_CHECK_EQUAL(result, 2);
+  auto result2 = map.getValue(1);
+  BOOST_CHECK_EQUAL(result2.has_value(), true);
+  BOOST_CHECK_EQUAL(result2.value(), 2);
+}
 
 BOOST_AUTO_TEST_SUITE_END()

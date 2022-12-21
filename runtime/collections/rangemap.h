@@ -39,8 +39,6 @@ private:
         T r2end = r2.second;
         if (r2end <= r1start) return false;
         else if (r1end <= r2start) return false;
-        assert(r1start < r2end);
-        assert(r2start < r1end);
         return true;
     }
 
@@ -54,8 +52,6 @@ private:
         T r2end = r2.second;
         if (r2end < r1start) return false;
         else if (r1end < r2start) return false;
-        assert(r1start <= r2end);
-        assert(r2start <= r1end);
         return true;
     }
 
@@ -197,11 +193,23 @@ public:
 
     RangeMap(RBTree<Range, V> t) : _map(t) {}
 
+    template<class I>
+    RangeMap(I b, I e)
+    {
+        RangeMap m = RangeMap();
+        for_each(b, e, [&m](std::pair<Range, V> const & p){
+            m = m.inserted(p.first, p.second);
+        });
+        _map = m._map;
+    }
+
+    // Return the number of key ranges in the map.
     size_t size() const
     {
         return _map.size();
     }
 
+    // Return true if a range in the map contains the key.
     bool containsKey(T k) const
     {
         std::optional<std::pair<Range, V> > opt = getKeyValue(k);
@@ -210,6 +218,8 @@ public:
         return false;
     }
 
+    // If the key is contained in any range in the map, return the value
+    // associated with the key.
     std::optional<V> getValue(T k) const
     {
         std::optional<std::pair<Range, V> > opt = getKeyValue(k);
@@ -218,20 +228,22 @@ public:
         return std::optional<V>();
     }
     
-     std::optional<std::pair<Range, V> > getKeyValue(T k) const
-     {
-        return getKeyValue(_map, k);
-     }
+    // If the key is contained in any range in the map, return the key range-
+    // value pair associated with the key.
+    std::optional<std::pair<Range, V> > getKeyValue(T k) const
+    {
+       return getKeyValue(_map, k);
+    }
 
-    /* Insert a pair of key range and value into the map, and return the
-       resulting map.
-       If the inserted range partially or completely overlaps any existing
-       range in the map, then the existing range (or ranges) will be partially
-       or completely replaced by the inserted range.
-       If the inserted range either overlaps or is immediately adjacent any
-       existing range mapping to the same value, then the ranges will be
-       coalesced into a single contiguous range.
-    */
+    /* Given a map and a pair of key range and value, return a map containing
+     * the key range-value pair.
+     * If the inserted range partially or completely overlaps any existing
+     * range in the map, then the existing range (or ranges) will be partially
+     * or completely replaced by the inserted range in the resulting map.
+     * If the inserted range either overlaps or is immediately adjacent to any
+     * existing range mapping to the same value, then the ranges will be
+     * coalesced into a single contiguous range in the resulting map.
+     */
     RangeMap inserted(Range r, V v)
     {
         // Empty ranges do not make sense here.
@@ -298,6 +310,12 @@ public:
         return RangeMap(tmpmap);
     }
 
+    /* Given a range to be removed and a map, return a map that does not
+     * contain the removed range or any part of it.
+     * If the range to be removed partially overlaps with any ranges in the
+     * map, then the boundaries of these ranges are adjusted in the resulting
+     * map so that they do not overlap with the removed range.
+     */
     RangeMap deleted(Range r)
     {
         // Empty ranges do not make sense here.
@@ -317,7 +335,7 @@ public:
         {
             Range rr = p.first;
             V rv = p.second;
-            assert(ranges_are_relevant(r, rr));
+            assert(ranges_overlap(r, rr));
             T rrs = rr.first;
             T rre = rr.second;
             tmpmap = tmpmap.deleted(rr);
@@ -346,6 +364,16 @@ public:
     }
 };
 
+template<class T, class V, class I>
+RangeMap<T, V> inserted(RangeMap<T, V> m, I it, I end)
+{
+    if (it == end)
+        return m;
+    std::pair<T, T> key = it->first;
+    V val = it->second;
+    auto m1 = m.inserted(key, val);
+    return inserted(m1, ++it, end);
+}
 
 
 
