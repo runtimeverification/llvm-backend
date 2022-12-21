@@ -65,10 +65,8 @@ private:
     T start = r.first;
     if (k < start)
       return getKeyValue(t.left(), k);
-    T end = r.second;
-    if (k >= end)
-      return getKeyValue(t.right(), k);
-    assert(false);
+    assert(k >= r.second);
+    return getKeyValue(t.right(), k);
   }
 
   // Gather all <Range, V> pairs in t that are overlapping or directly

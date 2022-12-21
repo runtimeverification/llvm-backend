@@ -31,7 +31,7 @@ class RBTree {
     switch (c) {
     case B: return R;
     case BB: return B;
-    default: assert(false);
+    default: CONSTRUCT_MSG_AND_THROW("Unexpected color");
     }
   }
 
@@ -170,17 +170,25 @@ public:
   // 1. No red node has a red child.
   void assert1() const {
     if (!isEmpty()) {
-      assert(rootColor() != BB);
+      if (rootColor() == BB) {
+        CONSTRUCT_MSG_AND_THROW("Red invariant failed");
+      }
       auto lft = left();
       auto rgt = right();
       if (rootColor() == R) {
-        assert(lft.isEmpty() || lft.rootColor() == B);
-        assert(rgt.isEmpty() || rgt.rootColor() == B);
+        if (!(lft.isEmpty() || lft.rootColor() == B)) {
+          CONSTRUCT_MSG_AND_THROW("Red invariant failed");
+        }
+        if (!(rgt.isEmpty() || rgt.rootColor() == B)) {
+          CONSTRUCT_MSG_AND_THROW("Red invariant failed");
+        }
       }
       lft.assert1();
       rgt.assert1();
     } else {
-      assert(leafColor() == B);
+      if (leafColor() != B) {
+        CONSTRUCT_MSG_AND_THROW("Red invariant failed");
+      }
     }
   }
 
@@ -191,7 +199,9 @@ public:
       return 0;
     int lft = left().countB();
     int rgt = right().countB();
-    assert(lft == rgt);
+    if (lft != rgt) {
+      CONSTRUCT_MSG_AND_THROW("Black invariant failed");
+    }
     return (rootColor() == B) ? 1 + lft : lft;
   }
 
@@ -200,8 +210,12 @@ public:
       return;
     left().assertBST();
     right().assertBST();
-    assert(left().isEmpty() || left().root() < root());
-    assert(right().isEmpty() || right().root() > root());
+    if (!(left().isEmpty() || left().root() < root())) {
+      CONSTRUCT_MSG_AND_THROW("BST invariant failed");
+    }
+    if (!(right().isEmpty() || right().root() > root())) {
+      CONSTRUCT_MSG_AND_THROW("BST invariant failed");
+    }
   }
 
 private:
