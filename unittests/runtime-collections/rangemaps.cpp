@@ -13,9 +13,9 @@ BOOST_AUTO_TEST_CASE(rangemap_test_empty) {
 }
 
 BOOST_AUTO_TEST_CASE(rangemap_test_contains_key) {
-  auto m1 = (RangeMap<int, int>()).inserted(std::make_pair(0,5), 1);
-  auto m2 = m1.inserted(std::make_pair(2,4), 2);
-  auto map = m2.deleted(std::make_pair(3,4));
+  auto m1 = (RangeMap<int, int>()).inserted(std::make_pair(0, 5), 1);
+  auto m2 = m1.inserted(std::make_pair(2, 4), 2);
+  auto map = m2.deleted(std::make_pair(3, 4));
   auto result = map.size();
   BOOST_CHECK_EQUAL(result, 3);
   auto result2 = map.containsKey(0);
@@ -33,9 +33,9 @@ BOOST_AUTO_TEST_CASE(rangemap_test_contains_key) {
 }
 
 BOOST_AUTO_TEST_CASE(rangemap_test_vlookup) {
-  auto m1 = (RangeMap<int, int>()).inserted(std::make_pair(0,5), 1);
-  auto m2 = m1.inserted(std::make_pair(2,4), 2);
-  auto map = m2.deleted(std::make_pair(3,4));
+  auto m1 = (RangeMap<int, int>()).inserted(std::make_pair(0, 5), 1);
+  auto m2 = m1.inserted(std::make_pair(2, 4), 2);
+  auto map = m2.deleted(std::make_pair(3, 4));
   auto result = map.size();
   BOOST_CHECK_EQUAL(result, 3);
   auto result2 = map.getValue(0);
@@ -56,9 +56,9 @@ BOOST_AUTO_TEST_CASE(rangemap_test_vlookup) {
 }
 
 BOOST_AUTO_TEST_CASE(rangemap_test_kvlookup) {
-  auto m1 = (RangeMap<int, int>()).inserted(std::make_pair(0,5), 1);
-  auto m2 = m1.inserted(std::make_pair(2,4), 2);
-  auto map = m2.deleted(std::make_pair(3,4));
+  auto m1 = (RangeMap<int, int>()).inserted(std::make_pair(0, 5), 1);
+  auto m2 = m1.inserted(std::make_pair(2, 4), 2);
+  auto map = m2.deleted(std::make_pair(3, 4));
   auto result = map.size();
   BOOST_CHECK_EQUAL(result, 3);
   auto result2 = map.getKeyValue(0);
@@ -85,10 +85,10 @@ BOOST_AUTO_TEST_CASE(rangemap_test_kvlookup) {
 }
 
 BOOST_AUTO_TEST_CASE(rangemap_test_ins_1) {
-  auto map = (RangeMap<int, int>()).inserted(std::make_pair(0,5), 1);
+  auto map = (RangeMap<int, int>()).inserted(std::make_pair(0, 5), 1);
   auto result = map.size();
   BOOST_CHECK_EQUAL(result, 1);
-  auto map2 = map.inserted(std::make_pair(2,4), 2);
+  auto map2 = map.inserted(std::make_pair(2, 4), 2);
   result = map.size();
   BOOST_CHECK_EQUAL(result, 1);
   result = map2.size();
@@ -128,10 +128,10 @@ BOOST_AUTO_TEST_CASE(rangemap_test_ins_1) {
 }
 
 BOOST_AUTO_TEST_CASE(rangemap_test_ins_2) {
-  auto map = (RangeMap<int, int>()).inserted(std::make_pair(2,5), 1);
+  auto map = (RangeMap<int, int>()).inserted(std::make_pair(2, 5), 1);
   auto result = map.size();
   BOOST_CHECK_EQUAL(result, 1);
-  auto map2 = map.inserted(std::make_pair(4,7), 2);
+  auto map2 = map.inserted(std::make_pair(4, 7), 2);
   result = map.size();
   BOOST_CHECK_EQUAL(result, 1);
   result = map2.size();
@@ -146,7 +146,7 @@ BOOST_AUTO_TEST_CASE(rangemap_test_ins_2) {
   BOOST_CHECK_EQUAL(result2.value().second, 2);
   BOOST_CHECK_EQUAL(result2.value().first.first, 4);
   BOOST_CHECK_EQUAL(result2.value().first.second, 7);
-  auto map3 = map.inserted(std::make_pair(5,7), 2);
+  auto map3 = map.inserted(std::make_pair(5, 7), 2);
   result = map.size();
   BOOST_CHECK_EQUAL(result, 1);
   result = map3.size();
@@ -161,7 +161,7 @@ BOOST_AUTO_TEST_CASE(rangemap_test_ins_2) {
   BOOST_CHECK_EQUAL(result2.value().second, 2);
   BOOST_CHECK_EQUAL(result2.value().first.first, 5);
   BOOST_CHECK_EQUAL(result2.value().first.second, 7);
-  auto map4 = map.inserted(std::make_pair(4,7), 1);
+  auto map4 = map.inserted(std::make_pair(4, 7), 1);
   result = map.size();
   BOOST_CHECK_EQUAL(result, 1);
   result = map4.size();
@@ -176,7 +176,7 @@ BOOST_AUTO_TEST_CASE(rangemap_test_ins_2) {
   BOOST_CHECK_EQUAL(result2.value().second, 1);
   BOOST_CHECK_EQUAL(result2.value().first.first, 2);
   BOOST_CHECK_EQUAL(result2.value().first.second, 7);
-  auto map5 = map.inserted(std::make_pair(5,7), 1);
+  auto map5 = map.inserted(std::make_pair(5, 7), 1);
   result = map.size();
   BOOST_CHECK_EQUAL(result, 1);
   result = map5.size();
@@ -191,7 +191,7 @@ BOOST_AUTO_TEST_CASE(rangemap_test_ins_2) {
   BOOST_CHECK_EQUAL(result2.value().second, 1);
   BOOST_CHECK_EQUAL(result2.value().first.first, 2);
   BOOST_CHECK_EQUAL(result2.value().first.second, 7);
-  auto map6 = map.inserted(std::make_pair(0,3), 2);
+  auto map6 = map.inserted(std::make_pair(0, 3), 2);
   result = map.size();
   BOOST_CHECK_EQUAL(result, 1);
   result = map6.size();
@@ -206,7 +206,7 @@ BOOST_AUTO_TEST_CASE(rangemap_test_ins_2) {
   BOOST_CHECK_EQUAL(result2.value().second, 2);
   BOOST_CHECK_EQUAL(result2.value().first.first, 0);
   BOOST_CHECK_EQUAL(result2.value().first.second, 3);
-  auto map7 = map.inserted(std::make_pair(0,2), 2);
+  auto map7 = map.inserted(std::make_pair(0, 2), 2);
   result = map.size();
   BOOST_CHECK_EQUAL(result, 1);
   result = map7.size();
@@ -221,7 +221,7 @@ BOOST_AUTO_TEST_CASE(rangemap_test_ins_2) {
   BOOST_CHECK_EQUAL(result2.value().second, 1);
   BOOST_CHECK_EQUAL(result2.value().first.first, 2);
   BOOST_CHECK_EQUAL(result2.value().first.second, 5);
-  auto map8 = map.inserted(std::make_pair(0,3), 1);
+  auto map8 = map.inserted(std::make_pair(0, 3), 1);
   result = map.size();
   BOOST_CHECK_EQUAL(result, 1);
   result = map8.size();
@@ -236,7 +236,7 @@ BOOST_AUTO_TEST_CASE(rangemap_test_ins_2) {
   BOOST_CHECK_EQUAL(result2.value().second, 1);
   BOOST_CHECK_EQUAL(result2.value().first.first, 0);
   BOOST_CHECK_EQUAL(result2.value().first.second, 5);
-  auto map9 = map.inserted(std::make_pair(0,2), 1);
+  auto map9 = map.inserted(std::make_pair(0, 2), 1);
   result = map.size();
   BOOST_CHECK_EQUAL(result, 1);
   result = map9.size();
@@ -251,7 +251,7 @@ BOOST_AUTO_TEST_CASE(rangemap_test_ins_2) {
   BOOST_CHECK_EQUAL(result2.value().second, 1);
   BOOST_CHECK_EQUAL(result2.value().first.first, 0);
   BOOST_CHECK_EQUAL(result2.value().first.second, 5);
-  auto map10 = map.inserted(std::make_pair(1,7), 2);
+  auto map10 = map.inserted(std::make_pair(1, 7), 2);
   result = map.size();
   BOOST_CHECK_EQUAL(result, 1);
   result = map10.size();
@@ -266,7 +266,7 @@ BOOST_AUTO_TEST_CASE(rangemap_test_ins_2) {
   BOOST_CHECK_EQUAL(result2.value().second, 2);
   BOOST_CHECK_EQUAL(result2.value().first.first, 1);
   BOOST_CHECK_EQUAL(result2.value().first.second, 7);
-  auto map11 = map.inserted(std::make_pair(1,7), 1);
+  auto map11 = map.inserted(std::make_pair(1, 7), 1);
   result = map.size();
   BOOST_CHECK_EQUAL(result, 1);
   result = map11.size();
@@ -284,13 +284,13 @@ BOOST_AUTO_TEST_CASE(rangemap_test_ins_2) {
 }
 
 BOOST_AUTO_TEST_CASE(rangemap_test_ins_3) {
-  auto m1 = (RangeMap<int, int>()).inserted(std::make_pair(0,5), 1);
+  auto m1 = (RangeMap<int, int>()).inserted(std::make_pair(0, 5), 1);
   auto result = m1.size();
   BOOST_CHECK_EQUAL(result, 1);
-  auto map = m1.inserted(std::make_pair(10,15), 1);
+  auto map = m1.inserted(std::make_pair(10, 15), 1);
   result = map.size();
   BOOST_CHECK_EQUAL(result, 2);
-  auto map2 = map.inserted(std::make_pair(5,10), 1);
+  auto map2 = map.inserted(std::make_pair(5, 10), 1);
   result = map2.size();
   BOOST_CHECK_EQUAL(result, 1);
   auto result2 = map2.getKeyValue(4);
@@ -307,7 +307,7 @@ BOOST_AUTO_TEST_CASE(rangemap_test_ins_3) {
   result3 = map2.getValue(11);
   BOOST_CHECK_EQUAL(result3.has_value(), true);
   BOOST_CHECK_EQUAL(result3.value(), 1);
-  auto map3 = map.inserted(std::make_pair(4,10), 1);
+  auto map3 = map.inserted(std::make_pair(4, 10), 1);
   result = map3.size();
   BOOST_CHECK_EQUAL(result, 1);
   result2 = map3.getKeyValue(4);
@@ -324,7 +324,7 @@ BOOST_AUTO_TEST_CASE(rangemap_test_ins_3) {
   result3 = map3.getValue(11);
   BOOST_CHECK_EQUAL(result3.has_value(), true);
   BOOST_CHECK_EQUAL(result3.value(), 1);
-  auto map4 = map.inserted(std::make_pair(5,11), 1);
+  auto map4 = map.inserted(std::make_pair(5, 11), 1);
   result = map4.size();
   BOOST_CHECK_EQUAL(result, 1);
   result2 = map4.getKeyValue(4);
@@ -341,7 +341,7 @@ BOOST_AUTO_TEST_CASE(rangemap_test_ins_3) {
   result3 = map4.getValue(11);
   BOOST_CHECK_EQUAL(result3.has_value(), true);
   BOOST_CHECK_EQUAL(result3.value(), 1);
-  auto map5 = map.inserted(std::make_pair(4,11), 1);
+  auto map5 = map.inserted(std::make_pair(4, 11), 1);
   result = map5.size();
   BOOST_CHECK_EQUAL(result, 1);
   result2 = map5.getKeyValue(4);
@@ -358,7 +358,7 @@ BOOST_AUTO_TEST_CASE(rangemap_test_ins_3) {
   result3 = map5.getValue(11);
   BOOST_CHECK_EQUAL(result3.has_value(), true);
   BOOST_CHECK_EQUAL(result3.value(), 1);
-  auto map6 = map.inserted(std::make_pair(5,10), 2);
+  auto map6 = map.inserted(std::make_pair(5, 10), 2);
   result = map6.size();
   BOOST_CHECK_EQUAL(result, 3);
   result2 = map6.getKeyValue(4);
@@ -379,7 +379,7 @@ BOOST_AUTO_TEST_CASE(rangemap_test_ins_3) {
   result3 = map6.getValue(11);
   BOOST_CHECK_EQUAL(result3.has_value(), true);
   BOOST_CHECK_EQUAL(result3.value(), 1);
-  auto map7 = map.inserted(std::make_pair(4,10), 2);
+  auto map7 = map.inserted(std::make_pair(4, 10), 2);
   result = map7.size();
   BOOST_CHECK_EQUAL(result, 3);
   result2 = map7.getKeyValue(4);
@@ -398,7 +398,7 @@ BOOST_AUTO_TEST_CASE(rangemap_test_ins_3) {
   result3 = map7.getValue(11);
   BOOST_CHECK_EQUAL(result3.has_value(), true);
   BOOST_CHECK_EQUAL(result3.value(), 1);
-  auto map8 = map.inserted(std::make_pair(5,11), 2);
+  auto map8 = map.inserted(std::make_pair(5, 11), 2);
   result = map8.size();
   BOOST_CHECK_EQUAL(result, 3);
   result2 = map8.getKeyValue(4);
@@ -419,7 +419,7 @@ BOOST_AUTO_TEST_CASE(rangemap_test_ins_3) {
   BOOST_CHECK_EQUAL(result2.value().second, 1);
   BOOST_CHECK_EQUAL(result2.value().first.first, 11);
   BOOST_CHECK_EQUAL(result2.value().first.second, 15);
-  auto map9 = map.inserted(std::make_pair(4,11), 2);
+  auto map9 = map.inserted(std::make_pair(4, 11), 2);
   result = map9.size();
   BOOST_CHECK_EQUAL(result, 3);
   result2 = map9.getKeyValue(4);
@@ -441,13 +441,13 @@ BOOST_AUTO_TEST_CASE(rangemap_test_ins_3) {
 }
 
 BOOST_AUTO_TEST_CASE(rangemap_test_del) {
-  auto m1 = (RangeMap<int, int>()).inserted(std::make_pair(0,10), 1);
+  auto m1 = (RangeMap<int, int>()).inserted(std::make_pair(0, 10), 1);
   auto result = m1.size();
   BOOST_CHECK_EQUAL(result, 1);
-  auto map = m1.inserted(std::make_pair(5,10), 2);
+  auto map = m1.inserted(std::make_pair(5, 10), 2);
   result = map.size();
   BOOST_CHECK_EQUAL(result, 2);
-  auto map2 = map.deleted(std::make_pair(4,6));
+  auto map2 = map.deleted(std::make_pair(4, 6));
   result = map2.size();
   BOOST_CHECK_EQUAL(result, 2);
   auto result2 = map2.getKeyValue(3);
@@ -464,7 +464,7 @@ BOOST_AUTO_TEST_CASE(rangemap_test_del) {
   BOOST_CHECK_EQUAL(result2.value().second, 2);
   BOOST_CHECK_EQUAL(result2.value().first.first, 6);
   BOOST_CHECK_EQUAL(result2.value().first.second, 10);
-  auto map3 = map2.deleted(std::make_pair(8,9));
+  auto map3 = map2.deleted(std::make_pair(8, 9));
   result = map3.size();
   BOOST_CHECK_EQUAL(result, 3);
   result2 = map3.getKeyValue(7);
@@ -479,7 +479,7 @@ BOOST_AUTO_TEST_CASE(rangemap_test_del) {
   BOOST_CHECK_EQUAL(result2.value().second, 2);
   BOOST_CHECK_EQUAL(result2.value().first.first, 9);
   BOOST_CHECK_EQUAL(result2.value().first.second, 10);
-  auto map4 = map3.deleted(std::make_pair(3,10));
+  auto map4 = map3.deleted(std::make_pair(3, 10));
   result = map4.size();
   BOOST_CHECK_EQUAL(result, 1);
   result2 = map4.getKeyValue(2);
@@ -489,7 +489,7 @@ BOOST_AUTO_TEST_CASE(rangemap_test_del) {
   BOOST_CHECK_EQUAL(result2.value().first.second, 3);
   result3 = map4.containsKey(3);
   BOOST_CHECK_EQUAL(result3, false);
-  auto map5 = map4.deleted(std::make_pair(5,7));
+  auto map5 = map4.deleted(std::make_pair(5, 7));
   result = map5.size();
   BOOST_CHECK_EQUAL(result, 1);
   result2 = map5.getKeyValue(2);
@@ -497,7 +497,7 @@ BOOST_AUTO_TEST_CASE(rangemap_test_del) {
   BOOST_CHECK_EQUAL(result2.value().second, 1);
   BOOST_CHECK_EQUAL(result2.value().first.first, 0);
   BOOST_CHECK_EQUAL(result2.value().first.second, 3);
-  auto map6 = map2.deleted(std::make_pair(3,10));
+  auto map6 = map2.deleted(std::make_pair(3, 10));
   result = map6.size();
   BOOST_CHECK_EQUAL(result, 1);
   result2 = map6.getKeyValue(2);
@@ -507,7 +507,7 @@ BOOST_AUTO_TEST_CASE(rangemap_test_del) {
   BOOST_CHECK_EQUAL(result2.value().first.second, 3);
   result3 = map6.containsKey(3);
   BOOST_CHECK_EQUAL(result3, false);
-  auto map7 = map2.deleted(std::make_pair(5,7));
+  auto map7 = map2.deleted(std::make_pair(5, 7));
   result = map7.size();
   BOOST_CHECK_EQUAL(result, 2);
   result2 = map7.getKeyValue(3);
@@ -522,7 +522,7 @@ BOOST_AUTO_TEST_CASE(rangemap_test_del) {
   BOOST_CHECK_EQUAL(result2.value().second, 2);
   BOOST_CHECK_EQUAL(result2.value().first.first, 7);
   BOOST_CHECK_EQUAL(result2.value().first.second, 10);
-  auto map8 = map3.deleted(std::make_pair(4,9));
+  auto map8 = map3.deleted(std::make_pair(4, 9));
   result = map8.size();
   BOOST_CHECK_EQUAL(result, 2);
   result2 = map8.getKeyValue(3);
@@ -542,8 +542,9 @@ BOOST_AUTO_TEST_CASE(rangemap_test_del) {
 }
 
 BOOST_AUTO_TEST_CASE(rangemap_test_constr_mult) {
-  auto v = {std::pair<std::pair<int, int>, int>(std::pair<int, int>(0, 2), 1),
-            std::pair<std::pair<int, int>, int>(std::pair<int, int>(1, 3), 2)};
+  auto v
+      = {std::pair<std::pair<int, int>, int>(std::pair<int, int>(0, 2), 1),
+         std::pair<std::pair<int, int>, int>(std::pair<int, int>(1, 3), 2)};
   auto map = RangeMap<int, int>(v.begin(), v.end());
   auto result = map.size();
   BOOST_CHECK_EQUAL(result, 2);
@@ -553,8 +554,9 @@ BOOST_AUTO_TEST_CASE(rangemap_test_constr_mult) {
 }
 
 BOOST_AUTO_TEST_CASE(rangemap_test_ins_mult) {
-  auto v = {std::pair<std::pair<int, int>, int>(std::pair<int, int>(0, 2), 1),
-            std::pair<std::pair<int, int>, int>(std::pair<int, int>(1, 3), 2)};
+  auto v
+      = {std::pair<std::pair<int, int>, int>(std::pair<int, int>(0, 2), 1),
+         std::pair<std::pair<int, int>, int>(std::pair<int, int>(1, 3), 2)};
   auto m1 = RangeMap<int, int>();
   auto map = inserted(m1, v.begin(), v.end());
   auto result = map.size();
