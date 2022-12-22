@@ -1,6 +1,7 @@
 add_library(collections STATIC
   lists.cpp
   maps.cpp
+  rangemaps.cpp
   sets.cpp
   hash.cpp
 )

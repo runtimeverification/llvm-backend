@@ -3,6 +3,7 @@ add_kllvm_unittest(runtime-collections-tests
   maps.cpp
   treemaps.cpp
   rangemaps.cpp
+  rangemap-hooks.cpp
   sets.cpp
   main.cpp
 )

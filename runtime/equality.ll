@@ -22,6 +22,101 @@ declare i1 @hook_INT_eq(%mpz*, %mpz*)
 declare i1 @hook_FLOAT_trueeq(%floating*, %floating*)
 declare i1 @hook_STRING_eq(%block*, %block*)
 
+define i1 @hook_KEQUAL_lt(%block* %arg1, %block* %arg2) {
+entry:
+  %arg1intptr = ptrtoint %block* %arg1 to i64
+  %arg2intptr = ptrtoint %block* %arg2 to i64
+  %arg1leastbit = trunc i64 %arg1intptr to i1
+  %arg2leastbit = trunc i64 %arg2intptr to i1
+  %eq = icmp eq i1 %arg1leastbit, %arg2leastbit
+  br i1 %eq, label %getTag, label %exit
+getTag:
+  br i1 %arg1leastbit, label %constant, label %block
+constant:
+  %eqconstant = icmp lt i64 %arg1intptr, %arg2intptr
+  br label %exit
+block:
+  %arg1hdrptr = getelementptr inbounds %block, %block* %arg1, i64 0, i32 0, i32 0
+  %arg2hdrptr = getelementptr inbounds %block, %block* %arg2, i64 0, i32 0, i32 0
+  %arg1hdr = load i64, i64* %arg1hdrptr
+  %arg2hdr = load i64, i64* %arg2hdrptr
+  %arg1len = and i64 %arg1hdr, -16888498602639361
+  %arg2len = and i64 %arg2hdr, -16888498602639361
+  %eqblock = icmp eq i64 %arg1len, %arg2len
+  br i1 %eqblock, label %getChildren, label %exit
+getChildren:
+  %arglayout = lshr i64 %arg1hdr, 54
+  %isString = icmp eq i64 %arglayout, 0
+  br i1 %isString, label %eqString, label %compareChildren
+eqString:
+  call void @abort()
+  unreachable
+compareChildren:
+  %arglayoutshort = trunc i64 %arglayout to i16
+  %layoutPtr = call %layout* @getLayoutData(i16 %arglayoutshort)
+  %layoutData = load %layout, %layout* %layoutPtr
+  %length = extractvalue %layout %layoutData, 0
+  %children = extractvalue %layout %layoutData, 1
+  br label %loop
+loop:
+  %counter = phi i8 [ %length, %compareChildren ], [ %sub1, %compareInt ]
+  %index = sub i8 %length, %counter
+  %indexlong = zext i8 %index to i64
+  %sub1 = sub i8 %counter, 1
+  %finished = icmp eq i8 %counter, 0
+  br i1 %finished, label %exit, label %compareChild
+compareChild:
+  %offsetPtr = getelementptr %layoutitem, %layoutitem* %children, i64 %indexlong, i32 0
+  %offset = load i64, i64* %offsetPtr
+  %kindPtr = getelementptr %layoutitem, %layoutitem* %children, i64 %indexlong, i32 1
+  %kind = load i16, i16* %kindPtr
+  %child1intptr = add i64 %arg1intptr, %offset
+  %child2intptr = add i64 %arg2intptr, %offset
+  switch i16 %kind, label %stuck [ i16 1, label %compareMap
+                                   i16 2, label %compareList
+				   i16 3, label %compareSet
+				   i16 4, label %compareInt
+				   i16 5, label %compareFloat
+				   i16 6, label %stuck
+				   i16 7, label %compareBool
+				   i16 8, label %compareSymbol
+				   i16 9, label %compareVariable ]
+compareMap:
+  call void @abort()
+  unreachable
+compareList:
+  call void @abort()
+  unreachable
+compareSet:
+  call void @abort()
+  unreachable
+compareInt:
+  %int1ptrptr = inttoptr i64 %child1intptr to %mpz**
+  %int2ptrptr = inttoptr i64 %child2intptr to %mpz**
+  %int1ptr = load %mpz*, %mpz** %int1ptrptr
+  %int2ptr = load %mpz*, %mpz** %int2ptrptr
+  %comparedInt = call i1 @hook_INT_lt(%mpz* %int1ptr, %mpz* %int2ptr)
+  br i1 %comparedInt, label %loop, label %exit
+compareFloat:
+  call void @abort()
+  unreachable
+compareBool:
+  call void @abort()
+  unreachable
+compareSymbol:
+  call void @abort()
+  unreachable
+compareVariable:
+  call void @abort()
+  unreachable
+exit:
+  %phi = phi i1 [ 0, %entry ], [ %eqconstant, %constant ], [ 0, %block ], [ 1, %loop ], [ 0, %compareInt ]
+  ret i1 %phi
+stuck:
+  call void @abort()
+  unreachable
+}
+
 define i1 @hook_KEQUAL_eq(%block* %arg1, %block* %arg2) {
 entry:
   %arg1intptr = ptrtoint %block* %arg1 to i64
