@@ -1,6 +1,6 @@
 #include <boost/test/unit_test.hpp>
 
-#include "../../runtime/collections/rangemap.h"
+#include <runtime/collections/rangemap.h>
 
 BOOST_AUTO_TEST_SUITE(RangeMapTest)
 
