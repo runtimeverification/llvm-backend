@@ -4,6 +4,8 @@
 #include "RBTree.h"
 
 #include <cassert>
+#include <iostream>
+#include <optional>
 #include <stdexcept>
 
 template <class T, class V>
