@@ -12,6 +12,33 @@ BOOST_AUTO_TEST_CASE(rangemap_test_empty) {
   BOOST_CHECK_EQUAL(result2, false);
 }
 
+BOOST_AUTO_TEST_CASE(rangemap_test_concat_success) {
+  auto m = (RangeMap<int, int>()).inserted(std::make_pair(2, 4), 1);
+  auto map1 = m.inserted(std::make_pair(6, 7), 1);
+  auto m1 = (RangeMap<int, int>()).inserted(std::make_pair(0, 2), 2);
+  auto m2 = m1.inserted(std::make_pair(4, 6), 3);
+  auto map2 = m2.inserted(std::make_pair(8, 9), 4);
+  auto map3 = concat(map1, map2);
+  auto result = map3.size();
+  BOOST_CHECK_EQUAL(result, 5);
+  auto map4 = (RangeMap<int, int>()).inserted(std::make_pair(4, 6), 1);
+  auto map5 = concat(map1, map4);
+  result = map5.size();
+  BOOST_CHECK_EQUAL(result, 1);
+}
+
+BOOST_AUTO_TEST_CASE(rangemap_test_concat_failure) {
+  auto m = (RangeMap<int, int>()).inserted(std::make_pair(2, 4), 1);
+  auto map1 = m.inserted(std::make_pair(6, 7), 2);
+  auto m1 = (RangeMap<int, int>()).inserted(std::make_pair(0, 3), 2);
+  auto map2 = m1.inserted(std::make_pair(8, 9), 4);
+  BOOST_CHECK_THROW(concat(map1, map2), std::invalid_argument);
+  auto map3 = (RangeMap<int, int>()).inserted(std::make_pair(3, 6), 2);
+  BOOST_CHECK_THROW(concat(map1, map3), std::invalid_argument);
+  auto map4 = (RangeMap<int, int>()).inserted(std::make_pair(5, 8), 2);
+  BOOST_CHECK_THROW(concat(map1, map4), std::invalid_argument);
+}
+
 BOOST_AUTO_TEST_CASE(rangemap_test_contains_key) {
   auto m1 = (RangeMap<int, int>()).inserted(std::make_pair(0, 5), 1);
   auto m2 = m1.inserted(std::make_pair(2, 4), 2);

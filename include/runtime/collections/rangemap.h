@@ -71,6 +71,30 @@ private:
     return getKeyValue(t.right(), k);
   }
 
+  bool overlaps(RBTree<Range, V> const &t, Range r) const {
+    if (t.isEmpty())
+      return false;
+    T start = r.first;
+    T end = r.second;
+    T rstart = t.root().first;
+    T rend = t.root().second;
+    if (rend <= start) {
+      // The root is to the left of range r, possibly adjacent but not
+      // overlapping. Continue looking for overlapping ranges to the right of
+      // root.
+      return overlaps(t.right(), r);
+    } else if (end <= rstart) {
+      // The root is to the right of range r, possibly adjacent but not
+      // overlapping. Continue looking for overlapping ranges to the left of
+      // root.
+      return overlaps(t.left(), r);
+    } else {
+      // In any other case, range r somehow overlaps with root, either partially
+      // or completely.
+      return true;
+    }
+  }
+
   // Gather all <Range, V> pairs in t that are overlapping or directly
   // adjacent (share a boundary) with range r, in v.
   void getInsertionRelevantRanges(
@@ -183,6 +207,8 @@ public:
     });
     _map = m._map;
   }
+
+  RBTree<Range, V> getTreeMap() const { return _map; }
 
   // Return the number of key ranges in the map.
   size_t size() const { return _map.size(); }
@@ -312,6 +338,10 @@ public:
     return RangeMap(tmpmap);
   }
 
+  // Return true if range r partially or completely overlaps with any key range
+  // stored in the map
+  bool overlaps(Range r) const { return overlaps(_map, r); }
+
   void print() {
     std::cout << "--------------------------" << std::endl;
     forEach(_map, [](Range x, V v) {
@@ -326,10 +356,25 @@ template <class T, class V, class I>
 RangeMap<T, V> inserted(RangeMap<T, V> m, I it, I end) {
   if (it == end)
     return m;
-  std::pair<T, T> key = it->first;
+  typename RangeMap<T, V>::Range key = it->first;
   V val = it->second;
   auto m1 = m.inserted(key, val);
   return inserted(m1, ++it, end);
+}
+
+template <class T, class V>
+RangeMap<T, V> concat(RangeMap<T, V> const &a, RangeMap<T, V> const &b) {
+  RangeMap<T, V> res = a;
+  forEach(
+      b.getTreeMap(),
+      [&res, &a](typename RangeMap<T, V>::Range const &x, V const &v) {
+        if (!a.overlaps(x))
+          res = res.inserted(x, v);
+        else
+          CONSTRUCT_MSG_AND_THROW(
+              "Overlapping key ranges in map concatenation");
+      });
+  return res;
 }
 
 #endif // RANGEMAP_HEADER_H
