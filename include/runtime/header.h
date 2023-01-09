@@ -207,7 +207,9 @@ void printConfigurationInternal(
     writer *file, block *subject, const char *sort, bool);
 mpz_ptr move_int(mpz_t);
 
-void serializeConfiguration(const char *filename, block *subject);
+void serializeConfiguration(
+    block *subject, char const *sort, char **data_out, size_t *size_out);
+void serializeConfigurationToFile(const char *filename, block *subject);
 
 // The following functions have to be generated at kompile time
 // and linked with the interpreter.
