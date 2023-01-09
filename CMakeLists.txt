@@ -172,6 +172,10 @@ install(
   DESTINATION include/kllvm
 )
 install(
+  DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/include/fmt
+  DESTINATION include/fmt
+)
+install(
   DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/include/immer
   DESTINATION include/kllvm
 )
@@ -186,6 +190,7 @@ install(
 )
 
 file(COPY ${PROJECT_SOURCE_DIR}/deps/immer/immer DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/include)
+file(COPY ${PROJECT_SOURCE_DIR}/deps/fmt/include/fmt DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/include)
 file(COPY ${PROJECT_SOURCE_DIR}/deps/rapidjson/include/rapidjson DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/include)
 
 set(GC_THRESHOLD 2097152 CACHE STRING "Initial Young Generation Size")
@@ -254,6 +259,8 @@ add_subdirectory(deps)
 add_subdirectory(lib)
 add_subdirectory(tools)
 add_subdirectory(runtime)
+
+find_package(fmt)
 
 if(BUILD_TESTS)
   add_subdirectory(unittests)

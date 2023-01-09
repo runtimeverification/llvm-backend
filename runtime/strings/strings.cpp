@@ -82,7 +82,7 @@ static inline uint64_t gs(mpz_t i) {
 SortString hook_STRING_chr(SortInt ord) {
   uint64_t uord = gs(ord);
   if (uord > 255) {
-    KLLVM_HOOK_INVALID_ARGUMENT("Ord must be <= 255");
+    KLLVM_HOOK_INVALID_ARGUMENT("Ord must be <= 255: {}", uord);
   }
   auto ret
       = static_cast<string *>(koreAllocToken(sizeof(string) + sizeof(KCHAR)));
@@ -94,7 +94,8 @@ SortString hook_STRING_chr(SortInt ord) {
 SortInt hook_STRING_ord(SortString input) {
   mpz_t result;
   if (len(input) != 1) {
-    KLLVM_HOOK_INVALID_ARGUMENT("Input must a string of length 1");
+    KLLVM_HOOK_INVALID_ARGUMENT(
+        "Input must be a string of length 1: {}", std::string(input->data));
   }
   mpz_init_set_ui(result, static_cast<unsigned char>(input->data[0]));
   return move_int(result);
@@ -200,11 +201,16 @@ char *getTerminatedString(string *str) {
 }
 
 SortString hook_STRING_base2string_long(SortInt input, uint64_t base) {
-  size_t len = mpz_sizeinbase(input, base) + 2;
-  // +1 for null terminator needed by mpz_get_str, +1 for minus sign
+  auto str = intToStringInBase(input, base);
+
+  // Include the null terminator in size calculations relating to allocation,
+  // but not when setting the length of the string object itself. Any minus
+  // signs will have been accounted for already by the intToString call.
+  auto len = str.size() + 1;
   auto result = static_cast<string *>(koreAllocToken(sizeof(string) + len));
-  mpz_get_str(result->data, base, input);
-  set_len(result, strlen(result->data));
+  strncpy(result->data, str.c_str(), len);
+  set_len(result, str.size());
+
   return static_cast<string *>(koreResizeLastAlloc(
       result, sizeof(string) + len(result), sizeof(string) + len));
 }
@@ -226,7 +232,8 @@ SortInt hook_STRING_string2base_long(SortString input, uint64_t base) {
   memcpy(copy, dataStart, length);
   copy[length] = 0;
   if (mpz_init_set_str(result, copy, base)) {
-    KLLVM_HOOK_INVALID_ARGUMENT("Not a valid integer");
+    KLLVM_HOOK_INVALID_ARGUMENT(
+        "Not a valid integer: {}", std::string(input->data));
   }
   return move_int(result);
 }
@@ -271,7 +278,9 @@ SortString hook_STRING_token2string(string *input) {
   }
 
   if (layout(input) != 0) {
-    KLLVM_HOOK_INVALID_ARGUMENT("token2string: input is not a string token");
+    KLLVM_HOOK_INVALID_ARGUMENT(
+        "token2string: input is not a string token: {}",
+        std::string(input->data));
   }
   return input;
 }
@@ -468,49 +477,6 @@ void init_float2(floating *result, std::string contents) {
     retValue = mpfr_set_str(result->f, str_value.c_str(), 10, MPFR_RNDN);
   }
   if (retValue != 0) {
-    KLLVM_HOOK_INVALID_ARGUMENT("Can't convert to float");
+    KLLVM_HOOK_INVALID_ARGUMENT("Can't convert to float: {}", contents);
   }
-}
-
-std::string floatToString(const floating *f, const char *suffix) {
-  if (mpfr_nan_p(f->f)) {
-    return "NaN" + std::string(suffix);
-  } else if (mpfr_inf_p(f->f)) {
-    if (mpfr_signbit(f->f)) {
-      return "-Infinity" + std::string(suffix);
-    } else {
-      return "Infinity" + std::string(suffix);
-    }
-  } else {
-    mpfr_exp_t printed_exp;
-    char *str = mpfr_get_str(NULL, &printed_exp, 10, 0, f->f, MPFR_RNDN);
-    size_t len = strlen(str);
-    string *newstr = (string *)koreAllocToken(sizeof(string) + len + 2);
-    set_len(newstr, len + 2);
-    size_t idx = 0;
-    if (str[0] == '-') {
-      newstr->data[0] = '-';
-      idx = 1;
-    }
-    newstr->data[idx] = '0';
-    newstr->data[idx + 1] = '.';
-    strcpy(newstr->data + idx + 2, str + idx);
-    return std::string(newstr->data) + "e" + std::to_string(printed_exp)
-           + suffix;
-  }
-}
-
-std::string floatToString(const floating *f) {
-  uint64_t prec = mpfr_get_prec(f->f);
-  uint64_t exp = f->exp;
-  char suffix[41]; // 19 chars per long + p and x and null byte
-  if (prec == 53 && exp == 11) {
-    suffix[0] = 0;
-  } else if (prec == 24 && exp == 8) {
-    suffix[0] = 'f';
-    suffix[1] = 0;
-  } else {
-    snprintf(suffix, sizeof(suffix), "p%" PRIu64 "x%" PRIu64, prec, exp);
-  }
-  return floatToString(f, suffix);
 }
