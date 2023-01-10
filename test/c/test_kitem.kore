@@ -3,7 +3,7 @@
 // RUN: clang -I %include-path Inputs/kitem.c -o %t
 
 // RUN: %t %t.dir/libtest.so %t.foo.bin
-// RUN: %kore-convert %t.foo.bin | grep -q 'Lblbar()'
+// RUN: %kore-convert %t.foo.bin | grep -q 'Lblbar{}()'
 
 [topCellInitializer{}(LblinitGeneratedTopCell{}()), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/bruce/code/k/test.k)")]
 
