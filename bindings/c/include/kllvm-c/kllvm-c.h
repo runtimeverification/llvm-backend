@@ -87,6 +87,8 @@ void kore_sort_free(kore_sort const *);
 
 bool kore_sort_is_concrete(kore_sort const *);
 
+bool kore_sort_is_kitem(kore_sort const *);
+
 kore_sort *kore_composite_sort_new(char const *);
 void kore_composite_sort_add_argument(kore_sort const *, kore_sort const *);
 
