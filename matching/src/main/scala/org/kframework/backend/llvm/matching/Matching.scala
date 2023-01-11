@@ -13,7 +13,7 @@ object Matching {
   def writeDecisionTreeToFile(filename: File, heuristic: String, outputFolder: File, threshold: Optional[(Int, Int)], genSingleRuleTrees: Boolean, warn: Boolean, genSearch: Boolean, kem: KException => Unit) {
     val defn = new TextToKore().parse(filename)
     outputFolder.mkdirs()
-    val allAxioms = Parser.getAxioms(defn).zipWithIndex
+    val allAxioms = Parser.getAxioms(defn)
     val axioms = Parser.parseTopAxioms(allAxioms)
     val symlib = Parser.parseSymbols(defn, heuristic)
     val (dt, dtSearch, matrix) = if (axioms.isEmpty) {
