@@ -137,8 +137,14 @@ void kore_simplify(
   auto kitem_sort = kore_composite_sort_new("SortKItem");
   auto kitem_sort_str = kore_sort_dump(kitem_sort);
 
-  auto inj = kore_pattern_new_injection(pattern, sort, kitem_sort);
-  auto block = kore_pattern_construct(inj);
+  auto block = [&] {
+    if (kore_sort_is_kitem(sort)) {
+      return kore_pattern_construct(pattern);
+    } else {
+      auto inj = kore_pattern_new_injection(pattern, sort, kitem_sort);
+      return kore_pattern_construct(inj);
+    }
+  }();
 
   serializeConfiguration(block, kitem_sort_str, data_out, size_out);
   free(kitem_sort_str);
@@ -190,6 +196,15 @@ void kore_sort_free(kore_sort const *sort) {
 
 bool kore_sort_is_concrete(kore_sort const *sort) {
   return sort->ptr_->isConcrete();
+}
+
+bool kore_sort_is_kitem(kore_sort const *sort) {
+  if (auto composite
+      = dynamic_cast<kllvm::KORECompositeSort *>(sort->ptr_.get())) {
+    return composite->getName() == "SortKItem";
+  }
+
+  return false;
 }
 
 /* KORECompositeSort */
