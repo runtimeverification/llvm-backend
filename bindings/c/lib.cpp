@@ -9,19 +9,17 @@
 // definitions into the global namespace.
 #include <runtime/header.h>
 
+// Internal implementation details
 namespace {
+
 template <typename OS>
-char *get_c_string(OS const &os) {
-  auto str = os.str();
+char *get_c_string(OS const &);
 
-  // Include null terminator
-  auto total_length = str.length() + 1;
+kore_pattern *kore_string_pattern_new_internal(std::string const &);
 
-  auto c_str = reinterpret_cast<char *>(malloc(total_length * sizeof(char)));
-  std::strncpy(c_str, str.c_str(), total_length);
+kore_pattern *
+kore_pattern_new_token_internal(kore_pattern *, kore_sort const *);
 
-  return c_str;
-}
 } // namespace
 
 /*
@@ -60,13 +58,14 @@ void kore_pattern_free(kore_pattern const *pat) {
 }
 
 kore_pattern *kore_pattern_new_token(char const *value, kore_sort const *sort) {
-  auto sym = kore_symbol_new("\\dv");
-  kore_symbol_add_formal_argument(sym, sort);
+  auto pat = kore_string_pattern_new(value);
+  return kore_pattern_new_token_internal(pat, sort);
+}
 
-  auto pat = kore_composite_pattern_from_symbol(sym);
-  kore_composite_pattern_add_argument(pat, kore_string_pattern_new(value));
-
-  return pat;
+kore_pattern *kore_pattern_new_token_with_len(
+    char const *value, size_t len, kore_sort const *sort) {
+  auto pat = kore_string_pattern_new_with_len(value, len);
+  return kore_pattern_new_token_internal(pat, sort);
 }
 
 kore_pattern *kore_pattern_new_injection(
@@ -177,9 +176,12 @@ void kore_composite_pattern_add_argument(kore_pattern *pat, kore_pattern *arg) {
 /* KOREStringPattern */
 
 kore_pattern *kore_string_pattern_new(char const *contents) {
-  auto pat = new kore_pattern;
-  pat->ptr_ = kllvm::KOREStringPattern::Create(std::string(contents));
-  return pat;
+  return kore_string_pattern_new_internal(std::string(contents));
+}
+
+kore_pattern *
+kore_string_pattern_new_with_len(char const *contents, size_t len) {
+  return kore_string_pattern_new_internal(std::string(contents, len));
 }
 
 /* KORESort */
@@ -256,3 +258,37 @@ void kore_symbol_add_formal_argument(kore_symbol *sym, kore_sort const *sort) {
   sym->ptr_->addFormalArgument(sort->ptr_);
 }
 }
+
+namespace {
+
+template <typename OS>
+char *get_c_string(OS const &os) {
+  auto str = os.str();
+
+  // Include null terminator
+  auto total_length = str.length() + 1;
+
+  auto c_str = reinterpret_cast<char *>(malloc(total_length * sizeof(char)));
+  std::strncpy(c_str, str.c_str(), total_length);
+
+  return c_str;
+}
+
+kore_pattern *kore_string_pattern_new_internal(std::string const &str) {
+  auto pat = new kore_pattern;
+  pat->ptr_ = kllvm::KOREStringPattern::Create(str);
+  return pat;
+}
+
+kore_pattern *
+kore_pattern_new_token_internal(kore_pattern *value, kore_sort const *sort) {
+  auto sym = kore_symbol_new("\\dv");
+  kore_symbol_add_formal_argument(sym, sort);
+
+  auto pat = kore_composite_pattern_from_symbol(sym);
+  kore_composite_pattern_add_argument(pat, value);
+
+  return pat;
+}
+
+} // namespace
