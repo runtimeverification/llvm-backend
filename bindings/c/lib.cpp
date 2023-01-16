@@ -17,6 +17,9 @@ char *get_c_string(OS const &);
 
 kore_pattern *kore_string_pattern_new_internal(std::string const &);
 
+kore_pattern *
+kore_pattern_new_token_internal(kore_pattern *, kore_sort const *);
+
 } // namespace
 
 /*
@@ -55,13 +58,14 @@ void kore_pattern_free(kore_pattern const *pat) {
 }
 
 kore_pattern *kore_pattern_new_token(char const *value, kore_sort const *sort) {
-  auto sym = kore_symbol_new("\\dv");
-  kore_symbol_add_formal_argument(sym, sort);
+  auto pat = kore_string_pattern_new(value);
+  return kore_pattern_new_token_internal(pat, sort);
+}
 
-  auto pat = kore_composite_pattern_from_symbol(sym);
-  kore_composite_pattern_add_argument(pat, kore_string_pattern_new(value));
-
-  return pat;
+kore_pattern *kore_pattern_new_token_with_len(
+    char const *value, size_t len, kore_sort const *sort) {
+  auto pat = kore_string_pattern_new_with_len(value, len);
+  return kore_pattern_new_token_internal(pat, sort);
 }
 
 kore_pattern *kore_pattern_new_injection(
@@ -247,6 +251,7 @@ void kore_symbol_add_formal_argument(kore_symbol *sym, kore_sort const *sort) {
 }
 
 namespace {
+
 template <typename OS>
 char *get_c_string(OS const &os) {
   auto str = os.str();
@@ -265,4 +270,16 @@ kore_pattern *kore_string_pattern_new_internal(std::string const &str) {
   pat->ptr_ = kllvm::KOREStringPattern::Create(str);
   return pat;
 }
+
+kore_pattern *
+kore_pattern_new_token_internal(kore_pattern *value, kore_sort const *sort) {
+  auto sym = kore_symbol_new("\\dv");
+  kore_symbol_add_formal_argument(sym, sort);
+
+  auto pat = kore_composite_pattern_from_symbol(sym);
+  kore_composite_pattern_add_argument(pat, value);
+
+  return pat;
+}
+
 } // namespace

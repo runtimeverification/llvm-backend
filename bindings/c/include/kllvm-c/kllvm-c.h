@@ -51,8 +51,12 @@ char *kore_pattern_dump(kore_pattern const *);
 void kore_pattern_free(kore_pattern const *);
 
 kore_pattern *kore_pattern_new_token(char const *, kore_sort const *);
+kore_pattern *
+kore_pattern_new_token_with_len(char const *, size_t, kore_sort const *);
+
 kore_pattern *kore_pattern_new_injection(
     kore_pattern *, kore_sort const *, kore_sort const *);
+
 kore_pattern *kore_pattern_make_interpreter_input(kore_pattern *);
 
 kore_pattern *kore_composite_pattern_new(char const *);
