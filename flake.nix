@@ -92,7 +92,7 @@
           builtins.listToAttrs (lib.imap0 (i: v: { name = "check_${toString i}"; value = v; }) checks);
 
         matrix = builtins.listToAttrs (lib.forEach (lib.cartesianProductOfSets {
-          llvm-version = [12 13 14];
+          llvm-version = [11 12 13 14];
           build-type = ["Debug" "Release" "RelWithDebInfo" "FastBuild" "GcStats"];
         }) (
           args:
@@ -113,6 +113,7 @@
         checks = listToChecks [
           # Check that the backend compiles on each supported version of LLVM,
           # but don't run the test suite on all 15 configurations.
+          llvm-backend-11-FastBuild.llvm-backend
 
           # Disable the full set temporarily while the checks run on a hosted
           # runner.
