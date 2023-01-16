@@ -138,7 +138,7 @@ void kore_simplify(
   auto kitem_sort_str = kore_sort_dump(kitem_sort);
 
   auto block = [&] {
-    if (kore_sort_is_kitem(sort)) {
+    if (kore_sort_is_kitem(sort) || kore_sort_is_k(sort)) {
       return kore_pattern_construct(pattern);
     } else {
       auto inj = kore_pattern_new_injection(pattern, sort, kitem_sort);
@@ -202,6 +202,15 @@ bool kore_sort_is_kitem(kore_sort const *sort) {
   if (auto composite
       = dynamic_cast<kllvm::KORECompositeSort *>(sort->ptr_.get())) {
     return composite->getName() == "SortKItem";
+  }
+
+  return false;
+}
+
+bool kore_sort_is_k(kore_sort const *sort) {
+  if (auto composite
+      = dynamic_cast<kllvm::KORECompositeSort *>(sort->ptr_.get())) {
+    return composite->getName() == "SortK";
   }
 
   return false;
