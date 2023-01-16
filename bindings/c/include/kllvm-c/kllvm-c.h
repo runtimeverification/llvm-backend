@@ -60,6 +60,7 @@ kore_pattern *kore_composite_pattern_from_symbol(kore_symbol *);
 void kore_composite_pattern_add_argument(kore_pattern *, kore_pattern *);
 
 kore_pattern *kore_string_pattern_new(char const *);
+kore_pattern *kore_string_pattern_new_with_len(char const *, size_t);
 
 block *kore_pattern_construct(kore_pattern const *);
 char *kore_block_dump(block *);
