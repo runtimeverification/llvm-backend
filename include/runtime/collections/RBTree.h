@@ -43,7 +43,7 @@ class RBTree {
     size_t _s;
 
     virtual bool isLeaf() const = 0;
-    virtual ~Node(){};
+    virtual ~Node() = default;
   };
 
   struct Leaf : public Node {
@@ -52,7 +52,7 @@ class RBTree {
       assert(c == B || c == BB);
     }
     virtual bool isLeaf() const override { return true; }
-    virtual ~Leaf(){};
+    virtual ~Leaf() = default;
   };
 
   struct InternalNode : public Node {
@@ -72,7 +72,7 @@ class RBTree {
     std::shared_ptr<const Node> _rgt;
 
     virtual bool isLeaf() const override { return false; }
-    virtual ~InternalNode(){};
+    virtual ~InternalNode() = default;
   };
 
   explicit RBTree(std::shared_ptr<const Node> const &node)
@@ -168,7 +168,7 @@ public:
   RBTree deleted(T x) const { return redden().del(x); }
 
   // 1. No red node has a red child.
-  void assert1() const {
+  void assert_red_invariant() const {
     if (!isEmpty()) {
       if (rootColor() == BB) {
         CONSTRUCT_MSG_AND_THROW("Red invariant failed");
@@ -183,8 +183,8 @@ public:
           CONSTRUCT_MSG_AND_THROW("Red invariant failed");
         }
       }
-      lft.assert1();
-      rgt.assert1();
+      lft.assert_red_invariant();
+      rgt.assert_red_invariant();
     } else {
       if (leafColor() != B) {
         CONSTRUCT_MSG_AND_THROW("Red invariant failed");
@@ -194,22 +194,22 @@ public:
 
   // 2. Every path from root to empty node contains the same
   // number of black nodes.
-  int countB() const {
+  int assert_black_invariant() const {
     if (isEmpty())
       return 0;
-    int lft = left().countB();
-    int rgt = right().countB();
+    int lft = left().assert_black_invariant();
+    int rgt = right().assert_black_invariant();
     if (lft != rgt) {
       CONSTRUCT_MSG_AND_THROW("Black invariant failed");
     }
     return (rootColor() == B) ? 1 + lft : lft;
   }
 
-  void assertBST() const {
+  void assert_BST_invariant() const {
     if (isEmpty())
       return;
-    left().assertBST();
-    right().assertBST();
+    left().assert_BST_invariant();
+    right().assert_BST_invariant();
     if (!(left().isEmpty() || left().root() < root())) {
       CONSTRUCT_MSG_AND_THROW("BST invariant failed");
     }

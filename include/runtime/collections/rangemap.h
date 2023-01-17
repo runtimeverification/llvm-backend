@@ -8,76 +8,111 @@
 #include <optional>
 #include <stdexcept>
 
-template <class T, class V>
-class RangeMap {
-public:
-  using Range = std::pair<T, T>;
-
+template <class T>
+class Range {
 private:
-  RBTree<Range, V> _map;
+    T start;
+    T end;
 
-  // Returns true if range t contains k
-  bool range_contains(Range r, T k) const {
-    T start = r.first;
-    T end = r.second;
+public:
+  Range(T s, T e)
+      : start(s), end(e) { }
+
+  T get_start() {
+    return start;
+  }
+
+  T get_end() {
+    return end;
+  }
+
+  bool operator<(const Range &other) const {
+    return this->start == other.start ? this->end < other.end
+                                      : this->start < other.start;
+  }
+
+  bool operator>(const Range &other) const {
+    return other < *this;
+  }
+
+  bool operator==(const Range &other) const {
+    return !(*this < other || other < *this);
+  }
+
+  bool operator<=(const Range &other) const {
+    return !(other < *this);
+  }
+
+  bool operator>=(const Range &other) const {
+    return !(*this < other);
+  }
+
+  bool operator!=(const Range &other) const {
+    return *this < other || other < *this;
+  }
+
+  // Returns true if this range contains k
+  bool contains(T k) const {
     return k >= start && k < end;
   }
 
-  bool range_is_empty(Range r) const {
-    T start = r.first;
-    T end = r.second;
+  // Returns true if this range is empty
+  bool is_empty() const {
     return start >= end;
   }
 
-  // Returns true if ranges r1 and r2 overlap.
-  bool ranges_overlap(Range r1, Range r2) const {
-    T r1start = r1.first;
-    T r1end = r1.second;
-    T r2start = r2.first;
-    T r2end = r2.second;
-    if (r2end <= r1start)
+  // Returns true if this range overlaps with range r
+  bool overlaps(Range r) const {
+    T rstart = r.get_start();
+    T rend = r.get_end();
+    if (rend <= start)
       return false;
-    else if (r1end <= r2start)
+    else if (end <= rstart)
       return false;
     return true;
   }
 
-  // Returns true if ranges r1 and r2 overlap or are adjacent, i.e., share a
-  // bound, either inclusive or exclusive.
-  bool ranges_are_relevant(Range r1, Range r2) const {
-    T r1start = r1.first;
-    T r1end = r1.second;
-    T r2start = r2.first;
-    T r2end = r2.second;
-    if (r2end < r1start)
+  // Returns true if this range and range r overlap or are adjacent, i.e.,
+  // share a bound, either inclusive or exclusive.
+  bool is_relevant(Range r) const {
+    T rstart = r.get_start();
+    T rend = r.get_end();
+    if (rend < start)
       return false;
-    else if (r1end < r2start)
+    else if (end < rstart)
       return false;
     return true;
   }
+};
 
-  std::optional<std::pair<Range, V>>
-  getKeyValue(RBTree<Range, V> t, T k) const {
+template <class T, class V>
+class RangeMap {
+
+private:
+  RBTree<Range<T>, V> _map;
+
+  std::optional<std::pair<Range<T>, V>>
+  getKeyValue(RBTree<Range<T>, V> t, T k) const {
     if (t.isEmpty())
-      return std::optional<std::pair<Range, V>>();
-    Range r = t.root();
-    if (range_contains(r, k))
-      return std::make_optional<std::pair<Range, V>>(
+      return std::optional<std::pair<Range<T>, V>>();
+    Range<T> r = t.root();
+    if (r.contains(k))
+      return std::make_optional<std::pair<Range<T>, V>>(
           std::make_pair(r, t.rootVal()));
-    T start = r.first;
+    T start = r.get_start();
     if (k < start)
       return getKeyValue(t.left(), k);
-    assert(k >= r.second);
+    assert(k >= r.get_end());
     return getKeyValue(t.right(), k);
   }
 
-  bool overlaps(RBTree<Range, V> const &t, Range r) const {
+  bool overlaps(RBTree<Range<T>, V> const &t, Range<T> r) const {
     if (t.isEmpty())
       return false;
-    T start = r.first;
-    T end = r.second;
-    T rstart = t.root().first;
-    T rend = t.root().second;
+    T start = r.get_start();
+    T end = r.get_end();
+    T rstart = t.root().get_start();
+    T rend = t.root().get_end();
     if (rend <= start) {
       // The root is to the left of range r, possibly adjacent but not
       // overlapping. Continue looking for overlapping ranges to the right of
@@ -95,16 +130,16 @@ private:
     }
   }
 
-  // Gather all <Range, V> pairs in t that are overlapping or directly
+  // Gather all <Range<T>, V> pairs in t that are overlapping or directly
   // adjacent (share a boundary) with range r, in v.
   void getInsertionRelevantRanges(
-      RBTree<Range, V> t, Range r, std::vector<std::pair<Range, V>> &v) {
+      RBTree<Range<T>, V> t, Range<T> r, std::vector<std::pair<Range<T>, V>> &v) {
     if (t.isEmpty())
       return;
-    T start = r.first;
-    T end = r.second;
-    T rstart = t.root().first;
-    T rend = t.root().second;
+    T start = r.get_start();
+    T end = r.get_end();
+    T rstart = t.root().get_start();
+    T rend = t.root().get_end();
     if (rend < start) {
       // The candidate range is to the left of our target range, and does
       // not share a boundary. It is not relevant. Continue looking for
@@ -146,13 +181,13 @@ private:
 
   // Gather all <Range, V> pairs in t that are overlapping with range r, in v.
   void getDeletionRelevantRanges(
-      RBTree<Range, V> t, Range r, std::vector<std::pair<Range, V>> &v) {
+      RBTree<Range<T>, V> t, Range<T> r, std::vector<std::pair<Range<T>, V>> &v) {
     if (t.isEmpty())
       return;
-    T start = r.first;
-    T end = r.second;
-    T rstart = t.root().first;
-    T rend = t.root().second;
+    T start = r.get_start();
+    T end = r.get_end();
+    T rstart = t.root().get_start();
+    T rend = t.root().get_end();
     if (rend <= start) {
       // The candidate range is to the left of our target range, and may
       // share a boundary. It is not relevant. Continue looking for
@@ -194,28 +229,28 @@ private:
 
 public:
   RangeMap()
-      : _map(RBTree<Range, V>()) { }
+      : _map(RBTree<Range<T>, V>()) { }
 
-  RangeMap(RBTree<Range, V> t)
+  RangeMap(RBTree<Range<T>, V> t)
       : _map(t) { }
 
   template <class I>
   RangeMap(I b, I e) {
     RangeMap m = RangeMap();
-    for_each(b, e, [&m](std::pair<Range, V> const &p) {
+    for_each(b, e, [&m](std::pair<Range<T>, V> const &p) {
       m = m.inserted(p.first, p.second);
     });
     _map = m._map;
   }
 
-  RBTree<Range, V> getTreeMap() const { return _map; }
+  RBTree<Range<T>, V> getTreeMap() const { return _map; }
 
   // Return the number of key ranges in the map.
   size_t size() const { return _map.size(); }
 
   // Return true if a range in the map contains the key.
-  bool containsKey(T k) const {
-    std::optional<std::pair<Range, V>> opt = getKeyValue(k);
+  bool contains(T k) const {
+    std::optional<std::pair<Range<T>, V>> opt = getKeyValue(k);
     if (opt.has_value())
       return true;
     return false;
@@ -224,7 +259,7 @@ public:
   // If the key is contained in any range in the map, return the value
   // associated with the key.
   std::optional<V> getValue(T k) const {
-    std::optional<std::pair<Range, V>> opt = getKeyValue(k);
+    std::optional<std::pair<Range<T>, V>> opt = getKeyValue(k);
     if (opt.has_value())
       return std::make_optional<V>(opt.value().second);
     return std::optional<V>();
@@ -232,7 +267,7 @@ public:
 
   // If the key is contained in any range in the map, return the key range-
   // value pair associated with the key.
-  std::optional<std::pair<Range, V>> getKeyValue(T k) const {
+  std::optional<std::pair<Range<T>, V>> getKeyValue(T k) const {
     return getKeyValue(_map, k);
   }
 
@@ -245,26 +280,26 @@ public:
      * existing range mapping to the same value, then the ranges will be
      * coalesced into a single contiguous range in the resulting map.
      */
-  RangeMap inserted(Range r, V v) {
+  RangeMap inserted(Range<T> r, V v) {
     // Empty ranges do not make sense here.
-    if (range_is_empty(r))
+    if (r.is_empty())
       CONSTRUCT_MSG_AND_THROW("Insert empty range in range map");
 
-    std::vector<std::pair<Range, V>> ranges;
+    std::vector<std::pair<Range<T>, V>> ranges;
     getInsertionRelevantRanges(_map, r, ranges);
     // Each relevant range may lead to changes to the existing underlying
     // treemap data structure, as well as the bounds of the target inserted
     // range. We iterate over the collected relevant ranges to collect
     // these changes.
-    T is = r.first;
-    T ie = r.second;
-    RBTree<Range, V> tmpmap = _map;
+    T is = r.get_start();
+    T ie = r.get_end();
+    RBTree<Range<T>, V> tmpmap = _map;
     for (auto &p : ranges) {
-      Range rr = p.first;
+      Range<T> rr = p.first;
       V rv = p.second;
-      assert(ranges_are_relevant(r, rr));
-      T rrs = rr.first;
-      T rre = rr.second;
+      assert(r.is_relevant(rr));
+      T rrs = rr.get_start();
+      T rre = rr.get_end();
 
       if (v == rv) {
         // The inserted value is the same as the value stored in
@@ -277,17 +312,17 @@ public:
       } else {
         // The inserted value is different from the value stored
         // in the relevant range.
-        if (ranges_overlap(r, rr)) {
+        if (r.overlaps(rr)) {
           // The ranges overlap.
           // Delete the relevant range, and insert up to two ranges to
           // the left/right of the inserted range, as needed to
           // account for the bounds of the relevant range.
           tmpmap = tmpmap.deleted(rr);
           if (rrs < is) {
-            tmpmap = tmpmap.inserted(std::make_pair(rrs, is), rv);
+            tmpmap = tmpmap.inserted(Range<T>(rrs, is), rv);
           }
           if (rre > ie) {
-            tmpmap = tmpmap.inserted(std::make_pair(ie, rre), rv);
+            tmpmap = tmpmap.inserted(Range<T>(ie, rre), rv);
           }
         } else {
           // The ranges do not overlap. NOOP.
@@ -297,7 +332,7 @@ public:
 
     // Finally, insert a range with the properly adjusted bounds and the
     // new value. Create a new range map.
-    tmpmap = tmpmap.inserted(std::make_pair(is, ie), v);
+    tmpmap = tmpmap.inserted(Range<T>(is, ie), v);
     return RangeMap(tmpmap);
   }
 
@@ -307,32 +342,32 @@ public:
      * map, then the boundaries of these ranges are adjusted in the resulting
      * map so that they do not overlap with the removed range.
      */
-  RangeMap deleted(Range r) {
+  RangeMap deleted(Range<T> r) {
     // Empty ranges do not make sense here.
-    if (range_is_empty(r))
+    if (r.is_empty())
       CONSTRUCT_MSG_AND_THROW("Delete empty range from range map");
 
-    std::vector<std::pair<Range, V>> ranges;
+    std::vector<std::pair<Range<T>, V>> ranges;
     getDeletionRelevantRanges(_map, r, ranges);
     // Each relevant range may lead to changes to the existing underlying
     // treemap data structure.
     // We iterate over the collected relevant ranges to collect and apply
     // these changes.
-    T ds = r.first;
-    T de = r.second;
-    RBTree<Range, V> tmpmap = _map;
+    T ds = r.get_start();
+    T de = r.get_end();
+    RBTree<Range<T>, V> tmpmap = _map;
     for (auto &p : ranges) {
-      Range rr = p.first;
+      Range<T> rr = p.first;
       V rv = p.second;
-      assert(ranges_overlap(r, rr));
-      T rrs = rr.first;
-      T rre = rr.second;
+      assert(r.overlaps(rr));
+      T rrs = rr.get_start();
+      T rre = rr.get_end();
       tmpmap = tmpmap.deleted(rr);
       if (rrs < ds) {
-        tmpmap = tmpmap.inserted(std::make_pair(rrs, ds), rv);
+        tmpmap = tmpmap.inserted(Range<T>(rrs, ds), rv);
       }
       if (rre > de) {
-        tmpmap = tmpmap.inserted(std::make_pair(de, rre), rv);
+        tmpmap = tmpmap.inserted(Range<T>(de, rre), rv);
       }
     }
     return RangeMap(tmpmap);
@@ -340,12 +375,12 @@ public:
 
   // Return true if range r partially or completely overlaps with any key range
   // stored in the map
-  bool overlaps(Range r) const { return overlaps(_map, r); }
+  bool overlaps(Range<T> r) const { return overlaps(_map, r); }
 
   void print() {
     std::cout << "--------------------------" << std::endl;
-    forEach(_map, [](Range x, V v) {
-      std::cout << "[ " << x.first << ".." << x.second << " ) -> " << v
+    forEach(_map, [](Range<T> x, V v) {
+      std::cout << "[ " << x.get_start() << ".." << x.get_end() << " ) -> " << v
                 << std::endl;
     });
     std::cout << "--------------------------" << std::endl;
@@ -356,7 +391,7 @@ template <class T, class V, class I>
 RangeMap<T, V> inserted(RangeMap<T, V> m, I it, I end) {
   if (it == end)
     return m;
-  typename RangeMap<T, V>::Range key = it->first;
+  auto key = it->first;
   V val = it->second;
   auto m1 = m.inserted(key, val);
   return inserted(m1, ++it, end);
@@ -367,7 +402,7 @@ RangeMap<T, V> concat(RangeMap<T, V> const &a, RangeMap<T, V> const &b) {
   RangeMap<T, V> res = a;
   forEach(
       b.getTreeMap(),
-      [&res, &a](typename RangeMap<T, V>::Range const &x, V const &v) {
+      [&res, &a](Range<T> const &x, V const &v) {
         if (!a.overlaps(x))
           res = res.inserted(x, v);
         else

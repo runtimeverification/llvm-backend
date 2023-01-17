@@ -22,29 +22,29 @@ void hugeTest(std::vector<int> &v) {
     BOOST_CHECK_EQUAL(result1, true);
     auto result2 = trees[idxI1].lookup(v[i]);
     BOOST_CHECK_EQUAL(result2, v[i] + 1);
-    trees[idxI1].assert1();
-    trees[idxI1].countB();
-    trees[idxI1].assertBST();
+    trees[idxI1].assert_red_invariant();
+    trees[idxI1].assert_black_invariant();
+    trees[idxI1].assert_BST_invariant();
     int idxI2 = 1 + 2 * i + 1;
     result1 = trees[idxI2].member(v[i]);
     BOOST_CHECK_EQUAL(result1, true);
     result2 = trees[idxI2].lookup(v[i]);
     BOOST_CHECK_EQUAL(result2, v[i] + 2);
-    trees[idxI2].assert1();
-    trees[idxI2].countB();
-    trees[idxI2].assertBST();
+    trees[idxI2].assert_red_invariant();
+    trees[idxI2].assert_black_invariant();
+    trees[idxI2].assert_BST_invariant();
     int idxD = 1 + 2 * v.size() + i;
     result1 = trees[idxD].member(v[i]);
     BOOST_CHECK_EQUAL(result1, false);
-    trees[idxD].assert1();
-    trees[idxD].countB();
-    trees[idxD].assertBST();
+    trees[idxD].assert_red_invariant();
+    trees[idxD].assert_black_invariant();
+    trees[idxD].assert_BST_invariant();
   }
   auto result = trees[0].isEmpty();
   BOOST_CHECK_EQUAL(result, true);
-  trees[0].assert1();
-  trees[0].countB();
-  trees[0].assertBST();
+  trees[0].assert_red_invariant();
+  trees[0].assert_black_invariant();
+  trees[0].assert_BST_invariant();
 }
 
 void makeTestVectors(
