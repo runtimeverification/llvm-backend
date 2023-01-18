@@ -377,13 +377,13 @@ public:
   // stored in the map
   bool overlaps(Range<T> r) const { return overlaps(_map, r); }
 
-  void print() {
-    std::cout << "--------------------------" << std::endl;
-    forEach(_map, [](Range<T> x, V v) {
-      std::cout << "[ " << x.get_start() << ".." << x.get_end() << " ) -> " << v
-                << std::endl;
+  void print(std::ostream &os) {
+    os << "--------------------------" << std::endl;
+    forEach(_map, [&os](Range<T> x, V v) {
+      os << "[ " << x.get_start() << ".." << x.get_end() << " ) -> " << v
+         << std::endl;
     });
-    std::cout << "--------------------------" << std::endl;
+    os << "--------------------------" << std::endl;
   }
 };
 
