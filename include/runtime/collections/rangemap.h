@@ -90,11 +90,10 @@ private:
   std::optional<std::pair<Range<T>, V>>
   getKeyValue(RBTree<Range<T>, V> t, T k) const {
     if (t.isEmpty())
-      return std::optional<std::pair<Range<T>, V>>();
+      return std::nullopt;
     Range<T> r = t.root();
     if (r.contains(k))
-      return std::make_optional<std::pair<Range<T>, V>>(
-          std::make_pair(r, t.rootVal()));
+      return std::make_pair(r, t.rootVal());
     T start = r.get_start();
     if (k < start)
       return getKeyValue(t.left(), k);
@@ -246,19 +245,16 @@ public:
 
   // Return true if a range in the map contains the key.
   bool contains(T k) const {
-    std::optional<std::pair<Range<T>, V>> opt = getKeyValue(k);
-    if (opt.has_value())
-      return true;
-    return false;
+    return getKeyValue(k).has_value();
   }
 
   // If the key is contained in any range in the map, return the value
   // associated with the key.
   std::optional<V> getValue(T k) const {
-    std::optional<std::pair<Range<T>, V>> opt = getKeyValue(k);
+    auto opt = getKeyValue(k);
     if (opt.has_value())
-      return std::make_optional<V>(opt.value().second);
-    return std::optional<V>();
+      return opt.value().second;
+    return std::nullopt;
   }
 
   // If the key is contained in any range in the map, return the key range-
