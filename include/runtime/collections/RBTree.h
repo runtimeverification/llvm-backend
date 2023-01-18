@@ -25,12 +25,12 @@
 
 template <class T, class V>
 class RBTree {
-  enum Color { R, B, BB };
+  enum class Color { R, B, BB };
 
   static Color minusOneColor(Color c) {
     switch (c) {
-    case B: return R;
-    case BB: return B;
+    case Color::B: return Color::R;
+    case Color::BB: return Color::B;
     default: CONSTRUCT_MSG_AND_THROW("Unexpected color");
     }
   }
@@ -49,7 +49,7 @@ class RBTree {
   struct Leaf : public Node {
     Leaf(Color c)
         : Node(c) {
-      assert(c == B || c == BB);
+      assert(c == Color::B || c == Color::BB);
     }
     virtual bool isLeaf() const override { return true; }
     virtual ~Leaf() = default;
@@ -90,7 +90,7 @@ class RBTree {
 
 public:
   RBTree()
-      : _root(std::make_shared<const Leaf>(B)) { }
+      : _root(std::make_shared<const Leaf>(Color::B)) { }
 
   RBTree(Color c)
       : _root(std::make_shared<const Leaf>(c)) { }
@@ -104,7 +104,7 @@ public:
 
   template <class I>
   RBTree(I b, I e) {
-    RBTree t(B);
+    RBTree t(Color::B);
     for_each(b, e, [&t](std::pair<T, V> const &p) {
       t = t.inserted(p.first, p.second);
     });
@@ -170,23 +170,23 @@ public:
   // 1. No red node has a red child.
   void assert_red_invariant() const {
     if (!isEmpty()) {
-      if (rootColor() == BB) {
+      if (rootColor() == Color::BB) {
         CONSTRUCT_MSG_AND_THROW("Red invariant failed");
       }
       auto lft = left();
       auto rgt = right();
-      if (rootColor() == R) {
-        if (!(lft.isEmpty() || lft.rootColor() == B)) {
+      if (rootColor() == Color::R) {
+        if (!(lft.isEmpty() || lft.rootColor() == Color::B)) {
           CONSTRUCT_MSG_AND_THROW("Red invariant failed");
         }
-        if (!(rgt.isEmpty() || rgt.rootColor() == B)) {
+        if (!(rgt.isEmpty() || rgt.rootColor() == Color::B)) {
           CONSTRUCT_MSG_AND_THROW("Red invariant failed");
         }
       }
       lft.assert_red_invariant();
       rgt.assert_red_invariant();
     } else {
-      if (leafColor() != B) {
+      if (leafColor() != Color::B) {
         CONSTRUCT_MSG_AND_THROW("Red invariant failed");
       }
     }
@@ -202,7 +202,7 @@ public:
     if (lft != rgt) {
       CONSTRUCT_MSG_AND_THROW("Black invariant failed");
     }
-    return (rootColor() == B) ? 1 + lft : lft;
+    return (rootColor() == Color::B) ? 1 + lft : lft;
   }
 
   void assert_BST_invariant() const {
@@ -220,64 +220,64 @@ public:
 
 private:
   RBTree ins(T x, V v) const {
-    assert(!isEmpty(BB));
+    assert(!isEmpty(Color::BB));
 
-    if (isEmpty(B))
-      return RBTree(R, RBTree(), x, v, RBTree());
+    if (isEmpty(Color::B))
+      return RBTree(Color::R, RBTree(), x, v, RBTree());
     T y = root();
     V yVal = rootVal();
     Color c = rootColor();
-    if (c == B) {
+    if (c == Color::B) {
       if (x < y)
-        return balance(B, left().ins(x, v), y, yVal, right());
+        return balance(Color::B, left().ins(x, v), y, yVal, right());
       else if (y < x)
-        return balance(B, left(), y, yVal, right().ins(x, v));
+        return balance(Color::B, left(), y, yVal, right().ins(x, v));
       else
-        return RBTree(B, left(), x, v, right());
+        return RBTree(Color::B, left(), x, v, right());
     } else {
-      assert(c == R);
+      assert(c == Color::R);
       if (x < y)
-        return RBTree(R, left().ins(x, v), y, yVal, right());
+        return RBTree(Color::R, left().ins(x, v), y, yVal, right());
       else if (y < x)
-        return RBTree(R, left(), y, yVal, right().ins(x, v));
+        return RBTree(Color::R, left(), y, yVal, right().ins(x, v));
       else
-        return RBTree(R, left(), x, v, right());
+        return RBTree(Color::R, left(), x, v, right());
     }
   }
 
   RBTree del(T x) const {
-    assert(!isEmpty(BB));
+    assert(!isEmpty(Color::BB));
 
     // Black leaf
-    if (isEmpty(B)) {
+    if (isEmpty(Color::B)) {
       return RBTree();
     }
     T y = root();
     V yVal = rootVal();
     // Singleton red node
-    if (singleton(R)) {
+    if (singleton(Color::R)) {
       if (y == x)
         return RBTree();
       else
         return *this;
     }
     // Singleton black node
-    if (singleton(B)) {
+    if (singleton(Color::B)) {
       if (y == x)
-        return RBTree(BB);
+        return RBTree(Color::BB);
       else
         return *this;
     }
     // Black root with single left red child
-    if (onlyLeftChild(B, R)) {
-      assert(left().left().isEmpty(B));
-      assert(left().right().isEmpty(B));
+    if (onlyLeftChild(Color::B, Color::R)) {
+      assert(left().left().isEmpty(Color::B));
+      assert(left().right().isEmpty(Color::B));
       if (y == x)
-        return left().paint(B);
+        return left().paint(Color::B);
       else if (y < x)
         return *this;
       else // y > x
-        return RBTree(B, left().del(x), y, yVal, RBTree());
+        return RBTree(Color::B, left().del(x), y, yVal, RBTree());
     }
     // Otherwise
     if (y < x)
@@ -295,16 +295,16 @@ private:
   }
 
   RBTree redden() const {
-    if (nonEmpty(B) && left().nonEmpty(B) && right().nonEmpty(B))
-      return paint(R);
-    if (singleton(B))
-      return paint(R);
+    if (nonEmpty(Color::B) && left().nonEmpty(Color::B) && right().nonEmpty(Color::B))
+      return paint(Color::R);
+    if (singleton(Color::B))
+      return paint(Color::R);
     return *this;
   }
 
   RBTree blacken() const {
     if (doubledLeft() || doubledRight())
-      return paint(B);
+      return paint(Color::B);
     return *this;
   }
 
@@ -313,19 +313,19 @@ private:
     assert(!isEmpty());
 
     // Singleton red node
-    if (singleton(R)) {
+    if (singleton(Color::R)) {
       return std::make_pair(std::make_pair(root(), rootVal()), RBTree());
     }
     // Singleton black node
-    if (singleton(B)) {
-      return std::make_pair(std::make_pair(root(), rootVal()), RBTree(BB));
+    if (singleton(Color::B)) {
+      return std::make_pair(std::make_pair(root(), rootVal()), RBTree(Color::BB));
     }
     // Black node with single right child
-    if (onlyRightChild(B, R)) {
-      assert(right().left().isEmpty(B));
-      assert(right().right().isEmpty(B));
+    if (onlyRightChild(Color::B, Color::R)) {
+      assert(right().left().isEmpty(Color::B));
+      assert(right().right().isEmpty(Color::B));
       return std::make_pair(
-          std::make_pair(root(), rootVal()), right().paint(B));
+          std::make_pair(root(), rootVal()), right().paint(Color::B));
     }
     // Otherwise
     std::pair<std::pair<T, V>, RBTree> p = left().minDelete();
@@ -340,72 +340,72 @@ private:
   static RBTree
   rotate(Color c, RBTree const &lft, T x, V v, RBTree const &rgt) {
     // Red parent
-    if (c == R) {
-      if (lft.nonEmpty(BB) && rgt.nonEmpty(B))
+    if (c == Color::R) {
+      if (lft.nonEmpty(Color::BB) && rgt.nonEmpty(Color::B))
         return balance(
-            B, RBTree(R, lft.paint(B), x, v, rgt.left()), rgt.root(),
+            Color::B, RBTree(Color::R, lft.paint(Color::B), x, v, rgt.left()), rgt.root(),
             rgt.rootVal(), rgt.right());
-      else if (lft.isEmpty(BB) && rgt.nonEmpty(B))
+      else if (lft.isEmpty(Color::BB) && rgt.nonEmpty(Color::B))
         return balance(
-            B, RBTree(R, RBTree(), x, v, rgt.left()), rgt.root(), rgt.rootVal(),
+            Color::B, RBTree(Color::R, RBTree(), x, v, rgt.left()), rgt.root(), rgt.rootVal(),
             rgt.right());
-      else if (lft.nonEmpty(B) && rgt.nonEmpty(BB))
+      else if (lft.nonEmpty(Color::B) && rgt.nonEmpty(Color::BB))
         return balance(
-            B, lft.left(), lft.root(), lft.rootVal(),
-            RBTree(R, lft.right(), x, v, rgt.paint(B)));
-      else if (lft.nonEmpty(B) && rgt.isEmpty(BB))
+            Color::B, lft.left(), lft.root(), lft.rootVal(),
+            RBTree(Color::R, lft.right(), x, v, rgt.paint(Color::B)));
+      else if (lft.nonEmpty(Color::B) && rgt.isEmpty(Color::BB))
         return balance(
-            B, lft.left(), lft.root(), lft.rootVal(),
-            RBTree(R, lft.right(), x, v, RBTree()));
+            Color::B, lft.left(), lft.root(), lft.rootVal(),
+            RBTree(Color::R, lft.right(), x, v, RBTree()));
       else
         return RBTree(c, lft, x, v, rgt);
     }
     // Black parent
-    if (c == B) {
-      if (lft.nonEmpty(BB) && rgt.nonEmpty(B))
+    if (c == Color::B) {
+      if (lft.nonEmpty(Color::BB) && rgt.nonEmpty(Color::B))
         return balance(
-            BB, RBTree(R, lft.paint(B), x, v, rgt.left()), rgt.root(),
+            Color::BB, RBTree(Color::R, lft.paint(Color::B), x, v, rgt.left()), rgt.root(),
             rgt.rootVal(), rgt.right());
-      else if (lft.isEmpty(BB) && rgt.nonEmpty(B))
+      else if (lft.isEmpty(Color::BB) && rgt.nonEmpty(Color::B))
         return balance(
-            BB, RBTree(R, RBTree(), x, v, rgt.left()), rgt.root(),
+            Color::BB, RBTree(Color::R, RBTree(), x, v, rgt.left()), rgt.root(),
             rgt.rootVal(), rgt.right());
-      else if (lft.nonEmpty(B) && rgt.nonEmpty(BB))
+      else if (lft.nonEmpty(Color::B) && rgt.nonEmpty(Color::BB))
         return balance(
-            BB, lft.left(), lft.root(), lft.rootVal(),
-            RBTree(R, lft.right(), x, v, rgt.paint(B)));
-      else if (lft.nonEmpty(B) && rgt.isEmpty(BB))
+            Color::BB, lft.left(), lft.root(), lft.rootVal(),
+            RBTree(Color::R, lft.right(), x, v, rgt.paint(Color::B)));
+      else if (lft.nonEmpty(Color::B) && rgt.isEmpty(Color::BB))
         return balance(
-            BB, lft.left(), lft.root(), lft.rootVal(),
-            RBTree(R, lft.right(), x, v, RBTree()));
-      else if (lft.nonEmpty(BB) && rgt.nonEmpty(R) && rgt.left().nonEmpty(B))
+            Color::BB, lft.left(), lft.root(), lft.rootVal(),
+            RBTree(Color::R, lft.right(), x, v, RBTree()));
+      else if (lft.nonEmpty(Color::BB) && rgt.nonEmpty(Color::R) && rgt.left().nonEmpty(Color::B))
         return RBTree(
-            B,
+            Color::B,
             balance(
-                B, RBTree(R, lft.paint(B), x, v, rgt.left().left()),
+                Color::B, RBTree(Color::R, lft.paint(Color::B), x, v, rgt.left().left()),
                 rgt.left().root(), rgt.left().rootVal(), rgt.left().right()),
             rgt.root(), rgt.rootVal(), rgt.right());
-      else if (lft.isEmpty(BB) && rgt.nonEmpty(R) && rgt.left().nonEmpty(B))
+      else if (lft.isEmpty(Color::BB) && rgt.nonEmpty(Color::R) && rgt.left().nonEmpty(Color::B))
         return RBTree(
-            B,
+            Color::B,
             balance(
-                B, RBTree(R, RBTree(), x, v, rgt.left().left()),
+                Color::B, RBTree(Color::R, RBTree(), x, v, rgt.left().left()),
                 rgt.left().root(), rgt.left().rootVal(), rgt.left().right()),
             rgt.root(), rgt.rootVal(), rgt.right());
-      else if (lft.nonEmpty(R) && lft.right().nonEmpty(B) && rgt.nonEmpty(BB))
+      else if (lft.nonEmpty(Color::R) && lft.right().nonEmpty(Color::B) && rgt.nonEmpty(Color::BB))
         return RBTree(
-            B, lft.left(), lft.root(), lft.rootVal(),
+            Color::B, lft.left(), lft.root(), lft.rootVal(),
             balance(
-                B, lft.right().left(), lft.right().root(),
+                Color::B, lft.right().left(), lft.right().root(),
                 lft.right().rootVal(),
-                RBTree(R, lft.right().right(), x, v, rgt.paint(B))));
-      else if (lft.nonEmpty(R) && lft.right().nonEmpty(B) && rgt.isEmpty(BB))
+                RBTree(Color::R, lft.right().right(), x, v, rgt.paint(Color::B))));
+      else if (lft.nonEmpty(Color::R) && lft.right().nonEmpty(Color::B) && rgt.isEmpty(Color::BB))
         return RBTree(
-            B, lft.left(), lft.root(), lft.rootVal(),
+            Color::B, lft.left(), lft.root(), lft.rootVal(),
             balance(
-                B, lft.right().left(), lft.right().root(),
+                Color::B, lft.right().left(), lft.right().root(),
                 lft.right().rootVal(),
-                RBTree(R, lft.right().right(), x, v, RBTree())));
+                RBTree(Color::R, lft.right().right(), x, v, RBTree())));
       else
         return RBTree(c, lft, x, v, rgt);
     }
@@ -418,24 +418,24 @@ private:
   balance(Color c, RBTree const &lft, T x, V v, RBTree const &rgt) {
     if (lft.doubledLeft())
       return RBTree(
-          minusOneColor(c), lft.left().paint(B), lft.root(), lft.rootVal(),
-          RBTree(B, lft.right(), x, v, rgt));
+          minusOneColor(c), lft.left().paint(Color::B), lft.root(), lft.rootVal(),
+          RBTree(Color::B, lft.right(), x, v, rgt));
     else if (lft.doubledRight())
       return RBTree(
           minusOneColor(c),
-          RBTree(B, lft.left(), lft.root(), lft.rootVal(), lft.right().left()),
+          RBTree(Color::B, lft.left(), lft.root(), lft.rootVal(), lft.right().left()),
           lft.right().root(), lft.right().rootVal(),
-          RBTree(B, lft.right().right(), x, v, rgt));
+          RBTree(Color::B, lft.right().right(), x, v, rgt));
     else if (rgt.doubledLeft())
       return RBTree(
-          minusOneColor(c), RBTree(B, lft, x, v, rgt.left().left()),
+          minusOneColor(c), RBTree(Color::B, lft, x, v, rgt.left().left()),
           rgt.left().root(), rgt.left().rootVal(),
           RBTree(
-              B, rgt.left().right(), rgt.root(), rgt.rootVal(), rgt.right()));
+              Color::B, rgt.left().right(), rgt.root(), rgt.rootVal(), rgt.right()));
     else if (rgt.doubledRight())
       return RBTree(
-          minusOneColor(c), RBTree(B, lft, x, v, rgt.left()), rgt.root(),
-          rgt.rootVal(), rgt.right().paint(B));
+          minusOneColor(c), RBTree(Color::B, lft, x, v, rgt.left()), rgt.root(),
+          rgt.rootVal(), rgt.right().paint(Color::B));
     else
       return RBTree(c, lft, x, v, rgt);
   }
@@ -445,28 +445,28 @@ private:
   bool nonEmpty(Color c) const { return !isEmpty() && rootColor() == c; }
 
   bool singleton(Color c) const {
-    return !isEmpty() && rootColor() == c && left().isEmpty(B)
-           && right().isEmpty(B);
+    return !isEmpty() && rootColor() == c && left().isEmpty(Color::B)
+           && right().isEmpty(Color::B);
   }
 
   bool onlyLeftChild(Color parentColor, Color childColor) const {
     return !isEmpty() && rootColor() == parentColor && !left().isEmpty()
-           && left().rootColor() == childColor && right().isEmpty(B);
+           && left().rootColor() == childColor && right().isEmpty(Color::B);
   }
 
   bool onlyRightChild(Color parentColor, Color childColor) const {
-    return !isEmpty() && rootColor() == parentColor && left().isEmpty(B)
+    return !isEmpty() && rootColor() == parentColor && left().isEmpty(Color::B)
            && !right().isEmpty() && right().rootColor() == childColor;
   }
 
   bool doubledLeft() const {
-    return !isEmpty() && rootColor() == R && !left().isEmpty()
-           && left().rootColor() == R;
+    return !isEmpty() && rootColor() == Color::R && !left().isEmpty()
+           && left().rootColor() == Color::R;
   }
 
   bool doubledRight() const {
-    return !isEmpty() && rootColor() == R && !right().isEmpty()
-           && right().rootColor() == R;
+    return !isEmpty() && rootColor() == Color::R && !right().isEmpty()
+           && right().rootColor() == Color::R;
   }
 
   RBTree paint(Color c) const {
