@@ -37,10 +37,10 @@ class RBTree {
 
   struct Node {
     Node(Color c)
-        : _c(c)
-        , _s(0) { }
-    Color _c;
-    size_t _s;
+        : c_(c)
+        , s_(0) { }
+    Color c_;
+    size_t s_;
 
     virtual bool isLeaf() const = 0;
     virtual ~Node() = default;
@@ -60,44 +60,44 @@ class RBTree {
         Color c, std::shared_ptr<const Node> const &lft, T key, V val,
         std::shared_ptr<const Node> const &rgt)
         : Node(c)
-        , _lft(lft)
-        , _key(key)
-        , _val(val)
-        , _rgt(rgt) {
-      this->_s = 1 + _lft->_s + _rgt->_s;
+        , lft_(lft)
+        , key_(key)
+        , val_(val)
+        , rgt_(rgt) {
+      this->s_ = 1 + lft_->s_ + rgt_->s_;
     }
-    std::shared_ptr<const Node> _lft;
-    T _key;
-    V _val;
-    std::shared_ptr<const Node> _rgt;
+    std::shared_ptr<const Node> lft_;
+    T key_;
+    V val_;
+    std::shared_ptr<const Node> rgt_;
 
     virtual bool isLeaf() const override { return false; }
     virtual ~InternalNode() = default;
   };
 
   explicit RBTree(std::shared_ptr<const Node> const &node)
-      : _root(node) { }
+      : root_(node) { }
 
   Color rootColor() const {
     assert(!isEmpty());
-    return _root->_c;
+    return root_->c_;
   }
 
   Color leafColor() const {
     assert(isEmpty());
-    return _root->_c;
+    return root_->c_;
   }
 
 public:
   RBTree()
-      : _root(std::make_shared<const Leaf>(Color::B)) { }
+      : root_(std::make_shared<const Leaf>(Color::B)) { }
 
   RBTree(Color c)
-      : _root(std::make_shared<const Leaf>(c)) { }
+      : root_(std::make_shared<const Leaf>(c)) { }
 
   RBTree(Color c, RBTree const &lft, T key, V val, RBTree const &rgt)
-      : _root(std::make_shared<const InternalNode>(
-          c, lft._root, key, val, rgt._root)) {
+      : root_(std::make_shared<const InternalNode>(
+          c, lft.root_, key, val, rgt.root_)) {
     assert(lft.isEmpty() || lft.root() < key);
     assert(rgt.isEmpty() || key < rgt.root());
   }
@@ -108,36 +108,36 @@ public:
     for_each(b, e, [&t](std::pair<T, V> const &p) {
       t = t.inserted(p.first, p.second);
     });
-    _root = t._root;
+    root_ = t.root_;
   }
 
-  bool isEmpty() const { return _root->isLeaf(); }
+  bool isEmpty() const { return root_->isLeaf(); }
 
   T root() const {
     assert(!isEmpty());
-    const InternalNode *r = static_cast<const InternalNode *>(_root.get());
-    return r->_key;
+    const InternalNode *r = static_cast<const InternalNode *>(root_.get());
+    return r->key_;
   }
 
   V rootVal() const {
     assert(!isEmpty());
-    const InternalNode *r = static_cast<const InternalNode *>(_root.get());
-    return r->_val;
+    const InternalNode *r = static_cast<const InternalNode *>(root_.get());
+    return r->val_;
   }
 
   RBTree left() const {
     assert(!isEmpty());
-    const InternalNode *r = static_cast<const InternalNode *>(_root.get());
-    return RBTree(r->_lft);
+    const InternalNode *r = static_cast<const InternalNode *>(root_.get());
+    return RBTree(r->lft_);
   }
 
   RBTree right() const {
     assert(!isEmpty());
-    const InternalNode *r = static_cast<const InternalNode *>(_root.get());
-    return RBTree(r->_rgt);
+    const InternalNode *r = static_cast<const InternalNode *>(root_.get());
+    return RBTree(r->rgt_);
   }
 
-  size_t size() const { return _root->_s; }
+  size_t size() const { return root_->s_; }
 
   bool member(T x) const {
     if (isEmpty())
@@ -475,7 +475,7 @@ private:
   }
 
 private:
-  std::shared_ptr<const Node> _root;
+  std::shared_ptr<const Node> root_;
 };
 
 template <class T, class V, class F>
