@@ -9,6 +9,8 @@
 #include <memory>
 #include <stdexcept>
 #include <string>
+#include <functional>
+#include <utility>
 
 #define CONSTRUCT_MSG_AND_THROW(msg)                                           \
   do {                                                                         \
@@ -479,11 +481,11 @@ private:
 };
 
 template <class T, class V, class F>
-void forEach(RBTree<T, V> const &t, F f) {
+void forEach(RBTree<T, V> const &t, F&& f) {
   if (!t.isEmpty()) {
-    forEach(t.left(), f);
-    f(t.root(), t.rootVal());
-    forEach(t.right(), f);
+    forEach(t.left(), std::forward<F>(f));
+    std::invoke(f, t.root(), t.rootVal());
+    forEach(t.right(), std::forward<F>(f));
   }
 }
 
