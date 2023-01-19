@@ -40,7 +40,7 @@ void hugeTest(std::vector<int> &v) {
     trees[idxD].assert_black_invariant();
     trees[idxD].assert_BST_invariant();
   }
-  auto result = trees[0].isEmpty();
+  auto result = trees[0].is_empty();
   BOOST_CHECK_EQUAL(result, true);
   trees[0].assert_red_invariant();
   trees[0].assert_black_invariant();
@@ -91,7 +91,7 @@ BOOST_AUTO_TEST_CASE(treemap_test_size) {
 BOOST_AUTO_TEST_CASE(treemap_test_concat_success) {
   auto m1 = (RBTree<int, int>()).inserted(0, 1);
   auto m2 = (RBTree<int, int>()).inserted(1, 2);
-  auto map = mapConcat(m1, m2);
+  auto map = concat(m1, m2);
   auto result = map.size();
   BOOST_CHECK_EQUAL(result, 2);
   result = map.member(0);
@@ -107,7 +107,7 @@ BOOST_AUTO_TEST_CASE(treemap_test_concat_success) {
 BOOST_AUTO_TEST_CASE(treemap_test_concat_failure) {
   auto m1 = (RBTree<int, int>()).inserted(0, 1);
   auto m2 = (RBTree<int, int>()).inserted(0, 2);
-  BOOST_CHECK_THROW(mapConcat(m1, m2), std::invalid_argument);
+  BOOST_CHECK_THROW(concat(m1, m2), std::invalid_argument);
 }
 
 BOOST_AUTO_TEST_CASE(treemap_test_lookup) {
