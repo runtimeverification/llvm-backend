@@ -63,20 +63,22 @@ public:
 
   // Returns true if this range overlaps with range r
   bool overlaps(Range r) const {
-    if (r.end_ <= start_)
+    if (r.end_ <= start_) {
       return false;
-    else if (end_ <= r.start_)
+    } else if (end_ <= r.start_) {
       return false;
+    }
     return true;
   }
 
   // Returns true if this range and range r overlap or are adjacent, i.e.,
   // share a bound, either inclusive or exclusive.
   bool is_relevant(Range r) const {
-    if (r.end_ < start_)
+    if (r.end_ < start_) {
       return false;
-    else if (end_ < r.start_)
+    } else if (end_ < r.start_) {
       return false;
+    }
     return true;
   }
 };
@@ -89,21 +91,25 @@ private:
 
   std::optional<std::pair<Range<T>, V>>
   get_key_value(RBTree<Range<T>, V> t, T k) const {
-    if (t.is_empty())
+    if (t.is_empty()) {
       return std::nullopt;
+    }
     Range<T> r = t.root_key();
-    if (r.contains(k))
+    if (r.contains(k)) {
       return std::make_pair(r, t.root_val());
+    }
     T start = r.get_start();
-    if (k < start)
+    if (k < start) {
       return get_key_value(t.left(), k);
+    }
     assert(k >= r.get_end());
     return get_key_value(t.right(), k);
   }
 
   bool overlaps(RBTree<Range<T>, V> const &t, Range<T> r) const {
-    if (t.is_empty())
+    if (t.is_empty()) {
       return false;
+    }
     T start = r.get_start();
     T end = r.get_end();
     T rstart = t.root_key().get_start();
@@ -129,8 +135,9 @@ private:
   // adjacent (share a boundary) with range r, in v.
   void get_overlapping_or_adjacent_ranges(
       RBTree<Range<T>, V> t, Range<T> r, std::vector<std::pair<Range<T>, V>> &v) {
-    if (t.is_empty())
+    if (t.is_empty()) {
       return;
+    }
     T start = r.get_start();
     T end = r.get_end();
     T rstart = t.root_key().get_start();
@@ -177,8 +184,9 @@ private:
   // Gather all <Range, V> pairs in t that are overlapping with range r, in v.
   void get_overlapping_ranges(
       RBTree<Range<T>, V> t, Range<T> r, std::vector<std::pair<Range<T>, V>> &v) {
-    if (t.is_empty())
+    if (t.is_empty()) {
       return;
+    }
     T start = r.get_start();
     T end = r.get_end();
     T rstart = t.root_key().get_start();
@@ -200,10 +208,9 @@ private:
       get_overlapping_ranges(t.left(), r, v);
       v.push_back(std::make_pair(t.root_key(), t.root_val()));
       get_overlapping_ranges(t.right(), r, v);
-    } else if (rstart <= start && end <= rend)
-    // The candidate range contains the target range, i.e. is equal or
-    // larger. It is the only relevant range, no need to look for more.
-    {
+    } else if (rstart <= start && end <= rend) {
+      // The candidate range contains the target range, i.e. is equal or
+      // larger. It is the only relevant range, no need to look for more.
       v.push_back(std::make_pair(t.root_key(), t.root_val()));
     } else if (rstart <= start) {
       // The candidate range overlapps with the target range on the left
@@ -252,8 +259,9 @@ public:
   // associated with the key.
   std::optional<V> get_value(T k) const {
     auto opt = get_key_value(k);
-    if (opt.has_value())
+    if (opt.has_value()) {
       return opt.value().second;
+    }
     return std::nullopt;
   }
 
@@ -274,8 +282,9 @@ public:
      */
   RangeMap inserted(Range<T> r, V v) {
     // Empty ranges do not make sense here.
-    if (r.is_empty())
+    if (r.is_empty()) {
       CONSTRUCT_MSG_AND_THROW("Insert empty range in range map");
+    }
 
     std::vector<std::pair<Range<T>, V>> ranges;
     get_overlapping_or_adjacent_ranges(treemap_, r, ranges);
@@ -336,8 +345,9 @@ public:
      */
   RangeMap deleted(Range<T> r) {
     // Empty ranges do not make sense here.
-    if (r.is_empty())
+    if (r.is_empty()) {
       CONSTRUCT_MSG_AND_THROW("Delete empty range from range map");
+    }
 
     std::vector<std::pair<Range<T>, V>> ranges;
     get_overlapping_ranges(treemap_, r, ranges);
@@ -381,8 +391,9 @@ public:
 
 template <class T, class V, class I>
 RangeMap<T, V> inserted(RangeMap<T, V> m, I it, I end) {
-  if (it == end)
+  if (it == end) {
     return m;
+  }
   auto key = it->first;
   V val = it->second;
   auto m1 = m.inserted(key, val);
@@ -395,11 +406,12 @@ RangeMap<T, V> concat(RangeMap<T, V> const &a, RangeMap<T, V> const &b) {
   for_each(
       b.get_treemap(),
       [&res, &a](Range<T> const &x, V const &v) {
-        if (!a.overlaps(x))
+        if (!a.overlaps(x)) {
           res = res.inserted(x, v);
-        else
+        } else {
           CONSTRUCT_MSG_AND_THROW(
               "Overlapping key ranges in map concatenation");
+        }
       });
   return res;
 }
