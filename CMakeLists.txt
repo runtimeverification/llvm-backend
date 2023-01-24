@@ -275,5 +275,3 @@ if(BUILD_TESTS)
 endif()
 
 add_subdirectory(bindings)
-
-#add_subdirectory(test)
