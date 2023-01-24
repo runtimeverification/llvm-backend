@@ -12,14 +12,26 @@ save_temps=false
 output=false
 output_file="definition.o"
 compile=true
-for arg in "$@"; do
+python_cmd=python3
+
+python_extension() {
+  "$1" <<HERE
+import sysconfig
+print(sysconfig.get_config_var('EXT_SUFFIX'))
+HERE
+}
+
+clangpp_args=()
+while [[ $# -gt 0 ]]; do
   if $output; then
     output=false
-    output_file="$arg"
+    output_file="$1"
   fi
-  case "$arg" in
+
+  keep_arg=true
+  case "$1" in
     -O[0-3])
-      llc_opt_flags="$arg"
+      llc_opt_flags="$1"
       ;;
     -O.)
       echo "$0: invalid optimization level"
@@ -40,10 +52,21 @@ for arg in "$@"; do
     -o)
       output=true
       ;;
+    --python)
+      keep_arg=false
+      python_cmd="$2"
+      shift; shift
+      ;;
     *)
       ;;
   esac
+
+  if [[ "$keep_arg" = "true" ]]; then
+    clangpp_args+=("$1")
+    shift
+  fi
 done
+
 case "$modopt" in
   *.o)
     compile=false
@@ -51,6 +74,7 @@ case "$modopt" in
   *)
     ;;
 esac
+
 LIBDIR="$(dirname "$0")/../lib/kllvm/"
 INCDIR="$(dirname "$0")/../include/"
 if [ "$main" = "main" ]; then
@@ -89,32 +113,37 @@ if ! $save_temps; then
   trap 'rm -rf "$tmpdir"' INT TERM EXIT
 fi
 
-if [ "$lto" = "lto" ]; then
-  flags+=("-flto" "-Wl,-mllvm,-tailcallopt")
-  files=("$LIBDIR"/llvm/*.ll)
-  if ! $link; then
-    mv "$modopt" "$output_file"
-  fi
-else
-  files=()
-  if $compile; then
-    modasm="$tmpdir/asm.o"
+# When building the Python AST module, there's no runtime and no main file, so
+# we skip this entire step. The library code is just C++, so we can skip
+# straight to invoking the C++ compiler.
+if [ "$main" != "python_ast" ]; then
+  if [ "$lto" = "lto" ]; then
+    flags+=("-flto" "-Wl,-mllvm,-tailcallopt")
+    files=("$LIBDIR"/llvm/*.ll)
     if ! $link; then
-      modasm="$output_file"
+      mv "$modopt" "$output_file"
     fi
-    run @LLC@ \
-      -tailcallopt "$modopt" -mtriple=@BACKEND_TARGET_TRIPLE@ \
-      -filetype=obj "$llc_opt_flags" "${llc_flags[@]}" -o "$modasm"
-    modopt="$modasm"
-  fi
-  if $link; then
-    for file in "$LIBDIR"/llvm/*.ll; do
-      tmp="$tmpdir/$(basename "$file").o"
+  else
+    files=()
+    if $compile; then
+      modasm="$tmpdir/asm.o"
+      if ! $link; then
+        modasm="$output_file"
+      fi
       run @LLC@ \
-        -tailcallopt "$file" -mtriple=@BACKEND_TARGET_TRIPLE@ \
-        -filetype=obj "$llc_opt_flags" "${llc_flags[@]}" -o "$tmp"
-      files+=("$tmp")
-    done
+        -tailcallopt "$modopt" -mtriple=@BACKEND_TARGET_TRIPLE@ \
+        -filetype=obj "$llc_opt_flags" "${llc_flags[@]}" -o "$modasm"
+      modopt="$modasm"
+    fi
+    if $link; then
+      for file in "$LIBDIR"/llvm/*.ll; do
+        tmp="$tmpdir/$(basename "$file").o"
+        run @LLC@ \
+          -tailcallopt "$file" -mtriple=@BACKEND_TARGET_TRIPLE@ \
+          -filetype=obj "$llc_opt_flags" "${llc_flags[@]}" -o "$tmp"
+        files+=("$tmp")
+      done
+    fi
   fi
 fi
 
@@ -139,17 +168,17 @@ elif [ "$main" = "python" ]; then
   # If we didn't pass a filename explicitly as output, then we enforce the
   # blessed filename format that Python can understand.
   if [ "$output_file" = "definition.o" ]; then
-    flags+=("-o" "_kllvm_runtime$(python3-config --extension-suffix)")
+    flags+=("-o" "_kllvm_runtime$(python_extension ${python_cmd})")
   fi
 elif [ "$main" = "python_ast" ]; then
   # jemalloc and output naming considerations for Python AST library are shared
   # with the runtime ones above.
   all_libraries=("${libraries[@]}" "-lgmp" "-lmpfr" "-lpthread" "-ldl" "-lffi")
   flags+=("-fPIC" "-shared" "-I${INCDIR}" "-std=c++17")
-  flags+=($(python3 -m pybind11 --includes))
+  flags+=($(${python_cmd} -m pybind11 --includes))
 
   if [ "$output_file" = "definition.o" ]; then
-    flags+=("-o" "_kllvm$(python3-config --extension-suffix)")
+    flags+=("-o" "_kllvm$(python_extension ${python_cmd})")
   fi
 elif [ "$main" = "c" ]; then
   # Avoid jemalloc for similar reasons as Python; we don't know who is loading
@@ -180,5 +209,5 @@ run @CMAKE_CXX_COMPILER@ -Wno-override-module -Wno-return-type-c-linkage "$modop
   "${flags[@]}" \
   "${all_libraries[@]}" \
   -I "$(dirname "$0")"/../include/kllvm \
-  "$@"
+  "${clangpp_args[@]}"
 fi
