@@ -51,7 +51,8 @@ case "$modopt" in
   *)
     ;;
 esac
-LIBDIR="$(dirname "$0")"/../lib/kllvm/
+LIBDIR="$(dirname "$0")/../lib/kllvm/"
+INCDIR="$(dirname "$0")/../include/"
 if [ "$main" = "main" ]; then
   MAINFILES="$LIBDIR"/llvm/main/main.ll
 elif [ "$main" = "search" ]; then
@@ -139,6 +140,16 @@ elif [ "$main" = "python" ]; then
   # blessed filename format that Python can understand.
   if [ "$output_file" = "definition.o" ]; then
     flags+=("-o" "_kllvm_runtime$(python3-config --extension-suffix)")
+  fi
+elif [ "$main" = "python_ast" ]; then
+  # jemalloc and output naming considerations for Python AST library are shared
+  # with the runtime ones above.
+  all_libraries=("${libraries[@]}" "-lgmp" "-lmpfr" "-lpthread" "-ldl" "-lffi")
+  flags+=("-fPIC" "-shared" "-I${INCDIR}" "-std=c++17")
+  flags+=($(python3 -m pybind11 --includes))
+
+  if [ "$output_file" = "definition.o" ]; then
+    flags+=("-o" "_kllvm$(python3-config --extension-suffix)")
   fi
 elif [ "$main" = "c" ]; then
   # Avoid jemalloc for similar reasons as Python; we don't know who is loading

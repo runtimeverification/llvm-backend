@@ -176,6 +176,11 @@ install(
 )
 
 install(
+  DIRECTORY include/kllvm
+  DESTINATION include
+)
+
+install(
   DIRECTORY include/runtime
   DESTINATION include/kllvm
 )
