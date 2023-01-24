@@ -8,6 +8,8 @@
 #include <optional>
 #include <stdexcept>
 
+// Range bounded inclusively below and exlusively above: [start, end).
+// - T : class of values within the range
 template <class T>
 class Range {
 private:
@@ -15,17 +17,22 @@ private:
     T end_;
 
 public:
+  // Create a new range [start, end).
   Range(T start, T end)
       : start_(start), end_(end) { }
 
+  // Getter for the start of this range.
   T get_start() {
     return start_;
   }
 
+  // Getter for the end of this range.
   T get_end() {
     return end_;
   }
 
+  // The following methods define the ordering for objects of class Range.
+  // Operator < is used to subsequently define >, ==, <=, >=, and !=.
   bool operator<(const Range &other) const {
     return this->start_ == other.start_ ? this->end_ < other.end_
                                         : this->start_ < other.start_;
@@ -51,17 +58,17 @@ public:
     return *this < other || other < *this;
   }
 
-  // Returns true if this range contains k
+  // Returns true if this range contains k.
   bool contains(T k) const {
     return k >= start_ && k < end_;
   }
 
-  // Returns true if this range is empty
+  // Returns true if this range is empty.
   bool is_empty() const {
     return start_ >= end_;
   }
 
-  // Returns true if this range overlaps with range r
+  // Returns true if this range overlaps with range r.
   bool overlaps(Range r) const {
     if (r.end_ <= start_) {
       return false;
@@ -83,10 +90,14 @@ public:
   }
 };
 
+// Map whose keys are stored as ranges.
+// - T : class of map keys
+// - V : class of map values
 template <class T, class V>
 class RangeMap {
 
 private:
+  // Ordered map based on red-black tree.
   RBTree<Range<T>, V> treemap_;
 
   std::optional<std::pair<Range<T>, V>>
@@ -106,6 +117,8 @@ private:
     return get_key_value(t.right(), k);
   }
 
+  // Return true if range r partially or completely overlaps with any range
+  // stored in the ordered map t that is passed as an argument.
   bool overlaps(RBTree<Range<T>, V> const &t, Range<T> r) const {
     if (t.is_empty()) {
       return false;
@@ -230,12 +243,18 @@ private:
   }
 
 public:
+  // Create an empty rangemap.
   RangeMap()
       : treemap_(RBTree<Range<T>, V>()) { }
 
+  // Create a rangemap on top of a red-black tree that uses ranges as keys.
+  // The red black tree should already be a well-formed rangemap.
   RangeMap(RBTree<Range<T>, V> t)
       : treemap_(t) { }
 
+  // Create a rangemap with elements from the container designated by the
+  // beginning and end iterator arguments. The container should contain elements
+  // of type std::pair<Range<T>,V>.
   template <class I>
   RangeMap(I b, I e) {
     RangeMap m = RangeMap();
@@ -245,18 +264,19 @@ public:
     treemap_ = m.treemap_;
   }
 
+  // Getter method for the red-black tree.
   RBTree<Range<T>, V> get_treemap() const { return treemap_; }
 
   // Return the number of key ranges in the map.
   size_t size() const { return treemap_.size(); }
 
-  // Return true if a range in the map contains the key.
+  // Return true if a range in this map contains the key k.
   bool contains(T k) const {
     return get_key_value(k).has_value();
   }
 
-  // If the key is contained in any range in the map, return the value
-  // associated with the key.
+  // If the key k is contained in any range in this map, return the value
+  // associated with k.
   std::optional<V> get_value(T k) const {
     auto opt = get_key_value(k);
     if (opt.has_value()) {
@@ -265,14 +285,14 @@ public:
     return std::nullopt;
   }
 
-  // If the key is contained in any range in the map, return the key range-
-  // value pair associated with the key.
+  // If the key k is contained in any range in this map, return the key range-
+  // value pair associated with k.
   std::optional<std::pair<Range<T>, V>> get_key_value(T k) const {
     return get_key_value(treemap_, k);
   }
 
-  /* Given a map and a pair of key range and value, return a map containing
-     * the key range-value pair.
+  /* Return a map resulting from inserting the given key range and value into
+     * this map.
      * If the inserted range partially or completely overlaps any existing
      * range in the map, then the existing range (or ranges) will be partially
      * or completely replaced by the inserted range in the resulting map.
@@ -337,7 +357,7 @@ public:
     return RangeMap(tmpmap);
   }
 
-  /* Given a range to be removed and a map, return a map that does not
+  /* Given a range to be removed and this map, return a map that does not
      * contain the removed range or any part of it.
      * If the range to be removed partially overlaps with any ranges in the
      * map, then the boundaries of these ranges are adjusted in the resulting
@@ -376,9 +396,10 @@ public:
   }
 
   // Return true if range r partially or completely overlaps with any key range
-  // stored in the map
+  // stored in this rangemap.
   bool overlaps(Range<T> r) const { return overlaps(treemap_, r); }
 
+  // Print this rangemap to output stream os.
   void print(std::ostream &os) {
     os << "--------------------------" << std::endl;
     for_each(treemap_, [&os](Range<T> x, V v) {
@@ -389,6 +410,9 @@ public:
   }
 };
 
+// Return a rangemap with all elements in m, and then also from the container
+// designated by the beginning and end iterator arguments. The container should
+// contain elements of type std::pair<Range<T>, V>.
 template <class T, class V, class I>
 RangeMap<T, V> inserted(RangeMap<T, V> m, I it, I end) {
   if (it == end) {
@@ -400,6 +424,9 @@ RangeMap<T, V> inserted(RangeMap<T, V> m, I it, I end) {
   return inserted(m1, ++it, end);
 }
 
+// Return a rangemap that is the concatenation of rangemaps a and b. This
+// function throws an exception if any of the key ranges in rangemap a overlap
+// with any of the key ranges in rangemap b.
 template <class T, class V>
 RangeMap<T, V> concat(RangeMap<T, V> const &a, RangeMap<T, V> const &b) {
   RangeMap<T, V> res = a;

@@ -27,8 +27,14 @@
 
 template <class T, class V>
 class RBTree {
+  // Colors used by the red black tree: Red (R), Black (B), and Double Black
+  // (BB). BB is a transitory color that allows to temporarily preserve the
+  // black invariant when certain operations occur, and is gradually removed
+  // while they are being completed. A red-black tree is never expected to have
+  // any nodes or leaves of color BB after an operation is performed on it.
   enum class Color { R, B, BB };
 
+  // Return the "previous" color, i.e., the one containing one less black.
   static Color minus_one_color(Color c) {
     switch (c) {
     case Color::B: return Color::R;
@@ -37,18 +43,23 @@ class RBTree {
     }
   }
 
+  // Virtual class, for a node of the red-black tree.
   struct Node {
     Node(Color c)
         : c_(c)
         , s_(0) { }
-    Color c_;
-    size_t s_;
+    Color c_;   // Color of this tree Node
+    size_t s_;  // Size of the tree with root Node
 
+    // Return true if this object is a Leaf.
     virtual bool is_leaf() const = 0;
     virtual ~Node() = default;
   };
 
+  // A Leaf of the red-black tree.
   struct Leaf : public Node {
+    // Create a new Leaf object with the given color. Only B and BB colors are
+    // valid arguments.
     Leaf(Color c)
         : Node(c) {
       assert(c == Color::B || c == Color::BB);
@@ -57,7 +68,10 @@ class RBTree {
     virtual ~Leaf() = default;
   };
 
+  // An internal node of the red-black tree.
   struct InternalNode : public Node {
+    // Create a new InternalNode object with the given lft and rgt children,
+    // key and value, and color.
     InternalNode(
         Color c, std::shared_ptr<const Node> const &lft, T key, V val,
         std::shared_ptr<const Node> const &rgt)
@@ -68,35 +82,43 @@ class RBTree {
         , rgt_(rgt) {
       this->s_ = 1 + lft_->s_ + rgt_->s_;
     }
-    std::shared_ptr<const Node> lft_;
-    T key_;
-    V val_;
-    std::shared_ptr<const Node> rgt_;
+    std::shared_ptr<const Node> lft_; // Left child
+    T key_;                           // Node key
+    V val_;                           // Node value
+    std::shared_ptr<const Node> rgt_; // Right child
 
     virtual bool is_leaf() const override { return false; }
     virtual ~InternalNode() = default;
   };
 
+  // Copy constructor.
   explicit RBTree(std::shared_ptr<const Node> const &node)
       : root_(node) { }
 
+  // Return this Node's color when it is not empty.
   Color root_color() const {
     assert(!is_empty());
     return root_->c_;
   }
 
+  // Return this Node's color when it is empty.
   Color leaf_color() const {
     assert(is_empty());
     return root_->c_;
   }
 
 public:
+  // Create an empty red-black tree.
   RBTree()
       : root_(std::make_shared<const Leaf>(Color::B)) { }
 
+  // Create an empty red-black tree, with the specified color. Only B and BB
+  // are valid colors for this constructor.
   RBTree(Color c)
       : root_(std::make_shared<const Leaf>(c)) { }
 
+  // Create a red-black tree, with a root of the spefified color, key and value,
+  // and children lft and rgt.
   RBTree(Color c, RBTree const &lft, T key, V val, RBTree const &rgt)
       : root_(std::make_shared<const InternalNode>(
           c, lft.root_, key, val, rgt.root_)) {
@@ -104,6 +126,9 @@ public:
     assert(rgt.is_empty() || key < rgt.root_key());
   }
 
+  // Create a red-black tree with elements from the container designated by the
+  // beginning and end iterator arguments. The container should contain elements
+  // of type std::pair<T,V>.
   template <class I>
   RBTree(I b, I e) {
     RBTree t(Color::B);
@@ -113,34 +138,41 @@ public:
     root_ = t.root_;
   }
 
+  // Return true if this tree is empty.
   bool is_empty() const { return root_->is_leaf(); }
 
+  // Return the key stored in the root Node of this tree.
   T root_key() const {
     assert(!is_empty());
     const InternalNode *r = static_cast<const InternalNode *>(root_.get());
     return r->key_;
   }
 
+  // Return the value stored in the root Node of this tree.
   V root_val() const {
     assert(!is_empty());
     const InternalNode *r = static_cast<const InternalNode *>(root_.get());
     return r->val_;
   }
 
+  // Return the left subtree of this tree.
   RBTree left() const {
     assert(!is_empty());
     const InternalNode *r = static_cast<const InternalNode *>(root_.get());
     return RBTree(r->lft_);
   }
 
+  // Return the right subtree of this tree.
   RBTree right() const {
     assert(!is_empty());
     const InternalNode *r = static_cast<const InternalNode *>(root_.get());
     return RBTree(r->rgt_);
   }
 
+  // Return the size of this tree, i.e., the number of non-leaf nodes.
   size_t size() const { return root_->s_; }
 
+  // Return true if key x is found in this tree. Otherwise, return false.
   bool member(T x) const {
     if (is_empty()) {
       return false;
@@ -155,6 +187,8 @@ public:
     }
   }
 
+  // Return the corresponding value if key x is found in this tree. Otherwise,
+  // throw an exception.
   V lookup(T x) const {
     if (is_empty()) {
       CONSTRUCT_MSG_AND_THROW("Key not found for map lookup");
@@ -169,11 +203,18 @@ public:
     }
   }
 
+  // Return a new red-black tree that contains all key-value pairs in this
+  // tree plus the key value pair [x -> v]. If key x was already in this tree,
+  // key x will be associated with value v in the resulting tree instead.
   RBTree inserted(T x, V v) const { return ins(x, v).blacken(); }
 
+  // Return a new red-black tree that does not contain the key-value pair for
+  // key x, if any.
   RBTree deleted(T x) const { return redden().del(x); }
 
-  // 1. No red node has a red child.
+  // This method throws an exception if the red invariant does not hold for
+  // this red-black tree.
+  // Red invariant: No red node has a red child.
   void assert_red_invariant() const {
     if (!is_empty()) {
       if (root_color() == Color::BB) {
@@ -198,7 +239,9 @@ public:
     }
   }
 
-  // 2. Every path from root to empty node contains the same
+  // This method returns the black length of this red-black tree. It throws an
+  // exception if the black invariant does not hold for this tree.
+  // Black invariant: Every path from root to empty node contains the same
   // number of black nodes.
   int assert_black_invariant() const {
     if (is_empty()) {
@@ -212,6 +255,10 @@ public:
     return (root_color() == Color::B) ? 1 + lft : lft;
   }
 
+  // This method throws an exception if the binary search tree invariant does
+  // not hold for this tree.
+  // Binary search tree invariant: The key of each node must be greater than the
+  // key of each left child, and less than the key of each right child.
   void assert_BST_invariant() const {
     if (is_empty()) {
       return;
@@ -431,7 +478,7 @@ private:
     return RBTree(c, lft, x, v, rgt);
   }
 
-  // Called only when parent is black or double black
+  // Called only when parent is B or BB.
   static RBTree
   balance(Color c, RBTree const &lft, T x, V v, RBTree const &rgt) {
     if (lft.doubled_left()) {
@@ -497,6 +544,8 @@ private:
   std::shared_ptr<const Node> root_;
 };
 
+// Recursively (using inorder traversal) apply function f to all elements of
+// tree t. Function f must accept two arguments of types T and V respectively.
 template <class T, class V, class F>
 void for_each(RBTree<T, V> const &t, F&& f) {
   if (!t.is_empty()) {
@@ -506,6 +555,9 @@ void for_each(RBTree<T, V> const &t, F&& f) {
   }
 }
 
+// Return a red-black tree with all elements in t, and then also from the
+// container designated by the beginning and end iterator arguments. The
+// container should contain elements of type std::pair<T,V>.
 template <class T, class V, class I>
 RBTree<T, V> inserted(RBTree<T, V> t, I it, I end) {
   if (it == end) {
@@ -517,6 +569,9 @@ RBTree<T, V> inserted(RBTree<T, V> t, I it, I end) {
   return inserted(t1, ++it, end);
 }
 
+// Return a red-black tree that is the concatenation of trees a and b. This
+// function throws an exception if the sets of the keys in trees a and b are
+// not disjoint.
 template <class T, class V>
 RBTree<T, V> concat(RBTree<T, V> const &a, RBTree<T, V> const &b) {
   RBTree<T, V> res = a;
