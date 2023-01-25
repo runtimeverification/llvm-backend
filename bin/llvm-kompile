@@ -14,7 +14,7 @@ Options:
   --bindings-path Print the absolute path of the compiled Python bindings for
                   the LLVM backend, then exit.
   --python PATH   The path to a Python interpreter with Pybind installed. Only
-                  meaningful in "pythonast" mode.
+                  meaningful in "python" or "pythonast" mode.
 
 Any option not listed above will be passed through to clang; use '--' to
 separate additional positional arguments to clang from those for $0.
@@ -158,11 +158,19 @@ elif [ "$compile" = "object" ]; then
   main="${positional_args[1]}"
   modopt="$definition"
 elif [ "$compile" = "python_ast" ]; then
+  main="python_ast"
+  modopt=""
+fi
+
+if [[ "$main" =~ "python" ]]; then
   bin_dir=$(dirname "$0")
   src_dir=$(realpath "$bin_dir/../lib/kllvm/python_src")
 
-  main="python_ast"
-  modopt="$src_dir/ast.cpp"
+  if [[ "$compile" = "python_ast" ]]; then
+    kompile_clang_flags+=("$src_dir/ast.cpp")
+  else
+    kompile_clang_flags+=("$src_dir/runtime.cpp")
+  fi
 
   kompile_clang_flags+=("--python" "${python_cmd}")
 fi

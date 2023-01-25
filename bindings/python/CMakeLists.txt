@@ -31,7 +31,9 @@ install(FILES $<TARGET_FILE:kllvm-python-static>
   DESTINATION lib/kllvm
   RENAME libkllvmpythonruntime.a)
 
-install(FILES ast.cpp
+install(FILES
+    ast.cpp
+    runtime.cpp
   DESTINATION lib/kllvm/python_src)
 
 install(DIRECTORY package/
