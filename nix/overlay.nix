@@ -76,6 +76,7 @@ let
       prev.diffutils # for golden testing
       prev.lit
       prev.clang
+      prev.pythonPackages.pybind11
       llvm-kompile-testing # for constructing test input without the frontend
       llvm-backend # the system under test
     ];
