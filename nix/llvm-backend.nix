@@ -69,4 +69,6 @@ stdenv.mkDerivation {
   '';
 
   passthru = { inherit (host) clang; };
+
+  python-interpreter = python-env.interpreter;
 }

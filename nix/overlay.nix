@@ -68,10 +68,6 @@ let
     patchShebangs "$out/bin/llvm-kompile-testing"
   '';
 
-  python-env = prev.python39.withPackages (ps: with ps;
-    [ pybind11 ]
-  );
-
   integration-tests = prev.stdenv.mkDerivation {
     name = "llvm-backend-integration-tests";
     src = llvm-backend.src;
@@ -80,7 +76,6 @@ let
       prev.diffutils # for golden testing
       prev.lit
       prev.clang
-      python-env
       llvm-kompile-testing # for constructing test input without the frontend
       llvm-backend # the system under test
     ];
@@ -88,7 +83,7 @@ let
     buildPhase = ''
       runHook preBuild
 
-      PYTHON_INTERPRETER=${python-env.interpreter} \
+      PYTHON_INTERPRETER=${llvm-backend.python-interpreter} \
       BINDINGS_INSTALL_PATH=${llvm-backend}/lib/kllvm/python \
       INCLUDE_INSTALL_PATH=${llvm-backend}/include \
         LIT_USE_NIX=1 lit -v test
