@@ -5,6 +5,8 @@
 
 #include <kllvm-c/kllvm-c.h>
 
+#include <runtime/arena.h>
+
 // This header needs to be included last because it pollutes a number of macro
 // definitions into the global namespace.
 #include <runtime/header.h>
@@ -256,6 +258,12 @@ char *kore_symbol_dump(kore_symbol const *sym) {
 
 void kore_symbol_add_formal_argument(kore_symbol *sym, kore_sort const *sort) {
   sym->ptr_->addFormalArgument(sort->ptr_);
+}
+
+/* Memory management */
+
+void kllvm_free_all_memory(void) {
+  freeAllMemory();
 }
 }
 
