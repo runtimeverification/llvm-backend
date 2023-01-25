@@ -1,5 +1,5 @@
 { lib, src, cmake, flex, fmt, pkgconfig, llvm, libllvm, libcxxabi, stdenv, boost, gmp
-, jemalloc, libffi, libiconv, libyaml, mpfr, ncurses, python3, pythonPackages,
+, jemalloc, libffi, libiconv, libyaml, mpfr, ncurses, python3, python3Packages,
 # Runtime dependencies:
 host,
 # Options:
@@ -12,7 +12,7 @@ stdenv.mkDerivation {
 
   nativeBuildInputs = [ cmake flex llvm pkgconfig python3 ];
   buildInputs = [ boost libyaml ];
-  propagatedBuildInputs = [ fmt gmp jemalloc libffi mpfr ncurses pythonPackages.pybind11 ]
+  propagatedBuildInputs = [ fmt gmp jemalloc libffi mpfr ncurses python3Packages.pybind11 ]
     ++ lib.optional stdenv.isDarwin libiconv;
 
   postPatch = ''
