@@ -106,6 +106,10 @@ void kore_symbol_free(kore_symbol const *);
 
 void kore_symbol_add_formal_argument(kore_symbol *, kore_sort const *);
 
+/* Memory management */
+
+void kllvm_free_all_memory(void);
+
 #ifdef __cplusplus
 }
 #endif

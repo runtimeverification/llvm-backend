@@ -9,6 +9,7 @@
 typedef kore_pattern *new_comp_t(char const *);
 typedef kore_sort *new_sort_t(char const *);
 typedef void simplify_t(kore_pattern *, kore_sort *, char **, size_t *);
+typedef void free_all_t(void);
 
 int main(int argc, char **argv) {
   if (argc <= 3) {
@@ -23,8 +24,9 @@ int main(int argc, char **argv) {
   new_comp_t *new_comp = (new_comp_t *)dlsym(lib, "kore_composite_pattern_new");
   new_sort_t *new_sort = (new_sort_t *)dlsym(lib, "kore_composite_sort_new");
   simplify_t *simplify = (simplify_t *)dlsym(lib, "kore_simplify");
+  free_all_t *free_all = (free_all_t *)dlsym(lib, "kllvm_free_all_memory");
 
-  if (!new_comp || !new_sort || !simplify) {
+  if (!new_comp || !new_sort || !simplify || !free_all) {
     return 3;
   }
 
@@ -47,6 +49,8 @@ int main(int argc, char **argv) {
   char *data;
   size_t size;
   simplify(pat, sort, &data, &size);
+
+  free_all();
 
   FILE *f = fopen(argv[2], "wb");
   if (!f) {
