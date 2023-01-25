@@ -91,6 +91,20 @@ class RBTree {
     virtual ~InternalNode() = default;
   };
 
+  // Create an empty red-black tree, with the specified color. Only B and BB
+  // are valid colors for this constructor.
+  RBTree(Color c)
+      : root_(std::make_shared<const Leaf>(c)) { }
+
+  // Create a red-black tree, with a root of the spefified color, key and value,
+  // and children lft and rgt.
+  RBTree(Color c, RBTree const &lft, T key, V val, RBTree const &rgt)
+      : root_(std::make_shared<const InternalNode>(
+          c, lft.root_, key, val, rgt.root_)) {
+    assert(lft.is_empty() || lft.root_key() < key);
+    assert(rgt.is_empty() || key < rgt.root_key());
+  }
+
   // Copy constructor.
   explicit RBTree(std::shared_ptr<const Node> const &node)
       : root_(node) { }
@@ -111,20 +125,6 @@ public:
   // Create an empty red-black tree.
   RBTree()
       : root_(std::make_shared<const Leaf>(Color::B)) { }
-
-  // Create an empty red-black tree, with the specified color. Only B and BB
-  // are valid colors for this constructor.
-  RBTree(Color c)
-      : root_(std::make_shared<const Leaf>(c)) { }
-
-  // Create a red-black tree, with a root of the spefified color, key and value,
-  // and children lft and rgt.
-  RBTree(Color c, RBTree const &lft, T key, V val, RBTree const &rgt)
-      : root_(std::make_shared<const InternalNode>(
-          c, lft.root_, key, val, rgt.root_)) {
-    assert(lft.is_empty() || lft.root_key() < key);
-    assert(rgt.is_empty() || key < rgt.root_key());
-  }
 
   // Create a red-black tree with elements from the container designated by the
   // beginning and end iterator arguments. The container should contain elements

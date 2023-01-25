@@ -100,6 +100,11 @@ private:
   // Ordered map based on red-black tree.
   RBTree<Range<T>, V> treemap_;
 
+  // Create a rangemap on top of a red-black tree that uses ranges as keys.
+  // The red black tree should already be a well-formed rangemap.
+  RangeMap(RBTree<Range<T>, V> t)
+      : treemap_(t) { }
+
   std::optional<std::pair<Range<T>, V>>
   get_key_value(RBTree<Range<T>, V> t, T k) const {
     if (t.is_empty()) {
@@ -246,11 +251,6 @@ public:
   // Create an empty rangemap.
   RangeMap()
       : treemap_(RBTree<Range<T>, V>()) { }
-
-  // Create a rangemap on top of a red-black tree that uses ranges as keys.
-  // The red black tree should already be a well-formed rangemap.
-  RangeMap(RBTree<Range<T>, V> t)
-      : treemap_(t) { }
 
   // Create a rangemap with elements from the container designated by the
   // beginning and end iterator arguments. The container should contain elements
