@@ -73,8 +73,8 @@ class RBTree {
     // Create a new InternalNode object with the given lft and rgt children,
     // key and value, and color.
     InternalNode(
-        Color c, std::shared_ptr<const Node> const &lft, T key, V val,
-        std::shared_ptr<const Node> const &rgt)
+        Color c, std::shared_ptr<const Node> lft, T key, V val,
+        std::shared_ptr<const Node> rgt)
         : Node(c)
         , lft_(lft)
         , key_(key)
@@ -106,7 +106,7 @@ class RBTree {
   }
 
   // Copy constructor.
-  explicit RBTree(std::shared_ptr<const Node> const &node)
+  explicit RBTree(std::shared_ptr<const Node> node)
       : root_(node) { }
 
   // Return this Node's color when it is not empty.
@@ -173,7 +173,7 @@ public:
   size_t size() const { return root_->s_; }
 
   // Return true if key x is found in this tree. Otherwise, return false.
-  bool member(T x) const {
+  bool member(T const &x) const {
     if (is_empty()) {
       return false;
     }
@@ -189,7 +189,7 @@ public:
 
   // Return the corresponding value if key x is found in this tree. Otherwise,
   // throw an exception.
-  V lookup(T x) const {
+  V lookup(T const &x) const {
     if (is_empty()) {
       CONSTRUCT_MSG_AND_THROW("Key not found for map lookup");
     }
@@ -206,11 +206,11 @@ public:
   // Return a new red-black tree that contains all key-value pairs in this
   // tree plus the key value pair [x -> v]. If key x was already in this tree,
   // key x will be associated with value v in the resulting tree instead.
-  RBTree inserted(T x, V v) const { return ins(x, v).blacken(); }
+  RBTree inserted(T const &x, V const &v) const { return ins(x, v).blacken(); }
 
   // Return a new red-black tree that does not contain the key-value pair for
   // key x, if any.
-  RBTree deleted(T x) const { return redden().del(x); }
+  RBTree deleted(T const &x) const { return redden().del(x); }
 
   // This method throws an exception if the red invariant does not hold for
   // this red-black tree.
@@ -274,7 +274,7 @@ public:
   }
 
 private:
-  RBTree ins(T x, V v) const {
+  RBTree ins(T const &x, V const &v) const {
     assert(!is_empty(Color::BB));
 
     if (is_empty(Color::B)) {
@@ -303,7 +303,7 @@ private:
     }
   }
 
-  RBTree del(T x) const {
+  RBTree del(T const &x) const {
     assert(!is_empty(Color::BB));
 
     // Black leaf
@@ -401,7 +401,7 @@ private:
   }
 
   static RBTree
-  rotate(Color c, RBTree const &lft, T x, V v, RBTree const &rgt) {
+  rotate(Color c, RBTree const &lft, T const &x, V const &v, RBTree const &rgt) {
     // Red parent
     if (c == Color::R) {
       if (lft.non_empty(Color::BB) && rgt.non_empty(Color::B)) {
@@ -480,7 +480,7 @@ private:
 
   // Called only when parent is B or BB.
   static RBTree
-  balance(Color c, RBTree const &lft, T x, V v, RBTree const &rgt) {
+  balance(Color c, RBTree const &lft, T const &x, V const &v, RBTree const &rgt) {
     if (lft.doubled_left()) {
       return RBTree(
           minus_one_color(c), lft.left().paint(Color::B), lft.root_key(), lft.root_val(),
@@ -559,7 +559,7 @@ void for_each(RBTree<T, V> const &t, F&& f) {
 // container designated by the beginning and end iterator arguments. The
 // container should contain elements of type std::pair<T,V>.
 template <class T, class V, class I>
-RBTree<T, V> inserted(RBTree<T, V> t, I it, I end) {
+RBTree<T, V> inserted(RBTree<T, V> const &t, I it, I end) {
   if (it == end) {
     return t;
   }

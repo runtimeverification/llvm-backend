@@ -492,6 +492,8 @@ BOOST_AUTO_TEST_CASE(rangemap_test_del) {
   BOOST_CHECK_EQUAL(result2.value().first.get_start(), 6);
   BOOST_CHECK_EQUAL(result2.value().first.get_end(), 10);
   auto map3 = map2.deleted(Range<int>(8, 9));
+  result = map2.size();
+  BOOST_CHECK_EQUAL(result, 2);
   result = map3.size();
   BOOST_CHECK_EQUAL(result, 3);
   result2 = map3.get_key_value(7);
