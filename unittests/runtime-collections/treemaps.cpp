@@ -91,7 +91,7 @@ BOOST_AUTO_TEST_CASE(treemap_test_size) {
 BOOST_AUTO_TEST_CASE(treemap_test_concat_success) {
   auto m1 = (RBTree<int, int>()).inserted(0, 1);
   auto m2 = (RBTree<int, int>()).inserted(1, 2);
-  auto map = concat(m1, m2);
+  auto map = m1.concat(m2);
   auto result = map.size();
   BOOST_CHECK_EQUAL(result, 2);
   result = map.member(0);
@@ -107,7 +107,7 @@ BOOST_AUTO_TEST_CASE(treemap_test_concat_success) {
 BOOST_AUTO_TEST_CASE(treemap_test_concat_failure) {
   auto m1 = (RBTree<int, int>()).inserted(0, 1);
   auto m2 = (RBTree<int, int>()).inserted(0, 2);
-  BOOST_CHECK_THROW(concat(m1, m2), std::invalid_argument);
+  BOOST_CHECK_THROW(m1.concat(m2), std::invalid_argument);
 }
 
 BOOST_AUTO_TEST_CASE(treemap_test_lookup) {

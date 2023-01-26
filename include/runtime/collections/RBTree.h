@@ -212,6 +212,21 @@ public:
   // key x, if any.
   RBTree deleted(T const &x) const { return redden().del(x); }
 
+  // Return a red-black tree that is the concatenation of this tree and tree t.
+  // Throw an exception if the sets of the keys in this tree and tree t are not
+  // disjoint.
+  RBTree concat(RBTree const &t) const {
+    RBTree res = *this;
+    for_each(t, [&res, this](T const &x, V const &v) {
+      if (!member(x)) {
+        res = res.inserted(x, v);
+      } else {
+        CONSTRUCT_MSG_AND_THROW("Duplicate keys in map concatenation");
+      }
+    });
+    return res;
+  }
+
   // This method throws an exception if the red invariant does not hold for
   // this red-black tree.
   // Red invariant: No red node has a red child.
@@ -567,22 +582,6 @@ RBTree<T, V> inserted(RBTree<T, V> const &t, I it, I end) {
   V val = it->second;
   auto t1 = t.inserted(key, val);
   return inserted(t1, ++it, end);
-}
-
-// Return a red-black tree that is the concatenation of trees a and b. This
-// function throws an exception if the sets of the keys in trees a and b are
-// not disjoint.
-template <class T, class V>
-RBTree<T, V> concat(RBTree<T, V> const &a, RBTree<T, V> const &b) {
-  RBTree<T, V> res = a;
-  for_each(b, [&res, &a](T const &x, V const &v) {
-    if (!a.member(x)) {
-      res = res.inserted(x, v);
-    } else {
-      CONSTRUCT_MSG_AND_THROW("Duplicate keys in map concatenation");
-    }
-  });
-  return res;
 }
 
 #endif // RBTREE_HEADER_H

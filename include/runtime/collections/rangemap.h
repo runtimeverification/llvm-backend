@@ -264,9 +264,6 @@ public:
     treemap_ = m.treemap_;
   }
 
-  // Getter method for the red-black tree.
-  RBTree<Range<T>, V> get_treemap() const { return treemap_; }
-
   // Return the number of key ranges in the map.
   size_t size() const { return treemap_.size(); }
 
@@ -408,6 +405,24 @@ public:
     });
     os << "--------------------------" << std::endl;
   }
+
+  // Return a rangemap that is the concatenation of this rangemap and rangemap
+  // m. Throw an exception if any of the key ranges in this rangemap overlaps
+  // with any of the key ranges in rangemap m.
+  RangeMap concat(RangeMap const &m) const {
+    RangeMap res = *this;
+    for_each(
+        m.treemap_,
+        [&res, this](Range<T> const &x, V const &v) {
+          if (!overlaps(x)) {
+            res = res.inserted(x, v);
+          } else {
+            CONSTRUCT_MSG_AND_THROW(
+                "Overlapping key ranges in map concatenation");
+          }
+        });
+    return res;
+  }
 };
 
 // Return a rangemap with all elements in m, and then also from the container
@@ -422,25 +437,6 @@ RangeMap<T, V> inserted(RangeMap<T, V> const &m, I it, I end) {
   V val = it->second;
   auto m1 = m.inserted(key, val);
   return inserted(m1, ++it, end);
-}
-
-// Return a rangemap that is the concatenation of rangemaps a and b. This
-// function throws an exception if any of the key ranges in rangemap a overlap
-// with any of the key ranges in rangemap b.
-template <class T, class V>
-RangeMap<T, V> concat(RangeMap<T, V> const &a, RangeMap<T, V> const &b) {
-  RangeMap<T, V> res = a;
-  for_each(
-      b.get_treemap(),
-      [&res, &a](Range<T> const &x, V const &v) {
-        if (!a.overlaps(x)) {
-          res = res.inserted(x, v);
-        } else {
-          CONSTRUCT_MSG_AND_THROW(
-              "Overlapping key ranges in map concatenation");
-        }
-      });
-  return res;
 }
 
 #endif // RANGEMAP_HEADER_H
