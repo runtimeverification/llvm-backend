@@ -6,17 +6,18 @@
  * https://matt.might.net/papers/germane2014deletion.pdf                      */
 
 #include <cassert>
+#include <fmt/format.h>
 #include <functional>
 #include <memory>
 #include <stdexcept>
 #include <string>
 #include <utility>
 
-#define CONSTRUCT_MSG_AND_THROW(msg)                                           \
+#define CONSTRUCT_MSG_AND_THROW(...)                                           \
   do {                                                                         \
-    std::string emsg = std::string("[") + std::string(__func__)                \
-                       + std::string("] ") + std::string(msg);                 \
-    throw std::invalid_argument(emsg);                                         \
+    auto err_msg                                                               \
+        = ::fmt::format("[{}]: {}", __func__, ::fmt::format(__VA_ARGS__));     \
+    throw std::invalid_argument(err_msg);                                      \
   } while (false)
 
 //---               Ordered map on top of a red-black tree.                ---//
