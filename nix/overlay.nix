@@ -100,7 +100,7 @@ let
   };
   devShell = prev.callPackage ./devShell.nix { };
 in {
-  inherit kllvm llvm-backend llvm-backend-matching integration-tests;
+  inherit kllvm llvm-backend llvm-backend-matching llvm-kompile-testing integration-tests;
   inherit (prev) clang; # for compatibility
   inherit devShell; # for CI
 }
