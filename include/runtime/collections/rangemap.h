@@ -417,7 +417,7 @@ RangeMap<T, V> inserted(RangeMap<T, V> const &m, I it, I end) {
   if (it == end) {
     return m;
   }
-  auto key = it->first;
+  Range<T> key = it->first;
   V val = it->second;
   auto m1 = m.inserted(key, val);
   return inserted(m1, ++it, end);
