@@ -20,7 +20,7 @@ char *get_c_string(OS const &);
 kore_pattern *kore_string_pattern_new_internal(std::string const &);
 
 kore_pattern *
-kore_pattern_new_token_internal(kore_pattern *, kore_sort const *);
+kore_pattern_new_token_internal(kore_pattern const *, kore_sort const *);
 
 } // namespace
 
@@ -36,7 +36,7 @@ extern "C" {
 /* Completed types */
 
 struct kore_pattern {
-  std::unique_ptr<kllvm::KOREPattern> ptr_;
+  std::shared_ptr<kllvm::KOREPattern> ptr_;
 };
 
 struct kore_sort {
@@ -44,7 +44,7 @@ struct kore_sort {
 };
 
 struct kore_symbol {
-  std::unique_ptr<kllvm::KORESymbol> ptr_;
+  std::shared_ptr<kllvm::KORESymbol> ptr_;
 };
 
 /* KOREPattern */
@@ -71,7 +71,7 @@ kore_pattern *kore_pattern_new_token_with_len(
 }
 
 kore_pattern *kore_pattern_new_injection(
-    kore_pattern *term, kore_sort const *from, kore_sort const *to) {
+    kore_pattern const *term, kore_sort const *from, kore_sort const *to) {
   auto inj_sym = kore_symbol_new("inj");
   kore_symbol_add_formal_argument(inj_sym, from);
   kore_symbol_add_formal_argument(inj_sym, to);
@@ -81,7 +81,7 @@ kore_pattern *kore_pattern_new_injection(
   return inj;
 }
 
-kore_pattern *kore_pattern_make_interpreter_input(kore_pattern *pgm) {
+kore_pattern *kore_pattern_make_interpreter_input(kore_pattern const *pgm) {
   auto config_sort = kore_composite_sort_new("SortKConfigVar");
   auto kitem_sort = kore_composite_sort_new("SortKItem");
 
@@ -124,7 +124,7 @@ bool kore_block_get_bool(block *term) {
   return (bool)(term->children[0]);
 }
 
-bool kore_simplify_bool(kore_pattern *pattern) {
+bool kore_simplify_bool(kore_pattern const *pattern) {
   auto bool_sort = kore_composite_sort_new("SortBool");
   auto kitem_sort = kore_composite_sort_new("SortKItem");
 
@@ -134,7 +134,8 @@ bool kore_simplify_bool(kore_pattern *pattern) {
 }
 
 void kore_simplify(
-    kore_pattern *pattern, kore_sort *sort, char **data_out, size_t *size_out) {
+    kore_pattern const *pattern, kore_sort const *sort, char **data_out,
+    size_t *size_out) {
   auto kitem_sort = kore_composite_sort_new("SortKItem");
   auto kitem_sort_str = kore_sort_dump(kitem_sort);
 
@@ -161,15 +162,15 @@ kore_pattern *kore_composite_pattern_new(char const *name) {
 
 kore_pattern *kore_composite_pattern_from_symbol(kore_symbol *sym) {
   auto pat = new kore_pattern;
-  pat->ptr_ = kllvm::KORECompositePattern::Create(std::move(sym->ptr_));
+  pat->ptr_ = kllvm::KORECompositePattern::Create(sym->ptr_.get());
   return pat;
 }
 
-void kore_composite_pattern_add_argument(kore_pattern *pat, kore_pattern *arg) {
+void kore_composite_pattern_add_argument(
+    kore_pattern *pat, kore_pattern const *arg) {
   if (auto cast_ptr
       = dynamic_cast<kllvm::KORECompositePattern *>(pat->ptr_.get())) {
-    cast_ptr->addArgument(
-        std::shared_ptr<kllvm::KOREPattern>(arg->ptr_.release()));
+    cast_ptr->addArgument(arg->ptr_);
   } else {
     abort();
   }
@@ -288,8 +289,8 @@ kore_pattern *kore_string_pattern_new_internal(std::string const &str) {
   return pat;
 }
 
-kore_pattern *
-kore_pattern_new_token_internal(kore_pattern *value, kore_sort const *sort) {
+kore_pattern *kore_pattern_new_token_internal(
+    kore_pattern const *value, kore_sort const *sort) {
   auto sym = kore_symbol_new("\\dv");
   kore_symbol_add_formal_argument(sym, sort);
 
