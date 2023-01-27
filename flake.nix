@@ -106,7 +106,7 @@
         ));
       in with matrix; {
         packages = utils.lib.flattenTree {
-          inherit (llvm-backend-14-FastBuild) llvm-backend llvm-backend-matching;
+          inherit (llvm-backend-14-FastBuild) llvm-backend llvm-backend-matching llvm-kompile-testing;
           default = llvm-backend-14-FastBuild.llvm-backend;
           llvm-backend-release = llvm-backend-14-Release.llvm-backend;
         };
