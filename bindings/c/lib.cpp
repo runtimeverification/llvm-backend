@@ -66,13 +66,19 @@ void kore_pattern_free(kore_pattern const *pat) {
 
 kore_pattern *kore_pattern_new_token(char const *value, kore_sort const *sort) {
   auto pat = kore_string_pattern_new(value);
-  return kore_pattern_new_token_internal(pat, sort);
+  auto ret = kore_pattern_new_token_internal(pat, sort);
+
+  kore_pattern_free(pat);
+  return ret;
 }
 
 kore_pattern *kore_pattern_new_token_with_len(
     char const *value, size_t len, kore_sort const *sort) {
   auto pat = kore_string_pattern_new_with_len(value, len);
-  return kore_pattern_new_token_internal(pat, sort);
+  auto ret = kore_pattern_new_token_internal(pat, sort);
+
+  kore_pattern_free(pat);
+  return ret;
 }
 
 kore_pattern *kore_pattern_new_injection(
@@ -83,6 +89,8 @@ kore_pattern *kore_pattern_new_injection(
 
   auto inj = kore_composite_pattern_from_symbol(inj_sym);
   kore_composite_pattern_add_argument(inj, term);
+
+  kore_symbol_free(inj_sym);
   return inj;
 }
 
@@ -105,6 +113,13 @@ kore_pattern *kore_pattern_make_interpreter_input(kore_pattern const *pgm) {
 
   auto top_cell = kore_composite_pattern_new("LblinitGeneratedTopCell");
   kore_composite_pattern_add_argument(top_cell, map_concat);
+
+  kore_sort_free(config_sort);
+  kore_sort_free(kitem_sort);
+  kore_pattern_free(map_item);
+  kore_pattern_free(map_unit);
+  kore_pattern_free(map_concat);
+  kore_pattern_free(top_cell);
 
   return top_cell;
 }
@@ -134,8 +149,13 @@ bool kore_simplify_bool(kore_pattern const *pattern) {
   auto kitem_sort = kore_composite_sort_new("SortKItem");
 
   auto inj = kore_pattern_new_injection(pattern, bool_sort, kitem_sort);
+  auto ret = kore_block_get_bool(kore_pattern_construct(inj));
 
-  return kore_block_get_bool(kore_pattern_construct(inj));
+  kore_sort_free(bool_sort);
+  kore_sort_free(kitem_sort);
+  kore_pattern_free(inj);
+
+  return ret;
 }
 
 void kore_simplify(
@@ -149,11 +169,15 @@ void kore_simplify(
       return kore_pattern_construct(pattern);
     } else {
       auto inj = kore_pattern_new_injection(pattern, sort, kitem_sort);
-      return kore_pattern_construct(inj);
+      auto ret = kore_pattern_construct(inj);
+      kore_pattern_free(inj);
+      return ret;
     }
   }();
 
   serializeConfiguration(block, kitem_sort_str, data_out, size_out);
+
+  kore_sort_free(kitem_sort);
   free(kitem_sort_str);
 }
 
@@ -306,6 +330,7 @@ kore_pattern *kore_pattern_new_token_internal(
   auto pat = kore_composite_pattern_from_symbol(sym);
   kore_composite_pattern_add_argument(pat, value);
 
+  kore_symbol_free(sym);
   return pat;
 }
 
