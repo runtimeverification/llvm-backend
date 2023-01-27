@@ -46,8 +46,9 @@ std::map<std::string, std::string> getFormats() {
     formats["\\exists"] = "#Exists %1 . %2";
     formats["\\forall"] = "#Forall %1 . %2";
     formats["\\rewrites"] = "%1 => %2";
-    formats["\\weakExistsFinally"] = "#wEF ( %1 )";
-    formats["\\allPathGlobally"] = "#AG ( %1 )";
+    formats["weakAlwaysFinally"] = "#wAF ( %1 )";
+    formats["weakExistsFinally"] = "#wEF ( %1 )";
+    formats["allPathGlobally"] = "#AG ( %1 )";
     formats["bracket"] = "( %1 )";
     once = false;
   }
@@ -76,8 +77,9 @@ std::map<std::string, std::string> getTerminals() {
     terminals["\\exists"] = "1010";
     terminals["\\forall"] = "1010";
     terminals["\\rewrites"] = "010";
-    terminals["\\weakExistsFinally"] = "101";
-    terminals["\\allPathGlobally"] = "101";
+    terminals["weakAlwaysFinally"] = "101";
+    terminals["weakExistsFinally"] = "101";
+    terminals["allPathGlobally"] = "101";
     terminals["bracket"] = "101";
     once = false;
   }

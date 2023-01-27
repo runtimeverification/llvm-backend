@@ -29,7 +29,12 @@ kore_pattern_new_token_internal(kore_pattern const *, kore_sort const *);
  * through any header files, so we pull them in manually here.
  */
 void *constructInitialConfiguration(const kllvm::KOREPattern *);
-extern "C" block *take_steps(int64_t, block *);
+
+extern "C" {
+block *take_steps(int64_t, block *);
+void initStaticObjects(void);
+void freeAllKoreMem(void);
+}
 
 extern "C" {
 
@@ -263,8 +268,12 @@ void kore_symbol_add_formal_argument(kore_symbol *sym, kore_sort const *sort) {
 
 /* Memory management */
 
+void kllvm_init(void) {
+  initStaticObjects();
+}
+
 void kllvm_free_all_memory(void) {
-  freeAllMemory();
+  freeAllKoreMem();
 }
 }
 

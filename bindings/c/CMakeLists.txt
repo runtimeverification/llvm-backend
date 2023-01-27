@@ -8,6 +8,7 @@ target_include_directories(kllvm-c-static PUBLIC
 target_link_libraries(kllvm-c-static PUBLIC
   AST
   util
+  collect
 )
 
 install(FILES $<TARGET_FILE:kllvm-c-static>

@@ -197,7 +197,10 @@ getArgSort(KORESymbol *symbol, int position, sptr<KORESort> firstArgSort) {
       || symbol->getName() == "\\iff" || symbol->getName() == "\\ceil"
       || symbol->getName() == "\\floor" || symbol->getName() == "\\equals"
       || symbol->getName() == "\\in" || symbol->getName() == "\\next"
-      || symbol->getName() == "\\rewrites") {
+      || symbol->getName() == "\\rewrites"
+      || symbol->getName() == "weakAlwaysFinally"
+      || symbol->getName() == "weakExistsFinally"
+      || symbol->getName() == "allPathGlobally") {
     return symbol->getFormalArguments()[0];
   } else if (
       symbol->getName() == "\\forall" || symbol->getName() == "\\exists") {
@@ -226,7 +229,10 @@ sptr<KORESort> getReturnSort(KOREPattern *pat) {
         || symbol->getName() == "\\or" || symbol->getName() == "\\implies"
         || symbol->getName() == "\\iff" || symbol->getName() == "\\exists"
         || symbol->getName() == "\\forall" || symbol->getName() == "\\next"
-        || symbol->getName() == "\\rewrites") {
+        || symbol->getName() == "\\rewrites"
+        || symbol->getName() == "weakAlwaysFinally"
+        || symbol->getName() == "weakExistsFinally"
+        || symbol->getName() == "allPathGlobally") {
       return symbol->getFormalArguments()[0];
     } else if (
         symbol->getName() == "\\ceil" || symbol->getName() == "\\floor"
