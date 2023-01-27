@@ -6,10 +6,10 @@
  * https://matt.might.net/papers/germane2014deletion.pdf                      */
 
 #include <cassert>
+#include <functional>
 #include <memory>
 #include <stdexcept>
 #include <string>
-#include <functional>
 #include <utility>
 
 #define CONSTRUCT_MSG_AND_THROW(msg)                                           \
@@ -48,8 +48,8 @@ class RBTree {
     Node(Color c)
         : c_(c)
         , s_(0) { }
-    Color c_;   // Color of this tree Node
-    size_t s_;  // Size of the tree with root Node
+    Color c_; // Color of this tree Node
+    size_t s_; // Size of the tree with root Node
 
     // Return true if this object is a Leaf.
     virtual bool is_leaf() const = 0;
@@ -83,8 +83,8 @@ class RBTree {
       this->s_ = 1 + lft_->s_ + rgt_->s_;
     }
     std::shared_ptr<const Node> lft_; // Left child
-    T key_;                           // Node key
-    V val_;                           // Node value
+    T key_; // Node key
+    V val_; // Node value
     std::shared_ptr<const Node> rgt_; // Right child
 
     virtual bool is_leaf() const override { return false; }
@@ -370,7 +370,8 @@ private:
   }
 
   RBTree redden() const {
-    if (non_empty(Color::B) && left().non_empty(Color::B) && right().non_empty(Color::B)) {
+    if (non_empty(Color::B) && left().non_empty(Color::B)
+        && right().non_empty(Color::B)) {
       return paint(Color::R);
     }
     if (singleton(Color::B)) {
@@ -396,7 +397,8 @@ private:
     }
     // Singleton black node
     if (singleton(Color::B)) {
-      return std::make_pair(std::make_pair(root_key(), root_val()), RBTree(Color::BB));
+      return std::make_pair(
+          std::make_pair(root_key(), root_val()), RBTree(Color::BB));
     }
     // Black node with single right child
     if (only_right_child(Color::B, Color::R)) {
@@ -415,18 +417,18 @@ private:
         rotate(root_color(), new_left, root_key(), root_val(), right()));
   }
 
-  static RBTree
-  rotate(Color c, RBTree const &lft, T const &x, V const &v, RBTree const &rgt) {
+  static RBTree rotate(
+      Color c, RBTree const &lft, T const &x, V const &v, RBTree const &rgt) {
     // Red parent
     if (c == Color::R) {
       if (lft.non_empty(Color::BB) && rgt.non_empty(Color::B)) {
         return balance(
-            Color::B, RBTree(Color::R, lft.paint(Color::B), x, v, rgt.left()), rgt.root_key(),
-            rgt.root_val(), rgt.right());
+            Color::B, RBTree(Color::R, lft.paint(Color::B), x, v, rgt.left()),
+            rgt.root_key(), rgt.root_val(), rgt.right());
       } else if (lft.is_empty(Color::BB) && rgt.non_empty(Color::B)) {
         return balance(
-            Color::B, RBTree(Color::R, RBTree(), x, v, rgt.left()), rgt.root_key(), rgt.root_val(),
-            rgt.right());
+            Color::B, RBTree(Color::R, RBTree(), x, v, rgt.left()),
+            rgt.root_key(), rgt.root_val(), rgt.right());
       } else if (lft.non_empty(Color::B) && rgt.non_empty(Color::BB)) {
         return balance(
             Color::B, lft.left(), lft.root_key(), lft.root_val(),
@@ -443,12 +445,12 @@ private:
     if (c == Color::B) {
       if (lft.non_empty(Color::BB) && rgt.non_empty(Color::B)) {
         return balance(
-            Color::BB, RBTree(Color::R, lft.paint(Color::B), x, v, rgt.left()), rgt.root_key(),
-            rgt.root_val(), rgt.right());
+            Color::BB, RBTree(Color::R, lft.paint(Color::B), x, v, rgt.left()),
+            rgt.root_key(), rgt.root_val(), rgt.right());
       } else if (lft.is_empty(Color::BB) && rgt.non_empty(Color::B)) {
         return balance(
-            Color::BB, RBTree(Color::R, RBTree(), x, v, rgt.left()), rgt.root_key(),
-            rgt.root_val(), rgt.right());
+            Color::BB, RBTree(Color::R, RBTree(), x, v, rgt.left()),
+            rgt.root_key(), rgt.root_val(), rgt.right());
       } else if (lft.non_empty(Color::B) && rgt.non_empty(Color::BB)) {
         return balance(
             Color::BB, lft.left(), lft.root_key(), lft.root_val(),
@@ -457,28 +459,40 @@ private:
         return balance(
             Color::BB, lft.left(), lft.root_key(), lft.root_val(),
             RBTree(Color::R, lft.right(), x, v, RBTree()));
-      } else if (lft.non_empty(Color::BB) && rgt.non_empty(Color::R) && rgt.left().non_empty(Color::B)) {
+      } else if (
+          lft.non_empty(Color::BB) && rgt.non_empty(Color::R)
+          && rgt.left().non_empty(Color::B)) {
         return RBTree(
             Color::B,
             balance(
-                Color::B, RBTree(Color::R, lft.paint(Color::B), x, v, rgt.left().left()),
-                rgt.left().root_key(), rgt.left().root_val(), rgt.left().right()),
+                Color::B,
+                RBTree(Color::R, lft.paint(Color::B), x, v, rgt.left().left()),
+                rgt.left().root_key(), rgt.left().root_val(),
+                rgt.left().right()),
             rgt.root_key(), rgt.root_val(), rgt.right());
-      } else if (lft.is_empty(Color::BB) && rgt.non_empty(Color::R) && rgt.left().non_empty(Color::B)) {
+      } else if (
+          lft.is_empty(Color::BB) && rgt.non_empty(Color::R)
+          && rgt.left().non_empty(Color::B)) {
         return RBTree(
             Color::B,
             balance(
                 Color::B, RBTree(Color::R, RBTree(), x, v, rgt.left().left()),
-                rgt.left().root_key(), rgt.left().root_val(), rgt.left().right()),
+                rgt.left().root_key(), rgt.left().root_val(),
+                rgt.left().right()),
             rgt.root_key(), rgt.root_val(), rgt.right());
-      } else if (lft.non_empty(Color::R) && lft.right().non_empty(Color::B) && rgt.non_empty(Color::BB)) {
+      } else if (
+          lft.non_empty(Color::R) && lft.right().non_empty(Color::B)
+          && rgt.non_empty(Color::BB)) {
         return RBTree(
             Color::B, lft.left(), lft.root_key(), lft.root_val(),
             balance(
                 Color::B, lft.right().left(), lft.right().root_key(),
                 lft.right().root_val(),
-                RBTree(Color::R, lft.right().right(), x, v, rgt.paint(Color::B))));
-      } else if (lft.non_empty(Color::R) && lft.right().non_empty(Color::B) && rgt.is_empty(Color::BB)) {
+                RBTree(
+                    Color::R, lft.right().right(), x, v, rgt.paint(Color::B))));
+      } else if (
+          lft.non_empty(Color::R) && lft.right().non_empty(Color::B)
+          && rgt.is_empty(Color::BB)) {
         return RBTree(
             Color::B, lft.left(), lft.root_key(), lft.root_val(),
             balance(
@@ -494,16 +508,18 @@ private:
   }
 
   // Called only when parent is B or BB.
-  static RBTree
-  balance(Color c, RBTree const &lft, T const &x, V const &v, RBTree const &rgt) {
+  static RBTree balance(
+      Color c, RBTree const &lft, T const &x, V const &v, RBTree const &rgt) {
     if (lft.doubled_left()) {
       return RBTree(
-          minus_one_color(c), lft.left().paint(Color::B), lft.root_key(), lft.root_val(),
-          RBTree(Color::B, lft.right(), x, v, rgt));
+          minus_one_color(c), lft.left().paint(Color::B), lft.root_key(),
+          lft.root_val(), RBTree(Color::B, lft.right(), x, v, rgt));
     } else if (lft.doubled_right()) {
       return RBTree(
           minus_one_color(c),
-          RBTree(Color::B, lft.left(), lft.root_key(), lft.root_val(), lft.right().left()),
+          RBTree(
+              Color::B, lft.left(), lft.root_key(), lft.root_val(),
+              lft.right().left()),
           lft.right().root_key(), lft.right().root_val(),
           RBTree(Color::B, lft.right().right(), x, v, rgt));
     } else if (rgt.doubled_left()) {
@@ -511,11 +527,12 @@ private:
           minus_one_color(c), RBTree(Color::B, lft, x, v, rgt.left().left()),
           rgt.left().root_key(), rgt.left().root_val(),
           RBTree(
-              Color::B, rgt.left().right(), rgt.root_key(), rgt.root_val(), rgt.right()));
+              Color::B, rgt.left().right(), rgt.root_key(), rgt.root_val(),
+              rgt.right()));
     } else if (rgt.doubled_right()) {
       return RBTree(
-          minus_one_color(c), RBTree(Color::B, lft, x, v, rgt.left()), rgt.root_key(),
-          rgt.root_val(), rgt.right().paint(Color::B));
+          minus_one_color(c), RBTree(Color::B, lft, x, v, rgt.left()),
+          rgt.root_key(), rgt.root_val(), rgt.right().paint(Color::B));
     } else {
       return RBTree(c, lft, x, v, rgt);
     }
@@ -536,8 +553,9 @@ private:
   }
 
   bool only_right_child(Color parent_color, Color child_color) const {
-    return !is_empty() && root_color() == parent_color && left().is_empty(Color::B)
-           && !right().is_empty() && right().root_color() == child_color;
+    return !is_empty() && root_color() == parent_color
+           && left().is_empty(Color::B) && !right().is_empty()
+           && right().root_color() == child_color;
   }
 
   bool doubled_left() const {
@@ -562,7 +580,7 @@ private:
 // Recursively (using inorder traversal) apply function f to all elements of
 // tree t. Function f must accept two arguments of types T and V respectively.
 template <class T, class V, class F>
-void for_each(RBTree<T, V> const &t, F&& f) {
+void for_each(RBTree<T, V> const &t, F &&f) {
   if (!t.is_empty()) {
     for_each(t.left(), std::forward<F>(f));
     std::invoke(f, t.root_key(), t.root_val());

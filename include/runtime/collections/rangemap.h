@@ -13,23 +13,20 @@
 template <class T>
 class Range {
 private:
-    T start_;
-    T end_;
+  T start_;
+  T end_;
 
 public:
   // Create a new range [start, end).
   Range(T start, T end)
-      : start_(start), end_(end) { }
+      : start_(start)
+      , end_(end) { }
 
   // Getter for the start of this range.
-  T get_start() const {
-    return start_;
-  }
+  T get_start() const { return start_; }
 
   // Getter for the end of this range.
-  T get_end() const {
-    return end_;
-  }
+  T get_end() const { return end_; }
 
   // The following methods define the ordering for objects of class Range.
   // Operator < is used to subsequently define >, ==, <=, >=, and !=.
@@ -38,35 +35,25 @@ public:
                                         : this->start_ < other.start_;
   }
 
-  bool operator>(Range const &other) const {
-    return other < *this;
-  }
+  bool operator>(Range const &other) const { return other < *this; }
 
   bool operator==(Range const &other) const {
     return !(*this < other || other < *this);
   }
 
-  bool operator<=(Range const &other) const {
-    return !(other < *this);
-  }
+  bool operator<=(Range const &other) const { return !(other < *this); }
 
-  bool operator>=(Range const &other) const {
-    return !(*this < other);
-  }
+  bool operator>=(Range const &other) const { return !(*this < other); }
 
   bool operator!=(Range const &other) const {
     return *this < other || other < *this;
   }
 
   // Returns true if this range contains k.
-  bool contains(T const &k) const {
-    return k >= start_ && k < end_;
-  }
+  bool contains(T const &k) const { return k >= start_ && k < end_; }
 
   // Returns true if this range is empty.
-  bool is_empty() const {
-    return start_ >= end_;
-  }
+  bool is_empty() const { return start_ >= end_; }
 
   // Returns true if this range overlaps with range r.
   bool overlaps(Range const &r) const {
@@ -152,7 +139,8 @@ private:
   // Gather all <Range<T>, V> pairs in t that are overlapping or directly
   // adjacent (share a boundary) with range r, in v.
   void get_overlapping_or_adjacent_ranges(
-      RBTree<Range<T>, V> const &t, Range<T> const &r, std::vector<std::pair<Range<T>, V>> &v) const {
+      RBTree<Range<T>, V> const &t, Range<T> const &r,
+      std::vector<std::pair<Range<T>, V>> &v) const {
     if (t.is_empty()) {
       return;
     }
@@ -201,7 +189,8 @@ private:
 
   // Gather all <Range, V> pairs in t that are overlapping with range r, in v.
   void get_overlapping_ranges(
-      RBTree<Range<T>, V> const &t, Range<T> const &r, std::vector<std::pair<Range<T>, V>> &v) const {
+      RBTree<Range<T>, V> const &t, Range<T> const &r,
+      std::vector<std::pair<Range<T>, V>> &v) const {
     if (t.is_empty()) {
       return;
     }
@@ -268,9 +257,7 @@ public:
   size_t size() const { return treemap_.size(); }
 
   // Return true if a range in this map contains the key k.
-  bool contains(T const &k) const {
-    return get_key_value(k).has_value();
-  }
+  bool contains(T const &k) const { return get_key_value(k).has_value(); }
 
   // If the key k is contained in any range in this map, return the value
   // associated with k.
@@ -411,16 +398,13 @@ public:
   // with any of the key ranges in rangemap m.
   RangeMap concat(RangeMap const &m) const {
     RangeMap res = *this;
-    for_each(
-        m.treemap_,
-        [&res, this](Range<T> const &x, V const &v) {
-          if (!overlaps(x)) {
-            res = res.inserted(x, v);
-          } else {
-            CONSTRUCT_MSG_AND_THROW(
-                "Overlapping key ranges in map concatenation");
-          }
-        });
+    for_each(m.treemap_, [&res, this](Range<T> const &x, V const &v) {
+      if (!overlaps(x)) {
+        res = res.inserted(x, v);
+      } else {
+        CONSTRUCT_MSG_AND_THROW("Overlapping key ranges in map concatenation");
+      }
+    });
     return res;
   }
 };
