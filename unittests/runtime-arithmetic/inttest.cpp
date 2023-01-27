@@ -4,6 +4,12 @@
 #include "runtime/header.h"
 
 extern "C" {
+
+void *koreAllocToken(size_t requested) {
+  return malloc(requested);
+}
+const size_t BLOCK_SIZE = -1;
+
 mpz_ptr hook_INT_tmod(mpz_t, mpz_t);
 mpz_ptr hook_INT_emod(mpz_t, mpz_t);
 mpz_ptr hook_INT_add(mpz_t, mpz_t);

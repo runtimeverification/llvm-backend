@@ -86,7 +86,11 @@ endif()
 set(CMAKE_AR "${CMAKE_C_COMPILER_AR}")
 set(CMAKE_RANLIB "${CMAKE_C_COMPILER_RANLIB}")
 
-find_package(LLVM 14 QUIET CONFIG)
+find_package(LLVM 15 QUIET CONFIG)
+
+if (NOT LLVM_FOUND)
+  find_package(LLVM 14 QUIET CONFIG)
+endif()
 
 if (NOT LLVM_FOUND)
   find_package(LLVM 13 QUIET CONFIG)
@@ -101,16 +105,12 @@ if (NOT LLVM_FOUND)
 endif()
 
 if (NOT LLVM_FOUND)
-  find_package(LLVM 11 QUIET CONFIG)
-endif()
-
-if (NOT LLVM_FOUND)
-  find_package(LLVM 10 REQUIRED CONFIG)
+  find_package(LLVM 11 REQUIRED CONFIG)
 endif()
 
 message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
-if (${LLVM_PACKAGE_VERSION} VERSION_LESS 10)
-  message(FATAL_ERROR "LLVM 10 or newer is required")
+if (${LLVM_PACKAGE_VERSION} VERSION_LESS 11)
+  message(FATAL_ERROR "LLVM 11 or newer is required")
 endif()
 
 include(SetTriple)
@@ -180,6 +180,10 @@ install(
   DESTINATION include/kllvm
 )
 install(
+  DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/include/fmt
+  DESTINATION include/fmt
+)
+install(
   DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/include/immer
   DESTINATION include/kllvm
 )
@@ -194,6 +198,7 @@ install(
 )
 
 file(COPY ${PROJECT_SOURCE_DIR}/deps/immer/immer DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/include)
+file(COPY ${PROJECT_SOURCE_DIR}/deps/fmt/include/fmt DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/include)
 file(COPY ${PROJECT_SOURCE_DIR}/deps/rapidjson/include/rapidjson DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/include)
 
 set(GC_THRESHOLD 2097152 CACHE STRING "Initial Young Generation Size")
@@ -262,6 +267,8 @@ add_subdirectory(deps)
 add_subdirectory(lib)
 add_subdirectory(tools)
 add_subdirectory(runtime)
+
+find_package(fmt)
 
 if(BUILD_TESTS)
   add_subdirectory(unittests)

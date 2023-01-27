@@ -9,11 +9,9 @@
 typedef kore_pattern *new_comp_t(char const *);
 typedef kore_sort *new_sort_t(char const *);
 typedef void simplify_t(kore_pattern *, kore_sort *, char **, size_t *);
-typedef void free_all_t(void);
-typedef void init_t(void);
 
 int main(int argc, char **argv) {
-  if (argc <= 3) {
+  if (argc <= 2) {
     return 1;
   }
 
@@ -25,41 +23,29 @@ int main(int argc, char **argv) {
   new_comp_t *new_comp = (new_comp_t *)dlsym(lib, "kore_composite_pattern_new");
   new_sort_t *new_sort = (new_sort_t *)dlsym(lib, "kore_composite_sort_new");
   simplify_t *simplify = (simplify_t *)dlsym(lib, "kore_simplify");
-  free_all_t *free_all = (free_all_t *)dlsym(lib, "kllvm_free_all_memory");
-  init_t *init = (init_t *)dlsym(lib, "kllvm_init");
 
-  if (!new_comp || !new_sort || !simplify || !free_all || !init) {
+  if (!new_comp || !new_sort || !simplify) {
     return 3;
   }
 
-  init();
-
-  kore_sort *sort = new_sort("SortInt");
+  kore_sort *k_sort = new_sort("SortK");
 
   /*
     module TEST
-      imports INT
+        imports DOMAINS
 
-      syntax Int ::= foo() [function, klabel(foo), symbol]
-                   | bar() [function, klabel(bar), symbol]
+        syntax KItem ::= bar() [klabel(bar), symbol]
 
-      rule foo() => 328
-      rule bar() => 562
+        syntax K ::= foo() [function, klabel(foo), symbol]
+        rule foo() => bar()
     endmodule
   */
-  kore_pattern *pat = new_comp(argv[3]);
-  assert(sort && pat && "Bad sort or pattern");
+  kore_pattern *pat = new_comp("Lblfoo");
+  assert(k_sort && pat && "Bad sort or pattern");
 
   char *data;
   size_t size;
-  simplify(pat, sort, &data, &size);
-
-  // Do the simplification twice to make sure GC works
-  free_all();
-
-  // Workaround while patterns can't be reused
-  kore_pattern *pat_2 = new_comp(argv[3]);
-  simplify(pat_2, sort, &data, &size);
+  simplify(pat, k_sort, &data, &size);
 
   FILE *f = fopen(argv[2], "wb");
   if (!f) {

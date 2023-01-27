@@ -11,5 +11,6 @@ target_link_libraries(runtime-collections-tests
   PUBLIC
   collections
   gmp
+  mpfr
   ${Boost_UNIT_TEST_FRAMEWORK_LIBRARIES}
 )

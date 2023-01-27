@@ -183,7 +183,7 @@ string *ffiCall(
   void (*address)(void);
 
   if (!mpz_fits_ulong_p(addr)) {
-    KLLVM_HOOK_INVALID_ARGUMENT("Addr is too large");
+    KLLVM_HOOK_INVALID_ARGUMENT("Addr is too large: {}", intToString(addr));
   }
 
   address = (void (*)(void))mpz_get_ui(addr);
@@ -197,7 +197,9 @@ string *ffiCall(
   }
 
   if (nargs != (nfixtypes + nvartypes)) {
-    KLLVM_HOOK_INVALID_ARGUMENT("Args size does not match types size");
+    KLLVM_HOOK_INVALID_ARGUMENT(
+        "Args size does not match types size: args={}, types={}", nargs,
+        (nfixtypes + nvartypes));
   }
 
   argtypes = (ffi_type **)malloc(sizeof(ffi_type *) * nargs);
@@ -368,10 +370,11 @@ string *hook_FFI_alloc(block *kitem, mpz_t size, mpz_t align) {
   }
 
   if (!mpz_fits_ulong_p(size)) {
-    KLLVM_HOOK_INVALID_ARGUMENT("Size is too large");
+    KLLVM_HOOK_INVALID_ARGUMENT("Size is too large: {}", intToString(size));
   }
   if (!mpz_fits_ulong_p(align)) {
-    KLLVM_HOOK_INVALID_ARGUMENT("Alignment is too large");
+    KLLVM_HOOK_INVALID_ARGUMENT(
+        "Alignment is too large: {}", intToString(align));
   }
 
   size_t a = mpz_get_ui(align);

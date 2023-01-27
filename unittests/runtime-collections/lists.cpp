@@ -248,7 +248,7 @@ BOOST_AUTO_TEST_CASE(fill_out_of_range) {
   mpz_init_set_ui(len, 2);
 
   BOOST_CHECK_THROW(
-      hook_LIST_fill(&list, index, len, DUMMY0), std::out_of_range);
+      hook_LIST_fill(&list, index, len, DUMMY0), std::invalid_argument);
 }
 
 BOOST_AUTO_TEST_CASE(fill) {

@@ -4,6 +4,9 @@
   inputs = {
     utils.url = "github:numtide/flake-utils";
     nixpkgs.url = "github:nixos/nixpkgs";
+    fmt-src.url =
+      "github:fmtlib/fmt/9.1.0";
+    fmt-src.flake = false;
     immer-src.url =
       "github:runtimeverification/immer/198c2ae260d49ef1800a2fe4433e07d7dec20059";
     immer-src.flake = false;
@@ -16,7 +19,7 @@
     mavenix.url = "github:nix-community/mavenix";
   };
 
-  outputs = { self, nixpkgs, utils, immer-src, rapidjson-src, pybind11-src, mavenix }:
+  outputs = { self, nixpkgs, utils, fmt-src, immer-src, rapidjson-src, pybind11-src, mavenix }:
     let
       inherit (nixpkgs) lib;
 
@@ -24,7 +27,7 @@
       # if you have additional overlays, you may add them here
       localOverlay = import ./nix/overlay.nix; # this should expose devShell
       depsOverlay = (final: prev: {
-        inherit immer-src rapidjson-src pybind11-src;
+        inherit fmt-src immer-src rapidjson-src pybind11-src;
 
         llvm-backend-src = prev.stdenv.mkDerivation {
           name = "llvm-backend-src";
@@ -41,9 +44,11 @@
             mkdir $out
             cp -rv $src/* $out
             chmod -R u+w $out
+            mkdir -p $out/deps/fmt
             mkdir -p $out/deps/immer
             mkdir -p $out/deps/rapidjson
             mkdir -p $out/deps/pybind11
+            cp -rv ${final.fmt-src}/* $out/deps/fmt
             cp -rv ${final.immer-src}/* $out/deps/immer
             cp -rv ${final.rapidjson-src}/* $out/deps/rapidjson
             cp -rv ${final.pybind11-src}/* $out/deps/pybind11
@@ -87,7 +92,7 @@
           builtins.listToAttrs (lib.imap0 (i: v: { name = "check_${toString i}"; value = v; }) checks);
 
         matrix = builtins.listToAttrs (lib.forEach (lib.cartesianProductOfSets {
-          llvm-version = [12 13 14];
+          llvm-version = [11 12 13 14];
           build-type = ["Debug" "Release" "RelWithDebInfo" "FastBuild" "GcStats"];
         }) (
           args:
@@ -108,6 +113,7 @@
         checks = listToChecks [
           # Check that the backend compiles on each supported version of LLVM,
           # but don't run the test suite on all 15 configurations.
+          llvm-backend-11-FastBuild.llvm-backend
 
           # Disable the full set temporarily while the checks run on a hosted
           # runner.

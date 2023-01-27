@@ -11,7 +11,7 @@ case class AxiomInfo(priority: Int, ordinal: Int, rewrite: GeneralizedRewrite, s
 
 object Parser {
 
-  private def hasAtt(axiom: AxiomDeclaration, att: String): Boolean = {
+  def hasAtt(axiom: AxiomDeclaration, att: String): Boolean = {
     getAtt(axiom, att).isDefined
   }
 
@@ -19,7 +19,7 @@ object Parser {
     att.patterns.find(isAtt(attName, _)).isDefined
   }
 
-  private def getAtt(axiom: AxiomDeclaration, att: String): Option[Pattern] = {
+  def getAtt(axiom: AxiomDeclaration, att: String): Option[Pattern] = {
     axiom.att.patterns.find(isAtt(att, _))
   }
 
@@ -240,7 +240,7 @@ object Parser {
     }
   }
 
-  private def expandAliases(axiom: AxiomDeclaration, aliases: Map[String, AliasDeclaration]) : AxiomDeclaration = { 
+  def expandAliases(axiom: AxiomDeclaration, aliases: Map[String, AliasDeclaration]) : AxiomDeclaration = { 
     B.AxiomDeclaration(axiom.params, expandAliases(axiom.pattern, aliases), axiom.att).asInstanceOf[AxiomDeclaration]
   }
 
@@ -253,13 +253,13 @@ object Parser {
     defn.modules.flatMap(_.decls).filter(_.isInstanceOf[SortDeclaration]).map(_.asInstanceOf[SortDeclaration].sort)
   }
 
-  def parseTopAxioms(axioms: Seq[(AxiomDeclaration, Int)]) : IndexedSeq[AxiomInfo] = {
-    val withOwise = axioms.flatMap(parseAxiomSentence(splitTop, _))
+  def parseTopAxioms(axioms: Seq[AxiomDeclaration]) : IndexedSeq[AxiomInfo] = {
+    val withOwise = axioms.zipWithIndex.flatMap(parseAxiomSentence(splitTop, _))
     withOwise.map(_._2).sortWith(_.priority < _.priority).toIndexedSeq
   }
 
-  def parseFunctionAxioms(axioms: Seq[(AxiomDeclaration, Int)]) : Map[SymbolOrAlias, IndexedSeq[AxiomInfo]] = {
-    val withOwise = axioms.flatMap(parseAxiomSentence(a => splitFunction(a), _))
+  def parseFunctionAxioms(axioms: Seq[AxiomDeclaration]) : Map[SymbolOrAlias, IndexedSeq[AxiomInfo]] = {
+    val withOwise = axioms.zipWithIndex.flatMap(parseAxiomSentence(a => splitFunction(a), _))
     withOwise.sortWith(_._2.priority < _._2.priority).toIndexedSeq.filter(_._1.isDefined).map(t => (t._1.get, t._2)).groupBy(_._1).mapValues(_.map(_._2))
   }
 

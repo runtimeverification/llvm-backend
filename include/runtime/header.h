@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <limits>
 
+#include <fmt/format.h>
 #include <gmp.h>
 #include <mpfr.h>
 
@@ -275,10 +276,13 @@ block *strip_injection(block *);
 std::string floatToString(const floating *);
 void init_float2(floating *, std::string);
 
-#define KLLVM_HOOK_INVALID_ARGUMENT(msg)                                       \
+std::string intToStringInBase(mpz_t, uint64_t);
+std::string intToString(mpz_t);
+
+#define KLLVM_HOOK_INVALID_ARGUMENT(...)                                       \
   do {                                                                         \
-    auto err_msg = std::string("[") + std::string(__func__)                    \
-                   + std::string("]: ") + std::string(msg);                    \
+    auto err_msg                                                               \
+        = ::fmt::format("[{}]: {}", __func__, ::fmt::format(__VA_ARGS__));     \
     throw std::invalid_argument(err_msg);                                      \
   } while (false)
 

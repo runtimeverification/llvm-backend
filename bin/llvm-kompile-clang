@@ -155,6 +155,7 @@ run @CMAKE_CXX_COMPILER@ -Wno-override-module -Wno-return-type-c-linkage "$modop
   "$MAINFILES" \
   "$LIBDIR"/libutil.a \
   "$LIBDIR"/libstrings.a \
+  "$LIBDIR"/libnumeric_strings.a \
   "$LIBDIR"/libio.a \
   "$LIBDIR"/libcollections.a \
   "$LIBDIR"/libParser.a \
