@@ -100,7 +100,7 @@
             {
               name = "llvm-backend-${toString args.llvm-version}-${args.build-type}";
               value = {
-                inherit (pkgs) llvm-backend llvm-backend-matching integration-tests devShell;
+                inherit (pkgs) llvm-backend llvm-backend-matching llvm-kompile-testing integration-tests devShell;
               };
             }
         ));
