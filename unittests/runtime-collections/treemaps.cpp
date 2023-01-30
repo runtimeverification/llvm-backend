@@ -40,7 +40,7 @@ void hugeTest(std::vector<int> &v) {
     trees[idxD].assert_black_invariant();
     trees[idxD].assert_BST_invariant();
   }
-  auto result = trees[0].is_empty();
+  auto result = trees[0].empty();
   BOOST_CHECK_EQUAL(result, true);
   trees[0].assert_red_invariant();
   trees[0].assert_black_invariant();

@@ -94,7 +94,7 @@ private:
 
   std::optional<std::pair<Range<T>, V>>
   get_key_value(RBTree<Range<T>, V> const &t, T const &k) const {
-    if (t.is_empty()) {
+    if (t.empty()) {
       return std::nullopt;
     }
     Range<T> r = t.root_key();
@@ -112,7 +112,7 @@ private:
   // Return true if range r partially or completely overlaps with any range
   // stored in the ordered map t that is passed as an argument.
   bool overlaps(RBTree<Range<T>, V> const &t, Range<T> const &r) const {
-    if (t.is_empty()) {
+    if (t.empty()) {
       return false;
     }
     T start = r.start();
@@ -141,7 +141,7 @@ private:
   void get_overlapping_or_adjacent_ranges(
       RBTree<Range<T>, V> const &t, Range<T> const &r,
       std::vector<std::pair<Range<T>, V>> &v) const {
-    if (t.is_empty()) {
+    if (t.empty()) {
       return;
     }
     T start = r.start();
@@ -191,7 +191,7 @@ private:
   void get_overlapping_ranges(
       RBTree<Range<T>, V> const &t, Range<T> const &r,
       std::vector<std::pair<Range<T>, V>> &v) const {
-    if (t.is_empty()) {
+    if (t.empty()) {
       return;
     }
     T start = r.start();
