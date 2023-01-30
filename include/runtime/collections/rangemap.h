@@ -23,10 +23,10 @@ public:
       , end_(end) { }
 
   // Getter for the start of this range.
-  T get_start() const { return start_; }
+  T start() const { return start_; }
 
   // Getter for the end of this range.
-  T get_end() const { return end_; }
+  T end() const { return end_; }
 
   // The following methods define the ordering for objects of class Range.
   // Operator < is used to subsequently define >, ==, <=, >=, and !=.
@@ -101,11 +101,11 @@ private:
     if (r.contains(k)) {
       return std::make_pair(r, t.root_val());
     }
-    T start = r.get_start();
+    T start = r.start();
     if (k < start) {
       return get_key_value(t.left(), k);
     }
-    assert(k >= r.get_end());
+    assert(k >= r.end());
     return get_key_value(t.right(), k);
   }
 
@@ -115,10 +115,10 @@ private:
     if (t.is_empty()) {
       return false;
     }
-    T start = r.get_start();
-    T end = r.get_end();
-    T rstart = t.root_key().get_start();
-    T rend = t.root_key().get_end();
+    T start = r.start();
+    T end = r.end();
+    T rstart = t.root_key().start();
+    T rend = t.root_key().end();
     if (rend <= start) {
       // The root is to the left of range r, possibly adjacent but not
       // overlapping. Continue looking for overlapping ranges to the right of
@@ -144,10 +144,10 @@ private:
     if (t.is_empty()) {
       return;
     }
-    T start = r.get_start();
-    T end = r.get_end();
-    T rstart = t.root_key().get_start();
-    T rend = t.root_key().get_end();
+    T start = r.start();
+    T end = r.end();
+    T rstart = t.root_key().start();
+    T rend = t.root_key().end();
     if (rend < start) {
       // The candidate range is to the left of our target range, and does
       // not share a boundary. It is not relevant. Continue looking for
@@ -194,10 +194,10 @@ private:
     if (t.is_empty()) {
       return;
     }
-    T start = r.get_start();
-    T end = r.get_end();
-    T rstart = t.root_key().get_start();
-    T rend = t.root_key().get_end();
+    T start = r.start();
+    T end = r.end();
+    T rstart = t.root_key().start();
+    T rend = t.root_key().end();
     if (rend <= start) {
       // The candidate range is to the left of our target range, and may
       // share a boundary. It is not relevant. Continue looking for
@@ -296,15 +296,15 @@ public:
     // treemap data structure, as well as the bounds of the target inserted
     // range. We iterate over the collected relevant ranges to collect
     // these changes.
-    T is = r.get_start();
-    T ie = r.get_end();
+    T is = r.start();
+    T ie = r.end();
     RBTree<Range<T>, V> tmpmap = treemap_;
     for (auto &p : ranges) {
       Range<T> rr = p.first;
       V rv = p.second;
       assert(r.is_relevant(rr));
-      T rrs = rr.get_start();
-      T rre = rr.get_end();
+      T rrs = rr.start();
+      T rre = rr.end();
 
       if (v == rv) {
         // The inserted value is the same as the value stored in
@@ -359,15 +359,15 @@ public:
     // treemap data structure.
     // We iterate over the collected relevant ranges to collect and apply
     // these changes.
-    T ds = r.get_start();
-    T de = r.get_end();
+    T ds = r.start();
+    T de = r.end();
     RBTree<Range<T>, V> tmpmap = treemap_;
     for (auto &p : ranges) {
       Range<T> rr = p.first;
       V rv = p.second;
       assert(r.overlaps(rr));
-      T rrs = rr.get_start();
-      T rre = rr.get_end();
+      T rrs = rr.start();
+      T rre = rr.end();
       tmpmap = tmpmap.deleted(rr);
       if (rrs < ds) {
         tmpmap = tmpmap.inserted(Range<T>(rrs, ds), rv);
@@ -387,7 +387,7 @@ public:
   void print(std::ostream &os) const {
     os << "--------------------------" << std::endl;
     for_each(treemap_, [&os](Range<T> x, V v) {
-      os << "[ " << x.get_start() << ".." << x.get_end() << " ) -> " << v
+      os << "[ " << x.start() << ".." << x.end() << " ) -> " << v
          << std::endl;
     });
     os << "--------------------------" << std::endl;
