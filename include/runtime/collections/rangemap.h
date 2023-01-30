@@ -53,7 +53,7 @@ public:
   bool contains(T const &k) const { return k >= start_ && k < end_; }
 
   // Returns true if this range is empty.
-  bool is_empty() const { return start_ >= end_; }
+  bool empty() const { return start_ >= end_; }
 
   // Returns true if this range overlaps with range r.
   bool overlaps(Range const &r) const {
@@ -286,7 +286,7 @@ public:
      */
   RangeMap inserted(Range<T> const &r, V const &v) const {
     // Empty ranges do not make sense here.
-    if (r.is_empty()) {
+    if (r.empty()) {
       CONSTRUCT_MSG_AND_THROW("Insert empty range in range map");
     }
 
@@ -349,7 +349,7 @@ public:
      */
   RangeMap deleted(Range<T> const &r) const {
     // Empty ranges do not make sense here.
-    if (r.is_empty()) {
+    if (r.empty()) {
       CONSTRUCT_MSG_AND_THROW("Delete empty range from range map");
     }
 
