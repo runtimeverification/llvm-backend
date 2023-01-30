@@ -289,9 +289,28 @@ bool KORESymbol::isPolymorphic() const {
 }
 
 static std::unordered_set<std::string> BUILTINS{
-    "\\and",    "\\not",  "\\or",       "\\implies", "\\iff", "\\forall",
-    "\\exists", "\\ceil", "\\floor",    "\\equals",  "\\in",  "\\top",
-    "\\bottom", "\\dv",   "\\rewrites", "\\next",    "\\mu",  "\\nu"};
+    "\\and",
+    "\\not",
+    "\\or",
+    "\\implies",
+    "\\iff",
+    "\\forall",
+    "\\exists",
+    "\\ceil",
+    "\\floor",
+    "\\equals",
+    "\\in",
+    "\\top",
+    "\\bottom",
+    "\\dv",
+    "\\rewrites",
+    "\\next",
+    "\\mu",
+    "\\nu",
+    "weakAlwaysFinally",
+    "weakExistsFinally",
+    "allPathGlobally",
+};
 
 bool KORESymbol::isBuiltin() const {
   return BUILTINS.count(name);
