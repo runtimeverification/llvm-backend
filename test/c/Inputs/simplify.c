@@ -63,9 +63,7 @@ int main(int argc, char **argv) {
   // Do the simplification twice to make sure GC works
   free_all();
 
-  // Workaround while patterns can't be reused
-  kore_pattern *pat_2 = new_comp(argv[3]);
-  simplify(pat_2, sort, &data, &size);
+  simplify(pat, sort, &data, &size);
 
   FILE *f = fopen(argv[2], "wb");
   if (!f) {
@@ -76,6 +74,5 @@ int main(int argc, char **argv) {
   fclose(f);
 
   pattern_free(pat);
-  pattern_free(pat_2);
   sort_free(sort);
 }
