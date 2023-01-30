@@ -8,6 +8,8 @@
 #include <optional>
 #include <stdexcept>
 
+namespace rangemap {
+
 // Range bounded inclusively below and exlusively above: [start, end).
 // - T : class of values within the range
 template <class T>
@@ -85,15 +87,15 @@ class RangeMap {
 
 private:
   // Ordered map based on red-black tree.
-  RBTree<Range<T>, V> treemap_;
+  rb_tree::RBTree<Range<T>, V> treemap_;
 
   // Create a rangemap on top of a red-black tree that uses ranges as keys.
   // The red black tree should already be a well-formed rangemap.
-  RangeMap(RBTree<Range<T>, V> t)
+  RangeMap(rb_tree::RBTree<Range<T>, V> t)
       : treemap_(t) { }
 
   std::optional<std::pair<Range<T>, V>>
-  get_key_value(RBTree<Range<T>, V> const &t, T const &k) const {
+  get_key_value(rb_tree::RBTree<Range<T>, V> const &t, T const &k) const {
     if (t.empty()) {
       return std::nullopt;
     }
@@ -111,7 +113,8 @@ private:
 
   // Return true if range r partially or completely overlaps with any range
   // stored in the ordered map t that is passed as an argument.
-  bool overlaps(RBTree<Range<T>, V> const &t, Range<T> const &r) const {
+  bool
+  overlaps(rb_tree::RBTree<Range<T>, V> const &t, Range<T> const &r) const {
     if (t.empty()) {
       return false;
     }
@@ -139,7 +142,7 @@ private:
   // Gather all <Range<T>, V> pairs in t that are overlapping or directly
   // adjacent (share a boundary) with range r, in v.
   void get_overlapping_or_adjacent_ranges(
-      RBTree<Range<T>, V> const &t, Range<T> const &r,
+      rb_tree::RBTree<Range<T>, V> const &t, Range<T> const &r,
       std::vector<std::pair<Range<T>, V>> &v) const {
     if (t.empty()) {
       return;
@@ -189,7 +192,7 @@ private:
 
   // Gather all <Range, V> pairs in t that are overlapping with range r, in v.
   void get_overlapping_ranges(
-      RBTree<Range<T>, V> const &t, Range<T> const &r,
+      rb_tree::RBTree<Range<T>, V> const &t, Range<T> const &r,
       std::vector<std::pair<Range<T>, V>> &v) const {
     if (t.empty()) {
       return;
@@ -239,7 +242,7 @@ private:
 public:
   // Create an empty rangemap.
   RangeMap()
-      : treemap_(RBTree<Range<T>, V>()) { }
+      : treemap_(rb_tree::RBTree<Range<T>, V>()) { }
 
   // Create a rangemap with elements from the container designated by the
   // beginning and end iterator arguments. The container should contain elements
@@ -298,7 +301,7 @@ public:
     // these changes.
     T is = r.start();
     T ie = r.end();
-    RBTree<Range<T>, V> tmpmap = treemap_;
+    rb_tree::RBTree<Range<T>, V> tmpmap = treemap_;
     for (auto &p : ranges) {
       Range<T> rr = p.first;
       V rv = p.second;
@@ -361,7 +364,7 @@ public:
     // these changes.
     T ds = r.start();
     T de = r.end();
-    RBTree<Range<T>, V> tmpmap = treemap_;
+    rb_tree::RBTree<Range<T>, V> tmpmap = treemap_;
     for (auto &p : ranges) {
       Range<T> rr = p.first;
       V rv = p.second;
@@ -387,8 +390,7 @@ public:
   void print(std::ostream &os) const {
     os << "--------------------------" << std::endl;
     for_each(treemap_, [&os](Range<T> x, V v) {
-      os << "[ " << x.start() << ".." << x.end() << " ) -> " << v
-         << std::endl;
+      os << "[ " << x.start() << ".." << x.end() << " ) -> " << v << std::endl;
     });
     os << "--------------------------" << std::endl;
   }
@@ -422,5 +424,7 @@ RangeMap<T, V> inserted(RangeMap<T, V> const &m, I it, I end) {
   auto m1 = m.inserted(key, val);
   return inserted(m1, ++it, end);
 }
+
+} // namespace rangemap
 
 #endif // RANGEMAP_HEADER_H

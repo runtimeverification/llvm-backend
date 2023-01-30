@@ -13,6 +13,8 @@
 #include <string>
 #include <utility>
 
+namespace rb_tree {
+
 #define CONSTRUCT_MSG_AND_THROW(...)                                           \
   do {                                                                         \
     auto err_msg                                                               \
@@ -553,9 +555,8 @@ private:
   }
 
   bool only_right_child(Color parent_color, Color child_color) const {
-    return !empty() && root_color() == parent_color
-           && left().empty(Color::B) && !right().empty()
-           && right().root_color() == child_color;
+    return !empty() && root_color() == parent_color && left().empty(Color::B)
+           && !right().empty() && right().root_color() == child_color;
   }
 
   bool doubled_left() const {
@@ -601,5 +602,7 @@ RBTree<T, V> inserted(RBTree<T, V> const &t, I it, I end) {
   auto t1 = t.inserted(key, val);
   return inserted(t1, ++it, end);
 }
+
+} // namespace rb_tree
 
 #endif // RBTREE_HEADER_H

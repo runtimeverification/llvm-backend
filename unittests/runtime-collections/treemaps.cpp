@@ -7,8 +7,8 @@
 #include <iostream>
 
 void hugeTest(std::vector<int> &v) {
-  std::vector<RBTree<int, int>> trees;
-  trees.push_back(RBTree<int, int>());
+  std::vector<rb_tree::RBTree<int, int>> trees;
+  trees.push_back(rb_tree::RBTree<int, int>());
   for (int i : v) {
     trees.push_back(trees.back().inserted(i, i + 1));
     trees.push_back(trees.back().inserted(i, i + 2));
@@ -72,13 +72,13 @@ BOOST_AUTO_TEST_CASE(hugetest) {
 }
 
 BOOST_AUTO_TEST_CASE(treemap_test_element) {
-  auto map = (RBTree<int, int>()).inserted(0, 0);
+  auto map = (rb_tree::RBTree<int, int>()).inserted(0, 0);
   auto result = map.at(0);
   BOOST_CHECK_EQUAL(result, 0);
 }
 
 BOOST_AUTO_TEST_CASE(treemap_test_size) {
-  auto map = RBTree<int, int>();
+  auto map = rb_tree::RBTree<int, int>();
   auto result = map.size();
   BOOST_CHECK_EQUAL(result, 0);
   auto map2 = map.inserted(0, 1);
@@ -89,8 +89,8 @@ BOOST_AUTO_TEST_CASE(treemap_test_size) {
 }
 
 BOOST_AUTO_TEST_CASE(treemap_test_concat_success) {
-  auto m1 = (RBTree<int, int>()).inserted(0, 1);
-  auto m2 = (RBTree<int, int>()).inserted(1, 2);
+  auto m1 = (rb_tree::RBTree<int, int>()).inserted(0, 1);
+  auto m2 = (rb_tree::RBTree<int, int>()).inserted(1, 2);
   auto map = m1.concat(m2);
   auto result = map.size();
   BOOST_CHECK_EQUAL(result, 2);
@@ -105,20 +105,20 @@ BOOST_AUTO_TEST_CASE(treemap_test_concat_success) {
 }
 
 BOOST_AUTO_TEST_CASE(treemap_test_concat_failure) {
-  auto m1 = (RBTree<int, int>()).inserted(0, 1);
-  auto m2 = (RBTree<int, int>()).inserted(0, 2);
+  auto m1 = (rb_tree::RBTree<int, int>()).inserted(0, 1);
+  auto m2 = (rb_tree::RBTree<int, int>()).inserted(0, 2);
   BOOST_CHECK_THROW(m1.concat(m2), std::invalid_argument);
 }
 
 BOOST_AUTO_TEST_CASE(treemap_test_at) {
-  auto map = (RBTree<int, int>()).inserted(0, 1);
+  auto map = (rb_tree::RBTree<int, int>()).inserted(0, 1);
   auto result = map.at(0);
   BOOST_CHECK_EQUAL(result, 1);
   BOOST_CHECK_THROW(map.at(2), std::invalid_argument);
 }
 
 BOOST_AUTO_TEST_CASE(treemap_test_contains) {
-  auto map = (RBTree<int, int>()).inserted(0, 1);
+  auto map = (rb_tree::RBTree<int, int>()).inserted(0, 1);
   auto result = map.contains(0);
   BOOST_CHECK_EQUAL(result, true);
   result = map.contains(1);
@@ -126,7 +126,7 @@ BOOST_AUTO_TEST_CASE(treemap_test_contains) {
 }
 
 BOOST_AUTO_TEST_CASE(treemap_test_inserted) {
-  auto map = (RBTree<int, int>());
+  auto map = (rb_tree::RBTree<int, int>());
   auto result = map.size();
   BOOST_CHECK_EQUAL(result, 0);
   auto map2 = map.inserted(0, 0);
@@ -137,7 +137,7 @@ BOOST_AUTO_TEST_CASE(treemap_test_inserted) {
 }
 
 BOOST_AUTO_TEST_CASE(treemap_test_update) {
-  auto map = (RBTree<int, int>()).inserted(0, 0);
+  auto map = (rb_tree::RBTree<int, int>()).inserted(0, 0);
   auto result = map.at(0);
   BOOST_CHECK_EQUAL(result, 0);
   auto map2 = map.inserted(0, 1);
@@ -148,7 +148,7 @@ BOOST_AUTO_TEST_CASE(treemap_test_update) {
 }
 
 BOOST_AUTO_TEST_CASE(treemap_test_remove) {
-  auto map = (RBTree<int, int>()).inserted(0, 0);
+  auto map = (rb_tree::RBTree<int, int>()).inserted(0, 0);
   auto map2 = map.deleted(0);
   auto result = map.size();
   BOOST_CHECK_EQUAL(result, 1);
@@ -157,25 +157,25 @@ BOOST_AUTO_TEST_CASE(treemap_test_remove) {
 }
 
 BOOST_AUTO_TEST_CASE(treemap_test_inserted_multiple) {
-  auto map = (RBTree<int, int>()).inserted(0, 0);
+  auto map = (rb_tree::RBTree<int, int>()).inserted(0, 0);
   auto results = map.size();
   BOOST_CHECK_EQUAL(results, 1);
   auto resultv = map.at(0);
   BOOST_CHECK_EQUAL(resultv, 0);
   auto v = {std::pair<int, int>(1, 1), std::pair<int, int>(2, 2)};
-  auto map2 = inserted(map, v.begin(), v.end());
+  auto map2 = rb_tree::inserted(map, v.begin(), v.end());
   results = map.size();
   BOOST_CHECK_EQUAL(results, 1);
   results = map2.size();
   BOOST_CHECK_EQUAL(results, 3);
   auto u = {std::pair<int, int>(1, 1), std::pair<int, int>(1, 2)};
-  auto map3 = inserted(map, u.begin(), u.end());
+  auto map3 = rb_tree::inserted(map, u.begin(), u.end());
   results = map3.size();
   BOOST_CHECK_EQUAL(results, 2);
   resultv = map3.at(1);
   BOOST_CHECK_EQUAL(resultv, 2);
   auto w = {std::pair<int, int>(0, 1)};
-  auto map4 = inserted(map, w.begin(), w.end());
+  auto map4 = rb_tree::inserted(map, w.begin(), w.end());
   results = map4.size();
   BOOST_CHECK_EQUAL(results, 1);
   resultv = map4.at(0);
