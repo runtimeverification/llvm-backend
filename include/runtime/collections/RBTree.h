@@ -106,7 +106,6 @@ class RBTree {
     assert(rgt.is_empty() || key < rgt.root_key());
   }
 
-  // Copy constructor.
   explicit RBTree(std::shared_ptr<const Node> node)
       : root_(node) { }
 
