@@ -189,15 +189,15 @@ public:
 
   // Return the corresponding value if key x is found in this tree. Otherwise,
   // throw an exception.
-  V lookup(T const &x) const {
+  V at(T const &x) const {
     if (empty()) {
       CONSTRUCT_MSG_AND_THROW("Key not found for map lookup");
     }
     T y = root_key();
     if (x < y) {
-      return left().lookup(x);
+      return left().at(x);
     } else if (y < x) {
-      return right().lookup(x);
+      return right().at(x);
     } else {
       return root_val();
     }
