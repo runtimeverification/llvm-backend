@@ -18,7 +18,7 @@ void hugeTest(std::vector<int> &v) {
   }
   for (int i = 0; i < v.size(); i++) {
     int idxI1 = 1 + 2 * i;
-    auto result1 = trees[idxI1].member(v[i]);
+    auto result1 = trees[idxI1].contains(v[i]);
     BOOST_CHECK_EQUAL(result1, true);
     auto result2 = trees[idxI1].lookup(v[i]);
     BOOST_CHECK_EQUAL(result2, v[i] + 1);
@@ -26,7 +26,7 @@ void hugeTest(std::vector<int> &v) {
     trees[idxI1].assert_black_invariant();
     trees[idxI1].assert_BST_invariant();
     int idxI2 = 1 + 2 * i + 1;
-    result1 = trees[idxI2].member(v[i]);
+    result1 = trees[idxI2].contains(v[i]);
     BOOST_CHECK_EQUAL(result1, true);
     result2 = trees[idxI2].lookup(v[i]);
     BOOST_CHECK_EQUAL(result2, v[i] + 2);
@@ -34,7 +34,7 @@ void hugeTest(std::vector<int> &v) {
     trees[idxI2].assert_black_invariant();
     trees[idxI2].assert_BST_invariant();
     int idxD = 1 + 2 * v.size() + i;
-    result1 = trees[idxD].member(v[i]);
+    result1 = trees[idxD].contains(v[i]);
     BOOST_CHECK_EQUAL(result1, false);
     trees[idxD].assert_red_invariant();
     trees[idxD].assert_black_invariant();
@@ -94,9 +94,9 @@ BOOST_AUTO_TEST_CASE(treemap_test_concat_success) {
   auto map = m1.concat(m2);
   auto result = map.size();
   BOOST_CHECK_EQUAL(result, 2);
-  result = map.member(0);
+  result = map.contains(0);
   BOOST_CHECK_EQUAL(result, true);
-  result = map.member(1);
+  result = map.contains(1);
   BOOST_CHECK_EQUAL(result, true);
   result = map.lookup(0);
   BOOST_CHECK_EQUAL(result, 1);
@@ -117,11 +117,11 @@ BOOST_AUTO_TEST_CASE(treemap_test_lookup) {
   BOOST_CHECK_THROW(map.lookup(2), std::invalid_argument);
 }
 
-BOOST_AUTO_TEST_CASE(treemap_test_member) {
+BOOST_AUTO_TEST_CASE(treemap_test_contains) {
   auto map = (RBTree<int, int>()).inserted(0, 1);
-  auto result = map.member(0);
+  auto result = map.contains(0);
   BOOST_CHECK_EQUAL(result, true);
-  result = map.member(1);
+  result = map.contains(1);
   BOOST_CHECK_EQUAL(result, false);
 }
 

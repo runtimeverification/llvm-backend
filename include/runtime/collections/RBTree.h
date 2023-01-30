@@ -173,15 +173,15 @@ public:
   size_t size() const { return root_->s_; }
 
   // Return true if key x is found in this tree. Otherwise, return false.
-  bool member(T const &x) const {
+  bool contains(T const &x) const {
     if (empty()) {
       return false;
     }
     T y = root_key();
     if (x < y) {
-      return left().member(x);
+      return left().contains(x);
     } else if (y < x) {
-      return right().member(x);
+      return right().contains(x);
     } else {
       return true;
     }
@@ -218,7 +218,7 @@ public:
   RBTree concat(RBTree const &t) const {
     RBTree res = *this;
     for_each(t, [&res, this](T const &x, V const &v) {
-      if (!member(x)) {
+      if (!contains(x)) {
         res = res.inserted(x, v);
       } else {
         CONSTRUCT_MSG_AND_THROW("Duplicate keys in map concatenation");
