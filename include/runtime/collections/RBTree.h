@@ -5,8 +5,8 @@
 /* Implementing algorithms from                                               *
  * https://matt.might.net/papers/germane2014deletion.pdf                      */
 
+#include "runtime/fmt_error_handling.h"
 #include <cassert>
-#include <fmt/format.h>
 #include <functional>
 #include <memory>
 #include <stdexcept>
@@ -14,13 +14,6 @@
 #include <utility>
 
 namespace rb_tree {
-
-#define CONSTRUCT_MSG_AND_THROW(...)                                           \
-  do {                                                                         \
-    auto err_msg                                                               \
-        = ::fmt::format("[{}]: {}", __func__, ::fmt::format(__VA_ARGS__));     \
-    throw std::invalid_argument(err_msg);                                      \
-  } while (false)
 
 //---               Ordered map on top of a red-black tree.                ---//
 
@@ -42,7 +35,7 @@ class RBTree {
     switch (c) {
     case Color::B: return Color::R;
     case Color::BB: return Color::B;
-    default: CONSTRUCT_MSG_AND_THROW("Unexpected color");
+    default: KLLVM_HOOK_INVALID_ARGUMENT("Unexpected color");
     }
   }
 
@@ -193,7 +186,7 @@ public:
   // throw an exception.
   V at(T const &x) const {
     if (empty()) {
-      CONSTRUCT_MSG_AND_THROW("Key not found for map lookup");
+      KLLVM_HOOK_INVALID_ARGUMENT("Key not found for map lookup");
     }
     T y = root_key();
     if (x < y) {
@@ -223,7 +216,7 @@ public:
       if (!contains(x)) {
         res = res.inserted(x, v);
       } else {
-        CONSTRUCT_MSG_AND_THROW("Duplicate keys in map concatenation");
+        KLLVM_HOOK_INVALID_ARGUMENT("Duplicate keys in map concatenation");
       }
     });
     return res;
@@ -235,23 +228,23 @@ public:
   void assert_red_invariant() const {
     if (!empty()) {
       if (root_color() == Color::BB) {
-        CONSTRUCT_MSG_AND_THROW("Red invariant failed");
+        KLLVM_HOOK_INVALID_ARGUMENT("Red invariant failed");
       }
       auto lft = left();
       auto rgt = right();
       if (root_color() == Color::R) {
         if (!(lft.empty() || lft.root_color() == Color::B)) {
-          CONSTRUCT_MSG_AND_THROW("Red invariant failed");
+          KLLVM_HOOK_INVALID_ARGUMENT("Red invariant failed");
         }
         if (!(rgt.empty() || rgt.root_color() == Color::B)) {
-          CONSTRUCT_MSG_AND_THROW("Red invariant failed");
+          KLLVM_HOOK_INVALID_ARGUMENT("Red invariant failed");
         }
       }
       lft.assert_red_invariant();
       rgt.assert_red_invariant();
     } else {
       if (leaf_color() != Color::B) {
-        CONSTRUCT_MSG_AND_THROW("Red invariant failed");
+        KLLVM_HOOK_INVALID_ARGUMENT("Red invariant failed");
       }
     }
   }
@@ -267,7 +260,7 @@ public:
     int lft = left().assert_black_invariant();
     int rgt = right().assert_black_invariant();
     if (lft != rgt) {
-      CONSTRUCT_MSG_AND_THROW("Black invariant failed");
+      KLLVM_HOOK_INVALID_ARGUMENT("Black invariant failed");
     }
     return (root_color() == Color::B) ? 1 + lft : lft;
   }
@@ -283,10 +276,10 @@ public:
     left().assert_BST_invariant();
     right().assert_BST_invariant();
     if (!(left().empty() || left().root_key() < root_key())) {
-      CONSTRUCT_MSG_AND_THROW("BST invariant failed");
+      KLLVM_HOOK_INVALID_ARGUMENT("BST invariant failed");
     }
     if (!(right().empty() || right().root_key() > root_key())) {
-      CONSTRUCT_MSG_AND_THROW("BST invariant failed");
+      KLLVM_HOOK_INVALID_ARGUMENT("BST invariant failed");
     }
   }
 

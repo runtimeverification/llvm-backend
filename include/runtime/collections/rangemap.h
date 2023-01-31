@@ -3,6 +3,7 @@
 
 #include "RBTree.h"
 
+#include "runtime/fmt_error_handling.h"
 #include <cassert>
 #include <iostream>
 #include <optional>
@@ -290,7 +291,7 @@ public:
   RangeMap inserted(Range<T> const &r, V const &v) const {
     // Empty ranges do not make sense here.
     if (r.empty()) {
-      CONSTRUCT_MSG_AND_THROW("Insert empty range in range map");
+      KLLVM_HOOK_INVALID_ARGUMENT("Insert empty range in range map");
     }
 
     std::vector<std::pair<Range<T>, V>> ranges;
@@ -353,7 +354,7 @@ public:
   RangeMap deleted(Range<T> const &r) const {
     // Empty ranges do not make sense here.
     if (r.empty()) {
-      CONSTRUCT_MSG_AND_THROW("Delete empty range from range map");
+      KLLVM_HOOK_INVALID_ARGUMENT("Delete empty range from range map");
     }
 
     std::vector<std::pair<Range<T>, V>> ranges;
@@ -404,7 +405,8 @@ public:
       if (!overlaps(x)) {
         res = res.inserted(x, v);
       } else {
-        CONSTRUCT_MSG_AND_THROW("Overlapping key ranges in map concatenation");
+        KLLVM_HOOK_INVALID_ARGUMENT(
+            "Overlapping key ranges in map concatenation");
       }
     });
     return res;
