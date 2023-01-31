@@ -8,7 +8,7 @@
 #include <optional>
 #include <stdexcept>
 
-namespace rangemap {
+namespace rng_map {
 
 // Range bounded inclusively below and exlusively above: [start, end).
 // - T : class of values within the range
@@ -425,6 +425,6 @@ RangeMap<T, V> inserted(RangeMap<T, V> const &m, I it, I end) {
   return inserted(m1, ++it, end);
 }
 
-} // namespace rangemap
+} // namespace rng_map
 
 #endif // RANGEMAP_HEADER_H
