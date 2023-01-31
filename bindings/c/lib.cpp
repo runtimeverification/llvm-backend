@@ -119,7 +119,6 @@ kore_pattern *kore_pattern_make_interpreter_input(kore_pattern const *pgm) {
   kore_pattern_free(map_item);
   kore_pattern_free(map_unit);
   kore_pattern_free(map_concat);
-  kore_pattern_free(top_cell);
 
   return top_cell;
 }
