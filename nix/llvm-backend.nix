@@ -1,23 +1,28 @@
 { lib, src, cmake, flex, fmt, pkgconfig, llvm, libllvm, libcxxabi, stdenv, boost, gmp
-, jemalloc, libffi, libiconv, libyaml, mpfr, ncurses, python3,
+, jemalloc, libffi, libiconv, libyaml, mpfr, ncurses, python39,
 # Runtime dependencies:
 host,
 # Options:
 cmakeBuildType ? "FastBuild" # optimized release build, currently: LTO
 }:
+let python-env = (python39.withPackages (ps: with ps; [ pybind11 ])); in
 stdenv.mkDerivation {
   pname = "llvm-backend";
   version = "0";
   inherit src cmakeBuildType;
 
-  nativeBuildInputs = [ cmake flex llvm pkgconfig python3 ];
-  buildInputs = [ boost libyaml ];
-  propagatedBuildInputs = [ fmt gmp jemalloc libffi mpfr ncurses ]
-    ++ lib.optional stdenv.isDarwin libiconv;
+  nativeBuildInputs = [ cmake flex llvm pkgconfig ];
+  buildInputs = [ libyaml ];
+  propagatedBuildInputs = [
+    boost fmt gmp jemalloc libffi mpfr ncurses python-env
+  ] ++ lib.optional stdenv.isDarwin libiconv;
 
   postPatch = ''
     sed -i bin/llvm-kompile \
       -e '2a export PATH="${lib.getBin host.clang}/bin:''${PATH}"'
+
+    substituteInPlace bin/llvm-kompile \
+      --replace 'python_cmd=python3' 'python_cmd="${python-env.interpreter}"'
 
     substituteInPlace bin/llvm-kompile-clang \
       --replace '"-lgmp"' '"-I${gmp.dev}/include" "-L${gmp}/lib" "-lgmp"' \
@@ -28,7 +33,9 @@ stdenv.mkDerivation {
       --replace '"-lncurses"' '"-L${ncurses}/lib" "-lncurses"' \
       --replace '"-ltinfo"' '"-L${ncurses}/lib" "-ltinfo"' \
       --replace '"-L@BREW_PREFIX@/opt/libffi/lib"' ' ' \
-      --replace '-L@BREW_PREFIX@/lib' '-L${libcxxabi}/lib'
+      --replace '-L@BREW_PREFIX@/lib' '-L${libcxxabi}/lib' \
+      --replace '-I "$(dirname "$0")"/../include/kllvm' \
+                '-I "$(dirname "$0")"/../include/kllvm -I ${boost.dev}/include -I ${fmt.dev}/include'
   '';
 
   cmakeFlags =
@@ -62,4 +69,6 @@ stdenv.mkDerivation {
   '';
 
   passthru = { inherit (host) clang; };
+
+  python-interpreter = python-env.interpreter;
 }
