@@ -176,6 +176,11 @@ install(
 )
 
 install(
+  DIRECTORY include/kllvm
+  DESTINATION include
+)
+
+install(
   DIRECTORY include/runtime
   DESTINATION include/kllvm
 )
@@ -275,5 +280,3 @@ if(BUILD_TESTS)
 endif()
 
 add_subdirectory(bindings)
-
-#add_subdirectory(test)
