@@ -245,7 +245,7 @@ typedef struct {
 void printMap(writer *, map *, const char *, const char *, const char *);
 void printSet(writer *, set *, const char *, const char *, const char *);
 void printList(writer *, list *, const char *, const char *, const char *);
-void visitChildren(block *subject, writer *file, visitor *printer);
+void visitChildren(block *subject, writer *file, visitor *printer, void *state);
 
 void sfprintf(writer *, const char *, ...);
 

@@ -180,7 +180,7 @@ void printConfigurationInternal(
          printMInt,
          printComma};
 
-  visitChildren(subject, file, &callbacks);
+  visitChildren(subject, file, &callbacks, nullptr);
 
   if (isBinder) {
     boundVariables.pop_back();

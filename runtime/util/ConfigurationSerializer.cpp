@@ -259,7 +259,7 @@ void serializeConfigurationInternal(
          serializeMInt,
          serializeComma};
 
-  visitChildren(subject, file, &callbacks);
+  visitChildren(subject, file, &callbacks, nullptr);
 
   auto symbol = getSymbolNameForTag(tag);
   auto symbolStr = std::string(symbol);

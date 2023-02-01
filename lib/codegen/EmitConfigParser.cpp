@@ -735,6 +735,7 @@ static void emitTraversal(
     argTypes.push_back(file);
     argTypes.push_back(
         makePackedVisitorStructureType(Ctx, module)->getPointerTo());
+    argTypes.push_back(llvm::Type::getInt8Ty(Ctx)->getPointerTo());
   } else {
     argTypes.push_back(llvm::PointerType::getUnqual(
         llvm::ArrayType::get(llvm::Type::getInt8PtrTy(Ctx), 0)));
