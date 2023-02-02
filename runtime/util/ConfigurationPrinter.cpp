@@ -12,6 +12,35 @@
 #include "runtime/alloc.h"
 #include "runtime/header.h"
 
+struct StringHash {
+  size_t operator()(string *const &k) const {
+    return std::hash<std::string>{}(std::string(k->data, len(k)));
+  }
+};
+
+struct StringEq {
+  bool operator()(string *const &lhs, string *const &rhs) const {
+    return hook_STRING_eq(lhs, rhs);
+  }
+};
+
+struct print_state {
+  print_state()
+      : boundVariables{}
+      , varNames{}
+      , usedVarNames{}
+      , varCounter(0) { }
+
+  // We never want to copy the state; it should only ever get passed around by
+  // reference.
+  print_state(print_state const &) = delete;
+
+  std::vector<block *> boundVariables;
+  std::unordered_map<string *, std::string, StringHash, StringEq> varNames;
+  std::set<std::string> usedVarNames;
+  uint64_t varCounter;
+};
+
 void printInt(writer *file, mpz_t i, const char *sort, void *state) {
   auto str = intToString(i);
   sfprintf(file, "\\dv{%s}(\"%s\")", sort, str.c_str());
@@ -82,35 +111,19 @@ void printComma(writer *file, void *state) {
   sfprintf(file, ",");
 }
 
-struct StringHash {
-  size_t operator()(string *const &k) const {
-    return std::hash<std::string>{}(std::string(k->data, len(k)));
-  }
-};
-
-struct StringEq {
-  bool operator()(string *const &lhs, string *const &rhs) const {
-    return hook_STRING_eq(lhs, rhs);
-  }
-};
-
-static thread_local std::vector<block *> boundVariables;
-static thread_local std::unordered_map<
-    string *, std::string, StringHash, StringEq>
-    varNames;
-static thread_local std::set<std::string> usedVarNames;
-static thread_local uint64_t varCounter = 0;
-
 void printConfigurationInternal(
-    writer *file, block *subject, const char *sort, bool isVar, void *state) {
+    writer *file, block *subject, const char *sort, bool isVar,
+    void *state_ptr) {
+  auto &state = *static_cast<print_state *>(state_ptr);
+
   uint8_t isConstant = ((uintptr_t)subject) & 3;
   if (isConstant) {
     uint32_t tag = ((uintptr_t)subject) >> 32;
     if (isConstant == 3) {
       // bound variable
       printConfigurationInternal(
-          file, boundVariables[boundVariables.size() - 1 - tag], sort, true,
-          state);
+          file, state.boundVariables[state.boundVariables.size() - 1 - tag],
+          sort, true, state_ptr);
       return;
     }
     const char *symbol = getSymbolNameForTag(tag);
@@ -140,18 +153,18 @@ void printConfigurationInternal(
         break;
       }
     }
-    if (isVar && !varNames.count(str)) {
+    if (isVar && !state.varNames.count(str)) {
       std::string stdStr = std::string(str->data, len(str));
       std::string suffix = "";
-      while (usedVarNames.count(stdStr + suffix)) {
-        suffix = std::to_string(varCounter++);
+      while (state.usedVarNames.count(stdStr + suffix)) {
+        suffix = std::to_string(state.varCounter++);
       }
       stdStr = stdStr + suffix;
       sfprintf(file, "%s", suffix.c_str());
-      usedVarNames.insert(stdStr);
-      varNames[str] = suffix;
+      state.usedVarNames.insert(stdStr);
+      state.varNames[str] = suffix;
     } else if (isVar) {
-      sfprintf(file, "%s", varNames[str].c_str());
+      sfprintf(file, "%s", state.varNames[str].c_str());
     }
     sfprintf(file, "\")");
     return;
@@ -159,7 +172,7 @@ void printConfigurationInternal(
   uint32_t tag = tag_hdr(subject->h.hdr);
   bool isBinder = isSymbolABinder(tag);
   if (isBinder) {
-    boundVariables.push_back(
+    state.boundVariables.push_back(
         *(block **)(((char *)subject) + sizeof(blockheader)));
   }
   const char *symbol = getSymbolNameForTag(tag);
@@ -183,10 +196,10 @@ void printConfigurationInternal(
          printMInt,
          printComma};
 
-  visitChildren(subject, file, &callbacks, state);
+  visitChildren(subject, file, &callbacks, state_ptr);
 
   if (isBinder) {
-    boundVariables.pop_back();
+    state.boundVariables.pop_back();
   }
   sfprintf(file, ")");
 }
@@ -199,20 +212,19 @@ void printStatistics(const char *filename, uint64_t steps) {
 
 void printConfiguration(const char *filename, block *subject) {
   FILE *file = fopen(filename, "a");
-  boundVariables.clear();
-  varCounter = 0;
+  auto state = print_state();
+
   writer w = {file, nullptr};
-  printConfigurationInternal(&w, subject, nullptr, false, nullptr);
-  varNames.clear();
-  usedVarNames.clear();
+  printConfigurationInternal(&w, subject, nullptr, false, &state);
+
   fclose(file);
 }
 
 void printConfigurations(
     const char *filename, std::unordered_set<block *, HashBlock, KEq> results) {
   FILE *file = fopen(filename, "a");
-  boundVariables.clear();
-  varCounter = 0;
+  auto state = print_state();
+
   writer w = {file, nullptr};
   ssize_t size = results.size();
   if (size == 0) {
@@ -221,46 +233,36 @@ void printConfigurations(
     sfprintf(&w, "\\left-assoc{}(\\or{SortGeneratedTopCell{}}(");
     size_t j = 0;
     for (const auto &subject : results) {
-      printConfigurationInternal(&w, subject, nullptr, false, nullptr);
+      printConfigurationInternal(&w, subject, nullptr, false, &state);
       if (++j != results.size()) {
         sfprintf(&w, ",");
       }
     }
     sfprintf(&w, "))");
   }
-  varNames.clear();
-  usedVarNames.clear();
+
   fclose(file);
 }
 
 string *printConfigurationToString(block *subject) {
-  boundVariables.clear();
-  varCounter = 0;
+  auto state = print_state();
   stringbuffer *buf = hook_BUFFER_empty();
   writer w = {nullptr, buf};
-  printConfigurationInternal(&w, subject, nullptr, false, nullptr);
-  varNames.clear();
-  usedVarNames.clear();
+  printConfigurationInternal(&w, subject, nullptr, false, &state);
   return hook_BUFFER_toString(buf);
 }
 
 void printConfigurationToFile(FILE *file, block *subject) {
-  boundVariables.clear();
-  varCounter = 0;
+  auto state = print_state();
   writer w = {file, nullptr};
-  printConfigurationInternal(&w, subject, nullptr, false, nullptr);
-  varNames.clear();
-  usedVarNames.clear();
+  printConfigurationInternal(&w, subject, nullptr, false, &state);
 }
 
 void printSortedConfigurationToFile(
     FILE *file, block *subject, char const *sort) {
-  boundVariables.clear();
-  varCounter = 0;
+  auto state = print_state();
   writer w = {file, nullptr};
-  printConfigurationInternal(&w, subject, sort, false, nullptr);
-  varNames.clear();
-  usedVarNames.clear();
+  printConfigurationInternal(&w, subject, sort, false, &state);
 }
 
 extern "C" void *getStderr(void) {
