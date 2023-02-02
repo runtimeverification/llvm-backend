@@ -90,7 +90,7 @@ static void emitToken(char const *sort, char const *string, int len = 0) {
 
 void serializeMap(
     writer *file, map *map, const char *unit, const char *element,
-    const char *concat) {
+    const char *concat, void *state) {
   size_t size = map->size();
   if (size == 0) {
     emitSymbol(unit);
@@ -110,7 +110,7 @@ void serializeMap(
 
 void serializeList(
     writer *file, list *list, const char *unit, const char *element,
-    const char *concat) {
+    const char *concat, void *state) {
   size_t size = list->size();
   if (size == 0) {
     emitSymbol(unit);
@@ -129,7 +129,7 @@ void serializeList(
 
 void serializeSet(
     writer *file, set *set, const char *unit, const char *element,
-    const char *concat) {
+    const char *concat, void *state) {
   size_t size = set->size();
   if (size == 0) {
     emitSymbol(unit);
@@ -146,27 +146,29 @@ void serializeSet(
   }
 }
 
-void serializeInt(writer *file, mpz_t i, const char *sort) {
+void serializeInt(writer *file, mpz_t i, const char *sort, void *state) {
   auto str = intToString(i);
   emitToken(sort, str.c_str());
 }
 
-void serializeFloat(writer *file, floating *f, const char *sort) {
+void serializeFloat(writer *file, floating *f, const char *sort, void *state) {
   std::string str = floatToString(f);
   emitToken(sort, str.c_str());
 }
 
-void serializeBool(writer *file, bool b, const char *sort) {
+void serializeBool(writer *file, bool b, const char *sort, void *state) {
   const char *str = b ? "true" : "false";
   emitToken(sort, str);
 }
 
-void serializeStringBuffer(writer *file, stringbuffer *b, const char *sort) {
+void serializeStringBuffer(
+    writer *file, stringbuffer *b, const char *sort, void *state) {
   std::string str(b->contents->data, b->strlen);
   emitToken(sort, str.c_str());
 }
 
-void serializeMInt(writer *file, size_t *i, size_t bits, const char *sort) {
+void serializeMInt(
+    writer *file, size_t *i, size_t bits, const char *sort, void *state) {
   auto fmt = "%sp%zd";
   auto str = std::string{};
 
@@ -184,7 +186,7 @@ void serializeMInt(writer *file, size_t *i, size_t bits, const char *sort) {
   emitToken(sort, buffer.get());
 }
 
-void serializeComma(writer *file) { }
+void serializeComma(writer *file, void *state) { }
 
 static std::pair<std::string, std::vector<sptr<KORESort>>>
 cached_symbol_sort_list(std::string const &symbol) {
@@ -199,7 +201,7 @@ cached_symbol_sort_list(std::string const &symbol) {
 }
 
 void serializeConfigurationInternal(
-    writer *file, block *subject, const char *sort, bool isVar) {
+    writer *file, block *subject, const char *sort, bool isVar, void *state) {
   uint8_t isConstant = ((uintptr_t)subject) & 3;
 
   if (isConstant) {
@@ -259,7 +261,7 @@ void serializeConfigurationInternal(
          serializeMInt,
          serializeComma};
 
-  visitChildren(subject, file, &callbacks, nullptr);
+  visitChildren(subject, file, &callbacks, state);
 
   auto symbol = getSymbolNameForTag(tag);
   auto symbolStr = std::string(symbol);
@@ -308,7 +310,7 @@ void serializeConfiguration(
   varCounter = 0;
 
   writer w = {nullptr, nullptr};
-  serializeConfigurationInternal(&w, subject, sort, false);
+  serializeConfigurationInternal(&w, subject, sort, false, nullptr);
 
   varNames.clear();
   usedVarNames.clear();

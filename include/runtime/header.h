@@ -230,21 +230,27 @@ const char *getSymbolNameForTag(uint32_t tag);
 const char *topSort(void);
 
 typedef struct {
-  void (*visitConfig)(writer *, block *, const char *, bool);
-  void (*visitMap)(writer *, map *, const char *, const char *, const char *);
-  void (*visitList)(writer *, list *, const char *, const char *, const char *);
-  void (*visitSet)(writer *, set *, const char *, const char *, const char *);
-  void (*visitInt)(writer *, mpz_t, const char *);
-  void (*visitFloat)(writer *, floating *, const char *);
-  void (*visitBool)(writer *, bool, const char *);
-  void (*visitStringBuffer)(writer *, stringbuffer *, const char *);
-  void (*visitMInt)(writer *, size_t *, size_t, const char *);
-  void (*visitSeparator)(writer *);
+  void (*visitConfig)(writer *, block *, const char *, bool, void *);
+  void (*visitMap)(
+      writer *, map *, const char *, const char *, const char *, void *);
+  void (*visitList)(
+      writer *, list *, const char *, const char *, const char *, void *);
+  void (*visitSet)(
+      writer *, set *, const char *, const char *, const char *, void *);
+  void (*visitInt)(writer *, mpz_t, const char *, void *);
+  void (*visitFloat)(writer *, floating *, const char *, void *);
+  void (*visitBool)(writer *, bool, const char *, void *);
+  void (*visitStringBuffer)(writer *, stringbuffer *, const char *, void *);
+  void (*visitMInt)(writer *, size_t *, size_t, const char *, void *);
+  void (*visitSeparator)(writer *, void *);
 } visitor;
 
-void printMap(writer *, map *, const char *, const char *, const char *);
-void printSet(writer *, set *, const char *, const char *, const char *);
-void printList(writer *, list *, const char *, const char *, const char *);
+void printMap(
+    writer *, map *, const char *, const char *, const char *, void *);
+void printSet(
+    writer *, set *, const char *, const char *, const char *, void *);
+void printList(
+    writer *, list *, const char *, const char *, const char *, void *);
 void visitChildren(block *subject, writer *file, visitor *printer, void *state);
 
 void sfprintf(writer *, const char *, ...);

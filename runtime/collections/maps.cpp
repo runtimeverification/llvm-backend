@@ -193,7 +193,7 @@ map map_map(map *map, block *(process)(block *)) {
 
 void printMap(
     writer *file, map *map, const char *unit, const char *element,
-    const char *concat) {
+    const char *concat, void *state) {
   size_t size = map->size();
   if (size == 0) {
     sfprintf(file, "%s()", unit);

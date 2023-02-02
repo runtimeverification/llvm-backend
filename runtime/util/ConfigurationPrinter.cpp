@@ -12,27 +12,29 @@
 #include "runtime/alloc.h"
 #include "runtime/header.h"
 
-void printInt(writer *file, mpz_t i, const char *sort) {
+void printInt(writer *file, mpz_t i, const char *sort, void *state) {
   auto str = intToString(i);
   sfprintf(file, "\\dv{%s}(\"%s\")", sort, str.c_str());
 }
 
-void printFloat(writer *file, floating *f, const char *sort) {
+void printFloat(writer *file, floating *f, const char *sort, void *state) {
   std::string str = floatToString(f);
   sfprintf(file, "\\dv{%s}(\"%s\")", sort, str.c_str());
 }
 
-void printBool(writer *file, bool b, const char *sort) {
+void printBool(writer *file, bool b, const char *sort, void *state) {
   const char *str = b ? "true" : "false";
   sfprintf(file, "\\dv{%s}(\"%s\")", sort, str);
 }
 
-void printStringBuffer(writer *file, stringbuffer *b, const char *sort) {
+void printStringBuffer(
+    writer *file, stringbuffer *b, const char *sort, void *state) {
   std::string str(b->contents->data, b->strlen);
   sfprintf(file, "\\dv{%s}(\"%s\")", sort, str.c_str());
 }
 
-void printMInt(writer *file, size_t *i, size_t bits, const char *sort) {
+void printMInt(
+    writer *file, size_t *i, size_t bits, const char *sort, void *state) {
   if (i == nullptr) {
     sfprintf(file, "\\dv{%s}(\"0p%zd\")", sort, bits);
   } else {
@@ -76,7 +78,7 @@ void sfprintf(writer *file, const char *fmt, ...) {
   }
 }
 
-void printComma(writer *file) {
+void printComma(writer *file, void *state) {
   sfprintf(file, ",");
 }
 
@@ -100,7 +102,7 @@ static thread_local std::set<std::string> usedVarNames;
 static thread_local uint64_t varCounter = 0;
 
 void printConfigurationInternal(
-    writer *file, block *subject, const char *sort, bool isVar) {
+    writer *file, block *subject, const char *sort, bool isVar, void *state) {
   uint8_t isConstant = ((uintptr_t)subject) & 3;
   if (isConstant) {
     uint32_t tag = ((uintptr_t)subject) >> 32;
@@ -180,7 +182,7 @@ void printConfigurationInternal(
          printMInt,
          printComma};
 
-  visitChildren(subject, file, &callbacks, nullptr);
+  visitChildren(subject, file, &callbacks, state);
 
   if (isBinder) {
     boundVariables.pop_back();
