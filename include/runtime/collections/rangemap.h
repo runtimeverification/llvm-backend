@@ -25,6 +25,11 @@ public:
       : start_(start)
       , end_(end) { }
 
+  // Create a new empty range.
+  Range()
+      : start_()
+      , end_() { }
+
   // Getter for the start of this range.
   T start() const { return start_; }
 

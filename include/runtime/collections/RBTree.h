@@ -137,14 +137,14 @@ public:
   bool empty() const { return root_->is_leaf(); }
 
   // Return the key stored in the root Node of this tree.
-  T const & root_key() const {
+  T const &root_key() const {
     assert(!empty());
     const InternalNode *r = static_cast<const InternalNode *>(root_.get());
     return r->key_;
   }
 
   // Return the value stored in the root Node of this tree.
-  V const & root_val() const {
+  V const &root_val() const {
     assert(!empty());
     const InternalNode *r = static_cast<const InternalNode *>(root_.get());
     return r->val_;
@@ -172,7 +172,7 @@ public:
     if (empty()) {
       return false;
     }
-    T const & y = root_key();
+    T const &y = root_key();
     if (x < y) {
       return left().contains(x);
     } else if (y < x) {
@@ -184,11 +184,11 @@ public:
 
   // Return the corresponding value if key x is found in this tree. Otherwise,
   // throw an exception.
-  V const & at(T const &x) const {
+  V const &at(T const &x) const {
     if (empty()) {
       KLLVM_HOOK_INVALID_ARGUMENT("Key not found for map lookup");
     }
-    T const & y = root_key();
+    T const &y = root_key();
     if (x < y) {
       return left().at(x);
     } else if (y < x) {
@@ -290,8 +290,8 @@ private:
     if (empty(Color::B)) {
       return RBTree(Color::R, RBTree(), x, v, RBTree());
     }
-    T const & ykey = root_key();
-    V const & yval = root_val();
+    T const &ykey = root_key();
+    V const &yval = root_val();
     Color c = root_color();
     if (c == Color::B) {
       if (x < ykey) {
@@ -320,8 +320,8 @@ private:
     if (empty(Color::B)) {
       return RBTree();
     }
-    T const & ykey = root_key();
-    V const & yval = root_val();
+    T const &ykey = root_key();
+    V const &yval = root_val();
     // Singleton red node
     if (singleton(Color::R)) {
       if (ykey == x) {
@@ -356,10 +356,9 @@ private:
     } else if (ykey > x) {
       return rotate(root_color(), left().del(x), ykey, yval, right());
     } else { // ykey == x
-      std::pair<std::pair<T, V>, RBTree> p = right().min_delete();
-      T minkey = p.first.first;
-      V minval = p.first.second;
-      RBTree new_right = p.second;
+      T minkey;
+      V minval;
+      RBTree new_right = right().min_delete(minkey, minval);
       return rotate(root_color(), left(), minkey, minval, new_right);
     }
   }
@@ -382,34 +381,33 @@ private:
     return *this;
   }
 
-  std::pair<std::pair<T, V>, RBTree> min_delete() const {
+  RBTree min_delete(T &minkey, V &minval) const {
     // Empty tree
     assert(!empty());
 
     // Singleton red node
     if (singleton(Color::R)) {
-      return std::make_pair(std::make_pair(root_key(), root_val()), RBTree());
+      minkey = root_key();
+      minval = root_val();
+      return RBTree();
     }
     // Singleton black node
     if (singleton(Color::B)) {
-      return std::make_pair(
-          std::make_pair(root_key(), root_val()), RBTree(Color::BB));
+      minkey = root_key();
+      minval = root_val();
+      return RBTree(Color::BB);
     }
     // Black node with single right child
     if (only_right_child(Color::B, Color::R)) {
       assert(right().left().empty(Color::B));
       assert(right().right().empty(Color::B));
-      return std::make_pair(
-          std::make_pair(root_key(), root_val()), right().paint(Color::B));
+      minkey = root_key();
+      minval = root_val();
+      return right().paint(Color::B);
     }
     // Otherwise
-    std::pair<std::pair<T, V>, RBTree> p = left().min_delete();
-    T minkey = p.first.first;
-    V minval = p.first.second;
-    RBTree new_left = p.second;
-    return std::make_pair(
-        std::make_pair(minkey, minval),
-        rotate(root_color(), new_left, root_key(), root_val(), right()));
+    RBTree new_left = left().min_delete(minkey, minval);
+    return rotate(root_color(), new_left, root_key(), root_val(), right());
   }
 
   static RBTree rotate(
