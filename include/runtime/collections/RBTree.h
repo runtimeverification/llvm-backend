@@ -137,14 +137,14 @@ public:
   bool empty() const { return root_->is_leaf(); }
 
   // Return the key stored in the root Node of this tree.
-  T root_key() const {
+  T const & root_key() const {
     assert(!empty());
     const InternalNode *r = static_cast<const InternalNode *>(root_.get());
     return r->key_;
   }
 
   // Return the value stored in the root Node of this tree.
-  V root_val() const {
+  V const & root_val() const {
     assert(!empty());
     const InternalNode *r = static_cast<const InternalNode *>(root_.get());
     return r->val_;
@@ -172,7 +172,7 @@ public:
     if (empty()) {
       return false;
     }
-    T y = root_key();
+    T const & y = root_key();
     if (x < y) {
       return left().contains(x);
     } else if (y < x) {
@@ -184,11 +184,11 @@ public:
 
   // Return the corresponding value if key x is found in this tree. Otherwise,
   // throw an exception.
-  V at(T const &x) const {
+  V const & at(T const &x) const {
     if (empty()) {
       KLLVM_HOOK_INVALID_ARGUMENT("Key not found for map lookup");
     }
-    T y = root_key();
+    T const & y = root_key();
     if (x < y) {
       return left().at(x);
     } else if (y < x) {
@@ -290,8 +290,8 @@ private:
     if (empty(Color::B)) {
       return RBTree(Color::R, RBTree(), x, v, RBTree());
     }
-    T ykey = root_key();
-    V yval = root_val();
+    T const & ykey = root_key();
+    V const & yval = root_val();
     Color c = root_color();
     if (c == Color::B) {
       if (x < ykey) {
@@ -320,8 +320,8 @@ private:
     if (empty(Color::B)) {
       return RBTree();
     }
-    T ykey = root_key();
-    V yval = root_val();
+    T const & ykey = root_key();
+    V const & yval = root_val();
     // Singleton red node
     if (singleton(Color::R)) {
       if (ykey == x) {
