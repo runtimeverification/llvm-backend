@@ -157,7 +157,7 @@ void printSet(
     }
 
     sfprintf(file, "%s(", element);
-    printConfigurationInternal(file, *iter, "SortKItem{}", false);
+    printConfigurationInternal(file, *iter, "SortKItem{}", false, state);
     sfprintf(file, ")");
   }
   sfprintf(file, "))");

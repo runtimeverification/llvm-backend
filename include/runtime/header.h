@@ -204,7 +204,7 @@ void printConfigurationToFile(FILE *, block *subject);
 void printSortedConfigurationToFile(
     FILE *file, block *subject, char const *sort);
 void printConfigurationInternal(
-    writer *file, block *subject, const char *sort, bool);
+    writer *file, block *subject, const char *sort, bool, void *);
 mpz_ptr move_int(mpz_t);
 
 void serializeConfiguration(

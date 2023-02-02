@@ -212,9 +212,9 @@ void printMap(
 
     sfprintf(file, "%s(", element);
     auto entry = *iter;
-    printConfigurationInternal(file, entry.first, "SortKItem{}", false);
+    printConfigurationInternal(file, entry.first, "SortKItem{}", false, state);
     sfprintf(file, ",");
-    printConfigurationInternal(file, entry.second, "SortKItem{}", false);
+    printConfigurationInternal(file, entry.second, "SortKItem{}", false, state);
     sfprintf(file, ")");
   }
   sfprintf(file, "))");

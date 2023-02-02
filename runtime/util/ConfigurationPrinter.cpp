@@ -109,7 +109,8 @@ void printConfigurationInternal(
     if (isConstant == 3) {
       // bound variable
       printConfigurationInternal(
-          file, boundVariables[boundVariables.size() - 1 - tag], sort, true);
+          file, boundVariables[boundVariables.size() - 1 - tag], sort, true,
+          state);
       return;
     }
     const char *symbol = getSymbolNameForTag(tag);
@@ -201,7 +202,7 @@ void printConfiguration(const char *filename, block *subject) {
   boundVariables.clear();
   varCounter = 0;
   writer w = {file, nullptr};
-  printConfigurationInternal(&w, subject, nullptr, false);
+  printConfigurationInternal(&w, subject, nullptr, false, nullptr);
   varNames.clear();
   usedVarNames.clear();
   fclose(file);
@@ -220,7 +221,7 @@ void printConfigurations(
     sfprintf(&w, "\\left-assoc{}(\\or{SortGeneratedTopCell{}}(");
     size_t j = 0;
     for (const auto &subject : results) {
-      printConfigurationInternal(&w, subject, nullptr, false);
+      printConfigurationInternal(&w, subject, nullptr, false, nullptr);
       if (++j != results.size()) {
         sfprintf(&w, ",");
       }
@@ -237,7 +238,7 @@ string *printConfigurationToString(block *subject) {
   varCounter = 0;
   stringbuffer *buf = hook_BUFFER_empty();
   writer w = {nullptr, buf};
-  printConfigurationInternal(&w, subject, nullptr, false);
+  printConfigurationInternal(&w, subject, nullptr, false, nullptr);
   varNames.clear();
   usedVarNames.clear();
   return hook_BUFFER_toString(buf);
@@ -247,7 +248,7 @@ void printConfigurationToFile(FILE *file, block *subject) {
   boundVariables.clear();
   varCounter = 0;
   writer w = {file, nullptr};
-  printConfigurationInternal(&w, subject, nullptr, false);
+  printConfigurationInternal(&w, subject, nullptr, false, nullptr);
   varNames.clear();
   usedVarNames.clear();
 }
@@ -257,7 +258,7 @@ void printSortedConfigurationToFile(
   boundVariables.clear();
   varCounter = 0;
   writer w = {file, nullptr};
-  printConfigurationInternal(&w, subject, sort, false);
+  printConfigurationInternal(&w, subject, sort, false, nullptr);
   varNames.clear();
   usedVarNames.clear();
 }

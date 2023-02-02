@@ -38,7 +38,7 @@ static thread_local std::set<std::string> usedVarNames;
 static thread_local uint64_t varCounter = 0;
 
 void serializeConfigurationInternal(
-    writer *file, block *subject, const char *sort, bool isVar);
+    writer *file, block *subject, const char *sort, bool isVar, void *state);
 
 /**
  * Emit a symbol of the form ctor{}(...); this should be preceded by the
@@ -98,8 +98,10 @@ void serializeMap(
   }
 
   for (auto iter = map->begin(); iter != map->end(); ++iter) {
-    serializeConfigurationInternal(file, iter->first, "SortKItem{}", false);
-    serializeConfigurationInternal(file, iter->second, "SortKItem{}", false);
+    serializeConfigurationInternal(
+        file, iter->first, "SortKItem{}", false, state);
+    serializeConfigurationInternal(
+        file, iter->second, "SortKItem{}", false, state);
     emitSymbol(element, 2);
 
     if (iter != map->begin()) {
@@ -118,7 +120,7 @@ void serializeList(
   }
 
   for (auto iter = list->begin(); iter != list->end(); ++iter) {
-    serializeConfigurationInternal(file, *iter, "SortKItem{}", false);
+    serializeConfigurationInternal(file, *iter, "SortKItem{}", false, state);
     emitSymbol(element, 1);
 
     if (iter != list->begin()) {
@@ -137,7 +139,7 @@ void serializeSet(
   }
 
   for (auto iter = set->begin(); iter != set->end(); ++iter) {
-    serializeConfigurationInternal(file, *iter, "SortKItem{}", false);
+    serializeConfigurationInternal(file, *iter, "SortKItem{}", false, state);
     emitSymbol(element, 1);
 
     if (iter != set->begin()) {
@@ -209,8 +211,9 @@ void serializeConfigurationInternal(
 
     if (isConstant == 3) {
       // bound variable
-      printConfigurationInternal(
-          file, boundVariables[boundVariables.size() - 1 - tag], sort, true);
+      serializeConfigurationInternal(
+          file, boundVariables[boundVariables.size() - 1 - tag], sort, true,
+          state);
       return;
     }
 
