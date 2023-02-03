@@ -1,6 +1,8 @@
 #include <kllvm/binary/serializer.h>
 
+#include <cstdint>
 #include <iostream>
+#include <vector>
 
 int main() {
   auto s = kllvm::serializer();

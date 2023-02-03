@@ -1,10 +1,14 @@
+#include <llvm/ADT/DenseMapInfo.h>
+#include <llvm/ADT/StringRef.h>
 #include <llvm/Support/CommandLine.h>
 
-#include <array>
+#include <algorithm>
+#include <cstdint>
 #include <cstdio>
 #include <cstdlib>
 #include <iostream>
 #include <sstream>
+#include <string>
 #include <vector>
 
 using namespace llvm;

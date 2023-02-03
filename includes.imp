@@ -13,10 +13,13 @@
   { include: [ "<stdarg.h>", public, "<cstdarg>", public ] },
   { include: [ "<stddef.h>", public, "<cstddef>", public ] },
   { include: [ "<stdio.h>", public, "<cstdio>", public ] },
+  { include: [ "<stdint.h>", public, "<cstdint>", public ] },
   { include: [ "<stdlib.h>", public, "<cstdlib>", public ] },
   { include: [ "<string.h>", public, "<cstring>", public ] },
   { include: [ "<time.h>", public, "<ctime>", public ] },
   { include: [ "<wchar.h>", public, "<cwchar>", public ] },
   { include: [ "<wctype.h>", public, "<cwctype>", public ] },
   { include: [ "<ext/alloc_traits.h>", private, "<vector>", public ] },
+  { symbol: [ "std::ifstream", private, "<fstream>", public ] },
+  { symbol: [ "std::ofstream", private, "<fstream>", public ] },
 ]

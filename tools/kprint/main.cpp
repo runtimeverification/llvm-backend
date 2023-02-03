@@ -1,6 +1,9 @@
+#include "kllvm/ast/AST.h"
 #include "kllvm/printer/printer.h"
 
 #include <iostream>
+#include <string>
+#include <unistd.h>
 
 using namespace kllvm;
 
