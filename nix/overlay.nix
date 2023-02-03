@@ -6,7 +6,7 @@ let
   };
 
   clang = if !llvmPackages.stdenv.targetPlatform.isDarwin then
-    prev.llvmPackages_14.clangNoLibcxx.override (attrs: {
+    llvmPackages.clangNoLibcxx.override (attrs: {
       extraBuildCommands = ''
         ${attrs.extraBuildCommands}
         sed -i $out/nix-support/cc-cflags -e '/^-nostdlib/ d'
