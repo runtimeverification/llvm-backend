@@ -5,12 +5,12 @@
 #include <cstdint>
 #include <limits>
 
-#include <fmt/format.h>
 #include <gmp.h>
 #include <mpfr.h>
 
 #include "config/macros.h"
 #include "runtime/alloc.h"
+#include "runtime/fmt_error_handling.h"
 
 #ifndef IMMER_TAGGED_NODE
 #define IMMER_TAGGED_NODE 0
@@ -284,12 +284,5 @@ void init_float2(floating *, std::string);
 
 std::string intToStringInBase(mpz_t, uint64_t);
 std::string intToString(mpz_t);
-
-#define KLLVM_HOOK_INVALID_ARGUMENT(...)                                       \
-  do {                                                                         \
-    auto err_msg                                                               \
-        = ::fmt::format("[{}]: {}", __func__, ::fmt::format(__VA_ARGS__));     \
-    throw std::invalid_argument(err_msg);                                      \
-  } while (false)
 
 #endif // RUNTIME_HEADER_H
