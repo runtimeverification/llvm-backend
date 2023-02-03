@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+
+ROOT="$(realpath "$(dirname "$0")/..")"
+
+usage() {
+  echo "Usage: $0 [BUILD_DIR]"
+}
+
+check_command() {
+  cmd="$1"
+  
+  if ! [ -x "$(command -v "$cmd")" ]; then
+    echo "$cmd is not executable"
+    exit 1
+  fi
+}
+
+get_clang_include_dir() {
+  llvm_config_exe="$1"
+  check_command "$llvm_config_exe"
+
+  llvm_lib="$($llvm_config_exe --libdir)"
+  llvm_version="$($llvm_config_exe --version)"
+
+  echo "$llvm_lib/clang/$llvm_version/include"
+}
+
+check_command iwyu
+
+build_dir="$ROOT/build"
+llvm_config="llvm-config"
+
+while [[ "$#" -gt 0 ]]; do
+  case "$1" in
+    -b|--build-dir)
+      build_dir="$2"
+      shift; shift
+      ;;
+    -c|--llvm-config)
+      llvm_config="$2"
+      shift; shift
+      ;;
+    *)
+      usage
+      exit 1
+  esac
+done
+
+if ! [ -f "$build_dir/compile_commands.json" ]; then
+  echo "No compile_commands.json found in $build_dir"
+  echo "Try setting '-DCMAKE_EXPORT_COMPILE_COMMANDS=On' in your build"
+  exit 1
+fi
+
+clang_include=$(get_clang_include_dir "$llvm_config")
+
+iwyu_tool                                             \
+  -p "$build_dir"                                     \
+  -j "$(nproc)"                                       \
+  "$ROOT/lib" "$ROOT/tools"                           \
+  --                                                  \
+  -I"$clang_include"                                  \
+  -Xiwyu --no_comments                                \
+  -Xiwyu --no_fwd_decls                               \
+  -Xiwyu --mapping_file="$ROOT/scripts/includes.imp"
