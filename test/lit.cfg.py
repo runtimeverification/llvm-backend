@@ -22,6 +22,8 @@ INCLUDE_INSTALL_PATH = os.environ.get(
     'INCLUDE_INSTALL_PATH',
     os.path.join(ROOT_PATH, 'build', 'install', 'include'))
 
+PYTHON_INTERPRETER = os.environ.get('PYTHON_INTERPRETER', 'python3')
+
 config.name = 'llvm-backend'
 config.test_source_root = os.path.join(ROOT_PATH, "test")
 
@@ -68,7 +70,8 @@ config.substitutions.extend([
 
     ('%bindings-path', BINDINGS_INSTALL_PATH),
     ('%include-path', INCLUDE_INSTALL_PATH),
-    ('%python', 'BINDINGS_INSTALL_PATH=%bindings-path python3'),
+    ('%py-interpreter', PYTHON_INTERPRETER),
+    ('%python', 'BINDINGS_INSTALL_PATH=%bindings-path ' + PYTHON_INTERPRETER),
 
     ('%check-grep', one_line('''
         %run | grep -f %test-grep-out -q

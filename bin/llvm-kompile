@@ -4,6 +4,7 @@ set -e
 usage() {
   cat << HERE
 Usage: $0 <definition.kore> <dt_dir> <object type> [options] [clang flags]
+   or: $0                            pythonast     [options] [clang flags]
    or: $0 <interpreter.o>            <object type> [options] [clang flags]
 
 Options:
@@ -12,25 +13,30 @@ Options:
   --save-temps    Do not delete temporary files on exit.
   --bindings-path Print the absolute path of the compiled Python bindings for
                   the LLVM backend, then exit.
+  --python PATH   The path to a Python interpreter with Pybind installed. Only
+                  meaningful in "python" or "pythonast" mode.
 
 Any option not listed above will be passed through to clang; use '--' to
 separate additional positional arguments to clang from those for $0.
 
 Valid values for a KLLVM object type are:
-  main:     a main function will be generated. The resulting executable has the
-            signature "interpreter <input.kore> <depth> <output.kore>"
+  main:       a main function will be generated. The resulting executable has the
+              signature "interpreter <input.kore> <depth> <output.kore>"
 
-  library:  generate an interpreter with no main function linked.
+  library:    generate an interpreter with no main function linked.
 
-  search:   as "main", but the resulting executable has collects all possible
-            results at each rewrite step.
+  search:     as "main", but the resulting executable has collects all possible
+              results at each rewrite step.
 
-  static:   as "main", but do not link the resulting binary against the
-            necessary shared libraries. This must be done manually later.
+  static:     as "main", but do not link the resulting binary against the
+              necessary shared libraries. This must be done manually later.
 
-  python:   build a Python bindings module rather than a standalone executable.
+  python:     build a Python bindings module rather than a standalone executable.
 
-  c:        build a C bindings module rather than a standalone executable.
+  pythonast:  build a Python bindings module for the KORE AST structures only,
+              without relying on a specific K definition.
+
+  c:          build a C bindings module rather than a standalone executable.
 HERE
 }
 
@@ -52,6 +58,7 @@ positional_args=()
 reading_clang_args=false
 kompile_clang_flags=()
 clang_args=()
+python_cmd=python3
 
 verbose=false
 save_temps=false
@@ -82,6 +89,10 @@ while [[ $# -gt 0 ]]; do
       print_bindings_path
       exit 0
       ;;
+    --python)
+      python_cmd="$2"
+      shift; shift
+      ;;
     --)
       reading_clang_args=true
       shift
@@ -97,7 +108,12 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-if ! [[ "${#positional_args[@]}" -eq 2 || "${#positional_args[@]}" -eq 3 ]]; then
+if [[ "${#positional_args[@]}" -eq 1 && "${positional_args[0]}" != "pythonast" ]]; then
+  usage
+  exit 1
+fi
+
+if [[ "${#positional_args[@]}" -lt 1 || "${#positional_args[@]}" -gt 3 ]]; then
   usage
   exit 1
 fi
@@ -110,16 +126,19 @@ if [ "$save_temps" = false ]; then
 fi
 
 definition="${positional_args[0]}"
-compile=true
+compile="default"
 case "$definition" in
   *.o)
-    compile=false
+    compile="object"
+    ;;
+  pythonast)
+    compile="python_ast"
     ;;
   *)
     ;;
 esac
 
-if [ "$compile" = true ]; then
+if [ "$compile" = "default" ]; then
   dt_dir="${positional_args[1]}"
   main="${positional_args[2]}"
   debug=0
@@ -135,9 +154,25 @@ if [ "$compile" = true ]; then
   done
   run "$(dirname "$0")"/llvm-kompile-codegen "$definition" "$dt_dir"/dt.yaml "$dt_dir" $debug > "$mod"
   run @OPT@ -mem2reg -tailcallelim -tailcallopt "$mod" -o "$modopt"
-else
+elif [ "$compile" = "object" ]; then
   main="${positional_args[1]}"
   modopt="$definition"
+elif [ "$compile" = "python_ast" ]; then
+  main="python_ast"
+  modopt=""
+fi
+
+if [[ "$main" =~ "python" ]]; then
+  bin_dir=$(dirname "$0")
+  src_dir=$(realpath "$bin_dir/../lib/kllvm/python_src")
+
+  if [[ "$compile" = "python_ast" ]]; then
+    kompile_clang_flags+=("$src_dir/ast.cpp")
+  else
+    kompile_clang_flags+=("$src_dir/runtime.cpp")
+  fi
+
+  kompile_clang_flags+=("--python" "${python_cmd}")
 fi
 
 if [[ "$OSTYPE" != "darwin"* ]]; then
