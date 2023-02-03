@@ -1,6 +1,14 @@
 #include "kllvm/ast/AST.h"
 
+#include <cassert>
+#include <cstdlib>
+#include <map>
 #include <memory>
+#include <set>
+#include <string>
+#include <unordered_map>
+#include <utility>
+#include <vector>
 
 namespace kllvm {
 

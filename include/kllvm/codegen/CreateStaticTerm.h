@@ -2,12 +2,13 @@
 #define CREATE_STATIC_TERM_H
 
 #include "kllvm/ast/AST.h"
-#include "kllvm/codegen/CreateTerm.h"
-#include "kllvm/codegen/DecisionParser.h"
 
-#include "llvm/ADT/StringMap.h"
+#include "llvm/IR/Constant.h"
+#include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/Module.h"
-#include "llvm/IR/Value.h"
+
+#include <string>
+#include <utility>
 
 namespace kllvm {
 

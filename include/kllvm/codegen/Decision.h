@@ -2,20 +2,30 @@
 #define DECISION_H
 
 #include "kllvm/ast/AST.h"
-
-#include "llvm/ADT/StringMap.h"
-#include "llvm/IR/Instructions.h"
-#include "llvm/IR/Module.h"
-#include "llvm/IR/Value.h"
-
 #include "kllvm/codegen/DecisionParser.h"
 
+#include <llvm/ADT/APInt.h>
+#include <llvm/IR/BasicBlock.h>
+#include <llvm/IR/Constant.h>
+#include <llvm/IR/Instructions.h>
+#include <llvm/IR/LLVMContext.h>
+#include <llvm/IR/Module.h>
+#include <llvm/IR/Type.h>
+#include <llvm/IR/Value.h>
+
+#include <algorithm>
+#include <cstdint>
+#include <cstdlib>
+#include <map>
+#include <string>
+#include <unordered_map>
 #include <unordered_set>
+#include <utility>
+#include <vector>
 
 namespace kllvm {
 
 class Decision;
-class DecisionCase;
 class LeafNode;
 class IterNextNode;
 

@@ -1,6 +1,11 @@
 #include "kllvm/codegen/Util.h"
-#include "llvm/Support/Casting.h"
-#include "llvm/Support/raw_ostream.h"
+
+#include <llvm/ADT/ArrayRef.h>
+#include <llvm/IR/Type.h>
+#include <llvm/Support/Casting.h>
+#include <llvm/Support/raw_ostream.h>
+
+#include <cstdlib>
 
 namespace kllvm {
 

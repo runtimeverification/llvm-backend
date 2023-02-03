@@ -3,6 +3,7 @@
 #include "kllvm/parser/KOREScanner.h"
 
 #include <cstdio>
+#include <cstdlib>
 #include <fstream>
 #include <iostream>
 

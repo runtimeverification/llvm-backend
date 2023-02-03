@@ -1,11 +1,13 @@
 #ifndef DECISION_PARSER_H
 #define DECISION_PARSER_H
 
-#include <string>
-
 #include "kllvm/ast/AST.h"
-#include "llvm/ADT/StringMap.h"
-#include "llvm/IR/Module.h"
+
+#include <llvm/IR/Module.h>
+
+#include <map>
+#include <string>
+#include <vector>
 
 namespace kllvm {
 

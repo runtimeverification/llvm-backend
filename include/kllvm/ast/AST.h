@@ -1,13 +1,20 @@
 #ifndef AST_H
 #define AST_H
 
-#include <boost/functional/hash.hpp>
+#include <boost/container_hash/extensions.hpp>
 
-#include <iostream>
+#include <cassert>
+#include <cstddef>
+#include <cstdint>
+#include <cstdlib>
 #include <list>
 #include <map>
+#include <memory>
 #include <set>
+#include <sstream>
 #include <string>
+#include <tuple>
+#include <type_traits>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
@@ -479,7 +486,6 @@ private:
       , sort(Sort) { }
 };
 
-class KOREPattern;
 void deallocateSPtrKorePattern(sptr<KOREPattern> pattern);
 
 class KORECompositePattern : public KOREPattern {
@@ -746,7 +752,6 @@ public:
   friend KOREDefinition;
 };
 
-class KOREModule;
 class KOREModuleImportDeclaration : public KOREDeclaration {
 private:
   std::string moduleName;
