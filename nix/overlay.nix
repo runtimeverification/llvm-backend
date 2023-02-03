@@ -6,14 +6,14 @@ let
   };
 
   clang = if !llvmPackages.stdenv.targetPlatform.isDarwin then
-    llvmPackages.clangNoLibcxx.override (attrs: {
+    prev.llvmPackages_14.clangNoLibcxx.override (attrs: {
       extraBuildCommands = ''
         ${attrs.extraBuildCommands}
         sed -i $out/nix-support/cc-cflags -e '/^-nostdlib/ d'
       '';
     })
   else
-    llvmPackages.libcxxClang.overrideAttrs (old: {
+    prev.llvmPackages_14.libcxxClang.overrideAttrs (old: {
       # Hack from https://github.com/NixOS/nixpkgs/issues/166205 for macOS
       postFixup = old.postFixup + ''
         echo "-lc++abi" >> $out/nix-support/libcxx-ldflags
