@@ -26,4 +26,37 @@ rangemap hook_RANGEMAP_concat(SortRangeMap m1, SortRangeMap m2) {
   return mfirst->concat(*msec);
 }
 
+SortKItem hook_RANGEMAP_lookup_null(SortRangeMap m, SortKItem key) {
+  auto val = m->get_value(key);
+  if (val.has_value()) {
+    return val.value();
+  }
+  return nullptr;
+}
+
+SortKItem hook_RANGEMAP_lookup(SortRangeMap m, SortKItem key) {
+  auto res = hook_RANGEMAP_lookup_null(m, key);
+  if (!res) {
+    KLLVM_HOOK_INVALID_ARGUMENT("Key not found for map lookup");
+  }
+  return res;
+}
+
+SortKItem
+hook_RANGEMAP_lookupOrDefault(SortRangeMap m, SortKItem key, SortKItem _default) {
+  auto res = hook_RANGEMAP_lookup_null(m, key);
+  if (!res) {
+    return _default;
+  }
+  return res;
+}
+
+rangemap hook_RANGEMAP_update(SortRangeMap m, SortKItem keyRangeStart, SortKItem keyRangeEnd, SortKItem value) {
+  return m->inserted(rng_map::Range<KElem>(keyRangeStart, keyRangeEnd), value);
+}
+
+rangemap hook_RANGEMAP_remove(SortRangeMap m, SortKItem keyRangeStart, SortKItem keyRangeEnd) {
+  return m->deleted(rng_map::Range<KElem>(keyRangeStart, keyRangeEnd));
+}
+
 }
