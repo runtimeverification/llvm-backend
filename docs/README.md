@@ -68,7 +68,7 @@
 
 ### Environment Setup
 
-* Dependencies
+* [Dependencies](../INSTALL.md)
 * Submodules
 
 ### Style and Code Checks
