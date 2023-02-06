@@ -8,6 +8,6 @@ core developers; most use cases are supported by the user-facing K tools.
 Internal documentation for core developers and advanced K users can be found in
 the [`docs/`](docs) directory.
 
-For installation instructions, refer to [INSTALL.md](INSTALL.md).
+For developer setup instructions, refer to [INSTALL.md](INSTALL.md).
 
 [K]: https://github.com/runtimeverification/k
