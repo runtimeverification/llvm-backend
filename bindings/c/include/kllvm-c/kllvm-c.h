@@ -55,13 +55,13 @@ kore_pattern *
 kore_pattern_new_token_with_len(char const *, size_t, kore_sort const *);
 
 kore_pattern *kore_pattern_new_injection(
-    kore_pattern *, kore_sort const *, kore_sort const *);
+    kore_pattern const *, kore_sort const *, kore_sort const *);
 
-kore_pattern *kore_pattern_make_interpreter_input(kore_pattern *);
+kore_pattern *kore_pattern_make_interpreter_input(kore_pattern const *);
 
 kore_pattern *kore_composite_pattern_new(char const *);
 kore_pattern *kore_composite_pattern_from_symbol(kore_symbol *);
-void kore_composite_pattern_add_argument(kore_pattern *, kore_pattern *);
+void kore_composite_pattern_add_argument(kore_pattern *, kore_pattern const *);
 
 kore_pattern *kore_string_pattern_new(char const *);
 kore_pattern *kore_string_pattern_new_with_len(char const *, size_t);
@@ -75,14 +75,15 @@ char *kore_block_dump(block *);
  */
 bool kore_block_get_bool(block *);
 
-bool kore_simplify_bool(kore_pattern *);
+bool kore_simplify_bool(kore_pattern const *);
 
 /*
  * The two final parameters here are outputs: the serialized binary data and the
  * number of serialized bytes, respectively. The binary data should be freed
  * with `free()`.
  */
-void kore_simplify(kore_pattern *pattern, kore_sort *sort, char **, size_t *);
+void kore_simplify(
+    kore_pattern const *pattern, kore_sort const *sort, char **, size_t *);
 
 /* KORESort */
 
@@ -108,6 +109,7 @@ void kore_symbol_add_formal_argument(kore_symbol *, kore_sort const *);
 
 /* Memory management */
 
+void kllvm_init(void);
 void kllvm_free_all_memory(void);
 
 #ifdef __cplusplus

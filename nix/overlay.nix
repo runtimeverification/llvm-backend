@@ -1,9 +1,11 @@
 final: prev:
 let
-  llvmPackages = prev."llvmPackages_${toString prev.llvm-version}".override {
+  mkLlvmPackages = (packages: packages.override {
     bootBintoolsNoLibc = null;
     bootBintools = null;
-  };
+  });
+
+  llvmPackages = mkLlvmPackages prev."llvmPackages_${toString prev.llvm-version}";
 
   clang = if !llvmPackages.stdenv.targetPlatform.isDarwin then
     llvmPackages.clangNoLibcxx.override (attrs: {
@@ -13,7 +15,13 @@ let
       '';
     })
   else
-    llvmPackages.libcxxClang.overrideAttrs (old: {
+    # In llvmPackages_15, libcxx is broken, so we use clang 14 as our compiler
+    # for C code etc, but still use LLVM 15 to build the backend properly. This
+    # is a workaround until the underlying package is more stable on macOS.
+    let clangPackages = if prev.llvm-version == 15
+      then mkLlvmPackages prev.llvmPackages_14
+      else llvmPackages; in
+    clangPackages.libcxxClang.overrideAttrs (old: {
       # Hack from https://github.com/NixOS/nixpkgs/issues/166205 for macOS
       postFixup = old.postFixup + ''
         echo "-lc++abi" >> $out/nix-support/libcxx-ldflags
@@ -85,6 +93,7 @@ let
     buildPhase = ''
       runHook preBuild
 
+      PYTHON_INTERPRETER=${llvm-backend.python-interpreter} \
       BINDINGS_INSTALL_PATH=${llvm-backend}/lib/kllvm/python \
       INCLUDE_INSTALL_PATH=${llvm-backend}/include \
         LIT_USE_NIX=1 lit -v test

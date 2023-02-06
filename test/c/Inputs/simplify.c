@@ -10,6 +10,9 @@ typedef kore_pattern *new_comp_t(char const *);
 typedef kore_sort *new_sort_t(char const *);
 typedef void simplify_t(kore_pattern *, kore_sort *, char **, size_t *);
 typedef void free_all_t(void);
+typedef void init_t(void);
+typedef void pattern_free_t(kore_pattern *);
+typedef void sort_free_t(kore_sort *);
 
 int main(int argc, char **argv) {
   if (argc <= 3) {
@@ -25,10 +28,17 @@ int main(int argc, char **argv) {
   new_sort_t *new_sort = (new_sort_t *)dlsym(lib, "kore_composite_sort_new");
   simplify_t *simplify = (simplify_t *)dlsym(lib, "kore_simplify");
   free_all_t *free_all = (free_all_t *)dlsym(lib, "kllvm_free_all_memory");
+  init_t *init = (init_t *)dlsym(lib, "kllvm_init");
 
-  if (!new_comp || !new_sort || !simplify || !free_all) {
+  pattern_free_t *pattern_free
+      = (pattern_free_t *)dlsym(lib, "kore_pattern_free");
+  sort_free_t *sort_free = (sort_free_t *)dlsym(lib, "kore_sort_free");
+
+  if (!new_comp || !new_sort || !simplify || !free_all || !init) {
     return 3;
   }
+
+  init();
 
   kore_sort *sort = new_sort("SortInt");
 
@@ -50,7 +60,10 @@ int main(int argc, char **argv) {
   size_t size;
   simplify(pat, sort, &data, &size);
 
+  // Do the simplification twice to make sure GC works
   free_all();
+
+  simplify(pat, sort, &data, &size);
 
   FILE *f = fopen(argv[2], "wb");
   if (!f) {
@@ -59,4 +72,7 @@ int main(int argc, char **argv) {
 
   fwrite(data, size, 1, f);
   fclose(f);
+
+  pattern_free(pat);
+  sort_free(sort);
 }
