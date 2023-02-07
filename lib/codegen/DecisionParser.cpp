@@ -7,8 +7,16 @@
 
 #include <yaml.h>
 
+#include <llvm/IR/DerivedTypes.h>
+#include <llvm/IR/Module.h>
+#include <llvm/IR/Type.h>
+
+#include <cassert>
+#include <cstdio>
+#include <cstdlib>
 #include <iostream>
-#include <stack>
+#include <memory>
+#include <utility>
 
 namespace kllvm {
 

@@ -1,19 +1,29 @@
 #include "kllvm/codegen/CreateStaticTerm.h"
-#include "kllvm/codegen/Debug.h"
+
+#include "kllvm/codegen/CreateTerm.h"
 #include "kllvm/codegen/Util.h"
 
-#include <iomanip>
-#include <sstream>
+#include <llvm/ADT/ArrayRef.h>
+#include <llvm/IR/Constants.h>
+#include <llvm/IR/DerivedTypes.h>
+#include <llvm/IR/GlobalVariable.h>
+#include <llvm/IR/Type.h>
+#include <llvm/Support/Casting.h>
 
+#include <gmp.h>
+#include <mpfr.h>
+
+#include <cassert>
+#include <cstdint>
+#include <cstdlib>
+#include <memory>
+#include <sstream>
+#include <stdexcept>
+#include <unordered_map>
+#include <vector>
+
+#include "config/macros.h"
 #include "runtime/header.h"
-#include "llvm/IR/BasicBlock.h"
-#include "llvm/IR/Constants.h"
-#include "llvm/IR/DerivedTypes.h"
-#include "llvm/IR/Instructions.h"
-#include "llvm/IRReader/IRReader.h"
-#include "llvm/Support/MemoryBuffer.h"
-#include "llvm/Support/SourceMgr.h"
-#include "llvm/Support/raw_ostream.h"
 
 namespace kllvm {
 

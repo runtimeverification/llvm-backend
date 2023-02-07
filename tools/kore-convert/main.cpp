@@ -2,12 +2,19 @@
 #include "kllvm/binary/deserializer.h"
 #include "kllvm/binary/serializer.h"
 #include "kllvm/parser/KOREParser.h"
+#include "kllvm/parser/location.h"
 
+#include <llvm/ADT/SmallVector.h>
+#include <llvm/ADT/StringRef.h>
 #include <llvm/Support/CommandLine.h>
+#include <llvm/Support/type_traits.h>
 
-#include <algorithm>
+#include <cstdint>
 #include <fstream>
 #include <iostream>
+#include <memory>
+#include <string>
+#include <vector>
 
 using namespace llvm;
 using namespace kllvm;

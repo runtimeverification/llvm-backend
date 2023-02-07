@@ -6,8 +6,10 @@
 
 #include <algorithm>
 #include <cassert>
+#include <cctype>
+#include <cstdio>
 #include <iostream>
-#include <limits>
+#include <iterator>
 #include <unordered_map>
 #include <unordered_set>
 

@@ -2,6 +2,8 @@
 #include <kllvm/binary/deserializer.h>
 #include <kllvm/binary/serializer.h>
 
+#include <algorithm>
+#include <array>
 #include <fstream>
 #include <string>
 

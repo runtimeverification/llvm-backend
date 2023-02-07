@@ -1,6 +1,22 @@
 #include "kllvm/codegen/Debug.h"
 
-#include "llvm/IR/DIBuilder.h"
+#include <llvm/BinaryFormat/Dwarf.h>
+#include <llvm/Config/llvm-config.h>
+#include <llvm/IR/Argument.h>
+#include <llvm/IR/DIBuilder.h>
+#include <llvm/IR/DebugInfoMetadata.h>
+#include <llvm/IR/DebugLoc.h>
+#include <llvm/IR/Function.h>
+#include <llvm/IR/GlobalVariable.h>
+#include <llvm/IR/Instruction.h>
+#include <llvm/IR/Metadata.h>
+#include <llvm/IR/Module.h>
+
+#include <cassert>
+#include <cstdint>
+#include <cstdlib>
+#include <map>
+#include <memory>
 
 namespace kllvm {
 

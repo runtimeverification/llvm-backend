@@ -1,8 +1,5 @@
 #include <kllvm/binary/serializer.h>
-
-#include <cassert>
-#include <iostream>
-#include <limits>
+#include <kllvm/binary/version.h>
 
 namespace kllvm {
 
