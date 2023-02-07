@@ -8,6 +8,7 @@
 #include <iostream>
 #include <optional>
 #include <stdexcept>
+#include <vector>
 
 namespace rng_map {
 
