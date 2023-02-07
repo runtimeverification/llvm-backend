@@ -1,8 +1,10 @@
 #include "runtime/header.h"
 
 extern "C" {
-rangemap hook_RANGEMAP_element(SortKItem keyRangeStart, SortKItem keyRangeEnd, SortKItem value) {
-  return rangemap().inserted(rng_map::Range<KElem>(keyRangeStart, keyRangeEnd), value);
+rangemap hook_RANGEMAP_element(
+    SortKItem keyRangeStart, SortKItem keyRangeEnd, SortKItem value) {
+  return rangemap().inserted(
+      rng_map::Range<KElem>(keyRangeStart, keyRangeEnd), value);
 }
 
 rangemap hook_RANGEMAP_unit() {
@@ -42,8 +44,8 @@ SortKItem hook_RANGEMAP_lookup(SortRangeMap m, SortKItem key) {
   return res;
 }
 
-SortKItem
-hook_RANGEMAP_lookupOrDefault(SortRangeMap m, SortKItem key, SortKItem _default) {
+SortKItem hook_RANGEMAP_lookupOrDefault(
+    SortRangeMap m, SortKItem key, SortKItem _default) {
   auto res = hook_RANGEMAP_lookup_null(m, key);
   if (!res) {
     return _default;
@@ -51,12 +53,18 @@ hook_RANGEMAP_lookupOrDefault(SortRangeMap m, SortKItem key, SortKItem _default)
   return res;
 }
 
-rangemap hook_RANGEMAP_update(SortRangeMap m, SortKItem keyRangeStart, SortKItem keyRangeEnd, SortKItem value) {
+rangemap hook_RANGEMAP_update(
+    SortRangeMap m, SortKItem keyRangeStart, SortKItem keyRangeEnd,
+    SortKItem value) {
   return m->inserted(rng_map::Range<KElem>(keyRangeStart, keyRangeEnd), value);
 }
 
-rangemap hook_RANGEMAP_remove(SortRangeMap m, SortKItem keyRangeStart, SortKItem keyRangeEnd) {
+rangemap hook_RANGEMAP_remove(
+    SortRangeMap m, SortKItem keyRangeStart, SortKItem keyRangeEnd) {
   return m->deleted(rng_map::Range<KElem>(keyRangeStart, keyRangeEnd));
 }
 
+rangemap hook_RANGEMAP_difference(SortRangeMap m1, SortRangeMap m2) {
+  return m1->difference(*m2);
+}
 }

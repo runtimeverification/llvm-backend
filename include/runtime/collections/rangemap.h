@@ -416,6 +416,49 @@ public:
     });
     return res;
   }
+
+  // Return a rangemap that is the difference of this rangemap and rangemap m.
+  // Given rangemaps A and B, we compute the intersection of A and B, as all
+  // key range-value pairs whose keys are contained in ranges in both A and B
+  // and are mapped to the same value. Then, we perform A - A^B, and return the
+  // map resulting from deleting these ranges from A.
+  RangeMap difference(RangeMap const &m) const {
+    std::vector<std::pair<Range<T>, V>> r1;
+    for_each(treemap_, [&r1](Range<T> const &x, V const &v) {
+      r1.emplace_back(std::make_pair(x, v));
+    });
+    std::vector<std::pair<Range<T>, V>> r2;
+    for_each(m.treemap_, [&r2](Range<T> const &x, V const &v) {
+      r2.emplace_back(std::make_pair(x, v));
+    });
+    // Compute the intersection of this rangemap and m.
+    std::vector<Range<T>> intersect;
+    int i = 0;
+    int j = 0;
+    // Repeat while there are more ranges in both rangemaps.
+    while (i < r1.size() && j < r2.size()) {
+      // Consider ranges r1[i] and r2[j] for intersection.
+      T s = r1[i].first.start() > r2[j].first.start() ? r1[i].first.start()
+                                                      : r2[j].first.start();
+      T e = r1[i].first.end() < r2[j].first.end() ? r1[i].first.end()
+                                                  : r2[j].first.end();
+      if (s < e && r1[i].second == r2[j].second) {
+        intersect.emplace_back(Range(s, e));
+      }
+      // The range with the smallest end has been processed - remove it.
+      if (r1[i].first.end() < r2[j].first.end()) {
+        i++;
+      } else {
+        j++;
+      }
+    }
+    // Delete all collected intersection ranges from this rangemap.
+    RangeMap tmpmap = *this;
+    for (auto &r : intersect) {
+      tmpmap = tmpmap.deleted(r);
+    }
+    return tmpmap;
+  }
 };
 
 // Return a rangemap with all elements in m, and then also from the container
