@@ -92,7 +92,7 @@
           builtins.listToAttrs (lib.imap0 (i: v: { name = "check_${toString i}"; value = v; }) checks);
 
         matrix = builtins.listToAttrs (lib.forEach (lib.cartesianProductOfSets {
-          llvm-version = [11 12 13 14];
+          llvm-version = [11 12 13 14 15];
           build-type = ["Debug" "Release" "RelWithDebInfo" "FastBuild" "GcStats"];
         }) (
           args:
@@ -100,15 +100,15 @@
             {
               name = "llvm-backend-${toString args.llvm-version}-${args.build-type}";
               value = {
-                inherit (pkgs) llvm-backend llvm-backend-matching integration-tests devShell;
+                inherit (pkgs) llvm-backend llvm-backend-matching llvm-kompile-testing integration-tests devShell;
               };
             }
         ));
       in with matrix; {
         packages = utils.lib.flattenTree {
-          inherit (llvm-backend-14-FastBuild) llvm-backend llvm-backend-matching;
-          default = llvm-backend-14-FastBuild.llvm-backend;
-          llvm-backend-release = llvm-backend-14-Release.llvm-backend;
+          inherit (llvm-backend-15-FastBuild) llvm-backend llvm-backend-matching llvm-kompile-testing;
+          default = llvm-backend-15-FastBuild.llvm-backend;
+          llvm-backend-release = llvm-backend-15-Release.llvm-backend;
         };
         checks = listToChecks [
           # Check that the backend compiles on each supported version of LLVM,
@@ -130,9 +130,11 @@
           # llvm-backend-14-FastBuild.integration-tests
           # llvm-backend-14-GcStats.integration-tests
 
-          llvm-backend-14-FastBuild.integration-tests
+          llvm-backend-14-FastBuild.llvm-backend
+
+          llvm-backend-15-FastBuild.integration-tests
         ];
-        devShells.default = llvm-backend-14-FastBuild.devShell;
+        devShells.default = llvm-backend-15-FastBuild.devShell;
       }) // {
         # non-system suffixed items should go here
         overlays.default = llvm-backend-overlay;
