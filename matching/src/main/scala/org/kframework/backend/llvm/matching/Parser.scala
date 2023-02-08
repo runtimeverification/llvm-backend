@@ -138,7 +138,7 @@ object Parser {
     val splitted = split(axiom._1.pattern)
     if (splitted.isDefined) {
       val s = axiom._1
-      if (hasAtt(s, "comm") || hasAtt(s, "assoc") || hasAtt(s, "idem") || hasAtt(s, "non-executable") || hasAtt(s, "simplification")) {
+      if (hasAtt(s, "comm") || hasAtt(s, "assoc") || hasAtt(s, "idem") || hasAtt(s, "unit") || hasAtt(s, "non-executable") || hasAtt(s, "simplification")) {
         Seq()
       } else {
         Seq((splitted.get._1, AxiomInfo(rulePriority(s), axiom._2, splitted.get._2, splitted.get._3, source(s), location(s))))
