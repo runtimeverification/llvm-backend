@@ -33,7 +33,7 @@ entry:
 getTag:
   br i1 %arg1leastbit, label %constant, label %block
 constant:
-  %eqconstant = icmp lt i64 %arg1intptr, %arg2intptr
+  %eqconstant = icmp ult i64 %arg1intptr, %arg2intptr
   br label %exit
 block:
   %arg1hdrptr = getelementptr inbounds %block, %block* %arg1, i64 0, i32 0, i32 0
