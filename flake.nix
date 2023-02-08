@@ -53,6 +53,11 @@
             cp -rv ${final.rapidjson-src}/* $out/deps/rapidjson
             cp -rv ${final.pybind11-src}/* $out/deps/pybind11
           '';
+
+          fixupPhase = ''
+            substituteInPlace $out/tools/llvm-backend-version/version.inc.in \
+              --replace '@LLVM_BACKEND_VERSION@' '${self.rev or "dirty"}'
+          '';
         };
 
         llvm-backend-matching-src = prev.lib.cleanSource
@@ -100,13 +105,13 @@
             {
               name = "llvm-backend-${toString args.llvm-version}-${args.build-type}";
               value = {
-                inherit (pkgs) llvm-backend llvm-backend-matching integration-tests devShell;
+                inherit (pkgs) llvm-backend llvm-backend-matching llvm-kompile-testing integration-tests devShell;
               };
             }
         ));
       in with matrix; {
         packages = utils.lib.flattenTree {
-          inherit (llvm-backend-15-FastBuild) llvm-backend llvm-backend-matching;
+          inherit (llvm-backend-15-FastBuild) llvm-backend llvm-backend-matching llvm-kompile-testing;
           default = llvm-backend-15-FastBuild.llvm-backend;
           llvm-backend-release = llvm-backend-15-Release.llvm-backend;
         };

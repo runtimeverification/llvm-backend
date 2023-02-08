@@ -1,9 +1,10 @@
 #ifndef KORE_PRINTER_H
 #define KORE_PRINTER_H
 
-#include "kllvm/parser/KOREParser.h"
+#include "kllvm/ast/AST.h"
 
 #include <iostream>
+#include <string>
 
 namespace kllvm {
 

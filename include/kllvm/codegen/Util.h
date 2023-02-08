@@ -1,7 +1,13 @@
 #ifndef KLLVM_UTIL_H
 #define KLLVM_UTIL_H
 
-#include "llvm/IR/Module.h"
+#include <llvm/Config/llvm-config.h>
+#include <llvm/IR/DerivedTypes.h>
+#include <llvm/IR/Function.h>
+#include <llvm/IR/Module.h>
+#include <llvm/IR/Value.h>
+
+#include <string>
 
 namespace kllvm {
 

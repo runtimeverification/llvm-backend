@@ -1,9 +1,11 @@
 #include "kllvm/ast/AST.h"
-#include "kllvm/parser/KOREParser.h"
-#include "kllvm/parser/KOREScanner.h"
+#include "kllvm/parser/location.h"
 
 #include <fstream>
 #include <iostream>
+#include <memory>
+#include <string>
+#include <vector>
 
 using namespace kllvm;
 using namespace kllvm::parser;

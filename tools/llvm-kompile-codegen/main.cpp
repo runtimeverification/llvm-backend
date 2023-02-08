@@ -1,21 +1,28 @@
+#include "kllvm/ast/AST.h"
 #include "kllvm/codegen/CreateTerm.h"
 #include "kllvm/codegen/Debug.h"
 #include "kllvm/codegen/Decision.h"
 #include "kllvm/codegen/DecisionParser.h"
 #include "kllvm/codegen/EmitConfigParser.h"
 #include "kllvm/parser/KOREParser.h"
-#include "kllvm/parser/KOREScanner.h"
+#include "kllvm/parser/location.h"
 
-#include "llvm/IR/Instructions.h"
-#include "llvm/IR/LLVMContext.h"
-#include "llvm/IR/Module.h"
-#include "llvm/Support/raw_ostream.h"
+#include <llvm/IR/LLVMContext.h>
+#include <llvm/IR/Module.h>
+#include <llvm/Support/raw_ostream.h>
 
 #include <libgen.h>
 #include <sys/stat.h>
 
+#include <cstdlib>
 #include <fstream>
 #include <iostream>
+#include <list>
+#include <map>
+#include <memory>
+#include <string>
+#include <unordered_map>
+#include <utility>
 
 using namespace kllvm;
 using namespace kllvm::parser;

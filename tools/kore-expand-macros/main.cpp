@@ -1,5 +1,6 @@
 #include "kllvm/ast/AST.h"
 #include "kllvm/parser/KOREParser.h"
+#include "kllvm/parser/location.h"
 
 #include <algorithm>
 #include <iostream>
