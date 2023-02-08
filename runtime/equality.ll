@@ -19,6 +19,7 @@ declare i1 @hook_MAP_eq(%map*, %map*)
 declare i1 @hook_LIST_eq(%list*, %list*)
 declare i1 @hook_SET_eq(%set*, %set*)
 declare i1 @hook_INT_eq(%mpz*, %mpz*)
+declare i1 @hook_INT_lt(%mpz*, %mpz*)
 declare i1 @hook_FLOAT_trueeq(%floating*, %floating*)
 declare i1 @hook_STRING_eq(%block*, %block*)
 
