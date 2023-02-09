@@ -183,6 +183,10 @@ object Parser {
       case Implies(_, And(_, Not(_, _), And (_, Equals(_, _, pat, _), args)), Equals(i, o, Application(symbol, _), And(_, rhs, _))) => Some(Some(symbol), B.Equals(i, o, B.Application(symbol, getPatterns(args)), rhs), Some(pat))
       case Implies(_, And(_, Not(_, _), And (_, Top(_), args)), Equals(i, o, Application(symbol, _), And(_, rhs, _))) => Some(Some(symbol), B.Equals(i, o, B.Application(symbol, getPatterns(args)), rhs), None)
       case Implies(_, And(_, Top(_), args), Equals(i, o, Application(symbol, _), And(_, rhs, _))) => Some(Some(symbol), B.Equals(i, o, B.Application(symbol, getPatterns(args)), rhs), None)
+      case Implies(_, Top(_), Equals(i, o, app @ Application(symbol, _), And(_, rhs, Top(_)))) => Some(Some(symbol), B.Equals(i, o, app, rhs), None)
+      case Implies(_, Equals(_, _, pat, _), Equals(i, o, app @ Application(symbol, _), And(_, rhs, Top(_)))) => Some(Some(symbol), B.Equals(i, o, app, rhs), Some(pat))
+      case Implies(_, Top(_), eq @ Equals(_, _, Application(symbol, _), _)) => Some(Some(symbol), eq, None)
+      case Implies(_, Equals(_, _, pat, _), eq @ Equals(_, _, Application(symbol, _), _)) => Some(Some(symbol), eq, Some(pat))
       case eq @ Equals(_, _, Application(symbol, _), _) => Some(Some(symbol), eq, None)
       case _ => None
     }
