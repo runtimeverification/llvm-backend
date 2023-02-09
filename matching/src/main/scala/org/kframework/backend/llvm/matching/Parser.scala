@@ -133,12 +133,13 @@ object Parser {
 
   private def parseAxiomSentence[T <: GeneralizedRewrite](
       split: Pattern => Option[(Option[SymbolOrAlias], T, Option[Pattern])],
-      axiom: (AxiomDeclaration, Int)) :
+      axiom: (AxiomDeclaration, Int),
+      simplification: Boolean) :
       Seq[(Option[SymbolOrAlias], AxiomInfo)] = {
     val splitted = split(axiom._1.pattern)
     if (splitted.isDefined) {
       val s = axiom._1
-      if (hasAtt(s, "comm") || hasAtt(s, "assoc") || hasAtt(s, "idem") || hasAtt(s, "unit") || hasAtt(s, "non-executable") || hasAtt(s, "simplification")) {
+      if (hasAtt(s, "comm") || hasAtt(s, "assoc") || hasAtt(s, "idem") || hasAtt(s, "unit") || hasAtt(s, "non-executable") || (hasAtt(s, "simplification") && !simplification)) {
         Seq()
       } else {
         Seq((splitted.get._1, AxiomInfo(rulePriority(s), axiom._2, splitted.get._2, splitted.get._3, source(s), location(s))))
@@ -254,12 +255,12 @@ object Parser {
   }
 
   def parseTopAxioms(axioms: Seq[AxiomDeclaration]) : IndexedSeq[AxiomInfo] = {
-    val withOwise = axioms.zipWithIndex.flatMap(parseAxiomSentence(splitTop, _))
+    val withOwise = axioms.zipWithIndex.flatMap(parseAxiomSentence(splitTop, _, false))
     withOwise.map(_._2).sortWith(_.priority < _.priority).toIndexedSeq
   }
 
-  def parseFunctionAxioms(axioms: Seq[AxiomDeclaration]) : Map[SymbolOrAlias, IndexedSeq[AxiomInfo]] = {
-    val withOwise = axioms.zipWithIndex.flatMap(parseAxiomSentence(a => splitFunction(a), _))
+  def parseFunctionAxioms(axioms: Seq[AxiomDeclaration], simplification: Boolean) : Map[SymbolOrAlias, IndexedSeq[AxiomInfo]] = {
+    val withOwise = axioms.zipWithIndex.flatMap(parseAxiomSentence(a => splitFunction(a), _, simplification))
     withOwise.sortWith(_._2.priority < _._2.priority).toIndexedSeq.filter(_._1.isDefined).map(t => (t._1.get, t._2)).groupBy(_._1).mapValues(_.map(_._2))
   }
 
