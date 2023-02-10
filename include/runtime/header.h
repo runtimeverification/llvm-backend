@@ -197,6 +197,8 @@ typedef set *SortSet;
 extern "C" {
 
 block *parseConfiguration(const char *filename);
+block *deserializeConfiguration(char *, size_t);
+
 void printConfiguration(const char *filename, block *subject);
 void printStatistics(const char *filename, uint64_t steps);
 string *printConfigurationToString(block *subject);

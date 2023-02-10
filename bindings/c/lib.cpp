@@ -195,6 +195,17 @@ void kore_simplify(
   free(kitem_sort_str);
 }
 
+void kore_simplify_binary(
+    char *data_in, size_t size_in, kore_sort const *sort, char **data_out,
+    size_t *size_out) {
+  auto sort_str = kore_sort_dump(sort);
+
+  auto block = deserializeConfiguration(data_in, size_in);
+  serializeConfiguration(block, sort_str, data_out, size_out);
+
+  free(sort_str);
+}
+
 /* KORECompositePattern */
 
 kore_pattern *kore_composite_pattern_new(char const *name) {

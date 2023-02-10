@@ -272,3 +272,7 @@ block *parseConfiguration(const char *filename) {
     return b;
   }
 }
+
+block *deserializeConfiguration(char *data, size_t size) {
+  return nullptr;
+}
