@@ -48,6 +48,13 @@ typedef struct block block;
 
 char *kore_pattern_dump(kore_pattern const *);
 
+/*
+ * The two final parameters here are outputs: the serialized binary data and the
+ * number of serialized bytes, respectively. The binary data should be freed
+ * with `free()`.
+ */
+void kore_pattern_serialize(kore_pattern const *, char **, size_t *);
+
 void kore_pattern_free(kore_pattern const *);
 
 kore_pattern *kore_pattern_new_token(char const *, kore_sort const *);
