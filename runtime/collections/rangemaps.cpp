@@ -75,5 +75,4 @@ bool hook_RANGEMAP_in_keys(SortKItem key, SortRangeMap m) {
 bool hook_RANGEMAP_inclusion(SortRangeMap m1, SortRangeMap m2) {
   return m1->inclusion(*m2);
 }
-
 }

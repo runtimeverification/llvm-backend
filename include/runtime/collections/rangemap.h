@@ -249,8 +249,8 @@ private:
   // Gather the intersection ranges of this rangemap and rangemap m, i.e. all
   // ranges in this rangemap that overlap (fully or partially) with ranges in m
   // and are mapped to the same value in both rangemaps, in res.
-  void get_intersection_ranges(RangeMap const &m,
-      std::vector<Range<T>> &res) const {
+  void
+  get_intersection_ranges(RangeMap const &m, std::vector<Range<T>> &res) const {
     std::vector<std::pair<Range<T>, V>> r1;
     for_each(treemap_, [&r1](Range<T> const &x, V const &v) {
       r1.emplace_back(std::make_pair(x, v));
@@ -481,16 +481,17 @@ public:
     // If they differ, return false.
     auto it = intersect.begin();
     bool equals = true;
-    for_each(treemap_, [&intersect, &it, &equals](Range<T> const &x, V const &v) {
-      if (it == intersect.end()) {
-        equals = false;
-      } else {
-        if (x != *it) {
-          equals = false;
-        }
-        ++it;
-        }
-    });
+    for_each(
+        treemap_, [&intersect, &it, &equals](Range<T> const &x, V const &v) {
+          if (it == intersect.end()) {
+            equals = false;
+          } else {
+            if (x != *it) {
+              equals = false;
+            }
+            ++it;
+          }
+        });
     return (it == intersect.end()) && equals;
   }
 };
