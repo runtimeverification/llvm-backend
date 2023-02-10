@@ -246,6 +246,41 @@ private:
     }
   }
 
+  // Gather the intersection ranges of this rangemap and rangemap m, i.e. all
+  // ranges in this rangemap that overlap (fully or partially) with ranges in m
+  // and are mapped to the same value in both rangemaps, in res.
+  void get_intersection_ranges(RangeMap const &m,
+      std::vector<Range<T>> &res) const {
+    std::vector<std::pair<Range<T>, V>> r1;
+    for_each(treemap_, [&r1](Range<T> const &x, V const &v) {
+      r1.emplace_back(std::make_pair(x, v));
+    });
+    std::vector<std::pair<Range<T>, V>> r2;
+    for_each(m.treemap_, [&r2](Range<T> const &x, V const &v) {
+      r2.emplace_back(std::make_pair(x, v));
+    });
+    // Compute the intersection of this rangemap and m.
+    int i = 0;
+    int j = 0;
+    // Repeat while there are more ranges in both rangemaps.
+    while (i < r1.size() && j < r2.size()) {
+      // Consider ranges r1[i] and r2[j] for intersection.
+      T s = r1[i].first.start() > r2[j].first.start() ? r1[i].first.start()
+                                                      : r2[j].first.start();
+      T e = r1[i].first.end() < r2[j].first.end() ? r1[i].first.end()
+                                                  : r2[j].first.end();
+      if (s < e && r1[i].second == r2[j].second) {
+        res.emplace_back(Range(s, e));
+      }
+      // The range with the smallest end has been processed - remove it.
+      if (r1[i].first.end() < r2[j].first.end()) {
+        i++;
+      } else {
+        j++;
+      }
+    }
+  }
+
 public:
   // Create an empty rangemap.
   RangeMap()
@@ -424,41 +459,39 @@ public:
   // and are mapped to the same value. Then, we perform A - A^B, and return the
   // map resulting from deleting these ranges from A.
   RangeMap difference(RangeMap const &m) const {
-    std::vector<std::pair<Range<T>, V>> r1;
-    for_each(treemap_, [&r1](Range<T> const &x, V const &v) {
-      r1.emplace_back(std::make_pair(x, v));
-    });
-    std::vector<std::pair<Range<T>, V>> r2;
-    for_each(m.treemap_, [&r2](Range<T> const &x, V const &v) {
-      r2.emplace_back(std::make_pair(x, v));
-    });
     // Compute the intersection of this rangemap and m.
     std::vector<Range<T>> intersect;
-    int i = 0;
-    int j = 0;
-    // Repeat while there are more ranges in both rangemaps.
-    while (i < r1.size() && j < r2.size()) {
-      // Consider ranges r1[i] and r2[j] for intersection.
-      T s = r1[i].first.start() > r2[j].first.start() ? r1[i].first.start()
-                                                      : r2[j].first.start();
-      T e = r1[i].first.end() < r2[j].first.end() ? r1[i].first.end()
-                                                  : r2[j].first.end();
-      if (s < e && r1[i].second == r2[j].second) {
-        intersect.emplace_back(Range(s, e));
-      }
-      // The range with the smallest end has been processed - remove it.
-      if (r1[i].first.end() < r2[j].first.end()) {
-        i++;
-      } else {
-        j++;
-      }
-    }
+    get_intersection_ranges(m, intersect);
     // Delete all collected intersection ranges from this rangemap.
     RangeMap tmpmap = *this;
     for (auto &r : intersect) {
       tmpmap = tmpmap.deleted(r);
     }
     return tmpmap;
+  }
+
+  // Return true if this rangemap is included in rangemap m, i.e. all key
+  // range-value pairs contained in this rangemap whose keys are also contained
+  // in key ranges in m and are mapped to the same value.
+  bool inclusion(RangeMap const &m) const {
+    // Compute the intersection of this rangemap and m.
+    std::vector<Range<T>> intersect;
+    get_intersection_ranges(m, intersect);
+    // Compare the intersection ranges with this rangemap's ranges.
+    // If they differ, return false.
+    auto it = intersect.begin();
+    bool equals = true;
+    for_each(treemap_, [&intersect, &it, &equals](Range<T> const &x, V const &v) {
+      if (it == intersect.end()) {
+        equals = false;
+      } else {
+        if (x != *it) {
+          equals = false;
+        }
+        ++it;
+        }
+    });
+    return (it == intersect.end()) && equals;
   }
 };
 

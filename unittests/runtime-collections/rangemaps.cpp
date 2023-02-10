@@ -680,4 +680,35 @@ BOOST_AUTO_TEST_CASE(rangemap_test_difference) {
   BOOST_CHECK_EQUAL(result, 0);
 }
 
+BOOST_AUTO_TEST_CASE(rangemap_test_inclusion) {
+  auto map = rng_map::RangeMap<int, int>();
+  auto m1 = map.inserted(rng_map::Range<int>(0, 2), 0);
+  auto m2 = m1.inserted(rng_map::Range<int>(5, 8), 0);
+  auto m3 = m2.inserted(rng_map::Range<int>(12, 13), 0);
+  auto map1 = m3.inserted(rng_map::Range<int>(15, 18), 0);
+  auto map2 = map.inserted(rng_map::Range<int>(0, 20), 0);
+  auto m4 = map.inserted(rng_map::Range<int>(0, 3), 0);
+  auto m5 = m4.inserted(rng_map::Range<int>(4, 8), 0);
+  auto m6 = m5.inserted(rng_map::Range<int>(9, 14), 0);
+  auto map3 = m6.inserted(rng_map::Range<int>(15, 18), 0);
+  auto map4 = m6.inserted(rng_map::Range<int>(15, 18), 1);
+  auto m7 = map.inserted(rng_map::Range<int>(0, 3), 0);
+  auto m8 = m7.inserted(rng_map::Range<int>(6, 9), 0);
+  auto map5 = m8.inserted(rng_map::Range<int>(10, 19), 0);
+  auto result = map1.inclusion(map);
+  BOOST_CHECK_EQUAL(result, false);
+  result = map1.inclusion(map2);
+  BOOST_CHECK_EQUAL(result, true);
+  result = map1.inclusion(map3);
+  BOOST_CHECK_EQUAL(result, true);
+  result = map1.inclusion(map4);
+  BOOST_CHECK_EQUAL(result, false);
+  result = map1.inclusion(map5);
+  BOOST_CHECK_EQUAL(result, false);
+  result = map.inclusion(map1);
+  BOOST_CHECK_EQUAL(result, true);
+  result = map.inclusion(map);
+  BOOST_CHECK_EQUAL(result, true);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

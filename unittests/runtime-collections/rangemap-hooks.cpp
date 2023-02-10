@@ -16,6 +16,8 @@ rangemap hook_RANGEMAP_update(
 rangemap
 hook_RANGEMAP_remove(rangemap *m, block *keyRangeStart, block *keyRangeEnd);
 rangemap hook_RANGEMAP_difference(rangemap *m1, rangemap *m2);
+bool hook_RANGEMAP_in_keys(block *key, rangemap *m);
+bool hook_RANGEMAP_inclusion(rangemap *m1, rangemap *m2);
 size_t hook_RANGEMAP_size_long(rangemap *m);
 mpz_ptr hook_RANGEMAP_size(rangemap *m);
 
@@ -98,6 +100,26 @@ BOOST_AUTO_TEST_CASE(rangemap_hook_difference) {
   auto map4 = hook_RANGEMAP_difference(&map2, &map1);
   result = hook_RANGEMAP_size_long(&map4);
   BOOST_CHECK_EQUAL(result, 0);
+}
+
+BOOST_AUTO_TEST_CASE(rangemap_hook_in_keys) {
+  auto map = hook_RANGEMAP_element(RDUMMY0, RDUMMY1, RDUMMY0);
+  auto result = hook_RANGEMAP_in_keys(RDUMMY0, &map);
+  BOOST_CHECK(result);
+  result = hook_RANGEMAP_in_keys(RDUMMY1, &map);
+  BOOST_CHECK(!result);
+}
+
+BOOST_AUTO_TEST_CASE(rangemap_hook_inclusion) {
+  auto map1 = hook_RANGEMAP_element(RDUMMY0, RDUMMY2, RDUMMY0);
+  auto map2 = hook_RANGEMAP_element(RDUMMY0, RDUMMY1, RDUMMY0);
+  auto result = hook_RANGEMAP_inclusion(&map1, &map2);
+  BOOST_CHECK(!result);
+  result = hook_RANGEMAP_inclusion(&map2, &map1);
+  BOOST_CHECK(result);
+  auto map3 = hook_RANGEMAP_update(&map2, RDUMMY0, RDUMMY1, RDUMMY1);
+  result = hook_RANGEMAP_inclusion(&map3, &map1);
+  BOOST_CHECK(!result);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
