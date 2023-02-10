@@ -53,6 +53,31 @@ SortKItem hook_RANGEMAP_lookupOrDefault(
   return res;
 }
 
+struct range {
+  blockheader h;
+  block *start;
+  block *end;
+};
+static struct blockheader range_header() {
+  static struct blockheader hdr = {(uint64_t)-1};
+  if (hdr.hdr == -1) {
+    hdr = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("range{SortKItem{}, SortKItem{}}"));
+  }
+  return hdr;
+}
+SortRange hook_RANGEMAP_find_range(SortRangeMap m, SortKItem key) {
+  auto val = m->get_key_value(key);
+  if (val.has_value()) {
+    range *ptr = (range *)koreAlloc(sizeof(range));
+    ptr->h = range_header();
+    ptr->start = val.value().first.start();
+    ptr->end = val.value().first.end();
+    return (SortRange)ptr;
+  } else {
+    KLLVM_HOOK_INVALID_ARGUMENT("Key not found for map lookup");
+  }
+}
+
 rangemap hook_RANGEMAP_update(
     SortRangeMap m, SortKItem keyRangeStart, SortKItem keyRangeEnd,
     SortKItem value) {

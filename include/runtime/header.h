@@ -208,6 +208,7 @@ typedef block *SortFFIType;
 typedef list *SortList;
 typedef map *SortMap;
 typedef set *SortSet;
+typedef block *SortRange;
 typedef rangemap *SortRangeMap;
 
 extern "C" {

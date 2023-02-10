@@ -11,6 +11,7 @@ rangemap hook_RANGEMAP_unit(void);
 //block *hook_RANGEMAP_lookup_null(rangemap *m, block *key);
 block *hook_RANGEMAP_lookup(rangemap *m, block *key);
 block *hook_RANGEMAP_lookupOrDefault(rangemap *m, block *key, block *_default);
+block *hook_RANGEMAP_find_range(rangemap *m, block *key);
 rangemap hook_RANGEMAP_update(
     rangemap *m, block *keyRangeStart, block *keyRangeEnd, block *value);
 rangemap
@@ -30,6 +31,18 @@ block *RDUMMY2 = &RD2;
 
 bool hook_KEQUAL_lt(block *b1, block *b2) {
   return b1->h.hdr < b2->h.hdr;
+}
+
+void *koreAlloc(size_t requested) {
+  return malloc(requested);
+}
+
+uint32_t getTagForSymbolName(const char *symbolName) {
+  return 0;
+}
+
+struct blockheader getBlockHeaderForSymbol(uint32_t tag) {
+  return { (uint64_t)tag };
 }
 }
 
@@ -69,6 +82,14 @@ BOOST_AUTO_TEST_CASE(rangemap_hook_lookup_or_default) {
   BOOST_CHECK_EQUAL(result, RDUMMY0);
   result = hook_RANGEMAP_lookupOrDefault(&map, RDUMMY1, RDUMMY1);
   BOOST_CHECK_EQUAL(result, RDUMMY1);
+}
+
+BOOST_AUTO_TEST_CASE(rangemap_hook_find_range) {
+  auto map = hook_RANGEMAP_element(RDUMMY0, RDUMMY1, RDUMMY0);
+  auto result = hook_RANGEMAP_find_range(&map, RDUMMY0);
+  BOOST_CHECK_EQUAL((block *)result->children[0], RDUMMY0);
+  BOOST_CHECK_EQUAL((block *)result->children[1], RDUMMY1);
+  BOOST_CHECK_THROW(hook_RANGEMAP_find_range(&map, RDUMMY1), std::invalid_argument);
 }
 
 BOOST_AUTO_TEST_CASE(rangemap_hook_update) {
