@@ -2,6 +2,7 @@
 #include <memory>
 
 #include <kllvm/ast/AST.h>
+#include <kllvm/binary/serializer.h>
 
 #include <kllvm-c/kllvm-c.h>
 
@@ -58,6 +59,20 @@ char *kore_pattern_dump(kore_pattern const *pat) {
   auto os = std::ostringstream{};
   pat->ptr_->print(os);
   return get_c_string(os);
+}
+
+void kore_pattern_serialize(
+    kore_pattern const *pat, char **data_out, size_t *size_out) {
+  auto out = kllvm::serializer();
+  pat->ptr_->serialize_to(out);
+
+  auto const &binary_data = out.data();
+  auto binary_size = binary_data.size();
+
+  *size_out = binary_size;
+  *data_out = static_cast<char *>(malloc(sizeof(char) * binary_size));
+
+  std::memcpy(*data_out, binary_data.data(), binary_size);
 }
 
 void kore_pattern_free(kore_pattern const *pat) {
@@ -178,6 +193,17 @@ void kore_simplify(
 
   kore_sort_free(kitem_sort);
   free(kitem_sort_str);
+}
+
+void kore_simplify_binary(
+    char *data_in, size_t size_in, kore_sort const *sort, char **data_out,
+    size_t *size_out) {
+  auto sort_str = kore_sort_dump(sort);
+
+  auto block = deserializeConfiguration(data_in, size_in);
+  serializeConfiguration(block, sort_str, data_out, size_out);
+
+  free(sort_str);
 }
 
 /* KORECompositePattern */

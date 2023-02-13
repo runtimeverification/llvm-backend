@@ -239,7 +239,7 @@ list list_push_back(list *list, block *value) {
 
 void printList(
     writer *file, list *list, const char *unit, const char *element,
-    const char *concat) {
+    const char *concat, void *state) {
   size_t size = list->size();
   if (size == 0) {
     sfprintf(file, "%s()", unit);
@@ -256,7 +256,7 @@ void printList(
       sfprintf(file, ",");
     }
     sfprintf(file, "%s(", element);
-    printConfigurationInternal(file, *iter, "SortKItem{}", false);
+    printConfigurationInternal(file, *iter, "SortKItem{}", false, state);
     sfprintf(file, ")");
   }
   sfprintf(file, "))");
