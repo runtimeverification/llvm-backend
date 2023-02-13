@@ -272,3 +272,19 @@ block *parseConfiguration(const char *filename) {
     return b;
   }
 }
+
+block *deserializeConfiguration(char *data, size_t size) {
+  auto ptr = data;
+  auto end = data + size;
+
+  for (auto i = 0; i < serializer::magic_header.size(); ++i) {
+    detail::read<char>(ptr, end);
+  }
+
+  auto v_major = detail::read<int16_t>(ptr, end);
+  auto v_minor = detail::read<int16_t>(ptr, end);
+  auto v_patch = detail::read<int16_t>(ptr, end);
+
+  return static_cast<block *>(deserializeInitialConfiguration(
+      ptr, end, binary_version(v_major, v_minor, v_patch)));
+}

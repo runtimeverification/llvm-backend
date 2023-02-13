@@ -1,8 +1,12 @@
 #include <kllvm/binary/serializer.h>
 
+#include <llvm/ADT/DenseMapInfo.h>
+#include <llvm/ADT/StringRef.h>
 #include <llvm/Support/CommandLine.h>
 
+#include <cstdint>
 #include <iostream>
+#include <vector>
 
 using namespace llvm;
 

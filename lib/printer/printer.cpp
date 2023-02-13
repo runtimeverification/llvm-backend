@@ -1,8 +1,19 @@
-#include "kllvm/parser/KOREParser.h"
-#include "kllvm/parser/KOREScanner.h"
-#include <kllvm/printer/printer.h>
+#include "kllvm/printer/printer.h"
 
+#include "kllvm/ast/AST.h"
+#include "kllvm/parser/KOREParser.h"
+#include "kllvm/parser/location.h"
+
+#include <cstddef>
+#include <list>
 #include <map>
+#include <memory>
+#include <set>
+#include <string>
+#include <unordered_map>
+#include <unordered_set>
+#include <utility>
+#include <vector>
 
 namespace {
 
