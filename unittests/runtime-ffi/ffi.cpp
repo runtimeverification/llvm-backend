@@ -71,7 +71,7 @@ bool during_gc() {
 }
 
 void printConfigurationInternal(
-    writer *file, block *subject, const char *sort, bool) { }
+    writer *file, block *subject, const char *sort, bool, void *) { }
 void sfprintf(writer *, const char *, ...) { }
 
 bool hook_KEQUAL_eq(block *lhs, block *rhs) {

@@ -34,7 +34,7 @@ void *koreAllocToken(size_t requested) {
 const size_t BLOCK_SIZE = -1;
 
 void printConfigurationInternal(
-    writer *file, block *subject, const char *sort, bool) { }
+    writer *file, block *subject, const char *sort, bool, void *) { }
 void sfprintf(writer *, const char *, ...) { }
 
 bool hook_KEQUAL_eq(block *b1, block *b2) {

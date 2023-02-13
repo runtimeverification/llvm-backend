@@ -693,6 +693,9 @@ static llvm::PointerType *makeVisitorType(
   for (int i = 0; i < numBools; i++) {
     types.push_back(llvm::Type::getInt1Ty(Ctx));
   }
+
+  types.push_back(llvm::Type::getInt8PtrTy(Ctx));
+
   return llvm::PointerType::getUnqual(
       llvm::FunctionType::get(llvm::Type::getVoidTy(Ctx), types, false));
 }
@@ -735,10 +738,11 @@ makePackedVisitorStructureType(llvm::LLVMContext &Ctx, llvm::Module *module) {
          llvm::PointerType::getUnqual(llvm::FunctionType::get(
              llvm::Type::getVoidTy(Ctx),
              {file, llvm::Type::getInt64PtrTy(Ctx), llvm::Type::getInt64Ty(Ctx),
-              llvm::Type::getInt8PtrTy(Ctx)},
+              llvm::Type::getInt8PtrTy(Ctx), llvm::Type::getInt8PtrTy(Ctx)},
              false)),
          llvm::PointerType::getUnqual(llvm::FunctionType::get(
-             llvm::Type::getVoidTy(Ctx), {file}, false))}};
+             llvm::Type::getVoidTy(Ctx), {file, llvm::Type::getInt8PtrTy(Ctx)},
+             false))}};
 
     auto structTy = llvm::StructType::create(Ctx, elementTypes, name);
     types[&Ctx] = structTy;
@@ -765,6 +769,7 @@ static void emitTraversal(
     argTypes.push_back(file);
     argTypes.push_back(
         makePackedVisitorStructureType(Ctx, module)->getPointerTo());
+    argTypes.push_back(llvm::Type::getInt8PtrTy(Ctx));
   } else {
     argTypes.push_back(llvm::PointerType::getUnqual(
         llvm::ArrayType::get(llvm::Type::getInt8PtrTy(Ctx), 0)));
@@ -870,7 +875,8 @@ static void emitGetSymbolNameForTag(KOREDefinition *def, llvm::Module *mod) {
 static void visitCollection(
     KOREDefinition *definition, llvm::Module *module,
     KORECompositeSort *compositeSort, llvm::Function *func,
-    llvm::Value *ChildPtr, llvm::BasicBlock *CaseBlock, llvm::Value *callback) {
+    llvm::Value *ChildPtr, llvm::BasicBlock *CaseBlock, llvm::Value *callback,
+    llvm::Value *state_ptr) {
   llvm::LLVMContext &Ctx = module->getContext();
   llvm::Constant *zero = llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0);
   auto indices = std::vector<llvm::Constant *>{zero, zero};
@@ -898,15 +904,16 @@ static void visitCollection(
   auto elementPtr
       = getSymbolNamePtr(element->getConstructor(), nullptr, module);
   auto file = makeWriterType(Ctx);
+  auto i8_ptr_ty = llvm::Type::getInt8PtrTy(Ctx);
   auto fnType = llvm::FunctionType::get(
       llvm::Type::getVoidTy(Ctx),
-      {file, ChildPtr->getType(), llvm::Type::getInt8PtrTy(Ctx),
-       llvm::Type::getInt8PtrTy(Ctx), llvm::Type::getInt8PtrTy(Ctx)},
+      {file, ChildPtr->getType(), i8_ptr_ty, i8_ptr_ty, i8_ptr_ty, i8_ptr_ty},
       false);
   llvm::CallInst::Create(
       fnType, callback,
-      {func->arg_begin() + 1, ChildPtr, unitPtr, elementPtr, concatPtr}, "",
-      CaseBlock);
+      {func->arg_begin() + 1, ChildPtr, unitPtr, elementPtr, concatPtr,
+       state_ptr},
+      "", CaseBlock);
 }
 
 static void getVisitor(
@@ -923,6 +930,8 @@ static void getVisitor(
       CaseBlock);
   unsigned i = 0;
   auto file = makeWriterType(Ctx);
+
+  auto state_ptr = func->arg_end() - 1;
 
   for (auto sort : symbol->getArguments()) {
     auto compositeSort = dynamic_cast<KORECompositeSort *>(sort.get());
@@ -952,45 +961,54 @@ static void getVisitor(
           llvm::FunctionType::get(
               llvm::Type::getVoidTy(Ctx),
               {file, Child->getType(), llvm::Type::getInt8PtrTy(Ctx),
-               llvm::Type::getInt1Ty(Ctx)},
+               llvm::Type::getInt1Ty(Ctx), llvm::Type::getInt8PtrTy(Ctx)},
               false),
           callbacks.at(0),
           {func->arg_begin() + 1, Child, CharPtr,
            llvm::ConstantInt::get(
-               llvm::Type::getInt1Ty(Ctx), cat.cat == SortCategory::Variable)},
+               llvm::Type::getInt1Ty(Ctx), cat.cat == SortCategory::Variable),
+           state_ptr},
           "", CaseBlock);
       break;
     case SortCategory::Int:
       llvm::CallInst::Create(
           llvm::FunctionType::get(
               llvm::Type::getVoidTy(Ctx),
-              {file, Child->getType(), llvm::Type::getInt8PtrTy(Ctx)}, false),
-          callbacks.at(4), {func->arg_begin() + 1, Child, CharPtr}, "",
-          CaseBlock);
+              {file, Child->getType(), llvm::Type::getInt8PtrTy(Ctx),
+               llvm::Type::getInt8PtrTy(Ctx)},
+              false),
+          callbacks.at(4), {func->arg_begin() + 1, Child, CharPtr, state_ptr},
+          "", CaseBlock);
       break;
     case SortCategory::Float:
       llvm::CallInst::Create(
           llvm::FunctionType::get(
               llvm::Type::getVoidTy(Ctx),
-              {file, Child->getType(), llvm::Type::getInt8PtrTy(Ctx)}, false),
-          callbacks.at(5), {func->arg_begin() + 1, Child, CharPtr}, "",
-          CaseBlock);
+              {file, Child->getType(), llvm::Type::getInt8PtrTy(Ctx),
+               llvm::Type::getInt8PtrTy(Ctx)},
+              false),
+          callbacks.at(5), {func->arg_begin() + 1, Child, CharPtr, state_ptr},
+          "", CaseBlock);
       break;
     case SortCategory::Bool:
       llvm::CallInst::Create(
           llvm::FunctionType::get(
               llvm::Type::getVoidTy(Ctx),
-              {file, Child->getType(), llvm::Type::getInt8PtrTy(Ctx)}, false),
-          callbacks.at(6), {func->arg_begin() + 1, Child, CharPtr}, "",
-          CaseBlock);
+              {file, Child->getType(), llvm::Type::getInt8PtrTy(Ctx),
+               llvm::Type::getInt8PtrTy(Ctx)},
+              false),
+          callbacks.at(6), {func->arg_begin() + 1, Child, CharPtr, state_ptr},
+          "", CaseBlock);
       break;
     case SortCategory::StringBuffer:
       llvm::CallInst::Create(
           llvm::FunctionType::get(
               llvm::Type::getVoidTy(Ctx),
-              {file, Child->getType(), llvm::Type::getInt8PtrTy(Ctx)}, false),
-          callbacks.at(7), {func->arg_begin() + 1, Child, CharPtr}, "",
-          CaseBlock);
+              {file, Child->getType(), llvm::Type::getInt8PtrTy(Ctx),
+               llvm::Type::getInt8PtrTy(Ctx)},
+              false),
+          callbacks.at(7), {func->arg_begin() + 1, Child, CharPtr, state_ptr},
+          "", CaseBlock);
       break;
     case SortCategory::MInt: {
       llvm::Value *mint = new llvm::LoadInst(
@@ -1001,14 +1019,14 @@ static void getVisitor(
       auto fnType = llvm::FunctionType::get(
           llvm::Type::getVoidTy(Ctx),
           {file, llvm::Type::getInt64PtrTy(Ctx), llvm::Type::getInt64Ty(Ctx),
-           llvm::Type::getInt8PtrTy(Ctx)},
+           llvm::Type::getInt8PtrTy(Ctx), llvm::Type::getInt8PtrTy(Ctx)},
           false);
       if (nwords == 0) {
         llvm::CallInst::Create(
             fnType, func->arg_begin() + 10,
             {func->arg_begin() + 1,
              llvm::ConstantPointerNull::get(llvm::Type::getInt64PtrTy(Ctx)),
-             nbits, CharPtr},
+             nbits, CharPtr, state_ptr},
             "", CaseBlock);
       } else {
         auto Ptr = allocateTerm(
@@ -1043,32 +1061,35 @@ static void getVisitor(
         }
         llvm::CallInst::Create(
             fnType, callbacks.at(8),
-            {func->arg_begin() + 1, Ptr, nbits, CharPtr}, "", CaseBlock);
+            {func->arg_begin() + 1, Ptr, nbits, CharPtr, state_ptr}, "",
+            CaseBlock);
       }
       break;
     }
     case SortCategory::Map:
       visitCollection(
           definition, module, compositeSort, func, ChildPtr, CaseBlock,
-          callbacks.at(1));
+          callbacks.at(1), state_ptr);
       break;
     case SortCategory::Set:
       visitCollection(
           definition, module, compositeSort, func, ChildPtr, CaseBlock,
-          callbacks.at(3));
+          callbacks.at(3), state_ptr);
       break;
     case SortCategory::List: {
       visitCollection(
           definition, module, compositeSort, func, ChildPtr, CaseBlock,
-          callbacks.at(2));
+          callbacks.at(2), state_ptr);
       break;
     }
     case SortCategory::Uncomputed: abort();
     }
     if (i != symbol->getArguments().size() - 1) {
       llvm::CallInst::Create(
-          llvm::FunctionType::get(llvm::Type::getVoidTy(Ctx), {file}, false),
-          callbacks.at(9), {func->arg_begin() + 1}, "", CaseBlock);
+          llvm::FunctionType::get(
+              llvm::Type::getVoidTy(Ctx), {file, llvm::Type::getInt8PtrTy(Ctx)},
+              false),
+          callbacks.at(9), {func->arg_begin() + 1, state_ptr}, "", CaseBlock);
     }
     i++;
   }

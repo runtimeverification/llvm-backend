@@ -139,7 +139,7 @@ set set_map(set *s, block *(process)(block *)) {
 
 void printSet(
     writer *file, set *set, const char *unit, const char *element,
-    const char *concat) {
+    const char *concat, void *state) {
   size_t size = set->size();
   if (size == 0) {
     sfprintf(file, "%s()", unit);
@@ -157,7 +157,7 @@ void printSet(
     }
 
     sfprintf(file, "%s(", element);
-    printConfigurationInternal(file, *iter, "SortKItem{}", false);
+    printConfigurationInternal(file, *iter, "SortKItem{}", false, state);
     sfprintf(file, ")");
   }
   sfprintf(file, "))");

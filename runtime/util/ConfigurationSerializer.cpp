@@ -12,12 +12,6 @@
 using namespace kllvm;
 using namespace kllvm::parser;
 
-static std::string drop_back(std::string s, int n) {
-  return s.substr(0, s.size() - n);
-}
-
-static thread_local serializer instance = serializer();
-
 struct StringHash {
   size_t operator()(string *const &k) const {
     return std::hash<std::string>{}(std::string(k->data, len(k)));
@@ -30,21 +24,38 @@ struct StringEq {
   }
 };
 
-static thread_local std::vector<block *> boundVariables;
-static thread_local std::unordered_map<
-    string *, std::string, StringHash, StringEq>
-    varNames;
-static thread_local std::set<std::string> usedVarNames;
-static thread_local uint64_t varCounter = 0;
+struct serialization_state {
+  serialization_state()
+      : instance()
+      , boundVariables{}
+      , varNames{}
+      , usedVarNames{}
+      , varCounter(0) { }
+
+  // We never want to copy the state; it should only ever get passed around by
+  // reference.
+  serialization_state(serialization_state const &) = delete;
+
+  serializer instance;
+  std::vector<block *> boundVariables;
+  std::unordered_map<string *, std::string, StringHash, StringEq> varNames;
+  std::set<std::string> usedVarNames;
+  uint64_t varCounter;
+};
+
+static std::string drop_back(std::string s, int n) {
+  return s.substr(0, s.size() - n);
+}
 
 void serializeConfigurationInternal(
-    writer *file, block *subject, const char *sort, bool isVar);
+    writer *file, block *subject, const char *sort, bool isVar, void *state);
 
 /**
  * Emit a symbol of the form ctor{}(...); this should be preceded by the
  * appropriate pattern arguments in the buffer.
  */
-static void emitSymbol(char const *name, uint64_t arity = 0) {
+static void
+emitSymbol(serializer &instance, char const *name, uint64_t arity = 0) {
   instance.emit(header_byte<KORESymbol>);
   instance.emit_length(0);
   instance.emit_string(drop_back(name, 2));
@@ -56,7 +67,7 @@ static void emitSymbol(char const *name, uint64_t arity = 0) {
 /**
  * Emit a 0-argument sort of the form Sort{}
  */
-static void emitConstantSort(char const *name) {
+static void emitConstantSort(serializer &instance, char const *name) {
   instance.emit(header_byte<KORECompositeSort>);
   instance.emit_length(0);
   instance.emit_string(name);
@@ -65,7 +76,8 @@ static void emitConstantSort(char const *name) {
 /**
  * Emit a symbol of the form \dv{Sort}("string")
  */
-static void emitToken(char const *sort, char const *string, int len = 0) {
+static void emitToken(
+    serializer &instance, char const *sort, char const *string, int len = 0) {
   instance.emit(header_byte<KOREStringPattern>);
 
   // Allow the length of the token to be passed in explicitly to handle the
@@ -78,7 +90,7 @@ static void emitToken(char const *sort, char const *string, int len = 0) {
     instance.emit_string(std::string(string, len));
   }
 
-  emitConstantSort(drop_back(sort, 2).c_str());
+  emitConstantSort(instance, drop_back(sort, 2).c_str());
 
   instance.emit(header_byte<KORESymbol>);
   instance.emit_length(1);
@@ -90,83 +102,103 @@ static void emitToken(char const *sort, char const *string, int len = 0) {
 
 void serializeMap(
     writer *file, map *map, const char *unit, const char *element,
-    const char *concat) {
+    const char *concat, void *state) {
+  auto &instance = static_cast<serialization_state *>(state)->instance;
+
   size_t size = map->size();
   if (size == 0) {
-    emitSymbol(unit);
+    emitSymbol(instance, unit);
     return;
   }
 
   for (auto iter = map->begin(); iter != map->end(); ++iter) {
-    serializeConfigurationInternal(file, iter->first, "SortKItem{}", false);
-    serializeConfigurationInternal(file, iter->second, "SortKItem{}", false);
-    emitSymbol(element, 2);
+    serializeConfigurationInternal(
+        file, iter->first, "SortKItem{}", false, state);
+    serializeConfigurationInternal(
+        file, iter->second, "SortKItem{}", false, state);
+    emitSymbol(instance, element, 2);
 
     if (iter != map->begin()) {
-      emitSymbol(concat, 2);
+      emitSymbol(instance, concat, 2);
     }
   }
 }
 
 void serializeList(
     writer *file, list *list, const char *unit, const char *element,
-    const char *concat) {
+    const char *concat, void *state) {
+  auto &instance = static_cast<serialization_state *>(state)->instance;
+
   size_t size = list->size();
   if (size == 0) {
-    emitSymbol(unit);
+    emitSymbol(instance, unit);
     return;
   }
 
   for (auto iter = list->begin(); iter != list->end(); ++iter) {
-    serializeConfigurationInternal(file, *iter, "SortKItem{}", false);
-    emitSymbol(element, 1);
+    serializeConfigurationInternal(file, *iter, "SortKItem{}", false, state);
+    emitSymbol(instance, element, 1);
 
     if (iter != list->begin()) {
-      emitSymbol(concat, 2);
+      emitSymbol(instance, concat, 2);
     }
   }
 }
 
 void serializeSet(
     writer *file, set *set, const char *unit, const char *element,
-    const char *concat) {
+    const char *concat, void *state) {
+  auto &instance = static_cast<serialization_state *>(state)->instance;
+
   size_t size = set->size();
   if (size == 0) {
-    emitSymbol(unit);
+    emitSymbol(instance, unit);
     return;
   }
 
   for (auto iter = set->begin(); iter != set->end(); ++iter) {
-    serializeConfigurationInternal(file, *iter, "SortKItem{}", false);
-    emitSymbol(element, 1);
+    serializeConfigurationInternal(file, *iter, "SortKItem{}", false, state);
+    emitSymbol(instance, element, 1);
 
     if (iter != set->begin()) {
-      emitSymbol(concat, 2);
+      emitSymbol(instance, concat, 2);
     }
   }
 }
 
-void serializeInt(writer *file, mpz_t i, const char *sort) {
+void serializeInt(writer *file, mpz_t i, const char *sort, void *state) {
+  auto &instance = static_cast<serialization_state *>(state)->instance;
+
   auto str = intToString(i);
-  emitToken(sort, str.c_str());
+  emitToken(instance, sort, str.c_str());
 }
 
-void serializeFloat(writer *file, floating *f, const char *sort) {
+void serializeFloat(writer *file, floating *f, const char *sort, void *state) {
+  auto &instance = static_cast<serialization_state *>(state)->instance;
+
   std::string str = floatToString(f);
-  emitToken(sort, str.c_str());
+  emitToken(instance, sort, str.c_str());
 }
 
-void serializeBool(writer *file, bool b, const char *sort) {
+void serializeBool(writer *file, bool b, const char *sort, void *state) {
+  auto &instance = static_cast<serialization_state *>(state)->instance;
+
   const char *str = b ? "true" : "false";
-  emitToken(sort, str);
+  emitToken(instance, sort, str);
 }
 
-void serializeStringBuffer(writer *file, stringbuffer *b, const char *sort) {
+void serializeStringBuffer(
+    writer *file, stringbuffer *b, const char *sort, void *state) {
+  auto &instance = static_cast<serialization_state *>(state)->instance;
+
   std::string str(b->contents->data, b->strlen);
-  emitToken(sort, str.c_str());
+  emitToken(instance, sort, str.c_str());
 }
 
-void serializeMInt(writer *file, size_t *i, size_t bits, const char *sort) {
+void serializeMInt(
+    writer *file, size_t *i, size_t bits, const char *sort, void *state) {
+  auto &instance = static_cast<serialization_state *>(state)->instance;
+
   auto fmt = "%sp%zd";
   auto str = std::string{};
 
@@ -181,10 +213,10 @@ void serializeMInt(writer *file, size_t *i, size_t bits, const char *sort) {
   auto buffer = std::make_unique<char[]>(buf_len + 1);
 
   snprintf(buffer.get(), buf_len + 1, fmt, str.c_str(), bits);
-  emitToken(sort, buffer.get());
+  emitToken(instance, sort, buffer.get());
 }
 
-void serializeComma(writer *file) { }
+void serializeComma(writer *file, void *state) { }
 
 static std::pair<std::string, std::vector<sptr<KORESort>>>
 cached_symbol_sort_list(std::string const &symbol) {
@@ -199,7 +231,10 @@ cached_symbol_sort_list(std::string const &symbol) {
 }
 
 void serializeConfigurationInternal(
-    writer *file, block *subject, const char *sort, bool isVar) {
+    writer *file, block *subject, const char *sort, bool isVar,
+    void *state_ptr) {
+  auto &state = *static_cast<serialization_state *>(state_ptr);
+
   uint8_t isConstant = ((uintptr_t)subject) & 3;
 
   if (isConstant) {
@@ -207,12 +242,13 @@ void serializeConfigurationInternal(
 
     if (isConstant == 3) {
       // bound variable
-      printConfigurationInternal(
-          file, boundVariables[boundVariables.size() - 1 - tag], sort, true);
+      serializeConfigurationInternal(
+          file, state.boundVariables[state.boundVariables.size() - 1 - tag],
+          sort, true, state_ptr);
       return;
     }
 
-    emitSymbol(getSymbolNameForTag(tag));
+    emitSymbol(state.instance, getSymbolNameForTag(tag));
     return;
   }
 
@@ -221,20 +257,20 @@ void serializeConfigurationInternal(
     string *str = (string *)subject;
     size_t len = len(subject);
 
-    if (isVar && !varNames.count(str)) {
+    if (isVar && !state.varNames.count(str)) {
       std::string stdStr = std::string(str->data, len(str));
       std::string suffix = "";
-      while (usedVarNames.count(stdStr + suffix)) {
-        suffix = std::to_string(varCounter++);
+      while (state.usedVarNames.count(stdStr + suffix)) {
+        suffix = std::to_string(state.varCounter++);
       }
       stdStr = stdStr + suffix;
-      emitToken(sort, suffix.c_str());
-      usedVarNames.insert(stdStr);
-      varNames[str] = suffix;
+      emitToken(state.instance, sort, suffix.c_str());
+      state.usedVarNames.insert(stdStr);
+      state.varNames[str] = suffix;
     } else if (isVar) {
-      emitToken(sort, varNames[str].c_str());
+      emitToken(state.instance, sort, state.varNames[str].c_str());
     } else {
-      emitToken(sort, str->data, len);
+      emitToken(state.instance, sort, str->data, len);
     }
 
     return;
@@ -243,7 +279,7 @@ void serializeConfigurationInternal(
   uint32_t tag = tag_hdr(subject->h.hdr);
   bool isBinder = isSymbolABinder(tag);
   if (isBinder) {
-    boundVariables.push_back(
+    state.boundVariables.push_back(
         *(block **)(((char *)subject) + sizeof(blockheader)));
   }
 
@@ -259,7 +295,7 @@ void serializeConfigurationInternal(
          serializeMInt,
          serializeComma};
 
-  visitChildren(subject, file, &callbacks);
+  visitChildren(subject, file, &callbacks, state_ptr);
 
   auto symbol = getSymbolNameForTag(tag);
   auto symbolStr = std::string(symbol);
@@ -271,23 +307,23 @@ void serializeConfigurationInternal(
       abort();
     }
 
-    sorts[0]->serialize_to(instance);
-    emitConstantSort(drop_back(sort, 2).c_str());
+    sorts[0]->serialize_to(state.instance);
+    emitConstantSort(state.instance, drop_back(sort, 2).c_str());
   } else {
     for (auto const &s : sorts) {
-      s->serialize_to(instance);
+      s->serialize_to(state.instance);
     }
   }
 
-  instance.emit(header_byte<KORESymbol>);
-  instance.emit_length(sorts.size());
-  instance.emit_string(name);
+  state.instance.emit(header_byte<KORESymbol>);
+  state.instance.emit_length(sorts.size());
+  state.instance.emit_string(name);
 
-  instance.emit(header_byte<KORECompositePattern>);
-  instance.emit_length(getSymbolArity(tag));
+  state.instance.emit(header_byte<KORECompositePattern>);
+  state.instance.emit_length(getSymbolArity(tag));
 
   if (isBinder) {
-    boundVariables.pop_back();
+    state.boundVariables.pop_back();
   }
 }
 
@@ -303,16 +339,15 @@ void serializeConfigurationToFile(const char *filename, block *subject) {
 
 void serializeConfiguration(
     block *subject, char const *sort, char **data_out, size_t *size_out) {
-  instance.reset();
-  boundVariables.clear();
-  varCounter = 0;
+  auto state = serialization_state();
 
   writer w = {nullptr, nullptr};
-  serializeConfigurationInternal(&w, subject, sort, false);
+  serializeConfigurationInternal(&w, subject, sort, false, &state);
 
-  varNames.clear();
-  usedVarNames.clear();
+  auto size = state.instance.data().size();
+  auto buf = static_cast<char *>(malloc(size));
+  std::memcpy(buf, state.instance.data().data(), size);
 
-  *data_out = (char *)instance.data().data();
-  *size_out = instance.data().size();
+  *data_out = buf;
+  *size_out = size;
 }
