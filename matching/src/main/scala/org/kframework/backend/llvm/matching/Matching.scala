@@ -37,7 +37,7 @@ object Matching {
         dt.serializeToYaml(new File(outputFolder, filename))
       }
     }
-    val funcAxioms = Parser.parseFunctionAxioms(allAxioms)
+    val funcAxioms = Parser.parseFunctionAxioms(allAxioms, false)
     val dts = symlib.functions.map(f => {
       if (logging) {
         System.out.println("Compiling " + f)
