@@ -93,6 +93,11 @@ while [[ $# -gt 0 ]]; do
       python_cmd="$2"
       shift; shift
       ;;
+    -g)
+      debug=true
+      kompile_clang_flags+=("-g")
+      shift
+      ;;
     --)
       reading_clang_args=true
       shift
