@@ -694,7 +694,7 @@ class KStart(gdb.Command):
 
     def invoke(self, arg, from_tty):
         gdb.execute("start", from_tty)
-        gdb.execute("advance definition.kore:step", from_tty)
+        gdb.execute("advance definition.kore:k_step", from_tty)
 
 start = KStart()
 
@@ -711,7 +711,7 @@ class KStep(gdb.Command):
         if arg != "":
             times = int(arg)
         if times > 0:
-            bp = gdb.Breakpoint("definition.kore:step", internal=True, temporary=True)
+            bp = gdb.Breakpoint("definition.kore:k_step", internal=True, temporary=True)
             bp.ignore_count = times-1
             gdb.execute("c", from_tty)
         else:

@@ -93,11 +93,6 @@ while [[ $# -gt 0 ]]; do
       python_cmd="$2"
       shift; shift
       ;;
-    -g)
-      debug=true
-      kompile_clang_flags+=("-g")
-      shift
-      ;;
     --)
       reading_clang_args=true
       shift
@@ -148,7 +143,7 @@ if [ "$compile" = "default" ]; then
   main="${positional_args[2]}"
   debug=0
 
-  for arg in "$@"; do
+  for arg in "${clang_args[@]}"; do
     case "$arg" in
       -g)
         debug=1
