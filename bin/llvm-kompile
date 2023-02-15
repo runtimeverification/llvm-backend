@@ -143,7 +143,7 @@ if [ "$compile" = "default" ]; then
   main="${positional_args[2]}"
   debug=0
 
-  for arg in "$@"; do
+  for arg in "${clang_args[@]}"; do
     case "$arg" in
       -g)
         debug=1
