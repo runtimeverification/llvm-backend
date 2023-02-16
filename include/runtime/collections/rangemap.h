@@ -298,6 +298,9 @@ public:
     treemap_ = m.treemap_;
   }
 
+  // Getter for the rb-tree underlying this rangemap.
+  rb_tree::RBTree<Range<T>, V> treemap() const { return treemap_; }
+
   // Return the number of key ranges in the map.
   size_t size() const { return treemap_.size(); }
 
@@ -508,6 +511,17 @@ RangeMap<T, V> inserted(RangeMap<T, V> const &m, I it, I end) {
   V val = it->second;
   auto m1 = m.inserted(key, val);
   return inserted(m1, ++it, end);
+}
+
+// Apply function f to all elements of rangemap m.
+// Function f must accept two arguments of types T, corresponding to the start
+// and end of a range, and one of type V correspondong to the mapped value.
+template <class T, class V, class F>
+void for_each(RangeMap<T, V> const &m, F &&f) {
+  for_each(
+    m.treemap(), [&f](Range<T> const &x, V const &v) {
+      std::invoke(f, x.start(), x.end(), v);
+    });
 }
 
 } // namespace rng_map
