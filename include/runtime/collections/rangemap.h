@@ -536,7 +536,7 @@ public:
     return t.root_data();
   }
 
-  std::pair<Range<T>, V> const &operator->() const {
+  std::pair<Range<T>, V> const *operator->() const {
     rb_tree::RBTree<Range<T>, V> const &t = stack_.top();
     return &t.root_data();
   }
