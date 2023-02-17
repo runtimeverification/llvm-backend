@@ -102,26 +102,19 @@ bool hook_RANGEMAP_inclusion(SortRangeMap m1, SortRangeMap m2) {
 }
 
 bool hook_RANGEMAP_eq(SortRangeMap m1, SortRangeMap m2) {
-  std::vector<std::pair<rng_map::Range<KElem>, KElem>> rm1;
-  rng_map::for_each(*m1, [&rm1](KElem const &s, KElem const &e, KElem const &v) {
-    rm1.emplace_back(std::make_pair(rng_map::Range<KElem>(s, e), v));
-  });
-  auto it1 = rm1.begin();
-  bool equals = true;
-  rng_map::for_each(*m2, [&rm1, &it1, &equals](KElem const &s2, KElem const &e2, KElem const &v2) {
-    if (it1 == rm1.end()) {
-      equals = false;
-    } else {
-      KElem s1 = it1->first.start();
-      KElem e1 = it1->first.end();
-      KElem v1 = it1->second;
-      if (s1 != s2 || e1 != e2 || v1 != v2) {
-        equals = false;
-      }
-      ++it1;
+  rng_map::RangeMapIterator<KElem, KElem> it1 = rng_map::RangeMapIterator<KElem, KElem>(*m1);
+  rng_map::RangeMapIterator<KElem, KElem> it2 = rng_map::RangeMapIterator<KElem, KElem>(*m2);
+  for (; it1.has_next() && it2.has_next(); ++it1, ++it2) {
+    std::pair<rng_map::Range<KElem>, KElem> const &r1 = *it1;
+    std::pair<rng_map::Range<KElem>, KElem> const &r2 = *it2;
+    if (r1 != r2) {
+      return false;
     }
-  });
-  return (it1 == rm1.end()) && equals;
+  }
+  if (it1.has_next() || it2.has_next()) {
+    return false;
+  }
+  return true;
 }
 
 }

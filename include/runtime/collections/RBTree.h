@@ -73,14 +73,12 @@ class RBTree {
         std::shared_ptr<const Node> rgt)
         : Node(c)
         , lft_(lft)
-        , key_(key)
-        , val_(val)
+        , data_(key, val)
         , rgt_(rgt) {
       this->s_ = 1 + lft_->s_ + rgt_->s_;
     }
     std::shared_ptr<const Node> lft_; // Left child
-    T key_; // Node key
-    V val_; // Node value
+    std::pair<T, V> data_; // data_.first: Node key. data_.second: Node value.
     std::shared_ptr<const Node> rgt_; // Right child
 
     virtual bool is_leaf() const override { return false; }
@@ -140,14 +138,21 @@ public:
   T const &root_key() const {
     assert(!empty());
     const InternalNode *r = static_cast<const InternalNode *>(root_.get());
-    return r->key_;
+    return r->data_.first;
   }
 
   // Return the value stored in the root Node of this tree.
   V const &root_val() const {
     assert(!empty());
     const InternalNode *r = static_cast<const InternalNode *>(root_.get());
-    return r->val_;
+    return r->data_.second;
+  }
+
+  // Return the data (key-value pair) stored in the root Node of this tree.
+  std::pair<T, V> const &root_data() const {
+    assert(!empty());
+    const InternalNode *r = static_cast<const InternalNode *>(root_.get());
+    return r->data_;
   }
 
   // Return the left subtree of this tree.

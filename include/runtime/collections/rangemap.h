@@ -8,6 +8,7 @@
 #include <iostream>
 #include <optional>
 #include <stdexcept>
+#include <stack>
 #include <vector>
 
 namespace rng_map {
@@ -496,6 +497,54 @@ public:
           }
         });
     return (it == intersect.end()) && equals;
+  }
+};
+
+// Iterator over objects of class RangeMap.
+// We do not need the full flexibility offered by the std interface.
+// Instead we only need to iterate. Therefore, this iterator provides
+// prefix increment operator, dereference operator, and a function that tests
+// if there are more elements instead of an equality operator.
+template <class T, class V>
+class RangeMapIterator {
+
+private:
+  std::stack<rb_tree::RBTree<Range<T>, V>> stack_;
+
+  void update_stack_state(rb_tree::RBTree<Range<T>, V> const &t) {
+    rb_tree::RBTree<Range<T>, V> tmp = t;
+    while (!tmp.empty()) {
+      stack_.push(tmp);
+      tmp = tmp.left();
+    }
+  }
+public:
+  // Create an iterator over rangemap m.
+  RangeMapIterator(RangeMap<T, V> m) {
+    update_stack_state(m.treemap());
+  }
+
+  // Prefix increment operator.
+  void operator ++() {
+    rb_tree::RBTree<Range<T>, V> const &t = stack_.top();
+    stack_.pop();
+    update_stack_state(t.right());
+  }
+
+  // Dereference operator.
+  std::pair<Range<T>, V> const &operator*() const {
+    rb_tree::RBTree<Range<T>, V> const &t = stack_.top();
+    return t.root_data();
+  }
+
+  std::pair<Range<T>, V> const &operator->() const {
+    rb_tree::RBTree<Range<T>, V> const &t = stack_.top();
+    return &t.root_data();
+  }
+
+  // Return true if there are more elemetns in the underlying rangemap.
+  bool has_next() const {
+    return !stack_.empty();
   }
 };
 
