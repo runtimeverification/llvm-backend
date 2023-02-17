@@ -7,8 +7,8 @@
 #include <cassert>
 #include <iostream>
 #include <optional>
-#include <stdexcept>
 #include <stack>
+#include <stdexcept>
 #include <vector>
 
 namespace rng_map {
@@ -518,14 +518,13 @@ private:
       tmp = tmp.left();
     }
   }
+
 public:
   // Create an iterator over rangemap m.
-  RangeMapIterator(RangeMap<T, V> m) {
-    update_stack_state(m.treemap());
-  }
+  RangeMapIterator(RangeMap<T, V> m) { update_stack_state(m.treemap()); }
 
   // Prefix increment operator.
-  void operator ++() {
+  void operator++() {
     rb_tree::RBTree<Range<T>, V> const &t = stack_.top();
     stack_.pop();
     update_stack_state(t.right());
@@ -543,9 +542,7 @@ public:
   }
 
   // Return true if there are more elemetns in the underlying rangemap.
-  bool has_next() const {
-    return !stack_.empty();
-  }
+  bool has_next() const { return !stack_.empty(); }
 };
 
 // Return a rangemap with all elements in m, and then also from the container
@@ -567,10 +564,9 @@ RangeMap<T, V> inserted(RangeMap<T, V> const &m, I it, I end) {
 // and end of a range, and one of type V correspondong to the mapped value.
 template <class T, class V, class F>
 void for_each(RangeMap<T, V> const &m, F &&f) {
-  for_each(
-    m.treemap(), [&f](Range<T> const &x, V const &v) {
-      std::invoke(f, x.start(), x.end(), v);
-    });
+  for_each(m.treemap(), [&f](Range<T> const &x, V const &v) {
+    std::invoke(f, x.start(), x.end(), v);
+  });
 }
 
 } // namespace rng_map

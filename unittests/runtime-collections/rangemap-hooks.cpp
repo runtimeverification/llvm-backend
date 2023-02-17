@@ -43,7 +43,7 @@ uint32_t getTagForSymbolName(const char *symbolName) {
 }
 
 struct blockheader getBlockHeaderForSymbol(uint32_t tag) {
-  return { (uint64_t)tag };
+  return {(uint64_t)tag};
 }
 }
 
@@ -90,7 +90,8 @@ BOOST_AUTO_TEST_CASE(rangemap_hook_find_range) {
   auto result = hook_RANGEMAP_find_range(&map, RDUMMY0);
   BOOST_CHECK_EQUAL((block *)result->children[0], RDUMMY0);
   BOOST_CHECK_EQUAL((block *)result->children[1], RDUMMY1);
-  BOOST_CHECK_THROW(hook_RANGEMAP_find_range(&map, RDUMMY1), std::invalid_argument);
+  BOOST_CHECK_THROW(
+      hook_RANGEMAP_find_range(&map, RDUMMY1), std::invalid_argument);
 }
 
 BOOST_AUTO_TEST_CASE(rangemap_hook_update) {

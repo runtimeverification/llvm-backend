@@ -61,7 +61,8 @@ struct range {
 static struct blockheader range_header() {
   static struct blockheader hdr = {(uint64_t)-1};
   if (hdr.hdr == -1) {
-    hdr = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("range{SortKItem{}, SortKItem{}}"));
+    hdr = getBlockHeaderForSymbol(
+        (uint64_t)getTagForSymbolName("range{SortKItem{}, SortKItem{}}"));
   }
   return hdr;
 }
@@ -102,8 +103,10 @@ bool hook_RANGEMAP_inclusion(SortRangeMap m1, SortRangeMap m2) {
 }
 
 bool hook_RANGEMAP_eq(SortRangeMap m1, SortRangeMap m2) {
-  rng_map::RangeMapIterator<KElem, KElem> it1 = rng_map::RangeMapIterator<KElem, KElem>(*m1);
-  rng_map::RangeMapIterator<KElem, KElem> it2 = rng_map::RangeMapIterator<KElem, KElem>(*m2);
+  rng_map::RangeMapIterator<KElem, KElem> it1
+      = rng_map::RangeMapIterator<KElem, KElem>(*m1);
+  rng_map::RangeMapIterator<KElem, KElem> it2
+      = rng_map::RangeMapIterator<KElem, KElem>(*m2);
   for (; it1.has_next() && it2.has_next(); ++it1, ++it2) {
     std::pair<rng_map::Range<KElem>, KElem> const &r1 = *it1;
     std::pair<rng_map::Range<KElem>, KElem> const &r2 = *it2;
@@ -116,5 +119,4 @@ bool hook_RANGEMAP_eq(SortRangeMap m1, SortRangeMap m2) {
   }
   return true;
 }
-
 }
