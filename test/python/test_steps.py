@@ -1,6 +1,6 @@
 # RUN: mkdir -p %t
 # RUN: export IN=$(realpath Inputs/test_steps.kore)
-# RUN: cd %t && %kompile "$IN" python --python %py-interpreter
+# RUN: cd %t && %kompile "$IN" python --python %py-interpreter --python-output-dir .
 # RUN: KLLVM_DEFINITION=%t %python -u %s
 
 from test_bindings import kllvm

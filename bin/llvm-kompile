@@ -59,6 +59,7 @@ reading_clang_args=false
 kompile_clang_flags=()
 clang_args=()
 python_cmd=python3
+python_output_dir=""
 
 verbose=false
 save_temps=false
@@ -93,6 +94,10 @@ while [[ $# -gt 0 ]]; do
       python_cmd="$2"
       shift; shift
       ;;
+    --python-output-dir)
+      python_output_dir="$2"
+      shift; shift
+      ;;
     --)
       reading_clang_args=true
       shift
@@ -117,6 +122,7 @@ if [[ "${#positional_args[@]}" -lt 1 || "${#positional_args[@]}" -gt 3 ]]; then
   usage
   exit 1
 fi
+
 
 mod="$(mktemp tmp.XXXXXXXXXX)"
 modopt_tmp="$(mktemp tmp.XXXXXXXXXX)"
@@ -179,7 +185,10 @@ if [[ "$OSTYPE" != "darwin"* ]]; then
   kompile_clang_flags+=("-fuse-ld=lld")
 fi
 
-kompile_clang_flags+=("--definition" "$(dirname "${definition}")")
+if [[ "${python_output_dir}" == "" ]]; then
+  python_output_dir="$(dirname ${definition})"
+fi
+kompile_clang_flags+=("--python-output-dir" "${python_output_dir}")
 
 run "$(dirname "$0")"/llvm-kompile-clang          \
   "$modopt" "$main"                               \

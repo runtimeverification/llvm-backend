@@ -13,7 +13,7 @@ output=false
 output_file="definition.o"
 compile=true
 python_cmd=python3
-definition_dir="."
+python_output_dir="."
 
 python_extension() {
   "$1" <<HERE
@@ -58,9 +58,9 @@ while [[ $# -gt 0 ]]; do
       python_cmd="$2"
       shift; shift
       ;;
-    --definition)
+    --python-output-dir)
       keep_arg=false
-      definition_dir="$2";
+      python_output_dir="$2";
       shift; shift;
       ;;
     *)
@@ -181,7 +181,7 @@ elif [[ "$main" =~ "python" ]]; then
   # If we didn't pass a filename explicitly as output, then we enforce the
   # blessed filename format that Python can understand.
   if [ "$output_file" = "definition.o" ]; then
-    flags+=("-o" "${definition_dir}/_kllvm${suffix}$(python_extension ${python_cmd})")
+    flags+=("-o" "${python_output_dir}/_kllvm${suffix}$(python_extension ${python_cmd})")
   fi
 elif [ "$main" = "c" ]; then
   # Avoid jemalloc for similar reasons as Python; we don't know who is loading
