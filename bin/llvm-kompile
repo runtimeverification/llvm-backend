@@ -8,13 +8,16 @@ Usage: $0 <definition.kore> <dt_dir> <object type> [options] [clang flags]
    or: $0 <interpreter.o>            <object type> [options] [clang flags]
 
 Options:
-  -h, --help      Print this message and exit.
-  -v, --verbose   Print commands executed to stderr.
-  --save-temps    Do not delete temporary files on exit.
-  --bindings-path Print the absolute path of the compiled Python bindings for
-                  the LLVM backend, then exit.
-  --python PATH   The path to a Python interpreter with Pybind installed. Only
-                  meaningful in "python" or "pythonast" mode.
+  -h, --help                Print this message and exit.
+  -v, --verbose             Print commands executed to stderr.
+  --save-temps              Do not delete temporary files on exit.
+  --bindings-path           Print the absolute path of the compiled Python bindings for
+                            the LLVM backend, then exit.
+  --python PATH             The path to a Python interpreter with Pybind installed. Only
+                            meaningful in "python" or "pythonast" mode.
+  --python-output-dir PATH  Output directory to place automatically-named Python
+                            modules. Only meaningful in "python" or "pythonast"
+                            mode.
 
 Any option not listed above will be passed through to clang; use '--' to
 separate additional positional arguments to clang from those for $0.
@@ -59,6 +62,7 @@ reading_clang_args=false
 kompile_clang_flags=()
 clang_args=()
 python_cmd=python3
+python_output_dir=""
 
 verbose=false
 save_temps=false
@@ -93,6 +97,10 @@ while [[ $# -gt 0 ]]; do
       python_cmd="$2"
       shift; shift
       ;;
+    --python-output-dir)
+      python_output_dir="$2"
+      shift; shift
+      ;;
     --)
       reading_clang_args=true
       shift
@@ -117,6 +125,7 @@ if [[ "${#positional_args[@]}" -lt 1 || "${#positional_args[@]}" -gt 3 ]]; then
   usage
   exit 1
 fi
+
 
 mod="$(mktemp tmp.XXXXXXXXXX)"
 modopt_tmp="$(mktemp tmp.XXXXXXXXXX)"
@@ -179,7 +188,12 @@ if [[ "$OSTYPE" != "darwin"* ]]; then
   kompile_clang_flags+=("-fuse-ld=lld")
 fi
 
+if [[ "${python_output_dir}" == "" ]]; then
+  python_output_dir="$(dirname "${definition}")"
+fi
+kompile_clang_flags+=("--python-output-dir" "${python_output_dir}")
+
 run "$(dirname "$0")"/llvm-kompile-clang          \
   "$modopt" "$main"                               \
   @LLVM_KOMPILE_LTO@ -fno-stack-protector         \
-  "${kompile_clang_flags[@]}" "${clang_args[@]}"
+  "${kompile_clang_flags[@]}" "${clang_args[@]}"  \
