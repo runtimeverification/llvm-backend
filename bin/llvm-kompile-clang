@@ -170,7 +170,9 @@ elif [[ "$main" =~ "python" ]]; then
   # pymalloc implementation that Python expects you to use.
   all_libraries=("${libraries[@]}" "-lgmp" "-lmpfr" "-lpthread" "-ldl" "-lffi")
   flags+=("-fPIC" "-shared" "-I${INCDIR}" "-std=c++17")
-  flags+=($(${python_cmd} -m pybind11 --includes))
+
+  read -r -a python_include_flags <<< "$("${python_cmd}" -m pybind11 --includes)"
+  flags+=("${python_include_flags[@]}")
 
   if [ "$main" = "python" ]; then
     suffix="_runtime"
@@ -181,7 +183,7 @@ elif [[ "$main" =~ "python" ]]; then
   # If we didn't pass a filename explicitly as output, then we enforce the
   # blessed filename format that Python can understand.
   if [ "$output_file" = "definition.o" ]; then
-    flags+=("-o" "${python_output_dir}/_kllvm${suffix}$(python_extension ${python_cmd})")
+    flags+=("-o" "${python_output_dir}/_kllvm${suffix}$(python_extension "${python_cmd}")")
   fi
 elif [ "$main" = "c" ]; then
   # Avoid jemalloc for similar reasons as Python; we don't know who is loading

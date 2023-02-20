@@ -186,7 +186,7 @@ if [[ "$OSTYPE" != "darwin"* ]]; then
 fi
 
 if [[ "${python_output_dir}" == "" ]]; then
-  python_output_dir="$(dirname ${definition})"
+  python_output_dir="$(dirname "${definition}")"
 fi
 kompile_clang_flags+=("--python-output-dir" "${python_output_dir}")
 
