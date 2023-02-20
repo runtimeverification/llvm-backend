@@ -8,13 +8,16 @@ Usage: $0 <definition.kore> <dt_dir> <object type> [options] [clang flags]
    or: $0 <interpreter.o>            <object type> [options] [clang flags]
 
 Options:
-  -h, --help      Print this message and exit.
-  -v, --verbose   Print commands executed to stderr.
-  --save-temps    Do not delete temporary files on exit.
-  --bindings-path Print the absolute path of the compiled Python bindings for
-                  the LLVM backend, then exit.
-  --python PATH   The path to a Python interpreter with Pybind installed. Only
-                  meaningful in "python" or "pythonast" mode.
+  -h, --help                Print this message and exit.
+  -v, --verbose             Print commands executed to stderr.
+  --save-temps              Do not delete temporary files on exit.
+  --bindings-path           Print the absolute path of the compiled Python bindings for
+                            the LLVM backend, then exit.
+  --python PATH             The path to a Python interpreter with Pybind installed. Only
+                            meaningful in "python" or "pythonast" mode.
+  --python-output-dir PATH  Output directory to place automatically-named Python
+                            modules. Only meaningful in "python" or "pythonast"
+                            mode.
 
 Any option not listed above will be passed through to clang; use '--' to
 separate additional positional arguments to clang from those for $0.
