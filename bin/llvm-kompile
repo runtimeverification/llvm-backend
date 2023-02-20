@@ -179,7 +179,9 @@ if [[ "$OSTYPE" != "darwin"* ]]; then
   kompile_clang_flags+=("-fuse-ld=lld")
 fi
 
+kompile_clang_flags+=("--definition" "$(dirname "${definition}")")
+
 run "$(dirname "$0")"/llvm-kompile-clang          \
   "$modopt" "$main"                               \
   @LLVM_KOMPILE_LTO@ -fno-stack-protector         \
-  "${kompile_clang_flags[@]}" "${clang_args[@]}"
+  "${kompile_clang_flags[@]}" "${clang_args[@]}"  \
