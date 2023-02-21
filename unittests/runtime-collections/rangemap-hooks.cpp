@@ -25,10 +25,14 @@ size_t hook_RANGEMAP_size_long(rangemap *m);
 mpz_ptr hook_RANGEMAP_size(rangemap *m);
 bool hook_RANGEMAP_inclusion(rangemap *m1, rangemap *m2);
 rangemap hook_RANGEMAP_updateAll(rangemap *m1, rangemap *m2);
+rangemap hook_RANGEMAP_removeAll(rangemap *map, set *set);
 bool hook_RANGEMAP_eq(rangemap *m1, rangemap *m2);
 
+set hook_SET_element(block *);
 bool hook_SET_in(block *, set *);
+set hook_SET_unit(void);
 bool hook_LIST_in(block *, list *);
+
 block *hook_LIST_get_long(list *, size_t);
 block RD0 = {{0}};
 block *RDUMMY0 = &RD0;
@@ -211,6 +215,22 @@ BOOST_AUTO_TEST_CASE(rangemap_hook_update_all) {
   auto result2 = hook_RANGEMAP_find_range(&map, RDUMMY0);
   BOOST_CHECK_EQUAL((block *)result2->children[0], RDUMMY0);
   BOOST_CHECK_EQUAL((block *)result2->children[1], RDUMMY2);
+}
+
+BOOST_AUTO_TEST_CASE(rangemap_hook_remove_all) {
+  auto map1 = hook_RANGEMAP_element(RDUMMY0, RDUMMY1, RDUMMY0);
+  auto set = hook_SET_unit();
+  auto map2 = hook_RANGEMAP_removeAll(&map1, &set);
+  auto result = hook_RANGEMAP_size_long(&map2);
+  BOOST_CHECK_EQUAL(result, 1);
+  range *ptr = (range *)koreAlloc(sizeof(range));
+  ptr->h = range_header();
+  ptr->start = RDUMMY0;
+  ptr->end = RDUMMY1;
+  auto elem = hook_SET_element((SortRange)ptr);
+  map2 = hook_RANGEMAP_removeAll(&map1, &elem);
+  result = hook_RANGEMAP_size_long(&map2);
+  BOOST_CHECK_EQUAL(result, 0);
 }
 
 BOOST_AUTO_TEST_CASE(rangemap_hook_eq) {
