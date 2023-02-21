@@ -8,7 +8,6 @@ rangemap
 hook_RANGEMAP_element(block *keyrangestart, block *keyrangeend, block *value);
 rangemap hook_RANGEMAP_concat(rangemap *m1, rangemap *m2);
 rangemap hook_RANGEMAP_unit(void);
-//block *hook_RANGEMAP_lookup_null(rangemap *m, block *key);
 block *hook_RANGEMAP_lookup(rangemap *m, block *key);
 block *hook_RANGEMAP_lookupOrDefault(rangemap *m, block *key, block *_default);
 block *hook_RANGEMAP_find_range(rangemap *m, block *key);
@@ -17,12 +16,20 @@ rangemap hook_RANGEMAP_update(
 rangemap
 hook_RANGEMAP_remove(rangemap *m, block *keyRangeStart, block *keyRangeEnd);
 rangemap hook_RANGEMAP_difference(rangemap *m1, rangemap *m2);
+set hook_RANGEMAP_keys(rangemap *m);
+list hook_RANGEMAP_keys_list(rangemap *m);
 bool hook_RANGEMAP_in_keys(block *key, rangemap *m);
-bool hook_RANGEMAP_inclusion(rangemap *m1, rangemap *m2);
+list hook_RANGEMAP_values(rangemap *m);
+block *hook_RANGEMAP_choice(rangemap *m);
 size_t hook_RANGEMAP_size_long(rangemap *m);
 mpz_ptr hook_RANGEMAP_size(rangemap *m);
+bool hook_RANGEMAP_inclusion(rangemap *m1, rangemap *m2);
+rangemap hook_RANGEMAP_updateAll(rangemap *m1, rangemap *m2);
 bool hook_RANGEMAP_eq(rangemap *m1, rangemap *m2);
 
+bool hook_SET_in(block *, set *);
+bool hook_LIST_in(block *, list *);
+block *hook_LIST_get_long(list *, size_t);
 block RD0 = {{0}};
 block *RDUMMY0 = &RD0;
 block RD1 = {{1}};
@@ -44,6 +51,20 @@ uint32_t getTagForSymbolName(const char *symbolName) {
 
 struct blockheader getBlockHeaderForSymbol(uint32_t tag) {
   return {(uint64_t)tag};
+}
+
+struct range {
+  blockheader h;
+  block *start;
+  block *end;
+};
+static struct blockheader range_header() {
+  static struct blockheader hdr = {(uint64_t)-1};
+  if (hdr.hdr == -1) {
+    hdr = getBlockHeaderForSymbol(
+        (uint64_t)getTagForSymbolName("range{SortKItem{}, SortKItem{}}"));
+  }
+  return hdr;
 }
 }
 
@@ -125,12 +146,45 @@ BOOST_AUTO_TEST_CASE(rangemap_hook_difference) {
   BOOST_CHECK_EQUAL(result, 0);
 }
 
+BOOST_AUTO_TEST_CASE(rangemap_hook_keys) {
+  auto map = hook_RANGEMAP_element(RDUMMY0, RDUMMY1, RDUMMY0);
+  auto set = hook_RANGEMAP_keys(&map);
+  range *ptr = (range *)koreAlloc(sizeof(range));
+  ptr->h = range_header();
+  ptr->start = RDUMMY0;
+  ptr->end = RDUMMY1;
+  BOOST_CHECK(hook_SET_in((SortRange)ptr, &set));
+}
+
+BOOST_AUTO_TEST_CASE(rangemap_hook_keys_list) {
+  auto map = hook_RANGEMAP_element(RDUMMY0, RDUMMY1, RDUMMY0);
+  auto list = hook_RANGEMAP_keys_list(&map);
+  range *ptr = (range *)koreAlloc(sizeof(range));
+  ptr->h = range_header();
+  ptr->start = RDUMMY0;
+  ptr->end = RDUMMY1;
+  BOOST_CHECK(hook_LIST_in((SortRange)ptr, &list));
+}
+
 BOOST_AUTO_TEST_CASE(rangemap_hook_in_keys) {
   auto map = hook_RANGEMAP_element(RDUMMY0, RDUMMY1, RDUMMY0);
   auto result = hook_RANGEMAP_in_keys(RDUMMY0, &map);
   BOOST_CHECK(result);
   result = hook_RANGEMAP_in_keys(RDUMMY1, &map);
   BOOST_CHECK(!result);
+}
+
+BOOST_AUTO_TEST_CASE(rangemap_hook_values) {
+  auto map = hook_RANGEMAP_element(RDUMMY0, RDUMMY1, RDUMMY0);
+  auto list = hook_RANGEMAP_values(&map);
+  BOOST_CHECK_EQUAL(hook_LIST_get_long(&list, 0), RDUMMY0);
+}
+
+BOOST_AUTO_TEST_CASE(rangemap_hook_choice) {
+  auto map = hook_RANGEMAP_element(RDUMMY0, RDUMMY1, RDUMMY0);
+  auto result = hook_RANGEMAP_choice(&map);
+  BOOST_CHECK_EQUAL((block *)result->children[0], RDUMMY0);
+  BOOST_CHECK_EQUAL((block *)result->children[1], RDUMMY1);
 }
 
 BOOST_AUTO_TEST_CASE(rangemap_hook_inclusion) {
@@ -143,6 +197,20 @@ BOOST_AUTO_TEST_CASE(rangemap_hook_inclusion) {
   auto map3 = hook_RANGEMAP_update(&map2, RDUMMY0, RDUMMY1, RDUMMY1);
   result = hook_RANGEMAP_inclusion(&map3, &map1);
   BOOST_CHECK(!result);
+}
+
+BOOST_AUTO_TEST_CASE(rangemap_hook_update_all) {
+  auto map1 = hook_RANGEMAP_element(RDUMMY0, RDUMMY1, RDUMMY0);
+  auto m1 = hook_RANGEMAP_element(RDUMMY0, RDUMMY2, RDUMMY0);
+  auto map2 = hook_RANGEMAP_update(&m1, RDUMMY0, RDUMMY1, RDUMMY1);
+  auto map = hook_RANGEMAP_updateAll(&map2, &map1);
+  auto result = hook_RANGEMAP_lookup(&map, RDUMMY0);
+  BOOST_CHECK_EQUAL(result, RDUMMY0);
+  result = hook_RANGEMAP_lookup(&map, RDUMMY1);
+  BOOST_CHECK_EQUAL(result, RDUMMY0);
+  auto result2 = hook_RANGEMAP_find_range(&map, RDUMMY0);
+  BOOST_CHECK_EQUAL((block *)result2->children[0], RDUMMY0);
+  BOOST_CHECK_EQUAL((block *)result2->children[1], RDUMMY2);
 }
 
 BOOST_AUTO_TEST_CASE(rangemap_hook_eq) {
