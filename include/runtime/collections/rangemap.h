@@ -305,6 +305,9 @@ public:
   // Return the number of key ranges in the map.
   size_t size() const { return treemap_.size(); }
 
+  // Returns true if this rangemap is empty.
+  bool empty() const { return treemap_.size() == 0; }
+
   // Return true if a range in this map contains the key k.
   bool contains(T const &k) const { return get_key_value(k).has_value(); }
 

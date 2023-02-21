@@ -12,6 +12,19 @@ BOOST_AUTO_TEST_CASE(rangemap_test_empty) {
   BOOST_CHECK_EQUAL(result2, false);
 }
 
+BOOST_AUTO_TEST_CASE(rangemap_test_is_empty) {
+  auto map1 = rng_map::RangeMap<int, int>();
+  auto m1 = map1.inserted(rng_map::Range<int>(0, 5), 1);
+  auto map2 = m1.inserted(rng_map::Range<int>(2, 4), 2);
+  auto map3 = map2.deleted(rng_map::Range<int>(0, 5));
+  auto result = map1.empty();
+  BOOST_CHECK_EQUAL(result, true);
+  result = map2.empty();
+  BOOST_CHECK_EQUAL(result, false);
+  result = map3.empty();
+  BOOST_CHECK_EQUAL(result, true);
+}
+
 BOOST_AUTO_TEST_CASE(rangemap_test_concat_success) {
   auto m
       = (rng_map::RangeMap<int, int>()).inserted(rng_map::Range<int>(2, 4), 1);
