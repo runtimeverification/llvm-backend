@@ -3,10 +3,9 @@
 #include "immer/flex_vector_transient.hpp"
 
 extern "C" {
-rangemap hook_RANGEMAP_element(
-    SortKItem keyRangeStart, SortKItem keyRangeEnd, SortKItem value) {
-  return rangemap().inserted(
-      rng_map::Range<KElem>(keyRangeStart, keyRangeEnd), value);
+rangemap
+hook_RANGEMAP_element(SortKItem start, SortKItem end, SortKItem value) {
+  return rangemap().inserted(rng_map::Range<KElem>(start, end), value);
 }
 
 struct range {
@@ -22,8 +21,7 @@ static struct blockheader range_header() {
   }
   return hdr;
 }
-rangemap hook_RANGEMAP_elementRng(
-    SortKItem rng, SortKItem value) {
+rangemap hook_RANGEMAP_elementRng(SortKItem rng, SortKItem value) {
   range *ptr = (range *)rng;
   return hook_RANGEMAP_element(ptr->start, ptr->end, value);
 }
@@ -77,19 +75,18 @@ SortRange hook_RANGEMAP_find_range(SortRangeMap m, SortKItem key) {
 }
 
 rangemap hook_RANGEMAP_update(
-    SortRangeMap m, SortKItem keyRangeStart, SortKItem keyRangeEnd,
-    SortKItem value) {
-  return m->inserted(rng_map::Range<KElem>(keyRangeStart, keyRangeEnd), value);
+    SortRangeMap m, SortKItem start, SortKItem end, SortKItem value) {
+  return m->inserted(rng_map::Range<KElem>(start, end), value);
 }
 
-rangemap hook_RANGEMAP_updateRng(SortRangeMap m, SortKItem rng, SortKItem value) {
+rangemap
+hook_RANGEMAP_updateRng(SortRangeMap m, SortKItem rng, SortKItem value) {
   range *ptr = (range *)rng;
   return hook_RANGEMAP_update(m, ptr->start, ptr->end, value);
 }
 
-rangemap hook_RANGEMAP_remove(
-    SortRangeMap m, SortKItem keyRangeStart, SortKItem keyRangeEnd) {
-  return m->deleted(rng_map::Range<KElem>(keyRangeStart, keyRangeEnd));
+rangemap hook_RANGEMAP_remove(SortRangeMap m, SortKItem start, SortKItem end) {
+  return m->deleted(rng_map::Range<KElem>(start, end));
 }
 
 rangemap hook_RANGEMAP_removeRng(SortRangeMap m, SortKItem rng) {
@@ -107,7 +104,8 @@ set hook_SET_concat(set *, set *);
 
 set hook_RANGEMAP_keys(SortRangeMap m) {
   auto tmp = hook_SET_unit();
-  for (auto iter = rng_map::RangeMapIterator<KElem, KElem>(*m); iter.has_next() ; ++iter) {
+  for (auto iter = rng_map::RangeMapIterator<KElem, KElem>(*m); iter.has_next();
+       ++iter) {
     range *ptr = (range *)koreAlloc(sizeof(range));
     ptr->h = range_header();
     ptr->start = iter->first.start();
@@ -120,7 +118,8 @@ set hook_RANGEMAP_keys(SortRangeMap m) {
 
 list hook_RANGEMAP_keys_list(SortRangeMap m) {
   auto tmp = list().transient();
-  for (auto iter = rng_map::RangeMapIterator<KElem, KElem>(*m); iter.has_next() ; ++iter) {
+  for (auto iter = rng_map::RangeMapIterator<KElem, KElem>(*m); iter.has_next();
+       ++iter) {
     range *ptr = (range *)koreAlloc(sizeof(range));
     ptr->h = range_header();
     ptr->start = iter->first.start();
@@ -136,7 +135,8 @@ bool hook_RANGEMAP_in_keys(SortKItem key, SortRangeMap m) {
 
 list hook_RANGEMAP_values(SortRangeMap m) {
   auto tmp = list().transient();
-  for (auto iter = rng_map::RangeMapIterator<KElem, KElem>(*m); iter.has_next() ; ++iter) {
+  for (auto iter = rng_map::RangeMapIterator<KElem, KElem>(*m); iter.has_next();
+       ++iter) {
     tmp.push_back(iter->second);
   }
   return tmp.persistent();
@@ -172,7 +172,8 @@ bool hook_RANGEMAP_inclusion(SortRangeMap m1, SortRangeMap m2) {
 rangemap hook_RANGEMAP_updateAll(SortRangeMap m1, SortRangeMap m2) {
   auto from = m2;
   auto to = *m1;
-  for (auto iter = rng_map::RangeMapIterator<KElem, KElem>(*from); iter.has_next() ; ++iter) {
+  for (auto iter = rng_map::RangeMapIterator<KElem, KElem>(*from);
+       iter.has_next(); ++iter) {
     to = to.inserted(iter->first, iter->second);
   }
   return to;

@@ -4,19 +4,17 @@
 #include "runtime/header.h"
 
 extern "C" {
-rangemap
-hook_RANGEMAP_element(block *keyrangestart, block *keyrangeend, block *value);
+rangemap hook_RANGEMAP_element(block *start, block *end, block *value);
 rangemap hook_RANGEMAP_elementRng(block *rng, block *value);
 rangemap hook_RANGEMAP_concat(rangemap *m1, rangemap *m2);
 rangemap hook_RANGEMAP_unit(void);
 block *hook_RANGEMAP_lookup(rangemap *m, block *key);
 block *hook_RANGEMAP_lookupOrDefault(rangemap *m, block *key, block *_default);
 block *hook_RANGEMAP_find_range(rangemap *m, block *key);
-rangemap hook_RANGEMAP_update(
-    rangemap *m, block *keyRangeStart, block *keyRangeEnd, block *value);
-rangemap hook_RANGEMAP_updateRng(rangemap *m, block *rng, block *value);
 rangemap
-hook_RANGEMAP_remove(rangemap *m, block *keyRangeStart, block *keyRangeEnd);
+hook_RANGEMAP_update(rangemap *m, block *start, block *end, block *value);
+rangemap hook_RANGEMAP_updateRng(rangemap *m, block *rng, block *value);
+rangemap hook_RANGEMAP_remove(rangemap *m, block *start, block *end);
 rangemap hook_RANGEMAP_removeRng(rangemap *map, block *rng);
 rangemap hook_RANGEMAP_difference(rangemap *m1, rangemap *m2);
 set hook_RANGEMAP_keys(rangemap *m);
