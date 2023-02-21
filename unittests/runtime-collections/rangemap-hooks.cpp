@@ -6,6 +6,7 @@
 extern "C" {
 rangemap
 hook_RANGEMAP_element(block *keyrangestart, block *keyrangeend, block *value);
+rangemap hook_RANGEMAP_elementRng(block *rng, block *value);
 rangemap hook_RANGEMAP_concat(rangemap *m1, rangemap *m2);
 rangemap hook_RANGEMAP_unit(void);
 block *hook_RANGEMAP_lookup(rangemap *m, block *key);
@@ -13,8 +14,10 @@ block *hook_RANGEMAP_lookupOrDefault(rangemap *m, block *key, block *_default);
 block *hook_RANGEMAP_find_range(rangemap *m, block *key);
 rangemap hook_RANGEMAP_update(
     rangemap *m, block *keyRangeStart, block *keyRangeEnd, block *value);
+rangemap hook_RANGEMAP_updateRng(rangemap *m, block *rng, block *value);
 rangemap
 hook_RANGEMAP_remove(rangemap *m, block *keyRangeStart, block *keyRangeEnd);
+rangemap hook_RANGEMAP_removeRng(rangemap *map, block *rng);
 rangemap hook_RANGEMAP_difference(rangemap *m1, rangemap *m2);
 set hook_RANGEMAP_keys(rangemap *m);
 list hook_RANGEMAP_keys_list(rangemap *m);
@@ -82,6 +85,18 @@ BOOST_AUTO_TEST_CASE(rangemap_hook_element) {
   BOOST_CHECK_EQUAL(result2, RDUMMY0);
 }
 
+BOOST_AUTO_TEST_CASE(rangemap_hook_element_rng) {
+  range *ptr = (range *)koreAlloc(sizeof(range));
+  ptr->h = range_header();
+  ptr->start = RDUMMY0;
+  ptr->end = RDUMMY1;
+  auto map = hook_RANGEMAP_elementRng((SortRange)ptr, RDUMMY0);
+  auto result1 = hook_RANGEMAP_size_long(&map);
+  BOOST_CHECK_EQUAL(result1, 1);
+  auto result2 = hook_RANGEMAP_lookup(&map, RDUMMY0);
+  BOOST_CHECK_EQUAL(result2, RDUMMY0);
+}
+
 BOOST_AUTO_TEST_CASE(rangemap_hook_unit) {
   auto map = hook_RANGEMAP_unit();
   auto result = hook_RANGEMAP_size_long(&map);
@@ -130,6 +145,23 @@ BOOST_AUTO_TEST_CASE(rangemap_hook_update) {
   BOOST_CHECK_EQUAL(result, RDUMMY1);
 }
 
+BOOST_AUTO_TEST_CASE(rangemap_hook_update_rng) {
+  auto map1 = hook_RANGEMAP_element(RDUMMY0, RDUMMY2, RDUMMY0);
+  auto result = hook_RANGEMAP_lookup(&map1, RDUMMY0);
+  BOOST_CHECK_EQUAL(result, RDUMMY0);
+  auto result2 = hook_RANGEMAP_size_long(&map1);
+  BOOST_CHECK_EQUAL(result2, 1);
+  range *ptr = (range *)koreAlloc(sizeof(range));
+  ptr->h = range_header();
+  ptr->start = RDUMMY0;
+  ptr->end = RDUMMY1;
+  auto map2 = hook_RANGEMAP_updateRng(&map1, (SortRange)ptr, RDUMMY1);
+  result = hook_RANGEMAP_lookup(&map2, RDUMMY0);
+  BOOST_CHECK_EQUAL(result, RDUMMY1);
+  result2 = hook_RANGEMAP_size_long(&map2);
+  BOOST_CHECK_EQUAL(result2, 2);
+}
+
 BOOST_AUTO_TEST_CASE(rangemap_hook_remove) {
   auto map = hook_RANGEMAP_element(RDUMMY0, RDUMMY1, RDUMMY0);
   auto map2 = hook_RANGEMAP_remove(&map, RDUMMY0, RDUMMY1);
@@ -137,6 +169,20 @@ BOOST_AUTO_TEST_CASE(rangemap_hook_remove) {
   BOOST_CHECK_EQUAL(mpz_cmp_ui(result, 1), 0);
   result = hook_RANGEMAP_size(&map2);
   BOOST_CHECK_EQUAL(mpz_cmp_ui(result, 0), 0);
+}
+
+BOOST_AUTO_TEST_CASE(rangemap_hook_remove_rng) {
+  auto m1 = hook_RANGEMAP_element(RDUMMY0, RDUMMY2, RDUMMY0);
+  auto map1 = hook_RANGEMAP_update(&m1, RDUMMY0, RDUMMY1, RDUMMY1);
+  auto result = hook_RANGEMAP_size_long(&map1);
+  BOOST_CHECK_EQUAL(result, 2);
+  range *ptr = (range *)koreAlloc(sizeof(range));
+  ptr->h = range_header();
+  ptr->start = RDUMMY0;
+  ptr->end = RDUMMY1;
+  auto map2 = hook_RANGEMAP_removeRng(&map1, (SortRange)ptr);
+  result = hook_RANGEMAP_size_long(&map2);
+  BOOST_CHECK_EQUAL(result, 1);
 }
 
 BOOST_AUTO_TEST_CASE(rangemap_hook_difference) {

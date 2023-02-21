@@ -9,6 +9,25 @@ rangemap hook_RANGEMAP_element(
       rng_map::Range<KElem>(keyRangeStart, keyRangeEnd), value);
 }
 
+struct range {
+  blockheader h;
+  block *start;
+  block *end;
+};
+static struct blockheader range_header() {
+  static struct blockheader hdr = {(uint64_t)-1};
+  if (hdr.hdr == -1) {
+    hdr = getBlockHeaderForSymbol(
+        (uint64_t)getTagForSymbolName("range{SortKItem{}, SortKItem{}}"));
+  }
+  return hdr;
+}
+rangemap hook_RANGEMAP_elementRng(
+    SortKItem rng, SortKItem value) {
+  range *ptr = (range *)rng;
+  return hook_RANGEMAP_element(ptr->start, ptr->end, value);
+}
+
 rangemap hook_RANGEMAP_unit() {
   return rangemap();
 }
@@ -44,19 +63,6 @@ SortKItem hook_RANGEMAP_lookupOrDefault(
   return res;
 }
 
-struct range {
-  blockheader h;
-  block *start;
-  block *end;
-};
-static struct blockheader range_header() {
-  static struct blockheader hdr = {(uint64_t)-1};
-  if (hdr.hdr == -1) {
-    hdr = getBlockHeaderForSymbol(
-        (uint64_t)getTagForSymbolName("range{SortKItem{}, SortKItem{}}"));
-  }
-  return hdr;
-}
 SortRange hook_RANGEMAP_find_range(SortRangeMap m, SortKItem key) {
   auto val = m->get_key_value(key);
   if (val.has_value()) {
@@ -76,9 +82,19 @@ rangemap hook_RANGEMAP_update(
   return m->inserted(rng_map::Range<KElem>(keyRangeStart, keyRangeEnd), value);
 }
 
+rangemap hook_RANGEMAP_updateRng(SortRangeMap m, SortKItem rng, SortKItem value) {
+  range *ptr = (range *)rng;
+  return hook_RANGEMAP_update(m, ptr->start, ptr->end, value);
+}
+
 rangemap hook_RANGEMAP_remove(
     SortRangeMap m, SortKItem keyRangeStart, SortKItem keyRangeEnd) {
   return m->deleted(rng_map::Range<KElem>(keyRangeStart, keyRangeEnd));
+}
+
+rangemap hook_RANGEMAP_removeRng(SortRangeMap m, SortKItem rng) {
+  range *ptr = (range *)rng;
+  return hook_RANGEMAP_remove(m, ptr->start, ptr->end);
 }
 
 rangemap hook_RANGEMAP_difference(SortRangeMap m1, SortRangeMap m2) {
