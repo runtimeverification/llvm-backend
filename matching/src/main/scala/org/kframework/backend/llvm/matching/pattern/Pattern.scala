@@ -205,7 +205,7 @@ case class MapP[T](keys: Seq[Pattern[T]], values: Seq[Pattern[T]], frame: Option
       case (HasKey(_, _, Some(p)), None) => keys.map(_.canonicalize(clause)).exists(Pattern.mightUnify(p, _))
       case (HasNoKey(_, Some(p)), _) => !keys.map(_.canonicalize(clause)).contains(p)
       case (HasKey(_, _, None), None) => keys.nonEmpty && clause.action.priority <= maxPriority
-      case (HasNoKey(_, None), _) => keys.nonEmpty && clause.action.priority > maxPriority
+      case (HasNoKey(_, None), _) => (keys.nonEmpty && clause.action.priority > maxPriority) || isWildcard
     }
   }
   def score(h: Heuristic, f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double = h.scoreMap(this, f, c, key, isEmpty)
@@ -322,7 +322,7 @@ case class SetP[T](elements: Seq[Pattern[T]], frame: Option[Pattern[T]], ctr: Sy
       case (HasKey(_, _, Some(p)), None) => elements.map(_.canonicalize(clause)).exists(Pattern.mightUnify(p, _))
       case (HasNoKey(_, Some(p)), _) => !elements.map(_.canonicalize(clause)).contains(p)
       case (HasKey(_, _, None), None) => elements.nonEmpty && clause.action.priority <= maxPriority
-      case (HasNoKey(_, None), _) => elements.nonEmpty && clause.action.priority > maxPriority
+      case (HasNoKey(_, None), _) => (elements.nonEmpty && clause.action.priority > maxPriority) || isWildcard
     }
   }
   def score(h: Heuristic, f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double = h.scoreSet(this, f, c, key, isEmpty)
