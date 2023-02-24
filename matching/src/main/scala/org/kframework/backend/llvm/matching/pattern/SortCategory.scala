@@ -135,6 +135,9 @@ case class ListS() extends SortCategory {
   // get each element of the list specified in the list pattern and bind it to the occurrences,
   // then compile the remaining matrix
   def expandListPattern(matrix: Matrix, listO: Occurrence, cons: ListC): DecisionTree = {
+    if (Matching.logging) {
+      System.out.println("Specializing by lists of length " + cons.name)
+    }
     (0 until cons.length).foldLeft(matrix.compile)((dt, i) => listGet(listO, None, dt, i))
   }
 
