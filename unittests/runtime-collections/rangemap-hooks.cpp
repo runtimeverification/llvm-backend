@@ -22,6 +22,7 @@ list hook_RANGEMAP_keys_list(rangemap *m);
 bool hook_RANGEMAP_in_keys(block *key, rangemap *m);
 list hook_RANGEMAP_values(rangemap *m);
 block *hook_RANGEMAP_choice(rangemap *m);
+block *hook_RANGEMAP_choiceRng(rangemap *m);
 size_t hook_RANGEMAP_size_long(rangemap *m);
 mpz_ptr hook_RANGEMAP_size(rangemap *m);
 bool hook_RANGEMAP_inclusion(rangemap *m1, rangemap *m2);
@@ -231,6 +232,12 @@ BOOST_AUTO_TEST_CASE(rangemap_hook_values) {
 BOOST_AUTO_TEST_CASE(rangemap_hook_choice) {
   auto map = hook_RANGEMAP_element(RDUMMY0, RDUMMY1, RDUMMY0);
   auto result = hook_RANGEMAP_choice(&map);
+  BOOST_CHECK_EQUAL(result, RDUMMY0);
+}
+
+BOOST_AUTO_TEST_CASE(rangemap_hook_choice_rng) {
+  auto map = hook_RANGEMAP_element(RDUMMY0, RDUMMY1, RDUMMY0);
+  auto result = hook_RANGEMAP_choiceRng(&map);
   BOOST_CHECK_EQUAL((block *)result->children[0], RDUMMY0);
   BOOST_CHECK_EQUAL((block *)result->children[1], RDUMMY1);
 }
