@@ -71,8 +71,7 @@ llvm::Constant *CreateStaticTerm::notInjectionCase(
       blockVals.push_back(ChildValue);
     }
 
-    globalVar->setInitializer(llvm::ConstantExpr::getBitCast(
-        llvm::ConstantStruct::get(BlockType, blockVals), BlockType));
+    globalVar->setInitializer(llvm::ConstantStruct::get(BlockType, blockVals));
   }
 
   std::vector<llvm::Constant *> Idxs
