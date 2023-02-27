@@ -4,6 +4,7 @@
 #include <llvm/Config/llvm-config.h>
 #include <llvm/IR/DerivedTypes.h>
 #include <llvm/IR/Function.h>
+#include <llvm/IR/Instruction.h>
 #include <llvm/IR/Module.h>
 #include <llvm/IR/Value.h>
 
@@ -34,6 +35,8 @@ static llvm::Function *getOrInsertFunction(llvm::Module *module, Ts... Args) {
 }
 
 llvm::StructType *getTypeByName(llvm::Module *module, std::string name);
+
+void insertAtBack(llvm::BasicBlock *block, llvm::Instruction *inst);
 
 } // namespace kllvm
 

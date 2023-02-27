@@ -392,7 +392,7 @@ static std::pair<llvm::Value *, llvm::BasicBlock *> getEval(
         creator.getCurrentBlock(), llvm::Type::getInt64Ty(Ctx),
         result->getType(), llvm::ConstantExpr::getSizeOf(result->getType()),
         nullptr, nullptr);
-    creator.getCurrentBlock()->getInstList().push_back(Malloc);
+    insertAtBack(creator.getCurrentBlock(), Malloc);
     new llvm::StoreInst(result, Malloc, creator.getCurrentBlock());
     retval = new llvm::BitCastInst(
         Malloc, llvm::Type::getInt8PtrTy(Ctx), "", creator.getCurrentBlock());
@@ -400,7 +400,7 @@ static std::pair<llvm::Value *, llvm::BasicBlock *> getEval(
   }
   case SortCategory::Uncomputed: abort();
   }
-  creator.getCurrentBlock()->getInstList().push_back(inst);
+  insertAtBack(creator.getCurrentBlock(), inst);
   return std::make_pair(retval, creator.getCurrentBlock());
 }
 
@@ -553,7 +553,7 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
       llvm::Instruction *Malloc = llvm::CallInst::CreateMalloc(
           CaseBlock, llvm::Type::getInt64Ty(Ctx), compare->getType(),
           llvm::ConstantExpr::getSizeOf(compare->getType()), nullptr, nullptr);
-      CaseBlock->getInstList().push_back(Malloc);
+      insertAtBack(CaseBlock, Malloc);
       new llvm::StoreInst(compare, Malloc, CaseBlock);
       auto result = new llvm::BitCastInst(
           Malloc, llvm::Type::getInt8PtrTy(Ctx), "", CaseBlock);

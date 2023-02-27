@@ -41,4 +41,8 @@ llvm::StructType *getTypeByName(llvm::Module *module, std::string name) {
   return t;
 }
 
+void insertAtBack(llvm::BasicBlock *block, llvm::Instruction *inst) {
+  block->getInstList().push_back(inst);
+}
+
 } // namespace kllvm

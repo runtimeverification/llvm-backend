@@ -226,8 +226,8 @@ llvm::Value *allocateTerm(
   llvm::Instruction *Malloc = llvm::CallInst::CreateMalloc(
       block, llvm::Type::getInt64Ty(block->getContext()), AllocType, Len,
       nullptr, koreHeapAlloc(allocFn, block->getModule()));
-  setDebugLoc(&block->getInstList().back());
-  block->getInstList().push_back(Malloc);
+  /* setDebugLoc(&block->getInstList().back()); */
+  insertAtBack(block, Malloc);
   return Malloc;
 }
 
