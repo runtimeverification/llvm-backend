@@ -104,8 +104,8 @@ set hook_SET_concat(set *, set *);
 
 set hook_RANGEMAP_keys(SortRangeMap m) {
   auto tmp = hook_SET_unit();
-  for (auto iter = rng_map::RangeMapIterator<KElem, KElem>(*m); iter.has_next();
-       ++iter) {
+  for (auto iter = rng_map::ConstRangeMapIterator<KElem, KElem>(*m);
+       iter.has_next(); ++iter) {
     range *ptr = (range *)koreAlloc(sizeof(range));
     ptr->h = range_header();
     ptr->start = iter->first.start();
@@ -118,8 +118,8 @@ set hook_RANGEMAP_keys(SortRangeMap m) {
 
 list hook_RANGEMAP_keys_list(SortRangeMap m) {
   auto tmp = list().transient();
-  for (auto iter = rng_map::RangeMapIterator<KElem, KElem>(*m); iter.has_next();
-       ++iter) {
+  for (auto iter = rng_map::ConstRangeMapIterator<KElem, KElem>(*m);
+       iter.has_next(); ++iter) {
     range *ptr = (range *)koreAlloc(sizeof(range));
     ptr->h = range_header();
     ptr->start = iter->first.start();
@@ -135,8 +135,8 @@ bool hook_RANGEMAP_in_keys(SortKItem key, SortRangeMap m) {
 
 list hook_RANGEMAP_values(SortRangeMap m) {
   auto tmp = list().transient();
-  for (auto iter = rng_map::RangeMapIterator<KElem, KElem>(*m); iter.has_next();
-       ++iter) {
+  for (auto iter = rng_map::ConstRangeMapIterator<KElem, KElem>(*m);
+       iter.has_next(); ++iter) {
     tmp.push_back(iter->second);
   }
   return tmp.persistent();
@@ -146,7 +146,7 @@ SortKItem hook_RANGEMAP_choice(SortRangeMap m) {
   if (m->empty()) {
     KLLVM_HOOK_INVALID_ARGUMENT("Cannot choose from an empty map");
   }
-  auto iter = rng_map::RangeMapIterator<KElem, KElem>(*m);
+  auto iter = rng_map::ConstRangeMapIterator<KElem, KElem>(*m);
   block *elem = iter->first.start();
   return (SortKItem)elem;
 }
@@ -155,7 +155,7 @@ SortKItem hook_RANGEMAP_choiceRng(SortRangeMap m) {
   if (m->empty()) {
     KLLVM_HOOK_INVALID_ARGUMENT("Cannot choose from an empty map");
   }
-  auto iter = rng_map::RangeMapIterator<KElem, KElem>(*m);
+  auto iter = rng_map::ConstRangeMapIterator<KElem, KElem>(*m);
   range *ptr = (range *)koreAlloc(sizeof(range));
   ptr->h = range_header();
   ptr->start = iter->first.start();
@@ -181,7 +181,7 @@ bool hook_RANGEMAP_inclusion(SortRangeMap m1, SortRangeMap m2) {
 rangemap hook_RANGEMAP_updateAll(SortRangeMap m1, SortRangeMap m2) {
   auto from = m2;
   auto to = *m1;
-  for (auto iter = rng_map::RangeMapIterator<KElem, KElem>(*from);
+  for (auto iter = rng_map::ConstRangeMapIterator<KElem, KElem>(*from);
        iter.has_next(); ++iter) {
     to = to.inserted(iter->first, iter->second);
   }
@@ -198,8 +198,8 @@ rangemap hook_RANGEMAP_removeAll(SortRangeMap map, SortSet set) {
 }
 
 bool hook_RANGEMAP_eq(SortRangeMap m1, SortRangeMap m2) {
-  auto it1 = rng_map::RangeMapIterator<KElem, KElem>(*m1);
-  auto it2 = rng_map::RangeMapIterator<KElem, KElem>(*m2);
+  auto it1 = rng_map::ConstRangeMapIterator<KElem, KElem>(*m1);
+  auto it2 = rng_map::ConstRangeMapIterator<KElem, KElem>(*m2);
   for (; it1.has_next() && it2.has_next(); ++it1, ++it2) {
     std::pair<rng_map::Range<KElem>, KElem> const &r1 = *it1;
     std::pair<rng_map::Range<KElem>, KElem> const &r2 = *it2;

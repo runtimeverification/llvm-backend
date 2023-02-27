@@ -32,6 +32,19 @@ public:
       : start_()
       , end_() { }
 
+  /* WARNING: The following two methods return non-const references, in order *
+   * to enable altering this data structure (and potentially ones implemented *
+   * on top of it, namely RangeMap) in place. The data structure is intended  *
+   * to be immutable: the exposed functionality should not alter the data     *
+   * structure's contents in place. Only request a non-const reference if you *
+   * in fact need to edit the data structure in place for a specific reason,  *
+   * e.g., garbage collection.                                                */
+  // Getter for the start of this range. Returns a non-const reference.
+  T &start_mutable() { return start_; }
+
+  // Getter for the end of this range. Returns a non-const reference.
+  T &end_mutable() { return end_; }
+
   // Getter for the start of this range.
   T const &start() const { return start_; }
 
@@ -503,15 +516,15 @@ public:
   }
 };
 
-// Iterator over objects of class RangeMap.
+// Iterator and Const Iterator over objects of class RangeMap.
 // We do not need the full flexibility offered by the std interface.
-// Instead we only need to iterate. Therefore, this iterator provides
-// prefix increment operator, dereference operator, and a function that tests
-// if there are more elements instead of an equality operator.
+// Instead we only need to iterate. Therefore, these iterators provide
+// prefix increment operator, dereference operator, arrow operator, and a
+// function that tests if there are more elements instead of equality operator.
 template <class T, class V>
-class RangeMapIterator {
+class AbstractRangeMapIterator {
 
-private:
+protected:
   std::stack<rb_tree::RBTree<Range<T>, V>> stack_;
 
   void update_stack_state(rb_tree::RBTree<Range<T>, V> const &t) {
@@ -522,10 +535,12 @@ private:
     }
   }
 
-public:
   // Create an iterator over rangemap m.
-  RangeMapIterator(RangeMap<T, V> m) { update_stack_state(m.treemap()); }
+  AbstractRangeMapIterator(RangeMap<T, V> m) {
+    update_stack_state(m.treemap());
+  }
 
+public:
   // Prefix increment operator.
   void operator++() {
     rb_tree::RBTree<Range<T>, V> const &t = stack_.top();
@@ -533,19 +548,61 @@ public:
     update_stack_state(t.right());
   }
 
+  // Return true if there are more elements in the underlying rangemap.
+  bool has_next() const { return !stack_.empty(); }
+};
+
+template <class T, class V>
+class ConstRangeMapIterator : public AbstractRangeMapIterator<T, V> {
+
+public:
+  using AbstractRangeMapIterator<T, V>::stack_;
+
+  // Create an iterator over rangemap m.
+  ConstRangeMapIterator(RangeMap<T, V> m)
+      : AbstractRangeMapIterator<T, V>(m) { }
+
   // Dereference operator.
   std::pair<Range<T>, V> const &operator*() const {
     rb_tree::RBTree<Range<T>, V> const &t = stack_.top();
     return t.root_data();
   }
 
+  // Member access (arrow) operator.
   std::pair<Range<T>, V> const *operator->() const {
     rb_tree::RBTree<Range<T>, V> const &t = stack_.top();
     return &t.root_data();
   }
+};
 
-  // Return true if there are more elemetns in the underlying rangemap.
-  bool has_next() const { return !stack_.empty(); }
+/* WARNING: This iterator returns non-const references, in order to enable    *
+ * altering the underlying data structure, RangeMap, in place. The RangeMap   *
+ * data structure is intended to be immutable: the exposed functionality      *
+ * should not alter the data structure's content in place. Only request a     *
+ * RangeMapIterator instead of a ConstRangeMapIterator if you in fact need to *
+ * edit the RangeMap in place for a specific reason, e.g., garbage            *
+ * collection.                                                                */
+template <class T, class V>
+class RangeMapIterator : public AbstractRangeMapIterator<T, V> {
+
+public:
+  using AbstractRangeMapIterator<T, V>::stack_;
+
+  // Create an iterator over rangemap m.
+  RangeMapIterator(RangeMap<T, V> m)
+      : AbstractRangeMapIterator<T, V>(m) { }
+
+  // Non-const dereference operator.
+  std::pair<Range<T>, V> &operator*() {
+    rb_tree::RBTree<Range<T>, V> &t = stack_.top();
+    return t.root_data_mutable();
+  }
+
+  // Non-const member access (arrow) operator.
+  std::pair<Range<T>, V> *operator->() {
+    rb_tree::RBTree<Range<T>, V> &t = stack_.top();
+    return &t.root_data_mutable();
+  }
 };
 
 // Return a rangemap with all elements in m, and then also from the container

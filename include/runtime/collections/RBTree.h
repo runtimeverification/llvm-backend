@@ -69,17 +69,17 @@ class RBTree {
     // Create a new InternalNode object with the given lft and rgt children,
     // key and value, and color.
     InternalNode(
-        Color c, std::shared_ptr<const Node> lft, T key, V val,
-        std::shared_ptr<const Node> rgt)
+        Color c, std::shared_ptr<Node> lft, T key, V val,
+        std::shared_ptr<Node> rgt)
         : Node(c)
         , lft_(lft)
         , data_(key, val)
         , rgt_(rgt) {
       this->s_ = 1 + lft_->s_ + rgt_->s_;
     }
-    std::shared_ptr<const Node> lft_; // Left child
+    std::shared_ptr<Node> lft_; // Left child
     std::pair<T, V> data_; // data_.first: Node key. data_.second: Node value.
-    std::shared_ptr<const Node> rgt_; // Right child
+    std::shared_ptr<Node> rgt_; // Right child
 
     virtual bool is_leaf() const override { return false; }
     virtual ~InternalNode() = default;
@@ -88,18 +88,18 @@ class RBTree {
   // Create an empty red-black tree, with the specified color. Only B and BB
   // are valid colors for this constructor.
   RBTree(Color c)
-      : root_(std::make_shared<const Leaf>(c)) { }
+      : root_(std::make_shared<Leaf>(c)) { }
 
   // Create a red-black tree, with a root of the spefified color, key and value,
   // and children lft and rgt.
   RBTree(Color c, RBTree const &lft, T key, V val, RBTree const &rgt)
-      : root_(std::make_shared<const InternalNode>(
-          c, lft.root_, key, val, rgt.root_)) {
+      : root_(
+          std::make_shared<InternalNode>(c, lft.root_, key, val, rgt.root_)) {
     assert(lft.empty() || lft.root_key() < key);
     assert(rgt.empty() || key < rgt.root_key());
   }
 
-  explicit RBTree(std::shared_ptr<const Node> node)
+  explicit RBTree(std::shared_ptr<Node> node)
       : root_(node) { }
 
   // Return this Node's color when it is not empty.
@@ -117,7 +117,7 @@ class RBTree {
 public:
   // Create an empty red-black tree.
   RBTree()
-      : root_(std::make_shared<const Leaf>(Color::B)) { }
+      : root_(std::make_shared<Leaf>(Color::B)) { }
 
   // Create a red-black tree with elements from the container designated by the
   // beginning and end iterator arguments. The container should contain elements
@@ -148,10 +148,26 @@ public:
     return r->data_.second;
   }
 
-  // Return the data (key-value pair) stored in the root Node of this tree.
+  // Return a const reference to the data (key-value pair) stored in the root
+  // Node of this tree.
   std::pair<T, V> const &root_data() const {
     assert(!empty());
     const InternalNode *r = static_cast<const InternalNode *>(root_.get());
+    return r->data_;
+  }
+
+  /* WARNING: The following method returns a non-const reference in order to  *
+   * enable altering this data structure (and potentially ones implemented on *
+   * top of it, namely RangeMap) in place. The data structure is intended to  *
+   * be immutable: the exposed functionality should not alter the data        *
+   * structure's contents in place. Only request a non-const reference if you *
+   * in fact need to edit the data structure in place for a specific reason,  *
+   * e.g. garbage collection.                                                 */
+  // Return a reference to the data (key-value pair) stored in the root Node of
+  // this tree.
+  std::pair<T, V> &root_data_mutable() {
+    assert(!empty());
+    InternalNode *r = static_cast<InternalNode *>(root_.get());
     return r->data_;
   }
 
@@ -571,7 +587,7 @@ private:
   }
 
 private:
-  std::shared_ptr<const Node> root_;
+  std::shared_ptr<Node> root_;
 };
 
 // Recursively (using inorder traversal) apply function f to all elements of
