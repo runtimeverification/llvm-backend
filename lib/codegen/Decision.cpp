@@ -314,6 +314,16 @@ void SwitchNode::codegen(Decision *d) {
                 d->CurrentBlock->getParent(), currChoiceBlock),
             currentElt, d->CurrentBlock);
         d->FailJump->addDestination(currChoiceBlock);
+      } else if (
+          currChoiceBlock && _case.getLiteral() == 0 && d->HasSearchResults) {
+        auto loaded = new llvm::LoadInst(
+            llvm::Type::getInt1Ty(d->Ctx), d->HasSearchResults, "",
+            d->CurrentBlock);
+        auto newCaseBlock = llvm::BasicBlock::Create(
+            d->Ctx, "hasNoSearchResults", d->CurrentBlock->getParent());
+        llvm::BranchInst::Create(
+            d->FailureBlock, newCaseBlock, loaded, d->CurrentBlock);
+        d->CurrentBlock = newCaseBlock;
       }
     }
     _case.getChild()->codegen(d);
@@ -497,6 +507,9 @@ void LeafNode::codegen(Decision *d) {
   if (child == nullptr) {
     llvm::ReturnInst::Create(d->Ctx, Call, d->CurrentBlock);
   } else {
+    new llvm::StoreInst(
+        llvm::ConstantInt::getTrue(d->Ctx), d->HasSearchResults,
+        d->CurrentBlock);
     auto Call2 = llvm::CallInst::Create(
         getOrInsertFunction(
             d->Module, "addSearchResult",
@@ -667,7 +680,7 @@ void makeEvalOrAnywhereFunction(
   int i = 0;
   Decision codegen(
       definition, block, fail, jump, choiceBuffer, choiceDepth, module,
-      returnSort, nullptr, nullptr, nullptr);
+      returnSort, nullptr, nullptr, nullptr, nullptr);
   for (auto val = matchFunc->arg_begin(); val != matchFunc->arg_end();
        ++val, ++i) {
     val->setName("_" + std::to_string(i + 1));
@@ -983,6 +996,12 @@ void makeStepFunction(
   initChoiceBuffer(
       dt, module, block, pre_stuck, fail, &choiceBuffer, &choiceDepth, &jump);
 
+  llvm::AllocaInst *HasSearchResults = nullptr;
+  if (search) {
+    HasSearchResults = new llvm::AllocaInst(
+        llvm::Type::getInt1Ty(module->getContext()), 0, "hasSearchResults",
+        block);
+  }
   initDebugParam(
       matchFunc, 0, "subject", {SortCategory::Symbol, 0},
       "SortGeneratedTopCell{}");
@@ -993,7 +1012,7 @@ void makeStepFunction(
   collectedVal->setName("_1");
   Decision codegen(
       definition, result.second, fail, jump, choiceBuffer, choiceDepth, module,
-      {SortCategory::Symbol, 0}, nullptr, nullptr, nullptr);
+      {SortCategory::Symbol, 0}, nullptr, nullptr, nullptr, HasSearchResults);
   codegen.store(
       std::make_pair(collectedVal->getName().str(), collectedVal->getType()),
       collectedVal);
@@ -1068,7 +1087,7 @@ void makeMatchReasonFunction(
   val->setName("_1");
   Decision codegen(
       definition, block, fail, jump, choiceBuffer, choiceDepth, module,
-      {SortCategory::Symbol, 0}, FailSubject, FailPattern, FailSort);
+      {SortCategory::Symbol, 0}, FailSubject, FailPattern, FailSort, nullptr);
   codegen.store(std::make_pair(val->getName().str(), val->getType()), val);
   llvm::ReturnInst::Create(module->getContext(), stuck);
 
@@ -1182,7 +1201,7 @@ void makeStepFunction(
   i = 0;
   Decision codegen(
       definition, header.second, fail, jump, choiceBuffer, choiceDepth, module,
-      {SortCategory::Symbol, 0}, nullptr, nullptr, nullptr);
+      {SortCategory::Symbol, 0}, nullptr, nullptr, nullptr, nullptr);
   for (auto val : header.first) {
     val->setName(res.residuals[i].occurrence.substr(0, max_name_length));
     codegen.store(std::make_pair(val->getName().str(), val->getType()), val);
