@@ -150,7 +150,8 @@ static void emitDataTableForSymbol(
   initDebugGlobal(
       "table_" + name,
       getArrayDebugType(
-          dity, syms.size(), llvm::DataLayout(module).getABITypeAlignment(ty)),
+          dity, syms.size(),
+          llvm::DataLayout(module).getABITypeAlign(ty).value()),
       globalVar);
   std::vector<llvm::Constant *> values;
   for (auto iter = syms.begin(); iter != syms.end(); ++iter) {
@@ -1220,7 +1221,8 @@ static void emitSortTable(KOREDefinition *definition, llvm::Module *module) {
   initDebugGlobal(
       "sort_table",
       getArrayDebugType(
-          dity, syms.size(), llvm::DataLayout(module).getABITypeAlignment(ty)),
+          dity, syms.size(),
+          llvm::DataLayout(module).getABITypeAlign(ty).value()),
       globalVar);
   std::vector<llvm::Constant *> values;
   for (auto iter = syms.begin(); iter != syms.end(); ++iter) {
@@ -1239,8 +1241,9 @@ static void emitSortTable(KOREDefinition *definition, llvm::Module *module) {
         "sorts_" + symbol->getName(),
         getArrayDebugType(
             getCharPtrDebugType(), symbol->getArguments().size(),
-            llvm::DataLayout(module).getABITypeAlignment(
-                llvm::Type::getInt8PtrTy(Ctx))),
+            llvm::DataLayout(module)
+                .getABITypeAlign(llvm::Type::getInt8PtrTy(Ctx))
+                .value()),
         subtableVar);
     llvm::Constant *zero
         = llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0);
