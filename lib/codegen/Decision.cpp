@@ -1001,6 +1001,9 @@ void makeStepFunction(
     HasSearchResults = new llvm::AllocaInst(
         llvm::Type::getInt1Ty(module->getContext()), 0, "hasSearchResults",
         block);
+    new llvm::StoreInst(
+        llvm::ConstantInt::getFalse(module->getContext()), HasSearchResults,
+        block);
   }
   initDebugParam(
       matchFunc, 0, "subject", {SortCategory::Symbol, 0},
