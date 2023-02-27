@@ -42,7 +42,11 @@ llvm::StructType *getTypeByName(llvm::Module *module, std::string name) {
 }
 
 void insertAtBack(llvm::BasicBlock *block, llvm::Instruction *inst) {
+#if LLVM_VERSION_MAJOR >= 16
+  inst->insertInto(block, block->back());
+#else
   block->getInstList().push_back(inst);
+#endif
 }
 
 } // namespace kllvm
