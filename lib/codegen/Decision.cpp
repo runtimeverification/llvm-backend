@@ -316,6 +316,19 @@ void SwitchNode::codegen(Decision *d) {
         d->FailJump->addDestination(currChoiceBlock);
       } else if (
           currChoiceBlock && _case.getLiteral() == 0 && d->HasSearchResults) {
+        // see https://github.com/runtimeverification/llvm-backend/issues/672
+        // To summarize, if we are doing a search, and we have already found
+        // at least one rule that applies of a given priority, we need to not
+        // apply any rules with lower priority. However, by default the
+        // decision tree tells us to try rules with lower priority after a
+        // map/set choice has been exited, because we may have rules that apply
+        // that can only be tried after we have tried higher-priority rules on
+        // every map/set element in the collection. These lower-priority rules
+        // cannot apply if we are doing a search and one rule of higher
+        // priority has already been chosen, however, due to the nature of
+        // rule priority. Thus, since we know due to the way decision trees
+        // are compiled that this subtree contains only lower-priority rules,
+        // in this case we simply jump immediately to the failure node.
         auto loaded = new llvm::LoadInst(
             llvm::Type::getInt1Ty(d->Ctx), d->HasSearchResults, "",
             d->CurrentBlock);
