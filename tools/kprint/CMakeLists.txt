@@ -2,7 +2,7 @@ kllvm_add_tool(kprint
   main.cpp
 )
 
-target_link_libraries(kprint PUBLIC KOREPrinter)
+target_link_libraries(kprint PUBLIC KOREPrinter ${llvm_libs})
 target_compile_options(kprint PUBLIC -O3)
 
 install(
