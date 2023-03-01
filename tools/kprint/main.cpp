@@ -1,6 +1,7 @@
 #include "kllvm/ast/AST.h"
 #include "kllvm/printer/printer.h"
 #include "llvm/Support/CommandLine.h"
+#include "llvm/Support/WithColor.h"
 
 #include <iostream>
 #include <string>
@@ -15,9 +16,19 @@ cl::opt<std::string> DefinitionFilename(
 cl::opt<std::string>
     PatternFilename(cl::Positional, cl::desc("<pattern.kore>"), cl::Required);
 
-cl::opt<bool> FilterSubst("subs", cl::desc("Filter Substitutions"), cl::init("-"));
+cl::opt<bool> FilterSubst(cl::Positional, cl::desc("[true|false]"));
 
-int main(int argc, char **argv) {  
+cl::opt<std::string> ArgColor(cl::Positional, cl::desc("[true|false|auto]"));
+
+int main(int argc, char **argv) {
+  cl::PrintOptionValues();
+  StringMap<cl::Option *> &Map = cl::getRegisteredOptions();
+  Map["color"]->setHiddenFlag(cl::Hidden);
+
   cl::ParseCommandLineOptions(argc, argv);
-  printKORE(std::cout, argv[1], argv[2], isatty(1), FilterSubst);
+
+  bool hasColor = ArgColor == "true" || (ArgColor == "auto" && isatty(1));
+
+  printKORE(
+      std::cout, DefinitionFilename, PatternFilename, hasColor, FilterSubst);
 }
