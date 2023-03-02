@@ -16,7 +16,7 @@ cl::opt<std::string> DefinitionFilename(
 cl::opt<std::string>
     PatternFilename(cl::Positional, cl::desc("<pattern.kore>"), cl::Required);
 
-cl::opt<bool> FilterSubst(cl::Positional, cl::desc("[true|false]"));
+cl::opt<std::string> FilterSubst(cl::Positional, cl::desc("[true|false]"));
 
 cl::opt<std::string> ArgColor(cl::Positional, cl::desc("[true|false|auto]"));
 
@@ -27,8 +27,10 @@ int main(int argc, char **argv) {
 
   cl::ParseCommandLineOptions(argc, argv);
 
-  bool hasColor = ArgColor == "true" || (ArgColor == "auto" && isatty(1));
+  bool hasColor = ArgColor == "true" || (ArgColor == "auto" && isatty(1))
+                  || (ArgColor == "" && isatty(1));
+  bool filterSubst = FilterSubst == "true" || "" == FilterSubst;
 
   printKORE(
-      std::cout, DefinitionFilename, PatternFilename, hasColor, FilterSubst);
+      std::cout, DefinitionFilename, PatternFilename, hasColor, filterSubst);
 }
