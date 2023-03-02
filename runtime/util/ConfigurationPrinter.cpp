@@ -187,6 +187,7 @@ void printConfigurationInternal(
   visitor callbacks
       = {printConfigurationInternal,
          printMap,
+         printRangeMap,
          printList,
          printSet,
          printInt,

@@ -215,8 +215,8 @@ bool hook_RANGEMAP_eq(SortRangeMap m1, SortRangeMap m2) {
 
 void rangemap_hash(rangemap *m, void *hasher) {
   if (hash_enter()) {
-    for (auto iter = rng_map::ConstRangeMapIterator<KElem, KElem>(*m); iter.has_next();
-         ++iter) {
+    for (auto iter = rng_map::ConstRangeMapIterator<KElem, KElem>(*m);
+         iter.has_next(); ++iter) {
       auto entry = *iter;
       k_hash(entry.first.start(), hasher);
       k_hash(entry.first.end(), hasher);
@@ -227,8 +227,8 @@ void rangemap_hash(rangemap *m, void *hasher) {
 }
 
 void rangemap_foreach(rangemap *map, void(process)(block **)) {
-  for (auto iter = rng_map::RangeMapIterator<KElem, KElem>(*map); iter.has_next();
-       ++iter) {
+  for (auto iter = rng_map::RangeMapIterator<KElem, KElem>(*map);
+       iter.has_next(); ++iter) {
     process((block **)&iter->first.start());
     process((block **)&iter->first.end());
     process((block **)&iter->second);
@@ -237,11 +237,43 @@ void rangemap_foreach(rangemap *map, void(process)(block **)) {
 
 rangemap rangemap_map(rangemap *map, block *(process)(block *)) {
   auto tmp = *map;
-  for (auto iter = rng_map::ConstRangeMapIterator<KElem, KElem>(*map); iter.has_next();
-       ++iter) {
+  for (auto iter = rng_map::ConstRangeMapIterator<KElem, KElem>(*map);
+       iter.has_next(); ++iter) {
     auto entry = *iter;
     tmp = tmp.inserted(entry.first, process(entry.second));
   }
   return tmp;
+}
+
+void printRangeMap(
+    writer *file, rangemap *map, const char *unit, const char *element,
+    const char *concat) {
+  size_t size = map->size();
+  if (size == 0) {
+    sfprintf(file, "%s()", unit);
+    return;
+  }
+
+  sfprintf(file, "\\left-assoc{}(%s(", concat);
+
+  bool once = true;
+  for (auto iter = rng_map::ConstRangeMapIterator<KElem, KElem>(*map);
+       iter.has_next(); ++iter) {
+    if (once) {
+      once = false;
+    } else {
+      sfprintf(file, ",");
+    }
+
+    sfprintf(file, "%s(", element);
+    auto entry = *iter;
+    printConfigurationInternal(file, entry.first.start(), "SortKItem{}", false);
+    sfprintf(file, ",");
+    printConfigurationInternal(file, entry.first.end(), "SortKItem{}", false);
+    sfprintf(file, ",");
+    printConfigurationInternal(file, entry.second, "SortKItem{}", false);
+    sfprintf(file, ")");
+  }
+  sfprintf(file, "))");
 }
 }
