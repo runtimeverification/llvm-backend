@@ -17,6 +17,8 @@ stdenv.mkDerivation {
     boost fmt gmp jemalloc libffi mpfr ncurses python-env
   ] ++ lib.optional stdenv.isDarwin libiconv;
 
+  dontStrip = true;
+
   postPatch = ''
     sed -i bin/llvm-kompile \
       -e '2a export PATH="${lib.getBin host.clang}/bin:''${PATH}"'
