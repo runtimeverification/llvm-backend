@@ -127,10 +127,15 @@ include_directories (${PROJECT_SOURCE_DIR}/include)
 
 # Find the libraries that correspond to the LLVM components
 # that we wish to use
-llvm_map_components_to_libnames(llvm_libs core irreader)
 
 macro(kllvm_add_tool name)
   add_executable(${name} ${ARGN})
+
+  llvm_config(${name}
+    USE_SHARED true
+    core irreader
+  )
+
   if(APPLE)
     if(NOT USE_NIX)
       target_link_libraries(${name} PUBLIC "-ljemalloc" "-Wl,-rpath ${BREW_PREFIX}/lib" "-ldl")

@@ -3,7 +3,7 @@ kllvm_add_tool(kore-strip
 )
 
 target_link_libraries(kore-strip
-  PUBLIC BinaryKore ${llvm_libs}
+  PUBLIC BinaryKore
 )
 
 install(
