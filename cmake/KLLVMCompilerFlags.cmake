@@ -37,3 +37,7 @@ set(CMAKE_RANLIB "${CMAKE_C_COMPILER_RANLIB}")
 
 include_directories(${LLVM_INCLUDE_DIRS})
 include_directories(${PROJECT_SOURCE_DIR}/include)
+
+# Auto-generated header path
+set(KLLVM_AUTOGEN_INCLUDE_DIR ${CMAKE_BINARY_DIR}/include)
+include_directories(${KLLVM_AUTOGEN_INCLUDE_DIR})

@@ -1,13 +1,11 @@
 include(FindLLVM)
 
-add_subdirectory(deps)
-
-find_package(fmt        REQUIRED)
-find_package(PkgConfig  REQUIRED)
-find_package(ZLIB       REQUIRED)
+find_package(Boost      REQUIRED COMPONENTS unit_test_framework)
 find_package(FLEX       REQUIRED)
 find_package(GMP        REQUIRED)
-find_package(Boost      REQUIRED COMPONENTS unit_test_framework)
+find_package(PkgConfig  REQUIRED)
+find_package(ZLIB       REQUIRED)
+find_package(fmt        REQUIRED)
 
 pkg_check_modules(FFI REQUIRED libffi)
 if(USE_NIX)
