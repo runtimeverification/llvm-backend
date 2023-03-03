@@ -1,33 +1,34 @@
 #include "kllvm/ast/AST.h"
 #include "kllvm/printer/printer.h"
+#include "llvm/Support/CommandLine.h"
 
 #include <iostream>
 #include <string>
 #include <unistd.h>
 
 using namespace kllvm;
+using namespace llvm;
+
+cl::opt<std::string> DefinitionFilename(
+    cl::Positional, cl::desc("<definition.kore>"), cl::Required);
+
+cl::opt<std::string>
+    PatternFilename(cl::Positional, cl::desc("<pattern.kore>"), cl::Required);
+
+cl::opt<std::string>
+    ArgColor(cl::Positional, cl::desc("[true|false|auto]"), cl::init("auto"));
+
+cl::opt<bool>
+    FilterSubst(cl::Positional, cl::desc("[true|false]"), cl::init(true));
 
 int main(int argc, char **argv) {
-  if (argc != 3 && argc != 4 && argc != 5) {
-    std::cerr
-        << "usage: " << argv[0]
-        << " <definition.kore> <pattern.kore> [true|false|auto] [true|false]"
-        << std::endl;
-  }
+  auto map = cl::getRegisteredOptions();
+  map["color"]->setHiddenFlag(cl::Hidden);
 
-  bool hasColor, filterSubst;
-  if (argc >= 4) {
-    std::string arg = argv[3];
-    hasColor = arg == "true" || (arg == "auto" && isatty(1));
-  } else {
-    hasColor = isatty(1);
-  }
-  if (argc >= 5) {
-    std::string arg = argv[4];
-    filterSubst = arg == "true";
-  } else {
-    filterSubst = true;
-  }
+  cl::ParseCommandLineOptions(argc, argv);
 
-  printKORE(std::cout, argv[1], argv[2], hasColor, filterSubst);
+  bool has_color = ArgColor == "true" || (ArgColor == "auto" && isatty(1));
+
+  printKORE(
+      std::cout, DefinitionFilename, PatternFilename, has_color, FilterSubst);
 }
