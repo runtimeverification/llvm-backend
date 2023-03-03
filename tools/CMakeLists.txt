@@ -1,3 +1,26 @@
+macro(kllvm_add_tool name)
+  add_executable(${name} ${ARGN})
+
+  llvm_config(${name}
+    USE_SHARED true
+    core irreader
+  )
+
+  if(APPLE)
+    if(NOT USE_NIX)
+      target_link_libraries(${name} PUBLIC "-ljemalloc" "-Wl,-rpath ${BREW_PREFIX}/lib" "-ldl")
+    else()
+      target_link_libraries(${name} PUBLIC "-ljemalloc" "-ldl")
+    endif() # NOT USE_NIX
+  else()
+    if(NOT USE_NIX)
+      target_link_libraries(${name} PUBLIC "-ljemalloc" "-Wl,-rpath /usr/local/lib" "-ldl")
+    else()
+      target_link_libraries(${name} PUBLIC "-ljemalloc" "-ldl")
+    endif() # NOT USE_NIX
+  endif() # APPLE
+endmacro(kllvm_add_tool)
+
 add_subdirectory(llvm-backend-version)
 add_subdirectory(llvm-kompile-codegen)
 add_subdirectory(llvm-kompile-gc-stats)
