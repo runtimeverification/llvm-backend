@@ -125,9 +125,6 @@ find_package(Boost REQUIRED COMPONENTS unit_test_framework)
 include_directories(${LLVM_INCLUDE_DIRS})
 include_directories (${PROJECT_SOURCE_DIR}/include)
 
-# Find the libraries that correspond to the LLVM components
-# that we wish to use
-
 macro(kllvm_add_tool name)
   add_executable(${name} ${ARGN})
 
