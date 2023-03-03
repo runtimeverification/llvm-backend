@@ -1,5 +1,8 @@
 include(FindLLVM)
 
+add_subdirectory(deps)
+
+find_package(fmt        REQUIRED)
 find_package(PkgConfig  REQUIRED)
 find_package(ZLIB       REQUIRED)
 find_package(FLEX       REQUIRED)
