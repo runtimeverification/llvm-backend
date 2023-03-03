@@ -3,7 +3,7 @@ kllvm_add_tool(kore-convert
 )
 
 target_link_libraries(kore-convert
-  PUBLIC Parser AST ${llvm_libs}
+  PUBLIC Parser AST
 )
 
 install(

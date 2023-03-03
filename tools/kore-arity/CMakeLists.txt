@@ -3,7 +3,7 @@ kllvm_add_tool(kore-arity
 )
 
 target_link_libraries(kore-arity
-  PUBLIC BinaryKore ${llvm_libs}
+  PUBLIC BinaryKore
 )
 
 install(
