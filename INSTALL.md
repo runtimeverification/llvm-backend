@@ -92,7 +92,12 @@ lit test
 ```
 from the root source directory.
 
-There is also a unit test suite for backend internals; run:
+There is also a unit test suite for backend internals;
+Add the following option to your CMake invocation to enable it:
+```
+-DBUILD_TESTS=On
+```
+run it with:
 ```shell
 make test
 ```

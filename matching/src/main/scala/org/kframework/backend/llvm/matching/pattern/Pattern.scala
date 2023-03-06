@@ -88,7 +88,7 @@ case class AsP[T](name: T, sort: SortCategory, pat: Pattern[T]) extends Pattern[
   }
 }
 
-case class ListP[T](head: Seq[Pattern[T]], frame: Option[Pattern[T]], tail: Seq[Pattern[T]], ctr: SymbolOrAlias, orig: Pattern[T]) extends Pattern[T] {
+case class ListP[T] private(head: Seq[Pattern[T]], frame: Option[Pattern[T]], tail: Seq[Pattern[T]], ctr: SymbolOrAlias, orig: Pattern[T]) extends Pattern[T] {
   def signature(clause: Clause): Seq[Constructor] = {
     (0 to (head.size + tail.size)).map(ListC(ctr, _))
   }
@@ -130,8 +130,8 @@ case class ListP[T](head: Seq[Pattern[T]], frame: Option[Pattern[T]], tail: Seq[
     }
   }
   def expandOr: Seq[Pattern[T]] = {
-    val withHead = head.indices.foldLeft(Seq(this))((accum, ix) => accum.flatMap(l => l.head(ix).expandOr.map(p => ListP(l.head.updated(ix, p), l.frame, l.tail, ctr, orig))))
-    val withTail = tail.indices.foldLeft(withHead)((accum, ix) => accum.flatMap(l => l.tail(ix).expandOr.map(p => ListP(l.head, l.frame, l.tail.updated(ix, p), ctr, orig))))
+    val withHead = head.indices.foldLeft(Seq(this))((accum, ix) => accum.flatMap(l => l.head(ix).expandOr.map(p => new ListP(l.head.updated(ix, p), l.frame, l.tail, ctr, orig))))
+    val withTail = tail.indices.foldLeft(withHead)((accum, ix) => accum.flatMap(l => l.tail(ix).expandOr.map(p => new ListP(l.head, l.frame, l.tail.updated(ix, p), ctr, orig))))
     if (frame.isDefined) {
       withTail.flatMap(l => l.frame.get.expandOr.map(p => ListP(l.head, Some(p), l.tail, ctr, orig)))
     } else {
@@ -153,6 +153,16 @@ case class ListP[T](head: Seq[Pattern[T]], frame: Option[Pattern[T]], tail: Seq[
   override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
   def toShortString: String = "L(" + head.size + " " + frame.isDefined + " " + tail.size + ")"
   def toKORE(f: Fringe): kore.Pattern = orig.toKORE(f)
+}
+
+object ListP {
+  def apply[T](head: Seq[Pattern[T]], frame: Option[Pattern[T]], tail: Seq[Pattern[T]], ctr: SymbolOrAlias, orig: Pattern[T]): Pattern[T] = {
+    if (head.isEmpty && tail.isEmpty && frame.isDefined) {
+      frame.get
+    } else {
+      new ListP(head, frame, tail, ctr, orig)
+    }
+  }
 }
 
 case class LiteralP[T](literal: String, sort: SortCategory) extends Pattern[T] {
@@ -183,7 +193,7 @@ case class LiteralP[T](literal: String, sort: SortCategory) extends Pattern[T] {
   }
 }
 
-case class MapP[T](keys: Seq[Pattern[T]], values: Seq[Pattern[T]], frame: Option[Pattern[T]], ctr: SymbolOrAlias, orig: Pattern[T]) extends Pattern[T] {
+case class MapP[T] private(keys: Seq[Pattern[T]], values: Seq[Pattern[T]], frame: Option[Pattern[T]], ctr: SymbolOrAlias, orig: Pattern[T]) extends Pattern[T] {
   def signature(clause: Clause): Seq[Constructor] = {
     if (keys.isEmpty && frame.isEmpty) {
       Seq(Empty())
@@ -236,8 +246,8 @@ case class MapP[T](keys: Seq[Pattern[T]], values: Seq[Pattern[T]], frame: Option
     }
   }
   def expandOr: Seq[Pattern[T]] = {
-    val withKeys = keys.indices.foldLeft(Seq(this))((accum, ix) => accum.flatMap(m => m.keys(ix).expandOr.map(p => MapP(m.keys.updated(ix, p), m.values, m.frame, ctr, orig))))
-    val withValues = values.indices.foldLeft(withKeys)((accum, ix) => accum.flatMap(m => m.values(ix).expandOr.map(p => MapP(m.keys, m.values.updated(ix, p), m.frame, ctr, orig))))
+    val withKeys = keys.indices.foldLeft(Seq(this))((accum, ix) => accum.flatMap(m => m.keys(ix).expandOr.map(p => new MapP(m.keys.updated(ix, p), m.values, m.frame, ctr, orig))))
+    val withValues = values.indices.foldLeft(withKeys)((accum, ix) => accum.flatMap(m => m.values(ix).expandOr.map(p => new MapP(m.keys, m.values.updated(ix, p), m.frame, ctr, orig))))
     if (frame.isDefined) {
       withValues.flatMap(m => m.frame.get.expandOr.map(p => MapP(m.keys, m.values, Some(p), ctr, orig)))
     } else {
@@ -249,13 +259,25 @@ case class MapP[T](keys: Seq[Pattern[T]], values: Seq[Pattern[T]], frame: Option
 
   def category = Some(MapS())
   lazy val variables: Set[T] = keys.flatMap(_.variables).toSet ++ values.flatMap(_.variables).toSet ++ frame.map(_.variables).getOrElse(Set())
-  def canonicalize(clause: Clause): MapP[Option[Occurrence]] = MapP(keys.map(_.canonicalize(clause)), values.map(_.canonicalize(clause)), frame.map(_.canonicalize(clause)), ctr, orig.canonicalize(clause))
-  def decanonicalize: MapP[String] = MapP(keys.map(_.decanonicalize), values.map(_.decanonicalize), frame.map(_.decanonicalize), ctr, orig.decanonicalize)
+  def canonicalize(clause: Clause): MapP[Option[Occurrence]] = new MapP(keys.map(_.canonicalize(clause)), values.map(_.canonicalize(clause)), frame.map(_.canonicalize(clause)), ctr, orig.canonicalize(clause))
+  def decanonicalize: MapP[String] = new MapP(keys.map(_.decanonicalize), values.map(_.decanonicalize), frame.map(_.decanonicalize), ctr, orig.decanonicalize)
   def isBound(clause: Clause): Boolean = keys.forall(_.isBound(clause)) && values.forall(_.isBound(clause)) && frame.forall(_.isBound(clause))
   def isResidual(symlib: Parser.SymLib) = true
   override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
   def toShortString: String = "M(" + keys.size + " " + frame.isDefined + ")"
   def toKORE(f: Fringe): kore.Pattern = orig.toKORE(f)
+}
+
+object MapP {
+  def apply[T](keys: Seq[Pattern[T]], values: Seq[Pattern[T]], frame: Option[Pattern[T]], ctr: SymbolOrAlias, orig: Pattern[T]): Pattern[T] = {
+    if (keys.length != values.length) {
+      throw new AssertionError("invalid MapP")
+    } else if (keys.isEmpty && frame.isDefined) {
+      frame.get
+    } else {
+      new MapP(keys, values, frame, ctr, orig)
+    }
+  }
 }
 
 case class OrP[T](ps: Seq[Pattern[T]]) extends Pattern[T] {
@@ -300,7 +322,7 @@ object OrP {
   }
 }
 
-case class SetP[T](elements: Seq[Pattern[T]], frame: Option[Pattern[T]], ctr: SymbolOrAlias, orig: Pattern[T]) extends Pattern[T] {
+case class SetP[T] private(elements: Seq[Pattern[T]], frame: Option[Pattern[T]], ctr: SymbolOrAlias, orig: Pattern[T]) extends Pattern[T] {
   def signature(clause: Clause): Seq[Constructor] = {
     if (elements.isEmpty && frame.isEmpty) {
       Seq(Empty())
@@ -353,7 +375,7 @@ case class SetP[T](elements: Seq[Pattern[T]], frame: Option[Pattern[T]], ctr: Sy
     }
   }
   def expandOr: Seq[Pattern[T]] = {
-    val withElements = elements.indices.foldLeft(Seq(this))((accum, ix) => accum.flatMap(s => s.elements(ix).expandOr.map(p => SetP(s.elements.updated(ix, p), s.frame, ctr, orig))))
+    val withElements = elements.indices.foldLeft(Seq(this))((accum, ix) => accum.flatMap(s => s.elements(ix).expandOr.map(p => new SetP(s.elements.updated(ix, p), s.frame, ctr, orig))))
     if (frame.isDefined) {
       withElements.flatMap(s => s.frame.get.expandOr.map(p => SetP(s.elements, Some(p), ctr, orig)))
     } else {
@@ -365,13 +387,23 @@ case class SetP[T](elements: Seq[Pattern[T]], frame: Option[Pattern[T]], ctr: Sy
 
   def category = Some(SetS())
   lazy val variables: Set[T] = elements.flatMap(_.variables).toSet ++ frame.map(_.variables).getOrElse(Set())
-  def canonicalize(clause: Clause): SetP[Option[Occurrence]] = SetP(elements.map(_.canonicalize(clause)), frame.map(_.canonicalize(clause)), ctr, orig.canonicalize(clause))
-  def decanonicalize: SetP[String] = SetP(elements.map(_.decanonicalize), frame.map(_.decanonicalize), ctr, orig.decanonicalize)
+  def canonicalize(clause: Clause): SetP[Option[Occurrence]] = new SetP(elements.map(_.canonicalize(clause)), frame.map(_.canonicalize(clause)), ctr, orig.canonicalize(clause))
+  def decanonicalize: SetP[String] = new SetP(elements.map(_.decanonicalize), frame.map(_.decanonicalize), ctr, orig.decanonicalize)
   def isBound(clause: Clause): Boolean = elements.forall(_.isBound(clause)) && frame.forall(_.isBound(clause))
   def isResidual(symlib: Parser.SymLib) = true
   override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
   def toShortString: String = "S(" + elements.size + " " + frame.isDefined + ")"
   def toKORE(f: Fringe): kore.Pattern = orig.toKORE(f)
+}
+
+object SetP {
+  def apply[T](elements: Seq[Pattern[T]], frame: Option[Pattern[T]], ctr: SymbolOrAlias, orig: Pattern[T]): Pattern[T] = {
+    if (elements.isEmpty && frame.isDefined) {
+      frame.get
+    } else {
+      new SetP(elements, frame, ctr, orig)
+    }
+  }
 }
 
 case class SymbolP[T](sym: SymbolOrAlias, ps: Seq[Pattern[T]]) extends Pattern[T] {

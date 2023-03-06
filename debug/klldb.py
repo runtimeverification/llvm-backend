@@ -1,49 +1,75 @@
-#!/usr/bin/env python3
-
-import sys
-sys.path.append("@LLDB_PYTHONPATH@")  # noqa
-
-import argparse
 import lldb
-import os
-import pathlib
+import sys
+import inspect
 
 
-def dispatch_k(debugger, command, result, internal_dict):
-    print('K-specific support for LLDB is not yet implemented')
+class StartCommand:
+    program = 'start'
+
+    @classmethod
+    def register_lldb_command(cls, debugger, container, module_name):
+        command = f'command script add -o -c {module_name}.{cls.__name__} {container} {cls.program}'
+        debugger.HandleCommand(command)
+
+    def __init__(self, debugger, unused):
+        pass
+
+    def __call__(self, debugger, command, exe_ctx, result):
+        print(f'{self.program} is not implemented')
 
 
-def parse_args():
-    parser = argparse.ArgumentParser(
-        description="Run a K definition under LLDB")
-    parser.add_argument(
-        'interpreter', help='Path to the compiled K interpreter to run')
-    parser.add_argument('input', help='Path to input KORE term')
-    parser.add_argument('depth', help='Number of rewriting steps to take')
-    parser.add_argument('output', help='Path to write output KORE term to')
-    return parser.parse_args()
+class StepCommand:
+    program = 'step'
+
+    @classmethod
+    def register_lldb_command(cls, debugger, container, module_name):
+        command = f'command script add -o -c {module_name}.{cls.__name__} {container} {cls.program}'
+        debugger.HandleCommand(command)
+
+    def __init__(self, debugger, unused):
+        pass
+
+    def __call__(self, debugger, command, exe_ctx, result):
+        print(f'{self.program} is not implemented')
 
 
-if __name__ == "__main__":
-    args = parse_args()
+class MatchCommand:
+    program = 'match'
 
-    debugger = lldb.SBDebugger.Create()
-    debugger.SetAsync(False)
+    @classmethod
+    def register_lldb_command(cls, debugger, container, module_name):
+        command = f'command script add -o -c {module_name}.{cls.__name__} {container} {cls.program}'
+        debugger.HandleCommand(command)
 
-    debugger.HandleCommand(
-        f"command script import {pathlib.Path(__file__).resolve()}")
+    def __init__(self, debugger, unused):
+        pass
 
-    target = debugger.CreateTargetWithFileAndArch(
-        args.interpreter, lldb.LLDB_ARCH_DEFAULT)
+    def __call__(self, debugger, command, exe_ctx, result):
+        print(f'{self.program} is not implemented')
 
-    main_bp = target.BreakpointCreateByName(
-        "main", target.GetExecutable().GetFilename())
 
-    process = target.LaunchSimple([args.input, args.depth, args.output], None, os.getcwd())
+class BlockSummary:
+    typename = 'block'
 
-    n_errors, quit_requested, has_crashed = debugger.RunCommandInterpreter(
-        True, False, lldb.SBCommandInterpreterRunOptions(), 0, False, False)
+    @classmethod
+    def register_lldb_summary(cls, debugger, module_name):
+        command = f'type summary add -F {module_name}.{cls.__name__}.summary {cls.typename}'
+        debugger.HandleCommand(command)
+
+    @staticmethod
+    def summary(value, unused):
+        return f'<block@{value.addr}>'
 
 
 def __lldb_init_module(debugger, internal_dict):
-    debugger.HandleCommand("command script add -f klldb.dispatch_k k")
+    debugger.HandleCommand('command container add -h "K commands" k')
+
+    # Adapted from llvm-project/lldb/examples/python/cmdtemplate.py
+    # Register all classes that have a register_lldb_command method
+    for _name, cls in inspect.getmembers(sys.modules[__name__]):
+        if inspect.isclass(cls):
+            if callable(getattr(cls, "register_lldb_command", None)):
+                cls.register_lldb_command(debugger, 'k', __name__)
+
+            if callable(getattr(cls, "register_lldb_summary", None)):
+                cls.register_lldb_summary(debugger, __name__)
