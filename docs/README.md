@@ -11,6 +11,8 @@ repository](https://github.com/runtimeverification/k/issues).
 
 ## Overview
 
+![Flow diagram of LLVM backend interpreter compilation](images/compilation.svg)
+
 ## Contents
 
 The LLVM backend documentation is split into two main sections: technical
