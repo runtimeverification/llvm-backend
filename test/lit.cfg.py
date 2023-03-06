@@ -64,6 +64,7 @@ def one_line(s):
 config.substitutions.extend([
     ('%kompile', 'llvm-kompile-testing'),
     ('%interpreter', '%kompile %s main -o %t.interpreter'),
+    ('%search-interpreter', '%kompile %s search -o %t.interpreter'),
     ('%convert-input', '%kore-convert %test-input -o %t.bin'),
     ('%strip-binary', 'kore-strip'),
     ('%arity', 'kore-arity'),
@@ -97,6 +98,15 @@ config.substitutions.extend([
         for out in %test-dir-out/*.out.diff; do
             in=%test-dir-in/`basename $out .out.diff`.in
             %t.interpreter $in -1 /dev/stdout | diff - $out || (echo $in && exit 1)
+        done
+    ''')),
+
+    ('%check-kprint-dir-diff', one_line('''
+        for out_diff in %test-dir-out/*.out.diff; do
+            in=%test-dir-in/`basename $out_diff .out.diff`.in
+            out=%test-dir-in/`basename $out_diff .out.diff`.out
+            %t.interpreter $in -1 $out
+            kprint %S/search $out | diff - $out_diff
         done
     ''')),
 
