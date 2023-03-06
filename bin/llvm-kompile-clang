@@ -195,24 +195,35 @@ else
 fi
 
 if $link; then
-run @CMAKE_CXX_COMPILER@ -Wno-override-module -Wno-return-type-c-linkage "$modopt" "${files[@]}" \
-  "$LIBDIR"/libarithmetic.a \
-  "$MAINFILES" \
-  "$LIBDIR"/libutil.a \
-  "$LIBDIR"/libstrings.a \
-  "$LIBDIR"/libnumeric_strings.a \
-  "$LIBDIR"/libio.a \
-  "$LIBDIR"/libcollections.a \
-  "$LIBDIR"/libParser.a \
-  "$LIBDIR"/libAST.a \
-  "$LIBDIR"/libBinaryKore.a \
-  "$LIBDIR"/libKOREPrinter.a \
-  "$LIBDIR"/liballoc.a \
-  "$LIBDIR"/libcollect.a \
-  "$LIBDIR"/libmeta.a \
-  "$LIBDIR"/libjson.a \
-  "${flags[@]}" \
-  "${all_libraries[@]}" \
-  -I "$(dirname "$0")"/../include/kllvm \
-  "${clangpp_args[@]}"
+  run @CMAKE_CXX_COMPILER@ -Wno-override-module -Wno-return-type-c-linkage "$modopt" "${files[@]}" \
+    "$LIBDIR"/libarithmetic.a \
+    "$MAINFILES" \
+    "$LIBDIR"/libutil.a \
+    "$LIBDIR"/libstrings.a \
+    "$LIBDIR"/libnumeric_strings.a \
+    "$LIBDIR"/libio.a \
+    "$LIBDIR"/libcollections.a \
+    "$LIBDIR"/libParser.a \
+    "$LIBDIR"/libAST.a \
+    "$LIBDIR"/libBinaryKore.a \
+    "$LIBDIR"/libKOREPrinter.a \
+    "$LIBDIR"/liballoc.a \
+    "$LIBDIR"/libcollect.a \
+    "$LIBDIR"/libmeta.a \
+    "$LIBDIR"/libjson.a \
+    "${flags[@]}" \
+    "${all_libraries[@]}" \
+    -I "$(dirname "$0")"/../include/kllvm \
+    "${clangpp_args[@]}"
+
+  if [[ "$OSTYPE" == "darwin"* ]]; then
+    dsym_path="${output_file}.dSYM"
+    if [[ -d "$dsym_path" ]]; then
+      python_path="$dsym_path/Contents/Resources/Python"
+      mkdir -p "$python_path"
+
+      script_name="$(basename "$output_file").py"
+      cp "$LIBDIR/lldb/klldb.py" "$python_path/$script_name"
+    fi
+  fi
 fi
