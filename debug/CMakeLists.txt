@@ -1,29 +1,12 @@
-if(APPLE)
-  find_program(LLDB lldb
-  PATHS ${LLVM_TOOLS_BINARY_DIR}
-  NO_DEFAULT_PATH)
-
-  if(LLDB)
-    execute_process(
-      COMMAND ${LLDB}
-      ARGUMENTS "-P"
-      OUTPUT_VARIABLE LLDB_PYTHONPATH
-      OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-    configure_file(klldb.py ${CMAKE_CURRENT_BINARY_DIR} @ONLY)
-
-    install(
-      PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/klldb.py
-      DESTINATION lib/lldb)
-  else()
-    message(WARNING "No compatible LLDB installation found")
-  endif()
-endif()
-
 set(GDB_SCRIPT_PATH ${CMAKE_CURRENT_BINARY_DIR})
 set(GDB_SCRIPT_NAME kgdb.py)
 
-configure_file(kgdb.py ${CMAKE_CURRENT_BINARY_DIR} @ONLY)
+configure_file(kgdb.py  ${CMAKE_CURRENT_BINARY_DIR} @ONLY)
+configure_file(klldb.py ${CMAKE_CURRENT_BINARY_DIR} @ONLY)
+
+install(
+  PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/klldb.py
+  DESTINATION lib/kllvm/lldb)
 
 configure_file(
   ${CMAKE_SOURCE_DIR}/config/macros.h
