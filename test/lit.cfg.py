@@ -101,15 +101,6 @@ config.substitutions.extend([
         done
     ''')),
 
-    ('%check-kprint-dir-diff', one_line('''
-        for out_diff in %test-dir-out/*.out.diff; do
-            in=%test-dir-in/`basename $out_diff .out.diff`.in
-            out=%test-dir-in/`basename $out_diff .out.diff`.out
-            %t.interpreter $in -1 $out
-            kprint %S/search $out | diff - $out_diff
-        done
-    ''')),
-
     ('%run-binary-out', '%t.interpreter %test-input -1 %t.out.bin --binary-output'),
     ('%run-binary', '%convert-input && %t.interpreter %t.bin -1 /dev/stdout'),
     ('%run', '%t.interpreter %test-input -1 /dev/stdout'),

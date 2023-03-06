@@ -1,5 +1,5 @@
 // RUN: %search-interpreter
-// RUN: %check-kprint-dir-diff
+// RUN: %check-dir-diff
 
 [topCellInitializer{}(LblinitGeneratedTopCell{}()), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/Users/robertorosmaninho/rv/tests/search.k)")]
 
