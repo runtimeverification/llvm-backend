@@ -42,7 +42,8 @@ Then, information from the definition and the compiled decision trees are used
 to emit LLVM IR that implements an interpreter for the definition's rewrite
 system.
 
-![Flow diagram of LLVM backend interpreter compilation](images/compilation.svg)
+![Flow diagram of LLVM backend interpreter compilation](images/compilation.svg#gh-light-mode-only)
+![Flow diagram of LLVM backend interpreter compilation](images/compilation-dark.svg#gh-dark-mode-only)
 
 ### Execution
 
@@ -51,7 +52,8 @@ it to generate a space-efficient internal term structure. Rewrite rules are
 applied to the term until no more can apply (i.e. rewriting finishes), and the
 result is un-parsed to a KORE term for output.
 
-![Flow diagram of LLVM backend execution](images/execution.svg)
+![Flow diagram of LLVM backend execution](images/execution.svg#gh-light-mode-only)
+![Flow diagram of LLVM backend execution](images/execution-dark.svg#gh-dark-mode-only)
 
 [dev-guide]: developer-guide.md
 [issues]: https://github.com/runtimeverification/k/issues
