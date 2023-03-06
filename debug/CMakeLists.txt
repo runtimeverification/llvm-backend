@@ -1,12 +1,11 @@
 if(APPLE)
-  # We need to hard-code the path to the system (i.e. XCode) installation of
-  # lldb here because a Homebrew version is likely to want a different version
-  # of Python 3 than the default macOS version.
-  set(LLDB_PATH "/usr/local/bin/lldb")
+  find_program(LLDB lldb
+  PATHS ${LLVM_TOOLS_BINARY_DIR}
+  NO_DEFAULT_PATH)
 
-  if(EXISTS ${LLDB_PATH})
+  if(LLDB)
     execute_process(
-      COMMAND ${LLDB_PATH}
+      COMMAND ${LLDB}
       ARGUMENTS "-P"
       OUTPUT_VARIABLE LLDB_PYTHONPATH
       OUTPUT_STRIP_TRAILING_WHITESPACE)
