@@ -59,6 +59,6 @@ result is un-parsed to a KORE term for output.
 [issues]: https://github.com/runtimeverification/k/issues
 [k]: https://github.com/runtimeverification/k
 [llvm-ir]: https://llvm.org/docs/LangRef.html
-[maranget]: https://dl.acm.org/doi/10.1145/1411304.1411311
+[maranget]: http://moscova.inria.fr/~maranget/papers/ml05e-maranget.pdf
 [matching]: ../matching/README.md
 [tech-docs]: technical-documentation.md
