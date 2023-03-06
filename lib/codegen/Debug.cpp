@@ -29,11 +29,7 @@ static llvm::DISubprogram *DbgSP;
 static unsigned DbgLine;
 static unsigned DbgColumn;
 
-#if LLVM_VERSION_MAJOR >= 14
-#define DWARF_VERSION 5
-#else
 #define DWARF_VERSION 4
-#endif
 
 void initDebugInfo(llvm::Module *module, std::string filename) {
   Dbg = new llvm::DIBuilder(*module);
