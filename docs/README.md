@@ -1,95 +1,22 @@
 # LLVM Backend
 
-## Technical Documentation
+The [K Framework](https://github.com/runtimeverification/k) LLVM backend
+implements **fast concrete execution** for languages written in K. It does so by
+compiling K definitions to specialized, native-code interpreters via [LLVM
+IR](https://llvm.org/docs/LangRef.html). This document is intended as a
+technical reference for developers of the LLVM backend, rather than for end
+users of K. If you are a K user looking for technical advice, please [open an
+issue on the main K
+repository](https://github.com/runtimeverification/k/issues).
 
-* Documentation for all the major components of the backend
+## Overview
 
-### Overview
+## Contents
 
-* Summary of project
-* Diagram showing components
+The LLVM backend documentation is split into two main sections: technical
+documentation for the internal implementation details of the backend, and a
+developer guide with best practices and conventions for working on the
+repository.
 
-### KORE
-
-* High level summary
-* Language specification inc. syntax
-* Parsing
-* [Binary format](binary_kore.md)
-
-### Pattern Matching
-
-* [Existing documentation](../matching/README.md)
-* Paper
-* Decision tree structure
-* Parsing / serializing tree
-
-### Runtime Term Representation
-
-* Blocks / tags / headers
-* Hooked / native type representations
-
-### Code Generation and Rewriting
-
-* Emitted functions / lookup tables
-* Printing & serialization / visitors
-* Rewriting / rule application
-
-### Garbage Collection
-
-* Arenas
-* Allocation / collection
-* Static terms
-
-### Runtime Library
-
-* Hooks
-* Generated vs. LLVM
-* Main, search etc.
-
-### Bindings
-
-* C
-* Python
-
-### Debugging Support
-
-* GDB script
-
-### Interface
-
-* Scripts installed
-* KORE tools
-* Ordinal lookups
-
-## Developer Guide
-
-* How do we work on the backend?
-* Tools, environment, best practice etc.
-
-### Environment Setup
-
-* [Dependencies](../INSTALL.md)
-* Submodules
-
-### Style and Code Checks
-
-* Shellcheck
-* Clang format
-* IWYU
-* Style guides?
-
-### Testing
-
-* Adding tests
-* `lit`, `FileCheck` etc.
-* Path assumptions
-
-### Using the Backend
-
-* Building a semantics that uses the backend directly
-* Embedding / library mode
-* Advantages / disadvantages
-
-### Nix
-
-* Differences to traditional setup
+* [Technical documentation](technical-documentation.md)
+* [Developer guide](developer-guide.md)
