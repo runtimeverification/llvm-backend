@@ -3,7 +3,6 @@ modopt="$1"
 main="$2"
 lto="$3"
 shift; shift; shift
-debug=false
 flags=()
 llc_flags=()
 llc_opt_flags="-O0"
