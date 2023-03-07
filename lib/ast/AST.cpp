@@ -1234,7 +1234,7 @@ bool KOREAxiomDeclaration::isRequired() {
   return !attributes.count(ASSOC) && !attributes.count(COMM)
          && !attributes.count(IDEM) && !attributes.count(UNIT)
          && !attributes.count(FUNCTIONAL) && !attributes.count(CONSTRUCTOR)
-         && !attributes.count(TOTAL) && !attributes.count(SUBSORT) 
+         && !attributes.count(TOTAL) && !attributes.count(SUBSORT)
          && !attributes.count(CEIL) && !attributes.count(NON_EXECUTABLE)
          && !attributes.count(SIMPLIFICATION);
 }
