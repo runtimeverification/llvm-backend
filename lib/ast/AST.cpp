@@ -1223,6 +1223,7 @@ static const std::string COMM = "comm";
 static const std::string IDEM = "idem";
 static const std::string UNIT = "unit";
 static const std::string FUNCTIONAL = "functional";
+static const std::string TOTAL = "total";
 static const std::string SUBSORT = "subsort";
 static const std::string CONSTRUCTOR = "constructor";
 static const std::string CEIL = "ceil";
@@ -1233,6 +1234,7 @@ bool KOREAxiomDeclaration::isRequired() {
   return !attributes.count(ASSOC) && !attributes.count(COMM)
          && !attributes.count(IDEM) && !attributes.count(UNIT)
          && !attributes.count(FUNCTIONAL) && !attributes.count(CONSTRUCTOR)
+         && !attributes.count(TOTAL) && !attributes.count(CONSTRUCTOR)
          && !attributes.count(SUBSORT) && !attributes.count(CEIL)
          && !attributes.count(NON_EXECUTABLE)
          && !attributes.count(SIMPLIFICATION);
