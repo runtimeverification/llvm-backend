@@ -247,7 +247,7 @@ rangemap rangemap_map(rangemap *map, block *(process)(block *)) {
 
 void printRangeMap(
     writer *file, rangemap *map, const char *unit, const char *element,
-    const char *concat) {
+    const char *concat, void *state) {
   size_t size = map->size();
   if (size == 0) {
     sfprintf(file, "%s()", unit);
@@ -267,11 +267,13 @@ void printRangeMap(
 
     sfprintf(file, "%s(", element);
     auto entry = *iter;
-    printConfigurationInternal(file, entry.first.start(), "SortKItem{}", false);
+    printConfigurationInternal(
+        file, entry.first.start(), "SortKItem{}", false, state);
     sfprintf(file, ",");
-    printConfigurationInternal(file, entry.first.end(), "SortKItem{}", false);
+    printConfigurationInternal(
+        file, entry.first.end(), "SortKItem{}", false, state);
     sfprintf(file, ",");
-    printConfigurationInternal(file, entry.second, "SortKItem{}", false);
+    printConfigurationInternal(file, entry.second, "SortKItem{}", false, state);
     sfprintf(file, ")");
   }
   sfprintf(file, "))");

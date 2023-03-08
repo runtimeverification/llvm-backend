@@ -264,13 +264,13 @@ typedef struct {
   void (*visitMInt)(writer *, size_t *, size_t, const char *, void *);
   void (*visitSeparator)(writer *, void *);
   void (*visitRangeMap)(
-      writer *, rangemap *, const char *, const char *, const char *);
+      writer *, rangemap *, const char *, const char *, const char *, void *);
 } visitor;
 
 void printMap(
     writer *, map *, const char *, const char *, const char *, void *);
 void printRangeMap(
-    writer *, rangemap *, const char *, const char *, const char *);
+    writer *, rangemap *, const char *, const char *, const char *, void *);
 void printSet(
     writer *, set *, const char *, const char *, const char *, void *);
 void printList(

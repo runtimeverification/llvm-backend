@@ -126,10 +126,12 @@ void serializeMap(
 
 void serializeRangeMap(
     writer *file, rangemap *map, const char *unit, const char *element,
-    const char *concat) {
+    const char *concat, void *state) {
+  auto &instance = static_cast<serialization_state *>(state)->instance;
+
   size_t size = map->size();
   if (size == 0) {
-    emitSymbol(unit);
+    emitSymbol(instance, unit);
     return;
   }
 
@@ -137,16 +139,17 @@ void serializeRangeMap(
   for (auto iter = rng_map::ConstRangeMapIterator<KElem, KElem>(*map);
        iter.has_next(); ++iter) {
     serializeConfigurationInternal(
-        file, iter->first.start(), "SortKItem{}", false);
+        file, iter->first.start(), "SortKItem{}", false, state);
     serializeConfigurationInternal(
-        file, iter->first.end(), "SortKItem{}", false);
-    serializeConfigurationInternal(file, iter->second, "SortKItem{}", false);
-    emitSymbol(element, 3);
+        file, iter->first.end(), "SortKItem{}", false, state);
+    serializeConfigurationInternal(
+        file, iter->second, "SortKItem{}", false, state);
+    emitSymbol(instance, element, 3);
 
     if (once) {
       once = false;
     } else {
-      emitSymbol(concat, 2);
+      emitSymbol(instance, concat, 2);
     }
   }
 }
