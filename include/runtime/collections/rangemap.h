@@ -5,6 +5,7 @@
 
 #include "runtime/fmt_error_handling.h"
 #include <cassert>
+#include <functional>
 #include <iostream>
 #include <optional>
 #include <stack>
@@ -284,7 +285,7 @@ private:
       T e = r1[i].first.end() < r2[j].first.end() ? r1[i].first.end()
                                                   : r2[j].first.end();
       if (s < e && r1[i].second == r2[j].second) {
-        res.emplace_back(Range(s, e));
+        res.emplace_back(Range<T>(s, e));
       }
       // The range with the smallest end has been processed - remove it.
       if (r1[i].first.end() < r2[j].first.end()) {
