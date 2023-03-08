@@ -253,8 +253,6 @@ typedef struct {
   void (*visitConfig)(writer *, block *, const char *, bool, void *);
   void (*visitMap)(
       writer *, map *, const char *, const char *, const char *, void *);
-  void (*visitRangeMap)(
-      writer *, rangemap *, const char *, const char *, const char *);
   void (*visitList)(
       writer *, list *, const char *, const char *, const char *, void *);
   void (*visitSet)(
@@ -265,6 +263,8 @@ typedef struct {
   void (*visitStringBuffer)(writer *, stringbuffer *, const char *, void *);
   void (*visitMInt)(writer *, size_t *, size_t, const char *, void *);
   void (*visitSeparator)(writer *, void *);
+  void (*visitRangeMap)(
+      writer *, rangemap *, const char *, const char *, const char *);
 } visitor;
 
 void printMap(

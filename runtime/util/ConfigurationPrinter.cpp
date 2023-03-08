@@ -187,7 +187,6 @@ void printConfigurationInternal(
   visitor callbacks
       = {printConfigurationInternal,
          printMap,
-         printRangeMap,
          printList,
          printSet,
          printInt,
@@ -195,7 +194,8 @@ void printConfigurationInternal(
          printBool,
          printStringBuffer,
          printMInt,
-         printComma};
+         printComma,
+         printRangeMap};
 
   visitChildren(subject, file, &callbacks, state_ptr);
 

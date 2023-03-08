@@ -313,7 +313,6 @@ void serializeConfigurationInternal(
   visitor callbacks
       = {serializeConfigurationInternal,
          serializeMap,
-         serializeRangeMap,
          serializeList,
          serializeSet,
          serializeInt,
@@ -321,7 +320,8 @@ void serializeConfigurationInternal(
          serializeBool,
          serializeStringBuffer,
          serializeMInt,
-         serializeComma};
+         serializeComma,
+         serializeRangeMap};
 
   visitChildren(subject, file, &callbacks, state_ptr);
 
