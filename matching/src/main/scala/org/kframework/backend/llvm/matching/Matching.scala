@@ -14,17 +14,19 @@ object Matching {
     val defn = new TextToKore().parse(filename)
     outputFolder.mkdirs()
     val allAxioms = Parser.getAxioms(defn)
-    val axioms = Parser.parseTopAxioms(allAxioms)
+    val axioms = Parser.parseTopAxioms(allAxioms, false)
+    val searchAxioms = Parser.parseTopAxioms(allAxioms, true)
     val symlib = Parser.parseSymbols(defn, heuristic)
     val (dt, dtSearch, matrix) = if (axioms.isEmpty) {
       (Failure(), Failure(), null)
     } else {
       val matrix = Generator.genClauseMatrix(symlib, defn, axioms, Seq(axioms.head.rewrite.sort))
+      val searchMatrix = Generator.genClauseMatrix(symlib, defn, searchAxioms, Seq(searchAxioms.head.rewrite.sort))
       if (warn) {
-        matrix.checkUsefulness(kem)
+        searchMatrix.checkUsefulness(kem)
       }
       if (genSearch) {
-        (matrix.compile, matrix.compileSearch, matrix)
+        (matrix.compile, searchMatrix.compileSearch, matrix)
       } else {
         (matrix.compile, Failure(), matrix)
       }
