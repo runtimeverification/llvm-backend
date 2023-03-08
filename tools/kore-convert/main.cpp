@@ -1,8 +1,8 @@
-#include "kllvm/ast/AST.h"
-#include "kllvm/binary/deserializer.h"
-#include "kllvm/binary/serializer.h"
-#include "kllvm/parser/KOREParser.h"
-#include "kllvm/parser/location.h"
+#include <kllvm/ast/AST.h>
+#include <kllvm/binary/deserializer.h>
+#include <kllvm/binary/serializer.h>
+#include <kllvm/parser/KOREParser.h>
+#include <kllvm/parser/location.h>
 
 #include <llvm/ADT/SmallVector.h>
 #include <llvm/ADT/StringRef.h>
@@ -26,38 +26,44 @@ enum kore_file_format {
   binary,
 };
 
-cl::opt<std::string>
-    InputFilename(cl::Positional, cl::desc("<input file>"), cl::Required);
+cl::OptionCategory KoreConvertCat("kore-convert options");
+
+cl::opt<std::string> InputFilename(
+    cl::Positional, cl::desc("<input file>"), cl::Required,
+    cl::cat(KoreConvertCat));
 
 cl::opt<kore_file_format> InputFormat(
     "from", cl::desc("Specify input file format"),
     cl::values(
         clEnumVal(detect, "Detect input format automatically"),
         clEnumVal(text, "Textual KORE"), clEnumVal(binary, "Binary KORE")),
-    cl::init(detect));
+    cl::init(detect), cl::cat(KoreConvertCat));
 
 cl::opt<std::string> OutputFilename(
     "o", cl::desc("Specify output filename"), cl::value_desc("filename"),
-    cl::init("-"));
+    cl::init("-"), cl::cat(KoreConvertCat));
 
 cl::opt<kore_file_format> OutputFormat(
     "to", cl::desc("Specify output file format"),
     cl::values(
         clEnumVal(detect, "Convert binary <=> text"),
         clEnumVal(text, "Textual KORE"), clEnumVal(binary, "Binary KORE")),
-    cl::init(detect));
+    cl::init(detect), cl::cat(KoreConvertCat));
 
-cl::opt<bool> ForceBinary("F", cl::desc("Force binary output on stdout"));
+cl::opt<bool> ForceBinary(
+    "F", cl::desc("Force binary output on stdout"), cl::cat(KoreConvertCat));
 
 cl::opt<bool> NoHeader(
     "k",
     cl::desc(
-        "Don't add the KORE header and version at the start of binary output"));
+        "Don't add the KORE header and version at the start of binary output"),
+    cl::cat(KoreConvertCat));
 
 cl::opt<bool> NoArity(
     "a",
     cl::desc(
-        "Don't add the topmost constructor arity at the end of binary output"));
+        "Don't add the topmost constructor arity at the end of binary output"),
+    cl::cat(KoreConvertCat));
 
 sptr<KOREPattern> get_input_pattern() {
   auto get_text = [&]() { return KOREParser(InputFilename).pattern(); };
@@ -107,6 +113,7 @@ serializer::flags get_flags() {
 }
 
 int main(int argc, char **argv) {
+  cl::HideUnrelatedOptions({&KoreConvertCat});
   cl::ParseCommandLineOptions(argc, argv);
 
   auto input = get_input_pattern();

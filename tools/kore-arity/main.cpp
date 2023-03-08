@@ -10,9 +10,13 @@
 
 using namespace llvm;
 
-cl::opt<uint64_t> Arity(cl::Positional, cl::desc("<arity>"), cl::Required);
+cl::OptionCategory KoreArityCat("kore-arity options");
+
+cl::opt<uint64_t> Arity(
+    cl::Positional, cl::desc("<arity>"), cl::Required, cl::cat(KoreArityCat));
 
 int main(int argc, char **argv) {
+  cl::HideUnrelatedOptions({&KoreArityCat});
   cl::ParseCommandLineOptions(argc, argv);
 
   auto s = kllvm::serializer(kllvm::serializer::DROP_HEADER);

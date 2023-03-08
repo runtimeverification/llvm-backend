@@ -13,23 +13,27 @@
 
 using namespace llvm;
 
+cl::OptionCategory KoreStripCat("kore-strip options");
+
 cl::opt<bool> StripArity(
     "a",
     cl::desc(
-        "Strip a single sequence of arity bytes from the end of the input"));
+        "Strip a single sequence of arity bytes from the end of the input"),
+    cl::cat(KoreStripCat));
 
 cl::opt<bool> StripHeader(
     "k",
     cl::desc(
-        "Strip the leading 11 bytes (header and version) from the input file"));
+        "Strip the leading 11 bytes (header and version) from the input file"),
+    cl::cat(KoreStripCat));
 
 cl::opt<std::string> InputFilename(
     "i", cl::desc("Specify input filename"), cl::value_desc("filename"),
-    cl::Required);
+    cl::Required, cl::cat(KoreStripCat));
 
 cl::opt<std::string> OutputFilename(
     "o", cl::desc("Specify output filename"), cl::value_desc("filename"),
-    cl::init("-"));
+    cl::init("-"), cl::cat(KoreStripCat));
 
 std::FILE *check_fopen(char const *name, char const *mode) {
   auto f = std::fopen(name, mode);
@@ -44,6 +48,7 @@ std::FILE *check_fopen(char const *name, char const *mode) {
 }
 
 int main(int argc, char **argv) {
+  cl::HideUnrelatedOptions({&KoreStripCat});
   cl::ParseCommandLineOptions(argc, argv);
 
   auto input = check_fopen(InputFilename.c_str(), "rb");
