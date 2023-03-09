@@ -130,6 +130,7 @@ void addKompiledDirSymbol(
 }
 
 std::string MAP_STRUCT = "map";
+std::string RANGEMAP_STRUCT = "rangemap";
 std::string LIST_STRUCT = "list";
 std::string SET_STRUCT = "set";
 std::string INT_WRAPPER_STRUCT = "mpz_hdr";
@@ -144,6 +145,7 @@ llvm::Type *getParamType(ValueType sort, llvm::Module *Module) {
   llvm::Type *type = getValueType(sort, Module);
   switch (sort.cat) {
   case SortCategory::Map:
+  case SortCategory::RangeMap:
   case SortCategory::List:
   case SortCategory::Set: type = llvm::PointerType::getUnqual(type); break;
   default: break;
@@ -158,6 +160,7 @@ llvm::StructType *getBlockType(llvm::Module *Module) {
 llvm::Type *getValueType(ValueType sort, llvm::Module *Module) {
   switch (sort.cat) {
   case SortCategory::Map: return getTypeByName(Module, MAP_STRUCT);
+  case SortCategory::RangeMap: return getTypeByName(Module, RANGEMAP_STRUCT);
   case SortCategory::List: return getTypeByName(Module, LIST_STRUCT);
   case SortCategory::Set: return getTypeByName(Module, SET_STRUCT);
   case SortCategory::Int:
@@ -762,6 +765,7 @@ llvm::Value *CreateTerm::createFunctionCall(
         = createAllocation(pattern->getArguments()[i++].get()).first;
     switch (concreteSort->getCategory(Definition).cat) {
     case SortCategory::Map:
+    case SortCategory::RangeMap:
     case SortCategory::List:
     case SortCategory::Set: {
       if (!arg->getType()->isPointerTy()) {
@@ -788,6 +792,7 @@ llvm::Value *CreateTerm::createFunctionCall(
   bool collection = false;
   switch (returnCat.cat) {
   case SortCategory::Map:
+  case SortCategory::RangeMap:
   case SortCategory::List:
   case SortCategory::Set: collection = true; break;
   default: sret = false; break;
@@ -1064,6 +1069,7 @@ bool makeFunction(
     debugArgs.push_back(getDebugType(cat, Out.str()));
     switch (cat.cat) {
     case SortCategory::Map:
+    case SortCategory::RangeMap:
     case SortCategory::List:
     case SortCategory::Set:
       paramType = llvm::PointerType::getUnqual(paramType);
@@ -1079,6 +1085,7 @@ bool makeFunction(
   auto returnType = getValueType(returnCat, Module);
   switch (returnCat.cat) {
   case SortCategory::Map:
+  case SortCategory::RangeMap:
   case SortCategory::List:
   case SortCategory::Set:
     returnType = llvm::PointerType::getUnqual(returnType);
@@ -1180,6 +1187,7 @@ std::string makeApplyRuleFunction(
     debugArgs.push_back(getDebugType(cat, Out.str()));
     switch (cat.cat) {
     case SortCategory::Map:
+    case SortCategory::RangeMap:
     case SortCategory::List:
     case SortCategory::Set:
       paramType = llvm::PointerType::getUnqual(paramType);
@@ -1231,6 +1239,7 @@ std::string makeApplyRuleFunction(
     auto cat = sort->getCategory(definition);
     switch (cat.cat) {
     case SortCategory::Map:
+    case SortCategory::RangeMap:
     case SortCategory::List:
     case SortCategory::Set:
       if (!arg->getType()->isPointerTy()) {
@@ -1278,6 +1287,7 @@ llvm::Type *getArgType(ValueType cat, llvm::Module *mod) {
   case SortCategory::Bool:
   case SortCategory::MInt:
   case SortCategory::Map:
+  case SortCategory::RangeMap:
   case SortCategory::List:
   case SortCategory::Set: {
     return getValueType(cat, mod);

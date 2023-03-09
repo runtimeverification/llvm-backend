@@ -258,6 +258,7 @@ void SwitchNode::codegen(Decision *d) {
 
         switch (cat.cat) {
         case SortCategory::Map:
+        case SortCategory::RangeMap:
         case SortCategory::List:
         case SortCategory::Set: Child = ChildPtr; break;
         default:
@@ -628,6 +629,7 @@ void makeEvalOrAnywhereFunction(
     debugArgs.push_back(getDebugType(cat, Out.str()));
     switch (cat.cat) {
     case SortCategory::Map:
+    case SortCategory::RangeMap:
     case SortCategory::List:
     case SortCategory::Set:
       args.push_back(llvm::PointerType::getUnqual(getValueType(cat, module)));
@@ -765,6 +767,7 @@ void addOwise(
   auto returnType = getValueType(returnSort, module);
   switch (returnSort.cat) {
   case SortCategory::Map:
+  case SortCategory::RangeMap:
   case SortCategory::List:
   case SortCategory::Set:
     if (retval->getType() == returnType) {
@@ -818,6 +821,7 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> stepFunctionHeader(
   for (auto type : types) {
     switch (type.cat) {
     case SortCategory::Map:
+    case SortCategory::RangeMap:
     case SortCategory::List:
     case SortCategory::Set:
       nroots++;
@@ -862,6 +866,7 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> stepFunctionHeader(
   for (auto cat : types) {
     switch (cat.cat) {
     case SortCategory::Map:
+    case SortCategory::RangeMap:
     case SortCategory::List:
     case SortCategory::Set:
     case SortCategory::StringBuffer:
@@ -925,6 +930,7 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> stepFunctionHeader(
   for (auto type : types) {
     switch (type.cat) {
     case SortCategory::Map:
+    case SortCategory::RangeMap:
     case SortCategory::List:
     case SortCategory::Set:
     case SortCategory::StringBuffer:
@@ -1121,6 +1127,7 @@ void makeStepFunction(
     debugTypes.push_back(getDebugType(cat, Out.str()));
     switch (cat.cat) {
     case SortCategory::Map:
+    case SortCategory::RangeMap:
     case SortCategory::List:
     case SortCategory::Set:
       argTypes.push_back(

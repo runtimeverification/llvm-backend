@@ -191,6 +191,8 @@ ValueType KORECompositeSort::getCategory(std::string name) {
   uint64_t bits = 0;
   if (name == "MAP.Map")
     category = SortCategory::Map;
+  else if (name == "RANGEMAP.RangeMap")
+    category = SortCategory::RangeMap;
   else if (name == "LIST.List")
     category = SortCategory::List;
   else if (name == "SET.Set")
@@ -247,6 +249,7 @@ std::string KORESymbol::layoutString(KOREDefinition *definition) const {
     ValueType cat = sort->getCategory(definition);
     switch (cat.cat) {
     case SortCategory::Map: result.push_back('1'); break;
+    case SortCategory::RangeMap: result.push_back('a'); break;
     case SortCategory::List: result.push_back('2'); break;
     case SortCategory::Set: result.push_back('3'); break;
     case SortCategory::Int: result.push_back('4'); break;

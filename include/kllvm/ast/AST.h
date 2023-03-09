@@ -112,6 +112,7 @@ private:
 enum class SortCategory {
   Uncomputed,
   Map,
+  RangeMap,
   List,
   Set,
   Int,

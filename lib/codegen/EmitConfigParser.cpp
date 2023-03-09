@@ -331,6 +331,7 @@ static llvm::Value *getArgValue(
     break;
   }
   case SortCategory::Map:
+  case SortCategory::RangeMap:
   case SortCategory::List:
   case SortCategory::Set:
     arg = new llvm::BitCastInst(
@@ -380,6 +381,7 @@ static std::pair<llvm::Value *, llvm::BasicBlock *> getEval(
   case SortCategory::Symbol:
   case SortCategory::Variable:
   case SortCategory::Map:
+  case SortCategory::RangeMap:
   case SortCategory::List:
   case SortCategory::Set:
     retval = new llvm::BitCastInst(
@@ -528,6 +530,7 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
     llvm::BranchInst::Create(CaseBlock, FalseBlock, icmp, CurrentBlock);
     switch (cat.cat) {
     case SortCategory::Map:
+    case SortCategory::RangeMap:
     case SortCategory::List:
     case SortCategory::Set: addAbort(CaseBlock, module); break;
     case SortCategory::StringBuffer:
@@ -742,7 +745,12 @@ makePackedVisitorStructureType(llvm::LLVMContext &Ctx, llvm::Module *module) {
              false)),
          llvm::PointerType::getUnqual(llvm::FunctionType::get(
              llvm::Type::getVoidTy(Ctx), {file, llvm::Type::getInt8PtrTy(Ctx)},
-             false))}};
+             false)),
+         makeVisitorType(
+             Ctx, file,
+             llvm::PointerType::getUnqual(
+                 getValueType({SortCategory::RangeMap, 0}, module)),
+             3, 0)}};
 
     auto structTy = llvm::StructType::create(Ctx, elementTypes, name);
     types[&Ctx] = structTy;
@@ -1070,6 +1078,11 @@ static void getVisitor(
       visitCollection(
           definition, module, compositeSort, func, ChildPtr, CaseBlock,
           callbacks.at(1), state_ptr);
+      break;
+    case SortCategory::RangeMap:
+      visitCollection(
+          definition, module, compositeSort, func, ChildPtr, CaseBlock,
+          callbacks.at(10), state_ptr);
       break;
     case SortCategory::Set:
       visitCollection(
