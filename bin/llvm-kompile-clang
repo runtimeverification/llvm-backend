@@ -195,7 +195,7 @@ else
 fi
 
 if $link; then
-  run @CMAKE_CXX_COMPILER@ -Wno-override-module -Wno-return-type-c-linkage "$modopt" "${files[@]}" \
+  run @CMAKE_CXX_COMPILER@ -std=c++17 -Wno-override-module -Wno-return-type-c-linkage "$modopt" "${files[@]}" \
     "$LIBDIR"/libarithmetic.a \
     "$MAINFILES" \
     "$LIBDIR"/libutil.a \
