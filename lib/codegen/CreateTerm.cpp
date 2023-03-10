@@ -64,6 +64,7 @@ target triple = "@BACKEND_TARGET_TRIPLE@"
 %string = type { %blockheader, [0 x i8] } ; 10-bit layout, 4-bit gc flags, 10 unused bits, 40-bit length (or buffer capacity for string pointed by stringbuffers), bytes
 %stringbuffer = type { i64, i64, %string* } ; 10-bit layout, 4-bit gc flags, 10 unused bits, 40-bit length, string length, current contents
 %map = type { { i8 *, i64 } } ; immer::map
+%rangemap = type { { { { { i32 (...)**, i32, i64 }*, { { i32 (...)**, i32, i32 }* } } } } } ; rng_map::RangeMap
 %set = type { { i8 *, i64 } } ; immer::set
 %iter = type { { i8 *, i8 *, i32, [14 x i8**] }, { { i8 *, i64 } } } ; immer::map_iter / immer::set_iter
 %list = type { { i64, i32, i8 *, i8 * } } ; immer::flex_vector
