@@ -1,6 +1,49 @@
-import lldb
-import sys
 import inspect
+import lldb
+import subprocess
+import sys
+
+LENGTH_MASK = @LENGTH_MASK@
+ENCODING = 'iso-8859-1'
+
+
+def value_or_raise(err, val):
+    if err.success:
+        return val
+    else:
+        raise RuntimeError(err.description)
+
+
+def to_address(value):
+    err = lldb.SBError()
+    a = value.data.GetAddress(err, 0)
+
+    return value_or_raise(err, a)
+
+
+def read_k_string(string):
+    hdr = string.deref.EvaluateExpression(
+        "h").EvaluateExpression("hdr").unsigned & LENGTH_MASK
+    data = string.deref.EvaluateExpression('data[0]').load_addr
+
+    err = lldb.SBError()
+    mem = string.GetProcess().ReadMemory(data, hdr, err)
+
+    return value_or_raise(err, mem)
+
+
+def kompiled_dir(target):
+    addr = target.FindFirstGlobalVariable('kompiled_directory').load_addr
+    err = lldb.SBError()
+    return target.GetProcess().ReadCStringFromMemory(addr, 4096, err)
+
+
+def pretty_print_kore(kore, target):
+    return subprocess.check_output(['kprint', kompiled_dir(target), '/dev/stdin', 'false'], input=kore).decode(ENCODING)
+
+
+def term_to_kore(value):
+    return value.GetFrame().EvaluateExpression(f"printConfigurationToString((block *){to_address(value)})")
 
 
 class StartCommand:
@@ -50,6 +93,7 @@ class MatchCommand:
 
 class BlockSummary:
     typename = 'block'
+    debugger = None
 
     @classmethod
     def register_lldb_summary(cls, debugger, module_name):
@@ -58,7 +102,8 @@ class BlockSummary:
 
     @staticmethod
     def summary(value, unused):
-        return f'<block@{value.addr}>'
+        kore = term_to_kore(value)
+        return pretty_print_kore(read_k_string(kore), value.GetTarget())
 
 
 def __lldb_init_module(debugger, internal_dict):
