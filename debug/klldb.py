@@ -91,23 +91,15 @@ class MatchCommand:
         print(f'{self.program} is not implemented')
 
 
-class BlockSummary:
-    typename = 'block'
-    debugger = None
-
-    @classmethod
-    def register_lldb_summary(cls, debugger, module_name):
-        command = f'type summary add -F {module_name}.{cls.__name__}.summary {cls.typename}'
-        debugger.HandleCommand(command)
-
-    @staticmethod
-    def summary(value, unused):
-        kore = term_to_kore(value)
-        return pretty_print_kore(read_k_string(kore), value.GetTarget())
+def block_summary(value, unused=None):
+    kore = term_to_kore(value)
+    return pretty_print_kore(read_k_string(kore), value.GetTarget())
 
 
 def __lldb_init_module(debugger, internal_dict):
+    debugger.SetAsync(False)
     debugger.HandleCommand('command container add -h "K commands" k')
+    debugger.HandleCommand(f'type summary add -F {__name__}.block_summary block')
 
     # Adapted from llvm-project/lldb/examples/python/cmdtemplate.py
     # Register all classes that have a register_lldb_command method
@@ -115,6 +107,3 @@ def __lldb_init_module(debugger, internal_dict):
         if inspect.isclass(cls):
             if callable(getattr(cls, "register_lldb_command", None)):
                 cls.register_lldb_command(debugger, 'k', __name__)
-
-            if callable(getattr(cls, "register_lldb_summary", None)):
-                cls.register_lldb_summary(debugger, __name__)
