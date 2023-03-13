@@ -82,6 +82,11 @@ def target_call(exe_ctx, f_name, ret_ty, arg_tys=None, args=None):
     return exe_ctx.target.EvaluateExpression(call_exp)
 
 
+def block_summary(value, unused=None):
+    kore = term_to_kore(value)
+    return pretty_print_kore(read_k_string(kore), value.GetTarget())
+
+
 class StartCommand:
     program = 'start'
 
@@ -133,6 +138,24 @@ class LogEntry:
     def kind(self):
         return self._field_expr('kind').data.sint32[0]
 
+    @property
+    def pattern(self):
+        err = lldb.SBError()
+        kore = self.exe_ctx.process.ReadCStringFromMemory(
+            to_address(self._field_expr('pattern')), 65536, err)
+        return pretty_print_kore(kore.encode(ENCODING), self.exe_ctx.target).strip()
+
+    @property
+    def sort(self):
+        err = lldb.SBError()
+        return self.exe_ctx.process.ReadCStringFromMemory(
+            to_address(self._field_expr('sort')), 65536, err)
+
+    @property
+    def subject(self):
+        cast_to = self.exe_ctx.target.FindFirstType(self.sort)
+        return self._field_expr('subject').Cast(cast_to)
+
 
 class RuleMatcher:
     SUCCESS = 0
@@ -168,7 +191,10 @@ class RuleMatcher:
             elif entry.kind == self.FUNCTION:
                 raise NotImplementedError
             elif entry.kind == self.FAIL:
-                print('Match fails')
+                print('Subject:')
+                print(block_summary(entry.subject).strip())
+                print('does not match pattern:')
+                print(entry.pattern)
             else:
                 raise RuntimeError(f'Invalid match type: {entry.kind}')
 
@@ -219,11 +245,6 @@ Does not actually take a step if matching succeeds.
         args = self.parser.parse_args(shlex.split(command))
         matcher = RuleMatcher(exe_ctx)
         matcher(args.rule, args.term)
-
-
-def block_summary(value, unused=None):
-    kore = term_to_kore(value)
-    return pretty_print_kore(read_k_string(kore), value.GetTarget())
 
 
 def __lldb_init_module(debugger, internal_dict):
