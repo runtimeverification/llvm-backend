@@ -1,5 +1,6 @@
 import inspect
 import lldb
+import shlex
 import subprocess
 import sys
 
@@ -58,7 +59,8 @@ class StartCommand:
         pass
 
     def __call__(self, debugger, command, exe_ctx, result):
-        print(f'{self.program} is not implemented')
+        print(f'{self.program} is not implemented.')
+        print('Run `process launch --stop-at-entry` instead.')
 
 
 class StepCommand:
@@ -73,7 +75,8 @@ class StepCommand:
         pass
 
     def __call__(self, debugger, command, exe_ctx, result):
-        print(f'{self.program} is not implemented')
+        print(f'{self.program} is not implemented.')
+        print('Run `rbreak k_step --one-shot true`, then `continue` instead.')
 
 
 class MatchCommand:
@@ -99,7 +102,8 @@ def block_summary(value, unused=None):
 def __lldb_init_module(debugger, internal_dict):
     debugger.SetAsync(False)
     debugger.HandleCommand('command container add -h "K commands" k')
-    debugger.HandleCommand(f'type summary add -F {__name__}.block_summary block')
+    debugger.HandleCommand(
+        f'type summary add -F {__name__}.block_summary block')
 
     # Adapted from llvm-project/lldb/examples/python/cmdtemplate.py
     # Register all classes that have a register_lldb_command method
