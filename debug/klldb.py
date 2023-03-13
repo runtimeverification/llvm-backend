@@ -48,6 +48,40 @@ def term_to_kore(value):
     return value.GetFrame().EvaluateExpression(f"printConfigurationToString((block *){to_address(value)})")
 
 
+def lookup_function(exe_ctx, f_name):
+    fns = exe_ctx.target.FindFunctions(f_name).functions
+
+    if len(fns) != 1:
+        raise RuntimeError(
+            f'Failed to look up function: {f_name}')
+
+    return fns[0]
+
+
+def target_call(exe_ctx, f_name, ret_ty, arg_tys=None, args=None):
+    if arg_tys is None:
+        arg_tys = []
+
+    if args is None:
+        args = []
+
+    assert len(arg_tys) == len(args)
+    assert all(ty == 'block *' for ty in arg_tys)
+
+    fn = lookup_function(exe_ctx, f_name)
+    match_fn = lookup_function(exe_ctx, f_name)
+    fn_addr = match_fn.addr.GetLoadAddress(exe_ctx.target)
+
+    fp_arg_tys = ', '.join(arg_tys)
+    fp_cast_ty = f'({ret_ty} (*)({fp_arg_tys}))'
+    fp_cast_exp = f'({fp_cast_ty}{fn_addr})'
+
+    args_cast_exp = ', '.join(
+        f'({ty})({to_address(arg)})' for ty, arg in zip(arg_tys, args))
+    call_exp = f'{fp_cast_exp}({args_cast_exp})'
+    return exe_ctx.target.EvaluateExpression(call_exp)
+
+
 class StartCommand:
     program = 'start'
 
@@ -80,19 +114,74 @@ class StepCommand:
         print('Run `rbreak k_step --one-shot true`, then `continue` instead.')
 
 
-class MatchCommand:
-    program = 'match'
+class LogEntry:
+    typename = 'MatchLog'
 
+    def __init__(self, exe_ctx, root, idx):
+        self.exe_ctx = exe_ctx
+        self.entry_type = self.exe_ctx.target.FindFirstType(self.typename)
+
+        index_exp = f'&(({self.typename} *){to_address(root)})[{idx}]'
+        self.base_addr = to_address(
+            self.exe_ctx.target.EvaluateExpression(index_exp))
+
+    def _field_expr(self, field):
+        ptr_exp = f'(({self.typename} *){self.base_addr})->{field}'
+        return self.exe_ctx.target.EvaluateExpression(ptr_exp)
+
+    @property
+    def kind(self):
+        return self._field_expr('kind').data.sint32[0]
+
+
+class RuleMatcher:
     SUCCESS = 0
     FUNCTION = 1
     FAIL = 2
 
-    @classmethod
+    def __init__(self, exe_ctx):
+        self.exe_ctx = exe_ctx
+
+    def _reset_match_reason(self):
+        target_call(self.exe_ctx, 'resetMatchReason', 'void')
+
+    def _try_match(self, rule_name, subject):
+        expr = self.exe_ctx.target.EvaluateExpression(subject)  # check eval?
+        target_call(self.exe_ctx, f'{rule_name}.match',
+                    'void', ['block *'], [expr])
+
+    def _get_match_log_size(self):
+        return target_call(self.exe_ctx, 'getMatchLogSize', 'size_t').data.uint64[0]
+
+    def _get_match_log(self):
+        return target_call(self.exe_ctx, 'getMatchLog', 'MatchLog *')
+
+    def __call__(self, rule_name, subject):
+        self._reset_match_reason()
+        self._try_match(rule_name, subject)
+
+        log = self._get_match_log()
+        for i in range(self._get_match_log_size()):
+            entry = LogEntry(self.exe_ctx, log, i)
+            if entry.kind == self.SUCCESS:
+                print('Match succeeds')
+            elif entry.kind == self.FUNCTION:
+                raise NotImplementedError
+            elif entry.kind == self.FAIL:
+                print('Match fails')
+            else:
+                raise RuntimeError(f'Invalid match type: {entry.kind}')
+
+
+class MatchCommand:
+    program = 'match'
+
+    @ classmethod
     def register_lldb_command(cls, debugger, container, module_name):
         command = f'command script add -o -c {module_name}.{cls.__name__} {container} {cls.program}'
         debugger.HandleCommand(command)
 
-    @classmethod
+    @ classmethod
     def make_parser(cls):
         description = """
 Attempt to match a particular rule against a particular configuration.
@@ -126,56 +215,10 @@ Does not actually take a step if matching succeeds.
         self.parser = self.make_parser()
         self.help_text = self.parser.format_help()
 
-    def _lookup_function(self, exe_ctx, f_name):
-        fns = exe_ctx.target.FindFunctions(f_name).functions
-
-        if len(fns) != 1:
-            raise RuntimeError(
-                f'Failed to look up function: {f_name}')
-
-        return fns[0]
-
-    def _call(self, exe_ctx, f_name, ret_ty, arg_tys=None, args=None):
-        if arg_tys is None:
-            arg_tys = []
-
-        if args is None:
-            args = []
-
-        assert len(arg_tys) == len(args)
-        assert all(ty == 'block *' for ty in arg_tys)
-
-        fn = self._lookup_function(exe_ctx, f_name)
-        match_fn = self._lookup_function(exe_ctx, f_name)
-        fn_addr = match_fn.addr.GetLoadAddress(exe_ctx.target)
-
-        fp_arg_tys = ', '.join(arg_tys)
-        fp_cast_ty = f'({ret_ty} (*)({fp_arg_tys}))'
-        fp_cast_exp = f'({fp_cast_ty}{fn_addr})'
-
-        args_cast_exp = ', '.join(
-            f'({ty})({to_address(arg)})' for ty, arg in zip(arg_tys, args))
-        call_exp = f'{fp_cast_exp}({args_cast_exp})'
-        return exe_ctx.target.EvaluateExpression(call_exp)
-
-    def _reset_match_reason(self, exe_ctx):
-        self._call(exe_ctx, 'resetMatchReason', 'void')
-
-    def _try_match(self, exe_ctx, rule_name, subject):
-        expr = exe_ctx.target.EvaluateExpression(subject)  # check eval?
-        self._call(exe_ctx, f'{rule_name}.match', 'void', ['block *'], [expr])
-
-    def _get_match_log_size(self, exe_ctx):
-        return self._call(exe_ctx, 'getMatchLogSize', 'size_t').data.uint64[0]
-
-    def _get_match_log(self, exe_ctx):
-        return self._call(exe_ctx, 'getMatchLog', 'MatchLog *')
-
     def __call__(self, debugger, command, exe_ctx, result):
         args = self.parser.parse_args(shlex.split(command))
-        self._reset_match_reason(exe_ctx)
-        self._try_match(exe_ctx, args.rule, args.term)
-        print(self._get_match_log_size(exe_ctx))
+        matcher = RuleMatcher(exe_ctx)
+        matcher(args.rule, args.term)
 
 
 def block_summary(value, unused=None):
