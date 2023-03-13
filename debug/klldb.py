@@ -66,7 +66,6 @@ def target_call(exe_ctx, f_name, ret_ty, arg_tys=None, args=None):
         args = []
 
     assert len(arg_tys) == len(args)
-    assert all(ty == 'block *' for ty in arg_tys)
 
     fn = lookup_function(exe_ctx, f_name)
     match_fn = lookup_function(exe_ctx, f_name)
@@ -129,10 +128,14 @@ class LogEntry:
         index_exp = f'&(({self.typename} *){to_address(root)})[{idx}]'
         self.base_addr = to_address(
             self.exe_ctx.target.EvaluateExpression(index_exp))
+        print(index_exp)
 
     def _field_expr(self, field):
         ptr_exp = f'(({self.typename} *){self.base_addr})->{field}'
         return self.exe_ctx.target.EvaluateExpression(ptr_exp)
+
+    def get_match_function_args(self):
+        pass
 
     @property
     def kind(self):
@@ -154,7 +157,18 @@ class LogEntry:
     @property
     def subject(self):
         cast_to = self.exe_ctx.target.FindFirstType(self.sort)
+        print(cast_to)
         return self._field_expr('subject').Cast(cast_to)
+
+    @property
+    def debug_name(self):
+        err = lldb.SBError()
+        return self.exe_ctx.process.ReadCStringFromMemory(
+            to_address(self._field_expr('debugName')), 65536, err)
+
+    @property
+    def function(self):
+        return lookup_function(self.exe_ctx, self.debug_name)
 
 
 class RuleMatcher:
@@ -189,7 +203,9 @@ class RuleMatcher:
             if entry.kind == self.SUCCESS:
                 print('Match succeeds')
             elif entry.kind == self.FUNCTION:
-                raise NotImplementedError
+                print(entry.debug_name)
+                for t in entry.function.type.GetFunctionArgumentTypes():
+                    print(f'  {t.GetName()}')
             elif entry.kind == self.FAIL:
                 print('Subject:')
                 print(block_summary(entry.subject).strip())
