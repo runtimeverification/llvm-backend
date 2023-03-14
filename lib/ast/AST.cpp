@@ -249,7 +249,7 @@ std::string KORESymbol::layoutString(KOREDefinition *definition) const {
     ValueType cat = sort->getCategory(definition);
     switch (cat.cat) {
     case SortCategory::Map: result.push_back('1'); break;
-    case SortCategory::RangeMap: result.push_back('a'); break;
+    case SortCategory::RangeMap: result.push_back('b'); break;
     case SortCategory::List: result.push_back('2'); break;
     case SortCategory::Set: result.push_back('3'); break;
     case SortCategory::Int: result.push_back('4'); break;

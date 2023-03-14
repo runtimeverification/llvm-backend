@@ -112,7 +112,6 @@ private:
 enum class SortCategory {
   Uncomputed,
   Map,
-  RangeMap,
   List,
   Set,
   Int,
@@ -121,7 +120,8 @@ enum class SortCategory {
   Bool,
   Symbol,
   Variable,
-  MInt
+  MInt,
+  RangeMap
 };
 
 // represents the syntactic category of an LLVM backend term at runtime
