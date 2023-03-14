@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <limits>
+#include <vector>
 
 #include <gmp.h>
 #include <mpfr.h>
@@ -194,9 +195,10 @@ typedef list *SortList;
 typedef map *SortMap;
 typedef set *SortSet;
 
+void *constructCompositePattern(uint32_t tag, std::vector<void *> &arguments);
+
 extern "C" {
 
-void *constructCompositePattern(uint32_t tag, std::vector<void *> &arguments);
 block *parseConfiguration(const char *filename);
 block *deserializeConfiguration(char *, size_t);
 
