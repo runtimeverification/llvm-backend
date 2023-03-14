@@ -119,7 +119,8 @@ bool hook_KEQUAL_eq(block *arg1, block *arg2) {
             case VARIABLE_LAYOUT: {
               block **var1ptrptr = (block **)(child1intptr);
               block **var2ptrptr = (block **)(child2intptr);
-              bool cmp = hook_STRING_eq((string *)*var1ptrptr, (string *)*var2ptrptr);
+              bool cmp = hook_STRING_eq(
+                  (string *)*var1ptrptr, (string *)*var2ptrptr);
               if (!cmp) {
                 return false;
               }
