@@ -249,9 +249,9 @@ string *debug_print_term(block *subject, char const *sort) {
   auto *buf = hook_BUFFER_empty();
   writer w = {nullptr, buf};
 
-  char const* print_sort = nullptr;
+  char const *print_sort = nullptr;
 
-  if(sort) {
+  if (sort) {
     auto inj_sym = "inj{" + std::string(sort) + ", SortKItem{}}";
     auto tag = getTagForSymbolName(inj_sym.c_str());
     auto args = std::vector<void *>{subject};
