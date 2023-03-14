@@ -49,8 +49,7 @@ static uint32_t getTagForSymbol(KORESymbol const &symbol) {
   return getTagForSymbolName(out.str().c_str());
 }
 
-void *
-constructCompositePattern(uint32_t tag, std::vector<void *> &arguments) {
+void *constructCompositePattern(uint32_t tag, std::vector<void *> &arguments) {
   if (isSymbolAFunction(tag)) {
     return evaluateFunctionSymbol(tag, &arguments[0]);
   }
