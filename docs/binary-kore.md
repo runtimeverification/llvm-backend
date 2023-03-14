@@ -68,7 +68,7 @@ For example, consider the following sequence of bytes:
 0104 5678 5678 0207 ff
 ```
 
-First, the string `wVwV` is encoded directly with its length (the single
+First, the string `VxVx` is encoded directly with its length (the single
 uncontinued byte `04`). Splitting the prefix and length from the characters,
 this is `0104 5678 5678`). Then, a variable-length backreference of 7 bytes is
 encoded (`0207`). This backreference is counted from the byte `ff`, and
