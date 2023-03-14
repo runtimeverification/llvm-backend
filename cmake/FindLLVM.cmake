@@ -33,6 +33,10 @@ find_program(LLC llc
   PATHS ${LLVM_TOOLS_BINARY_DIR}
   NO_DEFAULT_PATH)
 
+find_program(LLDB lldb
+  PATHS ${LLVM_TOOLS_BINARY_DIR}
+  NO_DEFAULT_PATH)
+
 if(NOT OPT)
   message(FATAL_ERROR "Could not find an opt binary. Is llvm installed on your PATH?")
 endif()
