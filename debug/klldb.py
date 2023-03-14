@@ -41,11 +41,22 @@ def kompiled_dir(target):
 
 
 def pretty_print_kore(kore, target):
-    return subprocess.check_output(['kprint', kompiled_dir(target), '/dev/stdin', 'false'], input=kore).decode(ENCODING)
+    return subprocess.check_output(['kprint', kompiled_dir(target), '/dev/stdin', 'false'], input=kore).decode(ENCODING).strip()
 
 
-def term_to_kore(value):
-    return value.GetFrame().EvaluateExpression(f"printConfigurationToString((block *){to_address(value)})")
+def term_to_kore(value, sort=None):
+    if sort is None:
+        sort = '((char *)0)'
+    else:
+        sort = f'"{sort}"'
+
+    call_exp = f'debug_print_term((block *){to_address(value)}, {sort})'
+    return value.frame.EvaluateExpression(call_exp)
+
+
+def pretty_print_term(value, sort=None):
+    kore = term_to_kore(value, sort)
+    return pretty_print_kore(read_k_string(kore), value.GetTarget())
 
 
 def lookup_function(exe_ctx, f_name):
@@ -79,11 +90,6 @@ def target_call(exe_ctx, f_name, ret_ty, arg_tys=None, args=None):
         f'({ty})({to_address(arg)})' for ty, arg in zip(arg_tys, args))
     call_exp = f'{fp_cast_exp}({args_cast_exp})'
     return exe_ctx.target.EvaluateExpression(call_exp)
-
-
-def block_summary(value, unused=None):
-    kore = term_to_kore(value)
-    return pretty_print_kore(read_k_string(kore), value.GetTarget())
 
 
 class StartCommand:
@@ -126,16 +132,17 @@ class LogEntry:
         self.entry_type = self.exe_ctx.target.FindFirstType(self.typename)
 
         index_exp = f'&(({self.typename} *){to_address(root)})[{idx}]'
+        self.root = root
         self.base_addr = to_address(
             self.exe_ctx.target.EvaluateExpression(index_exp))
-        print(index_exp)
 
     def _field_expr(self, field):
         ptr_exp = f'(({self.typename} *){self.base_addr})->{field}'
         return self.exe_ctx.target.EvaluateExpression(ptr_exp)
 
     def get_match_function_args(self):
-        pass
+        return target_call(self.exe_ctx, 'getMatchFnArgs', 'void **',
+                           ['MatchLog *'], [self.root])
 
     @property
     def kind(self):
@@ -156,8 +163,7 @@ class LogEntry:
 
     @property
     def subject(self):
-        cast_to = self.exe_ctx.target.FindFirstType(self.sort)
-        print(cast_to)
+        cast_to = self.exe_ctx.target.FindFirstType(self.sort).GetPointerType()
         return self._field_expr('subject').Cast(cast_to)
 
     @property
@@ -169,6 +175,10 @@ class LogEntry:
     @property
     def function(self):
         return lookup_function(self.exe_ctx, self.debug_name)
+
+    @property
+    def result(self):
+        return self._field_expr('result')
 
 
 class RuleMatcher:
@@ -183,7 +193,7 @@ class RuleMatcher:
         target_call(self.exe_ctx, 'resetMatchReason', 'void')
 
     def _try_match(self, rule_name, subject):
-        expr = self.exe_ctx.target.EvaluateExpression(subject)  # check eval?
+        expr = self.exe_ctx.target.EvaluateExpression(subject)
         target_call(self.exe_ctx, f'{rule_name}.match',
                     'void', ['block *'], [expr])
 
@@ -192,6 +202,11 @@ class RuleMatcher:
 
     def _get_match_log(self):
         return target_call(self.exe_ctx, 'getMatchLog', 'MatchLog *')
+
+    def _type_to_sort(self, ty):
+        return {
+            'bool': 'SortBool{}'
+        }.get(ty, ty)
 
     def __call__(self, rule_name, subject):
         self._reset_match_reason()
@@ -203,12 +218,22 @@ class RuleMatcher:
             if entry.kind == self.SUCCESS:
                 print('Match succeeds')
             elif entry.kind == self.FUNCTION:
-                print(entry.debug_name)
-                for t in entry.function.type.GetFunctionArgumentTypes():
-                    print(f'  {t.GetName()}')
+                args = lldb.value(entry.get_match_function_args())
+                arg_tys = entry.function.type.GetFunctionArgumentTypes()
+
+                pretty_args = [pretty_print_term(
+                    args[idx].sbvalue, t.name) for idx, t in enumerate(arg_tys)]
+                pretty_args_str = ', '.join(pretty_args)
+
+                return_ty = entry.function.type.GetFunctionReturnType()
+                return_sort = self._type_to_sort(return_ty.name)
+
+                return_val = pretty_print_term(entry.result, return_sort)
+
+                print(f'{entry.debug_name}({pretty_args_str}) => {return_val}')
             elif entry.kind == self.FAIL:
                 print('Subject:')
-                print(block_summary(entry.subject).strip())
+                print(pretty_print_term(entry.subject, entry.sort).strip())
                 print('does not match pattern:')
                 print(entry.pattern)
             else:
@@ -261,6 +286,10 @@ Does not actually take a step if matching succeeds.
         args = self.parser.parse_args(shlex.split(command))
         matcher = RuleMatcher(exe_ctx)
         matcher(args.rule, args.term)
+
+
+def block_summary(value, unused=None):
+    return pretty_print_term(value)
 
 
 def __lldb_init_module(debugger, internal_dict):

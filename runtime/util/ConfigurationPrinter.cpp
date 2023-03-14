@@ -244,6 +244,26 @@ void printConfigurations(
   fclose(file);
 }
 
+string *debug_print_term(block *subject, char const *sort) {
+  auto state = print_state();
+  auto *buf = hook_BUFFER_empty();
+  writer w = {nullptr, buf};
+
+  char const* print_sort = nullptr;
+
+  if(sort) {
+    auto inj_sym = "inj{" + std::string(sort) + ", SortKItem{}}";
+    auto tag = getTagForSymbolName(inj_sym.c_str());
+    auto args = std::vector<void *>{subject};
+
+    subject = static_cast<block *>(constructCompositePattern(tag, args));
+    print_sort = "SortKItem{}";
+  }
+
+  printConfigurationInternal(&w, subject, print_sort, false, &state);
+  return hook_BUFFER_toString(buf);
+}
+
 string *printConfigurationToString(block *subject) {
   auto state = print_state();
   stringbuffer *buf = hook_BUFFER_empty();
