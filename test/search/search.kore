@@ -1,5 +1,13 @@
 // RUN: %search-interpreter
 // RUN: %check-dir-diff
+// RUN: %t.interpreter %test-dir-in/search.initial.in 3 /dev/stdout | diff - %test-dir-out/search.initial.out.diff
+// RUN: %kore-convert %test-dir-in/search.initial.in -o %t.bin && %t.interpreter %t.bin 3 /dev/stdout | diff - %test-dir-out/search.initial.out.diff
+// RUN: %t.interpreter %test-dir-in/search.initial.in 3 %t.bin --binary-output
+// RUN: %kore-convert %t.bin -o %t.kore && %kore-convert %test-dir-out/search.initial.out.diff --to=text | diff - %t.kore
+// RUN: %t.interpreter %test-dir-in/search.next1.in 3 /dev/stdout | diff - %test-dir-out/search.next1.out.diff
+// RUN: %kore-convert %test-dir-in/search.next1.in -o %t.bin && %t.interpreter %t.bin 3 /dev/stdout | diff - %test-dir-out/search.next1.out.diff
+// RUN: %t.interpreter %test-dir-in/search.next1.in 3 %t.bin --binary-output
+// RUN: %kore-convert %t.bin -o %t.kore && %kore-convert %test-dir-out/search.next1.out.diff --to=text | diff - %t.kore
 
 [topCellInitializer{}(LblinitGeneratedTopCell{}()), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/Users/robertorosmaninho/rv/tests/search.k)")]
 

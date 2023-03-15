@@ -13,13 +13,20 @@ take_search_steps(int64_t depth, int64_t bound, block *subject);
 void printConfigurations(
     const char *filename, std::unordered_set<block *, HashBlock, KEq> results);
 
+void serializeConfigurations(
+    const char *filename, std::unordered_set<block *, HashBlock, KEq> results);
+
 static bool hasStatistics = false;
+static bool binaryOutput = false;
 static int64_t bound = -1;
 
 void parse_flags(int argc, char **argv) {
   for (int i = 4; i < argc; ++i) {
     if (strcmp(argv[i], "--statistics") == 0) {
       hasStatistics = true;
+    }
+    if (strcmp(argv[i], "--binary-output") == 0) {
+      binaryOutput = true;
     }
     if (strcmp(argv[i], "--bound") == 0) {
       bound = std::stoll(argv[i + 1]);
@@ -43,6 +50,10 @@ int main(int argc, char **argv) {
   if (hasStatistics) {
     printStatistics(output, get_steps());
   }
-  printConfigurations(output, results);
+  if (binaryOutput) {
+    serializeConfigurations(output, results);
+  } else {
+    printConfigurations(output, results);
+  }
   return 0;
 }
