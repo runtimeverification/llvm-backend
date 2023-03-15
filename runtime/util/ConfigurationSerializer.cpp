@@ -6,6 +6,7 @@
 
 #include <cassert>
 #include <cstdio>
+#include <iostream>
 #include <limits>
 #include <set>
 
@@ -51,13 +52,14 @@ void serializeConfigurationInternal(
     writer *file, block *subject, const char *sort, bool isVar, void *state);
 
 /**
- * Emit a symbol of the form ctor{}(...); this should be preceded by the
+ * Emit a symbol of the form ctor{...}(...); this should be preceded by the
  * appropriate pattern arguments in the buffer.
  */
-static void
-emitSymbol(serializer &instance, char const *name, uint64_t arity = 0) {
+static void emitSymbol(
+    serializer &instance, char const *name, uint64_t arity = 0,
+    uint64_t symbol_arity = 0) {
   instance.emit(header_byte<KORESymbol>);
-  instance.emit_length(0);
+  instance.emit_length(symbol_arity);
   instance.emit_string(drop_back(name, 2));
 
   instance.emit(header_byte<KORECompositePattern>);
@@ -325,6 +327,33 @@ void serializeConfigurationInternal(
   if (isBinder) {
     state.boundVariables.pop_back();
   }
+}
+
+void serializeConfigurations(
+    const char *filename, std::unordered_set<block *, HashBlock, KEq> results) {
+  FILE *file = fopen(filename, "w");
+  auto state = serialization_state();
+
+  writer w = {file, nullptr};
+  ssize_t size = results.size();
+  if (size == 0) {
+    emitConstantSort(state.instance, "SortGeneratedTopCell");
+    emitSymbol(state.instance, "\\bottom{}", size, 1);
+  } else {
+    for (const auto &subject : results) {
+      serializeConfigurationInternal(&w, subject, nullptr, false, &state);
+    }
+
+    emitConstantSort(state.instance, "SortGeneratedTopCell");
+    emitSymbol(state.instance, "\\or{}", results.size(), 1);
+  }
+
+  auto buf_size = state.instance.data().size();
+  auto buf = static_cast<char *>(malloc(buf_size));
+  std::memcpy(buf, state.instance.data().data(), buf_size);
+  fwrite(buf, 1, buf_size, file);
+
+  fclose(file);
 }
 
 void serializeConfigurationToFile(const char *filename, block *subject) {
