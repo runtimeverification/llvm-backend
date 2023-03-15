@@ -335,7 +335,7 @@ void serializeConfigurations(
   auto state = serialization_state();
 
   writer w = {file, nullptr};
-  ssize_t size = results.size();
+  auto size = results.size();
   if (size == 0) {
     emitConstantSort(state.instance, "SortGeneratedTopCell");
     emitSymbol(state.instance, "\\bottom{}", size, 1);
@@ -343,12 +343,12 @@ void serializeConfigurations(
     auto result = *results.begin();
     serializeConfigurationInternal(&w, result, nullptr, false, &state);
   } else {
-    for (const auto &subject : results) {
+    for (auto const&subject : results) {
       serializeConfigurationInternal(&w, subject, nullptr, false, &state);
     }
 
     emitConstantSort(state.instance, "SortGeneratedTopCell");
-    emitSymbol(state.instance, "\\or{}", results.size(), 1);
+    emitSymbol(state.instance, "\\or{}", size, 1);
   }
 
   auto buf_size = state.instance.data().size();
