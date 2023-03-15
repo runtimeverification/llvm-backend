@@ -334,7 +334,7 @@ void serializeConfigurations(
   FILE *file = fopen(filename, "w");
   auto state = serialization_state();
 
-  writer w = {file, nullptr};
+  auto w = writer{file, nullptr};
   auto size = results.size();
   if (size == 0) {
     emitConstantSort(state.instance, "SortGeneratedTopCell");
