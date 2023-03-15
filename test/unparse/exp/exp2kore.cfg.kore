@@ -1,0 +1,2 @@
+// RUN: kprint %S %s true --kore | diff - %s.out
+Lbl'UndsPlusUndsUnds'TEST'Unds'Exp'Unds'Exp'Unds'Exp{}(Lbl'UndsPlusUndsUnds'TEST'Unds'Exp'Unds'Exp'Unds'Exp{}(inj{SortInt{}, SortExp{}}(\dv{SortInt{}}("1")),Lbl'UndsPlusUndsUnds'TEST'Unds'Exp'Unds'Exp'Unds'Exp{}(inj{SortInt{}, SortExp{}}(\dv{SortInt{}}("1")),inj{SortInt{}, SortExp{}}(\dv{SortInt{}}("1")))),inj{SortInt{}, SortExp{}}(\dv{SortInt{}}("1")))
