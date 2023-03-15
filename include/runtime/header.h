@@ -18,6 +18,7 @@
 #include <immer/flex_vector.hpp>
 #include <immer/map.hpp>
 #include <immer/set.hpp>
+#include <unordered_set>
 
 // the actual length is equal to the block header with the gc bits masked out.
 
@@ -209,6 +210,8 @@ void printConfigurationInternal(
     writer *file, block *subject, const char *sort, bool, void *);
 mpz_ptr move_int(mpz_t);
 
+void serializeConfigurations(
+    const char *filename, std::unordered_set<block *, HashBlock, KEq> results);
 void serializeConfiguration(
     block *subject, char const *sort, char **data_out, size_t *size_out);
 void serializeConfigurationToFile(const char *filename, block *subject);
