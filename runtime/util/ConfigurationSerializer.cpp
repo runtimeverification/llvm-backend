@@ -339,6 +339,9 @@ void serializeConfigurations(
   if (size == 0) {
     emitConstantSort(state.instance, "SortGeneratedTopCell");
     emitSymbol(state.instance, "\\bottom{}", size, 1);
+  } if (size == 1) {
+    auto result = *results.begin();
+    serializeConfigurationInternal(&w, result, nullptr, false, &state);
   } else {
     for (const auto &subject : results) {
       serializeConfigurationInternal(&w, subject, nullptr, false, &state);
