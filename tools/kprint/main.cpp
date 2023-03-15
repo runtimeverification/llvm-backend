@@ -28,6 +28,11 @@ cl::opt<bool> FilterSubst(
     cl::Positional, cl::desc("[true|false]"), cl::init(true),
     cl::cat(KPrintCat));
 
+cl::opt<bool> PrintAsKore(
+    "kore",
+    cl::desc("Perform unparsing, but print KORE rather than surface syntax"),
+    cl::cat(KPrintCat));
+
 int main(int argc, char **argv) {
   cl::HideUnrelatedOptions({&KPrintCat});
   cl::ParseCommandLineOptions(argc, argv);
@@ -35,5 +40,6 @@ int main(int argc, char **argv) {
   bool has_color = ArgColor == "true" || (ArgColor == "auto" && isatty(1));
 
   printKORE(
-      std::cout, DefinitionFilename, PatternFilename, has_color, FilterSubst);
+      std::cout, DefinitionFilename, PatternFilename, has_color, FilterSubst,
+      !PrintAsKore);
 }

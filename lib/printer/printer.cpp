@@ -343,7 +343,8 @@ using namespace parser;
 
 std::ostream &printKORE(
     std::ostream &os, std::string const &definitionPath,
-    std::string const &patternPath, bool hasColor, bool filterSubst) {
+    std::string const &patternPath, bool hasColor, bool filterSubst,
+    bool pretty) {
   static std::map<std::string, PreprocessedPrintData> cache;
 
   auto const &def = getDefinition(definitionPath);
@@ -391,7 +392,11 @@ std::ostream &printKORE(
   }
 
   sptr<KOREPattern> withBrackets = addBrackets(filtered, data);
-  withBrackets->prettyPrint(os, data);
+  if (pretty) {
+    withBrackets->prettyPrint(os, data);
+  } else {
+    withBrackets->print(os);
+  }
   os << std::endl;
 
   return os;
