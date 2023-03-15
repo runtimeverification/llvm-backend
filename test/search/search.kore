@@ -1,5 +1,6 @@
 // RUN: %search-interpreter
 // RUN: %check-dir-diff
+// RUN: %check-search-convert-test
 
 [topCellInitializer{}(LblinitGeneratedTopCell{}()), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/Users/robertorosmaninho/rv/tests/search.k)")]
 

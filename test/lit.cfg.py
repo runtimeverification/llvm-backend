@@ -100,6 +100,16 @@ config.substitutions.extend([
             %t.interpreter $in -1 /dev/stdout | diff - $out || (echo $in && exit 1)
         done
     ''')),
+    
+    ('%check-search-convert-test', one_line('''
+        for out in %test-dir-out/*.out.diff; do
+            in=%test-dir-in/`basename $out .out.diff`.in
+            %t.interpreter $in 3 /dev/stdout | diff - $out
+            %kore-convert $in -o %t.bin && %t.interpreter %t.bin 3 /dev/stdout | diff - $out
+            %t.interpreter $in 3 %t.bin --binary-output
+            %kore-convert %t.bin -o %t.kore && %kore-convert $out --to=text | diff - %t.kore
+        done
+    ''')),
 
     ('%run-binary-out', '%t.interpreter %test-input -1 %t.out.bin --binary-output'),
     ('%run-binary', '%convert-input && %t.interpreter %t.bin -1 /dev/stdout'),
