@@ -146,7 +146,7 @@ bool hook_KEQUAL_eq(block *arg1, block *arg2) {
 // - Constants < Blocks.
 // - Symbols < Strings.
 // - Symbols with different tags are ordered based on their tags.
-// - Symbols with same tags are ordered be laxicoghraphically comparing their
+// - Symbols with same tags are ordered be lexicographically comparing their
 //   childen.
 bool hook_KEQUAL_lt(block *arg1, block *arg2) {
   uint64_t arg1intptr = (uint64_t)arg1;
