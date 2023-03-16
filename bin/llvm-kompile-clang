@@ -22,7 +22,7 @@ print(sysconfig.get_config_var('EXT_SUFFIX'))
 HERE
 }
 
-clangpp_args=()
+clangpp_args=("--std=c++17")
 while [[ $# -gt 0 ]]; do
   if $output; then
     output=false
@@ -169,7 +169,7 @@ elif [[ "$main" =~ "python" ]]; then
   # Don't link jemalloc when building a python library; it clashes with the
   # pymalloc implementation that Python expects you to use.
   all_libraries=("${libraries[@]}" "-lgmp" "-lmpfr" "-lpthread" "-ldl" "-lffi")
-  flags+=("-fPIC" "-shared" "-I${INCDIR}" "-std=c++17")
+  flags+=("-fPIC" "-shared" "-I${INCDIR}")
 
   read -r -a python_include_flags <<< "$("${python_cmd}" -m pybind11 --includes)"
   flags+=("${python_include_flags[@]}")
