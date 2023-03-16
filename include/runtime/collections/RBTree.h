@@ -158,11 +158,16 @@ public:
 
   /* WARNING: The following method returns a non-const reference in order to  *
    * enable altering this data structure (and potentially ones implemented on *
-   * top of it, namely RangeMap) in place. The data structure is intended to  *
-   * be immutable: the exposed functionality should not alter the data        *
-   * structure's contents in place. Only request a non-const reference if you *
-   * in fact need to edit the data structure in place for a specific reason,  *
-   * e.g. garbage collection.                                                 */
+   * top of it, namely RangeMap) in place. The red-black tree is intended to  *
+   * be immutable: the exposed functionality should not generally alter the   *
+   * tree in place. This API is not intended to change the structure or data  *
+   * of the tree, e.g., key-value pairs, colors, child-parent relations. It   *
+   * is intended for internal use, available so that data orthogonal to the   *
+   * data structure can be altered, e.g., GC bits, memory locations of blocks *
+   * that contain the nodes, etc (see include/runtime/header.h). Only use     *
+   * this API to request a non-const reference if you in fact need to edit    *
+   * the data structure in place for a specific reason, e.g. garbage          *
+   * collection.                                                              */
   // Return a reference to the data (key-value pair) stored in the root Node of
   // this tree.
   std::pair<T, V> &root_data_mutable() {

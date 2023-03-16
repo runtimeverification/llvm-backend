@@ -33,13 +33,17 @@ public:
       : start_()
       , end_() { }
 
-  /* WARNING: The following two methods return non-const references, in order *
+  /* WARNING: The following two methods return non-const references in order  *
    * to enable altering this data structure (and potentially ones implemented *
-   * on top of it, namely RangeMap) in place. The data structure is intended  *
-   * to be immutable: the exposed functionality should not alter the data     *
-   * structure's contents in place. Only request a non-const reference if you *
-   * in fact need to edit the data structure in place for a specific reason,  *
-   * e.g., garbage collection.                                                */
+   * on top of it, namely RangeMap) in place. The Range data structure is     *
+   * intended to be immutable: the exposed functionality should not generally *
+   * alter the ranges in place. This API is not intended to change the        *
+   * structure or data of a range, e.g., start, end. It is intended for       *
+   * internal use, available so that data orthogonal to the data structure    *
+   * can be altered, e.g., GC bits, memory locations of blocks that contain   *
+   * the nodes, etc (see include/runtime/header.h). Only use this API to      *
+   * request a non-const reference if you in fact need to edit the data       *
+   * structure in place for a specific reason, e.g. garbage collection.       */
   // Getter for the start of this range. Returns a non-const reference.
   T &start_mutable() { return start_; }
 
@@ -576,13 +580,17 @@ public:
   }
 };
 
-/* WARNING: This iterator returns non-const references, in order to enable    *
+/* WARNING: This iterator returns non-const references in order to enable     *
  * altering the underlying data structure, RangeMap, in place. The RangeMap   *
  * data structure is intended to be immutable: the exposed functionality      *
- * should not alter the data structure's content in place. Only request a     *
- * RangeMapIterator instead of a ConstRangeMapIterator if you in fact need to *
- * edit the RangeMap in place for a specific reason, e.g., garbage            *
- * collection.                                                                */
+ * should not generally alter it in place. This API is not intended to change *
+ * the structure or data of a range map, e.g., key-value pairs, stored        *
+ * ranges' bounds. It is intended for internal use, available so that data    *
+ * orthogonal to the data structure can be altered, e.g., GC bits, memory     *
+ * locations of blocks that contain the nodes, etc                            *
+ * (see include/runtime/header.h). Only request a RangeMapIterator instead of *
+ * a ConstRangeMapIterator if you in fact need to edit the data structure in  *
+ * place for a specific reason, e.g. garbage collection.                      */
 template <class T, class V>
 class RangeMapIterator : public AbstractRangeMapIterator<T, V> {
 
