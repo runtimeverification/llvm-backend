@@ -98,10 +98,10 @@ object Parser {
     val koreToK = new KoreToK(hookAtts)
   }
 
-  private def rulePriority(axiom: AxiomDeclaration): Int = {
+  private def rulePriority(axiom: AxiomDeclaration, search: Boolean): Int = {
     if (hasAtt(axiom, "owise")) 200
-    else if (hasAtt(axiom, "cool")) 150
-    else if (hasAtt(axiom, "cool-like")) 100
+    else if (hasAtt(axiom, "cool") && !search) 150
+    else if (hasAtt(axiom, "cool-like") && !search) 100
     else if (hasAtt(axiom, "priority")) getStringAtt(axiom.att, "priority").get.toInt
     else 50
   }
@@ -134,7 +134,8 @@ object Parser {
   private def parseAxiomSentence[T <: GeneralizedRewrite](
       split: Pattern => Option[(Option[SymbolOrAlias], T, Option[Pattern])],
       axiom: (AxiomDeclaration, Int),
-      simplification: Boolean) :
+      simplification: Boolean,
+      search: Boolean) :
       Seq[(Option[SymbolOrAlias], AxiomInfo)] = {
     val splitted = split(axiom._1.pattern)
     if (splitted.isDefined) {
@@ -142,7 +143,7 @@ object Parser {
       if (hasAtt(s, "comm") || hasAtt(s, "assoc") || hasAtt(s, "idem") || hasAtt(s, "unit") || hasAtt(s, "non-executable") || (hasAtt(s, "simplification") && !simplification)) {
         Seq()
       } else {
-        Seq((splitted.get._1, AxiomInfo(rulePriority(s), axiom._2, splitted.get._2, splitted.get._3, source(s), location(s))))
+        Seq((splitted.get._1, AxiomInfo(rulePriority(s, search), axiom._2, splitted.get._2, splitted.get._3, source(s), location(s))))
       }
     } else {
       Seq()
@@ -258,13 +259,13 @@ object Parser {
     defn.modules.flatMap(_.decls).filter(_.isInstanceOf[SortDeclaration]).map(_.asInstanceOf[SortDeclaration].sort)
   }
 
-  def parseTopAxioms(axioms: Seq[AxiomDeclaration]) : IndexedSeq[AxiomInfo] = {
-    val withOwise = axioms.zipWithIndex.flatMap(parseAxiomSentence(splitTop, _, false))
+  def parseTopAxioms(axioms: Seq[AxiomDeclaration], search: Boolean) : IndexedSeq[AxiomInfo] = {
+    val withOwise = axioms.zipWithIndex.flatMap(parseAxiomSentence(splitTop, _, false, search))
     withOwise.map(_._2).sortWith(_.priority < _.priority).toIndexedSeq
   }
 
   def parseFunctionAxioms(axioms: Seq[AxiomDeclaration], simplification: Boolean) : Map[SymbolOrAlias, IndexedSeq[AxiomInfo]] = {
-    val withOwise = axioms.zipWithIndex.flatMap(parseAxiomSentence(a => splitFunction(a), _, simplification))
+    val withOwise = axioms.zipWithIndex.flatMap(parseAxiomSentence(a => splitFunction(a), _, simplification, true))
     withOwise.sortWith(_._2.priority < _._2.priority).toIndexedSeq.filter(_._1.isDefined).map(t => (t._1.get, t._2)).groupBy(_._1).mapValues(_.map(_._2))
   }
 
