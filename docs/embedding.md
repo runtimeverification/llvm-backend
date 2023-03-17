@@ -37,6 +37,9 @@ of concrete side conditions for symbolic terms.
 
 ### Python
 
+**Note:** for specific API documentation for the backend's Python bindings,
+please visit the [Pyk][pyk] repository.
+
 Most uses of the backend's Python bindings should be made via the `pyk.kllvm`
 module of the [Pyk library][pyk], rather than directly from your own Python
 code. There are Python-specific wrappers in Pyk that make using the generated
@@ -71,7 +74,56 @@ Python interpreter.
 
 ### C
 
+For languages other than Python, the backend provides bindings to C that can be
+consumed from any language with a C FFI. Generating the C bindings requires a
+KORE definition; the bindings include features for both KORE AST manipulation
+and concrete execution of KORE terms. To generate C bindings from a definition:
+```console
+$ llvm-kompile definition.kore dt_dir c -- -o liblang.so
+```
+
+The resulting shared library can either be linked into a C or C++ program at
+compile time, or dynamically loaded at run time with `dlopen`.
+
+#### API
+
+The API for the C bindings is installed at [`include/kllvm-c/kllvm-c.h`][header]
+when the backend is built. This header fully specifies the public C API exposed
+by the library. For full details of anything mentioned in this section, please
+consult that header; the examples in this document are currently a high-level
+overview of how to use the bindings, rather than a detailed reference.
+
+At a high level, the C bindings implement opaque wrappers over the internal KORE
+AST data structures (sorts, patterns, symbols) and runtime term blocks.
+
+Instances of these opaque wrappers are created by a family of `*_new` functions;
+callers are responsible for cleaning up by calling the corresponding `*_free`
+function on the returned object when its lifetime ends. Failing to do so will
+leak memory. For example, to create and then immediately free an object
+representing the `Int` sort:
+```c
+kore_sort *int_sort = kore_composite_sort_new("SortInt");
+kore_sort_free(int_sort);
+```
+
+The API contains functions to manipulate the KORE AST. For example, to construct
+the pattern `a(b())` in KORE:
+```c
+kore_pattern *b = kore_composite_pattern_new("Lblb");
+kore_pattern *a = kore_composite_pattern_new("Lbla");
+kore_composite_pattern_add_argument(a, b);
+kore_pattern_free(b); // a is valid here as it holds an internal reference to b
+// use a ...
+kore_pattern_free(a);
+```
+
 ## Static Library
+
+If an application does not require KORE AST manipulation, but needs to perform
+concrete rewriting of KORE terms, it may be more appropriate to link the
+generated interpreter directly into your application and provide your own
+entrypoint.
 
 [pybind]: https://github.com/pybind/pybind11
 [pyk]: https://github.com/runtimeverification/pyk
+[header]: https://github.com/runtimeverification/llvm-backend/blob/master/bindings/c/include/kllvm-c/kllvm-c.h
