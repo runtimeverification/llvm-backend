@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <limits>
+#include <vector>
 
 #include <gmp.h>
 #include <mpfr.h>
@@ -195,6 +196,8 @@ typedef list *SortList;
 typedef map *SortMap;
 typedef set *SortSet;
 
+void *constructCompositePattern(uint32_t tag, std::vector<void *> &arguments);
+
 extern "C" {
 
 block *parseConfiguration(const char *filename);
@@ -208,6 +211,14 @@ void printSortedConfigurationToFile(
     FILE *file, block *subject, char const *sort);
 void printConfigurationInternal(
     writer *file, block *subject, const char *sort, bool, void *);
+
+// This function injects its argument into KItem before printing, using the sort
+// argument as the source sort. Doing so allows the term to be pretty-printed
+// using the existing recursion scheme code (and without manually inspecting the
+// sort to see what printer we need to call if the term isn't an entire
+// configuration).
+string *debug_print_term(block *subject, char const *sort);
+
 mpz_ptr move_int(mpz_t);
 
 void serializeConfigurations(
