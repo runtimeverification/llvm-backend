@@ -117,13 +117,48 @@ kore_pattern_free(b); // a is valid here as it holds an internal reference to b
 kore_pattern_free(a);
 ```
 
+Limited support for concrete execution is provided by this API. Currently, only
+evaluation of KORE function terms is implemented via the `kore_simplify_*`
+functions.
+
 ## Static Library
 
 If an application does not require KORE AST manipulation, but needs to perform
-concrete rewriting of KORE terms, it may be more appropriate to link the
-generated interpreter directly into your application and provide your own
-entrypoint.
+concrete rewriting of KORE terms beyond function evaluation, it may be more
+appropriate to link the generated interpreter directly into your application and
+provide your own entrypoint.
+
+To build an object file that contains a compiled definition's full generated
+rewriting code, `llvm-kompile` can be invoked as:
+```console
+$ llvm-kompile definition.kore dt_dir library -c -- -o interpreter.o
+```
+
+The generated object file can be linked into any larger application's build
+system at this point. However, it does not have a definition of `main`, and so
+an application that embeds the interpreter must supply one. The [default
+implementations][main] used by `llvm-kompile` in `main` mode are a useful
+reference for what steps need to be taken to interpret a KORE term:
+* Extract information from command line arguments
+* Parse (or deserialize) a textual (or binary) KORE term from a file
+* Instantiate an initial runtime term from the parsed KORE
+* Take rewriting steps
+* Print the final KORE term.
+
+The API available to applications using interpreter object files in this way is
+the [full internal API][runtime-header] used by the LLVM backend. Currently,
+this interface is not fully documented, and many details relevant only to
+internal usage are exposed. Additionally, several important functions are not
+listed in this header:
+* `void initStaticObjects(void)`
+* `block *take_steps(uint64_t steps, block *term)`
+* `block *k_step(block *term)`
+
+Improving this API documentation for end users is a priority for the LLVM
+backend.
 
 [pybind]: https://github.com/pybind/pybind11
 [pyk]: https://github.com/runtimeverification/pyk
 [header]: https://github.com/runtimeverification/llvm-backend/blob/master/bindings/c/include/kllvm-c/kllvm-c.h
+[mains]: https://github.com/runtimeverification/llvm-backend/tree/master/runtime/main
+[runtime-header]: https://github.com/runtimeverification/llvm-backend/blob/master/include/runtime/header.h
