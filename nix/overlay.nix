@@ -96,7 +96,7 @@ let
       PYTHON_INTERPRETER=${llvm-backend.python-interpreter} \
       BINDINGS_INSTALL_PATH=${llvm-backend}/lib/kllvm/python \
       INCLUDE_INSTALL_PATH=${llvm-backend}/include \
-        LIT_USE_NIX=1 lit -v test -j1
+        LIT_USE_NIX=1 lit -v test
 
       runHook postBuild
     '';
