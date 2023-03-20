@@ -83,7 +83,7 @@ $ llvm-kompile definition.kore dt_dir c -- -o liblang.so
 ```
 
 The resulting shared library can either be linked into a C or C++ program at
-compile time, or dynamically loaded at run time with `dlopen`.
+compile time, or dynamically loaded at runtime with `dlopen`.
 
 #### API
 
