@@ -137,7 +137,7 @@ $ llvm-kompile definition.kore dt_dir library -c -- -o interpreter.o
 The generated object file can be linked into any larger application's build
 system at this point. However, it does not have a definition of `main`, and so
 an application that embeds the interpreter must supply one. The [default
-implementations][main] used by `llvm-kompile` in `main` mode are a useful
+implementations][mains] used by `llvm-kompile` in `main` mode are a useful
 reference for what steps need to be taken to interpret a KORE term:
 * Extract information from command line arguments
 * Parse (or deserialize) a textual (or binary) KORE term from a file
