@@ -31,7 +31,7 @@ The LLVM backend implements two shared library language bindings:
 * C (and therefore any language with a C FFI)
 
 These bindings are most appropriate for implementing features that
-programmatically maniulate the KORE data structures in the context of a larger
+programmatically manipulate the KORE data structures in the context of a larger
 tool. For example, the C bindings can be used to implement efficient evaluation
 of concrete side conditions for symbolic terms.
 
