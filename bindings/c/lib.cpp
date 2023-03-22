@@ -3,6 +3,7 @@
 
 #include <kllvm/ast/AST.h>
 #include <kllvm/binary/serializer.h>
+#include <kllvm/parser/KOREParser.h>
 
 #include <kllvm-c/kllvm-c.h>
 
@@ -77,6 +78,12 @@ void kore_pattern_serialize(
 
 void kore_pattern_free(kore_pattern const *pat) {
   delete pat;
+}
+
+kore_pattern *kore_pattern_parse(char const *kore_text) {
+  auto pat = new kore_pattern;
+  pat->ptr_ = kllvm::parser::KOREParser::from_string(kore_text)->pattern();
+  return pat;
 }
 
 kore_pattern *kore_pattern_new_token(char const *value, kore_sort const *sort) {
