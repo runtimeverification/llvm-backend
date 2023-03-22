@@ -25,7 +25,7 @@ HERE
 infer_library_name() {
   base_name="$1"
   
-  if [[ "$base_name" =~ "." ]]; then
+  if [[ "$base_name" =~ \. ]]; then
     echo "$base_name"
   else
     if [[ "$(uname)" == "Darwin" ]]; then
