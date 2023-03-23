@@ -1,13 +1,6 @@
 #include "api.h"
 
-#include <kllvm-c/kllvm-c.h>
-
-#include <assert.h>
-#include <dlfcn.h>
-#include <stdint.h>
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
 /*
   module ARITHMETIC-SYNTAX
