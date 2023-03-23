@@ -1,6 +1,6 @@
 // RUN: mkdir -p %t.dir
 // RUN: %kompile %s c -o %t.dir/libtest.so
-// RUN: clang -I %include-path Inputs/simplify.c -o %t
+// RUN: %kllvm-clang Inputs/simplify.c -o %t
 
 // RUN: %t %t.dir/libtest.so %t.foo.bin Lblfoo
 // RUN: %kore-convert %t.foo.bin | grep -q 'inj{SortInt{}, SortKItem{}}(\\dv{SortInt{}}("328"))'
