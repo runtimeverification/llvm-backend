@@ -1,6 +1,6 @@
 // RUN: mkdir -p %t.dir
 // RUN: %kompile %s c -o %t.dir/libtest.so
-// RUN: clang -I %include-path Inputs/kitem.c -o %t
+// RUN: %kllvm-clang Inputs/kitem.c -o %t
 
 // RUN: %t %t.dir/libtest.so %t.foo.bin
 // RUN: %kore-convert %t.foo.bin | grep -q 'Lblbar{}()'
