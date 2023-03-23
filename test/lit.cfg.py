@@ -69,7 +69,7 @@ config.substitutions.extend([
     ('%strip-binary', 'kore-strip'),
     ('%arity', 'kore-arity'),
 
-    ('%kllvm-clang', 'clang -I %include-path -I Inputs'),
+    ('%kllvm-clang', 'clang -I %include-path -I Inputs Inputs/api.c'),
 
     ('%bindings-path', BINDINGS_INSTALL_PATH),
     ('%include-path', INCLUDE_INSTALL_PATH),
