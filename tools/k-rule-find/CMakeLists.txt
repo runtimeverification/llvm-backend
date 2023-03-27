@@ -3,13 +3,10 @@ kllvm_add_tool(k-rule-find
 )
 
 target_link_libraries(k-rule-find 
-  PUBLIC util BinaryKore Codegen Parser AST gmp mpfr numeric_strings
+  PUBLIC Parser AST
 )
 
 install(
   TARGETS k-rule-find
   RUNTIME DESTINATION bin
 )
-
-separate_arguments(LLVM_DEFINITIONS_LIST NATIVE_COMMAND ${LLVM_DEFINITIONS})
-add_definitions(${LLVM_DEFINITIONS_LIST})
