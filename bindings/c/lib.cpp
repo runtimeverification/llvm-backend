@@ -68,6 +68,15 @@ char *kore_pattern_dump(kore_pattern const *pat) {
 }
 
 char *kore_pattern_pretty_print(kore_pattern const *pat) {
+  char temp_file_name[] = "tmp.pretty_print.XXXXXX";
+
+  if (mkstemp(temp_file_name) == -1) {
+    std::perror("Could not create temporary pretty-printing directory: ");
+    std::exit(1);
+  }
+
+  fs::create_directory(temp_file_name);
+
   __builtin_trap();
 }
 

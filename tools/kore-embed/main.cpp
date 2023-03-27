@@ -124,17 +124,20 @@ int main(int argc, char **argv) {
   auto impl_path = std::string(
       fmt::format("{}/{}.{}", Directory, VariableName, Extension));
 
-  FILE *header_f = check_fopen(header_path.c_str(), "w");
+  FILE *header_f = NULL;
   FILE *in_f = check_fopen(TargetFile.c_str(), "rb");
   FILE *impl_f = check_fopen(impl_path.c_str(), "w");
 
   if (!NoHeader) {
+    header_f = check_fopen(header_path.c_str(), "w");
     print_header(header_f);
   }
 
   print_implementation(in_f, impl_f);
 
   for (auto f : {header_f, impl_f, in_f}) {
-    std::fclose(f);
+    if (f) {
+      std::fclose(f);
+    }
   }
 }

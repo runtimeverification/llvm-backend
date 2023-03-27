@@ -20,8 +20,9 @@ Options:
   --python-output-dir PATH  Output directory to place automatically-named Python
                             modules. Only meaningful in "python" or "pythonast"
                             mode.
-  --embed-kprint            Embed additional information into shared library
-                            bindings. Only meaningful in "c" mode.
+  --embed PATH NAME         Embed additional information into shared library
+                            bindings. This is a low-level interface designed to
+                            be called from kompile. Only meaningful in "c" mode.
 
 Any option not listed above will be passed through to clang; use '--' to
 separate additional positional arguments to clang from those for $0.
@@ -73,7 +74,8 @@ kompile_clang_flags=()
 clang_args=()
 python_cmd=python3
 python_output_dir=""
-embed_kprint=false
+embedded_files=()
+embedded_names=()
 
 verbose=false
 save_temps=false
@@ -116,9 +118,10 @@ while [[ $# -gt 0 ]]; do
       python_output_dir="$2"
       shift; shift
       ;;
-    --embed-kprint)
-      embed_kprint=true
-      shift
+    --embed)
+      embedded_files+=("$2")
+      embedded_names+=("$3")
+      shift; shift; shift
       ;;
     --)
       reading_clang_args=true
@@ -213,24 +216,17 @@ if [[ "${python_output_dir}" == "" ]]; then
 fi
 kompile_clang_flags+=("--python-output-dir" "${python_output_dir}")
 
-if [[ "$embed_kprint" = "true" ]]; then
-  defn_dir="$(dirname "$definition")"
-
+embed_length="${#embedded_files[@]}"
+for (( idx = 0; idx < embed_length; idx++ )); do
   run "$(dirname "$0")"/kore-embed    \
-    "$defn_dir/syntaxDefinition.kore" \
-    --name kore_definition_syntax     \
+    "${embedded_files[$idx]}"         \
+    --name "${embedded_names[$idx]}"  \
     --ext cpp                         \
-    --directory "$tmpdir"
+    --directory "$tmpdir"             \
+    --no-header
 
-  run "$(dirname "$0")"/kore-embed    \
-    "$defn_dir/macros.kore"           \
-    --name kore_definition_macros     \
-    --ext cpp                         \
-    --directory "$tmpdir"
-
-  kompile_clang_flags+=("$tmpdir/kore_definition_syntax.cpp")
-  kompile_clang_flags+=("$tmpdir/kore_definition_macros.cpp")
-fi
+  kompile_clang_flags+=("$tmpdir/${embedded_names[$idx]}.cpp")
+done
 
 run "$(dirname "$0")"/llvm-kompile-clang          \
   "$modopt" "$main"                               \
