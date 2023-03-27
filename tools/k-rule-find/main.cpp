@@ -9,21 +9,28 @@
 
 using namespace llvm;
 
+struct Location {
+  std::string filename;
+  int64_t line;
+  int64_t column;
+};
+
 cl::OptionCategory KRuleCat("k-rule-find options");
 
 cl::opt<std::string> KTermFilename(
     cl::Positional, cl::desc("<kore_term_filename>"), cl::Required,
     cl::cat(KRuleCat));
 
-cl::opt<std::string> Location(
-    cl::Positional, cl::desc("<filename.k:line:column>"), cl::Required,
+cl::opt<std::string> RuleLocation(
+    cl::Positional, cl::desc("<filename.k:line[:column]>"), cl::Required,
     cl::cat(KRuleCat));
 
 cl::opt<std::string> SharedLibPath(
     cl::Positional, cl::desc("<path_to_shared_lib>"), cl::cat(KRuleCat));
 
-void parseLocation(
-    std::string loc, std::string &filename, int64_t &line, int64_t &column) {
+Location parseLocation(std::string loc) {
+  std::string filename;
+  int64_t line, column = -1;
   size_t pos = loc.find(":");
   if (pos == std::string::npos) {
     std::cerr
@@ -35,25 +42,22 @@ void parseLocation(
   std::string lineColumn = loc.substr(pos + 1);
   size_t pos_lc = lineColumn.find(":");
 
+  // If another “:” isn’t found, the tool assumes no column number was given.
   if (pos_lc == std::string::npos) {
-    std::cerr
-        << "Rule's location must me in the format: defintion.k:line:column\n";
-    exit(EXIT_FAILURE);
+    line = stoi(lineColumn);
+  } else {
+    line = stoi(lineColumn.substr(0, pos_lc));
+    column = stoi(lineColumn.substr(pos_lc + 1));
   }
 
-  line = stoi(lineColumn.substr(0, pos_lc));
-  column = stoi(lineColumn.substr(pos_lc + 1));
+  return {filename, line, column};
 }
 
 int main(int argc, char **argv) {
   cl::HideUnrelatedOptions({&KRuleCat});
   cl::ParseCommandLineOptions(argc, argv);
 
-  std::string filename;
-  int64_t lineNumber, columnNumber;
-  parseLocation(Location, filename, lineNumber, columnNumber);
-
-  std::cout << filename << " : " << lineNumber << " : " << columnNumber << "\n";
+  auto loc = parseLocation(RuleLocation);
 
   // Open the shared library that contains the llvm match functions.
   auto handle = dlopen(SharedLibPath.c_str(), RTLD_LAZY);
@@ -83,7 +87,7 @@ int main(int argc, char **argv) {
           llvm_function_ptr);
 
   // Call the function to check if the given K Term matches with the given rule.
-  match_function(b, filename, lineNumber, columnNumber);
+  match_function(b, loc.filename, loc.line, loc.column);
 
   return 0;
 }
