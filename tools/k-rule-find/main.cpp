@@ -76,10 +76,10 @@ int main(int argc, char **argv) {
   // Get the constructInitialConfiguration utils function from the function,
   // cast it to right type, and call it to get the block pointer.
   void *construct_ptr = dlsym(
-      handle, "_Z29constructInitialConfigurationPKN5kllvm11KOREPatternE");
+      handle, "_Z29constructInitialConfigurationPKN5kllvm11KOREPattern");
   if (construct_ptr == NULL) {
-    std::cerr << "Couldn't find the constructInitialConfiguration on the given "
-                 "shared lib.\n";
+    std::cerr << "Error: " << dlerror() << "\n";
+    dlclose(handle);
     return EXIT_FAILURE;
   }
   auto constructInitialConfiguration
@@ -89,8 +89,8 @@ int main(int argc, char **argv) {
   // Get the llvm match function pointer and cast it to right type.
   void *llvm_function_ptr = dlsym(handle, "llvm_match_function");
   if (llvm_function_ptr == NULL) {
-    std::cerr
-        << "Couldn't find the llvm_match_function on the given shared lib.\n";
+    std::cerr << "Error: " << dlerror() << "\n";
+    dlclose(handle);
     return EXIT_FAILURE;
   }
   auto match_function
@@ -101,5 +101,6 @@ int main(int argc, char **argv) {
   // rule.
   match_function(b, loc.filename, loc.line, loc.column);
 
+  dlclose(handle);
   return 0;
 }
