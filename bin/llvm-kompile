@@ -20,6 +20,8 @@ Options:
   --python-output-dir PATH  Output directory to place automatically-named Python
                             modules. Only meaningful in "python" or "pythonast"
                             mode.
+  --embed-kprint            Embed additional information into shared library
+                            bindings. Only meaningful in "c" mode.
 
 Any option not listed above will be passed through to clang; use '--' to
 separate additional positional arguments to clang from those for $0.
@@ -71,6 +73,7 @@ kompile_clang_flags=()
 clang_args=()
 python_cmd=python3
 python_output_dir=""
+embed_kprint=false
 
 verbose=false
 save_temps=false
@@ -113,6 +116,10 @@ while [[ $# -gt 0 ]]; do
       python_output_dir="$2"
       shift; shift
       ;;
+    --embed-kprint)
+      embed_kprint=true
+      shift
+      ;;
     --)
       reading_clang_args=true
       shift
@@ -141,9 +148,10 @@ fi
 
 mod="$(mktemp tmp.XXXXXXXXXX)"
 modopt_tmp="$(mktemp tmp.XXXXXXXXXX)"
+tmpdir="$(mktemp -d tmp.XXXXXXXXXX)"
 modopt="$modopt_tmp"
 if [ "$save_temps" = false ]; then
-  trap 'rm -rf "$mod" "$modopt_tmp"' INT TERM EXIT
+  trap 'rm -rf "$mod" "$modopt_tmp" "$tmpdir"' INT TERM EXIT
 fi
 
 definition="${positional_args[0]}"
@@ -204,6 +212,25 @@ if [[ "${python_output_dir}" == "" ]]; then
   python_output_dir="$(dirname "${definition}")"
 fi
 kompile_clang_flags+=("--python-output-dir" "${python_output_dir}")
+
+if [[ "$embed_kprint" = "true" ]]; then
+  defn_dir="$(dirname "$definition")"
+
+  run "$(dirname "$0")"/kore-embed    \
+    "$defn_dir/syntaxDefinition.kore" \
+    --name kore_definition_syntax     \
+    --ext cpp                         \
+    --directory "$tmpdir"
+
+  run "$(dirname "$0")"/kore-embed    \
+    "$defn_dir/macros.kore"           \
+    --name kore_definition_macros     \
+    --ext cpp                         \
+    --directory "$tmpdir"
+
+  kompile_clang_flags+=("$tmpdir/kore_definition_syntax.cpp")
+  kompile_clang_flags+=("$tmpdir/kore_definition_macros.cpp")
+fi
 
 run "$(dirname "$0")"/llvm-kompile-clang          \
   "$modopt" "$main"                               \

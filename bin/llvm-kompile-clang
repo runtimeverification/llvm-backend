@@ -100,6 +100,8 @@ esac
 
 LIBDIR="$(dirname "$0")/../lib/kllvm/"
 INCDIR="$(dirname "$0")/../include/"
+BINDIR="$(dirname "$0")"
+
 if [ "$main" = "main" ]; then
   MAINFILES="$LIBDIR"/llvm/main/main.ll
 elif [ "$main" = "search" ]; then

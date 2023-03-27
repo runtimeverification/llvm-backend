@@ -25,6 +25,10 @@ cl::opt<std::string> Extension(
     "ext", cl::desc("Extension to use for generated files"), cl::init("c"),
     cl::cat(KoreEmbedCat));
 
+cl::opt<std::string> Directory(
+    "directory", cl::desc("Directory to output generated files in"),
+    cl::init("."), cl::cat(KoreEmbedCat));
+
 cl::opt<bool> NoHeader(
     "no-header", cl::desc("Don't generate a header file"), cl::init(false),
     cl::cat(KoreEmbedCat));
@@ -115,14 +119,19 @@ int main(int argc, char **argv) {
   cl::HideUnrelatedOptions({&KoreEmbedCat});
   cl::ParseCommandLineOptions(argc, argv);
 
-  auto header_path = std::string(fmt::format("{}.h", VariableName));
-  auto impl_path = std::string(fmt::format("{}.{}", VariableName, Extension));
+  auto header_path
+      = std::string(fmt::format("{}/{}.h", Directory, VariableName));
+  auto impl_path = std::string(
+      fmt::format("{}/{}.{}", Directory, VariableName, Extension));
 
   FILE *header_f = check_fopen(header_path.c_str(), "w");
   FILE *in_f = check_fopen(TargetFile.c_str(), "rb");
   FILE *impl_f = check_fopen(impl_path.c_str(), "w");
 
-  print_header(header_f);
+  if (!NoHeader) {
+    print_header(header_f);
+  }
+
   print_implementation(in_f, impl_f);
 
   for (auto f : {header_f, impl_f, in_f}) {
