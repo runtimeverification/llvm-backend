@@ -73,6 +73,11 @@ int main(int argc, char **argv) {
 
   // Get the llvm match function pointer and cast it to right type.
   void *llvm_function_ptr = dlsym(handle, "llvm_match_function");
+  if (llvm_function_ptr == NULL) {
+    std::cerr
+        << "Couldn't find the llvm_match_function on the given shared lib.\n";
+    return EXIT_FAILURE;
+  }
   auto match_function
       = reinterpret_cast<void (*)(block *, std::string, int64_t, int64_t)>(
           llvm_function_ptr);
