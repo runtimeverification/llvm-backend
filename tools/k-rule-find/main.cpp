@@ -17,8 +17,8 @@ struct Location {
 
 cl::OptionCategory KRuleCat("k-rule-find options");
 
-cl::opt<std::string> KTermFilename(
-    cl::Positional, cl::desc("<kore_term_filename>"), cl::Required,
+cl::opt<std::string> KOREPatternFilename(
+    cl::Positional, cl::desc("<kore_patten_filename>"), cl::Required,
     cl::cat(KRuleCat));
 
 cl::opt<std::string> RuleLocation(
@@ -34,7 +34,7 @@ Location parseLocation(std::string loc) {
   size_t pos = loc.find(":");
   if (pos == std::string::npos) {
     std::cerr
-        << "Rule's location must me in the format: defintion.k:line:column\n";
+        << "Rule's location must me in the format: defintion.k:line[:column]\n";
     exit(EXIT_FAILURE);
   }
   filename = loc.substr(0, pos);
@@ -68,9 +68,9 @@ int main(int argc, char **argv) {
     return EXIT_FAILURE;
   }
 
-  // Parse the given KTerm and get the block* to use as input for the match
-  // function.
-  kllvm::parser::KOREParser parser(KTermFilename);
+  // Parse the given KORE Pattern and get the block* to use as input for the
+  // match function.
+  kllvm::parser::KOREParser parser(KOREPatternFilename);
   auto InitialConfiguration = parser.pattern();
   //auto b = (block *)constructInitialConfiguration(InitialConfiguration.get());
   block *b = nullptr;
@@ -86,7 +86,8 @@ int main(int argc, char **argv) {
       = reinterpret_cast<void (*)(block *, std::string, int64_t, int64_t)>(
           llvm_function_ptr);
 
-  // Call the function to check if the given K Term matches with the given rule.
+  // Call the function to check if the given KORE pattern matches with the given
+  // rule.
   match_function(b, loc.filename, loc.line, loc.column);
 
   return 0;
