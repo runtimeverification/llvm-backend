@@ -10,7 +10,7 @@
 using namespace llvm;
 
 struct Location {
-  std::string filename;
+  char *filename;
   int64_t line;
   int64_t column;
 };
@@ -29,7 +29,7 @@ cl::opt<std::string> SharedLibPath(
     cl::Positional, cl::desc("<path_to_shared_lib>"), cl::cat(KRuleCat));
 
 Location parseLocation(std::string loc) {
-  std::string filename;
+  char *filename;
   int64_t line, column = -1;
   size_t pos = loc.find(":");
   if (pos == std::string::npos) {
@@ -37,7 +37,7 @@ Location parseLocation(std::string loc) {
         << "Rule's location must me in the format: defintion.k:line[:column]\n";
     exit(EXIT_FAILURE);
   }
-  filename = loc.substr(0, pos);
+  filename = (char *)loc.substr(0, pos).c_str();
 
   std::string lineColumn = loc.substr(pos + 1);
   size_t pos_lc = lineColumn.find(":");
@@ -83,7 +83,7 @@ int main(int argc, char **argv) {
     return EXIT_FAILURE;
   }
   auto match_function
-      = reinterpret_cast<void (*)(block *, std::string, int64_t, int64_t)>(
+      = reinterpret_cast<void (*)(block *, char *, int64_t, int64_t)>(
           llvm_function_ptr);
 
   // Call the function to check if the given KORE pattern matches with the given
