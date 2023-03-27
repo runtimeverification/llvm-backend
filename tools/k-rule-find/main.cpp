@@ -1,4 +1,4 @@
-
+#include "kllvm/ast/AST.h"
 #include "kllvm/parser/KOREParser.h"
 #include "llvm/Support/CommandLine.h"
 
@@ -72,8 +72,19 @@ int main(int argc, char **argv) {
   // match function.
   kllvm::parser::KOREParser parser(KOREPatternFilename);
   auto InitialConfiguration = parser.pattern();
-  //auto b = (block *)constructInitialConfiguration(InitialConfiguration.get());
-  block *b = nullptr;
+
+  // Get the constructInitialConfiguration utils function from the function,
+  // cast it to right type, and call it to get the block pointer.
+  void *construct_ptr = dlsym(
+      handle, "_Z29constructInitialConfigurationPKN5kllvm11KOREPatternE");
+  if (construct_ptr == NULL) {
+    std::cerr << "Couldn't find the constructInitialConfiguration on the given "
+                 "shared lib.\n";
+    return EXIT_FAILURE;
+  }
+  auto constructInitialConfiguration
+      = reinterpret_cast<void *(*)(const kllvm::KOREPattern *)>(construct_ptr);
+  auto b = (block *)constructInitialConfiguration(InitialConfiguration.get());
 
   // Get the llvm match function pointer and cast it to right type.
   void *llvm_function_ptr = dlsym(handle, "llvm_match_function");
