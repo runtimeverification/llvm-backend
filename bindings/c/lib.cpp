@@ -1,9 +1,12 @@
+#include <dlfcn.h>
+#include <filesystem>
 #include <iostream>
 #include <memory>
 
 #include <kllvm/ast/AST.h>
 #include <kllvm/binary/serializer.h>
 #include <kllvm/parser/KOREParser.h>
+#include <kllvm/printer/printer.h>
 
 #include <kllvm-c/kllvm-c.h>
 
@@ -12,6 +15,8 @@
 // This header needs to be included last because it pollutes a number of macro
 // definitions into the global namespace.
 #include <runtime/header.h>
+
+namespace fs = std::filesystem;
 
 // Internal implementation details
 namespace {
@@ -60,6 +65,10 @@ char *kore_pattern_dump(kore_pattern const *pat) {
   auto os = std::ostringstream{};
   pat->ptr_->print(os);
   return get_c_string(os);
+}
+
+char *kore_pattern_pretty_print(kore_pattern const *pat) {
+  __builtin_trap();
 }
 
 void kore_pattern_serialize(

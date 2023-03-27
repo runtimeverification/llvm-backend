@@ -39,6 +39,8 @@ typedef struct block block;
 
 char *kore_pattern_dump(kore_pattern const *);
 
+char *kore_pattern_pretty_print(kore_pattern const *);
+
 void kore_pattern_serialize(kore_pattern const *, char **, size_t *);
 
 void kore_pattern_free(kore_pattern const *);
