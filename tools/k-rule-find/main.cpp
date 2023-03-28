@@ -4,10 +4,12 @@
 
 #include <dlfcn.h>
 #include <iostream>
+#include <stdlib.h>
 
 #include "runtime/header.h"
 
 using namespace llvm;
+using namespace kllvm;
 
 struct Location {
   char *filename;
@@ -15,18 +17,18 @@ struct Location {
   int64_t column;
 };
 
+std::string SOURCE_ATT = "org'Stop'kframework'Stop'attributes'Stop'Source";
+std::string LOCATION_ATT = "org'Stop'kframework'Stop'attributes'Stop'Location";
+
 cl::OptionCategory KRuleCat("k-rule-find options");
 
-cl::opt<std::string> KOREPatternFilename(
-    cl::Positional, cl::desc("<kore_patten_filename>"), cl::Required,
+cl::opt<std::string> KompiledDir(
+    cl::Positional, cl::desc("<kompiled-dir>"), cl::Required,
     cl::cat(KRuleCat));
 
 cl::opt<std::string> RuleLocation(
     cl::Positional, cl::desc("<filename.k:line[:column]>"), cl::Required,
     cl::cat(KRuleCat));
-
-cl::opt<std::string> SharedLibPath(
-    cl::Positional, cl::desc("<path_to_shared_lib>"), cl::cat(KRuleCat));
 
 Location parseLocation(std::string loc) {
   char *filename;
@@ -53,54 +55,67 @@ Location parseLocation(std::string loc) {
   return {filename, line, column};
 }
 
+std::string getSource(KOREAxiomDeclaration *axiom) {
+  auto *sourceAtt = axiom->getAttributes().at(SOURCE_ATT).get();
+  assert(sourceAtt->getArguments().size() == 1);
+
+  auto strPattern
+      = dynamic_cast<KOREStringPattern *>(sourceAtt->getArguments()[0].get());
+  return strPattern->getContents();
+}
+
+Location getLocation(KOREAxiomDeclaration *axiom) {
+  auto *locationAtt = axiom->getAttributes().at(LOCATION_ATT).get();
+  assert(locationAtt->getArguments().size() == 1);
+
+  auto strPattern
+      = dynamic_cast<KOREStringPattern *>(locationAtt->getArguments()[0].get());
+
+  std::string location = strPattern->getContents();
+  auto filename = (char *)location.c_str();
+
+  size_t first_comma = location.find_first_of(',');
+  int64_t lineNumber = std::stoi(location.substr(9, first_comma - 9));
+  int64_t columnNumber = std::stoi(location.substr(
+      first_comma + 1,
+      location.find_first_of(',', first_comma + 1) - first_comma - 1));
+
+  return {filename, lineNumber, columnNumber};
+}
+
 int main(int argc, char **argv) {
   cl::HideUnrelatedOptions({&KRuleCat});
   cl::ParseCommandLineOptions(argc, argv);
 
   auto loc = parseLocation(RuleLocation);
+  auto definition = KompiledDir + "/definition.kore";
+  auto source_filename = realpath(loc.filename, NULL);
+  std::string rule_label = "";
 
-  // Open the shared library that contains the llvm match functions.
-  auto handle = dlopen(SharedLibPath.c_str(), RTLD_LAZY);
+  // Parse the definition.kore to get the AST.
+  kllvm::parser::KOREParser parser(definition);
+  auto kore_ast = parser.definition();
 
-  // Check if the shared library exits in the given location.
-  if (!handle) {
-    std::cerr << "Error: " << dlerror() << "\n";
-    return EXIT_FAILURE;
+  // Iterate through axioms.
+  for (auto axiom : kore_ast.get()->getAxioms()) {
+    if (axiom->getAttributes().count(SOURCE_ATT)) {
+      std::string source = getSource(axiom);
+      if (source.find(source_filename) != std::string::npos) {
+        Location source_loc = getLocation(axiom);
+        if (loc.line == source_loc.line
+            && (loc.column == -1 || loc.column == source_loc.column)) {
+          rule_label = axiom->getStringAttribute("label");
+        }
+      }
+    }
   }
 
-  // Parse the given KORE Pattern and get the block* to use as input for the
-  // match function.
-  kllvm::parser::KOREParser parser(KOREPatternFilename);
-  auto InitialConfiguration = parser.pattern();
-
-  // Get the constructInitialConfiguration utils function from the function,
-  // cast it to right type, and call it to get the block pointer.
-  void *construct_ptr = dlsym(
-      handle, "_Z29constructInitialConfigurationPKN5kllvm11KOREPattern");
-  if (construct_ptr == NULL) {
-    std::cerr << "Error: " << dlerror() << "\n";
-    dlclose(handle);
-    return EXIT_FAILURE;
+  // Output the result or the error message.
+  if (rule_label.empty()) {
+    std::cerr << "Error: Couldn't find rule label within the given location.\n";
+  } else {
+    std::cout << rule_label << "\n";
   }
-  auto constructInitialConfiguration
-      = reinterpret_cast<void *(*)(const kllvm::KOREPattern *)>(construct_ptr);
-  auto b = (block *)constructInitialConfiguration(InitialConfiguration.get());
 
-  // Get the llvm match function pointer and cast it to right type.
-  void *llvm_function_ptr = dlsym(handle, "llvm_match_function");
-  if (llvm_function_ptr == NULL) {
-    std::cerr << "Error: " << dlerror() << "\n";
-    dlclose(handle);
-    return EXIT_FAILURE;
-  }
-  auto match_function
-      = reinterpret_cast<void (*)(block *, char *, int64_t, int64_t)>(
-          llvm_function_ptr);
-
-  // Call the function to check if the given KORE pattern matches with the given
-  // rule.
-  match_function(b, loc.filename, loc.line, loc.column);
-
-  dlclose(handle);
   return 0;
 }
