@@ -127,6 +127,10 @@ while [[ $# -gt 0 ]]; do
       reading_clang_args=true
       shift
       ;;
+    -o)
+      kompile_clang_flags+=("$1" "$2")
+      shift; shift;
+      ;;
     -*)
       kompile_clang_flags+=("$1")
       shift

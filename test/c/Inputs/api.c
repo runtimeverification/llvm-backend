@@ -21,6 +21,7 @@ struct kllvm_c_api load_c_api(char const *path) {
   struct kllvm_c_api api;
 
   API_FUNCTION(kore_pattern_dump);
+  API_FUNCTION(kore_pattern_pretty_print);
   API_FUNCTION(kore_pattern_serialize);
   API_FUNCTION(kore_pattern_free);
   API_FUNCTION(kore_pattern_parse);
