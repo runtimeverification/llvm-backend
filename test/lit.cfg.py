@@ -68,6 +68,7 @@ config.substitutions.extend([
     ('%convert-input', '%kore-convert %test-input -o %t.bin'),
     ('%strip-binary', 'kore-strip'),
     ('%arity', 'kore-arity'),
+    ('%find-rule', 'k-rule-find'),
 
     ('%bindings-path', BINDINGS_INSTALL_PATH),
     ('%include-path', INCLUDE_INSTALL_PATH),
