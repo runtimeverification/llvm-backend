@@ -14,8 +14,10 @@ using namespace kllvm;
 
 struct Location {
   std::string filename;
-  int64_t line;
-  int64_t column;
+  int64_t start_line;
+  int64_t end_line;
+  int64_t start_column;
+  int64_t end_column;
 };
 
 cl::OptionCategory KRuleCat("k-rule-find options");
@@ -43,33 +45,40 @@ Location getLocation(KOREAxiomDeclaration *axiom) {
 
   auto strPattern
       = dynamic_cast<KOREStringPattern *>(locationAtt->getArguments()[0].get());
-
   std::string location = strPattern->getContents();
 
+  size_t l_paren = location.find_first_of('(');
   size_t first_comma = location.find_first_of(',');
-  int64_t lineNumber = std::stoi(location.substr(9, first_comma - 9));
-  int64_t columnNumber = std::stoi(location.substr(
-      first_comma + 1,
-      location.find_first_of(',', first_comma + 1) - first_comma - 1));
+  size_t length = first_comma - l_paren - 1;
+  int64_t start_line = std::stoi(location.substr(l_paren + 1, length));
 
-  return {location, lineNumber, columnNumber};
+  size_t second_comma = location.find_first_of(',', first_comma + 1);
+  length = second_comma - first_comma - 1;
+  int64_t start_column = std::stoi(location.substr(first_comma + 1, length));
+
+  size_t third_comma = location.find_last_of(',');
+  length = third_comma - second_comma - 1;
+  int64_t end_line = std::stoi(location.substr(second_comma + 1, length));
+
+  length = location.find_last_of(')');
+  int64_t end_column = std::stoi(location.substr(third_comma + 1, length));
+
+  return {location, start_line, end_line, start_column, end_column};
 }
 
 Location parseLocation(std::string loc) {
-  std::string filename;
-  int64_t line, column = -1;
   size_t pos = loc.find(":");
   if (pos == std::string::npos) {
     std::cerr
         << "Rule's location must me in the format: defintion.k:line[:column]\n";
     exit(EXIT_FAILURE);
   }
-  filename = loc.substr(0, pos);
 
   std::string lineColumn = loc.substr(pos + 1);
   size_t pos_lc = lineColumn.find(":");
 
   // If another “:” isn’t found, the tool assumes no column number was given.
+  int64_t line, column = -1;
   if (pos_lc == std::string::npos) {
     line = stoi(lineColumn);
   } else {
@@ -77,7 +86,15 @@ Location parseLocation(std::string loc) {
     column = stoi(lineColumn.substr(pos_lc + 1));
   }
 
-  return {filename, line, column};
+  return {loc.substr(0, pos), line, line, column, column};
+}
+
+bool checkRanges(Location param, Location file, bool checkColumn) {
+  auto line
+      = param.start_line >= file.start_line && param.end_line <= file.end_line;
+  auto column = param.start_column >= file.start_column
+                && param.end_column <= file.end_column;
+  return checkColumn ? line && column : line;
 }
 
 int main(int argc, char **argv) {
@@ -98,8 +115,7 @@ int main(int argc, char **argv) {
       auto source = getSource(axiom);
       if (source.find(loc.filename) != std::string::npos) {
         auto source_loc = getLocation(axiom);
-        if (loc.line == source_loc.line
-            && (loc.column == -1 || loc.column == source_loc.column)) {
+        if (checkRanges(loc, source_loc, loc.start_column != -1)) {
           rule_label = axiom->getStringAttribute("label");
         }
       }
