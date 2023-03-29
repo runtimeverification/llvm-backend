@@ -22,6 +22,9 @@ namespace kllvm {
 
 int CODEGEN_DEBUG;
 
+std::string SOURCE_ATT = "org'Stop'kframework'Stop'attributes'Stop'Source";
+std::string LOCATION_ATT = "org'Stop'kframework'Stop'attributes'Stop'Location";
+
 static llvm::DIBuilder *Dbg;
 static llvm::DICompileUnit *DbgCU;
 static llvm::DIFile *DbgFile;

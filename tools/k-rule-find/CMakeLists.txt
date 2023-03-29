@@ -3,7 +3,7 @@ kllvm_add_tool(k-rule-find
 )
 
 target_link_libraries(k-rule-find 
-  PUBLIC Parser AST
+  PUBLIC Parser AST Codegen
 )
 
 install(

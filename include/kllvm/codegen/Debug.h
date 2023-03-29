@@ -19,10 +19,8 @@ namespace kllvm {
 
 extern int CODEGEN_DEBUG;
 
-static std::string SOURCE_ATT
-    = "org'Stop'kframework'Stop'attributes'Stop'Source";
-static std::string LOCATION_ATT
-    = "org'Stop'kframework'Stop'attributes'Stop'Location";
+extern std::string SOURCE_ATT;
+extern std::string LOCATION_ATT;
 
 void initDebugInfo(llvm::Module *module, std::string filename);
 void finalizeDebugInfo(void);

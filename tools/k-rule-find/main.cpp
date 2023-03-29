@@ -1,7 +1,6 @@
 #include <kllvm/ast/AST.h>
 #include <kllvm/codegen/Debug.h>
 #include <kllvm/parser/KOREParser.h>
-#include <runtime/header.h>
 
 #include <llvm/Support/CommandLine.h>
 
