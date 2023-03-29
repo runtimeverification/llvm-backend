@@ -101,11 +101,6 @@ void initDebugGlobal(
   var->addDebugInfo(DbgExp);
 }
 
-static std::string SOURCE_ATT
-    = "org'Stop'kframework'Stop'attributes'Stop'Source";
-static std::string LOCATION_ATT
-    = "org'Stop'kframework'Stop'attributes'Stop'Location";
-
 void initDebugAxiom(
     std::unordered_map<std::string, ptr<KORECompositePattern>> const &att) {
   if (!Dbg)

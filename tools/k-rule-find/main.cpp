@@ -1,4 +1,5 @@
 #include "kllvm/ast/AST.h"
+#include "kllvm/codegen/Debug.h"
 #include "kllvm/parser/KOREParser.h"
 #include "llvm/Support/CommandLine.h"
 
@@ -16,9 +17,6 @@ struct Location {
   int64_t line;
   int64_t column;
 };
-
-std::string SOURCE_ATT = "org'Stop'kframework'Stop'attributes'Stop'Source";
-std::string LOCATION_ATT = "org'Stop'kframework'Stop'attributes'Stop'Location";
 
 cl::OptionCategory KRuleCat("k-rule-find options");
 
