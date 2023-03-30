@@ -21,6 +21,19 @@
 #include <immer/set.hpp>
 #include <unordered_set>
 
+struct MatchLog {
+  enum { SUCCESS = 0, FUNCTION, FAIL } kind;
+
+  char *function;
+  char *debugName;
+  void *result;
+  std::vector<void *> args;
+
+  char *pattern;
+  void *subject;
+  char *sort;
+};
+
 // the actual length is equal to the block header with the gc bits masked out.
 
 #define len(s) len_hdr((s)->h.hdr)

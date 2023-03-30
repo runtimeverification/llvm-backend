@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <functional>
+#include <iostream>
 #include <set>
 #include <string>
 #include <unordered_map>
@@ -283,4 +284,21 @@ void printSortedConfigurationToFile(
   auto state = print_state();
   writer w = {file, nullptr};
   printConfigurationInternal(&w, subject, sort, false, &state);
+}
+
+void printMatchResult(
+    std::ostream &os, MatchLog *matchLog, size_t logSize) {
+  if (logSize > 0) {
+    for (int i = 0; i < logSize; i++) {
+      if (matchLog[i].kind == MatchLog::SUCCESS)
+        os << "Match succeeds\n";
+      else if (matchLog[i].kind == MatchLog::FAIL) {
+        os << "Subject:\n";
+        os << "\n"; // TODO: Print the subject
+        os << "does not match pattern: \n";
+        os << matchLog[i].pattern << "\n";
+      } else if (matchLog[i].kind == MatchLog::FUNCTION)
+        os << "Match Function type not supported!\n"; // TODO
+    }
+  }
 }
