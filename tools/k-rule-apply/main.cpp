@@ -62,7 +62,6 @@ std::optional<std::string> getMatchFunctionName() {
     }
   }
 
- 
   std::cerr << "Rule with label " << ruleLabel << " does not exist.\n";
   return std::nullopt;
 }
@@ -74,8 +73,7 @@ int main(int argc, char **argv) {
   // Parse the given KORE Pattern and get the block* to use as input for the
   // match function.
   parser::KOREParser parser(KOREPatternFilename);
-  auto InitialConfiguration = parser.pattern();  
-
+  auto InitialConfiguration = parser.pattern();
 
   auto match_function_name = getMatchFunctionName();
   if (match_function_name == std::nullopt) {

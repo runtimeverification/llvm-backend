@@ -286,8 +286,7 @@ void printSortedConfigurationToFile(
   printConfigurationInternal(&w, subject, sort, false, &state);
 }
 
-void printMatchResult(
-    std::ostream &os, MatchLog *matchLog, size_t logSize) {
+void printMatchResult(std::ostream &os, MatchLog *matchLog, size_t logSize) {
   if (logSize > 0) {
     for (int i = 0; i < logSize; i++) {
       if (matchLog[i].kind == MatchLog::SUCCESS)
