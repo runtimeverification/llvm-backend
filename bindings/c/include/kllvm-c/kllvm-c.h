@@ -4,8 +4,10 @@
 #ifndef __cplusplus
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdint.h>
 #else
 #include <cstddef>
+#include <cstdint>
 #endif
 
 #ifdef __cplusplus
@@ -41,6 +43,8 @@ void kore_pattern_serialize(kore_pattern const *, char **, size_t *);
 
 void kore_pattern_free(kore_pattern const *);
 
+kore_pattern *kore_pattern_parse(char const *);
+
 kore_pattern *kore_pattern_new_token(char const *, kore_sort const *);
 kore_pattern *
 kore_pattern_new_token_with_len(char const *, size_t, kore_sort const *);
@@ -48,7 +52,8 @@ kore_pattern_new_token_with_len(char const *, size_t, kore_sort const *);
 kore_pattern *kore_pattern_new_injection(
     kore_pattern const *, kore_sort const *, kore_sort const *);
 
-kore_pattern *kore_pattern_make_interpreter_input(kore_pattern const *);
+kore_pattern *
+kore_pattern_make_interpreter_input(kore_pattern const *, kore_sort const *);
 
 kore_pattern *kore_composite_pattern_new(char const *);
 kore_pattern *kore_composite_pattern_from_symbol(kore_symbol *);
@@ -72,6 +77,8 @@ void kore_simplify(
     kore_pattern const *pattern, kore_sort const *sort, char **, size_t *);
 
 void kore_simplify_binary(char *, size_t, kore_sort const *, char **, size_t *);
+
+block *take_steps(int64_t depth, block *term);
 
 /* KORESort */
 

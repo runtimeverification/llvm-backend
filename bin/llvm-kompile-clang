@@ -22,6 +22,23 @@ print(sysconfig.get_config_var('EXT_SUFFIX'))
 HERE
 }
 
+infer_library_name() {
+  base_name="$(basename "$1")"
+  dir_name="$(dirname "$1")"
+  
+  if [[ "$base_name" =~ \. ]]; then
+    echo "$1"
+  else
+    if [[ "$(uname)" == "Darwin" ]]; then
+      ext=".dylib"
+    else
+      ext=".so"
+    fi
+
+    echo "${dir_name}/${base_name}${ext}"
+  fi
+}
+
 clangpp_args=("--std=c++17")
 while [[ $# -gt 0 ]]; do
   if $output; then
@@ -186,10 +203,13 @@ elif [[ "$main" =~ "python" ]]; then
     flags+=("-o" "${python_output_dir}/_kllvm${suffix}$(python_extension "${python_cmd}")")
   fi
 elif [ "$main" = "c" ]; then
+  output_file="$(infer_library_name "$output_file")"
+
   # Avoid jemalloc for similar reasons as Python; we don't know who is loading
   # this library so don't want to impose it.
   all_libraries=("${libraries[@]}" "-lgmp" "-lmpfr" "-lpthread" "-ldl" "-lffi")
   flags+=("-fPIC" "-shared" "$start_whole_archive" "$LIBDIR/libkllvmcruntime.a" "$end_whole_archive")
+  clangpp_args+=("-o" "${output_file}")
 else
   all_libraries=("${libraries[@]}" "-lgmp" "-lmpfr" "-lpthread" "-ldl" "-lffi" "-ljemalloc")
 fi

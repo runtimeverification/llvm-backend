@@ -12,7 +12,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - runner: ubuntu-20.04
+          - runner: [self-hosted, linux, normal-ephemeral]
             os: ubuntu-20.04
           - runner: macos-12
             os: macos-12
@@ -45,4 +45,4 @@ jobs:
         run: GC_DONT_GC=1 nix build --print-build-logs .
 
       - name: 'Test LLVM backend'
-        run: GC_DONT_GC=1 nix flake check --print-build-logs --max-jobs 1
+        run: GC_DONT_GC=1 nix flake check --print-build-logs

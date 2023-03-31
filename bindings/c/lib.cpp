@@ -3,6 +3,7 @@
 
 #include <kllvm/ast/AST.h>
 #include <kllvm/binary/serializer.h>
+#include <kllvm/parser/KOREParser.h>
 
 #include <kllvm-c/kllvm-c.h>
 
@@ -79,6 +80,12 @@ void kore_pattern_free(kore_pattern const *pat) {
   delete pat;
 }
 
+kore_pattern *kore_pattern_parse(char const *kore_text) {
+  auto pat = new kore_pattern;
+  pat->ptr_ = kllvm::parser::KOREParser::from_string(kore_text)->pattern();
+  return pat;
+}
+
 kore_pattern *kore_pattern_new_token(char const *value, kore_sort const *sort) {
   auto pat = kore_string_pattern_new(value);
   auto ret = kore_pattern_new_token_internal(pat, sort);
@@ -109,7 +116,8 @@ kore_pattern *kore_pattern_new_injection(
   return inj;
 }
 
-kore_pattern *kore_pattern_make_interpreter_input(kore_pattern const *pgm) {
+kore_pattern *kore_pattern_make_interpreter_input(
+    kore_pattern const *pgm, kore_sort const *sort) {
   auto config_sort = kore_composite_sort_new("SortKConfigVar");
   auto kitem_sort = kore_composite_sort_new("SortKItem");
 
@@ -118,7 +126,14 @@ kore_pattern *kore_pattern_make_interpreter_input(kore_pattern const *pgm) {
 
   auto map_item = kore_composite_pattern_new("Lbl'UndsPipe'-'-GT-Unds'");
   kore_composite_pattern_add_argument(map_item, key);
-  kore_composite_pattern_add_argument(map_item, pgm);
+
+  if (kore_sort_is_kitem(sort)) {
+    kore_composite_pattern_add_argument(map_item, pgm);
+  } else {
+    auto inj = kore_pattern_new_injection(pgm, sort, kitem_sort);
+    kore_composite_pattern_add_argument(map_item, inj);
+    kore_pattern_free(inj);
+  }
 
   auto map_unit = kore_composite_pattern_new("Lbl'Stop'Map");
 

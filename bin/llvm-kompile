@@ -13,6 +13,8 @@ Options:
   --save-temps              Do not delete temporary files on exit.
   --bindings-path           Print the absolute path of the compiled Python bindings for
                             the LLVM backend, then exit.
+  --include-dir             Print the absolute include path for the LLVM backend
+                            runtime and binding headers, then exit.
   --python PATH             The path to a Python interpreter with Pybind installed. Only
                             meaningful in "python" or "pythonast" mode.
   --python-output-dir PATH  Output directory to place automatically-named Python
@@ -52,9 +54,15 @@ run () {
 }
 
 print_bindings_path () {
-  bin_dir=$(dirname "$0")
-  bindings_dir=$(realpath "$bin_dir/../lib/kllvm/python")
+  bin_dir="$(dirname "$0")"
+  bindings_dir="$(realpath "$bin_dir/../lib/kllvm/python")"
   echo "$bindings_dir"
+}
+
+print_include_path () {
+  bin_dir="$(dirname "$0")"
+  include_dir="$(realpath "$bin_dir/../include")"
+  echo "$include_dir"
 }
 
 positional_args=()
@@ -91,6 +99,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --bindings-path)
       print_bindings_path
+      exit 0
+      ;;
+    --include-dir)
+      print_include_path
       exit 0
       ;;
     --python)

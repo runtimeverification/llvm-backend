@@ -1,4 +1,4 @@
-{ lib, src, cmake, flex, fmt, pkgconfig, llvm, libllvm, libcxxabi, stdenv, boost, gmp
+{ lib, src, cmake, coreutils, flex, fmt, pkgconfig, llvm, libllvm, libcxxabi, stdenv, boost, gmp
 , jemalloc, libffi, libiconv, libyaml, mpfr, ncurses, python39,
 # Runtime dependencies:
 host,
@@ -14,7 +14,7 @@ stdenv.mkDerivation {
   nativeBuildInputs = [ cmake flex llvm pkgconfig ];
   buildInputs = [ libyaml ];
   propagatedBuildInputs = [
-    boost fmt gmp jemalloc libffi mpfr ncurses python-env
+    boost coreutils fmt gmp jemalloc libffi mpfr ncurses python-env
   ] ++ lib.optional stdenv.isDarwin libiconv;
 
   dontStrip = true;
@@ -30,6 +30,7 @@ stdenv.mkDerivation {
       --replace 'python_cmd=python3' 'python_cmd="${python-env.interpreter}"'
 
     substituteInPlace bin/llvm-kompile-clang \
+      --replace 'uname' '${coreutils}/bin/uname' \
       --replace '"-lgmp"' '"-I${gmp.dev}/include" "-L${gmp}/lib" "-lgmp"' \
       --replace '"-lmpfr"' '-I${mpfr.dev}/include "-L${mpfr}/lib" "-lmpfr"' \
       --replace '"-lffi"' '"-L${libffi}/lib" "-lffi"' \
