@@ -66,6 +66,7 @@ config.substitutions.extend([
     ('%convert-input', '%kore-convert %test-input -o %t.bin'),
     ('%strip-binary', 'kore-strip'),
     ('%arity', 'kore-arity'),
+    ('%find-rule', 'k-rule-find'),
 
     ('%kllvm-clang', 'clang -I %include-path -I Inputs Inputs/api.c'),
 
