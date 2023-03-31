@@ -5,7 +5,6 @@
 #include <llvm/Support/CommandLine.h>
 
 #include <cstdlib>
-#include <dlfcn.h>
 #include <iostream>
 
 using namespace llvm;
@@ -68,8 +67,8 @@ Location getLocation(KOREAxiomDeclaration *axiom) {
 Location parseLocation(std::string loc) {
   size_t pos = loc.find(":");
   if (pos == std::string::npos) {
-    std::cerr
-        << "Rule's location must me in the format: defintion.k:line[:column]\n";
+    std::cerr << "Rule's location must be in the format: "
+                 "definition.k:line[:column]\n";
     exit(EXIT_FAILURE);
   }
 
