@@ -1045,13 +1045,43 @@ void makeStepFunction(
   codegen(dt);
 }
 
+void makeMatchReasonFunctionWrapper(
+    KOREDefinition *definition, llvm::Module *module,
+    KOREAxiomDeclaration *axiom, std::string name) {
+  auto blockType = getValueType({SortCategory::Symbol, 0}, module);
+  llvm::FunctionType *funcType = llvm::FunctionType::get(
+      llvm::Type::getVoidTy(module->getContext()), {blockType}, false);
+  std::string wrapperName = "match_" + std::to_string(axiom->getOrdinal());
+  llvm::Function *matchFunc = getOrInsertFunction(module, wrapperName, funcType);
+  std::string debugName = name;
+  if (axiom->getAttributes().count("label")) {
+    debugName = axiom->getStringAttribute("label") + "_fastcc_" + ".match";
+  }
+  auto debugType
+      = getDebugType({SortCategory::Symbol, 0}, "SortGeneratedTopCell{}");
+  resetDebugLoc();
+  initDebugFunction(
+      debugName, debugName,
+      getDebugFunctionType(getVoidDebugType(), {debugType}), definition,
+      matchFunc);
+  matchFunc->setCallingConv(llvm::CallingConv::Fast);
+  llvm::BasicBlock *entry
+      = llvm::BasicBlock::Create(module->getContext(), "entry", matchFunc);
+
+  auto ci = module->getFunction(name);
+  auto call = llvm::CallInst::Create(ci, matchFunc->getArg(0), "", entry);
+  setDebugLoc(call);
+
+  llvm::ReturnInst::Create(module->getContext(), entry);
+}
+
 void makeMatchReasonFunction(
     KOREDefinition *definition, llvm::Module *module,
     KOREAxiomDeclaration *axiom, DecisionNode *dt) {
   auto blockType = getValueType({SortCategory::Symbol, 0}, module);
   llvm::FunctionType *funcType = llvm::FunctionType::get(
       llvm::Type::getVoidTy(module->getContext()), {blockType}, false);
-  std::string name = "match_" + std::to_string(axiom->getOrdinal());
+  std::string name = "intern_match_" + std::to_string(axiom->getOrdinal());
   llvm::Function *matchFunc = getOrInsertFunction(module, name, funcType);
   std::string debugName = name;
   if (axiom->getAttributes().count("label")) {
@@ -1064,7 +1094,6 @@ void makeMatchReasonFunction(
       debugName, debugName,
       getDebugFunctionType(getVoidDebugType(), {debugType}), definition,
       matchFunc);
-  matchFunc->setCallingConv(llvm::CallingConv::Fast);
   auto val = matchFunc->arg_begin();
   llvm::BasicBlock *block
       = llvm::BasicBlock::Create(module->getContext(), "entry", matchFunc);
@@ -1108,6 +1137,7 @@ void makeMatchReasonFunction(
   llvm::ReturnInst::Create(module->getContext(), stuck);
 
   codegen(dt);
+  makeMatchReasonFunctionWrapper(definition, module, axiom, name);
 }
 
 // TODO: actually collect the return value of this function. Right now it

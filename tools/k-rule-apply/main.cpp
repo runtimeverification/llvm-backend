@@ -57,7 +57,7 @@ std::optional<std::string> getMatchFunctionName() {
       if (attr != axiom->getAttributes().end()) {
         // Compare the axiom's label with the given rule label.
         if (ruleLabel.compare(axiom->getStringAttribute("label")))
-          return "match_" + std::to_string(axiom->getOrdinal());
+          return "intern_match_" + std::to_string(axiom->getOrdinal());
       }
     }
   }
@@ -135,6 +135,13 @@ int main(int argc, char **argv) {
     return EXIT_FAILURE;
   }
 
+  void *initStaticObjects_ptr = dlsym(handle, "initStaticObjects");
+  if (initStaticObjects_ptr == NULL) {
+    std::cerr << "Error: " << dlerror() << "\n";
+    dlclose(handle);
+    return EXIT_FAILURE;
+  }
+
   auto resetMatchReason = reinterpret_cast<void (*)()>(resetMatchReason_ptr);
   auto match_funtion = reinterpret_cast<void (*)(block *)>(match_function_ptr);
   auto constructInitialConfiguration
@@ -144,9 +151,11 @@ int main(int argc, char **argv) {
   auto printMatchResult
       = reinterpret_cast<void (*)(std::ostream &, MatchLog *, size_t)>(
           printMatchResult_ptr);
+  auto initStaticObjects = reinterpret_cast<void (*)()>(initStaticObjects_ptr);
 
-  // Step 0: Reset MatchLog Reason
+  // Step 0: Reset MatchLog Reason and Init Static Objects
   resetMatchReason();
+  initStaticObjects();
   // Step 1: Trying to get the initial configuration as a block*
   auto b = (block *)constructInitialConfiguration(InitialConfiguration.get());
   // Step 2: Trying to apply match
