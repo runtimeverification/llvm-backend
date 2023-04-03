@@ -127,8 +127,9 @@ int main(int argc, char **argv) {
     return EXIT_FAILURE;
   }
 
-  void *printMatchResult_ptr
-      = dlsym(handle, "_Z16printMatchResultRSoP8MatchLogm");
+  void *printMatchResult_ptr = dlsym(
+      handle, "_Z16printMatchResultRSoP8MatchLogmRNSt7__cxx1112basic_"
+              "stringIcSt11char_traitsIcESaIcEEE");
   if (printMatchResult_ptr == NULL) {
     std::cerr << "Error: " << dlerror() << "\n";
     dlclose(handle);
@@ -148,9 +149,9 @@ int main(int argc, char **argv) {
       = reinterpret_cast<void *(*)(const KOREPattern *)>(construct_ptr);
   auto matchLog = reinterpret_cast<MatchLog *(*)()>(matchLog_ptr);
   auto matchLogSize = reinterpret_cast<size_t (*)()>(matchLogSize_ptr);
-  auto printMatchResult
-      = reinterpret_cast<void (*)(std::ostream &, MatchLog *, size_t)>(
-          printMatchResult_ptr);
+  auto printMatchResult = reinterpret_cast<void (*)(
+      std::ostream &, MatchLog *, size_t, std::string const &)>(
+      printMatchResult_ptr);
   auto initStaticObjects = reinterpret_cast<void (*)()>(initStaticObjects_ptr);
 
   // Step 0: Reset MatchLog Reason and Init Static Objects
@@ -165,7 +166,7 @@ int main(int argc, char **argv) {
   // Step 4: Trying to get matchLogSize
   size_t logSize = matchLogSize();
   // Step 5: Verify Match
-  printMatchResult(std::cerr, log, logSize);
+  printMatchResult(std::cerr, log, logSize, KompiledDir);
 
   dlclose(handle);
   return 0;

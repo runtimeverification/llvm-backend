@@ -1,3 +1,5 @@
+#include <kllvm/printer/printer.h>
+
 #include <cinttypes>
 #include <cstdio>
 #include <cstdlib>
@@ -286,18 +288,39 @@ void printSortedConfigurationToFile(
   printConfigurationInternal(&w, subject, sort, false, &state);
 }
 
-void printMatchResult(std::ostream &os, MatchLog *matchLog, size_t logSize) {
+void printMatchResult(
+    std::ostream &os, MatchLog *matchLog, size_t logSize,
+    std::string &definitionPath) {
+  char subjectFilename[15] = "subject_XXXXXX";
+  int sf = mkstemp(subjectFilename);
+  FILE *subject = fdopen(sf, "w");
+
+  char patternFilename[15] = "pattern_XXXXXX";
+  int pf = mkstemp(patternFilename);
+  FILE *pattern = fdopen(pf, "w");
+
   if (logSize > 0) {
     for (int i = 0; i < logSize; i++) {
       if (matchLog[i].kind == MatchLog::SUCCESS)
         os << "Match succeeds\n";
       else if (matchLog[i].kind == MatchLog::FAIL) {
         os << "Subject:\n";
-        os << "\n"; // TODO: Print the subject
+        printSortedConfigurationToFile(
+            subject, (block *)matchLog[i].subject, matchLog[i].sort);
+        fflush(subject);
+        kllvm::printKORE(os, definitionPath, subjectFilename, false, true);
         os << "does not match pattern: \n";
-        os << matchLog[i].pattern << "\n";
+        fprintf(pattern, "%s\n", matchLog[i].pattern);
+        fflush(pattern);
+        kllvm::printKORE(os, definitionPath, patternFilename, false, true);
       } else if (matchLog[i].kind == MatchLog::FUNCTION)
         os << "Match Function type not supported!\n"; // TODO
     }
   }
+
+  close(sf);
+  remove(subjectFilename);
+
+  close(pf);
+  remove(patternFilename);
 }
