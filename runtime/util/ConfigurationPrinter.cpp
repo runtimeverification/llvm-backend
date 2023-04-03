@@ -284,3 +284,7 @@ void printSortedConfigurationToFile(
   writer w = {file, nullptr};
   printConfigurationInternal(&w, subject, sort, false, &state);
 }
+
+void *termToKorePattern(block *term) {
+  __builtin_trap();
+}
