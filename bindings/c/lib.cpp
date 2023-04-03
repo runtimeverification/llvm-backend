@@ -168,6 +168,15 @@ char *kore_block_dump(block *term) {
   return new_str;
 }
 
+kore_pattern *kore_pattern_from_block(block *term) {
+  auto raw_ptr = static_cast<kllvm::KOREPattern *>(termToKorePattern(term));
+  auto ast = std::shared_ptr<kllvm::KOREPattern>(raw_ptr);
+
+  auto pat = new kore_pattern;
+  pat->ptr_ = ast;
+  return pat;
+}
+
 bool kore_block_get_bool(block *term) {
   assert((((uintptr_t)term) & 1) == 0);
   return (bool)(term->children[0]);

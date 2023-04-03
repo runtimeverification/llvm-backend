@@ -65,6 +65,8 @@ kore_pattern *kore_string_pattern_new_with_len(char const *, size_t);
 block *kore_pattern_construct(kore_pattern const *);
 char *kore_block_dump(block *);
 
+kore_pattern *kore_pattern_from_block(block *);
+
 /* 
  * Expects the argument term to be of the form:
  *   sym{}(BOOL)

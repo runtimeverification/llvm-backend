@@ -35,6 +35,7 @@ struct kllvm_c_api load_c_api(char const *path) {
   API_FUNCTION(kore_string_pattern_new_with_len);
   API_FUNCTION(kore_pattern_construct);
   API_FUNCTION(kore_block_dump);
+  API_FUNCTION(kore_pattern_from_block);
   API_FUNCTION(kore_block_get_bool);
   API_FUNCTION(kore_simplify_bool);
   API_FUNCTION(kore_simplify);
