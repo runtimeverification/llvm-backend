@@ -26,6 +26,9 @@ def make_term_class(mod):
             other._block = self._block.step(0)
             return other
 
+        def to_pattern(self):
+            return self._block.to_pattern()
+
     return Term
 
 
