@@ -86,6 +86,12 @@ kore_pattern *kore_pattern_parse(char const *kore_text) {
   return pat;
 }
 
+kore_pattern *kore_pattern_parse_file(char const *filename) {
+  auto pat = new kore_pattern;
+  pat->ptr_ = kllvm::parser::KOREParser(std::string(filename)).pattern();
+  return pat;
+}
+
 kore_pattern *kore_pattern_new_token(char const *value, kore_sort const *sort) {
   auto pat = kore_string_pattern_new(value);
   auto ret = kore_pattern_new_token_internal(pat, sort);

@@ -24,6 +24,7 @@ struct kllvm_c_api load_c_api(char const *path) {
   API_FUNCTION(kore_pattern_serialize);
   API_FUNCTION(kore_pattern_free);
   API_FUNCTION(kore_pattern_parse);
+  API_FUNCTION(kore_pattern_parse_file);
   API_FUNCTION(kore_pattern_new_token);
   API_FUNCTION(kore_pattern_new_token_with_len);
   API_FUNCTION(kore_pattern_new_injection);
