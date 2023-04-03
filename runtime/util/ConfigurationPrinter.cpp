@@ -9,6 +9,8 @@
 #include <unordered_set>
 #include <vector>
 
+#include <kllvm/parser/KOREParser.h>
+
 #include "runtime/alloc.h"
 #include "runtime/header.h"
 
@@ -283,4 +285,14 @@ void printSortedConfigurationToFile(
   auto state = print_state();
   writer w = {file, nullptr};
   printConfigurationInternal(&w, subject, sort, false, &state);
+}
+
+void *termToKorePattern(block *subject) {
+  auto *kore_str = printConfigurationToString(subject);
+  auto kore = std::string(kore_str->data, len(kore_str));
+
+  auto parser = kllvm::parser::KOREParser::from_string(kore);
+  auto pattern = parser->pattern();
+
+  return static_cast<void *>(pattern.release());
 }

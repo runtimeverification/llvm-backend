@@ -67,6 +67,12 @@ class TestSteps(unittest.TestCase):
         t.run()
         self.assertEqual(str(t), bar_output())
 
+    def test_steps_to_pattern(self):
+        t = kllvm.runtime.Term(start_pattern())
+        t.run()
+        pat = t.to_pattern()
+        self.assertEqual(str(pat), bar_output())
+
 
 if __name__ == "__main__":
     unittest.main()

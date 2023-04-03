@@ -8,6 +8,7 @@ struct kllvm_c_api {
   void (*kore_pattern_serialize)(kore_pattern const *, char **, size_t *);
   void (*kore_pattern_free)(kore_pattern const *);
   kore_pattern *(*kore_pattern_parse)(char const *);
+  kore_pattern *(*kore_pattern_parse_file)(char const *);
   kore_pattern *(*kore_pattern_new_token)(char const *, kore_sort const *);
   kore_pattern *(*kore_pattern_new_token_with_len)(
       char const *, size_t, kore_sort const *);
@@ -23,6 +24,7 @@ struct kllvm_c_api {
   kore_pattern *(*kore_string_pattern_new_with_len)(char const *, size_t);
   block *(*kore_pattern_construct)(kore_pattern const *);
   char *(*kore_block_dump)(block *);
+  kore_pattern *(*kore_pattern_from_block)(block *);
   bool (*kore_block_get_bool)(block *);
   bool (*kore_simplify_bool)(kore_pattern const *);
   void (*kore_simplify)(
