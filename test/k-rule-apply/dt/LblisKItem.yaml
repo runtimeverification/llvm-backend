@@ -1,0 +1,18 @@
+default: &id001
+  action:
+  - 210
+  - []
+specializations:
+- - kseq{}
+  - default: *id001
+    specializations:
+    - - dotk{}
+      - action:
+        - 211
+        - []
+      - []
+    sort: STRING.String
+    occurrence: ['1', '1']
+  - [STRING.String, STRING.String]
+sort: STRING.String
+occurrence: ['1']

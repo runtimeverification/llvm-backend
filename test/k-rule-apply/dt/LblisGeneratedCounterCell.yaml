@@ -1,0 +1,24 @@
+default: &id001
+  action:
+  - 193
+  - []
+specializations:
+- - kseq{}
+  - default: *id001
+    specializations:
+    - - dotk{}
+      - default: *id001
+        specializations:
+        - - inj{SortGeneratedCounterCell{}, SortKItem{}}
+          - action:
+            - 194
+            - []
+          - [STRING.String]
+        sort: STRING.String
+        occurrence: ['0', '1']
+      - []
+    sort: STRING.String
+    occurrence: ['1', '1']
+  - [STRING.String, STRING.String]
+sort: STRING.String
+occurrence: ['1']

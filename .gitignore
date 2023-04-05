@@ -32,6 +32,8 @@ a.out
 
 # Build directory
 build/
+cmake-build-debug/
+.vscode/
 bin/llvm-kompile-matching
 
 # Maven stuff

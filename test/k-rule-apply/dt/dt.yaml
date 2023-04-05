@@ -1,0 +1,73 @@
+default: null
+specializations:
+- - Lbl'-LT-'generatedTop'-GT-'{}
+  - default: null
+    specializations:
+    - - Lbl'-LT-'k'-GT-'{}
+      - default: fail
+        specializations:
+        - - kseq{}
+          - default: fail
+            specializations:
+            - - inj{SortBar{}, SortKItem{}}
+              - default: fail
+                specializations:
+                - - Lblbar'LParUndsRParUnds'TEST'Unds'Bar'Unds'Baz{}
+                  - default: fail
+                    specializations:
+                    - - Lblbaz'LParRParUnds'TEST'Unds'Baz{}
+                      - action:
+                        - 147
+                        - - - &id001 ['1', '1']
+                            - STRING.String
+                          - - &id002 ['1', '0', '0', '1']
+                            - STRING.String
+                      - []
+                    sort: STRING.String
+                    occurrence: ['0', '0', '0', '0', '0', '1']
+                  - [STRING.String]
+                sort: STRING.String
+                occurrence: ['0', '0', '0', '0', '1']
+              - [STRING.String]
+            - - inj{SortFoo{}, SortKItem{}}
+              - default: fail
+                specializations:
+                - - Lblfoo'LParUndsRParUnds'TEST'Unds'Foo'Unds'Int{}
+                  - args:
+                    - - ['0', '0', '0', '0', '0', '1']
+                      - INT.Int
+                    next:
+                      default: null
+                      specializations:
+                      - - '1'
+                        - action:
+                          - 148
+                          - - - *id001
+                              - STRING.String
+                            - - *id002
+                              - STRING.String
+                        - []
+                      - - '0'
+                        - fail
+                        - []
+                      bitwidth: 1
+                      sort: BOOL.Bool
+                      occurrence: &id003 [side_condition_148]
+                    function: side_condition_148
+                    sort: BOOL.Bool
+                    occurrence: *id003
+                  - [INT.Int]
+                sort: STRING.String
+                occurrence: ['0', '0', '0', '0', '1']
+              - [STRING.String]
+            sort: STRING.String
+            occurrence: ['0', '0', '0', '1']
+          - [STRING.String, STRING.String]
+        sort: STRING.String
+        occurrence: ['0', '0', '1']
+      - [STRING.String]
+    sort: STRING.String
+    occurrence: ['0', '1']
+  - [STRING.String, STRING.String]
+sort: STRING.String
+occurrence: ['1']

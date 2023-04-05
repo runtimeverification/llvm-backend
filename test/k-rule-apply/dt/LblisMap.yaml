@@ -1,0 +1,24 @@
+default: &id001
+  action:
+  - 214
+  - []
+specializations:
+- - kseq{}
+  - default: *id001
+    specializations:
+    - - dotk{}
+      - default: *id001
+        specializations:
+        - - inj{SortMap{}, SortKItem{}}
+          - action:
+            - 215
+            - []
+          - [MAP.Map]
+        sort: STRING.String
+        occurrence: ['0', '1']
+      - []
+    sort: STRING.String
+    occurrence: ['1', '1']
+  - [STRING.String, STRING.String]
+sort: STRING.String
+occurrence: ['1']

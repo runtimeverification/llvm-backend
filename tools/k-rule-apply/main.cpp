@@ -166,7 +166,7 @@ int main(int argc, char **argv) {
   // Step 4: Trying to get matchLogSize
   size_t logSize = matchLogSize();
   // Step 5: Verify Match
-  printMatchResult(std::cerr, log, logSize, KompiledDir);
+  printMatchResult(std::cout, log, logSize, KompiledDir);
 
   dlclose(handle);
   return 0;

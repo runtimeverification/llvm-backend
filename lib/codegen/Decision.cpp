@@ -19,6 +19,7 @@
 #include <llvm/IR/DerivedTypes.h>
 #include <llvm/IR/Function.h>
 #include <llvm/IR/GlobalVariable.h>
+//#include <llvm/IR/IRBuilder.h>
 #include <llvm/IR/InstrTypes.h>
 #include <llvm/IR/Instruction.h>
 #include <llvm/IR/Instructions.h>
@@ -28,13 +29,57 @@
 #include <llvm/IR/Value.h>
 #include <llvm/Support/Casting.h>
 
+//#include <cstdarg>
 #include <iostream>
 #include <limits>
 #include <memory>
 #include <set>
 #include <type_traits>
 
+// using namespace llvm;
 namespace kllvm {
+
+// llvm::Constant *
+// myStringLiteral(std::string str, LLVMContext &ctx, Module *mod) {
+//   auto Str = llvm::ConstantDataArray::getString(ctx, str, true);
+//   auto global = mod->getOrInsertGlobal(str, Str->getType());
+//   llvm::GlobalVariable *globalVar
+//       = llvm::dyn_cast<llvm::GlobalVariable>(global);
+//   if (!globalVar->hasInitializer()) {
+//     globalVar->setInitializer(Str);
+//   }
+//   llvm::Constant *zero = llvm::ConstantInt::get(llvm::Type::getInt64Ty(ctx), 0);
+//   auto indices = std::vector<llvm::Constant *>{zero, zero};
+//   auto Ptr = llvm::ConstantExpr::getInBoundsGetElementPtr(
+//       Str->getType(), globalVar, indices);
+//   return Ptr;
+// }
+
+// void insertPrintf(Module *mod, BasicBlock *bb, std::string str) {
+//   Function *func_printf = mod->getFunction("printf");
+//   if (!func_printf) {
+//     // PointerType *Pty
+//     //     = PointerType::get(IntegerType::get(mod->getContext(), 8), 0);
+//     FunctionType *FuncTy9
+//         = FunctionType::get(IntegerType::get(mod->getContext(), 32), true);
+
+//     func_printf = Function::Create(
+//         FuncTy9, GlobalValue::ExternalLinkage, "printf", mod);
+//     func_printf->setCallingConv(CallingConv::C);
+
+//     AttributeList func_printf_PAL;
+//     func_printf->setAttributes(func_printf_PAL);
+//   }
+//   IRBuilder<> builder(mod->getContext());
+//   auto strValue = myStringLiteral(str, mod->getContext(), mod);
+
+//   builder.SetInsertPoint(bb);
+
+//   std::vector<Value *> int32_call_params;
+//   int32_call_params.push_back(strValue);
+
+//   CallInst::Create(func_printf, int32_call_params, "call", bb);
+// }
 
 static std::string LAYOUTITEM_STRUCT = "layoutitem";
 
@@ -207,6 +252,16 @@ void SwitchNode::codegen(Decision *d) {
     if (caseData.size() == 0) {
       llvm::BranchInst::Create(_default, d->CurrentBlock);
     } else {
+      // insertPrintf(d->Module, d->CurrentBlock, "switch" + name + "\n");
+
+      // if (d->FailPattern) {
+      //   std::string sort
+      //       = getFailPattern(caseData, isInt, d->FailureBlock).first;
+      //   insertPrintf(d->Module, d->CurrentBlock, "  FailSort: " + sort + "\n");
+      //   d->getPrintConfiguration(val, sort.c_str());
+      // } else {
+      //   d->getPrintConfiguration(val, "");
+      // }
       llvm::Value *tagVal = d->getTag(val);
       auto _switch = llvm::SwitchInst::Create(
           tagVal, _default, caseData.size(), d->CurrentBlock);
@@ -548,6 +603,53 @@ llvm::Value *Decision::getTag(llvm::Value *val) {
   setDebugLoc(res);
   return res;
 }
+
+/*llvm::Value *
+Decision::getPrintConfiguration(llvm::Value *val, const char *sort) {
+  auto llvmSort = stringLiteral(sort);
+
+  std::vector<llvm::Type *> types;
+  types.push_back(getValueType({SortCategory::Symbol, 0}, Module));
+  types.push_back(llvmSort->getType());
+
+  auto funcType = llvm::FunctionType::get(
+      getValueType({SortCategory::StringBuffer}, Module), types, false);
+  auto str = llvm::CallInst::Create(
+      getOrInsertFunction(Module, "printConfigurationToStringBuffer", funcType),
+      {val, llvmSort}, "", CurrentBlock);
+  setDebugLoc(str);
+  auto res = llvm::CallInst::Create(
+      getOrInsertFunction(
+          Module, "printStringBuffer", llvm::Type::getVoidTy(Ctx),
+          getValueType({SortCategory::StringBuffer}, Module)),
+      str, "", CurrentBlock);
+  setDebugLoc(res);
+  return res;
+}
+
+llvm::Value *getPrintConfiguration(
+    Module *mod, LLVMContext &Ctx, BasicBlock *bb, llvm::Value *val,
+    llvm::Value *sort) {
+  //auto llvmSort = myStringLiteral(sort, Ctx, mod);
+
+  std::vector<llvm::Type *> types;
+  types.push_back(val->getType());
+  types.push_back(sort->getType());
+
+  auto funcType = llvm::FunctionType::get(
+      getValueType({SortCategory::StringBuffer}, mod), types, false);
+  auto str = llvm::CallInst::Create(
+      getOrInsertFunction(mod, "printConfigurationToStringBuffer", funcType),
+      {val, sort}, "", bb);
+  setDebugLoc(str);
+  auto res = llvm::CallInst::Create(
+      getOrInsertFunction(
+          mod, "printStringBuffer", llvm::Type::getVoidTy(Ctx),
+          getValueType({SortCategory::StringBuffer}, mod)),
+      str, "", bb);
+  setDebugLoc(res);
+  return res;
+}*/
 
 llvm::AllocaInst *Decision::decl(var_type name) {
   auto sym = new llvm::AllocaInst(
@@ -1110,6 +1212,8 @@ void makeMatchReasonFunction(
       llvm::Type::getInt8PtrTy(module->getContext()), 0, "pattern", fail);
   llvm::PHINode *FailSort = llvm::PHINode::Create(
       llvm::Type::getInt8PtrTy(module->getContext()), 0, "sort", fail);
+  //getPrintConfiguration(
+  //    module, module->getContext(), fail, FailSubject, FailSort);
   auto call = llvm::CallInst::Create(
       getOrInsertFunction(
           module, "addMatchFailReason",
@@ -1123,6 +1227,7 @@ void makeMatchReasonFunction(
 
   llvm::AllocaInst *choiceBuffer, *choiceDepth;
   llvm::IndirectBrInst *jump;
+  //insertPrintf(module, block, "entry\n");
   initChoiceBuffer(
       dt, module, block, pre_stuck, fail, &choiceBuffer, &choiceDepth, &jump);
 

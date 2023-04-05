@@ -219,6 +219,9 @@ block *deserializeConfiguration(char *, size_t);
 void printConfiguration(const char *filename, block *subject);
 void printStatistics(const char *filename, uint64_t steps);
 string *printConfigurationToString(block *subject);
+// stringbuffer *
+// printConfigurationToStringBuffer(block *subject, const char *sort);
+// void printStringBuffer(stringbuffer *str);
 void printConfigurationToFile(FILE *, block *subject);
 void printSortedConfigurationToFile(
     FILE *file, block *subject, char const *sort);
