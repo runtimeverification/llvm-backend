@@ -305,16 +305,26 @@ void printMatchResult(
         os << "Match succeeds\n";
       else if (matchLog[i].kind == MatchLog::FAIL) {
         os << "Subject:\n";
-        printSortedConfigurationToFile(
-            subject, (block *)matchLog[i].subject, matchLog[i].sort);
+        auto subjectSort
+            = debug_print_term((block *)matchLog[i].subject, matchLog[i].sort);
+        auto strSubjectSort = std::string(subjectSort->data, len(subjectSort));
+        fprintf(subject, "%s\n", strSubjectSort.c_str());
         fflush(subject);
         kllvm::printKORE(os, definitionPath, subjectFilename, false, true);
         os << "does not match pattern: \n";
         fprintf(pattern, "%s\n", matchLog[i].pattern);
         fflush(pattern);
         kllvm::printKORE(os, definitionPath, patternFilename, false, true);
-      } else if (matchLog[i].kind == MatchLog::FUNCTION)
-        os << "Match Function type not supported!\n"; // TODO
+      } else if (matchLog[i].kind == MatchLog::FUNCTION) {
+        std::cerr << matchLog[i].debugName << "(";
+
+        for (int j = 0; j < matchLog[i].args.size(); j++) {
+          std::cerr << matchLog[i].args[j];
+          if (j + 1 != matchLog[i].args.size())
+            std::cerr << ", ";
+        }
+        std::cerr << ") => " << matchLog[i].result << "\n";
+      }
     }
   }
 

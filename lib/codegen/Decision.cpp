@@ -1052,7 +1052,8 @@ void makeMatchReasonFunctionWrapper(
   llvm::FunctionType *funcType = llvm::FunctionType::get(
       llvm::Type::getVoidTy(module->getContext()), {blockType}, false);
   std::string wrapperName = "match_" + std::to_string(axiom->getOrdinal());
-  llvm::Function *matchFunc = getOrInsertFunction(module, wrapperName, funcType);
+  llvm::Function *matchFunc
+      = getOrInsertFunction(module, wrapperName, funcType);
   std::string debugName = name;
   if (axiom->getAttributes().count("label")) {
     debugName = axiom->getStringAttribute("label") + "_fastcc_" + ".match";
