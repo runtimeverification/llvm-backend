@@ -248,7 +248,7 @@ case class SetS() extends SortCategory {
 }
 case class RangeMapS() extends SortCategory {
   def hookAtt = "RANGEMAP.RangeMap"
-  def hasIncompleteSignature(sigma: Seq[Constructor], isExact: Boolean, sortInfo: SortInfo): Boolean = ???
+  def hasIncompleteSignature(sigma: Seq[Constructor], isExact: Boolean, sortInfo: SortInfo): Boolean = true
   def missingConstructor(sigma: Seq[Constructor], f: Fringe): Pattern[String] = ???
   def tree(matrix: Matrix): DecisionTree = ???
   def equalityFun = "hook_RANGEMAP_eq"
