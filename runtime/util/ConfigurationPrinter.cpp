@@ -276,34 +276,6 @@ string *printConfigurationToString(block *subject) {
   return hook_BUFFER_toString(buf);
 }
 
-// stringbuffer *
-// printConfigurationToStringBuffer(block *subject, char const *sort) {
-//   auto state = print_state();
-//   stringbuffer *buf = hook_BUFFER_empty();
-//   writer w = {nullptr, buf};
-
-//   char const *print_sort = nullptr;
-//   std::string empty = "";
-//   auto inj_sym = "inj{" + std::string(sort) + ", SortKItem{}}";
-//   auto tag = getTagForSymbolName(inj_sym.c_str());
-
-//   if (empty.compare(sort) != 0 && tag != 0) {
-//     auto args = std::vector<void *>{subject};
-
-//     subject = static_cast<block *>(constructCompositePattern(tag, args));
-//     print_sort = "SortKItem{}";
-//   }
-
-//   printConfigurationInternal(&w, subject, print_sort, false, &state);
-//   return buf;
-// }
-
-// void printStringBuffer(stringbuffer *str) {
-//   string *p = hook_BUFFER_toString(str);
-//   auto s = std::string(p->data, len(p));
-//   std::cerr << "  FailSubject: " << s << "\n";
-// }
-
 void printConfigurationToFile(FILE *file, block *subject) {
   auto state = print_state();
   writer w = {file, nullptr};

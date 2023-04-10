@@ -381,7 +381,6 @@ private:
   std::map<var_type, llvm::AllocaInst *> symbols;
 
   llvm::Value *getTag(llvm::Value *);
-  //llvm::Value *getPrintConfiguration(llvm::Value *val, const char *sort);
 
   llvm::AllocaInst *decl(var_type name);
 
