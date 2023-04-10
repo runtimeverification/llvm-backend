@@ -19,7 +19,6 @@
 #include <llvm/IR/DerivedTypes.h>
 #include <llvm/IR/Function.h>
 #include <llvm/IR/GlobalVariable.h>
-//#include <llvm/IR/IRBuilder.h>
 #include <llvm/IR/InstrTypes.h>
 #include <llvm/IR/Instruction.h>
 #include <llvm/IR/Instructions.h>
@@ -466,9 +465,23 @@ void FunctionNode::codegen(Decision *d) {
     std::vector<llvm::Value *> functionArgs;
     functionArgs.push_back(d->stringLiteral(debugName));
     functionArgs.push_back(d->stringLiteral(function));
-    functionArgs.push_back(d->ptrTerm(Call));
+    auto tempAllocCall = d->ptrTerm(Call);
+    llvm::Value *zext = new llvm::ZExtInst(
+        Call, llvm::Type::getInt8Ty(d->Ctx), "", d->CurrentBlock);
+    new llvm::StoreInst(zext, tempAllocCall, d->CurrentBlock);
+    functionArgs.push_back(tempAllocCall);
     for (auto arg : args) {
-      functionArgs.push_back(d->ptrTerm(arg));
+      auto tempAllocArg = d->ptrTerm(arg);
+      if (arg->getType() == llvm::Type::getInt1Ty(d->Ctx)) {
+        llvm::Value *zext = new llvm::ZExtInst(
+            Call, llvm::Type::getInt8Ty(d->Ctx), "", d->CurrentBlock);
+        new llvm::StoreInst(zext, tempAllocArg, d->CurrentBlock);
+      }
+      functionArgs.push_back(tempAllocArg);
+      std::string str;
+      llvm::raw_string_ostream output(str);
+      arg->getType()->print(output);
+      functionArgs.push_back(d->stringLiteral(str));
     }
     functionArgs.push_back(
         llvm::ConstantPointerNull::get(llvm::Type::getInt8PtrTy(d->Ctx)));

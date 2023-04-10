@@ -1,5 +1,6 @@
 #include <kllvm/printer/printer.h>
 
+#include "gmp.h"
 #include <cinttypes>
 #include <cstdio>
 #include <cstdlib>
@@ -346,12 +347,13 @@ void printMatchResult(
       } else if (matchLog[i].kind == MatchLog::FUNCTION) {
         os << matchLog[i].debugName << "(";
 
-        for (int j = 0; j < matchLog[i].args.size(); j++) {
-          /*os << matchLog[i].args[j];*/
-          if (j + 1 != matchLog[i].args.size())
+        for (int j = 0; j < matchLog[i].args.size(); j += 2) {
+          auto typeName = reinterpret_cast<char *>(matchLog[i].args[j + 1]);
+          printValueOfType(os, definitionPath, matchLog[i].args[j], typeName);
+          if (j + 2 != matchLog[i].args.size())
             os << ", ";
         }
-        os << ") => " /*<< matchLog[i].result*/ << "\n";
+        os << ") => " << *reinterpret_cast<bool *>(matchLog[i].result) << "\n";
       }
     }
   }
@@ -361,4 +363,32 @@ void printMatchResult(
 
   close(pf);
   remove(patternFilename);
+}
+
+void printValueOfType(
+    std::ostream &os, std::string definitionPath, void *value,
+    std::string type) {
+  if (type.compare("%mpz*") == 0) {
+    os << reinterpret_cast<mpz_ptr>(value);
+  } else if (type.compare("%block*") == 0) {
+    char patternFilename[15] = "pattern_XXXXXX";
+    int pf = mkstemp(patternFilename);
+    FILE *pattern = fdopen(pf, "w");
+    string *s = printConfigurationToString(reinterpret_cast<block *>(value));
+    auto strSubjectSort = std::string(s->data, len(s));
+    fprintf(pattern, "%s", strSubjectSort.c_str());
+    fflush(pattern);
+    kllvm::printKORE(os, definitionPath, patternFilename, false, true);
+    close(pf);
+    remove(patternFilename);
+  } else if (type.compare("%floating*") == 0) {
+    os << floatToString(reinterpret_cast<floating *>(value));
+  } else if (type.compare("%string*") == 0) { // TODO: Fix
+    auto s = reinterpret_cast<string *>(value);
+    os << std::string(s->data, len(s));
+  } else if (type.compare("i1") == 0) {
+    os << *reinterpret_cast<bool *>(value);
+  } else {
+    os << "Error: " << type << " not implemented!";
+  }
 }

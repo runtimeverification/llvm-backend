@@ -3,7 +3,7 @@ kllvm_add_tool(k-rule-apply
 )
 
 target_link_libraries(k-rule-apply 
-  PUBLIC Parser AST
+  PUBLIC Parser AST gmp gmpxx
 )
 
 install(
