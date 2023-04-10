@@ -13,7 +13,7 @@ else()
   set(K_LLVM_BACKEND_LTO_FLAG "")
 endif()
 
-add_definitions(-Wall -Wno-return-type-c-linkage)
+add_definitions(-Wall -Werror -Wno-return-type-c-linkage)
 if (CMAKE_BUILD_TYPE STREQUAL "GcStats")
   add_definitions(-DGC_DBG)
 endif()
