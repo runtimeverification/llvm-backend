@@ -1,7 +1,12 @@
 #include <dlfcn.h>
 #include <filesystem>
+#include <fstream>
 #include <iostream>
 #include <memory>
+#include <unistd.h>
+
+#define FMT_HEADER_ONLY
+#include <fmt/format.h>
 
 #include <kllvm/ast/AST.h>
 #include <kllvm/binary/serializer.h>
@@ -28,6 +33,8 @@ kore_pattern *kore_string_pattern_new_internal(std::string const &);
 
 kore_pattern *
 kore_pattern_new_token_internal(kore_pattern const *, kore_sort const *);
+
+std::string load_dynamic_string(void *dylib, std::string const &symbol);
 
 } // namespace
 
@@ -68,15 +75,33 @@ char *kore_pattern_dump(kore_pattern const *pat) {
 }
 
 char *kore_pattern_pretty_print(kore_pattern const *pat) {
-  char temp_file_name[] = "tmp.pretty_print.XXXXXX";
+  char temp_dir_name[] = "tmp.pretty_print.XXXXXX";
 
-  if (mkstemp(temp_file_name) == -1) {
+  if (!mkdtemp(temp_dir_name)) {
     std::perror("Could not create temporary pretty-printing directory: ");
     std::exit(1);
   }
 
-  fs::create_directory(temp_file_name);
+  auto dylib = dlopen(nullptr, RTLD_LAZY);
+  if (!dylib) {
+    std::perror("Could not open executable to look up pretty-printing symbols");
+    std::exit(1);
+  }
 
+  auto syntax = load_dynamic_string(dylib, "kore_definition_syntax");
+  auto macros = load_dynamic_string(dylib, "kore_definition_macros");
+
+  auto syntax_out = std::ofstream(
+      fmt::format("{}/syntaxDefinition.kore", temp_dir_name), std::ios::out);
+  syntax_out << syntax;
+  syntax_out.close();
+
+  auto macros_out = std::ofstream(
+      fmt::format("{}/macros.kore", temp_dir_name), std::ios::out);
+  macros_out << macros;
+  macros_out.close();
+
+  std::remove(temp_dir_name);
   __builtin_trap();
 }
 
@@ -405,6 +430,17 @@ kore_pattern *kore_pattern_new_token_internal(
 
   kore_symbol_free(sym);
   return pat;
+}
+
+std::string load_dynamic_string(void *dylib, std::string const &symbol) {
+  auto size_symbol = fmt::format("{}_size", symbol);
+
+  auto size_ptr = static_cast<int *>(dlsym(dylib, size_symbol.c_str()));
+  auto size = *size_ptr;
+
+  auto data = static_cast<char *>(dlsym(dylib, symbol.c_str()));
+
+  return std::string(data, size);
 }
 
 } // namespace

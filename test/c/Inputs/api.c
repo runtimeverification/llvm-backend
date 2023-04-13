@@ -2,6 +2,7 @@
 
 #include <assert.h>
 #include <dlfcn.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 // Uses a GNU extension (fully supported by clang) to make the cast from dlsym
@@ -15,6 +16,7 @@
 struct kllvm_c_api load_c_api(char const *path) {
   void *lib = dlopen(path, RTLD_NOW);
   if (!lib) {
+    fprintf(stderr, "%s", dlerror());
     abort();
   }
 
