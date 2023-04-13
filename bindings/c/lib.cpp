@@ -76,6 +76,9 @@ char *kore_pattern_dump(kore_pattern const *pat) {
 
 char *kore_pattern_pretty_print(kore_pattern const *pat) {
   char temp_dir_name[] = "tmp.pretty_print.XXXXXX";
+  auto temp_path = [&temp_dir_name](auto const &file) {
+    return fmt::format("{}/{}", temp_dir_name, file);
+  };
 
   if (!mkdtemp(temp_dir_name)) {
     std::perror("Could not create temporary pretty-printing directory: ");
@@ -91,18 +94,33 @@ char *kore_pattern_pretty_print(kore_pattern const *pat) {
   auto syntax = load_dynamic_string(dylib, "kore_definition_syntax");
   auto macros = load_dynamic_string(dylib, "kore_definition_macros");
 
-  auto syntax_out = std::ofstream(
-      fmt::format("{}/syntaxDefinition.kore", temp_dir_name), std::ios::out);
-  syntax_out << syntax;
-  syntax_out.close();
+  // Clean up ostreams at block scope exit
+  {
+    auto syntax_out
+        = std::ofstream(temp_path("syntaxDefinition.kore"), std::ios::out);
+    syntax_out << syntax;
 
-  auto macros_out = std::ofstream(
-      fmt::format("{}/macros.kore", temp_dir_name), std::ios::out);
-  macros_out << macros;
-  macros_out.close();
+    auto macros_out = std::ofstream(temp_path("macros.kore"), std::ios::out);
+    macros_out << macros;
+
+    auto pattern_out = std::ofstream(temp_path("pattern.kore"), std::ios::out);
+    pat->ptr_->print(pattern_out);
+  }
+
+  auto ss = std::stringstream{};
+  kllvm::printKORE(
+      ss, temp_dir_name, temp_path("pattern.kore"), false, false, true);
 
   std::remove(temp_dir_name);
-  __builtin_trap();
+
+  auto pretty_str = ss.str();
+  auto data
+      = static_cast<char *>(malloc(sizeof(char) * (pretty_str.size() + 1)));
+
+  std::copy(pretty_str.begin(), pretty_str.end(), data);
+  data[pretty_str.size()] = '\0';
+
+  return data;
 }
 
 void kore_pattern_serialize(

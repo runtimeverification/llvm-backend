@@ -1,6 +1,7 @@
 #include "api.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 
 /*
   module TEST
@@ -20,32 +21,17 @@ int main(int argc, char **argv) {
   api.kllvm_init();
 
   kore_sort *sort_int = api.kore_composite_sort_new("SortInt");
-  kore_sort *sort_foo = api.kore_composite_sort_new("SortFoo");
 
   kore_pattern *foo = api.kore_composite_pattern_new("Lblfoo");
   kore_pattern *val = api.kore_pattern_new_token("423", sort_int);
+  api.kore_sort_free(sort_int);
 
   api.kore_composite_pattern_add_argument(foo, val);
+  api.kore_pattern_free(val);
 
-  printf("%s\n", api.kore_pattern_pretty_print(foo));
+  char *printed = api.kore_pattern_pretty_print(foo);
+  printf("%s", printed);
+  free(printed);
 
-  /* char *data; */
-  /* size_t size; */
-  /* api.kore_simplify(pat, sort, &data, &size); */
-
-  /* // Do the simplification twice to make sure GC works */
-  /* api.kllvm_free_all_memory(); */
-
-  /* api.kore_simplify(pat, sort, &data, &size); */
-
-  /* FILE *f = fopen(argv[2], "wb"); */
-  /* if (!f) { */
-  /*   return 4; */
-  /* } */
-
-  /* fwrite(data, size, 1, f); */
-  /* fclose(f); */
-
-  /* api.kore_pattern_free(pat); */
-  /* api.kore_sort_free(sort); */
+  api.kore_pattern_free(foo);
 }

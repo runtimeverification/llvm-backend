@@ -3,7 +3,7 @@
 // RUN:   --embed Inputs/printing/syntaxDefinition.kore kore_definition_syntax \
 // RUN:   --embed Inputs/printing/macros.kore kore_definition_macros
 // RUN: %kllvm-clang Inputs/print.c -o %t
-// RUN: %t %t.dir/libtest.so
+// RUN: %t %t.dir/libtest.so | diff - refs/test_pretty_print.ref
 [topCellInitializer{}(LblinitGeneratedTopCell{}()), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/bruce/code/scratch/test.k)")]
 
 module BASIC-K
