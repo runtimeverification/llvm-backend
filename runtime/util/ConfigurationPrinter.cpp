@@ -306,10 +306,16 @@ void printMatchResult(
         os << "Match succeeds\n";
       else if (matchLog[i].kind == MatchLog::FAIL) {
         os << "Subject:\n";
-        auto subjectSort
-            = debug_print_term((block *)matchLog[i].subject, matchLog[i].sort);
-        auto strSubjectSort = std::string(subjectSort->data, len(subjectSort));
-        fprintf(subject, "%s\n", strSubjectSort.c_str());
+        if (i == 0) {
+          printSortedConfigurationToFile(
+              subject, (block *)matchLog[i].subject, matchLog[i].sort);
+        } else {
+          auto subjectSort = debug_print_term(
+              (block *)matchLog[i].subject, matchLog[i].sort);
+          auto strSubjectSort
+              = std::string(subjectSort->data, len(subjectSort));
+          fprintf(subject, "%s\n", strSubjectSort.c_str());
+        }
         fflush(subject);
         kllvm::printKORE(os, definitionPath, subjectFilename, false, true);
         os << "does not match pattern: \n";
@@ -343,21 +349,25 @@ void printValueOfType(
   if (type.compare("%mpz*") == 0) {
     os << reinterpret_cast<mpz_ptr>(value);
   } else if (type.compare("%block*") == 0) {
-    char patternFilename[15] = "pattern_XXXXXX";
-    int pf = mkstemp(patternFilename);
-    FILE *pattern = fdopen(pf, "w");
-    string *s = printConfigurationToString(reinterpret_cast<block *>(value));
-    auto strSubjectSort = std::string(s->data, len(s));
-    fprintf(pattern, "%s", strSubjectSort.c_str());
-    fflush(pattern);
-    kllvm::printKORE(os, definitionPath, patternFilename, false, true);
-    close(pf);
-    remove(patternFilename);
+    if ((((uintptr_t)value) & 3) == 1) {
+      char subjectFilename[15] = "pattern_XXXXXX";
+      int sf = mkstemp(subjectFilename);
+      FILE *pattern = fdopen(sf, "w");
+      string *s = printConfigurationToString(reinterpret_cast<block *>(value));
+      auto strSubjectSort = std::string(s->data, len(s));
+      fprintf(pattern, "%s", strSubjectSort.c_str());
+      fflush(pattern);
+      kllvm::printKORE(os, definitionPath, subjectFilename, false, true);
+      close(sf);
+      remove(subjectFilename);
+    } else if ((((uintptr_t)value) & 1) == 0) {
+      auto s = reinterpret_cast<string *>(value);
+      os << std::string(s->data, len(s));
+    } else {
+      os << "Error: " << type << " not implemented!";
+    }
   } else if (type.compare("%floating*") == 0) {
     os << floatToString(reinterpret_cast<floating *>(value));
-  } else if (type.compare("%string*") == 0) { // TODO: Fix
-    auto s = reinterpret_cast<string *>(value);
-    os << std::string(s->data, len(s));
   } else if (type.compare("i1") == 0) {
     os << *reinterpret_cast<bool *>(value);
   } else {
