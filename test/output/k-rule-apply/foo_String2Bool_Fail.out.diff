@@ -1,0 +1,5 @@
+TEST.testString2Bool.sc(false) => 0
+Subject:
+false
+does not match pattern: 
+true

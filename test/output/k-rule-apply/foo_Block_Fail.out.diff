@@ -1,0 +1,6 @@
+TEST.testBlock.sc(bar2 ( )
+) => 0
+Subject:
+false
+does not match pattern: 
+true

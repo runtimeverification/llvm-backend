@@ -8,7 +8,7 @@ specializations:
         specializations:
         - - inj{SortBool{}, SortKItem{}}
           - action:
-            - 224
+            - 372
             - - - ['0', '0', '1']
                 - BOOL.Bool
           - [BOOL.Bool]

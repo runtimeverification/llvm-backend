@@ -8,7 +8,7 @@ specializations:
         specializations:
         - - inj{SortInt{}, SortKItem{}}
           - action:
-            - 230
+            - 387
             - - - ['0', '0', '1']
                 - INT.Int
           - [INT.Int]

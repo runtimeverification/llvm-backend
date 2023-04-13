@@ -1,0 +1,5 @@
+TEST.testFloat.sc(0.10000000000000000e1) => 0
+Subject:
+false
+does not match pattern: 
+true

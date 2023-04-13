@@ -1,0 +1,12 @@
+default: null
+specializations:
+- - Lblarr'LParUndsCommUndsCommUndsRParUnds'ARRAY-IN-K'Unds'Array'Unds'List'Unds'Int'Unds'KItem{}
+  - action:
+    - 284
+    - - - ['1', '2']
+        - INT.Int
+      - - ['1']
+        - INT.Int
+  - [LIST.List, INT.Int, STRING.String]
+sort: STRING.String
+occurrence: ['2']

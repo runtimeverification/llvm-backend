@@ -8,13 +8,13 @@ specializations:
         specializations:
         - - inj{SortGeneratedCounterCellOpt{}, SortKItem{}}
           - action:
-            - 227
+            - 384
             - - - ['0', '0', '1']
                 - STRING.String
           - [STRING.String]
         - - inj{SortGeneratedCounterCell{}, SortKItem{}}
           - action:
-            - 227
+            - 384
             - - - &id001 ['0', '1']
                 - STRING.String
           - [STRING.String]

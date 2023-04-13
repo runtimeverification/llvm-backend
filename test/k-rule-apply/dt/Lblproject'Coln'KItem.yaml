@@ -5,7 +5,7 @@ specializations:
     specializations:
     - - dotk{}
       - action:
-        - 234
+        - 391
         - - - ['0', '1']
             - STRING.String
       - []

@@ -103,6 +103,14 @@ config.substitutions.extend([
         done
     ''')),
 
+    ('%check-k-rule-apply-diff', one_line('''
+        for out in %output-dir/`basename %S`/*.out.diff; do
+            in=%input-dir/`basename %S`/`basename $out .out.diff`.in
+            rule=%input-dir/`basename %S`/rules/`basename $out .out.diff`.rule
+            %apply-rule %S $rule $in %S/definition.o | diff - $out
+        done
+    ''')),
+
     ('%run-binary-out', '%t.interpreter %test-input -1 %t.out.bin --binary-output'),
     ('%run-binary', '%convert-input && %t.interpreter %t.bin -1 /dev/stdout'),
     ('%run', '%t.interpreter %test-input -1 /dev/stdout'),
