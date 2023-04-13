@@ -43,11 +43,14 @@ jobs:
           distribution: 'adopt'
           overwrite-settings: true
           java-version: '11'
+        
       - name: 'Update Maven dependencies'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -x
+          cat ~/.m2/settings.xml
+          
           if ! git diff --exit-code origin/${GITHUB_BASE_REF} origin/${GITHUB_HEAD_REF} \
                 -- $(find . -name pom.xml)                                              \
                    $(find nix -name '*.nix'); then
