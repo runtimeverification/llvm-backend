@@ -2,7 +2,7 @@
 set -e
 
 if [ $# -lt 2 ]; then
-  echo "Usage: $0 <definition.kore> [main|search|static|python] <clang flags>"
+  echo "Usage: $0 <definition.kore> [main|library|search|static|python|pythonast|c] <clang flags>"
   echo "See llvm-kompile -h for help"
   exit 1
 fi
