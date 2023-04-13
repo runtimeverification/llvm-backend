@@ -36,6 +36,8 @@ jobs:
           authToken: '${{ secrets.CACHIX_PUBLIC_TOKEN }}'
 
       - name: 'Update Maven dependencies'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -x
           if ! git diff --exit-code origin/${GITHUB_BASE_REF} origin/${GITHUB_HEAD_REF} \
