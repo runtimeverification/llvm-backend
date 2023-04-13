@@ -1,4 +1,4 @@
-// RUN: %bin-kompile %s %S/dt c -- -g
+// RUN: %kompile %s c
 // RUN: %check-k-rule-apply-diff
 
 [topCellInitializer{}(LblinitGeneratedTopCell{}()), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/robertorosmaninho/rv/tests/foo_bar/test.k)")]
