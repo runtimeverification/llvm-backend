@@ -12,6 +12,9 @@ jobs:
   nix-maven:
     name: 'Nix: Maven'
     runs-on: ubuntu-20.04
+    permissions:
+      contents: read
+      packages: write
     steps:
       - name: 'Check out code'
         uses: actions/checkout@v3
@@ -35,6 +38,11 @@ jobs:
           name: k-framework
           authToken: '${{ secrets.CACHIX_PUBLIC_TOKEN }}'
 
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'adopt'
+          overwrite-settings: true
+          java-version: '11'
       - name: 'Update Maven dependencies'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
