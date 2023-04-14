@@ -105,7 +105,7 @@ yyin = in;
   return token::TOKEN_EOF;
 }
 
-<COMM,STR,INITIAL>. { error(*loc, std::string("Unknown token \"") + yytext + std::string("\"\n")); }
+<*>. { error(*loc, std::string("Unknown token \"") + yytext + std::string("\"\n")); }
 
 %%
 
