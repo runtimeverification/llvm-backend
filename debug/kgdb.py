@@ -761,7 +761,7 @@ Does not actually take a step if matching succeeds.
                     print('Match succeeds')
                 elif entry['kind'] == self.FUNCTION:
                     print(entry['debugName'].string("iso-8859-1") + '(', end='')
-                    function = gdb.lookup_global_symbol(entry['function'].string("iso-8859-1")).value().type
+                    function = gdb.lookup_global_symbol(entry['debugName'].string("iso-8859-1")).value().type
                     front = gdb.lookup_global_symbol("getMatchFnArgs").value()(entry.address)
                     conn = ""
                     for i in range(len(function.fields())):
