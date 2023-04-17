@@ -10,9 +10,14 @@ class TestSymbols(unittest.TestCase):
     def test_str(self):
         sym = kllvm.ast.Symbol("Lbl'Plus")
         self.assertEqual(str(sym), "Lbl'Plus{}")
+        self.assertTrue(sym.is_concrete)
+        self.assertFalse(sym.is_builtin)
 
         sym.add_formal_argument(kllvm.ast.CompositeSort("A"))
         self.assertEqual(str(sym), "Lbl'Plus{A{}}")
+        self.assertTrue(sym.is_concrete)
+        self.assertFalse(sym.is_builtin)
+        self.assertEqual(sym.formal_arguments[0], kllvm.ast.CompositeSort("A"))
 
     def test_equal(self):
         a1 = kllvm.ast.Symbol("A")
