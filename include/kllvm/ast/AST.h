@@ -166,6 +166,8 @@ public:
   virtual void serialize_to(serializer &s) const override;
   virtual bool operator==(const KORESort &other) const override;
 
+  std::vector<sptr<KORESort>> const &getArguments() const { return arguments; }
+
 private:
   KORECompositeSort(const std::string &Name, ValueType category)
       : name(Name)
