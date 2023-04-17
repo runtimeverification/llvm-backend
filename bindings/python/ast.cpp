@@ -99,7 +99,8 @@ void bind_ast(py::module_ &m) {
 
   py::class_<KORESortVariable, std::shared_ptr<KORESortVariable>>(
       ast, "SortVariable", sort_base)
-      .def(py::init(&KORESortVariable::Create));
+      .def(py::init(&KORESortVariable::Create))
+      .def_property_readonly("name", &KORESortVariable::getName);
 
   py::class_<KORECompositeSort, std::shared_ptr<KORECompositeSort>>(
       ast, "CompositeSort", sort_base)
