@@ -1061,7 +1061,7 @@ void writeLong(
 
 bool makeFunction(
     std::string name, KOREPattern *pattern, KOREDefinition *definition,
-    llvm::Module *Module, bool fastcc, bool bigStep,
+    llvm::Module *Module, bool fastcc, bool bigStep, bool apply,
     KOREAxiomDeclaration *axiom, std::string postfix) {
   std::map<std::string, KOREVariablePattern *> vars;
   pattern->markVariables(vars);
@@ -1201,10 +1201,11 @@ void makeApplyRuleFunction(
     llvm::Module *Module, bool bigStep) {
   KOREPattern *pattern = axiom->getRightHandSide();
   std::string name = "apply_rule_" + std::to_string(axiom->getOrdinal());
-  makeFunction(name, pattern, definition, Module, true, bigStep, axiom, ".rhs");
+  makeFunction(
+      name, pattern, definition, Module, true, bigStep, true, axiom, ".rhs");
   if (bigStep) {
     makeFunction(
-        name + "_search", pattern, definition, Module, true, false, axiom,
+        name + "_search", pattern, definition, Module, true, false, true, axiom,
         ".rhs");
   }
 }
@@ -1253,7 +1254,7 @@ std::string makeApplyRuleFunction(
 
   makeFunction(
       name + "_search", axiom->getRightHandSide(), definition, Module, true,
-      false, axiom, ".rhs");
+      false, true, axiom, ".rhs");
 
   llvm::Function *applyRule = getOrInsertFunction(Module, name, funcType);
   initDebugAxiom(axiom->getAttributes());
@@ -1324,7 +1325,8 @@ std::string makeSideConditionFunction(
   }
   std::string name = "side_condition_" + std::to_string(axiom->getOrdinal());
   if (makeFunction(
-          name, pattern, definition, Module, false, false, axiom, ".sc")) {
+          name, pattern, definition, Module, false, false, false, axiom,
+          ".sc")) {
     return name;
   }
   return "";
