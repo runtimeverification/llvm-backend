@@ -50,6 +50,8 @@ private:
     return yylex(lval, loc, scanner);
   }
   void error(const location &loc, const std::string &err_message);
+  std::string codepoint_to_utf8(unsigned long int code, const location &loc);
+
   FILE *in;
   std::string stringBuffer;
 };
