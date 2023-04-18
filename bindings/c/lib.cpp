@@ -475,26 +475,4 @@ std::optional<pretty_print_definition> get_print_data() {
       std::string(&kore_definition_macros, kore_definition_macros_size)};
 }
 
-/* std::string load_dynamic_string(void *dylib, std::string const &symbol) { */
-/*   auto size_symbol = fmt::format("{}_size", symbol); */
-
-/*   dlerror(); */
-/*   auto size_ptr = static_cast<int *>(dlsym(dylib, size_symbol.c_str())); */
-/*   if (auto err = dlerror()) { */
-/*     std::cerr << err; */
-/*     abort(); */
-/*   } */
-
-/*   auto size = *size_ptr; */
-
-/*   dlerror(); */
-/*   auto data = static_cast<char *>(dlsym(dylib, symbol.c_str())); */
-/*   if (auto err = dlerror()) { */
-/*     std::cerr << err; */
-/*     abort(); */
-/*   } */
-
-/*   return std::string(data, size); */
-/* } */
-
 } // namespace
