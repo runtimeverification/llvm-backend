@@ -11,5 +11,5 @@ add_library(Codegen
 )
 
 target_link_libraries(Codegen
-  PUBLIC  AST
+  PUBLIC  AST fmt::fmt
   PRIVATE base64)
