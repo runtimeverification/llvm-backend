@@ -1,24 +1,23 @@
-#include <dlfcn.h>
-#include <filesystem>
-#include <fstream>
-#include <iostream>
-#include <memory>
-#include <unistd.h>
-
-#define FMT_HEADER_ONLY
-#include <fmt/format.h>
+#include <kllvm-c/kllvm-c.h>
 
 #include <kllvm/ast/AST.h>
 #include <kllvm/binary/serializer.h>
 #include <kllvm/parser/KOREParser.h>
 #include <kllvm/printer/printer.h>
 
-#include <kllvm-c/kllvm-c.h>
+#define FMT_HEADER_ONLY
+#include <fmt/format.h>
 
-#include <runtime/arena.h>
+#include <filesystem>
+#include <fstream>
+#include <iostream>
+#include <memory>
+#include <optional>
+#include <unistd.h>
 
-// This header needs to be included last because it pollutes a number of macro
+// These headers need to be included last because they pollute a number of macro
 // definitions into the global namespace.
+#include <runtime/arena.h>
 #include <runtime/header.h>
 
 namespace fs = std::filesystem;
@@ -34,7 +33,14 @@ kore_pattern *kore_string_pattern_new_internal(std::string const &);
 kore_pattern *
 kore_pattern_new_token_internal(kore_pattern const *, kore_sort const *);
 
-std::string load_dynamic_string(void *dylib, std::string const &symbol);
+struct pretty_print_definition {
+  std::string syntax;
+  std::string macros;
+};
+
+std::optional<pretty_print_definition> get_print_data();
+
+/* std::string load_dynamic_string(void *dylib, std::string const &symbol); */
 
 } // namespace
 
@@ -51,6 +57,17 @@ void freeAllKoreMem(void);
 }
 
 extern "C" {
+
+/*
+ * These symbols may not have been compiled into the library (if
+ * `--embed-kprint` was not passed), and so we need to give them a weak default
+ * definition. If the embed flag was passed, the value of these symbols will be
+ * given by the embedded data.
+ */
+int kore_definition_syntax_size __attribute__((weak)) = -1;
+char kore_definition_syntax __attribute__((weak)) = -1;
+int kore_definition_macros_size __attribute__((weak)) = -1;
+char kore_definition_macros __attribute__((weak)) = -1;
 
 /* Completed types */
 
@@ -81,18 +98,15 @@ char *kore_pattern_pretty_print(kore_pattern const *pat) {
   };
 
   if (!mkdtemp(temp_dir_name)) {
-    std::perror("Could not create temporary pretty-printing directory: ");
-    std::exit(1);
+    return nullptr;
   }
 
-  auto dylib = dlopen(nullptr, RTLD_LAZY);
-  if (!dylib) {
-    std::perror("Could not open executable to look up pretty-printing symbols");
-    std::exit(1);
+  auto maybe_print_data = get_print_data();
+  if (!maybe_print_data) {
+    return nullptr;
   }
 
-  auto syntax = load_dynamic_string(dylib, "kore_definition_syntax");
-  auto macros = load_dynamic_string(dylib, "kore_definition_macros");
+  auto [syntax, macros] = *maybe_print_data;
 
   // Clean up ostreams at block scope exit
   {
@@ -111,7 +125,7 @@ char *kore_pattern_pretty_print(kore_pattern const *pat) {
   kllvm::printKORE(
       ss, temp_dir_name, temp_path("pattern.kore"), false, false, true);
 
-  std::remove(temp_dir_name);
+  fs::remove_all(temp_dir_name);
 
   auto pretty_str = ss.str();
   auto data
@@ -450,15 +464,37 @@ kore_pattern *kore_pattern_new_token_internal(
   return pat;
 }
 
-std::string load_dynamic_string(void *dylib, std::string const &symbol) {
-  auto size_symbol = fmt::format("{}_size", symbol);
+std::optional<pretty_print_definition> get_print_data() {
+  if (kore_definition_macros_size == -1 || kore_definition_macros == -1
+      || kore_definition_syntax_size == -1 || kore_definition_syntax == -1) {
+    return std::nullopt;
+  }
 
-  auto size_ptr = static_cast<int *>(dlsym(dylib, size_symbol.c_str()));
-  auto size = *size_ptr;
-
-  auto data = static_cast<char *>(dlsym(dylib, symbol.c_str()));
-
-  return std::string(data, size);
+  return pretty_print_definition{
+      std::string(&kore_definition_syntax, kore_definition_syntax_size),
+      std::string(&kore_definition_macros, kore_definition_macros_size)};
 }
+
+/* std::string load_dynamic_string(void *dylib, std::string const &symbol) { */
+/*   auto size_symbol = fmt::format("{}_size", symbol); */
+
+/*   dlerror(); */
+/*   auto size_ptr = static_cast<int *>(dlsym(dylib, size_symbol.c_str())); */
+/*   if (auto err = dlerror()) { */
+/*     std::cerr << err; */
+/*     abort(); */
+/*   } */
+
+/*   auto size = *size_ptr; */
+
+/*   dlerror(); */
+/*   auto data = static_cast<char *>(dlsym(dylib, symbol.c_str())); */
+/*   if (auto err = dlerror()) { */
+/*     std::cerr << err; */
+/*     abort(); */
+/*   } */
+
+/*   return std::string(data, size); */
+/* } */
 
 } // namespace
