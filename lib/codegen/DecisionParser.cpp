@@ -362,6 +362,7 @@ DecisionNode *parseYamlDecisionTreeFromString(
   yaml_parser_t parser;
   yaml_document_t doc;
   yaml_parser_initialize(&parser);
+  yaml_parser_set_encoding(&parser, YAML_UTF8_ENCODING);
   yaml_parser_set_input_string(
       &parser, (unsigned char *)yaml.c_str(), yaml.size());
   yaml_parser_load(&parser, &doc);
