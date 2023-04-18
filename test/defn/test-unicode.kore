@@ -1,4 +1,4 @@
-// RUN: %interpreter
+// RUN: LC_ALL=en_US.UTF-8 %interpreter
 // RUN: %check-diff
 [topCellInitializer{}(LblinitGeneratedTopCell{}()), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/sguest/work/k-test/emoji/emoji.k)")]
 
