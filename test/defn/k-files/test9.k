@@ -8,5 +8,5 @@ module TEST
   syntax Operand ::= Int
   syntax Ints ::= NEInts
 
-  rule O:Operand, Os:Operands => O
+  rule O:Operand, Os:Operands => (O):KItem
 endmodule

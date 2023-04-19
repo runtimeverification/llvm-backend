@@ -1,6 +1,7 @@
 module TEST
   imports INT
   imports MAP
+  imports STRING
 
   syntax Int ::= bar(Map) [function]
   syntax Int ::= foo(Map, Int) [function]

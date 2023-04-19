@@ -4,6 +4,7 @@ module TEST
 
   syntax KItem ::= bar(K, List)
   syntax KItem ::= foo(List) [function]
+  syntax KItem ::= baz(KItem, K) [symbol]
 
   rule foo(ListItem(0) ListItem(1 #as X)) => bar(X, .List)
   rule foo(ListItem(0 #as X)) => bar(X, .List)

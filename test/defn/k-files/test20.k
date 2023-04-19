@@ -1,5 +1,6 @@
 module TEST
   imports INT
+  imports STRING
 
   syntax Bar ::= bar()
   syntax Foo ::= foo()

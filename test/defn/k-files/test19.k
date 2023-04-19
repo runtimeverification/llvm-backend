@@ -6,6 +6,7 @@ module TEST
                | Exp "+" Exp [strict]
                | Exp "-" Exp [strict]
   syntax Exp ::= Int
+  syntax KResult ::= Int
 
   configuration <k> $PGM:K </k> <state> .Map </state>
 

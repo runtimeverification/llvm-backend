@@ -19,7 +19,7 @@ conditional, while loop and sequential composition constructs for statements.
 
 ```k
 require "ffi.md"
-module IMP-SYNTAX
+module TEST-SYNTAX
   imports DOMAINS-SYNTAX
   imports BASIC-K
 ```
@@ -67,8 +67,8 @@ that you write and parse several interesting programs before you move to the
 semantics.
 
 ```k
-module IMP
-  imports IMP-SYNTAX
+module TEST
+  imports TEST-SYNTAX
   imports DOMAINS
   imports BYTES
   imports FFI

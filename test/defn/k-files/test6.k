@@ -5,6 +5,8 @@ module TEST
   syntax KItem ::= done(Int, Set)
   syntax KItem ::= val(Int, Int) [symbol]
   syntax KItem ::= foo(Int, Int, Set) [function]
+  syntax KItem ::= bar(KItem, K) [symbol]
+  syntax KItem ::= baz() [symbol]
 
   rule foo(A, _, SetItem(A)) => done(1, .Set)
   rule foo(A, B, SetItem(val(A, 0)) SetItem(B)) => done(3, .Set)

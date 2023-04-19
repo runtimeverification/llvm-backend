@@ -12,5 +12,5 @@ module TEST
 
   rule #toInts(ListItem(I) ARGS) => I, #toInts(ARGS)
   rule #toInts(.List) => .NEInts
-  rule I:Int => #toInts(ListItem(I))
+  rule I:Int:KItem => #toInts(ListItem(I))
 endmodule

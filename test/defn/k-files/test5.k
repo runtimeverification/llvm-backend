@@ -4,7 +4,9 @@ module TEST
 
   syntax KItem ::= val(Int, Int) [symbol]
   syntax KItem ::= foo(Int, Map) [function]
+  syntax KItem ::= bar(KItem, K) [symbol]
   syntax KItem ::= done(Int, Map)
+  syntax KItem ::= baz() [symbol]
 
   rule foo(_, _) => done(2, .Map) [owise]
   rule foo(A, val(A, 1) |-> val(B, 0) B |-> C M) => done(C, M)

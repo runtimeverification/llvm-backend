@@ -29,7 +29,8 @@ module TEST
 
   syntax KResult ::= MInt{8} | Bool
 
-  rule I:Int => Int2MInt(I)::MInt{8}
+  rule <k> (I:Int => Int2MInt(I)::MInt{8}) ~> K:KItem ~> _ </k>
+  rule <k> I:MInt{8} => MInt2Signed(I) </k>
 
   rule ~ I => ~MInt I
   rule - I => --MInt I

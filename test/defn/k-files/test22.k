@@ -1,6 +1,7 @@
 module TEST
   imports INT
   imports BOOL
+  imports STRING
 
   syntax Int ::= foo(Bool) [function]
 
