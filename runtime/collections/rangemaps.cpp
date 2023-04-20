@@ -267,12 +267,13 @@ void printRangeMap(
 
     sfprintf(file, "%s(", element);
     auto entry = *iter;
+    sfprintf(file, "LblRangemap'Coln'Range{}(");
     printConfigurationInternal(
         file, entry.first.start(), "SortKItem{}", false, state);
     sfprintf(file, ",");
     printConfigurationInternal(
         file, entry.first.end(), "SortKItem{}", false, state);
-    sfprintf(file, ",");
+    sfprintf(file, "),");
     printConfigurationInternal(file, entry.second, "SortKItem{}", false, state);
     sfprintf(file, ")");
   }
