@@ -213,4 +213,13 @@ bool hook_KEQUAL_lt(block *arg1, block *arg2) {
     }
   }
 }
+
+bool hook_KEQUAL_ne(block *arg1, block *arg2) {
+  return !hook_KEQUAL_eq(arg1, arg2);
+}
+
+bool hook_BOOL_eq(bool arg1, bool arg2) {
+  return arg1 == arg2;
+}
+
 }
