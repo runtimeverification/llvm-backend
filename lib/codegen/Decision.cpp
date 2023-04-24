@@ -411,9 +411,11 @@ void FunctionNode::codegen(Decision *d) {
     functionArgs.push_back(d->stringLiteral(debugName));
     functionArgs.push_back(d->stringLiteral(function));
     auto tempAllocCall = d->ptrTerm(Call);
-    llvm::Value *zext = new llvm::ZExtInst(
-        Call, llvm::Type::getInt8Ty(d->Ctx), "", d->CurrentBlock);
-    new llvm::StoreInst(zext, tempAllocCall, d->CurrentBlock);
+    if (Call->getType() == llvm::Type::getInt1Ty(d->Ctx)) {
+      llvm::Value *zext = new llvm::ZExtInst(
+          Call, llvm::Type::getInt8Ty(d->Ctx), "", d->CurrentBlock);
+      new llvm::StoreInst(zext, tempAllocCall, d->CurrentBlock);
+    }
     functionArgs.push_back(tempAllocCall);
     for (auto arg : args) {
       auto tempAllocArg = d->ptrTerm(arg);
