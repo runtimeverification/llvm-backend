@@ -25,7 +25,7 @@ cl::opt<std::string> RuleLabel(
     cl::cat(KRuleCat));
 
 cl::opt<std::string> KOREPatternFilename(
-    cl::Positional, cl::desc("<kore_patten_filename>"), cl::Required,
+    cl::Positional, cl::desc("<kore_pattern_filename>"), cl::Required,
     cl::cat(KRuleCat));
 
 cl::opt<std::string> SharedLibPath(
@@ -61,8 +61,6 @@ std::optional<std::string> getMatchFunctionName() {
       }
     }
   }
-
-  std::cerr << "Rule with label " << ruleLabel << " does not exist.\n";
   return std::nullopt;
 }
 
@@ -77,6 +75,7 @@ int main(int argc, char **argv) {
 
   auto match_function_name = getMatchFunctionName();
   if (match_function_name == std::nullopt) {
+    std::cerr << "Rule with label does not exist.\n";
     return EXIT_FAILURE;
   }
 
@@ -128,7 +127,7 @@ int main(int argc, char **argv) {
   }
 
   void *printMatchResult_ptr = dlsym(
-      handle, "_Z16printMatchResultRSoP8MatchLogmRNSt7__cxx1112basic_"
+      handle, "_Z16printMatchResultRSoP8MatchLogmRKNSt7__cxx1112basic_"
               "stringIcSt11char_traitsIcESaIcEEE");
   if (printMatchResult_ptr == NULL) {
     std::cerr << "Error: " << dlerror() << "\n";
@@ -144,7 +143,7 @@ int main(int argc, char **argv) {
   }
 
   auto resetMatchReason = reinterpret_cast<void (*)()>(resetMatchReason_ptr);
-  auto match_funtion = reinterpret_cast<void (*)(block *)>(match_function_ptr);
+  auto match_function = reinterpret_cast<void (*)(block *)>(match_function_ptr);
   auto constructInitialConfiguration
       = reinterpret_cast<void *(*)(const KOREPattern *)>(construct_ptr);
   auto matchLog = reinterpret_cast<MatchLog *(*)()>(matchLog_ptr);
@@ -154,18 +153,12 @@ int main(int argc, char **argv) {
       printMatchResult_ptr);
   auto initStaticObjects = reinterpret_cast<void (*)()>(initStaticObjects_ptr);
 
-  // Step 0: Reset MatchLog Reason and Init Static Objects
   resetMatchReason();
   initStaticObjects();
-  // Step 1: Trying to get the initial configuration as a block*
   auto b = (block *)constructInitialConfiguration(InitialConfiguration.get());
-  // Step 2: Trying to apply match
-  match_funtion(b);
-  // Step 3: Trying to cast matchLog
+  match_function(b);
   MatchLog *log = matchLog();
-  // Step 4: Trying to get matchLogSize
   size_t logSize = matchLogSize();
-  // Step 5: Verify Match
   printMatchResult(std::cout, log, logSize, KompiledDir);
 
   dlclose(handle);

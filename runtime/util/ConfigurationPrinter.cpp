@@ -291,7 +291,7 @@ void printSortedConfigurationToFile(
 
 void printMatchResult(
     std::ostream &os, MatchLog *matchLog, size_t logSize,
-    std::string &definitionPath) {
+    const std::string &definitionPath) {
   char subjectFilename[15] = "subject_XXXXXX";
   int sf = mkstemp(subjectFilename);
   FILE *subject = fdopen(sf, "w");
@@ -300,11 +300,10 @@ void printMatchResult(
   int pf = mkstemp(patternFilename);
   FILE *pattern = fdopen(pf, "w");
 
-  if (logSize > 0) {
     for (int i = 0; i < logSize; i++) {
-      if (matchLog[i].kind == MatchLog::SUCCESS)
+      if (matchLog[i].kind == MatchLog::SUCCESS) {
         os << "Match succeeds\n";
-      else if (matchLog[i].kind == MatchLog::FAIL) {
+      } else if (matchLog[i].kind == MatchLog::FAIL) {
         os << "Subject:\n";
         if (i == 0) {
           printSortedConfigurationToFile(
@@ -333,7 +332,6 @@ void printMatchResult(
         }
         os << ") => " << *reinterpret_cast<bool *>(matchLog[i].result) << "\n";
       }
-    }
   }
 
   close(sf);
