@@ -32,16 +32,6 @@ cl::opt<std::string> SharedLibPath(
     cl::Positional, cl::desc("<path_to_shared_lib>"), cl::cat(KRuleCat));
 
 std::optional<std::string> getMatchFunctionName() {
-  std::ifstream in(RuleLabel);
-  std::string ruleLabel;
-  std::getline(in, ruleLabel);
-  in.close();
-
-  if (ruleLabel.empty()) {
-    std::cerr << "Error: Couldn't get RULE.label from the input file.\n";
-    return std::nullopt;
-  }
-
   auto definition = KompiledDir + "/definition.kore";
   // Parse the definition.kore to get the AST.
   parser::KOREParser parser(definition);
@@ -56,11 +46,12 @@ std::optional<std::string> getMatchFunctionName() {
 
       if (attr != axiom->getAttributes().end()) {
         // Compare the axiom's label with the given rule label.
-        if (!ruleLabel.compare(axiom->getStringAttribute("label")))
+        if (!RuleLabel.compare(axiom->getStringAttribute("label")))
           return "intern_match_" + std::to_string(axiom->getOrdinal());
       }
     }
   }
+  std::cerr << RuleLabel << "\n";
   return std::nullopt;
 }
 

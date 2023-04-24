@@ -1,5 +1,28 @@
 // RUN: %kompile %s c
-// RUN: %check-k-rule-apply-diff
+// RUN: %apply-rule %S TEST.testArray %input-dir/`basename %S`/foo_Array_Success.in %S/definition.o | diff - %output-dir/`basename %S`/foo_Array_Success.out.diff
+// RUN: %apply-rule %S TEST.testArray %input-dir/`basename %S`/foo_Array_Fail.in %S/definition.o | diff - %output-dir/`basename %S`/foo_Array_Fail.out.diff
+// RUN: %apply-rule %S TEST.testBlock %input-dir/`basename %S`/foo_Block_Success.in %S/definition.o | diff - %output-dir/`basename %S`/foo_Block_Success.out.diff
+// RUN: %apply-rule %S TEST.testBlock %input-dir/`basename %S`/foo_Block_Fail.in %S/definition.o | diff - %output-dir/`basename %S`/foo_Block_Fail.out.diff
+// RUN: %apply-rule %S TEST.testBool %input-dir/`basename %S`/foo_Bool_Success.in %S/definition.o | diff - %output-dir/`basename %S`/foo_Bool_Success.out.diff
+// RUN: %apply-rule %S TEST.testBool %input-dir/`basename %S`/foo_Bool_Fail.in %S/definition.o | diff - %output-dir/`basename %S`/foo_Bool_Fail.out.diff
+// RUN: %apply-rule %S TEST.testFloat %input-dir/`basename %S`/foo_Float_Success.in %S/definition.o | diff - %output-dir/`basename %S`/foo_Float_Success.out.diff
+// RUN: %apply-rule %S TEST.testFloat %input-dir/`basename %S`/foo_Float_Fail.in %S/definition.o | diff - %output-dir/`basename %S`/foo_Float_Fail.out.diff
+// RUN: %apply-rule %S TEST.testSignFloat %input-dir/`basename %S`/foo_Float_SignFloat_Success.in %S/definition.o | diff - %output-dir/`basename %S`/foo_Float_SignFloat_Success.out.diff
+// RUN: %apply-rule %S TEST.testSignFloat %input-dir/`basename %S`/foo_Float_SignFloat_Fail.in %S/definition.o | diff - %output-dir/`basename %S`/foo_Float_SignFloat_Fail.out.diff
+// RUN: %apply-rule %S TEST.testIsNANFloat %input-dir/`basename %S`/foo_Float_IsNANFloat_Success.in %S/definition.o | diff - %output-dir/`basename %S`/foo_Float_IsNANFloat_Success.out.diff
+// RUN: %apply-rule %S TEST.testIsNANFloat %input-dir/`basename %S`/foo_Float_IsNANFloat_Fail.in %S/definition.o | diff - %output-dir/`basename %S`/foo_Float_IsNANFloat_Fail.out.diff
+// RUN: %apply-rule %S TEST.testInt %input-dir/`basename %S`/foo_Int_Success.in %S/definition.o | diff - %output-dir/`basename %S`/foo_Int_Success.out.diff
+// RUN: %apply-rule %S TEST.testInt %input-dir/`basename %S`/foo_Int_Fail.in %S/definition.o | diff - %output-dir/`basename %S`/foo_Int_Fail.out.diff
+// RUN: %apply-rule %S TEST.testList %input-dir/`basename %S`/foo_List_Success.in %S/definition.o | diff - %output-dir/`basename %S`/foo_List_Success.out.diff
+// RUN: %apply-rule %S TEST.testList %input-dir/`basename %S`/foo_List_Fail.in %S/definition.o | diff - %output-dir/`basename %S`/foo_List_Fail.out.diff
+// RUN: %apply-rule %S TEST.testString %input-dir/`basename %S`/foo_String_Success.in %S/definition.o | diff - %output-dir/`basename %S`/foo_String_Success.out.diff
+// RUN: %apply-rule %S TEST.testString %input-dir/`basename %S`/foo_String_Fail.in %S/definition.o | diff - %output-dir/`basename %S`/foo_String_Fail.out.diff
+// RUN: %apply-rule %S TEST.testString2Bool %input-dir/`basename %S`/foo_String2Bool_Success.in %S/definition.o | diff - %output-dir/`basename %S`/foo_String2Bool_Success.out.diff
+// RUN: %apply-rule %S TEST.testString2Bool %input-dir/`basename %S`/foo_String2Bool_Fail.in %S/definition.o | diff - %output-dir/`basename %S`/foo_String2Bool_Fail.out.diff
+// RUN: %apply-rule %S TEST.testList %input-dir/`basename %S`/foo_List_Success.in %S/definition.o | diff - %output-dir/`basename %S`/foo_List_Success.out.diff
+// RUN: %apply-rule %S TEST.testList %input-dir/`basename %S`/foo_List_Fail.in %S/definition.o | diff - %output-dir/`basename %S`/foo_List_Fail.out.diff
+// RUN: %apply-rule %S TEST.testMap %input-dir/`basename %S`/foo_Map_Success.in %S/definition.o | diff - %output-dir/`basename %S`/foo_Map_Success.out.diff
+// RUN: %apply-rule %S TEST.testMap %input-dir/`basename %S`/foo_Map_Fail.in %S/definition.o | diff - %output-dir/`basename %S`/foo_Map_Fail.out.diff
 
 [topCellInitializer{}(LblinitGeneratedTopCell{}()), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/robertorosmaninho/rv/tests/foo_bar/test.k)")]
 
