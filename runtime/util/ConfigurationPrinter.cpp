@@ -288,8 +288,7 @@ void printSortedConfigurationToFile(
   writer w = {file, nullptr};
   printConfigurationInternal(&w, subject, sort, false, &state);
 }
-
-void printMatchResult(
+extern "C" void printMatchResult(
     std::ostream &os, MatchLog *matchLog, size_t logSize,
     const std::string &definitionPath) {
   char subjectFilename[15] = "subject_XXXXXX";

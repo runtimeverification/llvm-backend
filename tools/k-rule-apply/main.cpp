@@ -66,7 +66,7 @@ int main(int argc, char **argv) {
 
   auto match_function_name = getMatchFunctionName();
   if (match_function_name == std::nullopt) {
-    std::cerr << "Rule with label does not exist.\n";
+    std::cerr << "Rule with label " << RuleLabel << " does not exist.\n";
     return EXIT_FAILURE;
   }
 
@@ -81,15 +81,14 @@ int main(int argc, char **argv) {
 
   // Get utils functions from the shared lib, cast them to their right type, and
   // call each with its appropriate argument if any.
-  void *construct_ptr = dlsym(
-      handle, "_Z29constructInitialConfigurationPKN5kllvm11KOREPatternE");
+  void *construct_ptr = dlsym(handle, "constructInitialConfiguration");
   if (construct_ptr == NULL) {
     std::cerr << "Error: " << dlerror() << "\n";
     dlclose(handle);
     return EXIT_FAILURE;
   }
 
-  void *resetMatchReason_ptr = dlsym(handle, "_Z16resetMatchReasonv");
+  void *resetMatchReason_ptr = dlsym(handle, "resetMatchReason");
   if (resetMatchReason_ptr == NULL) {
     std::cerr << "Error: " << dlerror() << "\n";
     dlclose(handle);
@@ -103,23 +102,21 @@ int main(int argc, char **argv) {
     return EXIT_FAILURE;
   }
 
-  void *matchLog_ptr = dlsym(handle, "_Z11getMatchLogv");
+  void *matchLog_ptr = dlsym(handle, "getMatchLog");
   if (matchLog_ptr == NULL) {
     std::cerr << "Error: " << dlerror() << "\n";
     dlclose(handle);
     return EXIT_FAILURE;
   }
 
-  void *matchLogSize_ptr = dlsym(handle, "_Z15getMatchLogSizev");
+  void *matchLogSize_ptr = dlsym(handle, "getMatchLogSize");
   if (matchLogSize_ptr == NULL) {
     std::cerr << "Error: " << dlerror() << "\n";
     dlclose(handle);
     return EXIT_FAILURE;
   }
 
-  void *printMatchResult_ptr = dlsym(
-      handle, "_Z16printMatchResultRSoP8MatchLogmRKNSt7__cxx1112basic_"
-              "stringIcSt11char_traitsIcESaIcEEE");
+  void *printMatchResult_ptr = dlsym(handle, "printMatchResult");
   if (printMatchResult_ptr == NULL) {
     std::cerr << "Error: " << dlerror() << "\n";
     dlclose(handle);
