@@ -299,6 +299,7 @@ void *termToKorePattern(block *subject) {
   auto pattern = parser->pattern();
 
   return static_cast<void *>(pattern.release());
+}
 
 extern "C" void printMatchResult(
     std::ostream &os, MatchLog *matchLog, size_t logSize,
