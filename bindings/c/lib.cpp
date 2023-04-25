@@ -86,6 +86,12 @@ kore_pattern *kore_pattern_parse(char const *kore_text) {
   return pat;
 }
 
+kore_pattern *kore_pattern_parse_file(char const *filename) {
+  auto pat = new kore_pattern;
+  pat->ptr_ = kllvm::parser::KOREParser(std::string(filename)).pattern();
+  return pat;
+}
+
 kore_pattern *kore_pattern_new_token(char const *value, kore_sort const *sort) {
   auto pat = kore_string_pattern_new(value);
   auto ret = kore_pattern_new_token_internal(pat, sort);
@@ -166,6 +172,15 @@ char *kore_block_dump(block *term) {
   new_str[len] = '\0';
 
   return new_str;
+}
+
+kore_pattern *kore_pattern_from_block(block *term) {
+  auto raw_ptr = static_cast<kllvm::KOREPattern *>(termToKorePattern(term));
+  auto ast = std::shared_ptr<kllvm::KOREPattern>(raw_ptr);
+
+  auto pat = new kore_pattern;
+  pat->ptr_ = ast;
+  return pat;
 }
 
 bool kore_block_get_bool(block *term) {

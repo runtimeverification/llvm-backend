@@ -22,6 +22,9 @@ namespace kllvm {
 
 int CODEGEN_DEBUG;
 
+std::string SOURCE_ATT = "org'Stop'kframework'Stop'attributes'Stop'Source";
+std::string LOCATION_ATT = "org'Stop'kframework'Stop'attributes'Stop'Location";
+
 static llvm::DIBuilder *Dbg;
 static llvm::DICompileUnit *DbgCU;
 static llvm::DIFile *DbgFile;
@@ -100,11 +103,6 @@ void initDebugGlobal(
       DbgCU, name, name, DbgFile, DbgLine, type, false);
   var->addDebugInfo(DbgExp);
 }
-
-static std::string SOURCE_ATT
-    = "org'Stop'kframework'Stop'attributes'Stop'Source";
-static std::string LOCATION_ATT
-    = "org'Stop'kframework'Stop'attributes'Stop'Location";
 
 void initDebugAxiom(
     std::unordered_map<std::string, ptr<KORECompositePattern>> const &att) {
@@ -256,12 +254,13 @@ llvm::DIType *getPointerDebugType(llvm::DIType *ty, std::string typeName) {
   return Dbg->createTypedef(ptrType, typeName, DbgFile, 0, DbgCU);
 }
 
-llvm::DIType *getArrayDebugType(llvm::DIType *ty, size_t len, size_t align) {
+llvm::DIType *
+getArrayDebugType(llvm::DIType *ty, size_t len, llvm::Align align) {
   if (!Dbg)
     return nullptr;
   std::vector<llvm::Metadata *> subscripts;
   auto arr = Dbg->getOrCreateArray(subscripts);
-  return Dbg->createArrayType(len, align, ty, arr);
+  return Dbg->createArrayType(len, align.value(), ty, arr);
 }
 
 llvm::DIType *getShortDebugType(void) {

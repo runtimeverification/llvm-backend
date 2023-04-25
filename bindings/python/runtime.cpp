@@ -56,8 +56,16 @@ void bind_runtime(py::module_ &m) {
       }))
       .def(
           "__str__",
-          [](block *term) { return printConfigurationToString(term)->data; })
-      .def("step", [](block *term, int64_t n) { return take_steps(n, term); });
+          [](block *term) {
+            auto k_str = printConfigurationToString(term);
+            return std::string(k_str->data, len(k_str));
+          })
+      .def("step", [](block *term, int64_t n) { return take_steps(n, term); })
+      .def("to_pattern", [](block *term) {
+        auto raw_ptr
+            = static_cast<kllvm::KOREPattern *>(termToKorePattern(term));
+        return std::shared_ptr<kllvm::KOREPattern>(raw_ptr);
+      });
 }
 
 PYBIND11_MODULE(_kllvm_runtime, m) {

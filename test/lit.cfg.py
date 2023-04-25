@@ -67,6 +67,7 @@ config.substitutions.extend([
     ('%strip-binary', 'kore-strip'),
     ('%arity', 'kore-arity'),
     ('%apply-rule', 'k-rule-apply'),
+    ('%find-rule', 'k-rule-find'),
 
     ('%kllvm-clang', 'clang -I %include-path -I Inputs Inputs/api.c'),
 

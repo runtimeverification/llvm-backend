@@ -225,6 +225,12 @@ void printSortedConfigurationToFile(
 void printConfigurationInternal(
     writer *file, block *subject, const char *sort, bool, void *);
 
+// Returns a raw pointer to a KOREPattern; the caller of this function is
+// responsible for managing its lifetime (e.g. by placing the returned pointer
+// back into a unique_ptr). The return type here is void* only to accommodate
+// C linkage so that the function can be called from the C and Python bindings.
+void *termToKorePattern(block *);
+
 // This function injects its argument into KItem before printing, using the sort
 // argument as the source sort. Doing so allows the term to be pretty-printed
 // using the existing recursion scheme code (and without manually inspecting the

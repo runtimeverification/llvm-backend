@@ -6,6 +6,7 @@
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
+#include <unistd.h>
 
 namespace kllvm {
 namespace parser {
@@ -13,10 +14,12 @@ namespace parser {
 std::unique_ptr<KOREParser> KOREParser::from_string(std::string text) {
   char temp_file_name[] = "tmp.parse.XXXXXX";
 
-  if (mkstemp(temp_file_name) == -1) {
+  int temp_fd = mkstemp(temp_file_name);
+  if (temp_fd == -1) {
     std::perror("Could not create temporary parsing file: ");
     std::exit(1);
   }
+  close(temp_fd);
 
   auto os = std::ofstream(temp_file_name);
   os << text;
