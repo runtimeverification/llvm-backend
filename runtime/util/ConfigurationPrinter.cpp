@@ -312,38 +312,37 @@ extern "C" void printMatchResult(
   int pf = mkstemp(patternFilename);
   FILE *pattern = fdopen(pf, "w");
 
-    for (int i = 0; i < logSize; i++) {
-      if (matchLog[i].kind == MatchLog::SUCCESS) {
-        os << "Match succeeds\n";
-      } else if (matchLog[i].kind == MatchLog::FAIL) {
-        os << "Subject:\n";
-        if (i == 0) {
-          printSortedConfigurationToFile(
-              subject, (block *)matchLog[i].subject, matchLog[i].sort);
-        } else {
-          auto subjectSort = debug_print_term(
-              (block *)matchLog[i].subject, matchLog[i].sort);
-          auto strSubjectSort
-              = std::string(subjectSort->data, len(subjectSort));
-          fprintf(subject, "%s\n", strSubjectSort.c_str());
-        }
-        fflush(subject);
-        kllvm::printKORE(os, definitionPath, subjectFilename, false, true);
-        os << "does not match pattern: \n";
-        fprintf(pattern, "%s\n", matchLog[i].pattern);
-        fflush(pattern);
-        kllvm::printKORE(os, definitionPath, patternFilename, false, true);
-      } else if (matchLog[i].kind == MatchLog::FUNCTION) {
-        os << matchLog[i].debugName << "(";
-
-        for (int j = 0; j < matchLog[i].args.size(); j += 2) {
-          auto typeName = reinterpret_cast<char *>(matchLog[i].args[j + 1]);
-          printValueOfType(os, definitionPath, matchLog[i].args[j], typeName);
-          if (j + 2 != matchLog[i].args.size())
-            os << ", ";
-        }
-        os << ") => " << *reinterpret_cast<bool *>(matchLog[i].result) << "\n";
+  for (int i = 0; i < logSize; i++) {
+    if (matchLog[i].kind == MatchLog::SUCCESS) {
+      os << "Match succeeds\n";
+    } else if (matchLog[i].kind == MatchLog::FAIL) {
+      os << "Subject:\n";
+      if (i == 0) {
+        printSortedConfigurationToFile(
+            subject, (block *)matchLog[i].subject, matchLog[i].sort);
+      } else {
+        auto subjectSort
+            = debug_print_term((block *)matchLog[i].subject, matchLog[i].sort);
+        auto strSubjectSort = std::string(subjectSort->data, len(subjectSort));
+        fprintf(subject, "%s\n", strSubjectSort.c_str());
       }
+      fflush(subject);
+      kllvm::printKORE(os, definitionPath, subjectFilename, false, true);
+      os << "does not match pattern: \n";
+      fprintf(pattern, "%s\n", matchLog[i].pattern);
+      fflush(pattern);
+      kllvm::printKORE(os, definitionPath, patternFilename, false, true);
+    } else if (matchLog[i].kind == MatchLog::FUNCTION) {
+      os << matchLog[i].debugName << "(";
+
+      for (int j = 0; j < matchLog[i].args.size(); j += 2) {
+        auto typeName = reinterpret_cast<char *>(matchLog[i].args[j + 1]);
+        printValueOfType(os, definitionPath, matchLog[i].args[j], typeName);
+        if (j + 2 != matchLog[i].args.size())
+          os << ", ";
+      }
+      os << ") => " << *reinterpret_cast<bool *>(matchLog[i].result) << "\n";
+    }
   }
 
   close(sf);
