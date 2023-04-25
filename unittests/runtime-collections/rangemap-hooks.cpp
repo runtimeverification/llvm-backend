@@ -72,6 +72,18 @@ static struct blockheader range_header() {
   }
   return hdr;
 }
+struct inj_range2kitem {
+  blockheader h;
+  range *child;
+};
+static struct blockheader inj_range2kitem_header() {
+  static struct blockheader hdr = {(uint64_t)-1};
+  if (hdr.hdr == -1) {
+    hdr = getBlockHeaderForSymbol(
+        (uint64_t)getTagForSymbolName("inj{SortRange{}, SortKItem{}}"));
+  }
+  return hdr;
+}
 }
 
 BOOST_AUTO_TEST_SUITE(RangeMapHookTest)
@@ -278,7 +290,11 @@ BOOST_AUTO_TEST_CASE(rangemap_hook_remove_all) {
   ptr->h = range_header();
   ptr->start = RDUMMY0;
   ptr->end = RDUMMY1;
-  auto elem = hook_SET_element((SortRange)ptr);
+  inj_range2kitem *inj_ptr
+      = (inj_range2kitem *)koreAlloc(sizeof(inj_range2kitem));
+  inj_ptr->h = inj_range2kitem_header();
+  inj_ptr->child = ptr;
+  auto elem = hook_SET_element((SortKItem)inj_ptr);
   map2 = hook_RANGEMAP_removeAll(&map1, &elem);
   result = hook_RANGEMAP_size_long(&map2);
   BOOST_CHECK_EQUAL(result, 0);

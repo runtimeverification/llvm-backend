@@ -191,8 +191,9 @@ rangemap hook_RANGEMAP_updateAll(SortRangeMap m1, SortRangeMap m2) {
 rangemap hook_RANGEMAP_removeAll(SortRangeMap map, SortSet set) {
   auto tmp = *map;
   for (auto iter = set->begin(); iter != set->end(); ++iter) {
-    range *ptr = (range *)iter->elem;
-    tmp = tmp.deleted(rng_map::Range<KElem>(ptr->start, ptr->end));
+    block *b_ptr = (block *)iter->elem;
+    range *r_ptr = (range *)(b_ptr->children[0]);
+    tmp = tmp.deleted(rng_map::Range<KElem>(r_ptr->start, r_ptr->end));
   }
   return tmp;
 }
