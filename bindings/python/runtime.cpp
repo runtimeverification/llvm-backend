@@ -40,9 +40,8 @@ PYBIND11_DECLARE_HOLDER_TYPE(T, raw_ptr<T>, true);
 extern "C" {
 void initStaticObjects();
 block *take_steps(int64_t, block *);
-}
-
 void *constructInitialConfiguration(const KOREPattern *initial);
+}
 
 void bind_runtime(py::module_ &m) {
   auto runtime = m.def_submodule("runtime", "K LLVM backend runtime");

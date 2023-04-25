@@ -30,12 +30,12 @@ kore_pattern_new_token_internal(kore_pattern const *, kore_sort const *);
  * These declarations are internal to the backend and aren't exposed explicitly
  * through any header files, so we pull them in manually here.
  */
-void *constructInitialConfiguration(const kllvm::KOREPattern *);
 
 extern "C" {
 block *take_steps(int64_t, block *);
 void initStaticObjects(void);
 void freeAllKoreMem(void);
+void *constructInitialConfiguration(const kllvm::KOREPattern *);
 }
 
 extern "C" {
