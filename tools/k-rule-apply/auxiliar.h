@@ -58,22 +58,24 @@ size_t getMatchLogSize(void *handle) {
   return f();
 }
 
-void* printMatchResult(
-    std::ostream &os, MatchLog *log, size_t logSize, std::string const &dir, void *handle) {
+void *printMatchResult(
+    std::ostream &os, MatchLog *log, size_t logSize, std::string const &dir,
+    void *handle) {
   void *funcPtr = dlsym(handle, "printMatchResult");
   if (funcPtr == NULL) {
     return NULL;
   }
-  auto f = reinterpret_cast<void* (*)(
-      std::ostream &, MatchLog *, size_t, std::string const &)>(funcPtr);
+  auto f = reinterpret_cast<
+      void *(*)(std::ostream &, MatchLog *, size_t, std::string const &)>(
+      funcPtr);
   return f(os, log, logSize, dir);
 }
 
-void* initStaticObjects(void *handle) {
+void *initStaticObjects(void *handle) {
   void *funcPtr = dlsym(handle, "initStaticObjects");
   if (funcPtr == NULL) {
     return NULL;
   }
-  auto f = reinterpret_cast<void* (*)()>(funcPtr);
+  auto f = reinterpret_cast<void *(*)()>(funcPtr);
   return f();
 }
