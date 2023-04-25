@@ -1,15 +1,4 @@
-#include <kllvm/ast/AST.h>
-#include <kllvm/parser/KOREParser.h>
-
-#include <llvm/Support/CommandLine.h>
-
-#include <cstdlib>
-#include <dlfcn.h>
-#include <fstream>
-#include <iostream>
-#include <optional>
-
-#include "runtime/header.h"
+#include "auxiliar.h"
 
 using namespace llvm;
 using namespace kllvm;
@@ -79,75 +68,38 @@ int main(int argc, char **argv) {
     return EXIT_FAILURE;
   }
 
-  // Get utils functions from the shared lib, cast them to their right type, and
-  // call each with its appropriate argument if any.
-  void *construct_ptr = dlsym(handle, "constructInitialConfiguration");
-  if (construct_ptr == NULL) {
-    std::cerr << "Error: " << dlerror() << "\n";
-    dlclose(handle);
-    return EXIT_FAILURE;
-  }
-
-  void *resetMatchReason_ptr = dlsym(handle, "resetMatchReason");
-  if (resetMatchReason_ptr == NULL) {
-    std::cerr << "Error: " << dlerror() << "\n";
-    dlclose(handle);
-    return EXIT_FAILURE;
-  }
-
+  // Get util function from the shared lib, cast it to its right type, and call
+  // with its appropriate argument if any.
   void *match_function_ptr = dlsym(handle, match_function_name->c_str());
   if (match_function_ptr == NULL) {
     std::cerr << "Error: " << dlerror() << "\n";
     dlclose(handle);
     return EXIT_FAILURE;
   }
-
-  void *matchLog_ptr = dlsym(handle, "getMatchLog");
-  if (matchLog_ptr == NULL) {
-    std::cerr << "Error: " << dlerror() << "\n";
-    dlclose(handle);
-    return EXIT_FAILURE;
-  }
-
-  void *matchLogSize_ptr = dlsym(handle, "getMatchLogSize");
-  if (matchLogSize_ptr == NULL) {
-    std::cerr << "Error: " << dlerror() << "\n";
-    dlclose(handle);
-    return EXIT_FAILURE;
-  }
-
-  void *printMatchResult_ptr = dlsym(handle, "printMatchResult");
-  if (printMatchResult_ptr == NULL) {
-    std::cerr << "Error: " << dlerror() << "\n";
-    dlclose(handle);
-    return EXIT_FAILURE;
-  }
-
-  void *initStaticObjects_ptr = dlsym(handle, "initStaticObjects");
-  if (initStaticObjects_ptr == NULL) {
-    std::cerr << "Error: " << dlerror() << "\n";
-    dlclose(handle);
-    return EXIT_FAILURE;
-  }
-
-  auto resetMatchReason = reinterpret_cast<void (*)()>(resetMatchReason_ptr);
   auto match_function = reinterpret_cast<void (*)(block *)>(match_function_ptr);
-  auto constructInitialConfiguration
-      = reinterpret_cast<void *(*)(const KOREPattern *)>(construct_ptr);
-  auto matchLog = reinterpret_cast<MatchLog *(*)()>(matchLog_ptr);
-  auto matchLogSize = reinterpret_cast<size_t (*)()>(matchLogSize_ptr);
-  auto printMatchResult = reinterpret_cast<void (*)(
-      std::ostream &, MatchLog *, size_t, std::string const &)>(
-      printMatchResult_ptr);
-  auto initStaticObjects = reinterpret_cast<void (*)()>(initStaticObjects_ptr);
 
-  resetMatchReason();
-  initStaticObjects();
-  auto b = (block *)constructInitialConfiguration(InitialConfiguration.get());
-  match_function(b);
-  MatchLog *log = matchLog();
-  size_t logSize = matchLogSize();
-  printMatchResult(std::cout, log, logSize, KompiledDir);
+  resetMatchReason(handle);
+  initStaticObjects(handle);
+  auto b = constructInitialConfiguration(InitialConfiguration.get(), handle);
+  if (b == NULL) {
+    std::cerr << "Error: " << dlerror() << "\n";
+    return EXIT_FAILURE;
+  }
+
+  match_function((block *)b);
+  auto log = getMatchLog(handle);
+  if (log == NULL) {
+    std::cerr << "Error: " << dlerror() << "\n";
+    return EXIT_FAILURE;
+  }
+
+  size_t logSize = getMatchLogSize(handle);
+  if (logSize == -1) {
+    std::cerr << "Error: " << dlerror() << "\n";
+    return EXIT_FAILURE;
+  }
+
+  printMatchResult(std::cout, (MatchLog *)log, logSize, KompiledDir, handle);
 
   dlclose(handle);
   return 0;
