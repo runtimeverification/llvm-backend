@@ -1,0 +1,5 @@
+TEST.testIsInfiniteFloat.sc(0.00000000000000000e0) => 0
+Subject:
+false
+does not match pattern: 
+true

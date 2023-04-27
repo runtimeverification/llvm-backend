@@ -1,0 +1,2 @@
+TEST.testIsNANFloat.sc(NaN) => 1
+Match succeeds

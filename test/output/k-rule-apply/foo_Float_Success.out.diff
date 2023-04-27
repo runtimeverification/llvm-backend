@@ -1,0 +1,2 @@
+TEST.testFloat.sc(0.00000000000000000e0) => 1
+Match succeeds

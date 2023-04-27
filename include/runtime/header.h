@@ -21,6 +21,19 @@
 #include <immer/set.hpp>
 #include <unordered_set>
 
+struct MatchLog {
+  enum { SUCCESS = 0, FUNCTION, FAIL } kind;
+
+  char *function;
+  char *debugName;
+  void *result;
+  std::vector<void *> args;
+
+  char *pattern;
+  void *subject;
+  char *sort;
+};
+
 // the actual length is equal to the block header with the gc bits masked out.
 
 #define len(s) len_hdr((s)->h.hdr)
@@ -306,5 +319,6 @@ void init_float2(floating *, std::string);
 
 std::string intToStringInBase(mpz_t, uint64_t);
 std::string intToString(mpz_t);
-
+void printValueOfType(
+    std::ostream &os, std::string definitionPath, void *, std::string);
 #endif // RUNTIME_HEADER_H

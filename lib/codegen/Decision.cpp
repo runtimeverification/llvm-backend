@@ -33,7 +33,6 @@
 #include <memory>
 #include <set>
 #include <type_traits>
-
 namespace kllvm {
 
 static std::string LAYOUTITEM_STRUCT = "layoutitem";
@@ -411,9 +410,25 @@ void FunctionNode::codegen(Decision *d) {
     std::vector<llvm::Value *> functionArgs;
     functionArgs.push_back(d->stringLiteral(debugName));
     functionArgs.push_back(d->stringLiteral(function));
-    functionArgs.push_back(d->ptrTerm(Call));
+    auto tempAllocCall = d->ptrTerm(Call);
+    if (Call->getType() == llvm::Type::getInt1Ty(d->Ctx)) {
+      llvm::Value *zext = new llvm::ZExtInst(
+          Call, llvm::Type::getInt8Ty(d->Ctx), "", d->CurrentBlock);
+      new llvm::StoreInst(zext, tempAllocCall, d->CurrentBlock);
+    }
+    functionArgs.push_back(tempAllocCall);
     for (auto arg : args) {
-      functionArgs.push_back(d->ptrTerm(arg));
+      auto tempAllocArg = d->ptrTerm(arg);
+      if (arg->getType() == llvm::Type::getInt1Ty(d->Ctx)) {
+        llvm::Value *zext = new llvm::ZExtInst(
+            Call, llvm::Type::getInt8Ty(d->Ctx), "", d->CurrentBlock);
+        new llvm::StoreInst(zext, tempAllocArg, d->CurrentBlock);
+      }
+      functionArgs.push_back(tempAllocArg);
+      std::string str;
+      llvm::raw_string_ostream output(str);
+      arg->getType()->print(output);
+      functionArgs.push_back(d->stringLiteral(str));
     }
     functionArgs.push_back(
         llvm::ConstantPointerNull::get(llvm::Type::getInt8PtrTy(d->Ctx)));
@@ -1045,13 +1060,44 @@ void makeStepFunction(
   codegen(dt);
 }
 
+void makeMatchReasonFunctionWrapper(
+    KOREDefinition *definition, llvm::Module *module,
+    KOREAxiomDeclaration *axiom, std::string name) {
+  auto blockType = getValueType({SortCategory::Symbol, 0}, module);
+  llvm::FunctionType *funcType = llvm::FunctionType::get(
+      llvm::Type::getVoidTy(module->getContext()), {blockType}, false);
+  std::string wrapperName = "match_" + std::to_string(axiom->getOrdinal());
+  llvm::Function *matchFunc
+      = getOrInsertFunction(module, wrapperName, funcType);
+  std::string debugName = name;
+  if (axiom->getAttributes().count("label")) {
+    debugName = axiom->getStringAttribute("label") + "_fastcc_" + ".match";
+  }
+  auto debugType
+      = getDebugType({SortCategory::Symbol, 0}, "SortGeneratedTopCell{}");
+  resetDebugLoc();
+  initDebugFunction(
+      debugName, debugName,
+      getDebugFunctionType(getVoidDebugType(), {debugType}), definition,
+      matchFunc);
+  matchFunc->setCallingConv(llvm::CallingConv::Fast);
+  llvm::BasicBlock *entry
+      = llvm::BasicBlock::Create(module->getContext(), "entry", matchFunc);
+
+  auto ci = module->getFunction(name);
+  auto call = llvm::CallInst::Create(ci, matchFunc->getArg(0), "", entry);
+  setDebugLoc(call);
+
+  llvm::ReturnInst::Create(module->getContext(), entry);
+}
+
 void makeMatchReasonFunction(
     KOREDefinition *definition, llvm::Module *module,
     KOREAxiomDeclaration *axiom, DecisionNode *dt) {
   auto blockType = getValueType({SortCategory::Symbol, 0}, module);
   llvm::FunctionType *funcType = llvm::FunctionType::get(
       llvm::Type::getVoidTy(module->getContext()), {blockType}, false);
-  std::string name = "match_" + std::to_string(axiom->getOrdinal());
+  std::string name = "intern_match_" + std::to_string(axiom->getOrdinal());
   llvm::Function *matchFunc = getOrInsertFunction(module, name, funcType);
   std::string debugName = name;
   if (axiom->getAttributes().count("label")) {
@@ -1064,7 +1110,6 @@ void makeMatchReasonFunction(
       debugName, debugName,
       getDebugFunctionType(getVoidDebugType(), {debugType}), definition,
       matchFunc);
-  matchFunc->setCallingConv(llvm::CallingConv::Fast);
   auto val = matchFunc->arg_begin();
   llvm::BasicBlock *block
       = llvm::BasicBlock::Create(module->getContext(), "entry", matchFunc);
@@ -1108,6 +1153,7 @@ void makeMatchReasonFunction(
   llvm::ReturnInst::Create(module->getContext(), stuck);
 
   codegen(dt);
+  makeMatchReasonFunctionWrapper(definition, module, axiom, name);
 }
 
 // TODO: actually collect the return value of this function. Right now it
