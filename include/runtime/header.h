@@ -44,6 +44,7 @@ struct MatchLog {
 #define size_hdr(s) ((((s) >> 32) & 0xff) * 8)
 #define layout(s) layout_hdr((s)->h.hdr)
 #define layout_hdr(s) ((s) >> LAYOUT_OFFSET)
+#define tag(s) tag_hdr((s)->h.hdr)
 #define tag_hdr(s) (s & TAG_MASK)
 #define is_in_young_gen_hdr(s) (!((s)&NOT_YOUNG_OBJECT_BIT))
 #define is_in_old_gen_hdr(s) (((s)&NOT_YOUNG_OBJECT_BIT) && ((s)&AGE_MASK))
