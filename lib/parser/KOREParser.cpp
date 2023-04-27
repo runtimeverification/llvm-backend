@@ -1,5 +1,6 @@
-#include "kllvm/parser/KOREParser.h"
 #include "kllvm/ast/AST.h"
+#include "kllvm/util/FileRAII.h"
+#include "kllvm/parser/KOREParser.h"
 #include "kllvm/parser/KOREScanner.h"
 
 #include <cstdio>
@@ -13,20 +14,10 @@ namespace parser {
 
 std::unique_ptr<KOREParser> KOREParser::from_string(std::string text) {
   char temp_file_name[] = "tmp.parse.XXXXXX";
-
-  int temp_fd = mkstemp(temp_file_name);
-  if (temp_fd == -1) {
-    std::perror("Could not create temporary parsing file: ");
-    std::exit(1);
-  }
-  close(temp_fd);
-
-  auto os = std::ofstream(temp_file_name);
-  os << text;
-  os.close();
+  auto os =  FileRAII(temp_file_name).getOFStream();
+  *os << text;
 
   auto parser = std::make_unique<KOREParser>(temp_file_name);
-  std::remove(temp_file_name);
   return parser;
 }
 

@@ -1,3 +1,4 @@
+#include "kllvm/util/FileRAII.h"
 #include "runtime/header.h"
 
 #include <kllvm/printer/printer.h>
@@ -23,9 +24,7 @@ SortKItem hook_IO_logTerm(SortString path, SortKItem term) {
 
 SortK hook_IO_traceTerm(block *term) {
   char filename[17] = "traceKORE_XXXXXX";
-  int fd = mkstemp(filename);
-
-  FILE *fp = fdopen(fd, "w");
+  auto fp = FileRAII(filename).getFILE("w");
 
   // Ensure that the term is injected into KItem correctly; if we don't do this
   // then the unparsed KORE ends up with a (null) in it which breaks the
@@ -34,9 +33,6 @@ SortK hook_IO_traceTerm(block *term) {
   fflush(fp);
 
   kllvm::printKORE(std::cerr, &kompiled_directory, filename, false, true);
-
-  close(fd);
-  remove(filename);
 
   return dotK;
 }

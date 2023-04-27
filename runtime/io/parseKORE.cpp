@@ -1,6 +1,7 @@
 #include <cstdio>
 #include <unistd.h>
 
+#include "kllvm/util/FileRAII.h"
 #include "runtime/header.h"
 
 extern "C" {
@@ -10,17 +11,13 @@ block *hook_KREFLECTION_parseKORE(SortString kore) {
   block *parsed = dotK;
   char filename[17] = "parseKORE_XXXXXX";
 
-  int fd = mkstemp(filename);
+  int fd = FileRAII(filename).getTempFd();
 
   bool failed = write(fd, kore->data, len(kore)) == -1;
-
-  close(fd);
 
   if (!failed) {
     parsed = parseConfiguration(filename);
   }
-
-  remove(filename);
 
   return parsed;
 }

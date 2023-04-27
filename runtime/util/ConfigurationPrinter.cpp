@@ -14,6 +14,7 @@
 #include <vector>
 
 #include <kllvm/parser/KOREParser.h>
+#include <kllvm/util/FileRAII.h>
 
 #include "runtime/alloc.h"
 #include "runtime/header.h"
@@ -305,12 +306,9 @@ extern "C" void printMatchResult(
     std::ostream &os, MatchLog *matchLog, size_t logSize,
     const std::string &definitionPath) {
   char subjectFilename[15] = "subject_XXXXXX";
-  int sf = mkstemp(subjectFilename);
-  FILE *subject = fdopen(sf, "w");
-
+  auto subject = FileRAII(subjectFilename).getFILE();
   char patternFilename[15] = "pattern_XXXXXX";
-  int pf = mkstemp(patternFilename);
-  FILE *pattern = fdopen(pf, "w");
+  auto pattern = FileRAII(patternFilename).getFILE();
 
   for (int i = 0; i < logSize; i++) {
     if (matchLog[i].kind == MatchLog::SUCCESS) {
@@ -344,12 +342,6 @@ extern "C" void printMatchResult(
       os << ") => " << *reinterpret_cast<bool *>(matchLog[i].result) << "\n";
     }
   }
-
-  close(sf);
-  remove(subjectFilename);
-
-  close(pf);
-  remove(patternFilename);
 }
 
 void printValueOfType(
@@ -359,16 +351,13 @@ void printValueOfType(
     os << reinterpret_cast<mpz_ptr>(value);
   } else if (type.compare("%block*") == 0) {
     if ((((uintptr_t)value) & 3) == 1) {
-      char subjectFilename[15] = "pattern_XXXXXX";
-      int sf = mkstemp(subjectFilename);
-      FILE *pattern = fdopen(sf, "w");
+      char subjectFilename[15] = "subject_XXXXXX";
+      auto subject = FileRAII(subjectFilename).getFILE();
       string *s = printConfigurationToString(reinterpret_cast<block *>(value));
       auto strSubjectSort = std::string(s->data, len(s));
-      fprintf(pattern, "%s", strSubjectSort.c_str());
-      fflush(pattern);
+      fprintf(subject, "%s", strSubjectSort.c_str());
+      fflush(subject);
       kllvm::printKORE(os, definitionPath, subjectFilename, false, true);
-      close(sf);
-      remove(subjectFilename);
     } else if ((((uintptr_t)value) & 1) == 0) {
       auto s = reinterpret_cast<string *>(value);
       os << std::string(s->data, len(s));
