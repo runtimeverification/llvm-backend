@@ -30,14 +30,16 @@ public:
     if (temp_c_file) {
       fclose(temp_c_file);
     }
-    
+
     close(temp_fd);
     remove(temp_filename);
   }
 
-  FILE *getFILE() {
+  int getTempFd() { return temp_fd; }
+
+  FILE *getFILE(char const *mode = "r") {
     if (!temp_c_file) {
-      temp_c_file = fdopen(temp_fd, "r");
+      temp_c_file = fdopen(temp_fd, mode);
     }
     return temp_c_file;
   }
