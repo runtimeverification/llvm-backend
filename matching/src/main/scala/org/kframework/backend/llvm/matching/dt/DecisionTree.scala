@@ -2,22 +2,29 @@ package org.kframework.backend.llvm.matching.dt
 
 import org.kframework.backend.llvm.matching.Occurrence
 import org.kframework.backend.llvm.matching.pattern._
-import java.io.File
-import java.io.FileWriter
+
+import java.io.{File, FileOutputStream, OutputStreamWriter}
 import java.util
 import java.util.concurrent.ConcurrentHashMap
-
 import org.yaml.snakeyaml.Yaml
+
+import java.nio.charset.Charset
 
 sealed trait DecisionTree {
   def serializeToYaml(file: File): Unit = {
-    val writer = new FileWriter(file)
+    val writer = new OutputStreamWriter(
+      new FileOutputStream(file),
+      Charset.forName("UTF-8").newEncoder()
+    );
     new Yaml().dump(representation, writer)
     writer.close()
   }
 
   def serializeToYaml(file: File, residuals: Seq[(Pattern[String], Occurrence)]): Unit = {
-    val writer = new FileWriter(file)
+    val writer = new OutputStreamWriter(
+      new FileOutputStream(file),
+      Charset.forName("UTF-8").newEncoder()
+    );
     val residualRepr = new util.ArrayList[AnyRef]()
     for (entry <- residuals) {
       val pair = new util.ArrayList[AnyRef]()

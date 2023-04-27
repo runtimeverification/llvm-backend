@@ -104,6 +104,8 @@ public:
 
   virtual bool operator==(const KORESort &other) const override;
 
+  std::string const &getName() const { return name; }
+
 private:
   KORESortVariable(const std::string &Name)
       : name(Name) { }
@@ -163,6 +165,8 @@ public:
   virtual void prettyPrint(std::ostream &out) const override;
   virtual void serialize_to(serializer &s) const override;
   virtual bool operator==(const KORESort &other) const override;
+
+  std::vector<sptr<KORESort>> const &getArguments() const { return arguments; }
 
 private:
   KORECompositeSort(const std::string &Name, ValueType category)

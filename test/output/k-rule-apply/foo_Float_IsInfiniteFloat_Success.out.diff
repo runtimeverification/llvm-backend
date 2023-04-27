@@ -1,0 +1,2 @@
+TEST.testIsInfiniteFloat.sc(Infinity) => 1
+Match succeeds

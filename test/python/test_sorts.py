@@ -37,6 +37,9 @@ class TestSorts(unittest.TestCase):
 
         self.assertEqual(str(top), "Top{A{},B}")
 
+        self.assertEqual(top.arguments[0], a)
+        self.assertEqual(top.arguments[1], b)
+
     def test_substitution(self):
         a = kllvm.ast.SortVariable("A")
         target = kllvm.ast.CompositeSort("Target")

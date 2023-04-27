@@ -1,8 +1,12 @@
+#include <kllvm/printer/printer.h>
+
+#include "gmp.h"
 #include <cinttypes>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <functional>
+#include <iostream>
 #include <set>
 #include <string>
 #include <unordered_map>
@@ -295,4 +299,87 @@ void *termToKorePattern(block *subject) {
   auto pattern = parser->pattern();
 
   return static_cast<void *>(pattern.release());
+}
+
+extern "C" void printMatchResult(
+    std::ostream &os, MatchLog *matchLog, size_t logSize,
+    const std::string &definitionPath) {
+  char subjectFilename[15] = "subject_XXXXXX";
+  int sf = mkstemp(subjectFilename);
+  FILE *subject = fdopen(sf, "w");
+
+  char patternFilename[15] = "pattern_XXXXXX";
+  int pf = mkstemp(patternFilename);
+  FILE *pattern = fdopen(pf, "w");
+
+  for (int i = 0; i < logSize; i++) {
+    if (matchLog[i].kind == MatchLog::SUCCESS) {
+      os << "Match succeeds\n";
+    } else if (matchLog[i].kind == MatchLog::FAIL) {
+      os << "Subject:\n";
+      if (i == 0) {
+        printSortedConfigurationToFile(
+            subject, (block *)matchLog[i].subject, matchLog[i].sort);
+      } else {
+        auto subjectSort
+            = debug_print_term((block *)matchLog[i].subject, matchLog[i].sort);
+        auto strSubjectSort = std::string(subjectSort->data, len(subjectSort));
+        fprintf(subject, "%s\n", strSubjectSort.c_str());
+      }
+      fflush(subject);
+      kllvm::printKORE(os, definitionPath, subjectFilename, false, true);
+      os << "does not match pattern: \n";
+      fprintf(pattern, "%s\n", matchLog[i].pattern);
+      fflush(pattern);
+      kllvm::printKORE(os, definitionPath, patternFilename, false, true);
+    } else if (matchLog[i].kind == MatchLog::FUNCTION) {
+      os << matchLog[i].debugName << "(";
+
+      for (int j = 0; j < matchLog[i].args.size(); j += 2) {
+        auto typeName = reinterpret_cast<char *>(matchLog[i].args[j + 1]);
+        printValueOfType(os, definitionPath, matchLog[i].args[j], typeName);
+        if (j + 2 != matchLog[i].args.size())
+          os << ", ";
+      }
+      os << ") => " << *reinterpret_cast<bool *>(matchLog[i].result) << "\n";
+    }
+  }
+
+  close(sf);
+  remove(subjectFilename);
+
+  close(pf);
+  remove(patternFilename);
+}
+
+void printValueOfType(
+    std::ostream &os, std::string definitionPath, void *value,
+    std::string type) {
+  if (type.compare("%mpz*") == 0) {
+    os << reinterpret_cast<mpz_ptr>(value);
+  } else if (type.compare("%block*") == 0) {
+    if ((((uintptr_t)value) & 3) == 1) {
+      char subjectFilename[15] = "pattern_XXXXXX";
+      int sf = mkstemp(subjectFilename);
+      FILE *pattern = fdopen(sf, "w");
+      string *s = printConfigurationToString(reinterpret_cast<block *>(value));
+      auto strSubjectSort = std::string(s->data, len(s));
+      fprintf(pattern, "%s", strSubjectSort.c_str());
+      fflush(pattern);
+      kllvm::printKORE(os, definitionPath, subjectFilename, false, true);
+      close(sf);
+      remove(subjectFilename);
+    } else if ((((uintptr_t)value) & 1) == 0) {
+      auto s = reinterpret_cast<string *>(value);
+      os << std::string(s->data, len(s));
+    } else {
+      os << "Error: " << type << " not implemented!";
+    }
+  } else if (type.compare("%floating*") == 0) {
+    os << floatToString(reinterpret_cast<floating *>(value));
+  } else if (type.compare("i1") == 0) {
+    os << *reinterpret_cast<bool *>(value);
+  } else {
+    os << "Error: " << type << " not implemented!";
+  }
 }

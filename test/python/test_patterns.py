@@ -23,10 +23,12 @@ class TestPatterns(unittest.TestCase):
 
         pat.add_argument(kllvm.ast.CompositePattern("X"))
         self.assertEqual(str(pat), "ABC{}(X{}())")
+        self.assertEqual(str(pat.arguments[0]), "X{}()")
 
         pat.add_argument(kllvm.ast.VariablePattern(
             "Z", kllvm.ast.CompositeSort("S")))
         self.assertEqual(str(pat), "ABC{}(X{}(),Z : S{})")
+        self.assertEqual(str(pat.arguments[1]), "Z : S{}")
 
         subbed = pat.substitute({"Z": kllvm.ast.CompositePattern("Target")})
         self.assertEqual(str(subbed), "ABC{}(X{}(),Target{}())")
