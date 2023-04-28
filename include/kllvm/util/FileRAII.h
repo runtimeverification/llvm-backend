@@ -11,8 +11,8 @@ private:
   std::ofstream *temp_cpp_file = nullptr;
 
 public:
-  FileRAII(char *template_name) {
-    temp_filename = template_name;
+  FileRAII(std::string template_name) {
+    temp_filename = (char*)template_name.c_str();
     temp_fd = mkstemp(temp_filename);
 
     if (temp_fd == -1) {
@@ -36,6 +36,8 @@ public:
   }
 
   int getTempFd() { return temp_fd; }
+
+  std::string getFilename() { return temp_filename; }
 
   FILE *getFILE(char const *mode = "r") {
     if (!temp_c_file) {
