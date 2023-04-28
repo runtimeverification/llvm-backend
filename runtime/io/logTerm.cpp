@@ -1,11 +1,11 @@
-#include "kllvm/util/FileRAII.h"
-#include "runtime/header.h"
-
 #include <kllvm/printer/printer.h>
+#include <unistd.h>
 
 #include <cstdio>
 #include <iostream>
-#include <unistd.h>
+
+#include "kllvm/util/FileRAII.h"
+#include "runtime/header.h"
 
 static block *dotK = leaf_block(getTagForSymbolName("dotk{}"));
 
@@ -32,8 +32,8 @@ SortK hook_IO_traceTerm(block *term) {
   printSortedConfigurationToFile(fp, term, "SortKItem{}");
   fflush(fp);
 
-  kllvm::printKORE(std::cerr, &kompiled_directory, temp_file.getFilename(),
-                   false, true);
+  kllvm::printKORE(
+      std::cerr, &kompiled_directory, temp_file.getFilename(), false, true);
 
   return dotK;
 }

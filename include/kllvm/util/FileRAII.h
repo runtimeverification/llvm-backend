@@ -12,7 +12,7 @@ private:
 
 public:
   FileRAII(std::string template_name) {
-    temp_filename = (char*)template_name.c_str();
+    temp_filename = (char *)template_name.c_str();
     temp_fd = mkstemp(temp_filename);
 
     if (temp_fd == -1) {

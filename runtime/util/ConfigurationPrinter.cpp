@@ -326,12 +326,12 @@ extern "C" void printMatchResult(
       }
       fflush(subject);
       kllvm::printKORE(
-        os, definitionPath, subject_raii.getFilename(), false, true);
+          os, definitionPath, subject_raii.getFilename(), false, true);
       os << "does not match pattern: \n";
       fprintf(pattern, "%s\n", matchLog[i].pattern);
       fflush(pattern);
       kllvm::printKORE(
-        os, definitionPath, pattern_raii.getFilename(), false, true);
+          os, definitionPath, pattern_raii.getFilename(), false, true);
     } else if (matchLog[i].kind == MatchLog::FUNCTION) {
       os << matchLog[i].debugName << "(";
 

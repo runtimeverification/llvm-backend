@@ -1,7 +1,7 @@
 #include "kllvm/ast/AST.h"
-#include "kllvm/util/FileRAII.h"
 #include "kllvm/parser/KOREParser.h"
 #include "kllvm/parser/KOREScanner.h"
+#include "kllvm/util/FileRAII.h"
 
 #include <cstdio>
 #include <cstdlib>
