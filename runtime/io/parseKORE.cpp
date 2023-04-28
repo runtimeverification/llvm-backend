@@ -9,14 +9,14 @@ static block *dotK = leaf_block(getTagForSymbolName("dotk{}"));
 
 block *hook_KREFLECTION_parseKORE(SortString kore) {
   block *parsed = dotK;
-  char filename[17] = "parseKORE_XXXXXX";
+  auto temp_file = FileRAII("parseKORE_XXXXXX");
 
-  int fd = FileRAII(filename).getTempFd();
+  int fd = temp_file.getTempFd();
 
   bool failed = write(fd, kore->data, len(kore)) == -1;
 
   if (!failed) {
-    parsed = parseConfiguration(filename);
+    parsed = parseConfiguration(temp_file.getFilename().c_str());
   }
 
   return parsed;

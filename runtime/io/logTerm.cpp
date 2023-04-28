@@ -23,8 +23,8 @@ SortKItem hook_IO_logTerm(SortString path, SortKItem term) {
 }
 
 SortK hook_IO_traceTerm(block *term) {
-  char filename[17] = "traceKORE_XXXXXX";
-  auto fp = FileRAII(filename).getFILE("w");
+  auto temp_file = FileRAII("traceKORE_XXXXXX");
+  auto fp = temp_file.getFILE("w");
 
   // Ensure that the term is injected into KItem correctly; if we don't do this
   // then the unparsed KORE ends up with a (null) in it which breaks the
@@ -32,7 +32,8 @@ SortK hook_IO_traceTerm(block *term) {
   printSortedConfigurationToFile(fp, term, "SortKItem{}");
   fflush(fp);
 
-  kllvm::printKORE(std::cerr, &kompiled_directory, filename, false, true);
+  kllvm::printKORE(std::cerr, &kompiled_directory, temp_file.getFilename(),
+                   false, true);
 
   return dotK;
 }

@@ -13,11 +13,11 @@ namespace kllvm {
 namespace parser {
 
 std::unique_ptr<KOREParser> KOREParser::from_string(std::string text) {
-  char temp_file_name[] = "tmp.parse.XXXXXX";
-  auto os =  FileRAII(temp_file_name).getOFStream();
+  auto temp_file = FileRAII("tmp.parse.XXXXXX");
+  auto os = temp_file.getOFStream();
   *os << text;
 
-  auto parser = std::make_unique<KOREParser>(temp_file_name);
+  auto parser = std::make_unique<KOREParser>(temp_file.getFilename());
   return parser;
 }
 
