@@ -1,5 +1,5 @@
-#include "kllvm/ast/AST.h"
 #include "kllvm/parser/KOREParser.h"
+#include "kllvm/ast/AST.h"
 #include "kllvm/parser/KOREScanner.h"
 #include "kllvm/util/FileRAII.h"
 
