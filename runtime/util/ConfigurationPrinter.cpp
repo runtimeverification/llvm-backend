@@ -305,10 +305,10 @@ void *termToKorePattern(block *subject) {
 extern "C" void printMatchResult(
     std::ostream &os, MatchLog *matchLog, size_t logSize,
     const std::string &definitionPath) {
-  char subjectFilename[15] = "subject_XXXXXX";
-  auto subject = FileRAII(subjectFilename).getFILE();
-  char patternFilename[15] = "pattern_XXXXXX";
-  auto pattern = FileRAII(patternFilename).getFILE();
+  auto subject_raii = FileRAII("subject_XXXXXX");
+  auto subject = subject_raii.getFILE("w");
+  auto pattern_raii = FileRAII("pattern_XXXXXX");
+  auto pattern = pattern_raii.getFILE("w");
 
   for (int i = 0; i < logSize; i++) {
     if (matchLog[i].kind == MatchLog::SUCCESS) {
@@ -325,11 +325,13 @@ extern "C" void printMatchResult(
         fprintf(subject, "%s\n", strSubjectSort.c_str());
       }
       fflush(subject);
-      kllvm::printKORE(os, definitionPath, subjectFilename, false, true);
+      kllvm::printKORE(
+        os, definitionPath, subject_raii.getFilename(), false, true);
       os << "does not match pattern: \n";
       fprintf(pattern, "%s\n", matchLog[i].pattern);
       fflush(pattern);
-      kllvm::printKORE(os, definitionPath, patternFilename, false, true);
+      kllvm::printKORE(
+        os, definitionPath, pattern_raii.getFilename(), false, true);
     } else if (matchLog[i].kind == MatchLog::FUNCTION) {
       os << matchLog[i].debugName << "(";
 
@@ -351,13 +353,13 @@ void printValueOfType(
     os << reinterpret_cast<mpz_ptr>(value);
   } else if (type.compare("%block*") == 0) {
     if ((((uintptr_t)value) & 3) == 1) {
-      char subjectFilename[15] = "subject_XXXXXX";
-      auto subject = FileRAII(subjectFilename).getFILE();
+      auto f = FileRAII("subject_XXXXXX");
+      auto subject = f.getFILE("w");
       string *s = printConfigurationToString(reinterpret_cast<block *>(value));
       auto strSubjectSort = std::string(s->data, len(s));
       fprintf(subject, "%s", strSubjectSort.c_str());
       fflush(subject);
-      kllvm::printKORE(os, definitionPath, subjectFilename, false, true);
+      kllvm::printKORE(os, definitionPath, f.getFilename(), false, true);
     } else if ((((uintptr_t)value) & 1) == 0) {
       auto s = reinterpret_cast<string *>(value);
       os << std::string(s->data, len(s));
