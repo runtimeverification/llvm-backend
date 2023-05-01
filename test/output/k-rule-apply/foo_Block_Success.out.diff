@@ -1,0 +1,3 @@
+TEST.testBlock.sc(bar ( )
+) => 1
+Match succeeds

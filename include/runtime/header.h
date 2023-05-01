@@ -21,6 +21,19 @@
 #include <immer/set.hpp>
 #include <unordered_set>
 
+struct MatchLog {
+  enum { SUCCESS = 0, FUNCTION, FAIL } kind;
+
+  char *function;
+  char *debugName;
+  void *result;
+  std::vector<void *> args;
+
+  char *pattern;
+  void *subject;
+  char *sort;
+};
+
 // the actual length is equal to the block header with the gc bits masked out.
 
 #define len(s) len_hdr((s)->h.hdr)
@@ -31,6 +44,7 @@
 #define size_hdr(s) ((((s) >> 32) & 0xff) * 8)
 #define layout(s) layout_hdr((s)->h.hdr)
 #define layout_hdr(s) ((s) >> LAYOUT_OFFSET)
+#define tag(s) tag_hdr((s)->h.hdr)
 #define tag_hdr(s) (s & TAG_MASK)
 #define is_in_young_gen_hdr(s) (!((s)&NOT_YOUNG_OBJECT_BIT))
 #define is_in_old_gen_hdr(s) (((s)&NOT_YOUNG_OBJECT_BIT) && ((s)&AGE_MASK))
@@ -306,5 +320,6 @@ void init_float2(floating *, std::string);
 
 std::string intToStringInBase(mpz_t, uint64_t);
 std::string intToString(mpz_t);
-
+void printValueOfType(
+    std::ostream &os, std::string definitionPath, void *, std::string);
 #endif // RUNTIME_HEADER_H

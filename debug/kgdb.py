@@ -760,8 +760,11 @@ Does not actually take a step if matching succeeds.
                 if entry['kind'] == self.SUCCESS:
                     print('Match succeeds')
                 elif entry['kind'] == self.FUNCTION:
-                    print(entry['debugName'].string("iso-8859-1") + '(', end='')
-                    function = gdb.lookup_global_symbol(entry['function'].string("iso-8859-1")).value().type
+                    debugFunctionName = entry['debugName'].string("iso-8859-1")
+                    functionName = entry['function'].string("iso-8859-1")
+                    print(debugFunctionName + '(', end='')
+                    name = functionName if functionName[:5] == 'hook_' else debugFunctionName
+                    function = gdb.lookup_global_symbol(name).value().type
                     front = gdb.lookup_global_symbol("getMatchFnArgs").value()(entry.address)
                     conn = ""
                     for i in range(len(function.fields())):

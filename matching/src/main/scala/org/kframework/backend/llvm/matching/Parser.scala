@@ -155,6 +155,7 @@ object Parser {
       case Rewrites(s, And(_, Equals(_, _, pat, _), l), And(_, _, r)) => Some((None, B.Rewrites(s, l, r), Some(pat)))
       case Rewrites(s, And(_, l, Equals(_, _, pat, _)), And(_, r, _)) => Some((None, B.Rewrites(s, l, r), Some(pat)))
       case Rewrites(s, And(_, Top(_), l), And(_, _, r)) => Some((None, B.Rewrites(s, l, r), None))
+      case Rewrites(s, And(_, l, Top(_)), And(_, r, _)) => Some((None, B.Rewrites(s, l, r), None))
       case Rewrites(s, And(_, Not(_, _), And(_, Equals(_, _, pat, _), l)), And(_, _, r)) => Some((None, B.Rewrites(s, l, r), Some(pat)))
       case Rewrites(s, And(_, Not(_, _), And(_, Top(_), l)), And(_, _, r)) => Some((None, B.Rewrites(s, l, r), None))
       case _ => None

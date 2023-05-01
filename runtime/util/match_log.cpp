@@ -8,21 +8,13 @@ extern "C" void *getStderr(void) {
   return stderr;
 }
 
-struct MatchLog {
-  enum { SUCCESS = 0, FUNCTION, FAIL } kind;
-
-  char *function;
-  char *debugName;
-  void *result;
-  std::vector<void *> args;
-
-  char *pattern;
-  void *subject;
-  char *sort;
-};
-
 static std::vector<MatchLog> matchLog;
 
+void **getMatchFnArgs(MatchLog *log) {
+  return &log->args[0];
+}
+
+extern "C" {
 void resetMatchReason(void) {
   matchLog.clear();
 }
@@ -31,15 +23,9 @@ MatchLog *getMatchLog(void) {
   return &matchLog[0];
 }
 
-void **getMatchFnArgs(MatchLog *log) {
-  return &log->args[0];
-}
-
 size_t getMatchLogSize(void) {
   return matchLog.size();
 }
-
-extern "C" {
 
 void addMatchSuccess(void) {
   matchLog.push_back(
