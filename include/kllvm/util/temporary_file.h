@@ -3,25 +3,24 @@
 #include <iostream>
 #include <unistd.h>
 
-class FileRAII {
+class temporary_file {
 private:
   int temp_fd;
-  char *temp_filename = nullptr;
+  std::string temp_filename;
   FILE *temp_c_file = nullptr;
   std::ofstream *temp_cpp_file = nullptr;
 
 public:
-  FileRAII(std::string template_name) {
-    temp_filename = (char *)template_name.c_str();
-    temp_fd = mkstemp(temp_filename);
+  temporary_file(std::string template_name) {
+    temp_fd = mkstemp(template_name.data());
+    temp_filename = template_name;
 
     if (temp_fd == -1) {
-      std::perror("Could not create temporary file: ");
-      std::exit(1);
+      std::runtime_error("Could not create temporary file!");
     }
   }
 
-  ~FileRAII() {
+  ~temporary_file() {
     if (temp_cpp_file != nullptr) {
       temp_cpp_file->close();
       delete temp_cpp_file;
@@ -32,7 +31,7 @@ public:
     }
 
     close(temp_fd);
-    remove(temp_filename);
+    remove(temp_filename.data());
   }
 
   int getTempFd() { return temp_fd; }

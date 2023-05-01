@@ -1,7 +1,7 @@
 #include "kllvm/parser/KOREParser.h"
 #include "kllvm/ast/AST.h"
 #include "kllvm/parser/KOREScanner.h"
-#include "kllvm/util/FileRAII.h"
+#include "kllvm/util/temporary_file.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -13,7 +13,7 @@ namespace kllvm {
 namespace parser {
 
 std::unique_ptr<KOREParser> KOREParser::from_string(std::string text) {
-  auto temp_file = FileRAII("tmp.parse.XXXXXX");
+  auto temp_file = temporary_file("tmp.parse.XXXXXX");
   auto os = temp_file.getOFStream();
   *os << text;
 

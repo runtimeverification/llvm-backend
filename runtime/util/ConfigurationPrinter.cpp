@@ -14,7 +14,7 @@
 #include <vector>
 
 #include <kllvm/parser/KOREParser.h>
-#include <kllvm/util/FileRAII.h>
+#include <kllvm/util/temporary_file.h>
 
 #include "runtime/alloc.h"
 #include "runtime/header.h"
@@ -305,9 +305,9 @@ void *termToKorePattern(block *subject) {
 extern "C" void printMatchResult(
     std::ostream &os, MatchLog *matchLog, size_t logSize,
     const std::string &definitionPath) {
-  auto subject_raii = FileRAII("subject_XXXXXX");
+  auto subject_raii = temporary_file("subject_XXXXXX");
   auto subject = subject_raii.getFILE("w");
-  auto pattern_raii = FileRAII("pattern_XXXXXX");
+  auto pattern_raii = temporary_file("pattern_XXXXXX");
   auto pattern = pattern_raii.getFILE("w");
 
   for (int i = 0; i < logSize; i++) {
@@ -353,7 +353,7 @@ void printValueOfType(
     os << reinterpret_cast<mpz_ptr>(value);
   } else if (type.compare("%block*") == 0) {
     if ((((uintptr_t)value) & 3) == 1) {
-      auto f = FileRAII("subject_XXXXXX");
+      auto f = temporary_file("subject_XXXXXX");
       auto subject = f.getFILE("w");
       string *s = printConfigurationToString(reinterpret_cast<block *>(value));
       auto strSubjectSort = std::string(s->data, len(s));

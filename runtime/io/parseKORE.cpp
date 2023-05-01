@@ -1,7 +1,7 @@
 #include <cstdio>
 #include <unistd.h>
 
-#include "kllvm/util/FileRAII.h"
+#include "kllvm/util/temporary_file.h"
 #include "runtime/header.h"
 
 extern "C" {
@@ -9,7 +9,7 @@ static block *dotK = leaf_block(getTagForSymbolName("dotk{}"));
 
 block *hook_KREFLECTION_parseKORE(SortString kore) {
   block *parsed = dotK;
-  auto temp_file = FileRAII("parseKORE_XXXXXX");
+  auto temp_file = temporary_file("parseKORE_XXXXXX");
 
   int fd = temp_file.getTempFd();
 

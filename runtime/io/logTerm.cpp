@@ -4,7 +4,7 @@
 #include <cstdio>
 #include <iostream>
 
-#include "kllvm/util/FileRAII.h"
+#include "kllvm/util/temporary_file.h"
 #include "runtime/header.h"
 
 static block *dotK = leaf_block(getTagForSymbolName("dotk{}"));
@@ -23,7 +23,7 @@ SortKItem hook_IO_logTerm(SortString path, SortKItem term) {
 }
 
 SortK hook_IO_traceTerm(block *term) {
-  auto temp_file = FileRAII("traceKORE_XXXXXX");
+  auto temp_file = temporary_file("traceKORE_XXXXXX");
   auto fp = temp_file.getFILE("w");
 
   // Ensure that the term is injected into KItem correctly; if we don't do this
