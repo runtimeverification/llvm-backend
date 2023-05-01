@@ -1264,6 +1264,11 @@ bool KOREAxiomDeclaration::isTopAxiom() {
   return false;
 }
 
+/*
+ * rhs(\implies(_, \equals(_, \and(X, _)))) = X
+ * rhs(\equals(_, X)) = X
+ * rhs(\rewrites(_, \and(X, Y))) = if X is a builtin then X else Y
+ */
 KOREPattern *KOREAxiomDeclaration::getRightHandSide() const {
   if (auto top = dynamic_cast<KORECompositePattern *>(pattern.get())) {
     if (top->getConstructor()->getName() == "\\implies"
@@ -1307,6 +1312,19 @@ KOREPattern *KOREAxiomDeclaration::getRightHandSide() const {
   abort();
 }
 
+/**
+ * requires(\implies(\and(\not(_), \and(\top(), _), _), _)) = nullptr
+ * requires(\implies(\and(\not(_), \and(\equals(X, _), _)), _)) = X
+ * requires(\implies(\and(\top(), _), _)) = nullptr
+ * requires(\implies(\and(\equals(X, _), _), _)) = X
+ * requires(\equals(_, _)) = nullptr
+ * requires(\rewrites(\and(\equals(X, _), _), _)) = X
+ * requires(\rewrites(\and(\top(), _), _)) = nullptr
+ * requires(\rewrites(\and(\not(_), \and(\equals(X, _), _)), _) = X
+ * requires(\rewrites(\and(\not(_), \and(\top(), _)), _) = nullptr
+ * requires(\rewrites(\and(_, \equals(X, _)), _)) = X
+ * requires(\rewrites(\and(_, \top()), _)) = nullptr
+ */
 KOREPattern *KOREAxiomDeclaration::getRequires() const {
   if (auto top = dynamic_cast<KORECompositePattern *>(pattern.get())) {
     if (top->getConstructor()->getName() == "\\implies"
