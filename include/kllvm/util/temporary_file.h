@@ -40,10 +40,10 @@ public:
     return temp_c_file.get();
   }
 
-  std::ofstream *ofstream() {
+  std::ofstream &ofstream() {
     if (!temp_cpp_file) {
       temp_cpp_file = std::ofstream(temp_filename);
     }
-    return &temp_cpp_file.value();
+    return temp_cpp_file.value();
   }
 };

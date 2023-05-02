@@ -321,12 +321,12 @@ extern "C" void printMatchResult(
         auto subjectSort
             = debug_print_term((block *)matchLog[i].subject, matchLog[i].sort);
         auto strSubjectSort = std::string(subjectSort->data, len(subjectSort));
-        *subject_file.ofstream() << strSubjectSort << std::endl;
+        subject_file.ofstream() << strSubjectSort << std::endl;
       }
       kllvm::printKORE(
           os, definitionPath, subject_file.filename(), false, true);
       os << "does not match pattern: \n";
-      *pattern_file.ofstream() << matchLog[i].pattern << std::endl;
+      pattern_file.ofstream() << matchLog[i].pattern << std::endl;
       kllvm::printKORE(
           os, definitionPath, pattern_file.filename(), false, true);
     } else if (matchLog[i].kind == MatchLog::FUNCTION) {
@@ -352,7 +352,7 @@ void printValueOfType(
     if ((((uintptr_t)value) & 3) == 1) {
       auto f = temporary_file("subject_XXXXXX");
       string *s = printConfigurationToString(reinterpret_cast<block *>(value));
-      *f.ofstream() << std::string(s->data, len(s)) << std::endl;
+      f.ofstream() << std::string(s->data, len(s)) << std::endl;
       kllvm::printKORE(os, definitionPath, f.filename(), false, true);
     } else if ((((uintptr_t)value) & 1) == 0) {
       auto s = reinterpret_cast<string *>(value);

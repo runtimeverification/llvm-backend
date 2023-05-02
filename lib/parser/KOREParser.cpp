@@ -14,8 +14,8 @@ namespace parser {
 
 std::unique_ptr<KOREParser> KOREParser::from_string(std::string text) {
   auto temp_file = temporary_file("tmp.parse.XXXXXX");
-  auto os = temp_file.ofstream();
-  *os << text;
+  auto &os = temp_file.ofstream();
+  os << text;
 
   auto parser = std::make_unique<KOREParser>(temp_file.filename());
   return parser;
