@@ -305,10 +305,9 @@ void *termToKorePattern(block *subject) {
 extern "C" void printMatchResult(
     std::ostream &os, MatchLog *matchLog, size_t logSize,
     const std::string &definitionPath) {
-  auto subject_raii = temporary_file("subject_XXXXXX");
-  auto subject = subject_raii.getFILE("w");
-  auto pattern_raii = temporary_file("pattern_XXXXXX");
-  auto pattern = pattern_raii.getFILE("w");
+  auto subject_file = temporary_file("subject_XXXXXX");
+  auto subject = subject_file.file_pointer("w");
+  auto pattern_file = temporary_file("pattern_XXXXXX");
 
   for (int i = 0; i < logSize; i++) {
     if (matchLog[i].kind == MatchLog::SUCCESS) {
@@ -322,16 +321,14 @@ extern "C" void printMatchResult(
         auto subjectSort
             = debug_print_term((block *)matchLog[i].subject, matchLog[i].sort);
         auto strSubjectSort = std::string(subjectSort->data, len(subjectSort));
-        fprintf(subject, "%s\n", strSubjectSort.c_str());
+        *subject_file.ofstream() << strSubjectSort << std::endl;
       }
-      fflush(subject);
       kllvm::printKORE(
-          os, definitionPath, subject_raii.getFilename(), false, true);
+          os, definitionPath, subject_file.filename(), false, true);
       os << "does not match pattern: \n";
-      fprintf(pattern, "%s\n", matchLog[i].pattern);
-      fflush(pattern);
+      *pattern_file.ofstream() << matchLog[i].pattern << std::endl;
       kllvm::printKORE(
-          os, definitionPath, pattern_raii.getFilename(), false, true);
+          os, definitionPath, pattern_file.filename(), false, true);
     } else if (matchLog[i].kind == MatchLog::FUNCTION) {
       os << matchLog[i].debugName << "(";
 
@@ -354,12 +351,9 @@ void printValueOfType(
   } else if (type.compare("%block*") == 0) {
     if ((((uintptr_t)value) & 3) == 1) {
       auto f = temporary_file("subject_XXXXXX");
-      auto subject = f.getFILE("w");
       string *s = printConfigurationToString(reinterpret_cast<block *>(value));
-      auto strSubjectSort = std::string(s->data, len(s));
-      fprintf(subject, "%s", strSubjectSort.c_str());
-      fflush(subject);
-      kllvm::printKORE(os, definitionPath, f.getFilename(), false, true);
+      *f.ofstream() << std::string(s->data, len(s)) << std::endl;
+      kllvm::printKORE(os, definitionPath, f.filename(), false, true);
     } else if ((((uintptr_t)value) & 1) == 0) {
       auto s = reinterpret_cast<string *>(value);
       os << std::string(s->data, len(s));

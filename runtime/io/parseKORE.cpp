@@ -11,12 +11,12 @@ block *hook_KREFLECTION_parseKORE(SortString kore) {
   block *parsed = dotK;
   auto temp_file = temporary_file("parseKORE_XXXXXX");
 
-  int fd = temp_file.getTempFd();
+  int fd = temp_file.descriptor();
 
   bool failed = write(fd, kore->data, len(kore)) == -1;
 
   if (!failed) {
-    parsed = parseConfiguration(temp_file.getFilename().c_str());
+    parsed = parseConfiguration(temp_file.filename().c_str());
   }
 
   return parsed;
