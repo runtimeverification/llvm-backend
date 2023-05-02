@@ -1,11 +1,12 @@
 #include <cstdlib>
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <memory>
 #include <optional>
 #include <unistd.h>
 
-typedef std::unique_ptr<FILE, decltype(&fclose)> temp_c_file_type;
+typedef std::unique_ptr<FILE, int (*)(FILE *)> temp_c_file_type;
 
 class temporary_file {
 private:
@@ -16,31 +17,32 @@ private:
 
 public:
   temporary_file(std::string template_name)
-      : temp_c_file(nullptr, &fclose) {
-    temp_fd = mkstemp(template_name.data());
-    temp_filename = template_name;
-
+      : temp_fd(mkstemp(template_name.data()))
+      , temp_filename(template_name)
+      , temp_c_file(nullptr, &fclose) {
     if (temp_fd == -1) {
       std::runtime_error("Could not create temporary file!");
     }
   }
 
   ~temporary_file() {
-    close(temp_fd);
-    remove(temp_filename.data());
+    if (!std::filesystem::remove(temp_filename)) {
+      std::runtime_error("Could not delete temporary file!");
+    }
   }
 
-  int descriptor() { return temp_fd; }
+  int descriptor() const { return temp_fd; }
 
-  std::string filename() { return temp_filename; }
+  std::string const &filename() const { return temp_filename; }
 
   FILE *file_pointer(std::string const &mode = "r") {
     if (!temp_c_file.get()) {
-      temp_c_file = temp_c_file_type(fdopen(temp_fd, mode.data()), &fclose);
-    }
-
-    if (!temp_c_file.get()) {
-      std::runtime_error("Could not open file " + temp_filename);
+      auto f = fdopen(temp_fd, mode.data());
+      if (f) {
+        temp_c_file_type(f, [](std::FILE *p) { return fclose(p); });
+      } else {
+        std::runtime_error("Could not open file " + temp_filename);
+      }
     }
 
     return temp_c_file.get();
