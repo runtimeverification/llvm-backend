@@ -15,7 +15,8 @@ private:
   std::optional<std::ofstream> temp_cpp_file;
 
 public:
-  temporary_file(std::string template_name) : temp_c_file(nullptr, &fclose) {
+  temporary_file(std::string template_name)
+      : temp_c_file(nullptr, &fclose) {
     temp_fd = mkstemp(template_name.data());
     temp_filename = template_name;
 
