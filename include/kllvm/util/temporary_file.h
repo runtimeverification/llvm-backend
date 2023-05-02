@@ -38,6 +38,11 @@ public:
     if (!temp_c_file.get()) {
       temp_c_file = temp_c_file_type(fdopen(temp_fd, mode.data()), &fclose);
     }
+
+    if (!temp_c_file.get()) {
+      std::runtime_error("Could not open file " + temp_filename);
+    }
+
     return temp_c_file.get();
   }
 
