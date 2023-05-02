@@ -152,14 +152,12 @@ object Parser {
 
   private def splitTop(topPattern: Pattern): Option[(Option[SymbolOrAlias], Rewrites, Option[Pattern])] = {
     topPattern match {
-      case And(_, Equals(_, _, pat, _), And(_, _, rw @ Rewrites(_, _, _))) => Some((None, rw, Some(pat)))
-      case And(_, Top(_), And(_, _, rw @ Rewrites(_, _, _))) => Some((None, rw, None))
       case Rewrites(s, And(_, Equals(_, _, pat, _), l), And(_, _, r)) => Some((None, B.Rewrites(s, l, r), Some(pat)))
       case Rewrites(s, And(_, l, Equals(_, _, pat, _)), And(_, r, _)) => Some((None, B.Rewrites(s, l, r), Some(pat)))
       case Rewrites(s, And(_, Top(_), l), And(_, _, r)) => Some((None, B.Rewrites(s, l, r), None))
+      case Rewrites(s, And(_, l, Top(_)), And(_, r, _)) => Some((None, B.Rewrites(s, l, r), None))
       case Rewrites(s, And(_, Not(_, _), And(_, Equals(_, _, pat, _), l)), And(_, _, r)) => Some((None, B.Rewrites(s, l, r), Some(pat)))
       case Rewrites(s, And(_, Not(_, _), And(_, Top(_), l)), And(_, _, r)) => Some((None, B.Rewrites(s, l, r), None))
-      case Implies(_, Bottom(_), p) => splitTop(p)
       case _ => None
     }
   }
@@ -173,14 +171,6 @@ object Parser {
 
   private def splitFunction(topPattern: Pattern): Option[(Option[SymbolOrAlias], Equals, Option[Pattern])] = {
     topPattern match {
-      case Implies(_, Equals(_, _, pat, _), And(_, eq @ Equals(_, _, Application(symbol, _), _), _)) => Some(Some(symbol), eq, Some(pat))
-      case Implies(_, Top(_), And(_, eq @ Equals(_, _, Application(symbol, _), _), _)) => Some(Some(symbol), eq, None)
-      case Implies(_, And(_, Not(_, _), Equals(_, _, pat, _)), And(_, eq @ Equals(_, _, Application(symbol, _), _), _)) => Some(Some(symbol), eq, Some(pat))
-      case Implies(_, And(_, Not(_, _), Top(_)), And(_, eq @ Equals(_, _, Application(symbol, _), _), _)) => Some(Some(symbol), eq, None)
-      case Implies(_, And(_, Top(_), args), And(_, Equals(i, o, Application(symbol, _), rhs), _)) => Some(Some(symbol), B.Equals(i, o, B.Application(symbol, getPatterns(args)), rhs), None)
-      case Implies(_, And(_, Equals(_, _, pat, _), args), And(_, Equals(i, o, Application(symbol, _), rhs), _)) => Some(Some(symbol), B.Equals(i, o, B.Application(symbol, getPatterns(args)), rhs), Some(pat))
-      case Implies(_, And(_, Not(_, _), And(_, Top(_), args)), And(_, Equals(i, o, Application(symbol, _), rhs), _)) => Some(Some(symbol), B.Equals(i, o, B.Application(symbol, getPatterns(args)), rhs), None)
-      case Implies(_, And(_, Not(_, _), And(_, Equals(_, _, pat, _), args)), And(_, Equals(i, o, Application(symbol, _), rhs), _)) => Some(Some(symbol), B.Equals(i, o, B.Application(symbol, getPatterns(args)), rhs), Some(pat))
       case Implies(_, And(_, Equals(_, _, pat, _), args), Equals(i, o, Application(symbol, _), And(_, rhs, _))) => Some(Some(symbol), B.Equals(i, o, B.Application(symbol, getPatterns(args)), rhs), Some(pat))
       case Implies(_, And(_, Not(_, _), And (_, Equals(_, _, pat, _), args)), Equals(i, o, Application(symbol, _), And(_, rhs, _))) => Some(Some(symbol), B.Equals(i, o, B.Application(symbol, getPatterns(args)), rhs), Some(pat))
       case Implies(_, And(_, Not(_, _), And (_, Top(_), args)), Equals(i, o, Application(symbol, _), And(_, rhs, _))) => Some(Some(symbol), B.Equals(i, o, B.Application(symbol, getPatterns(args)), rhs), None)
