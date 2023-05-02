@@ -5,15 +5,17 @@
 #include <optional>
 #include <unistd.h>
 
+typedef std::unique_ptr<FILE, decltype(&fclose)> temp_c_file_type;
+
 class temporary_file {
 private:
   int temp_fd;
   std::string temp_filename;
-  std::unique_ptr<FILE *> temp_c_file;
+  temp_c_file_type temp_c_file;
   std::optional<std::ofstream> temp_cpp_file;
 
 public:
-  temporary_file(std::string template_name) {
+  temporary_file(std::string template_name) : temp_c_file(nullptr, &fclose) {
     temp_fd = mkstemp(template_name.data());
     temp_filename = template_name;
 
@@ -23,10 +25,6 @@ public:
   }
 
   ~temporary_file() {
-    if (temp_c_file) {
-      fclose(*temp_c_file);
-    }
-
     close(temp_fd);
     remove(temp_filename.data());
   }
@@ -36,10 +34,10 @@ public:
   std::string filename() { return temp_filename; }
 
   FILE *file_pointer(std::string const &mode = "r") {
-    if (!temp_c_file) {
-      temp_c_file = std::make_unique<FILE *>(fdopen(temp_fd, mode.data()));
+    if (!temp_c_file.get()) {
+      temp_c_file = temp_c_file_type(fdopen(temp_fd, mode.data()), &fclose);
     }
-    return *temp_c_file;
+    return temp_c_file.get();
   }
 
   std::ofstream *ofstream() {
