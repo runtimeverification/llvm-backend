@@ -472,7 +472,7 @@ public:
         res = res.inserted(x, v);
       } else {
         KLLVM_HOOK_INVALID_ARGUMENT(
-            "Overlapping key ranges in map concatenation");
+            "Overlapping ranges in range map concatenation");
       }
     });
     return res;

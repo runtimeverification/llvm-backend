@@ -212,7 +212,7 @@ public:
   // throw an exception.
   V const &at(T const &x) const {
     if (empty()) {
-      KLLVM_HOOK_INVALID_ARGUMENT("Key not found for map lookup");
+      KLLVM_HOOK_INVALID_ARGUMENT("Key not found for treemap lookup");
     }
     T const &y = root_key();
     if (x < y) {

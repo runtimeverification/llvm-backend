@@ -47,7 +47,7 @@ SortKItem hook_RANGEMAP_lookup_null(SortRangeMap m, SortKItem key) {
 SortKItem hook_RANGEMAP_lookup(SortRangeMap m, SortKItem key) {
   auto res = hook_RANGEMAP_lookup_null(m, key);
   if (!res) {
-    KLLVM_HOOK_INVALID_ARGUMENT("Key not found for map lookup");
+    KLLVM_HOOK_INVALID_ARGUMENT("Key not found for range map lookup");
   }
   return res;
 }
@@ -70,7 +70,7 @@ SortRange hook_RANGEMAP_find_range(SortRangeMap m, SortKItem key) {
     ptr->end = val.value().first.end();
     return (SortRange)ptr;
   } else {
-    KLLVM_HOOK_INVALID_ARGUMENT("Key not found for map lookup");
+    KLLVM_HOOK_INVALID_ARGUMENT("Key not found for range map lookup");
   }
 }
 
@@ -144,7 +144,7 @@ list hook_RANGEMAP_values(SortRangeMap m) {
 
 SortKItem hook_RANGEMAP_choice(SortRangeMap m) {
   if (m->empty()) {
-    KLLVM_HOOK_INVALID_ARGUMENT("Cannot choose from an empty map");
+    KLLVM_HOOK_INVALID_ARGUMENT("Cannot choose from an empty range map");
   }
   block *elem = m->treemap().root_data().first.start();
   return (SortKItem)elem;
@@ -152,7 +152,7 @@ SortKItem hook_RANGEMAP_choice(SortRangeMap m) {
 
 SortKItem hook_RANGEMAP_choiceRng(SortRangeMap m) {
   if (m->empty()) {
-    KLLVM_HOOK_INVALID_ARGUMENT("Cannot choose from an empty map");
+    KLLVM_HOOK_INVALID_ARGUMENT("Cannot choose from an empty range map");
   }
   auto pair = m->treemap().root_data();
   range *ptr = (range *)koreAlloc(sizeof(range));
