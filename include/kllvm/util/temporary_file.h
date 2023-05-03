@@ -5,21 +5,22 @@
 #include <memory>
 #include <optional>
 #include <unistd.h>
-
-typedef std::unique_ptr<FILE, int (*)(FILE *)> temp_c_file_type;
-
+struct deleter {
+    void operator()(FILE *fp) const {
+        std::fclose(fp);
+    }
+};
 class temporary_file {
 private:
   int temp_fd;
   std::string temp_filename;
-  temp_c_file_type temp_c_file;
+  std::unique_ptr<FILE, deleter> temp_c_file;
   std::optional<std::ofstream> temp_cpp_file;
 
 public:
   temporary_file(std::string template_name)
       : temp_fd(mkstemp(template_name.data()))
-      , temp_filename(template_name)
-      , temp_c_file(nullptr, &fclose) {
+      , temp_filename(template_name) {
     if (temp_fd == -1) {
       std::runtime_error("Could not create temporary file!");
     }
@@ -39,7 +40,7 @@ public:
     if (!temp_c_file.get()) {
       auto f = fdopen(temp_fd, mode.data());
       if (f) {
-        temp_c_file_type(f, [](std::FILE *p) { return fclose(p); });
+        temp_c_file = std::unique_ptr<FILE, deleter>(f);
       } else {
         std::runtime_error("Could not open file " + temp_filename);
       }
