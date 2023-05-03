@@ -146,8 +146,7 @@ SortKItem hook_RANGEMAP_choice(SortRangeMap m) {
   if (m->empty()) {
     KLLVM_HOOK_INVALID_ARGUMENT("Cannot choose from an empty map");
   }
-  auto iter = rng_map::ConstRangeMapIterator<KElem, KElem>(*m);
-  block *elem = iter->first.start();
+  block *elem = m->treemap().root_data().first.start();
   return (SortKItem)elem;
 }
 
@@ -155,11 +154,11 @@ SortKItem hook_RANGEMAP_choiceRng(SortRangeMap m) {
   if (m->empty()) {
     KLLVM_HOOK_INVALID_ARGUMENT("Cannot choose from an empty map");
   }
-  auto iter = rng_map::ConstRangeMapIterator<KElem, KElem>(*m);
+  auto pair = m->treemap().root_data();
   range *ptr = (range *)koreAlloc(sizeof(range));
   ptr->h = range_header();
-  ptr->start = iter->first.start();
-  ptr->end = iter->first.end();
+  ptr->start = pair.first.start();
+  ptr->end = pair.first.end();
   return (SortRange)ptr;
 }
 
