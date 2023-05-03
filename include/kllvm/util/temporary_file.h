@@ -6,9 +6,7 @@
 #include <optional>
 #include <unistd.h>
 struct deleter {
-    void operator()(FILE *fp) const {
-        std::fclose(fp);
-    }
+  void operator()(FILE *fp) const { std::fclose(fp); }
 };
 class temporary_file {
 private:
