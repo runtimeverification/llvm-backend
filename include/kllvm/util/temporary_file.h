@@ -25,9 +25,8 @@ public:
   }
 
   ~temporary_file() {
-    if (!std::filesystem::remove(temp_filename)) {
-      std::runtime_error("Could not delete temporary file!");
-    }
+    close(temp_fd);
+    remove(temp_filename.data());
   }
 
   int descriptor() const { return temp_fd; }
