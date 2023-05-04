@@ -1,5 +1,3 @@
-#include <kllvm/util/temporary_file.h>
-
 #include <llvm/ADT/DenseMapInfo.h>
 #include <llvm/ADT/StringRef.h>
 #include <llvm/Support/CommandLine.h>
@@ -106,7 +104,12 @@ int main(int argc, char **argv) {
     if (OutputFilename == "-") {
       return stdout;
     } else {
-      return temporary_file(temp_file_name).file_pointer("wb");
+      if (mkstemp(temp_file_name) == -1) {
+        std::perror("Could not create temporary file: ");
+        std::exit(1);
+      }
+
+      return check_fopen(temp_file_name, "wb");
     }
   }();
 
