@@ -14,7 +14,6 @@
 #include <vector>
 
 #include <kllvm/parser/KOREParser.h>
-#include <kllvm/util/temporary_file.h>
 
 #include "runtime/alloc.h"
 #include "runtime/header.h"
@@ -305,9 +304,13 @@ void *termToKorePattern(block *subject) {
 extern "C" void printMatchResult(
     std::ostream &os, MatchLog *matchLog, size_t logSize,
     const std::string &definitionPath) {
-  auto subject_file = temporary_file("subject_XXXXXX");
-  auto subject = subject_file.file_pointer("w");
-  auto pattern_file = temporary_file("pattern_XXXXXX");
+  char subjectFilename[15] = "subject_XXXXXX";
+  int sf = mkstemp(subjectFilename);
+  FILE *subject = fdopen(sf, "w");
+
+  char patternFilename[15] = "pattern_XXXXXX";
+  int pf = mkstemp(patternFilename);
+  FILE *pattern = fdopen(pf, "w");
 
   for (int i = 0; i < logSize; i++) {
     if (matchLog[i].kind == MatchLog::SUCCESS) {
@@ -321,14 +324,14 @@ extern "C" void printMatchResult(
         auto subjectSort
             = debug_print_term((block *)matchLog[i].subject, matchLog[i].sort);
         auto strSubjectSort = std::string(subjectSort->data, len(subjectSort));
-        subject_file.ofstream() << strSubjectSort << std::endl;
+        fprintf(subject, "%s\n", strSubjectSort.c_str());
       }
-      kllvm::printKORE(
-          os, definitionPath, subject_file.filename(), false, true);
+      fflush(subject);
+      kllvm::printKORE(os, definitionPath, subjectFilename, false, true);
       os << "does not match pattern: \n";
-      pattern_file.ofstream() << matchLog[i].pattern << std::endl;
-      kllvm::printKORE(
-          os, definitionPath, pattern_file.filename(), false, true);
+      fprintf(pattern, "%s\n", matchLog[i].pattern);
+      fflush(pattern);
+      kllvm::printKORE(os, definitionPath, patternFilename, false, true);
     } else if (matchLog[i].kind == MatchLog::FUNCTION) {
       os << matchLog[i].debugName << "(";
 
@@ -341,6 +344,12 @@ extern "C" void printMatchResult(
       os << ") => " << *reinterpret_cast<bool *>(matchLog[i].result) << "\n";
     }
   }
+
+  close(sf);
+  remove(subjectFilename);
+
+  close(pf);
+  remove(patternFilename);
 }
 
 void printValueOfType(
@@ -350,10 +359,16 @@ void printValueOfType(
     os << reinterpret_cast<mpz_ptr>(value);
   } else if (type.compare("%block*") == 0) {
     if ((((uintptr_t)value) & 3) == 1) {
-      auto f = temporary_file("subject_XXXXXX");
+      char subjectFilename[15] = "pattern_XXXXXX";
+      int sf = mkstemp(subjectFilename);
+      FILE *pattern = fdopen(sf, "w");
       string *s = printConfigurationToString(reinterpret_cast<block *>(value));
-      f.ofstream() << std::string(s->data, len(s)) << std::endl;
-      kllvm::printKORE(os, definitionPath, f.filename(), false, true);
+      auto strSubjectSort = std::string(s->data, len(s));
+      fprintf(pattern, "%s", strSubjectSort.c_str());
+      fflush(pattern);
+      kllvm::printKORE(os, definitionPath, subjectFilename, false, true);
+      close(sf);
+      remove(subjectFilename);
     } else if ((((uintptr_t)value) & 1) == 0) {
       auto s = reinterpret_cast<string *>(value);
       os << std::string(s->data, len(s));
