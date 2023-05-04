@@ -1,4 +1,6 @@
+#include <cerrno>
 #include <cstdlib>
+#include <cstring>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -23,7 +25,7 @@ public:
       : temp_fd(mkstemp(template_name.data()))
       , temp_filename(template_name) {
     if (temp_fd == -1) {
-      std::runtime_error("Could not create temporary file!");
+      throw std::runtime_error("Could not create temporary file!");
     }
   }
 
@@ -42,10 +44,9 @@ public:
       if (f) {
         temp_c_file = std::unique_ptr<FILE, deleter>(f);
       } else {
-        auto str = std::stringstream{};
-        str << "Could not open file " << temp_filename;
-        std::perror(str.str().c_str());
-        std::runtime_error(str.str());
+        throw std::runtime_error(
+            "Could not open file " + temp_filename + ": "
+            + std::strerror(errno));
       }
     }
 
