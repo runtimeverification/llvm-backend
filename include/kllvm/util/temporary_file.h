@@ -4,6 +4,7 @@
 #include <iostream>
 #include <memory>
 #include <optional>
+#include <sstream>
 #include <unistd.h>
 
 struct deleter {
