@@ -5,9 +5,11 @@
 #include <memory>
 #include <optional>
 #include <unistd.h>
+
 struct deleter {
   void operator()(FILE *fp) const { std::fclose(fp); }
 };
+
 class temporary_file {
 private:
   int temp_fd;
@@ -34,12 +36,15 @@ public:
   std::string const &filename() const { return temp_filename; }
 
   FILE *file_pointer(std::string const &mode = "r") {
-    if (!temp_c_file.get()) {
+    if (!temp_c_file) {
       auto f = fdopen(temp_fd, mode.data());
       if (f) {
         temp_c_file = std::unique_ptr<FILE, deleter>(f);
       } else {
-        std::runtime_error("Could not open file " + temp_filename);
+        auto str = std::stringstream{};
+        str << "Could not open file " << temp_filename;
+        std::perror(str.str().c_str());
+        std::runtime_error(str.str());
       }
     }
 
