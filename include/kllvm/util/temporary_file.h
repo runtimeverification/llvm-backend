@@ -38,9 +38,10 @@ public:
 
   std::string const &filename() const { return temp_filename; }
 
-  FILE *file_pointer(std::string const &mode = "r") {
+  FILE *file_pointer(bool use_fopen = false, std::string const &mode = "r") {
     if (!temp_c_file) {
-      auto f = fdopen(temp_fd, mode.data());
+      auto f = use_fopen ? fopen(temp_filename.data(), mode.data())
+                         : fdopen(temp_fd, mode.data());
       if (f) {
         temp_c_file = std::unique_ptr<FILE, deleter>(f);
       } else {
@@ -58,5 +59,9 @@ public:
       temp_cpp_file = std::ofstream(temp_filename);
     }
     return temp_cpp_file.value();
+  }
+
+  void rename(std::string new_name) {
+    std::rename(temp_filename.data(), new_name.data());
   }
 };

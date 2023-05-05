@@ -100,16 +100,6 @@ int main(int argc, char **argv) {
     begin_skip_length = 11;
   }
 
-  char temp_file_name[] = "tmp.strip.XXXXXXXXXX";
-
-  std::FILE *output = [&] {
-    if (OutputFilename == "-") {
-      return stdout;
-    } else {
-      return temporary_file(temp_file_name).file_pointer("wb");
-    }
-  }();
-
   auto result_size = file_size - (begin_skip_length + end_skip_length);
   auto buffer = std::vector<uint8_t>(result_size);
 
@@ -120,12 +110,14 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  std::fwrite(buffer.data(), sizeof(uint8_t), result_size, output);
-
-  std::fclose(input);
-
-  if (OutputFilename != "-") {
-    std::fclose(output);
-    std::rename(temp_file_name, OutputFilename.c_str());
+  if (OutputFilename == "-") {
+    std::fwrite(buffer.data(), sizeof(uint8_t), result_size, stdout);
+    std::fclose(input);
+  } else {
+    auto tmp_file = temporary_file("tmp.strip.XXXXXXXXXX");
+    std::fwrite(
+        buffer.data(), sizeof(uint8_t), result_size,
+        tmp_file.file_pointer(false, "wb"));
+    tmp_file.rename(OutputFilename);
   }
 }
