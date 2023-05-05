@@ -187,7 +187,7 @@ if [ "$main" = "static" ]; then
 elif [[ "$main" =~ "python" ]]; then
   # Don't link jemalloc when building a python library; it clashes with the
   # pymalloc implementation that Python expects you to use.
-  all_libraries=("${libraries[@]}" "-lgmp" "-lmpfr" "-lpthread" "-ldl" "-lffi")
+  all_libraries=("${libraries[@]}" "-lgmp" "-lgmpxx" "-lmpfr" "-lpthread" "-ldl" "-lffi")
   flags+=("-fPIC" "-shared" "-I${INCDIR}")
 
   read -r -a python_include_flags <<< "$("${python_cmd}" -m pybind11 --includes)"
@@ -209,11 +209,11 @@ elif [ "$main" = "c" ]; then
 
   # Avoid jemalloc for similar reasons as Python; we don't know who is loading
   # this library so don't want to impose it.
-  all_libraries=("${libraries[@]}" "-lgmp" "-lmpfr" "-lpthread" "-ldl" "-lffi")
+  all_libraries=("${libraries[@]}" "-lgmp" "-lgmpxx" "-lmpfr" "-lpthread" "-ldl" "-lffi")
   flags+=("-fPIC" "-shared" "$start_whole_archive" "$LIBDIR/libkllvmcruntime.a" "$end_whole_archive")
   clangpp_args+=("-o" "${output_file}")
 else
-  all_libraries=("${libraries[@]}" "-lgmp" "-lmpfr" "-lpthread" "-ldl" "-lffi" "-ljemalloc")
+  all_libraries=("${libraries[@]}" "-lgmp" "-lgmpxx" "-lmpfr" "-lpthread" "-ldl" "-lffi" "-ljemalloc")
 fi
 
 if $link; then

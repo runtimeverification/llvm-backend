@@ -48,12 +48,12 @@ std::optional<pretty_print_definition> get_print_data();
  * These declarations are internal to the backend and aren't exposed explicitly
  * through any header files, so we pull them in manually here.
  */
-void *constructInitialConfiguration(const kllvm::KOREPattern *);
 
 extern "C" {
 block *take_steps(int64_t, block *);
 void initStaticObjects(void);
 void freeAllKoreMem(void);
+void *constructInitialConfiguration(const kllvm::KOREPattern *);
 }
 
 extern "C" {

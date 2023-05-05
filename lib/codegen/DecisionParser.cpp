@@ -5,6 +5,8 @@
 
 #include <base64/base64.h>
 
+#include <fmt/format.h>
+
 #include <yaml.h>
 
 #include <llvm/IR/DerivedTypes.h>
@@ -360,10 +362,14 @@ DecisionNode *parseYamlDecisionTreeFromString(
   yaml_parser_t parser;
   yaml_document_t doc;
   yaml_parser_initialize(&parser);
+  yaml_parser_set_encoding(&parser, YAML_UTF8_ENCODING);
   yaml_parser_set_input_string(
       &parser, (unsigned char *)yaml.c_str(), yaml.size());
   yaml_parser_load(&parser, &doc);
   yaml_node_t *root = yaml_document_get_root_node(&doc);
+  if (!root) {
+    throw std::runtime_error("Failed to parse decision tree from YAML string");
+  }
   auto result = DTPreprocessor(syms, sorts, mod, &doc)(root);
   yaml_document_delete(&doc);
   yaml_parser_delete(&parser);
@@ -381,6 +387,10 @@ DecisionNode *parseYamlDecisionTree(
   yaml_parser_set_input_file(&parser, f);
   yaml_parser_load(&parser, &doc);
   yaml_node_t *root = yaml_document_get_root_node(&doc);
+  if (!root) {
+    throw std::runtime_error(
+        fmt::format("Failed to parse decision tree from file: {}", filename));
+  }
   auto result = DTPreprocessor(syms, sorts, mod, &doc)(root);
   yaml_document_delete(&doc);
   yaml_parser_delete(&parser);
@@ -399,6 +409,10 @@ PartialStep parseYamlSpecialDecisionTree(
   yaml_parser_set_input_file(&parser, f);
   yaml_parser_load(&parser, &doc);
   yaml_node_t *root = yaml_document_get_root_node(&doc);
+  if (!root) {
+    throw std::runtime_error(fmt::format(
+        "Failed to parse special decision tree from file: {}", filename));
+  }
   auto pp = DTPreprocessor(syms, sorts, mod, &doc);
   auto dt = pp(pp.get(root, 0));
   auto result = pp.makeResiduals(pp.get(root, 1), dt);

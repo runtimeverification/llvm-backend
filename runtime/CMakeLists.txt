@@ -3,7 +3,6 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/main)
 configure_file(main/main.ll         ${CMAKE_CURRENT_BINARY_DIR}/main  @ONLY)
-configure_file(equality.ll          ${CMAKE_CURRENT_BINARY_DIR}       @ONLY)
 configure_file(finish_rewriting.ll  ${CMAKE_CURRENT_BINARY_DIR}       @ONLY)
 configure_file(fresh.ll             ${CMAKE_CURRENT_BINARY_DIR}       @ONLY)
 configure_file(getTag.ll            ${CMAKE_CURRENT_BINARY_DIR}       @ONLY)
