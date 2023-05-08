@@ -115,9 +115,11 @@ int main(int argc, char **argv) {
     std::fclose(input);
   } else {
     auto tmp_file = temporary_file("tmp.strip.XXXXXXXXXX");
-    std::fwrite(
-        buffer.data(), sizeof(uint8_t), result_size,
-        tmp_file.file_pointer(false, "wb"));
+    auto file_pointer = tmp_file.file_pointer("wb");
+
+    std::fwrite(buffer.data(), sizeof(uint8_t), result_size, file_pointer);
+    std::fflush(file_pointer);
+
     tmp_file.rename(OutputFilename);
   }
 }
