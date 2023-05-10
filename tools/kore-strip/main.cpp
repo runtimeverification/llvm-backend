@@ -1,3 +1,5 @@
+#include <kllvm/util/temporary_file.h>
+
 #include <llvm/ADT/DenseMapInfo.h>
 #include <llvm/ADT/StringRef.h>
 #include <llvm/Support/CommandLine.h>
@@ -98,21 +100,6 @@ int main(int argc, char **argv) {
     begin_skip_length = 11;
   }
 
-  char temp_file_name[] = "tmp.strip.XXXXXXXXXX";
-
-  std::FILE *output = [&] {
-    if (OutputFilename == "-") {
-      return stdout;
-    } else {
-      if (mkstemp(temp_file_name) == -1) {
-        std::perror("Could not create temporary file: ");
-        std::exit(1);
-      }
-
-      return check_fopen(temp_file_name, "wb");
-    }
-  }();
-
   auto result_size = file_size - (begin_skip_length + end_skip_length);
   auto buffer = std::vector<uint8_t>(result_size);
 
@@ -123,12 +110,16 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  std::fwrite(buffer.data(), sizeof(uint8_t), result_size, output);
+  if (OutputFilename == "-") {
+    std::fwrite(buffer.data(), sizeof(uint8_t), result_size, stdout);
+    std::fclose(input);
+  } else {
+    auto tmp_file = temporary_file("tmp.strip.XXXXXXXXXX");
+    auto file_pointer = tmp_file.file_pointer("wb");
 
-  std::fclose(input);
+    std::fwrite(buffer.data(), sizeof(uint8_t), result_size, file_pointer);
+    std::fflush(file_pointer);
 
-  if (OutputFilename != "-") {
-    std::fclose(output);
-    std::rename(temp_file_name, OutputFilename.c_str());
+    tmp_file.rename(OutputFilename);
   }
 }
