@@ -1,7 +1,7 @@
 // RUN: %interpreter
 // RUN: %check-dir-diff
 
-[topCellInitializer{}(LblinitGeneratedTopCell{}()), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/maria/builds/RV/k/k-distribution/tests/regression-new/rangemap-tests-llvm/test.k)")]
+[topCellInitializer{}(LblinitGeneratedTopCell{}()), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/maria/builds/RV/llvm-backend/test/defn/k-files/rangemap-simple.k)")]
 
 module BASIC-K
     sort SortK{} []
@@ -65,7 +65,7 @@ module K
 endmodule
 []
 
-module TEST
+module RANGEMAP-SIMPLE
 
 // imports
   import K []
@@ -101,7 +101,7 @@ module TEST
   symbol Lbl'-LT-'generatedCounter'-GT-'{}(SortInt{}) : SortGeneratedCounterCell{} [functional{}(), constructor{}(), cellName{}("generatedCounter"), priorities{}(), right{}(), terminals{}("101"), left{}(), format{}("%c<generatedCounter>%r%i%n%1%d%n%c</generatedCounter>%r"), injective{}(), cell{}()]
   symbol Lbl'-LT-'generatedTop'-GT-'{}(SortKCell{}, SortGeneratedCounterCell{}) : SortGeneratedTopCell{} [functional{}(), constructor{}(), cellName{}("generatedTop"), priorities{}(), right{}(), terminals{}("1001"), left{}(), format{}("%1"), injective{}(), cell{}(), topcell{}()]
   symbol Lbl'-LT-'generatedTop'-GT-'-fragment{}(SortKCellOpt{}, SortGeneratedCounterCellOpt{}) : SortGeneratedTopCellFragment{} [functional{}(), constructor{}(), cellFragment{}("GeneratedTopCell"), priorities{}(), right{}(), terminals{}("1001"), left{}(), format{}("%c<generatedTop>-fragment%r %1 %2 %c</generatedTop>-fragment%r"), injective{}()]
-  symbol Lbl'-LT-'k'-GT-'{}(SortK{}) : SortKCell{} [functional{}(), constructor{}(), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/maria/builds/RV/k/k-distribution/tests/regression-new/rangemap-tests-llvm/test.k)"), cellName{}("k"), maincell{}(), priorities{}(), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol]"), right{}(), terminals{}("101"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(32,17,32,36)"), left{}(), format{}("%c<k>%r%i%n%1%d%n%c</k>%r"), injective{}(), cell{}(), topcell{}()]
+  symbol Lbl'-LT-'k'-GT-'{}(SortK{}) : SortKCell{} [functional{}(), constructor{}(), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/maria/builds/RV/llvm-backend/test/defn/k-files/rangemap-simple.k)"), cellName{}("k"), maincell{}(), priorities{}(), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol]"), right{}(), terminals{}("101"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(32,17,32,36)"), left{}(), format{}("%c<k>%r%i%n%1%d%n%c</k>%r"), injective{}(), cell{}(), topcell{}()]
   hooked-symbol LblJSON2String'LParUndsRParUnds'JSON'Unds'String'Unds'JSON{}(SortJSON{}) : SortString{} [org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/maria/builds/RV/k/k-distribution/target/release/k/include/kframework/builtin/json.md)"), priorities{}(), right{}(), terminals{}("1101"), klabel{}("JSON2String"), hook{}("JSON.json2string"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(43,23,43,75)"), left{}(), format{}("%cJSON2String%r %c(%r %1 %c)%r"), function{}()]
   symbol LblJSONEntry{}(SortJSONKey{}, SortJSON{}) : SortJSON{} [functional{}(), constructor{}(), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/maria/builds/RV/k/k-distribution/target/release/k/include/kframework/builtin/json.md)"), symbol'Kywd'{}(), priorities{}(), right{}(), terminals{}("010"), klabel{}("JSONEntry"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(25,24,25,73)"), left{}(), format{}("%1 %c:%r %2"), injective{}()]
   symbol LblJSONList{}(SortJSONs{}) : SortJSON{} [functional{}(), constructor{}(), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/maria/builds/RV/k/k-distribution/target/release/k/include/kframework/builtin/json.md)"), symbol'Kywd'{}(), priorities{}(), right{}(), terminals{}("101"), klabel{}("JSONList"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(27,24,27,73)"), left{}(), format{}("%c[%r %1 %c]%r"), injective{}()]
@@ -241,7 +241,7 @@ module TEST
   symbol Lblproject'Coln'Set{}(SortK{}) : SortSet{} [priorities{}(), right{}(), terminals{}("1101"), projection{}(), left{}(), format{}("%cproject:Set%r %c(%r %1 %c)%r"), function{}()]
   symbol Lblproject'Coln'String{}(SortK{}) : SortString{} [priorities{}(), right{}(), terminals{}("1101"), projection{}(), left{}(), format{}("%cproject:String%r %c(%r %1 %c)%r"), function{}()]
   hooked-symbol LblrandInt'LParUndsRParUnds'INT-COMMON'Unds'Int'Unds'Int{}(SortInt{}) : SortInt{} [org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/maria/builds/RV/k/k-distribution/target/release/k/include/kframework/builtin/domains.md)"), priorities{}(), right{}(), terminals{}("1101"), impure{}(), klabel{}("randInt"), hook{}("INT.rand"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(1362,18,1362,65)"), left{}(), format{}("%crandInt%r %c(%r %1 %c)%r"), function{}()]
-  symbol Lblrangemap'LParUndsRParUnds'TEST-SYNTAX'Unds'RangeMap'Unds'Int{}(SortInt{}) : SortRangeMap{} [org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/maria/builds/RV/k/k-distribution/tests/regression-new/rangemap-tests-llvm/test.k)"), priorities{}(), right{}(), terminals{}("1101"), klabel{}("rangemap"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(10,23,10,48)"), left{}(), format{}("%crangemap%r %c(%r %1 %c)%r"), function{}()]
+  symbol Lblrangemap'LParUndsRParUnds'RANGEMAP-SIMPLE-SYNTAX'Unds'RangeMap'Unds'Int{}(SortInt{}) : SortRangeMap{} [org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/maria/builds/RV/llvm-backend/test/defn/k-files/rangemap-simple.k)"), priorities{}(), right{}(), terminals{}("1101"), klabel{}("rangemap"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(10,23,10,48)"), left{}(), format{}("%crangemap%r %c(%r %1 %c)%r"), function{}()]
   hooked-symbol LblremoveAll'LParUndsCommUndsRParUnds'MAP'Unds'Map'Unds'Map'Unds'Set{}(SortMap{}, SortSet{}) : SortMap{} [functional{}(), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/maria/builds/RV/k/k-distribution/target/release/k/include/kframework/builtin/domains.md)"), total{}(), priorities{}(), right{}(), terminals{}("110101"), klabel{}("removeAll"), hook{}("MAP.removeAll"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(333,18,333,87)"), left{}(), format{}("%cremoveAll%r %c(%r %1 %c,%r %2 %c)%r"), function{}()]
   hooked-symbol LblremoveAll'LParUndsCommUndsRParUnds'RANGEMAP'Unds'RangeMap'Unds'RangeMap'Unds'Set{}(SortRangeMap{}, SortSet{}) : SortRangeMap{} [org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/maria/builds/RV/k/k-distribution/target/release/k/include/kframework/builtin/domains.md)"), priorities{}(), right{}(), terminals{}("110101"), klabel{}("removeAll"), hook{}("RANGEMAP.removeAll"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(643,23,643,95)"), left{}(), format{}("%cremoveAll%r %c(%r %1 %c,%r %2 %c)%r"), function{}()]
   hooked-symbol LblsignExtendBitRangeInt'LParUndsCommUndsCommUndsRParUnds'INT-COMMON'Unds'Int'Unds'Int'Unds'Int'Unds'Int{}(SortInt{}, SortInt{}, SortInt{}) : SortInt{} [org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/maria/builds/RV/k/k-distribution/target/release/k/include/kframework/builtin/domains.md)"), priorities{}(), right{}(), terminals{}("11010101"), klabel{}("signExtendBitRangeInt"), hook{}("INT.signExtendBitRange"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(1329,18,1329,113)"), left{}(), format{}("%csignExtendBitRangeInt%r %c(%r %1 %c,%r %2 %c,%r %3 %c)%r"), function{}()]
@@ -2837,7 +2837,7 @@ module TEST
         \top{SortString{}}())))
   [projection{}()]
 
-// rule `rangemap(_)_TEST-SYNTAX_RangeMap_Int`(#token("2","Int") #as _Gen0)=>`_r|->_`(`Rangemap:Range`(inj{Int,KItem}(_Gen0),inj{Int,KItem}(#token("3","Int"))),inj{Int,KItem}(#token("40","Int"))) requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(08b9f1403e74d14bc9b75f74352e2d78e0209fc7157119209f20583fa46e78c7), org.kframework.attributes.Location(Location(15,8,15,42)), org.kframework.attributes.Source(Source(/home/maria/builds/RV/k/k-distribution/tests/regression-new/rangemap-tests-llvm/test.k)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+// rule `rangemap(_)_RANGEMAP-SIMPLE-SYNTAX_RangeMap_Int`(#token("2","Int") #as _Gen0)=>`_r|->_`(`Rangemap:Range`(inj{Int,KItem}(_Gen0),inj{Int,KItem}(#token("3","Int"))),inj{Int,KItem}(#token("40","Int"))) requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(2a25b1a948c5e9e096e05f6bd46b7e1f3f270ba9e9c79827348e919f2be7d823), org.kframework.attributes.Location(Location(15,8,15,42)), org.kframework.attributes.Source(Source(/home/maria/builds/RV/llvm-backend/test/defn/k-files/rangemap-simple.k)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
   axiom{R} \implies{R} (
     \and{R}(
       \top{R}(),
@@ -2849,13 +2849,13 @@ module TEST
           \top{R} ()
         )),
     \equals{SortRangeMap{},R} (
-      Lblrangemap'LParUndsRParUnds'TEST-SYNTAX'Unds'RangeMap'Unds'Int{}(X0:SortInt{}),
+      Lblrangemap'LParUndsRParUnds'RANGEMAP-SIMPLE-SYNTAX'Unds'RangeMap'Unds'Int{}(X0:SortInt{}),
      \and{SortRangeMap{}} (
        Lbl'Unds'r'Pipe'-'-GT-Unds'{}(LblRangemap'Coln'Range{}(inj{SortInt{}, SortKItem{}}(Var'Unds'Gen0:SortInt{}),inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("3"))),inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("40"))),
         \top{SortRangeMap{}}())))
-  [org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(15,8,15,42)"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/maria/builds/RV/k/k-distribution/tests/regression-new/rangemap-tests-llvm/test.k)"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol]"), UNIQUE'Unds'ID{}("08b9f1403e74d14bc9b75f74352e2d78e0209fc7157119209f20583fa46e78c7")]
+  [org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(15,8,15,42)"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/maria/builds/RV/llvm-backend/test/defn/k-files/rangemap-simple.k)"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol]"), UNIQUE'Unds'ID{}("2a25b1a948c5e9e096e05f6bd46b7e1f3f270ba9e9c79827348e919f2be7d823")]
 
-// rule `rangemap(_)_TEST-SYNTAX_RangeMap_Int`(#token("5","Int") #as _Gen0)=>`_RangeMap_`(`_r|->_`(`Rangemap:Range`(inj{Int,KItem}(#token("1","Int")),inj{Int,KItem}(#token("2","Int"))),inj{Int,KItem}(#token("45","Int"))),`_r|->_`(`Rangemap:Range`(inj{Int,KItem}(#token("3","Int")),inj{Int,KItem}(_Gen0)),inj{Int,KItem}(#token("40","Int")))) requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(8130bfa5e3e5b92a35894f9dc8bad2c94f2300e063f316524b2d51251bd4524f), org.kframework.attributes.Location(Location(19,8,19,62)), org.kframework.attributes.Source(Source(/home/maria/builds/RV/k/k-distribution/tests/regression-new/rangemap-tests-llvm/test.k)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+// rule `rangemap(_)_RANGEMAP-SIMPLE-SYNTAX_RangeMap_Int`(#token("5","Int") #as _Gen0)=>`_RangeMap_`(`_r|->_`(`Rangemap:Range`(inj{Int,KItem}(#token("1","Int")),inj{Int,KItem}(#token("2","Int"))),inj{Int,KItem}(#token("45","Int"))),`_r|->_`(`Rangemap:Range`(inj{Int,KItem}(#token("3","Int")),inj{Int,KItem}(_Gen0)),inj{Int,KItem}(#token("40","Int")))) requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(c2396eb6f152018f24e2fd58d70b807fa175d5e46f5d25e9fe91b73557c28edf), org.kframework.attributes.Location(Location(19,8,19,62)), org.kframework.attributes.Source(Source(/home/maria/builds/RV/llvm-backend/test/defn/k-files/rangemap-simple.k)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
   axiom{R} \implies{R} (
     \and{R}(
       \top{R}(),
@@ -2867,13 +2867,13 @@ module TEST
           \top{R} ()
         )),
     \equals{SortRangeMap{},R} (
-      Lblrangemap'LParUndsRParUnds'TEST-SYNTAX'Unds'RangeMap'Unds'Int{}(X0:SortInt{}),
+      Lblrangemap'LParUndsRParUnds'RANGEMAP-SIMPLE-SYNTAX'Unds'RangeMap'Unds'Int{}(X0:SortInt{}),
      \and{SortRangeMap{}} (
        Lbl'Unds'RangeMap'Unds'{}(Lbl'Unds'r'Pipe'-'-GT-Unds'{}(LblRangemap'Coln'Range{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("1")),inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("2"))),inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("45"))),Lbl'Unds'r'Pipe'-'-GT-Unds'{}(LblRangemap'Coln'Range{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("3")),inj{SortInt{}, SortKItem{}}(Var'Unds'Gen0:SortInt{})),inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("40")))),
         \top{SortRangeMap{}}())))
-  [org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(19,8,19,62)"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/maria/builds/RV/k/k-distribution/tests/regression-new/rangemap-tests-llvm/test.k)"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol]"), UNIQUE'Unds'ID{}("8130bfa5e3e5b92a35894f9dc8bad2c94f2300e063f316524b2d51251bd4524f")]
+  [org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(19,8,19,62)"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/maria/builds/RV/llvm-backend/test/defn/k-files/rangemap-simple.k)"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol]"), UNIQUE'Unds'ID{}("c2396eb6f152018f24e2fd58d70b807fa175d5e46f5d25e9fe91b73557c28edf")]
 
-// rule `rangemap(_)_TEST-SYNTAX_RangeMap_Int`(#token("7","Int") #as _Gen0)=>`_RangeMap_`(`_RangeMap_`(`_r|->_`(`Rangemap:Range`(inj{Int,KItem}(#token("1","Int")),inj{Int,KItem}(#token("2","Int"))),inj{Int,KItem}(#token("40","Int"))),`_r|->_`(`Rangemap:Range`(inj{Int,KItem}(#token("5","Int")),inj{Int,KItem}(_Gen0)),inj{Int,KItem}(#token("40","Int")))),`_r|->_`(`Rangemap:Range`(inj{Int,KItem}(#token("9","Int")),inj{Int,KItem}(#token("12","Int"))),inj{Int,KItem}(#token("40","Int")))) requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(9f6d1b07f976e1017a3aa8ab520e2efafe6d70e62bd91c8707131eadb3a88f64), org.kframework.attributes.Location(Location(22,8,22,83)), org.kframework.attributes.Source(Source(/home/maria/builds/RV/k/k-distribution/tests/regression-new/rangemap-tests-llvm/test.k)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+// rule `rangemap(_)_RANGEMAP-SIMPLE-SYNTAX_RangeMap_Int`(#token("7","Int") #as _Gen0)=>`_RangeMap_`(`_RangeMap_`(`_r|->_`(`Rangemap:Range`(inj{Int,KItem}(#token("1","Int")),inj{Int,KItem}(#token("2","Int"))),inj{Int,KItem}(#token("40","Int"))),`_r|->_`(`Rangemap:Range`(inj{Int,KItem}(#token("5","Int")),inj{Int,KItem}(_Gen0)),inj{Int,KItem}(#token("40","Int")))),`_r|->_`(`Rangemap:Range`(inj{Int,KItem}(#token("9","Int")),inj{Int,KItem}(#token("12","Int"))),inj{Int,KItem}(#token("40","Int")))) requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(7db52e91476a0157c38c73bba9b772f7fe79f8b4e6a2f4692e9fc2a4c78d88d0), org.kframework.attributes.Location(Location(22,8,22,83)), org.kframework.attributes.Source(Source(/home/maria/builds/RV/llvm-backend/test/defn/k-files/rangemap-simple.k)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
   axiom{R} \implies{R} (
     \and{R}(
       \top{R}(),
@@ -2885,13 +2885,13 @@ module TEST
           \top{R} ()
         )),
     \equals{SortRangeMap{},R} (
-      Lblrangemap'LParUndsRParUnds'TEST-SYNTAX'Unds'RangeMap'Unds'Int{}(X0:SortInt{}),
+      Lblrangemap'LParUndsRParUnds'RANGEMAP-SIMPLE-SYNTAX'Unds'RangeMap'Unds'Int{}(X0:SortInt{}),
      \and{SortRangeMap{}} (
        Lbl'Unds'RangeMap'Unds'{}(Lbl'Unds'RangeMap'Unds'{}(Lbl'Unds'r'Pipe'-'-GT-Unds'{}(LblRangemap'Coln'Range{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("1")),inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("2"))),inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("40"))),Lbl'Unds'r'Pipe'-'-GT-Unds'{}(LblRangemap'Coln'Range{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("5")),inj{SortInt{}, SortKItem{}}(Var'Unds'Gen0:SortInt{})),inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("40")))),Lbl'Unds'r'Pipe'-'-GT-Unds'{}(LblRangemap'Coln'Range{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("9")),inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("12"))),inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("40")))),
         \top{SortRangeMap{}}())))
-  [org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(22,8,22,83)"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/maria/builds/RV/k/k-distribution/tests/regression-new/rangemap-tests-llvm/test.k)"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol]"), UNIQUE'Unds'ID{}("9f6d1b07f976e1017a3aa8ab520e2efafe6d70e62bd91c8707131eadb3a88f64")]
+  [org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(22,8,22,83)"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/maria/builds/RV/llvm-backend/test/defn/k-files/rangemap-simple.k)"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol]"), UNIQUE'Unds'ID{}("7db52e91476a0157c38c73bba9b772f7fe79f8b4e6a2f4692e9fc2a4c78d88d0")]
 
-// rule `rangemap(_)_TEST-SYNTAX_RangeMap_Int`(#token("8","Int") #as _Gen0)=>`_RangeMap_`(`_RangeMap_`(`_r|->_`(`Rangemap:Range`(inj{Int,KItem}(#token("0","Int")),inj{Int,KItem}(#token("2","Int"))),inj{Int,KItem}(#token("40","Int"))),`_r|->_`(`Rangemap:Range`(inj{Int,KItem}(#token("3","Int")),inj{Int,KItem}(_Gen0)),inj{Int,KItem}(#token("40","Int")))),`_r|->_`(`Rangemap:Range`(inj{Int,KItem}(#token("9","Int")),inj{Int,KItem}(#token("12","Int"))),inj{Int,KItem}(#token("45","Int")))) requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(5131a9a6abce860e96398acdc97d38d66f6229c8a3d73760e610baf941af68d8), org.kframework.attributes.Location(Location(23,8,23,83)), org.kframework.attributes.Source(Source(/home/maria/builds/RV/k/k-distribution/tests/regression-new/rangemap-tests-llvm/test.k)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+// rule `rangemap(_)_RANGEMAP-SIMPLE-SYNTAX_RangeMap_Int`(#token("8","Int") #as _Gen0)=>`_RangeMap_`(`_RangeMap_`(`_r|->_`(`Rangemap:Range`(inj{Int,KItem}(#token("0","Int")),inj{Int,KItem}(#token("2","Int"))),inj{Int,KItem}(#token("40","Int"))),`_r|->_`(`Rangemap:Range`(inj{Int,KItem}(#token("3","Int")),inj{Int,KItem}(_Gen0)),inj{Int,KItem}(#token("40","Int")))),`_r|->_`(`Rangemap:Range`(inj{Int,KItem}(#token("9","Int")),inj{Int,KItem}(#token("12","Int"))),inj{Int,KItem}(#token("45","Int")))) requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(5866df45ae82b5ff0cec833d01bace71d8ba62556d500a8b6240582f3340ca65), org.kframework.attributes.Location(Location(23,8,23,83)), org.kframework.attributes.Source(Source(/home/maria/builds/RV/llvm-backend/test/defn/k-files/rangemap-simple.k)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
   axiom{R} \implies{R} (
     \and{R}(
       \top{R}(),
@@ -2903,13 +2903,13 @@ module TEST
           \top{R} ()
         )),
     \equals{SortRangeMap{},R} (
-      Lblrangemap'LParUndsRParUnds'TEST-SYNTAX'Unds'RangeMap'Unds'Int{}(X0:SortInt{}),
+      Lblrangemap'LParUndsRParUnds'RANGEMAP-SIMPLE-SYNTAX'Unds'RangeMap'Unds'Int{}(X0:SortInt{}),
      \and{SortRangeMap{}} (
        Lbl'Unds'RangeMap'Unds'{}(Lbl'Unds'RangeMap'Unds'{}(Lbl'Unds'r'Pipe'-'-GT-Unds'{}(LblRangemap'Coln'Range{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("0")),inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("2"))),inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("40"))),Lbl'Unds'r'Pipe'-'-GT-Unds'{}(LblRangemap'Coln'Range{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("3")),inj{SortInt{}, SortKItem{}}(Var'Unds'Gen0:SortInt{})),inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("40")))),Lbl'Unds'r'Pipe'-'-GT-Unds'{}(LblRangemap'Coln'Range{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("9")),inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("12"))),inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("45")))),
         \top{SortRangeMap{}}())))
-  [org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(23,8,23,83)"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/maria/builds/RV/k/k-distribution/tests/regression-new/rangemap-tests-llvm/test.k)"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol]"), UNIQUE'Unds'ID{}("5131a9a6abce860e96398acdc97d38d66f6229c8a3d73760e610baf941af68d8")]
+  [org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(23,8,23,83)"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/maria/builds/RV/llvm-backend/test/defn/k-files/rangemap-simple.k)"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol]"), UNIQUE'Unds'ID{}("5866df45ae82b5ff0cec833d01bace71d8ba62556d500a8b6240582f3340ca65")]
 
-// rule `rangemap(_)_TEST-SYNTAX_RangeMap_Int`(#token("9","Int") #as _Gen0)=>`_RangeMap_`(`_RangeMap_`(`_RangeMap_`(`_r|->_`(`Rangemap:Range`(inj{Int,KItem}(#token("0","Int")),inj{Int,KItem}(#token("1","Int"))),inj{Int,KItem}(#token("40","Int"))),`_r|->_`(`Rangemap:Range`(inj{Int,KItem}(#token("2","Int")),inj{Int,KItem}(#token("5","Int"))),inj{Int,KItem}(#token("40","Int")))),`_r|->_`(`Rangemap:Range`(inj{Int,KItem}(#token("7","Int")),inj{Int,KItem}(_Gen0)),inj{Int,KItem}(#token("40","Int")))),`_r|->_`(`Rangemap:Range`(inj{Int,KItem}(#token("12","Int")),inj{Int,KItem}(#token("15","Int"))),inj{Int,KItem}(#token("40","Int")))) requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(59b416419ccb5bd726e047e5b3020d55c09dfa9320748cbde9b8af0a5a479f81), org.kframework.attributes.Location(Location(25,8,25,104)), org.kframework.attributes.Source(Source(/home/maria/builds/RV/k/k-distribution/tests/regression-new/rangemap-tests-llvm/test.k)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+// rule `rangemap(_)_RANGEMAP-SIMPLE-SYNTAX_RangeMap_Int`(#token("9","Int") #as _Gen0)=>`_RangeMap_`(`_RangeMap_`(`_RangeMap_`(`_r|->_`(`Rangemap:Range`(inj{Int,KItem}(#token("0","Int")),inj{Int,KItem}(#token("1","Int"))),inj{Int,KItem}(#token("40","Int"))),`_r|->_`(`Rangemap:Range`(inj{Int,KItem}(#token("2","Int")),inj{Int,KItem}(#token("5","Int"))),inj{Int,KItem}(#token("40","Int")))),`_r|->_`(`Rangemap:Range`(inj{Int,KItem}(#token("7","Int")),inj{Int,KItem}(_Gen0)),inj{Int,KItem}(#token("40","Int")))),`_r|->_`(`Rangemap:Range`(inj{Int,KItem}(#token("12","Int")),inj{Int,KItem}(#token("15","Int"))),inj{Int,KItem}(#token("40","Int")))) requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(828d082f3b5b55b4ea1786e928483b59083469bc4037ff551a057ff932418532), org.kframework.attributes.Location(Location(25,8,25,104)), org.kframework.attributes.Source(Source(/home/maria/builds/RV/llvm-backend/test/defn/k-files/rangemap-simple.k)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
   axiom{R} \implies{R} (
     \and{R}(
       \top{R}(),
@@ -2921,13 +2921,13 @@ module TEST
           \top{R} ()
         )),
     \equals{SortRangeMap{},R} (
-      Lblrangemap'LParUndsRParUnds'TEST-SYNTAX'Unds'RangeMap'Unds'Int{}(X0:SortInt{}),
+      Lblrangemap'LParUndsRParUnds'RANGEMAP-SIMPLE-SYNTAX'Unds'RangeMap'Unds'Int{}(X0:SortInt{}),
      \and{SortRangeMap{}} (
        Lbl'Unds'RangeMap'Unds'{}(Lbl'Unds'RangeMap'Unds'{}(Lbl'Unds'RangeMap'Unds'{}(Lbl'Unds'r'Pipe'-'-GT-Unds'{}(LblRangemap'Coln'Range{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("0")),inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("1"))),inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("40"))),Lbl'Unds'r'Pipe'-'-GT-Unds'{}(LblRangemap'Coln'Range{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("2")),inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("5"))),inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("40")))),Lbl'Unds'r'Pipe'-'-GT-Unds'{}(LblRangemap'Coln'Range{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("7")),inj{SortInt{}, SortKItem{}}(Var'Unds'Gen0:SortInt{})),inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("40")))),Lbl'Unds'r'Pipe'-'-GT-Unds'{}(LblRangemap'Coln'Range{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("12")),inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("15"))),inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("40")))),
         \top{SortRangeMap{}}())))
-  [org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(25,8,25,104)"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/maria/builds/RV/k/k-distribution/tests/regression-new/rangemap-tests-llvm/test.k)"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol]"), UNIQUE'Unds'ID{}("59b416419ccb5bd726e047e5b3020d55c09dfa9320748cbde9b8af0a5a479f81")]
+  [org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(25,8,25,104)"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/maria/builds/RV/llvm-backend/test/defn/k-files/rangemap-simple.k)"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol]"), UNIQUE'Unds'ID{}("828d082f3b5b55b4ea1786e928483b59083469bc4037ff551a057ff932418532")]
 
-// rule `rangemap(_)_TEST-SYNTAX_RangeMap_Int`(#token("0","Int"))=>`.RangeMap`(.KList) requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(5c90795801f18964dece4bee876665ab051ec5397cc392edc29be12aff84ab7a), org.kframework.attributes.Location(Location(12,8,12,32)), org.kframework.attributes.Source(Source(/home/maria/builds/RV/k/k-distribution/tests/regression-new/rangemap-tests-llvm/test.k)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+// rule `rangemap(_)_RANGEMAP-SIMPLE-SYNTAX_RangeMap_Int`(#token("0","Int"))=>`.RangeMap`(.KList) requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(0d57a51181097d513f663462b13087a1f171099a7106c03ccb24b434c3a6ad15), org.kframework.attributes.Location(Location(12,8,12,32)), org.kframework.attributes.Source(Source(/home/maria/builds/RV/llvm-backend/test/defn/k-files/rangemap-simple.k)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
   axiom{R} \implies{R} (
     \and{R}(
       \top{R}(),
@@ -2939,13 +2939,13 @@ module TEST
           \top{R} ()
         )),
     \equals{SortRangeMap{},R} (
-      Lblrangemap'LParUndsRParUnds'TEST-SYNTAX'Unds'RangeMap'Unds'Int{}(X0:SortInt{}),
+      Lblrangemap'LParUndsRParUnds'RANGEMAP-SIMPLE-SYNTAX'Unds'RangeMap'Unds'Int{}(X0:SortInt{}),
      \and{SortRangeMap{}} (
        Lbl'Stop'RangeMap{}(),
         \top{SortRangeMap{}}())))
-  [org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(12,8,12,32)"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/maria/builds/RV/k/k-distribution/tests/regression-new/rangemap-tests-llvm/test.k)"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol]"), UNIQUE'Unds'ID{}("5c90795801f18964dece4bee876665ab051ec5397cc392edc29be12aff84ab7a")]
+  [org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(12,8,12,32)"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/maria/builds/RV/llvm-backend/test/defn/k-files/rangemap-simple.k)"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol]"), UNIQUE'Unds'ID{}("0d57a51181097d513f663462b13087a1f171099a7106c03ccb24b434c3a6ad15")]
 
-// rule `rangemap(_)_TEST-SYNTAX_RangeMap_Int`(#token("1","Int"))=>`_r|->_`(`Rangemap:Range`(inj{Int,KItem}(#token("0","Int")),inj{Int,KItem}(#token("20","Int"))),inj{Int,KItem}(#token("40","Int"))) requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(a4e70e273669297259416bb5ab77d59ca32a9699fa2a754b1a9c85adad3786d3), org.kframework.attributes.Location(Location(14,8,14,43)), org.kframework.attributes.Source(Source(/home/maria/builds/RV/k/k-distribution/tests/regression-new/rangemap-tests-llvm/test.k)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+// rule `rangemap(_)_RANGEMAP-SIMPLE-SYNTAX_RangeMap_Int`(#token("1","Int"))=>`_r|->_`(`Rangemap:Range`(inj{Int,KItem}(#token("0","Int")),inj{Int,KItem}(#token("20","Int"))),inj{Int,KItem}(#token("40","Int"))) requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(f365592057e77bcd4260a4c0a04ac9f4bc142cd8f363593e6d24be6b75bb773d), org.kframework.attributes.Location(Location(14,8,14,43)), org.kframework.attributes.Source(Source(/home/maria/builds/RV/llvm-backend/test/defn/k-files/rangemap-simple.k)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
   axiom{R} \implies{R} (
     \and{R}(
       \top{R}(),
@@ -2957,13 +2957,13 @@ module TEST
           \top{R} ()
         )),
     \equals{SortRangeMap{},R} (
-      Lblrangemap'LParUndsRParUnds'TEST-SYNTAX'Unds'RangeMap'Unds'Int{}(X0:SortInt{}),
+      Lblrangemap'LParUndsRParUnds'RANGEMAP-SIMPLE-SYNTAX'Unds'RangeMap'Unds'Int{}(X0:SortInt{}),
      \and{SortRangeMap{}} (
        Lbl'Unds'r'Pipe'-'-GT-Unds'{}(LblRangemap'Coln'Range{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("0")),inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("20"))),inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("40"))),
         \top{SortRangeMap{}}())))
-  [org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(14,8,14,43)"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/maria/builds/RV/k/k-distribution/tests/regression-new/rangemap-tests-llvm/test.k)"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol]"), UNIQUE'Unds'ID{}("a4e70e273669297259416bb5ab77d59ca32a9699fa2a754b1a9c85adad3786d3")]
+  [org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(14,8,14,43)"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/maria/builds/RV/llvm-backend/test/defn/k-files/rangemap-simple.k)"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol]"), UNIQUE'Unds'ID{}("f365592057e77bcd4260a4c0a04ac9f4bc142cd8f363593e6d24be6b75bb773d")]
 
-// rule `rangemap(_)_TEST-SYNTAX_RangeMap_Int`(#token("10","Int"))=>`_RangeMap_`(`_RangeMap_`(`_RangeMap_`(`_r|->_`(`Rangemap:Range`(inj{Int,KItem}(#token("1","Int")),inj{Int,KItem}(#token("3","Int"))),inj{Int,KItem}(#token("45","Int"))),`_r|->_`(`Rangemap:Range`(inj{Int,KItem}(#token("4","Int")),inj{Int,KItem}(#token("6","Int"))),inj{Int,KItem}(#token("50","Int")))),`_r|->_`(`Rangemap:Range`(inj{Int,KItem}(#token("8","Int")),inj{Int,KItem}(#token("9","Int"))),inj{Int,KItem}(#token("40","Int")))),`_r|->_`(`Rangemap:Range`(inj{Int,KItem}(#token("12","Int")),inj{Int,KItem}(#token("15","Int"))),inj{Int,KItem}(#token("45","Int")))) requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(78688a8c94478b213b7ca946350215d1daf2a867b00eb6e78b2a791139bc65ee), org.kframework.attributes.Location(Location(26,8,26,105)), org.kframework.attributes.Source(Source(/home/maria/builds/RV/k/k-distribution/tests/regression-new/rangemap-tests-llvm/test.k)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+// rule `rangemap(_)_RANGEMAP-SIMPLE-SYNTAX_RangeMap_Int`(#token("10","Int"))=>`_RangeMap_`(`_RangeMap_`(`_RangeMap_`(`_r|->_`(`Rangemap:Range`(inj{Int,KItem}(#token("1","Int")),inj{Int,KItem}(#token("3","Int"))),inj{Int,KItem}(#token("45","Int"))),`_r|->_`(`Rangemap:Range`(inj{Int,KItem}(#token("4","Int")),inj{Int,KItem}(#token("6","Int"))),inj{Int,KItem}(#token("50","Int")))),`_r|->_`(`Rangemap:Range`(inj{Int,KItem}(#token("8","Int")),inj{Int,KItem}(#token("9","Int"))),inj{Int,KItem}(#token("40","Int")))),`_r|->_`(`Rangemap:Range`(inj{Int,KItem}(#token("12","Int")),inj{Int,KItem}(#token("15","Int"))),inj{Int,KItem}(#token("45","Int")))) requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(17f7bfa3846dac853186d73891984166fcd46837dcd378aae40ac9aee51f2cb0), org.kframework.attributes.Location(Location(26,8,26,105)), org.kframework.attributes.Source(Source(/home/maria/builds/RV/llvm-backend/test/defn/k-files/rangemap-simple.k)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
   axiom{R} \implies{R} (
     \and{R}(
       \top{R}(),
@@ -2975,13 +2975,13 @@ module TEST
           \top{R} ()
         )),
     \equals{SortRangeMap{},R} (
-      Lblrangemap'LParUndsRParUnds'TEST-SYNTAX'Unds'RangeMap'Unds'Int{}(X0:SortInt{}),
+      Lblrangemap'LParUndsRParUnds'RANGEMAP-SIMPLE-SYNTAX'Unds'RangeMap'Unds'Int{}(X0:SortInt{}),
      \and{SortRangeMap{}} (
        Lbl'Unds'RangeMap'Unds'{}(Lbl'Unds'RangeMap'Unds'{}(Lbl'Unds'RangeMap'Unds'{}(Lbl'Unds'r'Pipe'-'-GT-Unds'{}(LblRangemap'Coln'Range{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("1")),inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("3"))),inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("45"))),Lbl'Unds'r'Pipe'-'-GT-Unds'{}(LblRangemap'Coln'Range{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("4")),inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("6"))),inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("50")))),Lbl'Unds'r'Pipe'-'-GT-Unds'{}(LblRangemap'Coln'Range{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("8")),inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("9"))),inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("40")))),Lbl'Unds'r'Pipe'-'-GT-Unds'{}(LblRangemap'Coln'Range{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("12")),inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("15"))),inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("45")))),
         \top{SortRangeMap{}}())))
-  [org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(26,8,26,105)"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/maria/builds/RV/k/k-distribution/tests/regression-new/rangemap-tests-llvm/test.k)"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol]"), UNIQUE'Unds'ID{}("78688a8c94478b213b7ca946350215d1daf2a867b00eb6e78b2a791139bc65ee")]
+  [org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(26,8,26,105)"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/maria/builds/RV/llvm-backend/test/defn/k-files/rangemap-simple.k)"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol]"), UNIQUE'Unds'ID{}("17f7bfa3846dac853186d73891984166fcd46837dcd378aae40ac9aee51f2cb0")]
 
-// rule `rangemap(_)_TEST-SYNTAX_RangeMap_Int`(#token("3","Int"))=>`_r|->_`(`Rangemap:Range`(inj{Int,KItem}(#token("17","Int")),inj{Int,KItem}(#token("19","Int"))),inj{Int,KItem}(#token("40","Int"))) requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(2bdf6d2b65dc60a860e7360a8159ec1fbebdb47a0b695d007201df4a6288ac3d), org.kframework.attributes.Location(Location(16,8,16,44)), org.kframework.attributes.Source(Source(/home/maria/builds/RV/k/k-distribution/tests/regression-new/rangemap-tests-llvm/test.k)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+// rule `rangemap(_)_RANGEMAP-SIMPLE-SYNTAX_RangeMap_Int`(#token("3","Int"))=>`_r|->_`(`Rangemap:Range`(inj{Int,KItem}(#token("17","Int")),inj{Int,KItem}(#token("19","Int"))),inj{Int,KItem}(#token("40","Int"))) requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(cf4c822dce8a588f6799b74b24fb5d73cba0c4d4c2d29ce7b047fdbb6e645b53), org.kframework.attributes.Location(Location(16,8,16,44)), org.kframework.attributes.Source(Source(/home/maria/builds/RV/llvm-backend/test/defn/k-files/rangemap-simple.k)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
   axiom{R} \implies{R} (
     \and{R}(
       \top{R}(),
@@ -2993,13 +2993,13 @@ module TEST
           \top{R} ()
         )),
     \equals{SortRangeMap{},R} (
-      Lblrangemap'LParUndsRParUnds'TEST-SYNTAX'Unds'RangeMap'Unds'Int{}(X0:SortInt{}),
+      Lblrangemap'LParUndsRParUnds'RANGEMAP-SIMPLE-SYNTAX'Unds'RangeMap'Unds'Int{}(X0:SortInt{}),
      \and{SortRangeMap{}} (
        Lbl'Unds'r'Pipe'-'-GT-Unds'{}(LblRangemap'Coln'Range{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("17")),inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("19"))),inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("40"))),
         \top{SortRangeMap{}}())))
-  [org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(16,8,16,44)"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/maria/builds/RV/k/k-distribution/tests/regression-new/rangemap-tests-llvm/test.k)"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol]"), UNIQUE'Unds'ID{}("2bdf6d2b65dc60a860e7360a8159ec1fbebdb47a0b695d007201df4a6288ac3d")]
+  [org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(16,8,16,44)"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/maria/builds/RV/llvm-backend/test/defn/k-files/rangemap-simple.k)"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol]"), UNIQUE'Unds'ID{}("cf4c822dce8a588f6799b74b24fb5d73cba0c4d4c2d29ce7b047fdbb6e645b53")]
 
-// rule `rangemap(_)_TEST-SYNTAX_RangeMap_Int`(#token("4","Int"))=>`_RangeMap_`(`_r|->_`(`Rangemap:Range`(inj{Int,KItem}(#token("1","Int")),inj{Int,KItem}(#token("2","Int"))),inj{Int,KItem}(#token("40","Int"))),`_r|->_`(`Rangemap:Range`(inj{Int,KItem}(#token("3","Int")),inj{Int,KItem}(#token("5","Int"))),inj{Int,KItem}(#token("40","Int")))) requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(9958fc16003a5720554e5f65100307d9fb354dfe917daf15016b2910c0260541), org.kframework.attributes.Location(Location(18,8,18,62)), org.kframework.attributes.Source(Source(/home/maria/builds/RV/k/k-distribution/tests/regression-new/rangemap-tests-llvm/test.k)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+// rule `rangemap(_)_RANGEMAP-SIMPLE-SYNTAX_RangeMap_Int`(#token("4","Int"))=>`_RangeMap_`(`_r|->_`(`Rangemap:Range`(inj{Int,KItem}(#token("1","Int")),inj{Int,KItem}(#token("2","Int"))),inj{Int,KItem}(#token("40","Int"))),`_r|->_`(`Rangemap:Range`(inj{Int,KItem}(#token("3","Int")),inj{Int,KItem}(#token("5","Int"))),inj{Int,KItem}(#token("40","Int")))) requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(78aecfe344969995de02341ba7c2d84ac142d8695f42f5414fdc8d7bd692c780), org.kframework.attributes.Location(Location(18,8,18,62)), org.kframework.attributes.Source(Source(/home/maria/builds/RV/llvm-backend/test/defn/k-files/rangemap-simple.k)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
   axiom{R} \implies{R} (
     \and{R}(
       \top{R}(),
@@ -3011,13 +3011,13 @@ module TEST
           \top{R} ()
         )),
     \equals{SortRangeMap{},R} (
-      Lblrangemap'LParUndsRParUnds'TEST-SYNTAX'Unds'RangeMap'Unds'Int{}(X0:SortInt{}),
+      Lblrangemap'LParUndsRParUnds'RANGEMAP-SIMPLE-SYNTAX'Unds'RangeMap'Unds'Int{}(X0:SortInt{}),
      \and{SortRangeMap{}} (
        Lbl'Unds'RangeMap'Unds'{}(Lbl'Unds'r'Pipe'-'-GT-Unds'{}(LblRangemap'Coln'Range{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("1")),inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("2"))),inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("40"))),Lbl'Unds'r'Pipe'-'-GT-Unds'{}(LblRangemap'Coln'Range{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("3")),inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("5"))),inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("40")))),
         \top{SortRangeMap{}}())))
-  [org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(18,8,18,62)"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/maria/builds/RV/k/k-distribution/tests/regression-new/rangemap-tests-llvm/test.k)"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol]"), UNIQUE'Unds'ID{}("9958fc16003a5720554e5f65100307d9fb354dfe917daf15016b2910c0260541")]
+  [org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(18,8,18,62)"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/maria/builds/RV/llvm-backend/test/defn/k-files/rangemap-simple.k)"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol]"), UNIQUE'Unds'ID{}("78aecfe344969995de02341ba7c2d84ac142d8695f42f5414fdc8d7bd692c780")]
 
-// rule `rangemap(_)_TEST-SYNTAX_RangeMap_Int`(#token("6","Int"))=>`_RangeMap_`(`_r|->_`(`Rangemap:Range`(inj{Int,KItem}(#token("0","Int")),inj{Int,KItem}(#token("1","Int"))),inj{Int,KItem}(#token("40","Int"))),`_r|->_`(`Rangemap:Range`(inj{Int,KItem}(#token("4","Int")),inj{Int,KItem}(#token("5","Int"))),inj{Int,KItem}(#token("40","Int")))) requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(6ecd598f01386872e68e18c247c252e588ab2d16a17e612799e14e584463100c), org.kframework.attributes.Location(Location(20,8,20,62)), org.kframework.attributes.Source(Source(/home/maria/builds/RV/k/k-distribution/tests/regression-new/rangemap-tests-llvm/test.k)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+// rule `rangemap(_)_RANGEMAP-SIMPLE-SYNTAX_RangeMap_Int`(#token("6","Int"))=>`_RangeMap_`(`_r|->_`(`Rangemap:Range`(inj{Int,KItem}(#token("0","Int")),inj{Int,KItem}(#token("1","Int"))),inj{Int,KItem}(#token("40","Int"))),`_r|->_`(`Rangemap:Range`(inj{Int,KItem}(#token("4","Int")),inj{Int,KItem}(#token("5","Int"))),inj{Int,KItem}(#token("40","Int")))) requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(b4c5c3652e562628e6875b3ac5c386ce3e05432d2ed22dbbf27195686534eed9), org.kframework.attributes.Location(Location(20,8,20,62)), org.kframework.attributes.Source(Source(/home/maria/builds/RV/llvm-backend/test/defn/k-files/rangemap-simple.k)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
   axiom{R} \implies{R} (
     \and{R}(
       \top{R}(),
@@ -3029,11 +3029,11 @@ module TEST
           \top{R} ()
         )),
     \equals{SortRangeMap{},R} (
-      Lblrangemap'LParUndsRParUnds'TEST-SYNTAX'Unds'RangeMap'Unds'Int{}(X0:SortInt{}),
+      Lblrangemap'LParUndsRParUnds'RANGEMAP-SIMPLE-SYNTAX'Unds'RangeMap'Unds'Int{}(X0:SortInt{}),
      \and{SortRangeMap{}} (
        Lbl'Unds'RangeMap'Unds'{}(Lbl'Unds'r'Pipe'-'-GT-Unds'{}(LblRangemap'Coln'Range{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("0")),inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("1"))),inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("40"))),Lbl'Unds'r'Pipe'-'-GT-Unds'{}(LblRangemap'Coln'Range{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("4")),inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("5"))),inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("40")))),
         \top{SortRangeMap{}}())))
-  [org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(20,8,20,62)"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/maria/builds/RV/k/k-distribution/tests/regression-new/rangemap-tests-llvm/test.k)"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol]"), UNIQUE'Unds'ID{}("6ecd598f01386872e68e18c247c252e588ab2d16a17e612799e14e584463100c")]
+  [org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(20,8,20,62)"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/maria/builds/RV/llvm-backend/test/defn/k-files/rangemap-simple.k)"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol]"), UNIQUE'Unds'ID{}("b4c5c3652e562628e6875b3ac5c386ce3e05432d2ed22dbbf27195686534eed9")]
 
 // rule `signExtendBitRangeInt(_,_,_)_INT-COMMON_Int_Int_Int_Int`(I,IDX,LEN)=>`_-Int_`(`_modInt_`(`_+Int_`(`bitRangeInt(_,_,_)_INT-COMMON_Int_Int_Int_Int`(I,IDX,LEN),`_<<Int_`(#token("1","Int"),`_-Int_`(LEN,#token("1","Int")))),`_<<Int_`(#token("1","Int"),LEN)),`_<<Int_`(#token("1","Int"),`_-Int_`(LEN,#token("1","Int")))) requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(3b67f4bf2235fc46fc94b1d10e936100ea3fc4f2dbaa4e4a77593e8385f5004f), org.kframework.attributes.Location(Location(1461,8,1461,164)), org.kframework.attributes.Source(Source(/home/maria/builds/RV/k/k-distribution/target/release/k/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
   axiom{R} \implies{R} (
@@ -3063,4 +3063,4 @@ module TEST
 
 
 // priority groups
-endmodule [org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(29,1,33,10)"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/maria/builds/RV/k/k-distribution/tests/regression-new/rangemap-tests-llvm/test.k)")]
+endmodule [org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(29,1,33,10)"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/maria/builds/RV/llvm-backend/test/defn/k-files/rangemap-simple.k)")]
