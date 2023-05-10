@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <limits>
+#include <vector>
 
 #include <gmp.h>
 #include <mpfr.h>
@@ -20,6 +21,19 @@
 #include <immer/set.hpp>
 #include <runtime/collections/rangemap.h>
 #include <unordered_set>
+
+struct MatchLog {
+  enum { SUCCESS = 0, FUNCTION, FAIL } kind;
+
+  char *function;
+  char *debugName;
+  void *result;
+  std::vector<void *> args;
+
+  char *pattern;
+  void *subject;
+  char *sort;
+};
 
 // the actual length is equal to the block header with the gc bits masked out.
 
@@ -213,6 +227,8 @@ typedef set *SortSet;
 typedef block *SortRange;
 typedef rangemap *SortRangeMap;
 
+void *constructCompositePattern(uint32_t tag, std::vector<void *> &arguments);
+
 extern "C" {
 
 block *parseConfiguration(const char *filename);
@@ -226,6 +242,20 @@ void printSortedConfigurationToFile(
     FILE *file, block *subject, char const *sort);
 void printConfigurationInternal(
     writer *file, block *subject, const char *sort, bool, void *);
+
+// Returns a raw pointer to a KOREPattern; the caller of this function is
+// responsible for managing its lifetime (e.g. by placing the returned pointer
+// back into a unique_ptr). The return type here is void* only to accommodate
+// C linkage so that the function can be called from the C and Python bindings.
+void *termToKorePattern(block *);
+
+// This function injects its argument into KItem before printing, using the sort
+// argument as the source sort. Doing so allows the term to be pretty-printed
+// using the existing recursion scheme code (and without manually inspecting the
+// sort to see what printer we need to call if the term isn't an entire
+// configuration).
+string *debug_print_term(block *subject, char const *sort);
+
 mpz_ptr move_int(mpz_t);
 
 void serializeConfigurations(
@@ -311,5 +341,6 @@ void init_float2(floating *, std::string);
 
 std::string intToStringInBase(mpz_t, uint64_t);
 std::string intToString(mpz_t);
-
+void printValueOfType(
+    std::ostream &os, std::string definitionPath, void *, std::string);
 #endif // RUNTIME_HEADER_H

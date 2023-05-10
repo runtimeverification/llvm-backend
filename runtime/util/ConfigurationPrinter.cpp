@@ -1,13 +1,20 @@
+#include <kllvm/printer/printer.h>
+
+#include "gmp.h"
 #include <cinttypes>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <functional>
+#include <iostream>
 #include <set>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
+
+#include <kllvm/parser/KOREParser.h>
+#include <kllvm/util/temporary_file.h>
 
 #include "runtime/alloc.h"
 #include "runtime/header.h"
@@ -245,6 +252,26 @@ void printConfigurations(
   fclose(file);
 }
 
+string *debug_print_term(block *subject, char const *sort) {
+  auto state = print_state();
+  auto *buf = hook_BUFFER_empty();
+  writer w = {nullptr, buf};
+
+  char const *print_sort = nullptr;
+
+  if (sort) {
+    auto inj_sym = "inj{" + std::string(sort) + ", SortKItem{}}";
+    auto tag = getTagForSymbolName(inj_sym.c_str());
+    auto args = std::vector<void *>{subject};
+
+    subject = static_cast<block *>(constructCompositePattern(tag, args));
+    print_sort = "SortKItem{}";
+  }
+
+  printConfigurationInternal(&w, subject, print_sort, false, &state);
+  return hook_BUFFER_toString(buf);
+}
+
 string *printConfigurationToString(block *subject) {
   auto state = print_state();
   stringbuffer *buf = hook_BUFFER_empty();
@@ -264,4 +291,81 @@ void printSortedConfigurationToFile(
   auto state = print_state();
   writer w = {file, nullptr};
   printConfigurationInternal(&w, subject, sort, false, &state);
+}
+
+void *termToKorePattern(block *subject) {
+  auto *kore_str = printConfigurationToString(subject);
+  auto kore = std::string(kore_str->data, len(kore_str));
+
+  auto parser = kllvm::parser::KOREParser::from_string(kore);
+  auto pattern = parser->pattern();
+
+  return static_cast<void *>(pattern.release());
+}
+
+extern "C" void printMatchResult(
+    std::ostream &os, MatchLog *matchLog, size_t logSize,
+    const std::string &definitionPath) {
+  auto subject_file = temporary_file("subject_XXXXXX");
+  auto subject = subject_file.file_pointer("w");
+  auto pattern_file = temporary_file("pattern_XXXXXX");
+
+  for (int i = 0; i < logSize; i++) {
+    if (matchLog[i].kind == MatchLog::SUCCESS) {
+      os << "Match succeeds\n";
+    } else if (matchLog[i].kind == MatchLog::FAIL) {
+      os << "Subject:\n";
+      if (i == 0) {
+        printSortedConfigurationToFile(
+            subject, (block *)matchLog[i].subject, matchLog[i].sort);
+      } else {
+        auto subjectSort
+            = debug_print_term((block *)matchLog[i].subject, matchLog[i].sort);
+        auto strSubjectSort = std::string(subjectSort->data, len(subjectSort));
+        subject_file.ofstream() << strSubjectSort << std::endl;
+      }
+      kllvm::printKORE(
+          os, definitionPath, subject_file.filename(), false, true);
+      os << "does not match pattern: \n";
+      pattern_file.ofstream() << matchLog[i].pattern << std::endl;
+      kllvm::printKORE(
+          os, definitionPath, pattern_file.filename(), false, true);
+    } else if (matchLog[i].kind == MatchLog::FUNCTION) {
+      os << matchLog[i].debugName << "(";
+
+      for (int j = 0; j < matchLog[i].args.size(); j += 2) {
+        auto typeName = reinterpret_cast<char *>(matchLog[i].args[j + 1]);
+        printValueOfType(os, definitionPath, matchLog[i].args[j], typeName);
+        if (j + 2 != matchLog[i].args.size())
+          os << ", ";
+      }
+      os << ") => " << *reinterpret_cast<bool *>(matchLog[i].result) << "\n";
+    }
+  }
+}
+
+void printValueOfType(
+    std::ostream &os, std::string definitionPath, void *value,
+    std::string type) {
+  if (type.compare("%mpz*") == 0) {
+    os << reinterpret_cast<mpz_ptr>(value);
+  } else if (type.compare("%block*") == 0) {
+    if ((((uintptr_t)value) & 3) == 1) {
+      auto f = temporary_file("subject_XXXXXX");
+      string *s = printConfigurationToString(reinterpret_cast<block *>(value));
+      f.ofstream() << std::string(s->data, len(s)) << std::endl;
+      kllvm::printKORE(os, definitionPath, f.filename(), false, true);
+    } else if ((((uintptr_t)value) & 1) == 0) {
+      auto s = reinterpret_cast<string *>(value);
+      os << std::string(s->data, len(s));
+    } else {
+      os << "Error: " << type << " not implemented!";
+    }
+  } else if (type.compare("%floating*") == 0) {
+    os << floatToString(reinterpret_cast<floating *>(value));
+  } else if (type.compare("i1") == 0) {
+    os << *reinterpret_cast<bool *>(value);
+  } else {
+    os << "Error: " << type << " not implemented!";
+  }
 }

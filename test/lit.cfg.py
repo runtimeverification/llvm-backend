@@ -20,7 +20,7 @@ BINDINGS_INSTALL_PATH = os.environ.get(
 
 INCLUDE_INSTALL_PATH = os.environ.get(
     'INCLUDE_INSTALL_PATH',
-    os.path.join(ROOT_PATH, 'build', 'install', 'include'))
+    '$(llvm-kompile --include-dir)')
 
 PYTHON_INTERPRETER = os.environ.get('PYTHON_INTERPRETER', 'python3')
 
@@ -55,8 +55,6 @@ if os.getenv('LIT_USE_NIX'):
 # An interaction between lit and the shell on macOS means that we can't have
 # multiline substitutions natively. This function sanitizes them so that we can
 # use them cross-platform while retaining nice source code.
-
-
 def one_line(s):
     return s.strip().replace('\n', ' ; ').replace('do ;', 'do').replace("' ; '", r"'\\n'")
 
@@ -68,6 +66,10 @@ config.substitutions.extend([
     ('%convert-input', '%kore-convert %test-input -o %t.bin'),
     ('%strip-binary', 'kore-strip'),
     ('%arity', 'kore-arity'),
+    ('%apply-rule', 'k-rule-apply'),
+    ('%find-rule', 'k-rule-find'),
+
+    ('%kllvm-clang', 'clang -I %include-path -I Inputs Inputs/api.c'),
 
     ('%bindings-path', BINDINGS_INSTALL_PATH),
     ('%include-path', INCLUDE_INSTALL_PATH),

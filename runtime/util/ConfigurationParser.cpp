@@ -49,8 +49,7 @@ static uint32_t getTagForSymbol(KORESymbol const &symbol) {
   return getTagForSymbolName(out.str().c_str());
 }
 
-static void *
-constructCompositePattern(uint32_t tag, std::vector<void *> &arguments) {
+void *constructCompositePattern(uint32_t tag, std::vector<void *> &arguments) {
   if (isSymbolAFunction(tag)) {
     return evaluateFunctionSymbol(tag, &arguments[0]);
   }
@@ -88,7 +87,7 @@ struct construction {
   size_t nchildren;
 };
 
-void *constructInitialConfiguration(const KOREPattern *initial) {
+extern "C" void *constructInitialConfiguration(const KOREPattern *initial) {
   std::vector<std::variant<const KOREPattern *, construction>> workList{
       initial};
   std::vector<void *> output;

@@ -1,6 +1,7 @@
 #include <cstdio>
 #include <unistd.h>
 
+#include "kllvm/util/temporary_file.h"
 #include "runtime/header.h"
 
 extern "C" {
@@ -8,19 +9,15 @@ static block *dotK = leaf_block(getTagForSymbolName("dotk{}"));
 
 block *hook_KREFLECTION_parseKORE(SortString kore) {
   block *parsed = dotK;
-  char filename[17] = "parseKORE_XXXXXX";
+  auto temp_file = temporary_file("parseKORE_XXXXXX");
 
-  int fd = mkstemp(filename);
+  int fd = temp_file.descriptor();
 
   bool failed = write(fd, kore->data, len(kore)) == -1;
 
-  close(fd);
-
   if (!failed) {
-    parsed = parseConfiguration(filename);
+    parsed = parseConfiguration(temp_file.filename().c_str());
   }
-
-  remove(filename);
 
   return parsed;
 }

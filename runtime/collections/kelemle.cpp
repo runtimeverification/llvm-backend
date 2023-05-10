@@ -7,7 +7,6 @@ bool hook_LIST_eq(SortList, SortList);
 bool hook_SET_eq(SortSet, SortSet);
 bool hook_INT_eq(SortInt, SortInt);
 bool hook_FLOAT_trueeq(SortFloat, SortFloat);
-
 bool hook_STRING_lt(SortString, SortString);
 
 bool hook_KEQUAL_eq(block *arg1, block *arg2) {
@@ -226,5 +225,13 @@ bool hook_KEQUAL_lt(block *arg1, block *arg2) {
       }
     }
   }
+}
+
+bool hook_KEQUAL_ne(block *arg1, block *arg2) {
+  return !hook_KEQUAL_eq(arg1, arg2);
+}
+
+bool hook_BOOL_eq(bool arg1, bool arg2) {
+  return arg1 == arg2;
 }
 }

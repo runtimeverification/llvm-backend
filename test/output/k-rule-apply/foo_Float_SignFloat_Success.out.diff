@@ -1,0 +1,2 @@
+TEST.testSignFloat.sc(-0.10000000000000000e1) => 1
+Match succeeds

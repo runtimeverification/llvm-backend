@@ -150,7 +150,7 @@ static void emitDataTableForSymbol(
   initDebugGlobal(
       "table_" + name,
       getArrayDebugType(
-          dity, syms.size(), llvm::DataLayout(module).getABITypeAlignment(ty)),
+          dity, syms.size(), llvm::DataLayout(module).getABITypeAlign(ty)),
       globalVar);
   std::vector<llvm::Constant *> values;
   for (auto iter = syms.begin(); iter != syms.end(); ++iter) {
@@ -393,7 +393,7 @@ static std::pair<llvm::Value *, llvm::BasicBlock *> getEval(
         creator.getCurrentBlock(), llvm::Type::getInt64Ty(Ctx),
         result->getType(), llvm::ConstantExpr::getSizeOf(result->getType()),
         nullptr, nullptr);
-    creator.getCurrentBlock()->getInstList().push_back(Malloc);
+    Malloc->insertAfter(&creator.getCurrentBlock()->back());
     new llvm::StoreInst(result, Malloc, creator.getCurrentBlock());
     retval = new llvm::BitCastInst(
         Malloc, llvm::Type::getInt8PtrTy(Ctx), "", creator.getCurrentBlock());
@@ -401,7 +401,7 @@ static std::pair<llvm::Value *, llvm::BasicBlock *> getEval(
   }
   case SortCategory::Uncomputed: abort();
   }
-  creator.getCurrentBlock()->getInstList().push_back(inst);
+  inst->insertAfter(&creator.getCurrentBlock()->back());
   return std::make_pair(retval, creator.getCurrentBlock());
 }
 
@@ -555,7 +555,7 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
       llvm::Instruction *Malloc = llvm::CallInst::CreateMalloc(
           CaseBlock, llvm::Type::getInt64Ty(Ctx), compare->getType(),
           llvm::ConstantExpr::getSizeOf(compare->getType()), nullptr, nullptr);
-      CaseBlock->getInstList().push_back(Malloc);
+      Malloc->insertAfter(&CaseBlock->back());
       new llvm::StoreInst(compare, Malloc, CaseBlock);
       auto result = new llvm::BitCastInst(
           Malloc, llvm::Type::getInt8PtrTy(Ctx), "", CaseBlock);
@@ -1233,7 +1233,7 @@ static void emitSortTable(KOREDefinition *definition, llvm::Module *module) {
   initDebugGlobal(
       "sort_table",
       getArrayDebugType(
-          dity, syms.size(), llvm::DataLayout(module).getABITypeAlignment(ty)),
+          dity, syms.size(), llvm::DataLayout(module).getABITypeAlign(ty)),
       globalVar);
   std::vector<llvm::Constant *> values;
   for (auto iter = syms.begin(); iter != syms.end(); ++iter) {
@@ -1252,7 +1252,7 @@ static void emitSortTable(KOREDefinition *definition, llvm::Module *module) {
         "sorts_" + symbol->getName(),
         getArrayDebugType(
             getCharPtrDebugType(), symbol->getArguments().size(),
-            llvm::DataLayout(module).getABITypeAlignment(
+            llvm::DataLayout(module).getABITypeAlign(
                 llvm::Type::getInt8PtrTy(Ctx))),
         subtableVar);
     llvm::Constant *zero

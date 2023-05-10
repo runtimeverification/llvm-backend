@@ -100,7 +100,8 @@ void bind_ast(py::module_ &m) {
 
   py::class_<KORESortVariable, std::shared_ptr<KORESortVariable>>(
       ast, "SortVariable", sort_base)
-      .def(py::init(&KORESortVariable::Create));
+      .def(py::init(&KORESortVariable::Create))
+      .def_property_readonly("name", &KORESortVariable::getName);
 
   py::class_<KORECompositeSort, std::shared_ptr<KORECompositeSort>>(
       ast, "CompositeSort", sort_base)
@@ -108,7 +109,8 @@ void bind_ast(py::module_ &m) {
           py::init(&KORECompositeSort::Create), py::arg("name"),
           py::arg("cat") = ValueType{SortCategory::Uncomputed, 0})
       .def("add_argument", &KORECompositeSort::addArgument)
-      .def_property_readonly("name", &KORECompositeSort::getName);
+      .def_property_readonly("name", &KORECompositeSort::getName)
+      .def_property_readonly("arguments", &KORECompositeSort::getArguments);
 
   /* Symbols */
 
@@ -116,6 +118,11 @@ void bind_ast(py::module_ &m) {
       .def(py::init(&KORESymbol::Create))
       .def("__repr__", print_repr_adapter<KORESymbol>())
       .def("add_formal_argument", &KORESymbol::addFormalArgument)
+      .def_property_readonly(
+          "formal_arguments", &KORESymbol::getFormalArguments)
+      .def_property_readonly("name", &KORESymbol::getName)
+      .def_property_readonly("is_concrete", &KORESymbol::isConcrete)
+      .def_property_readonly("is_builtin", &KORESymbol::isBuiltin)
       .def(py::self == py::self)
       .def(py::self != py::self);
 
@@ -130,6 +137,7 @@ void bind_ast(py::module_ &m) {
       = py::class_<KOREPattern, std::shared_ptr<KOREPattern>>(ast, "Pattern")
             .def(py::init(&KOREPattern::load))
             .def("__repr__", print_repr_adapter<KOREPattern>())
+            .def_property_readonly("sort", &KOREPattern::getSort)
             .def("substitute", &KOREPattern::substitute);
 
   py::class_<KORECompositePattern, std::shared_ptr<KORECompositePattern>>(
@@ -138,13 +146,15 @@ void bind_ast(py::module_ &m) {
           &KORECompositePattern::Create)))
       .def(py::init(
           py::overload_cast<KORESymbol *>(&KORECompositePattern::Create)))
-      .def("add_argument", &KORECompositePattern::addArgument);
+      .def_property_readonly(
+          "constructor", &KORECompositePattern::getConstructor)
+      .def("add_argument", &KORECompositePattern::addArgument)
+      .def_property_readonly("arguments", &KORECompositePattern::getArguments);
 
   py::class_<KOREVariablePattern, std::shared_ptr<KOREVariablePattern>>(
       ast, "VariablePattern", pattern_base)
       .def(py::init(&KOREVariablePattern::Create))
-      .def_property_readonly("name", &KOREVariablePattern::getName)
-      .def_property_readonly("sort", &KOREVariablePattern::getSort);
+      .def_property_readonly("name", &KOREVariablePattern::getName);
 
   py::class_<KOREStringPattern, std::shared_ptr<KOREStringPattern>>(
       ast, "StringPattern", pattern_base)
