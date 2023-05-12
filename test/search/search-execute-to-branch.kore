@@ -1,20 +1,6 @@
 // RUN: %search-interpreter
 // RUN: %t.interpreter %test-input -1 /dev/stdout --execute-to-branch | diff - %test-diff-out
 
-/* test.k
-module TEST
-  imports BOOL
-
-  syntax Foo ::= "a" | "b" | "c" | "d" | "e"
-
-  rule a => b
-  rule b => c
-  rule c => d
-  rule c => e
-
-endmodule
-*/
-
 [topCellInitializer{}(LblinitGeneratedTopCell{}()), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/robertorosmaninho/rv/tests/issue_752/test.k)")]
 
 module BASIC-K
