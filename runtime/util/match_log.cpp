@@ -2,6 +2,7 @@
 
 #include "runtime/alloc.h"
 
+#include <cstdarg>
 #include <vector>
 
 extern "C" void *getStderr(void) {

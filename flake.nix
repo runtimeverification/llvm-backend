@@ -97,7 +97,7 @@
           builtins.listToAttrs (lib.imap0 (i: v: { name = "check_${toString i}"; value = v; }) checks);
 
         matrix = builtins.listToAttrs (lib.forEach (lib.cartesianProductOfSets {
-          llvm-version = [11 12 13 14 15];
+          llvm-version = [11 12 13 14 15 16];
           build-type = ["Debug" "Release" "RelWithDebInfo" "FastBuild" "GcStats"];
         }) (
           args:
@@ -111,9 +111,9 @@
         ));
       in with matrix; {
         packages = utils.lib.flattenTree {
-          inherit (llvm-backend-15-FastBuild) llvm-backend llvm-backend-matching llvm-kompile-testing;
-          default = llvm-backend-15-FastBuild.llvm-backend;
-          llvm-backend-release = llvm-backend-15-Release.llvm-backend;
+          inherit (llvm-backend-16-FastBuild) llvm-backend llvm-backend-matching llvm-kompile-testing;
+          default = llvm-backend-16-FastBuild.llvm-backend;
+          llvm-backend-release = llvm-backend-16-Release.llvm-backend;
         };
         checks = listToChecks [
           # Check that the backend compiles on each supported version of LLVM,
@@ -137,7 +137,9 @@
 
           llvm-backend-14-FastBuild.llvm-backend
 
-          llvm-backend-15-FastBuild.integration-tests
+          llvm-backend-15-FastBuild.llvm-backend
+
+          llvm-backend-16-FastBuild.integration-tests
         ];
         devShells.default = llvm-backend-15-FastBuild.devShell;
       }) // {
