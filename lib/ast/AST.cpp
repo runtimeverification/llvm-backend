@@ -1050,11 +1050,11 @@ sptr<KOREPattern> KORECompositePattern::desugarAssociative() {
       auto accum = std::move(comp_arg->arguments[0]);
 
       for (auto i = 1u; i < comp_arg->arguments.size(); i++) {
-        auto newAccum
+        auto new_accum
             = KORECompositePattern::Create(comp_arg->getConstructor());
-        newAccum->addArgument(std::move(accum));
-        newAccum->addArgument(comp_arg->arguments[i]->desugarAssociative());
-        accum = ptr<KOREPattern>(newAccum.release());
+        new_accum->addArgument(std::move(accum));
+        new_accum->addArgument(comp_arg->arguments[i]->desugarAssociative());
+        accum = ptr<KOREPattern>(new_accum.release());
       }
 
       return accum;
@@ -1066,11 +1066,11 @@ sptr<KOREPattern> KORECompositePattern::desugarAssociative() {
           = std::move(comp_arg->arguments[comp_arg->arguments.size() - 1]);
 
       for (int i = comp_arg->arguments.size() - 2; i >= 0; i--) {
-        auto newAccum
+        auto new_accum
             = KORECompositePattern::Create(comp_arg->getConstructor());
-        newAccum->addArgument(comp_arg->arguments[i]->desugarAssociative());
-        newAccum->addArgument(std::move(accum));
-        accum = ptr<KOREPattern>(newAccum.release());
+        new_accum->addArgument(comp_arg->arguments[i]->desugarAssociative());
+        new_accum->addArgument(std::move(accum));
+        accum = ptr<KOREPattern>(new_accum.release());
       }
 
       return accum;
