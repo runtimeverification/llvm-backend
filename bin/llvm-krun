@@ -204,7 +204,7 @@ for name in "${pretty[@]}"; do
   pretty_name="pretty_$name"
   set +e
   (
-  if [ $verbose -ge 1 ]; then
+  if [ "$verbose" -ge 1 ]; then
     set -x
   fi
   printf %s "${!pretty_name}" | "$dir/parser_$name" /dev/stdin > "$parser_file"
@@ -238,7 +238,7 @@ for name in "${params[@]}"; do
       temp_inputs+=("$temp_file")
 
       (
-      if [ $verbose -ge 2 ]; then
+      if [ "$verbose" -ge 2 ]; then
         set -x
       fi
       {
@@ -296,7 +296,7 @@ HERE
       cat "${!file_name}" >> "$input_file"
     elif [ -n "${!binary_file_name}" ]; then
       (
-      if [ $verbose -ge 5 ]; then
+      if [ "$verbose" -ge 5 ]; then
         set -x
       fi
       "$(dirname "$0")/kore-convert" "${!binary_file_name}" >> "$input_file"
@@ -320,7 +320,7 @@ construct_binary_input()
 {
   if [ ${#params[@]} -ne 0 ]; then
     (
-    if [ $verbose -ge 5 ]; then
+    if [ "$verbose" -ge 5 ]; then
       set -x
     fi
     echo "Lbl'Stop'Map{}()" | $convert_term >> "$input_file"
@@ -334,7 +334,7 @@ construct_binary_input()
 
     set +e
     (
-    if [ $verbose -ge 5 ]; then
+    if [ "$verbose" -ge 5 ]; then
       set -x
     fi
     echo "inj{SortKConfigVar{},SortKItem{}}(\dv{SortKConfigVar{}}(\"\$${param}\"))" \
@@ -343,7 +343,7 @@ construct_binary_input()
 
     if [ -n "${!file_name}" ]; then
       (
-      if [ $verbose -ge 5 ]; then
+      if [ "$verbose" -ge 5 ]; then
         set -x
       fi
       cat "${!file_name}" | $convert_term -k >> "$input_file"
@@ -353,7 +353,7 @@ construct_binary_input()
       temp_inputs+=("$temp_file")
 
       (
-      if [ $verbose -ge 3 ]; then
+      if [ "$verbose" -ge 3 ]; then
         set -x
       fi
       "$(dirname "$0")/kore-strip" -k -i "${!binary_file_name}" -o "$temp_file"
@@ -361,7 +361,7 @@ construct_binary_input()
       cat "$temp_file" >> "$input_file"
     else
       (
-      if [ $verbose -ge 5 ]; then
+      if [ "$verbose" -ge 5 ]; then
         set -x
       fi
       echo "${!var_name}" | $convert_term -k >> "$input_file"
@@ -369,7 +369,7 @@ construct_binary_input()
     fi
 
     (
-    if [ $verbose -ge 2 ]; then
+    if [ "$verbose" -ge 2 ]; then
       set -x
     fi
     {
@@ -383,14 +383,14 @@ construct_binary_input()
   done
 
   (
-  if [ $verbose -ge 5 ]; then
+  if [ "$verbose" -ge 5 ]; then
     set -x
   fi
   echo "$initializer()" | $convert_term -ka >> "$input_file"
   )
 
   (
-  if [ $verbose -ge 2 ]; then
+  if [ "$verbose" -ge 2 ]; then
     set -x
   fi
   "$(dirname "$0")/kore-arity" 1 >> "$input_file"
@@ -405,7 +405,7 @@ fi
 
 if $expandMacros; then
   (
-  if [ $verbose -ge 4 ]; then
+  if [ "$verbose" -ge 4 ]; then
     set -x
   fi
   "$(dirname "$0")/kore-expand-macros" "$dir" "$input_file" > "$expanded_input_file"
@@ -417,14 +417,14 @@ fi
 if $dryRun; then
   if [ $binary_input != $binary_output ] && [ -n "$real_output_file" ]; then
     (
-    if [ $verbose -ge 1 ]; then
+    if [ "$verbose" -ge 1 ]; then
       set -x
     fi
     "$(dirname "$0")/kore-convert" "$expanded_input_file" -o "$real_output_file"
     )
   elif [ $binary_input != $binary_output ]; then
     (
-    if [ $verbose -ge 1 ]; then
+    if [ "$verbose" -ge 1 ]; then
       set -x
     fi
     "$(dirname "$0")/kore-convert" -F "$expanded_input_file"
@@ -439,7 +439,7 @@ fi
 
 set +e
 (
-if [ $verbose -ge 1 ]; then
+if [ "$verbose" -ge 1 ]; then
   set -x
 fi
 $debug "$dir"/interpreter "$expanded_input_file" "$depth" "$output_file" "${interpreter_flags[@]}"
@@ -451,7 +451,7 @@ if [ -n "${real_output_file}" ]; then
   if $pretty_print; then
   set +e
   (
-  if [ $verbose -ge 1 ]; then
+  if [ "$verbose" -ge 1 ]; then
     set -x
   fi
   "$(dirname "$0")/kprint" "$dir" "$output_file" > "$real_output_file"
@@ -462,7 +462,7 @@ if [ -n "${real_output_file}" ]; then
 elif $pretty_print; then
   set +e
   (
-  if [ $verbose -ge 1 ]; then
+  if [ "$verbose" -ge 1 ]; then
     set -x
   fi
   "$(dirname "$0")/kprint" "$dir" "$output_file"
