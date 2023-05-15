@@ -148,6 +148,7 @@ void bind_ast(py::module_ &m) {
       .def_property_readonly(
           "constructor", &KORECompositePattern::getConstructor)
       .def("add_argument", &KORECompositePattern::addArgument)
+      .def("desugar_associative", &KORECompositePattern::desugarAssociative)
       .def_property_readonly("arguments", &KORECompositePattern::getArguments);
 
   py::class_<KOREVariablePattern, std::shared_ptr<KOREVariablePattern>>(
