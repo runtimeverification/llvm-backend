@@ -1043,6 +1043,10 @@ sptr<KOREPattern> KORECompositePattern::filterSubstitution(
   return shared_from_this();
 }
 
+sptr<KOREPattern> KORECompositePattern::desugarAssociative() {
+  return shared_from_this();
+}
+
 sptr<KOREPattern> KORECompositePattern::expandMacros(
     SubsortMap const &subsorts, SymbolMap const &overloads,
     std::vector<ptr<KOREDeclaration>> const &macros, bool reverse,
