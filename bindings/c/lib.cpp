@@ -159,6 +159,12 @@ kore_pattern *kore_pattern_make_interpreter_input(
   return top_cell;
 }
 
+kore_pattern *kore_pattern_desugar_associative(kore_pattern const *pat) {
+  auto ret = new kore_pattern;
+  ret->ptr_ = pat->ptr_;
+  return ret;
+}
+
 block *kore_pattern_construct(kore_pattern const *pat) {
   return static_cast<block *>(constructInitialConfiguration(pat->ptr_.get()));
 }

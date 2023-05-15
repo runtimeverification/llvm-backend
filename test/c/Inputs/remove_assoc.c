@@ -48,8 +48,9 @@ int main(int argc, char **argv) {
   api.kore_composite_pattern_add_argument(run, assoc);
 
   kore_pattern *input = api.kore_pattern_make_interpreter_input(run, sort_foo);
+  kore_pattern *desugared = api.kore_pattern_desugar_associative(input);
 
-  block *term = api.kore_pattern_construct(input);
+  block *term = api.kore_pattern_construct(desugared);
   block *after = api.take_steps(-1, term);
 
   printf("%s", api.kore_block_dump(after));
