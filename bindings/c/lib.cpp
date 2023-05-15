@@ -161,7 +161,7 @@ kore_pattern *kore_pattern_make_interpreter_input(
 
 kore_pattern *kore_pattern_desugar_associative(kore_pattern const *pat) {
   auto ret = new kore_pattern;
-  ret->ptr_ = pat->ptr_;
+  ret->ptr_ = pat->ptr_->desugarAssociative();
   return ret;
 }
 

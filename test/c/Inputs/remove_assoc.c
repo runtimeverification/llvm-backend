@@ -2,7 +2,7 @@
 
 #include <stdio.h>
 
-#define N_ARGS 1
+#define N_ARGS 3
 
 kore_pattern *make_list_item(struct kllvm_c_api *api, char const *arg) {
   kore_sort *sort_int = api->kore_composite_sort_new("SortInt");
@@ -26,7 +26,7 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  char const *args[N_ARGS] = {"78"};
+  char const *args[N_ARGS] = {"78", "12", "45"};
 
   struct kllvm_c_api api = load_c_api(argv[1]);
 

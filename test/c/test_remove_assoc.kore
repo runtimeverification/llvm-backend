@@ -1,7 +1,7 @@
 // RUN: mkdir -p %t.dir
 // RUN: %kompile %s c -o %t.dir/libtest.so
 // RUN: %kllvm-clang Inputs/remove_assoc.c -o %t
-// RUN: %t %t.dir/libtest.so
+// RUN: %t %t.dir/libtest.so | grep -q '\\dv{SortInt{}}("135")'
 
 [topCellInitializer{}(LblinitGeneratedTopCell{}()), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/bruce/code/scratch/test.k)")]
 
