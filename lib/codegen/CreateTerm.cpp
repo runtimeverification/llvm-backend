@@ -1044,6 +1044,11 @@ bool makeFunction(
     llvm::Module *Module, bool fastcc, bool bigStep, bool apply,
     KOREAxiomDeclaration *axiom, std::string postfix) {
   std::map<std::string, KOREVariablePattern *> vars;
+  if (apply) {
+    for (KOREPattern *lhs : axiom->getLeftHandSide()) {
+      lhs->markVariables(vars);
+    }
+  }
   pattern->markVariables(vars);
   llvm::StringMap<ValueType> params;
   std::vector<llvm::Type *> paramTypes;
