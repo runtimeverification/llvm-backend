@@ -40,7 +40,6 @@ std::string kllvm::decodeKore(std::string kore) {
     codes["Star"] = '*';
     codes["Plus"] = '+';
     codes["Comm"] = ',';
-    codes["Hyph"] = '-';
     codes["Stop"] = '.';
     codes["Slsh"] = '/';
     codes["Coln"] = ':';
