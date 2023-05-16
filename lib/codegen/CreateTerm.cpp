@@ -1045,6 +1045,20 @@ void addAbort(llvm::BasicBlock *block, llvm::Module *Module) {
   new llvm::UnreachableInst(Module->getContext(), block);
 }
 
+void writeLong(
+    llvm::Value *outputFile, llvm::Module *Module, uint64_t value,
+    llvm::BasicBlock *Block) {
+  llvm::CallInst::Create(
+      getOrInsertFunction(
+          Module, "writeLongToFile",
+          llvm::Type::getVoidTy(Module->getContext()),
+          llvm::Type::getInt8PtrTy(Module->getContext()),
+          llvm::Type::getInt64Ty(Module->getContext())),
+      {outputFile, llvm::ConstantInt::get(
+                       llvm::Type::getInt64Ty(Module->getContext()), value)},
+      "", Block);
+}
+
 bool makeFunction(
     std::string name, KOREPattern *pattern, KOREDefinition *definition,
     llvm::Module *Module, bool fastcc, bool bigStep,
@@ -1132,19 +1146,52 @@ bool makeFunction(
     new llvm::StoreInst(retval, tempAlloc, creator.getCurrentBlock());
     retval = tempAlloc;
   }
+  auto CurrentBlock = creator.getCurrentBlock();
+  if (apply) {
+    auto ProofOutputFlag = Module->getOrInsertGlobal(
+        "proof_output", llvm::Type::getInt1Ty(Module->getContext()));
+    auto OutputFileName = Module->getOrInsertGlobal(
+        "output_file", llvm::Type::getInt8PtrTy(Module->getContext()));
+    auto proofOutput = new llvm::LoadInst(
+        llvm::Type::getInt1Ty(Module->getContext()), ProofOutputFlag,
+        "proof_output", CurrentBlock);
+    llvm::BasicBlock *TrueBlock
+        = llvm::BasicBlock::Create(Module->getContext(), "if", applyRule);
+    llvm::BasicBlock *MergeBlock
+        = llvm::BasicBlock::Create(Module->getContext(), "tail", applyRule);
+    llvm::BranchInst::Create(TrueBlock, MergeBlock, proofOutput, CurrentBlock);
+    auto outputFile = new llvm::LoadInst(
+        llvm::Type::getInt8PtrTy(Module->getContext()), OutputFileName,
+        "output", TrueBlock);
+    writeLong(outputFile, Module, axiom->getOrdinal(), TrueBlock);
+    writeLong(
+        outputFile, Module, applyRule->arg_end() - applyRule->arg_begin(),
+        TrueBlock);
+    if (bigStep) {
+      llvm::CallInst::Create(
+          getOrInsertFunction(
+              Module, "serializeConfigurationToFile",
+              llvm::Type::getVoidTy(Module->getContext()),
+              llvm::Type::getInt8PtrTy(Module->getContext()),
+              getValueType({SortCategory::Symbol, 0}, Module)),
+          {outputFile, retval}, "", TrueBlock);
+    }
+    llvm::BranchInst::Create(MergeBlock, TrueBlock);
+    CurrentBlock = MergeBlock;
+  }
+
   if (bigStep) {
     llvm::Type *blockType = getValueType({SortCategory::Symbol, 0}, Module);
     llvm::Function *step = getOrInsertFunction(
         Module, "k_step",
         llvm::FunctionType::get(blockType, {blockType}, false));
-    auto call
-        = llvm::CallInst::Create(step, {retval}, "", creator.getCurrentBlock());
+    auto call = llvm::CallInst::Create(step, {retval}, "", CurrentBlock);
     setDebugLoc(call);
     call->setCallingConv(llvm::CallingConv::Fast);
     retval = call;
   }
-  auto ret = llvm::ReturnInst::Create(
-      Module->getContext(), retval, creator.getCurrentBlock());
+  auto ret
+      = llvm::ReturnInst::Create(Module->getContext(), retval, CurrentBlock);
   setDebugLoc(ret);
   return true;
 }
