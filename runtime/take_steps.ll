@@ -6,7 +6,11 @@ target triple = "@BACKEND_TARGET_TRIPLE@"
 
 declare fastcc %block* @k_step(%block*)
 declare fastcc %block** @stepAll(%block*, i64*)
+declare void @serializeConfigurationToFile(i8*, %block*)
+declare void @writeLongToFile(i8*, i64)
 
+@proof_output = external global i1
+@output_file = external global i8*
 @depth = thread_local global i64 zeroinitializer
 @steps = thread_local global i64 zeroinitializer
 @current_interval = thread_local global i64 0
@@ -42,6 +46,14 @@ else:
 }
 
 define %block* @take_steps(i64 %depth, %block* %subject) {
+  %proof_output = load i1, i1* @proof_output
+  br i1 %proof_output, label %if, label %merge
+if:
+  %output_file = load i8*, i8** @output_file
+  call void @writeLongToFile(i8* %output_file, i64 18446744073709551615)
+  call void @serializeConfigurationToFile(i8* %output_file, %block* %subject)
+  br label %merge
+merge:
   store i64 %depth, i64* @depth
   %result = call fastcc %block* @k_step(%block* %subject)
   ret %block* %result
