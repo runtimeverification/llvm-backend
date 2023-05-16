@@ -396,7 +396,7 @@ void serializeConfigurationToFile(
   size_t size;
   serializeConfiguration(subject, nullptr, &data, &size, emit_size);
 
-  FILE *file = fopen(filename, "w");
+  FILE *file = fopen(filename, "a");
   fwrite(data, 1, size, file);
   fclose(file);
 }
