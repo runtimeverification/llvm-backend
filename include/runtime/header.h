@@ -246,6 +246,7 @@ void serializeConfigurations(
 void serializeConfiguration(
     block *subject, char const *sort, char **data_out, size_t *size_out);
 void serializeConfigurationToFile(const char *filename, block *subject);
+void writeLongToFile(const char *filename, uint64_t i);
 
 // The following functions have to be generated at kompile time
 // and linked with the interpreter.
