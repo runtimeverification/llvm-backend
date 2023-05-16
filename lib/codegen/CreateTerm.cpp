@@ -1167,6 +1167,9 @@ std::string makeApplyRuleFunction(
   for (auto residual : residuals) {
     residual.pattern->markVariables(vars);
   }
+  for (KOREPattern *lhs : axiom->getLeftHandSide()) {
+    lhs->markVariables(vars);
+  }
   llvm::StringMap<ValueType> params;
   std::vector<llvm::Type *> paramTypes;
   std::vector<std::string> paramNames;
