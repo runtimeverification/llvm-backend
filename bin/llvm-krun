@@ -19,6 +19,7 @@ initializer="LblinitGeneratedTopCell{}"
 dir=.
 debug=
 depth=-1
+verbose=0
 binary_input=false
 binary_output=false
 pretty_print=false
@@ -67,14 +68,11 @@ Mandatory arguments to long options are mandatory for short options too.
       --depth INT          Execute up to INT steps
   -i, --initializer INIT   Use INIT as the top cell initializer 
   -nm, --no-expand-macros  Don't expand macros in initial configuration
-  -v, --verbose            Print commands executed to standard error
-      --verbose-depth INT  Print commands executed by intermediate tools to
-                           standard error output as:
-                             * Level 1: Equals to --verbose
-                             * Level 2: Level 1 + kore-arity commands
-                             * Level 3: Level 2 + kore-strip commands
-                             * Level 4: Level 3 + kore-expand-macros commands
-                             * Level 5: Level 4 + all kore-convert commands
+  -v, --verbose            Print major commands executed to standard error
+  -vv                      Print also commands executed by intermediate tools to
+                           standard error
+  -vvv                     Print all commands executed by this script to
+                           standard error
       -save-temps          Do not delete temporary files on exit
   -h, --help               Display this help and exit
 HERE
@@ -163,13 +161,18 @@ do
     shift; shift
     ;;
 
-    --verbose-depth)
-    verbose="$2"
-    shift; shift
+    -vvv)
+    verbose+=3
+    shift;
+    ;;
+
+    -vv)
+    verbose+=2
+    shift;
     ;;
 
     -v|--verbose)
-    verbose=1
+    verbose+=1
     shift;
     ;;
 
@@ -194,6 +197,10 @@ do
     ;;
   esac
 done
+
+if [ "$verbose" -ge 3 ]; then
+  set -x
+fi
 
 if $binary_output; then
   interpreter_flags+=("--binary-output")
@@ -296,7 +303,7 @@ HERE
       cat "${!file_name}" >> "$input_file"
     elif [ -n "${!binary_file_name}" ]; then
       (
-      if [ "$verbose" -ge 5 ]; then
+      if [ "$verbose" -ge 2 ]; then
         set -x
       fi
       "$(dirname "$0")/kore-convert" "${!binary_file_name}" >> "$input_file"
@@ -320,7 +327,7 @@ construct_binary_input()
 {
   if [ ${#params[@]} -ne 0 ]; then
     (
-    if [ "$verbose" -ge 5 ]; then
+    if [ "$verbose" -ge 2 ]; then
       set -x
     fi
     echo "Lbl'Stop'Map{}()" | $convert_term >> "$input_file"
@@ -334,7 +341,7 @@ construct_binary_input()
 
     set +e
     (
-    if [ "$verbose" -ge 5 ]; then
+    if [ "$verbose" -ge 2 ]; then
       set -x
     fi
     echo "inj{SortKConfigVar{},SortKItem{}}(\dv{SortKConfigVar{}}(\"\$${param}\"))" \
@@ -343,7 +350,7 @@ construct_binary_input()
 
     if [ -n "${!file_name}" ]; then
       (
-      if [ "$verbose" -ge 5 ]; then
+      if [ "$verbose" -ge 2 ]; then
         set -x
       fi
       cat "${!file_name}" | $convert_term -k >> "$input_file"
@@ -353,7 +360,7 @@ construct_binary_input()
       temp_inputs+=("$temp_file")
 
       (
-      if [ "$verbose" -ge 3 ]; then
+      if [ "$verbose" -ge 2 ]; then
         set -x
       fi
       "$(dirname "$0")/kore-strip" -k -i "${!binary_file_name}" -o "$temp_file"
@@ -361,7 +368,7 @@ construct_binary_input()
       cat "$temp_file" >> "$input_file"
     else
       (
-      if [ "$verbose" -ge 5 ]; then
+      if [ "$verbose" -ge 2 ]; then
         set -x
       fi
       echo "${!var_name}" | $convert_term -k >> "$input_file"
@@ -383,16 +390,10 @@ construct_binary_input()
   done
 
   (
-  if [ "$verbose" -ge 5 ]; then
-    set -x
-  fi
-  echo "$initializer()" | $convert_term -ka >> "$input_file"
-  )
-
-  (
   if [ "$verbose" -ge 2 ]; then
     set -x
   fi
+  echo "$initializer()" | $convert_term -ka >> "$input_file"
   "$(dirname "$0")/kore-arity" 1 >> "$input_file"
   )
 }
@@ -405,7 +406,7 @@ fi
 
 if $expandMacros; then
   (
-  if [ "$verbose" -ge 4 ]; then
+  if [ "$verbose" -ge 2 ]; then
     set -x
   fi
   "$(dirname "$0")/kore-expand-macros" "$dir" "$input_file" > "$expanded_input_file"
