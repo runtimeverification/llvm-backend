@@ -1042,6 +1042,51 @@ sptr<KOREPattern> KORECompositePattern::filterSubstitution(
   return shared_from_this();
 }
 
+sptr<KOREPattern> KORECompositePattern::desugarAssociative() {
+  if (constructor->getName() == "\\left-assoc") {
+    if (auto comp_arg
+        = dynamic_cast<KORECompositePattern *>(arguments[0].get())) {
+      auto accum = std::move(comp_arg->arguments[0]);
+
+      for (auto i = 1u; i < comp_arg->arguments.size(); i++) {
+        auto new_accum
+            = KORECompositePattern::Create(comp_arg->getConstructor());
+        new_accum->addArgument(std::move(accum));
+        new_accum->addArgument(comp_arg->arguments[i]->desugarAssociative());
+        accum = ptr<KOREPattern>(new_accum.release());
+      }
+
+      return accum;
+    }
+  } else if (constructor->getName() == "\\right-assoc") {
+    if (auto comp_arg
+        = dynamic_cast<KORECompositePattern *>(arguments[0].get())) {
+      auto accum
+          = std::move(comp_arg->arguments[comp_arg->arguments.size() - 1]);
+
+      for (int i = comp_arg->arguments.size() - 2; i >= 0; i--) {
+        auto new_accum
+            = KORECompositePattern::Create(comp_arg->getConstructor());
+        new_accum->addArgument(comp_arg->arguments[i]->desugarAssociative());
+        new_accum->addArgument(std::move(accum));
+        accum = ptr<KOREPattern>(new_accum.release());
+      }
+
+      return accum;
+    }
+  } else {
+    auto result = KORECompositePattern::Create(constructor.get());
+
+    for (auto &arg : arguments) {
+      result->addArgument(arg->desugarAssociative());
+    }
+
+    return result;
+  }
+
+  return shared_from_this();
+}
+
 sptr<KOREPattern> KORECompositePattern::expandMacros(
     SubsortMap const &subsorts, SymbolMap const &overloads,
     std::vector<ptr<KOREDeclaration>> const &macros, bool reverse,

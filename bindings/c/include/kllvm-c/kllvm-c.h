@@ -60,6 +60,8 @@ kore_pattern *kore_composite_pattern_new(char const *);
 kore_pattern *kore_composite_pattern_from_symbol(kore_symbol *);
 void kore_composite_pattern_add_argument(kore_pattern *, kore_pattern const *);
 
+kore_pattern *kore_pattern_desugar_associative(kore_pattern const *);
+
 kore_pattern *kore_string_pattern_new(char const *);
 kore_pattern *kore_string_pattern_new_with_len(char const *, size_t);
 
