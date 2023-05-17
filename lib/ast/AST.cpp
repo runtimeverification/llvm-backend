@@ -1046,7 +1046,7 @@ sptr<KOREPattern> KORECompositePattern::desugarAssociative() {
   if (constructor->getName() == "\\left-assoc") {
     if (auto comp_arg
         = dynamic_cast<KORECompositePattern *>(arguments[0].get())) {
-      auto accum = std::move(comp_arg->arguments[0]);
+      auto accum = comp_arg->arguments[0]->desugarAssociative();
 
       for (auto i = 1u; i < comp_arg->arguments.size(); i++) {
         auto new_accum
@@ -1061,8 +1061,8 @@ sptr<KOREPattern> KORECompositePattern::desugarAssociative() {
   } else if (constructor->getName() == "\\right-assoc") {
     if (auto comp_arg
         = dynamic_cast<KORECompositePattern *>(arguments[0].get())) {
-      auto accum
-          = std::move(comp_arg->arguments[comp_arg->arguments.size() - 1]);
+      auto accum = comp_arg->arguments[comp_arg->arguments.size() - 1]
+                       ->desugarAssociative();
 
       for (int i = comp_arg->arguments.size() - 2; i >= 0; i--) {
         auto new_accum
