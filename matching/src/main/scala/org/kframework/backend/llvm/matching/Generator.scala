@@ -130,7 +130,7 @@ object Generator {
       val lhsVarNames = lhsVars.map(_.name)
       val rhsVars = genVars(a.rewrite.getRightHandSide)
       val scVars = a.sideCondition.map(genVars(_))
-      new Action(a.ordinal, (lhsVars ++ rhsVars).map(_.name).sorted.distinct, scVars.map(_.map(_.name).sorted.distinct), (rhsVars ++ scVars.getOrElse(Seq())).filter(_.name.startsWith("Var'Bang")).map(v => (v.name, v.sort)), a.rewrite.getLeftHandSide.size, a.priority, a.source, a.location, lhsVarNames.toSet.size != lhsVarNames.size)
+      new Action(a.ordinal, lhsVars, rhsVars.map(_.name).sorted.distinct, scVars.map(_.map(_.name).sorted.distinct), (rhsVars ++ scVars.getOrElse(Seq())).filter(_.name.startsWith("Var'Bang")).map(v => (v.name, v.sort)), a.rewrite.getLeftHandSide.size, a.priority, a.source, a.location, lhsVarNames.toSet.size != lhsVarNames.size)
     })
     val patterns = axioms.map(a => genPatterns(mod, symlib, a.rewrite.getLeftHandSide)).transpose
     val cols = (sorts, if (axioms.isEmpty) sorts.map(_ => IndexedSeq()) else patterns).zipped.toIndexedSeq
