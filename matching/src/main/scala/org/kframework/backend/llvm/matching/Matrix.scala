@@ -3,7 +3,7 @@ package org.kframework.backend.llvm.matching
 import org.kframework.kore.KORE.{KApply,KList}
 import org.kframework.unparser.ToKast
 import org.kframework.attributes.{Location,Source,HasLocation}
-import org.kframework.parser.kore.{Sort,CompoundSort,SymbolOrAlias}
+import org.kframework.parser.kore.{Variable,Sort,CompoundSort,SymbolOrAlias}
 import org.kframework.parser.kore.implementation.{DefaultBuilders => B}
 import org.kframework.utils.errorsystem.KException
 import org.kframework.utils.errorsystem.KEMException
@@ -292,7 +292,7 @@ object SortInfo {
   }
 }
 
-case class Action(val ordinal: Int, val rhsVars: Seq[String], val scVars: Option[Seq[String]], val freshConstants: Seq[(String, Sort)], val arity: Int, val priority: Int, source: Optional[Source], location: Optional[Location], nonlinear: Boolean) extends HasLocation {
+case class Action(val ordinal: Int, val lhsVars: Seq[Variable], val rhsVars: Seq[String], val scVars: Option[Seq[String]], val freshConstants: Seq[(String, Sort)], val arity: Int, val priority: Int, source: Optional[Source], location: Optional[Location], nonlinear: Boolean) extends HasLocation {
   override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
 }
 
@@ -562,10 +562,14 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
     // compute the variables bound more than once
     val nonlinear = grouped.filter(_._2.size > 1)
     val nonlinearPairs = nonlinear.mapValues(l => (l, l.tail).zipped)
-    val newVars = try {
-      row.clause.action.rhsVars.map(v => (grouped(v).head._2, grouped(v).head._1.hookAtt))
-    } catch {
-      case e: NoSuchElementException => throw KEMException.internalError("Could not find binding for variable while compiling pattern matching.", e, row.clause.action)
+    val uniqueLhsVars = row.clause.action.lhsVars.filterNot(v => row.clause.action.rhsVars.contains(v.name)).distinct
+    val newVars = {
+      val lhs = uniqueLhsVars.map(v => grouped.get(v.name).map(g => v.name -> (g.head._2, g.head._1.hookAtt)).getOrElse(v.name -> (Base(),SortCategory(None, v.sort,symlib).hookAtt)))
+      val rhs = try { row.clause.action.rhsVars.map(v => v -> (grouped(v).head._2, grouped(v).head._1.hookAtt))
+      } catch {
+        case e: NoSuchElementException => throw KEMException.internalError("Could not find binding for variable while compiling pattern matching.", e, row.clause.action)
+      }
+      (lhs ++ rhs).sortBy(v => v._1).map(v => v._2)
     }
     val atomicLeaf = if (search) {
       SearchLeaf(row.clause.action.ordinal, newVars, Matrix.fromRows(symlib, firstGroup.patch(bestRowIx, Nil, 1), fringe, true).compile)
