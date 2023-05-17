@@ -31,9 +31,9 @@ rangemap hook_RANGEMAP_removeAll(rangemap *map, set *set);
 bool hook_RANGEMAP_eq(rangemap *m1, rangemap *m2);
 
 set hook_SET_element(block *);
-bool hook_SET_in(block *, set *);
+mpz_ptr hook_SET_size(set *s);
 set hook_SET_unit(void);
-bool hook_LIST_in(block *, list *);
+mpz_ptr hook_LIST_size(list *);
 
 block *hook_LIST_get_long(list *, size_t);
 block RD0 = {{0}};
@@ -210,21 +210,27 @@ BOOST_AUTO_TEST_CASE(rangemap_hook_difference) {
 BOOST_AUTO_TEST_CASE(rangemap_hook_keys) {
   auto map = hook_RANGEMAP_element(RDUMMY0, RDUMMY1, RDUMMY0);
   auto set = hook_RANGEMAP_keys(&map);
-  range *ptr = (range *)koreAlloc(sizeof(range));
-  ptr->h = range_header();
-  ptr->start = RDUMMY0;
-  ptr->end = RDUMMY1;
-  BOOST_CHECK(hook_SET_in((SortRange)ptr, &set));
+  auto result = hook_SET_size(&set);
+  BOOST_CHECK_EQUAL(mpz_cmp_ui(result, 1), 0);
+  for (auto iter = set.begin(); iter != set.end(); ++iter) {
+    block *b_ptr = (block *)iter->elem;
+    range *r_ptr = (range *)(b_ptr->children[0]);
+    BOOST_CHECK_EQUAL(r_ptr->start, RDUMMY0);
+    BOOST_CHECK_EQUAL(r_ptr->end, RDUMMY1);
+  }
 }
 
 BOOST_AUTO_TEST_CASE(rangemap_hook_keys_list) {
   auto map = hook_RANGEMAP_element(RDUMMY0, RDUMMY1, RDUMMY0);
   auto list = hook_RANGEMAP_keys_list(&map);
-  range *ptr = (range *)koreAlloc(sizeof(range));
-  ptr->h = range_header();
-  ptr->start = RDUMMY0;
-  ptr->end = RDUMMY1;
-  BOOST_CHECK(hook_LIST_in((SortRange)ptr, &list));
+  auto result = hook_LIST_size(&list);
+  BOOST_CHECK_EQUAL(mpz_cmp_ui(result, 1), 0);
+  for (auto iter = list.begin(); iter != list.end(); ++iter) {
+    block *b_ptr = (block *)iter->elem;
+    range *r_ptr = (range *)(b_ptr->children[0]);
+    BOOST_CHECK_EQUAL(r_ptr->start, RDUMMY0);
+    BOOST_CHECK_EQUAL(r_ptr->end, RDUMMY1);
+  }
 }
 
 BOOST_AUTO_TEST_CASE(rangemap_hook_in_keys) {

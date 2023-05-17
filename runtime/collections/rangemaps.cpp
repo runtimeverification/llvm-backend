@@ -21,7 +21,7 @@ static struct blockheader range_header() {
   }
   return hdr;
 }
-rangemap hook_RANGEMAP_elementRng(SortKItem rng, SortKItem value) {
+rangemap hook_RANGEMAP_elementRng(SortRange rng, SortKItem value) {
   range *ptr = (range *)rng;
   return hook_RANGEMAP_element(ptr->start, ptr->end, value);
 }
@@ -80,7 +80,7 @@ rangemap hook_RANGEMAP_update(
 }
 
 rangemap
-hook_RANGEMAP_updateRng(SortRangeMap m, SortKItem rng, SortKItem value) {
+hook_RANGEMAP_updateRng(SortRangeMap m, SortRange rng, SortKItem value) {
   range *ptr = (range *)rng;
   return hook_RANGEMAP_update(m, ptr->start, ptr->end, value);
 }
@@ -89,7 +89,7 @@ rangemap hook_RANGEMAP_remove(SortRangeMap m, SortKItem start, SortKItem end) {
   return m->deleted(rng_map::Range<KElem>(start, end));
 }
 
-rangemap hook_RANGEMAP_removeRng(SortRangeMap m, SortKItem rng) {
+rangemap hook_RANGEMAP_removeRng(SortRangeMap m, SortRange rng) {
   range *ptr = (range *)rng;
   return hook_RANGEMAP_remove(m, ptr->start, ptr->end);
 }
@@ -102,6 +102,18 @@ set hook_SET_unit(void);
 set hook_SET_element(block *);
 set hook_SET_concat(set *, set *);
 
+struct inj_range2kitem {
+  blockheader h;
+  range *child;
+};
+static struct blockheader inj_range2kitem_header() {
+  static struct blockheader hdr = {(uint64_t)-1};
+  if (hdr.hdr == -1) {
+    hdr = getBlockHeaderForSymbol(
+        (uint64_t)getTagForSymbolName("inj{SortRange{}, SortKItem{}}"));
+  }
+  return hdr;
+}
 set hook_RANGEMAP_keys(SortRangeMap m) {
   auto tmp = hook_SET_unit();
   for (auto iter = rng_map::ConstRangeMapIterator<KElem, KElem>(*m);
@@ -110,7 +122,11 @@ set hook_RANGEMAP_keys(SortRangeMap m) {
     ptr->h = range_header();
     ptr->start = iter->first.start();
     ptr->end = iter->first.end();
-    auto elem = hook_SET_element((SortRange)ptr);
+    inj_range2kitem *inj_ptr
+        = (inj_range2kitem *)koreAlloc(sizeof(inj_range2kitem));
+    inj_ptr->h = inj_range2kitem_header();
+    inj_ptr->child = ptr;
+    auto elem = hook_SET_element((SortKItem)inj_ptr);
     tmp = hook_SET_concat(&tmp, &elem);
   }
   return tmp;
@@ -124,7 +140,11 @@ list hook_RANGEMAP_keys_list(SortRangeMap m) {
     ptr->h = range_header();
     ptr->start = iter->first.start();
     ptr->end = iter->first.end();
-    tmp.push_back((SortRange)ptr);
+    inj_range2kitem *inj_ptr
+        = (inj_range2kitem *)koreAlloc(sizeof(inj_range2kitem));
+    inj_ptr->h = inj_range2kitem_header();
+    inj_ptr->child = ptr;
+    tmp.push_back((SortKItem)inj_ptr);
   }
   return tmp.persistent();
 }
@@ -150,7 +170,7 @@ SortKItem hook_RANGEMAP_choice(SortRangeMap m) {
   return (SortKItem)elem;
 }
 
-SortKItem hook_RANGEMAP_choiceRng(SortRangeMap m) {
+SortRange hook_RANGEMAP_choiceRng(SortRangeMap m) {
   if (m->empty()) {
     KLLVM_HOOK_INVALID_ARGUMENT("Cannot choose from an empty range map");
   }
