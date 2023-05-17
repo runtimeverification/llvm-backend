@@ -69,7 +69,7 @@ Mandatory arguments to long options are mandatory for short options too.
   -i, --initializer INIT   Use INIT as the top cell initializer 
   -nm, --no-expand-macros  Don't expand macros in initial configuration
   -v, --verbose            Print major commands executed to standard error
-  -vv                      Print also commands executed by intermediate tools to
+  -vv                      Also print commands executed by intermediate tools to
                            standard error
   -vvv                     Print all commands executed by this script to
                            standard error
@@ -162,13 +162,13 @@ do
     ;;
 
     -vvv)
-    verbose+=3
-    shift;
+    verbose=$((verbose+=3))
+    shift
     ;;
 
     -vv)
-    verbose+=2
-    shift;
+    verbose=$((verbose+=2))
+    shift
     ;;
 
     -v|--verbose)
@@ -339,7 +339,6 @@ construct_binary_input()
     file_name="file_$param"
     binary_file_name="binary_$param"
 
-    set +e
     (
     if [ "$verbose" -ge 2 ]; then
       set -x
