@@ -65,6 +65,10 @@ print_include_path () {
   echo "$include_dir"
 }
 
+llvm_major_version () {
+  echo "@LLVM_PACKAGE_VERSION@" | cut -d'.' -f1
+}
+
 positional_args=()
 reading_clang_args=false
 kompile_clang_flags=()
@@ -173,8 +177,14 @@ if [ "$compile" = "default" ]; then
         ;;
     esac
   done
+
   run "$(dirname "$0")"/llvm-kompile-codegen "$definition" "$dt_dir"/dt.yaml "$dt_dir" $debug > "$mod"
-  run @OPT@ -mem2reg -tailcallelim -tailcallopt "$mod" -o "$modopt"
+
+  if [ "$(llvm_major_version)" -ge "16" ]; then
+    run @OPT@ -passes='mem2reg,tailcallelim' -tailcallopt "$mod" -o "$modopt"
+  else
+    run @OPT@ -mem2reg -tailcallelim -tailcallopt "$mod" -o "$modopt"
+  fi
 elif [ "$compile" = "object" ]; then
   main="${positional_args[1]}"
   modopt="$definition"

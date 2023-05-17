@@ -226,8 +226,17 @@ llvm::Value *allocateTerm(
   llvm::Instruction *Malloc = llvm::CallInst::CreateMalloc(
       block, llvm::Type::getInt64Ty(block->getContext()), AllocType, Len,
       nullptr, koreHeapAlloc(allocFn, block->getModule()));
-  setDebugLoc(&block->back());
+
+  if (!block->empty()) {
+    setDebugLoc(&block->back());
+  }
+
+#if LLVM_VERSION_MAJOR < 16
   Malloc->insertAfter(&block->back());
+#else
+  Malloc->insertInto(block, block->end());
+#endif
+
   return Malloc;
 }
 
