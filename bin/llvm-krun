@@ -162,18 +162,18 @@ do
     ;;
 
     -vvv)
-    verbose=$((verbose+=3))
+    verbose=$((verbose + 3))
     shift
     ;;
 
     -vv)
-    verbose=$((verbose+=2))
+    verbose=$((verbose + 2))
     shift
     ;;
 
     -v|--verbose)
-    verbose+=1
-    shift;
+    verbose=$((verbose + 1))
+    shift
     ;;
 
     -save-temps)
