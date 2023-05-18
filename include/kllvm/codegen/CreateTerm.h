@@ -120,6 +120,8 @@ llvm::Type *getArgType(ValueType cat, llvm::Module *mod);
 llvm::Type *getValueType(ValueType sort, llvm::Module *Module);
 llvm::Type *getParamType(ValueType sort, llvm::Module *Module);
 
+bool isCollectionSort(ValueType cat);
+
 void addAbort(llvm::BasicBlock *block, llvm::Module *Module);
 
 llvm::Value *allocateTerm(
