@@ -68,7 +68,7 @@ static struct blockheader range_header() {
   static struct blockheader hdr = {(uint64_t)-1};
   if (hdr.hdr == -1) {
     hdr = getBlockHeaderForSymbol(
-        (uint64_t)getTagForSymbolName("range{SortKItem{}, SortKItem{}}"));
+        (uint64_t)getTagForSymbolName("LblRangemap'Coln'Range{}"));
   }
   return hdr;
 }
