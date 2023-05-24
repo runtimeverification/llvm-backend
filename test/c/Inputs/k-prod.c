@@ -3,17 +3,6 @@
 #include <assert.h>
 #include <stdio.h>
 
-/*
-  module TEST
-    imports DOMAINS
-
-    syntax KItem ::= bar() [klabel(bar), symbol]
-
-    syntax K ::= foo() [function, klabel(foo), symbol]
-    rule foo() => bar()
-  endmodule
-*/
-
 int main(int argc, char **argv) {
   if (argc <= 2) {
     return 1;
