@@ -1,5 +1,5 @@
 # RUN: mkdir -p %t
-# RUN: export IN=$(realpath Inputs/test_labels.kore)
+# RUN: export IN=$(realpath Inputs/labels.kore)
 # RUN: cd %t && %kompile "$IN" python --python %py-interpreter --python-output-dir .
 # RUN: KLLVM_DEFINITION=%t %python %s
 
