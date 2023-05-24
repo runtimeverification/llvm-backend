@@ -1,4 +1,4 @@
-module TEST
+module REMOVE-ASSOC
   imports DOMAINS
 
   syntax Foo ::= run(List) [klabel(run), symbol]
