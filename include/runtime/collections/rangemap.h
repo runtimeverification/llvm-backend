@@ -265,11 +265,10 @@ private:
     }
   }
 
-  // Gather the intersection ranges of this rangemap and rangemap m, i.e. all
+  // Return the intersection ranges of this rangemap and rangemap m, i.e. all
   // ranges in this rangemap that overlap (fully or partially) with ranges in m
-  // and are mapped to the same value in both rangemaps, in res.
-  void
-  get_intersection_ranges(RangeMap const &m, std::vector<Range<T>> &res) const {
+  // and are mapped to the same value in both rangemaps.
+  std::vector<Range<T>> get_intersection_ranges(RangeMap const &m) const {
     std::vector<std::pair<Range<T>, V>> r1;
     for_each(treemap_, [&r1](Range<T> const &x, V const &v) {
       r1.emplace_back(std::make_pair(x, v));
@@ -279,6 +278,7 @@ private:
       r2.emplace_back(std::make_pair(x, v));
     });
     // Compute the intersection of this rangemap and m.
+    std::vector<Range<T>> res;
     int i = 0;
     int j = 0;
     // Repeat while there are more ranges in both rangemaps.
@@ -298,6 +298,7 @@ private:
         j++;
       }
     }
+    return res;
   }
 
 public:
@@ -485,8 +486,7 @@ public:
   // map resulting from deleting these ranges from A.
   RangeMap difference(RangeMap const &m) const {
     // Compute the intersection of this rangemap and m.
-    std::vector<Range<T>> intersect;
-    get_intersection_ranges(m, intersect);
+    std::vector<Range<T>> intersect = get_intersection_ranges(m);
     // Delete all collected intersection ranges from this rangemap.
     RangeMap tmpmap = *this;
     for (auto &r : intersect) {
@@ -500,8 +500,7 @@ public:
   // in key ranges in m and are mapped to the same value.
   bool inclusion(RangeMap const &m) const {
     // Compute the intersection of this rangemap and m.
-    std::vector<Range<T>> intersect;
-    get_intersection_ranges(m, intersect);
+    std::vector<Range<T>> intersect = get_intersection_ranges(m);
     // Compare the intersection ranges with this rangemap's ranges.
     // If they differ, return false.
     auto it = intersect.begin();
