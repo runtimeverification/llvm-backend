@@ -246,15 +246,6 @@ void rangemap_hash(rangemap *m, void *hasher) {
   hash_exit();
 }
 
-void rangemap_foreach(rangemap *map, void(process)(block **)) {
-  for (auto iter = rng_map::RangeMapIterator<KElem, KElem>(*map);
-       iter.has_next(); ++iter) {
-    process((block **)&iter->first.start());
-    process((block **)&iter->first.end());
-    process((block **)&iter->second);
-  }
-}
-
 rangemap rangemap_map(rangemap *map, block *(process)(block *)) {
   auto tmp = *map;
   for (auto iter = rng_map::ConstRangeMapIterator<KElem, KElem>(*map);
