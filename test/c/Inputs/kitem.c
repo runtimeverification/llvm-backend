@@ -3,17 +3,6 @@
 #include <assert.h>
 #include <stdio.h>
 
-/*
-  module TEST
-    imports INT
-
-    syntax KItem ::= foo() [function, klabel(foo), symbol]
-                   | bar() [klabel(bar), symbol]
-
-    rule foo() => bar()
-  endmodule
-*/
-
 int main(int argc, char **argv) {
   if (argc <= 2) {
     return 1;
