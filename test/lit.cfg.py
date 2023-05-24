@@ -56,7 +56,11 @@ if os.getenv('LIT_USE_NIX'):
 # multiline substitutions natively. This function sanitizes them so that we can
 # use them cross-platform while retaining nice source code.
 def one_line(s):
-    return s.strip().replace('\n', ' ; ').replace('do ;', 'do').replace("' ; '", r"'\\n'")
+    return s.strip() \
+        .replace('\n', ' ; ') \
+        .replace('do ;', 'do') \
+        .replace('then ;', 'then') \
+        .replace("' ; '", r"'\\n'") \
 
 
 config.substitutions.extend([
@@ -92,14 +96,24 @@ config.substitutions.extend([
     ('%check-dir-grep', one_line('''
         for out in %test-dir-out/*.out.grep; do
             in=%test-dir-in/`basename $out .out.grep`.in
-            %t.interpreter $in -1 /dev/stdout | grep -f $out -q || (echo $in && exit 1)
+            %t.interpreter $in -1 /dev/stdout | grep -f $out -q
+            result="$?"
+            if [ "$result" -ne 0 ]; then
+                echo "$in"
+                exit 1
+            fi
         done
     ''')),
 
     ('%check-dir-diff', one_line('''
         for out in %test-dir-out/*.out.diff; do
             in=%test-dir-in/`basename $out .out.diff`.in
-            %t.interpreter $in -1 /dev/stdout | diff - $out || (echo $in && exit 1)
+            %t.interpreter $in -1 /dev/stdout | diff - $out
+            result="$?"
+            if [ "$result" -ne 0 ]; then
+                echo "$in"
+                exit 1
+            fi
         done
     ''')),
 
