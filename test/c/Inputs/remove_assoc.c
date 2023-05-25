@@ -1,6 +1,7 @@
 #include "api.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 
 #define N_ARGS 3
 
@@ -17,6 +18,7 @@ kore_pattern *make_list_item(struct kllvm_c_api *api, char const *arg) {
   api->kore_pattern_free(token);
   api->kore_pattern_free(inj);
   api->kore_sort_free(sort_int);
+  api->kore_sort_free(sort_kitem);
 
   return list_item;
 }
@@ -40,8 +42,9 @@ int main(int argc, char **argv) {
   kore_pattern *assoc = api.kore_composite_pattern_new("\\left-assoc");
 
   for (int i = 0; i < N_ARGS; ++i) {
-    api.kore_composite_pattern_add_argument(
-        concat, make_list_item(&api, args[i]));
+    kore_pattern *list_item = make_list_item(&api, args[i]);
+    api.kore_composite_pattern_add_argument(concat, list_item);
+    api.kore_pattern_free(list_item);
   }
 
   api.kore_composite_pattern_add_argument(assoc, concat);
@@ -53,5 +56,14 @@ int main(int argc, char **argv) {
   block *term = api.kore_pattern_construct(desugared);
   block *after = api.take_steps(-1, term);
 
-  printf("%s", api.kore_block_dump(after));
+  char *output = api.kore_block_dump(after);
+  printf("%s", output);
+  free(output);
+
+  api.kore_pattern_free(run);
+  api.kore_pattern_free(concat);
+  api.kore_pattern_free(assoc);
+  api.kore_pattern_free(input);
+  api.kore_pattern_free(desugared);
+  api.kore_sort_free(sort_foo);
 }
