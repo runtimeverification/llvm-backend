@@ -73,9 +73,8 @@ SortInt hook_BYTES_bytes2int(
 
 unsigned long get_ui_named(mpz_t i, std::string const &caller) {
   if (!mpz_fits_ulong_p(i)) {
-    std::string const error_msg
-        = "Integer overflow from " + caller + ": " + intToString(i);
-    KLLVM_HOOK_INVALID_ARGUMENT(error_msg);
+    KLLVM_HOOK_INVALID_ARGUMENT(
+        "Integer overflow from {}: {}", caller, intToString(i));
   }
   return mpz_get_ui(i);
 }
