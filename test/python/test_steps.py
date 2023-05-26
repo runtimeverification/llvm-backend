@@ -43,6 +43,8 @@ class TestSteps(unittest.TestCase):
         t.step(200)
         self.assertEqual(str(t), bar_output())
 
+        kllvm.runtime.free_all_kore_memory()
+
     def test_steps_2(self):
         t = kllvm.runtime.Term(start_pattern())
 
@@ -51,6 +53,8 @@ class TestSteps(unittest.TestCase):
         self.assertEqual(str(t), foo_output(50))
         t.step(-1)
         self.assertEqual(str(t), bar_output())
+
+        kllvm.runtime.free_all_kore_memory()
 
     def test_steps_3(self):
         t = kllvm.runtime.Term(start_pattern())
@@ -62,6 +66,8 @@ class TestSteps(unittest.TestCase):
         t.run()
         pat = t.to_pattern()
         self.assertEqual(str(pat), bar_output())
+
+        kllvm.runtime.free_all_kore_memory()
 
 
 if __name__ == "__main__":

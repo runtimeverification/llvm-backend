@@ -10,6 +10,10 @@ namespace py = pybind11;
 
 using namespace kllvm;
 
+extern "C" {
+void freeAllKoreMem(void);
+}
+
 /*
  * We can't use the pybind default holders because they'll try to take ownership
  * of the runtime's objects. This is the minimum viable holder that does _not_
@@ -66,6 +70,8 @@ void bind_runtime(py::module_ &m) {
             = static_cast<kllvm::KOREPattern *>(termToKorePattern(term));
         return std::shared_ptr<kllvm::KOREPattern>(raw_ptr);
       });
+
+  m.def("free_all_kore_memory", &freeAllKoreMem);
 }
 
 PYBIND11_MODULE(_kllvm_runtime, m) {
