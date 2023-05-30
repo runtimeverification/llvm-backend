@@ -407,6 +407,23 @@ public:
       SubsortMap const &subsorts, SymbolMap const &overloads,
       std::vector<ptr<KOREDeclaration>> const &axioms, bool reverse);
 
+  /*
+   * Recursively expands productions of the form:
+   *
+   *   \{left,right}-assoc{}(LABEL(a_0, a_1, ..., a_n-1, a_n))
+   *
+   * Into their canonical forms:
+   *
+   *    left: LABEL(LABEL(..., a_n-1), a_n)
+   *   right: LABEL(a_0, LABEL(a_1, ...))
+   *
+   * This will be a no-op if this pattern was produced by the KORE parser, which
+   * performs this desugaring "live" at parsing time. The method is intended
+   * primarily to be called from language bindings that programatically
+   * construct patterns.
+   */
+  virtual sptr<KOREPattern> desugarAssociative() = 0;
+
   friend KORECompositePattern;
 
 private:
@@ -470,6 +487,11 @@ public:
       PrettyPrintData const &data, std::set<std::string> const &vars) override {
     return shared_from_this();
   }
+
+  virtual sptr<KOREPattern> desugarAssociative() override {
+    return shared_from_this();
+  }
+
   virtual bool matches(
       substitution &subst, SubsortMap const &, SymbolMap const &,
       sptr<KOREPattern> subject) override;
@@ -537,6 +559,7 @@ public:
   sortCollections(PrettyPrintData const &data) override;
   virtual sptr<KOREPattern> dedupeDisjuncts(void) override;
   virtual std::map<std::string, int> gatherVarCounts(void) override;
+  virtual sptr<KOREPattern> desugarAssociative() override;
   virtual sptr<KOREPattern> filterSubstitution(
       PrettyPrintData const &data, std::set<std::string> const &vars) override;
   virtual bool matches(
@@ -596,6 +619,11 @@ public:
   virtual std::map<std::string, int> gatherVarCounts(void) override {
     return std::map<std::string, int>{};
   }
+
+  virtual sptr<KOREPattern> desugarAssociative() override {
+    return shared_from_this();
+  }
+
   virtual sptr<KOREPattern> filterSubstitution(
       PrettyPrintData const &data, std::set<std::string> const &var) override {
     return shared_from_this();

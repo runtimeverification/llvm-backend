@@ -48,8 +48,8 @@ blockEnumerator() {
   return std::make_pair(blocks.begin(), blocks.end());
 }
 
-std::unordered_set<block *, HashBlock, KEq>
-take_search_steps(int64_t depth, int64_t bound, block *subject) {
+std::unordered_set<block *, HashBlock, KEq> take_search_steps(
+    bool executeToBranch, int64_t depth, int64_t bound, block *subject) {
   static int registered = -1;
   if (registered == -1) {
     registerGCRootsEnumerator(blockEnumerator);
@@ -78,6 +78,10 @@ take_search_steps(int64_t depth, int64_t bound, block *subject) {
     stepResults.clear();
     take_search_step(state);
 
+    if (executeToBranch && stepResults.size() > 1) {
+      results.insert(state);
+      return results;
+    }
     if (stepResults.size() == 0) {
       results.insert(state);
       if (results.size() == bound) {

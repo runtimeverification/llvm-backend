@@ -2,29 +2,6 @@
 
 #include <stdio.h>
 
-/*
-  module ARITHMETIC-SYNTAX
-    imports UNSIGNED-INT-SYNTAX
-
-    syntax Exp ::= Int
-                 | Exp "+" Exp [left, strict]
-  endmodule
-
-  module ARITHMETIC
-    imports ARITHMETIC-SYNTAX
-    imports DOMAINS
-
-    configuration
-      <k> $PGM:Exp </k>
-
-    rule A + B => A +Int B
-
-    syntax Bool ::= isKResult(Exp) [function, symbol]
-    rule isKResult(_::Int) => true
-    rule isKResult(_)      => false [owise]
-  endmodule
-*/
-
 int main(int argc, char **argv) {
   if (argc <= 1) {
     return 1;

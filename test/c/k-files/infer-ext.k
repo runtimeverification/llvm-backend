@@ -1,0 +1,2 @@
+module INFER-EXT
+endmodule

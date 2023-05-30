@@ -127,11 +127,13 @@ kore_pattern *kore_pattern_make_interpreter_input(
   auto config_sort = kore_composite_sort_new("SortKConfigVar");
   auto kitem_sort = kore_composite_sort_new("SortKItem");
 
-  auto key = kore_pattern_new_injection(
-      kore_pattern_new_token("$PGM", config_sort), config_sort, kitem_sort);
+  auto pgm_token = kore_pattern_new_token("$PGM", config_sort);
+  auto key = kore_pattern_new_injection(pgm_token, config_sort, kitem_sort);
+  kore_pattern_free(pgm_token);
 
   auto map_item = kore_composite_pattern_new("Lbl'UndsPipe'-'-GT-Unds'");
   kore_composite_pattern_add_argument(map_item, key);
+  kore_pattern_free(key);
 
   if (kore_sort_is_kitem(sort)) {
     kore_composite_pattern_add_argument(map_item, pgm);
@@ -159,6 +161,12 @@ kore_pattern *kore_pattern_make_interpreter_input(
   return top_cell;
 }
 
+kore_pattern *kore_pattern_desugar_associative(kore_pattern const *pat) {
+  auto ret = new kore_pattern;
+  ret->ptr_ = pat->ptr_->desugarAssociative();
+  return ret;
+}
+
 block *kore_pattern_construct(kore_pattern const *pat) {
   return static_cast<block *>(constructInitialConfiguration(pat->ptr_.get()));
 }
@@ -167,7 +175,7 @@ char *kore_block_dump(block *term) {
   auto hooked_str = printConfigurationToString(term)->data;
   auto len = std::strlen(hooked_str);
 
-  auto new_str = static_cast<char *>(malloc(len * sizeof(char)));
+  auto new_str = static_cast<char *>(malloc((len + 1) * sizeof(char)));
   std::strncpy(new_str, hooked_str, len);
   new_str[len] = '\0';
 
