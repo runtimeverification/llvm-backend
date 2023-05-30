@@ -66,6 +66,7 @@ void bind_ast(py::module_ &m) {
   py::enum_<SortCategory>(ast, "SortCategory")
       .value("Uncomputed", SortCategory::Uncomputed)
       .value("Map", SortCategory::Map)
+      .value("RangeMap", SortCategory::RangeMap)
       .value("List", SortCategory::List)
       .value("Set", SortCategory::Set)
       .value("Int", SortCategory::Int)

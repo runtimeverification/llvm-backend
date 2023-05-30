@@ -126,6 +126,36 @@ void serializeMap(
   }
 }
 
+void serializeRangeMap(
+    writer *file, rangemap *map, const char *unit, const char *element,
+    const char *concat, void *state) {
+  auto &instance = static_cast<serialization_state *>(state)->instance;
+
+  size_t size = map->size();
+  if (size == 0) {
+    emitSymbol(instance, unit);
+    return;
+  }
+
+  bool once = true;
+  for (auto iter = rng_map::ConstRangeMapIterator<KElem, KElem>(*map);
+       iter.has_next(); ++iter) {
+    serializeConfigurationInternal(
+        file, iter->first.start(), "SortKItem{}", false, state);
+    serializeConfigurationInternal(
+        file, iter->first.end(), "SortKItem{}", false, state);
+    serializeConfigurationInternal(
+        file, iter->second, "SortKItem{}", false, state);
+    emitSymbol(instance, element, 3);
+
+    if (once) {
+      once = false;
+    } else {
+      emitSymbol(instance, concat, 2);
+    }
+  }
+}
+
 void serializeList(
     writer *file, list *list, const char *unit, const char *element,
     const char *concat, void *state) {
@@ -295,7 +325,8 @@ void serializeConfigurationInternal(
          serializeBool,
          serializeStringBuffer,
          serializeMInt,
-         serializeComma};
+         serializeComma,
+         serializeRangeMap};
 
   visitChildren(subject, file, &callbacks, state_ptr);
 

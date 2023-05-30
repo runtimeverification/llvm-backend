@@ -2,6 +2,7 @@ add_library(collections STATIC
   kelemle.cpp
   lists.cpp
   maps.cpp
+  rangemaps.cpp
   sets.cpp
   hash.cpp
 )

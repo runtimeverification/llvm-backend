@@ -152,6 +152,7 @@ llvm::DIType *getForwardDecl(std::string name) {
 }
 
 static std::string MAP_STRUCT = "map";
+static std::string RANGEMAP_STRUCT = "rangemap";
 static std::string LIST_STRUCT = "list";
 static std::string SET_STRUCT = "set";
 static std::string INT_STRUCT = "__mpz_struct";
@@ -163,8 +164,8 @@ llvm::DIType *getDebugType(ValueType type, std::string typeName) {
   if (!Dbg)
     return nullptr;
   static std::map<std::string, llvm::DIType *> types;
-  llvm::DIType *map, *list, *set, *integer, *floating, *buffer, *boolean, *mint,
-      *symbol;
+  llvm::DIType *map, *rangemap, *list, *set, *integer, *floating, *buffer,
+      *boolean, *mint, *symbol;
   if (types[typeName]) {
     return types[typeName];
   }
@@ -173,6 +174,10 @@ llvm::DIType *getDebugType(ValueType type, std::string typeName) {
     map = getPointerDebugType(getForwardDecl(MAP_STRUCT), typeName);
     types[typeName] = map;
     return map;
+  case SortCategory::RangeMap:
+    rangemap = getPointerDebugType(getForwardDecl(RANGEMAP_STRUCT), typeName);
+    types[typeName] = rangemap;
+    return rangemap;
   case SortCategory::List:
     list = getPointerDebugType(getForwardDecl(LIST_STRUCT), typeName);
     types[typeName] = list;

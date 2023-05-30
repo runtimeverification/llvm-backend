@@ -2,6 +2,7 @@
 
 extern "C" {
 bool hook_MAP_eq(SortMap, SortMap);
+bool hook_RANGEMAP_eq(SortRangeMap, SortRangeMap);
 bool hook_LIST_eq(SortList, SortList);
 bool hook_SET_eq(SortSet, SortSet);
 bool hook_INT_eq(SortInt, SortInt);
@@ -43,6 +44,15 @@ bool hook_KEQUAL_eq(block *arg1, block *arg2) {
               map *map1ptr = (map *)(child1intptr);
               map *map2ptr = (map *)(child2intptr);
               bool cmp = hook_MAP_eq(map1ptr, map2ptr);
+              if (!cmp) {
+                return false;
+              }
+              break;
+            }
+            case RANGEMAP_LAYOUT: {
+              rangemap *rangemap1ptr = (rangemap *)(child1intptr);
+              rangemap *rangemap2ptr = (rangemap *)(child2intptr);
+              bool cmp = hook_RANGEMAP_eq(rangemap1ptr, rangemap2ptr);
               if (!cmp) {
                 return false;
               }
@@ -173,6 +183,9 @@ bool hook_KEQUAL_lt(block *arg1, block *arg2) {
           uint16_t cat = layoutPtr->args[i].cat;
           switch (cat) {
           case MAP_LAYOUT: {
+            abort(); // Implement when needed.
+          }
+          case RANGEMAP_LAYOUT: {
             abort(); // Implement when needed.
           }
           case LIST_LAYOUT: {
