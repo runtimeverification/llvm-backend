@@ -148,4 +148,11 @@ __attribute__((always_inline)) void *koreAllocFloatingOld(size_t requested) {
   set_len(result, sizeof(floating_hdr) - sizeof(blockheader));
   return &result->f;
 }
+
+void resetMemory() {
+  freeAllMemory();
+  arenaReset(&youngspace);
+  arenaReset(&oldspace);
+  arenaReset(&alwaysgcspace);
+}
 }

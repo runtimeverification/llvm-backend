@@ -11,7 +11,7 @@ namespace py = pybind11;
 using namespace kllvm;
 
 extern "C" {
-void freeAllKoreMem(void);
+void resetMemory(void);
 }
 
 /*
@@ -71,7 +71,7 @@ void bind_runtime(py::module_ &m) {
         return std::shared_ptr<kllvm::KOREPattern>(raw_ptr);
       });
 
-  m.def("free_all_kore_memory", &freeAllKoreMem);
+  m.def("free_all_kllvm_memory", &resetMemory);
 }
 
 PYBIND11_MODULE(_kllvm_runtime, m) {
