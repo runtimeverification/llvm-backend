@@ -29,6 +29,13 @@ def make_term_class(mod):
         def to_pattern(self):
             return self._block.to_pattern()
 
+        def serialize(self):
+            return self._block.serialize()
+
+        @staticmethod
+        def deserialize(bs):
+            return mod.InternalTerm.deserialize(bs)
+
     return Term
 
 
