@@ -426,3 +426,33 @@ void writeLongToFile(const char *filename, uint64_t i) {
   fwrite(&i, 8, 1, file);
   fclose(file);
 }
+
+void serializeTermToFile(
+    const char *filename, block *subject, const char *sort) {
+  char *data;
+  size_t size;
+  serializeConfiguration(subject, sort, &data, &size);
+
+  FILE *file = fopen(filename, "a");
+  fwrite(data, 1, size, file);
+  fclose(file);
+}
+
+void serializeRawTermToFile(
+    const char *filename, void *subject, const char *sort) {
+  std::string s = "inj{";
+  s += sort;
+  s += ", SortKItem{}}";
+  uint32_t tag = getTagForSymbolName(s.c_str());
+  std::vector<void *> vec = std::vector<void *>();
+  vec.push_back(subject);
+  block *term = (block *)constructCompositePattern(tag, vec);
+
+  char *data;
+  size_t size;
+  serializeConfiguration(term, "SortKItem{}", &data, &size);
+
+  FILE *file = fopen(filename, "a");
+  fwrite(data, 1, size, file);
+  fclose(file);
+}

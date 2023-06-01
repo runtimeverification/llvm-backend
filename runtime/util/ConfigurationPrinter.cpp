@@ -369,3 +369,13 @@ void printValueOfType(
     os << "Error: " << type << " not implemented!";
   }
 }
+
+void printVariableToFile(const char *filename, const char *varname) {
+  FILE *file = fopen(filename, "a");
+
+  fprintf(file, "%s", varname);
+  char n = 0;
+  fwrite(&n, 1, 1, file);
+
+  fclose(file);
+}

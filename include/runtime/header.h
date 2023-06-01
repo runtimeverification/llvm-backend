@@ -266,6 +266,11 @@ void serializeConfiguration(
 void serializeConfigurationToFile(
     const char *filename, block *subject, bool emit_size);
 void writeLongToFile(const char *filename, uint64_t i);
+void serializeTermToFile(
+    const char *filename, block *subject, const char *sort);
+void serializeRawTermToFile(
+    const char *filename, void *subject, const char *sort);
+void printVariableToFile(const char *filename, const char *varname);
 
 // The following functions have to be generated at kompile time
 // and linked with the interpreter.

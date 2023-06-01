@@ -11,6 +11,7 @@
 #include "llvm/IR/BasicBlock.h"
 #include "llvm/IR/Constants.h"
 #include "llvm/IR/DerivedTypes.h"
+#include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/Instructions.h"
 #include "llvm/IRReader/IRReader.h"
 #include "llvm/Support/MemoryBuffer.h"
@@ -98,7 +99,7 @@ target triple = "@BACKEND_TARGET_TRIPLE@"
 
 ; Interface to the configuration parser
 declare %block* @parseConfiguration(i8*)
-declare void @printConfiguration(i32, %block *)
+declare void @printConfiguration(i8 *, %block *)
 )LLVM";
 
 std::unique_ptr<llvm::Module>
@@ -1162,6 +1163,7 @@ bool makeFunction(
         "proof_output", CurrentBlock);
     llvm::BasicBlock *TrueBlock
         = llvm::BasicBlock::Create(Module->getContext(), "if", applyRule);
+    auto ir = new llvm::IRBuilder(TrueBlock);
     llvm::BasicBlock *MergeBlock
         = llvm::BasicBlock::Create(Module->getContext(), "tail", applyRule);
     llvm::BranchInst::Create(TrueBlock, MergeBlock, proofOutput, CurrentBlock);
@@ -1172,14 +1174,65 @@ bool makeFunction(
     writeLong(
         outputFile, Module, applyRule->arg_end() - applyRule->arg_begin(),
         TrueBlock);
+    for (auto entry = subst.begin(); entry != subst.end(); ++entry) {
+      auto key = entry->getKey();
+      auto val = entry->getValue();
+      auto var = vars[key.str()];
+      auto sort = dynamic_cast<KORECompositeSort *>(var->getSort().get());
+      std::ostringstream Out;
+      sort->print(Out);
+      auto sortptr = ir->CreateGlobalStringPtr(Out.str(), "", 0, Module);
+      auto varname = ir->CreateGlobalStringPtr(key, "", 0, Module);
+      ir->CreateCall(
+          getOrInsertFunction(
+              Module, "printVariableToFile",
+              llvm::Type::getVoidTy(Module->getContext()),
+              llvm::Type::getInt8PtrTy(Module->getContext()),
+              llvm::Type::getInt8PtrTy(Module->getContext())),
+          {outputFile, varname});
+      if (val->getType() == getValueType({SortCategory::Symbol, 0}, Module)) {
+        ir->CreateCall(
+            getOrInsertFunction(
+                Module, "serializeTermToFile",
+                llvm::Type::getVoidTy(Module->getContext()),
+                llvm::Type::getInt8PtrTy(Module->getContext()),
+                getValueType({SortCategory::Symbol, 0}, Module),
+                llvm::Type::getInt8PtrTy(Module->getContext())),
+            {outputFile, val, sortptr});
+      } else if (val->getType()->isIntegerTy()) {
+        val = ir->CreateIntToPtr(
+            val, llvm::Type::getInt8PtrTy(Module->getContext()));
+        ir->CreateCall(
+            getOrInsertFunction(
+                Module, "serializeRawTermToFile",
+                llvm::Type::getVoidTy(Module->getContext()),
+                llvm::Type::getInt8PtrTy(Module->getContext()),
+                llvm::Type::getInt8PtrTy(Module->getContext()),
+                llvm::Type::getInt8PtrTy(Module->getContext())),
+            {outputFile, val, sortptr});
+      } else {
+        val = ir->CreatePointerCast(
+            val, llvm::Type::getInt8PtrTy(Module->getContext()));
+        ir->CreateCall(
+            getOrInsertFunction(
+                Module, "serializeRawTermToFile",
+                llvm::Type::getVoidTy(Module->getContext()),
+                llvm::Type::getInt8PtrTy(Module->getContext()),
+                llvm::Type::getInt8PtrTy(Module->getContext()),
+                llvm::Type::getInt8PtrTy(Module->getContext())),
+            {outputFile, val, sortptr});
+      }
+    }
+
     if (bigStep) {
-      llvm::CallInst::Create(
+      writeLong(outputFile, Module, 0xffffffffffffffff, TrueBlock);
+      ir->CreateCall(
           getOrInsertFunction(
               Module, "serializeConfigurationToFile",
               llvm::Type::getVoidTy(Module->getContext()),
               llvm::Type::getInt8PtrTy(Module->getContext()),
               getValueType({SortCategory::Symbol, 0}, Module)),
-          {outputFile, retval}, "", TrueBlock);
+          {outputFile, retval});
     }
     llvm::BranchInst::Create(MergeBlock, TrueBlock);
     CurrentBlock = MergeBlock;
