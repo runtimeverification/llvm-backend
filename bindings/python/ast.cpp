@@ -1,4 +1,5 @@
 #include <kllvm/ast/AST.h>
+#include <kllvm/binary/deserializer.h>
 #include <kllvm/binary/serializer.h>
 #include <kllvm/parser/KOREParser.h>
 
@@ -141,10 +142,16 @@ void bind_ast(py::module_ &m) {
             .def("__repr__", print_repr_adapter<KOREPattern>())
             .def_property_readonly("sort", &KOREPattern::getSort)
             .def("substitute", &KOREPattern::substitute)
-            .def("serialize", [](KOREPattern const &pattern) {
-              auto out = serializer{};
-              pattern.serialize_to(out);
-              return py::bytes(out.byte_string());
+            .def(
+                "serialize",
+                [](KOREPattern const &pattern) {
+                  auto out = serializer{};
+                  pattern.serialize_to(out);
+                  return py::bytes(out.byte_string());
+                })
+            .def_static("deserialize", [](py::bytes const &bytes) {
+              auto str = std::string(bytes);
+              return deserialize_pattern(str.begin(), str.end());
             });
 
   py::class_<KORECompositePattern, std::shared_ptr<KORECompositePattern>>(

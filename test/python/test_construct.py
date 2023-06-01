@@ -23,6 +23,9 @@ class TestTermConstruct(unittest.TestCase):
             term = kllvm.runtime.Term(pat)
             self.assertEqual(str(pat), str(term))
 
+            binary = pat.serialize()
+            pat_2 = kllvm.ast.Pattern.deserialize(binary)
+            self.assertEqual(str(pat), str(pat_2))
 
 if __name__ == "__main__":
     unittest.main()
