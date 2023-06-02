@@ -107,6 +107,14 @@ Composite patterns encode each of their arguments (recursively, following this
 schema), then the constructor symbol (as described above). These are followed by
 the byte `04`, and a variable-length arity for the pattern.
 
+Pattern variables encode their sort argument, followed by the byte `09`, then a
+variable as described below.
+
+### Variables
+
+KORE variables are encoded as the byte `0D`, followed by a string representing
+the variable name.
+
 ## Manipulating Binary Terms
 
 This binary format is designed for easy composition through concatenation. To do
