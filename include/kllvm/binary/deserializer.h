@@ -186,6 +186,16 @@ sptr<KOREPattern> read(It &ptr, It end, binary_version version) {
       break;
     }
 
+    case header_byte<KOREVariablePattern>: {
+      ++ptr;
+      auto name = read_variable(ptr, end, version);
+      auto sort = sort_stack.back();
+      sort_stack.pop_back();
+
+      term_stack.push_back(KOREVariablePattern::Create(name->getName(), sort));
+      break;
+    }
+
     case header_byte<KORESymbol>: {
       ++ptr;
       symbol = read_symbol(ptr, end, sort_stack, version);
