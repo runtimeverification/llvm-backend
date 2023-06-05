@@ -24,7 +24,7 @@ stdenv.mkDerivation {
       -e '2a export PATH="${lib.getBin host.clang}/bin:''${PATH}"'
 
     sed -i bin/llvm-kompile \
-      -e '169i kompile_clang_flags+=$(${python-env}/bin/pybind11-config --includes)'
+      -e '190i kompile_clang_flags+=$(${python-env}/bin/pybind11-config --includes)'
 
     substituteInPlace bin/llvm-kompile \
       --replace 'python_cmd=python3' 'python_cmd="${python-env.interpreter}"'
