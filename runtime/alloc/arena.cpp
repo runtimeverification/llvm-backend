@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/mman.h>
 
 #include "runtime/alloc.h"
 #include "runtime/arena.h"
@@ -50,11 +51,20 @@ static unsigned blocks_left = 0;
 static void *megabyte_malloc() {
   if (blocks_left == 0) {
     blocks_left = 15;
-    if (int result
-        = posix_memalign(&superblock_ptr, BLOCK_SIZE, BLOCK_SIZE * 15)) {
-      errno = result;
-      perror("posix_memalign");
+    auto ptr = mmap(
+        NULL, BLOCK_SIZE * 16, PROT_READ | PROT_WRITE,
+        MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+    if (ptr == MAP_FAILED) {
+      perror("mmap");
+      abort();
     }
+    superblock_ptr
+        = (void *)(((uintptr_t)ptr + (BLOCK_SIZE - 1)) & (~(BLOCK_SIZE - 1)));
+    /* if (int result */
+    /*     = posix_memalign(&superblock_ptr, BLOCK_SIZE, BLOCK_SIZE * 15)) { */
+    /*   errno = result; */
+    /*   perror("posix_memalign"); */
+    /* } */
     if (!first_superblock_ptr) {
       first_superblock_ptr = superblock_ptr;
     }
@@ -236,7 +246,7 @@ void freeAllMemory() {
   while (superblock) {
     memory_block_header *next_superblock
         = (memory_block_header *)superblock->next_superblock;
-    free(superblock);
+    munmap(superblock, 15 * BLOCK_SIZE);
     superblock = next_superblock;
   }
   first_superblock_ptr = 0;
