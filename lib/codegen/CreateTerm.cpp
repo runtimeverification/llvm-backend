@@ -1153,7 +1153,7 @@ bool makeFunction(
     retval = tempAlloc;
   }
   auto CurrentBlock = creator.getCurrentBlock();
-  if (apply) {
+  if (apply && bigStep) {
     auto ProofOutputFlag = Module->getOrInsertGlobal(
         "proof_output", llvm::Type::getInt1Ty(Module->getContext()));
     auto OutputFileName = Module->getOrInsertGlobal(
@@ -1224,16 +1224,15 @@ bool makeFunction(
       }
     }
 
-    if (bigStep) {
-      writeLong(outputFile, Module, 0xffffffffffffffff, TrueBlock);
-      ir->CreateCall(
-          getOrInsertFunction(
-              Module, "serializeConfigurationToFile",
-              llvm::Type::getVoidTy(Module->getContext()),
-              llvm::Type::getInt8PtrTy(Module->getContext()),
-              getValueType({SortCategory::Symbol, 0}, Module)),
-          {outputFile, retval});
-    }
+    writeLong(outputFile, Module, 0xffffffffffffffff, TrueBlock);
+    ir->CreateCall(
+        getOrInsertFunction(
+            Module, "serializeConfigurationToFile",
+            llvm::Type::getVoidTy(Module->getContext()),
+            llvm::Type::getInt8PtrTy(Module->getContext()),
+            getValueType({SortCategory::Symbol, 0}, Module)),
+        {outputFile, retval});
+
     llvm::BranchInst::Create(MergeBlock, TrueBlock);
     CurrentBlock = MergeBlock;
   }
