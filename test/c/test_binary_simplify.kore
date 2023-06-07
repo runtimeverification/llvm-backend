@@ -1,6 +1,6 @@
 // RUN: mkdir -p %t.dir
-// RUN: %kompile %s c -o %t.dir/libtest.so
-// RUN: %kllvm-clang Inputs/binary_simplify.c -o %t
+// RUN: %kompile %s c -o %t.dir/libtest.so -g
+// RUN: %kllvm-clang Inputs/binary_simplify.c -o %t -g
 
 // RUN: %t %t.dir/libtest.so %t.foo.bin
 // RUN: %kore-convert %t.foo.bin | grep -q 'Lblbar{}(\\dv{SortInt{}}("17"))'
