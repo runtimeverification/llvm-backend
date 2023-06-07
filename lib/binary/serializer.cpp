@@ -59,6 +59,13 @@ void serializer::emit_zero_size() {
   emit(uint64_t{0});
 }
 
+void serializer::correct_emitted_size() {
+  auto bytes = detail::to_bytes(uint64_t{buffer_.size()});
+  auto header_prefix_length = 11u;
+
+  std::copy(bytes.begin(), bytes.end(), buffer_.begin() + header_prefix_length);
+}
+
 void serializer::emit(std::byte b) {
   buffer_.push_back(b);
   next_idx_++;

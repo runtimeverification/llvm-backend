@@ -86,6 +86,12 @@ public:
    */
   int emit_length(uint64_t len);
 
+  /**
+   * Set the previously-emitted bytes following the header to reflect the actual
+   * number of bytes currently contained in the buffer.
+   */
+  void correct_emitted_size();
+
   std::vector<std::byte> const &data() { return buffer_; }
 
   /**
