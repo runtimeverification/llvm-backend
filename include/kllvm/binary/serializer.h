@@ -49,7 +49,7 @@ public:
   };
 
   static constexpr auto magic_header = std::array{'\x7f', 'K', 'O', 'R', 'E'};
-  static constexpr auto version = binary_version(1, 1, 0);
+  static constexpr auto version = binary_version(1, 2, 0);
 
   serializer();
   serializer(flags f);
@@ -116,6 +116,12 @@ private:
    * Emit the standard \xf7KORE prefix and version number to the buffer.
    */
   void emit_header_and_version();
+
+  /**
+   * Emit 8 zero bytes to the buffer; these bytes can optionally later be
+   * mutated to encode the actual size of a serialized pattern.
+   */
+  void emit_zero_size();
 
   /**
    * Emit a string directly to the output buffer and update the interning table,

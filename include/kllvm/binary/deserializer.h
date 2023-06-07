@@ -54,8 +54,8 @@ binary_version read_version(It &ptr, It end) {
 
 template <typename It>
 uint64_t read_pattern_size(It &ptr, It end, binary_version version) {
-  if (version.compatible(binary_version(1, 2, 0))) {
-    abort();
+  if (version >= binary_version(1, 2, 0)) {
+    return detail::read<uint64_t>(ptr, end);
   }
 
   return 0u;

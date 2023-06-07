@@ -26,6 +26,7 @@ serializer::serializer(flags f)
     , intern_table_{} {
   if (use_header_) {
     emit_header_and_version();
+    emit_zero_size();
   }
 }
 
@@ -36,6 +37,7 @@ void serializer::reset() {
 
   if (use_header_) {
     emit_header_and_version();
+    emit_zero_size();
   }
 }
 
@@ -51,6 +53,10 @@ void serializer::emit_header_and_version() {
   emit(version.v_major);
   emit(version.v_minor);
   emit(version.v_patch);
+}
+
+void serializer::emit_zero_size() {
+  emit(uint64_t{0});
 }
 
 void serializer::emit(std::byte b) {

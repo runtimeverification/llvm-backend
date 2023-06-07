@@ -38,6 +38,23 @@ constexpr bool operator!=(binary_version a, binary_version b) {
   return !(a == b);
 }
 
+constexpr bool operator<(binary_version a, binary_version b) {
+  return std::tie(a.v_major, a.v_minor, a.v_patch)
+         < std::tie(b.v_major, b.v_minor, b.v_patch);
+}
+
+constexpr bool operator<=(binary_version a, binary_version b) {
+  return a < b || a == b;
+}
+
+constexpr bool operator>(binary_version a, binary_version b) {
+  return !(a <= b);
+}
+
+constexpr bool operator>=(binary_version a, binary_version b) {
+  return !(a < b);
+}
+
 } // namespace kllvm
 
 #endif
