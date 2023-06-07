@@ -1222,6 +1222,7 @@ bool makeFunction(
                 llvm::Type::getInt8PtrTy(Module->getContext())),
             {outputFile, val, sortptr});
       }
+      writeLong(outputFile, Module, 0xcccccccccccccccc, TrueBlock);
     }
 
     writeLong(outputFile, Module, 0xffffffffffffffff, TrueBlock);
@@ -1232,6 +1233,7 @@ bool makeFunction(
             llvm::Type::getInt8PtrTy(Module->getContext()),
             getValueType({SortCategory::Symbol, 0}, Module)),
         {outputFile, retval});
+    writeLong(outputFile, Module, 0xcccccccccccccccc, TrueBlock);
 
     llvm::BranchInst::Create(MergeBlock, TrueBlock);
     CurrentBlock = MergeBlock;

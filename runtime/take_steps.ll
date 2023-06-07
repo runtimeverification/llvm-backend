@@ -52,6 +52,7 @@ if:
   %output_file = load i8*, i8** @output_file
   call void @writeLongToFile(i8* %output_file, i64 18446744073709551615)
   call void @serializeConfigurationToFile(i8* %output_file, %block* %subject)
+  call void @writeLongToFile(i8* %output_file, i64 14757395258967641292)
   br label %merge
 merge:
   store i64 %depth, i64* @depth
