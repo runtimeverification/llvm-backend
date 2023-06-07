@@ -53,6 +53,15 @@ binary_version read_version(It &ptr, It end) {
 }
 
 template <typename It>
+uint64_t read_pattern_size(It &ptr, It end, binary_version version) {
+  if (version.compatible(binary_version(1, 2, 0))) {
+    abort();
+  }
+
+  return 0u;
+}
+
+template <typename It>
 uint64_t read_length(It &ptr, It end, binary_version version, int v1_bytes) {
   if (version.compatible(binary_version(1, 0, 0))) {
     uint64_t ret = 0;
@@ -240,6 +249,12 @@ sptr<KOREPattern> deserialize_pattern(It begin, It end) {
   }
 
   auto version = detail::read_version(begin, end);
+  auto total_size = detail::read_pattern_size(begin, end, version);
+
+  if (total_size > 0 && std::distance(begin, end) > total_size) {
+    end = std::next(begin, total_size);
+  }
+
   return detail::read(begin, end, version);
 }
 
