@@ -54,7 +54,7 @@ binary_version read_version(It &ptr, It end) {
 
 template <typename It>
 uint64_t read_length(It &ptr, It end, binary_version version, int v1_bytes) {
-  if (are_compatible(version, binary_version(1, 0, 0))) {
+  if (version.compatible(binary_version(1, 0, 0))) {
     uint64_t ret = 0;
 
     for (auto i = 0; i < v1_bytes; ++i) {
