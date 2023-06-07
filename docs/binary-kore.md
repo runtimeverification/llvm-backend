@@ -51,6 +51,12 @@ For example, a file of version `1.0.0` should begin:
 7f4b 4f52 4501 0000 0000 00
 ```
 
+In version `1.2.0` and newer of the format, immediately following the version
+header, patterns contain a `0E` byte followed by an 8-byte value representing
+the length of the subsequent pattern in bytes. If that value is zero, then the
+implementation should parse as far as possible (e.g. following the convention of
+versions `1.1.0` and older).
+
 ## Strings
 
 Two representations for strings are available: direct and interned.

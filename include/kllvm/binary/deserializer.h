@@ -45,6 +45,14 @@ T read(It &ptr, It end) {
 }
 
 template <typename It>
+binary_version read_version(It &ptr, It end) {
+  auto v_major = detail::read<int16_t>(ptr, end);
+  auto v_minor = detail::read<int16_t>(ptr, end);
+  auto v_patch = detail::read<int16_t>(ptr, end);
+  return binary_version(v_major, v_minor, v_patch);
+}
+
+template <typename It>
 uint64_t read_length(It &ptr, It end, binary_version version, int v1_bytes) {
   if (are_compatible(version, binary_version(1, 0, 0))) {
     uint64_t ret = 0;
@@ -231,11 +239,8 @@ sptr<KOREPattern> deserialize_pattern(It begin, It end) {
     detail::read<char>(begin, end);
   }
 
-  auto v_major = detail::read<int16_t>(begin, end);
-  auto v_minor = detail::read<int16_t>(begin, end);
-  auto v_patch = detail::read<int16_t>(begin, end);
-
-  return detail::read(begin, end, binary_version(v_major, v_minor, v_patch));
+  auto version = detail::read_version(begin, end);
+  return detail::read(begin, end, version);
 }
 
 bool has_binary_kore_header(std::string const &filename);
