@@ -60,8 +60,11 @@ void serializer::emit_zero_size() {
 }
 
 void serializer::correct_emitted_size() {
-  auto bytes = detail::to_bytes(uint64_t{buffer_.size()});
   auto header_prefix_length = 11u;
+  auto header_prefix_length_with_version = header_prefix_length + 8u;
+
+  auto bytes = detail::to_bytes(
+      uint64_t{buffer_.size() - header_prefix_length_with_version});
 
   std::copy(bytes.begin(), bytes.end(), buffer_.begin() + header_prefix_length);
 }
