@@ -247,20 +247,7 @@ deserializeInitialConfiguration(It ptr, It end, binary_version version) {
 block *parseConfiguration(const char *filename) {
   if (has_binary_kore_header(filename)) {
     auto data = file_contents(filename);
-
-    auto ptr = data.begin();
-    auto end = data.end();
-
-    for (auto i = 0; i < serializer::magic_header.size(); ++i) {
-      detail::read<char>(ptr, end);
-    }
-
-    auto v_major = detail::read<int16_t>(ptr, end);
-    auto v_minor = detail::read<int16_t>(ptr, end);
-    auto v_patch = detail::read<int16_t>(ptr, end);
-
-    return reinterpret_cast<block *>(deserializeInitialConfiguration(
-        ptr, data.end(), binary_version(v_major, v_minor, v_patch)));
+    return deserializeConfiguration(data.data(), data.size());
   } else {
     auto InitialConfiguration = parser::KOREParser(filename).pattern();
     // InitialConfiguration->print(std::cout);
@@ -280,10 +267,13 @@ block *deserializeConfiguration(char *data, size_t size) {
     detail::read<char>(ptr, end);
   }
 
-  auto v_major = detail::read<int16_t>(ptr, end);
-  auto v_minor = detail::read<int16_t>(ptr, end);
-  auto v_patch = detail::read<int16_t>(ptr, end);
+  auto version = detail::read_version(ptr, end);
+  auto total_size = detail::read_pattern_size(ptr, end, version);
 
-  return static_cast<block *>(deserializeInitialConfiguration(
-      ptr, end, binary_version(v_major, v_minor, v_patch)));
+  if (total_size > 0 && std::distance(ptr, end) > total_size) {
+    end = std::next(ptr, total_size);
+  }
+
+  return static_cast<block *>(
+      deserializeInitialConfiguration(ptr, end, version));
 }

@@ -390,10 +390,11 @@ void serializeConfigurations(
   fclose(file);
 }
 
-void serializeConfigurationToFile(const char *filename, block *subject) {
+void serializeConfigurationToFile(
+    const char *filename, block *subject, bool emit_size) {
   char *data;
   size_t size;
-  serializeConfiguration(subject, nullptr, &data, &size);
+  serializeConfiguration(subject, nullptr, &data, &size, emit_size);
 
   FILE *file = fopen(filename, "w");
   fwrite(data, 1, size, file);
@@ -401,11 +402,16 @@ void serializeConfigurationToFile(const char *filename, block *subject) {
 }
 
 void serializeConfiguration(
-    block *subject, char const *sort, char **data_out, size_t *size_out) {
+    block *subject, char const *sort, char **data_out, size_t *size_out,
+    bool emit_size) {
   auto state = serialization_state();
 
   writer w = {nullptr, nullptr};
   serializeConfigurationInternal(&w, subject, sort, false, &state);
+
+  if (emit_size) {
+    state.instance.correct_emitted_size();
+  }
 
   auto size = state.instance.data().size();
   auto buf = static_cast<char *>(malloc(size));

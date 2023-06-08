@@ -70,12 +70,13 @@ void bind_runtime(py::module_ &m) {
           })
       .def(
           "serialize",
-          [](block *term) {
+          [](block *term, bool emit_size) {
             char *data;
             size_t size;
-            serializeConfiguration(term, nullptr, &data, &size);
+            serializeConfiguration(term, nullptr, &data, &size, emit_size);
             return py::bytes(std::string(data, data + size));
-          })
+          },
+          py::kw_only(), py::arg("emit_size") = false)
       .def("deserialize", [](py::bytes const &bytes) {
         auto str = std::string(bytes);
         return deserializeConfiguration(str.data(), str.size());

@@ -61,6 +61,56 @@ auto print_repr_adapter(Args &&...args) {
       ::detail::type_identity<T>{}, std::forward<Args>(args)...);
 }
 
+/**
+ * Rather than requiring the entire contents of the binary file to be read into
+ * memory ahead of time, this binding uses the optional size field present in
+ * version 1.2.0 of the binary format to read only the required portion of the
+ * file. If the size is zero, or the input pattern uses an older version, an
+ * exception will be thrown. The file pointer will be left at the end of the
+ * pattern's bytes after calling this function.
+ */
+std::shared_ptr<KOREPattern> read_pattern_from_file(py::object &file_like) {
+  if (!py::hasattr(file_like, "read")) {
+    throw py::type_error("Argument to read_from is not a file-like object");
+  }
+
+  auto read_attr = file_like.attr("read");
+  auto read = [&read_attr](auto len) -> std::string {
+    return py::bytes(read_attr(len));
+  };
+
+  auto header = read(5);
+  auto ref_header = serializer::magic_header;
+  if (!std::equal(header.begin(), header.end(), ref_header.begin())) {
+    throw std::invalid_argument(
+        "Data does not begin with the binary KORE header bytes");
+  }
+
+  auto version_bytes = read(6);
+  auto version_begin = version_bytes.begin();
+  auto version
+      = kllvm::detail::read_version(version_begin, version_bytes.end());
+
+  if (version < binary_version(1, 2, 0)) {
+    throw std::invalid_argument(
+        "Pattern read from a file-like object must use version 1.2.0 or newer");
+  }
+
+  auto size_bytes = read(8);
+  auto size_begin = size_bytes.begin();
+  auto size = kllvm::detail::read_pattern_size_unchecked(
+      size_begin, size_bytes.end());
+
+  if (size == 0) {
+    throw std::invalid_argument("Pattern size must be set explicitly when "
+                                "reading from a file-like object");
+  }
+
+  auto pattern_bytes = read(size);
+  auto pattern_begin = pattern_bytes.begin();
+  return kllvm::detail::read(pattern_begin, pattern_bytes.end(), version);
+}
+
 void bind_ast(py::module_ &m) {
   auto ast = m.def_submodule("ast", "K LLVM backend KORE AST");
 
@@ -144,15 +194,24 @@ void bind_ast(py::module_ &m) {
             .def("substitute", &KOREPattern::substitute)
             .def(
                 "serialize",
-                [](KOREPattern const &pattern) {
+                [](KOREPattern const &pattern, bool emit_size) {
                   auto out = serializer{};
                   pattern.serialize_to(out);
+
+                  if (emit_size) {
+                    out.correct_emitted_size();
+                  }
+
                   return py::bytes(out.byte_string());
+                },
+                py::kw_only(), py::arg("emit_size") = false)
+            .def_static(
+                "deserialize",
+                [](py::bytes const &bytes) {
+                  auto str = std::string(bytes);
+                  return deserialize_pattern(str.begin(), str.end());
                 })
-            .def_static("deserialize", [](py::bytes const &bytes) {
-              auto str = std::string(bytes);
-              return deserialize_pattern(str.begin(), str.end());
-            });
+            .def_static("read_from", &read_pattern_from_file);
 
   py::class_<KORECompositePattern, std::shared_ptr<KORECompositePattern>>(
       ast, "CompositePattern", pattern_base)

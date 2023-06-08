@@ -29,8 +29,8 @@ def make_term_class(mod):
         def to_pattern(self):
             return self._block.to_pattern()
 
-        def serialize(self):
-            return self._block.serialize()
+        def serialize(self, emit_size=False):
+            return self._block.serialize(emit_size=emit_size)
 
         @staticmethod
         def deserialize(bs):

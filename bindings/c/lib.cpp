@@ -227,7 +227,7 @@ void kore_simplify(
     }
   }();
 
-  serializeConfiguration(block, kitem_sort_str, data_out, size_out);
+  serializeConfiguration(block, kitem_sort_str, data_out, size_out, true);
 
   kore_sort_free(kitem_sort);
   free(kitem_sort_str);
@@ -239,7 +239,7 @@ void kore_simplify_binary(
   auto sort_str = kore_sort_dump(sort);
 
   auto block = deserializeConfiguration(data_in, size_in);
-  serializeConfiguration(block, sort_str, data_out, size_out);
+  serializeConfiguration(block, sort_str, data_out, size_out, true);
 
   free(sort_str);
 }
