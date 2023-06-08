@@ -95,6 +95,12 @@ public:
   std::vector<std::byte> const &data() { return buffer_; }
 
   /**
+   * Return a copy of the bytes currently stored by this serializer as a string,
+   * for compatibility with interfaces that don't deal with vectors of bytes.
+   */
+  std::string byte_string() const;
+
+  /**
    * Reset the state of the serializer back to its newly-constructed state, with
    * only the KORE header and version number in its buffer.
    */

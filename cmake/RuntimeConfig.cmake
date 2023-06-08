@@ -34,6 +34,7 @@ set(STRINGBUFFER_LAYOUT 6)
 set(BOOL_LAYOUT         7)
 set(SYMBOL_LAYOUT       8)
 set(VARIABLE_LAYOUT     9)
+set(RANGEMAP_LAYOUT    11)
 
 get_filename_component(INSTALL_DIR_ABS_PATH "${CMAKE_INSTALL_PREFIX}"
                        REALPATH BASE_DIR "${CMAKE_BINARY_DIR}")

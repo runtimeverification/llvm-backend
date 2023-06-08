@@ -1,10 +1,13 @@
 #include <kllvm/ast/AST.h>
+#include <kllvm/binary/deserializer.h>
+#include <kllvm/binary/serializer.h>
 #include <kllvm/parser/KOREParser.h>
 
 #include <pybind11/operators.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
+#include <cstddef>
 #include <sstream>
 #include <tuple>
 
@@ -66,6 +69,7 @@ void bind_ast(py::module_ &m) {
   py::enum_<SortCategory>(ast, "SortCategory")
       .value("Uncomputed", SortCategory::Uncomputed)
       .value("Map", SortCategory::Map)
+      .value("RangeMap", SortCategory::RangeMap)
       .value("List", SortCategory::List)
       .value("Set", SortCategory::Set)
       .value("Int", SortCategory::Int)
@@ -137,7 +141,18 @@ void bind_ast(py::module_ &m) {
             .def(py::init(&KOREPattern::load))
             .def("__repr__", print_repr_adapter<KOREPattern>())
             .def_property_readonly("sort", &KOREPattern::getSort)
-            .def("substitute", &KOREPattern::substitute);
+            .def("substitute", &KOREPattern::substitute)
+            .def(
+                "serialize",
+                [](KOREPattern const &pattern) {
+                  auto out = serializer{};
+                  pattern.serialize_to(out);
+                  return py::bytes(out.byte_string());
+                })
+            .def_static("deserialize", [](py::bytes const &bytes) {
+              auto str = std::string(bytes);
+              return deserialize_pattern(str.begin(), str.end());
+            });
 
   py::class_<KORECompositePattern, std::shared_ptr<KORECompositePattern>>(
       ast, "CompositePattern", pattern_base)

@@ -613,6 +613,8 @@ class termPrinter:
             sort = gdb.lookup_global_symbol("sort_table").value()[tag][i].string("iso-8859-1")
             if cat == @MAP_LAYOUT@:
                 self.appendMap(arg.cast(self.map_ptr), sort)
+            elif cat == @RANGEMAP_LAYOUT@:
+                assert False
             elif cat == @LIST_LAYOUT@:
                 self.appendList(arg.cast(self.list_ptr), sort)
             elif cat == @SET_LAYOUT@:
