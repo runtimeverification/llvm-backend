@@ -261,8 +261,10 @@ mpz_ptr move_int(mpz_t);
 void serializeConfigurations(
     const char *filename, std::unordered_set<block *, HashBlock, KEq> results);
 void serializeConfiguration(
-    block *subject, char const *sort, char **data_out, size_t *size_out);
-void serializeConfigurationToFile(const char *filename, block *subject);
+    block *subject, char const *sort, char **data_out, size_t *size_out,
+    bool emit_size);
+void serializeConfigurationToFile(
+    const char *filename, block *subject, bool emit_size);
 
 // The following functions have to be generated at kompile time
 // and linked with the interpreter.

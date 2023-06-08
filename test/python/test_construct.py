@@ -23,14 +23,16 @@ class TestTermConstruct(unittest.TestCase):
         self.assertEqual(str(term), str(pattern))
 
     def _pattern_binary_round_trip(self, pattern):
-        binary = pattern.serialize()
-        back = kllvm.ast.Pattern.deserialize(binary)
-        self.assertEqual(str(pattern), str(back))
+        for es in [True, False]:
+            binary = pattern.serialize(emit_size=es)
+            back = kllvm.ast.Pattern.deserialize(binary)
+            self.assertEqual(str(pattern), str(back))
 
     def _term_binary_round_trip(self, term):
-        binary = term.serialize()
-        back = kllvm.runtime.Term.deserialize(binary)
-        self.assertEqual(str(term), str(back))
+        for es in [True, False]:
+            binary = term.serialize(emit_size=es)
+            back = kllvm.runtime.Term.deserialize(binary)
+            self.assertEqual(str(term), str(back))
 
     def test_construct(self):
         """
