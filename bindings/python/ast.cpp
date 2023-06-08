@@ -10,7 +10,6 @@
 #include <cstddef>
 #include <sstream>
 #include <tuple>
-#include <variant>
 
 namespace py = pybind11;
 
@@ -70,8 +69,7 @@ auto print_repr_adapter(Args &&...args) {
  * exception will be thrown. The file pointer will be left at the end of the
  * pattern's bytes after calling this function.
  */
-std::variant<py::none, std::shared_ptr<KOREPattern>>
-read_pattern_from_file(py::object &file_like) {
+std::shared_ptr<KOREPattern> read_pattern_from_file(py::object &file_like) {
   if (!py::hasattr(file_like, "read")) {
     throw py::type_error("Argument to read_from is not a file-like object");
   }
@@ -84,7 +82,8 @@ read_pattern_from_file(py::object &file_like) {
   auto header = read(5);
   auto ref_header = serializer::magic_header;
   if (!std::equal(header.begin(), header.end(), ref_header.begin())) {
-    return py::none();
+    throw std::invalid_argument(
+        "Data does not begin with the binary KORE header bytes");
   }
 
   auto version_bytes = read(6);
