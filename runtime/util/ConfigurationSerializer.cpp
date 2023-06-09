@@ -443,9 +443,15 @@ void serializeRawTermToFile(
   std::string s = "inj{";
   s += sort;
   s += ", SortKItem{}}";
+  auto sort_str = std::string(sort);
   uint32_t tag = getTagForSymbolName(s.c_str());
   std::vector<void *> vec = std::vector<void *>();
-  vec.push_back(subject);
+  if (sort_str.substr(0, 8) == "SortBool"
+      || sort_str.substr(0, 8) == "SortMInt") {
+    vec.push_back(&subject);
+  } else {
+    vec.push_back(subject);
+  }
   block *term = (block *)constructCompositePattern(tag, vec);
 
   char *data;
