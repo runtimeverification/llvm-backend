@@ -564,7 +564,7 @@ class Matrix private(val symlib: Parser.SymLib, private val rawColumns: IndexedS
     val nonlinearPairs = nonlinear.mapValues(l => (l, l.tail).zipped)
     val uniqueLhsVars = row.clause.action.lhsVars.filterNot(v => row.clause.action.rhsVars.contains(v.name)).distinct
     val newVars = {
-      val lhs = uniqueLhsVars.map(v => grouped.get(v.name).map(g => v.name -> (g.head._2, g.head._1.hookAtt)).getOrElse(v.name -> (Base(),SortCategory(None, v.sort,symlib).hookAtt)))
+      val lhs = uniqueLhsVars.map(v => grouped.get(v.name).map(g => v.name -> (g.head._2, g.head._1.hookAtt)).getOrElse(v.name -> (Base(),sortCat(v.sort).hookAtt)))
       val rhs = try { row.clause.action.rhsVars.map(v => v -> (grouped(v).head._2, grouped(v).head._1.hookAtt))
       } catch {
         case e: NoSuchElementException => throw KEMException.internalError("Could not find binding for variable while compiling pattern matching.", e, row.clause.action)
