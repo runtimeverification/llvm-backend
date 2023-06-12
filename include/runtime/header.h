@@ -265,7 +265,7 @@ void serializeConfiguration(
     bool emit_size);
 void serializeConfigurationToFile(
     const char *filename, block *subject, bool emit_size);
-void writeLongToFile(const char *filename, uint64_t i);
+void writeUInt64ToFile(const char *filename, uint64_t i);
 void serializeTermToFile(
     const char *filename, block *subject, const char *sort);
 void serializeRawTermToFile(

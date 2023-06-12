@@ -1046,12 +1046,12 @@ void addAbort(llvm::BasicBlock *block, llvm::Module *Module) {
   new llvm::UnreachableInst(Module->getContext(), block);
 }
 
-void writeLong(
+void writeUInt64(
     llvm::Value *outputFile, llvm::Module *Module, uint64_t value,
     llvm::BasicBlock *Block) {
   llvm::CallInst::Create(
       getOrInsertFunction(
-          Module, "writeLongToFile",
+          Module, "writeUInt64ToFile",
           llvm::Type::getVoidTy(Module->getContext()),
           llvm::Type::getInt8PtrTy(Module->getContext()),
           llvm::Type::getInt64Ty(Module->getContext())),
@@ -1170,8 +1170,8 @@ bool makeFunction(
     auto outputFile = new llvm::LoadInst(
         llvm::Type::getInt8PtrTy(Module->getContext()), OutputFileName,
         "output", TrueBlock);
-    writeLong(outputFile, Module, axiom->getOrdinal(), TrueBlock);
-    writeLong(
+    writeUInt64(outputFile, Module, axiom->getOrdinal(), TrueBlock);
+    writeUInt64(
         outputFile, Module, applyRule->arg_end() - applyRule->arg_begin(),
         TrueBlock);
     for (auto entry = subst.begin(); entry != subst.end(); ++entry) {
@@ -1222,10 +1222,10 @@ bool makeFunction(
                 llvm::Type::getInt8PtrTy(Module->getContext())),
             {outputFile, val, sortptr});
       }
-      writeLong(outputFile, Module, 0xcccccccccccccccc, TrueBlock);
+      writeUInt64(outputFile, Module, 0xcccccccccccccccc, TrueBlock);
     }
 
-    writeLong(outputFile, Module, 0xffffffffffffffff, TrueBlock);
+    writeUInt64(outputFile, Module, 0xffffffffffffffff, TrueBlock);
     ir->CreateCall(
         getOrInsertFunction(
             Module, "serializeConfigurationToFile",
@@ -1233,7 +1233,7 @@ bool makeFunction(
             llvm::Type::getInt8PtrTy(Module->getContext()),
             getValueType({SortCategory::Symbol, 0}, Module)),
         {outputFile, retval});
-    writeLong(outputFile, Module, 0xcccccccccccccccc, TrueBlock);
+    writeUInt64(outputFile, Module, 0xcccccccccccccccc, TrueBlock);
 
     llvm::BranchInst::Create(MergeBlock, TrueBlock);
     CurrentBlock = MergeBlock;
