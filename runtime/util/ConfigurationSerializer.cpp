@@ -420,3 +420,9 @@ void serializeConfiguration(
   *data_out = buf;
   *size_out = size;
 }
+
+void writeLongToFile(const char *filename, uint64_t i) {
+  FILE *file = fopen(filename, "a");
+  fwrite(&i, 8, 1, file);
+  fclose(file);
+}
