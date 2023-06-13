@@ -1311,6 +1311,10 @@ bool KOREAxiomDeclaration::isTopAxiom() {
   return false;
 }
 
+/*
+ * getPatterns(\top()) = []
+ * getPatterns(\and(\in(_, X), Y) = X : getPatterns(Y)
+ */
 static std::vector<KOREPattern *>
 getPatterns(KOREPattern *pat, std::vector<KOREPattern *> &result) {
   if (auto composite = dynamic_cast<KORECompositePattern *>(pat)) {
