@@ -1,6 +1,8 @@
 #ifndef ALLOC_H
 #define ALLOC_H
 
+#include <cstddef>
+
 extern "C" {
 
 // The maximum single allocation size in bytes.
