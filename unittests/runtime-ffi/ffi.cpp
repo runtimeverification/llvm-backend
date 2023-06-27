@@ -13,6 +13,11 @@
 
 #define KCHAR char
 #define TYPETAG(type) "Lbl'Hash'ffi'Unds'" #type "{}"
+
+void *constructCompositePattern(uint32_t tag, std::vector<void *> &arguments) {
+  return nullptr;
+}
+
 extern "C" {
 
 struct point {

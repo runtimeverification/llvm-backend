@@ -11,6 +11,11 @@
 #include "runtime/header.h"
 
 #define KCHAR char
+
+void *constructCompositePattern(uint32_t tag, std::vector<void *> &arguments) {
+  return nullptr;
+}
+
 extern "C" {
 bool hook_STRING_gt(string *, string *);
 bool hook_STRING_ge(string *, string *);
