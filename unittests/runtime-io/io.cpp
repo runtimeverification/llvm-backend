@@ -13,6 +13,11 @@
 #include "unistd.h"
 
 #define KCHAR char
+
+void *constructCompositePattern(uint32_t tag, std::vector<void *> &arguments) {
+  return nullptr;
+}
+
 extern "C" {
 
 char kompiled_directory[] = "some/test/directory/path";
