@@ -330,6 +330,8 @@ size_t hook_SET_size_long(set *);
 
 mpz_ptr hook_MINT_import(size_t *i, uint64_t bits, bool isSigned);
 
+block *dot_k();
+
 block *debruijnize(block *);
 block *incrementDebruijn(block *);
 block *alphaRename(block *);
