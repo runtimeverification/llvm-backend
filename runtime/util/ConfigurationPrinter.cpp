@@ -260,11 +260,7 @@ string *debug_print_term(block *subject, char const *sort) {
   char const *print_sort = nullptr;
 
   if (sort) {
-    auto inj_sym = "inj{" + std::string(sort) + ", SortKItem{}}";
-    auto tag = getTagForSymbolName(inj_sym.c_str());
-    auto args = std::vector<void *>{subject};
-
-    subject = static_cast<block *>(constructCompositePattern(tag, args));
+    subject = constructKItemInj(subject, sort, false);
     print_sort = "SortKItem{}";
   }
 
@@ -368,4 +364,14 @@ void printValueOfType(
   } else {
     os << "Error: " << type << " not implemented!";
   }
+}
+
+void printVariableToFile(const char *filename, const char *varname) {
+  FILE *file = fopen(filename, "a");
+
+  fprintf(file, "%s", varname);
+  char n = 0;
+  fwrite(&n, 1, 1, file);
+
+  fclose(file);
 }

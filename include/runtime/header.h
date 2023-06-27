@@ -265,6 +265,12 @@ void serializeConfiguration(
     bool emit_size);
 void serializeConfigurationToFile(
     const char *filename, block *subject, bool emit_size);
+void writeUInt64ToFile(const char *filename, uint64_t i);
+void serializeTermToFile(
+    const char *filename, block *subject, const char *sort);
+void serializeRawTermToFile(
+    const char *filename, void *subject, const char *sort);
+void printVariableToFile(const char *filename, const char *varname);
 
 // The following functions have to be generated at kompile time
 // and linked with the interpreter.
@@ -338,6 +344,7 @@ block *map_iterator_next(mapiter *);
 extern const uint32_t first_inj_tag, last_inj_tag;
 bool is_injection(block *);
 block *strip_injection(block *);
+block *constructKItemInj(void *subject, const char *sort, bool raw_value);
 }
 
 std::string floatToString(const floating *);

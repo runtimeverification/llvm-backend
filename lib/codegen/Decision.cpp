@@ -574,6 +574,17 @@ llvm::AllocaInst *Decision::decl(var_type name) {
 }
 
 llvm::Value *Decision::load(var_type name) {
+  if (name.first == "") {
+    llvm::Type *ty = name.second;
+    if (ty->isPointerTy()) {
+      auto ptr_ty = (llvm::PointerType *)ty;
+      return llvm::ConstantPointerNull::get(ptr_ty);
+    } else if (ty->isIntegerTy()) {
+      auto int_ty = (llvm::IntegerType *)ty;
+      return llvm::ConstantInt::get(int_ty, 0);
+    }
+    assert(false && "Unbound variable on LHS is neither pointer nor integral");
+  }
   auto sym = this->symbols[name];
   if (!sym) {
     sym = this->decl(name);

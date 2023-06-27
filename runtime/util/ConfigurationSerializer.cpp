@@ -396,7 +396,7 @@ void serializeConfigurationToFile(
   size_t size;
   serializeConfiguration(subject, nullptr, &data, &size, emit_size);
 
-  FILE *file = fopen(filename, "w");
+  FILE *file = fopen(filename, "a");
   fwrite(data, 1, size, file);
   fclose(file);
 }
@@ -419,4 +419,34 @@ void serializeConfiguration(
 
   *data_out = buf;
   *size_out = size;
+}
+
+void writeUInt64ToFile(const char *filename, uint64_t i) {
+  FILE *file = fopen(filename, "a");
+  fwrite(&i, 8, 1, file);
+  fclose(file);
+}
+
+void serializeTermToFile(
+    const char *filename, block *subject, const char *sort) {
+  char *data;
+  size_t size;
+  serializeConfiguration(subject, sort, &data, &size, false);
+
+  FILE *file = fopen(filename, "a");
+  fwrite(data, 1, size, file);
+  fclose(file);
+}
+
+void serializeRawTermToFile(
+    const char *filename, void *subject, const char *sort) {
+  block *term = constructKItemInj(subject, sort, true);
+
+  char *data;
+  size_t size;
+  serializeConfiguration(term, "SortKItem{}", &data, &size, false);
+
+  FILE *file = fopen(filename, "a");
+  fwrite(data, 1, size, file);
+  fclose(file);
 }

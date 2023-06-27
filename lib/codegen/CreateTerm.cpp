@@ -11,6 +11,7 @@
 #include "llvm/IR/BasicBlock.h"
 #include "llvm/IR/Constants.h"
 #include "llvm/IR/DerivedTypes.h"
+#include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/Instructions.h"
 #include "llvm/IRReader/IRReader.h"
 #include "llvm/Support/MemoryBuffer.h"
@@ -98,7 +99,7 @@ target triple = "@BACKEND_TARGET_TRIPLE@"
 
 ; Interface to the configuration parser
 declare %block* @parseConfiguration(i8*)
-declare void @printConfiguration(i32, %block *)
+declare void @printConfiguration(i8 *, %block *)
 )LLVM";
 
 std::unique_ptr<llvm::Module>
@@ -1045,11 +1046,30 @@ void addAbort(llvm::BasicBlock *block, llvm::Module *Module) {
   new llvm::UnreachableInst(Module->getContext(), block);
 }
 
+void writeUInt64(
+    llvm::Value *outputFile, llvm::Module *Module, uint64_t value,
+    llvm::BasicBlock *Block) {
+  llvm::CallInst::Create(
+      getOrInsertFunction(
+          Module, "writeUInt64ToFile",
+          llvm::Type::getVoidTy(Module->getContext()),
+          llvm::Type::getInt8PtrTy(Module->getContext()),
+          llvm::Type::getInt64Ty(Module->getContext())),
+      {outputFile, llvm::ConstantInt::get(
+                       llvm::Type::getInt64Ty(Module->getContext()), value)},
+      "", Block);
+}
+
 bool makeFunction(
     std::string name, KOREPattern *pattern, KOREDefinition *definition,
-    llvm::Module *Module, bool fastcc, bool bigStep,
+    llvm::Module *Module, bool fastcc, bool bigStep, bool apply,
     KOREAxiomDeclaration *axiom, std::string postfix) {
   std::map<std::string, KOREVariablePattern *> vars;
+  if (apply) {
+    for (KOREPattern *lhs : axiom->getLeftHandSide()) {
+      lhs->markVariables(vars);
+    }
+  }
   pattern->markVariables(vars);
   llvm::StringMap<ValueType> params;
   std::vector<llvm::Type *> paramTypes;
@@ -1132,19 +1152,105 @@ bool makeFunction(
     new llvm::StoreInst(retval, tempAlloc, creator.getCurrentBlock());
     retval = tempAlloc;
   }
+  auto CurrentBlock = creator.getCurrentBlock();
+  if (apply && bigStep) {
+    auto ProofOutputFlag = Module->getOrInsertGlobal(
+        "proof_output", llvm::Type::getInt1Ty(Module->getContext()));
+    auto OutputFileName = Module->getOrInsertGlobal(
+        "output_file", llvm::Type::getInt8PtrTy(Module->getContext()));
+    auto proofOutput = new llvm::LoadInst(
+        llvm::Type::getInt1Ty(Module->getContext()), ProofOutputFlag,
+        "proof_output", CurrentBlock);
+    llvm::BasicBlock *TrueBlock
+        = llvm::BasicBlock::Create(Module->getContext(), "if", applyRule);
+    auto ir = new llvm::IRBuilder(TrueBlock);
+    llvm::BasicBlock *MergeBlock
+        = llvm::BasicBlock::Create(Module->getContext(), "tail", applyRule);
+    llvm::BranchInst::Create(TrueBlock, MergeBlock, proofOutput, CurrentBlock);
+    auto outputFile = new llvm::LoadInst(
+        llvm::Type::getInt8PtrTy(Module->getContext()), OutputFileName,
+        "output", TrueBlock);
+    writeUInt64(outputFile, Module, axiom->getOrdinal(), TrueBlock);
+    writeUInt64(
+        outputFile, Module, applyRule->arg_end() - applyRule->arg_begin(),
+        TrueBlock);
+    for (auto entry = subst.begin(); entry != subst.end(); ++entry) {
+      auto key = entry->getKey();
+      auto val = entry->getValue();
+      auto var = vars[key.str()];
+      auto sort = dynamic_cast<KORECompositeSort *>(var->getSort().get());
+      std::ostringstream Out;
+      sort->print(Out);
+      auto sortptr = ir->CreateGlobalStringPtr(Out.str(), "", 0, Module);
+      auto varname = ir->CreateGlobalStringPtr(key, "", 0, Module);
+      ir->CreateCall(
+          getOrInsertFunction(
+              Module, "printVariableToFile",
+              llvm::Type::getVoidTy(Module->getContext()),
+              llvm::Type::getInt8PtrTy(Module->getContext()),
+              llvm::Type::getInt8PtrTy(Module->getContext())),
+          {outputFile, varname});
+      if (val->getType() == getValueType({SortCategory::Symbol, 0}, Module)) {
+        ir->CreateCall(
+            getOrInsertFunction(
+                Module, "serializeTermToFile",
+                llvm::Type::getVoidTy(Module->getContext()),
+                llvm::Type::getInt8PtrTy(Module->getContext()),
+                getValueType({SortCategory::Symbol, 0}, Module),
+                llvm::Type::getInt8PtrTy(Module->getContext())),
+            {outputFile, val, sortptr});
+      } else if (val->getType()->isIntegerTy()) {
+        val = ir->CreateIntToPtr(
+            val, llvm::Type::getInt8PtrTy(Module->getContext()));
+        ir->CreateCall(
+            getOrInsertFunction(
+                Module, "serializeRawTermToFile",
+                llvm::Type::getVoidTy(Module->getContext()),
+                llvm::Type::getInt8PtrTy(Module->getContext()),
+                llvm::Type::getInt8PtrTy(Module->getContext()),
+                llvm::Type::getInt8PtrTy(Module->getContext())),
+            {outputFile, val, sortptr});
+      } else {
+        val = ir->CreatePointerCast(
+            val, llvm::Type::getInt8PtrTy(Module->getContext()));
+        ir->CreateCall(
+            getOrInsertFunction(
+                Module, "serializeRawTermToFile",
+                llvm::Type::getVoidTy(Module->getContext()),
+                llvm::Type::getInt8PtrTy(Module->getContext()),
+                llvm::Type::getInt8PtrTy(Module->getContext()),
+                llvm::Type::getInt8PtrTy(Module->getContext())),
+            {outputFile, val, sortptr});
+      }
+      writeUInt64(outputFile, Module, 0xcccccccccccccccc, TrueBlock);
+    }
+
+    writeUInt64(outputFile, Module, 0xffffffffffffffff, TrueBlock);
+    ir->CreateCall(
+        getOrInsertFunction(
+            Module, "serializeConfigurationToFile",
+            llvm::Type::getVoidTy(Module->getContext()),
+            llvm::Type::getInt8PtrTy(Module->getContext()),
+            getValueType({SortCategory::Symbol, 0}, Module)),
+        {outputFile, retval});
+    writeUInt64(outputFile, Module, 0xcccccccccccccccc, TrueBlock);
+
+    llvm::BranchInst::Create(MergeBlock, TrueBlock);
+    CurrentBlock = MergeBlock;
+  }
+
   if (bigStep) {
     llvm::Type *blockType = getValueType({SortCategory::Symbol, 0}, Module);
     llvm::Function *step = getOrInsertFunction(
         Module, "k_step",
         llvm::FunctionType::get(blockType, {blockType}, false));
-    auto call
-        = llvm::CallInst::Create(step, {retval}, "", creator.getCurrentBlock());
+    auto call = llvm::CallInst::Create(step, {retval}, "", CurrentBlock);
     setDebugLoc(call);
     call->setCallingConv(llvm::CallingConv::Fast);
     retval = call;
   }
-  auto ret = llvm::ReturnInst::Create(
-      Module->getContext(), retval, creator.getCurrentBlock());
+  auto ret
+      = llvm::ReturnInst::Create(Module->getContext(), retval, CurrentBlock);
   setDebugLoc(ret);
   return true;
 }
@@ -1154,10 +1260,11 @@ void makeApplyRuleFunction(
     llvm::Module *Module, bool bigStep) {
   KOREPattern *pattern = axiom->getRightHandSide();
   std::string name = "apply_rule_" + std::to_string(axiom->getOrdinal());
-  makeFunction(name, pattern, definition, Module, true, bigStep, axiom, ".rhs");
+  makeFunction(
+      name, pattern, definition, Module, true, bigStep, true, axiom, ".rhs");
   if (bigStep) {
     makeFunction(
-        name + "_search", pattern, definition, Module, true, false, axiom,
+        name + "_search", pattern, definition, Module, true, false, true, axiom,
         ".rhs");
   }
 }
@@ -1168,6 +1275,9 @@ std::string makeApplyRuleFunction(
   std::map<std::string, KOREVariablePattern *> vars;
   for (auto residual : residuals) {
     residual.pattern->markVariables(vars);
+  }
+  for (KOREPattern *lhs : axiom->getLeftHandSide()) {
+    lhs->markVariables(vars);
   }
   llvm::StringMap<ValueType> params;
   std::vector<llvm::Type *> paramTypes;
@@ -1206,7 +1316,7 @@ std::string makeApplyRuleFunction(
 
   makeFunction(
       name + "_search", axiom->getRightHandSide(), definition, Module, true,
-      false, axiom, ".rhs");
+      false, true, axiom, ".rhs");
 
   llvm::Function *applyRule = getOrInsertFunction(Module, name, funcType);
   initDebugAxiom(axiom->getAttributes());
@@ -1277,7 +1387,8 @@ std::string makeSideConditionFunction(
   }
   std::string name = "side_condition_" + std::to_string(axiom->getOrdinal());
   if (makeFunction(
-          name, pattern, definition, Module, false, false, axiom, ".sc")) {
+          name, pattern, definition, Module, false, false, false, axiom,
+          ".sc")) {
     return name;
   }
   return "";
