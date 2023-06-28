@@ -224,15 +224,15 @@ for (( idx = 0; idx < embed_length; idx++ )); do
   out_asm="$tmpdir/$name.s"
 
   cat << EOF > "$out_asm"
-.global ${name}
-${name}:
+.global _${name}
+_${name}:
   .incbin "${embedded_files[$idx]}"
-.global ${name}_end
-${name}_end:
+.global _${name}_end
+_${name}_end:
   .byte 0
-.global ${name}_size
-${name}_size:
-  .int ${name}_end - ${name}
+.global _${name}_size
+_${name}_size:
+  .int _${name}_end - _${name}
 EOF
 
   kompile_clang_flags+=("$out_asm")
