@@ -184,8 +184,6 @@ if [[ "$compile" = "default" ]]; then
       -g)
         debug=1
         ;;
-      *)
-        ;;
     esac
   done
   run "$(dirname "$0")"/llvm-kompile-codegen "$definition" "$dt_dir"/dt.yaml "$dt_dir" $debug > "$mod"
