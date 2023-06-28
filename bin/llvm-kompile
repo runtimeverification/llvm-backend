@@ -222,14 +222,22 @@ kompile_clang_flags+=("--python-output-dir" "${python_output_dir}")
 
 embed_length="${#embedded_files[@]}"
 for (( idx = 0; idx < embed_length; idx++ )); do
-  run "$(dirname "$0")"/kore-embed    \
-    "${embedded_files[$idx]}"         \
-    --name "${embedded_names[$idx]}"  \
-    --ext cpp                         \
-    --directory "$tmpdir"             \
-    --no-header
+  name="${embedded_names[$idx]}"
+  out_asm="$tmpdir/$name.s"
 
-  kompile_clang_flags+=("$tmpdir/${embedded_names[$idx]}.cpp")
+  cat << EOF > "$out_asm"
+.global ${name}
+${name}:
+  .incbin "${embedded_files[$idx]}"
+.global ${name}_end
+${name}_end:
+  .byte 0
+.global ${name}_size
+${name}_size:
+  .int ${name}_end - ${name}
+EOF
+
+  kompile_clang_flags+=("$out_asm")
 done
 
 run "$(dirname "$0")"/llvm-kompile-clang          \
