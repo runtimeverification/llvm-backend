@@ -174,7 +174,7 @@ case "$definition" in
     ;;
 esac
 
-if [ "$compile" = "default" ]; then
+if [[ "$compile" = "default" ]]; then
   dt_dir="${positional_args[1]}"
   main="${positional_args[2]}"
   debug=0
