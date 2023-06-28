@@ -1,21 +1,11 @@
 # RUN: mkdir -p %t
-# RUN: export IN=$(realpath Inputs/test_steps.kore)
+# RUN: export IN=$(realpath Inputs/steps.kore)
 # RUN: cd %t && %kompile "$IN" python --python %py-interpreter --python-output-dir .
 # RUN: KLLVM_DEFINITION=%t %python -u %s
 
 from test_bindings import kllvm
 
 import unittest
-
-"""
-module STEPS
-  imports INT
-
-  syntax Foo ::= foo(Int) | bar()
-  rule foo(I) => foo(I -Int 1) requires I >Int 0
-  rule foo(_) => bar() [owise]
-endmodule
-"""
 
 
 def start_pattern():

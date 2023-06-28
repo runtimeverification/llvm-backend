@@ -1,3 +1,6 @@
+#include <kllvm/binary/deserializer.h>
+#include <kllvm/util/temporary_file.h>
+
 #include <llvm/ADT/DenseMapInfo.h>
 #include <llvm/ADT/StringRef.h>
 #include <llvm/Support/CommandLine.h>
@@ -23,8 +26,8 @@ cl::opt<bool> StripArity(
 
 cl::opt<bool> StripHeader(
     "k",
-    cl::desc(
-        "Strip the leading 11 bytes (header and version) from the input file"),
+    cl::desc("Strip the leading bytes (header, version and size for version "
+             "1.2.0 onwards) from the input file"),
     cl::cat(KoreStripCat));
 
 cl::opt<std::string> InputFilename(
@@ -95,23 +98,23 @@ int main(int argc, char **argv) {
   }
 
   if (StripHeader) {
-    begin_skip_length = 11;
-  }
-
-  char temp_file_name[] = "tmp.strip.XXXXXXXXXX";
-
-  std::FILE *output = [&] {
-    if (OutputFilename == "-") {
-      return stdout;
-    } else {
-      if (mkstemp(temp_file_name) == -1) {
-        std::perror("Could not create temporary file: ");
-        std::exit(1);
-      }
-
-      return check_fopen(temp_file_name, "wb");
+    std::fseek(input, 5, SEEK_SET);
+    auto buffer = std::vector<uint8_t>(6);
+    auto read
+        = std::fread(buffer.data(), sizeof(uint8_t), buffer.size(), input);
+    if (read != buffer.size()) {
+      std::cerr << "Failed to read 6-byte version into buffer\n";
     }
-  }();
+
+    auto begin = buffer.begin();
+    auto version = kllvm::detail::read_version(begin, buffer.end());
+
+    if (version >= kllvm::binary_version(1, 2, 0)) {
+      begin_skip_length = 19;
+    } else {
+      begin_skip_length = 11;
+    }
+  }
 
   auto result_size = file_size - (begin_skip_length + end_skip_length);
   auto buffer = std::vector<uint8_t>(result_size);
@@ -123,12 +126,16 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  std::fwrite(buffer.data(), sizeof(uint8_t), result_size, output);
+  if (OutputFilename == "-") {
+    std::fwrite(buffer.data(), sizeof(uint8_t), result_size, stdout);
+    std::fclose(input);
+  } else {
+    auto tmp_file = temporary_file("tmp.strip.XXXXXXXXXX");
+    auto file_pointer = tmp_file.file_pointer("wb");
 
-  std::fclose(input);
+    std::fwrite(buffer.data(), sizeof(uint8_t), result_size, file_pointer);
+    std::fflush(file_pointer);
 
-  if (OutputFilename != "-") {
-    std::fclose(output);
-    std::rename(temp_file_name, OutputFilename.c_str());
+    tmp_file.rename(OutputFilename);
   }
 }

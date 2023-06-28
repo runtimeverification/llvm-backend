@@ -1,0 +1,8 @@
+// RUN: %strip-binary -i %test-input -k -o %t.out
+// RUN: diff %t.out %test-diff-out
+
+// This test is for the case where the binary is big enough so the stripped
+// output needs to be flushed beforw renaming it. Previously, this was
+// implicitly done by the std::fwrite call in the fdopen case, but not in the
+// fopen case. This test ensures that the behaviour is consistent between the
+// two cases.

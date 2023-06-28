@@ -65,6 +65,13 @@ cl::opt<bool> NoArity(
         "Don't add the topmost constructor arity at the end of binary output"),
     cl::cat(KoreConvertCat));
 
+cl::opt<bool> UseSize(
+    "s",
+    cl::desc("Emit size bytes for this pattern (useful if the resulting file "
+             "will be embedded in a larger format, but will prohibit "
+             "concatenation of terms)"),
+    cl::cat(KoreConvertCat));
+
 sptr<KOREPattern> get_input_pattern() {
   auto get_text = [&]() { return KOREParser(InputFilename).pattern(); };
   auto get_binary = [&]() { return deserialize_pattern(InputFilename); };
@@ -152,6 +159,10 @@ int main(int argc, char **argv) {
   if (OutputFormat == binary) {
     auto s = serializer(get_flags());
     input->serialize_to(s);
+
+    if (UseSize) {
+      s.correct_emitted_size();
+    }
 
     auto output = [&](std::ostream &os) {
       for (auto byte : s.data()) {

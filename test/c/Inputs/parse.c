@@ -2,13 +2,6 @@
 
 #include <stdio.h>
 
-/*
-  module TEST
-    syntax Foo ::= foo() | bar()
-    rule foo() => bar()
-  endmodule
-*/
-
 int main(int argc, char **argv) {
   if (argc <= 1) {
     return 1;

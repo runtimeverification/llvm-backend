@@ -40,7 +40,6 @@ std::string kllvm::decodeKore(std::string kore) {
     codes["Star"] = '*';
     codes["Plus"] = '+';
     codes["Comm"] = ',';
-    codes["Hyph"] = '-';
     codes["Stop"] = '.';
     codes["Slsh"] = '/';
     codes["Coln"] = ':';
@@ -191,6 +190,8 @@ ValueType KORECompositeSort::getCategory(std::string name) {
   uint64_t bits = 0;
   if (name == "MAP.Map")
     category = SortCategory::Map;
+  else if (name == "RANGEMAP.RangeMap")
+    category = SortCategory::RangeMap;
   else if (name == "LIST.List")
     category = SortCategory::List;
   else if (name == "SET.Set")
@@ -247,6 +248,7 @@ std::string KORESymbol::layoutString(KOREDefinition *definition) const {
     ValueType cat = sort->getCategory(definition);
     switch (cat.cat) {
     case SortCategory::Map: result.push_back('1'); break;
+    case SortCategory::RangeMap: result.push_back('b'); break;
     case SortCategory::List: result.push_back('2'); break;
     case SortCategory::Set: result.push_back('3'); break;
     case SortCategory::Int: result.push_back('4'); break;
@@ -1043,6 +1045,51 @@ sptr<KOREPattern> KORECompositePattern::filterSubstitution(
   return shared_from_this();
 }
 
+sptr<KOREPattern> KORECompositePattern::desugarAssociative() {
+  if (constructor->getName() == "\\left-assoc") {
+    if (auto comp_arg
+        = dynamic_cast<KORECompositePattern *>(arguments[0].get())) {
+      auto accum = comp_arg->arguments[0]->desugarAssociative();
+
+      for (auto i = 1u; i < comp_arg->arguments.size(); i++) {
+        auto new_accum
+            = KORECompositePattern::Create(comp_arg->getConstructor());
+        new_accum->addArgument(std::move(accum));
+        new_accum->addArgument(comp_arg->arguments[i]->desugarAssociative());
+        accum = ptr<KOREPattern>(new_accum.release());
+      }
+
+      return accum;
+    }
+  } else if (constructor->getName() == "\\right-assoc") {
+    if (auto comp_arg
+        = dynamic_cast<KORECompositePattern *>(arguments[0].get())) {
+      auto accum = comp_arg->arguments[comp_arg->arguments.size() - 1]
+                       ->desugarAssociative();
+
+      for (int i = comp_arg->arguments.size() - 2; i >= 0; i--) {
+        auto new_accum
+            = KORECompositePattern::Create(comp_arg->getConstructor());
+        new_accum->addArgument(comp_arg->arguments[i]->desugarAssociative());
+        new_accum->addArgument(std::move(accum));
+        accum = ptr<KOREPattern>(new_accum.release());
+      }
+
+      return accum;
+    }
+  } else {
+    auto result = KORECompositePattern::Create(constructor.get());
+
+    for (auto &arg : arguments) {
+      result->addArgument(arg->desugarAssociative());
+    }
+
+    return result;
+  }
+
+  return shared_from_this();
+}
+
 sptr<KOREPattern> KORECompositePattern::expandMacros(
     SubsortMap const &subsorts, SymbolMap const &overloads,
     std::vector<ptr<KOREDeclaration>> const &macros, bool reverse,
@@ -1262,6 +1309,167 @@ bool KOREAxiomDeclaration::isTopAxiom() {
     }
   }
   return false;
+}
+
+/*
+ * getPatterns(\top()) = []
+ * getPatterns(\and(\in(_, X), Y) = X : getPatterns(Y)
+ */
+static std::vector<KOREPattern *>
+getPatterns(KOREPattern *pat, std::vector<KOREPattern *> &result) {
+  if (auto composite = dynamic_cast<KORECompositePattern *>(pat)) {
+    if (composite->getConstructor()->getName() == "\\top"
+        && composite->getArguments().size() == 0) {
+      return result;
+    } else if (
+        composite->getConstructor()->getName() == "\\and"
+        && composite->getArguments().size() == 2) {
+      if (auto firstChild = dynamic_cast<KORECompositePattern *>(
+              composite->getArguments()[0].get())) {
+        if (firstChild->getConstructor()->getName() == "\\in"
+            && firstChild->getArguments().size() == 2) {
+          result.push_back(firstChild->getArguments()[1].get());
+          return getPatterns(composite->getArguments()[1].get(), result);
+        }
+      }
+    }
+  }
+  assert(false && "could not read \\in patterns on lhs");
+  abort();
+}
+
+/*
+ * lhs(\rewrites(\and(\equals(_, _), X), _)) = [X]
+ * lhs(\rewrites(\and(X, \equals(_, _)), _)) = [X]
+ * lhs(\rewrites(\and(\top(), X), _)) = [X]
+ * lhs(\rewrites(\and(X, \top()), _)) = [X]
+ * lhs(\rewrites(\and(\not(_), \and(\equals(_, _), X)), _)) = [X]
+ * lhs(\rewrites(\and(\not(_), \and(\top(), X)), _)) = [X]
+ * lhs(\equals(_(Xs), _)) = Xs
+ * lhs(\implies(\and(\equals(_, _), X), _)) = getPatterns(X)
+ * lhs(\implies(\and(\top(), X), _)) = getPatterns(X)
+ * lhs(\implies(\and(\not(_), \and(\equals(_, _), X)), _)) = getPatterns(X)
+ * lhs(\implies(\and(\not(_), \and(\top(), X)), _)) = getPatterns(X)
+ * lhs(\implies(\top(), \equals(_(Xs), _))) = Xs
+ * lhs(\implies(\equals(_, _), \equals(_(Xs), _))) = Xs
+ */
+std::vector<KOREPattern *> KOREAxiomDeclaration::getLeftHandSide() const {
+  if (auto top = dynamic_cast<KORECompositePattern *>(pattern.get())) {
+    if (top->getConstructor()->getName() == "\\rewrites"
+        && top->getArguments().size() == 2) {
+      if (auto andPattern = dynamic_cast<KORECompositePattern *>(
+              top->getArguments()[0].get())) {
+        if (andPattern->getConstructor()->getName() == "\\and"
+            && andPattern->getArguments().size() == 2) {
+          if (auto firstChild = dynamic_cast<KORECompositePattern *>(
+                  andPattern->getArguments()[0].get())) {
+            if (firstChild->getConstructor()->getName() == "\\equals"
+                && firstChild->getArguments().size() == 2) {
+              return {andPattern->getArguments()[1].get()};
+            } else if (
+                firstChild->getConstructor()->getName() == "\\top"
+                && firstChild->getArguments().size() == 0) {
+              return {andPattern->getArguments()[1].get()};
+            } else {
+              if (auto secondChild = dynamic_cast<KORECompositePattern *>(
+                      andPattern->getArguments()[1].get())) {
+                if (secondChild->getConstructor()->getName() == "\\equals"
+                    && secondChild->getArguments().size() == 2) {
+                  return {firstChild};
+                } else if (
+                    secondChild->getConstructor()->getName() == "\\top"
+                    && secondChild->getArguments().size() == 0) {
+                  return {firstChild};
+                } else {
+                  if (firstChild->getConstructor()->getName() == "\\not"
+                      && firstChild->getArguments().size() == 1
+                      && secondChild->getConstructor()->getName() == "\\and"
+                      && secondChild->getArguments().size() == 2) {
+                    if (auto inner = dynamic_cast<KORECompositePattern *>(
+                            secondChild->getArguments()[0].get())) {
+                      if (inner->getConstructor()->getName() == "\\equals"
+                          && inner->getArguments().size() == 2) {
+                        return {secondChild->getArguments()[1].get()};
+                      } else if (
+                          inner->getConstructor()->getName() == "\\top"
+                          && inner->getArguments().size() == 0) {
+                        return {secondChild->getArguments()[1].get()};
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    } else if (
+        top->getConstructor()->getName() == "\\equals"
+        && top->getArguments().size() == 2) {
+      if (auto firstChild = dynamic_cast<KORECompositePattern *>(
+              top->getArguments()[0].get())) {
+        std::vector<KOREPattern *> result;
+        for (auto &sptr : firstChild->getArguments()) {
+          result.push_back(sptr.get());
+        }
+        return result;
+      }
+    } else if (
+        top->getConstructor()->getName() == "\\implies"
+        && top->getArguments().size() == 2) {
+      if (auto firstChild = dynamic_cast<KORECompositePattern *>(
+              top->getArguments()[0].get())) {
+        if (firstChild->getConstructor()->getName() == "\\and"
+            && firstChild->getArguments().size() == 2) {
+          auto lhsAnd = firstChild;
+          if (auto innerFirst = dynamic_cast<KORECompositePattern *>(
+                  firstChild->getArguments()[0].get())) {
+            if (innerFirst->getConstructor()->getName() == "\\not"
+                && innerFirst->getArguments().size() == 1) {
+              if (auto innerSecond = dynamic_cast<KORECompositePattern *>(
+                      firstChild->getArguments()[1].get())) {
+                lhsAnd = innerSecond;
+              }
+            }
+          }
+          if (auto sideCondition = dynamic_cast<KORECompositePattern *>(
+                  lhsAnd->getArguments()[0].get())) {
+            if (sideCondition->getConstructor()->getName() == "\\equals"
+                && sideCondition->getArguments().size() == 2) {
+              std::vector<KOREPattern *> result;
+              return getPatterns(lhsAnd->getArguments()[1].get(), result);
+            } else if (
+                sideCondition->getConstructor()->getName() == "\\top"
+                && sideCondition->getArguments().size() == 0) {
+              std::vector<KOREPattern *> result;
+              return getPatterns(lhsAnd->getArguments()[1].get(), result);
+            }
+          }
+        } else if (
+            (firstChild->getConstructor()->getName() == "\\top"
+             && firstChild->getArguments().size() == 0)
+            || (firstChild->getConstructor()->getName() == "\\equals"
+                && firstChild->getArguments().size() == 2)) {
+          if (auto secondChild = dynamic_cast<KORECompositePattern *>(
+                  top->getArguments()[1].get())) {
+            if (secondChild->getConstructor()->getName() == "\\equals"
+                && secondChild->getArguments().size() == 2) {
+              if (auto lhs = dynamic_cast<KORECompositePattern *>(
+                      secondChild->getArguments()[0].get())) {
+                std::vector<KOREPattern *> result;
+                for (auto &sptr : lhs->getArguments()) {
+                  result.push_back(sptr.get());
+                }
+                return result;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  assert(false && "could not compute left hand side of axiom");
+  abort();
 }
 
 /*

@@ -138,6 +138,7 @@ llvm::Constant *
 CreateStaticTerm::createToken(ValueType sort, std::string contents) {
   switch (sort.cat) {
   case SortCategory::Map:
+  case SortCategory::RangeMap:
   case SortCategory::List:
   case SortCategory::Set:
     assert(false && "cannot create tokens of collection category");

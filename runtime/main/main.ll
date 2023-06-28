@@ -14,10 +14,12 @@ declare void @initStaticObjects()
 
 @statistics.flag = private constant [13 x i8] c"--statistics\00"
 @binary_out.flag = private constant [16 x i8] c"--binary-output\00"
+@proof_out.flag = private constant [15 x i8] c"--proof-output\00"
 
 @output_file = external global i8*
 @statistics = external global i1
 @binary_output = external global i1
+@proof_output = external global i1
 
 declare i32 @strcmp(i8* %a, i8* %b)
 
@@ -48,10 +50,19 @@ set.stats:
 binary.body:
   %binary.cmp = call i32 @strcmp(i8* %arg, i8* getelementptr inbounds ([16 x i8], [16 x i8]* @binary_out.flag, i64 0, i64 0))
   %binary.eq = icmp eq i32 %binary.cmp, 0
-  br i1 %binary.eq, label %binary.set, label %body.tail
+  br i1 %binary.eq, label %binary.set, label %proof.body
 
 binary.set:
   store i1 1, i1* @binary_output
+  br label %proof.body
+
+proof.body:
+  %proof.cmp = call i32 @strcmp(i8* %arg, i8* getelementptr inbounds ([15 x i8], [15 x i8]* @proof_out.flag, i64 0, i64 0))
+  %proof.eq = icmp eq i32 %proof.cmp, 0
+  br i1 %proof.eq, label %proof.set, label %body.tail
+
+proof.set:
+  store i1 1, i1* @proof_output
   br label %body.tail
 
 body.tail:

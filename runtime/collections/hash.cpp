@@ -2,6 +2,7 @@
 
 extern "C" {
 void map_hash(map *, void *);
+void rangemap_hash(rangemap *, void *);
 void list_hash(list *, void *);
 void set_hash(set *, void *);
 void int_hash(mpz_ptr, void *);
@@ -77,6 +78,11 @@ void k_hash(block *arg, void *h) {
           case MAP_LAYOUT: {
             map *mapptr = (map *)(argintptr + offset);
             map_hash(mapptr, h);
+            break;
+          }
+          case RANGEMAP_LAYOUT: {
+            rangemap *rangemapptr = (rangemap *)(argintptr + offset);
+            rangemap_hash(rangemapptr, h);
             break;
           }
           case LIST_LAYOUT: {

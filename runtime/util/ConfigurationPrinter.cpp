@@ -14,6 +14,7 @@
 #include <vector>
 
 #include <kllvm/parser/KOREParser.h>
+#include <kllvm/util/temporary_file.h>
 
 #include "runtime/alloc.h"
 #include "runtime/header.h"
@@ -200,7 +201,8 @@ void printConfigurationInternal(
          printBool,
          printStringBuffer,
          printMInt,
-         printComma};
+         printComma,
+         printRangeMap};
 
   visitChildren(subject, file, &callbacks, state_ptr);
 
@@ -258,11 +260,7 @@ string *debug_print_term(block *subject, char const *sort) {
   char const *print_sort = nullptr;
 
   if (sort) {
-    auto inj_sym = "inj{" + std::string(sort) + ", SortKItem{}}";
-    auto tag = getTagForSymbolName(inj_sym.c_str());
-    auto args = std::vector<void *>{subject};
-
-    subject = static_cast<block *>(constructCompositePattern(tag, args));
+    subject = constructKItemInj(subject, sort, false);
     print_sort = "SortKItem{}";
   }
 
@@ -304,13 +302,9 @@ void *termToKorePattern(block *subject) {
 extern "C" void printMatchResult(
     std::ostream &os, MatchLog *matchLog, size_t logSize,
     const std::string &definitionPath) {
-  char subjectFilename[15] = "subject_XXXXXX";
-  int sf = mkstemp(subjectFilename);
-  FILE *subject = fdopen(sf, "w");
-
-  char patternFilename[15] = "pattern_XXXXXX";
-  int pf = mkstemp(patternFilename);
-  FILE *pattern = fdopen(pf, "w");
+  auto subject_file = temporary_file("subject_XXXXXX");
+  auto subject = subject_file.file_pointer("w");
+  auto pattern_file = temporary_file("pattern_XXXXXX");
 
   for (int i = 0; i < logSize; i++) {
     if (matchLog[i].kind == MatchLog::SUCCESS) {
@@ -324,14 +318,14 @@ extern "C" void printMatchResult(
         auto subjectSort
             = debug_print_term((block *)matchLog[i].subject, matchLog[i].sort);
         auto strSubjectSort = std::string(subjectSort->data, len(subjectSort));
-        fprintf(subject, "%s\n", strSubjectSort.c_str());
+        subject_file.ofstream() << strSubjectSort << std::endl;
       }
-      fflush(subject);
-      kllvm::printKORE(os, definitionPath, subjectFilename, false, true);
+      kllvm::printKORE(
+          os, definitionPath, subject_file.filename(), false, true);
       os << "does not match pattern: \n";
-      fprintf(pattern, "%s\n", matchLog[i].pattern);
-      fflush(pattern);
-      kllvm::printKORE(os, definitionPath, patternFilename, false, true);
+      pattern_file.ofstream() << matchLog[i].pattern << std::endl;
+      kllvm::printKORE(
+          os, definitionPath, pattern_file.filename(), false, true);
     } else if (matchLog[i].kind == MatchLog::FUNCTION) {
       os << matchLog[i].debugName << "(";
 
@@ -344,12 +338,6 @@ extern "C" void printMatchResult(
       os << ") => " << *reinterpret_cast<bool *>(matchLog[i].result) << "\n";
     }
   }
-
-  close(sf);
-  remove(subjectFilename);
-
-  close(pf);
-  remove(patternFilename);
 }
 
 void printValueOfType(
@@ -359,16 +347,10 @@ void printValueOfType(
     os << reinterpret_cast<mpz_ptr>(value);
   } else if (type.compare("%block*") == 0) {
     if ((((uintptr_t)value) & 3) == 1) {
-      char subjectFilename[15] = "pattern_XXXXXX";
-      int sf = mkstemp(subjectFilename);
-      FILE *pattern = fdopen(sf, "w");
+      auto f = temporary_file("subject_XXXXXX");
       string *s = printConfigurationToString(reinterpret_cast<block *>(value));
-      auto strSubjectSort = std::string(s->data, len(s));
-      fprintf(pattern, "%s", strSubjectSort.c_str());
-      fflush(pattern);
-      kllvm::printKORE(os, definitionPath, subjectFilename, false, true);
-      close(sf);
-      remove(subjectFilename);
+      f.ofstream() << std::string(s->data, len(s)) << std::endl;
+      kllvm::printKORE(os, definitionPath, f.filename(), false, true);
     } else if ((((uintptr_t)value) & 1) == 0) {
       auto s = reinterpret_cast<string *>(value);
       os << std::string(s->data, len(s));
@@ -382,4 +364,14 @@ void printValueOfType(
   } else {
     os << "Error: " << type << " not implemented!";
   }
+}
+
+void printVariableToFile(const char *filename, const char *varname) {
+  FILE *file = fopen(filename, "a");
+
+  fprintf(file, "%s", varname);
+  char n = 0;
+  fwrite(&n, 1, 1, file);
+
+  fclose(file);
 }

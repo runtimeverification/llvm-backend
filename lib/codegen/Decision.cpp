@@ -257,6 +257,7 @@ void SwitchNode::codegen(Decision *d) {
 
         switch (cat.cat) {
         case SortCategory::Map:
+        case SortCategory::RangeMap:
         case SortCategory::List:
         case SortCategory::Set: Child = ChildPtr; break;
         default:
@@ -573,6 +574,17 @@ llvm::AllocaInst *Decision::decl(var_type name) {
 }
 
 llvm::Value *Decision::load(var_type name) {
+  if (name.first == "") {
+    llvm::Type *ty = name.second;
+    if (ty->isPointerTy()) {
+      auto ptr_ty = (llvm::PointerType *)ty;
+      return llvm::ConstantPointerNull::get(ptr_ty);
+    } else if (ty->isIntegerTy()) {
+      auto int_ty = (llvm::IntegerType *)ty;
+      return llvm::ConstantInt::get(int_ty, 0);
+    }
+    assert(false && "Unbound variable on LHS is neither pointer nor integral");
+  }
   auto sym = this->symbols[name];
   if (!sym) {
     sym = this->decl(name);
@@ -669,6 +681,7 @@ void makeEvalOrAnywhereFunction(
     debugArgs.push_back(getDebugType(cat, Out.str()));
     switch (cat.cat) {
     case SortCategory::Map:
+    case SortCategory::RangeMap:
     case SortCategory::List:
     case SortCategory::Set:
       args.push_back(llvm::PointerType::getUnqual(getValueType(cat, module)));
@@ -806,6 +819,7 @@ void addOwise(
   auto returnType = getValueType(returnSort, module);
   switch (returnSort.cat) {
   case SortCategory::Map:
+  case SortCategory::RangeMap:
   case SortCategory::List:
   case SortCategory::Set:
     if (retval->getType() == returnType) {
@@ -859,6 +873,7 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> stepFunctionHeader(
   for (auto type : types) {
     switch (type.cat) {
     case SortCategory::Map:
+    case SortCategory::RangeMap:
     case SortCategory::List:
     case SortCategory::Set:
       nroots++;
@@ -903,6 +918,7 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> stepFunctionHeader(
   for (auto cat : types) {
     switch (cat.cat) {
     case SortCategory::Map:
+    case SortCategory::RangeMap:
     case SortCategory::List:
     case SortCategory::Set:
     case SortCategory::StringBuffer:
@@ -966,6 +982,7 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> stepFunctionHeader(
   for (auto type : types) {
     switch (type.cat) {
     case SortCategory::Map:
+    case SortCategory::RangeMap:
     case SortCategory::List:
     case SortCategory::Set:
     case SortCategory::StringBuffer:
@@ -1202,6 +1219,7 @@ void makeStepFunction(
     debugTypes.push_back(getDebugType(cat, Out.str()));
     switch (cat.cat) {
     case SortCategory::Map:
+    case SortCategory::RangeMap:
     case SortCategory::List:
     case SortCategory::Set:
       argTypes.push_back(

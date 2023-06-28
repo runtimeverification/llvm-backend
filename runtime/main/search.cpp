@@ -8,8 +8,8 @@ void initStaticObjects(void);
 uint64_t get_steps(void);
 }
 
-std::unordered_set<block *, HashBlock, KEq>
-take_search_steps(int64_t depth, int64_t bound, block *subject);
+std::unordered_set<block *, HashBlock, KEq> take_search_steps(
+    bool executeToBranch, int64_t depth, int64_t bound, block *subject);
 void printConfigurations(
     const char *filename, std::unordered_set<block *, HashBlock, KEq> results);
 
@@ -18,6 +18,7 @@ void serializeConfigurations(
 
 static bool hasStatistics = false;
 static bool binaryOutput = false;
+static bool executeToBranch = false;
 static int64_t bound = -1;
 
 void parse_flags(int argc, char **argv) {
@@ -31,6 +32,9 @@ void parse_flags(int argc, char **argv) {
     if (strcmp(argv[i], "--bound") == 0) {
       bound = std::stoll(argv[i + 1]);
       ++i;
+    }
+    if (strcmp(argv[i], "--execute-to-branch") == 0) {
+      executeToBranch = true;
     }
   }
 }
@@ -46,7 +50,7 @@ int main(int argc, char **argv) {
 
   block *input = parseConfiguration(filename);
   std::unordered_set<block *, HashBlock, KEq> results
-      = take_search_steps(depth, bound, input);
+      = take_search_steps(executeToBranch, depth, bound, input);
   if (hasStatistics) {
     printStatistics(output, get_steps());
   }
