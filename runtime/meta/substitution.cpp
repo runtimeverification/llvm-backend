@@ -14,6 +14,7 @@ static thread_local uint64_t idx2;
 extern "C" {
 bool hook_KEQUAL_eq(block *, block *);
 map map_map(void *, block *(block *));
+rangemap rangemap_map(void *, block *(block *));
 list list_map(void *, block *(block *));
 set set_map(void *, block *(block *));
 }
@@ -53,6 +54,11 @@ block *debruijnizeInternal(block *currBlock) {
       switch (argData->cat) {
       case MAP_LAYOUT: {
         map newArg = map_map(arg, debruijnizeInternal);
+        makeDirty(dirty, argData->offset, newArg, newBlock);
+        break;
+      }
+      case RANGEMAP_LAYOUT: {
+        rangemap newArg = rangemap_map(arg, debruijnizeInternal);
         makeDirty(dirty, argData->offset, newArg, newBlock);
         break;
       }
@@ -133,6 +139,11 @@ block *replaceBinderInternal(block *currBlock) {
         makeDirty(dirty, argData->offset, newArg, newBlock);
         break;
       }
+      case RANGEMAP_LAYOUT: {
+        rangemap newArg = rangemap_map(arg, replaceBinderInternal);
+        makeDirty(dirty, argData->offset, newArg, newBlock);
+        break;
+      }
       case LIST_LAYOUT: {
         list newArg = list_map(arg, replaceBinderInternal);
         makeDirty(dirty, argData->offset, newArg, newBlock);
@@ -202,6 +213,12 @@ block *substituteInternal(block *currBlock) {
       switch (argData->cat) {
       case MAP_LAYOUT: {
         map newArg = map_map(arg, substituteInternal);
+        makeDirty(dirty, argData->offset, newArg, newBlock);
+        arguments.push_back(((char *)newBlock) + argData->offset);
+        break;
+      }
+      case RANGEMAP_LAYOUT: {
+        rangemap newArg = rangemap_map(arg, substituteInternal);
         makeDirty(dirty, argData->offset, newArg, newBlock);
         arguments.push_back(((char *)newBlock) + argData->offset);
         break;
@@ -308,6 +325,11 @@ block *incrementDebruijn(block *currBlock) {
       switch (argData->cat) {
       case MAP_LAYOUT: {
         map newArg = map_map(arg, incrementDebruijn);
+        makeDirty(dirty, argData->offset, newArg, newBlock);
+        break;
+      }
+      case RANGEMAP_LAYOUT: {
+        rangemap newArg = rangemap_map(arg, incrementDebruijn);
         makeDirty(dirty, argData->offset, newArg, newBlock);
         break;
       }

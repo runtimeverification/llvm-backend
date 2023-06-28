@@ -206,6 +206,7 @@ migrate_child(void *currBlock, layoutitem *args, unsigned i, bool ptr) {
   void *arg = ((char *)currBlock) + argData->offset;
   switch (argData->cat) {
   case MAP_LAYOUT: migrate_map(ptr ? *(map **)arg : arg); break;
+  case RANGEMAP_LAYOUT: abort();
   case LIST_LAYOUT: migrate_list(ptr ? *(list **)arg : arg); break;
   case SET_LAYOUT: migrate_set(ptr ? *(set **)arg : arg); break;
   case STRINGBUFFER_LAYOUT: migrate_string_buffer((stringbuffer **)arg); break;

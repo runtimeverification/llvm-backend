@@ -3,18 +3,6 @@
 #include <assert.h>
 #include <stdio.h>
 
-/*
-  module TEST
-    imports INT
-
-    syntax Foo ::= bar(Int)      [klabel(bar), symbol]
-                 | foo(Int, Int) [function, klabel(foo), symbol]
-
-    rule foo(A, 0) => bar(A)
-    rule foo(A, B) => foo(A +Int 1, absInt(B) -Int 1) [owise]
-  endmodule
-*/
-
 int main(int argc, char **argv) {
   if (argc <= 2) {
     return 1;

@@ -51,6 +51,12 @@ For example, a file of version `1.0.0` should begin:
 7f4b 4f52 4501 0000 0000 00
 ```
 
+In version `1.2.0` and newer of the format, immediately following the version
+header, patterns contain an 8-byte value representing the length of the
+subsequent pattern in bytes. If that value is zero, then the implementation
+should parse as far as possible (e.g. following the convention of versions
+`1.1.0` and older).
+
 ## Strings
 
 Two representations for strings are available: direct and interned.
@@ -106,6 +112,14 @@ KORE string patterns are encoded as the byte `05`, then the string data.
 Composite patterns encode each of their arguments (recursively, following this
 schema), then the constructor symbol (as described above). These are followed by
 the byte `04`, and a variable-length arity for the pattern.
+
+Pattern variables encode their sort argument, followed by the byte `09`, then a
+variable as described below.
+
+### Variables
+
+KORE variables are encoded as the byte `0D`, followed by a string representing
+the variable name.
 
 ## Manipulating Binary Terms
 

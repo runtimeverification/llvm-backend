@@ -126,6 +126,36 @@ void serializeMap(
   }
 }
 
+void serializeRangeMap(
+    writer *file, rangemap *map, const char *unit, const char *element,
+    const char *concat, void *state) {
+  auto &instance = static_cast<serialization_state *>(state)->instance;
+
+  size_t size = map->size();
+  if (size == 0) {
+    emitSymbol(instance, unit);
+    return;
+  }
+
+  bool once = true;
+  for (auto iter = rng_map::ConstRangeMapIterator<KElem, KElem>(*map);
+       iter.has_next(); ++iter) {
+    serializeConfigurationInternal(
+        file, iter->first.start(), "SortKItem{}", false, state);
+    serializeConfigurationInternal(
+        file, iter->first.end(), "SortKItem{}", false, state);
+    serializeConfigurationInternal(
+        file, iter->second, "SortKItem{}", false, state);
+    emitSymbol(instance, element, 3);
+
+    if (once) {
+      once = false;
+    } else {
+      emitSymbol(instance, concat, 2);
+    }
+  }
+}
+
 void serializeList(
     writer *file, list *list, const char *unit, const char *element,
     const char *concat, void *state) {
@@ -295,7 +325,8 @@ void serializeConfigurationInternal(
          serializeBool,
          serializeStringBuffer,
          serializeMInt,
-         serializeComma};
+         serializeComma,
+         serializeRangeMap};
 
   visitChildren(subject, file, &callbacks, state_ptr);
 
@@ -359,22 +390,28 @@ void serializeConfigurations(
   fclose(file);
 }
 
-void serializeConfigurationToFile(const char *filename, block *subject) {
+void serializeConfigurationToFile(
+    const char *filename, block *subject, bool emit_size) {
   char *data;
   size_t size;
-  serializeConfiguration(subject, nullptr, &data, &size);
+  serializeConfiguration(subject, nullptr, &data, &size, emit_size);
 
-  FILE *file = fopen(filename, "w");
+  FILE *file = fopen(filename, "a");
   fwrite(data, 1, size, file);
   fclose(file);
 }
 
 void serializeConfiguration(
-    block *subject, char const *sort, char **data_out, size_t *size_out) {
+    block *subject, char const *sort, char **data_out, size_t *size_out,
+    bool emit_size) {
   auto state = serialization_state();
 
   writer w = {nullptr, nullptr};
   serializeConfigurationInternal(&w, subject, sort, false, &state);
+
+  if (emit_size) {
+    state.instance.correct_emitted_size();
+  }
 
   auto size = state.instance.data().size();
   auto buf = static_cast<char *>(malloc(size));
@@ -382,4 +419,34 @@ void serializeConfiguration(
 
   *data_out = buf;
   *size_out = size;
+}
+
+void writeUInt64ToFile(const char *filename, uint64_t i) {
+  FILE *file = fopen(filename, "a");
+  fwrite(&i, 8, 1, file);
+  fclose(file);
+}
+
+void serializeTermToFile(
+    const char *filename, block *subject, const char *sort) {
+  char *data;
+  size_t size;
+  serializeConfiguration(subject, sort, &data, &size, false);
+
+  FILE *file = fopen(filename, "a");
+  fwrite(data, 1, size, file);
+  fclose(file);
+}
+
+void serializeRawTermToFile(
+    const char *filename, void *subject, const char *sort) {
+  block *term = constructKItemInj(subject, sort, true);
+
+  char *data;
+  size_t size;
+  serializeConfiguration(term, "SortKItem{}", &data, &size, false);
+
+  FILE *file = fopen(filename, "a");
+  fwrite(data, 1, size, file);
+  fclose(file);
 }

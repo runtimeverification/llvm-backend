@@ -19,6 +19,7 @@
 #include <immer/flex_vector.hpp>
 #include <immer/map.hpp>
 #include <immer/set.hpp>
+#include <runtime/collections/rangemap.h>
 #include <unordered_set>
 
 struct MatchLog {
@@ -120,6 +121,7 @@ typedef struct {
   stringbuffer *buffer;
 } writer;
 
+bool hook_KEQUAL_lt(block *, block *);
 bool hook_KEQUAL_eq(block *, block *);
 bool during_gc(void);
 size_t hash_k(block *);
@@ -130,6 +132,8 @@ void hash_exit(void);
 
 class KElem {
 public:
+  KElem() { this->elem = NULL; }
+
   KElem(block *elem) { this->elem = elem; }
 
   bool operator==(const KElem &other) const {
@@ -137,6 +141,16 @@ public:
   }
 
   bool operator!=(const KElem &other) const { return !(*this == other); }
+
+  bool operator<(const KElem &other) const {
+    return hook_KEQUAL_lt(this->elem, other.elem);
+  }
+
+  bool operator>(const KElem &other) const { return other < *this; }
+
+  bool operator<=(const KElem &other) const { return !(other < *this); }
+
+  bool operator>=(const KElem &other) const { return !(*this < other); }
 
   operator block *() const { return elem; }
 
@@ -181,6 +195,7 @@ using map = immer::map<
     KElem, KElem, HashBlock, std::equal_to<KElem>, list::memory_policy>;
 using set
     = immer::set<KElem, HashBlock, std::equal_to<KElem>, list::memory_policy>;
+using rangemap = rng_map::RangeMap<KElem, KElem>;
 
 typedef struct mapiter {
   map::iterator curr;
@@ -209,6 +224,8 @@ typedef block *SortFFIType;
 typedef list *SortList;
 typedef map *SortMap;
 typedef set *SortSet;
+typedef block *SortRange;
+typedef rangemap *SortRangeMap;
 
 void *constructCompositePattern(uint32_t tag, std::vector<void *> &arguments);
 
@@ -244,8 +261,16 @@ mpz_ptr move_int(mpz_t);
 void serializeConfigurations(
     const char *filename, std::unordered_set<block *, HashBlock, KEq> results);
 void serializeConfiguration(
-    block *subject, char const *sort, char **data_out, size_t *size_out);
-void serializeConfigurationToFile(const char *filename, block *subject);
+    block *subject, char const *sort, char **data_out, size_t *size_out,
+    bool emit_size);
+void serializeConfigurationToFile(
+    const char *filename, block *subject, bool emit_size);
+void writeUInt64ToFile(const char *filename, uint64_t i);
+void serializeTermToFile(
+    const char *filename, block *subject, const char *sort);
+void serializeRawTermToFile(
+    const char *filename, void *subject, const char *sort);
+void printVariableToFile(const char *filename, const char *varname);
 
 // The following functions have to be generated at kompile time
 // and linked with the interpreter.
@@ -279,10 +304,14 @@ typedef struct {
   void (*visitStringBuffer)(writer *, stringbuffer *, const char *, void *);
   void (*visitMInt)(writer *, size_t *, size_t, const char *, void *);
   void (*visitSeparator)(writer *, void *);
+  void (*visitRangeMap)(
+      writer *, rangemap *, const char *, const char *, const char *, void *);
 } visitor;
 
 void printMap(
     writer *, map *, const char *, const char *, const char *, void *);
+void printRangeMap(
+    writer *, rangemap *, const char *, const char *, const char *, void *);
 void printSet(
     writer *, set *, const char *, const char *, const char *, void *);
 void printList(
@@ -301,6 +330,8 @@ size_t hook_SET_size_long(set *);
 
 mpz_ptr hook_MINT_import(size_t *i, uint64_t bits, bool isSigned);
 
+block *dot_k();
+
 block *debruijnize(block *);
 block *incrementDebruijn(block *);
 block *alphaRename(block *);
@@ -313,6 +344,7 @@ block *map_iterator_next(mapiter *);
 extern const uint32_t first_inj_tag, last_inj_tag;
 bool is_injection(block *);
 block *strip_injection(block *);
+block *constructKItemInj(void *subject, const char *sort, bool raw_value);
 }
 
 std::string floatToString(const floating *);
