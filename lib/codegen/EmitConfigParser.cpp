@@ -857,7 +857,7 @@ static void getStore(
         BlockType, cast,
         {zero, llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), idx++ + 2)},
         "", CaseBlock);
-    if (arg->getType() == ChildPtr->getType()) {
+    if (isCollectionSort(cat)) {
       arg = new llvm::LoadInst(arg_ty, arg, "", CaseBlock);
     }
     new llvm::StoreInst(arg, ChildPtr, CaseBlock);
