@@ -64,9 +64,9 @@ extern "C" {
  * definition. If the embed flag was passed, the value of these symbols will be
  * given by the embedded data.
  */
-int kore_definition_syntax_size __attribute__((weak)) = -1;
+int kore_definition_syntax_len __attribute__((weak)) = -1;
 char kore_definition_syntax __attribute__((weak)) = -1;
-int kore_definition_macros_size __attribute__((weak)) = -1;
+int kore_definition_macros_len __attribute__((weak)) = -1;
 char kore_definition_macros __attribute__((weak)) = -1;
 
 /* Completed types */
@@ -473,14 +473,14 @@ kore_pattern *kore_pattern_new_token_internal(
 }
 
 std::optional<pretty_print_definition> get_print_data() {
-  if (kore_definition_macros_size == -1 || kore_definition_macros == -1
-      || kore_definition_syntax_size == -1 || kore_definition_syntax == -1) {
+  if (kore_definition_macros_len == -1 || kore_definition_macros == -1
+      || kore_definition_syntax_len == -1 || kore_definition_syntax == -1) {
     return std::nullopt;
   }
 
   return pretty_print_definition{
-      std::string(&kore_definition_syntax, kore_definition_syntax_size),
-      std::string(&kore_definition_macros, kore_definition_macros_size)};
+      std::string(&kore_definition_syntax, kore_definition_syntax_len),
+      std::string(&kore_definition_macros, kore_definition_macros_len)};
 }
 
 } // namespace

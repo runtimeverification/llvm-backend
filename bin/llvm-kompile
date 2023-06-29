@@ -221,21 +221,12 @@ kompile_clang_flags+=("--python-output-dir" "${python_output_dir}")
 embed_length="${#embedded_files[@]}"
 for (( idx = 0; idx < embed_length; idx++ )); do
   name="${embedded_names[$idx]}"
-  out_asm="$tmpdir/$name.s"
+  file="${embedded_files[$idx]}"
 
-  cat << EOF > "$out_asm"
-.global _${name}
-_${name}:
-  .incbin "${embedded_files[$idx]}"
-.global _${name}_end
-_${name}_end:
-  .byte 0
-.global _${name}_size
-_${name}_size:
-  .int _${name}_end - _${name}
-EOF
+  cp "$file" "$tmpdir/$name"
+  (cd "$tmpdir"; xxd -i "$name" > "$name.cpp")
 
-  kompile_clang_flags+=("$out_asm")
+  kompile_clang_flags+=("$tmpdir/$name.cpp")
 done
 
 run "$(dirname "$0")"/llvm-kompile-clang          \
