@@ -773,7 +773,7 @@ void abortWhenStuck(
           {llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0),
            llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), idx + 2)},
           "", CurrentBlock);
-      if (ChildValue->getType() == ChildPtr->getType()) {
+      if (isCollectionSort(cat)) {
         ChildValue = new llvm::LoadInst(
             getArgType(cat, Module), ChildValue, "", CurrentBlock);
       }
@@ -814,23 +814,16 @@ void addOwise(
   }
   CreateTerm creator = CreateTerm(finalSubst, d, stuck, module, true);
   llvm::Value *retval = creator(pat.get()).first;
+
   auto returnSort = dynamic_cast<KORECompositeSort *>(symbol->getSort().get())
                         ->getCategory(d);
-  auto returnType = getValueType(returnSort, module);
-  switch (returnSort.cat) {
-  case SortCategory::Map:
-  case SortCategory::RangeMap:
-  case SortCategory::List:
-  case SortCategory::Set:
-    if (retval->getType() == returnType) {
-      auto tempAlloc = allocateTerm(
-          retval->getType(), creator.getCurrentBlock(), "koreAllocAlwaysGC");
-      new llvm::StoreInst(retval, tempAlloc, creator.getCurrentBlock());
-      retval = tempAlloc;
-    }
-    break;
-  default: break;
+  if (isCollectionSort(returnSort)) {
+    auto tempAlloc = allocateTerm(
+        retval->getType(), creator.getCurrentBlock(), "koreAllocAlwaysGC");
+    new llvm::StoreInst(retval, tempAlloc, creator.getCurrentBlock());
+    retval = tempAlloc;
   }
+
   llvm::ReturnInst::Create(
       module->getContext(), retval, creator.getCurrentBlock());
 }

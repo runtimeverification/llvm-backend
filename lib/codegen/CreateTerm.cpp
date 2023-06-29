@@ -861,9 +861,9 @@ llvm::Value *CreateTerm::notInjectionCase(
     } else {
       ChildValue = createAllocation(child.get()).first;
     }
-    llvm::Type *ChildPtrType
-        = llvm::PointerType::get(BlockType->elements()[idx], 0);
-    if (ChildValue->getType() == ChildPtrType) {
+
+    auto sort = dynamic_cast<KORECompositeSort *>(child->getSort().get());
+    if (sort && isCollectionSort(sort->getCategory(Definition))) {
       ChildValue = new llvm::LoadInst(
           BlockType->elements()[idx], ChildValue, "", CurrentBlock);
     }
@@ -1416,6 +1416,16 @@ llvm::Type *getArgType(ValueType cat, llvm::Module *mod) {
   default: {
     abort();
   }
+  }
+}
+
+bool isCollectionSort(ValueType cat) {
+  switch (cat.cat) {
+  case SortCategory::Map:
+  case SortCategory::RangeMap:
+  case SortCategory::List:
+  case SortCategory::Set: return true;
+  default: return false;
   }
 }
 
