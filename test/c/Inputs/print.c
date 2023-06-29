@@ -3,14 +3,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-/*
-  module TEST
-    imports INT
-
-    syntax Foo ::= "#foo" "[" Int "]" [format(%1 %2%n%i%3%n%d%4), klabel(foo), symbol]
-  endmodule
-*/
-
 int main(int argc, char **argv) {
   if (argc <= 1) {
     return 1;
