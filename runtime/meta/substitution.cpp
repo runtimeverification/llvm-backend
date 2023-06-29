@@ -105,9 +105,8 @@ block *debruijnizeInternal(block *currBlock) {
 }
 
 block *replaceBinderInternal(block *currBlock) {
-  uintptr_t ptr = (uintptr_t)currBlock;
-  if (is_variable_block(ptr)) {
-    uint64_t varIdx = ptr >> 32;
+  if (is_variable_block(currBlock)) {
+    uint64_t varIdx = ((uintptr_t)currBlock) >> 32;
     if (idx == varIdx) {
       return (block *)var;
     } else if (idx < varIdx) {
@@ -116,7 +115,7 @@ block *replaceBinderInternal(block *currBlock) {
     } else {
       return currBlock;
     }
-  } else if (is_leaf_block(ptr)) {
+  } else if (is_leaf_block(currBlock)) {
     return currBlock;
   }
   const uint64_t hdr = currBlock->h.hdr;
@@ -278,7 +277,7 @@ block *substituteInternal(block *currBlock) {
 extern "C" {
 
 block *debruijnize(block *term) {
-  auto layoutData = getLayoutData(layout(term));
+  auto layoutData = getLayoutData(get_layout(term));
   auto layoutVar = layoutData->args[0];
   auto layoutBody = layoutData->args[layoutData->nargs - 1];
   var = *(string **)(((char *)term) + layoutVar.offset);
@@ -296,16 +295,15 @@ block *debruijnize(block *term) {
 }
 
 block *incrementDebruijn(block *currBlock) {
-  uintptr_t ptr = (uintptr_t)currBlock;
-  if (is_variable_block(ptr)) {
-    uint64_t varIdx = ptr >> 32;
+  if (is_variable_block(currBlock)) {
+    uint64_t varIdx = ((uintptr_t)currBlock) >> 32;
     if (varIdx >= idx2) {
       varIdx += idx;
       return variable_block(varIdx);
     } else {
       return currBlock;
     }
-  } else if (is_leaf_block(ptr)) {
+  } else if (is_leaf_block(currBlock)) {
     return currBlock;
   }
   const uint64_t hdr = currBlock->h.hdr;

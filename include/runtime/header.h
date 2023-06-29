@@ -37,26 +37,8 @@ struct MatchLog {
 
 // the actual length is equal to the block header with the gc bits masked out.
 
-#define set_len(s, l)                                                          \
-  ((s)->h.hdr                                                                  \
-   = (l) | (l > BLOCK_SIZE - sizeof(char *) ? NOT_YOUNG_OBJECT_BIT : 0))
-#define size_hdr(s) ((((s) >> 32) & 0xff) * 8)
-#define layout(s) layout_hdr((s)->h.hdr)
-#define layout_hdr(s) ((s) >> LAYOUT_OFFSET)
-#define tag(s) tag_hdr((s)->h.hdr)
-#define tag_hdr(s) (s & TAG_MASK)
-#define is_in_young_gen_hdr(s) (!((s)&NOT_YOUNG_OBJECT_BIT))
-#define is_in_old_gen_hdr(s) (((s)&NOT_YOUNG_OBJECT_BIT) && ((s)&AGE_MASK))
-#define reset_gc(s)                                                            \
-  ((s)->h.hdr = (s)->h.hdr & ~(NOT_YOUNG_OBJECT_BIT | AGE_MASK | FWD_PTR_BIT))
 #define struct_base(struct_type, member_name, member_addr)                     \
   ((struct_type *)((char *)(member_addr)-offsetof(struct_type, member_name)))
-#define leaf_block(tag) ((block *)((((uint64_t)(tag)) << 32) | 1))
-#define variable_block(tag) ((block *)((((uint64_t)(tag)) << 32) | 3))
-#define is_leaf_block(block) (((uintptr_t)block) & 1)
-#define is_variable_block(block) ((((uintptr_t)block) & 3) == 3)
-#define is_heap_block(s)                                                       \
-  (is_in_young_gen_hdr((s)->h.hdr) || is_in_old_gen_hdr((s)->h.hdr))
 
 extern "C" {
 // llvm: blockheader = type { i64 }
@@ -128,20 +110,81 @@ bool hash_enter(void);
 void hash_exit(void);
 }
 
-#define KLLVM_FORCE_INLINE [[gnu::always_inline, gnu::artificial]]
-#define KLLVM_CONSTEXPR KLLVM_FORCE_INLINE inline constexpr
-
-KLLVM_CONSTEXPR uint64_t len_hdr(uint64_t hdr) {
+__attribute__((always_inline)) constexpr uint64_t len_hdr(uint64_t hdr) {
   return hdr & LENGTH_MASK;
 }
 
 template <typename T>
-KLLVM_CONSTEXPR uint64_t len(T const *s) {
+__attribute__((always_inline)) constexpr uint64_t len(T const *s) {
   return len_hdr(s->h.hdr);
 }
 
-#undef KLLVM_CONSTEXPR
-#undef KLLVM_FORCE_INLINE
+template <typename T>
+__attribute__((always_inline)) constexpr void set_len(T *s, uint64_t l) {
+  s->h.hdr = l | (l > BLOCK_SIZE - sizeof(char *) ? NOT_YOUNG_OBJECT_BIT : 0);
+}
+
+__attribute__((always_inline)) constexpr uint64_t size_hdr(uint64_t hdr) {
+  return ((hdr >> 32) & 0xff) * 8;
+}
+
+__attribute__((always_inline)) constexpr uint64_t layout_hdr(uint64_t hdr) {
+  return hdr >> LAYOUT_OFFSET;
+}
+
+template <typename T>
+__attribute__((always_inline)) constexpr uint64_t get_layout(T const *s) {
+  return layout_hdr((s)->h.hdr);
+}
+
+__attribute__((always_inline)) constexpr uint64_t tag_hdr(uint64_t hdr) {
+  return hdr & TAG_MASK;
+}
+
+template <typename T>
+__attribute__((always_inline)) constexpr uint64_t tag(T const *s) {
+  return tag_hdr(s->h.hdr);
+}
+
+__attribute__((always_inline)) constexpr bool
+is_in_young_gen_hdr(uint64_t hdr) {
+  return !(hdr & NOT_YOUNG_OBJECT_BIT);
+}
+
+__attribute__((always_inline)) constexpr bool is_in_old_gen_hdr(uint64_t hdr) {
+  return (hdr & NOT_YOUNG_OBJECT_BIT) && (hdr & AGE_MASK);
+}
+
+template <typename T>
+__attribute__((always_inline)) constexpr void reset_gc(T *s) {
+  constexpr auto all_gc_mask = NOT_YOUNG_OBJECT_BIT | AGE_MASK | FWD_PTR_BIT;
+  s->h.hdr = s->h.hdr & ~all_gc_mask;
+}
+
+__attribute__((always_inline)) inline block *leaf_block(uint64_t tag) {
+  auto value = uintptr_t{(tag << 32) | 1};
+  return reinterpret_cast<block *>(value);
+}
+
+__attribute__((always_inline)) inline block *variable_block(uint64_t tag) {
+  auto value = uintptr_t{(tag << 32) | 3};
+  return reinterpret_cast<block *>(value);
+}
+
+template <typename T>
+__attribute__((always_inline)) inline bool is_leaf_block(T const *b) {
+  return reinterpret_cast<uintptr_t>(b) & 1;
+}
+
+template <typename T>
+__attribute__((always_inline)) inline bool is_variable_block(T const *b) {
+  return (reinterpret_cast<uintptr_t>(b) & 3) == 3;
+}
+
+template <typename T>
+__attribute__((always_inline)) constexpr bool is_heap_block(T const *s) {
+  return is_in_young_gen_hdr(s->h.hdr) || is_in_old_gen_hdr(s->h.hdr);
+}
 
 class KElem {
 public:

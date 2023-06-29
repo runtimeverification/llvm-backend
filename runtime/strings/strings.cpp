@@ -277,7 +277,7 @@ SortString hook_STRING_token2string(string *input) {
     input = (string *)strip_injection(in_block);
   }
 
-  if (layout(input) != 0) {
+  if (get_layout(input) != 0) {
     KLLVM_HOOK_INVALID_ARGUMENT(
         "token2string: input is not a string token: {}",
         std::string(input->data));

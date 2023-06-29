@@ -284,7 +284,7 @@ void serializeConfigurationInternal(
     return;
   }
 
-  uint16_t layout = layout(subject);
+  uint16_t layout = get_layout(subject);
   if (!layout) {
     string *str = (string *)subject;
     size_t subject_len = len(subject);
