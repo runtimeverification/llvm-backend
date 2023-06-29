@@ -1,5 +1,5 @@
 { lib, src, cmake, coreutils, flex, fmt, pkgconfig, llvm, libllvm, libcxxabi, stdenv, boost, gmp
-, jemalloc, libffi, libiconv, libyaml, mpfr, ncurses, python39,
+, jemalloc, libffi, libiconv, libyaml, mpfr, ncurses, python39, unixtools,
 # Runtime dependencies:
 host,
 # Options:
@@ -14,7 +14,7 @@ stdenv.mkDerivation {
   nativeBuildInputs = [ cmake flex llvm pkgconfig ];
   buildInputs = [ libyaml ];
   propagatedBuildInputs = [
-    boost coreutils fmt gmp jemalloc libffi mpfr ncurses python-env
+    boost coreutils fmt gmp jemalloc libffi mpfr ncurses python-env unixtools.xxd
   ] ++ lib.optional stdenv.isDarwin libiconv;
 
   dontStrip = true;
