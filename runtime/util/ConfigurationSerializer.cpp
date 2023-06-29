@@ -287,7 +287,7 @@ void serializeConfigurationInternal(
   uint16_t layout = layout(subject);
   if (!layout) {
     string *str = (string *)subject;
-    size_t len = len(subject);
+    size_t subject_len = len(subject);
 
     if (isVar && !state.varNames.count(str)) {
       std::string stdStr = std::string(str->data, len(str));
@@ -302,7 +302,7 @@ void serializeConfigurationInternal(
     } else if (isVar) {
       emitToken(state.instance, sort, state.varNames[str].c_str());
     } else {
-      emitToken(state.instance, sort, str->data, len);
+      emitToken(state.instance, sort, str->data, subject_len);
     }
 
     return;

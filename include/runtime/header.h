@@ -37,8 +37,6 @@ struct MatchLog {
 
 // the actual length is equal to the block header with the gc bits masked out.
 
-#define len(s) len_hdr((s)->h.hdr)
-#define len_hdr(s) ((s)&LENGTH_MASK)
 #define set_len(s, l)                                                          \
   ((s)->h.hdr                                                                  \
    = (l) | (l > BLOCK_SIZE - sizeof(char *) ? NOT_YOUNG_OBJECT_BIT : 0))
@@ -129,6 +127,21 @@ void k_hash(block *, void *);
 bool hash_enter(void);
 void hash_exit(void);
 }
+
+#define KLLVM_FORCE_INLINE [[gnu::always_inline, gnu::artificial]]
+#define KLLVM_CONSTEXPR KLLVM_FORCE_INLINE inline constexpr
+
+KLLVM_CONSTEXPR uint64_t len_hdr(uint64_t hdr) {
+  return hdr & LENGTH_MASK;
+}
+
+template <typename T>
+KLLVM_CONSTEXPR uint64_t len(T const *s) {
+  return len_hdr(s->h.hdr);
+}
+
+#undef KLLVM_CONSTEXPR
+#undef KLLVM_FORCE_INLINE
 
 class KElem {
 public:

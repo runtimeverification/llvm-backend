@@ -376,10 +376,10 @@ block *incrementDebruijn(block *currBlock) {
 
 block *alphaRename(block *term) {
   string *var = (string *)term;
-  size_t len = len(var);
-  auto newToken = (string *)koreAllocToken(sizeof(string) + len);
-  memcpy(newToken->data, var->data, len);
-  set_len(newToken, len);
+  size_t var_len = len(var);
+  auto newToken = (string *)koreAllocToken(sizeof(string) + var_len);
+  memcpy(newToken->data, var->data, var_len);
+  set_len(newToken, var_len);
   newToken->h.hdr |= VARIABLE_BIT;
   return (block *)newToken;
 }

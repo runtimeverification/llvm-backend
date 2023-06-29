@@ -206,13 +206,13 @@ SortString hook_STRING_base2string_long(SortInt input, uint64_t base) {
   // Include the null terminator in size calculations relating to allocation,
   // but not when setting the length of the string object itself. Any minus
   // signs will have been accounted for already by the intToString call.
-  auto len = str.size() + 1;
-  auto result = static_cast<string *>(koreAllocToken(sizeof(string) + len));
-  strncpy(result->data, str.c_str(), len);
+  auto str_len = str.size() + 1;
+  auto result = static_cast<string *>(koreAllocToken(sizeof(string) + str_len));
+  strncpy(result->data, str.c_str(), str_len);
   set_len(result, str.size());
 
   return static_cast<string *>(koreResizeLastAlloc(
-      result, sizeof(string) + len(result), sizeof(string) + len));
+      result, sizeof(string) + len(result), sizeof(string) + str_len));
 }
 
 SortInt hook_STRING_string2base_long(SortString input, uint64_t base) {

@@ -257,12 +257,12 @@ BOOST_AUTO_TEST_CASE(getc) {
 
 BOOST_AUTO_TEST_CASE(read) {
   mpz_t f;
-  mpz_t len;
+  mpz_t length;
   int fd = overwriteTestFile();
   mpz_init_set_si(f, fd);
-  mpz_init_set_si(len, 6);
+  mpz_init_set_si(length, 6);
 
-  block *b = hook_IO_read(f, len);
+  block *b = hook_IO_read(f, length);
   BOOST_CHECK_EQUAL(
       b->h.hdr, getBlockHeaderForSymbol(
                     getTagForSymbolName("inj{SortString{}, SortIOString{}}"))
@@ -271,7 +271,7 @@ BOOST_AUTO_TEST_CASE(read) {
 
   BOOST_CHECK_EQUAL(0, strncmp(str->data, "hello ", 6));
 
-  b = hook_IO_read(f, len);
+  b = hook_IO_read(f, length);
   BOOST_CHECK_EQUAL(
       b->h.hdr, getBlockHeaderForSymbol(
                     getTagForSymbolName("inj{SortString{}, SortIOString{}}"))
@@ -281,7 +281,7 @@ BOOST_AUTO_TEST_CASE(read) {
 
   ::lseek(fd, 0, SEEK_END);
 
-  b = hook_IO_read(f, len);
+  b = hook_IO_read(f, length);
   BOOST_CHECK_EQUAL(
       b->h.hdr, getBlockHeaderForSymbol(
                     getTagForSymbolName("inj{SortString{}, SortIOString{}}"))
@@ -291,7 +291,7 @@ BOOST_AUTO_TEST_CASE(read) {
 
   ::close(fd);
 
-  b = hook_IO_read(f, len);
+  b = hook_IO_read(f, length);
   BOOST_CHECK_EQUAL(
       b->h.hdr, getBlockHeaderForSymbol(
                     getTagForSymbolName("inj{SortIOError{}, SortKItem{}}"))
