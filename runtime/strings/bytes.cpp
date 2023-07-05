@@ -188,8 +188,8 @@ SortInt hook_BYTES_length(SortBytes a) {
   return move_int(result);
 }
 
-SortBytes hook_BYTES_padRight(SortBytes b, SortInt len, SortInt v) {
-  unsigned long ulen = get_ui(len);
+SortBytes hook_BYTES_padRight(SortBytes b, SortInt length, SortInt v) {
+  unsigned long ulen = get_ui(length);
   if (ulen <= len(b)) {
     return b;
   }
@@ -204,8 +204,8 @@ SortBytes hook_BYTES_padRight(SortBytes b, SortInt len, SortInt v) {
   return result;
 }
 
-SortBytes hook_BYTES_padLeft(SortBytes b, SortInt len, SortInt v) {
-  unsigned long ulen = get_ui(len);
+SortBytes hook_BYTES_padLeft(SortBytes b, SortInt length, SortInt v) {
+  unsigned long ulen = get_ui(length);
   if (ulen <= len(b)) {
     return b;
   }
