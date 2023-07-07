@@ -751,7 +751,7 @@ llvm::Value *CreateTerm::createHook(
   }
 }
 
-// We use tailcc calling convention for apply_rule_* and eval_* functions to 
+// We use tailcc calling convention for apply_rule_* and eval_* functions to
 // make these K functions tail recursive when their K definitions are tail
 // recursive.
 llvm::Value *CreateTerm::createFunctionCall(
