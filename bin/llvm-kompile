@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+# This is configured generated code; shellcheck can't follow it properly
+# shellcheck disable=SC1091
 source "$(dirname "$0")/../lib/scripts/utils.sh"
 
 usage() {
@@ -67,8 +69,8 @@ clang_args=()
 python_cmd=python3
 python_output_dir=""
 
-verbose=false
-profile=false
+export verbose=false
+export profile=false
 save_temps=false
 
 while [[ $# -gt 0 ]]; do

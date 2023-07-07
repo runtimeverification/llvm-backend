@@ -2,6 +2,9 @@
 
 export DEPTH=0
 
+verbose=${verbose:-false}
+profile=${profile:-false}
+
 if [[ "$OSTYPE" == "darwin"* ]]; then
   DATE_CMD="gdate"
 else
@@ -28,7 +31,7 @@ run () {
   { set +e; } 2>/dev/null
 
   if [ "$verbose" = "true" ]; then
-    indented "+ $@"
+    indented "+ " "$@"
   fi
 
   start=$(time_now_ms)
