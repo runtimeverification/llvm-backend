@@ -1,5 +1,5 @@
-#include "kllvm/codegen/CreateStaticTerm.h"
 #include "kllvm/codegen/CreateTerm.h"
+#include "kllvm/codegen/CreateStaticTerm.h"
 #include "kllvm/codegen/Debug.h"
 #include "kllvm/codegen/Util.h"
 
