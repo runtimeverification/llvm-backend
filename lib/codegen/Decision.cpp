@@ -1082,7 +1082,7 @@ void makeMatchReasonFunctionWrapper(
       = getOrInsertFunction(module, wrapperName, funcType);
   std::string debugName = name;
   if (axiom->getAttributes().count("label")) {
-    debugName = axiom->getStringAttribute("label") + "_fastcc_" + ".match";
+    debugName = axiom->getStringAttribute("label") + "_tailcc_" + ".match";
   }
   auto debugType
       = getDebugType({SortCategory::Symbol, 0}, "SortGeneratedTopCell{}");
