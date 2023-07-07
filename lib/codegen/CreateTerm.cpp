@@ -1,5 +1,5 @@
-#include "kllvm/codegen/CreateTerm.h"
 #include "kllvm/codegen/CreateStaticTerm.h"
+#include "kllvm/codegen/CreateTerm.h"
 #include "kllvm/codegen/Debug.h"
 #include "kllvm/codegen/Util.h"
 
@@ -824,7 +824,7 @@ llvm::Value *CreateTerm::createFunctionCall(
   auto call = llvm::CallInst::Create(func, realArgs, "", CurrentBlock);
   setDebugLoc(call);
   if (tailcc) {
-    call->setCallingConv(llvm::CallingConv::Fast);
+    call->setCallingConv(llvm::CallingConv::Tail);
   }
   if (sret) {
 #if LLVM_VERSION_MAJOR >= 12
@@ -1128,7 +1128,7 @@ bool makeFunction(
       getDebugFunctionType(getDebugType(returnCat, Out.str()), debugArgs),
       definition, applyRule);
   if (tailcc) {
-    applyRule->setCallingConv(llvm::CallingConv::Fast);
+    applyRule->setCallingConv(llvm::CallingConv::Tail);
   }
   llvm::StringMap<llvm::Value *> subst;
   llvm::BasicBlock *block
@@ -1246,7 +1246,7 @@ bool makeFunction(
         llvm::FunctionType::get(blockType, {blockType}, false));
     auto call = llvm::CallInst::Create(step, {retval}, "", CurrentBlock);
     setDebugLoc(call);
-    call->setCallingConv(llvm::CallingConv::Fast);
+    call->setCallingConv(llvm::CallingConv::Tail);
     retval = call;
   }
   auto ret
@@ -1326,7 +1326,7 @@ std::string makeApplyRuleFunction(
           getDebugType({SortCategory::Symbol, 0}, "SortGeneratedTopCell{}"),
           debugArgs),
       definition, applyRule);
-  applyRule->setCallingConv(llvm::CallingConv::Fast);
+  applyRule->setCallingConv(llvm::CallingConv::Tail);
   llvm::StringMap<llvm::Value *> subst;
   llvm::BasicBlock *block
       = llvm::BasicBlock::Create(Module->getContext(), "entry", applyRule);
@@ -1372,7 +1372,7 @@ std::string makeApplyRuleFunction(
   auto retval
       = llvm::CallInst::Create(step, args, "", creator.getCurrentBlock());
   setDebugLoc(retval);
-  retval->setCallingConv(llvm::CallingConv::Fast);
+  retval->setCallingConv(llvm::CallingConv::Tail);
   llvm::ReturnInst::Create(
       Module->getContext(), retval, creator.getCurrentBlock());
   return name;
