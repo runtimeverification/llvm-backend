@@ -17,7 +17,8 @@ python_output_dir="."
 
 run () {
   if [ "$verbose" = true ]; then
-    set -x
+    # set -x
+    echo "RUNNING $INDENT: $@"
   fi
   "$@"
   { set +x; } 2>/dev/null
