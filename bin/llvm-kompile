@@ -12,6 +12,7 @@ Usage: $0 <definition.kore> <dt_dir> <object type> [options] [clang flags]
 Options:
   -h, --help                Print this message and exit.
   -v, --verbose             Print commands executed to stderr.
+      --profile             Print profiling information to stderr.
   --save-temps              Do not delete temporary files on exit.
   --bindings-path           Print the absolute path of the compiled Python bindings for
                             the LLVM backend, then exit.
@@ -67,6 +68,7 @@ python_cmd=python3
 python_output_dir=""
 
 verbose=false
+profile=false
 save_temps=false
 
 while [[ $# -gt 0 ]]; do
@@ -84,6 +86,11 @@ while [[ $# -gt 0 ]]; do
     -v|--verbose)
       verbose=true
       kompile_clang_flags+=("-v")
+      shift
+      ;;
+    --profile)
+      profile=true
+      kompile_clang_flags+=("--profile")
       shift
       ;;
     --save-temps)

@@ -17,6 +17,10 @@ indented () {
     echo -n "  " 1>&2
   done
 
+  if [[ "$DEPTH" -gt 0 ]]; then
+    echo -n "| " 1>&2
+  fi
+
   echo "$@" 1>&2
 }
 
@@ -36,7 +40,7 @@ run () {
 
   { set -e; } 2>/dev/null
 
-  if [ "$verbose" = "true" ]; then
+  if [[ "$verbose" = "true" ]] && [[ "$profile" = "true" ]]; then
     time=$((end - start))
     time_s=$(bc <<< "scale=3; $time/1000" | sed -e 's/^\./0./')
 

@@ -12,6 +12,7 @@ llc_flags=()
 llc_opt_flags="-O0"
 link=true
 verbose=false
+profile=false
 save_temps=false
 output=false
 output_file="definition.o"
@@ -67,6 +68,11 @@ while [[ $# -gt 0 ]]; do
       ;;
     -v)
       verbose=true
+      keep_arg=false
+      shift
+      ;;
+    --profile)
+      profile=true
       keep_arg=false
       shift
       ;;
