@@ -1,4 +1,12 @@
 #!/bin/bash -e
+
+# This is configured generated code; shellcheck can't follow it properly
+# shellcheck disable=SC1091
+source "$(dirname "$0")/../lib/scripts/utils.sh"
+
+# Set the printing depth for profiling and verbose execution information
+export DEPTH=1
+
 modopt="$1"
 main="$2"
 lto="$3"
@@ -7,7 +15,8 @@ flags=()
 llc_flags=()
 llc_opt_flags="-O0"
 link=true
-verbose=false
+export verbose=false
+export profile=false
 save_temps=false
 output=false
 output_file="definition.o"
@@ -63,6 +72,13 @@ while [[ $# -gt 0 ]]; do
       ;;
     -v)
       verbose=true
+      keep_arg=false
+      shift
+      ;;
+    --profile)
+      profile=true
+      keep_arg=false
+      shift
       ;;
     -save-temps)
       save_temps=true	    
@@ -122,14 +138,6 @@ else
 fi
 
 llc_flags+=("--relocation-model=pic")
-
-run () {
-  if $verbose; then
-    set -x
-  fi
-  "$@"
-  { set +x; } 2>/dev/null
-}
 
 tmpdir="$(mktemp -d tmp.XXXXXXXXXX)"
 if ! $save_temps; then
