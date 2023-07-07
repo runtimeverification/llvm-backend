@@ -751,11 +751,11 @@ llvm::Value *CreateTerm::createHook(
   }
 }
 
-// we use fastcc calling convention for apply_rule_* and eval_* functions so
-// that the -tailcallopt LLVM pass can be used to make K functions tail
-// recursive when their K definitions are tail recursive.
+// We use tailcc calling convention for apply_rule_* and eval_* functions to 
+// make these K functions tail recursive when their K definitions are tail
+// recursive.
 llvm::Value *CreateTerm::createFunctionCall(
-    std::string name, KORECompositePattern *pattern, bool sret, bool fastcc) {
+    std::string name, KORECompositePattern *pattern, bool sret, bool tailcc) {
   std::vector<llvm::Value *> args;
   auto returnSort = dynamic_cast<KORECompositeSort *>(
       pattern->getConstructor()->getSort().get());
@@ -783,12 +783,12 @@ llvm::Value *CreateTerm::createFunctionCall(
     default: args.push_back(arg); break;
     }
   }
-  return createFunctionCall(name, returnCat, args, sret, fastcc);
+  return createFunctionCall(name, returnCat, args, sret, tailcc);
 }
 
 llvm::Value *CreateTerm::createFunctionCall(
     std::string name, ValueType returnCat,
-    const std::vector<llvm::Value *> &args, bool sret, bool fastcc) {
+    const std::vector<llvm::Value *> &args, bool sret, bool tailcc) {
   llvm::Type *returnType = getValueType(returnCat, Module);
   std::vector<llvm::Type *> types;
   bool collection = false;
@@ -823,7 +823,7 @@ llvm::Value *CreateTerm::createFunctionCall(
   llvm::Function *func = getOrInsertFunction(Module, name, funcType);
   auto call = llvm::CallInst::Create(func, realArgs, "", CurrentBlock);
   setDebugLoc(call);
-  if (fastcc) {
+  if (tailcc) {
     call->setCallingConv(llvm::CallingConv::Fast);
   }
   if (sret) {
@@ -1062,7 +1062,7 @@ void writeUInt64(
 
 bool makeFunction(
     std::string name, KOREPattern *pattern, KOREDefinition *definition,
-    llvm::Module *Module, bool fastcc, bool bigStep, bool apply,
+    llvm::Module *Module, bool tailcc, bool bigStep, bool apply,
     KOREAxiomDeclaration *axiom, std::string postfix) {
   std::map<std::string, KOREVariablePattern *> vars;
   if (apply) {
@@ -1127,7 +1127,7 @@ bool makeFunction(
       debugName, debugName,
       getDebugFunctionType(getDebugType(returnCat, Out.str()), debugArgs),
       definition, applyRule);
-  if (fastcc) {
+  if (tailcc) {
     applyRule->setCallingConv(llvm::CallingConv::Fast);
   }
   llvm::StringMap<llvm::Value *> subst;

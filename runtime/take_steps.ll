@@ -4,8 +4,8 @@ target triple = "@BACKEND_TARGET_TRIPLE@"
 %blockheader = type { i64 } 
 %block = type { %blockheader, [0 x i64 *] } ; 16-bit layout, 8-bit length, 32-bit tag, children
 
-declare fastcc %block* @k_step(%block*)
-declare fastcc %block** @stepAll(%block*, i64*)
+declare tailcc %block* @k_step(%block*)
+declare tailcc %block** @stepAll(%block*, i64*)
 declare void @serializeConfigurationToFile(i8*, %block*)
 declare void @writeUInt64ToFile(i8*, i64)
 
@@ -56,13 +56,13 @@ if:
   br label %merge
 merge:
   store i64 %depth, i64* @depth
-  %result = call fastcc %block* @k_step(%block* %subject)
+  %result = call tailcc %block* @k_step(%block* %subject)
   ret %block* %result
 }
 
 define %block** @take_search_step(%block* %subject, i64* %count) {
   store i64 -1, i64* @depth
-  %result = call fastcc %block** @stepAll(%block* %subject, i64* %count)
+  %result = call tailcc %block** @stepAll(%block* %subject, i64* %count)
   ret %block** %result
 }
 

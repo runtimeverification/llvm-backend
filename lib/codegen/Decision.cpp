@@ -1070,6 +1070,7 @@ void makeStepFunction(
   codegen(dt);
 }
 
+// TODO: As we're not using fastcc, we must check if we can remove this wrapper
 void makeMatchReasonFunctionWrapper(
     KOREDefinition *definition, llvm::Module *module,
     KOREAxiomDeclaration *axiom, std::string name) {
