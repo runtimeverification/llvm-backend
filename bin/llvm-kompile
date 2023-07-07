@@ -141,6 +141,9 @@ if [[ "${#positional_args[@]}" -lt 1 || "${#positional_args[@]}" -gt 3 ]]; then
   exit 1
 fi
 
+if [[ "$profile" == "true" ]] && [[ "$verbose" == "false" ]]; then
+  echo "[warning] llvm-kompile: --profile will only produce output with -v/--verbose" 1>&2
+fi
 
 mod="$(mktemp tmp.XXXXXXXXXX)"
 modopt_tmp="$(mktemp tmp.XXXXXXXXXX)"
