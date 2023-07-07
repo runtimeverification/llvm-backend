@@ -180,7 +180,7 @@ if [ "$compile" = "default" ]; then
     esac
   done
   run "$(dirname "$0")"/llvm-kompile-codegen "$definition" "$dt_dir"/dt.yaml "$dt_dir" $debug > "$mod"
-  run @OPT@ -mem2reg -tailcallelim -tailcallopt "$mod" -o "$modopt"
+  run @OPT@ -mem2reg -tailcallelim "$mod" -o "$modopt"
 elif [ "$compile" = "object" ]; then
   main="${positional_args[1]}"
   modopt="$definition"
