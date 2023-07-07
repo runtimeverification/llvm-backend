@@ -15,6 +15,14 @@ compile=true
 python_cmd=python3
 python_output_dir="."
 
+run () {
+  if [ "$verbose" = true ]; then
+    set -x
+  fi
+  "$@"
+  { set +x; } 2>/dev/null
+}
+
 python_extension() {
   "$1" <<HERE
 import sysconfig
@@ -124,14 +132,6 @@ else
 fi
 
 llc_flags+=("--relocation-model=pic")
-
-run () {
-  if $verbose; then
-    set -x
-  fi
-  "$@"
-  { set +x; } 2>/dev/null
-}
 
 tmpdir="$(mktemp -d tmp.XXXXXXXXXX)"
 if ! $save_temps; then
