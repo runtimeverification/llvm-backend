@@ -1,4 +1,8 @@
 #!/bin/bash -e
+
+source "$(dirname "$0")/../lib/scripts/utils.sh"
+DEPTH=1
+
 modopt="$1"
 main="$2"
 lto="$3"
@@ -14,15 +18,6 @@ output_file="definition.o"
 compile=true
 python_cmd=python3
 python_output_dir="."
-
-run () {
-  if [ "$verbose" = true ]; then
-    # set -x
-    echo "RUNNING $INDENT: $@"
-  fi
-  "$@"
-  { set +x; } 2>/dev/null
-}
 
 python_extension() {
   "$1" <<HERE

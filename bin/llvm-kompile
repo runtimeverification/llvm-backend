@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+source "$(dirname "$0")/../lib/scripts/utils.sh"
+
 usage() {
   cat << HERE
 Usage: $0 <definition.kore> <dt_dir> <object type> [options] [clang flags]
@@ -43,50 +45,6 @@ Valid values for a KLLVM object type are:
 
   c:          build a C bindings module rather than a standalone executable.
 HERE
-}
-
-export DEPTH=0
-
-if [[ "$OSTYPE" == "darwin"* ]]; then
-  date_cmd="gdate"
-else
-  date_cmd="date"
-fi
-
-time_now_ms () {
-  "$date_cmd" "+%s%3N"
-}
-
-indented () {
-  for ((i=0; i < DEPTH; ++i)); do
-    echo -n "  " 1>&2
-  done
-
-  echo "$@" 1>&2
-}
-
-run () {
-  { set +e; } 2>/dev/null
-
-  indented "+ $@"
-
-  start=$(time_now_ms)
-
-  "$@"
-  result="$?"
-
-  end=$(time_now_ms)
-
-  { set -e; } 2>/dev/null
-
-  time=$((end - start))
-  time_s=$(bc <<< "scale=3; $time/1000" | sed -e 's/^\./0./')
-
-  indented "- time=${time_s}"
-
-  if [ "$result" -ne 0 ]; then
-    exit "$result"
-  fi
 }
 
 print_bindings_path () {
