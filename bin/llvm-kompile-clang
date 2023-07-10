@@ -149,7 +149,7 @@ fi
 # straight to invoking the C++ compiler.
 if [ "$main" != "python_ast" ]; then
   if [ "$lto" = "lto" ]; then
-    flags+=("-flto" "-Wl,-mllvm,-tailcallopt")
+    flags+=("-flto")
     files=("$LIBDIR"/llvm/*.ll)
     if ! $link; then
       mv "$modopt" "$output_file"
@@ -162,7 +162,7 @@ if [ "$main" != "python_ast" ]; then
         modasm="$output_file"
       fi
       run @LLC@ \
-        -tailcallopt "$modopt" -mtriple=@BACKEND_TARGET_TRIPLE@ \
+        "$modopt" -mtriple=@BACKEND_TARGET_TRIPLE@ \
         -filetype=obj "$llc_opt_flags" "${llc_flags[@]}" -o "$modasm"
       modopt="$modasm"
     fi
@@ -170,7 +170,7 @@ if [ "$main" != "python_ast" ]; then
       for file in "$LIBDIR"/llvm/*.ll; do
         tmp="$tmpdir/$(basename "$file").o"
         run @LLC@ \
-          -tailcallopt "$file" -mtriple=@BACKEND_TARGET_TRIPLE@ \
+          "$file" -mtriple=@BACKEND_TARGET_TRIPLE@ \
           -filetype=obj "$llc_opt_flags" "${llc_flags[@]}" -o "$tmp"
         files+=("$tmp")
       done
