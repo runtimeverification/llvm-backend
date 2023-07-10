@@ -149,7 +149,7 @@ fi
 # straight to invoking the C++ compiler.
 if [ "$main" != "python_ast" ]; then
   if [ "$lto" = "lto" ]; then
-    flags+=("-flto" "-Wl,-mllvm")
+    flags+=("-flto")
     files=("$LIBDIR"/llvm/*.ll)
     if ! $link; then
       mv "$modopt" "$output_file"
