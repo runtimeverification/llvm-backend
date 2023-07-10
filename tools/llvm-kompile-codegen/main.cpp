@@ -1,4 +1,5 @@
 #include <kllvm/ast/AST.h>
+#include <kllvm/codegen/ApplyPasses.h>
 #include <kllvm/codegen/CreateTerm.h>
 #include <kllvm/codegen/Debug.h>
 #include <kllvm/codegen/Decision.h>
@@ -49,6 +50,11 @@ cl::opt<std::string> Directory(
 cl::opt<int, true> Debug(
     cl::Positional, cl::desc("[0|1]"), cl::Required, cl::cat(CodegenCat),
     cl::location(CODEGEN_DEBUG));
+
+cl::opt<bool> NoOptimize(
+    "no-optimize",
+    cl::desc("Don't run optimization passes before producing output"),
+    cl::cat(CodegenCat));
 
 static fs::path dt_dir() {
   return fs::path(Directory.getValue());
@@ -154,6 +160,10 @@ int main(int argc, char **argv) {
 
   if (CODEGEN_DEBUG) {
     finalizeDebugInfo();
+  }
+
+  if (!NoOptimize) {
+    apply_kllvm_opt_passes(*mod);
   }
 
   mod->print(llvm::outs(), nullptr);
