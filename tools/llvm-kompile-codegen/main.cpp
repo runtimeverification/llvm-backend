@@ -49,9 +49,9 @@ cl::opt<std::string> DecisionTree(
 cl::opt<std::string> Directory(
     cl::Positional, cl::desc("<dir>"), cl::Required, cl::cat(CodegenCat));
 
-cl::opt<int, true> Debug(
-    cl::Positional, cl::desc("[0|1]"), cl::Required, cl::cat(CodegenCat),
-    cl::location(CODEGEN_DEBUG));
+cl::opt<bool> Debug(
+    "debug", cl::desc("Enable debug information"), cl::Required,
+    cl::cat(CodegenCat));
 
 cl::opt<bool> NoOptimize(
     "no-optimize",
@@ -136,6 +136,8 @@ void write_output(Module const &mod) {
 int main(int argc, char **argv) {
   cl::HideUnrelatedOptions({&CodegenCat});
   cl::ParseCommandLineOptions(argc, argv);
+
+  CODEGEN_DEBUG = Debug ? 1 : 0;
 
   KOREParser parser(Definition);
   ptr<KOREDefinition> definition = parser.definition();
