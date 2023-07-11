@@ -189,6 +189,8 @@ if [ "$compile" = "default" ]; then
     esac
   done
 
+  codegen_flags+=("--binary-ir")
+
   run "$(dirname "$0")"/llvm-kompile-codegen "${codegen_flags[@]}" \
     "$definition" "$dt_dir"/dt.yaml "$dt_dir" "$debug" -o "$mod"
 

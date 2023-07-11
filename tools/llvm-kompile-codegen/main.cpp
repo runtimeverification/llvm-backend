@@ -49,9 +49,8 @@ cl::opt<std::string> DecisionTree(
 cl::opt<std::string> Directory(
     cl::Positional, cl::desc("<dir>"), cl::Required, cl::cat(CodegenCat));
 
-cl::opt<bool> Debug(
-    "debug", cl::desc("Enable debug information"), cl::Required,
-    cl::cat(CodegenCat));
+cl::opt<bool>
+    Debug("debug", cl::desc("Enable debug information"), cl::cat(CodegenCat));
 
 cl::opt<bool> NoOptimize(
     "no-optimize",
@@ -65,12 +64,8 @@ cl::alias OutputFileAlias(
     "o", cl::desc("Alias for --output"), cl::aliasopt(OutputFile),
     cl::cat(CodegenCat));
 
-cl::opt<bool> TextualIR(
-    "textual-ir", cl::desc("Emit textual IR rather than bitcode"),
-    cl::cat(CodegenCat));
-
-cl::alias TextualIRAlias(
-    "S", cl::desc("Alias for --textual-ir"), cl::aliasopt(TextualIR),
+cl::opt<bool> BinaryIR(
+    "binary-ir", cl::desc("Emit binary IR rather than text"),
     cl::cat(CodegenCat));
 
 cl::opt<bool> ForceBinary(
@@ -103,18 +98,19 @@ std::map<std::string, std::string> read_index_file() {
 }
 
 void write_output(Module const &mod, raw_ostream &os) {
-  if (TextualIR) {
-    mod.print(os, nullptr);
-  } else {
+  if (BinaryIR) {
     WriteBitcodeToFile(mod, os);
+  } else {
+    mod.print(os, nullptr);
   }
 }
 
 void write_output(Module const &mod) {
   if (OutputFile == "-") {
-    if (!TextualIR && !ForceBinary) {
-      throw std::runtime_error("Not printing binary output to stdout; use -S "
-                               "for textual output or force binary with -f\n");
+    if (BinaryIR && !ForceBinary) {
+      throw std::runtime_error(
+          "Not printing binary output to stdout; use -o to specify output path "
+          "or force binary with -f\n");
     }
 
     write_output(mod, llvm::outs());
