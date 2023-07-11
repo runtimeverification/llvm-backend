@@ -25,8 +25,8 @@ stdenv.mkDerivation {
 
     substituteInPlace bin/llvm-kompile \
       --replace 'python_cmd=python3' 'python_cmd="${python-env.interpreter}"' \
-      --replace '"$src_dir/ast.cpp"' \
-                '"$src_dir/ast.cpp" $(${python-env}/bin/pybind11-config --includes)'
+      --replace 'extra_python_flags=()' \
+                'extra_python_flags=($(${python-env}/bin/pybind11-config --includes))'
 
     substituteInPlace bin/utils.sh \
       --replace 'gdate' 'date'
