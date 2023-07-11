@@ -23,11 +23,10 @@ stdenv.mkDerivation {
     sed -i bin/llvm-kompile \
       -e '2a export PATH="${lib.getBin host.clang}/bin:''${PATH}"'
 
-    sed -i bin/llvm-kompile \
-      -e '190i kompile_clang_flags+=$(${python-env}/bin/pybind11-config --includes)'
-
     substituteInPlace bin/llvm-kompile \
-      --replace 'python_cmd=python3' 'python_cmd="${python-env.interpreter}"'
+      --replace 'python_cmd=python3' 'python_cmd="${python-env.interpreter}"' \
+      --replace '"$src_dir/ast.cpp"' \
+                '"$src_dir/ast.cpp" $(${python-env}/bin/pybind11-config --includes)'
 
     substituteInPlace bin/utils.sh \
       --replace 'gdate' 'date'
