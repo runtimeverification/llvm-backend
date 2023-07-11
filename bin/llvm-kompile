@@ -195,7 +195,7 @@ if [ "$compile" = "default" ]; then
   if [[ "$use_opt" = "true" ]]; then
     run @OPT@ -mem2reg -tailcallelim "$mod" -o "$modopt"
   else
-    mv "$mod" "$modopt"
+    cp "$mod" "$modopt"
   fi
 elif [ "$compile" = "object" ]; then
   main="${positional_args[1]}"
