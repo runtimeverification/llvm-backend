@@ -20,6 +20,8 @@ Options:
                             the LLVM backend, then exit.
   --include-dir             Print the absolute include path for the LLVM backend
                             runtime and binding headers, then exit.
+  --use-opt                 Use standalone LLVM opt to apply optimization passes
+                            to the generated LLVM IR for this definition.
   --python PATH             The path to a Python interpreter with Pybind installed. Only
                             meaningful in "python" or "pythonast" mode.
   --python-output-dir PATH  Output directory to place automatically-named Python
@@ -64,10 +66,12 @@ print_include_path () {
 
 positional_args=()
 reading_clang_args=false
+codegen_flags=()
 kompile_clang_flags=()
 clang_args=()
 python_cmd=python3
 python_output_dir=""
+use_opt=false
 
 export verbose=false
 export profile=false
@@ -107,6 +111,11 @@ while [[ $# -gt 0 ]]; do
     --include-dir)
       print_include_path
       exit 0
+      ;;
+    --use-opt)
+      use_opt=true
+      codegen_flags+=("--no-optimize")
+      shift
       ;;
     --python)
       python_cmd="$2"
@@ -168,19 +177,28 @@ esac
 if [ "$compile" = "default" ]; then
   dt_dir="${positional_args[1]}"
   main="${positional_args[2]}"
-  debug=0
+  debug=""
 
   for arg in "${clang_args[@]}"; do
     case "$arg" in
       -g)
-        debug=1
+        debug="--debug"
         ;;
       *)
         ;;
     esac
   done
-  run "$(dirname "$0")"/llvm-kompile-codegen "$definition" "$dt_dir"/dt.yaml "$dt_dir" $debug > "$mod"
-  run @OPT@ -mem2reg -tailcallelim "$mod" -o "$modopt"
+
+  codegen_flags+=("--binary-ir")
+
+  run "$(dirname "$0")"/llvm-kompile-codegen "${codegen_flags[@]}" \
+    "$definition" "$dt_dir"/dt.yaml "$dt_dir" "$debug" -o "$mod"
+
+  if [[ "$use_opt" = "true" ]]; then
+    run @OPT@ -mem2reg -tailcallelim "$mod" -o "$modopt"
+  else
+    cp "$mod" "$modopt"
+  fi
 elif [ "$compile" = "object" ]; then
   main="${positional_args[1]}"
   modopt="$definition"
