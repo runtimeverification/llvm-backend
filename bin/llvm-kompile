@@ -209,6 +209,10 @@ if [[ "$main" =~ "python" ]]; then
   bin_dir=$(dirname "$0")
   src_dir=$(realpath "$bin_dir/../lib/kllvm/python_src")
 
+  # Hook to allow Nix to patch this line easily
+  extra_python_flags=()
+  kompile_clang_flags+=("${extra_python_flags[@]}")
+
   if [[ "$compile" = "python_ast" ]]; then
     kompile_clang_flags+=("$src_dir/ast.cpp")
   else
