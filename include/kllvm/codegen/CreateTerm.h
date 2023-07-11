@@ -23,7 +23,7 @@ private:
   llvm::Value *
   createHook(KORECompositePattern *hookAtt, KORECompositePattern *pattern);
   llvm::Value *createFunctionCall(
-      std::string name, KORECompositePattern *pattern, bool sret, bool fastcc);
+      std::string name, KORECompositePattern *pattern, bool sret, bool tailcc);
   llvm::Value *
   notInjectionCase(KORECompositePattern *constructor, llvm::Value *val);
   bool populateStaticSet(KOREPattern *pattern);
@@ -47,20 +47,24 @@ public:
      specified definition, and returns the value itself, along with a boolean
      indicating whether the resulting term could be an injection. */
   std::pair<llvm::Value *, bool> operator()(KOREPattern *pattern);
-  /* creates a call instructin calling a particular llvm function, abstracting
-   * certain abi and calling convention details. name: the nmae of the function
-   * to call in llvm returnCat: the value category of the return type of the
-   * function args: the arguments to pass to the functgion sret: if true, this
-   * is a function that returns a struct constant via the C abi, ie, the
-   * function actually returns void and the return value is via a pointe. Note
-   * that this can be set to true even if the function does not return a struct,
-   * in which case its value is ignored. load: if the function returns a struct
-   * via sret, then if load is true, we load the value fastcc: true if we should
-   * use the fastcc calling convention returned from the function before
-   * returning it. */
+
+  /* creates a call instruction calling a particular LLVM function, abstracting
+     certain ABI and calling convention details:
+      - name: the name of the function to call
+      - returnCat: the value category of the return type of the function
+      - args: the arguments to pass to the function
+      - sret: if true, this is a function that returns a struct constant via the
+              C ABI (that is, the function actually returns void and the return value
+              is via a pointer). Note that this can be set to true even if the
+              function does not return a struct, in which case its value is
+              ignored.
+      - load: if the function returns a struct via sret and load is true,
+              we load the value on return.
+      - tailcc: true if the call should be made via the tailcc calling convention.
+    */
   llvm::Value *createFunctionCall(
       std::string name, ValueType returnCat,
-      const std::vector<llvm::Value *> &args, bool sret, bool fastcc);
+      const std::vector<llvm::Value *> &args, bool sret, bool tailcc);
 
   llvm::BasicBlock *getCurrentBlock() const { return CurrentBlock; }
 };

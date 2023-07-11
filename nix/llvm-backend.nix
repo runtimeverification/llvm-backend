@@ -29,6 +29,9 @@ stdenv.mkDerivation {
     substituteInPlace bin/llvm-kompile \
       --replace 'python_cmd=python3' 'python_cmd="${python-env.interpreter}"'
 
+    substituteInPlace bin/utils.sh \
+      --replace 'gdate' 'date'
+
     substituteInPlace bin/llvm-kompile-clang \
       --replace 'uname' '${coreutils}/bin/uname' \
       --replace '"-lgmp"' '"-I${gmp.dev}/include" "-L${gmp}/lib" "-lgmp"' \

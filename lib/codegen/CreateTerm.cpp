@@ -751,11 +751,11 @@ llvm::Value *CreateTerm::createHook(
   }
 }
 
-// we use fastcc calling convention for apply_rule_* and eval_* functions so
-// that the -tailcallopt LLVM pass can be used to make K functions tail
-// recursive when their K definitions are tail recursive.
+// We use tailcc calling convention for apply_rule_* and eval_* functions to
+// make these K functions tail recursive when their K definitions are tail
+// recursive.
 llvm::Value *CreateTerm::createFunctionCall(
-    std::string name, KORECompositePattern *pattern, bool sret, bool fastcc) {
+    std::string name, KORECompositePattern *pattern, bool sret, bool tailcc) {
   std::vector<llvm::Value *> args;
   auto returnSort = dynamic_cast<KORECompositeSort *>(
       pattern->getConstructor()->getSort().get());
@@ -783,12 +783,12 @@ llvm::Value *CreateTerm::createFunctionCall(
     default: args.push_back(arg); break;
     }
   }
-  return createFunctionCall(name, returnCat, args, sret, fastcc);
+  return createFunctionCall(name, returnCat, args, sret, tailcc);
 }
 
 llvm::Value *CreateTerm::createFunctionCall(
     std::string name, ValueType returnCat,
-    const std::vector<llvm::Value *> &args, bool sret, bool fastcc) {
+    const std::vector<llvm::Value *> &args, bool sret, bool tailcc) {
   llvm::Type *returnType = getValueType(returnCat, Module);
   std::vector<llvm::Type *> types;
   bool collection = false;
@@ -823,8 +823,8 @@ llvm::Value *CreateTerm::createFunctionCall(
   llvm::Function *func = getOrInsertFunction(Module, name, funcType);
   auto call = llvm::CallInst::Create(func, realArgs, "", CurrentBlock);
   setDebugLoc(call);
-  if (fastcc) {
-    call->setCallingConv(llvm::CallingConv::Fast);
+  if (tailcc) {
+    call->setCallingConv(llvm::CallingConv::Tail);
   }
   if (sret) {
 #if LLVM_VERSION_MAJOR >= 12
@@ -1062,7 +1062,7 @@ void writeUInt64(
 
 bool makeFunction(
     std::string name, KOREPattern *pattern, KOREDefinition *definition,
-    llvm::Module *Module, bool fastcc, bool bigStep, bool apply,
+    llvm::Module *Module, bool tailcc, bool bigStep, bool apply,
     KOREAxiomDeclaration *axiom, std::string postfix) {
   std::map<std::string, KOREVariablePattern *> vars;
   if (apply) {
@@ -1127,8 +1127,8 @@ bool makeFunction(
       debugName, debugName,
       getDebugFunctionType(getDebugType(returnCat, Out.str()), debugArgs),
       definition, applyRule);
-  if (fastcc) {
-    applyRule->setCallingConv(llvm::CallingConv::Fast);
+  if (tailcc) {
+    applyRule->setCallingConv(llvm::CallingConv::Tail);
   }
   llvm::StringMap<llvm::Value *> subst;
   llvm::BasicBlock *block
@@ -1246,7 +1246,7 @@ bool makeFunction(
         llvm::FunctionType::get(blockType, {blockType}, false));
     auto call = llvm::CallInst::Create(step, {retval}, "", CurrentBlock);
     setDebugLoc(call);
-    call->setCallingConv(llvm::CallingConv::Fast);
+    call->setCallingConv(llvm::CallingConv::Tail);
     retval = call;
   }
   auto ret
@@ -1326,7 +1326,7 @@ std::string makeApplyRuleFunction(
           getDebugType({SortCategory::Symbol, 0}, "SortGeneratedTopCell{}"),
           debugArgs),
       definition, applyRule);
-  applyRule->setCallingConv(llvm::CallingConv::Fast);
+  applyRule->setCallingConv(llvm::CallingConv::Tail);
   llvm::StringMap<llvm::Value *> subst;
   llvm::BasicBlock *block
       = llvm::BasicBlock::Create(Module->getContext(), "entry", applyRule);
@@ -1372,7 +1372,7 @@ std::string makeApplyRuleFunction(
   auto retval
       = llvm::CallInst::Create(step, args, "", creator.getCurrentBlock());
   setDebugLoc(retval);
-  retval->setCallingConv(llvm::CallingConv::Fast);
+  retval->setCallingConv(llvm::CallingConv::Tail);
   llvm::ReturnInst::Create(
       Module->getContext(), retval, creator.getCurrentBlock());
   return name;

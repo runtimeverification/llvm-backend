@@ -532,7 +532,7 @@ void LeafNode::codegen(Decision *d) {
           d->Module, name, llvm::FunctionType::get(type, types, false)),
       args, "", d->CurrentBlock);
   setDebugLoc(Call);
-  Call->setCallingConv(llvm::CallingConv::Fast);
+  Call->setCallingConv(llvm::CallingConv::Tail);
   if (child == nullptr) {
     llvm::ReturnInst::Create(d->Ctx, Call, d->CurrentBlock);
   } else {
@@ -705,7 +705,7 @@ void makeEvalOrAnywhereFunction(
   initDebugFunction(
       function->getName(), name,
       getDebugFunctionType(debugReturnType, debugArgs), definition, matchFunc);
-  matchFunc->setCallingConv(llvm::CallingConv::Fast);
+  matchFunc->setCallingConv(llvm::CallingConv::Tail);
   llvm::BasicBlock *block
       = llvm::BasicBlock::Create(module->getContext(), "entry", matchFunc);
   llvm::BasicBlock *stuck
@@ -1017,7 +1017,7 @@ void makeStepFunction(
         name, name, getDebugFunctionType(debugType, {debugType}), definition,
         matchFunc);
   }
-  matchFunc->setCallingConv(llvm::CallingConv::Fast);
+  matchFunc->setCallingConv(llvm::CallingConv::Tail);
   auto val = matchFunc->arg_begin();
   llvm::BasicBlock *block
       = llvm::BasicBlock::Create(module->getContext(), "entry", matchFunc);
@@ -1081,7 +1081,7 @@ void makeMatchReasonFunctionWrapper(
       = getOrInsertFunction(module, wrapperName, funcType);
   std::string debugName = name;
   if (axiom->getAttributes().count("label")) {
-    debugName = axiom->getStringAttribute("label") + "_fastcc_" + ".match";
+    debugName = axiom->getStringAttribute("label") + "_tailcc_" + ".match";
   }
   auto debugType
       = getDebugType({SortCategory::Symbol, 0}, "SortGeneratedTopCell{}");
@@ -1090,7 +1090,7 @@ void makeMatchReasonFunctionWrapper(
       debugName, debugName,
       getDebugFunctionType(getVoidDebugType(), {debugType}), definition,
       matchFunc);
-  matchFunc->setCallingConv(llvm::CallingConv::Fast);
+  matchFunc->setCallingConv(llvm::CallingConv::Tail);
   llvm::BasicBlock *entry
       = llvm::BasicBlock::Create(module->getContext(), "entry", matchFunc);
 
@@ -1231,7 +1231,7 @@ void makeStepFunction(
   initDebugFunction(
       name, name, getDebugFunctionType(blockDebugType, debugTypes), definition,
       matchFunc);
-  matchFunc->setCallingConv(llvm::CallingConv::Fast);
+  matchFunc->setCallingConv(llvm::CallingConv::Tail);
 
   llvm::StringMap<llvm::Value *> stuckSubst;
   llvm::BasicBlock *block

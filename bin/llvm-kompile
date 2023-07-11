@@ -1,6 +1,10 @@
 #!/bin/bash
 set -e
 
+# This is configured generated code; shellcheck can't follow it properly
+# shellcheck disable=SC1091
+source "$(dirname "$0")/../lib/scripts/utils.sh"
+
 usage() {
   cat << HERE
 Usage: $0 <definition.kore> <dt_dir> <object type> [options] [clang flags]
@@ -10,6 +14,7 @@ Usage: $0 <definition.kore> <dt_dir> <object type> [options] [clang flags]
 Options:
   -h, --help                Print this message and exit.
   -v, --verbose             Print commands executed to stderr.
+      --profile             Print profiling information to stderr.
   --save-temps              Do not delete temporary files on exit.
   --bindings-path           Print the absolute path of the compiled Python bindings for
                             the LLVM backend, then exit.
@@ -47,14 +52,6 @@ Valid values for a KLLVM object type are:
 HERE
 }
 
-run () {
-  if [ "$verbose" = true ]; then
-    set -x
-  fi
-  "$@"
-  { set +x; } 2>/dev/null
-}
-
 print_bindings_path () {
   bin_dir="$(dirname "$0")"
   bindings_dir="$(realpath "$bin_dir/../lib/kllvm/python")"
@@ -76,7 +73,8 @@ python_cmd=python3
 python_output_dir=""
 use_opt=false
 
-verbose=false
+export verbose=false
+export profile=false
 save_temps=false
 
 while [[ $# -gt 0 ]]; do
@@ -94,6 +92,11 @@ while [[ $# -gt 0 ]]; do
     -v|--verbose)
       verbose=true
       kompile_clang_flags+=("-v")
+      shift
+      ;;
+    --profile)
+      profile=true
+      kompile_clang_flags+=("--profile")
       shift
       ;;
     --save-temps)
@@ -147,6 +150,9 @@ if [[ "${#positional_args[@]}" -lt 1 || "${#positional_args[@]}" -gt 3 ]]; then
   exit 1
 fi
 
+if [[ "$profile" == "true" ]] && [[ "$verbose" == "false" ]]; then
+  echo "[warning] llvm-kompile: --profile will only produce output with -v/--verbose" 1>&2
+fi
 
 mod="$(mktemp tmp.XXXXXXXXXX)"
 modopt_tmp="$(mktemp tmp.XXXXXXXXXX)"
@@ -182,11 +188,12 @@ if [ "$compile" = "default" ]; then
         ;;
     esac
   done
+
   run "$(dirname "$0")"/llvm-kompile-codegen "${codegen_flags[@]}" \
     "$definition" "$dt_dir"/dt.yaml "$dt_dir" $debug > "$mod"
 
   if [[ "$use_opt" = "true" ]]; then
-    run @OPT@ -mem2reg -tailcallelim -tailcallopt "$mod" -o "$modopt"
+    run @OPT@ -mem2reg -tailcallelim "$mod" -o "$modopt"
   else
     mv "$mod" "$modopt"
   fi
