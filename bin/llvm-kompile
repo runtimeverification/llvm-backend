@@ -190,7 +190,7 @@ if [ "$compile" = "default" ]; then
   done
 
   run "$(dirname "$0")"/llvm-kompile-codegen "${codegen_flags[@]}" \
-    "$definition" "$dt_dir"/dt.yaml "$dt_dir" $debug > "$mod"
+    "$definition" "$dt_dir"/dt.yaml "$dt_dir" $debug -o "$mod"
 
   if [[ "$use_opt" = "true" ]]; then
     run @OPT@ -mem2reg -tailcallelim "$mod" -o "$modopt"

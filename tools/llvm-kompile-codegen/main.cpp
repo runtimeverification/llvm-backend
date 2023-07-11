@@ -8,9 +8,11 @@
 #include <kllvm/parser/KOREParser.h>
 #include <kllvm/parser/location.h>
 
+#include <llvm/Bitcode/BitcodeWriter.h>
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Module.h>
 #include <llvm/Support/CommandLine.h>
+#include <llvm/Support/FileSystem.h>
 #include <llvm/Support/raw_ostream.h>
 
 #include <fmt/format.h>
@@ -56,17 +58,38 @@ cl::opt<bool> NoOptimize(
     cl::desc("Don't run optimization passes before producing output"),
     cl::cat(CodegenCat));
 
-static fs::path dt_dir() {
+cl::opt<std::string> OutputFile(
+    "output", cl::desc("Output file path"), cl::init("-"), cl::cat(CodegenCat));
+
+cl::alias OutputFileAlias(
+    "o", cl::desc("Alias for --output"), cl::aliasopt(OutputFile),
+    cl::cat(CodegenCat));
+
+cl::opt<bool> TextualIR(
+    "textual-ir", cl::desc("Emit textual IR rather than bitcode"),
+    cl::cat(CodegenCat));
+
+cl::alias TextualIRAlias(
+    "S", cl::desc("Alias for --textual-ir"), cl::aliasopt(TextualIR),
+    cl::cat(CodegenCat));
+
+cl::opt<bool> ForceBinary(
+    "f", cl::desc("Force binary bitcode output to stdout"), cl::Hidden,
+    cl::cat(CodegenCat));
+
+namespace {
+
+fs::path dt_dir() {
   return fs::path(Directory.getValue());
 }
 
-static fs::path get_indexed_filename(
+fs::path get_indexed_filename(
     std::map<std::string, std::string> const &index,
     KORESymbolDeclaration *decl) {
   return dt_dir() / index.at(decl->getSymbol()->getName());
 }
 
-static std::map<std::string, std::string> read_index_file() {
+std::map<std::string, std::string> read_index_file() {
   auto index = std::map<std::string, std::string>{};
   auto in = std::ifstream(dt_dir() / "index.txt");
 
@@ -78,6 +101,37 @@ static std::map<std::string, std::string> read_index_file() {
 
   return index;
 }
+
+void write_output(Module const &mod, raw_ostream &os) {
+  if (TextualIR) {
+    mod.print(os, nullptr);
+  } else {
+    WriteBitcodeToFile(mod, os);
+  }
+}
+
+void write_output(Module const &mod) {
+  if (OutputFile == "-") {
+    if (!TextualIR && !ForceBinary) {
+      throw std::runtime_error("Not printing binary output to stdout; use -S "
+                               "for textual output or force binary with -f\n");
+    }
+
+    write_output(mod, llvm::outs());
+  } else {
+    auto err = std::error_code{};
+    auto os = raw_fd_ostream(OutputFile, err, sys::fs::FA_Write);
+
+    if (err) {
+      throw std::runtime_error(
+          fmt::format("Error opening file {}: {}", OutputFile, err.message()));
+    }
+
+    write_output(mod, os);
+  }
+}
+
+} // namespace
 
 int main(int argc, char **argv) {
   cl::HideUnrelatedOptions({&CodegenCat});
@@ -166,6 +220,6 @@ int main(int argc, char **argv) {
     apply_kllvm_opt_passes(*mod);
   }
 
-  mod->print(llvm::outs(), nullptr);
+  write_output(*mod);
   return 0;
 }
