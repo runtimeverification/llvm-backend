@@ -177,12 +177,11 @@ esac
 if [ "$compile" = "default" ]; then
   dt_dir="${positional_args[1]}"
   main="${positional_args[2]}"
-  debug=""
 
   for arg in "${clang_args[@]}"; do
     case "$arg" in
       -g)
-        debug="--debug"
+        codegen_flags+=("--debug")
         ;;
       *)
         ;;
@@ -192,7 +191,7 @@ if [ "$compile" = "default" ]; then
   codegen_flags+=("--binary-ir")
 
   run "$(dirname "$0")"/llvm-kompile-codegen "${codegen_flags[@]}" \
-    "$definition" "$dt_dir"/dt.yaml "$dt_dir" "$debug" -o "$mod"
+    "$definition" "$dt_dir"/dt.yaml "$dt_dir" -o "$mod"
 
   if [[ "$use_opt" = "true" ]]; then
     run @OPT@ -mem2reg -tailcallelim "$mod" -o "$modopt"
