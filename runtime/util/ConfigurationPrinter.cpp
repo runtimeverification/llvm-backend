@@ -137,12 +137,12 @@ void printConfigurationInternal(
     sfprintf(file, "%s()", symbol);
     return;
   }
-  uint16_t layout = layout(subject);
+  uint16_t layout = get_layout(subject);
   if (!layout) {
     string *str = (string *)subject;
-    size_t len = len(subject);
+    size_t subject_len = len(subject);
     sfprintf(file, "\\dv{%s}(\"", sort);
-    for (size_t i = 0; i < len; ++i) {
+    for (size_t i = 0; i < subject_len; ++i) {
       char c = str->data[i];
       switch (c) {
       case '\\': sfprintf(file, "\\\\"); break;

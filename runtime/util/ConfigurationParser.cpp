@@ -62,7 +62,7 @@ void *constructCompositePattern(uint32_t tag, std::vector<void *> &arguments) {
     layout *data = getLayoutData(layout_code);
     if (data->args[0].cat == SYMBOL_LAYOUT) {
       block *child = (block *)arguments[0];
-      if (!is_leaf_block(child) && layout(child) != 0) {
+      if (!is_leaf_block(child) && get_layout(child) != 0) {
         uint32_t tag = tag_hdr(child->h.hdr);
         if (tag >= first_inj_tag && tag <= last_inj_tag) {
           return child;

@@ -1,6 +1,10 @@
 #!/bin/bash
 set -e
 
+# This is configured generated code; shellcheck can't follow it properly
+# shellcheck disable=SC1091
+source "$(dirname "$0")/../lib/scripts/utils.sh"
+
 usage() {
   cat << HERE
 Usage: $0 <definition.kore> <dt_dir> <object type> [options] [clang flags]
@@ -10,11 +14,14 @@ Usage: $0 <definition.kore> <dt_dir> <object type> [options] [clang flags]
 Options:
   -h, --help                Print this message and exit.
   -v, --verbose             Print commands executed to stderr.
+      --profile             Print profiling information to stderr.
   --save-temps              Do not delete temporary files on exit.
   --bindings-path           Print the absolute path of the compiled Python bindings for
                             the LLVM backend, then exit.
   --include-dir             Print the absolute include path for the LLVM backend
                             runtime and binding headers, then exit.
+  --use-opt                 Use standalone LLVM opt to apply optimization passes
+                            to the generated LLVM IR for this definition.
   --python PATH             The path to a Python interpreter with Pybind installed. Only
                             meaningful in "python" or "pythonast" mode.
   --python-output-dir PATH  Output directory to place automatically-named Python
@@ -48,14 +55,6 @@ Valid values for a KLLVM object type are:
 HERE
 }
 
-run () {
-  if [ "$verbose" = true ]; then
-    set -x
-  fi
-  "$@"
-  { set +x; } 2>/dev/null
-}
-
 print_bindings_path () {
   bin_dir="$(dirname "$0")"
   bindings_dir="$(realpath "$bin_dir/../lib/kllvm/python")"
@@ -70,14 +69,17 @@ print_include_path () {
 
 positional_args=()
 reading_clang_args=false
+codegen_flags=()
 kompile_clang_flags=()
 clang_args=()
 python_cmd=python3
 python_output_dir=""
 embedded_files=()
 embedded_names=()
+use_opt=false
 
-verbose=false
+export verbose=false
+export profile=false
 save_temps=false
 
 while [[ $# -gt 0 ]]; do
@@ -97,6 +99,11 @@ while [[ $# -gt 0 ]]; do
       kompile_clang_flags+=("-v")
       shift
       ;;
+    --profile)
+      profile=true
+      kompile_clang_flags+=("--profile")
+      shift
+      ;;
     --save-temps)
       save_temps=true	    
       kompile_clang_flags+=("-save-temps")
@@ -109,6 +116,11 @@ while [[ $# -gt 0 ]]; do
     --include-dir)
       print_include_path
       exit 0
+      ;;
+    --use-opt)
+      use_opt=true
+      codegen_flags+=("--no-optimize")
+      shift
       ;;
     --python)
       python_cmd="$2"
@@ -152,6 +164,9 @@ if [[ "${#positional_args[@]}" -lt 1 || "${#positional_args[@]}" -gt 3 ]]; then
   exit 1
 fi
 
+if [[ "$profile" == "true" ]] && [[ "$verbose" == "false" ]]; then
+  echo "[warning] llvm-kompile: --profile will only produce output with -v/--verbose" 1>&2
+fi
 
 mod="$(mktemp tmp.XXXXXXXXXX)"
 modopt_tmp="$(mktemp tmp.XXXXXXXXXX)"
@@ -177,17 +192,26 @@ esac
 if [[ "$compile" = "default" ]]; then
   dt_dir="${positional_args[1]}"
   main="${positional_args[2]}"
-  debug=0
+  debug=""
 
   for arg in "${clang_args[@]}"; do
     case "$arg" in
       -g)
-        debug=1
+        debug="--debug"
         ;;
     esac
   done
-  run "$(dirname "$0")"/llvm-kompile-codegen "$definition" "$dt_dir"/dt.yaml "$dt_dir" $debug > "$mod"
-  run @OPT@ -mem2reg -tailcallelim -tailcallopt "$mod" -o "$modopt"
+
+  codegen_flags+=("--binary-ir")
+
+  run "$(dirname "$0")"/llvm-kompile-codegen "${codegen_flags[@]}" \
+    "$definition" "$dt_dir"/dt.yaml "$dt_dir" "$debug" -o "$mod"
+
+  if [[ "$use_opt" = "true" ]]; then
+    run @OPT@ -mem2reg -tailcallelim "$mod" -o "$modopt"
+  else
+    cp "$mod" "$modopt"
+  fi
 elif [ "$compile" = "object" ]; then
   main="${positional_args[1]}"
   modopt="$definition"
@@ -199,6 +223,10 @@ fi
 if [[ "$main" =~ "python" ]]; then
   bin_dir=$(dirname "$0")
   src_dir=$(realpath "$bin_dir/../lib/kllvm/python_src")
+
+  # Hook to allow Nix to patch this line easily
+  extra_python_flags=()
+  kompile_clang_flags+=("${extra_python_flags[@]}")
 
   if [[ "$compile" = "python_ast" ]]; then
     kompile_clang_flags+=("$src_dir/ast.cpp")

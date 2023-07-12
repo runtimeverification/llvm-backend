@@ -1,20 +1,27 @@
-#include "kllvm/ast/AST.h"
-#include "kllvm/codegen/CreateTerm.h"
-#include "kllvm/codegen/Debug.h"
-#include "kllvm/codegen/Decision.h"
-#include "kllvm/codegen/DecisionParser.h"
-#include "kllvm/codegen/EmitConfigParser.h"
-#include "kllvm/parser/KOREParser.h"
-#include "kllvm/parser/location.h"
+#include <kllvm/ast/AST.h>
+#include <kllvm/codegen/ApplyPasses.h>
+#include <kllvm/codegen/CreateTerm.h>
+#include <kllvm/codegen/Debug.h>
+#include <kllvm/codegen/Decision.h>
+#include <kllvm/codegen/DecisionParser.h>
+#include <kllvm/codegen/EmitConfigParser.h>
+#include <kllvm/parser/KOREParser.h>
+#include <kllvm/parser/location.h>
 
+#include <llvm/Bitcode/BitcodeWriter.h>
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Module.h>
+#include <llvm/Support/CommandLine.h>
+#include <llvm/Support/FileSystem.h>
 #include <llvm/Support/raw_ostream.h>
+
+#include <fmt/format.h>
 
 #include <libgen.h>
 #include <sys/stat.h>
 
 #include <cstdlib>
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <list>
@@ -24,49 +31,131 @@
 #include <unordered_map>
 #include <utility>
 
+using namespace llvm;
 using namespace kllvm;
 using namespace kllvm::parser;
 
-std::string getFilename(
-    std::map<std::string, std::string> index, char **argv,
-    KORESymbolDeclaration *decl) {
-  return argv[3] + std::string("/") + index.at(decl->getSymbol()->getName());
+namespace fs = std::filesystem;
+
+cl::OptionCategory CodegenCat("llvm-kompile-codegen options");
+
+cl::opt<std::string> Definition(
+    cl::Positional, cl::desc("<definition.kore>"), cl::Required,
+    cl::cat(CodegenCat));
+
+cl::opt<std::string> DecisionTree(
+    cl::Positional, cl::desc("<dt.yaml>"), cl::Required, cl::cat(CodegenCat));
+
+cl::opt<std::string> Directory(
+    cl::Positional, cl::desc("<dir>"), cl::Required, cl::cat(CodegenCat));
+
+cl::opt<bool>
+    Debug("debug", cl::desc("Enable debug information"), cl::cat(CodegenCat));
+
+cl::opt<bool> NoOptimize(
+    "no-optimize",
+    cl::desc("Don't run optimization passes before producing output"),
+    cl::cat(CodegenCat));
+
+cl::opt<std::string> OutputFile(
+    "output", cl::desc("Output file path"), cl::init("-"), cl::cat(CodegenCat));
+
+cl::alias OutputFileAlias(
+    "o", cl::desc("Alias for --output"), cl::aliasopt(OutputFile),
+    cl::cat(CodegenCat));
+
+cl::opt<bool> BinaryIR(
+    "binary-ir", cl::desc("Emit binary IR rather than text"),
+    cl::cat(CodegenCat));
+
+cl::opt<bool> ForceBinary(
+    "f", cl::desc("Force binary bitcode output to stdout"), cl::Hidden,
+    cl::cat(CodegenCat));
+
+namespace {
+
+fs::path dt_dir() {
+  return fs::path(Directory.getValue());
 }
 
-int main(int argc, char **argv) {
-  if (argc < 5) {
-    std::cerr
-        << "Usage: llvm-kompile-codegen <def.kore> <dt.yaml> <dir> [1|0]\n";
-    exit(1);
+fs::path get_indexed_filename(
+    std::map<std::string, std::string> const &index,
+    KORESymbolDeclaration *decl) {
+  return dt_dir() / index.at(decl->getSymbol()->getName());
+}
+
+std::map<std::string, std::string> read_index_file() {
+  auto index = std::map<std::string, std::string>{};
+  auto in = std::ifstream(dt_dir() / "index.txt");
+
+  auto line = std::string{};
+  while (std::getline(in, line)) {
+    size_t delim = line.find('\t');
+    index[line.substr(0, delim)] = line.substr(delim + 1);
   }
 
-  CODEGEN_DEBUG = atoi(argv[4]);
+  return index;
+}
 
-  KOREParser parser(argv[1]);
+void write_output(Module const &mod, raw_ostream &os) {
+  if (BinaryIR) {
+    WriteBitcodeToFile(mod, os);
+  } else {
+    mod.print(os, nullptr);
+  }
+}
+
+void write_output(Module const &mod) {
+  if (OutputFile == "-") {
+    if (BinaryIR && !ForceBinary) {
+      throw std::runtime_error(
+          "Not printing binary output to stdout; use -o to specify output path "
+          "or force binary with -f\n");
+    }
+
+    write_output(mod, llvm::outs());
+  } else {
+    auto err = std::error_code{};
+    auto os = raw_fd_ostream(OutputFile, err, sys::fs::FA_Write);
+
+    if (err) {
+      throw std::runtime_error(
+          fmt::format("Error opening file {}: {}", OutputFile, err.message()));
+    }
+
+    write_output(mod, os);
+  }
+}
+
+} // namespace
+
+int main(int argc, char **argv) {
+  cl::HideUnrelatedOptions({&CodegenCat});
+  cl::ParseCommandLineOptions(argc, argv);
+
+  CODEGEN_DEBUG = Debug ? 1 : 0;
+
+  KOREParser parser(Definition);
   ptr<KOREDefinition> definition = parser.definition();
   definition->preprocess();
 
   llvm::LLVMContext Context;
-
-  char *realPath = realpath(argv[1], NULL);
-
   std::unique_ptr<llvm::Module> mod = newModule("definition", Context);
 
   if (CODEGEN_DEBUG) {
-    initDebugInfo(mod.get(), argv[1]);
+    initDebugInfo(mod.get(), Definition);
   }
 
-  addKompiledDirSymbol(Context, dirname(realPath), mod.get(), CODEGEN_DEBUG);
+  auto kompiled_dir = fs::absolute(Definition.getValue()).parent_path();
+  addKompiledDirSymbol(Context, kompiled_dir, mod.get(), CODEGEN_DEBUG);
 
   for (auto axiom : definition->getAxioms()) {
     makeSideConditionFunction(axiom, definition.get(), mod.get());
     if (!axiom->isTopAxiom()) {
       makeApplyRuleFunction(axiom, definition.get(), mod.get());
     } else {
-      std::string filename = argv[3] + std::string("/") + "dt_"
-                             + std::to_string(axiom->getOrdinal()) + ".yaml";
-      struct stat buf;
-      if (stat(filename.c_str(), &buf) == 0) {
+      auto filename = dt_dir() / fmt::format("dt_{}.yaml", axiom->getOrdinal());
+      if (fs::exists(filename)) {
         auto residuals = parseYamlSpecialDecisionTree(
             mod.get(), filename, definition->getAllSymbols(),
             definition->getHookedSorts());
@@ -76,9 +165,9 @@ int main(int argc, char **argv) {
       } else {
         makeApplyRuleFunction(axiom, definition.get(), mod.get(), true);
       }
-      filename = argv[3] + std::string("/") + "match_"
-                 + std::to_string(axiom->getOrdinal()) + ".yaml";
-      if (stat(filename.c_str(), &buf) == 0) {
+
+      filename = dt_dir() / fmt::format("match_{}.yaml", axiom->getOrdinal());
+      if (fs::exists(filename)) {
         auto dt = parseYamlDecisionTree(
             mod.get(), filename, definition->getAllSymbols(),
             definition->getHookedSorts());
@@ -90,37 +179,26 @@ int main(int argc, char **argv) {
   emitConfigParserFunctions(definition.get(), mod.get());
 
   auto dt = parseYamlDecisionTree(
-      mod.get(), argv[2], definition->getAllSymbols(),
+      mod.get(), DecisionTree, definition->getAllSymbols(),
       definition->getHookedSorts());
   makeStepFunction(definition.get(), mod.get(), dt, false);
   auto dtSearch = parseYamlDecisionTree(
-      mod.get(), argv[3] + std::string("/") + "dt-search.yaml",
-      definition->getAllSymbols(), definition->getHookedSorts());
+      mod.get(), dt_dir() / "dt-search.yaml", definition->getAllSymbols(),
+      definition->getHookedSorts());
   makeStepFunction(definition.get(), mod.get(), dtSearch, true);
 
-  std::map<std::string, std::string> index;
-
-  std::ifstream in(argv[3] + std::string("/index.txt"));
-
-  std::string line;
-  while (std::getline(in, line)) {
-    size_t delim = line.find('\t');
-    index[line.substr(0, delim)] = line.substr(delim + 1);
-  }
-
-  in.close();
-
+  auto index = read_index_file();
   for (auto &entry : definition->getSymbols()) {
     auto symbol = entry.second;
     auto decl = definition->getSymbolDeclarations().at(symbol->getName());
-    if ((decl->getAttributes().count("function") && !decl->isHooked())) {
-      std::string filename = getFilename(index, argv, decl);
+    if (decl->getAttributes().count("function") && !decl->isHooked()) {
+      auto filename = get_indexed_filename(index, decl);
       auto funcDt = parseYamlDecisionTree(
           mod.get(), filename, definition->getAllSymbols(),
           definition->getHookedSorts());
       makeEvalFunction(decl->getSymbol(), definition.get(), mod.get(), funcDt);
     } else if (decl->isAnywhere()) {
-      std::string filename = getFilename(index, argv, decl);
+      auto filename = get_indexed_filename(index, decl);
       auto funcDt = parseYamlDecisionTree(
           mod.get(), filename, definition->getAllSymbols(),
           definition->getHookedSorts());
@@ -136,6 +214,10 @@ int main(int argc, char **argv) {
     finalizeDebugInfo();
   }
 
-  mod->print(llvm::outs(), nullptr);
+  if (!NoOptimize) {
+    apply_kllvm_opt_passes(*mod);
+  }
+
+  write_output(*mod);
   return 0;
 }
