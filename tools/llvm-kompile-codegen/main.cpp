@@ -13,6 +13,7 @@
 #include <llvm/IR/Module.h>
 #include <llvm/Support/CommandLine.h>
 #include <llvm/Support/FileSystem.h>
+#include <llvm/Support/TargetSelect.h>
 #include <llvm/Support/raw_ostream.h>
 
 #include <fmt/format.h>
@@ -127,9 +128,19 @@ void write_output(Module const &mod) {
   }
 }
 
+void initialize_llvm() {
+  InitializeAllTargetInfos();
+  InitializeAllTargets();
+  InitializeAllTargetMCs();
+  InitializeAllAsmParsers();
+  InitializeAllAsmPrinters();
+}
+
 } // namespace
 
 int main(int argc, char **argv) {
+  initialize_llvm();
+
   cl::HideUnrelatedOptions({&CodegenCat});
   cl::ParseCommandLineOptions(argc, argv);
 
