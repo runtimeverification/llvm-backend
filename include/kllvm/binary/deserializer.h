@@ -45,8 +45,30 @@ T read(It &ptr, It end) {
 }
 
 template <typename It>
+binary_version read_version(It &ptr, It end) {
+  auto v_major = detail::read<int16_t>(ptr, end);
+  auto v_minor = detail::read<int16_t>(ptr, end);
+  auto v_patch = detail::read<int16_t>(ptr, end);
+  return binary_version(v_major, v_minor, v_patch);
+}
+
+template <typename It>
+uint64_t read_pattern_size_unchecked(It &ptr, It end) {
+  return detail::read<uint64_t>(ptr, end);
+}
+
+template <typename It>
+uint64_t read_pattern_size(It &ptr, It end, binary_version version) {
+  if (version >= binary_version(1, 2, 0)) {
+    return read_pattern_size_unchecked(ptr, end);
+  }
+
+  return 0u;
+}
+
+template <typename It>
 uint64_t read_length(It &ptr, It end, binary_version version, int v1_bytes) {
-  if (are_compatible(version, binary_version(1, 0, 0))) {
+  if (version.compatible(binary_version(1, 0, 0))) {
     uint64_t ret = 0;
 
     for (auto i = 0; i < v1_bytes; ++i) {
@@ -186,6 +208,16 @@ sptr<KOREPattern> read(It &ptr, It end, binary_version version) {
       break;
     }
 
+    case header_byte<KOREVariablePattern>: {
+      ++ptr;
+      auto name = read_variable(ptr, end, version);
+      auto sort = sort_stack.back();
+      sort_stack.pop_back();
+
+      term_stack.push_back(KOREVariablePattern::Create(name->getName(), sort));
+      break;
+    }
+
     case header_byte<KORESymbol>: {
       ++ptr;
       symbol = read_symbol(ptr, end, sort_stack, version);
@@ -231,11 +263,14 @@ sptr<KOREPattern> deserialize_pattern(It begin, It end) {
     detail::read<char>(begin, end);
   }
 
-  auto v_major = detail::read<int16_t>(begin, end);
-  auto v_minor = detail::read<int16_t>(begin, end);
-  auto v_patch = detail::read<int16_t>(begin, end);
+  auto version = detail::read_version(begin, end);
+  auto total_size = detail::read_pattern_size(begin, end, version);
 
-  return detail::read(begin, end, binary_version(v_major, v_minor, v_patch));
+  if (total_size > 0 && std::distance(begin, end) > total_size) {
+    end = std::next(begin, total_size);
+  }
+
+  return detail::read(begin, end, version);
 }
 
 bool has_binary_kore_header(std::string const &filename);

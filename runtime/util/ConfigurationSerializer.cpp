@@ -284,10 +284,10 @@ void serializeConfigurationInternal(
     return;
   }
 
-  uint16_t layout = layout(subject);
+  uint16_t layout = get_layout(subject);
   if (!layout) {
     string *str = (string *)subject;
-    size_t len = len(subject);
+    size_t subject_len = len(subject);
 
     if (isVar && !state.varNames.count(str)) {
       std::string stdStr = std::string(str->data, len(str));
@@ -302,7 +302,7 @@ void serializeConfigurationInternal(
     } else if (isVar) {
       emitToken(state.instance, sort, state.varNames[str].c_str());
     } else {
-      emitToken(state.instance, sort, str->data, len);
+      emitToken(state.instance, sort, str->data, subject_len);
     }
 
     return;
@@ -390,22 +390,28 @@ void serializeConfigurations(
   fclose(file);
 }
 
-void serializeConfigurationToFile(const char *filename, block *subject) {
+void serializeConfigurationToFile(
+    const char *filename, block *subject, bool emit_size) {
   char *data;
   size_t size;
-  serializeConfiguration(subject, nullptr, &data, &size);
+  serializeConfiguration(subject, nullptr, &data, &size, emit_size);
 
-  FILE *file = fopen(filename, "w");
+  FILE *file = fopen(filename, "a");
   fwrite(data, 1, size, file);
   fclose(file);
 }
 
 void serializeConfiguration(
-    block *subject, char const *sort, char **data_out, size_t *size_out) {
+    block *subject, char const *sort, char **data_out, size_t *size_out,
+    bool emit_size) {
   auto state = serialization_state();
 
   writer w = {nullptr, nullptr};
   serializeConfigurationInternal(&w, subject, sort, false, &state);
+
+  if (emit_size) {
+    state.instance.correct_emitted_size();
+  }
 
   auto size = state.instance.data().size();
   auto buf = static_cast<char *>(malloc(size));
@@ -413,4 +419,34 @@ void serializeConfiguration(
 
   *data_out = buf;
   *size_out = size;
+}
+
+void writeUInt64ToFile(const char *filename, uint64_t i) {
+  FILE *file = fopen(filename, "a");
+  fwrite(&i, 8, 1, file);
+  fclose(file);
+}
+
+void serializeTermToFile(
+    const char *filename, block *subject, const char *sort) {
+  char *data;
+  size_t size;
+  serializeConfiguration(subject, sort, &data, &size, false);
+
+  FILE *file = fopen(filename, "a");
+  fwrite(data, 1, size, file);
+  fclose(file);
+}
+
+void serializeRawTermToFile(
+    const char *filename, void *subject, const char *sort) {
+  block *term = constructKItemInj(subject, sort, true);
+
+  char *data;
+  size_t size;
+  serializeConfiguration(term, "SortKItem{}", &data, &size, false);
+
+  FILE *file = fopen(filename, "a");
+  fwrite(data, 1, size, file);
+  fclose(file);
 }

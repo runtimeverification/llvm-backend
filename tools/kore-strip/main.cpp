@@ -1,3 +1,4 @@
+#include <kllvm/binary/deserializer.h>
 #include <kllvm/util/temporary_file.h>
 
 #include <llvm/ADT/DenseMapInfo.h>
@@ -25,8 +26,8 @@ cl::opt<bool> StripArity(
 
 cl::opt<bool> StripHeader(
     "k",
-    cl::desc(
-        "Strip the leading 11 bytes (header and version) from the input file"),
+    cl::desc("Strip the leading bytes (header, version and size for version "
+             "1.2.0 onwards) from the input file"),
     cl::cat(KoreStripCat));
 
 cl::opt<std::string> InputFilename(
@@ -97,7 +98,22 @@ int main(int argc, char **argv) {
   }
 
   if (StripHeader) {
-    begin_skip_length = 11;
+    std::fseek(input, 5, SEEK_SET);
+    auto buffer = std::vector<uint8_t>(6);
+    auto read
+        = std::fread(buffer.data(), sizeof(uint8_t), buffer.size(), input);
+    if (read != buffer.size()) {
+      std::cerr << "Failed to read 6-byte version into buffer\n";
+    }
+
+    auto begin = buffer.begin();
+    auto version = kllvm::detail::read_version(begin, buffer.end());
+
+    if (version >= kllvm::binary_version(1, 2, 0)) {
+      begin_skip_length = 19;
+    } else {
+      begin_skip_length = 11;
+    }
   }
 
   auto result_size = file_size - (begin_skip_length + end_skip_length);

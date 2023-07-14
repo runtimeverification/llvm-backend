@@ -126,10 +126,11 @@ object Generator {
       sorts: Seq[Sort]) :
       Matrix = {
     val actions = axioms.map(a => {
-      val lhsVars = a.rewrite.getLeftHandSide.flatMap(genVars(_)).map(_.name)
+      val lhsVars = a.rewrite.getLeftHandSide.flatMap(genVars(_))
+      val lhsVarNames = lhsVars.map(_.name)
       val rhsVars = genVars(a.rewrite.getRightHandSide)
       val scVars = a.sideCondition.map(genVars(_))
-      new Action(a.ordinal, rhsVars.map(_.name).sorted.distinct, scVars.map(_.map(_.name).sorted.distinct), (rhsVars ++ scVars.getOrElse(Seq())).filter(_.name.startsWith("Var'Bang")).map(v => (v.name, v.sort)), a.rewrite.getLeftHandSide.size, a.priority, a.source, a.location, lhsVars.toSet.size != lhsVars.size)
+      new Action(a.ordinal, lhsVars, rhsVars.map(_.name).sorted.distinct, scVars.map(_.map(_.name).sorted.distinct), (rhsVars ++ scVars.getOrElse(Seq())).filter(_.name.startsWith("Var'Bang")).map(v => (v.name, v.sort)), a.rewrite.getLeftHandSide.size, a.priority, a.source, a.location, lhsVarNames.toSet.size != lhsVarNames.size)
     })
     val patterns = axioms.map(a => genPatterns(mod, symlib, a.rewrite.getLeftHandSide)).transpose
     val cols = (sorts, if (axioms.isEmpty) sorts.map(_ => IndexedSeq()) else patterns).zipped.toIndexedSeq
