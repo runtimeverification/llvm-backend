@@ -25,6 +25,8 @@ module IMP-WITH-RANGEMAPS-SYNTAX
                  | "element" "(" AExp "," AExp "," AExp ")" [klabel(element(_,_,_)), symbol, seqstrict]
                  | "update" "(" RmExp "," AExp "," AExp "," AExp ")" [klabel(update(_,_,_,_)), symbol, seqstrict]
                  | "remove" "(" RmExp "," AExp "," AExp ")" [klabel(remove(_,_,_)), symbol, seqstrict]
+                 | "updaterangemap" "(" RmExp "," RmExp ")" [klabel(updatermap(_,_)), symbol, seqstrict]
+                 | "difference" "(" RmExp "," RmExp ")" [klabel(difference(_,_)), symbol, seqstrict]
   syntax Block ::= "{" "}"                    [klabel({}), symbol]
                  | "{" Stmt "}"               [klabel({_}), symbol, format(%1%i%n%2%d%n%3)]
   syntax Stmt  ::= Block
@@ -61,6 +63,8 @@ module IMP-WITH-RANGEMAPS
   rule <k> element(S:Int, E:Int, V:Int) => [ S , E ) r|-> V  ... </k>
   rule <k> update(Rm:RangeMap, S:Int, E:Int, V:Int) => Rm [ [S, E) <- V ] ... </k>
   rule <k> remove(Rm:RangeMap, S:Int, E:Int) => Rm [ [S, E) <- undef ] ... </k>
+  rule <k> updaterangemap(Rm1:RangeMap, Rm2:RangeMap) => updateRangeMap(Rm1, Rm2) ... </k>
+  rule <k> difference(Rm1:RangeMap, Rm2:RangeMap) => Rm1 -RangeMap Rm2 ... </k>
   rule <k> contains_key(Rm:RangeMap, K:Int) => K in_keys ( Rm ) ... </k>
   rule <k> rm_size(Rm:RangeMap) => size ( Rm ) ... </k>
   rule <k> lookup(Rm:RangeMap, K:Int) => Rm [ K ] ... </k>
