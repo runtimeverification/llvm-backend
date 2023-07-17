@@ -14,6 +14,7 @@ static thread_local uint64_t idx2;
 extern "C" {
 bool hook_KEQUAL_eq(block *, block *);
 map map_map(void *, block *(block *));
+rangemap rangemap_map(void *, block *(block *));
 list list_map(void *, block *(block *));
 set set_map(void *, block *(block *));
 }
@@ -53,6 +54,11 @@ block *debruijnizeInternal(block *currBlock) {
       switch (argData->cat) {
       case MAP_LAYOUT: {
         map newArg = map_map(arg, debruijnizeInternal);
+        makeDirty(dirty, argData->offset, newArg, newBlock);
+        break;
+      }
+      case RANGEMAP_LAYOUT: {
+        rangemap newArg = rangemap_map(arg, debruijnizeInternal);
         makeDirty(dirty, argData->offset, newArg, newBlock);
         break;
       }
@@ -99,9 +105,8 @@ block *debruijnizeInternal(block *currBlock) {
 }
 
 block *replaceBinderInternal(block *currBlock) {
-  uintptr_t ptr = (uintptr_t)currBlock;
-  if (is_variable_block(ptr)) {
-    uint64_t varIdx = ptr >> 32;
+  if (is_variable_block(currBlock)) {
+    uint64_t varIdx = ((uintptr_t)currBlock) >> 32;
     if (idx == varIdx) {
       return (block *)var;
     } else if (idx < varIdx) {
@@ -110,7 +115,7 @@ block *replaceBinderInternal(block *currBlock) {
     } else {
       return currBlock;
     }
-  } else if (is_leaf_block(ptr)) {
+  } else if (is_leaf_block(currBlock)) {
     return currBlock;
   }
   const uint64_t hdr = currBlock->h.hdr;
@@ -130,6 +135,11 @@ block *replaceBinderInternal(block *currBlock) {
       switch (argData->cat) {
       case MAP_LAYOUT: {
         map newArg = map_map(arg, replaceBinderInternal);
+        makeDirty(dirty, argData->offset, newArg, newBlock);
+        break;
+      }
+      case RANGEMAP_LAYOUT: {
+        rangemap newArg = rangemap_map(arg, replaceBinderInternal);
         makeDirty(dirty, argData->offset, newArg, newBlock);
         break;
       }
@@ -206,6 +216,12 @@ block *substituteInternal(block *currBlock) {
         arguments.push_back(((char *)newBlock) + argData->offset);
         break;
       }
+      case RANGEMAP_LAYOUT: {
+        rangemap newArg = rangemap_map(arg, substituteInternal);
+        makeDirty(dirty, argData->offset, newArg, newBlock);
+        arguments.push_back(((char *)newBlock) + argData->offset);
+        break;
+      }
       case LIST_LAYOUT: {
         list newArg = list_map(arg, substituteInternal);
         makeDirty(dirty, argData->offset, newArg, newBlock);
@@ -261,7 +277,7 @@ block *substituteInternal(block *currBlock) {
 extern "C" {
 
 block *debruijnize(block *term) {
-  auto layoutData = getLayoutData(layout(term));
+  auto layoutData = getLayoutData(get_layout(term));
   auto layoutVar = layoutData->args[0];
   auto layoutBody = layoutData->args[layoutData->nargs - 1];
   var = *(string **)(((char *)term) + layoutVar.offset);
@@ -279,16 +295,15 @@ block *debruijnize(block *term) {
 }
 
 block *incrementDebruijn(block *currBlock) {
-  uintptr_t ptr = (uintptr_t)currBlock;
-  if (is_variable_block(ptr)) {
-    uint64_t varIdx = ptr >> 32;
+  if (is_variable_block(currBlock)) {
+    uint64_t varIdx = ((uintptr_t)currBlock) >> 32;
     if (varIdx >= idx2) {
       varIdx += idx;
       return variable_block(varIdx);
     } else {
       return currBlock;
     }
-  } else if (is_leaf_block(ptr)) {
+  } else if (is_leaf_block(currBlock)) {
     return currBlock;
   }
   const uint64_t hdr = currBlock->h.hdr;
@@ -308,6 +323,11 @@ block *incrementDebruijn(block *currBlock) {
       switch (argData->cat) {
       case MAP_LAYOUT: {
         map newArg = map_map(arg, incrementDebruijn);
+        makeDirty(dirty, argData->offset, newArg, newBlock);
+        break;
+      }
+      case RANGEMAP_LAYOUT: {
+        rangemap newArg = rangemap_map(arg, incrementDebruijn);
         makeDirty(dirty, argData->offset, newArg, newBlock);
         break;
       }
@@ -354,10 +374,10 @@ block *incrementDebruijn(block *currBlock) {
 
 block *alphaRename(block *term) {
   string *var = (string *)term;
-  size_t len = len(var);
-  auto newToken = (string *)koreAllocToken(sizeof(string) + len);
-  memcpy(newToken->data, var->data, len);
-  set_len(newToken, len);
+  size_t var_len = len(var);
+  auto newToken = (string *)koreAllocToken(sizeof(string) + var_len);
+  memcpy(newToken->data, var->data, var_len);
+  set_len(newToken, var_len);
   newToken->h.hdr |= VARIABLE_BIT;
   return (block *)newToken;
 }

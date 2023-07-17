@@ -2,6 +2,7 @@
 
 extern "C" {
 void map_hash(map *, void *);
+void rangemap_hash(rangemap *, void *);
 void list_hash(list *, void *);
 void set_hash(set *, void *);
 void int_hash(mpz_ptr, void *);
@@ -62,11 +63,11 @@ void hash_exit() {
 void k_hash(block *arg, void *h) {
   if (hash_enter()) {
     uint64_t argintptr = (uint64_t)arg;
-    if (is_leaf_block(argintptr)) {
+    if (is_leaf_block(arg)) {
       add_hash64(h, argintptr);
     } else {
       uint64_t arghdrcanon = arg->h.hdr & HDR_MASK;
-      if (uint16_t arglayout = layout(arg)) {
+      if (uint16_t arglayout = get_layout(arg)) {
         add_hash64(h, arghdrcanon);
         layout *layoutPtr = getLayoutData(arglayout);
         uint8_t length = layoutPtr->nargs;
@@ -77,6 +78,11 @@ void k_hash(block *arg, void *h) {
           case MAP_LAYOUT: {
             map *mapptr = (map *)(argintptr + offset);
             map_hash(mapptr, h);
+            break;
+          }
+          case RANGEMAP_LAYOUT: {
+            rangemap *rangemapptr = (rangemap *)(argintptr + offset);
+            rangemap_hash(rangemapptr, h);
             break;
           }
           case LIST_LAYOUT: {

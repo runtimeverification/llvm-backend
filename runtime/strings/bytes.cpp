@@ -10,6 +10,8 @@
 
 extern "C" {
 
+#undef get_ui
+#define get_ui(x) get_ui_named(x, __func__)
 #define KCHAR char
 
 mpz_ptr move_int(mpz_t);
@@ -69,9 +71,10 @@ SortInt hook_BYTES_bytes2int(
   return move_int(result);
 }
 
-unsigned long get_ui(mpz_t i) {
+unsigned long get_ui_named(mpz_t i, std::string const &caller) {
   if (!mpz_fits_ulong_p(i)) {
-    KLLVM_HOOK_INVALID_ARGUMENT("Integer overflow");
+    KLLVM_HOOK_INVALID_ARGUMENT(
+        "Integer overflow from {}: {}", caller, intToString(i));
   }
   return mpz_get_ui(i);
 }
@@ -185,8 +188,8 @@ SortInt hook_BYTES_length(SortBytes a) {
   return move_int(result);
 }
 
-SortBytes hook_BYTES_padRight(SortBytes b, SortInt len, SortInt v) {
-  unsigned long ulen = get_ui(len);
+SortBytes hook_BYTES_padRight(SortBytes b, SortInt length, SortInt v) {
+  unsigned long ulen = get_ui(length);
   if (ulen <= len(b)) {
     return b;
   }
@@ -201,8 +204,8 @@ SortBytes hook_BYTES_padRight(SortBytes b, SortInt len, SortInt v) {
   return result;
 }
 
-SortBytes hook_BYTES_padLeft(SortBytes b, SortInt len, SortInt v) {
-  unsigned long ulen = get_ui(len);
+SortBytes hook_BYTES_padLeft(SortBytes b, SortInt length, SortInt v) {
+  unsigned long ulen = get_ui(length);
   if (ulen <= len(b)) {
     return b;
   }

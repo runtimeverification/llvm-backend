@@ -20,13 +20,14 @@ declare i8* @getStderr()
 @exit_int_0 = global %mpz { i32 0, i32 0, i64* getelementptr inbounds ([0 x i64], [0 x i64]* @exit_int_0_limbs, i32 0, i32 0) }
 @exit_int_0_limbs = global [0 x i64] zeroinitializer
 
-define weak fastcc %mpz* @"eval_LblgetExitCode{SortGeneratedTopCell{}}"(%block*) {
+define weak tailcc %mpz* @"eval_LblgetExitCode{SortGeneratedTopCell{}}"(%block*) {
   ret %mpz* @exit_int_0
 }
 
 @output_file = global i8* zeroinitializer
 @statistics = global i1 zeroinitializer
 @binary_output = global i1 zeroinitializer
+@proof_output = global i1 zeroinitializer
 @steps = external thread_local global i64
 
 define void @finish_rewriting(%block* %subject, i1 %error) #0 {
@@ -48,20 +49,25 @@ printStatistics:
   br label %printEntry
 printEntry:
   %useBinary = load i1, i1* @binary_output
-  br i1 %useBinary, label %printBinary, label %printConfig
+  br i1 %useBinary, label %printBinary, label %printElse
 printBinary:
   call void @serializeConfigurationToFile(i8* %output, %block* %subject)
-  br i1 %error, label %exit, label %exitCode
+  br label %tail
+printElse:
+  %useProof = load i1, i1* @proof_output
+  br i1 %useProof, label %tail, label %printConfig
 printConfig:
   call void @printConfiguration(i8* %output, %block* %subject)
+  br label %tail
+tail:
   br i1 %error, label %exit, label %exitCode
 exitCode:
-  %exit_z = call fastcc %mpz* @"eval_LblgetExitCode{SortGeneratedTopCell{}}"(%block* %subject)
+  %exit_z = call tailcc %mpz* @"eval_LblgetExitCode{SortGeneratedTopCell{}}"(%block* %subject)
   %exit_ul = call i64 @__gmpz_get_ui(%mpz* %exit_z)
   %exit_trunc = trunc i64 %exit_ul to i32
   br label %exit
 exit:
-  %exit_ui = phi i32 [ %exit_trunc, %exitCode ], [ 113, %printConfig ], [ 113, %printBinary ]
+  %exit_ui = phi i32 [ %exit_trunc, %exitCode ], [ 113, %tail ]
   call void @exit(i32 %exit_ui)
   unreachable
 }

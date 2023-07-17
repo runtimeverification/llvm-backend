@@ -10,6 +10,7 @@ configure_file(llvm-kompile         ${CMAKE_CURRENT_BINARY_DIR} @ONLY)
 configure_file(llvm-krun            ${CMAKE_CURRENT_BINARY_DIR} @ONLY)
 configure_file(llvm-kompile-testing ${CMAKE_CURRENT_BINARY_DIR} @ONLY)
 configure_file(llvm-kompile-clang   ${CMAKE_CURRENT_BINARY_DIR} @ONLY)
+configure_file(utils.sh             ${CMAKE_CURRENT_BINARY_DIR} @ONLY)
 
 install(
   PROGRAMS
@@ -17,4 +18,10 @@ install(
     ${CMAKE_CURRENT_BINARY_DIR}/llvm-kompile-clang
     ${CMAKE_CURRENT_BINARY_DIR}/llvm-krun
   DESTINATION bin
+)
+
+install(
+  PROGRAMS
+    ${CMAKE_CURRENT_BINARY_DIR}/utils.sh
+  DESTINATION lib/scripts
 )

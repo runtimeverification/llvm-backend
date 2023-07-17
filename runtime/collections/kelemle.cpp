@@ -2,6 +2,7 @@
 
 extern "C" {
 bool hook_MAP_eq(SortMap, SortMap);
+bool hook_RANGEMAP_eq(SortRangeMap, SortRangeMap);
 bool hook_LIST_eq(SortList, SortList);
 bool hook_SET_eq(SortSet, SortSet);
 bool hook_INT_eq(SortInt, SortInt);
@@ -11,8 +12,8 @@ bool hook_STRING_lt(SortString, SortString);
 bool hook_KEQUAL_eq(block *arg1, block *arg2) {
   uint64_t arg1intptr = (uint64_t)arg1;
   uint64_t arg2intptr = (uint64_t)arg2;
-  bool arg1lb = is_leaf_block(arg1intptr);
-  bool arg2lb = is_leaf_block(arg2intptr);
+  bool arg1lb = is_leaf_block(arg1);
+  bool arg2lb = is_leaf_block(arg2);
   if (arg1lb == arg2lb) {
     if (arg1lb) {
       // Both arg1 and arg2 are constants.
@@ -24,7 +25,7 @@ bool hook_KEQUAL_eq(block *arg1, block *arg2) {
       if (arg1hdrcanon == arg2hdrcanon) {
         // Canonical headers of arg1 and arg2 are equal.
         // Both arg1 and arg2 are either strings or symbols.
-        uint64_t arglayout = layout(arg1);
+        uint64_t arglayout = get_layout(arg1);
         if (arglayout == 0) {
           // Both arg1 and arg2 are strings.
           return hook_STRING_eq((string *)arg1, (string *)arg2);
@@ -43,6 +44,15 @@ bool hook_KEQUAL_eq(block *arg1, block *arg2) {
               map *map1ptr = (map *)(child1intptr);
               map *map2ptr = (map *)(child2intptr);
               bool cmp = hook_MAP_eq(map1ptr, map2ptr);
+              if (!cmp) {
+                return false;
+              }
+              break;
+            }
+            case RANGEMAP_LAYOUT: {
+              rangemap *rangemap1ptr = (rangemap *)(child1intptr);
+              rangemap *rangemap2ptr = (rangemap *)(child2intptr);
+              bool cmp = hook_RANGEMAP_eq(rangemap1ptr, rangemap2ptr);
               if (!cmp) {
                 return false;
               }
@@ -140,8 +150,8 @@ bool hook_KEQUAL_eq(block *arg1, block *arg2) {
 bool hook_KEQUAL_lt(block *arg1, block *arg2) {
   uint64_t arg1intptr = (uint64_t)arg1;
   uint64_t arg2intptr = (uint64_t)arg2;
-  bool isconstant1 = is_leaf_block(arg1intptr);
-  bool isconstant2 = is_leaf_block(arg2intptr);
+  bool isconstant1 = is_leaf_block(arg1);
+  bool isconstant2 = is_leaf_block(arg2);
   if (isconstant1 != isconstant2) {
     // Between arg1 and arg2, one is a constant and one is not.
     return isconstant1;
@@ -150,8 +160,8 @@ bool hook_KEQUAL_lt(block *arg1, block *arg2) {
     return arg1intptr < arg2intptr;
   } else {
     // Both arg1 and arg2 are blocks.
-    uint16_t arg1layout = layout(arg1);
-    uint16_t arg2layout = layout(arg2);
+    uint16_t arg1layout = get_layout(arg1);
+    uint16_t arg2layout = get_layout(arg2);
     if (arg1layout == 0 && arg2layout == 0) {
       // Both arg1 and arg2 are strings.
       return hook_STRING_lt((string *)arg1, (string *)arg2);
@@ -173,6 +183,9 @@ bool hook_KEQUAL_lt(block *arg1, block *arg2) {
           uint16_t cat = layoutPtr->args[i].cat;
           switch (cat) {
           case MAP_LAYOUT: {
+            abort(); // Implement when needed.
+          }
+          case RANGEMAP_LAYOUT: {
             abort(); // Implement when needed.
           }
           case LIST_LAYOUT: {

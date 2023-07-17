@@ -257,6 +257,7 @@ void SwitchNode::codegen(Decision *d) {
 
         switch (cat.cat) {
         case SortCategory::Map:
+        case SortCategory::RangeMap:
         case SortCategory::List:
         case SortCategory::Set: Child = ChildPtr; break;
         default:
@@ -531,7 +532,7 @@ void LeafNode::codegen(Decision *d) {
           d->Module, name, llvm::FunctionType::get(type, types, false)),
       args, "", d->CurrentBlock);
   setDebugLoc(Call);
-  Call->setCallingConv(llvm::CallingConv::Fast);
+  Call->setCallingConv(llvm::CallingConv::Tail);
   if (child == nullptr) {
     llvm::ReturnInst::Create(d->Ctx, Call, d->CurrentBlock);
   } else {
@@ -573,6 +574,17 @@ llvm::AllocaInst *Decision::decl(var_type name) {
 }
 
 llvm::Value *Decision::load(var_type name) {
+  if (name.first == "") {
+    llvm::Type *ty = name.second;
+    if (ty->isPointerTy()) {
+      auto ptr_ty = (llvm::PointerType *)ty;
+      return llvm::ConstantPointerNull::get(ptr_ty);
+    } else if (ty->isIntegerTy()) {
+      auto int_ty = (llvm::IntegerType *)ty;
+      return llvm::ConstantInt::get(int_ty, 0);
+    }
+    assert(false && "Unbound variable on LHS is neither pointer nor integral");
+  }
   auto sym = this->symbols[name];
   if (!sym) {
     sym = this->decl(name);
@@ -669,6 +681,7 @@ void makeEvalOrAnywhereFunction(
     debugArgs.push_back(getDebugType(cat, Out.str()));
     switch (cat.cat) {
     case SortCategory::Map:
+    case SortCategory::RangeMap:
     case SortCategory::List:
     case SortCategory::Set:
       args.push_back(llvm::PointerType::getUnqual(getValueType(cat, module)));
@@ -692,7 +705,7 @@ void makeEvalOrAnywhereFunction(
   initDebugFunction(
       function->getName(), name,
       getDebugFunctionType(debugReturnType, debugArgs), definition, matchFunc);
-  matchFunc->setCallingConv(llvm::CallingConv::Fast);
+  matchFunc->setCallingConv(llvm::CallingConv::Tail);
   llvm::BasicBlock *block
       = llvm::BasicBlock::Create(module->getContext(), "entry", matchFunc);
   llvm::BasicBlock *stuck
@@ -760,7 +773,7 @@ void abortWhenStuck(
           {llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0),
            llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), idx + 2)},
           "", CurrentBlock);
-      if (ChildValue->getType() == ChildPtr->getType()) {
+      if (isCollectionSort(cat)) {
         ChildValue = new llvm::LoadInst(
             getArgType(cat, Module), ChildValue, "", CurrentBlock);
       }
@@ -801,22 +814,16 @@ void addOwise(
   }
   CreateTerm creator = CreateTerm(finalSubst, d, stuck, module, true);
   llvm::Value *retval = creator(pat.get()).first;
+
   auto returnSort = dynamic_cast<KORECompositeSort *>(symbol->getSort().get())
                         ->getCategory(d);
-  auto returnType = getValueType(returnSort, module);
-  switch (returnSort.cat) {
-  case SortCategory::Map:
-  case SortCategory::List:
-  case SortCategory::Set:
-    if (retval->getType() == returnType) {
-      auto tempAlloc = allocateTerm(
-          retval->getType(), creator.getCurrentBlock(), "koreAllocAlwaysGC");
-      new llvm::StoreInst(retval, tempAlloc, creator.getCurrentBlock());
-      retval = tempAlloc;
-    }
-    break;
-  default: break;
+  if (isCollectionSort(returnSort)) {
+    auto tempAlloc = allocateTerm(
+        retval->getType(), creator.getCurrentBlock(), "koreAllocAlwaysGC");
+    new llvm::StoreInst(retval, tempAlloc, creator.getCurrentBlock());
+    retval = tempAlloc;
   }
+
   llvm::ReturnInst::Create(
       module->getContext(), retval, creator.getCurrentBlock());
 }
@@ -859,6 +866,7 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> stepFunctionHeader(
   for (auto type : types) {
     switch (type.cat) {
     case SortCategory::Map:
+    case SortCategory::RangeMap:
     case SortCategory::List:
     case SortCategory::Set:
       nroots++;
@@ -903,6 +911,7 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> stepFunctionHeader(
   for (auto cat : types) {
     switch (cat.cat) {
     case SortCategory::Map:
+    case SortCategory::RangeMap:
     case SortCategory::List:
     case SortCategory::Set:
     case SortCategory::StringBuffer:
@@ -966,6 +975,7 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> stepFunctionHeader(
   for (auto type : types) {
     switch (type.cat) {
     case SortCategory::Map:
+    case SortCategory::RangeMap:
     case SortCategory::List:
     case SortCategory::Set:
     case SortCategory::StringBuffer:
@@ -1007,7 +1017,7 @@ void makeStepFunction(
         name, name, getDebugFunctionType(debugType, {debugType}), definition,
         matchFunc);
   }
-  matchFunc->setCallingConv(llvm::CallingConv::Fast);
+  matchFunc->setCallingConv(llvm::CallingConv::Tail);
   auto val = matchFunc->arg_begin();
   llvm::BasicBlock *block
       = llvm::BasicBlock::Create(module->getContext(), "entry", matchFunc);
@@ -1071,7 +1081,7 @@ void makeMatchReasonFunctionWrapper(
       = getOrInsertFunction(module, wrapperName, funcType);
   std::string debugName = name;
   if (axiom->getAttributes().count("label")) {
-    debugName = axiom->getStringAttribute("label") + "_fastcc_" + ".match";
+    debugName = axiom->getStringAttribute("label") + "_tailcc_" + ".match";
   }
   auto debugType
       = getDebugType({SortCategory::Symbol, 0}, "SortGeneratedTopCell{}");
@@ -1080,7 +1090,7 @@ void makeMatchReasonFunctionWrapper(
       debugName, debugName,
       getDebugFunctionType(getVoidDebugType(), {debugType}), definition,
       matchFunc);
-  matchFunc->setCallingConv(llvm::CallingConv::Fast);
+  matchFunc->setCallingConv(llvm::CallingConv::Tail);
   llvm::BasicBlock *entry
       = llvm::BasicBlock::Create(module->getContext(), "entry", matchFunc);
 
@@ -1202,6 +1212,7 @@ void makeStepFunction(
     debugTypes.push_back(getDebugType(cat, Out.str()));
     switch (cat.cat) {
     case SortCategory::Map:
+    case SortCategory::RangeMap:
     case SortCategory::List:
     case SortCategory::Set:
       argTypes.push_back(
@@ -1220,7 +1231,7 @@ void makeStepFunction(
   initDebugFunction(
       name, name, getDebugFunctionType(blockDebugType, debugTypes), definition,
       matchFunc);
-  matchFunc->setCallingConv(llvm::CallingConv::Fast);
+  matchFunc->setCallingConv(llvm::CallingConv::Tail);
 
   llvm::StringMap<llvm::Value *> stuckSubst;
   llvm::BasicBlock *block

@@ -12,6 +12,19 @@ BOOST_AUTO_TEST_CASE(rangemap_test_empty) {
   BOOST_CHECK_EQUAL(result2, false);
 }
 
+BOOST_AUTO_TEST_CASE(rangemap_test_is_empty) {
+  auto map1 = rng_map::RangeMap<int, int>();
+  auto m1 = map1.inserted(rng_map::Range<int>(0, 5), 1);
+  auto map2 = m1.inserted(rng_map::Range<int>(2, 4), 2);
+  auto map3 = map2.deleted(rng_map::Range<int>(0, 5));
+  auto result = map1.empty();
+  BOOST_CHECK_EQUAL(result, true);
+  result = map2.empty();
+  BOOST_CHECK_EQUAL(result, false);
+  result = map3.empty();
+  BOOST_CHECK_EQUAL(result, true);
+}
+
 BOOST_AUTO_TEST_CASE(rangemap_test_concat_success) {
   auto m
       = (rng_map::RangeMap<int, int>()).inserted(rng_map::Range<int>(2, 4), 1);
@@ -607,6 +620,108 @@ BOOST_AUTO_TEST_CASE(rangemap_test_ins_mult) {
   auto result2 = map.get_value(1);
   BOOST_CHECK_EQUAL(result2.has_value(), true);
   BOOST_CHECK_EQUAL(result2.value(), 2);
+}
+
+BOOST_AUTO_TEST_CASE(rangemap_test_difference) {
+  auto map1 = rng_map::RangeMap<int, int>();
+  auto m1 = map1.inserted(rng_map::Range<int>(0, 2), 0);
+  auto m2 = m1.inserted(rng_map::Range<int>(5, 8), 0);
+  auto m3 = m2.inserted(rng_map::Range<int>(12, 13), 0);
+  auto map2 = m3.inserted(rng_map::Range<int>(15, 18), 0);
+  auto map3 = map1.inserted(rng_map::Range<int>(0, 20), 0);
+  auto m4 = map1.inserted(rng_map::Range<int>(0, 1), 0);
+  auto m5 = m4.inserted(rng_map::Range<int>(2, 3), 0);
+  auto m6 = m5.inserted(rng_map::Range<int>(4, 6), 0);
+  auto map4 = m6.inserted(rng_map::Range<int>(9, 15), 0);
+  auto map5 = map2.difference(map1);
+  auto result = map5.size();
+  BOOST_CHECK_EQUAL(result, 4);
+  auto result2 = map5.get_key_value(1);
+  BOOST_CHECK_EQUAL(result2.has_value(), true);
+  BOOST_CHECK_EQUAL(result2.value().second, 0);
+  BOOST_CHECK_EQUAL(result2.value().first.start(), 0);
+  BOOST_CHECK_EQUAL(result2.value().first.end(), 2);
+  result2 = map5.get_key_value(5);
+  BOOST_CHECK_EQUAL(result2.has_value(), true);
+  BOOST_CHECK_EQUAL(result2.value().second, 0);
+  BOOST_CHECK_EQUAL(result2.value().first.start(), 5);
+  BOOST_CHECK_EQUAL(result2.value().first.end(), 8);
+  result2 = map5.get_key_value(12);
+  BOOST_CHECK_EQUAL(result2.has_value(), true);
+  BOOST_CHECK_EQUAL(result2.value().second, 0);
+  BOOST_CHECK_EQUAL(result2.value().first.start(), 12);
+  BOOST_CHECK_EQUAL(result2.value().first.end(), 13);
+  result2 = map5.get_key_value(15);
+  BOOST_CHECK_EQUAL(result2.has_value(), true);
+  BOOST_CHECK_EQUAL(result2.value().second, 0);
+  BOOST_CHECK_EQUAL(result2.value().first.start(), 15);
+  BOOST_CHECK_EQUAL(result2.value().first.end(), 18);
+  auto map6 = map2.difference(map3);
+  result = map6.size();
+  BOOST_CHECK_EQUAL(result, 0);
+  auto map7 = map2.difference(map4);
+  result = map7.size();
+  BOOST_CHECK_EQUAL(result, 3);
+  result2 = map7.get_key_value(1);
+  BOOST_CHECK_EQUAL(result2.has_value(), true);
+  BOOST_CHECK_EQUAL(result2.value().second, 0);
+  BOOST_CHECK_EQUAL(result2.value().first.start(), 1);
+  BOOST_CHECK_EQUAL(result2.value().first.end(), 2);
+  result2 = map7.get_key_value(7);
+  BOOST_CHECK_EQUAL(result2.has_value(), true);
+  BOOST_CHECK_EQUAL(result2.value().second, 0);
+  BOOST_CHECK_EQUAL(result2.value().first.start(), 6);
+  BOOST_CHECK_EQUAL(result2.value().first.end(), 8);
+  result2 = map7.get_key_value(15);
+  BOOST_CHECK_EQUAL(result2.has_value(), true);
+  BOOST_CHECK_EQUAL(result2.value().second, 0);
+  BOOST_CHECK_EQUAL(result2.value().first.start(), 15);
+  BOOST_CHECK_EQUAL(result2.value().first.end(), 18);
+  auto result3 = map7.contains(0);
+  BOOST_CHECK_EQUAL(result3, false);
+  result3 = map7.contains(5);
+  BOOST_CHECK_EQUAL(result3, false);
+  result3 = map7.contains(12);
+  BOOST_CHECK_EQUAL(result3, false);
+  result3 = map7.contains(13);
+  BOOST_CHECK_EQUAL(result3, false);
+  auto map8 = map1.difference(map2);
+  result = map8.size();
+  BOOST_CHECK_EQUAL(result, 0);
+  auto map9 = map1.difference(map1);
+  result = map9.size();
+  BOOST_CHECK_EQUAL(result, 0);
+}
+
+BOOST_AUTO_TEST_CASE(rangemap_test_inclusion) {
+  auto map = rng_map::RangeMap<int, int>();
+  auto m1 = map.inserted(rng_map::Range<int>(0, 2), 0);
+  auto m2 = m1.inserted(rng_map::Range<int>(5, 8), 0);
+  auto m3 = m2.inserted(rng_map::Range<int>(12, 13), 0);
+  auto map1 = m3.inserted(rng_map::Range<int>(15, 18), 0);
+  auto map2 = map.inserted(rng_map::Range<int>(0, 20), 0);
+  auto m4 = map.inserted(rng_map::Range<int>(0, 3), 0);
+  auto m5 = m4.inserted(rng_map::Range<int>(4, 8), 0);
+  auto m6 = m5.inserted(rng_map::Range<int>(9, 14), 0);
+  auto map3 = m6.inserted(rng_map::Range<int>(15, 18), 0);
+  auto map4 = m6.inserted(rng_map::Range<int>(15, 18), 1);
+  auto m7 = map.inserted(rng_map::Range<int>(0, 3), 0);
+  auto m8 = m7.inserted(rng_map::Range<int>(6, 9), 0);
+  auto map5 = m8.inserted(rng_map::Range<int>(10, 19), 0);
+  auto result = map1.inclusion(map);
+  BOOST_CHECK_EQUAL(result, false);
+  result = map1.inclusion(map2);
+  BOOST_CHECK_EQUAL(result, true);
+  result = map1.inclusion(map3);
+  BOOST_CHECK_EQUAL(result, true);
+  result = map1.inclusion(map4);
+  BOOST_CHECK_EQUAL(result, false);
+  result = map1.inclusion(map5);
+  BOOST_CHECK_EQUAL(result, false);
+  result = map.inclusion(map1);
+  BOOST_CHECK_EQUAL(result, true);
+  result = map.inclusion(map);
+  BOOST_CHECK_EQUAL(result, true);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

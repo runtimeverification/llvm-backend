@@ -5,9 +5,12 @@
 
 #include "runtime/fmt_error_handling.h"
 #include <cassert>
+#include <functional>
 #include <iostream>
 #include <optional>
+#include <stack>
 #include <stdexcept>
+#include <vector>
 
 namespace rng_map {
 
@@ -30,11 +33,28 @@ public:
       : start_()
       , end_() { }
 
+  /* WARNING: The following two methods return non-const references in order  *
+   * to enable altering this data structure (and potentially ones implemented *
+   * on top of it, namely RangeMap) in place. The Range data structure is     *
+   * intended to be immutable: the exposed functionality should not generally *
+   * alter the ranges in place. This API is not intended to change the        *
+   * structure or data of a range, e.g., start, end. It is intended for       *
+   * internal use, available so that data orthogonal to the data structure    *
+   * can be altered, e.g., GC bits, memory locations of blocks that contain   *
+   * the nodes, etc (see include/runtime/header.h). Only use this API to      *
+   * request a non-const reference if you in fact need to edit the data       *
+   * structure in place for a specific reason, e.g. garbage collection.       */
+  // Getter for the start of this range. Returns a non-const reference.
+  T &start_mutable() { return start_; }
+
+  // Getter for the end of this range. Returns a non-const reference.
+  T &end_mutable() { return end_; }
+
   // Getter for the start of this range.
-  T start() const { return start_; }
+  T const &start() const { return start_; }
 
   // Getter for the end of this range.
-  T end() const { return end_; }
+  T const &end() const { return end_; }
 
   // The following methods define the ordering for objects of class Range.
   // Operator < is used to subsequently define >, ==, <=, >=, and !=.
@@ -109,7 +129,7 @@ private:
     if (r.contains(k)) {
       return std::make_pair(r, t.root_val());
     }
-    T start = r.start();
+    T const &start = r.start();
     if (k < start) {
       return get_key_value(t.left(), k);
     }
@@ -124,10 +144,10 @@ private:
     if (t.empty()) {
       return false;
     }
-    T start = r.start();
-    T end = r.end();
-    T rstart = t.root_key().start();
-    T rend = t.root_key().end();
+    T const &start = r.start();
+    T const &end = r.end();
+    T const &rstart = t.root_key().start();
+    T const &rend = t.root_key().end();
     if (rend <= start) {
       // The root is to the left of range r, possibly adjacent but not
       // overlapping. Continue looking for overlapping ranges to the right of
@@ -153,10 +173,10 @@ private:
     if (t.empty()) {
       return;
     }
-    T start = r.start();
-    T end = r.end();
-    T rstart = t.root_key().start();
-    T rend = t.root_key().end();
+    T const &start = r.start();
+    T const &end = r.end();
+    T const &rstart = t.root_key().start();
+    T const &rend = t.root_key().end();
     if (rend < start) {
       // The candidate range is to the left of our target range, and does
       // not share a boundary. It is not relevant. Continue looking for
@@ -203,10 +223,10 @@ private:
     if (t.empty()) {
       return;
     }
-    T start = r.start();
-    T end = r.end();
-    T rstart = t.root_key().start();
-    T rend = t.root_key().end();
+    T const &start = r.start();
+    T const &end = r.end();
+    T const &rstart = t.root_key().start();
+    T const &rend = t.root_key().end();
     if (rend <= start) {
       // The candidate range is to the left of our target range, and may
       // share a boundary. It is not relevant. Continue looking for
@@ -245,6 +265,42 @@ private:
     }
   }
 
+  // Return the intersection ranges of this rangemap and rangemap m, i.e. all
+  // ranges in this rangemap that overlap (fully or partially) with ranges in m
+  // and are mapped to the same value in both rangemaps.
+  std::vector<Range<T>> get_intersection_ranges(RangeMap const &m) const {
+    std::vector<std::pair<Range<T>, V>> r1;
+    for_each(treemap_, [&r1](Range<T> const &x, V const &v) {
+      r1.emplace_back(std::make_pair(x, v));
+    });
+    std::vector<std::pair<Range<T>, V>> r2;
+    for_each(m.treemap_, [&r2](Range<T> const &x, V const &v) {
+      r2.emplace_back(std::make_pair(x, v));
+    });
+    // Compute the intersection of this rangemap and m.
+    std::vector<Range<T>> res;
+    int i = 0;
+    int j = 0;
+    // Repeat while there are more ranges in both rangemaps.
+    while (i < r1.size() && j < r2.size()) {
+      // Consider ranges r1[i] and r2[j] for intersection.
+      T s = r1[i].first.start() > r2[j].first.start() ? r1[i].first.start()
+                                                      : r2[j].first.start();
+      T e = r1[i].first.end() < r2[j].first.end() ? r1[i].first.end()
+                                                  : r2[j].first.end();
+      if (s < e && r1[i].second == r2[j].second) {
+        res.emplace_back(Range<T>(s, e));
+      }
+      // The range with the smallest end has been processed - remove it.
+      if (r1[i].first.end() < r2[j].first.end()) {
+        i++;
+      } else {
+        j++;
+      }
+    }
+    return res;
+  }
+
 public:
   // Create an empty rangemap.
   RangeMap()
@@ -262,8 +318,14 @@ public:
     treemap_ = m.treemap_;
   }
 
+  // Getter for the rb-tree underlying this rangemap.
+  rb_tree::RBTree<Range<T>, V> treemap() const { return treemap_; }
+
   // Return the number of key ranges in the map.
   size_t size() const { return treemap_.size(); }
+
+  // Returns true if this rangemap is empty.
+  bool empty() const { return treemap_.size() == 0; }
 
   // Return true if a range in this map contains the key k.
   bool contains(T const &k) const { return get_key_value(k).has_value(); }
@@ -312,8 +374,8 @@ public:
       Range<T> rr = p.first;
       V rv = p.second;
       assert(r.is_relevant(rr));
-      T rrs = rr.start();
-      T rre = rr.end();
+      T const &rrs = rr.start();
+      T const &rre = rr.end();
 
       if (v == rv) {
         // The inserted value is the same as the value stored in
@@ -368,15 +430,15 @@ public:
     // treemap data structure.
     // We iterate over the collected relevant ranges to collect and apply
     // these changes.
-    T ds = r.start();
-    T de = r.end();
+    T const &ds = r.start();
+    T const &de = r.end();
     rb_tree::RBTree<Range<T>, V> tmpmap = treemap_;
     for (auto &p : ranges) {
       Range<T> rr = p.first;
       V rv = p.second;
       assert(r.overlaps(rr));
-      T rrs = rr.start();
-      T rre = rr.end();
+      T const &rrs = rr.start();
+      T const &rre = rr.end();
       tmpmap = tmpmap.deleted(rr);
       if (rrs < ds) {
         tmpmap = tmpmap.inserted(Range<T>(rrs, ds), rv);
@@ -411,10 +473,143 @@ public:
         res = res.inserted(x, v);
       } else {
         KLLVM_HOOK_INVALID_ARGUMENT(
-            "Overlapping key ranges in map concatenation");
+            "Overlapping ranges in range map concatenation");
       }
     });
     return res;
+  }
+
+  // Return a rangemap that is the difference of this rangemap and rangemap m.
+  // Given rangemaps A and B, we compute the intersection of A and B, as all
+  // key range-value pairs whose keys are contained in ranges in both A and B
+  // and are mapped to the same value. Then, we perform A - A^B, and return the
+  // map resulting from deleting these ranges from A.
+  RangeMap difference(RangeMap const &m) const {
+    // Compute the intersection of this rangemap and m.
+    std::vector<Range<T>> intersect = get_intersection_ranges(m);
+    // Delete all collected intersection ranges from this rangemap.
+    RangeMap tmpmap = *this;
+    for (auto &r : intersect) {
+      tmpmap = tmpmap.deleted(r);
+    }
+    return tmpmap;
+  }
+
+  // Return true if this rangemap is included in rangemap m, i.e. all key
+  // range-value pairs contained in this rangemap whose keys are also contained
+  // in key ranges in m and are mapped to the same value.
+  bool inclusion(RangeMap const &m) const {
+    // Compute the intersection of this rangemap and m.
+    std::vector<Range<T>> intersect = get_intersection_ranges(m);
+    // Compare the intersection ranges with this rangemap's ranges.
+    // If they differ, return false.
+    auto it = intersect.begin();
+    bool equals = true;
+    for_each(
+        treemap_, [&intersect, &it, &equals](Range<T> const &x, V const &v) {
+          if (it == intersect.end()) {
+            equals = false;
+          } else {
+            if (x != *it) {
+              equals = false;
+            }
+            ++it;
+          }
+        });
+    return (it == intersect.end()) && equals;
+  }
+};
+
+// Iterator and Const Iterator over objects of class RangeMap.
+// We do not need the full flexibility offered by the std interface.
+// Instead we only need to iterate. Therefore, these iterators provide
+// prefix increment operator, dereference operator, arrow operator, and a
+// function that tests if there are more elements instead of equality operator.
+template <class T, class V>
+class AbstractRangeMapIterator {
+
+protected:
+  std::stack<rb_tree::RBTree<Range<T>, V>> stack_;
+
+  void update_stack_state(rb_tree::RBTree<Range<T>, V> const &t) {
+    rb_tree::RBTree<Range<T>, V> tmp = t;
+    while (!tmp.empty()) {
+      stack_.push(tmp);
+      tmp = tmp.left();
+    }
+  }
+
+  // Create an iterator over rangemap m.
+  AbstractRangeMapIterator(RangeMap<T, V> m) {
+    update_stack_state(m.treemap());
+  }
+
+public:
+  // Prefix increment operator.
+  void operator++() {
+    rb_tree::RBTree<Range<T>, V> const &t = stack_.top();
+    stack_.pop();
+    update_stack_state(t.right());
+  }
+
+  // Return true if there are more elements in the underlying rangemap.
+  bool has_next() const { return !stack_.empty(); }
+};
+
+template <class T, class V>
+class ConstRangeMapIterator : public AbstractRangeMapIterator<T, V> {
+
+public:
+  using AbstractRangeMapIterator<T, V>::stack_;
+
+  // Create an iterator over rangemap m.
+  ConstRangeMapIterator(RangeMap<T, V> m)
+      : AbstractRangeMapIterator<T, V>(m) { }
+
+  // Dereference operator.
+  std::pair<Range<T>, V> const &operator*() const {
+    rb_tree::RBTree<Range<T>, V> const &t = stack_.top();
+    return t.root_data();
+  }
+
+  // Member access (arrow) operator.
+  std::pair<Range<T>, V> const *operator->() const {
+    rb_tree::RBTree<Range<T>, V> const &t = stack_.top();
+    return &t.root_data();
+  }
+};
+
+/* WARNING: This iterator returns non-const references in order to enable     *
+ * altering the underlying data structure, RangeMap, in place. The RangeMap   *
+ * data structure is intended to be immutable: the exposed functionality      *
+ * should not generally alter it in place. This API is not intended to change *
+ * the structure or data of a range map, e.g., key-value pairs, stored        *
+ * ranges' bounds. It is intended for internal use, available so that data    *
+ * orthogonal to the data structure can be altered, e.g., GC bits, memory     *
+ * locations of blocks that contain the nodes, etc                            *
+ * (see include/runtime/header.h). Only request a RangeMapIterator instead of *
+ * a ConstRangeMapIterator if you in fact need to edit the data structure in  *
+ * place for a specific reason, e.g. garbage collection.                      */
+template <class T, class V>
+class RangeMapIterator : public AbstractRangeMapIterator<T, V> {
+
+public:
+  using AbstractRangeMapIterator<T, V>::stack_;
+
+  // Create an iterator over rangemap m.
+  RangeMapIterator(RangeMap<T, V> m)
+      : AbstractRangeMapIterator<T, V>(m) { }
+
+  // Non-const dereference operator.
+  std::pair<Range<T>, V> &operator*() {
+    rb_tree::RBTree<Range<T>, V> &t = stack_.top();
+    return t.root_data_mutable();
+  }
+
+  // Non-const member access (arrow) operator.
+  std::pair<Range<T>, V> *operator->() {
+    rb_tree::RBTree<Range<T>, V> &t = stack_.top();
+    return &t.root_data_mutable();
   }
 };
 
@@ -430,6 +625,16 @@ RangeMap<T, V> inserted(RangeMap<T, V> const &m, I it, I end) {
   V val = it->second;
   auto m1 = m.inserted(key, val);
   return inserted(m1, ++it, end);
+}
+
+// Apply function f to all elements of rangemap m.
+// Function f must accept two arguments of types T, corresponding to the start
+// and end of a range, and one of type V correspondong to the mapped value.
+template <class T, class V, class F>
+void for_each(RangeMap<T, V> const &m, F &&f) {
+  for_each(m.treemap(), [&f](Range<T> const &x, V const &v) {
+    std::invoke(f, x.start(), x.end(), v);
+  });
 }
 
 } // namespace rng_map
