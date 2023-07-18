@@ -116,3 +116,20 @@ void migrate_map(void *m) {
   migrate_collection_node((void **)&impl.root);
   migrate_champ_traversal(impl.root, 0, migrate_map_leaf);
 }
+
+using treemap = rb_tree::RBTree<rng_map::Range<KElem>, KElem>;
+void migrate_treemap(treemap t) {
+  if (t.empty()) {
+    return;
+  }
+  auto &data = t.root_data_mutable();
+  migrate_once(&data.first.start_mutable().elem);
+  migrate_once(&data.first.end_mutable().elem);
+  migrate_once(&data.second.elem);
+  migrate_treemap(t.left());
+  migrate_treemap(t.right());
+}
+
+void migrate_rangemap(void *m) {
+  migrate_treemap(((rangemap *)m)->treemap());
+}
