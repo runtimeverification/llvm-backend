@@ -2,6 +2,7 @@
 
 #include <assert.h>
 #include <dlfcn.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 // Uses a GNU extension (fully supported by clang) to make the cast from dlsym
@@ -15,12 +16,14 @@
 struct kllvm_c_api load_c_api(char const *path) {
   void *lib = dlopen(path, RTLD_NOW);
   if (!lib) {
+    fprintf(stderr, "%s", dlerror());
     abort();
   }
 
   struct kllvm_c_api api;
 
   API_FUNCTION(kore_pattern_dump);
+  API_FUNCTION(kore_pattern_pretty_print);
   API_FUNCTION(kore_pattern_serialize);
   API_FUNCTION(kore_pattern_free);
   API_FUNCTION(kore_pattern_parse);

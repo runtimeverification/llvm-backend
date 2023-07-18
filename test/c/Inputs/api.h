@@ -5,6 +5,7 @@
 
 struct kllvm_c_api {
   char *(*kore_pattern_dump)(kore_pattern const *);
+  char *(*kore_pattern_pretty_print)(kore_pattern const *);
   void (*kore_pattern_serialize)(kore_pattern const *, char **, size_t *);
   void (*kore_pattern_free)(kore_pattern const *);
   kore_pattern *(*kore_pattern_parse)(char const *);

@@ -1,17 +1,26 @@
-#include <iostream>
-#include <memory>
+#include <kllvm-c/kllvm-c.h>
 
 #include <kllvm/ast/AST.h>
 #include <kllvm/binary/serializer.h>
 #include <kllvm/parser/KOREParser.h>
+#include <kllvm/printer/printer.h>
 
-#include <kllvm-c/kllvm-c.h>
+#define FMT_HEADER_ONLY
+#include <fmt/format.h>
 
-#include <runtime/arena.h>
+#include <filesystem>
+#include <fstream>
+#include <iostream>
+#include <memory>
+#include <optional>
+#include <unistd.h>
 
-// This header needs to be included last because it pollutes a number of macro
+// These headers need to be included last because they pollute a number of macro
 // definitions into the global namespace.
+#include <runtime/arena.h>
 #include <runtime/header.h>
+
+namespace fs = std::filesystem;
 
 // Internal implementation details
 namespace {
@@ -23,6 +32,15 @@ kore_pattern *kore_string_pattern_new_internal(std::string const &);
 
 kore_pattern *
 kore_pattern_new_token_internal(kore_pattern const *, kore_sort const *);
+
+struct pretty_print_definition {
+  std::string syntax;
+  std::string macros;
+};
+
+std::optional<pretty_print_definition> get_print_data();
+
+/* std::string load_dynamic_string(void *dylib, std::string const &symbol); */
 
 } // namespace
 
@@ -39,6 +57,17 @@ void *constructInitialConfiguration(const kllvm::KOREPattern *);
 }
 
 extern "C" {
+
+/*
+ * These symbols may not have been compiled into the library (if
+ * `--embed-kprint` was not passed), and so we need to give them a weak default
+ * definition. If the embed flag was passed, the value of these symbols will be
+ * given by the embedded data.
+ */
+int kore_definition_syntax_len __attribute__((weak)) = -1;
+char kore_definition_syntax __attribute__((weak)) = -1;
+int kore_definition_macros_len __attribute__((weak)) = -1;
+char kore_definition_macros __attribute__((weak)) = -1;
 
 /* Completed types */
 
@@ -60,6 +89,52 @@ char *kore_pattern_dump(kore_pattern const *pat) {
   auto os = std::ostringstream{};
   pat->ptr_->print(os);
   return get_c_string(os);
+}
+
+char *kore_pattern_pretty_print(kore_pattern const *pat) {
+  char temp_dir_name[] = "tmp.pretty_print.XXXXXX";
+  auto temp_path = [&temp_dir_name](auto const &file) {
+    return fmt::format("{}/{}", temp_dir_name, file);
+  };
+
+  if (!mkdtemp(temp_dir_name)) {
+    return nullptr;
+  }
+
+  auto maybe_print_data = get_print_data();
+  if (!maybe_print_data) {
+    return nullptr;
+  }
+
+  auto [syntax, macros] = *maybe_print_data;
+
+  // Clean up ostreams at block scope exit
+  {
+    auto syntax_out
+        = std::ofstream(temp_path("syntaxDefinition.kore"), std::ios::out);
+    syntax_out << syntax;
+
+    auto macros_out = std::ofstream(temp_path("macros.kore"), std::ios::out);
+    macros_out << macros;
+
+    auto pattern_out = std::ofstream(temp_path("pattern.kore"), std::ios::out);
+    pat->ptr_->print(pattern_out);
+  }
+
+  auto ss = std::stringstream{};
+  kllvm::printKORE(
+      ss, temp_dir_name, temp_path("pattern.kore"), false, false, true);
+
+  fs::remove_all(temp_dir_name);
+
+  auto pretty_str = ss.str();
+  auto data
+      = static_cast<char *>(malloc(sizeof(char) * (pretty_str.size() + 1)));
+
+  std::copy(pretty_str.begin(), pretty_str.end(), data);
+  data[pretty_str.size()] = '\0';
+
+  return data;
 }
 
 void kore_pattern_serialize(
@@ -395,6 +470,17 @@ kore_pattern *kore_pattern_new_token_internal(
 
   kore_symbol_free(sym);
   return pat;
+}
+
+std::optional<pretty_print_definition> get_print_data() {
+  if (kore_definition_macros_len == -1 || kore_definition_macros == -1
+      || kore_definition_syntax_len == -1 || kore_definition_syntax == -1) {
+    return std::nullopt;
+  }
+
+  return pretty_print_definition{
+      std::string(&kore_definition_syntax, kore_definition_syntax_len),
+      std::string(&kore_definition_macros, kore_definition_macros_len)};
 }
 
 } // namespace
