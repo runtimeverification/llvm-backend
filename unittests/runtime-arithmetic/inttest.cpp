@@ -16,6 +16,7 @@ mpz_ptr hook_INT_add(mpz_t, mpz_t);
 mpz_ptr hook_INT_and(mpz_t, mpz_t);
 mpz_ptr hook_INT_mul(mpz_t, mpz_t);
 mpz_ptr hook_INT_sub(mpz_t, mpz_t);
+mpz_ptr hook_INT_neg(mpz_t);
 mpz_ptr hook_INT_tdiv(mpz_t, mpz_t);
 mpz_ptr hook_INT_ediv(mpz_t, mpz_t);
 mpz_ptr hook_INT_shl(mpz_t, mpz_t);
