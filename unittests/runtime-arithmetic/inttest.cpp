@@ -196,6 +196,27 @@ BOOST_AUTO_TEST_CASE(sub) {
   mpz_clear(b);
 }
 
+BOOST_AUTO_TEST_CASE(neg) {
+  mpz_t a;
+  mpz_ptr result;
+  mpz_init_set_ui(a, 7);
+  result = hook_INT_neg(a);
+  BOOST_CHECK_EQUAL(mpz_cmp_si(result, -7), 0);
+  mpz_clear(result);
+  free(result);
+  mpz_set_si(a, -7);
+  result = hook_INT_neg(a);
+  BOOST_CHECK_EQUAL(mpz_cmp_ui(result, 7), 0);
+  mpz_clear(result);
+  free(result);
+  mpz_set_ui(a, 0);
+  result = hook_INT_neg(a);
+  BOOST_CHECK_EQUAL(mpz_cmp_ui(result, 0), 0);
+  mpz_clear(result);
+  free(result);
+  mpz_clear(a);
+}
+
 BOOST_AUTO_TEST_CASE(tdiv) {
   mpz_t a, b;
   mpz_ptr result;
