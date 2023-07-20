@@ -27,6 +27,9 @@ Options:
   --python-output-dir PATH  Output directory to place automatically-named Python
                             modules. Only meaningful in "python" or "pythonast"
                             mode.
+  --embed PATH NAME         Embed additional information into shared library
+                            bindings. This is a low-level interface designed to
+                            be called from kompile. Only meaningful in "c" mode.
 
 Any option not listed above will be passed through to clang; use '--' to
 separate additional positional arguments to clang from those for $0.
@@ -75,6 +78,8 @@ kompile_clang_flags=()
 clang_args=()
 python_cmd=python3
 python_output_dir=""
+embedded_files=()
+embedded_names=()
 use_opt=false
 
 export verbose=false
@@ -129,9 +134,18 @@ while [[ $# -gt 0 ]]; do
       python_output_dir="$2"
       shift; shift
       ;;
+    --embed)
+      embedded_files+=("$2")
+      embedded_names+=("$3")
+      shift; shift; shift
+      ;;
     --)
       reading_clang_args=true
       shift
+      ;;
+    -o)
+      kompile_clang_flags+=("$1" "$2")
+      shift; shift;
       ;;
     -*)
       kompile_clang_flags+=("$1")
@@ -160,9 +174,10 @@ fi
 
 mod="$(mktemp tmp.XXXXXXXXXX)"
 modopt_tmp="$(mktemp tmp.XXXXXXXXXX)"
+tmpdir="$(mktemp -d tmp.XXXXXXXXXX)"
 modopt="$modopt_tmp"
 if [ "$save_temps" = false ]; then
-  trap 'rm -rf "$mod" "$modopt_tmp"' INT TERM EXIT
+  trap 'rm -rf "$mod" "$modopt_tmp" "$tmpdir"' INT TERM EXIT
 fi
 
 definition="${positional_args[0]}"
@@ -178,7 +193,7 @@ case "$definition" in
     ;;
 esac
 
-if [ "$compile" = "default" ]; then
+if [[ "$compile" = "default" ]]; then
   dt_dir="${positional_args[1]}"
   main="${positional_args[2]}"
 
@@ -186,8 +201,6 @@ if [ "$compile" = "default" ]; then
     case "$arg" in
       -g)
         codegen_flags+=("--debug")
-        ;;
-      *)
         ;;
     esac
   done
@@ -239,6 +252,17 @@ if [[ "${python_output_dir}" == "" ]]; then
   python_output_dir="$(dirname "${definition}")"
 fi
 kompile_clang_flags+=("--python-output-dir" "${python_output_dir}")
+
+embed_length="${#embedded_files[@]}"
+for (( idx = 0; idx < embed_length; idx++ )); do
+  name="${embedded_names[$idx]}"
+  file="${embedded_files[$idx]}"
+
+  cp "$file" "$tmpdir/$name"
+  (cd "$tmpdir"; xxd -i "$name" > "$name.cpp")
+
+  kompile_clang_flags+=("$tmpdir/$name.cpp")
+done
 
 run "$(dirname "$0")"/llvm-kompile-clang          \
   "$modopt" "$main"                               \

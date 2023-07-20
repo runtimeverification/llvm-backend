@@ -7,20 +7,24 @@ import org.kframework.parser.kore.implementation.{DefaultBuilders => B}
 import java.util
 import java.util.Optional
 
-case class AxiomInfo(priority: Int, ordinal: Int, rewrite: GeneralizedRewrite, sideCondition: Option[Pattern], source: Optional[Source], location: Optional[Location]) {}
+case class AxiomInfo(priority: Int, ordinal: Int, rewrite: GeneralizedRewrite, sideCondition: Option[Pattern], source: Optional[Source], location: Optional[Location], att: Attributes) {}
 
 object Parser {
 
   def hasAtt(axiom: AxiomDeclaration, att: String): Boolean = {
-    getAtt(axiom, att).isDefined
+    hasAtt(axiom.att, att)
   }
 
   def hasAtt(att: Attributes, attName: String): Boolean = {
-    att.patterns.find(isAtt(attName, _)).isDefined
+    getAtt(att, attName).isDefined
   }
 
   def getAtt(axiom: AxiomDeclaration, att: String): Option[Pattern] = {
-    axiom.att.patterns.find(isAtt(att, _))
+    getAtt(axiom.att, att)
+  }
+
+  def getAtt(att: Attributes, attName: String): Option[Pattern] = {
+    att.patterns.find(isAtt(attName, _))
   }
 
   def getStringAtt(att: Attributes, attName: String): Option[String] = {
@@ -143,7 +147,7 @@ object Parser {
       if (hasAtt(s, "comm") || hasAtt(s, "assoc") || hasAtt(s, "idem") || hasAtt(s, "unit") || hasAtt(s, "non-executable") || (hasAtt(s, "simplification") && !simplification)) {
         Seq()
       } else {
-        Seq((splitted.get._1, AxiomInfo(rulePriority(s, search), axiom._2, splitted.get._2, splitted.get._3, source(s), location(s))))
+        Seq((splitted.get._1, AxiomInfo(rulePriority(s, search), axiom._2, splitted.get._2, splitted.get._3, source(s), location(s), s.att)))
       }
     } else {
       Seq()

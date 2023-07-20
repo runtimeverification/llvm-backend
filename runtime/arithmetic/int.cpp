@@ -80,6 +80,13 @@ SortInt hook_INT_sub(SortInt a, SortInt b) {
   return move_int(result);
 }
 
+SortInt hook_INT_neg(SortInt a) {
+  mpz_t result;
+  mpz_init(result);
+  mpz_neg(result, a);
+  return move_int(result);
+}
+
 SortInt hook_INT_tdiv(SortInt a, SortInt b) {
   mpz_t result;
   if (mpz_sgn(b) == 0) {
