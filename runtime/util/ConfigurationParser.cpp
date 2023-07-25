@@ -102,7 +102,6 @@ extern "C" void *constructInitialConfiguration(const KOREPattern *initial) {
       assert(constructor && "Pattern in worklist is not composite");
 
       const KORESymbol *symbol = constructor->getConstructor();
-      std::cerr << "Constructing " << symbol->getName() << '\n';
       assert(
           symbol->isConcrete()
           && "found sort variable in initial configuration");
@@ -118,7 +117,6 @@ extern "C" void *constructInitialConfiguration(const KOREPattern *initial) {
       }
 
       uint32_t tag = getTagForSymbol(*symbol);
-      std::cerr << "  with tag: " << tag << '\n';
 
       if (isSymbolAFunction(tag) && constructor->getArguments().empty()) {
         output.push_back(evaluateFunctionSymbol(tag, nullptr));
@@ -129,7 +127,6 @@ extern "C" void *constructInitialConfiguration(const KOREPattern *initial) {
       }
 
       construction term{tag, constructor->getArguments().size()};
-      std::cerr << "  and arg: " << constructor->getArguments().size() << '\n';
       workList.push_back(term);
       for (const auto &child : constructor->getArguments()) {
         workList.push_back(child.get());
@@ -137,7 +134,6 @@ extern "C" void *constructInitialConfiguration(const KOREPattern *initial) {
     } else {
       uint32_t tag = std::get_if<construction>(&current)->tag;
       size_t nchildren = std::get_if<construction>(&current)->nchildren;
-      std::cerr << "Popping " << tag << " (" << nchildren << ")\n";
 
       std::vector<void *> arguments;
       for (size_t i = 0; i < nchildren; i++) {

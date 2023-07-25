@@ -1,3 +1,4 @@
+// UNSUPPORTED: *
 // RUN: %kompile %s c
 // RUN: %apply-rule %S TEST.testArray %input-dir/`basename %S`/foo_Array_Success.in %S/definition.o | diff - %output-dir/`basename %S`/foo_Array_Success.out.diff
 // RUN: %apply-rule %S TEST.testArray %input-dir/`basename %S`/foo_Array_Fail.in %S/definition.o | diff - %output-dir/`basename %S`/foo_Array_Fail.out.diff

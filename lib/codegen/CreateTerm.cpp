@@ -1154,13 +1154,7 @@ bool makeFunction(
   }
   CreateTerm creator = CreateTerm(subst, definition, block, Module, false);
   llvm::Value *retval = creator(pattern).first;
-  if (funcType->getReturnType()
-      == llvm::PointerType::getUnqual(retval->getType())) {
-    auto tempAlloc = allocateTerm(
-        retval->getType(), creator.getCurrentBlock(), "koreAllocAlwaysGC");
-    new llvm::StoreInst(retval, tempAlloc, creator.getCurrentBlock());
-    retval = tempAlloc;
-  }
+
   auto CurrentBlock = creator.getCurrentBlock();
   if (apply && bigStep) {
     auto ProofOutputFlag = Module->getOrInsertGlobal(
