@@ -1897,6 +1897,7 @@ size_t kllvm::bytesStringPatternToBytes(char *contents, size_t length) {
       codepoint = ((byte1 & ~0xE0) << 6) | (byte2 & 0x3F);
     } else {
       assert(0 && "Contents are not a UTF-8 encoding of a Bytes domain value");
+      codepoint = '\0';
     }
     contents[newLength] = codepoint;
   }
