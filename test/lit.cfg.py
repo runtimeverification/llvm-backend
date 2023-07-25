@@ -1,7 +1,16 @@
 import glob
 import os
+import subprocess
 
 from lit import formats
+
+def llvm_major_version():
+    result = subprocess.run(['llvm-backend-version', '--llvm'], capture_output=True)
+    if result.returncode != 0:
+        raise RuntimeError('Failed to get LLVM package version')
+
+    major, _, _ = result.stdout.decode('utf-8').strip().split('.')
+    return int(major)
 
 ROOT_PATH = os.path.realpath(os.path.join(
     os.path.dirname(os.path.realpath(__file__)), ".."))
@@ -38,6 +47,9 @@ config.excludes = [
     'lit.cfg.py',
     'test_bindings.py'
 ]
+
+if llvm_major_version() >= 16:
+    config.available_features.add('opaque-pointers')
 
 # When lit is launched, it doesn't inherit any environment variables from the
 # parent process' environment. This breaks the Nix derivations for the host
