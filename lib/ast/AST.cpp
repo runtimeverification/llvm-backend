@@ -1881,7 +1881,7 @@ void KOREStringPattern::print(std::ostream &Out, unsigned indent) const {
   Out << Indent << "\"" << escapeString(contents) << "\"";
 }
 
-size_t bytesStringPatternToBytes(char *contents, size_t length) {
+size_t kllvm::bytesStringPatternToBytes(char *contents, size_t length) {
   char *contentsIter = contents;
   char *contentsEnd = contents + length;
   size_t newLength = 0;
