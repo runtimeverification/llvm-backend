@@ -1,5 +1,6 @@
 #include "kllvm/codegen/CreateStaticTerm.h"
 
+#include "kllvm/ast/AST.h"
 #include "kllvm/codegen/CreateTerm.h"
 #include "kllvm/codegen/Util.h"
 
@@ -294,6 +295,11 @@ CreateStaticTerm::createToken(ValueType sort, std::string contents) {
         llvm::Type::getInt1Ty(Ctx), contents == "true");
   case SortCategory::Variable:
   case SortCategory::Symbol: {
+    if (Definition->getHookedSorts().count(sort) &&
+	Definition->getHookedSorts().at(sort)->getHook(Definition) == "BYTES.Bytes") {
+      size_t newSize = bytesStringPatternToBytes(contents.data(), contents.size());
+      contents.resize(newSize);
+    }
     llvm::StructType *StringType = llvm::StructType::get(
         Ctx,
         {getTypeByName(Module, BLOCKHEADER_STRUCT),

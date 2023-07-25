@@ -646,6 +646,16 @@ private:
       : contents(Contents) { }
 };
 
+// A Bytes domain value is represented as a KOREStringPattern by storing each
+// byte 0xHH as the (UTF-8 encoded) Unicode codepoint U+00HH.
+//
+// Given the contents of such a KOREStringPattern, this function produces the
+// actual char[] for the Bytes domain value. In effect, this is just a conversion
+// from UTF-8 to latin-1.
+//
+// The input buffer is overwritten, and the new length is returned.
+size_t bytesStringPatternToBytes(char *contents, size_t length);
+
 // KOREDeclaration
 class KOREDeclaration {
 protected:

@@ -80,7 +80,7 @@ yyin = in;
 <STR>"\\\""     { stringBuffer.push_back('\"');               }
 <STR>"\\\\"     { stringBuffer.push_back('\\');               }
 <STR>\\[0-9]{3} { stringBuffer.push_back((yytext[1] - '0') * 64 + (yytext[2] - '0') * 8 + yytext[3] - '0'); }
-<STR>\\x[0-9a-fA-F]{2} { stringBuffer.push_back(strtol(yytext+2, NULL, 16)); }
+<STR>\\x[0-9a-fA-F]{2} { stringBuffer.append(codepoint_to_utf8(strtoul(yytext+2, NULL, 16), *loc)); }
 <STR>\\u[0-9a-fA-F]{4} { stringBuffer.append(codepoint_to_utf8(strtoul(yytext+2, NULL, 16), *loc)); }
 <STR>\\U[0-9a-fA-F]{8} { stringBuffer.append(codepoint_to_utf8(strtoul(yytext+2, NULL, 16), *loc)); }
 <STR>"\""       {

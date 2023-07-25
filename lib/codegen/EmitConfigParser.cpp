@@ -474,6 +474,50 @@ emitGetTagForFreshSort(KOREDefinition *definition, llvm::Module *module) {
   }
 }
 
+static llvm::Value *makeStringToken(llvm::Value *Str, llvm::Value *StrLength,
+				    llvm::BasicBlock *InsertAtEnd) {
+  auto Module = InsertAtEnd->getModule();
+  llvm::LLVMContext &Ctx = Module->getContext();
+  auto StringType = getTypeByName(Module, STRING_STRUCT);
+  auto Len = llvm::BinaryOperator::Create(
+      llvm::Instruction::Add, StrLength,
+      llvm::ConstantExpr::getSizeOf(StringType), "", InsertAtEnd);
+  llvm::Value *Block
+      = allocateTerm(StringType, Len, InsertAtEnd, "koreAllocToken");
+  llvm::Constant *zero = llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0);
+  llvm::Constant *zero32
+      = llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), 0);
+  auto HdrPtr = llvm::GetElementPtrInst::CreateInBounds(
+      StringType, Block, {zero, zero32, zero32}, "", InsertAtEnd);
+  auto BlockSize
+      = Module->getOrInsertGlobal("BLOCK_SIZE", llvm::Type::getInt64Ty(Ctx));
+  auto BlockSizeVal = new llvm::LoadInst(
+      llvm::Type::getInt64Ty(Ctx), BlockSize, "", InsertAtEnd);
+  auto BlockAllocSize = llvm::BinaryOperator::Create(
+      llvm::Instruction::Sub, BlockSizeVal,
+      llvm::ConstantExpr::getSizeOf(llvm::Type::getInt8PtrTy(Ctx)), "",
+      InsertAtEnd);
+  auto icmp = new llvm::ICmpInst(
+      *InsertAtEnd, llvm::CmpInst::ICMP_UGT, Len, BlockAllocSize);
+  auto Mask = llvm::SelectInst::Create(
+      icmp,
+      llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), NOT_YOUNG_OBJECT_BIT),
+      llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0), "", InsertAtEnd);
+  auto HdrOred = llvm::BinaryOperator::Create(
+      llvm::Instruction::Or, StrLength, Mask, "", InsertAtEnd);
+  new llvm::StoreInst(HdrOred, HdrPtr, InsertAtEnd);
+  llvm::Function *Memcpy = getOrInsertFunction(
+      Module, "memcpy", llvm::Type::getInt8PtrTy(Ctx),
+      llvm::Type::getInt8PtrTy(Ctx), llvm::Type::getInt8PtrTy(Ctx),
+      llvm::Type::getInt64Ty(Ctx));
+  auto StrPtr = llvm::GetElementPtrInst::CreateInBounds(
+      StringType, Block,
+      {zero, llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), 1), zero}, "",
+      InsertAtEnd);
+  llvm::CallInst::Create(Memcpy, {StrPtr, Str, StrLength}, "", InsertAtEnd);
+  return new llvm::BitCastInst(Block, llvm::Type::getInt8PtrTy(Ctx), "", InsertAtEnd);
+}
+
 static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
   llvm::LLVMContext &Ctx = module->getContext();
   auto getTokenType = llvm::FunctionType::get(
@@ -503,9 +547,11 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
       // TODO: MINT in initial configuration
       continue;
     }
+
     auto sort = KORECompositeSort::Create(name);
     ValueType cat = sort->getCategory(definition);
-    if (cat.cat == SortCategory::Symbol || cat.cat == SortCategory::Variable) {
+    if ((cat.cat == SortCategory::Symbol && sort->getHook(definition) != "BYTES.Bytes") ||
+	cat.cat == SortCategory::Variable) {
       continue;
     }
     CurrentBlock->insertInto(func);
@@ -620,54 +666,30 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
       Phi->addIncoming(cast, CaseBlock);
       break;
     }
-    case SortCategory::Variable:
-    case SortCategory::Symbol: break;
+    case SortCategory::Variable: break;
+    case SortCategory::Symbol: {
+      llvm::Function *DecodeBytes =
+	getOrInsertFunction(module, "bytesStringPatternToBytes",
+			    llvm::Type::getInt64Ty(Ctx),
+			    llvm::Type::getInt8PtrTy(Ctx), llvm::Type::getInt64Ty(Ctx));
+      llvm::Value *BytesLength =
+	llvm::CallInst::Create(DecodeBytes,
+			       {func->arg_begin() + 2, func->arg_begin() + 1},
+			       "", CurrentBlock);
+      auto result = makeStringToken(func->arg_begin() + 2, BytesLength, CurrentBlock);
+      Phi->addIncoming(result, CaseBlock);
+      llvm::BranchInst::Create(MergeBlock, CaseBlock);
+      break;
+    }
     case SortCategory::Uncomputed: abort();
     }
     CurrentBlock = FalseBlock;
   }
   CurrentBlock->setName("symbol");
   CurrentBlock->insertInto(func);
-  auto StringType = getTypeByName(module, STRING_STRUCT);
-  auto Len = llvm::BinaryOperator::Create(
-      llvm::Instruction::Add, func->arg_begin() + 1,
-      llvm::ConstantExpr::getSizeOf(StringType), "", CurrentBlock);
-  llvm::Value *Block
-      = allocateTerm(StringType, Len, CurrentBlock, "koreAllocToken");
-  auto HdrPtr = llvm::GetElementPtrInst::CreateInBounds(
-      StringType, Block, {zero, zero32, zero32}, "", CurrentBlock);
-  auto BlockSize
-      = module->getOrInsertGlobal("BLOCK_SIZE", llvm::Type::getInt64Ty(Ctx));
-  auto BlockSizeVal = new llvm::LoadInst(
-      llvm::Type::getInt64Ty(Ctx), BlockSize, "", CurrentBlock);
-  auto BlockAllocSize = llvm::BinaryOperator::Create(
-      llvm::Instruction::Sub, BlockSizeVal,
-      llvm::ConstantExpr::getSizeOf(llvm::Type::getInt8PtrTy(Ctx)), "",
-      CurrentBlock);
-  auto icmp = new llvm::ICmpInst(
-      *CurrentBlock, llvm::CmpInst::ICMP_UGT, Len, BlockAllocSize);
-  auto Mask = llvm::SelectInst::Create(
-      icmp,
-      llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), NOT_YOUNG_OBJECT_BIT),
-      llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0), "", CurrentBlock);
-  auto HdrOred = llvm::BinaryOperator::Create(
-      llvm::Instruction::Or, func->arg_begin() + 1, Mask, "", CurrentBlock);
-  new llvm::StoreInst(HdrOred, HdrPtr, CurrentBlock);
-  llvm::Function *Memcpy = getOrInsertFunction(
-      module, "memcpy", llvm::Type::getInt8PtrTy(Ctx),
-      llvm::Type::getInt8PtrTy(Ctx), llvm::Type::getInt8PtrTy(Ctx),
-      llvm::Type::getInt64Ty(Ctx));
-  auto StrPtr = llvm::GetElementPtrInst::CreateInBounds(
-      StringType, Block,
-      {zero, llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), 1), zero}, "",
-      CurrentBlock);
-  llvm::CallInst::Create(
-      Memcpy, {StrPtr, func->arg_begin() + 2, func->arg_begin() + 1}, "",
-      CurrentBlock);
-  auto cast = new llvm::BitCastInst(
-      Block, llvm::Type::getInt8PtrTy(Ctx), "", CurrentBlock);
+  auto strToken = makeStringToken(func->arg_begin() + 2, func->arg_begin() + 1, CurrentBlock);
   llvm::BranchInst::Create(MergeBlock, CurrentBlock);
-  Phi->addIncoming(cast, CurrentBlock);
+  Phi->addIncoming(strToken, CurrentBlock);
   llvm::ReturnInst::Create(Ctx, Phi, MergeBlock);
   MergeBlock->insertInto(func);
 }

@@ -1881,6 +1881,28 @@ void KOREStringPattern::print(std::ostream &Out, unsigned indent) const {
   Out << Indent << "\"" << escapeString(contents) << "\"";
 }
 
+size_t bytesStringPatternToBytes(char *contents, size_t length) {
+  char *contentsIter = contents;
+  char *contentsEnd = contents + length;
+  size_t newLength = 0;
+  for (; contentsIter != contentsEnd; ++contentsIter, ++newLength) {
+    char byte1 = *contentsIter;
+    char codepoint;
+    if ((byte1 & 0x80) == 0) {
+      // 0xxxxxxx
+      codepoint = byte1;
+    } else if ((byte1 & 0xE0) == 0xC0) {
+      // 110xxxxx 10xxxxxx
+      char byte2 = *(++contentsIter);
+      codepoint = ((byte1 & ~0xE0) << 6) | (byte2 & 0x3F);
+    } else {
+      assert(0 && "Contents are not a UTF-8 encoding of a Bytes domain value");
+    }
+    contents[newLength] = codepoint;
+  }
+  return newLength;
+}
+
 static void printAttributeList(
     std::ostream &Out,
     const std::unordered_map<std::string, ptr<KORECompositePattern>>
