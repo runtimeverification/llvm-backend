@@ -1182,6 +1182,7 @@ bool makeFunction(
       auto val = entry->getValue();
       auto var = vars[key.str()];
       auto sort = dynamic_cast<KORECompositeSort *>(var->getSort().get());
+      auto cat = sort->getCategory(definition);
       std::ostringstream Out;
       sort->print(Out);
       auto sortptr = ir->CreateGlobalStringPtr(Out.str(), "", 0, Module);
@@ -1193,7 +1194,8 @@ bool makeFunction(
               llvm::Type::getInt8PtrTy(Module->getContext()),
               llvm::Type::getInt8PtrTy(Module->getContext())),
           {outputFile, varname});
-      if (val->getType() == getValueType({SortCategory::Symbol, 0}, Module)) {
+      if (cat.cat == SortCategory::Symbol
+          || cat.cat == SortCategory::Variable) {
         ir->CreateCall(
             getOrInsertFunction(
                 Module, "serializeTermToFile",
