@@ -97,7 +97,7 @@
           builtins.listToAttrs (lib.imap0 (i: v: { name = "check_${toString i}"; value = v; }) checks);
 
         matrix = builtins.listToAttrs (lib.forEach (lib.cartesianProductOfSets {
-          llvm-version = [11 12 13 14 15];
+          llvm-version = [12 13 14 15];
           build-type = ["Debug" "Release" "RelWithDebInfo" "FastBuild" "GcStats"];
         }) (
           args:
@@ -117,26 +117,10 @@
         };
         checks = listToChecks [
           # Check that the backend compiles on each supported version of LLVM,
-          # but don't run the test suite on all 15 configurations.
-          llvm-backend-11-FastBuild.llvm-backend
-
-          # Disable the full set temporarily while the checks run on a hosted
-          # runner.
-          # llvm-backend-12-Debug.llvm-backend
+          # but don't run the test suite on all possible configurations.
           llvm-backend-12-FastBuild.llvm-backend
-
-          # llvm-backend-13-Debug.llvm-backend
           llvm-backend-13-FastBuild.llvm-backend
-
-          # llvm-backend-14-Debug.integration-tests
-          # llvm-backend-14-Release.integration-tests
-
-          # llvm-backend-14-RelWithDebInfo.integration-tests
-          # llvm-backend-14-FastBuild.integration-tests
-          # llvm-backend-14-GcStats.integration-tests
-
           llvm-backend-14-FastBuild.llvm-backend
-
           llvm-backend-15-FastBuild.integration-tests
         ];
         devShells.default = llvm-backend-15-FastBuild.devShell;
