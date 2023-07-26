@@ -67,6 +67,10 @@ print_include_path () {
   echo "$include_dir"
 }
 
+llvm_major_version () {
+  echo "@LLVM_PACKAGE_VERSION@" | cut -d'.' -f1
+}
+
 positional_args=()
 reading_clang_args=false
 codegen_flags=()
@@ -207,7 +211,11 @@ if [[ "$compile" = "default" ]]; then
     "$definition" "$dt_dir"/dt.yaml "$dt_dir" -o "$mod"
 
   if [[ "$use_opt" = "true" ]]; then
-    run @OPT@ -mem2reg -tailcallelim "$mod" -o "$modopt"
+    if [ "$(llvm_major_version)" -ge "16" ]; then
+      run @OPT@ -passes='mem2reg,tailcallelim' "$mod" -o "$modopt"
+    else
+      run @OPT@ -mem2reg -tailcallelim "$mod" -o "$modopt"
+    fi
   else
     cp "$mod" "$modopt"
   fi
