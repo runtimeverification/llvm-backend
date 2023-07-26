@@ -59,6 +59,11 @@ cl::opt<bool> NoOptimize(
     cl::desc("Don't run optimization passes before producing output"),
     cl::cat(CodegenCat));
 
+cl::opt<bool> EmitObject(
+    "emit-object",
+    cl::desc("Directly emit an object file to avoid separately invoking llc"),
+    cl::cat(CodegenCat));
+
 cl::opt<std::string> OutputFile(
     "output", cl::desc("Output file path"), cl::init("-"), cl::cat(CodegenCat));
 
@@ -137,6 +142,14 @@ void initialize_llvm() {
   InitializeAllAsmPrinters();
 }
 
+void validate_args() {
+  if (EmitObject && (BinaryIR || NoOptimize)) {
+    std::cerr << "Cannot specify --emit-object with --binary-ir or "
+                 "--no-optimize\n";
+    std::exit(1);
+  }
+}
+
 } // namespace
 
 int main(int argc, char **argv) {
@@ -144,6 +157,8 @@ int main(int argc, char **argv) {
 
   cl::HideUnrelatedOptions({&CodegenCat});
   cl::ParseCommandLineOptions(argc, argv);
+
+  validate_args();
 
   CODEGEN_DEBUG = Debug ? 1 : 0;
 
