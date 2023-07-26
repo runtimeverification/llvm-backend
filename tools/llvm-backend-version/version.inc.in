@@ -1,1 +1,2 @@
 static const char llvm_backend_version[] = "@LLVM_BACKEND_VERSION@";
+static const char llvm_version[] = "@LLVM_PACKAGE_VERSION@";
