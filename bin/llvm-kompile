@@ -74,7 +74,11 @@ llvm_major_version () {
 positional_args=()
 reading_clang_args=false
 codegen_flags=()
-kompile_clang_flags=()
+if [[ -z "${NIX_LLVM_KOMPILE_LIBS}" ]]; then
+  kompile_clang_flags=()
+else
+  kompile_clang_flags=("${NIX_LLVM_KOMPILE_LIBS}")
+fi
 clang_args=()
 python_cmd=python3
 python_output_dir=""
