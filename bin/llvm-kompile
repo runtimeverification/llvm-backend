@@ -77,7 +77,11 @@ codegen_flags=()
 if [[ -z "${NIX_LLVM_KOMPILE_LIBS}" ]]; then
   kompile_clang_flags=()
 else
-  kompile_clang_flags=("${NIX_LLVM_KOMPILE_LIBS}")
+  readarray -td " " kompile_clang_flags <<<"$NIX_LLVM_KOMPILE_LIBS "
+  # <<< inserts a newline, which we want to delete. 
+  # by adding a trailing space to the above, the last array element will be just '\n'
+  # we then delete the trailing newline below
+  unset 'kompile_clang_flags[-1]'
 fi
 clang_args=()
 python_cmd=python3
