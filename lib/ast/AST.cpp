@@ -1881,25 +1881,52 @@ void KOREStringPattern::print(std::ostream &Out, unsigned indent) const {
   Out << Indent << "\"" << escapeString(contents) << "\"";
 }
 
+struct UTF8EncodingType {
+  // A mask to extract the leading bits from the first byte 
+  char leadingBitsMask;
+  // The expected value after applying the leading bits mask
+  char leadingBitsValue;
+  // The number of non-leading 10xxxxxx bytes used to encode a codepoint
+  int numContinuationBytes;
+};
+
+static const UTF8EncodingType utf8EncodingTypes[4] = {
+  // 0xxxxxxx
+  { 0x80, 0x00, 0 },
+  // 110xxxxx 10xxxxxx
+  { 0xE0, 0xC0, 1 },
+  // 1110xxxx 10xxxxxx 10xxxxxx
+  { 0xF0, 0xE0, 2 },
+  // 11110xxx 10xxxxxx 10xxxxxx	10xxxxxx
+  { 0xF8, 0xF0, 3 }
+};
+
+// Read one codepoint from a UTF-8 encoded string, returning the codepoint
+// as well as a pointer to start of the next codepoint
+static std::pair<uint32_t, char*> readCodepoint(char *utf8Str) {
+  char leadByte = *utf8Str;
+  for (auto const &type : utf8EncodingTypes) {
+    if ((leadByte & type.leadingBitsMask) == type.leadingBitsValue) {
+      uint32_t codepoint = leadByte & ~type.leadingBitsMask;
+      for (int i = 0; i < type.numContinuationBytes; ++i) {
+	char contByte = *(++utf8Str);
+	codepoint = (codepoint << 6) | (contByte & 0x3F);
+      }
+      return { codepoint , ++utf8Str };
+    }
+  }
+  assert(0 && "Invalid UTF-8 string");
+}
 size_t kllvm::bytesStringPatternToBytes(char *contents, size_t length) {
-  char *contentsIter = contents;
+  char *contentsStart = contents;
   char *contentsEnd = contents + length;
   size_t newLength = 0;
-  for (; contentsIter != contentsEnd; ++contentsIter, ++newLength) {
-    char byte1 = *contentsIter;
-    char codepoint;
-    if ((byte1 & 0x80) == 0) {
-      // 0xxxxxxx
-      codepoint = byte1;
-    } else if ((byte1 & 0xE0) == 0xC0) {
-      // 110xxxxx 10xxxxxx
-      char byte2 = *(++contentsIter);
-      codepoint = ((byte1 & ~0xE0) << 6) | (byte2 & 0x3F);
-    } else {
-      assert(0 && "Contents are not a UTF-8 encoding of a Bytes domain value");
-      codepoint = '\0';
-    }
-    contents[newLength] = codepoint;
+  while (contents != contentsEnd) {
+    auto [codepoint, nextByte] = readCodepoint(contents);
+    assert(codepoint <= 0xFF && "Bytes string patterns should only contain codepoints up to U+00FF");
+    contentsStart[newLength] = static_cast<char>(codepoint);
+    ++newLength;
+    contents = nextByte;
   }
   return newLength;
 }
