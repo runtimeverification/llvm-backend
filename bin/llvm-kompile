@@ -32,6 +32,7 @@ Options:
   --embed PATH NAME         Embed additional information into shared library
                             bindings. This is a low-level interface designed to
                             be called from kompile. Only meaningful in "c" mode.
+  -fno-omit-frame-pointer   Keep the frame pointer in compiled code for debugging purposes.
 
 Any option not listed above will be passed through to clang; use '--' to
 separate additional positional arguments to clang from those for $0.
@@ -92,6 +93,7 @@ embedded_files=()
 embedded_names=()
 use_opt=false
 emit_ir=false
+frame_pointer=false
 
 export verbose=false
 export profile=false
@@ -154,6 +156,11 @@ while [[ $# -gt 0 ]]; do
       embedded_names+=("$3")
       shift; shift; shift
       ;;
+    -fno-omit-frame-pointer)
+      kompile_clang_flags+=("$1")
+      frame_pointer=true
+      shift
+      ;;
     --)
       reading_clang_args=true
       shift
@@ -189,6 +196,9 @@ fi
 
 if [[ "$emit_ir" == "false" ]]; then
   codegen_flags+=("--emit-object")
+  if [[ "$frame_pointer" == "true" ]]; then
+    codegen_flags+=("-fno-omit-frame-pointer")
+  fi
 else
   codegen_flags+=("--binary-ir")
 fi

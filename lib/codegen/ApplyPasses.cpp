@@ -9,6 +9,7 @@
 #include <llvm/IR/LegacyPassManager.h>
 #include <llvm/MC/SubtargetFeature.h>
 #include <llvm/Pass.h>
+#include <llvm/Support/CommandLine.h>
 #include <llvm/Support/Host.h>
 #include <llvm/Target/TargetMachine.h>
 #include <llvm/Target/TargetOptions.h>
@@ -18,6 +19,13 @@
 #include <optional>
 
 using namespace llvm;
+
+extern cl::OptionCategory CodegenCat;
+
+cl::opt<bool> FramePointer(
+    "fno-omit-frame-pointer",
+    cl::desc("Keep frame pointer in compiled code for debugging purposes"),
+    cl::cat(CodegenCat));
 
 namespace kllvm {
 
@@ -31,6 +39,12 @@ void apply_kllvm_opt_passes(llvm::Module &mod) {
 }
 
 void generate_object_file(llvm::Module &mod, llvm::raw_ostream &os) {
+  if (FramePointer) {
+    mod.setFramePointer(FramePointerKind::All);
+  } else {
+    mod.setFramePointer(FramePointerKind::None);
+  }
+
   auto triple = sys::getDefaultTargetTriple();
   mod.setTargetTriple(triple);
 
