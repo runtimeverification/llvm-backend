@@ -45,7 +45,7 @@ void generate_object_file(llvm::Module &mod, llvm::raw_ostream &os) {
 
   auto target_machine
       = std::unique_ptr<TargetMachine>(target->createTargetMachine(
-          triple, cpu, features_string, options, Reloc::PIC_, None,
+          triple, cpu, features_string, options, Reloc::PIC_, std::nullopt,
           CodeGenOpt::None));
 
   auto pm = legacy::PassManager{};
