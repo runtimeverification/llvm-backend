@@ -20,6 +20,8 @@
 
 using namespace llvm;
 
+enum opt_level { O0, O1, O2, O3 };
+
 extern cl::OptionCategory CodegenCat;
 
 cl::opt<bool> FramePointer(
@@ -27,7 +29,25 @@ cl::opt<bool> FramePointer(
     cl::desc("Keep frame pointer in compiled code for debugging purposes"),
     cl::cat(CodegenCat));
 
+cl::opt<opt_level> OptimizationLevel(
+    cl::desc("Choose optimization level"),
+    cl::values(
+        clEnumVal(O0, "No optimizations"),
+        clEnumVal(O1, "Enable trivial optimizations"),
+        clEnumVal(O2, "Enable default optimizations"),
+        clEnumVal(O3, "Enable expensive optimizations")),
+    cl::cat(CodegenCat));
+
 namespace kllvm {
+
+CodeGenOpt::Level get_opt_level() {
+  switch (OptimizationLevel) {
+  case O0: return CodeGenOpt::None;
+  case O1: return CodeGenOpt::Less;
+  case O2: return CodeGenOpt::Default;
+  case O3: return CodeGenOpt::Aggressive;
+  }
+}
 
 void apply_kllvm_opt_passes(llvm::Module &mod) {
   auto pm = legacy::PassManager();
@@ -73,7 +93,7 @@ void generate_object_file(llvm::Module &mod, llvm::raw_ostream &os) {
   auto target_machine
       = std::unique_ptr<TargetMachine>(target->createTargetMachine(
           triple, cpu, features_string, options, Reloc::PIC_, model,
-          CodeGenOpt::None));
+          get_opt_level()));
 
   auto pm = legacy::PassManager{};
   mod.setDataLayout(target_machine->createDataLayout());

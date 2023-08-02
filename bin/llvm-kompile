@@ -33,6 +33,7 @@ Options:
                             bindings. This is a low-level interface designed to
                             be called from kompile. Only meaningful in "c" mode.
   -fno-omit-frame-pointer   Keep the frame pointer in compiled code for debugging purposes.
+  -O[0123]                  Set the optimization level for code generation.
 
 Any option not listed above will be passed through to clang; use '--' to
 separate additional positional arguments to clang from those for $0.
@@ -159,6 +160,11 @@ while [[ $# -gt 0 ]]; do
     -fno-omit-frame-pointer)
       kompile_clang_flags+=("$1")
       frame_pointer=true
+      shift
+      ;;
+    -O*)
+      codegen_flags+=("$1")
+      kompile_clang_flags+=("$1")
       shift
       ;;
     --)
