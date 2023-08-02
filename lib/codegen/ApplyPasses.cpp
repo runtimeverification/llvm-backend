@@ -60,9 +60,17 @@ void apply_kllvm_opt_passes(llvm::Module &mod) {
 
 void generate_object_file(llvm::Module &mod, llvm::raw_ostream &os) {
   if (FramePointer) {
+#if LLVM_VERSION_MAJOR <= 12
+    mod.setFramePointer(FramePointer::All);
+#else
     mod.setFramePointer(FramePointerKind::All);
+#endif
   } else {
+#if LLVM_VERSION_MAJOR <= 12
+    mod.setFramePointer(FramePointer::None);
+#else
     mod.setFramePointer(FramePointerKind::None);
+#endif
   }
 
   auto triple = sys::getDefaultTargetTriple();
