@@ -22,6 +22,8 @@ Options:
                             runtime and binding headers, then exit.
   --use-opt                 Use standalone LLVM opt to apply optimization passes
                             to the generated LLVM IR for this definition.
+  --emit-ir                 Emit LLVM IR at intermediate compilation steps, rather than
+                            directly generating an object file.
   --python PATH             The path to a Python interpreter with Pybind installed. Only
                             meaningful in "python" or "pythonast" mode.
   --python-output-dir PATH  Output directory to place automatically-named Python
@@ -89,6 +91,7 @@ python_output_dir=""
 embedded_files=()
 embedded_names=()
 use_opt=false
+emit_ir=false
 
 export verbose=false
 export profile=false
@@ -132,6 +135,10 @@ while [[ $# -gt 0 ]]; do
     --use-opt)
       use_opt=true
       codegen_flags+=("--no-optimize")
+      shift
+      ;;
+    --emit-ir)
+      emit_ir=true
       shift
       ;;
     --python)
@@ -180,6 +187,12 @@ if [[ "$profile" == "true" ]] && [[ "$verbose" == "false" ]]; then
   echo "[warning] llvm-kompile: --profile will only produce output with -v/--verbose" 1>&2
 fi
 
+if [[ "$emit_ir" == "false" ]]; then
+  codegen_flags+=("--emit-object")
+else
+  codegen_flags+=("--binary-ir")
+fi
+
 mod="$(mktemp tmp.XXXXXXXXXX)"
 modopt_tmp="$(mktemp tmp.XXXXXXXXXX)"
 tmpdir="$(mktemp -d tmp.XXXXXXXXXX)"
@@ -213,8 +226,6 @@ if [[ "$compile" = "default" ]]; then
     esac
   done
 
-  codegen_flags+=("--binary-ir")
-
   run "$(dirname "$0")"/llvm-kompile-codegen "${codegen_flags[@]}" \
     "$definition" "$dt_dir"/dt.yaml "$dt_dir" -o "$mod"
 
@@ -225,7 +236,11 @@ if [[ "$compile" = "default" ]]; then
       run @OPT@ -mem2reg -tailcallelim "$mod" -o "$modopt"
     fi
   else
-    cp "$mod" "$modopt"
+    if [[ "$emit_ir" == "false" ]]; then
+      modopt="${modopt}.o"
+    fi
+
+    run cp "$mod" "$modopt"
   fi
 elif [ "$compile" = "object" ]; then
   main="${positional_args[1]}"
