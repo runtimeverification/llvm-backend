@@ -24,7 +24,7 @@ enum opt_level { O0, O1, O2, O3 };
 
 extern cl::OptionCategory CodegenCat;
 
-cl::opt<bool> FramePointer(
+cl::opt<bool> KeepFramePointer(
     "fno-omit-frame-pointer",
     cl::desc("Keep frame pointer in compiled code for debugging purposes"),
     cl::cat(CodegenCat));
@@ -59,19 +59,19 @@ void apply_kllvm_opt_passes(llvm::Module &mod) {
 }
 
 void generate_object_file(llvm::Module &mod, llvm::raw_ostream &os) {
-  if (FramePointer) {
-#if LLVM_VERSION_MAJOR <= 12
-    mod.setFramePointer(FramePointer::All);
-#else
+  // The frame-pointer retention code in LLVM 12 and older is tied strongly to
+  // the actual command-line flag used to specify it for code generation, rather
+  // than being decoupled as it is in 13 and newer. Because LLVM 12 will be
+  // deprecated for our purposes sooner rather than later, and is not the
+  // default version for packaged versions of K, we simply disable the FP
+  // feature.
+#if LLVM_VERSION_MAJOR > 12
+  if (KeepFramePointer) {
     mod.setFramePointer(FramePointerKind::All);
-#endif
   } else {
-#if LLVM_VERSION_MAJOR <= 12
-    mod.setFramePointer(FramePointer::None);
-#else
     mod.setFramePointer(FramePointerKind::None);
-#endif
   }
+#endif
 
   auto triple = sys::getDefaultTargetTriple();
   mod.setTargetTriple(triple);
