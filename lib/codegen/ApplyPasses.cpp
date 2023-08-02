@@ -10,6 +10,8 @@
 #include <llvm/Transforms/Scalar.h>
 #include <llvm/Transforms/Utils.h>
 
+#include <optional>
+
 using namespace llvm;
 
 namespace kllvm {
@@ -43,9 +45,15 @@ void generate_object_file(llvm::Module &mod, llvm::raw_ostream &os) {
   auto features_string = features.getString();
   auto options = TargetOptions{};
 
+#if LLVM_VERSION_MAJOR >= 16
+  std::optional<CodeModel::Model> model = std::nullopt;
+#else
+  Optional<CodeModel::Model> model = None;
+#endif
+
   auto target_machine
       = std::unique_ptr<TargetMachine>(target->createTargetMachine(
-          triple, cpu, features_string, options, Reloc::PIC_, std::nullopt,
+          triple, cpu, features_string, options, Reloc::PIC_, model,
           CodeGenOpt::None));
 
   auto pm = legacy::PassManager{};
