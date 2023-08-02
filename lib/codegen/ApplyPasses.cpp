@@ -1,8 +1,13 @@
 #include <kllvm/codegen/ApplyPasses.h>
 
+#if LLVM_VERSION_MAJOR >= 14
+#include <llvm/MC/TargetRegistry.h>
+#else
+#include <llvm/Support/TargetRegistry.h>
+#endif
+
 #include <llvm/IR/LegacyPassManager.h>
 #include <llvm/MC/SubtargetFeature.h>
-#include <llvm/MC/TargetRegistry.h>
 #include <llvm/Pass.h>
 #include <llvm/Support/Host.h>
 #include <llvm/Target/TargetMachine.h>
