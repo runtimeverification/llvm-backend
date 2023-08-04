@@ -144,9 +144,10 @@ void serializeRangeMap(
         file, iter->first.start(), "SortKItem{}", false, state);
     serializeConfigurationInternal(
         file, iter->first.end(), "SortKItem{}", false, state);
+    emitSymbol(instance, "LblRangemap'Coln'Range{}", 2);
     serializeConfigurationInternal(
         file, iter->second, "SortKItem{}", false, state);
-    emitSymbol(instance, element, 3);
+    emitSymbol(instance, element, 2);
 
     if (once) {
       once = false;
