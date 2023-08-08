@@ -1261,7 +1261,7 @@ std::string KOREDeclaration::getStringAttribute(std::string name) const {
   return strPattern->getContents();
 }
 
-void KOREAxiomDeclaration::addPattern(ptr<KOREPattern> Pattern) {
+void KOREAxiomDeclaration::addPattern(sptr<KOREPattern> Pattern) {
   pattern = std::move(Pattern);
 }
 
@@ -1620,11 +1620,11 @@ KOREPattern *KOREAxiomDeclaration::getRequires() const {
   abort();
 }
 
-void KOREAliasDeclaration::addVariables(ptr<KORECompositePattern> Variables) {
+void KOREAliasDeclaration::addVariables(sptr<KORECompositePattern> Variables) {
   boundVariables = std::move(Variables);
 }
 
-void KOREAliasDeclaration::addPattern(ptr<KOREPattern> Pattern) {
+void KOREAliasDeclaration::addPattern(sptr<KOREPattern> Pattern) {
   pattern = std::move(Pattern);
 }
 

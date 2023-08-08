@@ -111,8 +111,114 @@ std::shared_ptr<KOREPattern> read_pattern_from_file(py::object &file_like) {
   return kllvm::detail::read(pattern_begin, pattern_bytes.end(), version);
 }
 
+// Automatic convertors can't seem to handle STL container of unique_ptrs
+// returned by const reference, so we handle it manually instead
+template <typename T>
+py::object getAttributes(const T &self) {
+  auto pydict = py::dict();
+  for (auto &it : self.getAttributes()) {
+    // reference_internal can't detect the parent object in this
+    // context, so instead we tie the reference's lifetime to
+    // the returned dict
+    pydict[py::cast(it.first)] = py::cast(
+        *it.second, py::return_value_policy::reference_internal, pydict);
+  }
+  return pydict;
+}
+
+template <typename T>
+py::object
+vectorOfUniquePtrsToPyList(const std::vector<std::unique_ptr<T>> &vec) {
+  auto pylist = py::list();
+  for (auto &ptr : vec) {
+    pylist.append(
+        py::cast(*ptr, py::return_value_policy::reference_internal, pylist));
+  }
+  return pylist;
+}
+
 void bind_ast(py::module_ &m) {
   auto ast = m.def_submodule("ast", "K LLVM backend KORE AST");
+
+  /* Declarations */
+  auto decl_base = py::class_<KOREDeclaration>(ast, "Declaration")
+                       .def("__repr__", print_repr_adapter<KOREDeclaration>())
+                       .def_property_readonly(
+                           "object_sort_variables",
+                           &KOREDeclaration::getObjectSortVariables)
+                       .def_property_readonly(
+                           "attributes", &getAttributes<KOREDeclaration>);
+
+  py::class_<KORECompositeSortDeclaration>(
+      ast, "CompositeSortDeclaration", decl_base)
+      .def(
+          py::init(&KORECompositeSortDeclaration::Create), py::arg("name"),
+          py::arg("is_hooked") = false)
+      .def_property_readonly(
+          "is_hooked", &KORECompositeSortDeclaration::isHooked)
+      .def_property_readonly("name", &KORECompositeSortDeclaration::getName);
+
+  auto symbol_alias_decl_base
+      = py::class_<KORESymbolAliasDeclaration>(
+            ast, "SymbolAliasDeclaration", decl_base)
+            .def_property_readonly(
+                "symbol", &KORESymbolAliasDeclaration::getSymbol);
+
+  py::class_<KORESymbolDeclaration>(
+      ast, "SymbolDeclaration", symbol_alias_decl_base)
+      .def(
+          py::init(&KORESymbolDeclaration::Create), py::arg("name"),
+          py::arg("is_hooked") = false)
+      .def_property_readonly("is_hooked", &KORESymbolDeclaration::isHooked);
+
+  py::class_<KOREAliasDeclaration>(
+      ast, "AliasDeclaration", symbol_alias_decl_base)
+      .def(py::init(&KOREAliasDeclaration::Create))
+      .def("add_variables", &KOREAliasDeclaration::addVariables)
+      .def_property_readonly(
+          "variables", &KOREAliasDeclaration::getBoundVariables)
+      .def("add_pattern", &KOREAliasDeclaration::addPattern)
+      .def_property_readonly("pattern", &KOREAliasDeclaration::getPattern);
+
+  py::class_<KOREAxiomDeclaration>(ast, "AxiomDeclaration", decl_base)
+      .def(py::init(&KOREAxiomDeclaration::Create), py::arg("is_claim") = false)
+      .def_property_readonly("is_claim", &KOREAxiomDeclaration::isClaim)
+      .def("add_pattern", &KOREAxiomDeclaration::addPattern)
+      .def_property_readonly("pattern", &KOREAxiomDeclaration::getPattern);
+
+  py::class_<KOREModuleImportDeclaration>(
+      ast, "ModuleImportDeclaration", decl_base)
+      .def(py::init(&KOREModuleImportDeclaration::Create))
+      .def_property_readonly(
+          "module_name", &KOREModuleImportDeclaration::getModuleName);
+
+  py::class_<KOREModule>(ast, "Module")
+      .def(py::init(&KOREModule::Create))
+      .def("__repr__", print_repr_adapter<KOREModule>())
+      .def_property_readonly("name", &KOREModule::getName)
+      .def_property_readonly(
+          "declarations",
+          [](KOREModule &module) {
+            return vectorOfUniquePtrsToPyList<KOREDeclaration>(
+                module.getDeclarations());
+          })
+      .def_property_readonly("attributes", &getAttributes<KOREModule>);
+
+  py::class_<KOREDefinition>(ast, "Definition")
+      .def(py::init(&KOREDefinition::Create))
+      .def("__repr__", print_repr_adapter<KOREDefinition>())
+      .def_property_readonly(
+          "modules",
+          [](KOREDefinition &def) {
+            auto pylist = py::list();
+            for (auto &ptr : def.getModules()) {
+              auto pyobj = py::cast(
+                  *ptr, py::return_value_policy::reference_internal, pylist);
+              pylist.append(pyobj);
+            }
+            return pylist;
+          })
+      .def_property_readonly("attributes", &getAttributes<KOREDefinition>);
 
   /* Data Types */
 
@@ -170,9 +276,14 @@ void bind_ast(py::module_ &m) {
   py::class_<KORESymbol>(ast, "Symbol")
       .def(py::init(&KORESymbol::Create))
       .def("__repr__", print_repr_adapter<KORESymbol>())
+      .def("add_argument", &KORESymbol::addArgument)
+      .def_property_readonly("arguments", &KORESymbol::getArguments)
       .def("add_formal_argument", &KORESymbol::addFormalArgument)
       .def_property_readonly(
           "formal_arguments", &KORESymbol::getFormalArguments)
+      .def("add_sort", &KORESymbol::addSort)
+      .def_property_readonly(
+          "sort", py::overload_cast<>(&KORESymbol::getSort, py::const_))
       .def_property_readonly("name", &KORESymbol::getName)
       .def_property_readonly("is_concrete", &KORESymbol::isConcrete)
       .def_property_readonly("is_builtin", &KORESymbol::isBuiltin)
@@ -242,8 +353,11 @@ void bind_parser(py::module_ &mod) {
   py::class_<KOREParser, std::unique_ptr<KOREParser>>(parser, "Parser")
       .def(py::init<std::string>())
       .def_static("from_string", &KOREParser::from_string)
-      .def("pattern", [](KOREParser &parser) {
-        return std::shared_ptr(parser.pattern());
+      .def(
+          "pattern",
+          [](KOREParser &parser) { return std::shared_ptr(parser.pattern()); })
+      .def("definition", [](KOREParser &parser) {
+        return std::shared_ptr(parser.definition());
       });
 }
 

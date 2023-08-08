@@ -653,9 +653,14 @@ protected:
   std::vector<sptr<KORESortVariable>> objectSortVariables;
 
 public:
+  KOREDeclaration() = default;
+  KOREDeclaration(const KOREDeclaration &) = delete;
+  KOREDeclaration &operator=(const KOREDeclaration &) = delete;
+
   void addAttribute(ptr<KORECompositePattern> Attribute);
   void addObjectSortVariable(sptr<KORESortVariable> SortVariable);
   virtual void print(std::ostream &Out, unsigned indent = 0) const = 0;
+
   const std::unordered_map<std::string, ptr<KORECompositePattern>> &
   getAttributes() const {
     return attributes;
@@ -694,9 +699,7 @@ private:
       , sortName(Name) { }
 };
 
-class KORESymbolOrAliasDeclaration : public KOREDeclaration { };
-
-class KORESymbolAliasDeclaration : public KORESymbolOrAliasDeclaration {
+class KORESymbolAliasDeclaration : public KOREDeclaration {
 protected:
   ptr<KORESymbol> symbol;
 
@@ -733,7 +736,7 @@ private:
 
 class KOREAliasDeclaration : public KORESymbolAliasDeclaration {
 private:
-  ptr<KORECompositePattern> boundVariables;
+  sptr<KORECompositePattern> boundVariables;
   sptr<KOREPattern> pattern;
 
 public:
@@ -742,9 +745,12 @@ public:
     return ptr<KOREAliasDeclaration>(new KOREAliasDeclaration(std::move(Sym)));
   }
 
-  void addVariables(ptr<KORECompositePattern> variables);
-  void addPattern(ptr<KOREPattern> Pattern);
+  void addVariables(sptr<KORECompositePattern> variables);
+  void addPattern(sptr<KOREPattern> Pattern);
   KOREPattern::substitution getSubstitution(KORECompositePattern *subject);
+  KORECompositePattern *getBoundVariables() const {
+    return boundVariables.get();
+  }
   sptr<KOREPattern> &getPattern() { return pattern; }
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
 
@@ -767,7 +773,7 @@ public:
     return ptr<KOREAxiomDeclaration>(new KOREAxiomDeclaration(isClaim));
   }
 
-  void addPattern(ptr<KOREPattern> Pattern);
+  void addPattern(sptr<KOREPattern> Pattern);
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
 
   /* returns true if the axiom is actually required to be translated to llvm
@@ -796,6 +802,8 @@ public:
         new KOREModuleImportDeclaration(Name));
   }
 
+  const std::string &getModuleName() const { return moduleName; }
+
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
 
 private:
@@ -815,10 +823,19 @@ public:
     return ptr<KOREModule>(new KOREModule(Name));
   }
 
+  KOREModule() = default;
+  KOREModule(const KOREModule &) = delete;
+  KOREModule &operator=(const KOREModule &) = delete;
+
   void addAttribute(ptr<KORECompositePattern> Attribute);
   void addDeclaration(ptr<KOREDeclaration> Declaration);
   void print(std::ostream &Out, unsigned indent = 0) const;
 
+  const std::string &getName() const { return name; }
+  const std::unordered_map<std::string, ptr<KORECompositePattern>> &
+  getAttributes() const {
+    return attributes;
+  }
   const std::vector<ptr<KOREDeclaration>> &getDeclarations() const {
     return declarations;
   }
@@ -896,6 +913,7 @@ public:
   void addAttribute(ptr<KORECompositePattern> Attribute);
   void print(std::ostream &Out, unsigned indent = 0) const;
 
+  const std::vector<ptr<KOREModule>> &getModules() const { return modules; }
   const KORECompositeSortDeclarationMapType &getSortDeclarations() const {
     return sortDeclarations;
   }
