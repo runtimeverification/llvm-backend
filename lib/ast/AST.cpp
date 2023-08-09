@@ -1243,7 +1243,7 @@ bool KOREStringPattern::matches(
   return subj->contents == contents;
 }
 
-void KOREDeclaration::addAttribute(ptr<KORECompositePattern> Attribute) {
+void KOREDeclaration::addAttribute(sptr<KORECompositePattern> Attribute) {
   std::string name = Attribute->getConstructor()->getName();
   attributes.insert({name, std::move(Attribute)});
 }
@@ -1646,16 +1646,16 @@ bool KORESymbolDeclaration::isAnywhere() {
   return getAttributes().count("anywhere");
 }
 
-void KOREModule::addAttribute(ptr<KORECompositePattern> Attribute) {
+void KOREModule::addAttribute(sptr<KORECompositePattern> Attribute) {
   std::string name = Attribute->getConstructor()->getName();
   attributes.insert({name, std::move(Attribute)});
 }
 
-void KOREModule::addDeclaration(ptr<KOREDeclaration> Declaration) {
+void KOREModule::addDeclaration(sptr<KOREDeclaration> Declaration) {
   declarations.push_back(std::move(Declaration));
 }
 
-void KOREDefinition::addModule(ptr<KOREModule> Module) {
+void KOREDefinition::addModule(sptr<KOREModule> Module) {
   for (auto &decl : Module->getDeclarations()) {
     if (auto sortDecl
         = dynamic_cast<KORECompositeSortDeclaration *>(decl.get())) {
@@ -1675,7 +1675,7 @@ void KOREDefinition::addModule(ptr<KOREModule> Module) {
   modules.push_back(std::move(Module));
 }
 
-void KOREDefinition::addAttribute(ptr<KORECompositePattern> Attribute) {
+void KOREDefinition::addAttribute(sptr<KORECompositePattern> Attribute) {
   std::string name = Attribute->getConstructor()->getName();
   attributes.insert({name, std::move(Attribute)});
 }
@@ -1883,7 +1883,7 @@ void KOREStringPattern::print(std::ostream &Out, unsigned indent) const {
 
 static void printAttributeList(
     std::ostream &Out,
-    const std::unordered_map<std::string, ptr<KORECompositePattern>>
+    const std::unordered_map<std::string, sptr<KORECompositePattern>>
         &attributes,
     unsigned indent = 0) {
 

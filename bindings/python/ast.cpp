@@ -141,15 +141,19 @@ void bind_ast(py::module_ &m) {
   auto ast = m.def_submodule("ast", "K LLVM backend KORE AST");
 
   /* Declarations */
-  auto decl_base = py::class_<KOREDeclaration>(ast, "Declaration")
-                       .def("__repr__", print_repr_adapter<KOREDeclaration>())
-                       .def_property_readonly(
-                           "object_sort_variables",
-                           &KOREDeclaration::getObjectSortVariables)
-                       .def_property_readonly(
-                           "attributes", &getAttributes<KOREDeclaration>);
+  auto decl_base
+      = py::class_<KOREDeclaration, std::shared_ptr<KOREDeclaration>>(
+            ast, "Declaration")
+            .def("__repr__", print_repr_adapter<KOREDeclaration>())
+            .def_property_readonly(
+                "object_sort_variables",
+                &KOREDeclaration::getObjectSortVariables)
+            .def_property_readonly(
+                "attributes", &getAttributes<KOREDeclaration>);
 
-  py::class_<KORECompositeSortDeclaration>(
+  py::class_<
+      KORECompositeSortDeclaration,
+      std::shared_ptr<KORECompositeSortDeclaration>>(
       ast, "CompositeSortDeclaration", decl_base)
       .def(
           py::init(&KORECompositeSortDeclaration::Create), py::arg("name"),
@@ -159,19 +163,21 @@ void bind_ast(py::module_ &m) {
       .def_property_readonly("name", &KORECompositeSortDeclaration::getName);
 
   auto symbol_alias_decl_base
-      = py::class_<KORESymbolAliasDeclaration>(
+      = py::class_<
+            KORESymbolAliasDeclaration,
+            std::shared_ptr<KORESymbolAliasDeclaration>>(
             ast, "SymbolAliasDeclaration", decl_base)
             .def_property_readonly(
                 "symbol", &KORESymbolAliasDeclaration::getSymbol);
 
-  py::class_<KORESymbolDeclaration>(
+  py::class_<KORESymbolDeclaration, std::shared_ptr<KORESymbolDeclaration>>(
       ast, "SymbolDeclaration", symbol_alias_decl_base)
       .def(
           py::init(&KORESymbolDeclaration::Create), py::arg("name"),
           py::arg("is_hooked") = false)
       .def_property_readonly("is_hooked", &KORESymbolDeclaration::isHooked);
 
-  py::class_<KOREAliasDeclaration>(
+  py::class_<KOREAliasDeclaration, std::shared_ptr<KOREAliasDeclaration>>(
       ast, "AliasDeclaration", symbol_alias_decl_base)
       .def(py::init(&KOREAliasDeclaration::Create))
       .def("add_variables", &KOREAliasDeclaration::addVariables)
@@ -180,33 +186,32 @@ void bind_ast(py::module_ &m) {
       .def("add_pattern", &KOREAliasDeclaration::addPattern)
       .def_property_readonly("pattern", &KOREAliasDeclaration::getPattern);
 
-  py::class_<KOREAxiomDeclaration>(ast, "AxiomDeclaration", decl_base)
+  py::class_<KOREAxiomDeclaration, std::shared_ptr<KOREAxiomDeclaration>>(
+      ast, "AxiomDeclaration", decl_base)
       .def(py::init(&KOREAxiomDeclaration::Create), py::arg("is_claim") = false)
       .def_property_readonly("is_claim", &KOREAxiomDeclaration::isClaim)
       .def("add_pattern", &KOREAxiomDeclaration::addPattern)
       .def_property_readonly("pattern", &KOREAxiomDeclaration::getPattern);
 
-  py::class_<KOREModuleImportDeclaration>(
+  py::class_<
+      KOREModuleImportDeclaration,
+      std::shared_ptr<KOREModuleImportDeclaration>>(
       ast, "ModuleImportDeclaration", decl_base)
       .def(py::init(&KOREModuleImportDeclaration::Create))
       .def_property_readonly(
           "module_name", &KOREModuleImportDeclaration::getModuleName);
 
-  py::class_<KOREModule>(ast, "Module")
+  py::class_<KOREModule, std::shared_ptr<KOREModule>>(ast, "Module")
       .def(py::init(&KOREModule::Create))
       .def("__repr__", print_repr_adapter<KOREModule>())
       .def_property_readonly("name", &KOREModule::getName)
-      .def_property_readonly(
-          "declarations",
-          [](KOREModule &module) {
-            return vectorOfUniquePtrsToPyList<KOREDeclaration>(
-                module.getDeclarations());
-          })
+      .def_property_readonly("declarations", &KOREModule::getDeclarations)
       .def_property_readonly("attributes", &getAttributes<KOREModule>);
 
-  py::class_<KOREDefinition>(ast, "Definition")
+  py::class_<KOREDefinition, std::shared_ptr<KOREDefinition>>(ast, "Definition")
       .def(py::init(&KOREDefinition::Create))
       .def("__repr__", print_repr_adapter<KOREDefinition>())
+      .def("add_module", &KOREDefinition::addModule)
       .def_property_readonly(
           "modules",
           [](KOREDefinition &def) {
@@ -218,6 +223,7 @@ void bind_ast(py::module_ &m) {
             }
             return pylist;
           })
+      .def("add_attribute", &KOREDefinition::addAttribute)
       .def_property_readonly("attributes", &getAttributes<KOREDefinition>);
 
   /* Data Types */
@@ -267,8 +273,8 @@ void bind_ast(py::module_ &m) {
       .def(
           py::init(&KORECompositeSort::Create), py::arg("name"),
           py::arg("cat") = ValueType{SortCategory::Uncomputed, 0})
-      .def("add_argument", &KORECompositeSort::addArgument)
       .def_property_readonly("name", &KORECompositeSort::getName)
+      .def("add_argument", &KORECompositeSort::addArgument)
       .def_property_readonly("arguments", &KORECompositeSort::getArguments);
 
   /* Symbols */
@@ -332,8 +338,8 @@ void bind_ast(py::module_ &m) {
           py::overload_cast<KORESymbol *>(&KORECompositePattern::Create)))
       .def_property_readonly(
           "constructor", &KORECompositePattern::getConstructor)
-      .def("add_argument", &KORECompositePattern::addArgument)
       .def("desugar_associative", &KORECompositePattern::desugarAssociative)
+      .def("add_argument", &KORECompositePattern::addArgument)
       .def_property_readonly("arguments", &KORECompositePattern::getArguments);
 
   py::class_<KOREVariablePattern, std::shared_ptr<KOREVariablePattern>>(
