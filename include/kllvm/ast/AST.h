@@ -724,7 +724,7 @@ public:
 
   bool isHooked() const { return _isHooked; }
 
-  bool isAnywhere();
+  bool isAnywhere() const;
 
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
 
@@ -780,9 +780,9 @@ public:
      and false if it is an axiom pertaining to symbolic execution which is not
      required for concrete execution. Axioms that are not required are elided
      from the definition by KOREDefinition::preprocess. */
-  bool isRequired();
-  bool isTopAxiom();
-  bool isClaim() { return _isClaim; }
+  bool isRequired() const;
+  bool isTopAxiom() const;
+  bool isClaim() const { return _isClaim; }
   KOREPattern *getRightHandSide() const;
   std::vector<KOREPattern *> getLeftHandSide() const;
   KOREPattern *getRequires() const;

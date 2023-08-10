@@ -1277,7 +1277,7 @@ static const std::string CEIL = "ceil";
 static const std::string NON_EXECUTABLE = "non-executable";
 static const std::string SIMPLIFICATION = "simplification";
 
-bool KOREAxiomDeclaration::isRequired() {
+bool KOREAxiomDeclaration::isRequired() const {
   return !attributes.count(ASSOC) && !attributes.count(COMM)
          && !attributes.count(IDEM) && !attributes.count(UNIT)
          && !attributes.count(FUNCTIONAL) && !attributes.count(CONSTRUCTOR)
@@ -1286,7 +1286,7 @@ bool KOREAxiomDeclaration::isRequired() {
          && !attributes.count(SIMPLIFICATION);
 }
 
-bool KOREAxiomDeclaration::isTopAxiom() {
+bool KOREAxiomDeclaration::isTopAxiom() const {
   if (auto top = dynamic_cast<KORECompositePattern *>(pattern.get())) {
     if (top->getConstructor()->getName() == "\\implies"
         && top->getArguments().size() == 2) {
@@ -1642,7 +1642,7 @@ KOREAliasDeclaration::getSubstitution(KORECompositePattern *subject) {
   return result;
 }
 
-bool KORESymbolDeclaration::isAnywhere() {
+bool KORESymbolDeclaration::isAnywhere() const {
   return getAttributes().count("anywhere");
 }
 
@@ -1963,7 +1963,7 @@ void KOREAliasDeclaration::print(std::ostream &Out, unsigned indent) const {
 
 void KOREAxiomDeclaration::print(std::ostream &Out, unsigned indent) const {
   std::string Indent(indent, ' ');
-  Out << Indent << "axiom ";
+  Out << Indent << (isClaim() ? "claim " : "axiom ");
   printSortVariables(Out);
   pattern->print(Out);
   Out << " ";
