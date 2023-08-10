@@ -136,6 +136,7 @@ void bind_ast(py::module_ &m) {
             .def_property_readonly(
                 "object_sort_variables",
                 &KOREDeclaration::getObjectSortVariables)
+            .def("add_attribute", &KOREDeclaration::addAttribute)
             .def_property_readonly(
                 "attributes", &KOREDeclaration::getAttributes);
 
