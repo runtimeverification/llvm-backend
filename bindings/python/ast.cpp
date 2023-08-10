@@ -111,21 +111,6 @@ std::shared_ptr<KOREPattern> read_pattern_from_file(py::object &file_like) {
   return kllvm::detail::read(pattern_begin, pattern_bytes.end(), version);
 }
 
-// Automatic convertors can't seem to handle STL container of unique_ptrs
-// returned by const reference, so we handle it manually instead
-template <typename T>
-py::object getAttributes(const T &self) {
-  auto pydict = py::dict();
-  for (auto &it : self.getAttributes()) {
-    // reference_internal can't detect the parent object in this
-    // context, so instead we tie the reference's lifetime to
-    // the returned dict
-    pydict[py::cast(it.first)] = py::cast(
-        *it.second, py::return_value_policy::reference_internal, pydict);
-  }
-  return pydict;
-}
-
 template <typename T>
 py::object
 vectorOfUniquePtrsToPyList(const std::vector<std::unique_ptr<T>> &vec) {
@@ -145,11 +130,14 @@ void bind_ast(py::module_ &m) {
       = py::class_<KOREDeclaration, std::shared_ptr<KOREDeclaration>>(
             ast, "Declaration")
             .def("__repr__", print_repr_adapter<KOREDeclaration>())
+            .def(
+                "add_object_sort_variable",
+                &KOREDeclaration::addObjectSortVariable)
             .def_property_readonly(
                 "object_sort_variables",
                 &KOREDeclaration::getObjectSortVariables)
             .def_property_readonly(
-                "attributes", &getAttributes<KOREDeclaration>);
+                "attributes", &KOREDeclaration::getAttributes);
 
   py::class_<
       KORECompositeSortDeclaration,
@@ -205,8 +193,10 @@ void bind_ast(py::module_ &m) {
       .def(py::init(&KOREModule::Create))
       .def("__repr__", print_repr_adapter<KOREModule>())
       .def_property_readonly("name", &KOREModule::getName)
+      .def("add_declaration", &KOREModule::addDeclaration)
       .def_property_readonly("declarations", &KOREModule::getDeclarations)
-      .def_property_readonly("attributes", &getAttributes<KOREModule>);
+      .def("add_attribute", &KOREModule::addAttribute)
+      .def_property_readonly("attributes", &KOREModule::getAttributes);
 
   py::class_<KOREDefinition, std::shared_ptr<KOREDefinition>>(ast, "Definition")
       .def(py::init(&KOREDefinition::Create))
@@ -224,7 +214,7 @@ void bind_ast(py::module_ &m) {
             return pylist;
           })
       .def("add_attribute", &KOREDefinition::addAttribute)
-      .def_property_readonly("attributes", &getAttributes<KOREDefinition>);
+      .def_property_readonly("attributes", &KOREDefinition::getAttributes);
 
   /* Data Types */
 
