@@ -111,17 +111,6 @@ std::shared_ptr<KOREPattern> read_pattern_from_file(py::object &file_like) {
   return kllvm::detail::read(pattern_begin, pattern_bytes.end(), version);
 }
 
-template <typename T>
-py::object
-vectorOfUniquePtrsToPyList(const std::vector<std::unique_ptr<T>> &vec) {
-  auto pylist = py::list();
-  for (auto &ptr : vec) {
-    pylist.append(
-        py::cast(*ptr, py::return_value_policy::reference_internal, pylist));
-  }
-  return pylist;
-}
-
 void bind_ast(py::module_ &m) {
   auto ast = m.def_submodule("ast", "K LLVM backend KORE AST");
 
@@ -203,17 +192,7 @@ void bind_ast(py::module_ &m) {
       .def(py::init(&KOREDefinition::Create))
       .def("__repr__", print_repr_adapter<KOREDefinition>())
       .def("add_module", &KOREDefinition::addModule)
-      .def_property_readonly(
-          "modules",
-          [](KOREDefinition &def) {
-            auto pylist = py::list();
-            for (auto &ptr : def.getModules()) {
-              auto pyobj = py::cast(
-                  *ptr, py::return_value_policy::reference_internal, pylist);
-              pylist.append(pyobj);
-            }
-            return pylist;
-          })
+      .def_property_readonly("modules", &KOREDefinition::getModules)
       .def("add_attribute", &KOREDefinition::addAttribute)
       .def_property_readonly("attributes", &KOREDefinition::getAttributes);
 
