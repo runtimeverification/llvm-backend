@@ -653,10 +653,6 @@ protected:
   std::vector<sptr<KORESortVariable>> objectSortVariables;
 
 public:
-  KOREDeclaration() = default;
-  KOREDeclaration(const KOREDeclaration &) = delete;
-  KOREDeclaration &operator=(const KOREDeclaration &) = delete;
-
   void addAttribute(sptr<KORECompositePattern> Attribute);
   void addObjectSortVariable(sptr<KORESortVariable> SortVariable);
   virtual void print(std::ostream &Out, unsigned indent = 0) const = 0;
@@ -822,10 +818,6 @@ public:
   static ptr<KOREModule> Create(const std::string &Name) {
     return ptr<KOREModule>(new KOREModule(Name));
   }
-
-  KOREModule() = default;
-  KOREModule(const KOREModule &) = delete;
-  KOREModule &operator=(const KOREModule &) = delete;
 
   void addAttribute(sptr<KORECompositePattern> Attribute);
   void addDeclaration(sptr<KOREDeclaration> Declaration);
