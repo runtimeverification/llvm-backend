@@ -105,7 +105,7 @@ void initDebugGlobal(
 }
 
 void initDebugAxiom(
-    std::unordered_map<std::string, ptr<KORECompositePattern>> const &att) {
+    std::unordered_map<std::string, sptr<KORECompositePattern>> const &att) {
   if (!Dbg)
     return;
   if (!att.count(SOURCE_ATT)) {

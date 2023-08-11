@@ -1243,7 +1243,7 @@ bool KOREStringPattern::matches(
   return subj->contents == contents;
 }
 
-void KOREDeclaration::addAttribute(ptr<KORECompositePattern> Attribute) {
+void KOREDeclaration::addAttribute(sptr<KORECompositePattern> Attribute) {
   std::string name = Attribute->getConstructor()->getName();
   attributes.insert({name, std::move(Attribute)});
 }
@@ -1261,7 +1261,7 @@ std::string KOREDeclaration::getStringAttribute(std::string name) const {
   return strPattern->getContents();
 }
 
-void KOREAxiomDeclaration::addPattern(ptr<KOREPattern> Pattern) {
+void KOREAxiomDeclaration::addPattern(sptr<KOREPattern> Pattern) {
   pattern = std::move(Pattern);
 }
 
@@ -1277,7 +1277,7 @@ static const std::string CEIL = "ceil";
 static const std::string NON_EXECUTABLE = "non-executable";
 static const std::string SIMPLIFICATION = "simplification";
 
-bool KOREAxiomDeclaration::isRequired() {
+bool KOREAxiomDeclaration::isRequired() const {
   return !attributes.count(ASSOC) && !attributes.count(COMM)
          && !attributes.count(IDEM) && !attributes.count(UNIT)
          && !attributes.count(FUNCTIONAL) && !attributes.count(CONSTRUCTOR)
@@ -1286,7 +1286,7 @@ bool KOREAxiomDeclaration::isRequired() {
          && !attributes.count(SIMPLIFICATION);
 }
 
-bool KOREAxiomDeclaration::isTopAxiom() {
+bool KOREAxiomDeclaration::isTopAxiom() const {
   if (auto top = dynamic_cast<KORECompositePattern *>(pattern.get())) {
     if (top->getConstructor()->getName() == "\\implies"
         && top->getArguments().size() == 2) {
@@ -1620,11 +1620,11 @@ KOREPattern *KOREAxiomDeclaration::getRequires() const {
   abort();
 }
 
-void KOREAliasDeclaration::addVariables(ptr<KORECompositePattern> Variables) {
+void KOREAliasDeclaration::addVariables(sptr<KORECompositePattern> Variables) {
   boundVariables = std::move(Variables);
 }
 
-void KOREAliasDeclaration::addPattern(ptr<KOREPattern> Pattern) {
+void KOREAliasDeclaration::addPattern(sptr<KOREPattern> Pattern) {
   pattern = std::move(Pattern);
 }
 
@@ -1642,20 +1642,20 @@ KOREAliasDeclaration::getSubstitution(KORECompositePattern *subject) {
   return result;
 }
 
-bool KORESymbolDeclaration::isAnywhere() {
+bool KORESymbolDeclaration::isAnywhere() const {
   return getAttributes().count("anywhere");
 }
 
-void KOREModule::addAttribute(ptr<KORECompositePattern> Attribute) {
+void KOREModule::addAttribute(sptr<KORECompositePattern> Attribute) {
   std::string name = Attribute->getConstructor()->getName();
   attributes.insert({name, std::move(Attribute)});
 }
 
-void KOREModule::addDeclaration(ptr<KOREDeclaration> Declaration) {
+void KOREModule::addDeclaration(sptr<KOREDeclaration> Declaration) {
   declarations.push_back(std::move(Declaration));
 }
 
-void KOREDefinition::addModule(ptr<KOREModule> Module) {
+void KOREDefinition::addModule(sptr<KOREModule> Module) {
   for (auto &decl : Module->getDeclarations()) {
     if (auto sortDecl
         = dynamic_cast<KORECompositeSortDeclaration *>(decl.get())) {
@@ -1675,7 +1675,7 @@ void KOREDefinition::addModule(ptr<KOREModule> Module) {
   modules.push_back(std::move(Module));
 }
 
-void KOREDefinition::addAttribute(ptr<KORECompositePattern> Attribute) {
+void KOREDefinition::addAttribute(sptr<KORECompositePattern> Attribute) {
   std::string name = Attribute->getConstructor()->getName();
   attributes.insert({name, std::move(Attribute)});
 }
@@ -1883,7 +1883,7 @@ void KOREStringPattern::print(std::ostream &Out, unsigned indent) const {
 
 static void printAttributeList(
     std::ostream &Out,
-    const std::unordered_map<std::string, ptr<KORECompositePattern>>
+    const std::unordered_map<std::string, sptr<KORECompositePattern>>
         &attributes,
     unsigned indent = 0) {
 
@@ -1963,7 +1963,7 @@ void KOREAliasDeclaration::print(std::ostream &Out, unsigned indent) const {
 
 void KOREAxiomDeclaration::print(std::ostream &Out, unsigned indent) const {
   std::string Indent(indent, ' ');
-  Out << Indent << "axiom ";
+  Out << Indent << (isClaim() ? "claim " : "axiom ");
   printSortVariables(Out);
   pattern->print(Out);
   Out << " ";
