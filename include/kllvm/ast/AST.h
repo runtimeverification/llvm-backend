@@ -659,14 +659,15 @@ size_t bytesStringPatternToBytes(char *contents, size_t length);
 // KOREDeclaration
 class KOREDeclaration {
 protected:
-  std::unordered_map<std::string, ptr<KORECompositePattern>> attributes;
+  std::unordered_map<std::string, sptr<KORECompositePattern>> attributes;
   std::vector<sptr<KORESortVariable>> objectSortVariables;
 
 public:
-  void addAttribute(ptr<KORECompositePattern> Attribute);
+  void addAttribute(sptr<KORECompositePattern> Attribute);
   void addObjectSortVariable(sptr<KORESortVariable> SortVariable);
   virtual void print(std::ostream &Out, unsigned indent = 0) const = 0;
-  const std::unordered_map<std::string, ptr<KORECompositePattern>> &
+
+  const std::unordered_map<std::string, sptr<KORECompositePattern>> &
   getAttributes() const {
     return attributes;
   }
@@ -704,9 +705,7 @@ private:
       , sortName(Name) { }
 };
 
-class KORESymbolOrAliasDeclaration : public KOREDeclaration { };
-
-class KORESymbolAliasDeclaration : public KORESymbolOrAliasDeclaration {
+class KORESymbolAliasDeclaration : public KOREDeclaration {
 protected:
   ptr<KORESymbol> symbol;
 
@@ -731,7 +730,7 @@ public:
 
   bool isHooked() const { return _isHooked; }
 
-  bool isAnywhere();
+  bool isAnywhere() const;
 
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
 
@@ -743,7 +742,7 @@ private:
 
 class KOREAliasDeclaration : public KORESymbolAliasDeclaration {
 private:
-  ptr<KORECompositePattern> boundVariables;
+  sptr<KORECompositePattern> boundVariables;
   sptr<KOREPattern> pattern;
 
 public:
@@ -752,9 +751,12 @@ public:
     return ptr<KOREAliasDeclaration>(new KOREAliasDeclaration(std::move(Sym)));
   }
 
-  void addVariables(ptr<KORECompositePattern> variables);
-  void addPattern(ptr<KOREPattern> Pattern);
+  void addVariables(sptr<KORECompositePattern> variables);
+  void addPattern(sptr<KOREPattern> Pattern);
   KOREPattern::substitution getSubstitution(KORECompositePattern *subject);
+  KORECompositePattern *getBoundVariables() const {
+    return boundVariables.get();
+  }
   sptr<KOREPattern> &getPattern() { return pattern; }
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
 
@@ -777,16 +779,16 @@ public:
     return ptr<KOREAxiomDeclaration>(new KOREAxiomDeclaration(isClaim));
   }
 
-  void addPattern(ptr<KOREPattern> Pattern);
+  void addPattern(sptr<KOREPattern> Pattern);
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
 
   /* returns true if the axiom is actually required to be translated to llvm
      and false if it is an axiom pertaining to symbolic execution which is not
      required for concrete execution. Axioms that are not required are elided
      from the definition by KOREDefinition::preprocess. */
-  bool isRequired();
-  bool isTopAxiom();
-  bool isClaim() { return _isClaim; }
+  bool isRequired() const;
+  bool isTopAxiom() const;
+  bool isClaim() const { return _isClaim; }
   KOREPattern *getRightHandSide() const;
   std::vector<KOREPattern *> getLeftHandSide() const;
   KOREPattern *getRequires() const;
@@ -806,6 +808,8 @@ public:
         new KOREModuleImportDeclaration(Name));
   }
 
+  const std::string &getModuleName() const { return moduleName; }
+
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
 
 private:
@@ -817,19 +821,24 @@ private:
 class KOREModule {
 private:
   std::string name;
-  std::vector<ptr<KOREDeclaration>> declarations;
-  std::unordered_map<std::string, ptr<KORECompositePattern>> attributes;
+  std::vector<sptr<KOREDeclaration>> declarations;
+  std::unordered_map<std::string, sptr<KORECompositePattern>> attributes;
 
 public:
   static ptr<KOREModule> Create(const std::string &Name) {
     return ptr<KOREModule>(new KOREModule(Name));
   }
 
-  void addAttribute(ptr<KORECompositePattern> Attribute);
-  void addDeclaration(ptr<KOREDeclaration> Declaration);
+  void addAttribute(sptr<KORECompositePattern> Attribute);
+  void addDeclaration(sptr<KOREDeclaration> Declaration);
   void print(std::ostream &Out, unsigned indent = 0) const;
 
-  const std::vector<ptr<KOREDeclaration>> &getDeclarations() const {
+  const std::string &getName() const { return name; }
+  const std::unordered_map<std::string, sptr<KORECompositePattern>> &
+  getAttributes() const {
+    return attributes;
+  }
+  const std::vector<sptr<KOREDeclaration>> &getDeclarations() const {
     return declarations;
   }
 
@@ -880,8 +889,8 @@ private:
   KORESymbolStringMapType freshFunctions;
   KOREAxiomMapType ordinals;
 
-  std::vector<ptr<KOREModule>> modules;
-  std::unordered_map<std::string, ptr<KORECompositePattern>> attributes;
+  std::vector<sptr<KOREModule>> modules;
+  std::unordered_map<std::string, sptr<KORECompositePattern>> attributes;
   /* an automatically computed list of all the axioms in the definition */
   std::list<KOREAxiomDeclaration *> axioms;
 
@@ -902,10 +911,11 @@ public:
      user in the definition. */
   void preprocess();
 
-  void addModule(ptr<KOREModule> Module);
-  void addAttribute(ptr<KORECompositePattern> Attribute);
+  void addModule(sptr<KOREModule> Module);
+  void addAttribute(sptr<KORECompositePattern> Attribute);
   void print(std::ostream &Out, unsigned indent = 0) const;
 
+  const std::vector<sptr<KOREModule>> &getModules() const { return modules; }
   const KORECompositeSortDeclarationMapType &getSortDeclarations() const {
     return sortDeclarations;
   }
@@ -924,7 +934,7 @@ public:
   KOREAxiomDeclaration *getAxiomByOrdinal(size_t ordinal) const {
     return ordinals.at(ordinal);
   }
-  const std::unordered_map<std::string, ptr<KORECompositePattern>> &
+  const std::unordered_map<std::string, sptr<KORECompositePattern>> &
   getAttributes() const {
     return attributes;
   }

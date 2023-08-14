@@ -1,7 +1,23 @@
 #include "version.inc"
 
-#include <cstdio>
+#include <llvm/Support/CommandLine.h>
+#include <llvm/Support/raw_ostream.h>
 
-int main() {
-  printf("%s\n", llvm_backend_version);
+using namespace llvm;
+
+cl::OptionCategory VersionCat("kprint options");
+
+cl::opt<bool> LLVMVersion(
+    "llvm", cl::desc("Print LLVM version rather than backend version"),
+    cl::cat(VersionCat));
+
+int main(int argc, char **argv) {
+  cl::HideUnrelatedOptions({&VersionCat});
+  cl::ParseCommandLineOptions(argc, argv);
+
+  if (LLVMVersion) {
+    llvm::outs() << llvm_version << '\n';
+  } else {
+    llvm::outs() << llvm_backend_version << '\n';
+  }
 }

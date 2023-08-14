@@ -67,10 +67,22 @@ print_include_path () {
   echo "$include_dir"
 }
 
+llvm_major_version () {
+  echo "@LLVM_PACKAGE_VERSION@" | cut -d'.' -f1
+}
+
 positional_args=()
 reading_clang_args=false
 codegen_flags=()
-kompile_clang_flags=()
+if [[ -z "${NIX_LLVM_KOMPILE_LIBS}" ]]; then
+  kompile_clang_flags=()
+else
+  readarray -td " " kompile_clang_flags <<<"$NIX_LLVM_KOMPILE_LIBS "
+  # <<< inserts a newline, which we want to delete. 
+  # by adding a trailing space to the above, the last array element will be just '\n'
+  # we then delete the trailing newline below
+  unset 'kompile_clang_flags[-1]'
+fi
 clang_args=()
 python_cmd=python3
 python_output_dir=""
@@ -207,7 +219,11 @@ if [[ "$compile" = "default" ]]; then
     "$definition" "$dt_dir"/dt.yaml "$dt_dir" -o "$mod"
 
   if [[ "$use_opt" = "true" ]]; then
-    run @OPT@ -mem2reg -tailcallelim "$mod" -o "$modopt"
+    if [ "$(llvm_major_version)" -ge "16" ]; then
+      run @OPT@ -passes='mem2reg,tailcallelim' "$mod" -o "$modopt"
+    else
+      run @OPT@ -mem2reg -tailcallelim "$mod" -o "$modopt"
+    fi
   else
     cp "$mod" "$modopt"
   fi

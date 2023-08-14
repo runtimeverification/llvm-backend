@@ -15,10 +15,10 @@ let
       '';
     })
   else
-    # In llvmPackages_15, libcxx is broken, so we use clang 14 as our compiler
+    # In llvmPackages_15/16, libcxx is broken, so we use clang 14 as our compiler
     # for C code etc, but still use LLVM 15 to build the backend properly. This
     # is a workaround until the underlying package is more stable on macOS.
-    let clangPackages = if prev.llvm-version == 15
+    let clangPackages = if prev.llvm-version >= 15
       then mkLlvmPackages prev.llvmPackages_14
       else llvmPackages; in
     clangPackages.libcxxClang.overrideAttrs (old: {

@@ -79,14 +79,14 @@ static void emitConstantSort(serializer &instance, char const *name) {
  * Emit a symbol of the form \dv{Sort}("string")
  */
 static void emitToken(
-    serializer &instance, char const *sort, char const *string, int len = 0) {
+    serializer &instance, char const *sort, char const *string, int len = -1) {
   instance.emit(header_byte<KOREStringPattern>);
 
   // Allow the length of the token to be passed in explicitly to handle the
   // Bytes sort, which can include null characters in the middle of a string.
   // Otherwise, assume that the string is null-terminated and that its length
   // can be worked out implicitly.
-  if (len == 0) {
+  if (len < 0) {
     instance.emit_string(string);
   } else {
     instance.emit_string(std::string(string, len));
@@ -144,9 +144,10 @@ void serializeRangeMap(
         file, iter->first.start(), "SortKItem{}", false, state);
     serializeConfigurationInternal(
         file, iter->first.end(), "SortKItem{}", false, state);
+    emitSymbol(instance, "LblRangemap'Coln'Range{}", 2);
     serializeConfigurationInternal(
         file, iter->second, "SortKItem{}", false, state);
-    emitSymbol(instance, element, 3);
+    emitSymbol(instance, element, 2);
 
     if (once) {
       once = false;
@@ -223,8 +224,7 @@ void serializeStringBuffer(
     writer *file, stringbuffer *b, const char *sort, void *state) {
   auto &instance = static_cast<serialization_state *>(state)->instance;
 
-  std::string str(b->contents->data, b->strlen);
-  emitToken(instance, sort, str.c_str());
+  emitToken(instance, sort, b->contents->data, b->strlen);
 }
 
 void serializeMInt(
