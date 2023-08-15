@@ -106,7 +106,7 @@ hook_BYTES_int2bytes(SortInt len, SortInt i, SortEndianness endianness_ptr) {
   return result;
 }
 
-string *bytes2string(string *b, size_t len) {
+string *allocStringCopy(string *b, size_t len) {
   string *result = static_cast<string *>(koreAllocToken(sizeof(string) + len));
   memcpy(result->data, b->data, len);
   set_len(result, len);
@@ -114,11 +114,15 @@ string *bytes2string(string *b, size_t len) {
 }
 
 SortString hook_BYTES_bytes2string(SortBytes b) {
-  return bytes2string(b, len(b));
+  string *result = allocStringCopy(b, len(b));
+  set_is_bytes(result, false);
+  return result;
 }
 
 SortBytes hook_BYTES_string2bytes(SortString s) {
-  return hook_BYTES_bytes2string(s);
+  string *result = allocStringCopy(s, len(s));
+  set_is_bytes(result, true);
+  return result;
 }
 
 SortBytes hook_BYTES_substr(SortBytes input, SortInt start, SortInt end) {
