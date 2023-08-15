@@ -110,6 +110,25 @@ bool hash_enter(void);
 void hash_exit(void);
 }
 
+__attribute__((always_inline)) constexpr bool is_bytes_hdr(uint64_t hdr) {
+  return hdr & IS_BYTES_BIT;
+}
+
+template <typename T>
+__attribute__((always_inline)) constexpr bool is_bytes(T const *s) {
+  return is_bytes_hdr(s->h.hdr);
+}
+
+template <typename T>
+__attribute__((always_inline)) constexpr void
+set_is_bytes(T *s, bool is_bytes) {
+  if (is_bytes) {
+    s->h.hdr |= IS_BYTES_BIT;
+  } else {
+    s->h.hdr &= !IS_BYTES_BIT;
+  }
+}
+
 __attribute__((always_inline)) constexpr uint64_t len_hdr(uint64_t hdr) {
   return hdr & LENGTH_MASK;
 }

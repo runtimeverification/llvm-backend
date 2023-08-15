@@ -8,6 +8,7 @@
 #include <cassert>
 #include <cctype>
 #include <cstdio>
+#include <inttypes.h>
 #include <iostream>
 #include <iterator>
 #include <unordered_map>
@@ -645,32 +646,90 @@ color(std::ostream &out, std::string color, PrettyPrintData const &data) {
 
 #define RESET_COLOR "\x1b[0m"
 
-std::string enquote(std::string str) {
+struct UTF8EncodingType {
+  // A mask to extract the leading bits from the first byte
+  char leadingBitsMask;
+  // The expected value after applying the leading bits mask
+  char leadingBitsValue;
+  // The number of non-leading 10xxxxxx bytes used to encode a codepoint
+  int numContinuationBytes;
+};
+
+static const UTF8EncodingType utf8EncodingTypes[4] = {
+    // 0xxxxxxx
+    {static_cast<char>(0x80), static_cast<char>(0x00), 0},
+    // 110xxxxx 10xxxxxx
+    {static_cast<char>(0xE0), static_cast<char>(0xC0), 1},
+    // 1110xxxx 10xxxxxx 10xxxxxx
+    {static_cast<char>(0xF0), static_cast<char>(0xE0), 2},
+    // 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
+    {static_cast<char>(0xF8), static_cast<char>(0xF0), 3}};
+
+// Read one codepoint from a UTF-8 encoded string, returning the codepoint
+// along with the number of bytes it took to encode
+static std::pair<uint32_t, int> readCodepoint(const char *utf8Str) {
+  char leadByte = *utf8Str;
+  for (auto const &type : utf8EncodingTypes) {
+    if ((leadByte & type.leadingBitsMask) == type.leadingBitsValue) {
+      uint32_t codepoint = leadByte & ~type.leadingBitsMask;
+      for (int i = 0; i < type.numContinuationBytes; ++i) {
+        char contByte = *(++utf8Str);
+        codepoint = (codepoint << 6) | (contByte & 0x3F);
+      }
+      return {codepoint, 1 + type.numContinuationBytes};
+    }
+  }
+  assert(false && "Invalid UTF-8 string");
+}
+
+std::string
+kllvm::escapeString(const std::string &str, kllvm::StringType strType) {
   std::string result;
-  result.push_back('"');
-  for (size_t i = 0; i < str.length(); ++i) {
-    char c = str[i];
-    switch (c) {
-    case '\\': result.append("\\\\"); break;
-    case '"': result.append("\\\""); break;
-    case '\n': result.append("\\n"); break;
-    case '\t': result.append("\\t"); break;
-    case '\r': result.append("\\r"); break;
-    case '\f': result.append("\\f"); break;
+  const char *strIter = str.data();
+  const char *strEnd = strIter + str.length();
+  while (strIter != strEnd) {
+    uint64_t codepoint;
+    if (strType == kllvm::StringType::BYTES) {
+      codepoint = static_cast<uint64_t>(*strIter);
+      ++strIter;
+    } else {
+      assert(strType == kllvm::StringType::UTF8);
+      int numBytes;
+      std::tie(codepoint, numBytes) = readCodepoint(strIter);
+      strIter += numBytes;
+    }
+    switch (codepoint) {
+    case 0x5C: result.append("\\\\"); break;
+    case 0x22: result.append("\\\""); break;
+    case 0x0A: result.append("\\n"); break;
+    case 0x09: result.append("\\t"); break;
+    case 0x0D: result.append("\\r"); break;
+    case 0x0C: result.append("\\f"); break;
     default:
-      if ((unsigned char)c >= 32 && (unsigned char)c < 127) {
-        result.push_back(c);
-      } else {
+      if (32 <= codepoint && codepoint < 127) {
+        result.push_back(static_cast<char>(codepoint));
+      } else if (codepoint <= 0xFF) {
         char buf[3];
         buf[2] = 0;
-        snprintf(buf, 3, "%02x", (unsigned char)c);
+        snprintf(buf, 3, "%02" PRIx64, codepoint);
         result.append("\\x");
+        result.append(buf);
+      } else if (codepoint <= 0xFFFF) {
+        char buf[5];
+        buf[4] = 0;
+        snprintf(buf, 3, "%04" PRIx64, codepoint);
+        result.append("\\u");
+        result.append(buf);
+      } else {
+        char buf[9];
+        buf[8] = 0;
+        snprintf(buf, 3, "%08" PRIx64, codepoint);
+        result.append("\\U");
         result.append(buf);
       }
       break;
     }
   }
-  result.push_back('"');
   return result;
 }
 
@@ -710,10 +769,13 @@ void KORECompositePattern::prettyPrint(
     if (hasHook) {
       auto hook = data.hook.at(s->getName());
       if (hook == "STRING.String") {
-        append(out, enquote(str->getContents()));
+        append(out, '"');
+        append(out, escapeString(str->getContents(), StringType::UTF8));
+        append(out, '"');
       } else if (hook == "BYTES.Bytes") {
-        append(out, 'b');
-        append(out, enquote(str->getContents()));
+        append(out, "b\"");
+        append(out, escapeString(str->getContents(), StringType::UTF8));
+        append(out, '"');
       } else {
         append(out, str->getContents());
       }
@@ -1859,74 +1921,24 @@ void KORECompositePattern::print(std::ostream &Out, unsigned indent) const {
   Out << ")";
 }
 
-static std::string escapeString(const std::string &str) {
-  std::string result;
-  for (char c : str) {
-    if (c == '"' || c == '\\' || !isprint(c)) {
-      result.push_back('\\');
-      result.push_back('x');
-      char code[3];
-      snprintf(code, 3, "%02x", (unsigned char)c);
-      result.push_back(code[0]);
-      result.push_back(code[1]);
-    } else {
-      result.push_back(c);
-    }
-  }
-  return result;
-}
-
 void KOREStringPattern::print(std::ostream &Out, unsigned indent) const {
   std::string Indent(indent, ' ');
-  Out << Indent << "\"" << escapeString(contents) << "\"";
+  Out << Indent << "\"" << escapeString(contents, StringType::UTF8) << "\"";
 }
 
-struct UTF8EncodingType {
-  // A mask to extract the leading bits from the first byte 
-  char leadingBitsMask;
-  // The expected value after applying the leading bits mask
-  char leadingBitsValue;
-  // The number of non-leading 10xxxxxx bytes used to encode a codepoint
-  int numContinuationBytes;
-};
-
-static const UTF8EncodingType utf8EncodingTypes[4] = {
-  // 0xxxxxxx
-  { 0x80, 0x00, 0 },
-  // 110xxxxx 10xxxxxx
-  { 0xE0, 0xC0, 1 },
-  // 1110xxxx 10xxxxxx 10xxxxxx
-  { 0xF0, 0xE0, 2 },
-  // 11110xxx 10xxxxxx 10xxxxxx	10xxxxxx
-  { 0xF8, 0xF0, 3 }
-};
-
-// Read one codepoint from a UTF-8 encoded string, returning the codepoint
-// as well as a pointer to start of the next codepoint
-static std::pair<uint32_t, char*> readCodepoint(char *utf8Str) {
-  char leadByte = *utf8Str;
-  for (auto const &type : utf8EncodingTypes) {
-    if ((leadByte & type.leadingBitsMask) == type.leadingBitsValue) {
-      uint32_t codepoint = leadByte & ~type.leadingBitsMask;
-      for (int i = 0; i < type.numContinuationBytes; ++i) {
-	char contByte = *(++utf8Str);
-	codepoint = (codepoint << 6) | (contByte & 0x3F);
-      }
-      return { codepoint , ++utf8Str };
-    }
-  }
-  assert(0 && "Invalid UTF-8 string");
-}
 size_t kllvm::bytesStringPatternToBytes(char *contents, size_t length) {
   char *contentsStart = contents;
   char *contentsEnd = contents + length;
   size_t newLength = 0;
   while (contents != contentsEnd) {
-    auto [codepoint, nextByte] = readCodepoint(contents);
-    assert(codepoint <= 0xFF && "Bytes string patterns should only contain codepoints up to U+00FF");
+    auto [codepoint, numBytes] = readCodepoint(contents);
+    assert(
+        codepoint <= 0xFF
+        && "A StringPattern representing Bytes should only contain codepoints "
+           "up to U+00FF");
     contentsStart[newLength] = static_cast<char>(codepoint);
     ++newLength;
-    contents = nextByte;
+    contents += numBytes;
   }
   return newLength;
 }

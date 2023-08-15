@@ -142,28 +142,13 @@ void printConfigurationInternal(
   uint16_t layout = get_layout(subject);
   if (!layout) {
     string *str = (string *)subject;
-    size_t subject_len = len(subject);
-    sfprintf(file, "\\dv{%s}(\"", sort);
-    for (size_t i = 0; i < subject_len; ++i) {
-      char c = str->data[i];
-      switch (c) {
-      case '\\': sfprintf(file, "\\\\"); break;
-      case '"': sfprintf(file, "\\\""); break;
-      case '\n': sfprintf(file, "\\n"); break;
-      case '\t': sfprintf(file, "\\t"); break;
-      case '\r': sfprintf(file, "\\r"); break;
-      case '\f': sfprintf(file, "\\f"); break;
-      default:
-        if ((unsigned char)c >= 32 && (unsigned char)c < 127) {
-          sfprintf(file, "%c", c);
-        } else {
-          sfprintf(file, "\\x%02x", (unsigned char)c);
-        }
-        break;
-      }
-    }
+    std::string stdStr = std::string(str->data, len(str));
+    kllvm::StringType strType = is_bytes(subject) ? kllvm::StringType::BYTES
+                                                  : kllvm::StringType::UTF8;
+    sfprintf(
+        file, "\\dv{%s}(\"%s", sort,
+        kllvm::escapeString(stdStr, strType).c_str());
     if (isVar && !state.varNames.count(str)) {
-      std::string stdStr = std::string(str->data, len(str));
       std::string suffix = "";
       while (state.usedVarNames.count(stdStr + suffix)) {
         suffix = std::to_string(state.varCounter++);

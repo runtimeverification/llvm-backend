@@ -62,7 +62,7 @@ target triple = "@BACKEND_TARGET_TRIPLE@"
 
 ; We also define the following LLVM structure types:
 
-%string = type { %blockheader, [0 x i8] } ; 10-bit layout, 4-bit gc flags, 10 unused bits, 40-bit length (or buffer capacity for string pointed by stringbuffers), bytes
+%string = type { %blockheader, [0 x i8] } ; 10-bit layout, 4-bit gc flags, 9 unused bits, 1 bit to mark byte strings, 40-bit length (or buffer capacity for string pointed by stringbuffers), bytes
 %stringbuffer = type { i64, i64, %string* } ; 10-bit layout, 4-bit gc flags, 10 unused bits, 40-bit length, string length, current contents
 %map = type { { i8 *, i64 } } ; immer::map
 %rangemap = type { { { { { i32 (...)**, i32, i64 }*, { { i32 (...)**, i32, i32 }* } } } } } ; rng_map::RangeMap
@@ -280,16 +280,6 @@ sptr<KORESort> termSort(KOREPattern *pattern) {
     assert(false && "not supported yet: meta level");
     abort();
   }
-}
-
-std::string escape(std::string str) {
-  std::stringstream os;
-  os << std::setfill('0') << std::setw(2) << std::hex;
-  for (char c : str) {
-    unsigned char uc = c;
-    os << (int)uc;
-  }
-  return os.str();
 }
 
 llvm::Value *CreateTerm::createHook(

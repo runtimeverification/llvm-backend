@@ -561,9 +561,14 @@ class termPrinter:
         if not layout:
             string = subject.cast(self.string_ptr)
             length = hdr & @LENGTH_MASK@
+            string_bytes = bytes(int(string.dereference()['data'][i].cast(self.unsigned_char)) for i in range(length))
+            if hdr & @IS_BYTES_BIT@:
+                py_str = string_bytes.decode('iso-8859-1')
+            else:
+                py_str = string_bytes.decode('utf-8')
+
             self.result += "\\dv{" + sort + "}(\""
-            for i in range(length):
-                c = chr(int(string.dereference()['data'][i].cast(self.unsigned_char)))
+            for c in py_str:
                 if c == '\\':
                     self.result += "\\\\"
                 elif c == '"':
@@ -576,10 +581,14 @@ class termPrinter:
                     self.result += "\\r"
                 elif c == '\f':
                     self.result += "\\f"
-                elif ord(c) >= 32 and ord(c) < 127:
+                elif 32 <= ord(c) and ord(c) < 127:
                     self.result += c
+                elif ord(c) <= 0xFF:
+                    self.result += "\\x{:02x}".format(ord(c))
+                elif ord(c) <= 0xFFFF:
+                    self.result += "\\u{:04x}".format(ord(c))
                 else:
-                    self.result += "{:02x}".format(ord(c))
+                    self.result += "\\U{:08x}".format(ord(c))
             var = Variable(string)
             stdStr = var.stdStr
             if isVar and not var in self.var_names:

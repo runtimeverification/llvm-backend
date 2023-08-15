@@ -474,8 +474,9 @@ emitGetTagForFreshSort(KOREDefinition *definition, llvm::Module *module) {
   }
 }
 
-static llvm::Value *makeStringToken(llvm::Value *Str, llvm::Value *StrLength,
-				    llvm::BasicBlock *InsertAtEnd) {
+static llvm::Value *makeStringToken(
+    llvm::Value *Str, llvm::Value *StrLength, kllvm::StringType strType,
+    llvm::BasicBlock *InsertAtEnd) {
   auto Module = InsertAtEnd->getModule();
   llvm::LLVMContext &Ctx = Module->getContext();
   auto StringType = getTypeByName(Module, STRING_STRUCT);
@@ -505,6 +506,12 @@ static llvm::Value *makeStringToken(llvm::Value *Str, llvm::Value *StrLength,
       llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0), "", InsertAtEnd);
   auto HdrOred = llvm::BinaryOperator::Create(
       llvm::Instruction::Or, StrLength, Mask, "", InsertAtEnd);
+  if (strType == kllvm::StringType::BYTES) {
+    HdrOred = llvm::BinaryOperator::Create(
+        llvm::Instruction::Or, HdrOred,
+        llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), IS_BYTES_BIT), "",
+        InsertAtEnd);
+  }
   new llvm::StoreInst(HdrOred, HdrPtr, InsertAtEnd);
   llvm::Function *Memcpy = getOrInsertFunction(
       Module, "memcpy", llvm::Type::getInt8PtrTy(Ctx),
@@ -515,7 +522,8 @@ static llvm::Value *makeStringToken(llvm::Value *Str, llvm::Value *StrLength,
       {zero, llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), 1), zero}, "",
       InsertAtEnd);
   llvm::CallInst::Create(Memcpy, {StrPtr, Str, StrLength}, "", InsertAtEnd);
-  return new llvm::BitCastInst(Block, llvm::Type::getInt8PtrTy(Ctx), "", InsertAtEnd);
+  return new llvm::BitCastInst(
+      Block, llvm::Type::getInt8PtrTy(Ctx), "", InsertAtEnd);
 }
 
 static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
@@ -550,8 +558,9 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
 
     auto sort = KORECompositeSort::Create(name);
     ValueType cat = sort->getCategory(definition);
-    if ((cat.cat == SortCategory::Symbol && sort->getHook(definition) != "BYTES.Bytes") ||
-	cat.cat == SortCategory::Variable) {
+    if ((cat.cat == SortCategory::Symbol
+         && sort->getHook(definition) != "BYTES.Bytes")
+        || cat.cat == SortCategory::Variable) {
       continue;
     }
     CurrentBlock->insertInto(func);
@@ -668,15 +677,15 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
     }
     case SortCategory::Variable: break;
     case SortCategory::Symbol: {
-      llvm::Function *DecodeBytes =
-	getOrInsertFunction(module, "bytesStringPatternToBytes",
-			    llvm::Type::getInt64Ty(Ctx),
-			    llvm::Type::getInt8PtrTy(Ctx), llvm::Type::getInt64Ty(Ctx));
-      llvm::Value *BytesLength =
-	llvm::CallInst::Create(DecodeBytes,
-			       {func->arg_begin() + 2, func->arg_begin() + 1},
-			       "", CurrentBlock);
-      auto result = makeStringToken(func->arg_begin() + 2, BytesLength, CurrentBlock);
+      llvm::Function *DecodeBytes = getOrInsertFunction(
+          module, "bytesStringPatternToBytes", llvm::Type::getInt64Ty(Ctx),
+          llvm::Type::getInt8PtrTy(Ctx), llvm::Type::getInt64Ty(Ctx));
+      llvm::Value *BytesLength = llvm::CallInst::Create(
+          DecodeBytes, {func->arg_begin() + 2, func->arg_begin() + 1}, "",
+          CurrentBlock);
+      auto result = makeStringToken(
+          func->arg_begin() + 2, BytesLength, kllvm::StringType::BYTES,
+          CurrentBlock);
       Phi->addIncoming(result, CaseBlock);
       llvm::BranchInst::Create(MergeBlock, CaseBlock);
       break;
@@ -687,7 +696,9 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
   }
   CurrentBlock->setName("symbol");
   CurrentBlock->insertInto(func);
-  auto strToken = makeStringToken(func->arg_begin() + 2, func->arg_begin() + 1, CurrentBlock);
+  auto strToken = makeStringToken(
+      func->arg_begin() + 2, func->arg_begin() + 1, kllvm::StringType::UTF8,
+      CurrentBlock);
   llvm::BranchInst::Create(MergeBlock, CurrentBlock);
   Phi->addIncoming(strToken, CurrentBlock);
   llvm::ReturnInst::Create(Ctx, Phi, MergeBlock);

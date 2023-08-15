@@ -1,7 +1,7 @@
 target datalayout = "@BACKEND_TARGET_DATALAYOUT@"
 target triple = "@BACKEND_TARGET_TRIPLE@"
 
-%string = type { %blockheader, [0 x i8] } ; 10-bit layout, 4-bit gc flags, 10 unused bits, 40-bit length (or buffer capacity for string pointed by stringbuffers), bytes
+%string = type { %blockheader, [0 x i8] } ; 10-bit layout, 4-bit gc flags, 9 unused bits, 1 bit to mark byte strings, 40-bit length (or buffer capacity for string pointed by stringbuffers), bytes
 %blockheader = type { i64 } 
 %block = type { %blockheader, [0 x i64 *] } ; 16-bit layout, 8-bit length, 32-bit tag, children
 %mpz = type { i32, i32, i64* }

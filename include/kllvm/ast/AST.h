@@ -646,6 +646,19 @@ private:
       : contents(Contents) { }
 };
 
+// Return a representation of str with all special characters replaced by their
+// escape sequences.
+//
+// The provided StringType indicates whether to treat the string as a sequence of bytes
+// or as a UTF-8 encoded Unicode string.
+//
+// For example, U+1F601 (😁) is UTF-8 encoded as the byte sequence 0xF0 0x9F 0x98 0x81, so
+// - escapeString("😁", StringType::UTF8)  returns "\U0001f601"
+// - escapeString("😁", StringType::BYTES) returns "\xf0\x9f\x98\x81"
+//
+enum class StringType { BYTES, UTF8 };
+std::string escapeString(const std::string &str, StringType strType);
+
 // A Bytes domain value is represented as a KOREStringPattern by storing each
 // byte 0xHH as the (UTF-8 encoded) Unicode codepoint U+00HH.
 //
