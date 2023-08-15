@@ -22,7 +22,7 @@ extern "C" {
 mpz_ptr move_int(mpz_t);
 floating *move_float(floating *);
 
-string *bytes2string(string *, size_t);
+string *allocStringCopy(string *, size_t);
 string *hook_BYTES_concat(string *a, string *b);
 mpz_ptr hook_BYTES_length(string *a);
 string *hook_BYTES_substr(string *a, mpz_t start, mpz_t end);
@@ -442,7 +442,7 @@ hook_BUFFER_concat_raw(stringbuffer *buf, char const *data, uint64_t n) {
 }
 
 SortString hook_BUFFER_toString(SortStringBuffer buf) {
-  return bytes2string(buf->contents, buf->strlen);
+  return allocStringCopy(buf->contents, buf->strlen);
 }
 }
 
