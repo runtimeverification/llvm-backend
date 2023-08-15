@@ -718,13 +718,13 @@ kllvm::escapeString(const std::string &str, kllvm::StringType strType) {
       } else if (codepoint <= 0xFFFF) {
         char buf[5];
         buf[4] = 0;
-        snprintf(buf, 3, "%04" PRIx64, codepoint);
+        snprintf(buf, 5, "%04" PRIx64, codepoint);
         result.append("\\u");
         result.append(buf);
       } else {
         char buf[9];
         buf[8] = 0;
-        snprintf(buf, 3, "%08" PRIx64, codepoint);
+        snprintf(buf, 9, "%08" PRIx64, codepoint);
         result.append("\\U");
         result.append(buf);
       }
