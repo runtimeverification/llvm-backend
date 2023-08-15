@@ -680,6 +680,7 @@ static std::pair<uint32_t, int> readCodepoint(const char *utf8Str) {
     }
   }
   assert(false && "Invalid UTF-8 string");
+  return {0, 0};
 }
 
 std::string
