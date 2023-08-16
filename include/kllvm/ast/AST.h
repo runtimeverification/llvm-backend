@@ -667,7 +667,7 @@ std::string escapeString(const std::string &str, StringType strType);
 // from UTF-8 to latin-1.
 //
 // The input buffer is overwritten, and the new length is returned.
-size_t bytesStringPatternToBytes(char *contents, size_t length);
+extern "C" size_t bytesStringPatternToBytes(char *contents, size_t length);
 
 // KOREDeclaration
 class KOREDeclaration {
