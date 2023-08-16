@@ -682,12 +682,12 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
           llvm::Type::getInt8PtrTy(Ctx), llvm::Type::getInt64Ty(Ctx));
       llvm::Value *BytesLength = llvm::CallInst::Create(
           DecodeBytes, {func->arg_begin() + 2, func->arg_begin() + 1}, "",
-          CurrentBlock);
+          CaseBlock);
       auto result = makeStringToken(
           func->arg_begin() + 2, BytesLength, kllvm::StringType::BYTES,
-          CurrentBlock);
-      Phi->addIncoming(result, CaseBlock);
+          CaseBlock);
       llvm::BranchInst::Create(MergeBlock, CaseBlock);
+      Phi->addIncoming(result, CaseBlock);
       break;
     }
     case SortCategory::Uncomputed: abort();
