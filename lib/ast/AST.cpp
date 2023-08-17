@@ -713,7 +713,7 @@ kllvm::escapeString(const std::string &str, kllvm::StringType strType) {
   while (strIter != strEnd) {
     uint32_t codepoint;
     if (strType == kllvm::StringType::BYTES) {
-      codepoint = static_cast<uint32_t>(*strIter);
+      codepoint = static_cast<uint32_t>(static_cast<unsigned char>(*strIter));
       ++strIter;
     } else {
       assert(strType == kllvm::StringType::UTF8);
@@ -730,7 +730,7 @@ kllvm::escapeString(const std::string &str, kllvm::StringType strType) {
     case 0x0C: result.append("\\f"); break;
     default:
       if (32 <= codepoint && codepoint < 127) {
-        result.push_back(static_cast<char>(codepoint));
+        result.push_back(static_cast<unsigned char>(codepoint));
       } else if (codepoint <= 0xFF) {
         char buf[3];
         buf[2] = 0;
@@ -738,12 +738,14 @@ kllvm::escapeString(const std::string &str, kllvm::StringType strType) {
         result.append("\\x");
         result.append(buf);
       } else if (codepoint <= 0xFFFF) {
+        assert(strType == kllvm::StringType::UTF8);
         char buf[5];
         buf[4] = 0;
         snprintf(buf, 5, "%04" PRIx32, codepoint);
         result.append("\\u");
         result.append(buf);
       } else {
+        assert(strType == kllvm::StringType::UTF8);
         char buf[9];
         buf[8] = 0;
         snprintf(buf, 9, "%08" PRIx32, codepoint);
