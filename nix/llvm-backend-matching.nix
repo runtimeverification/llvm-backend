@@ -1,4 +1,4 @@
-{ buildMaven, src }:
+{ jdk11_headless, makeWrapper, buildMaven, src }:
 
 let
   self = buildMaven {
@@ -12,8 +12,13 @@ let
         "${self}/share/java/llvm-backend-matching-1.0-SNAPSHOT-jar-with-dependencies.jar";
     };
 
+    nativeBuildInputs = [ makeWrapper ];
+
     postInstall = ''
       test -f "$out/share/java/llvm-backend-matching-1.0-SNAPSHOT-jar-with-dependencies.jar"
+
+      makeWrapper ${jdk11_headless}/bin/java $out/bin/llvm-backend-matching \
+          --add-flags "-jar $out/share/java/llvm-backend-matching-1.0-SNAPSHOT-jar-with-dependencies.jar"
     '';
 
     # Add build dependencies
