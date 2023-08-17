@@ -647,6 +647,10 @@ color(std::ostream &out, std::string color, PrettyPrintData const &data) {
 #define RESET_COLOR "\x1b[0m"
 
 struct UTF8EncodingType {
+  // The first codepoint which is encoded with this type
+  uint32_t firstCodepoint;
+  // The last codepoint which is encoded with this type
+  uint32_t lastCodepoint;
   // A mask to extract the leading bits from the first byte
   char leadingBitsMask;
   // The expected value after applying the leading bits mask
@@ -657,13 +661,31 @@ struct UTF8EncodingType {
 
 static const UTF8EncodingType utf8EncodingTypes[4] = {
     // 0xxxxxxx
-    {static_cast<char>(0x80), static_cast<char>(0x00), 0},
+    {0x0000, 0x007F, static_cast<char>(0x80), static_cast<char>(0x00), 0},
     // 110xxxxx 10xxxxxx
-    {static_cast<char>(0xE0), static_cast<char>(0xC0), 1},
+    {0x0080, 0x07FF, static_cast<char>(0xE0), static_cast<char>(0xC0), 1},
     // 1110xxxx 10xxxxxx 10xxxxxx
-    {static_cast<char>(0xF0), static_cast<char>(0xE0), 2},
+    {0x0800, 0xFFFF, static_cast<char>(0xF0), static_cast<char>(0xE0), 2},
     // 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
-    {static_cast<char>(0xF8), static_cast<char>(0xF0), 3}};
+    {0x10000, 0x10FFFF, static_cast<char>(0xF8), static_cast<char>(0xF0), 3}};
+
+std::string kllvm::codepointToUTF8(uint32_t codepoint) {
+  std::string result;
+  for (auto const &type : utf8EncodingTypes) {
+    if (type.firstCodepoint <= codepoint && codepoint <= type.lastCodepoint) {
+      int numCont = type.numContinuationBytes;
+      std::string result(1 + numCont, '\0');
+      for (int i = numCont; i > 0; --i) {
+        result[i] = 0x80 | (codepoint & 0x3F);
+        codepoint >>= 6;
+      }
+      result[0] = type.leadingBitsValue | codepoint;
+      return result;
+    }
+  }
+  assert(false && "Invalid Unicode codepoint");
+  return "";
+}
 
 // Read one codepoint from a UTF-8 encoded string, returning the codepoint
 // along with the number of bytes it took to encode
@@ -689,9 +711,9 @@ kllvm::escapeString(const std::string &str, kllvm::StringType strType) {
   const char *strIter = str.data();
   const char *strEnd = strIter + str.length();
   while (strIter != strEnd) {
-    uint64_t codepoint;
+    uint32_t codepoint;
     if (strType == kllvm::StringType::BYTES) {
-      codepoint = static_cast<uint64_t>(*strIter);
+      codepoint = static_cast<uint32_t>(*strIter);
       ++strIter;
     } else {
       assert(strType == kllvm::StringType::UTF8);
@@ -712,19 +734,19 @@ kllvm::escapeString(const std::string &str, kllvm::StringType strType) {
       } else if (codepoint <= 0xFF) {
         char buf[3];
         buf[2] = 0;
-        snprintf(buf, 3, "%02" PRIx64, codepoint);
+        snprintf(buf, 3, "%02" PRIx32, codepoint);
         result.append("\\x");
         result.append(buf);
       } else if (codepoint <= 0xFFFF) {
         char buf[5];
         buf[4] = 0;
-        snprintf(buf, 5, "%04" PRIx64, codepoint);
+        snprintf(buf, 5, "%04" PRIx32, codepoint);
         result.append("\\u");
         result.append(buf);
       } else {
         char buf[9];
         buf[8] = 0;
-        snprintf(buf, 9, "%08" PRIx64, codepoint);
+        snprintf(buf, 9, "%08" PRIx32, codepoint);
         result.append("\\U");
         result.append(buf);
       }

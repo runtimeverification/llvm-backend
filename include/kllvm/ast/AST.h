@@ -646,6 +646,9 @@ private:
       : contents(Contents) { }
 };
 
+// Convert a Unicode codepoint to a UTF-8 encoded string containing that codepoint
+std::string codepointToUTF8(uint32_t codepoint);
+
 // Return a representation of str with all special characters replaced by their
 // escape sequences.
 //
