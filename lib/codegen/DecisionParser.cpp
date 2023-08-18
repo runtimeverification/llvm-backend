@@ -178,6 +178,9 @@ public:
       sym->addFormalArgument(sort);
       sym->addSort(sort);
       auto pat = KORECompositePattern::Create(std::move(sym));
+      if (hook == "BYTES.Bytes") {
+        val = kllvm::bytesToBytesStringPattern(val.c_str(), val.length());
+      }
       pat->addArgument(KOREStringPattern::Create(val));
       return pat;
     } else {

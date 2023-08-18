@@ -1968,6 +1968,15 @@ size_t kllvm::bytesStringPatternToBytes(char *contents, size_t length) {
   return newLength;
 }
 
+std::string kllvm::bytesToBytesStringPattern(const char *bytes, size_t length) {
+  std::string result;
+  for (int i = 0; i < length; ++i) {
+    result += kllvm::codepointToUTF8(
+        static_cast<uint32_t>(static_cast<unsigned char>(bytes[i])));
+  }
+  return result;
+}
+
 static void printAttributeList(
     std::ostream &Out,
     const std::unordered_map<std::string, sptr<KORECompositePattern>>

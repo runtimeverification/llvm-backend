@@ -672,6 +672,9 @@ std::string escapeString(const std::string &str, StringType strType);
 // The input buffer is overwritten, and the new length is returned.
 extern "C" size_t bytesStringPatternToBytes(char *contents, size_t length);
 
+// Given a char[] of bytes, return its representation as the contents of a KOREStringPattern.
+std::string bytesToBytesStringPattern(const char *bytes, size_t length);
+
 // KOREDeclaration
 class KOREDeclaration {
 protected:

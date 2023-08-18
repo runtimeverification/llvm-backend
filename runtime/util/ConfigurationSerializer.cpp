@@ -302,13 +302,9 @@ void serializeConfigurationInternal(
     } else if (isVar) {
       emitToken(state.instance, sort, state.varNames[str].c_str());
     } else if (is_bytes(str)) {
-      std::string utf8Encoded;
-      for (int i = 0; i < subject_len; ++i) {
-        utf8Encoded += kllvm::codepointToUTF8(
-            static_cast<uint32_t>(static_cast<unsigned char>(str->data[i])));
-      }
-      emitToken(
-          state.instance, sort, utf8Encoded.c_str(), utf8Encoded.length());
+      std::string encoded
+          = kllvm::bytesToBytesStringPattern(str->data, subject_len);
+      emitToken(state.instance, sort, encoded.c_str(), encoded.length());
     } else {
       emitToken(state.instance, sort, str->data, subject_len);
     }
