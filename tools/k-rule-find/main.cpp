@@ -101,7 +101,7 @@ int main(int argc, char **argv) {
 
   auto loc = parseLocation(RuleLocation);
   auto definition = KompiledDir + "/definition.kore";
-  std::string rule_label = "";
+  std::vector<std::string> rule_labels;
 
   // Parse the definition.kore to get the AST.
   kllvm::parser::KOREParser parser(definition);
@@ -114,17 +114,18 @@ int main(int argc, char **argv) {
       if (source.find(loc.filename) != std::string::npos) {
         auto source_loc = getLocation(axiom);
         if (checkRanges(loc, source_loc, loc.start_column != -1)) {
-          rule_label = axiom->getStringAttribute("label");
+          rule_labels.push_back(axiom->getStringAttribute("label"));
         }
       }
     }
   }
 
   // Output the result or the error message.
-  if (rule_label.empty()) {
+  if (rule_labels.empty()) {
     std::cerr << "Error: Couldn't find rule label within the given location.\n";
   } else {
-    std::cout << rule_label << "\n";
+    for (auto rule_label : rule_labels)
+      std::cout << rule_label << "\n";
   }
 
   return 0;

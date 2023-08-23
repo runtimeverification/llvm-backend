@@ -268,7 +268,7 @@ kore_pattern *kore_pattern_from_block(block *term) {
 
 bool kore_block_get_bool(block *term) {
   assert((((uintptr_t)term) & 1) == 0);
-  return (bool)(term->children[0]);
+  return *(bool *)term->children;
 }
 
 bool kore_simplify_bool(kore_pattern const *pattern) {
