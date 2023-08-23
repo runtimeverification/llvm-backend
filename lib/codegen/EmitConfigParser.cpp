@@ -341,6 +341,7 @@ static llvm::Value *getArgValue(
   case SortCategory::Int:
   case SortCategory::Float:
   case SortCategory::StringBuffer:
+  case SortCategory::Bytes:
   case SortCategory::Symbol:
   case SortCategory::Variable:
     arg = new llvm::BitCastInst(arg, getValueType(cat, mod), "", CaseBlock);
@@ -378,6 +379,7 @@ static std::pair<llvm::Value *, llvm::BasicBlock *> getEval(
   case SortCategory::Int:
   case SortCategory::Float:
   case SortCategory::StringBuffer:
+  case SortCategory::Bytes:
   case SortCategory::Symbol:
   case SortCategory::Variable:
   case SortCategory::Map:
@@ -558,9 +560,7 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
 
     auto sort = KORECompositeSort::Create(name);
     ValueType cat = sort->getCategory(definition);
-    if ((cat.cat == SortCategory::Symbol
-         && sort->getHook(definition) != "BYTES.Bytes")
-        || cat.cat == SortCategory::Variable) {
+    if (cat.cat == SortCategory::Symbol || cat.cat == SortCategory::Variable) {
       continue;
     }
     CurrentBlock->insertInto(func);
@@ -675,8 +675,7 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
       Phi->addIncoming(cast, CaseBlock);
       break;
     }
-    case SortCategory::Variable: break;
-    case SortCategory::Symbol: {
+    case SortCategory::Bytes: {
       llvm::Function *DecodeBytes = getOrInsertFunction(
           module, "bytesStringPatternToBytes", llvm::Type::getInt64Ty(Ctx),
           llvm::Type::getInt8PtrTy(Ctx), llvm::Type::getInt64Ty(Ctx));
@@ -690,6 +689,8 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
       Phi->addIncoming(result, CaseBlock);
       break;
     }
+    case SortCategory::Variable:
+    case SortCategory::Symbol: break;
     case SortCategory::Uncomputed: abort();
     }
     CurrentBlock = FalseBlock;
@@ -997,6 +998,7 @@ static void getVisitor(
         Str->getType(), global, indices);
     switch (cat.cat) {
     case SortCategory::Variable:
+    case SortCategory::Bytes:
     case SortCategory::Symbol:
       llvm::CallInst::Create(
           llvm::FunctionType::get(

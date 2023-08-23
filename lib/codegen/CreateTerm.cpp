@@ -174,6 +174,7 @@ llvm::Type *getValueType(ValueType sort, llvm::Module *Module) {
   case SortCategory::Bool: return llvm::Type::getInt1Ty(Module->getContext());
   case SortCategory::MInt:
     return llvm::IntegerType::get(Module->getContext(), sort.bits);
+  case SortCategory::Bytes:
   case SortCategory::Symbol:
   case SortCategory::Variable:
     return llvm::PointerType::getUnqual(getTypeByName(Module, BLOCK_STRUCT));
@@ -971,12 +972,12 @@ CreateTerm::createAllocation(KOREPattern *pattern) {
             createFunctionCall("eval_" + Out.str(), constructor, false, true),
             true);
       }
-    } else if (
-        symbolDecl->getAttributes().count("sortInjection")
-        && dynamic_cast<KORECompositeSort *>(symbol->getArguments()[0].get())
-                   ->getCategory(Definition)
-                   .cat
-               == SortCategory::Symbol) {
+    } else if (auto cat = dynamic_cast<KORECompositeSort *>(
+                              symbol->getArguments()[0].get())
+                              ->getCategory(Definition)
+                              .cat;
+               symbolDecl->getAttributes().count("sortInjection")
+               && (cat == SortCategory::Symbol || cat == SortCategory::Bytes)) {
       std::pair<llvm::Value *, bool> val
           = createAllocation(constructor->getArguments()[0].get());
       if (val.second) {
@@ -1184,8 +1185,8 @@ bool makeFunction(
               llvm::Type::getInt8PtrTy(Module->getContext()),
               llvm::Type::getInt8PtrTy(Module->getContext())),
           {outputFile, varname});
-      if (cat.cat == SortCategory::Symbol
-          || cat.cat == SortCategory::Variable) {
+      if (cat.cat == SortCategory::Symbol || cat.cat == SortCategory::Variable
+          || cat.cat == SortCategory::Bytes) {
         ir->CreateCall(
             getOrInsertFunction(
                 Module, "serializeTermToFile",
@@ -1402,6 +1403,7 @@ llvm::Type *getArgType(ValueType cat, llvm::Module *mod) {
   case SortCategory::Int: return getTypeByName(mod, INT_STRUCT);
   case SortCategory::Float: return getTypeByName(mod, FLOAT_STRUCT);
   case SortCategory::StringBuffer: return getTypeByName(mod, BUFFER_STRUCT);
+  case SortCategory::Bytes:
   case SortCategory::Symbol:
   case SortCategory::Variable: {
     return getBlockType(mod);

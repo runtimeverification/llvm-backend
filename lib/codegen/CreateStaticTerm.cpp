@@ -117,11 +117,12 @@ CreateStaticTerm::operator()(KOREPattern *pattern) {
     }
     KORESymbolDeclaration *symbolDecl
         = Definition->getSymbolDeclarations().at(symbol->getName());
+    SortCategory cat
+        = dynamic_cast<KORECompositeSort *>(symbol->getArguments()[0].get())
+              ->getCategory(Definition)
+              .cat;
     if (symbolDecl->getAttributes().count("sortInjection")
-        && dynamic_cast<KORECompositeSort *>(symbol->getArguments()[0].get())
-                   ->getCategory(Definition)
-                   .cat
-               == SortCategory::Symbol) {
+        && (cat == SortCategory::Symbol || cat == SortCategory::Bytes)) {
       std::pair<llvm::Constant *, bool> val
           = (*this)(constructor->getArguments()[0].get());
       if (val.second) {
@@ -303,10 +304,9 @@ CreateStaticTerm::createToken(ValueType sort, std::string contents) {
     return llvm::ConstantInt::get(
         llvm::Type::getInt1Ty(Ctx), contents == "true");
   case SortCategory::Variable:
+  case SortCategory::Bytes:
   case SortCategory::Symbol: {
-    bool isBytes = Definition->getHookedSorts().count(sort)
-                   && Definition->getHookedSorts().at(sort)->getHook(Definition)
-                          == "BYTES.Bytes";
+    bool isBytes = sort.cat == SortCategory::Bytes;
     if (isBytes) {
       size_t newSize
           = bytesStringPatternToBytes(contents.data(), contents.size());

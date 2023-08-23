@@ -123,7 +123,8 @@ enum class SortCategory {
   Symbol,
   Variable,
   MInt,
-  RangeMap
+  RangeMap,
+  Bytes
 };
 
 // represents the syntactic category of an LLVM backend term at runtime

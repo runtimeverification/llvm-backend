@@ -207,6 +207,7 @@ llvm::DIType *getDebugType(ValueType type, std::string typeName) {
         typeName, type.bits, llvm::dwarf::DW_ATE_unsigned);
     types[typeName] = mint;
     return mint;
+  case SortCategory::Bytes:
   case SortCategory::Symbol:
   case SortCategory::Variable:
     symbol = getPointerDebugType(getForwardDecl(BLOCK_STRUCT), typeName);

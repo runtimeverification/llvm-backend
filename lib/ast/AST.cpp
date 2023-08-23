@@ -207,6 +207,8 @@ ValueType KORECompositeSort::getCategory(std::string name) {
     category = SortCategory::StringBuffer;
   else if (name == "BOOL.Bool")
     category = SortCategory::Bool;
+  else if (name == "BYTES.Bytes")
+    category = SortCategory::Bytes;
   else if (name == "KVAR.KVar")
     category = SortCategory::Variable;
   // we expect the "hook" of a MInt to be of the form "MINT.MInt N" for some
@@ -259,6 +261,7 @@ std::string KORESymbol::layoutString(KOREDefinition *definition) const {
     case SortCategory::Variable: result.push_back('8'); break;
     case SortCategory::MInt:
       result.append("_" + std::to_string(cat.bits) + "_");
+    case SortCategory::Bytes:
     case SortCategory::Symbol: result.push_back('0'); break;
     case SortCategory::Uncomputed: abort();
     }
