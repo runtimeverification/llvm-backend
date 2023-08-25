@@ -18,7 +18,7 @@ let
       test -f "$out/share/java/llvm-backend-matching-1.0-SNAPSHOT-jar-with-dependencies.jar"
 
       makeWrapper ${jdk11_headless}/bin/java $out/bin/llvm-backend-matching \
-          --add-flags "-jar $out/share/java/llvm-backend-matching-1.0-SNAPSHOT-jar-with-dependencies.jar"
+          --add-flags "-Xss32m -jar $out/share/java/llvm-backend-matching-1.0-SNAPSHOT-jar-with-dependencies.jar"
     '';
 
     # Add build dependencies
