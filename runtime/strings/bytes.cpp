@@ -92,6 +92,7 @@ hook_BYTES_int2bytes(SortInt len, SortInt i, SortEndianness endianness_ptr) {
   bool neg = mpz_sgn(i) < 0;
   string *result
       = static_cast<string *>(koreAllocToken(sizeof(string) + len_long));
+  set_is_bytes(result, true);
   set_len(result, len_long);
   memset(result->data, neg ? 0xff : 0x00, len_long);
   int order = endianness == tag_big_endian() ? 1 : -1;
@@ -144,6 +145,7 @@ SortBytes hook_BYTES_substr(SortBytes input, SortInt start, SortInt end) {
   uint64_t len = uend - ustart;
   auto ret = static_cast<string *>(
       koreAllocToken(sizeof(string) + sizeof(KCHAR) * len));
+  set_is_bytes(ret, true);
   set_len(ret, len);
   memcpy(&(ret->data), &(input->data[ustart]), len * sizeof(KCHAR));
   return ret;
@@ -202,6 +204,7 @@ SortBytes hook_BYTES_padRight(SortBytes b, SortInt length, SortInt v) {
     KLLVM_HOOK_INVALID_ARGUMENT("Integer overflow on value: {}", uv);
   }
   string *result = static_cast<string *>(koreAllocToken(sizeof(string) + ulen));
+  set_is_bytes(result, true);
   set_len(result, ulen);
   memcpy(result->data, b->data, len(b));
   memset(result->data + len(b), uv, ulen - len(b));
@@ -218,6 +221,7 @@ SortBytes hook_BYTES_padLeft(SortBytes b, SortInt length, SortInt v) {
     KLLVM_HOOK_INVALID_ARGUMENT("Integer overflow on value: {}", uv);
   }
   string *result = static_cast<string *>(koreAllocToken(sizeof(string) + ulen));
+  set_is_bytes(result, true);
   set_len(result, ulen);
   memset(result->data, uv, ulen - len(b));
   memcpy(result->data + ulen - len(b), b->data, len(b));
@@ -234,6 +238,7 @@ SortBytes hook_BYTES_concat(SortBytes a, SortBytes b) {
   auto len_b = len(b);
   auto newlen = len_a + len_b;
   auto ret = static_cast<string *>(koreAllocToken(sizeof(string) + newlen));
+  set_is_bytes(ret, true);
   set_len(ret, newlen);
   memcpy(&(ret->data), &(a->data), len(a) * sizeof(KCHAR));
   memcpy(&(ret->data[len(a)]), &(b->data), len(b) * sizeof(KCHAR));
