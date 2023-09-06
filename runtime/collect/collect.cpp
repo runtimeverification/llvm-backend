@@ -210,6 +210,7 @@ migrate_child(void *currBlock, layoutitem *args, unsigned i, bool ptr) {
   case LIST_LAYOUT: migrate_list(ptr ? *(list **)arg : arg); break;
   case SET_LAYOUT: migrate_set(ptr ? *(set **)arg : arg); break;
   case STRINGBUFFER_LAYOUT: migrate_string_buffer((stringbuffer **)arg); break;
+  case BYTES_LAYOUT:
   case SYMBOL_LAYOUT:
   case VARIABLE_LAYOUT: migrate((block **)arg); break;
   case INT_LAYOUT: migrate_mpz((mpz_ptr *)arg); break;

@@ -251,7 +251,6 @@ std::string KORESymbol::layoutString(KOREDefinition *definition) const {
     ValueType cat = sort->getCategory(definition);
     switch (cat.cat) {
     case SortCategory::Map: result.push_back('1'); break;
-    case SortCategory::RangeMap: result.push_back('b'); break;
     case SortCategory::List: result.push_back('2'); break;
     case SortCategory::Set: result.push_back('3'); break;
     case SortCategory::Int: result.push_back('4'); break;
@@ -259,9 +258,10 @@ std::string KORESymbol::layoutString(KOREDefinition *definition) const {
     case SortCategory::StringBuffer: result.push_back('6'); break;
     case SortCategory::Bool: result.push_back('7'); break;
     case SortCategory::Variable: result.push_back('8'); break;
+    case SortCategory::RangeMap: result.push_back('9'); break;
+    case SortCategory::Bytes: result.push_back('a'); break;
     case SortCategory::MInt:
       result.append("_" + std::to_string(cat.bits) + "_");
-    case SortCategory::Bytes:
     case SortCategory::Symbol: result.push_back('0'); break;
     case SortCategory::Uncomputed: abort();
     }
