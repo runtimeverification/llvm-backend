@@ -125,7 +125,7 @@ set_is_bytes(T *s, bool is_bytes) {
   if (is_bytes) {
     s->h.hdr |= IS_BYTES_BIT;
   } else {
-    s->h.hdr &= !IS_BYTES_BIT;
+    s->h.hdr &= ~IS_BYTES_BIT;
   }
 }
 
