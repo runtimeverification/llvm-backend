@@ -18,7 +18,7 @@ mpz_ptr move_int(mpz_t);
 
 SortBytes hook_BYTES_empty() {
   static string empty;
-  empty.h.hdr = NOT_YOUNG_OBJECT_BIT;
+  empty.h.hdr = NOT_YOUNG_OBJECT_BIT | IS_BYTES_BIT;
   return &empty;
 }
 
