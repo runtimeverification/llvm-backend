@@ -65,7 +65,9 @@ bool hook_STRING_ne(SortString a, SortString b) {
 }
 
 SortString hook_STRING_concat(SortString a, SortString b) {
-  return hook_BYTES_concat(a, b);
+  auto ret = hook_BYTES_concat(a, b);
+  set_is_bytes(ret, false);
+  return ret;
 }
 
 SortInt hook_STRING_length(SortString a) {
@@ -102,7 +104,9 @@ SortInt hook_STRING_ord(SortString input) {
 }
 
 SortString hook_STRING_substr(SortString input, SortInt start, SortInt end) {
-  return hook_BYTES_substr(input, start, end);
+  auto ret = hook_BYTES_substr(input, start, end);
+  set_is_bytes(ret, false);
+  return ret;
 }
 
 SortInt hook_STRING_find(SortString haystack, SortString needle, SortInt pos) {
