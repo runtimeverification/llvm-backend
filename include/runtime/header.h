@@ -140,8 +140,8 @@ __attribute__((always_inline)) constexpr uint64_t len(T const *s) {
 
 template <typename T>
 __attribute__((always_inline)) constexpr void set_len(T *s, uint64_t l) {
-  s->h.hdr = (s->h.hdr & ~LENGTH_MASK) | l
-             | (l > BLOCK_SIZE - sizeof(char *) ? NOT_YOUNG_OBJECT_BIT : 0);
+  s->h.hdr &= ~(LENGTH_MASK | NOT_YOUNG_OBJECT_BIT);
+  s->h.hdr |= l | (l > BLOCK_SIZE - sizeof(char *) ? NOT_YOUNG_OBJECT_BIT : 0);
 }
 
 __attribute__((always_inline)) constexpr uint64_t size_hdr(uint64_t hdr) {
