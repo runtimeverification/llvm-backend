@@ -137,7 +137,7 @@ get_header(boolHdr, "inj{SortBool{}, SortJSON{}}")
     stringinj *inj = (stringinj *)koreAlloc(sizeof(stringinj));
     inj->h = strHdr();
     string *token = (string *)koreAllocToken(sizeof(string) + len);
-    set_len(token, len);
+    init_with_len(token, len);
     memcpy(token->data, str, len);
     inj->data = token;
     result = (block *)inj;
@@ -145,7 +145,9 @@ get_header(boolHdr, "inj{SortBool{}, SortJSON{}}")
     return true;
   }
 
-  bool StartObject() { return true; }
+  bool StartObject() {
+    return true;
+  }
 
   bool Key(const char *str, SizeType len, bool copy) {
     return String(str, len, copy);
@@ -173,7 +175,9 @@ get_header(boolHdr, "inj{SortBool{}, SortJSON{}}")
     return true;
   }
 
-  bool StartArray() { return true; }
+  bool StartArray() {
+    return true;
+  }
 
   bool EndArray(SizeType elementCount) {
     result = dotList();
