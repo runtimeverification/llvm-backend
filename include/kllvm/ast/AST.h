@@ -122,9 +122,10 @@ enum class SortCategory {
   Bool,
   Symbol,
   Variable,
-  MInt,
   RangeMap,
-  Bytes
+  Bytes,
+  // WARNING: MInt must be the last value, so that valueType.cat + valueType.bits can unique identify the ValueType
+  MInt
 };
 
 // represents the syntactic category of an LLVM backend term at runtime
