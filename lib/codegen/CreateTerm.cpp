@@ -103,6 +103,10 @@ declare %block* @parseConfiguration(i8*)
 declare void @printConfiguration(i8 *, %block *)
 )LLVM";
 
+void writeUInt64(
+    llvm::Value *outputFile, llvm::Module *Module, uint64_t value,
+    llvm::BasicBlock *Block);
+
 std::unique_ptr<llvm::Module>
 newModule(std::string name, llvm::LLVMContext &Context) {
   llvm::SMDiagnostic Err;
@@ -924,6 +928,51 @@ llvm::Value *CreateTerm::createFunctionCall(
     default: args.push_back(arg); break;
     }
   }
+
+  llvm::Function *func = CurrentBlock->getParent();
+
+  auto ProofOutputFlag = Module->getOrInsertGlobal(
+      "proof_output", llvm::Type::getInt1Ty(Module->getContext()));
+  auto OutputFileName = Module->getOrInsertGlobal(
+      "output_file", llvm::Type::getInt8PtrTy(Module->getContext()));
+  auto proofOutput = new llvm::LoadInst(
+      llvm::Type::getInt1Ty(Module->getContext()), ProofOutputFlag,
+      "proof_output", CurrentBlock);
+  llvm::BasicBlock *TrueBlock
+      = llvm::BasicBlock::Create(Module->getContext(), "if", func);
+  auto outputFile = new llvm::LoadInst(
+      llvm::Type::getInt8PtrTy(Module->getContext()), OutputFileName, "output",
+      TrueBlock);
+  auto ir = new llvm::IRBuilder(TrueBlock);
+  llvm::BasicBlock *MergeBlock
+      = llvm::BasicBlock::Create(Module->getContext(), "tail", func);
+  llvm::BranchInst::Create(TrueBlock, MergeBlock, proofOutput, CurrentBlock);
+
+  std::ostringstream symbolName;
+  pattern->getConstructor()->print(symbolName);
+
+  auto symbolString
+      = ir->CreateGlobalStringPtr(symbolName.str(), "", 0, Module);
+  auto positionString = ir->CreateGlobalStringPtr(locationStack, "", 0, Module);
+  writeUInt64(outputFile, Module, 0xdddddddddddddddd, TrueBlock);
+  ir->CreateCall(
+      getOrInsertFunction(
+          Module, "printVariableToFile",
+          llvm::Type::getVoidTy(Module->getContext()),
+          llvm::Type::getInt8PtrTy(Module->getContext()),
+          llvm::Type::getInt8PtrTy(Module->getContext())),
+      {outputFile, symbolString});
+  ir->CreateCall(
+      getOrInsertFunction(
+          Module, "printVariableToFile",
+          llvm::Type::getVoidTy(Module->getContext()),
+          llvm::Type::getInt8PtrTy(Module->getContext()),
+          llvm::Type::getInt8PtrTy(Module->getContext())),
+      {outputFile, positionString});
+
+  llvm::BranchInst::Create(MergeBlock, TrueBlock);
+  CurrentBlock = MergeBlock;
+
   return createFunctionCall(name, returnCat, args, sret, tailcc, locationStack);
 }
 
@@ -963,6 +1012,7 @@ llvm::Value *CreateTerm::createFunctionCall(
   llvm::FunctionType *funcType
       = llvm::FunctionType::get(returnType, types, false);
   llvm::Function *func = getOrInsertFunction(Module, name, funcType);
+
   auto call = llvm::CallInst::Create(func, realArgs, "", CurrentBlock);
   setDebugLoc(call);
   if (tailcc) {
