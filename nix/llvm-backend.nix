@@ -28,9 +28,6 @@ stdenv.mkDerivation {
       --replace 'extra_python_flags=()' \
                 'extra_python_flags=($(${python-env}/bin/pybind11-config --includes))'
 
-    substituteInPlace bin/utils.sh \
-      --replace 'gdate' 'date'
-
     substituteInPlace bin/llvm-kompile-clang \
       --replace 'uname' '${coreutils}/bin/uname' \
       --replace '"-lgmp"' '"-I${gmp.dev}/include" "-L${gmp}/lib" "-lgmp"' \
