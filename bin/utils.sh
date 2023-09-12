@@ -5,14 +5,9 @@ export DEPTH=0
 verbose=${verbose:-false}
 profile=${profile:-false}
 
-if [[ "$OSTYPE" == "darwin"* ]]; then
-  DATE_CMD="gdate"
-else
-  DATE_CMD="date"
-fi
 
 time_now_ms () {
-  "$DATE_CMD" "+%s%3N"
+  perl -MTime::HiRes=time -e 'printf "%d\n", time*1000'
 }
 
 indented () {
