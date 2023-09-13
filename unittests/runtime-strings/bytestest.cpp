@@ -23,6 +23,7 @@ string *hook_BYTES_string2bytes(string *s);
 string *hook_BYTES_substr(string *b, mpz_t start, mpz_t end);
 string *hook_BYTES_replaceAt(string *b, mpz_t start, string *b2);
 string *hook_BYTES_update(string *b, mpz_t off, mpz_t val);
+string *hook_BYTES_memset(string *b, mpz_t start, mpz_t cnt, mpz_t val);
 mpz_ptr hook_BYTES_get(string *b, mpz_t off);
 mpz_ptr hook_BYTES_length(string *b);
 string *hook_BYTES_padRight(string *b, mpz_t len, mpz_t v);
@@ -225,6 +226,28 @@ BOOST_AUTO_TEST_CASE(update) {
   BOOST_CHECK_EQUAL(_1234, res);
   BOOST_CHECK_EQUAL(4, len(res));
   BOOST_CHECK_EQUAL(0, memcmp(res->data, "1204", 4));
+}
+
+BOOST_AUTO_TEST_CASE(memset) {
+  auto _12345 = makeString("12345");
+  mpz_t _0, _1, _3;
+  mpz_init_set_si(_0, '0');
+  mpz_init_set_ui(_1, 1);
+  mpz_init_set_ui(_3, 3);
+
+  auto res = hook_BYTES_memset(_12345, _1, _3, _0);
+  BOOST_CHECK_EQUAL(_12345, res);
+  BOOST_CHECK_EQUAL(5, len(res));
+  BOOST_CHECK_EQUAL(0, memcmp(res->data, "10005", 5));
+
+  mpz_t neg1;
+  mpz_init_set_si(neg1, -1);
+  res = hook_BYTES_memset(_12345, _1, _1, neg1);
+  BOOST_CHECK_EQUAL(_12345, res);
+  BOOST_CHECK_EQUAL(5, len(res));
+  BOOST_CHECK_EQUAL((unsigned char)_12345->data[1], 255);
+
+  BOOST_CHECK_THROW(hook_BYTES_memset(_12345, _3, _3, _0), std::invalid_argument);
 }
 
 BOOST_AUTO_TEST_CASE(get) {
