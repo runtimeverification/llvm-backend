@@ -1,4 +1,4 @@
-{ lib, src, cmake, coreutils, flex, fmt, pkgconfig, llvm, libllvm, libcxxabi, stdenv, boost, gmp
+{ lib, src, cmake, flex, fmt, pkgconfig, llvm, libllvm, libcxxabi, stdenv, boost, gmp
 , jemalloc, libffi, libiconv, libyaml, mpfr, ncurses, python39, unixtools,
 # Runtime dependencies:
 host,
