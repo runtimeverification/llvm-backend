@@ -905,7 +905,7 @@ KORECompositePattern::sortCollections(PrettyPrintData const &data) {
     std::vector<std::pair<std::string, sptr<KOREPattern>>> printed;
     int oldIndent = indent;
     bool oldAtNewLine = atNewLine;
-    atNewLine = true;
+    atNewLine = false;
     indent = 0;
     PrettyPrintData newData = data;
     newData.hasColor = false;
