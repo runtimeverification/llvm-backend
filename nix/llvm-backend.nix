@@ -14,7 +14,7 @@ stdenv.mkDerivation {
   nativeBuildInputs = [ cmake flex llvm pkgconfig ];
   buildInputs = [ libyaml ];
   propagatedBuildInputs = [
-    boost coreutils fmt gmp jemalloc libffi mpfr ncurses python-env unixtools.xxd
+    boost coreutils fmt gmp jemalloc libffi mpfr ncurses python-env unixtools.xxd perl
   ] ++ lib.optional stdenv.isDarwin libiconv;
 
   dontStrip = true;
