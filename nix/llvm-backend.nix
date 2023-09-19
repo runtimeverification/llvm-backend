@@ -14,7 +14,7 @@ stdenv.mkDerivation {
   nativeBuildInputs = [ cmake flex llvm pkgconfig ];
   buildInputs = [ libyaml ];
   propagatedBuildInputs = [
-    boost coreutils fmt gmp jemalloc libffi mpfr ncurses python-env unixtools.xxd perl
+    boost coreutils fmt gmp jemalloc libffi mpfr ncurses python-env unixtools.xxd
   ] ++ lib.optional stdenv.isDarwin libiconv;
 
   dontStrip = true;
@@ -22,6 +22,9 @@ stdenv.mkDerivation {
   postPatch = ''
     sed -i bin/llvm-kompile \
       -e '2a export PATH="${lib.getBin host.clang}/bin:''${PATH}"'
+
+    substituteInPlace bin/utils.sh \
+      --replace 'perl' '${perl}/bin/perl'
 
     substituteInPlace bin/llvm-kompile \
       --replace 'python_cmd=python3' 'python_cmd="${python-env.interpreter}"' \
