@@ -1,7 +1,7 @@
 { lib, src, cmake, coreutils, flex, fmt, pkgconfig, llvm, libllvm, libcxxabi, stdenv, boost, gmp
-, jemalloc, libffi, libiconv, libyaml, mpfr, ncurses, python39, unixtools, perl
+, jemalloc, libffi, libiconv, libyaml, mpfr, ncurses, python39, unixtools,
 # Runtime dependencies:
-host,
+host, perl,
 # Options:
 cmakeBuildType ? "FastBuild" # optimized release build, currently: LTO
 }:
