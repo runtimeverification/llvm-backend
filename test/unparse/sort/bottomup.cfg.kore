@@ -1,0 +1,35 @@
+// RUN: %kprint-nofilter-check
+\or{SortGeneratedTopCell{}}(
+  \and{SortGeneratedTopCell{}}(
+    \and{SortGeneratedTopCell{}}(
+      \equals{SortString{}, SortGeneratedTopCell{}}(
+        Var'Unds'Gen0:SortString{},
+        \dv{SortString{}}("aaa")
+      ),
+      \equals{SortString{}, SortGeneratedTopCell{}}(
+        VarOut:SortString{},
+        \dv{SortString{}}("ccc")
+      )
+    ),
+    \equals{SortString{}, SortGeneratedTopCell{}}(
+      VarOut:SortString{},
+      \dv{SortString{}}("bbb")
+    )
+  ),
+  \and{SortGeneratedTopCell{}}(
+    \and{SortGeneratedTopCell{}}(
+      \equals{SortString{}, SortGeneratedTopCell{}}(
+        Var'Unds'Gen0:SortString{},
+        \dv{SortString{}}("bbb")
+      ),
+      \equals{SortString{}, SortGeneratedTopCell{}}(
+        VarOut:SortString{},
+        \dv{SortString{}}("ddd")
+      )
+    ),
+    \equals{SortString{}, SortGeneratedTopCell{}}(
+      VarOut:SortString{},
+      \dv{SortString{}}("aaa")
+    )
+  )
+)

@@ -905,12 +905,13 @@ KORECompositePattern::sortCollections(PrettyPrintData const &data) {
     std::vector<std::pair<std::string, sptr<KOREPattern>>> printed;
     int oldIndent = indent;
     bool oldAtNewLine = atNewLine;
-    atNewLine = true;
+    atNewLine = false;
     indent = 0;
     PrettyPrintData newData = data;
     newData.hasColor = false;
     for (auto &item : items) {
       std::ostringstream Out;
+      item = item->sortCollections(data);
       item->prettyPrint(Out, newData);
       printed.push_back({Out.str(), item});
     }
@@ -921,12 +922,12 @@ KORECompositePattern::sortCollections(PrettyPrintData const &data) {
     for (auto &item : printed) {
       items.push_back(item.second);
     }
-    sptr<KOREPattern> result = items[0]->sortCollections(data);
+    sptr<KOREPattern> result = items[0];
     for (int i = 1; i < items.size(); ++i) {
       sptr<KORECompositePattern> tmp
           = KORECompositePattern::Create(constructor.get());
       tmp->addArgument(result);
-      tmp->addArgument(items[i]->sortCollections(data));
+      tmp->addArgument(items[i]);
       result = tmp;
     }
     return result;
