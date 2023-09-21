@@ -1,7 +1,7 @@
 { lib, src, cmake, flex, fmt, pkgconfig, llvm, libllvm, libcxxabi, stdenv, boost, gmp
 , jemalloc, libffi, libiconv, libyaml, mpfr, ncurses, python39, unixtools,
 # Runtime dependencies:
-host,
+host, perl,
 # Options:
 cmakeBuildType ? "FastBuild" # optimized release build, currently: LTO
 }:
@@ -22,6 +22,9 @@ stdenv.mkDerivation {
   postPatch = ''
     sed -i bin/llvm-kompile \
       -e '2a export PATH="${lib.getBin host.clang}/bin:''${PATH}"'
+
+    substituteInPlace bin/utils.sh \
+      --replace 'perl' '${perl}/bin/perl'
 
     substituteInPlace bin/llvm-kompile \
       --replace 'python_cmd=python3' 'python_cmd="${python-env.interpreter}"' \
