@@ -1,4 +1,4 @@
-{ lib, src, cmake, coreutils, flex, fmt, pkgconfig, llvm, libllvm, libcxxabi, stdenv, boost, gmp
+{ lib, src, cmake, flex, fmt, pkgconfig, llvm, libllvm, libcxxabi, stdenv, boost, gmp
 , jemalloc, libffi, libiconv, libyaml, mpfr, ncurses, python39, unixtools,
 # Runtime dependencies:
 host, perl,
@@ -14,7 +14,7 @@ stdenv.mkDerivation {
   nativeBuildInputs = [ cmake flex llvm pkgconfig ];
   buildInputs = [ libyaml ];
   propagatedBuildInputs = [
-    boost coreutils fmt gmp jemalloc libffi mpfr ncurses python-env unixtools.xxd
+    boost fmt gmp jemalloc libffi mpfr ncurses python-env unixtools.xxd
   ] ++ lib.optional stdenv.isDarwin libiconv;
 
   dontStrip = true;
@@ -32,7 +32,6 @@ stdenv.mkDerivation {
                 'extra_python_flags=($(${python-env}/bin/pybind11-config --includes))'
 
     substituteInPlace bin/llvm-kompile-clang \
-      --replace 'uname' '${coreutils}/bin/uname' \
       --replace '"-lgmp"' '"-I${gmp.dev}/include" "-L${gmp}/lib" "-lgmp"' \
       --replace '"-lmpfr"' '-I${mpfr.dev}/include "-L${mpfr}/lib" "-lmpfr"' \
       --replace '"-lffi"' '"-L${libffi}/lib" "-lffi"' \

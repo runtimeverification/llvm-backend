@@ -35,7 +35,6 @@ brew update
 brew install  \
   boost       \
   cmake       \
-  coreutils   \
   flex        \
   fmt         \
   git         \
