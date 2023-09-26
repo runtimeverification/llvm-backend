@@ -877,6 +877,7 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> stepFunctionHeader(
     case SortCategory::Int:
     case SortCategory::Float:
     case SortCategory::StringBuffer:
+    case SortCategory::Bytes:
     case SortCategory::Symbol:
     case SortCategory::Variable:
       nroots++;
@@ -915,6 +916,7 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> stepFunctionHeader(
     case SortCategory::List:
     case SortCategory::Set:
     case SortCategory::StringBuffer:
+    case SortCategory::Bytes:
     case SortCategory::Symbol:
     case SortCategory::Variable:
     case SortCategory::Int:
@@ -979,6 +981,7 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> stepFunctionHeader(
     case SortCategory::List:
     case SortCategory::Set:
     case SortCategory::StringBuffer:
+    case SortCategory::Bytes:
     case SortCategory::Symbol:
     case SortCategory::Variable:
     case SortCategory::Int:

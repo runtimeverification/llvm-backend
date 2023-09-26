@@ -62,7 +62,7 @@ target triple = "@BACKEND_TARGET_TRIPLE@"
 
 ; We also define the following LLVM structure types:
 
-%string = type { %blockheader, [0 x i8] } ; 10-bit layout, 4-bit gc flags, 10 unused bits, 40-bit length (or buffer capacity for string pointed by stringbuffers), bytes
+%string = type { %blockheader, [0 x i8] } ; 10-bit layout, 4-bit gc flags, 9 unused bits, 1 bit to mark byte strings, 40-bit length (or buffer capacity for string pointed by stringbuffers), bytes
 %stringbuffer = type { i64, i64, %string* } ; 10-bit layout, 4-bit gc flags, 10 unused bits, 40-bit length, string length, current contents
 %map = type { { i8 *, i64 } } ; immer::map
 %rangemap = type { { { { { i32 (...)**, i32, i64 }*, { { i32 (...)**, i32, i32 }* } } } } } ; rng_map::RangeMap
@@ -174,6 +174,7 @@ llvm::Type *getValueType(ValueType sort, llvm::Module *Module) {
   case SortCategory::Bool: return llvm::Type::getInt1Ty(Module->getContext());
   case SortCategory::MInt:
     return llvm::IntegerType::get(Module->getContext(), sort.bits);
+  case SortCategory::Bytes:
   case SortCategory::Symbol:
   case SortCategory::Variable:
     return llvm::PointerType::getUnqual(getTypeByName(Module, BLOCK_STRUCT));
@@ -280,16 +281,6 @@ sptr<KORESort> termSort(KOREPattern *pattern) {
     assert(false && "not supported yet: meta level");
     abort();
   }
-}
-
-std::string escape(std::string str) {
-  std::stringstream os;
-  os << std::setfill('0') << std::setw(2) << std::hex;
-  for (char c : str) {
-    unsigned char uc = c;
-    os << (int)uc;
-  }
-  return os.str();
 }
 
 llvm::Value *CreateTerm::createHook(
@@ -981,12 +972,12 @@ CreateTerm::createAllocation(KOREPattern *pattern) {
             createFunctionCall("eval_" + Out.str(), constructor, false, true),
             true);
       }
-    } else if (
-        symbolDecl->getAttributes().count("sortInjection")
-        && dynamic_cast<KORECompositeSort *>(symbol->getArguments()[0].get())
-                   ->getCategory(Definition)
-                   .cat
-               == SortCategory::Symbol) {
+    } else if (auto cat = dynamic_cast<KORECompositeSort *>(
+                              symbol->getArguments()[0].get())
+                              ->getCategory(Definition)
+                              .cat;
+               symbolDecl->getAttributes().count("sortInjection")
+               && (cat == SortCategory::Symbol || cat == SortCategory::Bytes)) {
       std::pair<llvm::Value *, bool> val
           = createAllocation(constructor->getArguments()[0].get());
       if (val.second) {
@@ -1194,8 +1185,8 @@ bool makeFunction(
               llvm::Type::getInt8PtrTy(Module->getContext()),
               llvm::Type::getInt8PtrTy(Module->getContext())),
           {outputFile, varname});
-      if (cat.cat == SortCategory::Symbol
-          || cat.cat == SortCategory::Variable) {
+      if (cat.cat == SortCategory::Symbol || cat.cat == SortCategory::Variable
+          || cat.cat == SortCategory::Bytes) {
         ir->CreateCall(
             getOrInsertFunction(
                 Module, "serializeTermToFile",
@@ -1412,6 +1403,7 @@ llvm::Type *getArgType(ValueType cat, llvm::Module *mod) {
   case SortCategory::Int: return getTypeByName(mod, INT_STRUCT);
   case SortCategory::Float: return getTypeByName(mod, FLOAT_STRUCT);
   case SortCategory::StringBuffer: return getTypeByName(mod, BUFFER_STRUCT);
+  case SortCategory::Bytes:
   case SortCategory::Symbol:
   case SortCategory::Variable: {
     return getBlockType(mod);

@@ -337,7 +337,7 @@ SortIOString hook_IO_read(SortInt i, SortInt len) {
   block *retBlock
       = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(string *)));
   retBlock->h = header_string();
-  set_len(result, bytes);
+  init_with_len(result, bytes);
   memcpy(retBlock->children, &result, sizeof(string *));
   return retBlock;
 }
@@ -601,7 +601,7 @@ string *hook_KREFLECTION_kompiledDir(void) {
   auto len = strlen(str_ptr);
   auto ret = static_cast<string *>(koreAllocToken(sizeof(string) + len));
   memcpy(ret->data, str_ptr, len);
-  set_len(ret, len);
+  init_with_len(ret, len);
   return ret;
 }
 
@@ -647,7 +647,7 @@ SortIOFile hook_IO_mkstemp(SortString filename) {
   string *retString = static_cast<string *>(
       koreAllocToken(sizeof(string) + sizeof(char) * length));
   memcpy(retString->data, temp, sizeof(char) * length);
-  set_len(retString, length);
+  init_with_len(retString, length);
   memcpy(retBlock->children, &retString, sizeof(string *));
   memcpy(retBlock->children + 1, &p, sizeof(mpz_ptr));
   retBlock->h = getBlockHeaderForSymbol(

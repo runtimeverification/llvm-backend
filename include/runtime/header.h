@@ -110,6 +110,25 @@ bool hash_enter(void);
 void hash_exit(void);
 }
 
+__attribute__((always_inline)) constexpr bool is_bytes_hdr(uint64_t hdr) {
+  return hdr & IS_BYTES_BIT;
+}
+
+template <typename T>
+__attribute__((always_inline)) constexpr bool is_bytes(T const *s) {
+  return is_bytes_hdr(s->h.hdr);
+}
+
+template <typename T>
+__attribute__((always_inline)) constexpr void
+set_is_bytes(T *s, bool is_bytes) {
+  if (is_bytes) {
+    s->h.hdr |= IS_BYTES_BIT;
+  } else {
+    s->h.hdr &= ~IS_BYTES_BIT;
+  }
+}
+
 __attribute__((always_inline)) constexpr uint64_t len_hdr(uint64_t hdr) {
   return hdr & LENGTH_MASK;
 }
@@ -120,7 +139,7 @@ __attribute__((always_inline)) constexpr uint64_t len(T const *s) {
 }
 
 template <typename T>
-__attribute__((always_inline)) constexpr void set_len(T *s, uint64_t l) {
+__attribute__((always_inline)) constexpr void init_with_len(T *s, uint64_t l) {
   s->h.hdr = l | (l > BLOCK_SIZE - sizeof(char *) ? NOT_YOUNG_OBJECT_BIT : 0);
 }
 
@@ -221,7 +240,7 @@ struct kore_alloc_heap {
       return ::operator new(size);
     } else {
       string *result = (string *)koreAllocToken(size + sizeof(blockheader));
-      set_len(result, size);
+      init_with_len(result, size);
       return result->data;
     }
   }

@@ -22,7 +22,7 @@ extern "C" {
 mpz_ptr move_int(mpz_t);
 floating *move_float(floating *);
 
-string *bytes2string(string *, size_t);
+string *allocStringCopy(string *, size_t);
 string *hook_BYTES_concat(string *a, string *b);
 mpz_ptr hook_BYTES_length(string *a);
 string *hook_BYTES_substr(string *a, mpz_t start, mpz_t end);
@@ -65,7 +65,9 @@ bool hook_STRING_ne(SortString a, SortString b) {
 }
 
 SortString hook_STRING_concat(SortString a, SortString b) {
-  return hook_BYTES_concat(a, b);
+  auto ret = hook_BYTES_concat(a, b);
+  set_is_bytes(ret, false);
+  return ret;
 }
 
 SortInt hook_STRING_length(SortString a) {
@@ -86,7 +88,7 @@ SortString hook_STRING_chr(SortInt ord) {
   }
   auto ret
       = static_cast<string *>(koreAllocToken(sizeof(string) + sizeof(KCHAR)));
-  set_len(ret, 1);
+  init_with_len(ret, 1);
   ret->data[0] = static_cast<KCHAR>(uord);
   return ret;
 }
@@ -102,7 +104,9 @@ SortInt hook_STRING_ord(SortString input) {
 }
 
 SortString hook_STRING_substr(SortString input, SortInt start, SortInt end) {
-  return hook_BYTES_substr(input, start, end);
+  auto ret = hook_BYTES_substr(input, start, end);
+  set_is_bytes(ret, false);
+  return ret;
 }
 
 SortInt hook_STRING_find(SortString haystack, SortString needle, SortInt pos) {
@@ -186,7 +190,7 @@ string *makeString(const KCHAR *input, ssize_t len = -1) {
   }
   auto ret = static_cast<string *>(koreAllocToken(sizeof(string) + len));
   memcpy(ret->data, input, len);
-  set_len(ret, len);
+  init_with_len(ret, len);
   return ret;
 }
 
@@ -195,7 +199,7 @@ char *getTerminatedString(string *str) {
   string *buf
       = static_cast<string *>(koreAllocToken(sizeof(string) + (length + 1)));
   memcpy(buf->data, str->data, length);
-  set_len(buf, length + 1);
+  init_with_len(buf, length + 1);
   buf->data[length] = '\0';
   return buf->data;
 }
@@ -209,7 +213,7 @@ SortString hook_STRING_base2string_long(SortInt input, uint64_t base) {
   auto str_len = str.size() + 1;
   auto result = static_cast<string *>(koreAllocToken(sizeof(string) + str_len));
   strncpy(result->data, str.c_str(), str_len);
-  set_len(result, str.size());
+  init_with_len(result, str.size());
 
   return static_cast<string *>(koreResizeLastAlloc(
       result, sizeof(string) + len(result), sizeof(string) + str_len));
@@ -310,7 +314,7 @@ inline SortString hook_STRING_replace(
   size_t new_len = len(haystack) - i * diff;
   auto ret = static_cast<string *>(
       koreAllocToken(sizeof(string) + new_len * sizeof(KCHAR)));
-  set_len(ret, new_len);
+  init_with_len(ret, new_len);
   int m = 0;
   for (size_t r = 0, h = 0; r < new_len;) {
     if (m >= i) {
@@ -401,10 +405,10 @@ string *hook_STRING_floatFormat(string *str, string *fmt) {
 
 SortStringBuffer hook_BUFFER_empty() {
   auto result = static_cast<stringbuffer *>(koreAlloc(sizeof(stringbuffer)));
-  set_len(result, sizeof(stringbuffer) - sizeof(blockheader));
+  init_with_len(result, sizeof(stringbuffer) - sizeof(blockheader));
   result->strlen = 0;
   auto str = static_cast<string *>(koreAllocToken(sizeof(string) + 16));
-  set_len(str, 16);
+  init_with_len(str, 16);
   result->contents = str;
   return result;
 }
@@ -437,12 +441,12 @@ hook_BUFFER_concat_raw(stringbuffer *buf, char const *data, uint64_t n) {
   }
   memcpy(buf->contents->data + buf->strlen, data, n);
   buf->strlen += n;
-  set_len(buf->contents, newCapacity);
+  init_with_len(buf->contents, newCapacity);
   return buf;
 }
 
 SortString hook_BUFFER_toString(SortStringBuffer buf) {
-  return bytes2string(buf->contents, buf->strlen);
+  return allocStringCopy(buf->contents, buf->strlen);
 }
 }
 

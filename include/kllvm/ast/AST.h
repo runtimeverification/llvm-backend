@@ -122,8 +122,10 @@ enum class SortCategory {
   Bool,
   Symbol,
   Variable,
-  MInt,
-  RangeMap
+  RangeMap,
+  Bytes,
+  // WARNING: MInt must be the last value, so that valueType.cat + valueType.bits can unique identify the ValueType
+  MInt
 };
 
 // represents the syntactic category of an LLVM backend term at runtime
@@ -645,6 +647,35 @@ private:
   KOREStringPattern(const std::string &Contents)
       : contents(Contents) { }
 };
+
+// Convert a Unicode codepoint to a UTF-8 encoded string containing that codepoint
+std::string codepointToUTF8(uint32_t codepoint);
+
+// Return a representation of str with all special characters replaced by their
+// escape sequences.
+//
+// The provided StringType indicates whether to treat the string as a sequence of bytes
+// or as a UTF-8 encoded Unicode string.
+//
+// For example, U+1F601 (😁) is UTF-8 encoded as the byte sequence 0xF0 0x9F 0x98 0x81, so
+// - escapeString("😁", StringType::UTF8)  returns "\U0001f601"
+// - escapeString("😁", StringType::BYTES) returns "\xf0\x9f\x98\x81"
+//
+enum class StringType { BYTES, UTF8 };
+std::string escapeString(const std::string &str, StringType strType);
+
+// A Bytes domain value is represented as a KOREStringPattern by storing each
+// byte 0xHH as the (UTF-8 encoded) Unicode codepoint U+00HH.
+//
+// Given the contents of such a KOREStringPattern, this function produces the
+// actual char[] for the Bytes domain value. In effect, this is just a conversion
+// from UTF-8 to latin-1.
+//
+// The input buffer is overwritten, and the new length is returned.
+extern "C" size_t bytesStringPatternToBytes(char *contents, size_t length);
+
+// Given a char[] of bytes, return its representation as the contents of a KOREStringPattern.
+std::string bytesToBytesStringPattern(const char *bytes, size_t length);
 
 // KOREDeclaration
 class KOREDeclaration {
