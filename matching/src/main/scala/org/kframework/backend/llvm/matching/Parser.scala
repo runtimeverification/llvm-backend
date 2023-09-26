@@ -7,7 +7,7 @@ import org.kframework.parser.kore.implementation.{DefaultBuilders => B}
 import java.util
 import java.util.Optional
 
-case class AxiomInfo(priority: Int, ordinal: Int, rewrite: GeneralizedRewrite, sideCondition: Option[Pattern], source: Optional[Source], location: Optional[Location], att: Attributes) {}
+case class AxiomInfo(priority: Int, ordinal: Int, rewrite: GeneralizedRewrite, sideCondition: Option[Pattern], ensures: Option[Pattern], source: Optional[Source], location: Optional[Location], att: Attributes) {}
 
 object Parser {
 
@@ -136,7 +136,7 @@ object Parser {
   private def location(axiom: AxiomDeclaration): Optional[Location] = location(axiom.att)
 
   private def parseAxiomSentence[T <: GeneralizedRewrite](
-      split: Pattern => Option[(Option[SymbolOrAlias], T, Option[Pattern])],
+      split: Pattern => Option[(Option[SymbolOrAlias], T, Option[Pattern], Option[Pattern])],
       axiom: (AxiomDeclaration, Int),
       simplification: Boolean,
       search: Boolean) :
@@ -147,22 +147,27 @@ object Parser {
       if (hasAtt(s, "comm") || hasAtt(s, "assoc") || hasAtt(s, "idem") || hasAtt(s, "unit") || hasAtt(s, "non-executable") || (hasAtt(s, "simplification") && !simplification)) {
         Seq()
       } else {
-        Seq((splitted.get._1, AxiomInfo(rulePriority(s, search), axiom._2, splitted.get._2, splitted.get._3, source(s), location(s), s.att)))
+        Seq((splitted.get._1, AxiomInfo(rulePriority(s, search), axiom._2, splitted.get._2, splitted.get._3, splitted.get._4, source(s), location(s), s.att)))
       }
     } else {
       Seq()
     }
   }
 
-  private def splitTop(topPattern: Pattern): Option[(Option[SymbolOrAlias], Rewrites, Option[Pattern])] = {
+  private def splitTop(topPattern: Pattern): Option[(Option[SymbolOrAlias], Rewrites, Option[Pattern], Option[Pattern])] = {
     topPattern match {
-      case Rewrites(s, And(_, Equals(_, _, pat, _), l), And(_, _, r)) => Some((None, B.Rewrites(s, l, r), Some(pat)))
-      case Rewrites(s, And(_, l, Equals(_, _, pat, _)), And(_, r, _)) => Some((None, B.Rewrites(s, l, r), Some(pat)))
-      case Rewrites(s, And(_, Top(_), l), And(_, _, r)) => Some((None, B.Rewrites(s, l, r), None))
-      case Rewrites(s, And(_, l, Top(_)), And(_, r, _)) => Some((None, B.Rewrites(s, l, r), None))
-      case Rewrites(s, And(_, Not(_, _), And(_, Equals(_, _, pat, _), l)), And(_, _, r)) => Some((None, B.Rewrites(s, l, r), Some(pat)))
-      case Rewrites(s, And(_, Not(_, _), And(_, Top(_), l)), And(_, _, r)) => Some((None, B.Rewrites(s, l, r), None))
+      case Rewrites(s, And(_, req @ Equals(_, _, _, _), l), And(_, ens, r)) => Some((None, B.Rewrites(s, l, r), splitPredicate(req), splitPredicate(ens)))
+      case Rewrites(s, And(_, req @ Top(_), l), And(_, ens, r)) => Some((None, B.Rewrites(s, l, r), splitPredicate(req), splitPredicate(ens)))
+      case Rewrites(s, And(_, Not(_, _), And(_, req, l)), And(_, ens, r)) => Some((None, B.Rewrites(s, l, r), splitPredicate(req), splitPredicate(ens)))
+      case Rewrites(s, And(_, l, req), And(_, r, ens)) => Some((None, B.Rewrites(s, l, r), splitPredicate(req), splitPredicate(ens)))
       case _ => None
+    }
+  }
+
+  private def splitPredicate(pat: Pattern): Option[Pattern] = {
+    pat match {
+      case Top(_) => None
+      case Equals(_, _, pat, _) => Some(pat)
     }
   }
 
@@ -173,17 +178,13 @@ object Parser {
     }
   }
 
-  private def splitFunction(topPattern: Pattern): Option[(Option[SymbolOrAlias], Equals, Option[Pattern])] = {
+  private def splitFunction(topPattern: Pattern): Option[(Option[SymbolOrAlias], Equals, Option[Pattern], Option[Pattern])] = {
     topPattern match {
-      case Implies(_, And(_, Equals(_, _, pat, _), args), Equals(i, o, Application(symbol, _), And(_, rhs, _))) => Some(Some(symbol), B.Equals(i, o, B.Application(symbol, getPatterns(args)), rhs), Some(pat))
-      case Implies(_, And(_, Not(_, _), And (_, Equals(_, _, pat, _), args)), Equals(i, o, Application(symbol, _), And(_, rhs, _))) => Some(Some(symbol), B.Equals(i, o, B.Application(symbol, getPatterns(args)), rhs), Some(pat))
-      case Implies(_, And(_, Not(_, _), And (_, Top(_), args)), Equals(i, o, Application(symbol, _), And(_, rhs, _))) => Some(Some(symbol), B.Equals(i, o, B.Application(symbol, getPatterns(args)), rhs), None)
-      case Implies(_, And(_, Top(_), args), Equals(i, o, Application(symbol, _), And(_, rhs, _))) => Some(Some(symbol), B.Equals(i, o, B.Application(symbol, getPatterns(args)), rhs), None)
-      case Implies(_, Top(_), Equals(i, o, app @ Application(symbol, _), And(_, rhs, Top(_)))) => Some(Some(symbol), B.Equals(i, o, app, rhs), None)
-      case Implies(_, Equals(_, _, pat, _), Equals(i, o, app @ Application(symbol, _), And(_, rhs, Top(_)))) => Some(Some(symbol), B.Equals(i, o, app, rhs), Some(pat))
-      case Implies(_, Top(_), eq @ Equals(_, _, Application(symbol, _), _)) => Some(Some(symbol), eq, None)
-      case Implies(_, Equals(_, _, pat, _), eq @ Equals(_, _, Application(symbol, _), _)) => Some(Some(symbol), eq, Some(pat))
-      case eq @ Equals(_, _, Application(symbol, _), _) => Some(Some(symbol), eq, None)
+      case Implies(_, And(_, Not(_, _), And (_, req, args)), Equals(i, o, Application(symbol, _), And(_, rhs, ens))) => Some(Some(symbol), B.Equals(i, o, B.Application(symbol, getPatterns(args)), rhs), splitPredicate(req), splitPredicate(ens))
+      case Implies(_, And(_, req, args), Equals(i, o, Application(symbol, _), And(_, rhs, ens))) => Some(Some(symbol), B.Equals(i, o, B.Application(symbol, getPatterns(args)), rhs), splitPredicate(req), splitPredicate(ens))
+      case Implies(_, req, Equals(i, o, app @ Application(symbol, _), And(_, rhs, ens))) => Some(Some(symbol), B.Equals(i, o, app, rhs), splitPredicate(req), splitPredicate(ens))
+      case Implies(_, req, eq @ Equals(_, _, Application(symbol, _), _)) => Some(Some(symbol), eq, splitPredicate(req), None)
+      case eq @ Equals(_, _, Application(symbol, _), _) => Some(Some(symbol), eq, None, None)
       case _ => None
     }
   }

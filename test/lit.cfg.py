@@ -135,6 +135,7 @@ config.substitutions.extend([
     ('%run', '%t.interpreter %test-input -1 /dev/stdout'),
 
     ('%kprint-check', 'kprint %S %s true | diff - %s.out'),
+    ('%kprint-nofilter-check', 'kprint %S %s true false | diff - %s.out'),
 
     ('%input-dir', os.path.join(ROOT_PATH, 'test', 'input')),
     ('%output-dir', os.path.join(ROOT_PATH, 'test', 'output')),

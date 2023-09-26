@@ -1,7 +1,7 @@
-{ lib, src, cmake, coreutils, flex, fmt, pkgconfig, llvm, libllvm, libcxxabi, stdenv, boost, gmp
+{ lib, src, cmake, flex, fmt, pkgconfig, llvm, libllvm, libcxxabi, stdenv, boost, gmp
 , jemalloc, libffi, libiconv, libyaml, mpfr, ncurses, python39, unixtools,
 # Runtime dependencies:
-host,
+host, perl,
 # Options:
 cmakeBuildType ? "FastBuild" # optimized release build, currently: LTO
 }:
@@ -14,7 +14,7 @@ stdenv.mkDerivation {
   nativeBuildInputs = [ cmake flex llvm pkgconfig ];
   buildInputs = [ libyaml ];
   propagatedBuildInputs = [
-    boost coreutils fmt gmp jemalloc libffi mpfr ncurses python-env unixtools.xxd
+    boost fmt gmp jemalloc libffi mpfr ncurses python-env unixtools.xxd
   ] ++ lib.optional stdenv.isDarwin libiconv;
 
   dontStrip = true;
@@ -23,16 +23,15 @@ stdenv.mkDerivation {
     sed -i bin/llvm-kompile \
       -e '2a export PATH="${lib.getBin host.clang}/bin:''${PATH}"'
 
+    substituteInPlace bin/utils.sh \
+      --replace 'perl' '${perl}/bin/perl'
+
     substituteInPlace bin/llvm-kompile \
       --replace 'python_cmd=python3' 'python_cmd="${python-env.interpreter}"' \
       --replace 'extra_python_flags=()' \
                 'extra_python_flags=($(${python-env}/bin/pybind11-config --includes))'
 
-    substituteInPlace bin/utils.sh \
-      --replace 'gdate' 'date'
-
     substituteInPlace bin/llvm-kompile-clang \
-      --replace 'uname' '${coreutils}/bin/uname' \
       --replace '"-lgmp"' '"-I${gmp.dev}/include" "-L${gmp}/lib" "-lgmp"' \
       --replace '"-lmpfr"' '-I${mpfr.dev}/include "-L${mpfr}/lib" "-lmpfr"' \
       --replace '"-lffi"' '"-L${libffi}/lib" "-lffi"' \
