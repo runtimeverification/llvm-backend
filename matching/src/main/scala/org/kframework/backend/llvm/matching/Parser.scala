@@ -1,41 +1,37 @@
 package org.kframework.backend.llvm.matching
 
 import org.kframework.attributes.{Source, Location}
-import org.kframework.parser.kore.GeneralizedRewrite
-import org.kframework.parser.kore.Pattern
-import org.kframework.parser.kore.Sort
-import org.kframework.parser.{kore => i}
-import org.kframework.parser.kore.implementation.ConcreteClasses._
+import org.kframework.parser.kore._
 import org.kframework.parser.kore.parser.KoreToK
 import org.kframework.parser.kore.implementation.{DefaultBuilders => B}
 import java.util
 import java.util.Optional
 
-case class AxiomInfo(priority: Int, ordinal: Int, rewrite: GeneralizedRewrite, sideCondition: Option[Pattern], ensures: Option[Pattern], source: Optional[Source], location: Optional[Location], att: i.Attributes) {}
+case class AxiomInfo(priority: Int, ordinal: Int, rewrite: GeneralizedRewrite, sideCondition: Option[Pattern], ensures: Option[Pattern], source: Optional[Source], location: Optional[Location], att: Attributes) {}
 
 object Parser {
 
-  def hasAtt(axiom: i.AxiomDeclaration, att: String): Boolean = {
+  def hasAtt(axiom: AxiomDeclaration, att: String): Boolean = {
     hasAtt(axiom.att, att)
   }
 
-  def hasAtt(att: i.Attributes, attName: String): Boolean = {
+  def hasAtt(att: Attributes, attName: String): Boolean = {
     getAtt(att, attName).isDefined
   }
 
-  def getAtt(axiom: i.AxiomDeclaration, att: String): Option[Pattern] = {
+  def getAtt(axiom: AxiomDeclaration, att: String): Option[Pattern] = {
     getAtt(axiom.att, att)
   }
 
-  def getAtt(att: i.Attributes, attName: String): Option[Pattern] = {
+  def getAtt(att: Attributes, attName: String): Option[Pattern] = {
     att.patterns.find(isAtt(attName, _))
   }
 
-  def getStringAtt(att: i.Attributes, attName: String): Option[String] = {
+  def getStringAtt(att: Attributes, attName: String): Option[String] = {
     att.patterns.find(isAtt(attName, _)).map(_.asInstanceOf[Application].args.head.asInstanceOf[StringLiteral].str)
   }
 
-  def getSymbolAtt(att: i.Attributes, attName: String): Option[i.SymbolOrAlias] = {
+  def getSymbolAtt(att: Attributes, attName: String): Option[SymbolOrAlias] = {
     att.patterns.find(isAtt(attName, _)).map(_.asInstanceOf[Application].args.head.asInstanceOf[Application].head)
   }
 
@@ -46,12 +42,12 @@ object Parser {
     }
   }
 
-  class SymLib(symbols: Seq[i.SymbolOrAlias], sorts: Seq[Sort], mod: i.Definition, overloadSeq: Seq[(i.SymbolOrAlias, i.SymbolOrAlias)], val heuristics: Seq[Heuristic]) {
+  class SymLib(symbols: Seq[SymbolOrAlias], sorts: Seq[Sort], mod: Definition, overloadSeq: Seq[(SymbolOrAlias, SymbolOrAlias)], val heuristics: Seq[Heuristic]) {
     val sortCache = new util.HashMap[Sort, SortInfo]()
 
-    private val symbolDecls = mod.modules.flatMap(_.decls).filter(_.isInstanceOf[i.SymbolDeclaration]).map(_.asInstanceOf[i.SymbolDeclaration]).groupBy(_.symbol.ctr)
+    private val symbolDecls = mod.modules.flatMap(_.decls).filter(_.isInstanceOf[SymbolDeclaration]).map(_.asInstanceOf[SymbolDeclaration]).groupBy(_.symbol.ctr)
 
-    private val sortDecls = mod.modules.flatMap(_.decls).filter(_.isInstanceOf[i.SortDeclaration]).map(_.asInstanceOf[i.SortDeclaration]).groupBy(_.sort.asInstanceOf[CompoundSort].ctr)
+    private val sortDecls = mod.modules.flatMap(_.decls).filter(_.isInstanceOf[SortDeclaration]).map(_.asInstanceOf[SortDeclaration]).groupBy(_.sort.asInstanceOf[CompoundSort].ctr)
 
     private def instantiate(s: Sort, params: Seq[Sort], args: Seq[Sort]): Sort = {
       val map = (params, args).zipped.toMap
@@ -61,13 +57,13 @@ object Parser {
       }
     }
 
-    def isHooked(symbol: i.SymbolOrAlias): Boolean = {
+    def isHooked(symbol: SymbolOrAlias): Boolean = {
       return symbolDecls(symbol.ctr).head.isInstanceOf[HookSymbolDeclaration]
     }
 
     private def instantiate(s: Seq[Sort], params: Seq[Sort], args: Seq[Sort]): Seq[Sort] = s.map(instantiate(_, params, args))
 
-    val signatures: Map[i.SymbolOrAlias, (Seq[Sort], Sort, i.Attributes)] = {
+    val signatures: Map[SymbolOrAlias, (Seq[Sort], Sort, Attributes)] = {
       symbols.map(symbol => {
         if (symbol.ctr == "\\dv") {
           (symbol, (Seq(), symbol.params(0), B.Attributes(Seq())))
@@ -77,23 +73,23 @@ object Parser {
       }).toMap
     }
 
-    val constructorsForSort: Map[Sort, Seq[i.SymbolOrAlias]] = {
+    val constructorsForSort: Map[Sort, Seq[SymbolOrAlias]] = {
       signatures.groupBy(_._2._2).mapValues(_.keys.filter(k => !hasAtt(signatures(k)._3, "function")).toSeq)
     }
 
-    private val sortAttData: Map[String, i.Attributes] = {
-      sorts.filter(_.isInstanceOf[i.CompoundSort]).map(sort => (sort.asInstanceOf[i.CompoundSort].ctr, sortDecls(sort.asInstanceOf[i.CompoundSort].ctr).head.att)).toMap
+    private val sortAttData: Map[String, Attributes] = {
+      sorts.filter(_.isInstanceOf[CompoundSort]).map(sort => (sort.asInstanceOf[CompoundSort].ctr, sortDecls(sort.asInstanceOf[CompoundSort].ctr).head.att)).toMap
     }
 
-    def sortAtt(s: Sort): i.Attributes = {
-      sortAttData(s.asInstanceOf[i.CompoundSort].ctr)
+    def sortAtt(s: Sort): Attributes = {
+      sortAttData(s.asInstanceOf[CompoundSort].ctr)
     }
 
-    val functions: Seq[i.SymbolOrAlias] = {
+    val functions: Seq[SymbolOrAlias] = {
       signatures.filter(s => s._2._3.patterns.exists(isAtt("anywhere", _)) || s._2._3.patterns.exists(isAtt("function", _))).keys.toSeq
     }
 
-    val overloads: Map[i.SymbolOrAlias, Seq[i.SymbolOrAlias]] = {
+    val overloads: Map[SymbolOrAlias, Seq[SymbolOrAlias]] = {
       overloadSeq.groupBy(_._1).mapValues(_.map(_._2).toSeq)
     }
 
@@ -117,7 +113,7 @@ object Parser {
   private val SOURCE = "org'Stop'kframework'Stop'attributes'Stop'Source"
   private val LOCATION = "org'Stop'kframework'Stop'attributes'Stop'Location"
 
-  def source(att: i.Attributes): Optional[Source] = {
+  def source(att: Attributes): Optional[Source] = {
     if (hasAtt(att, SOURCE)) {
       val sourceStr = getStringAtt(att, SOURCE).get
       return Optional.of(Source(sourceStr.substring("Source(".length, sourceStr.length - 1)))
@@ -126,7 +122,7 @@ object Parser {
     }
   }
 
-  def location(att: i.Attributes): Optional[Location] = {
+  def location(att: Attributes): Optional[Location] = {
     if (hasAtt(att, LOCATION)) {
       val locStr = getStringAtt(att, LOCATION).get
       val splitted = locStr.split("[(,)]")
@@ -140,11 +136,11 @@ object Parser {
   private def location(axiom: AxiomDeclaration): Optional[Location] = location(axiom.att)
 
   private def parseAxiomSentence[T <: GeneralizedRewrite](
-      split: Pattern => Option[(Option[i.SymbolOrAlias], T, Option[Pattern], Option[Pattern])],
+      split: Pattern => Option[(Option[SymbolOrAlias], T, Option[Pattern], Option[Pattern])],
       axiom: (AxiomDeclaration, Int),
       simplification: Boolean,
       search: Boolean) :
-      Seq[(Option[i.SymbolOrAlias], AxiomInfo)] = {
+      Seq[(Option[SymbolOrAlias], AxiomInfo)] = {
     val splitted = split(axiom._1.pattern)
     if (splitted.isDefined) {
       val s = axiom._1
@@ -158,7 +154,7 @@ object Parser {
     }
   }
 
-  private def splitTop(topPattern: Pattern): Option[(Option[i.SymbolOrAlias], i.Rewrites, Option[Pattern], Option[Pattern])] = {
+  private def splitTop(topPattern: Pattern): Option[(Option[SymbolOrAlias], Rewrites, Option[Pattern], Option[Pattern])] = {
     topPattern match {
       case Rewrites(s, And(_, (req @ Equals(_, _, _, _)) +: l +: Seq()), And(_, ens +: r +: Seq())) => Some((None, B.Rewrites(s, l, r), splitPredicate(req), splitPredicate(ens)))
       case Rewrites(s, And(_, (req @ Top(_)) +: l +: Seq()), And(_, ens +: r +: Seq())) => Some((None, B.Rewrites(s, l, r), splitPredicate(req), splitPredicate(ens)))
@@ -182,7 +178,7 @@ object Parser {
     }
   }
 
-  private def splitFunction(topPattern: Pattern): Option[(Option[i.SymbolOrAlias], i.Equals, Option[Pattern], Option[Pattern])] = {
+  private def splitFunction(topPattern: Pattern): Option[(Option[SymbolOrAlias], Equals, Option[Pattern], Option[Pattern])] = {
     topPattern match {
       case Implies(_, And(_, Not(_, _) +: And (_, req +: args +: Seq()) +: Seq()), Equals(i, o, Application(symbol, _), And(_, rhs +: ens +: Seq()))) => Some(Some(symbol), B.Equals(i, o, B.Application(symbol, getPatterns(args)), rhs), splitPredicate(req), splitPredicate(ens))
       case Implies(_, And(_, req +: args +: Seq()), Equals(i, o, Application(symbol, _), And(_, rhs +: ens +: Seq()))) => Some(Some(symbol), B.Equals(i, o, B.Application(symbol, getPatterns(args)), rhs), splitPredicate(req), splitPredicate(ens))
@@ -250,13 +246,13 @@ object Parser {
     B.AxiomDeclaration(axiom.params, expandAliases(axiom.pattern, aliases), axiom.att).asInstanceOf[AxiomDeclaration]
   }
 
-  def getAxioms(defn: i.Definition) : Seq[AxiomDeclaration] = {
+  def getAxioms(defn: Definition) : Seq[AxiomDeclaration] = {
     val aliases = defn.modules.flatMap(_.decls).filter(_.isInstanceOf[AliasDeclaration]).map(_.asInstanceOf[AliasDeclaration]).map(al => (al.alias.ctr, al)).toMap
     defn.modules.flatMap(_.decls).filter(_.isInstanceOf[AxiomDeclaration]).map(_.asInstanceOf[AxiomDeclaration]).map(expandAliases(_, aliases))
   }
 
-  def getSorts(defn: i.Definition): Seq[Sort] = {
-    defn.modules.flatMap(_.decls).filter(_.isInstanceOf[i.SortDeclaration]).map(_.asInstanceOf[i.SortDeclaration].sort)
+  def getSorts(defn: Definition): Seq[Sort] = {
+    defn.modules.flatMap(_.decls).filter(_.isInstanceOf[SortDeclaration]).map(_.asInstanceOf[SortDeclaration].sort)
   }
 
   def parseTopAxioms(axioms: Seq[AxiomDeclaration], search: Boolean) : IndexedSeq[AxiomInfo] = {
@@ -264,16 +260,16 @@ object Parser {
     withOwise.map(_._2).sortWith(_.priority < _.priority).toIndexedSeq
   }
 
-  def parseFunctionAxioms(axioms: Seq[AxiomDeclaration], simplification: Boolean) : Map[i.SymbolOrAlias, IndexedSeq[AxiomInfo]] = {
+  def parseFunctionAxioms(axioms: Seq[AxiomDeclaration], simplification: Boolean) : Map[SymbolOrAlias, IndexedSeq[AxiomInfo]] = {
     val withOwise = axioms.zipWithIndex.flatMap(parseAxiomSentence(a => splitFunction(a), _, simplification, true))
     withOwise.sortWith(_._2.priority < _._2.priority).toIndexedSeq.filter(_._1.isDefined).map(t => (t._1.get, t._2)).groupBy(_._1).mapValues(_.map(_._2))
   }
 
-  private def isConcrete(symbol: i.SymbolOrAlias) : Boolean = {
+  private def isConcrete(symbol: SymbolOrAlias) : Boolean = {
     symbol.params.forall(_.isInstanceOf[CompoundSort])
   }
 
-  private def parsePatternForSymbols(pat: Pattern): Seq[i.SymbolOrAlias] = {
+  private def parsePatternForSymbols(pat: Pattern): Seq[SymbolOrAlias] = {
     pat match {
       case And(_, ps) => ps.flatMap(parsePatternForSymbols)
       case Application(s, ps) => Seq(s).filter(isConcrete) ++ ps.flatMap(parsePatternForSymbols)
@@ -294,7 +290,7 @@ object Parser {
     }
   }
 
-  private def getOverloads(axioms: Seq[AxiomDeclaration]): Seq[(i.SymbolOrAlias, i.SymbolOrAlias)] = {
+  private def getOverloads(axioms: Seq[AxiomDeclaration]): Seq[(SymbolOrAlias, SymbolOrAlias)] = {
     if (axioms.isEmpty) {
       Seq()
     }
@@ -333,7 +329,7 @@ object Parser {
     heuristics.toList.map(parseHeuristic(_))
   }
 
-  def parseSymbols(defn: i.Definition, heuristics: String) : SymLib = {
+  def parseSymbols(defn: Definition, heuristics: String) : SymLib = {
     val axioms = getAxioms(defn)
     val symbols = axioms.flatMap(a => parsePatternForSymbols(a.pattern))
     val allSorts = getSorts(defn)
