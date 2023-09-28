@@ -569,121 +569,45 @@ llvm::Value *CreateTerm::createHook(
   } else if (name == "MINT.not") {
     llvm::Value *in = ALLOC_ARG(0);
     return llvm::BinaryOperator::CreateNot(in, "hook_MINT_not", CurrentBlock);
-  } else if (name == "MINT.eq") {
-    llvm::Value *first = ALLOC_ARG(0);
-    llvm::Value *second = ALLOC_ARG(1);
-    return new llvm::ICmpInst(
-        *CurrentBlock, llvm::CmpInst::ICMP_EQ, first, second, "hook_MINT_eq");
-  } else if (name == "MINT.ne") {
-    llvm::Value *first = ALLOC_ARG(0);
-    llvm::Value *second = ALLOC_ARG(1);
-    return new llvm::ICmpInst(
-        *CurrentBlock, llvm::CmpInst::ICMP_NE, first, second, "hook_MINT_ne");
-  } else if (name == "MINT.ult") {
-    llvm::Value *first = ALLOC_ARG(0);
-    llvm::Value *second = ALLOC_ARG(1);
-    return new llvm::ICmpInst(
-        *CurrentBlock, llvm::CmpInst::ICMP_ULT, first, second, "hook_MINT_ult");
-  } else if (name == "MINT.ule") {
-    llvm::Value *first = ALLOC_ARG(0);
-    llvm::Value *second = ALLOC_ARG(1);
-    return new llvm::ICmpInst(
-        *CurrentBlock, llvm::CmpInst::ICMP_ULE, first, second, "hook_MINT_ule");
-  } else if (name == "MINT.ugt") {
-    llvm::Value *first = ALLOC_ARG(0);
-    llvm::Value *second = ALLOC_ARG(1);
-    return new llvm::ICmpInst(
-        *CurrentBlock, llvm::CmpInst::ICMP_UGT, first, second, "hook_MINT_ugt");
-  } else if (name == "MINT.uge") {
-    llvm::Value *first = ALLOC_ARG(0);
-    llvm::Value *second = ALLOC_ARG(1);
-    return new llvm::ICmpInst(
-        *CurrentBlock, llvm::CmpInst::ICMP_UGE, first, second, "hook_MINT_uge");
-  } else if (name == "MINT.slt") {
-    llvm::Value *first = ALLOC_ARG(0);
-    llvm::Value *second = ALLOC_ARG(1);
-    return new llvm::ICmpInst(
-        *CurrentBlock, llvm::CmpInst::ICMP_SLT, first, second, "hook_MINT_slt");
-  } else if (name == "MINT.sle") {
-    llvm::Value *first = ALLOC_ARG(0);
-    llvm::Value *second = ALLOC_ARG(1);
-    return new llvm::ICmpInst(
-        *CurrentBlock, llvm::CmpInst::ICMP_SLE, first, second, "hook_MINT_sle");
-  } else if (name == "MINT.sgt") {
-    llvm::Value *first = ALLOC_ARG(0);
-    llvm::Value *second = ALLOC_ARG(1);
-    return new llvm::ICmpInst(
-        *CurrentBlock, llvm::CmpInst::ICMP_SGT, first, second, "hook_MINT_sgt");
-  } else if (name == "MINT.sge") {
-    llvm::Value *first = ALLOC_ARG(0);
-    llvm::Value *second = ALLOC_ARG(1);
-    return new llvm::ICmpInst(
-        *CurrentBlock, llvm::CmpInst::ICMP_SGE, first, second, "hook_MINT_sge");
-  } else if (name == "MINT.xor") {
-    llvm::Value *first = ALLOC_ARG(0);
-    llvm::Value *second = ALLOC_ARG(1);
-    return llvm::BinaryOperator::Create(
-        llvm::Instruction::Xor, first, second, "hook_MINT_xor", CurrentBlock);
-  } else if (name == "MINT.or") {
-    llvm::Value *first = ALLOC_ARG(0);
-    llvm::Value *second = ALLOC_ARG(1);
-    return llvm::BinaryOperator::Create(
-        llvm::Instruction::Or, first, second, "hook_MINT_or", CurrentBlock);
-  } else if (name == "MINT.and") {
-    llvm::Value *first = ALLOC_ARG(0);
-    llvm::Value *second = ALLOC_ARG(1);
-    return llvm::BinaryOperator::Create(
-        llvm::Instruction::And, first, second, "hook_MINT_and", CurrentBlock);
-  } else if (name == "MINT.shl") {
-    llvm::Value *first = ALLOC_ARG(0);
-    llvm::Value *second = ALLOC_ARG(1);
-    return llvm::BinaryOperator::Create(
-        llvm::Instruction::Shl, first, second, "hook_MINT_shl", CurrentBlock);
-  } else if (name == "MINT.lshr") {
-    llvm::Value *first = ALLOC_ARG(0);
-    llvm::Value *second = ALLOC_ARG(1);
-    return llvm::BinaryOperator::Create(
-        llvm::Instruction::LShr, first, second, "hook_MINT_lshr", CurrentBlock);
-  } else if (name == "MINT.ashr") {
-    llvm::Value *first = ALLOC_ARG(0);
-    llvm::Value *second = ALLOC_ARG(1);
-    return llvm::BinaryOperator::Create(
-        llvm::Instruction::AShr, first, second, "hook_MINT_ashr", CurrentBlock);
-  } else if (name == "MINT.add") {
-    llvm::Value *first = ALLOC_ARG(0);
-    llvm::Value *second = ALLOC_ARG(1);
-    return llvm::BinaryOperator::Create(
-        llvm::Instruction::Add, first, second, "hook_MINT_add", CurrentBlock);
-  } else if (name == "MINT.sub") {
-    llvm::Value *first = ALLOC_ARG(0);
-    llvm::Value *second = ALLOC_ARG(1);
-    return llvm::BinaryOperator::Create(
-        llvm::Instruction::Sub, first, second, "hook_MINT_sub", CurrentBlock);
-  } else if (name == "MINT.mul") {
-    llvm::Value *first = ALLOC_ARG(0);
-    llvm::Value *second = ALLOC_ARG(1);
-    return llvm::BinaryOperator::Create(
-        llvm::Instruction::Mul, first, second, "hook_MINT_mul", CurrentBlock);
-  } else if (name == "MINT.sdiv") {
-    llvm::Value *first = ALLOC_ARG(0);
-    llvm::Value *second = ALLOC_ARG(1);
-    return llvm::BinaryOperator::Create(
-        llvm::Instruction::SDiv, first, second, "hook_MINT_sdiv", CurrentBlock);
-  } else if (name == "MINT.udiv") {
-    llvm::Value *first = ALLOC_ARG(0);
-    llvm::Value *second = ALLOC_ARG(1);
-    return llvm::BinaryOperator::Create(
-        llvm::Instruction::UDiv, first, second, "hook_MINT_udiv", CurrentBlock);
-  } else if (name == "MINT.srem") {
-    llvm::Value *first = ALLOC_ARG(0);
-    llvm::Value *second = ALLOC_ARG(1);
-    return llvm::BinaryOperator::Create(
-        llvm::Instruction::SRem, first, second, "hook_MINT_srem", CurrentBlock);
-  } else if (name == "MINT.urem") {
-    llvm::Value *first = ALLOC_ARG(0);
-    llvm::Value *second = ALLOC_ARG(1);
-    return llvm::BinaryOperator::Create(
-        llvm::Instruction::URem, first, second, "hook_MINT_urem", CurrentBlock);
+#define MINT_CMP(hookname, inst)                                               \
+  }                                                                            \
+  else if (name == "MINT." #hookname) {                                        \
+    llvm::Value *first = ALLOC_ARG(0);                                         \
+    llvm::Value *second = ALLOC_ARG(1);                                        \
+    return new llvm::ICmpInst(                                                 \
+        *CurrentBlock, llvm::CmpInst::inst, first, second,                     \
+        "hook_MINT_" #hookname)
+    MINT_CMP(eq, ICMP_EQ);
+    MINT_CMP(ne, ICMP_NE);
+    MINT_CMP(ult, ICMP_ULT);
+    MINT_CMP(ule, ICMP_ULE);
+    MINT_CMP(ugt, ICMP_UGT);
+    MINT_CMP(uge, ICMP_UGE);
+    MINT_CMP(slt, ICMP_SLT);
+    MINT_CMP(sle, ICMP_SLE);
+    MINT_CMP(sgt, ICMP_SGT);
+    MINT_CMP(sge, ICMP_SGE);
+#define MINT_BINOP(hookname, inst)                                             \
+  }                                                                            \
+  else if (name == "MINT." #hookname) {                                        \
+    llvm::Value *first = ALLOC_ARG(0);                                         \
+    llvm::Value *second = ALLOC_ARG(1);                                        \
+    return llvm::BinaryOperator::Create(                                       \
+        llvm::Instruction::inst, first, second, "hook_MINT_" #hookname,        \
+        CurrentBlock)
+    MINT_BINOP(xor, Xor);
+    MINT_BINOP(or, Or);
+    MINT_BINOP(and, And);
+    MINT_BINOP(shl, Shl);
+    MINT_BINOP(lshr, LShr);
+    MINT_BINOP(ashr, AShr);
+    MINT_BINOP(add, Add);
+    MINT_BINOP(sub, Sub);
+    MINT_BINOP(mul, Mul);
+    MINT_BINOP(sdiv, SDiv);
+    MINT_BINOP(udiv, UDiv);
+    MINT_BINOP(srem, SRem);
+    MINT_BINOP(urem, URem);
   } else if (!name.compare(0, 5, "MINT.")) {
     std::cerr << name << std::endl;
     assert(false && "not implemented yet: MInt");
