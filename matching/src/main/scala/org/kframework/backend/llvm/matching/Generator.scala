@@ -2,7 +2,10 @@ package org.kframework.backend.llvm.matching
 
 import org.kframework.backend.llvm.matching.dt.DecisionTree
 import org.kframework.backend.llvm.matching.pattern.{Pattern => P, SymbolP, LiteralP, VariableP, AsP, OrP, ListP, MapP, SetP, WildcardP, SortCategory}
-import org.kframework.parser.kore._
+import org.kframework.parser.kore.Pattern
+import org.kframework.parser.kore.Sort
+import org.kframework.parser.{kore => i}
+import org.kframework.parser.kore.implementation.ConcreteClasses._
 import org.kframework.utils.errorsystem.KException
 
 object Generator {
@@ -12,7 +15,7 @@ object Generator {
   case class Unit() extends CollectionCons
   case class Element() extends CollectionCons
 
-  private def listPattern(sym: SymbolOrAlias, cons: CollectionCons, ps: Seq[P[String]], c: SymbolOrAlias) : P[String] = {
+  private def listPattern(sym: i.SymbolOrAlias, cons: CollectionCons, ps: Seq[P[String]], c: i.SymbolOrAlias) : P[String] = {
     (cons, ps) match {
       case (Concat(), Seq(ListP(hd1, None, tl1, _, o1), ListP(hd2, frame, tl2, _, o2))) => ListP(hd1 ++ tl1 ++ hd2, frame, tl2, c, SymbolP(sym, Seq(o1, o2)))
       case (Concat(), Seq(ListP(hd1, frame, tl1, _, o1), ListP(hd2, None, tl2, _, o2))) => ListP(hd1, frame, tl1 ++ hd2 ++ tl2, c, SymbolP(sym, Seq(o1, o2)))
@@ -26,7 +29,7 @@ object Generator {
     }
   }
 
-  private def mapPattern(sym: SymbolOrAlias, cons: CollectionCons, ps: Seq[P[String]], c: SymbolOrAlias) : P[String] = {
+  private def mapPattern(sym: i.SymbolOrAlias, cons: CollectionCons, ps: Seq[P[String]], c: i.SymbolOrAlias) : P[String] = {
     (cons, ps) match {
       case (Concat(), Seq(MapP(ks1, vs1, None, _, o1), MapP(ks2, vs2, frame, _, o2))) => MapP(ks1 ++ ks2, vs1 ++ vs2, frame, c, SymbolP(sym, Seq(o1, o2)))
       case (Concat(), Seq(MapP(ks1, vs1, frame,_, o1), MapP(ks2, vs2, None, _, o2))) => MapP(ks1 ++ ks2, vs1 ++ vs2, frame, c, SymbolP(sym, Seq(o1, o2)))
@@ -40,7 +43,7 @@ object Generator {
     }
   }
 
-  private def setPattern(sym: SymbolOrAlias, cons: CollectionCons, ps: Seq[P[String]], c: SymbolOrAlias) : P[String] = {
+  private def setPattern(sym: i.SymbolOrAlias, cons: CollectionCons, ps: Seq[P[String]], c: i.SymbolOrAlias) : P[String] = {
     (cons, ps) match {
       case (Concat(), Seq(SetP(ks1, None, _, o1), SetP(ks2, frame, _, o2))) => SetP(ks1 ++ ks2, frame, c, SymbolP(sym, Seq(o1, o2)))
       case (Concat(), Seq(SetP(ks1, frame,_, o1), SetP(ks2, None, _, o2))) => SetP(ks1 ++ ks2, frame, c, SymbolP(sym, Seq(o1, o2)))
@@ -54,8 +57,8 @@ object Generator {
     }
   }
 
-  private def genPatterns(mod: Definition, symlib: Parser.SymLib, lhs: Seq[Pattern]) : List[P[String]] = {
-    def getElementSym(sort: Sort): SymbolOrAlias = {
+  private def genPatterns(mod: i.Definition, symlib: Parser.SymLib, lhs: Seq[Pattern]) : List[P[String]] = {
+    def getElementSym(sort: Sort): i.SymbolOrAlias = {
       Parser.getSymbolAtt(symlib.sortAtt(sort), "element").get
     }
     def genPattern(pat: Pattern) : P[String] = {
@@ -121,7 +124,7 @@ object Generator {
 
   def genClauseMatrix[T](
       symlib: Parser.SymLib,
-      mod: Definition,
+      mod: i.Definition,
       axioms: IndexedSeq[AxiomInfo],
       sorts: Seq[Sort]) :
       Matrix = {
@@ -137,7 +140,7 @@ object Generator {
     new Matrix(symlib, cols, actions).expand
   }
   
-  def mkDecisionTree(symlib: Parser.SymLib, mod: Definition, axioms: IndexedSeq[AxiomInfo], sorts: Seq[Sort], name: SymbolOrAlias, kem: KException => scala.Unit) : DecisionTree = {
+  def mkDecisionTree(symlib: Parser.SymLib, mod: i.Definition, axioms: IndexedSeq[AxiomInfo], sorts: Seq[Sort], name: i.SymbolOrAlias, kem: KException => scala.Unit) : DecisionTree = {
     val matrix = genClauseMatrix(symlib, mod, axioms, sorts)
     matrix.checkUsefulness(kem)
     if (!symlib.isHooked(name) && (Parser.hasAtt(symlib.signatures(name)._3, "functional") || Parser.hasAtt(symlib.signatures(name)._3, "total")) && Parser.hasAtt(symlib.signatures(name)._3, "function")) {
@@ -155,7 +158,7 @@ object Generator {
     numerator <= denominator
   }
 
-  def mkSpecialDecisionTree(symlib: Parser.SymLib, mod: Definition, matrix: Matrix, axiom: AxiomInfo, threshold: (Int, Int)) : Option[(DecisionTree, Seq[(P[String], Occurrence)])] = {
+  def mkSpecialDecisionTree(symlib: Parser.SymLib, mod: i.Definition, matrix: Matrix, axiom: AxiomInfo, threshold: (Int, Int)) : Option[(DecisionTree, Seq[(P[String], Occurrence)])] = {
     val rhs = genPatterns(mod, symlib, Seq(axiom.rewrite.getRightHandSide))
     val (specialized,residuals) = matrix.specializeBy(rhs.toIndexedSeq)
     val residualMap = (residuals, specialized.fringe.map(_.occurrence)).zipped.toSeq
