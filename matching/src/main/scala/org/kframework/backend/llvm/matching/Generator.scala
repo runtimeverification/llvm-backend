@@ -93,10 +93,10 @@ object Generator {
           val att = symlib.sortAtt(sort)
           val hookAtt = Parser.getStringAtt(att, "hook")
           VariableP(name, SortCategory(hookAtt.orElse(Some("STRING.String")), sort, symlib))
-        case And(_, p, v @ Variable(_, _)) =>
+        case And(_, p +: (v @ Variable(_, _)) +: Seq()) =>
           val _var = genPattern(v).asInstanceOf[VariableP[String]]
           AsP(_var.name, _var.sort, genPattern(p))
-        case Or(_, p1, p2) => OrP(genPattern(p1), genPattern(p2))
+        case Or(_, args) => args.map(genPattern).reduce(OrP(_, _))
       }
     }
     lhs.map(genPattern).toList
@@ -105,7 +105,7 @@ object Generator {
   private def genVars(pat: Pattern) : Seq[Variable] = {
     pat match {
       case v @ Variable(_, _) => Seq(v)
-      case And(_, p1, p2) => genVars(p1) ++ genVars(p2)
+      case And(_, ps) => ps.flatMap(genVars)
       case Application(_, ps) => ps.flatMap(genVars)
       case Ceil(_, _, p) => genVars(p)
       case Equals(_, _, p1, p2) => genVars(p1) ++ genVars(p2)
@@ -117,7 +117,7 @@ object Generator {
       case Mem(_, _, p1, p2) => genVars(p1) ++ genVars(p2)
       // case Next(_, p) => genVars(p)
       case Not(_, p) => genVars(p)
-      case Or(_, p1, p2) => genVars(p1) ++ genVars(p2)
+      case Or(_, ps) => ps.flatMap(genVars)
       case _ => Seq()
     }
   }

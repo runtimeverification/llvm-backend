@@ -160,10 +160,10 @@ object Parser {
 
   private def splitTop(topPattern: Pattern): Option[(Option[i.SymbolOrAlias], i.Rewrites, Option[Pattern], Option[Pattern])] = {
     topPattern match {
-      case Rewrites(s, And(_, req @ Equals(_, _, _, _), l), And(_, ens, r)) => Some((None, B.Rewrites(s, l, r), splitPredicate(req), splitPredicate(ens)))
-      case Rewrites(s, And(_, req @ Top(_), l), And(_, ens, r)) => Some((None, B.Rewrites(s, l, r), splitPredicate(req), splitPredicate(ens)))
-      case Rewrites(s, And(_, Not(_, _), And(_, req, l)), And(_, ens, r)) => Some((None, B.Rewrites(s, l, r), splitPredicate(req), splitPredicate(ens)))
-      case Rewrites(s, And(_, l, req), And(_, r, ens)) => Some((None, B.Rewrites(s, l, r), splitPredicate(req), splitPredicate(ens)))
+      case Rewrites(s, And(_, (req @ Equals(_, _, _, _)) +: l +: Seq()), And(_, ens +: r +: Seq())) => Some((None, B.Rewrites(s, l, r), splitPredicate(req), splitPredicate(ens)))
+      case Rewrites(s, And(_, (req @ Top(_)) +: l +: Seq()), And(_, ens +: r +: Seq())) => Some((None, B.Rewrites(s, l, r), splitPredicate(req), splitPredicate(ens)))
+      case Rewrites(s, And(_, Not(_, _) +: And(_, req +: l +: Seq()) +: Seq()), And(_, ens +: r +: Seq())) => Some((None, B.Rewrites(s, l, r), splitPredicate(req), splitPredicate(ens)))
+      case Rewrites(s, And(_, l +: req +: Seq()), And(_, r +: ens +: Seq())) => Some((None, B.Rewrites(s, l, r), splitPredicate(req), splitPredicate(ens)))
       case _ => None
     }
   }
@@ -177,16 +177,16 @@ object Parser {
 
   private def getPatterns(pat: Pattern): List[Pattern] = {
     pat match {
-      case And(_, Mem(_, _, _, pat), pats) => pat :: getPatterns(pats)
+      case And(_, Mem(_, _, _, pat) +: pats +: Seq()) => pat :: getPatterns(pats)
       case Top(_) => Nil
     }
   }
 
   private def splitFunction(topPattern: Pattern): Option[(Option[i.SymbolOrAlias], i.Equals, Option[Pattern], Option[Pattern])] = {
     topPattern match {
-      case Implies(_, And(_, Not(_, _), And (_, req, args)), Equals(i, o, Application(symbol, _), And(_, rhs, ens))) => Some(Some(symbol), B.Equals(i, o, B.Application(symbol, getPatterns(args)), rhs), splitPredicate(req), splitPredicate(ens))
-      case Implies(_, And(_, req, args), Equals(i, o, Application(symbol, _), And(_, rhs, ens))) => Some(Some(symbol), B.Equals(i, o, B.Application(symbol, getPatterns(args)), rhs), splitPredicate(req), splitPredicate(ens))
-      case Implies(_, req, Equals(i, o, app @ Application(symbol, _), And(_, rhs, ens))) => Some(Some(symbol), B.Equals(i, o, app, rhs), splitPredicate(req), splitPredicate(ens))
+      case Implies(_, And(_, Not(_, _) +: And (_, req +: args +: Seq()) +: Seq()), Equals(i, o, Application(symbol, _), And(_, rhs +: ens +: Seq()))) => Some(Some(symbol), B.Equals(i, o, B.Application(symbol, getPatterns(args)), rhs), splitPredicate(req), splitPredicate(ens))
+      case Implies(_, And(_, req +: args +: Seq()), Equals(i, o, Application(symbol, _), And(_, rhs +: ens +: Seq()))) => Some(Some(symbol), B.Equals(i, o, B.Application(symbol, getPatterns(args)), rhs), splitPredicate(req), splitPredicate(ens))
+      case Implies(_, req, Equals(i, o, app @ Application(symbol, _), And(_, rhs +: ens +: Seq()))) => Some(Some(symbol), B.Equals(i, o, app, rhs), splitPredicate(req), splitPredicate(ens))
       case Implies(_, req, eq @ Equals(_, _, Application(symbol, _), _)) => Some(Some(symbol), eq, splitPredicate(req), None)
       case eq @ Equals(_, _, Application(symbol, _), _) => Some(Some(symbol), eq, None, None)
       case _ => None
@@ -202,8 +202,8 @@ object Parser {
     pat match {
       case Variable(name, _) => subst.getOrElse(name, pat)
       case Application(head, args) => B.Application(head, args.map(substitute(_, subst)))
-      case And(s, l, r) => B.And(s, substitute(l, subst), substitute(r, subst))
-      case Or(s, l, r) => B.Or(s, substitute(l, subst), substitute(r, subst))
+      case And(s, args)=> B.And(s, args.map(substitute(_, subst)))
+      case Or(s, args) => B.Or(s, args.map(substitute(_, subst)))
       case Not(s, p) => B.Not(s, substitute(p, subst))
       case Implies(s, l, r) => B.Implies(s, substitute(l, subst), substitute(r, subst))
       case Iff(s, l, r) => B.Iff(s, substitute(l, subst), substitute(r, subst))
@@ -230,8 +230,8 @@ object Parser {
         } else {
           B.Application(head, args.map(expandAliases(_, aliases)))
         }
-      case And(s, l, r) => B.And(s, expandAliases(l, aliases), expandAliases(r, aliases))
-      case Or(s, l, r) => B.Or(s, expandAliases(l, aliases), expandAliases(r, aliases))
+      case And(s, args) => B.And(s, args.map(expandAliases(_, aliases)))
+      case Or(s, args) => B.Or(s, args.map(expandAliases(_, aliases)))
       case Not(s, p) => B.Not(s, expandAliases(p, aliases))
       case Implies(s, l, r) => B.Implies(s, expandAliases(l, aliases), expandAliases(r, aliases))
       case Iff(s, l, r) => B.Iff(s, expandAliases(l, aliases), expandAliases(r, aliases))
@@ -275,7 +275,7 @@ object Parser {
 
   private def parsePatternForSymbols(pat: Pattern): Seq[i.SymbolOrAlias] = {
     pat match {
-      case And(_, p1, p2) => parsePatternForSymbols(p1) ++ parsePatternForSymbols(p2)
+      case And(_, ps) => ps.flatMap(parsePatternForSymbols)
       case Application(s, ps) => Seq(s).filter(isConcrete) ++ ps.flatMap(parsePatternForSymbols)
       case DomainValue(sort, _) => Seq(B.SymbolOrAlias("\\dv", Seq(sort)))
       case Ceil(_, _, p) => parsePatternForSymbols(p)
@@ -288,7 +288,7 @@ object Parser {
       case Mem(_, _, p1, p2) => parsePatternForSymbols(p1) ++ parsePatternForSymbols(p2)
 //      case Next(_, p) => parsePatternForSymbols(p)
       case Not(_, p) => parsePatternForSymbols(p)
-      case Or(_, p1, p2) => parsePatternForSymbols(p1) ++ parsePatternForSymbols(p2)
+      case Or(_, ps) => ps.flatMap(parsePatternForSymbols)
       case Rewrites(_, p1, p2) => parsePatternForSymbols(p1) ++ parsePatternForSymbols(p2)
       case _ => Seq()
     }
