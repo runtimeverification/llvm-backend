@@ -250,7 +250,7 @@ void printConfigurations(
   if (size == 0) {
     sfprintf(&w, "\\bottom{SortGeneratedTopCell{}}()");
   } else {
-    sfprintf(&w, "\\left-assoc{}(\\or{SortGeneratedTopCell{}}(");
+    sfprintf(&w, "\\or{SortGeneratedTopCell{}}(");
     size_t j = 0;
     for (const auto &subject : results) {
       printConfigurationInternal(&w, subject, nullptr, false, &state);
@@ -258,7 +258,7 @@ void printConfigurations(
         sfprintf(&w, ",");
       }
     }
-    sfprintf(&w, "))");
+    sfprintf(&w, ")");
   }
 
   fclose(file);
