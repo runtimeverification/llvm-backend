@@ -406,6 +406,7 @@ public:
   sptr<KOREPattern> expandMacros(
       SubsortMap const &subsorts, SymbolMap const &overloads,
       std::vector<ptr<KOREDeclaration>> const &axioms, bool reverse);
+  virtual sptr<KOREPattern> unflattenAndOr(void) = 0;
 
   /*
    * Recursively expands productions of the form:
@@ -492,6 +493,10 @@ public:
     return shared_from_this();
   }
 
+  virtual sptr<KOREPattern> unflattenAndOr() override {
+    return shared_from_this();
+  }
+
   virtual bool matches(
       substitution &subst, SubsortMap const &, SymbolMap const &,
       sptr<KOREPattern> subject) override;
@@ -560,6 +565,7 @@ public:
   virtual sptr<KOREPattern> dedupeDisjuncts(void) override;
   virtual std::map<std::string, int> gatherVarCounts(void) override;
   virtual sptr<KOREPattern> desugarAssociative() override;
+  virtual sptr<KOREPattern> unflattenAndOr() override;
   virtual sptr<KOREPattern> filterSubstitution(
       PrettyPrintData const &data, std::set<std::string> const &vars) override;
   virtual bool matches(
@@ -621,6 +627,10 @@ public:
   }
 
   virtual sptr<KOREPattern> desugarAssociative() override {
+    return shared_from_this();
+  }
+
+  virtual sptr<KOREPattern> unflattenAndOr() override {
     return shared_from_this();
   }
 
