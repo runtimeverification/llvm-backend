@@ -640,10 +640,7 @@ llvm::Value *CreateTerm::createFunctionCall(
   int i = 0;
   for (auto sort : pattern->getConstructor()->getArguments()) {
     auto concreteSort = dynamic_cast<KORECompositeSort *>(sort.get());
-    llvm::Value *arg = createAllocation(
-                           pattern->getArguments()[i].get(),
-                           fmt::format("{}:{}", locationStack, i))
-                           .first;
+    llvm::Value *arg = ALLOC_ARG(i);
     i++;
     switch (concreteSort->getCategory(Definition).cat) {
     case SortCategory::Map:
