@@ -20,14 +20,18 @@ private:
   bool isAnywhereOwise;
   std::set<KOREPattern *> staticTerms;
 
-  llvm::Value *
-  createHook(KORECompositePattern *hookAtt, KORECompositePattern *pattern);
+  llvm::Value *createHook(
+      KORECompositePattern *hookAtt, KORECompositePattern *pattern,
+      std::string locationStack = "0");
   llvm::Value *createFunctionCall(
-      std::string name, KORECompositePattern *pattern, bool sret, bool tailcc);
-  llvm::Value *
-  notInjectionCase(KORECompositePattern *constructor, llvm::Value *val);
+      std::string name, KORECompositePattern *pattern, bool sret, bool tailcc,
+      std::string locationStack = "0");
+  llvm::Value *notInjectionCase(
+      KORECompositePattern *constructor, llvm::Value *val,
+      std::string locationStack = "0");
   bool populateStaticSet(KOREPattern *pattern);
-  std::pair<llvm::Value *, bool> createAllocation(KOREPattern *pattern);
+  std::pair<llvm::Value *, bool>
+  createAllocation(KOREPattern *pattern, std::string locationStack = "0");
 
 public:
   CreateTerm(
@@ -64,7 +68,8 @@ public:
     */
   llvm::Value *createFunctionCall(
       std::string name, ValueType returnCat,
-      const std::vector<llvm::Value *> &args, bool sret, bool tailcc);
+      const std::vector<llvm::Value *> &args, bool sret, bool tailcc,
+      std::string locationStack = "0");
 
   llvm::BasicBlock *getCurrentBlock() const { return CurrentBlock; }
 };
