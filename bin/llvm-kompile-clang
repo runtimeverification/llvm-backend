@@ -2,7 +2,7 @@
 
 # This is configured generated code; shellcheck can't follow it properly
 # shellcheck disable=SC1091
-source "$(dirname "$0")/../lib/scripts/utils.sh"
+source "$(dirname $(realpath "$0"))/../lib/scripts/utils.sh"
 
 # Set the printing depth for profiling and verbose execution information
 export DEPTH=1
@@ -114,9 +114,9 @@ case "$modopt" in
     ;;
 esac
 
-LIBDIR="$(dirname "$0")/../lib/kllvm/"
-INCDIR="$(dirname "$0")/../include/"
-BINDIR="$(dirname "$0")"
+LIBDIR="$(dirname $(realpath "$0"))/../lib/kllvm/"
+INCDIR="$(dirname $(realpath "$0"))/../include/"
+BINDIR="$(dirname $(realpath "$0"))"
 
 if [ "$main" = "main" ]; then
   MAINFILES="$LIBDIR"/llvm/main/main.ll
@@ -243,7 +243,7 @@ if $link; then
     "$LIBDIR"/libjson.a \
     "${flags[@]}" \
     "${all_libraries[@]}" \
-    -I "$(dirname "$0")"/../include/kllvm \
+    -I "$(dirname $(realpath "$0"))"/../include/kllvm \
     "${clangpp_args[@]}"
 
   if [[ "$OSTYPE" == "darwin"* ]]; then
