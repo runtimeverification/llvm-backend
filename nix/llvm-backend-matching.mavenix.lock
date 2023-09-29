@@ -10,28 +10,12 @@
       "sha1": "nx34986x5284ggylf3bg8yd36hilsn5i"
     },
     {
-      "path": "ant-contrib/ant-contrib/1.0b3/ant-contrib-1.0b3.jar",
-      "sha1": "943cd5c8802b2a3a64a010efb86ec19bac142e40"
-    },
-    {
-      "path": "ant-contrib/ant-contrib/1.0b3/ant-contrib-1.0b3.pom",
-      "sha1": "3a97f431768378a9fdbf082aec8312b99339ae78"
-    },
-    {
       "path": "antlr/antlr/2.7.2/antlr-2.7.2.jar",
       "sha1": "546b5220622c4d9b2da45ad1899224b6ce1c8830"
     },
     {
       "path": "antlr/antlr/2.7.2/antlr-2.7.2.pom",
       "sha1": "60b2b206af3df735765e8e284396bcfdbced5665"
-    },
-    {
-      "path": "antlr/antlr/2.7.7/antlr-2.7.7.jar",
-      "sha1": "83cd2cd674a217ade95a4bb83a8a14f351f48bd0"
-    },
-    {
-      "path": "antlr/antlr/2.7.7/antlr-2.7.7.pom",
-      "sha1": "52f15b99911ab8b8bc8744675f5cf1994a626fb8"
     },
     {
       "path": "avalon-framework/avalon-framework/4.1.3/avalon-framework-4.1.3.pom",
@@ -54,26 +38,6 @@
       "sha1": "c23a09377059bb343b69e9b86b9fc60257b83406"
     },
     {
-      "path": "ch/qos/logback/logback-classic/1.2.3/logback-classic-1.2.3.jar",
-      "sha1": "7c4f3c474fb2c041d8028740440937705ebb473a"
-    },
-    {
-      "path": "ch/qos/logback/logback-classic/1.2.3/logback-classic-1.2.3.pom",
-      "sha1": "bc627b0345626c9dfa55eac703602c3a7846950b"
-    },
-    {
-      "path": "ch/qos/logback/logback-core/1.2.3/logback-core-1.2.3.jar",
-      "sha1": "864344400c3d4d92dfeb0a305dc87d953677c03c"
-    },
-    {
-      "path": "ch/qos/logback/logback-core/1.2.3/logback-core-1.2.3.pom",
-      "sha1": "a8d536fbd395b033310f686c4085eec5d6099b0f"
-    },
-    {
-      "path": "ch/qos/logback/logback-parent/1.2.3/logback-parent-1.2.3.pom",
-      "sha1": "97bb391732b4500e61247d7fb261ff5b01efece3"
-    },
-    {
       "path": "classworlds/classworlds/1.1-alpha-2/classworlds-1.1-alpha-2.jar",
       "sha1": "05adf2e681c57d7f48038b602f3ca2254ee82d47"
     },
@@ -90,1046 +54,6 @@
       "sha1": "4703c4199028094698c222c17afea6dcd9f04999"
     },
     {
-      "path": "com/amazonaws/aws-java-sdk-acm/1.11.276/aws-java-sdk-acm-1.11.276.jar",
-      "sha1": "0ccf1e14f40dd7963a9bedb4d43f94cb3e94cd43"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-acm/1.11.276/aws-java-sdk-acm-1.11.276.pom",
-      "sha1": "ffb5688b8ef02552f5bd24d2e92826d6c9a2f16e"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-alexaforbusiness/1.11.276/aws-java-sdk-alexaforbusiness-1.11.276.jar",
-      "sha1": "c2f7dc55733886807e2a5858ad9ae057a2da9822"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-alexaforbusiness/1.11.276/aws-java-sdk-alexaforbusiness-1.11.276.pom",
-      "sha1": "d9839eea046dbdad2615dc2de75fb31ca0cea4e5"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-api-gateway/1.11.276/aws-java-sdk-api-gateway-1.11.276.jar",
-      "sha1": "b847a3845f14a14cdff3a03ce5b54ebd902f7e03"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-api-gateway/1.11.276/aws-java-sdk-api-gateway-1.11.276.pom",
-      "sha1": "01b239525ea319dda57f336c76d201433194e5d9"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-applicationautoscaling/1.11.276/aws-java-sdk-applicationautoscaling-1.11.276.jar",
-      "sha1": "5b5d021bc1152f298116069e683e730e413c8f2f"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-applicationautoscaling/1.11.276/aws-java-sdk-applicationautoscaling-1.11.276.pom",
-      "sha1": "232a8eea9ed8eedfbf6c6fc80cc43855e30c932f"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-appstream/1.11.276/aws-java-sdk-appstream-1.11.276.jar",
-      "sha1": "52edcd28aa6928409fe20c9bfd39b0ecd27c29cd"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-appstream/1.11.276/aws-java-sdk-appstream-1.11.276.pom",
-      "sha1": "07f2805782a461e622d66806f61d0b2a89bddecb"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-appsync/1.11.276/aws-java-sdk-appsync-1.11.276.jar",
-      "sha1": "a55899ccab0950d7e1eaaed0936b64a22ebf2041"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-appsync/1.11.276/aws-java-sdk-appsync-1.11.276.pom",
-      "sha1": "23f214f52a94d0c1754026ab58e06276677bc41d"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-athena/1.11.276/aws-java-sdk-athena-1.11.276.jar",
-      "sha1": "0584cde1bb4b179605caacddadd146628b2b765e"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-athena/1.11.276/aws-java-sdk-athena-1.11.276.pom",
-      "sha1": "a4ccfc7b5ea45ace9e5c7b7c63732b51dc041dbd"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-autoscaling/1.11.276/aws-java-sdk-autoscaling-1.11.276.jar",
-      "sha1": "0144d52dac9d1bbf3cf25c8008da89d61c72f40b"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-autoscaling/1.11.276/aws-java-sdk-autoscaling-1.11.276.pom",
-      "sha1": "a3720d51609ac9de66c8c844f43f5c3b31436f49"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-autoscalingplans/1.11.276/aws-java-sdk-autoscalingplans-1.11.276.jar",
-      "sha1": "c5991c84d494ac7ee58868744cbcc3cd0ce547a8"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-autoscalingplans/1.11.276/aws-java-sdk-autoscalingplans-1.11.276.pom",
-      "sha1": "2615f75855bd860537985c9723c39f0d09f73127"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-batch/1.11.276/aws-java-sdk-batch-1.11.276.jar",
-      "sha1": "90a649709b90b4e07a5c289fdc536421665cfa6a"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-batch/1.11.276/aws-java-sdk-batch-1.11.276.pom",
-      "sha1": "2032e2cfc63f55f4a17265be03f476bf60294a2c"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-budgets/1.11.276/aws-java-sdk-budgets-1.11.276.jar",
-      "sha1": "2ce15ef9e905b726e40bba248906818ee0aec387"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-budgets/1.11.276/aws-java-sdk-budgets-1.11.276.pom",
-      "sha1": "7af6f7efb97044b22684319958dee9a919bbf34b"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-cloud9/1.11.276/aws-java-sdk-cloud9-1.11.276.jar",
-      "sha1": "a9fea16c1fb5bdd04b59eb52f0d1183eb06d087e"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-cloud9/1.11.276/aws-java-sdk-cloud9-1.11.276.pom",
-      "sha1": "a2a04907100038957700c28ba543418be147b589"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-clouddirectory/1.11.276/aws-java-sdk-clouddirectory-1.11.276.jar",
-      "sha1": "27fa410648645078c6508f2626584a7bfc79fe02"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-clouddirectory/1.11.276/aws-java-sdk-clouddirectory-1.11.276.pom",
-      "sha1": "a0a36481bbdca321e7b4aff4d578fab01da6d719"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-cloudformation/1.11.276/aws-java-sdk-cloudformation-1.11.276.jar",
-      "sha1": "e94f39552fe16ae613427d3f5434031cb1a5edb0"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-cloudformation/1.11.276/aws-java-sdk-cloudformation-1.11.276.pom",
-      "sha1": "b0a6cc028c8aa0c86cefddf6d5471b2c499db908"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-cloudfront/1.11.276/aws-java-sdk-cloudfront-1.11.276.jar",
-      "sha1": "77d1ba3d0e816ff8d4fac4c71993b6b1e7f9f934"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-cloudfront/1.11.276/aws-java-sdk-cloudfront-1.11.276.pom",
-      "sha1": "80a0b27b4524a6f881826d1aa81c7bc3bb609fe0"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-cloudhsm/1.11.276/aws-java-sdk-cloudhsm-1.11.276.jar",
-      "sha1": "031030694052d742dd56d00f879e6c661fa7b8f0"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-cloudhsm/1.11.276/aws-java-sdk-cloudhsm-1.11.276.pom",
-      "sha1": "a8e71a50f4c06266855a909a1b13681d03a4064f"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-cloudhsmv2/1.11.276/aws-java-sdk-cloudhsmv2-1.11.276.jar",
-      "sha1": "d4fdbabb266c02e88843c1881249d88ca8a6b879"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-cloudhsmv2/1.11.276/aws-java-sdk-cloudhsmv2-1.11.276.pom",
-      "sha1": "699193145c8c12dd9cec2a97894c54d4c36909e5"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-cloudsearch/1.11.276/aws-java-sdk-cloudsearch-1.11.276.jar",
-      "sha1": "f48f7e638aa212fcda99b07b212f4facd5a072b9"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-cloudsearch/1.11.276/aws-java-sdk-cloudsearch-1.11.276.pom",
-      "sha1": "72de2ece8d1e8a3ae183e43798421f8da158633a"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-cloudtrail/1.11.276/aws-java-sdk-cloudtrail-1.11.276.jar",
-      "sha1": "cd16e67ee94339e61a03c6b9c12913f79c1c4b02"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-cloudtrail/1.11.276/aws-java-sdk-cloudtrail-1.11.276.pom",
-      "sha1": "9501b2700fd94b03a0453da2dc4974cda5987f56"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-cloudwatch/1.11.276/aws-java-sdk-cloudwatch-1.11.276.jar",
-      "sha1": "21a4b720237288803c7ee28ca7f4a20cba1e4180"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-cloudwatch/1.11.276/aws-java-sdk-cloudwatch-1.11.276.pom",
-      "sha1": "f2875c0309e7b0084b2edd69a437be3337c639fc"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-cloudwatchmetrics/1.11.276/aws-java-sdk-cloudwatchmetrics-1.11.276.jar",
-      "sha1": "eb0bcc9638c58069de4c98d6c8c95683ea74fdea"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-cloudwatchmetrics/1.11.276/aws-java-sdk-cloudwatchmetrics-1.11.276.pom",
-      "sha1": "6955863ffa7c25fad3823b7a770b0ef21d8d1516"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-codebuild/1.11.276/aws-java-sdk-codebuild-1.11.276.jar",
-      "sha1": "70c0421e62702df4de30e3465805c278870f5e88"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-codebuild/1.11.276/aws-java-sdk-codebuild-1.11.276.pom",
-      "sha1": "59944b1116ebbaeb12eb45e9b3472c78e3288d74"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-codecommit/1.11.276/aws-java-sdk-codecommit-1.11.276.jar",
-      "sha1": "411b0fbb74a54991ab3d04a39b45336075622247"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-codecommit/1.11.276/aws-java-sdk-codecommit-1.11.276.pom",
-      "sha1": "7ae380b8aacff6be00c88e577fd6e81e2d2126e9"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-codedeploy/1.11.276/aws-java-sdk-codedeploy-1.11.276.jar",
-      "sha1": "6c0167b0d5807a16e258354fefdb274e73470d2a"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-codedeploy/1.11.276/aws-java-sdk-codedeploy-1.11.276.pom",
-      "sha1": "609c42b7e86b9e719fc2a2ea0ec5a0b557558ce7"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-codepipeline/1.11.276/aws-java-sdk-codepipeline-1.11.276.jar",
-      "sha1": "a63cd65e9f2de6f8bd4465cfcfc0bc9ca02dd4a1"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-codepipeline/1.11.276/aws-java-sdk-codepipeline-1.11.276.pom",
-      "sha1": "78fa03968cf3c7a1e831361053d5a1d142a406b5"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-codestar/1.11.276/aws-java-sdk-codestar-1.11.276.jar",
-      "sha1": "ae5e5dd636094cf13b9ccc9d5dc8c3a0fbc654fe"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-codestar/1.11.276/aws-java-sdk-codestar-1.11.276.pom",
-      "sha1": "a6ffdaa51530b02e5dabd91ec48368815eab3fe1"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-cognitoidentity/1.11.276/aws-java-sdk-cognitoidentity-1.11.276.jar",
-      "sha1": "30a99289ed90271717a7ca6b7984e8d7c076172c"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-cognitoidentity/1.11.276/aws-java-sdk-cognitoidentity-1.11.276.pom",
-      "sha1": "092229066fd4c86db254c4de1b9f8392561aaacf"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-cognitoidp/1.11.276/aws-java-sdk-cognitoidp-1.11.276.jar",
-      "sha1": "f6cc34675fde34177f30efa1560260602e1ba2a1"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-cognitoidp/1.11.276/aws-java-sdk-cognitoidp-1.11.276.pom",
-      "sha1": "b2d31acee6501d23f7d5cc1ea5c34925df01f2e0"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-cognitosync/1.11.276/aws-java-sdk-cognitosync-1.11.276.jar",
-      "sha1": "4b5fb7fa655db5f8dece2b14b26b7ff77f187c5f"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-cognitosync/1.11.276/aws-java-sdk-cognitosync-1.11.276.pom",
-      "sha1": "14a9f17d2b9ec66b21813ef3a3514b7efbba08f6"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-comprehend/1.11.276/aws-java-sdk-comprehend-1.11.276.jar",
-      "sha1": "646a959d7af0ea019b614d3cd0e8c4349b86afbd"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-comprehend/1.11.276/aws-java-sdk-comprehend-1.11.276.pom",
-      "sha1": "e65561d9c8b9421e164ed0de01d6bebbd9b6c1f4"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-config/1.11.276/aws-java-sdk-config-1.11.276.jar",
-      "sha1": "bd0ec45dd93fc045b1bf38b45d8f9b76cc7e1744"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-config/1.11.276/aws-java-sdk-config-1.11.276.pom",
-      "sha1": "286ec624ccc087331a0762947985acb65d65d4fb"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-core/1.11.22/aws-java-sdk-core-1.11.22.pom",
-      "sha1": "0cae44f2477e7c2cbbe284e13420c97ff570dc3d"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-core/1.11.276/aws-java-sdk-core-1.11.276.jar",
-      "sha1": "07314655715cae0193838dc81bbc25cbdf0edc42"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-core/1.11.276/aws-java-sdk-core-1.11.276.pom",
-      "sha1": "5bab63c08067b88a5ce1785e6bfc6c1b786e1f01"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-costandusagereport/1.11.276/aws-java-sdk-costandusagereport-1.11.276.jar",
-      "sha1": "e4b9f7b4a55d585be48095ac5d5ca6fb4237d5fb"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-costandusagereport/1.11.276/aws-java-sdk-costandusagereport-1.11.276.pom",
-      "sha1": "2d5db18b836607d922e41ba82a6542ffee958f9b"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-costexplorer/1.11.276/aws-java-sdk-costexplorer-1.11.276.jar",
-      "sha1": "53ea925f336e5c8589768049f41f30dec0d32a83"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-costexplorer/1.11.276/aws-java-sdk-costexplorer-1.11.276.pom",
-      "sha1": "1d80f0d1ab1d503ae5ddb461d53776511b9e3b87"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-datapipeline/1.11.276/aws-java-sdk-datapipeline-1.11.276.jar",
-      "sha1": "7e57778c6db4c0da53d29e1009295a634f578b9f"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-datapipeline/1.11.276/aws-java-sdk-datapipeline-1.11.276.pom",
-      "sha1": "7609cdbe6e69f867d5bff6835972686bc465a75b"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-dax/1.11.276/aws-java-sdk-dax-1.11.276.jar",
-      "sha1": "718f998ab5205afdd945551ef08e5580a3d44153"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-dax/1.11.276/aws-java-sdk-dax-1.11.276.pom",
-      "sha1": "ab687372004d599a1711b146684d91ce3ba6cf4c"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-devicefarm/1.11.276/aws-java-sdk-devicefarm-1.11.276.jar",
-      "sha1": "26b082ddd7330aef50250ed8d005a68708c62fac"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-devicefarm/1.11.276/aws-java-sdk-devicefarm-1.11.276.pom",
-      "sha1": "29b6f486a052dfdf427f2930cf37f5f50d1c1032"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-directconnect/1.11.276/aws-java-sdk-directconnect-1.11.276.jar",
-      "sha1": "87363075ab6749c5692225e76ae6cfe329dcc6e9"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-directconnect/1.11.276/aws-java-sdk-directconnect-1.11.276.pom",
-      "sha1": "e94851e773117bc73171302c799e55b665942748"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-directory/1.11.276/aws-java-sdk-directory-1.11.276.jar",
-      "sha1": "bf32c1a084dfb52efaade73c74a1193e1a5f4bdc"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-directory/1.11.276/aws-java-sdk-directory-1.11.276.pom",
-      "sha1": "3c23f6ca641636d4142440dc959bef83a5532ac4"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-discovery/1.11.276/aws-java-sdk-discovery-1.11.276.jar",
-      "sha1": "06115d03c71c9ae03ca3f76959fc241ad3ad17ba"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-discovery/1.11.276/aws-java-sdk-discovery-1.11.276.pom",
-      "sha1": "b7db17f655b0f2db1abed5091e28994246bf82ea"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-dms/1.11.276/aws-java-sdk-dms-1.11.276.jar",
-      "sha1": "3b1f27ba6dad81ecece5e9644cf3eb29ef2588bc"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-dms/1.11.276/aws-java-sdk-dms-1.11.276.pom",
-      "sha1": "7deb35774893443f4b621e31e464b7366c2a687c"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-dynamodb/1.11.276/aws-java-sdk-dynamodb-1.11.276.jar",
-      "sha1": "9697461438dac7af35b86772245cd6ba8b9ff4c2"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-dynamodb/1.11.276/aws-java-sdk-dynamodb-1.11.276.pom",
-      "sha1": "9fde2b2eb5ba20dd0ef1a8e6278b12b7fc6bfa5a"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-ec2/1.11.276/aws-java-sdk-ec2-1.11.276.jar",
-      "sha1": "ed55b03f6a5a5a451f75ead107b20ff530f59478"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-ec2/1.11.276/aws-java-sdk-ec2-1.11.276.pom",
-      "sha1": "0cd187c9e24f229699d8a49f1b48e129d27d06f2"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-ecr/1.11.276/aws-java-sdk-ecr-1.11.276.jar",
-      "sha1": "1084f04a1bf743e6caa8e768fa83c0f2878b8063"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-ecr/1.11.276/aws-java-sdk-ecr-1.11.276.pom",
-      "sha1": "71fb106667bc8428cd2421bfd1838717e2d6cfa9"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-ecs/1.11.276/aws-java-sdk-ecs-1.11.276.jar",
-      "sha1": "0710ea1d24086dd8498d7235a999ded10c840455"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-ecs/1.11.276/aws-java-sdk-ecs-1.11.276.pom",
-      "sha1": "130518a966311b3a16b01cc9c51bf3926ff5696b"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-efs/1.11.276/aws-java-sdk-efs-1.11.276.jar",
-      "sha1": "243affd81184b497db484cd7c884a7ddae993119"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-efs/1.11.276/aws-java-sdk-efs-1.11.276.pom",
-      "sha1": "894d766b226d0122fd674818b99a703dd4ce73a8"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-elasticache/1.11.276/aws-java-sdk-elasticache-1.11.276.jar",
-      "sha1": "7aee71ad6b268b95cedecfca1890b6e38e41e153"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-elasticache/1.11.276/aws-java-sdk-elasticache-1.11.276.pom",
-      "sha1": "6a1bc4cc78951487fec755267b77de4b16925d05"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-elasticbeanstalk/1.11.276/aws-java-sdk-elasticbeanstalk-1.11.276.jar",
-      "sha1": "d0e26004b4ce3be877659ccbaf637df7b3f5f693"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-elasticbeanstalk/1.11.276/aws-java-sdk-elasticbeanstalk-1.11.276.pom",
-      "sha1": "dad836114f21e179dc71d684e577fa27ffe2e935"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-elasticloadbalancing/1.11.276/aws-java-sdk-elasticloadbalancing-1.11.276.jar",
-      "sha1": "19aabdbbbf0b970b971f3596c50a14c92ea84678"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-elasticloadbalancing/1.11.276/aws-java-sdk-elasticloadbalancing-1.11.276.pom",
-      "sha1": "f8d1a56af06414ed8f87570dcd506f02aa27232c"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-elasticloadbalancingv2/1.11.276/aws-java-sdk-elasticloadbalancingv2-1.11.276.jar",
-      "sha1": "561b85cc0dbe7e602dfe1cdd6048d1e1aa0ad019"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-elasticloadbalancingv2/1.11.276/aws-java-sdk-elasticloadbalancingv2-1.11.276.pom",
-      "sha1": "f815f8abb368eeb13ff5e4ce2564c9b74fc04308"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-elasticsearch/1.11.276/aws-java-sdk-elasticsearch-1.11.276.jar",
-      "sha1": "d80bf64fe82f7a7e92196ebeb0585fcce1fc6bbe"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-elasticsearch/1.11.276/aws-java-sdk-elasticsearch-1.11.276.pom",
-      "sha1": "5e403c079512b8e61399e1de14547212e19f7cdb"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-elastictranscoder/1.11.276/aws-java-sdk-elastictranscoder-1.11.276.jar",
-      "sha1": "0828ef9b4f26b7c85a5df24774ea7a2635894449"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-elastictranscoder/1.11.276/aws-java-sdk-elastictranscoder-1.11.276.pom",
-      "sha1": "af77702e4c30cf244eea789005150c1b3bf6cf09"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-emr/1.11.276/aws-java-sdk-emr-1.11.276.jar",
-      "sha1": "39ca2c9d9ab16e731cb396c18891f1ef8c97d943"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-emr/1.11.276/aws-java-sdk-emr-1.11.276.pom",
-      "sha1": "451e89f02c26ec89bf7b992655d15724badbd488"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-events/1.11.276/aws-java-sdk-events-1.11.276.jar",
-      "sha1": "a5896efd68b80b37f51fe751381bebc1279ef279"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-events/1.11.276/aws-java-sdk-events-1.11.276.pom",
-      "sha1": "b87116314504ad44f2f44e0e8aff64a8cd9abf65"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-gamelift/1.11.276/aws-java-sdk-gamelift-1.11.276.jar",
-      "sha1": "4d1dfa1d531467e5e372733ef71bc19f1c6f5478"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-gamelift/1.11.276/aws-java-sdk-gamelift-1.11.276.pom",
-      "sha1": "72ee506d6d6ed92d7f72e64b6fc42b8b08475ca3"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-glacier/1.11.276/aws-java-sdk-glacier-1.11.276.jar",
-      "sha1": "18cf237bf3974be658946305db595470904e8da2"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-glacier/1.11.276/aws-java-sdk-glacier-1.11.276.pom",
-      "sha1": "7155535f89e30ad2fc7aed9b75f9b80355af2e8c"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-glue/1.11.276/aws-java-sdk-glue-1.11.276.jar",
-      "sha1": "06eefd48a3a25dbb55c412725eccad6c637a6511"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-glue/1.11.276/aws-java-sdk-glue-1.11.276.pom",
-      "sha1": "2ad29ca038e103f5142a17b48e54594a2b4288c6"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-greengrass/1.11.276/aws-java-sdk-greengrass-1.11.276.jar",
-      "sha1": "56ab3ff919366e36814d950f656826ad99dce103"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-greengrass/1.11.276/aws-java-sdk-greengrass-1.11.276.pom",
-      "sha1": "3913a29ab4e9fda3921b82de5d5429ad1bd89af3"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-guardduty/1.11.276/aws-java-sdk-guardduty-1.11.276.jar",
-      "sha1": "e949a26b94fbf4aa2b1a2667005e3ee4f333158c"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-guardduty/1.11.276/aws-java-sdk-guardduty-1.11.276.pom",
-      "sha1": "a4ca17b17683d24bdd304007c4fd82bfa605c604"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-health/1.11.276/aws-java-sdk-health-1.11.276.jar",
-      "sha1": "6f741c720c7d2368abe0e5184adf6481b2af1be0"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-health/1.11.276/aws-java-sdk-health-1.11.276.pom",
-      "sha1": "d77c14e6624804f965ca753b8c935e2a962d5658"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-iam/1.11.276/aws-java-sdk-iam-1.11.276.jar",
-      "sha1": "277f5569b115b1c36174b4ce2fd6aa024172926d"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-iam/1.11.276/aws-java-sdk-iam-1.11.276.pom",
-      "sha1": "3c46d28dbb1c3286bc935d48298d119b89c7e367"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-importexport/1.11.276/aws-java-sdk-importexport-1.11.276.jar",
-      "sha1": "e4c8b451c8ad1497dff9f3a333ec2d471bd1582f"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-importexport/1.11.276/aws-java-sdk-importexport-1.11.276.pom",
-      "sha1": "02092625b7dc489641c14da2cf23d6f67c998364"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-inspector/1.11.276/aws-java-sdk-inspector-1.11.276.jar",
-      "sha1": "1946dd3e9eb9b5dbd6718841d97cc1969a86bcb9"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-inspector/1.11.276/aws-java-sdk-inspector-1.11.276.pom",
-      "sha1": "5cdc7b4143db34dc9b1fa6d8070df92b4ea8ca86"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-iot/1.11.276/aws-java-sdk-iot-1.11.276.jar",
-      "sha1": "2c0354b346a6dfa300ee031d78ed049b35c85df1"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-iot/1.11.276/aws-java-sdk-iot-1.11.276.pom",
-      "sha1": "9499ad941cdcf33c7a9cb30ab8c64581c327e731"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-iotjobsdataplane/1.11.276/aws-java-sdk-iotjobsdataplane-1.11.276.jar",
-      "sha1": "f2166046316067a7033592630389d6da37c99e04"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-iotjobsdataplane/1.11.276/aws-java-sdk-iotjobsdataplane-1.11.276.pom",
-      "sha1": "00e638af1810f1d14ae05fc9277743fa6ce60b16"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-kinesis/1.11.276/aws-java-sdk-kinesis-1.11.276.jar",
-      "sha1": "ad4a7919d6128216f1a2ff17a8769c1aabfbd98c"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-kinesis/1.11.276/aws-java-sdk-kinesis-1.11.276.pom",
-      "sha1": "e113ad7d61476cdede35c4181059c43f33ca2d88"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-kinesisvideo/1.11.276/aws-java-sdk-kinesisvideo-1.11.276.jar",
-      "sha1": "26cedb8cd8f0b0b756953515550b0653bc8ac52b"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-kinesisvideo/1.11.276/aws-java-sdk-kinesisvideo-1.11.276.pom",
-      "sha1": "b397355102c463e529267034f32682a54d4b7614"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-kms/1.11.276/aws-java-sdk-kms-1.11.276.jar",
-      "sha1": "9120fe917b08b7f882c637554d7c26b481dbd97e"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-kms/1.11.276/aws-java-sdk-kms-1.11.276.pom",
-      "sha1": "8b3cd3fa230aeebcc7258777031d78c177510595"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-lambda/1.11.276/aws-java-sdk-lambda-1.11.276.jar",
-      "sha1": "f0644142c0d967b3df07cd0ed565201d6f1e1cd4"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-lambda/1.11.276/aws-java-sdk-lambda-1.11.276.pom",
-      "sha1": "cb16afd03e372e4f2cd123e6a5e2f587e04b2d2a"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-lex/1.11.276/aws-java-sdk-lex-1.11.276.jar",
-      "sha1": "9eaa481f31283545750e456d42c58641807f21b0"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-lex/1.11.276/aws-java-sdk-lex-1.11.276.pom",
-      "sha1": "50ce68ed04e5425cda511aae59cb1b16caa28817"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-lexmodelbuilding/1.11.276/aws-java-sdk-lexmodelbuilding-1.11.276.jar",
-      "sha1": "881b7c012ddc1a7f02bf1148785fefbf6de90acf"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-lexmodelbuilding/1.11.276/aws-java-sdk-lexmodelbuilding-1.11.276.pom",
-      "sha1": "5474602eb83b8a07428840fd5743599ecf41e626"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-lightsail/1.11.276/aws-java-sdk-lightsail-1.11.276.jar",
-      "sha1": "837d3e96e3bb39778ae4cec3db9e6253cbdb1fe3"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-lightsail/1.11.276/aws-java-sdk-lightsail-1.11.276.pom",
-      "sha1": "a7ed266c44fd74545e1e8b95ed4d7119d62ca737"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-logs/1.11.276/aws-java-sdk-logs-1.11.276.jar",
-      "sha1": "1ae771f73d8392d3b3a5cb5f59a05f1721df00f7"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-logs/1.11.276/aws-java-sdk-logs-1.11.276.pom",
-      "sha1": "6c6fe51b6e37f1c1c467887bde2e6c579e4e8382"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-machinelearning/1.11.276/aws-java-sdk-machinelearning-1.11.276.jar",
-      "sha1": "272a54f6f0bf9d832f9d63baa6d492e7e4945958"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-machinelearning/1.11.276/aws-java-sdk-machinelearning-1.11.276.pom",
-      "sha1": "8f64350da4dc6ee5b33029016cacf035f2a22ccb"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-marketplacecommerceanalytics/1.11.276/aws-java-sdk-marketplacecommerceanalytics-1.11.276.jar",
-      "sha1": "b1f8d1d30dc45ac0d3ba107c4488e70606f972e2"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-marketplacecommerceanalytics/1.11.276/aws-java-sdk-marketplacecommerceanalytics-1.11.276.pom",
-      "sha1": "d667832f3f0917f15dce5d1d64bac34cea87c86e"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-marketplaceentitlement/1.11.276/aws-java-sdk-marketplaceentitlement-1.11.276.jar",
-      "sha1": "8be55cb8c36e28996e0b980c494846cdecaed375"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-marketplaceentitlement/1.11.276/aws-java-sdk-marketplaceentitlement-1.11.276.pom",
-      "sha1": "c8f915728fb5460cb67c8705eb26114ceaa67c47"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-marketplacemeteringservice/1.11.276/aws-java-sdk-marketplacemeteringservice-1.11.276.jar",
-      "sha1": "41e2b80ada0d3fef8e5c32273fd96845ba5cffb3"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-marketplacemeteringservice/1.11.276/aws-java-sdk-marketplacemeteringservice-1.11.276.pom",
-      "sha1": "f4b33544a31fca86485f6d8934923fb9af17736a"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-mechanicalturkrequester/1.11.276/aws-java-sdk-mechanicalturkrequester-1.11.276.jar",
-      "sha1": "9203bd137a090d03834d337d787d15082861b3f8"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-mechanicalturkrequester/1.11.276/aws-java-sdk-mechanicalturkrequester-1.11.276.pom",
-      "sha1": "4eeac77fbfd90d0313f1a5739ccac8994bb2cc70"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-mediaconvert/1.11.276/aws-java-sdk-mediaconvert-1.11.276.jar",
-      "sha1": "830abe735b0b1a2490c929a6fcd672e94ae7d4bd"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-mediaconvert/1.11.276/aws-java-sdk-mediaconvert-1.11.276.pom",
-      "sha1": "c3de7fa40b836d31bc392d9922d7b4b2ff9b04fe"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-medialive/1.11.276/aws-java-sdk-medialive-1.11.276.jar",
-      "sha1": "3b545e020a358184dc650b45b123caf40fdfcb86"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-medialive/1.11.276/aws-java-sdk-medialive-1.11.276.pom",
-      "sha1": "2a3134247c28ded6f7f4653827f5446ac250ecea"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-mediapackage/1.11.276/aws-java-sdk-mediapackage-1.11.276.jar",
-      "sha1": "6b5f36d70e1e7dca45d4bdd8b15b7faea439f5cd"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-mediapackage/1.11.276/aws-java-sdk-mediapackage-1.11.276.pom",
-      "sha1": "643f8424820fe2d85dade6d957160ed22a96be04"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-mediastore/1.11.276/aws-java-sdk-mediastore-1.11.276.jar",
-      "sha1": "f6f90eb80b9ed0fb067b22c87799253f6a0fc1f0"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-mediastore/1.11.276/aws-java-sdk-mediastore-1.11.276.pom",
-      "sha1": "ebe9686c157c7a246598be96154142fbac4f7642"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-mediastoredata/1.11.276/aws-java-sdk-mediastoredata-1.11.276.jar",
-      "sha1": "030092743df6ae167eff57b597ba9c94adc1450d"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-mediastoredata/1.11.276/aws-java-sdk-mediastoredata-1.11.276.pom",
-      "sha1": "91b34f14ff76b21c1ef9e25161d3908c36b1e423"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-migrationhub/1.11.276/aws-java-sdk-migrationhub-1.11.276.jar",
-      "sha1": "0b3c7bbbfecb12b8db03c308cfd93eb02fd9115f"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-migrationhub/1.11.276/aws-java-sdk-migrationhub-1.11.276.pom",
-      "sha1": "01323165da6cdbeb112a66a980c8d28c4fb92324"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-mobile/1.11.276/aws-java-sdk-mobile-1.11.276.jar",
-      "sha1": "059cdb47ff4b845b19702ed333d1ff475ce5c0be"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-mobile/1.11.276/aws-java-sdk-mobile-1.11.276.pom",
-      "sha1": "a369b36ac448ddd9e175fce2c2c8778fee3dc675"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-models/1.11.276/aws-java-sdk-models-1.11.276.jar",
-      "sha1": "1e8d4066528a1f3925646eb1d13eb9d972f711ce"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-models/1.11.276/aws-java-sdk-models-1.11.276.pom",
-      "sha1": "bc3ad5fedf94f0a5ddf011fee05a695e087c825e"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-mq/1.11.276/aws-java-sdk-mq-1.11.276.jar",
-      "sha1": "f5554cfe3f9c56269f5e1fbb509c0fbdada0c5c8"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-mq/1.11.276/aws-java-sdk-mq-1.11.276.pom",
-      "sha1": "b6119d0b648d9bd86ed0137ad5db53bee8f01709"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-opsworks/1.11.276/aws-java-sdk-opsworks-1.11.276.jar",
-      "sha1": "a0638875d33a7ca4d2d0d008ebeb1e522bea93f7"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-opsworks/1.11.276/aws-java-sdk-opsworks-1.11.276.pom",
-      "sha1": "4198ca4cd5d8c1fe6c650b432c81463d2ddd822e"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-opsworkscm/1.11.276/aws-java-sdk-opsworkscm-1.11.276.jar",
-      "sha1": "6dc7c11ebbbb6921fc11dae7344d9fc6211041f4"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-opsworkscm/1.11.276/aws-java-sdk-opsworkscm-1.11.276.pom",
-      "sha1": "a41d4b3bc6087da0c1e43a58f55cb4209e9a263f"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-organizations/1.11.276/aws-java-sdk-organizations-1.11.276.jar",
-      "sha1": "b09552c772461a5e470561c8e733e9c4de836e64"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-organizations/1.11.276/aws-java-sdk-organizations-1.11.276.pom",
-      "sha1": "1f2e0e2c40fd1e9b6de007975ca82e6be21357b6"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-pinpoint/1.11.276/aws-java-sdk-pinpoint-1.11.276.jar",
-      "sha1": "259ecaceeef98805370b7ed5bdb19ef67cacc347"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-pinpoint/1.11.276/aws-java-sdk-pinpoint-1.11.276.pom",
-      "sha1": "21a3aa52c55cf43ba81b8fce1525beb45f4d9060"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-polly/1.11.276/aws-java-sdk-polly-1.11.276.jar",
-      "sha1": "719c35b1188b9bec076974433d8f1c4a2003d4f1"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-polly/1.11.276/aws-java-sdk-polly-1.11.276.pom",
-      "sha1": "087d394d008074dc99806f37b587b2035fe022d2"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-pom/1.11.22/aws-java-sdk-pom-1.11.22.pom",
-      "sha1": "c8ef804a5c40011aa68cc3a97e7f2abdba79cb4f"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-pom/1.11.276/aws-java-sdk-pom-1.11.276.pom",
-      "sha1": "af705cd2e2d33092c5529e096dde83ac89a539b8"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-pricing/1.11.276/aws-java-sdk-pricing-1.11.276.jar",
-      "sha1": "ae86dcef66fa8669cd591a7cf1136a16ea259c96"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-pricing/1.11.276/aws-java-sdk-pricing-1.11.276.pom",
-      "sha1": "394788969b12da20369687c467eab4634d3bd76a"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-rds/1.11.276/aws-java-sdk-rds-1.11.276.jar",
-      "sha1": "9d58a3878a881c777ec31e46b21278166d74df67"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-rds/1.11.276/aws-java-sdk-rds-1.11.276.pom",
-      "sha1": "52120ac852c5555d8d566d0ad738de7f2c0eab83"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-redshift/1.11.276/aws-java-sdk-redshift-1.11.276.jar",
-      "sha1": "cd6a3e660d751c8f33c90d16f1321dd2c7f653e6"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-redshift/1.11.276/aws-java-sdk-redshift-1.11.276.pom",
-      "sha1": "49c7f9422fbd7c22a8f5aa8d97faa705594ac1f0"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-rekognition/1.11.276/aws-java-sdk-rekognition-1.11.276.jar",
-      "sha1": "10018100c11691cd1a46fa27520631ca8fd81d7a"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-rekognition/1.11.276/aws-java-sdk-rekognition-1.11.276.pom",
-      "sha1": "966ad8b2a9fce06f3362b9665118925e2966d86d"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-resourcegroups/1.11.276/aws-java-sdk-resourcegroups-1.11.276.jar",
-      "sha1": "47f68d2891565487716bc647c2a7c2ac18e34fdd"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-resourcegroups/1.11.276/aws-java-sdk-resourcegroups-1.11.276.pom",
-      "sha1": "01a85786375cbd4cbc4c78fbd6353f131dbc3c38"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-resourcegroupstaggingapi/1.11.276/aws-java-sdk-resourcegroupstaggingapi-1.11.276.jar",
-      "sha1": "2e1b995e3a3edace323fb97679d129dcedbf1993"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-resourcegroupstaggingapi/1.11.276/aws-java-sdk-resourcegroupstaggingapi-1.11.276.pom",
-      "sha1": "ce4231670d2268df2747c7a58b3464a525086698"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-route53/1.11.276/aws-java-sdk-route53-1.11.276.jar",
-      "sha1": "ef9993a1c3ba9d652deca3bc073f659f009d7efd"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-route53/1.11.276/aws-java-sdk-route53-1.11.276.pom",
-      "sha1": "e8aa32cfd284a39c121a6a5e4f5637cc634d31a1"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-s3/1.11.276/aws-java-sdk-s3-1.11.276.jar",
-      "sha1": "a1c52a11e8c03c5f63890895271216ba91922ff7"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-s3/1.11.276/aws-java-sdk-s3-1.11.276.pom",
-      "sha1": "91102d28c685da7903443a2d0ebaf3201b1e3813"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-sagemaker/1.11.276/aws-java-sdk-sagemaker-1.11.276.jar",
-      "sha1": "2d025aa555b79951dff69fd4ef77e1212ad69a45"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-sagemaker/1.11.276/aws-java-sdk-sagemaker-1.11.276.pom",
-      "sha1": "52e8d0daeccf38540bddcf740c10029a1cdbc7c3"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-sagemakerruntime/1.11.276/aws-java-sdk-sagemakerruntime-1.11.276.jar",
-      "sha1": "fc9bc60e85501c94e4a003fc8b0cd6b84c7f836d"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-sagemakerruntime/1.11.276/aws-java-sdk-sagemakerruntime-1.11.276.pom",
-      "sha1": "bc5b5500dc186a3427e8fe3b275c9f45ce834b5d"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-serverlessapplicationrepository/1.11.276/aws-java-sdk-serverlessapplicationrepository-1.11.276.jar",
-      "sha1": "7c4176f2f9a2a610741b2c76f400ee8b242b60a8"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-serverlessapplicationrepository/1.11.276/aws-java-sdk-serverlessapplicationrepository-1.11.276.pom",
-      "sha1": "27e89380f1cdc46c1dd009e3ee60232d786cc05a"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-servermigration/1.11.276/aws-java-sdk-servermigration-1.11.276.jar",
-      "sha1": "fae9eea0f5724034b766e4e26aeb32d61aa1c5f9"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-servermigration/1.11.276/aws-java-sdk-servermigration-1.11.276.pom",
-      "sha1": "d96224bb4d638e4ae094ac0da554a12d2c16460c"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-servicecatalog/1.11.276/aws-java-sdk-servicecatalog-1.11.276.jar",
-      "sha1": "5a6f8ed4df44da55f942ce939f5d0807ecc20d4a"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-servicecatalog/1.11.276/aws-java-sdk-servicecatalog-1.11.276.pom",
-      "sha1": "17794c38b674772a7cb1d8164adc6dd7bca97c57"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-servicediscovery/1.11.276/aws-java-sdk-servicediscovery-1.11.276.jar",
-      "sha1": "5b900ce7f5d57ecae66584cdeda3dcc82eeac901"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-servicediscovery/1.11.276/aws-java-sdk-servicediscovery-1.11.276.pom",
-      "sha1": "33d9307b80b119808810b7722ae89b7c40919a85"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-ses/1.11.276/aws-java-sdk-ses-1.11.276.jar",
-      "sha1": "27a9be1c6b35ae66ec9e1d1655e4982e526df4c5"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-ses/1.11.276/aws-java-sdk-ses-1.11.276.pom",
-      "sha1": "6c2b2d55fa2c9de4c040a7b137972b717c93185a"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-shield/1.11.276/aws-java-sdk-shield-1.11.276.jar",
-      "sha1": "73aed832cdcdd75c3d1c85aea03e8426cc6ae774"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-shield/1.11.276/aws-java-sdk-shield-1.11.276.pom",
-      "sha1": "806d6f6ecdaca575213bf430ca2a4b2da0d30a56"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-simpledb/1.11.276/aws-java-sdk-simpledb-1.11.276.jar",
-      "sha1": "77618ac03ec6a9a04a837f824dcfa9e9470559de"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-simpledb/1.11.276/aws-java-sdk-simpledb-1.11.276.pom",
-      "sha1": "1e84a3452d9d8cff80374572ec981b749c16c67e"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-simpleworkflow/1.11.22/aws-java-sdk-simpleworkflow-1.11.22.pom",
-      "sha1": "d2146fa8131bd799d84532b7caae35497eb35221"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-simpleworkflow/1.11.276/aws-java-sdk-simpleworkflow-1.11.276.jar",
-      "sha1": "44701c6cfcaf7b7b945318511c222f02e8a0046d"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-simpleworkflow/1.11.276/aws-java-sdk-simpleworkflow-1.11.276.pom",
-      "sha1": "840b92ea6c35dab6530ff3dbca65c2f49b3cb0e2"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-snowball/1.11.276/aws-java-sdk-snowball-1.11.276.jar",
-      "sha1": "0524a290ecdaefa4fc0a10faead0a4ce44f496e3"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-snowball/1.11.276/aws-java-sdk-snowball-1.11.276.pom",
-      "sha1": "9db650cbee2f7aee599f1db90613d8489202805b"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-sns/1.11.276/aws-java-sdk-sns-1.11.276.jar",
-      "sha1": "88bce4048c07061a950a3861a11c6afc662d6b6f"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-sns/1.11.276/aws-java-sdk-sns-1.11.276.pom",
-      "sha1": "e515608a30c3145b7741980cd9fa31a8bb3640df"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-sqs/1.11.276/aws-java-sdk-sqs-1.11.276.jar",
-      "sha1": "4687506096ff8017386c05102b76e376e7f60a19"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-sqs/1.11.276/aws-java-sdk-sqs-1.11.276.pom",
-      "sha1": "10e71b970c1fe26e5a485d245d0d5ae20b066bc6"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-ssm/1.11.276/aws-java-sdk-ssm-1.11.276.jar",
-      "sha1": "b3ece033c61dc2bc03c83145a3579db712199d4f"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-ssm/1.11.276/aws-java-sdk-ssm-1.11.276.pom",
-      "sha1": "32e87e8b117a58a92a106c2326644cdba15d20a4"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-stepfunctions/1.11.276/aws-java-sdk-stepfunctions-1.11.276.jar",
-      "sha1": "7a1dcb7d08cd5f23b41f0eb94a5eb1172a342f72"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-stepfunctions/1.11.276/aws-java-sdk-stepfunctions-1.11.276.pom",
-      "sha1": "b797cacfbe47e1808fca5f47505b00e535c27e85"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-storagegateway/1.11.276/aws-java-sdk-storagegateway-1.11.276.jar",
-      "sha1": "b786f51d5f82a4d35701e16abe5836e7a95091bd"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-storagegateway/1.11.276/aws-java-sdk-storagegateway-1.11.276.pom",
-      "sha1": "24cde3c25f23857f24269d37d2e4424c98a1413c"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-sts/1.11.276/aws-java-sdk-sts-1.11.276.jar",
-      "sha1": "fe7b86d2cd9495d09b533e03c5f5e054b613c814"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-sts/1.11.276/aws-java-sdk-sts-1.11.276.pom",
-      "sha1": "5263e61453a3e08085deb484d7d743817f98f2c5"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-support/1.11.276/aws-java-sdk-support-1.11.276.jar",
-      "sha1": "e85ab956c4640271966b48ca576d0286753580e1"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-support/1.11.276/aws-java-sdk-support-1.11.276.pom",
-      "sha1": "c9be0a4437f3cf8885690a0e4a86c610fba7e44e"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-swf-libraries/1.11.22/aws-java-sdk-swf-libraries-1.11.22.jar",
-      "sha1": "04bb64607f756c0c1f427bdb491db05b48402694"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-swf-libraries/1.11.22/aws-java-sdk-swf-libraries-1.11.22.pom",
-      "sha1": "fcf308cd1a842bdaa033b0c2d3f3fede348f9409"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-transcribe/1.11.276/aws-java-sdk-transcribe-1.11.276.jar",
-      "sha1": "e562cb9a752d4b8618d7066de998b67bdca8127d"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-transcribe/1.11.276/aws-java-sdk-transcribe-1.11.276.pom",
-      "sha1": "449606f62a1fd602c855d08daee9249a708f2414"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-translate/1.11.276/aws-java-sdk-translate-1.11.276.jar",
-      "sha1": "7acce1c63e820f00ee1948e0629f0f1619321032"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-translate/1.11.276/aws-java-sdk-translate-1.11.276.pom",
-      "sha1": "b1f2f878c1f24d717b7b59a6441215d51d790422"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-waf/1.11.276/aws-java-sdk-waf-1.11.276.jar",
-      "sha1": "2753a8321b6e779773de4bb007ecade4675f8f23"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-waf/1.11.276/aws-java-sdk-waf-1.11.276.pom",
-      "sha1": "5712967c583a62123ab02398a976e153ab209e88"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-workdocs/1.11.276/aws-java-sdk-workdocs-1.11.276.jar",
-      "sha1": "04b22eea6229c6942a80fd9012448b2afe0d7b6b"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-workdocs/1.11.276/aws-java-sdk-workdocs-1.11.276.pom",
-      "sha1": "615d04da482d7f5ebac35191e44e0477a2b7165b"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-workmail/1.11.276/aws-java-sdk-workmail-1.11.276.jar",
-      "sha1": "cb653a4f9c0a98b0c762a801de40511794bcc0e8"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-workmail/1.11.276/aws-java-sdk-workmail-1.11.276.pom",
-      "sha1": "d00ba76d278a6d56d5f7517b3c9b70434bf36bb5"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-workspaces/1.11.276/aws-java-sdk-workspaces-1.11.276.jar",
-      "sha1": "6929638a7907394778f1e22f3c3bfcb7282f31d5"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-workspaces/1.11.276/aws-java-sdk-workspaces-1.11.276.pom",
-      "sha1": "41b5b7aa6da766d0572c98d8229965d2feb046cd"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-xray/1.11.276/aws-java-sdk-xray-1.11.276.jar",
-      "sha1": "022497a43a019258bbe59abff5a567ac6c4443ef"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-xray/1.11.276/aws-java-sdk-xray-1.11.276.pom",
-      "sha1": "2cceb79465ba9f13b70e1cda984060cdff698520"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk/1.11.276/aws-java-sdk-1.11.276.jar",
-      "sha1": "65128e5f3eaa97aab03711a3ed1560908d6a26b3"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk/1.11.276/aws-java-sdk-1.11.276.pom",
-      "sha1": "11ef577b2a751072bfe49e7fee13d60beb94b1ee"
-    },
-    {
-      "path": "com/amazonaws/jmespath-java/1.11.276/jmespath-java-1.11.276.jar",
-      "sha1": "3dc2aaf1bf185fe91ff44e17339f480bd4f44ff4"
-    },
-    {
-      "path": "com/amazonaws/jmespath-java/1.11.276/jmespath-java-1.11.276.pom",
-      "sha1": "c7a62a124dcf9d2bb31c37529509072e943fcf7c"
-    },
-    {
       "path": "com/beust/jcommander/1.78/jcommander-1.78.jar",
       "sha1": "a3927de9bd6f351429bcf763712c9890629d8f51"
     },
@@ -1138,80 +62,12 @@
       "sha1": "d99f5df85ea6656189de6865d34653a804feca16"
     },
     {
-      "path": "com/fasterxml/jackson/core/jackson-annotations/2.6.0/jackson-annotations-2.6.0.jar",
-      "sha1": "a0990e2e812ac6639b6ce955c91b13228500476e"
-    },
-    {
-      "path": "com/fasterxml/jackson/core/jackson-annotations/2.6.0/jackson-annotations-2.6.0.pom",
-      "sha1": "74f0cf17283e921a4b78ce5a0588d22ffa26d832"
-    },
-    {
-      "path": "com/fasterxml/jackson/core/jackson-core/2.6.6/jackson-core-2.6.6.pom",
-      "sha1": "3bbe4552671bc6c44eb0d4eb194b383dd6dfdb88"
-    },
-    {
-      "path": "com/fasterxml/jackson/core/jackson-core/2.6.7/jackson-core-2.6.7.jar",
-      "sha1": "81838e08d5e10e33cdee7299f9682d836b78c63e"
-    },
-    {
-      "path": "com/fasterxml/jackson/core/jackson-core/2.6.7/jackson-core-2.6.7.pom",
-      "sha1": "3457ebb3180f4f2f599242e70697c80135c58dcf"
-    },
-    {
-      "path": "com/fasterxml/jackson/core/jackson-databind/2.6.6/jackson-databind-2.6.6.pom",
-      "sha1": "32698733d34d0c3bf27904a1549c9dd2a9555dbe"
-    },
-    {
-      "path": "com/fasterxml/jackson/core/jackson-databind/2.6.7.1/jackson-databind-2.6.7.1.jar",
-      "sha1": "306775aeb5164835a1dcbdf3f945587045cfb3b5"
-    },
-    {
-      "path": "com/fasterxml/jackson/core/jackson-databind/2.6.7.1/jackson-databind-2.6.7.1.pom",
-      "sha1": "fa5574a223726d64bcd6ec5f5c6afaa166d63471"
-    },
-    {
-      "path": "com/fasterxml/jackson/dataformat/jackson-dataformat-cbor/2.6.6/jackson-dataformat-cbor-2.6.6.pom",
-      "sha1": "41621b57be660f734089aa44f95152232a21cceb"
-    },
-    {
-      "path": "com/fasterxml/jackson/dataformat/jackson-dataformat-cbor/2.6.7/jackson-dataformat-cbor-2.6.7.jar",
-      "sha1": "ba9e74b11135b18248e960df657a2b86ae77a079"
-    },
-    {
-      "path": "com/fasterxml/jackson/dataformat/jackson-dataformat-cbor/2.6.7/jackson-dataformat-cbor-2.6.7.pom",
-      "sha1": "db89ee53576ae700a78bfe1a9f605b074531064a"
-    },
-    {
-      "path": "com/fasterxml/jackson/jackson-parent/2.6.1/jackson-parent-2.6.1.pom",
-      "sha1": "d9178b7012e394e8c631f98167deca4f85a2cfde"
-    },
-    {
-      "path": "com/fasterxml/jackson/jackson-parent/2.6.2/jackson-parent-2.6.2.pom",
-      "sha1": "b232d48541db046aa1245c27bfa7398ea737d2ad"
-    },
-    {
-      "path": "com/fasterxml/oss-parent/23/oss-parent-23.pom",
-      "sha1": "8ee7f1755fea4b333428aac06fca31330404357f"
-    },
-    {
-      "path": "com/fasterxml/oss-parent/24/oss-parent-24.pom",
-      "sha1": "f4fbf349d22ab6a355ebecdb8a2886dd790b4877"
-    },
-    {
       "path": "com/github/luben/zstd-jni/1.5.2-5/zstd-jni-1.5.2-5.jar",
       "sha1": "ef34c3a855e144c03de5c0b0a8e80469915ebae6"
     },
     {
       "path": "com/github/luben/zstd-jni/1.5.2-5/zstd-jni-1.5.2-5.pom",
       "sha1": "25ac03c4da03aa7211e7cc5c2c23ec72f1eb8b71"
-    },
-    {
-      "path": "com/github/platform-team/aws-maven/6.0.0/aws-maven-6.0.0.jar",
-      "sha1": "01d5ce82f21445014ea661b94edb1776659fdec0"
-    },
-    {
-      "path": "com/github/platform-team/aws-maven/6.0.0/aws-maven-6.0.0.pom",
-      "sha1": "dc15dc0462a71c38cf113738c99975b883fbffb7"
     },
     {
       "path": "com/google/code/findbugs/annotations/3.0.0/annotations-3.0.0.jar",
@@ -1246,10 +102,6 @@
       "sha1": "7b3103607f633aeb40a35e10ee382ad52984d410"
     },
     {
-      "path": "com/google/code/findbugs/jsr305/1.3.9/jsr305-1.3.9.pom",
-      "sha1": "67ea333a3244bc20a17d6f0c29498071dfa409fc"
-    },
-    {
       "path": "com/google/code/findbugs/jsr305/2.0.1/jsr305-2.0.1.jar",
       "sha1": "516c03b21d50a644d538de0f0369c620989cd8f0"
     },
@@ -1266,32 +118,48 @@
       "sha1": "278c908b87e003ccbd36588d769655d2b870a7c7"
     },
     {
+      "path": "com/google/code/findbugs/jsr305/3.0.2/jsr305-3.0.2.jar",
+      "sha1": "25ea2e8b0c338a877313bd4672d3fe056ea78f0d"
+    },
+    {
       "path": "com/google/code/findbugs/jsr305/3.0.2/jsr305-3.0.2.pom",
       "sha1": "8d93cdf4d84d7e1de736df607945c6df0730a10f"
     },
     {
-      "path": "com/google/errorprone/error_prone_annotations/2.1.3/error_prone_annotations-2.1.3.jar",
-      "sha1": "39b109f2cd352b2d71b52a3b5a1a9850e1dc304b"
+      "path": "com/google/collections/google-collections/1.0/google-collections-1.0.jar",
+      "sha1": "9ffe71ac6dcab6bc03ea13f5c2e7b2804e69b357"
     },
     {
-      "path": "com/google/errorprone/error_prone_annotations/2.1.3/error_prone_annotations-2.1.3.pom",
-      "sha1": "02d1529fa92342313d1c98beb8ca261e36a2d319"
+      "path": "com/google/collections/google-collections/1.0/google-collections-1.0.pom",
+      "sha1": "292197f3cb1ebc0dd03e20897e4250b265177286"
     },
     {
-      "path": "com/google/errorprone/error_prone_annotations/2.2.0/error_prone_annotations-2.2.0.jar",
-      "sha1": "88e3c593e9b3586e1c6177f89267da6fc6986f0c"
+      "path": "com/google/errorprone/error_prone_annotations/2.3.4/error_prone_annotations-2.3.4.jar",
+      "sha1": "dac170e4594de319655ffb62f41cbd6dbb5e601e"
     },
     {
-      "path": "com/google/errorprone/error_prone_annotations/2.2.0/error_prone_annotations-2.2.0.pom",
-      "sha1": "e28b5b546020f18ea29e2b4756023f53ee91492b"
+      "path": "com/google/errorprone/error_prone_annotations/2.3.4/error_prone_annotations-2.3.4.pom",
+      "sha1": "9a23fcb83bc8ed502506a8e6c648bf763dc5bcf9"
     },
     {
-      "path": "com/google/errorprone/error_prone_parent/2.1.3/error_prone_parent-2.1.3.pom",
-      "sha1": "fa65cf11b2b7e955eb3862eb01d5bae721e458c0"
+      "path": "com/google/errorprone/error_prone_annotations/2.7.1/error_prone_annotations-2.7.1.jar",
+      "sha1": "458d9042f7aa6fa9a634df902b37f544e15aacac"
     },
     {
-      "path": "com/google/errorprone/error_prone_parent/2.2.0/error_prone_parent-2.2.0.pom",
-      "sha1": "72e2f31cb1952eada003d2ba7e82874cfe4b738c"
+      "path": "com/google/errorprone/error_prone_annotations/2.7.1/error_prone_annotations-2.7.1.pom",
+      "sha1": "0b0fa22131b64b3985fba347927252af21898984"
+    },
+    {
+      "path": "com/google/errorprone/error_prone_parent/2.3.4/error_prone_parent-2.3.4.pom",
+      "sha1": "a9b9dd42d174a5f96d6c195525877fc6d0b2028a"
+    },
+    {
+      "path": "com/google/errorprone/error_prone_parent/2.7.1/error_prone_parent-2.7.1.pom",
+      "sha1": "cca3ba79de44febe5a196510393e1011bd554e0b"
+    },
+    {
+      "path": "com/google/google/1/google-1.pom",
+      "sha1": "c35a5268151b7a1bbb77f7ee94a950f00e32db61"
     },
     {
       "path": "com/google/guava/failureaccess/1.0.1/failureaccess-1.0.1.jar",
@@ -1302,32 +170,32 @@
       "sha1": "e8160e78fdaaf7088621dc1649d9dd2dfcf8d0e8"
     },
     {
-      "path": "com/google/guava/guava-parent/24.1.1-jre/guava-parent-24.1.1-jre.pom",
-      "sha1": "3f3c90d555bc6029d1f4c8e82eb3d5b12919d847"
-    },
-    {
       "path": "com/google/guava/guava-parent/26.0-android/guava-parent-26.0-android.pom",
       "sha1": "a2c0df489614352b7e8e503e274bd1dee5c42a64"
     },
     {
-      "path": "com/google/guava/guava-parent/27.1-jre/guava-parent-27.1-jre.pom",
-      "sha1": "a4686474dcba0d75d89e3d4f9665634832e49b6f"
+      "path": "com/google/guava/guava-parent/30.0-jre/guava-parent-30.0-jre.pom",
+      "sha1": "967743c6cda3e5267084455bca3c7ab08df3f453"
     },
     {
-      "path": "com/google/guava/guava/24.1.1-jre/guava-24.1.1-jre.jar",
-      "sha1": "2e3014320a8005e3f3c1800cb246ed42db8cab81"
+      "path": "com/google/guava/guava-parent/31.0.1-jre/guava-parent-31.0.1-jre.pom",
+      "sha1": "eb78b5264bd92cca5655396c44420eef3ad3ec0f"
     },
     {
-      "path": "com/google/guava/guava/24.1.1-jre/guava-24.1.1-jre.pom",
-      "sha1": "cb751eeb5ebbce9005bf5cd58110ef21f7d3fa5c"
+      "path": "com/google/guava/guava/30.0-jre/guava-30.0-jre.jar",
+      "sha1": "8ddbc8769f73309fe09b54c5951163f10b0d89fa"
     },
     {
-      "path": "com/google/guava/guava/27.1-jre/guava-27.1-jre.jar",
-      "sha1": "e47b59c893079b87743cdcfb6f17ca95c08c592c"
+      "path": "com/google/guava/guava/30.0-jre/guava-30.0-jre.pom",
+      "sha1": "d7239fe628e6e3fbb6734acbc07195435fdac305"
     },
     {
-      "path": "com/google/guava/guava/27.1-jre/guava-27.1-jre.pom",
-      "sha1": "db536f4a1c26739eb6ee1cfb707ec3fbe8325c86"
+      "path": "com/google/guava/guava/31.0.1-jre/guava-31.0.1-jre.jar",
+      "sha1": "119ea2b2bc205b138974d351777b20f02b92704b"
+    },
+    {
+      "path": "com/google/guava/guava/31.0.1-jre/guava-31.0.1-jre.pom",
+      "sha1": "d0ec1628dcc04e4835721416103672384ea3136f"
     },
     {
       "path": "com/google/guava/listenablefuture/9999.0-empty-to-avoid-conflict-with-guava/listenablefuture-9999.0-empty-to-avoid-conflict-with-guava.jar",
@@ -1338,20 +206,12 @@
       "sha1": "1b77ba79f9b2b7dfd4e15ea7bb0d568d5eb9cb8d"
     },
     {
-      "path": "com/google/j2objc/j2objc-annotations/1.1/j2objc-annotations-1.1.jar",
-      "sha1": "ed28ded51a8b1c6b112568def5f4b455e6809019"
+      "path": "com/google/j2objc/j2objc-annotations/1.3/j2objc-annotations-1.3.jar",
+      "sha1": "ba035118bc8bac37d7eff77700720999acd9986d"
     },
     {
-      "path": "com/google/j2objc/j2objc-annotations/1.1/j2objc-annotations-1.1.pom",
-      "sha1": "b964a9414771661bdf35a3f10692a2fb0dd2c866"
-    },
-    {
-      "path": "com/ibm/icu/icu4j/63.1/icu4j-63.1.jar",
-      "sha1": "385682b7fff53cd5ac2cad0fdb4658a7b97e9475"
-    },
-    {
-      "path": "com/ibm/icu/icu4j/63.1/icu4j-63.1.pom",
-      "sha1": "ac9bbff56a4a94b546468cdee50d17ee0fc4c24f"
+      "path": "com/google/j2objc/j2objc-annotations/1.3/j2objc-annotations-1.3.pom",
+      "sha1": "47e0dd93285dcc6b33181713bc7e8aed66742964"
     },
     {
       "path": "com/jcraft/jsch/0.1.27/jsch-0.1.27.jar",
@@ -1378,24 +238,28 @@
       "sha1": "d96547ef58c82124f804209865254f13aa1db928"
     },
     {
-      "path": "com/puppycrawl/tools/checkstyle/8.19/checkstyle-8.19.jar",
-      "sha1": "b89d91993480a473c416f83677ad92dbede809fa"
+      "path": "com/puppycrawl/tools/checkstyle/9.3/checkstyle-9.3.jar",
+      "sha1": "f8c4b25a65d8e4b9b5f60e3fb3efb9c9ad2c7d7b"
     },
     {
-      "path": "com/puppycrawl/tools/checkstyle/8.19/checkstyle-8.19.pom",
-      "sha1": "db7bb76bc0aefa23d21d36949cec9ab8e0d14e1d"
+      "path": "com/puppycrawl/tools/checkstyle/9.3/checkstyle-9.3.pom",
+      "sha1": "fdec6f2d2514787039928bcb781f9e67f4738899"
     },
     {
-      "path": "com/runtimeverification/k/kore/1.0-SNAPSHOT/kore-1.0-20200713.173746-176.jar",
-      "sha1": "322a51de66cca78ba302d0126b51f6f2800f33f6"
+      "path": "com/runtimeverification/k/kore/1.0-SNAPSHOT/kore-1.0-20230928.233040-27.jar",
+      "sha1": "2482a36bad712f35d5df397760ffb777f24ec07e"
     },
     {
-      "path": "com/runtimeverification/k/kore/1.0-SNAPSHOT/kore-1.0-20200713.173746-176.pom",
-      "sha1": "0554e7abac72f475727a307f03370269e141503e"
+      "path": "com/runtimeverification/k/kore/1.0-SNAPSHOT/kore-1.0-20230928.233040-27.pom",
+      "sha1": "2706d868319a03bc491350cb3a1af0927ef1a839"
     },
     {
-      "path": "com/runtimeverification/k/parent/1.0-SNAPSHOT/parent-1.0-20200713.173706-176.pom",
-      "sha1": "54a2ded5657583ddf53845ed8347386b704d4348"
+      "path": "com/runtimeverification/k/parent/1.0-SNAPSHOT/parent-1.0-20230928.233019-27.pom",
+      "sha1": "62b92746f9104b7966075e98dc7b69c44475c72c"
+    },
+    {
+      "path": "com/sun/activation/all/1.2.0/all-1.2.0.pom",
+      "sha1": "9b1023e38195ea19d1a0ac79192d486da1904f97"
     },
     {
       "path": "com/thoughtworks/qdox/qdox/1.12/qdox-1.12.jar",
@@ -1458,12 +322,12 @@
       "sha1": "19eca029edacc1be30030faf43ea6acb30556d1a"
     },
     {
-      "path": "commons-beanutils/commons-beanutils/1.9.3/commons-beanutils-1.9.3.jar",
-      "sha1": "c845703de334ddc6b4b3cd26835458cb1cba1f3d"
+      "path": "commons-beanutils/commons-beanutils/1.9.4/commons-beanutils-1.9.4.jar",
+      "sha1": "d52b9abcd97f38c81342bb7e7ae1eee9b73cba51"
     },
     {
-      "path": "commons-beanutils/commons-beanutils/1.9.3/commons-beanutils-1.9.3.pom",
-      "sha1": "a0db273e77035b0443974984e92d48896c12ee9c"
+      "path": "commons-beanutils/commons-beanutils/1.9.4/commons-beanutils-1.9.4.pom",
+      "sha1": "42e7c39331e1735250b294ce2984d0e434ebc955"
     },
     {
       "path": "commons-chain/commons-chain/1.1/commons-chain-1.1.jar",
@@ -1490,6 +354,14 @@
       "sha1": "e1b71e4b511c3c63f8b19d0302fe1d1c6e79035a"
     },
     {
+      "path": "commons-codec/commons-codec/1.11/commons-codec-1.11.jar",
+      "sha1": "3acb4705652e16236558f0f4f2192cc33c3bd189"
+    },
+    {
+      "path": "commons-codec/commons-codec/1.11/commons-codec-1.11.pom",
+      "sha1": "093ee1760aba62d6896d578bd7d247d0fa52f0e7"
+    },
+    {
       "path": "commons-codec/commons-codec/1.2/commons-codec-1.2.jar",
       "sha1": "397f4731a9f9b6eb1907e224911c77ea3aa27a8b"
     },
@@ -1514,20 +386,16 @@
       "sha1": "9499f0c87ab43a74c456b9847acbcb5e67fe9f32"
     },
     {
-      "path": "commons-codec/commons-codec/1.9/commons-codec-1.9.jar",
-      "sha1": "9ce04e34240f674bc72680f8b843b1457383161a"
-    },
-    {
-      "path": "commons-codec/commons-codec/1.9/commons-codec-1.9.pom",
-      "sha1": "f5357ff0f308600af3660bf00a8be3415a335723"
-    },
-    {
       "path": "commons-collections/commons-collections/2.0/commons-collections-2.0.pom",
       "sha1": "b0d78d06e725d7f8176256eaeceb9d5b3f0a7bca"
     },
     {
       "path": "commons-collections/commons-collections/2.1/commons-collections-2.1.pom",
       "sha1": "03ac124c9f50b403afc9819e1f430d6883e77213"
+    },
+    {
+      "path": "commons-collections/commons-collections/3.1/commons-collections-3.1.jar",
+      "sha1": "40fb048097caeacdb11dbb33b5755854d89efdeb"
     },
     {
       "path": "commons-collections/commons-collections/3.1/commons-collections-3.1.pom",
@@ -1626,6 +494,10 @@
       "sha1": "7e39112810f6096061c43504188d18edc7d7eece"
     },
     {
+      "path": "commons-io/commons-io/2.6/commons-io-2.6.jar",
+      "sha1": "815893df5f31da2ece4040fe0a12fd44b577afaf"
+    },
+    {
       "path": "commons-io/commons-io/2.6/commons-io-2.6.pom",
       "sha1": "5060835593e5b6ed18c82fc2e782f0a3c30a00b1"
     },
@@ -1690,6 +562,10 @@
       "sha1": "d80c5278c4f112aba0a6e987d7321676ce074a22"
     },
     {
+      "path": "commons-logging/commons-logging/1.2/commons-logging-1.2.jar",
+      "sha1": "4bfc12adfe4842bf07b657f0369c4cb522955686"
+    },
+    {
       "path": "commons-logging/commons-logging/1.2/commons-logging-1.2.pom",
       "sha1": "075c03ba4b01932842a996ef8d3fc1ab61ddeac2"
     },
@@ -1734,72 +610,36 @@
       "sha1": "7ea9ce66f04c02826340f41052fa2883818df602"
     },
     {
-      "path": "info/picocli/picocli/3.9.5/picocli-3.9.5.jar",
-      "sha1": "f659a2feef0e8f7f8458aaf7d36c4d92f65320c8"
+      "path": "info/picocli/picocli/4.6.2/picocli-4.6.2.jar",
+      "sha1": "2c4196c67c0bc65f7a86cba64787b10d61c3cc63"
     },
     {
-      "path": "info/picocli/picocli/3.9.5/picocli-3.9.5.pom",
-      "sha1": "b13a5c3a0441370820a2d7bf36cbc4b7be6dd32b"
+      "path": "info/picocli/picocli/4.6.2/picocli-4.6.2.pom",
+      "sha1": "8df91b46d389066807c634e85ddb8b10222c7586"
     },
     {
-      "path": "io/netty/netty-buffer/4.1.17.Final/netty-buffer-4.1.17.Final.jar",
-      "sha1": "fdd68fb3defd7059a7392b9395ee941ef9bacc25"
+      "path": "javax/activation/javax.activation-api/1.2.0/javax.activation-api-1.2.0.jar",
+      "sha1": "85262acf3ca9816f9537ca47d5adeabaead7cb16"
     },
     {
-      "path": "io/netty/netty-buffer/4.1.17.Final/netty-buffer-4.1.17.Final.pom",
-      "sha1": "c82408a1224f512ecabe27947caac8c80b6bf9aa"
+      "path": "javax/activation/javax.activation-api/1.2.0/javax.activation-api-1.2.0.pom",
+      "sha1": "1aa9ef58e50ba6868b2e955d61fcd73be5b4cea5"
     },
     {
-      "path": "io/netty/netty-codec-http/4.1.17.Final/netty-codec-http-4.1.17.Final.jar",
-      "sha1": "251d7edcb897122b9b23f24ff793cd0739056b9e"
+      "path": "javax/annotation/javax.annotation-api/1.2/javax.annotation-api-1.2.jar",
+      "sha1": "479c1e06db31c432330183f5cae684163f186146"
     },
     {
-      "path": "io/netty/netty-codec-http/4.1.17.Final/netty-codec-http-4.1.17.Final.pom",
-      "sha1": "d0471c9e26719bccb05702ee4146b842e3017b33"
+      "path": "javax/annotation/javax.annotation-api/1.2/javax.annotation-api-1.2.pom",
+      "sha1": "d90e6c7f83898fe30f83aeaf4d411285f970a433"
     },
     {
-      "path": "io/netty/netty-codec/4.1.17.Final/netty-codec-4.1.17.Final.jar",
-      "sha1": "1d00f56dc9e55203a4bde5aae3d0828fdeb818e7"
+      "path": "javax/enterprise/cdi-api/1.2/cdi-api-1.2.jar",
+      "sha1": "53bba91dc3968adf411e076df020cf207283d7dc"
     },
     {
-      "path": "io/netty/netty-codec/4.1.17.Final/netty-codec-4.1.17.Final.pom",
-      "sha1": "8d2947bda992ae0ba35827ced7d32d90ce8d23f4"
-    },
-    {
-      "path": "io/netty/netty-common/4.1.17.Final/netty-common-4.1.17.Final.jar",
-      "sha1": "581c8ee239e4dc0976c2405d155f475538325098"
-    },
-    {
-      "path": "io/netty/netty-common/4.1.17.Final/netty-common-4.1.17.Final.pom",
-      "sha1": "2e3b41a4a2f637055ff873d45b283dc6e86b2221"
-    },
-    {
-      "path": "io/netty/netty-handler/4.1.17.Final/netty-handler-4.1.17.Final.jar",
-      "sha1": "18c40ffb61a1d1979eca024087070762fdc4664a"
-    },
-    {
-      "path": "io/netty/netty-handler/4.1.17.Final/netty-handler-4.1.17.Final.pom",
-      "sha1": "40290f7b9c7f54eec0f6441e5d6e82b374d0c650"
-    },
-    {
-      "path": "io/netty/netty-parent/4.1.17.Final/netty-parent-4.1.17.Final.pom",
-      "sha1": "ef64d4dca26e45efa7b42dea81688f8607b642ef"
-    },
-    {
-      "path": "io/netty/netty-resolver/4.1.17.Final/netty-resolver-4.1.17.Final.jar",
-      "sha1": "8f386c80821e200f542da282ae1d3cde5cad8368"
-    },
-    {
-      "path": "io/netty/netty-resolver/4.1.17.Final/netty-resolver-4.1.17.Final.pom",
-      "sha1": "2e0bc9391f7800a33f70eea96907bc64baa0b3d0"
-    },
-    {
-      "path": "io/netty/netty-transport/4.1.17.Final/netty-transport-4.1.17.Final.jar",
-      "sha1": "9585776b0a8153182412b5d5366061ff486914c1"
-    },
-    {
-      "path": "io/netty/netty-transport/4.1.17.Final/netty-transport-4.1.17.Final.pom",
-      "sha1": "dba27c519135ee04fdecfb5b37696f5d1b9b4b6a"
+      "path": "javax/enterprise/cdi-api/1.2/cdi-api-1.2.pom",
+      "sha1": "b0239d3cc2f5a47533bb0be184830a9f90db984a"
     },
     {
       "path": "javax/inject/javax.inject/1/javax.inject-1.jar",
@@ -1822,16 +662,16 @@
       "sha1": "a159fa05cce714c83deff647655dd53db064b21c"
     },
     {
-      "path": "javax/xml/bind/jaxb-api-parent/2.3.0/jaxb-api-parent-2.3.0.pom",
-      "sha1": "813cc0def6b156ec1808f4695a74cf6777030012"
+      "path": "javax/xml/bind/jaxb-api-parent/2.3.1/jaxb-api-parent-2.3.1.pom",
+      "sha1": "26101e8a1a09e16cdf277a4591f6d29917b2e06e"
     },
     {
-      "path": "javax/xml/bind/jaxb-api/2.3.0/jaxb-api-2.3.0.jar",
-      "sha1": "99f802e0cb3e953ba3d6e698795c4aeb98d37c48"
+      "path": "javax/xml/bind/jaxb-api/2.3.1/jaxb-api-2.3.1.jar",
+      "sha1": "8531ad5ac454cc2deb9d4d32c40c4d7451939b5d"
     },
     {
-      "path": "javax/xml/bind/jaxb-api/2.3.0/jaxb-api-2.3.0.pom",
-      "sha1": "61dab99f547e2110e42e35f659d9ba27bd00108c"
+      "path": "javax/xml/bind/jaxb-api/2.3.1/jaxb-api-2.3.1.pom",
+      "sha1": "c42c51ae84892b73ef7de5351188908e673f5c69"
     },
     {
       "path": "jaxen/jaxen/1.1-beta-8/jaxen-1.1-beta-8.jar",
@@ -1874,16 +714,8 @@
       "sha1": "419d0d7f80d7d00f8155bd45de15e7cf5d889f0a"
     },
     {
-      "path": "jline/jline/2.14.5/jline-2.14.5.pom",
-      "sha1": "9eb9ceeea01a5668165055f317af43db1a834c4f"
-    },
-    {
-      "path": "joda-time/joda-time/2.8.1/joda-time-2.8.1.jar",
-      "sha1": "f5bfc718c95a7b1d3c371bb02a188a4df18361a9"
-    },
-    {
-      "path": "joda-time/joda-time/2.8.1/joda-time-2.8.1.pom",
-      "sha1": "b6cd86ad72eb5eb5aa0614880ca284369e4e3624"
+      "path": "jline/jline/2.14.6/jline-2.14.6.pom",
+      "sha1": "378c8caace8e1e65314477420d9734373cf29531"
     },
     {
       "path": "jtidy/jtidy/4aug2000r7-dev/jtidy-4aug2000r7-dev.jar",
@@ -1924,6 +756,14 @@
     {
       "path": "junit/junit/4.12/junit-4.12.pom",
       "sha1": "35fb238baee3f3af739074d723279ebea2028398"
+    },
+    {
+      "path": "junit/junit/4.13.1/junit-4.13.1.jar",
+      "sha1": "cdd00374f1fee76b11e2a9d127405aa3f6be5b6a"
+    },
+    {
+      "path": "junit/junit/4.13.1/junit-4.13.1.pom",
+      "sha1": "643e8b4c40dca9f0b0abd8125d378d9f47d7d69e"
     },
     {
       "path": "log4j/log4j/1.2.12/log4j-1.2.12.pom",
@@ -1978,32 +818,36 @@
       "sha1": "2f357932a1ad37dae4d8aad4b68bd0901cbe9427"
     },
     {
+      "path": "net/java/jvnet-parent/1/jvnet-parent-1.pom",
+      "sha1": "b55a1b046dbe82acdee8edde7476eebcba1e57d8"
+    },
+    {
+      "path": "net/java/jvnet-parent/3/jvnet-parent-3.pom",
+      "sha1": "f8f3be3e980551a39b5679411e171aeb6931aaec"
+    },
+    {
       "path": "net/java/jvnet-parent/5/jvnet-parent-5.pom",
       "sha1": "5343c954d21549d039feebe5fadef023cdfc1388"
     },
     {
-      "path": "net/sf/saxon/Saxon-HE/9.9.1-2/Saxon-HE-9.9.1-2.jar",
-      "sha1": "2f7b0257a1b60990d1909f7fcd33739732dd2843"
+      "path": "net/sf/saxon/Saxon-HE/10.6/Saxon-HE-10.6.jar",
+      "sha1": "6c961655bd2e6ec11054bf7142c502406359f635"
     },
     {
-      "path": "net/sf/saxon/Saxon-HE/9.9.1-2/Saxon-HE-9.9.1-2.pom",
-      "sha1": "8ed41101df308d914e8572f991eb7a37f4072a86"
+      "path": "net/sf/saxon/Saxon-HE/10.6/Saxon-HE-10.6.pom",
+      "sha1": "ba8bb059ca776ff5e0b2cc6aaa25949f74fc1e97"
     },
     {
-      "path": "org/antlr/antlr4-master/4.7.2/antlr4-master-4.7.2.pom",
-      "sha1": "be60f81cb61996f57281497067d890caf8eeece8"
+      "path": "org/antlr/antlr4-master/4.9.3/antlr4-master-4.9.3.pom",
+      "sha1": "036b2162383e22b5a6c8c254e485921b5d77ad0c"
     },
     {
-      "path": "org/antlr/antlr4-runtime/4.7.2/antlr4-runtime-4.7.2.jar",
-      "sha1": "e27d8ab4f984f9d186f54da984a6ab1cccac755e"
+      "path": "org/antlr/antlr4-runtime/4.9.3/antlr4-runtime-4.9.3.jar",
+      "sha1": "81befc16ebedb8b8aea3e4c0835dd5ca7e8523a8"
     },
     {
-      "path": "org/antlr/antlr4-runtime/4.7.2/antlr4-runtime-4.7.2.pom",
-      "sha1": "0ef31048e832523e34634045589c56c5e63d4866"
-    },
-    {
-      "path": "org/apache/ant/ant-launcher/1.8.1/ant-launcher-1.8.1.pom",
-      "sha1": "436b71817fb83bb7a162a22b1aadebe0a2910133"
+      "path": "org/antlr/antlr4-runtime/4.9.3/antlr4-runtime-4.9.3.pom",
+      "sha1": "7ed961275fcdee7e2b69a66bf1ae6c4f9f5a1ab8"
     },
     {
       "path": "org/apache/ant/ant-launcher/1.8.2/ant-launcher-1.8.2.jar",
@@ -2014,24 +858,8 @@
       "sha1": "5a563897c817d0ce483710b43344d51efa28e7c9"
     },
     {
-      "path": "org/apache/ant/ant-nodeps/1.8.1/ant-nodeps-1.8.1.jar",
-      "sha1": "24a049c1581192602fc4e16d311d5351e6678a44"
-    },
-    {
-      "path": "org/apache/ant/ant-nodeps/1.8.1/ant-nodeps-1.8.1.pom",
-      "sha1": "b1c32867d08c10c60bcb54c9c0dcd39e309f07b2"
-    },
-    {
-      "path": "org/apache/ant/ant-parent/1.8.1/ant-parent-1.8.1.pom",
-      "sha1": "25fac3901cbb571d7f8412312843f8c772307eed"
-    },
-    {
       "path": "org/apache/ant/ant-parent/1.8.2/ant-parent-1.8.2.pom",
       "sha1": "2368d8cfa4d7c8546008d049d924ee83589c6ac6"
-    },
-    {
-      "path": "org/apache/ant/ant/1.8.1/ant-1.8.1.pom",
-      "sha1": "381a0b0df3f0ee802f0bda5d7d312b60d2cb019f"
     },
     {
       "path": "org/apache/ant/ant/1.8.2/ant-1.8.2.jar",
@@ -2096,6 +924,10 @@
     {
       "path": "org/apache/apache/26/apache-26.pom",
       "sha1": "d05aaef85ff7d6ddf4e5c8770046c006cb66795a"
+    },
+    {
+      "path": "org/apache/apache/27/apache-27.pom",
+      "sha1": "ea179482b464bfc8cac939c6d6e632b6a8e3316b"
     },
     {
       "path": "org/apache/apache/3/apache-3.pom",
@@ -2178,12 +1010,16 @@
       "sha1": "08b969f02dfa03fa493fd6eba4cb9dcceea5aefd"
     },
     {
-      "path": "org/apache/commons/commons-lang3/3.7/commons-lang3-3.7.jar",
-      "sha1": "557edd918fd41f9260963583ebf5a61a43a6b423"
-    },
-    {
       "path": "org/apache/commons/commons-lang3/3.7/commons-lang3-3.7.pom",
       "sha1": "c445be3b6442b41cbea539d4218be3aea9428a55"
+    },
+    {
+      "path": "org/apache/commons/commons-lang3/3.8.1/commons-lang3-3.8.1.jar",
+      "sha1": "6505a72a097d9270f7a9e7bf42c4238283247755"
+    },
+    {
+      "path": "org/apache/commons/commons-lang3/3.8.1/commons-lang3-3.8.1.pom",
+      "sha1": "59092f9d06947b986318dfbe297312e08379b0ae"
     },
     {
       "path": "org/apache/commons/commons-parent/11/commons-parent-11.pom",
@@ -2208,10 +1044,6 @@
     {
       "path": "org/apache/commons/commons-parent/25/commons-parent-25.pom",
       "sha1": "67b84199ca4acf0d8fbc5256d90b80f746737e94"
-    },
-    {
-      "path": "org/apache/commons/commons-parent/32/commons-parent-32.pom",
-      "sha1": "0e51c4223003c2c7c63f38d7b8823e40eb06bd1f"
     },
     {
       "path": "org/apache/commons/commons-parent/33/commons-parent-33.pom",
@@ -2242,6 +1074,14 @@
       "sha1": "a24c1d164086ee8f10c11879da2f86f52cbea7fb"
     },
     {
+      "path": "org/apache/commons/commons-parent/45/commons-parent-45.pom",
+      "sha1": "71201c6eea226cd986f03adb1b6ec326dd860786"
+    },
+    {
+      "path": "org/apache/commons/commons-parent/47/commons-parent-47.pom",
+      "sha1": "391715f2f4f1b32604a201a2f4ea74a174e1f21c"
+    },
+    {
       "path": "org/apache/commons/commons-parent/5/commons-parent-5.pom",
       "sha1": "a0a168281558e7ae972f113fa128bc46b4973edd"
     },
@@ -2258,6 +1098,26 @@
       "sha1": "217cc375e25b647a61956e1d6a88163f9e3a387c"
     },
     {
+      "path": "org/apache/commons/commons-text/1.3/commons-text-1.3.jar",
+      "sha1": "9abf61708a66ab5e55f6169a200dbfc584b546d9"
+    },
+    {
+      "path": "org/apache/commons/commons-text/1.3/commons-text-1.3.pom",
+      "sha1": "319d278bae93adc3f5b5e8408a90fd2d98ce75f7"
+    },
+    {
+      "path": "org/apache/geronimo/genesis/genesis-default-flava/2.0/genesis-default-flava-2.0.pom",
+      "sha1": "3ad9b678150869f27aa7f92fb5359da79c74cda5"
+    },
+    {
+      "path": "org/apache/geronimo/genesis/genesis-java5-flava/2.0/genesis-java5-flava-2.0.pom",
+      "sha1": "045137568f17802240e75e9776c9d7d948f9673a"
+    },
+    {
+      "path": "org/apache/geronimo/genesis/genesis/2.0/genesis-2.0.pom",
+      "sha1": "8d7ac66279bb3dce6f19e43a68d9e761c40b7aa3"
+    },
+    {
       "path": "org/apache/httpcomponents/httpclient/4.0.2/httpclient-4.0.2.jar",
       "sha1": "781b68c2fd5335de914166241b8d4bfe8c2f91b7"
     },
@@ -2266,28 +1126,36 @@
       "sha1": "f218515f169bb93b7fd6c67fab0dedbaf832a8ae"
     },
     {
-      "path": "org/apache/httpcomponents/httpclient/4.5.2/httpclient-4.5.2.jar",
-      "sha1": "733db77aa8d9b2d68015189df76ab06304406e50"
+      "path": "org/apache/httpcomponents/httpclient/4.5.13/httpclient-4.5.13.jar",
+      "sha1": "e5f6cae5ca7ecaac1ec2827a9e2d65ae2869cada"
     },
     {
-      "path": "org/apache/httpcomponents/httpclient/4.5.2/httpclient-4.5.2.pom",
-      "sha1": "56f6338b324e438307e1f2c2b33bd02268310fc2"
+      "path": "org/apache/httpcomponents/httpclient/4.5.13/httpclient-4.5.13.pom",
+      "sha1": "e5b134e5cd3e28dc431ca5397e9b53d28d1cfa74"
     },
     {
       "path": "org/apache/httpcomponents/httpcomponents-client/4.0.2/httpcomponents-client-4.0.2.pom",
       "sha1": "f068349e19ba323665d0bc49141333747b174f3f"
     },
     {
-      "path": "org/apache/httpcomponents/httpcomponents-client/4.5.2/httpcomponents-client-4.5.2.pom",
-      "sha1": "55d500e6c1e98ffbb00c35bee72fabc255c22108"
+      "path": "org/apache/httpcomponents/httpcomponents-client/4.5.13/httpcomponents-client-4.5.13.pom",
+      "sha1": "61045e5bac5f6b0a7e3301053de0d78fc92f09db"
     },
     {
       "path": "org/apache/httpcomponents/httpcomponents-core/4.0.1/httpcomponents-core-4.0.1.pom",
       "sha1": "2766fab80fcc4f8bfdfe4f4a7cf151140ec8e0ed"
     },
     {
-      "path": "org/apache/httpcomponents/httpcomponents-core/4.4.4/httpcomponents-core-4.4.4.pom",
-      "sha1": "84c5600018f58510ef3d2c3b5d218bea5d51bbbe"
+      "path": "org/apache/httpcomponents/httpcomponents-core/4.4.13/httpcomponents-core-4.4.13.pom",
+      "sha1": "221f9ef52d6147e7c193f540c495db26f25d64b6"
+    },
+    {
+      "path": "org/apache/httpcomponents/httpcomponents-core/4.4.14/httpcomponents-core-4.4.14.pom",
+      "sha1": "6dede7e95d51c365a10c346b010797c2656edc65"
+    },
+    {
+      "path": "org/apache/httpcomponents/httpcomponents-parent/11/httpcomponents-parent-11.pom",
+      "sha1": "3ee7a841cc49326e8681089ea7ad6a3b81b88581"
     },
     {
       "path": "org/apache/httpcomponents/httpcore/4.0.1/httpcore-4.0.1.jar",
@@ -2298,12 +1166,16 @@
       "sha1": "d965db94102b75a50bd29938ef67105da1535554"
     },
     {
-      "path": "org/apache/httpcomponents/httpcore/4.4.4/httpcore-4.4.4.jar",
-      "sha1": "b31526a230871fbe285fbcbe2813f9c0839ae9b0"
+      "path": "org/apache/httpcomponents/httpcore/4.4.13/httpcore-4.4.13.pom",
+      "sha1": "7d4610db34bf2175d0d3813d7faac9cf7ca7c0e5"
     },
     {
-      "path": "org/apache/httpcomponents/httpcore/4.4.4/httpcore-4.4.4.pom",
-      "sha1": "2feaed055f70af1aafd223137e4bd456decc5995"
+      "path": "org/apache/httpcomponents/httpcore/4.4.14/httpcore-4.4.14.jar",
+      "sha1": "9dd1a631c082d92ecd4bd8fd4cf55026c720a8c1"
+    },
+    {
+      "path": "org/apache/httpcomponents/httpcore/4.4.14/httpcore-4.4.14.pom",
+      "sha1": "16db7143a7586192ac1d863c7ecfaf25541bbc47"
     },
     {
       "path": "org/apache/httpcomponents/project/4.0/project-4.0.pom",
@@ -2312,10 +1184,6 @@
     {
       "path": "org/apache/httpcomponents/project/4.1/project-4.1.pom",
       "sha1": "b63ff67e6ffc1940041319e0e06d7c6b1d671fd2"
-    },
-    {
-      "path": "org/apache/httpcomponents/project/7/project-7.pom",
-      "sha1": "c486760d8e0eafe8d4932450e386c2805364f782"
     },
     {
       "path": "org/apache/jackrabbit/jackrabbit-jcr-commons/1.5.0/jackrabbit-jcr-commons-1.5.0.jar",
@@ -2354,6 +1222,14 @@
       "sha1": "6746463f79c8f1bcd049222d500d4c9bdd3fa38f"
     },
     {
+      "path": "org/apache/maven/doxia/doxia-core/1.11.1/doxia-core-1.11.1.jar",
+      "sha1": "0b0438a61c2c1208b4d2e2b38241478383dd758b"
+    },
+    {
+      "path": "org/apache/maven/doxia/doxia-core/1.11.1/doxia-core-1.11.1.pom",
+      "sha1": "aa9c5245d88b7ee6950904d37a743ca01fde6499"
+    },
+    {
       "path": "org/apache/maven/doxia/doxia-core/1.2/doxia-core-1.2.jar",
       "sha1": "58675d96dbee38691c7085d12907a9fd04ff27d3"
     },
@@ -2386,6 +1262,14 @@
       "sha1": "3c5a873ca8a24cd8f32e1e8ea019a4f52b0d3226"
     },
     {
+      "path": "org/apache/maven/doxia/doxia-decoration-model/1.11.1/doxia-decoration-model-1.11.1.jar",
+      "sha1": "1e10f4e9268b49edf40bca721eef07271bc91de5"
+    },
+    {
+      "path": "org/apache/maven/doxia/doxia-decoration-model/1.11.1/doxia-decoration-model-1.11.1.pom",
+      "sha1": "fdbb72f0d54a43e13a8329e74096a96dae5abe17"
+    },
+    {
       "path": "org/apache/maven/doxia/doxia-decoration-model/1.2/doxia-decoration-model-1.2.pom",
       "sha1": "b21179344a7a25ae86298e1a051508ecb54ff118"
     },
@@ -2402,8 +1286,12 @@
       "sha1": "deaf255b7f237392dde3f76100300a41c8409532"
     },
     {
-      "path": "org/apache/maven/doxia/doxia-decoration-model/1.6/doxia-decoration-model-1.6.pom",
-      "sha1": "4009e46e902f2ebaac97670fc4d0b973206ce78c"
+      "path": "org/apache/maven/doxia/doxia-integration-tools/1.11.1/doxia-integration-tools-1.11.1.jar",
+      "sha1": "fdc4c4f29d10b0e2b5b9d7f9eea16812d496e478"
+    },
+    {
+      "path": "org/apache/maven/doxia/doxia-integration-tools/1.11.1/doxia-integration-tools-1.11.1.pom",
+      "sha1": "9ebdded413aade54a0363d8fc7137ead4c31e4c8"
     },
     {
       "path": "org/apache/maven/doxia/doxia-integration-tools/1.5/doxia-integration-tools-1.5.jar",
@@ -2412,14 +1300,6 @@
     {
       "path": "org/apache/maven/doxia/doxia-integration-tools/1.5/doxia-integration-tools-1.5.pom",
       "sha1": "b2384c4865857d55209a95ac4a21f2d358984f57"
-    },
-    {
-      "path": "org/apache/maven/doxia/doxia-integration-tools/1.6/doxia-integration-tools-1.6.jar",
-      "sha1": "aa12128117facfa64c1ac8b8f70c6cf1dbf8b5ca"
-    },
-    {
-      "path": "org/apache/maven/doxia/doxia-integration-tools/1.6/doxia-integration-tools-1.6.pom",
-      "sha1": "9793d30249abc7b4d66cc4a45f25dae88c893c7d"
     },
     {
       "path": "org/apache/maven/doxia/doxia-logging-api/1.1.2/doxia-logging-api-1.1.2.jar",
@@ -2446,6 +1326,14 @@
       "sha1": "511c87192bc6c0883d077ba7ae7ddbe8a2d06fa9"
     },
     {
+      "path": "org/apache/maven/doxia/doxia-logging-api/1.11.1/doxia-logging-api-1.11.1.jar",
+      "sha1": "ee28757cce6ee0215bac550dead25074c97c532d"
+    },
+    {
+      "path": "org/apache/maven/doxia/doxia-logging-api/1.11.1/doxia-logging-api-1.11.1.pom",
+      "sha1": "af26cdf5a6904c4fa2b20f36cdee7e705807b120"
+    },
+    {
       "path": "org/apache/maven/doxia/doxia-logging-api/1.2/doxia-logging-api-1.2.pom",
       "sha1": "369a028bcaa2b7aa935cbd0fd1483d2f4a4d64f4"
     },
@@ -2460,10 +1348,6 @@
     {
       "path": "org/apache/maven/doxia/doxia-logging-api/1.4/doxia-logging-api-1.4.pom",
       "sha1": "042598efe5bf93859b9366c333c2398af28a2bb5"
-    },
-    {
-      "path": "org/apache/maven/doxia/doxia-logging-api/1.6/doxia-logging-api-1.6.pom",
-      "sha1": "483135610509c3ccd9137b3dbdaaed18c338f2d8"
     },
     {
       "path": "org/apache/maven/doxia/doxia-module-apt/1.0-alpha-10/doxia-module-apt-1.0-alpha-10.pom",
@@ -2542,6 +1426,14 @@
       "sha1": "7127a073d9e36527071d6cf11b174c55f4be6d26"
     },
     {
+      "path": "org/apache/maven/doxia/doxia-module-xhtml/1.11.1/doxia-module-xhtml-1.11.1.jar",
+      "sha1": "f1b755a09934cd9c51d87b606c8e8ddf07719ebf"
+    },
+    {
+      "path": "org/apache/maven/doxia/doxia-module-xhtml/1.11.1/doxia-module-xhtml-1.11.1.pom",
+      "sha1": "9e3bb8e5e94e8bef653c39706682750ad6139967"
+    },
+    {
       "path": "org/apache/maven/doxia/doxia-module-xhtml/1.2/doxia-module-xhtml-1.2.pom",
       "sha1": "da521780a03c3ef10917fd918e33ee19f2756510"
     },
@@ -2554,6 +1446,14 @@
       "sha1": "98902234bd791acb345e987a0513b25daf061196"
     },
     {
+      "path": "org/apache/maven/doxia/doxia-module-xhtml5/1.11.1/doxia-module-xhtml5-1.11.1.jar",
+      "sha1": "e4ee721555ff063d7ef9042d6b9237386c6b33e0"
+    },
+    {
+      "path": "org/apache/maven/doxia/doxia-module-xhtml5/1.11.1/doxia-module-xhtml5-1.11.1.pom",
+      "sha1": "0d8e33c7b4edded1ade1e13d56d78beb4b510bc9"
+    },
+    {
       "path": "org/apache/maven/doxia/doxia-modules/1.0-alpha-10/doxia-modules-1.0-alpha-10.pom",
       "sha1": "ae077e474fa8206f400ebc197eb78577f280a653"
     },
@@ -2564,6 +1464,10 @@
     {
       "path": "org/apache/maven/doxia/doxia-modules/1.1.3/doxia-modules-1.1.3.pom",
       "sha1": "b1a87a4973f1da44a484e74c2ac47a2436eb9424"
+    },
+    {
+      "path": "org/apache/maven/doxia/doxia-modules/1.11.1/doxia-modules-1.11.1.pom",
+      "sha1": "8d840d311dff1c26fdabb11cdcccb6dcfdea20f7"
     },
     {
       "path": "org/apache/maven/doxia/doxia-modules/1.2/doxia-modules-1.2.pom",
@@ -2614,6 +1518,14 @@
       "sha1": "0a73bb471bb8fe69ed25d59c348139e6afb834bc"
     },
     {
+      "path": "org/apache/maven/doxia/doxia-sink-api/1.11.1/doxia-sink-api-1.11.1.jar",
+      "sha1": "59c2255f58c78fbbcb7e638e82bd2914e78aec8b"
+    },
+    {
+      "path": "org/apache/maven/doxia/doxia-sink-api/1.11.1/doxia-sink-api-1.11.1.pom",
+      "sha1": "d5edaf41ae531082a30c7cf2dac699645f0af643"
+    },
+    {
       "path": "org/apache/maven/doxia/doxia-sink-api/1.2/doxia-sink-api-1.2.pom",
       "sha1": "d50511019c3eae662d803f6722d353fd0af2e37d"
     },
@@ -2642,6 +1554,14 @@
       "sha1": "0d48d19dfd34ff16b0d71befdbaca53427592ac1"
     },
     {
+      "path": "org/apache/maven/doxia/doxia-site-renderer/1.11.1/doxia-site-renderer-1.11.1.jar",
+      "sha1": "414e3b2049aa6f6710ecca4fa905d9d2ce318773"
+    },
+    {
+      "path": "org/apache/maven/doxia/doxia-site-renderer/1.11.1/doxia-site-renderer-1.11.1.pom",
+      "sha1": "86029ecfaf40c43c94eebddca9173cc3cdb4934c"
+    },
+    {
       "path": "org/apache/maven/doxia/doxia-site-renderer/1.2/doxia-site-renderer-1.2.pom",
       "sha1": "02d945960abfc9ff27d0b0ad76a5e806c7c776a1"
     },
@@ -2666,6 +1586,10 @@
       "sha1": "a507679b334f14def6a81b3fca8adde67868181d"
     },
     {
+      "path": "org/apache/maven/doxia/doxia-sitetools/1.11.1/doxia-sitetools-1.11.1.pom",
+      "sha1": "4ccd0bdfe05e890d6d4354284fc1cd709ee68a5d"
+    },
+    {
       "path": "org/apache/maven/doxia/doxia-sitetools/1.2/doxia-sitetools-1.2.pom",
       "sha1": "78990d3ce17fbf65b8e4290b043bac7868a3e51d"
     },
@@ -2678,16 +1602,16 @@
       "sha1": "09cf8365031618c2d39ea0118e1a75be6ba18b66"
     },
     {
-      "path": "org/apache/maven/doxia/doxia-sitetools/1.6/doxia-sitetools-1.6.pom",
-      "sha1": "561855c84f27d4c5dd00dda557c3bf9efc1dbad9"
+      "path": "org/apache/maven/doxia/doxia-skin-model/1.11.1/doxia-skin-model-1.11.1.jar",
+      "sha1": "b6994a60da09eb429c01362e9a6a510e0f83d24e"
+    },
+    {
+      "path": "org/apache/maven/doxia/doxia-skin-model/1.11.1/doxia-skin-model-1.11.1.pom",
+      "sha1": "0c19bbbb51b5ccd70b299b28c77cd79cd916d453"
     },
     {
       "path": "org/apache/maven/doxia/doxia-tools/2/doxia-tools-2.pom",
       "sha1": "c13f811b01d98631ebe9131b63aeb6bded234aff"
-    },
-    {
-      "path": "org/apache/maven/doxia/doxia-tools/3/doxia-tools-3.pom",
-      "sha1": "aadd84e5a564ed471990a24e56c5c9b484fb1438"
     },
     {
       "path": "org/apache/maven/doxia/doxia/1.0-alpha-10/doxia-1.0-alpha-10.pom",
@@ -2714,6 +1638,10 @@
       "sha1": "b2306ce11082ee839fa2deee1fe4f1122c15227c"
     },
     {
+      "path": "org/apache/maven/doxia/doxia/1.11.1/doxia-1.11.1.pom",
+      "sha1": "73c5c8642a1a66260e448866657f9231399fb938"
+    },
+    {
       "path": "org/apache/maven/doxia/doxia/1.2/doxia-1.2.pom",
       "sha1": "1cd5c098f618eec281c1b8716f90fa2680c5d26a"
     },
@@ -2724,10 +1652,6 @@
     {
       "path": "org/apache/maven/doxia/doxia/1.4/doxia-1.4.pom",
       "sha1": "121c5566d364de8190fcab422b41870acb86f2de"
-    },
-    {
-      "path": "org/apache/maven/doxia/doxia/1.6/doxia-1.6.pom",
-      "sha1": "08acdcf813dddb754acb38173b4d764403583bb5"
     },
     {
       "path": "org/apache/maven/enforcer/enforcer-api/3.0.0-M2/enforcer-api-3.0.0-M2.jar",
@@ -2766,6 +1690,14 @@
       "sha1": "a3e7fa0d4d0d26f901c919173681bab824c5588c"
     },
     {
+      "path": "org/apache/maven/maven-aether-provider/3.1.0/maven-aether-provider-3.1.0.jar",
+      "sha1": "dda2231a2be2768109d474805c702b76a8e794e6"
+    },
+    {
+      "path": "org/apache/maven/maven-aether-provider/3.1.0/maven-aether-provider-3.1.0.pom",
+      "sha1": "7110ccc3760777302afd19972b8609d5ea167607"
+    },
+    {
       "path": "org/apache/maven/maven-archiver/2.4.2/maven-archiver-2.4.2.jar",
       "sha1": "ddcb393749701eb292a263a3500db69df39aef43"
     },
@@ -2792,14 +1724,6 @@
     {
       "path": "org/apache/maven/maven-artifact-manager/2.0.10/maven-artifact-manager-2.0.10.pom",
       "sha1": "46d1bab9afd325c06e6c26510215949f955e7636"
-    },
-    {
-      "path": "org/apache/maven/maven-artifact-manager/2.0.11/maven-artifact-manager-2.0.11.jar",
-      "sha1": "6c8764f10c7bd2ef8ad050190e3922be6078ecca"
-    },
-    {
-      "path": "org/apache/maven/maven-artifact-manager/2.0.11/maven-artifact-manager-2.0.11.pom",
-      "sha1": "337bb85c33b571b3fea7a5f55cd87be458481630"
     },
     {
       "path": "org/apache/maven/maven-artifact-manager/2.0.2/maven-artifact-manager-2.0.2.pom",
@@ -2848,14 +1772,6 @@
     {
       "path": "org/apache/maven/maven-artifact/2.0.10/maven-artifact-2.0.10.pom",
       "sha1": "79570a5cf88d69f6472f9b65f86372b6d84a4254"
-    },
-    {
-      "path": "org/apache/maven/maven-artifact/2.0.11/maven-artifact-2.0.11.jar",
-      "sha1": "432e01884f40b5d1d0b4706b019322d352c3b77b"
-    },
-    {
-      "path": "org/apache/maven/maven-artifact/2.0.11/maven-artifact-2.0.11.pom",
-      "sha1": "fa061e877d8d3bff604568969b02c98b62c8d841"
     },
     {
       "path": "org/apache/maven/maven-artifact/2.0.2/maven-artifact-2.0.2.pom",
@@ -2914,6 +1830,14 @@
       "sha1": "6823c7ad1a5557c2f96bd2fd312948513af8e524"
     },
     {
+      "path": "org/apache/maven/maven-artifact/3.1.0/maven-artifact-3.1.0.jar",
+      "sha1": "446e6a69fee5b7f2b0f498c0e4dfbd38f740a8f9"
+    },
+    {
+      "path": "org/apache/maven/maven-artifact/3.1.0/maven-artifact-3.1.0.pom",
+      "sha1": "29d03c0c9e8e47bcc1ab504e574fc235f6e6df83"
+    },
+    {
       "path": "org/apache/maven/maven-compat/3.0.4/maven-compat-3.0.4.jar",
       "sha1": "14d626e1e29a36f5f4629b689e964f8665707839"
     },
@@ -2970,6 +1894,14 @@
       "sha1": "3727542038487060064a4a14b74c7590d364c45b"
     },
     {
+      "path": "org/apache/maven/maven-core/3.1.0/maven-core-3.1.0.jar",
+      "sha1": "3aca07a1e496f1fb9c0d2d950b6aac7779c67b98"
+    },
+    {
+      "path": "org/apache/maven/maven-core/3.1.0/maven-core-3.1.0.pom",
+      "sha1": "95634e1849f1d9acd0d2709935417195ddd610c1"
+    },
+    {
       "path": "org/apache/maven/maven-error-diagnostics/2.0.6/maven-error-diagnostics-2.0.6.jar",
       "sha1": "49f5380c07a79cd91ee09e0cb9063764f1f6525c"
     },
@@ -3010,16 +1942,16 @@
       "sha1": "e4b3e5ffec18728f099d8000e400ac763af2cc20"
     },
     {
+      "path": "org/apache/maven/maven-model-builder/3.1.0/maven-model-builder-3.1.0.jar",
+      "sha1": "13ba294cedb659c3851f0c2980af7f44bcc6a8e0"
+    },
+    {
+      "path": "org/apache/maven/maven-model-builder/3.1.0/maven-model-builder-3.1.0.pom",
+      "sha1": "c8acc6f639a2ee4206f53a29ceee12c873c5f67f"
+    },
+    {
       "path": "org/apache/maven/maven-model/2.0.10/maven-model-2.0.10.pom",
       "sha1": "a9d1ee85a9a3194bafc184842ce9054f191523d9"
-    },
-    {
-      "path": "org/apache/maven/maven-model/2.0.11/maven-model-2.0.11.jar",
-      "sha1": "b4947c88b8f0e19944b1e5d121e2f7dcd2440895"
-    },
-    {
-      "path": "org/apache/maven/maven-model/2.0.11/maven-model-2.0.11.pom",
-      "sha1": "985770dc0a3cb952665b38e288036e5aa89f82db"
     },
     {
       "path": "org/apache/maven/maven-model/2.0.4/maven-model-2.0.4.pom",
@@ -3074,6 +2006,10 @@
       "sha1": "3aa89da7792286192b860c58841b3907364d33a8"
     },
     {
+      "path": "org/apache/maven/maven-model/3.1.0/maven-model-3.1.0.pom",
+      "sha1": "3e7b6ecee46f39f4ba482d5ad47669cd4f239a26"
+    },
+    {
       "path": "org/apache/maven/maven-monitor/2.0.6/maven-monitor-2.0.6.jar",
       "sha1": "ab682e67281bb025980181c83acbcad19042a342"
     },
@@ -3104,10 +2040,6 @@
     {
       "path": "org/apache/maven/maven-parent/11/maven-parent-11.pom",
       "sha1": "4bb80173fa4979737840fda012af86f5beabf1bc"
-    },
-    {
-      "path": "org/apache/maven/maven-parent/12/maven-parent-12.pom",
-      "sha1": "d14a4861204250a79cfac405c0d995602a8cd49f"
     },
     {
       "path": "org/apache/maven/maven-parent/13/maven-parent-13.pom",
@@ -3178,6 +2110,10 @@
       "sha1": "af78602525e1c7ac4575ef2e3059b7910bb79f3a"
     },
     {
+      "path": "org/apache/maven/maven-parent/37/maven-parent-37.pom",
+      "sha1": "4dea31650e71386d7c41da8806ef4c87ef8de0b1"
+    },
+    {
       "path": "org/apache/maven/maven-parent/4/maven-parent-4.pom",
       "sha1": "0fc039b0bd4d17d7c147a30e1d83994629c5297c"
     },
@@ -3208,14 +2144,6 @@
     {
       "path": "org/apache/maven/maven-plugin-api/2.0.1/maven-plugin-api-2.0.1.pom",
       "sha1": "c0d6d833b8c2e3b077c7570015e86ce70bec066e"
-    },
-    {
-      "path": "org/apache/maven/maven-plugin-api/2.0.11/maven-plugin-api-2.0.11.jar",
-      "sha1": "f7aa99d1f2c0e941b60c107194dc5f9d107a0d77"
-    },
-    {
-      "path": "org/apache/maven/maven-plugin-api/2.0.11/maven-plugin-api-2.0.11.pom",
-      "sha1": "d5583e2aa345c6496c764c62d524789715c9fb6a"
     },
     {
       "path": "org/apache/maven/maven-plugin-api/2.0.6/maven-plugin-api-2.0.6.jar",
@@ -3256,6 +2184,14 @@
     {
       "path": "org/apache/maven/maven-plugin-api/3.0/maven-plugin-api-3.0.pom",
       "sha1": "9627e130b4f516945f0db03119dbafb86f168026"
+    },
+    {
+      "path": "org/apache/maven/maven-plugin-api/3.1.0/maven-plugin-api-3.1.0.jar",
+      "sha1": "8821fd1b81c6b960f7ce39f5dde612c665146fd8"
+    },
+    {
+      "path": "org/apache/maven/maven-plugin-api/3.1.0/maven-plugin-api-3.1.0.pom",
+      "sha1": "b5099f8ebbd34e79be313854f554a2de0994166b"
     },
     {
       "path": "org/apache/maven/maven-plugin-descriptor/2.0.10/maven-plugin-descriptor-2.0.10.jar",
@@ -3322,14 +2258,6 @@
       "sha1": "65f0e009b7e9d2a74c5febbe457799b3d696f43d"
     },
     {
-      "path": "org/apache/maven/maven-plugin-registry/2.0.11/maven-plugin-registry-2.0.11.jar",
-      "sha1": "c4703e5496fa93dcea339f9cc665290f9179c108"
-    },
-    {
-      "path": "org/apache/maven/maven-plugin-registry/2.0.11/maven-plugin-registry-2.0.11.pom",
-      "sha1": "1934959e96e767b4af4b20ed8fd06b77e88dec72"
-    },
-    {
       "path": "org/apache/maven/maven-plugin-registry/2.0.6/maven-plugin-registry-2.0.6.jar",
       "sha1": "4242ec8629b4797387751379f57e72cb718aac7a"
     },
@@ -3368,14 +2296,6 @@
     {
       "path": "org/apache/maven/maven-profile/2.0.10/maven-profile-2.0.10.pom",
       "sha1": "4d0680a07f9a6f9fc812b1ce77ac599e1c9fcfa1"
-    },
-    {
-      "path": "org/apache/maven/maven-profile/2.0.11/maven-profile-2.0.11.jar",
-      "sha1": "130057d04b0e914509f1223a85a6b1e83b08957f"
-    },
-    {
-      "path": "org/apache/maven/maven-profile/2.0.11/maven-profile-2.0.11.pom",
-      "sha1": "d15bcf55e55c8d5f7b3c3a3a5afe62e335e7b695"
     },
     {
       "path": "org/apache/maven/maven-profile/2.0.4/maven-profile-2.0.4.pom",
@@ -3422,14 +2342,6 @@
       "sha1": "5d51eba53265db60c55abf8da3555f3f23727e66"
     },
     {
-      "path": "org/apache/maven/maven-project/2.0.11/maven-project-2.0.11.jar",
-      "sha1": "adc2114aa1d9b7a599aa226849ad7f463de3cadc"
-    },
-    {
-      "path": "org/apache/maven/maven-project/2.0.11/maven-project-2.0.11.pom",
-      "sha1": "db1a7bda7cf9d695a129554d8520d2cce35be68c"
-    },
-    {
       "path": "org/apache/maven/maven-project/2.0.4/maven-project-2.0.4.pom",
       "sha1": "a904c3b53bc6c82d928cc97ad2697bc5798b3f7d"
     },
@@ -3468,14 +2380,6 @@
     {
       "path": "org/apache/maven/maven-repository-metadata/2.0.10/maven-repository-metadata-2.0.10.pom",
       "sha1": "f14e68c7000dabc2e119bd4bd0a38a74f015efda"
-    },
-    {
-      "path": "org/apache/maven/maven-repository-metadata/2.0.11/maven-repository-metadata-2.0.11.jar",
-      "sha1": "88b1222854edcbf0ca02bfa5484b65c5f9240fdb"
-    },
-    {
-      "path": "org/apache/maven/maven-repository-metadata/2.0.11/maven-repository-metadata-2.0.11.pom",
-      "sha1": "d3bd175e188240c3ef31114b0e051183d3d0008f"
     },
     {
       "path": "org/apache/maven/maven-repository-metadata/2.0.2/maven-repository-metadata-2.0.2.pom",
@@ -3530,6 +2434,14 @@
       "sha1": "5126010cefcb80ed5dc6eb066541b546dbdbc971"
     },
     {
+      "path": "org/apache/maven/maven-repository-metadata/3.1.0/maven-repository-metadata-3.1.0.jar",
+      "sha1": "77bb2c383b1654b158cf9f905f4105d9d522fc7e"
+    },
+    {
+      "path": "org/apache/maven/maven-repository-metadata/3.1.0/maven-repository-metadata-3.1.0.pom",
+      "sha1": "9f0ec3ca8467110d8fcc9957e6ccdf9e51ef0374"
+    },
+    {
       "path": "org/apache/maven/maven-settings-builder/3.0.4/maven-settings-builder-3.0.4.jar",
       "sha1": "1c47e99b3cef4aed391f6c76aa073f3f7f25044b"
     },
@@ -3546,20 +2458,20 @@
       "sha1": "69a41566b573bda12bd2bb7dcb64d30da834cb9c"
     },
     {
+      "path": "org/apache/maven/maven-settings-builder/3.1.0/maven-settings-builder-3.1.0.jar",
+      "sha1": "ab0e825308fb8862d6d2b6fecea80c0d06c48407"
+    },
+    {
+      "path": "org/apache/maven/maven-settings-builder/3.1.0/maven-settings-builder-3.1.0.pom",
+      "sha1": "1731542d386485f51ffdb9126cb73432ce2f838b"
+    },
+    {
       "path": "org/apache/maven/maven-settings/2.0.10/maven-settings-2.0.10.jar",
       "sha1": "f092b75e2846e92880753ff60e5633554c308743"
     },
     {
       "path": "org/apache/maven/maven-settings/2.0.10/maven-settings-2.0.10.pom",
       "sha1": "82fe60f0a91a6bd644e8888439203c47f057d088"
-    },
-    {
-      "path": "org/apache/maven/maven-settings/2.0.11/maven-settings-2.0.11.jar",
-      "sha1": "3f81af64ca039c3ef000ecee0a31668a2b9a432d"
-    },
-    {
-      "path": "org/apache/maven/maven-settings/2.0.11/maven-settings-2.0.11.pom",
-      "sha1": "442b0036e20eb89ede65801e3f623bcd76aafba1"
     },
     {
       "path": "org/apache/maven/maven-settings/2.0.4/maven-settings-2.0.4.pom",
@@ -3610,6 +2522,14 @@
       "sha1": "efc9c618ca5b82f76d1894977482069fe0e4565a"
     },
     {
+      "path": "org/apache/maven/maven-settings/3.1.0/maven-settings-3.1.0.jar",
+      "sha1": "032c65d957271cb15ae3c93c883ab7e6aca39138"
+    },
+    {
+      "path": "org/apache/maven/maven-settings/3.1.0/maven-settings-3.1.0.pom",
+      "sha1": "5ad20b57975d041847a01814cc9f362c3e6901f8"
+    },
+    {
       "path": "org/apache/maven/maven-toolchain/2.0.9/maven-toolchain-2.0.9.jar",
       "sha1": "db9f7eb8b6708b7ee46db0f0357fed43ef555793"
     },
@@ -3632,10 +2552,6 @@
     {
       "path": "org/apache/maven/maven/2.0.10/maven-2.0.10.pom",
       "sha1": "d79e3299a4ebb7bd50ca8208b86a7c1d9394ae7b"
-    },
-    {
-      "path": "org/apache/maven/maven/2.0.11/maven-2.0.11.pom",
-      "sha1": "0b523eb492a38b5080bc79dc4f70960a78942b61"
     },
     {
       "path": "org/apache/maven/maven/2.0.2/maven-2.0.2.pom",
@@ -3674,6 +2590,10 @@
       "sha1": "30c961aaf964aadcc028102ebe03d1afff324ec0"
     },
     {
+      "path": "org/apache/maven/maven/3.1.0/maven-3.1.0.pom",
+      "sha1": "d529c90764cc6292f9581e33ce828cc3fd4e34c5"
+    },
+    {
       "path": "org/apache/maven/plugin-tools/maven-plugin-annotations/3.2/maven-plugin-annotations-3.2.jar",
       "sha1": "06959f227cb1d36470877ce56c7425fe6626dac2"
     },
@@ -3710,12 +2630,12 @@
       "sha1": "0fd82c7f0703abb93d32bc12dd1a12f221247c20"
     },
     {
-      "path": "org/apache/maven/plugins/maven-checkstyle-plugin/3.1.0/maven-checkstyle-plugin-3.1.0.jar",
-      "sha1": "4cbc5be82d92e87f8db396f8e1f8c218f6dcce0e"
+      "path": "org/apache/maven/plugins/maven-checkstyle-plugin/3.2.1/maven-checkstyle-plugin-3.2.1.jar",
+      "sha1": "ccb6c40aec280db3e1eb4ddbb1d60b306c3c682b"
     },
     {
-      "path": "org/apache/maven/plugins/maven-checkstyle-plugin/3.1.0/maven-checkstyle-plugin-3.1.0.pom",
-      "sha1": "81d9a6e0b315ba84839c42eff734fd9502d81437"
+      "path": "org/apache/maven/plugins/maven-checkstyle-plugin/3.2.1/maven-checkstyle-plugin-3.2.1.pom",
+      "sha1": "1efbbc80bb1ecdd7eff846fc3aecbc60d535c553"
     },
     {
       "path": "org/apache/maven/plugins/maven-clean-plugin/2.5/maven-clean-plugin-2.5.jar",
@@ -3798,12 +2718,12 @@
       "sha1": "0b5efc4b76da252b79b683e47d3df82752f44093"
     },
     {
-      "path": "org/apache/maven/plugins/maven-plugins/33/maven-plugins-33.pom",
-      "sha1": "1492c1ec367964ea0a088d128d13b1df4529c8ae"
-    },
-    {
       "path": "org/apache/maven/plugins/maven-plugins/36/maven-plugins-36.pom",
       "sha1": "d24967cb7bd0eac8a30be48d1dd2e00340c928e7"
+    },
+    {
+      "path": "org/apache/maven/plugins/maven-plugins/37/maven-plugins-37.pom",
+      "sha1": "d3614b72d15b15c9e3bbd8a08abe648083389b1b"
     },
     {
       "path": "org/apache/maven/plugins/maven-release-plugin/2.5/maven-release-plugin-2.5.jar",
@@ -3886,6 +2806,14 @@
       "sha1": "eca7bd81ad86e6d8a978f37e1d077fee5c59d41e"
     },
     {
+      "path": "org/apache/maven/reporting/maven-reporting-api/3.1.1/maven-reporting-api-3.1.1.jar",
+      "sha1": "74ca00a13e46d065071cdf6376d7d231e0208916"
+    },
+    {
+      "path": "org/apache/maven/reporting/maven-reporting-api/3.1.1/maven-reporting-api-3.1.1.pom",
+      "sha1": "c0dc187be8c0ecdc11eb876abaf22307f20a1d0a"
+    },
+    {
       "path": "org/apache/maven/reporting/maven-reporting-exec/1.1/maven-reporting-exec-1.1.jar",
       "sha1": "6e584f7a77d08716e703aae223809e22cbba3af7"
     },
@@ -3912,6 +2840,14 @@
     {
       "path": "org/apache/maven/reporting/maven-reporting-impl/2.3/maven-reporting-impl-2.3.pom",
       "sha1": "c7b6a61fc5cde341d34f7c4030600e3adef1e0f4"
+    },
+    {
+      "path": "org/apache/maven/reporting/maven-reporting-impl/3.2.0/maven-reporting-impl-3.2.0.jar",
+      "sha1": "97ffee6a6c3f81e341f42f641651a37f077759c6"
+    },
+    {
+      "path": "org/apache/maven/reporting/maven-reporting-impl/3.2.0/maven-reporting-impl-3.2.0.pom",
+      "sha1": "7f3f289d6b84ee0b17f18f11dfabd1a2a9e917b4"
     },
     {
       "path": "org/apache/maven/reporting/maven-reporting/2.0.4/maven-reporting-2.0.4.pom",
@@ -4362,10 +3298,6 @@
       "sha1": "20a5f96a873ad02124be3dafded7acba5fdcb70b"
     },
     {
-      "path": "org/apache/maven/shared/maven-shared-utils/0.6/maven-shared-utils-0.6.jar",
-      "sha1": "6310f3d6d252fa4da46a05d0c08d2a6a1019299c"
-    },
-    {
       "path": "org/apache/maven/shared/maven-shared-utils/0.6/maven-shared-utils-0.6.pom",
       "sha1": "8b703e3862a8c071daeb80934a4e24568897e35e"
     },
@@ -4388,6 +3320,14 @@
     {
       "path": "org/apache/maven/shared/maven-shared-utils/3.2.0/maven-shared-utils-3.2.0.pom",
       "sha1": "562babea575ea1aabdea1911ea9d9226bb2c7c78"
+    },
+    {
+      "path": "org/apache/maven/shared/maven-shared-utils/3.3.4/maven-shared-utils-3.3.4.jar",
+      "sha1": "f87a61adb1e12a00dcc6cc6005a51e693aa7c4ac"
+    },
+    {
+      "path": "org/apache/maven/shared/maven-shared-utils/3.3.4/maven-shared-utils-3.3.4.pom",
+      "sha1": "9e3c134dc5c3f2a588203ce1cd137b7c3c51c642"
     },
     {
       "path": "org/apache/maven/surefire/maven-surefire-common/2.17/maven-surefire-common-2.17.jar",
@@ -4658,6 +3598,26 @@
       "sha1": "929626ce5697f341cdf81bbbd9c7387b701a821f"
     },
     {
+      "path": "org/apache/velocity/velocity/1.7/velocity-1.7.jar",
+      "sha1": "2ceb567b8f3f21118ecdec129fe1271dbc09aa7a"
+    },
+    {
+      "path": "org/apache/velocity/velocity/1.7/velocity-1.7.pom",
+      "sha1": "6047636d464804f4075f703660a010890e40723d"
+    },
+    {
+      "path": "org/apache/xbean/xbean-reflect/3.7/xbean-reflect-3.7.jar",
+      "sha1": "6072a967ec936b3bb25b421d8eca07dd750219fd"
+    },
+    {
+      "path": "org/apache/xbean/xbean-reflect/3.7/xbean-reflect-3.7.pom",
+      "sha1": "c0ade23ea098a70947671b7f612112f133b1dc98"
+    },
+    {
+      "path": "org/apache/xbean/xbean/3.7/xbean-3.7.pom",
+      "sha1": "7535d6499940c84ce0af8124ea57d3cfd4b2989b"
+    },
+    {
       "path": "org/beanshell/beanshell/2.0b4/beanshell-2.0b4.pom",
       "sha1": "d00ea1e44675318c6c9105473bc2168e6df4a9aa"
     },
@@ -4670,20 +3630,20 @@
       "sha1": "57e0b6a607859774b2cdd680c6f2aab147b83a4f"
     },
     {
-      "path": "org/checkerframework/checker-compat-qual/2.0.0/checker-compat-qual-2.0.0.jar",
-      "sha1": "fc89b03860d11d6213d0154a62bcd1c2f69b9efa"
+      "path": "org/checkerframework/checker-qual/3.12.0/checker-qual-3.12.0.jar",
+      "sha1": "d5692f0526415fcc6de94bb5bfbd3afd9dd3b3e5"
     },
     {
-      "path": "org/checkerframework/checker-compat-qual/2.0.0/checker-compat-qual-2.0.0.pom",
-      "sha1": "bc750668514742aba3cfbe83a1766697a1144828"
+      "path": "org/checkerframework/checker-qual/3.12.0/checker-qual-3.12.0.pom",
+      "sha1": "fb8dca6f40fcb30f7b89de269940bf3316fb9845"
     },
     {
-      "path": "org/checkerframework/checker-qual/2.5.2/checker-qual-2.5.2.jar",
-      "sha1": "cea74543d5904a30861a61b4643a5f2bb372efc4"
+      "path": "org/checkerframework/checker-qual/3.5.0/checker-qual-3.5.0.jar",
+      "sha1": "2f50520c8abea66fbd8d26e481d3aef5c673b510"
     },
     {
-      "path": "org/checkerframework/checker-qual/2.5.2/checker-qual-2.5.2.pom",
-      "sha1": "7cee753353b0fc94e0300ad3dbf155069260c4d7"
+      "path": "org/checkerframework/checker-qual/3.5.0/checker-qual-3.5.0.pom",
+      "sha1": "408a4451ff5bdef60400a49657867db100ea0f83"
     },
     {
       "path": "org/codehaus/codehaus-parent/4/codehaus-parent-4.pom",
@@ -4790,30 +3750,6 @@
       "sha1": "f9f2e45942b25bfded764cce615156228e7b8a3a"
     },
     {
-      "path": "org/codehaus/mojo/animal-sniffer-annotations/1.14/animal-sniffer-annotations-1.14.jar",
-      "sha1": "775b7e22fb10026eed3f86e8dc556dfafe35f2d5"
-    },
-    {
-      "path": "org/codehaus/mojo/animal-sniffer-annotations/1.14/animal-sniffer-annotations-1.14.pom",
-      "sha1": "99a56e3312f8ece1d457c8ca0a3c4b69d173d000"
-    },
-    {
-      "path": "org/codehaus/mojo/animal-sniffer-annotations/1.17/animal-sniffer-annotations-1.17.jar",
-      "sha1": "f97ce6decaea32b36101e37979f8b647f00681fb"
-    },
-    {
-      "path": "org/codehaus/mojo/animal-sniffer-annotations/1.17/animal-sniffer-annotations-1.17.pom",
-      "sha1": "80948bd07c5db60753d8d5a9164b8b2272e0842a"
-    },
-    {
-      "path": "org/codehaus/mojo/animal-sniffer-parent/1.14/animal-sniffer-parent-1.14.pom",
-      "sha1": "c1e91a9c2f36d9e6d3c7087242d8d9ec56052e5d"
-    },
-    {
-      "path": "org/codehaus/mojo/animal-sniffer-parent/1.17/animal-sniffer-parent-1.17.pom",
-      "sha1": "eea4b805793494ebb025e5a9926ea3cf1ee8b34d"
-    },
-    {
       "path": "org/codehaus/mojo/exec-maven-plugin/1.6.0/exec-maven-plugin-1.6.0.jar",
       "sha1": "8ce62c79a0c32e3e7be27330ef901aad4aa8c727"
     },
@@ -4832,10 +3768,6 @@
     {
       "path": "org/codehaus/mojo/mojo-parent/30/mojo-parent-30.pom",
       "sha1": "be742febdaa3cc7a971dacdf8cdc7ebd94b5765b"
-    },
-    {
-      "path": "org/codehaus/mojo/mojo-parent/34/mojo-parent-34.pom",
-      "sha1": "803dc5cf36e504c5a48aa9a321f7fba1d6396733"
     },
     {
       "path": "org/codehaus/mojo/mojo-parent/40/mojo-parent-40.pom",
@@ -4898,12 +3830,28 @@
       "sha1": "068f7ac6a425f5e82bbbb5faef91e4b5d3d84f76"
     },
     {
+      "path": "org/codehaus/plexus/plexus-classworlds/2.4.2/plexus-classworlds-2.4.2.jar",
+      "sha1": "e006f28662eba33d91d1c5e342e0bd66f8e9da18"
+    },
+    {
+      "path": "org/codehaus/plexus/plexus-classworlds/2.4.2/plexus-classworlds-2.4.2.pom",
+      "sha1": "55f9b6f069b025381e0e0975ce946575a4c49d8d"
+    },
+    {
       "path": "org/codehaus/plexus/plexus-classworlds/2.4/plexus-classworlds-2.4.jar",
       "sha1": "ef38ff5c25f83a4a02fcd9843d85f3e47012873e"
     },
     {
       "path": "org/codehaus/plexus/plexus-classworlds/2.4/plexus-classworlds-2.4.pom",
       "sha1": "e93052514961d9aebb23ef1090b85292a19af650"
+    },
+    {
+      "path": "org/codehaus/plexus/plexus-classworlds/2.5.2/plexus-classworlds-2.5.2.pom",
+      "sha1": "a39bedbc3fa3652d3606821d7c21d80e900f57a0"
+    },
+    {
+      "path": "org/codehaus/plexus/plexus-classworlds/2.6.0/plexus-classworlds-2.6.0.pom",
+      "sha1": "e05bc927ead7a1e7dc36c7daed209611d94fbb6d"
     },
     {
       "path": "org/codehaus/plexus/plexus-compiler-api/2.8.2/plexus-compiler-api-2.8.2.jar",
@@ -5002,6 +3950,10 @@
       "sha1": "4fcb5bb11c1f4afa8cfc4a0cac8578e46a4dc072"
     },
     {
+      "path": "org/codehaus/plexus/plexus-components/1.3/plexus-components-1.3.pom",
+      "sha1": "979daf6b32bf4eb1fc8ff51689bf31731651a0c8"
+    },
+    {
       "path": "org/codehaus/plexus/plexus-components/4.0/plexus-components-4.0.pom",
       "sha1": "dcad998d9c45ca35212ac7efc49b729efce20395"
     },
@@ -5038,6 +3990,14 @@
       "sha1": "d00c65ec36fb3cc8c755182a7ee52d3d80340179"
     },
     {
+      "path": "org/codehaus/plexus/plexus-container-default/2.1.0/plexus-container-default-2.1.0.jar",
+      "sha1": "c189df3d30aa7707c36aa2746fae55ebe11d711e"
+    },
+    {
+      "path": "org/codehaus/plexus/plexus-container-default/2.1.0/plexus-container-default-2.1.0.pom",
+      "sha1": "422fa1b8961ec766735cc1bea268e8206402667a"
+    },
+    {
       "path": "org/codehaus/plexus/plexus-containers/1.0-alpha-20/plexus-containers-1.0-alpha-20.pom",
       "sha1": "5e436ba5a20b19e6b840f087e12e1c993b427de0"
     },
@@ -5066,8 +4026,20 @@
       "sha1": "7ff4e431b5af8100be6e9fcd946ba7c532d890e2"
     },
     {
+      "path": "org/codehaus/plexus/plexus-containers/2.1.0/plexus-containers-2.1.0.pom",
+      "sha1": "133ad2d4fca8f498be182d776e85f359f7ac6e36"
+    },
+    {
       "path": "org/codehaus/plexus/plexus-containers/2.1.1/plexus-containers-2.1.1.pom",
       "sha1": "b159bc1c2557f85a60cc38e7703be49c7ec95cc0"
+    },
+    {
+      "path": "org/codehaus/plexus/plexus-i18n/1.0-beta-10/plexus-i18n-1.0-beta-10.jar",
+      "sha1": "27506f59e54cc80b8c28b977c2bcd0478094e0cc"
+    },
+    {
+      "path": "org/codehaus/plexus/plexus-i18n/1.0-beta-10/plexus-i18n-1.0-beta-10.pom",
+      "sha1": "d7865049eee42a4c87888fd1e762e9b8d864a78d"
     },
     {
       "path": "org/codehaus/plexus/plexus-i18n/1.0-beta-7/plexus-i18n-1.0-beta-7.jar",
@@ -5142,12 +4114,8 @@
       "sha1": "3dda3be2ada841f5ca3976a48281349a99f27e89"
     },
     {
-      "path": "org/codehaus/plexus/plexus-interpolation/1.24/plexus-interpolation-1.24.jar",
-      "sha1": "ff3f217127fbd6846bba831ab156e227db2cf347"
-    },
-    {
-      "path": "org/codehaus/plexus/plexus-interpolation/1.24/plexus-interpolation-1.24.pom",
-      "sha1": "1909f6cd42a5ead655435ebc7ecb609e3d6536ac"
+      "path": "org/codehaus/plexus/plexus-interpolation/1.16/plexus-interpolation-1.16.pom",
+      "sha1": "c70b5eaf02d61618e86d8d78e4faf75404046366"
     },
     {
       "path": "org/codehaus/plexus/plexus-interpolation/1.26/plexus-interpolation-1.26.jar",
@@ -5228,10 +4196,6 @@
     {
       "path": "org/codehaus/plexus/plexus-utils/1.0.4/plexus-utils-1.0.4.pom",
       "sha1": "a82e1ddd2d795616ac58d73ed246b8ec65326dfa"
-    },
-    {
-      "path": "org/codehaus/plexus/plexus-utils/1.1/plexus-utils-1.1.jar",
-      "sha1": "fa632b7f1cb7c50963d0fb7d818ca93c75c10127"
     },
     {
       "path": "org/codehaus/plexus/plexus-utils/1.1/plexus-utils-1.1.pom",
@@ -5354,10 +4318,6 @@
       "sha1": "553c5a129da11f6d56a2599ad0b21649a6d6de08"
     },
     {
-      "path": "org/codehaus/plexus/plexus-utils/3.0.24/plexus-utils-3.0.24.jar",
-      "sha1": "b4ac9780b37cb1b736eae9fbcef27609b7c911ef"
-    },
-    {
       "path": "org/codehaus/plexus/plexus-utils/3.0.24/plexus-utils-3.0.24.pom",
       "sha1": "288f4a74efd0cea03e1d59272271f07d598b88d6"
     },
@@ -5404,6 +4364,14 @@
     {
       "path": "org/codehaus/plexus/plexus-velocity/1.1.8/plexus-velocity-1.1.8.pom",
       "sha1": "7023c6a73051a5addaa912405ef0a95e56c64c7e"
+    },
+    {
+      "path": "org/codehaus/plexus/plexus-velocity/1.2/plexus-velocity-1.2.jar",
+      "sha1": "1331b9d6bbf99ead362c68c2f318ebe5fedda598"
+    },
+    {
+      "path": "org/codehaus/plexus/plexus-velocity/1.2/plexus-velocity-1.2.pom",
+      "sha1": "ed912aed85e5225ef3dda9a9cd2acaa0a08c643b"
     },
     {
       "path": "org/codehaus/plexus/plexus/1.0.10/plexus-1.0.10.pom",
@@ -5490,6 +4458,30 @@
       "sha1": "b3982e53f063775a9ab1d8522a5928ffadfcf54a"
     },
     {
+      "path": "org/eclipse/aether/aether-api/0.9.0.M2/aether-api-0.9.0.M2.jar",
+      "sha1": "97662c999c6b2fbf2ee50e814a34639c1c1d22de"
+    },
+    {
+      "path": "org/eclipse/aether/aether-api/0.9.0.M2/aether-api-0.9.0.M2.pom",
+      "sha1": "3b0bb3ce9bc61aabe2b1a699e2fc92127218f72b"
+    },
+    {
+      "path": "org/eclipse/aether/aether-impl/0.9.0.M2/aether-impl-0.9.0.M2.jar",
+      "sha1": "eab9a4baae8de96a24c04219236363d0ca73e8a9"
+    },
+    {
+      "path": "org/eclipse/aether/aether-impl/0.9.0.M2/aether-impl-0.9.0.M2.pom",
+      "sha1": "62fb6f92ddea8b994756c6cba4198f63effc04c7"
+    },
+    {
+      "path": "org/eclipse/aether/aether-spi/0.9.0.M2/aether-spi-0.9.0.M2.jar",
+      "sha1": "3647d00620a91360990c9680f29fbcc22d69c2ee"
+    },
+    {
+      "path": "org/eclipse/aether/aether-spi/0.9.0.M2/aether-spi-0.9.0.M2.pom",
+      "sha1": "b2279ec2d571105a2db40191ba78b2fc8202bb7d"
+    },
+    {
       "path": "org/eclipse/aether/aether-util/0.9.0.M2/aether-util-0.9.0.M2.jar",
       "sha1": "b957089deb654647da320ad7507b0a4b5ce23813"
     },
@@ -5504,6 +4496,30 @@
     {
       "path": "org/eclipse/jetty/jetty-parent/14/jetty-parent-14.pom",
       "sha1": "17d9344459471ef3d2792e7452ead549809eccc5"
+    },
+    {
+      "path": "org/eclipse/sisu/org.eclipse.sisu.inject/0.3.5/org.eclipse.sisu.inject-0.3.5.jar",
+      "sha1": "d4265dd4f0f1d7a06d80df5a5f475d5ff9c17140"
+    },
+    {
+      "path": "org/eclipse/sisu/org.eclipse.sisu.inject/0.3.5/org.eclipse.sisu.inject-0.3.5.pom",
+      "sha1": "3722f112fe5752bbb677eeae0ff379848902df2c"
+    },
+    {
+      "path": "org/eclipse/sisu/org.eclipse.sisu.plexus/0.3.5/org.eclipse.sisu.plexus-0.3.5.jar",
+      "sha1": "d71996bb2e536f966b3b70e647067fff3b73d32f"
+    },
+    {
+      "path": "org/eclipse/sisu/org.eclipse.sisu.plexus/0.3.5/org.eclipse.sisu.plexus-0.3.5.pom",
+      "sha1": "e462a9a33f45e2f44460eb67611708791a8e9640"
+    },
+    {
+      "path": "org/eclipse/sisu/sisu-inject/0.3.5/sisu-inject-0.3.5.pom",
+      "sha1": "37191778332db19b604649f562b3aa4aaa84063b"
+    },
+    {
+      "path": "org/eclipse/sisu/sisu-plexus/0.3.5/sisu-plexus-0.3.5.pom",
+      "sha1": "2bfdf50eb1fcf53bf56114cf988f5ad5ddb34e4d"
     },
     {
       "path": "org/fusesource/fusesource-pom/1.12/fusesource-pom-1.12.pom",
@@ -5552,6 +4568,18 @@
     {
       "path": "org/iq80/snappy/snappy/0.4/snappy-0.4.pom",
       "sha1": "a2a52b5dc6183010d4e3d12a520ced355607ce32"
+    },
+    {
+      "path": "org/javassist/javassist/3.28.0-GA/javassist-3.28.0-GA.jar",
+      "sha1": "9a958811a88381bb159cc2f5ed79c34a45c4af7a"
+    },
+    {
+      "path": "org/javassist/javassist/3.28.0-GA/javassist-3.28.0-GA.pom",
+      "sha1": "12ec4905545213432afa703f4caf0b7409fbc3d9"
+    },
+    {
+      "path": "org/jboss/weld/weld-parent/26/weld-parent-26.pom",
+      "sha1": "54a75d96c0c3f6bb4b32293d2ababb8fae665e91"
     },
     {
       "path": "org/jdom/jdom/1.1/jdom-1.1.jar",
@@ -5770,12 +4798,20 @@
       "sha1": "5ada4f90b1651ae7b89766df379740215570fec7"
     },
     {
-      "path": "org/scala-lang/modules/scala-xml_2.12/1.0.6/scala-xml_2.12-1.0.6.jar",
-      "sha1": "e22de3366a698a9f744106fb6dda4335838cf6a7"
+      "path": "org/reflections/reflections/0.10.2/reflections-0.10.2.jar",
+      "sha1": "b638d7ca0e0fe0146b60a0e7ba232ad852a73b31"
     },
     {
-      "path": "org/scala-lang/modules/scala-xml_2.12/1.0.6/scala-xml_2.12-1.0.6.pom",
-      "sha1": "be1e909cee8fcaa2aba20438ffb7e2f7462e3e7d"
+      "path": "org/reflections/reflections/0.10.2/reflections-0.10.2.pom",
+      "sha1": "79c2b5f8150ae55c4f46c77a5f8f5ea9ad2850a2"
+    },
+    {
+      "path": "org/scala-lang/modules/scala-xml_2.12/2.1.0/scala-xml_2.12-2.1.0.jar",
+      "sha1": "16b228fa6f9d5afece0f2d2d6d5b03d5372dbea4"
+    },
+    {
+      "path": "org/scala-lang/modules/scala-xml_2.12/2.1.0/scala-xml_2.12-2.1.0.pom",
+      "sha1": "d07e9c55f4e6c91902087aeac9d2a9d351119c68"
     },
     {
       "path": "org/scala-lang/scala-compiler/2.10.5/scala-compiler-2.10.5.jar",
@@ -5786,12 +4822,12 @@
       "sha1": "c3e0b6cf2f45a5a7cb052ef9e00f8fdac55e71b7"
     },
     {
-      "path": "org/scala-lang/scala-compiler/2.12.4/scala-compiler-2.12.4.jar",
-      "sha1": "c69c0ee397050d7fa30cfe490471388d30c03bd0"
+      "path": "org/scala-lang/scala-compiler/2.12.18/scala-compiler-2.12.18.jar",
+      "sha1": "87fa026116e55786ea1a878ea37fb13b6d1365f6"
     },
     {
-      "path": "org/scala-lang/scala-compiler/2.12.4/scala-compiler-2.12.4.pom",
-      "sha1": "b1584d2334a379f4d670d4bf479028dda04446b7"
+      "path": "org/scala-lang/scala-compiler/2.12.18/scala-compiler-2.12.18.pom",
+      "sha1": "eb8ca5ce97606a7ee2ab8e056f2b442a15106268"
     },
     {
       "path": "org/scala-lang/scala-library/2.10.5/scala-library-2.10.5.jar",
@@ -5802,20 +4838,20 @@
       "sha1": "4e8b721680f2defb491fe90447302658d464d5c0"
     },
     {
-      "path": "org/scala-lang/scala-library/2.12.0/scala-library-2.12.0.jar",
-      "sha1": "270fc1cda47bc255f3cd03152ec8c2ed7d224e2b"
+      "path": "org/scala-lang/scala-library/2.12.15/scala-library-2.12.15.jar",
+      "sha1": "0f2e89c89340282c9625ac57efb451056f31af57"
     },
     {
-      "path": "org/scala-lang/scala-library/2.12.0/scala-library-2.12.0.pom",
-      "sha1": "ec47a11a9a60cd7c33d3fb68d6e5bb81a92b973e"
+      "path": "org/scala-lang/scala-library/2.12.15/scala-library-2.12.15.pom",
+      "sha1": "206e552eb6bed28249057c2f6e2357ed348ad4fd"
     },
     {
-      "path": "org/scala-lang/scala-library/2.12.4/scala-library-2.12.4.jar",
-      "sha1": "7663f74ef944453c86cc7e6597ed33e9281f6412"
+      "path": "org/scala-lang/scala-library/2.12.18/scala-library-2.12.18.jar",
+      "sha1": "fa825f984172f6801e3d8c476071b1823c0a925b"
     },
     {
-      "path": "org/scala-lang/scala-library/2.12.4/scala-library-2.12.4.pom",
-      "sha1": "661d2aad643bbbe5b530b917dcbf5ae4750e01e5"
+      "path": "org/scala-lang/scala-library/2.12.18/scala-library-2.12.18.pom",
+      "sha1": "e143788a12ccf03101653a0ad8158ecda8850159"
     },
     {
       "path": "org/scala-lang/scala-reflect/2.10.5/scala-reflect-2.10.5.jar",
@@ -5826,12 +4862,12 @@
       "sha1": "30f1f646114a79eeefb254ead190f045c4605649"
     },
     {
-      "path": "org/scala-lang/scala-reflect/2.12.4/scala-reflect-2.12.4.jar",
-      "sha1": "2df9e6015b97e35464edddd20eec392bb54fab11"
+      "path": "org/scala-lang/scala-reflect/2.12.18/scala-reflect-2.12.18.jar",
+      "sha1": "7e1a6985bfbe78bdc94f33613301ef385d4629b4"
     },
     {
-      "path": "org/scala-lang/scala-reflect/2.12.4/scala-reflect-2.12.4.pom",
-      "sha1": "2fa11f84ca26c8a29add2bec72f4137d0cf254a2"
+      "path": "org/scala-lang/scala-reflect/2.12.18/scala-reflect-2.12.18.pom",
+      "sha1": "7a479b115f28e4e4a977886fd703be68dff3ce53"
     },
     {
       "path": "org/slf4j/jcl-over-slf4j/1.5.6/jcl-over-slf4j-1.5.6.jar",
@@ -5840,14 +4876,6 @@
     {
       "path": "org/slf4j/jcl-over-slf4j/1.5.6/jcl-over-slf4j-1.5.6.pom",
       "sha1": "8aa25adef55174f1436073e551953c2f74a5c71b"
-    },
-    {
-      "path": "org/slf4j/jcl-over-slf4j/1.7.25/jcl-over-slf4j-1.7.25.jar",
-      "sha1": "f8c32b13ff142a513eeb5b6330b1588dcb2c0461"
-    },
-    {
-      "path": "org/slf4j/jcl-over-slf4j/1.7.25/jcl-over-slf4j-1.7.25.pom",
-      "sha1": "7d600fcbc5fec890d33f4ca3e99bc3f664d0051a"
     },
     {
       "path": "org/slf4j/slf4j-api/1.5.10/slf4j-api-1.5.10.jar",
@@ -5870,12 +4898,12 @@
       "sha1": "b79729ffc12292c0ec755db12360486066f6fd34"
     },
     {
-      "path": "org/slf4j/slf4j-api/1.7.25/slf4j-api-1.7.25.jar",
-      "sha1": "da76ca59f6a57ee3102f8f9bd9cee742973efa8a"
+      "path": "org/slf4j/slf4j-api/1.7.32/slf4j-api-1.7.32.jar",
+      "sha1": "cdcff33940d9f2de763bc41ea05a0be5941176c3"
     },
     {
-      "path": "org/slf4j/slf4j-api/1.7.25/slf4j-api-1.7.25.pom",
-      "sha1": "df51c4a85dd6acf8b6cdc9323596766b3d577c28"
+      "path": "org/slf4j/slf4j-api/1.7.32/slf4j-api-1.7.32.pom",
+      "sha1": "dd71cee8b1ef6f54fa6e60f3814fa748f03642e2"
     },
     {
       "path": "org/slf4j/slf4j-api/1.7.36/slf4j-api-1.7.36.jar",
@@ -5922,8 +4950,8 @@
       "sha1": "7e94cd535680417391d54c1b1a14bcf9ed29a400"
     },
     {
-      "path": "org/slf4j/slf4j-parent/1.7.25/slf4j-parent-1.7.25.pom",
-      "sha1": "8521938f0f43c60b79f9f73a9409d10e4bac649a"
+      "path": "org/slf4j/slf4j-parent/1.7.32/slf4j-parent-1.7.32.pom",
+      "sha1": "a3cb6b2b36f7d228af85043d7b31393c6c16a4d6"
     },
     {
       "path": "org/slf4j/slf4j-parent/1.7.36/slf4j-parent-1.7.36.pom",
@@ -6262,14 +5290,6 @@
       "sha1": "aefe9b573584341d6c271e43b95ba64179c98b31"
     },
     {
-      "path": "software/amazon/ion/ion-java/1.0.2/ion-java-1.0.2.jar",
-      "sha1": "ee9dacea7726e495f8352b81c12c23834ffbc564"
-    },
-    {
-      "path": "software/amazon/ion/ion-java/1.0.2/ion-java-1.0.2.pom",
-      "sha1": "fbc83906db667eaef1cb07b0c01087b1ba8a97c3"
-    },
-    {
       "path": "sslext/sslext/1.2-0/sslext-1.2-0.jar",
       "sha1": "c86a7db4ac0bc450e675f3d44b3d64cdc934361b"
     },
@@ -6317,19 +5337,19 @@
   "groupId": "com.runtimeverification.k",
   "metas": [
     {
-      "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<metadata modelVersion=\"1.1.0\">\n  <groupId>com.runtimeverification.k</groupId>\n  <artifactId>kore</artifactId>\n  <version>1.0-SNAPSHOT</version>\n  <versioning>\n    <snapshot>\n      <timestamp>20200713.173746</timestamp>\n      <buildNumber>176</buildNumber>\n    </snapshot>\n    <lastUpdated>20200713173746</lastUpdated>\n    <snapshotVersions>\n      <snapshotVersion>\n        <extension>jar</extension>\n        <value>1.0-20200713.173746-176</value>\n        <updated>20200713173746</updated>\n      </snapshotVersion>\n      <snapshotVersion>\n        <extension>pom</extension>\n        <value>1.0-20200713.173746-176</value>\n        <updated>20200713173746</updated>\n      </snapshotVersion>\n    </snapshotVersions>\n  </versioning>\n</metadata>",
+      "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<metadata modelVersion=\"1.1.0\">\n  <groupId>com.runtimeverification.k</groupId>\n  <artifactId>kore</artifactId>\n  <version>1.0-SNAPSHOT</version>\n  <versioning>\n    <snapshot>\n      <timestamp>20230928.233040</timestamp>\n      <buildNumber>27</buildNumber>\n    </snapshot>\n    <lastUpdated>20230928233040</lastUpdated>\n    <snapshotVersions>\n      <snapshotVersion>\n        <extension>jar</extension>\n        <value>1.0-20230928.233040-27</value>\n        <updated>20230928233040</updated>\n      </snapshotVersion>\n      <snapshotVersion>\n        <extension>pom</extension>\n        <value>1.0-20230928.233040-27</value>\n        <updated>20230928233040</updated>\n      </snapshotVersion>\n    </snapshotVersions>\n  </versioning>\n</metadata>",
       "path": "com/runtimeverification/k/kore/1.0-SNAPSHOT"
     },
     {
-      "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<metadata modelVersion=\"1.1.0\">\n  <groupId>com.runtimeverification.k</groupId>\n  <artifactId>parent</artifactId>\n  <version>1.0-SNAPSHOT</version>\n  <versioning>\n    <snapshot>\n      <timestamp>20200713.173706</timestamp>\n      <buildNumber>176</buildNumber>\n    </snapshot>\n    <lastUpdated>20200713173706</lastUpdated>\n    <snapshotVersions>\n      <snapshotVersion>\n        <extension>pom</extension>\n        <value>1.0-20200713.173706-176</value>\n        <updated>20200713173706</updated>\n      </snapshotVersion>\n    </snapshotVersions>\n  </versioning>\n</metadata>",
+      "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<metadata modelVersion=\"1.1.0\">\n  <groupId>com.runtimeverification.k</groupId>\n  <artifactId>parent</artifactId>\n  <version>1.0-SNAPSHOT</version>\n  <versioning>\n    <snapshot>\n      <timestamp>20230928.233019</timestamp>\n      <buildNumber>27</buildNumber>\n    </snapshot>\n    <lastUpdated>20230928233019</lastUpdated>\n    <snapshotVersions>\n      <snapshotVersion>\n        <extension>pom</extension>\n        <value>1.0-20230928.233019-27</value>\n        <updated>20230928233019</updated>\n      </snapshotVersion>\n    </snapshotVersions>\n  </versioning>\n</metadata>",
       "path": "com/runtimeverification/k/parent/1.0-SNAPSHOT"
     }
   ],
   "name": "llvm-backend-matching-1.0-SNAPSHOT",
   "remotes": {
     "central": "https://repo.maven.apache.org/maven2",
-    "runtime.verification": "https://s3.us-east-2.amazonaws.com/runtimeverificationmaven/internal",
-    "runtime.verification.snapshots": "https://s3.us-east-2.amazonaws.com/runtimeverificationmaven/snapshots"
+    "runtime.verification": "https://runtimeverification.mycloudrepo.io/public/repositories/runtimeverification",
+    "runtime.verification.snapshots": "https://runtimeverification.mycloudrepo.io/public/repositories/runtimeverification"
   },
   "submodules": [
     {
