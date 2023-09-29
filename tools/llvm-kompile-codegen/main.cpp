@@ -50,8 +50,9 @@ cl::opt<std::string> DecisionTree(
 cl::opt<std::string> Directory(
     cl::Positional, cl::desc("<dir>"), cl::Required, cl::cat(CodegenCat));
 
-cl::opt<bool>
-    Debug("debug", cl::desc("Enable debug information"), cl::cat(CodegenCat));
+cl::opt<bool> Debug(
+  "debug", cl::desc("Enable debug information"), cl::ZeroOrMore,
+  cl::cat(CodegenCat));
 
 cl::opt<bool> NoOptimize(
     "no-optimize",
