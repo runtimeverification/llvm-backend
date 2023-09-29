@@ -2,8 +2,8 @@
 set -e
 
 # This is configured generated code; shellcheck can't follow it properly
-# shellcheck disable=SC1091
-source "$(dirname $(realpath "$0"))/../lib/scripts/utils.sh"
+# shellcheck source=/dev/null
+source "$(dirname "$(realpath "$0")")"/../lib/scripts/utils.sh
 
 usage() {
   cat << HERE
@@ -56,13 +56,13 @@ HERE
 }
 
 print_bindings_path () {
-  bin_dir="$(dirname $(realpath "$0"))"
+  bin_dir="$(dirname "$(realpath "$0")")"
   bindings_dir="$(realpath "$bin_dir/../lib/kllvm/python")"
   echo "$bindings_dir"
 }
 
 print_include_path () {
-  bin_dir="$(dirname $(realpath "$0"))"
+  bin_dir="$(dirname "$(realpath "$0")")"
   include_dir="$(realpath "$bin_dir/../include")"
   echo "$include_dir"
 }
@@ -215,7 +215,7 @@ if [[ "$compile" = "default" ]]; then
 
   codegen_flags+=("--binary-ir")
 
-  run "$(dirname $(realpath "$0"))"/llvm-kompile-codegen "${codegen_flags[@]}" \
+  run "$(dirname "$(realpath "$0")")"/llvm-kompile-codegen "${codegen_flags[@]}" \
     "$definition" "$dt_dir"/dt.yaml "$dt_dir" -o "$mod"
 
   if [[ "$use_opt" = "true" ]]; then
@@ -236,7 +236,7 @@ elif [ "$compile" = "python_ast" ]; then
 fi
 
 if [[ "$main" =~ "python" ]]; then
-  bin_dir=$(dirname $(realpath "$0"))
+  bin_dir=$(dirname "$(realpath "$0")")
   src_dir=$(realpath "$bin_dir/../lib/kllvm/python_src")
 
   # Hook to allow Nix to patch this line easily
@@ -272,7 +272,7 @@ for (( idx = 0; idx < embed_length; idx++ )); do
   kompile_clang_flags+=("$tmpdir/$name.cpp")
 done
 
-run "$(dirname $(realpath "$0"))"/llvm-kompile-clang          \
+run "$(dirname "$(realpath "$0")")"/llvm-kompile-clang          \
   "$modopt" "$main"                               \
   @LLVM_KOMPILE_LTO@ -fno-stack-protector         \
   "${kompile_clang_flags[@]}" "${clang_args[@]}"  \

@@ -41,8 +41,8 @@ stdenv.mkDerivation {
       --replace '"-ltinfo"' '"-L${ncurses}/lib" "-ltinfo"' \
       --replace '"-L@BREW_PREFIX@/opt/libffi/lib"' ' ' \
       --replace '-L@BREW_PREFIX@/lib' '-L${libcxxabi}/lib' \
-      --replace '-I "$(dirname $(realpath "$0"))"/../include/kllvm' \
-                '-I "$(dirname $(realpath "$0"))"/../include/kllvm -I ${boost.dev}/include -I ${fmt.dev}/include'
+      --replace '-I "$(dirname "$(realpath "$0")")"/../include/kllvm' \
+                '-I "$(dirname "$(realpath "$0")")"/../include/kllvm -I ${boost.dev}/include -I ${fmt.dev}/include'
   '';
 
   cmakeFlags =

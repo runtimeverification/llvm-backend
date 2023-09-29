@@ -27,7 +27,7 @@ interpreter_flags=()
 dryRun=false
 expandMacros=true
 
-convert_term="$(dirname $(realpath "$0"))/kore-convert --from=text --to=binary /dev/stdin -F"
+convert_term="$(dirname "$(realpath "$0")")/kore-convert --from=text --to=binary /dev/stdin -F"
 
 print_usage () {
 cat <<HERE
@@ -251,7 +251,7 @@ for name in "${params[@]}"; do
       {
         cat "${!binary_file_name}"
         echo "inj{Sort$sort{}, SortKItem{}}()" | $convert_term -ka
-        "$(dirname $(realpath "$0"))/kore-arity" 1
+        "$(dirname "$(realpath "$0")")/kore-arity" 1
       } >> "$temp_file"
       )
       printf -v "$binary_file_name" %s "$temp_file"
@@ -306,7 +306,7 @@ HERE
       if [ "$verbose" -ge 2 ]; then
         set -x
       fi
-      "$(dirname $(realpath "$0"))/kore-convert" "${!binary_file_name}" >> "$input_file"
+      "$(dirname "$(realpath "$0")")/kore-convert" "${!binary_file_name}" >> "$input_file"
       )
     else
       echo "${!var_name}" >> "$input_file"
@@ -362,7 +362,7 @@ construct_binary_input()
       if [ "$verbose" -ge 2 ]; then
         set -x
       fi
-      "$(dirname $(realpath "$0"))/kore-strip" -k -i "${!binary_file_name}" -o "$temp_file"
+      "$(dirname "$(realpath "$0")")/kore-strip" -k -i "${!binary_file_name}" -o "$temp_file"
       )
       cat "$temp_file" >> "$input_file"
     else
@@ -380,10 +380,10 @@ construct_binary_input()
     fi
     {
       echo "Lbl'UndsPipe'-'-GT-Unds'{}()" | $convert_term -ka
-      "$(dirname $(realpath "$0"))/kore-arity" 2
+      "$(dirname "$(realpath "$0")")/kore-arity" 2
 
       echo "Lbl'Unds'Map'Unds'{}()" | $convert_term -ka
-      "$(dirname $(realpath "$0"))/kore-arity" 2
+      "$(dirname "$(realpath "$0")")/kore-arity" 2
     } >> "$input_file"
     )
   done
@@ -393,7 +393,7 @@ construct_binary_input()
     set -x
   fi
   echo "$initializer()" | $convert_term -ka >> "$input_file"
-  "$(dirname $(realpath "$0"))/kore-arity" 1 >> "$input_file"
+  "$(dirname "$(realpath "$0")")/kore-arity" 1 >> "$input_file"
   )
 }
 
@@ -408,7 +408,7 @@ if $expandMacros; then
   if [ "$verbose" -ge 2 ]; then
     set -x
   fi
-  "$(dirname $(realpath "$0"))/kore-expand-macros" "$dir" "$input_file" > "$expanded_input_file"
+  "$(dirname "$(realpath "$0")")/kore-expand-macros" "$dir" "$input_file" > "$expanded_input_file"
   )
 else
   cp "$input_file" "$expanded_input_file"
@@ -420,14 +420,14 @@ if $dryRun; then
     if [ "$verbose" -ge 1 ]; then
       set -x
     fi
-    "$(dirname $(realpath "$0"))/kore-convert" "$expanded_input_file" -o "$real_output_file"
+    "$(dirname "$(realpath "$0")")/kore-convert" "$expanded_input_file" -o "$real_output_file"
     )
   elif [ $binary_input != $binary_output ]; then
     (
     if [ "$verbose" -ge 1 ]; then
       set -x
     fi
-    "$(dirname $(realpath "$0"))/kore-convert" -F "$expanded_input_file"
+    "$(dirname "$(realpath "$0")")/kore-convert" -F "$expanded_input_file"
     )
   elif [ -n "$real_output_file" ]; then
     cat "$expanded_input_file" > "$real_output_file"
@@ -454,7 +454,7 @@ if [ -n "${real_output_file}" ]; then
   if [ "$verbose" -ge 1 ]; then
     set -x
   fi
-  "$(dirname $(realpath "$0"))/kprint" "$dir" "$output_file" > "$real_output_file"
+  "$(dirname "$(realpath "$0")")/kprint" "$dir" "$output_file" > "$real_output_file"
   )
   else
     mv -f "$output_file" "$real_output_file"
@@ -465,7 +465,7 @@ elif $pretty_print; then
   if [ "$verbose" -ge 1 ]; then
     set -x
   fi
-  "$(dirname $(realpath "$0"))/kprint" "$dir" "$output_file"
+  "$(dirname "$(realpath "$0")")/kprint" "$dir" "$output_file"
   )
 else
   cat "$output_file"
