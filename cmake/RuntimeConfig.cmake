@@ -18,7 +18,6 @@ set(VARIABLE_BIT  0x8000000000000)
 set(LAYOUT_OFFSET 54)
 set(TAG_MASK      0xffffffff)
 set(LENGTH_MASK   0xffffffffff)
-set(IS_BYTES_BIT  0x10000000000)
 
 if(CMAKE_BUILD_TYPE STREQUAL "GcStats")
   set(HDR_MASK -18013298997854209) # 0xffc000ffffffffff
@@ -35,8 +34,7 @@ set(STRINGBUFFER_LAYOUT 6)
 set(BOOL_LAYOUT         7)
 set(SYMBOL_LAYOUT       8)
 set(VARIABLE_LAYOUT     9)
-set(RANGEMAP_LAYOUT    10)
-set(BYTES_LAYOUT       11)
+set(RANGEMAP_LAYOUT    11)
 
 get_filename_component(INSTALL_DIR_ABS_PATH "${CMAKE_INSTALL_PREFIX}"
                        REALPATH BASE_DIR "${CMAKE_BINARY_DIR}")
