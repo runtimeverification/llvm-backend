@@ -137,7 +137,7 @@ get_header(boolHdr, "inj{SortBool{}, SortJSON{}}")
     stringinj *inj = (stringinj *)koreAlloc(sizeof(stringinj));
     inj->h = strHdr();
     string *token = (string *)koreAllocToken(sizeof(string) + len);
-    init_with_len(token, len);
+    set_len(token, len);
     memcpy(token->data, str, len);
     inj->data = token;
     result = (block *)inj;

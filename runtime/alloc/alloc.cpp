@@ -111,7 +111,7 @@ void *koreResizeLastAlloc(void *oldptr, size_t newrequest, size_t last_size) {
 
 void *koreAllocMP(size_t requested) {
   string *_new = (string *)koreAllocToken(sizeof(string) + requested);
-  init_with_len(_new, requested);
+  set_len(_new, requested);
   return _new->data;
 }
 
@@ -119,7 +119,7 @@ void *koreReallocMP(void *ptr, size_t old_size, size_t new_size) {
   string *_new = (string *)koreAllocToken(sizeof(string) + new_size);
   size_t min = old_size > new_size ? new_size : old_size;
   memcpy(_new->data, ptr, min);
-  init_with_len(_new, new_size);
+  set_len(_new, new_size);
   return _new->data;
 }
 
@@ -127,25 +127,25 @@ void koreFree(void *ptr, size_t size) { }
 
 __attribute__((always_inline)) void *koreAllocInteger(size_t requested) {
   mpz_hdr *result = (mpz_hdr *)koreAlloc(sizeof(mpz_hdr));
-  init_with_len(result, sizeof(mpz_hdr) - sizeof(blockheader));
+  set_len(result, sizeof(mpz_hdr) - sizeof(blockheader));
   return &result->i;
 }
 
 __attribute__((always_inline)) void *koreAllocFloating(size_t requested) {
   floating_hdr *result = (floating_hdr *)koreAlloc(sizeof(floating_hdr));
-  init_with_len(result, sizeof(floating_hdr) - sizeof(blockheader));
+  set_len(result, sizeof(floating_hdr) - sizeof(blockheader));
   return &result->f;
 }
 
 __attribute__((always_inline)) void *koreAllocIntegerOld(size_t requested) {
   mpz_hdr *result = (mpz_hdr *)koreAllocOld(sizeof(mpz_hdr));
-  init_with_len(result, sizeof(mpz_hdr) - sizeof(blockheader));
+  set_len(result, sizeof(mpz_hdr) - sizeof(blockheader));
   return &result->i;
 }
 
 __attribute__((always_inline)) void *koreAllocFloatingOld(size_t requested) {
   floating_hdr *result = (floating_hdr *)koreAllocOld(sizeof(floating_hdr));
-  init_with_len(result, sizeof(floating_hdr) - sizeof(blockheader));
+  set_len(result, sizeof(floating_hdr) - sizeof(blockheader));
   return &result->f;
 }
 }

@@ -106,7 +106,6 @@ bool hook_KEQUAL_eq(block *arg1, block *arg2) {
               }
               break;
             }
-            case BYTES_LAYOUT:
             case SYMBOL_LAYOUT: {
               block **child1ptrptr = (block **)(child1intptr);
               block **child2ptrptr = (block **)(child2intptr);
@@ -211,9 +210,6 @@ bool hook_KEQUAL_lt(block *arg1, block *arg2) {
             abort(); // Implement when needed.
           }
           case BOOL_LAYOUT: {
-            abort(); // Implement when needed.
-          }
-          case BYTES_LAYOUT: {
             abort(); // Implement when needed.
           }
           case SYMBOL_LAYOUT: {

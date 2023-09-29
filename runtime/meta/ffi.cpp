@@ -266,7 +266,7 @@ string *ffiCall(
   ffi_call(&cif, address, (void *)(rvalue->data), avalues);
 
   free(argtypes);
-  init_with_len(rvalue, rtype->size);
+  set_len(rvalue, rtype->size);
   free(avalues);
 
   for (auto &s : structTypes) {
@@ -397,7 +397,7 @@ string *hook_FFI_alloc(block *kitem, mpz_t size, mpz_t align) {
     KLLVM_HOOK_INVALID_ARGUMENT("Could not allocate");
   }
   memset(ret, 0, sizeof(string *) + s);
-  init_with_len(ret, s);
+  set_len(ret, s);
   ret->h.hdr |= NOT_YOUNG_OBJECT_BIT;
 
   allocatedKItemPtrs[kitem] = ret;

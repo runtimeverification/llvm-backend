@@ -301,10 +301,6 @@ void serializeConfigurationInternal(
       state.varNames[str] = suffix;
     } else if (isVar) {
       emitToken(state.instance, sort, state.varNames[str].c_str());
-    } else if (is_bytes(str)) {
-      std::string encoded
-          = kllvm::bytesToBytesStringPattern(str->data, subject_len);
-      emitToken(state.instance, sort, encoded.c_str(), encoded.length());
     } else {
       emitToken(state.instance, sort, str->data, subject_len);
     }

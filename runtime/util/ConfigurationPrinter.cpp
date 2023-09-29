@@ -90,8 +90,6 @@ void sfprintf(writer *file, const char *fmt, ...) {
   } else {
     char buf[8192];
     char *finalBuf = buf;
-    va_list args_copy;
-    va_copy(args_copy, args);
     int res = vsnprintf(
         buf + sizeof(blockheader), sizeof(buf) - sizeof(blockheader), fmt,
         args);
@@ -99,32 +97,23 @@ void sfprintf(writer *file, const char *fmt, ...) {
       size_t size = sizeof(buf) * 2;
       finalBuf = (char *)malloc(size);
       memcpy(finalBuf, buf, sizeof(buf));
-      va_list args_temp;
-      va_copy(args_temp, args_copy);
       res = vsnprintf(
           finalBuf + sizeof(blockheader), size - sizeof(blockheader), fmt,
-          args_temp);
-      va_end(args_temp);
+          args);
       if (res >= size - sizeof(blockheader)) {
         do {
           size *= 2;
           finalBuf = (char *)realloc(finalBuf, size);
-          va_list args_temp;
-          va_copy(args_temp, args_copy);
           res = vsnprintf(
               finalBuf + sizeof(blockheader), size - sizeof(blockheader), fmt,
-              args_temp);
-          va_end(args_temp);
-
+              args);
         } while (res >= size - sizeof(blockheader));
       }
     }
-    va_end(args_copy);
     string *str = (string *)finalBuf;
-    init_with_len(str, res);
+    set_len(str, res);
     hook_BUFFER_concat(file->buffer, str);
   }
-  va_end(args);
 }
 
 void printComma(writer *file, void *state) {
@@ -153,13 +142,28 @@ void printConfigurationInternal(
   uint16_t layout = get_layout(subject);
   if (!layout) {
     string *str = (string *)subject;
-    std::string stdStr = std::string(str->data, len(str));
-    kllvm::StringType strType = is_bytes(subject) ? kllvm::StringType::BYTES
-                                                  : kllvm::StringType::UTF8;
-    sfprintf(
-        file, "\\dv{%s}(\"%s", sort,
-        kllvm::escapeString(stdStr, strType).c_str());
+    size_t subject_len = len(subject);
+    sfprintf(file, "\\dv{%s}(\"", sort);
+    for (size_t i = 0; i < subject_len; ++i) {
+      char c = str->data[i];
+      switch (c) {
+      case '\\': sfprintf(file, "\\\\"); break;
+      case '"': sfprintf(file, "\\\""); break;
+      case '\n': sfprintf(file, "\\n"); break;
+      case '\t': sfprintf(file, "\\t"); break;
+      case '\r': sfprintf(file, "\\r"); break;
+      case '\f': sfprintf(file, "\\f"); break;
+      default:
+        if ((unsigned char)c >= 32 && (unsigned char)c < 127) {
+          sfprintf(file, "%c", c);
+        } else {
+          sfprintf(file, "\\x%02x", (unsigned char)c);
+        }
+        break;
+      }
+    }
     if (isVar && !state.varNames.count(str)) {
+      std::string stdStr = std::string(str->data, len(str));
       std::string suffix = "";
       while (state.usedVarNames.count(stdStr + suffix)) {
         suffix = std::to_string(state.varCounter++);

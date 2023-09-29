@@ -553,13 +553,13 @@ BOOST_AUTO_TEST_CASE(buffer_concat) {
     int len = rand() % 1000;
     totalLen += len;
     auto str = static_cast<string *>(malloc(sizeof(string) + len));
-    init_with_len(str, len);
+    set_len(str, len);
     memset(str->data, 'a', len);
     hook_BUFFER_concat(buf, str);
   }
   auto result = hook_BUFFER_toString(buf);
   auto expected = static_cast<string *>(malloc(sizeof(string) + totalLen));
-  init_with_len(expected, totalLen);
+  set_len(expected, totalLen);
   memset(expected->data, 'a', totalLen);
   BOOST_CHECK_EQUAL(totalLen, len(result));
   BOOST_CHECK_EQUAL(0, memcmp(result->data, expected->data, totalLen));
