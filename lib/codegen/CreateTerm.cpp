@@ -920,14 +920,6 @@ CreateTerm::createAllocation(KOREPattern *pattern, std::string locationStack) {
       std::pair<llvm::Value *, bool> val = createAllocation(
           constructor->getArguments()[0].get(),
           fmt::format("{}:0", locationStack));
-    } else if (
-        symbolDecl->getAttributes().count("sortInjection")
-        && dynamic_cast<KORECompositeSort *>(symbol->getArguments()[0].get())
-                   ->getCategory(Definition)
-                   .cat
-               == SortCategory::Symbol) {
-      std::pair<llvm::Value *, bool> val
-          = createAllocation(constructor->getArguments()[0].get());
       if (val.second) {
         llvm::Instruction *Tag = llvm::CallInst::Create(
             getOrInsertFunction(
