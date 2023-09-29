@@ -120,7 +120,7 @@ __attribute__((always_inline)) constexpr uint64_t len(T const *s) {
 }
 
 template <typename T>
-__attribute__((always_inline)) constexpr void set_len(T *s, uint64_t l) {
+__attribute__((always_inline)) constexpr void init_with_len(T *s, uint64_t l) {
   s->h.hdr = l | (l > BLOCK_SIZE - sizeof(char *) ? NOT_YOUNG_OBJECT_BIT : 0);
 }
 
@@ -221,7 +221,7 @@ struct kore_alloc_heap {
       return ::operator new(size);
     } else {
       string *result = (string *)koreAllocToken(size + sizeof(blockheader));
-      set_len(result, size);
+      init_with_len(result, size);
       return result->data;
     }
   }

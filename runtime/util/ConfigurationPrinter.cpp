@@ -111,7 +111,7 @@ void sfprintf(writer *file, const char *fmt, ...) {
       }
     }
     string *str = (string *)finalBuf;
-    set_len(str, res);
+    init_with_len(str, res);
     hook_BUFFER_concat(file->buffer, str);
   }
 }

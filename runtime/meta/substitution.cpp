@@ -377,7 +377,7 @@ block *alphaRename(block *term) {
   size_t var_len = len(var);
   auto newToken = (string *)koreAllocToken(sizeof(string) + var_len);
   memcpy(newToken->data, var->data, var_len);
-  set_len(newToken, var_len);
+  init_with_len(newToken, var_len);
   newToken->h.hdr |= VARIABLE_BIT;
   return (block *)newToken;
 }
