@@ -90,6 +90,8 @@ void sfprintf(writer *file, const char *fmt, ...) {
   } else {
     char buf[8192];
     char *finalBuf = buf;
+    va_list args_copy;
+    va_copy(args_copy, args);
     int res = vsnprintf(
         buf + sizeof(blockheader), sizeof(buf) - sizeof(blockheader), fmt,
         args);
@@ -97,23 +99,31 @@ void sfprintf(writer *file, const char *fmt, ...) {
       size_t size = sizeof(buf) * 2;
       finalBuf = (char *)malloc(size);
       memcpy(finalBuf, buf, sizeof(buf));
+      va_list args_temp;
+      va_copy(args_temp, args_copy);
       res = vsnprintf(
           finalBuf + sizeof(blockheader), size - sizeof(blockheader), fmt,
-          args);
+          args_temp);
+      va_end(args_temp);
       if (res >= size - sizeof(blockheader)) {
         do {
           size *= 2;
           finalBuf = (char *)realloc(finalBuf, size);
+          va_list args_temp;
+          va_copy(args_temp, args_copy);
           res = vsnprintf(
               finalBuf + sizeof(blockheader), size - sizeof(blockheader), fmt,
-              args);
+              args_temp);
+          va_end(args_temp);
         } while (res >= size - sizeof(blockheader));
       }
     }
+    va_end(args_copy);
     string *str = (string *)finalBuf;
     init_with_len(str, res);
     hook_BUFFER_concat(file->buffer, str);
   }
+  va_end(args);
 }
 
 void printComma(writer *file, void *state) {
