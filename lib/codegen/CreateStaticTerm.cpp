@@ -1,5 +1,6 @@
 #include "kllvm/codegen/CreateStaticTerm.h"
 
+#include "kllvm/ast/AST.h"
 #include "kllvm/codegen/CreateTerm.h"
 #include "kllvm/codegen/Util.h"
 
@@ -16,6 +17,7 @@
 #include <cassert>
 #include <cstdint>
 #include <cstdlib>
+#include <iomanip>
 #include <memory>
 #include <sstream>
 #include <stdexcept>
@@ -27,7 +29,15 @@
 
 namespace kllvm {
 
-extern std::string escape(std::string str);
+static std::string stringToHex(const std::string &str) {
+  std::stringstream os;
+  os << std::setfill('0') << std::setw(2) << std::hex;
+  for (char c : str) {
+    unsigned char uc = c;
+    os << (int)uc;
+  }
+  return os.str();
+}
 
 /* create a term, given the assumption that the created term will not be a
  * triangle injection pair */
@@ -107,11 +117,12 @@ CreateStaticTerm::operator()(KOREPattern *pattern) {
     }
     KORESymbolDeclaration *symbolDecl
         = Definition->getSymbolDeclarations().at(symbol->getName());
+    SortCategory cat
+        = dynamic_cast<KORECompositeSort *>(symbol->getArguments()[0].get())
+              ->getCategory(Definition)
+              .cat;
     if (symbolDecl->getAttributes().count("sortInjection")
-        && dynamic_cast<KORECompositeSort *>(symbol->getArguments()[0].get())
-                   ->getCategory(Definition)
-                   .cat
-               == SortCategory::Symbol) {
+        && (cat == SortCategory::Symbol || cat == SortCategory::Bytes)) {
       std::pair<llvm::Constant *, bool> val
           = (*this)(constructor->getArguments()[0].get());
       if (val.second) {
@@ -293,13 +304,21 @@ CreateStaticTerm::createToken(ValueType sort, std::string contents) {
     return llvm::ConstantInt::get(
         llvm::Type::getInt1Ty(Ctx), contents == "true");
   case SortCategory::Variable:
+  case SortCategory::Bytes:
   case SortCategory::Symbol: {
+    bool isBytes = sort.cat == SortCategory::Bytes;
+    if (isBytes) {
+      size_t newSize
+          = bytesStringPatternToBytes(contents.data(), contents.size());
+      contents.resize(newSize);
+    }
     llvm::StructType *StringType = llvm::StructType::get(
         Ctx,
         {getTypeByName(Module, BLOCKHEADER_STRUCT),
          llvm::ArrayType::get(llvm::Type::getInt8Ty(Ctx), contents.size())});
-    llvm::Constant *global
-        = Module->getOrInsertGlobal("token_" + escape(contents), StringType);
+    std::string globalName = std::string("token_") + (isBytes ? "bytes_" : "")
+                             + stringToHex(contents);
+    llvm::Constant *global = Module->getOrInsertGlobal(globalName, StringType);
     llvm::GlobalVariable *globalVar
         = llvm::dyn_cast<llvm::GlobalVariable>(global);
     if (!globalVar->hasInitializer()) {
@@ -310,7 +329,8 @@ CreateStaticTerm::createToken(ValueType sort, std::string contents) {
       llvm::Constant *BlockHeader = llvm::ConstantStruct::get(
           BlockHeaderType, llvm::ConstantInt::get(
                                llvm::Type::getInt64Ty(Ctx),
-                               contents.size() | NOT_YOUNG_OBJECT_BIT));
+                               contents.size() | NOT_YOUNG_OBJECT_BIT
+                                   | (isBytes ? IS_BYTES_BIT : 0)));
       globalVar->setInitializer(llvm::ConstantStruct::get(
           StringType, BlockHeader,
           llvm::ConstantDataArray::getString(Ctx, contents, false)));

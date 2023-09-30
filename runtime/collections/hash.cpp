@@ -111,6 +111,7 @@ void k_hash(block *arg, void *h) {
             break;
           }
           case SYMBOL_LAYOUT:
+          case BYTES_LAYOUT:
           case VARIABLE_LAYOUT: {
             block **childptrptr = (block **)(argintptr + offset);
             k_hash(*childptrptr, h);

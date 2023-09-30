@@ -210,7 +210,8 @@ void bind_ast(py::module_ &m) {
       .value("Bool", SortCategory::Bool)
       .value("Symbol", SortCategory::Symbol)
       .value("Variable", SortCategory::Variable)
-      .value("MInt", SortCategory::MInt);
+      .value("MInt", SortCategory::MInt)
+      .value("Bytes", SortCategory::Bytes);
 
   py::class_<ValueType>(ast, "ValueType")
       .def(py::init([](SortCategory cat) {

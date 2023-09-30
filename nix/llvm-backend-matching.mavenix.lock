@@ -246,15 +246,15 @@
       "sha1": "fdec6f2d2514787039928bcb781f9e67f4738899"
     },
     {
-      "path": "com/runtimeverification/k/kore/1.0-SNAPSHOT/kore-1.0-20230929.174637-28.jar",
-      "sha1": "eb69f46a691abd910e46a6f37b721066e9adc804"
+      "path": "com/runtimeverification/k/kore/1.0-SNAPSHOT/kore-1.0-20230928.233040-27.jar",
+      "sha1": "2482a36bad712f35d5df397760ffb777f24ec07e"
     },
     {
-      "path": "com/runtimeverification/k/kore/1.0-SNAPSHOT/kore-1.0-20230929.174637-28.pom",
+      "path": "com/runtimeverification/k/kore/1.0-SNAPSHOT/kore-1.0-20230928.233040-27.pom",
       "sha1": "2706d868319a03bc491350cb3a1af0927ef1a839"
     },
     {
-      "path": "com/runtimeverification/k/parent/1.0-SNAPSHOT/parent-1.0-20230929.174609-28.pom",
+      "path": "com/runtimeverification/k/parent/1.0-SNAPSHOT/parent-1.0-20230928.233019-27.pom",
       "sha1": "62b92746f9104b7966075e98dc7b69c44475c72c"
     },
     {
@@ -5337,11 +5337,11 @@
   "groupId": "com.runtimeverification.k",
   "metas": [
     {
-      "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<metadata modelVersion=\"1.1.0\">\n  <groupId>com.runtimeverification.k</groupId>\n  <artifactId>kore</artifactId>\n  <version>1.0-SNAPSHOT</version>\n  <versioning>\n    <snapshot>\n      <timestamp>20230929.174637</timestamp>\n      <buildNumber>28</buildNumber>\n    </snapshot>\n    <lastUpdated>20230929174637</lastUpdated>\n    <snapshotVersions>\n      <snapshotVersion>\n        <extension>jar</extension>\n        <value>1.0-20230929.174637-28</value>\n        <updated>20230929174637</updated>\n      </snapshotVersion>\n      <snapshotVersion>\n        <extension>pom</extension>\n        <value>1.0-20230929.174637-28</value>\n        <updated>20230929174637</updated>\n      </snapshotVersion>\n    </snapshotVersions>\n  </versioning>\n</metadata>",
+      "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<metadata modelVersion=\"1.1.0\">\n  <groupId>com.runtimeverification.k</groupId>\n  <artifactId>kore</artifactId>\n  <version>1.0-SNAPSHOT</version>\n  <versioning>\n    <snapshot>\n      <timestamp>20230928.233040</timestamp>\n      <buildNumber>27</buildNumber>\n    </snapshot>\n    <lastUpdated>20230928233040</lastUpdated>\n    <snapshotVersions>\n      <snapshotVersion>\n        <extension>jar</extension>\n        <value>1.0-20230928.233040-27</value>\n        <updated>20230928233040</updated>\n      </snapshotVersion>\n      <snapshotVersion>\n        <extension>pom</extension>\n        <value>1.0-20230928.233040-27</value>\n        <updated>20230928233040</updated>\n      </snapshotVersion>\n    </snapshotVersions>\n  </versioning>\n</metadata>",
       "path": "com/runtimeverification/k/kore/1.0-SNAPSHOT"
     },
     {
-      "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<metadata modelVersion=\"1.1.0\">\n  <groupId>com.runtimeverification.k</groupId>\n  <artifactId>parent</artifactId>\n  <version>1.0-SNAPSHOT</version>\n  <versioning>\n    <snapshot>\n      <timestamp>20230929.174609</timestamp>\n      <buildNumber>28</buildNumber>\n    </snapshot>\n    <lastUpdated>20230929174609</lastUpdated>\n    <snapshotVersions>\n      <snapshotVersion>\n        <extension>pom</extension>\n        <value>1.0-20230929.174609-28</value>\n        <updated>20230929174609</updated>\n      </snapshotVersion>\n    </snapshotVersions>\n  </versioning>\n</metadata>",
+      "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<metadata modelVersion=\"1.1.0\">\n  <groupId>com.runtimeverification.k</groupId>\n  <artifactId>parent</artifactId>\n  <version>1.0-SNAPSHOT</version>\n  <versioning>\n    <snapshot>\n      <timestamp>20230928.233019</timestamp>\n      <buildNumber>27</buildNumber>\n    </snapshot>\n    <lastUpdated>20230928233019</lastUpdated>\n    <snapshotVersions>\n      <snapshotVersion>\n        <extension>pom</extension>\n        <value>1.0-20230928.233019-27</value>\n        <updated>20230928233019</updated>\n      </snapshotVersion>\n    </snapshotVersions>\n  </versioning>\n</metadata>",
       "path": "com/runtimeverification/k/parent/1.0-SNAPSHOT"
     }
   ],
