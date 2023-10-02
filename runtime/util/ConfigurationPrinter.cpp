@@ -115,7 +115,6 @@ void sfprintf(writer *file, const char *fmt, ...) {
               finalBuf + sizeof(blockheader), size - sizeof(blockheader), fmt,
               args_temp);
           va_end(args_temp);
-
         } while (res >= size - sizeof(blockheader));
       }
     }
