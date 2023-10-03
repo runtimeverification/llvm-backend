@@ -690,9 +690,7 @@ std::string kllvm::codepointToUTF8(uint32_t codepoint) {
   return "";
 }
 
-// Read one codepoint from a UTF-8 encoded string, returning the codepoint
-// along with the number of bytes it took to encode
-static std::pair<uint32_t, int> readCodepoint(const char *utf8Str) {
+std::pair<uint32_t, int> kllvm::readCodepoint(const char *utf8Str) {
   char leadByte = *utf8Str;
   for (auto const &type : utf8EncodingTypes) {
     if ((leadByte & type.leadingBitsMask) == type.leadingBitsValue) {

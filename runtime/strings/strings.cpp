@@ -22,7 +22,6 @@ extern "C" {
 mpz_ptr move_int(mpz_t);
 floating *move_float(floating *);
 
-string *allocStringCopy(string *, size_t);
 string *hook_BYTES_concat(string *a, string *b);
 mpz_ptr hook_BYTES_length(string *a);
 string *hook_BYTES_substr(string *a, mpz_t start, mpz_t end);
@@ -446,7 +445,13 @@ hook_BUFFER_concat_raw(stringbuffer *buf, char const *data, uint64_t n) {
 }
 
 SortString hook_BUFFER_toString(SortStringBuffer buf) {
-  return allocStringCopy(buf->contents, buf->strlen);
+  uint64_t buf_len = buf->strlen;
+  string *result
+      = static_cast<string *>(koreAllocToken(sizeof(string) + buf_len));
+  init_with_len(result, buf_len);
+  set_is_bytes(result, false);
+  memcpy(result->data, buf->contents->data, buf_len);
+  return result;
 }
 }
 

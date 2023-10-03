@@ -5,6 +5,7 @@
 #include <gmp.h>
 #include <stdexcept>
 
+#include "kllvm/ast/AST.h"
 #include "runtime/alloc.h"
 #include "runtime/header.h"
 
@@ -107,21 +108,52 @@ hook_BYTES_int2bytes(SortInt len, SortInt i, SortEndianness endianness_ptr) {
   return result;
 }
 
-string *allocStringCopy(string *b, size_t len) {
-  string *result = static_cast<string *>(koreAllocToken(sizeof(string) + len));
-  memcpy(result->data, b->data, len);
-  init_with_len(result, len);
-  return result;
-}
-
 SortString hook_BYTES_bytes2string(SortBytes b) {
-  string *result = allocStringCopy(b, len(b));
+  uint64_t b_len = len(b);
+  uint64_t new_len = 0;
+  for (int i = 0; i < b_len; ++i) {
+    new_len += (static_cast<unsigned char>(b->data[i]) <= 0x7F) ? 1 : 2;
+  }
+
+  string *result
+      = static_cast<string *>(koreAllocToken(sizeof(string) + new_len));
+  init_with_len(result, new_len);
   set_is_bytes(result, false);
+  for (int b_i = 0, res_i = 0; b_i < b_len; ++b_i) {
+    unsigned char hh = static_cast<unsigned char>(b->data[b_i]);
+    if (hh <= 0x7F) {
+      result->data[res_i] = hh;
+      ++res_i;
+    } else {
+      result->data[res_i] = 0xC0 | (hh >> 6);
+      result->data[res_i + 1] = 0x80 | (hh & 0x3F);
+      res_i += 2;
+    }
+  }
   return result;
 }
 
 SortBytes hook_BYTES_string2bytes(SortString s) {
-  string *result = allocStringCopy(s, len(s));
+  std::string std_result;
+  char *s_iter = s->data;
+  char *s_end = s->data + len(s);
+  int index = 0;
+  while (s_iter != s_end) {
+    auto [codepoint, num_bytes] = kllvm::readCodepoint(s->data);
+    if (codepoint > 0xFF) {
+      KLLVM_HOOK_INVALID_ARGUMENT(
+          "Invalid codepoint U+{:04X} at index {} in input. Only codepoints up "
+          "to U+00FF are permitted.",
+          codepoint, index);
+    }
+    std_result += static_cast<char>(codepoint);
+    s_iter += num_bytes;
+    ++index;
+  }
+
+  string *result = static_cast<string *>(
+      koreAllocToken(sizeof(string) + std_result.size()));
+  memcpy(result->data, std_result.c_str(), std_result.size());
   set_is_bytes(result, true);
   return result;
 }

@@ -651,6 +651,10 @@ private:
 // Convert a Unicode codepoint to a UTF-8 encoded string containing that codepoint
 std::string codepointToUTF8(uint32_t codepoint);
 
+// Read one codepoint from a UTF-8 encoded string, returning the codepoint
+// along with the number of bytes it took to encode
+std::pair<uint32_t, int> readCodepoint(const char *utf8Str);
+
 // Return a representation of str with all special characters replaced by their
 // escape sequences.
 //
