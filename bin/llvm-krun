@@ -66,6 +66,7 @@ Mandatory arguments to long options are mandatory for short options too.
   -p, --pretty-print       Pretty print output configuration. By default,
                            output is in kore syntax
       --debug              Use GDB to debug the program
+      --debug-batch        Use GDB in batch mode to debug the program
       --debug-command FILE Execute GDB commands from FILE to debug the program
       --depth INT          Execute up to INT steps
   -i, --initializer INIT   Use INIT as the top cell initializer 
@@ -160,8 +161,16 @@ do
 
     --debug-command)
     debug_command="$2"
-    debug="gdb -x ${debug_command} --args "
+    if [[ -z $debug ]]; then
+      debug="gdb -x ${debug_command} --args "
+    else
+      debug="${debug/--args /} -x ${debug_command} --args "
+    fi
     shift;
+    ;;
+
+    --debug-batch)
+    debug="gdb --batch --args "
     ;;
 
     --depth)
