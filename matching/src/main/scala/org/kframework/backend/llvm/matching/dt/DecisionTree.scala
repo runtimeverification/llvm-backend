@@ -268,11 +268,7 @@ object MakePattern {
       case ListP(_, _, _, _, o) => return representPattern(o)
       case LiteralP(s, h) => {
         result.put("hook", h.hookAtt)
-        if (h.hookAtt == "BYTES.Bytes") {
-          result.put("literal", s.getBytes("ISO-8859-1"))
-        } else {
-          result.put("literal", s)
-        }
+        result.put("literal", s)
       }
       case SymbolP(s, ps) => {
         result.put("constructor", s.toString)
