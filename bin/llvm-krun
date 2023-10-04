@@ -18,6 +18,7 @@ trap 'cleanup' INT TERM EXIT
 initializer="LblinitGeneratedTopCell{}"
 dir=.
 debug=
+debug_command=
 depth=-1
 verbose=0
 binary_input=false
@@ -64,7 +65,9 @@ Mandatory arguments to long options are mandatory for short options too.
                            KORE format, rather than the textual syntax;
   -p, --pretty-print       Pretty print output configuration. By default,
                            output is in kore syntax
-      --debug              Use GDB to debug program
+      --debug              Use GDB to debug the program
+      --debug-batch        Use GDB in batch mode to debug the program
+      --debug-command FILE Execute GDB commands from FILE to debug the program
       --depth INT          Execute up to INT steps
   -i, --initializer INIT   Use INIT as the top cell initializer 
   -nm, --no-expand-macros  Don't expand macros in initial configuration
@@ -154,6 +157,20 @@ do
     --debug)
     debug="gdb --args "
     shift;
+    ;;
+
+    --debug-command)
+    debug_command="$2"
+    if [[ -z $debug ]]; then
+      debug="gdb -x ${debug_command} --args "
+    else
+      debug="${debug/--args /} -x ${debug_command} --args "
+    fi
+    shift;
+    ;;
+
+    --debug-batch)
+    debug="gdb --batch --args "
     ;;
 
     --depth)
