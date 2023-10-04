@@ -139,7 +139,7 @@ SortBytes hook_BYTES_string2bytes(SortString s) {
   char *s_end = s->data + len(s);
   int index = 0;
   while (s_iter != s_end) {
-    auto [codepoint, num_bytes] = kllvm::readCodepoint(s->data);
+    auto [codepoint, num_bytes] = kllvm::readCodepoint(s_iter);
     if (codepoint > 0xFF) {
       KLLVM_HOOK_INVALID_ARGUMENT(
           "Invalid codepoint U+{:04X} at index {} in input. Only codepoints up "
@@ -153,8 +153,9 @@ SortBytes hook_BYTES_string2bytes(SortString s) {
 
   string *result = static_cast<string *>(
       koreAllocToken(sizeof(string) + std_result.size()));
-  memcpy(result->data, std_result.c_str(), std_result.size());
+  init_with_len(result, std_result.size());
   set_is_bytes(result, true);
+  memcpy(result->data, std_result.c_str(), std_result.size());
   return result;
 }
 
