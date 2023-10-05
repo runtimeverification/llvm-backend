@@ -376,7 +376,25 @@ sptr<KOREPattern> KOREParser::applicationPattern(std::string name) {
       return accum;
     }
   }
-  return _applicationPattern(name);
+  auto result = _applicationPattern(name);
+  if (name == "\\or") {
+    if (result->getArguments().size() == 0) {
+      auto pat = KORECompositePattern::Create("\\bottom");
+      pat->getConstructor()->initPatternArguments();
+      return pat;
+    } else if (result->getArguments().size() == 1) {
+      return result->getArguments()[0];
+    }
+  } else if (name == "\\and") {
+    if (result->getArguments().size() == 0) {
+      auto pat = KORECompositePattern::Create("\\top");
+      pat->getConstructor()->initPatternArguments();
+      return pat;
+    } else if (result->getArguments().size() == 1) {
+      return result->getArguments()[0];
+    }
+  }
+  return result;
 }
 
 ptr<KORECompositePattern> KOREParser::_applicationPattern(std::string name) {
