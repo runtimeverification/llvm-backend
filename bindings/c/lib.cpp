@@ -258,8 +258,7 @@ char *kore_block_dump(block *term) {
 }
 
 kore_pattern *kore_pattern_from_block(block *term) {
-  auto raw_ptr = static_cast<kllvm::KOREPattern *>(termToKorePattern(term));
-  auto ast = std::shared_ptr<kllvm::KOREPattern>(raw_ptr);
+  auto ast = termToKorePattern(term);
 
   auto pat = new kore_pattern;
   pat->ptr_ = ast;

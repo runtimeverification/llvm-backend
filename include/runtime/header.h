@@ -19,6 +19,7 @@
 #include <immer/flex_vector.hpp>
 #include <immer/map.hpp>
 #include <immer/set.hpp>
+#include <kllvm/ast/AST.h>
 #include <runtime/collections/rangemap.h>
 #include <unordered_set>
 
@@ -303,7 +304,7 @@ void printConfigurationInternal(
 // responsible for managing its lifetime (e.g. by placing the returned pointer
 // back into a unique_ptr). The return type here is void* only to accommodate
 // C linkage so that the function can be called from the C and Python bindings.
-void *termToKorePattern(block *);
+std::shared_ptr<kllvm::KOREPattern> termToKorePattern(block *);
 
 // This function injects its argument into KItem before printing, using the sort
 // argument as the source sort. Doing so allows the term to be pretty-printed
