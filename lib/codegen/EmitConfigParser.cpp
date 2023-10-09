@@ -1143,6 +1143,20 @@ static void getVisitor(
   }
 }
 
+static llvm::Constant *getOffsetOfMember(
+    [[maybe_unused]] llvm::Module *mod, llvm::StructType *struct_ty,
+    int nth_member) {
+#if LLVM_VERSION_MAJOR >= 17
+  auto offset
+      = llvm::DataLayout(mod).getStructLayout(struct_ty)->getElementOffset(
+          nth_member);
+  auto offset_ty = llvm::Type::getInt32Ty(mod->getContext());
+  return llvm::ConstantInt::get(offset_ty, offset);
+#else
+  return llvm::ConstantExpr::getOffsetOf(struct_ty, nth_member);
+#endif
+}
+
 static llvm::Constant *getLayoutData(
     uint16_t layout, KORESymbol *symbol, llvm::Module *module,
     KOREDefinition *def) {
@@ -1154,7 +1168,9 @@ static llvm::Constant *getLayoutData(
   for (auto sort : symbol->getArguments()) {
     ValueType cat
         = dynamic_cast<KORECompositeSort *>(sort.get())->getCategory(def);
-    auto offset = llvm::ConstantExpr::getOffsetOf(BlockType, i++);
+    auto offset = getOffsetOfMember(
+        module, BlockType,
+        i++); //llvm::ConstantExpr::getOffsetOf(BlockType, i++);
     elements.push_back(llvm::ConstantStruct::get(
         getTypeByName(module, LAYOUTITEM_STRUCT), offset,
         llvm::ConstantInt::get(
