@@ -416,6 +416,10 @@ block *set_iterator_next(setiter *);
 mapiter map_iterator(map *);
 block *map_iterator_next(mapiter *);
 
+unsigned long get_ui_named(mpz_t i, std::string const &caller);
+#undef get_ui
+#define get_ui(x) get_ui_named(x, __func__)
+
 extern const uint32_t first_inj_tag, last_inj_tag;
 bool is_injection(block *);
 block *strip_injection(block *);

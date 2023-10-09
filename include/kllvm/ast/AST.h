@@ -655,6 +655,11 @@ std::string codepointToUTF8(uint32_t codepoint);
 // along with the number of bytes it took to encode
 std::pair<uint32_t, int> readCodepoint(const char *utf8Str);
 
+// Read the UTF-8 codepoint whose last byte occurs at the given index in the provided string,
+// returning the codepoint along with the number of bytes it took to encode
+std::pair<uint32_t, int>
+readCodepointEndingAtIndex(const char *utf8Str, uint64_t idx);
+
 // Return a representation of str with all special characters replaced by their
 // escape sequences.
 //

@@ -11,8 +11,6 @@
 
 extern "C" {
 
-#undef get_ui
-#define get_ui(x) get_ui_named(x, __func__)
 #define KCHAR char
 
 mpz_ptr move_int(mpz_t);
@@ -72,14 +70,6 @@ SortInt hook_BYTES_bytes2int(
   return move_int(result);
 }
 
-unsigned long get_ui_named(mpz_t i, std::string const &caller) {
-  if (!mpz_fits_ulong_p(i)) {
-    KLLVM_HOOK_INVALID_ARGUMENT(
-        "Integer overflow from {}: {}", caller, intToString(i));
-  }
-  return mpz_get_ui(i);
-}
-
 void extract(mpz_t, mpz_t, size_t, size_t);
 
 // syntax Bytes ::= Int2Bytes(Int, Int, Endianness)
@@ -111,7 +101,7 @@ hook_BYTES_int2bytes(SortInt len, SortInt i, SortEndianness endianness_ptr) {
 SortString hook_BYTES_bytes2string(SortBytes b) {
   uint64_t b_len = len(b);
   uint64_t new_len = 0;
-  for (int i = 0; i < b_len; ++i) {
+  for (uint64_t i = 0; i < b_len; ++i) {
     new_len += (static_cast<unsigned char>(b->data[i]) <= 0x7F) ? 1 : 2;
   }
 
@@ -119,7 +109,7 @@ SortString hook_BYTES_bytes2string(SortBytes b) {
       = static_cast<string *>(koreAllocToken(sizeof(string) + new_len));
   init_with_len(result, new_len);
   set_is_bytes(result, false);
-  for (int b_i = 0, res_i = 0; b_i < b_len; ++b_i) {
+  for (uint64_t b_i = 0, res_i = 0; b_i < b_len; ++b_i) {
     unsigned char hh = static_cast<unsigned char>(b->data[b_i]);
     if (hh <= 0x7F) {
       result->data[res_i] = hh;
@@ -164,15 +154,15 @@ SortBytes hook_BYTES_substr(SortBytes input, SortInt start, SortInt end) {
   uint64_t uend = get_ui(end);
   if (uend < ustart) {
     KLLVM_HOOK_INVALID_ARGUMENT(
-        "Invalid string slice: Requested start index {} is greater than "
+        "Invalid bytes slice: Requested start index {} is greater than "
         "requested end index {}.",
         ustart, uend);
   }
   uint64_t input_len = len(input);
   if (uend > input_len) {
     KLLVM_HOOK_INVALID_ARGUMENT(
-        "Invalid string slice for string: Requested end index {} is greater "
-        "than string length {}",
+        "Invalid bytes slice for bytes: Requested end index {} is greater "
+        "than bytes length {}",
         uend, input_len);
   }
   uint64_t len = uend - ustart;

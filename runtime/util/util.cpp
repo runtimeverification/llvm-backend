@@ -28,4 +28,12 @@ block *constructKItemInj(void *subject, const char *sort, bool raw_value) {
   auto args = std::vector<void *>{add_indirection ? (void *)&subject : subject};
   return static_cast<block *>(constructCompositePattern(tag, args));
 }
+
+unsigned long get_ui_named(mpz_t i, std::string const &caller) {
+  if (!mpz_fits_ulong_p(i)) {
+    KLLVM_HOOK_INVALID_ARGUMENT(
+        "Integer overflow from {}: {}", caller, intToString(i));
+  }
+  return mpz_get_ui(i);
+}
 }

@@ -43,6 +43,7 @@ string *hook_STRING_replaceFirst(string *, string *, string *);
 mpz_ptr hook_STRING_countAllOccurrences(string *, string *);
 string *hook_STRING_transcode(string *, string *, string *);
 string *makeString(const KCHAR *, int64_t len = -1);
+string *hook_BYTES_bytes2string(string *);
 stringbuffer *hook_BUFFER_empty();
 stringbuffer *hook_BUFFER_concat(stringbuffer *, string *);
 string *hook_BUFFER_toString(stringbuffer *);
@@ -232,38 +233,52 @@ BOOST_AUTO_TEST_CASE(concat) {
 }
 
 BOOST_AUTO_TEST_CASE(chr) {
-  mpz_t a, b;
-  mpz_init_set_ui(a, 65);
-  mpz_init_set_ui(b, 32);
+  mpz_t a, b, c, d, e;
+  mpz_init_set_ui(a, 0x20);
+  mpz_init_set_ui(b, 0x41);
+  mpz_init_set_ui(c, 0xA3);
+  mpz_init_set_ui(d, 0x20AC);
+  mpz_init_set_ui(e, 0x10348);
 
-  const string *A = hook_STRING_chr(a);
-  const string *space = hook_STRING_chr(b);
+  const string *space = hook_STRING_chr(a);
+  const string *A = hook_STRING_chr(b);
+  const string *pound = hook_STRING_chr(c);
+  const string *euro = hook_STRING_chr(d);
+  const string *hwair = hook_STRING_chr(e);
 
-  BOOST_CHECK_EQUAL(A->data[0], 'A');
-  BOOST_CHECK_EQUAL(len(A), 1);
-  BOOST_CHECK_EQUAL(space->data[0], ' ');
-  BOOST_CHECK_EQUAL(len(space), 1);
+  BOOST_CHECK_EQUAL(std::string(space->data, len(space)), " ");
+  BOOST_CHECK_EQUAL(std::string(A->data, len(A)), "A");
+  BOOST_CHECK_EQUAL(std::string(pound->data, len(pound)), "£");
+  BOOST_CHECK_EQUAL(std::string(euro->data, len(euro)), "€");
+  BOOST_CHECK_EQUAL(std::string(hwair->data, len(hwair)), "𐍈");
 }
 
 BOOST_AUTO_TEST_CASE(length) {
   BOOST_CHECK_EQUAL(mpz_cmp_ui(hook_STRING_length(makeString("hello")), 5), 0);
   BOOST_CHECK_EQUAL(mpz_cmp_ui(hook_STRING_length(makeString("")), 0), 0);
   BOOST_CHECK_EQUAL(mpz_cmp_ui(hook_STRING_length(makeString("worl")), 4), 0);
+  BOOST_CHECK_EQUAL(mpz_cmp_ui(hook_STRING_length(makeString("A£€𐍈")), 4), 0);
 }
 
 BOOST_AUTO_TEST_CASE(ord) {
-  mpz_ptr result = hook_STRING_ord(makeString("A"));
-  BOOST_CHECK_EQUAL(mpz_cmp_ui(result, 65), 0);
+  mpz_ptr result;
   result = hook_STRING_ord(makeString(" "));
-  BOOST_CHECK_EQUAL(mpz_cmp_ui(result, 32), 0);
-  result = hook_STRING_ord(makeString("\xff"));
-  BOOST_CHECK_EQUAL(mpz_cmp_ui(result, 255), 0);
+  BOOST_CHECK_EQUAL(mpz_cmp_ui(result, 0x20), 0);
+  result = hook_STRING_ord(makeString("A"));
+  BOOST_CHECK_EQUAL(mpz_cmp_ui(result, 0x41), 0);
+  result = hook_STRING_ord(makeString("£"));
+  BOOST_CHECK_EQUAL(mpz_cmp_ui(result, 0xA3), 0);
+  result = hook_STRING_ord(makeString("€"));
+  BOOST_CHECK_EQUAL(mpz_cmp_ui(result, 0x20AC), 0);
+  result = hook_STRING_ord(makeString("𐍈"));
+  BOOST_CHECK_EQUAL(mpz_cmp_ui(result, 0x10348), 0);
+
   BOOST_CHECK_THROW(hook_STRING_ord(makeString("")), std::invalid_argument);
   BOOST_CHECK_THROW(hook_STRING_ord(makeString("AA")), std::invalid_argument);
 }
 
 BOOST_AUTO_TEST_CASE(substr) {
-  auto catAll = makeString("hellohehf");
+  auto catAll = makeString("h£ll𐍈h€hf");
 
   mpz_t _2, _9, _6, _0, _4, _7, _40, _8, _10, _1024, _4096;
   mpz_init_set_si(_2, 2);
@@ -278,13 +293,13 @@ BOOST_AUTO_TEST_CASE(substr) {
   mpz_init_set_si(_1024, 1024);
   mpz_init_set_si(_4096, 4096);
   BOOST_CHECK_EQUAL(
-      memcmp(hook_STRING_substr(catAll, _2, _9)->data, "llohehf", 7), 0);
+      memcmp(hook_STRING_substr(catAll, _2, _9)->data, "ll𐍈h€hf", 7), 0);
   BOOST_CHECK_EQUAL(
-      memcmp(hook_STRING_substr(catAll, _2, _6)->data, "lloh", 4), 0);
+      memcmp(hook_STRING_substr(catAll, _2, _6)->data, "ll𐍈h", 4), 0);
   BOOST_CHECK_EQUAL(
-      memcmp(hook_STRING_substr(catAll, _0, _4)->data, "hell", 4), 0);
+      memcmp(hook_STRING_substr(catAll, _0, _4)->data, "h£ll", 4), 0);
   BOOST_CHECK_EQUAL(
-      memcmp(hook_STRING_substr(catAll, _6, _9)->data, "ehf", 3), 0);
+      memcmp(hook_STRING_substr(catAll, _6, _9)->data, "€hf", 3), 0);
   BOOST_CHECK_THROW(hook_STRING_substr(catAll, _7, _40), std::invalid_argument);
   BOOST_CHECK_THROW(hook_STRING_substr(catAll, _8, _40), std::invalid_argument);
   BOOST_CHECK_EQUAL(
@@ -297,8 +312,8 @@ BOOST_AUTO_TEST_CASE(substr) {
 }
 
 BOOST_AUTO_TEST_CASE(find) {
-  auto haystack = makeString("hellollo");
-  auto needle = makeString("llo");
+  auto haystack = makeString("hell𐍈ll𐍈");
+  auto needle = makeString("ll𐍈");
   auto needle2 = makeString("hf");
 
   mpz_t a, b, c, d, e, f, g;
@@ -321,25 +336,25 @@ BOOST_AUTO_TEST_CASE(find) {
 }
 
 BOOST_AUTO_TEST_CASE(findChar) {
-  auto haystack = makeString("Hello world");
-  auto needle = makeString("Hd");
+  auto haystack = makeString("A£€Hello worl𐍈d");
+  auto needle = makeString("H𐍈d");
 
-  mpz_t a, b;
-  mpz_init_set_si(a, 0);
-  mpz_init_set_si(b, 1);
+  mpz_t _0, _4;
+  mpz_init_set_si(_0, 0);
+  mpz_init_set_si(_4, 4);
 
   BOOST_CHECK_EQUAL(
-      mpz_cmp_si(hook_STRING_findChar(haystack, needle, a), 0), 0);
+      mpz_cmp_si(hook_STRING_findChar(haystack, needle, _0), 3), 0);
   BOOST_CHECK_EQUAL(
-      mpz_cmp_si(hook_STRING_findChar(haystack, needle, b), 10), 0);
+      mpz_cmp_si(hook_STRING_findChar(haystack, needle, _4), 13), 0);
 }
 
 BOOST_AUTO_TEST_CASE(rfind) {
-  auto haystack = makeString("hellollo");
-  auto needle = makeString("llo");
+  auto haystack = makeString("h€ll𐍈ll𐍈");
+  auto needle = makeString("ll𐍈");
   auto needle2 = makeString("hf");
-  auto needle3 = makeString("hello");
-  auto needle4 = makeString("lol");
+  auto needle3 = makeString("h€ll𐍈");
+  auto needle4 = makeString("l𐍈l");
 
   mpz_t a, b, c, d, e, f, g;
   mpz_init_set_si(a, 0);
@@ -363,17 +378,17 @@ BOOST_AUTO_TEST_CASE(rfind) {
 }
 
 BOOST_AUTO_TEST_CASE(rfindChar) {
-  auto haystack = makeString("Hello world");
-  auto needle = makeString("Hd");
+  auto haystack = makeString("Hello£€ world𐍈");
+  auto needle = makeString("H𐍈d");
 
-  mpz_t a, b;
-  mpz_init_set_si(a, 10);
-  mpz_init_set_si(b, 9);
+  mpz_t _13, _11;
+  mpz_init_set_si(_13, 13);
+  mpz_init_set_si(_11, 11);
 
   BOOST_CHECK_EQUAL(
-      mpz_cmp_si(hook_STRING_rfindChar(haystack, needle, a), 10), 0);
+      mpz_cmp_si(hook_STRING_rfindChar(haystack, needle, _13), 13), 0);
   BOOST_CHECK_EQUAL(
-      mpz_cmp_si(hook_STRING_rfindChar(haystack, needle, b), 0), 0);
+      mpz_cmp_si(hook_STRING_rfindChar(haystack, needle, _11), 0), 0);
 }
 
 BOOST_AUTO_TEST_CASE(int2string) {
@@ -567,10 +582,12 @@ BOOST_AUTO_TEST_CASE(buffer_concat) {
 
 BOOST_AUTO_TEST_CASE(transcode) {
   auto foo = makeString("foo");
-  auto fooUTF16LE = makeString("f\0o\0o\0", 6);
-  auto fooUTF16BE = makeString("\0f\0o\0o", 6);
-  auto fooUTF32LE = makeString("f\0\0\0o\0\0\0o\0\0\0", 12);
-  auto fooUTF32BE = makeString("\0\0\0f\0\0\0o\0\0\0o", 12);
+  auto fooUTF16LE = hook_BYTES_bytes2string(makeString("f\0o\0o\0", 6));
+  auto fooUTF16BE = hook_BYTES_bytes2string(makeString("\0f\0o\0o", 6));
+  auto fooUTF32LE
+      = hook_BYTES_bytes2string(makeString("f\0\0\0o\0\0\0o\0\0\0", 12));
+  auto fooUTF32BE
+      = hook_BYTES_bytes2string(makeString("\0\0\0f\0\0\0o\0\0\0o", 12));
   auto UTF8 = makeString("UTF-8");
   auto UTF16LE = makeString("UTF-16LE");
   auto UTF16BE = makeString("UTF-16BE");

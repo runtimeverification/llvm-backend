@@ -12,6 +12,7 @@
 #include <stdexcept>
 #include <string>
 
+#include "kllvm/ast/AST.h"
 #include "runtime/alloc.h"
 #include "runtime/header.h"
 
@@ -23,11 +24,13 @@ mpz_ptr move_int(mpz_t);
 floating *move_float(floating *);
 
 string *hook_BYTES_concat(string *a, string *b);
-mpz_ptr hook_BYTES_length(string *a);
-string *hook_BYTES_substr(string *a, mpz_t start, mpz_t end);
+string *hook_BYTES_bytes2string(string *);
+string *hook_BYTES_string2bytes(string *);
 char *getTerminatedString(string *str);
 
 bool hook_STRING_gt(SortString a, SortString b) {
+  // UTF-8 ensures lexicographic ordering by bytes aligns
+  // with lexicographic ordering by code points
   auto res = memcmp(a->data, b->data, std::min(len(a), len(b)));
   return res > 0 || (res == 0 && len(a) > len(b));
 }
@@ -69,117 +72,272 @@ SortString hook_STRING_concat(SortString a, SortString b) {
   return ret;
 }
 
-SortInt hook_STRING_length(SortString a) {
-  return hook_BYTES_length(a);
+static uint64_t num_codepoints(SortString a) {
+  uint64_t length = 0;
+  for (size_t i = 0; i < len(a); ++i) {
+    // every continuation byte is of the form 10xxxxxx,
+    // and the number of codepoints is the number of non-continuation bytes
+    if ((a->data[i] & 0xC0) != 0x80) {
+      length += 1;
+    }
+  }
+  return length;
 }
 
-static inline uint64_t gs(mpz_t i) {
-  if (!mpz_fits_ulong_p(i)) {
-    KLLVM_HOOK_INVALID_ARGUMENT("Arg too large for int64_t");
-  }
-  return mpz_get_ui(i);
+SortInt hook_STRING_length(SortString a) {
+  mpz_t result;
+  mpz_init_set_ui(result, num_codepoints(a));
+  return move_int(result);
 }
 
 SortString hook_STRING_chr(SortInt ord) {
-  uint64_t uord = gs(ord);
-  if (uord > 255) {
-    KLLVM_HOOK_INVALID_ARGUMENT("Ord must be <= 255: {}", uord);
+  uint64_t uord = get_ui(ord);
+  if (0xD800 <= uord && uord <= 0xDFFF) {
+    KLLVM_HOOK_INVALID_ARGUMENT(
+        "Ord cannot correspond to a surrogate code point in the range [U+D800, "
+        "U+DFFF]: {}",
+        uord);
   }
+  if (uord > 0x10FFFF) {
+    KLLVM_HOOK_INVALID_ARGUMENT(
+        "Ord exceeds the largest code point U+10FFFF: {}", uord);
+  }
+  std::string std_ret = kllvm::codepointToUTF8(static_cast<uint32_t>(uord));
+
   auto ret
-      = static_cast<string *>(koreAllocToken(sizeof(string) + sizeof(KCHAR)));
-  init_with_len(ret, 1);
-  ret->data[0] = static_cast<KCHAR>(uord);
+      = static_cast<string *>(koreAllocToken(sizeof(string) + std_ret.size()));
+  init_with_len(ret, std_ret.size());
+  memcpy(ret->data, std_ret.c_str(), std_ret.size());
   return ret;
 }
 
 SortInt hook_STRING_ord(SortString input) {
-  mpz_t result;
-  if (len(input) != 1) {
-    KLLVM_HOOK_INVALID_ARGUMENT(
-        "Input must be a string of length 1: {}", std::string(input->data));
+  if (len(input) > 0) {
+    auto [codepoint, num_bytes] = kllvm::readCodepoint(input->data);
+    if (num_bytes == len(input)) {
+      mpz_t result;
+      mpz_init_set_ui(result, codepoint);
+      return move_int(result);
+    }
   }
-  mpz_init_set_ui(result, static_cast<unsigned char>(input->data[0]));
-  return move_int(result);
+  KLLVM_HOOK_INVALID_ARGUMENT(
+      "Input must be a string of length 1: {}", std::string(input->data));
+}
+
+// Convert from a byte-based index to a codepoint-based index.
+// Provided idx must be in the range [0, length of str).
+//
+// Returns whatever codepoint that idx occurs in.
+static inline uint64_t byte_idx_to_codepoint(const char *str, uint64_t idx) {
+  uint64_t codepoint = 0;
+  for (size_t i = 1; i <= idx; ++i) {
+    if ((str[i] & 0xC0) != 0x80) {
+      ++codepoint;
+    }
+  }
+  return codepoint;
+}
+
+// Convert from a codepoint-based index to a byte-based index.
+//
+// If the codepoint is found, i.e., it is in the range [0, num_codepoints(str, length)),
+// we return true and write the byte-based index of the start of the codepoint to *result.
+//
+// Otherwise, we return false and write num_codepoints(str, length) to *result.
+static inline bool codepoint_idx_to_byte(
+    const char *str, uint64_t length, uint64_t idx, uint64_t *result) {
+  uint64_t codepoint = 0;
+  for (uint64_t i = 0; i < length; ++i) {
+    if ((str[i] & 0xC0) != 0x80) {
+      // codepoint records number of codepoints so far, not the index of the current codepoint,
+      // so we do this check before incrementing to account for the off by 1
+      if (codepoint == idx) {
+        *result = i;
+        return true;
+      }
+      ++codepoint;
+    }
+  }
+  // out of range, so return number of codepoints
+  *result = codepoint;
+  return false;
 }
 
 SortString hook_STRING_substr(SortString input, SortInt start, SortInt end) {
-  auto ret = hook_BYTES_substr(input, start, end);
-  set_is_bytes(ret, false);
+  uint64_t ustart = get_ui(start);
+  uint64_t uend = get_ui(end);
+  if (uend < ustart) {
+    KLLVM_HOOK_INVALID_ARGUMENT(
+        "Invalid string slice: Requested start index {} is greater than "
+        "requested end index {}.",
+        ustart, uend);
+  }
+
+  uint64_t start_bytes;
+  uint64_t end_bytes;
+  if (codepoint_idx_to_byte(input->data, len(input), ustart, &start_bytes)) {
+  } else if (ustart == start_bytes) {
+    // in the failure case, codepoint_to_idx writes num_codepoints to start_bytes,
+    // so this branch is when ustart is one past the end of the string
+    start_bytes = len(input);
+  } else {
+    KLLVM_HOOK_INVALID_ARGUMENT(
+        "Invalid string slice for string: Requested start index {} is greater "
+        "than string length {}",
+        ustart, len(input));
+  }
+
+  if (codepoint_idx_to_byte(
+          input->data + start_bytes, len(input) - start_bytes, uend - ustart,
+          &end_bytes)) {
+    end_bytes += start_bytes;
+  } else if (uend == ustart + end_bytes) {
+    // in the failure case, codepoint_to_idx writes num_codepoints to end_bytes,
+    // so this branch is when uend is one past the end of the string
+    end_bytes = len(input);
+  } else {
+    KLLVM_HOOK_INVALID_ARGUMENT(
+        "Invalid string slice for string: Requested end index {} is greater "
+        "than string length {}",
+        uend, len(input));
+  }
+
+  uint64_t len_bytes = end_bytes - start_bytes;
+  auto ret = static_cast<string *>(
+      koreAllocToken(sizeof(string) + sizeof(KCHAR) * len_bytes));
+  init_with_len(ret, len_bytes);
+  memcpy(&(ret->data), &(input->data[start_bytes]), len_bytes * sizeof(KCHAR));
   return ret;
 }
 
 SortInt hook_STRING_find(SortString haystack, SortString needle, SortInt pos) {
   mpz_t result;
-  uint64_t upos = gs(pos);
-  if (upos >= len(haystack)) {
+  uint64_t upos = get_ui(pos);
+  uint64_t upos_bytes;
+  if (!codepoint_idx_to_byte(
+          haystack->data, len(haystack), upos, &upos_bytes)) {
     mpz_init_set_si(result, -1);
     return move_int(result);
   }
+
   auto out = std::search(
-      haystack->data + upos * sizeof(KCHAR),
+      haystack->data + upos_bytes * sizeof(KCHAR),
       haystack->data + len(haystack) * sizeof(KCHAR), needle->data,
       needle->data + len(needle) * sizeof(KCHAR));
-  int64_t ret = (out - haystack->data) / sizeof(KCHAR);
+  uint64_t ret = (out - haystack->data) / sizeof(KCHAR);
+
   // search returns the end of the range if it is not found, but we want -1 in
   // such a case.
-  auto res = (ret < len(haystack)) ? ret : -1;
-  mpz_init_set_si(result, res);
+  if (ret >= len(haystack)) {
+    mpz_init_set_si(result, -1);
+  } else {
+    mpz_init_set_ui(
+        result, upos
+                    + byte_idx_to_codepoint(
+                        haystack->data + upos_bytes, ret - upos_bytes));
+  }
   return move_int(result);
 }
 
 SortInt hook_STRING_rfind(SortString haystack, SortString needle, SortInt pos) {
   // The semantics of rfind uposition are strange, it is the last position at
-  // which the match can _start_, which means the end of the haystack needs to
-  // be upos + len(needle), or the end of the haystack, if that's less.
+  // which the match can _start_, which means the end of the match needs to
+  // be upos_bytes + len(needle), or the end of the haystack, if that's less.
   mpz_t result;
-  uint64_t upos = gs(pos);
-  upos += len(needle);
-  auto end = (upos < len(haystack)) ? upos : len(haystack);
+  uint64_t upos = get_ui(pos);
+  uint64_t end_bytes;
+  if (codepoint_idx_to_byte(haystack->data, len(haystack), upos, &end_bytes)) {
+    end_bytes += len(needle);
+    end_bytes = end_bytes < len(haystack) ? end_bytes : len(haystack);
+  } else {
+    end_bytes = len(haystack);
+  }
+
+  // TODO: find_end works with forward iterators and thus searches front to back,
+  // so we could be a bit more efficient using std::find with reverse_iterators
   auto out = std::find_end(
-      &haystack->data[0], &haystack->data[end], &needle->data[0],
+      &haystack->data[0], &haystack->data[end_bytes], &needle->data[0],
       &needle->data[len(needle)]);
-  auto ret = &*out - &haystack->data[0];
-  auto res = (ret < end) ? ret : -1;
-  mpz_init_set_si(result, res);
+  uint64_t ret = &*out - &haystack->data[0];
+
+  if (ret >= end_bytes) {
+    mpz_init_set_si(result, -1);
+  } else {
+    mpz_init_set_ui(result, byte_idx_to_codepoint(haystack->data, ret));
+  }
   return move_int(result);
+}
+
+static std::vector<uint64_t>
+string_to_codepoints(const char *str, uint64_t length) {
+  std::vector<uint64_t> res;
+  res.reserve(length);
+  for (uint64_t i = 0; i < length;) {
+    auto [codepoint, num_bytes] = kllvm::readCodepoint(str + i);
+    res.push_back(codepoint);
+    i += num_bytes;
+  }
+  return res;
 }
 
 SortInt
 hook_STRING_findChar(SortString haystack, SortString needle, SortInt pos) {
   mpz_t result;
-  uint64_t upos = gs(pos);
-  if (upos >= len(haystack)) {
+  uint64_t upos = get_ui(pos);
+  uint64_t upos_bytes;
+  if (!codepoint_idx_to_byte(
+          haystack->data, len(haystack), upos, &upos_bytes)) {
     mpz_init_set_si(result, -1);
     return move_int(result);
   }
-  auto out = std::find_first_of(
-      haystack->data + upos * sizeof(KCHAR),
-      haystack->data + len(haystack) * sizeof(KCHAR), needle->data,
-      needle->data + len(needle) * sizeof(KCHAR));
-  int64_t ret = (out - haystack->data) / sizeof(KCHAR);
-  // search returns the end of the range if it is not found, but we want -1 in
-  // such a case.
-  auto res = (ret < len(haystack)) ? ret : -1;
-  mpz_init_set_si(result, res);
+
+  std::vector<uint64_t> needle_pts
+      = string_to_codepoints(needle->data, len(needle));
+  for (uint64_t h = upos_bytes, h_pt = upos; h < len(haystack); ++h_pt) {
+    auto [codepoint, num_bytes] = kllvm::readCodepoint(haystack->data + h);
+    for (uint64_t n : needle_pts) {
+      if (codepoint == n) {
+        mpz_init_set_ui(result, h_pt);
+        return move_int(result);
+      }
+    }
+    h += num_bytes;
+  }
+
+  mpz_init_set_si(result, -1);
   return move_int(result);
 }
 
 SortInt
 hook_STRING_rfindChar(SortString haystack, SortString needle, SortInt pos) {
-  // The semantics of rfind uposition are strange, it is the last position at
-  // which the match can _start_, which means the end of the haystack needs to
-  // be upos + len(needle), or the end of the haystack, if that's less.
   mpz_t result;
-  uint64_t upos = gs(pos);
-  upos += 1;
-  auto end = (upos < len(haystack)) ? upos : len(haystack);
-  auto out = std::find_first_of(
-      std::reverse_iterator<const char *>(&haystack->data[end]),
-      std::reverse_iterator<const char *>(&haystack->data[0]), &needle->data[0],
-      &needle->data[len(needle)]);
-  auto ret = &*out - &haystack->data[0];
-  auto res = (ret < end) ? ret : -1;
-  mpz_init_set_si(result, res);
+  uint64_t upos = get_ui(pos);
+  uint64_t end_bytes;
+  if (codepoint_idx_to_byte(
+          haystack->data, len(haystack), upos + 1, &end_bytes)) {
+    // found the start of upos + 1, so subtract 1 byte to get the end of the upos codepoint
+    --end_bytes;
+  } else {
+    // In the failure case, codepoint_idx_to_byte writes num_codepoints to end_bytes
+    upos = end_bytes - 1;
+    end_bytes = len(haystack) - 1;
+  }
+
+  std::vector<uint64_t> needle_pts
+      = string_to_codepoints(needle->data, len(needle));
+  for (uint64_t h = 0, h_pt = upos; h <= end_bytes; --h_pt) {
+    auto [codepoint, num_bytes]
+        = kllvm::readCodepointEndingAtIndex(haystack->data, end_bytes - h);
+    for (uint64_t n : needle_pts) {
+      if (codepoint == n) {
+        mpz_init_set_ui(result, h_pt);
+        return move_int(result);
+      }
+    }
+    h += num_bytes;
+  }
+
+  mpz_init_set_si(result, -1);
   return move_int(result);
 }
 
@@ -188,8 +346,8 @@ string *makeString(const KCHAR *input, ssize_t len = -1) {
     len = strlen(input);
   }
   auto ret = static_cast<string *>(koreAllocToken(sizeof(string) + len));
-  memcpy(ret->data, input, len);
   init_with_len(ret, len);
+  memcpy(ret->data, input, len);
   return ret;
 }
 
@@ -197,8 +355,8 @@ char *getTerminatedString(string *str) {
   int length = len(str);
   string *buf
       = static_cast<string *>(koreAllocToken(sizeof(string) + (length + 1)));
-  memcpy(buf->data, str->data, length);
   init_with_len(buf, length + 1);
+  memcpy(buf->data, str->data, length);
   buf->data[length] = '\0';
   return buf->data;
 }
@@ -211,8 +369,8 @@ SortString hook_STRING_base2string_long(SortInt input, uint64_t base) {
   // signs will have been accounted for already by the intToString call.
   auto str_len = str.size() + 1;
   auto result = static_cast<string *>(koreAllocToken(sizeof(string) + str_len));
-  strncpy(result->data, str.c_str(), str_len);
   init_with_len(result, str.size());
+  strncpy(result->data, str.c_str(), str_len);
 
   return static_cast<string *>(koreResizeLastAlloc(
       result, sizeof(string) + len(result), sizeof(string) + str_len));
@@ -250,12 +408,12 @@ SortInt hook_STRING_string2int(SortString input) {
 }
 
 SortInt hook_STRING_string2base(SortString input, SortInt base) {
-  uint64_t ubase = gs(base);
+  uint64_t ubase = get_ui(base);
   return hook_STRING_string2base_long(input, ubase);
 }
 
 SortString hook_STRING_base2string(SortInt input, SortInt base) {
-  uint64_t ubase = gs(base);
+  uint64_t ubase = get_ui(base);
   return hook_STRING_base2string_long(input, ubase);
 }
 
@@ -291,12 +449,12 @@ SortString hook_STRING_token2string(string *input) {
 inline SortString hook_STRING_replace(
     SortString haystack, SortString needle, SortString replacer,
     SortInt occurences) {
-  uint64_t uoccurences = gs(occurences);
+  uint64_t uoccurences = get_ui(occurences);
   auto start = &haystack->data[0];
   auto pos = start;
   auto end = &haystack->data[len(haystack)];
   size_t matches[len(haystack)];
-  int i = 0;
+  uint64_t i = 0;
   while (i < uoccurences) {
     pos = std::search(pos, end, &needle->data[0], &needle->data[len(needle)]);
     if (pos == end) {
@@ -369,9 +527,10 @@ hook_STRING_countAllOccurrences(SortString haystack, SortString needle) {
 }
 
 SortString hook_STRING_transcode(
-    SortString input, SortString inputCharset, SortString outputCharset) {
+    SortString inputStr, SortString inputCharset, SortString outputCharset) {
   iconv_t converter = iconv_open(
       getTerminatedString(outputCharset), getTerminatedString(inputCharset));
+  SortBytes input = hook_BYTES_string2bytes(inputStr);
   char *inbuf = input->data;
   size_t inbytesleft = len(input);
   size_t outbytesleft = inbytesleft * 4;
@@ -383,7 +542,8 @@ SortString hook_STRING_transcode(
     KLLVM_HOOK_INVALID_ARGUMENT("transcoding failed: STRING.transcode");
   }
   *outbuf = 0;
-  return makeString(buf, len(input) * 4 - outbytesleft);
+  return hook_BYTES_bytes2string(
+      makeString(buf, len(input) * 4 - outbytesleft));
 }
 
 string *hook_STRING_uuid() {
@@ -449,7 +609,6 @@ SortString hook_BUFFER_toString(SortStringBuffer buf) {
   string *result
       = static_cast<string *>(koreAllocToken(sizeof(string) + buf_len));
   init_with_len(result, buf_len);
-  set_is_bytes(result, false);
   memcpy(result->data, buf->contents->data, buf_len);
   return result;
 }

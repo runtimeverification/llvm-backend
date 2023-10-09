@@ -167,6 +167,11 @@ BOOST_AUTO_TEST_CASE(bytes2string) {
   BOOST_CHECK(res != _1234);
   BOOST_CHECK_EQUAL(len(_1234), 4);
   BOOST_CHECK_EQUAL(0, memcmp(_1234->data, "1234", 4));
+
+  auto unicode = makeString("\x7F\xFF", 2);
+  res = hook_BYTES_bytes2string(unicode);
+  BOOST_CHECK_EQUAL(len(res), 3);
+  BOOST_CHECK_EQUAL(0, memcmp(res->data, "\x7F\xC3\xBF", 3));
 }
 
 BOOST_AUTO_TEST_CASE(string2bytes) {
@@ -180,6 +185,11 @@ BOOST_AUTO_TEST_CASE(string2bytes) {
   BOOST_CHECK(res != _1234);
   BOOST_CHECK_EQUAL(len(_1234), 4);
   BOOST_CHECK_EQUAL(0, memcmp(_1234->data, "1234", 4));
+
+  auto unicode = makeString("\x7F\xC3\xBF");
+  res = hook_BYTES_string2bytes(unicode);
+  BOOST_CHECK_EQUAL(len(res), 2);
+  BOOST_CHECK_EQUAL(0, memcmp(res->data, "\x7F\xFF", 2));
 }
 
 BOOST_AUTO_TEST_CASE(substr) {

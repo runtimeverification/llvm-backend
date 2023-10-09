@@ -662,6 +662,7 @@ struct UTF8EncodingType {
   int numContinuationBytes;
 };
 
+// All the different UTF-8 encoding types, indexed by their number of continuation bytes
 static const UTF8EncodingType utf8EncodingTypes[4] = {
     // 0xxxxxxx
     {0x0000, 0x007F, static_cast<char>(0x80), static_cast<char>(0x00), 0},
@@ -700,6 +701,22 @@ std::pair<uint32_t, int> kllvm::readCodepoint(const char *utf8Str) {
         codepoint = (codepoint << 6) | (contByte & 0x3F);
       }
       return {codepoint, 1 + type.numContinuationBytes};
+    }
+  }
+  assert(false && "Invalid UTF-8 string");
+  return {0, 0};
+}
+
+std::pair<uint32_t, int>
+kllvm::readCodepointEndingAtIndex(const char *utf8Str, uint64_t idx) {
+  uint64_t codepoint = 0;
+  for (int i = 0; i <= 3; ++i) {
+    char byte = utf8Str[idx - i];
+    if ((byte & 0xC0) == 0x80) {
+      codepoint |= (byte & 0x3F) << (6 * i);
+    } else {
+      codepoint |= (byte & ~(utf8EncodingTypes[i].leadingBitsMask)) << (6 * i);
+      return {codepoint, i + 1};
     }
   }
   assert(false && "Invalid UTF-8 string");
