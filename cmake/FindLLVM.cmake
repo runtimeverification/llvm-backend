@@ -1,4 +1,8 @@
-find_package(LLVM 16 QUIET CONFIG)
+find_package(LLVM 17 QUIET CONFIG)
+
+if (NOT LLVM_FOUND)
+  find_package(LLVM 16 QUIET CONFIG)
+endif()
 
 if (NOT LLVM_FOUND)
   find_package(LLVM 15 QUIET CONFIG)
