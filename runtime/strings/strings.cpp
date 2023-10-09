@@ -22,7 +22,7 @@ extern "C" {
 mpz_ptr move_int(mpz_t);
 floating *move_float(floating *);
 
-string *allocStringCopy(string *, size_t);
+string *bytes2string(string *, size_t);
 string *hook_BYTES_concat(string *a, string *b);
 mpz_ptr hook_BYTES_length(string *a);
 string *hook_BYTES_substr(string *a, mpz_t start, mpz_t end);
@@ -65,9 +65,7 @@ bool hook_STRING_ne(SortString a, SortString b) {
 }
 
 SortString hook_STRING_concat(SortString a, SortString b) {
-  auto ret = hook_BYTES_concat(a, b);
-  set_is_bytes(ret, false);
-  return ret;
+  return hook_BYTES_concat(a, b);
 }
 
 SortInt hook_STRING_length(SortString a) {
@@ -104,9 +102,7 @@ SortInt hook_STRING_ord(SortString input) {
 }
 
 SortString hook_STRING_substr(SortString input, SortInt start, SortInt end) {
-  auto ret = hook_BYTES_substr(input, start, end);
-  set_is_bytes(ret, false);
-  return ret;
+  return hook_BYTES_substr(input, start, end);
 }
 
 SortInt hook_STRING_find(SortString haystack, SortString needle, SortInt pos) {
@@ -446,7 +442,7 @@ hook_BUFFER_concat_raw(stringbuffer *buf, char const *data, uint64_t n) {
 }
 
 SortString hook_BUFFER_toString(SortStringBuffer buf) {
-  return allocStringCopy(buf->contents, buf->strlen);
+  return bytes2string(buf->contents, buf->strlen);
 }
 }
 

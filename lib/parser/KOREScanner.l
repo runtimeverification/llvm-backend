@@ -1,6 +1,5 @@
 %{
 
-#include "kllvm/ast/AST.h"
 #include "kllvm/parser/KOREScanner.h"
 #include <boost/locale.hpp>
 #include <iostream>
@@ -81,9 +80,9 @@ yyin = in;
 <STR>"\\\""     { stringBuffer.push_back('\"');               }
 <STR>"\\\\"     { stringBuffer.push_back('\\');               }
 <STR>\\[0-9]{3} { stringBuffer.push_back((yytext[1] - '0') * 64 + (yytext[2] - '0') * 8 + yytext[3] - '0'); }
-<STR>\\x[0-9a-fA-F]{2} { stringBuffer.append(codepointToUTF8(yytext + 2, *loc)); }
-<STR>\\u[0-9a-fA-F]{4} { stringBuffer.append(codepointToUTF8(yytext + 2, *loc)); }
-<STR>\\U[0-9a-fA-F]{8} { stringBuffer.append(codepointToUTF8(yytext + 2, *loc)); }
+<STR>\\x[0-9a-fA-F]{2} { stringBuffer.push_back(strtol(yytext+2, NULL, 16)); }
+<STR>\\u[0-9a-fA-F]{4} { stringBuffer.append(codepoint_to_utf8(strtoul(yytext+2, NULL, 16), *loc)); }
+<STR>\\U[0-9a-fA-F]{8} { stringBuffer.append(codepoint_to_utf8(strtoul(yytext+2, NULL, 16), *loc)); }
 <STR>"\""       {
   BEGIN(INITIAL);
   *lval = stringBuffer;
@@ -129,18 +128,45 @@ void KOREScanner::error(
   exit(-1);
 }
 
-std::string
-KOREScanner::codepointToUTF8(const char *codepointStr, const location &loc) {
-  uint32_t codepoint = static_cast<uint32_t>(strtoul(codepointStr, NULL, 16));
-  if (0xD800 <= codepoint && codepoint <= 0xDFFF) {
+std::string KOREScanner::codepoint_to_utf8(unsigned long int code,
+					   const location &loc) {
+  // Let xxxx... denote the bits of the code point
+  if (code <= 0x7F) {
+    // 0xxxxxxx
+    char utf8[1] = {static_cast<char>(code)};
+    return std::string(utf8, 1);
+  }
+  if (code <= 0x7FF) {
+    // 110xxxxx	10xxxxxx
+    char utf8[2]
+        = {static_cast<char>(0xC0 | (code >> 6)),
+           static_cast<char>(0x80 | (code & 0x3F))};
+    return std::string(utf8, 2);
+  }
+  if (0xD800 <= code && code <= 0xDFFF) {
     error(
         loc, "The surrogate code points in the range [U+D800, U+DFFF] "
              "are illegal in Unicode escape sequences\n");
   }
-  if (codepoint > 0x10FFFF) {
-    error(loc, "Unicode code points cannot exceed U+10FFFF\n");
+  if (code <= 0xFFFF) {
+    // 1110xxxx	10xxxxxx 10xxxxxx
+    char utf8[3]
+        = {static_cast<char>(0xE0 | (code >> 12)),
+           static_cast<char>(0x80 | ((code >> 6) & 0x3F)),
+           static_cast<char>(0x80 | (code & 0x3F))};
+    return std::string(utf8, 3);
   }
-  return kllvm::codepointToUTF8(codepoint);
+  if (code <= 0x10FFFF) {
+    // 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
+    char utf8[4]
+        = {static_cast<char>(0xF0 | (code >> 18)),
+           static_cast<char>(0x80 | ((code >> 12) & 0x3F)),
+           static_cast<char>(0x80 | ((code >> 6) & 0x3F)),
+           static_cast<char>(0x80 | (code & 0x3F))};
+    return std::string(utf8, 4);
+  }
+  error(loc, "Unicode code points cannot exceed U+10FFFF\n");
+  return "";
 }
 
 int KOREScanner::scan() {

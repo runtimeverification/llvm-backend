@@ -8,7 +8,6 @@
 #include <cassert>
 #include <cctype>
 #include <cstdio>
-#include <inttypes.h>
 #include <iostream>
 #include <iterator>
 #include <unordered_map>
@@ -207,8 +206,6 @@ ValueType KORECompositeSort::getCategory(std::string name) {
     category = SortCategory::StringBuffer;
   else if (name == "BOOL.Bool")
     category = SortCategory::Bool;
-  else if (name == "BYTES.Bytes")
-    category = SortCategory::Bytes;
   else if (name == "KVAR.KVar")
     category = SortCategory::Variable;
   // we expect the "hook" of a MInt to be of the form "MINT.MInt N" for some
@@ -251,6 +248,7 @@ std::string KORESymbol::layoutString(KOREDefinition *definition) const {
     ValueType cat = sort->getCategory(definition);
     switch (cat.cat) {
     case SortCategory::Map: result.push_back('1'); break;
+    case SortCategory::RangeMap: result.push_back('b'); break;
     case SortCategory::List: result.push_back('2'); break;
     case SortCategory::Set: result.push_back('3'); break;
     case SortCategory::Int: result.push_back('4'); break;
@@ -258,8 +256,6 @@ std::string KORESymbol::layoutString(KOREDefinition *definition) const {
     case SortCategory::StringBuffer: result.push_back('6'); break;
     case SortCategory::Bool: result.push_back('7'); break;
     case SortCategory::Variable: result.push_back('8'); break;
-    case SortCategory::RangeMap: result.push_back('9'); break;
-    case SortCategory::Bytes: result.push_back('a'); break;
     case SortCategory::MInt:
       result.append("_" + std::to_string(cat.bits) + "_");
     case SortCategory::Symbol: result.push_back('0'); break;
@@ -649,115 +645,32 @@ color(std::ostream &out, std::string color, PrettyPrintData const &data) {
 
 #define RESET_COLOR "\x1b[0m"
 
-struct UTF8EncodingType {
-  // The first codepoint which is encoded with this type
-  uint32_t firstCodepoint;
-  // The last codepoint which is encoded with this type
-  uint32_t lastCodepoint;
-  // A mask to extract the leading bits from the first byte
-  char leadingBitsMask;
-  // The expected value after applying the leading bits mask
-  char leadingBitsValue;
-  // The number of non-leading 10xxxxxx bytes used to encode a codepoint
-  int numContinuationBytes;
-};
-
-static const UTF8EncodingType utf8EncodingTypes[4] = {
-    // 0xxxxxxx
-    {0x0000, 0x007F, static_cast<char>(0x80), static_cast<char>(0x00), 0},
-    // 110xxxxx 10xxxxxx
-    {0x0080, 0x07FF, static_cast<char>(0xE0), static_cast<char>(0xC0), 1},
-    // 1110xxxx 10xxxxxx 10xxxxxx
-    {0x0800, 0xFFFF, static_cast<char>(0xF0), static_cast<char>(0xE0), 2},
-    // 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
-    {0x10000, 0x10FFFF, static_cast<char>(0xF8), static_cast<char>(0xF0), 3}};
-
-std::string kllvm::codepointToUTF8(uint32_t codepoint) {
+std::string enquote(std::string str) {
   std::string result;
-  for (auto const &type : utf8EncodingTypes) {
-    if (type.firstCodepoint <= codepoint && codepoint <= type.lastCodepoint) {
-      int numCont = type.numContinuationBytes;
-      std::string result(1 + numCont, '\0');
-      for (int i = numCont; i > 0; --i) {
-        result[i] = 0x80 | (codepoint & 0x3F);
-        codepoint >>= 6;
-      }
-      result[0] = type.leadingBitsValue | codepoint;
-      return result;
-    }
-  }
-  assert(false && "Invalid Unicode codepoint");
-  return "";
-}
-
-// Read one codepoint from a UTF-8 encoded string, returning the codepoint
-// along with the number of bytes it took to encode
-static std::pair<uint32_t, int> readCodepoint(const char *utf8Str) {
-  char leadByte = *utf8Str;
-  for (auto const &type : utf8EncodingTypes) {
-    if ((leadByte & type.leadingBitsMask) == type.leadingBitsValue) {
-      uint32_t codepoint = leadByte & ~type.leadingBitsMask;
-      for (int i = 0; i < type.numContinuationBytes; ++i) {
-        char contByte = *(++utf8Str);
-        codepoint = (codepoint << 6) | (contByte & 0x3F);
-      }
-      return {codepoint, 1 + type.numContinuationBytes};
-    }
-  }
-  assert(false && "Invalid UTF-8 string");
-  return {0, 0};
-}
-
-std::string
-kllvm::escapeString(const std::string &str, kllvm::StringType strType) {
-  std::string result;
-  const char *strIter = str.data();
-  const char *strEnd = strIter + str.length();
-  while (strIter != strEnd) {
-    uint32_t codepoint;
-    if (strType == kllvm::StringType::BYTES) {
-      codepoint = static_cast<uint32_t>(static_cast<unsigned char>(*strIter));
-      ++strIter;
-    } else {
-      assert(strType == kllvm::StringType::UTF8);
-      int numBytes;
-      std::tie(codepoint, numBytes) = readCodepoint(strIter);
-      strIter += numBytes;
-    }
-    switch (codepoint) {
-    case 0x5C: result.append("\\\\"); break;
-    case 0x22: result.append("\\\""); break;
-    case 0x0A: result.append("\\n"); break;
-    case 0x09: result.append("\\t"); break;
-    case 0x0D: result.append("\\r"); break;
-    case 0x0C: result.append("\\f"); break;
+  result.push_back('"');
+  for (size_t i = 0; i < str.length(); ++i) {
+    char c = str[i];
+    switch (c) {
+    case '\\': result.append("\\\\"); break;
+    case '"': result.append("\\\""); break;
+    case '\n': result.append("\\n"); break;
+    case '\t': result.append("\\t"); break;
+    case '\r': result.append("\\r"); break;
+    case '\f': result.append("\\f"); break;
     default:
-      if (32 <= codepoint && codepoint < 127) {
-        result.push_back(static_cast<unsigned char>(codepoint));
-      } else if (codepoint <= 0xFF) {
+      if ((unsigned char)c >= 32 && (unsigned char)c < 127) {
+        result.push_back(c);
+      } else {
         char buf[3];
         buf[2] = 0;
-        snprintf(buf, 3, "%02" PRIx32, codepoint);
+        snprintf(buf, 3, "%02x", (unsigned char)c);
         result.append("\\x");
-        result.append(buf);
-      } else if (codepoint <= 0xFFFF) {
-        assert(strType == kllvm::StringType::UTF8);
-        char buf[5];
-        buf[4] = 0;
-        snprintf(buf, 5, "%04" PRIx32, codepoint);
-        result.append("\\u");
-        result.append(buf);
-      } else {
-        assert(strType == kllvm::StringType::UTF8);
-        char buf[9];
-        buf[8] = 0;
-        snprintf(buf, 9, "%08" PRIx32, codepoint);
-        result.append("\\U");
         result.append(buf);
       }
       break;
     }
   }
+  result.push_back('"');
   return result;
 }
 
@@ -797,13 +710,10 @@ void KORECompositePattern::prettyPrint(
     if (hasHook) {
       auto hook = data.hook.at(s->getName());
       if (hook == "STRING.String") {
-        append(out, '"');
-        append(out, escapeString(str->getContents(), StringType::UTF8));
-        append(out, '"');
+        append(out, enquote(str->getContents()));
       } else if (hook == "BYTES.Bytes") {
-        append(out, "b\"");
-        append(out, escapeString(str->getContents(), StringType::UTF8));
-        append(out, '"');
+        append(out, 'b');
+        append(out, enquote(str->getContents()));
       } else {
         append(out, str->getContents());
       }
@@ -1950,35 +1860,26 @@ void KORECompositePattern::print(std::ostream &Out, unsigned indent) const {
   Out << ")";
 }
 
-void KOREStringPattern::print(std::ostream &Out, unsigned indent) const {
-  std::string Indent(indent, ' ');
-  Out << Indent << "\"" << escapeString(contents, StringType::UTF8) << "\"";
-}
-
-size_t kllvm::bytesStringPatternToBytes(char *contents, size_t length) {
-  char *contentsStart = contents;
-  char *contentsEnd = contents + length;
-  size_t newLength = 0;
-  while (contents != contentsEnd) {
-    auto [codepoint, numBytes] = readCodepoint(contents);
-    assert(
-        codepoint <= 0xFF
-        && "A StringPattern representing Bytes should only contain codepoints "
-           "up to U+00FF");
-    contentsStart[newLength] = static_cast<char>(codepoint);
-    ++newLength;
-    contents += numBytes;
-  }
-  return newLength;
-}
-
-std::string kllvm::bytesToBytesStringPattern(const char *bytes, size_t length) {
+static std::string escapeString(const std::string &str) {
   std::string result;
-  for (int i = 0; i < length; ++i) {
-    result += kllvm::codepointToUTF8(
-        static_cast<uint32_t>(static_cast<unsigned char>(bytes[i])));
+  for (char c : str) {
+    if (c == '"' || c == '\\' || !isprint(c)) {
+      result.push_back('\\');
+      result.push_back('x');
+      char code[3];
+      snprintf(code, 3, "%02x", (unsigned char)c);
+      result.push_back(code[0]);
+      result.push_back(code[1]);
+    } else {
+      result.push_back(c);
+    }
   }
   return result;
+}
+
+void KOREStringPattern::print(std::ostream &Out, unsigned indent) const {
+  std::string Indent(indent, ' ');
+  Out << Indent << "\"" << escapeString(contents) << "\"";
 }
 
 static void printAttributeList(

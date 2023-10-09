@@ -91,7 +91,6 @@ block *debruijnizeInternal(block *currBlock) {
       case INT_LAYOUT:
       case FLOAT_LAYOUT:
       case BOOL_LAYOUT:
-      case BYTES_LAYOUT:
       default: // mint
         break;
       }
@@ -167,7 +166,6 @@ block *replaceBinderInternal(block *currBlock) {
       case INT_LAYOUT:
       case FLOAT_LAYOUT:
       case BOOL_LAYOUT:
-      case BYTES_LAYOUT:
       default: // mint
         break;
       }
@@ -248,8 +246,7 @@ block *substituteInternal(block *currBlock) {
       }
       case STRINGBUFFER_LAYOUT:
       case INT_LAYOUT:
-      case FLOAT_LAYOUT:
-      case BYTES_LAYOUT: arguments.push_back(*(void **)arg); break;
+      case FLOAT_LAYOUT: arguments.push_back(*(void **)arg); break;
       case BOOL_LAYOUT:
       default: // mint
         arguments.push_back(arg);
@@ -362,7 +359,6 @@ block *incrementDebruijn(block *currBlock) {
       case INT_LAYOUT:
       case FLOAT_LAYOUT:
       case BOOL_LAYOUT:
-      case BYTES_LAYOUT:
       default: // mint
         break;
       }
