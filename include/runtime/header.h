@@ -300,10 +300,15 @@ void printSortedConfigurationToFile(
 void printConfigurationInternal(
     writer *file, block *subject, const char *sort, bool, void *);
 
-// Returns a raw pointer to a KOREPattern; the caller of this function is
-// responsible for managing its lifetime (e.g. by placing the returned pointer
-// back into a unique_ptr). The return type here is void* only to accommodate
-// C linkage so that the function can be called from the C and Python bindings.
+// Returns a shared_ptr to a KOREPattern. The shared_ptr managess the lifetime
+// of the pattern and the pattern will be deallocated when the last reference
+// to the pattern is destroyed. There may exist references beyond the ones that
+// are provided to the user via this method, so destroying all values returned
+// by this method may not fully deallocate the pattern. However, it will still
+// be deallocated when the last reference is eventually destroyed.
+// If you need to have access to a function that returns a type with C linkage,
+// you can use the C bindings, which wrap the return value of this method in
+// a POD struct.
 std::shared_ptr<kllvm::KOREPattern> termToKorePattern(block *);
 
 // This function injects its argument into KItem before printing, using the sort
