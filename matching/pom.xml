@@ -47,7 +47,6 @@
       <artifactId>mpfr_java</artifactId>
       <version>1.4</version>
     </dependency>
-
     <dependency>
       <groupId>org.kframework.mpfr_java</groupId>
       <artifactId>mpfr_java</artifactId>

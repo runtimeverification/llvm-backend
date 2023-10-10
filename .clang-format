@@ -6,7 +6,7 @@ AlignAfterOpenBracket: AlwaysBreak
 AlignOperands: true
 Cpp11BracedListStyle: true
 AllowShortBlocksOnASingleLine: false
-AllowShortCaseLabelsOnASingleLine: false
+AllowShortCaseLabelsOnASingleLine: true
 AllowShortFunctionsOnASingleLine: Inline
 AllowShortIfStatementsOnASingleLine: false
 AllowShortLoopsOnASingleLine: false
@@ -19,6 +19,5 @@ FixNamespaceComments: true
 SpaceBeforeCpp11BracedList: false
 DerivePointerAlignment: false
 PointerAlignment: Right
-AllowShortCaseLabelsOnASingleLine: true
 ReflowComments: false
 ...
