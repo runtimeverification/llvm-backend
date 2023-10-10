@@ -244,6 +244,7 @@ if $link; then
     "${flags[@]}" \
     "${all_libraries[@]}" \
     -I "$(dirname "$0")"/../include/kllvm \
+    -I "$(dirname "$0")"/../include \
     "${clangpp_args[@]}"
 
   if [[ "$OSTYPE" == "darwin"* ]]; then

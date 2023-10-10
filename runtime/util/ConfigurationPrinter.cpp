@@ -250,7 +250,7 @@ void printConfigurations(
   if (size == 0) {
     sfprintf(&w, "\\bottom{SortGeneratedTopCell{}}()");
   } else {
-    sfprintf(&w, "\\left-assoc{}(\\or{SortGeneratedTopCell{}}(");
+    sfprintf(&w, "\\or{SortGeneratedTopCell{}}(");
     size_t j = 0;
     for (const auto &subject : results) {
       printConfigurationInternal(&w, subject, nullptr, false, &state);
@@ -258,7 +258,7 @@ void printConfigurations(
         sfprintf(&w, ",");
       }
     }
-    sfprintf(&w, "))");
+    sfprintf(&w, ")");
   }
 
   fclose(file);
@@ -301,14 +301,12 @@ void printSortedConfigurationToFile(
   printConfigurationInternal(&w, subject, sort, false, &state);
 }
 
-void *termToKorePattern(block *subject) {
+std::shared_ptr<kllvm::KOREPattern> termToKorePattern(block *subject) {
   auto *kore_str = printConfigurationToString(subject);
   auto kore = std::string(kore_str->data, len(kore_str));
 
   auto parser = kllvm::parser::KOREParser::from_string(kore);
-  auto pattern = parser->pattern();
-
-  return static_cast<void *>(pattern.release());
+  return parser->pattern();
 }
 
 extern "C" void printMatchResult(

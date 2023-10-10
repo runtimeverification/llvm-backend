@@ -358,6 +358,7 @@ std::ostream &printKORE(
   };
 
   auto config = KOREPattern::load(patternPath);
+  config = config->unflattenAndOr();
   std::map<std::string, std::vector<KORESymbol *>> symbols;
   config->markSymbols(symbols);
 
