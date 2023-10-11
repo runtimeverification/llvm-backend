@@ -637,6 +637,8 @@ void LeafNode::codegen(Decision *d) {
   d->CurrentBlock = MergeBlock;
   auto Call = llvm::CallInst::Create(applyRule, args, "", d->CurrentBlock);
 
+  // How do you emit the resulting config from here?
+
   setDebugLoc(Call);
   Call->setCallingConv(llvm::CallingConv::Tail);
   if (child == nullptr) {
