@@ -19,6 +19,7 @@
 #include <llvm/IR/DerivedTypes.h>
 #include <llvm/IR/Function.h>
 #include <llvm/IR/GlobalVariable.h>
+#include <llvm/IR/IRBuilder.h>
 #include <llvm/IR/InstrTypes.h>
 #include <llvm/IR/Instruction.h>
 #include <llvm/IR/Instructions.h>
@@ -527,10 +528,115 @@ void LeafNode::codegen(Decision *d) {
     types.push_back(val->getType());
   }
   auto type = getParamType(d->Cat, d->Module);
-  auto Call = llvm::CallInst::Create(
-      getOrInsertFunction(
-          d->Module, name, llvm::FunctionType::get(type, types, false)),
-      args, "", d->CurrentBlock);
+
+  llvm::Module *Module = d->Module;
+  llvm::BasicBlock *CurrentBlock = d->CurrentBlock;
+  llvm::Function *applyRule = getOrInsertFunction(
+      d->Module, name, llvm::FunctionType::get(type, types, false));
+
+  auto ProofOutputFlag = Module->getOrInsertGlobal(
+      "proof_output", llvm::Type::getInt1Ty(Module->getContext()));
+  auto OutputFileName = Module->getOrInsertGlobal(
+      "output_file", llvm::Type::getInt8PtrTy(Module->getContext()));
+  auto proofOutput = new llvm::LoadInst(
+      llvm::Type::getInt1Ty(Module->getContext()), ProofOutputFlag,
+      "proof_output", CurrentBlock);
+
+  llvm::BasicBlock *TrueBlock = llvm::BasicBlock::Create(
+      Module->getContext(), "if", CurrentBlock->getParent());
+  llvm::BasicBlock *MergeBlock = llvm::BasicBlock::Create(
+      Module->getContext(), "tail", CurrentBlock->getParent());
+  llvm::BranchInst::Create(TrueBlock, MergeBlock, proofOutput, CurrentBlock);
+  auto ir = new llvm::IRBuilder(TrueBlock);
+
+  auto outputFile = new llvm::LoadInst(
+      llvm::Type::getInt8PtrTy(Module->getContext()), OutputFileName, "output",
+      TrueBlock);
+
+  size_t ordinal = std::stoll(name.substr(11));
+  KOREDefinition *definition = d->Definition;
+  KOREAxiomDeclaration *axiom = definition->getAxiomByOrdinal(ordinal);
+  std::map<std::string, KOREVariablePattern *> vars;
+  for (KOREPattern *lhs : axiom->getLeftHandSide()) {
+    lhs->markVariables(vars);
+  }
+  axiom->getRightHandSide()->markVariables(vars);
+  std::vector<std::string> paramNames;
+  for (auto iter = vars.begin(); iter != vars.end(); ++iter) {
+    auto &entry = *iter;
+    paramNames.push_back(entry.first);
+  }
+
+#define WriteUInt64(val)                                                       \
+  llvm::CallInst::Create(                                                      \
+      getOrInsertFunction(                                                     \
+          Module, "writeUInt64ToFile",                                         \
+          llvm::Type::getVoidTy(Module->getContext()),                         \
+          llvm::Type::getInt8PtrTy(Module->getContext()),                      \
+          llvm::Type::getInt64Ty(Module->getContext())),                       \
+      {outputFile, llvm::ConstantInt::get(                                     \
+                       llvm::Type::getInt64Ty(Module->getContext()), (val))},  \
+      "", TrueBlock);
+
+  WriteUInt64(ordinal);
+  WriteUInt64(applyRule->arg_end() - applyRule->arg_begin());
+
+  int i = 0;
+  for (auto arg = args.begin(); arg != args.end(); arg++, i++) {
+    std::string name = paramNames[i];
+    auto sort = dynamic_cast<KORECompositeSort *>(vars[name]->getSort().get());
+    std::ostringstream Out;
+    sort->print(Out);
+    auto sortptr = ir->CreateGlobalStringPtr(Out.str(), "", 0, Module);
+    auto cat = sort->getCategory(definition);
+    auto s = ir->CreateGlobalStringPtr(name, "", 0, Module);
+    auto val = *arg;
+    ir->CreateCall(
+        getOrInsertFunction(
+            Module, "printVariableToFile",
+            llvm::Type::getVoidTy(Module->getContext()),
+            llvm::Type::getInt8PtrTy(Module->getContext()),
+            llvm::Type::getInt8PtrTy(Module->getContext())),
+        {outputFile, s});
+    if (cat.cat == SortCategory::Symbol || cat.cat == SortCategory::Variable) {
+      ir->CreateCall(
+          getOrInsertFunction(
+              Module, "serializeTermToFile",
+              llvm::Type::getVoidTy(Module->getContext()),
+              llvm::Type::getInt8PtrTy(Module->getContext()),
+              getValueType({SortCategory::Symbol, 0}, Module),
+              llvm::Type::getInt8PtrTy(Module->getContext())),
+          {outputFile, *arg, sortptr});
+    } else if (val->getType()->isIntegerTy()) {
+      val = ir->CreateIntToPtr(
+          val, llvm::Type::getInt8PtrTy(Module->getContext()));
+      ir->CreateCall(
+          getOrInsertFunction(
+              Module, "serializeRawTermToFile",
+              llvm::Type::getVoidTy(Module->getContext()),
+              llvm::Type::getInt8PtrTy(Module->getContext()),
+              llvm::Type::getInt8PtrTy(Module->getContext()),
+              llvm::Type::getInt8PtrTy(Module->getContext())),
+          {outputFile, val, sortptr});
+    } else {
+      val = ir->CreatePointerCast(
+          val, llvm::Type::getInt8PtrTy(Module->getContext()));
+      ir->CreateCall(
+          getOrInsertFunction(
+              Module, "serializeRawTermToFile",
+              llvm::Type::getVoidTy(Module->getContext()),
+              llvm::Type::getInt8PtrTy(Module->getContext()),
+              llvm::Type::getInt8PtrTy(Module->getContext()),
+              llvm::Type::getInt8PtrTy(Module->getContext())),
+          {outputFile, val, sortptr});
+    }
+    WriteUInt64(0xcccccccccccccccc);
+  }
+
+  llvm::BranchInst::Create(MergeBlock, TrueBlock);
+  d->CurrentBlock = MergeBlock;
+  auto Call = llvm::CallInst::Create(applyRule, args, "", d->CurrentBlock);
+
   setDebugLoc(Call);
   Call->setCallingConv(llvm::CallingConv::Tail);
   if (child == nullptr) {
