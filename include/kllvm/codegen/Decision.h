@@ -201,7 +201,7 @@ public:
 class FunctionNode : public DecisionNode {
 private:
   /* the list of arguments to the function. */
-  std::vector<var_type> bindings;
+  std::vector<std::pair<var_type, ValueType>> bindings;
   /* the name of the variable to bind to the result of the function. */
   std::string name;
   /* the name of the function to call */
@@ -227,9 +227,11 @@ public:
     return new FunctionNode(name, function, child, cat, type);
   }
 
-  const std::vector<var_type> &getBindings() const { return bindings; }
+  const std::vector<std::pair<var_type, ValueType>> &getBindings() const {
+    return bindings;
+  }
   void addBinding(std::string name, ValueType type, llvm::Module *mod) {
-    bindings.push_back(std::make_pair(name, getParamType(type, mod)));
+    bindings.push_back({{name, getParamType(type, mod)}, type});
   }
 
   virtual void codegen(Decision *d);
