@@ -131,7 +131,7 @@ config.substitutions.extend([
 
     ('%run-binary-out', 'rm -f %t.out.bin && %t.interpreter %test-input -1 %t.out.bin --binary-output'),
     ('%run-binary', 'rm -f %t.bin && %convert-input && %t.interpreter %t.bin -1 /dev/stdout'),
-    ('%run-proof-out', '%t.interpreter %test-input -1 %t.out.bin --proof-output'),
+    ('%run-proof-out', 'rm -f %t.out.bin && %t.interpreter %test-input -1 %t.out.bin --proof-output'),
     ('%run', '%t.interpreter %test-input -1 /dev/stdout'),
 
     ('%kprint-check', 'kprint %S %s true | diff - %s.out'),
