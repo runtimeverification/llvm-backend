@@ -247,7 +247,8 @@ BOOST_AUTO_TEST_CASE(memset) {
   BOOST_CHECK_EQUAL(5, len(res));
   BOOST_CHECK_EQUAL((unsigned char)_12345->data[1], 255);
 
-  BOOST_CHECK_THROW(hook_BYTES_memset(_12345, _3, _3, _0), std::invalid_argument);
+  BOOST_CHECK_THROW(
+      hook_BYTES_memset(_12345, _3, _3, _0), std::invalid_argument);
 }
 
 BOOST_AUTO_TEST_CASE(get) {
