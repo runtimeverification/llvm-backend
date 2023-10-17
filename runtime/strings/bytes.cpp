@@ -194,6 +194,11 @@ SortBytes hook_BYTES_memset(SortBytes b, SortInt start, SortInt count, SortInt v
         ustart, ucount, input_len);
   }
   int v = mpz_get_si(value);
+  if ((v < -128) || (v > 127)) {
+    KLLVM_HOOK_INVALID_ARGUMENT(
+        "Not a valid value for a byte in memset: v={}",
+        v);
+  }
   memset(b->data + ustart, v, ucount);
   return b;
 }
