@@ -351,8 +351,8 @@ extern "C" void printMatchResult(
 }
 
 void printValueOfType(
-    std::ostream &os, std::string definitionPath, void *value,
-    std::string type) {
+    std::ostream &os, std::string const &definitionPath, void *value,
+    std::string const &type) {
   if (type.compare("%mpz*") == 0) {
     os << reinterpret_cast<mpz_ptr>(value);
   } else if (type.compare("%block*") == 0) {

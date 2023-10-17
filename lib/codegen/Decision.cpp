@@ -373,13 +373,45 @@ void MakePatternNode::codegen(Decision *d) {
   setCompleted();
 }
 
+/*
+ * The code generation step for FunctionNodes emits a call to addMatchFunction
+ * that records why a match failed to apply in the case of side-condition calls
+ * failing. Doing so requires that we store the _type_ of each argument
+ * somewhere, in order that opaque block* values can be safely reinterpreted in
+ * the sort that they originated from (int, bool, symbol, ...). In LLVM versions
+ * < 16, we could encode this information in the LLVM type safely. However,
+ * after the LLVM opaque pointer migration, we can no longer do so (as the
+ * legacy types %mpz* and %block* would both be %ptr, for example). We
+ * therefore define a compatibility translation between sort categories and what
+ * their corresponding LLVM type _would have been_ before opaque pointers.
+ */
+static std::string legacy_value_type_to_string(ValueType sort) {
+  switch (sort.cat) {
+  case SortCategory::Int: return "%mpz*";
+  case SortCategory::Bool: return "i1";
+  case SortCategory::Float: return "%floating*";
+  case SortCategory::Symbol:
+  case SortCategory::Variable: return "%block*";
+
+  // Cases below are deliberately not implemented; the return values are
+  // placeholders to help with debugging only.
+  case SortCategory::Map: return "<map>";
+  case SortCategory::RangeMap: return "<rangemap>";
+  case SortCategory::List: return "<list>";
+  case SortCategory::Set: return "<set>";
+  case SortCategory::StringBuffer: return "<stringbuffer>";
+  case SortCategory::MInt: return "<mint>";
+  case SortCategory::Uncomputed: abort();
+  }
+}
+
 void FunctionNode::codegen(Decision *d) {
   if (beginNode(d, "function" + name)) {
     return;
   }
   std::vector<llvm::Value *> args;
   llvm::StringMap<llvm::Value *> finalSubst;
-  for (auto arg : bindings) {
+  for (auto [arg, cat] : bindings) {
     llvm::Value *val;
     if (arg.first.find_first_not_of("-0123456789") == std::string::npos) {
       val = llvm::ConstantInt::get(
@@ -418,7 +450,10 @@ void FunctionNode::codegen(Decision *d) {
       new llvm::StoreInst(zext, tempAllocCall, d->CurrentBlock);
     }
     functionArgs.push_back(tempAllocCall);
-    for (auto arg : args) {
+    for (auto i = 0u; i < args.size(); ++i) {
+      auto arg = args[i];
+      auto cat = bindings[i].second;
+
       auto tempAllocArg = d->ptrTerm(arg);
       if (arg->getType() == llvm::Type::getInt1Ty(d->Ctx)) {
         llvm::Value *zext = new llvm::ZExtInst(
@@ -426,9 +461,7 @@ void FunctionNode::codegen(Decision *d) {
         new llvm::StoreInst(zext, tempAllocArg, d->CurrentBlock);
       }
       functionArgs.push_back(tempAllocArg);
-      std::string str;
-      llvm::raw_string_ostream output(str);
-      arg->getType()->print(output);
+      auto str = legacy_value_type_to_string(cat);
       functionArgs.push_back(d->stringLiteral(str));
     }
     functionArgs.push_back(

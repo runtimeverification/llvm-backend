@@ -138,12 +138,10 @@ public:
       if (occurrence.size() == 3 && occurrence[0] == "lit"
           && occurrence[2] == "MINT.MInt 64") {
         result->addBinding(
-            occurrence[1],
-            getParamType(KORECompositeSort::getCategory(hook), mod));
+            occurrence[1], KORECompositeSort::getCategory(hook), mod);
       } else {
         result->addBinding(
-            to_string(occurrence),
-            getParamType(KORECompositeSort::getCategory(hook), mod));
+            to_string(occurrence), KORECompositeSort::getCategory(hook), mod);
       }
     }
     return result;
@@ -306,7 +304,7 @@ public:
       auto occurrence = vec(get(var, 0));
       auto hook = str(get(var, 1));
       ValueType cat = KORECompositeSort::getCategory(hook);
-      result->addBinding(to_string(occurrence), getParamType(cat, mod));
+      result->addBinding(to_string(occurrence), cat, mod);
     }
     if (auto next = get(node, "next")) {
       auto child = (*this)(next);
