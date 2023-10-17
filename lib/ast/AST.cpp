@@ -1091,6 +1091,34 @@ sptr<KOREPattern> KORECompositePattern::desugarAssociative() {
   return shared_from_this();
 }
 
+sptr<KOREPattern> KORECompositePattern::unflattenAndOr() {
+  if ((constructor->getName() == "\\and" || constructor->getName() == "\\or")
+      && arguments.size() != 2) {
+    if (arguments.size() == 1) {
+      return arguments[0]->unflattenAndOr();
+    } else {
+      auto accum = arguments[0]->unflattenAndOr();
+
+      for (auto i = 1u; i < arguments.size(); i++) {
+        auto new_accum = KORECompositePattern::Create(constructor.get());
+        new_accum->addArgument(std::move(accum));
+        new_accum->addArgument(arguments[i]->unflattenAndOr());
+        accum = ptr<KOREPattern>(new_accum.release());
+      }
+
+      return accum;
+    }
+  } else {
+    auto result = KORECompositePattern::Create(constructor.get());
+
+    for (auto &arg : arguments) {
+      result->addArgument(arg->unflattenAndOr());
+    }
+
+    return result;
+  }
+}
+
 sptr<KOREPattern> KORECompositePattern::expandMacros(
     SubsortMap const &subsorts, SymbolMap const &overloads,
     std::vector<ptr<KOREDeclaration>> const &macros, bool reverse,

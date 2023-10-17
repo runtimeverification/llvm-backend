@@ -89,7 +89,7 @@ ptr<KOREDefinition> KOREParser::definition() {
   return result;
 }
 
-ptr<KOREPattern> KOREParser::pattern() {
+sptr<KOREPattern> KOREParser::pattern() {
   auto result = _pattern();
   consume(token::TOKEN_EOF);
   return result;
@@ -312,7 +312,7 @@ sptr<KORESort> KOREParser::sort() {
   }
 }
 
-ptr<KOREPattern> KOREParser::_pattern() {
+sptr<KOREPattern> KOREParser::_pattern() {
   token current = peek();
   switch (current) {
   case token::ID: {
@@ -331,14 +331,14 @@ ptr<KOREPattern> KOREParser::_pattern() {
   }
 }
 
-ptr<KOREPattern> KOREParser::applicationPattern() {
+sptr<KOREPattern> KOREParser::applicationPattern() {
   return applicationPattern(consume(token::ID));
 }
 ptr<KORECompositePattern> KOREParser::_applicationPattern() {
   return _applicationPattern(consume(token::ID));
 }
 
-ptr<KOREPattern> KOREParser::applicationPattern(std::string name) {
+sptr<KOREPattern> KOREParser::applicationPattern(std::string name) {
   if (name == "\\left-assoc" || name == "\\right-assoc") {
     consume(token::LEFTBRACE);
     consume(token::RIGHTBRACE);
@@ -350,31 +350,55 @@ ptr<KOREPattern> KOREParser::applicationPattern(std::string name) {
     pat->getConstructor()->initPatternArguments();
     consume(token::RIGHTBRACE);
     consume(token::LEFTPAREN);
-    std::vector<ptr<KOREPattern>> pats;
+    std::vector<sptr<KOREPattern>> pats;
     patterns(pats);
     consume(token::RIGHTPAREN);
     consume(token::RIGHTPAREN);
     if (name == "\\left-assoc") {
-      ptr<KOREPattern> accum = std::move(pats[0]);
+      sptr<KOREPattern> accum = pats[0];
       for (auto i = 1u; i < pats.size(); i++) {
-        auto newAccum = KORECompositePattern::Create(pat->getConstructor());
-        newAccum->addArgument(std::move(accum));
-        newAccum->addArgument(std::move(pats[i]));
-        accum = ptr<KOREPattern>(newAccum.release());
+        sptr<KORECompositePattern> newAccum
+            = KORECompositePattern::Create(pat->getConstructor());
+        newAccum->addArgument(accum);
+        newAccum->addArgument(pats[i]);
+        accum = newAccum;
       }
       return accum;
     } else {
-      ptr<KOREPattern> accum = std::move(pats[pats.size() - 1]);
+      sptr<KOREPattern> accum = pats[pats.size() - 1];
       for (int i = pats.size() - 2; i >= 0; i--) {
-        auto newAccum = KORECompositePattern::Create(pat->getConstructor());
-        newAccum->addArgument(std::move(pats[i]));
-        newAccum->addArgument(std::move(accum));
-        accum = ptr<KOREPattern>(newAccum.release());
+        sptr<KORECompositePattern> newAccum
+            = KORECompositePattern::Create(pat->getConstructor());
+        newAccum->addArgument(pats[i]);
+        newAccum->addArgument(accum);
+        accum = newAccum;
       }
       return accum;
     }
   }
-  return _applicationPattern(name);
+  auto result = _applicationPattern(name);
+  if (name == "\\or") {
+    if (result->getArguments().size() == 0) {
+      auto pat = KORECompositePattern::Create("\\bottom");
+      pat->getConstructor()->addArgument(
+          result->getConstructor()->getFormalArguments()[0]);
+      pat->getConstructor()->initPatternArguments();
+      return pat;
+    } else if (result->getArguments().size() == 1) {
+      return result->getArguments()[0];
+    }
+  } else if (name == "\\and") {
+    if (result->getArguments().size() == 0) {
+      auto pat = KORECompositePattern::Create("\\top");
+      pat->getConstructor()->addArgument(
+          result->getConstructor()->getFormalArguments()[0]);
+      pat->getConstructor()->initPatternArguments();
+      return pat;
+    } else if (result->getArguments().size() == 1) {
+      return result->getArguments()[0];
+    }
+  }
+  return result;
 }
 
 ptr<KORECompositePattern> KOREParser::_applicationPattern(std::string name) {
@@ -405,19 +429,19 @@ void KOREParser::patternsNE(KORECompositePattern *node) {
   }
 }
 
-void KOREParser::patterns(std::vector<ptr<KOREPattern>> &node) {
+void KOREParser::patterns(std::vector<sptr<KOREPattern>> &node) {
   if (peek() == token::RIGHTPAREN)
     return;
   patternsNE(node);
 }
 
-void KOREParser::patternsNE(std::vector<ptr<KOREPattern>> &node) {
+void KOREParser::patternsNE(std::vector<sptr<KOREPattern>> &node) {
   auto pat = _pattern();
-  node.push_back(std::move(pat));
+  node.push_back(pat);
   while (peek() == token::COMMA) {
     consume(token::COMMA);
     pat = _pattern();
-    node.push_back(std::move(pat));
+    node.push_back(pat);
   }
 }
 

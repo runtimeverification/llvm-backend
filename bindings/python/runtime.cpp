@@ -61,13 +61,7 @@ void bind_runtime(py::module_ &m) {
             return std::string(k_str->data, len(k_str));
           })
       .def("step", [](block *term, int64_t n) { return take_steps(n, term); })
-      .def(
-          "to_pattern",
-          [](block *term) {
-            auto raw_ptr
-                = static_cast<kllvm::KOREPattern *>(termToKorePattern(term));
-            return std::shared_ptr<kllvm::KOREPattern>(raw_ptr);
-          })
+      .def("to_pattern", [](block *term) { return termToKorePattern(term); })
       .def(
           "serialize",
           [](block *term, bool emit_size) {

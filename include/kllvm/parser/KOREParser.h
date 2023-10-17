@@ -22,7 +22,7 @@ public:
   static std::unique_ptr<KOREParser> from_string(std::string text);
 
   ptr<KOREDefinition> definition(void);
-  ptr<KOREPattern> pattern(void);
+  sptr<KOREPattern> pattern(void);
   std::vector<ptr<KOREDeclaration>> declarations(void);
 
   std::pair<std::string, std::vector<sptr<KORESort>>> symbol_sort_list();
@@ -56,14 +56,14 @@ private:
   void sortsNE(Node *node);
   sptr<KORESort> sort(void);
 
-  ptr<KOREPattern> _pattern(void);
+  sptr<KOREPattern> _pattern(void);
   void patterns(KORECompositePattern *node);
   void patternsNE(KORECompositePattern *node);
-  void patterns(std::vector<ptr<KOREPattern>> &node);
-  void patternsNE(std::vector<ptr<KOREPattern>> &node);
+  void patterns(std::vector<sptr<KOREPattern>> &node);
+  void patternsNE(std::vector<sptr<KOREPattern>> &node);
 
-  ptr<KOREPattern> applicationPattern(void);
-  ptr<KOREPattern> applicationPattern(std::string name);
+  sptr<KOREPattern> applicationPattern(void);
+  sptr<KOREPattern> applicationPattern(std::string name);
   ptr<KORECompositePattern> _applicationPattern(void);
   ptr<KORECompositePattern> _applicationPattern(std::string name);
 
