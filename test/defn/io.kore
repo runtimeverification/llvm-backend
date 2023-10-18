@@ -1,8 +1,9 @@
+// RUN: rm -f %S/*io_log*
 // RUN: %interpreter
 // RUN: %check-dir-grep
 // RUN: diff %S/io_output1.txt %output-dir/ioTest1.output
-// RUN: diff %S/`ls %S | grep io_log` %output-dir/ioTest3.output
-// RUN: (ls %S | grep io_log && rm %S/`ls %S | grep io_log`) || true
+// RUN: diff %S/*io_log* %output-dir/ioTest3.output
+// RUN: ls %S | grep -q io_log
 [topCellInitializer{}(LblinitGeneratedTopCell{}()), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/llvm-backend/test/defn/k-files/io.k)")]
 
 module BASIC-K
