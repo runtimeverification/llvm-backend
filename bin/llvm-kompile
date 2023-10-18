@@ -254,9 +254,10 @@ if [[ "$compile" = "default" ]]; then
   else
     if [[ "$emit_ir" == "false" ]]; then
       modopt="${modopt}.o"
+      modopt_tmp="${modopt}"
     fi
 
-    run cp "$mod" "$modopt"
+    run mv "$mod" "$modopt"
   fi
 elif [ "$compile" = "object" ]; then
   main="${positional_args[1]}"
