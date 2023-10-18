@@ -254,6 +254,7 @@ if [[ "$compile" = "default" ]]; then
   else
     if [[ "$emit_ir" == "false" ]]; then
       modopt="${modopt}.o"
+      rm "${modopt_tmp}"
       modopt_tmp="${modopt}"
     fi
 
