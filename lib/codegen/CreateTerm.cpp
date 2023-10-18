@@ -1,6 +1,7 @@
 #include "kllvm/codegen/CreateTerm.h"
 #include "kllvm/codegen/CreateStaticTerm.h"
 #include "kllvm/codegen/Debug.h"
+#include "kllvm/codegen/ProofEvent.h"
 #include "kllvm/codegen/Util.h"
 
 #include <fmt/format.h>
@@ -916,11 +917,23 @@ CreateTerm::createAllocation(KOREPattern *pattern, std::string locationStack) {
         || (symbolDecl->getAttributes().count("anywhere")
             && !isAnywhereOwise)) {
       if (symbolDecl->getAttributes().count("hook")) {
-        return std::make_pair(
-            createHook(
-                symbolDecl->getAttributes().at("hook").get(), constructor,
-                locationStack),
-            true);
+        llvm::Value *val = createHook(
+            symbolDecl->getAttributes().at("hook").get(), constructor,
+            locationStack);
+
+        auto sort
+            = dynamic_cast<KORECompositeSort *>(constructor->getSort().get());
+        auto strPattern
+            = dynamic_cast<KOREStringPattern *>(symbolDecl->getAttributes()
+                                                    .at("hook")
+                                                    .get()
+                                                    ->getArguments()[0]
+                                                    .get());
+        std::string name = strPattern->getContents();
+        ProofEvent e(Definition, CurrentBlock, Module);
+        CurrentBlock = e.hookEvent(name, val, sort);
+
+        return std::make_pair(val, true);
       } else {
         std::ostringstream Out;
         symbol->print(Out, 0, false);
@@ -1004,20 +1017,6 @@ void addAbort(llvm::BasicBlock *block, llvm::Module *Module) {
   AbortFunc->addFnAttr(llvm::Attribute::NoReturn);
   llvm::CallInst::Create(AbortFunc, "", block);
   new llvm::UnreachableInst(Module->getContext(), block);
-}
-
-void writeUInt64(
-    llvm::Value *outputFile, llvm::Module *Module, uint64_t value,
-    llvm::BasicBlock *Block) {
-  llvm::CallInst::Create(
-      getOrInsertFunction(
-          Module, "writeUInt64ToFile",
-          llvm::Type::getVoidTy(Module->getContext()),
-          llvm::Type::getInt8PtrTy(Module->getContext()),
-          llvm::Type::getInt64Ty(Module->getContext())),
-      {outputFile, llvm::ConstantInt::get(
-                       llvm::Type::getInt64Ty(Module->getContext()), value)},
-      "", Block);
 }
 
 bool makeFunction(
