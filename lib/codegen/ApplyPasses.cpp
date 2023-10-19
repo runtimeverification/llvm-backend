@@ -7,10 +7,17 @@
 #endif
 
 #include <llvm/IR/LegacyPassManager.h>
+
+#if LLVM_VERSION_MAJOR >= 17
+#include <llvm/TargetParser/Host.h>
+#include <llvm/TargetParser/SubtargetFeature.h>
+#else
 #include <llvm/MC/SubtargetFeature.h>
+#include <llvm/Support/Host.h>
+#endif
+
 #include <llvm/Pass.h>
 #include <llvm/Support/CommandLine.h>
-#include <llvm/Support/Host.h>
 #include <llvm/Target/TargetMachine.h>
 #include <llvm/Target/TargetOptions.h>
 #include <llvm/Transforms/Scalar.h>
