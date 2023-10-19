@@ -73,7 +73,7 @@ void generate_object_file(llvm::Module &mod, llvm::raw_ostream &os) {
   }
 #endif
 
-  auto triple = sys::getDefaultTargetTriple();
+  auto triple = "@BACKEND_TARGET_TRIPLE@";
   mod.setTargetTriple(triple);
 
   auto error = std::string{};
