@@ -187,6 +187,12 @@ hook_BYTES_memset(SortBytes b, SortInt start, SortInt count, SortInt value) {
   uint64_t ustart = get_ui(start);
   uint64_t ucount = get_ui(count);
   uint64_t uend = ustart + ucount;
+  if ((uend < ustart) || (uend < ucount)) {
+    KLLVM_HOOK_INVALID_ARGUMENT(
+        "Exception on memset: unsigned addition start {} plus count {} wraps "
+        "around: uend= {}",
+        ustart, ucount, uend);
+  }
   uint64_t input_len = len(b);
   if (uend > input_len) {
     KLLVM_HOOK_INVALID_ARGUMENT(

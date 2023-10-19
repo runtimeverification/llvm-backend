@@ -249,6 +249,11 @@ BOOST_AUTO_TEST_CASE(memset) {
 
   BOOST_CHECK_THROW(
       hook_BYTES_memset(_12345, _3, _3, _0), std::invalid_argument);
+
+  mpz_t uint64max;
+  mpz_init_set_ui(uint64max, UINT64_MAX);
+  BOOST_CHECK_THROW(
+      hook_BYTES_memset(_12345, _1, uint64max, _0), std::invalid_argument);
 }
 
 BOOST_AUTO_TEST_CASE(get) {
