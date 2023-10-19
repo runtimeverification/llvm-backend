@@ -1,5 +1,7 @@
 #include <kllvm/codegen/ApplyPasses.h>
 
+#include "runtime/header.h"
+
 #if LLVM_VERSION_MAJOR >= 14
 #include <llvm/MC/TargetRegistry.h>
 #else
@@ -80,7 +82,7 @@ void generate_object_file(llvm::Module &mod, llvm::raw_ostream &os) {
   }
 #endif
 
-  auto triple = "@BACKEND_TARGET_TRIPLE@";
+  auto triple = BACKEND_TARGET_TRIPLE;
   mod.setTargetTriple(triple);
 
   auto error = std::string{};
