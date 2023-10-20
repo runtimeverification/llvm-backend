@@ -59,6 +59,11 @@ cl::opt<bool> NoOptimize(
     cl::desc("Don't run optimization passes before producing output"),
     cl::cat(CodegenCat));
 
+cl::opt<bool> EmitObject(
+    "emit-object",
+    cl::desc("Directly emit an object file to avoid separately invoking llc"),
+    cl::cat(CodegenCat));
+
 cl::opt<std::string> OutputFile(
     "output", cl::desc("Output file path"), cl::init("-"), cl::cat(CodegenCat));
 
@@ -99,23 +104,10 @@ std::map<std::string, std::string> read_index_file() {
   return index;
 }
 
-void write_output(Module const &mod, raw_ostream &os) {
-  if (BinaryIR) {
-    WriteBitcodeToFile(mod, os);
-  } else {
-    mod.print(os, nullptr);
-  }
-}
-
-void write_output(Module const &mod) {
+template <typename F>
+void perform_output(F &&action) {
   if (OutputFile == "-") {
-    if (BinaryIR && !ForceBinary) {
-      throw std::runtime_error(
-          "Not printing binary output to stdout; use -o to specify output path "
-          "or force binary with -f\n");
-    }
-
-    write_output(mod, llvm::outs());
+    std::invoke(std::forward<F>(action), llvm::outs());
   } else {
     auto err = std::error_code{};
     auto os = raw_fd_ostream(OutputFile, err, sys::fs::FA_Write);
@@ -125,7 +117,7 @@ void write_output(Module const &mod) {
           fmt::format("Error opening file {}: {}", OutputFile, err.message()));
     }
 
-    write_output(mod, os);
+    std::invoke(std::forward<F>(action), os);
   }
 }
 
@@ -137,6 +129,19 @@ void initialize_llvm() {
   InitializeAllAsmPrinters();
 }
 
+void validate_args() {
+  if (EmitObject && (BinaryIR || NoOptimize)) {
+    throw std::runtime_error(
+        "Cannot specify --emit-object with --binary-ir or --no-optimize");
+  }
+
+  if ((EmitObject || BinaryIR) && (OutputFile == "-") && !ForceBinary) {
+    throw std::runtime_error(
+        "Not printing binary file to stdout; use -o to specify output path "
+        "or force binary with -f\n");
+  }
+}
+
 } // namespace
 
 int main(int argc, char **argv) {
@@ -144,6 +149,8 @@ int main(int argc, char **argv) {
 
   cl::HideUnrelatedOptions({&CodegenCat});
   cl::ParseCommandLineOptions(argc, argv);
+
+  validate_args();
 
   CODEGEN_DEBUG = Debug ? 1 : 0;
 
@@ -230,6 +237,17 @@ int main(int argc, char **argv) {
     apply_kllvm_opt_passes(*mod);
   }
 
-  write_output(*mod);
+  perform_output([&](auto &os) {
+    if (EmitObject) {
+      generate_object_file(*mod, os);
+    } else {
+      if (BinaryIR) {
+        WriteBitcodeToFile(*mod, os);
+      } else {
+        mod->print(os, nullptr);
+      }
+    }
+  });
+
   return 0;
 }

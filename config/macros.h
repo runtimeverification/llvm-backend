@@ -1,3 +1,6 @@
+// The CMake @ symbols in this file break clang-format
+// clang-format off
+
 #ifndef RUNTIME_MACROS_H
 #define RUNTIME_MACROS_H
 
@@ -30,5 +33,8 @@
 #define GDB_SCRIPT_NAME TOSTRING(@GDB_SCRIPT_NAME@)
 
 #define ERROR_TAG @ERROR_TAG@
+
+#define BACKEND_TARGET_DATALAYOUT TOSTRING(@BACKEND_TARGET_DATALAYOUT@)
+#define BACKEND_TARGET_TRIPLE TOSTRING(@BACKEND_TARGET_TRIPLE@)
 
 #endif
