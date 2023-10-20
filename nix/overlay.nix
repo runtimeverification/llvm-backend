@@ -51,7 +51,7 @@ let
   };
 
   llvm-backend-matching = import ./llvm-backend-matching.nix {
-    inherit (prev) buildMaven jdk11_headless makeWrapper;
+    inherit (prev) buildMaven;
     src = prev.llvm-backend-matching-src;
   };
 
