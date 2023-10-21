@@ -23,6 +23,7 @@ private:
 public:
   llvm::BasicBlock *
   hookEvent(std::string name, llvm::Value *val, KORECompositeSort *sort);
+  llvm::BasicBlock *hookArg(llvm::Value *val, KORECompositeSort *sort);
 
 public:
   ProofEvent(

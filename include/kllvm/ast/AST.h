@@ -540,7 +540,12 @@ public:
         new KORECompositePattern(std::move(newSym)));
   }
 
-  sptr<KORESort> getSort() const override { return constructor->getSort(); }
+  sptr<KORESort> getSort() const override {
+    if (constructor->getName() == "\\dv") {
+      return constructor->getFormalArguments()[0];
+    }
+    return constructor->getSort();
+  }
 
   KORESymbol *getConstructor() const { return constructor.get(); }
   const std::vector<sptr<KOREPattern>> &getArguments() const {
