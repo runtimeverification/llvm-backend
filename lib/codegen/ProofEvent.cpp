@@ -19,8 +19,7 @@ void writeUInt64(
       "", Block);
 }
 
-llvm::BasicBlock *ProofEvent::hookEvent(
-    std::string name, llvm::Value *val, KORECompositeSort *sort) {
+llvm::BasicBlock *ProofEvent::hookEvent_pre(std::string name) {
   llvm::Function *f = CurrentBlock->getParent();
   auto ProofOutputFlag = Module->getOrInsertGlobal(
       "proof_output", llvm::Type::getInt1Ty(Module->getContext()));
@@ -30,19 +29,15 @@ llvm::BasicBlock *ProofEvent::hookEvent(
       llvm::Type::getInt1Ty(Module->getContext()), ProofOutputFlag,
       "proof_output", CurrentBlock);
   llvm::BasicBlock *TrueBlock
-      = llvm::BasicBlock::Create(Module->getContext(), "if", f);
+      = llvm::BasicBlock::Create(Module->getContext(), "if_hookpre", f);
   auto ir = new llvm::IRBuilder(TrueBlock);
   llvm::BasicBlock *MergeBlock
-      = llvm::BasicBlock::Create(Module->getContext(), "tail", f);
+      = llvm::BasicBlock::Create(Module->getContext(), "tail_hookpre", f);
   llvm::BranchInst::Create(TrueBlock, MergeBlock, proofOutput, CurrentBlock);
   auto outputFile = new llvm::LoadInst(
       llvm::Type::getInt8PtrTy(Module->getContext()), OutputFileName, "output",
       TrueBlock);
 
-  auto cat = sort->getCategory(Definition);
-  std::ostringstream Out;
-  sort->print(Out);
-  auto sortptr = ir->CreateGlobalStringPtr(Out.str(), "", 0, Module);
   auto nameptr = ir->CreateGlobalStringPtr(name, "", 0, Module);
 
   writeUInt64(outputFile, Module, 0xaaaaaaaaaaaaaaaa, TrueBlock);
@@ -53,6 +48,36 @@ llvm::BasicBlock *ProofEvent::hookEvent(
           llvm::Type::getInt8PtrTy(Module->getContext()),
           llvm::Type::getInt8PtrTy(Module->getContext())),
       {outputFile, nameptr});
+
+  llvm::BranchInst::Create(MergeBlock, TrueBlock);
+  return CurrentBlock = MergeBlock;
+}
+
+llvm::BasicBlock *
+ProofEvent::hookEvent_post(llvm::Value *val, KORECompositeSort *sort) {
+  llvm::Function *f = CurrentBlock->getParent();
+  auto ProofOutputFlag = Module->getOrInsertGlobal(
+      "proof_output", llvm::Type::getInt1Ty(Module->getContext()));
+  auto OutputFileName = Module->getOrInsertGlobal(
+      "output_file", llvm::Type::getInt8PtrTy(Module->getContext()));
+  auto proofOutput = new llvm::LoadInst(
+      llvm::Type::getInt1Ty(Module->getContext()), ProofOutputFlag,
+      "proof_output", CurrentBlock);
+  llvm::BasicBlock *TrueBlock
+      = llvm::BasicBlock::Create(Module->getContext(), "if_hookpost", f);
+  auto ir = new llvm::IRBuilder(TrueBlock);
+  llvm::BasicBlock *MergeBlock
+      = llvm::BasicBlock::Create(Module->getContext(), "tail_hookpost", f);
+  llvm::BranchInst::Create(TrueBlock, MergeBlock, proofOutput, CurrentBlock);
+  auto outputFile = new llvm::LoadInst(
+      llvm::Type::getInt8PtrTy(Module->getContext()), OutputFileName, "output",
+      TrueBlock);
+
+  auto cat = sort->getCategory(Definition);
+  std::ostringstream Out;
+  sort->print(Out);
+  auto sortptr = ir->CreateGlobalStringPtr(Out.str(), "", 0, Module);
+
   if (cat.cat == SortCategory::Symbol || cat.cat == SortCategory::Variable) {
     ir->CreateCall(
         getOrInsertFunction(
@@ -87,7 +112,7 @@ llvm::BasicBlock *ProofEvent::hookEvent(
   }
 
   llvm::BranchInst::Create(MergeBlock, TrueBlock);
-  return MergeBlock;
+  return CurrentBlock = MergeBlock;
 }
 
 llvm::BasicBlock *
@@ -101,10 +126,10 @@ ProofEvent::hookArg(llvm::Value *val, KORECompositeSort *sort) {
       llvm::Type::getInt1Ty(Module->getContext()), ProofOutputFlag,
       "proof_output", CurrentBlock);
   llvm::BasicBlock *TrueBlock
-      = llvm::BasicBlock::Create(Module->getContext(), "if", f);
+      = llvm::BasicBlock::Create(Module->getContext(), "if_hookarg", f);
   auto ir = new llvm::IRBuilder(TrueBlock);
   llvm::BasicBlock *MergeBlock
-      = llvm::BasicBlock::Create(Module->getContext(), "tail", f);
+      = llvm::BasicBlock::Create(Module->getContext(), "tail_hookarg", f);
   llvm::BranchInst::Create(TrueBlock, MergeBlock, proofOutput, CurrentBlock);
   auto outputFile = new llvm::LoadInst(
       llvm::Type::getInt8PtrTy(Module->getContext()), OutputFileName, "output",
@@ -149,7 +174,7 @@ ProofEvent::hookArg(llvm::Value *val, KORECompositeSort *sort) {
   }
 
   llvm::BranchInst::Create(MergeBlock, TrueBlock);
-  return MergeBlock;
+  return CurrentBlock = MergeBlock;
 }
 
 } // namespace kllvm

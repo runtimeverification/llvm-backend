@@ -21,8 +21,8 @@ private:
   llvm::LLVMContext &Ctx;
 
 public:
-  llvm::BasicBlock *
-  hookEvent(std::string name, llvm::Value *val, KORECompositeSort *sort);
+  llvm::BasicBlock *hookEvent_pre(std::string name);
+  llvm::BasicBlock *hookEvent_post(llvm::Value *val, KORECompositeSort *sort);
   llvm::BasicBlock *hookArg(llvm::Value *val, KORECompositeSort *sort);
 
 public:

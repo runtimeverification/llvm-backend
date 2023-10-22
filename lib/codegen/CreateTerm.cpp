@@ -317,8 +317,8 @@ llvm::Value *CreateTerm::alloc_arg(
   KOREPattern *p = pattern->getArguments()[idx].get();
   llvm::Value *ret
       = createAllocation(p, fmt::format("{}:{}", locationStack, idx)).first;
-  ProofEvent e(Definition, CurrentBlock, Module);
   auto sort = dynamic_cast<KORECompositeSort *>(p->getSort().get());
+  ProofEvent e(Definition, CurrentBlock, Module);
   CurrentBlock = e.hookArg(ret, sort);
   return ret;
 }
@@ -922,10 +922,6 @@ CreateTerm::createAllocation(KOREPattern *pattern, std::string locationStack) {
         || (symbolDecl->getAttributes().count("anywhere")
             && !isAnywhereOwise)) {
       if (symbolDecl->getAttributes().count("hook")) {
-        llvm::Value *val = createHook(
-            symbolDecl->getAttributes().at("hook").get(), constructor,
-            locationStack);
-
         auto sort
             = dynamic_cast<KORECompositeSort *>(constructor->getSort().get());
         auto strPattern
@@ -935,8 +931,14 @@ CreateTerm::createAllocation(KOREPattern *pattern, std::string locationStack) {
                                                     ->getArguments()[0]
                                                     .get());
         std::string name = strPattern->getContents();
-        ProofEvent e(Definition, CurrentBlock, Module);
-        CurrentBlock = e.hookEvent(name, val, sort);
+
+        ProofEvent p1(Definition, CurrentBlock, Module);
+        CurrentBlock = p1.hookEvent_pre(name);
+        llvm::Value *val = createHook(
+            symbolDecl->getAttributes().at("hook").get(), constructor,
+            locationStack);
+        ProofEvent p2(Definition, CurrentBlock, Module);
+        CurrentBlock = p2.hookEvent_post(val, sort);
 
         return std::make_pair(val, true);
       } else {
