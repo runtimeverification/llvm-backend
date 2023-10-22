@@ -25,6 +25,9 @@ Here is a BNF styled description of the format
 delimited_serial_kore := 0xffffffffffffffff serialized_term 0xcccccccccccccccc
 
 null_terminated_name := <c-style null terminated string>
+relative_position := [0-9]+(:[0-9]+)* 0x00
+
+function_event := 0xdddddddddddddddd null_terminated_name relative_position
 
 variable := null_terminated_name serialized_term 0xcccccccccccccccc
 
@@ -35,7 +38,7 @@ rewrite_trace := rule_ordinal rule_arity variable* delimited_serial_kore
 
 initial_config := delimited_serial_kore
 
-proof_trace := initial_config rewrite_trace*
+proof_trace := initial_config (function_event|rewrite_trace)*
 ```
 
 ## Notes
