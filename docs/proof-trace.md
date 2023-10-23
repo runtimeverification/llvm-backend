@@ -29,6 +29,12 @@ relative_position := [0-9]+(:[0-9]+)* 0x00
 
 function_event := 0xdddddddddddddddd null_terminated_name relative_position
 
+hook_event := 0xaaaaaaaaaaaaaaaa null_terminated_name hook_arg* 0xbbbbbbbbbbbbbbbb serialized_term
+
+hook_arg := serialized_term
+          | function_event
+          | hook_event
+
 variable := null_terminated_name serialized_term 0xcccccccccccccccc
 
 rule_ordinal := <64-bit unsigned little endian integer>
@@ -38,7 +44,7 @@ rewrite_trace := rule_ordinal rule_arity variable* delimited_serial_kore
 
 initial_config := delimited_serial_kore
 
-proof_trace := function_event* initial_config (function_event|rewrite_trace)*
+proof_trace := (function_event|hook_event)* initial_config (function_event|hook_event|rewrite_trace)*
 ```
 
 ## Notes
@@ -46,5 +52,5 @@ proof_trace := function_event* initial_config (function_event|rewrite_trace)*
 - The `rule_arity` should be used to determine how many variable substitutions to read
 - The serialized term for a variable substitution does not begin with the sentinel delimiter.
   This is because the null terminated variable name can act as the sentinel.
-- The `function_event`s at the beginning of the proof_trace are related to configuration initialization.
+- The `function_event|hook_event`s at the beginning of the proof_trace are related to configuration initialization.
 - The `relative_position` is a null terminated string of positive integers separated by `:` (ie. `0:1:1`)
