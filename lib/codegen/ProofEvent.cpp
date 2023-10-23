@@ -1,5 +1,5 @@
-#include "kllvm/codegen/CreateTerm.h"
 #include "kllvm/codegen/ProofEvent.h"
+#include "kllvm/codegen/CreateTerm.h"
 
 #include "llvm/IR/IRBuilder.h"
 
