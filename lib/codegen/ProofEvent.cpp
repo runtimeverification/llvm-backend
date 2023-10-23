@@ -78,6 +78,7 @@ ProofEvent::hookEvent_post(llvm::Value *val, KORECompositeSort *sort) {
   sort->print(Out);
   auto sortptr = ir->CreateGlobalStringPtr(Out.str(), "", 0, Module);
 
+  writeUInt64(outputFile, Module, 0xbbbbbbbbbbbbbbbb, TrueBlock);
   if (cat.cat == SortCategory::Symbol || cat.cat == SortCategory::Variable) {
     ir->CreateCall(
         getOrInsertFunction(
