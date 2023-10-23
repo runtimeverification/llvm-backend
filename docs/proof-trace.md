@@ -38,7 +38,7 @@ rewrite_trace := rule_ordinal rule_arity variable* delimited_serial_kore
 
 initial_config := delimited_serial_kore
 
-proof_trace := initial_config (function_event|rewrite_trace)*
+proof_trace := function_event* initial_config (function_event|rewrite_trace)*
 ```
 
 ## Notes
@@ -46,3 +46,5 @@ proof_trace := initial_config (function_event|rewrite_trace)*
 - The `rule_arity` should be used to determine how many variable substitutions to read
 - The serialized term for a variable substitution does not begin with the sentinel delimiter.
   This is because the null terminated variable name can act as the sentinel.
+- The `function_event`s at the beginning of the proof_trace are related to configuration initialization.
+- The `relative_position` is a null terminated string of positive integers separated by `:` (ie. `0:1:1`)
