@@ -19,21 +19,29 @@ void writeUInt64(
       "", Block);
 }
 
-llvm::BasicBlock *ProofEvent::hookEvent_pre(std::string name) {
+std::pair<llvm::BasicBlock *, llvm::BasicBlock *>
+ProofEvent::proofBranch(std::string label) {
   llvm::Function *f = CurrentBlock->getParent();
   auto ProofOutputFlag = Module->getOrInsertGlobal(
       "proof_output", llvm::Type::getInt1Ty(Module->getContext()));
-  auto OutputFileName = Module->getOrInsertGlobal(
-      "output_file", llvm::Type::getInt8PtrTy(Module->getContext()));
   auto proofOutput = new llvm::LoadInst(
       llvm::Type::getInt1Ty(Module->getContext()), ProofOutputFlag,
       "proof_output", CurrentBlock);
   llvm::BasicBlock *TrueBlock
-      = llvm::BasicBlock::Create(Module->getContext(), "if_hookpre", f);
-  auto ir = new llvm::IRBuilder(TrueBlock);
+      = llvm::BasicBlock::Create(Module->getContext(), "if_" + label, f);
   llvm::BasicBlock *MergeBlock
-      = llvm::BasicBlock::Create(Module->getContext(), "tail_hookpre", f);
+      = llvm::BasicBlock::Create(Module->getContext(), "tail_" + label, f);
   llvm::BranchInst::Create(TrueBlock, MergeBlock, proofOutput, CurrentBlock);
+  return std::pair(TrueBlock, MergeBlock);
+}
+
+llvm::BasicBlock *ProofEvent::hookEvent_pre(std::string name) {
+  auto b = proofBranch("hookpre");
+  auto TrueBlock = b.first;
+  auto MergeBlock = b.second;
+  auto OutputFileName = Module->getOrInsertGlobal(
+      "output_file", llvm::Type::getInt8PtrTy(Module->getContext()));
+  auto ir = new llvm::IRBuilder(TrueBlock);
   auto outputFile = new llvm::LoadInst(
       llvm::Type::getInt8PtrTy(Module->getContext()), OutputFileName, "output",
       TrueBlock);
@@ -55,20 +63,12 @@ llvm::BasicBlock *ProofEvent::hookEvent_pre(std::string name) {
 
 llvm::BasicBlock *
 ProofEvent::hookEvent_post(llvm::Value *val, KORECompositeSort *sort) {
-  llvm::Function *f = CurrentBlock->getParent();
-  auto ProofOutputFlag = Module->getOrInsertGlobal(
-      "proof_output", llvm::Type::getInt1Ty(Module->getContext()));
+  auto b = proofBranch("hookpost");
+  auto TrueBlock = b.first;
+  auto MergeBlock = b.second;
   auto OutputFileName = Module->getOrInsertGlobal(
       "output_file", llvm::Type::getInt8PtrTy(Module->getContext()));
-  auto proofOutput = new llvm::LoadInst(
-      llvm::Type::getInt1Ty(Module->getContext()), ProofOutputFlag,
-      "proof_output", CurrentBlock);
-  llvm::BasicBlock *TrueBlock
-      = llvm::BasicBlock::Create(Module->getContext(), "if_hookpost", f);
   auto ir = new llvm::IRBuilder(TrueBlock);
-  llvm::BasicBlock *MergeBlock
-      = llvm::BasicBlock::Create(Module->getContext(), "tail_hookpost", f);
-  llvm::BranchInst::Create(TrueBlock, MergeBlock, proofOutput, CurrentBlock);
   auto outputFile = new llvm::LoadInst(
       llvm::Type::getInt8PtrTy(Module->getContext()), OutputFileName, "output",
       TrueBlock);
@@ -118,20 +118,12 @@ ProofEvent::hookEvent_post(llvm::Value *val, KORECompositeSort *sort) {
 
 llvm::BasicBlock *
 ProofEvent::hookArg(llvm::Value *val, KORECompositeSort *sort) {
-  llvm::Function *f = CurrentBlock->getParent();
-  auto ProofOutputFlag = Module->getOrInsertGlobal(
-      "proof_output", llvm::Type::getInt1Ty(Module->getContext()));
+  auto b = proofBranch("hookarg");
+  auto TrueBlock = b.first;
+  auto MergeBlock = b.second;
   auto OutputFileName = Module->getOrInsertGlobal(
       "output_file", llvm::Type::getInt8PtrTy(Module->getContext()));
-  auto proofOutput = new llvm::LoadInst(
-      llvm::Type::getInt1Ty(Module->getContext()), ProofOutputFlag,
-      "proof_output", CurrentBlock);
-  llvm::BasicBlock *TrueBlock
-      = llvm::BasicBlock::Create(Module->getContext(), "if_hookarg", f);
   auto ir = new llvm::IRBuilder(TrueBlock);
-  llvm::BasicBlock *MergeBlock
-      = llvm::BasicBlock::Create(Module->getContext(), "tail_hookarg", f);
-  llvm::BranchInst::Create(TrueBlock, MergeBlock, proofOutput, CurrentBlock);
   auto outputFile = new llvm::LoadInst(
       llvm::Type::getInt8PtrTy(Module->getContext()), OutputFileName, "output",
       TrueBlock);

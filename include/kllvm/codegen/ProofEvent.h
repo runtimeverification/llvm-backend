@@ -19,6 +19,8 @@ private:
   llvm::BasicBlock *CurrentBlock;
   llvm::Module *Module;
   llvm::LLVMContext &Ctx;
+  std::pair<llvm::BasicBlock *, llvm::BasicBlock *>
+  proofBranch(std::string label);
 
 public:
   llvm::BasicBlock *hookEvent_pre(std::string name);
