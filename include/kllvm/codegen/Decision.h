@@ -2,6 +2,7 @@
 #define DECISION_H
 
 #include "kllvm/ast/AST.h"
+#include "kllvm/codegen/CreateTerm.h"
 #include "kllvm/codegen/DecisionParser.h"
 
 #include <llvm/ADT/APInt.h>
@@ -110,8 +111,8 @@ public:
 
   KORESymbol *getConstructor() const { return constructor; }
   const std::vector<var_type> &getBindings() const { return bindings; }
-  void addBinding(std::string name, llvm::Type *type) {
-    bindings.push_back(std::make_pair(name, type));
+  void addBinding(std::string name, ValueType type, llvm::Module *mod) {
+    bindings.push_back(std::make_pair(name, getParamType(type, mod)));
   }
   llvm::APInt getLiteral() const { return literal; }
   DecisionNode *getChild() const { return child; }
@@ -200,7 +201,7 @@ public:
 class FunctionNode : public DecisionNode {
 private:
   /* the list of arguments to the function. */
-  std::vector<var_type> bindings;
+  std::vector<std::pair<var_type, ValueType>> bindings;
   /* the name of the variable to bind to the result of the function. */
   std::string name;
   /* the name of the function to call */
@@ -226,9 +227,11 @@ public:
     return new FunctionNode(name, function, child, cat, type);
   }
 
-  const std::vector<var_type> &getBindings() const { return bindings; }
-  void addBinding(std::string name, llvm::Type *type) {
-    bindings.push_back(std::make_pair(name, type));
+  const std::vector<std::pair<var_type, ValueType>> &getBindings() const {
+    return bindings;
+  }
+  void addBinding(std::string name, ValueType type, llvm::Module *mod) {
+    bindings.push_back({{name, getParamType(type, mod)}, type});
   }
 
   virtual void codegen(Decision *d);
@@ -262,8 +265,8 @@ public:
   }
 
   const std::vector<var_type> &getBindings() const { return bindings; }
-  void addBinding(std::string name, llvm::Type *type) {
-    bindings.push_back(std::make_pair(name, type));
+  void addBinding(std::string name, ValueType type, llvm::Module *mod) {
+    bindings.push_back(std::make_pair(name, getParamType(type, mod)));
   }
   void setChild(DecisionNode *child) { this->child = child; }
 

@@ -21,11 +21,21 @@
 
 namespace kllvm {
 
-std::string LLVM_HEADER = R"LLVM(
-; Target determined during CMake build
-target datalayout = "@BACKEND_TARGET_DATALAYOUT@"
-target triple = "@BACKEND_TARGET_TRIPLE@"
+using namespace fmt::literals;
 
+namespace {
+std::string llvm_header() {
+  auto target_dependent = fmt::format(
+      R"LLVM(
+; Target determined during CMake build
+target datalayout = "{datalayout}"
+target triple = "{triple}"
+  )LLVM",
+      "datalayout"_a = BACKEND_TARGET_DATALAYOUT,
+      "triple"_a = BACKEND_TARGET_TRIPLE);
+
+  auto rest =
+      R"LLVM(
 ; K types in LLVM
 
 ; A K value in the LLVM backend can be one of the following values:
@@ -102,6 +112,9 @@ target triple = "@BACKEND_TARGET_TRIPLE@"
 declare %block* @parseConfiguration(i8*)
 declare void @printConfiguration(i8 *, %block *)
 )LLVM";
+  return target_dependent + rest;
+}
+} // namespace
 
 void writeUInt64(
     llvm::Value *outputFile, llvm::Module *Module, uint64_t value,
@@ -111,7 +124,7 @@ std::unique_ptr<llvm::Module>
 newModule(std::string name, llvm::LLVMContext &Context) {
   llvm::SMDiagnostic Err;
   auto mod = llvm::parseIR(
-      *llvm::MemoryBuffer::getMemBuffer(LLVM_HEADER), Err, Context);
+      *llvm::MemoryBuffer::getMemBuffer(llvm_header()), Err, Context);
   if (!mod) {
     Err.print("header.ll", llvm::errs());
   }

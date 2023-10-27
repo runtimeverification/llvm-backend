@@ -77,7 +77,13 @@ def one_line(s):
 
 config.substitutions.extend([
     ('%kompile', 'llvm-kompile-testing'),
-    ('%interpreter', '%kompile %s main -o %t.interpreter'),
+    ('%interpreter', one_line('''
+        output=$(%kompile %s main -o %t.interpreter 2>&1)
+        if [[ -n "$output" ]]; then
+            echo "llvm-kompile error or warning: $output"
+            exit 1
+        fi
+    ''')),
     ('%search-interpreter', '%kompile %s search -o %t.interpreter'),
     ('%convert-input', '%kore-convert %test-input -o %t.bin'),
     ('%strip-binary', 'kore-strip'),
@@ -129,9 +135,9 @@ config.substitutions.extend([
         done
     ''')),
 
-    ('%run-binary-out', '%t.interpreter %test-input -1 %t.out.bin --binary-output'),
-    ('%run-binary', '%convert-input && %t.interpreter %t.bin -1 /dev/stdout'),
-    ('%run-proof-out', '%t.interpreter %test-input -1 %t.out.bin --proof-output'),
+    ('%run-binary-out', 'rm -f %t.out.bin && %t.interpreter %test-input -1 %t.out.bin --binary-output'),
+    ('%run-binary', 'rm -f %t.bin && %convert-input && %t.interpreter %t.bin -1 /dev/stdout'),
+    ('%run-proof-out', 'rm -f %t.out.bin && %t.interpreter %test-input -1 %t.out.bin --proof-output'),
     ('%run', '%t.interpreter %test-input -1 /dev/stdout'),
 
     ('%kprint-check', 'kprint %S %s true | diff - %s.out'),

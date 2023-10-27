@@ -22,6 +22,8 @@ Options:
                             runtime and binding headers, then exit.
   --use-opt                 Use standalone LLVM opt to apply optimization passes
                             to the generated LLVM IR for this definition.
+  --emit-ir                 Emit LLVM IR at intermediate compilation steps, rather than
+                            directly generating an object file.
   --python PATH             The path to a Python interpreter with Pybind installed. Only
                             meaningful in "python" or "pythonast" mode.
   --python-output-dir PATH  Output directory to place automatically-named Python
@@ -30,6 +32,8 @@ Options:
   --embed PATH NAME         Embed additional information into shared library
                             bindings. This is a low-level interface designed to
                             be called from kompile. Only meaningful in "c" mode.
+  -fno-omit-frame-pointer   Keep the frame pointer in compiled code for debugging purposes.
+  -O[0123]                  Set the optimization level for code generation.
 
 Any option not listed above will be passed through to clang; use '--' to
 separate additional positional arguments to clang from those for $0.
@@ -89,6 +93,8 @@ python_output_dir=""
 embedded_files=()
 embedded_names=()
 use_opt=false
+emit_ir=false
+frame_pointer=false
 
 export verbose=false
 export profile=false
@@ -134,6 +140,10 @@ while [[ $# -gt 0 ]]; do
       codegen_flags+=("--no-optimize")
       shift
       ;;
+    --emit-ir)
+      emit_ir=true
+      shift
+      ;;
     --python)
       python_cmd="$2"
       shift; shift
@@ -146,6 +156,16 @@ while [[ $# -gt 0 ]]; do
       embedded_files+=("$2")
       embedded_names+=("$3")
       shift; shift; shift
+      ;;
+    -fno-omit-frame-pointer)
+      kompile_clang_flags+=("$1")
+      frame_pointer=true
+      shift
+      ;;
+    -O*)
+      codegen_flags+=("$1")
+      kompile_clang_flags+=("$1")
+      shift
       ;;
     --)
       reading_clang_args=true
@@ -178,6 +198,15 @@ fi
 
 if [[ "$profile" == "true" ]] && [[ "$verbose" == "false" ]]; then
   echo "[warning] llvm-kompile: --profile will only produce output with -v/--verbose" 1>&2
+fi
+
+if [[ "$emit_ir" == "false" ]]; then
+  codegen_flags+=("--emit-object")
+  if [[ "$frame_pointer" == "true" ]]; then
+    codegen_flags+=("-fno-omit-frame-pointer")
+  fi
+else
+  codegen_flags+=("--binary-ir")
 fi
 
 mod="$(mktemp tmp.XXXXXXXXXX)"
@@ -213,8 +242,6 @@ if [[ "$compile" = "default" ]]; then
     esac
   done
 
-  codegen_flags+=("--binary-ir")
-
   run "$(dirname "$0")"/llvm-kompile-codegen "${codegen_flags[@]}" \
     "$definition" "$dt_dir"/dt.yaml "$dt_dir" -o "$mod"
 
@@ -225,7 +252,13 @@ if [[ "$compile" = "default" ]]; then
       run @OPT@ -mem2reg -tailcallelim "$mod" -o "$modopt"
     fi
   else
-    cp "$mod" "$modopt"
+    if [[ "$emit_ir" == "false" ]]; then
+      modopt="${modopt}.o"
+      rm "${modopt_tmp}"
+      modopt_tmp="${modopt}"
+    fi
+
+    run mv "$mod" "$modopt"
   fi
 elif [ "$compile" = "object" ]; then
   main="${positional_args[1]}"
