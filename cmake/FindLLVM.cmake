@@ -8,21 +8,9 @@ if (NOT LLVM_FOUND)
   find_package(LLVM 15 QUIET CONFIG)
 endif()
 
-if (NOT LLVM_FOUND)
-  find_package(LLVM 14 QUIET CONFIG)
-endif()
-
-if (NOT LLVM_FOUND)
-  find_package(LLVM 13 QUIET CONFIG)
-endif()
-
-if (NOT LLVM_FOUND)
-  find_package(LLVM 12 QUIET CONFIG)
-endif()
-
 message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
-if (${LLVM_PACKAGE_VERSION} VERSION_LESS 12)
-  message(FATAL_ERROR "LLVM 12 or newer is required")
+if (${LLVM_PACKAGE_VERSION} VERSION_LESS 15)
+  message(FATAL_ERROR "LLVM 15 or newer is required")
 endif()
 
 find_program(OPT opt

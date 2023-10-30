@@ -773,14 +773,8 @@ llvm::Value *CreateTerm::createFunctionCall(
     call->setCallingConv(llvm::CallingConv::Tail);
   }
   if (sret) {
-#if LLVM_VERSION_MAJOR >= 12
     llvm::Attribute sretAttr
         = llvm::Attribute::get(Ctx, llvm::Attribute::StructRet, sretType);
-#else
-    (void)sretType;
-    llvm::Attribute sretAttr
-        = llvm::Attribute::get(Ctx, llvm::Attribute::StructRet);
-#endif
     func->arg_begin()->addAttr(sretAttr);
     call->addParamAttr(0, sretAttr);
     return AllocSret;

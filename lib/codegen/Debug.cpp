@@ -69,14 +69,9 @@ void initDebugFunction(
     return;
   auto Unit = Dbg->createFile(DbgFile->getFilename(), DbgFile->getDirectory());
   llvm::DIScope *FContext = Unit;
-#if LLVM_VERSION_MAJOR >= 8
   DbgSP = Dbg->createFunction(
       FContext, name, name, Unit, DbgLine, type, DbgLine,
       llvm::DINode::DIFlags::FlagZero, llvm::DISubprogram::SPFlagDefinition);
-#else
-  DbgSP = Dbg->createFunction(
-      FContext, name, name, Unit, DbgLine, type, false, true, DbgLine);
-#endif
   func->setSubprogram(DbgSP);
 }
 

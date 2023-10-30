@@ -32,13 +32,7 @@ llvm::Function *castToFunctionOrAbort(llvm::Value *value) {
 }
 
 llvm::StructType *getTypeByName(llvm::Module *module, std::string name) {
-  llvm::StructType *t;
-#if LLVM_VERSION_MAJOR >= 12
-  t = llvm::StructType::getTypeByName(module->getContext(), name);
-#else
-  t = module->getTypeByName(name);
-#endif
-  return t;
+  return llvm::StructType::getTypeByName(module->getContext(), name);
 }
 
 } // namespace kllvm
