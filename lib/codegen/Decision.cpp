@@ -266,8 +266,9 @@ void SwitchNode::codegen(Decision *d) {
               binding.first.substr(0, max_name_length), d->CurrentBlock);
           break;
         }
-        auto BlockPtr = llvm::PointerType::getUnqual(
-            getTypeByName(d->Module, BLOCK_STRUCT));
+        auto BlockPtr
+            = llvm::PointerType::getUnqual(llvm::StructType::getTypeByName(
+                d->Module->getContext(), BLOCK_STRUCT));
         if (symbolDecl->getAttributes().count("binder")) {
           if (offset == 0) {
             Renamed = llvm::CallInst::Create(
@@ -492,7 +493,8 @@ void MakeIteratorNode::codegen(Decision *d) {
   llvm::Value *arg = d->load(std::make_pair(collection, collectionType));
   args.push_back(arg);
   types.push_back(arg->getType());
-  llvm::Type *sretType = getTypeByName(d->Module, "iter");
+  llvm::Type *sretType
+      = llvm::StructType::getTypeByName(d->Module->getContext(), "iter");
   llvm::Value *AllocSret
       = allocateTerm(sretType, d->CurrentBlock, "koreAllocAlwaysGC");
   AllocSret->setName(name.substr(0, max_name_length));
@@ -504,13 +506,8 @@ void MakeIteratorNode::codegen(Decision *d) {
   llvm::Function *func = getOrInsertFunction(d->Module, hookName, funcType);
   auto call = llvm::CallInst::Create(func, args, "", d->CurrentBlock);
   setDebugLoc(call);
-#if __clang_major__ >= 12
   llvm::Attribute sretAttr
       = llvm::Attribute::get(d->Ctx, llvm::Attribute::StructRet, sretType);
-#else
-  llvm::Attribute sretAttr
-      = llvm::Attribute::get(d->Ctx, llvm::Attribute::StructRet);
-#endif
   func->arg_begin()->addAttr(sretAttr);
   call->addParamAttr(0, sretAttr);
   d->store(std::make_pair(name, type), AllocSret);
@@ -777,8 +774,8 @@ void abortWhenStuck(
   symbol = d->getAllSymbols().at(Out.str());
   auto BlockType = getBlockType(Module, d, symbol);
   llvm::Value *Ptr;
-  auto BlockPtr
-      = llvm::PointerType::getUnqual(getTypeByName(Module, BLOCK_STRUCT));
+  auto BlockPtr = llvm::PointerType::getUnqual(
+      llvm::StructType::getTypeByName(Module->getContext(), BLOCK_STRUCT));
   if (symbol->getArguments().empty()) {
     Ptr = llvm::ConstantExpr::getIntToPtr(
         llvm::ConstantInt::get(
@@ -953,7 +950,8 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> stepFunctionHeader(
     case SortCategory::Int:
     case SortCategory::Float:
       elements.push_back(llvm::ConstantStruct::get(
-          getTypeByName(module, LAYOUTITEM_STRUCT),
+          llvm::StructType::getTypeByName(
+              module->getContext(), LAYOUTITEM_STRUCT),
           llvm::ConstantInt::get(
               llvm::Type::getInt64Ty(module->getContext()), i++ * 8),
           llvm::ConstantInt::get(
@@ -967,7 +965,9 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> stepFunctionHeader(
   }
   auto layoutArr = llvm::ConstantArray::get(
       llvm::ArrayType::get(
-          getTypeByName(module, LAYOUTITEM_STRUCT), elements.size()),
+          llvm::StructType::getTypeByName(
+              module->getContext(), LAYOUTITEM_STRUCT),
+          elements.size()),
       elements);
   auto layout = module->getOrInsertGlobal(
       "layout_item_rule_" + std::to_string(ordinal), layoutArr->getType());
@@ -976,8 +976,9 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> stepFunctionHeader(
   if (!globalVar->hasInitializer()) {
     globalVar->setInitializer(layoutArr);
   }
-  auto ptrTy = llvm::PointerType::getUnqual(
-      llvm::ArrayType::get(getTypeByName(module, LAYOUTITEM_STRUCT), 0));
+  auto ptrTy = llvm::PointerType::getUnqual(llvm::ArrayType::get(
+      llvm::StructType::getTypeByName(module->getContext(), LAYOUTITEM_STRUCT),
+      0));
   auto koreCollect = getOrInsertFunction(
       module, "koreCollect",
       llvm::FunctionType::get(

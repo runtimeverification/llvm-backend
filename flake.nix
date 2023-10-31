@@ -97,7 +97,7 @@
           builtins.listToAttrs (lib.imap0 (i: v: { name = "check_${toString i}"; value = v; }) checks);
 
         matrix = builtins.listToAttrs (lib.forEach (lib.cartesianProductOfSets {
-          llvm-version = [12 13 14 15 16];
+          llvm-version = [15 16];
           build-type = ["Debug" "Release" "RelWithDebInfo" "FastBuild" "GcStats"];
         }) (
           args:
@@ -116,15 +116,15 @@
           llvm-backend-release = llvm-backend-16-Release.llvm-backend;
         };
         checks = listToChecks [
-          # Check that the backend compiles on each supported version of LLVM,
-          # but don't run the test suite on all possible configurations.
-          llvm-backend-12-FastBuild.llvm-backend
-          llvm-backend-13-FastBuild.llvm-backend
-          llvm-backend-14-FastBuild.llvm-backend
-          llvm-backend-15-FastBuild.llvm-backend
+          llvm-backend-16-Debug.llvm-backend
+          llvm-backend-16-Release.llvm-backend
+          llvm-backend-16-RelWithDebInfo.llvm-backend
+          llvm-backend-16-GcStats.llvm-backend
+
+          llvm-backend-15-FastBuild.integration-tests
           llvm-backend-16-FastBuild.integration-tests
         ];
-        devShells.default = llvm-backend-15-FastBuild.devShell;
+        devShells.default = llvm-backend-16-FastBuild.devShell;
       }) // {
         # non-system suffixed items should go here
         overlays.default = llvm-backend-overlay;

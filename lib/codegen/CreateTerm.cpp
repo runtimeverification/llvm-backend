@@ -174,27 +174,36 @@ llvm::Type *getParamType(ValueType sort, llvm::Module *Module) {
 }
 
 llvm::StructType *getBlockType(llvm::Module *Module) {
-  return getTypeByName(Module, BLOCK_STRUCT);
+  return llvm::StructType::getTypeByName(Module->getContext(), BLOCK_STRUCT);
 }
 
 llvm::Type *getValueType(ValueType sort, llvm::Module *Module) {
   switch (sort.cat) {
-  case SortCategory::Map: return getTypeByName(Module, MAP_STRUCT);
-  case SortCategory::RangeMap: return getTypeByName(Module, RANGEMAP_STRUCT);
-  case SortCategory::List: return getTypeByName(Module, LIST_STRUCT);
-  case SortCategory::Set: return getTypeByName(Module, SET_STRUCT);
+  case SortCategory::Map:
+    return llvm::StructType::getTypeByName(Module->getContext(), MAP_STRUCT);
+  case SortCategory::RangeMap:
+    return llvm::StructType::getTypeByName(
+        Module->getContext(), RANGEMAP_STRUCT);
+  case SortCategory::List:
+    return llvm::StructType::getTypeByName(Module->getContext(), LIST_STRUCT);
+  case SortCategory::Set:
+    return llvm::StructType::getTypeByName(Module->getContext(), SET_STRUCT);
   case SortCategory::Int:
-    return llvm::PointerType::getUnqual(getTypeByName(Module, INT_STRUCT));
+    return llvm::PointerType::getUnqual(
+        llvm::StructType::getTypeByName(Module->getContext(), INT_STRUCT));
   case SortCategory::Float:
-    return llvm::PointerType::getUnqual(getTypeByName(Module, FLOAT_STRUCT));
+    return llvm::PointerType::getUnqual(
+        llvm::StructType::getTypeByName(Module->getContext(), FLOAT_STRUCT));
   case SortCategory::StringBuffer:
-    return llvm::PointerType::getUnqual(getTypeByName(Module, BUFFER_STRUCT));
+    return llvm::PointerType::getUnqual(
+        llvm::StructType::getTypeByName(Module->getContext(), BUFFER_STRUCT));
   case SortCategory::Bool: return llvm::Type::getInt1Ty(Module->getContext());
   case SortCategory::MInt:
     return llvm::IntegerType::get(Module->getContext(), sort.bits);
   case SortCategory::Symbol:
   case SortCategory::Variable:
-    return llvm::PointerType::getUnqual(getTypeByName(Module, BLOCK_STRUCT));
+    return llvm::PointerType::getUnqual(
+        llvm::StructType::getTypeByName(Module->getContext(), BLOCK_STRUCT));
   case SortCategory::Uncomputed: abort();
   }
 }
@@ -202,7 +211,8 @@ llvm::Type *getValueType(ValueType sort, llvm::Module *Module) {
 llvm::StructType *getBlockType(
     llvm::Module *Module, KOREDefinition *definition,
     const KORESymbol *symbol) {
-  llvm::StructType *BlockHeaderType = getTypeByName(Module, BLOCKHEADER_STRUCT);
+  llvm::StructType *BlockHeaderType = llvm::StructType::getTypeByName(
+      Module->getContext(), BLOCKHEADER_STRUCT);
   llvm::ArrayType *EmptyArrayType
       = llvm::ArrayType::get(llvm::Type::getInt64Ty(Module->getContext()), 0);
   llvm::SmallVector<llvm::Type *, 4> Types;
@@ -229,7 +239,8 @@ uint64_t getBlockHeaderVal(
 llvm::Value *getBlockHeader(
     llvm::Module *Module, KOREDefinition *definition, const KORESymbol *symbol,
     llvm::Type *BlockType) {
-  llvm::StructType *BlockHeaderType = getTypeByName(Module, BLOCKHEADER_STRUCT);
+  llvm::StructType *BlockHeaderType = llvm::StructType::getTypeByName(
+      Module->getContext(), BLOCKHEADER_STRUCT);
   uint64_t headerVal = getBlockHeaderVal(Module, symbol, BlockType);
   return llvm::ConstantStruct::get(
       BlockHeaderType,
@@ -773,14 +784,8 @@ llvm::Value *CreateTerm::createFunctionCall(
     call->setCallingConv(llvm::CallingConv::Tail);
   }
   if (sret) {
-#if LLVM_VERSION_MAJOR >= 12
     llvm::Attribute sretAttr
         = llvm::Attribute::get(Ctx, llvm::Attribute::StructRet, sretType);
-#else
-    (void)sretType;
-    llvm::Attribute sretAttr
-        = llvm::Attribute::get(Ctx, llvm::Attribute::StructRet);
-#endif
     func->arg_begin()->addAttr(sretAttr);
     call->addParamAttr(0, sretAttr);
     return AllocSret;
@@ -837,8 +842,8 @@ llvm::Value *CreateTerm::notInjectionCase(
     new llvm::StoreInst(ChildValue, ChildPtr, CurrentBlock);
   }
 
-  auto BlockPtr
-      = llvm::PointerType::getUnqual(getTypeByName(Module, BLOCK_STRUCT));
+  auto BlockPtr = llvm::PointerType::getUnqual(
+      llvm::StructType::getTypeByName(Module->getContext(), BLOCK_STRUCT));
   auto bitcast = new llvm::BitCastInst(Block, BlockPtr, "", CurrentBlock);
   if (symbolDecl->getAttributes().count("binder")) {
     auto call = llvm::CallInst::Create(
@@ -1356,9 +1361,12 @@ llvm::Type *getArgType(ValueType cat, llvm::Module *mod) {
   case SortCategory::Set: {
     return getValueType(cat, mod);
   }
-  case SortCategory::Int: return getTypeByName(mod, INT_STRUCT);
-  case SortCategory::Float: return getTypeByName(mod, FLOAT_STRUCT);
-  case SortCategory::StringBuffer: return getTypeByName(mod, BUFFER_STRUCT);
+  case SortCategory::Int:
+    return llvm::StructType::getTypeByName(mod->getContext(), INT_STRUCT);
+  case SortCategory::Float:
+    return llvm::StructType::getTypeByName(mod->getContext(), FLOAT_STRUCT);
+  case SortCategory::StringBuffer:
+    return llvm::StructType::getTypeByName(mod->getContext(), BUFFER_STRUCT);
   case SortCategory::Symbol:
   case SortCategory::Variable: {
     return getBlockType(mod);

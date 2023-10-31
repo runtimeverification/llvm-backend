@@ -218,8 +218,9 @@ public:
 
     return MakeIteratorNode::Create(
         name, type, name + "_iter",
-        llvm::PointerType::getUnqual(getTypeByName(mod, "iter")), function,
-        child);
+        llvm::PointerType::getUnqual(
+            llvm::StructType::getTypeByName(mod->getContext(), "iter")),
+        function, child);
   }
 
   DecisionNode *iterNext(yaml_node_t *node) {
@@ -231,7 +232,9 @@ public:
     auto child = (*this)(get(node, "next"));
 
     return IterNextNode::Create(
-        iterator, llvm::PointerType::getUnqual(getTypeByName(mod, "iter")),
+        iterator,
+        llvm::PointerType::getUnqual(
+            llvm::StructType::getTypeByName(mod->getContext(), "iter")),
         name, type, function, child);
   }
 
