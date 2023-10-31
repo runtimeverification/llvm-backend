@@ -31,8 +31,4 @@ llvm::Function *castToFunctionOrAbort(llvm::Value *value) {
   return func;
 }
 
-llvm::StructType *getTypeByName(llvm::Module *module, std::string name) {
-  return llvm::StructType::getTypeByName(module->getContext(), name);
-}
-
 } // namespace kllvm
