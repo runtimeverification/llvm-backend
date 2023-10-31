@@ -506,13 +506,8 @@ void MakeIteratorNode::codegen(Decision *d) {
   llvm::Function *func = getOrInsertFunction(d->Module, hookName, funcType);
   auto call = llvm::CallInst::Create(func, args, "", d->CurrentBlock);
   setDebugLoc(call);
-#if __clang_major__ >= 12
   llvm::Attribute sretAttr
       = llvm::Attribute::get(d->Ctx, llvm::Attribute::StructRet, sretType);
-#else
-  llvm::Attribute sretAttr
-      = llvm::Attribute::get(d->Ctx, llvm::Attribute::StructRet);
-#endif
   func->arg_begin()->addAttr(sretAttr);
   call->addParamAttr(0, sretAttr);
   d->store(std::make_pair(name, type), AllocSret);
