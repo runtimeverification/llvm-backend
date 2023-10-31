@@ -22,13 +22,4 @@ llvm::Function *koreHeapAlloc(std::string name, llvm::Module *module) {
   return getOrInsertFunction(module, name, allocType);
 }
 
-llvm::Function *castToFunctionOrAbort(llvm::Value *value) {
-  llvm::Function *func = llvm::dyn_cast<llvm::Function>(value);
-  if (!func) {
-    value->print(llvm::errs());
-    abort();
-  }
-  return func;
-}
-
 } // namespace kllvm
