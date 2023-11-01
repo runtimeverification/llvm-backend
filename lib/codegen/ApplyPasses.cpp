@@ -2,14 +2,6 @@
 
 #include "runtime/header.h"
 
-#if LLVM_VERSION_MAJOR >= 14
-#include <llvm/MC/TargetRegistry.h>
-#else
-#include <llvm/Support/TargetRegistry.h>
-#endif
-
-#include <llvm/IR/LegacyPassManager.h>
-
 #if LLVM_VERSION_MAJOR >= 17
 #include <llvm/TargetParser/Host.h>
 #include <llvm/TargetParser/SubtargetFeature.h>
@@ -18,6 +10,8 @@
 #include <llvm/Support/Host.h>
 #endif
 
+#include <llvm/IR/LegacyPassManager.h>
+#include <llvm/MC/TargetRegistry.h>
 #include <llvm/Pass.h>
 #include <llvm/Support/CommandLine.h>
 #include <llvm/Target/TargetMachine.h>
@@ -68,19 +62,11 @@ void apply_kllvm_opt_passes(llvm::Module &mod) {
 }
 
 void generate_object_file(llvm::Module &mod, llvm::raw_ostream &os) {
-  // The frame-pointer retention code in LLVM 12 and older is tied strongly to
-  // the actual command-line flag used to specify it for code generation, rather
-  // than being decoupled as it is in 13 and newer. Because LLVM 12 will be
-  // deprecated for our purposes sooner rather than later, and is not the
-  // default version for packaged versions of K, we simply disable the FP
-  // feature.
-#if LLVM_VERSION_MAJOR > 12
   if (KeepFramePointer) {
     mod.setFramePointer(FramePointerKind::All);
   } else {
     mod.setFramePointer(FramePointerKind::None);
   }
-#endif
 
   auto triple = BACKEND_TARGET_TRIPLE;
   mod.setTargetTriple(triple);
