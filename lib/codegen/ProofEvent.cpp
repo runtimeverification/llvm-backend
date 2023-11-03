@@ -58,6 +58,17 @@ llvm::BasicBlock *ProofEvent::hookEvent_pre(std::string name) {
       {outputFile, nameptr});
 
   llvm::BranchInst::Create(MergeBlock, TrueBlock);
+
+  // Some places will try to use llvm::Instruction::insertAfter on the back of
+  // the MergeBlock.
+  // If the MergeBlock has no instructions, this has resulted in a segfault when
+  // printing the IR. Adding an effective nop prevents this.
+  llvm::BinaryOperator::Create(
+      llvm::Instruction::Add,
+      llvm::ConstantInt::get(llvm::Type::getInt8Ty(Module->getContext()), 0),
+      llvm::ConstantInt::get(llvm::Type::getInt8Ty(Module->getContext()), 0),
+      "nop", MergeBlock);
+
   return CurrentBlock = MergeBlock;
 }
 
@@ -113,6 +124,13 @@ ProofEvent::hookEvent_post(llvm::Value *val, KORECompositeSort *sort) {
   }
 
   llvm::BranchInst::Create(MergeBlock, TrueBlock);
+
+  llvm::BinaryOperator::Create(
+      llvm::Instruction::Add,
+      llvm::ConstantInt::get(llvm::Type::getInt8Ty(Module->getContext()), 0),
+      llvm::ConstantInt::get(llvm::Type::getInt8Ty(Module->getContext()), 0),
+      "nop", MergeBlock);
+
   return CurrentBlock = MergeBlock;
 }
 
@@ -167,6 +185,13 @@ ProofEvent::hookArg(llvm::Value *val, KORECompositeSort *sort) {
   }
 
   llvm::BranchInst::Create(MergeBlock, TrueBlock);
+
+  llvm::BinaryOperator::Create(
+      llvm::Instruction::Add,
+      llvm::ConstantInt::get(llvm::Type::getInt8Ty(Module->getContext()), 0),
+      llvm::ConstantInt::get(llvm::Type::getInt8Ty(Module->getContext()), 0),
+      "nop", MergeBlock);
+
   return CurrentBlock = MergeBlock;
 }
 
