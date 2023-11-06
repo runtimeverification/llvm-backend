@@ -541,9 +541,13 @@ public:
   }
 
   sptr<KORESort> getSort() const override {
-    if (constructor->getName() == "\\dv") {
-      return constructor->getFormalArguments()[0];
+    if (constructor->getName() == "\\dv"
+        && !constructor->getFormalArguments().empty()) {
+      if (auto arg = constructor->getFormalArguments()[0]) {
+        return arg;
+      }
     }
+
     return constructor->getSort();
   }
 
