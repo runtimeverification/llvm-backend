@@ -390,8 +390,8 @@ public:
   virtual sptr<KOREPattern> substitute(const substitution &) = 0;
   virtual sptr<KOREPattern> expandAliases(KOREDefinition *) = 0;
 
-  virtual void
-  prettyPrint(std::ostream &, PrettyPrintData const &data) const = 0;
+  virtual void prettyPrint(std::ostream &, PrettyPrintData const &data) const
+      = 0;
   virtual sptr<KOREPattern> sortCollections(PrettyPrintData const &data) = 0;
   std::set<std::string> gatherSingletonVars(void);
   virtual std::map<std::string, int> gatherVarCounts(void) = 0;
