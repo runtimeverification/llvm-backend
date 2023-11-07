@@ -3,7 +3,22 @@
 
 #include "llvm/IR/IRBuilder.h"
 
+#include <fmt/format.h>
+
 namespace kllvm {
+
+namespace {
+
+template <typename IRBuilder>
+llvm::Constant *createGlobalSortStringPtr(
+    IRBuilder &B, KORECompositeSort &sort, llvm::Module *mod) {
+  auto os = std::ostringstream{};
+  sort.print(os);
+  return B.CreateGlobalStringPtr(
+      os.str(), fmt::format("{}_str", sort.getName()), 0, mod);
+}
+
+} // namespace
 
 void writeUInt64(
     llvm::Value *outputFile, llvm::Module *Module, uint64_t value,
@@ -17,6 +32,45 @@ void writeUInt64(
       {outputFile, llvm::ConstantInt::get(
                        llvm::Type::getInt64Ty(Module->getContext()), value)},
       "", Block);
+}
+
+llvm::CallInst *ProofEvent::emitSerializeTerm(
+    KORECompositeSort &sort, llvm::Value *outputFile, llvm::Value *term,
+    llvm::BasicBlock *insertAtEnd) {
+  auto B = llvm::IRBuilder(insertAtEnd);
+
+  auto cat = sort.getCategory(Definition);
+  auto sort_name_ptr = createGlobalSortStringPtr(B, sort, Module);
+
+  auto &ctx = Module->getContext();
+  auto void_ty = llvm::Type::getVoidTy(ctx);
+  auto i8_ptr_ty = llvm::Type::getInt8PtrTy(ctx);
+
+  if (cat.cat == SortCategory::Symbol || cat.cat == SortCategory::Variable) {
+    auto block_ty = getValueType({SortCategory::Symbol, 0}, Module);
+
+    auto func_ty = llvm::FunctionType::get(
+        void_ty, {i8_ptr_ty, block_ty, i8_ptr_ty}, false);
+
+    auto serialize
+        = getOrInsertFunction(Module, "serializeTermToFile", func_ty);
+
+    return B.CreateCall(serialize, {outputFile, term, sort_name_ptr});
+  } else {
+    if (term->getType()->isIntegerTy()) {
+      term = B.CreateIntToPtr(term, i8_ptr_ty);
+    } else {
+      term = B.CreatePointerCast(term, i8_ptr_ty);
+    }
+
+    auto func_ty = llvm::FunctionType::get(
+        void_ty, {i8_ptr_ty, i8_ptr_ty, i8_ptr_ty}, false);
+
+    auto serialize
+        = getOrInsertFunction(Module, "serializeRawTermToFile", func_ty);
+
+    return B.CreateCall(serialize, {outputFile, term, sort_name_ptr});
+  }
 }
 
 std::pair<llvm::BasicBlock *, llvm::BasicBlock *>
@@ -79,49 +133,13 @@ ProofEvent::hookEvent_post(llvm::Value *val, KORECompositeSort *sort) {
   auto MergeBlock = b.second;
   auto OutputFileName = Module->getOrInsertGlobal(
       "output_file", llvm::Type::getInt8PtrTy(Module->getContext()));
-  auto ir = new llvm::IRBuilder(TrueBlock);
   auto outputFile = new llvm::LoadInst(
       llvm::Type::getInt8PtrTy(Module->getContext()), OutputFileName, "output",
       TrueBlock);
 
-  auto cat = sort->getCategory(Definition);
-  std::ostringstream Out;
-  sort->print(Out);
-  auto sortptr = ir->CreateGlobalStringPtr(Out.str(), "", 0, Module);
-
   writeUInt64(outputFile, Module, 0xbbbbbbbbbbbbbbbb, TrueBlock);
-  if (cat.cat == SortCategory::Symbol || cat.cat == SortCategory::Variable) {
-    ir->CreateCall(
-        getOrInsertFunction(
-            Module, "serializeTermToFile",
-            llvm::Type::getVoidTy(Module->getContext()),
-            llvm::Type::getInt8PtrTy(Module->getContext()),
-            getValueType({SortCategory::Symbol, 0}, Module),
-            llvm::Type::getInt8PtrTy(Module->getContext())),
-        {outputFile, val, sortptr});
-  } else if (val->getType()->isIntegerTy()) {
-    val = ir->CreateIntToPtr(
-        val, llvm::Type::getInt8PtrTy(Module->getContext()));
-    ir->CreateCall(
-        getOrInsertFunction(
-            Module, "serializeRawTermToFile",
-            llvm::Type::getVoidTy(Module->getContext()),
-            llvm::Type::getInt8PtrTy(Module->getContext()),
-            llvm::Type::getInt8PtrTy(Module->getContext()),
-            llvm::Type::getInt8PtrTy(Module->getContext())),
-        {outputFile, val, sortptr});
-  } else {
-    val = ir->CreatePointerCast(
-        val, llvm::Type::getInt8PtrTy(Module->getContext()));
-    ir->CreateCall(
-        getOrInsertFunction(
-            Module, "serializeRawTermToFile",
-            llvm::Type::getVoidTy(Module->getContext()),
-            llvm::Type::getInt8PtrTy(Module->getContext()),
-            llvm::Type::getInt8PtrTy(Module->getContext()),
-            llvm::Type::getInt8PtrTy(Module->getContext())),
-        {outputFile, val, sortptr});
-  }
+
+  emitSerializeTerm(*sort, outputFile, val, TrueBlock);
 
   llvm::BranchInst::Create(MergeBlock, TrueBlock);
 
@@ -139,50 +157,14 @@ ProofEvent::hookArg(llvm::Value *val, KORECompositeSort *sort) {
   auto b = proofBranch("hookarg");
   auto TrueBlock = b.first;
   auto MergeBlock = b.second;
+
   auto OutputFileName = Module->getOrInsertGlobal(
       "output_file", llvm::Type::getInt8PtrTy(Module->getContext()));
-  auto ir = new llvm::IRBuilder(TrueBlock);
   auto outputFile = new llvm::LoadInst(
       llvm::Type::getInt8PtrTy(Module->getContext()), OutputFileName, "output",
       TrueBlock);
 
-  auto cat = sort->getCategory(Definition);
-  std::ostringstream Out;
-  sort->print(Out);
-  auto sortptr = ir->CreateGlobalStringPtr(Out.str(), "", 0, Module);
-
-  if (cat.cat == SortCategory::Symbol || cat.cat == SortCategory::Variable) {
-    ir->CreateCall(
-        getOrInsertFunction(
-            Module, "serializeTermToFile",
-            llvm::Type::getVoidTy(Module->getContext()),
-            llvm::Type::getInt8PtrTy(Module->getContext()),
-            getValueType({SortCategory::Symbol, 0}, Module),
-            llvm::Type::getInt8PtrTy(Module->getContext())),
-        {outputFile, val, sortptr});
-  } else if (val->getType()->isIntegerTy()) {
-    val = ir->CreateIntToPtr(
-        val, llvm::Type::getInt8PtrTy(Module->getContext()));
-    ir->CreateCall(
-        getOrInsertFunction(
-            Module, "serializeRawTermToFile",
-            llvm::Type::getVoidTy(Module->getContext()),
-            llvm::Type::getInt8PtrTy(Module->getContext()),
-            llvm::Type::getInt8PtrTy(Module->getContext()),
-            llvm::Type::getInt8PtrTy(Module->getContext())),
-        {outputFile, val, sortptr});
-  } else {
-    val = ir->CreatePointerCast(
-        val, llvm::Type::getInt8PtrTy(Module->getContext()));
-    ir->CreateCall(
-        getOrInsertFunction(
-            Module, "serializeRawTermToFile",
-            llvm::Type::getVoidTy(Module->getContext()),
-            llvm::Type::getInt8PtrTy(Module->getContext()),
-            llvm::Type::getInt8PtrTy(Module->getContext()),
-            llvm::Type::getInt8PtrTy(Module->getContext())),
-        {outputFile, val, sortptr});
-  }
+  emitSerializeTerm(*sort, outputFile, val, TrueBlock);
 
   llvm::BranchInst::Create(MergeBlock, TrueBlock);
 

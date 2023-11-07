@@ -19,8 +19,18 @@ private:
   llvm::BasicBlock *CurrentBlock;
   llvm::Module *Module;
   llvm::LLVMContext &Ctx;
+
   std::pair<llvm::BasicBlock *, llvm::BasicBlock *>
   proofBranch(std::string label);
+
+  /*
+   * Emit a call that will serialize `term` to the specified `outputFile` as
+   * binary KORE. The returned call instruction is inserted at the end of the
+   * basic block `insertAtEnd`.
+   */
+  llvm::CallInst *emitSerializeTerm(
+      KORECompositeSort &sort, llvm::Value *outputFile, llvm::Value *term,
+      llvm::BasicBlock *insertAtEnd);
 
 public:
   llvm::BasicBlock *hookEvent_pre(std::string name);
