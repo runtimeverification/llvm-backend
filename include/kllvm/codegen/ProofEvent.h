@@ -32,6 +32,17 @@ private:
       KORECompositeSort &sort, llvm::Value *outputFile, llvm::Value *term,
       llvm::BasicBlock *insertAtEnd);
 
+  /* 
+   * Emit an instruction that has no effect and will be removed by optimization
+   * passes.
+   *
+   * We need this workaround because some callsites will try to use
+   * llvm::Instruction::insertAfter on the back of the MergeBlock after a proof
+   * branch is created. If the MergeBlock has no instructions, this has resulted
+   * in a segfault when printing the IR. Adding an effective no-op prevents this.
+   */
+  llvm::BinaryOperator *emitNoOp(llvm::BasicBlock *insertAtEnd);
+
 public:
   llvm::BasicBlock *hookEvent_pre(std::string name);
   llvm::BasicBlock *hookEvent_post(llvm::Value *val, KORECompositeSort *sort);

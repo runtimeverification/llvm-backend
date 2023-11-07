@@ -42,9 +42,8 @@ llvm::CallInst *ProofEvent::emitSerializeTerm(
   auto cat = sort.getCategory(Definition);
   auto sort_name_ptr = createGlobalSortStringPtr(B, sort, Module);
 
-  auto &ctx = Module->getContext();
-  auto void_ty = llvm::Type::getVoidTy(ctx);
-  auto i8_ptr_ty = llvm::Type::getInt8PtrTy(ctx);
+  auto void_ty = llvm::Type::getVoidTy(Ctx);
+  auto i8_ptr_ty = llvm::Type::getInt8PtrTy(Ctx);
 
   if (cat.cat == SortCategory::Symbol || cat.cat == SortCategory::Variable) {
     auto block_ty = getValueType({SortCategory::Symbol, 0}, Module);
@@ -71,6 +70,14 @@ llvm::CallInst *ProofEvent::emitSerializeTerm(
 
     return B.CreateCall(serialize, {outputFile, term, sort_name_ptr});
   }
+}
+
+llvm::BinaryOperator *ProofEvent::emitNoOp(llvm::BasicBlock *insertAtEnd) {
+  auto i8_ty = llvm::Type::getInt8Ty(Ctx);
+  auto zero = llvm::ConstantInt::get(i8_ty, 0);
+
+  return llvm::BinaryOperator::Create(
+      llvm::Instruction::Add, zero, zero, "no-op", insertAtEnd);
 }
 
 std::pair<llvm::BasicBlock *, llvm::BasicBlock *>
@@ -112,16 +119,7 @@ llvm::BasicBlock *ProofEvent::hookEvent_pre(std::string name) {
       {outputFile, nameptr});
 
   llvm::BranchInst::Create(MergeBlock, TrueBlock);
-
-  // Some places will try to use llvm::Instruction::insertAfter on the back of
-  // the MergeBlock.
-  // If the MergeBlock has no instructions, this has resulted in a segfault when
-  // printing the IR. Adding an effective nop prevents this.
-  llvm::BinaryOperator::Create(
-      llvm::Instruction::Add,
-      llvm::ConstantInt::get(llvm::Type::getInt8Ty(Module->getContext()), 0),
-      llvm::ConstantInt::get(llvm::Type::getInt8Ty(Module->getContext()), 0),
-      "nop", MergeBlock);
+  emitNoOp(MergeBlock);
 
   return CurrentBlock = MergeBlock;
 }
@@ -142,12 +140,7 @@ ProofEvent::hookEvent_post(llvm::Value *val, KORECompositeSort *sort) {
   emitSerializeTerm(*sort, outputFile, val, TrueBlock);
 
   llvm::BranchInst::Create(MergeBlock, TrueBlock);
-
-  llvm::BinaryOperator::Create(
-      llvm::Instruction::Add,
-      llvm::ConstantInt::get(llvm::Type::getInt8Ty(Module->getContext()), 0),
-      llvm::ConstantInt::get(llvm::Type::getInt8Ty(Module->getContext()), 0),
-      "nop", MergeBlock);
+  emitNoOp(MergeBlock);
 
   return CurrentBlock = MergeBlock;
 }
@@ -167,12 +160,7 @@ ProofEvent::hookArg(llvm::Value *val, KORECompositeSort *sort) {
   emitSerializeTerm(*sort, outputFile, val, TrueBlock);
 
   llvm::BranchInst::Create(MergeBlock, TrueBlock);
-
-  llvm::BinaryOperator::Create(
-      llvm::Instruction::Add,
-      llvm::ConstantInt::get(llvm::Type::getInt8Ty(Module->getContext()), 0),
-      llvm::ConstantInt::get(llvm::Type::getInt8Ty(Module->getContext()), 0),
-      "nop", MergeBlock);
+  emitNoOp(MergeBlock);
 
   return CurrentBlock = MergeBlock;
 }
