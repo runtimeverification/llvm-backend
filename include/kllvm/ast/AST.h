@@ -390,8 +390,8 @@ public:
   virtual sptr<KOREPattern> substitute(const substitution &) = 0;
   virtual sptr<KOREPattern> expandAliases(KOREDefinition *) = 0;
 
-  virtual void
-  prettyPrint(std::ostream &, PrettyPrintData const &data) const = 0;
+  virtual void prettyPrint(std::ostream &, PrettyPrintData const &data) const
+      = 0;
   virtual sptr<KOREPattern> sortCollections(PrettyPrintData const &data) = 0;
   std::set<std::string> gatherSingletonVars(void);
   virtual std::map<std::string, int> gatherVarCounts(void) = 0;
@@ -540,7 +540,16 @@ public:
         new KORECompositePattern(std::move(newSym)));
   }
 
-  sptr<KORESort> getSort() const override { return constructor->getSort(); }
+  sptr<KORESort> getSort() const override {
+    if (constructor->getName() == "\\dv"
+        && !constructor->getFormalArguments().empty()) {
+      if (auto arg = constructor->getFormalArguments()[0]) {
+        return arg;
+      }
+    }
+
+    return constructor->getSort();
+  }
 
   KORESymbol *getConstructor() const { return constructor.get(); }
   const std::vector<sptr<KOREPattern>> &getArguments() const {

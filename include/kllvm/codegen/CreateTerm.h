@@ -20,6 +20,8 @@ private:
   bool isAnywhereOwise;
   std::set<KOREPattern *> staticTerms;
 
+  llvm::Value *
+  alloc_arg(KORECompositePattern *pattern, int idx, std::string locationStack);
   llvm::Value *createHook(
       KORECompositePattern *hookAtt, KORECompositePattern *pattern,
       std::string locationStack = "0");
