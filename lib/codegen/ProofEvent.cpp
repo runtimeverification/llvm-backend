@@ -130,15 +130,13 @@ std::pair<llvm::BasicBlock *, llvm::BasicBlock *> ProofEvent::proofBranch(
  */
 
 llvm::BasicBlock *ProofEvent::hookEvent_pre(std::string name) {
-  auto b = proofBranch("hookpre");
-  auto TrueBlock = b.first;
-  auto MergeBlock = b.second;
-  auto outputFile = emitGetOutputFileName(TrueBlock);
-  auto ir = new llvm::IRBuilder(TrueBlock);
+  auto [true_block, merge_block] = proofBranch("hookpre");
+  auto outputFile = emitGetOutputFileName(true_block);
+  auto ir = new llvm::IRBuilder(true_block);
 
   auto nameptr = ir->CreateGlobalStringPtr(name, "", 0, Module);
 
-  emitWriteUInt64(outputFile, 0xaaaaaaaaaaaaaaaa, TrueBlock);
+  emitWriteUInt64(outputFile, 0xaaaaaaaaaaaaaaaa, true_block);
   ir->CreateCall(
       getOrInsertFunction(
           Module, "printVariableToFile",
@@ -147,43 +145,39 @@ llvm::BasicBlock *ProofEvent::hookEvent_pre(std::string name) {
           llvm::Type::getInt8PtrTy(Module->getContext())),
       {outputFile, nameptr});
 
-  llvm::BranchInst::Create(MergeBlock, TrueBlock);
-  emitNoOp(MergeBlock);
+  llvm::BranchInst::Create(merge_block, true_block);
+  emitNoOp(merge_block);
 
-  return CurrentBlock = MergeBlock;
+  return CurrentBlock = merge_block;
 }
 
 llvm::BasicBlock *
 ProofEvent::hookEvent_post(llvm::Value *val, KORECompositeSort *sort) {
-  auto b = proofBranch("hookpost");
-  auto TrueBlock = b.first;
-  auto MergeBlock = b.second;
-  auto outputFile = emitGetOutputFileName(TrueBlock);
+  auto [true_block, merge_block] = proofBranch("hookpost");
+  auto outputFile = emitGetOutputFileName(true_block);
 
-  emitWriteUInt64(outputFile, 0xbbbbbbbbbbbbbbbb, TrueBlock);
+  emitWriteUInt64(outputFile, 0xbbbbbbbbbbbbbbbb, true_block);
 
-  emitSerializeTerm(*sort, outputFile, val, TrueBlock);
+  emitSerializeTerm(*sort, outputFile, val, true_block);
 
-  llvm::BranchInst::Create(MergeBlock, TrueBlock);
-  emitNoOp(MergeBlock);
+  llvm::BranchInst::Create(merge_block, true_block);
+  emitNoOp(merge_block);
 
-  return CurrentBlock = MergeBlock;
+  return CurrentBlock = merge_block;
 }
 
 llvm::BasicBlock *
 ProofEvent::hookArg(llvm::Value *val, KORECompositeSort *sort) {
-  auto b = proofBranch("hookarg");
-  auto TrueBlock = b.first;
-  auto MergeBlock = b.second;
+  auto [true_block, merge_block] = proofBranch("hookarg");
 
-  auto outputFile = emitGetOutputFileName(TrueBlock);
+  auto outputFile = emitGetOutputFileName(true_block);
 
-  emitSerializeTerm(*sort, outputFile, val, TrueBlock);
+  emitSerializeTerm(*sort, outputFile, val, true_block);
 
-  llvm::BranchInst::Create(MergeBlock, TrueBlock);
-  emitNoOp(MergeBlock);
+  llvm::BranchInst::Create(merge_block, true_block);
+  emitNoOp(merge_block);
 
-  return CurrentBlock = MergeBlock;
+  return CurrentBlock = merge_block;
 }
 
 } // namespace kllvm
