@@ -11,10 +11,6 @@
 
 namespace kllvm {
 
-llvm::CallInst *writeUInt64(
-    llvm::Value *outputFile, llvm::Module *Module, uint64_t value,
-    llvm::BasicBlock *Block);
-
 class ProofEvent {
 private:
   KOREDefinition *Definition;

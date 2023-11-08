@@ -33,24 +33,6 @@ constexpr uint64_t word(uint8_t byte) {
 
 } // namespace
 
-llvm::CallInst *writeUInt64(
-    llvm::Value *outputFile, llvm::Module *Module, uint64_t value,
-    llvm::BasicBlock *Block) {
-  auto &Ctx = Module->getContext();
-
-  auto void_ty = llvm::Type::getVoidTy(Ctx);
-  auto i8_ptr_ty = llvm::Type::getInt8PtrTy(Ctx);
-  auto i64_ptr_ty = llvm::Type::getInt64Ty(Ctx);
-
-  auto func_ty
-      = llvm::FunctionType::get(void_ty, {i8_ptr_ty, i64_ptr_ty}, false);
-  auto func = getOrInsertFunction(Module, "writeUInt64ToFile", func_ty);
-
-  auto i64_value = llvm::ConstantInt::get(i64_ptr_ty, value);
-
-  return llvm::CallInst::Create(func, {outputFile, i64_value}, "", Block);
-}
-
 llvm::CallInst *ProofEvent::emitSerializeTerm(
     KORECompositeSort &sort, llvm::Value *outputFile, llvm::Value *term,
     llvm::BasicBlock *insert_at_end) {
@@ -106,7 +88,18 @@ llvm::CallInst *ProofEvent::emitSerializeConfiguration(
 
 llvm::CallInst *ProofEvent::emitWriteUInt64(
     llvm::Value *outputFile, uint64_t value, llvm::BasicBlock *insert_at_end) {
-  return writeUInt64(outputFile, Module, value, insert_at_end);
+  auto void_ty = llvm::Type::getVoidTy(Ctx);
+  auto i8_ptr_ty = llvm::Type::getInt8PtrTy(Ctx);
+  auto i64_ptr_ty = llvm::Type::getInt64Ty(Ctx);
+
+  auto func_ty
+      = llvm::FunctionType::get(void_ty, {i8_ptr_ty, i64_ptr_ty}, false);
+  auto func = getOrInsertFunction(Module, "writeUInt64ToFile", func_ty);
+
+  auto i64_value = llvm::ConstantInt::get(i64_ptr_ty, value);
+
+  return llvm::CallInst::Create(
+      func, {outputFile, i64_value}, "", insert_at_end);
 }
 
 llvm::CallInst *ProofEvent::emitWriteString(
