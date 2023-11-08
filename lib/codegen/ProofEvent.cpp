@@ -80,6 +80,21 @@ llvm::CallInst *ProofEvent::emitSerializeTerm(
   }
 }
 
+llvm::CallInst *ProofEvent::emitSerializeConfiguration(
+    llvm::Value *outputFile, llvm::Value *config,
+    llvm::BasicBlock *insertAtEnd) {
+  auto void_ty = llvm::Type::getVoidTy(Ctx);
+  auto i8_ptr_ty = llvm::Type::getInt8PtrTy(Ctx);
+  auto block_ty = getValueType({SortCategory::Symbol, 0}, Module);
+
+  auto func_ty = llvm::FunctionType::get(void_ty, {i8_ptr_ty, block_ty}, false);
+  auto serialize
+      = getOrInsertFunction(Module, "serializeConfigurationToFile", func_ty);
+
+  return llvm::CallInst::Create(
+      serialize, {outputFile, config}, "", insertAtEnd);
+}
+
 llvm::CallInst *ProofEvent::emitWriteUInt64(
     llvm::Value *outputFile, uint64_t value, llvm::BasicBlock *insert_at_end) {
   return writeUInt64(outputFile, Module, value, insert_at_end);
@@ -93,7 +108,8 @@ llvm::CallInst *ProofEvent::emitWriteString(
   auto void_ty = llvm::Type::getVoidTy(Ctx);
   auto i8_ptr_ty = llvm::Type::getInt8PtrTy(Ctx);
 
-  auto func_ty = llvm::FunctionType::get(void_ty, {i8_ptr_ty, i8_ptr_ty}, false);
+  auto func_ty
+      = llvm::FunctionType::get(void_ty, {i8_ptr_ty, i8_ptr_ty}, false);
 
   auto print = getOrInsertFunction(Module, "printVariableToFile", func_ty);
 
@@ -209,13 +225,7 @@ llvm::BasicBlock *ProofEvent::rewriteEvent(
   }
 
   emitWriteUInt64(outputFile, 0xffffffffffffffff, true_block);
-  ir.CreateCall(
-      getOrInsertFunction(
-          Module, "serializeConfigurationToFile",
-          llvm::Type::getVoidTy(Module->getContext()),
-          llvm::Type::getInt8PtrTy(Module->getContext()),
-          getValueType({SortCategory::Symbol, 0}, Module)),
-      {outputFile, return_value});
+  emitSerializeConfiguration(outputFile, return_value, true_block);
   emitWriteUInt64(outputFile, 0xcccccccccccccccc, true_block);
 
   llvm::BranchInst::Create(merge_block, true_block);

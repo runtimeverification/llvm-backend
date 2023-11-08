@@ -36,10 +36,20 @@ private:
 
   /*
    * Emit a call that will serialize `term` to the specified `outputFile` as
-   * binary KORE.
+   * binary KORE. This function can be called on any term, but the sort of that
+   * term must be known.
    */
   llvm::CallInst *emitSerializeTerm(
       KORECompositeSort &sort, llvm::Value *outputFile, llvm::Value *term,
+      llvm::BasicBlock *insertAtEnd);
+
+  /*
+   * Emit a call that will serialize `config` to the specified `outputFile` as
+   * binary KORE. This function does not require a sort, but the configuration
+   * passed must be a top-level configuration.
+   */
+  llvm::CallInst *emitSerializeConfiguration(
+      llvm::Value *outputFile, llvm::Value *config,
       llvm::BasicBlock *insertAtEnd);
 
   /*
