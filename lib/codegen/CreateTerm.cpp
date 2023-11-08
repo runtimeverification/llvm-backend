@@ -10,6 +10,7 @@
 #include <iostream>
 
 #include "runtime/header.h" //for macros
+
 #include "llvm/IR/BasicBlock.h"
 #include "llvm/IR/Constants.h"
 #include "llvm/IR/DerivedTypes.h"
@@ -116,10 +117,6 @@ declare void @printConfiguration(i8 *, %block *)
   return target_dependent + rest;
 }
 } // namespace
-
-void writeUInt64(
-    llvm::Value *outputFile, llvm::Module *Module, uint64_t value,
-    llvm::BasicBlock *Block);
 
 std::unique_ptr<llvm::Module>
 newModule(std::string name, llvm::LLVMContext &Context) {

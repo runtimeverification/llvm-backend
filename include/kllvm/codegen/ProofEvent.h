@@ -9,7 +9,7 @@
 
 namespace kllvm {
 
-void writeUInt64(
+llvm::CallInst *writeUInt64(
     llvm::Value *outputFile, llvm::Module *Module, uint64_t value,
     llvm::BasicBlock *Block);
 
@@ -25,12 +25,17 @@ private:
 
   /*
    * Emit a call that will serialize `term` to the specified `outputFile` as
-   * binary KORE. The returned call instruction is inserted at the end of the
-   * basic block `insertAtEnd`.
+   * binary KORE.
    */
   llvm::CallInst *emitSerializeTerm(
       KORECompositeSort &sort, llvm::Value *outputFile, llvm::Value *term,
       llvm::BasicBlock *insertAtEnd);
+
+  /*
+   * Emit a call that will serialize `value` to the specified `outputFile`.
+   */
+  llvm::CallInst *emitWriteUInt64(
+      llvm::Value *outputFile, uint64_t value, llvm::BasicBlock *insertAtEnd);
 
   /* 
    * Emit an instruction that has no effect and will be removed by optimization

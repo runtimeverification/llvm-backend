@@ -20,18 +20,22 @@ llvm::Constant *createGlobalSortStringPtr(
 
 } // namespace
 
-void writeUInt64(
+llvm::CallInst *writeUInt64(
     llvm::Value *outputFile, llvm::Module *Module, uint64_t value,
     llvm::BasicBlock *Block) {
-  llvm::CallInst::Create(
-      getOrInsertFunction(
-          Module, "writeUInt64ToFile",
-          llvm::Type::getVoidTy(Module->getContext()),
-          llvm::Type::getInt8PtrTy(Module->getContext()),
-          llvm::Type::getInt64Ty(Module->getContext())),
-      {outputFile, llvm::ConstantInt::get(
-                       llvm::Type::getInt64Ty(Module->getContext()), value)},
-      "", Block);
+  auto &Ctx = Module->getContext();
+
+  auto void_ty = llvm::Type::getVoidTy(Ctx);
+  auto i8_ptr_ty = llvm::Type::getInt8PtrTy(Ctx);
+  auto i64_ptr_ty = llvm::Type::getInt64Ty(Ctx);
+
+  auto func_ty
+      = llvm::FunctionType::get(void_ty, {i8_ptr_ty, i64_ptr_ty}, false);
+  auto func = getOrInsertFunction(Module, "writeUInt64ToFile", func_ty);
+
+  auto i64_value = llvm::ConstantInt::get(i64_ptr_ty, value);
+
+  return llvm::CallInst::Create(func, {outputFile, i64_value}, "", Block);
 }
 
 llvm::CallInst *ProofEvent::emitSerializeTerm(
@@ -72,6 +76,11 @@ llvm::CallInst *ProofEvent::emitSerializeTerm(
   }
 }
 
+llvm::CallInst *ProofEvent::emitWriteUInt64(
+    llvm::Value *outputFile, uint64_t value, llvm::BasicBlock *insertAtEnd) {
+  return writeUInt64(outputFile, Module, value, insertAtEnd);
+}
+
 llvm::BinaryOperator *ProofEvent::emitNoOp(llvm::BasicBlock *insertAtEnd) {
   auto i8_ty = llvm::Type::getInt8Ty(Ctx);
   auto zero = llvm::ConstantInt::get(i8_ty, 0);
@@ -109,7 +118,7 @@ llvm::BasicBlock *ProofEvent::hookEvent_pre(std::string name) {
 
   auto nameptr = ir->CreateGlobalStringPtr(name, "", 0, Module);
 
-  writeUInt64(outputFile, Module, 0xaaaaaaaaaaaaaaaa, TrueBlock);
+  emitWriteUInt64(outputFile, 0xaaaaaaaaaaaaaaaa, TrueBlock);
   ir->CreateCall(
       getOrInsertFunction(
           Module, "printVariableToFile",
@@ -135,7 +144,7 @@ ProofEvent::hookEvent_post(llvm::Value *val, KORECompositeSort *sort) {
       llvm::Type::getInt8PtrTy(Module->getContext()), OutputFileName, "output",
       TrueBlock);
 
-  writeUInt64(outputFile, Module, 0xbbbbbbbbbbbbbbbb, TrueBlock);
+  emitWriteUInt64(outputFile, 0xbbbbbbbbbbbbbbbb, TrueBlock);
 
   emitSerializeTerm(*sort, outputFile, val, TrueBlock);
 
