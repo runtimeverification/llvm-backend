@@ -230,6 +230,8 @@ llvm::BasicBlock *ProofEvent::rewriteEvent(
   emitWriteUInt64(outputFile, word(0xCC), true_block);
 
   llvm::BranchInst::Create(merge_block, true_block);
+  emitNoOp(merge_block);
+
   return merge_block;
 }
 
@@ -247,6 +249,8 @@ llvm::BasicBlock *ProofEvent::functionEvent(
   emitWriteString(outputFile, locationStack, true_block);
 
   llvm::BranchInst::Create(merge_block, true_block);
+  emitNoOp(merge_block);
+
   return merge_block;
 }
 
