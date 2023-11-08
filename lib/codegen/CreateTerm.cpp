@@ -315,8 +315,8 @@ llvm::Value *CreateTerm::alloc_arg(
   llvm::Value *ret
       = createAllocation(p, fmt::format("{}:{}", locationStack, idx)).first;
   auto sort = dynamic_cast<KORECompositeSort *>(p->getSort().get());
-  ProofEvent e(Definition, CurrentBlock, Module);
-  CurrentBlock = e.hookArg(ret, sort);
+  ProofEvent e(Definition, Module);
+  CurrentBlock = e.hookArg(ret, sort, CurrentBlock);
   return ret;
 }
 
@@ -929,13 +929,12 @@ CreateTerm::createAllocation(KOREPattern *pattern, std::string locationStack) {
                                                     .get());
         std::string name = strPattern->getContents();
 
-        ProofEvent p1(Definition, CurrentBlock, Module);
-        CurrentBlock = p1.hookEvent_pre(name);
+        ProofEvent p(Definition, Module);
+        CurrentBlock = p.hookEvent_pre(name, CurrentBlock);
         llvm::Value *val = createHook(
             symbolDecl->getAttributes().at("hook").get(), constructor,
             locationStack);
-        ProofEvent p2(Definition, CurrentBlock, Module);
-        CurrentBlock = p2.hookEvent_post(val, sort);
+        CurrentBlock = p.hookEvent_post(val, sort, CurrentBlock);
 
         return std::make_pair(val, true);
       } else {

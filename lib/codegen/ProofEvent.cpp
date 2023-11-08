@@ -101,11 +101,6 @@ ProofEvent::emitGetOutputFileName(llvm::BasicBlock *insert_at_end) {
       i8_ptr_ty, fileNamePointer, "output", insert_at_end);
 }
 
-std::pair<llvm::BasicBlock *, llvm::BasicBlock *>
-ProofEvent::proofBranch(std::string const &label) {
-  return proofBranch(label, CurrentBlock);
-}
-
 std::pair<llvm::BasicBlock *, llvm::BasicBlock *> ProofEvent::proofBranch(
     std::string const &label, llvm::BasicBlock *insert_at_end) {
   auto i1_ty = llvm::Type::getInt1Ty(Ctx);
@@ -129,8 +124,9 @@ std::pair<llvm::BasicBlock *, llvm::BasicBlock *> ProofEvent::proofBranch(
  * Hook Events
  */
 
-llvm::BasicBlock *ProofEvent::hookEvent_pre(std::string name) {
-  auto [true_block, merge_block] = proofBranch("hookpre");
+llvm::BasicBlock *
+ProofEvent::hookEvent_pre(std::string name, llvm::BasicBlock *current_block) {
+  auto [true_block, merge_block] = proofBranch("hookpre", current_block);
   auto outputFile = emitGetOutputFileName(true_block);
   auto ir = new llvm::IRBuilder(true_block);
 
@@ -148,12 +144,13 @@ llvm::BasicBlock *ProofEvent::hookEvent_pre(std::string name) {
   llvm::BranchInst::Create(merge_block, true_block);
   emitNoOp(merge_block);
 
-  return CurrentBlock = merge_block;
+  return merge_block;
 }
 
-llvm::BasicBlock *
-ProofEvent::hookEvent_post(llvm::Value *val, KORECompositeSort *sort) {
-  auto [true_block, merge_block] = proofBranch("hookpost");
+llvm::BasicBlock *ProofEvent::hookEvent_post(
+    llvm::Value *val, KORECompositeSort *sort,
+    llvm::BasicBlock *current_block) {
+  auto [true_block, merge_block] = proofBranch("hookpost", current_block);
   auto outputFile = emitGetOutputFileName(true_block);
 
   emitWriteUInt64(outputFile, 0xbbbbbbbbbbbbbbbb, true_block);
@@ -163,12 +160,13 @@ ProofEvent::hookEvent_post(llvm::Value *val, KORECompositeSort *sort) {
   llvm::BranchInst::Create(merge_block, true_block);
   emitNoOp(merge_block);
 
-  return CurrentBlock = merge_block;
+  return merge_block;
 }
 
-llvm::BasicBlock *
-ProofEvent::hookArg(llvm::Value *val, KORECompositeSort *sort) {
-  auto [true_block, merge_block] = proofBranch("hookarg");
+llvm::BasicBlock *ProofEvent::hookArg(
+    llvm::Value *val, KORECompositeSort *sort,
+    llvm::BasicBlock *current_block) {
+  auto [true_block, merge_block] = proofBranch("hookarg", current_block);
 
   auto outputFile = emitGetOutputFileName(true_block);
 
@@ -177,7 +175,7 @@ ProofEvent::hookArg(llvm::Value *val, KORECompositeSort *sort) {
   llvm::BranchInst::Create(merge_block, true_block);
   emitNoOp(merge_block);
 
-  return CurrentBlock = merge_block;
+  return merge_block;
 }
 
 } // namespace kllvm

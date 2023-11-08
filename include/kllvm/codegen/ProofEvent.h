@@ -16,7 +16,6 @@ llvm::CallInst *writeUInt64(
 class ProofEvent {
 private:
   KOREDefinition *Definition;
-  llvm::BasicBlock *CurrentBlock;
   llvm::Module *Module;
   llvm::LLVMContext &Ctx;
 
@@ -32,12 +31,6 @@ private:
    */
   std::pair<llvm::BasicBlock *, llvm::BasicBlock *>
   proofBranch(std::string const &label, llvm::BasicBlock *insertAtEnd);
-
-  /*
-   * Overload to branch at the end of CurrentBlock
-   */
-  std::pair<llvm::BasicBlock *, llvm::BasicBlock *>
-  proofBranch(std::string const &label);
 
   /*
    * Emit a call that will serialize `term` to the specified `outputFile` as
@@ -71,16 +64,20 @@ private:
   llvm::LoadInst *emitGetOutputFileName(llvm::BasicBlock *insertAtEnd);
 
 public:
-  llvm::BasicBlock *hookEvent_pre(std::string name);
-  llvm::BasicBlock *hookEvent_post(llvm::Value *val, KORECompositeSort *sort);
-  llvm::BasicBlock *hookArg(llvm::Value *val, KORECompositeSort *sort);
+  llvm::BasicBlock *
+  hookEvent_pre(std::string name, llvm::BasicBlock *current_block);
+
+  llvm::BasicBlock *hookEvent_post(
+      llvm::Value *val, KORECompositeSort *sort,
+      llvm::BasicBlock *current_block);
+
+  llvm::BasicBlock *hookArg(
+      llvm::Value *val, KORECompositeSort *sort,
+      llvm::BasicBlock *current_block);
 
 public:
-  ProofEvent(
-      KOREDefinition *Definition, llvm::BasicBlock *EntryBlock,
-      llvm::Module *Module)
+  ProofEvent(KOREDefinition *Definition, llvm::Module *Module)
       : Definition(Definition)
-      , CurrentBlock(EntryBlock)
       , Module(Module)
       , Ctx(Module->getContext()) { }
 };
