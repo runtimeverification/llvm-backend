@@ -20,8 +20,24 @@ private:
   llvm::Module *Module;
   llvm::LLVMContext &Ctx;
 
+  /*
+   * Load the boolean flag that controls whether proof hint output is enabled or
+   * not, then create a branch at the end of this basic block depending on the
+   * result.
+   *
+   * Returns a pair of blocks [proof enabled, merge]; the first of these is
+   * intended for self-contained behaviour only relevant in proof output mode,
+   * while the second is for the continuation of the interpreter's previous
+   * behaviour.
+   */
   std::pair<llvm::BasicBlock *, llvm::BasicBlock *>
-  proofBranch(std::string label);
+  proofBranch(std::string const &label, llvm::BasicBlock *insertAtEnd);
+
+  /*
+   * Overload to branch at the end of CurrentBlock
+   */
+  std::pair<llvm::BasicBlock *, llvm::BasicBlock *>
+  proofBranch(std::string const &label);
 
   /*
    * Emit a call that will serialize `term` to the specified `outputFile` as

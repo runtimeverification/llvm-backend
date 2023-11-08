@@ -7,6 +7,10 @@
 
 namespace kllvm {
 
+/*
+ * Internal implementation details
+ */
+
 namespace {
 
 template <typename IRBuilder>
@@ -40,8 +44,8 @@ llvm::CallInst *writeUInt64(
 
 llvm::CallInst *ProofEvent::emitSerializeTerm(
     KORECompositeSort &sort, llvm::Value *outputFile, llvm::Value *term,
-    llvm::BasicBlock *insertAtEnd) {
-  auto B = llvm::IRBuilder(insertAtEnd);
+    llvm::BasicBlock *insert_at_end) {
+  auto B = llvm::IRBuilder(insert_at_end);
 
   auto cat = sort.getCategory(Definition);
   auto sort_name_ptr = createGlobalSortStringPtr(B, sort, Module);
@@ -77,40 +81,53 @@ llvm::CallInst *ProofEvent::emitSerializeTerm(
 }
 
 llvm::CallInst *ProofEvent::emitWriteUInt64(
-    llvm::Value *outputFile, uint64_t value, llvm::BasicBlock *insertAtEnd) {
-  return writeUInt64(outputFile, Module, value, insertAtEnd);
+    llvm::Value *outputFile, uint64_t value, llvm::BasicBlock *insert_at_end) {
+  return writeUInt64(outputFile, Module, value, insert_at_end);
 }
 
-llvm::BinaryOperator *ProofEvent::emitNoOp(llvm::BasicBlock *insertAtEnd) {
+llvm::BinaryOperator *ProofEvent::emitNoOp(llvm::BasicBlock *insert_at_end) {
   auto i8_ty = llvm::Type::getInt8Ty(Ctx);
   auto zero = llvm::ConstantInt::get(i8_ty, 0);
 
   return llvm::BinaryOperator::Create(
-      llvm::Instruction::Add, zero, zero, "no-op", insertAtEnd);
+      llvm::Instruction::Add, zero, zero, "no-op", insert_at_end);
 }
 
 llvm::LoadInst *
-ProofEvent::emitGetOutputFileName(llvm::BasicBlock *insertAtEnd) {
+ProofEvent::emitGetOutputFileName(llvm::BasicBlock *insert_at_end) {
   auto i8_ptr_ty = llvm::Type::getInt8PtrTy(Ctx);
   auto fileNamePointer = Module->getOrInsertGlobal("output_file", i8_ptr_ty);
-  return new llvm::LoadInst(i8_ptr_ty, fileNamePointer, "output", insertAtEnd);
+  return new llvm::LoadInst(
+      i8_ptr_ty, fileNamePointer, "output", insert_at_end);
 }
 
 std::pair<llvm::BasicBlock *, llvm::BasicBlock *>
-ProofEvent::proofBranch(std::string label) {
-  llvm::Function *f = CurrentBlock->getParent();
-  auto ProofOutputFlag = Module->getOrInsertGlobal(
-      "proof_output", llvm::Type::getInt1Ty(Module->getContext()));
-  auto proofOutput = new llvm::LoadInst(
-      llvm::Type::getInt1Ty(Module->getContext()), ProofOutputFlag,
-      "proof_output", CurrentBlock);
-  llvm::BasicBlock *TrueBlock
-      = llvm::BasicBlock::Create(Module->getContext(), "if_" + label, f);
-  llvm::BasicBlock *MergeBlock
-      = llvm::BasicBlock::Create(Module->getContext(), "tail_" + label, f);
-  llvm::BranchInst::Create(TrueBlock, MergeBlock, proofOutput, CurrentBlock);
-  return std::pair(TrueBlock, MergeBlock);
+ProofEvent::proofBranch(std::string const &label) {
+  return proofBranch(label, CurrentBlock);
 }
+
+std::pair<llvm::BasicBlock *, llvm::BasicBlock *> ProofEvent::proofBranch(
+    std::string const &label, llvm::BasicBlock *insert_at_end) {
+  auto i1_ty = llvm::Type::getInt1Ty(Ctx);
+
+  auto proof_output_flag = Module->getOrInsertGlobal("proof_output", i1_ty);
+  auto proof_output = new llvm::LoadInst(
+      i1_ty, proof_output_flag, "proof_output", insert_at_end);
+
+  auto f = insert_at_end->getParent();
+  auto true_block
+      = llvm::BasicBlock::Create(Ctx, fmt::format("if_{}", label), f);
+  auto *merge_block
+      = llvm::BasicBlock::Create(Ctx, fmt::format("tail_{}", label), f);
+
+  llvm::BranchInst::Create(
+      true_block, merge_block, proof_output, insert_at_end);
+  return {true_block, merge_block};
+}
+
+/*
+ * Hook Events
+ */
 
 llvm::BasicBlock *ProofEvent::hookEvent_pre(std::string name) {
   auto b = proofBranch("hookpre");
