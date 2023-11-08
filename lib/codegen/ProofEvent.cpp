@@ -89,6 +89,13 @@ llvm::BinaryOperator *ProofEvent::emitNoOp(llvm::BasicBlock *insertAtEnd) {
       llvm::Instruction::Add, zero, zero, "no-op", insertAtEnd);
 }
 
+llvm::LoadInst *
+ProofEvent::emitGetOutputFileName(llvm::BasicBlock *insertAtEnd) {
+  auto i8_ptr_ty = llvm::Type::getInt8PtrTy(Ctx);
+  auto fileNamePointer = Module->getOrInsertGlobal("output_file", i8_ptr_ty);
+  return new llvm::LoadInst(i8_ptr_ty, fileNamePointer, "output", insertAtEnd);
+}
+
 std::pair<llvm::BasicBlock *, llvm::BasicBlock *>
 ProofEvent::proofBranch(std::string label) {
   llvm::Function *f = CurrentBlock->getParent();
@@ -109,12 +116,8 @@ llvm::BasicBlock *ProofEvent::hookEvent_pre(std::string name) {
   auto b = proofBranch("hookpre");
   auto TrueBlock = b.first;
   auto MergeBlock = b.second;
-  auto OutputFileName = Module->getOrInsertGlobal(
-      "output_file", llvm::Type::getInt8PtrTy(Module->getContext()));
+  auto outputFile = emitGetOutputFileName(TrueBlock);
   auto ir = new llvm::IRBuilder(TrueBlock);
-  auto outputFile = new llvm::LoadInst(
-      llvm::Type::getInt8PtrTy(Module->getContext()), OutputFileName, "output",
-      TrueBlock);
 
   auto nameptr = ir->CreateGlobalStringPtr(name, "", 0, Module);
 
@@ -138,11 +141,7 @@ ProofEvent::hookEvent_post(llvm::Value *val, KORECompositeSort *sort) {
   auto b = proofBranch("hookpost");
   auto TrueBlock = b.first;
   auto MergeBlock = b.second;
-  auto OutputFileName = Module->getOrInsertGlobal(
-      "output_file", llvm::Type::getInt8PtrTy(Module->getContext()));
-  auto outputFile = new llvm::LoadInst(
-      llvm::Type::getInt8PtrTy(Module->getContext()), OutputFileName, "output",
-      TrueBlock);
+  auto outputFile = emitGetOutputFileName(TrueBlock);
 
   emitWriteUInt64(outputFile, 0xbbbbbbbbbbbbbbbb, TrueBlock);
 
@@ -160,11 +159,7 @@ ProofEvent::hookArg(llvm::Value *val, KORECompositeSort *sort) {
   auto TrueBlock = b.first;
   auto MergeBlock = b.second;
 
-  auto OutputFileName = Module->getOrInsertGlobal(
-      "output_file", llvm::Type::getInt8PtrTy(Module->getContext()));
-  auto outputFile = new llvm::LoadInst(
-      llvm::Type::getInt8PtrTy(Module->getContext()), OutputFileName, "output",
-      TrueBlock);
+  auto outputFile = emitGetOutputFileName(TrueBlock);
 
   emitSerializeTerm(*sort, outputFile, val, TrueBlock);
 

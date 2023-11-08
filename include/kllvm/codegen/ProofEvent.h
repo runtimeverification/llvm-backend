@@ -48,6 +48,12 @@ private:
    */
   llvm::BinaryOperator *emitNoOp(llvm::BasicBlock *insertAtEnd);
 
+  /*
+   * Emit instructions to load the path of the interpreter's current output
+   * file; used here for binary proof trace data.
+   */
+  llvm::LoadInst *emitGetOutputFileName(llvm::BasicBlock *insertAtEnd);
+
 public:
   llvm::BasicBlock *hookEvent_pre(std::string name);
   llvm::BasicBlock *hookEvent_post(llvm::Value *val, KORECompositeSort *sort);
