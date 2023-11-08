@@ -22,6 +22,15 @@ llvm::Constant *createGlobalSortStringPtr(
       os.str(), fmt::format("{}_str", sort.getName()), 0, mod);
 }
 
+constexpr uint64_t word(uint8_t byte) {
+  auto ret = uint64_t{0};
+  for (auto i = 0u; i < sizeof(ret); ++i) {
+    ret <<= 8;
+    ret |= byte;
+  }
+  return ret;
+}
+
 } // namespace
 
 llvm::CallInst *writeUInt64(
@@ -161,7 +170,7 @@ ProofEvent::hookEvent_pre(std::string name, llvm::BasicBlock *current_block) {
   auto [true_block, merge_block] = proofBranch("hookpre", current_block);
   auto outputFile = emitGetOutputFileName(true_block);
 
-  emitWriteUInt64(outputFile, 0xaaaaaaaaaaaaaaaa, true_block);
+  emitWriteUInt64(outputFile, word(0xAA), true_block);
   emitWriteString(outputFile, name, true_block);
 
   llvm::BranchInst::Create(merge_block, true_block);
@@ -176,7 +185,7 @@ llvm::BasicBlock *ProofEvent::hookEvent_post(
   auto [true_block, merge_block] = proofBranch("hookpost", current_block);
   auto outputFile = emitGetOutputFileName(true_block);
 
-  emitWriteUInt64(outputFile, 0xbbbbbbbbbbbbbbbb, true_block);
+  emitWriteUInt64(outputFile, word(0xBB), true_block);
 
   emitSerializeTerm(*sort, outputFile, val, true_block);
 
@@ -221,12 +230,12 @@ llvm::BasicBlock *ProofEvent::rewriteEvent(
 
     emitWriteString(outputFile, key.str(), true_block);
     emitSerializeTerm(*sort, outputFile, val, true_block);
-    emitWriteUInt64(outputFile, 0xcccccccccccccccc, true_block);
+    emitWriteUInt64(outputFile, word(0xCC), true_block);
   }
 
-  emitWriteUInt64(outputFile, 0xffffffffffffffff, true_block);
+  emitWriteUInt64(outputFile, word(0xFF), true_block);
   emitSerializeConfiguration(outputFile, return_value, true_block);
-  emitWriteUInt64(outputFile, 0xcccccccccccccccc, true_block);
+  emitWriteUInt64(outputFile, word(0xCC), true_block);
 
   llvm::BranchInst::Create(merge_block, true_block);
   return merge_block;
