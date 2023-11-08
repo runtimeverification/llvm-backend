@@ -31,6 +31,8 @@ constexpr uint64_t word(uint8_t byte) {
   return ret;
 }
 
+static_assert(word(0xAA) == 0xAAAAAAAAAAAAAAAA);
+
 } // namespace
 
 llvm::CallInst *ProofEvent::emitSerializeTerm(
