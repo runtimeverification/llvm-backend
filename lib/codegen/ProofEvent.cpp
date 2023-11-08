@@ -241,4 +241,22 @@ llvm::BasicBlock *ProofEvent::rewriteEvent(
   return merge_block;
 }
 
+llvm::BasicBlock *ProofEvent::functionEvent(
+    llvm::BasicBlock *current_block, KORECompositePattern *pattern,
+    std::string const &locationStack) {
+  auto [true_block, merge_block] = proofBranch("hookarg", current_block);
+  auto ir = llvm::IRBuilder(true_block);
+  auto outputFile = emitGetOutputFileName(true_block);
+
+  std::ostringstream symbolName;
+  pattern->getConstructor()->print(symbolName);
+
+  emitWriteUInt64(outputFile, word(0xDD), true_block);
+  emitWriteString(outputFile, symbolName.str(), true_block);
+  emitWriteString(outputFile, locationStack, true_block);
+
+  llvm::BranchInst::Create(merge_block, true_block);
+  return merge_block;
+}
+
 } // namespace kllvm

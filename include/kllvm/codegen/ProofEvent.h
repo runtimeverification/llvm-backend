@@ -100,6 +100,10 @@ public:
       llvm::StringMap<llvm::Value *> const &subst,
       llvm::BasicBlock *current_block);
 
+  llvm::BasicBlock *functionEvent(
+      llvm::BasicBlock *current_block, KORECompositePattern *pattern,
+      std::string const &locationStack);
+
 public:
   ProofEvent(KOREDefinition *Definition, llvm::Module *Module)
       : Definition(Definition)
