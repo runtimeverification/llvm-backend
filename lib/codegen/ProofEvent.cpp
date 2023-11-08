@@ -85,6 +85,22 @@ llvm::CallInst *ProofEvent::emitWriteUInt64(
   return writeUInt64(outputFile, Module, value, insert_at_end);
 }
 
+llvm::CallInst *ProofEvent::emitWriteString(
+    llvm::Value *outputFile, std::string const &str,
+    llvm::BasicBlock *insertAtEnd) {
+  auto B = llvm::IRBuilder(insertAtEnd);
+
+  auto void_ty = llvm::Type::getVoidTy(Ctx);
+  auto i8_ptr_ty = llvm::Type::getInt8PtrTy(Ctx);
+
+  auto func_ty = llvm::FunctionType::get(void_ty, {i8_ptr_ty, i8_ptr_ty}, false);
+
+  auto print = getOrInsertFunction(Module, "printVariableToFile", func_ty);
+
+  auto varname = B.CreateGlobalStringPtr(str, "", 0, Module);
+  return B.CreateCall(print, {outputFile, varname});
+}
+
 llvm::BinaryOperator *ProofEvent::emitNoOp(llvm::BasicBlock *insert_at_end) {
   auto i8_ty = llvm::Type::getInt8Ty(Ctx);
   auto zero = llvm::ConstantInt::get(i8_ty, 0);
@@ -128,18 +144,9 @@ llvm::BasicBlock *
 ProofEvent::hookEvent_pre(std::string name, llvm::BasicBlock *current_block) {
   auto [true_block, merge_block] = proofBranch("hookpre", current_block);
   auto outputFile = emitGetOutputFileName(true_block);
-  auto ir = new llvm::IRBuilder(true_block);
-
-  auto nameptr = ir->CreateGlobalStringPtr(name, "", 0, Module);
 
   emitWriteUInt64(outputFile, 0xaaaaaaaaaaaaaaaa, true_block);
-  ir->CreateCall(
-      getOrInsertFunction(
-          Module, "printVariableToFile",
-          llvm::Type::getVoidTy(Module->getContext()),
-          llvm::Type::getInt8PtrTy(Module->getContext()),
-          llvm::Type::getInt8PtrTy(Module->getContext())),
-      {outputFile, nameptr});
+  emitWriteString(outputFile, name, true_block);
 
   llvm::BranchInst::Create(merge_block, true_block);
   emitNoOp(merge_block);
@@ -195,18 +202,9 @@ llvm::BasicBlock *ProofEvent::rewriteEvent(
     auto var = vars[key.str()];
 
     auto sort = dynamic_cast<KORECompositeSort *>(var->getSort().get());
-    auto varname = ir.CreateGlobalStringPtr(key, "", 0, Module);
 
-    ir.CreateCall(
-        getOrInsertFunction(
-            Module, "printVariableToFile",
-            llvm::Type::getVoidTy(Module->getContext()),
-            llvm::Type::getInt8PtrTy(Module->getContext()),
-            llvm::Type::getInt8PtrTy(Module->getContext())),
-        {outputFile, varname});
-
+    emitWriteString(outputFile, key.str(), true_block);
     emitSerializeTerm(*sort, outputFile, val, true_block);
-
     emitWriteUInt64(outputFile, 0xcccccccccccccccc, true_block);
   }
 

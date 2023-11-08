@@ -48,6 +48,13 @@ private:
   llvm::CallInst *emitWriteUInt64(
       llvm::Value *outputFile, uint64_t value, llvm::BasicBlock *insertAtEnd);
 
+  /*
+   * Emit a call that will serialize `str` to the specified `outputFile`.
+   */
+  llvm::CallInst *emitWriteString(
+      llvm::Value *outputFile, std::string const &str,
+      llvm::BasicBlock *insertAtEnd);
+
   /* 
    * Emit an instruction that has no effect and will be removed by optimization
    * passes.
