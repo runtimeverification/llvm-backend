@@ -216,7 +216,6 @@ llvm::BasicBlock *ProofEvent::rewriteEvent(
     llvm::StringMap<llvm::Value *> const &subst,
     llvm::BasicBlock *current_block) {
   auto [true_block, merge_block] = proofBranch("hookarg", current_block);
-  auto ir = llvm::IRBuilder(true_block);
   auto outputFile = emitGetOutputFileName(true_block);
 
   emitWriteUInt64(outputFile, axiom->getOrdinal(), true_block);
@@ -245,7 +244,6 @@ llvm::BasicBlock *ProofEvent::functionEvent(
     llvm::BasicBlock *current_block, KORECompositePattern *pattern,
     std::string const &locationStack) {
   auto [true_block, merge_block] = proofBranch("hookarg", current_block);
-  auto ir = llvm::IRBuilder(true_block);
   auto outputFile = emitGetOutputFileName(true_block);
 
   std::ostringstream symbolName;
