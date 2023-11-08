@@ -7,6 +7,8 @@
 
 #include "llvm/IR/Instructions.h"
 
+#include <map>
+
 namespace kllvm {
 
 llvm::CallInst *writeUInt64(
@@ -73,6 +75,12 @@ public:
 
   llvm::BasicBlock *hookArg(
       llvm::Value *val, KORECompositeSort *sort,
+      llvm::BasicBlock *current_block);
+
+  llvm::BasicBlock *rewriteEvent(
+      KOREAxiomDeclaration *axiom, llvm::Value *return_value, uint64_t arity,
+      std::map<std::string, KOREVariablePattern *> vars,
+      llvm::StringMap<llvm::Value *> const &subst,
       llvm::BasicBlock *current_block);
 
 public:

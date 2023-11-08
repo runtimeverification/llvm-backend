@@ -1110,91 +1110,10 @@ bool makeFunction(
 
   auto CurrentBlock = creator.getCurrentBlock();
   if (apply && bigStep) {
-    auto ProofOutputFlag = Module->getOrInsertGlobal(
-        "proof_output", llvm::Type::getInt1Ty(Module->getContext()));
-    auto OutputFileName = Module->getOrInsertGlobal(
-        "output_file", llvm::Type::getInt8PtrTy(Module->getContext()));
-    auto proofOutput = new llvm::LoadInst(
-        llvm::Type::getInt1Ty(Module->getContext()), ProofOutputFlag,
-        "proof_output", CurrentBlock);
-    llvm::BasicBlock *TrueBlock
-        = llvm::BasicBlock::Create(Module->getContext(), "if", applyRule);
-    auto ir = new llvm::IRBuilder(TrueBlock);
-    llvm::BasicBlock *MergeBlock
-        = llvm::BasicBlock::Create(Module->getContext(), "tail", applyRule);
-    llvm::BranchInst::Create(TrueBlock, MergeBlock, proofOutput, CurrentBlock);
-    auto outputFile = new llvm::LoadInst(
-        llvm::Type::getInt8PtrTy(Module->getContext()), OutputFileName,
-        "output", TrueBlock);
-    writeUInt64(outputFile, Module, axiom->getOrdinal(), TrueBlock);
-    writeUInt64(
-        outputFile, Module, applyRule->arg_end() - applyRule->arg_begin(),
-        TrueBlock);
-    for (auto entry = subst.begin(); entry != subst.end(); ++entry) {
-      auto key = entry->getKey();
-      auto val = entry->getValue();
-      auto var = vars[key.str()];
-      auto sort = dynamic_cast<KORECompositeSort *>(var->getSort().get());
-      auto cat = sort->getCategory(definition);
-      std::ostringstream Out;
-      sort->print(Out);
-      auto sortptr = ir->CreateGlobalStringPtr(Out.str(), "", 0, Module);
-      auto varname = ir->CreateGlobalStringPtr(key, "", 0, Module);
-      ir->CreateCall(
-          getOrInsertFunction(
-              Module, "printVariableToFile",
-              llvm::Type::getVoidTy(Module->getContext()),
-              llvm::Type::getInt8PtrTy(Module->getContext()),
-              llvm::Type::getInt8PtrTy(Module->getContext())),
-          {outputFile, varname});
-      if (cat.cat == SortCategory::Symbol
-          || cat.cat == SortCategory::Variable) {
-        ir->CreateCall(
-            getOrInsertFunction(
-                Module, "serializeTermToFile",
-                llvm::Type::getVoidTy(Module->getContext()),
-                llvm::Type::getInt8PtrTy(Module->getContext()),
-                getValueType({SortCategory::Symbol, 0}, Module),
-                llvm::Type::getInt8PtrTy(Module->getContext())),
-            {outputFile, val, sortptr});
-      } else if (val->getType()->isIntegerTy()) {
-        val = ir->CreateIntToPtr(
-            val, llvm::Type::getInt8PtrTy(Module->getContext()));
-        ir->CreateCall(
-            getOrInsertFunction(
-                Module, "serializeRawTermToFile",
-                llvm::Type::getVoidTy(Module->getContext()),
-                llvm::Type::getInt8PtrTy(Module->getContext()),
-                llvm::Type::getInt8PtrTy(Module->getContext()),
-                llvm::Type::getInt8PtrTy(Module->getContext())),
-            {outputFile, val, sortptr});
-      } else {
-        val = ir->CreatePointerCast(
-            val, llvm::Type::getInt8PtrTy(Module->getContext()));
-        ir->CreateCall(
-            getOrInsertFunction(
-                Module, "serializeRawTermToFile",
-                llvm::Type::getVoidTy(Module->getContext()),
-                llvm::Type::getInt8PtrTy(Module->getContext()),
-                llvm::Type::getInt8PtrTy(Module->getContext()),
-                llvm::Type::getInt8PtrTy(Module->getContext())),
-            {outputFile, val, sortptr});
-      }
-      writeUInt64(outputFile, Module, 0xcccccccccccccccc, TrueBlock);
-    }
-
-    writeUInt64(outputFile, Module, 0xffffffffffffffff, TrueBlock);
-    ir->CreateCall(
-        getOrInsertFunction(
-            Module, "serializeConfigurationToFile",
-            llvm::Type::getVoidTy(Module->getContext()),
-            llvm::Type::getInt8PtrTy(Module->getContext()),
-            getValueType({SortCategory::Symbol, 0}, Module)),
-        {outputFile, retval});
-    writeUInt64(outputFile, Module, 0xcccccccccccccccc, TrueBlock);
-
-    llvm::BranchInst::Create(MergeBlock, TrueBlock);
-    CurrentBlock = MergeBlock;
+    auto event = ProofEvent(definition, Module);
+    event.rewriteEvent(
+        axiom, retval, applyRule->arg_end() - applyRule->arg_begin(), vars,
+        subst, CurrentBlock);
   }
 
   if (bigStep) {

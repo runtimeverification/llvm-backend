@@ -178,4 +178,50 @@ llvm::BasicBlock *ProofEvent::hookArg(
   return merge_block;
 }
 
+llvm::BasicBlock *ProofEvent::rewriteEvent(
+    KOREAxiomDeclaration *axiom, llvm::Value *return_value, uint64_t arity,
+    std::map<std::string, KOREVariablePattern *> vars,
+    llvm::StringMap<llvm::Value *> const &subst,
+    llvm::BasicBlock *current_block) {
+  auto [true_block, merge_block] = proofBranch("hookarg", current_block);
+  auto ir = llvm::IRBuilder(true_block);
+  auto outputFile = emitGetOutputFileName(true_block);
+
+  emitWriteUInt64(outputFile, axiom->getOrdinal(), true_block);
+  emitWriteUInt64(outputFile, arity, true_block);
+  for (auto entry = subst.begin(); entry != subst.end(); ++entry) {
+    auto key = entry->getKey();
+    auto val = entry->getValue();
+    auto var = vars[key.str()];
+
+    auto sort = dynamic_cast<KORECompositeSort *>(var->getSort().get());
+    auto varname = ir.CreateGlobalStringPtr(key, "", 0, Module);
+
+    ir.CreateCall(
+        getOrInsertFunction(
+            Module, "printVariableToFile",
+            llvm::Type::getVoidTy(Module->getContext()),
+            llvm::Type::getInt8PtrTy(Module->getContext()),
+            llvm::Type::getInt8PtrTy(Module->getContext())),
+        {outputFile, varname});
+
+    emitSerializeTerm(*sort, outputFile, val, true_block);
+
+    emitWriteUInt64(outputFile, 0xcccccccccccccccc, true_block);
+  }
+
+  emitWriteUInt64(outputFile, 0xffffffffffffffff, true_block);
+  ir.CreateCall(
+      getOrInsertFunction(
+          Module, "serializeConfigurationToFile",
+          llvm::Type::getVoidTy(Module->getContext()),
+          llvm::Type::getInt8PtrTy(Module->getContext()),
+          getValueType({SortCategory::Symbol, 0}, Module)),
+      {outputFile, return_value});
+  emitWriteUInt64(outputFile, 0xcccccccccccccccc, true_block);
+
+  llvm::BranchInst::Create(merge_block, true_block);
+  return merge_block;
+}
+
 } // namespace kllvm
