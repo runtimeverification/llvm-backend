@@ -1119,7 +1119,7 @@ static llvm::Constant *getOffsetOfMember(
   auto offset
       = llvm::DataLayout(mod).getStructLayout(struct_ty)->getElementOffset(
           nth_member);
-  auto offset_ty = llvm::Type::getInt32Ty(mod->getContext());
+  auto offset_ty = llvm::Type::getInt64Ty(mod->getContext());
   return llvm::ConstantInt::get(offset_ty, offset);
 #else
   return llvm::ConstantExpr::getOffsetOf(struct_ty, nth_member);

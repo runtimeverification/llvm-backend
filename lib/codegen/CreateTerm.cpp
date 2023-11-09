@@ -698,7 +698,7 @@ llvm::Value *CreateTerm::createFunctionCall(
   }
 
   auto event = ProofEvent(Definition, Module);
-  event.functionEvent(CurrentBlock, pattern, locationStack);
+  CurrentBlock = event.functionEvent(CurrentBlock, pattern, locationStack);
 
   return createFunctionCall(name, returnCat, args, sret, tailcc, locationStack);
 }
@@ -1070,7 +1070,7 @@ bool makeFunction(
   auto CurrentBlock = creator.getCurrentBlock();
   if (apply && bigStep) {
     auto event = ProofEvent(definition, Module);
-    event.rewriteEvent(
+    CurrentBlock = event.rewriteEvent(
         axiom, retval, applyRule->arg_end() - applyRule->arg_begin(), vars,
         subst, CurrentBlock);
   }

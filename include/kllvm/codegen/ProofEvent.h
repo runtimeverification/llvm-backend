@@ -79,24 +79,24 @@ private:
   llvm::LoadInst *emitGetOutputFileName(llvm::BasicBlock *insertAtEnd);
 
 public:
-  llvm::BasicBlock *
+  [[nodiscard]] llvm::BasicBlock *
   hookEvent_pre(std::string name, llvm::BasicBlock *current_block);
 
-  llvm::BasicBlock *hookEvent_post(
+  [[nodiscard]] llvm::BasicBlock *hookEvent_post(
       llvm::Value *val, KORECompositeSort *sort,
       llvm::BasicBlock *current_block);
 
-  llvm::BasicBlock *hookArg(
+  [[nodiscard]] llvm::BasicBlock *hookArg(
       llvm::Value *val, KORECompositeSort *sort,
       llvm::BasicBlock *current_block);
 
-  llvm::BasicBlock *rewriteEvent(
+  [[nodiscard]] llvm::BasicBlock *rewriteEvent(
       KOREAxiomDeclaration *axiom, llvm::Value *return_value, uint64_t arity,
       std::map<std::string, KOREVariablePattern *> vars,
       llvm::StringMap<llvm::Value *> const &subst,
       llvm::BasicBlock *current_block);
 
-  llvm::BasicBlock *functionEvent(
+  [[nodiscard]] llvm::BasicBlock *functionEvent(
       llvm::BasicBlock *current_block, KORECompositePattern *pattern,
       std::string const &locationStack);
 
