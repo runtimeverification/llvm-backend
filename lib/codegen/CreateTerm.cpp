@@ -1070,7 +1070,7 @@ bool makeFunction(
   auto CurrentBlock = creator.getCurrentBlock();
   if (apply && bigStep) {
     CurrentBlock = ProofEvent(definition, Module)
-                       .rewriteEvent_post(retval, CurrentBlock);
+                       .rewriteEvent_post(axiom, retval, CurrentBlock);
   }
 
   if (bigStep) {
