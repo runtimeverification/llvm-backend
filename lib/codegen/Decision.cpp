@@ -581,9 +581,9 @@ void LeafNode::codegen(Decision *d) {
     subst[iter->first] = args[i];
   }
 
-  auto p = ProofEvent(d->Definition, d->Module);
   d->CurrentBlock
-      = p.rewriteEvent_pre(axiom, arity, vars, subst, d->CurrentBlock);
+      = ProofEvent(d->Definition, d->Module)
+            .rewriteEvent_pre(axiom, arity, vars, subst, d->CurrentBlock);
 
   auto Call = llvm::CallInst::Create(
       getOrInsertFunction(
@@ -591,12 +591,6 @@ void LeafNode::codegen(Decision *d) {
       args, "", d->CurrentBlock);
   setDebugLoc(Call);
   Call->setCallingConv(llvm::CallingConv::Tail);
-
-  // Disabled as printing every resulting configuration here breaks tail
-  // recursion badly enough that interpreters crash after taking a certain
-  // number of steps; I'm not sure what the solution is if we want to be able to
-  // inspect this intermediate configuration.
-  /* d->CurrentBlock = p.rewriteEvent_post(axiom, Call, d->CurrentBlock); */
 
   if (child == nullptr) {
     llvm::ReturnInst::Create(d->Ctx, Call, d->CurrentBlock);
