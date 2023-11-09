@@ -238,12 +238,16 @@ llvm::BasicBlock *ProofEvent::rewriteEvent_pre(
 }
 
 llvm::BasicBlock *ProofEvent::rewriteEvent_post(
-    llvm::Value *return_value, llvm::BasicBlock *current_block) {
+    KOREAxiomDeclaration *axiom, llvm::Value *return_value,
+    llvm::BasicBlock *current_block) {
   auto [true_block, merge_block, output_file]
       = eventPrelude("rewrite_post", current_block);
 
+  auto return_sort = std::dynamic_pointer_cast<KORECompositeSort>(
+      axiom->getRightHandSide()->getSort());
+
   emitWriteUInt64(output_file, word(0xFF), true_block);
-  emitSerializeConfiguration(output_file, return_value, true_block);
+  emitSerializeTerm(*return_sort, output_file, return_value, true_block);
   emitWriteUInt64(output_file, word(0xCC), true_block);
 
   llvm::BranchInst::Create(merge_block, true_block);

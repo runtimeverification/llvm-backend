@@ -108,8 +108,9 @@ public:
       llvm::StringMap<llvm::Value *> const &subst,
       llvm::BasicBlock *current_block);
 
-  [[nodiscard]] llvm::BasicBlock *
-  rewriteEvent_post(llvm::Value *return_value, llvm::BasicBlock *current_block);
+  [[nodiscard]] llvm::BasicBlock *rewriteEvent_post(
+      KOREAxiomDeclaration *axiom, llvm::Value *return_value,
+      llvm::BasicBlock *current_block);
 
   [[nodiscard]] llvm::BasicBlock *functionEvent(
       llvm::BasicBlock *current_block, KORECompositePattern *pattern,

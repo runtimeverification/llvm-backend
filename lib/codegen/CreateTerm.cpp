@@ -1069,11 +1069,8 @@ bool makeFunction(
 
   auto CurrentBlock = creator.getCurrentBlock();
   if (apply && bigStep) {
-    auto event = ProofEvent(definition, Module);
-    CurrentBlock = event.rewriteEvent_pre(
-        axiom, applyRule->arg_end() - applyRule->arg_begin(), vars, subst,
-        CurrentBlock);
-    CurrentBlock = event.rewriteEvent_post(retval, CurrentBlock);
+    CurrentBlock = ProofEvent(definition, Module)
+                       .rewriteEvent_post(retval, CurrentBlock);
   }
 
   if (bigStep) {
