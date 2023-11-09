@@ -226,7 +226,7 @@ llvm::BasicBlock *ProofEvent::rewriteEvent(
     auto val = entry->getValue();
     auto var = vars[key.str()];
 
-    auto sort = dynamic_cast<KORECompositeSort *>(var->getSort().get());
+    auto sort = std::dynamic_pointer_cast<KORECompositeSort>(var->getSort());
 
     emitWriteString(outputFile, key.str(), true_block);
     emitSerializeTerm(*sort, outputFile, val, true_block);
