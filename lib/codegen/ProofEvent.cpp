@@ -205,6 +205,10 @@ llvm::BasicBlock *ProofEvent::hookArg(
   return merge_block;
 }
 
+/*
+ * Rewrite Events
+ */
+
 llvm::BasicBlock *ProofEvent::rewriteEvent(
     KOREAxiomDeclaration *axiom, llvm::Value *return_value, uint64_t arity,
     std::map<std::string, KOREVariablePattern *> vars,
@@ -236,6 +240,10 @@ llvm::BasicBlock *ProofEvent::rewriteEvent(
 
   return merge_block;
 }
+
+/*
+ * Function Events
+ */
 
 llvm::BasicBlock *ProofEvent::functionEvent(
     llvm::BasicBlock *current_block, KORECompositePattern *pattern,
