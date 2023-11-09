@@ -211,13 +211,13 @@ llvm::BasicBlock *ProofEvent::hookArg(
  * Rewrite Events
  */
 
-llvm::BasicBlock *ProofEvent::rewriteEvent(
-    KOREAxiomDeclaration *axiom, llvm::Value *return_value, uint64_t arity,
+llvm::BasicBlock *ProofEvent::rewriteEvent_pre(
+    KOREAxiomDeclaration *axiom, uint64_t arity,
     std::map<std::string, KOREVariablePattern *> vars,
     llvm::StringMap<llvm::Value *> const &subst,
     llvm::BasicBlock *current_block) {
   auto [true_block, merge_block, outputFile]
-      = eventPrelude("rewrite", current_block);
+      = eventPrelude("rewrite_pre", current_block);
 
   emitWriteUInt64(outputFile, axiom->getOrdinal(), true_block);
   emitWriteUInt64(outputFile, arity, true_block);
@@ -233,9 +233,18 @@ llvm::BasicBlock *ProofEvent::rewriteEvent(
     emitWriteUInt64(outputFile, word(0xCC), true_block);
   }
 
-  emitWriteUInt64(outputFile, word(0xFF), true_block);
-  emitSerializeConfiguration(outputFile, return_value, true_block);
-  emitWriteUInt64(outputFile, word(0xCC), true_block);
+  llvm::BranchInst::Create(merge_block, true_block);
+  return merge_block;
+}
+
+llvm::BasicBlock *ProofEvent::rewriteEvent_post(
+    llvm::Value *return_value, llvm::BasicBlock *current_block) {
+  auto [true_block, merge_block, output_file]
+      = eventPrelude("rewrite_post", current_block);
+
+  emitWriteUInt64(output_file, word(0xFF), true_block);
+  emitSerializeConfiguration(output_file, return_value, true_block);
+  emitWriteUInt64(output_file, word(0xCC), true_block);
 
   llvm::BranchInst::Create(merge_block, true_block);
   return merge_block;
