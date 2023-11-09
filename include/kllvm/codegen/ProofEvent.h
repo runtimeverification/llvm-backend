@@ -8,6 +8,7 @@
 #include "llvm/IR/Instructions.h"
 
 #include <map>
+#include <tuple>
 
 namespace kllvm {
 
@@ -29,6 +30,17 @@ private:
    */
   std::pair<llvm::BasicBlock *, llvm::BasicBlock *>
   proofBranch(std::string const &label, llvm::BasicBlock *insertAtEnd);
+
+  /*
+   * Set up a standard event prelude by creating a pair of basic blocks for the
+   * proof output and continuation, then loading the output filename from its
+   * global.
+   *
+   * Returns a triple [proof enabled, merge, output_file]; see `proofBranch` and
+   * `emitGetOutputFileName`.
+   */
+  std::tuple<llvm::BasicBlock *, llvm::BasicBlock *, llvm::Value *>
+  eventPrelude(std::string const &label, llvm::BasicBlock *insertAtEnd);
 
   /*
    * Emit a call that will serialize `term` to the specified `outputFile` as

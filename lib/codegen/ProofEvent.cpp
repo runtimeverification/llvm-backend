@@ -151,9 +151,18 @@ std::pair<llvm::BasicBlock *, llvm::BasicBlock *> ProofEvent::proofBranch(
   auto *merge_block
       = llvm::BasicBlock::Create(Ctx, fmt::format("tail_{}", label), f);
 
+  emitNoOp(merge_block);
+
   llvm::BranchInst::Create(
       true_block, merge_block, proof_output, insert_at_end);
   return {true_block, merge_block};
+}
+
+std::tuple<llvm::BasicBlock *, llvm::BasicBlock *, llvm::Value *>
+ProofEvent::eventPrelude(
+    std::string const &label, llvm::BasicBlock *insertAtEnd) {
+  auto [true_block, merge_block] = proofBranch(label, insertAtEnd);
+  return {true_block, merge_block, emitGetOutputFileName(true_block)};
 }
 
 /*
@@ -162,46 +171,39 @@ std::pair<llvm::BasicBlock *, llvm::BasicBlock *> ProofEvent::proofBranch(
 
 llvm::BasicBlock *
 ProofEvent::hookEvent_pre(std::string name, llvm::BasicBlock *current_block) {
-  auto [true_block, merge_block] = proofBranch("hookpre", current_block);
-  auto outputFile = emitGetOutputFileName(true_block);
+  auto [true_block, merge_block, outputFile]
+      = eventPrelude("hookpre", current_block);
 
   emitWriteUInt64(outputFile, word(0xAA), true_block);
   emitWriteString(outputFile, name, true_block);
 
   llvm::BranchInst::Create(merge_block, true_block);
-  emitNoOp(merge_block);
-
   return merge_block;
 }
 
 llvm::BasicBlock *ProofEvent::hookEvent_post(
     llvm::Value *val, KORECompositeSort *sort,
     llvm::BasicBlock *current_block) {
-  auto [true_block, merge_block] = proofBranch("hookpost", current_block);
-  auto outputFile = emitGetOutputFileName(true_block);
+  auto [true_block, merge_block, outputFile]
+      = eventPrelude("hookpost", current_block);
 
   emitWriteUInt64(outputFile, word(0xBB), true_block);
 
   emitSerializeTerm(*sort, outputFile, val, true_block);
 
   llvm::BranchInst::Create(merge_block, true_block);
-  emitNoOp(merge_block);
-
   return merge_block;
 }
 
 llvm::BasicBlock *ProofEvent::hookArg(
     llvm::Value *val, KORECompositeSort *sort,
     llvm::BasicBlock *current_block) {
-  auto [true_block, merge_block] = proofBranch("hookarg", current_block);
-
-  auto outputFile = emitGetOutputFileName(true_block);
+  auto [true_block, merge_block, outputFile]
+      = eventPrelude("hookarg", current_block);
 
   emitSerializeTerm(*sort, outputFile, val, true_block);
 
   llvm::BranchInst::Create(merge_block, true_block);
-  emitNoOp(merge_block);
-
   return merge_block;
 }
 
@@ -214,8 +216,8 @@ llvm::BasicBlock *ProofEvent::rewriteEvent(
     std::map<std::string, KOREVariablePattern *> vars,
     llvm::StringMap<llvm::Value *> const &subst,
     llvm::BasicBlock *current_block) {
-  auto [true_block, merge_block] = proofBranch("rewrite", current_block);
-  auto outputFile = emitGetOutputFileName(true_block);
+  auto [true_block, merge_block, outputFile]
+      = eventPrelude("rewrite", current_block);
 
   emitWriteUInt64(outputFile, axiom->getOrdinal(), true_block);
   emitWriteUInt64(outputFile, arity, true_block);
@@ -236,8 +238,6 @@ llvm::BasicBlock *ProofEvent::rewriteEvent(
   emitWriteUInt64(outputFile, word(0xCC), true_block);
 
   llvm::BranchInst::Create(merge_block, true_block);
-  emitNoOp(merge_block);
-
   return merge_block;
 }
 
@@ -248,8 +248,8 @@ llvm::BasicBlock *ProofEvent::rewriteEvent(
 llvm::BasicBlock *ProofEvent::functionEvent(
     llvm::BasicBlock *current_block, KORECompositePattern *pattern,
     std::string const &locationStack) {
-  auto [true_block, merge_block] = proofBranch("function", current_block);
-  auto outputFile = emitGetOutputFileName(true_block);
+  auto [true_block, merge_block, outputFile]
+      = eventPrelude("function", current_block);
 
   std::ostringstream symbolName;
   pattern->getConstructor()->print(symbolName);
@@ -259,8 +259,6 @@ llvm::BasicBlock *ProofEvent::functionEvent(
   emitWriteString(outputFile, locationStack, true_block);
 
   llvm::BranchInst::Create(merge_block, true_block);
-  emitNoOp(merge_block);
-
   return merge_block;
 }
 
