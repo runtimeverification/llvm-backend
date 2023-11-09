@@ -560,7 +560,7 @@ void LeafNode::codegen(Decision *d) {
   }
   auto type = getParamType(d->Cat, d->Module);
 
-  llvm::Function *applyRule = getOrInsertFunction(
+  auto applyRule = getOrInsertFunction(
       d->Module, name, llvm::FunctionType::get(type, types, false));
 
   // We are generating code for a function with name beginning apply_rule_\d+; to
@@ -585,10 +585,7 @@ void LeafNode::codegen(Decision *d) {
       = ProofEvent(d->Definition, d->Module)
             .rewriteEvent_pre(axiom, arity, vars, subst, d->CurrentBlock);
 
-  auto Call = llvm::CallInst::Create(
-      getOrInsertFunction(
-          d->Module, name, llvm::FunctionType::get(type, types, false)),
-      args, "", d->CurrentBlock);
+  auto Call = llvm::CallInst::Create(applyRule, args, "", d->CurrentBlock);
   setDebugLoc(Call);
   Call->setCallingConv(llvm::CallingConv::Tail);
 
