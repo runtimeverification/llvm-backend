@@ -258,11 +258,11 @@ llvm::BasicBlock *ProofEvent::rewriteEvent_post(
  * Function Events
  */
 
-llvm::BasicBlock *ProofEvent::functionEvent(
+llvm::BasicBlock *ProofEvent::functionEvent_pre(
     llvm::BasicBlock *current_block, KORECompositePattern *pattern,
     std::string const &locationStack) {
   auto [true_block, merge_block, outputFile]
-      = eventPrelude("function", current_block);
+      = eventPrelude("function_pre", current_block);
 
   std::ostringstream symbolName;
   pattern->getConstructor()->print(symbolName);
@@ -270,6 +270,17 @@ llvm::BasicBlock *ProofEvent::functionEvent(
   emitWriteUInt64(outputFile, word(0xDD), true_block);
   emitWriteString(outputFile, symbolName.str(), true_block);
   emitWriteString(outputFile, locationStack, true_block);
+
+  llvm::BranchInst::Create(merge_block, true_block);
+  return merge_block;
+}
+
+llvm::BasicBlock *
+ProofEvent::functionEvent_post(llvm::BasicBlock *current_block) {
+  auto [true_block, merge_block, outputFile]
+      = eventPrelude("function_post", current_block);
+
+  emitWriteUInt64(outputFile, word(0x11), true_block);
 
   llvm::BranchInst::Create(merge_block, true_block);
   return merge_block;

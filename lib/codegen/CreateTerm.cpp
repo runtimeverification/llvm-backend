@@ -669,6 +669,10 @@ llvm::Value *CreateTerm::createHook(
 llvm::Value *CreateTerm::createFunctionCall(
     std::string name, KORECompositePattern *pattern, bool sret, bool tailcc,
     std::string locationStack) {
+  auto event = ProofEvent(Definition, Module);
+
+  CurrentBlock = event.functionEvent_pre(CurrentBlock, pattern, locationStack);
+
   std::vector<llvm::Value *> args;
   auto returnSort = dynamic_cast<KORECompositeSort *>(
       pattern->getConstructor()->getSort().get());
@@ -697,8 +701,7 @@ llvm::Value *CreateTerm::createFunctionCall(
     }
   }
 
-  auto event = ProofEvent(Definition, Module);
-  CurrentBlock = event.functionEvent(CurrentBlock, pattern, locationStack);
+  CurrentBlock = event.functionEvent_post(CurrentBlock);
 
   return createFunctionCall(name, returnCat, args, sret, tailcc, locationStack);
 }
