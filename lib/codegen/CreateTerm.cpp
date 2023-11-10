@@ -21,6 +21,13 @@
 #include "llvm/Support/SourceMgr.h"
 #include "llvm/Support/raw_ostream.h"
 
+extern llvm::cl::OptionCategory CodegenCat;
+
+llvm::cl::opt<bool> ProofHintInstrumentation(
+    "proof-hint-instrumentation",
+    llvm::cl::desc("Enable instrumentation for generation of proof hints"),
+    llvm::cl::cat(CodegenCat));
+
 namespace kllvm {
 
 using namespace fmt::literals;
@@ -314,9 +321,11 @@ llvm::Value *CreateTerm::alloc_arg(
   KOREPattern *p = pattern->getArguments()[idx].get();
   llvm::Value *ret
       = createAllocation(p, fmt::format("{}:{}", locationStack, idx)).first;
-  auto sort = dynamic_cast<KORECompositeSort *>(p->getSort().get());
-  ProofEvent e(Definition, Module);
-  CurrentBlock = e.hookArg(ret, sort, CurrentBlock);
+  if (ProofHintInstrumentation) {
+    auto sort = dynamic_cast<KORECompositeSort *>(p->getSort().get());
+    ProofEvent e(Definition, Module);
+    CurrentBlock = e.hookArg(ret, sort, CurrentBlock);
+  }
   return ret;
 }
 
@@ -697,8 +706,10 @@ llvm::Value *CreateTerm::createFunctionCall(
     }
   }
 
-  auto event = ProofEvent(Definition, Module);
-  CurrentBlock = event.functionEvent(CurrentBlock, pattern, locationStack);
+  if (ProofHintInstrumentation) {
+    auto event = ProofEvent(Definition, Module);
+    CurrentBlock = event.functionEvent(CurrentBlock, pattern, locationStack);
+  }
 
   return createFunctionCall(name, returnCat, args, sret, tailcc, locationStack);
 }
@@ -889,11 +900,15 @@ CreateTerm::createAllocation(KOREPattern *pattern, std::string locationStack) {
         std::string name = strPattern->getContents();
 
         ProofEvent p(Definition, Module);
-        CurrentBlock = p.hookEvent_pre(name, CurrentBlock);
+        if (ProofHintInstrumentation) {
+          CurrentBlock = p.hookEvent_pre(name, CurrentBlock);
+        }
         llvm::Value *val = createHook(
             symbolDecl->getAttributes().at("hook").get(), constructor,
             locationStack);
-        CurrentBlock = p.hookEvent_post(val, sort, CurrentBlock);
+        if (ProofHintInstrumentation) {
+          CurrentBlock = p.hookEvent_post(val, sort, CurrentBlock);
+        }
 
         return std::make_pair(val, true);
       } else {
@@ -1068,7 +1083,7 @@ bool makeFunction(
   llvm::Value *retval = creator(pattern).first;
 
   auto CurrentBlock = creator.getCurrentBlock();
-  if (apply && bigStep) {
+  if (apply && bigStep && ProofHintInstrumentation) {
     auto event = ProofEvent(definition, Module);
     CurrentBlock = event.rewriteEvent(
         axiom, retval, applyRule->arg_end() - applyRule->arg_begin(), vars,

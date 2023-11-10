@@ -24,6 +24,7 @@ verbose=0
 binary_input=false
 binary_output=false
 pretty_print=false
+proof_hints=false
 interpreter_flags=()
 dryRun=false
 expandMacros=true
@@ -65,6 +66,9 @@ Mandatory arguments to long options are mandatory for short options too.
                            KORE format, rather than the textual syntax;
   -p, --pretty-print       Pretty print output configuration. By default,
                            output is in kore syntax
+      --proof-hints        Enable output of proof hints; requires proof hint
+                           instrumentation to have been enabled during
+                           compilation.
       --debug              Use GDB to debug the program
       --debug-batch        Use GDB in batch mode to debug the program
       --debug-command FILE Execute GDB commands from FILE to debug the program
@@ -136,6 +140,11 @@ do
 
     -p|--pretty-print)
     pretty_print=true
+    shift
+    ;;
+
+    --proof-hints)
+    proof_hints=true
     shift
     ;;
 
@@ -221,6 +230,10 @@ fi
 
 if $binary_output; then
   interpreter_flags+=("--binary-output")
+fi
+
+if $proof_hints; then
+  interpreter_flags+=("--proof-output")
 fi
 
 for name in "${pretty[@]}"; do
