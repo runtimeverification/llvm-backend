@@ -382,6 +382,7 @@ void printVariableToFile(const char *filename, const char *varname) {
   fprintf(file, "%s", varname);
   char n = 0;
   fwrite(&n, 1, 1, file);
+  fflush(file);
 
   fclose(file);
 }
