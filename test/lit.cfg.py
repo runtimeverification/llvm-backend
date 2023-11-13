@@ -84,6 +84,13 @@ config.substitutions.extend([
             exit 1
         fi
     ''')),
+    ('%proof-interpreter', one_line('''
+        output=$(%kompile %s main --proof-hint-instrumentation -o %t.interpreter 2>&1)
+        if [[ -n "$output" ]]; then
+            echo "llvm-kompile error or warning: $output"
+            exit 1
+        fi
+    ''')),
     ('%search-interpreter', '%kompile %s search -o %t.interpreter'),
     ('%convert-input', '%kore-convert %test-input -o %t.bin'),
     ('%strip-binary', 'kore-strip'),
