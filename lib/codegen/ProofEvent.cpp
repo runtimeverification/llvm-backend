@@ -219,6 +219,7 @@ llvm::BasicBlock *ProofEvent::rewriteEvent_pre(
   auto [true_block, merge_block, outputFile]
       = eventPrelude("rewrite_pre", current_block);
 
+  emitWriteUInt64(outputFile, word(0x22), true_block);
   emitWriteUInt64(outputFile, axiom->getOrdinal(), true_block);
   emitWriteUInt64(outputFile, arity, true_block);
   for (auto entry = subst.begin(); entry != subst.end(); ++entry) {
