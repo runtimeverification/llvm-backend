@@ -19,38 +19,42 @@ have rendered this unnecessary, but the change hasn't been implemented yet.
 
 ## Grammar
 
-Here is a BNF styled description of the format
-
+Here is a BNF styled description of the format:
 ```
-delimited_serial_kore := 0xffffffffffffffff serialized_term 0xcccccccccccccccc
+proof_trace ::= event*
 
-null_terminated_name := <c-style null terminated string>
-relative_position := [0-9]+(:[0-9]+)* 0x00
+event       ::= hook
+              | function
+              | rule
+              | config
 
-function_event := 0xdddddddddddddddd null_terminated_name relative_position
+argument    ::= hook
+              | function
+              | rule
+              | kore_term
 
-hook_event := 0xaaaaaaaaaaaaaaaa null_terminated_name hook_arg* 0xbbbbbbbbbbbbbbbb serialized_term
+name        ::= string
+location    ::= string
+function    ::= WORD(0xDD) name location arg* WORD(0x11)
 
-hook_arg := serialized_term
-          | function_event
-          | hook_event
+hook        ::= WORD(0xAA) name arg* WORD(0xBB) kore_term
 
-variable := null_terminated_name serialized_term 0xcccccccccccccccc
+ordinal     ::= uint64
+arity       ::= uint64
+variable    ::= name kore_term WORD(0xCC)
+rule        ::= ordinal arity variable*
 
-rule_ordinal := <64-bit unsigned little endian integer>
-rule_arity := <64-bit unsigned little endian integer>
+config      ::= WORD(0xFF) kore_term WORD(0xCC)
 
-rewrite_trace := rule_ordinal rule_arity variable* delimited_serial_kore
-
-initial_config := delimited_serial_kore
-
-proof_trace := (function_event|hook_event)* initial_config (function_event|hook_event|rewrite_trace)*
+string      ::= <c-style null terminated string>
+uint64      ::= <64-bit unsigned little endian integer>
 ```
 
 ## Notes
 
-- The `rule_arity` should be used to determine how many variable substitutions to read
-- The serialized term for a variable substitution does not begin with the sentinel delimiter.
-  This is because the null terminated variable name can act as the sentinel.
-- The `function_event|hook_event`s at the beginning of the proof_trace are related to configuration initialization.
-- The `relative_position` is a null terminated string of positive integers separated by `:` (ie. `0:1:1`)
+- The `rule_arity` should be used to determine how many variable substitutions
+  to read.
+- Events at the beginning of the trace (i.e. before the first `config` event)
+  are related to configuration initialization.
+- The `relative_position` is a null terminated string of positive integers
+  separated by `:` (ie. `0:1:1`)
