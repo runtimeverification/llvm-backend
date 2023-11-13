@@ -1,5 +1,5 @@
-#include "kllvm/codegen/ProofEvent.h"
 #include "kllvm/codegen/CreateTerm.h"
+#include "kllvm/codegen/ProofEvent.h"
 
 #include "llvm/IR/IRBuilder.h"
 
@@ -283,6 +283,42 @@ ProofEvent::functionEvent_post(llvm::BasicBlock *current_block) {
   emitWriteUInt64(outputFile, word(0x11), true_block);
 
   llvm::BranchInst::Create(merge_block, true_block);
+
+  return merge_block;
+}
+
+llvm::BasicBlock *ProofEvent::scEvent(
+    KOREAxiomDeclaration *axiom, std::vector<llvm::Value *> const &args,
+    llvm::BasicBlock *current_block) {
+  auto [true_block, merge_block, outputFile]
+      = eventPrelude("side_condition", current_block);
+
+  size_t ordinal = axiom->getOrdinal();
+  size_t arity = args.size();
+
+  emitWriteUInt64(outputFile, word(0xEE), true_block);
+  emitWriteUInt64(outputFile, ordinal, true_block);
+  emitWriteUInt64(outputFile, arity, true_block);
+
+  KOREPattern *pattern = axiom->getRequires();
+  std::map<std::string, KOREVariablePattern *> vars;
+  pattern->markVariables(vars);
+
+  int i = 0;
+  for (auto entry = vars.begin(); entry != vars.end(); ++i, ++entry) {
+    auto varName = entry->first;
+    auto var = entry->second;
+    auto val = args[i];
+
+    auto sort = std::dynamic_pointer_cast<KORECompositeSort>(var->getSort());
+
+    emitWriteString(outputFile, varName, true_block);
+    emitSerializeTerm(*sort, outputFile, val, true_block);
+    emitWriteUInt64(outputFile, word(0xCC), true_block);
+  }
+
+  llvm::BranchInst::Create(merge_block, true_block);
+
   return merge_block;
 }
 
