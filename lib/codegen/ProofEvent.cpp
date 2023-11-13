@@ -231,8 +231,8 @@ llvm::BasicBlock *ProofEvent::hookArg(
  * Rewrite Events
  */
 
-llvm::BasicBlock *ProofEvent::rewriteEvent(
-    KOREAxiomDeclaration *axiom, llvm::Value *return_value, uint64_t arity,
+llvm::BasicBlock *ProofEvent::rewriteEvent_pre(
+    KOREAxiomDeclaration *axiom, uint64_t arity,
     std::map<std::string, KOREVariablePattern *> vars,
     llvm::StringMap<llvm::Value *> const &subst,
     llvm::BasicBlock *current_block) {
@@ -241,7 +241,7 @@ llvm::BasicBlock *ProofEvent::rewriteEvent(
   }
 
   auto [true_block, merge_block, outputFile]
-      = eventPrelude("rewrite", current_block);
+      = eventPrelude("rewrite_pre", current_block);
 
   emitWriteUInt64(outputFile, axiom->getOrdinal(), true_block);
   emitWriteUInt64(outputFile, arity, true_block);
@@ -257,9 +257,22 @@ llvm::BasicBlock *ProofEvent::rewriteEvent(
     emitWriteUInt64(outputFile, word(0xCC), true_block);
   }
 
-  emitWriteUInt64(outputFile, word(0xFF), true_block);
-  emitSerializeConfiguration(outputFile, return_value, true_block);
-  emitWriteUInt64(outputFile, word(0xCC), true_block);
+  llvm::BranchInst::Create(merge_block, true_block);
+  return merge_block;
+}
+
+llvm::BasicBlock *ProofEvent::rewriteEvent_post(
+    KOREAxiomDeclaration *axiom, llvm::Value *return_value,
+    llvm::BasicBlock *current_block) {
+  auto [true_block, merge_block, output_file]
+      = eventPrelude("rewrite_post", current_block);
+
+  auto return_sort = std::dynamic_pointer_cast<KORECompositeSort>(
+      axiom->getRightHandSide()->getSort());
+
+  emitWriteUInt64(output_file, word(0xFF), true_block);
+  emitSerializeTerm(*return_sort, output_file, return_value, true_block);
+  emitWriteUInt64(output_file, word(0xCC), true_block);
 
   llvm::BranchInst::Create(merge_block, true_block);
   return merge_block;
@@ -269,7 +282,7 @@ llvm::BasicBlock *ProofEvent::rewriteEvent(
  * Function Events
  */
 
-llvm::BasicBlock *ProofEvent::functionEvent(
+llvm::BasicBlock *ProofEvent::functionEvent_pre(
     llvm::BasicBlock *current_block, KORECompositePattern *pattern,
     std::string const &locationStack) {
   if (!ProofHintInstrumentation) {
@@ -277,7 +290,7 @@ llvm::BasicBlock *ProofEvent::functionEvent(
   }
 
   auto [true_block, merge_block, outputFile]
-      = eventPrelude("function", current_block);
+      = eventPrelude("function_pre", current_block);
 
   std::ostringstream symbolName;
   pattern->getConstructor()->print(symbolName);
@@ -285,6 +298,17 @@ llvm::BasicBlock *ProofEvent::functionEvent(
   emitWriteUInt64(outputFile, word(0xDD), true_block);
   emitWriteString(outputFile, symbolName.str(), true_block);
   emitWriteString(outputFile, locationStack, true_block);
+
+  llvm::BranchInst::Create(merge_block, true_block);
+  return merge_block;
+}
+
+llvm::BasicBlock *
+ProofEvent::functionEvent_post(llvm::BasicBlock *current_block) {
+  auto [true_block, merge_block, outputFile]
+      = eventPrelude("function_post", current_block);
+
+  emitWriteUInt64(outputFile, word(0x11), true_block);
 
   llvm::BranchInst::Create(merge_block, true_block);
   return merge_block;

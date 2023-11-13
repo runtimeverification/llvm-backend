@@ -102,15 +102,22 @@ public:
       llvm::Value *val, KORECompositeSort *sort,
       llvm::BasicBlock *current_block);
 
-  [[nodiscard]] llvm::BasicBlock *rewriteEvent(
-      KOREAxiomDeclaration *axiom, llvm::Value *return_value, uint64_t arity,
+  [[nodiscard]] llvm::BasicBlock *rewriteEvent_pre(
+      KOREAxiomDeclaration *axiom, uint64_t arity,
       std::map<std::string, KOREVariablePattern *> vars,
       llvm::StringMap<llvm::Value *> const &subst,
       llvm::BasicBlock *current_block);
 
-  [[nodiscard]] llvm::BasicBlock *functionEvent(
+  [[nodiscard]] llvm::BasicBlock *rewriteEvent_post(
+      KOREAxiomDeclaration *axiom, llvm::Value *return_value,
+      llvm::BasicBlock *current_block);
+
+  [[nodiscard]] llvm::BasicBlock *functionEvent_pre(
       llvm::BasicBlock *current_block, KORECompositePattern *pattern,
       std::string const &locationStack);
+
+  [[nodiscard]] llvm::BasicBlock *
+  functionEvent_post(llvm::BasicBlock *current_block);
 
 public:
   ProofEvent(KOREDefinition *Definition, llvm::Module *Module)

@@ -2,6 +2,7 @@
 
 #include "kllvm/codegen/CreateTerm.h"
 #include "kllvm/codegen/Debug.h"
+#include "kllvm/codegen/ProofEvent.h"
 #include "kllvm/codegen/Util.h"
 
 #include <llvm/ADT/APInt.h>
@@ -549,6 +550,7 @@ void LeafNode::codegen(Decision *d) {
     setCompleted();
     return;
   }
+
   std::vector<llvm::Value *> args;
   std::vector<llvm::Type *> types;
   for (auto arg : bindings) {
@@ -557,12 +559,36 @@ void LeafNode::codegen(Decision *d) {
     types.push_back(val->getType());
   }
   auto type = getParamType(d->Cat, d->Module);
-  auto Call = llvm::CallInst::Create(
-      getOrInsertFunction(
-          d->Module, name, llvm::FunctionType::get(type, types, false)),
-      args, "", d->CurrentBlock);
+
+  auto applyRule = getOrInsertFunction(
+      d->Module, name, llvm::FunctionType::get(type, types, false));
+
+  // We are generating code for a function with name beginning apply_rule_\d+; to
+  // retrieve the corresponding ordinal we drop the apply_rule_ prefix.
+  auto ordinal = std::stoll(name.substr(11));
+  auto arity = applyRule->arg_end() - applyRule->arg_begin();
+  auto axiom = d->Definition->getAxiomByOrdinal(ordinal);
+
+  auto vars = std::map<std::string, KOREVariablePattern *>{};
+  for (KOREPattern *lhs : axiom->getLeftHandSide()) {
+    lhs->markVariables(vars);
+  }
+  axiom->getRightHandSide()->markVariables(vars);
+
+  auto subst = llvm::StringMap<llvm::Value *>{};
+  auto i = 0;
+  for (auto iter = vars.begin(); iter != vars.end(); ++iter, ++i) {
+    subst[iter->first] = args[i];
+  }
+
+  d->CurrentBlock
+      = ProofEvent(d->Definition, d->Module)
+            .rewriteEvent_pre(axiom, arity, vars, subst, d->CurrentBlock);
+
+  auto Call = llvm::CallInst::Create(applyRule, args, "", d->CurrentBlock);
   setDebugLoc(Call);
   Call->setCallingConv(llvm::CallingConv::Tail);
+
   if (child == nullptr) {
     llvm::ReturnInst::Create(d->Ctx, Call, d->CurrentBlock);
   } else {
