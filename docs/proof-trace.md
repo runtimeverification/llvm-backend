@@ -21,7 +21,9 @@ have rendered this unnecessary, but the change hasn't been implemented yet.
 
 Here is a BNF styled description of the format:
 ```
-proof_trace ::= event*
+proof_trace ::= header event*
+
+header      ::= "HINT" <4-byte version number>
 
 event       ::= hook
               | function
