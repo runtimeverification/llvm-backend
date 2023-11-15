@@ -316,9 +316,13 @@ ProofEvent::functionEvent_post(llvm::BasicBlock *current_block) {
   return merge_block;
 }
 
-llvm::BasicBlock *ProofEvent::scEvent(
+llvm::BasicBlock *ProofEvent::sideConditionEvent(
     KOREAxiomDeclaration *axiom, std::vector<llvm::Value *> const &args,
     llvm::BasicBlock *current_block) {
+  if (!ProofHintInstrumentation) {
+    return current_block;
+  }
+
   auto [true_block, merge_block, outputFile]
       = eventPrelude("side_condition", current_block);
 
