@@ -52,34 +52,12 @@ cl::opt<std::string> DecisionTree(
 cl::opt<std::string> Directory(
     cl::Positional, cl::desc("<dir>"), cl::Required, cl::cat(CodegenToolCat));
 
-cl::opt<bool> Debug(
-    "debug", cl::desc("Enable debug information"), cl::ZeroOrMore,
-    cl::cat(CodegenToolCat));
-
-cl::opt<bool> NoOptimize(
-    "no-optimize",
-    cl::desc("Don't run optimization passes before producing output"),
-    cl::cat(CodegenToolCat));
-
-cl::opt<bool> EmitObject(
-    "emit-object",
-    cl::desc("Directly emit an object file to avoid separately invoking llc"),
-    cl::cat(CodegenToolCat));
-
 cl::opt<std::string> OutputFile(
     "output", cl::desc("Output file path"), cl::init("-"),
     cl::cat(CodegenToolCat));
 
 cl::alias OutputFileAlias(
     "o", cl::desc("Alias for --output"), cl::aliasopt(OutputFile),
-    cl::cat(CodegenToolCat));
-
-cl::opt<bool> BinaryIR(
-    "binary-ir", cl::desc("Emit binary IR rather than text"),
-    cl::cat(CodegenToolCat));
-
-cl::opt<bool> ForceBinary(
-    "f", cl::desc("Force binary bitcode output to stdout"), cl::Hidden,
     cl::cat(CodegenToolCat));
 
 namespace {
@@ -132,19 +110,6 @@ void initialize_llvm() {
   InitializeAllAsmPrinters();
 }
 
-void validate_args() {
-  if (EmitObject && (BinaryIR || NoOptimize)) {
-    throw std::runtime_error(
-        "Cannot specify --emit-object with --binary-ir or --no-optimize");
-  }
-
-  if ((EmitObject || BinaryIR) && (OutputFile == "-") && !ForceBinary) {
-    throw std::runtime_error(
-        "Not printing binary file to stdout; use -o to specify output path "
-        "or force binary with -f\n");
-  }
-}
-
 } // namespace
 
 int main(int argc, char **argv) {
@@ -153,7 +118,7 @@ int main(int argc, char **argv) {
   cl::HideUnrelatedOptions({&CodegenToolCat, &CodegenLibCat});
   cl::ParseCommandLineOptions(argc, argv);
 
-  validate_args();
+  validate_codegen_args(OutputFile == "-");
 
   CODEGEN_DEBUG = Debug ? 1 : 0;
 
