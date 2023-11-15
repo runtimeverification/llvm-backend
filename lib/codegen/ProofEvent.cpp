@@ -1,17 +1,11 @@
 #include "kllvm/codegen/ProofEvent.h"
 #include "kllvm/codegen/CreateTerm.h"
+#include "kllvm/codegen/Options.h"
 
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/Support/CommandLine.h"
 
 #include <fmt/format.h>
-
-extern llvm::cl::OptionCategory CodegenCat;
-
-llvm::cl::opt<bool> ProofHintInstrumentation(
-    "proof-hint-instrumentation",
-    llvm::cl::desc("Enable instrumentation for generation of proof hints"),
-    llvm::cl::cat(CodegenCat));
 
 namespace kllvm {
 

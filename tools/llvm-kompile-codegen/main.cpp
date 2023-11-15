@@ -5,6 +5,7 @@
 #include <kllvm/codegen/Decision.h>
 #include <kllvm/codegen/DecisionParser.h>
 #include <kllvm/codegen/EmitConfigParser.h>
+#include <kllvm/codegen/Options.h>
 #include <kllvm/parser/KOREParser.h>
 #include <kllvm/parser/location.h>
 
@@ -38,46 +39,26 @@ using namespace kllvm::parser;
 
 namespace fs = std::filesystem;
 
-cl::OptionCategory CodegenCat("llvm-kompile-codegen options");
+cl::OptionCategory CodegenToolCat("llvm-kompile-codegen options");
 
 cl::opt<std::string> Definition(
     cl::Positional, cl::desc("<definition.kore>"), cl::Required,
-    cl::cat(CodegenCat));
+    cl::cat(CodegenToolCat));
 
 cl::opt<std::string> DecisionTree(
-    cl::Positional, cl::desc("<dt.yaml>"), cl::Required, cl::cat(CodegenCat));
+    cl::Positional, cl::desc("<dt.yaml>"), cl::Required,
+    cl::cat(CodegenToolCat));
 
 cl::opt<std::string> Directory(
-    cl::Positional, cl::desc("<dir>"), cl::Required, cl::cat(CodegenCat));
-
-cl::opt<bool> Debug(
-    "debug", cl::desc("Enable debug information"), cl::ZeroOrMore,
-    cl::cat(CodegenCat));
-
-cl::opt<bool> NoOptimize(
-    "no-optimize",
-    cl::desc("Don't run optimization passes before producing output"),
-    cl::cat(CodegenCat));
-
-cl::opt<bool> EmitObject(
-    "emit-object",
-    cl::desc("Directly emit an object file to avoid separately invoking llc"),
-    cl::cat(CodegenCat));
+    cl::Positional, cl::desc("<dir>"), cl::Required, cl::cat(CodegenToolCat));
 
 cl::opt<std::string> OutputFile(
-    "output", cl::desc("Output file path"), cl::init("-"), cl::cat(CodegenCat));
+    "output", cl::desc("Output file path"), cl::init("-"),
+    cl::cat(CodegenToolCat));
 
 cl::alias OutputFileAlias(
     "o", cl::desc("Alias for --output"), cl::aliasopt(OutputFile),
-    cl::cat(CodegenCat));
-
-cl::opt<bool> BinaryIR(
-    "binary-ir", cl::desc("Emit binary IR rather than text"),
-    cl::cat(CodegenCat));
-
-cl::opt<bool> ForceBinary(
-    "f", cl::desc("Force binary bitcode output to stdout"), cl::Hidden,
-    cl::cat(CodegenCat));
+    cl::cat(CodegenToolCat));
 
 namespace {
 
@@ -129,30 +110,15 @@ void initialize_llvm() {
   InitializeAllAsmPrinters();
 }
 
-void validate_args() {
-  if (EmitObject && (BinaryIR || NoOptimize)) {
-    throw std::runtime_error(
-        "Cannot specify --emit-object with --binary-ir or --no-optimize");
-  }
-
-  if ((EmitObject || BinaryIR) && (OutputFile == "-") && !ForceBinary) {
-    throw std::runtime_error(
-        "Not printing binary file to stdout; use -o to specify output path "
-        "or force binary with -f\n");
-  }
-}
-
 } // namespace
 
 int main(int argc, char **argv) {
   initialize_llvm();
 
-  cl::HideUnrelatedOptions({&CodegenCat});
+  cl::HideUnrelatedOptions({&CodegenToolCat, &CodegenLibCat});
   cl::ParseCommandLineOptions(argc, argv);
 
-  validate_args();
-
-  CODEGEN_DEBUG = Debug ? 1 : 0;
+  validate_codegen_args(OutputFile == "-");
 
   KOREParser parser(Definition);
   ptr<KOREDefinition> definition = parser.definition();
@@ -161,22 +127,23 @@ int main(int argc, char **argv) {
   llvm::LLVMContext Context;
   std::unique_ptr<llvm::Module> mod = newModule("definition", Context);
 
-  if (CODEGEN_DEBUG) {
+  if (Debug) {
     initDebugInfo(mod.get(), Definition);
   }
 
   auto kompiled_dir = fs::absolute(Definition.getValue()).parent_path();
-  addKompiledDirSymbol(Context, kompiled_dir, mod.get(), CODEGEN_DEBUG);
+  addKompiledDirSymbol(Context, kompiled_dir, mod.get(), Debug);
 
   for (auto axiom : definition->getAxioms()) {
     makeSideConditionFunction(axiom, definition.get(), mod.get());
     if (!axiom->isTopAxiom()) {
       makeApplyRuleFunction(axiom, definition.get(), mod.get());
     } else {
-      auto filename = dt_dir() / fmt::format("dt_{}.yaml", axiom->getOrdinal());
-      if (fs::exists(filename)) {
+      auto dt_filename
+          = dt_dir() / fmt::format("dt_{}.yaml", axiom->getOrdinal());
+      if (fs::exists(dt_filename) && !ProofHintInstrumentation) {
         auto residuals = parseYamlSpecialDecisionTree(
-            mod.get(), filename, definition->getAllSymbols(),
+            mod.get(), dt_filename, definition->getAllSymbols(),
             definition->getHookedSorts());
         makeApplyRuleFunction(
             axiom, definition.get(), mod.get(), residuals.residuals);
@@ -185,10 +152,11 @@ int main(int argc, char **argv) {
         makeApplyRuleFunction(axiom, definition.get(), mod.get(), true);
       }
 
-      filename = dt_dir() / fmt::format("match_{}.yaml", axiom->getOrdinal());
-      if (fs::exists(filename)) {
+      auto match_filename
+          = dt_dir() / fmt::format("match_{}.yaml", axiom->getOrdinal());
+      if (fs::exists(match_filename)) {
         auto dt = parseYamlDecisionTree(
-            mod.get(), filename, definition->getAllSymbols(),
+            mod.get(), match_filename, definition->getAllSymbols(),
             definition->getHookedSorts());
         makeMatchReasonFunction(definition.get(), mod.get(), axiom, dt);
       }
@@ -229,7 +197,7 @@ int main(int argc, char **argv) {
     }
   }
 
-  if (CODEGEN_DEBUG) {
+  if (Debug) {
     finalizeDebugInfo();
   }
 
