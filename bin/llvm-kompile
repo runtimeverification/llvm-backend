@@ -12,28 +12,29 @@ Usage: $0 <definition.kore> <dt_dir> <object type> [options] [clang flags]
    or: $0 <interpreter.o>            <object type> [options] [clang flags]
 
 Options:
-  -h, --help                Print this message and exit.
-  -v, --verbose             Print commands executed to stderr.
-      --profile             Print profiling information to stderr.
-  --save-temps              Do not delete temporary files on exit.
-  --bindings-path           Print the absolute path of the compiled Python bindings for
-                            the LLVM backend, then exit.
-  --include-dir             Print the absolute include path for the LLVM backend
-                            runtime and binding headers, then exit.
-  --use-opt                 Use standalone LLVM opt to apply optimization passes
-                            to the generated LLVM IR for this definition.
-  --emit-ir                 Emit LLVM IR at intermediate compilation steps, rather than
-                            directly generating an object file.
-  --python PATH             The path to a Python interpreter with Pybind installed. Only
-                            meaningful in "python" or "pythonast" mode.
-  --python-output-dir PATH  Output directory to place automatically-named Python
-                            modules. Only meaningful in "python" or "pythonast"
-                            mode.
-  --embed PATH NAME         Embed additional information into shared library
-                            bindings. This is a low-level interface designed to
-                            be called from kompile. Only meaningful in "c" mode.
-  -fno-omit-frame-pointer   Keep the frame pointer in compiled code for debugging purposes.
-  -O[0123]                  Set the optimization level for code generation.
+  -h, --help                   Print this message and exit.
+  -v, --verbose                Print commands executed to stderr.
+      --profile                Print profiling information to stderr.
+  --save-temps                 Do not delete temporary files on exit.
+  --bindings-path              Print the absolute path of the compiled Python bindings for
+                               the LLVM backend, then exit.
+  --include-dir                Print the absolute include path for the LLVM backend
+                               runtime and binding headers, then exit.
+  --use-opt                    Use standalone LLVM opt to apply optimization passes
+                               to the generated LLVM IR for this definition.
+  --emit-ir                    Emit LLVM IR at intermediate compilation steps, rather than
+                               directly generating an object file.
+  --python PATH                The path to a Python interpreter with Pybind installed. Only
+                               meaningful in "python" or "pythonast" mode.
+  --python-output-dir PATH     Output directory to place automatically-named Python
+                               modules. Only meaningful in "python" or "pythonast"
+                               mode.
+  --embed PATH NAME            Embed additional information into shared library
+                               bindings. This is a low-level interface designed to
+                               be called from kompile. Only meaningful in "c" mode.
+  -fno-omit-frame-pointer      Keep the frame pointer in compiled code for debugging purposes.
+  --proof-hint-instrumentation Enable instrumentation for generation of proof hints.
+  -O[0123]                     Set the optimization level for code generation.
 
 Any option not listed above will be passed through to clang; use '--' to
 separate additional positional arguments to clang from those for $0.
@@ -160,6 +161,10 @@ while [[ $# -gt 0 ]]; do
     -fno-omit-frame-pointer)
       kompile_clang_flags+=("$1")
       frame_pointer=true
+      shift
+      ;;
+    --proof-hint-instrumentation)
+      codegen_flags+=("--proof-hint-instrumentation")
       shift
       ;;
     -O*)

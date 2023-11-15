@@ -1,4 +1,4 @@
-// RUN: %interpreter
+// RUN: %proof-interpreter
 // RUN: %run-proof-out
 [topCellInitializer{}(LblinitGeneratedTopCell{}()), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/gtrepta/runtimeverification/llvm-backend/tmp/imp.k)")]
 

@@ -2,8 +2,16 @@
 #include "kllvm/codegen/CreateTerm.h"
 
 #include "llvm/IR/IRBuilder.h"
+#include "llvm/Support/CommandLine.h"
 
 #include <fmt/format.h>
+
+extern llvm::cl::OptionCategory CodegenCat;
+
+llvm::cl::opt<bool> ProofHintInstrumentation(
+    "proof-hint-instrumentation",
+    llvm::cl::desc("Enable instrumentation for generation of proof hints"),
+    llvm::cl::cat(CodegenCat));
 
 namespace kllvm {
 
@@ -171,6 +179,10 @@ ProofEvent::eventPrelude(
 
 llvm::BasicBlock *
 ProofEvent::hookEvent_pre(std::string name, llvm::BasicBlock *current_block) {
+  if (!ProofHintInstrumentation) {
+    return current_block;
+  }
+
   auto [true_block, merge_block, outputFile]
       = eventPrelude("hookpre", current_block);
 
@@ -184,6 +196,10 @@ ProofEvent::hookEvent_pre(std::string name, llvm::BasicBlock *current_block) {
 llvm::BasicBlock *ProofEvent::hookEvent_post(
     llvm::Value *val, KORECompositeSort *sort,
     llvm::BasicBlock *current_block) {
+  if (!ProofHintInstrumentation) {
+    return current_block;
+  }
+
   auto [true_block, merge_block, outputFile]
       = eventPrelude("hookpost", current_block);
 
@@ -198,6 +214,10 @@ llvm::BasicBlock *ProofEvent::hookEvent_post(
 llvm::BasicBlock *ProofEvent::hookArg(
     llvm::Value *val, KORECompositeSort *sort,
     llvm::BasicBlock *current_block) {
+  if (!ProofHintInstrumentation) {
+    return current_block;
+  }
+
   auto [true_block, merge_block, outputFile]
       = eventPrelude("hookarg", current_block);
 
@@ -216,6 +236,10 @@ llvm::BasicBlock *ProofEvent::rewriteEvent_pre(
     std::map<std::string, KOREVariablePattern *> vars,
     llvm::StringMap<llvm::Value *> const &subst,
     llvm::BasicBlock *current_block) {
+  if (!ProofHintInstrumentation) {
+    return current_block;
+  }
+
   auto [true_block, merge_block, outputFile]
       = eventPrelude("rewrite_pre", current_block);
 
@@ -262,6 +286,10 @@ llvm::BasicBlock *ProofEvent::rewriteEvent_post(
 llvm::BasicBlock *ProofEvent::functionEvent_pre(
     llvm::BasicBlock *current_block, KORECompositePattern *pattern,
     std::string const &locationStack) {
+  if (!ProofHintInstrumentation) {
+    return current_block;
+  }
+
   auto [true_block, merge_block, outputFile]
       = eventPrelude("function_pre", current_block);
 
