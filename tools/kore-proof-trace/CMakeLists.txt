@@ -3,7 +3,7 @@ kllvm_add_tool(kore-proof-trace
 )
 
 target_link_libraries(kore-proof-trace
-  PUBLIC Parser AST
+  PUBLIC BinaryKore AST
 )
 
 install(
