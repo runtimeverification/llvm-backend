@@ -120,8 +120,6 @@ int main(int argc, char **argv) {
 
   validate_codegen_args(OutputFile == "-");
 
-  CODEGEN_DEBUG = Debug ? 1 : 0;
-
   KOREParser parser(Definition);
   ptr<KOREDefinition> definition = parser.definition();
   definition->preprocess();
@@ -129,12 +127,12 @@ int main(int argc, char **argv) {
   llvm::LLVMContext Context;
   std::unique_ptr<llvm::Module> mod = newModule("definition", Context);
 
-  if (CODEGEN_DEBUG) {
+  if (Debug) {
     initDebugInfo(mod.get(), Definition);
   }
 
   auto kompiled_dir = fs::absolute(Definition.getValue()).parent_path();
-  addKompiledDirSymbol(Context, kompiled_dir, mod.get(), CODEGEN_DEBUG);
+  addKompiledDirSymbol(Context, kompiled_dir, mod.get(), Debug);
 
   for (auto axiom : definition->getAxioms()) {
     makeSideConditionFunction(axiom, definition.get(), mod.get());
@@ -197,7 +195,7 @@ int main(int argc, char **argv) {
     }
   }
 
-  if (CODEGEN_DEBUG) {
+  if (Debug) {
     finalizeDebugInfo();
   }
 
