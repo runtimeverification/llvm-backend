@@ -139,10 +139,11 @@ int main(int argc, char **argv) {
     if (!axiom->isTopAxiom()) {
       makeApplyRuleFunction(axiom, definition.get(), mod.get());
     } else {
-      auto filename = dt_dir() / fmt::format("dt_{}.yaml", axiom->getOrdinal());
-      if (fs::exists(filename)) {
+      auto dt_filename
+          = dt_dir() / fmt::format("dt_{}.yaml", axiom->getOrdinal());
+      if (fs::exists(dt_filename) && !ProofHintInstrumentation) {
         auto residuals = parseYamlSpecialDecisionTree(
-            mod.get(), filename, definition->getAllSymbols(),
+            mod.get(), dt_filename, definition->getAllSymbols(),
             definition->getHookedSorts());
         makeApplyRuleFunction(
             axiom, definition.get(), mod.get(), residuals.residuals);
@@ -151,10 +152,11 @@ int main(int argc, char **argv) {
         makeApplyRuleFunction(axiom, definition.get(), mod.get(), true);
       }
 
-      filename = dt_dir() / fmt::format("match_{}.yaml", axiom->getOrdinal());
-      if (fs::exists(filename)) {
+      auto match_filename
+          = dt_dir() / fmt::format("match_{}.yaml", axiom->getOrdinal());
+      if (fs::exists(match_filename)) {
         auto dt = parseYamlDecisionTree(
-            mod.get(), filename, definition->getAllSymbols(),
+            mod.get(), match_filename, definition->getAllSymbols(),
             definition->getHookedSorts());
         makeMatchReasonFunction(definition.get(), mod.get(), axiom, dt);
       }
