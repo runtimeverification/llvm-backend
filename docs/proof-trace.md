@@ -40,7 +40,7 @@ name        ::= string
 location    ::= string
 function    ::= WORD(0xDD) name location arg* WORD(0x11)
 
-hook        ::= WORD(0xAA) name arg* WORD(0xBB) kore_term
+hook        ::= WORD(0xAA) name location arg* WORD(0xBB) kore_term
 
 ordinal     ::= uint64
 arity       ::= uint64

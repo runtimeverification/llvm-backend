@@ -892,7 +892,7 @@ CreateTerm::createAllocation(KOREPattern *pattern, std::string locationStack) {
         std::string name = strPattern->getContents();
 
         ProofEvent p(Definition, Module);
-        CurrentBlock = p.hookEvent_pre(name, CurrentBlock);
+        CurrentBlock = p.hookEvent_pre(name, CurrentBlock, locationStack);
         llvm::Value *val = createHook(
             symbolDecl->getAttributes().at("hook").get(), constructor,
             locationStack);

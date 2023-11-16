@@ -92,8 +92,9 @@ private:
   llvm::LoadInst *emitGetOutputFileName(llvm::BasicBlock *insertAtEnd);
 
 public:
-  [[nodiscard]] llvm::BasicBlock *
-  hookEvent_pre(std::string name, llvm::BasicBlock *current_block);
+  [[nodiscard]] llvm::BasicBlock *hookEvent_pre(
+      std::string name, llvm::BasicBlock *current_block,
+      std::string locationStack);
 
   [[nodiscard]] llvm::BasicBlock *hookEvent_post(
       llvm::Value *val, KORECompositeSort *sort,
