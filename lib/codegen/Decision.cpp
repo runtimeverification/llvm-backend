@@ -424,6 +424,15 @@ void FunctionNode::codegen(Decision *d) {
     args.push_back(val);
     finalSubst[arg.first] = val;
   }
+  bool isSideCondition = function.substr(0, 15) == "side_condition_";
+
+  if (isSideCondition) {
+    ProofEvent p(d->Definition, d->Module);
+    size_t ordinal = std::stoll(function.substr(15));
+    KOREAxiomDeclaration *axiom = d->Definition->getAxiomByOrdinal(ordinal);
+    d->CurrentBlock = p.sideConditionEvent(axiom, args, d->CurrentBlock);
+  }
+
   CreateTerm creator(
       finalSubst, d->Definition, d->CurrentBlock, d->Module, false);
   auto Call = creator.createFunctionCall(
@@ -435,7 +444,7 @@ void FunctionNode::codegen(Decision *d) {
     if (function.substr(0, 5) == "hook_") {
       debugName = function.substr(5, function.find_first_of('_', 5) - 5) + "."
                   + function.substr(function.find_first_of('_', 5) + 1);
-    } else if (function.substr(0, 15) == "side_condition_") {
+    } else if (isSideCondition) {
       size_t ordinal = std::stoll(function.substr(15));
       KOREAxiomDeclaration *axiom = d->Definition->getAxiomByOrdinal(ordinal);
       if (axiom->getAttributes().count("label")) {

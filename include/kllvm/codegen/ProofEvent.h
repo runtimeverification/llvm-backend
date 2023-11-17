@@ -2,6 +2,7 @@
 #define PROOF_EVENT_H
 
 #include "kllvm/ast/AST.h"
+#include "kllvm/codegen/Decision.h"
 #include "kllvm/codegen/DecisionParser.h"
 #include "kllvm/codegen/Util.h"
 
@@ -91,8 +92,9 @@ private:
   llvm::LoadInst *emitGetOutputFileName(llvm::BasicBlock *insertAtEnd);
 
 public:
-  [[nodiscard]] llvm::BasicBlock *
-  hookEvent_pre(std::string name, llvm::BasicBlock *current_block);
+  [[nodiscard]] llvm::BasicBlock *hookEvent_pre(
+      std::string name, llvm::BasicBlock *current_block,
+      std::string locationStack);
 
   [[nodiscard]] llvm::BasicBlock *hookEvent_post(
       llvm::Value *val, KORECompositeSort *sort,
@@ -118,6 +120,10 @@ public:
 
   [[nodiscard]] llvm::BasicBlock *
   functionEvent_post(llvm::BasicBlock *current_block);
+
+  [[nodiscard]] llvm::BasicBlock *sideConditionEvent(
+      KOREAxiomDeclaration *axiom, std::vector<llvm::Value *> const &args,
+      llvm::BasicBlock *current_block);
 
 public:
   ProofEvent(KOREDefinition *Definition, llvm::Module *Module)

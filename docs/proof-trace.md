@@ -21,11 +21,14 @@ have rendered this unnecessary, but the change hasn't been implemented yet.
 
 Here is a BNF styled description of the format:
 ```
-proof_trace ::= event*
+proof_trace ::= header event*
+
+header      ::= "HINT" <4-byte version number>
 
 event       ::= hook
               | function
               | rule
+              | side_cond
               | config
 
 argument    ::= hook
@@ -37,12 +40,14 @@ name        ::= string
 location    ::= string
 function    ::= WORD(0xDD) name location arg* WORD(0x11)
 
-hook        ::= WORD(0xAA) name arg* WORD(0xBB) kore_term
+hook        ::= WORD(0xAA) name location arg* WORD(0xBB) kore_term
 
 ordinal     ::= uint64
 arity       ::= uint64
 variable    ::= name kore_term WORD(0xCC)
-rule        ::= ordinal arity variable*
+rule        ::= WORD(0x22) ordinal arity variable*
+
+side_cond   ::= WORD(0xEE) ordinal arity variable*
 
 config      ::= WORD(0xFF) kore_term WORD(0xCC)
 
