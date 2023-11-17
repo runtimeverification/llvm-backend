@@ -171,8 +171,9 @@ ProofEvent::eventPrelude(
  * Hook Events
  */
 
-llvm::BasicBlock *
-ProofEvent::hookEvent_pre(std::string name, llvm::BasicBlock *current_block) {
+llvm::BasicBlock *ProofEvent::hookEvent_pre(
+    std::string name, llvm::BasicBlock *current_block,
+    std::string locationStack) {
   if (!ProofHintInstrumentation) {
     return current_block;
   }
@@ -182,6 +183,7 @@ ProofEvent::hookEvent_pre(std::string name, llvm::BasicBlock *current_block) {
 
   emitWriteUInt64(outputFile, word(0xAA), true_block);
   emitWriteString(outputFile, name, true_block);
+  emitWriteString(outputFile, locationStack, true_block);
 
   llvm::BranchInst::Create(merge_block, true_block);
   return merge_block;
