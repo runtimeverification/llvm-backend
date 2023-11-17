@@ -30,7 +30,7 @@ block *constructKItemInj(void *subject, const char *sort, bool raw_value) {
 }
 
 void printProofHintHeader(char *output_file) {
-  unsigned int version = 1;
+  unsigned int version = 2;
   FILE *file = fopen(output_file, "a");
   fprintf(file, "HINT");
   fwrite(&version, sizeof(version), 1, file);
