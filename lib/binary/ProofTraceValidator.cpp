@@ -2,7 +2,9 @@
 
 namespace kllvm {
 
-ProofTraceValidator::ProofTraceValidator(bool _verbose) : depth(0), verbose(_verbose) { }
+ProofTraceValidator::ProofTraceValidator(bool _verbose)
+    : depth(0)
+    , verbose(_verbose) { }
 
 bool ProofTraceValidator::validate_proof_trace(std::string const &filename) {
   auto data = file_contents(filename);

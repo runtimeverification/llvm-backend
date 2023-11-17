@@ -5,8 +5,8 @@
 
 #include <fmt/format.h>
 
-#include <string>
 #include <iostream>
+#include <string>
 
 namespace kllvm {
 
@@ -43,7 +43,8 @@ private:
   // stream before peeking
   template <typename It>
   uint64_t peek_word(It const &it) {
-    return detail::from_bytes<uint64_t>(reinterpret_cast<std::byte const *>(&*it));
+    return detail::from_bytes<uint64_t>(
+        reinterpret_cast<std::byte const *>(&*it));
   }
 
   template <typename It>
@@ -103,11 +104,11 @@ private:
     if (std::distance(ptr, end) < 11u) {
       return false;
     }
-    if (detail::read<char>(ptr, end) != '\x7F' ||
-        detail::read<char>(ptr, end) != 'K' ||
-        detail::read<char>(ptr, end) != 'O' ||
-        detail::read<char>(ptr, end) != 'R' ||
-        detail::read<char>(ptr, end) != 'E') {
+    if (detail::read<char>(ptr, end) != '\x7F'
+        || detail::read<char>(ptr, end) != 'K'
+        || detail::read<char>(ptr, end) != 'O'
+        || detail::read<char>(ptr, end) != 'R'
+        || detail::read<char>(ptr, end) != 'E') {
       return false;
     }
     ptr += 6;
@@ -139,10 +140,10 @@ private:
     if (std::distance(ptr, end) < 4u) {
       return false;
     }
-    if (detail::read<char>(ptr, end) != 'H' ||
-        detail::read<char>(ptr, end) != 'I' ||
-        detail::read<char>(ptr, end) != 'N' ||
-        detail::read<char>(ptr, end) != 'T') {
+    if (detail::read<char>(ptr, end) != 'H'
+        || detail::read<char>(ptr, end) != 'I'
+        || detail::read<char>(ptr, end) != 'N'
+        || detail::read<char>(ptr, end) != 'T') {
       return false;
     }
 
@@ -191,7 +192,8 @@ private:
 
     print(fmt::format("hook: {} ({})", name, location));
 
-    while (std::distance(ptr, end) < 8u || peek_word(ptr) != detail::word(0xBB)) {
+    while (std::distance(ptr, end) < 8u
+           || peek_word(ptr) != detail::word(0xBB)) {
       if (!validate_argument(ptr, end)) {
         return false;
       }
@@ -229,7 +231,8 @@ private:
 
     print(fmt::format("function: {} ({})", name, location));
 
-    while (std::distance(ptr, end) < 8u || peek_word(ptr) != detail::word(0x11)) {
+    while (std::distance(ptr, end) < 8u
+           || peek_word(ptr) != detail::word(0x11)) {
       if (!validate_argument(ptr, end)) {
         return false;
       }
@@ -312,7 +315,8 @@ private:
   bool validate_argument(It &ptr, It end) {
     depth++;
 
-    if (std::distance(ptr, end) >= 1u && detail::peek(ptr) == std::byte('\x7F')) {
+    if (std::distance(ptr, end) >= 1u
+        && detail::peek(ptr) == std::byte('\x7F')) {
       uint64_t pattern_len;
       if (!validate_kore_term(ptr, end, pattern_len)) {
         return false;
@@ -354,8 +358,7 @@ private:
       return true;
     }
 
-    default:
-      return false;
+    default: return false;
     }
   }
 
@@ -367,23 +370,17 @@ private:
 
     switch (peek_word(ptr)) {
 
-    case detail::word(0xAA):
-      return validate_hook(ptr, end);
+    case detail::word(0xAA): return validate_hook(ptr, end);
 
-    case detail::word(0xDD):
-      return validate_function(ptr, end);
+    case detail::word(0xDD): return validate_function(ptr, end);
 
-    case detail::word(0xFF):
-      return validate_config(ptr, end);
+    case detail::word(0xFF): return validate_config(ptr, end);
 
-    case detail::word(0x22):
-      return validate_rule(ptr, end);
+    case detail::word(0x22): return validate_rule(ptr, end);
 
-    case detail::word(0xEE):
-      return validate_side_condition(ptr, end);
+    case detail::word(0xEE): return validate_side_condition(ptr, end);
 
-    default:
-      return false;
+    default: return false;
     }
   }
 
