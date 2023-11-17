@@ -261,6 +261,10 @@ llvm::BasicBlock *ProofEvent::rewriteEvent_pre(
 llvm::BasicBlock *ProofEvent::rewriteEvent_post(
     KOREAxiomDeclaration *axiom, llvm::Value *return_value,
     llvm::BasicBlock *current_block) {
+  if (!ProofHintInstrumentation) {
+    return current_block;
+  }
+
   auto [true_block, merge_block, output_file]
       = eventPrelude("rewrite_post", current_block);
 
@@ -302,6 +306,10 @@ llvm::BasicBlock *ProofEvent::functionEvent_pre(
 
 llvm::BasicBlock *
 ProofEvent::functionEvent_post(llvm::BasicBlock *current_block) {
+  if (!ProofHintInstrumentation) {
+    return current_block;
+  }
+
   auto [true_block, merge_block, outputFile]
       = eventPrelude("function_post", current_block);
 
