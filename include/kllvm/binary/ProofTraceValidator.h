@@ -56,6 +56,16 @@ private:
   }
 
   template <typename It>
+  bool read_uint32(It &ptr, It end, uint32_t &i) {
+    if (std::distance(ptr, end) < sizeof(uint32_t)) {
+      return false;
+    }
+
+    i = detail::read<uint32_t>(ptr, end);
+    return true;
+  }
+
+  template <typename It>
   bool read_uint64(It &ptr, It end, uint64_t &i) {
     if (std::distance(ptr, end) < sizeof(uint64_t)) {
       return false;
@@ -125,6 +135,28 @@ private:
   }
 
   template <typename It>
+  bool validate_header(It &ptr, It end) {
+    if (std::distance(ptr, end) < 4u) {
+      return false;
+    }
+    if (detail::read<char>(ptr, end) != 'H' ||
+        detail::read<char>(ptr, end) != 'I' ||
+        detail::read<char>(ptr, end) != 'N' ||
+        detail::read<char>(ptr, end) != 'T') {
+      return false;
+    }
+
+    uint32_t version;
+    if (!read_uint32(ptr, end, version)) {
+      return false;
+    }
+
+    print(fmt::format("version: {}", version));
+
+    return true;
+  }
+
+  template <typename It>
   bool validate_variable(It &ptr, It end) {
     std::string name;
     if (!validate_name(ptr, end, name)) {
@@ -152,7 +184,12 @@ private:
       return false;
     }
 
-    print(fmt::format("hook: {}", name));
+    std::string location;
+    if (!validate_location(ptr, end, location)) {
+      return false;
+    }
+
+    print(fmt::format("hook: {} ({})", name, location));
 
     while (std::distance(ptr, end) < 8u || peek_word(ptr) != detail::word(0xBB)) {
       if (!validate_argument(ptr, end)) {
@@ -219,6 +256,10 @@ private:
 
   template <typename It>
   bool validate_rule(It &ptr, It end) {
+    if (!validate_word(ptr, end, detail::word(0x22))) {
+      return false;
+    }
+
     uint64_t ordinal;
     if (!validate_ordinal(ptr, end, ordinal)) {
       return false;
@@ -230,6 +271,33 @@ private:
     }
 
     print(fmt::format("rule: {} {}", ordinal, arity));
+
+    for (auto i = 0; i < arity; i++) {
+      if (!validate_variable(ptr, end)) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  template <typename It>
+  bool validate_side_condition(It &ptr, It end) {
+    if (!validate_word(ptr, end, detail::word(0xEE))) {
+      return false;
+    }
+
+    uint64_t ordinal;
+    if (!validate_ordinal(ptr, end, ordinal)) {
+      return false;
+    }
+
+    uint64_t arity;
+    if (!validate_arity(ptr, end, arity)) {
+      return false;
+    }
+
+    print(fmt::format("side condition: {} {}", ordinal, arity));
 
     for (auto i = 0; i < arity; i++) {
       if (!validate_variable(ptr, end)) {
@@ -278,13 +346,16 @@ private:
       return true;
     }
 
-    default: {
+    case detail::word(0x22): {
       if (!validate_rule(ptr, end)) {
         return false;
       }
       depth--;
       return true;
     }
+
+    default:
+      return false;
     }
   }
 
@@ -305,13 +376,23 @@ private:
     case detail::word(0xFF):
       return validate_config(ptr, end);
 
-    default:
+    case detail::word(0x22):
       return validate_rule(ptr, end);
+
+    case detail::word(0xEE):
+      return validate_side_condition(ptr, end);
+
+    default:
+      return false;
     }
   }
 
   template <typename It>
   bool validate_trace(It &ptr, It end) {
+    if (!validate_header(ptr, end)) {
+      return false;
+    }
+
     while (ptr != end) {
       if (!validate_event(ptr, end)) {
         return false;
