@@ -943,6 +943,31 @@ public:
   void addAttribute(sptr<KORECompositePattern> Attribute);
   void print(std::ostream &Out, unsigned indent = 0) const;
 
+  /*
+   * Return the argument sorts for each hooked collection's element constructor.
+   * For example, the standard hooked collections (List, Map and Set) have the
+   * following element constructors and argument sorts:
+   *
+   *   LblListItem              -> [ SortKItem{} ]
+   *   Lbl'UndsPipe'-'-GT-Unds' -> [ SortKItem{}, SortKItem{} ]
+   *   LblSetItem               -> [ SortKItem{} ]
+   *
+   * However, it is possible to define additional hooked collection sorts to
+   * enforce domain-specific type-safety constraints. To soundly serialize terms
+   * of such custom sorts, we need to be able to look up the sorts of the
+   * element constructor's arguments; otherwise, injections stored in
+   * collections must be (incorrectly) injected into KItem.
+   *
+   * The map returned by this method is used to emit a function into interpreter
+   * binaries that performs an equivalent lookup at runtime.
+   *
+   * Note that because this function is called from the per-symbol config parser
+   * emission infrastructure, the underlying map is computed on first call and
+   * cached for subsequent calls.
+   */
+  std::map<sptr<KORESymbol>, std::vector<sptr<KORESort>>>
+  getCollectionElementSorts() const;
+
   const std::vector<sptr<KOREModule>> &getModules() const { return modules; }
   const KORECompositeSortDeclarationMapType &getSortDeclarations() const {
     return sortDeclarations;

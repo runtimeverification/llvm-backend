@@ -1684,6 +1684,45 @@ void KOREModule::addDeclaration(sptr<KOREDeclaration> Declaration) {
   declarations.push_back(std::move(Declaration));
 }
 
+std::map<sptr<KORESymbol>, std::vector<sptr<KORESort>>>
+KOREDefinition::getCollectionElementSorts() const {
+  static bool once = false;
+  static auto ret = std::map<sptr<KORESymbol>, std::vector<sptr<KORESort>>>{};
+
+  if (!once) {
+    auto const &decls = getSymbolDeclarations();
+    for (auto const &[sort_name, sort_decl] : getSortDeclarations()) {
+      if (sort_decl->isHooked()) {
+        auto const &attrs = sort_decl->getAttributes();
+        if (auto element_it = attrs.find("element");
+            element_it != attrs.end()) {
+          auto [attr_key, attr_pattern] = *element_it;
+          /*       auto comp = std::dynamic_pointer_cast<KORECompositePattern>(pattern); */
+          /*       auto arg = std::dynamic_pointer_cast<KORECompositePattern>( */
+          /*           comp->getArguments()[0]); */
+          /*       auto name = arg->getConstructor()->getName(); */
+
+          /*       auto decl = decls.at(name); */
+          /*       arg->print(std::cerr); */
+          /*       std::cerr << '\n'; */
+          /*       for (auto const &arg : decl->getSymbol()->getArguments()) { */
+          /*         std::cerr << "  "; */
+          /*         arg->print(std::cerr); */
+          /*         std::cerr << '\n'; */
+          /*       } */
+          /*       std::cerr << '\n'; */
+          /*     } */
+        }
+        (void)decls;
+      }
+    }
+
+    once = true;
+  }
+
+  return ret;
+}
+
 void KOREDefinition::addModule(sptr<KOREModule> Module) {
   for (auto &decl : Module->getDeclarations()) {
     if (auto sortDecl
