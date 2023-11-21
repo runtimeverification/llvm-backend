@@ -39,9 +39,17 @@ jobs:
         with:
           name: k-framework
           authToken: '${{ secrets.CACHIX_PUBLIC_TOKEN }}'
+          skipPush: true
 
       - name: 'Build LLVM backend'
         run: GC_DONT_GC=1 nix build --print-build-logs .
 
       - name: 'Test LLVM backend'
         run: GC_DONT_GC=1 nix flake check --print-build-logs
+
+      - name: 'Push Flake to Cachix'
+        run: |
+          GC_DONT_GC=1 nix build --print-build-logs . --json \
+            | jq -r '.[].outputs \
+            | to_entries[].value' \
+            | cachix push k-framework
