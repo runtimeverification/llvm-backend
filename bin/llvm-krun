@@ -176,10 +176,12 @@ do
       debug="${debug/--args /} -x ${debug_command} --args "
     fi
     shift;
+    shift
     ;;
 
     --debug-batch)
     debug="gdb --batch --args "
+    shift;
     ;;
 
     --depth)
@@ -291,6 +293,14 @@ for name in "${params[@]}"; do
     ;;
   esac
 done
+
+replace_gdb_by_lldb() {
+  if [ -n "$debug" ]; then
+    debug="${debug/gdb/lldb}"
+    debug="${debug/--args /--}"
+    debug="${debug/-x /-s }"
+  fi
+}
 
 construct_text_input() {
   echo "$initializer" >> "$input_file"
@@ -465,6 +475,10 @@ if $dryRun; then
     cat "$expanded_input_file"
   fi
   exit 0
+fi
+
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  replace_gdb_by_lldb
 fi
 
 set +e
