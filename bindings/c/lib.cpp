@@ -5,7 +5,6 @@
 #include <kllvm/parser/KOREParser.h>
 #include <kllvm/printer/printer.h>
 
-#define FMT_HEADER_ONLY
 #include <fmt/format.h>
 
 #include <filesystem>

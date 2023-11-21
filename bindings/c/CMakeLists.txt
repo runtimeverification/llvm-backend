@@ -7,6 +7,7 @@ target_include_directories(kllvm-c-static PUBLIC
 
 target_link_libraries(kllvm-c-static PUBLIC
   AST
+  BindingsCore
   util
   collect
 )
