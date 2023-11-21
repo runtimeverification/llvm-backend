@@ -28,6 +28,10 @@ block *simplify_to_term(
     std::shared_ptr<kllvm::KOREPattern> pattern,
     std::shared_ptr<kllvm::KORESort> sort);
 
+std::shared_ptr<kllvm::KOREPattern> simplify(
+    std::shared_ptr<kllvm::KOREPattern> pattern,
+    std::shared_ptr<kllvm::KORESort> sort);
+
 bool is_sort_kitem(std::shared_ptr<kllvm::KORESort> const &sort);
 bool is_sort_k(std::shared_ptr<kllvm::KORESort> const &sort);
 

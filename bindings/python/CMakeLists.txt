@@ -25,6 +25,7 @@ target_link_libraries(_kllvm PUBLIC
 target_link_libraries(kllvm-python-static PUBLIC
   AST
   util
+  BindingsCore
 )
 
 install(FILES $<TARGET_FILE:kllvm-python-static>

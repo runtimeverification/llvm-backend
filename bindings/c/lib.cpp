@@ -1,9 +1,8 @@
 #include <kllvm-c/kllvm-c.h>
 
-#include "bindings/core/core.h"
-
 #include <kllvm/ast/AST.h>
 #include <kllvm/binary/serializer.h>
+#include <kllvm/bindings/core/core.h>
 #include <kllvm/parser/KOREParser.h>
 #include <kllvm/printer/printer.h>
 

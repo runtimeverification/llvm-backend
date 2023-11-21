@@ -1,4 +1,4 @@
-#include <bindings/core/core.h>
+#include <kllvm/bindings/core/core.h>
 
 using namespace kllvm;
 
