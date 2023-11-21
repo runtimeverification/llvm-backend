@@ -1,5 +1,5 @@
 // RUN: %proof-interpreter
-// RUN: %run-proof-out
+// RUN: %check-proof-out
 [topCellInitializer{}(LblinitGeneratedTopCell{}()), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/gtrepta/runtimeverification/llvm-backend/tmp/imp.k)")]
 
 module BASIC-K

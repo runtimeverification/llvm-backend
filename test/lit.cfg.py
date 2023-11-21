@@ -142,6 +142,11 @@ config.substitutions.extend([
         done
     ''')),
 
+    ('%check-proof-out', one_line('''
+        %run-proof-out
+        %kore-proof-trace %t.out.bin
+    ''')),
+
     ('%run-binary-out', 'rm -f %t.out.bin && %t.interpreter %test-input -1 %t.out.bin --binary-output'),
     ('%run-binary', 'rm -f %t.bin && %convert-input && %t.interpreter %t.bin -1 /dev/stdout'),
     ('%run-proof-out', 'rm -f %t.out.bin && %t.interpreter %test-input -1 %t.out.bin --proof-output'),
@@ -163,6 +168,8 @@ config.substitutions.extend([
     ('%allow-pipefail', 'set +o pipefail'),
 
     ('%kore-convert', 'kore-convert'),
+
+    ('%kore-proof-trace', 'kore-proof-trace'),
 ])
 
 config.recursiveExpansionLimit = 10
