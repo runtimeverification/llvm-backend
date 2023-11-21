@@ -2,7 +2,7 @@
 
 # This is configured generated code; shellcheck can't follow it properly
 # shellcheck disable=SC1091
-source "$(dirname "$0")/../lib/scripts/utils.sh"
+source "$(dirname "$0")/../lib/kllvm/scripts/utils.sh"
 
 # Set the printing depth for profiling and verbose execution information
 export DEPTH=1
@@ -153,9 +153,6 @@ if [ "$main" != "python_ast" ]; then
   if [ "$lto" = "lto" ]; then
     flags+=("-flto")
     files=("$LIBDIR"/llvm/*.ll)
-    if ! $link; then
-      mv "$modopt" "$output_file"
-    fi
   else
     files=()
     if $compile; then
@@ -177,6 +174,10 @@ if [ "$main" != "python_ast" ]; then
         files+=("$tmp")
       done
     fi
+  fi
+
+  if ! $link; then
+    mv "$modopt" "$output_file"
   fi
 fi
 

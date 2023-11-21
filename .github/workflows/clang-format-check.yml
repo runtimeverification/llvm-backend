@@ -12,9 +12,10 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Check that C and C++ code is correctly formatted
-      uses: jidicula/clang-format-action@v4.8.0
+      uses: jidicula/clang-format-action@v4.11.0
       with:
         exclude-regex: '(build|config|deps)'
+        clang-format-version: 17
 
   shell-check:
     name: Shell check

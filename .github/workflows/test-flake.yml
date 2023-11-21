@@ -12,7 +12,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - runner: [self-hosted, linux, normal-ephemeral]
+          - runner: [self-hosted, linux, normal]
             os: ubuntu-20.04
           - runner: macos-12
             os: macos-12
@@ -35,7 +35,6 @@ jobs:
             access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
 
       - name: 'Install Cachix'
-        if: ${{ !startsWith(matrix.os, 'self') }}
         uses: cachix/cachix-action@v12
         with:
           name: k-framework

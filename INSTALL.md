@@ -1,11 +1,11 @@
 # Dependencies
 
-## Ubuntu 20.04:
+## Ubuntu 22.04:
 
 ```shell
 sudo apt update
 sudo apt install      \
-  clang-12            \
+  clang-15            \
   cmake               \
   curl                \
   flex                \
@@ -17,9 +17,10 @@ sudo apt install      \
   libjemalloc-dev     \
   libmpfr-dev         \
   libyaml-dev         \
-  lld-12              \
-  llvm-12-tools       \
+  lld-15              \
+  llvm-15-tools       \
   maven               \
+  openjdk-17-jdk      \
   pkg-config          \
   python3             \
   python3-pip         \

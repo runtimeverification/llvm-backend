@@ -16,24 +16,19 @@ namespace kllvm {
 // one does not yet exist
 llvm::Function *koreHeapAlloc(std::string name, llvm::Module *module);
 
-// If Value is an instance of llvm::Function, cast and return. Otherwise, print
-// errors and abort.
-llvm::Function *castToFunctionOrAbort(llvm::Value *value);
-
 // getOrInsertFunction on module, aborting on failure
 template <class... Ts>
-static llvm::Function *getOrInsertFunction(llvm::Module *module, Ts... Args) {
-  llvm::Value *callee;
-  auto ret = module->getOrInsertFunction(Args...);
-#if LLVM_VERSION_MAJOR >= 9
-  callee = ret.getCallee();
-#else
-  callee = ret;
-#endif
-  return castToFunctionOrAbort(callee);
-}
+llvm::Function *getOrInsertFunction(llvm::Module *module, Ts... Args) {
+  auto callee = module->getOrInsertFunction(Args...).getCallee();
+  auto func = llvm::dyn_cast<llvm::Function>(callee);
 
-llvm::StructType *getTypeByName(llvm::Module *module, std::string name);
+  if (!func) {
+    func->print(llvm::errs());
+    abort();
+  }
+
+  return func;
+}
 
 } // namespace kllvm
 

@@ -1,13 +1,13 @@
-configure_file(CreateTerm.cpp CreateTerm.cpp @ONLY)
-
 add_library(Codegen
-  ${CMAKE_CURRENT_BINARY_DIR}/CreateTerm.cpp
+  CreateTerm.cpp
   ApplyPasses.cpp
   CreateStaticTerm.cpp
   Debug.cpp
   Decision.cpp
   DecisionParser.cpp
   EmitConfigParser.cpp
+  Options.cpp
+  ProofEvent.cpp
   Util.cpp
 )
 

@@ -182,6 +182,33 @@ SortBytes hook_BYTES_replaceAt(SortBytes b, SortInt start, SortBytes b2) {
   return b;
 }
 
+SortBytes
+hook_BYTES_memset(SortBytes b, SortInt start, SortInt count, SortInt value) {
+  uint64_t ustart = get_ui(start);
+  uint64_t ucount = get_ui(count);
+  uint64_t uend = ustart + ucount;
+  if ((uend < ustart) || (uend < ucount)) {
+    KLLVM_HOOK_INVALID_ARGUMENT(
+        "Exception on memset: unsigned addition start {} plus count {} wraps "
+        "around: uend= {}",
+        ustart, ucount, uend);
+  }
+  uint64_t input_len = len(b);
+  if (uend > input_len) {
+    KLLVM_HOOK_INVALID_ARGUMENT(
+        "Buffer overflow on memset: start {} plus count {} is greater "
+        "than buffer length {}",
+        ustart, ucount, input_len);
+  }
+  int v = mpz_get_si(value);
+  if ((v < -128) || (v > 127)) {
+    KLLVM_HOOK_INVALID_ARGUMENT(
+        "Not a valid value for a byte in memset: v={}", v);
+  }
+  memset(b->data + ustart, v, ucount);
+  return b;
+}
+
 SortInt hook_BYTES_length(SortBytes a) {
   mpz_t result;
   mpz_init_set_ui(result, len(a));

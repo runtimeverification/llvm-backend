@@ -415,5 +415,6 @@ void init_float2(floating *, std::string);
 std::string intToStringInBase(mpz_t, uint64_t);
 std::string intToString(mpz_t);
 void printValueOfType(
-    std::ostream &os, std::string definitionPath, void *, std::string);
+    std::ostream &os, std::string const &definitionPath, void *value,
+    std::string const &type);
 #endif // RUNTIME_HEADER_H

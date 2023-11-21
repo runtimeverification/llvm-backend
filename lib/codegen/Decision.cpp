@@ -2,6 +2,7 @@
 
 #include "kllvm/codegen/CreateTerm.h"
 #include "kllvm/codegen/Debug.h"
+#include "kllvm/codegen/ProofEvent.h"
 #include "kllvm/codegen/Util.h"
 
 #include <llvm/ADT/APInt.h>
@@ -266,8 +267,9 @@ void SwitchNode::codegen(Decision *d) {
               binding.first.substr(0, max_name_length), d->CurrentBlock);
           break;
         }
-        auto BlockPtr = llvm::PointerType::getUnqual(
-            getTypeByName(d->Module, BLOCK_STRUCT));
+        auto BlockPtr
+            = llvm::PointerType::getUnqual(llvm::StructType::getTypeByName(
+                d->Module->getContext(), BLOCK_STRUCT));
         if (symbolDecl->getAttributes().count("binder")) {
           if (offset == 0) {
             Renamed = llvm::CallInst::Create(
@@ -373,13 +375,45 @@ void MakePatternNode::codegen(Decision *d) {
   setCompleted();
 }
 
+/*
+ * The code generation step for FunctionNodes emits a call to addMatchFunction
+ * that records why a match failed to apply in the case of side-condition calls
+ * failing. Doing so requires that we store the _type_ of each argument
+ * somewhere, in order that opaque block* values can be safely reinterpreted in
+ * the sort that they originated from (int, bool, symbol, ...). In LLVM versions
+ * < 16, we could encode this information in the LLVM type safely. However,
+ * after the LLVM opaque pointer migration, we can no longer do so (as the
+ * legacy types %mpz* and %block* would both be %ptr, for example). We
+ * therefore define a compatibility translation between sort categories and what
+ * their corresponding LLVM type _would have been_ before opaque pointers.
+ */
+static std::string legacy_value_type_to_string(ValueType sort) {
+  switch (sort.cat) {
+  case SortCategory::Int: return "%mpz*";
+  case SortCategory::Bool: return "i1";
+  case SortCategory::Float: return "%floating*";
+  case SortCategory::Symbol:
+  case SortCategory::Variable: return "%block*";
+
+  // Cases below are deliberately not implemented; the return values are
+  // placeholders to help with debugging only.
+  case SortCategory::Map: return "<map>";
+  case SortCategory::RangeMap: return "<rangemap>";
+  case SortCategory::List: return "<list>";
+  case SortCategory::Set: return "<set>";
+  case SortCategory::StringBuffer: return "<stringbuffer>";
+  case SortCategory::MInt: return "<mint>";
+  case SortCategory::Uncomputed: abort();
+  }
+}
+
 void FunctionNode::codegen(Decision *d) {
   if (beginNode(d, "function" + name)) {
     return;
   }
   std::vector<llvm::Value *> args;
   llvm::StringMap<llvm::Value *> finalSubst;
-  for (auto arg : bindings) {
+  for (auto [arg, cat] : bindings) {
     llvm::Value *val;
     if (arg.first.find_first_not_of("-0123456789") == std::string::npos) {
       val = llvm::ConstantInt::get(
@@ -390,6 +424,15 @@ void FunctionNode::codegen(Decision *d) {
     args.push_back(val);
     finalSubst[arg.first] = val;
   }
+  bool isSideCondition = function.substr(0, 15) == "side_condition_";
+
+  if (isSideCondition) {
+    ProofEvent p(d->Definition, d->Module);
+    size_t ordinal = std::stoll(function.substr(15));
+    KOREAxiomDeclaration *axiom = d->Definition->getAxiomByOrdinal(ordinal);
+    d->CurrentBlock = p.sideConditionEvent(axiom, args, d->CurrentBlock);
+  }
+
   CreateTerm creator(
       finalSubst, d->Definition, d->CurrentBlock, d->Module, false);
   auto Call = creator.createFunctionCall(
@@ -401,7 +444,7 @@ void FunctionNode::codegen(Decision *d) {
     if (function.substr(0, 5) == "hook_") {
       debugName = function.substr(5, function.find_first_of('_', 5) - 5) + "."
                   + function.substr(function.find_first_of('_', 5) + 1);
-    } else if (function.substr(0, 15) == "side_condition_") {
+    } else if (isSideCondition) {
       size_t ordinal = std::stoll(function.substr(15));
       KOREAxiomDeclaration *axiom = d->Definition->getAxiomByOrdinal(ordinal);
       if (axiom->getAttributes().count("label")) {
@@ -418,7 +461,10 @@ void FunctionNode::codegen(Decision *d) {
       new llvm::StoreInst(zext, tempAllocCall, d->CurrentBlock);
     }
     functionArgs.push_back(tempAllocCall);
-    for (auto arg : args) {
+    for (auto i = 0u; i < args.size(); ++i) {
+      auto arg = args[i];
+      auto cat = bindings[i].second;
+
       auto tempAllocArg = d->ptrTerm(arg);
       if (arg->getType() == llvm::Type::getInt1Ty(d->Ctx)) {
         llvm::Value *zext = new llvm::ZExtInst(
@@ -426,9 +472,7 @@ void FunctionNode::codegen(Decision *d) {
         new llvm::StoreInst(zext, tempAllocArg, d->CurrentBlock);
       }
       functionArgs.push_back(tempAllocArg);
-      std::string str;
-      llvm::raw_string_ostream output(str);
-      arg->getType()->print(output);
+      auto str = legacy_value_type_to_string(cat);
       functionArgs.push_back(d->stringLiteral(str));
     }
     functionArgs.push_back(
@@ -459,7 +503,8 @@ void MakeIteratorNode::codegen(Decision *d) {
   llvm::Value *arg = d->load(std::make_pair(collection, collectionType));
   args.push_back(arg);
   types.push_back(arg->getType());
-  llvm::Type *sretType = getTypeByName(d->Module, "iter");
+  llvm::Type *sretType
+      = llvm::StructType::getTypeByName(d->Module->getContext(), "iter");
   llvm::Value *AllocSret
       = allocateTerm(sretType, d->CurrentBlock, "koreAllocAlwaysGC");
   AllocSret->setName(name.substr(0, max_name_length));
@@ -471,13 +516,8 @@ void MakeIteratorNode::codegen(Decision *d) {
   llvm::Function *func = getOrInsertFunction(d->Module, hookName, funcType);
   auto call = llvm::CallInst::Create(func, args, "", d->CurrentBlock);
   setDebugLoc(call);
-#if __clang_major__ >= 12
   llvm::Attribute sretAttr
       = llvm::Attribute::get(d->Ctx, llvm::Attribute::StructRet, sretType);
-#else
-  llvm::Attribute sretAttr
-      = llvm::Attribute::get(d->Ctx, llvm::Attribute::StructRet);
-#endif
   func->arg_begin()->addAttr(sretAttr);
   call->addParamAttr(0, sretAttr);
   d->store(std::make_pair(name, type), AllocSret);
@@ -519,6 +559,7 @@ void LeafNode::codegen(Decision *d) {
     setCompleted();
     return;
   }
+
   std::vector<llvm::Value *> args;
   std::vector<llvm::Type *> types;
   for (auto arg : bindings) {
@@ -527,12 +568,36 @@ void LeafNode::codegen(Decision *d) {
     types.push_back(val->getType());
   }
   auto type = getParamType(d->Cat, d->Module);
-  auto Call = llvm::CallInst::Create(
-      getOrInsertFunction(
-          d->Module, name, llvm::FunctionType::get(type, types, false)),
-      args, "", d->CurrentBlock);
+
+  auto applyRule = getOrInsertFunction(
+      d->Module, name, llvm::FunctionType::get(type, types, false));
+
+  // We are generating code for a function with name beginning apply_rule_\d+; to
+  // retrieve the corresponding ordinal we drop the apply_rule_ prefix.
+  auto ordinal = std::stoll(name.substr(11));
+  auto arity = applyRule->arg_end() - applyRule->arg_begin();
+  auto axiom = d->Definition->getAxiomByOrdinal(ordinal);
+
+  auto vars = std::map<std::string, KOREVariablePattern *>{};
+  for (KOREPattern *lhs : axiom->getLeftHandSide()) {
+    lhs->markVariables(vars);
+  }
+  axiom->getRightHandSide()->markVariables(vars);
+
+  auto subst = llvm::StringMap<llvm::Value *>{};
+  auto i = 0;
+  for (auto iter = vars.begin(); iter != vars.end(); ++iter, ++i) {
+    subst[iter->first] = args[i];
+  }
+
+  d->CurrentBlock
+      = ProofEvent(d->Definition, d->Module)
+            .rewriteEvent_pre(axiom, arity, vars, subst, d->CurrentBlock);
+
+  auto Call = llvm::CallInst::Create(applyRule, args, "", d->CurrentBlock);
   setDebugLoc(Call);
   Call->setCallingConv(llvm::CallingConv::Tail);
+
   if (child == nullptr) {
     llvm::ReturnInst::Create(d->Ctx, Call, d->CurrentBlock);
   } else {
@@ -744,8 +809,8 @@ void abortWhenStuck(
   symbol = d->getAllSymbols().at(Out.str());
   auto BlockType = getBlockType(Module, d, symbol);
   llvm::Value *Ptr;
-  auto BlockPtr
-      = llvm::PointerType::getUnqual(getTypeByName(Module, BLOCK_STRUCT));
+  auto BlockPtr = llvm::PointerType::getUnqual(
+      llvm::StructType::getTypeByName(Module->getContext(), BLOCK_STRUCT));
   if (symbol->getArguments().empty()) {
     Ptr = llvm::ConstantExpr::getIntToPtr(
         llvm::ConstantInt::get(
@@ -920,7 +985,8 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> stepFunctionHeader(
     case SortCategory::Int:
     case SortCategory::Float:
       elements.push_back(llvm::ConstantStruct::get(
-          getTypeByName(module, LAYOUTITEM_STRUCT),
+          llvm::StructType::getTypeByName(
+              module->getContext(), LAYOUTITEM_STRUCT),
           llvm::ConstantInt::get(
               llvm::Type::getInt64Ty(module->getContext()), i++ * 8),
           llvm::ConstantInt::get(
@@ -934,7 +1000,9 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> stepFunctionHeader(
   }
   auto layoutArr = llvm::ConstantArray::get(
       llvm::ArrayType::get(
-          getTypeByName(module, LAYOUTITEM_STRUCT), elements.size()),
+          llvm::StructType::getTypeByName(
+              module->getContext(), LAYOUTITEM_STRUCT),
+          elements.size()),
       elements);
   auto layout = module->getOrInsertGlobal(
       "layout_item_rule_" + std::to_string(ordinal), layoutArr->getType());
@@ -943,8 +1011,9 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> stepFunctionHeader(
   if (!globalVar->hasInitializer()) {
     globalVar->setInitializer(layoutArr);
   }
-  auto ptrTy = llvm::PointerType::getUnqual(
-      llvm::ArrayType::get(getTypeByName(module, LAYOUTITEM_STRUCT), 0));
+  auto ptrTy = llvm::PointerType::getUnqual(llvm::ArrayType::get(
+      llvm::StructType::getTypeByName(module->getContext(), LAYOUTITEM_STRUCT),
+      0));
   auto koreCollect = getOrInsertFunction(
       module, "koreCollect",
       llvm::FunctionType::get(

@@ -23,5 +23,5 @@ install(
 install(
   PROGRAMS
     ${CMAKE_CURRENT_BINARY_DIR}/utils.sh
-  DESTINATION lib/scripts
+  DESTINATION lib/kllvm/scripts
 )

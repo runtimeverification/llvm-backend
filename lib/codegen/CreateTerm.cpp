@@ -1,6 +1,7 @@
 #include "kllvm/codegen/CreateTerm.h"
 #include "kllvm/codegen/CreateStaticTerm.h"
 #include "kllvm/codegen/Debug.h"
+#include "kllvm/codegen/ProofEvent.h"
 #include "kllvm/codegen/Util.h"
 
 #include <fmt/format.h>
@@ -9,6 +10,7 @@
 #include <iostream>
 
 #include "runtime/header.h" //for macros
+
 #include "llvm/IR/BasicBlock.h"
 #include "llvm/IR/Constants.h"
 #include "llvm/IR/DerivedTypes.h"
@@ -21,11 +23,21 @@
 
 namespace kllvm {
 
-std::string LLVM_HEADER = R"LLVM(
-; Target determined during CMake build
-target datalayout = "@BACKEND_TARGET_DATALAYOUT@"
-target triple = "@BACKEND_TARGET_TRIPLE@"
+using namespace fmt::literals;
 
+namespace {
+std::string llvm_header() {
+  auto target_dependent = fmt::format(
+      R"LLVM(
+; Target determined during CMake build
+target datalayout = "{datalayout}"
+target triple = "{triple}"
+  )LLVM",
+      "datalayout"_a = BACKEND_TARGET_DATALAYOUT,
+      "triple"_a = BACKEND_TARGET_TRIPLE);
+
+  auto rest =
+      R"LLVM(
 ; K types in LLVM
 
 ; A K value in the LLVM backend can be one of the following values:
@@ -102,16 +114,15 @@ target triple = "@BACKEND_TARGET_TRIPLE@"
 declare %block* @parseConfiguration(i8*)
 declare void @printConfiguration(i8 *, %block *)
 )LLVM";
-
-void writeUInt64(
-    llvm::Value *outputFile, llvm::Module *Module, uint64_t value,
-    llvm::BasicBlock *Block);
+  return target_dependent + rest;
+}
+} // namespace
 
 std::unique_ptr<llvm::Module>
 newModule(std::string name, llvm::LLVMContext &Context) {
   llvm::SMDiagnostic Err;
   auto mod = llvm::parseIR(
-      *llvm::MemoryBuffer::getMemBuffer(LLVM_HEADER), Err, Context);
+      *llvm::MemoryBuffer::getMemBuffer(llvm_header()), Err, Context);
   if (!mod) {
     Err.print("header.ll", llvm::errs());
   }
@@ -161,27 +172,36 @@ llvm::Type *getParamType(ValueType sort, llvm::Module *Module) {
 }
 
 llvm::StructType *getBlockType(llvm::Module *Module) {
-  return getTypeByName(Module, BLOCK_STRUCT);
+  return llvm::StructType::getTypeByName(Module->getContext(), BLOCK_STRUCT);
 }
 
 llvm::Type *getValueType(ValueType sort, llvm::Module *Module) {
   switch (sort.cat) {
-  case SortCategory::Map: return getTypeByName(Module, MAP_STRUCT);
-  case SortCategory::RangeMap: return getTypeByName(Module, RANGEMAP_STRUCT);
-  case SortCategory::List: return getTypeByName(Module, LIST_STRUCT);
-  case SortCategory::Set: return getTypeByName(Module, SET_STRUCT);
+  case SortCategory::Map:
+    return llvm::StructType::getTypeByName(Module->getContext(), MAP_STRUCT);
+  case SortCategory::RangeMap:
+    return llvm::StructType::getTypeByName(
+        Module->getContext(), RANGEMAP_STRUCT);
+  case SortCategory::List:
+    return llvm::StructType::getTypeByName(Module->getContext(), LIST_STRUCT);
+  case SortCategory::Set:
+    return llvm::StructType::getTypeByName(Module->getContext(), SET_STRUCT);
   case SortCategory::Int:
-    return llvm::PointerType::getUnqual(getTypeByName(Module, INT_STRUCT));
+    return llvm::PointerType::getUnqual(
+        llvm::StructType::getTypeByName(Module->getContext(), INT_STRUCT));
   case SortCategory::Float:
-    return llvm::PointerType::getUnqual(getTypeByName(Module, FLOAT_STRUCT));
+    return llvm::PointerType::getUnqual(
+        llvm::StructType::getTypeByName(Module->getContext(), FLOAT_STRUCT));
   case SortCategory::StringBuffer:
-    return llvm::PointerType::getUnqual(getTypeByName(Module, BUFFER_STRUCT));
+    return llvm::PointerType::getUnqual(
+        llvm::StructType::getTypeByName(Module->getContext(), BUFFER_STRUCT));
   case SortCategory::Bool: return llvm::Type::getInt1Ty(Module->getContext());
   case SortCategory::MInt:
     return llvm::IntegerType::get(Module->getContext(), sort.bits);
   case SortCategory::Symbol:
   case SortCategory::Variable:
-    return llvm::PointerType::getUnqual(getTypeByName(Module, BLOCK_STRUCT));
+    return llvm::PointerType::getUnqual(
+        llvm::StructType::getTypeByName(Module->getContext(), BLOCK_STRUCT));
   case SortCategory::Uncomputed: abort();
   }
 }
@@ -189,7 +209,8 @@ llvm::Type *getValueType(ValueType sort, llvm::Module *Module) {
 llvm::StructType *getBlockType(
     llvm::Module *Module, KOREDefinition *definition,
     const KORESymbol *symbol) {
-  llvm::StructType *BlockHeaderType = getTypeByName(Module, BLOCKHEADER_STRUCT);
+  llvm::StructType *BlockHeaderType = llvm::StructType::getTypeByName(
+      Module->getContext(), BLOCKHEADER_STRUCT);
   llvm::ArrayType *EmptyArrayType
       = llvm::ArrayType::get(llvm::Type::getInt64Ty(Module->getContext()), 0);
   llvm::SmallVector<llvm::Type *, 4> Types;
@@ -216,7 +237,8 @@ uint64_t getBlockHeaderVal(
 llvm::Value *getBlockHeader(
     llvm::Module *Module, KOREDefinition *definition, const KORESymbol *symbol,
     llvm::Type *BlockType) {
-  llvm::StructType *BlockHeaderType = getTypeByName(Module, BLOCKHEADER_STRUCT);
+  llvm::StructType *BlockHeaderType = llvm::StructType::getTypeByName(
+      Module->getContext(), BLOCKHEADER_STRUCT);
   uint64_t headerVal = getBlockHeaderVal(Module, symbol, BlockType);
   return llvm::ConstantStruct::get(
       BlockHeaderType,
@@ -287,11 +309,16 @@ sptr<KORESort> termSort(KOREPattern *pattern) {
   }
 }
 
-#define ALLOC_ARG(x)                                                           \
-  createAllocation(                                                            \
-      pattern->getArguments()[x].get(),                                        \
-      fmt::format("{}:{}", locationStack, x))                                  \
-      .first
+llvm::Value *CreateTerm::alloc_arg(
+    KORECompositePattern *pattern, int idx, std::string locationStack) {
+  KOREPattern *p = pattern->getArguments()[idx].get();
+  llvm::Value *ret
+      = createAllocation(p, fmt::format("{}:{}", locationStack, idx)).first;
+  auto sort = dynamic_cast<KORECompositeSort *>(p->getSort().get());
+  ProofEvent e(Definition, Module);
+  CurrentBlock = e.hookArg(ret, sort, CurrentBlock);
+  return ret;
+}
 
 std::string escape(std::string str) {
   std::stringstream os;
@@ -312,7 +339,7 @@ llvm::Value *CreateTerm::createHook(
   std::string name = strPattern->getContents();
   if (name == "BOOL.and" || name == "BOOL.andThen") {
     assert(pattern->getArguments().size() == 2);
-    llvm::Value *firstArg = ALLOC_ARG(0);
+    llvm::Value *firstArg = alloc_arg(pattern, 0, locationStack);
     llvm::BasicBlock *CondBlock = CurrentBlock;
     llvm::BasicBlock *TrueBlock
         = llvm::BasicBlock::Create(Ctx, "then", CurrentBlock->getParent());
@@ -320,7 +347,7 @@ llvm::Value *CreateTerm::createHook(
         Ctx, "hook_BOOL_and", CurrentBlock->getParent());
     llvm::BranchInst::Create(TrueBlock, MergeBlock, firstArg, CurrentBlock);
     CurrentBlock = TrueBlock;
-    llvm::Value *secondArg = ALLOC_ARG(1);
+    llvm::Value *secondArg = alloc_arg(pattern, 1, locationStack);
     llvm::BranchInst::Create(MergeBlock, CurrentBlock);
     llvm::PHINode *Phi = llvm::PHINode::Create(
         llvm::Type::getInt1Ty(Ctx), 2, "phi", MergeBlock);
@@ -330,7 +357,7 @@ llvm::Value *CreateTerm::createHook(
     return Phi;
   } else if (name == "BOOL.or" || name == "BOOL.orElse") {
     assert(pattern->getArguments().size() == 2);
-    llvm::Value *firstArg = ALLOC_ARG(0);
+    llvm::Value *firstArg = alloc_arg(pattern, 0, locationStack);
     llvm::BasicBlock *CondBlock = CurrentBlock;
     llvm::BasicBlock *FalseBlock
         = llvm::BasicBlock::Create(Ctx, "else", CurrentBlock->getParent());
@@ -338,7 +365,7 @@ llvm::Value *CreateTerm::createHook(
         Ctx, "hook_BOOL_or", CurrentBlock->getParent());
     llvm::BranchInst::Create(MergeBlock, FalseBlock, firstArg, CurrentBlock);
     CurrentBlock = FalseBlock;
-    llvm::Value *secondArg = ALLOC_ARG(1);
+    llvm::Value *secondArg = alloc_arg(pattern, 1, locationStack);
     llvm::BranchInst::Create(MergeBlock, CurrentBlock);
     llvm::PHINode *Phi = llvm::PHINode::Create(
         llvm::Type::getInt1Ty(Ctx), 2, "phi", MergeBlock);
@@ -348,7 +375,7 @@ llvm::Value *CreateTerm::createHook(
     return Phi;
   } else if (name == "BOOL.not") {
     assert(pattern->getArguments().size() == 1);
-    llvm::Value *arg = ALLOC_ARG(0);
+    llvm::Value *arg = alloc_arg(pattern, 0, locationStack);
     llvm::BinaryOperator *Not = llvm::BinaryOperator::Create(
         llvm::Instruction::Xor, arg,
         llvm::ConstantInt::get(llvm::Type::getInt1Ty(Ctx), 1), "hook_BOOL_not",
@@ -356,7 +383,7 @@ llvm::Value *CreateTerm::createHook(
     return Not;
   } else if (name == "BOOL.implies") {
     assert(pattern->getArguments().size() == 2);
-    llvm::Value *firstArg = ALLOC_ARG(0);
+    llvm::Value *firstArg = alloc_arg(pattern, 0, locationStack);
     llvm::BasicBlock *CondBlock = CurrentBlock;
     llvm::BasicBlock *TrueBlock
         = llvm::BasicBlock::Create(Ctx, "then", CurrentBlock->getParent());
@@ -364,7 +391,7 @@ llvm::Value *CreateTerm::createHook(
         Ctx, "hook_BOOL_implies", CurrentBlock->getParent());
     llvm::BranchInst::Create(TrueBlock, MergeBlock, firstArg, CurrentBlock);
     CurrentBlock = TrueBlock;
-    llvm::Value *secondArg = ALLOC_ARG(1);
+    llvm::Value *secondArg = alloc_arg(pattern, 1, locationStack);
     llvm::BranchInst::Create(MergeBlock, CurrentBlock);
     llvm::PHINode *Phi = llvm::PHINode::Create(
         llvm::Type::getInt1Ty(Ctx), 2, "phi", MergeBlock);
@@ -375,23 +402,23 @@ llvm::Value *CreateTerm::createHook(
     return Phi;
   } else if (name == "BOOL.ne" || name == "BOOL.xor") {
     assert(pattern->getArguments().size() == 2);
-    llvm::Value *firstArg = ALLOC_ARG(0);
-    llvm::Value *secondArg = ALLOC_ARG(1);
+    llvm::Value *firstArg = alloc_arg(pattern, 0, locationStack);
+    llvm::Value *secondArg = alloc_arg(pattern, 1, locationStack);
     llvm::BinaryOperator *Xor = llvm::BinaryOperator::Create(
         llvm::Instruction::Xor, firstArg, secondArg, "hook_BOOL_ne",
         CurrentBlock);
     return Xor;
   } else if (name == "BOOL.eq") {
     assert(pattern->getArguments().size() == 2);
-    llvm::Value *firstArg = ALLOC_ARG(0);
-    llvm::Value *secondArg = ALLOC_ARG(1);
+    llvm::Value *firstArg = alloc_arg(pattern, 0, locationStack);
+    llvm::Value *secondArg = alloc_arg(pattern, 1, locationStack);
     llvm::ICmpInst *Eq = new llvm::ICmpInst(
         *CurrentBlock, llvm::CmpInst::ICMP_EQ, firstArg, secondArg,
         "hook_BOOL_eq");
     return Eq;
   } else if (name == "KEQUAL.ite") {
     assert(pattern->getArguments().size() == 3);
-    llvm::Value *cond = ALLOC_ARG(0);
+    llvm::Value *cond = alloc_arg(pattern, 0, locationStack);
     llvm::BasicBlock *TrueBlock
         = llvm::BasicBlock::Create(Ctx, "then", CurrentBlock->getParent());
     llvm::BasicBlock *FalseBlock
@@ -400,10 +427,10 @@ llvm::Value *CreateTerm::createHook(
         Ctx, "hook_KEQUAL_ite", CurrentBlock->getParent());
     llvm::BranchInst::Create(TrueBlock, FalseBlock, cond, CurrentBlock);
     CurrentBlock = TrueBlock;
-    llvm::Value *trueArg = ALLOC_ARG(1);
+    llvm::Value *trueArg = alloc_arg(pattern, 1, locationStack);
     llvm::BasicBlock *NewTrueBlock = CurrentBlock;
     CurrentBlock = FalseBlock;
-    llvm::Value *falseArg = ALLOC_ARG(2);
+    llvm::Value *falseArg = alloc_arg(pattern, 2, locationStack);
     if (trueArg->getType()->isPointerTy()
         && !falseArg->getType()->isPointerTy()) {
       llvm::AllocaInst *AllocCollection
@@ -427,7 +454,7 @@ llvm::Value *CreateTerm::createHook(
     CurrentBlock = MergeBlock;
     return Phi;
   } else if (name == "MINT.uvalue") {
-    llvm::Value *mint = ALLOC_ARG(0);
+    llvm::Value *mint = alloc_arg(pattern, 0, locationStack);
     ValueType cat = dynamic_cast<KORECompositeSort *>(
                         pattern->getConstructor()->getArguments()[0].get())
                         ->getCategory(Definition);
@@ -478,7 +505,7 @@ llvm::Value *CreateTerm::createHook(
     setDebugLoc(result);
     return result;
   } else if (name == "MINT.svalue") {
-    llvm::Value *mint = ALLOC_ARG(0);
+    llvm::Value *mint = alloc_arg(pattern, 0, locationStack);
     ValueType cat = dynamic_cast<KORECompositeSort *>(
                         pattern->getConstructor()->getArguments()[0].get())
                         ->getCategory(Definition);
@@ -529,7 +556,7 @@ llvm::Value *CreateTerm::createHook(
     setDebugLoc(result);
     return result;
   } else if (name == "MINT.integer") {
-    llvm::Value *mpz = ALLOC_ARG(0);
+    llvm::Value *mpz = alloc_arg(pattern, 0, locationStack);
     ValueType cat = dynamic_cast<KORECompositeSort *>(
                         pattern->getConstructor()->getSort().get())
                         ->getCategory(Definition);
@@ -573,16 +600,16 @@ llvm::Value *CreateTerm::createHook(
       return result;
     }
   } else if (name == "MINT.neg") {
-    llvm::Value *in = ALLOC_ARG(0);
+    llvm::Value *in = alloc_arg(pattern, 0, locationStack);
     return llvm::BinaryOperator::CreateNeg(in, "hook_MINT_neg", CurrentBlock);
   } else if (name == "MINT.not") {
-    llvm::Value *in = ALLOC_ARG(0);
+    llvm::Value *in = alloc_arg(pattern, 0, locationStack);
     return llvm::BinaryOperator::CreateNot(in, "hook_MINT_not", CurrentBlock);
 #define MINT_CMP(hookname, inst)                                               \
   }                                                                            \
   else if (name == "MINT." #hookname) {                                        \
-    llvm::Value *first = ALLOC_ARG(0);                                         \
-    llvm::Value *second = ALLOC_ARG(1);                                        \
+    llvm::Value *first = alloc_arg(pattern, 0, locationStack);                 \
+    llvm::Value *second = alloc_arg(pattern, 1, locationStack);                \
     return new llvm::ICmpInst(                                                 \
         *CurrentBlock, llvm::CmpInst::inst, first, second,                     \
         "hook_MINT_" #hookname)
@@ -599,8 +626,8 @@ llvm::Value *CreateTerm::createHook(
 #define MINT_BINOP(hookname, inst)                                             \
   }                                                                            \
   else if (name == "MINT." #hookname) {                                        \
-    llvm::Value *first = ALLOC_ARG(0);                                         \
-    llvm::Value *second = ALLOC_ARG(1);                                        \
+    llvm::Value *first = alloc_arg(pattern, 0, locationStack);                 \
+    llvm::Value *second = alloc_arg(pattern, 1, locationStack);                \
     return llvm::BinaryOperator::Create(                                       \
         llvm::Instruction::inst, first, second, "hook_MINT_" #hookname,        \
         CurrentBlock)
@@ -642,6 +669,10 @@ llvm::Value *CreateTerm::createHook(
 llvm::Value *CreateTerm::createFunctionCall(
     std::string name, KORECompositePattern *pattern, bool sret, bool tailcc,
     std::string locationStack) {
+  auto event = ProofEvent(Definition, Module);
+
+  CurrentBlock = event.functionEvent_pre(CurrentBlock, pattern, locationStack);
+
   std::vector<llvm::Value *> args;
   auto returnSort = dynamic_cast<KORECompositeSort *>(
       pattern->getConstructor()->getSort().get());
@@ -649,7 +680,7 @@ llvm::Value *CreateTerm::createFunctionCall(
   int i = 0;
   for (auto sort : pattern->getConstructor()->getArguments()) {
     auto concreteSort = dynamic_cast<KORECompositeSort *>(sort.get());
-    llvm::Value *arg = ALLOC_ARG(i);
+    llvm::Value *arg = alloc_arg(pattern, i, locationStack);
     i++;
     switch (concreteSort->getCategory(Definition).cat) {
     case SortCategory::Map:
@@ -670,49 +701,7 @@ llvm::Value *CreateTerm::createFunctionCall(
     }
   }
 
-  llvm::Function *func = CurrentBlock->getParent();
-
-  auto ProofOutputFlag = Module->getOrInsertGlobal(
-      "proof_output", llvm::Type::getInt1Ty(Module->getContext()));
-  auto OutputFileName = Module->getOrInsertGlobal(
-      "output_file", llvm::Type::getInt8PtrTy(Module->getContext()));
-  auto proofOutput = new llvm::LoadInst(
-      llvm::Type::getInt1Ty(Module->getContext()), ProofOutputFlag,
-      "proof_output", CurrentBlock);
-  llvm::BasicBlock *TrueBlock
-      = llvm::BasicBlock::Create(Module->getContext(), "if", func);
-  auto outputFile = new llvm::LoadInst(
-      llvm::Type::getInt8PtrTy(Module->getContext()), OutputFileName, "output",
-      TrueBlock);
-  auto ir = new llvm::IRBuilder(TrueBlock);
-  llvm::BasicBlock *MergeBlock
-      = llvm::BasicBlock::Create(Module->getContext(), "tail", func);
-  llvm::BranchInst::Create(TrueBlock, MergeBlock, proofOutput, CurrentBlock);
-
-  std::ostringstream symbolName;
-  pattern->getConstructor()->print(symbolName);
-
-  auto symbolString
-      = ir->CreateGlobalStringPtr(symbolName.str(), "", 0, Module);
-  auto positionString = ir->CreateGlobalStringPtr(locationStack, "", 0, Module);
-  writeUInt64(outputFile, Module, 0xdddddddddddddddd, TrueBlock);
-  ir->CreateCall(
-      getOrInsertFunction(
-          Module, "printVariableToFile",
-          llvm::Type::getVoidTy(Module->getContext()),
-          llvm::Type::getInt8PtrTy(Module->getContext()),
-          llvm::Type::getInt8PtrTy(Module->getContext())),
-      {outputFile, symbolString});
-  ir->CreateCall(
-      getOrInsertFunction(
-          Module, "printVariableToFile",
-          llvm::Type::getVoidTy(Module->getContext()),
-          llvm::Type::getInt8PtrTy(Module->getContext()),
-          llvm::Type::getInt8PtrTy(Module->getContext())),
-      {outputFile, positionString});
-
-  llvm::BranchInst::Create(MergeBlock, TrueBlock);
-  CurrentBlock = MergeBlock;
+  CurrentBlock = event.functionEvent_post(CurrentBlock);
 
   return createFunctionCall(name, returnCat, args, sret, tailcc, locationStack);
 }
@@ -760,14 +749,8 @@ llvm::Value *CreateTerm::createFunctionCall(
     call->setCallingConv(llvm::CallingConv::Tail);
   }
   if (sret) {
-#if LLVM_VERSION_MAJOR >= 12
     llvm::Attribute sretAttr
         = llvm::Attribute::get(Ctx, llvm::Attribute::StructRet, sretType);
-#else
-    (void)sretType;
-    llvm::Attribute sretAttr
-        = llvm::Attribute::get(Ctx, llvm::Attribute::StructRet);
-#endif
     func->arg_begin()->addAttr(sretAttr);
     call->addParamAttr(0, sretAttr);
     return AllocSret;
@@ -824,8 +807,8 @@ llvm::Value *CreateTerm::notInjectionCase(
     new llvm::StoreInst(ChildValue, ChildPtr, CurrentBlock);
   }
 
-  auto BlockPtr
-      = llvm::PointerType::getUnqual(getTypeByName(Module, BLOCK_STRUCT));
+  auto BlockPtr = llvm::PointerType::getUnqual(
+      llvm::StructType::getTypeByName(Module->getContext(), BLOCK_STRUCT));
   auto bitcast = new llvm::BitCastInst(Block, BlockPtr, "", CurrentBlock);
   if (symbolDecl->getAttributes().count("binder")) {
     auto call = llvm::CallInst::Create(
@@ -898,11 +881,24 @@ CreateTerm::createAllocation(KOREPattern *pattern, std::string locationStack) {
         || (symbolDecl->getAttributes().count("anywhere")
             && !isAnywhereOwise)) {
       if (symbolDecl->getAttributes().count("hook")) {
-        return std::make_pair(
-            createHook(
-                symbolDecl->getAttributes().at("hook").get(), constructor,
-                locationStack),
-            true);
+        auto sort
+            = dynamic_cast<KORECompositeSort *>(constructor->getSort().get());
+        auto strPattern
+            = dynamic_cast<KOREStringPattern *>(symbolDecl->getAttributes()
+                                                    .at("hook")
+                                                    .get()
+                                                    ->getArguments()[0]
+                                                    .get());
+        std::string name = strPattern->getContents();
+
+        ProofEvent p(Definition, Module);
+        CurrentBlock = p.hookEvent_pre(name, CurrentBlock, locationStack);
+        llvm::Value *val = createHook(
+            symbolDecl->getAttributes().at("hook").get(), constructor,
+            locationStack);
+        CurrentBlock = p.hookEvent_post(val, sort, CurrentBlock);
+
+        return std::make_pair(val, true);
       } else {
         std::ostringstream Out;
         symbol->print(Out, 0, false);
@@ -986,20 +982,6 @@ void addAbort(llvm::BasicBlock *block, llvm::Module *Module) {
   AbortFunc->addFnAttr(llvm::Attribute::NoReturn);
   llvm::CallInst::Create(AbortFunc, "", block);
   new llvm::UnreachableInst(Module->getContext(), block);
-}
-
-void writeUInt64(
-    llvm::Value *outputFile, llvm::Module *Module, uint64_t value,
-    llvm::BasicBlock *Block) {
-  llvm::CallInst::Create(
-      getOrInsertFunction(
-          Module, "writeUInt64ToFile",
-          llvm::Type::getVoidTy(Module->getContext()),
-          llvm::Type::getInt8PtrTy(Module->getContext()),
-          llvm::Type::getInt64Ty(Module->getContext())),
-      {outputFile, llvm::ConstantInt::get(
-                       llvm::Type::getInt64Ty(Module->getContext()), value)},
-      "", Block);
 }
 
 bool makeFunction(
@@ -1090,91 +1072,8 @@ bool makeFunction(
 
   auto CurrentBlock = creator.getCurrentBlock();
   if (apply && bigStep) {
-    auto ProofOutputFlag = Module->getOrInsertGlobal(
-        "proof_output", llvm::Type::getInt1Ty(Module->getContext()));
-    auto OutputFileName = Module->getOrInsertGlobal(
-        "output_file", llvm::Type::getInt8PtrTy(Module->getContext()));
-    auto proofOutput = new llvm::LoadInst(
-        llvm::Type::getInt1Ty(Module->getContext()), ProofOutputFlag,
-        "proof_output", CurrentBlock);
-    llvm::BasicBlock *TrueBlock
-        = llvm::BasicBlock::Create(Module->getContext(), "if", applyRule);
-    auto ir = new llvm::IRBuilder(TrueBlock);
-    llvm::BasicBlock *MergeBlock
-        = llvm::BasicBlock::Create(Module->getContext(), "tail", applyRule);
-    llvm::BranchInst::Create(TrueBlock, MergeBlock, proofOutput, CurrentBlock);
-    auto outputFile = new llvm::LoadInst(
-        llvm::Type::getInt8PtrTy(Module->getContext()), OutputFileName,
-        "output", TrueBlock);
-    writeUInt64(outputFile, Module, axiom->getOrdinal(), TrueBlock);
-    writeUInt64(
-        outputFile, Module, applyRule->arg_end() - applyRule->arg_begin(),
-        TrueBlock);
-    for (auto entry = subst.begin(); entry != subst.end(); ++entry) {
-      auto key = entry->getKey();
-      auto val = entry->getValue();
-      auto var = vars[key.str()];
-      auto sort = dynamic_cast<KORECompositeSort *>(var->getSort().get());
-      auto cat = sort->getCategory(definition);
-      std::ostringstream Out;
-      sort->print(Out);
-      auto sortptr = ir->CreateGlobalStringPtr(Out.str(), "", 0, Module);
-      auto varname = ir->CreateGlobalStringPtr(key, "", 0, Module);
-      ir->CreateCall(
-          getOrInsertFunction(
-              Module, "printVariableToFile",
-              llvm::Type::getVoidTy(Module->getContext()),
-              llvm::Type::getInt8PtrTy(Module->getContext()),
-              llvm::Type::getInt8PtrTy(Module->getContext())),
-          {outputFile, varname});
-      if (cat.cat == SortCategory::Symbol
-          || cat.cat == SortCategory::Variable) {
-        ir->CreateCall(
-            getOrInsertFunction(
-                Module, "serializeTermToFile",
-                llvm::Type::getVoidTy(Module->getContext()),
-                llvm::Type::getInt8PtrTy(Module->getContext()),
-                getValueType({SortCategory::Symbol, 0}, Module),
-                llvm::Type::getInt8PtrTy(Module->getContext())),
-            {outputFile, val, sortptr});
-      } else if (val->getType()->isIntegerTy()) {
-        val = ir->CreateIntToPtr(
-            val, llvm::Type::getInt8PtrTy(Module->getContext()));
-        ir->CreateCall(
-            getOrInsertFunction(
-                Module, "serializeRawTermToFile",
-                llvm::Type::getVoidTy(Module->getContext()),
-                llvm::Type::getInt8PtrTy(Module->getContext()),
-                llvm::Type::getInt8PtrTy(Module->getContext()),
-                llvm::Type::getInt8PtrTy(Module->getContext())),
-            {outputFile, val, sortptr});
-      } else {
-        val = ir->CreatePointerCast(
-            val, llvm::Type::getInt8PtrTy(Module->getContext()));
-        ir->CreateCall(
-            getOrInsertFunction(
-                Module, "serializeRawTermToFile",
-                llvm::Type::getVoidTy(Module->getContext()),
-                llvm::Type::getInt8PtrTy(Module->getContext()),
-                llvm::Type::getInt8PtrTy(Module->getContext()),
-                llvm::Type::getInt8PtrTy(Module->getContext())),
-            {outputFile, val, sortptr});
-      }
-      writeUInt64(outputFile, Module, 0xcccccccccccccccc, TrueBlock);
-    }
-
-    writeUInt64(outputFile, Module, 0xffffffffffffffff, TrueBlock);
-    ir->CreateCall(
-        getOrInsertFunction(
-            Module, "serializeConfigurationToFile",
-            llvm::Type::getVoidTy(Module->getContext()),
-            llvm::Type::getInt8PtrTy(Module->getContext()),
-            getValueType({SortCategory::Symbol, 0}, Module)),
-        {outputFile, retval});
-    writeUInt64(outputFile, Module, 0xcccccccccccccccc, TrueBlock);
-
-    llvm::BranchInst::Create(MergeBlock, TrueBlock);
-    CurrentBlock = MergeBlock;
+    CurrentBlock = ProofEvent(definition, Module)
+                       .rewriteEvent_post(axiom, retval, CurrentBlock);
   }
 
   if (bigStep) {
@@ -1343,9 +1242,12 @@ llvm::Type *getArgType(ValueType cat, llvm::Module *mod) {
   case SortCategory::Set: {
     return getValueType(cat, mod);
   }
-  case SortCategory::Int: return getTypeByName(mod, INT_STRUCT);
-  case SortCategory::Float: return getTypeByName(mod, FLOAT_STRUCT);
-  case SortCategory::StringBuffer: return getTypeByName(mod, BUFFER_STRUCT);
+  case SortCategory::Int:
+    return llvm::StructType::getTypeByName(mod->getContext(), INT_STRUCT);
+  case SortCategory::Float:
+    return llvm::StructType::getTypeByName(mod->getContext(), FLOAT_STRUCT);
+  case SortCategory::StringBuffer:
+    return llvm::StructType::getTypeByName(mod->getContext(), BUFFER_STRUCT);
   case SortCategory::Symbol:
   case SortCategory::Variable: {
     return getBlockType(mod);

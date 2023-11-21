@@ -19,27 +19,47 @@ have rendered this unnecessary, but the change hasn't been implemented yet.
 
 ## Grammar
 
-Here is a BNF styled description of the format
-
+Here is a BNF styled description of the format:
 ```
-delimited_serial_kore := 0xffffffffffffffff serialized_term 0xcccccccccccccccc
+proof_trace ::= header event*
 
-null_terminated_name := <c-style null terminated string>
+header      ::= "HINT" <4-byte version number>
 
-variable := null_terminated_name serialized_term 0xcccccccccccccccc
+event       ::= hook
+              | function
+              | rule
+              | side_cond
+              | config
 
-rule_ordinal := <64-bit unsigned little endian integer>
-rule_arity := <64-bit unsigned little endian integer>
+argument    ::= hook
+              | function
+              | rule
+              | kore_term
 
-rewrite_trace := rule_ordinal rule_arity variable* delimited_serial_kore
+name        ::= string
+location    ::= string
+function    ::= WORD(0xDD) name location arg* WORD(0x11)
 
-initial_config := delimited_serial_kore
+hook        ::= WORD(0xAA) name location arg* WORD(0xBB) kore_term
 
-proof_trace := initial_config rewrite_trace*
+ordinal     ::= uint64
+arity       ::= uint64
+variable    ::= name kore_term WORD(0xCC)
+rule        ::= WORD(0x22) ordinal arity variable*
+
+side_cond   ::= WORD(0xEE) ordinal arity variable*
+
+config      ::= WORD(0xFF) kore_term WORD(0xCC)
+
+string      ::= <c-style null terminated string>
+uint64      ::= <64-bit unsigned little endian integer>
 ```
 
 ## Notes
 
-- The `rule_arity` should be used to determine how many variable substitutions to read
-- The serialized term for a variable substitution does not begin with the sentinel delimiter.
-  This is because the null terminated variable name can act as the sentinel.
+- The `rule_arity` should be used to determine how many variable substitutions
+  to read.
+- Events at the beginning of the trace (i.e. before the first `config` event)
+  are related to configuration initialization.
+- The `relative_position` is a null terminated string of positive integers
+  separated by `:` (ie. `0:1:1`)

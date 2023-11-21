@@ -1,6 +1,15 @@
 add_library(BinaryKore
   serializer.cpp
   deserializer.cpp
+  ProofTraceValidator.cpp
+)
+
+target_link_libraries(BinaryKore
+  PUBLIC AST fmt::fmt
+)
+
+target_link_libraries(BinaryKore
+  PUBLIC AST
 )
 
 install(

@@ -36,7 +36,7 @@ let
           # Avoid spurious rebuilds by ignoring files that don't affect the build.
           mavenix = import sources."mavenix" { inherit (prev) pkgs; };
         in {
-          llvm-version = 13;
+          llvm-version = 15;
           llvm-backend-build-type = cmakeBuildType;
           inherit (mavenix) buildMaven;
           mavenix-cli = mavenix.cli;

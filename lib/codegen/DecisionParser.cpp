@@ -138,12 +138,10 @@ public:
       if (occurrence.size() == 3 && occurrence[0] == "lit"
           && occurrence[2] == "MINT.MInt 64") {
         result->addBinding(
-            occurrence[1],
-            getParamType(KORECompositeSort::getCategory(hook), mod));
+            occurrence[1], KORECompositeSort::getCategory(hook), mod);
       } else {
         result->addBinding(
-            to_string(occurrence),
-            getParamType(KORECompositeSort::getCategory(hook), mod));
+            to_string(occurrence), KORECompositeSort::getCategory(hook), mod);
       }
     }
     return result;
@@ -220,8 +218,9 @@ public:
 
     return MakeIteratorNode::Create(
         name, type, name + "_iter",
-        llvm::PointerType::getUnqual(getTypeByName(mod, "iter")), function,
-        child);
+        llvm::PointerType::getUnqual(
+            llvm::StructType::getTypeByName(mod->getContext(), "iter")),
+        function, child);
   }
 
   DecisionNode *iterNext(yaml_node_t *node) {
@@ -233,7 +232,9 @@ public:
     auto child = (*this)(get(node, "next"));
 
     return IterNextNode::Create(
-        iterator, llvm::PointerType::getUnqual(getTypeByName(mod, "iter")),
+        iterator,
+        llvm::PointerType::getUnqual(
+            llvm::StructType::getTypeByName(mod->getContext(), "iter")),
         name, type, function, child);
   }
 
@@ -306,7 +307,7 @@ public:
       auto occurrence = vec(get(var, 0));
       auto hook = str(get(var, 1));
       ValueType cat = KORECompositeSort::getCategory(hook);
-      result->addBinding(to_string(occurrence), getParamType(cat, mod));
+      result->addBinding(to_string(occurrence), cat, mod);
     }
     if (auto next = get(node, "next")) {
       auto child = (*this)(next);

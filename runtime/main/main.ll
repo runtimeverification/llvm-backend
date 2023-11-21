@@ -12,6 +12,8 @@ declare void @finish_rewriting(%block*, i1) #0
 
 declare void @initStaticObjects()
 
+declare void @printProofHintHeader(i8*)
+
 @statistics.flag = private constant [13 x i8] c"--statistics\00"
 @binary_out.flag = private constant [16 x i8] c"--binary-output\00"
 @proof_out.flag = private constant [15 x i8] c"--proof-output\00"
@@ -91,6 +93,12 @@ entry:
 
   call void @initStaticObjects()
 
+  %proof_output = load i1, i1* @proof_output
+  br i1 %proof_output, label %if, label %else
+if:
+  call void @printProofHintHeader(i8* %output_str)
+  br label %else
+else:
   %ret = call %block* @parseConfiguration(i8* %filename)
   %result = call %block* @take_steps(i64 %depth, %block* %ret)
   call void @finish_rewriting(%block* %result, i1 0)

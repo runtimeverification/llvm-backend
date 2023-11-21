@@ -431,7 +431,7 @@ void serializeTermToFile(
     const char *filename, block *subject, const char *sort) {
   char *data;
   size_t size;
-  serializeConfiguration(subject, sort, &data, &size, false);
+  serializeConfiguration(subject, sort, &data, &size, true);
 
   FILE *file = fopen(filename, "a");
   fwrite(data, 1, size, file);
@@ -444,7 +444,7 @@ void serializeRawTermToFile(
 
   char *data;
   size_t size;
-  serializeConfiguration(term, "SortKItem{}", &data, &size, false);
+  serializeConfiguration(term, "SortKItem{}", &data, &size, true);
 
   FILE *file = fopen(filename, "a");
   fwrite(data, 1, size, file);

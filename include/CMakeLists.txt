@@ -9,7 +9,7 @@ install(
 )
 install(
   DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/fmt
-  DESTINATION include/fmt
+  DESTINATION include/kllvm
 )
 install(
   DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/immer

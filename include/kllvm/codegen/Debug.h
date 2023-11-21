@@ -17,8 +17,6 @@
 
 namespace kllvm {
 
-extern int CODEGEN_DEBUG;
-
 extern std::string SOURCE_ATT;
 extern std::string LOCATION_ATT;
 
