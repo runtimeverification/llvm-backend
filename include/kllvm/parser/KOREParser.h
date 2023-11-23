@@ -23,6 +23,7 @@ public:
 
   ptr<KOREDefinition> definition(void);
   sptr<KOREPattern> pattern(void);
+  sptr<KORESort> sort(void);
   std::vector<ptr<KOREDeclaration>> declarations(void);
 
   std::pair<std::string, std::vector<sptr<KORESort>>> symbol_sort_list();
@@ -54,7 +55,6 @@ private:
   void sorts(Node *node);
   template <typename Node>
   void sortsNE(Node *node);
-  sptr<KORESort> sort(void);
 
   sptr<KOREPattern> _pattern(void);
   void patterns(KORECompositePattern *node);
