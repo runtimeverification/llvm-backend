@@ -68,6 +68,7 @@ kore_pattern *kore_string_pattern_new(char const *);
 kore_pattern *kore_string_pattern_new_with_len(char const *, size_t);
 
 block *kore_pattern_construct(kore_pattern const *);
+block *kore_evaluate_function(char const *label, block **args);
 char *kore_block_dump(block *);
 
 kore_pattern *kore_pattern_from_block(block *);

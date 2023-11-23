@@ -246,6 +246,11 @@ block *kore_pattern_construct(kore_pattern const *pat) {
   return static_cast<block *>(constructInitialConfiguration(pat->ptr_.get()));
 }
 
+block *kore_evaluate_function(char const *label, block **args) {
+  auto tag = getTagForSymbolName(label);
+  return static_cast<block *>(evaluateFunctionSymbol(tag, (void **)args));
+}
+
 char *kore_block_dump(block *term) {
   auto hooked_str = printConfigurationToString(term)->data;
   auto len = std::strlen(hooked_str);
