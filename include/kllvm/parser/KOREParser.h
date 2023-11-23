@@ -21,10 +21,10 @@ public:
 
   static std::unique_ptr<KOREParser> from_string(std::string text);
 
-  ptr<KOREDefinition> definition(void);
-  sptr<KOREPattern> pattern(void);
-  sptr<KORESort> sort(void);
-  std::vector<ptr<KOREDeclaration>> declarations(void);
+  ptr<KOREDefinition> definition();
+  sptr<KOREPattern> pattern();
+  sptr<KORESort> sort();
+  std::vector<ptr<KOREDeclaration>> declarations();
 
   std::pair<std::string, std::vector<sptr<KORESort>>> symbol_sort_list();
 
@@ -34,7 +34,7 @@ private:
   [[noreturn]] void error(const location &loc, const std::string &err_message);
 
   std::string consume(token next);
-  token peek(void);
+  token peek();
 
   template <typename Node>
   void attributes(Node *node);
@@ -43,10 +43,10 @@ private:
   void attributesNE(Node *node);
 
   void modules(KOREDefinition *node);
-  ptr<KOREModule> module(void);
+  ptr<KOREModule> module();
 
   void sentences(KOREModule *node);
-  ptr<KOREDeclaration> sentence(void);
+  ptr<KOREDeclaration> sentence();
 
   void sortVariables(KOREDeclaration *node);
   void sortVariablesNE(KOREDeclaration *node);
@@ -56,15 +56,15 @@ private:
   template <typename Node>
   void sortsNE(Node *node);
 
-  sptr<KOREPattern> _pattern(void);
+  sptr<KOREPattern> _pattern();
   void patterns(KORECompositePattern *node);
   void patternsNE(KORECompositePattern *node);
   void patterns(std::vector<sptr<KOREPattern>> &node);
   void patternsNE(std::vector<sptr<KOREPattern>> &node);
 
-  sptr<KOREPattern> applicationPattern(void);
+  sptr<KOREPattern> applicationPattern();
   sptr<KOREPattern> applicationPattern(std::string name);
-  ptr<KORECompositePattern> _applicationPattern(void);
+  ptr<KORECompositePattern> _applicationPattern();
   ptr<KORECompositePattern> _applicationPattern(std::string name);
 
   struct {
