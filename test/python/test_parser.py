@@ -17,6 +17,14 @@ class TestParser(unittest.TestCase):
             "A{}(X:S, Y:Z, Int{}())").pattern()
         self.assertEqual(str(pat), "A{}(X : S,Y : Z,Int{}())")
 
+    def test_composite_sort(self):
+        sort = kllvm.parser.Parser.from_string("SortInt{}").sort()
+        self.assertEqual(str(sort), 'SortInt{}')
+
+    def test_sort_variable(self):
+        sort = kllvm.parser.Parser.from_string('X { A }').sort()
+        self.assertEqual(str(sort), 'X{A}')
+
 
 if __name__ == "__main__":
     unittest.main()

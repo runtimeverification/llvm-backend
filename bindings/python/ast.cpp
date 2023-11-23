@@ -332,6 +332,7 @@ void bind_parser(py::module_ &mod) {
       .def(
           "pattern",
           [](KOREParser &parser) { return std::shared_ptr(parser.pattern()); })
+      .def("sort", [](KOREParser &parser) { return parser.sort(); })
       .def("definition", [](KOREParser &parser) {
         return std::shared_ptr(parser.definition());
       });
