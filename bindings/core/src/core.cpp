@@ -72,7 +72,15 @@ simplify(std::shared_ptr<KOREPattern> pattern, std::shared_ptr<KORESort> sort) {
 std::shared_ptr<KOREPattern> evaluate_function(
     std::string const &label,
     std::vector<std::shared_ptr<KOREPattern>> const &args) {
-  abort();
+  auto term_args = std::vector<void *>{};
+  for (auto const &arg : args) {
+    term_args.push_back(static_cast<void *>(construct_term(arg)));
+  }
+
+  auto tag = getTagForSymbolName(label.c_str());
+  auto result = evaluateFunctionSymbol(tag, term_args.data());
+
+  return term_to_pattern(static_cast<block *>(result));
 }
 
 bool is_sort_kitem(std::shared_ptr<KORESort> const &sort) {
