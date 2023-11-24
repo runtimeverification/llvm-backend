@@ -55,6 +55,10 @@ void bind_runtime(py::module_ &m) {
 
   m.def("return_sort_for_label", bindings::return_sort_for_label);
 
+  m.def("simplify_bool_pattern", bindings::simplify_to_bool);
+
+  m.def("evaluate_function", bindings::evaluate_function);
+
   // This class can't be used directly from Python; the mutability semantics
   // that we get from the Pybind wrappers make it really easy to break things.
   // We therefore have to wrap it up in some external Python code; see

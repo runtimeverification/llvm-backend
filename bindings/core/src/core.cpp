@@ -69,6 +69,12 @@ simplify(std::shared_ptr<KOREPattern> pattern, std::shared_ptr<KORESort> sort) {
   return term_to_pattern(simplify_to_term(pattern, sort));
 }
 
+std::shared_ptr<KOREPattern> evaluate_function(
+    std::string const &label,
+    std::vector<std::shared_ptr<KOREPattern>> const &args) {
+  abort();
+}
+
 bool is_sort_kitem(std::shared_ptr<KORESort> const &sort) {
   if (auto composite = std::dynamic_pointer_cast<KORECompositeSort>(sort)) {
     return composite->getName() == "SortKItem";
