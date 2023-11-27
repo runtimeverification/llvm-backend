@@ -50,6 +50,5 @@ jobs:
       - name: 'Push Flake to Cachix'
         run: |
           GC_DONT_GC=1 nix build --print-build-logs . --json \
-            | jq -r '.[].outputs \
-            | to_entries[].value' \
+            | jq -r '.[].outputs | to_entries[].value' \
             | cachix push k-framework
