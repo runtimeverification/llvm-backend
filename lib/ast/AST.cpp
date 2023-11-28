@@ -1709,7 +1709,21 @@ void KOREDefinition::addAttribute(sptr<KORECompositePattern> Attribute) {
   attributes.insert({name, std::move(Attribute)});
 }
 
+void KOREDefinition::insertReservedSymbols() {
+  auto mod = KOREModule::Create("K-RAW-TERM");
+  auto decl = KORESymbolDeclaration::Create("rawTerm");
+  auto sort = KORECompositeSort::Create("SortKItem");
+
+  decl->getSymbol()->addSort(sort);
+  decl->getSymbol()->addArgument(sort);
+  mod->addDeclaration(std::move(decl));
+
+  addModule(std::move(mod));
+}
+
 void KOREDefinition::preprocess() {
+  insertReservedSymbols();
+
   for (auto iter = axioms.begin(); iter != axioms.end(); ++iter) {
     auto axiom = *iter;
     axiom->pattern = axiom->pattern->expandAliases(this);
