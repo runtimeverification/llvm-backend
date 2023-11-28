@@ -1711,7 +1711,7 @@ void KOREDefinition::addAttribute(sptr<KORECompositePattern> Attribute) {
 
 void KOREDefinition::insertReservedSymbols() {
   auto mod = KOREModule::Create("K-RAW-TERM");
-  auto decl = KORESymbolDeclaration::Create("rawTerm");
+  auto decl = KORESymbolDeclaration::Create("rawTerm", true);
   auto sort = KORECompositeSort::Create("SortKItem");
 
   decl->getSymbol()->addSort(sort);

@@ -29,6 +29,13 @@ block *constructKItemInj(void *subject, const char *sort, bool raw_value) {
   return static_cast<block *>(constructCompositePattern(tag, args));
 }
 
+block *constructRawTerm(void *subject, const char *sort) {
+  auto tag = getTagForSymbolName("rawTerm{}");
+  auto args = std::vector{
+      static_cast<void *>(constructKItemInj(subject, sort, true))};
+  return static_cast<block *>(constructCompositePattern(tag, args));
+}
+
 void printProofHintHeader(char *output_file) {
   uint32_t version = 2;
   FILE *file = fopen(output_file, "a");

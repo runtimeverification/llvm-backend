@@ -440,7 +440,7 @@ void serializeTermToFile(
 
 void serializeRawTermToFile(
     const char *filename, void *subject, const char *sort) {
-  block *term = constructKItemInj(subject, sort, true);
+  block *term = constructRawTerm(subject, sort);
 
   char *data;
   size_t size;
