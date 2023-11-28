@@ -22,8 +22,9 @@ int main(int argc, char **argv) {
   cl::HideUnrelatedOptions({&KoreProofTraceCat});
   cl::ParseCommandLineOptions(argc, argv);
 
-  ProofTraceValidator Validator(VerboseOutput);
-  if (Validator.validate_proof_trace(InputFilename)) {
+  ProofTraceValidator Validator(VerboseOutput, 3u);
+  LLVMRewriteTrace Trace;
+  if (Validator.validate_proof_trace(InputFilename, Trace)) {
     return 0;
   }
 
