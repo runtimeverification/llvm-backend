@@ -1,5 +1,7 @@
 #include <kllvm-c/kllvm-c.h>
 
+#include "bindings/core/core.h"
+
 #include <kllvm/ast/AST.h>
 #include <kllvm/binary/serializer.h>
 #include <kllvm/parser/KOREParser.h>
@@ -52,7 +54,6 @@ extern "C" {
 block *take_steps(int64_t, block *);
 void initStaticObjects(void);
 void freeAllKoreMem(void);
-void *constructInitialConfiguration(const kllvm::KOREPattern *);
 }
 
 extern "C" {
@@ -185,14 +186,8 @@ kore_pattern *kore_pattern_new_token_with_len(
 
 kore_pattern *kore_pattern_new_injection(
     kore_pattern const *term, kore_sort const *from, kore_sort const *to) {
-  auto inj_sym = kore_symbol_new("inj");
-  kore_symbol_add_formal_argument(inj_sym, from);
-  kore_symbol_add_formal_argument(inj_sym, to);
-
-  auto inj = kore_composite_pattern_from_symbol(inj_sym);
-  kore_composite_pattern_add_argument(inj, term);
-
-  kore_symbol_free(inj_sym);
+  auto inj = new kore_pattern;
+  inj->ptr_ = kllvm::bindings::make_injection(term->ptr_, from->ptr_, to->ptr_);
   return inj;
 }
 
@@ -242,7 +237,7 @@ kore_pattern *kore_pattern_desugar_associative(kore_pattern const *pat) {
 }
 
 block *kore_pattern_construct(kore_pattern const *pat) {
-  return static_cast<block *>(constructInitialConfiguration(pat->ptr_.get()));
+  return kllvm::bindings::construct_term(pat->ptr_);
 }
 
 char *kore_block_dump(block *term) {
@@ -257,53 +252,24 @@ char *kore_block_dump(block *term) {
 }
 
 kore_pattern *kore_pattern_from_block(block *term) {
-  auto ast = termToKorePattern(term);
-
   auto pat = new kore_pattern;
-  pat->ptr_ = ast;
+  pat->ptr_ = kllvm::bindings::term_to_pattern(term);
   return pat;
 }
 
 bool kore_block_get_bool(block *term) {
-  assert((((uintptr_t)term) & 1) == 0);
-  return *(bool *)term->children;
+  return kllvm::bindings::get_bool(term);
 }
 
 bool kore_simplify_bool(kore_pattern const *pattern) {
-  auto bool_sort = kore_composite_sort_new("SortBool");
-  auto kitem_sort = kore_composite_sort_new("SortKItem");
-
-  auto inj = kore_pattern_new_injection(pattern, bool_sort, kitem_sort);
-  auto ret = kore_block_get_bool(kore_pattern_construct(inj));
-
-  kore_sort_free(bool_sort);
-  kore_sort_free(kitem_sort);
-  kore_pattern_free(inj);
-
-  return ret;
+  return kllvm::bindings::simplify_to_bool(pattern->ptr_);
 }
 
 void kore_simplify(
     kore_pattern const *pattern, kore_sort const *sort, char **data_out,
     size_t *size_out) {
-  auto kitem_sort = kore_composite_sort_new("SortKItem");
-  auto kitem_sort_str = kore_sort_dump(kitem_sort);
-
-  auto block = [&] {
-    if (kore_sort_is_kitem(sort) || kore_sort_is_k(sort)) {
-      return kore_pattern_construct(pattern);
-    } else {
-      auto inj = kore_pattern_new_injection(pattern, sort, kitem_sort);
-      auto ret = kore_pattern_construct(inj);
-      kore_pattern_free(inj);
-      return ret;
-    }
-  }();
-
-  serializeConfiguration(block, kitem_sort_str, data_out, size_out, true);
-
-  kore_sort_free(kitem_sort);
-  free(kitem_sort_str);
+  auto block = kllvm::bindings::simplify_to_term(pattern->ptr_, sort->ptr_);
+  serializeConfiguration(block, "SortKItem{}", data_out, size_out, true);
 }
 
 void kore_simplify_binary(
@@ -369,21 +335,11 @@ bool kore_sort_is_concrete(kore_sort const *sort) {
 }
 
 bool kore_sort_is_kitem(kore_sort const *sort) {
-  if (auto composite
-      = dynamic_cast<kllvm::KORECompositeSort *>(sort->ptr_.get())) {
-    return composite->getName() == "SortKItem";
-  }
-
-  return false;
+  return kllvm::bindings::is_sort_kitem(sort->ptr_);
 }
 
 bool kore_sort_is_k(kore_sort const *sort) {
-  if (auto composite
-      = dynamic_cast<kllvm::KORECompositeSort *>(sort->ptr_.get())) {
-    return composite->getName() == "SortK";
-  }
-
-  return false;
+  return kllvm::bindings::is_sort_k(sort->ptr_);
 }
 
 /* KORECompositeSort */
