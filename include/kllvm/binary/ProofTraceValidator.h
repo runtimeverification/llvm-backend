@@ -152,6 +152,10 @@ private:
       return false;
     }
 
+    if (version != 3) {
+      return false;
+    }
+
     print(fmt::format("version: {}", version));
 
     return true;
