@@ -37,7 +37,7 @@ block *constructRawTerm(void *subject, const char *sort) {
 }
 
 void printProofHintHeader(char *output_file) {
-  uint32_t version = 2;
+  uint32_t version = 3;
   FILE *file = fopen(output_file, "a");
   fprintf(file, "HINT");
   fwrite(&version, sizeof(version), 1, file);
