@@ -1,4 +1,5 @@
 #include <kllvm/ast/AST.h>
+#include <kllvm/binary/deserializer.h>
 #include <kllvm/binary/serializer.h>
 #include <kllvm/parser/KOREParser.h>
 
@@ -449,4 +450,12 @@ void serializeRawTermToFile(
   FILE *file = fopen(filename, "a");
   fwrite(data, 1, size, file);
   fclose(file);
+}
+
+std::shared_ptr<kllvm::KOREPattern> termToKorePattern(block *subject) {
+  char *data_out;
+  size_t size_out;
+
+  serializeConfiguration(subject, "SortKItem{}", &data_out, &size_out, true);
+  return deserialize_pattern(data_out, data_out + size_out);
 }

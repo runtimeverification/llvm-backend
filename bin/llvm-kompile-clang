@@ -236,6 +236,7 @@ if $link; then
     "$LIBDIR"/libcollections.a \
     "$LIBDIR"/libParser.a \
     "$LIBDIR"/libAST.a \
+    "$LIBDIR"/libBindingsCore.a \
     "$LIBDIR"/libBinaryKore.a \
     "$LIBDIR"/libKOREPrinter.a \
     "$LIBDIR"/liballoc.a \

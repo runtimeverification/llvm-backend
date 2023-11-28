@@ -1,4 +1,5 @@
 #include <kllvm/ast/AST.h>
+#include <kllvm/bindings/core/core.h>
 
 #include <pybind11/pybind11.h>
 
@@ -45,6 +46,15 @@ void *constructInitialConfiguration(const KOREPattern *initial);
 
 void bind_runtime(py::module_ &m) {
   auto runtime = m.def_submodule("runtime", "K LLVM backend runtime");
+
+  // This simplification should really be a member function on the Python
+  // Pattern class, but it depends on the runtime library and so needs to be
+  // bound as a free function in the kllvm.runtime module.
+  m.def(
+      "simplify_pattern",
+      [](std::shared_ptr<KOREPattern> pattern, std::shared_ptr<KORESort> sort) {
+        return bindings::simplify(pattern, sort);
+      });
 
   // This class can't be used directly from Python; the mutability semantics
   // that we get from the Pybind wrappers make it really easy to break things.

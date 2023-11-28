@@ -301,14 +301,6 @@ void printSortedConfigurationToFile(
   printConfigurationInternal(&w, subject, sort, false, &state);
 }
 
-std::shared_ptr<kllvm::KOREPattern> termToKorePattern(block *subject) {
-  auto *kore_str = printConfigurationToString(subject);
-  auto kore = std::string(kore_str->data, len(kore_str));
-
-  auto parser = kllvm::parser::KOREParser::from_string(kore);
-  return parser->pattern();
-}
-
 extern "C" void printMatchResult(
     std::ostream &os, MatchLog *matchLog, size_t logSize,
     const std::string &definitionPath) {
