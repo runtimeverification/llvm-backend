@@ -908,7 +908,7 @@ private:
   /*
    * Insert symbols into this definition that have knowable labels, but cannot
    * be directly referenced in user code:
-   *   - #rawTerm(KItem) for serializing non-symbol backend terms
+   *   - rawTerm(KItem) for serializing non-symbol backend terms
    */
   void insertReservedSymbols();
 
