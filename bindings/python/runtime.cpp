@@ -81,10 +81,17 @@ void bind_runtime(py::module_ &m) {
             return py::bytes(std::string(data, data + size));
           },
           py::kw_only(), py::arg("emit_size") = false)
-      .def("deserialize", [](py::bytes const &bytes) {
-        auto str = std::string(bytes);
-        return deserializeConfiguration(str.data(), str.size());
-      });
+      .def(
+          "deserialize",
+          [](py::bytes const &bytes) {
+            auto str = std::string(bytes);
+            return deserializeConfiguration(str.data(), str.size());
+          })
+      .def(
+          "_serialize_raw", [](block *term, std::string const &filename,
+                               std::string const &sort) {
+            serializeRawTermToFile(filename.c_str(), term, sort.c_str());
+          });
 }
 
 PYBIND11_MODULE(_kllvm_runtime, m) {

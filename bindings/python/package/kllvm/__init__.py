@@ -32,6 +32,11 @@ def make_term_class(mod):
         def serialize(self, emit_size=False):
             return self._block.serialize(emit_size=emit_size)
 
+        # Used to implement backend integration tests; should not be bound
+        # onwards to Pyk without rethinking the underlying API.
+        def _serialize_raw(self, filename, sort):
+            self._block._serialize_raw(filename, sort)
+
         @staticmethod
         def deserialize(bs):
             return mod.InternalTerm.deserialize(bs)
