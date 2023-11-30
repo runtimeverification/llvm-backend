@@ -25,9 +25,9 @@ class TestRawTerms(unittest.TestCase):
             with_raw = kllvm.ast.Pattern.deserialize(data, strip_raw_term = False)
             without_raw = kllvm.ast.Pattern.deserialize(data)
 
-            self.assertEqual(str(token), str(without_raw))
-            self.assertNotEqual(str(token), str(with_raw))
-            self.assertTrue(str(token) in str(with_raw))
+        self.assertEqual(str(token), str(without_raw))
+        self.assertNotEqual(str(token), str(with_raw))
+        self.assertTrue(str(token) in str(with_raw))
 
 if __name__ == "__main__":
     unittest.main()
