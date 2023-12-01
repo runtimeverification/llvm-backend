@@ -970,9 +970,7 @@ sptr<KOREPattern> KORECompositePattern::dedupeDisjuncts(void) {
   flatten(this, "\\or", items);
   std::set<std::string> printed;
   for (sptr<KOREPattern> item : items) {
-    std::ostringstream Out;
-    item->print(Out);
-    if (printed.insert(Out.str()).second) {
+    if (printed.insert(ast_to_string(*item)).second) {
       dedupedItems.push_back(item);
     }
   }
@@ -1170,10 +1168,7 @@ bool KOREVariablePattern::matches(
     substitution &subst, SubsortMap const &subsorts, SymbolMap const &overloads,
     sptr<KOREPattern> subject) {
   if (subst[name->getName()]) {
-    std::ostringstream Out1, Out2;
-    subst[name->getName()]->print(Out1);
-    subject->print(Out2);
-    return Out1.str() == Out2.str();
+    return ast_to_string(*subst[name->getName()]) == ast_to_string(*subject);
   } else {
     subst[name->getName()] = subject;
     return true;
@@ -1796,9 +1791,7 @@ void KOREDefinition::preprocess() {
         symbol->firstTag = symbol->lastTag = instantiations.at(*symbol);
         symbol->layout = layouts.at(layoutStr);
         objectSymbols[symbol->firstTag] = symbol;
-        std::ostringstream Out;
-        symbol->print(Out);
-        allObjectSymbols[Out.str()] = symbol;
+        allObjectSymbols[ast_to_string(*symbol)] = symbol;
       }
     }
     uint32_t lastTag = nextSymbol - 1;
