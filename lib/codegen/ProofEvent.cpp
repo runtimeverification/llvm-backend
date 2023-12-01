@@ -18,10 +18,8 @@ namespace {
 template <typename IRBuilder>
 llvm::Constant *createGlobalSortStringPtr(
     IRBuilder &B, KORECompositeSort &sort, llvm::Module *mod) {
-  auto os = std::ostringstream{};
-  sort.print(os);
   return B.CreateGlobalStringPtr(
-      os.str(), fmt::format("{}_str", sort.getName()), 0, mod);
+      ast_to_string(sort), fmt::format("{}_str", sort.getName()), 0, mod);
 }
 
 constexpr uint64_t word(uint8_t byte) {
@@ -293,11 +291,9 @@ llvm::BasicBlock *ProofEvent::functionEvent_pre(
   auto [true_block, merge_block, outputFile]
       = eventPrelude("function_pre", current_block);
 
-  std::ostringstream symbolName;
-  pattern->getConstructor()->print(symbolName);
-
   emitWriteUInt64(outputFile, word(0xDD), true_block);
-  emitWriteString(outputFile, symbolName.str(), true_block);
+  emitWriteString(
+      outputFile, ast_to_string(*pattern->getConstructor()), true_block);
   emitWriteString(outputFile, locationStack, true_block);
 
   llvm::BranchInst::Create(merge_block, true_block);
