@@ -114,11 +114,14 @@ void serializeMap(
     return;
   }
 
+  auto tag = getTagForSymbolName(element);
+  auto element_sorts = getHookedSortElementSorts(tag);
+
   for (auto iter = map->begin(); iter != map->end(); ++iter) {
     serializeConfigurationInternal(
-        file, iter->first, "SortKItem{}", false, state);
+        file, iter->first, element_sorts[0], false, state);
     serializeConfigurationInternal(
-        file, iter->second, "SortKItem{}", false, state);
+        file, iter->second, element_sorts[1], false, state);
     emitSymbol(instance, element, 2);
 
     if (iter != map->begin()) {
@@ -138,6 +141,9 @@ void serializeRangeMap(
     return;
   }
 
+  auto tag = getTagForSymbolName(element);
+  auto element_sorts = getHookedSortElementSorts(tag);
+
   bool once = true;
   for (auto iter = rng_map::ConstRangeMapIterator<KElem, KElem>(*map);
        iter.has_next(); ++iter) {
@@ -147,7 +153,7 @@ void serializeRangeMap(
         file, iter->first.end(), "SortKItem{}", false, state);
     emitSymbol(instance, "LblRangemap'Coln'Range{}", 2);
     serializeConfigurationInternal(
-        file, iter->second, "SortKItem{}", false, state);
+        file, iter->second, element_sorts[1], false, state);
     emitSymbol(instance, element, 2);
 
     if (once) {
@@ -169,8 +175,11 @@ void serializeList(
     return;
   }
 
+  auto tag = getTagForSymbolName(element);
+  auto element_sorts = getHookedSortElementSorts(tag);
+
   for (auto iter = list->begin(); iter != list->end(); ++iter) {
-    serializeConfigurationInternal(file, *iter, "SortKItem{}", false, state);
+    serializeConfigurationInternal(file, *iter, element_sorts[0], false, state);
     emitSymbol(instance, element, 1);
 
     if (iter != list->begin()) {
@@ -190,8 +199,11 @@ void serializeSet(
     return;
   }
 
+  auto tag = getTagForSymbolName(element);
+  auto element_sorts = getHookedSortElementSorts(tag);
+
   for (auto iter = set->begin(); iter != set->end(); ++iter) {
-    serializeConfigurationInternal(file, *iter, "SortKItem{}", false, state);
+    serializeConfigurationInternal(file, *iter, element_sorts[0], false, state);
     emitSymbol(instance, element, 1);
 
     if (iter != set->begin()) {

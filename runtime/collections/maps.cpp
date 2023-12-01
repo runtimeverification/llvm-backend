@@ -202,6 +202,9 @@ void printMap(
 
   sfprintf(file, "\\left-assoc{}(%s(", concat);
 
+  auto tag = getTagForSymbolName(element);
+  auto element_sorts = getHookedSortElementSorts(tag);
+
   bool once = true;
   for (auto iter = map->begin(); iter != map->end(); ++iter) {
     if (once) {
@@ -212,9 +215,11 @@ void printMap(
 
     sfprintf(file, "%s(", element);
     auto entry = *iter;
-    printConfigurationInternal(file, entry.first, "SortKItem{}", false, state);
+    printConfigurationInternal(
+        file, entry.first, element_sorts[0], false, state);
     sfprintf(file, ",");
-    printConfigurationInternal(file, entry.second, "SortKItem{}", false, state);
+    printConfigurationInternal(
+        file, entry.second, element_sorts[1], false, state);
     sfprintf(file, ")");
   }
   sfprintf(file, "))");

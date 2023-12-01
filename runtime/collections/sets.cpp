@@ -148,6 +148,9 @@ void printSet(
 
   sfprintf(file, "\\left-assoc{}(%s(", concat);
 
+  auto tag = getTagForSymbolName(element);
+  auto element_sorts = getHookedSortElementSorts(tag);
+
   bool once = true;
   for (auto iter = set->begin(); iter != set->end(); ++iter) {
     if (once) {
@@ -157,7 +160,7 @@ void printSet(
     }
 
     sfprintf(file, "%s(", element);
-    printConfigurationInternal(file, *iter, "SortKItem{}", false, state);
+    printConfigurationInternal(file, *iter, element_sorts[0], false, state);
     sfprintf(file, ")");
   }
   sfprintf(file, "))");

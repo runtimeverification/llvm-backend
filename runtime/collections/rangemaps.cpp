@@ -267,6 +267,9 @@ void printRangeMap(
 
   sfprintf(file, "\\left-assoc{}(%s(", concat);
 
+  auto tag = getTagForSymbolName(element);
+  auto element_sorts = getHookedSortElementSorts(tag);
+
   bool once = true;
   for (auto iter = rng_map::ConstRangeMapIterator<KElem, KElem>(*map);
        iter.has_next(); ++iter) {
@@ -285,7 +288,8 @@ void printRangeMap(
     printConfigurationInternal(
         file, entry.first.end(), "SortKItem{}", false, state);
     sfprintf(file, "),");
-    printConfigurationInternal(file, entry.second, "SortKItem{}", false, state);
+    printConfigurationInternal(
+        file, entry.second, element_sorts[1], false, state);
     sfprintf(file, ")");
   }
   sfprintf(file, "))");
