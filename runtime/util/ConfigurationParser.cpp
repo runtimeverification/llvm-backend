@@ -44,9 +44,8 @@ uint32_t getTagForSymbolName(const char *name) {
 }
 
 static uint32_t getTagForSymbol(KORESymbol const &symbol) {
-  std::ostringstream out;
-  symbol.print(out);
-  return getTagForSymbolName(out.str().c_str());
+  auto name = ast_to_string(symbol);
+  return getTagForSymbolName(name.c_str());
 }
 
 void *constructCompositePattern(uint32_t tag, std::vector<void *> &arguments) {
