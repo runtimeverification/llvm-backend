@@ -41,10 +41,10 @@ std::string decodeKore(std::string);
  * just want the string representation of a node, rather than to print it to a
  * stream.
  */
-template <typename T>
-std::string ast_to_string(T &&node) {
+template <typename T, typename... Args>
+std::string ast_to_string(T &&node, Args &&...args) {
   auto os = std::ostringstream{};
-  std::forward<T>(node).print(os);
+  std::forward<T>(node).print(os, std::forward<Args>(args)...);
   return os.str();
 }
 
