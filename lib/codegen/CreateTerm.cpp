@@ -652,10 +652,9 @@ llvm::Value *CreateTerm::createHook(
     std::string domain = name.substr(0, name.find('.'));
     if (domain == "ARRAY") {
       // array is not really hooked in llvm, it's implemented in K
-      std::ostringstream Out;
-      pattern->getConstructor()->print(Out, 0, false);
-      return createFunctionCall(
-          "eval_" + Out.str(), pattern, false, true, locationStack);
+      auto fn_name = fmt::format(
+          "eval_{}", ast_to_string(*pattern->getConstructor(), 0, false));
+      return createFunctionCall(fn_name, pattern, false, true, locationStack);
     }
     std::string hookName
         = "hook_" + domain + "_" + name.substr(name.find('.') + 1);
@@ -900,11 +899,10 @@ CreateTerm::createAllocation(KOREPattern *pattern, std::string locationStack) {
 
         return std::make_pair(val, true);
       } else {
-        std::ostringstream Out;
-        symbol->print(Out, 0, false);
+        auto fn_name = fmt::format("eval_{}", ast_to_string(*symbol, 0, false));
         return std::make_pair(
             createFunctionCall(
-                "eval_" + Out.str(), constructor, false, true, locationStack),
+                fn_name, constructor, false, true, locationStack),
             true);
       }
     } else if (auto cat = dynamic_cast<KORECompositeSort *>(
@@ -1008,10 +1006,8 @@ bool makeFunction(
       return false;
     }
     auto cat = sort->getCategory(definition);
-    std::ostringstream Out;
-    sort->print(Out);
     llvm::Type *paramType = getValueType(cat, Module);
-    debugArgs.push_back(getDebugType(cat, Out.str()));
+    debugArgs.push_back(getDebugType(cat, ast_to_string(*sort)));
     switch (cat.cat) {
     case SortCategory::Map:
     case SortCategory::RangeMap:
@@ -1045,11 +1041,11 @@ bool makeFunction(
   if (axiom->getAttributes().count("label")) {
     debugName = axiom->getStringAttribute("label") + postfix;
   }
-  std::ostringstream Out;
-  termSort(pattern)->print(Out);
   initDebugFunction(
       debugName, debugName,
-      getDebugFunctionType(getDebugType(returnCat, Out.str()), debugArgs),
+      getDebugFunctionType(
+          getDebugType(returnCat, ast_to_string(*termSort(pattern))),
+          debugArgs),
       definition, applyRule);
   if (tailcc) {
     applyRule->setCallingConv(llvm::CallingConv::Tail);
@@ -1129,10 +1125,8 @@ std::string makeApplyRuleFunction(
       return "";
     }
     auto cat = sort->getCategory(definition);
-    std::ostringstream Out;
-    sort->print(Out);
     llvm::Type *paramType = getValueType(cat, Module);
-    debugArgs.push_back(getDebugType(cat, Out.str()));
+    debugArgs.push_back(getDebugType(cat, ast_to_string(*sort)));
     switch (cat.cat) {
     case SortCategory::Map:
     case SortCategory::RangeMap:
