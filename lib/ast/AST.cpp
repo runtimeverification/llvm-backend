@@ -1684,10 +1684,10 @@ void KOREModule::addDeclaration(sptr<KOREDeclaration> Declaration) {
   declarations.push_back(std::move(Declaration));
 }
 
-std::map<sptr<KORESymbol>, std::vector<sptr<KORESort>>>
+std::map<std::string, std::vector<sptr<KORESort>>>
 KOREDefinition::getCollectionElementSorts() const {
   static bool once = false;
-  static auto ret = std::map<sptr<KORESymbol>, std::vector<sptr<KORESort>>>{};
+  static auto ret = std::map<std::string, std::vector<sptr<KORESort>>>{};
 
   if (!once) {
     auto const &decls = getSymbolDeclarations();
@@ -1697,29 +1697,24 @@ KOREDefinition::getCollectionElementSorts() const {
         if (auto element_it = attrs.find("element");
             element_it != attrs.end()) {
           auto [attr_key, attr_pattern] = *element_it;
-          /*       auto comp = std::dynamic_pointer_cast<KORECompositePattern>(pattern); */
-          /*       auto arg = std::dynamic_pointer_cast<KORECompositePattern>( */
-          /*           comp->getArguments()[0]); */
-          /*       auto name = arg->getConstructor()->getName(); */
+          auto comp
+              = std::dynamic_pointer_cast<KORECompositePattern>(attr_pattern);
+          auto arg = std::dynamic_pointer_cast<KORECompositePattern>(
+              comp->getArguments()[0]);
+          auto name = arg->getConstructor()->getName();
 
-          /*       auto decl = decls.at(name); */
-          /*       arg->print(std::cerr); */
-          /*       std::cerr << '\n'; */
-          /*       for (auto const &arg : decl->getSymbol()->getArguments()) { */
-          /*         std::cerr << "  "; */
-          /*         arg->print(std::cerr); */
-          /*         std::cerr << '\n'; */
-          /*       } */
-          /*       std::cerr << '\n'; */
-          /*     } */
+          ret[name] = std::vector<sptr<KORESort>>{};
+
+          auto decl = decls.at(name);
+          for (auto const &arg_sort : decl->getSymbol()->getArguments()) {
+            ret[name].push_back(arg_sort);
+          }
         }
-        (void)decls;
       }
     }
-
-    once = true;
   }
 
+  once = true;
   return ret;
 }
 

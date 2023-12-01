@@ -24,9 +24,12 @@
 #include <llvm/IR/Value.h>
 #include <llvm/Support/Casting.h>
 
+#include <fmt/format.h>
+
 #include <cstdint>
 #include <cstdlib>
 #include <iosfwd>
+#include <iostream>
 #include <iterator>
 #include <map>
 #include <memory>
@@ -1357,6 +1360,66 @@ emitReturnSortTable(KOREDefinition *definition, llvm::Module *module) {
   }
 }
 
+static void
+emitHookedSortElementTable(KOREDefinition *definition, llvm::Module *module) {
+  auto &ctx = module->getContext();
+
+  auto const &syms = definition->getSymbols();
+  auto const &table_data = definition->getCollectionElementSorts();
+
+  auto element_type
+      = llvm::PointerType::getUnqual(llvm::Type::getInt8PtrTy(ctx));
+  auto table_type = llvm::ArrayType::get(element_type, syms.size());
+
+  auto table
+      = module->getOrInsertGlobal("hooked_sort_element_table", table_type);
+  auto values = std::vector<llvm::Constant *>{};
+
+  for (auto [tag, symbol] : syms) {
+    auto found = table_data.find(symbol->getName());
+
+    if (found == table_data.end()) {
+      values.push_back(llvm::ConstantPointerNull::get(element_type));
+    } else {
+      auto const &[name, sorts] = *found;
+
+      auto subtable_type
+          = llvm::ArrayType::get(llvm::Type::getInt8PtrTy(ctx), sorts.size());
+
+      auto subtable = module->getOrInsertGlobal(
+          fmt::format("element_sorts_{}", name), subtable_type);
+      auto subtable_global = llvm::dyn_cast<llvm::GlobalVariable>(subtable);
+
+      auto zero = llvm::ConstantInt::get(llvm::Type::getInt64Ty(ctx), 0);
+
+      auto indices = std::vector<llvm::Constant *>{zero, zero};
+      values.push_back(llvm::ConstantExpr::getInBoundsGetElementPtr(
+          subtable_type, subtable_global, indices));
+
+      auto sub_values = std::vector<llvm::Constant *>{};
+      for (auto const &sort : sorts) {
+        auto sort_str = ast_to_string(*sort);
+
+        auto str_type = llvm::ArrayType::get(
+            llvm::Type::getInt8Ty(ctx), sort_str.size() + 1);
+        auto sort_name = module->getOrInsertGlobal(
+            fmt::format("sort_name_{}", sort_str), str_type);
+
+        sub_values.push_back(llvm::ConstantExpr::getInBoundsGetElementPtr(
+            str_type, sort_name, indices));
+      }
+
+      subtable_global->setInitializer(
+          llvm::ConstantArray::get(subtable_type, sub_values));
+    }
+  }
+
+  auto global = llvm::dyn_cast<llvm::GlobalVariable>(table);
+  if (!global->hasInitializer()) {
+    global->setInitializer(llvm::ConstantArray::get(table_type, values));
+  }
+}
+
 void emitConfigParserFunctions(
     KOREDefinition *definition, llvm::Module *module) {
   emitGetTagForSymbolName(definition, module);
@@ -1379,6 +1442,8 @@ void emitConfigParserFunctions(
 
   emitSortTable(definition, module);
   emitReturnSortTable(definition, module);
+
+  emitHookedSortElementTable(definition, module);
 }
 
 } // namespace kllvm

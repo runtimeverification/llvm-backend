@@ -965,7 +965,7 @@ public:
    * emission infrastructure, the underlying map is computed on first call and
    * cached for subsequent calls.
    */
-  std::map<sptr<KORESymbol>, std::vector<sptr<KORESort>>>
+  std::map<std::string, std::vector<sptr<KORESort>>>
   getCollectionElementSorts() const;
 
   const std::vector<sptr<KOREModule>> &getModules() const { return modules; }
