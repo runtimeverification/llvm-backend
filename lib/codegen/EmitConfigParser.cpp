@@ -1308,6 +1308,18 @@ static void emitSortTable(KOREDefinition *definition, llvm::Module *module) {
   }
 }
 
+/*
+ * Emit a table mapping symbol tags to the declared return sort for that symbol.
+ * For example:
+ *
+ *   tag_of(initGeneratedTopCell) |-> sort_name_SortGeneratedTopCell{}
+ *
+ * Each value in the table is a pointer to a global variable containing the
+ * relevant sort name as a null-terminated string.
+ *
+ * The function `getReturnSortForTag` abstracts accesses to the data in this
+ * table.
+ */
 static void
 emitReturnSortTable(KOREDefinition *definition, llvm::Module *module) {
   auto &ctx = module->getContext();
