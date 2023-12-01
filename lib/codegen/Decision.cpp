@@ -29,11 +29,14 @@
 #include <llvm/IR/Value.h>
 #include <llvm/Support/Casting.h>
 
+#include <fmt/format.h>
+
 #include <iostream>
 #include <limits>
 #include <memory>
 #include <set>
 #include <type_traits>
+
 namespace kllvm {
 
 static std::string LAYOUTITEM_STRUCT = "layoutitem";
@@ -104,22 +107,19 @@ getFailPattern(DecisionCase const &_case, bool isInt) {
                     + std::to_string(bitwidth) + "\")");
     }
   } else {
-    std::ostringstream symbol;
-    _case.getConstructor()->print(symbol);
-    std::ostringstream returnSort;
-    _case.getConstructor()->getSort()->print(returnSort);
-    std::string result = symbol.str() + "(";
+    auto result = fmt::format("{}(", ast_to_string(*_case.getConstructor()));
+
     std::string conn = "";
     for (int i = 0; i < _case.getConstructor()->getArguments().size(); i++) {
-      result += conn;
-      result += "Var'Unds'";
-      std::ostringstream argSort;
-      _case.getConstructor()->getArguments()[i]->print(argSort);
-      result += ":" + argSort.str();
+      result += fmt::format(
+          "{}Var'Unds':{}", conn,
+          ast_to_string(*_case.getConstructor()->getArguments()[i]));
       conn = ",";
     }
     result += ")";
-    return std::make_pair(returnSort.str(), result);
+
+    auto return_sort = ast_to_string(*_case.getConstructor()->getSort());
+    return std::make_pair(return_sort, result);
   }
 }
 
@@ -732,18 +732,15 @@ void makeEvalOrAnywhereFunction(
   auto returnSort = dynamic_cast<KORECompositeSort *>(function->getSort().get())
                         ->getCategory(definition);
   auto returnType = getParamType(returnSort, module);
-  std::ostringstream Out;
-  function->getSort()->print(Out);
-  auto debugReturnType = getDebugType(returnSort, Out.str());
+  auto debugReturnType
+      = getDebugType(returnSort, ast_to_string(*function->getSort()));
   std::vector<llvm::Type *> args;
   std::vector<llvm::Metadata *> debugArgs;
   std::vector<ValueType> cats;
   for (auto &sort : function->getArguments()) {
     auto cat = dynamic_cast<KORECompositeSort *>(sort.get())
                    ->getCategory(definition);
-    std::ostringstream Out;
-    sort->print(Out);
-    debugArgs.push_back(getDebugType(cat, Out.str()));
+    debugArgs.push_back(getDebugType(cat, ast_to_string(*sort)));
     switch (cat.cat) {
     case SortCategory::Map:
     case SortCategory::RangeMap:
@@ -760,9 +757,7 @@ void makeEvalOrAnywhereFunction(
   }
   llvm::FunctionType *funcType
       = llvm::FunctionType::get(returnType, args, false);
-  std::ostringstream Out2;
-  function->print(Out2, 0, false);
-  std::string name = "eval_" + Out2.str();
+  std::string name = fmt::format("eval_{}", ast_to_string(*function, 0, false));
   llvm::Function *matchFunc = getOrInsertFunction(module, name, funcType);
   KORESymbolDeclaration *symbolDecl
       = definition->getSymbolDeclarations().at(function->getName());
@@ -791,9 +786,9 @@ void makeEvalOrAnywhereFunction(
        ++val, ++i) {
     val->setName("_" + std::to_string(i + 1));
     codegen.store(std::make_pair(val->getName().str(), val->getType()), val);
-    std::ostringstream Out;
-    function->getArguments()[i]->print(Out);
-    initDebugParam(matchFunc, i, val->getName().str(), cats[i], Out.str());
+    initDebugParam(
+        matchFunc, i, val->getName().str(), cats[i],
+        ast_to_string(*function->getArguments()[i]));
   }
   addStuck(stuck, module, function, codegen, definition);
 
@@ -804,9 +799,7 @@ void abortWhenStuck(
     llvm::BasicBlock *CurrentBlock, llvm::Module *Module, KORESymbol *symbol,
     Decision &codegen, KOREDefinition *d) {
   auto &Ctx = Module->getContext();
-  std::ostringstream Out;
-  symbol->print(Out);
-  symbol = d->getAllSymbols().at(Out.str());
+  symbol = d->getAllSymbols().at(ast_to_string(*symbol));
   auto BlockType = getBlockType(Module, d, symbol);
   llvm::Value *Ptr;
   auto BlockPtr = llvm::PointerType::getUnqual(
@@ -1276,9 +1269,7 @@ void makeStepFunction(
     auto argSort
         = dynamic_cast<KORECompositeSort *>(res.pattern->getSort().get());
     auto cat = argSort->getCategory(definition);
-    std::ostringstream Out;
-    argSort->print(Out);
-    debugTypes.push_back(getDebugType(cat, Out.str()));
+    debugTypes.push_back(getDebugType(cat, ast_to_string(*argSort)));
     switch (cat.cat) {
     case SortCategory::Map:
     case SortCategory::RangeMap:
@@ -1334,9 +1325,8 @@ void makeStepFunction(
     auto cat = dynamic_cast<KORECompositeSort *>(sort.get())
                    ->getCategory(definition);
     types.push_back(cat);
-    std::ostringstream Out;
-    sort->print(Out);
-    initDebugParam(matchFunc, i, "_" + std::to_string(i + 1), cat, Out.str());
+    initDebugParam(
+        matchFunc, i, "_" + std::to_string(i + 1), cat, ast_to_string(*sort));
   }
   auto header = stepFunctionHeader(
       axiom->getOrdinal(), module, definition, block, stuck, args, types);
