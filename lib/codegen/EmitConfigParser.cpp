@@ -1308,6 +1308,55 @@ static void emitSortTable(KOREDefinition *definition, llvm::Module *module) {
   }
 }
 
+/*
+ * Emit a table mapping symbol tags to the declared return sort for that symbol.
+ * For example:
+ *
+ *   tag_of(initGeneratedTopCell) |-> sort_name_SortGeneratedTopCell{}
+ *
+ * Each value in the table is a pointer to a global variable containing the
+ * relevant sort name as a null-terminated string.
+ *
+ * The function `getReturnSortForTag` abstracts accesses to the data in this
+ * table.
+ */
+static void
+emitReturnSortTable(KOREDefinition *definition, llvm::Module *module) {
+  auto &ctx = module->getContext();
+
+  auto const &syms = definition->getSymbols();
+
+  auto element_type = llvm::Type::getInt8PtrTy(ctx);
+  auto table_type = llvm::ArrayType::get(element_type, syms.size());
+
+  auto table = module->getOrInsertGlobal("return_sort_table", table_type);
+  auto values = std::vector<llvm::Constant *>{};
+
+  for (auto [tag, symbol] : syms) {
+    auto sort = symbol->getSort();
+    auto sort_str = ast_to_string(*sort);
+
+    auto char_type = llvm::Type::getInt8Ty(ctx);
+    auto str_type = llvm::ArrayType::get(char_type, sort_str.size() + 1);
+
+    auto sort_name
+        = module->getOrInsertGlobal("sort_name_" + sort_str, str_type);
+
+    auto i64_type = llvm::Type::getInt64Ty(ctx);
+    auto zero = llvm::ConstantInt::get(i64_type, 0);
+
+    auto pointer = llvm::ConstantExpr::getInBoundsGetElementPtr(
+        str_type, sort_name, std::vector<llvm::Constant *>{zero});
+
+    values.push_back(pointer);
+  }
+
+  auto global = llvm::dyn_cast<llvm::GlobalVariable>(table);
+  if (!global->hasInitializer()) {
+    global->setInitializer(llvm::ConstantArray::get(table_type, values));
+  }
+}
+
 void emitConfigParserFunctions(
     KOREDefinition *definition, llvm::Module *module) {
   emitGetTagForSymbolName(definition, module);
@@ -1329,6 +1378,7 @@ void emitConfigParserFunctions(
   emitInjTags(definition, module);
 
   emitSortTable(definition, module);
+  emitReturnSortTable(definition, module);
 }
 
 } // namespace kllvm

@@ -36,6 +36,18 @@ using sptr = std::shared_ptr<T>;
 
 std::string decodeKore(std::string);
 
+/*
+ * Helper function to avoid repeated call-site uses of ostringstream when we
+ * just want the string representation of a node, rather than to print it to a
+ * stream.
+ */
+template <typename T>
+std::string ast_to_string(T &&node) {
+  auto os = std::ostringstream{};
+  std::forward<T>(node).print(os);
+  return os.str();
+}
+
 // KORESort
 class KORESort : public std::enable_shared_from_this<KORESort> {
 public:

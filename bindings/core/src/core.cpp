@@ -12,6 +12,11 @@ void *constructInitialConfiguration(const KOREPattern *);
 
 namespace kllvm::bindings {
 
+std::string return_sort_for_label(std::string const &label) {
+  auto tag = getTagForSymbolName(label.c_str());
+  return getReturnSortForTag(tag);
+}
+
 std::shared_ptr<KOREPattern> make_injection(
     std::shared_ptr<KOREPattern> term, std::shared_ptr<KORESort> from,
     std::shared_ptr<KORESort> to) {

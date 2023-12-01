@@ -12,6 +12,8 @@
 
 namespace kllvm::bindings {
 
+std::string return_sort_for_label(std::string const &label);
+
 std::shared_ptr<kllvm::KOREPattern> make_injection(
     std::shared_ptr<kllvm::KOREPattern> term,
     std::shared_ptr<kllvm::KORESort> from, std::shared_ptr<kllvm::KORESort> to);
