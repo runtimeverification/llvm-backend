@@ -464,10 +464,18 @@ void serializeRawTermToFile(
   fclose(file);
 }
 
-std::shared_ptr<kllvm::KOREPattern> termToKorePattern(block *subject) {
+std::shared_ptr<kllvm::KOREPattern>
+sortedTermToKorePattern(block *subject, const char *sort) {
+  auto is_kitem = (std::string(sort) == "SortKItem{}");
+  block *term = is_kitem ? subject : constructRawTerm(subject, sort);
+
   char *data_out;
   size_t size_out;
 
-  serializeConfiguration(subject, "SortKItem{}", &data_out, &size_out, true);
-  return deserialize_pattern(data_out, data_out + size_out);
+  serializeConfiguration(term, "SortKItem{}", &data_out, &size_out, true);
+  return deserialize_pattern(data_out, data_out + size_out, true);
+}
+
+std::shared_ptr<kllvm::KOREPattern> termToKorePattern(block *subject) {
+  return sortedTermToKorePattern(subject, "SortKItem{}");
 }

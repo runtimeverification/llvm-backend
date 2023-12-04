@@ -78,9 +78,10 @@ std::shared_ptr<KOREPattern> evaluate_function(
   }
 
   auto tag = getTagForSymbolName(label.c_str());
+  auto return_sort = getReturnSortForTag(tag);
   auto result = evaluateFunctionSymbol(tag, term_args.data());
 
-  return term_to_pattern(static_cast<block *>(result));
+  return sortedTermToKorePattern(static_cast<block *>(result), return_sort);
 }
 
 bool is_sort_kitem(std::shared_ptr<KORESort> const &sort) {
