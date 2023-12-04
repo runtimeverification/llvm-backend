@@ -1,47 +1,18 @@
 #ifndef EMIT_CONFIG_PARSER_H
 #define EMIT_CONFIG_PARSER_H
 
-#include "kllvm/codegen/EmitConfigParser.h"
-
 #include "kllvm/ast/AST.h"
 #include "kllvm/codegen/CreateTerm.h"
 #include "kllvm/codegen/Debug.h"
 #include "kllvm/codegen/Util.h"
 
-#include <llvm/ADT/StringMap.h>
-#include <llvm/ADT/StringRef.h>
-#include <llvm/ADT/Twine.h>
-#include <llvm/IR/Argument.h>
-#include <llvm/IR/BasicBlock.h>
 #include <llvm/IR/Constant.h>
 #include <llvm/IR/Constants.h>
-#include <llvm/IR/DataLayout.h>
-#include <llvm/IR/DebugInfoMetadata.h>
-#include <llvm/IR/DerivedTypes.h>
 #include <llvm/IR/Function.h>
-#include <llvm/IR/GlobalVariable.h>
-#include <llvm/IR/InstrTypes.h>
 #include <llvm/IR/Instruction.h>
 #include <llvm/IR/Instructions.h>
-#include <llvm/IR/LLVMContext.h>
-#include <llvm/IR/Metadata.h>
-#include <llvm/IR/Module.h>
-#include <llvm/IR/Type.h>
-#include <llvm/IR/Value.h>
-#include <llvm/Support/Casting.h>
 
-#include <fmt/format.h>
-
-#include <cstdint>
-#include <cstdlib>
-#include <iosfwd>
-#include <iostream>
-#include <iterator>
-#include <map>
-#include <memory>
 #include <string>
-#include <type_traits>
-#include <unordered_map>
 #include <utility>
 #include <vector>
 
