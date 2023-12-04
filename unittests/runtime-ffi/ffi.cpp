@@ -38,6 +38,10 @@ const char *symbols[NUM_SYMBOLS]
        "inj{SortBytes{}, SortKItem{}}",
        "inj{SortFFIType{}, SortKItem{}}"};
 
+const char **getArgumentSortsForTag(uint32_t tag) {
+  return nullptr;
+}
+
 const uint32_t first_inj_tag = 4;
 const uint32_t last_inj_tag = 5;
 
