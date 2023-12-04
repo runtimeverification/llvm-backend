@@ -1311,23 +1311,12 @@ static void emitSortTable(KOREDefinition *definition, llvm::Module *module) {
  *
  * Each value in the table is a pointer to a global variable containing the
  * relevant sort name as a null-terminated string.
- *
- * The function `getReturnSortForTag` abstracts accesses to the data in this
- * table.
  */
-static void
-emitReturnSortTable(KOREDefinition *definition, llvm::Module *module) {
-  auto &ctx = module->getContext();
+static void emitReturnSortTable(KOREDefinition *def, llvm::Module *mod) {
+  auto getter = [](KOREDefinition *definition, llvm::Module *module,
+                   KORESymbol *symbol) -> llvm::Constant * {
+    auto &ctx = module->getContext();
 
-  auto const &syms = definition->getSymbols();
-
-  auto element_type = llvm::Type::getInt8PtrTy(ctx);
-  auto table_type = llvm::ArrayType::get(element_type, syms.size());
-
-  auto table = module->getOrInsertGlobal("return_sort_table", table_type);
-  auto values = std::vector<llvm::Constant *>{};
-
-  for (auto [tag, symbol] : syms) {
     auto sort = symbol->getSort();
     auto sort_str = ast_to_string(*sort);
 
@@ -1340,16 +1329,13 @@ emitReturnSortTable(KOREDefinition *definition, llvm::Module *module) {
     auto i64_type = llvm::Type::getInt64Ty(ctx);
     auto zero = llvm::ConstantInt::get(i64_type, 0);
 
-    auto pointer = llvm::ConstantExpr::getInBoundsGetElementPtr(
+    return llvm::ConstantExpr::getInBoundsGetElementPtr(
         str_type, sort_name, std::vector<llvm::Constant *>{zero});
+  };
 
-    values.push_back(pointer);
-  }
-
-  auto global = llvm::dyn_cast<llvm::GlobalVariable>(table);
-  if (!global->hasInitializer()) {
-    global->setInitializer(llvm::ConstantArray::get(table_type, values));
-  }
+  emitDataTableForSymbol(
+      "getReturnSortForTag", llvm::Type::getInt8PtrTy(mod->getContext()),
+      getCharPtrDebugType(), def, mod, getter);
 }
 
 void emitConfigParserFunctions(
