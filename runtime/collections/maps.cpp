@@ -200,6 +200,9 @@ void printMap(
     return;
   }
 
+  auto tag = getTagForSymbolName(element);
+  auto arg_sorts = getArgumentSortsForTag(tag);
+
   sfprintf(file, "\\left-assoc{}(%s(", concat);
 
   bool once = true;
@@ -212,9 +215,9 @@ void printMap(
 
     sfprintf(file, "%s(", element);
     auto entry = *iter;
-    printConfigurationInternal(file, entry.first, "SortKItem{}", false, state);
+    printConfigurationInternal(file, entry.first, arg_sorts[0], false, state);
     sfprintf(file, ",");
-    printConfigurationInternal(file, entry.second, "SortKItem{}", false, state);
+    printConfigurationInternal(file, entry.second, arg_sorts[1], false, state);
     sfprintf(file, ")");
   }
   sfprintf(file, "))");
