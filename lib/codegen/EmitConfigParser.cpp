@@ -126,57 +126,6 @@ static std::string STRING_STRUCT = "string";
 static std::string LAYOUT_STRUCT = "layout";
 static std::string LAYOUTITEM_STRUCT = "layoutitem";
 
-static void emitDataTableForSymbol(
-    std::string name, llvm::Type *ty, llvm::DIType *dity,
-    KOREDefinition *definition, llvm::Module *module,
-    llvm::Constant *getter(KOREDefinition *, llvm::Module *, KORESymbol *)) {
-  llvm::LLVMContext &Ctx = module->getContext();
-  std::vector<llvm::Type *> argTypes;
-  argTypes.push_back(llvm::Type::getInt32Ty(Ctx));
-  auto func = getOrInsertFunction(
-      module, name, llvm::FunctionType::get(ty, argTypes, false));
-  initDebugFunction(
-      name, name, getDebugFunctionType(dity, {getIntDebugType()}), definition,
-      func);
-  auto EntryBlock = llvm::BasicBlock::Create(Ctx, "entry", func);
-  auto MergeBlock = llvm::BasicBlock::Create(Ctx, "exit");
-  auto stuck = llvm::BasicBlock::Create(Ctx, "stuck");
-  auto &syms = definition->getSymbols();
-  auto icmp = new llvm::ICmpInst(
-      *EntryBlock, llvm::CmpInst::ICMP_ULE, func->arg_begin(),
-      llvm::ConstantInt::get(
-          llvm::Type::getInt32Ty(Ctx), syms.rbegin()->first));
-  llvm::BranchInst::Create(MergeBlock, stuck, icmp, EntryBlock);
-  auto tableType = llvm::ArrayType::get(ty, syms.size());
-  auto table = module->getOrInsertGlobal("table_" + name, tableType);
-  llvm::GlobalVariable *globalVar = llvm::dyn_cast<llvm::GlobalVariable>(table);
-  initDebugGlobal(
-      "table_" + name,
-      getArrayDebugType(
-          dity, syms.size(), llvm::DataLayout(module).getABITypeAlign(ty)),
-      globalVar);
-  std::vector<llvm::Constant *> values;
-  for (auto iter = syms.begin(); iter != syms.end(); ++iter) {
-    auto entry = *iter;
-    auto symbol = entry.second;
-    auto val = getter(definition, module, symbol);
-    values.push_back(val);
-  }
-  if (!globalVar->hasInitializer()) {
-    globalVar->setInitializer(llvm::ConstantArray::get(tableType, values));
-  }
-  auto offset = new llvm::ZExtInst(
-      func->arg_begin(), llvm::Type::getInt64Ty(Ctx), "", MergeBlock);
-  llvm::Constant *zero = llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0);
-  auto retval = llvm::GetElementPtrInst::Create(
-      tableType, globalVar, {zero, offset}, "", MergeBlock);
-  MergeBlock->insertInto(func);
-  auto load = new llvm::LoadInst(ty, retval, "", MergeBlock);
-  llvm::ReturnInst::Create(Ctx, load, MergeBlock);
-  addAbort(stuck, module);
-  stuck->insertInto(func);
-}
-
 static void emitDataForSymbol(
     std::string name, llvm::Type *ty, llvm::DIType *dity,
     KOREDefinition *definition, llvm::Module *module, bool isEval,
@@ -270,7 +219,7 @@ getBinder(KOREDefinition *def, llvm::Module *mod, KORESymbol *symbol) {
 }
 
 static void emitIsSymbolABinder(KOREDefinition *def, llvm::Module *mod) {
-  emitDataTableForSymbol(
+  detail::emitDataTableForSymbol(
       "isSymbolABinder", llvm::Type::getInt1Ty(mod->getContext()),
       getBoolDebugType(), def, mod, getBinder);
 }
@@ -305,7 +254,7 @@ getArity(KOREDefinition *, llvm::Module *mod, KORESymbol *symbol) {
 }
 
 static void emitGetSymbolArity(KOREDefinition *def, llvm::Module *mod) {
-  emitDataTableForSymbol(
+  detail::emitDataTableForSymbol(
       "getSymbolArity", llvm::Type::getInt32Ty(mod->getContext()),
       getIntDebugType(), def, mod, getArity);
 }
@@ -882,7 +831,7 @@ static llvm::Constant *getSymbolName(
 }
 
 static void emitGetSymbolNameForTag(KOREDefinition *def, llvm::Module *mod) {
-  emitDataTableForSymbol(
+  detail::emitDataTableForSymbol(
       "getSymbolNameForTag", llvm::Type::getInt8PtrTy(mod->getContext()),
       getCharPtrDebugType(), def, mod, getSymbolName);
 }
@@ -1311,25 +1260,6 @@ static void emitSortTable(KOREDefinition *definition, llvm::Module *module) {
   }
 }
 
-static llvm::Constant *
-getReturnSort(KOREDefinition *def, llvm::Module *mod, KORESymbol *symbol) {
-  auto &ctx = mod->getContext();
-
-  auto sort = symbol->getSort();
-  auto sort_str = ast_to_string(*sort);
-
-  auto char_type = llvm::Type::getInt8Ty(ctx);
-  auto str_type = llvm::ArrayType::get(char_type, sort_str.size() + 1);
-
-  auto sort_name = mod->getOrInsertGlobal("sort_name_" + sort_str, str_type);
-
-  auto i64_type = llvm::Type::getInt64Ty(ctx);
-  auto zero = llvm::ConstantInt::get(i64_type, 0);
-
-  return llvm::ConstantExpr::getInBoundsGetElementPtr(
-      str_type, sort_name, std::vector<llvm::Constant *>{zero});
-}
-
 /*
  * Emit a table mapping symbol tags to the declared return sort for that symbol.
  * For example:
@@ -1344,66 +1274,85 @@ getReturnSort(KOREDefinition *def, llvm::Module *mod, KORESymbol *symbol) {
  */
 static void
 emitReturnSortTable(KOREDefinition *definition, llvm::Module *module) {
-  emitDataTableForSymbol(
-      "getReturnSortForTag", llvm::Type::getInt8PtrTy(module->getContext()),
-      getCharPtrDebugType(), definition, module, getReturnSort);
-}
+  auto getter = [](KOREDefinition *definition, llvm::Module *module,
+                   KORESymbol *symbol) -> llvm::Constant * {
+    auto &ctx = module->getContext();
 
-static llvm::Constant *getHookedSortElementSorts(
-    KOREDefinition *definition, llvm::Module *module, KORESymbol *symbol) {
-  auto &ctx = module->getContext();
-  auto const &table_data = definition->getCollectionElementSorts();
+    auto sort = symbol->getSort();
+    auto sort_str = ast_to_string(*sort);
 
-  auto element_type
-      = llvm::PointerType::getUnqual(llvm::Type::getInt8PtrTy(ctx));
+    auto char_type = llvm::Type::getInt8Ty(ctx);
+    auto str_type = llvm::ArrayType::get(char_type, sort_str.size() + 1);
 
-  auto found = table_data.find(symbol->getName());
+    auto sort_name
+        = module->getOrInsertGlobal("sort_name_" + sort_str, str_type);
 
-  if (found == table_data.end()) {
-    return llvm::ConstantPointerNull::get(element_type);
-  } else {
-    auto const &[name, sorts] = *found;
-
-    auto subtable_type
-        = llvm::ArrayType::get(llvm::Type::getInt8PtrTy(ctx), sorts.size());
-
-    auto subtable = module->getOrInsertGlobal(
-        fmt::format("element_sorts_{}", name), subtable_type);
-    auto subtable_global = llvm::dyn_cast<llvm::GlobalVariable>(subtable);
-
-    auto zero = llvm::ConstantInt::get(llvm::Type::getInt64Ty(ctx), 0);
-
-    auto indices = std::vector<llvm::Constant *>{zero, zero};
-
-    auto sub_values = std::vector<llvm::Constant *>{};
-    for (auto const &sort : sorts) {
-      auto sort_str = ast_to_string(*sort);
-
-      auto str_type = llvm::ArrayType::get(
-          llvm::Type::getInt8Ty(ctx), sort_str.size() + 1);
-      auto sort_name = module->getOrInsertGlobal(
-          fmt::format("sort_name_{}", sort_str), str_type);
-
-      sub_values.push_back(llvm::ConstantExpr::getInBoundsGetElementPtr(
-          str_type, sort_name, indices));
-    }
-
-    subtable_global->setInitializer(
-        llvm::ConstantArray::get(subtable_type, sub_values));
+    auto i64_type = llvm::Type::getInt64Ty(ctx);
+    auto zero = llvm::ConstantInt::get(i64_type, 0);
 
     return llvm::ConstantExpr::getInBoundsGetElementPtr(
-        subtable_type, subtable_global, indices);
-  }
+        str_type, sort_name, std::vector<llvm::Constant *>{zero});
+  };
+
+  detail::emitDataTableForSymbol(
+      "getReturnSortForTag", llvm::Type::getInt8PtrTy(module->getContext()),
+      getCharPtrDebugType(), definition, module, getter);
 }
 
 static void
 emitHookedSortElementTable(KOREDefinition *definition, llvm::Module *module) {
-  emitDataTableForSymbol(
+  auto const &table_data = definition->getCollectionElementSorts();
+
+  auto getter = [&table_data](
+                    KOREDefinition *definition, llvm::Module *module,
+                    KORESymbol *symbol) -> llvm::Constant * {
+    auto &ctx = module->getContext();
+
+    auto found = table_data.find(symbol->getName());
+    if (found == table_data.end()) {
+      return llvm::ConstantPointerNull::get(
+          llvm::PointerType::getUnqual(llvm::Type::getInt8PtrTy(ctx)));
+    } else {
+      auto const &[name, sorts] = *found;
+
+      auto subtable_type
+          = llvm::ArrayType::get(llvm::Type::getInt8PtrTy(ctx), sorts.size());
+
+      auto subtable = module->getOrInsertGlobal(
+          fmt::format("element_sorts_{}", name), subtable_type);
+      auto subtable_global = llvm::dyn_cast<llvm::GlobalVariable>(subtable);
+
+      auto zero = llvm::ConstantInt::get(llvm::Type::getInt64Ty(ctx), 0);
+
+      auto indices = std::vector<llvm::Constant *>{zero, zero};
+
+      auto sub_values = std::vector<llvm::Constant *>{};
+      for (auto const &sort : sorts) {
+        auto sort_str = ast_to_string(*sort);
+
+        auto str_type = llvm::ArrayType::get(
+            llvm::Type::getInt8Ty(ctx), sort_str.size() + 1);
+        auto sort_name = module->getOrInsertGlobal(
+            fmt::format("sort_name_{}", sort_str), str_type);
+
+        sub_values.push_back(llvm::ConstantExpr::getInBoundsGetElementPtr(
+            str_type, sort_name, indices));
+      }
+
+      subtable_global->setInitializer(
+          llvm::ConstantArray::get(subtable_type, sub_values));
+
+      return llvm::ConstantExpr::getInBoundsGetElementPtr(
+          subtable_type, subtable_global, indices);
+    }
+  };
+
+  detail::emitDataTableForSymbol(
       "getHookedSortElementSorts",
       llvm::PointerType::getUnqual(
           llvm::Type::getInt8PtrTy(module->getContext())),
       getPointerDebugType(getCharPtrDebugType(), "char **"), definition, module,
-      getHookedSortElementSorts);
+      getter);
 }
 
 void emitConfigParserFunctions(

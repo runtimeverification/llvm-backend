@@ -1686,35 +1686,30 @@ void KOREModule::addDeclaration(sptr<KOREDeclaration> Declaration) {
 
 std::map<std::string, std::vector<sptr<KORESort>>>
 KOREDefinition::getCollectionElementSorts() const {
-  static bool once = false;
-  static auto ret = std::map<std::string, std::vector<sptr<KORESort>>>{};
+  auto ret = std::map<std::string, std::vector<sptr<KORESort>>>{};
 
-  if (!once) {
-    auto const &decls = getSymbolDeclarations();
-    for (auto const &[sort_name, sort_decl] : getSortDeclarations()) {
-      if (sort_decl->isHooked()) {
-        auto const &attrs = sort_decl->getAttributes();
-        if (auto element_it = attrs.find("element");
-            element_it != attrs.end()) {
-          auto [attr_key, attr_pattern] = *element_it;
-          auto comp
-              = std::dynamic_pointer_cast<KORECompositePattern>(attr_pattern);
-          auto arg = std::dynamic_pointer_cast<KORECompositePattern>(
-              comp->getArguments()[0]);
-          auto name = arg->getConstructor()->getName();
+  auto const &decls = getSymbolDeclarations();
+  for (auto const &[sort_name, sort_decl] : getSortDeclarations()) {
+    if (sort_decl->isHooked()) {
+      auto const &attrs = sort_decl->getAttributes();
+      if (auto element_it = attrs.find("element"); element_it != attrs.end()) {
+        auto [attr_key, attr_pattern] = *element_it;
+        auto comp
+            = std::dynamic_pointer_cast<KORECompositePattern>(attr_pattern);
+        auto arg = std::dynamic_pointer_cast<KORECompositePattern>(
+            comp->getArguments()[0]);
+        auto name = arg->getConstructor()->getName();
 
-          ret[name] = std::vector<sptr<KORESort>>{};
+        ret[name] = std::vector<sptr<KORESort>>{};
 
-          auto decl = decls.at(name);
-          for (auto const &arg_sort : decl->getSymbol()->getArguments()) {
-            ret[name].push_back(arg_sort);
-          }
+        auto decl = decls.at(name);
+        for (auto const &arg_sort : decl->getSymbol()->getArguments()) {
+          ret[name].push_back(arg_sort);
         }
       }
     }
   }
 
-  once = true;
   return ret;
 }
 
