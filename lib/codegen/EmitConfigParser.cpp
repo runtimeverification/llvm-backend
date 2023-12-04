@@ -1268,9 +1268,6 @@ static void emitSortTable(KOREDefinition *definition, llvm::Module *module) {
  *
  * Each value in the table is a pointer to a global variable containing the
  * relevant sort name as a null-terminated string.
- *
- * The function `getReturnSortForTag` abstracts accesses to the data in this
- * table.
  */
 static void
 emitReturnSortTable(KOREDefinition *definition, llvm::Module *module) {
@@ -1299,6 +1296,18 @@ emitReturnSortTable(KOREDefinition *definition, llvm::Module *module) {
       getCharPtrDebugType(), definition, module, getter);
 }
 
+/*
+ * Emit a table mapping symbol tags to the element sorts for that symbol, if the
+ * symbol is declared as the value of an element(_) attribute, and null
+ * otherwise. For example:
+ *
+ *   tag_of(ListItem) |-> [ SortKItem{} ]
+ *   tag_of(SetItem)  |-> [ SortKItem{} ]
+ *   tag_of(_|->_)    |-> [ SortKItem{}, SortKItem{} ]
+ *
+ * Each value in the table is a pointer to a global variable; that variable is
+ * itself an array of strings containing the relevant sort name.
+ */
 static void
 emitHookedSortElementTable(KOREDefinition *definition, llvm::Module *module) {
   auto const &table_data = definition->getCollectionElementSorts();
