@@ -1,0 +1,1 @@
+Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'wasm'-GT-'{}(Lbl'-LT-'instrs'-GT-'{}(dotk{}()),Lbl'-LT-'locals'-GT-'{}(\left-assoc{}(Lbl'Unds'MapIntToVal'Unds'{}(Lbl'Unds'Int2Val'Pipe'-'-GT-Unds'{}(LblwrapInt{}(\dv{SortInt{}}("1")),inj{SortWrappedInt{}, SortVal{}}(LblwrapInt{}(\dv{SortInt{}}("2")))))))),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))

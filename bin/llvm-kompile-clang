@@ -131,12 +131,12 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
   flags=(
     "-L@BREW_PREFIX@/opt/libffi/lib"
     "-L@BREW_PREFIX@/lib"
-    "-Wl,-u,_sort_table"
+    "-Wl,-u,_table_getArgumentSortsForTag"
     "-I" "@BREW_PREFIX@/include"
   )
 else
   libraries=("-ltinfo")
-  flags=("-Wl,-u,sort_table")
+  flags=("-Wl,-u,table_getArgumentSortsForTag")
 fi
 
 llc_flags+=("--relocation-model=pic")
