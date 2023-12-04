@@ -1248,26 +1248,13 @@ static void emitInjTags(KOREDefinition *def, llvm::Module *mod) {
   }
 }
 
-static void emitSortTable(KOREDefinition *definition, llvm::Module *module) {
-  llvm::LLVMContext &Ctx = module->getContext();
-  auto &syms = definition->getSymbols();
-  auto ty = llvm::PointerType::getUnqual(llvm::Type::getInt8PtrTy(Ctx));
-  auto dity = getPointerDebugType(getCharPtrDebugType(), "char *");
-  auto tableType = llvm::ArrayType::get(ty, syms.size());
-  auto table = module->getOrInsertGlobal("sort_table", tableType);
-  llvm::GlobalVariable *globalVar = llvm::dyn_cast<llvm::GlobalVariable>(table);
-  initDebugGlobal(
-      "sort_table",
-      getArrayDebugType(
-          dity, syms.size(), llvm::DataLayout(module).getABITypeAlign(ty)),
-      globalVar);
-  std::vector<llvm::Constant *> values;
-  for (auto iter = syms.begin(); iter != syms.end(); ++iter) {
-    auto entry = *iter;
-    auto symbol = entry.second;
+static void emitSortTable(KOREDefinition *def, llvm::Module *mod) {
+  auto getter = [](KOREDefinition *definition, llvm::Module *module,
+                   KORESymbol *symbol) -> llvm::Constant * {
+    auto &ctx = module->getContext();
 
     auto subtableType = llvm::ArrayType::get(
-        llvm::Type::getInt8PtrTy(Ctx), symbol->getArguments().size());
+        llvm::Type::getInt8PtrTy(ctx), symbol->getArguments().size());
     auto subtable = module->getOrInsertGlobal(
         fmt::format("sorts_{}", ast_to_string(*symbol)), subtableType);
     llvm::GlobalVariable *subtableVar
@@ -1277,19 +1264,17 @@ static void emitSortTable(KOREDefinition *definition, llvm::Module *module) {
         getArrayDebugType(
             getCharPtrDebugType(), symbol->getArguments().size(),
             llvm::DataLayout(module).getABITypeAlign(
-                llvm::Type::getInt8PtrTy(Ctx))),
+                llvm::Type::getInt8PtrTy(ctx))),
         subtableVar);
     llvm::Constant *zero
-        = llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0);
+        = llvm::ConstantInt::get(llvm::Type::getInt64Ty(ctx), 0);
     auto indices = std::vector<llvm::Constant *>{zero, zero};
-    values.push_back(llvm::ConstantExpr::getInBoundsGetElementPtr(
-        subtableType, subtableVar, indices));
 
     std::vector<llvm::Constant *> subvalues;
     for (size_t i = 0; i < symbol->getArguments().size(); ++i) {
       auto arg_str = ast_to_string(*symbol->getArguments()[i]);
       auto strType = llvm::ArrayType::get(
-          llvm::Type::getInt8Ty(Ctx), arg_str.size() + 1);
+          llvm::Type::getInt8Ty(ctx), arg_str.size() + 1);
       auto sortName = module->getOrInsertGlobal(
           fmt::format("sort_name_{}", arg_str), strType);
       subvalues.push_back(llvm::ConstantExpr::getInBoundsGetElementPtr(
@@ -1297,10 +1282,17 @@ static void emitSortTable(KOREDefinition *definition, llvm::Module *module) {
     }
     subtableVar->setInitializer(
         llvm::ConstantArray::get(subtableType, subvalues));
-  }
-  if (!globalVar->hasInitializer()) {
-    globalVar->setInitializer(llvm::ConstantArray::get(tableType, values));
-  }
+
+    return llvm::ConstantExpr::getInBoundsGetElementPtr(
+        subtableType, subtableVar, indices);
+  };
+
+  auto i8_ptr_ty = llvm::Type::getInt8PtrTy(mod->getContext());
+  auto entry_ty = llvm::PointerType::getUnqual(i8_ptr_ty);
+  auto debug_ty = getPointerDebugType(getCharPtrDebugType(), "char **");
+
+  emitDataTableForSymbol(
+      "getArgumentSortsForTag", entry_ty, debug_ty, def, mod, getter);
 }
 
 /*
