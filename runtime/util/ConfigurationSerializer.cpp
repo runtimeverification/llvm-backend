@@ -453,7 +453,7 @@ void serializeTermToFile(
 
 void serializeRawTermToFile(
     const char *filename, void *subject, const char *sort) {
-  block *term = constructRawTerm(subject, sort);
+  block *term = constructRawTerm(subject, sort, true);
 
   char *data;
   size_t size;
@@ -467,7 +467,7 @@ void serializeRawTermToFile(
 std::shared_ptr<kllvm::KOREPattern>
 sortedTermToKorePattern(block *subject, const char *sort) {
   auto is_kitem = (std::string(sort) == "SortKItem{}");
-  block *term = is_kitem ? subject : constructRawTerm(subject, sort);
+  block *term = is_kitem ? subject : constructRawTerm(subject, sort, false);
 
   char *data_out;
   size_t size_out;

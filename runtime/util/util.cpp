@@ -29,10 +29,10 @@ block *constructKItemInj(void *subject, const char *sort, bool raw_value) {
   return static_cast<block *>(constructCompositePattern(tag, args));
 }
 
-block *constructRawTerm(void *subject, const char *sort) {
+block *constructRawTerm(void *subject, const char *sort, bool raw_value) {
   auto tag = getTagForSymbolName("rawTerm{}");
   auto args = std::vector{
-      static_cast<void *>(constructKItemInj(subject, sort, true))};
+      static_cast<void *>(constructKItemInj(subject, sort, raw_value))};
   return static_cast<block *>(constructCompositePattern(tag, args));
 }
 

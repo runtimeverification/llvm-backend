@@ -411,7 +411,7 @@ extern const uint32_t first_inj_tag, last_inj_tag;
 bool is_injection(block *);
 block *strip_injection(block *);
 block *constructKItemInj(void *subject, const char *sort, bool raw_value);
-block *constructRawTerm(void *subject, const char *sort);
+block *constructRawTerm(void *subject, const char *sort, bool raw_value);
 }
 
 std::string floatToString(const floating *);
