@@ -4,6 +4,14 @@
 #include "runtime/header.h"
 
 extern "C" {
+
+#define NUM_HOOKED_SORTS 2
+const char *hooked_sorts[NUM_HOOKED_SORTS] = {"SortKItem{}", "SortKItem{}"};
+
+const char **getHookedSortElementSorts(uint32_t tag) {
+  return &hooked_sorts[0];
+}
+
 list hook_LIST_unit();
 list hook_LIST_element(block *);
 list hook_LIST_concat(list *, list *);

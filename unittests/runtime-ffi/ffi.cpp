@@ -14,9 +14,6 @@
 #define KCHAR char
 #define TYPETAG(type) "Lbl'Hash'ffi'Unds'" #type "{}"
 
-char *return_sort_table = nullptr;
-char **hooked_sort_element_table = nullptr;
-
 void *constructCompositePattern(uint32_t tag, std::vector<void *> &arguments) {
   return nullptr;
 }
@@ -40,6 +37,13 @@ const char *symbols[NUM_SYMBOLS]
        TYPETAG(pointer),
        "inj{SortBytes{}, SortKItem{}}",
        "inj{SortFFIType{}, SortKItem{}}"};
+
+#define NUM_HOOKED_SORTS 2
+const char *hooked_sorts[NUM_HOOKED_SORTS] = {"SortKItem{}", "SortKItem{}"};
+
+const char **getHookedSortElementSorts(uint32_t tag) {
+  return &hooked_sorts[0];
+}
 
 const uint32_t first_inj_tag = 4;
 const uint32_t last_inj_tag = 5;

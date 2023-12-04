@@ -14,9 +14,6 @@
 
 #define KCHAR char
 
-char *return_sort_table = nullptr;
-char **hooked_sort_element_table = nullptr;
-
 void *constructCompositePattern(uint32_t tag, std::vector<void *> &arguments) {
   return nullptr;
 }
