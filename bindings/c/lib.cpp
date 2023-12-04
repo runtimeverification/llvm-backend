@@ -25,8 +25,7 @@ namespace fs = std::filesystem;
 // Internal implementation details
 namespace {
 
-template <typename OS>
-char *get_c_string(OS const &);
+char *get_c_string(std::string const &);
 
 kore_pattern *kore_string_pattern_new_internal(std::string const &);
 
@@ -85,9 +84,7 @@ struct kore_symbol {
 /* KOREPattern */
 
 char *kore_pattern_dump(kore_pattern const *pat) {
-  auto os = std::ostringstream{};
-  pat->ptr_->print(os);
-  return get_c_string(os);
+  return get_c_string(ast_to_string(*pat->ptr_));
 }
 
 char *kore_pattern_pretty_print(kore_pattern const *pat) {
@@ -320,9 +317,7 @@ kore_string_pattern_new_with_len(char const *contents, size_t len) {
 /* KORESort */
 
 char *kore_sort_dump(kore_sort const *sort) {
-  auto os = std::ostringstream{};
-  sort->ptr_->print(os);
-  return get_c_string(os);
+  return get_c_string(ast_to_string(*sort->ptr_));
 }
 
 void kore_sort_free(kore_sort const *sort) {
@@ -372,9 +367,7 @@ void kore_symbol_free(kore_symbol const *sym) {
 }
 
 char *kore_symbol_dump(kore_symbol const *sym) {
-  auto os = std::ostringstream{};
-  sym->ptr_->print(os);
-  return get_c_string(os);
+  return get_c_string(ast_to_string(*sym->ptr_));
 }
 
 void kore_symbol_add_formal_argument(kore_symbol *sym, kore_sort const *sort) {
@@ -394,10 +387,7 @@ void kllvm_free_all_memory(void) {
 
 namespace {
 
-template <typename OS>
-char *get_c_string(OS const &os) {
-  auto str = os.str();
-
+char *get_c_string(std::string const &str) {
   // Include null terminator
   auto total_length = str.length() + 1;
 

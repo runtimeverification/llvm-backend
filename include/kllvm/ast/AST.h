@@ -36,6 +36,18 @@ using sptr = std::shared_ptr<T>;
 
 std::string decodeKore(std::string);
 
+/*
+ * Helper function to avoid repeated call-site uses of ostringstream when we
+ * just want the string representation of a node, rather than to print it to a
+ * stream.
+ */
+template <typename T, typename... Args>
+std::string ast_to_string(T &&node, Args &&...args) {
+  auto os = std::ostringstream{};
+  std::forward<T>(node).print(os, std::forward<Args>(args)...);
+  return os.str();
+}
+
 // KORESort
 class KORESort : public std::enable_shared_from_this<KORESort> {
 public:
@@ -62,9 +74,7 @@ static inline std::ostream &operator<<(std::ostream &out, const KORESort &s) {
 
 struct HashSort {
   size_t operator()(const kllvm::KORESort &s) const noexcept {
-    std::ostringstream Out;
-    s.print(Out);
-    return std::hash<std::string>{}(Out.str());
+    return std::hash<std::string>{}(ast_to_string(s));
   }
 };
 
@@ -76,9 +86,7 @@ struct EqualSortPtr {
 
 struct HashSortPtr {
   size_t operator()(kllvm::KORESort *const &s) const noexcept {
-    std::ostringstream Out;
-    s->print(Out);
-    return std::hash<std::string>{}(Out.str());
+    return std::hash<std::string>{}(ast_to_string(*s));
   }
 };
 
@@ -281,18 +289,13 @@ struct HashSymbol {
 
 struct EqualSymbolPtr {
   bool operator()(KORESymbol *const &first, KORESymbol *const &second) const {
-    std::ostringstream Out1, Out2;
-    first->print(Out1);
-    second->print(Out2);
-    return Out1.str() == Out2.str();
+    return ast_to_string(*first) == ast_to_string(*second);
   }
 };
 
 struct HashSymbolPtr {
   size_t operator()(kllvm::KORESymbol *const &s) const noexcept {
-    std::ostringstream Out;
-    s->print(Out);
-    return std::hash<std::string>{}(Out.str());
+    return std::hash<std::string>{}(ast_to_string(*s));
   }
 };
 

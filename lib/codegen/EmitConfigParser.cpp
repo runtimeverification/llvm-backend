@@ -24,6 +24,8 @@
 #include <llvm/IR/Value.h>
 #include <llvm/Support/Casting.h>
 
+#include <fmt/format.h>
+
 #include <cstdint>
 #include <cstdlib>
 #include <iosfwd>
@@ -43,14 +45,13 @@ namespace kllvm {
 static llvm::Constant *getSymbolNamePtr(
     KORESymbol *symbol, llvm::BasicBlock *SetBlockName, llvm::Module *module) {
   llvm::LLVMContext &Ctx = module->getContext();
-  std::ostringstream Out;
-  symbol->print(Out);
+  auto name = ast_to_string(*symbol);
   if (SetBlockName) {
-    SetBlockName->setName(Out.str());
+    SetBlockName->setName(name);
   }
-  auto Str = llvm::ConstantDataArray::getString(Ctx, Out.str(), true);
-  auto global
-      = module->getOrInsertGlobal("sym_name_" + Out.str(), Str->getType());
+  auto Str = llvm::ConstantDataArray::getString(Ctx, name, true);
+  auto global = module->getOrInsertGlobal(
+      fmt::format("sym_name_{}", name), Str->getType());
   llvm::GlobalVariable *globalVar
       = llvm::dyn_cast<llvm::GlobalVariable>(global);
   if (!globalVar->hasInitializer()) {
@@ -457,12 +458,10 @@ emitGetTagForFreshSort(KOREDefinition *definition, llvm::Module *module) {
     auto CaseBlock = llvm::BasicBlock::Create(Ctx, name, func);
     llvm::BranchInst::Create(CaseBlock, FalseBlock, icmp, CurrentBlock);
     auto symbol = definition->getFreshFunctions().at(name);
-    std::ostringstream Out;
-    symbol->print(Out);
     Phi->addIncoming(
         llvm::ConstantInt::get(
             llvm::Type::getInt32Ty(Ctx),
-            definition->getAllSymbols().at(Out.str())->getTag()),
+            definition->getAllSymbols().at(ast_to_string(*symbol))->getTag()),
         CaseBlock);
     llvm::BranchInst::Create(MergeBlock, CaseBlock);
     CurrentBlock = FalseBlock;
@@ -954,11 +953,10 @@ static void getVisitor(
         "", CaseBlock);
     llvm::Value *Child = new llvm::LoadInst(
         getValueType(cat, module), ChildPtr, "", CaseBlock);
-    std::ostringstream Out;
-    sort->print(Out);
-    auto Str = llvm::ConstantDataArray::getString(Ctx, Out.str(), true);
-    auto global
-        = module->getOrInsertGlobal("sort_name_" + Out.str(), Str->getType());
+    auto sort_name = ast_to_string(*sort);
+    auto Str = llvm::ConstantDataArray::getString(Ctx, sort_name, true);
+    auto global = module->getOrInsertGlobal(
+        fmt::format("sort_name_{}", sort_name), Str->getType());
     llvm::GlobalVariable *globalVar
         = llvm::dyn_cast<llvm::GlobalVariable>(global);
     if (!globalVar->hasInitializer()) {
@@ -1270,10 +1268,8 @@ static void emitSortTable(KOREDefinition *definition, llvm::Module *module) {
 
     auto subtableType = llvm::ArrayType::get(
         llvm::Type::getInt8PtrTy(Ctx), symbol->getArguments().size());
-    std::ostringstream Out;
-    symbol->print(Out);
-    auto subtable
-        = module->getOrInsertGlobal("sorts_" + Out.str(), subtableType);
+    auto subtable = module->getOrInsertGlobal(
+        fmt::format("sorts_{}", ast_to_string(*symbol)), subtableType);
     llvm::GlobalVariable *subtableVar
         = llvm::dyn_cast<llvm::GlobalVariable>(subtable);
     initDebugGlobal(
@@ -1291,12 +1287,11 @@ static void emitSortTable(KOREDefinition *definition, llvm::Module *module) {
 
     std::vector<llvm::Constant *> subvalues;
     for (size_t i = 0; i < symbol->getArguments().size(); ++i) {
-      std::ostringstream Out;
-      symbol->getArguments()[i]->print(Out);
+      auto arg_str = ast_to_string(*symbol->getArguments()[i]);
       auto strType = llvm::ArrayType::get(
-          llvm::Type::getInt8Ty(Ctx), Out.str().size() + 1);
-      auto sortName
-          = module->getOrInsertGlobal("sort_name_" + Out.str(), strType);
+          llvm::Type::getInt8Ty(Ctx), arg_str.size() + 1);
+      auto sortName = module->getOrInsertGlobal(
+          fmt::format("sort_name_{}", arg_str), strType);
       subvalues.push_back(llvm::ConstantExpr::getInBoundsGetElementPtr(
           strType, sortName, indices));
     }
@@ -1305,6 +1300,55 @@ static void emitSortTable(KOREDefinition *definition, llvm::Module *module) {
   }
   if (!globalVar->hasInitializer()) {
     globalVar->setInitializer(llvm::ConstantArray::get(tableType, values));
+  }
+}
+
+/*
+ * Emit a table mapping symbol tags to the declared return sort for that symbol.
+ * For example:
+ *
+ *   tag_of(initGeneratedTopCell) |-> sort_name_SortGeneratedTopCell{}
+ *
+ * Each value in the table is a pointer to a global variable containing the
+ * relevant sort name as a null-terminated string.
+ *
+ * The function `getReturnSortForTag` abstracts accesses to the data in this
+ * table.
+ */
+static void
+emitReturnSortTable(KOREDefinition *definition, llvm::Module *module) {
+  auto &ctx = module->getContext();
+
+  auto const &syms = definition->getSymbols();
+
+  auto element_type = llvm::Type::getInt8PtrTy(ctx);
+  auto table_type = llvm::ArrayType::get(element_type, syms.size());
+
+  auto table = module->getOrInsertGlobal("return_sort_table", table_type);
+  auto values = std::vector<llvm::Constant *>{};
+
+  for (auto [tag, symbol] : syms) {
+    auto sort = symbol->getSort();
+    auto sort_str = ast_to_string(*sort);
+
+    auto char_type = llvm::Type::getInt8Ty(ctx);
+    auto str_type = llvm::ArrayType::get(char_type, sort_str.size() + 1);
+
+    auto sort_name
+        = module->getOrInsertGlobal("sort_name_" + sort_str, str_type);
+
+    auto i64_type = llvm::Type::getInt64Ty(ctx);
+    auto zero = llvm::ConstantInt::get(i64_type, 0);
+
+    auto pointer = llvm::ConstantExpr::getInBoundsGetElementPtr(
+        str_type, sort_name, std::vector<llvm::Constant *>{zero});
+
+    values.push_back(pointer);
+  }
+
+  auto global = llvm::dyn_cast<llvm::GlobalVariable>(table);
+  if (!global->hasInitializer()) {
+    global->setInitializer(llvm::ConstantArray::get(table_type, values));
   }
 }
 
@@ -1329,6 +1373,7 @@ void emitConfigParserFunctions(
   emitInjTags(definition, module);
 
   emitSortTable(definition, module);
+  emitReturnSortTable(definition, module);
 }
 
 } // namespace kllvm

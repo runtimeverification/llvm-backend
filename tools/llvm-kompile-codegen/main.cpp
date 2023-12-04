@@ -189,11 +189,10 @@ int main(int argc, char **argv) {
       auto funcDt = parseYamlDecisionTree(
           mod.get(), filename, definition->getAllSymbols(),
           definition->getHookedSorts());
-      std::ostringstream Out;
-      decl->getSymbol()->print(Out);
+
       makeAnywhereFunction(
-          definition->getAllSymbols().at(Out.str()), definition.get(),
-          mod.get(), funcDt);
+          definition->getAllSymbols().at(ast_to_string(*decl->getSymbol())),
+          definition.get(), mod.get(), funcDt);
     }
   }
 

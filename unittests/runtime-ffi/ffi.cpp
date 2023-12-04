@@ -14,6 +14,8 @@
 #define KCHAR char
 #define TYPETAG(type) "Lbl'Hash'ffi'Unds'" #type "{}"
 
+char *return_sort_table = nullptr;
+
 void *constructCompositePattern(uint32_t tag, std::vector<void *> &arguments) {
   return nullptr;
 }
