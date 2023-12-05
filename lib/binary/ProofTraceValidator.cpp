@@ -14,7 +14,7 @@ void LLVMRewriteEvent::printSubstitution(
 }
 
 void LLVMRuleEvent::print(std::ostream &Out, unsigned indent) const {
-  std::string Indent(indent, ' ');
+  std::string Indent(indent * INDENT_SIZE, ' ');
   Out << Indent << "rule: " << ruleOrdinal << " " << substitution.size()
       << std::endl;
   printSubstitution(Out, indent + 1u);
