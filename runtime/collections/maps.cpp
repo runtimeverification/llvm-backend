@@ -18,6 +18,20 @@ map hook_MAP_element(SortKItem key, SortKItem value) {
   return map().set(key, value);
 }
 
+map hook_MAP_user_element(block *key, block *value) {
+  std::string key_sort = getReturnSortForTag(tag(key));
+  if (key_sort != "SortKItem{}") {
+    key = constructKItemInj(key, key_sort.c_str(), false);
+  }
+
+  std::string val_sort = getReturnSortForTag(tag(value));
+  if (val_sort != "SortKItem{}") {
+    value = constructKItemInj(value, val_sort.c_str(), false);
+  }
+
+  return map().set(key, value);
+}
+
 map hook_MAP_unit() {
   return map();
 }
