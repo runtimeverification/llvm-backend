@@ -294,10 +294,13 @@ void bind_ast(py::module_ &m) {
                 py::kw_only(), py::arg("emit_size") = false)
             .def_static(
                 "deserialize",
-                [](py::bytes const &bytes) {
+                [](py::bytes const &bytes, bool strip_raw_term) {
                   auto str = std::string(bytes);
-                  return deserialize_pattern(str.begin(), str.end());
-                })
+                  return deserialize_pattern(
+                      str.begin(), str.end(), strip_raw_term);
+                },
+                py::arg("bytes"), py::kw_only(),
+                py::arg("strip_raw_term") = true)
             .def_static("read_from", &read_pattern_from_file);
 
   py::class_<KORECompositePattern, std::shared_ptr<KORECompositePattern>>(
