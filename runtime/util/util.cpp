@@ -2,12 +2,6 @@
 
 extern "C" {
 
-extern char *return_sort_table;
-
-const char *getReturnSortForTag(uint32_t tag) {
-  return (&return_sort_table)[tag];
-}
-
 block *dot_k() {
   return leaf_block(getTagForSymbolName("dotk{}"));
 }

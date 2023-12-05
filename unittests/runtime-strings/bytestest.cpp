@@ -9,8 +9,6 @@
 #define KCHAR char
 extern "C" {
 
-char *return_sort_table = nullptr;
-
 uint32_t getTagForSymbolName(const char *s) {
   return 0;
 }

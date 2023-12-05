@@ -351,6 +351,7 @@ bool hook_STRING_eq(SortString, SortString);
 
 const char *getSymbolNameForTag(uint32_t tag);
 const char *getReturnSortForTag(uint32_t tag);
+const char **getArgumentSortsForTag(uint32_t tag);
 const char *topSort(void);
 
 typedef struct {

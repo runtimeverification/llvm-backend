@@ -610,7 +610,7 @@ class termPrinter:
             argData = layoutData['args'] + i
             arg = subject.cast(self.long_int) + int(argData.dereference()['offset'])
             cat = argData.dereference()['cat']
-            sort = gdb.lookup_global_symbol("sort_table").value()[tag][i].string("iso-8859-1")
+            sort = gdb.lookup_global_symbol("table_getArgumentSortsForTag").value()[tag][i].string("iso-8859-1")
             if cat == @MAP_LAYOUT@:
                 self.appendMap(arg.cast(self.map_ptr), sort)
             elif cat == @RANGEMAP_LAYOUT@:

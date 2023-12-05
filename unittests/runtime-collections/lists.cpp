@@ -33,6 +33,10 @@ void *koreAllocToken(size_t requested) {
 }
 const size_t BLOCK_SIZE = -1;
 
+const char **getArgumentSortsForTag(uint32_t tag) {
+  return nullptr;
+}
+
 void printConfigurationInternal(
     writer *file, block *subject, const char *sort, bool, void *) { }
 void sfprintf(writer *, const char *, ...) { }

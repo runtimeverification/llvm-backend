@@ -265,6 +265,9 @@ void printRangeMap(
     return;
   }
 
+  auto tag = getTagForSymbolName(element);
+  auto arg_sorts = getArgumentSortsForTag(tag);
+
   sfprintf(file, "\\left-assoc{}(%s(", concat);
 
   bool once = true;
@@ -285,7 +288,7 @@ void printRangeMap(
     printConfigurationInternal(
         file, entry.first.end(), "SortKItem{}", false, state);
     sfprintf(file, "),");
-    printConfigurationInternal(file, entry.second, "SortKItem{}", false, state);
+    printConfigurationInternal(file, entry.second, arg_sorts[1], false, state);
     sfprintf(file, ")");
   }
   sfprintf(file, "))");
