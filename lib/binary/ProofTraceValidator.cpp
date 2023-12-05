@@ -4,28 +4,33 @@ namespace kllvm {
 
 #define INDENT_SIZE 2u
 
-void LLVMRewriteEvent::printSubstitution(std::ostream &Out, unsigned indent) const {
+void LLVMRewriteEvent::printSubstitution(
+    std::ostream &Out, unsigned indent) const {
   std::string Indent(indent * INDENT_SIZE, ' ');
   for (const auto &p : substitution) {
-    Out << Indent << p.first << " = kore[" << p.second.second << "]" << std::endl;
+    Out << Indent << p.first << " = kore[" << p.second.second << "]"
+        << std::endl;
   }
 }
 
 void LLVMRuleEvent::print(std::ostream &Out, unsigned indent) const {
   std::string Indent(indent, ' ');
-  Out << Indent << "rule: " << ruleOrdinal << " " << substitution.size() << std::endl;
+  Out << Indent << "rule: " << ruleOrdinal << " " << substitution.size()
+      << std::endl;
   printSubstitution(Out, indent + 1u);
 }
 
 void LLVMSideConditionEvent::print(std::ostream &Out, unsigned indent) const {
   std::string Indent(indent * INDENT_SIZE, ' ');
-  Out << Indent << "side condition: " << ruleOrdinal << " " << substitution.size() << std::endl;
+  Out << Indent << "side condition: " << ruleOrdinal << " "
+      << substitution.size() << std::endl;
   printSubstitution(Out, indent + 1u);
 }
 
 void LLVMFunctionEvent::print(std::ostream &Out, unsigned indent) const {
   std::string Indent(indent * INDENT_SIZE, ' ');
-  Out << Indent << "function: " << name << " (" << relativePosition << ")" << std::endl;
+  Out << Indent << "function: " << name << " (" << relativePosition << ")"
+      << std::endl;
   for (const auto &arg : arguments) {
     arg.print(Out, indent + 1u);
   }
@@ -33,7 +38,8 @@ void LLVMFunctionEvent::print(std::ostream &Out, unsigned indent) const {
 
 void LLVMHookEvent::print(std::ostream &Out, unsigned indent) const {
   std::string Indent(indent * INDENT_SIZE, ' ');
-  Out << Indent << "hook: " << name << " (" << relativePosition << ")" << std::endl;
+  Out << Indent << "hook: " << name << " (" << relativePosition << ")"
+      << std::endl;
   for (const auto &arg : arguments) {
     arg.print(Out, indent + 1u);
   }
@@ -49,11 +55,13 @@ void LLVMEvent::print(std::ostream &Out, unsigned indent) const {
   }
 }
 
-ProofTraceValidator::ProofTraceValidator(bool _verbose, uint32_t _expectedVersion)
+ProofTraceValidator::ProofTraceValidator(
+    bool _verbose, uint32_t _expectedVersion)
     : verbose(_verbose)
     , expectedVersion(_expectedVersion) { }
 
-bool ProofTraceValidator::validate_proof_trace(std::string const &filename, LLVMRewriteTrace &trace) {
+bool ProofTraceValidator::validate_proof_trace(
+    std::string const &filename, LLVMRewriteTrace &trace) {
   auto data = file_contents(filename);
 
   auto ptr = data.begin();

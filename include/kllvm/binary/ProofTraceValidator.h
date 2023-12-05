@@ -40,7 +40,8 @@ public:
 
 class LLVMRewriteEvent : public LLVMStepEvent {
 public:
-  using substitution_t = std::unordered_map<std::string, std::pair<sptr<KOREPattern>, uint64_t>>;
+  using substitution_t
+      = std::unordered_map<std::string, std::pair<sptr<KOREPattern>, uint64_t>>;
 
 protected:
   uint64_t ruleOrdinal;
@@ -50,13 +51,16 @@ protected:
 
 public:
   LLVMRewriteEvent(uint64_t _ruleOrdinal)
-      : ruleOrdinal(_ruleOrdinal), substitution() { }
+      : ruleOrdinal(_ruleOrdinal)
+      , substitution() { }
 
   uint64_t getRuleOrdinal() const { return ruleOrdinal; }
   substitution_t const &getSubstitution() const { return substitution; }
 
-  void addSubstitution(std::string const &name, sptr<KOREPattern> term, uint64_t pattern_len) {
-    substitution.insert(std::make_pair(name, std::make_pair(term, pattern_len)));
+  void addSubstitution(
+      std::string const &name, sptr<KOREPattern> term, uint64_t pattern_len) {
+    substitution.insert(
+        std::make_pair(name, std::make_pair(term, pattern_len)));
   }
 
   virtual ~LLVMRewriteEvent() = default;
@@ -82,7 +86,8 @@ private:
 
 public:
   static sptr<LLVMSideConditionEvent> Create(uint64_t _ruleOrdinal) {
-    return sptr<LLVMSideConditionEvent>(new LLVMSideConditionEvent(_ruleOrdinal));
+    return sptr<LLVMSideConditionEvent>(
+        new LLVMSideConditionEvent(_ruleOrdinal));
   }
 
   virtual void print(std::ostream &Out, unsigned indent = 0u) const override;
@@ -96,21 +101,24 @@ private:
   std::string relativePosition;
   std::vector<LLVMEvent> arguments;
 
-  LLVMFunctionEvent(std::string const &_name, std::string const &_relativePosition)
-      : name(_name), relativePosition(_relativePosition), arguments() { }
+  LLVMFunctionEvent(
+      std::string const &_name, std::string const &_relativePosition)
+      : name(_name)
+      , relativePosition(_relativePosition)
+      , arguments() { }
 
 public:
-  static sptr<LLVMFunctionEvent> Create(std::string const &_name, std::string const &_relativePosition) {
-    return sptr<LLVMFunctionEvent>(new LLVMFunctionEvent(_name, _relativePosition));
+  static sptr<LLVMFunctionEvent>
+  Create(std::string const &_name, std::string const &_relativePosition) {
+    return sptr<LLVMFunctionEvent>(
+        new LLVMFunctionEvent(_name, _relativePosition));
   }
 
   std::string const &getName() const { return name; }
   std::string const &getRelativePosition() const { return relativePosition; }
   std::vector<LLVMEvent> const &getArguemnts() const { return arguments; }
 
-  void addArgument(LLVMEvent const &argument) {
-    arguments.push_back(argument);
-  }
+  void addArgument(LLVMEvent const &argument) { arguments.push_back(argument); }
 
   virtual void print(std::ostream &Out, unsigned indent = 0u) const override;
 };
@@ -124,10 +132,15 @@ private:
   uint64_t patternLength;
 
   LLVMHookEvent(std::string const &_name, std::string const &_relativePosition)
-      : name(_name), relativePosition(_relativePosition), arguments(), korePattern(nullptr), patternLength(0u) { }
+      : name(_name)
+      , relativePosition(_relativePosition)
+      , arguments()
+      , korePattern(nullptr)
+      , patternLength(0u) { }
 
 public:
-  static sptr<LLVMHookEvent> Create(std::string const &_name, std::string const &_relativePosition) {
+  static sptr<LLVMHookEvent>
+  Create(std::string const &_name, std::string const &_relativePosition) {
     return sptr<LLVMHookEvent>(new LLVMHookEvent(_name, _relativePosition));
   }
 
@@ -141,9 +154,7 @@ public:
     patternLength = _patternLength;
   }
 
-  void addArgument(LLVMEvent const &argument) {
-    arguments.push_back(argument);
-  }
+  void addArgument(LLVMEvent const &argument) { arguments.push_back(argument); }
 
   virtual void print(std::ostream &Out, unsigned indent = 0u) const override;
 };
@@ -586,8 +597,7 @@ private:
       return false;
     }
 
-    while (std::distance(ptr, end) >= 8u
-           && peek_word(ptr) != config_sentinel) {
+    while (std::distance(ptr, end) >= 8u && peek_word(ptr) != config_sentinel) {
       LLVMEvent event;
       if (!parse_event(ptr, end, event)) {
         return false;
@@ -619,7 +629,8 @@ private:
 public:
   ProofTraceValidator(bool _verbose, uint32_t _expectedVersion);
 
-  bool validate_proof_trace(std::string const &filename, LLVMRewriteTrace &trace);
+  bool
+  validate_proof_trace(std::string const &filename, LLVMRewriteTrace &trace);
 };
 
 } // namespace kllvm
