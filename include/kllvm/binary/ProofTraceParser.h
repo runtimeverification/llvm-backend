@@ -41,7 +41,7 @@ public:
 class LLVMRewriteEvent : public LLVMStepEvent {
 public:
   using substitution_t
-      = std::unordered_map<std::string, std::pair<sptr<KOREPattern>, uint64_t>>;
+      = std::map<std::string, std::pair<sptr<KOREPattern>, uint64_t>>;
 
 protected:
   uint64_t ruleOrdinal;
