@@ -190,7 +190,7 @@ struct LLVMRewriteTrace {
   std::vector<LLVMEvent> trace;
 };
 
-class ProofTraceValidator {
+class ProofTraceParser {
 
 private:
   bool verbose;
@@ -627,10 +627,9 @@ private:
   }
 
 public:
-  ProofTraceValidator(bool _verbose, uint32_t _expectedVersion);
+  ProofTraceParser(bool _verbose, uint32_t _expectedVersion);
 
-  bool
-  validate_proof_trace(std::string const &filename, LLVMRewriteTrace &trace);
+  bool parse_proof_trace(std::string const &filename, LLVMRewriteTrace &trace);
 };
 
 } // namespace kllvm

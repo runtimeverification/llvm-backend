@@ -1,4 +1,4 @@
-#include <kllvm/binary/ProofTraceValidator.h>
+#include <kllvm/binary/ProofTraceParser.h>
 
 #include <llvm/Support/CommandLine.h>
 
@@ -22,9 +22,9 @@ int main(int argc, char **argv) {
   cl::HideUnrelatedOptions({&KoreProofTraceCat});
   cl::ParseCommandLineOptions(argc, argv);
 
-  ProofTraceValidator Validator(VerboseOutput, 3u);
+  ProofTraceParser Parser(VerboseOutput, 3u);
   LLVMRewriteTrace Trace;
-  if (Validator.validate_proof_trace(InputFilename, Trace)) {
+  if (Parser.parse_proof_trace(InputFilename, Trace)) {
     return 0;
   }
 

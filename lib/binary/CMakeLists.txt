@@ -1,7 +1,7 @@
 add_library(BinaryKore
   serializer.cpp
   deserializer.cpp
-  ProofTraceValidator.cpp
+  ProofTraceParser.cpp
 )
 
 target_link_libraries(BinaryKore

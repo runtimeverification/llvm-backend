@@ -1,4 +1,4 @@
-#include <kllvm/binary/ProofTraceValidator.h>
+#include <kllvm/binary/ProofTraceParser.h>
 
 namespace kllvm {
 
@@ -55,12 +55,11 @@ void LLVMEvent::print(std::ostream &Out, unsigned indent) const {
   }
 }
 
-ProofTraceValidator::ProofTraceValidator(
-    bool _verbose, uint32_t _expectedVersion)
+ProofTraceParser::ProofTraceParser(bool _verbose, uint32_t _expectedVersion)
     : verbose(_verbose)
     , expectedVersion(_expectedVersion) { }
 
-bool ProofTraceValidator::validate_proof_trace(
+bool ProofTraceParser::parse_proof_trace(
     std::string const &filename, LLVMRewriteTrace &trace) {
   auto data = file_contents(filename);
 
