@@ -181,13 +181,16 @@ public:
     korePattern = _korePattern;
     patternLength = _patternLength;
   }
-  void print(std::ostream &Out, unsigned indent = 0u) const;
+  void print(std::ostream &Out, bool isArg, unsigned indent = 0u) const;
 };
 
 struct LLVMRewriteTrace {
+  uint32_t version;
   std::vector<LLVMEvent> preTrace;
-  sptr<KOREPattern> initialConfig;
+  LLVMEvent initialConfig;
   std::vector<LLVMEvent> trace;
+
+  void print(std::ostream &Out, unsigned indent = 0u) const;
 };
 
 class ProofTraceParser {
@@ -195,10 +198,6 @@ class ProofTraceParser {
 private:
   bool verbose;
   uint32_t expectedVersion;
-
-  void print(std::string const &message) const {
-    std::cout << message << std::endl;
-  }
 
   // Caller needs to check that there are at least 8 bytes remaining in the
   // stream before peeking
@@ -298,7 +297,7 @@ private:
   }
 
   template <typename It>
-  bool parse_header(It &ptr, It end) {
+  bool parse_header(It &ptr, It end, uint32_t &version) {
     if (std::distance(ptr, end) < 4u) {
       return false;
     }
@@ -309,17 +308,12 @@ private:
       return false;
     }
 
-    uint32_t version;
     if (!read_uint32(ptr, end, version)) {
       return false;
     }
 
     if (version != expectedVersion) {
       return false;
-    }
-
-    if (verbose) {
-      print(fmt::format("version: {}", version));
     }
 
     return true;
@@ -573,17 +567,11 @@ private:
       if (!config) {
         return false;
       }
-      if (verbose) {
-        print(fmt::format("config: kore[{}]", pattern_len));
-      }
       event.setKOREPattern(config, pattern_len);
     } else {
       auto step_event = parse_step_event(ptr, end);
       if (!step_event) {
         return false;
-      }
-      if (verbose) {
-        step_event->print(std::cout);
       }
       event.setStepEvent(step_event);
     }
@@ -593,9 +581,11 @@ private:
 
   template <typename It>
   bool parse_trace(It &ptr, It end, LLVMRewriteTrace &trace) {
-    if (!parse_header(ptr, end)) {
+    uint32_t version;
+    if (!parse_header(ptr, end, version)) {
       return false;
     }
+    trace.version = version;
 
     while (std::distance(ptr, end) >= 8u && peek_word(ptr) != config_sentinel) {
       LLVMEvent event;
@@ -610,10 +600,9 @@ private:
     if (!config) {
       return false;
     }
-    if (verbose) {
-      print(fmt::format("config: kore[{}]", pattern_len));
-    }
-    trace.initialConfig = config;
+    LLVMEvent config_event;
+    config_event.setKOREPattern(config, pattern_len);
+    trace.initialConfig = config_event;
 
     while (ptr != end) {
       LLVMEvent event;
