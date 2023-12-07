@@ -1,20 +1,74 @@
 package org.kframework.backend.llvm.matching
 
-import org.kframework.parser.kore.SymbolOrAlias
 import org.kframework.backend.llvm.matching.pattern._
+import org.kframework.parser.kore.SymbolOrAlias
 
 sealed trait Heuristic {
   val needsMatrix: Boolean
 
-  def scoreAs[T](p: AsP[T], f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double = ???
-  def scoreList[T](p: ListP[T], f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double = ???
-  def scoreLiteral[T](p: LiteralP[T], f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double = ???
-  def scoreMap[T](p: MapP[T], f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double = ???
-  def scoreOr[T](p: OrP[T], f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double = ???
-  def scoreSet[T](p: SetP[T], f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double = ???
-  def scoreSymbol[T](p: SymbolP[T], f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double = ???
-  def scoreVariable[T](p: VariableP[T], f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double = ???
-  def scoreWildcard[T](p: WildcardP[T], f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double = ???
+  def scoreAs[T](
+      p: AsP[T],
+      f: Fringe,
+      c: Clause,
+      key: Option[Pattern[Option[Occurrence]]],
+      isEmpty: Boolean
+  ): Double = ???
+  def scoreList[T](
+      p: ListP[T],
+      f: Fringe,
+      c: Clause,
+      key: Option[Pattern[Option[Occurrence]]],
+      isEmpty: Boolean
+  ): Double = ???
+  def scoreLiteral[T](
+      p: LiteralP[T],
+      f: Fringe,
+      c: Clause,
+      key: Option[Pattern[Option[Occurrence]]],
+      isEmpty: Boolean
+  ): Double = ???
+  def scoreMap[T](
+      p: MapP[T],
+      f: Fringe,
+      c: Clause,
+      key: Option[Pattern[Option[Occurrence]]],
+      isEmpty: Boolean
+  ): Double = ???
+  def scoreOr[T](
+      p: OrP[T],
+      f: Fringe,
+      c: Clause,
+      key: Option[Pattern[Option[Occurrence]]],
+      isEmpty: Boolean
+  ): Double = ???
+  def scoreSet[T](
+      p: SetP[T],
+      f: Fringe,
+      c: Clause,
+      key: Option[Pattern[Option[Occurrence]]],
+      isEmpty: Boolean
+  ): Double = ???
+  def scoreSymbol[T](
+      p: SymbolP[T],
+      f: Fringe,
+      c: Clause,
+      key: Option[Pattern[Option[Occurrence]]],
+      isEmpty: Boolean
+  ): Double = ???
+  def scoreVariable[T](
+      p: VariableP[T],
+      f: Fringe,
+      c: Clause,
+      key: Option[Pattern[Option[Occurrence]]],
+      isEmpty: Boolean
+  ): Double = ???
+  def scoreWildcard[T](
+      p: WildcardP[T],
+      f: Fringe,
+      c: Clause,
+      key: Option[Pattern[Option[Occurrence]]],
+      isEmpty: Boolean
+  ): Double = ???
 
   def computeScoreForKey(c: AbstractColumn, key: Option[Pattern[Option[Occurrence]]]): Double
 
@@ -24,10 +78,13 @@ sealed trait Heuristic {
 object Heuristic {
   def getBest(cols: Seq[MatrixColumn], allCols: Seq[MatrixColumn]): Seq[MatrixColumn] = {
     var result: List[MatrixColumn] = Nil
-    var best = cols(0).score
+    var best                       = cols(0).score
     for (col <- cols) {
       import Ordering.Implicits._
-      val bestInvalid = allCols.filter(c => !c.column.isValid && col.column.needed(c.column.keyVars)).sortBy(_.score).headOption
+      val bestInvalid = allCols
+        .filter(c => !c.column.isValid && col.column.needed(c.column.keyVars))
+        .sortBy(_.score)
+        .headOption
       val colBest = if (bestInvalid.isDefined && bestInvalid.get.score > col.score) {
         bestInvalid.get.score
       } else {
@@ -44,14 +101,38 @@ object Heuristic {
   }
 }
 
-@NamedHeuristic(name='_')
+@NamedHeuristic(name = '_')
 object DefaultHeuristic extends Heuristic {
   val needsMatrix: Boolean = false
 
-  override def scoreAs[T](p: AsP[T], f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double = p.pat.score(this, f, c, key, isEmpty)
-  override def scoreList[T](p: ListP[T], f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double = 1.0
-  override def scoreLiteral[T](p: LiteralP[T], f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double = 1.0
-  override def scoreMap[T](p: MapP[T], f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double = {
+  override def scoreAs[T](
+      p: AsP[T],
+      f: Fringe,
+      c: Clause,
+      key: Option[Pattern[Option[Occurrence]]],
+      isEmpty: Boolean
+  ): Double = p.pat.score(this, f, c, key, isEmpty)
+  override def scoreList[T](
+      p: ListP[T],
+      f: Fringe,
+      c: Clause,
+      key: Option[Pattern[Option[Occurrence]]],
+      isEmpty: Boolean
+  ): Double = 1.0
+  override def scoreLiteral[T](
+      p: LiteralP[T],
+      f: Fringe,
+      c: Clause,
+      key: Option[Pattern[Option[Occurrence]]],
+      isEmpty: Boolean
+  ): Double = 1.0
+  override def scoreMap[T](
+      p: MapP[T],
+      f: Fringe,
+      c: Clause,
+      key: Option[Pattern[Option[Occurrence]]],
+      isEmpty: Boolean
+  ): Double =
     if (p.keys.isEmpty && p.frame.isEmpty) {
       1.0
     } else if (isEmpty) {
@@ -63,14 +144,24 @@ object DefaultHeuristic extends Heuristic {
     } else {
       1.0
     }
-  }
 
-  override def scoreOr[T](p: OrP[T], f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double = {
+  override def scoreOr[T](
+      p: OrP[T],
+      f: Fringe,
+      c: Clause,
+      key: Option[Pattern[Option[Occurrence]]],
+      isEmpty: Boolean
+  ): Double =
     p.ps.map(_.score(this, f, c, key, isEmpty)).sum
-  }
 
-  override def scoreSet[T](p: SetP[T], f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double = {
-    if (p.elements.isEmpty && p.frame.isEmpty) { 
+  override def scoreSet[T](
+      p: SetP[T],
+      f: Fringe,
+      c: Clause,
+      key: Option[Pattern[Option[Occurrence]]],
+      isEmpty: Boolean
+  ): Double =
+    if (p.elements.isEmpty && p.frame.isEmpty) {
       1.0
     } else if (isEmpty) {
       0.0
@@ -81,28 +172,47 @@ object DefaultHeuristic extends Heuristic {
     } else {
       1.0
     }
-  }
 
-  override def scoreSymbol[T](p: SymbolP[T], f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double = {
+  override def scoreSymbol[T](
+      p: SymbolP[T],
+      f: Fringe,
+      c: Clause,
+      key: Option[Pattern[Option[Occurrence]]],
+      isEmpty: Boolean
+  ): Double = {
     val ncons = f.overloads(p.sym).size + 1.0
     1.0 / ncons
   }
 
-  override def scoreVariable[T](p: VariableP[T], f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double = 0.0
-  override def scoreWildcard[T](p: WildcardP[T], f: Fringe, c: Clause, key: Option[Pattern[Option[Occurrence]]], isEmpty: Boolean): Double = 0.0
+  override def scoreVariable[T](
+      p: VariableP[T],
+      f: Fringe,
+      c: Clause,
+      key: Option[Pattern[Option[Occurrence]]],
+      isEmpty: Boolean
+  ): Double = 0.0
+  override def scoreWildcard[T](
+      p: WildcardP[T],
+      f: Fringe,
+      c: Clause,
+      key: Option[Pattern[Option[Occurrence]]],
+      isEmpty: Boolean
+  ): Double = 0.0
 
   def computeScoreForKey(c: AbstractColumn, key: Option[Pattern[Option[Occurrence]]]): Double = {
     var result = 0.0
     for (i <- c.column.patterns.indices) {
       if (c.column.clauses(i).action.priority != c.column.clauses.head.action.priority)
         return result
-      result += c.column.patterns(i).score(DefaultHeuristic, c.column.fringe, c.column.clauses(i), key, c.column.isEmpty)
+      result += c.column
+        .patterns(i)
+        .score(DefaultHeuristic, c.column.fringe, c.column.clauses(i), key, c.column.isEmpty)
     }
     result
   }
 }
 
-@NamedHeuristic(name='f')
+@NamedHeuristic(name = 'f')
 object FHeuristic extends Heuristic {
   val needsMatrix: Boolean = false
 
@@ -118,55 +228,52 @@ object FHeuristic extends Heuristic {
   }
 }
 
-@NamedHeuristic(name='d')
+@NamedHeuristic(name = 'd')
 object DHeuristic extends Heuristic {
   val needsMatrix: Boolean = false
 
-  def computeScoreForKey(c: AbstractColumn, key: Option[Pattern[Option[Occurrence]]]): Double = {
-    -(c.column.patterns.count(_.isDefault))
-  }
+  def computeScoreForKey(c: AbstractColumn, key: Option[Pattern[Option[Occurrence]]]): Double =
+    -c.column.patterns.count(_.isDefault)
 }
 
-@NamedHeuristic(name='b')
+@NamedHeuristic(name = 'b')
 object BHeuristic extends Heuristic {
   val needsMatrix: Boolean = false
 
   def bf(c: AbstractColumn, key: Option[Pattern[Option[Occurrence]]]): Int = {
     val sigma = c.column.signatureForKey(key)
     if (c.column.category.hasIncompleteSignature(sigma, c.column.fringe)) {
-      sigma.size+1
+      sigma.size + 1
     } else {
       sigma.size
     }
   }
 
-  def computeScoreForKey(c: AbstractColumn, key: Option[Pattern[Option[Occurrence]]]): Double = {
+  def computeScoreForKey(c: AbstractColumn, key: Option[Pattern[Option[Occurrence]]]): Double =
     -bf(c, key)
-  }
 }
 
-@NamedHeuristic(name='a')
+@NamedHeuristic(name = 'a')
 object AHeuristic extends Heuristic {
   val needsMatrix: Boolean = false
 
   def computeScoreForKey(c: AbstractColumn, key: Option[Pattern[Option[Occurrence]]]): Double = {
     var result = 0.0
-    for (con <- c.column.signatureForKey(key)) {
+    for (con <- c.column.signatureForKey(key))
       result -= c.column.fringe.expand(con).size
-    }
     result
   }
 }
 
-@NamedHeuristic(name='l')
+@NamedHeuristic(name = 'l')
 object LHeuristic extends Heuristic {
   val needsMatrix: Boolean = true
 
   def computeScoreForKey(c: AbstractColumn, key: Option[Pattern[Option[Occurrence]]]): Double = {
-    var result = 0.0
+    var result       = 0.0
     val matrixColumn = c.asInstanceOf[MatrixColumn]
-    val matrix = matrixColumn.matrix
-    val colIx = matrixColumn.colIx
+    val matrix       = matrixColumn.matrix
+    val colIx        = matrixColumn.colIx
 
     val sigma = matrix.columns(colIx).signatureForKey(key)
     for (con <- sigma) {
@@ -186,55 +293,62 @@ object LHeuristic extends Heuristic {
   }
 }
 
-@NamedHeuristic(name='r')
+@NamedHeuristic(name = 'r')
 object RHeuristic extends Heuristic {
   val needsMatrix: Boolean = false
 
   def computeScoreForKey(c: AbstractColumn, key: Option[Pattern[Option[Occurrence]]]): Double = {
-    var result = 0.0
+    var result    = 0.0
     val signature = c.column.signatureForKey(key)
-    for (con <- signature) {
-      for (i <- c.column.patterns.indices) {
-        if (c.column.patterns(i).isSpecialized(con, false, c.column.fringe, c.column.clauses(i), c.column.maxPriorityForKey(key))) {
+    for (con <- signature)
+      for (i <- c.column.patterns.indices)
+        if (
+          c.column
+            .patterns(i)
+            .isSpecialized(
+              con,
+              false,
+              c.column.fringe,
+              c.column.clauses(i),
+              c.column.maxPriorityForKey(key)
+            )
+        ) {
           result += 1.0
         }
-      }
-    }
 
     if (c.column.category.hasIncompleteSignature(signature, c.column.fringe)) {
-      for (i <- c.column.patterns.indices) {
+      for (i <- c.column.patterns.indices)
         if (c.column.patterns(i).isDefault) {
           result += 1.0
         }
-      }
     }
 
     -result
   }
 }
 
-@NamedHeuristic(name='n')
+@NamedHeuristic(name = 'n')
 object NHeuristic extends Heuristic {
   val needsMatrix: Boolean = true
 
   def computeScoreForKey(c: AbstractColumn, key: Option[Pattern[Option[Occurrence]]]): Double = {
     val matrixColumn = c.asInstanceOf[MatrixColumn]
-    val matrix = matrixColumn.matrix
-    val colIx = matrixColumn.colIx
+    val matrix       = matrixColumn.matrix
+    val colIx        = matrixColumn.colIx
     matrix.rows.indices.count(matrix.necessary(_, colIx))
   }
 }
 
-@NamedHeuristic(name='p')
+@NamedHeuristic(name = 'p')
 object PHeuristic extends Heuristic {
   val needsMatrix: Boolean = true
 
   def computeScoreForKey(c: AbstractColumn, key: Option[Pattern[Option[Occurrence]]]): Double = {
     val matrixColumn = c.asInstanceOf[MatrixColumn]
-    val matrix = matrixColumn.matrix
-    val colIx = matrixColumn.colIx
-    var result = 0
-    var priority = c.column.clauses.head.action.priority
+    val matrix       = matrixColumn.matrix
+    val colIx        = matrixColumn.colIx
+    var result       = 0
+    var priority     = c.column.clauses.head.action.priority
     for (i <- c.column.patterns.indices) {
       if (c.column.clauses(i).action.priority != priority) {
         if (result != i) {
@@ -250,12 +364,12 @@ object PHeuristic extends Heuristic {
   }
 }
 
-@NamedHeuristic(name='q')
+@NamedHeuristic(name = 'q')
 object QHeuristic extends Heuristic {
   val needsMatrix: Boolean = false
 
   def computeScoreForKey(c: AbstractColumn, key: Option[Pattern[Option[Occurrence]]]): Double = {
-    var result = 0
+    var result   = 0
     var priority = c.column.clauses.head.action.priority
     for (i <- c.column.patterns.indices) {
       if (c.column.clauses(i).action.priority != priority) {
@@ -273,22 +387,19 @@ object QHeuristic extends Heuristic {
 }
 
 /**
- * One branch heuristic. Essentially, o is to b as f is to q. Where b measures
- * the total number of branches resulting from choosing a particular column,
- * and picks the column with the least branches, o only measures whether
- * choosing a particular column has a branching factor of 1, ie, no branching.
- * As a result, you can use the 'o' heuristic before the 'q' heuristic as
- * a way of reducing the cost of generating the decision tree at the expense
- * of greater path length.
+ * One branch heuristic. Essentially, o is to b as f is to q. Where b measures the total number of
+ * branches resulting from choosing a particular column, and picks the column with the least
+ * branches, o only measures whether choosing a particular column has a branching factor of 1, ie,
+ * no branching. As a result, you can use the 'o' heuristic before the 'q' heuristic as a way of
+ * reducing the cost of generating the decision tree at the expense of greater path length.
  */
-@NamedHeuristic(name='o')
+@NamedHeuristic(name = 'o')
 object OHeuristic extends Heuristic {
   val needsMatrix: Boolean = false
 
-  def computeScoreForKey(c: AbstractColumn, key: Option[Pattern[Option[Occurrence]]]): Double = {
-    //-c.column.bf
+  def computeScoreForKey(c: AbstractColumn, key: Option[Pattern[Option[Occurrence]]]): Double =
+    // -c.column.bf
     if (BHeuristic.bf(c, key) == 1) 1 else 0
-  }
 }
 
 sealed trait PseudoHeuristic extends Heuristic {
@@ -297,23 +408,20 @@ sealed trait PseudoHeuristic extends Heuristic {
   def computeScoreForKey(c: AbstractColumn, key: Option[Pattern[Option[Occurrence]]]): Double = 0.0
 }
 
-@NamedHeuristic(name='N')
+@NamedHeuristic(name = 'N')
 object NPseudoHeuristic extends PseudoHeuristic {
-  override def breakTies(cols: Seq[MatrixColumn]): MatrixColumn = {
+  override def breakTies(cols: Seq[MatrixColumn]): MatrixColumn =
     cols(0)
-  }
 }
 
-@NamedHeuristic(name='L')
+@NamedHeuristic(name = 'L')
 object LPseudoHeuristic extends PseudoHeuristic {
-  override def breakTies(cols: Seq[MatrixColumn]): MatrixColumn = {
+  override def breakTies(cols: Seq[MatrixColumn]): MatrixColumn =
     cols.minBy(_.column.fringe.occurrence.size)
-  }
 }
 
-@NamedHeuristic(name='R')
+@NamedHeuristic(name = 'R')
 object RPseudoHeuristic extends PseudoHeuristic {
-  override def breakTies(cols: Seq[MatrixColumn]): MatrixColumn = {
+  override def breakTies(cols: Seq[MatrixColumn]): MatrixColumn =
     cols.reverse.minBy(_.column.fringe.occurrence.size)
-  }
 }
