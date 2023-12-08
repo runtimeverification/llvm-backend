@@ -51,8 +51,9 @@ let
   };
 
   llvm-backend-matching = import ./llvm-backend-matching.nix {
-    inherit (prev) buildMaven;
     src = prev.llvm-backend-matching-src;
+    mvnHash = "sha256-tz8AvPz6aVdFxvufsA29JPvTvp60XmFLuPjK2AbUb40=";
+    inherit (final) maven;
   };
 
   # This code is a bit of a hack to get Nix to accept the binding library being
@@ -113,10 +114,8 @@ let
       runHook postInstall
     '';
   };
-  devShell = prev.callPackage ./devShell.nix { };
 in {
   inherit kllvm llvm-backend llvm-backend-matching llvm-kompile-testing
     integration-tests;
   inherit (prev) clang; # for compatibility
-  inherit devShell; # for CI
 }
