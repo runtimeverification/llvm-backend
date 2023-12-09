@@ -67,14 +67,11 @@ void LLVMRewriteTrace::print(std::ostream &Out, unsigned indent) const {
   }
 }
 
-ProofTraceParser::ProofTraceParser(bool _verbose, uint32_t _expectedVersion)
-    : verbose(_verbose)
-    , expectedVersion(_expectedVersion) { }
+ProofTraceParser::ProofTraceParser(bool _verbose)
+    : verbose(_verbose) { }
 
 std::optional<LLVMRewriteTrace>
-ProofTraceParser::parse_proof_trace(std::string const &filename) {
-  auto data = file_contents(filename);
-
+ProofTraceParser::parse_proof_trace(std::string const &data) {
   auto ptr = data.begin();
   LLVMRewriteTrace trace;
   bool result = parse_trace(ptr, data.end(), trace);
@@ -88,6 +85,12 @@ ProofTraceParser::parse_proof_trace(std::string const &filename) {
   }
 
   return trace;
+}
+
+std::optional<LLVMRewriteTrace>
+ProofTraceParser::parse_proof_trace_from_file(std::string const &filename) {
+  auto data = file_contents(filename);
+  return parse_proof_trace(data);
 }
 
 } // namespace kllvm
