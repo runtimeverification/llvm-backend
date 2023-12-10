@@ -52,7 +52,7 @@ let
 
   llvm-backend-matching = import ./llvm-backend-matching.nix {
     src = prev.llvm-backend-matching-src;
-    mvnHash = "sha256-tz8AvPz6aVdFxvufsA29JPvTvp60XmFLuPjK2AbUb40=";
+    mvnHash = "sha256-QvBSAXl9MuB2MvSOqQj6vJDHFVnhoq+7gbz/x9YeBGw=";
     inherit (final) maven;
   };
 
