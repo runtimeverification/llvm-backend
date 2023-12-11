@@ -16,16 +16,15 @@
     pybind11-src.url =
       "github:pybind/pybind11/0ba639d6177659c5dc2955ac06ad7b5b0d22e05c";
     pybind11-src.flake = false;
-    mavenix.url = "github:nix-community/mavenix";
   };
 
-  outputs = { self, nixpkgs, utils, fmt-src, immer-src, rapidjson-src, pybind11-src, mavenix }:
+  outputs = { self, nixpkgs, utils, fmt-src, immer-src, rapidjson-src, pybind11-src }:
     let
       inherit (nixpkgs) lib;
 
-      # put devShell and any other required packages into local overlay
+      # put required packages into local overlay
       # if you have additional overlays, you may add them here
-      localOverlay = import ./nix/overlay.nix; # this should expose devShell
+      localOverlay = import ./nix/overlay.nix;
       depsOverlay = (final: prev: {
         inherit fmt-src immer-src rapidjson-src pybind11-src;
 
@@ -71,6 +70,10 @@
           ] ./matching);
       });
 
+      maven-overlay = (final: prev: {
+        maven = prev.callPackage ./nix/maven.nix { };
+      });
+
       llvm-backend-overlay =
         nixpkgs.lib.composeManyExtensions [ depsOverlay localOverlay ];
 
@@ -81,7 +84,7 @@
               inherit llvm-version;
               inherit llvm-backend-build-type;
             })
-            mavenix.overlay
+            maven-overlay
             llvm-backend-overlay
           ];
           inherit system;
@@ -105,7 +108,7 @@
             {
               name = "llvm-backend-${toString args.llvm-version}-${args.build-type}";
               value = {
-                inherit (pkgs) llvm-backend llvm-backend-matching llvm-kompile-testing integration-tests devShell;
+                inherit (pkgs) llvm-backend llvm-backend-matching llvm-kompile-testing integration-tests;
               };
             }
         ));
@@ -124,9 +127,9 @@
           llvm-backend-15-FastBuild.integration-tests
           llvm-backend-16-FastBuild.integration-tests
         ];
-        devShells.default = llvm-backend-16-FastBuild.devShell;
       }) // {
         # non-system suffixed items should go here
         overlays.default = llvm-backend-overlay;
+        overlays.maven = maven-overlay;
       };
 }
