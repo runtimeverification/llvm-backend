@@ -6,7 +6,6 @@ Checks:
   -clang-analyzer-deadcode.DeadStores
   -clang-analyzer-security.insecureAPI.rand
   -clang-analyzer-security.insecureAPI.strcpy
-  -clang-analyzer-unix.Malloc
 
 WarningsAsErrors:
   '*'
