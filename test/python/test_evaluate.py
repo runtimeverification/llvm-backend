@@ -14,20 +14,35 @@ class TestEvaluate(unittest.TestCase):
         left = kllvm.parser.Parser.from_string('Lblfoo{}(\\dv{SortInt{}}("23"))').pattern()
         right = kllvm.parser.Parser.from_string('Lblbar{}(\\dv{SortInt{}}("56"))').pattern()
 
-        result = kllvm.runtime.evaluate_function('Lblf{}', [left, right])
+        call = kllvm.ast.CompositePattern('Lblf')
+        call.add_argument(left)
+        call.add_argument(right)
+
+        result = kllvm.runtime.evaluate_function(call)
         self.assertEqual(str(result), 'Lblfoo{}(\dv{SortInt{}}("79"))')
 
     def test_int_function(self):
-        result = kllvm.runtime.evaluate_function('Lblbaz{}', [])
+        call = kllvm.ast.CompositePattern('Lblbaz')
+
+        result = kllvm.runtime.evaluate_function(call)
         self.assertEqual(str(result), '\dv{SortInt{}}("78")')
 
-    def test_bool_function(self):
+    def test_true_function(self):
         arg_t = kllvm.parser.Parser.from_string('\\dv{SortInt{}}("34")').pattern()
-        result_t = kllvm.runtime.evaluate_function('Lblqux{}', [arg_t])
+
+        call = kllvm.ast.CompositePattern('Lblqux')
+        call.add_argument(arg_t)
+
+        result_t = kllvm.runtime.evaluate_function(call)
         self.assertEqual(str(result_t), '\dv{SortBool{}}("true")')
 
+    def test_false_function(self):
         arg_f = kllvm.parser.Parser.from_string('\\dv{SortInt{}}("98")').pattern()
-        result_f = kllvm.runtime.evaluate_function('Lblqux{}', [arg_f])
+
+        call = kllvm.ast.CompositePattern('Lblqux')
+        call.add_argument(arg_f)
+
+        result_f = kllvm.runtime.evaluate_function(call)
         self.assertEqual(str(result_f), '\dv{SortBool{}}("false")')
 
 
