@@ -147,7 +147,7 @@ static void emitDataTableForSymbol(
   llvm::BranchInst::Create(MergeBlock, stuck, icmp, EntryBlock);
   auto tableType = llvm::ArrayType::get(ty, syms.size());
   auto table = module->getOrInsertGlobal("table_" + name, tableType);
-  llvm::GlobalVariable *globalVar = llvm::dyn_cast<llvm::GlobalVariable>(table);
+  llvm::GlobalVariable *globalVar = llvm::cast<llvm::GlobalVariable>(table);
   initDebugGlobal(
       "table_" + name,
       getArrayDebugType(
@@ -442,8 +442,7 @@ emitGetTagForFreshSort(KOREDefinition *definition, llvm::Module *module) {
     auto Str = llvm::ConstantDataArray::getString(Ctx, name, true);
     auto global
         = module->getOrInsertGlobal("sort_name_" + name, Str->getType());
-    llvm::GlobalVariable *globalVar
-        = llvm::dyn_cast<llvm::GlobalVariable>(global);
+    llvm::GlobalVariable *globalVar = llvm::cast<llvm::GlobalVariable>(global);
     if (!globalVar->hasInitializer()) {
       globalVar->setInitializer(Str);
     }
@@ -786,7 +785,7 @@ static void emitTraversal(
         llvm::ArrayType::get(llvm::Type::getInt8PtrTy(Ctx), 0)));
   }
 
-  auto func = llvm::dyn_cast<llvm::Function>(getOrInsertFunction(
+  auto func = llvm::cast<llvm::Function>(getOrInsertFunction(
       module, name,
       llvm::FunctionType::get(llvm::Type::getVoidTy(Ctx), argTypes, false)));
   llvm::Constant *zero = llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0);
@@ -1185,7 +1184,7 @@ static void emitLayouts(KOREDefinition *definition, llvm::Module *module) {
   llvm::LLVMContext &Ctx = module->getContext();
   std::vector<llvm::Type *> argTypes;
   argTypes.push_back(llvm::Type::getInt16Ty(Ctx));
-  auto func = llvm::dyn_cast<llvm::Function>(getOrInsertFunction(
+  auto func = llvm::cast<llvm::Function>(getOrInsertFunction(
       module, "getLayoutData",
       llvm::FunctionType::get(
           llvm::PointerType::getUnqual(llvm::StructType::getTypeByName(
@@ -1232,15 +1231,14 @@ static void emitInjTags(KOREDefinition *def, llvm::Module *mod) {
   llvm::LLVMContext &Ctx = mod->getContext();
   auto global
       = mod->getOrInsertGlobal("first_inj_tag", llvm::Type::getInt32Ty(Ctx));
-  llvm::GlobalVariable *globalVar
-      = llvm::dyn_cast<llvm::GlobalVariable>(global);
+  llvm::GlobalVariable *globalVar = llvm::cast<llvm::GlobalVariable>(global);
   globalVar->setConstant(true);
   if (!globalVar->hasInitializer()) {
     globalVar->setInitializer(llvm::ConstantInt::get(
         llvm::Type::getInt32Ty(Ctx), def->getInjSymbol()->getFirstTag()));
   }
   global = mod->getOrInsertGlobal("last_inj_tag", llvm::Type::getInt32Ty(Ctx));
-  globalVar = llvm::dyn_cast<llvm::GlobalVariable>(global);
+  globalVar = llvm::cast<llvm::GlobalVariable>(global);
   globalVar->setConstant(true);
   if (!globalVar->hasInitializer()) {
     globalVar->setInitializer(llvm::ConstantInt::get(

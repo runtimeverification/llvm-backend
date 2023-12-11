@@ -136,8 +136,7 @@ void addKompiledDirSymbol(
     bool debug) {
   auto Str = llvm::ConstantDataArray::getString(Context, dir, true);
   auto global = mod->getOrInsertGlobal(KOMPILED_DIR, Str->getType());
-  llvm::GlobalVariable *globalVar
-      = llvm::dyn_cast<llvm::GlobalVariable>(global);
+  llvm::GlobalVariable *globalVar = llvm::cast<llvm::GlobalVariable>(global);
   if (!globalVar->hasInitializer()) {
     globalVar->setInitializer(Str);
   }
@@ -1060,7 +1059,7 @@ bool makeFunction(
     if (debugArgs[i]) {
       initDebugParam(
           applyRule, i, paramNames[i], params[paramNames[i]],
-          llvm::dyn_cast<llvm::DIType>(debugArgs[i])->getName().str());
+          llvm::cast<llvm::DIType>(debugArgs[i])->getName().str());
     }
   }
   CreateTerm creator = CreateTerm(subst, definition, block, Module, false);
@@ -1168,7 +1167,7 @@ std::string makeApplyRuleFunction(
     if (debugArgs[i]) {
       initDebugParam(
           applyRule, i, paramNames[i], params[paramNames[i]],
-          llvm::dyn_cast<llvm::DIType>(debugArgs[i])->getName().str());
+          llvm::cast<llvm::DIType>(debugArgs[i])->getName().str());
     }
   }
   CreateTerm creator = CreateTerm(subst, definition, block, Module, false);

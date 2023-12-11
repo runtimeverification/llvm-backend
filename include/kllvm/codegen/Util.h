@@ -23,7 +23,6 @@ llvm::Function *getOrInsertFunction(llvm::Module *module, Ts... Args) {
   auto func = llvm::dyn_cast<llvm::Function>(callee);
 
   if (!func) {
-    func->print(llvm::errs());
     abort();
   }
 
