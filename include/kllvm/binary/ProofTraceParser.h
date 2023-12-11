@@ -13,13 +13,16 @@ namespace kllvm {
 
 namespace detail {
 
-constexpr uint64_t word(uint8_t b) {
-  uint64_t w = uint64_t(b);
-  for (auto i = 0; i < 7; ++i) {
-    w = (w << 8u) | w;
+constexpr uint64_t word(uint8_t byte) {
+  auto ret = uint64_t{0};
+  for (auto i = 0u; i < sizeof(ret); ++i) {
+    ret <<= 8;
+    ret |= byte;
   }
-  return w;
+  return ret;
 }
+
+static_assert(word(0xAA) == 0xAAAAAAAAAAAAAAAA);
 
 } // namespace detail
 
