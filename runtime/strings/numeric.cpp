@@ -28,7 +28,8 @@ std::string floatToString(const floating *f, const char *suffix) {
     }
     newstr->data[idx] = '0';
     newstr->data[idx + 1] = '.';
-    strcpy(newstr->data + idx + 2, str + idx);
+    strncpy(newstr->data + idx + 2, str + idx, len - idx + 1);
+    newstr->data[len + 2] = '\0';
     return std::string(newstr->data) + "e" + std::to_string(printed_exp)
            + suffix;
   }
