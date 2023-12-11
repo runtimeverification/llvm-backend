@@ -9,10 +9,12 @@
 #endif
 
 static mpfr_exp_t emin(mpfr_exp_t e, mpfr_prec_t p) {
+  assert(e >= 1);
   return (-(1 << (e - 1))) + 2;
 }
 
 static mpfr_exp_t emax(mpfr_exp_t e) {
+  assert(e >= 1);
   return (1 << (e - 1)) - 1;
 }
 
