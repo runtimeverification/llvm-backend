@@ -1,7 +1,6 @@
 Checks:
   clang-analyzer-*
   -clang-analyzer-cplusplus.PlacementNew
-  -clang-analyzer-security.insecureAPI.rand
 
 WarningsAsErrors:
   '*'
