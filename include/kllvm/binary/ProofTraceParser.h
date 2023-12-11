@@ -1,5 +1,5 @@
-#ifndef PROOF_TRACE_VALIDATOR_H
-#define PROOF_TRACE_VALIDATOR_H
+#ifndef PROOF_TRACE_PARSER_H
+#define PROOF_TRACE_PARSER_H
 
 #include <kllvm/ast/AST.h>
 #include <kllvm/binary/deserializer.h>
