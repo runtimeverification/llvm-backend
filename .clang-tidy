@@ -1,0 +1,12 @@
+Checks:
+  clang-analyzer-*
+  -clang-analyzer-core.CallAndMessage
+  -clang-analyzer-core.UndefinedBinaryOperatorResult
+  -clang-analyzer-cplusplus.PlacementNew
+  -clang-analyzer-deadcode.DeadStores
+  -clang-analyzer-security.insecureAPI.rand
+  -clang-analyzer-security.insecureAPI.strcpy
+  -clang-analyzer-unix.Malloc
+
+WarningsAsErrors:
+  '*'
