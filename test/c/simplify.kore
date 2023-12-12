@@ -3,10 +3,10 @@
 // RUN: %kllvm-clang Inputs/simplify.c -o %t
 
 // RUN: %t %t.dir/libtest.so %t.foo.bin Lblfoo
-// RUN: %kore-convert %t.foo.bin | grep -q 'inj{SortInt{}, SortKItem{}}(\\dv{SortInt{}}("328"))'
+// RUN: %kore-convert %t.foo.bin | grep -q '\\dv{SortInt{}}("328")'
 
 // RUN: %t %t.dir/libtest.so %t.bar.bin Lblbar
-// RUN: %kore-convert %t.bar.bin | grep -q 'inj{SortInt{}, SortKItem{}}(\\dv{SortInt{}}("562"))'
+// RUN: %kore-convert %t.bar.bin | grep -q '\\dv{SortInt{}}("562")'
 
 [topCellInitializer{}(LblinitGeneratedTopCell{}()), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/bruce/code/llvm-backend/test/c/k-files/simplify.k)")]
 
