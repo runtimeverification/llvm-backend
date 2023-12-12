@@ -17,6 +17,19 @@ std::string return_sort_for_label(std::string const &label) {
   return getReturnSortForTag(tag);
 }
 
+std::shared_ptr<KOREPattern> make_rawTerm(
+    std::shared_ptr<KOREPattern> term, std::shared_ptr<KORESort> from,
+    std::shared_ptr<KORESort> to) {
+  auto inj = make_injection(term, from, to);
+
+  auto rawTerm_sym = KORESymbol::Create("rawTerm");
+
+  auto rawTerm = KORECompositePattern::Create(std::move(rawTerm_sym));
+  rawTerm->addArgument(inj);
+
+  return rawTerm;
+}
+
 std::shared_ptr<KOREPattern> make_injection(
     std::shared_ptr<KOREPattern> term, std::shared_ptr<KORESort> from,
     std::shared_ptr<KORESort> to) {
@@ -59,8 +72,8 @@ block *simplify_to_term(
   if (is_sort_kitem(sort) || is_sort_k(sort)) {
     return construct_term(pattern);
   } else {
-    auto inj = make_injection(pattern, sort, kitem_sort);
-    return construct_term(inj);
+    auto rawTerm = make_rawTerm(pattern, sort, kitem_sort);
+    return construct_term(rawTerm);
   }
 }
 
