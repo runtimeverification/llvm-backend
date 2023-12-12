@@ -26,3 +26,26 @@ jobs:
       name: Check that shell scripts follow best practices
       with:
         scandir: './bin'
+
+  scala-check:
+    name: Scala formatting check
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Check out code'
+        uses: actions/checkout@v3
+
+      - name: 'Set up Java 17'
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: 17
+
+      - name: 'Install Maven'
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes maven
+
+      - name: 'Check code is formatted correctly'
+        run: |
+          cd matching
+          mvn spotless:check --batch-mode -U
