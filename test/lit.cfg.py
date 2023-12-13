@@ -144,7 +144,12 @@ config.substitutions.extend([
 
     ('%check-proof-out', one_line('''
         %run-proof-out
-        %kore-proof-trace %t.out.bin
+        %kore-proof-trace --verbose %t.out.bin | diff - %test-diff-out
+        result="$?"
+        if [ "$result" -ne 0 ]; then
+            echo "kore-proof-trace error while parsing proof hint trace"
+            exit 1
+        fi
     ''')),
 
     ('%run-binary-out', 'rm -f %t.out.bin && %t.interpreter %test-input -1 %t.out.bin --binary-output'),
@@ -170,6 +175,7 @@ config.substitutions.extend([
     ('%kore-convert', 'kore-convert'),
 
     ('%kore-proof-trace', 'kore-proof-trace'),
+    ('%kore-proof-trace-test', 'kore-proof-trace-test'),
 ])
 
 config.recursiveExpansionLimit = 10
