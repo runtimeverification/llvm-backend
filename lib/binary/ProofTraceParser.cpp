@@ -2,11 +2,11 @@
 
 namespace kllvm {
 
-#define INDENT_SIZE 2u
+constexpr auto indent_size = 2u;
 
 void LLVMRewriteEvent::printSubstitution(
     std::ostream &Out, unsigned indent) const {
-  std::string Indent(indent * INDENT_SIZE, ' ');
+  std::string Indent(indent * indent_size, ' ');
   for (const auto &p : substitution) {
     Out << Indent << p.first << " = kore[" << p.second.second << "]"
         << std::endl;
@@ -14,21 +14,21 @@ void LLVMRewriteEvent::printSubstitution(
 }
 
 void LLVMRuleEvent::print(std::ostream &Out, unsigned indent) const {
-  std::string Indent(indent * INDENT_SIZE, ' ');
+  std::string Indent(indent * indent_size, ' ');
   Out << Indent << "rule: " << ruleOrdinal << " " << substitution.size()
       << std::endl;
   printSubstitution(Out, indent + 1u);
 }
 
 void LLVMSideConditionEvent::print(std::ostream &Out, unsigned indent) const {
-  std::string Indent(indent * INDENT_SIZE, ' ');
+  std::string Indent(indent * indent_size, ' ');
   Out << Indent << "side condition: " << ruleOrdinal << " "
       << substitution.size() << std::endl;
   printSubstitution(Out, indent + 1u);
 }
 
 void LLVMFunctionEvent::print(std::ostream &Out, unsigned indent) const {
-  std::string Indent(indent * INDENT_SIZE, ' ');
+  std::string Indent(indent * indent_size, ' ');
   Out << Indent << "function: " << name << " (" << relativePosition << ")"
       << std::endl;
   for (const auto &arg : arguments) {
@@ -37,7 +37,7 @@ void LLVMFunctionEvent::print(std::ostream &Out, unsigned indent) const {
 }
 
 void LLVMHookEvent::print(std::ostream &Out, unsigned indent) const {
-  std::string Indent(indent * INDENT_SIZE, ' ');
+  std::string Indent(indent * indent_size, ' ');
   Out << Indent << "hook: " << name << " (" << relativePosition << ")"
       << std::endl;
   for (const auto &arg : arguments) {
@@ -50,7 +50,7 @@ void LLVMEvent::print(std::ostream &Out, bool isArg, unsigned indent) const {
   if (isStepEvent) {
     stepEvent->print(Out, indent);
   } else {
-    std::string Indent(indent * INDENT_SIZE, ' ');
+    std::string Indent(indent * indent_size, ' ');
     if (isArg) {
       Out << Indent << "arg: kore[";
     } else {
@@ -61,7 +61,7 @@ void LLVMEvent::print(std::ostream &Out, bool isArg, unsigned indent) const {
 }
 
 void LLVMRewriteTrace::print(std::ostream &Out, unsigned indent) const {
-  std::string Indent(indent * INDENT_SIZE, ' ');
+  std::string Indent(indent * indent_size, ' ');
   Out << Indent << "version: " << version << std::endl;
   for (const auto &pre_trace_event : preTrace) {
     pre_trace_event.print(Out, false, indent);
