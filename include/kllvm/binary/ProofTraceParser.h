@@ -621,7 +621,8 @@ private:
 public:
   ProofTraceParser(bool _verbose, uint32_t _expectedVersion);
 
-  bool parse_proof_trace(std::string const &filename, LLVMRewriteTrace &trace);
+  std::optional<LLVMRewriteTrace>
+  parse_proof_trace(std::string const &filename);
 };
 
 } // namespace kllvm

@@ -76,22 +76,23 @@ ProofTraceParser::ProofTraceParser(bool _verbose, uint32_t _expectedVersion)
     : verbose(_verbose)
     , expectedVersion(_expectedVersion) { }
 
-bool ProofTraceParser::parse_proof_trace(
-    std::string const &filename, LLVMRewriteTrace &trace) {
+std::optional<LLVMRewriteTrace>
+ProofTraceParser::parse_proof_trace(std::string const &filename) {
   auto data = file_contents(filename);
 
   auto ptr = data.begin();
+  LLVMRewriteTrace trace;
   bool result = parse_trace(ptr, data.end(), trace);
 
-  if (ptr != data.end()) {
-    return false;
+  if (!result || ptr != data.end()) {
+    return std::nullopt;
   }
 
-  if (result && verbose) {
+  if (verbose) {
     trace.print(std::cout);
   }
 
-  return result;
+  return trace;
 }
 
 } // namespace kllvm

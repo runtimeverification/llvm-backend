@@ -23,8 +23,8 @@ int main(int argc, char **argv) {
   cl::ParseCommandLineOptions(argc, argv);
 
   ProofTraceParser Parser(VerboseOutput, 3u);
-  LLVMRewriteTrace Trace;
-  if (Parser.parse_proof_trace(InputFilename, Trace)) {
+  auto Trace = Parser.parse_proof_trace(InputFilename);
+  if (Trace.has_value()) {
     return 0;
   }
 
