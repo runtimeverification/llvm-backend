@@ -35,8 +35,8 @@ int main(int argc, char **argv) {
   }
 
   // check that the first event is the rewrite a() => b()
-  const auto *Rule1 = dynamic_cast<LLVMRuleEvent const *>(
-      Trace.trace[0].getStepEvent().get());
+  const auto Rule1
+      = std::dynamic_pointer_cast<LLVMRuleEvent>(Trace.trace[0].getStepEvent());
   if (!Rule1) {
     return 1;
   }
@@ -50,8 +50,8 @@ int main(int argc, char **argv) {
   }
 
   // check that the third event is the rewrite b() => c()
-  const auto *Rule2 = dynamic_cast<LLVMRuleEvent const *>(
-      Trace.trace[2].getStepEvent().get());
+  const auto Rule2
+      = std::dynamic_pointer_cast<LLVMRuleEvent>(Trace.trace[2].getStepEvent());
   if (!Rule2) {
     return 1;
   }
