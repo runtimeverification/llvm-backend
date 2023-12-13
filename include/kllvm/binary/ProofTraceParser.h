@@ -4,8 +4,6 @@
 #include <kllvm/ast/AST.h>
 #include <kllvm/binary/deserializer.h>
 
-#include <fmt/format.h>
-
 #include <iostream>
 #include <string>
 
