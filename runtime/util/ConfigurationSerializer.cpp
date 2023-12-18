@@ -254,7 +254,7 @@ void serializeMInt(
     str = intToString(z);
   }
 
-  auto buf_len = snprintf(NULL, 0, fmt, str.c_str(), bits);
+  auto buf_len = snprintf(nullptr, 0, fmt, str.c_str(), bits);
   auto buffer = std::make_unique<char[]>(buf_len + 1);
 
   snprintf(buffer.get(), buf_len + 1, fmt, str.c_str(), bits);

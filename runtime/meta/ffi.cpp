@@ -71,13 +71,13 @@ size_t hook_LIST_size_long(list *l);
 block *hook_LIST_get_long(list *l, ssize_t idx);
 
 static void *so_lib_handle() {
-  static void *handle = NULL;
+  static void *handle = nullptr;
 
-  if (handle == NULL) {
-    handle = dlopen(NULL, RTLD_LAZY);
+  if (handle == nullptr) {
+    handle = dlopen(nullptr, RTLD_LAZY);
 
-    if (handle == NULL) {
-      KLLVM_HOOK_INVALID_ARGUMENT("dlopen returned NULL");
+    if (handle == nullptr) {
+      KLLVM_HOOK_INVALID_ARGUMENT("dlopen returned nullptr");
     }
   }
 
@@ -165,7 +165,7 @@ static ffi_type *getTypeFromBlock(block *elem) {
           = getTypeFromBlock((block *)*(structField->children));
     }
 
-    structType->elements[numFields] = NULL;
+    structType->elements[numFields] = nullptr;
 
     structTypes.push_back(structType);
 
@@ -281,7 +281,7 @@ string *ffiCall(
 
 SortBytes
 hook_FFI_call(SortInt addr, SortList args, SortList types, SortFFIType ret) {
-  return ffiCall(false, addr, args, types, NULL, ret);
+  return ffiCall(false, addr, args, types, nullptr, ret);
 }
 
 SortBytes hook_FFI_call_variadic(

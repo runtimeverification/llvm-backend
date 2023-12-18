@@ -17,7 +17,7 @@ std::string floatToString(const floating *f, const char *suffix) {
     }
   } else {
     mpfr_exp_t printed_exp;
-    char *str = mpfr_get_str(NULL, &printed_exp, 10, 0, f->f, MPFR_RNDN);
+    char *str = mpfr_get_str(nullptr, &printed_exp, 10, 0, f->f, MPFR_RNDN);
     size_t len = strlen(str);
     string *newstr = (string *)koreAllocToken(sizeof(string) + len + 2);
     init_with_len(newstr, len + 2);
@@ -51,11 +51,11 @@ std::string floatToString(const floating *f) {
 }
 
 std::string intToStringInBase(mpz_t i, uint64_t base) {
-  char *tmp = mpz_get_str(NULL, base, i);
+  char *tmp = mpz_get_str(nullptr, base, i);
   auto ret = std::string(tmp);
 
   void (*mpz_free)(void *, size_t);
-  mp_get_memory_functions(NULL, NULL, &mpz_free);
+  mp_get_memory_functions(nullptr, nullptr, &mpz_free);
   mpz_free(tmp, strlen(tmp) + 1);
 
   return ret;

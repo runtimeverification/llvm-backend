@@ -486,7 +486,7 @@ SortIOInt hook_IO_accept(SortInt sock) {
   }
 
   int fd = mpz_get_si(sock);
-  int clientsock = accept(fd, NULL, NULL);
+  int clientsock = accept(fd, nullptr, nullptr);
 
   if (clientsock == -1) {
     return getInjErrorBlock();
@@ -679,10 +679,10 @@ SortKItem hook_IO_system(SortString cmd) {
 
     if (len(cmd) > 0) {
       char *command = getTerminatedString(cmd);
-      ret = execl("/bin/sh", "/bin/sh", "-c", command, NULL);
+      ret = execl("/bin/sh", "/bin/sh", "-c", command, nullptr);
       ret == -1 ? exit(127) : exit(0);
     } else {
-      ret = system(NULL);
+      ret = system(nullptr);
       exit(ret);
     }
   }
@@ -699,7 +699,7 @@ SortKItem hook_IO_system(SortString cmd) {
 
   while (done < 2) {
     ready_fds = read_fds;
-    if (select(FD_SETSIZE, &ready_fds, NULL, NULL, NULL) == -1) {
+    if (select(FD_SETSIZE, &ready_fds, nullptr, nullptr, nullptr) == -1) {
       return getKSeqErrorBlock();
     }
     if (FD_ISSET(out[0], &ready_fds)) {
@@ -762,7 +762,7 @@ block *hook_IO_opendir(string *path) {
 
 SortInt hook_IO_time() {
   mpz_t result;
-  mpz_init_set_si(result, time(NULL));
+  mpz_init_set_si(result, time(nullptr));
   return move_int(result);
 }
 }

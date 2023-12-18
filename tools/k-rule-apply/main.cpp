@@ -71,7 +71,7 @@ int main(int argc, char **argv) {
   // Get util function from the shared lib, cast it to its right type, and call
   // with its appropriate argument if any.
   void *match_function_ptr = dlsym(handle, match_function_name->c_str());
-  if (match_function_ptr == NULL) {
+  if (match_function_ptr == nullptr) {
     std::cerr << "Error: " << dlerror() << "\n";
     dlclose(handle);
     return EXIT_FAILURE;
@@ -81,14 +81,14 @@ int main(int argc, char **argv) {
   resetMatchReason(handle);
   initStaticObjects(handle);
   auto b = constructInitialConfiguration(InitialConfiguration.get(), handle);
-  if (b == NULL) {
+  if (b == nullptr) {
     std::cerr << "Error: " << dlerror() << "\n";
     return EXIT_FAILURE;
   }
 
   match_function((block *)b);
   auto log = getMatchLog(handle);
-  if (log == NULL) {
+  if (log == nullptr) {
     std::cerr << "Error: " << dlerror() << "\n";
     return EXIT_FAILURE;
   }

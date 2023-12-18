@@ -392,7 +392,7 @@ SortInt hook_INT_rand(SortInt upperBound) {
   mpz_init(result);
   if (!kllvm_randStateInitialized) {
     gmp_randinit_default(kllvm_randState);
-    mpz_set_si(result, time(NULL));
+    mpz_set_si(result, time(nullptr));
     gmp_randseed(kllvm_randState, result);
     kllvm_randStateInitialized = true;
   }
