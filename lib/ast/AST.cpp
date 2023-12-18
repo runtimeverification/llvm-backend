@@ -4,8 +4,9 @@
 #include "kllvm/binary/serializer.h"
 #include "kllvm/parser/KOREParser.h"
 
+#include <fmt/format.h>
+
 #include <algorithm>
-#include <array>
 #include <cassert>
 #include <cctype>
 #include <cstdio>
@@ -661,11 +662,7 @@ std::string enquote(std::string str) {
       if ((unsigned char)c >= 32 && (unsigned char)c < 127) {
         result.push_back(c);
       } else {
-        auto buf = std::array<char, 3>{};
-        buf[2] = 0;
-        snprintf(buf.data(), 3, "%02x", (unsigned char)c);
-        result.append("\\x");
-        result.append(buf.data());
+        fmt::format_to(std::back_inserter(result), "\\x{:02x}", c);
       }
       break;
     }
@@ -1886,19 +1883,16 @@ void KORECompositePattern::print(std::ostream &Out, unsigned indent) const {
 }
 
 static std::string escapeString(const std::string &str) {
-  std::string result;
+  auto result = std::string{};
+
   for (char c : str) {
     if (c == '"' || c == '\\' || !isprint(c)) {
-      result.push_back('\\');
-      result.push_back('x');
-      auto code = std::array<char, 3>{};
-      snprintf(code.data(), 3, "%02x", (unsigned char)c);
-      result.push_back(code[0]);
-      result.push_back(code[1]);
+      fmt::format_to(std::back_inserter(result), "\\x{:02x}", c);
     } else {
       result.push_back(c);
     }
   }
+
   return result;
 }
 
