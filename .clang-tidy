@@ -3,9 +3,8 @@ Checks:
   -clang-analyzer-cplusplus.PlacementNew
   misc-*
   -misc-no-recursion
-  -misc-non-private-member-variables-in-classes
   -misc-unused-parameters
-  -misc-throw-by-value-catch-by-reference
+  -misc-non-private-member-variables-in-classes
 
 WarningsAsErrors:
   '*'
