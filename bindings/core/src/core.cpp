@@ -73,7 +73,7 @@ std::shared_ptr<KOREPattern> simplify(
 }
 
 std::shared_ptr<KOREPattern>
-evaluate_function(std::shared_ptr<KORECompositePattern> term) {
+evaluate_function(std::shared_ptr<KORECompositePattern> const &term) {
   auto term_args = std::vector<void *>{};
   for (auto const &arg : term->getArguments()) {
     term_args.push_back(static_cast<void *>(construct_term(arg)));
