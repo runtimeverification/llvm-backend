@@ -719,6 +719,7 @@ llvm::Value *CreateTerm::createFunctionCall(
   default: sret = false; break;
   }
   llvm::Value *AllocSret;
+  types.reserve(args.size());
   for (auto arg : args) {
     types.push_back(arg->getType());
   }

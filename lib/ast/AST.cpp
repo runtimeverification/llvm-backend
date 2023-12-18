@@ -647,7 +647,7 @@ static void color(
 
 #define RESET_COLOR "\x1b[0m"
 
-std::string enquote(std::string str) {
+std::string enquote(const std::string &str) {
   std::string result;
   result.push_back('"');
   for (char c : str) {
@@ -1721,7 +1721,7 @@ void KOREDefinition::preprocess() {
   }
   auto symbols = std::map<std::string, std::vector<KORESymbol *>>{};
   unsigned nextOrdinal = 0;
-  for (auto decl : symbolDeclarations) {
+  for (const auto &decl : symbolDeclarations) {
     if (decl.second->getAttributes().count("freshGenerator")) {
       auto sort = decl.second->getSymbol()->getSort();
       if (sort->isConcrete()) {
@@ -1754,7 +1754,7 @@ void KOREDefinition::preprocess() {
       }
     }
   }
-  for (auto entry : symbols) {
+  for (const auto &entry : symbols) {
     for (auto symbol : entry.second) {
       auto decl = symbolDeclarations.at(symbol->getName());
       symbol->instantiateSymbol(decl);
@@ -1766,7 +1766,7 @@ void KOREDefinition::preprocess() {
   auto layouts = std::unordered_map<std::string, uint16_t>{};
   auto variables
       = std::unordered_map<std::string, std::pair<uint32_t, uint32_t>>{};
-  for (auto entry : symbols) {
+  for (const auto &entry : symbols) {
     uint32_t firstTag = nextSymbol;
     for (auto symbol : entry.second) {
       if (symbol->isConcrete()) {
@@ -1789,7 +1789,7 @@ void KOREDefinition::preprocess() {
           entry.first, std::pair<uint32_t, uint32_t>{firstTag, lastTag});
     }
   }
-  for (auto entry : symbols) {
+  for (const auto &entry : symbols) {
     auto range = variables.at(entry.first);
     for (auto symbol : entry.second) {
       for (auto &sort : symbol->getArguments()) {
