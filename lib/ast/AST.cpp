@@ -1427,6 +1427,7 @@ std::vector<KOREPattern *> KOREAxiomDeclaration::getLeftHandSide() const {
 
   if (auto top = pattern->matchesShape("\\implies", 2)) {
     auto &impliesLhs = top->getArguments()[0];
+    auto &impliesRhs = top->getArguments()[1];
 
     if (auto firstChild = impliesLhs->matchesShape("\\and", 2)) {
       auto lhsAnd = firstChild;
@@ -1450,22 +1451,21 @@ std::vector<KOREPattern *> KOREAxiomDeclaration::getLeftHandSide() const {
 
     if (impliesLhs->matchesShape("\\top", 0)
         || impliesLhs->matchesShape("\\equals", 2)) {
-      if (auto secondChild = dynamic_cast<KORECompositePattern *>(
-              top->getArguments()[1].get())) {
-        if (secondChild->getConstructor()->getName() == "\\equals"
-            && secondChild->getArguments().size() == 2) {
-          if (auto lhs = dynamic_cast<KORECompositePattern *>(
-                  secondChild->getArguments()[0].get())) {
-            std::vector<KOREPattern *> result;
-            for (auto &sptr : lhs->getArguments()) {
-              result.push_back(sptr.get());
-            }
-            return result;
+      if (auto secondChild = impliesRhs->matchesShape("\\equals", 2)) {
+        if (auto lhs = std::dynamic_pointer_cast<KORECompositePattern>(
+                secondChild->getArguments()[0])) {
+
+          auto result = std::vector<KOREPattern *>{};
+          for (auto &sptr : lhs->getArguments()) {
+            result.push_back(sptr.get());
           }
+
+          return result;
         }
       }
     }
   }
+
   assert(false && "could not compute left hand side of axiom");
   abort();
 }
