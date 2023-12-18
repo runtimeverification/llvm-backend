@@ -27,4 +27,4 @@ mapfile -t inputs < <(find "${source_dirs[@]}" -name '*.cpp' -or -name '*.h')
   "${inputs[@]}"                      \
   -clang-tidy-binary "${clang_tidy}"  \
   -j "$(nproc)"                       \
-  -p "${BUILD_DIR}"
+  -p "${BUILD_DIR}" "$@"
