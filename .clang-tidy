@@ -1,6 +1,10 @@
 Checks:
   clang-analyzer-*
   -clang-analyzer-cplusplus.PlacementNew
+  misc-*
+  -misc-no-recursion
+  -misc-unused-parameters
+  -misc-non-private-member-variables-in-classes
   modernize-*
   -modernize-use-trailing-return-type
   performance-*
@@ -8,3 +12,7 @@ Checks:
 
 WarningsAsErrors:
   '*'
+
+CheckOptions:
+  - key: 'misc-const-correctness.AnalyzeValues'
+    value: false
