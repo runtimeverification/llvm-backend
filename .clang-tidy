@@ -4,7 +4,6 @@ Checks:
   modernize-*
   -modernize-avoid-c-arrays
   -modernize-concat-nested-namespaces
-  -modernize-deprecated-headers
   -modernize-use-trailing-return-type
 
 WarningsAsErrors:

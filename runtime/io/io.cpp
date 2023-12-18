@@ -1,5 +1,6 @@
 #include <cerrno>
 #include <cstring>
+#include <ctime>
 #include <fcntl.h>
 #include <gmp.h>
 #include <iostream>
@@ -10,7 +11,6 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-#include <time.h>
 #include <unistd.h>
 
 #include "runtime/alloc.h"
