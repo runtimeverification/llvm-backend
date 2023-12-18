@@ -1,5 +1,6 @@
 #include <cerrno>
 #include <cstring>
+#include <ctime>
 #include <fcntl.h>
 #include <gmp.h>
 #include <iostream>
@@ -10,7 +11,6 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-#include <time.h>
 #include <unistd.h>
 
 #include <fmt/format.h>
@@ -110,7 +110,7 @@ static block *block_errno() {
   case ELOOP: errStr = GETTAG(ELOOP); break;
   case EOVERFLOW: errStr = GETTAG(EOVERFLOW); break;
   default:
-    block *retBlock
+    auto *retBlock
         = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(mpz_ptr)));
     retBlock->h = getBlockHeaderForSymbol(
         (uint64_t)getTagForSymbolName("Lbl'Hash'unknownIOError{}"));
@@ -159,9 +159,9 @@ static blockheader header_string() {
 
 static inline block *getKSeqErrorBlock() {
   block *err = block_errno();
-  block *retBlock
+  auto *retBlock
       = static_cast<block *>(koreAlloc(sizeof(block) + 2 * sizeof(block *)));
-  block *inj = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(block *)));
+  auto *inj = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(block *)));
   retBlock->h = kseqHeader;
   inj->h = header_err();
   memcpy(inj->children, &err, sizeof(block *));
@@ -172,7 +172,7 @@ static inline block *getKSeqErrorBlock() {
 
 static inline block *getInjErrorBlock() {
   block *p = block_errno();
-  block *retBlock
+  auto *retBlock
       = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(block *)));
   retBlock->h = header_err();
   memcpy(retBlock->children, &p, sizeof(block *));
@@ -257,7 +257,7 @@ SortIOInt hook_IO_open(SortString filename, SortString control) {
     return getInjErrorBlock();
   }
 
-  block *retBlock
+  auto *retBlock
       = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(mpz_ptr)));
   retBlock->h = header_int();
   mpz_init_set_si(result, fd);
@@ -278,7 +278,7 @@ SortIOInt hook_IO_tell(SortInt i) {
     return getInjErrorBlock();
   }
 
-  block *retBlock
+  auto *retBlock
       = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(mpz_ptr)));
   retBlock->h = header_int();
   mpz_t result;
@@ -299,7 +299,7 @@ SortIOInt hook_IO_getc(SortInt i) {
 
   if (0 == ret) {
     block *p = leaf_block(getTagForSymbolName(GETTAG(EOF)));
-    block *retBlock
+    auto *retBlock
         = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(block *)));
     retBlock->h = header_err();
     memcpy(retBlock->children, &p, sizeof(block *));
@@ -308,7 +308,7 @@ SortIOInt hook_IO_getc(SortInt i) {
     return getInjErrorBlock();
   }
 
-  block *retBlock
+  auto *retBlock
       = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(mpz_ptr)));
   retBlock->h = header_int();
   mpz_t result;
@@ -336,7 +336,7 @@ SortIOString hook_IO_read(SortInt i, SortInt len) {
 
   result = static_cast<string *>(koreResizeLastAlloc(
       result, sizeof(string) + bytes, sizeof(string) + length));
-  block *retBlock
+  auto *retBlock
       = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(string *)));
   retBlock->h = header_string();
   init_with_len(result, bytes);
@@ -488,13 +488,13 @@ SortIOInt hook_IO_accept(SortInt sock) {
   }
 
   int fd = mpz_get_si(sock);
-  int clientsock = accept(fd, NULL, NULL);
+  int clientsock = accept(fd, nullptr, nullptr);
 
   if (clientsock == -1) {
     return getInjErrorBlock();
   }
 
-  block *retBlock
+  auto *retBlock
       = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(mpz_ptr)));
   retBlock->h = header_int();
 
@@ -622,7 +622,7 @@ list hook_KREFLECTION_argv() {
     buf = hook_BUFFER_concat_raw(
         buf, llvm_backend_argv[i], strlen(llvm_backend_argv[i]));
     SortString str = hook_BUFFER_toString(buf);
-    block *b = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(str)));
+    auto *b = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(str)));
     b->h = getBlockHeaderForSymbol(
         (uint64_t)getTagForSymbolName("inj{SortString{}, SortKItem{}}"));
     memcpy(b->children, &str, sizeof(str));
@@ -640,14 +640,14 @@ SortIOFile hook_IO_mkstemp(SortString filename) {
     return getInjErrorBlock();
   }
 
-  block *retBlock = static_cast<block *>(
+  auto *retBlock = static_cast<block *>(
       koreAlloc(sizeof(block) + sizeof(string *) + sizeof(mpz_ptr)));
 
   mpz_t result;
   mpz_init_set_si(result, ret);
   mpz_ptr p = move_int(result);
   size_t length = len(filename);
-  string *retString = static_cast<string *>(
+  auto *retString = static_cast<string *>(
       koreAllocToken(sizeof(string) + sizeof(char) * length));
   memcpy(retString->data, temp, sizeof(char) * length);
   init_with_len(retString, length);
@@ -680,10 +680,10 @@ SortKItem hook_IO_system(SortString cmd) {
 
     if (len(cmd) > 0) {
       char *command = getTerminatedString(cmd);
-      ret = execl("/bin/sh", "/bin/sh", "-c", command, NULL);
+      ret = execl("/bin/sh", "/bin/sh", "-c", command, nullptr);
       ret == -1 ? exit(127) : exit(0);
     } else {
-      ret = system(NULL);
+      ret = system(nullptr);
       exit(ret);
     }
   }
@@ -700,7 +700,7 @@ SortKItem hook_IO_system(SortString cmd) {
 
   while (done < 2) {
     ready_fds = read_fds;
-    if (select(FD_SETSIZE, &ready_fds, NULL, NULL, NULL) == -1) {
+    if (select(FD_SETSIZE, &ready_fds, nullptr, nullptr, nullptr) == -1) {
       return getKSeqErrorBlock();
     }
     if (FD_ISSET(out[0], &ready_fds)) {
@@ -730,7 +730,7 @@ SortKItem hook_IO_system(SortString cmd) {
   waitpid(pid, &ret, 0);
   ret = WEXITSTATUS(ret);
 
-  block *retBlock = static_cast<block *>(koreAlloc(
+  auto *retBlock = static_cast<block *>(koreAlloc(
       sizeof(block) + sizeof(mpz_ptr) + sizeof(string *) + sizeof(string *)));
 
   mpz_t result;
@@ -763,7 +763,7 @@ block *hook_IO_opendir(string *path) {
 
 SortInt hook_IO_time() {
   mpz_t result;
-  mpz_init_set_si(result, time(NULL));
+  mpz_init_set_si(result, time(nullptr));
   return move_int(result);
 }
 }

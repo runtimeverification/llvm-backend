@@ -5,6 +5,8 @@ Checks:
   -misc-no-recursion
   -misc-unused-parameters
   -misc-non-private-member-variables-in-classes
+  modernize-*
+  -modernize-use-trailing-return-type
   performance-*
   -performance-no-int-to-ptr
 

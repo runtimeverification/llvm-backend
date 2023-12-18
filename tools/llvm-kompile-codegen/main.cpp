@@ -63,7 +63,7 @@ cl::alias OutputFileAlias(
 namespace {
 
 fs::path dt_dir() {
-  return fs::path(Directory.getValue());
+  return Directory.getValue();
 }
 
 fs::path get_indexed_filename(

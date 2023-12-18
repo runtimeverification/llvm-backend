@@ -23,7 +23,7 @@ template <class New>
 void makeDirty(bool &dirty, uint64_t offset, New newArg, block *&newBlock) {
   if (!dirty) {
     dirty = true;
-    block *alloc = (block *)koreAlloc(size_hdr(newBlock->h.hdr));
+    auto *alloc = (block *)koreAlloc(size_hdr(newBlock->h.hdr));
     alloc->h = newBlock->h;
     reset_gc(alloc);
     memcpy(alloc->children, newBlock->children, offset - 8);
@@ -261,7 +261,7 @@ block *substituteInternal(block *currBlock) {
       block *to_replace_stack = to_replace;
       block *replacement_stack = replacement;
       block *replacementInj_stack = replacementInj;
-      block *result = (block *)evaluateFunctionSymbol(tag, &arguments[0]);
+      auto *result = (block *)evaluateFunctionSymbol(tag, &arguments[0]);
       to_replace = to_replace_stack;
       replacement = replacement_stack;
       replacementInj = replacementInj_stack;
@@ -373,7 +373,7 @@ block *incrementDebruijn(block *currBlock) {
 }
 
 block *alphaRename(block *term) {
-  string *var = (string *)term;
+  auto *var = (string *)term;
   size_t var_len = len(var);
   auto newToken = (string *)koreAllocToken(sizeof(string) + var_len);
   memcpy(newToken->data, var->data, var_len);

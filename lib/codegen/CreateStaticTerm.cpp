@@ -38,7 +38,7 @@ llvm::Constant *CreateStaticTerm::notInjectionCase(
   constructor->print(koreString);
   llvm::Constant *Block
       = Module->getOrInsertGlobal(koreString.str().c_str(), BlockType);
-  llvm::GlobalVariable *globalVar = llvm::dyn_cast<llvm::GlobalVariable>(Block);
+  auto *globalVar = llvm::dyn_cast<llvm::GlobalVariable>(Block);
 
   if (!globalVar->hasInitializer()) {
     std::vector<llvm::Constant *> blockVals;
@@ -146,8 +146,7 @@ CreateStaticTerm::createToken(ValueType sort, std::string contents) {
     llvm::Constant *global = Module->getOrInsertGlobal(
         "int_" + contents, llvm::StructType::getTypeByName(
                                Module->getContext(), INT_WRAPPER_STRUCT));
-    llvm::GlobalVariable *globalVar
-        = llvm::dyn_cast<llvm::GlobalVariable>(global);
+    auto *globalVar = llvm::dyn_cast<llvm::GlobalVariable>(global);
     if (!globalVar->hasInitializer()) {
       mpz_t value;
       const char *dataStart
@@ -159,8 +158,7 @@ CreateStaticTerm::createToken(ValueType sort, std::string contents) {
           = llvm::ArrayType::get(llvm::Type::getInt64Ty(Ctx), size);
       llvm::Constant *limbs
           = Module->getOrInsertGlobal("int_" + contents + "_limbs", limbsType);
-      llvm::GlobalVariable *limbsVar
-          = llvm::dyn_cast<llvm::GlobalVariable>(limbs);
+      auto *limbsVar = llvm::dyn_cast<llvm::GlobalVariable>(limbs);
       std::vector<llvm::Constant *> allocdLimbs;
       for (size_t i = 0; i < size; i++) {
         allocdLimbs.push_back(llvm::ConstantInt::get(
@@ -202,8 +200,7 @@ CreateStaticTerm::createToken(ValueType sort, std::string contents) {
     llvm::Constant *global = Module->getOrInsertGlobal(
         "float_" + contents, llvm::StructType::getTypeByName(
                                  Module->getContext(), FLOAT_WRAPPER_STRUCT));
-    llvm::GlobalVariable *globalVar
-        = llvm::dyn_cast<llvm::GlobalVariable>(global);
+    auto *globalVar = llvm::dyn_cast<llvm::GlobalVariable>(global);
     if (!globalVar->hasInitializer()) {
       size_t prec, exp;
       const char last = contents.back();
@@ -243,8 +240,7 @@ CreateStaticTerm::createToken(ValueType sort, std::string contents) {
           = llvm::ArrayType::get(llvm::Type::getInt64Ty(Ctx), size);
       llvm::Constant *limbs = Module->getOrInsertGlobal(
           "float_" + contents + "_limbs", limbsType);
-      llvm::GlobalVariable *limbsVar
-          = llvm::dyn_cast<llvm::GlobalVariable>(limbs);
+      auto *limbsVar = llvm::dyn_cast<llvm::GlobalVariable>(limbs);
       std::vector<llvm::Constant *> allocdLimbs;
       for (size_t i = 0; i < size; i++) {
         allocdLimbs.push_back(llvm::ConstantInt::get(
@@ -316,8 +312,7 @@ CreateStaticTerm::createToken(ValueType sort, std::string contents) {
          llvm::ArrayType::get(llvm::Type::getInt8Ty(Ctx), contents.size())});
     llvm::Constant *global
         = Module->getOrInsertGlobal("token_" + escape(contents), StringType);
-    llvm::GlobalVariable *globalVar
-        = llvm::dyn_cast<llvm::GlobalVariable>(global);
+    auto *globalVar = llvm::dyn_cast<llvm::GlobalVariable>(global);
     if (!globalVar->hasInitializer()) {
       llvm::StructType *BlockHeaderType = llvm::StructType::getTypeByName(
           Module->getContext(), BLOCKHEADER_STRUCT);

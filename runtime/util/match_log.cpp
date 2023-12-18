@@ -30,12 +30,19 @@ size_t getMatchLogSize(void) {
 
 void addMatchSuccess(void) {
   matchLog.push_back(
-      {MatchLog::SUCCESS, NULL, NULL, NULL, {}, NULL, NULL, NULL});
+      {MatchLog::SUCCESS,
+       nullptr,
+       nullptr,
+       nullptr,
+       {},
+       nullptr,
+       nullptr,
+       nullptr});
 }
 
 void addMatchFailReason(void *subject, char *pattern, char *sort) {
   matchLog.push_back(
-      {MatchLog::FAIL, NULL, NULL, NULL, {}, pattern, subject, sort});
+      {MatchLog::FAIL, nullptr, nullptr, nullptr, {}, pattern, subject, sort});
 }
 
 void addMatchFunction(char *debugName, char *function, void *result, ...) {
@@ -51,8 +58,8 @@ void addMatchFunction(char *debugName, char *function, void *result, ...) {
   }
 
   matchLog.push_back(
-      {MatchLog::FUNCTION, function, debugName, result, args, NULL, NULL,
-       NULL});
+      {MatchLog::FUNCTION, function, debugName, result, args, nullptr, nullptr,
+       nullptr});
 
   va_end(ap);
 }

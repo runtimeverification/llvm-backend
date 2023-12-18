@@ -37,8 +37,7 @@ struct print_state {
   print_state()
       : boundVariables{}
       , varNames{}
-      , usedVarNames{}
-      , varCounter(0) { }
+      , usedVarNames{} { }
 
   // We never want to copy the state; it should only ever get passed around by
   // reference.
@@ -47,38 +46,38 @@ struct print_state {
   std::vector<block *> boundVariables;
   std::unordered_map<string *, std::string, StringHash, StringEq> varNames;
   std::set<std::string> usedVarNames;
-  uint64_t varCounter;
+  uint64_t varCounter{0};
 };
 
 void printInt(writer *file, mpz_t i, const char *sort, void *state) {
   auto str = intToString(i);
-  sfprintf(file, "\\dv{%s}(\"%s\")", sort, str.c_str());
+  sfprintf(file, R"(\dv{%s}("%s"))", sort, str.c_str());
 }
 
 void printFloat(writer *file, floating *f, const char *sort, void *state) {
   std::string str = floatToString(f);
-  sfprintf(file, "\\dv{%s}(\"%s\")", sort, str.c_str());
+  sfprintf(file, R"(\dv{%s}("%s"))", sort, str.c_str());
 }
 
 void printBool(writer *file, bool b, const char *sort, void *state) {
   const char *str = b ? "true" : "false";
-  sfprintf(file, "\\dv{%s}(\"%s\")", sort, str);
+  sfprintf(file, R"(\dv{%s}("%s"))", sort, str);
 }
 
 void printStringBuffer(
     writer *file, stringbuffer *b, const char *sort, void *state) {
   std::string str(b->contents->data, b->strlen);
-  sfprintf(file, "\\dv{%s}(\"%s\")", sort, str.c_str());
+  sfprintf(file, R"(\dv{%s}("%s"))", sort, str.c_str());
 }
 
 void printMInt(
     writer *file, size_t *i, size_t bits, const char *sort, void *state) {
   if (i == nullptr) {
-    sfprintf(file, "\\dv{%s}(\"0p%zd\")", sort, bits);
+    sfprintf(file, R"(\dv{%s}("0p%zd"))", sort, bits);
   } else {
     mpz_ptr z = hook_MINT_import(i, bits, false);
     auto str = intToString(z);
-    sfprintf(file, "\\dv{%s}(\"%sp%zd\")", sort, str.c_str(), bits);
+    sfprintf(file, R"(\dv{%s}("%sp%zd"))", sort, str.c_str(), bits);
   }
 }
 
@@ -119,7 +118,7 @@ void sfprintf(writer *file, const char *fmt, ...) {
       }
     }
     va_end(args_copy);
-    string *str = (string *)finalBuf;
+    auto *str = (string *)finalBuf;
     init_with_len(str, res);
     hook_BUFFER_concat(file->buffer, str);
   }
@@ -151,7 +150,7 @@ void printConfigurationInternal(
   }
   uint16_t layout = get_layout(subject);
   if (!layout) {
-    string *str = (string *)subject;
+    auto *str = (string *)subject;
     size_t subject_len = len(subject);
     sfprintf(file, "\\dv{%s}(\"", sort);
     for (size_t i = 0; i < subject_len; ++i) {

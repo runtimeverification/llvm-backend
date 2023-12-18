@@ -1,8 +1,10 @@
+#include <gmp.h>
+
+#include <array>
 #include <cassert>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <gmp.h>
 
 int main(int argc, char **argv) {
   const char *usage = "usage: %s [dump|analyze|generation|count] <file>"
@@ -12,8 +14,8 @@ int main(int argc, char **argv) {
     return 1;
   }
   FILE *f = fopen(argv[2], "rb");
-  size_t frame[2049];
-  mpz_t total[2048];
+  auto frame = std::array<size_t, 2049>{};
+  auto total = std::array<mpz_t, 2048>{};
   size_t step = 0;
   // `llvm-kompile-gc-stats dump` dumps the raw log to stdout. useful for
   // debugging, less useful as information
@@ -34,8 +36,8 @@ int main(int argc, char **argv) {
   // over time.
   bool alloc = strcmp(argv[1], "alloc") == 0;
   if (analyze) {
-    for (int i = 0; i < 2048; i++) {
-      mpz_init(total[i]);
+    for (auto &i : total) {
+      mpz_init(i);
     }
   }
   int lowerBound;
@@ -47,7 +49,7 @@ int main(int argc, char **argv) {
     mpz_init(size);
   }
   while (true) {
-    int ret = fread(frame, sizeof(size_t), 2049, f);
+    int ret = fread(frame.data(), sizeof(size_t), 2049, f);
     // the frame contains 2049 integers:
     //
     // frame[0] contains the total number of bytes allocated since the last

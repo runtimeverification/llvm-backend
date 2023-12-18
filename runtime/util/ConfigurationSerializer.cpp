@@ -31,8 +31,7 @@ struct serialization_state {
       : instance()
       , boundVariables{}
       , varNames{}
-      , usedVarNames{}
-      , varCounter(0) { }
+      , usedVarNames{} { }
 
   // We never want to copy the state; it should only ever get passed around by
   // reference.
@@ -42,7 +41,7 @@ struct serialization_state {
   std::vector<block *> boundVariables;
   std::unordered_map<string *, std::string, StringHash, StringEq> varNames;
   std::set<std::string> usedVarNames;
-  uint64_t varCounter;
+  uint64_t varCounter{0};
 };
 
 static std::string drop_back(std::string const &s, int n) {
@@ -254,11 +253,11 @@ void serializeMInt(
     str = intToString(z);
   }
 
-  auto buf_len = snprintf(NULL, 0, fmt, str.c_str(), bits);
-  auto buffer = std::make_unique<char[]>(buf_len + 1);
+  auto buf_len = snprintf(nullptr, 0, fmt, str.c_str(), bits);
+  auto buffer = std::vector<char>(buf_len + 1);
 
-  snprintf(buffer.get(), buf_len + 1, fmt, str.c_str(), bits);
-  emitToken(instance, sort, buffer.get());
+  snprintf(buffer.data(), buf_len + 1, fmt, str.c_str(), bits);
+  emitToken(instance, sort, buffer.data());
 }
 
 void serializeComma(writer *file, void *state) { }
@@ -299,7 +298,7 @@ void serializeConfigurationInternal(
 
   uint16_t layout = get_layout(subject);
   if (!layout) {
-    string *str = (string *)subject;
+    auto *str = (string *)subject;
     size_t subject_len = len(subject);
 
     if (isVar && !state.varNames.count(str)) {

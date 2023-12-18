@@ -52,8 +52,7 @@ static llvm::Constant *getSymbolNamePtr(
   auto Str = llvm::ConstantDataArray::getString(Ctx, name, true);
   auto global = module->getOrInsertGlobal(
       fmt::format("sym_name_{}", name), Str->getType());
-  llvm::GlobalVariable *globalVar
-      = llvm::dyn_cast<llvm::GlobalVariable>(global);
+  auto *globalVar = llvm::dyn_cast<llvm::GlobalVariable>(global);
   if (!globalVar->hasInitializer()) {
     globalVar->setInitializer(Str);
   }
@@ -92,8 +91,7 @@ emitGetTagForSymbolName(KOREDefinition *definition, llvm::Module *module) {
       MergeBlock);
   auto &syms = definition->getAllSymbols();
   llvm::Function *Strcmp = getStrcmp(module);
-  for (auto iter = syms.begin(); iter != syms.end(); ++iter) {
-    auto &entry = *iter;
+  for (const auto &entry : syms) {
     uint32_t tag = entry.second->getTag();
     auto symbol = entry.second;
     CurrentBlock->insertInto(func);
@@ -147,15 +145,14 @@ static void emitDataTableForSymbol(
   llvm::BranchInst::Create(MergeBlock, stuck, icmp, EntryBlock);
   auto tableType = llvm::ArrayType::get(ty, syms.size());
   auto table = module->getOrInsertGlobal("table_" + name, tableType);
-  llvm::GlobalVariable *globalVar = llvm::cast<llvm::GlobalVariable>(table);
+  auto *globalVar = llvm::cast<llvm::GlobalVariable>(table);
   initDebugGlobal(
       "table_" + name,
       getArrayDebugType(
           dity, syms.size(), llvm::DataLayout(module).getABITypeAlign(ty)),
       globalVar);
   std::vector<llvm::Constant *> values;
-  for (auto iter = syms.begin(); iter != syms.end(); ++iter) {
-    auto entry = *iter;
+  for (auto entry : syms) {
     auto symbol = entry.second;
     auto val = getter(definition, module, symbol);
     values.push_back(val);
@@ -203,8 +200,7 @@ static void emitDataForSymbol(
       func->arg_begin(), stuck, syms.size(), EntryBlock);
   auto Phi = llvm::PHINode::Create(
       ty, definition->getSymbols().size(), "phi", MergeBlock);
-  for (auto iter = syms.begin(); iter != syms.end(); ++iter) {
-    auto entry = *iter;
+  for (auto entry : syms) {
     uint32_t tag = entry.first;
     auto symbol = entry.second;
     auto decl = definition->getSymbolDeclarations().at(symbol->getName());
@@ -430,8 +426,7 @@ emitGetTagForFreshSort(KOREDefinition *definition, llvm::Module *module) {
   llvm::Constant *zero32
       = llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), 0);
   bool hasCase = false;
-  for (auto iter = sorts.begin(); iter != sorts.end(); ++iter) {
-    auto &entry = *iter;
+  for (const auto &entry : sorts) {
     std::string name = entry.first;
     if (!definition->getFreshFunctions().count(name)) {
       continue;
@@ -442,7 +437,7 @@ emitGetTagForFreshSort(KOREDefinition *definition, llvm::Module *module) {
     auto Str = llvm::ConstantDataArray::getString(Ctx, name, true);
     auto global
         = module->getOrInsertGlobal("sort_name_" + name, Str->getType());
-    llvm::GlobalVariable *globalVar = llvm::cast<llvm::GlobalVariable>(global);
+    auto *globalVar = llvm::cast<llvm::GlobalVariable>(global);
     if (!globalVar->hasInitializer()) {
       globalVar->setInitializer(Str);
     }
@@ -495,8 +490,7 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
   llvm::Constant *zero = llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0);
   llvm::Constant *zero32
       = llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), 0);
-  for (auto iter = sorts.begin(); iter != sorts.end(); ++iter) {
-    auto &entry = *iter;
+  for (const auto &entry : sorts) {
     std::string name = entry.first;
     if (!entry.second->getObjectSortVariables().empty()) {
       // TODO: MINT in initial configuration
@@ -512,8 +506,7 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
     auto Str = llvm::ConstantDataArray::getString(Ctx, name, true);
     auto global
         = module->getOrInsertGlobal("sort_name_" + name, Str->getType());
-    llvm::GlobalVariable *globalVar
-        = llvm::dyn_cast<llvm::GlobalVariable>(global);
+    auto *globalVar = llvm::dyn_cast<llvm::GlobalVariable>(global);
     if (!globalVar->hasInitializer()) {
       globalVar->setInitializer(Str);
     }
@@ -540,8 +533,7 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
     case SortCategory::Bool: {
       auto Str = llvm::ConstantDataArray::getString(Ctx, "true", false);
       auto global = module->getOrInsertGlobal("bool_true", Str->getType());
-      llvm::GlobalVariable *globalVar
-          = llvm::dyn_cast<llvm::GlobalVariable>(global);
+      auto *globalVar = llvm::dyn_cast<llvm::GlobalVariable>(global);
       if (!globalVar->hasInitializer()) {
         globalVar->setInitializer(Str);
       }
@@ -820,8 +812,7 @@ static void emitTraversal(
   auto &syms = definition->getSymbols();
   auto Switch = llvm::SwitchInst::Create(Tag, stuck, syms.size(), EntryBlock);
 
-  for (auto iter = syms.begin(); iter != syms.end(); ++iter) {
-    auto entry = *iter;
+  for (auto entry : syms) {
     uint32_t tag = entry.first;
     auto symbol = entry.second;
     if (symbol->getArguments().empty()) {
@@ -956,8 +947,7 @@ static void getVisitor(
     auto Str = llvm::ConstantDataArray::getString(Ctx, sort_name, true);
     auto global = module->getOrInsertGlobal(
         fmt::format("sort_name_{}", sort_name), Str->getType());
-    llvm::GlobalVariable *globalVar
-        = llvm::dyn_cast<llvm::GlobalVariable>(global);
+    auto *globalVar = llvm::dyn_cast<llvm::GlobalVariable>(global);
     if (!globalVar->hasInitializer()) {
       globalVar->setInitializer(Str);
     }
@@ -1152,7 +1142,7 @@ static llvm::Constant *getLayoutData(
       elements);
   auto global = module->getOrInsertGlobal(
       "layout_item_" + std::to_string(layout), Arr->getType());
-  llvm::GlobalVariable *globalVar = llvm::cast<llvm::GlobalVariable>(global);
+  auto *globalVar = llvm::cast<llvm::GlobalVariable>(global);
   if (!globalVar->hasInitializer()) {
     globalVar->setInitializer(Arr);
   }
@@ -1164,7 +1154,7 @@ static llvm::Constant *getLayoutData(
   auto global2 = module->getOrInsertGlobal(
       name,
       llvm::StructType::getTypeByName(module->getContext(), LAYOUT_STRUCT));
-  llvm::GlobalVariable *globalVar2 = llvm::cast<llvm::GlobalVariable>(global2);
+  auto *globalVar2 = llvm::cast<llvm::GlobalVariable>(global2);
   initDebugGlobal(name, getForwardDecl(LAYOUT_STRUCT), globalVar2);
   if (!globalVar2->hasInitializer()) {
     globalVar2->setInitializer(llvm::ConstantStruct::get(
@@ -1203,8 +1193,7 @@ static void emitLayouts(KOREDefinition *definition, llvm::Module *module) {
       llvm::PointerType::getUnqual(
           llvm::StructType::getTypeByName(module->getContext(), LAYOUT_STRUCT)),
       layouts.size(), "phi", MergeBlock);
-  for (auto iter = layouts.begin(); iter != layouts.end(); ++iter) {
-    auto entry = *iter;
+  for (auto entry : layouts) {
     uint16_t layout = entry.first;
     auto symbol = entry.second;
     auto CaseBlock = llvm::BasicBlock::Create(
@@ -1229,7 +1218,7 @@ static void emitInjTags(KOREDefinition *def, llvm::Module *mod) {
   llvm::LLVMContext &Ctx = mod->getContext();
   auto global
       = mod->getOrInsertGlobal("first_inj_tag", llvm::Type::getInt32Ty(Ctx));
-  llvm::GlobalVariable *globalVar = llvm::cast<llvm::GlobalVariable>(global);
+  auto *globalVar = llvm::cast<llvm::GlobalVariable>(global);
   globalVar->setConstant(true);
   if (!globalVar->hasInitializer()) {
     globalVar->setInitializer(llvm::ConstantInt::get(
@@ -1253,8 +1242,7 @@ static void emitSortTable(KOREDefinition *def, llvm::Module *mod) {
         llvm::Type::getInt8PtrTy(ctx), symbol->getArguments().size());
     auto subtable = module->getOrInsertGlobal(
         fmt::format("sorts_{}", ast_to_string(*symbol)), subtableType);
-    llvm::GlobalVariable *subtableVar
-        = llvm::dyn_cast<llvm::GlobalVariable>(subtable);
+    auto *subtableVar = llvm::dyn_cast<llvm::GlobalVariable>(subtable);
     initDebugGlobal(
         "sorts_" + symbol->getName(),
         getArrayDebugType(
@@ -1267,8 +1255,8 @@ static void emitSortTable(KOREDefinition *def, llvm::Module *mod) {
     auto indices = std::vector<llvm::Constant *>{zero, zero};
 
     std::vector<llvm::Constant *> subvalues;
-    for (size_t i = 0; i < symbol->getArguments().size(); ++i) {
-      auto arg_str = ast_to_string(*symbol->getArguments()[i]);
+    for (const auto &i : symbol->getArguments()) {
+      auto arg_str = ast_to_string(*i);
       auto strType = llvm::ArrayType::get(
           llvm::Type::getInt8Ty(ctx), arg_str.size() + 1);
       auto sortName = module->getOrInsertGlobal(

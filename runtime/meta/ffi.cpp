@@ -71,13 +71,13 @@ size_t hook_LIST_size_long(list *l);
 block *hook_LIST_get_long(list *l, ssize_t idx);
 
 static void *so_lib_handle() {
-  static void *handle = NULL;
+  static void *handle = nullptr;
 
-  if (handle == NULL) {
-    handle = dlopen(NULL, RTLD_LAZY);
+  if (handle == nullptr) {
+    handle = dlopen(nullptr, RTLD_LAZY);
 
-    if (handle == NULL) {
-      KLLVM_HOOK_INVALID_ARGUMENT("dlopen returned NULL");
+    if (handle == nullptr) {
+      KLLVM_HOOK_INVALID_ARGUMENT("dlopen returned nullptr");
     }
   }
 
@@ -86,7 +86,7 @@ static void *so_lib_handle() {
 
 static ffi_type *getTypeFromBlock(block *elem) {
   if (is_leaf_block(elem)) {
-    uint64_t symbol = (uint64_t)elem;
+    auto symbol = (uint64_t)elem;
 
     if (symbol == tag_type_void()) {
       return &ffi_type_void;
@@ -146,7 +146,7 @@ static ffi_type *getTypeFromBlock(block *elem) {
     size_t numFields = hook_LIST_size_long(elements);
     block *structField;
 
-    ffi_type *structType = (ffi_type *)malloc(sizeof(ffi_type));
+    auto *structType = (ffi_type *)malloc(sizeof(ffi_type));
     structType->size = 0;
     structType->alignment = 0;
     structType->type = FFI_TYPE_STRUCT;
@@ -165,7 +165,7 @@ static ffi_type *getTypeFromBlock(block *elem) {
           = getTypeFromBlock((block *)*(structField->children));
     }
 
-    structType->elements[numFields] = NULL;
+    structType->elements[numFields] = nullptr;
 
     structTypes.push_back(structType);
 
@@ -180,13 +180,13 @@ string *ffiCall(
     block *ret) {
   ffi_cif cif;
   ffi_type **argtypes, *rtype;
-  void (*address)(void);
+  void (*address)();
 
   if (!mpz_fits_ulong_p(addr)) {
     KLLVM_HOOK_INVALID_ARGUMENT("Addr is too large: {}", intToString(addr));
   }
 
-  address = (void (*)(void))mpz_get_ui(addr);
+  address = (void (*)())mpz_get_ui(addr);
 
   size_t nargs = hook_LIST_size_long(args);
   size_t nfixtypes = hook_LIST_size_long(fixtypes);
@@ -261,7 +261,7 @@ string *ffiCall(
   default: KLLVM_HOOK_INVALID_ARGUMENT("Bad FFI argument type"); break;
   }
 
-  string *rvalue
+  auto *rvalue
       = static_cast<string *>(koreAllocToken(sizeof(string) + rtype->size));
   ffi_call(&cif, address, (void *)(rvalue->data), avalues);
 
@@ -281,7 +281,7 @@ string *ffiCall(
 
 SortBytes
 hook_FFI_call(SortInt addr, SortList args, SortList types, SortFFIType ret) {
-  return ffiCall(false, addr, args, types, NULL, ret);
+  return ffiCall(false, addr, args, types, nullptr, ret);
 }
 
 SortBytes hook_FFI_call_variadic(
@@ -425,9 +425,8 @@ block *hook_FFI_free(block *kitem) {
 }
 
 block *hook_FFI_freeAll(void) {
-  for (auto iter = allocatedKItemPtrs.begin(); iter != allocatedKItemPtrs.end();
-       ++iter) {
-    hook_FFI_free(iter->first);
+  for (auto &allocatedKItemPtr : allocatedKItemPtrs) {
+    hook_FFI_free(allocatedKItemPtr.first);
   }
 
   return dotK;
@@ -455,7 +454,7 @@ bool hook_FFI_allocated(block *kitem) {
 
 SortK hook_FFI_read(SortInt addr, SortBytes mem) {
   unsigned long l = mpz_get_ui(addr);
-  uintptr_t intptr = (uintptr_t)l;
+  auto intptr = (uintptr_t)l;
   char *ptr = (char *)intptr;
   memcpy(mem->data, ptr, len(mem));
   return dotK;
@@ -463,7 +462,7 @@ SortK hook_FFI_read(SortInt addr, SortBytes mem) {
 
 SortK hook_FFI_write(SortInt addr, SortBytes mem) {
   unsigned long l = mpz_get_ui(addr);
-  uintptr_t intptr = (uintptr_t)l;
+  auto intptr = (uintptr_t)l;
   char *ptr = (char *)intptr;
   for (size_t i = 0; i < len(mem); ++i) {
     if (ptr[i] != mem->data[i]) {
