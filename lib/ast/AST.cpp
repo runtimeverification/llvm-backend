@@ -1412,66 +1412,55 @@ std::vector<KOREPattern *> KOREAxiomDeclaration::getLeftHandSide() const {
     }
   }
 
-  if (auto top = std::dynamic_pointer_cast<KORECompositePattern>(pattern)) {
-    if (top->getConstructor()->getName() == "\\equals"
-        && top->getArguments().size() == 2) {
-      if (auto firstChild = dynamic_cast<KORECompositePattern *>(
-              top->getArguments()[0].get())) {
-        std::vector<KOREPattern *> result;
-        for (auto &sptr : firstChild->getArguments()) {
-          result.push_back(sptr.get());
-        }
-        return result;
+  if (auto top = pattern->matchesShape("\\equals", 2)) {
+    if (auto firstChild = std::dynamic_pointer_cast<KORECompositePattern>(
+            top->getArguments()[0])) {
+      auto result = std::vector<KOREPattern *>{};
+
+      for (auto &sptr : firstChild->getArguments()) {
+        result.push_back(sptr.get());
       }
-    } else if (
-        top->getConstructor()->getName() == "\\implies"
-        && top->getArguments().size() == 2) {
-      if (auto firstChild = dynamic_cast<KORECompositePattern *>(
-              top->getArguments()[0].get())) {
-        if (firstChild->getConstructor()->getName() == "\\and"
-            && firstChild->getArguments().size() == 2) {
-          auto lhsAnd = firstChild;
-          if (auto innerFirst = dynamic_cast<KORECompositePattern *>(
-                  firstChild->getArguments()[0].get())) {
-            if (innerFirst->getConstructor()->getName() == "\\not"
-                && innerFirst->getArguments().size() == 1) {
-              if (auto innerSecond = dynamic_cast<KORECompositePattern *>(
-                      firstChild->getArguments()[1].get())) {
-                lhsAnd = innerSecond;
-              }
+
+      return result;
+    }
+  }
+
+  if (auto top = pattern->matchesShape("\\implies", 2)) {
+    auto &impliesLhs = top->getArguments()[0];
+
+    if (auto firstChild = impliesLhs->matchesShape("\\and", 2)) {
+      auto lhsAnd = firstChild;
+
+      if (auto innerFirst
+          = firstChild->getArguments()[0]->matchesShape("\\not", 1)) {
+        if (auto innerSecond = std::dynamic_pointer_cast<KORECompositePattern>(
+                firstChild->getArguments()[1])) {
+          lhsAnd = innerSecond;
+        }
+      }
+
+      auto &sideCondition = lhsAnd->getArguments()[0];
+      if (sideCondition->matchesShape("\\equals", 2)
+          || sideCondition->matchesShape("\\top", 0)) {
+
+        std::vector<KOREPattern *> result;
+        return getPatterns(lhsAnd->getArguments()[1].get(), result);
+      }
+    }
+
+    if (impliesLhs->matchesShape("\\top", 0)
+        || impliesLhs->matchesShape("\\equals", 2)) {
+      if (auto secondChild = dynamic_cast<KORECompositePattern *>(
+              top->getArguments()[1].get())) {
+        if (secondChild->getConstructor()->getName() == "\\equals"
+            && secondChild->getArguments().size() == 2) {
+          if (auto lhs = dynamic_cast<KORECompositePattern *>(
+                  secondChild->getArguments()[0].get())) {
+            std::vector<KOREPattern *> result;
+            for (auto &sptr : lhs->getArguments()) {
+              result.push_back(sptr.get());
             }
-          }
-          if (auto sideCondition = dynamic_cast<KORECompositePattern *>(
-                  lhsAnd->getArguments()[0].get())) {
-            if (sideCondition->getConstructor()->getName() == "\\equals"
-                && sideCondition->getArguments().size() == 2) {
-              std::vector<KOREPattern *> result;
-              return getPatterns(lhsAnd->getArguments()[1].get(), result);
-            } else if (
-                sideCondition->getConstructor()->getName() == "\\top"
-                && sideCondition->getArguments().size() == 0) {
-              std::vector<KOREPattern *> result;
-              return getPatterns(lhsAnd->getArguments()[1].get(), result);
-            }
-          }
-        } else if (
-            (firstChild->getConstructor()->getName() == "\\top"
-             && firstChild->getArguments().size() == 0)
-            || (firstChild->getConstructor()->getName() == "\\equals"
-                && firstChild->getArguments().size() == 2)) {
-          if (auto secondChild = dynamic_cast<KORECompositePattern *>(
-                  top->getArguments()[1].get())) {
-            if (secondChild->getConstructor()->getName() == "\\equals"
-                && secondChild->getArguments().size() == 2) {
-              if (auto lhs = dynamic_cast<KORECompositePattern *>(
-                      secondChild->getArguments()[0].get())) {
-                std::vector<KOREPattern *> result;
-                for (auto &sptr : lhs->getArguments()) {
-                  result.push_back(sptr.get());
-                }
-                return result;
-              }
-            }
+            return result;
           }
         }
       }
