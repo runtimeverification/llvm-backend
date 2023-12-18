@@ -54,7 +54,7 @@ int main(int argc, char **argv) {
   auto InitialConfiguration = parser.pattern();
 
   auto match_function_name = getMatchFunctionName();
-  if (match_function_name == std::nullopt) {
+  if (!match_function_name.has_value()) {
     std::cerr << "Rule with label " << RuleLabel << " does not exist.\n";
     return EXIT_FAILURE;
   }
