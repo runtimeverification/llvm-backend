@@ -27,8 +27,6 @@
 
 namespace kllvm {
 
-extern std::string escape(std::string str);
-
 /* create a term, given the assumption that the created term will not be a
  * triangle injection pair */
 llvm::Constant *CreateStaticTerm::notInjectionCase(

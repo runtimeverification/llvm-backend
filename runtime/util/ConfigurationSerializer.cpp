@@ -44,7 +44,7 @@ struct serialization_state {
   uint64_t varCounter{0};
 };
 
-static std::string drop_back(std::string s, int n) {
+static std::string drop_back(std::string const &s, int n) {
   return s.substr(0, s.size() - n);
 }
 

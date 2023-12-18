@@ -13,6 +13,8 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+#include <fmt/format.h>
+
 #include "runtime/alloc.h"
 #include "runtime/header.h"
 
@@ -543,8 +545,7 @@ void flush_IO_logs() {
     if (getenv("K_LOG_PREFIX")) {
       prefix = getenv("K_LOG_PREFIX");
     }
-    std::string fullPath
-        = std::string(fulldir) + "/" + prefix + pid + "_" + std::string(base);
+    auto fullPath = fmt::format("{}/{}{}_{}", fulldir, prefix, pid, base);
     FILE *f = fopen(fullPath.c_str(), "a+");
     fwrite(msg.c_str(), sizeof(char), msg.length(), f);
     fclose(f);

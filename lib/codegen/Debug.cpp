@@ -32,7 +32,7 @@ static unsigned DbgColumn;
 
 #define DWARF_VERSION 4
 
-void initDebugInfo(llvm::Module *module, std::string filename) {
+void initDebugInfo(llvm::Module *module, std::string const &filename) {
   Dbg = new llvm::DIBuilder(*module);
   DbgFile = Dbg->createFile(filename, ".");
 
@@ -61,8 +61,9 @@ void finalizeDebugInfo() {
 }
 
 void initDebugFunction(
-    std::string name, std::string linkageName, llvm::DISubroutineType *type,
-    KOREDefinition *definition, llvm::Function *func) {
+    std::string const &name, std::string const &linkageName,
+    llvm::DISubroutineType *type, KOREDefinition *definition,
+    llvm::Function *func) {
   if (!Dbg)
     return;
   auto Unit = Dbg->createFile(DbgFile->getFilename(), DbgFile->getDirectory());
@@ -74,8 +75,8 @@ void initDebugFunction(
 }
 
 void initDebugParam(
-    llvm::Function *func, unsigned argNo, std::string name, ValueType type,
-    std::string typeName) {
+    llvm::Function *func, unsigned argNo, std::string const &name,
+    ValueType type, std::string const &typeName) {
   if (!Dbg)
     return;
   llvm::DILocalVariable *DbgVar = Dbg->createParameterVariable(
@@ -88,7 +89,7 @@ void initDebugParam(
 }
 
 void initDebugGlobal(
-    std::string name, llvm::DIType *type, llvm::GlobalVariable *var) {
+    std::string const &name, llvm::DIType *type, llvm::GlobalVariable *var) {
   if (!Dbg)
     return;
   resetDebugLoc();
@@ -136,7 +137,7 @@ void resetDebugLoc() {
   DbgFile = DbgCU->getFile();
 }
 
-llvm::DIType *getForwardDecl(std::string name) {
+llvm::DIType *getForwardDecl(std::string const &name) {
   if (!Dbg)
     return nullptr;
   auto Unit = Dbg->createFile(DbgFile->getFilename(), DbgFile->getDirectory());
@@ -153,7 +154,7 @@ static std::string FLOAT_STRUCT = "floating";
 static std::string BUFFER_STRUCT = "stringbuffer";
 static std::string BLOCK_STRUCT = "block";
 
-llvm::DIType *getDebugType(ValueType type, std::string typeName) {
+llvm::DIType *getDebugType(ValueType type, std::string const &typeName) {
   if (!Dbg)
     return nullptr;
   static std::map<std::string, llvm::DIType *> types;
@@ -245,7 +246,8 @@ llvm::DIType *getCharDebugType() {
   return Dbg->createBasicType("char", 8, llvm::dwarf::DW_ATE_signed_char);
 }
 
-llvm::DIType *getPointerDebugType(llvm::DIType *ty, std::string typeName) {
+llvm::DIType *
+getPointerDebugType(llvm::DIType *ty, std::string const &typeName) {
   if (!Dbg)
     return nullptr;
   auto ptrType = Dbg->createPointerType(ty, sizeof(size_t) * 8);

@@ -66,7 +66,7 @@ private:
   }
 
 public:
-  yaml_node_t *get(yaml_node_t *node, std::string name) {
+  yaml_node_t *get(yaml_node_t *node, std::string const &name) {
     yaml_node_pair_t *entry;
     for (entry = node->data.mapping.pairs.start;
          entry < node->data.mapping.pairs.top; ++entry) {
@@ -107,9 +107,9 @@ public:
     dv = KORESymbol::Create("\\dv").release();
   }
 
-  std::string to_string(std::vector<std::string> occurrence) {
+  std::string to_string(std::vector<std::string> const &occurrence) {
     std::string result = "";
-    for (std::string i : occurrence) {
+    for (auto const &i : occurrence) {
       result.push_back('_');
       result += i;
     }
@@ -355,7 +355,7 @@ public:
 };
 
 DecisionNode *parseYamlDecisionTreeFromString(
-    llvm::Module *mod, std::string yaml,
+    llvm::Module *mod, std::string const &yaml,
     const std::map<std::string, KORESymbol *> &syms,
     const std::map<ValueType, sptr<KORECompositeSort>> &sorts) {
   yaml_parser_t parser;
@@ -376,7 +376,7 @@ DecisionNode *parseYamlDecisionTreeFromString(
 }
 
 DecisionNode *parseYamlDecisionTree(
-    llvm::Module *mod, std::string filename,
+    llvm::Module *mod, std::string const &filename,
     const std::map<std::string, KORESymbol *> &syms,
     const std::map<ValueType, sptr<KORECompositeSort>> &sorts) {
   yaml_parser_t parser;
@@ -398,7 +398,7 @@ DecisionNode *parseYamlDecisionTree(
 }
 
 PartialStep parseYamlSpecialDecisionTree(
-    llvm::Module *mod, std::string filename,
+    llvm::Module *mod, std::string const &filename,
     const std::map<std::string, KORESymbol *> &syms,
     const std::map<ValueType, sptr<KORECompositeSort>> &sorts) {
   yaml_parser_t parser;

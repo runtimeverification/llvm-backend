@@ -239,6 +239,11 @@ void printConfiguration(const char *filename, block *subject) {
   fclose(file);
 }
 
+// If the parameter `results` is passed by reference, the ordering induced by
+// the hash table becomes unstable when running tests in CI and examining the
+// expected output. We therefore just pass the results by value for now as this
+// code is not on a hot path.
+// NOLINTBEGIN(performance-unnecessary-value-param)
 void printConfigurations(
     const char *filename, std::unordered_set<block *, HashBlock, KEq> results) {
   FILE *file = fopen(filename, "a");
@@ -262,6 +267,7 @@ void printConfigurations(
 
   fclose(file);
 }
+// NOLINTEND(performance-unnecessary-value-param)
 
 string *debug_print_term(block *subject, char const *sort) {
   auto state = print_state();

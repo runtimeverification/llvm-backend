@@ -11,7 +11,7 @@
 
 namespace kllvm::parser {
 
-std::unique_ptr<KOREParser> KOREParser::from_string(std::string text) {
+std::unique_ptr<KOREParser> KOREParser::from_string(std::string const &text) {
   auto temp_file = temporary_file("tmp.parse.XXXXXX");
   temp_file.ofstream() << text;
 
@@ -251,12 +251,12 @@ void KOREParser::sortVariables(KOREDeclaration *node) {
 void KOREParser::sortVariablesNE(KOREDeclaration *node) {
   std::string name = consume(token::ID);
   auto var = KORESortVariable::Create(name);
-  node->addObjectSortVariable(std::move(var));
+  node->addObjectSortVariable(var);
   while (peek() == token::COMMA) {
     consume(token::COMMA);
     name = consume(token::ID);
     var = KORESortVariable::Create(name);
-    node->addObjectSortVariable(std::move(var));
+    node->addObjectSortVariable(var);
   }
 }
 
@@ -337,7 +337,7 @@ ptr<KORECompositePattern> KOREParser::_applicationPattern() {
   return _applicationPattern(consume(token::ID));
 }
 
-sptr<KOREPattern> KOREParser::applicationPattern(std::string name) {
+sptr<KOREPattern> KOREParser::applicationPattern(std::string const &name) {
   if (name == "\\left-assoc" || name == "\\right-assoc") {
     consume(token::LEFTBRACE);
     consume(token::RIGHTBRACE);
@@ -400,7 +400,8 @@ sptr<KOREPattern> KOREParser::applicationPattern(std::string name) {
   return result;
 }
 
-ptr<KORECompositePattern> KOREParser::_applicationPattern(std::string name) {
+ptr<KORECompositePattern>
+KOREParser::_applicationPattern(std::string const &name) {
   consume(token::LEFTBRACE);
   auto pat = KORECompositePattern::Create(name);
   sorts(pat->getConstructor());
@@ -420,11 +421,11 @@ void KOREParser::patterns(KORECompositePattern *node) {
 
 void KOREParser::patternsNE(KORECompositePattern *node) {
   auto pat = _pattern();
-  node->addArgument(std::move(pat));
+  node->addArgument(pat);
   while (peek() == token::COMMA) {
     consume(token::COMMA);
     pat = _pattern();
-    node->addArgument(std::move(pat));
+    node->addArgument(pat);
   }
 }
 

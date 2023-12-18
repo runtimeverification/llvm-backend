@@ -161,8 +161,8 @@ ProofEvent::eventPrelude(
  */
 
 llvm::BasicBlock *ProofEvent::hookEvent_pre(
-    std::string name, llvm::BasicBlock *current_block,
-    std::string locationStack) {
+    std::string const &name, llvm::BasicBlock *current_block,
+    std::string const &locationStack) {
   if (!ProofHintInstrumentation) {
     return current_block;
   }
