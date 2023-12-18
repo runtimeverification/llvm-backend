@@ -9,8 +9,7 @@
 #include <iostream>
 #include <unistd.h>
 
-namespace kllvm {
-namespace parser {
+namespace kllvm::parser {
 
 std::unique_ptr<KOREParser> KOREParser::from_string(std::string text) {
   auto temp_file = temporary_file("tmp.parse.XXXXXX");
@@ -445,5 +444,4 @@ void KOREParser::patternsNE(std::vector<sptr<KOREPattern>> &node) {
   }
 }
 
-} // namespace parser
 } // namespace kllvm

@@ -3,7 +3,6 @@ Checks:
   -clang-analyzer-cplusplus.PlacementNew
   modernize-*
   -modernize-avoid-c-arrays
-  -modernize-concat-nested-namespaces
   -modernize-use-trailing-return-type
 
 WarningsAsErrors:
