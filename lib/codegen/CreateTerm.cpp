@@ -856,8 +856,8 @@ bool CreateTerm::populateStaticSet(KOREPattern *pattern) {
   return can_be_static;
 }
 
-std::pair<llvm::Value *, bool>
-CreateTerm::createAllocation(KOREPattern *pattern, std::string locationStack) {
+std::pair<llvm::Value *, bool> CreateTerm::createAllocation(
+    KOREPattern *pattern, std::string const &locationStack) {
   if (staticTerms.count(pattern)) {
     auto *staticTerm = new CreateStaticTerm(Definition, Module);
     return (*staticTerm)(pattern);
@@ -1257,10 +1257,10 @@ bool isCollectionSort(ValueType cat) {
   }
 }
 
-bool isInjectionSymbol(KOREPattern *p, KORESymbol *inj) {
+bool isInjectionSymbol(KOREPattern *p, KORESymbol *sym) {
   if (auto *constructor = dynamic_cast<KORECompositePattern *>(p)) {
     KORESymbol const *symbol = constructor->getConstructor();
-    if (symbol->getName() == inj->getName()) {
+    if (symbol->getName() == sym->getName()) {
       return true;
     }
   }
