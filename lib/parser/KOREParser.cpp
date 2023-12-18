@@ -444,4 +444,4 @@ void KOREParser::patternsNE(std::vector<sptr<KOREPattern>> &node) {
   }
 }
 
-} // namespace kllvm
+} // namespace kllvm::parser

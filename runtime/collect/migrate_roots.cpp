@@ -30,7 +30,7 @@ void migrateRoots() {
     return;
   }
 
-  for (auto & blockEnumerator : blockEnumerators) {
+  for (auto &blockEnumerator : blockEnumerators) {
     auto BlockIteratorPair = (*blockEnumerator)();
     auto BlockStartIt = BlockIteratorPair.first;
     auto BlockEndIt = BlockIteratorPair.second;

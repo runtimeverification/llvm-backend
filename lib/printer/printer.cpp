@@ -367,7 +367,7 @@ std::ostream &printKORE(
     axiom->getPattern()->markSymbols(symbols);
   }
 
-  for (auto & entry : symbols) {
+  for (auto &entry : symbols) {
     for (auto symbol : entry.second) {
       auto decl = def->getSymbolDeclarations().at(symbol->getName());
       symbol->instantiateSymbol(decl);

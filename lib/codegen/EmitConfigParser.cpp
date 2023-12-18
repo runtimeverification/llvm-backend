@@ -91,7 +91,7 @@ emitGetTagForSymbolName(KOREDefinition *definition, llvm::Module *module) {
       MergeBlock);
   auto &syms = definition->getAllSymbols();
   llvm::Function *Strcmp = getStrcmp(module);
-  for (const auto & entry : syms) {
+  for (const auto &entry : syms) {
     uint32_t tag = entry.second->getTag();
     auto symbol = entry.second;
     CurrentBlock->insertInto(func);
@@ -426,7 +426,7 @@ emitGetTagForFreshSort(KOREDefinition *definition, llvm::Module *module) {
   llvm::Constant *zero32
       = llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), 0);
   bool hasCase = false;
-  for (const auto & entry : sorts) {
+  for (const auto &entry : sorts) {
     std::string name = entry.first;
     if (!definition->getFreshFunctions().count(name)) {
       continue;
@@ -490,7 +490,7 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
   llvm::Constant *zero = llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0);
   llvm::Constant *zero32
       = llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), 0);
-  for (const auto & entry : sorts) {
+  for (const auto &entry : sorts) {
     std::string name = entry.first;
     if (!entry.second->getObjectSortVariables().empty()) {
       // TODO: MINT in initial configuration
@@ -1255,7 +1255,7 @@ static void emitSortTable(KOREDefinition *def, llvm::Module *mod) {
     auto indices = std::vector<llvm::Constant *>{zero, zero};
 
     std::vector<llvm::Constant *> subvalues;
-    for (const auto & i : symbol->getArguments()) {
+    for (const auto &i : symbol->getArguments()) {
       auto arg_str = ast_to_string(*i);
       auto strType = llvm::ArrayType::get(
           llvm::Type::getInt8Ty(ctx), arg_str.size() + 1);

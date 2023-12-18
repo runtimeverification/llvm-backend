@@ -995,7 +995,7 @@ bool makeFunction(
   std::vector<llvm::Type *> paramTypes;
   std::vector<std::string> paramNames;
   std::vector<llvm::Metadata *> debugArgs;
-  for (auto & entry : vars) {
+  for (auto &entry : vars) {
     auto sort
         = dynamic_cast<KORECompositeSort *>(entry.second->getSort().get());
     if (!sort) {
@@ -1113,7 +1113,7 @@ std::string makeApplyRuleFunction(
   std::vector<llvm::Type *> paramTypes;
   std::vector<std::string> paramNames;
   std::vector<llvm::Metadata *> debugArgs;
-  for (auto & entry : vars) {
+  for (auto &entry : vars) {
     auto sort
         = dynamic_cast<KORECompositeSort *>(entry.second->getSort().get());
     if (!sort) {

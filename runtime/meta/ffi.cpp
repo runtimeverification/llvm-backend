@@ -425,7 +425,7 @@ block *hook_FFI_free(block *kitem) {
 }
 
 block *hook_FFI_freeAll(void) {
-  for (auto & allocatedKItemPtr : allocatedKItemPtrs) {
+  for (auto &allocatedKItemPtr : allocatedKItemPtrs) {
     hook_FFI_free(allocatedKItemPtr.first);
   }
 

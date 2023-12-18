@@ -110,10 +110,8 @@ getFailPattern(DecisionCase const &_case, bool isInt) {
     auto result = fmt::format("{}(", ast_to_string(*_case.getConstructor()));
 
     std::string conn = "";
-    for (const auto & i : _case.getConstructor()->getArguments()) {
-      result += fmt::format(
-          "{}Var'Unds':{}", conn,
-          ast_to_string(*i));
+    for (const auto &i : _case.getConstructor()->getArguments()) {
+      result += fmt::format("{}Var'Unds':{}", conn, ast_to_string(*i));
       conn = ",";
     }
     result += ")";
@@ -691,8 +689,7 @@ static void initChoiceBuffer(
   dt->preprocess(leaves);
   auto ty = llvm::ArrayType::get(
       llvm::Type::getInt8PtrTy(module->getContext()), dt->getChoiceDepth() + 1);
-  auto *choiceBuffer
-      = new llvm::AllocaInst(ty, 0, "choiceBuffer", block);
+  auto *choiceBuffer = new llvm::AllocaInst(ty, 0, "choiceBuffer", block);
   auto *choiceDepth = new llvm::AllocaInst(
       llvm::Type::getInt64Ty(module->getContext()), 0, "choiceDepth", block);
   auto zero

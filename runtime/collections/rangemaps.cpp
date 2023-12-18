@@ -122,8 +122,7 @@ set hook_RANGEMAP_keys(SortRangeMap m) {
     ptr->h = range_header();
     ptr->start = iter->first.start();
     ptr->end = iter->first.end();
-    auto *inj_ptr
-        = (inj_range2kitem *)koreAlloc(sizeof(inj_range2kitem));
+    auto *inj_ptr = (inj_range2kitem *)koreAlloc(sizeof(inj_range2kitem));
     inj_ptr->h = inj_range2kitem_header();
     inj_ptr->child = ptr;
     auto elem = hook_SET_element((SortKItem)inj_ptr);
@@ -140,8 +139,7 @@ list hook_RANGEMAP_keys_list(SortRangeMap m) {
     ptr->h = range_header();
     ptr->start = iter->first.start();
     ptr->end = iter->first.end();
-    auto *inj_ptr
-        = (inj_range2kitem *)koreAlloc(sizeof(inj_range2kitem));
+    auto *inj_ptr = (inj_range2kitem *)koreAlloc(sizeof(inj_range2kitem));
     inj_ptr->h = inj_range2kitem_header();
     inj_ptr->child = ptr;
     tmp.push_back((SortKItem)inj_ptr);

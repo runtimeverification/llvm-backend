@@ -37,8 +37,7 @@ struct print_state {
   print_state()
       : boundVariables{}
       , varNames{}
-      , usedVarNames{}
-       { }
+      , usedVarNames{} { }
 
   // We never want to copy the state; it should only ever get passed around by
   // reference.

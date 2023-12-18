@@ -235,8 +235,7 @@ size_t arenaSize(const struct arena *Arena) {
 void freeAllMemory() {
   auto *superblock = (memory_block_header *)first_superblock_ptr;
   while (superblock) {
-    auto *next_superblock
-        = (memory_block_header *)superblock->next_superblock;
+    auto *next_superblock = (memory_block_header *)superblock->next_superblock;
     free(superblock);
     superblock = next_superblock;
   }
