@@ -243,7 +243,7 @@ bool KORESymbol::operator==(const KORESymbol &other) const {
 
 std::string KORESymbol::layoutString(KOREDefinition *definition) const {
   std::string result;
-  for (auto arg : arguments) {
+  for (auto const &arg : arguments) {
     auto sort = dynamic_cast<KORECompositeSort *>(arg.get());
     ValueType cat = sort->getCategory(definition);
     switch (cat.cat) {
@@ -266,7 +266,7 @@ std::string KORESymbol::layoutString(KOREDefinition *definition) const {
 }
 
 bool KORECompositeSort::isConcrete() const {
-  for (auto sort : arguments) {
+  for (auto const &sort : arguments) {
     if (!sort->isConcrete()) {
       return false;
     }
@@ -275,7 +275,7 @@ bool KORECompositeSort::isConcrete() const {
 }
 
 bool KORESymbol::isConcrete() const {
-  for (auto sort : arguments) {
+  for (auto const &sort : arguments) {
     if (!sort->isConcrete()) {
       return false;
     }
@@ -284,7 +284,7 @@ bool KORESymbol::isConcrete() const {
 }
 
 bool KORESymbol::isPolymorphic() const {
-  for (auto sort : arguments) {
+  for (auto const &sort : arguments) {
     if (sort->isConcrete()) {
       return false;
     }
@@ -324,10 +324,10 @@ void KORESymbol::instantiateSymbol(KORESymbolDeclaration *decl) {
   std::vector<sptr<KORESort>> instantiated;
   int i = 0;
   KORESort::substitution vars;
-  for (auto var : decl->getObjectSortVariables()) {
+  for (auto const &var : decl->getObjectSortVariables()) {
     vars.emplace(*var, formalArguments[i++]);
   }
-  for (auto sort : decl->getSymbol()->getArguments()) {
+  for (auto const &sort : decl->getSymbol()->getArguments()) {
     instantiated.push_back(sort->substitute(vars));
   }
   auto returnSort = decl->getSymbol()->sort;
@@ -943,7 +943,7 @@ KORECompositePattern::sortCollections(PrettyPrintData const &data) {
 std::set<std::string> KOREPattern::gatherSingletonVars(void) {
   auto counts = gatherVarCounts();
   std::set<std::string> result;
-  for (auto entry : counts) {
+  for (auto const &entry : counts) {
     if (entry.second == 1) {
       result.insert(entry.first);
     }
@@ -955,7 +955,7 @@ std::map<std::string, int> KORECompositePattern::gatherVarCounts(void) {
   std::map<std::string, int> result;
   for (auto &arg : arguments) {
     auto childResult = arg->gatherVarCounts();
-    for (auto entry : childResult) {
+    for (auto const &entry : childResult) {
       result[entry.first] += entry.second;
     }
   }
@@ -969,7 +969,7 @@ sptr<KOREPattern> KORECompositePattern::dedupeDisjuncts(void) {
   std::vector<sptr<KOREPattern>> items, dedupedItems;
   flatten(this, "\\or", items);
   std::set<std::string> printed;
-  for (sptr<KOREPattern> item : items) {
+  for (auto const &item : items) {
     if (printed.insert(ast_to_string(*item)).second) {
       dedupedItems.push_back(item);
     }

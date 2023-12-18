@@ -124,7 +124,7 @@ int main(int argc, char **argv) {
   if (rule_labels.empty()) {
     std::cerr << "Error: Couldn't find rule label within the given location.\n";
   } else {
-    for (auto rule_label : rule_labels)
+    for (auto const &rule_label : rule_labels)
       std::cout << rule_label << "\n";
   }
 

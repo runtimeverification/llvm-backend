@@ -943,7 +943,7 @@ static void getVisitor(
 
   auto state_ptr = func->arg_end() - 1;
 
-  for (auto sort : symbol->getArguments()) {
+  for (auto const &sort : symbol->getArguments()) {
     auto compositeSort = dynamic_cast<KORECompositeSort *>(sort.get());
     ValueType cat = compositeSort->getCategory(definition);
     llvm::Value *ChildPtr = llvm::GetElementPtrInst::CreateInBounds(
@@ -1131,7 +1131,7 @@ static llvm::Constant *getLayoutData(
   llvm::LLVMContext &Ctx = module->getContext();
   auto BlockType = getBlockType(module, def, symbol);
   int i = 2;
-  for (auto sort : symbol->getArguments()) {
+  for (auto const &sort : symbol->getArguments()) {
     ValueType cat
         = dynamic_cast<KORECompositeSort *>(sort.get())->getCategory(def);
     auto offset = getOffsetOfMember(

@@ -244,7 +244,7 @@ void SwitchNode::codegen(Decision *d) {
           = d->Definition->getSymbolDeclarations().at(
               _case.getConstructor()->getName());
       llvm::Instruction *Renamed;
-      for (auto binding : _case.getBindings()) {
+      for (auto const &binding : _case.getBindings()) {
         llvm::Value *ChildPtr = llvm::GetElementPtrInst::CreateInBounds(
             BlockType, Cast,
             {llvm::ConstantInt::get(llvm::Type::getInt64Ty(d->Ctx), 0),
@@ -364,7 +364,7 @@ void MakePatternNode::codegen(Decision *d) {
     return;
   }
   llvm::StringMap<llvm::Value *> finalSubst;
-  for (auto use : uses) {
+  for (auto const &use : uses) {
     finalSubst[use.first] = d->load(use);
   }
   CreateTerm creator(
@@ -563,7 +563,7 @@ void LeafNode::codegen(Decision *d) {
 
   std::vector<llvm::Value *> args;
   std::vector<llvm::Type *> types;
-  for (auto arg : bindings) {
+  for (auto const &arg : bindings) {
     auto val = d->load(arg);
     args.push_back(val);
     types.push_back(val->getType());
@@ -1264,7 +1264,7 @@ void makeStepFunction(
   auto blockType = getValueType({SortCategory::Symbol, 0}, module);
   std::vector<llvm::Type *> argTypes;
   std::vector<llvm::Metadata *> debugTypes;
-  for (auto res : res.residuals) {
+  for (auto const &res : res.residuals) {
     auto argSort
         = dynamic_cast<KORECompositeSort *>(res.pattern->getSort().get());
     auto cat = argSort->getCategory(definition);
@@ -1340,7 +1340,7 @@ void makeStepFunction(
     phis[i++]->addIncoming(val, pre_stuck);
   }
   std::set<std::string> occurrences;
-  for (auto residual : res.residuals) {
+  for (auto const &residual : res.residuals) {
     occurrences.insert(residual.occurrence);
   }
   KOREPattern *partialTerm = makePartialTerm(

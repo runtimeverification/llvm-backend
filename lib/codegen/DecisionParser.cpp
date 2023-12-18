@@ -108,9 +108,9 @@ public:
     dv = KORESymbol::Create("\\dv").release();
   }
 
-  std::string to_string(std::vector<std::string> occurrence) {
+  std::string to_string(std::vector<std::string> const &occurrence) {
     std::string result = "";
-    for (std::string i : occurrence) {
+    for (auto const &i : occurrence) {
       result.push_back('_');
       result += i;
     }

@@ -676,7 +676,7 @@ llvm::Value *CreateTerm::createFunctionCall(
       pattern->getConstructor()->getSort().get());
   auto returnCat = returnSort->getCategory(Definition);
   int i = 0;
-  for (auto sort : pattern->getConstructor()->getArguments()) {
+  for (auto const &sort : pattern->getConstructor()->getArguments()) {
     auto concreteSort = dynamic_cast<KORECompositeSort *>(sort.get());
     llvm::Value *arg = alloc_arg(pattern, i, locationStack);
     i++;
@@ -842,7 +842,7 @@ bool CreateTerm::populateStaticSet(KOREPattern *pattern) {
               && !isAnywhereOwise)) {
         can_be_static = false;
       }
-      for (auto sptr_nextPattern : constructor->getArguments()) {
+      for (auto const &sptr_nextPattern : constructor->getArguments()) {
         KOREPattern *nextPattern = sptr_nextPattern.get();
         can_be_static &= populateStaticSet(nextPattern);
       }
@@ -1173,7 +1173,7 @@ std::string makeApplyRuleFunction(
   CreateTerm creator = CreateTerm(subst, definition, block, Module, false);
   std::vector<llvm::Value *> args;
   std::vector<llvm::Type *> types;
-  for (auto residual : residuals) {
+  for (auto const &residual : residuals) {
     llvm::Value *arg = creator(residual.pattern).first;
     auto sort
         = dynamic_cast<KORECompositeSort *>(residual.pattern->getSort().get());
