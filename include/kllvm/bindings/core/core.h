@@ -37,6 +37,9 @@ std::shared_ptr<kllvm::KOREPattern> simplify(
 bool is_sort_kitem(std::shared_ptr<kllvm::KORESort> const &sort);
 bool is_sort_k(std::shared_ptr<kllvm::KORESort> const &sort);
 
+std::shared_ptr<KOREPattern>
+evaluate_function(std::shared_ptr<KORECompositePattern> term);
+
 } // namespace kllvm::bindings
 
 #endif

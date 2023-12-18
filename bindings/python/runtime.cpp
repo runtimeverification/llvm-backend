@@ -2,6 +2,7 @@
 #include <kllvm/bindings/core/core.h>
 
 #include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 
 // This header needs to be included last because it pollutes a number of macro
 // definitions into the global namespace.
@@ -54,6 +55,8 @@ void bind_runtime(py::module_ &m) {
   m.def("simplify_bool_pattern", bindings::simplify_to_bool);
 
   m.def("return_sort_for_label", bindings::return_sort_for_label);
+
+  m.def("evaluate_function", bindings::evaluate_function);
 
   // This class can't be used directly from Python; the mutability semantics
   // that we get from the Pybind wrappers make it really easy to break things.
