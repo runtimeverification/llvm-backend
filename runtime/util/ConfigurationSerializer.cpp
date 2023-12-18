@@ -479,9 +479,13 @@ sortedTermToKorePattern(block *subject, const char *sort) {
   char *data_out;
   size_t size_out;
 
-  serializeConfiguration(subject, "SortKItem{}", &data_out, &size_out, true);
+  serializeConfiguration(term, "SortKItem{}", &data_out, &size_out, true);
   auto result = deserialize_pattern(data_out, data_out + size_out);
 
   free(data_out);
   return result;
+}
+
+std::shared_ptr<kllvm::KOREPattern> termToKorePattern(block *subject) {
+  return sortedTermToKorePattern(subject, "SortKItem{}");
 }
