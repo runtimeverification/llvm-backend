@@ -32,7 +32,7 @@ struct serialization_state {
       , boundVariables{}
       , varNames{}
       , usedVarNames{}
-      , varCounter(0) { }
+       { }
 
   // We never want to copy the state; it should only ever get passed around by
   // reference.
@@ -42,7 +42,7 @@ struct serialization_state {
   std::vector<block *> boundVariables;
   std::unordered_map<string *, std::string, StringHash, StringEq> varNames;
   std::set<std::string> usedVarNames;
-  uint64_t varCounter;
+  uint64_t varCounter{0};
 };
 
 static std::string drop_back(std::string s, int n) {

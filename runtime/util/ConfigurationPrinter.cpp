@@ -38,7 +38,7 @@ struct print_state {
       : boundVariables{}
       , varNames{}
       , usedVarNames{}
-      , varCounter(0) { }
+       { }
 
   // We never want to copy the state; it should only ever get passed around by
   // reference.
@@ -47,7 +47,7 @@ struct print_state {
   std::vector<block *> boundVariables;
   std::unordered_map<string *, std::string, StringHash, StringEq> varNames;
   std::set<std::string> usedVarNames;
-  uint64_t varCounter;
+  uint64_t varCounter{0};
 };
 
 void printInt(writer *file, mpz_t i, const char *sort, void *state) {
