@@ -11,12 +11,7 @@ import unittest
 class TestEvaluate(unittest.TestCase):
 
     def test_ctor(self):
-        left = kllvm.parser.Parser.from_string('Lblfoo{}(\\dv{SortInt{}}("23"))').pattern()
-        right = kllvm.parser.Parser.from_string('Lblbar{}(\\dv{SortInt{}}("56"))').pattern()
-
-        call = kllvm.ast.CompositePattern('Lblf')
-        call.add_argument(left)
-        call.add_argument(right)
+        call = kllvm.parser.Parser.from_string('Lblf{}(Lblfoo{}(\\dv{SortInt{}}("23")),Lblbar{}(\\dv{SortInt{}}("56")))').pattern()
 
         result = kllvm.runtime.evaluate_function(call)
         self.assertEqual(str(result), 'Lblfoo{}(\dv{SortInt{}}("79"))')
