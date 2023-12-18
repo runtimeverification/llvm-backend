@@ -56,7 +56,7 @@ void initDebugInfo(llvm::Module *module, std::string filename) {
       llvm::DICompileUnit::DebugNameTableKind::None);
 }
 
-void finalizeDebugInfo(void) {
+void finalizeDebugInfo() {
   Dbg->finalize();
 }
 
@@ -128,7 +128,7 @@ void initDebugAxiom(
   DbgFile = Dbg->createFile(source, DbgFile->getDirectory());
 }
 
-void resetDebugLoc(void) {
+void resetDebugLoc() {
   if (!Dbg)
     return;
   DbgLine = 0;
@@ -209,29 +209,29 @@ llvm::DIType *getDebugType(ValueType type, std::string typeName) {
   }
 }
 
-llvm::DIType *getIntDebugType(void) {
+llvm::DIType *getIntDebugType() {
   if (!Dbg)
     return nullptr;
   return Dbg->createBasicType("uint32_t", 32, llvm::dwarf::DW_ATE_unsigned);
 }
 
-llvm::DIType *getLongDebugType(void) {
+llvm::DIType *getLongDebugType() {
   if (!Dbg)
     return nullptr;
   return Dbg->createBasicType("uint64_t", 64, llvm::dwarf::DW_ATE_unsigned);
 }
 
-llvm::DIType *getBoolDebugType(void) {
+llvm::DIType *getBoolDebugType() {
   if (!Dbg)
     return nullptr;
   return Dbg->createBasicType("bool", 8, llvm::dwarf::DW_ATE_boolean);
 }
 
-llvm::DIType *getVoidDebugType(void) {
+llvm::DIType *getVoidDebugType() {
   return nullptr;
 }
 
-llvm::DIType *getCharPtrDebugType(void) {
+llvm::DIType *getCharPtrDebugType() {
   if (!Dbg)
     return nullptr;
   return Dbg->createPointerType(
@@ -239,7 +239,7 @@ llvm::DIType *getCharPtrDebugType(void) {
       sizeof(size_t) * 8);
 }
 
-llvm::DIType *getCharDebugType(void) {
+llvm::DIType *getCharDebugType() {
   if (!Dbg)
     return nullptr;
   return Dbg->createBasicType("char", 8, llvm::dwarf::DW_ATE_signed_char);
@@ -261,7 +261,7 @@ getArrayDebugType(llvm::DIType *ty, size_t len, llvm::Align align) {
   return Dbg->createArrayType(len, align.value(), ty, arr);
 }
 
-llvm::DIType *getShortDebugType(void) {
+llvm::DIType *getShortDebugType() {
   if (!Dbg)
     return nullptr;
   return Dbg->createBasicType("uint16_t", 16, llvm::dwarf::DW_ATE_unsigned);

@@ -940,7 +940,7 @@ KORECompositePattern::sortCollections(PrettyPrintData const &data) {
   return result;
 }
 
-std::set<std::string> KOREPattern::gatherSingletonVars(void) {
+std::set<std::string> KOREPattern::gatherSingletonVars() {
   auto counts = gatherVarCounts();
   std::set<std::string> result;
   for (auto entry : counts) {
@@ -951,7 +951,7 @@ std::set<std::string> KOREPattern::gatherSingletonVars(void) {
   return result;
 }
 
-std::map<std::string, int> KORECompositePattern::gatherVarCounts(void) {
+std::map<std::string, int> KORECompositePattern::gatherVarCounts() {
   std::map<std::string, int> result;
   for (auto &arg : arguments) {
     auto childResult = arg->gatherVarCounts();
@@ -962,7 +962,7 @@ std::map<std::string, int> KORECompositePattern::gatherVarCounts(void) {
   return result;
 }
 
-sptr<KOREPattern> KORECompositePattern::dedupeDisjuncts(void) {
+sptr<KOREPattern> KORECompositePattern::dedupeDisjuncts() {
   if (constructor->getName() != "\\or") {
     return shared_from_this();
   }

@@ -180,13 +180,13 @@ string *ffiCall(
     block *ret) {
   ffi_cif cif;
   ffi_type **argtypes, *rtype;
-  void (*address)(void);
+  void (*address)();
 
   if (!mpz_fits_ulong_p(addr)) {
     KLLVM_HOOK_INVALID_ARGUMENT("Addr is too large: {}", intToString(addr));
   }
 
-  address = (void (*)(void))mpz_get_ui(addr);
+  address = (void (*)())mpz_get_ui(addr);
 
   size_t nargs = hook_LIST_size_long(args);
   size_t nfixtypes = hook_LIST_size_long(fixtypes);

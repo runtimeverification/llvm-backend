@@ -8,7 +8,6 @@ Checks:
   -modernize-loop-convert
   -modernize-macro-to-enum
   -modernize-raw-string-literal
-  -modernize-redundant-void-arg
   -modernize-use-trailing-return-type
 
 WarningsAsErrors:
