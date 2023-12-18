@@ -15,7 +15,6 @@ Checks:
   -modernize-use-emplace
   -modernize-use-nullptr
   -modernize-use-trailing-return-type
-  -modernize-use-using
 
 WarningsAsErrors:
   '*'

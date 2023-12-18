@@ -33,10 +33,10 @@ struct stringinj {
   string *data;
 };
 
-typedef struct boolinj {
+struct boolinj {
   struct blockheader h;
   bool data;
-} boolinj;
+};
 
 struct jsonlist {
   blockheader h;
