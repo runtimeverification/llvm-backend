@@ -52,33 +52,33 @@ struct print_state {
 
 void printInt(writer *file, mpz_t i, const char *sort, void *state) {
   auto str = intToString(i);
-  sfprintf(file, "\\dv{%s}(\"%s\")", sort, str.c_str());
+  sfprintf(file, R"(\dv{%s}("%s"))", sort, str.c_str());
 }
 
 void printFloat(writer *file, floating *f, const char *sort, void *state) {
   std::string str = floatToString(f);
-  sfprintf(file, "\\dv{%s}(\"%s\")", sort, str.c_str());
+  sfprintf(file, R"(\dv{%s}("%s"))", sort, str.c_str());
 }
 
 void printBool(writer *file, bool b, const char *sort, void *state) {
   const char *str = b ? "true" : "false";
-  sfprintf(file, "\\dv{%s}(\"%s\")", sort, str);
+  sfprintf(file, R"(\dv{%s}("%s"))", sort, str);
 }
 
 void printStringBuffer(
     writer *file, stringbuffer *b, const char *sort, void *state) {
   std::string str(b->contents->data, b->strlen);
-  sfprintf(file, "\\dv{%s}(\"%s\")", sort, str.c_str());
+  sfprintf(file, R"(\dv{%s}("%s"))", sort, str.c_str());
 }
 
 void printMInt(
     writer *file, size_t *i, size_t bits, const char *sort, void *state) {
   if (i == nullptr) {
-    sfprintf(file, "\\dv{%s}(\"0p%zd\")", sort, bits);
+    sfprintf(file, R"(\dv{%s}("0p%zd"))", sort, bits);
   } else {
     mpz_ptr z = hook_MINT_import(i, bits, false);
     auto str = intToString(z);
-    sfprintf(file, "\\dv{%s}(\"%sp%zd\")", sort, str.c_str(), bits);
+    sfprintf(file, R"(\dv{%s}("%sp%zd"))", sort, str.c_str(), bits);
   }
 }
 
