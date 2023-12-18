@@ -913,7 +913,7 @@ KORECompositePattern::sortCollections(PrettyPrintData const &data) {
       std::ostringstream Out;
       item = item->sortCollections(data);
       item->prettyPrint(Out, newData);
-      printed.push_back({Out.str(), item});
+      printed.emplace_back(Out.str(), item);
     }
     indent = oldIndent;
     atNewLine = oldAtNewLine;

@@ -171,7 +171,7 @@ void SwitchNode::codegen(Decision *d) {
     }
     if (auto sym = _case.getConstructor()) {
       isInt = isInt || sym->getName() == "\\dv";
-      caseData.push_back(std::make_pair(CaseBlock, &_case));
+      caseData.emplace_back(CaseBlock, &_case);
     } else {
       _default = CaseBlock;
       defaultCase = &_case;

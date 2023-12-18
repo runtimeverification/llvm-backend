@@ -126,9 +126,9 @@ extern "C" void *constructInitialConfiguration(const KOREPattern *initial) {
       }
 
       construction term{tag, constructor->getArguments().size()};
-      workList.push_back(term);
+      workList.emplace_back(term);
       for (const auto &child : constructor->getArguments()) {
-        workList.push_back(child.get());
+        workList.emplace_back(child.get());
       }
     } else {
       uint32_t tag = std::get_if<construction>(&current)->tag;
