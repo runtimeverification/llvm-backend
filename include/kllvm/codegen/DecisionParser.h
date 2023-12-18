@@ -24,15 +24,15 @@ struct PartialStep {
 };
 
 DecisionNode *parseYamlDecisionTreeFromString(
-    llvm::Module *, std::string yaml,
+    llvm::Module *, std::string const &yaml,
     const std::map<std::string, KORESymbol *> &syms,
     const std::map<ValueType, sptr<KORECompositeSort>> &sorts);
 DecisionNode *parseYamlDecisionTree(
-    llvm::Module *, std::string filename,
+    llvm::Module *, std::string const &filename,
     const std::map<std::string, KORESymbol *> &syms,
     const std::map<ValueType, sptr<KORECompositeSort>> &sorts);
 PartialStep parseYamlSpecialDecisionTree(
-    llvm::Module *, std::string filename,
+    llvm::Module *, std::string const &filename,
     const std::map<std::string, KORESymbol *> &syms,
     const std::map<ValueType, sptr<KORECompositeSort>> &sorts);
 

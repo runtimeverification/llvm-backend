@@ -19,7 +19,7 @@ public:
       : scanner(KOREScanner(filename))
       , loc(location(filename)) { }
 
-  static std::unique_ptr<KOREParser> from_string(std::string text);
+  static std::unique_ptr<KOREParser> from_string(std::string const &text);
 
   ptr<KOREDefinition> definition();
   sptr<KOREPattern> pattern();
@@ -63,9 +63,9 @@ private:
   void patternsNE(std::vector<sptr<KOREPattern>> &node);
 
   sptr<KOREPattern> applicationPattern();
-  sptr<KOREPattern> applicationPattern(std::string name);
+  sptr<KOREPattern> applicationPattern(std::string const &name);
   ptr<KORECompositePattern> _applicationPattern();
-  ptr<KORECompositePattern> _applicationPattern(std::string name);
+  ptr<KORECompositePattern> _applicationPattern(std::string const &name);
 
   struct {
     std::string data;

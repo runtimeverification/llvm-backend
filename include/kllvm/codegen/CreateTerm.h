@@ -24,10 +24,10 @@ private:
   alloc_arg(KORECompositePattern *pattern, int idx, std::string locationStack);
   llvm::Value *createHook(
       KORECompositePattern *hookAtt, KORECompositePattern *pattern,
-      std::string locationStack = "0");
+      std::string const &locationStack = "0");
   llvm::Value *createFunctionCall(
-      std::string name, KORECompositePattern *pattern, bool sret, bool tailcc,
-      std::string locationStack = "0");
+      std::string const &name, KORECompositePattern *pattern, bool sret,
+      bool tailcc, std::string const &locationStack = "0");
   llvm::Value *notInjectionCase(
       KORECompositePattern *constructor, llvm::Value *val,
       std::string locationStack = "0");
@@ -69,19 +69,22 @@ public:
       - tailcc: true if the call should be made via the tailcc calling convention.
     */
   llvm::Value *createFunctionCall(
-      std::string name, ValueType returnCat,
+      std::string const &name, ValueType returnCat,
       const std::vector<llvm::Value *> &args, bool sret, bool tailcc,
-      std::string locationStack = "0");
+      std::string const &locationStack = "0");
 
   llvm::BasicBlock *getCurrentBlock() const { return CurrentBlock; }
 };
 
+std::string escape(std::string const &str);
+
 /* Creates a new llvm::Module with the predefined declarations common to all
    llvm modules in the llvm backend. */
 std::unique_ptr<llvm::Module>
-newModule(std::string name, llvm::LLVMContext &Context);
+newModule(std::string const &name, llvm::LLVMContext &Context);
 void addKompiledDirSymbol(
-    llvm::LLVMContext &Context, std::string dir, llvm::Module *mod, bool debug);
+    llvm::LLVMContext &Context, std::string const &dir, llvm::Module *mod,
+    bool debug);
 
 llvm::StructType *getBlockType(
     llvm::Module *Module, KOREDefinition *definition, const KORESymbol *symbol);
@@ -104,7 +107,7 @@ void makeApplyRuleFunction(
     llvm::Module *Module, bool bigStep = false);
 std::string makeApplyRuleFunction(
     KOREAxiomDeclaration *axiom, KOREDefinition *definition,
-    llvm::Module *Module, std::vector<Residual> residuals);
+    llvm::Module *Module, std::vector<Residual> const &residuals);
 /** creates a function that evaluates the side condition of the specified rule,
  * and returns the name of the function. Returns empty string if function has no
  * side condition. */
