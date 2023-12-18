@@ -137,7 +137,8 @@ static std::pair<std::string, std::string> getFailPattern(
         reason = caseReason.second;
         sort = caseReason.first;
       } else {
-        reason = "\\or{" + sort + "}(" + reason + "," + caseReason.second + ")";
+        reason
+            = fmt::format("\\or{{{}}}({},{})", sort, reason, caseReason.second);
       }
     }
   }
