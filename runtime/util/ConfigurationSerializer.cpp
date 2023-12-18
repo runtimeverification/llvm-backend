@@ -31,8 +31,7 @@ struct serialization_state {
       : instance()
       , boundVariables{}
       , varNames{}
-      , usedVarNames{}
-       { }
+      , usedVarNames{} { }
 
   // We never want to copy the state; it should only ever get passed around by
   // reference.
@@ -255,10 +254,10 @@ void serializeMInt(
   }
 
   auto buf_len = snprintf(nullptr, 0, fmt, str.c_str(), bits);
-  auto buffer = std::make_unique<char[]>(buf_len + 1);
+  auto buffer = std::vector<char>(buf_len + 1);
 
-  snprintf(buffer.get(), buf_len + 1, fmt, str.c_str(), bits);
-  emitToken(instance, sort, buffer.get());
+  snprintf(buffer.data(), buf_len + 1, fmt, str.c_str(), bits);
+  emitToken(instance, sort, buffer.data());
 }
 
 void serializeComma(writer *file, void *state) { }

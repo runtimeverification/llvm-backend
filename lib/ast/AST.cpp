@@ -5,6 +5,7 @@
 #include "kllvm/parser/KOREParser.h"
 
 #include <algorithm>
+#include <array>
 #include <cassert>
 #include <cctype>
 #include <cstdio>
@@ -660,11 +661,11 @@ std::string enquote(std::string str) {
       if ((unsigned char)c >= 32 && (unsigned char)c < 127) {
         result.push_back(c);
       } else {
-        char buf[3];
+        auto buf = std::array<char, 3>{};
         buf[2] = 0;
-        snprintf(buf, 3, "%02x", (unsigned char)c);
+        snprintf(buf.data(), 3, "%02x", (unsigned char)c);
         result.append("\\x");
-        result.append(buf);
+        result.append(buf.data());
       }
       break;
     }
@@ -1743,9 +1744,9 @@ void KOREDefinition::preprocess() {
       ++iter;
     }
   }
-  for (auto & module : modules) {
+  for (auto &module : modules) {
     auto &declarations = module->getDeclarations();
-    for (const auto & declaration : declarations) {
+    for (const auto &declaration : declarations) {
       auto *decl = dynamic_cast<KORESymbolDeclaration *>(declaration.get());
       if (decl == nullptr) {
         continue;
@@ -1890,8 +1891,8 @@ static std::string escapeString(const std::string &str) {
     if (c == '"' || c == '\\' || !isprint(c)) {
       result.push_back('\\');
       result.push_back('x');
-      char code[3];
-      snprintf(code, 3, "%02x", (unsigned char)c);
+      auto code = std::array<char, 3>{};
+      snprintf(code.data(), 3, "%02x", (unsigned char)c);
       result.push_back(code[0]);
       result.push_back(code[1]);
     } else {

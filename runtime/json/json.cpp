@@ -120,7 +120,7 @@ get_header(boolHdr, "inj{SortBool{}, SortJSON{}}")
       return true;
     } else {
       mpz_clear(z);
-      floating f[1];
+      floating f[1]; // NOLINT(modernize-avoid-c-arrays)
       mpfr_init2(f->f, 53);
       f->exp = 11;
       mpfr_set_str(f->f, str, 9, MPFR_RNDN);
