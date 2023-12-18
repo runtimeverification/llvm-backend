@@ -136,7 +136,7 @@ void addKompiledDirSymbol(
     bool debug) {
   auto Str = llvm::ConstantDataArray::getString(Context, dir, true);
   auto global = mod->getOrInsertGlobal(KOMPILED_DIR, Str->getType());
-  llvm::GlobalVariable *globalVar = llvm::cast<llvm::GlobalVariable>(global);
+  auto *globalVar = llvm::cast<llvm::GlobalVariable>(global);
   if (!globalVar->hasInitializer()) {
     globalVar->setInitializer(Str);
   }
@@ -411,7 +411,7 @@ llvm::Value *CreateTerm::createHook(
     assert(pattern->getArguments().size() == 2);
     llvm::Value *firstArg = alloc_arg(pattern, 0, locationStack);
     llvm::Value *secondArg = alloc_arg(pattern, 1, locationStack);
-    llvm::ICmpInst *Eq = new llvm::ICmpInst(
+    auto *Eq = new llvm::ICmpInst(
         *CurrentBlock, llvm::CmpInst::ICMP_EQ, firstArg, secondArg,
         "hook_BOOL_eq");
     return Eq;
@@ -432,14 +432,14 @@ llvm::Value *CreateTerm::createHook(
     llvm::Value *falseArg = alloc_arg(pattern, 2, locationStack);
     if (trueArg->getType()->isPointerTy()
         && !falseArg->getType()->isPointerTy()) {
-      llvm::AllocaInst *AllocCollection
+      auto *AllocCollection
           = new llvm::AllocaInst(falseArg->getType(), 0, "", CurrentBlock);
       new llvm::StoreInst(falseArg, AllocCollection, CurrentBlock);
       falseArg = AllocCollection;
     } else if (
         !trueArg->getType()->isPointerTy()
         && falseArg->getType()->isPointerTy()) {
-      llvm::AllocaInst *AllocCollection
+      auto *AllocCollection
           = new llvm::AllocaInst(trueArg->getType(), 0, "", NewTrueBlock);
       new llvm::StoreInst(trueArg, AllocCollection, NewTrueBlock);
       trueArg = AllocCollection;
@@ -686,7 +686,7 @@ llvm::Value *CreateTerm::createFunctionCall(
     case SortCategory::List:
     case SortCategory::Set: {
       if (!arg->getType()->isPointerTy()) {
-        llvm::AllocaInst *AllocCollection
+        auto *AllocCollection
             = new llvm::AllocaInst(arg->getType(), 0, "", CurrentBlock);
         new llvm::StoreInst(arg, AllocCollection, CurrentBlock);
         args.push_back(AllocCollection);
@@ -719,8 +719,8 @@ llvm::Value *CreateTerm::createFunctionCall(
   default: sret = false; break;
   }
   llvm::Value *AllocSret;
-  for (int i = 0; i < args.size(); i++) {
-    llvm::Value *arg = args[i];
+  types.reserve(args.size());
+  for (auto arg : args) {
     types.push_back(arg->getType());
   }
   std::vector<llvm::Value *> realArgs = args;
@@ -996,8 +996,7 @@ bool makeFunction(
   std::vector<llvm::Type *> paramTypes;
   std::vector<std::string> paramNames;
   std::vector<llvm::Metadata *> debugArgs;
-  for (auto iter = vars.begin(); iter != vars.end(); ++iter) {
-    auto &entry = *iter;
+  for (auto &entry : vars) {
     auto sort
         = dynamic_cast<KORECompositeSort *>(entry.second->getSort().get());
     if (!sort) {
@@ -1115,8 +1114,7 @@ std::string makeApplyRuleFunction(
   std::vector<llvm::Type *> paramTypes;
   std::vector<std::string> paramNames;
   std::vector<llvm::Metadata *> debugArgs;
-  for (auto iter = vars.begin(); iter != vars.end(); ++iter) {
-    auto &entry = *iter;
+  for (auto &entry : vars) {
     auto sort
         = dynamic_cast<KORECompositeSort *>(entry.second->getSort().get());
     if (!sort) {

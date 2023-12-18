@@ -83,8 +83,7 @@ public:
   }
 
   std::string str(yaml_node_t *node) {
-    return std::string(
-        (char *)node->data.scalar.value, node->data.scalar.length);
+    return {(char *)node->data.scalar.value, node->data.scalar.length};
   }
 
   std::vector<std::string> vec(yaml_node_t *node) {
@@ -158,7 +157,7 @@ public:
         name = str(o);
       }
       ValueType hook = KORECompositeSort::getCategory(str(get(node, "hook")));
-      uses.push_back(std::make_pair(name, getParamType(hook, mod)));
+      uses.emplace_back(name, getParamType(hook, mod));
       return KOREVariablePattern::Create(name, sorts.at(hook));
     } else if (get(node, "literal")) {
       auto sym = KORESymbol::Create("\\dv");
@@ -264,9 +263,8 @@ public:
           newOccurrence.insert(newOccurrence.begin(), std::to_string(i));
           std::string binding = to_string(newOccurrence);
           std::string hook = str(get(get(_case, 2), i));
-          bindings.push_back(std::make_pair(
-              binding,
-              getParamType(KORECompositeSort::getCategory(hook), mod)));
+          bindings.emplace_back(
+              binding, getParamType(KORECompositeSort::getCategory(hook), mod));
         }
       }
       DecisionNode *child = (*this)(get(_case, 1));

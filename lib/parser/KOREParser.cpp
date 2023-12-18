@@ -9,8 +9,7 @@
 #include <iostream>
 #include <unistd.h>
 
-namespace kllvm {
-namespace parser {
+namespace kllvm::parser {
 
 std::unique_ptr<KOREParser> KOREParser::from_string(std::string const &text) {
   auto temp_file = temporary_file("tmp.parse.XXXXXX");
@@ -70,7 +69,7 @@ std::string KOREParser::consume(token next) {
   error(loc, "Expected: " + str(next) + " Actual: " + str(actual));
 }
 
-token KOREParser::peek(void) {
+token KOREParser::peek() {
   std::string data;
   if (buffer.tok == token::EMPTY) {
     buffer.tok = scanner.yylex(&data, &loc);
@@ -141,7 +140,7 @@ void KOREParser::sentences(KOREModule *node) {
   }
 }
 
-std::vector<ptr<KOREDeclaration>> KOREParser::declarations(void) {
+std::vector<ptr<KOREDeclaration>> KOREParser::declarations() {
   std::vector<ptr<KOREDeclaration>> decls;
   while (peek() != token::TOKEN_EOF) {
     auto decl = sentence();
@@ -446,5 +445,4 @@ void KOREParser::patternsNE(std::vector<sptr<KOREPattern>> &node) {
   }
 }
 
-} // namespace parser
-} // namespace kllvm
+} // namespace kllvm::parser

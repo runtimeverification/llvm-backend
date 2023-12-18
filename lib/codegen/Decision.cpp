@@ -110,10 +110,8 @@ getFailPattern(DecisionCase const &_case, bool isInt) {
     auto result = fmt::format("{}(", ast_to_string(*_case.getConstructor()));
 
     std::string conn = "";
-    for (int i = 0; i < _case.getConstructor()->getArguments().size(); i++) {
-      result += fmt::format(
-          "{}Var'Unds':{}", conn,
-          ast_to_string(*_case.getConstructor()->getArguments()[i]));
+    for (const auto &i : _case.getConstructor()->getArguments()) {
+      result += fmt::format("{}Var'Unds':{}", conn, ast_to_string(*i));
       conn = ",";
     }
     result += ")";
@@ -172,7 +170,7 @@ void SwitchNode::codegen(Decision *d) {
     }
     if (auto sym = _case.getConstructor()) {
       isInt = isInt || sym->getName() == "\\dv";
-      caseData.push_back(std::make_pair(CaseBlock, &_case));
+      caseData.emplace_back(CaseBlock, &_case);
     } else {
       _default = CaseBlock;
       defaultCase = &_case;
@@ -238,7 +236,7 @@ void SwitchNode::codegen(Decision *d) {
       int offset = 0;
       llvm::StructType *BlockType
           = getBlockType(d->Module, d->Definition, _case.getConstructor());
-      llvm::BitCastInst *Cast = new llvm::BitCastInst(
+      auto *Cast = new llvm::BitCastInst(
           val, llvm::PointerType::getUnqual(BlockType), "", d->CurrentBlock);
       KORESymbolDeclaration *symbolDecl
           = d->Definition->getSymbolDeclarations().at(
@@ -672,7 +670,7 @@ void Decision::store(var_type const &name, llvm::Value *val) {
 llvm::Constant *Decision::stringLiteral(std::string const &str) {
   auto Str = llvm::ConstantDataArray::getString(Ctx, str, true);
   auto global = Module->getOrInsertGlobal("str_lit_" + str, Str->getType());
-  llvm::GlobalVariable *globalVar = llvm::cast<llvm::GlobalVariable>(global);
+  auto *globalVar = llvm::cast<llvm::GlobalVariable>(global);
   if (!globalVar->hasInitializer()) {
     globalVar->setInitializer(Str);
   }
@@ -692,9 +690,8 @@ static void initChoiceBuffer(
   dt->preprocess(leaves);
   auto ty = llvm::ArrayType::get(
       llvm::Type::getInt8PtrTy(module->getContext()), dt->getChoiceDepth() + 1);
-  llvm::AllocaInst *choiceBuffer
-      = new llvm::AllocaInst(ty, 0, "choiceBuffer", block);
-  llvm::AllocaInst *choiceDepth = new llvm::AllocaInst(
+  auto *choiceBuffer = new llvm::AllocaInst(ty, 0, "choiceBuffer", block);
+  auto *choiceDepth = new llvm::AllocaInst(
       llvm::Type::getInt64Ty(module->getContext()), 0, "choiceDepth", block);
   auto zero
       = llvm::ConstantInt::get(llvm::Type::getInt64Ty(module->getContext()), 0);
@@ -704,11 +701,11 @@ static void initChoiceBuffer(
   new llvm::StoreInst(
       llvm::BlockAddress::get(block->getParent(), stuck), firstElt, block);
 
-  llvm::LoadInst *currDepth = new llvm::LoadInst(
+  auto *currDepth = new llvm::LoadInst(
       llvm::Type::getInt64Ty(module->getContext()), choiceDepth, "", fail);
   auto currentElt = llvm::GetElementPtrInst::CreateInBounds(
       ty, choiceBuffer, {zero, currDepth}, "", fail);
-  llvm::LoadInst *failAddress
+  auto *failAddress
       = new llvm::LoadInst(ty->getElementType(), currentElt, "", fail);
   auto newDepth = llvm::BinaryOperator::Create(
       llvm::Instruction::Sub, currDepth,
@@ -999,7 +996,7 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> stepFunctionHeader(
       elements);
   auto layout = module->getOrInsertGlobal(
       "layout_item_rule_" + std::to_string(ordinal), layoutArr->getType());
-  llvm::GlobalVariable *globalVar = llvm::cast<llvm::GlobalVariable>(layout);
+  auto *globalVar = llvm::cast<llvm::GlobalVariable>(layout);
   if (!globalVar->hasInitializer()) {
     globalVar->setInitializer(layoutArr);
   }

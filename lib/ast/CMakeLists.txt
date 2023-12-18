@@ -6,7 +6,7 @@ add_library(AST
 )
 
 target_link_libraries(AST
-  PUBLIC Parser BinaryKore)
+  PUBLIC fmt::fmt-header-only Parser BinaryKore)
 
 install(
   TARGETS AST
