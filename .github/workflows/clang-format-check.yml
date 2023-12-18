@@ -27,6 +27,34 @@ jobs:
       with:
         scandir: './bin'
 
+  clang-tidy-check:
+    name: Clang Tidy check
+    runs-on: [self-hosted, linux, normal]
+    steps:
+      - name: 'Check out code'
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: 'Set up Docker'
+        uses: ./.github/actions/with-docker
+        with:
+          tag: llvm-backend-ci-${{ github.sha }}
+          os: ubuntu
+          distro: jammy
+          llvm: 15
+
+      - name: 'Run clang-tidy checks'
+        run: |
+          docker exec -t llvm-backend-ci-${GITHUB_SHA} /bin/bash -c 'mkdir build && cd build && cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=On -DBUILD_TESTS=On ..'
+          docker exec -t llvm-backend-ci-${GITHUB_SHA} scripts/clang-tidy.sh
+
+      - name: 'Tear down Docker'
+        if: always()
+        run: |
+          docker stop --time=0 llvm-backend-ci-${GITHUB_SHA}
+          docker container rm --force llvm-backend-ci-${GITHUB_SHA} || true
+
   scala-check:
     name: Scala formatting check
     runs-on: ubuntu-latest

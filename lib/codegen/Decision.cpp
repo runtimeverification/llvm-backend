@@ -149,7 +149,7 @@ void SwitchNode::codegen(Decision *d) {
     return;
   }
   llvm::Value *val = d->load(std::make_pair(name, type));
-  llvm::Value *ptrVal;
+  llvm::Value *ptrVal = nullptr;
   if (d->FailPattern) {
     ptrVal = d->ptrTerm(val);
   }
@@ -305,7 +305,7 @@ void SwitchNode::codegen(Decision *d) {
             d->CurrentBlock);
         new llvm::StoreInst(CurrDepth, d->ChoiceDepth, d->CurrentBlock);
 
-        auto alloc = llvm::dyn_cast<llvm::AllocaInst>(d->ChoiceBuffer);
+        auto alloc = llvm::cast<llvm::AllocaInst>(d->ChoiceBuffer);
         auto ty = alloc->getAllocatedType();
 
         auto zero = llvm::ConstantInt::get(llvm::Type::getInt64Ty(d->Ctx), 0);
@@ -654,7 +654,7 @@ llvm::Value *Decision::load(var_type name) {
   if (!sym) {
     sym = this->decl(name);
   }
-  auto alloc = llvm::dyn_cast<llvm::AllocaInst>(sym);
+  auto alloc = llvm::cast<llvm::AllocaInst>(sym);
   auto ty = alloc->getAllocatedType();
   return new llvm::LoadInst(
       ty, sym, name.first.substr(0, max_name_length), this->CurrentBlock);
@@ -671,8 +671,7 @@ void Decision::store(var_type name, llvm::Value *val) {
 llvm::Constant *Decision::stringLiteral(std::string str) {
   auto Str = llvm::ConstantDataArray::getString(Ctx, str, true);
   auto global = Module->getOrInsertGlobal("str_lit_" + str, Str->getType());
-  llvm::GlobalVariable *globalVar
-      = llvm::dyn_cast<llvm::GlobalVariable>(global);
+  llvm::GlobalVariable *globalVar = llvm::cast<llvm::GlobalVariable>(global);
   if (!globalVar->hasInitializer()) {
     globalVar->setInitializer(Str);
   }
@@ -999,8 +998,7 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> stepFunctionHeader(
       elements);
   auto layout = module->getOrInsertGlobal(
       "layout_item_rule_" + std::to_string(ordinal), layoutArr->getType());
-  llvm::GlobalVariable *globalVar
-      = llvm::dyn_cast<llvm::GlobalVariable>(layout);
+  llvm::GlobalVariable *globalVar = llvm::cast<llvm::GlobalVariable>(layout);
   if (!globalVar->hasInitializer()) {
     globalVar->setInitializer(layoutArr);
   }

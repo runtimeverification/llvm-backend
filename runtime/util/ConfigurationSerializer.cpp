@@ -400,6 +400,7 @@ void serializeConfigurations(
   std::memcpy(buf, state.instance.data().data(), buf_size);
   fwrite(buf, 1, buf_size, file);
 
+  free(buf);
   fclose(file);
 }
 
@@ -411,6 +412,8 @@ void serializeConfigurationToFile(
 
   FILE *file = fopen(filename, "a");
   fwrite(data, 1, size, file);
+
+  free(data);
   fclose(file);
 }
 
@@ -448,6 +451,8 @@ void serializeTermToFile(
 
   FILE *file = fopen(filename, "a");
   fwrite(data, 1, size, file);
+
+  free(data);
   fclose(file);
 }
 
@@ -461,6 +466,8 @@ void serializeRawTermToFile(
 
   FILE *file = fopen(filename, "a");
   fwrite(data, 1, size, file);
+
+  free(data);
   fclose(file);
 }
 
@@ -472,10 +479,9 @@ sortedTermToKorePattern(block *subject, const char *sort) {
   char *data_out;
   size_t size_out;
 
-  serializeConfiguration(term, "SortKItem{}", &data_out, &size_out, true);
-  return deserialize_pattern(data_out, data_out + size_out, true);
-}
+  serializeConfiguration(subject, "SortKItem{}", &data_out, &size_out, true);
+  auto result = deserialize_pattern(data_out, data_out + size_out);
 
-std::shared_ptr<kllvm::KOREPattern> termToKorePattern(block *subject) {
-  return sortedTermToKorePattern(subject, "SortKItem{}");
+  free(data_out);
+  return result;
 }

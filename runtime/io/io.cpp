@@ -525,9 +525,11 @@ void flush_IO_logs() {
     std::string msg = log.second;
     size_t length = pathStr.length();
     char *path1 = (char *)malloc(sizeof(char) * (length + 1));
-    strcpy(path1, pathStr.c_str());
+    strncpy(path1, pathStr.c_str(), length + 1);
+    path1[length] = '\0';
     char *path2 = (char *)malloc(sizeof(char) * (length + 1));
-    strcpy(path2, pathStr.c_str());
+    strncpy(path2, pathStr.c_str(), length + 1);
+    path2[length] = '\0';
     char *dir = dirname(path1);
     if (getenv("K_LOG_DIR")) {
       dir = getenv("K_LOG_DIR");

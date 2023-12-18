@@ -268,8 +268,6 @@ void extract(mpz_t result, mpz_t i, size_t off, size_t len) {
     } else {
       mpn_copyi(result->_mp_d, i->_mp_d + off_words, copy_size);
     }
-  } else {
-    copy_size = 0;
   }
   if (mpz_sgn(i) < 0) {
     mpn_com(result->_mp_d, result->_mp_d, size);
