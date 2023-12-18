@@ -2,7 +2,6 @@ Checks:
   clang-analyzer-*
   -clang-analyzer-cplusplus.PlacementNew
   performance-*
-  -performance-unnecessary-value-param
   -performance-no-int-to-ptr
 
 WarningsAsErrors:

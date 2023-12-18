@@ -463,7 +463,7 @@ sptr<KOREPattern> addBrackets(
 }
 
 sptr<KOREPattern>
-addBrackets(sptr<KOREPattern> t, PrettyPrintData const &data) {
+addBrackets(sptr<KOREPattern> const &t, PrettyPrintData const &data) {
   return addBrackets(t, nullptr, nullptr, data);
 }
 

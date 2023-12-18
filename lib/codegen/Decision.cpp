@@ -75,7 +75,7 @@ llvm::Value *Decision::ptrTerm(llvm::Value *val) {
       val, llvm::Type::getInt8PtrTy(Ctx), "", CurrentBlock);
 }
 
-bool DecisionNode::beginNode(Decision *d, std::string name) {
+bool DecisionNode::beginNode(Decision *d, std::string const &name) {
   if (isCompleted()) {
     llvm::BranchInst::Create(cachedCode, d->CurrentBlock);
     return true;
@@ -631,7 +631,7 @@ llvm::Value *Decision::getTag(llvm::Value *val) {
   return res;
 }
 
-llvm::AllocaInst *Decision::decl(var_type name) {
+llvm::AllocaInst *Decision::decl(var_type const &name) {
   auto sym = new llvm::AllocaInst(
       name.second, 0, "",
       this->CurrentBlock->getParent()->getEntryBlock().getFirstNonPHI());
@@ -639,7 +639,7 @@ llvm::AllocaInst *Decision::decl(var_type name) {
   return sym;
 }
 
-llvm::Value *Decision::load(var_type name) {
+llvm::Value *Decision::load(var_type const &name) {
   if (name.first == "") {
     llvm::Type *ty = name.second;
     if (ty->isPointerTy()) {
@@ -661,7 +661,7 @@ llvm::Value *Decision::load(var_type name) {
       ty, sym, name.first.substr(0, max_name_length), this->CurrentBlock);
 }
 
-void Decision::store(var_type name, llvm::Value *val) {
+void Decision::store(var_type const &name, llvm::Value *val) {
   auto sym = this->symbols[name];
   if (!sym) {
     sym = this->decl(name);
@@ -669,7 +669,7 @@ void Decision::store(var_type name, llvm::Value *val) {
   new llvm::StoreInst(val, sym, this->CurrentBlock);
 }
 
-llvm::Constant *Decision::stringLiteral(std::string str) {
+llvm::Constant *Decision::stringLiteral(std::string const &str) {
   auto Str = llvm::ConstantDataArray::getString(Ctx, str, true);
   auto global = Module->getOrInsertGlobal("str_lit_" + str, Str->getType());
   llvm::GlobalVariable *globalVar = llvm::cast<llvm::GlobalVariable>(global);
@@ -895,7 +895,7 @@ void makeAnywhereFunction(
 std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> stepFunctionHeader(
     unsigned ordinal, llvm::Module *module, KOREDefinition *definition,
     llvm::BasicBlock *block, llvm::BasicBlock *stuck,
-    std::vector<llvm::Value *> args, std::vector<ValueType> types) {
+    std::vector<llvm::Value *> args, std::vector<ValueType> const &types) {
   auto finished = getOrInsertFunction(
       module, "finished_rewriting",
       llvm::FunctionType::get(
@@ -1133,7 +1133,7 @@ void makeStepFunction(
 
 void makeMatchReasonFunctionWrapper(
     KOREDefinition *definition, llvm::Module *module,
-    KOREAxiomDeclaration *axiom, std::string name) {
+    KOREAxiomDeclaration *axiom, std::string const &name) {
   auto blockType = getValueType({SortCategory::Symbol, 0}, module);
   llvm::FunctionType *funcType = llvm::FunctionType::get(
       llvm::Type::getVoidTy(module->getContext()), {blockType}, false);
@@ -1237,8 +1237,8 @@ void makeMatchReasonFunction(
 // that much about memory leaks in the compiler right now, so it's probably
 // fine.
 KOREPattern *makePartialTerm(
-    KOREPattern *term, std::set<std::string> occurrences,
-    std::string occurrence) {
+    KOREPattern *term, std::set<std::string> const &occurrences,
+    std::string const &occurrence) {
   if (occurrences.count(occurrence)) {
     return KOREVariablePattern::Create(occurrence, term->getSort()).release();
   }

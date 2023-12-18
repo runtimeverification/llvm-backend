@@ -64,7 +64,7 @@ Location getLocation(KOREAxiomDeclaration *axiom) {
   return {location, start_line, end_line, start_column, end_column};
 }
 
-Location parseLocation(std::string loc) {
+Location parseLocation(std::string const &loc) {
   size_t pos = loc.find(':');
   if (pos == std::string::npos) {
     std::cerr << "Rule's location must be in the format: "
@@ -87,7 +87,8 @@ Location parseLocation(std::string loc) {
   return {loc.substr(0, pos), line, line, column, column};
 }
 
-bool checkRanges(Location param, Location file, bool checkColumn) {
+bool checkRanges(
+    Location const &param, Location const &file, bool checkColumn) {
   auto line
       = param.start_line >= file.start_line && param.end_line <= file.end_line;
   auto column = param.start_column >= file.start_column

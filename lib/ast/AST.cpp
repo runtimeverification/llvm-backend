@@ -113,7 +113,7 @@ bool KORESortVariable::operator==(const KORESort &other) const {
   return false;
 }
 
-void KORECompositeSort::addArgument(sptr<KORESort> Argument) {
+void KORECompositeSort::addArgument(sptr<KORESort> const &Argument) {
   arguments.push_back(Argument);
 }
 
@@ -185,7 +185,7 @@ std::string KORECompositeSort::getHook(KOREDefinition *definition) {
   return strPattern->getContents();
 }
 
-ValueType KORECompositeSort::getCategory(std::string name) {
+ValueType KORECompositeSort::getCategory(std::string const &name) {
   SortCategory category;
   uint64_t bits = 0;
   if (name == "MAP.Map")
@@ -218,16 +218,16 @@ ValueType KORECompositeSort::getCategory(std::string name) {
   return {category, bits};
 }
 
-void KORESymbol::addArgument(sptr<KORESort> Argument) {
+void KORESymbol::addArgument(sptr<KORESort> const &Argument) {
   arguments.push_back(Argument);
 }
 
-void KORESymbol::addFormalArgument(sptr<KORESort> Argument) {
+void KORESymbol::addFormalArgument(sptr<KORESort> const &Argument) {
   formalArguments.push_back(Argument);
 }
 
 void KORESymbol::addSort(sptr<KORESort> Sort) {
-  sort = Sort;
+  sort = std::move(Sort);
 }
 
 bool KORESymbol::operator==(const KORESymbol &other) const {
@@ -344,7 +344,7 @@ std::string KOREVariablePattern::getName() const {
   return name->getName();
 }
 
-void KORECompositePattern::addArgument(sptr<KOREPattern> Argument) {
+void KORECompositePattern::addArgument(sptr<KOREPattern> const &Argument) {
   arguments.push_back(Argument);
 }
 
@@ -428,13 +428,13 @@ static void append(std::ostream &out, char c) {
   out << c;
 }
 
-static void append(std::ostream &out, std::string str) {
+static void append(std::ostream &out, std::string const &str) {
   printIndent(out);
   out << str;
 }
 
-static void
-color(std::ostream &out, std::string color, PrettyPrintData const &data) {
+static void color(
+    std::ostream &out, std::string const &color, PrettyPrintData const &data) {
   if (data.hasColor) {
     static bool once = true;
     static std::map<std::string, std::string> colors;
@@ -878,7 +878,7 @@ struct CompareFirst {
 };
 
 void kllvm::flatten(
-    KORECompositePattern *pat, std::string name,
+    KORECompositePattern *pat, std::string const &name,
     std::vector<sptr<KOREPattern>> &result) {
   for (auto &arg : pat->getArguments()) {
     if (auto pat2 = dynamic_cast<KORECompositePattern *>(arg.get())) {
@@ -1053,7 +1053,7 @@ sptr<KOREPattern> KORECompositePattern::desugarAssociative() {
       for (auto i = 1u; i < comp_arg->arguments.size(); i++) {
         auto new_accum
             = KORECompositePattern::Create(comp_arg->getConstructor());
-        new_accum->addArgument(std::move(accum));
+        new_accum->addArgument(accum);
         new_accum->addArgument(comp_arg->arguments[i]->desugarAssociative());
         accum = ptr<KOREPattern>(new_accum.release());
       }
@@ -1070,7 +1070,7 @@ sptr<KOREPattern> KORECompositePattern::desugarAssociative() {
         auto new_accum
             = KORECompositePattern::Create(comp_arg->getConstructor());
         new_accum->addArgument(comp_arg->arguments[i]->desugarAssociative());
-        new_accum->addArgument(std::move(accum));
+        new_accum->addArgument(accum);
         accum = ptr<KOREPattern>(new_accum.release());
       }
 
@@ -1099,7 +1099,7 @@ sptr<KOREPattern> KORECompositePattern::unflattenAndOr() {
 
       for (auto i = 1u; i < arguments.size(); i++) {
         auto new_accum = KORECompositePattern::Create(constructor.get());
-        new_accum->addArgument(std::move(accum));
+        new_accum->addArgument(accum);
         new_accum->addArgument(arguments[i]->unflattenAndOr());
         accum = ptr<KOREPattern>(new_accum.release());
       }
@@ -1273,11 +1273,11 @@ void KOREDeclaration::addAttribute(sptr<KORECompositePattern> Attribute) {
 }
 
 void KOREDeclaration::addObjectSortVariable(
-    sptr<KORESortVariable> SortVariable) {
+    sptr<KORESortVariable> const &SortVariable) {
   objectSortVariables.push_back(SortVariable);
 }
 
-std::string KOREDeclaration::getStringAttribute(std::string name) const {
+std::string KOREDeclaration::getStringAttribute(std::string const &name) const {
   KORECompositePattern *attr = attributes.at(name).get();
   assert(attr->getArguments().size() == 1);
   auto strPattern
@@ -2100,8 +2100,9 @@ void KOREVariable::serialize_to(serializer &s) const {
 }
 
 void kllvm::readMultimap(
-    std::string name, KORESymbolDeclaration *decl,
-    std::map<std::string, std::set<std::string>> &output, std::string attName) {
+    std::string const &name, KORESymbolDeclaration *decl,
+    std::map<std::string, std::set<std::string>> &output,
+    std::string const &attName) {
   if (decl->getAttributes().count(attName)) {
     KORECompositePattern *att = decl->getAttributes().at(attName).get();
     for (auto &pat : att->getArguments()) {

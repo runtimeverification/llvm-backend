@@ -125,7 +125,7 @@ static std::string LAYOUT_STRUCT = "layout";
 static std::string LAYOUTITEM_STRUCT = "layoutitem";
 
 static void emitDataTableForSymbol(
-    std::string name, llvm::Type *ty, llvm::DIType *dity,
+    std::string const &name, llvm::Type *ty, llvm::DIType *dity,
     KOREDefinition *definition, llvm::Module *module,
     llvm::Constant *getter(KOREDefinition *, llvm::Module *, KORESymbol *)) {
   llvm::LLVMContext &Ctx = module->getContext();
@@ -176,7 +176,7 @@ static void emitDataTableForSymbol(
 }
 
 static void emitDataForSymbol(
-    std::string name, llvm::Type *ty, llvm::DIType *dity,
+    std::string const &name, llvm::Type *ty, llvm::DIType *dity,
     KOREDefinition *definition, llvm::Module *module, bool isEval,
     std::pair<llvm::Value *, llvm::BasicBlock *> getter(
         KOREDefinition *, llvm::Module *, KORESymbol *, llvm::Instruction *)) {
@@ -762,7 +762,7 @@ makePackedVisitorStructureType(llvm::LLVMContext &Ctx, llvm::Module *module) {
 }
 
 static void emitTraversal(
-    std::string name, KOREDefinition *definition, llvm::Module *module,
+    std::string const &name, KOREDefinition *definition, llvm::Module *module,
     bool isVisitor,
     void getter(
         KOREDefinition *, llvm::Module *, KORESymbol *, llvm::BasicBlock *,

@@ -241,7 +241,8 @@ void printConfiguration(const char *filename, block *subject) {
 }
 
 void printConfigurations(
-    const char *filename, std::unordered_set<block *, HashBlock, KEq> results) {
+    const char *filename,
+    std::unordered_set<block *, HashBlock, KEq> const &results) {
   FILE *file = fopen(filename, "a");
   auto state = print_state();
 
