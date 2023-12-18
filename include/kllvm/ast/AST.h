@@ -428,6 +428,21 @@ public:
    */
   virtual sptr<KOREPattern> desugarAssociative() = 0;
 
+  /**
+   * Abstracts the common pattern of checking whether a composite pattern has a
+   * particular top-level constructor and arity. For example:
+   *
+   *   c(A, B) -> matchesShape(c, 2) == true
+   *   c()     -> matchesShape(c, 2) == false
+   *   c()     -> matchesShape(b, 0) == false
+   *
+   * For instances of KORECompositePattern, return this if the constructor and
+   * arity and match. For all other subclasses, and when they do not match,
+   * return nullptr;
+   */
+  virtual sptr<KORECompositePattern>
+  matchesShape(std::string const &constructor, size_t arity) = 0;
+
   friend KORECompositePattern;
 
 private:
@@ -498,6 +513,11 @@ public:
 
   virtual sptr<KOREPattern> unflattenAndOr() override {
     return shared_from_this();
+  }
+
+  sptr<KORECompositePattern>
+  matchesShape(std::string const &constructor, size_t arity) override {
+    return nullptr;
   }
 
   virtual bool matches(
@@ -584,6 +604,9 @@ public:
       substitution &, SubsortMap const &, SymbolMap const &,
       sptr<KOREPattern>) override;
 
+  sptr<KORECompositePattern>
+  matchesShape(std::string const &constructor, size_t arity) override;
+
 private:
   virtual sptr<KOREPattern> expandMacros(
       SubsortMap const &, SymbolMap const &,
@@ -653,6 +676,11 @@ public:
   virtual bool matches(
       substitution &, SubsortMap const &, SymbolMap const &,
       sptr<KOREPattern> subject) override;
+
+  sptr<KORECompositePattern>
+  matchesShape(std::string const &constructor, size_t arity) override {
+    return nullptr;
+  }
 
 private:
   virtual sptr<KOREPattern> expandMacros(

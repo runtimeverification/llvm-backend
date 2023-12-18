@@ -406,6 +406,16 @@ sptr<KOREPattern> KORECompositePattern::expandAliases(KOREDefinition *def) {
   return ptr;
 }
 
+sptr<KORECompositePattern> KORECompositePattern::matchesShape(
+    std::string const &constructor, size_t arity) {
+  if (getConstructor()->getName() == constructor
+      && getArguments().size() == arity) {
+    return std::dynamic_pointer_cast<KORECompositePattern>(shared_from_this());
+  }
+
+  return nullptr;
+}
+
 static int indent = 0;
 static bool atNewLine = true;
 
