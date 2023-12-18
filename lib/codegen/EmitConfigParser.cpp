@@ -1152,8 +1152,7 @@ static llvm::Constant *getLayoutData(
       elements);
   auto global = module->getOrInsertGlobal(
       "layout_item_" + std::to_string(layout), Arr->getType());
-  llvm::GlobalVariable *globalVar
-      = llvm::dyn_cast<llvm::GlobalVariable>(global);
+  llvm::GlobalVariable *globalVar = llvm::cast<llvm::GlobalVariable>(global);
   if (!globalVar->hasInitializer()) {
     globalVar->setInitializer(Arr);
   }
@@ -1165,8 +1164,7 @@ static llvm::Constant *getLayoutData(
   auto global2 = module->getOrInsertGlobal(
       name,
       llvm::StructType::getTypeByName(module->getContext(), LAYOUT_STRUCT));
-  llvm::GlobalVariable *globalVar2
-      = llvm::dyn_cast<llvm::GlobalVariable>(global2);
+  llvm::GlobalVariable *globalVar2 = llvm::cast<llvm::GlobalVariable>(global2);
   initDebugGlobal(name, getForwardDecl(LAYOUT_STRUCT), globalVar2);
   if (!globalVar2->hasInitializer()) {
     globalVar2->setInitializer(llvm::ConstantStruct::get(
