@@ -1,6 +1,13 @@
 Checks:
   clang-analyzer-*
   -clang-analyzer-cplusplus.PlacementNew
+  performance-*
+  -performance-unnecessary-value-param
+  -performance-for-range-copy
+  -performance-inefficient-string-concatenation
+  -performance-unnecessary-copy-initialization
+  -performance-faster-string-find
+  -performance-no-int-to-ptr
 
 WarningsAsErrors:
   '*'
