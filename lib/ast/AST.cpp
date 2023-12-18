@@ -407,16 +407,16 @@ sptr<KOREPattern> KORECompositePattern::expandAliases(KOREDefinition *def) {
 static int indent = 0;
 static bool atNewLine = true;
 
-#define INDENT_SIZE 2
-
 static void newline(std::ostream &out) {
   out << std::endl;
   atNewLine = true;
 }
 
 static void printIndent(std::ostream &out) {
+  constexpr auto indent_size = 2;
+
   if (atNewLine) {
-    for (int i = 0; i < INDENT_SIZE * indent; i++) {
+    for (int i = 0; i < indent_size * indent; i++) {
       out << ' ';
     }
     atNewLine = false;
@@ -1750,8 +1750,7 @@ void KOREDefinition::preprocess() {
   for (auto moditer = modules.begin(); moditer != modules.end(); ++moditer) {
     auto &declarations = (*moditer)->getDeclarations();
     for (auto iter = declarations.begin(); iter != declarations.end(); ++iter) {
-      auto *decl
-          = dynamic_cast<KORESymbolDeclaration *>(iter->get());
+      auto *decl = dynamic_cast<KORESymbolDeclaration *>(iter->get());
       if (decl == nullptr) {
         continue;
       }
