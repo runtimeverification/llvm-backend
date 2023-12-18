@@ -61,7 +61,7 @@ static void *megabyte_malloc() {
     if (next_superblock_ptr) {
       *next_superblock_ptr = (char *)superblock_ptr;
     }
-    memory_block_header *hdr = (memory_block_header *)superblock_ptr;
+    auto *hdr = (memory_block_header *)superblock_ptr;
     next_superblock_ptr = &hdr->next_superblock;
     hdr->next_superblock = nullptr;
   }
@@ -76,7 +76,7 @@ static void freshBlock(struct arena *Arena) {
   if (Arena->block_start == nullptr) {
     nextBlock = (char *)megabyte_malloc();
     Arena->first_block = nextBlock;
-    memory_block_header *nextHeader = (memory_block_header *)nextBlock;
+    auto *nextHeader = (memory_block_header *)nextBlock;
     nextHeader->next_block = nullptr;
     nextHeader->semispace = Arena->allocation_semispace_id;
     Arena->num_blocks++;
@@ -97,7 +97,7 @@ static void freshBlock(struct arena *Arena) {
           Arena->allocation_semispace_id);
       nextBlock = (char *)megabyte_malloc();
       *(char **)Arena->block_start = nextBlock;
-      memory_block_header *nextHeader = (memory_block_header *)nextBlock;
+      auto *nextHeader = (memory_block_header *)nextBlock;
       nextHeader->next_block = nullptr;
       nextHeader->semispace = Arena->allocation_semispace_id;
       Arena->num_blocks++;
@@ -233,9 +233,9 @@ size_t arenaSize(const struct arena *Arena) {
 }
 
 void freeAllMemory() {
-  memory_block_header *superblock = (memory_block_header *)first_superblock_ptr;
+  auto *superblock = (memory_block_header *)first_superblock_ptr;
   while (superblock) {
-    memory_block_header *next_superblock
+    auto *next_superblock
         = (memory_block_header *)superblock->next_superblock;
     free(superblock);
     superblock = next_superblock;

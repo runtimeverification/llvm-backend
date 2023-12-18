@@ -10,8 +10,8 @@ bool hook_FLOAT_trueeq(SortFloat, SortFloat);
 bool hook_STRING_lt(SortString, SortString);
 
 bool hook_KEQUAL_eq(block *arg1, block *arg2) {
-  uint64_t arg1intptr = (uint64_t)arg1;
-  uint64_t arg2intptr = (uint64_t)arg2;
+  auto arg1intptr = (uint64_t)arg1;
+  auto arg2intptr = (uint64_t)arg2;
   bool arg1lb = is_leaf_block(arg1);
   bool arg2lb = is_leaf_block(arg2);
   if (arg1lb == arg2lb) {
@@ -31,7 +31,7 @@ bool hook_KEQUAL_eq(block *arg1, block *arg2) {
           return hook_STRING_eq((string *)arg1, (string *)arg2);
         } else { // arglayout != 0
           // Both arg1 and arg2 are blocks.
-          uint16_t arglayoutshort = (uint16_t)arglayout;
+          auto arglayoutshort = (uint16_t)arglayout;
           layout *layoutPtr = getLayoutData(arglayoutshort);
           uint8_t length = layoutPtr->nargs;
           for (uint8_t i = 0; i < length; i++) {
@@ -50,8 +50,8 @@ bool hook_KEQUAL_eq(block *arg1, block *arg2) {
               break;
             }
             case RANGEMAP_LAYOUT: {
-              rangemap *rangemap1ptr = (rangemap *)(child1intptr);
-              rangemap *rangemap2ptr = (rangemap *)(child2intptr);
+              auto *rangemap1ptr = (rangemap *)(child1intptr);
+              auto *rangemap2ptr = (rangemap *)(child2intptr);
               bool cmp = hook_RANGEMAP_eq(rangemap1ptr, rangemap2ptr);
               if (!cmp) {
                 return false;
@@ -77,8 +77,8 @@ bool hook_KEQUAL_eq(block *arg1, block *arg2) {
               break;
             }
             case INT_LAYOUT: {
-              mpz_ptr *int1ptrptr = (mpz_ptr *)(child1intptr);
-              mpz_ptr *int2ptrptr = (mpz_ptr *)(child2intptr);
+              auto *int1ptrptr = (mpz_ptr *)(child1intptr);
+              auto *int2ptrptr = (mpz_ptr *)(child2intptr);
               bool cmp = hook_INT_eq(*int1ptrptr, *int2ptrptr);
               if (!cmp) {
                 return false;
@@ -86,8 +86,8 @@ bool hook_KEQUAL_eq(block *arg1, block *arg2) {
               break;
             }
             case FLOAT_LAYOUT: {
-              floating **float1ptrptr = (floating **)(child1intptr);
-              floating **float2ptrptr = (floating **)(child2intptr);
+              auto **float1ptrptr = (floating **)(child1intptr);
+              auto **float2ptrptr = (floating **)(child2intptr);
               bool cmp = hook_FLOAT_trueeq(*float1ptrptr, *float2ptrptr);
               if (!cmp) {
                 return false;
@@ -107,8 +107,8 @@ bool hook_KEQUAL_eq(block *arg1, block *arg2) {
               break;
             }
             case SYMBOL_LAYOUT: {
-              block **child1ptrptr = (block **)(child1intptr);
-              block **child2ptrptr = (block **)(child2intptr);
+              auto **child1ptrptr = (block **)(child1intptr);
+              auto **child2ptrptr = (block **)(child2intptr);
               bool cmp = hook_KEQUAL_eq(*child1ptrptr, *child2ptrptr);
               if (!cmp) {
                 return false;
@@ -116,8 +116,8 @@ bool hook_KEQUAL_eq(block *arg1, block *arg2) {
               break;
             }
             case VARIABLE_LAYOUT: {
-              block **var1ptrptr = (block **)(child1intptr);
-              block **var2ptrptr = (block **)(child2intptr);
+              auto **var1ptrptr = (block **)(child1intptr);
+              auto **var2ptrptr = (block **)(child2intptr);
               bool cmp = hook_STRING_eq(
                   (string *)*var1ptrptr, (string *)*var2ptrptr);
               if (!cmp) {
@@ -148,8 +148,8 @@ bool hook_KEQUAL_eq(block *arg1, block *arg2) {
 // - Symbols with same tags are ordered be lexicographically comparing their
 //   childen.
 bool hook_KEQUAL_lt(block *arg1, block *arg2) {
-  uint64_t arg1intptr = (uint64_t)arg1;
-  uint64_t arg2intptr = (uint64_t)arg2;
+  auto arg1intptr = (uint64_t)arg1;
+  auto arg2intptr = (uint64_t)arg2;
   bool isconstant1 = is_leaf_block(arg1);
   bool isconstant2 = is_leaf_block(arg2);
   if (isconstant1 != isconstant2) {
@@ -195,8 +195,8 @@ bool hook_KEQUAL_lt(block *arg1, block *arg2) {
             abort(); // Implement when needed.
           }
           case INT_LAYOUT: {
-            mpz_ptr *int1ptrptr = (mpz_ptr *)(arg1intptr + offset);
-            mpz_ptr *int2ptrptr = (mpz_ptr *)(arg2intptr + offset);
+            auto *int1ptrptr = (mpz_ptr *)(arg1intptr + offset);
+            auto *int2ptrptr = (mpz_ptr *)(arg2intptr + offset);
             int cmp = mpz_cmp(*int1ptrptr, *int2ptrptr);
             if (cmp != 0) {
               return cmp < 0;

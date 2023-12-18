@@ -192,7 +192,7 @@ string *makeString(const KCHAR *input, ssize_t len = -1) {
 
 char *getTerminatedString(string *str) {
   int length = len(str);
-  string *buf
+  auto *buf
       = static_cast<string *>(koreAllocToken(sizeof(string) + (length + 1)));
   memcpy(buf->data, str->data, length);
   init_with_len(buf, length + 1);

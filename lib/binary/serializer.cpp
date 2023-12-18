@@ -7,7 +7,7 @@ namespace detail {
 
 bool is_big_endian() {
   uint32_t i = 1;
-  uint8_t *c = reinterpret_cast<uint8_t *>(&i);
+  auto *c = reinterpret_cast<uint8_t *>(&i);
   return *c == 0x00;
 }
 

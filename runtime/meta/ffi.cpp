@@ -86,7 +86,7 @@ static void *so_lib_handle() {
 
 static ffi_type *getTypeFromBlock(block *elem) {
   if (is_leaf_block(elem)) {
-    uint64_t symbol = (uint64_t)elem;
+    auto symbol = (uint64_t)elem;
 
     if (symbol == tag_type_void()) {
       return &ffi_type_void;
@@ -146,7 +146,7 @@ static ffi_type *getTypeFromBlock(block *elem) {
     size_t numFields = hook_LIST_size_long(elements);
     block *structField;
 
-    ffi_type *structType = (ffi_type *)malloc(sizeof(ffi_type));
+    auto *structType = (ffi_type *)malloc(sizeof(ffi_type));
     structType->size = 0;
     structType->alignment = 0;
     structType->type = FFI_TYPE_STRUCT;
@@ -261,7 +261,7 @@ string *ffiCall(
   default: KLLVM_HOOK_INVALID_ARGUMENT("Bad FFI argument type"); break;
   }
 
-  string *rvalue
+  auto *rvalue
       = static_cast<string *>(koreAllocToken(sizeof(string) + rtype->size));
   ffi_call(&cif, address, (void *)(rvalue->data), avalues);
 
@@ -455,7 +455,7 @@ bool hook_FFI_allocated(block *kitem) {
 
 SortK hook_FFI_read(SortInt addr, SortBytes mem) {
   unsigned long l = mpz_get_ui(addr);
-  uintptr_t intptr = (uintptr_t)l;
+  auto intptr = (uintptr_t)l;
   char *ptr = (char *)intptr;
   memcpy(mem->data, ptr, len(mem));
   return dotK;
@@ -463,7 +463,7 @@ SortK hook_FFI_read(SortInt addr, SortBytes mem) {
 
 SortK hook_FFI_write(SortInt addr, SortBytes mem) {
   unsigned long l = mpz_get_ui(addr);
-  uintptr_t intptr = (uintptr_t)l;
+  auto intptr = (uintptr_t)l;
   char *ptr = (char *)intptr;
   for (size_t i = 0; i < len(mem); ++i) {
     if (ptr[i] != mem->data[i]) {

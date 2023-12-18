@@ -19,7 +19,7 @@ std::string floatToString(const floating *f, const char *suffix) {
     mpfr_exp_t printed_exp;
     char *str = mpfr_get_str(nullptr, &printed_exp, 10, 0, f->f, MPFR_RNDN);
     size_t len = strlen(str);
-    string *newstr = (string *)koreAllocToken(sizeof(string) + len + 2);
+    auto *newstr = (string *)koreAllocToken(sizeof(string) + len + 2);
     init_with_len(newstr, len + 2);
     size_t idx = 0;
     if (str[0] == '-') {

@@ -413,7 +413,7 @@ size_t *hook_MINT_export(mpz_t in, uint64_t bits) {
     count = 0;
   uint64_t alloccount = nwords > count ? nwords : count;
   size_t allocsize = alloccount * sizeof(size_t);
-  size_t *allocptr = (size_t *)koreAllocAlwaysGC(allocsize);
+  auto *allocptr = (size_t *)koreAllocAlwaysGC(allocsize);
   memset(allocptr, 0, allocsize);
   size_t *exportptr = nwords > count ? allocptr + nwords - count : allocptr;
   size_t actualcount;

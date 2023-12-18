@@ -51,7 +51,7 @@ void migrate(block **blockPtr) {
   initialize_migrate();
   uint16_t layout = layout_hdr(hdr);
   size_t lenInBytes = get_size(hdr, layout);
-  block **forwardingAddress = (block **)(currBlock + 1);
+  auto **forwardingAddress = (block **)(currBlock + 1);
   if (!hasForwardingAddress) {
     block *newBlock;
     if (shouldPromote || (isInOldGen && collect_old)) {
@@ -221,7 +221,7 @@ migrate_child(void *currBlock, layoutitem *args, unsigned i, bool ptr) {
 }
 
 static char *evacuate(char *scan_ptr, char **alloc_ptr) {
-  block *currBlock = (block *)scan_ptr;
+  auto *currBlock = (block *)scan_ptr;
   const uint64_t hdr = currBlock->h.hdr;
   uint16_t layoutInt = layout_hdr(hdr);
   if (layoutInt) {

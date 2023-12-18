@@ -22,7 +22,7 @@ static struct blockheader range_header() {
   return hdr;
 }
 rangemap hook_RANGEMAP_elementRng(SortRange rng, SortKItem value) {
-  range *ptr = (range *)rng;
+  auto *ptr = (range *)rng;
   return hook_RANGEMAP_element(ptr->start, ptr->end, value);
 }
 
@@ -64,7 +64,7 @@ SortKItem hook_RANGEMAP_lookupOrDefault(
 SortRange hook_RANGEMAP_find_range(SortRangeMap m, SortKItem key) {
   auto val = m->get_key_value(key);
   if (val.has_value()) {
-    range *ptr = (range *)koreAlloc(sizeof(range));
+    auto *ptr = (range *)koreAlloc(sizeof(range));
     ptr->h = range_header();
     ptr->start = val.value().first.start();
     ptr->end = val.value().first.end();
@@ -81,7 +81,7 @@ rangemap hook_RANGEMAP_update(
 
 rangemap
 hook_RANGEMAP_updateRng(SortRangeMap m, SortRange rng, SortKItem value) {
-  range *ptr = (range *)rng;
+  auto *ptr = (range *)rng;
   return hook_RANGEMAP_update(m, ptr->start, ptr->end, value);
 }
 
@@ -90,7 +90,7 @@ rangemap hook_RANGEMAP_remove(SortRangeMap m, SortKItem start, SortKItem end) {
 }
 
 rangemap hook_RANGEMAP_removeRng(SortRangeMap m, SortRange rng) {
-  range *ptr = (range *)rng;
+  auto *ptr = (range *)rng;
   return hook_RANGEMAP_remove(m, ptr->start, ptr->end);
 }
 
@@ -118,11 +118,11 @@ set hook_RANGEMAP_keys(SortRangeMap m) {
   auto tmp = hook_SET_unit();
   for (auto iter = rng_map::ConstRangeMapIterator<KElem, KElem>(*m);
        iter.has_next(); ++iter) {
-    range *ptr = (range *)koreAlloc(sizeof(range));
+    auto *ptr = (range *)koreAlloc(sizeof(range));
     ptr->h = range_header();
     ptr->start = iter->first.start();
     ptr->end = iter->first.end();
-    inj_range2kitem *inj_ptr
+    auto *inj_ptr
         = (inj_range2kitem *)koreAlloc(sizeof(inj_range2kitem));
     inj_ptr->h = inj_range2kitem_header();
     inj_ptr->child = ptr;
@@ -136,11 +136,11 @@ list hook_RANGEMAP_keys_list(SortRangeMap m) {
   auto tmp = list().transient();
   for (auto iter = rng_map::ConstRangeMapIterator<KElem, KElem>(*m);
        iter.has_next(); ++iter) {
-    range *ptr = (range *)koreAlloc(sizeof(range));
+    auto *ptr = (range *)koreAlloc(sizeof(range));
     ptr->h = range_header();
     ptr->start = iter->first.start();
     ptr->end = iter->first.end();
-    inj_range2kitem *inj_ptr
+    auto *inj_ptr
         = (inj_range2kitem *)koreAlloc(sizeof(inj_range2kitem));
     inj_ptr->h = inj_range2kitem_header();
     inj_ptr->child = ptr;
@@ -175,7 +175,7 @@ SortRange hook_RANGEMAP_choiceRng(SortRangeMap m) {
     KLLVM_HOOK_INVALID_ARGUMENT("Cannot choose from an empty range map");
   }
   auto pair = m->treemap().root_data();
-  range *ptr = (range *)koreAlloc(sizeof(range));
+  auto *ptr = (range *)koreAlloc(sizeof(range));
   ptr->h = range_header();
   ptr->start = pair.first.start();
   ptr->end = pair.first.end();
@@ -210,8 +210,8 @@ rangemap hook_RANGEMAP_updateAll(SortRangeMap m1, SortRangeMap m2) {
 rangemap hook_RANGEMAP_removeAll(SortRangeMap map, SortSet set) {
   auto tmp = *map;
   for (auto iter = set->begin(); iter != set->end(); ++iter) {
-    block *b_ptr = (block *)iter->elem;
-    range *r_ptr = (range *)(b_ptr->children[0]);
+    auto *b_ptr = (block *)iter->elem;
+    auto *r_ptr = (range *)(b_ptr->children[0]);
     tmp = tmp.deleted(rng_map::Range<KElem>(r_ptr->start, r_ptr->end));
   }
   return tmp;

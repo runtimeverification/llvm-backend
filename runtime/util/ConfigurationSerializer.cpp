@@ -299,7 +299,7 @@ void serializeConfigurationInternal(
 
   uint16_t layout = get_layout(subject);
   if (!layout) {
-    string *str = (string *)subject;
+    auto *str = (string *)subject;
     size_t subject_len = len(subject);
 
     if (isVar && !state.varNames.count(str)) {

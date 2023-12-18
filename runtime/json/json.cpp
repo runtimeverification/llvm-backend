@@ -100,7 +100,7 @@ get_header(boolHdr, "inj{SortBool{}, SortJSON{}}")
     return true;
   }
   bool Bool(bool b) {
-    boolinj *inj = (boolinj *)koreAlloc(sizeof(boolinj));
+    auto *inj = (boolinj *)koreAlloc(sizeof(boolinj));
     inj->h = boolHdr();
     inj->data = b;
     result = (block *)inj;
@@ -124,7 +124,7 @@ get_header(boolHdr, "inj{SortBool{}, SortJSON{}}")
       mpfr_init2(f->f, 53);
       f->exp = 11;
       mpfr_set_str(f->f, str, 9, MPFR_RNDN);
-      floatinj *inj = (floatinj *)koreAlloc(sizeof(floatinj));
+      auto *inj = (floatinj *)koreAlloc(sizeof(floatinj));
       inj->h = floatHdr();
       inj->data = move_float(f);
       result = (block *)inj;
@@ -134,9 +134,9 @@ get_header(boolHdr, "inj{SortBool{}, SortJSON{}}")
   }
 
   bool String(const char *str, SizeType len, bool copy) {
-    stringinj *inj = (stringinj *)koreAlloc(sizeof(stringinj));
+    auto *inj = (stringinj *)koreAlloc(sizeof(stringinj));
     inj->h = strHdr();
-    string *token = (string *)koreAllocToken(sizeof(string) + len);
+    auto *token = (string *)koreAllocToken(sizeof(string) + len);
     init_with_len(token, len);
     memcpy(token->data, str, len);
     inj->data = token;
@@ -154,13 +154,13 @@ get_header(boolHdr, "inj{SortBool{}, SortJSON{}}")
   bool EndObject(SizeType memberCount) {
     result = dotList();
     for (int i = 0; i < memberCount; i++) {
-      jsonmember *member = (jsonmember *)koreAlloc(sizeof(jsonmember));
+      auto *member = (jsonmember *)koreAlloc(sizeof(jsonmember));
       member->h = membHdr();
       member->val = stack.back();
       stack.pop_back();
       member->key = stack.back();
       stack.pop_back();
-      jsonlist *list = (jsonlist *)koreAlloc(sizeof(jsonlist));
+      auto *list = (jsonlist *)koreAlloc(sizeof(jsonlist));
       list->h = listHdr();
       list->hd = (block *)member;
       list->tl = (jsonlist *)result;
@@ -178,7 +178,7 @@ get_header(boolHdr, "inj{SortBool{}, SortJSON{}}")
   bool EndArray(SizeType elementCount) {
     result = dotList();
     for (int i = 0; i < elementCount; i++) {
-      jsonlist *list = (jsonlist *)koreAlloc(sizeof(jsonlist));
+      auto *list = (jsonlist *)koreAlloc(sizeof(jsonlist));
       list->h = listHdr();
       list->hd = stack.back();
       stack.pop_back();
@@ -214,18 +214,18 @@ static bool write_json(KoreWriter<Stream> &writer, block *data) {
     if (data == null()) {
       writer.Null();
     } else if (tag_hdr(data->h.hdr) == tag_hdr(boolHdr().hdr)) {
-      boolinj *inj = (boolinj *)data;
+      auto *inj = (boolinj *)data;
       writer.Bool(inj->data);
     } else if (tag_hdr(data->h.hdr) == tag_hdr(intHdr().hdr)) {
       zinj *inj = (zinj *)data;
       string *str = hook_STRING_int2string(inj->data);
       writer.RawNumber(str->data, len(str), false);
     } else if (tag_hdr(data->h.hdr) == tag_hdr(floatHdr().hdr)) {
-      floatinj *inj = (floatinj *)data;
+      auto *inj = (floatinj *)data;
       std::string str = floatToString(inj->data, "");
       writer.RawNumber(str.c_str(), str.length(), false);
     } else if (tag_hdr(data->h.hdr) == tag_hdr(strHdr().hdr)) {
-      stringinj *inj = (stringinj *)data;
+      auto *inj = (stringinj *)data;
       writer.String(inj->data->data, len(inj->data), false);
     } else if (tag_hdr(data->h.hdr) == tag_hdr(objHdr().hdr)) {
       writer.StartObject();
@@ -238,12 +238,12 @@ static bool write_json(KoreWriter<Stream> &writer, block *data) {
       return_value = write_json(writer, (block *)obj->data);
       writer.EndArray();
     } else if (tag_hdr(data->h.hdr) == tag_hdr(listHdr().hdr)) {
-      jsonlist *list = (jsonlist *)data;
+      auto *list = (jsonlist *)data;
       return_value = write_json(writer, list->hd)
                      && write_json(writer, (block *)list->tl);
     } else if (tag_hdr(data->h.hdr) == tag_hdr(membHdr().hdr)) {
-      jsonmember *memb = (jsonmember *)data;
-      stringinj *inj = (stringinj *)memb->key;
+      auto *memb = (jsonmember *)data;
+      auto *inj = (stringinj *)memb->key;
       writer.Key(inj->data->data, len(inj->data), false);
       return_value = write_json(writer, memb->val);
     } else {

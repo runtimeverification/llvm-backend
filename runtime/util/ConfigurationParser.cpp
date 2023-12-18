@@ -27,7 +27,7 @@ void init_float(floating *result, const char *c_str) {
 uint32_t getTagForSymbolName(const char *name) {
   std::string s = name;
   // https://stackoverflow.com/a/101980/6209703
-  Cache::iterator lb = cache.lower_bound(s);
+  auto lb = cache.lower_bound(s);
   // key exists
   if (lb != cache.end() && !(cache.key_comp()(s, lb->first))) {
     return lb->second;
@@ -60,7 +60,7 @@ void *constructCompositePattern(uint32_t tag, std::vector<void *> &arguments) {
     uint16_t layout_code = layout_hdr(headerVal.hdr);
     layout *data = getLayoutData(layout_code);
     if (data->args[0].cat == SYMBOL_LAYOUT) {
-      block *child = (block *)arguments[0];
+      auto *child = (block *)arguments[0];
       if (!is_leaf_block(child) && get_layout(child) != 0) {
         uint32_t tag = tag_hdr(child->h.hdr);
         if (tag >= first_inj_tag && tag <= last_inj_tag) {
@@ -70,7 +70,7 @@ void *constructCompositePattern(uint32_t tag, std::vector<void *> &arguments) {
     }
   }
 
-  block *Block = (block *)koreAlloc(size);
+  auto *Block = (block *)koreAlloc(size);
   Block->h = headerVal;
 
   storeSymbolChildren(Block, &arguments[0]);

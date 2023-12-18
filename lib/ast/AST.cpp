@@ -703,7 +703,7 @@ void KORECompositePattern::prettyPrint(
     std::ostream &out, PrettyPrintData const &data) const {
   std::string name = getConstructor()->getName();
   if (name == "\\dv") {
-    KORECompositeSort *s = dynamic_cast<KORECompositeSort *>(
+    auto *s = dynamic_cast<KORECompositeSort *>(
         getConstructor()->getFormalArguments()[0].get());
     bool hasHook = data.hook.count(s->getName());
     auto str = dynamic_cast<KOREStringPattern *>(arguments[0].get());
@@ -1657,7 +1657,7 @@ KOREAliasDeclaration::getSubstitution(KORECompositePattern *subject) {
   int i = 0;
   KOREPattern::substitution result;
   for (auto &arg : boundVariables->getArguments()) {
-    KOREVariablePattern *var = dynamic_cast<KOREVariablePattern *>(arg.get());
+    auto *var = dynamic_cast<KOREVariablePattern *>(arg.get());
     if (!var) {
       abort();
     }
@@ -1750,7 +1750,7 @@ void KOREDefinition::preprocess() {
   for (auto moditer = modules.begin(); moditer != modules.end(); ++moditer) {
     auto &declarations = (*moditer)->getDeclarations();
     for (auto iter = declarations.begin(); iter != declarations.end(); ++iter) {
-      KORESymbolDeclaration *decl
+      auto *decl
           = dynamic_cast<KORESymbolDeclaration *>(iter->get());
       if (decl == nullptr) {
         continue;

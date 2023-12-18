@@ -119,7 +119,7 @@ void sfprintf(writer *file, const char *fmt, ...) {
       }
     }
     va_end(args_copy);
-    string *str = (string *)finalBuf;
+    auto *str = (string *)finalBuf;
     init_with_len(str, res);
     hook_BUFFER_concat(file->buffer, str);
   }
@@ -151,7 +151,7 @@ void printConfigurationInternal(
   }
   uint16_t layout = get_layout(subject);
   if (!layout) {
-    string *str = (string *)subject;
+    auto *str = (string *)subject;
     size_t subject_len = len(subject);
     sfprintf(file, "\\dv{%s}(\"", sort);
     for (size_t i = 0; i < subject_len; ++i) {
