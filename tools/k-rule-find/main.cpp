@@ -65,7 +65,7 @@ Location getLocation(KOREAxiomDeclaration *axiom) {
 }
 
 Location parseLocation(std::string loc) {
-  size_t pos = loc.find(":");
+  size_t pos = loc.find(':');
   if (pos == std::string::npos) {
     std::cerr << "Rule's location must be in the format: "
                  "definition.k:line[:column]\n";
@@ -73,7 +73,7 @@ Location parseLocation(std::string loc) {
   }
 
   std::string lineColumn = loc.substr(pos + 1);
-  size_t pos_lc = lineColumn.find(":");
+  size_t pos_lc = lineColumn.find(':');
 
   // If another “:” isn’t found, the tool assumes no column number was given.
   int64_t line, column = -1;

@@ -6,7 +6,6 @@ Checks:
   -performance-for-range-copy
   -performance-inefficient-string-concatenation
   -performance-unnecessary-copy-initialization
-  -performance-faster-string-find
   -performance-no-int-to-ptr
 
 WarningsAsErrors:
