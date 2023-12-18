@@ -34,8 +34,8 @@ int main(int argc, char **argv) {
   // over time.
   bool alloc = strcmp(argv[1], "alloc") == 0;
   if (analyze) {
-    for (int i = 0; i < 2048; i++) {
-      mpz_init(total[i]);
+    for (auto & i : total) {
+      mpz_init(i);
     }
   }
   int lowerBound;

@@ -648,8 +648,7 @@ color(std::ostream &out, std::string color, PrettyPrintData const &data) {
 std::string enquote(std::string str) {
   std::string result;
   result.push_back('"');
-  for (size_t i = 0; i < str.length(); ++i) {
-    char c = str[i];
+  for (char c : str) {
     switch (c) {
     case '\\': result.append("\\\\"); break;
     case '"': result.append("\\\""); break;
@@ -1719,15 +1718,12 @@ void KOREDefinition::insertReservedSymbols() {
 void KOREDefinition::preprocess() {
   insertReservedSymbols();
 
-  for (auto iter = axioms.begin(); iter != axioms.end(); ++iter) {
-    auto axiom = *iter;
+  for (auto axiom : axioms) {
     axiom->pattern = axiom->pattern->expandAliases(this);
   }
   auto symbols = std::map<std::string, std::vector<KORESymbol *>>{};
   unsigned nextOrdinal = 0;
-  for (auto iter = symbolDeclarations.begin(); iter != symbolDeclarations.end();
-       ++iter) {
-    auto decl = *iter;
+  for (auto decl : symbolDeclarations) {
     if (decl.second->getAttributes().count("freshGenerator")) {
       auto sort = decl.second->getSymbol()->getSort();
       if (sort->isConcrete()) {
@@ -1747,10 +1743,10 @@ void KOREDefinition::preprocess() {
       ++iter;
     }
   }
-  for (auto moditer = modules.begin(); moditer != modules.end(); ++moditer) {
-    auto &declarations = (*moditer)->getDeclarations();
-    for (auto iter = declarations.begin(); iter != declarations.end(); ++iter) {
-      auto *decl = dynamic_cast<KORESymbolDeclaration *>(iter->get());
+  for (auto & module : modules) {
+    auto &declarations = module->getDeclarations();
+    for (const auto & declaration : declarations) {
+      auto *decl = dynamic_cast<KORESymbolDeclaration *>(declaration.get());
       if (decl == nullptr) {
         continue;
       }
@@ -1760,10 +1756,8 @@ void KOREDefinition::preprocess() {
       }
     }
   }
-  for (auto iter = symbols.begin(); iter != symbols.end(); ++iter) {
-    auto entry = *iter;
-    for (auto iter = entry.second.begin(); iter != entry.second.end(); ++iter) {
-      KORESymbol *symbol = *iter;
+  for (auto entry : symbols) {
+    for (auto symbol : entry.second) {
       auto decl = symbolDeclarations.at(symbol->getName());
       symbol->instantiateSymbol(decl);
     }
@@ -1774,11 +1768,9 @@ void KOREDefinition::preprocess() {
   auto layouts = std::unordered_map<std::string, uint16_t>{};
   auto variables
       = std::unordered_map<std::string, std::pair<uint32_t, uint32_t>>{};
-  for (auto iter = symbols.begin(); iter != symbols.end(); ++iter) {
-    auto entry = *iter;
+  for (auto entry : symbols) {
     uint32_t firstTag = nextSymbol;
-    for (auto iter = entry.second.begin(); iter != entry.second.end(); ++iter) {
-      KORESymbol *symbol = *iter;
+    for (auto symbol : entry.second) {
       if (symbol->isConcrete()) {
         if (!instantiations.count(*symbol)) {
           instantiations.emplace(*symbol, nextSymbol++);
@@ -1799,11 +1791,9 @@ void KOREDefinition::preprocess() {
           entry.first, std::pair<uint32_t, uint32_t>{firstTag, lastTag});
     }
   }
-  for (auto iter = symbols.begin(); iter != symbols.end(); ++iter) {
-    auto entry = *iter;
+  for (auto entry : symbols) {
     auto range = variables.at(entry.first);
-    for (auto iter = entry.second.begin(); iter != entry.second.end(); ++iter) {
-      KORESymbol *symbol = *iter;
+    for (auto symbol : entry.second) {
       for (auto &sort : symbol->getArguments()) {
         if (sort->isConcrete()) {
           hookedSorts[dynamic_cast<KORECompositeSort *>(sort.get())

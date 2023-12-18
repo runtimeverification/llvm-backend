@@ -719,8 +719,7 @@ llvm::Value *CreateTerm::createFunctionCall(
   default: sret = false; break;
   }
   llvm::Value *AllocSret;
-  for (int i = 0; i < args.size(); i++) {
-    llvm::Value *arg = args[i];
+  for (auto arg : args) {
     types.push_back(arg->getType());
   }
   std::vector<llvm::Value *> realArgs = args;
@@ -996,8 +995,7 @@ bool makeFunction(
   std::vector<llvm::Type *> paramTypes;
   std::vector<std::string> paramNames;
   std::vector<llvm::Metadata *> debugArgs;
-  for (auto iter = vars.begin(); iter != vars.end(); ++iter) {
-    auto &entry = *iter;
+  for (auto & entry : vars) {
     auto sort
         = dynamic_cast<KORECompositeSort *>(entry.second->getSort().get());
     if (!sort) {
@@ -1115,8 +1113,7 @@ std::string makeApplyRuleFunction(
   std::vector<llvm::Type *> paramTypes;
   std::vector<std::string> paramNames;
   std::vector<llvm::Metadata *> debugArgs;
-  for (auto iter = vars.begin(); iter != vars.end(); ++iter) {
-    auto &entry = *iter;
+  for (auto & entry : vars) {
     auto sort
         = dynamic_cast<KORECompositeSort *>(entry.second->getSort().get());
     if (!sort) {

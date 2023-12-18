@@ -5,7 +5,6 @@ Checks:
   -modernize-avoid-c-arrays
   -modernize-concat-nested-namespaces
   -modernize-deprecated-headers
-  -modernize-loop-convert
   -modernize-use-trailing-return-type
 
 WarningsAsErrors:
