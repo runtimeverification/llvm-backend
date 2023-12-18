@@ -1,6 +1,21 @@
 Checks:
   clang-analyzer-*
   -clang-analyzer-cplusplus.PlacementNew
+  modernize-*
+  -modernize-avoid-c-arrays
+  -modernize-concat-nested-namespaces
+  -modernize-deprecated-headers
+  -modernize-loop-convert
+  -modernize-macro-to-enum
+  -modernize-raw-string-literal
+  -modernize-redundant-void-arg
+  -modernize-return-braced-init-list
+  -modernize-use-auto
+  -modernize-use-default-member-init
+  -modernize-use-emplace
+  -modernize-use-nullptr
+  -modernize-use-trailing-return-type
+  -modernize-use-using
 
 WarningsAsErrors:
   '*'
