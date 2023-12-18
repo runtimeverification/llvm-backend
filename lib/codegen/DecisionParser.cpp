@@ -83,8 +83,8 @@ public:
   }
 
   std::string str(yaml_node_t *node) {
-    return std::string(
-        (char *)node->data.scalar.value, node->data.scalar.length);
+    return {
+        (char *)node->data.scalar.value, node->data.scalar.length};
   }
 
   std::vector<std::string> vec(yaml_node_t *node) {

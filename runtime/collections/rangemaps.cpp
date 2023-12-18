@@ -27,7 +27,7 @@ rangemap hook_RANGEMAP_elementRng(SortRange rng, SortKItem value) {
 }
 
 rangemap hook_RANGEMAP_unit() {
-  return rangemap();
+  return {};
 }
 
 rangemap hook_RANGEMAP_concat(SortRangeMap m1, SortRangeMap m2) {

@@ -19,7 +19,7 @@ map hook_MAP_element(SortKItem key, SortKItem value) {
 }
 
 map hook_MAP_unit() {
-  return map();
+  return {};
 }
 
 map hook_MAP_concat(SortMap m1, SortMap m2) {

@@ -32,7 +32,7 @@ serializer::serializer(flags f)
 
 std::string serializer::byte_string() const {
   auto *ptr = reinterpret_cast<unsigned char const *>(buffer_.data());
-  return std::string(ptr, ptr + buffer_.size());
+  return {ptr, ptr + buffer_.size()};
 }
 
 void serializer::reset() {
