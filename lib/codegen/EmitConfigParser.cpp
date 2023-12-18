@@ -125,7 +125,7 @@ static std::string LAYOUT_STRUCT = "layout";
 static std::string LAYOUTITEM_STRUCT = "layoutitem";
 
 static void emitDataTableForSymbol(
-    std::string name, llvm::Type *ty, llvm::DIType *dity,
+    std::string const &name, llvm::Type *ty, llvm::DIType *dity,
     KOREDefinition *definition, llvm::Module *module,
     llvm::Constant *getter(KOREDefinition *, llvm::Module *, KORESymbol *)) {
   llvm::LLVMContext &Ctx = module->getContext();
@@ -176,7 +176,7 @@ static void emitDataTableForSymbol(
 }
 
 static void emitDataForSymbol(
-    std::string name, llvm::Type *ty, llvm::DIType *dity,
+    std::string const &name, llvm::Type *ty, llvm::DIType *dity,
     KOREDefinition *definition, llvm::Module *module, bool isEval,
     std::pair<llvm::Value *, llvm::BasicBlock *> getter(
         KOREDefinition *, llvm::Module *, KORESymbol *, llvm::Instruction *)) {
@@ -762,7 +762,7 @@ makePackedVisitorStructureType(llvm::LLVMContext &Ctx, llvm::Module *module) {
 }
 
 static void emitTraversal(
-    std::string name, KOREDefinition *definition, llvm::Module *module,
+    std::string const &name, KOREDefinition *definition, llvm::Module *module,
     bool isVisitor,
     void getter(
         KOREDefinition *, llvm::Module *, KORESymbol *, llvm::BasicBlock *,
@@ -943,7 +943,7 @@ static void getVisitor(
 
   auto state_ptr = func->arg_end() - 1;
 
-  for (auto sort : symbol->getArguments()) {
+  for (auto const &sort : symbol->getArguments()) {
     auto compositeSort = dynamic_cast<KORECompositeSort *>(sort.get());
     ValueType cat = compositeSort->getCategory(definition);
     llvm::Value *ChildPtr = llvm::GetElementPtrInst::CreateInBounds(
@@ -1131,7 +1131,7 @@ static llvm::Constant *getLayoutData(
   llvm::LLVMContext &Ctx = module->getContext();
   auto BlockType = getBlockType(module, def, symbol);
   int i = 2;
-  for (auto sort : symbol->getArguments()) {
+  for (auto const &sort : symbol->getArguments()) {
     ValueType cat
         = dynamic_cast<KORECompositeSort *>(sort.get())->getCategory(def);
     auto offset = getOffsetOfMember(
@@ -1152,8 +1152,7 @@ static llvm::Constant *getLayoutData(
       elements);
   auto global = module->getOrInsertGlobal(
       "layout_item_" + std::to_string(layout), Arr->getType());
-  llvm::GlobalVariable *globalVar
-      = llvm::dyn_cast<llvm::GlobalVariable>(global);
+  llvm::GlobalVariable *globalVar = llvm::cast<llvm::GlobalVariable>(global);
   if (!globalVar->hasInitializer()) {
     globalVar->setInitializer(Arr);
   }
@@ -1165,8 +1164,7 @@ static llvm::Constant *getLayoutData(
   auto global2 = module->getOrInsertGlobal(
       name,
       llvm::StructType::getTypeByName(module->getContext(), LAYOUT_STRUCT));
-  llvm::GlobalVariable *globalVar2
-      = llvm::dyn_cast<llvm::GlobalVariable>(global2);
+  llvm::GlobalVariable *globalVar2 = llvm::cast<llvm::GlobalVariable>(global2);
   initDebugGlobal(name, getForwardDecl(LAYOUT_STRUCT), globalVar2);
   if (!globalVar2->hasInitializer()) {
     globalVar2->setInitializer(llvm::ConstantStruct::get(

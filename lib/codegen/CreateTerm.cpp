@@ -119,7 +119,7 @@ declare void @printConfiguration(i8 *, %block *)
 } // namespace
 
 std::unique_ptr<llvm::Module>
-newModule(std::string name, llvm::LLVMContext &Context) {
+newModule(std::string const &name, llvm::LLVMContext &Context) {
   llvm::SMDiagnostic Err;
   auto mod = llvm::parseIR(
       *llvm::MemoryBuffer::getMemBuffer(llvm_header()), Err, Context);
@@ -132,7 +132,7 @@ newModule(std::string name, llvm::LLVMContext &Context) {
 static std::string KOMPILED_DIR = "kompiled_directory";
 
 void addKompiledDirSymbol(
-    llvm::LLVMContext &Context, std::string dir, llvm::Module *mod,
+    llvm::LLVMContext &Context, std::string const &dir, llvm::Module *mod,
     bool debug) {
   auto Str = llvm::ConstantDataArray::getString(Context, dir, true);
   auto global = mod->getOrInsertGlobal(KOMPILED_DIR, Str->getType());
@@ -319,7 +319,7 @@ llvm::Value *CreateTerm::alloc_arg(
   return ret;
 }
 
-std::string escape(std::string str) {
+std::string escape(std::string const &str) {
   std::stringstream os;
   os << std::setfill('0') << std::setw(2) << std::hex;
   for (char c : str) {
@@ -331,7 +331,7 @@ std::string escape(std::string str) {
 
 llvm::Value *CreateTerm::createHook(
     KORECompositePattern *hookAtt, KORECompositePattern *pattern,
-    std::string locationStack) {
+    std::string const &locationStack) {
   assert(hookAtt->getArguments().size() == 1);
   auto strPattern
       = dynamic_cast<KOREStringPattern *>(hookAtt->getArguments()[0].get());
@@ -665,8 +665,8 @@ llvm::Value *CreateTerm::createHook(
 // make these K functions tail recursive when their K definitions are tail
 // recursive.
 llvm::Value *CreateTerm::createFunctionCall(
-    std::string name, KORECompositePattern *pattern, bool sret, bool tailcc,
-    std::string locationStack) {
+    std::string const &name, KORECompositePattern *pattern, bool sret,
+    bool tailcc, std::string const &locationStack) {
   auto event = ProofEvent(Definition, Module);
 
   CurrentBlock = event.functionEvent_pre(CurrentBlock, pattern, locationStack);
@@ -676,7 +676,7 @@ llvm::Value *CreateTerm::createFunctionCall(
       pattern->getConstructor()->getSort().get());
   auto returnCat = returnSort->getCategory(Definition);
   int i = 0;
-  for (auto sort : pattern->getConstructor()->getArguments()) {
+  for (auto const &sort : pattern->getConstructor()->getArguments()) {
     auto concreteSort = dynamic_cast<KORECompositeSort *>(sort.get());
     llvm::Value *arg = alloc_arg(pattern, i, locationStack);
     i++;
@@ -705,9 +705,9 @@ llvm::Value *CreateTerm::createFunctionCall(
 }
 
 llvm::Value *CreateTerm::createFunctionCall(
-    std::string name, ValueType returnCat,
+    std::string const &name, ValueType returnCat,
     const std::vector<llvm::Value *> &args, bool sret, bool tailcc,
-    std::string locationStack) {
+    std::string const &locationStack) {
   llvm::Type *returnType = getValueType(returnCat, Module);
   std::vector<llvm::Type *> types;
   bool collection = false;
@@ -842,7 +842,7 @@ bool CreateTerm::populateStaticSet(KOREPattern *pattern) {
               && !isAnywhereOwise)) {
         can_be_static = false;
       }
-      for (auto sptr_nextPattern : constructor->getArguments()) {
+      for (auto const &sptr_nextPattern : constructor->getArguments()) {
         KOREPattern *nextPattern = sptr_nextPattern.get();
         can_be_static &= populateStaticSet(nextPattern);
       }
@@ -982,9 +982,9 @@ void addAbort(llvm::BasicBlock *block, llvm::Module *Module) {
 }
 
 bool makeFunction(
-    std::string name, KOREPattern *pattern, KOREDefinition *definition,
+    std::string const &name, KOREPattern *pattern, KOREDefinition *definition,
     llvm::Module *Module, bool tailcc, bool bigStep, bool apply,
-    KOREAxiomDeclaration *axiom, std::string postfix) {
+    KOREAxiomDeclaration *axiom, std::string const &postfix) {
   std::map<std::string, KOREVariablePattern *> vars;
   if (apply) {
     for (KOREPattern *lhs : axiom->getLeftHandSide()) {
@@ -1103,7 +1103,7 @@ void makeApplyRuleFunction(
 
 std::string makeApplyRuleFunction(
     KOREAxiomDeclaration *axiom, KOREDefinition *definition,
-    llvm::Module *Module, std::vector<Residual> residuals) {
+    llvm::Module *Module, std::vector<Residual> const &residuals) {
   std::map<std::string, KOREVariablePattern *> vars;
   for (auto residual : residuals) {
     residual.pattern->markVariables(vars);
@@ -1173,7 +1173,7 @@ std::string makeApplyRuleFunction(
   CreateTerm creator = CreateTerm(subst, definition, block, Module, false);
   std::vector<llvm::Value *> args;
   std::vector<llvm::Type *> types;
-  for (auto residual : residuals) {
+  for (auto const &residual : residuals) {
     llvm::Value *arg = creator(residual.pattern).first;
     auto sort
         = dynamic_cast<KORECompositeSort *>(residual.pattern->getSort().get());

@@ -93,8 +93,8 @@ private:
 
 public:
   [[nodiscard]] llvm::BasicBlock *hookEvent_pre(
-      std::string name, llvm::BasicBlock *current_block,
-      std::string locationStack);
+      std::string const &name, llvm::BasicBlock *current_block,
+      std::string const &locationStack);
 
   [[nodiscard]] llvm::BasicBlock *hookEvent_post(
       llvm::Value *val, KORECompositeSort *sort,

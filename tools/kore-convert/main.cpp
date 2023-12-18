@@ -94,7 +94,7 @@ sptr<KOREPattern> get_input_pattern() {
   }
 }
 
-void dump_text(sptr<KOREPattern> pat) {
+void dump_text(sptr<KOREPattern> const &pat) {
   if (OutputFilename == "-") {
     pat->print(std::cout);
     std::cout << '\n';
