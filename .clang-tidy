@@ -5,7 +5,6 @@ Checks:
   -performance-unnecessary-value-param
   -performance-for-range-copy
   -performance-inefficient-string-concatenation
-  -performance-unnecessary-copy-initialization
   -performance-no-int-to-ptr
 
 WarningsAsErrors:
