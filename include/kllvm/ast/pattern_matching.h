@@ -159,15 +159,21 @@ private:
 template <typename Pattern, typename Result>
 class matcher {
 public:
+  using result_t = Result;
+
   template <typename Func>
   matcher(Pattern p, Func f)
       : pattern_(p)
-      , func_(f) { }
+      , func_(f) {
+    static_assert(
+        detail::subject_count_v<Pattern> == 1,
+        "Cannot instantiate a matcher without a subject");
+  }
 
   matcher(Pattern p)
       : matcher(p, [](auto const &p) { return p; }) { }
 
-  Result match(std::shared_ptr<KOREPattern> const &term) {
+  Result match(std::shared_ptr<KOREPattern> const &term) const {
     auto [match, subject] = pattern_.match(term);
 
     if (!match || !subject) {
@@ -187,7 +193,32 @@ matcher(Pattern, Func) -> matcher<
     Pattern, std::invoke_result_t<Func, std::shared_ptr<KOREPattern> const &>>;
 
 template <typename Pattern>
-matcher(Pattern) -> matcher<Pattern, std::shared_ptr<KOREPattern> const &>;
+matcher(Pattern)
+    -> matcher<Pattern, std::optional<std::shared_ptr<KOREPattern>>>;
+
+template <typename M, typename... Ms>
+class match_first {
+public:
+  match_first(M first, Ms... rest)
+      : matchers_(first, rest...) { }
+
+  typename M::result_t match(std::shared_ptr<KOREPattern> const &term) const {
+    typename M::result_t result = std::nullopt;
+
+    detail::for_each(matchers_, [&](auto idx, auto const &matcher) {
+      if (!result) {
+        if (auto next_res = matcher.match(term)) {
+          result = next_res;
+        }
+      }
+    });
+
+    return result;
+  }
+
+private:
+  std::tuple<M, Ms...> matchers_;
+};
 
 namespace literals {
 
