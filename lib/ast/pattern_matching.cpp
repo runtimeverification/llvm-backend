@@ -2,8 +2,18 @@
 #include <kllvm/ast/pattern_matching.h>
 
 using namespace kllvm;
+using namespace kllvm::pattern_matching;
+using namespace kllvm::pattern_matching::literals;
 
 namespace {
+
+auto implies = R"(\implies)"_p;
+auto and_ = R"(\and)"_p;
+auto equals_ = R"(\equals)"_p;
+auto not_ = R"(\not)"_p;
+auto rewrites = R"(\rewrites)"_p;
+auto top = R"(\top)"_p;
+auto X = subject(any);
 
 /*
  * getPatterns(\top()) = []
@@ -30,6 +40,29 @@ getPatterns(KOREPattern *pat, std::vector<KOREPattern *> &result) {
   }
   assert(false && "could not read \\in patterns on lhs");
   abort();
+}
+
+/*
+ * getBuiltin(_(X, Y)) = if X is not a builtin then X else Y
+ */
+std::optional<std::shared_ptr<KOREPattern>>
+getBuiltin(std::shared_ptr<KOREPattern> const &term) {
+  auto comp = std::dynamic_pointer_cast<KORECompositePattern>(term);
+  if (!comp) {
+    return std::nullopt;
+  }
+
+  auto lhs = std::dynamic_pointer_cast<KORECompositePattern>(
+      comp->getArguments()[0]);
+  if (!lhs) {
+    return std::nullopt;
+  }
+
+  if (!lhs->getConstructor()->isBuiltin()) {
+    return lhs;
+  } else {
+    return comp->getArguments()[1];
+  }
 }
 
 } // namespace
@@ -169,38 +202,16 @@ std::vector<KOREPattern *> KOREAxiomDeclaration::getLeftHandSide() const {
 }
 
 /*
- * rhs(\implies(_, \equals(_, \and(X, _)))) = X
- * rhs(\equals(_, X)) = X
- * rhs(\rewrites(_, \and(X, Y))) = if X is a builtin then X else Y
+ * 0: rhs(\implies(_, \equals(_, \and(X, _)))) = X
+ * 1: rhs(\equals(_, X)) = X
+ * 2: rhs(\rewrites(_, \and(X, Y))) = getBuiltin(\and(X, Y))
  */
 KOREPattern *KOREAxiomDeclaration::getRightHandSide() const {
-  using namespace kllvm::pattern_matching;
-  using namespace kllvm::pattern_matching::literals;
-
-  auto get_builtin = [](auto const &term) -> std::optional<sptr<KOREPattern>> {
-    auto comp = std::dynamic_pointer_cast<KORECompositePattern>(term);
-    auto lhs = std::dynamic_pointer_cast<KORECompositePattern>(
-        comp->getArguments()[0]);
-
-    if (!lhs->getConstructor()->isBuiltin()) {
-      return lhs;
-    } else {
-      return comp->getArguments()[1];
-    }
-  };
-
-  auto implies = R"(\implies)"_p;
-  auto and_ = R"(\and)"_p;
-  auto equals_ = R"(\equals)"_p;
-  auto rewrites = R"(\rewrites)"_p;
-
-  auto X = subject(any);
-
   auto p0 = implies(any, equals_(any, and_(X, any)));
   auto p1 = equals_(any, X);
   auto p2 = rewrites(any, subject(and_(any, any)));
 
-  auto patterns = match_first(p0, p1, matcher(p2, get_builtin));
+  auto patterns = match_first(p0, p1, matcher(p2, getBuiltin));
   auto [any_match, result] = patterns.match(pattern);
 
   if (result) {
@@ -225,18 +236,6 @@ KOREPattern *KOREAxiomDeclaration::getRightHandSide() const {
  * 10: requires(\rewrites(\and(_, \top()), _)) = nullptr
  */
 KOREPattern *KOREAxiomDeclaration::getRequires() const {
-  using namespace kllvm::pattern_matching;
-  using namespace kllvm::pattern_matching::literals;
-
-  auto implies = R"(\implies)"_p;
-  auto and_ = R"(\and)"_p;
-  auto equals_ = R"(\equals)"_p;
-  auto not_ = R"(\not)"_p;
-  auto rewrites = R"(\rewrites)"_p;
-  auto top = R"(\top)"_p;
-
-  auto X = subject(any);
-
   auto p0 = implies(and_(not_(any), and_(top(), any)), any);
   auto p1 = implies(and_(not_(any), and_(equals_(X, any), any)), any);
   auto p2 = implies(and_(top(), any), any);
@@ -264,15 +263,10 @@ KOREPattern *KOREAxiomDeclaration::getRequires() const {
   abort();
 }
 
-// We're looking for special patterns that have the form:
-//
-//   rawTerm{}(inj{S, SortKItem{}}(X))
-//
-// and extracting the inner term X.
+/*
+ * strip(rawTerm{}(inj{S, SortKItem{}}(X))) = X
+ */
 sptr<KOREPattern> kllvm::stripRawTerm(sptr<KOREPattern> const &term) {
-  using namespace kllvm::pattern_matching;
-  using namespace kllvm::pattern_matching::literals;
-
   auto [success, inner] = "rawTerm"_p("inj"_p(subject(any))).match(term);
   if (success && inner) {
     return inner;
