@@ -198,7 +198,9 @@ public:
   LLVMEvent getInitialConfig() const { return initialConfig; }
   std::vector<LLVMEvent> const &getTrace() const { return trace; }
   void setVersion(uint32_t _version) { version = _version; }
-  void setInitialConfig(LLVMEvent _initialConfig) { initialConfig = _initialConfig; }
+  void setInitialConfig(LLVMEvent _initialConfig) {
+    initialConfig = _initialConfig;
+  }
 
   void addPreTraceEvent(LLVMEvent const &event) { preTrace.push_back(event); }
   void addTraceEvent(LLVMEvent const &event) { trace.push_back(event); }
@@ -634,8 +636,7 @@ public:
 
   std::optional<LLVMRewriteTrace>
   parse_proof_trace_from_file(std::string const &filename);
-  std::optional<LLVMRewriteTrace>
-  parse_proof_trace(std::string const &data);
+  std::optional<LLVMRewriteTrace> parse_proof_trace(std::string const &data);
 };
 
 } // namespace kllvm

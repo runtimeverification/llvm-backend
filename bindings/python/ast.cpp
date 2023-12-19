@@ -1,7 +1,7 @@
 #include <kllvm/ast/AST.h>
+#include <kllvm/binary/ProofTraceParser.h>
 #include <kllvm/binary/deserializer.h>
 #include <kllvm/binary/serializer.h>
-#include <kllvm/binary/ProofTraceParser.h>
 #include <kllvm/parser/KOREParser.h>
 
 #include <pybind11/operators.h>
@@ -352,14 +352,17 @@ void bind_proof_trace(py::module_ &m) {
   auto proof_trace = m.def_submodule("prooftrace", "K LLVM backend KORE AST");
 
   auto llvm_step_event
-      = py::class_<LLVMStepEvent, std::shared_ptr<LLVMStepEvent>>(proof_trace, "LLVMStepEvent")
+      = py::class_<LLVMStepEvent, std::shared_ptr<LLVMStepEvent>>(
+            proof_trace, "LLVMStepEvent")
             .def("__repr__", print_repr_adapter<LLVMStepEvent>());
 
   auto llvm_rewrite_event
       = py::class_<LLVMRewriteEvent, std::shared_ptr<LLVMRewriteEvent>>(
-          proof_trace, "LLVMREwriteEvent", llvm_step_event)
-          .def_property_readonly("rule_ordinal", &LLVMRewriteEvent::getRuleOrdinal)
-          .def_property_readonly("substitution", &LLVMRewriteEvent::getSubstitution);
+            proof_trace, "LLVMREwriteEvent", llvm_step_event)
+            .def_property_readonly(
+                "rule_ordinal", &LLVMRewriteEvent::getRuleOrdinal)
+            .def_property_readonly(
+                "substitution", &LLVMRewriteEvent::getSubstitution);
 
   py::class_<LLVMRuleEvent, std::shared_ptr<LLVMRuleEvent>>(
       proof_trace, "LLVMRuleEvent", llvm_rewrite_event);
@@ -370,13 +373,15 @@ void bind_proof_trace(py::module_ &m) {
   py::class_<LLVMFunctionEvent, std::shared_ptr<LLVMFunctionEvent>>(
       proof_trace, "LLVMFunctionEvent", llvm_step_event)
       .def_property_readonly("name", &LLVMFunctionEvent::getName)
-      .def_property_readonly("relative_position", &LLVMFunctionEvent::getRelativePosition)
+      .def_property_readonly(
+          "relative_position", &LLVMFunctionEvent::getRelativePosition)
       .def_property_readonly("args", &LLVMFunctionEvent::getArguments);
 
   py::class_<LLVMHookEvent, std::shared_ptr<LLVMHookEvent>>(
       proof_trace, "LLVMHookEvent", llvm_step_event)
       .def_property_readonly("name", &LLVMHookEvent::getName)
-      .def_property_readonly("relative_position", &LLVMHookEvent::getRelativePosition)
+      .def_property_readonly(
+          "relative_position", &LLVMHookEvent::getRelativePosition)
       .def_property_readonly("args", &LLVMHookEvent::getArguments)
       .def_property_readonly("result", &LLVMHookEvent::getKOREPattern);
 
@@ -387,11 +392,13 @@ void bind_proof_trace(py::module_ &m) {
       .def("is_step_event", &LLVMEvent::isStep)
       .def("is_kore_pattern", &LLVMEvent::isPattern);
 
-  py::class_<LLVMRewriteTrace, std::shared_ptr<LLVMRewriteTrace>>(proof_trace, "LLVMRewriteTrace")
+  py::class_<LLVMRewriteTrace, std::shared_ptr<LLVMRewriteTrace>>(
+      proof_trace, "LLVMRewriteTrace")
       .def("__repr__", print_repr_adapter<LLVMRewriteTrace>())
       .def_property_readonly("version", &LLVMRewriteTrace::getVersion)
       .def_property_readonly("pre_trace", &LLVMRewriteTrace::getPreTrace)
-      .def_property_readonly("initial_config", &LLVMRewriteTrace::getInitialConfig)
+      .def_property_readonly(
+          "initial_config", &LLVMRewriteTrace::getInitialConfig)
       .def_property_readonly("trace", &LLVMRewriteTrace::getTrace)
       .def_static(
           "parse",

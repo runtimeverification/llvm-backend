@@ -45,7 +45,8 @@ int main(int argc, char **argv) {
   }
 
   // check that the second event is a configuration
-  if (!(Trace->getTrace()[1].isPattern() && Trace->getTrace()[1].getKOREPattern())) {
+  if (!(Trace->getTrace()[1].isPattern()
+        && Trace->getTrace()[1].getKOREPattern())) {
     return 1;
   }
 
@@ -60,7 +61,8 @@ int main(int argc, char **argv) {
   }
 
   // check that the fourth event is a configuration
-  if (!(Trace->getTrace()[3].isPattern() && Trace->getTrace()[3].getKOREPattern())) {
+  if (!(Trace->getTrace()[3].isPattern()
+        && Trace->getTrace()[3].getKOREPattern())) {
     return 1;
   }
 
