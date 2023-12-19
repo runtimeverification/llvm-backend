@@ -1555,12 +1555,6 @@ KOREPattern *KOREAxiomDeclaration::getRightHandSide() const {
  * requires(\rewrites(\and(\not(_), \and(\top(), _)), _) = nullptr
  * requires(\rewrites(\and(_, \equals(X, _)), _)) = X
  * requires(\rewrites(\and(_, \top()), _)) = nullptr
- *
- * requires(\implies(\and(\not(_), \and(\equals(X, _), _)), _)) = X
- * requires(\implies(\and(\equals(X, _), _), _)) = X
- * requires(\rewrites(\and(\equals(X, _), _), _)) = X
- * requires(\rewrites(\and(\not(_), \and(\equals(X, _), _)), _) = X
- * requires(\rewrites(\and(_, \equals(X, _)), _)) = X
  */
 KOREPattern *KOREAxiomDeclaration::getRequires() const {
   using namespace kllvm::pattern_matching;
@@ -1576,12 +1570,10 @@ KOREPattern *KOREAxiomDeclaration::getRequires() const {
       matcher(implies_(
           and_(not_(any), and_(equals_(subject(any), any), any)), any)),
       matcher(implies_(and_(equals_(subject(any), any), any), any)),
+      matcher(rewrites_(and_(equals_(subject(any), any), any), any)),
       matcher(rewrites_(
           and_(not_(any), and_(equals_(subject(any), any), any)), any)),
-      matcher(rewrites_(
-          and_(not_(any), and_(equals_(subject(any), any), any)), any)),
-      matcher(rewrites_(and_(any, equals_(subject(any), any)), any)),
-      matcher(rewrites_(and_(equals_(subject(any), any), any), any)));
+      matcher(rewrites_(and_(any, equals_(subject(any), any)), any)));
 
   auto result = patterns.match(pattern);
   if (result) {
