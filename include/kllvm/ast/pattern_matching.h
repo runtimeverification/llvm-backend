@@ -180,23 +180,20 @@ public:
   template <typename Func>
   matcher(Pattern p, Func f)
       : pattern_(p)
-      , func_(f) {
-    static_assert(
-        detail::subject_count_v<Pattern> == 1,
-        "Cannot instantiate a matcher without a subject");
-  }
+      , func_(f) { }
 
   matcher(Pattern p)
       : matcher(p, [](auto const &p) { return p; }) { }
 
-  Result match(std::shared_ptr<KOREPattern> const &term) const {
+  std::pair<bool, Result>
+  match(std::shared_ptr<KOREPattern> const &term) const {
     auto [match, subject] = pattern_.match(term);
 
-    if (!match || !subject) {
-      return std::nullopt;
+    if (!match) {
+      return {false, std::nullopt};
     }
 
-    return func_(subject);
+    return {true, func_(subject)};
   }
 
 private:
@@ -230,18 +227,23 @@ public:
   match_first(M first, Ms... rest)
       : matchers_(make_matcher(first), make_matcher(rest)...) { }
 
-  result_t match(std::shared_ptr<KOREPattern> const &term) const {
+  std::pair<bool, result_t>
+  match(std::shared_ptr<KOREPattern> const &term) const {
     result_t result = std::nullopt;
+    bool any = false;
 
     detail::for_each(matchers_, [&](auto idx, auto const &matcher) {
       if (!result) {
-        if (auto next_res = matcher.match(term)) {
+        auto [matched, next_res] = matcher.match(term);
+        if (matched && next_res) {
           result = next_res;
         }
+
+        any = any || matched;
       }
     });
 
-    return result;
+    return {any, result};
   }
 
 private:

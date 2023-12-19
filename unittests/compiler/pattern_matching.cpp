@@ -106,7 +106,10 @@ BOOST_AUTO_TEST_CASE(single_match) {
       = term("foo", term("a1"), term("a2", bar), term("a3", term("b1", baz)));
 
   auto m = matcher("foo"_p(any, subject(any), any), get_name);
-  BOOST_CHECK_EQUAL(*m.match(foo), "a2");
+  auto [success, result] = m.match(foo);
+
+  BOOST_CHECK(success);
+  BOOST_CHECK_EQUAL(*result, "a2");
 }
 
 BOOST_AUTO_TEST_CASE(first) {
@@ -127,7 +130,8 @@ BOOST_AUTO_TEST_CASE(first) {
           "a1"_p(), "a2"_p(any), "a3"_p("b1"_p(subject(any))))), // succeeds
       matcher("foo"_p(subject(any), any, any)));
 
-  auto result = patterns.match(foo);
+  auto [any, result] = patterns.match(foo);
+  BOOST_CHECK(any);
   BOOST_CHECK(result);
   BOOST_CHECK_EQUAL(ast_to_string(**result), ast_to_string(*baz));
 }
@@ -151,7 +155,8 @@ BOOST_AUTO_TEST_CASE(first_transformed) {
           get_name), // succeeds
       matcher("foo"_p(subject(any), any, any), get_name));
 
-  auto result = patterns.match(foo);
+  auto [any, result] = patterns.match(foo);
+  BOOST_CHECK(any);
   BOOST_CHECK(result);
   BOOST_CHECK_EQUAL(*result, "bar");
 }
@@ -171,7 +176,8 @@ BOOST_AUTO_TEST_CASE(first_no_match) {
       matcher("foo"_p(subject(any), any, "bad"_p(any))),
       matcher("bar"_p(subject(any), any, any)));
 
-  auto result = patterns.match(foo);
+  auto [any, result] = patterns.match(foo);
+  BOOST_CHECK(!any);
   BOOST_CHECK(!result);
 }
 

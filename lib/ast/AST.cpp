@@ -1544,42 +1544,56 @@ KOREPattern *KOREAxiomDeclaration::getRightHandSide() const {
 }
 
 /**
- * requires(\implies(\and(\not(_), \and(\top(), _), _), _)) = nullptr
- * requires(\implies(\and(\not(_), \and(\equals(X, _), _)), _)) = X
- * requires(\implies(\and(\top(), _), _)) = nullptr
- * requires(\implies(\and(\equals(X, _), _), _)) = X
- * requires(\equals(_, _)) = nullptr
- * requires(\rewrites(\and(\equals(X, _), _), _)) = X
- * requires(\rewrites(\and(\top(), _), _)) = nullptr
- * requires(\rewrites(\and(\not(_), \and(\equals(X, _), _)), _) = X
- * requires(\rewrites(\and(\not(_), \and(\top(), _)), _) = nullptr
- * requires(\rewrites(\and(_, \equals(X, _)), _)) = X
- * requires(\rewrites(\and(_, \top()), _)) = nullptr
+ *  0: requires(\implies(\and(\not(_), \and(\top(), _)), _)) = nullptr
+ *  1: requires(\implies(\and(\not(_), \and(\equals(X, _), _)), _)) = X
+ *  2: requires(\implies(\and(\top(), _), _)) = nullptr
+ *  3: requires(\implies(\and(\equals(X, _), _), _)) = X
+ *  4: requires(\equals(_, _)) = nullptr
+ *  5: requires(\rewrites(\and(\equals(X, _), _), _)) = X
+ *  6: requires(\rewrites(\and(\top(), _), _)) = nullptr
+ *  7: requires(\rewrites(\and(\not(_), \and(\equals(X, _), _)), _) = X
+ *  8: requires(\rewrites(\and(\not(_), \and(\top(), _)), _) = nullptr
+ *  9: requires(\rewrites(\and(_, \equals(X, _)), _)) = X
+ * 10: requires(\rewrites(\and(_, \top()), _)) = nullptr
  */
 KOREPattern *KOREAxiomDeclaration::getRequires() const {
   using namespace kllvm::pattern_matching;
   using namespace kllvm::pattern_matching::literals;
 
-  auto implies = "\\implies"_p;
-  auto and_ = "\\and"_p;
-  auto equals_ = "\\equals"_p;
-  auto not_ = "\\not"_p;
-  auto rewrites = "\\rewrites"_p;
+  auto implies = R"(\implies)"_p;
+  auto and_ = R"(\and)"_p;
+  auto equals_ = R"(\equals)"_p;
+  auto not_ = R"(\not)"_p;
+  auto rewrites = R"(\rewrites)"_p;
+  auto top = R"(\top)"_p;
 
   auto X = subject(any);
 
-  auto patterns = match_first(
-      implies(and_(not_(any), and_(equals_(X, any), any)), any),
-      implies(and_(equals_(X, any), any), any),
-      rewrites(and_(equals_(X, any), any), any),
-      rewrites(and_(not_(any), and_(equals_(X, any), any)), any),
-      rewrites(and_(any, equals_(X, any)), any));
+  auto p0 = implies(and_(not_(any), and_(top(), any)), any);
+  auto p1 = implies(and_(not_(any), and_(equals_(X, any), any)), any);
+  auto p2 = implies(and_(top(), any), any);
+  auto p3 = implies(and_(equals_(X, any), any), any);
+  auto p4 = equals_(any, any);
+  auto p5 = rewrites(and_(equals_(X, any), any), any);
+  auto p6 = rewrites(and_(top(), any), any);
+  auto p7 = rewrites(and_(not_(any), and_(equals_(X, any), any)), any);
+  auto p8 = rewrites(and_(not_(any), and_(top(), any)), any);
+  auto p9 = rewrites(and_(any, equals_(X, any)), any);
+  auto p10 = rewrites(and_(any, top()), any);
 
-  if (auto result = patterns.match(pattern)) {
+  auto patterns = match_first(p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10);
+  auto [any_match, result] = patterns.match(pattern);
+
+  if (result) {
     return result->get();
   }
 
-  return nullptr;
+  if (any_match) {
+    return nullptr;
+  }
+
+  assert(false && "Invalid axiom");
+  abort();
 }
 
 void KOREAliasDeclaration::addVariables(sptr<KORECompositePattern> Variables) {
