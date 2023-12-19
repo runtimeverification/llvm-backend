@@ -1575,8 +1575,7 @@ KOREPattern *KOREAxiomDeclaration::getRequires() const {
           and_(not_(any), and_(equals_(subject(any), any), any)), any)),
       matcher(rewrites_(and_(any, equals_(subject(any), any)), any)));
 
-  auto result = patterns.match(pattern);
-  if (result) {
+  if (auto result = patterns.match(pattern)) {
     return result->get();
   }
 
