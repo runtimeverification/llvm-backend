@@ -62,7 +62,7 @@ private:
       return Leaf;
     if (get(node, "function"))
       return Function;
-    throw node;
+    throw *node;
   }
 
 public:
