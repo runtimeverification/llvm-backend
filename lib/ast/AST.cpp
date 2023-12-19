@@ -1560,20 +1560,20 @@ KOREPattern *KOREAxiomDeclaration::getRequires() const {
   using namespace kllvm::pattern_matching;
   using namespace kllvm::pattern_matching::literals;
 
-  auto implies_ = "\\implies"_p;
+  auto implies = "\\implies"_p;
   auto and_ = "\\and"_p;
   auto equals_ = "\\equals"_p;
   auto not_ = "\\not"_p;
-  auto rewrites_ = "\\rewrites"_p;
+  auto rewrites = "\\rewrites"_p;
+
+  auto X = subject(any);
 
   auto patterns = match_first(
-      matcher(implies_(
-          and_(not_(any), and_(equals_(subject(any), any), any)), any)),
-      matcher(implies_(and_(equals_(subject(any), any), any), any)),
-      matcher(rewrites_(and_(equals_(subject(any), any), any), any)),
-      matcher(rewrites_(
-          and_(not_(any), and_(equals_(subject(any), any), any)), any)),
-      matcher(rewrites_(and_(any, equals_(subject(any), any)), any)));
+      matcher(implies(and_(not_(any), and_(equals_(X, any), any)), any)),
+      matcher(implies(and_(equals_(X, any), any), any)),
+      matcher(rewrites(and_(equals_(X, any), any), any)),
+      matcher(rewrites(and_(not_(any), and_(equals_(X, any), any)), any)),
+      matcher(rewrites(and_(any, equals_(X, any)), any)));
 
   if (auto result = patterns.match(pattern)) {
     return result->get();
