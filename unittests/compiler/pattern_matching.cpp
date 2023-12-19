@@ -35,4 +35,33 @@ BOOST_AUTO_TEST_CASE(any_match) {
   }
 }
 
+BOOST_AUTO_TEST_CASE(extract_subject_simple) {
+  auto foo = term("foo");
+  auto [match, sub] = subject(pattern("foo")).match(foo);
+  BOOST_CHECK(match);
+  BOOST_CHECK_EQUAL(ast_to_string(*foo), ast_to_string(*sub));
+}
+
+BOOST_AUTO_TEST_CASE(extract_subject_deeper) {
+  auto bar = term("bar");
+  auto baz = term("baz");
+
+  // foo(a1(), a2(bar()), a3(b1(baz())))
+  auto foo
+      = term("foo", term("a1"), term("a2", bar), term("a3", term("b1", baz)));
+
+  // foo(_, a2(X), _)
+  auto [bar_m, bar_sub]
+      = pattern("foo", any, pattern("a2", subject(any)), any).match(foo);
+  BOOST_CHECK(bar_m);
+  BOOST_CHECK_EQUAL(ast_to_string(*bar), ast_to_string(*bar_sub));
+
+  // foo(_, _, a3(b1(X)))
+  auto [baz_m, baz_sub]
+      = pattern("foo", any, any, pattern("a3", pattern("b1", subject(any))))
+            .match(foo);
+  BOOST_CHECK(baz_m);
+  BOOST_CHECK_EQUAL(ast_to_string(*baz), ast_to_string(*baz_sub));
+}
+
 BOOST_AUTO_TEST_SUITE_END()
