@@ -62,19 +62,6 @@ struct subject_count<pattern<Ts...>> {
 template <typename T>
 constexpr inline size_t subject_count_v = subject_count<T>::value;
 
-template <typename T>
-struct is_matcher {
-  constexpr static bool value = false;
-};
-
-template <typename Pattern, typename Result>
-struct is_matcher<matcher<Pattern, Result>> {
-  constexpr static bool value = true;
-};
-
-template <typename T>
-constexpr inline bool is_matcher_v = is_matcher<T>::value;
-
 struct pattern_forwarder {
   std::string constructor;
 
@@ -211,11 +198,7 @@ matcher(Pattern)
 
 template <typename T>
 constexpr auto make_matcher(T arg) {
-  if constexpr (detail::is_matcher_v<T>) {
-    return arg;
-  } else {
-    return matcher(arg);
-  }
+  return matcher(arg);
 }
 
 template <typename M, typename... Ms>
