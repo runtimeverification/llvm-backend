@@ -121,7 +121,7 @@ public:
 
   match_result match(std::shared_ptr<KOREPattern> const &term) const {
     if (auto composite = std::dynamic_pointer_cast<KORECompositePattern>(term);
-        composite->getArguments().size() == arity()
+        composite && composite->getArguments().size() == arity()
         && composite->getConstructor()->getName() == constructor_) {
       auto results = std::vector<match_result>{};
 
@@ -222,7 +222,8 @@ private:
 
 namespace literals {
 
-detail::pattern_forwarder operator""_p(const char *str, std::size_t data) {
+inline detail::pattern_forwarder
+operator""_p(const char *str, std::size_t data) {
   return {std::string(str, data)};
 }
 

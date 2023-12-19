@@ -1,5 +1,7 @@
 #include "kllvm/ast/AST.h"
 
+#include "kllvm/ast/pattern_matching.h"
+
 #include "kllvm/binary/deserializer.h"
 #include "kllvm/binary/serializer.h"
 #include "kllvm/parser/KOREParser.h"
@@ -2081,6 +2083,23 @@ void KORESymbol::serialize_to(serializer &s) const {
 void KOREVariable::serialize_to(serializer &s) const {
   s.emit(header_byte<KOREVariable>);
   s.emit_string(name);
+}
+
+// We're looking for special patterns that have the form:
+//
+//   rawTerm{}(inj{S, SortKItem{}}(X))
+//
+// and extracting the inner term X.
+sptr<KOREPattern> kllvm::stripRawTerm(sptr<KOREPattern> const &term) {
+  using namespace kllvm::pattern_matching;
+  using namespace kllvm::pattern_matching::literals;
+
+  auto [success, inner] = "rawTerm"_p("inj"_p(subject(any))).match(term);
+  if (success && inner) {
+    return inner;
+  }
+
+  return term;
 }
 
 void kllvm::readMultimap(
