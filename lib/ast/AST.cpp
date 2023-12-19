@@ -1569,11 +1569,11 @@ KOREPattern *KOREAxiomDeclaration::getRequires() const {
   auto X = subject(any);
 
   auto patterns = match_first(
-      matcher(implies(and_(not_(any), and_(equals_(X, any), any)), any)),
-      matcher(implies(and_(equals_(X, any), any), any)),
-      matcher(rewrites(and_(equals_(X, any), any), any)),
-      matcher(rewrites(and_(not_(any), and_(equals_(X, any), any)), any)),
-      matcher(rewrites(and_(any, equals_(X, any)), any)));
+      implies(and_(not_(any), and_(equals_(X, any), any)), any),
+      implies(and_(equals_(X, any), any), any),
+      rewrites(and_(equals_(X, any), any), any),
+      rewrites(and_(not_(any), and_(equals_(X, any), any)), any),
+      rewrites(and_(any, equals_(X, any)), any));
 
   if (auto result = patterns.match(pattern)) {
     return result->get();

@@ -23,6 +23,9 @@ class subject;
 
 class any_;
 
+template <typename Pattern, typename Result>
+class matcher;
+
 namespace detail {
 
 template <typename Tuple, typename Func, std::size_t... Idxs>
@@ -58,6 +61,19 @@ struct subject_count<pattern<Ts...>> {
 
 template <typename T>
 constexpr inline size_t subject_count_v = subject_count<T>::value;
+
+template <typename T>
+struct is_matcher {
+  constexpr static bool value = false;
+};
+
+template <typename Pattern, typename Result>
+struct is_matcher<matcher<Pattern, Result>> {
+  constexpr static bool value = true;
+};
+
+template <typename T>
+constexpr inline bool is_matcher_v = is_matcher<T>::value;
 
 struct pattern_forwarder {
   std::string constructor;
@@ -196,14 +212,26 @@ template <typename Pattern>
 matcher(Pattern)
     -> matcher<Pattern, std::optional<std::shared_ptr<KOREPattern>>>;
 
+template <typename T>
+constexpr auto make_matcher(T arg) {
+  if constexpr (detail::is_matcher_v<T>) {
+    return arg;
+  } else {
+    return matcher(arg);
+  }
+}
+
 template <typename M, typename... Ms>
 class match_first {
+  using result_t =
+      typename std::invoke_result_t<decltype(make_matcher<M>), M>::result_t;
+
 public:
   match_first(M first, Ms... rest)
-      : matchers_(first, rest...) { }
+      : matchers_(make_matcher(first), make_matcher(rest)...) { }
 
-  typename M::result_t match(std::shared_ptr<KOREPattern> const &term) const {
-    typename M::result_t result = std::nullopt;
+  result_t match(std::shared_ptr<KOREPattern> const &term) const {
+    result_t result = std::nullopt;
 
     detail::for_each(matchers_, [&](auto idx, auto const &matcher) {
       if (!result) {
@@ -217,7 +245,10 @@ public:
   }
 
 private:
-  std::tuple<M, Ms...> matchers_;
+  std::tuple<
+      std::invoke_result_t<decltype(make_matcher<M>), M>,
+      std::invoke_result_t<decltype(make_matcher<Ms>), Ms>...>
+      matchers_;
 };
 
 namespace literals {
