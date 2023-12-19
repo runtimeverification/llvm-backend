@@ -132,4 +132,47 @@ BOOST_AUTO_TEST_CASE(first) {
   BOOST_CHECK_EQUAL(ast_to_string(**result), ast_to_string(*baz));
 }
 
+BOOST_AUTO_TEST_CASE(first_transformed) {
+  using namespace kllvm::pattern_matching::literals;
+
+  auto bar = term("bar");
+  auto baz = term("baz");
+
+  // foo(a1(), a2(bar()), a3(b1(baz())))
+  auto foo
+      = term("foo", term("a1"), term("a2", bar), term("a3", term("b1", baz)));
+
+  auto patterns = match_first(
+      matcher("foo"_p(subject(any), any), get_name),
+      matcher("foo"_p(subject(any), any, "bad"_p(any)), get_name),
+      matcher("bar"_p(subject(any), any, any), get_name),
+      matcher(
+          "foo"_p("a1"_p(), "a2"_p(subject(any)), "a3"_p("b1"_p(any))),
+          get_name), // succeeds
+      matcher("foo"_p(subject(any), any, any), get_name));
+
+  auto result = patterns.match(foo);
+  BOOST_CHECK(result);
+  BOOST_CHECK_EQUAL(*result, "bar");
+}
+
+BOOST_AUTO_TEST_CASE(first_no_match) {
+  using namespace kllvm::pattern_matching::literals;
+
+  auto bar = term("bar");
+  auto baz = term("baz");
+
+  // foo(a1(), a2(bar()), a3(b1(baz())))
+  auto foo
+      = term("foo", term("a1"), term("a2", bar), term("a3", term("b1", baz)));
+
+  auto patterns = match_first(
+      matcher("foo"_p(subject(any), any)),
+      matcher("foo"_p(subject(any), any, "bad"_p(any))),
+      matcher("bar"_p(subject(any), any, any)));
+
+  auto result = patterns.match(foo);
+  BOOST_CHECK(!result);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
