@@ -4,10 +4,12 @@
 #include <kllvm/ast/AST.h>
 
 #include <cassert>
+#include <functional>
 #include <iostream>
 #include <memory>
 #include <string>
 #include <tuple>
+#include <type_traits>
 #include <utility>
 #include <vector>
 
@@ -153,6 +155,39 @@ private:
   std::string constructor_;
   std::tuple<Ts...> children_;
 };
+
+template <typename Pattern, typename Result>
+class matcher {
+public:
+  template <typename Func>
+  matcher(Pattern p, Func f)
+      : pattern_(p)
+      , func_(f) { }
+
+  matcher(Pattern p)
+      : matcher(p, [](auto const &p) { return p; }) { }
+
+  Result match(std::shared_ptr<KOREPattern> const &term) {
+    auto [match, subject] = pattern_.match(term);
+
+    if (!match || !subject) {
+      return std::nullopt;
+    }
+
+    return func_(subject);
+  }
+
+private:
+  Pattern pattern_;
+  std::function<Result(std::shared_ptr<KOREPattern> const &)> func_;
+};
+
+template <typename Pattern, typename Func>
+matcher(Pattern, Func) -> matcher<
+    Pattern, std::invoke_result_t<Func, std::shared_ptr<KOREPattern> const &>>;
+
+template <typename Pattern>
+matcher(Pattern) -> matcher<Pattern, std::shared_ptr<KOREPattern> const &>;
 
 namespace literals {
 

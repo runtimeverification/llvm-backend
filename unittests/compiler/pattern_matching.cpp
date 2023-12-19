@@ -86,4 +86,26 @@ BOOST_AUTO_TEST_CASE(literals) {
   BOOST_CHECK_EQUAL(ast_to_string(*baz), ast_to_string(*baz_sub));
 }
 
+BOOST_AUTO_TEST_CASE(matcher) {
+  using namespace kllvm::pattern_matching::literals;
+
+  auto bar = term("bar");
+  auto baz = term("baz");
+
+  // foo(a1(), a2(bar()), a3(b1(baz())))
+  auto foo
+      = term("foo", term("a1"), term("a2", bar), term("a3", term("b1", baz)));
+
+  auto get_name = [](auto const &term) -> std::optional<std::string> {
+    if (auto comp = std::dynamic_pointer_cast<KORECompositePattern>(term)) {
+      return comp->getConstructor()->getName();
+    }
+
+    return std::nullopt;
+  };
+
+  auto m = matcher("foo"_p(any, subject(any), any), get_name);
+  BOOST_CHECK_EQUAL(*m.match(foo), "a2");
+}
+
 BOOST_AUTO_TEST_SUITE_END()
