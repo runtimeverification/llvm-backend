@@ -64,4 +64,26 @@ BOOST_AUTO_TEST_CASE(extract_subject_deeper) {
   BOOST_CHECK_EQUAL(ast_to_string(*baz), ast_to_string(*baz_sub));
 }
 
+BOOST_AUTO_TEST_CASE(literals) {
+  using namespace kllvm::pattern_matching::literals;
+
+  auto bar = term("bar");
+  auto baz = term("baz");
+
+  // foo(a1(), a2(bar()), a3(b1(baz())))
+  auto foo
+      = term("foo", term("a1"), term("a2", bar), term("a3", term("b1", baz)));
+
+  // foo(_, a2(X), _)
+  auto [bar_m, bar_sub] = "foo"_p(any, "a2"_p(subject(any)), any).match(foo);
+  BOOST_CHECK(bar_m);
+  BOOST_CHECK_EQUAL(ast_to_string(*bar), ast_to_string(*bar_sub));
+
+  // foo(_, _, a3(b1(X)))
+  auto [baz_m, baz_sub]
+      = "foo"_p(any, any, "a3"_p("b1"_p(subject(any)))).match(foo);
+  BOOST_CHECK(baz_m);
+  BOOST_CHECK_EQUAL(ast_to_string(*baz), ast_to_string(*baz_sub));
+}
+
 BOOST_AUTO_TEST_SUITE_END()

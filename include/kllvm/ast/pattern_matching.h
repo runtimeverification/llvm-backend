@@ -57,6 +57,15 @@ struct subject_count<pattern<Ts...>> {
 template <typename T>
 constexpr inline size_t subject_count_v = subject_count<T>::value;
 
+struct pattern_forwarder {
+  std::string constructor;
+
+  template <typename... Args>
+  pattern<Args...> operator()(Args... args) const {
+    return pattern(constructor, args...);
+  }
+};
+
 } // namespace detail
 
 struct match_result {
@@ -144,6 +153,14 @@ private:
   std::string constructor_;
   std::tuple<Ts...> children_;
 };
+
+namespace literals {
+
+detail::pattern_forwarder operator""_p(const char *str, std::size_t data) {
+  return {std::string(str, data)};
+}
+
+} // namespace literals
 
 } // namespace kllvm::pattern_matching
 
