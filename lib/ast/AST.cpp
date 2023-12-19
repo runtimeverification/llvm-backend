@@ -1555,92 +1555,40 @@ KOREPattern *KOREAxiomDeclaration::getRightHandSide() const {
  * requires(\rewrites(\and(\not(_), \and(\top(), _)), _) = nullptr
  * requires(\rewrites(\and(_, \equals(X, _)), _)) = X
  * requires(\rewrites(\and(_, \top()), _)) = nullptr
+ *
+ * requires(\implies(\and(\not(_), \and(\equals(X, _), _)), _)) = X
+ * requires(\implies(\and(\equals(X, _), _), _)) = X
+ * requires(\rewrites(\and(\equals(X, _), _), _)) = X
+ * requires(\rewrites(\and(\not(_), \and(\equals(X, _), _)), _) = X
+ * requires(\rewrites(\and(_, \equals(X, _)), _)) = X
  */
 KOREPattern *KOREAxiomDeclaration::getRequires() const {
-  if (auto top = dynamic_cast<KORECompositePattern *>(pattern.get())) {
-    if (top->getConstructor()->getName() == "\\implies"
-        && top->getArguments().size() == 2) {
-      if (auto outer = dynamic_cast<KORECompositePattern *>(
-              top->getArguments()[0].get())) {
-        if (outer->getConstructor()->getName() == "\\and"
-            && outer->getArguments().size() == 2) {
-          if (auto _not = dynamic_cast<KORECompositePattern *>(
-                  outer->getArguments()[0].get())) {
-            if (_not->getConstructor()->getName() == "\\not"
-                && _not->getArguments().size() == 1) {
-              outer = dynamic_cast<KORECompositePattern *>(
-                  outer->getArguments()[1].get());
-              assert(outer);
-            }
-          }
-        }
-        if (outer->getConstructor()->getName() == "\\and"
-            && outer->getArguments().size() == 2) {
-          if (auto inner = dynamic_cast<KORECompositePattern *>(
-                  outer->getArguments()[0].get())) {
-            if (inner->getConstructor()->getName() == "\\top"
-                && inner->getArguments().empty()) {
-              return nullptr;
-            } else if (
-                inner->getConstructor()->getName() == "\\equals"
-                && inner->getArguments().size() == 2) {
-              return inner->getArguments()[0].get();
-            }
-          }
-        }
-      }
-    } else if (
-        top->getConstructor()->getName() == "\\equals"
-        && top->getArguments().size() == 2) {
-      return nullptr;
-    } else if (
-        top->getConstructor()->getName() == "\\rewrites"
-        && top->getArguments().size() == 2) {
-      if (auto andPattern = dynamic_cast<KORECompositePattern *>(
-              top->getArguments()[0].get())) {
-        if (andPattern->getConstructor()->getName() == "\\and"
-            && andPattern->getArguments().size() == 2) {
-          for (auto i = 0; i < 2; ++i) {
-            if (auto equals = dynamic_cast<KORECompositePattern *>(
-                    andPattern->getArguments()[i].get())) {
-              if (equals->getConstructor()->getName() == "\\equals"
-                  && equals->getArguments().size() == 2) {
-                return equals->getArguments()[0].get();
-              } else if (
-                  equals->getConstructor()->getName() == "\\top"
-                  && equals->getArguments().empty()) {
-                continue;
-              } else if (
-                  equals->getConstructor()->getName() == "\\not"
-                  && equals->getArguments().size() == 1) {
-                if (auto andPattern2 = dynamic_cast<KORECompositePattern *>(
-                        andPattern->getArguments()[1].get())) {
-                  if (andPattern2->getConstructor()->getName() == "\\and"
-                      && andPattern2->getArguments().size() == 2) {
-                    if (auto equals2 = dynamic_cast<KORECompositePattern *>(
-                            andPattern2->getArguments()[0].get())) {
-                      if (equals2->getConstructor()->getName() == "\\equals"
-                          && equals2->getArguments().size() == 2) {
-                        return equals2->getArguments()[0].get();
-                      } else if (
-                          equals2->getConstructor()->getName() == "\\top"
-                          && equals2->getArguments().empty()) {
-                        continue;
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
+  using namespace kllvm::pattern_matching;
+  using namespace kllvm::pattern_matching::literals;
 
-          return nullptr;
-        }
-      }
-    }
+  auto implies_ = "\\implies"_p;
+  auto and_ = "\\and"_p;
+  auto equals_ = "\\equals"_p;
+  auto not_ = "\\not"_p;
+  auto rewrites_ = "\\rewrites"_p;
+
+  auto patterns = match_first(
+      matcher(implies_(
+          and_(not_(any), and_(equals_(subject(any), any), any)), any)),
+      matcher(implies_(and_(equals_(subject(any), any), any), any)),
+      matcher(rewrites_(
+          and_(not_(any), and_(equals_(subject(any), any), any)), any)),
+      matcher(rewrites_(
+          and_(not_(any), and_(equals_(subject(any), any), any)), any)),
+      matcher(rewrites_(and_(any, equals_(subject(any), any)), any)),
+      matcher(rewrites_(and_(equals_(subject(any), any), any), any)));
+
+  auto result = patterns.match(pattern);
+  if (result) {
+    return result->get();
   }
-  assert(false && "ill-formed axiom");
-  abort();
+
+  return nullptr;
 }
 
 void KOREAliasDeclaration::addVariables(sptr<KORECompositePattern> Variables) {
