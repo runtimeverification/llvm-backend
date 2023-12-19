@@ -1501,45 +1501,40 @@ std::vector<KOREPattern *> KOREAxiomDeclaration::getLeftHandSide() const {
  * rhs(\rewrites(_, \and(X, Y))) = if X is a builtin then X else Y
  */
 KOREPattern *KOREAxiomDeclaration::getRightHandSide() const {
-  if (auto top = dynamic_cast<KORECompositePattern *>(pattern.get())) {
-    if (top->getConstructor()->getName() == "\\implies"
-        && top->getArguments().size() == 2) {
-      if (auto andPattern = dynamic_cast<KORECompositePattern *>(
-              top->getArguments()[1].get())) {
-        if (andPattern->getConstructor()->getName() == "\\equals"
-            && andPattern->getArguments().size() == 2) {
-          if (auto andPattern2 = dynamic_cast<KORECompositePattern *>(
-                  andPattern->getArguments()[1].get())) {
-            if (andPattern2->getConstructor()->getName() == "\\and"
-                && andPattern2->getArguments().size() == 2) {
-              return andPattern2->getArguments()[0].get();
-            }
-          }
-        }
-      }
-    } else if (
-        top->getConstructor()->getName() == "\\equals"
-        && top->getArguments().size() == 2) {
-      return top->getArguments()[1].get();
-    } else if (
-        top->getConstructor()->getName() == "\\rewrites"
-        && top->getArguments().size() == 2) {
-      if (auto andPattern = dynamic_cast<KORECompositePattern *>(
-              top->getArguments()[1].get())) {
-        if (andPattern->getConstructor()->getName() == "\\and"
-            && andPattern->getArguments().size() == 2) {
-          auto andLeft = dynamic_cast<KORECompositePattern *>(
-              andPattern->getArguments()[0].get());
-          if (!andLeft->getConstructor()->isBuiltin()) {
-            return andLeft;
-          } else {
-            return andPattern->getArguments()[1].get();
-          }
-        }
-      }
+  using namespace kllvm::pattern_matching;
+  using namespace kllvm::pattern_matching::literals;
+
+  auto get_builtin = [](auto const &term) -> std::optional<sptr<KOREPattern>> {
+    auto comp = std::dynamic_pointer_cast<KORECompositePattern>(term);
+    auto lhs = std::dynamic_pointer_cast<KORECompositePattern>(
+        comp->getArguments()[0]);
+
+    if (!lhs->getConstructor()->isBuiltin()) {
+      return lhs;
+    } else {
+      return comp->getArguments()[1];
     }
+  };
+
+  auto implies = R"(\implies)"_p;
+  auto and_ = R"(\and)"_p;
+  auto equals_ = R"(\equals)"_p;
+  auto rewrites = R"(\rewrites)"_p;
+
+  auto X = subject(any);
+
+  auto p0 = implies(any, equals_(any, and_(X, any)));
+  auto p1 = equals_(any, X);
+  auto p2 = rewrites(any, subject(and_(any, any)));
+
+  auto patterns = match_first(p0, p1, matcher(p2, get_builtin));
+  auto [any_match, result] = patterns.match(pattern);
+
+  if (result) {
+    return result->get();
   }
-  assert(false && "could not compute right hand side of axiom");
+
+  assert(false && "Invalid axiom");
   abort();
 }
 
