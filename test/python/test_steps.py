@@ -43,6 +43,8 @@ class TestSteps(unittest.TestCase):
         t.step(200)
         self.assertEqual(str(t), bar_output())
 
+        kllvm.runtime.free_all_gc_memory()
+
     def test_steps_2(self):
         t = kllvm.runtime.Term(start_pattern())
 
@@ -52,10 +54,14 @@ class TestSteps(unittest.TestCase):
         t.step(-1)
         self.assertEqual(str(t), bar_output())
 
+        kllvm.runtime.free_all_gc_memory()
+
     def test_steps_3(self):
         t = kllvm.runtime.Term(start_pattern())
         t.run()
         self.assertEqual(str(t), bar_output())
+
+        kllvm.runtime.free_all_gc_memory()
 
     def test_steps_to_pattern(self):
         t = kllvm.runtime.Term(start_pattern())
@@ -63,6 +69,9 @@ class TestSteps(unittest.TestCase):
         pat = t.to_pattern()
         self.assertEqual(str(pat), bar_output())
 
+        kllvm.runtime.free_all_gc_memory()
+
 
 if __name__ == "__main__":
+    kllvm.runtime.init_static_objects()
     unittest.main()
