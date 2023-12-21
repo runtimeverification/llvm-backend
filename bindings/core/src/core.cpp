@@ -18,8 +18,9 @@ std::string return_sort_for_label(std::string const &label) {
 }
 
 std::shared_ptr<KOREPattern> make_rawTerm(
-    std::shared_ptr<KOREPattern> term, std::shared_ptr<KORESort> from,
-    std::shared_ptr<KORESort> to) {
+    std::shared_ptr<KOREPattern> const &term,
+    std::shared_ptr<KORESort> const &from,
+    std::shared_ptr<KORESort> const &to) {
   auto inj = make_injection(term, from, to);
 
   auto rawTerm_sym = KORESymbol::Create("rawTerm");
