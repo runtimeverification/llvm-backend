@@ -6,7 +6,7 @@
 
 extern "C" {
 list hook_LIST_unit() {
-  return list();
+  return {};
 }
 
 list hook_LIST_element(SortKItem value) {
@@ -107,7 +107,7 @@ list hook_LIST_make(SortInt len, SortKItem value) {
   }
 
   size_t length = mpz_get_ui(len);
-  return list(length, value);
+  return {length, value};
 }
 
 list hook_LIST_update(SortList list, SortInt index, SortKItem value) {

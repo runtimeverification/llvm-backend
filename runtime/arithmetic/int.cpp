@@ -268,8 +268,6 @@ void extract(mpz_t result, mpz_t i, size_t off, size_t len) {
     } else {
       mpn_copyi(result->_mp_d, i->_mp_d + off_words, copy_size);
     }
-  } else {
-    copy_size = 0;
   }
   if (mpz_sgn(i) < 0) {
     mpn_com(result->_mp_d, result->_mp_d, size);
@@ -394,7 +392,7 @@ SortInt hook_INT_rand(SortInt upperBound) {
   mpz_init(result);
   if (!kllvm_randStateInitialized) {
     gmp_randinit_default(kllvm_randState);
-    mpz_set_si(result, time(NULL));
+    mpz_set_si(result, time(nullptr));
     gmp_randseed(kllvm_randState, result);
     kllvm_randStateInitialized = true;
   }
@@ -415,7 +413,7 @@ size_t *hook_MINT_export(mpz_t in, uint64_t bits) {
     count = 0;
   uint64_t alloccount = nwords > count ? nwords : count;
   size_t allocsize = alloccount * sizeof(size_t);
-  size_t *allocptr = (size_t *)koreAllocAlwaysGC(allocsize);
+  auto *allocptr = (size_t *)koreAllocAlwaysGC(allocsize);
   memset(allocptr, 0, allocsize);
   size_t *exportptr = nwords > count ? allocptr + nwords - count : allocptr;
   size_t actualcount;

@@ -31,8 +31,9 @@ std::shared_ptr<KOREPattern> make_rawTerm(
 }
 
 std::shared_ptr<KOREPattern> make_injection(
-    std::shared_ptr<KOREPattern> term, std::shared_ptr<KORESort> from,
-    std::shared_ptr<KORESort> to) {
+    std::shared_ptr<KOREPattern> const &term,
+    std::shared_ptr<KORESort> const &from,
+    std::shared_ptr<KORESort> const &to) {
   auto inj_sym = KORESymbol::Create("inj");
 
   inj_sym->addFormalArgument(from);
@@ -57,7 +58,7 @@ bool get_bool(block *term) {
   return *(bool *)term->children;
 }
 
-bool simplify_to_bool(std::shared_ptr<KOREPattern> pattern) {
+bool simplify_to_bool(std::shared_ptr<KOREPattern> const &pattern) {
   auto bool_sort = KORECompositeSort::Create("SortBool");
   auto kitem_sort = KORECompositeSort::Create("SortKItem");
 
@@ -66,7 +67,8 @@ bool simplify_to_bool(std::shared_ptr<KOREPattern> pattern) {
 }
 
 block *simplify_to_term(
-    std::shared_ptr<KOREPattern> pattern, std::shared_ptr<KORESort> sort) {
+    std::shared_ptr<KOREPattern> const &pattern,
+    std::shared_ptr<KORESort> const &sort) {
   auto kitem_sort = KORECompositeSort::Create("SortKItem");
 
   if (is_sort_kitem(sort) || is_sort_k(sort)) {
@@ -77,9 +79,25 @@ block *simplify_to_term(
   }
 }
 
-std::shared_ptr<KOREPattern>
-simplify(std::shared_ptr<KOREPattern> pattern, std::shared_ptr<KORESort> sort) {
+std::shared_ptr<KOREPattern> simplify(
+    std::shared_ptr<KOREPattern> const &pattern,
+    std::shared_ptr<KORESort> const &sort) {
   return term_to_pattern(simplify_to_term(pattern, sort));
+}
+
+std::shared_ptr<KOREPattern>
+evaluate_function(std::shared_ptr<KORECompositePattern> const &term) {
+  auto term_args = std::vector<void *>{};
+  for (auto const &arg : term->getArguments()) {
+    term_args.push_back(static_cast<void *>(construct_term(arg)));
+  }
+
+  auto label = ast_to_string(*term->getConstructor());
+  auto tag = getTagForSymbolName(label.c_str());
+  auto return_sort = getReturnSortForTag(tag);
+  auto result = evaluateFunctionSymbol(tag, term_args.data());
+
+  return sortedTermToKorePattern(static_cast<block *>(result), return_sort);
 }
 
 bool is_sort_kitem(std::shared_ptr<KORESort> const &sort) {

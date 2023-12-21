@@ -100,7 +100,7 @@ Fixity getFixity(int position, KORESymbol *sym, PrettyPrintData const &data) {
  * production
  */
 Fixity getFixity(KORESymbol *sym, PrettyPrintData const &data) {
-  std::string name = sym->getName();
+  auto const &name = sym->getName();
   int result = EMPTY;
   if (data.terminals.at(name)[0] == '0') {
     result = result | BARE_LEFT;
@@ -463,7 +463,7 @@ sptr<KOREPattern> addBrackets(
 }
 
 sptr<KOREPattern>
-addBrackets(sptr<KOREPattern> t, PrettyPrintData const &data) {
+addBrackets(sptr<KOREPattern> const &t, PrettyPrintData const &data) {
   return addBrackets(t, nullptr, nullptr, data);
 }
 

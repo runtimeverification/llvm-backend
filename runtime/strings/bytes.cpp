@@ -27,7 +27,7 @@ uint32_t getTagForSymbolName(const char *);
 // bytes2int and int2bytes expect constructors of sort Endianness, which become
 // a uint64_t constant value in the K term representation
 uint64_t tag_big_endian() {
-  static uint64_t tag = (uint64_t)-1;
+  static auto tag = (uint64_t)-1;
   if (tag == -1) {
     tag = (uint64_t)leaf_block(getTagForSymbolName("LblbigEndianBytes{}"));
   }
@@ -37,7 +37,7 @@ uint64_t tag_big_endian() {
 // bytes2int expects constructors of sort Signedness, which become a uint64_t
 // constant value in the K term representation
 uint64_t tag_unsigned() {
-  static uint64_t tag = (uint64_t)-1;
+  static auto tag = (uint64_t)-1;
   if (tag == -1) {
     tag = (uint64_t)leaf_block(getTagForSymbolName("LblunsignedBytes{}"));
   }
@@ -47,8 +47,8 @@ uint64_t tag_unsigned() {
 // syntax Int ::= Bytes2Int(Bytes, Endianness, Signedness)
 SortInt hook_BYTES_bytes2int(
     SortBytes b, SortEndianness endianness_ptr, SortSignedness signedness_ptr) {
-  uint64_t endianness = (uint64_t)endianness_ptr;
-  uint64_t signedness = (uint64_t)signedness_ptr;
+  auto endianness = (uint64_t)endianness_ptr;
+  auto signedness = (uint64_t)signedness_ptr;
   mpz_t result;
   mpz_init(result);
   int order = endianness == tag_big_endian() ? 1 : -1;
@@ -84,13 +84,13 @@ void extract(mpz_t, mpz_t, size_t, size_t);
 // syntax Bytes ::= Int2Bytes(Int, Int, Endianness)
 SortBytes
 hook_BYTES_int2bytes(SortInt len, SortInt i, SortEndianness endianness_ptr) {
-  uint64_t endianness = (uint64_t)endianness_ptr;
+  auto endianness = (uint64_t)endianness_ptr;
   unsigned long len_long = mpz_get_ui(len);
   if (len_long == 0) {
     return hook_BYTES_empty();
   }
   bool neg = mpz_sgn(i) < 0;
-  string *result
+  auto *result
       = static_cast<string *>(koreAllocToken(sizeof(string) + len_long));
   init_with_len(result, len_long);
   memset(result->data, neg ? 0xff : 0x00, len_long);
@@ -107,7 +107,7 @@ hook_BYTES_int2bytes(SortInt len, SortInt i, SortEndianness endianness_ptr) {
 }
 
 string *bytes2string(string *b, size_t len) {
-  string *result = static_cast<string *>(koreAllocToken(sizeof(string) + len));
+  auto *result = static_cast<string *>(koreAllocToken(sizeof(string) + len));
   memcpy(result->data, b->data, len);
   init_with_len(result, len);
   return result;
@@ -224,7 +224,7 @@ SortBytes hook_BYTES_padRight(SortBytes b, SortInt length, SortInt v) {
   if (uv > 255) {
     KLLVM_HOOK_INVALID_ARGUMENT("Integer overflow on value: {}", uv);
   }
-  string *result = static_cast<string *>(koreAllocToken(sizeof(string) + ulen));
+  auto *result = static_cast<string *>(koreAllocToken(sizeof(string) + ulen));
   init_with_len(result, ulen);
   memcpy(result->data, b->data, len(b));
   memset(result->data + len(b), uv, ulen - len(b));
@@ -240,7 +240,7 @@ SortBytes hook_BYTES_padLeft(SortBytes b, SortInt length, SortInt v) {
   if (uv > 255) {
     KLLVM_HOOK_INVALID_ARGUMENT("Integer overflow on value: {}", uv);
   }
-  string *result = static_cast<string *>(koreAllocToken(sizeof(string) + ulen));
+  auto *result = static_cast<string *>(koreAllocToken(sizeof(string) + ulen));
   init_with_len(result, ulen);
   memset(result->data, uv, ulen - len(b));
   memcpy(result->data + ulen - len(b), b->data, len(b));

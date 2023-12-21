@@ -31,8 +31,7 @@ struct serialization_state {
       : instance()
       , boundVariables{}
       , varNames{}
-      , usedVarNames{}
-      , varCounter(0) { }
+      , usedVarNames{} { }
 
   // We never want to copy the state; it should only ever get passed around by
   // reference.
@@ -42,10 +41,10 @@ struct serialization_state {
   std::vector<block *> boundVariables;
   std::unordered_map<string *, std::string, StringHash, StringEq> varNames;
   std::set<std::string> usedVarNames;
-  uint64_t varCounter;
+  uint64_t varCounter{0};
 };
 
-static std::string drop_back(std::string s, int n) {
+static std::string drop_back(std::string const &s, int n) {
   return s.substr(0, s.size() - n);
 }
 
@@ -254,11 +253,11 @@ void serializeMInt(
     str = intToString(z);
   }
 
-  auto buf_len = snprintf(NULL, 0, fmt, str.c_str(), bits);
-  auto buffer = std::make_unique<char[]>(buf_len + 1);
+  auto buf_len = snprintf(nullptr, 0, fmt, str.c_str(), bits);
+  auto buffer = std::vector<char>(buf_len + 1);
 
-  snprintf(buffer.get(), buf_len + 1, fmt, str.c_str(), bits);
-  emitToken(instance, sort, buffer.get());
+  snprintf(buffer.data(), buf_len + 1, fmt, str.c_str(), bits);
+  emitToken(instance, sort, buffer.data());
 }
 
 void serializeComma(writer *file, void *state) { }
@@ -299,7 +298,7 @@ void serializeConfigurationInternal(
 
   uint16_t layout = get_layout(subject);
   if (!layout) {
-    string *str = (string *)subject;
+    auto *str = (string *)subject;
     size_t subject_len = len(subject);
 
     if (isVar && !state.varNames.count(str)) {
@@ -400,6 +399,7 @@ void serializeConfigurations(
   std::memcpy(buf, state.instance.data().data(), buf_size);
   fwrite(buf, 1, buf_size, file);
 
+  free(buf);
   fclose(file);
 }
 
@@ -411,6 +411,8 @@ void serializeConfigurationToFile(
 
   FILE *file = fopen(filename, "a");
   fwrite(data, 1, size, file);
+
+  free(data);
   fclose(file);
 }
 
@@ -448,12 +450,14 @@ void serializeTermToFile(
 
   FILE *file = fopen(filename, "a");
   fwrite(data, 1, size, file);
+
+  free(data);
   fclose(file);
 }
 
 void serializeRawTermToFile(
     const char *filename, void *subject, const char *sort) {
-  block *term = constructRawTerm(subject, sort);
+  block *term = constructRawTerm(subject, sort, true);
 
   char *data;
   size_t size;
@@ -461,13 +465,26 @@ void serializeRawTermToFile(
 
   FILE *file = fopen(filename, "a");
   fwrite(data, 1, size, file);
+
+  free(data);
   fclose(file);
 }
 
-std::shared_ptr<kllvm::KOREPattern> termToKorePattern(block *subject) {
+std::shared_ptr<kllvm::KOREPattern>
+sortedTermToKorePattern(block *subject, const char *sort) {
+  auto is_kitem = (std::string(sort) == "SortKItem{}");
+  block *term = is_kitem ? subject : constructRawTerm(subject, sort, false);
+
   char *data_out;
   size_t size_out;
 
-  serializeConfiguration(subject, "SortKItem{}", &data_out, &size_out, true);
-  return deserialize_pattern(data_out, data_out + size_out);
+  serializeConfiguration(term, "SortKItem{}", &data_out, &size_out, true);
+  auto result = deserialize_pattern(data_out, data_out + size_out);
+
+  free(data_out);
+  return result;
+}
+
+std::shared_ptr<kllvm::KOREPattern> termToKorePattern(block *subject) {
+  return sortedTermToKorePattern(subject, "SortKItem{}");
 }

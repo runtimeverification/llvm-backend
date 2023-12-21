@@ -310,6 +310,8 @@ void printConfigurationInternal(
 // you can use the C bindings, which wrap the return value of this method in
 // a POD struct.
 std::shared_ptr<kllvm::KOREPattern> termToKorePattern(block *);
+std::shared_ptr<kllvm::KOREPattern>
+sortedTermToKorePattern(block *, const char *);
 
 // This function injects its argument into KItem before printing, using the sort
 // argument as the source sort. Doing so allows the term to be pretty-printed
@@ -409,7 +411,7 @@ extern const uint32_t first_inj_tag, last_inj_tag;
 bool is_injection(block *);
 block *strip_injection(block *);
 block *constructKItemInj(void *subject, const char *sort, bool raw_value);
-block *constructRawTerm(void *subject, const char *sort);
+block *constructRawTerm(void *subject, const char *sort, bool raw_value);
 }
 
 std::string floatToString(const floating *);

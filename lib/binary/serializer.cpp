@@ -7,7 +7,7 @@ namespace detail {
 
 bool is_big_endian() {
   uint32_t i = 1;
-  uint8_t *c = reinterpret_cast<uint8_t *>(&i);
+  auto *c = reinterpret_cast<uint8_t *>(&i);
   return *c == 0x00;
 }
 
@@ -32,7 +32,7 @@ serializer::serializer(flags f)
 
 std::string serializer::byte_string() const {
   auto *ptr = reinterpret_cast<unsigned char const *>(buffer_.data());
-  return std::string(ptr, ptr + buffer_.size());
+  return {ptr, ptr + buffer_.size()};
 }
 
 void serializer::reset() {

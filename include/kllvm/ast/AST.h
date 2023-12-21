@@ -164,12 +164,12 @@ public:
   const std::string getName() const { return name; }
   ValueType getCategory(KOREDefinition *definition);
   std::string getHook(KOREDefinition *definition);
-  static ValueType getCategory(std::string hook);
+  static ValueType getCategory(std::string const &hook);
 
   virtual bool isConcrete() const override;
   virtual sptr<KORESort> substitute(const substitution &subst) override;
 
-  void addArgument(sptr<KORESort> Argument);
+  void addArgument(sptr<KORESort> const &Argument);
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
   virtual void prettyPrint(std::ostream &out) const override;
   virtual void serialize_to(serializer &s) const override;
@@ -223,8 +223,8 @@ public:
     return ptr<KORESymbol>(new KORESymbol(Name));
   }
 
-  void addArgument(sptr<KORESort> Argument);
-  void addFormalArgument(sptr<KORESort> Argument);
+  void addArgument(sptr<KORESort> const &Argument);
+  void addFormalArgument(sptr<KORESort> const &Argument);
   void addSort(sptr<KORESort> Sort);
   void initPatternArguments(void) { arguments.swap(formalArguments); }
 
@@ -439,7 +439,7 @@ private:
 };
 
 void flatten(
-    KORECompositePattern *pat, std::string name,
+    KORECompositePattern *pat, std::string const &name,
     std::vector<sptr<KOREPattern>> &result);
 
 class KOREVariablePattern : public KOREPattern {
@@ -559,7 +559,7 @@ public:
     return arguments;
   }
 
-  void addArgument(sptr<KOREPattern> Argument);
+  void addArgument(sptr<KOREPattern> const &Argument);
 
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
   virtual void serialize_to(serializer &s) const override;
@@ -676,7 +676,7 @@ protected:
 
 public:
   void addAttribute(sptr<KORECompositePattern> Attribute);
-  void addObjectSortVariable(sptr<KORESortVariable> SortVariable);
+  void addObjectSortVariable(sptr<KORESortVariable> const &SortVariable);
   virtual void print(std::ostream &Out, unsigned indent = 0) const = 0;
 
   const std::unordered_map<std::string, sptr<KORECompositePattern>> &
@@ -688,7 +688,7 @@ public:
   }
   virtual ~KOREDeclaration() = default;
 
-  std::string getStringAttribute(std::string name) const;
+  std::string getStringAttribute(std::string const &name) const;
 
 protected:
   void printSortVariables(std::ostream &Out) const;
@@ -964,8 +964,8 @@ public:
 };
 
 void readMultimap(
-    std::string, KORESymbolDeclaration *,
-    std::map<std::string, std::set<std::string>> &, std::string);
+    std::string const &, KORESymbolDeclaration *,
+    std::map<std::string, std::set<std::string>> &, std::string const &);
 
 template <typename Elem, typename Hash, typename Equal>
 std::unordered_map<Elem *, std::unordered_set<Elem *, Hash, Equal>, Hash, Equal>

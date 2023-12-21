@@ -222,6 +222,10 @@ void bind_ast(py::module_ &m) {
 
   /* Sorts */
 
+  // The "redundant" expressions here are used by Pybind's metaprogramming to
+  // generate equality functions over the bound classes.
+  // NOLINTBEGIN(misc-redundant-expression)
+
   auto sort_base
       = py::class_<KORESort, std::shared_ptr<KORESort>>(ast, "Sort")
             .def_property_readonly("is_concrete", &KORESort::isConcrete)
@@ -270,6 +274,8 @@ void bind_ast(py::module_ &m) {
       .def(py::init(&KOREVariable::Create))
       .def("__repr__", print_repr_adapter<KOREVariable>())
       .def_property_readonly("name", &KOREVariable::getName);
+
+  // NOLINTEND(misc-redundant-expression)
 
   /* Patterns */
 

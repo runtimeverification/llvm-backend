@@ -14,13 +14,13 @@ static constexpr uint32_t HASH_THRESHOLD = 5;
 static constexpr uint32_t HASH_LENGTH_THRESHOLD = 1024;
 
 __attribute__((always_inline)) void add_hash8(void *h, uint8_t data) {
-  size_t *hash = (size_t *)h;
+  auto *hash = (size_t *)h;
   *hash = ((*hash) ^ ((size_t)data)) * 1099511628211UL;
   hash_length++;
 }
 
 __attribute__((always_inline)) void add_hash64(void *h, uint64_t data) {
-  uint8_t *buf = (uint8_t *)&data;
+  auto *buf = (uint8_t *)&data;
   add_hash8(h, buf[0]);
   add_hash8(h, buf[1]);
   add_hash8(h, buf[2]);
@@ -62,7 +62,7 @@ void hash_exit() {
 
 void k_hash(block *arg, void *h) {
   if (hash_enter()) {
-    uint64_t argintptr = (uint64_t)arg;
+    auto argintptr = (uint64_t)arg;
     if (is_leaf_block(arg)) {
       add_hash64(h, argintptr);
     } else {
@@ -81,7 +81,7 @@ void k_hash(block *arg, void *h) {
             break;
           }
           case RANGEMAP_LAYOUT: {
-            rangemap *rangemapptr = (rangemap *)(argintptr + offset);
+            auto *rangemapptr = (rangemap *)(argintptr + offset);
             rangemap_hash(rangemapptr, h);
             break;
           }
@@ -96,12 +96,12 @@ void k_hash(block *arg, void *h) {
             break;
           }
           case INT_LAYOUT: {
-            mpz_ptr *intptrptr = (mpz_ptr *)(argintptr + offset);
+            auto *intptrptr = (mpz_ptr *)(argintptr + offset);
             int_hash(*intptrptr, h);
             break;
           }
           case FLOAT_LAYOUT: {
-            floating **floatptrptr = (floating **)(argintptr + offset);
+            auto **floatptrptr = (floating **)(argintptr + offset);
             float_hash(*floatptrptr, h);
             break;
           }
@@ -112,7 +112,7 @@ void k_hash(block *arg, void *h) {
           }
           case SYMBOL_LAYOUT:
           case VARIABLE_LAYOUT: {
-            block **childptrptr = (block **)(argintptr + offset);
+            auto **childptrptr = (block **)(argintptr + offset);
             k_hash(*childptrptr, h);
             break;
           }
@@ -120,7 +120,7 @@ void k_hash(block *arg, void *h) {
           }
         }
       } else {
-        string *str = (string *)arg;
+        auto *str = (string *)arg;
         add_hash_str(h, str->data, len(arg));
       }
     }

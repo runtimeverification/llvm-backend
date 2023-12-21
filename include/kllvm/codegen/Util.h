@@ -14,16 +14,16 @@ namespace kllvm {
 // Returns a reference to the function declaration for a memory allocation
 // function with the given name, adding a declaration to the current module if
 // one does not yet exist
-llvm::Function *koreHeapAlloc(std::string name, llvm::Module *module);
+llvm::Function *koreHeapAlloc(std::string const &name, llvm::Module *module);
 
 // getOrInsertFunction on module, aborting on failure
 template <class... Ts>
-llvm::Function *getOrInsertFunction(llvm::Module *module, Ts... Args) {
-  auto callee = module->getOrInsertFunction(Args...).getCallee();
+llvm::Function *getOrInsertFunction(llvm::Module *module, Ts &&...args) {
+  auto callee
+      = module->getOrInsertFunction(std::forward<Ts>(args)...).getCallee();
   auto func = llvm::dyn_cast<llvm::Function>(callee);
 
   if (!func) {
-    func->print(llvm::errs());
     abort();
   }
 

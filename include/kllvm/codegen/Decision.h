@@ -50,7 +50,7 @@ public:
 
   virtual void codegen(Decision *d) = 0;
   virtual void preprocess(std::unordered_set<LeafNode *> &) = 0;
-  bool beginNode(Decision *d, std::string name);
+  bool beginNode(Decision *d, std::string const &name);
 
   void setCompleted() { completed = true; }
   bool isCompleted() const { return completed; }
@@ -385,9 +385,9 @@ private:
 
   llvm::Value *getTag(llvm::Value *);
 
-  llvm::AllocaInst *decl(var_type name);
+  llvm::AllocaInst *decl(var_type const &name);
 
-  llvm::Constant *stringLiteral(std::string name);
+  llvm::Constant *stringLiteral(std::string const &name);
   llvm::Value *ptrTerm(llvm::Value *val);
 
 public:
@@ -416,8 +416,8 @@ public:
   /* adds code to the specified basic block to take a single step based on
      the specified decision tree and return the result of taking that step. */
   void operator()(DecisionNode *entry);
-  void store(var_type name, llvm::Value *val);
-  llvm::Value *load(var_type name);
+  void store(var_type const &name, llvm::Value *val);
+  llvm::Value *load(var_type const &name);
 
   friend class SwitchNode;
   friend class MakePatternNode;

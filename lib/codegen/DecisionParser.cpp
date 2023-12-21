@@ -62,11 +62,11 @@ private:
       return Leaf;
     if (get(node, "function"))
       return Function;
-    throw node;
+    throw *node;
   }
 
 public:
-  yaml_node_t *get(yaml_node_t *node, std::string name) {
+  yaml_node_t *get(yaml_node_t *node, std::string const &name) {
     yaml_node_pair_t *entry;
     for (entry = node->data.mapping.pairs.start;
          entry < node->data.mapping.pairs.top; ++entry) {
@@ -83,8 +83,7 @@ public:
   }
 
   std::string str(yaml_node_t *node) {
-    return std::string(
-        (char *)node->data.scalar.value, node->data.scalar.length);
+    return {(char *)node->data.scalar.value, node->data.scalar.length};
   }
 
   std::vector<std::string> vec(yaml_node_t *node) {
@@ -108,9 +107,9 @@ public:
     dv = KORESymbol::Create("\\dv").release();
   }
 
-  std::string to_string(std::vector<std::string> occurrence) {
+  std::string to_string(std::vector<std::string> const &occurrence) {
     std::string result = "";
-    for (std::string i : occurrence) {
+    for (auto const &i : occurrence) {
       result.push_back('_');
       result += i;
     }
@@ -158,7 +157,7 @@ public:
         name = str(o);
       }
       ValueType hook = KORECompositeSort::getCategory(str(get(node, "hook")));
-      uses.push_back(std::make_pair(name, getParamType(hook, mod)));
+      uses.emplace_back(name, getParamType(hook, mod));
       return KOREVariablePattern::Create(name, sorts.at(hook));
     } else if (get(node, "literal")) {
       auto sym = KORESymbol::Create("\\dv");
@@ -264,9 +263,8 @@ public:
           newOccurrence.insert(newOccurrence.begin(), std::to_string(i));
           std::string binding = to_string(newOccurrence);
           std::string hook = str(get(get(_case, 2), i));
-          bindings.push_back(std::make_pair(
-              binding,
-              getParamType(KORECompositeSort::getCategory(hook), mod)));
+          bindings.emplace_back(
+              binding, getParamType(KORECompositeSort::getCategory(hook), mod));
         }
       }
       DecisionNode *child = (*this)(get(_case, 1));
@@ -357,7 +355,7 @@ public:
 };
 
 DecisionNode *parseYamlDecisionTreeFromString(
-    llvm::Module *mod, std::string yaml,
+    llvm::Module *mod, std::string const &yaml,
     const std::map<std::string, KORESymbol *> &syms,
     const std::map<ValueType, sptr<KORECompositeSort>> &sorts) {
   yaml_parser_t parser;
@@ -378,7 +376,7 @@ DecisionNode *parseYamlDecisionTreeFromString(
 }
 
 DecisionNode *parseYamlDecisionTree(
-    llvm::Module *mod, std::string filename,
+    llvm::Module *mod, std::string const &filename,
     const std::map<std::string, KORESymbol *> &syms,
     const std::map<ValueType, sptr<KORECompositeSort>> &sorts) {
   yaml_parser_t parser;
@@ -400,7 +398,7 @@ DecisionNode *parseYamlDecisionTree(
 }
 
 PartialStep parseYamlSpecialDecisionTree(
-    llvm::Module *mod, std::string filename,
+    llvm::Module *mod, std::string const &filename,
     const std::map<std::string, KORESymbol *> &syms,
     const std::map<ValueType, sptr<KORECompositeSort>> &sorts) {
   yaml_parser_t parser;

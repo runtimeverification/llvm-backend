@@ -19,7 +19,7 @@ set hook_SET_element(SortKItem elem) {
 }
 
 set hook_SET_unit() {
-  return set();
+  return {};
 }
 
 bool hook_SET_in(SortKItem elem, SortSet set) {
