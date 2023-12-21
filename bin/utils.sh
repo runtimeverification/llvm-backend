@@ -7,7 +7,7 @@ profile=${profile:-false}
 
 
 time_now_ms () {
-  perl -MTime::HiRes=time -e 'printf "%d\n", time*1000'
+  python3 -c 'import time; print(time.time_ns() // 1_000_000)'
 }
 
 indented () {
