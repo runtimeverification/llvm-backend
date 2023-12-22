@@ -24,7 +24,7 @@ class subject;
 class any_;
 
 template <typename Pattern, typename Result>
-class matcher;
+class map;
 
 namespace detail {
 
@@ -160,17 +160,17 @@ private:
 };
 
 template <typename Pattern, typename Result>
-class matcher {
+class map {
 public:
   using result_t = Result;
 
   template <typename Func>
-  matcher(Pattern p, Func f)
+  map(Pattern p, Func f)
       : pattern_(p)
       , func_(f) { }
 
-  matcher(Pattern p)
-      : matcher(p, [](auto const &p) { return p; }) { }
+  map(Pattern p)
+      : map(p, [](auto const &p) { return p; }) { }
 
   std::pair<bool, Result>
   match(std::shared_ptr<KOREPattern> const &term) const {
@@ -189,35 +189,34 @@ private:
 };
 
 template <typename Pattern, typename Func>
-matcher(Pattern, Func) -> matcher<
+map(Pattern, Func) -> map<
     Pattern, std::invoke_result_t<Func, std::shared_ptr<KOREPattern> const &>>;
 
 template <typename Pattern>
-matcher(Pattern)
-    -> matcher<Pattern, std::optional<std::shared_ptr<KOREPattern>>>;
+map(Pattern) -> map<Pattern, std::optional<std::shared_ptr<KOREPattern>>>;
 
 template <typename T>
-constexpr auto make_matcher(T arg) {
-  return matcher(arg);
+constexpr auto make_map(T arg) {
+  return map(arg);
 }
 
 template <typename M, typename... Ms>
 class match_first {
   using result_t =
-      typename std::invoke_result_t<decltype(make_matcher<M>), M>::result_t;
+      typename std::invoke_result_t<decltype(make_map<M>), M>::result_t;
 
 public:
   match_first(M first, Ms... rest)
-      : matchers_(make_matcher(first), make_matcher(rest)...) { }
+      : maps_(make_map(first), make_map(rest)...) { }
 
   std::pair<bool, result_t>
   match(std::shared_ptr<KOREPattern> const &term) const {
     result_t result = std::nullopt;
     bool any = false;
 
-    detail::for_each(matchers_, [&](auto idx, auto const &matcher) {
+    detail::for_each(maps_, [&](auto idx, auto const &map) {
       if (!result) {
-        auto [matched, next_res] = matcher.match(term);
+        auto [matched, next_res] = map.match(term);
         if (matched && next_res) {
           result = next_res;
         }
@@ -231,9 +230,9 @@ public:
 
 private:
   std::tuple<
-      std::invoke_result_t<decltype(make_matcher<M>), M>,
-      std::invoke_result_t<decltype(make_matcher<Ms>), Ms>...>
-      matchers_;
+      std::invoke_result_t<decltype(make_map<M>), M>,
+      std::invoke_result_t<decltype(make_map<Ms>), Ms>...>
+      maps_;
 };
 
 namespace literals {

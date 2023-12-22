@@ -105,7 +105,7 @@ BOOST_AUTO_TEST_CASE(single_match) {
   auto foo
       = term("foo", term("a1"), term("a2", bar), term("a3", term("b1", baz)));
 
-  auto m = matcher("foo"_p(any, subject(any), any), get_name);
+  auto m = map("foo"_p(any, subject(any), any), get_name);
   auto [success, result] = m.match(foo);
 
   BOOST_CHECK(success);
@@ -123,12 +123,12 @@ BOOST_AUTO_TEST_CASE(first) {
       = term("foo", term("a1"), term("a2", bar), term("a3", term("b1", baz)));
 
   auto patterns = match_first(
-      matcher("foo"_p(subject(any), any)),
-      matcher("foo"_p(subject(any), any, "bad"_p(any))),
-      matcher("bar"_p(subject(any), any, any)),
-      matcher("foo"_p(
+      map("foo"_p(subject(any), any)),
+      map("foo"_p(subject(any), any, "bad"_p(any))),
+      map("bar"_p(subject(any), any, any)),
+      map("foo"_p(
           "a1"_p(), "a2"_p(any), "a3"_p("b1"_p(subject(any))))), // succeeds
-      matcher("foo"_p(subject(any), any, any)));
+      map("foo"_p(subject(any), any, any)));
 
   auto [any, result] = patterns.match(foo);
   BOOST_CHECK(any);
@@ -147,13 +147,12 @@ BOOST_AUTO_TEST_CASE(first_transformed) {
       = term("foo", term("a1"), term("a2", bar), term("a3", term("b1", baz)));
 
   auto patterns = match_first(
-      matcher("foo"_p(subject(any), any), get_name),
-      matcher("foo"_p(subject(any), any, "bad"_p(any)), get_name),
-      matcher("bar"_p(subject(any), any, any), get_name),
-      matcher(
-          "foo"_p("a1"_p(), "a2"_p(subject(any)), "a3"_p("b1"_p(any))),
+      map("foo"_p(subject(any), any), get_name),
+      map("foo"_p(subject(any), any, "bad"_p(any)), get_name),
+      map("bar"_p(subject(any), any, any), get_name),
+      map("foo"_p("a1"_p(), "a2"_p(subject(any)), "a3"_p("b1"_p(any))),
           get_name), // succeeds
-      matcher("foo"_p(subject(any), any, any), get_name));
+      map("foo"_p(subject(any), any, any), get_name));
 
   auto [any, result] = patterns.match(foo);
   BOOST_CHECK(any);
@@ -172,9 +171,9 @@ BOOST_AUTO_TEST_CASE(first_no_match) {
       = term("foo", term("a1"), term("a2", bar), term("a3", term("b1", baz)));
 
   auto patterns = match_first(
-      matcher("foo"_p(subject(any), any)),
-      matcher("foo"_p(subject(any), any, "bad"_p(any))),
-      matcher("bar"_p(subject(any), any, any)));
+      map("foo"_p(subject(any), any)),
+      map("foo"_p(subject(any), any, "bad"_p(any))),
+      map("bar"_p(subject(any), any, any)));
 
   auto [any, result] = patterns.match(foo);
   BOOST_CHECK(!any);

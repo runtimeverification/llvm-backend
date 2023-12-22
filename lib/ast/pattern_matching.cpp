@@ -122,13 +122,11 @@ std::vector<KOREPattern *> KOREAxiomDeclaration::getLeftHandSide() const {
   auto p12 = implies(equals_(any, any), equals_(X, any));
 
   auto patterns = match_first(
-      matcher(p0, getSingleton), matcher(p1, getSingleton),
-      matcher(p2, getSingleton), matcher(p3, getSingleton),
-      matcher(p4, getSingleton), matcher(p5, getSingleton),
-      matcher(p6, getArguments), matcher(p7, getPatterns),
-      matcher(p8, getPatterns), matcher(p9, getPatterns),
-      matcher(p10, getPatterns), matcher(p11, getArguments),
-      matcher(p12, getArguments));
+      map(p0, getSingleton), map(p1, getSingleton), map(p2, getSingleton),
+      map(p3, getSingleton), map(p4, getSingleton), map(p5, getSingleton),
+      map(p6, getArguments), map(p7, getPatterns), map(p8, getPatterns),
+      map(p9, getPatterns), map(p10, getPatterns), map(p11, getArguments),
+      map(p12, getArguments));
 
   auto [any_match, result] = patterns.match(pattern);
 
@@ -150,7 +148,7 @@ KOREPattern *KOREAxiomDeclaration::getRightHandSide() const {
   auto p1 = equals_(any, X);
   auto p2 = rewrites(any, subject(and_(any, any)));
 
-  auto patterns = match_first(p0, p1, matcher(p2, getBuiltin));
+  auto patterns = match_first(p0, p1, map(p2, getBuiltin));
   auto [any_match, result] = patterns.match(pattern);
 
   if (result) {
