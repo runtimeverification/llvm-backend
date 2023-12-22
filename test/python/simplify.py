@@ -14,7 +14,7 @@ class TestSimplify(unittest.TestCase):
         p = kllvm.parser.Parser.from_string(f'Lbl{label}{{}}()').pattern()
         s = kllvm.ast.CompositeSort('SortInt')
         result = kllvm.runtime.simplify_pattern(p, s)
-        self.assertEqual(str(result), f'inj{{SortInt{{}}, SortKItem{{}}}}(\dv{{SortInt{{}}}}("{value}"))')
+        self.assertEqual(str(result), f'\dv{{SortInt{{}}}}("{value}")')
 
     def _check_bool_simplification(self, label, value):
         p = kllvm.parser.Parser.from_string(f'Lbl{label}{{}}()').pattern()

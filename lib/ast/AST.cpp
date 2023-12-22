@@ -664,7 +664,9 @@ std::string enquote(const std::string &str) {
       if ((unsigned char)c >= 32 && (unsigned char)c < 127) {
         result.push_back(c);
       } else {
-        fmt::format_to(std::back_inserter(result), "\\x{:02x}", c);
+        fmt::format_to(
+            std::back_inserter(result), "\\x{:02x}",
+            static_cast<unsigned char>(c));
       }
       break;
     }
@@ -1580,7 +1582,9 @@ static std::string escapeString(const std::string &str) {
 
   for (char c : str) {
     if (c == '"' || c == '\\' || !isprint(c)) {
-      fmt::format_to(std::back_inserter(result), "\\x{:02x}", c);
+      fmt::format_to(
+          std::back_inserter(result), "\\x{:02x}",
+          static_cast<unsigned char>(c));
     } else {
       result.push_back(c);
     }
