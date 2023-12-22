@@ -117,7 +117,7 @@ public:
 
   std::string const &getName() const { return name; }
   std::string const &getRelativePosition() const { return relativePosition; }
-  std::vector<LLVMEvent> const &getArguemnts() const { return arguments; }
+  std::vector<LLVMEvent> const &getArguments() const { return arguments; }
 
   void addArgument(LLVMEvent const &argument) { arguments.push_back(argument); }
 
@@ -147,7 +147,7 @@ public:
 
   std::string const &getName() const { return name; }
   std::string const &getRelativePosition() const { return relativePosition; }
-  std::vector<LLVMEvent> const &getArguemnts() const { return arguments; }
+  std::vector<LLVMEvent> const &getArguments() const { return arguments; }
   sptr<KOREPattern> getKOREPattern() const { return korePattern; }
   uint64_t getPatternLength() const { return patternLength; }
   void setKOREPattern(sptr<KOREPattern> _korePattern, uint64_t _patternLength) {
@@ -185,20 +185,35 @@ public:
   void print(std::ostream &Out, bool isArg, unsigned indent = 0u) const;
 };
 
-struct LLVMRewriteTrace {
+class LLVMRewriteTrace {
+private:
   uint32_t version;
   std::vector<LLVMEvent> preTrace;
   LLVMEvent initialConfig;
   std::vector<LLVMEvent> trace;
 
+public:
+  uint32_t getVersion() const { return version; }
+  std::vector<LLVMEvent> const &getPreTrace() const { return preTrace; }
+  LLVMEvent getInitialConfig() const { return initialConfig; }
+  std::vector<LLVMEvent> const &getTrace() const { return trace; }
+  void setVersion(uint32_t _version) { version = _version; }
+  void setInitialConfig(LLVMEvent _initialConfig) {
+    initialConfig = _initialConfig;
+  }
+
+  void addPreTraceEvent(LLVMEvent const &event) { preTrace.push_back(event); }
+  void addTraceEvent(LLVMEvent const &event) { trace.push_back(event); }
+
   void print(std::ostream &Out, unsigned indent = 0u) const;
 };
 
 class ProofTraceParser {
+public:
+  static constexpr uint32_t expectedVersion = 3u;
 
 private:
   bool verbose;
-  uint32_t expectedVersion;
 
   // Caller needs to check that there are at least 8 bytes remaining in the
   // stream before peeking
@@ -586,14 +601,14 @@ private:
     if (!parse_header(ptr, end, version)) {
       return false;
     }
-    trace.version = version;
+    trace.setVersion(version);
 
     while (std::distance(ptr, end) >= 8u && peek_word(ptr) != config_sentinel) {
       LLVMEvent event;
       if (!parse_event(ptr, end, event)) {
         return false;
       }
-      trace.preTrace.push_back(event);
+      trace.addPreTraceEvent(event);
     }
 
     uint64_t pattern_len;
@@ -603,24 +618,25 @@ private:
     }
     LLVMEvent config_event;
     config_event.setKOREPattern(config, pattern_len);
-    trace.initialConfig = config_event;
+    trace.setInitialConfig(config_event);
 
     while (ptr != end) {
       LLVMEvent event;
       if (!parse_event(ptr, end, event)) {
         return false;
       }
-      trace.trace.push_back(event);
+      trace.addTraceEvent(event);
     }
 
     return true;
   }
 
 public:
-  ProofTraceParser(bool _verbose, uint32_t _expectedVersion);
+  ProofTraceParser(bool _verbose);
 
   std::optional<LLVMRewriteTrace>
-  parse_proof_trace(std::string const &filename);
+  parse_proof_trace_from_file(std::string const &filename);
+  std::optional<LLVMRewriteTrace> parse_proof_trace(std::string const &data);
 };
 
 } // namespace kllvm
