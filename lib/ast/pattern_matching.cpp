@@ -17,7 +17,7 @@ auto X = subject(any);
 
 /*
  * getPatterns(\top()) = []
- * getPatterns(\and(\in(_, X), Y) = X : getPatterns(Y))
+ * getPatterns(\and(\in(_, X), Y)) = X : getPatterns(Y)
  */
 std::vector<KOREPattern *>
 getPatternsImpl(KOREPattern *pat, std::vector<KOREPattern *> &result) {
