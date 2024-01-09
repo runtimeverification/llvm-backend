@@ -46,6 +46,9 @@ void addMatchFailReason(void *subject, char *pattern, char *sort) {
 }
 
 void addMatchFunction(char *debugName, char *function, void *result, ...) {
+  // This function needs to use C variadic arguments because it's called from
+  // generated LLVM IR.
+  // NOLINTBEGIN(*-vararg)
   va_list ap;
   va_start(ap, result);
 
@@ -62,6 +65,7 @@ void addMatchFunction(char *debugName, char *function, void *result, ...) {
        nullptr});
 
   va_end(ap);
+  // NOLINTEND(*-vararg)
 }
 }
 

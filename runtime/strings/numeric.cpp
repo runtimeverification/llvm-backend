@@ -39,17 +39,18 @@ std::string floatToString(const floating *f, const char *suffix) {
 std::string floatToString(const floating *f) {
   uint64_t prec = mpfr_get_prec(f->f);
   uint64_t exp = f->exp;
-  auto suffix
-      = std::array<char, 41>{}; // 19 chars per long + p and x and null byte
-  if (prec == 53 && exp == 11) {
-    suffix[0] = 0;
-  } else if (prec == 24 && exp == 8) {
-    suffix[0] = 'f';
-    suffix[1] = 0;
-  } else {
-    snprintf(suffix.data(), sizeof(suffix), "p%" PRIu64 "x%" PRIu64, prec, exp);
-  }
-  return floatToString(f, suffix.data());
+
+  auto suffix = [&]() -> std::string {
+    if (prec == 53 && exp == 11) {
+      return "";
+    } else if (prec == 24 && exp == 8) {
+      return "f";
+    } else {
+      return fmt::sprintf("p%" PRIu64 "x%" PRIu64, prec, exp);
+    }
+  }();
+
+  return floatToString(f, suffix.c_str());
 }
 
 std::string intToStringInBase(mpz_t i, uint64_t base) {

@@ -24,7 +24,6 @@ Checks:
   -cppcoreguidelines-pro-type-const-cast
   -cppcoreguidelines-pro-type-cstyle-cast
   -cppcoreguidelines-pro-type-union-access
-  -cppcoreguidelines-pro-type-vararg
 
 WarningsAsErrors:
   '*'

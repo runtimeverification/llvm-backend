@@ -5,6 +5,8 @@
 
 #include "runtime/header.h"
 
+#include <fmt/printf.h>
+
 #include <cassert>
 #include <cstdio>
 #include <iostream>
@@ -249,21 +251,11 @@ void serializeMInt(
     writer *file, size_t *i, size_t bits, const char *sort, void *state) {
   auto &instance = static_cast<serialization_state *>(state)->instance;
 
-  auto fmt = "%sp%zd";
-  auto str = std::string{};
+  auto str = (i == nullptr) ? std::string("0")
+                            : intToString(hook_MINT_import(i, bits, false));
 
-  if (i == nullptr) {
-    str = "0";
-  } else {
-    mpz_ptr z = hook_MINT_import(i, bits, false);
-    str = intToString(z);
-  }
-
-  auto buf_len = snprintf(nullptr, 0, fmt, str.c_str(), bits);
-  auto buffer = std::vector<char>(buf_len + 1);
-
-  snprintf(buffer.data(), buf_len + 1, fmt, str.c_str(), bits);
-  emitToken(instance, sort, buffer.data());
+  auto buffer = fmt::format("{}p{}", str, bits);
+  emitToken(instance, sort, buffer.c_str());
 }
 
 void serializeComma(writer *file, void *state) { }

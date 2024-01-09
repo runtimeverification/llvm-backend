@@ -247,7 +247,7 @@ SortIOInt hook_IO_open(SortString filename, SortString control) {
     }
 
     char *f = getTerminatedString(filename);
-    fd = open(f, flags, access);
+    fd = open(f, flags, access); // NOLINT(*-vararg)
   } else {
     errno = EINVAL;
     fd = -1;
@@ -439,7 +439,7 @@ SortK hook_IO_lock(SortInt i, SortInt len) {
   lockp.l_whence = SEEK_CUR;
   lockp.l_start = 0;
   lockp.l_len = l;
-  int ret = fcntl(fd, F_SETLKW, &lockp);
+  int ret = fcntl(fd, F_SETLKW, &lockp); // NOLINT(*-vararg)
 
   if (ret == -1) {
     return getKSeqErrorBlock();
@@ -462,7 +462,7 @@ SortK hook_IO_unlock(SortInt i, SortInt len) {
   lockp.l_whence = SEEK_CUR;
   lockp.l_start = 0;
   lockp.l_len = l;
-  int ret = fcntl(fd, F_SETLKW, &lockp);
+  int ret = fcntl(fd, F_SETLKW, &lockp); // NOLINT(*-vararg)
 
   if (ret == -1) {
     return getKSeqErrorBlock();
@@ -680,6 +680,8 @@ SortKItem hook_IO_system(SortString cmd) {
 
     if (len(cmd) > 0) {
       char *command = getTerminatedString(cmd);
+
+      // NOLINTNEXTLINE(*-vararg)
       ret = execl("/bin/sh", "/bin/sh", "-c", command, nullptr);
       ret == -1 ? exit(127) : exit(0);
     } else {
