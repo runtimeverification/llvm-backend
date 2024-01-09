@@ -9,6 +9,8 @@
 #include <gmp.h>
 #include <mpfr.h>
 
+#include <fmt/printf.h>
+
 #include "config/macros.h"
 #include "runtime/alloc.h"
 #include "runtime/fmt_error_handling.h"
@@ -384,8 +386,6 @@ void printList(
     writer *, list *, const char *, const char *, const char *, void *);
 void visitChildren(block *subject, writer *file, visitor *printer, void *state);
 
-void sfprintf(writer *, const char *, ...);
-
 stringbuffer *hook_BUFFER_empty(void);
 stringbuffer *hook_BUFFER_concat(stringbuffer *buf, string *s);
 stringbuffer *
@@ -422,4 +422,15 @@ std::string intToString(mpz_t);
 void printValueOfType(
     std::ostream &os, std::string const &definitionPath, void *value,
     std::string const &type);
+
+template <typename... Args>
+void sfprintf(writer *file, const char *fmt, Args &&...args) {
+  if (file->file) {
+    fmt::fprintf(file->file, fmt, args...);
+  } else {
+    auto str = fmt::sprintf(fmt, args...);
+    hook_BUFFER_concat_raw(file->buffer, str.data(), str.size());
+  }
+}
+
 #endif // RUNTIME_HEADER_H
