@@ -343,12 +343,12 @@ extern "C" void printMatchResult(
       os << matchLog[i].debugName << "(";
 
       for (int j = 0; j < matchLog[i].args.size(); j += 2) {
-        auto typeName = reinterpret_cast<char *>(matchLog[i].args[j + 1]);
+        auto typeName = static_cast<char *>(matchLog[i].args[j + 1]);
         printValueOfType(os, definitionPath, matchLog[i].args[j], typeName);
         if (j + 2 != matchLog[i].args.size())
           os << ", ";
       }
-      os << ") => " << *reinterpret_cast<bool *>(matchLog[i].result) << "\n";
+      os << ") => " << *static_cast<bool *>(matchLog[i].result) << "\n";
     }
   }
 }
@@ -357,23 +357,23 @@ void printValueOfType(
     std::ostream &os, std::string const &definitionPath, void *value,
     std::string const &type) {
   if (type.compare("%mpz*") == 0) {
-    os << reinterpret_cast<mpz_ptr>(value);
+    os << static_cast<mpz_ptr>(value);
   } else if (type.compare("%block*") == 0) {
     if ((((uintptr_t)value) & 3) == 1) {
       auto f = temporary_file("subject_XXXXXX");
-      string *s = printConfigurationToString(reinterpret_cast<block *>(value));
+      string *s = printConfigurationToString(static_cast<block *>(value));
       f.ofstream() << std::string(s->data, len(s)) << std::endl;
       kllvm::printKORE(os, definitionPath, f.filename(), false, true);
     } else if ((((uintptr_t)value) & 1) == 0) {
-      auto s = reinterpret_cast<string *>(value);
+      auto s = static_cast<string *>(value);
       os << std::string(s->data, len(s));
     } else {
       os << "Error: " << type << " not implemented!";
     }
   } else if (type.compare("%floating*") == 0) {
-    os << floatToString(reinterpret_cast<floating *>(value));
+    os << floatToString(static_cast<floating *>(value));
   } else if (type.compare("i1") == 0) {
-    os << *reinterpret_cast<bool *>(value);
+    os << *static_cast<bool *>(value);
   } else {
     os << "Error: " << type << " not implemented!";
   }

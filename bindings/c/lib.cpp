@@ -391,7 +391,7 @@ char *get_c_string(std::string const &str) {
   // Include null terminator
   auto total_length = str.length() + 1;
 
-  auto c_str = reinterpret_cast<char *>(malloc(total_length * sizeof(char)));
+  auto c_str = static_cast<char *>(malloc(total_length * sizeof(char)));
   std::strncpy(c_str, str.c_str(), total_length);
 
   return c_str;

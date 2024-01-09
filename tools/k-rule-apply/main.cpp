@@ -76,6 +76,8 @@ int main(int argc, char **argv) {
     dlclose(handle);
     return EXIT_FAILURE;
   }
+
+  // NOLINTNEXTLINE(*-reinterpret-cast)
   auto match_function = reinterpret_cast<void (*)(block *)>(match_function_ptr);
 
   resetMatchReason(handle);
