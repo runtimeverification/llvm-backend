@@ -50,7 +50,7 @@ int main(int argc, char **argv) {
 
   // Parse the given KORE Pattern and get the block* to use as input for the
   // match function.
-  parser::KOREParser parser(KOREPatternFilename);
+  parser::KOREParser parser(KOREPatternFilename.getValue());
   auto InitialConfiguration = parser.pattern();
 
   auto match_function_name = getMatchFunctionName();

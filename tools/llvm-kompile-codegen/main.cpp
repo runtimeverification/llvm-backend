@@ -120,7 +120,7 @@ int main(int argc, char **argv) {
 
   validate_codegen_args(OutputFile == "-");
 
-  KOREParser parser(Definition);
+  KOREParser parser(Definition.getValue());
   ptr<KOREDefinition> definition = parser.definition();
   definition->preprocess();
 
