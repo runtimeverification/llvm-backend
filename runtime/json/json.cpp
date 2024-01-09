@@ -68,13 +68,14 @@ static blockheader kseqHeader
     return hdr;                                                                \
   }
 
-get_header(boolHdr, "inj{SortBool{}, SortJSON{}}")
-    get_header(intHdr, "inj{SortInt{}, SortJSON{}}")
-        get_header(floatHdr, "inj{SortFloat{}, SortJSON{}}")
-            get_header(strHdr, "inj{SortString{}, SortJSON{}}") get_header(
-                listHdr, "LblJSONs{}") get_header(membHdr, "LblJSONEntry{}")
-                get_header(objHdr, "LblJSONObject{}")
-                    get_header(listWrapHdr, "LblJSONList{}")
+get_header(boolHdr, "inj{SortBool{}, SortJSON{}}");
+get_header(intHdr, "inj{SortInt{}, SortJSON{}}");
+get_header(floatHdr, "inj{SortFloat{}, SortJSON{}}");
+get_header(strHdr, "inj{SortString{}, SortJSON{}}");
+get_header(listHdr, "LblJSONs{}");
+get_header(membHdr, "LblJSONEntry{}");
+get_header(objHdr, "LblJSONObject{}");
+get_header(listWrapHdr, "LblJSONList{}");
 
 #define get_block(name, symbol)                                                \
   static block *name() {                                                       \
@@ -85,14 +86,11 @@ get_header(boolHdr, "inj{SortBool{}, SortJSON{}}")
     return (block *)tag;                                                       \
   }
 
-                        get_block(
-                            dotList,
-                            "Lbl'Stop'List'LBraQuot'JSONs'QuotRBraUnds'JSONs{}")
-                            get_block(null, "LblJSONnull{}")
+get_block(dotList, "Lbl'Stop'List'LBraQuot'JSONs'QuotRBraUnds'JSONs{}");
+get_block(null, "LblJSONnull{}");
 
-                                struct KoreHandler
-    : BaseReaderHandler<UTF8<>, KoreHandler> {
-  block *result;
+struct KoreHandler : BaseReaderHandler<UTF8<>, KoreHandler> {
+  block *result = nullptr;
   std::vector<block *> stack;
 
   bool Null() {
