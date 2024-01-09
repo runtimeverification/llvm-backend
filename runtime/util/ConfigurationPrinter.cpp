@@ -42,6 +42,12 @@ struct print_state {
   // We never want to copy the state; it should only ever get passed around by
   // reference.
   print_state(print_state const &) = delete;
+  print_state &operator=(print_state const &) = delete;
+
+  print_state(print_state &&) = default;
+  print_state &operator=(print_state &&) = default;
+
+  ~print_state() = default;
 
   std::vector<block *> boundVariables;
   std::unordered_map<string *, std::string, StringHash, StringEq> varNames;

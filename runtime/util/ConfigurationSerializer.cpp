@@ -36,6 +36,12 @@ struct serialization_state {
   // We never want to copy the state; it should only ever get passed around by
   // reference.
   serialization_state(serialization_state const &) = delete;
+  serialization_state &operator=(serialization_state const &) = delete;
+
+  serialization_state(serialization_state &&) = default;
+  serialization_state &operator=(serialization_state &&) = default;
+
+  ~serialization_state() = default;
 
   serializer instance;
   std::vector<block *> boundVariables;
