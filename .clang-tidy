@@ -1,6 +1,7 @@
 Checks:
   clang-analyzer-*
   -clang-analyzer-cplusplus.PlacementNew
+  -clang-analyzer-optin.cplusplus.UninitializedObject
   misc-*
   -misc-no-recursion
   -misc-unused-parameters
@@ -30,7 +31,6 @@ Checks:
   -cppcoreguidelines-pro-bounds-pointer-arithmetic
   -cppcoreguidelines-pro-type-cstyle-cast
   -cppcoreguidelines-pro-type-union-access
-  -cppcoreguidelines-pro-type-vararg
 
 WarningsAsErrors:
   '*'

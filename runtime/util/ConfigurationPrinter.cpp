@@ -185,7 +185,7 @@ void printConfigurationInternal(
 
 void printStatistics(char const *filename, uint64_t steps) {
   FILE *file = fopen(filename, "w");
-  fprintf(file, "%" PRIu64 "\n", steps - 1); // off by one adjustment
+  fmt::print(file, "{}\n", steps - 1); // off by one adjustment
   fclose(file);
 }
 
@@ -337,7 +337,7 @@ void printValueOfType(
 void printVariableToFile(char const *filename, char const *varname) {
   FILE *file = fopen(filename, "a");
 
-  fprintf(file, "%s", varname);
+  fmt::print(file, "{}", varname);
   char n = 0;
   fwrite(&n, 1, 1, file);
   fflush(file);

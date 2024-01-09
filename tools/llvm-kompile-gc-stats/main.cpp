@@ -1,5 +1,7 @@
 #include <gmp.h>
 
+#include <fmt/printf.h>
+
 #include <array>
 #include <cassert>
 #include <cstdio>
@@ -11,7 +13,7 @@ int main(int argc, char **argv) {
   char const *usage = "usage: %s [dump|analyze|generation|count] <file>"
                       " [<lower_bound> <upper_bound>]\n";
   if (argc < 3) {
-    fprintf(stderr, usage, argv[0]);
+    fmt::fprintf(stderr, usage, argv[0]);
     return 1;
   }
   FILE *f = fopen(argv[2], "rb");
@@ -66,11 +68,11 @@ int main(int argc, char **argv) {
       break;
     }
     if (dump) {
-      printf("Collection %zd\n", step);
+      fmt::printf("Collection %zd\n", step);
       for (int i = 0; i < 2048; i++) {
-        printf("%d: %zd\n", i, frame.at(i));
+        fmt::printf("%d: %zd\n", i, frame.at(i));
       }
-      printf("saturated: %zd\n", frame[2048]);
+      fmt::printf("saturated: %zd\n", frame[2048]);
     } else if (analyze) {
       for (int i = 0; i < 2048; i++) {
         mpz_add_ui(total.at(i), total.at(i), frame.at(i));
@@ -91,9 +93,9 @@ int main(int argc, char **argv) {
       }
       gmp_printf("%zd: %Zd\n", step, size);
     } else if (alloc) {
-      printf("%zd: %zd\n", step, frame[0]);
+      fmt::printf("%zd: %zd\n", step, frame[0]);
     } else if (!count) {
-      fprintf(stderr, usage, argv[0]);
+      fmt::fprintf(stderr, usage, argv[0]);
       return 1;
     }
     step++;
@@ -104,7 +106,7 @@ int main(int argc, char **argv) {
     }
     gmp_printf("saturated: %Zd\n", total[2047]);
   } else if (count) {
-    printf("%zd collections\n", step);
+    fmt::printf("%zd collections\n", step);
   }
   return 0;
 }

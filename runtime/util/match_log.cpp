@@ -47,7 +47,10 @@ void addMatchFailReason(void *subject, char const *pattern, char const *sort) {
 
 void addMatchFunction(
     char const *debugName, char const *function, void *result, ...) {
-  va_list ap = nullptr;
+  // This function needs to use C variadic arguments because it's called from
+  // generated LLVM IR.
+  // NOLINTBEGIN(*-vararg)
+  va_list ap; // NOLINT(*-init-variables)
   va_start(ap, result);
 
   std::vector<void *> args;
@@ -64,6 +67,7 @@ void addMatchFunction(
        nullptr});
 
   va_end(ap);
+  // NOLINTEND(*-vararg)
 }
 }
 
