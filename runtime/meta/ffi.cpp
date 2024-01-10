@@ -340,6 +340,7 @@ SortInt hook_FFI_address(SortString fn) {
 static std::pair<
     std::vector<block **>::iterator, std::vector<block **>::iterator>
 firstBlockEnumerator() {
+  // NOLINTBEGIN(*-const-cast)
   static std::vector<block **> blocks;
 
   blocks.clear();
@@ -349,11 +350,13 @@ firstBlockEnumerator() {
   }
 
   return std::make_pair(blocks.begin(), blocks.end());
+  // NOLINTEND(*-const-cast)
 }
 
 static std::pair<
     std::vector<block **>::iterator, std::vector<block **>::iterator>
 secondBlockEnumerator() {
+  // NOLINTBEGIN(*-const-cast)
   static std::vector<block **> blocks;
 
   blocks.clear();
@@ -363,6 +366,7 @@ secondBlockEnumerator() {
   }
 
   return std::make_pair(blocks.begin(), blocks.end());
+  // NOLINTEND(*-const-cast)
 }
 
 string *hook_FFI_alloc(block *kitem, mpz_t size, mpz_t align) {
