@@ -10,8 +10,8 @@
 
 extern "C" {
 
-#undef get_ui
-#define get_ui(x) get_ui_named(x, __func__)
+#undef GET_UI
+#define GET_UI(x) get_ui_named(x, __func__)
 #define KCHAR char
 
 mpz_ptr move_int(mpz_t);
@@ -122,8 +122,8 @@ SortBytes hook_BYTES_string2bytes(SortString s) {
 }
 
 SortBytes hook_BYTES_substr(SortBytes input, SortInt start, SortInt end) {
-  uint64_t ustart = get_ui(start);
-  uint64_t uend = get_ui(end);
+  uint64_t ustart = GET_UI(start);
+  uint64_t uend = GET_UI(end);
   if (uend < ustart) {
     KLLVM_HOOK_INVALID_ARGUMENT(
         "Invalid string slice: Requested start index {} is greater than "
@@ -146,7 +146,7 @@ SortBytes hook_BYTES_substr(SortBytes input, SortInt start, SortInt end) {
 }
 
 SortInt hook_BYTES_get(SortBytes b, SortInt off) {
-  unsigned long off_long = get_ui(off);
+  unsigned long off_long = GET_UI(off);
   if (off_long >= len(b)) {
     KLLVM_HOOK_INVALID_ARGUMENT(
         "Buffer overflow on get: off={}, len={}", off_long, len(b));
@@ -157,12 +157,12 @@ SortInt hook_BYTES_get(SortBytes b, SortInt off) {
 }
 
 SortBytes hook_BYTES_update(SortBytes b, SortInt off, SortInt val) {
-  unsigned long off_long = get_ui(off);
+  unsigned long off_long = GET_UI(off);
   if (off_long >= len(b)) {
     KLLVM_HOOK_INVALID_ARGUMENT(
         "Buffer overflow on update: off={}, len={}", off_long, len(b));
   }
-  unsigned long val_long = get_ui(val);
+  unsigned long val_long = GET_UI(val);
   if (val_long >= 256) {
     KLLVM_HOOK_INVALID_ARGUMENT(
         "Not a valid value for a byte in update: {}", val_long);
@@ -172,7 +172,7 @@ SortBytes hook_BYTES_update(SortBytes b, SortInt off, SortInt val) {
 }
 
 SortBytes hook_BYTES_replaceAt(SortBytes b, SortInt start, SortBytes b2) {
-  unsigned long start_long = get_ui(start);
+  unsigned long start_long = GET_UI(start);
   if (start_long + len(b2) > len(b)) {
     KLLVM_HOOK_INVALID_ARGUMENT(
         "Buffer overflow on replaceAt: start={}, dest_len={}, src_len={}",
@@ -184,8 +184,8 @@ SortBytes hook_BYTES_replaceAt(SortBytes b, SortInt start, SortBytes b2) {
 
 SortBytes
 hook_BYTES_memset(SortBytes b, SortInt start, SortInt count, SortInt value) {
-  uint64_t ustart = get_ui(start);
-  uint64_t ucount = get_ui(count);
+  uint64_t ustart = GET_UI(start);
+  uint64_t ucount = GET_UI(count);
   uint64_t uend = ustart + ucount;
   if ((uend < ustart) || (uend < ucount)) {
     KLLVM_HOOK_INVALID_ARGUMENT(
@@ -216,11 +216,11 @@ SortInt hook_BYTES_length(SortBytes a) {
 }
 
 SortBytes hook_BYTES_padRight(SortBytes b, SortInt length, SortInt v) {
-  unsigned long ulen = get_ui(length);
+  unsigned long ulen = GET_UI(length);
   if (ulen <= len(b)) {
     return b;
   }
-  unsigned long uv = get_ui(v);
+  unsigned long uv = GET_UI(v);
   if (uv > 255) {
     KLLVM_HOOK_INVALID_ARGUMENT("Integer overflow on value: {}", uv);
   }
@@ -232,11 +232,11 @@ SortBytes hook_BYTES_padRight(SortBytes b, SortInt length, SortInt v) {
 }
 
 SortBytes hook_BYTES_padLeft(SortBytes b, SortInt length, SortInt v) {
-  unsigned long ulen = get_ui(length);
+  unsigned long ulen = GET_UI(length);
   if (ulen <= len(b)) {
     return b;
   }
-  unsigned long uv = get_ui(v);
+  unsigned long uv = GET_UI(v);
   if (uv > 255) {
     KLLVM_HOOK_INVALID_ARGUMENT("Integer overflow on value: {}", uv);
   }

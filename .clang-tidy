@@ -14,7 +14,6 @@ Checks:
   -cppcoreguidelines-avoid-magic-numbers
   -cppcoreguidelines-avoid-non-const-global-variables
   -cppcoreguidelines-init-variables
-  -cppcoreguidelines-macro-usage
   -cppcoreguidelines-narrowing-conversions
   -cppcoreguidelines-no-malloc
   -cppcoreguidelines-owning-memory
@@ -29,3 +28,5 @@ WarningsAsErrors:
 CheckOptions:
   - key: 'misc-const-correctness.AnalyzeValues'
     value: false
+  - key: 'cppcoreguidelines-macro-usage.CheckCapsOnly'
+    value: true
