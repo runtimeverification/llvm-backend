@@ -967,6 +967,8 @@ void readMultimap(
     std::string const &, KORESymbolDeclaration *,
     std::map<std::string, std::set<std::string>> &, std::string const &);
 
+sptr<KOREPattern> stripRawTerm(sptr<KOREPattern> const &term);
+
 template <typename Elem, typename Hash, typename Equal>
 std::unordered_map<Elem *, std::unordered_set<Elem *, Hash, Equal>, Hash, Equal>
 transitiveClosure(std::unordered_map<

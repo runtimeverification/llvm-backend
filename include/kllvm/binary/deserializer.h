@@ -271,31 +271,13 @@ deserialize_pattern(It begin, It end, bool strip_raw_term = true) {
     end = std::next(begin, total_size);
   }
 
-  auto pattern = detail::read(begin, end, version);
+  auto result = detail::read(begin, end, version);
 
-  // When strip_raw_term is set, we're looking for special patterns that have
-  // the form:
-  //
-  //   rawTerm{}(inj{S, SortKItem{}}(X))
-  //
-  // and extracting the inner term X.
   if (strip_raw_term) {
-    if (auto composite
-        = std::dynamic_pointer_cast<KORECompositePattern>(pattern)) {
-      if (composite->getConstructor()->getName() == "rawTerm"
-          && composite->getArguments().size() == 1) {
-        if (auto inj = std::dynamic_pointer_cast<KORECompositePattern>(
-                composite->getArguments()[0])) {
-          if (inj->getConstructor()->getName() == "inj"
-              && inj->getArguments().size() == 1) {
-            return inj->getArguments()[0];
-          }
-        }
-      }
-    }
+    return stripRawTerm(result);
   }
 
-  return pattern;
+  return result;
 }
 
 bool has_binary_kore_header(std::string const &filename);

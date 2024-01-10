@@ -1,5 +1,6 @@
 add_kllvm_unittest(compiler-tests
   asttest.cpp
+  pattern_matching.cpp
   main.cpp
 )
 
