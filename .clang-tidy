@@ -20,7 +20,6 @@ Checks:
   -cppcoreguidelines-owning-memory
   -cppcoreguidelines-pro-bounds-array-to-pointer-decay
   -cppcoreguidelines-pro-bounds-pointer-arithmetic
-  -cppcoreguidelines-pro-type-const-cast
   -cppcoreguidelines-pro-type-cstyle-cast
   -cppcoreguidelines-pro-type-union-access
 

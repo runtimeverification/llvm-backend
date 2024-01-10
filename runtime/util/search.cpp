@@ -25,6 +25,7 @@ static std::unordered_set<block *, HashBlock, KEq> results;
 static std::pair<
     std::vector<block **>::iterator, std::vector<block **>::iterator>
 blockEnumerator() {
+  // NOLINTBEGIN(*-const-cast)
   static std::vector<block **> blocks;
 
   blocks.clear();
@@ -46,6 +47,7 @@ blockEnumerator() {
   }
 
   return std::make_pair(blocks.begin(), blocks.end());
+  // NOLINTEND(*-const-cast)
 }
 
 std::unordered_set<block *, HashBlock, KEq> take_search_steps(
