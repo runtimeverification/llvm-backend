@@ -118,7 +118,7 @@ struct KoreHandler : BaseReaderHandler<UTF8<>, KoreHandler> {
       return true;
     } else {
       mpz_clear(z);
-      floating f[1]; // NOLINT(modernize-avoid-c-arrays)
+      floating f[1]; // NOLINT(*-avoid-c-arrays)
       mpfr_init2(f->f, 53);
       f->exp = 11;
       mpfr_set_str(f->f, str, 9, MPFR_RNDN);
