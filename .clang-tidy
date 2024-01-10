@@ -12,7 +12,6 @@ Checks:
   cppcoreguidelines-*
   -cppcoreguidelines-avoid-magic-numbers
   -cppcoreguidelines-avoid-non-const-global-variables
-  -cppcoreguidelines-init-variables
   -cppcoreguidelines-narrowing-conversions
   -cppcoreguidelines-no-malloc
   -cppcoreguidelines-owning-memory

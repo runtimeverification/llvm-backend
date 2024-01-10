@@ -159,7 +159,7 @@ void SwitchNode::codegen(Decision *d) {
   bool isInt = false;
   for (auto &_case : cases) {
     auto child = _case.getChild();
-    llvm::BasicBlock *CaseBlock;
+    llvm::BasicBlock *CaseBlock = nullptr;
     if (child == FailNode::get()) {
       CaseBlock = d->FailureBlock;
     } else {
@@ -188,7 +188,7 @@ void SwitchNode::codegen(Decision *d) {
     val = cmp;
     isInt = true;
   }
-  llvm::Value *failSort, *failPattern;
+  llvm::Value *failSort = nullptr, *failPattern = nullptr;
   if (d->FailPattern) {
     auto failReason = getFailPattern(caseData, isInt, d->FailureBlock);
     failSort = d->stringLiteral(failReason.first);
@@ -241,7 +241,7 @@ void SwitchNode::codegen(Decision *d) {
       KORESymbolDeclaration *symbolDecl
           = d->Definition->getSymbolDeclarations().at(
               _case.getConstructor()->getName());
-      llvm::Instruction *Renamed;
+      llvm::Instruction *Renamed = nullptr;
       for (auto const &binding : _case.getBindings()) {
         llvm::Value *ChildPtr = llvm::GetElementPtrInst::CreateInBounds(
             BlockType, Cast,
@@ -250,7 +250,7 @@ void SwitchNode::codegen(Decision *d) {
                  llvm::Type::getInt32Ty(d->Ctx), offset + 2)},
             "", d->CurrentBlock);
 
-        llvm::Value *Child;
+        llvm::Value *Child = nullptr;
         auto cat = dynamic_cast<KORECompositeSort *>(
                        _case.getConstructor()->getArguments()[offset].get())
                        ->getCategory(d->Definition);
@@ -413,7 +413,7 @@ void FunctionNode::codegen(Decision *d) {
   std::vector<llvm::Value *> args;
   llvm::StringMap<llvm::Value *> finalSubst;
   for (auto [arg, cat] : bindings) {
-    llvm::Value *val;
+    llvm::Value *val = nullptr;
     if (arg.first.find_first_not_of("-0123456789") == std::string::npos) {
       val = llvm::ConstantInt::get(
           llvm::Type::getInt64Ty(d->Ctx), std::stoi(arg.first));
@@ -770,8 +770,8 @@ void makeEvalOrAnywhereFunction(
   llvm::BasicBlock *fail
       = llvm::BasicBlock::Create(module->getContext(), "fail", matchFunc);
 
-  llvm::AllocaInst *choiceBuffer, *choiceDepth;
-  llvm::IndirectBrInst *jump;
+  llvm::AllocaInst *choiceBuffer = nullptr, *choiceDepth = nullptr;
+  llvm::IndirectBrInst *jump = nullptr;
   initChoiceBuffer(
       dt, module, block, stuck, fail, &choiceBuffer, &choiceDepth, &jump);
 
@@ -798,7 +798,7 @@ void abortWhenStuck(
   auto &Ctx = Module->getContext();
   symbol = d->getAllSymbols().at(ast_to_string(*symbol));
   auto BlockType = getBlockType(Module, d, symbol);
-  llvm::Value *Ptr;
+  llvm::Value *Ptr = nullptr;
   auto BlockPtr = llvm::PointerType::getUnqual(
       llvm::StructType::getTypeByName(Module->getContext(), BLOCK_STRUCT));
   if (symbol->getArguments().empty()) {
@@ -1054,7 +1054,7 @@ void makeStepFunction(
   auto blockType = getValueType({SortCategory::Symbol, 0}, module);
   auto debugType
       = getDebugType({SortCategory::Symbol, 0}, "SortGeneratedTopCell{}");
-  llvm::FunctionType *funcType;
+  llvm::FunctionType *funcType = nullptr;
   std::string name;
   if (search) {
     name = "stepAll";
@@ -1086,8 +1086,8 @@ void makeStepFunction(
   llvm::BasicBlock *fail
       = llvm::BasicBlock::Create(module->getContext(), "fail", matchFunc);
 
-  llvm::AllocaInst *choiceBuffer, *choiceDepth;
-  llvm::IndirectBrInst *jump;
+  llvm::AllocaInst *choiceBuffer = nullptr, *choiceDepth = nullptr;
+  llvm::IndirectBrInst *jump = nullptr;
 
   initChoiceBuffer(
       dt, module, block, pre_stuck, fail, &choiceBuffer, &choiceDepth, &jump);
@@ -1204,8 +1204,8 @@ void makeMatchReasonFunction(
       {FailSubject, FailPattern, FailSort}, "", fail);
   setDebugLoc(call);
 
-  llvm::AllocaInst *choiceBuffer, *choiceDepth;
-  llvm::IndirectBrInst *jump;
+  llvm::AllocaInst *choiceBuffer = nullptr, *choiceDepth = nullptr;
+  llvm::IndirectBrInst *jump = nullptr;
   initChoiceBuffer(
       dt, module, block, pre_stuck, fail, &choiceBuffer, &choiceDepth, &jump);
 
@@ -1299,8 +1299,8 @@ void makeStepFunction(
   llvm::BasicBlock *fail
       = llvm::BasicBlock::Create(module->getContext(), "fail", matchFunc);
 
-  llvm::AllocaInst *choiceBuffer, *choiceDepth;
-  llvm::IndirectBrInst *jump;
+  llvm::AllocaInst *choiceBuffer = nullptr, *choiceDepth = nullptr;
+  llvm::IndirectBrInst *jump = nullptr;
   initChoiceBuffer(
       res.dt, module, block, pre_stuck, fail, &choiceBuffer, &choiceDepth,
       &jump);

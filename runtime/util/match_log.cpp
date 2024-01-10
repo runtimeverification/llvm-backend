@@ -49,7 +49,7 @@ void addMatchFunction(char *debugName, char *function, void *result, ...) {
   // This function needs to use C variadic arguments because it's called from
   // generated LLVM IR.
   // NOLINTBEGIN(*-vararg)
-  va_list ap;
+  va_list ap; // NOLINT(*-init-variables)
   va_start(ap, result);
 
   std::vector<void *> args;

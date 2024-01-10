@@ -344,7 +344,7 @@ block *incrementDebruijn(block *currBlock) {
       case VARIABLE_LAYOUT:
       case SYMBOL_LAYOUT: {
         block *oldArg = *(block **)arg;
-        block *newArg;
+        block *newArg = nullptr;
         if (i == 0 && isBinder) {
           newArg = alphaRename(oldArg);
         } else {

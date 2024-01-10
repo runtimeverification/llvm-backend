@@ -31,6 +31,7 @@ enum class token {
   ID,
   STRING,
   TOKEN_EOF,
+  INVALID,
 };
 
 class KOREScanner {

@@ -67,7 +67,7 @@ private:
 
 public:
   yaml_node_t *get(yaml_node_t *node, std::string const &name) {
-    yaml_node_pair_t *entry;
+    yaml_node_pair_t *entry = nullptr;
     for (entry = node->data.mapping.pairs.start;
          entry < node->data.mapping.pairs.top; ++entry) {
       yaml_node_t *key = yaml_document_get_node(doc, entry->key);
@@ -88,7 +88,7 @@ public:
 
   std::vector<std::string> vec(yaml_node_t *node) {
     std::vector<std::string> result;
-    yaml_node_item_t *entry;
+    yaml_node_item_t *entry = nullptr;
     for (entry = node->data.sequence.items.start;
          entry < node->data.sequence.items.top; ++entry) {
       result.push_back(str(yaml_document_get_node(doc, *entry)));
@@ -248,7 +248,7 @@ public:
          iter < list->data.sequence.items.top; ++iter) {
       auto _case = yaml_document_get_node(doc, *iter);
       std::vector<std::pair<std::string, llvm::Type *>> bindings;
-      KORESymbol *symbol;
+      KORESymbol *symbol = nullptr;
       if (kind == SwitchLiteral || kind == CheckNull) {
         symbol = dv;
       } else {

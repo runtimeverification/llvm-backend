@@ -16,7 +16,7 @@ void migrate_collection_node(void **nodePtr) {
   initialize_migrate();
   size_t lenInBytes = get_size(hdr, 0);
   if (!hasForwardingAddress) {
-    string *newBlock;
+    string *newBlock = nullptr;
     if (shouldPromote || (isInOldGen && collect_old)) {
       newBlock = (string *)koreAllocOld(lenInBytes);
     } else {

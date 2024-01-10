@@ -403,8 +403,8 @@ void serializeConfigurations(
 
 void serializeConfigurationToFile(
     const char *filename, block *subject, bool emit_size) {
-  char *data;
-  size_t size;
+  char *data = nullptr;
+  size_t size = 0;
   serializeConfiguration(subject, nullptr, &data, &size, emit_size);
 
   FILE *file = fopen(filename, "a");
@@ -442,8 +442,8 @@ void writeUInt64ToFile(const char *filename, uint64_t i) {
 
 void serializeTermToFile(
     const char *filename, block *subject, const char *sort) {
-  char *data;
-  size_t size;
+  char *data = nullptr;
+  size_t size = 0;
   serializeConfiguration(subject, sort, &data, &size, true);
 
   FILE *file = fopen(filename, "a");
@@ -457,8 +457,8 @@ void serializeRawTermToFile(
     const char *filename, void *subject, const char *sort) {
   block *term = constructRawTerm(subject, sort, true);
 
-  char *data;
-  size_t size;
+  char *data = nullptr;
+  size_t size = 0;
   serializeConfiguration(term, "SortKItem{}", &data, &size, true);
 
   FILE *file = fopen(filename, "a");
@@ -473,8 +473,8 @@ sortedTermToKorePattern(block *subject, const char *sort) {
   auto is_kitem = (std::string(sort) == "SortKItem{}");
   block *term = is_kitem ? subject : constructRawTerm(subject, sort, false);
 
-  char *data_out;
-  size_t size_out;
+  char *data_out = nullptr;
+  size_t size_out = 0;
 
   serializeConfiguration(term, "SortKItem{}", &data_out, &size_out, true);
   auto result = deserialize_pattern(data_out, data_out + size_out);

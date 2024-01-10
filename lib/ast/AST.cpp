@@ -190,7 +190,7 @@ std::string KORECompositeSort::getHook(KOREDefinition *definition) {
 }
 
 ValueType KORECompositeSort::getCategory(std::string const &name) {
-  SortCategory category;
+  SortCategory category = SortCategory::Uncomputed;
   uint64_t bits = 0;
   if (name == "MAP.Map")
     category = SortCategory::Map;

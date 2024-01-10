@@ -53,7 +53,7 @@ void migrate(block **blockPtr) {
   size_t lenInBytes = get_size(hdr, layout);
   auto **forwardingAddress = (block **)(currBlock + 1);
   if (!hasForwardingAddress) {
-    block *newBlock;
+    block *newBlock = nullptr;
     if (shouldPromote || (isInOldGen && collect_old)) {
       newBlock = (block *)koreAllocOld(lenInBytes);
     } else {
@@ -93,8 +93,8 @@ static void migrate_string_buffer(stringbuffer **bufferPtr) {
   const uint64_t cap = len(buffer->contents);
   initialize_migrate();
   if (!hasForwardingAddress) {
-    stringbuffer *newBuffer;
-    string *newContents;
+    stringbuffer *newBuffer = nullptr;
+    string *newContents = nullptr;
     if (shouldPromote || (isInOldGen && collect_old)) {
       newBuffer = (stringbuffer *)koreAllocOld(sizeof(stringbuffer));
       newContents = (string *)koreAllocTokenOld(sizeof(string) + cap);
@@ -121,8 +121,8 @@ static void migrate_mpz(mpz_ptr *mpzPtr) {
   const uint64_t hdr = intgr->h.hdr;
   initialize_migrate();
   if (!hasForwardingAddress) {
-    mpz_hdr *newIntgr;
-    string *newLimbs;
+    mpz_hdr *newIntgr = nullptr;
+    string *newLimbs = nullptr;
     bool hasLimbs = intgr->i->_mp_alloc > 0;
 #ifdef GC_DBG
     numBytesLiveAtCollection[oldAge] += sizeof(mpz_hdr);
@@ -168,8 +168,8 @@ static void migrate_floating(floating **floatingPtr) {
   const uint64_t hdr = flt->h.hdr;
   initialize_migrate();
   if (!hasForwardingAddress) {
-    floating_hdr *newFlt;
-    string *newLimbs;
+    floating_hdr *newFlt = nullptr;
+    string *newLimbs = nullptr;
     string *limbs = struct_base(string, data, flt->f.f->_mpfr_d - 1);
     size_t lenLimbs = len(limbs);
 

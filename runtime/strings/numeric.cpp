@@ -17,7 +17,7 @@ std::string floatToString(const floating *f, const char *suffix) {
       return "Infinity" + std::string(suffix);
     }
   } else {
-    mpfr_exp_t printed_exp;
+    mpfr_exp_t printed_exp = 0;
     char *str = mpfr_get_str(nullptr, &printed_exp, 10, 0, f->f, MPFR_RNDN);
     size_t len = strlen(str);
     auto *newstr = (string *)koreAllocToken(sizeof(string) + len + 2);
@@ -57,7 +57,7 @@ std::string intToStringInBase(mpz_t i, uint64_t base) {
   char *tmp = mpz_get_str(nullptr, base, i);
   auto ret = std::string(tmp);
 
-  void (*mpz_free)(void *, size_t);
+  void (*mpz_free)(void *, size_t) = nullptr;
   mp_get_memory_functions(nullptr, nullptr, &mpz_free);
   mpz_free(tmp, strlen(tmp) + 1);
 

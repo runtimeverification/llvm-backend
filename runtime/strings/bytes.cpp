@@ -54,7 +54,7 @@ SortInt hook_BYTES_bytes2int(
   int order = endianness == tag_big_endian() ? 1 : -1;
   mpz_import(result, len(b), order, 1, 0, 0, b->data);
   if (signedness != tag_unsigned() && len(b) != 0) {
-    bool msb;
+    bool msb = false;
     if (endianness == tag_big_endian()) {
       msb = b->data[0] & 0x80;
     } else {

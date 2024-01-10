@@ -369,7 +369,7 @@ static std::pair<llvm::Value *, llvm::BasicBlock *> getEval(
   }
   CreateTerm creator(subst, def, CaseBlock, mod, false);
   llvm::Value *result = creator(pattern.get()).first;
-  llvm::Value *retval;
+  llvm::Value *retval = nullptr;
   ValueType cat = dynamic_cast<KORECompositeSort *>(symbol->getSort().get())
                       ->getCategory(def);
   switch (cat.cat) {
@@ -883,7 +883,7 @@ static void visitCollection(
   auto indices = std::vector<llvm::Constant *>{zero, zero};
   auto sortDecl
       = definition->getSortDeclarations().at(compositeSort->getName());
-  llvm::Constant *concatPtr;
+  llvm::Constant *concatPtr = nullptr;
   if (sortDecl->getAttributes().count("concat")) {
     auto concat = (KORECompositePattern *)sortDecl->getAttributes()
                       .at("concat")
@@ -1033,7 +1033,7 @@ static void getVisitor(
             llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), nwords * 8),
             CaseBlock, "koreAllocAlwaysGC");
         if (nwords == 1) {
-          llvm::Value *Word;
+          llvm::Value *Word = nullptr;
           if (cat.bits == 64) {
             Word = mint;
           } else {

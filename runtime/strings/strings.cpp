@@ -217,8 +217,8 @@ SortString hook_STRING_base2string_long(SortInt input, uint64_t base) {
 
 SortInt hook_STRING_string2base_long(SortString input, uint64_t base) {
   mpz_t result;
-  size_t length;
-  const char *dataStart;
+  size_t length = 0;
+  const char *dataStart = nullptr;
 
   if (*(input->data) == '+') {
     length = len(input) - 1;
@@ -423,7 +423,7 @@ hook_BUFFER_concat_raw(stringbuffer *buf, char const *data, uint64_t n) {
     if (newCapacity < minCapacity) {
       newCapacity = minCapacity;
     }
-    string *new_contents;
+    string *new_contents = nullptr;
     if (notYoungObjectBit) {
       assert(buf->h.hdr & AGE_MASK);
       new_contents = static_cast<string *>(
@@ -447,7 +447,7 @@ SortString hook_BUFFER_toString(SortStringBuffer buf) {
 }
 
 void init_float2(floating *result, std::string contents) {
-  size_t prec, exp;
+  size_t prec = 0, exp = 0;
   const char last = contents.back();
   if (last == 'f' || last == 'F') {
     prec = 24;
@@ -467,7 +467,7 @@ void init_float2(floating *result, std::string contents) {
   }
   result->exp = exp;
   mpfr_init2(result->f, prec);
-  int retValue;
+  int retValue = 0;
   if (contents == "+Infinity" || contents == "-Infinity"
       || contents == "Infinity") {
     retValue = mpfr_set_str(result->f, contents.c_str(), 10, MPFR_RNDN);

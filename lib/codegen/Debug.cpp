@@ -158,8 +158,8 @@ llvm::DIType *getDebugType(ValueType type, std::string const &typeName) {
   if (!Dbg)
     return nullptr;
   static std::map<std::string, llvm::DIType *> types;
-  llvm::DIType *map, *rangemap, *list, *set, *integer, *floating, *buffer,
-      *boolean, *mint, *symbol;
+  llvm::DIType *map = nullptr, *rangemap = nullptr, *list = nullptr, *set = nullptr, *integer = nullptr, *floating = nullptr, *buffer = nullptr,
+      *boolean = nullptr, *mint = nullptr, *symbol = nullptr;
   if (types[typeName]) {
     return types[typeName];
   }

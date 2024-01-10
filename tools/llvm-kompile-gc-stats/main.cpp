@@ -42,8 +42,8 @@ int main(int argc, char **argv) {
       mpz_init(i);
     }
   }
-  int lowerBound;
-  int upperBound;
+  int lowerBound = 0;
+  int upperBound = 0;
   mpz_t size;
   if (generation) {
     lowerBound = atoi(argv[3]);

@@ -36,7 +36,7 @@ static blockheader kseqHeader
 static std::map<std::string, std::string> logFiles;
 
 static block *block_errno() {
-  const char *errStr;
+  const char *errStr = nullptr;
   switch (errno) {
   case EOF: errStr = GETTAG(EOF); break;
   case E2BIG: errStr = GETTAG(E2BIG); break;
@@ -219,7 +219,7 @@ SortIOInt hook_IO_open(SortString filename, SortString control) {
   int flags = 0;
   int access = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;
   int modes = getFileModes(control);
-  int fd;
+  int fd = 0;
   mpz_t result;
 
   if (-1 != modes) {
@@ -294,7 +294,7 @@ SortIOInt hook_IO_getc(SortInt i) {
   }
 
   int fd = mpz_get_si(i);
-  char c;
+  char c = 0;
   ssize_t ret = read(fd, &c, sizeof(char));
 
   if (0 == ret) {
@@ -660,7 +660,7 @@ SortIOFile hook_IO_mkstemp(SortString filename) {
 }
 
 SortKItem hook_IO_system(SortString cmd) {
-  pid_t pid;
+  pid_t pid = 0;
   int ret = 0, out[2], err[2];
   stringbuffer *outBuffer = hook_BUFFER_empty();
   stringbuffer *errBuffer = hook_BUFFER_empty();
@@ -742,7 +742,7 @@ SortKItem hook_IO_system(SortString cmd) {
 
   retBlock->h = getBlockHeaderForSymbol(
       (uint64_t)getTagForSymbolName(GETTAG(systemResult)));
-  string *outStr, *errStr;
+  string *outStr = nullptr, *errStr = nullptr;
   outStr = hook_BUFFER_toString(outBuffer);
   errStr = hook_BUFFER_toString(errBuffer);
   memcpy(retBlock->children + 1, &outStr, sizeof(string *));

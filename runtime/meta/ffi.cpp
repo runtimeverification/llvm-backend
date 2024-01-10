@@ -144,7 +144,7 @@ static ffi_type *getTypeFromBlock(block *elem) {
       tag_hdr(elem->h.hdr) == (uint64_t)getTagForSymbolName(TYPETAG(struct))) {
     list *elements = (list *)*elem->children;
     size_t numFields = hook_LIST_size_long(elements);
-    block *structField;
+    block *structField = nullptr;
 
     auto *structType = (ffi_type *)malloc(sizeof(ffi_type));
     structType->size = 0;
@@ -179,8 +179,8 @@ string *ffiCall(
     bool isVariadic, mpz_t addr, list *args, list *fixtypes, list *vartypes,
     block *ret) {
   ffi_cif cif;
-  ffi_type **argtypes, *rtype;
-  void (*address)();
+  ffi_type **argtypes = nullptr, *rtype = nullptr;
+  void (*address)() = nullptr;
 
   if (!mpz_fits_ulong_p(addr)) {
     KLLVM_HOOK_INVALID_ARGUMENT("Addr is too large: {}", intToString(addr));
@@ -204,7 +204,7 @@ string *ffiCall(
 
   argtypes = (ffi_type **)malloc(sizeof(ffi_type *) * nargs);
 
-  block *elem;
+  block *elem = nullptr;
   for (int i = 0; i < nfixtypes; i++) {
     elem = hook_LIST_get_long(fixtypes, i);
     if (tag_hdr(elem->h.hdr)
@@ -237,13 +237,11 @@ string *ffiCall(
 
   rtype = getTypeFromBlock(ret);
 
-  ffi_status status;
-  if (isVariadic) {
-    status = ffi_prep_cif_var(
-        &cif, FFI_DEFAULT_ABI, nfixtypes, nargs, rtype, argtypes);
-  } else {
-    status = ffi_prep_cif(&cif, FFI_DEFAULT_ABI, nargs, rtype, argtypes);
-  }
+  auto status
+      = isVariadic
+            ? ffi_prep_cif_var(
+                &cif, FFI_DEFAULT_ABI, nfixtypes, nargs, rtype, argtypes)
+            : ffi_prep_cif(&cif, FFI_DEFAULT_ABI, nargs, rtype, argtypes);
 
   switch (status) {
   case FFI_OK: break;
@@ -319,7 +317,7 @@ SortInt hook_FFI_address(SortString fn) {
   static const std::map<std::string, void *> privateSymbols
       = getPrivateSymbols();
 
-  void *address;
+  void *address = nullptr;
   if (auto it = privateSymbols.find(funcStr); it != privateSymbols.end()) {
     address = it->second;
   } else {
@@ -393,7 +391,7 @@ string *hook_FFI_alloc(block *kitem, mpz_t size, mpz_t align) {
 
   size_t s = mpz_get_ui(size);
 
-  string *ret;
+  string *ret = nullptr;
   int result = posix_memalign(
       (void **)&ret, a < sizeof(void *) ? sizeof(void *) : a,
       sizeof(string *) + s);
