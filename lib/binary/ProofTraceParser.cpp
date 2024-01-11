@@ -6,6 +6,32 @@ namespace kllvm {
 
 constexpr auto indent_size = 2u;
 
+LLVMFunctionEvent::LLVMFunctionEvent(
+    std::string const &_name, std::string const &_relativePosition)
+    : name(_name)
+    , relativePosition(_relativePosition)
+    , arguments() { }
+
+std::vector<LLVMEvent> const &LLVMFunctionEvent::getArguments() const {
+  return arguments;
+}
+
+void LLVMFunctionEvent::addArgument(LLVMEvent const &argument) {
+  arguments.push_back(argument);
+}
+
+LLVMHookEvent::LLVMHookEvent(
+    std::string const &_name, std::string const &_relativePosition)
+    : name(_name)
+    , relativePosition(_relativePosition)
+    , arguments()
+    , korePattern(nullptr)
+    , patternLength(0u) { }
+
+void LLVMHookEvent::addArgument(LLVMEvent const &argument) {
+  arguments.push_back(argument);
+}
+
 void LLVMRewriteEvent::printSubstitution(
     std::ostream &Out, unsigned indent) const {
   std::string Indent(indent * indent_size, ' ');
