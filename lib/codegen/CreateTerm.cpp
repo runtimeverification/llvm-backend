@@ -981,6 +981,62 @@ void addAbort(llvm::BasicBlock *block, llvm::Module *Module) {
   new llvm::UnreachableInst(Module->getContext(), block);
 }
 
+std::unordered_set<std::string> copyOnWriteVariables(
+    KOREAxiomDeclaration *axiom,
+    std::map<std::string, KOREVariablePattern *> const &vars) {
+  auto byte_vars = std::unordered_set<std::string>{};
+
+  for (auto const &[_, var] : vars) {
+    if (auto sort
+        = std::dynamic_pointer_cast<KORECompositeSort>(var->getSort());
+        sort->getName() == "SortBytes") {
+      byte_vars.insert(var->getName());
+    }
+  }
+
+  if (byte_vars.empty()) {
+    return {};
+  }
+
+  auto cow_vars = std::unordered_set<std::string>{};
+
+  auto all_aliases = axiom->aliasSets();
+  auto rhs = axiom->getRightHandSide();
+
+  for (auto const &var : byte_vars) {
+    auto const &aliases = all_aliases.at(var);
+    auto total = std::accumulate(
+        aliases.begin(), aliases.end(), size_t{0},
+        [&](auto acc, auto const &other) {
+          return acc + rhs->countOccurrences(other);
+        });
+
+    if (total > 1) {
+      cow_vars.insert(var);
+    }
+  }
+
+  return cow_vars;
+}
+
+void makeCopyOnWriteCalls(
+    llvm::BasicBlock *insertAtEnd, std::unordered_set<std::string> const &vars,
+    llvm::StringMap<llvm::Value *> const &subst) {
+  auto &ctx = insertAtEnd->getContext();
+  auto *mod = insertAtEnd->getModule();
+
+  auto ptr_ty = llvm::PointerType::getUnqual(ctx);
+  auto void_ty = llvm::Type::getVoidTy(ctx);
+
+  auto fn_ty = llvm::FunctionType::get(void_ty, {ptr_ty}, false);
+
+  auto make_cow = mod->getOrInsertFunction("make_copy_on_write", fn_ty);
+
+  for (auto const &v : vars) {
+    llvm::CallInst::Create(make_cow, {subst.at(v)}, "cow_" + v, insertAtEnd);
+  }
+}
+
 bool makeFunction(
     std::string const &name, KOREPattern *pattern, KOREDefinition *definition,
     llvm::Module *Module, bool tailcc, bool bigStep, bool apply,
@@ -1061,6 +1117,9 @@ bool makeFunction(
           llvm::cast<llvm::DIType>(debugArgs[i])->getName().str());
     }
   }
+
+  makeCopyOnWriteCalls(block, copyOnWriteVariables(axiom, vars), subst);
+
   CreateTerm creator = CreateTerm(subst, definition, block, Module, false);
   llvm::Value *retval = creator(pattern).first;
 

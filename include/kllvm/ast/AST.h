@@ -440,6 +440,12 @@ public:
    */
   virtual AliasInfo aliasSets();
 
+  /*
+   * Count the number of times that a KORE variable with the specified name
+   * occurs in this pattern.
+   */
+  virtual size_t countOccurrences(std::string const &name) const = 0;
+
   friend KORECompositePattern;
 
 private:
@@ -517,6 +523,8 @@ public:
       sptr<KOREPattern> subject) override;
   virtual void
   prettyPrint(std::ostream &out, PrettyPrintData const &data) const override;
+
+  size_t countOccurrences(std::string const &name) const override;
 
 private:
   virtual sptr<KOREPattern> expandMacros(
@@ -596,6 +604,8 @@ public:
       substitution &, SubsortMap const &, SymbolMap const &,
       sptr<KOREPattern>) override;
 
+  size_t countOccurrences(std::string const &name) const override;
+
 private:
   virtual sptr<KOREPattern> expandMacros(
       SubsortMap const &, SymbolMap const &,
@@ -665,6 +675,8 @@ public:
   virtual bool matches(
       substitution &, SubsortMap const &, SymbolMap const &,
       sptr<KOREPattern> subject) override;
+
+  size_t countOccurrences(std::string const &name) const override;
 
 private:
   virtual sptr<KOREPattern> expandMacros(

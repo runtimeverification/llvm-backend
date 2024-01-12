@@ -1,9 +1,26 @@
 #include "kllvm/ast/AST.h"
 
+#include <numeric>
 #include <unordered_map>
 #include <unordered_set>
 
 using namespace kllvm;
+
+size_t KOREStringPattern::countOccurrences(std::string const &) const {
+  return 0;
+}
+
+size_t KOREVariablePattern::countOccurrences(std::string const &name) const {
+  return getName() == name ? 1 : 0;
+}
+
+size_t KORECompositePattern::countOccurrences(std::string const &name) const {
+  return std::accumulate(
+      arguments.begin(), arguments.end(), std::size_t{0},
+      [&](auto acc, auto const &child) {
+        return acc + child->countOccurrences(name);
+      });
+}
 
 AliasInfo KOREPattern::aliasSets() {
   std::map<std::string, KOREVariablePattern *> vars;
