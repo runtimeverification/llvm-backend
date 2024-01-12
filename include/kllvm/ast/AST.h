@@ -24,6 +24,8 @@ namespace kllvm {
 
 class serializer;
 
+class KOREPattern;
+class KOREVariablePattern;
 class KORESortVariable;
 
 struct HashSort;
@@ -33,6 +35,9 @@ using ptr = std::unique_ptr<T>;
 
 template <typename T>
 using sptr = std::shared_ptr<T>;
+
+using AliasInfo
+    = std::unordered_map<std::string, std::unordered_set<std::string>>;
 
 std::string decodeKore(std::string);
 
@@ -428,6 +433,13 @@ public:
    */
   virtual sptr<KOREPattern> desugarAssociative() = 0;
 
+  /*
+   * Compute the sets of variables that may alias each other in this pattern.
+   * Currently, this is a conservative analysis that assumes _all_ variables in
+   * the pattern may alias each other in the RHS.
+   */
+  virtual AliasInfo aliasSets();
+
   friend KORECompositePattern;
 
 private:
@@ -806,6 +818,15 @@ public:
   KOREPattern *getRequires() const;
   sptr<KOREPattern> getPattern() const { return pattern; }
   unsigned getOrdinal() const { return ordinal; }
+
+  /*
+   * Compute the sets of variables that may alias each other across all the
+   * patterns in this axiom's left hand side; the result is the union of all
+   * alias sets for each variable. For example, if A may alias only B in one LHS
+   * pattern, and may alias only C in another, it may alias B and C in the
+   * axiom's alias set.
+   */
+  AliasInfo aliasSets();
 
   friend KOREDefinition;
 };
