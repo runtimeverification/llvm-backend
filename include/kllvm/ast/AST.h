@@ -434,9 +434,10 @@ public:
   virtual sptr<KOREPattern> desugarAssociative() = 0;
 
   /*
-   * Compute the sets of variables that may alias each other in this pattern.
-   * Currently, this is a conservative analysis that assumes _all_ variables in
-   * the pattern may alias each other in the RHS.
+   * Compute the sets of variables that may alias each other in this pattern. A
+   * variable always aliases itself, and the set of variables that appear
+   * together under an \and constructor are conservatively assumed to alias each
+   * other regardless of other related structure.
    */
   virtual AliasInfo aliasSets() = 0;
 
