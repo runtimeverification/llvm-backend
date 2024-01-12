@@ -6,6 +6,23 @@
 
 using namespace kllvm;
 
+template <typename Container>
+AliasInfo mergeAliasSets(Container const &patterns) {
+  auto ret = AliasInfo{};
+
+  for (auto const &pat : patterns) {
+    auto const &alias_info = pat->aliasSets();
+    for (auto const &[from, to_set] : alias_info) {
+      ret.try_emplace(from);
+      for (auto const &to : to_set) {
+        ret.at(from).insert(to);
+      }
+    }
+  }
+
+  return ret;
+}
+
 size_t KOREStringPattern::countOccurrences(std::string const &) const {
   return 0;
 }
@@ -23,35 +40,30 @@ size_t KORECompositePattern::countOccurrences(std::string const &name) const {
 }
 
 AliasInfo KOREPattern::aliasSets() {
-  std::map<std::string, KOREVariablePattern *> vars;
-  markVariables(vars);
-
-  auto ret = AliasInfo{};
-
-  for (auto const &[from, _] : vars) {
-    ret.try_emplace(from);
-
-    for (auto const &[to, _] : vars) {
-      ret.at(from).insert(to);
-    }
-  }
-
-  return ret;
+  return {};
 }
 
-AliasInfo KOREAxiomDeclaration::aliasSets() {
-  auto ret = AliasInfo{};
+AliasInfo KORECompositePattern::aliasSets() {
+  if (constructor->getName() == R"(\and)") {
+    auto ret = AliasInfo{};
 
-  for (auto *lhs : getLeftHandSide()) {
-    auto lhs_aliases = lhs->aliasSets();
+    auto vars = std::map<std::string, KOREVariablePattern *>{};
+    markVariables(vars);
 
-    for (auto const &[from, alias_set] : lhs_aliases) {
+    for (auto const &[from, _] : vars) {
       ret.try_emplace(from);
-      for (auto const &to : alias_set) {
+
+      for (auto const &[to, _] : vars) {
         ret.at(from).insert(to);
       }
     }
+
+    return ret;
   }
 
-  return ret;
+  return mergeAliasSets(arguments);
+}
+
+AliasInfo KOREAxiomDeclaration::aliasSets() {
+  return mergeAliasSets(getLeftHandSide());
 }

@@ -604,6 +604,7 @@ public:
       substitution &, SubsortMap const &, SymbolMap const &,
       sptr<KOREPattern>) override;
 
+  AliasInfo aliasSets() override;
   size_t countOccurrences(std::string const &name) const override;
 
 private:

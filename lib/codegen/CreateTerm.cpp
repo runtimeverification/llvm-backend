@@ -1004,15 +1004,18 @@ std::unordered_set<std::string> copyOnWriteVariables(
   auto rhs = axiom->getRightHandSide();
 
   for (auto const &var : byte_vars) {
-    auto const &aliases = all_aliases.at(var);
-    auto total = std::accumulate(
-        aliases.begin(), aliases.end(), size_t{0},
-        [&](auto acc, auto const &other) {
-          return acc + rhs->countOccurrences(other);
-        });
+    if (auto found = all_aliases.find(var); found != all_aliases.end()) {
+      auto const &aliases = found->second;
 
-    if (total > 1) {
-      cow_vars.insert(var);
+      auto total = std::accumulate(
+          aliases.begin(), aliases.end(), size_t{0},
+          [&](auto acc, auto const &other) {
+            return acc + rhs->countOccurrences(other);
+          });
+
+      if (total > 1) {
+        cow_vars.insert(var);
+      }
     }
   }
 
