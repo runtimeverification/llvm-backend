@@ -1033,7 +1033,16 @@ void makeCopyOnWriteCalls(
   auto make_cow = mod->getOrInsertFunction("make_copy_on_write", fn_ty);
 
   for (auto const &v : vars) {
+#if LLVM_VERSION_MAJOR >= 17
     llvm::CallInst::Create(make_cow, {subst.at(v)}, "cow_" + v, insertAtEnd);
+#else
+    if (subst.find(v) != subst.end()) {
+      llvm::CallInst::Create(
+          make_cow, {subst.lookup(v)}, "cow_" + v, insertAtEnd);
+    } else {
+      assert(false && "Missing substitution for variable");
+    }
+#endif
   }
 }
 
