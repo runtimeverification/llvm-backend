@@ -4,15 +4,22 @@
 #include <cstring>
 #include <gmp.h>
 #include <stdexcept>
+#include <unordered_set>
 
 #include "runtime/alloc.h"
 #include "runtime/header.h"
+
+static std::unordered_set<SortBytes> copy_on_write_set = {};
 
 extern "C" {
 
 #undef get_ui
 #define get_ui(x) get_ui_named(x, __func__)
 #define KCHAR char
+
+void make_copy_on_write(SortBytes b) {
+  copy_on_write_set.insert(b);
+}
 
 mpz_ptr move_int(mpz_t);
 
@@ -171,7 +178,13 @@ SortBytes hook_BYTES_update(SortBytes b, SortInt off, SortInt val) {
   return b;
 }
 
+SortBytes hook_BYTES_concat(SortBytes a, SortBytes b);
+
 SortBytes hook_BYTES_replaceAt(SortBytes b, SortInt start, SortBytes b2) {
+  if (copy_on_write_set.find(b) != copy_on_write_set.end()) {
+    b = hook_BYTES_concat(b, hook_BYTES_empty());
+  }
+
   unsigned long start_long = get_ui(start);
   if (start_long + len(b2) > len(b)) {
     KLLVM_HOOK_INVALID_ARGUMENT(
