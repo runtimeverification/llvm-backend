@@ -34,6 +34,9 @@ using ptr = std::unique_ptr<T>;
 template <typename T>
 using sptr = std::shared_ptr<T>;
 
+using AliasInfo
+    = std::unordered_map<std::string, std::unordered_set<std::string>>;
+
 std::string decodeKore(std::string);
 
 /*
@@ -428,6 +431,20 @@ public:
    */
   virtual sptr<KOREPattern> desugarAssociative() = 0;
 
+  /*
+   * Compute the sets of variables that may alias each other in this pattern. A
+   * variable always aliases itself, and the set of variables that appear
+   * together under an \and constructor are conservatively assumed to alias each
+   * other regardless of other related structure.
+   */
+  virtual AliasInfo aliasSets() = 0;
+
+  /*
+   * Count the number of times that a KORE variable with the specified name
+   * occurs in this pattern.
+   */
+  virtual size_t countOccurrences(std::string const &name) const = 0;
+
   friend KORECompositePattern;
 
 private:
@@ -505,6 +522,9 @@ public:
       sptr<KOREPattern> subject) override;
   virtual void
   prettyPrint(std::ostream &out, PrettyPrintData const &data) const override;
+
+  AliasInfo aliasSets() override;
+  size_t countOccurrences(std::string const &name) const override;
 
 private:
   virtual sptr<KOREPattern> expandMacros(
@@ -584,6 +604,9 @@ public:
       substitution &, SubsortMap const &, SymbolMap const &,
       sptr<KOREPattern>) override;
 
+  AliasInfo aliasSets() override;
+  size_t countOccurrences(std::string const &name) const override;
+
 private:
   virtual sptr<KOREPattern> expandMacros(
       SubsortMap const &, SymbolMap const &,
@@ -653,6 +676,9 @@ public:
   virtual bool matches(
       substitution &, SubsortMap const &, SymbolMap const &,
       sptr<KOREPattern> subject) override;
+
+  AliasInfo aliasSets() override;
+  size_t countOccurrences(std::string const &name) const override;
 
 private:
   virtual sptr<KOREPattern> expandMacros(
@@ -806,6 +832,15 @@ public:
   KOREPattern *getRequires() const;
   sptr<KOREPattern> getPattern() const { return pattern; }
   unsigned getOrdinal() const { return ordinal; }
+
+  /*
+   * Compute the sets of variables that may alias each other across all the
+   * patterns in this axiom's left hand side; the result is the union of all
+   * alias sets for each variable. For example, if A may alias only B in one LHS
+   * pattern, and may alias only C in another, it may alias B and C in the
+   * axiom's alias set.
+   */
+  AliasInfo aliasSets() const;
 
   friend KOREDefinition;
 };
