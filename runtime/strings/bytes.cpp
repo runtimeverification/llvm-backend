@@ -11,6 +11,24 @@
 
 static std::unordered_set<SortBytes> copy_on_write_set = {};
 
+namespace {
+
+SortBytes copy_bytes(SortBytes b) {
+  auto new_len = len(b);
+  auto ret = static_cast<string *>(koreAllocToken(sizeof(string) + new_len));
+  init_with_len(ret, new_len);
+  memcpy(&(ret->data), &(b->data), new_len * sizeof(char));
+  return ret;
+}
+
+void copy_if_needed(SortBytes &b) {
+  if (copy_on_write_set.find(b) != copy_on_write_set.end()) {
+    b = copy_bytes(b);
+  }
+}
+
+} // namespace
+
 extern "C" {
 
 #undef get_ui
@@ -164,6 +182,8 @@ SortInt hook_BYTES_get(SortBytes b, SortInt off) {
 }
 
 SortBytes hook_BYTES_update(SortBytes b, SortInt off, SortInt val) {
+  copy_if_needed(b);
+
   unsigned long off_long = get_ui(off);
   if (off_long >= len(b)) {
     KLLVM_HOOK_INVALID_ARGUMENT(
@@ -178,12 +198,8 @@ SortBytes hook_BYTES_update(SortBytes b, SortInt off, SortInt val) {
   return b;
 }
 
-SortBytes hook_BYTES_concat(SortBytes a, SortBytes b);
-
 SortBytes hook_BYTES_replaceAt(SortBytes b, SortInt start, SortBytes b2) {
-  if (copy_on_write_set.find(b) != copy_on_write_set.end()) {
-    b = hook_BYTES_concat(b, hook_BYTES_empty());
-  }
+  copy_if_needed(b);
 
   unsigned long start_long = get_ui(start);
   if (start_long + len(b2) > len(b)) {
@@ -197,6 +213,8 @@ SortBytes hook_BYTES_replaceAt(SortBytes b, SortInt start, SortBytes b2) {
 
 SortBytes
 hook_BYTES_memset(SortBytes b, SortInt start, SortInt count, SortInt value) {
+  copy_if_needed(b);
+
   uint64_t ustart = get_ui(start);
   uint64_t ucount = get_ui(count);
   uint64_t uend = ustart + ucount;
@@ -261,6 +279,7 @@ SortBytes hook_BYTES_padLeft(SortBytes b, SortInt length, SortInt v) {
 }
 
 SortBytes hook_BYTES_reverse(SortBytes b) {
+  copy_if_needed(b);
   std::reverse(b->data, b->data + len(b));
   return b;
 }
