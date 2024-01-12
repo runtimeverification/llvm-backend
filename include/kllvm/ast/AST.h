@@ -24,8 +24,6 @@ namespace kllvm {
 
 class serializer;
 
-class KOREPattern;
-class KOREVariablePattern;
 class KORESortVariable;
 
 struct HashSort;
