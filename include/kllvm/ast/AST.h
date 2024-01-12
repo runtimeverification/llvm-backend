@@ -438,7 +438,7 @@ public:
    * Currently, this is a conservative analysis that assumes _all_ variables in
    * the pattern may alias each other in the RHS.
    */
-  virtual AliasInfo aliasSets();
+  virtual AliasInfo aliasSets() = 0;
 
   /*
    * Count the number of times that a KORE variable with the specified name
@@ -524,6 +524,7 @@ public:
   virtual void
   prettyPrint(std::ostream &out, PrettyPrintData const &data) const override;
 
+  AliasInfo aliasSets() override;
   size_t countOccurrences(std::string const &name) const override;
 
 private:
@@ -677,6 +678,7 @@ public:
       substitution &, SubsortMap const &, SymbolMap const &,
       sptr<KOREPattern> subject) override;
 
+  AliasInfo aliasSets() override;
   size_t countOccurrences(std::string const &name) const override;
 
 private:

@@ -39,8 +39,12 @@ size_t KORECompositePattern::countOccurrences(std::string const &name) const {
       });
 }
 
-AliasInfo KOREPattern::aliasSets() {
+AliasInfo KOREStringPattern::aliasSets() {
   return {};
+}
+
+AliasInfo KOREVariablePattern::aliasSets() {
+  return {{getName(), {getName()}}};
 }
 
 AliasInfo KORECompositePattern::aliasSets() {
