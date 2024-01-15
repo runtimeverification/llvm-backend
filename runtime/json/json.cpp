@@ -145,7 +145,7 @@ get_header(boolHdr, "inj{SortBool{}, SortJSON{}}")
     return true;
   }
 
-  bool StartObject() { return true; }
+  static bool StartObject() { return true; }
 
   bool Key(const char *str, SizeType len, bool copy) {
     return String(str, len, copy);
@@ -173,7 +173,7 @@ get_header(boolHdr, "inj{SortBool{}, SortJSON{}}")
     return true;
   }
 
-  bool StartArray() { return true; }
+  static bool StartArray() { return true; }
 
   bool EndArray(SizeType elementCount) {
     result = dotList();

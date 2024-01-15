@@ -15,7 +15,6 @@ Checks:
   -readability-implicit-bool-conversion
   -readability-redundant-member-init
   -readability-uppercase-literal-suffix
-  -readability-convert-member-functions-to-static
   -readability-container-size-empty
   -readability-container-data-pointer
   -readability-else-after-return

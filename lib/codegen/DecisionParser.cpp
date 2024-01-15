@@ -91,7 +91,7 @@ public:
     return yaml_document_get_node(doc, node->data.sequence.items.start[off]);
   }
 
-  std::string str(yaml_node_t *node) {
+  static std::string str(yaml_node_t *node) {
     return {(char *)node->data.scalar.value, node->data.scalar.length};
   }
 
@@ -116,7 +116,7 @@ public:
     dv = KORESymbol::Create("\\dv").release();
   }
 
-  std::string to_string(std::vector<std::string> const &occurrence) {
+  static std::string to_string(std::vector<std::string> const &occurrence) {
     std::string result = "";
     for (auto const &i : occurrence) {
       result.push_back('_');

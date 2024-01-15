@@ -114,7 +114,7 @@ int serializer::emit_length(uint64_t len) {
   return emitted;
 }
 
-int serializer::required_chunks(uint64_t len) const {
+int serializer::required_chunks(uint64_t len) {
   auto ret = 0;
   do {
     ++ret;

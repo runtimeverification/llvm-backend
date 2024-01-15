@@ -808,9 +808,9 @@ void KORECompositePattern::prettyPrint(
 }
 
 struct CompareFirst {
-  bool isDigit(char c) { return c >= '0' && c <= '9'; }
+  static bool isDigit(char c) { return c >= '0' && c <= '9'; }
 
-  std::string getChunk(std::string s, size_t slength, size_t marker) {
+  static std::string getChunk(std::string s, size_t slength, size_t marker) {
     std::string chunk;
     char c = s[marker];
     chunk.push_back(c);
