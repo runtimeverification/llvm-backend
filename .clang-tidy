@@ -17,7 +17,6 @@ Checks:
   -readability-else-after-return
   -readability-non-const-parameter
   -readability-function-cognitive-complexity
-  -readability-redundant-string-init
   -readability-named-parameter
   -readability-redundant-declaration
   -readability-isolate-declaration

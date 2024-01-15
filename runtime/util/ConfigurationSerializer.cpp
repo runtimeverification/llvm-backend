@@ -303,7 +303,7 @@ void serializeConfigurationInternal(
 
     if (isVar && !state.varNames.count(str)) {
       std::string stdStr = std::string(str->data, len(str));
-      std::string suffix = "";
+      std::string suffix;
       while (state.usedVarNames.count(stdStr + suffix)) {
         suffix = std::to_string(state.varCounter++);
       }

@@ -541,7 +541,7 @@ void flush_IO_logs() {
       abort();
     }
     char *base = basename(path2);
-    std::string prefix = "";
+    std::string prefix;
     if (getenv("K_LOG_PREFIX")) {
       prefix = getenv("K_LOG_PREFIX");
     }

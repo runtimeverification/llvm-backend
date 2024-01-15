@@ -117,7 +117,7 @@ public:
   }
 
   static std::string to_string(std::vector<std::string> const &occurrence) {
-    std::string result = "";
+    std::string result;
     for (auto const &i : occurrence) {
       result.push_back('_');
       result += i;

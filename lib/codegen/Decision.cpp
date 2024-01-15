@@ -109,7 +109,7 @@ getFailPattern(DecisionCase const &_case, bool isInt) {
   } else {
     auto result = fmt::format("{}(", ast_to_string(*_case.getConstructor()));
 
-    std::string conn = "";
+    std::string conn;
     for (const auto &i : _case.getConstructor()->getArguments()) {
       result += fmt::format("{}Var'Unds':{}", conn, ast_to_string(*i));
       conn = ",";

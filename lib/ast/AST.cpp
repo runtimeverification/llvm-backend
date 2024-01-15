@@ -678,7 +678,7 @@ void KORECompositeSort::prettyPrint(std::ostream &out) const {
   append(out, name.substr(4));
   if (!arguments.empty()) {
     append(out, '{');
-    std::string conn = "";
+    std::string conn;
     for (const auto &sort : arguments) {
       append(out, conn);
       sort->prettyPrint(out);
