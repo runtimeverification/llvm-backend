@@ -81,7 +81,7 @@ block *debruijnizeInternal(block *currBlock) {
         break;
       }
       case VARIABLE_LAYOUT: {
-        if (!(i == 0 && isBinder) && hook_STRING_eq(var, *(string **)arg)) {
+        if ((i != 0 || !isBinder) && hook_STRING_eq(var, *(string **)arg)) {
           block *newArg = variable_block(idx);
           makeDirty(dirty, argData->offset, newArg, newBlock);
         }

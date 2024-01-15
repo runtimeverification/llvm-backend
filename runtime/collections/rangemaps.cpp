@@ -225,10 +225,7 @@ bool hook_RANGEMAP_eq(SortRangeMap m1, SortRangeMap m2) {
       return false;
     }
   }
-  if (it1.has_next() || it2.has_next()) {
-    return false;
-  }
-  return true;
+  return !(it1.has_next() || it2.has_next());
 }
 
 void rangemap_hash(rangemap *m, void *hasher) {
