@@ -37,7 +37,7 @@ llvm::Constant *CreateStaticTerm::notInjectionCase(
   std::stringstream koreString;
   constructor->print(koreString);
   llvm::Constant *Block
-      = Module->getOrInsertGlobal(koreString.str().c_str(), BlockType);
+      = Module->getOrInsertGlobal(koreString.str(), BlockType);
   auto *globalVar = llvm::dyn_cast<llvm::GlobalVariable>(Block);
 
   if (!globalVar->hasInitializer()) {
