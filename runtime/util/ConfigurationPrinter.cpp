@@ -339,8 +339,9 @@ extern "C" void printMatchResult(
       for (int j = 0; j < matchLog[i].args.size(); j += 2) {
         auto typeName = reinterpret_cast<char *>(matchLog[i].args[j + 1]);
         printValueOfType(os, definitionPath, matchLog[i].args[j], typeName);
-        if (j + 2 != matchLog[i].args.size())
+        if (j + 2 != matchLog[i].args.size()) {
           os << ", ";
+        }
       }
       os << ") => " << *reinterpret_cast<bool *>(matchLog[i].result) << "\n";
     }

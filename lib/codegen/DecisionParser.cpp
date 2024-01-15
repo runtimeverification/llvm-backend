@@ -44,24 +44,33 @@ private:
   };
 
   Kind getKind(yaml_node_t *node) {
-    if (node->type == YAML_SCALAR_NODE)
+    if (node->type == YAML_SCALAR_NODE) {
       return Fail;
-    if (get(node, "collection"))
+    }
+    if (get(node, "collection")) {
       return MakeIterator;
-    if (get(node, "iterator"))
+    }
+    if (get(node, "iterator")) {
       return IterNext;
-    if (get(node, "isnull"))
+    }
+    if (get(node, "isnull")) {
       return CheckNull;
-    if (get(node, "pattern"))
+    }
+    if (get(node, "pattern")) {
       return MakePattern;
-    if (get(node, "bitwidth"))
+    }
+    if (get(node, "bitwidth")) {
       return SwitchLiteral;
-    if (get(node, "specializations"))
+    }
+    if (get(node, "specializations")) {
       return Switch;
-    if (get(node, "action"))
+    }
+    if (get(node, "action")) {
       return Leaf;
-    if (get(node, "function"))
+    }
+    if (get(node, "function")) {
       return Function;
+    }
     throw *node;
   }
 

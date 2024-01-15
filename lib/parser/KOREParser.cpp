@@ -64,8 +64,9 @@ std::string KOREParser::consume(token next) {
     data = buffer.data;
     buffer.tok = token::EMPTY;
   }
-  if (actual == next)
+  if (actual == next) {
     return data;
+  }
   error(loc, "Expected: " + str(next) + " Actual: " + str(actual));
 }
 
@@ -414,8 +415,9 @@ KOREParser::_applicationPattern(std::string const &name) {
 }
 
 void KOREParser::patterns(KORECompositePattern *node) {
-  if (peek() == token::RIGHTPAREN)
+  if (peek() == token::RIGHTPAREN) {
     return;
+  }
   patternsNE(node);
 }
 
@@ -430,8 +432,9 @@ void KOREParser::patternsNE(KORECompositePattern *node) {
 }
 
 void KOREParser::patterns(std::vector<sptr<KOREPattern>> &node) {
-  if (peek() == token::RIGHTPAREN)
+  if (peek() == token::RIGHTPAREN) {
     return;
+  }
   patternsNE(node);
 }
 

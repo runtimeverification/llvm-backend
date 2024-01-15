@@ -127,8 +127,9 @@ bool KORECompositeSort::operator==(const KORESort &other) const {
       return false;
     }
     for (int i = 0; i < arguments.size(); ++i) {
-      if (*sort->arguments[i] != *arguments[i])
+      if (*sort->arguments[i] != *arguments[i]) {
         return false;
+      }
     }
     return true;
   }
@@ -154,8 +155,9 @@ sptr<KORESort> KORECompositeSort::substitute(const substitution &subst) {
 }
 
 ValueType KORECompositeSort::getCategory(KOREDefinition *definition) {
-  if (category.cat != SortCategory::Uncomputed)
+  if (category.cat != SortCategory::Uncomputed) {
     return category;
+  }
   std::string name = getHook(definition);
   if (name == "MINT.MInt") {
     if (auto param = dynamic_cast<KORECompositeSort *>(arguments[0].get())) {
@@ -192,33 +194,34 @@ std::string KORECompositeSort::getHook(KOREDefinition *definition) const {
 ValueType KORECompositeSort::getCategory(std::string const &name) {
   SortCategory category;
   uint64_t bits = 0;
-  if (name == "MAP.Map")
+  if (name == "MAP.Map") {
     category = SortCategory::Map;
-  else if (name == "RANGEMAP.RangeMap")
+  } else if (name == "RANGEMAP.RangeMap") {
     category = SortCategory::RangeMap;
-  else if (name == "LIST.List")
+  } else if (name == "LIST.List") {
     category = SortCategory::List;
-  else if (name == "SET.Set")
+  } else if (name == "SET.Set") {
     category = SortCategory::Set;
-  else if (name == "ARRAY.Array")
+  } else if (name == "ARRAY.Array") {
     category = SortCategory::Symbol; // ARRAY is implemented in K
-  else if (name == "INT.Int")
+  } else if (name == "INT.Int") {
     category = SortCategory::Int;
-  else if (name == "FLOAT.Float")
+  } else if (name == "FLOAT.Float") {
     category = SortCategory::Float;
-  else if (name == "BUFFER.StringBuffer")
+  } else if (name == "BUFFER.StringBuffer") {
     category = SortCategory::StringBuffer;
-  else if (name == "BOOL.Bool")
+  } else if (name == "BOOL.Bool") {
     category = SortCategory::Bool;
-  else if (name == "KVAR.KVar")
+  } else if (name == "KVAR.KVar") {
     category = SortCategory::Variable;
-  // we expect the "hook" of a MInt to be of the form "MINT.MInt N" for some
-  // bitwidth N
-  else if (name.substr(0, 10) == "MINT.MInt ") {
+    // we expect the "hook" of a MInt to be of the form "MINT.MInt N" for some
+    // bitwidth N
+  } else if (name.substr(0, 10) == "MINT.MInt ") {
     category = SortCategory::MInt;
     bits = std::stoi(name.substr(10));
-  } else
+  } else {
     category = SortCategory::Symbol;
+  }
   return {category, bits};
 }
 
@@ -239,8 +242,9 @@ bool KORESymbol::operator==(const KORESymbol &other) const {
     return false;
   }
   for (int i = 0; i < arguments.size(); ++i) {
-    if (*arguments[i] != *other.arguments[i])
+    if (*arguments[i] != *other.arguments[i]) {
       return false;
+    }
   }
   return true;
 }
@@ -1515,8 +1519,9 @@ void KORECompositeSort::print(std::ostream &Out, unsigned indent) const {
   Out << Indent << name << "{";
   bool isFirst = true;
   for (auto &Argument : arguments) {
-    if (!isFirst)
+    if (!isFirst) {
       Out << ",";
+    }
     Argument->print(Out);
     isFirst = false;
   }
@@ -1532,8 +1537,9 @@ void KORESymbol::print(std::ostream &Out, unsigned indent, bool formal) const {
   Out << Indent << name << "{";
   bool isFirst = true;
   for (auto &Argument : (formal ? formalArguments : arguments)) {
-    if (!isFirst)
+    if (!isFirst) {
       Out << ", ";
+    }
     Argument->print(Out);
     isFirst = false;
   }
@@ -1560,8 +1566,9 @@ void KORECompositePattern::print(std::ostream &Out, unsigned indent) const {
   Out << "(";
   bool isFirst = true;
   for (auto &Argument : arguments) {
-    if (!isFirst)
+    if (!isFirst) {
       Out << ",";
+    }
     Argument->print(Out);
     isFirst = false;
   }
@@ -1599,8 +1606,9 @@ static void printAttributeList(
   Out << Indent << "[";
   bool isFirst = true;
   for (auto &Pattern : attributes) {
-    if (!isFirst)
+    if (!isFirst) {
       Out << ",";
+    }
     Pattern.second->print(Out);
     isFirst = false;
   }
@@ -1611,8 +1619,9 @@ void KOREDeclaration::printSortVariables(std::ostream &Out) const {
   Out << "{";
   bool isFirst = true;
   for (auto &Variable : objectSortVariables) {
-    if (!isFirst)
+    if (!isFirst) {
       Out << ",";
+    }
     Variable->print(Out);
     isFirst = false;
   }
@@ -1636,8 +1645,9 @@ void KORESymbolDeclaration::print(std::ostream &Out, unsigned indent) const {
   Out << "(";
   bool isFirst = true;
   for (auto &Argument : symbol->getArguments()) {
-    if (!isFirst)
+    if (!isFirst) {
       Out << ",";
+    }
     Argument->print(Out);
     isFirst = false;
   }
@@ -1654,8 +1664,9 @@ void KOREAliasDeclaration::print(std::ostream &Out, unsigned indent) const {
   Out << "(";
   bool isFirst = true;
   for (auto &Argument : symbol->getArguments()) {
-    if (!isFirst)
+    if (!isFirst) {
       Out << ",";
+    }
     Argument->print(Out);
     isFirst = false;
   }
@@ -1691,8 +1702,9 @@ void KOREModule::print(std::ostream &Out, unsigned indent) const {
   Out << Indent << "module " << name << "\n";
   bool isFirst = true;
   for (auto &Declaration : declarations) {
-    if (!isFirst)
+    if (!isFirst) {
       Out << "\n";
+    }
     Declaration->print(Out, indent + 2);
     Out << "\n";
     isFirst = false;

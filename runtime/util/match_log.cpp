@@ -52,8 +52,9 @@ void addMatchFunction(char *debugName, char *function, void *result, ...) {
   std::vector<void *> args;
   while (true) {
     void *arg = va_arg(ap, void *);
-    if (!arg)
+    if (!arg) {
       break;
+    }
     args.push_back(arg);
   }
 

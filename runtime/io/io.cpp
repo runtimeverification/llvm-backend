@@ -612,8 +612,9 @@ int llvm_backend_argc = 0;
 char const **llvm_backend_argv = nullptr;
 
 list hook_KREFLECTION_argv() {
-  if (!llvm_backend_argv)
+  if (!llvm_backend_argv) {
     KLLVM_HOOK_INVALID_ARGUMENT("KREFLECTION.argv: no arguments given");
+  }
 
   list l{};
 

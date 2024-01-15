@@ -18,7 +18,6 @@ Checks:
   -readability-uppercase-literal-suffix
   -readability-convert-member-functions-to-static
   -readability-container-size-empty
-  -readability-braces-around-statements
   -readability-container-data-pointer
   -readability-else-after-return
   -readability-non-const-parameter

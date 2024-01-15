@@ -405,12 +405,14 @@ size_t *hook_MINT_export(mpz_t in, uint64_t bits) {
   mpz_t twos;
   mpz_init(twos);
   extract(twos, in, 0, nwords * 64);
-  if (nwords == 0)
+  if (nwords == 0) {
     return nullptr;
+  }
   uint64_t numb = 8 * sizeof(size_t);
   uint64_t count = (mpz_sizeinbase(twos, 2) + numb - 1) / numb;
-  if (mpz_sgn(twos) == 0)
+  if (mpz_sgn(twos) == 0) {
     count = 0;
+  }
   uint64_t alloccount = nwords > count ? nwords : count;
   size_t allocsize = alloccount * sizeof(size_t);
   auto *allocptr = (size_t *)koreAllocAlwaysGC(allocsize);
@@ -419,8 +421,9 @@ size_t *hook_MINT_export(mpz_t in, uint64_t bits) {
   size_t actualcount;
   mpz_export(exportptr, &actualcount, 1, sizeof(size_t), 0, 0, twos);
   assert(count == actualcount);
-  if (count == 0)
+  if (count == 0) {
     return allocptr;
+  }
   size_t *resultptr = nwords > count ? allocptr : allocptr + count - nwords;
   return resultptr;
 }
