@@ -35,8 +35,9 @@ std::optional<std::string> getMatchFunctionName() {
 
       if (attr != axiom->getAttributes().end()) {
         // Compare the axiom's label with the given rule label.
-        if (!RuleLabel.compare(axiom->getStringAttribute("label")))
+        if (RuleLabel == axiom->getStringAttribute("label")) {
           return "intern_match_" + std::to_string(axiom->getOrdinal());
+        }
       }
     }
   }

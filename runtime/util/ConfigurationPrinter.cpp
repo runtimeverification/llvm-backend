@@ -350,9 +350,9 @@ extern "C" void printMatchResult(
 void printValueOfType(
     std::ostream &os, std::string const &definitionPath, void *value,
     std::string const &type) {
-  if (type.compare("%mpz*") == 0) {
+  if (type == "%mpz*") {
     os << reinterpret_cast<mpz_ptr>(value);
-  } else if (type.compare("%block*") == 0) {
+  } else if (type == "%block*") {
     if ((((uintptr_t)value) & 3) == 1) {
       auto f = temporary_file("subject_XXXXXX");
       string *s = printConfigurationToString(reinterpret_cast<block *>(value));
@@ -364,9 +364,9 @@ void printValueOfType(
     } else {
       os << "Error: " << type << " not implemented!";
     }
-  } else if (type.compare("%floating*") == 0) {
+  } else if (type == "%floating*") {
     os << floatToString(reinterpret_cast<floating *>(value));
-  } else if (type.compare("i1") == 0) {
+  } else if (type == "i1") {
     os << *reinterpret_cast<bool *>(value);
   } else {
     os << "Error: " << type << " not implemented!";
