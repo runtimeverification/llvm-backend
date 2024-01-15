@@ -270,30 +270,21 @@ std::string KORESymbol::layoutString(KOREDefinition *definition) const {
 }
 
 bool KORECompositeSort::isConcrete() const {
-  for (auto const &sort : arguments) {
-    if (!sort->isConcrete()) {
-      return false;
-    }
-  }
-  return true;
+  return std::all_of(arguments.begin(), arguments.end(), [](auto const &sort) {
+    return sort->isConcrete();
+  });
 }
 
 bool KORESymbol::isConcrete() const {
-  for (auto const &sort : arguments) {
-    if (!sort->isConcrete()) {
-      return false;
-    }
-  }
-  return true;
+  return std::all_of(arguments.begin(), arguments.end(), [](auto const &sort) {
+    return sort->isConcrete();
+  });
 }
 
 bool KORESymbol::isPolymorphic() const {
-  for (auto const &sort : arguments) {
-    if (sort->isConcrete()) {
-      return false;
-    }
-  }
-  return true;
+  return std::none_of(arguments.begin(), arguments.end(), [](auto const &sort) {
+    return sort->isConcrete();
+  });
 }
 
 static std::unordered_set<std::string> BUILTINS{
