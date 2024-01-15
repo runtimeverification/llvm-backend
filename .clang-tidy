@@ -13,11 +13,11 @@ Checks:
   -bugprone-easily-swappable-parameters
   -bugprone-narrowing-conversions
   -bugprone-exception-escape
-  -bugprone-unused-return-value
   -bugprone-assignment-in-if-condition
   -bugprone-branch-clone
   -bugprone-sizeof-expression
   -bugprone-implicit-widening-of-multiplication-result
+  -bugprone-unchecked-optional-access # false positives
 
 WarningsAsErrors:
   '*'
