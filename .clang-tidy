@@ -32,7 +32,6 @@ Checks:
   -readability-suspicious-call-argument
   -readability-inconsistent-declaration-parameter-name
   -readability-redundant-string-cstr
-  -readability-make-member-function-const
 
 WarningsAsErrors:
   '*'

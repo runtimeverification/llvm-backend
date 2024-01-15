@@ -176,7 +176,7 @@ ValueType KORECompositeSort::getCategory(KOREDefinition *definition) {
   return category;
 }
 
-std::string KORECompositeSort::getHook(KOREDefinition *definition) {
+std::string KORECompositeSort::getHook(KOREDefinition *definition) const {
   auto &att
       = definition->getSortDeclarations().at(this->getName())->getAttributes();
   if (!att.count("hook")) {
