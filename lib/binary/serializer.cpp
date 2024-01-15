@@ -19,11 +19,11 @@ serializer::serializer()
 serializer::serializer(flags f)
     : use_header_(!(f & DROP_HEADER))
     , use_arity_(!(f & DROP_ARITY))
-    , buffer_{}
-    , direct_string_prefix_{0x01}
+    , 
+     direct_string_prefix_{0x01}
     , backref_string_prefix_{0x02}
     , next_idx_(0)
-    , intern_table_{} {
+     {
   if (use_header_) {
     emit_header_and_version();
     emit_zero_size();
