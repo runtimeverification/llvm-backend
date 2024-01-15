@@ -50,7 +50,7 @@ static uint32_t getTagForSymbol(KORESymbol const &symbol) {
 
 void *constructCompositePattern(uint32_t tag, std::vector<void *> &arguments) {
   if (isSymbolAFunction(tag)) {
-    return evaluateFunctionSymbol(tag, &arguments[0]);
+    return evaluateFunctionSymbol(tag, arguments.data());
   }
 
   struct blockheader headerVal = getBlockHeaderForSymbol(tag);
@@ -73,7 +73,7 @@ void *constructCompositePattern(uint32_t tag, std::vector<void *> &arguments) {
   auto *Block = (block *)koreAlloc(size);
   Block->h = headerVal;
 
-  storeSymbolChildren(Block, &arguments[0]);
+  storeSymbolChildren(Block, arguments.data());
   if (isSymbolABinder(tag)) {
     Block = debruijnize(Block);
   }

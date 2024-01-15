@@ -261,7 +261,7 @@ block *substituteInternal(block *currBlock) {
       block *to_replace_stack = to_replace;
       block *replacement_stack = replacement;
       block *replacementInj_stack = replacementInj;
-      auto *result = (block *)evaluateFunctionSymbol(tag, &arguments[0]);
+      auto *result = (block *)evaluateFunctionSymbol(tag, arguments.data());
       to_replace = to_replace_stack;
       replacement = replacement_stack;
       replacementInj = replacementInj_stack;

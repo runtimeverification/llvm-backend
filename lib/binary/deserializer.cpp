@@ -20,7 +20,7 @@ std::string file_contents(std::string const &fn, int max_bytes) {
 
   ret.resize(max_bytes);
   ifs.seekg(0, std::ios::beg);
-  ifs.read(&ret[0], max_bytes);
+  ifs.read(ret.data(), max_bytes);
 
   return ret;
 }

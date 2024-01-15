@@ -12,7 +12,7 @@ extern "C" void *getStderr(void) {
 static std::vector<MatchLog> matchLog;
 
 void **getMatchFnArgs(MatchLog *log) {
-  return &log->args[0];
+  return log->args.data();
 }
 
 extern "C" {
@@ -21,7 +21,7 @@ void resetMatchReason(void) {
 }
 
 MatchLog *getMatchLog(void) {
-  return &matchLog[0];
+  return matchLog.data();
 }
 
 size_t getMatchLogSize(void) {
