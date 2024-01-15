@@ -1046,7 +1046,7 @@ sptr<KOREPattern> KORECompositePattern::desugarAssociative() {
         = dynamic_cast<KORECompositePattern *>(arguments[0].get())) {
       auto accum = comp_arg->arguments[0]->desugarAssociative();
 
-      for (auto i = 1u; i < comp_arg->arguments.size(); i++) {
+      for (auto i = 1U; i < comp_arg->arguments.size(); i++) {
         auto new_accum
             = KORECompositePattern::Create(comp_arg->getConstructor());
         new_accum->addArgument(accum);
@@ -1093,7 +1093,7 @@ sptr<KOREPattern> KORECompositePattern::unflattenAndOr() {
     } else {
       auto accum = arguments[0]->unflattenAndOr();
 
-      for (auto i = 1u; i < arguments.size(); i++) {
+      for (auto i = 1U; i < arguments.size(); i++) {
         auto new_accum = KORECompositePattern::Create(constructor.get());
         new_accum->addArgument(accum);
         new_accum->addArgument(arguments[i]->unflattenAndOr());

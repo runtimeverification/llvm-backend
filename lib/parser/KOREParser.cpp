@@ -356,7 +356,7 @@ sptr<KOREPattern> KOREParser::applicationPattern(std::string const &name) {
     consume(token::RIGHTPAREN);
     if (name == "\\left-assoc") {
       sptr<KOREPattern> accum = pats[0];
-      for (auto i = 1u; i < pats.size(); i++) {
+      for (auto i = 1U; i < pats.size(); i++) {
         sptr<KORECompositePattern> newAccum
             = KORECompositePattern::Create(pat->getConstructor());
         newAccum->addArgument(accum);

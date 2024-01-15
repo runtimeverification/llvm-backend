@@ -460,7 +460,7 @@ void FunctionNode::codegen(Decision *d) {
       new llvm::StoreInst(zext, tempAllocCall, d->CurrentBlock);
     }
     functionArgs.push_back(tempAllocCall);
-    for (auto i = 0u; i < args.size(); ++i) {
+    for (auto i = 0U; i < args.size(); ++i) {
       auto *arg = args[i];
       auto cat = bindings[i].second;
 

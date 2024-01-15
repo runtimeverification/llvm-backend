@@ -65,8 +65,8 @@ void serializer::emit_zero_size() {
 }
 
 void serializer::correct_emitted_size() {
-  auto header_prefix_length = 11u;
-  auto header_prefix_length_with_version = header_prefix_length + 8u;
+  auto header_prefix_length = 11U;
+  auto header_prefix_length_with_version = header_prefix_length + 8U;
 
   auto bytes = detail::to_bytes(
       uint64_t{buffer_.size() - header_prefix_length_with_version});
