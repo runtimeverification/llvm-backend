@@ -36,7 +36,8 @@ extern "C" {
 #define KCHAR char
 
 void make_copy_on_write(SortBytes b) {
-  copy_on_write_set.insert(b);
+  abort();
+  /* copy_on_write_set.insert(b); */
 }
 
 mpz_ptr move_int(mpz_t);
