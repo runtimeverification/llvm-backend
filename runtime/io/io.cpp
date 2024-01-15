@@ -617,6 +617,7 @@ list hook_KREFLECTION_argv() {
 
   list l{};
 
+  // NOLINTBEGIN(*-sizeof-expression)
   for (int i = 0; i < llvm_backend_argc; i++) {
     stringbuffer *buf = hook_BUFFER_empty();
     buf = hook_BUFFER_concat_raw(
@@ -628,6 +629,7 @@ list hook_KREFLECTION_argv() {
     memcpy(b->children, &str, sizeof(str));
     l = l.push_back(KElem(b));
   }
+  // NOLINTEND(*-sizeof-expression)
 
   return l;
 }
