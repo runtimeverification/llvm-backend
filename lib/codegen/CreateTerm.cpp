@@ -1107,11 +1107,11 @@ std::string makeApplyRuleFunction(
     KOREAxiomDeclaration *axiom, KOREDefinition *definition,
     llvm::Module *Module, std::vector<Residual> const &residuals) {
   std::map<std::string, KOREVariablePattern *> vars;
-  for (auto residual : residuals) {
-    residual.pattern->markVariables(vars);
-  }
   for (KOREPattern *lhs : axiom->getLeftHandSide()) {
     lhs->markVariables(vars);
+  }
+  for (auto residual : residuals) {
+    residual.pattern->markVariables(vars);
   }
   llvm::StringMap<ValueType> params;
   std::vector<llvm::Type *> paramTypes;
@@ -1171,6 +1171,7 @@ std::string makeApplyRuleFunction(
           llvm::cast<llvm::DIType>(debugArgs[i])->getName().str());
     }
   }
+  makeCopyOnWriteCalls(block, axiom, vars, subst);
   CreateTerm creator = CreateTerm(subst, definition, block, Module, false);
   std::vector<llvm::Value *> args;
   std::vector<llvm::Type *> types;
