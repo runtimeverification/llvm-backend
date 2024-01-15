@@ -378,7 +378,7 @@ sptr<KOREPattern> KOREParser::applicationPattern(std::string const &name) {
   }
   auto result = _applicationPattern(name);
   if (name == "\\or") {
-    if (result->getArguments().size() == 0) {
+    if (result->getArguments().empty()) {
       auto pat = KORECompositePattern::Create("\\bottom");
       pat->getConstructor()->addArgument(
           result->getConstructor()->getFormalArguments()[0]);
@@ -388,7 +388,7 @@ sptr<KOREPattern> KOREParser::applicationPattern(std::string const &name) {
       return result->getArguments()[0];
     }
   } else if (name == "\\and") {
-    if (result->getArguments().size() == 0) {
+    if (result->getArguments().empty()) {
       auto pat = KORECompositePattern::Create("\\top");
       pat->getConstructor()->addArgument(
           result->getConstructor()->getFormalArguments()[0]);

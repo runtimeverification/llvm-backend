@@ -29,7 +29,7 @@ std::optional<std::string> getMatchFunctionName() {
 
   // Iterate through axioms and return the one with the give rulen label if exits.
   for (auto *axiom : kore_ast.get()->getAxioms()) {
-    if (axiom->getAttributes().size() > 0) {
+    if (!axiom->getAttributes().empty()) {
       // Check if the current axiom has the attribute label.
       auto attr = axiom->getAttributes().find("label");
 

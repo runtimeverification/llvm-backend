@@ -23,7 +23,7 @@ std::vector<KOREPattern *>
 getPatternsImpl(KOREPattern *pat, std::vector<KOREPattern *> &result) {
   if (auto *composite = dynamic_cast<KORECompositePattern *>(pat)) {
     if (composite->getConstructor()->getName() == "\\top"
-        && composite->getArguments().size() == 0) {
+        && composite->getArguments().empty()) {
       return result;
     } else if (
         composite->getConstructor()->getName() == "\\and"

@@ -82,7 +82,7 @@ std::unordered_set<block *, HashBlock, KEq> take_search_steps(
       results.insert(state);
       return results;
     }
-    if (stepResults.size() == 0) {
+    if (stepResults.empty()) {
       results.insert(state);
       if (results.size() == bound) {
         return results;

@@ -203,7 +203,7 @@ void SwitchNode::codegen(Decision *d) {
           _case.first);
     }
   } else {
-    if (caseData.size() == 0) {
+    if (caseData.empty()) {
       llvm::BranchInst::Create(_default, d->CurrentBlock);
     } else {
       llvm::Value *tagVal = d->getTag(val);
@@ -638,7 +638,7 @@ llvm::AllocaInst *Decision::decl(var_type const &name) {
 }
 
 llvm::Value *Decision::load(var_type const &name) {
-  if (name.first == "") {
+  if (name.first.empty()) {
     llvm::Type *ty = name.second;
     if (ty->isPointerTy()) {
       auto *ptr_ty = (llvm::PointerType *)ty;
