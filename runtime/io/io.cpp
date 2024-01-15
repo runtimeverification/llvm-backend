@@ -662,7 +662,9 @@ SortIOFile hook_IO_mkstemp(SortString filename) {
 
 SortKItem hook_IO_system(SortString cmd) {
   pid_t pid;
-  int ret = 0, out[2], err[2];
+  int ret = 0;
+  int out[2];
+  int err[2];
   stringbuffer *outBuffer = hook_BUFFER_empty();
   stringbuffer *errBuffer = hook_BUFFER_empty();
   char buf[IOBUFSIZE];
@@ -692,7 +694,8 @@ SortKItem hook_IO_system(SortString cmd) {
   close(out[1]);
   close(err[1]);
 
-  fd_set read_fds, ready_fds;
+  fd_set read_fds;
+  fd_set ready_fds;
   FD_ZERO(&read_fds);
   FD_SET(out[0], &read_fds);
   FD_SET(err[0], &read_fds);
@@ -741,7 +744,8 @@ SortKItem hook_IO_system(SortString cmd) {
 
   retBlock->h = getBlockHeaderForSymbol(
       (uint64_t)getTagForSymbolName(GETTAG(systemResult)));
-  string *outStr, *errStr;
+  string *outStr;
+  string *errStr;
   outStr = hook_BUFFER_toString(outBuffer);
   errStr = hook_BUFFER_toString(errBuffer);
   memcpy(retBlock->children + 1, &outStr, sizeof(string *));

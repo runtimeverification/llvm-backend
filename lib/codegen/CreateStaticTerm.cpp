@@ -202,7 +202,8 @@ CreateStaticTerm::createToken(ValueType sort, std::string contents) {
                                  Module->getContext(), FLOAT_WRAPPER_STRUCT));
     auto *globalVar = llvm::dyn_cast<llvm::GlobalVariable>(global);
     if (!globalVar->hasInitializer()) {
-      size_t prec, exp;
+      size_t prec;
+      size_t exp;
       const char last = contents.back();
       if (last == 'f' || last == 'F') {
         prec = 24;

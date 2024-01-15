@@ -448,7 +448,8 @@ SortString hook_BUFFER_toString(SortStringBuffer buf) {
 }
 
 void init_float2(floating *result, std::string contents) {
-  size_t prec, exp;
+  size_t prec;
+  size_t exp;
   const char last = contents.back();
   if (last == 'f' || last == 'F') {
     prec = 24;

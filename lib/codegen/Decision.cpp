@@ -188,7 +188,8 @@ void SwitchNode::codegen(Decision *d) {
     val = cmp;
     isInt = true;
   }
-  llvm::Value *failSort, *failPattern;
+  llvm::Value *failSort;
+  llvm::Value *failPattern;
   if (d->FailPattern) {
     auto failReason = getFailPattern(caseData, isInt, d->FailureBlock);
     failSort = d->stringLiteral(failReason.first);
@@ -770,7 +771,8 @@ void makeEvalOrAnywhereFunction(
   llvm::BasicBlock *fail
       = llvm::BasicBlock::Create(module->getContext(), "fail", matchFunc);
 
-  llvm::AllocaInst *choiceBuffer, *choiceDepth;
+  llvm::AllocaInst *choiceBuffer;
+  llvm::AllocaInst *choiceDepth;
   llvm::IndirectBrInst *jump;
   initChoiceBuffer(
       dt, module, block, stuck, fail, &choiceBuffer, &choiceDepth, &jump);
@@ -1086,7 +1088,8 @@ void makeStepFunction(
   llvm::BasicBlock *fail
       = llvm::BasicBlock::Create(module->getContext(), "fail", matchFunc);
 
-  llvm::AllocaInst *choiceBuffer, *choiceDepth;
+  llvm::AllocaInst *choiceBuffer;
+  llvm::AllocaInst *choiceDepth;
   llvm::IndirectBrInst *jump;
 
   initChoiceBuffer(
@@ -1204,7 +1207,8 @@ void makeMatchReasonFunction(
       {FailSubject, FailPattern, FailSort}, "", fail);
   setDebugLoc(call);
 
-  llvm::AllocaInst *choiceBuffer, *choiceDepth;
+  llvm::AllocaInst *choiceBuffer;
+  llvm::AllocaInst *choiceDepth;
   llvm::IndirectBrInst *jump;
   initChoiceBuffer(
       dt, module, block, pre_stuck, fail, &choiceBuffer, &choiceDepth, &jump);
@@ -1299,7 +1303,8 @@ void makeStepFunction(
   llvm::BasicBlock *fail
       = llvm::BasicBlock::Create(module->getContext(), "fail", matchFunc);
 
-  llvm::AllocaInst *choiceBuffer, *choiceDepth;
+  llvm::AllocaInst *choiceBuffer;
+  llvm::AllocaInst *choiceDepth;
   llvm::IndirectBrInst *jump;
   initChoiceBuffer(
       res.dt, module, block, pre_stuck, fail, &choiceBuffer, &choiceDepth,

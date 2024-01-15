@@ -321,7 +321,8 @@ void signed_extract(mpz_t result, mpz_t i, size_t off, size_t len) {
     return;
   }
   if (mpz_tstbit(i, off + len - 1)) {
-    mpz_t max, tmp;
+    mpz_t max;
+    mpz_t tmp;
     mpz_init(max);
     mpz_init(tmp);
     mpz_set_ui(max, 1);
@@ -429,7 +430,8 @@ size_t *hook_MINT_export(mpz_t in, uint64_t bits) {
 }
 
 mpz_ptr hook_MINT_import(size_t *i, uint64_t bits, bool isSigned) {
-  mpz_t result, twos;
+  mpz_t result;
+  mpz_t twos;
   mpz_init(twos);
   mpz_init(result);
   uint64_t nwords = (bits + 63) / 64;

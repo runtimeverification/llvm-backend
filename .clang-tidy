@@ -18,7 +18,6 @@ Checks:
   -readability-function-cognitive-complexity
   -readability-named-parameter
   -readability-redundant-declaration
-  -readability-isolate-declaration
   -readability-simplify-boolean-expr
   -readability-suspicious-call-argument
   -readability-inconsistent-declaration-parameter-name

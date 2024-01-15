@@ -179,7 +179,8 @@ string *ffiCall(
     bool isVariadic, mpz_t addr, list *args, list *fixtypes, list *vartypes,
     block *ret) {
   ffi_cif cif;
-  ffi_type **argtypes, *rtype;
+  ffi_type **argtypes;
+  ffi_type *rtype;
   void (*address)();
 
   if (!mpz_fits_ulong_p(addr)) {

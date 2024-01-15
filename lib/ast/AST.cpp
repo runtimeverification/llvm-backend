@@ -962,7 +962,8 @@ sptr<KOREPattern> KORECompositePattern::dedupeDisjuncts() {
   if (constructor->getName() != "\\or") {
     return shared_from_this();
   }
-  std::vector<sptr<KOREPattern>> items, dedupedItems;
+  std::vector<sptr<KOREPattern>> items;
+  std::vector<sptr<KOREPattern>> dedupedItems;
   flatten(this, "\\or", items);
   std::set<std::string> printed;
   for (auto const &item : items) {

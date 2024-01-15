@@ -76,7 +76,8 @@ Location parseLocation(std::string const &loc) {
   size_t pos_lc = lineColumn.find(':');
 
   // If another “:” isn’t found, the tool assumes no column number was given.
-  int64_t line, column = -1;
+  int64_t line;
+  int64_t column = -1;
   if (pos_lc == std::string::npos) {
     line = stoi(lineColumn);
   } else {

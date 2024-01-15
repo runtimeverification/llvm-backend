@@ -165,8 +165,16 @@ llvm::DIType *getDebugType(ValueType type, std::string const &typeName) {
     return nullptr;
   }
   static std::map<std::string, llvm::DIType *> types;
-  llvm::DIType *map, *rangemap, *list, *set, *integer, *floating, *buffer,
-      *boolean, *mint, *symbol;
+  llvm::DIType *map;
+  llvm::DIType *rangemap;
+  llvm::DIType *list;
+  llvm::DIType *set;
+  llvm::DIType *integer;
+  llvm::DIType *floating;
+  llvm::DIType *buffer;
+  llvm::DIType *boolean;
+  llvm::DIType *mint;
+  llvm::DIType *symbol;
   if (types[typeName]) {
     return types[typeName];
   }
