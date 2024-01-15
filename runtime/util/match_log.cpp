@@ -40,12 +40,13 @@ void addMatchSuccess(void) {
        nullptr});
 }
 
-void addMatchFailReason(void *subject, char *pattern, char *sort) {
+void addMatchFailReason(void *subject, const char *pattern, const char *sort) {
   matchLog.push_back(
       {MatchLog::FAIL, nullptr, nullptr, nullptr, {}, pattern, subject, sort});
 }
 
-void addMatchFunction(char *debugName, char *function, void *result, ...) {
+void addMatchFunction(
+    const char *debugName, const char *function, void *result, ...) {
   va_list ap;
   va_start(ap, result);
 

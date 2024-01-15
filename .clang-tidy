@@ -15,7 +15,6 @@ Checks:
   -readability-implicit-bool-conversion
   -readability-redundant-member-init
   -readability-else-after-return
-  -readability-non-const-parameter
   -readability-function-cognitive-complexity
   -readability-named-parameter
   -readability-redundant-declaration
