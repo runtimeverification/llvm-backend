@@ -310,7 +310,7 @@ extern "C" void printMatchResult(
     std::ostream &os, MatchLog *matchLog, size_t logSize,
     const std::string &definitionPath) {
   auto subject_file = temporary_file("subject_XXXXXX");
-  auto subject = subject_file.file_pointer("w");
+  auto *subject = subject_file.file_pointer("w");
   auto pattern_file = temporary_file("pattern_XXXXXX");
 
   for (int i = 0; i < logSize; i++) {
@@ -322,7 +322,7 @@ extern "C" void printMatchResult(
         printSortedConfigurationToFile(
             subject, (block *)matchLog[i].subject, matchLog[i].sort);
       } else {
-        auto subjectSort
+        auto *subjectSort
             = debug_print_term((block *)matchLog[i].subject, matchLog[i].sort);
         auto strSubjectSort = std::string(subjectSort->data, len(subjectSort));
         subject_file.ofstream() << strSubjectSort << std::endl;
@@ -337,7 +337,7 @@ extern "C" void printMatchResult(
       os << matchLog[i].debugName << "(";
 
       for (int j = 0; j < matchLog[i].args.size(); j += 2) {
-        auto typeName = reinterpret_cast<char *>(matchLog[i].args[j + 1]);
+        auto *typeName = reinterpret_cast<char *>(matchLog[i].args[j + 1]);
         printValueOfType(os, definitionPath, matchLog[i].args[j], typeName);
         if (j + 2 != matchLog[i].args.size()) {
           os << ", ";
@@ -360,7 +360,7 @@ void printValueOfType(
       f.ofstream() << std::string(s->data, len(s)) << std::endl;
       kllvm::printKORE(os, definitionPath, f.filename(), false, true);
     } else if ((((uintptr_t)value) & 1) == 0) {
-      auto s = reinterpret_cast<string *>(value);
+      auto *s = reinterpret_cast<string *>(value);
       os << std::string(s->data, len(s));
     } else {
       os << "Error: " << type << " not implemented!";

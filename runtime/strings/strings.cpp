@@ -84,7 +84,7 @@ SortString hook_STRING_chr(SortInt ord) {
   if (uord > 255) {
     KLLVM_HOOK_INVALID_ARGUMENT("Ord must be <= 255: {}", uord);
   }
-  auto ret
+  auto *ret
       = static_cast<string *>(koreAllocToken(sizeof(string) + sizeof(KCHAR)));
   init_with_len(ret, 1);
   ret->data[0] = static_cast<KCHAR>(uord);
@@ -112,7 +112,7 @@ SortInt hook_STRING_find(SortString haystack, SortString needle, SortInt pos) {
     mpz_init_set_si(result, -1);
     return move_int(result);
   }
-  auto out = std::search(
+  auto *out = std::search(
       haystack->data + upos * sizeof(KCHAR),
       haystack->data + len(haystack) * sizeof(KCHAR), needle->data,
       needle->data + len(needle) * sizeof(KCHAR));
@@ -132,7 +132,7 @@ SortInt hook_STRING_rfind(SortString haystack, SortString needle, SortInt pos) {
   uint64_t upos = gs(pos);
   upos += len(needle);
   auto end = (upos < len(haystack)) ? upos : len(haystack);
-  auto out = std::find_end(
+  auto *out = std::find_end(
       &haystack->data[0], &haystack->data[end], &needle->data[0],
       &needle->data[len(needle)]);
   auto ret = &*out - &haystack->data[0];
@@ -149,7 +149,7 @@ hook_STRING_findChar(SortString haystack, SortString needle, SortInt pos) {
     mpz_init_set_si(result, -1);
     return move_int(result);
   }
-  auto out = std::find_first_of(
+  auto *out = std::find_first_of(
       haystack->data + upos * sizeof(KCHAR),
       haystack->data + len(haystack) * sizeof(KCHAR), needle->data,
       needle->data + len(needle) * sizeof(KCHAR));
@@ -184,7 +184,7 @@ string *makeString(const KCHAR *input, ssize_t len = -1) {
   if (len == -1) {
     len = strlen(input);
   }
-  auto ret = static_cast<string *>(koreAllocToken(sizeof(string) + len));
+  auto *ret = static_cast<string *>(koreAllocToken(sizeof(string) + len));
   memcpy(ret->data, input, len);
   init_with_len(ret, len);
   return ret;
@@ -207,7 +207,8 @@ SortString hook_STRING_base2string_long(SortInt input, uint64_t base) {
   // but not when setting the length of the string object itself. Any minus
   // signs will have been accounted for already by the intToString call.
   auto str_len = str.size() + 1;
-  auto result = static_cast<string *>(koreAllocToken(sizeof(string) + str_len));
+  auto *result
+      = static_cast<string *>(koreAllocToken(sizeof(string) + str_len));
   strncpy(result->data, str.c_str(), str_len);
   init_with_len(result, str.size());
 
@@ -228,7 +229,7 @@ SortInt hook_STRING_string2base_long(SortString input, uint64_t base) {
     dataStart = input->data;
   }
 
-  auto copy = static_cast<char *>(koreAllocToken(length + 1));
+  auto *copy = static_cast<char *>(koreAllocToken(length + 1));
   memcpy(copy, dataStart, length);
   copy[length] = 0;
   if (mpz_init_set_str(result, copy, base)) {
@@ -272,7 +273,7 @@ string *hook_STRING_string2token(SortString input) {
 }
 
 SortString hook_STRING_token2string(string *input) {
-  auto in_block = (block *)input;
+  auto *in_block = (block *)input;
   if (is_injection(in_block)) {
     input = (string *)strip_injection(in_block);
   }
@@ -289,9 +290,9 @@ inline SortString hook_STRING_replace(
     SortString haystack, SortString needle, SortString replacer,
     SortInt occurences) {
   uint64_t uoccurences = gs(occurences);
-  auto start = &haystack->data[0];
-  auto pos = start;
-  auto end = &haystack->data[len(haystack)];
+  auto *start = &haystack->data[0];
+  auto *pos = start;
+  auto *end = &haystack->data[len(haystack)];
   size_t matches[len(haystack)];
   int i = 0;
   while (i < uoccurences) {
@@ -308,7 +309,7 @@ inline SortString hook_STRING_replace(
   }
   auto diff = len(needle) - len(replacer);
   size_t new_len = len(haystack) - i * diff;
-  auto ret = static_cast<string *>(
+  auto *ret = static_cast<string *>(
       koreAllocToken(sizeof(string) + new_len * sizeof(KCHAR)));
   init_with_len(ret, new_len);
   int m = 0;
@@ -349,8 +350,8 @@ SortString hook_STRING_replaceFirst(
 
 SortInt
 hook_STRING_countAllOccurrences(SortString haystack, SortString needle) {
-  auto pos = &haystack->data[0];
-  auto end = &haystack->data[len(haystack)];
+  auto *pos = &haystack->data[0];
+  auto *end = &haystack->data[len(haystack)];
   int i = 0;
   while (true) {
     pos = std::search(pos, end, &needle->data[0], &needle->data[len(needle)]);
@@ -400,10 +401,10 @@ string *hook_STRING_floatFormat(string *str, string *fmt) {
 }
 
 SortStringBuffer hook_BUFFER_empty() {
-  auto result = static_cast<stringbuffer *>(koreAlloc(sizeof(stringbuffer)));
+  auto *result = static_cast<stringbuffer *>(koreAlloc(sizeof(stringbuffer)));
   init_with_len(result, sizeof(stringbuffer) - sizeof(blockheader));
   result->strlen = 0;
-  auto str = static_cast<string *>(koreAllocToken(sizeof(string) + 16));
+  auto *str = static_cast<string *>(koreAllocToken(sizeof(string) + 16));
   init_with_len(str, 16);
   result->contents = str;
   return result;

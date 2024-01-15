@@ -31,7 +31,7 @@ serializer::serializer(flags f)
 }
 
 std::string serializer::byte_string() const {
-  auto *ptr = reinterpret_cast<unsigned char const *>(buffer_.data());
+  const auto *ptr = reinterpret_cast<unsigned char const *>(buffer_.data());
   return {ptr, ptr + buffer_.size()};
 }
 

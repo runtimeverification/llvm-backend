@@ -31,8 +31,8 @@ rangemap hook_RANGEMAP_unit() {
 }
 
 rangemap hook_RANGEMAP_concat(SortRangeMap m1, SortRangeMap m2) {
-  auto mfirst = m1->size() >= m2->size() ? m1 : m2;
-  auto msec = m1->size() >= m2->size() ? m2 : m1;
+  auto *mfirst = m1->size() >= m2->size() ? m1 : m2;
+  auto *msec = m1->size() >= m2->size() ? m2 : m1;
   return mfirst->concat(*msec);
 }
 
@@ -45,7 +45,7 @@ SortKItem hook_RANGEMAP_lookup_null(SortRangeMap m, SortKItem key) {
 }
 
 SortKItem hook_RANGEMAP_lookup(SortRangeMap m, SortKItem key) {
-  auto res = hook_RANGEMAP_lookup_null(m, key);
+  auto *res = hook_RANGEMAP_lookup_null(m, key);
   if (!res) {
     KLLVM_HOOK_INVALID_ARGUMENT("Key not found for range map lookup");
   }
@@ -54,7 +54,7 @@ SortKItem hook_RANGEMAP_lookup(SortRangeMap m, SortKItem key) {
 
 SortKItem hook_RANGEMAP_lookupOrDefault(
     SortRangeMap m, SortKItem key, SortKItem _default) {
-  auto res = hook_RANGEMAP_lookup_null(m, key);
+  auto *res = hook_RANGEMAP_lookup_null(m, key);
   if (!res) {
     return _default;
   }
@@ -196,7 +196,7 @@ bool hook_RANGEMAP_inclusion(SortRangeMap m1, SortRangeMap m2) {
 }
 
 rangemap hook_RANGEMAP_updateAll(SortRangeMap m1, SortRangeMap m2) {
-  auto from = m2;
+  auto *from = m2;
   auto to = *m1;
   for (auto iter = rng_map::ConstRangeMapIterator<KElem, KElem>(*from);
        iter.has_next(); ++iter) {
@@ -264,7 +264,7 @@ void printRangeMap(
   }
 
   auto tag = getTagForSymbolName(element);
-  auto arg_sorts = getArgumentSortsForTag(tag);
+  auto *arg_sorts = getArgumentSortsForTag(tag);
 
   sfprintf(file, "\\left-assoc{}(%s(", concat);
 

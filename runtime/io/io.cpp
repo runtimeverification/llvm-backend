@@ -327,7 +327,7 @@ SortIOString hook_IO_read(SortInt i, SortInt len) {
   int fd = mpz_get_si(i);
   size_t length = mpz_get_ui(len);
 
-  auto result = static_cast<string *>(koreAllocToken(sizeof(string) + length));
+  auto *result = static_cast<string *>(koreAllocToken(sizeof(string) + length));
   int bytes = read(fd, &(result->data), length);
 
   if (-1 == bytes) {
@@ -600,9 +600,9 @@ block *hook_KREFLECTION_fresh(string *str) {
 }
 
 string *hook_KREFLECTION_kompiledDir(void) {
-  auto str_ptr = &kompiled_directory;
+  auto *str_ptr = &kompiled_directory;
   auto len = strlen(str_ptr);
-  auto ret = static_cast<string *>(koreAllocToken(sizeof(string) + len));
+  auto *ret = static_cast<string *>(koreAllocToken(sizeof(string) + len));
   memcpy(ret->data, str_ptr, len);
   init_with_len(ret, len);
   return ret;

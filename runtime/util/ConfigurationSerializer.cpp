@@ -114,7 +114,7 @@ void serializeMap(
   }
 
   auto tag = getTagForSymbolName(element);
-  auto arg_sorts = getArgumentSortsForTag(tag);
+  auto *arg_sorts = getArgumentSortsForTag(tag);
 
   for (auto iter = map->begin(); iter != map->end(); ++iter) {
     serializeConfigurationInternal(
@@ -141,7 +141,7 @@ void serializeRangeMap(
   }
 
   auto tag = getTagForSymbolName(element);
-  auto arg_sorts = getArgumentSortsForTag(tag);
+  auto *arg_sorts = getArgumentSortsForTag(tag);
 
   bool once = true;
   for (auto iter = rng_map::ConstRangeMapIterator<KElem, KElem>(*map);
@@ -175,7 +175,7 @@ void serializeList(
   }
 
   auto tag = getTagForSymbolName(element);
-  auto arg_sorts = getArgumentSortsForTag(tag);
+  auto *arg_sorts = getArgumentSortsForTag(tag);
 
   for (auto iter = list->begin(); iter != list->end(); ++iter) {
     serializeConfigurationInternal(file, *iter, arg_sorts[0], false, state);
@@ -199,7 +199,7 @@ void serializeSet(
   }
 
   auto tag = getTagForSymbolName(element);
-  auto arg_sorts = getArgumentSortsForTag(tag);
+  auto *arg_sorts = getArgumentSortsForTag(tag);
 
   for (auto iter = set->begin(); iter != set->end(); ++iter) {
     serializeConfigurationInternal(file, *iter, arg_sorts[0], false, state);
@@ -243,7 +243,7 @@ void serializeMInt(
     writer *file, size_t *i, size_t bits, const char *sort, void *state) {
   auto &instance = static_cast<serialization_state *>(state)->instance;
 
-  auto fmt = "%sp%zd";
+  const auto *fmt = "%sp%zd";
   auto str = std::string{};
 
   if (i == nullptr) {
@@ -342,7 +342,7 @@ void serializeConfigurationInternal(
 
   visitChildren(subject, file, &callbacks, state_ptr);
 
-  auto symbol = getSymbolNameForTag(tag);
+  const auto *symbol = getSymbolNameForTag(tag);
   auto symbolStr = std::string(symbol);
 
   auto [name, sorts] = cached_symbol_sort_list(symbolStr);
@@ -383,7 +383,7 @@ void serializeConfigurations(
     emitConstantSort(state.instance, "SortGeneratedTopCell");
     emitSymbol(state.instance, "\\bottom{}", size, 1);
   } else if (size == 1) {
-    auto result = *results.begin();
+    auto *result = *results.begin();
     serializeConfigurationInternal(&w, result, nullptr, false, &state);
   } else {
     for (auto const &subject : results) {
@@ -395,7 +395,7 @@ void serializeConfigurations(
   }
 
   auto buf_size = state.instance.data().size();
-  auto buf = static_cast<char *>(malloc(buf_size));
+  auto *buf = static_cast<char *>(malloc(buf_size));
   std::memcpy(buf, state.instance.data().data(), buf_size);
   fwrite(buf, 1, buf_size, file);
 
@@ -429,7 +429,7 @@ void serializeConfiguration(
   }
 
   auto size = state.instance.data().size();
-  auto buf = static_cast<char *>(malloc(size));
+  auto *buf = static_cast<char *>(malloc(size));
   std::memcpy(buf, state.instance.data().data(), size);
 
   *data_out = buf;

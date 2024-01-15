@@ -95,8 +95,8 @@ evaluate_function(std::shared_ptr<KORECompositePattern> const &term) {
 
   auto label = ast_to_string(*term->getConstructor());
   auto tag = getTagForSymbolName(label.c_str());
-  auto return_sort = getReturnSortForTag(tag);
-  auto result = evaluateFunctionSymbol(tag, term_args.data());
+  const auto *return_sort = getReturnSortForTag(tag);
+  auto *result = evaluateFunctionSymbol(tag, term_args.data());
 
   return sortedTermToKorePattern(static_cast<block *>(result), return_sort);
 }

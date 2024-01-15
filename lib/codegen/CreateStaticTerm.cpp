@@ -59,7 +59,7 @@ llvm::Constant *CreateStaticTerm::notInjectionCase(
         EmptyArrayType, llvm::ArrayRef<llvm::Constant *>()));
 
     int idx = 2;
-    for (auto &child : constructor->getArguments()) {
+    for (const auto &child : constructor->getArguments()) {
       llvm::Constant *ChildValue;
       if (idx++ == 2 && val != nullptr) {
         ChildValue = val;
@@ -83,13 +83,13 @@ llvm::Constant *CreateStaticTerm::notInjectionCase(
 
 std::pair<llvm::Constant *, bool>
 CreateStaticTerm::operator()(KOREPattern *pattern) {
-  if (auto constructor = dynamic_cast<KORECompositePattern *>(pattern)) {
+  if (auto *constructor = dynamic_cast<KORECompositePattern *>(pattern)) {
     const KORESymbol *symbol = constructor->getConstructor();
     assert(symbol->isConcrete() && "not supported yet: sort variables");
     if (symbol->getName() == "\\dv") {
-      auto sort = dynamic_cast<KORECompositeSort *>(
+      auto *sort = dynamic_cast<KORECompositeSort *>(
           symbol->getFormalArguments()[0].get());
-      auto strPattern = dynamic_cast<KOREStringPattern *>(
+      auto *strPattern = dynamic_cast<KOREStringPattern *>(
           constructor->getArguments()[0].get());
       return std::make_pair(
           createToken(sort->getCategory(Definition), strPattern->getContents()),

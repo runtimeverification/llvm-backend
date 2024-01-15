@@ -67,7 +67,7 @@ void initDebugFunction(
   if (!Dbg) {
     return;
   }
-  auto Unit = Dbg->createFile(DbgFile->getFilename(), DbgFile->getDirectory());
+  auto *Unit = Dbg->createFile(DbgFile->getFilename(), DbgFile->getDirectory());
   llvm::DIScope *FContext = Unit;
   DbgSP = Dbg->createFunction(
       FContext, name, name, Unit, DbgLine, type, DbgLine,
@@ -96,7 +96,7 @@ void initDebugGlobal(
     return;
   }
   resetDebugLoc();
-  auto DbgExp = Dbg->createGlobalVariableExpression(
+  auto *DbgExp = Dbg->createGlobalVariableExpression(
       DbgCU, name, name, DbgFile, DbgLine, type, false);
   var->addDebugInfo(DbgExp);
 }
@@ -112,7 +112,7 @@ void initDebugAxiom(
   }
   KORECompositePattern *sourceAtt = att.at(SOURCE_ATT).get();
   assert(sourceAtt->getArguments().size() == 1);
-  auto strPattern
+  auto *strPattern
       = dynamic_cast<KOREStringPattern *>(sourceAtt->getArguments()[0].get());
   std::string source = strPattern->getContents();
   if (!att.count(LOCATION_ATT)) {
@@ -121,7 +121,7 @@ void initDebugAxiom(
   }
   KORECompositePattern *locationAtt = att.at(LOCATION_ATT).get();
   assert(locationAtt->getArguments().size() == 1);
-  auto strPattern2
+  auto *strPattern2
       = dynamic_cast<KOREStringPattern *>(locationAtt->getArguments()[0].get());
   std::string location = strPattern2->getContents();
   source = source.substr(7, source.length() - 8);
@@ -146,7 +146,7 @@ llvm::DIType *getForwardDecl(std::string const &name) {
   if (!Dbg) {
     return nullptr;
   }
-  auto Unit = Dbg->createFile(DbgFile->getFilename(), DbgFile->getDirectory());
+  auto *Unit = Dbg->createFile(DbgFile->getFilename(), DbgFile->getDirectory());
   return Dbg->createForwardDecl(
       llvm::dwarf::DW_TAG_structure_type, name, DbgCU, Unit, 0);
 }
@@ -263,7 +263,7 @@ getPointerDebugType(llvm::DIType *ty, std::string const &typeName) {
   if (!Dbg) {
     return nullptr;
   }
-  auto ptrType = Dbg->createPointerType(ty, sizeof(size_t) * 8);
+  auto *ptrType = Dbg->createPointerType(ty, sizeof(size_t) * 8);
   return Dbg->createTypedef(ptrType, typeName, DbgFile, 0, DbgCU);
 }
 

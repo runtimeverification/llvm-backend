@@ -29,7 +29,7 @@ int main(int argc, char **argv) {
   KOREParser parser(argv[1] + std::string("/syntaxDefinition.kore"));
   ptr<KOREDefinition> def = parser.definition();
 
-  for (auto axiom : def->getAxioms()) {
+  for (auto *axiom : def->getAxioms()) {
     if (axiom->getAttributes().count("subsort")) {
       KORECompositePattern *att = axiom->getAttributes().at("subsort").get();
       KORESort *innerSort
@@ -69,13 +69,13 @@ int main(int argc, char **argv) {
   std::map<std::string, std::vector<KORESymbol *>> symbols;
   config->markSymbols(symbols);
   for (auto &decl : axioms) {
-    auto axiom = dynamic_cast<KOREAxiomDeclaration *>(decl.get());
+    auto *axiom = dynamic_cast<KOREAxiomDeclaration *>(decl.get());
     axiom->getPattern()->markSymbols(symbols);
   }
 
   for (auto &entry : symbols) {
-    for (auto symbol : entry.second) {
-      auto decl = def->getSymbolDeclarations().at(symbol->getName());
+    for (auto *symbol : entry.second) {
+      auto *decl = def->getSymbolDeclarations().at(symbol->getName());
       symbol->instantiateSymbol(decl);
     }
   }

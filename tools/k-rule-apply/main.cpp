@@ -28,7 +28,7 @@ std::optional<std::string> getMatchFunctionName() {
   kore_ast->preprocess();
 
   // Iterate through axioms and return the one with the give rulen label if exits.
-  for (auto axiom : kore_ast.get()->getAxioms()) {
+  for (auto *axiom : kore_ast.get()->getAxioms()) {
     if (axiom->getAttributes().size() > 0) {
       // Check if the current axiom has the attribute label.
       auto attr = axiom->getAttributes().find("label");
@@ -61,7 +61,7 @@ int main(int argc, char **argv) {
   }
 
   // Open the shared library that contains the llvm match functions.
-  auto handle = dlopen(SharedLibPath.c_str(), RTLD_LAZY);
+  auto *handle = dlopen(SharedLibPath.c_str(), RTLD_LAZY);
 
   // Check if the shared library exits in the given location.
   if (!handle) {
@@ -81,14 +81,14 @@ int main(int argc, char **argv) {
 
   resetMatchReason(handle);
   initStaticObjects(handle);
-  auto b = constructInitialConfiguration(InitialConfiguration.get(), handle);
+  auto *b = constructInitialConfiguration(InitialConfiguration.get(), handle);
   if (b == nullptr) {
     std::cerr << "Error: " << dlerror() << "\n";
     return EXIT_FAILURE;
   }
 
   match_function((block *)b);
-  auto log = getMatchLog(handle);
+  auto *log = getMatchLog(handle);
   if (log == nullptr) {
     std::cerr << "Error: " << dlerror() << "\n";
     return EXIT_FAILURE;

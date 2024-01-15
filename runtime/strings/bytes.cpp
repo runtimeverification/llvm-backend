@@ -138,7 +138,7 @@ SortBytes hook_BYTES_substr(SortBytes input, SortInt start, SortInt end) {
         uend, input_len);
   }
   uint64_t len = uend - ustart;
-  auto ret = static_cast<string *>(
+  auto *ret = static_cast<string *>(
       koreAllocToken(sizeof(string) + sizeof(KCHAR) * len));
   init_with_len(ret, len);
   memcpy(&(ret->data), &(input->data[ustart]), len * sizeof(KCHAR));
@@ -256,7 +256,7 @@ SortBytes hook_BYTES_concat(SortBytes a, SortBytes b) {
   auto len_a = len(a);
   auto len_b = len(b);
   auto newlen = len_a + len_b;
-  auto ret = static_cast<string *>(koreAllocToken(sizeof(string) + newlen));
+  auto *ret = static_cast<string *>(koreAllocToken(sizeof(string) + newlen));
   init_with_len(ret, newlen);
   memcpy(&(ret->data), &(a->data), len(a) * sizeof(KCHAR));
   memcpy(&(ret->data[len(a)]), &(b->data), len(b) * sizeof(KCHAR));

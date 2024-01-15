@@ -247,7 +247,7 @@ void printList(
   }
 
   auto tag = getTagForSymbolName(element);
-  auto arg_sorts = getArgumentSortsForTag(tag);
+  auto *arg_sorts = getArgumentSortsForTag(tag);
 
   sfprintf(file, "\\left-assoc{}(%s(", concat);
 

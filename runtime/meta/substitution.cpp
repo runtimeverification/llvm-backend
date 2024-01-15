@@ -277,19 +277,19 @@ block *substituteInternal(block *currBlock) {
 extern "C" {
 
 block *debruijnize(block *term) {
-  auto layoutData = getLayoutData(get_layout(term));
+  auto *layoutData = getLayoutData(get_layout(term));
   auto layoutVar = layoutData->args[0];
   auto layoutBody = layoutData->args[layoutData->nargs - 1];
   var = *(string **)(((char *)term) + layoutVar.offset);
   idx = 0;
-  auto bodyPtr = *(block **)(((char *)term) + layoutBody.offset);
-  auto newBody = debruijnizeInternal(bodyPtr);
-  auto newBlock = term;
+  auto *bodyPtr = *(block **)(((char *)term) + layoutBody.offset);
+  auto *newBody = debruijnizeInternal(bodyPtr);
+  auto *newBlock = term;
   if (newBody != bodyPtr) {
     bool dirty = false;
     makeDirty(dirty, layoutBody.offset, newBody, newBlock);
   }
-  auto newVar = *(string **)(((char *)newBlock) + layoutVar.offset);
+  auto *newVar = *(string **)(((char *)newBlock) + layoutVar.offset);
   newVar->h.hdr |= VARIABLE_BIT;
   return newBlock;
 }
@@ -375,7 +375,7 @@ block *incrementDebruijn(block *currBlock) {
 block *alphaRename(block *term) {
   auto *var = (string *)term;
   size_t var_len = len(var);
-  auto newToken = (string *)koreAllocToken(sizeof(string) + var_len);
+  auto *newToken = (string *)koreAllocToken(sizeof(string) + var_len);
   memcpy(newToken->data, var->data, var_len);
   init_with_len(newToken, var_len);
   newToken->h.hdr |= VARIABLE_BIT;

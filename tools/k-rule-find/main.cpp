@@ -32,7 +32,7 @@ std::string getSource(KOREAxiomDeclaration *axiom) {
   auto *sourceAtt = axiom->getAttributes().at(SOURCE_ATT).get();
   assert(sourceAtt->getArguments().size() == 1);
 
-  auto strPattern
+  auto *strPattern
       = dynamic_cast<KOREStringPattern *>(sourceAtt->getArguments()[0].get());
   return strPattern->getContents();
 }
@@ -41,7 +41,7 @@ Location getLocation(KOREAxiomDeclaration *axiom) {
   auto *locationAtt = axiom->getAttributes().at(LOCATION_ATT).get();
   assert(locationAtt->getArguments().size() == 1);
 
-  auto strPattern
+  auto *strPattern
       = dynamic_cast<KOREStringPattern *>(locationAtt->getArguments()[0].get());
   std::string location = strPattern->getContents();
 
@@ -109,7 +109,7 @@ int main(int argc, char **argv) {
   auto kore_ast = parser.definition();
 
   // Iterate through axioms.
-  for (auto axiom : kore_ast.get()->getAxioms()) {
+  for (auto *axiom : kore_ast.get()->getAxioms()) {
     if (axiom->getAttributes().count(SOURCE_ATT)) {
       auto source = getSource(axiom);
       if (source.find(loc.filename) != std::string::npos) {
