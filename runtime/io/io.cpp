@@ -666,6 +666,7 @@ SortKItem hook_IO_system(SortString cmd) {
   stringbuffer *errBuffer = hook_BUFFER_empty();
   char buf[IOBUFSIZE];
 
+  // NOLINTNEXTLINE(*-assignment-in-if-condition)
   if (pipe(out) == -1 || pipe(err) == -1 || (pid = fork()) == -1) {
     return getKSeqErrorBlock();
   }
