@@ -12,7 +12,7 @@ static thread_local uint64_t idx;
 static thread_local uint64_t idx2;
 
 extern "C" {
-bool hook_KEQUAL_eq(block *, block *);
+
 map map_map(void *, block *(block *));
 rangemap rangemap_map(void *, block *(block *));
 list list_map(void *, block *(block *));

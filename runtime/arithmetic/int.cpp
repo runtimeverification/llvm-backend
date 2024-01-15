@@ -7,7 +7,7 @@
 
 extern "C" {
 
-mpz_ptr move_int(mpz_t);
+
 void add_hash64(void *, uint64_t);
 
 SortInt hook_INT_tmod(SortInt a, SortInt b) {

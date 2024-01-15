@@ -19,7 +19,7 @@ extern "C" {
 
 #define KCHAR char
 
-mpz_ptr move_int(mpz_t);
+
 floating *move_float(floating *);
 
 string *bytes2string(string *, size_t);

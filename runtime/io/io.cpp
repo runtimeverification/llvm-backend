@@ -26,7 +26,7 @@ extern "C" {
 
 extern char kompiled_directory;
 
-mpz_ptr move_int(mpz_t);
+
 char *getTerminatedString(string *str);
 
 static block *dotK = leaf_block(getTagForSymbolName("dotk{}"));

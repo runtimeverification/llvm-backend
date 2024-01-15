@@ -28,7 +28,7 @@ struct StringEq {
 
 struct serialization_state {
   serialization_state()
-       { }
+       = default;
 
   // We never want to copy the state; it should only ever get passed around by
   // reference.

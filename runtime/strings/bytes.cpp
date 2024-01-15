@@ -14,7 +14,7 @@ extern "C" {
 #define get_ui(x) get_ui_named(x, __func__)
 #define KCHAR char
 
-mpz_ptr move_int(mpz_t);
+
 
 SortBytes hook_BYTES_empty() {
   static string empty;
@@ -22,7 +22,7 @@ SortBytes hook_BYTES_empty() {
   return &empty;
 }
 
-uint32_t getTagForSymbolName(const char *);
+
 
 // bytes2int and int2bytes expect constructors of sort Endianness, which become
 // a uint64_t constant value in the K term representation

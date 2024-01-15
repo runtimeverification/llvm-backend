@@ -49,7 +49,7 @@ std::optional<pretty_print_definition> get_print_data();
  */
 
 extern "C" {
-block *take_steps(int64_t, block *);
+
 void initStaticObjects(void);
 void freeAllKoreMem(void);
 }

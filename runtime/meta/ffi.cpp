@@ -16,7 +16,7 @@
 
 extern "C" {
 
-bool hook_KEQUAL_eq(block *, block *);
+
 
 #define KCHAR char
 #define TYPETAG(type) "Lbl'Hash'ffi'Unds'" #type "{}"
@@ -64,7 +64,7 @@ TAG_TYPE(complexdouble)
 TAG_TYPE(complexlongdouble)
 #endif
 
-mpz_ptr move_int(mpz_t);
+
 char *getTerminatedString(string *str);
 
 size_t hook_LIST_size_long(list *l);
