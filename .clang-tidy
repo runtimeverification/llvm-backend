@@ -16,7 +16,6 @@ Checks:
   -readability-function-cognitive-complexity
   -readability-named-parameter
   -readability-suspicious-call-argument
-  -readability-inconsistent-declaration-parameter-name
 
 WarningsAsErrors:
   '*'

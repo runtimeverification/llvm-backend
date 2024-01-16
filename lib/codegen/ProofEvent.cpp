@@ -28,8 +28,8 @@ llvm::Constant *createGlobalSortStringPtr(
 
 llvm::CallInst *ProofEvent::emitSerializeTerm(
     KORECompositeSort &sort, llvm::Value *outputFile, llvm::Value *term,
-    llvm::BasicBlock *insert_at_end) {
-  auto B = llvm::IRBuilder(insert_at_end);
+    llvm::BasicBlock *insertAtEnd) {
+  auto B = llvm::IRBuilder(insertAtEnd);
 
   auto cat = sort.getCategory(Definition);
   auto *sort_name_ptr = createGlobalSortStringPtr(B, sort, Module);
@@ -80,7 +80,7 @@ llvm::CallInst *ProofEvent::emitSerializeConfiguration(
 }
 
 llvm::CallInst *ProofEvent::emitWriteUInt64(
-    llvm::Value *outputFile, uint64_t value, llvm::BasicBlock *insert_at_end) {
+    llvm::Value *outputFile, uint64_t value, llvm::BasicBlock *insertAtEnd) {
   auto *void_ty = llvm::Type::getVoidTy(Ctx);
   auto *i8_ptr_ty = llvm::Type::getInt8PtrTy(Ctx);
   auto *i64_ptr_ty = llvm::Type::getInt64Ty(Ctx);
@@ -91,8 +91,7 @@ llvm::CallInst *ProofEvent::emitWriteUInt64(
 
   auto *i64_value = llvm::ConstantInt::get(i64_ptr_ty, value);
 
-  return llvm::CallInst::Create(
-      func, {outputFile, i64_value}, "", insert_at_end);
+  return llvm::CallInst::Create(func, {outputFile, i64_value}, "", insertAtEnd);
 }
 
 llvm::CallInst *ProofEvent::emitWriteString(
@@ -112,31 +111,30 @@ llvm::CallInst *ProofEvent::emitWriteString(
   return B.CreateCall(print, {outputFile, varname});
 }
 
-llvm::BinaryOperator *ProofEvent::emitNoOp(llvm::BasicBlock *insert_at_end) {
+llvm::BinaryOperator *ProofEvent::emitNoOp(llvm::BasicBlock *insertAtEnd) {
   auto *i8_ty = llvm::Type::getInt8Ty(Ctx);
   auto *zero = llvm::ConstantInt::get(i8_ty, 0);
 
   return llvm::BinaryOperator::Create(
-      llvm::Instruction::Add, zero, zero, "no-op", insert_at_end);
+      llvm::Instruction::Add, zero, zero, "no-op", insertAtEnd);
 }
 
 llvm::LoadInst *
-ProofEvent::emitGetOutputFileName(llvm::BasicBlock *insert_at_end) {
+ProofEvent::emitGetOutputFileName(llvm::BasicBlock *insertAtEnd) {
   auto *i8_ptr_ty = llvm::Type::getInt8PtrTy(Ctx);
   auto *fileNamePointer = Module->getOrInsertGlobal("output_file", i8_ptr_ty);
-  return new llvm::LoadInst(
-      i8_ptr_ty, fileNamePointer, "output", insert_at_end);
+  return new llvm::LoadInst(i8_ptr_ty, fileNamePointer, "output", insertAtEnd);
 }
 
 std::pair<llvm::BasicBlock *, llvm::BasicBlock *> ProofEvent::proofBranch(
-    std::string const &label, llvm::BasicBlock *insert_at_end) {
+    std::string const &label, llvm::BasicBlock *insertAtEnd) {
   auto *i1_ty = llvm::Type::getInt1Ty(Ctx);
 
   auto *proof_output_flag = Module->getOrInsertGlobal("proof_output", i1_ty);
   auto *proof_output = new llvm::LoadInst(
-      i1_ty, proof_output_flag, "proof_output", insert_at_end);
+      i1_ty, proof_output_flag, "proof_output", insertAtEnd);
 
-  auto *f = insert_at_end->getParent();
+  auto *f = insertAtEnd->getParent();
   auto *true_block
       = llvm::BasicBlock::Create(Ctx, fmt::format("if_{}", label), f);
   auto *merge_block
@@ -144,8 +142,7 @@ std::pair<llvm::BasicBlock *, llvm::BasicBlock *> ProofEvent::proofBranch(
 
   emitNoOp(merge_block);
 
-  llvm::BranchInst::Create(
-      true_block, merge_block, proof_output, insert_at_end);
+  llvm::BranchInst::Create(true_block, merge_block, proof_output, insertAtEnd);
   return {true_block, merge_block};
 }
 

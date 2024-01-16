@@ -190,34 +190,34 @@ std::string KORECompositeSort::getHook(KOREDefinition *definition) const {
   return strPattern->getContents();
 }
 
-ValueType KORECompositeSort::getCategory(std::string const &name) {
+ValueType KORECompositeSort::getCategory(std::string const &hookName) {
   SortCategory category;
   uint64_t bits = 0;
-  if (name == "MAP.Map") {
+  if (hookName == "MAP.Map") {
     category = SortCategory::Map;
-  } else if (name == "RANGEMAP.RangeMap") {
+  } else if (hookName == "RANGEMAP.RangeMap") {
     category = SortCategory::RangeMap;
-  } else if (name == "LIST.List") {
+  } else if (hookName == "LIST.List") {
     category = SortCategory::List;
-  } else if (name == "SET.Set") {
+  } else if (hookName == "SET.Set") {
     category = SortCategory::Set;
-  } else if (name == "ARRAY.Array") {
+  } else if (hookName == "ARRAY.Array") {
     category = SortCategory::Symbol; // ARRAY is implemented in K
-  } else if (name == "INT.Int") {
+  } else if (hookName == "INT.Int") {
     category = SortCategory::Int;
-  } else if (name == "FLOAT.Float") {
+  } else if (hookName == "FLOAT.Float") {
     category = SortCategory::Float;
-  } else if (name == "BUFFER.StringBuffer") {
+  } else if (hookName == "BUFFER.StringBuffer") {
     category = SortCategory::StringBuffer;
-  } else if (name == "BOOL.Bool") {
+  } else if (hookName == "BOOL.Bool") {
     category = SortCategory::Bool;
-  } else if (name == "KVAR.KVar") {
+  } else if (hookName == "KVAR.KVar") {
     category = SortCategory::Variable;
     // we expect the "hook" of a MInt to be of the form "MINT.MInt N" for some
     // bitwidth N
-  } else if (name.substr(0, 10) == "MINT.MInt ") {
+  } else if (hookName.substr(0, 10) == "MINT.MInt ") {
     category = SortCategory::MInt;
-    bits = std::stoi(name.substr(10));
+    bits = std::stoi(hookName.substr(10));
   } else {
     category = SortCategory::Symbol;
   }
