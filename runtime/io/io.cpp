@@ -617,19 +617,18 @@ list hook_KREFLECTION_argv() {
 
   list l{};
 
-  // NOLINTBEGIN(*-sizeof-expression)
   for (int i = 0; i < llvm_backend_argc; i++) {
     stringbuffer *buf = hook_BUFFER_empty();
     buf = hook_BUFFER_concat_raw(
         buf, llvm_backend_argv[i], strlen(llvm_backend_argv[i]));
     SortString str = hook_BUFFER_toString(buf);
-    auto *b = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(str)));
+    auto *b
+        = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(SortString)));
     b->h = getBlockHeaderForSymbol(
         (uint64_t)getTagForSymbolName("inj{SortString{}, SortKItem{}}"));
-    memcpy(b->children, &str, sizeof(str));
+    memcpy(b->children, &str, sizeof(SortString));
     l = l.push_back(KElem(b));
   }
-  // NOLINTEND(*-sizeof-expression)
 
   return l;
 }
