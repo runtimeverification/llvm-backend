@@ -989,27 +989,6 @@ void readMultimap(
 
 sptr<KOREPattern> stripRawTerm(sptr<KOREPattern> const &term);
 
-template <typename Elem, typename Hash, typename Equal>
-std::unordered_map<Elem *, std::unordered_set<Elem *, Hash, Equal>, Hash, Equal>
-transitiveClosure(std::unordered_map<
-                  Elem *, std::unordered_set<Elem *, Hash, Equal>, Hash, Equal>
-                      relations) {
-  bool dirty;
-  do {
-    dirty = false;
-    for (auto &entry : relations) {
-      SortSet newSucc;
-      for (auto &elem : entry.second) {
-        auto &relation = relations[elem];
-        for (auto elem2 : relation) {
-          dirty |= relations[entry.first].insert(elem2).second;
-        }
-      }
-    }
-  } while (dirty);
-  return relations;
-}
-
 namespace detail {
 
 template <typename T>
