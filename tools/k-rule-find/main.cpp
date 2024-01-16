@@ -32,7 +32,7 @@ std::string getSource(KOREAxiomDeclaration *axiom) {
   auto *sourceAtt = axiom->getAttributes().at(SOURCE_ATT).get();
   assert(sourceAtt->getArguments().size() == 1);
 
-  auto strPattern
+  auto *strPattern
       = dynamic_cast<KOREStringPattern *>(sourceAtt->getArguments()[0].get());
   return strPattern->getContents();
 }
@@ -41,7 +41,7 @@ Location getLocation(KOREAxiomDeclaration *axiom) {
   auto *locationAtt = axiom->getAttributes().at(LOCATION_ATT).get();
   assert(locationAtt->getArguments().size() == 1);
 
-  auto strPattern
+  auto *strPattern
       = dynamic_cast<KOREStringPattern *>(locationAtt->getArguments()[0].get());
   std::string location = strPattern->getContents();
 
@@ -76,7 +76,8 @@ Location parseLocation(std::string const &loc) {
   size_t pos_lc = lineColumn.find(':');
 
   // If another “:” isn’t found, the tool assumes no column number was given.
-  int64_t line, column = -1;
+  int64_t line;
+  int64_t column = -1;
   if (pos_lc == std::string::npos) {
     line = stoi(lineColumn);
   } else {
@@ -109,7 +110,7 @@ int main(int argc, char **argv) {
   auto kore_ast = parser.definition();
 
   // Iterate through axioms.
-  for (auto axiom : kore_ast.get()->getAxioms()) {
+  for (auto *axiom : kore_ast.get()->getAxioms()) {
     if (axiom->getAttributes().count(SOURCE_ATT)) {
       auto source = getSource(axiom);
       if (source.find(loc.filename) != std::string::npos) {
@@ -125,8 +126,9 @@ int main(int argc, char **argv) {
   if (rule_labels.empty()) {
     std::cerr << "Error: Couldn't find rule label within the given location.\n";
   } else {
-    for (auto const &rule_label : rule_labels)
+    for (auto const &rule_label : rule_labels) {
       std::cout << rule_label << "\n";
+    }
   }
 
   return 0;

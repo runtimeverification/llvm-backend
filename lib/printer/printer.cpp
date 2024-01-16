@@ -236,6 +236,7 @@ struct PreprocessedPrintData {
   SymbolMap overloads;
 };
 
+// NOLINTNEXTLINE(*-cognitive-complexity)
 PreprocessedPrintData getPrintData(
     ptr<KOREDefinition> const &def,
     std::vector<ptr<KOREDeclaration>> const &axioms, bool hasColor) {
@@ -255,7 +256,7 @@ PreprocessedPrintData getPrintData(
   SubsortMap subsorts;
   SymbolMap overloads;
 
-  for (auto &entry : def->getSymbolDeclarations()) {
+  for (const auto &entry : def->getSymbolDeclarations()) {
     std::string name = entry.first;
 
     if (entry.second->getAttributes().count("format")) {
@@ -278,10 +279,10 @@ PreprocessedPrintData getPrintData(
           if (pos == std::string::npos) {
             color.push_back(trim(colorAtt.substr(idx)));
             break;
-          } else {
-            color.push_back(trim(colorAtt.substr(idx, pos - idx)));
-            idx = pos + 1;
           }
+          color.push_back(trim(colorAtt.substr(idx, pos - idx)));
+          idx = pos + 1;
+
         } while (true);
         colors[name] = color;
       }
@@ -297,14 +298,14 @@ PreprocessedPrintData getPrintData(
     }
   }
 
-  for (auto &entry : def->getSortDeclarations()) {
+  for (const auto &entry : def->getSortDeclarations()) {
     std::string name = entry.first;
     if (entry.second->getAttributes().count("hook")) {
       hooks[name] = entry.second->getStringAttribute("hook");
     }
   }
 
-  for (auto axiom : def->getAxioms()) {
+  for (auto *axiom : def->getAxioms()) {
     if (axiom->getAttributes().count("subsort")) {
       KORECompositePattern *att = axiom->getAttributes().at("subsort").get();
       KORESort *innerSort
@@ -362,14 +363,14 @@ std::ostream &printKORE(
   std::map<std::string, std::vector<KORESymbol *>> symbols;
   config->markSymbols(symbols);
 
-  for (auto &decl : axioms) {
-    auto axiom = dynamic_cast<KOREAxiomDeclaration *>(decl.get());
+  for (const auto &decl : axioms) {
+    auto *axiom = dynamic_cast<KOREAxiomDeclaration *>(decl.get());
     axiom->getPattern()->markSymbols(symbols);
   }
 
   for (auto &entry : symbols) {
-    for (auto symbol : entry.second) {
-      auto decl = def->getSymbolDeclarations().at(symbol->getName());
+    for (auto *symbol : entry.second) {
+      auto *decl = def->getSymbolDeclarations().at(symbol->getName());
       symbol->instantiateSymbol(decl);
     }
   }

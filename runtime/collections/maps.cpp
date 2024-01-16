@@ -23,7 +23,7 @@ map hook_MAP_unit() {
 }
 
 map hook_MAP_concat(SortMap m1, SortMap m2) {
-  auto from = m1->size() < m2->size() ? m1 : m2;
+  auto *from = m1->size() < m2->size() ? m1 : m2;
   auto to = m1->size() < m2->size() ? *m2 : *m1;
   for (auto iter = from->begin(); iter != from->end(); ++iter) {
     auto entry = *iter;
@@ -36,14 +36,14 @@ map hook_MAP_concat(SortMap m1, SortMap m2) {
 }
 
 SortKItem hook_MAP_lookup_null(SortMap m, SortKItem key) {
-  if (auto val = m->find(key)) {
+  if (const auto *val = m->find(key)) {
     return *val;
   }
   return nullptr;
 }
 
 SortKItem hook_MAP_lookup(SortMap m, SortKItem key) {
-  auto res = hook_MAP_lookup_null(m, key);
+  auto *res = hook_MAP_lookup_null(m, key);
   if (!res) {
     KLLVM_HOOK_INVALID_ARGUMENT("Key not found for map lookup");
   }
@@ -52,7 +52,7 @@ SortKItem hook_MAP_lookup(SortMap m, SortKItem key) {
 
 SortKItem
 hook_MAP_lookupOrDefault(SortMap m, SortKItem key, SortKItem _default) {
-  auto res = hook_MAP_lookup_null(m, key);
+  auto *res = hook_MAP_lookup_null(m, key);
   if (!res) {
     return _default;
   }
@@ -68,11 +68,11 @@ map hook_MAP_remove(SortMap m, SortKItem key) {
 }
 
 map hook_MAP_difference(SortMap m1, SortMap m2) {
-  auto from = m2;
+  auto *from = m2;
   auto to = *m1;
   for (auto iter = from->begin(); iter != from->end(); ++iter) {
     auto entry = *iter;
-    if (auto value = to.find(entry.first)) {
+    if (const auto *value = to.find(entry.first)) {
       if (*value == entry.second) {
         to = to.erase(entry.first);
       }
@@ -135,7 +135,7 @@ SortInt hook_MAP_size(SortMap m) {
 bool hook_MAP_inclusion(SortMap m1, SortMap m2) {
   for (auto iter = m1->begin(); iter != m1->end(); ++iter) {
     auto entry = *iter;
-    auto val = m2->find(entry.first);
+    const auto *val = m2->find(entry.first);
     if (!val || *val != entry.second) {
       return false;
     }
@@ -144,7 +144,7 @@ bool hook_MAP_inclusion(SortMap m1, SortMap m2) {
 }
 
 map hook_MAP_updateAll(SortMap m1, SortMap m2) {
-  auto from = m2;
+  auto *from = m2;
   auto to = *m1;
   for (auto iter = from->begin(); iter != from->end(); ++iter) {
     to = to.insert(*iter);
@@ -201,7 +201,7 @@ void printMap(
   }
 
   auto tag = getTagForSymbolName(element);
-  auto arg_sorts = getArgumentSortsForTag(tag);
+  auto *arg_sorts = getArgumentSortsForTag(tag);
 
   sfprintf(file, "\\left-assoc{}(%s(", concat);
 

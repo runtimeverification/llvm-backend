@@ -39,7 +39,7 @@ cl::opt<std::string> OutputFilename(
     cl::init("-"), cl::cat(KoreStripCat));
 
 std::FILE *check_fopen(char const *name, char const *mode) {
-  auto f = std::fopen(name, mode);
+  auto *f = std::fopen(name, mode);
   if (!f) {
     auto str = std::stringstream{};
     str << "Could not open file " << name;
@@ -54,7 +54,7 @@ int main(int argc, char **argv) {
   cl::HideUnrelatedOptions({&KoreStripCat});
   cl::ParseCommandLineOptions(argc, argv);
 
-  auto input = check_fopen(InputFilename.c_str(), "rb");
+  auto *input = check_fopen(InputFilename.c_str(), "rb");
 
   std::fseek(input, 0, SEEK_END);
   auto file_size = std::ftell(input);
@@ -131,7 +131,7 @@ int main(int argc, char **argv) {
     std::fclose(input);
   } else {
     auto tmp_file = temporary_file("tmp.strip.XXXXXXXXXX");
-    auto file_pointer = tmp_file.file_pointer("wb");
+    auto *file_pointer = tmp_file.file_pointer("wb");
 
     std::fwrite(buffer.data(), sizeof(uint8_t), result_size, file_pointer);
     std::fflush(file_pointer);

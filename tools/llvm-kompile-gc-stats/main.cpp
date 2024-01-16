@@ -6,6 +6,7 @@
 #include <cstdlib>
 #include <cstring>
 
+// NOLINTNEXTLINE(*-cognitive-complexity)
 int main(int argc, char **argv) {
   const char *usage = "usage: %s [dump|analyze|generation|count] <file>"
                       " [<lower_bound> <upper_bound>]\n";
@@ -61,8 +62,9 @@ int main(int argc, char **argv) {
     //
     // frame[2048] contains the total number of bytes that survived
     // at least 2048 collection cycles that are alive at that point in time.
-    if (ret < 2049)
+    if (ret < 2049) {
       break;
+    }
     if (dump) {
       printf("Collection %zd\n", step);
       for (int i = 0; i < 2048; i++) {

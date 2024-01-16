@@ -58,7 +58,7 @@ struct migrate_visitor : immer::detail::rbts::visitor_base<migrate_visitor> {
 };
 
 void migrate_list(void *l) {
-  auto &impl = ((list *)l)->impl();
+  const auto &impl = ((list *)l)->impl();
   migrate_collection_node((void **)&impl.root);
   migrate_collection_node((void **)&impl.tail);
   if (auto &relaxed = impl.root->impl.d.data.inner.relaxed) {
@@ -93,26 +93,26 @@ void migrate_champ_traversal(
 
 void migrate_map_leaf(
     std::pair<KElem, KElem> *start, std::pair<KElem, KElem> *end) {
-  for (auto it = start; it != end; ++it) {
+  for (auto *it = start; it != end; ++it) {
     migrate_once(&it->first.elem);
     migrate_once(&it->second.elem);
   }
 }
 
 void migrate_set_leaf(KElem *start, KElem *end) {
-  for (auto it = start; it != end; ++it) {
+  for (auto *it = start; it != end; ++it) {
     migrate_once(&it->elem);
   }
 }
 
 void migrate_set(void *s) {
-  auto &impl = ((set *)s)->impl();
+  const auto &impl = ((set *)s)->impl();
   migrate_collection_node((void **)&impl.root);
   migrate_champ_traversal(impl.root, 0, migrate_set_leaf);
 }
 
 void migrate_map(void *m) {
-  auto &impl = ((map *)m)->impl();
+  const auto &impl = ((map *)m)->impl();
   migrate_collection_node((void **)&impl.root);
   migrate_champ_traversal(impl.root, 0, migrate_map_leaf);
 }

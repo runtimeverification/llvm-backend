@@ -73,7 +73,7 @@ void bind_runtime(py::module_ &m) {
       .def(
           "__str__",
           [](block *term) {
-            auto k_str = printConfigurationToString(term);
+            auto *k_str = printConfigurationToString(term);
             return std::string(k_str->data, len(k_str));
           })
       .def("step", [](block *term, int64_t n) { return take_steps(n, term); })

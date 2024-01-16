@@ -37,17 +37,18 @@ blockEnumerator() {
     blocks.push_back(const_cast<block **>(&(keyVal)));
   }
 
-  for (auto &keyVal : states_set) {
+  for (const auto &keyVal : states_set) {
     blocks.push_back(const_cast<block **>(&(keyVal)));
   }
 
-  for (auto &keyVal : results) {
+  for (const auto &keyVal : results) {
     blocks.push_back(const_cast<block **>(&(keyVal)));
   }
 
   return std::make_pair(blocks.begin(), blocks.end());
 }
 
+// NOLINTNEXTLINE(*-cognitive-complexity)
 std::unordered_set<block *, HashBlock, KEq> take_search_steps(
     bool executeToBranch, int64_t depth, int64_t bound, block *subject) {
   static int registered = -1;
@@ -82,7 +83,7 @@ std::unordered_set<block *, HashBlock, KEq> take_search_steps(
       results.insert(state);
       return results;
     }
-    if (stepResults.size() == 0) {
+    if (stepResults.empty()) {
       results.insert(state);
       if (results.size() == bound) {
         return results;
@@ -98,7 +99,7 @@ std::unordered_set<block *, HashBlock, KEq> take_search_steps(
   }
 
   if (depth == 0) {
-    for (auto state : states) {
+    for (auto *state : states) {
       results.insert(state);
       if (results.size() == bound) {
         return results;

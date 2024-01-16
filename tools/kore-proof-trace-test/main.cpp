@@ -30,7 +30,7 @@ int main(int argc, char **argv) {
   }
 
   // check that the trace after the initial configuration is 4 events long
-  if (Trace->getTrace().size() != 4u) {
+  if (Trace->getTrace().size() != 4U) {
     return 1;
   }
 

@@ -387,7 +387,7 @@ private:
 
   llvm::AllocaInst *decl(var_type const &name);
 
-  llvm::Constant *stringLiteral(std::string const &name);
+  llvm::Constant *stringLiteral(std::string const &str);
   llvm::Value *ptrTerm(llvm::Value *val);
 
 public:

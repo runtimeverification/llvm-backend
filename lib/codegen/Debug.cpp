@@ -64,9 +64,10 @@ void initDebugFunction(
     std::string const &name, std::string const &linkageName,
     llvm::DISubroutineType *type, KOREDefinition *definition,
     llvm::Function *func) {
-  if (!Dbg)
+  if (!Dbg) {
     return;
-  auto Unit = Dbg->createFile(DbgFile->getFilename(), DbgFile->getDirectory());
+  }
+  auto *Unit = Dbg->createFile(DbgFile->getFilename(), DbgFile->getDirectory());
   llvm::DIScope *FContext = Unit;
   DbgSP = Dbg->createFunction(
       FContext, name, name, Unit, DbgLine, type, DbgLine,
@@ -77,8 +78,9 @@ void initDebugFunction(
 void initDebugParam(
     llvm::Function *func, unsigned argNo, std::string const &name,
     ValueType type, std::string const &typeName) {
-  if (!Dbg)
+  if (!Dbg) {
     return;
+  }
   llvm::DILocalVariable *DbgVar = Dbg->createParameterVariable(
       DbgSP, name, argNo + 1, DbgFile, DbgLine, getDebugType(type, typeName),
       true);
@@ -90,25 +92,27 @@ void initDebugParam(
 
 void initDebugGlobal(
     std::string const &name, llvm::DIType *type, llvm::GlobalVariable *var) {
-  if (!Dbg)
+  if (!Dbg) {
     return;
+  }
   resetDebugLoc();
-  auto DbgExp = Dbg->createGlobalVariableExpression(
+  auto *DbgExp = Dbg->createGlobalVariableExpression(
       DbgCU, name, name, DbgFile, DbgLine, type, false);
   var->addDebugInfo(DbgExp);
 }
 
 void initDebugAxiom(
     std::unordered_map<std::string, sptr<KORECompositePattern>> const &att) {
-  if (!Dbg)
+  if (!Dbg) {
     return;
+  }
   if (!att.count(SOURCE_ATT)) {
     resetDebugLoc();
     return;
   }
   KORECompositePattern *sourceAtt = att.at(SOURCE_ATT).get();
   assert(sourceAtt->getArguments().size() == 1);
-  auto strPattern
+  auto *strPattern
       = dynamic_cast<KOREStringPattern *>(sourceAtt->getArguments()[0].get());
   std::string source = strPattern->getContents();
   if (!att.count(LOCATION_ATT)) {
@@ -117,7 +121,7 @@ void initDebugAxiom(
   }
   KORECompositePattern *locationAtt = att.at(LOCATION_ATT).get();
   assert(locationAtt->getArguments().size() == 1);
-  auto strPattern2
+  auto *strPattern2
       = dynamic_cast<KOREStringPattern *>(locationAtt->getArguments()[0].get());
   std::string location = strPattern2->getContents();
   source = source.substr(7, source.length() - 8);
@@ -130,17 +134,19 @@ void initDebugAxiom(
 }
 
 void resetDebugLoc() {
-  if (!Dbg)
+  if (!Dbg) {
     return;
+  }
   DbgLine = 0;
   DbgColumn = 0;
   DbgFile = DbgCU->getFile();
 }
 
 llvm::DIType *getForwardDecl(std::string const &name) {
-  if (!Dbg)
+  if (!Dbg) {
     return nullptr;
-  auto Unit = Dbg->createFile(DbgFile->getFilename(), DbgFile->getDirectory());
+  }
+  auto *Unit = Dbg->createFile(DbgFile->getFilename(), DbgFile->getDirectory());
   return Dbg->createForwardDecl(
       llvm::dwarf::DW_TAG_structure_type, name, DbgCU, Unit, 0);
 }
@@ -155,11 +161,20 @@ static std::string BUFFER_STRUCT = "stringbuffer";
 static std::string BLOCK_STRUCT = "block";
 
 llvm::DIType *getDebugType(ValueType type, std::string const &typeName) {
-  if (!Dbg)
+  if (!Dbg) {
     return nullptr;
+  }
   static std::map<std::string, llvm::DIType *> types;
-  llvm::DIType *map, *rangemap, *list, *set, *integer, *floating, *buffer,
-      *boolean, *mint, *symbol;
+  llvm::DIType *map;
+  llvm::DIType *rangemap;
+  llvm::DIType *list;
+  llvm::DIType *set;
+  llvm::DIType *integer;
+  llvm::DIType *floating;
+  llvm::DIType *buffer;
+  llvm::DIType *boolean;
+  llvm::DIType *mint;
+  llvm::DIType *symbol;
   if (types[typeName]) {
     return types[typeName];
   }
@@ -211,20 +226,23 @@ llvm::DIType *getDebugType(ValueType type, std::string const &typeName) {
 }
 
 llvm::DIType *getIntDebugType() {
-  if (!Dbg)
+  if (!Dbg) {
     return nullptr;
+  }
   return Dbg->createBasicType("uint32_t", 32, llvm::dwarf::DW_ATE_unsigned);
 }
 
 llvm::DIType *getLongDebugType() {
-  if (!Dbg)
+  if (!Dbg) {
     return nullptr;
+  }
   return Dbg->createBasicType("uint64_t", 64, llvm::dwarf::DW_ATE_unsigned);
 }
 
 llvm::DIType *getBoolDebugType() {
-  if (!Dbg)
+  if (!Dbg) {
     return nullptr;
+  }
   return Dbg->createBasicType("bool", 8, llvm::dwarf::DW_ATE_boolean);
 }
 
@@ -233,53 +251,60 @@ llvm::DIType *getVoidDebugType() {
 }
 
 llvm::DIType *getCharPtrDebugType() {
-  if (!Dbg)
+  if (!Dbg) {
     return nullptr;
+  }
   return Dbg->createPointerType(
       Dbg->createBasicType("char", 8, llvm::dwarf::DW_ATE_signed_char),
       sizeof(size_t) * 8);
 }
 
 llvm::DIType *getCharDebugType() {
-  if (!Dbg)
+  if (!Dbg) {
     return nullptr;
+  }
   return Dbg->createBasicType("char", 8, llvm::dwarf::DW_ATE_signed_char);
 }
 
 llvm::DIType *
 getPointerDebugType(llvm::DIType *ty, std::string const &typeName) {
-  if (!Dbg)
+  if (!Dbg) {
     return nullptr;
-  auto ptrType = Dbg->createPointerType(ty, sizeof(size_t) * 8);
+  }
+  auto *ptrType = Dbg->createPointerType(ty, sizeof(size_t) * 8);
   return Dbg->createTypedef(ptrType, typeName, DbgFile, 0, DbgCU);
 }
 
 llvm::DIType *
 getArrayDebugType(llvm::DIType *ty, size_t len, llvm::Align align) {
-  if (!Dbg)
+  if (!Dbg) {
     return nullptr;
+  }
   std::vector<llvm::Metadata *> subscripts;
   auto arr = Dbg->getOrCreateArray(subscripts);
   return Dbg->createArrayType(len, align.value(), ty, arr);
 }
 
 llvm::DIType *getShortDebugType() {
-  if (!Dbg)
+  if (!Dbg) {
     return nullptr;
+  }
   return Dbg->createBasicType("uint16_t", 16, llvm::dwarf::DW_ATE_unsigned);
 }
 
 llvm::DISubroutineType *getDebugFunctionType(
     llvm::Metadata *returnType, std::vector<llvm::Metadata *> argTypes) {
-  if (!Dbg)
+  if (!Dbg) {
     return nullptr;
+  }
   argTypes.insert(argTypes.begin(), returnType);
   return Dbg->createSubroutineType(Dbg->getOrCreateTypeArray(argTypes));
 }
 
 void setDebugLoc(llvm::Instruction *instr) {
-  if (!Dbg)
+  if (!Dbg) {
     return;
+  }
   instr->setDebugLoc(llvm::DebugLoc(
       llvm::DILocation::get(instr->getContext(), DbgLine, DbgColumn, DbgSP)));
 }
