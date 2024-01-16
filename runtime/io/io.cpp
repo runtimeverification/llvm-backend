@@ -661,6 +661,7 @@ SortIOFile hook_IO_mkstemp(SortString filename) {
   return retBlock;
 }
 
+// NOLINTNEXTLINE(*-cognitive-complexity)
 SortKItem hook_IO_system(SortString cmd) {
   pid_t pid;
   int ret = 0;

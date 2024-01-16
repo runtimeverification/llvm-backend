@@ -141,6 +141,7 @@ static std::pair<std::string, std::string> getFailPattern(
   return std::make_pair(sort, reason);
 }
 
+// NOLINTNEXTLINE(*-cognitive-complexity)
 void SwitchNode::codegen(Decision *d) {
   if (beginNode(d, "switch" + name)) {
     return;

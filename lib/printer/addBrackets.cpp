@@ -350,6 +350,7 @@ bool isPriorityWrong(
  * The terms `(1 ++) 1` and `1 (++ 1)` will not have brackets inserted
  * into them by this algorithm, even though they are required.
  */
+// NOLINTNEXTLINE(*-cognitive-complexity)
 bool requiresBracketWithSimpleAlgorithm(
     KORECompositePattern *outer, KORECompositePattern *leftCapture,
     KORECompositePattern *rightCapture, KOREPattern *inner, int position,

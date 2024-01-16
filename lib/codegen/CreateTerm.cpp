@@ -329,6 +329,7 @@ std::string escape(std::string const &str) {
   return os.str();
 }
 
+// NOLINTNEXTLINE(*-cognitive-complexity)
 llvm::Value *CreateTerm::createHook(
     KORECompositePattern *hookAtt, KORECompositePattern *pattern,
     std::string const &locationStack) {

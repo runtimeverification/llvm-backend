@@ -694,6 +694,7 @@ void KOREVariablePattern::prettyPrint(
   sort->prettyPrint(out);
 }
 
+// NOLINTNEXTLINE(*-cognitive-complexity)
 void KORECompositePattern::prettyPrint(
     std::ostream &out, PrettyPrintData const &data) const {
   std::string name = getConstructor()->getName();
@@ -981,6 +982,7 @@ sptr<KOREPattern> KORECompositePattern::dedupeDisjuncts() {
   return result;
 }
 
+// NOLINTNEXTLINE(*-cognitive-complexity)
 sptr<KOREPattern> KORECompositePattern::filterSubstitution(
     PrettyPrintData const &data, std::set<std::string> const &vars) {
   if (constructor->getName() == "\\equals") {
@@ -1166,6 +1168,7 @@ bool KOREVariablePattern::matches(
   return true;
 }
 
+// NOLINTNEXTLINE(*-cognitive-complexity)
 bool KORECompositePattern::matches(
     substitution &subst, SubsortMap const &subsorts, SymbolMap const &overloads,
     sptr<KOREPattern> subject) {
@@ -1395,6 +1398,7 @@ void KOREDefinition::insertReservedSymbols() {
   addModule(std::move(mod));
 }
 
+// NOLINTNEXTLINE(*-cognitive-complexity)
 void KOREDefinition::preprocess() {
   insertReservedSymbols();
 

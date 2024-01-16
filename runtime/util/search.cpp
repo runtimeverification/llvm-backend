@@ -48,6 +48,7 @@ blockEnumerator() {
   return std::make_pair(blocks.begin(), blocks.end());
 }
 
+// NOLINTNEXTLINE(*-cognitive-complexity)
 std::unordered_set<block *, HashBlock, KEq> take_search_steps(
     bool executeToBranch, int64_t depth, int64_t bound, block *subject) {
   static int registered = -1;

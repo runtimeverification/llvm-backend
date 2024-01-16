@@ -236,6 +236,7 @@ struct PreprocessedPrintData {
   SymbolMap overloads;
 };
 
+// NOLINTNEXTLINE(*-cognitive-complexity)
 PreprocessedPrintData getPrintData(
     ptr<KOREDefinition> const &def,
     std::vector<ptr<KOREDeclaration>> const &axioms, bool hasColor) {

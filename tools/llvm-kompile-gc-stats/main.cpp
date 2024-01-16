@@ -6,6 +6,7 @@
 #include <cstdlib>
 #include <cstring>
 
+// NOLINTNEXTLINE(*-cognitive-complexity)
 int main(int argc, char **argv) {
   const char *usage = "usage: %s [dump|analyze|generation|count] <file>"
                       " [<lower_bound> <upper_bound>]\n";

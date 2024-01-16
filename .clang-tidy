@@ -13,7 +13,6 @@ Checks:
   -readability-magic-numbers
   -readability-identifier-length
   -readability-implicit-bool-conversion
-  -readability-function-cognitive-complexity
   -readability-named-parameter
   -readability-suspicious-call-argument
 
@@ -23,3 +22,5 @@ WarningsAsErrors:
 CheckOptions:
   - key: 'misc-const-correctness.AnalyzeValues'
     value: false
+  - key: 'readability-function-cognitive-complexity.IgnoreMacros'
+    value: true

@@ -81,7 +81,7 @@ static void *so_lib_handle() {
   return handle;
 }
 
-// NOLINTBEGIN(*-else-after-return)
+// NOLINTBEGIN(*-else-after-return,*-cognitive-complexity)
 static ffi_type *getTypeFromBlock(block *elem) {
   if (is_leaf_block(elem)) {
     auto symbol = (uint64_t)elem;
@@ -172,8 +172,9 @@ static ffi_type *getTypeFromBlock(block *elem) {
 
   KLLVM_HOOK_INVALID_ARGUMENT("Arg is not a supported type");
 }
-// NOLINTEND(*-else-after-return)
+// NOLINTEND(*-else-after-return,*-cognitive-complexity)
 
+// NOLINTNEXTLINE(*-cognitive-complexity)
 string *ffiCall(
     bool isVariadic, mpz_t addr, list *args, list *fixtypes, list *vartypes,
     block *ret) {

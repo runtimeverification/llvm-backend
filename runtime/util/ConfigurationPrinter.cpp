@@ -126,6 +126,7 @@ void printComma(writer *file, void *state) {
   sfprintf(file, ",");
 }
 
+// NOLINTNEXTLINE(*-cognitive-complexity)
 void printConfigurationInternal(
     writer *file, block *subject, const char *sort, bool isVar,
     void *state_ptr) {

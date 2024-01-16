@@ -917,6 +917,7 @@ static void visitCollection(
       "", CaseBlock);
 }
 
+// NOLINTNEXTLINE(*-cognitive-complexity)
 static void getVisitor(
     KOREDefinition *definition, llvm::Module *module, KORESymbol *symbol,
     llvm::BasicBlock *CaseBlock, std::vector<llvm::Value *> const &callbacks) {

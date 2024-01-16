@@ -86,6 +86,7 @@ struct construction {
   size_t nchildren;
 };
 
+// NOLINTNEXTLINE(*-cognitive-complexity)
 extern "C" void *constructInitialConfiguration(const KOREPattern *initial) {
   std::vector<std::variant<const KOREPattern *, construction>> workList{
       initial};
@@ -148,6 +149,7 @@ extern "C" void *constructInitialConfiguration(const KOREPattern *initial) {
   return output[0];
 }
 
+// NOLINTBEGIN(*-cognitive-complexity)
 template <typename It>
 static void *
 deserializeInitialConfiguration(It ptr, It end, binary_version version) {
@@ -244,6 +246,7 @@ deserializeInitialConfiguration(It ptr, It end, binary_version version) {
   assert(output.size() == 1 && "Output stack left in invalid state");
   return output.front();
 }
+// NOLINTEND(*-cognitive-complexity)
 
 block *parseConfiguration(const char *filename) {
   if (has_binary_kore_header(filename)) {

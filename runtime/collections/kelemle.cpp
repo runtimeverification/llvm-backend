@@ -9,6 +9,7 @@ bool hook_INT_eq(SortInt, SortInt);
 bool hook_FLOAT_trueeq(SortFloat, SortFloat);
 bool hook_STRING_lt(SortString, SortString);
 
+// NOLINTNEXTLINE(*-cognitive-complexity)
 bool hook_KEQUAL_eq(block *arg1, block *arg2) {
   auto arg1intptr = (uint64_t)arg1;
   auto arg2intptr = (uint64_t)arg2;

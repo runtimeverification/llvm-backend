@@ -131,6 +131,7 @@ CreateStaticTerm::operator()(KOREPattern *pattern) {
   abort();
 }
 
+// NOLINTBEGIN(*-cognitive-complexity)
 llvm::Constant *
 CreateStaticTerm::createToken(ValueType sort, std::string contents) {
   switch (sort.cat) {
@@ -331,5 +332,6 @@ CreateStaticTerm::createToken(ValueType sort, std::string contents) {
   case SortCategory::Uncomputed: abort();
   }
 }
+// NOLINTEND(*-cognitive-complexity)
 
 } // namespace kllvm
