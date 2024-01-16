@@ -934,6 +934,22 @@ public:
   void addAttribute(sptr<KORECompositePattern> Attribute);
   void print(std::ostream &Out, unsigned indent = 0) const;
 
+  /*
+   * Build this definition's subsort relation from axioms that have the
+   * `subsort` attribute.
+   *
+   * The returned map is either as follows
+   *
+   *   S |-> {T . S is an immediate subsort of T}
+   *   S |-> {T . S is a subsort of T}
+   *
+   * depending on whether the transitive or non-transitive variant is used. The
+   * complexity of constructing the transitive relation is greater, and should
+   * only be used when the full partial order of sorts is required.
+   */
+  SubsortMap getSubsorts() const;
+  SubsortMap getTransitiveSubsorts() const;
+
   const std::vector<sptr<KOREModule>> &getModules() const { return modules; }
   const KORECompositeSortDeclarationMapType &getSortDeclarations() const {
     return sortDeclarations;
