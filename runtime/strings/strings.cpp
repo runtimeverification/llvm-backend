@@ -17,8 +17,6 @@
 
 extern "C" {
 
-#define KCHAR char
-
 floating *move_float(floating *);
 
 string *bytes2string(string *, size_t);
@@ -84,9 +82,9 @@ SortString hook_STRING_chr(SortInt ord) {
     KLLVM_HOOK_INVALID_ARGUMENT("Ord must be <= 255: {}", uord);
   }
   auto *ret
-      = static_cast<string *>(koreAllocToken(sizeof(string) + sizeof(KCHAR)));
+      = static_cast<string *>(koreAllocToken(sizeof(string) + sizeof(char)));
   init_with_len(ret, 1);
-  ret->data[0] = static_cast<KCHAR>(uord);
+  ret->data[0] = static_cast<char>(uord);
   return ret;
 }
 
@@ -112,10 +110,9 @@ SortInt hook_STRING_find(SortString haystack, SortString needle, SortInt pos) {
     return move_int(result);
   }
   auto *out = std::search(
-      haystack->data + upos * sizeof(KCHAR),
-      haystack->data + len(haystack) * sizeof(KCHAR), needle->data,
-      needle->data + len(needle) * sizeof(KCHAR));
-  int64_t ret = (out - haystack->data) / sizeof(KCHAR);
+      haystack->data + upos, haystack->data + len(haystack), needle->data,
+      needle->data + len(needle));
+  int64_t ret = out - haystack->data;
   // search returns the end of the range if it is not found, but we want -1 in
   // such a case.
   auto res = (ret < len(haystack)) ? ret : -1;
@@ -149,10 +146,9 @@ hook_STRING_findChar(SortString haystack, SortString needle, SortInt pos) {
     return move_int(result);
   }
   auto *out = std::find_first_of(
-      haystack->data + upos * sizeof(KCHAR),
-      haystack->data + len(haystack) * sizeof(KCHAR), needle->data,
-      needle->data + len(needle) * sizeof(KCHAR));
-  int64_t ret = (out - haystack->data) / sizeof(KCHAR);
+      haystack->data + upos, haystack->data + len(haystack), needle->data,
+      needle->data + len(needle));
+  int64_t ret = out - haystack->data;
   // search returns the end of the range if it is not found, but we want -1 in
   // such a case.
   auto res = (ret < len(haystack)) ? ret : -1;
@@ -179,7 +175,7 @@ hook_STRING_rfindChar(SortString haystack, SortString needle, SortInt pos) {
   return move_int(result);
 }
 
-string *makeString(const KCHAR *input, ssize_t len = -1) {
+string *makeString(const char *input, ssize_t len = -1) {
   if (len == -1) {
     len = strlen(input);
   }
@@ -308,8 +304,7 @@ inline SortString hook_STRING_replace(
   }
   auto diff = len(needle) - len(replacer);
   size_t new_len = len(haystack) - i * diff;
-  auto *ret = static_cast<string *>(
-      koreAllocToken(sizeof(string) + new_len * sizeof(KCHAR)));
+  auto *ret = static_cast<string *>(koreAllocToken(sizeof(string) + new_len));
   init_with_len(ret, new_len);
   int m = 0;
   for (size_t r = 0, h = 0; r < new_len;) {

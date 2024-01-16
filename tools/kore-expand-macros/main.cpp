@@ -88,5 +88,6 @@ int main(int argc, char **argv) {
   expanded->print(std::cout);
   std::cout << std::endl;
 
+  // NOLINTNEXTLINE(*-unused-return-value)
   def.release(); // so we don't waste time calling delete a bunch of times
 }
