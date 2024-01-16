@@ -221,32 +221,32 @@ public:
   }
 
   DecisionNode *makeIterator(yaml_node_t *node) {
-    std::string name = to_string(vec(get(node, "collection")));
-    llvm::Type *type = getParamType(
+    auto collection = to_string(vec(get(node, "collection")));
+    auto *type = getParamType(
         KORECompositeSort::getCategory(str(get(node, "sort"))), mod);
-    std::string function = str(get(node, "function"));
+    auto hookName = str(get(node, "function"));
     auto *child = (*this)(get(node, "next"));
 
     return MakeIteratorNode::Create(
-        name, type, name + "_iter",
+        collection, type, collection + "_iter",
         llvm::PointerType::getUnqual(
             llvm::StructType::getTypeByName(mod->getContext(), "iter")),
-        function, child);
+        hookName, child);
   }
 
   DecisionNode *iterNext(yaml_node_t *node) {
-    std::string iterator = to_string(vec(get(node, "iterator"))) + "_iter";
-    std::string name = to_string(vec(get(node, "binding")));
-    llvm::Type *type = getParamType(
+    auto iterator = to_string(vec(get(node, "iterator"))) + "_iter";
+    auto binding = to_string(vec(get(node, "binding")));
+    auto *type = getParamType(
         KORECompositeSort::getCategory(str(get(node, "sort"))), mod);
-    std::string function = str(get(node, "function"));
+    auto function = str(get(node, "function"));
     auto *child = (*this)(get(node, "next"));
 
     return IterNextNode::Create(
         iterator,
         llvm::PointerType::getUnqual(
             llvm::StructType::getTypeByName(mod->getContext(), "iter")),
-        name, type, function, child);
+        binding, type, function, child);
   }
 
   DecisionNode *switchCase(Kind kind, yaml_node_t *node) {
