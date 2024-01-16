@@ -200,8 +200,6 @@ ValueType KORECompositeSort::getCategory(std::string const &name) {
     category = SortCategory::List;
   else if (name == "SET.Set")
     category = SortCategory::Set;
-  else if (name == "ARRAY.Array")
-    category = SortCategory::Symbol; // ARRAY is implemented in K
   else if (name == "INT.Int")
     category = SortCategory::Int;
   else if (name == "FLOAT.Float")
@@ -217,8 +215,12 @@ ValueType KORECompositeSort::getCategory(std::string const &name) {
   else if (name.substr(0, 10) == "MINT.MInt ") {
     category = SortCategory::MInt;
     bits = std::stoi(name.substr(10));
-  } else
+  } else {
+    // ARRAY.Array is implemented in K and therefore should fall through to the
+    // default category. Should it one day be implemented as a fully hooked
+    // sort, a check needs to be added to the list above.
     category = SortCategory::Symbol;
+  }
   return {category, bits};
 }
 
@@ -1324,15 +1326,13 @@ bool KOREAxiomDeclaration::isTopAxiom() const {
       }
       return false;
     } else if (
-        top->getConstructor()->getName() == "\\rewrites"
-        && top->getArguments().size() == 2) {
-      return true;
-    } else if (
-        top->getConstructor()->getName() == "\\and"
+        (top->getConstructor()->getName() == "\\rewrites"
+         || top->getConstructor()->getName() == "\\and")
         && top->getArguments().size() == 2) {
       return true;
     }
   }
+
   return false;
 }
 

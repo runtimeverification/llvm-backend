@@ -524,7 +524,7 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
     case SortCategory::Map:
     case SortCategory::RangeMap:
     case SortCategory::List:
-    case SortCategory::Set: addAbort(CaseBlock, module); break;
+    case SortCategory::Set:
     case SortCategory::StringBuffer:
     case SortCategory::MInt:
       // TODO: tokens

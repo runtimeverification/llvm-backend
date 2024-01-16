@@ -88,6 +88,9 @@ static ffi_type *getTypeFromBlock(block *elem) {
   if (is_leaf_block(elem)) {
     auto symbol = (uint64_t)elem;
 
+    // Some of these types are aliased to each other and so the branch clone
+    // check produces false positives; it's clearer to keep it this way.
+    // NOLINTBEGIN(*-branch-clone)
     if (symbol == tag_type_void()) {
       return &ffi_type_void;
     } else if (symbol == tag_type_uint8()) {
@@ -171,6 +174,7 @@ static ffi_type *getTypeFromBlock(block *elem) {
 
     return structType;
   }
+  // NOLINTEND(*-branch-clone)
 
   KLLVM_HOOK_INVALID_ARGUMENT("Arg is not a supported type");
 }

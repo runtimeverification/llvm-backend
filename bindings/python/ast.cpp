@@ -364,10 +364,12 @@ void bind_proof_trace(py::module_ &m) {
             .def_property_readonly(
                 "substitution", &LLVMRewriteEvent::getSubstitution);
 
-  py::class_<LLVMRuleEvent, std::shared_ptr<LLVMRuleEvent>>(
-      proof_trace, "LLVMRuleEvent", llvm_rewrite_event);
+  [[maybe_unused]] auto llvm_rule_event
+      = py::class_<LLVMRuleEvent, std::shared_ptr<LLVMRuleEvent>>(
+          proof_trace, "LLVMRuleEvent", llvm_rewrite_event);
 
-  py::class_<LLVMSideConditionEvent, std::shared_ptr<LLVMSideConditionEvent>>(
+  [[maybe_unused]] auto llvm_side_condition_event = py::class_<
+      LLVMSideConditionEvent, std::shared_ptr<LLVMSideConditionEvent>>(
       proof_trace, "LLVMSideConditionEvent", llvm_rewrite_event);
 
   py::class_<LLVMFunctionEvent, std::shared_ptr<LLVMFunctionEvent>>(

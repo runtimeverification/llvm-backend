@@ -182,18 +182,15 @@ bool hook_KEQUAL_lt(block *arg1, block *arg2) {
           uint64_t offset = layoutPtr->args[i].offset;
           uint16_t cat = layoutPtr->args[i].cat;
           switch (cat) {
-          case MAP_LAYOUT: {
-            abort(); // Implement when needed.
-          }
-          case RANGEMAP_LAYOUT: {
-            abort(); // Implement when needed.
-          }
-          case LIST_LAYOUT: {
-            abort(); // Implement when needed.
-          }
-          case SET_LAYOUT: {
-            abort(); // Implement when needed.
-          }
+          case MAP_LAYOUT:
+          case RANGEMAP_LAYOUT:
+          case LIST_LAYOUT:
+          case SET_LAYOUT:
+          case FLOAT_LAYOUT:
+          case STRINGBUFFER_LAYOUT:
+          case BOOL_LAYOUT:
+          case SYMBOL_LAYOUT:
+          case VARIABLE_LAYOUT: abort(); // Implement when needed.
           case INT_LAYOUT: {
             auto *int1ptrptr = (mpz_ptr *)(arg1intptr + offset);
             auto *int2ptrptr = (mpz_ptr *)(arg2intptr + offset);
@@ -202,21 +199,6 @@ bool hook_KEQUAL_lt(block *arg1, block *arg2) {
               return cmp < 0;
             }
             break;
-          }
-          case FLOAT_LAYOUT: {
-            abort(); // Implement when needed.
-          }
-          case STRINGBUFFER_LAYOUT: {
-            abort(); // Implement when needed.
-          }
-          case BOOL_LAYOUT: {
-            abort(); // Implement when needed.
-          }
-          case SYMBOL_LAYOUT: {
-            abort(); // Implement when needed.
-          }
-          case VARIABLE_LAYOUT: {
-            abort(); // Implement when needed.
           }
           default: abort();
           }

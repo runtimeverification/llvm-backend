@@ -9,6 +9,12 @@ Checks:
   -modernize-use-trailing-return-type
   performance-*
   -performance-no-int-to-ptr
+  bugprone-*
+  -bugprone-easily-swappable-parameters
+  -bugprone-narrowing-conversions
+  -bugprone-exception-escape
+  -bugprone-implicit-widening-of-multiplication-result
+  -bugprone-unchecked-optional-access # false positives
 
 WarningsAsErrors:
   '*'
