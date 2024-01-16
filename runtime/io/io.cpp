@@ -26,7 +26,6 @@ extern "C" {
 
 extern char kompiled_directory;
 
-mpz_ptr move_int(mpz_t);
 char *getTerminatedString(string *str);
 
 static block *dotK = leaf_block(getTagForSymbolName("dotk{}"));
@@ -297,14 +296,16 @@ SortIOInt hook_IO_getc(SortInt i) {
   char c;
   ssize_t ret = read(fd, &c, sizeof(char));
 
-  if (0 == ret) {
+  if (ret == 0) {
     block *p = leaf_block(getTagForSymbolName(GETTAG(EOF)));
     auto *retBlock
         = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(block *)));
     retBlock->h = header_err();
     memcpy(retBlock->children, &p, sizeof(block *));
     return retBlock;
-  } else if (-1 == ret) {
+  }
+
+  if (ret == -1) {
     return getInjErrorBlock();
   }
 
@@ -327,7 +328,7 @@ SortIOString hook_IO_read(SortInt i, SortInt len) {
   int fd = mpz_get_si(i);
   size_t length = mpz_get_ui(len);
 
-  auto result = static_cast<string *>(koreAllocToken(sizeof(string) + length));
+  auto *result = static_cast<string *>(koreAllocToken(sizeof(string) + length));
   int bytes = read(fd, &(result->data), length);
 
   if (-1 == bytes) {
@@ -541,7 +542,7 @@ void flush_IO_logs() {
       abort();
     }
     char *base = basename(path2);
-    std::string prefix = "";
+    std::string prefix;
     if (getenv("K_LOG_PREFIX")) {
       prefix = getenv("K_LOG_PREFIX");
     }
@@ -600,9 +601,9 @@ block *hook_KREFLECTION_fresh(string *str) {
 }
 
 string *hook_KREFLECTION_kompiledDir(void) {
-  auto str_ptr = &kompiled_directory;
+  auto *str_ptr = &kompiled_directory;
   auto len = strlen(str_ptr);
-  auto ret = static_cast<string *>(koreAllocToken(sizeof(string) + len));
+  auto *ret = static_cast<string *>(koreAllocToken(sizeof(string) + len));
   memcpy(ret->data, str_ptr, len);
   init_with_len(ret, len);
   return ret;
@@ -612,8 +613,9 @@ int llvm_backend_argc = 0;
 char const **llvm_backend_argv = nullptr;
 
 list hook_KREFLECTION_argv() {
-  if (!llvm_backend_argv)
+  if (!llvm_backend_argv) {
     KLLVM_HOOK_INVALID_ARGUMENT("KREFLECTION.argv: no arguments given");
+  }
 
   list l{};
 
@@ -660,9 +662,12 @@ SortIOFile hook_IO_mkstemp(SortString filename) {
   return retBlock;
 }
 
+// NOLINTNEXTLINE(*-cognitive-complexity)
 SortKItem hook_IO_system(SortString cmd) {
   pid_t pid;
-  int ret = 0, out[2], err[2];
+  int ret = 0;
+  int out[2];
+  int err[2];
   stringbuffer *outBuffer = hook_BUFFER_empty();
   stringbuffer *errBuffer = hook_BUFFER_empty();
   char buf[IOBUFSIZE];
@@ -693,7 +698,8 @@ SortKItem hook_IO_system(SortString cmd) {
   close(out[1]);
   close(err[1]);
 
-  fd_set read_fds, ready_fds;
+  fd_set read_fds;
+  fd_set ready_fds;
   FD_ZERO(&read_fds);
   FD_SET(out[0], &read_fds);
   FD_SET(err[0], &read_fds);
@@ -709,7 +715,9 @@ SortKItem hook_IO_system(SortString cmd) {
       int nread = read(out[0], buf, IOBUFSIZE);
       if (nread == -1) {
         return getKSeqErrorBlock();
-      } else if (nread == 0) {
+      }
+
+      if (nread == 0) {
         FD_CLR(out[0], &read_fds);
         done++;
       } else {
@@ -720,7 +728,9 @@ SortKItem hook_IO_system(SortString cmd) {
       int nread = read(err[0], buf, IOBUFSIZE);
       if (nread == -1) {
         return getKSeqErrorBlock();
-      } else if (nread == 0) {
+      }
+
+      if (nread == 0) {
         FD_CLR(err[0], &read_fds);
         done++;
       } else {
@@ -742,7 +752,8 @@ SortKItem hook_IO_system(SortString cmd) {
 
   retBlock->h = getBlockHeaderForSymbol(
       (uint64_t)getTagForSymbolName(GETTAG(systemResult)));
-  string *outStr, *errStr;
+  string *outStr;
+  string *errStr;
   outStr = hook_BUFFER_toString(outBuffer);
   errStr = hook_BUFFER_toString(errBuffer);
   memcpy(retBlock->children + 1, &outStr, sizeof(string *));

@@ -145,7 +145,7 @@ private:
    * Calculate the number of continued bytes required to serialize this value as
    * a length field, without actually doing so.
    */
-  int required_chunks(uint64_t len) const;
+  static int required_chunks(uint64_t len);
 };
 
 template <typename It>

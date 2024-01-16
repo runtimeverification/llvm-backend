@@ -16,8 +16,6 @@
 
 extern "C" {
 
-bool hook_KEQUAL_eq(block *, block *);
-
 #define KCHAR char
 #define TYPETAG(type) "Lbl'Hash'ffi'Unds'" #type "{}"
 
@@ -64,7 +62,6 @@ TAG_TYPE(complexdouble)
 TAG_TYPE(complexlongdouble)
 #endif
 
-mpz_ptr move_int(mpz_t);
 char *getTerminatedString(string *str);
 
 size_t hook_LIST_size_long(list *l);
@@ -84,6 +81,7 @@ static void *so_lib_handle() {
   return handle;
 }
 
+// NOLINTBEGIN(*-else-after-return,*-cognitive-complexity)
 static ffi_type *getTypeFromBlock(block *elem) {
   if (is_leaf_block(elem)) {
     auto symbol = (uint64_t)elem;
@@ -178,12 +176,15 @@ static ffi_type *getTypeFromBlock(block *elem) {
 
   KLLVM_HOOK_INVALID_ARGUMENT("Arg is not a supported type");
 }
+// NOLINTEND(*-else-after-return,*-cognitive-complexity)
 
+// NOLINTNEXTLINE(*-cognitive-complexity)
 string *ffiCall(
     bool isVariadic, mpz_t addr, list *args, list *fixtypes, list *vartypes,
     block *ret) {
   ffi_cif cif;
-  ffi_type **argtypes, *rtype;
+  ffi_type **argtypes;
+  ffi_type *rtype;
   void (*address)();
 
   if (!mpz_fits_ulong_p(addr)) {

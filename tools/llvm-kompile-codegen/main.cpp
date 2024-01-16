@@ -112,6 +112,7 @@ void initialize_llvm() {
 
 } // namespace
 
+// NOLINTNEXTLINE(*-cognitive-complexity)
 int main(int argc, char **argv) {
   initialize_llvm();
 
@@ -134,7 +135,7 @@ int main(int argc, char **argv) {
   auto kompiled_dir = fs::absolute(Definition.getValue()).parent_path();
   addKompiledDirSymbol(Context, kompiled_dir, mod.get(), Debug);
 
-  for (auto axiom : definition->getAxioms()) {
+  for (auto *axiom : definition->getAxioms()) {
     makeSideConditionFunction(axiom, definition.get(), mod.get());
     if (!axiom->isTopAxiom()) {
       makeApplyRuleFunction(axiom, definition.get(), mod.get());
@@ -155,7 +156,7 @@ int main(int argc, char **argv) {
       auto match_filename
           = dt_dir() / fmt::format("match_{}.yaml", axiom->getOrdinal());
       if (fs::exists(match_filename)) {
-        auto dt = parseYamlDecisionTree(
+        auto *dt = parseYamlDecisionTree(
             mod.get(), match_filename, definition->getAllSymbols(),
             definition->getHookedSorts());
         makeMatchReasonFunction(definition.get(), mod.get(), axiom, dt);
@@ -165,28 +166,28 @@ int main(int argc, char **argv) {
 
   emitConfigParserFunctions(definition.get(), mod.get());
 
-  auto dt = parseYamlDecisionTree(
+  auto *dt = parseYamlDecisionTree(
       mod.get(), DecisionTree, definition->getAllSymbols(),
       definition->getHookedSorts());
   makeStepFunction(definition.get(), mod.get(), dt, false);
-  auto dtSearch = parseYamlDecisionTree(
+  auto *dtSearch = parseYamlDecisionTree(
       mod.get(), dt_dir() / "dt-search.yaml", definition->getAllSymbols(),
       definition->getHookedSorts());
   makeStepFunction(definition.get(), mod.get(), dtSearch, true);
 
   auto index = read_index_file();
-  for (auto &entry : definition->getSymbols()) {
-    auto symbol = entry.second;
-    auto decl = definition->getSymbolDeclarations().at(symbol->getName());
+  for (const auto &entry : definition->getSymbols()) {
+    auto *symbol = entry.second;
+    auto *decl = definition->getSymbolDeclarations().at(symbol->getName());
     if (decl->getAttributes().count("function") && !decl->isHooked()) {
       auto filename = get_indexed_filename(index, decl);
-      auto funcDt = parseYamlDecisionTree(
+      auto *funcDt = parseYamlDecisionTree(
           mod.get(), filename, definition->getAllSymbols(),
           definition->getHookedSorts());
       makeEvalFunction(decl->getSymbol(), definition.get(), mod.get(), funcDt);
     } else if (decl->isAnywhere()) {
       auto filename = get_indexed_filename(index, decl);
-      auto funcDt = parseYamlDecisionTree(
+      auto *funcDt = parseYamlDecisionTree(
           mod.get(), filename, definition->getAllSymbols(),
           definition->getHookedSorts());
 

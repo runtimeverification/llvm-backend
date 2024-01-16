@@ -50,7 +50,7 @@ static uint32_t getTagForSymbol(KORESymbol const &symbol) {
 
 void *constructCompositePattern(uint32_t tag, std::vector<void *> &arguments) {
   if (isSymbolAFunction(tag)) {
-    return evaluateFunctionSymbol(tag, &arguments[0]);
+    return evaluateFunctionSymbol(tag, arguments.data());
   }
 
   struct blockheader headerVal = getBlockHeaderForSymbol(tag);
@@ -73,7 +73,7 @@ void *constructCompositePattern(uint32_t tag, std::vector<void *> &arguments) {
   auto *Block = (block *)koreAlloc(size);
   Block->h = headerVal;
 
-  storeSymbolChildren(Block, &arguments[0]);
+  storeSymbolChildren(Block, arguments.data());
   if (isSymbolABinder(tag)) {
     Block = debruijnize(Block);
   }
@@ -86,6 +86,7 @@ struct construction {
   size_t nchildren;
 };
 
+// NOLINTNEXTLINE(*-cognitive-complexity)
 extern "C" void *constructInitialConfiguration(const KOREPattern *initial) {
   std::vector<std::variant<const KOREPattern *, construction>> workList{
       initial};
@@ -96,7 +97,7 @@ extern "C" void *constructInitialConfiguration(const KOREPattern *initial) {
     workList.pop_back();
 
     if (std::holds_alternative<const KOREPattern *>(current)) {
-      auto constructor = dynamic_cast<const KORECompositePattern *>(
+      const auto *constructor = dynamic_cast<const KORECompositePattern *>(
           *std::get_if<const KOREPattern *>(&current));
       assert(constructor && "Pattern in worklist is not composite");
 
@@ -105,9 +106,9 @@ extern "C" void *constructInitialConfiguration(const KOREPattern *initial) {
           symbol->isConcrete()
           && "found sort variable in initial configuration");
       if (symbol->getName() == "\\dv") {
-        const auto sort = dynamic_cast<KORECompositeSort *>(
+        auto *const sort = dynamic_cast<KORECompositeSort *>(
             symbol->getFormalArguments()[0].get());
-        const auto strPattern = dynamic_cast<KOREStringPattern *>(
+        auto *const strPattern = dynamic_cast<KOREStringPattern *>(
             constructor->getArguments()[0].get());
         std::string contents = strPattern->getContents();
         output.push_back(getToken(
@@ -120,7 +121,8 @@ extern "C" void *constructInitialConfiguration(const KOREPattern *initial) {
       if (isSymbolAFunction(tag) && constructor->getArguments().empty()) {
         output.push_back(evaluateFunctionSymbol(tag, nullptr));
         continue;
-      } else if (constructor->getArguments().empty()) {
+      }
+      if (constructor->getArguments().empty()) {
         output.push_back(leaf_block(tag));
         continue;
       }
@@ -147,6 +149,7 @@ extern "C" void *constructInitialConfiguration(const KOREPattern *initial) {
   return output[0];
 }
 
+// NOLINTBEGIN(*-cognitive-complexity)
 template <typename It>
 static void *
 deserializeInitialConfiguration(It ptr, It end, binary_version version) {
@@ -172,7 +175,7 @@ deserializeInitialConfiguration(It ptr, It end, binary_version version) {
           && "found sort variable in initial configuration");
 
       if (symbol->getName() == "\\dv") {
-        auto sort = dynamic_cast<KORECompositeSort *>(
+        auto *sort = dynamic_cast<KORECompositeSort *>(
             symbol->getFormalArguments()[0].get());
         assert(sort && "Not a composite sort");
         auto const &token = token_stack.back();
@@ -190,7 +193,8 @@ deserializeInitialConfiguration(It ptr, It end, binary_version version) {
       if (isSymbolAFunction(tag) && arity == 0) {
         output.push_back(evaluateFunctionSymbol(tag, nullptr));
         break;
-      } else if (arity == 0) {
+      }
+      if (arity == 0) {
         output.push_back(leaf_block(tag));
         break;
       }
@@ -242,25 +246,25 @@ deserializeInitialConfiguration(It ptr, It end, binary_version version) {
   assert(output.size() == 1 && "Output stack left in invalid state");
   return output.front();
 }
+// NOLINTEND(*-cognitive-complexity)
 
 block *parseConfiguration(const char *filename) {
   if (has_binary_kore_header(filename)) {
     auto data = file_contents(filename);
     return deserializeConfiguration(data.data(), data.size());
-  } else {
-    auto InitialConfiguration = parser::KOREParser(filename).pattern();
-    // InitialConfiguration->print(std::cout);
-
-    // Allocate the llvm KORE datastructures for the configuration
-    auto b = (block *)constructInitialConfiguration(InitialConfiguration.get());
-    deallocateSPtrKorePattern(std::move(InitialConfiguration));
-    return b;
   }
+  auto InitialConfiguration = parser::KOREParser(filename).pattern();
+  // InitialConfiguration->print(std::cout);
+
+  // Allocate the llvm KORE datastructures for the configuration
+  auto *b = (block *)constructInitialConfiguration(InitialConfiguration.get());
+  deallocateSPtrKorePattern(std::move(InitialConfiguration));
+  return b;
 }
 
 block *deserializeConfiguration(char *data, size_t size) {
-  auto ptr = data;
-  auto end = data + size;
+  auto *ptr = data;
+  auto *end = data + size;
 
   for (auto i = 0; i < serializer::magic_header.size(); ++i) {
     detail::read<char>(ptr, end);

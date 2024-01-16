@@ -84,10 +84,9 @@ sptr<KOREPattern> get_input_pattern() {
     if (has_binary_kore_header(InputFilename)) {
       InputFormat = binary;
       return get_binary();
-    } else {
-      InputFormat = text;
-      return get_text();
     }
+    InputFormat = text;
+    return get_text();
 
     break;
   }

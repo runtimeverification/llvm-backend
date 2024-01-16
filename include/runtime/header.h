@@ -26,14 +26,14 @@
 struct MatchLog {
   enum { SUCCESS = 0, FUNCTION, FAIL } kind;
 
-  char *function;
-  char *debugName;
+  char const *function;
+  char const *debugName;
   void *result;
   std::vector<void *> args;
 
-  char *pattern;
+  char const *pattern;
   void *subject;
-  char *sort;
+  char const *sort;
 };
 
 // the actual length is equal to the block header with the gc bits masked out.

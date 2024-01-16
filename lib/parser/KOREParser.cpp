@@ -64,8 +64,9 @@ std::string KOREParser::consume(token next) {
     data = buffer.data;
     buffer.tok = token::EMPTY;
   }
-  if (actual == next)
+  if (actual == next) {
     return data;
+  }
   error(loc, "Expected: " + str(next) + " Actual: " + str(actual));
 }
 
@@ -306,9 +307,8 @@ sptr<KORESort> KOREParser::sort() {
     sorts(sort.get());
     consume(token::RIGHTBRACE);
     return sort;
-  } else {
-    return KORESortVariable::Create(name);
   }
+  return KORESortVariable::Create(name);
 }
 
 sptr<KOREPattern> KOREParser::_pattern() {
@@ -355,45 +355,46 @@ sptr<KOREPattern> KOREParser::applicationPattern(std::string const &name) {
     consume(token::RIGHTPAREN);
     if (name == "\\left-assoc") {
       sptr<KOREPattern> accum = pats[0];
-      for (auto i = 1u; i < pats.size(); i++) {
+      for (auto i = 1U; i < pats.size(); i++) {
         sptr<KORECompositePattern> newAccum
             = KORECompositePattern::Create(pat->getConstructor());
         newAccum->addArgument(accum);
         newAccum->addArgument(pats[i]);
-        accum = newAccum;
-      }
-      return accum;
-    } else {
-      sptr<KOREPattern> accum = pats[pats.size() - 1];
-      for (int i = pats.size() - 2; i >= 0; i--) {
-        sptr<KORECompositePattern> newAccum
-            = KORECompositePattern::Create(pat->getConstructor());
-        newAccum->addArgument(pats[i]);
-        newAccum->addArgument(accum);
         accum = newAccum;
       }
       return accum;
     }
+    sptr<KOREPattern> accum = pats[pats.size() - 1];
+    for (int i = pats.size() - 2; i >= 0; i--) {
+      sptr<KORECompositePattern> newAccum
+          = KORECompositePattern::Create(pat->getConstructor());
+      newAccum->addArgument(pats[i]);
+      newAccum->addArgument(accum);
+      accum = newAccum;
+    }
+    return accum;
   }
   auto result = _applicationPattern(name);
   if (name == "\\or") {
-    if (result->getArguments().size() == 0) {
+    if (result->getArguments().empty()) {
       auto pat = KORECompositePattern::Create("\\bottom");
       pat->getConstructor()->addArgument(
           result->getConstructor()->getFormalArguments()[0]);
       pat->getConstructor()->initPatternArguments();
       return pat;
-    } else if (result->getArguments().size() == 1) {
+    }
+    if (result->getArguments().size() == 1) {
       return result->getArguments()[0];
     }
   } else if (name == "\\and") {
-    if (result->getArguments().size() == 0) {
+    if (result->getArguments().empty()) {
       auto pat = KORECompositePattern::Create("\\top");
       pat->getConstructor()->addArgument(
           result->getConstructor()->getFormalArguments()[0]);
       pat->getConstructor()->initPatternArguments();
       return pat;
-    } else if (result->getArguments().size() == 1) {
+    }
+    if (result->getArguments().size() == 1) {
       return result->getArguments()[0];
     }
   }
@@ -414,8 +415,9 @@ KOREParser::_applicationPattern(std::string const &name) {
 }
 
 void KOREParser::patterns(KORECompositePattern *node) {
-  if (peek() == token::RIGHTPAREN)
+  if (peek() == token::RIGHTPAREN) {
     return;
+  }
   patternsNE(node);
 }
 
@@ -430,8 +432,9 @@ void KOREParser::patternsNE(KORECompositePattern *node) {
 }
 
 void KOREParser::patterns(std::vector<sptr<KOREPattern>> &node) {
-  if (peek() == token::RIGHTPAREN)
+  if (peek() == token::RIGHTPAREN) {
     return;
+  }
   patternsNE(node);
 }
 

@@ -74,10 +74,9 @@ block *simplify_to_term(
 
   if (is_sort_kitem(sort) || is_sort_k(sort)) {
     return construct_term(pattern);
-  } else {
-    auto rawTerm = make_rawTerm(pattern, sort, kitem_sort);
-    return construct_term(rawTerm);
   }
+  auto rawTerm = make_rawTerm(pattern, sort, kitem_sort);
+  return construct_term(rawTerm);
 }
 
 std::shared_ptr<KOREPattern> simplify(
@@ -95,8 +94,8 @@ evaluate_function(std::shared_ptr<KORECompositePattern> const &term) {
 
   auto label = ast_to_string(*term->getConstructor());
   auto tag = getTagForSymbolName(label.c_str());
-  auto return_sort = getReturnSortForTag(tag);
-  auto result = evaluateFunctionSymbol(tag, term_args.data());
+  const auto *return_sort = getReturnSortForTag(tag);
+  auto *result = evaluateFunctionSymbol(tag, term_args.data());
 
   return sortedTermToKorePattern(static_cast<block *>(result), return_sort);
 }

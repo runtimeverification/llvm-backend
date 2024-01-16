@@ -54,7 +54,7 @@ static void mpfr_leave(int t, floating *result) {
 extern "C" {
 
 floating *move_float(floating *);
-mpz_ptr move_int(mpz_t);
+
 void add_hash64(void *, uint64_t);
 void *move_mint(mpz_t, uint64_t) {
   KLLVM_HOOK_INVALID_ARGUMENT("not yet implemented");
