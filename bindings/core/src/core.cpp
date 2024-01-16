@@ -74,9 +74,9 @@ block *simplify_to_term(
 
   if (is_sort_kitem(sort) || is_sort_k(sort)) {
     return construct_term(pattern);
-  }     auto rawTerm = make_rawTerm(pattern, sort, kitem_sort);
-    return construct_term(rawTerm);
- 
+  }
+  auto rawTerm = make_rawTerm(pattern, sort, kitem_sort);
+  return construct_term(rawTerm);
 }
 
 std::shared_ptr<KOREPattern> simplify(
