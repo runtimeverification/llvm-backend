@@ -98,27 +98,25 @@ getFailPattern(DecisionCase const &_case, bool isInt) {
                             + (_case.getLiteral() == 0 ? std::string("false")
                                                        : std::string("true"))
                             + "\")");
-    } else {
-      std::string sort = "SortMInt{Sort" + std::to_string(bitwidth) + "{}}";
-      llvm::SmallString<25> vec;
-      _case.getLiteral().toString(vec, 10, false);
-      return std::make_pair(
-          sort, "\\dv{" + sort + "}(\"" + std::string(vec.c_str()) + "p"
-                    + std::to_string(bitwidth) + "\")");
     }
-  } else {
-    auto result = fmt::format("{}(", ast_to_string(*_case.getConstructor()));
-
-    std::string conn;
-    for (const auto &i : _case.getConstructor()->getArguments()) {
-      result += fmt::format("{}Var'Unds':{}", conn, ast_to_string(*i));
-      conn = ",";
-    }
-    result += ")";
-
-    auto return_sort = ast_to_string(*_case.getConstructor()->getSort());
-    return std::make_pair(return_sort, result);
+    std::string sort = "SortMInt{Sort" + std::to_string(bitwidth) + "{}}";
+    llvm::SmallString<25> vec;
+    _case.getLiteral().toString(vec, 10, false);
+    return std::make_pair(
+        sort, "\\dv{" + sort + "}(\"" + std::string(vec.c_str()) + "p"
+                  + std::to_string(bitwidth) + "\")");
   }
+  auto result = fmt::format("{}(", ast_to_string(*_case.getConstructor()));
+
+  std::string conn;
+  for (const auto &i : _case.getConstructor()->getArguments()) {
+    result += fmt::format("{}Var'Unds':{}", conn, ast_to_string(*i));
+    conn = ",";
+  }
+  result += ")";
+
+  auto return_sort = ast_to_string(*_case.getConstructor()->getSort());
+  return std::make_pair(return_sort, result);
 }
 
 static std::pair<std::string, std::string> getFailPattern(
@@ -644,7 +642,8 @@ llvm::Value *Decision::load(var_type const &name) {
     if (ty->isPointerTy()) {
       auto *ptr_ty = (llvm::PointerType *)ty;
       return llvm::ConstantPointerNull::get(ptr_ty);
-    } else if (ty->isIntegerTy()) {
+    }
+    if (ty->isIntegerTy()) {
       auto *int_ty = (llvm::IntegerType *)ty;
       return llvm::ConstantInt::get(int_ty, 0);
     }

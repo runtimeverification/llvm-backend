@@ -14,15 +14,11 @@ extern "C" {
 #define get_ui(x) get_ui_named(x, __func__)
 #define KCHAR char
 
-
-
 SortBytes hook_BYTES_empty() {
   static string empty;
   empty.h.hdr = NOT_YOUNG_OBJECT_BIT;
   return &empty;
 }
-
-
 
 // bytes2int and int2bytes expect constructors of sort Endianness, which become
 // a uint64_t constant value in the K term representation

@@ -10,30 +10,28 @@
 std::string floatToString(const floating *f, const char *suffix) {
   if (mpfr_nan_p(f->f)) {
     return "NaN" + std::string(suffix);
-  } else if (mpfr_inf_p(f->f)) {
+  }
+  if (mpfr_inf_p(f->f)) {
     if (mpfr_signbit(f->f)) {
       return "-Infinity" + std::string(suffix);
-    } else {
-      return "Infinity" + std::string(suffix);
     }
-  } else {
-    mpfr_exp_t printed_exp;
-    char *str = mpfr_get_str(nullptr, &printed_exp, 10, 0, f->f, MPFR_RNDN);
-    size_t len = strlen(str);
-    auto *newstr = (string *)koreAllocToken(sizeof(string) + len + 2);
-    init_with_len(newstr, len + 2);
-    size_t idx = 0;
-    if (str[0] == '-') {
-      newstr->data[0] = '-';
-      idx = 1;
-    }
-    newstr->data[idx] = '0';
-    newstr->data[idx + 1] = '.';
-    strncpy(newstr->data + idx + 2, str + idx, len - idx + 1);
-    newstr->data[len + 2] = '\0';
-    return std::string(newstr->data) + "e" + std::to_string(printed_exp)
-           + suffix;
+    return "Infinity" + std::string(suffix);
   }
+  mpfr_exp_t printed_exp;
+  char *str = mpfr_get_str(nullptr, &printed_exp, 10, 0, f->f, MPFR_RNDN);
+  size_t len = strlen(str);
+  auto *newstr = (string *)koreAllocToken(sizeof(string) + len + 2);
+  init_with_len(newstr, len + 2);
+  size_t idx = 0;
+  if (str[0] == '-') {
+    newstr->data[0] = '-';
+    idx = 1;
+  }
+  newstr->data[idx] = '0';
+  newstr->data[idx + 1] = '.';
+  strncpy(newstr->data + idx + 2, str + idx, len - idx + 1);
+  newstr->data[len + 2] = '\0';
+  return std::string(newstr->data) + "e" + std::to_string(printed_exp) + suffix;
 }
 
 std::string floatToString(const floating *f) {

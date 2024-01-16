@@ -19,7 +19,6 @@ extern "C" {
 
 #define KCHAR char
 
-
 floating *move_float(floating *);
 
 string *bytes2string(string *, size_t);
@@ -317,7 +316,8 @@ inline SortString hook_STRING_replace(
     if (m >= i) {
       memcpy(ret->data + r, haystack->data + h, new_len - r);
       break;
-    } else if (r < matches[m] - diff * m) {
+    }
+    if (r < matches[m] - diff * m) {
       auto size = matches[m] - diff * m - r;
       memcpy(ret->data + r, haystack->data + h, size);
       r += size;

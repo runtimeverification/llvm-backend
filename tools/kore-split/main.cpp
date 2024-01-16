@@ -32,8 +32,7 @@ int main(int argc, char **argv) {
     }
 
     return 0;
-  } else {
-    std::cerr << "pattern must be an \\or" << std::endl;
-    return 1;
   }
+  std::cerr << "pattern must be an \\or" << std::endl;
+  return 1;
 }

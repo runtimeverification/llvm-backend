@@ -69,9 +69,8 @@ SortRange hook_RANGEMAP_find_range(SortRangeMap m, SortKItem key) {
     ptr->start = val.value().first.start();
     ptr->end = val.value().first.end();
     return (SortRange)ptr;
-  } else {
-    KLLVM_HOOK_INVALID_ARGUMENT("Key not found for range map lookup");
   }
+  KLLVM_HOOK_INVALID_ARGUMENT("Key not found for range map lookup");
 }
 
 rangemap hook_RANGEMAP_update(

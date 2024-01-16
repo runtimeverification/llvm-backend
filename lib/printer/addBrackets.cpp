@@ -139,9 +139,9 @@ KORECompositePattern *getLeftCapture(
   Fixity fixity = getFixity(outer->getConstructor(), data);
   if (position == 0 && (fixity & BARE_LEFT)) {
     return previousLeftCapture;
-  } else {
-    return outer;
   }
+
+  return outer;
 }
 
 /**
@@ -173,9 +173,9 @@ KORECompositePattern *getRightCapture(
   Fixity fixity = getFixity(outer->getConstructor(), data);
   if (position == outer->getArguments().size() - 1 && (fixity & BARE_RIGHT)) {
     return previousRightCapture;
-  } else {
-    return outer;
   }
+
+  return outer;
 }
 
 /**
@@ -199,8 +199,9 @@ sptr<KORESort>
 getArgSort(KORESymbol *symbol, int position, sptr<KORESort> firstArgSort) {
   if (!symbol->isBuiltin()) {
     return symbol->getArguments()[position];
-  } else if (
-      symbol->getName() == "\\and" || symbol->getName() == "\\not"
+  }
+
+  if (symbol->getName() == "\\and" || symbol->getName() == "\\not"
       || symbol->getName() == "\\or" || symbol->getName() == "\\implies"
       || symbol->getName() == "\\iff" || symbol->getName() == "\\ceil"
       || symbol->getName() == "\\floor" || symbol->getName() == "\\equals"
@@ -210,20 +211,23 @@ getArgSort(KORESymbol *symbol, int position, sptr<KORESort> firstArgSort) {
       || symbol->getName() == "weakExistsFinally"
       || symbol->getName() == "allPathGlobally") {
     return symbol->getFormalArguments()[0];
-  } else if (
-      symbol->getName() == "\\forall" || symbol->getName() == "\\exists") {
+  }
+
+  if (symbol->getName() == "\\forall" || symbol->getName() == "\\exists") {
     if (position == 0) {
       assert(firstArgSort != nullptr);
       return firstArgSort;
-    } else {
-      return symbol->getFormalArguments()[0];
     }
-  } else if (symbol->getName() == "\\mu" || symbol->getName() == "\\nu") {
+
+    return symbol->getFormalArguments()[0];
+  }
+
+  if (symbol->getName() == "\\mu" || symbol->getName() == "\\nu") {
     assert(firstArgSort != nullptr);
     return firstArgSort;
-  } else {
-    abort();
   }
+
+  abort();
 }
 
 sptr<KORESort> getReturnSort(KOREPattern *pat) {
@@ -231,8 +235,8 @@ sptr<KORESort> getReturnSort(KOREPattern *pat) {
     auto *symbol = composite->getConstructor();
     if (!symbol->isBuiltin()) {
       return pat->getSort();
-    } else if (
-        symbol->getName() == "\\top" || symbol->getName() == "\\bottom"
+    }
+    if (symbol->getName() == "\\top" || symbol->getName() == "\\bottom"
         || symbol->getName() == "\\and" || symbol->getName() == "\\not"
         || symbol->getName() == "\\or" || symbol->getName() == "\\implies"
         || symbol->getName() == "\\iff" || symbol->getName() == "\\exists"
@@ -242,15 +246,16 @@ sptr<KORESort> getReturnSort(KOREPattern *pat) {
         || symbol->getName() == "weakExistsFinally"
         || symbol->getName() == "allPathGlobally") {
       return symbol->getFormalArguments()[0];
-    } else if (
-        symbol->getName() == "\\ceil" || symbol->getName() == "\\floor"
+    }
+    if (symbol->getName() == "\\ceil" || symbol->getName() == "\\floor"
         || symbol->getName() == "\\equals" || symbol->getName() == "\\in") {
       return symbol->getFormalArguments()[1];
-    } else if (symbol->getName() == "\\mu" || symbol->getName() == "\\nu") {
-      return composite->getArguments()[0]->getSort();
-    } else {
-      abort();
     }
+    if (symbol->getName() == "\\mu" || symbol->getName() == "\\nu") {
+      return composite->getArguments()[0]->getSort();
+    }
+    abort();
+
   } else {
     return pat->getSort();
   }
@@ -390,9 +395,8 @@ bool requiresBracketWithSimpleAlgorithm(
       }
     }
     return false;
-  } else {
-    return false;
   }
+  return false;
 }
 
 sptr<KOREPattern> addBrackets(
@@ -458,9 +462,8 @@ sptr<KOREPattern> addBrackets(
       position++;
     }
     return result;
-  } else {
-    return t;
   }
+  return t;
 }
 
 sptr<KOREPattern>

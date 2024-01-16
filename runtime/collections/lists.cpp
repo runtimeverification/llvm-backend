@@ -20,9 +20,8 @@ list hook_LIST_concat(SortList l1, SortList l2) {
       tmp.push_back(*iter);
     }
     return tmp.persistent();
-  } else {
-    return (*l1) + (*l2);
   }
+  return (*l1) + (*l2);
 }
 
 bool hook_LIST_in(SortKItem value, SortList list) {
@@ -151,15 +150,14 @@ list hook_LIST_updateAll(SortList l1, SortInt index, SortList l2) {
     }
 
     return tmp.persistent();
-  } else {
-    auto tmp = l1->transient();
-    tmp.take(idx);
-    tmp.append(l2->transient());
-    auto tmp2 = l1->transient();
-    tmp2.drop(idx + size2);
-    tmp.append(tmp2);
-    return tmp.persistent();
   }
+  auto tmp = l1->transient();
+  tmp.take(idx);
+  tmp.append(l2->transient());
+  auto tmp2 = l1->transient();
+  tmp2.drop(idx + size2);
+  tmp.append(tmp2);
+  return tmp.persistent();
 }
 
 list hook_LIST_fill(SortList l, SortInt index, SortInt len, SortKItem val) {
@@ -192,16 +190,15 @@ list hook_LIST_fill(SortList l, SortInt index, SortInt len, SortKItem val) {
     }
 
     return tmp.persistent();
-  } else {
-    auto tmp = l->transient();
-    tmp.take(idx);
-    auto l2 = list{length, val}.transient();
-    tmp.append(l2);
-    auto tmp2 = l->transient();
-    tmp2.drop(idx + length);
-    tmp.append(tmp2);
-    return tmp.persistent();
   }
+  auto tmp = l->transient();
+  tmp.take(idx);
+  auto l2 = list{length, val}.transient();
+  tmp.append(l2);
+  auto tmp2 = l->transient();
+  tmp2.drop(idx + length);
+  tmp.append(tmp2);
+  return tmp.persistent();
 }
 
 bool hook_LIST_eq(SortList l1, SortList l2) {

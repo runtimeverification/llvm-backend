@@ -307,9 +307,8 @@ sptr<KORESort> KOREParser::sort() {
     sorts(sort.get());
     consume(token::RIGHTBRACE);
     return sort;
-  } else {
-    return KORESortVariable::Create(name);
   }
+  return KORESortVariable::Create(name);
 }
 
 sptr<KOREPattern> KOREParser::_pattern() {
@@ -364,17 +363,16 @@ sptr<KOREPattern> KOREParser::applicationPattern(std::string const &name) {
         accum = newAccum;
       }
       return accum;
-    } else {
-      sptr<KOREPattern> accum = pats[pats.size() - 1];
-      for (int i = pats.size() - 2; i >= 0; i--) {
-        sptr<KORECompositePattern> newAccum
-            = KORECompositePattern::Create(pat->getConstructor());
-        newAccum->addArgument(pats[i]);
-        newAccum->addArgument(accum);
-        accum = newAccum;
-      }
-      return accum;
     }
+    sptr<KOREPattern> accum = pats[pats.size() - 1];
+    for (int i = pats.size() - 2; i >= 0; i--) {
+      sptr<KORECompositePattern> newAccum
+          = KORECompositePattern::Create(pat->getConstructor());
+      newAccum->addArgument(pats[i]);
+      newAccum->addArgument(accum);
+      accum = newAccum;
+    }
+    return accum;
   }
   auto result = _applicationPattern(name);
   if (name == "\\or") {
@@ -384,7 +382,8 @@ sptr<KOREPattern> KOREParser::applicationPattern(std::string const &name) {
           result->getConstructor()->getFormalArguments()[0]);
       pat->getConstructor()->initPatternArguments();
       return pat;
-    } else if (result->getArguments().size() == 1) {
+    }
+    if (result->getArguments().size() == 1) {
       return result->getArguments()[0];
     }
   } else if (name == "\\and") {
@@ -394,7 +393,8 @@ sptr<KOREPattern> KOREParser::applicationPattern(std::string const &name) {
           result->getConstructor()->getFormalArguments()[0]);
       pat->getConstructor()->initPatternArguments();
       return pat;
-    } else if (result->getArguments().size() == 1) {
+    }
+    if (result->getArguments().size() == 1) {
       return result->getArguments()[0];
     }
   }

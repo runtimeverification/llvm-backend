@@ -118,15 +118,14 @@ doAllocSlow(size_t requested, struct arena *Arena) {
       Arena->block_end - Arena->block, requested);
   if (requested > BLOCK_SIZE - sizeof(memory_block_header)) {
     return malloc(requested);
-  } else {
-    freshBlock(Arena);
-    void *result = Arena->block;
-    Arena->block += requested;
-    MEM_LOG(
-        "Allocation at %p (size %zd), next alloc at %p (if it fits)\n", result,
-        requested, Arena->block);
-    return result;
   }
+  freshBlock(Arena);
+  void *result = Arena->block;
+  Arena->block += requested;
+  MEM_LOG(
+      "Allocation at %p (size %zd), next alloc at %p (if it fits)\n", result,
+      requested, Arena->block);
+  return result;
 }
 
 __attribute__((always_inline)) void *
@@ -213,16 +212,14 @@ ssize_t ptrDiff(char *ptr1, char *ptr2) {
   if (hdr == mem_block_header(ptr1)) {
     result += ptr1 - (char *)(hdr + 1);
     return result;
-  } else {
-    // reached the end of the arena and didn't find the block
-    // it's possible that the result should be negative, in which
-    // case the block will have been prior to the block we started
-    // at. To handle this, we recurse with reversed arguments and
-    // negate the result. This means that the code might not
-    // terminate if the two pointers do not belong to the same
-    // arena.
-    return -ptrDiff(ptr2, ptr1);
-  }
+  } // reached the end of the arena and didn't find the block
+  // it's possible that the result should be negative, in which
+  // case the block will have been prior to the block we started
+  // at. To handle this, we recurse with reversed arguments and
+  // negate the result. This means that the code might not
+  // terminate if the two pointers do not belong to the same
+  // arena.
+  return -ptrDiff(ptr2, ptr1);
 }
 
 size_t arenaSize(const struct arena *Arena) {

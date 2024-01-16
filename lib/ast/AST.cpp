@@ -22,9 +22,8 @@ using namespace kllvm;
 sptr<KOREPattern> KOREPattern::load(std::string const &filename) {
   if (has_binary_kore_header(filename)) {
     return deserialize_pattern(filename);
-  } else {
-    return parser::KOREParser(filename).pattern();
   }
+  return parser::KOREParser(filename).pattern();
 }
 
 std::string kllvm::decodeKore(std::string kore) {
@@ -1004,14 +1003,12 @@ sptr<KOREPattern> KORECompositePattern::filterSubstitution(
         unit->getConstructor()->addFormalArgument(
             constructor->getFormalArguments()[1]);
         return unit;
-      } else {
-        return shared_from_this();
       }
-    } else {
       return shared_from_this();
     }
-  } else if (
-      constructor->getName() == "\\and" || constructor->getName() == "\\or") {
+    return shared_from_this();
+  }
+  if (constructor->getName() == "\\and" || constructor->getName() == "\\or") {
     sptr<KORECompositePattern> result
         = KORECompositePattern::Create(constructor.get());
     for (auto &arg : arguments) {
@@ -1091,27 +1088,25 @@ sptr<KOREPattern> KORECompositePattern::unflattenAndOr() {
       && arguments.size() != 2) {
     if (arguments.size() == 1) {
       return arguments[0]->unflattenAndOr();
-    } else {
-      auto accum = arguments[0]->unflattenAndOr();
-
-      for (auto i = 1U; i < arguments.size(); i++) {
-        auto new_accum = KORECompositePattern::Create(constructor.get());
-        new_accum->addArgument(accum);
-        new_accum->addArgument(arguments[i]->unflattenAndOr());
-        accum = ptr<KOREPattern>(new_accum.release());
-      }
-
-      return accum;
     }
-  } else {
-    auto result = KORECompositePattern::Create(constructor.get());
+    auto accum = arguments[0]->unflattenAndOr();
 
-    for (auto &arg : arguments) {
-      result->addArgument(arg->unflattenAndOr());
+    for (auto i = 1U; i < arguments.size(); i++) {
+      auto new_accum = KORECompositePattern::Create(constructor.get());
+      new_accum->addArgument(accum);
+      new_accum->addArgument(arguments[i]->unflattenAndOr());
+      accum = ptr<KOREPattern>(new_accum.release());
     }
 
-    return result;
+    return accum;
   }
+  auto result = KORECompositePattern::Create(constructor.get());
+
+  for (auto &arg : arguments) {
+    result->addArgument(arg->unflattenAndOr());
+  }
+
+  return result;
 }
 
 sptr<KOREPattern> KORECompositePattern::expandMacros(
@@ -1166,10 +1161,9 @@ bool KOREVariablePattern::matches(
     sptr<KOREPattern> subject) {
   if (subst[name->getName()]) {
     return ast_to_string(*subst[name->getName()]) == ast_to_string(*subject);
-  } else {
-    subst[name->getName()] = subject;
-    return true;
   }
+  subst[name->getName()] = subject;
+  return true;
 }
 
 bool KORECompositePattern::matches(
@@ -1195,18 +1189,18 @@ bool KORECompositePattern::matches(
         ba->getConstructor()->addArgument(b);
         ba->addArgument(arguments[0]);
         return ba->matches(subst, subsorts, overloads, subj->getArguments()[0]);
-      } else if (
-          subsorts.count(a.get()) && subsorts.at(a.get()).count(b.get())) {
+      }
+      if (subsorts.count(a.get()) && subsorts.at(a.get()).count(b.get())) {
         sptr<KORECompositePattern> ab = KORECompositePattern::Create("inj");
         ab->getConstructor()->addFormalArgument(a);
         ab->getConstructor()->addFormalArgument(b);
         ab->getConstructor()->addArgument(a);
         ab->addArgument(subj->getArguments()[0]);
         return arguments[0]->matches(subst, subsorts, overloads, ab);
-      } else {
-        return false;
       }
-    } else if (subj->getConstructor()->getName() == "inj") {
+      return false;
+    }
+    if (subj->getConstructor()->getName() == "inj") {
       sptr<KOREPattern> child = subj->getArguments()[0];
       if (auto *composite = dynamic_cast<KORECompositePattern *>(child.get())) {
         if (overloads.count(composite->getConstructor())
@@ -1232,15 +1226,12 @@ bool KORECompositePattern::matches(
             }
           }
           return this->matches(subst, subsorts, overloads, greater);
-        } else {
-          return false;
         }
-      } else {
         return false;
       }
-    } else {
       return false;
     }
+    return false;
   }
   if (subj->arguments.size() != arguments.size()) {
     return false;
@@ -1319,12 +1310,12 @@ bool KOREAxiomDeclaration::isTopAxiom() const {
         }
       }
       return false;
-    } else if (
-        top->getConstructor()->getName() == "\\rewrites"
+    }
+    if (top->getConstructor()->getName() == "\\rewrites"
         && top->getArguments().size() == 2) {
       return true;
-    } else if (
-        top->getConstructor()->getName() == "\\and"
+    }
+    if (top->getConstructor()->getName() == "\\and"
         && top->getArguments().size() == 2) {
       return true;
     }

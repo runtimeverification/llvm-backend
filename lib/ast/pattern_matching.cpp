@@ -25,8 +25,8 @@ getPatternsImpl(KOREPattern *pat, std::vector<KOREPattern *> &result) {
     if (composite->getConstructor()->getName() == "\\top"
         && composite->getArguments().empty()) {
       return result;
-    } else if (
-        composite->getConstructor()->getName() == "\\and"
+    }
+    if (composite->getConstructor()->getName() == "\\and"
         && composite->getArguments().size() == 2) {
       if (auto *firstChild = dynamic_cast<KORECompositePattern *>(
               composite->getArguments()[0].get())) {
@@ -66,9 +66,8 @@ getBuiltin(std::shared_ptr<KOREPattern> const &term) {
 
   if (!lhs->getConstructor()->isBuiltin()) {
     return lhs;
-  } else {
-    return comp->getArguments()[1];
   }
+  return comp->getArguments()[1];
 }
 
 [[maybe_unused]] std::optional<std::vector<KOREPattern *>>

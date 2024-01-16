@@ -278,10 +278,10 @@ PreprocessedPrintData getPrintData(
           if (pos == std::string::npos) {
             color.push_back(trim(colorAtt.substr(idx)));
             break;
-          } else {
-            color.push_back(trim(colorAtt.substr(idx, pos - idx)));
-            idx = pos + 1;
           }
+          color.push_back(trim(colorAtt.substr(idx, pos - idx)));
+          idx = pos + 1;
+
         } while (true);
         colors[name] = color;
       }

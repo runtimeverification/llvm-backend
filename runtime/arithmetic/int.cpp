@@ -7,7 +7,6 @@
 
 extern "C" {
 
-
 void add_hash64(void *, uint64_t);
 
 SortInt hook_INT_tmod(SortInt a, SortInt b) {
@@ -434,13 +433,15 @@ mpz_ptr hook_MINT_import(size_t *i, uint64_t bits, bool isSigned) {
   mpz_t twos;
   mpz_init(twos);
   mpz_init(result);
+
   uint64_t nwords = (bits + 63) / 64;
   mpz_import(twos, nwords, -1, sizeof(size_t), 0, 0, i);
+
   if (isSigned) {
     signed_extract(result, twos, 0, bits);
     return move_int(result);
-  } else {
-    return move_int(twos);
   }
+
+  return move_int(twos);
 }
 }

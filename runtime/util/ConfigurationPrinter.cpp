@@ -34,8 +34,7 @@ struct StringEq {
 };
 
 struct print_state {
-  print_state()
-       = default;
+  print_state() = default;
 
   // We never want to copy the state; it should only ever get passed around by
   // reference.

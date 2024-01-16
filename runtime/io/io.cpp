@@ -26,7 +26,6 @@ extern "C" {
 
 extern char kompiled_directory;
 
-
 char *getTerminatedString(string *str);
 
 static block *dotK = leaf_block(getTagForSymbolName("dotk{}"));
@@ -297,14 +296,16 @@ SortIOInt hook_IO_getc(SortInt i) {
   char c;
   ssize_t ret = read(fd, &c, sizeof(char));
 
-  if (0 == ret) {
+  if (ret == 0) {
     block *p = leaf_block(getTagForSymbolName(GETTAG(EOF)));
     auto *retBlock
         = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(block *)));
     retBlock->h = header_err();
     memcpy(retBlock->children, &p, sizeof(block *));
     return retBlock;
-  } else if (-1 == ret) {
+  }
+
+  if (ret == -1) {
     return getInjErrorBlock();
   }
 
@@ -711,7 +712,9 @@ SortKItem hook_IO_system(SortString cmd) {
       int nread = read(out[0], buf, IOBUFSIZE);
       if (nread == -1) {
         return getKSeqErrorBlock();
-      } else if (nread == 0) {
+      }
+
+      if (nread == 0) {
         FD_CLR(out[0], &read_fds);
         done++;
       } else {
@@ -722,7 +725,9 @@ SortKItem hook_IO_system(SortString cmd) {
       int nread = read(err[0], buf, IOBUFSIZE);
       if (nread == -1) {
         return getKSeqErrorBlock();
-      } else if (nread == 0) {
+      }
+
+      if (nread == 0) {
         FD_CLR(err[0], &read_fds);
         done++;
       } else {

@@ -120,15 +120,12 @@ CreateStaticTerm::operator()(KOREPattern *pattern) {
         if (tag != (uint32_t)-1 && tag >= inj->getFirstTag()
             && tag <= inj->getLastTag()) {
           return std::make_pair(val.first, true);
-        } else {
-          return std::make_pair(notInjectionCase(constructor, val.first), true);
         }
-      } else {
         return std::make_pair(notInjectionCase(constructor, val.first), true);
       }
-    } else {
-      return std::make_pair(notInjectionCase(constructor, nullptr), false);
+      return std::make_pair(notInjectionCase(constructor, val.first), true);
     }
+    return std::make_pair(notInjectionCase(constructor, nullptr), false);
   }
   assert(false && "Something went wrong when trying to allocate a static term");
   abort();

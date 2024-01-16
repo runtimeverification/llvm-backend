@@ -168,7 +168,9 @@ public:
       ValueType hook = KORECompositeSort::getCategory(str(get(node, "hook")));
       uses.emplace_back(name, getParamType(hook, mod));
       return KOREVariablePattern::Create(name, sorts.at(hook));
-    } else if (get(node, "literal")) {
+    }
+
+    if (get(node, "literal")) {
       auto sym = KORESymbol::Create("\\dv");
       auto hook = str(get(node, "hook"));
       auto sort = sorts.at(KORECompositeSort::getCategory(hook));
@@ -186,21 +188,22 @@ public:
       auto pat = KORECompositePattern::Create(std::move(sym));
       pat->addArgument(KOREStringPattern::Create(val));
       return pat;
-    } else {
-      if (!get(node, "constructor")) {
-        std::cerr << node << std::endl;
-        abort();
-      }
-      auto *sym = syms.at(str(get(node, "constructor")));
-      auto pat = KORECompositePattern::Create(sym);
-      auto *seq = get(node, "args");
-      for (auto *iter = seq->data.sequence.items.start;
-           iter < seq->data.sequence.items.top; iter++) {
-        auto *child = yaml_document_get_node(doc, *iter);
-        pat->addArgument(parsePattern(child, uses));
-      }
-      return pat;
     }
+
+    if (!get(node, "constructor")) {
+      std::cerr << node << std::endl;
+      abort();
+    }
+
+    auto *sym = syms.at(str(get(node, "constructor")));
+    auto pat = KORECompositePattern::Create(sym);
+    auto *seq = get(node, "args");
+    for (auto *iter = seq->data.sequence.items.start;
+         iter < seq->data.sequence.items.top; iter++) {
+      auto *child = yaml_document_get_node(doc, *iter);
+      pat->addArgument(parsePattern(child, uses));
+    }
+    return pat;
   }
 
   DecisionNode *makePattern(yaml_node_t *node) {

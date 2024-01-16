@@ -99,9 +99,8 @@ block *debruijnizeInternal(block *currBlock) {
       idx--;
     }
     return newBlock;
-  } else {
-    return currBlock;
   }
+  return currBlock;
 }
 
 block *replaceBinderInternal(block *currBlock) {
@@ -109,13 +108,14 @@ block *replaceBinderInternal(block *currBlock) {
     uint64_t varIdx = ((uintptr_t)currBlock) >> 32;
     if (idx == varIdx) {
       return (block *)var;
-    } else if (idx < varIdx) {
+    }
+    if (idx < varIdx) {
       varIdx--;
       return variable_block(varIdx);
-    } else {
-      return currBlock;
     }
-  } else if (is_leaf_block(currBlock)) {
+    return currBlock;
+  }
+  if (is_leaf_block(currBlock)) {
     return currBlock;
   }
   const uint64_t hdr = currBlock->h.hdr;
@@ -174,9 +174,8 @@ block *replaceBinderInternal(block *currBlock) {
       idx--;
     }
     return newBlock;
-  } else {
-    return currBlock;
   }
+  return currBlock;
 }
 
 block *substituteInternal(block *currBlock) {
@@ -269,9 +268,8 @@ block *substituteInternal(block *currBlock) {
       return result;
     }
     return newBlock;
-  } else {
-    return currBlock;
   }
+  return currBlock;
 }
 
 extern "C" {
@@ -300,10 +298,10 @@ block *incrementDebruijn(block *currBlock) {
     if (varIdx >= idx2) {
       varIdx += idx;
       return variable_block(varIdx);
-    } else {
-      return currBlock;
     }
-  } else if (is_leaf_block(currBlock)) {
+    return currBlock;
+  }
+  if (is_leaf_block(currBlock)) {
     return currBlock;
   }
   const uint64_t hdr = currBlock->h.hdr;
@@ -367,9 +365,8 @@ block *incrementDebruijn(block *currBlock) {
       idx2--;
     }
     return newBlock;
-  } else {
-    return currBlock;
   }
+  return currBlock;
 }
 
 block *alphaRename(block *term) {

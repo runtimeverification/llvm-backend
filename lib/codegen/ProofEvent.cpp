@@ -47,21 +47,20 @@ llvm::CallInst *ProofEvent::emitSerializeTerm(
         = getOrInsertFunction(Module, "serializeTermToFile", func_ty);
 
     return B.CreateCall(serialize, {outputFile, term, sort_name_ptr});
-  } else {
-    if (term->getType()->isIntegerTy()) {
-      term = B.CreateIntToPtr(term, i8_ptr_ty);
-    } else {
-      term = B.CreatePointerCast(term, i8_ptr_ty);
-    }
-
-    auto *func_ty = llvm::FunctionType::get(
-        void_ty, {i8_ptr_ty, i8_ptr_ty, i8_ptr_ty}, false);
-
-    auto *serialize
-        = getOrInsertFunction(Module, "serializeRawTermToFile", func_ty);
-
-    return B.CreateCall(serialize, {outputFile, term, sort_name_ptr});
   }
+  if (term->getType()->isIntegerTy()) {
+    term = B.CreateIntToPtr(term, i8_ptr_ty);
+  } else {
+    term = B.CreatePointerCast(term, i8_ptr_ty);
+  }
+
+  auto *func_ty = llvm::FunctionType::get(
+      void_ty, {i8_ptr_ty, i8_ptr_ty, i8_ptr_ty}, false);
+
+  auto *serialize
+      = getOrInsertFunction(Module, "serializeRawTermToFile", func_ty);
+
+  return B.CreateCall(serialize, {outputFile, term, sort_name_ptr});
 }
 
 llvm::CallInst *ProofEvent::emitSerializeConfiguration(

@@ -120,7 +120,8 @@ extern "C" void *constructInitialConfiguration(const KOREPattern *initial) {
       if (isSymbolAFunction(tag) && constructor->getArguments().empty()) {
         output.push_back(evaluateFunctionSymbol(tag, nullptr));
         continue;
-      } else if (constructor->getArguments().empty()) {
+      }
+      if (constructor->getArguments().empty()) {
         output.push_back(leaf_block(tag));
         continue;
       }
@@ -190,7 +191,8 @@ deserializeInitialConfiguration(It ptr, It end, binary_version version) {
       if (isSymbolAFunction(tag) && arity == 0) {
         output.push_back(evaluateFunctionSymbol(tag, nullptr));
         break;
-      } else if (arity == 0) {
+      }
+      if (arity == 0) {
         output.push_back(leaf_block(tag));
         break;
       }
@@ -247,16 +249,14 @@ block *parseConfiguration(const char *filename) {
   if (has_binary_kore_header(filename)) {
     auto data = file_contents(filename);
     return deserializeConfiguration(data.data(), data.size());
-  } else {
-    auto InitialConfiguration = parser::KOREParser(filename).pattern();
-    // InitialConfiguration->print(std::cout);
-
-    // Allocate the llvm KORE datastructures for the configuration
-    auto *b
-        = (block *)constructInitialConfiguration(InitialConfiguration.get());
-    deallocateSPtrKorePattern(std::move(InitialConfiguration));
-    return b;
   }
+  auto InitialConfiguration = parser::KOREParser(filename).pattern();
+  // InitialConfiguration->print(std::cout);
+
+  // Allocate the llvm KORE datastructures for the configuration
+  auto *b = (block *)constructInitialConfiguration(InitialConfiguration.get());
+  deallocateSPtrKorePattern(std::move(InitialConfiguration));
+  return b;
 }
 
 block *deserializeConfiguration(char *data, size_t size) {

@@ -118,19 +118,18 @@ get_header(boolHdr, "inj{SortBool{}, SortJSON{}}")
       result = (block *)inj;
       stack.push_back(result);
       return true;
-    } else {
-      mpz_clear(z);
-      floating f[1]; // NOLINT(modernize-avoid-c-arrays)
-      mpfr_init2(f->f, 53);
-      f->exp = 11;
-      mpfr_set_str(f->f, str, 9, MPFR_RNDN);
-      auto *inj = (floatinj *)koreAlloc(sizeof(floatinj));
-      inj->h = floatHdr();
-      inj->data = move_float(f);
-      result = (block *)inj;
-      stack.push_back(result);
-      return true;
     }
+    mpz_clear(z);
+    floating f[1]; // NOLINT(modernize-avoid-c-arrays)
+    mpfr_init2(f->f, 53);
+    f->exp = 11;
+    mpfr_set_str(f->f, str, 9, MPFR_RNDN);
+    auto *inj = (floatinj *)koreAlloc(sizeof(floatinj));
+    inj->h = floatHdr();
+    inj->data = move_float(f);
+    result = (block *)inj;
+    stack.push_back(result);
+    return true;
   }
 
   bool String(const char *str, SizeType len, bool copy) {
@@ -272,8 +271,7 @@ SortJSON hook_JSON_string2json(SortString str) {
   bool result = reader.Parse<kParseNumbersAsStringsFlag>(s, handler);
   if (result) {
     return handler.stack.back();
-  } else {
-    abort();
   }
+  abort();
 }
 }
