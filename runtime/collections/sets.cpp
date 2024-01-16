@@ -27,7 +27,7 @@ bool hook_SET_in(SortKItem elem, SortSet set) {
 }
 
 set hook_SET_concat(SortSet s1, SortSet s2) {
-  auto from = s1->size() < s2->size() ? s1 : s2;
+  auto *from = s1->size() < s2->size() ? s1 : s2;
   auto to = s1->size() < s2->size() ? *s2 : *s1;
   for (auto iter = from->begin(); iter != from->end(); ++iter) {
     to = to.insert(*iter);
@@ -41,7 +41,7 @@ set hook_SET_union(SortSet s1, SortSet s2) {
 }
 
 set hook_SET_difference(SortSet s1, SortSet s2) {
-  auto from = s2;
+  auto *from = s2;
   auto to = *s1;
   for (auto iter = from->begin(); iter != from->end(); ++iter) {
     to = to.erase(*iter);
@@ -63,8 +63,8 @@ bool hook_SET_inclusion(SortSet s1, SortSet s2) {
 }
 
 set hook_SET_intersection(SortSet s1, SortSet s2) {
-  auto from = s1->size() < s2->size() ? s1 : s2;
-  auto to = s1->size() < s2->size() ? s2 : s1;
+  auto *from = s1->size() < s2->size() ? s1 : s2;
+  auto *to = s1->size() < s2->size() ? s2 : s1;
   auto result = set();
   for (auto iter = from->begin(); iter != from->end(); ++iter) {
     auto elem = *iter;
@@ -147,7 +147,7 @@ void printSet(
   }
 
   auto tag = getTagForSymbolName(element);
-  auto arg_sorts = getArgumentSortsForTag(tag);
+  auto *arg_sorts = getArgumentSortsForTag(tag);
 
   sfprintf(file, "\\left-assoc{}(%s(", concat);
 

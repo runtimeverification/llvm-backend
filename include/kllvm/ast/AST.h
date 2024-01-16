@@ -163,8 +163,8 @@ public:
 
   const std::string getName() const { return name; }
   ValueType getCategory(KOREDefinition *definition);
-  std::string getHook(KOREDefinition *definition);
-  static ValueType getCategory(std::string const &hook);
+  std::string getHook(KOREDefinition *definition) const;
+  static ValueType getCategory(std::string const &hookName);
 
   virtual bool isConcrete() const override;
   virtual sptr<KORESort> substitute(const substitution &subst) override;

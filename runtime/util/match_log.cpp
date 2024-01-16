@@ -12,7 +12,7 @@ extern "C" void *getStderr(void) {
 static std::vector<MatchLog> matchLog;
 
 void **getMatchFnArgs(MatchLog *log) {
-  return &log->args[0];
+  return log->args.data();
 }
 
 extern "C" {
@@ -21,7 +21,7 @@ void resetMatchReason(void) {
 }
 
 MatchLog *getMatchLog(void) {
-  return &matchLog[0];
+  return matchLog.data();
 }
 
 size_t getMatchLogSize(void) {
@@ -40,20 +40,22 @@ void addMatchSuccess(void) {
        nullptr});
 }
 
-void addMatchFailReason(void *subject, char *pattern, char *sort) {
+void addMatchFailReason(void *subject, const char *pattern, const char *sort) {
   matchLog.push_back(
       {MatchLog::FAIL, nullptr, nullptr, nullptr, {}, pattern, subject, sort});
 }
 
-void addMatchFunction(char *debugName, char *function, void *result, ...) {
+void addMatchFunction(
+    const char *debugName, const char *function, void *result, ...) {
   va_list ap;
   va_start(ap, result);
 
   std::vector<void *> args;
   while (true) {
     void *arg = va_arg(ap, void *);
-    if (!arg)
+    if (!arg) {
       break;
+    }
     args.push_back(arg);
   }
 

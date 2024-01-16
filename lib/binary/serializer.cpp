@@ -19,11 +19,9 @@ serializer::serializer()
 serializer::serializer(flags f)
     : use_header_(!(f & DROP_HEADER))
     , use_arity_(!(f & DROP_ARITY))
-    , buffer_{}
     , direct_string_prefix_{0x01}
     , backref_string_prefix_{0x02}
-    , next_idx_(0)
-    , intern_table_{} {
+    , next_idx_(0) {
   if (use_header_) {
     emit_header_and_version();
     emit_zero_size();
@@ -31,7 +29,7 @@ serializer::serializer(flags f)
 }
 
 std::string serializer::byte_string() const {
-  auto *ptr = reinterpret_cast<unsigned char const *>(buffer_.data());
+  const auto *ptr = reinterpret_cast<unsigned char const *>(buffer_.data());
   return {ptr, ptr + buffer_.size()};
 }
 
@@ -65,8 +63,8 @@ void serializer::emit_zero_size() {
 }
 
 void serializer::correct_emitted_size() {
-  auto header_prefix_length = 11u;
-  auto header_prefix_length_with_version = header_prefix_length + 8u;
+  auto header_prefix_length = 11U;
+  auto header_prefix_length_with_version = header_prefix_length + 8U;
 
   auto bytes = detail::to_bytes(
       uint64_t{buffer_.size() - header_prefix_length_with_version});
@@ -114,7 +112,7 @@ int serializer::emit_length(uint64_t len) {
   return emitted;
 }
 
-int serializer::required_chunks(uint64_t len) const {
+int serializer::required_chunks(uint64_t len) {
   auto ret = 0;
   do {
     ++ret;

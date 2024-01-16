@@ -34,10 +34,7 @@ struct StringEq {
 };
 
 struct print_state {
-  print_state()
-      : boundVariables{}
-      , varNames{}
-      , usedVarNames{} { }
+  print_state() = default;
 
   // We never want to copy the state; it should only ever get passed around by
   // reference.
@@ -129,6 +126,7 @@ void printComma(writer *file, void *state) {
   sfprintf(file, ",");
 }
 
+// NOLINTNEXTLINE(*-cognitive-complexity)
 void printConfigurationInternal(
     writer *file, block *subject, const char *sort, bool isVar,
     void *state_ptr) {
@@ -173,7 +171,7 @@ void printConfigurationInternal(
     }
     if (isVar && !state.varNames.count(str)) {
       std::string stdStr = std::string(str->data, len(str));
-      std::string suffix = "";
+      std::string suffix;
       while (state.usedVarNames.count(stdStr + suffix)) {
         suffix = std::to_string(state.varCounter++);
       }
@@ -310,7 +308,7 @@ extern "C" void printMatchResult(
     std::ostream &os, MatchLog *matchLog, size_t logSize,
     const std::string &definitionPath) {
   auto subject_file = temporary_file("subject_XXXXXX");
-  auto subject = subject_file.file_pointer("w");
+  auto *subject = subject_file.file_pointer("w");
   auto pattern_file = temporary_file("pattern_XXXXXX");
 
   for (int i = 0; i < logSize; i++) {
@@ -322,7 +320,7 @@ extern "C" void printMatchResult(
         printSortedConfigurationToFile(
             subject, (block *)matchLog[i].subject, matchLog[i].sort);
       } else {
-        auto subjectSort
+        auto *subjectSort
             = debug_print_term((block *)matchLog[i].subject, matchLog[i].sort);
         auto strSubjectSort = std::string(subjectSort->data, len(subjectSort));
         subject_file.ofstream() << strSubjectSort << std::endl;
@@ -337,10 +335,11 @@ extern "C" void printMatchResult(
       os << matchLog[i].debugName << "(";
 
       for (int j = 0; j < matchLog[i].args.size(); j += 2) {
-        auto typeName = reinterpret_cast<char *>(matchLog[i].args[j + 1]);
+        auto *typeName = reinterpret_cast<char *>(matchLog[i].args[j + 1]);
         printValueOfType(os, definitionPath, matchLog[i].args[j], typeName);
-        if (j + 2 != matchLog[i].args.size())
+        if (j + 2 != matchLog[i].args.size()) {
           os << ", ";
+        }
       }
       os << ") => " << *reinterpret_cast<bool *>(matchLog[i].result) << "\n";
     }
@@ -350,23 +349,23 @@ extern "C" void printMatchResult(
 void printValueOfType(
     std::ostream &os, std::string const &definitionPath, void *value,
     std::string const &type) {
-  if (type.compare("%mpz*") == 0) {
+  if (type == "%mpz*") {
     os << reinterpret_cast<mpz_ptr>(value);
-  } else if (type.compare("%block*") == 0) {
+  } else if (type == "%block*") {
     if ((((uintptr_t)value) & 3) == 1) {
       auto f = temporary_file("subject_XXXXXX");
       string *s = printConfigurationToString(reinterpret_cast<block *>(value));
       f.ofstream() << std::string(s->data, len(s)) << std::endl;
       kllvm::printKORE(os, definitionPath, f.filename(), false, true);
     } else if ((((uintptr_t)value) & 1) == 0) {
-      auto s = reinterpret_cast<string *>(value);
+      auto *s = reinterpret_cast<string *>(value);
       os << std::string(s->data, len(s));
     } else {
       os << "Error: " << type << " not implemented!";
     }
-  } else if (type.compare("%floating*") == 0) {
+  } else if (type == "%floating*") {
     os << floatToString(reinterpret_cast<floating *>(value));
-  } else if (type.compare("i1") == 0) {
+  } else if (type == "i1") {
     os << *reinterpret_cast<bool *>(value);
   } else {
     os << "Error: " << type << " not implemented!";

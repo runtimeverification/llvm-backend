@@ -4,7 +4,7 @@
 
 namespace kllvm {
 
-constexpr auto indent_size = 2u;
+constexpr auto indent_size = 2U;
 
 void LLVMRewriteEvent::printSubstitution(
     std::ostream &Out, unsigned indent) const {
@@ -18,21 +18,21 @@ void LLVMRuleEvent::print(std::ostream &Out, unsigned indent) const {
   std::string Indent(indent * indent_size, ' ');
   Out << fmt::format(
       "{}rule: {} {}\n", Indent, ruleOrdinal, substitution.size());
-  printSubstitution(Out, indent + 1u);
+  printSubstitution(Out, indent + 1U);
 }
 
 void LLVMSideConditionEvent::print(std::ostream &Out, unsigned indent) const {
   std::string Indent(indent * indent_size, ' ');
   Out << fmt::format(
       "{}side condition: {} {}\n", Indent, ruleOrdinal, substitution.size());
-  printSubstitution(Out, indent + 1u);
+  printSubstitution(Out, indent + 1U);
 }
 
 void LLVMFunctionEvent::print(std::ostream &Out, unsigned indent) const {
   std::string Indent(indent * indent_size, ' ');
   Out << fmt::format("{}function: {} ({})\n", Indent, name, relativePosition);
   for (const auto &arg : arguments) {
-    arg.print(Out, true, indent + 1u);
+    arg.print(Out, true, indent + 1U);
   }
 }
 
@@ -40,7 +40,7 @@ void LLVMHookEvent::print(std::ostream &Out, unsigned indent) const {
   std::string Indent(indent * indent_size, ' ');
   Out << fmt::format("{}hook: {} ({})\n", Indent, name, relativePosition);
   for (const auto &arg : arguments) {
-    arg.print(Out, true, indent + 1u);
+    arg.print(Out, true, indent + 1U);
   }
   Out << fmt::format("{}hook result: kore[{}]\n", Indent, patternLength);
 }

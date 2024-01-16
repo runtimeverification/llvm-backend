@@ -12,7 +12,7 @@ static thread_local uint64_t idx;
 static thread_local uint64_t idx2;
 
 extern "C" {
-bool hook_KEQUAL_eq(block *, block *);
+
 map map_map(void *, block *(block *));
 rangemap rangemap_map(void *, block *(block *));
 list list_map(void *, block *(block *));
@@ -81,7 +81,7 @@ block *debruijnizeInternal(block *currBlock) {
         break;
       }
       case VARIABLE_LAYOUT: {
-        if (!(i == 0 && isBinder) && hook_STRING_eq(var, *(string **)arg)) {
+        if ((i != 0 || !isBinder) && hook_STRING_eq(var, *(string **)arg)) {
           block *newArg = variable_block(idx);
           makeDirty(dirty, argData->offset, newArg, newBlock);
         }
@@ -99,9 +99,8 @@ block *debruijnizeInternal(block *currBlock) {
       idx--;
     }
     return newBlock;
-  } else {
-    return currBlock;
   }
+  return currBlock;
 }
 
 block *replaceBinderInternal(block *currBlock) {
@@ -109,13 +108,14 @@ block *replaceBinderInternal(block *currBlock) {
     uint64_t varIdx = ((uintptr_t)currBlock) >> 32;
     if (idx == varIdx) {
       return (block *)var;
-    } else if (idx < varIdx) {
+    }
+    if (idx < varIdx) {
       varIdx--;
       return variable_block(varIdx);
-    } else {
-      return currBlock;
     }
-  } else if (is_leaf_block(currBlock)) {
+    return currBlock;
+  }
+  if (is_leaf_block(currBlock)) {
     return currBlock;
   }
   const uint64_t hdr = currBlock->h.hdr;
@@ -174,9 +174,8 @@ block *replaceBinderInternal(block *currBlock) {
       idx--;
     }
     return newBlock;
-  } else {
-    return currBlock;
   }
+  return currBlock;
 }
 
 block *substituteInternal(block *currBlock) {
@@ -261,7 +260,7 @@ block *substituteInternal(block *currBlock) {
       block *to_replace_stack = to_replace;
       block *replacement_stack = replacement;
       block *replacementInj_stack = replacementInj;
-      auto *result = (block *)evaluateFunctionSymbol(tag, &arguments[0]);
+      auto *result = (block *)evaluateFunctionSymbol(tag, arguments.data());
       to_replace = to_replace_stack;
       replacement = replacement_stack;
       replacementInj = replacementInj_stack;
@@ -269,27 +268,26 @@ block *substituteInternal(block *currBlock) {
       return result;
     }
     return newBlock;
-  } else {
-    return currBlock;
   }
+  return currBlock;
 }
 
 extern "C" {
 
 block *debruijnize(block *term) {
-  auto layoutData = getLayoutData(get_layout(term));
+  auto *layoutData = getLayoutData(get_layout(term));
   auto layoutVar = layoutData->args[0];
   auto layoutBody = layoutData->args[layoutData->nargs - 1];
   var = *(string **)(((char *)term) + layoutVar.offset);
   idx = 0;
-  auto bodyPtr = *(block **)(((char *)term) + layoutBody.offset);
-  auto newBody = debruijnizeInternal(bodyPtr);
-  auto newBlock = term;
+  auto *bodyPtr = *(block **)(((char *)term) + layoutBody.offset);
+  auto *newBody = debruijnizeInternal(bodyPtr);
+  auto *newBlock = term;
   if (newBody != bodyPtr) {
     bool dirty = false;
     makeDirty(dirty, layoutBody.offset, newBody, newBlock);
   }
-  auto newVar = *(string **)(((char *)newBlock) + layoutVar.offset);
+  auto *newVar = *(string **)(((char *)newBlock) + layoutVar.offset);
   newVar->h.hdr |= VARIABLE_BIT;
   return newBlock;
 }
@@ -300,10 +298,10 @@ block *incrementDebruijn(block *currBlock) {
     if (varIdx >= idx2) {
       varIdx += idx;
       return variable_block(varIdx);
-    } else {
-      return currBlock;
     }
-  } else if (is_leaf_block(currBlock)) {
+    return currBlock;
+  }
+  if (is_leaf_block(currBlock)) {
     return currBlock;
   }
   const uint64_t hdr = currBlock->h.hdr;
@@ -367,15 +365,14 @@ block *incrementDebruijn(block *currBlock) {
       idx2--;
     }
     return newBlock;
-  } else {
-    return currBlock;
   }
+  return currBlock;
 }
 
 block *alphaRename(block *term) {
   auto *var = (string *)term;
   size_t var_len = len(var);
-  auto newToken = (string *)koreAllocToken(sizeof(string) + var_len);
+  auto *newToken = (string *)koreAllocToken(sizeof(string) + var_len);
   memcpy(newToken->data, var->data, var_len);
   init_with_len(newToken, var_len);
   newToken->h.hdr |= VARIABLE_BIT;

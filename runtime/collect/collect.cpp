@@ -37,9 +37,8 @@ size_t get_size(uint64_t hdr, uint16_t layout) {
   if (!layout) {
     size_t size = (len_hdr(hdr) + sizeof(blockheader) + 7) & ~7;
     return hdr == NOT_YOUNG_OBJECT_BIT ? 8 : size < 16 ? 16 : size;
-  } else {
-    return size_hdr(hdr);
   }
+  return size_hdr(hdr);
 }
 
 void migrate(block **blockPtr) {

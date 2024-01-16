@@ -16,7 +16,7 @@ transitiveClosure(std::unordered_map<
       SortSet newSucc;
       for (auto &elem : entry.second) {
         auto &relation = relations[elem];
-        for (auto elem2 : relation) {
+        for (auto *elem2 : relation) {
           dirty |= relations[entry.first].insert(elem2).second;
         }
       }
@@ -28,19 +28,19 @@ transitiveClosure(std::unordered_map<
 } // namespace
 
 void KOREDefinition::addModule(sptr<KOREModule> Module) {
-  for (auto &decl : Module->getDeclarations()) {
-    if (auto sortDecl
+  for (const auto &decl : Module->getDeclarations()) {
+    if (auto *sortDecl
         = dynamic_cast<KORECompositeSortDeclaration *>(decl.get())) {
       sortDeclarations.insert({sortDecl->getName(), sortDecl});
       auto sort = KORECompositeSort::Create(sortDecl->getName());
     } else if (
-        auto symbolDecl = dynamic_cast<KORESymbolDeclaration *>(decl.get())) {
+        auto *symbolDecl = dynamic_cast<KORESymbolDeclaration *>(decl.get())) {
       symbolDeclarations.insert(
           {symbolDecl->getSymbol()->getName(), symbolDecl});
     } else if (
-        auto aliasDecl = dynamic_cast<KOREAliasDeclaration *>(decl.get())) {
+        auto *aliasDecl = dynamic_cast<KOREAliasDeclaration *>(decl.get())) {
       aliasDeclarations.insert({aliasDecl->getSymbol()->getName(), aliasDecl});
-    } else if (auto axiom = dynamic_cast<KOREAxiomDeclaration *>(decl.get())) {
+    } else if (auto *axiom = dynamic_cast<KOREAxiomDeclaration *>(decl.get())) {
       axioms.push_back(axiom);
     }
   }
@@ -98,10 +98,11 @@ SymbolMap KOREDefinition::getOverloads() const {
   return transitiveClosure(overloads);
 }
 
+// NOLINTNEXTLINE(*-function-cognitive-complexity)
 void KOREDefinition::preprocess() {
   insertReservedSymbols();
 
-  for (auto axiom : axioms) {
+  for (auto *axiom : axioms) {
     axiom->pattern = axiom->pattern->expandAliases(this);
   }
   auto symbols = std::map<std::string, std::vector<KORESymbol *>>{};
@@ -116,7 +117,7 @@ void KOREDefinition::preprocess() {
     }
   }
   for (auto iter = axioms.begin(); iter != axioms.end();) {
-    auto axiom = *iter;
+    auto *axiom = *iter;
     axiom->ordinal = nextOrdinal;
     ordinals[nextOrdinal++] = axiom;
     axiom->pattern->markSymbols(symbols);
@@ -127,7 +128,7 @@ void KOREDefinition::preprocess() {
     }
   }
   for (auto &module : modules) {
-    auto &declarations = module->getDeclarations();
+    const auto &declarations = module->getDeclarations();
     for (const auto &declaration : declarations) {
       auto *decl = dynamic_cast<KORESymbolDeclaration *>(declaration.get());
       if (decl == nullptr) {
@@ -140,8 +141,8 @@ void KOREDefinition::preprocess() {
     }
   }
   for (const auto &entry : symbols) {
-    for (auto symbol : entry.second) {
-      auto decl = symbolDeclarations.at(symbol->getName());
+    for (auto *symbol : entry.second) {
+      auto *decl = symbolDeclarations.at(symbol->getName());
       symbol->instantiateSymbol(decl);
     }
   }
@@ -153,7 +154,7 @@ void KOREDefinition::preprocess() {
       = std::unordered_map<std::string, std::pair<uint32_t, uint32_t>>{};
   for (const auto &entry : symbols) {
     uint32_t firstTag = nextSymbol;
-    for (auto symbol : entry.second) {
+    for (auto *symbol : entry.second) {
       if (symbol->isConcrete()) {
         if (!instantiations.count(*symbol)) {
           instantiations.emplace(*symbol, nextSymbol++);
@@ -176,8 +177,8 @@ void KOREDefinition::preprocess() {
   }
   for (const auto &entry : symbols) {
     auto range = variables.at(entry.first);
-    for (auto symbol : entry.second) {
-      for (auto &sort : symbol->getArguments()) {
+    for (auto *symbol : entry.second) {
+      for (const auto &sort : symbol->getArguments()) {
         if (sort->isConcrete()) {
           hookedSorts[dynamic_cast<KORECompositeSort *>(sort.get())
                           ->getCategory(this)]
@@ -193,7 +194,7 @@ void KOREDefinition::preprocess() {
         if (symbol->isPolymorphic()) {
           symbol->firstTag = range.first;
           symbol->lastTag = range.second;
-          auto decl = symbolDeclarations.at(symbol->getName());
+          auto *decl = symbolDeclarations.at(symbol->getName());
           if (decl->getAttributes().count("sortInjection")) {
             injSymbol = symbol;
           }
