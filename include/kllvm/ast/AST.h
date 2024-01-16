@@ -938,17 +938,21 @@ public:
    * Build this definition's subsort relation from axioms that have the
    * `subsort` attribute.
    *
-   * The returned map is either as follows
+   * The returned map is as follows:
    *
-   *   S |-> {T . S is an immediate subsort of T}
    *   S |-> {T . S is a subsort of T}
-   *
-   * depending on whether the transitive or non-transitive variant is used. The
-   * complexity of constructing the transitive relation is greater, and should
-   * only be used when the full partial order of sorts is required.
    */
   SubsortMap getSubsorts() const;
-  SubsortMap getTransitiveSubsorts() const;
+
+  /*
+   * Build this definition's overload relation from axioms that have the
+   * `overload` attribute.
+   *
+   * The returned map is as follows:
+   *
+   *  P |-> {Q . P is a more specific overload of Q}
+   */
+  SymbolMap getOverloads() const;
 
   const std::vector<sptr<KOREModule>> &getModules() const { return modules; }
   const KORECompositeSortDeclarationMapType &getSortDeclarations() const {

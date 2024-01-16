@@ -40,11 +40,37 @@ void KOREDefinition::insertReservedSymbols() {
 }
 
 SubsortMap KOREDefinition::getSubsorts() const {
-  return {};
+  auto subsorts = SubsortMap{};
+
+  for (auto *axiom : axioms) {
+    if (axiom->getAttributes().count("subsort")) {
+      auto const &att = axiom->getAttributes().at("subsort");
+      auto const &innerSort = att->getConstructor()->getFormalArguments()[0];
+      auto const &outerSort = att->getConstructor()->getFormalArguments()[1];
+      subsorts[innerSort.get()].insert(outerSort.get());
+    }
+  }
+
+  return transitiveClosure(subsorts);
 }
 
-SubsortMap KOREDefinition::getTransitiveSubsorts() const {
-  return {};
+SymbolMap KOREDefinition::getOverloads() const {
+  auto overloads = SymbolMap{};
+
+  for (auto *axiom : axioms) {
+    if (axiom->getAttributes().count("overload")) {
+      auto const &att = axiom->getAttributes().at("overload");
+      auto *innerSymbol = std::dynamic_pointer_cast<KORECompositePattern>(
+                              att->getArguments()[1])
+                              ->getConstructor();
+      auto *outerSymbol = std::dynamic_pointer_cast<KORECompositePattern>(
+                              att->getArguments()[0])
+                              ->getConstructor();
+      overloads[innerSymbol].insert(outerSymbol);
+    }
+  }
+
+  return transitiveClosure(overloads);
 }
 
 void KOREDefinition::preprocess() {
