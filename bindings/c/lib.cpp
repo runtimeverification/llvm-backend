@@ -73,7 +73,7 @@ struct kore_error {
   bool success_ = true;
   std::optional<std::string> message_ = std::nullopt;
 
-  char const *c_str() const {
+  [[nodiscard]] char const *c_str() const {
     if (!success_ && message_.has_value()) {
       return message_->c_str();
     }
@@ -81,7 +81,7 @@ struct kore_error {
     return nullptr;
   }
 
-  void set_error(std::string msg) {
+  void set_error(const std::string& msg) {
     success_ = false;
     message_ = msg;
   }
