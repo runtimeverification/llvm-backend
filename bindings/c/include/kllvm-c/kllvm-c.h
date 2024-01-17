@@ -14,6 +14,48 @@
 extern "C" {
 #endif
 
+/**
+ * Error Handling
+ * ==============
+ *
+ * Some API functions in these bindings can bubble up internal errors from the
+ * LLVM backend to avoid crashing the host process.
+ *
+ * These functions take an initial parameter of type `kore_error *`; if that
+ * parameter is `NULL` then any C++ exceptions thrown by the backend will
+ * simply be rethrown and the host process will crash with the relevant error
+ * message.
+ *
+ * If the input is not NULL, then the object will have call-specific information
+ * filled in that can be accessed using the getter functions in this section.
+ */
+
+typedef struct kore_error kore_error;
+
+/**
+ * Create an empty error object. Initially, the created object will report
+ * success (not failure), and will return `NULL` if its message is accessed.
+ */
+kore_error *kore_error_new(void);
+
+/**
+ * Return true if no error occurred when this object was passed to an API call.
+ */
+bool kore_error_is_success(kore_error const *);
+
+/**
+ * Return any error-specific message that has been added to this object. The
+ * returned string is a reference to the error's internal state and should not
+ * be freed separately. If no error has occurred (i.e. is_success returns true),
+ * then return NULL.
+ */
+char const *kore_error_message(kore_error const *);
+
+/**
+ * Deallocate an error and its associated message.
+ */
+void kore_error_free(kore_error *);
+
 /*
  * Binary KORE Outputs
  * ===================
@@ -78,12 +120,14 @@ kore_pattern *kore_pattern_from_block(block *);
  */
 bool kore_block_get_bool(block *);
 
-bool kore_simplify_bool(kore_pattern const *);
+bool kore_simplify_bool(kore_error *, kore_pattern const *);
 
 void kore_simplify(
-    kore_pattern const *pattern, kore_sort const *sort, char **, size_t *);
+    kore_error *err, kore_pattern const *pattern, kore_sort const *sort,
+    char **, size_t *);
 
-void kore_simplify_binary(char *, size_t, kore_sort const *, char **, size_t *);
+void kore_simplify_binary(
+    kore_error *, char *, size_t, kore_sort const *, char **, size_t *);
 
 block *take_steps(int64_t depth, block *term);
 

@@ -30,7 +30,11 @@ int main(int argc, char **argv) {
   size_t size_in, size_out;
 
   api.kore_pattern_serialize(pat, &data_in, &size_in);
-  api.kore_simplify_binary(data_in, size_in, sort_foo, &data_out, &size_out);
+
+  kore_error *err = api.kore_error_new();
+  api.kore_simplify_binary(
+      err, data_in, size_in, sort_foo, &data_out, &size_out);
+  assert(api.kore_error_is_success(err));
 
   FILE *f = fopen(argv[2], "wb");
   if (!f) {
@@ -40,6 +44,7 @@ int main(int argc, char **argv) {
   fwrite(data_out, size_out, 1, f);
   fclose(f);
 
+  api.kore_error_free(err);
   api.kore_pattern_free(pat);
   api.kore_sort_free(sort_int);
   api.kore_sort_free(sort_foo);
