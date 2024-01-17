@@ -32,12 +32,12 @@ struct kllvm_c_api {
   char *(*kore_block_dump)(block *);
   kore_pattern *(*kore_pattern_from_block)(block *);
   bool (*kore_block_get_bool)(block *);
-  bool (*kore_simplify_bool)(kore_pattern const *);
+  bool (*kore_simplify_bool)(kore_error *err, kore_pattern const *);
   void (*kore_simplify)(
       kore_error *err, kore_pattern const *pattern, kore_sort const *sort,
       char **, size_t *);
   void (*kore_simplify_binary)(
-      char *, size_t, kore_sort const *, char **, size_t *);
+      kore_error *, char *, size_t, kore_sort const *, char **, size_t *);
   block *(*take_steps)(int64_t depth, block *term);
   char *(*kore_sort_dump)(kore_sort const *);
   void (*kore_sort_free)(kore_sort const *);

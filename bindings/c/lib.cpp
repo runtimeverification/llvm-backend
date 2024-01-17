@@ -81,7 +81,7 @@ struct kore_error {
     return nullptr;
   }
 
-  void set_error(const std::string& msg) {
+  void set_error(const std::string &msg) {
     success_ = false;
     message_ = msg;
   }
@@ -293,8 +293,17 @@ bool kore_block_get_bool(block *term) {
   return kllvm::bindings::get_bool(term);
 }
 
-bool kore_simplify_bool(kore_pattern const *pattern) {
-  return kllvm::bindings::simplify_to_bool(pattern->ptr_);
+bool kore_simplify_bool(kore_error *err, kore_pattern const *pattern) {
+  try {
+    return kllvm::bindings::simplify_to_bool(pattern->ptr_);
+  } catch (std::exception &e) {
+    if (err == nullptr) {
+      throw;
+    }
+
+    err->set_error(e.what());
+    return false;
+  }
 }
 
 void kore_simplify(
@@ -313,14 +322,21 @@ void kore_simplify(
 }
 
 void kore_simplify_binary(
-    char *data_in, size_t size_in, kore_sort const *sort, char **data_out,
-    size_t *size_out) {
-  auto *sort_str = kore_sort_dump(sort);
+    kore_error *err, char *data_in, size_t size_in, kore_sort const *sort,
+    char **data_out, size_t *size_out) {
+  try {
+    auto sort_str = std::unique_ptr<char, decltype(std::free) *>(
+        kore_sort_dump(sort), std::free);
 
-  auto *block = deserializeConfiguration(data_in, size_in);
-  serializeConfiguration(block, sort_str, data_out, size_out, true);
+    auto *block = deserializeConfiguration(data_in, size_in);
+    serializeConfiguration(block, sort_str.get(), data_out, size_out, true);
+  } catch (std::exception &e) {
+    if (err == nullptr) {
+      throw;
+    }
 
-  free(sort_str);
+    err->set_error(e.what());
+  }
 }
 
 /* KORECompositePattern */
