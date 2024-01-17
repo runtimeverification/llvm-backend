@@ -69,6 +69,24 @@ char kore_definition_macros __attribute__((weak)) = -1;
 
 /* Completed types */
 
+struct kore_error {
+  bool success_ = true;
+  std::optional<std::string> message_ = std::nullopt;
+
+  char const *c_str() const {
+    if (!success_ && message_.has_value()) {
+      return message_->c_str();
+    }
+
+    return nullptr;
+  }
+
+  void set_error(std::string msg) {
+    success_ = false;
+    message_ = msg;
+  }
+};
+
 struct kore_pattern {
   std::shared_ptr<kllvm::KOREPattern> ptr_;
 };
@@ -80,6 +98,24 @@ struct kore_sort {
 struct kore_symbol {
   std::shared_ptr<kllvm::KORESymbol> ptr_;
 };
+
+/* Error handling */
+
+kore_error *kore_error_new(void) {
+  return new kore_error;
+}
+
+bool kore_error_is_success(kore_error const *err) {
+  return err->success_;
+}
+
+char const *kore_error_message(kore_error const *err) {
+  return err->c_str();
+}
+
+void kore_error_free(kore_error *err) {
+  delete err;
+}
 
 /* KOREPattern */
 
