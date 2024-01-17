@@ -300,8 +300,16 @@ bool kore_simplify_bool(kore_pattern const *pattern) {
 void kore_simplify(
     kore_error *err, kore_pattern const *pattern, kore_sort const *sort,
     char **data_out, size_t *size_out) {
-  auto *block = kllvm::bindings::simplify_to_term(pattern->ptr_, sort->ptr_);
-  serializeConfiguration(block, "SortKItem{}", data_out, size_out, true);
+  try {
+    auto *block = kllvm::bindings::simplify_to_term(pattern->ptr_, sort->ptr_);
+    serializeConfiguration(block, "SortKItem{}", data_out, size_out, true);
+  } catch (std::exception &e) {
+    if (err == nullptr) {
+      throw;
+    }
+
+    err->set_error(e.what());
+  }
 }
 
 void kore_simplify_binary(
