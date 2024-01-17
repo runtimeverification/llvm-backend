@@ -25,7 +25,7 @@ char kompiled_directory[] = "some/test/directory/path";
 #define GETTAG(symbol) "Lbl'Hash'" #symbol "{}"
 #define ERRBLOCK(tag) (uint64_t)(leaf_block(tag))
 #define NUM_SYMBOLS 8
-const char *symbols[NUM_SYMBOLS]
+char const *symbols[NUM_SYMBOLS]
     = {GETTAG(EOF),
        GETTAG(ENOENT),
        GETTAG(EBADF),
@@ -35,10 +35,10 @@ const char *symbols[NUM_SYMBOLS]
        "kseq{}",
        GETTAG(systemResult)};
 
-const uint32_t first_inj_tag = 3;
-const uint32_t last_inj_tag = 5;
+uint32_t const first_inj_tag = 3;
+uint32_t const last_inj_tag = 5;
 
-uint32_t getTagForSymbolName(const char *s) {
+uint32_t getTagForSymbolName(char const *s) {
   for (int i = 0; i < NUM_SYMBOLS; i++) {
     if (0 == strcmp(symbols[i], s)) {
       return i;
@@ -238,7 +238,7 @@ BOOST_AUTO_TEST_CASE(getc) {
       b->h.hdr, getBlockHeaderForSymbol(
                     getTagForSymbolName("inj{SortIOError{}, SortKItem{}}"))
                     .hdr);
-  const char *temp = GETTAG(EOF);
+  char const *temp = GETTAG(EOF);
   BOOST_CHECK(std::string(temp) != "");
   BOOST_CHECK_EQUAL(
       (uint64_t) * (b->children), ERRBLOCK(getTagForSymbolName(GETTAG(EOF))));

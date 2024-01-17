@@ -176,7 +176,7 @@ int main(int argc, char **argv) {
   makeStepFunction(definition.get(), mod.get(), dtSearch, true);
 
   auto index = read_index_file();
-  for (const auto &entry : definition->getSymbols()) {
+  for (auto const &entry : definition->getSymbols()) {
     auto *symbol = entry.second;
     auto *decl = definition->getSymbolDeclarations().at(symbol->getName());
     if (decl->getAttributes().count("function") && !decl->isHooked()) {

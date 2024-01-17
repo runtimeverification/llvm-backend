@@ -25,8 +25,8 @@ namespace kllvm {
 class DTPreprocessor {
 private:
   std::map<yaml_node_t *, DecisionNode *> uniqueNodes;
-  const std::map<std::string, KORESymbol *> &syms;
-  const std::map<ValueType, sptr<KORECompositeSort>> &sorts;
+  std::map<std::string, KORESymbol *> const &syms;
+  std::map<ValueType, sptr<KORECompositeSort>> const &sorts;
   KORESymbol *dv;
   yaml_document_t *doc;
   llvm::Module *mod;
@@ -106,8 +106,8 @@ public:
   }
 
   DTPreprocessor(
-      const std::map<std::string, KORESymbol *> &syms,
-      const std::map<ValueType, sptr<KORECompositeSort>> &sorts,
+      std::map<std::string, KORESymbol *> const &syms,
+      std::map<ValueType, sptr<KORECompositeSort>> const &sorts,
       llvm::Module *mod, yaml_document_t *doc)
       : syms(syms)
       , sorts(sorts)
@@ -368,8 +368,8 @@ public:
 
 DecisionNode *parseYamlDecisionTreeFromString(
     llvm::Module *mod, std::string const &yaml,
-    const std::map<std::string, KORESymbol *> &syms,
-    const std::map<ValueType, sptr<KORECompositeSort>> &sorts) {
+    std::map<std::string, KORESymbol *> const &syms,
+    std::map<ValueType, sptr<KORECompositeSort>> const &sorts) {
   yaml_parser_t parser;
   yaml_document_t doc;
   yaml_parser_initialize(&parser);
@@ -389,8 +389,8 @@ DecisionNode *parseYamlDecisionTreeFromString(
 
 DecisionNode *parseYamlDecisionTree(
     llvm::Module *mod, std::string const &filename,
-    const std::map<std::string, KORESymbol *> &syms,
-    const std::map<ValueType, sptr<KORECompositeSort>> &sorts) {
+    std::map<std::string, KORESymbol *> const &syms,
+    std::map<ValueType, sptr<KORECompositeSort>> const &sorts) {
   yaml_parser_t parser;
   yaml_document_t doc;
   yaml_parser_initialize(&parser);
@@ -411,8 +411,8 @@ DecisionNode *parseYamlDecisionTree(
 
 PartialStep parseYamlSpecialDecisionTree(
     llvm::Module *mod, std::string const &filename,
-    const std::map<std::string, KORESymbol *> &syms,
-    const std::map<ValueType, sptr<KORECompositeSort>> &sorts) {
+    std::map<std::string, KORESymbol *> const &syms,
+    std::map<ValueType, sptr<KORECompositeSort>> const &sorts) {
   yaml_parser_t parser;
   yaml_document_t doc;
   yaml_parser_initialize(&parser);

@@ -51,7 +51,7 @@ void *koreAlloc(size_t requested) {
   return malloc(requested);
 }
 
-uint32_t getTagForSymbolName(const char *symbolName) {
+uint32_t getTagForSymbolName(char const *symbolName) {
   return 0;
 }
 

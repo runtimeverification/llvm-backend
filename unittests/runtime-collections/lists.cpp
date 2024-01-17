@@ -31,15 +31,15 @@ bool during_gc() {
 void *koreAllocToken(size_t requested) {
   return malloc(requested);
 }
-const size_t BLOCK_SIZE = -1;
+size_t const BLOCK_SIZE = -1;
 
-const char **getArgumentSortsForTag(uint32_t tag) {
+char const **getArgumentSortsForTag(uint32_t tag) {
   return nullptr;
 }
 
 void printConfigurationInternal(
-    writer *file, block *subject, const char *sort, bool, void *) { }
-void sfprintf(writer *, const char *, ...) { }
+    writer *file, block *subject, char const *sort, bool, void *) { }
+void sfprintf(writer *, char const *, ...) { }
 
 bool hook_KEQUAL_eq(block *b1, block *b2) {
   return b1->h.hdr == b2->h.hdr;

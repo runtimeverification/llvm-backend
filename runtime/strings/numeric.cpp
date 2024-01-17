@@ -7,7 +7,7 @@
 #include "runtime/alloc.h"
 #include "runtime/header.h"
 
-std::string floatToString(const floating *f, const char *suffix) {
+std::string floatToString(floating const *f, char const *suffix) {
   if (mpfr_nan_p(f->f)) {
     return "NaN" + std::string(suffix);
   }
@@ -34,7 +34,7 @@ std::string floatToString(const floating *f, const char *suffix) {
   return std::string(newstr->data) + "e" + std::to_string(printed_exp) + suffix;
 }
 
-std::string floatToString(const floating *f) {
+std::string floatToString(floating const *f) {
   uint64_t prec = mpfr_get_prec(f->f);
   uint64_t exp = f->exp;
   auto suffix

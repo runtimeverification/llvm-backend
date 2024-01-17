@@ -37,7 +37,7 @@ block *debruijnizeInternal(block *currBlock) {
   if (is_leaf_block(currBlock)) {
     return currBlock;
   }
-  const uint64_t hdr = currBlock->h.hdr;
+  uint64_t const hdr = currBlock->h.hdr;
   uint16_t layoutInt = layout_hdr(hdr);
   if (layoutInt) {
     uint32_t tag = tag_hdr(hdr);
@@ -118,7 +118,7 @@ block *replaceBinderInternal(block *currBlock) {
   if (is_leaf_block(currBlock)) {
     return currBlock;
   }
-  const uint64_t hdr = currBlock->h.hdr;
+  uint64_t const hdr = currBlock->h.hdr;
   uint16_t layoutInt = layout_hdr(hdr);
   if (layoutInt) {
     uint32_t tag = tag_hdr(hdr);
@@ -182,7 +182,7 @@ block *substituteInternal(block *currBlock) {
   if (is_leaf_block(currBlock)) {
     return currBlock;
   }
-  const uint64_t hdr = currBlock->h.hdr;
+  uint64_t const hdr = currBlock->h.hdr;
   uint16_t layoutInt = layout_hdr(hdr);
   if (hook_KEQUAL_eq(currBlock, to_replace)) {
     idx2 = 0;
@@ -304,7 +304,7 @@ block *incrementDebruijn(block *currBlock) {
   if (is_leaf_block(currBlock)) {
     return currBlock;
   }
-  const uint64_t hdr = currBlock->h.hdr;
+  uint64_t const hdr = currBlock->h.hdr;
   uint16_t layoutInt = layout_hdr(hdr);
   if (layoutInt) {
     layout *layoutData = getLayoutData(layoutInt);

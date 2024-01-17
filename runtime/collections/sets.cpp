@@ -138,8 +138,8 @@ set set_map(set *s, block *(process)(block *)) {
 }
 
 void printSet(
-    writer *file, set *set, const char *unit, const char *element,
-    const char *concat, void *state) {
+    writer *file, set *set, char const *unit, char const *element,
+    char const *concat, void *state) {
   size_t size = set->size();
   if (size == 0) {
     sfprintf(file, "%s()", unit);

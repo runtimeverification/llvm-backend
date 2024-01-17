@@ -193,21 +193,21 @@ public:
 
   KElem(block *elem) { this->elem = elem; }
 
-  bool operator==(const KElem &other) const {
+  bool operator==(KElem const &other) const {
     return hook_KEQUAL_eq(this->elem, other.elem);
   }
 
-  bool operator!=(const KElem &other) const { return !(*this == other); }
+  bool operator!=(KElem const &other) const { return !(*this == other); }
 
-  bool operator<(const KElem &other) const {
+  bool operator<(KElem const &other) const {
     return hook_KEQUAL_lt(this->elem, other.elem);
   }
 
-  bool operator>(const KElem &other) const { return other < *this; }
+  bool operator>(KElem const &other) const { return other < *this; }
 
-  bool operator<=(const KElem &other) const { return !(other < *this); }
+  bool operator<=(KElem const &other) const { return !(other < *this); }
 
-  bool operator>=(const KElem &other) const { return !(*this < other); }
+  bool operator>=(KElem const &other) const { return !(*this < other); }
 
   operator block *() const { return elem; }
 
@@ -235,7 +235,7 @@ struct kore_alloc_heap {
 };
 
 struct HashBlock {
-  size_t operator()(const KElem &block) const noexcept { return hash_k(block); }
+  size_t operator()(KElem const &block) const noexcept { return hash_k(block); }
 };
 
 struct KEq {
@@ -288,17 +288,17 @@ void *constructCompositePattern(uint32_t tag, std::vector<void *> &arguments);
 
 extern "C" {
 
-block *parseConfiguration(const char *filename);
+block *parseConfiguration(char const *filename);
 block *deserializeConfiguration(char *, size_t);
 
-void printConfiguration(const char *filename, block *subject);
-void printStatistics(const char *filename, uint64_t steps);
+void printConfiguration(char const *filename, block *subject);
+void printStatistics(char const *filename, uint64_t steps);
 string *printConfigurationToString(block *subject);
 void printConfigurationToFile(FILE *, block *subject);
 void printSortedConfigurationToFile(
     FILE *file, block *subject, char const *sort);
 void printConfigurationInternal(
-    writer *file, block *subject, const char *sort, bool, void *);
+    writer *file, block *subject, char const *sort, bool, void *);
 
 // Returns a shared_ptr to a KOREPattern. The shared_ptr managess the lifetime
 // of the pattern and the pattern will be deallocated when the last reference
@@ -311,7 +311,7 @@ void printConfigurationInternal(
 // a POD struct.
 std::shared_ptr<kllvm::KOREPattern> termToKorePattern(block *);
 std::shared_ptr<kllvm::KOREPattern>
-sortedTermToKorePattern(block *, const char *);
+sortedTermToKorePattern(block *, char const *);
 
 // This function injects its argument into KItem before printing, using the sort
 // argument as the source sort. Doing so allows the term to be pretty-printed
@@ -323,68 +323,68 @@ string *debug_print_term(block *subject, char const *sort);
 mpz_ptr move_int(mpz_t);
 
 void serializeConfigurations(
-    const char *filename, std::unordered_set<block *, HashBlock, KEq> results);
+    char const *filename, std::unordered_set<block *, HashBlock, KEq> results);
 void serializeConfiguration(
     block *subject, char const *sort, char **data_out, size_t *size_out,
     bool emit_size);
 void serializeConfigurationToFile(
-    const char *filename, block *subject, bool emit_size);
-void writeUInt64ToFile(const char *filename, uint64_t i);
+    char const *filename, block *subject, bool emit_size);
+void writeUInt64ToFile(char const *filename, uint64_t i);
 void serializeTermToFile(
-    const char *filename, block *subject, const char *sort);
+    char const *filename, block *subject, char const *sort);
 void serializeRawTermToFile(
-    const char *filename, void *subject, const char *sort);
-void printVariableToFile(const char *filename, const char *varname);
+    char const *filename, void *subject, char const *sort);
+void printVariableToFile(char const *filename, char const *varname);
 
 // The following functions have to be generated at kompile time
 // and linked with the interpreter.
-uint32_t getTagForSymbolName(const char *symbolname);
+uint32_t getTagForSymbolName(char const *symbolname);
 struct blockheader getBlockHeaderForSymbol(uint32_t tag);
 bool isSymbolAFunction(uint32_t tag);
 bool isSymbolABinder(uint32_t tag);
 uint32_t getSymbolArity(uint32_t tag);
 void storeSymbolChildren(block *symbol, void *children[]);
 void *evaluateFunctionSymbol(uint32_t tag, void *arguments[]);
-void *getToken(const char *sortname, uint64_t len, const char *tokencontents);
+void *getToken(char const *sortname, uint64_t len, char const *tokencontents);
 layout *getLayoutData(uint16_t);
 uint32_t getInjectionForSortOfTag(uint32_t tag);
 
 bool hook_STRING_eq(SortString, SortString);
 
-const char *getSymbolNameForTag(uint32_t tag);
-const char *getReturnSortForTag(uint32_t tag);
-const char **getArgumentSortsForTag(uint32_t tag);
-const char *topSort(void);
+char const *getSymbolNameForTag(uint32_t tag);
+char const *getReturnSortForTag(uint32_t tag);
+char const **getArgumentSortsForTag(uint32_t tag);
+char const *topSort(void);
 
 typedef struct {
-  void (*visitConfig)(writer *, block *, const char *, bool, void *);
+  void (*visitConfig)(writer *, block *, char const *, bool, void *);
   void (*visitMap)(
-      writer *, map *, const char *, const char *, const char *, void *);
+      writer *, map *, char const *, char const *, char const *, void *);
   void (*visitList)(
-      writer *, list *, const char *, const char *, const char *, void *);
+      writer *, list *, char const *, char const *, char const *, void *);
   void (*visitSet)(
-      writer *, set *, const char *, const char *, const char *, void *);
-  void (*visitInt)(writer *, mpz_t, const char *, void *);
-  void (*visitFloat)(writer *, floating *, const char *, void *);
-  void (*visitBool)(writer *, bool, const char *, void *);
-  void (*visitStringBuffer)(writer *, stringbuffer *, const char *, void *);
-  void (*visitMInt)(writer *, size_t *, size_t, const char *, void *);
+      writer *, set *, char const *, char const *, char const *, void *);
+  void (*visitInt)(writer *, mpz_t, char const *, void *);
+  void (*visitFloat)(writer *, floating *, char const *, void *);
+  void (*visitBool)(writer *, bool, char const *, void *);
+  void (*visitStringBuffer)(writer *, stringbuffer *, char const *, void *);
+  void (*visitMInt)(writer *, size_t *, size_t, char const *, void *);
   void (*visitSeparator)(writer *, void *);
   void (*visitRangeMap)(
-      writer *, rangemap *, const char *, const char *, const char *, void *);
+      writer *, rangemap *, char const *, char const *, char const *, void *);
 } visitor;
 
 void printMap(
-    writer *, map *, const char *, const char *, const char *, void *);
+    writer *, map *, char const *, char const *, char const *, void *);
 void printRangeMap(
-    writer *, rangemap *, const char *, const char *, const char *, void *);
+    writer *, rangemap *, char const *, char const *, char const *, void *);
 void printSet(
-    writer *, set *, const char *, const char *, const char *, void *);
+    writer *, set *, char const *, char const *, char const *, void *);
 void printList(
-    writer *, list *, const char *, const char *, const char *, void *);
+    writer *, list *, char const *, char const *, char const *, void *);
 void visitChildren(block *subject, writer *file, visitor *printer, void *state);
 
-void sfprintf(writer *, const char *, ...);
+void sfprintf(writer *, char const *, ...);
 
 stringbuffer *hook_BUFFER_empty(void);
 stringbuffer *hook_BUFFER_concat(stringbuffer *buf, string *s);
@@ -407,14 +407,14 @@ block *set_iterator_next(setiter *);
 mapiter map_iterator(map *);
 block *map_iterator_next(mapiter *);
 
-extern const uint32_t first_inj_tag, last_inj_tag;
+extern uint32_t const first_inj_tag, last_inj_tag;
 bool is_injection(block *);
 block *strip_injection(block *);
-block *constructKItemInj(void *subject, const char *sort, bool raw_value);
-block *constructRawTerm(void *subject, const char *sort, bool raw_value);
+block *constructKItemInj(void *subject, char const *sort, bool raw_value);
+block *constructRawTerm(void *subject, char const *sort, bool raw_value);
 }
 
-std::string floatToString(const floating *);
+std::string floatToString(floating const *);
 void init_float2(floating *, std::string);
 
 std::string intToStringInBase(mpz_t, uint64_t);

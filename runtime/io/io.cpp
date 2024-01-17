@@ -35,7 +35,7 @@ static blockheader kseqHeader
 static std::map<std::string, std::string> logFiles;
 
 static block *block_errno() {
-  const char *errStr;
+  char const *errStr;
   switch (errno) {
   case EOF: errStr = GETTAG(EOF); break;
   case E2BIG: errStr = GETTAG(E2BIG); break;

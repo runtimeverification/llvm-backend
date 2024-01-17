@@ -28,7 +28,7 @@ transitiveClosure(std::unordered_map<
 } // namespace
 
 void KOREDefinition::addModule(sptr<KOREModule> Module) {
-  for (const auto &decl : Module->getDeclarations()) {
+  for (auto const &decl : Module->getDeclarations()) {
     if (auto *sortDecl
         = dynamic_cast<KORECompositeSortDeclaration *>(decl.get())) {
       sortDeclarations.insert({sortDecl->getName(), sortDecl});
@@ -107,7 +107,7 @@ void KOREDefinition::preprocess() {
   }
   auto symbols = std::map<std::string, std::vector<KORESymbol *>>{};
   unsigned nextOrdinal = 0;
-  for (const auto &decl : symbolDeclarations) {
+  for (auto const &decl : symbolDeclarations) {
     if (decl.second->getAttributes().count("freshGenerator")) {
       auto sort = decl.second->getSymbol()->getSort();
       if (sort->isConcrete()) {
@@ -128,8 +128,8 @@ void KOREDefinition::preprocess() {
     }
   }
   for (auto &module : modules) {
-    const auto &declarations = module->getDeclarations();
-    for (const auto &declaration : declarations) {
+    auto const &declarations = module->getDeclarations();
+    for (auto const &declaration : declarations) {
       auto *decl = dynamic_cast<KORESymbolDeclaration *>(declaration.get());
       if (decl == nullptr) {
         continue;
@@ -140,7 +140,7 @@ void KOREDefinition::preprocess() {
       }
     }
   }
-  for (const auto &entry : symbols) {
+  for (auto const &entry : symbols) {
     for (auto *symbol : entry.second) {
       auto *decl = symbolDeclarations.at(symbol->getName());
       symbol->instantiateSymbol(decl);
@@ -152,7 +152,7 @@ void KOREDefinition::preprocess() {
   auto layouts = std::unordered_map<std::string, uint16_t>{};
   auto variables
       = std::unordered_map<std::string, std::pair<uint32_t, uint32_t>>{};
-  for (const auto &entry : symbols) {
+  for (auto const &entry : symbols) {
     uint32_t firstTag = nextSymbol;
     for (auto *symbol : entry.second) {
       if (symbol->isConcrete()) {
@@ -175,10 +175,10 @@ void KOREDefinition::preprocess() {
           entry.first, std::pair<uint32_t, uint32_t>{firstTag, lastTag});
     }
   }
-  for (const auto &entry : symbols) {
+  for (auto const &entry : symbols) {
     auto range = variables.at(entry.first);
     for (auto *symbol : entry.second) {
-      for (const auto &sort : symbol->getArguments()) {
+      for (auto const &sort : symbol->getArguments()) {
         if (sort->isConcrete()) {
           hookedSorts[dynamic_cast<KORECompositeSort *>(sort.get())
                           ->getCategory(this)]

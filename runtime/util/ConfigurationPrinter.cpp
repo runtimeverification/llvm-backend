@@ -46,29 +46,29 @@ struct print_state {
   uint64_t varCounter{0};
 };
 
-void printInt(writer *file, mpz_t i, const char *sort, void *state) {
+void printInt(writer *file, mpz_t i, char const *sort, void *state) {
   auto str = intToString(i);
   sfprintf(file, R"(\dv{%s}("%s"))", sort, str.c_str());
 }
 
-void printFloat(writer *file, floating *f, const char *sort, void *state) {
+void printFloat(writer *file, floating *f, char const *sort, void *state) {
   std::string str = floatToString(f);
   sfprintf(file, R"(\dv{%s}("%s"))", sort, str.c_str());
 }
 
-void printBool(writer *file, bool b, const char *sort, void *state) {
-  const char *str = b ? "true" : "false";
+void printBool(writer *file, bool b, char const *sort, void *state) {
+  char const *str = b ? "true" : "false";
   sfprintf(file, R"(\dv{%s}("%s"))", sort, str);
 }
 
 void printStringBuffer(
-    writer *file, stringbuffer *b, const char *sort, void *state) {
+    writer *file, stringbuffer *b, char const *sort, void *state) {
   std::string str(b->contents->data, b->strlen);
   sfprintf(file, R"(\dv{%s}("%s"))", sort, str.c_str());
 }
 
 void printMInt(
-    writer *file, size_t *i, size_t bits, const char *sort, void *state) {
+    writer *file, size_t *i, size_t bits, char const *sort, void *state) {
   if (i == nullptr) {
     sfprintf(file, R"(\dv{%s}("0p%zd"))", sort, bits);
   } else {
@@ -78,7 +78,7 @@ void printMInt(
   }
 }
 
-void sfprintf(writer *file, const char *fmt, ...) {
+void sfprintf(writer *file, char const *fmt, ...) {
   va_list args;
   va_start(args, fmt);
   if (file->file) {
@@ -128,7 +128,7 @@ void printComma(writer *file, void *state) {
 
 // NOLINTNEXTLINE(*-cognitive-complexity)
 void printConfigurationInternal(
-    writer *file, block *subject, const char *sort, bool isVar,
+    writer *file, block *subject, char const *sort, bool isVar,
     void *state_ptr) {
   auto &state = *static_cast<print_state *>(state_ptr);
 
@@ -142,7 +142,7 @@ void printConfigurationInternal(
           sort, true, state_ptr);
       return;
     }
-    const char *symbol = getSymbolNameForTag(tag);
+    char const *symbol = getSymbolNameForTag(tag);
     sfprintf(file, "%s()", symbol);
     return;
   }
@@ -191,7 +191,7 @@ void printConfigurationInternal(
     state.boundVariables.push_back(
         *(block **)(((char *)subject) + sizeof(blockheader)));
   }
-  const char *symbol = getSymbolNameForTag(tag);
+  char const *symbol = getSymbolNameForTag(tag);
   std::string symbolStr(symbol);
   if (symbolStr.rfind("inj{", 0) == 0) {
     std::string prefix = symbolStr.substr(0, symbolStr.find_first_of(','));
@@ -221,13 +221,13 @@ void printConfigurationInternal(
   sfprintf(file, ")");
 }
 
-void printStatistics(const char *filename, uint64_t steps) {
+void printStatistics(char const *filename, uint64_t steps) {
   FILE *file = fopen(filename, "w");
   fprintf(file, "%" PRIu64 "\n", steps - 1); // off by one adjustment
   fclose(file);
 }
 
-void printConfiguration(const char *filename, block *subject) {
+void printConfiguration(char const *filename, block *subject) {
   FILE *file = fopen(filename, "a");
   auto state = print_state();
 
@@ -243,7 +243,7 @@ void printConfiguration(const char *filename, block *subject) {
 // code is not on a hot path.
 // NOLINTBEGIN(performance-unnecessary-value-param)
 void printConfigurations(
-    const char *filename, std::unordered_set<block *, HashBlock, KEq> results) {
+    char const *filename, std::unordered_set<block *, HashBlock, KEq> results) {
   FILE *file = fopen(filename, "a");
   auto state = print_state();
 
@@ -254,7 +254,7 @@ void printConfigurations(
   } else {
     sfprintf(&w, "\\or{SortGeneratedTopCell{}}(");
     size_t j = 0;
-    for (const auto &subject : results) {
+    for (auto const &subject : results) {
       printConfigurationInternal(&w, subject, nullptr, false, &state);
       if (++j != results.size()) {
         sfprintf(&w, ",");
@@ -306,7 +306,7 @@ void printSortedConfigurationToFile(
 
 extern "C" void printMatchResult(
     std::ostream &os, MatchLog *matchLog, size_t logSize,
-    const std::string &definitionPath) {
+    std::string const &definitionPath) {
   auto subject_file = temporary_file("subject_XXXXXX");
   auto *subject = subject_file.file_pointer("w");
   auto pattern_file = temporary_file("pattern_XXXXXX");
@@ -372,7 +372,7 @@ void printValueOfType(
   }
 }
 
-void printVariableToFile(const char *filename, const char *varname) {
+void printVariableToFile(char const *filename, char const *varname) {
   FILE *file = fopen(filename, "a");
 
   fprintf(file, "%s", varname);

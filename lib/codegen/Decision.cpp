@@ -109,7 +109,7 @@ getFailPattern(DecisionCase const &_case, bool isInt) {
   auto result = fmt::format("{}(", ast_to_string(*_case.getConstructor()));
 
   std::string conn;
-  for (const auto &i : _case.getConstructor()->getArguments()) {
+  for (auto const &i : _case.getConstructor()->getArguments()) {
     result += fmt::format("{}Var'Unds':{}", conn, ast_to_string(*i));
     conn = ",";
   }
@@ -120,13 +120,13 @@ getFailPattern(DecisionCase const &_case, bool isInt) {
 }
 
 static std::pair<std::string, std::string> getFailPattern(
-    std::vector<std::pair<llvm::BasicBlock *, const DecisionCase *>> const
+    std::vector<std::pair<llvm::BasicBlock *, DecisionCase const *>> const
         &caseData,
     bool isInt, llvm::BasicBlock *FailBlock) {
   std::string reason;
   std::string sort;
-  for (const auto &entry : caseData) {
-    const auto &_case = *entry.second;
+  for (auto const &entry : caseData) {
+    auto const &_case = *entry.second;
     if (entry.first != FailBlock) {
       auto caseReason = getFailPattern(_case, isInt);
       if (reason.empty()) {
@@ -152,8 +152,8 @@ void SwitchNode::codegen(Decision *d) {
     ptrVal = d->ptrTerm(val);
   }
   llvm::BasicBlock *_default = d->FailureBlock;
-  const DecisionCase *defaultCase = nullptr;
-  std::vector<std::pair<llvm::BasicBlock *, const DecisionCase *>> caseData;
+  DecisionCase const *defaultCase = nullptr;
+  std::vector<std::pair<llvm::BasicBlock *, DecisionCase const *>> caseData;
   int idx = 0;
   bool isInt = false;
   for (auto &_case : cases) {
@@ -222,7 +222,7 @@ void SwitchNode::codegen(Decision *d) {
   d->ChoiceBlock = nullptr;
   auto *switchBlock = d->CurrentBlock;
   for (auto &entry : caseData) {
-    const auto &_case = *entry.second;
+    auto const &_case = *entry.second;
     if (entry.first == d->FailureBlock) {
       if (d->FailPattern) {
         d->FailSubject->addIncoming(ptrVal, switchBlock);
@@ -735,7 +735,7 @@ void makeEvalOrAnywhereFunction(
   std::vector<llvm::Type *> args;
   std::vector<llvm::Metadata *> debugArgs;
   std::vector<ValueType> cats;
-  for (const auto &sort : function->getArguments()) {
+  for (auto const &sort : function->getArguments()) {
     auto cat = dynamic_cast<KORECompositeSort *>(sort.get())
                    ->getCategory(definition);
     debugArgs.push_back(getDebugType(cat, ast_to_string(*sort)));

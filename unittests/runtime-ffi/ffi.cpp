@@ -30,7 +30,7 @@ struct point2 {
 };
 
 #define NUM_SYMBOLS 6
-const char *symbols[NUM_SYMBOLS]
+char const *symbols[NUM_SYMBOLS]
     = {TYPETAG(struct),
        TYPETAG(uint),
        TYPETAG(sint),
@@ -38,16 +38,16 @@ const char *symbols[NUM_SYMBOLS]
        "inj{SortBytes{}, SortKItem{}}",
        "inj{SortFFIType{}, SortKItem{}}"};
 
-const char **getArgumentSortsForTag(uint32_t tag) {
+char const **getArgumentSortsForTag(uint32_t tag) {
   return nullptr;
 }
 
-const uint32_t first_inj_tag = 4;
-const uint32_t last_inj_tag = 5;
+uint32_t const first_inj_tag = 4;
+uint32_t const last_inj_tag = 5;
 
 char *getTerminatedString(string *str);
 
-uint32_t getTagForSymbolName(const char *s) {
+uint32_t getTagForSymbolName(char const *s) {
   for (int i = 0; i < NUM_SYMBOLS; i++) {
     if (0 == strcmp(symbols[i], s)) {
       return i + 1;
@@ -80,8 +80,8 @@ bool during_gc() {
 }
 
 void printConfigurationInternal(
-    writer *file, block *subject, const char *sort, bool, void *) { }
-void sfprintf(writer *, const char *, ...) { }
+    writer *file, block *subject, char const *sort, bool, void *) { }
+void sfprintf(writer *, char const *, ...) { }
 
 bool hook_KEQUAL_eq(block *lhs, block *rhs) {
   return lhs->h.hdr == rhs->h.hdr;

@@ -17,14 +17,14 @@ using Cache = std::map<std::string, uint32_t>;
 static thread_local Cache cache;
 
 extern "C" {
-uint32_t getTagForSymbolNameInternal(const char *);
+uint32_t getTagForSymbolNameInternal(char const *);
 
-void init_float(floating *result, const char *c_str) {
+void init_float(floating *result, char const *c_str) {
   std::string contents = std::string(c_str);
   init_float2(result, contents);
 }
 
-uint32_t getTagForSymbolName(const char *name) {
+uint32_t getTagForSymbolName(char const *name) {
   std::string s = name;
   // https://stackoverflow.com/a/101980/6209703
   auto lb = cache.lower_bound(s);
@@ -87,21 +87,21 @@ struct construction {
 };
 
 // NOLINTNEXTLINE(*-cognitive-complexity)
-extern "C" void *constructInitialConfiguration(const KOREPattern *initial) {
-  std::vector<std::variant<const KOREPattern *, construction>> workList{
+extern "C" void *constructInitialConfiguration(KOREPattern const *initial) {
+  std::vector<std::variant<KOREPattern const *, construction>> workList{
       initial};
   std::vector<void *> output;
 
   while (!workList.empty()) {
-    std::variant<const KOREPattern *, construction> current = workList.back();
+    std::variant<KOREPattern const *, construction> current = workList.back();
     workList.pop_back();
 
-    if (std::holds_alternative<const KOREPattern *>(current)) {
-      const auto *constructor = dynamic_cast<const KORECompositePattern *>(
-          *std::get_if<const KOREPattern *>(&current));
+    if (std::holds_alternative<KOREPattern const *>(current)) {
+      auto const *constructor = dynamic_cast<KORECompositePattern const *>(
+          *std::get_if<KOREPattern const *>(&current));
       assert(constructor && "Pattern in worklist is not composite");
 
-      const KORESymbol *symbol = constructor->getConstructor();
+      KORESymbol const *symbol = constructor->getConstructor();
       assert(
           symbol->isConcrete()
           && "found sort variable in initial configuration");
@@ -129,7 +129,7 @@ extern "C" void *constructInitialConfiguration(const KOREPattern *initial) {
 
       construction term{tag, constructor->getArguments().size()};
       workList.emplace_back(term);
-      for (const auto &child : constructor->getArguments()) {
+      for (auto const &child : constructor->getArguments()) {
         workList.emplace_back(child.get());
       }
     } else {
@@ -248,7 +248,7 @@ deserializeInitialConfiguration(It ptr, It end, binary_version version) {
 }
 // NOLINTEND(*-cognitive-complexity)
 
-block *parseConfiguration(const char *filename) {
+block *parseConfiguration(char const *filename) {
   if (has_binary_kore_header(filename)) {
     auto data = file_contents(filename);
     return deserializeConfiguration(data.data(), data.size());

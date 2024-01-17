@@ -32,7 +32,7 @@ private:
   KOREScanner scanner;
   location loc;
   [[noreturn]] static void
-  error(const location &loc, const std::string &err_message);
+  error(location const &loc, std::string const &err_message);
 
   std::string consume(token next);
   token peek();
