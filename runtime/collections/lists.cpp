@@ -235,8 +235,8 @@ list list_push_back(list *list, block *value) {
 }
 
 void printList(
-    writer *file, list *list, const char *unit, const char *element,
-    const char *concat, void *state) {
+    writer *file, list *list, char const *unit, char const *element,
+    char const *concat, void *state) {
   size_t size = list->size();
   if (size == 0) {
     sfprintf(file, "%s()", unit);

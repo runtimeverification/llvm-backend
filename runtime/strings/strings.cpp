@@ -166,8 +166,8 @@ hook_STRING_rfindChar(SortString haystack, SortString needle, SortInt pos) {
   upos += 1;
   auto end = (upos < len(haystack)) ? upos : len(haystack);
   auto out = std::find_first_of(
-      std::reverse_iterator<const char *>(&haystack->data[end]),
-      std::reverse_iterator<const char *>(&haystack->data[0]), &needle->data[0],
+      std::reverse_iterator<char const *>(&haystack->data[end]),
+      std::reverse_iterator<char const *>(&haystack->data[0]), &needle->data[0],
       &needle->data[len(needle)]);
   auto ret = &*out - &haystack->data[0];
   auto res = (ret < end) ? ret : -1;
@@ -175,7 +175,7 @@ hook_STRING_rfindChar(SortString haystack, SortString needle, SortInt pos) {
   return move_int(result);
 }
 
-string *makeString(const char *input, ssize_t len = -1) {
+string *makeString(char const *input, ssize_t len = -1) {
   if (len == -1) {
     len = strlen(input);
   }
@@ -214,7 +214,7 @@ SortString hook_STRING_base2string_long(SortInt input, uint64_t base) {
 SortInt hook_STRING_string2base_long(SortString input, uint64_t base) {
   mpz_t result;
   size_t length;
-  const char *dataStart;
+  char const *dataStart;
 
   if (*(input->data) == '+') {
     length = len(input) - 1;
@@ -445,7 +445,7 @@ SortString hook_BUFFER_toString(SortStringBuffer buf) {
 void init_float2(floating *result, std::string contents) {
   size_t prec;
   size_t exp;
-  const char last = contents.back();
+  char const last = contents.back();
   if (last == 'f' || last == 'F') {
     prec = 24;
     exp = 8;

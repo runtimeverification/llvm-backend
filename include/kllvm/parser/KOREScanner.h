@@ -49,8 +49,8 @@ private:
   token yylex(std::string *lval, location *loc) {
     return yylex(lval, loc, scanner);
   }
-  void error(const location &loc, const std::string &err_message);
-  std::string codepoint_to_utf8(unsigned long int code, const location &loc);
+  void error(location const &loc, std::string const &err_message);
+  std::string codepoint_to_utf8(unsigned long int code, location const &loc);
 
   FILE *in;
   std::string stringBuffer;

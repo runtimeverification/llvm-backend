@@ -7,7 +7,7 @@ using namespace kllvm;
  * through any header files, so we pull them in manually here.
  */
 extern "C" {
-void *constructInitialConfiguration(const KOREPattern *);
+void *constructInitialConfiguration(KOREPattern const *);
 }
 
 namespace kllvm::bindings {
@@ -94,7 +94,7 @@ evaluate_function(std::shared_ptr<KORECompositePattern> const &term) {
 
   auto label = ast_to_string(*term->getConstructor());
   auto tag = getTagForSymbolName(label.c_str());
-  const auto *return_sort = getReturnSortForTag(tag);
+  auto const *return_sort = getReturnSortForTag(tag);
   auto *result = evaluateFunctionSymbol(tag, term_args.data());
 
   return sortedTermToKorePattern(static_cast<block *>(result), return_sort);

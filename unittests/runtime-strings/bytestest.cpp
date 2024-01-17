@@ -9,7 +9,7 @@
 #define KCHAR char
 extern "C" {
 
-uint32_t getTagForSymbolName(const char *s) {
+uint32_t getTagForSymbolName(char const *s) {
   return 0;
 }
 

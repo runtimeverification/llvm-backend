@@ -57,7 +57,7 @@ int main(int argc, char **argv) {
   std::vector<ptr<KOREDeclaration>> axioms = parser2.declarations();
   std::sort(
       axioms.begin(), axioms.end(),
-      [](const ptr<KOREDeclaration> &l, const ptr<KOREDeclaration> &r) {
+      [](ptr<KOREDeclaration> const &l, ptr<KOREDeclaration> const &r) {
         std::string lStr = l->getStringAttribute("priority");
         std::string rStr = r->getStringAttribute("priority");
         int lInt = std::stoi(lStr);

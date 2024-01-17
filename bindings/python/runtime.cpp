@@ -43,7 +43,7 @@ extern "C" {
 void initStaticObjects(void);
 void freeAllKoreMem(void);
 block *take_steps(int64_t, block *);
-void *constructInitialConfiguration(const KOREPattern *initial);
+void *constructInitialConfiguration(KOREPattern const *initial);
 }
 
 void bind_runtime(py::module_ &m) {

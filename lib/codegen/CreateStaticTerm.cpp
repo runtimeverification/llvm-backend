@@ -31,7 +31,7 @@ namespace kllvm {
  * triangle injection pair */
 llvm::Constant *CreateStaticTerm::notInjectionCase(
     KORECompositePattern *constructor, llvm::Constant *val) {
-  const KORESymbol *symbol = constructor->getConstructor();
+  KORESymbol const *symbol = constructor->getConstructor();
   llvm::StructType *BlockType = getBlockType(Module, Definition, symbol);
 
   std::stringstream koreString;
@@ -59,7 +59,7 @@ llvm::Constant *CreateStaticTerm::notInjectionCase(
         EmptyArrayType, llvm::ArrayRef<llvm::Constant *>()));
 
     int idx = 2;
-    for (const auto &child : constructor->getArguments()) {
+    for (auto const &child : constructor->getArguments()) {
       llvm::Constant *ChildValue;
       if (idx++ == 2 && val != nullptr) {
         ChildValue = val;
@@ -84,7 +84,7 @@ llvm::Constant *CreateStaticTerm::notInjectionCase(
 std::pair<llvm::Constant *, bool>
 CreateStaticTerm::operator()(KOREPattern *pattern) {
   if (auto *constructor = dynamic_cast<KORECompositePattern *>(pattern)) {
-    const KORESymbol *symbol = constructor->getConstructor();
+    KORESymbol const *symbol = constructor->getConstructor();
     assert(symbol->isConcrete() && "not supported yet: sort variables");
     if (symbol->getName() == "\\dv") {
       auto *sort = dynamic_cast<KORECompositeSort *>(
@@ -147,7 +147,7 @@ CreateStaticTerm::createToken(ValueType sort, std::string contents) {
     auto *globalVar = llvm::dyn_cast<llvm::GlobalVariable>(global);
     if (!globalVar->hasInitializer()) {
       mpz_t value;
-      const char *dataStart
+      char const *dataStart
           = contents.at(0) == '+' ? contents.c_str() + 1 : contents.c_str();
       mpz_init_set_str(value, dataStart, 10);
       size_t size = mpz_size(value);
@@ -202,7 +202,7 @@ CreateStaticTerm::createToken(ValueType sort, std::string contents) {
     if (!globalVar->hasInitializer()) {
       size_t prec;
       size_t exp;
-      const char last = contents.back();
+      char const last = contents.back();
       if (last == 'f' || last == 'F') {
         prec = 24;
         exp = 8;

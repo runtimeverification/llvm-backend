@@ -32,7 +32,7 @@ class IterNextNode;
 
 struct HashVar {
   size_t
-  operator()(const std::pair<std::string, llvm::Type *> &s) const noexcept {
+  operator()(std::pair<std::string, llvm::Type *> const &s) const noexcept {
     return std::hash<std::string>()(s.first)
            ^ std::hash<llvm::Type *>()(s.second);
   }
@@ -110,7 +110,7 @@ public:
       , child(child) { }
 
   KORESymbol *getConstructor() const { return constructor; }
-  const std::vector<var_type> &getBindings() const { return bindings; }
+  std::vector<var_type> const &getBindings() const { return bindings; }
   void addBinding(std::string name, ValueType type, llvm::Module *mod) {
     bindings.push_back(std::make_pair(name, getParamType(type, mod)));
   }
@@ -128,7 +128,7 @@ private:
 
   bool isCheckNull;
 
-  SwitchNode(const std::string &name, llvm::Type *type, bool isCheckNull)
+  SwitchNode(std::string const &name, llvm::Type *type, bool isCheckNull)
       : name(name)
       , type(type)
       , isCheckNull(isCheckNull) { }
@@ -137,13 +137,13 @@ public:
   void addCase(DecisionCase _case) { cases.push_back(_case); }
 
   static SwitchNode *
-  Create(const std::string &name, llvm::Type *type, bool isCheckNull) {
+  Create(std::string const &name, llvm::Type *type, bool isCheckNull) {
     return new SwitchNode(name, type, isCheckNull);
   }
 
   std::string getName() const { return name; }
   llvm::Type *getType() const { return type; }
-  const std::vector<DecisionCase> &getCases() const { return cases; }
+  std::vector<DecisionCase> const &getCases() const { return cases; }
 
   virtual void codegen(Decision *d);
   virtual void preprocess(std::unordered_set<LeafNode *> &leaves) {
@@ -172,7 +172,7 @@ private:
   DecisionNode *child;
 
   MakePatternNode(
-      const std::string &name, llvm::Type *type, KOREPattern *pattern,
+      std::string const &name, llvm::Type *type, KOREPattern *pattern,
       std::vector<var_type> &uses, DecisionNode *child)
       : name(name)
       , type(type)
@@ -182,7 +182,7 @@ private:
 
 public:
   static MakePatternNode *Create(
-      const std::string &name, llvm::Type *type, KOREPattern *pattern,
+      std::string const &name, llvm::Type *type, KOREPattern *pattern,
       std::vector<var_type> &uses, DecisionNode *child) {
     return new MakePatternNode(name, type, pattern, uses, child);
   }
@@ -212,7 +212,7 @@ private:
   llvm::Type *type;
 
   FunctionNode(
-      const std::string &name, const std::string &function, DecisionNode *child,
+      std::string const &name, std::string const &function, DecisionNode *child,
       ValueType cat, llvm::Type *type)
       : name(name)
       , function(function)
@@ -222,12 +222,12 @@ private:
 
 public:
   static FunctionNode *Create(
-      const std::string &name, const std::string &function, DecisionNode *child,
+      std::string const &name, std::string const &function, DecisionNode *child,
       ValueType cat, llvm::Type *type) {
     return new FunctionNode(name, function, child, cat, type);
   }
 
-  const std::vector<std::pair<var_type, ValueType>> &getBindings() const {
+  std::vector<std::pair<var_type, ValueType>> const &getBindings() const {
     return bindings;
   }
   void addBinding(std::string name, ValueType type, llvm::Module *mod) {
@@ -256,15 +256,15 @@ private:
 
   DecisionNode *child = nullptr;
 
-  LeafNode(const std::string &name)
+  LeafNode(std::string const &name)
       : name(name) { }
 
 public:
-  static LeafNode *Create(const std::string &name) {
+  static LeafNode *Create(std::string const &name) {
     return new LeafNode(name);
   }
 
-  const std::vector<var_type> &getBindings() const { return bindings; }
+  std::vector<var_type> const &getBindings() const { return bindings; }
   void addBinding(std::string name, ValueType type, llvm::Module *mod) {
     bindings.push_back(std::make_pair(name, getParamType(type, mod)));
   }
@@ -296,8 +296,8 @@ private:
   DecisionNode *child;
 
   MakeIteratorNode(
-      const std::string &collection, llvm::Type *collectionType,
-      const std::string &name, llvm::Type *type, const std::string &hookName,
+      std::string const &collection, llvm::Type *collectionType,
+      std::string const &name, llvm::Type *type, std::string const &hookName,
       DecisionNode *child)
       : collection(collection)
       , collectionType(collectionType)
@@ -308,8 +308,8 @@ private:
 
 public:
   static MakeIteratorNode *Create(
-      const std::string &collection, llvm::Type *collectionType,
-      const std::string &name, llvm::Type *type, const std::string &hookName,
+      std::string const &collection, llvm::Type *collectionType,
+      std::string const &name, llvm::Type *type, std::string const &hookName,
       DecisionNode *child) {
     return new MakeIteratorNode(
         collection, collectionType, name, type, hookName, child);
@@ -336,9 +336,9 @@ private:
   DecisionNode *child;
 
   IterNextNode(
-      const std::string &iterator, llvm::Type *iteratorType,
-      const std::string &binding, llvm::Type *bindingType,
-      const std::string &hookName, DecisionNode *child)
+      std::string const &iterator, llvm::Type *iteratorType,
+      std::string const &binding, llvm::Type *bindingType,
+      std::string const &hookName, DecisionNode *child)
       : iterator(iterator)
       , iteratorType(iteratorType)
       , binding(binding)
@@ -348,9 +348,9 @@ private:
 
 public:
   static IterNextNode *Create(
-      const std::string &iterator, llvm::Type *iteratorType,
-      const std::string &binding, llvm::Type *bindingType,
-      const std::string &hookName, DecisionNode *child) {
+      std::string const &iterator, llvm::Type *iteratorType,
+      std::string const &binding, llvm::Type *bindingType,
+      std::string const &hookName, DecisionNode *child) {
     return new IterNextNode(
         iterator, iteratorType, binding, bindingType, hookName, child);
   }

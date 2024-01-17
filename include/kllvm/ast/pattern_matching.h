@@ -400,7 +400,7 @@ namespace literals {
  * to create `pattern` lens objects.
  */
 inline detail::pattern_forwarder
-operator""_p(const char *str, std::size_t data) {
+operator""_p(char const *str, std::size_t data) {
   return {std::string(str, data)};
 }
 
