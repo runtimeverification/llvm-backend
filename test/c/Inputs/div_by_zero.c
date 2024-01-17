@@ -22,7 +22,7 @@ int main(int argc, char **argv) {
 
   char *data;
   size_t size;
-  api.kore_simplify(good_call, sort_int, &data, &size);
+  api.kore_simplify(NULL, good_call, sort_int, &data, &size);
 
   FILE *f = fopen(argv[2], "wb");
   if (!f) {
@@ -32,7 +32,7 @@ int main(int argc, char **argv) {
   fwrite(data, size, 1, f);
   fclose(f);
 
-  api.kore_simplify(bad_call, sort_int, &data, &size);
+  api.kore_simplify(NULL, bad_call, sort_int, &data, &size);
 
   api.kore_pattern_free(good_call);
   api.kore_pattern_free(bad_call);

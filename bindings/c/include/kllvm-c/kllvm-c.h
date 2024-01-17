@@ -123,7 +123,8 @@ bool kore_block_get_bool(block *);
 bool kore_simplify_bool(kore_pattern const *);
 
 void kore_simplify(
-    kore_pattern const *pattern, kore_sort const *sort, char **, size_t *);
+    kore_error *err, kore_pattern const *pattern, kore_sort const *sort,
+    char **, size_t *);
 
 void kore_simplify_binary(char *, size_t, kore_sort const *, char **, size_t *);
 
