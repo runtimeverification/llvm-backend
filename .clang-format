@@ -20,5 +20,6 @@ SpaceBeforeCpp11BracedList: false
 DerivePointerAlignment: false
 PointerAlignment: Right
 ReflowComments: false
-QualifierAlignment: Right
+QualifierAlignment: Custom
+QualifierOrder: ['static', 'constexpr', 'inline', 'friend', 'type', 'const', 'volatile', 'restrict']
 ...

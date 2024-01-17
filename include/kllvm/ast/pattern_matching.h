@@ -107,17 +107,17 @@ struct subject_count;
 
 template <>
 struct subject_count<any_> {
-  constexpr static size_t value = 0;
+  static constexpr size_t value = 0;
 };
 
 template <typename Inner>
 struct subject_count<subject<Inner>> {
-  constexpr static size_t value = 1 + subject_count<Inner>::value;
+  static constexpr size_t value = 1 + subject_count<Inner>::value;
 };
 
 template <typename... Ts>
 struct subject_count<pattern<Ts...>> {
-  constexpr static size_t value = (subject_count<Ts>::value + ... + 0);
+  static constexpr size_t value = (subject_count<Ts>::value + ... + 0);
 };
 
 template <typename T>
