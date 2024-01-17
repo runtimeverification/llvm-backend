@@ -81,7 +81,7 @@ struct kore_error {
     return nullptr;
   }
 
-  void set_error(const std::string &msg) {
+  void set_error(std::string const &msg) {
     success_ = false;
     message_ = msg;
   }
