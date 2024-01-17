@@ -20,9 +20,13 @@ int main(int argc, char **argv) {
   kore_pattern *bad_call = api.kore_pattern_parse(
       "Lblfoo{}(\\dv{SortInt{}}(\"2\"), \\dv{SortInt{}}(\"0\"))");
 
+  kore_error *err = api.kore_error_new();
+
   char *data;
   size_t size;
-  api.kore_simplify(NULL, good_call, sort_int, &data, &size);
+
+  api.kore_simplify(err, good_call, sort_int, &data, &size);
+  assert(api.kore_error_is_success(err));
 
   FILE *f = fopen(argv[2], "wb");
   if (!f) {
@@ -32,8 +36,12 @@ int main(int argc, char **argv) {
   fwrite(data, size, 1, f);
   fclose(f);
 
-  api.kore_simplify(NULL, bad_call, sort_int, &data, &size);
+  api.kore_simplify(err, bad_call, sort_int, &data, &size);
+  assert(!api.kore_error_is_success(err));
 
+  printf("%s\n", api.kore_error_message(err));
+
+  api.kore_error_free(err);
   api.kore_pattern_free(good_call);
   api.kore_pattern_free(bad_call);
   api.kore_sort_free(sort_int);

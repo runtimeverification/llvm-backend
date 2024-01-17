@@ -2,7 +2,7 @@
 // RUN: %kompile %s c -o %t.dir/libtest.so
 // RUN: %kllvm-clang Inputs/div_by_zero.c -o %t
 
-// RUN: %t %t.dir/libtest.so %t.foo.bin
+// RUN: %t %t.dir/libtest.so %t.foo.bin | grep -Fq '[hook_INT_tdiv]: Division by zero: 2 / 0'
 // RUN: %kore-convert %t.foo.bin | grep -q '\\dv{SortInt{}}("2")'
 
 [topCellInitializer{}(LblinitGeneratedTopCell{}()), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/Users/brucecollie/code/llvm-backend/test/c/k-files/div-by-zero.k)")]
