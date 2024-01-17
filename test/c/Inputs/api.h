@@ -4,6 +4,10 @@
 #include <kllvm-c/kllvm-c.h>
 
 struct kllvm_c_api {
+  kore_error *(*kore_error_new)(void);
+  bool (*kore_error_is_success)(kore_error const *);
+  char const *(*kore_error_message)(kore_error const *);
+  void (*kore_error_free)(kore_error *);
   char *(*kore_pattern_dump)(kore_pattern const *);
   char *(*kore_pattern_pretty_print)(kore_pattern const *);
   void (*kore_pattern_serialize)(kore_pattern const *, char **, size_t *);
