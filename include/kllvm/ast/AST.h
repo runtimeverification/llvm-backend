@@ -934,6 +934,26 @@ public:
   void addAttribute(sptr<KORECompositePattern> Attribute);
   void print(std::ostream &Out, unsigned indent = 0) const;
 
+  /*
+   * Build this definition's subsort relation from axioms that have the
+   * `subsort` attribute.
+   *
+   * The returned map is as follows:
+   *
+   *   S |-> {T . S is a subsort of T}
+   */
+  SubsortMap getSubsorts() const;
+
+  /*
+   * Build this definition's overload relation from axioms that have the
+   * `overload` attribute.
+   *
+   * The returned map is as follows:
+   *
+   *  P |-> {Q . P is a more specific overload of Q}
+   */
+  SymbolMap getOverloads() const;
+
   std::vector<sptr<KOREModule>> const &getModules() const { return modules; }
   KORECompositeSortDeclarationMapType const &getSortDeclarations() const {
     return sortDeclarations;
@@ -968,27 +988,6 @@ void readMultimap(
     std::map<std::string, std::set<std::string>> &, std::string const &);
 
 sptr<KOREPattern> stripRawTerm(sptr<KOREPattern> const &term);
-
-template <typename Elem, typename Hash, typename Equal>
-std::unordered_map<Elem *, std::unordered_set<Elem *, Hash, Equal>, Hash, Equal>
-transitiveClosure(std::unordered_map<
-                  Elem *, std::unordered_set<Elem *, Hash, Equal>, Hash, Equal>
-                      relations) {
-  bool dirty;
-  do {
-    dirty = false;
-    for (auto &entry : relations) {
-      SortSet newSucc;
-      for (auto &elem : entry.second) {
-        auto &relation = relations[elem];
-        for (auto elem2 : relation) {
-          dirty |= relations[entry.first].insert(elem2).second;
-        }
-      }
-    }
-  } while (dirty);
-  return relations;
-}
 
 namespace detail {
 
