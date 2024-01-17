@@ -253,8 +253,8 @@ PreprocessedPrintData getPrintData(
   std::map<std::string, std::string> hooks;
   std::map<std::string, std::vector<std::string>> colors;
 
-  SubsortMap subsorts;
-  SymbolMap overloads;
+  auto subsorts = def->getSubsorts();
+  auto overloads = def->getOverloads();
 
   for (const auto &entry : def->getSymbolDeclarations()) {
     std::string name = entry.first;
@@ -304,30 +304,6 @@ PreprocessedPrintData getPrintData(
       hooks[name] = entry.second->getStringAttribute("hook");
     }
   }
-
-  for (auto *axiom : def->getAxioms()) {
-    if (axiom->getAttributes().count("subsort")) {
-      KORECompositePattern *att = axiom->getAttributes().at("subsort").get();
-      KORESort *innerSort
-          = att->getConstructor()->getFormalArguments()[0].get();
-      KORESort *outerSort
-          = att->getConstructor()->getFormalArguments()[1].get();
-      subsorts[innerSort].insert(outerSort);
-    }
-    if (axiom->getAttributes().count("overload")) {
-      KORECompositePattern *att = axiom->getAttributes().at("overload").get();
-      KORESymbol *innerSymbol
-          = dynamic_cast<KORECompositePattern *>(att->getArguments()[1].get())
-                ->getConstructor();
-      KORESymbol *outerSymbol
-          = dynamic_cast<KORECompositePattern *>(att->getArguments()[0].get())
-                ->getConstructor();
-      overloads[innerSymbol].insert(outerSymbol);
-    }
-  }
-
-  subsorts = transitiveClosure(subsorts);
-  overloads = transitiveClosure(overloads);
 
   PrettyPrintData data
       = {formats, colors,   terminals, priorities, leftAssoc, rightAssoc,

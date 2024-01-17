@@ -8,6 +8,10 @@ add_library(Parser
   KOREParser.cpp
 )
 
+target_link_libraries(Parser
+  PUBLIC AST
+)
+
 install(
   TARGETS Parser
   ARCHIVE DESTINATION lib/kllvm
