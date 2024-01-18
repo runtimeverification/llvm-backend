@@ -1,5 +1,6 @@
 // RUN: %interpreter
 // RUN: %check-diff
+// RUN: rm -f %S/*_foo
 [topCellInitializer{}(LblinitGeneratedTopCell{}()), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/llvm-backend/test/defn/k-files/test26.k)")]
 
 module BASIC-K
