@@ -188,15 +188,13 @@ void kore_pattern_free(kore_pattern const *pat) {
 }
 
 kore_pattern *kore_pattern_parse(char const *kore_text) {
-  auto *pat = new kore_pattern;
-  pat->ptr_ = kllvm::parser::KOREParser::from_string(kore_text)->pattern();
-  return pat;
+  return new kore_pattern{
+      kllvm::parser::KOREParser::from_string(kore_text)->pattern()};
 }
 
 kore_pattern *kore_pattern_parse_file(char const *filename) {
-  auto *pat = new kore_pattern;
-  pat->ptr_ = kllvm::parser::KOREParser(std::string(filename)).pattern();
-  return pat;
+  return new kore_pattern{
+      kllvm::parser::KOREParser(std::string(filename)).pattern()};
 }
 
 kore_pattern *kore_pattern_new_token(char const *value, kore_sort const *sort) {
@@ -218,9 +216,8 @@ kore_pattern *kore_pattern_new_token_with_len(
 
 kore_pattern *kore_pattern_new_injection(
     kore_pattern const *term, kore_sort const *from, kore_sort const *to) {
-  auto *inj = new kore_pattern;
-  inj->ptr_ = kllvm::bindings::make_injection(term->ptr_, from->ptr_, to->ptr_);
-  return inj;
+  return new kore_pattern{
+      kllvm::bindings::make_injection(term->ptr_, from->ptr_, to->ptr_)};
 }
 
 kore_pattern *kore_pattern_make_interpreter_input(
@@ -263,9 +260,7 @@ kore_pattern *kore_pattern_make_interpreter_input(
 }
 
 kore_pattern *kore_pattern_desugar_associative(kore_pattern const *pat) {
-  auto *ret = new kore_pattern;
-  ret->ptr_ = pat->ptr_->desugarAssociative();
-  return ret;
+  return new kore_pattern{pat->ptr_->desugarAssociative()};
 }
 
 block *kore_pattern_construct(kore_pattern const *pat) {
@@ -284,9 +279,7 @@ char *kore_block_dump(block *term) {
 }
 
 kore_pattern *kore_pattern_from_block(block *term) {
-  auto *pat = new kore_pattern;
-  pat->ptr_ = kllvm::bindings::term_to_pattern(term);
-  return pat;
+  return new kore_pattern{kllvm::bindings::term_to_pattern(term)};
 }
 
 bool kore_block_get_bool(block *term) {
@@ -342,22 +335,19 @@ void kore_simplify_binary(
 /* KORECompositePattern */
 
 kore_pattern *kore_composite_pattern_new(char const *name) {
-  auto *pat = new kore_pattern;
-  pat->ptr_ = kllvm::KORECompositePattern::Create(std::string(name));
-  return pat;
+  return new kore_pattern{
+      kllvm::KORECompositePattern::Create(std::string(name))};
 }
 
 kore_pattern *kore_composite_pattern_from_symbol(kore_symbol *sym) {
-  auto *pat = new kore_pattern;
-  pat->ptr_ = kllvm::KORECompositePattern::Create(sym->ptr_.get());
-  return pat;
+  return new kore_pattern{kllvm::KORECompositePattern::Create(sym->ptr_.get())};
 }
 
 void kore_composite_pattern_add_argument(
     kore_pattern *pat, kore_pattern const *arg) {
-  if (auto *cast_ptr
-      = dynamic_cast<kllvm::KORECompositePattern *>(pat->ptr_.get())) {
-    cast_ptr->addArgument(arg->ptr_);
+  if (auto const &cast
+      = std::dynamic_pointer_cast<kllvm::KORECompositePattern>(pat->ptr_)) {
+    cast->addArgument(arg->ptr_);
   } else {
     abort();
   }
@@ -399,16 +389,14 @@ bool kore_sort_is_k(kore_sort const *sort) {
 /* KORECompositeSort */
 
 kore_sort *kore_composite_sort_new(char const *name) {
-  auto *sort = new kore_sort;
-  sort->ptr_ = kllvm::KORECompositeSort::Create(std::string(name));
-  return sort;
+  return new kore_sort{kllvm::KORECompositeSort::Create(std::string(name))};
 }
 
 void kore_composite_sort_add_argument(
     kore_sort const *sort, kore_sort const *arg) {
-  if (auto *cast_ptr
-      = dynamic_cast<kllvm::KORECompositeSort *>(sort->ptr_.get())) {
-    cast_ptr->addArgument(arg->ptr_);
+  if (auto const &cast
+      = std::dynamic_pointer_cast<kllvm::KORECompositeSort>(sort->ptr_)) {
+    cast->addArgument(arg->ptr_);
   } else {
     abort();
   }
@@ -417,9 +405,7 @@ void kore_composite_sort_add_argument(
 /* KORESymbol */
 
 kore_symbol *kore_symbol_new(char const *name) {
-  auto *sym = new kore_symbol;
-  sym->ptr_ = kllvm::KORESymbol::Create(std::string(name));
-  return sym;
+  return new kore_symbol{kllvm::KORESymbol::Create(std::string(name))};
 }
 
 void kore_symbol_free(kore_symbol const *sym) {
@@ -451,16 +437,14 @@ char *get_c_string(std::string const &str) {
   // Include null terminator
   auto total_length = str.length() + 1;
 
-  auto *c_str = reinterpret_cast<char *>(malloc(total_length * sizeof(char)));
+  auto *c_str = static_cast<char *>(malloc(total_length));
   std::strncpy(c_str, str.c_str(), total_length);
 
   return c_str;
 }
 
 kore_pattern *kore_string_pattern_new_internal(std::string const &str) {
-  auto *pat = new kore_pattern;
-  pat->ptr_ = kllvm::KOREStringPattern::Create(str);
-  return pat;
+  return new kore_pattern{kllvm::KOREStringPattern::Create(str)};
 }
 
 kore_pattern *kore_pattern_new_token_internal(
