@@ -176,13 +176,7 @@ char *kore_pattern_pretty_print(kore_pattern const *pat) {
 
   fs::remove_all(temp_dir_name);
 
-  auto pretty_str = ss.str();
-  auto *data = static_cast<char *>(malloc(pretty_str.size() + 1));
-
-  std::copy(pretty_str.begin(), pretty_str.end(), data);
-  data[pretty_str.size()] = '\0';
-
-  return data;
+  return get_c_string(ss.str());
 }
 
 void kore_pattern_serialize(
