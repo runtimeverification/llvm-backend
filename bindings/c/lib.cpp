@@ -39,7 +39,25 @@ struct pretty_print_definition {
 
 std::optional<pretty_print_definition> get_print_data();
 
-/* std::string load_dynamic_string(void *dylib, std::string const &symbol); */
+/*
+ * Any intermediate objects that are created in bindings functions and not
+ * returned to the caller should be allocated using `managed`; there should be
+ * no manual calls to any `kore_*_free` functions in this translation unit.
+ */
+auto managed(kore_pattern *ptr) {
+  return std::unique_ptr<kore_pattern, decltype(kore_pattern_free) *>(
+      ptr, kore_pattern_free);
+}
+
+auto managed(kore_sort *ptr) {
+  return std::unique_ptr<kore_sort, decltype(kore_sort_free) *>(
+      ptr, kore_sort_free);
+}
+
+auto managed(kore_symbol *ptr) {
+  return std::unique_ptr<kore_symbol, decltype(kore_symbol_free) *>(
+      ptr, kore_symbol_free);
+}
 
 } // namespace
 
@@ -49,7 +67,6 @@ std::optional<pretty_print_definition> get_print_data();
  */
 
 extern "C" {
-
 void initStaticObjects(void);
 void freeAllKoreMem(void);
 }
@@ -198,20 +215,14 @@ kore_pattern *kore_pattern_parse_file(char const *filename) {
 }
 
 kore_pattern *kore_pattern_new_token(char const *value, kore_sort const *sort) {
-  auto *pat = kore_string_pattern_new(value);
-  auto *ret = kore_pattern_new_token_internal(pat, sort);
-
-  kore_pattern_free(pat);
-  return ret;
+  auto pat = managed(kore_string_pattern_new(value));
+  return kore_pattern_new_token_internal(pat.get(), sort);
 }
 
 kore_pattern *kore_pattern_new_token_with_len(
     char const *value, size_t len, kore_sort const *sort) {
-  auto *pat = kore_string_pattern_new_with_len(value, len);
-  auto *ret = kore_pattern_new_token_internal(pat, sort);
-
-  kore_pattern_free(pat);
-  return ret;
+  auto pat = managed(kore_string_pattern_new_with_len(value, len));
+  return kore_pattern_new_token_internal(pat.get(), sort);
 }
 
 kore_pattern *kore_pattern_new_injection(
@@ -222,39 +233,32 @@ kore_pattern *kore_pattern_new_injection(
 
 kore_pattern *kore_pattern_make_interpreter_input(
     kore_pattern const *pgm, kore_sort const *sort) {
-  auto *config_sort = kore_composite_sort_new("SortKConfigVar");
-  auto *kitem_sort = kore_composite_sort_new("SortKItem");
+  auto config_sort = managed(kore_composite_sort_new("SortKConfigVar"));
+  auto kitem_sort = managed(kore_composite_sort_new("SortKItem"));
 
-  auto *pgm_token = kore_pattern_new_token("$PGM", config_sort);
-  auto *key = kore_pattern_new_injection(pgm_token, config_sort, kitem_sort);
-  kore_pattern_free(pgm_token);
+  auto pgm_token = managed(kore_pattern_new_token("$PGM", config_sort.get()));
+  auto key = managed(kore_pattern_new_injection(
+      pgm_token.get(), config_sort.get(), kitem_sort.get()));
 
-  auto *map_item = kore_composite_pattern_new("Lbl'UndsPipe'-'-GT-Unds'");
-  kore_composite_pattern_add_argument(map_item, key);
-  kore_pattern_free(key);
+  auto map_item
+      = managed(kore_composite_pattern_new("Lbl'UndsPipe'-'-GT-Unds'"));
+  kore_composite_pattern_add_argument(map_item.get(), key.get());
 
   if (kore_sort_is_kitem(sort)) {
-    kore_composite_pattern_add_argument(map_item, pgm);
+    kore_composite_pattern_add_argument(map_item.get(), pgm);
   } else {
-    auto *inj = kore_pattern_new_injection(pgm, sort, kitem_sort);
-    kore_composite_pattern_add_argument(map_item, inj);
-    kore_pattern_free(inj);
+    auto inj = managed(kore_pattern_new_injection(pgm, sort, kitem_sort.get()));
+    kore_composite_pattern_add_argument(map_item.get(), inj.get());
   }
 
-  auto *map_unit = kore_composite_pattern_new("Lbl'Stop'Map");
+  auto map_unit = managed(kore_composite_pattern_new("Lbl'Stop'Map"));
 
-  auto *map_concat = kore_composite_pattern_new("Lbl'Unds'Map'Unds'");
-  kore_composite_pattern_add_argument(map_concat, map_unit);
-  kore_composite_pattern_add_argument(map_concat, map_item);
+  auto map_concat = managed(kore_composite_pattern_new("Lbl'Unds'Map'Unds'"));
+  kore_composite_pattern_add_argument(map_concat.get(), map_unit.get());
+  kore_composite_pattern_add_argument(map_concat.get(), map_item.get());
 
   auto *top_cell = kore_composite_pattern_new("LblinitGeneratedTopCell");
-  kore_composite_pattern_add_argument(top_cell, map_concat);
-
-  kore_sort_free(config_sort);
-  kore_sort_free(kitem_sort);
-  kore_pattern_free(map_item);
-  kore_pattern_free(map_unit);
-  kore_pattern_free(map_concat);
+  kore_composite_pattern_add_argument(top_cell, map_concat.get());
 
   return top_cell;
 }
@@ -449,13 +453,12 @@ kore_pattern *kore_string_pattern_new_internal(std::string const &str) {
 
 kore_pattern *kore_pattern_new_token_internal(
     kore_pattern const *value, kore_sort const *sort) {
-  auto *sym = kore_symbol_new("\\dv");
-  kore_symbol_add_formal_argument(sym, sort);
+  auto sym = managed(kore_symbol_new("\\dv"));
+  kore_symbol_add_formal_argument(sym.get(), sort);
 
-  auto *pat = kore_composite_pattern_from_symbol(sym);
+  auto *pat = kore_composite_pattern_from_symbol(sym.get());
   kore_composite_pattern_add_argument(pat, value);
 
-  kore_symbol_free(sym);
   return pat;
 }
 
