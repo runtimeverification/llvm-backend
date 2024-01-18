@@ -935,6 +935,19 @@ public:
   void print(std::ostream &Out, unsigned indent = 0) const;
 
   /*
+   * Return the set of sorts that are hooked to a particular hook name.
+   * Typically, the set returned will be the singleton set. For example:
+   *
+   *   getSortsHookedTo("BYTES.Bytes") -> { "SortBytes" }
+   *
+   * If user K code hooks sorts to K's internal implementations (e.g. to
+   * implement type-safe collections), those user sorts will be returned as
+   * well.
+   */
+  std::unordered_set<std::string>
+  getSortsHookedTo(std::string const &hookName) const;
+
+  /*
    * Build this definition's subsort relation from axioms that have the
    * `subsort` attribute.
    *
