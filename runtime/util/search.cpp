@@ -37,11 +37,11 @@ blockEnumerator() {
     blocks.push_back(const_cast<block **>(&(keyVal)));
   }
 
-  for (const auto &keyVal : states_set) {
+  for (auto const &keyVal : states_set) {
     blocks.push_back(const_cast<block **>(&(keyVal)));
   }
 
-  for (const auto &keyVal : results) {
+  for (auto const &keyVal : results) {
     blocks.push_back(const_cast<block **>(&(keyVal)));
   }
 

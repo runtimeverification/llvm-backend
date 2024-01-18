@@ -51,11 +51,11 @@ void generate_object_file(llvm::Module &mod, llvm::raw_ostream &os) {
     mod.setFramePointer(FramePointerKind::None);
   }
 
-  const auto *triple = BACKEND_TARGET_TRIPLE;
+  auto const *triple = BACKEND_TARGET_TRIPLE;
   mod.setTargetTriple(triple);
 
   auto error = std::string{};
-  const auto *target = TargetRegistry::lookupTarget(triple, error);
+  auto const *target = TargetRegistry::lookupTarget(triple, error);
   auto cpu = sys::getHostCPUName();
 
   auto features = SubtargetFeatures{};

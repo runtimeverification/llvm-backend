@@ -19,7 +19,7 @@ block *strip_injection(block *term) {
   return term;
 }
 
-block *constructKItemInj(void *subject, const char *sort, bool raw_value) {
+block *constructKItemInj(void *subject, char const *sort, bool raw_value) {
   auto inj_sym = "inj{" + std::string(sort) + ", SortKItem{}}";
   auto tag = getTagForSymbolName(inj_sym.c_str());
   auto sort_prefix = std::string(sort).substr(0, 8);
@@ -29,7 +29,7 @@ block *constructKItemInj(void *subject, const char *sort, bool raw_value) {
   return static_cast<block *>(constructCompositePattern(tag, args));
 }
 
-block *constructRawTerm(void *subject, const char *sort, bool raw_value) {
+block *constructRawTerm(void *subject, char const *sort, bool raw_value) {
   auto tag = getTagForSymbolName("rawTerm{}");
   auto args = std::vector{
       static_cast<void *>(constructKItemInj(subject, sort, raw_value))};

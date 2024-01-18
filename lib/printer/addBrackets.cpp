@@ -419,7 +419,7 @@ sptr<KOREPattern> addBrackets(
     sptr<KORESort> outerSort = getArgSort(
         outer->getConstructor(), position, outer->getArguments()[0]->getSort());
     sptr<KORESort> innerSort = getReturnSort(inner.get());
-    for (const auto &entry : data.brackets) {
+    for (auto const &entry : data.brackets) {
       bool isCorrectOuterSort = lessThanEq(data, entry.first, outerSort.get());
       if (isCorrectOuterSort) {
         for (KORESymbol *s : entry.second) {
@@ -453,7 +453,7 @@ sptr<KOREPattern> addBrackets(
     sptr<KORECompositePattern> result
         = KORECompositePattern::Create(outer->getConstructor());
     int position = 0;
-    for (const auto &inner : outer->getArguments()) {
+    for (auto const &inner : outer->getArguments()) {
       KORECompositePattern *leftCapture
           = getLeftCapture(previousLeftCapture, outer, position, data);
       KORECompositePattern *rightCapture

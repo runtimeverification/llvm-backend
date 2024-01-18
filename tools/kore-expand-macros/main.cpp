@@ -23,41 +23,17 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  SubsortMap subsorts;
-  SymbolMap overloads;
-
   KOREParser parser(argv[1] + std::string("/syntaxDefinition.kore"));
   ptr<KOREDefinition> def = parser.definition();
 
-  for (auto *axiom : def->getAxioms()) {
-    if (axiom->getAttributes().count("subsort")) {
-      KORECompositePattern *att = axiom->getAttributes().at("subsort").get();
-      KORESort *innerSort
-          = att->getConstructor()->getFormalArguments()[0].get();
-      KORESort *outerSort
-          = att->getConstructor()->getFormalArguments()[1].get();
-      subsorts[innerSort].insert(outerSort);
-    }
-    if (axiom->getAttributes().count("overload")) {
-      KORECompositePattern *att = axiom->getAttributes().at("overload").get();
-      KORESymbol *innerSymbol
-          = dynamic_cast<KORECompositePattern *>(att->getArguments()[1].get())
-                ->getConstructor();
-      KORESymbol *outerSymbol
-          = dynamic_cast<KORECompositePattern *>(att->getArguments()[0].get())
-                ->getConstructor();
-      overloads[innerSymbol].insert(outerSymbol);
-    }
-  }
-
-  subsorts = transitiveClosure(subsorts);
-  overloads = transitiveClosure(overloads);
+  auto subsorts = def->getSubsorts();
+  auto overloads = def->getOverloads();
 
   KOREParser parser2(argv[1] + std::string("/macros.kore"));
   std::vector<ptr<KOREDeclaration>> axioms = parser2.declarations();
   std::sort(
       axioms.begin(), axioms.end(),
-      [](const ptr<KOREDeclaration> &l, const ptr<KOREDeclaration> &r) {
+      [](ptr<KOREDeclaration> const &l, ptr<KOREDeclaration> const &r) {
         std::string lStr = l->getStringAttribute("priority");
         std::string rStr = r->getStringAttribute("priority");
         int lInt = std::stoi(lStr);

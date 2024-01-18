@@ -36,7 +36,7 @@ map hook_MAP_concat(SortMap m1, SortMap m2) {
 }
 
 SortKItem hook_MAP_lookup_null(SortMap m, SortKItem key) {
-  if (const auto *val = m->find(key)) {
+  if (auto const *val = m->find(key)) {
     return *val;
   }
   return nullptr;
@@ -72,7 +72,7 @@ map hook_MAP_difference(SortMap m1, SortMap m2) {
   auto to = *m1;
   for (auto iter = from->begin(); iter != from->end(); ++iter) {
     auto entry = *iter;
-    if (const auto *value = to.find(entry.first)) {
+    if (auto const *value = to.find(entry.first)) {
       if (*value == entry.second) {
         to = to.erase(entry.first);
       }
@@ -135,7 +135,7 @@ SortInt hook_MAP_size(SortMap m) {
 bool hook_MAP_inclusion(SortMap m1, SortMap m2) {
   for (auto iter = m1->begin(); iter != m1->end(); ++iter) {
     auto entry = *iter;
-    const auto *val = m2->find(entry.first);
+    auto const *val = m2->find(entry.first);
     if (!val || *val != entry.second) {
       return false;
     }
@@ -192,8 +192,8 @@ map map_map(map *map, block *(process)(block *)) {
 }
 
 void printMap(
-    writer *file, map *map, const char *unit, const char *element,
-    const char *concat, void *state) {
+    writer *file, map *map, char const *unit, char const *element,
+    char const *concat, void *state) {
   size_t size = map->size();
   if (size == 0) {
     sfprintf(file, "%s()", unit);

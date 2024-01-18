@@ -251,8 +251,8 @@ rangemap rangemap_map(rangemap *map, block *(process)(block *)) {
 }
 
 void printRangeMap(
-    writer *file, rangemap *map, const char *unit, const char *element,
-    const char *concat, void *state) {
+    writer *file, rangemap *map, char const *unit, char const *element,
+    char const *concat, void *state) {
   size_t size = map->size();
   if (size == 0) {
     sfprintf(file, "%s()", unit);

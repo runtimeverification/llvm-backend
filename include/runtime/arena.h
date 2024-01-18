@@ -91,7 +91,7 @@ char **arenaEndPtr(struct arena *);
 // 3rd argument: the address of last allocated byte in the arena plus 1
 // Return value: the address allocated in the arena after size bytes from the
 //               starting pointer, or 0 if this is equal to the 3rd argument.
-char *movePtr(char *, size_t, const char *);
+char *movePtr(char *, size_t, char const *);
 
 // Given two pointers to objects allocated in the same arena, return the number
 // of bytes they are separated by within the virtual block of memory represented

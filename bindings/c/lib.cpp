@@ -69,6 +69,24 @@ char kore_definition_macros __attribute__((weak)) = -1;
 
 /* Completed types */
 
+struct kore_error {
+  bool success_ = true;
+  std::optional<std::string> message_ = std::nullopt;
+
+  [[nodiscard]] char const *c_str() const {
+    if (!success_ && message_.has_value()) {
+      return message_->c_str();
+    }
+
+    return nullptr;
+  }
+
+  void set_error(std::string const &msg) {
+    success_ = false;
+    message_ = msg;
+  }
+};
+
 struct kore_pattern {
   std::shared_ptr<kllvm::KOREPattern> ptr_;
 };
@@ -80,6 +98,24 @@ struct kore_sort {
 struct kore_symbol {
   std::shared_ptr<kllvm::KORESymbol> ptr_;
 };
+
+/* Error handling */
+
+kore_error *kore_error_new(void) {
+  return new kore_error;
+}
+
+bool kore_error_is_success(kore_error const *err) {
+  return err->success_;
+}
+
+char const *kore_error_message(kore_error const *err) {
+  return err->c_str();
+}
+
+void kore_error_free(kore_error *err) {
+  delete err;
+}
 
 /* KOREPattern */
 
@@ -257,26 +293,50 @@ bool kore_block_get_bool(block *term) {
   return kllvm::bindings::get_bool(term);
 }
 
-bool kore_simplify_bool(kore_pattern const *pattern) {
-  return kllvm::bindings::simplify_to_bool(pattern->ptr_);
+bool kore_simplify_bool(kore_error *err, kore_pattern const *pattern) {
+  try {
+    return kllvm::bindings::simplify_to_bool(pattern->ptr_);
+  } catch (std::exception &e) {
+    if (err == nullptr) {
+      throw;
+    }
+
+    err->set_error(e.what());
+    return false;
+  }
 }
 
 void kore_simplify(
-    kore_pattern const *pattern, kore_sort const *sort, char **data_out,
-    size_t *size_out) {
-  auto *block = kllvm::bindings::simplify_to_term(pattern->ptr_, sort->ptr_);
-  serializeConfiguration(block, "SortKItem{}", data_out, size_out, true);
+    kore_error *err, kore_pattern const *pattern, kore_sort const *sort,
+    char **data_out, size_t *size_out) {
+  try {
+    auto *block = kllvm::bindings::simplify_to_term(pattern->ptr_, sort->ptr_);
+    serializeConfiguration(block, "SortKItem{}", data_out, size_out, true);
+  } catch (std::exception &e) {
+    if (err == nullptr) {
+      throw;
+    }
+
+    err->set_error(e.what());
+  }
 }
 
 void kore_simplify_binary(
-    char *data_in, size_t size_in, kore_sort const *sort, char **data_out,
-    size_t *size_out) {
-  auto *sort_str = kore_sort_dump(sort);
+    kore_error *err, char *data_in, size_t size_in, kore_sort const *sort,
+    char **data_out, size_t *size_out) {
+  try {
+    auto sort_str = std::unique_ptr<char, decltype(std::free) *>(
+        kore_sort_dump(sort), std::free);
 
-  auto *block = deserializeConfiguration(data_in, size_in);
-  serializeConfiguration(block, sort_str, data_out, size_out, true);
+    auto *block = deserializeConfiguration(data_in, size_in);
+    serializeConfiguration(block, sort_str.get(), data_out, size_out, true);
+  } catch (std::exception &e) {
+    if (err == nullptr) {
+      throw;
+    }
 
-  free(sort_str);
+    err->set_error(e.what());
+  }
 }
 
 /* KORECompositePattern */

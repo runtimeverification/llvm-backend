@@ -321,7 +321,7 @@ SortInt hook_FFI_address(SortString fn) {
   char *func = getTerminatedString(fn);
 
   std::string funcStr = func;
-  static const std::map<std::string, void *> privateSymbols
+  static std::map<std::string, void *> const privateSymbols
       = getPrivateSymbols();
 
   void *address;

@@ -8,7 +8,7 @@
 #include "runtime/arena.h"
 #include "runtime/header.h"
 
-const size_t BLOCK_SIZE = 1024 * 1024;
+size_t const BLOCK_SIZE = 1024 * 1024;
 
 #define mem_block_header(ptr)                                                  \
   ((memory_block_header *)(((uintptr_t)(ptr)-1) & ~(BLOCK_SIZE - 1)))
@@ -179,7 +179,7 @@ __attribute__((always_inline)) char **arenaEndPtr(struct arena *Arena) {
   return &Arena->block;
 }
 
-char *movePtr(char *ptr, size_t size, const char *arena_end_ptr) {
+char *movePtr(char *ptr, size_t size, char const *arena_end_ptr) {
   char *next_ptr = ptr + size;
   if (next_ptr == arena_end_ptr) {
     return nullptr;

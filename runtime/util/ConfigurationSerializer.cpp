@@ -45,7 +45,7 @@ static std::string drop_back(std::string const &s, int n) {
 }
 
 void serializeConfigurationInternal(
-    writer *file, block *subject, const char *sort, bool isVar, void *state);
+    writer *file, block *subject, char const *sort, bool isVar, void *state);
 
 /**
  * Emit a symbol of the form ctor{...}(...); this should be preceded by the
@@ -99,8 +99,8 @@ static void emitToken(
 }
 
 void serializeMap(
-    writer *file, map *map, const char *unit, const char *element,
-    const char *concat, void *state) {
+    writer *file, map *map, char const *unit, char const *element,
+    char const *concat, void *state) {
   auto &instance = static_cast<serialization_state *>(state)->instance;
 
   size_t size = map->size();
@@ -126,8 +126,8 @@ void serializeMap(
 }
 
 void serializeRangeMap(
-    writer *file, rangemap *map, const char *unit, const char *element,
-    const char *concat, void *state) {
+    writer *file, rangemap *map, char const *unit, char const *element,
+    char const *concat, void *state) {
   auto &instance = static_cast<serialization_state *>(state)->instance;
 
   size_t size = map->size();
@@ -160,8 +160,8 @@ void serializeRangeMap(
 }
 
 void serializeList(
-    writer *file, list *list, const char *unit, const char *element,
-    const char *concat, void *state) {
+    writer *file, list *list, char const *unit, char const *element,
+    char const *concat, void *state) {
   auto &instance = static_cast<serialization_state *>(state)->instance;
 
   size_t size = list->size();
@@ -184,8 +184,8 @@ void serializeList(
 }
 
 void serializeSet(
-    writer *file, set *set, const char *unit, const char *element,
-    const char *concat, void *state) {
+    writer *file, set *set, char const *unit, char const *element,
+    char const *concat, void *state) {
   auto &instance = static_cast<serialization_state *>(state)->instance;
 
   size_t size = set->size();
@@ -207,39 +207,39 @@ void serializeSet(
   }
 }
 
-void serializeInt(writer *file, mpz_t i, const char *sort, void *state) {
+void serializeInt(writer *file, mpz_t i, char const *sort, void *state) {
   auto &instance = static_cast<serialization_state *>(state)->instance;
 
   auto str = intToString(i);
   emitToken(instance, sort, str.c_str());
 }
 
-void serializeFloat(writer *file, floating *f, const char *sort, void *state) {
+void serializeFloat(writer *file, floating *f, char const *sort, void *state) {
   auto &instance = static_cast<serialization_state *>(state)->instance;
 
   std::string str = floatToString(f);
   emitToken(instance, sort, str.c_str());
 }
 
-void serializeBool(writer *file, bool b, const char *sort, void *state) {
+void serializeBool(writer *file, bool b, char const *sort, void *state) {
   auto &instance = static_cast<serialization_state *>(state)->instance;
 
-  const char *str = b ? "true" : "false";
+  char const *str = b ? "true" : "false";
   emitToken(instance, sort, str);
 }
 
 void serializeStringBuffer(
-    writer *file, stringbuffer *b, const char *sort, void *state) {
+    writer *file, stringbuffer *b, char const *sort, void *state) {
   auto &instance = static_cast<serialization_state *>(state)->instance;
 
   emitToken(instance, sort, b->contents->data, b->strlen);
 }
 
 void serializeMInt(
-    writer *file, size_t *i, size_t bits, const char *sort, void *state) {
+    writer *file, size_t *i, size_t bits, char const *sort, void *state) {
   auto &instance = static_cast<serialization_state *>(state)->instance;
 
-  const auto *fmt = "%sp%zd";
+  auto const *fmt = "%sp%zd";
   auto str = std::string{};
 
   if (i == nullptr) {
@@ -271,7 +271,7 @@ cached_symbol_sort_list(std::string const &symbol) {
 }
 
 void serializeConfigurationInternal(
-    writer *file, block *subject, const char *sort, bool isVar,
+    writer *file, block *subject, char const *sort, bool isVar,
     void *state_ptr) {
   auto &state = *static_cast<serialization_state *>(state_ptr);
 
@@ -338,7 +338,7 @@ void serializeConfigurationInternal(
 
   visitChildren(subject, file, &callbacks, state_ptr);
 
-  const auto *symbol = getSymbolNameForTag(tag);
+  auto const *symbol = getSymbolNameForTag(tag);
   auto symbolStr = std::string(symbol);
 
   auto [name, sorts] = cached_symbol_sort_list(symbolStr);
@@ -369,7 +369,7 @@ void serializeConfigurationInternal(
 }
 
 void serializeConfigurations(
-    const char *filename, std::unordered_set<block *, HashBlock, KEq> results) {
+    char const *filename, std::unordered_set<block *, HashBlock, KEq> results) {
   FILE *file = fopen(filename, "w");
   auto state = serialization_state();
 
@@ -400,7 +400,7 @@ void serializeConfigurations(
 }
 
 void serializeConfigurationToFile(
-    const char *filename, block *subject, bool emit_size) {
+    char const *filename, block *subject, bool emit_size) {
   char *data;
   size_t size;
   serializeConfiguration(subject, nullptr, &data, &size, emit_size);
@@ -432,14 +432,14 @@ void serializeConfiguration(
   *size_out = size;
 }
 
-void writeUInt64ToFile(const char *filename, uint64_t i) {
+void writeUInt64ToFile(char const *filename, uint64_t i) {
   FILE *file = fopen(filename, "a");
   fwrite(&i, 8, 1, file);
   fclose(file);
 }
 
 void serializeTermToFile(
-    const char *filename, block *subject, const char *sort) {
+    char const *filename, block *subject, char const *sort) {
   char *data;
   size_t size;
   serializeConfiguration(subject, sort, &data, &size, true);
@@ -452,7 +452,7 @@ void serializeTermToFile(
 }
 
 void serializeRawTermToFile(
-    const char *filename, void *subject, const char *sort) {
+    char const *filename, void *subject, char const *sort) {
   block *term = constructRawTerm(subject, sort, true);
 
   char *data;
@@ -467,7 +467,7 @@ void serializeRawTermToFile(
 }
 
 std::shared_ptr<kllvm::KOREPattern>
-sortedTermToKorePattern(block *subject, const char *sort) {
+sortedTermToKorePattern(block *subject, char const *sort) {
   auto is_kitem = (std::string(sort) == "SortKItem{}");
   block *term = is_kitem ? subject : constructRawTerm(subject, sort, false);
 

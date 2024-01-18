@@ -36,7 +36,7 @@ target triple = "{triple}"
       "datalayout"_a = BACKEND_TARGET_DATALAYOUT,
       "triple"_a = BACKEND_TARGET_TRIPLE);
 
-  const auto *rest =
+  auto const *rest =
       R"LLVM(
 ; K types in LLVM
 
@@ -207,7 +207,7 @@ llvm::Type *getValueType(ValueType sort, llvm::Module *Module) {
 
 llvm::StructType *getBlockType(
     llvm::Module *Module, KOREDefinition *definition,
-    const KORESymbol *symbol) {
+    KORESymbol const *symbol) {
   llvm::StructType *BlockHeaderType = llvm::StructType::getTypeByName(
       Module->getContext(), BLOCKHEADER_STRUCT);
   llvm::ArrayType *EmptyArrayType
@@ -215,7 +215,7 @@ llvm::StructType *getBlockType(
   llvm::SmallVector<llvm::Type *, 4> Types;
   Types.push_back(BlockHeaderType);
   Types.push_back(EmptyArrayType);
-  for (const auto &arg : symbol->getArguments()) {
+  for (auto const &arg : symbol->getArguments()) {
     auto *sort = dynamic_cast<KORECompositeSort *>(arg.get());
     llvm::Type *type = getValueType(sort->getCategory(definition), Module);
     Types.push_back(type);
@@ -224,7 +224,7 @@ llvm::StructType *getBlockType(
 }
 
 uint64_t getBlockHeaderVal(
-    llvm::Module *Module, const KORESymbol *symbol, llvm::Type *BlockType) {
+    llvm::Module *Module, KORESymbol const *symbol, llvm::Type *BlockType) {
   uint64_t headerVal = symbol->getTag();
   uint64_t sizeInBytes = llvm::DataLayout(Module).getTypeAllocSize(BlockType);
   assert(sizeInBytes % 8 == 0);
@@ -234,7 +234,7 @@ uint64_t getBlockHeaderVal(
 }
 
 llvm::Value *getBlockHeader(
-    llvm::Module *Module, KOREDefinition *definition, const KORESymbol *symbol,
+    llvm::Module *Module, KOREDefinition *definition, KORESymbol const *symbol,
     llvm::Type *BlockType) {
   llvm::StructType *BlockHeaderType = llvm::StructType::getTypeByName(
       Module->getContext(), BLOCKHEADER_STRUCT);
@@ -246,14 +246,14 @@ llvm::Value *getBlockHeader(
 }
 
 llvm::Value *allocateTerm(
-    llvm::Type *AllocType, llvm::BasicBlock *block, const char *allocFn) {
+    llvm::Type *AllocType, llvm::BasicBlock *block, char const *allocFn) {
   return allocateTerm(
       AllocType, llvm::ConstantExpr::getSizeOf(AllocType), block, allocFn);
 }
 
 llvm::Value *allocateTerm(
     llvm::Type *AllocType, llvm::Value *Len, llvm::BasicBlock *block,
-    const char *allocFn) {
+    char const *allocFn) {
   llvm::Instruction *Malloc = llvm::CallInst::CreateMalloc(
       block, llvm::Type::getInt64Ty(block->getContext()), AllocType, Len,
       nullptr, koreHeapAlloc(allocFn, block->getModule()));
@@ -719,7 +719,7 @@ llvm::Value *CreateTerm::createFunctionCall(
 
 llvm::Value *CreateTerm::createFunctionCall(
     std::string const &name, ValueType returnCat,
-    const std::vector<llvm::Value *> &args, bool sret, bool tailcc,
+    std::vector<llvm::Value *> const &args, bool sret, bool tailcc,
     std::string const &locationStack) {
   llvm::Type *returnType = getValueType(returnCat, Module);
   std::vector<llvm::Type *> types;
@@ -774,7 +774,7 @@ llvm::Value *CreateTerm::createFunctionCall(
 llvm::Value *CreateTerm::notInjectionCase(
     KORECompositePattern *constructor, llvm::Value *val,
     std::string locationStack) {
-  const KORESymbol *symbol = constructor->getConstructor();
+  KORESymbol const *symbol = constructor->getConstructor();
   KORESymbolDeclaration *symbolDecl
       = Definition->getSymbolDeclarations().at(symbol->getName());
   llvm::StructType *BlockType = getBlockType(Module, Definition, symbol);
@@ -782,7 +782,7 @@ llvm::Value *CreateTerm::notInjectionCase(
       = getBlockHeader(Module, Definition, symbol, BlockType);
   int idx = 2;
   std::vector<llvm::Value *> children;
-  for (const auto &child : constructor->getArguments()) {
+  for (auto const &child : constructor->getArguments()) {
     llvm::Value *ChildValue;
     if (idx == 2 && val != nullptr) {
       ChildValue = val;
@@ -846,7 +846,7 @@ bool CreateTerm::populateStaticSet(KOREPattern *pattern) {
     can_be_static = false;
   } else if (
       auto *constructor = dynamic_cast<KORECompositePattern *>(pattern)) {
-    const KORESymbol *symbol = constructor->getConstructor();
+    KORESymbol const *symbol = constructor->getConstructor();
     if (symbol->getName() != "\\dv") {
       KORESymbolDeclaration *symbolDecl
           = Definition->getSymbolDeclarations().at(symbol->getName());
@@ -885,7 +885,7 @@ CreateTerm::createAllocation(KOREPattern *pattern, std::string locationStack) {
     return std::make_pair(val, true);
   }
   if (auto *constructor = dynamic_cast<KORECompositePattern *>(pattern)) {
-    const KORESymbol *symbol = constructor->getConstructor();
+    KORESymbol const *symbol = constructor->getConstructor();
     assert(symbol->isConcrete() && "not supported yet: sort variables");
     KORESymbolDeclaration *symbolDecl
         = Definition->getSymbolDeclarations().at(symbol->getName());

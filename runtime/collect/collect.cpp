@@ -46,7 +46,7 @@ void migrate(block **blockPtr) {
   if (is_leaf_block(currBlock) || !is_heap_block(currBlock)) {
     return;
   }
-  const uint64_t hdr = currBlock->h.hdr;
+  uint64_t const hdr = currBlock->h.hdr;
   initialize_migrate();
   uint16_t layout = layout_hdr(hdr);
   size_t lenInBytes = get_size(hdr, layout);
@@ -88,8 +88,8 @@ void migrate_once(block **blockPtr) {
 
 static void migrate_string_buffer(stringbuffer **bufferPtr) {
   stringbuffer *buffer = *bufferPtr;
-  const uint64_t hdr = buffer->h.hdr;
-  const uint64_t cap = len(buffer->contents);
+  uint64_t const hdr = buffer->h.hdr;
+  uint64_t const cap = len(buffer->contents);
   initialize_migrate();
   if (!hasForwardingAddress) {
     stringbuffer *newBuffer;
@@ -117,7 +117,7 @@ static void migrate_string_buffer(stringbuffer **bufferPtr) {
 
 static void migrate_mpz(mpz_ptr *mpzPtr) {
   mpz_hdr *intgr = struct_base(mpz_hdr, i, *mpzPtr);
-  const uint64_t hdr = intgr->h.hdr;
+  uint64_t const hdr = intgr->h.hdr;
   initialize_migrate();
   if (!hasForwardingAddress) {
     mpz_hdr *newIntgr;
@@ -164,7 +164,7 @@ static void migrate_mpz(mpz_ptr *mpzPtr) {
 
 static void migrate_floating(floating **floatingPtr) {
   floating_hdr *flt = struct_base(floating_hdr, f, *floatingPtr);
-  const uint64_t hdr = flt->h.hdr;
+  uint64_t const hdr = flt->h.hdr;
   initialize_migrate();
   if (!hasForwardingAddress) {
     floating_hdr *newFlt;
@@ -221,7 +221,7 @@ migrate_child(void *currBlock, layoutitem *args, unsigned i, bool ptr) {
 
 static char *evacuate(char *scan_ptr, char **alloc_ptr) {
   auto *currBlock = (block *)scan_ptr;
-  const uint64_t hdr = currBlock->h.hdr;
+  uint64_t const hdr = currBlock->h.hdr;
   uint16_t layoutInt = layout_hdr(hdr);
   if (layoutInt) {
     layout *layoutData = getLayoutData(layoutInt);

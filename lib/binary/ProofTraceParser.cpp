@@ -9,7 +9,7 @@ constexpr auto indent_size = 2U;
 void LLVMRewriteEvent::printSubstitution(
     std::ostream &Out, unsigned indent) const {
   std::string Indent(indent * indent_size, ' ');
-  for (const auto &p : substitution) {
+  for (auto const &p : substitution) {
     Out << fmt::format("{}{} = kore[{}]\n", Indent, p.first, p.second.second);
   }
 }
@@ -31,7 +31,7 @@ void LLVMSideConditionEvent::print(std::ostream &Out, unsigned indent) const {
 void LLVMFunctionEvent::print(std::ostream &Out, unsigned indent) const {
   std::string Indent(indent * indent_size, ' ');
   Out << fmt::format("{}function: {} ({})\n", Indent, name, relativePosition);
-  for (const auto &arg : arguments) {
+  for (auto const &arg : arguments) {
     arg.print(Out, true, indent + 1U);
   }
 }
@@ -39,7 +39,7 @@ void LLVMFunctionEvent::print(std::ostream &Out, unsigned indent) const {
 void LLVMHookEvent::print(std::ostream &Out, unsigned indent) const {
   std::string Indent(indent * indent_size, ' ');
   Out << fmt::format("{}hook: {} ({})\n", Indent, name, relativePosition);
-  for (const auto &arg : arguments) {
+  for (auto const &arg : arguments) {
     arg.print(Out, true, indent + 1U);
   }
   Out << fmt::format("{}hook result: kore[{}]\n", Indent, patternLength);
@@ -58,11 +58,11 @@ void LLVMEvent::print(std::ostream &Out, bool isArg, unsigned indent) const {
 void LLVMRewriteTrace::print(std::ostream &Out, unsigned indent) const {
   std::string Indent(indent * indent_size, ' ');
   Out << fmt::format("{}version: {}\n", Indent, version);
-  for (const auto &pre_trace_event : preTrace) {
+  for (auto const &pre_trace_event : preTrace) {
     pre_trace_event.print(Out, false, indent);
   }
   initialConfig.print(Out, false, indent);
-  for (const auto &trace_event : trace) {
+  for (auto const &trace_event : trace) {
     trace_event.print(Out, false, indent);
   }
 }

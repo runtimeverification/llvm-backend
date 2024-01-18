@@ -19,7 +19,7 @@ std::unique_ptr<KOREParser> KOREParser::from_string(std::string const &text) {
   return parser;
 }
 
-void KOREParser::error(const location &loc, const std::string &err_message) {
+void KOREParser::error(location const &loc, std::string const &err_message) {
   std::cerr << "Syntax error at " << loc << ": " << err_message << "\n";
   exit(-1);
 }
