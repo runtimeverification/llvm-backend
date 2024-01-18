@@ -177,8 +177,7 @@ char *kore_pattern_pretty_print(kore_pattern const *pat) {
   fs::remove_all(temp_dir_name);
 
   auto pretty_str = ss.str();
-  auto *data
-      = static_cast<char *>(malloc(sizeof(char) * (pretty_str.size() + 1)));
+  auto *data = static_cast<char *>(malloc(pretty_str.size() + 1));
 
   std::copy(pretty_str.begin(), pretty_str.end(), data);
   data[pretty_str.size()] = '\0';
@@ -195,7 +194,7 @@ void kore_pattern_serialize(
   auto binary_size = binary_data.size();
 
   *size_out = binary_size;
-  *data_out = static_cast<char *>(malloc(sizeof(char) * binary_size));
+  *data_out = static_cast<char *>(malloc(binary_size));
 
   std::memcpy(*data_out, binary_data.data(), binary_size);
 }
@@ -275,7 +274,7 @@ char *kore_block_dump(block *term) {
   auto *hooked_str = printConfigurationToString(term)->data;
   auto len = std::strlen(hooked_str);
 
-  auto *new_str = static_cast<char *>(malloc((len + 1) * sizeof(char)));
+  auto *new_str = static_cast<char *>(malloc(len + 1));
   std::strncpy(new_str, hooked_str, len);
   new_str[len] = '\0';
 
