@@ -113,7 +113,7 @@ config.substitutions.extend([
     ('%check-diff', one_line('''
         %run | diff - %test-diff-out
         %run-binary | diff - %test-diff-out
-        %run-binary-out
+        %run-binary-out | diff - <(echo -n)
         %kore-convert %t.out.bin -o %t.out.kore
         %kore-convert %test-diff-out --to=text | diff - %t.out.kore
     ''')),
