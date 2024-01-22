@@ -68,7 +68,7 @@ if os.getenv('LIT_USE_NIX'):
 # multiline substitutions natively. This function sanitizes them so that we can
 # use them cross-platform while retaining nice source code.
 def one_line(s):
-    return s.strip() \
+    return 'set -e; ' + s.strip() \
         .replace('\n', ' ; ') \
         .replace('do ;', 'do') \
         .replace('then ;', 'then') \
