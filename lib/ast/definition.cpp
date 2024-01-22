@@ -1,11 +1,23 @@
 #include <kllvm/ast/AST.h>
 
+#include <kllvm/parser/KOREParser.h>
 #include <kllvm/util/transitive_closure.h>
 
 #include <string>
 #include <unordered_set>
 
 namespace kllvm {
+
+ptr<KOREDefinition> KOREDefinition::load(std::string const &filename) {
+  auto definition = parser::KOREParser(filename).definition();
+  definition->precompute();
+  return definition;
+}
+
+void KOREDefinition::precompute() {
+  buildSubsortRelation();
+  buildOverloadRelation();
+}
 
 std::unordered_set<std::string>
 KOREDefinition::getSortsHookedTo(std::string const &hookName) const {
@@ -59,24 +71,22 @@ void KOREDefinition::insertReservedSymbols() {
   addModule(std::move(mod));
 }
 
-SubsortMap KOREDefinition::getSubsorts() const {
-  auto subsorts = SubsortMap{};
-
+void KOREDefinition::buildSubsortRelation() {
   for (auto *axiom : axioms) {
     if (axiom->getAttributes().count("subsort")) {
       auto const &att = axiom->getAttributes().at("subsort");
       auto const &innerSort = att->getConstructor()->getFormalArguments()[0];
       auto const &outerSort = att->getConstructor()->getFormalArguments()[1];
       subsorts[innerSort.get()].insert(outerSort.get());
+      supersorts[outerSort.get()].insert(innerSort.get());
     }
   }
 
-  return transitive_closure(subsorts);
+  subsorts = transitive_closure(subsorts);
+  supersorts = transitive_closure(supersorts);
 }
 
-SymbolMap KOREDefinition::getOverloads() const {
-  auto overloads = SymbolMap{};
-
+void KOREDefinition::buildOverloadRelation() {
   for (auto *axiom : axioms) {
     if (axiom->getAttributes().count("overload")) {
       auto const &att = axiom->getAttributes().at("overload");
@@ -90,7 +100,7 @@ SymbolMap KOREDefinition::getOverloads() const {
     }
   }
 
-  return transitive_closure(overloads);
+  overloads = transitive_closure(overloads);
 }
 
 // NOLINTNEXTLINE(*-function-cognitive-complexity)

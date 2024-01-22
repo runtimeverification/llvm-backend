@@ -935,6 +935,9 @@ private:
   KORECompositeSortMapType hookedSorts;
   KORESymbolStringMapType freshFunctions;
   KOREAxiomMapType ordinals;
+  SubsortMap subsorts;
+  SubsortMap supersorts;
+  SymbolMap overloads;
 
   std::vector<sptr<KOREModule>> modules;
   std::unordered_map<std::string, sptr<KORECompositePattern>> attributes;
@@ -944,13 +947,27 @@ private:
   KORESymbol *injSymbol;
 
   /*
+   * Perform preprocessing steps that are necessary whether or not this
+   * definition will be used for code generation.
+   */
+  void precompute();
+
+  /*
    * Insert symbols into this definition that have knowable labels, but cannot
    * be directly referenced in user code:
    *   - rawTerm(KItem) for serializing non-symbol backend terms
    */
   void insertReservedSymbols();
 
+  void buildSubsortRelation();
+  void buildOverloadRelation();
+
 public:
+  /*
+   * Parse and load a definition from a file on disk.
+   */
+  static ptr<KOREDefinition> load(std::string const &filename);
+
   static ptr<KOREDefinition> Create() {
     return ptr<KOREDefinition>(new KOREDefinition());
   }
@@ -983,24 +1000,34 @@ public:
   getSortsHookedTo(std::string const &hookName) const;
 
   /*
-   * Build this definition's subsort relation from axioms that have the
+   * Return this definition's subsort relation based on axioms that have the
    * `subsort` attribute.
    *
    * The returned map is as follows:
    *
    *   S |-> {T . S is a subsort of T}
    */
-  SubsortMap getSubsorts() const;
+  SubsortMap getSubsorts() const { return subsorts; }
 
   /*
-   * Build this definition's overload relation from axioms that have the
+   * Return this definition's supersort relation based on axioms that have the
+   * `subsort` attribute.
+   *
+   * The returned map is as follows:
+   *
+   *   S |-> {T . S is a supersort of T}
+   */
+  SubsortMap getSupersorts() const { return supersorts; }
+
+  /*
+   * Return this definition's overload relation based on axioms that have the
    * `overload` attribute.
    *
    * The returned map is as follows:
    *
    *  P |-> {Q . P is a more specific overload of Q}
    */
-  SymbolMap getOverloads() const;
+  SymbolMap getOverloads() const { return overloads; }
 
   std::vector<sptr<KOREModule>> const &getModules() const { return modules; }
   KORECompositeSortDeclarationMapType const &getSortDeclarations() const {

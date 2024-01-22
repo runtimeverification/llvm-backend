@@ -212,8 +212,8 @@ ptr<KOREDefinition> const &getDefinition(std::string const &kompiledDir) {
   static std::map<std::string, ptr<KOREDefinition>> cache;
 
   if (cache.find(kompiledDir) == cache.end()) {
-    KOREParser parser(kompiledDir + std::string("/syntaxDefinition.kore"));
-    cache[kompiledDir] = parser.definition();
+    cache[kompiledDir] = KOREDefinition::load(
+        kompiledDir + std::string("/syntaxDefinition.kore"));
   }
 
   return cache.at(kompiledDir);

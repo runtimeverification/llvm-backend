@@ -6,7 +6,6 @@
 #include <kllvm/codegen/DecisionParser.h>
 #include <kllvm/codegen/EmitConfigParser.h>
 #include <kllvm/codegen/Options.h>
-#include <kllvm/parser/KOREParser.h>
 #include <kllvm/parser/location.h>
 
 #include <llvm/Bitcode/BitcodeWriter.h>
@@ -121,8 +120,7 @@ int main(int argc, char **argv) {
 
   validate_codegen_args(OutputFile == "-");
 
-  KOREParser parser(Definition);
-  ptr<KOREDefinition> definition = parser.definition();
+  auto definition = KOREDefinition::load(Definition);
   definition->preprocess();
 
   llvm::LLVMContext Context;
