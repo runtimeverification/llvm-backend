@@ -1,34 +1,11 @@
 #include <kllvm/ast/AST.h>
 
+#include <kllvm/util/transitive_closure.h>
+
 #include <string>
 #include <unordered_set>
 
 namespace kllvm {
-
-namespace {
-
-template <typename Elem, typename Hash, typename Equal>
-std::unordered_map<Elem *, std::unordered_set<Elem *, Hash, Equal>, Hash, Equal>
-transitiveClosure(std::unordered_map<
-                  Elem *, std::unordered_set<Elem *, Hash, Equal>, Hash, Equal>
-                      relations) {
-  bool dirty;
-  do {
-    dirty = false;
-    for (auto &entry : relations) {
-      SortSet newSucc;
-      for (auto &elem : entry.second) {
-        auto &relation = relations[elem];
-        for (auto *elem2 : relation) {
-          dirty |= relations[entry.first].insert(elem2).second;
-        }
-      }
-    }
-  } while (dirty);
-  return relations;
-}
-
-} // namespace
 
 std::unordered_set<std::string>
 KOREDefinition::getSortsHookedTo(std::string const &hookName) const {
@@ -94,7 +71,7 @@ SubsortMap KOREDefinition::getSubsorts() const {
     }
   }
 
-  return transitiveClosure(subsorts);
+  return transitive_closure(subsorts);
 }
 
 SymbolMap KOREDefinition::getOverloads() const {
@@ -113,7 +90,7 @@ SymbolMap KOREDefinition::getOverloads() const {
     }
   }
 
-  return transitiveClosure(overloads);
+  return transitive_closure(overloads);
 }
 
 // NOLINTNEXTLINE(*-function-cognitive-complexity)
