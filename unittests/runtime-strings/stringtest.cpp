@@ -17,6 +17,10 @@ void *constructCompositePattern(uint32_t tag, std::vector<void *> &arguments) {
 }
 
 extern "C" {
+
+void visitChildren(
+    block *subject, writer *file, visitor *printer, void *state) { }
+
 bool hook_STRING_gt(string *, string *);
 bool hook_STRING_ge(string *, string *);
 bool hook_STRING_lt(string *, string *);
