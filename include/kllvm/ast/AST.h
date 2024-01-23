@@ -788,6 +788,10 @@ public:
 
   bool isAnywhere() const;
 
+  bool isFunction() const;
+
+  bool isCollectionElement() const;
+
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
 
 private:

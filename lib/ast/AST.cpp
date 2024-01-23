@@ -1364,6 +1364,18 @@ bool KORESymbolDeclaration::isAnywhere() const {
   return getAttributes().count("anywhere");
 }
 
+bool KORESymbolDeclaration::isFunction() const {
+  return getAttributes().count("function");
+}
+
+bool KORESymbolDeclaration::isCollectionElement() const {
+  static auto labels = std::unordered_set<std::string>{
+      "LIST.element", "MAP.element", "SET.element", "RANGEMAP.elementRng"};
+
+  return getAttributes().count("hook")
+         && labels.count(getStringAttribute("hook"));
+}
+
 void KOREModule::addAttribute(sptr<KORECompositePattern> Attribute) {
   std::string name = Attribute->getConstructor()->getName();
   attributes.insert({name, std::move(Attribute)});

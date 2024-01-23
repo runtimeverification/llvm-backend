@@ -108,9 +108,7 @@ void KOREDefinition::buildSortContainsRelation() {
   auto const &supersorts = getSupersorts();
 
   for (auto const &[name, decl] : getSymbolDeclarations()) {
-    auto const &atts = decl->getAttributes();
-    if (atts.find("function") != atts.end()) {
-      // TODO: exclude collection sorts
+    if (decl->isFunction() && !decl->isCollectionElement()) {
       continue;
     }
 
