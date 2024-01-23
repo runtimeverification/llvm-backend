@@ -153,6 +153,17 @@ sptr<KORESort> KORECompositeSort::substitute(substitution const &subst) {
   return shared_from_this();
 }
 
+KORECompositeSortDeclaration const *
+KORECompositeSort::declaration(KOREDefinition const &defn) const {
+  auto const &decls = defn.getSortDeclarations();
+
+  if (decls.find(getName()) != decls.end()) {
+    return decls.at(getName());
+  }
+
+  return nullptr;
+}
+
 ValueType KORECompositeSort::getCategory(KOREDefinition *definition) {
   if (category.cat != SortCategory::Uncomputed) {
     return category;

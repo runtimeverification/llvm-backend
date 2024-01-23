@@ -24,6 +24,8 @@ namespace kllvm {
 
 class serializer;
 
+class KOREDefinition;
+class KORECompositeSortDeclaration;
 class KORESortVariable;
 
 struct HashSort;
@@ -59,6 +61,14 @@ public:
 
   virtual bool isConcrete() const = 0;
   virtual sptr<KORESort> substitute(substitution const &) = 0;
+
+  /**
+   * Get the declaration of this sort if one exists in the given definition, and
+   * nullptr if no declaration exists (e.g. if this sort is a variable).
+   */
+  virtual KORECompositeSortDeclaration const *
+  declaration(KOREDefinition const &) const
+      = 0;
 
   virtual bool operator==(KORESort const &other) const = 0;
   bool operator!=(KORESort const &other) const { return !(*this == other); }
@@ -107,6 +117,11 @@ public:
   virtual bool isConcrete() const override { return false; }
   virtual sptr<KORESort> substitute(substitution const &subst) override {
     return subst.at(*this);
+  }
+
+  KORECompositeSortDeclaration const *
+  declaration(KOREDefinition const &) const override {
+    return nullptr;
   }
 
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
@@ -171,6 +186,9 @@ public:
 
   virtual bool isConcrete() const override;
   virtual sptr<KORESort> substitute(substitution const &subst) override;
+
+  KORECompositeSortDeclaration const *
+  declaration(KOREDefinition const &) const override;
 
   void addArgument(sptr<KORESort> const &Argument);
   virtual void print(std::ostream &Out, unsigned indent = 0) const override;
