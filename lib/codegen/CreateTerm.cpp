@@ -1071,6 +1071,9 @@ bool makeFunction(
           llvm::cast<llvm::DIType>(debugArgs[i])->getName().str());
     }
   }
+
+  makeCopyOnWriteCalls(block, definition, axiom, vars, subst);
+
   CreateTerm creator = CreateTerm(subst, definition, block, Module, false);
   llvm::Value *retval = creator(pattern).first;
 
@@ -1178,6 +1181,7 @@ std::string makeApplyRuleFunction(
           llvm::cast<llvm::DIType>(debugArgs[i])->getName().str());
     }
   }
+  makeCopyOnWriteCalls(block, definition, axiom, vars, subst);
   CreateTerm creator = CreateTerm(subst, definition, block, Module, false);
   std::vector<llvm::Value *> args;
   std::vector<llvm::Type *> types;

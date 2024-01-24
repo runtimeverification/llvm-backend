@@ -1,6 +1,7 @@
 add_library(Codegen
   CreateTerm.cpp
   ApplyPasses.cpp
+  CopyOnWrite.cpp
   CreateStaticTerm.cpp
   Debug.cpp
   Decision.cpp

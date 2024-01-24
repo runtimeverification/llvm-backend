@@ -115,6 +115,18 @@ std::string makeSideConditionFunction(
     KOREAxiomDeclaration *axiom, KOREDefinition *definition,
     llvm::Module *Module);
 
+/*
+ * For each variable of sort Bytes that appears in this axiom, conservatively
+ * estimate whether it may appear more than once in the right-hand-side. If it
+ * may, emit a call that marks it as copy-on-write for the runtime bytes
+ * library.
+ */
+void makeCopyOnWriteCalls(
+    llvm::BasicBlock *insertAtEnd, KOREDefinition *definition,
+    KOREAxiomDeclaration *axiom,
+    std::map<std::string, KOREVariablePattern *> const &all_vars,
+    llvm::StringMap<llvm::Value *> const &subst);
+
 extern std::string MAP_STRUCT;
 extern std::string LIST_STRUCT;
 extern std::string SET_STRUCT;
