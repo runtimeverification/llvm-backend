@@ -17,6 +17,7 @@ ptr<KOREDefinition> KOREDefinition::load(std::string const &filename) {
 void KOREDefinition::precompute() {
   buildSubsortRelation();
   buildOverloadRelation();
+  buildSortContainsRelation();
 }
 
 std::unordered_set<std::string>
@@ -101,6 +102,54 @@ void KOREDefinition::buildOverloadRelation() {
   }
 
   overloads = transitive_closure(overloads);
+}
+
+void KOREDefinition::buildSortContainsRelation() {
+  auto const &supersorts = getSupersorts();
+
+  for (auto const &[name, decl] : getSymbolDeclarations()) {
+    auto const &atts = decl->getAttributes();
+    if (atts.find("function") != atts.end()) {
+      // TODO: exclude collection sorts
+      continue;
+    }
+
+    auto *symbol = decl->getSymbol();
+    auto const &return_sort
+        = std::dynamic_pointer_cast<KORECompositeSort>(symbol->getSort());
+    if (!return_sort) {
+      continue;
+    }
+
+    auto &children = sortContains[return_sort.get()];
+    children.insert(return_sort.get());
+
+    for (auto const &arg : symbol->getArguments()) {
+      children.insert(arg.get());
+    }
+
+    auto subsorts = std::vector<KORESort *>{};
+    for (auto const &child_sort : children) {
+      if (supersorts.find(child_sort) != supersorts.end()) {
+        for (auto const &child_subsort : supersorts.at(child_sort)) {
+          subsorts.push_back(child_subsort);
+        }
+      }
+    }
+
+    std::copy(
+        subsorts.begin(), subsorts.end(),
+        std::inserter(children, children.begin()));
+  }
+
+  sortContains = transitive_closure(sortContains);
+
+  // Hooked sorts produce empty relations in the transitive closure because they
+  // cannot occur as the return sort of a constructor symbol, and cannot be
+  // subsorted. However, we want the relation to encode that a term of hooked
+  // sort H _can_ contain a term of hooked sort H, and so we take the reflexive
+  // closure of the transitive closure to ensure this.
+  sortContains = reflexive_closure(sortContains);
 }
 
 // NOLINTNEXTLINE(*-function-cognitive-complexity)

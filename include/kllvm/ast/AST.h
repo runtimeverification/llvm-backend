@@ -938,6 +938,7 @@ private:
   SubsortMap subsorts;
   SubsortMap supersorts;
   SymbolMap overloads;
+  SubsortMap sortContains;
 
   std::vector<sptr<KOREModule>> modules;
   std::unordered_map<std::string, sptr<KORECompositePattern>> attributes;
@@ -961,6 +962,7 @@ private:
 
   void buildSubsortRelation();
   void buildOverloadRelation();
+  void buildSortContainsRelation();
 
 public:
   /*
@@ -1028,6 +1030,23 @@ public:
    *  P |-> {Q . P is a more specific overload of Q}
    */
   SymbolMap getOverloads() const { return overloads; }
+
+  /*
+   * Return a relation specifying the set of sorts that may syntactically occur
+   * as children of another sort. For example, given symbols:
+   *
+   *   c(S_1, ..., S_N) : S_R
+   *   c(T_1, ..., T_N) : S_R
+   *
+   * The relation will contain an entry:
+   *
+   *   S_R |-> { S_R, S'_R, S_1, S'_1, ..., S_N, T_1, ..., T_N }
+   *
+   * where S'_X is a _subsort_ of S_X (that is, given that the first argument of
+   * `c` is of sort S_1, a term whose sort is a subsort of S_1 may also occur in
+   * the first argument position).
+   */
+  SubsortMap getSortContains() const { return sortContains; }
 
   std::vector<sptr<KOREModule>> const &getModules() const { return modules; }
   KORECompositeSortDeclarationMapType const &getSortDeclarations() const {

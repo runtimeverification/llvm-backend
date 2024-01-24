@@ -29,6 +29,15 @@ Map transitive_closure(Map relations) {
   return relations;
 }
 
+template <typename Map>
+Map reflexive_closure(Map relations) {
+  for (auto &[from, to_set] : relations) {
+    to_set.insert(from);
+  }
+
+  return relations;
+}
+
 } // namespace kllvm
 
 #endif
