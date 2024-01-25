@@ -34,19 +34,34 @@ bool is_hooked_to_bytes(KOREDefinition *definition, KORESort *sort) {
 /*
  * Test whether this variable or any of its subterms could syntactically be of a
  * sort that is hooked to the backend's implementation of mutable byte arrays.
+ *
+ * We memoize this check as otherwise we can end up doing a lot of repeated work
+ * for sorts at the top of the hierarchy that can contain many other sorts.
  */
 bool can_contain_bytes(KOREDefinition *definition, KOREVariablePattern *var) {
-  auto const &contains = definition->getSortContains();
-  auto const &var_sort = var->getSort();
+  static auto caches = std::unordered_map<
+      KOREDefinition *, std::unordered_map<std::string, bool>>{};
 
-  if (contains.find(var_sort.get()) == contains.end()) {
-    return false;
+  caches.try_emplace(definition);
+  auto &cache = caches.at(definition);
+
+  auto const &var_sort = var->getSort();
+  auto key = ast_to_string(*var_sort);
+
+  if (cache.find(key) == cache.end()) {
+    auto const &contains = definition->getSortContains();
+
+    if (contains.find(var_sort.get()) == contains.end()) {
+      cache[key] = false;
+    } else {
+      auto const &possible_contains = contains.at(var_sort.get());
+      cache[key] = std::any_of(
+          possible_contains.begin(), possible_contains.end(),
+          [&](auto *sort) { return is_hooked_to_bytes(definition, sort); });
+    }
   }
 
-  auto const &possible_contains = contains.at(var_sort.get());
-  return std::any_of(
-      possible_contains.begin(), possible_contains.end(),
-      [&](auto *sort) { return is_hooked_to_bytes(definition, sort); });
+  return cache.at(key);
 }
 
 /*
