@@ -4,9 +4,12 @@
 #include <cstring>
 #include <gmp.h>
 #include <stdexcept>
+#include <unordered_set>
 
 #include "runtime/alloc.h"
 #include "runtime/header.h"
+
+void copy_if_needed(SortBytes &b);
 
 extern "C" {
 
@@ -153,6 +156,8 @@ SortInt hook_BYTES_get(SortBytes b, SortInt off) {
 }
 
 SortBytes hook_BYTES_update(SortBytes b, SortInt off, SortInt val) {
+  copy_if_needed(b);
+
   unsigned long off_long = get_ui(off);
   if (off_long >= len(b)) {
     KLLVM_HOOK_INVALID_ARGUMENT(
@@ -168,6 +173,8 @@ SortBytes hook_BYTES_update(SortBytes b, SortInt off, SortInt val) {
 }
 
 SortBytes hook_BYTES_replaceAt(SortBytes b, SortInt start, SortBytes b2) {
+  copy_if_needed(b);
+
   unsigned long start_long = get_ui(start);
   if (start_long + len(b2) > len(b)) {
     KLLVM_HOOK_INVALID_ARGUMENT(
@@ -180,6 +187,8 @@ SortBytes hook_BYTES_replaceAt(SortBytes b, SortInt start, SortBytes b2) {
 
 SortBytes
 hook_BYTES_memset(SortBytes b, SortInt start, SortInt count, SortInt value) {
+  copy_if_needed(b);
+
   uint64_t ustart = get_ui(start);
   uint64_t ucount = get_ui(count);
   uint64_t uend = ustart + ucount;
@@ -244,6 +253,7 @@ SortBytes hook_BYTES_padLeft(SortBytes b, SortInt length, SortInt v) {
 }
 
 SortBytes hook_BYTES_reverse(SortBytes b) {
+  copy_if_needed(b);
   std::reverse(b->data, b->data + len(b));
   return b;
 }
