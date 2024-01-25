@@ -1,6 +1,7 @@
 add_library(strings STATIC
   strings.cpp
   bytes.cpp
+  copy_on_write.cpp
 )
 
 target_link_libraries(strings
