@@ -1072,7 +1072,9 @@ bool makeFunction(
     }
   }
 
-  makeCopyOnWriteCalls(block, definition, axiom, vars, subst);
+  if (apply && bigStep) {
+    makeCopyOnWriteCalls(block, definition, axiom, vars, subst);
+  }
 
   CreateTerm creator = CreateTerm(subst, definition, block, Module, false);
   llvm::Value *retval = creator(pattern).first;
