@@ -170,7 +170,7 @@ while [[ $# -gt 0 ]]; do
       codegen_flags+=("--proof-hint-instrumentation")
       shift
       ;;
-    --enable-k-semantics)
+    --use-k-semantics)
       codegen_flags+=("--strict-bytes")
       shift
       ;;

@@ -1,6 +1,6 @@
 #include <runtime/header.h>
 
-static std::unordered_set<SortBytes> copy_on_write_set = {};
+extern "C" bool enable_strict_bytes;
 
 namespace {
 
@@ -15,14 +15,7 @@ SortBytes copy_bytes(SortBytes b) {
 } // namespace
 
 void copy_if_needed(SortBytes &b) {
-  if (copy_on_write_set.find(b) != copy_on_write_set.end()) {
+  if (enable_strict_bytes) {
     b = copy_bytes(b);
   }
-}
-
-extern "C" {
-
-void make_copy_on_write(SortBytes b) {
-  copy_on_write_set.insert(b);
-}
 }
