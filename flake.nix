@@ -16,10 +16,15 @@
     pybind11-src.url =
       "github:pybind/pybind11/0ba639d6177659c5dc2955ac06ad7b5b0d22e05c";
     pybind11-src.flake = false;
-    mavenix.url = "github:nix-community/mavenix";
+    mavenix.url = "github:goodlyrottenapple/mavenix";
+    # needed by nix/flake-compat-k-unwrapped.nix
+    flake-compat = {
+      url = "github:edolstra/flake-compat";
+      flake = false;
+    };
   };
 
-  outputs = { self, nixpkgs, utils, fmt-src, immer-src, rapidjson-src, pybind11-src, mavenix }:
+  outputs = { self, nixpkgs, utils, fmt-src, immer-src, rapidjson-src, pybind11-src, mavenix, ... }:
     let
       inherit (nixpkgs) lib;
 
@@ -115,6 +120,22 @@
           inherit (llvm-backend-16-FastBuild) llvm-backend llvm-backend-matching llvm-kompile-testing;
           default = llvm-backend-16-FastBuild.llvm-backend;
           llvm-backend-release = llvm-backend-16-Release.llvm-backend;
+        } // {          
+          update-maven = let pkgs = import nixpkgs { 
+            overlays = [
+              (final: prev: {
+                maven = prev.maven // { inherit (prev) jdk; };
+              })
+              mavenix.overlay
+            ];
+            inherit system; };
+          in pkgs.writeShellScriptBin "update-maven" ''
+            #!/bin/sh
+            ${pkgs.nix}/bin/nix-build --no-out-link -E '(import ./flake-compat-k-unwrapped.nix).packages.${system}.llvm-backend-matching' \
+              || echo "^~~~ expected error"
+            export PATH="${pkgs.gnused}/bin:$PATH"
+            ${pkgs.mavenix-cli}/bin/mvnix-update -l ./nix/llvm-backend-matching.mavenix.lock -E '(import ./flake-compat-k-unwrapped.nix).packages.${system}.llvm-backend-matching'
+          '';
         };
         checks = listToChecks [
           llvm-backend-16-Debug.llvm-backend
