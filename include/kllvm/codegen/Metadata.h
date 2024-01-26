@@ -9,10 +9,9 @@
 namespace kllvm {
 
 void addKompiledDirSymbol(
-    llvm::LLVMContext &Context, std::string const &dir, llvm::Module *mod,
-    bool debug);
+    llvm::Module &mod, std::string const &dir, bool debug);
 
-void addStrictBytesFlag(llvm::Module *mod, bool enabled, bool debug);
+void addStrictBytesFlag(llvm::Module &mod, bool enabled, bool debug);
 
 } // namespace kllvm
 

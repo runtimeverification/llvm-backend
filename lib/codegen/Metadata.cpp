@@ -12,26 +12,30 @@ static std::string KOMPILED_DIR = "kompiled_directory";
 static std::string STRICT_BYTES = "enable_strict_bytes";
 
 void addKompiledDirSymbol(
-    llvm::LLVMContext &Context, std::string const &dir, llvm::Module *mod,
-    bool debug) {
-  auto *Str = llvm::ConstantDataArray::getString(Context, dir, true);
-  auto *global = mod->getOrInsertGlobal(KOMPILED_DIR, Str->getType());
-  auto *globalVar = llvm::cast<llvm::GlobalVariable>(global);
-  if (!globalVar->hasInitializer()) {
-    globalVar->setInitializer(Str);
+    llvm::Module &mod, std::string const &dir, bool debug) {
+  auto &ctx = mod.getContext();
+
+  auto *str = llvm::ConstantDataArray::getString(ctx, dir, true);
+
+  auto *global = mod.getOrInsertGlobal(KOMPILED_DIR, str->getType());
+  auto *global_var = llvm::cast<llvm::GlobalVariable>(global);
+
+  if (!global_var->hasInitializer()) {
+    global_var->setInitializer(str);
   }
 
   if (debug) {
-    initDebugGlobal(KOMPILED_DIR, getCharDebugType(), globalVar);
+    initDebugGlobal(KOMPILED_DIR, getCharDebugType(), global_var);
   }
 }
 
-void addStrictBytesFlag(llvm::Module *mod, bool enabled, bool debug) {
-  auto &ctx = mod->getContext();
+void addStrictBytesFlag(llvm::Module &mod, bool enabled, bool debug) {
+  auto &ctx = mod.getContext();
+
   auto *i1_ty = llvm::Type::getInt1Ty(ctx);
   auto *enabled_cst = llvm::ConstantInt::getBool(ctx, enabled);
 
-  auto *global = mod->getOrInsertGlobal(STRICT_BYTES, i1_ty);
+  auto *global = mod.getOrInsertGlobal(STRICT_BYTES, i1_ty);
   auto *global_var = llvm::cast<llvm::GlobalVariable>(global);
 
   if (!global_var->hasInitializer()) {

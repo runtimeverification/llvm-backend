@@ -111,6 +111,12 @@ void initialize_llvm() {
   InitializeAllAsmPrinters();
 }
 
+void emit_metadata(llvm::Module &mod) {
+  auto kompiled_dir = fs::absolute(Definition.getValue()).parent_path();
+  addKompiledDirSymbol(mod, kompiled_dir, Debug);
+  addStrictBytesFlag(mod, false, Debug);
+}
+
 } // namespace
 
 // NOLINTNEXTLINE(*-cognitive-complexity)
@@ -129,12 +135,11 @@ int main(int argc, char **argv) {
   llvm::LLVMContext Context;
   std::unique_ptr<llvm::Module> mod = newModule("definition", Context);
 
+  emit_metadata(*mod);
+
   if (Debug) {
     initDebugInfo(mod.get(), Definition);
   }
-
-  auto kompiled_dir = fs::absolute(Definition.getValue()).parent_path();
-  addKompiledDirSymbol(Context, kompiled_dir, mod.get(), Debug);
 
   for (auto *axiom : definition->getAxioms()) {
     makeSideConditionFunction(axiom, definition.get(), mod.get());
