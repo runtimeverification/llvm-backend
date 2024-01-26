@@ -62,9 +62,9 @@ cl::alias OutputFileAlias(
     cl::cat(CodegenToolCat));
 
 cl::opt<bool> StrictBytes(
-    "--strict-bytes",
+    "strict-bytes",
     cl::desc("Enable value semantics for objects of sort Bytes"),
-    cl::init(true), cl::cat(CodegenToolCat));
+    cl::init(false), cl::cat(CodegenToolCat));
 
 namespace {
 

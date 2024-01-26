@@ -34,6 +34,9 @@ Options:
                                be called from kompile. Only meaningful in "c" mode.
   -fno-omit-frame-pointer      Keep the frame pointer in compiled code for debugging purposes.
   --proof-hint-instrumentation Enable instrumentation for generation of proof hints.
+  --use-k-semantics            Use the stricter (immutable) semantics for objects of sort Bytes
+                               at run time, rather than the faster (mutable semantics) that are
+                               enabled by default.
   -O[0123]                     Set the optimization level for code generation.
 
 Any option not listed above will be passed through to clang; use '--' to
@@ -165,6 +168,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --proof-hint-instrumentation)
       codegen_flags+=("--proof-hint-instrumentation")
+      shift
+      ;;
+    --enable-k-semantics)
+      codegen_flags+=("--strict-bytes")
       shift
       ;;
     -O*)
