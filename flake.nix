@@ -77,9 +77,10 @@
       pkgsForSystem = system: llvm-version: llvm-backend-build-type:
         import nixpkgs {
           overlays = [
-            (_: _: {
+            (final: prev: {
               inherit llvm-version;
               inherit llvm-backend-build-type;
+              maven = prev.maven // { inherit (prev) jdk; };
             })
             mavenix.overlay
             llvm-backend-overlay

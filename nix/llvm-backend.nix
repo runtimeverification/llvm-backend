@@ -1,4 +1,4 @@
-{ lib, src, cmake, flex, fmt, pkgconfig, llvm, libllvm, libcxxabi, stdenv, boost, gmp
+{ lib, src, cmake, flex, fmt, pkg-config, llvm, libllvm, libcxxabi, stdenv, boost, gmp
 , jemalloc, libffi, libiconv, libyaml, mpfr, ncurses, python39, unixtools,
 # Runtime dependencies:
 host,
@@ -11,7 +11,7 @@ stdenv.mkDerivation {
   version = "0";
   inherit src cmakeBuildType;
 
-  nativeBuildInputs = [ cmake flex llvm pkgconfig ];
+  nativeBuildInputs = [ cmake flex llvm pkg-config ];
   buildInputs = [ libyaml ];
   propagatedBuildInputs = [
     boost fmt gmp jemalloc libffi mpfr ncurses python-env unixtools.xxd
