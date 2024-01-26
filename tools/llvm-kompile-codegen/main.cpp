@@ -5,6 +5,7 @@
 #include <kllvm/codegen/Decision.h>
 #include <kllvm/codegen/DecisionParser.h>
 #include <kllvm/codegen/EmitConfigParser.h>
+#include <kllvm/codegen/Metadata.h>
 #include <kllvm/codegen/Options.h>
 #include <kllvm/parser/KOREParser.h>
 #include <kllvm/parser/location.h>

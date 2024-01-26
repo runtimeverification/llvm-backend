@@ -82,9 +82,6 @@ std::string escape(std::string const &str);
    llvm modules in the llvm backend. */
 std::unique_ptr<llvm::Module>
 newModule(std::string const &name, llvm::LLVMContext &Context);
-void addKompiledDirSymbol(
-    llvm::LLVMContext &Context, std::string const &dir, llvm::Module *mod,
-    bool debug);
 
 llvm::StructType *getBlockType(
     llvm::Module *Module, KOREDefinition *definition, KORESymbol const *symbol);
