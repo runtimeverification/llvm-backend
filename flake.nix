@@ -103,7 +103,7 @@
           builtins.listToAttrs (lib.imap0 (i: v: { name = "check_${toString i}"; value = v; }) checks);
 
         matrix = builtins.listToAttrs (lib.forEach (lib.cartesianProductOfSets {
-          llvm-version = [15 16];
+          llvm-version = [15 16 17];
           build-type = ["Debug" "Release" "RelWithDebInfo" "FastBuild" "GcStats"];
         }) (
           args:
@@ -117,9 +117,9 @@
         ));
       in with matrix; {
         packages = utils.lib.flattenTree {
-          inherit (llvm-backend-16-FastBuild) llvm-backend llvm-backend-matching llvm-kompile-testing;
-          default = llvm-backend-16-FastBuild.llvm-backend;
-          llvm-backend-release = llvm-backend-16-Release.llvm-backend;
+          inherit (llvm-backend-17-FastBuild) llvm-backend llvm-backend-matching llvm-kompile-testing;
+          default = llvm-backend-17-FastBuild.llvm-backend;
+          llvm-backend-release = llvm-backend-17-Release.llvm-backend;
         } // {          
           update-maven = let pkgs = import nixpkgs { 
             overlays = [
@@ -138,15 +138,16 @@
           '';
         };
         checks = listToChecks [
-          llvm-backend-16-Debug.llvm-backend
-          llvm-backend-16-Release.llvm-backend
-          llvm-backend-16-RelWithDebInfo.llvm-backend
-          llvm-backend-16-GcStats.llvm-backend
+          llvm-backend-17-Debug.llvm-backend
+          llvm-backend-17-Release.llvm-backend
+          llvm-backend-17-RelWithDebInfo.llvm-backend
+          llvm-backend-17-GcStats.llvm-backend
 
           llvm-backend-15-FastBuild.integration-tests
           llvm-backend-16-FastBuild.integration-tests
+          llvm-backend-17-FastBuild.integration-tests
         ];
-        devShells.default = llvm-backend-16-FastBuild.devShell;
+        devShells.default = llvm-backend-17-FastBuild.devShell;
       }) // {
         # non-system suffixed items should go here
         overlays.default = llvm-backend-overlay;
