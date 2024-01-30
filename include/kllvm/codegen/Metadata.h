@@ -11,7 +11,7 @@ namespace kllvm {
 void addKompiledDirSymbol(
     llvm::Module &mod, std::string const &dir, bool debug);
 
-void addStrictBytesFlag(llvm::Module &mod, bool enabled, bool debug);
+void addMutableBytesFlag(llvm::Module &mod, bool enabled, bool debug);
 
 } // namespace kllvm
 

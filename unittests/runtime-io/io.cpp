@@ -20,7 +20,7 @@ void *constructCompositePattern(uint32_t tag, std::vector<void *> &arguments) {
 
 extern "C" {
 
-bool enable_strict_bytes = false;
+bool enable_mutable_bytes = false;
 char kompiled_directory[] = "some/test/directory/path";
 
 #define GETTAG(symbol) "Lbl'Hash'" #symbol "{}"

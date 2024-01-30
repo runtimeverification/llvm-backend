@@ -1,6 +1,6 @@
 #include <runtime/header.h>
 
-extern "C" bool enable_strict_bytes;
+extern "C" bool enable_mutable_bytes;
 
 namespace {
 
@@ -15,7 +15,7 @@ SortBytes copy_bytes(SortBytes b) {
 } // namespace
 
 void copy_if_needed(SortBytes &b) {
-  if (enable_strict_bytes) {
+  if (!enable_mutable_bytes) {
     b = copy_bytes(b);
   }
 }

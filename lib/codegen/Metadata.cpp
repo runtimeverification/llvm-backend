@@ -9,7 +9,7 @@
 namespace kllvm {
 
 static std::string KOMPILED_DIR = "kompiled_directory";
-static std::string STRICT_BYTES = "enable_strict_bytes";
+static std::string STRICT_BYTES = "enable_mutable_bytes";
 
 void addKompiledDirSymbol(
     llvm::Module &mod, std::string const &dir, bool debug) {
@@ -29,7 +29,7 @@ void addKompiledDirSymbol(
   }
 }
 
-void addStrictBytesFlag(llvm::Module &mod, bool enabled, bool debug) {
+void addMutableBytesFlag(llvm::Module &mod, bool enabled, bool debug) {
   auto &ctx = mod.getContext();
 
   auto *i1_ty = llvm::Type::getInt1Ty(ctx);

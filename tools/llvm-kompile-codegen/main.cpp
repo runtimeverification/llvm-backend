@@ -61,9 +61,9 @@ cl::alias OutputFileAlias(
     "o", cl::desc("Alias for --output"), cl::aliasopt(OutputFile),
     cl::cat(CodegenToolCat));
 
-cl::opt<bool> StrictBytes(
-    "strict-bytes",
-    cl::desc("Enable value semantics for objects of sort Bytes"),
+cl::opt<bool> MutableBytes(
+    "mutable-bytes",
+    cl::desc("Enable unsound reference semantics for objects of sort Bytes"),
     cl::init(false), cl::cat(CodegenToolCat));
 
 namespace {
@@ -119,7 +119,7 @@ void initialize_llvm() {
 void emit_metadata(llvm::Module &mod) {
   auto kompiled_dir = fs::absolute(Definition.getValue()).parent_path();
   addKompiledDirSymbol(mod, kompiled_dir, Debug);
-  addStrictBytesFlag(mod, StrictBytes, Debug);
+  addMutableBytesFlag(mod, MutableBytes, Debug);
 }
 
 } // namespace
