@@ -18,7 +18,7 @@ void *constructCompositePattern(uint32_t tag, std::vector<void *> &arguments) {
 
 extern "C" {
 
-bool enable_mutable_bytes = false;
+bool enable_mutable_bytes = true;
 
 bool hook_STRING_gt(string *, string *);
 bool hook_STRING_ge(string *, string *);
