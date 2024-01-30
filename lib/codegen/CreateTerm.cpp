@@ -311,8 +311,18 @@ sptr<KORESort> termSort(KOREPattern *pattern) {
 llvm::Value *CreateTerm::alloc_arg(
     KORECompositePattern *pattern, int idx, std::string locationStack) {
   KOREPattern *p = pattern->getArguments()[idx].get();
-  llvm::Value *ret
-      = createAllocation(p, fmt::format("{}:{}", locationStack, idx)).first;
+  std::string newLocation = fmt::format("{}:{}", locationStack, idx);
+  if (auto *constructor = dynamic_cast<KORECompositePattern *>(p)) {
+    KORESymbol const *symbol = constructor->getConstructor();
+    if (symbol->getName() != "\\dv") {
+      KORESymbolDeclaration *symbolDecl
+          = Definition->getSymbolDeclarations().at(symbol->getName());
+      if (symbolDecl->getAttributes().count("sortInjection")) {
+        newLocation = locationStack;
+      }
+    }
+  }
+  llvm::Value *ret = createAllocation(p, newLocation).first;
   auto *sort = dynamic_cast<KORECompositeSort *>(p->getSort().get());
   ProofEvent e(Definition, Module);
   CurrentBlock = e.hookArg(ret, sort, CurrentBlock);
@@ -787,10 +797,19 @@ llvm::Value *CreateTerm::notInjectionCase(
     if (idx == 2 && val != nullptr) {
       ChildValue = val;
     } else {
-      ChildValue
-          = createAllocation(
-                child.get(), fmt::format("{}:{}", locationStack, idx - 2))
-                .first;
+      std::string newLocation = fmt::format("{}:{}", locationStack, idx - 2);
+      if (auto constructor
+          = dynamic_cast<KORECompositePattern *>(child.get())) {
+        KORESymbol *symbol = constructor->getConstructor();
+        if (symbol->getName() != "\\dv") {
+          KORESymbolDeclaration *symbolDecl
+              = Definition->getSymbolDeclarations().at(symbol->getName());
+          if (symbolDecl->getAttributes().count("sortInjection")) {
+            newLocation = locationStack;
+          }
+        }
+      }
+      ChildValue = createAllocation(child.get(), newLocation).first;
     }
 
     auto *sort = dynamic_cast<KORECompositeSort *>(child->getSort().get());
@@ -924,8 +943,7 @@ CreateTerm::createAllocation(KOREPattern *pattern, std::string locationStack) {
         symbolDecl->getAttributes().count("sortInjection")
         && (cat == SortCategory::Symbol)) {
       std::pair<llvm::Value *, bool> val = createAllocation(
-          constructor->getArguments()[0].get(),
-          fmt::format("{}:0", locationStack));
+          constructor->getArguments()[0].get(), locationStack);
       if (val.second) {
         llvm::Instruction *Tag = llvm::CallInst::Create(
             getOrInsertFunction(
