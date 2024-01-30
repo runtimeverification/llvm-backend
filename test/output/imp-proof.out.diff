@@ -1,4 +1,4 @@
-version: 3
+version: 4
 hook: MAP.element (0)
   function: Lbl'UndsPipe'-'-GT-Unds'{} (0)
     arg: kore[60]
@@ -24,9 +24,9 @@ function: LblinitKCell{} (0:0)
   arg: kore[1291]
 rule: 2970 1
   VarInit = kore[1291]
-function: Lblproject'Coln'Pgm{} (0:0:0:0)
-  hook: MAP.lookup (0:0:0:0:0:0)
-    function: LblMap'Coln'lookup{} (0:0:0:0:0:0)
+function: Lblproject'Coln'Pgm{} (0:0)
+  hook: MAP.lookup (0:0:0:0)
+    function: LblMap'Coln'lookup{} (0:0:0:0)
       arg: kore[1291]
       arg: kore[60]
   hook result: kore[1178]
@@ -292,8 +292,8 @@ rule: 2911 5
   Var'Unds'DotVar2 = kore[1317]
   VarI1 = kore[64]
   VarI2 = kore[63]
-hook: INT.le (0:0:0:0:0:0)
-  function: Lbl'Unds-LT-Eqls'Int'Unds'{} (0:0:0:0:0:0)
+hook: INT.le (0:0:0:0:0)
+  function: Lbl'Unds-LT-Eqls'Int'Unds'{} (0:0:0:0:0)
     arg: kore[64]
     arg: kore[63]
 hook result: kore[68]
@@ -333,7 +333,7 @@ rule: 2895 4
   Var'Unds'DotVar1 = kore[232]
   Var'Unds'DotVar2 = kore[1237]
   VarT = kore[68]
-hook: BOOL.not (0:0:0:0:0:0)
+hook: BOOL.not (0:0:0:0:0)
   arg: kore[68]
 hook result: kore[67]
 config: kore[1634]
@@ -577,8 +577,8 @@ rule: 2905 5
   Var'Unds'DotVar2 = kore[1061]
   VarI1 = kore[63]
   VarI2 = kore[64]
-hook: INT.add (0:0:0:0:0:0)
-  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0:0)
+hook: INT.add (0:0:0:0:0)
+  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0)
     arg: kore[63]
     arg: kore[64]
 hook result: kore[64]
@@ -745,8 +745,8 @@ rule: 2896 4
   Var'Unds'DotVar1 = kore[230]
   Var'Unds'DotVar2 = kore[1091]
   VarI1 = kore[63]
-hook: INT.sub (0:0:0:0:0:0)
-  function: Lbl'Unds'-Int'Unds'{} (0:0:0:0:0:0)
+hook: INT.sub (0:0:0:0:0)
+  function: Lbl'Unds'-Int'Unds'{} (0:0:0:0:0)
     arg: kore[63]
     arg: kore[63]
 hook result: kore[64]
@@ -810,8 +810,8 @@ rule: 2905 5
   Var'Unds'DotVar2 = kore[949]
   VarI1 = kore[64]
   VarI2 = kore[64]
-hook: INT.add (0:0:0:0:0:0)
-  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0:0)
+hook: INT.add (0:0:0:0:0)
+  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0)
     arg: kore[64]
     arg: kore[64]
 hook result: kore[63]
@@ -1000,8 +1000,8 @@ rule: 2911 5
   Var'Unds'DotVar2 = kore[1317]
   VarI1 = kore[63]
   VarI2 = kore[63]
-hook: INT.le (0:0:0:0:0:0)
-  function: Lbl'Unds-LT-Eqls'Int'Unds'{} (0:0:0:0:0:0)
+hook: INT.le (0:0:0:0:0)
+  function: Lbl'Unds-LT-Eqls'Int'Unds'{} (0:0:0:0:0)
     arg: kore[63]
     arg: kore[63]
 hook result: kore[68]
@@ -1041,7 +1041,7 @@ rule: 2895 4
   Var'Unds'DotVar1 = kore[232]
   Var'Unds'DotVar2 = kore[1237]
   VarT = kore[68]
-hook: BOOL.not (0:0:0:0:0:0)
+hook: BOOL.not (0:0:0:0:0)
   arg: kore[68]
 hook result: kore[67]
 config: kore[1634]
@@ -1285,8 +1285,8 @@ rule: 2905 5
   Var'Unds'DotVar2 = kore[1061]
   VarI1 = kore[64]
   VarI2 = kore[63]
-hook: INT.add (0:0:0:0:0:0)
-  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0:0)
+hook: INT.add (0:0:0:0:0)
+  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0)
     arg: kore[64]
     arg: kore[63]
 hook result: kore[64]
@@ -1453,8 +1453,8 @@ rule: 2896 4
   Var'Unds'DotVar1 = kore[232]
   Var'Unds'DotVar2 = kore[1090]
   VarI1 = kore[63]
-hook: INT.sub (0:0:0:0:0:0)
-  function: Lbl'Unds'-Int'Unds'{} (0:0:0:0:0:0)
+hook: INT.sub (0:0:0:0:0)
+  function: Lbl'Unds'-Int'Unds'{} (0:0:0:0:0)
     arg: kore[63]
     arg: kore[63]
 hook result: kore[64]
@@ -1518,8 +1518,8 @@ rule: 2905 5
   Var'Unds'DotVar2 = kore[949]
   VarI1 = kore[63]
   VarI2 = kore[64]
-hook: INT.add (0:0:0:0:0:0)
-  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0:0)
+hook: INT.add (0:0:0:0:0)
+  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0)
     arg: kore[63]
     arg: kore[64]
 hook result: kore[63]
@@ -1708,8 +1708,8 @@ rule: 2911 5
   Var'Unds'DotVar2 = kore[1317]
   VarI1 = kore[63]
   VarI2 = kore[63]
-hook: INT.le (0:0:0:0:0:0)
-  function: Lbl'Unds-LT-Eqls'Int'Unds'{} (0:0:0:0:0:0)
+hook: INT.le (0:0:0:0:0)
+  function: Lbl'Unds-LT-Eqls'Int'Unds'{} (0:0:0:0:0)
     arg: kore[63]
     arg: kore[63]
 hook result: kore[68]
@@ -1749,7 +1749,7 @@ rule: 2895 4
   Var'Unds'DotVar1 = kore[232]
   Var'Unds'DotVar2 = kore[1237]
   VarT = kore[68]
-hook: BOOL.not (0:0:0:0:0:0)
+hook: BOOL.not (0:0:0:0:0)
   arg: kore[68]
 hook result: kore[67]
 config: kore[1634]
@@ -1993,8 +1993,8 @@ rule: 2905 5
   Var'Unds'DotVar2 = kore[1061]
   VarI1 = kore[64]
   VarI2 = kore[63]
-hook: INT.add (0:0:0:0:0:0)
-  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0:0)
+hook: INT.add (0:0:0:0:0)
+  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0)
     arg: kore[64]
     arg: kore[63]
 hook result: kore[64]
@@ -2161,8 +2161,8 @@ rule: 2896 4
   Var'Unds'DotVar1 = kore[232]
   Var'Unds'DotVar2 = kore[1090]
   VarI1 = kore[63]
-hook: INT.sub (0:0:0:0:0:0)
-  function: Lbl'Unds'-Int'Unds'{} (0:0:0:0:0:0)
+hook: INT.sub (0:0:0:0:0)
+  function: Lbl'Unds'-Int'Unds'{} (0:0:0:0:0)
     arg: kore[63]
     arg: kore[63]
 hook result: kore[64]
@@ -2226,8 +2226,8 @@ rule: 2905 5
   Var'Unds'DotVar2 = kore[949]
   VarI1 = kore[63]
   VarI2 = kore[64]
-hook: INT.add (0:0:0:0:0:0)
-  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0:0)
+hook: INT.add (0:0:0:0:0)
+  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0)
     arg: kore[63]
     arg: kore[64]
 hook result: kore[63]
@@ -2416,8 +2416,8 @@ rule: 2911 5
   Var'Unds'DotVar2 = kore[1317]
   VarI1 = kore[63]
   VarI2 = kore[63]
-hook: INT.le (0:0:0:0:0:0)
-  function: Lbl'Unds-LT-Eqls'Int'Unds'{} (0:0:0:0:0:0)
+hook: INT.le (0:0:0:0:0)
+  function: Lbl'Unds-LT-Eqls'Int'Unds'{} (0:0:0:0:0)
     arg: kore[63]
     arg: kore[63]
 hook result: kore[68]
@@ -2457,7 +2457,7 @@ rule: 2895 4
   Var'Unds'DotVar1 = kore[232]
   Var'Unds'DotVar2 = kore[1237]
   VarT = kore[68]
-hook: BOOL.not (0:0:0:0:0:0)
+hook: BOOL.not (0:0:0:0:0)
   arg: kore[68]
 hook result: kore[67]
 config: kore[1634]
@@ -2701,8 +2701,8 @@ rule: 2905 5
   Var'Unds'DotVar2 = kore[1061]
   VarI1 = kore[64]
   VarI2 = kore[63]
-hook: INT.add (0:0:0:0:0:0)
-  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0:0)
+hook: INT.add (0:0:0:0:0)
+  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0)
     arg: kore[64]
     arg: kore[63]
 hook result: kore[64]
@@ -2869,8 +2869,8 @@ rule: 2896 4
   Var'Unds'DotVar1 = kore[232]
   Var'Unds'DotVar2 = kore[1090]
   VarI1 = kore[63]
-hook: INT.sub (0:0:0:0:0:0)
-  function: Lbl'Unds'-Int'Unds'{} (0:0:0:0:0:0)
+hook: INT.sub (0:0:0:0:0)
+  function: Lbl'Unds'-Int'Unds'{} (0:0:0:0:0)
     arg: kore[63]
     arg: kore[63]
 hook result: kore[64]
@@ -2934,8 +2934,8 @@ rule: 2905 5
   Var'Unds'DotVar2 = kore[949]
   VarI1 = kore[63]
   VarI2 = kore[64]
-hook: INT.add (0:0:0:0:0:0)
-  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0:0)
+hook: INT.add (0:0:0:0:0)
+  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0)
     arg: kore[63]
     arg: kore[64]
 hook result: kore[63]
@@ -3124,8 +3124,8 @@ rule: 2911 5
   Var'Unds'DotVar2 = kore[1317]
   VarI1 = kore[63]
   VarI2 = kore[63]
-hook: INT.le (0:0:0:0:0:0)
-  function: Lbl'Unds-LT-Eqls'Int'Unds'{} (0:0:0:0:0:0)
+hook: INT.le (0:0:0:0:0)
+  function: Lbl'Unds-LT-Eqls'Int'Unds'{} (0:0:0:0:0)
     arg: kore[63]
     arg: kore[63]
 hook result: kore[68]
@@ -3165,7 +3165,7 @@ rule: 2895 4
   Var'Unds'DotVar1 = kore[232]
   Var'Unds'DotVar2 = kore[1237]
   VarT = kore[68]
-hook: BOOL.not (0:0:0:0:0:0)
+hook: BOOL.not (0:0:0:0:0)
   arg: kore[68]
 hook result: kore[67]
 config: kore[1634]
@@ -3409,8 +3409,8 @@ rule: 2905 5
   Var'Unds'DotVar2 = kore[1061]
   VarI1 = kore[64]
   VarI2 = kore[63]
-hook: INT.add (0:0:0:0:0:0)
-  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0:0)
+hook: INT.add (0:0:0:0:0)
+  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0)
     arg: kore[64]
     arg: kore[63]
 hook result: kore[64]
@@ -3577,8 +3577,8 @@ rule: 2896 4
   Var'Unds'DotVar1 = kore[232]
   Var'Unds'DotVar2 = kore[1090]
   VarI1 = kore[63]
-hook: INT.sub (0:0:0:0:0:0)
-  function: Lbl'Unds'-Int'Unds'{} (0:0:0:0:0:0)
+hook: INT.sub (0:0:0:0:0)
+  function: Lbl'Unds'-Int'Unds'{} (0:0:0:0:0)
     arg: kore[63]
     arg: kore[63]
 hook result: kore[64]
@@ -3642,8 +3642,8 @@ rule: 2905 5
   Var'Unds'DotVar2 = kore[949]
   VarI1 = kore[63]
   VarI2 = kore[64]
-hook: INT.add (0:0:0:0:0:0)
-  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0:0)
+hook: INT.add (0:0:0:0:0)
+  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0)
     arg: kore[63]
     arg: kore[64]
 hook result: kore[63]
@@ -3832,8 +3832,8 @@ rule: 2911 5
   Var'Unds'DotVar2 = kore[1317]
   VarI1 = kore[63]
   VarI2 = kore[63]
-hook: INT.le (0:0:0:0:0:0)
-  function: Lbl'Unds-LT-Eqls'Int'Unds'{} (0:0:0:0:0:0)
+hook: INT.le (0:0:0:0:0)
+  function: Lbl'Unds-LT-Eqls'Int'Unds'{} (0:0:0:0:0)
     arg: kore[63]
     arg: kore[63]
 hook result: kore[68]
@@ -3873,7 +3873,7 @@ rule: 2895 4
   Var'Unds'DotVar1 = kore[232]
   Var'Unds'DotVar2 = kore[1237]
   VarT = kore[68]
-hook: BOOL.not (0:0:0:0:0:0)
+hook: BOOL.not (0:0:0:0:0)
   arg: kore[68]
 hook result: kore[67]
 config: kore[1634]
@@ -4117,8 +4117,8 @@ rule: 2905 5
   Var'Unds'DotVar2 = kore[1061]
   VarI1 = kore[64]
   VarI2 = kore[63]
-hook: INT.add (0:0:0:0:0:0)
-  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0:0)
+hook: INT.add (0:0:0:0:0)
+  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0)
     arg: kore[64]
     arg: kore[63]
 hook result: kore[64]
@@ -4285,8 +4285,8 @@ rule: 2896 4
   Var'Unds'DotVar1 = kore[232]
   Var'Unds'DotVar2 = kore[1090]
   VarI1 = kore[63]
-hook: INT.sub (0:0:0:0:0:0)
-  function: Lbl'Unds'-Int'Unds'{} (0:0:0:0:0:0)
+hook: INT.sub (0:0:0:0:0)
+  function: Lbl'Unds'-Int'Unds'{} (0:0:0:0:0)
     arg: kore[63]
     arg: kore[63]
 hook result: kore[64]
@@ -4350,8 +4350,8 @@ rule: 2905 5
   Var'Unds'DotVar2 = kore[949]
   VarI1 = kore[63]
   VarI2 = kore[64]
-hook: INT.add (0:0:0:0:0:0)
-  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0:0)
+hook: INT.add (0:0:0:0:0)
+  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0)
     arg: kore[63]
     arg: kore[64]
 hook result: kore[63]
@@ -4540,8 +4540,8 @@ rule: 2911 5
   Var'Unds'DotVar2 = kore[1317]
   VarI1 = kore[63]
   VarI2 = kore[63]
-hook: INT.le (0:0:0:0:0:0)
-  function: Lbl'Unds-LT-Eqls'Int'Unds'{} (0:0:0:0:0:0)
+hook: INT.le (0:0:0:0:0)
+  function: Lbl'Unds-LT-Eqls'Int'Unds'{} (0:0:0:0:0)
     arg: kore[63]
     arg: kore[63]
 hook result: kore[68]
@@ -4581,7 +4581,7 @@ rule: 2895 4
   Var'Unds'DotVar1 = kore[232]
   Var'Unds'DotVar2 = kore[1237]
   VarT = kore[68]
-hook: BOOL.not (0:0:0:0:0:0)
+hook: BOOL.not (0:0:0:0:0)
   arg: kore[68]
 hook result: kore[67]
 config: kore[1634]
@@ -4825,8 +4825,8 @@ rule: 2905 5
   Var'Unds'DotVar2 = kore[1061]
   VarI1 = kore[64]
   VarI2 = kore[63]
-hook: INT.add (0:0:0:0:0:0)
-  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0:0)
+hook: INT.add (0:0:0:0:0)
+  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0)
     arg: kore[64]
     arg: kore[63]
 hook result: kore[64]
@@ -4993,8 +4993,8 @@ rule: 2896 4
   Var'Unds'DotVar1 = kore[232]
   Var'Unds'DotVar2 = kore[1090]
   VarI1 = kore[63]
-hook: INT.sub (0:0:0:0:0:0)
-  function: Lbl'Unds'-Int'Unds'{} (0:0:0:0:0:0)
+hook: INT.sub (0:0:0:0:0)
+  function: Lbl'Unds'-Int'Unds'{} (0:0:0:0:0)
     arg: kore[63]
     arg: kore[63]
 hook result: kore[64]
@@ -5058,8 +5058,8 @@ rule: 2905 5
   Var'Unds'DotVar2 = kore[949]
   VarI1 = kore[63]
   VarI2 = kore[64]
-hook: INT.add (0:0:0:0:0:0)
-  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0:0)
+hook: INT.add (0:0:0:0:0)
+  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0)
     arg: kore[63]
     arg: kore[64]
 hook result: kore[63]
@@ -5248,8 +5248,8 @@ rule: 2911 5
   Var'Unds'DotVar2 = kore[1317]
   VarI1 = kore[63]
   VarI2 = kore[63]
-hook: INT.le (0:0:0:0:0:0)
-  function: Lbl'Unds-LT-Eqls'Int'Unds'{} (0:0:0:0:0:0)
+hook: INT.le (0:0:0:0:0)
+  function: Lbl'Unds-LT-Eqls'Int'Unds'{} (0:0:0:0:0)
     arg: kore[63]
     arg: kore[63]
 hook result: kore[68]
@@ -5289,7 +5289,7 @@ rule: 2895 4
   Var'Unds'DotVar1 = kore[232]
   Var'Unds'DotVar2 = kore[1237]
   VarT = kore[68]
-hook: BOOL.not (0:0:0:0:0:0)
+hook: BOOL.not (0:0:0:0:0)
   arg: kore[68]
 hook result: kore[67]
 config: kore[1634]
@@ -5533,8 +5533,8 @@ rule: 2905 5
   Var'Unds'DotVar2 = kore[1061]
   VarI1 = kore[64]
   VarI2 = kore[63]
-hook: INT.add (0:0:0:0:0:0)
-  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0:0)
+hook: INT.add (0:0:0:0:0)
+  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0)
     arg: kore[64]
     arg: kore[63]
 hook result: kore[64]
@@ -5701,8 +5701,8 @@ rule: 2896 4
   Var'Unds'DotVar1 = kore[232]
   Var'Unds'DotVar2 = kore[1090]
   VarI1 = kore[63]
-hook: INT.sub (0:0:0:0:0:0)
-  function: Lbl'Unds'-Int'Unds'{} (0:0:0:0:0:0)
+hook: INT.sub (0:0:0:0:0)
+  function: Lbl'Unds'-Int'Unds'{} (0:0:0:0:0)
     arg: kore[63]
     arg: kore[63]
 hook result: kore[64]
@@ -5766,8 +5766,8 @@ rule: 2905 5
   Var'Unds'DotVar2 = kore[949]
   VarI1 = kore[63]
   VarI2 = kore[64]
-hook: INT.add (0:0:0:0:0:0)
-  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0:0)
+hook: INT.add (0:0:0:0:0)
+  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0)
     arg: kore[63]
     arg: kore[64]
 hook result: kore[63]
@@ -5956,8 +5956,8 @@ rule: 2911 5
   Var'Unds'DotVar2 = kore[1317]
   VarI1 = kore[63]
   VarI2 = kore[63]
-hook: INT.le (0:0:0:0:0:0)
-  function: Lbl'Unds-LT-Eqls'Int'Unds'{} (0:0:0:0:0:0)
+hook: INT.le (0:0:0:0:0)
+  function: Lbl'Unds-LT-Eqls'Int'Unds'{} (0:0:0:0:0)
     arg: kore[63]
     arg: kore[63]
 hook result: kore[68]
@@ -5997,7 +5997,7 @@ rule: 2895 4
   Var'Unds'DotVar1 = kore[232]
   Var'Unds'DotVar2 = kore[1237]
   VarT = kore[68]
-hook: BOOL.not (0:0:0:0:0:0)
+hook: BOOL.not (0:0:0:0:0)
   arg: kore[68]
 hook result: kore[67]
 config: kore[1634]
@@ -6241,8 +6241,8 @@ rule: 2905 5
   Var'Unds'DotVar2 = kore[1061]
   VarI1 = kore[64]
   VarI2 = kore[63]
-hook: INT.add (0:0:0:0:0:0)
-  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0:0)
+hook: INT.add (0:0:0:0:0)
+  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0)
     arg: kore[64]
     arg: kore[63]
 hook result: kore[64]
@@ -6409,8 +6409,8 @@ rule: 2896 4
   Var'Unds'DotVar1 = kore[232]
   Var'Unds'DotVar2 = kore[1090]
   VarI1 = kore[63]
-hook: INT.sub (0:0:0:0:0:0)
-  function: Lbl'Unds'-Int'Unds'{} (0:0:0:0:0:0)
+hook: INT.sub (0:0:0:0:0)
+  function: Lbl'Unds'-Int'Unds'{} (0:0:0:0:0)
     arg: kore[63]
     arg: kore[63]
 hook result: kore[64]
@@ -6474,8 +6474,8 @@ rule: 2905 5
   Var'Unds'DotVar2 = kore[949]
   VarI1 = kore[63]
   VarI2 = kore[64]
-hook: INT.add (0:0:0:0:0:0)
-  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0:0)
+hook: INT.add (0:0:0:0:0)
+  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0)
     arg: kore[63]
     arg: kore[64]
 hook result: kore[63]
@@ -6664,8 +6664,8 @@ rule: 2911 5
   Var'Unds'DotVar2 = kore[1317]
   VarI1 = kore[63]
   VarI2 = kore[63]
-hook: INT.le (0:0:0:0:0:0)
-  function: Lbl'Unds-LT-Eqls'Int'Unds'{} (0:0:0:0:0:0)
+hook: INT.le (0:0:0:0:0)
+  function: Lbl'Unds-LT-Eqls'Int'Unds'{} (0:0:0:0:0)
     arg: kore[63]
     arg: kore[63]
 hook result: kore[68]
@@ -6705,7 +6705,7 @@ rule: 2895 4
   Var'Unds'DotVar1 = kore[232]
   Var'Unds'DotVar2 = kore[1237]
   VarT = kore[68]
-hook: BOOL.not (0:0:0:0:0:0)
+hook: BOOL.not (0:0:0:0:0)
   arg: kore[68]
 hook result: kore[67]
 config: kore[1634]
@@ -6949,8 +6949,8 @@ rule: 2905 5
   Var'Unds'DotVar2 = kore[1061]
   VarI1 = kore[64]
   VarI2 = kore[63]
-hook: INT.add (0:0:0:0:0:0)
-  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0:0)
+hook: INT.add (0:0:0:0:0)
+  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0)
     arg: kore[64]
     arg: kore[63]
 hook result: kore[64]
@@ -7117,8 +7117,8 @@ rule: 2896 4
   Var'Unds'DotVar1 = kore[232]
   Var'Unds'DotVar2 = kore[1090]
   VarI1 = kore[63]
-hook: INT.sub (0:0:0:0:0:0)
-  function: Lbl'Unds'-Int'Unds'{} (0:0:0:0:0:0)
+hook: INT.sub (0:0:0:0:0)
+  function: Lbl'Unds'-Int'Unds'{} (0:0:0:0:0)
     arg: kore[63]
     arg: kore[63]
 hook result: kore[64]
@@ -7182,8 +7182,8 @@ rule: 2905 5
   Var'Unds'DotVar2 = kore[949]
   VarI1 = kore[63]
   VarI2 = kore[64]
-hook: INT.add (0:0:0:0:0:0)
-  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0:0)
+hook: INT.add (0:0:0:0:0)
+  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0)
     arg: kore[63]
     arg: kore[64]
 hook result: kore[63]
@@ -7372,8 +7372,8 @@ rule: 2911 5
   Var'Unds'DotVar2 = kore[1317]
   VarI1 = kore[63]
   VarI2 = kore[63]
-hook: INT.le (0:0:0:0:0:0)
-  function: Lbl'Unds-LT-Eqls'Int'Unds'{} (0:0:0:0:0:0)
+hook: INT.le (0:0:0:0:0)
+  function: Lbl'Unds-LT-Eqls'Int'Unds'{} (0:0:0:0:0)
     arg: kore[63]
     arg: kore[63]
 hook result: kore[67]
@@ -7413,7 +7413,7 @@ rule: 2895 4
   Var'Unds'DotVar1 = kore[232]
   Var'Unds'DotVar2 = kore[1237]
   VarT = kore[67]
-hook: BOOL.not (0:0:0:0:0:0)
+hook: BOOL.not (0:0:0:0:0)
   arg: kore[67]
 hook result: kore[68]
 config: kore[1635]
