@@ -14,8 +14,12 @@ SortBytes copy_bytes(SortBytes b) {
 
 } // namespace
 
+extern "C" bool hook_BYTES_mutableBytesEnabled() {
+  return enable_mutable_bytes;
+}
+
 void copy_if_needed(SortBytes &b) {
-  if (!enable_mutable_bytes) {
+  if (!hook_BYTES_mutableBytesEnabled()) {
     b = copy_bytes(b);
   }
 }
