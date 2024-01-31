@@ -370,7 +370,7 @@ void bind_proof_trace(py::module_ &m) {
 
   [[maybe_unused]] auto llvm_side_condition_event = py::class_<
       LLVMSideConditionEvent, std::shared_ptr<LLVMSideConditionEvent>>(
-      proof_trace, "LLVMSideConditionEvent", llvm_rewrite_event);
+      proof_trace, "LLVMSideConditionEvent", llvm_step_event);
 
   py::class_<LLVMFunctionEvent, std::shared_ptr<LLVMFunctionEvent>>(
       proof_trace, "LLVMFunctionEvent", llvm_step_event)

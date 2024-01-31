@@ -80,15 +80,14 @@ public:
   virtual void print(std::ostream &Out, unsigned indent = 0u) const override;
 };
 
-class LLVMSideConditionEvent : public LLVMRewriteEvent {
+class LLVMSideConditionEvent : public LLVMStepEvent {
 private:
-  LLVMSideConditionEvent(uint64_t _ruleOrdinal)
-      : LLVMRewriteEvent(_ruleOrdinal) { }
+  LLVMSideConditionEvent()
+      : LLVMStepEvent() { }
 
 public:
-  static sptr<LLVMSideConditionEvent> Create(uint64_t _ruleOrdinal) {
-    return sptr<LLVMSideConditionEvent>(
-        new LLVMSideConditionEvent(_ruleOrdinal));
+  static sptr<LLVMSideConditionEvent> Create() {
+    return sptr<LLVMSideConditionEvent>(new LLVMSideConditionEvent());
   }
 
   virtual void print(std::ostream &Out, unsigned indent = 0u) const override;
@@ -479,23 +478,7 @@ private:
       return nullptr;
     }
 
-    uint64_t ordinal;
-    if (!parse_ordinal(ptr, end, ordinal)) {
-      return nullptr;
-    }
-
-    uint64_t arity;
-    if (!parse_arity(ptr, end, arity)) {
-      return nullptr;
-    }
-
-    auto event = LLVMSideConditionEvent::Create(ordinal);
-
-    for (auto i = 0; i < arity; i++) {
-      if (!parse_variable(ptr, end, event)) {
-        return nullptr;
-      }
-    }
+    auto event = LLVMSideConditionEvent::Create();
 
     return event;
   }

@@ -427,9 +427,7 @@ void FunctionNode::codegen(Decision *d) {
 
   if (isSideCondition) {
     ProofEvent p(d->Definition, d->Module);
-    size_t ordinal = std::stoll(function.substr(15));
-    KOREAxiomDeclaration *axiom = d->Definition->getAxiomByOrdinal(ordinal);
-    d->CurrentBlock = p.sideConditionEvent(axiom, args, d->CurrentBlock);
+    d->CurrentBlock = p.sideConditionEvent(d->CurrentBlock);
   }
 
   CreateTerm creator(
