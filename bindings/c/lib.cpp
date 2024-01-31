@@ -67,8 +67,9 @@ auto managed(kore_symbol *ptr) {
  */
 
 extern "C" {
-void initStaticObjects(void);
-void freeAllKoreMem(void);
+void initStaticObjects();
+void freeAllKoreMem();
+bool hook_BYTES_mutableBytesEnabled();
 }
 
 extern "C" {
@@ -425,6 +426,10 @@ void kllvm_init(void) {
 
 void kllvm_free_all_memory(void) {
   freeAllKoreMem();
+}
+
+bool kllvm_mutable_bytes_enabled(void) {
+  return hook_BYTES_mutableBytesEnabled();
 }
 }
 

@@ -5,6 +5,7 @@
 #include <kllvm/codegen/Decision.h>
 #include <kllvm/codegen/DecisionParser.h>
 #include <kllvm/codegen/EmitConfigParser.h>
+#include <kllvm/codegen/Metadata.h>
 #include <kllvm/codegen/Options.h>
 #include <kllvm/parser/KOREParser.h>
 #include <kllvm/parser/location.h>
@@ -60,6 +61,11 @@ cl::alias OutputFileAlias(
     "o", cl::desc("Alias for --output"), cl::aliasopt(OutputFile),
     cl::cat(CodegenToolCat));
 
+cl::opt<bool> MutableBytes(
+    "mutable-bytes",
+    cl::desc("Enable unsound reference semantics for objects of sort Bytes"),
+    cl::init(false), cl::cat(CodegenToolCat));
+
 namespace {
 
 fs::path dt_dir() {
@@ -110,6 +116,12 @@ void initialize_llvm() {
   InitializeAllAsmPrinters();
 }
 
+void emit_metadata(llvm::Module &mod) {
+  auto kompiled_dir = fs::absolute(Definition.getValue()).parent_path();
+  addKompiledDirSymbol(mod, kompiled_dir, Debug);
+  addMutableBytesFlag(mod, MutableBytes, Debug);
+}
+
 } // namespace
 
 // NOLINTNEXTLINE(*-cognitive-complexity)
@@ -128,12 +140,11 @@ int main(int argc, char **argv) {
   llvm::LLVMContext Context;
   std::unique_ptr<llvm::Module> mod = newModule("definition", Context);
 
+  emit_metadata(*mod);
+
   if (Debug) {
     initDebugInfo(mod.get(), Definition);
   }
-
-  auto kompiled_dir = fs::absolute(Definition.getValue()).parent_path();
-  addKompiledDirSymbol(Context, kompiled_dir, mod.get(), Debug);
 
   for (auto *axiom : definition->getAxioms()) {
     makeSideConditionFunction(axiom, definition.get(), mod.get());
