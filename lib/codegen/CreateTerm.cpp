@@ -308,19 +308,26 @@ sptr<KORESort> termSort(KOREPattern *pattern) {
   abort();
 }
 
-llvm::Value *CreateTerm::alloc_arg(
-    KORECompositePattern *pattern, int idx, std::string locationStack) {
-  KOREPattern *p = pattern->getArguments()[idx].get();
-  std::string newLocation = fmt::format("{}:{}", locationStack, idx);
+bool isInjection(KOREPattern *p, KOREDefinition *definition) {
   if (auto *constructor = dynamic_cast<KORECompositePattern *>(p)) {
     KORESymbol const *symbol = constructor->getConstructor();
     if (symbol->getName() != "\\dv") {
       KORESymbolDeclaration *symbolDecl
-          = Definition->getSymbolDeclarations().at(symbol->getName());
+          = definition->getSymbolDeclarations().at(symbol->getName());
       if (symbolDecl->getAttributes().count("sortInjection")) {
-        newLocation = locationStack;
+        return true;
       }
     }
+  }
+  return false;
+}
+
+llvm::Value *CreateTerm::alloc_arg(
+    KORECompositePattern *pattern, int idx, std::string locationStack) {
+  KOREPattern *p = pattern->getArguments()[idx].get();
+  std::string newLocation = fmt::format("{}:{}", locationStack, idx);
+  if (isInjection(p, Definition)) {
+    newLocation = locationStack;
   }
   llvm::Value *ret = createAllocation(p, newLocation).first;
   auto *sort = dynamic_cast<KORECompositeSort *>(p->getSort().get());
@@ -798,16 +805,8 @@ llvm::Value *CreateTerm::notInjectionCase(
       ChildValue = val;
     } else {
       std::string newLocation = fmt::format("{}:{}", locationStack, idx - 2);
-      if (auto constructor
-          = dynamic_cast<KORECompositePattern *>(child.get())) {
-        KORESymbol *symbol = constructor->getConstructor();
-        if (symbol->getName() != "\\dv") {
-          KORESymbolDeclaration *symbolDecl
-              = Definition->getSymbolDeclarations().at(symbol->getName());
-          if (symbolDecl->getAttributes().count("sortInjection")) {
-            newLocation = locationStack;
-          }
-        }
+      if (isInjection(child.get(), Definition)) {
+        newLocation = locationStack;
       }
       ChildValue = createAllocation(child.get(), newLocation).first;
     }
