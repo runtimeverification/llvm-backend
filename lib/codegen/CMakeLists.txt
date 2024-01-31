@@ -6,6 +6,7 @@ add_library(Codegen
   Decision.cpp
   DecisionParser.cpp
   EmitConfigParser.cpp
+  Metadata.cpp
   Options.cpp
   ProofEvent.cpp
   Util.cpp

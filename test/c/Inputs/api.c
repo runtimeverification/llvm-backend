@@ -62,6 +62,7 @@ struct kllvm_c_api load_c_api(char const *path) {
   API_FUNCTION(kore_symbol_add_formal_argument);
   API_FUNCTION(kllvm_init);
   API_FUNCTION(kllvm_free_all_memory);
+  API_FUNCTION(kllvm_mutable_bytes_enabled);
 
   return api;
 }
