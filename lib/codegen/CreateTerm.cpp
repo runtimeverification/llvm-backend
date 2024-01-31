@@ -308,25 +308,11 @@ sptr<KORESort> termSort(KOREPattern *pattern) {
   abort();
 }
 
-bool isInjection(KOREPattern *p, KOREDefinition *definition) {
-  if (auto *constructor = dynamic_cast<KORECompositePattern *>(p)) {
-    KORESymbol const *symbol = constructor->getConstructor();
-    if (symbol->getName() != "\\dv") {
-      KORESymbolDeclaration *symbolDecl
-          = definition->getSymbolDeclarations().at(symbol->getName());
-      if (symbolDecl->getAttributes().count("sortInjection")) {
-        return true;
-      }
-    }
-  }
-  return false;
-}
-
 llvm::Value *CreateTerm::alloc_arg(
     KORECompositePattern *pattern, int idx, std::string locationStack) {
   KOREPattern *p = pattern->getArguments()[idx].get();
   std::string newLocation = fmt::format("{}:{}", locationStack, idx);
-  if (isInjection(p, Definition)) {
+  if (isInjectionSymbol(p, Definition->getInjSymbol())) {
     newLocation = locationStack;
   }
   llvm::Value *ret = createAllocation(p, newLocation).first;
@@ -805,7 +791,7 @@ llvm::Value *CreateTerm::notInjectionCase(
       ChildValue = val;
     } else {
       std::string newLocation = fmt::format("{}:{}", locationStack, idx - 2);
-      if (isInjection(child.get(), Definition)) {
+      if (isInjectionSymbol(child.get(), Definition->getInjSymbol())) {
         newLocation = locationStack;
       }
       ChildValue = createAllocation(child.get(), newLocation).first;
@@ -1286,6 +1272,16 @@ bool isCollectionSort(ValueType cat) {
   case SortCategory::Set: return true;
   default: return false;
   }
+}
+
+bool isInjectionSymbol(KOREPattern *p, KORESymbol *inj) {
+  if (auto *constructor = dynamic_cast<KORECompositePattern *>(p)) {
+    KORESymbol const *symbol = constructor->getConstructor();
+    if (symbol->getName() == inj->getName()) {
+      return true;
+    }
+  }
+  return false;
 }
 
 } // namespace kllvm
