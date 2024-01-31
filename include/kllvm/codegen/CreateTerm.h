@@ -132,6 +132,7 @@ llvm::Type *getValueType(ValueType sort, llvm::Module *Module);
 llvm::Type *getParamType(ValueType sort, llvm::Module *Module);
 
 bool isCollectionSort(ValueType cat);
+bool isInjectionSymbol(KOREPattern *p, KORESymbol *sym);
 
 void addAbort(llvm::BasicBlock *block, llvm::Module *Module);
 
