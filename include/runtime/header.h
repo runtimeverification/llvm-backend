@@ -326,13 +326,10 @@ void serializeConfigurations(
 void serializeConfiguration(
     block *subject, char const *sort, char **data_out, size_t *size_out,
     bool emit_size);
-void serializeConfigurationToFile(
-    FILE *file, block *subject, bool emit_size);
+void serializeConfigurationToFile(FILE *file, block *subject, bool emit_size);
 void writeUInt64ToFile(FILE *file, uint64_t i);
-void serializeTermToFile(
-    FILE *file, block *subject, char const *sort);
-void serializeRawTermToFile(
-    FILE *file, void *subject, char const *sort);
+void serializeTermToFile(FILE *file, block *subject, char const *sort);
+void serializeRawTermToFile(FILE *file, void *subject, char const *sort);
 void printVariableToFile(FILE *file, char const *varname);
 
 // The following functions have to be generated at kompile time
