@@ -10,6 +10,7 @@ declare void @printConfiguration(i8*, %block*)
 declare void @serializeConfigurationToFile(i8*, %block*)
 declare void @exit(i32) #0
 declare void @abort() #0
+declare void @fclose(i8*)
 declare i64 @__gmpz_get_ui(%mpz*)
 
 declare i8* @getStderr()
@@ -67,6 +68,7 @@ exitCode:
   br label %exit
 exit:
   %exit_ui = phi i32 [ %exit_trunc, %exitCode ], [ 113, %tail ]
+  call void @fclose(i8* %output)
   call void @exit(i32 %exit_ui)
   unreachable
 }

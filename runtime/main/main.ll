@@ -6,6 +6,7 @@ target triple = "@BACKEND_TARGET_TRIPLE@"
 
 declare %block* @parseConfiguration(i8*)
 declare i64 @atol(i8*)
+declare i8* @fopen(i8*, i8*)
 
 declare %block* @take_steps(i64, %block*)
 declare void @finish_rewriting(%block*, i1) #0
@@ -19,6 +20,7 @@ declare void @printProofHintHeader(i8*)
 @proof_out.flag = private constant [15 x i8] c"--proof-output\00"
 
 @output_file = external global i8*
+@a_str = private constant [2 x i8] c"a\00"
 @statistics = external global i1
 @binary_output = external global i1
 @proof_output = external global i1
@@ -87,7 +89,8 @@ entry:
   %depth = call i64 @atol(i8* %depth_str)
   %output_ptr = getelementptr inbounds i8*, i8** %argv, i64 3
   %output_str = load i8*, i8** %output_ptr
-  store i8* %output_str, i8** @output_file
+  %output_file = call i8* @fopen(i8* %output_str, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @a_str, i64 0, i64 0))
+  store i8* %output_file, i8** @output_file
   
   call void @parse_flags(i32 %argc, i8** %argv)
 
@@ -96,7 +99,7 @@ entry:
   %proof_output = load i1, i1* @proof_output
   br i1 %proof_output, label %if, label %else
 if:
-  call void @printProofHintHeader(i8* %output_str)
+  call void @printProofHintHeader(i8* %output_file)
   br label %else
 else:
   %ret = call %block* @parseConfiguration(i8* %filename)

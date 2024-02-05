@@ -51,13 +51,15 @@ int main(int argc, char **argv) {
   block *input = parseConfiguration(filename);
   std::unordered_set<block *, HashBlock, KEq> results
       = take_search_steps(executeToBranch, depth, bound, input);
+  FILE *file = fopen(output, "w");
   if (hasStatistics) {
-    printStatistics(output, get_steps());
+    printStatistics(file, get_steps());
   }
   if (binaryOutput) {
-    serializeConfigurations(output, results);
+    serializeConfigurations(file, results);
   } else {
-    printConfigurations(output, results);
+    printConfigurations(file, results);
   }
+  fclose(file);
   return 0;
 }
