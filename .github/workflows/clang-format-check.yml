@@ -15,7 +15,7 @@ jobs:
       uses: jidicula/clang-format-action@v4.11.0
       with:
         exclude-regex: '(build|config|deps)'
-        clang-format-version: 17
+        clang-format-version: 15
 
   shell-check:
     name: Shell check
