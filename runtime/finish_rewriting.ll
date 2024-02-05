@@ -7,7 +7,6 @@ target triple = "@BACKEND_TARGET_TRIPLE@"
 
 declare void @printStatistics(i8*, i64)
 declare void @printConfiguration(i8*, %block*)
-declare void @printConfigurationToFile(i8*, %block*)
 declare void @serializeConfigurationToFile(i8*, %block*)
 declare void @exit(i32) #0
 declare void @abort() #0
@@ -37,7 +36,7 @@ define void @finish_rewriting(%block* %subject, i1 %error) #0 {
   br i1 %isnull, label %abort, label %print
 abort:
   %stderr = call i8* @getStderr()
-  call void @printConfigurationToFile(i8* %stderr, %block* %subject)
+  call void @printConfiguration(i8* %stderr, %block* %subject)
   call void @abort()
   unreachable
 print:

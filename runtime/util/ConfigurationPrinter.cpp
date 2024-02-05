@@ -283,12 +283,6 @@ string *printConfigurationToString(block *subject) {
   return hook_BUFFER_toString(buf);
 }
 
-void printConfigurationToFile(FILE *file, block *subject) {
-  auto state = print_state();
-  writer w = {file, nullptr};
-  printConfigurationInternal(&w, subject, nullptr, false, &state);
-}
-
 void printSortedConfigurationToFile(
     FILE *file, block *subject, char const *sort) {
   auto state = print_state();

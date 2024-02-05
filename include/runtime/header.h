@@ -294,7 +294,6 @@ block *deserializeConfiguration(char *, size_t);
 void printConfiguration(FILE *file, block *subject);
 void printStatistics(FILE *file, uint64_t steps);
 string *printConfigurationToString(block *subject);
-void printConfigurationToFile(FILE *, block *subject);
 void printSortedConfigurationToFile(
     FILE *file, block *subject, char const *sort);
 void printConfigurationInternal(
