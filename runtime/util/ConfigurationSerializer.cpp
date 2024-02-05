@@ -369,8 +369,7 @@ void serializeConfigurationInternal(
 }
 
 void serializeConfigurations(
-    char const *filename, std::unordered_set<block *, HashBlock, KEq> results) {
-  FILE *file = fopen(filename, "w");
+    FILE *file, std::unordered_set<block *, HashBlock, KEq> results) {
   auto state = serialization_state();
 
   auto w = writer{file, nullptr};
@@ -396,7 +395,6 @@ void serializeConfigurations(
   fwrite(buf, 1, buf_size, file);
 
   free(buf);
-  fclose(file);
 }
 
 void serializeConfigurationToFile(FILE *file, block *subject, bool emit_size) {
