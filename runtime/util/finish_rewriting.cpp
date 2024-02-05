@@ -9,7 +9,9 @@ char *output_file = nullptr;
 bool statistics = false;
 bool binary_output = false;
 bool proof_output = false;
+
 extern int64_t steps;
+extern bool safe_partial;
 
 int32_t get_exit_code(block *);
 
@@ -17,6 +19,11 @@ int32_t get_exit_code(block *);
   if (output_file == nullptr) {
     printConfigurationToFile(stderr, subject);
     abort();
+  }
+
+  if (error && safe_partial) {
+    throw std::runtime_error(
+        "Attempted to evaluate partial function at an undefined input");
   }
 
   if (statistics) {
