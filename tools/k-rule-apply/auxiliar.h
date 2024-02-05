@@ -65,8 +65,9 @@ void *printMatchResult(
   if (funcPtr == NULL) {
     return NULL;
   }
-  auto f = reinterpret_cast<void *(*)(std::ostream &, MatchLog *, size_t,
-                                      std::string const &)>(funcPtr);
+  auto f = reinterpret_cast<
+      void *(*)(std::ostream &, MatchLog *, size_t, std::string const &)>(
+      funcPtr);
   return f(os, log, logSize, dir);
 }
 
