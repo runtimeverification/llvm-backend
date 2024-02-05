@@ -158,6 +158,10 @@ void kore_symbol_add_formal_argument(kore_symbol *, kore_sort const *);
 void kllvm_init(void);
 void kllvm_free_all_memory(void);
 
+/* Sort-specific functions */
+
+bool kllvm_mutable_bytes_enabled(void);
+
 #ifdef __cplusplus
 }
 #endif

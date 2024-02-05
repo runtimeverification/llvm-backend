@@ -52,6 +52,7 @@ struct kllvm_c_api {
   void (*kore_symbol_add_formal_argument)(kore_symbol *, kore_sort const *);
   void (*kllvm_init)(void);
   void (*kllvm_free_all_memory)(void);
+  bool (*kllvm_mutable_bytes_enabled)(void);
 };
 
 struct kllvm_c_api load_c_api(char const *);

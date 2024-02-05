@@ -129,23 +129,6 @@ newModule(std::string const &name, llvm::LLVMContext &Context) {
   return mod;
 }
 
-static std::string KOMPILED_DIR = "kompiled_directory";
-
-void addKompiledDirSymbol(
-    llvm::LLVMContext &Context, std::string const &dir, llvm::Module *mod,
-    bool debug) {
-  auto *Str = llvm::ConstantDataArray::getString(Context, dir, true);
-  auto *global = mod->getOrInsertGlobal(KOMPILED_DIR, Str->getType());
-  auto *globalVar = llvm::cast<llvm::GlobalVariable>(global);
-  if (!globalVar->hasInitializer()) {
-    globalVar->setInitializer(Str);
-  }
-
-  if (debug) {
-    initDebugGlobal(KOMPILED_DIR, getCharDebugType(), globalVar);
-  }
-}
-
 std::string MAP_STRUCT = "map";
 std::string RANGEMAP_STRUCT = "rangemap";
 std::string LIST_STRUCT = "list";
@@ -311,8 +294,11 @@ sptr<KORESort> termSort(KOREPattern *pattern) {
 llvm::Value *CreateTerm::alloc_arg(
     KORECompositePattern *pattern, int idx, std::string locationStack) {
   KOREPattern *p = pattern->getArguments()[idx].get();
-  llvm::Value *ret
-      = createAllocation(p, fmt::format("{}:{}", locationStack, idx)).first;
+  std::string newLocation = fmt::format("{}:{}", locationStack, idx);
+  if (isInjectionSymbol(p, Definition->getInjSymbol())) {
+    newLocation = locationStack;
+  }
+  llvm::Value *ret = createAllocation(p, newLocation).first;
   auto *sort = dynamic_cast<KORECompositeSort *>(p->getSort().get());
   ProofEvent e(Definition, Module);
   CurrentBlock = e.hookArg(ret, sort, CurrentBlock);
@@ -787,10 +773,11 @@ llvm::Value *CreateTerm::notInjectionCase(
     if (idx == 2 && val != nullptr) {
       ChildValue = val;
     } else {
-      ChildValue
-          = createAllocation(
-                child.get(), fmt::format("{}:{}", locationStack, idx - 2))
-                .first;
+      std::string newLocation = fmt::format("{}:{}", locationStack, idx - 2);
+      if (isInjectionSymbol(child.get(), Definition->getInjSymbol())) {
+        newLocation = locationStack;
+      }
+      ChildValue = createAllocation(child.get(), newLocation).first;
     }
 
     auto *sort = dynamic_cast<KORECompositeSort *>(child->getSort().get());
@@ -924,8 +911,7 @@ CreateTerm::createAllocation(KOREPattern *pattern, std::string locationStack) {
         symbolDecl->getAttributes().count("sortInjection")
         && (cat == SortCategory::Symbol)) {
       std::pair<llvm::Value *, bool> val = createAllocation(
-          constructor->getArguments()[0].get(),
-          fmt::format("{}:0", locationStack));
+          constructor->getArguments()[0].get(), locationStack);
       if (val.second) {
         llvm::Instruction *Tag = llvm::CallInst::Create(
             getOrInsertFunction(
@@ -1269,6 +1255,16 @@ bool isCollectionSort(ValueType cat) {
   case SortCategory::Set: return true;
   default: return false;
   }
+}
+
+bool isInjectionSymbol(KOREPattern *p, KORESymbol *inj) {
+  if (auto *constructor = dynamic_cast<KORECompositePattern *>(p)) {
+    KORESymbol const *symbol = constructor->getConstructor();
+    if (symbol->getName() == inj->getName()) {
+      return true;
+    }
+  }
+  return false;
 }
 
 } // namespace kllvm

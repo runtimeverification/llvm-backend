@@ -1,0 +1,1 @@
+Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'test'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lbld'Unds'BYTES-COW-4'Unds'KItem{}(),dotk{}())),Lbl'-LT-'mem'-GT-'{}(inj{SortBytes{}, SortFoo{}}(\dv{SortBytes{}}("bob__"))),Lbl'-LT-'stuff'-GT-'{}(inj{SortBytes{}, SortFoo{}}(\dv{SortBytes{}}("alice")))),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))
