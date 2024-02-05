@@ -16,14 +16,14 @@ extern bool safe_partial;
 int32_t get_exit_code(block *);
 
 [[noreturn]] void finish_rewriting(block *subject, bool error) {
-  if (output_file == nullptr) {
-    printConfigurationToFile(stderr, subject);
-    abort();
-  }
-
   if (error && safe_partial) {
     throw std::runtime_error(
         "Attempted to evaluate partial function at an undefined input");
+  }
+
+  if (!output_file) {
+    throw std::runtime_error(
+        "Called finish_rewriting with no output file specified");
   }
 
   if (statistics) {
@@ -38,7 +38,7 @@ int32_t get_exit_code(block *);
     }
   }
 
-  auto exit_code = error ? int32_t{113} : get_exit_code(subject);
+  auto exit_code = error ? 113 : get_exit_code(subject);
   std::exit(exit_code);
 }
 }
