@@ -11,10 +11,10 @@ uint64_t get_steps(void);
 std::unordered_set<block *, HashBlock, KEq> take_search_steps(
     bool executeToBranch, int64_t depth, int64_t bound, block *subject);
 void printConfigurations(
-    char const *filename, std::unordered_set<block *, HashBlock, KEq> results);
+    FILE *file, std::unordered_set<block *, HashBlock, KEq> results);
 
 void serializeConfigurations(
-    char const *filename, std::unordered_set<block *, HashBlock, KEq> results);
+    FILE *file, std::unordered_set<block *, HashBlock, KEq> results);
 
 static bool hasStatistics = false;
 static bool binaryOutput = false;

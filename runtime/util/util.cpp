@@ -36,12 +36,9 @@ block *constructRawTerm(void *subject, char const *sort, bool raw_value) {
   return static_cast<block *>(constructCompositePattern(tag, args));
 }
 
-void printProofHintHeader(char *output_file) {
+void printProofHintHeader(FILE *file) {
   uint32_t version = 4;
-  FILE *file = fopen(output_file, "a");
   fprintf(file, "HINT");
   fwrite(&version, sizeof(version), 1, file);
-  fflush(file);
-  fclose(file);
 }
 }

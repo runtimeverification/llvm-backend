@@ -400,16 +400,14 @@ void serializeConfigurations(
 }
 
 void serializeConfigurationToFile(
-    char const *filename, block *subject, bool emit_size) {
+    FILE *file, block *subject, bool emit_size) {
   char *data;
   size_t size;
   serializeConfiguration(subject, nullptr, &data, &size, emit_size);
 
-  FILE *file = fopen(filename, "a");
   fwrite(data, 1, size, file);
 
   free(data);
-  fclose(file);
 }
 
 void serializeConfiguration(
@@ -432,38 +430,32 @@ void serializeConfiguration(
   *size_out = size;
 }
 
-void writeUInt64ToFile(char const *filename, uint64_t i) {
-  FILE *file = fopen(filename, "a");
+void writeUInt64ToFile(FILE *file, uint64_t i) {
   fwrite(&i, 8, 1, file);
-  fclose(file);
 }
 
 void serializeTermToFile(
-    char const *filename, block *subject, char const *sort) {
+    FILE *file, block *subject, char const *sort) {
   char *data;
   size_t size;
   serializeConfiguration(subject, sort, &data, &size, true);
 
-  FILE *file = fopen(filename, "a");
   fwrite(data, 1, size, file);
 
   free(data);
-  fclose(file);
 }
 
 void serializeRawTermToFile(
-    char const *filename, void *subject, char const *sort) {
+    FILE *file, void *subject, char const *sort) {
   block *term = constructRawTerm(subject, sort, true);
 
   char *data;
   size_t size;
   serializeConfiguration(term, "SortKItem{}", &data, &size, true);
 
-  FILE *file = fopen(filename, "a");
   fwrite(data, 1, size, file);
 
   free(data);
-  fclose(file);
 }
 
 std::shared_ptr<kllvm::KOREPattern>
