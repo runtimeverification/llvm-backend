@@ -322,7 +322,7 @@ string *debug_print_term(block *subject, char const *sort);
 mpz_ptr move_int(mpz_t);
 
 void serializeConfigurations(
-    char const *filename, std::unordered_set<block *, HashBlock, KEq> results);
+    FILE *file, std::unordered_set<block *, HashBlock, KEq> results);
 void serializeConfiguration(
     block *subject, char const *sort, char **data_out, size_t *size_out,
     bool emit_size);
