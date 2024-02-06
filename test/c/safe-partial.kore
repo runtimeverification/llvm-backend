@@ -148,6 +148,7 @@ module SAFE-PARTIAL
   hooked-symbol Lbl'UndsPipe'Int'Unds'{}(SortInt{}, SortInt{}) : SortInt{} [comm{}(), format{}("%1 %c|Int%r %2"), function{}(), functional{}(), hook{}("INT.or"), klabel{}("_|Int_"), latex{}("{#1}\\mathrel{|_{\\scriptstyle\\it Int}}{#2}"), left{}(Lbl'UndsPipe'Int'Unds'{}()), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(1252,18,1252,181)"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/Users/brucecollie/code/k/k-distribution/target/release/k/include/kframework/builtin/domains.md)"), priorities{}(), right{}(), smtlib{}("orInt"), symbol'Kywd'{}(), terminals{}("010"), total{}()]
   hooked-symbol Lbl'UndsPipe'Set'UndsUnds'SET'Unds'Set'Unds'Set'Unds'Set{}(SortSet{}, SortSet{}) : SortSet{} [comm{}(), format{}("%1 %c|Set%r %2"), function{}(), functional{}(), hook{}("SET.union"), left{}(Lbl'UndsPipe'Set'UndsUnds'SET'Unds'Set'Unds'Set'Unds'Set{}()), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(748,18,748,92)"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/Users/brucecollie/code/k/k-distribution/target/release/k/include/kframework/builtin/domains.md)"), priorities{}(), right{}(), terminals{}("010"), total{}()]
   hooked-symbol LblabsInt'LParUndsRParUnds'INT-COMMON'Unds'Int'Unds'Int{}(SortInt{}) : SortInt{} [format{}("%cabsInt%r %c(%r %1 %c)%r"), function{}(), functional{}(), hook{}("INT.abs"), klabel{}("absInt"), left{}(), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(1269,18,1269,119)"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/Users/brucecollie/code/k/k-distribution/target/release/k/include/kframework/builtin/domains.md)"), priorities{}(), right{}(), smt-hook{}("(ite (< #1 0) (- 0 #1) #1)"), terminals{}("1101"), total{}()]
+  symbol Lblbar{}(SortInt{}) : SortInt{} [format{}("%cbar%r %c(%r %1 %c)%r"), function{}(), klabel{}("bar"), left{}(), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(5,18,5,58)"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/Users/brucecollie/code/llvm-backend/test/c/k-files/safe-partial.k)"), priorities{}(), right{}(), symbol'Kywd'{}(), terminals{}("1101")]
   hooked-symbol LblbitRangeInt'LParUndsCommUndsCommUndsRParUnds'INT-COMMON'Unds'Int'Unds'Int'Unds'Int'Unds'Int{}(SortInt{}, SortInt{}, SortInt{}) : SortInt{} [format{}("%cbitRangeInt%r %c(%r %1 %c,%r %2 %c,%r %3 %c)%r"), function{}(), hook{}("INT.bitRange"), klabel{}("bitRangeInt"), left{}(), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(1294,18,1294,103)"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/Users/brucecollie/code/k/k-distribution/target/release/k/include/kframework/builtin/domains.md)"), priorities{}(), right{}(), terminals{}("11010101")]
   hooked-symbol Lblchoice'LParUndsRParUnds'MAP'Unds'KItem'Unds'Map{}(SortMap{}) : SortKItem{} [format{}("%cchoice%r %c(%r %1 %c)%r"), function{}(), hook{}("MAP.choice"), klabel{}("Map:choice"), left{}(), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(393,20,393,101)"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/Users/brucecollie/code/k/k-distribution/target/release/k/include/kframework/builtin/domains.md)"), priorities{}(), right{}(), terminals{}("1101")]
   hooked-symbol Lblchoice'LParUndsRParUnds'SET'Unds'KItem'Unds'Set{}(SortSet{}) : SortKItem{} [format{}("%cchoice%r %c(%r %1 %c)%r"), function{}(), hook{}("SET.choice"), klabel{}("Set:choice"), left{}(), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(804,20,804,95)"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/Users/brucecollie/code/k/k-distribution/target/release/k/include/kframework/builtin/domains.md)"), priorities{}(), right{}(), terminals{}("1101")]
@@ -924,7 +925,7 @@ module SAFE-PARTIAL
         \top{SortInt{}}())))
   [UNIQUE'Unds'ID{}("147fc15c2ec6c36de1a9c0cad6212b8acd8b224f21c0aeabd36726e9c8a06119"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(1414,8,1414,85)"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/Users/brucecollie/code/k/k-distribution/target/release/k/include/kframework/builtin/domains.md)"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol]")]
 
-// rule foo(#token("0","Int") #as _Gen0)=>_Gen0 requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(12f874bc79738ddf5928f68f87a505e3e58ba0bae18dc5e4641a794a514e1f59), org.kframework.attributes.Location(Location(5,8,5,19)), org.kframework.attributes.Source(Source(/Users/brucecollie/code/llvm-backend/test/c/k-files/safe-partial.k)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+// rule foo(#token("0","Int") #as _Gen0)=>_Gen0 requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(12f874bc79738ddf5928f68f87a505e3e58ba0bae18dc5e4641a794a514e1f59), org.kframework.attributes.Location(Location(6,8,6,19)), org.kframework.attributes.Source(Source(/Users/brucecollie/code/llvm-backend/test/c/k-files/safe-partial.k)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
   axiom{R} \implies{R} (
     \and{R}(
       \top{R}(),
@@ -940,7 +941,7 @@ module SAFE-PARTIAL
      \and{SortInt{}} (
        Var'Unds'Gen0:SortInt{},
         \top{SortInt{}}())))
-  [UNIQUE'Unds'ID{}("12f874bc79738ddf5928f68f87a505e3e58ba0bae18dc5e4641a794a514e1f59"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(5,8,5,19)"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/Users/brucecollie/code/llvm-backend/test/c/k-files/safe-partial.k)"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol]")]
+  [UNIQUE'Unds'ID{}("12f874bc79738ddf5928f68f87a505e3e58ba0bae18dc5e4641a794a514e1f59"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(6,8,6,19)"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/Users/brucecollie/code/llvm-backend/test/c/k-files/safe-partial.k)"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol]")]
 
 // rule `freshInt(_)_INT_Int_Int`(I)=>I requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(cf2cb8f038b4bdc4edb1334a3b8ced9cd296a7af43f0a1916e082a4e1aefa08b), org.kframework.attributes.Location(Location(1433,8,1433,28)), org.kframework.attributes.Source(Source(/Users/brucecollie/code/k/k-distribution/target/release/k/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
   axiom{R} \implies{R} (
@@ -1033,13 +1034,13 @@ module SAFE-PARTIAL
     \and{R} (
       \not{R} (
         \or{R} (
-          \exists{R} (Var'Unds'Gen0:SortBool{},
+          \exists{R} (Var'Unds'Gen1:SortBool{},
             \and{R} (
               \top{R}(),
               \and{R} (
                 \in{SortK{}, R} (
                   X0:SortK{},
-                  kseq{}(inj{SortBool{}, SortKItem{}}(Var'Unds'Gen0:SortBool{}),dotk{}())
+                  kseq{}(inj{SortBool{}, SortKItem{}}(Var'Unds'Gen1:SortBool{}),dotk{}())
                 ),
                 \top{R} ()
               )
@@ -1141,13 +1142,13 @@ module SAFE-PARTIAL
     \and{R} (
       \not{R} (
         \or{R} (
-          \exists{R} (Var'Unds'Gen1:SortGeneratedCounterCellOpt{},
+          \exists{R} (Var'Unds'Gen0:SortGeneratedCounterCellOpt{},
             \and{R} (
               \top{R}(),
               \and{R} (
                 \in{SortK{}, R} (
                   X0:SortK{},
-                  kseq{}(inj{SortGeneratedCounterCellOpt{}, SortKItem{}}(Var'Unds'Gen1:SortGeneratedCounterCellOpt{}),dotk{}())
+                  kseq{}(inj{SortGeneratedCounterCellOpt{}, SortKItem{}}(Var'Unds'Gen0:SortGeneratedCounterCellOpt{}),dotk{}())
                 ),
                 \top{R} ()
               )
@@ -1483,13 +1484,13 @@ module SAFE-PARTIAL
     \and{R} (
       \not{R} (
         \or{R} (
-          \exists{R} (Var'Unds'Gen1:SortKConfigVar{},
+          \exists{R} (Var'Unds'Gen0:SortKConfigVar{},
             \and{R} (
               \top{R}(),
               \and{R} (
                 \in{SortK{}, R} (
                   X0:SortK{},
-                  kseq{}(inj{SortKConfigVar{}, SortKItem{}}(Var'Unds'Gen1:SortKConfigVar{}),dotk{}())
+                  kseq{}(inj{SortKConfigVar{}, SortKItem{}}(Var'Unds'Gen0:SortKConfigVar{}),dotk{}())
                 ),
                 \top{R} ()
               )
@@ -1699,13 +1700,13 @@ module SAFE-PARTIAL
     \and{R} (
       \not{R} (
         \or{R} (
-          \exists{R} (Var'Unds'Gen1:SortSet{},
+          \exists{R} (Var'Unds'Gen0:SortSet{},
             \and{R} (
               \top{R}(),
               \and{R} (
                 \in{SortK{}, R} (
                   X0:SortK{},
-                  kseq{}(inj{SortSet{}, SortKItem{}}(Var'Unds'Gen1:SortSet{}),dotk{}())
+                  kseq{}(inj{SortSet{}, SortKItem{}}(Var'Unds'Gen0:SortSet{}),dotk{}())
                 ),
                 \top{R} ()
               )
@@ -2092,4 +2093,4 @@ module SAFE-PARTIAL
         \top{SortInt{}}())))
   [UNIQUE'Unds'ID{}("3b67f4bf2235fc46fc94b1d10e936100ea3fc4f2dbaa4e4a77593e8385f5004f"), org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(1416,8,1416,164)"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/Users/brucecollie/code/k/k-distribution/target/release/k/include/kframework/builtin/domains.md)"), org'Stop'kframework'Stop'definition'Stop'Production{}("syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol]")]
 
-endmodule [org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(1,1,6,10)"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/Users/brucecollie/code/llvm-backend/test/c/k-files/safe-partial.k)")]
+endmodule [org'Stop'kframework'Stop'attributes'Stop'Location{}("Location(1,1,7,10)"), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/Users/brucecollie/code/llvm-backend/test/c/k-files/safe-partial.k)")]

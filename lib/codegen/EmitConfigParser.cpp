@@ -71,13 +71,6 @@ static llvm::Function *getStrcmp(llvm::Module *module) {
   return getOrInsertFunction(module, "strcmp", type);
 }
 
-static llvm::Function *getPuts(llvm::Module *module) {
-  llvm::LLVMContext &Ctx = module->getContext();
-  auto *type = llvm::FunctionType::get(
-      llvm::Type::getInt32Ty(Ctx), {llvm::Type::getInt8PtrTy(Ctx)}, false);
-  return getOrInsertFunction(module, "puts", type);
-}
-
 static void
 emitGetTagForSymbolName(KOREDefinition *definition, llvm::Module *module) {
   llvm::LLVMContext &Ctx = module->getContext();
@@ -107,8 +100,6 @@ emitGetTagForSymbolName(KOREDefinition *definition, llvm::Module *module) {
         llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), tag), CurrentBlock);
     CurrentBlock = FalseBlock;
   }
-  llvm::Function *Puts = getPuts(module);
-  llvm::CallInst::Create(Puts, {func->arg_begin()}, "", CurrentBlock);
   Phi->addIncoming(
       llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), ERROR_TAG),
       CurrentBlock);
