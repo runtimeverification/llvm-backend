@@ -17,7 +17,7 @@ int main(int argc, char **argv) {
   }
 
   auto config = KOREPattern::load(argv[1]);
-  if (auto composite = dynamic_cast<KORECompositePattern *>(config.get())) {
+  if (auto *composite = dynamic_cast<KORECompositePattern *>(config.get())) {
     if (composite->getConstructor()->getName() != "\\or") {
       std::cerr << "pattern must be an \\or" << std::endl;
       return 1;
@@ -32,8 +32,7 @@ int main(int argc, char **argv) {
     }
 
     return 0;
-  } else {
-    std::cerr << "pattern must be an \\or" << std::endl;
-    return 1;
   }
+  std::cerr << "pattern must be an \\or" << std::endl;
+  return 1;
 }

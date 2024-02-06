@@ -93,20 +93,22 @@ __attribute__((always_inline)) void *koreAllocAlwaysGC(size_t requested) {
 void *koreResizeLastAlloc(void *oldptr, size_t newrequest, size_t last_size) {
   newrequest = (newrequest + 7) & ~7;
   last_size = (last_size + 7) & ~7;
+
   if (oldptr != *arenaEndPtr(&youngspace) - last_size) {
     MEM_LOG(
         "May only reallocate last allocation. Tried to reallocate %p to %zd\n",
         oldptr, newrequest);
     exit(255);
   }
+
   ssize_t increase = newrequest - last_size;
   if (arenaResizeLastAlloc(&youngspace, increase)) {
     return oldptr;
-  } else {
-    void *newptr = koreAlloc(newrequest);
-    memcpy(newptr, oldptr, last_size);
-    return newptr;
   }
+
+  void *newptr = koreAlloc(newrequest);
+  memcpy(newptr, oldptr, last_size);
+  return newptr;
 }
 
 void *koreAllocMP(size_t requested) {

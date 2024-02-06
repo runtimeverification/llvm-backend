@@ -27,4 +27,5 @@ mapfile -t inputs < <(find "${source_dirs[@]}" -name '*.cpp' -or -name '*.h')
   "${inputs[@]}"                      \
   -clang-tidy-binary "${clang_tidy}"  \
   -j "$(nproc)"                       \
-  -p "${BUILD_DIR}" "$@"
+  -p "${BUILD_DIR}" "$@"              \
+  2>&1 | awk '!/(^Suppressed|^Use -header|^[0-9]+ warnings)/'

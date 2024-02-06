@@ -7,7 +7,7 @@ extern "C" {
 
 // The maximum single allocation size in bytes.
 // A contiguous area larger than that size cannot be allocated in any arena.
-extern const size_t BLOCK_SIZE;
+extern size_t const BLOCK_SIZE;
 
 #define YOUNGSPACE_ID 0
 #define OLDSPACE_ID 1
@@ -38,7 +38,7 @@ void *koreAllocAlwaysGC(size_t requested);
 // generation
 void koreAllocSwap(bool swapOld);
 // resizes the last allocation into the young generation
-void *koreResizeLastAlloc(void *oldptr, size_t newrequest, size_t oldrequest);
+void *koreResizeLastAlloc(void *oldptr, size_t newrequest, size_t last_size);
 // allocator hook for the GMP library
 void *koreAllocMP(size_t);
 // reallocator hook for the GMP library

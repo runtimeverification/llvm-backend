@@ -12,11 +12,11 @@ using namespace rapidjson;
 extern "C" {
 floating *move_float(floating *);
 string *hook_STRING_int2string(mpz_t);
-string *makeString(const char *input, ssize_t len = -1);
+string *makeString(char const *input, ssize_t len = -1);
 char *getTerminatedString(string *);
 }
 
-std::string floatToString(const floating *f, const char *suffix);
+std::string floatToString(floating const *f, char const *suffix);
 
 struct zinj {
   blockheader h;
@@ -108,7 +108,7 @@ get_header(boolHdr, "inj{SortBool{}, SortJSON{}}")
     return true;
   }
 
-  bool RawNumber(const char *str, SizeType length, bool copy) {
+  bool RawNumber(char const *str, SizeType length, bool copy) {
     mpz_t z;
     int status = mpz_init_set_str(z, str, 10);
     if (status == 0) {
@@ -118,22 +118,21 @@ get_header(boolHdr, "inj{SortBool{}, SortJSON{}}")
       result = (block *)inj;
       stack.push_back(result);
       return true;
-    } else {
-      mpz_clear(z);
-      floating f[1]; // NOLINT(modernize-avoid-c-arrays)
-      mpfr_init2(f->f, 53);
-      f->exp = 11;
-      mpfr_set_str(f->f, str, 9, MPFR_RNDN);
-      auto *inj = (floatinj *)koreAlloc(sizeof(floatinj));
-      inj->h = floatHdr();
-      inj->data = move_float(f);
-      result = (block *)inj;
-      stack.push_back(result);
-      return true;
     }
+    mpz_clear(z);
+    floating f[1]; // NOLINT(modernize-avoid-c-arrays)
+    mpfr_init2(f->f, 53);
+    f->exp = 11;
+    mpfr_set_str(f->f, str, 9, MPFR_RNDN);
+    auto *inj = (floatinj *)koreAlloc(sizeof(floatinj));
+    inj->h = floatHdr();
+    inj->data = move_float(f);
+    result = (block *)inj;
+    stack.push_back(result);
+    return true;
   }
 
-  bool String(const char *str, SizeType len, bool copy) {
+  bool String(char const *str, SizeType len, bool copy) {
     auto *inj = (stringinj *)koreAlloc(sizeof(stringinj));
     inj->h = strHdr();
     auto *token = (string *)koreAllocToken(sizeof(string) + len);
@@ -145,9 +144,9 @@ get_header(boolHdr, "inj{SortBool{}, SortJSON{}}")
     return true;
   }
 
-  bool StartObject() { return true; }
+  static bool StartObject() { return true; }
 
-  bool Key(const char *str, SizeType len, bool copy) {
+  bool Key(char const *str, SizeType len, bool copy) {
     return String(str, len, copy);
   }
 
@@ -173,7 +172,7 @@ get_header(boolHdr, "inj{SortBool{}, SortJSON{}}")
     return true;
   }
 
-  bool StartArray() { return true; }
+  static bool StartArray() { return true; }
 
   bool EndArray(SizeType elementCount) {
     result = dotList();
@@ -196,7 +195,7 @@ get_header(boolHdr, "inj{SortBool{}, SortJSON{}}")
 template <typename Stream>
 struct KoreWriter : Writer<Stream> {
   bool RawNumber(
-      const typename Writer<Stream>::Ch *str, rapidjson::SizeType length,
+      typename Writer<Stream>::Ch const *str, rapidjson::SizeType length,
       bool copy = false) {
     (void)copy;
     Writer<Stream>::Prefix(rapidjson::kNumberType);
@@ -272,8 +271,7 @@ SortJSON hook_JSON_string2json(SortString str) {
   bool result = reader.Parse<kParseNumbersAsStringsFlag>(s, handler);
   if (result) {
     return handler.stack.back();
-  } else {
-    abort();
   }
+  abort();
 }
 }

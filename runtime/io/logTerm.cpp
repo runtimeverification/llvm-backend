@@ -24,7 +24,7 @@ SortKItem hook_IO_logTerm(SortString path, SortKItem term) {
 
 SortK hook_IO_traceTerm(block *term) {
   auto temp_file = temporary_file("traceKORE_XXXXXX");
-  auto fp = temp_file.file_pointer("w");
+  auto *fp = temp_file.file_pointer("w");
 
   // Ensure that the term is injected into KItem correctly; if we don't do this
   // then the unparsed KORE ends up with a (null) in it which breaks the

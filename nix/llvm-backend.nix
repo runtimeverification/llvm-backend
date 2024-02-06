@@ -1,17 +1,17 @@
-{ lib, src, cmake, flex, fmt, pkgconfig, llvm, libllvm, libcxxabi, stdenv, boost, gmp
-, jemalloc, libffi, libiconv, libyaml, mpfr, ncurses, python39, unixtools,
+{ lib, src, cmake, flex, fmt, pkg-config, llvm, libllvm, libcxxabi, stdenv, boost, gmp
+, jemalloc, libffi, libiconv, libyaml, mpfr, ncurses, python310, unixtools,
 # Runtime dependencies:
 host,
 # Options:
 cmakeBuildType ? "FastBuild" # optimized release build, currently: LTO
 }:
-let python-env = (python39.withPackages (ps: with ps; [ pybind11 ])); in
+let python-env = (python310.withPackages (ps: with ps; [ pybind11 ])); in
 stdenv.mkDerivation {
   pname = "llvm-backend";
   version = "0";
   inherit src cmakeBuildType;
 
-  nativeBuildInputs = [ cmake flex llvm pkgconfig ];
+  nativeBuildInputs = [ cmake flex llvm pkg-config ];
   buildInputs = [ libyaml ];
   propagatedBuildInputs = [
     boost fmt gmp jemalloc libffi mpfr ncurses python-env unixtools.xxd

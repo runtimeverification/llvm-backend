@@ -5,6 +5,7 @@
 #include <kllvm/codegen/Decision.h>
 #include <kllvm/codegen/DecisionParser.h>
 #include <kllvm/codegen/EmitConfigParser.h>
+#include <kllvm/codegen/Metadata.h>
 #include <kllvm/codegen/Options.h>
 #include <kllvm/parser/KOREParser.h>
 #include <kllvm/parser/location.h>
@@ -60,6 +61,11 @@ cl::alias OutputFileAlias(
     "o", cl::desc("Alias for --output"), cl::aliasopt(OutputFile),
     cl::cat(CodegenToolCat));
 
+cl::opt<bool> MutableBytes(
+    "mutable-bytes",
+    cl::desc("Enable unsound reference semantics for objects of sort Bytes"),
+    cl::init(false), cl::cat(CodegenToolCat));
+
 namespace {
 
 fs::path dt_dir() {
@@ -110,8 +116,15 @@ void initialize_llvm() {
   InitializeAllAsmPrinters();
 }
 
+void emit_metadata(llvm::Module &mod) {
+  auto kompiled_dir = fs::absolute(Definition.getValue()).parent_path();
+  addKompiledDirSymbol(mod, kompiled_dir, Debug);
+  addMutableBytesFlag(mod, MutableBytes, Debug);
+}
+
 } // namespace
 
+// NOLINTNEXTLINE(*-cognitive-complexity)
 int main(int argc, char **argv) {
   initialize_llvm();
 
@@ -127,14 +140,13 @@ int main(int argc, char **argv) {
   llvm::LLVMContext Context;
   std::unique_ptr<llvm::Module> mod = newModule("definition", Context);
 
+  emit_metadata(*mod);
+
   if (Debug) {
     initDebugInfo(mod.get(), Definition);
   }
 
-  auto kompiled_dir = fs::absolute(Definition.getValue()).parent_path();
-  addKompiledDirSymbol(Context, kompiled_dir, mod.get(), Debug);
-
-  for (auto axiom : definition->getAxioms()) {
+  for (auto *axiom : definition->getAxioms()) {
     makeSideConditionFunction(axiom, definition.get(), mod.get());
     if (!axiom->isTopAxiom()) {
       makeApplyRuleFunction(axiom, definition.get(), mod.get());
@@ -155,7 +167,7 @@ int main(int argc, char **argv) {
       auto match_filename
           = dt_dir() / fmt::format("match_{}.yaml", axiom->getOrdinal());
       if (fs::exists(match_filename)) {
-        auto dt = parseYamlDecisionTree(
+        auto *dt = parseYamlDecisionTree(
             mod.get(), match_filename, definition->getAllSymbols(),
             definition->getHookedSorts());
         makeMatchReasonFunction(definition.get(), mod.get(), axiom, dt);
@@ -165,28 +177,28 @@ int main(int argc, char **argv) {
 
   emitConfigParserFunctions(definition.get(), mod.get());
 
-  auto dt = parseYamlDecisionTree(
+  auto *dt = parseYamlDecisionTree(
       mod.get(), DecisionTree, definition->getAllSymbols(),
       definition->getHookedSorts());
   makeStepFunction(definition.get(), mod.get(), dt, false);
-  auto dtSearch = parseYamlDecisionTree(
+  auto *dtSearch = parseYamlDecisionTree(
       mod.get(), dt_dir() / "dt-search.yaml", definition->getAllSymbols(),
       definition->getHookedSorts());
   makeStepFunction(definition.get(), mod.get(), dtSearch, true);
 
   auto index = read_index_file();
-  for (auto &entry : definition->getSymbols()) {
-    auto symbol = entry.second;
-    auto decl = definition->getSymbolDeclarations().at(symbol->getName());
+  for (auto const &entry : definition->getSymbols()) {
+    auto *symbol = entry.second;
+    auto *decl = definition->getSymbolDeclarations().at(symbol->getName());
     if (decl->getAttributes().count("function") && !decl->isHooked()) {
       auto filename = get_indexed_filename(index, decl);
-      auto funcDt = parseYamlDecisionTree(
+      auto *funcDt = parseYamlDecisionTree(
           mod.get(), filename, definition->getAllSymbols(),
           definition->getHookedSorts());
       makeEvalFunction(decl->getSymbol(), definition.get(), mod.get(), funcDt);
     } else if (decl->isAnywhere()) {
       auto filename = get_indexed_filename(index, decl);
-      auto funcDt = parseYamlDecisionTree(
+      auto *funcDt = parseYamlDecisionTree(
           mod.get(), filename, definition->getAllSymbols(),
           definition->getHookedSorts());
 

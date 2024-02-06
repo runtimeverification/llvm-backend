@@ -31,13 +31,13 @@ namespace kllvm {
  * triangle injection pair */
 llvm::Constant *CreateStaticTerm::notInjectionCase(
     KORECompositePattern *constructor, llvm::Constant *val) {
-  const KORESymbol *symbol = constructor->getConstructor();
+  KORESymbol const *symbol = constructor->getConstructor();
   llvm::StructType *BlockType = getBlockType(Module, Definition, symbol);
 
   std::stringstream koreString;
   constructor->print(koreString);
   llvm::Constant *Block
-      = Module->getOrInsertGlobal(koreString.str().c_str(), BlockType);
+      = Module->getOrInsertGlobal(koreString.str(), BlockType);
   auto *globalVar = llvm::dyn_cast<llvm::GlobalVariable>(Block);
 
   if (!globalVar->hasInitializer()) {
@@ -59,7 +59,7 @@ llvm::Constant *CreateStaticTerm::notInjectionCase(
         EmptyArrayType, llvm::ArrayRef<llvm::Constant *>()));
 
     int idx = 2;
-    for (auto &child : constructor->getArguments()) {
+    for (auto const &child : constructor->getArguments()) {
       llvm::Constant *ChildValue;
       if (idx++ == 2 && val != nullptr) {
         ChildValue = val;
@@ -83,13 +83,13 @@ llvm::Constant *CreateStaticTerm::notInjectionCase(
 
 std::pair<llvm::Constant *, bool>
 CreateStaticTerm::operator()(KOREPattern *pattern) {
-  if (auto constructor = dynamic_cast<KORECompositePattern *>(pattern)) {
-    const KORESymbol *symbol = constructor->getConstructor();
+  if (auto *constructor = dynamic_cast<KORECompositePattern *>(pattern)) {
+    KORESymbol const *symbol = constructor->getConstructor();
     assert(symbol->isConcrete() && "not supported yet: sort variables");
     if (symbol->getName() == "\\dv") {
-      auto sort = dynamic_cast<KORECompositeSort *>(
+      auto *sort = dynamic_cast<KORECompositeSort *>(
           symbol->getFormalArguments()[0].get());
-      auto strPattern = dynamic_cast<KOREStringPattern *>(
+      auto *strPattern = dynamic_cast<KOREStringPattern *>(
           constructor->getArguments()[0].get());
       return std::make_pair(
           createToken(sort->getCategory(Definition), strPattern->getContents()),
@@ -120,20 +120,18 @@ CreateStaticTerm::operator()(KOREPattern *pattern) {
         if (tag != (uint32_t)-1 && tag >= inj->getFirstTag()
             && tag <= inj->getLastTag()) {
           return std::make_pair(val.first, true);
-        } else {
-          return std::make_pair(notInjectionCase(constructor, val.first), true);
         }
-      } else {
         return std::make_pair(notInjectionCase(constructor, val.first), true);
       }
-    } else {
-      return std::make_pair(notInjectionCase(constructor, nullptr), false);
+      return std::make_pair(notInjectionCase(constructor, val.first), true);
     }
+    return std::make_pair(notInjectionCase(constructor, nullptr), false);
   }
   assert(false && "Something went wrong when trying to allocate a static term");
   abort();
 }
 
+// NOLINTBEGIN(*-cognitive-complexity)
 llvm::Constant *
 CreateStaticTerm::createToken(ValueType sort, std::string contents) {
   switch (sort.cat) {
@@ -149,7 +147,7 @@ CreateStaticTerm::createToken(ValueType sort, std::string contents) {
     auto *globalVar = llvm::dyn_cast<llvm::GlobalVariable>(global);
     if (!globalVar->hasInitializer()) {
       mpz_t value;
-      const char *dataStart
+      char const *dataStart
           = contents.at(0) == '+' ? contents.c_str() + 1 : contents.c_str();
       mpz_init_set_str(value, dataStart, 10);
       size_t size = mpz_size(value);
@@ -202,8 +200,9 @@ CreateStaticTerm::createToken(ValueType sort, std::string contents) {
                                  Module->getContext(), FLOAT_WRAPPER_STRUCT));
     auto *globalVar = llvm::dyn_cast<llvm::GlobalVariable>(global);
     if (!globalVar->hasInitializer()) {
-      size_t prec, exp;
-      const char last = contents.back();
+      size_t prec;
+      size_t exp;
+      char const last = contents.back();
       if (last == 'f' || last == 'F') {
         prec = 24;
         exp = 8;
@@ -333,5 +332,6 @@ CreateStaticTerm::createToken(ValueType sort, std::string contents) {
   case SortCategory::Uncomputed: abort();
   }
 }
+// NOLINTEND(*-cognitive-complexity)
 
 } // namespace kllvm

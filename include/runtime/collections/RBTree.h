@@ -137,14 +137,14 @@ public:
   // Return the key stored in the root Node of this tree.
   T const &root_key() const {
     assert(!empty());
-    const InternalNode *r = static_cast<const InternalNode *>(root_.get());
+    InternalNode const *r = static_cast<InternalNode const *>(root_.get());
     return r->data_.first;
   }
 
   // Return the value stored in the root Node of this tree.
   V const &root_val() const {
     assert(!empty());
-    const InternalNode *r = static_cast<const InternalNode *>(root_.get());
+    InternalNode const *r = static_cast<InternalNode const *>(root_.get());
     return r->data_.second;
   }
 
@@ -152,7 +152,7 @@ public:
   // Node of this tree.
   std::pair<T, V> const &root_data() const {
     assert(!empty());
-    const InternalNode *r = static_cast<const InternalNode *>(root_.get());
+    InternalNode const *r = static_cast<InternalNode const *>(root_.get());
     return r->data_;
   }
 
@@ -179,14 +179,14 @@ public:
   // Return the left subtree of this tree.
   RBTree left() const {
     assert(!empty());
-    const InternalNode *r = static_cast<const InternalNode *>(root_.get());
+    InternalNode const *r = static_cast<InternalNode const *>(root_.get());
     return RBTree(r->lft_);
   }
 
   // Return the right subtree of this tree.
   RBTree right() const {
     assert(!empty());
-    const InternalNode *r = static_cast<const InternalNode *>(root_.get());
+    InternalNode const *r = static_cast<InternalNode const *>(root_.get());
     return RBTree(r->rgt_);
   }
 

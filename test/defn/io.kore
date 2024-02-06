@@ -4,6 +4,7 @@
 // RUN: diff %S/io_output1.txt %output-dir/ioTest1.output
 // RUN: diff %S/*io_log* %output-dir/ioTest3.output
 // RUN: ls %S | grep -q io_log
+// RUN: rm -f %S/*io_log* %S/io_output*
 [topCellInitializer{}(LblinitGeneratedTopCell{}()), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/llvm-backend/test/defn/k-files/io.k)")]
 
 module BASIC-K

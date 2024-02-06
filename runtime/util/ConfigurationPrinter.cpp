@@ -34,10 +34,7 @@ struct StringEq {
 };
 
 struct print_state {
-  print_state()
-      : boundVariables{}
-      , varNames{}
-      , usedVarNames{} { }
+  print_state() = default;
 
   // We never want to copy the state; it should only ever get passed around by
   // reference.
@@ -49,29 +46,29 @@ struct print_state {
   uint64_t varCounter{0};
 };
 
-void printInt(writer *file, mpz_t i, const char *sort, void *state) {
+void printInt(writer *file, mpz_t i, char const *sort, void *state) {
   auto str = intToString(i);
   sfprintf(file, R"(\dv{%s}("%s"))", sort, str.c_str());
 }
 
-void printFloat(writer *file, floating *f, const char *sort, void *state) {
+void printFloat(writer *file, floating *f, char const *sort, void *state) {
   std::string str = floatToString(f);
   sfprintf(file, R"(\dv{%s}("%s"))", sort, str.c_str());
 }
 
-void printBool(writer *file, bool b, const char *sort, void *state) {
-  const char *str = b ? "true" : "false";
+void printBool(writer *file, bool b, char const *sort, void *state) {
+  char const *str = b ? "true" : "false";
   sfprintf(file, R"(\dv{%s}("%s"))", sort, str);
 }
 
 void printStringBuffer(
-    writer *file, stringbuffer *b, const char *sort, void *state) {
+    writer *file, stringbuffer *b, char const *sort, void *state) {
   std::string str(b->contents->data, b->strlen);
   sfprintf(file, R"(\dv{%s}("%s"))", sort, str.c_str());
 }
 
 void printMInt(
-    writer *file, size_t *i, size_t bits, const char *sort, void *state) {
+    writer *file, size_t *i, size_t bits, char const *sort, void *state) {
   if (i == nullptr) {
     sfprintf(file, R"(\dv{%s}("0p%zd"))", sort, bits);
   } else {
@@ -81,7 +78,7 @@ void printMInt(
   }
 }
 
-void sfprintf(writer *file, const char *fmt, ...) {
+void sfprintf(writer *file, char const *fmt, ...) {
   va_list args;
   va_start(args, fmt);
   if (file->file) {
@@ -129,8 +126,9 @@ void printComma(writer *file, void *state) {
   sfprintf(file, ",");
 }
 
+// NOLINTNEXTLINE(*-cognitive-complexity)
 void printConfigurationInternal(
-    writer *file, block *subject, const char *sort, bool isVar,
+    writer *file, block *subject, char const *sort, bool isVar,
     void *state_ptr) {
   auto &state = *static_cast<print_state *>(state_ptr);
 
@@ -144,7 +142,7 @@ void printConfigurationInternal(
           sort, true, state_ptr);
       return;
     }
-    const char *symbol = getSymbolNameForTag(tag);
+    char const *symbol = getSymbolNameForTag(tag);
     sfprintf(file, "%s()", symbol);
     return;
   }
@@ -173,7 +171,7 @@ void printConfigurationInternal(
     }
     if (isVar && !state.varNames.count(str)) {
       std::string stdStr = std::string(str->data, len(str));
-      std::string suffix = "";
+      std::string suffix;
       while (state.usedVarNames.count(stdStr + suffix)) {
         suffix = std::to_string(state.varCounter++);
       }
@@ -193,7 +191,7 @@ void printConfigurationInternal(
     state.boundVariables.push_back(
         *(block **)(((char *)subject) + sizeof(blockheader)));
   }
-  const char *symbol = getSymbolNameForTag(tag);
+  char const *symbol = getSymbolNameForTag(tag);
   std::string symbolStr(symbol);
   if (symbolStr.rfind("inj{", 0) == 0) {
     std::string prefix = symbolStr.substr(0, symbolStr.find_first_of(','));
@@ -223,13 +221,13 @@ void printConfigurationInternal(
   sfprintf(file, ")");
 }
 
-void printStatistics(const char *filename, uint64_t steps) {
+void printStatistics(char const *filename, uint64_t steps) {
   FILE *file = fopen(filename, "w");
   fprintf(file, "%" PRIu64 "\n", steps - 1); // off by one adjustment
   fclose(file);
 }
 
-void printConfiguration(const char *filename, block *subject) {
+void printConfiguration(char const *filename, block *subject) {
   FILE *file = fopen(filename, "a");
   auto state = print_state();
 
@@ -245,7 +243,7 @@ void printConfiguration(const char *filename, block *subject) {
 // code is not on a hot path.
 // NOLINTBEGIN(performance-unnecessary-value-param)
 void printConfigurations(
-    const char *filename, std::unordered_set<block *, HashBlock, KEq> results) {
+    char const *filename, std::unordered_set<block *, HashBlock, KEq> results) {
   FILE *file = fopen(filename, "a");
   auto state = print_state();
 
@@ -256,7 +254,7 @@ void printConfigurations(
   } else {
     sfprintf(&w, "\\or{SortGeneratedTopCell{}}(");
     size_t j = 0;
-    for (const auto &subject : results) {
+    for (auto const &subject : results) {
       printConfigurationInternal(&w, subject, nullptr, false, &state);
       if (++j != results.size()) {
         sfprintf(&w, ",");
@@ -308,9 +306,9 @@ void printSortedConfigurationToFile(
 
 extern "C" void printMatchResult(
     std::ostream &os, MatchLog *matchLog, size_t logSize,
-    const std::string &definitionPath) {
+    std::string const &definitionPath) {
   auto subject_file = temporary_file("subject_XXXXXX");
-  auto subject = subject_file.file_pointer("w");
+  auto *subject = subject_file.file_pointer("w");
   auto pattern_file = temporary_file("pattern_XXXXXX");
 
   for (int i = 0; i < logSize; i++) {
@@ -322,7 +320,7 @@ extern "C" void printMatchResult(
         printSortedConfigurationToFile(
             subject, (block *)matchLog[i].subject, matchLog[i].sort);
       } else {
-        auto subjectSort
+        auto *subjectSort
             = debug_print_term((block *)matchLog[i].subject, matchLog[i].sort);
         auto strSubjectSort = std::string(subjectSort->data, len(subjectSort));
         subject_file.ofstream() << strSubjectSort << std::endl;
@@ -337,10 +335,11 @@ extern "C" void printMatchResult(
       os << matchLog[i].debugName << "(";
 
       for (int j = 0; j < matchLog[i].args.size(); j += 2) {
-        auto typeName = reinterpret_cast<char *>(matchLog[i].args[j + 1]);
+        auto *typeName = reinterpret_cast<char *>(matchLog[i].args[j + 1]);
         printValueOfType(os, definitionPath, matchLog[i].args[j], typeName);
-        if (j + 2 != matchLog[i].args.size())
+        if (j + 2 != matchLog[i].args.size()) {
           os << ", ";
+        }
       }
       os << ") => " << *reinterpret_cast<bool *>(matchLog[i].result) << "\n";
     }
@@ -350,30 +349,30 @@ extern "C" void printMatchResult(
 void printValueOfType(
     std::ostream &os, std::string const &definitionPath, void *value,
     std::string const &type) {
-  if (type.compare("%mpz*") == 0) {
+  if (type == "%mpz*") {
     os << reinterpret_cast<mpz_ptr>(value);
-  } else if (type.compare("%block*") == 0) {
+  } else if (type == "%block*") {
     if ((((uintptr_t)value) & 3) == 1) {
       auto f = temporary_file("subject_XXXXXX");
       string *s = printConfigurationToString(reinterpret_cast<block *>(value));
       f.ofstream() << std::string(s->data, len(s)) << std::endl;
       kllvm::printKORE(os, definitionPath, f.filename(), false, true);
     } else if ((((uintptr_t)value) & 1) == 0) {
-      auto s = reinterpret_cast<string *>(value);
+      auto *s = reinterpret_cast<string *>(value);
       os << std::string(s->data, len(s));
     } else {
       os << "Error: " << type << " not implemented!";
     }
-  } else if (type.compare("%floating*") == 0) {
+  } else if (type == "%floating*") {
     os << floatToString(reinterpret_cast<floating *>(value));
-  } else if (type.compare("i1") == 0) {
+  } else if (type == "i1") {
     os << *reinterpret_cast<bool *>(value);
   } else {
     os << "Error: " << type << " not implemented!";
   }
 }
 
-void printVariableToFile(const char *filename, const char *varname) {
+void printVariableToFile(char const *filename, char const *varname) {
   FILE *file = fopen(filename, "a");
 
   fprintf(file, "%s", varname);

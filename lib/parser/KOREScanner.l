@@ -20,6 +20,7 @@ using namespace kllvm::parser;
 %option noyywrap
 %option nounput
 %option reentrant
+%option 8bit
 
 /* Flex macros */
 ident @?[a-zA-Z][a-zA-Z0-9'-]*
@@ -72,11 +73,11 @@ yyin = in;
 }
 
 "\""            { stringBuffer.clear(); BEGIN(STR);           }
-<STR>[^\"\n\\]* { stringBuffer.append(yytext);                }
-<STR>"\\n"       { stringBuffer.push_back('\n'); loc->lines(); }
-<STR>"\\r"       { stringBuffer.push_back('\r'); loc->lines(); }
-<STR>"\\t"       { stringBuffer.push_back('\t'); loc->lines(); }
-<STR>"\\f"       { stringBuffer.push_back('\f'); loc->lines(); }
+<STR>([\x20-\x7E]{-}[\"\\])* { stringBuffer.append(yytext);   }
+<STR>"\\n"      { stringBuffer.push_back('\n'); loc->lines(); }
+<STR>"\\r"      { stringBuffer.push_back('\r'); loc->lines(); }
+<STR>"\\t"      { stringBuffer.push_back('\t'); loc->lines(); }
+<STR>"\\f"      { stringBuffer.push_back('\f'); loc->lines(); }
 <STR>"\\\""     { stringBuffer.push_back('\"');               }
 <STR>"\\\\"     { stringBuffer.push_back('\\');               }
 <STR>\\[0-9]{3} { stringBuffer.push_back((yytext[1] - '0') * 64 + (yytext[2] - '0') * 8 + yytext[3] - '0'); }

@@ -14,7 +14,7 @@
 using namespace kllvm;
 
 extern "C" {
-void *constructInitialConfiguration(const KOREPattern *);
+void *constructInitialConfiguration(KOREPattern const *);
 void resetMatchReason();
 MatchLog *getMatchLog();
 size_t getMatchLogSize();
@@ -22,12 +22,12 @@ void printMatchResult(std::ostream &, MatchLog *, size_t, std::string const &);
 void initStaticObjects();
 }
 
-void *constructInitialConfiguration(const KOREPattern *pattern, void *handle) {
+void *constructInitialConfiguration(KOREPattern const *pattern, void *handle) {
   void *funcPtr = dlsym(handle, "constructInitialConfiguration");
   if (funcPtr == NULL) {
     return NULL;
   }
-  auto f = reinterpret_cast<void *(*)(const KOREPattern *)>(funcPtr);
+  auto f = reinterpret_cast<void *(*)(KOREPattern const *)>(funcPtr);
   return f(pattern);
 }
 
@@ -65,8 +65,9 @@ void *printMatchResult(
   if (funcPtr == NULL) {
     return NULL;
   }
-  auto f = reinterpret_cast<void *(*)(std::ostream &, MatchLog *, size_t,
-                                      std::string const &)>(funcPtr);
+  auto f = reinterpret_cast<
+      void *(*)(std::ostream &, MatchLog *, size_t, std::string const &)>(
+      funcPtr);
   return f(os, log, logSize, dir);
 }
 

@@ -70,7 +70,7 @@ public:
     */
   llvm::Value *createFunctionCall(
       std::string const &name, ValueType returnCat,
-      const std::vector<llvm::Value *> &args, bool sret, bool tailcc,
+      std::vector<llvm::Value *> const &args, bool sret, bool tailcc,
       std::string const &locationStack = "0");
 
   llvm::BasicBlock *getCurrentBlock() const { return CurrentBlock; }
@@ -82,16 +82,13 @@ std::string escape(std::string const &str);
    llvm modules in the llvm backend. */
 std::unique_ptr<llvm::Module>
 newModule(std::string const &name, llvm::LLVMContext &Context);
-void addKompiledDirSymbol(
-    llvm::LLVMContext &Context, std::string const &dir, llvm::Module *mod,
-    bool debug);
 
 llvm::StructType *getBlockType(
-    llvm::Module *Module, KOREDefinition *definition, const KORESymbol *symbol);
+    llvm::Module *Module, KOREDefinition *definition, KORESymbol const *symbol);
 uint64_t getBlockHeaderVal(
-    llvm::Module *Module, const KORESymbol *symbol, llvm::Type *BlockType);
+    llvm::Module *Module, KORESymbol const *symbol, llvm::Type *BlockType);
 llvm::Value *getBlockHeader(
-    llvm::Module *Module, KOREDefinition *definition, const KORESymbol *symbol,
+    llvm::Module *Module, KOREDefinition *definition, KORESymbol const *symbol,
     llvm::Type *BlockType);
 
 /* returns the llvm::Type corresponding to the type of the result of calling
@@ -135,15 +132,16 @@ llvm::Type *getValueType(ValueType sort, llvm::Module *Module);
 llvm::Type *getParamType(ValueType sort, llvm::Module *Module);
 
 bool isCollectionSort(ValueType cat);
+bool isInjectionSymbol(KOREPattern *p, KORESymbol *sym);
 
 void addAbort(llvm::BasicBlock *block, llvm::Module *Module);
 
 llvm::Value *allocateTerm(
     llvm::Type *AllocType, llvm::BasicBlock *block,
-    const char *allocFn = "koreAlloc");
+    char const *allocFn = "koreAlloc");
 llvm::Value *allocateTerm(
     llvm::Type *AllocType, llvm::Value *Len, llvm::BasicBlock *block,
-    const char *allocFn = "koreAlloc");
+    char const *allocFn = "koreAlloc");
 } // namespace kllvm
 
 #endif // CREATE_TERM_H

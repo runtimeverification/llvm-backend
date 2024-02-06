@@ -17,6 +17,9 @@ void *constructCompositePattern(uint32_t tag, std::vector<void *> &arguments) {
 }
 
 extern "C" {
+
+bool enable_mutable_bytes = true;
+
 bool hook_STRING_gt(string *, string *);
 bool hook_STRING_ge(string *, string *);
 bool hook_STRING_lt(string *, string *);
@@ -47,8 +50,8 @@ stringbuffer *hook_BUFFER_empty();
 stringbuffer *hook_BUFFER_concat(stringbuffer *, string *);
 string *hook_BUFFER_toString(stringbuffer *);
 
-const uint32_t first_inj_tag = std::numeric_limits<uint32_t>::max();
-const uint32_t last_inj_tag = std::numeric_limits<uint32_t>::min();
+uint32_t const first_inj_tag = std::numeric_limits<uint32_t>::max();
+uint32_t const last_inj_tag = std::numeric_limits<uint32_t>::min();
 
 mpz_ptr move_int(mpz_t i) {
   mpz_ptr result = (mpz_ptr)malloc(sizeof(__mpz_struct));
@@ -236,8 +239,8 @@ BOOST_AUTO_TEST_CASE(chr) {
   mpz_init_set_ui(a, 65);
   mpz_init_set_ui(b, 32);
 
-  const string *A = hook_STRING_chr(a);
-  const string *space = hook_STRING_chr(b);
+  string const *A = hook_STRING_chr(a);
+  string const *space = hook_STRING_chr(b);
 
   BOOST_CHECK_EQUAL(A->data[0], 'A');
   BOOST_CHECK_EQUAL(len(A), 1);

@@ -25,16 +25,16 @@ struct PartialStep {
 
 DecisionNode *parseYamlDecisionTreeFromString(
     llvm::Module *, std::string const &yaml,
-    const std::map<std::string, KORESymbol *> &syms,
-    const std::map<ValueType, sptr<KORECompositeSort>> &sorts);
+    std::map<std::string, KORESymbol *> const &syms,
+    std::map<ValueType, sptr<KORECompositeSort>> const &sorts);
 DecisionNode *parseYamlDecisionTree(
     llvm::Module *, std::string const &filename,
-    const std::map<std::string, KORESymbol *> &syms,
-    const std::map<ValueType, sptr<KORECompositeSort>> &sorts);
+    std::map<std::string, KORESymbol *> const &syms,
+    std::map<ValueType, sptr<KORECompositeSort>> const &sorts);
 PartialStep parseYamlSpecialDecisionTree(
     llvm::Module *, std::string const &filename,
-    const std::map<std::string, KORESymbol *> &syms,
-    const std::map<ValueType, sptr<KORECompositeSort>> &sorts);
+    std::map<std::string, KORESymbol *> const &syms,
+    std::map<ValueType, sptr<KORECompositeSort>> const &sorts);
 
 } // namespace kllvm
 

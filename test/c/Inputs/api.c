@@ -22,6 +22,10 @@ struct kllvm_c_api load_c_api(char const *path) {
 
   struct kllvm_c_api api;
 
+  API_FUNCTION(kore_error_new);
+  API_FUNCTION(kore_error_is_success);
+  API_FUNCTION(kore_error_message);
+  API_FUNCTION(kore_error_free);
   API_FUNCTION(kore_pattern_dump);
   API_FUNCTION(kore_pattern_pretty_print);
   API_FUNCTION(kore_pattern_serialize);
@@ -58,6 +62,7 @@ struct kllvm_c_api load_c_api(char const *path) {
   API_FUNCTION(kore_symbol_add_formal_argument);
   API_FUNCTION(kllvm_init);
   API_FUNCTION(kllvm_free_all_memory);
+  API_FUNCTION(kllvm_mutable_bytes_enabled);
 
   return api;
 }

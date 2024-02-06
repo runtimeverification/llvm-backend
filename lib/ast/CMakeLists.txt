@@ -1,6 +1,7 @@
 add_library(AST
   AST.cpp
   pattern_matching.cpp
+  definition.cpp
 )
 
 target_link_libraries(AST

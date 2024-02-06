@@ -8,7 +8,7 @@ extern "C" {
 void *koreAllocToken(size_t requested) {
   return malloc(requested);
 }
-const size_t BLOCK_SIZE = -1;
+size_t const BLOCK_SIZE = -1;
 
 mpz_ptr hook_INT_tmod(mpz_t, mpz_t);
 mpz_ptr hook_INT_emod(mpz_t, mpz_t);
@@ -49,7 +49,7 @@ mpz_ptr move_int(mpz_t i) {
 
 void add_hash64(void *, uint64_t) { }
 
-uint32_t getTagForSymbolName(const char *) {
+uint32_t getTagForSymbolName(char const *) {
   return 0;
 }
 

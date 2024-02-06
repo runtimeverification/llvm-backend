@@ -60,10 +60,10 @@ let
   # lib/python directory directly causes a provenance error when reading the
   # pyproject file.
   kllvm = prev.poetry2nix.mkPoetryApplication {
-    python = prev.python39;
+    python = prev.python310;
     projectDir = ../bindings/python/package;
     postInstall = ''
-      cp ${llvm-backend}/lib/python/kllvm/* $out/lib/python3.9/site-packages/kllvm/
+      cp ${llvm-backend}/lib/python/kllvm/* $out/lib/python3.10/site-packages/kllvm/
     '';
   };
 

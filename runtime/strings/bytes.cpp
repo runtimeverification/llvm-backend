@@ -4,9 +4,12 @@
 #include <cstring>
 #include <gmp.h>
 #include <stdexcept>
+#include <unordered_set>
 
 #include "runtime/alloc.h"
 #include "runtime/header.h"
+
+void copy_if_needed(SortBytes &b);
 
 extern "C" {
 
@@ -14,15 +17,11 @@ extern "C" {
 #define get_ui(x) get_ui_named(x, __func__)
 #define KCHAR char
 
-mpz_ptr move_int(mpz_t);
-
 SortBytes hook_BYTES_empty() {
   static string empty;
   empty.h.hdr = NOT_YOUNG_OBJECT_BIT;
   return &empty;
 }
-
-uint32_t getTagForSymbolName(const char *);
 
 // bytes2int and int2bytes expect constructors of sort Endianness, which become
 // a uint64_t constant value in the K term representation
@@ -138,7 +137,7 @@ SortBytes hook_BYTES_substr(SortBytes input, SortInt start, SortInt end) {
         uend, input_len);
   }
   uint64_t len = uend - ustart;
-  auto ret = static_cast<string *>(
+  auto *ret = static_cast<string *>(
       koreAllocToken(sizeof(string) + sizeof(KCHAR) * len));
   init_with_len(ret, len);
   memcpy(&(ret->data), &(input->data[ustart]), len * sizeof(KCHAR));
@@ -157,6 +156,8 @@ SortInt hook_BYTES_get(SortBytes b, SortInt off) {
 }
 
 SortBytes hook_BYTES_update(SortBytes b, SortInt off, SortInt val) {
+  copy_if_needed(b);
+
   unsigned long off_long = get_ui(off);
   if (off_long >= len(b)) {
     KLLVM_HOOK_INVALID_ARGUMENT(
@@ -172,6 +173,8 @@ SortBytes hook_BYTES_update(SortBytes b, SortInt off, SortInt val) {
 }
 
 SortBytes hook_BYTES_replaceAt(SortBytes b, SortInt start, SortBytes b2) {
+  copy_if_needed(b);
+
   unsigned long start_long = get_ui(start);
   if (start_long + len(b2) > len(b)) {
     KLLVM_HOOK_INVALID_ARGUMENT(
@@ -184,6 +187,8 @@ SortBytes hook_BYTES_replaceAt(SortBytes b, SortInt start, SortBytes b2) {
 
 SortBytes
 hook_BYTES_memset(SortBytes b, SortInt start, SortInt count, SortInt value) {
+  copy_if_needed(b);
+
   uint64_t ustart = get_ui(start);
   uint64_t ucount = get_ui(count);
   uint64_t uend = ustart + ucount;
@@ -248,6 +253,7 @@ SortBytes hook_BYTES_padLeft(SortBytes b, SortInt length, SortInt v) {
 }
 
 SortBytes hook_BYTES_reverse(SortBytes b) {
+  copy_if_needed(b);
   std::reverse(b->data, b->data + len(b));
   return b;
 }
@@ -256,7 +262,7 @@ SortBytes hook_BYTES_concat(SortBytes a, SortBytes b) {
   auto len_a = len(a);
   auto len_b = len(b);
   auto newlen = len_a + len_b;
-  auto ret = static_cast<string *>(koreAllocToken(sizeof(string) + newlen));
+  auto *ret = static_cast<string *>(koreAllocToken(sizeof(string) + newlen));
   init_with_len(ret, newlen);
   memcpy(&(ret->data), &(a->data), len(a) * sizeof(KCHAR));
   memcpy(&(ret->data[len(a)]), &(b->data), len(b) * sizeof(KCHAR));

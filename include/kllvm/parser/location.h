@@ -34,7 +34,7 @@ inline position &operator+=(position &res, int width) {
 
 template <typename YYChar>
 std::basic_ostream<YYChar> &
-operator<<(std::basic_ostream<YYChar> &ostr, const position &pos) {
+operator<<(std::basic_ostream<YYChar> &ostr, position const &pos) {
   ostr << pos.filename << ':';
   return ostr << pos.line << '.' << pos.column;
 }
@@ -57,7 +57,7 @@ public:
 
 template <typename YYChar>
 std::basic_ostream<YYChar> &
-operator<<(std::basic_ostream<YYChar> &ostr, const location &loc) {
+operator<<(std::basic_ostream<YYChar> &ostr, location const &loc) {
   unsigned end_col = 0 < loc.end.column ? loc.end.column - 1 : 0;
   ostr << loc.begin;
   if (loc.begin.filename != loc.end.filename)

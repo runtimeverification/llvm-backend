@@ -21,14 +21,14 @@ auto X = subject(any);
  */
 std::vector<KOREPattern *>
 getPatternsImpl(KOREPattern *pat, std::vector<KOREPattern *> &result) {
-  if (auto composite = dynamic_cast<KORECompositePattern *>(pat)) {
+  if (auto *composite = dynamic_cast<KORECompositePattern *>(pat)) {
     if (composite->getConstructor()->getName() == "\\top"
-        && composite->getArguments().size() == 0) {
+        && composite->getArguments().empty()) {
       return result;
-    } else if (
-        composite->getConstructor()->getName() == "\\and"
+    }
+    if (composite->getConstructor()->getName() == "\\and"
         && composite->getArguments().size() == 2) {
-      if (auto firstChild = dynamic_cast<KORECompositePattern *>(
+      if (auto *firstChild = dynamic_cast<KORECompositePattern *>(
               composite->getArguments()[0].get())) {
         if (firstChild->getConstructor()->getName() == "\\in"
             && firstChild->getArguments().size() == 2) {
@@ -66,9 +66,8 @@ getBuiltin(std::shared_ptr<KOREPattern> const &term) {
 
   if (!lhs->getConstructor()->isBuiltin()) {
     return lhs;
-  } else {
-    return comp->getArguments()[1];
   }
+  return comp->getArguments()[1];
 }
 
 [[maybe_unused]] std::optional<std::vector<KOREPattern *>>

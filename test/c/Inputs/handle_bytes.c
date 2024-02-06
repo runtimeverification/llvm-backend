@@ -21,7 +21,7 @@ int main(int argc, char **argv) {
 
   char *data;
   size_t size;
-  api.kore_simplify(pat, bytes, &data, &size);
+  api.kore_simplify(NULL, pat, bytes, &data, &size);
 
   FILE *f = fopen(argv[2], "wb");
   if (!f) {

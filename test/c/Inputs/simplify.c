@@ -18,12 +18,12 @@ int main(int argc, char **argv) {
 
   char *data;
   size_t size;
-  api.kore_simplify(pat, sort, &data, &size);
+  api.kore_simplify(NULL, pat, sort, &data, &size);
 
   // Do the simplification twice to make sure GC works
   api.kllvm_free_all_memory();
 
-  api.kore_simplify(pat, sort, &data, &size);
+  api.kore_simplify(NULL, pat, sort, &data, &size);
 
   FILE *f = fopen(argv[2], "wb");
   if (!f) {

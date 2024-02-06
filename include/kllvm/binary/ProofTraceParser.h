@@ -202,7 +202,7 @@ public:
 
 class ProofTraceParser {
 public:
-  static constexpr uint32_t expectedVersion = 3u;
+  static constexpr uint32_t expectedVersion = 4u;
 
 private:
   bool verbose;

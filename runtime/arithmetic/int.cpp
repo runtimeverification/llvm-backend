@@ -7,7 +7,6 @@
 
 extern "C" {
 
-mpz_ptr move_int(mpz_t);
 void add_hash64(void *, uint64_t);
 
 SortInt hook_INT_tmod(SortInt a, SortInt b) {
@@ -321,7 +320,8 @@ void signed_extract(mpz_t result, mpz_t i, size_t off, size_t len) {
     return;
   }
   if (mpz_tstbit(i, off + len - 1)) {
-    mpz_t max, tmp;
+    mpz_t max;
+    mpz_t tmp;
     mpz_init(max);
     mpz_init(tmp);
     mpz_set_ui(max, 1);
@@ -405,12 +405,14 @@ size_t *hook_MINT_export(mpz_t in, uint64_t bits) {
   mpz_t twos;
   mpz_init(twos);
   extract(twos, in, 0, nwords * 64);
-  if (nwords == 0)
+  if (nwords == 0) {
     return nullptr;
+  }
   uint64_t numb = 8 * sizeof(size_t);
   uint64_t count = (mpz_sizeinbase(twos, 2) + numb - 1) / numb;
-  if (mpz_sgn(twos) == 0)
+  if (mpz_sgn(twos) == 0) {
     count = 0;
+  }
   uint64_t alloccount = nwords > count ? nwords : count;
   size_t allocsize = alloccount * sizeof(size_t);
   auto *allocptr = (size_t *)koreAllocAlwaysGC(allocsize);
@@ -419,23 +421,27 @@ size_t *hook_MINT_export(mpz_t in, uint64_t bits) {
   size_t actualcount;
   mpz_export(exportptr, &actualcount, 1, sizeof(size_t), 0, 0, twos);
   assert(count == actualcount);
-  if (count == 0)
+  if (count == 0) {
     return allocptr;
+  }
   size_t *resultptr = nwords > count ? allocptr : allocptr + count - nwords;
   return resultptr;
 }
 
 mpz_ptr hook_MINT_import(size_t *i, uint64_t bits, bool isSigned) {
-  mpz_t result, twos;
+  mpz_t result;
+  mpz_t twos;
   mpz_init(twos);
   mpz_init(result);
+
   uint64_t nwords = (bits + 63) / 64;
   mpz_import(twos, nwords, -1, sizeof(size_t), 0, 0, i);
+
   if (isSigned) {
     signed_extract(result, twos, 0, bits);
     return move_int(result);
-  } else {
-    return move_int(twos);
   }
+
+  return move_int(twos);
 }
 }

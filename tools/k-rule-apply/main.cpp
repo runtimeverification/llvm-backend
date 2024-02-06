@@ -28,15 +28,16 @@ std::optional<std::string> getMatchFunctionName() {
   kore_ast->preprocess();
 
   // Iterate through axioms and return the one with the give rulen label if exits.
-  for (auto axiom : kore_ast.get()->getAxioms()) {
-    if (axiom->getAttributes().size() > 0) {
+  for (auto *axiom : kore_ast.get()->getAxioms()) {
+    if (!axiom->getAttributes().empty()) {
       // Check if the current axiom has the attribute label.
       auto attr = axiom->getAttributes().find("label");
 
       if (attr != axiom->getAttributes().end()) {
         // Compare the axiom's label with the given rule label.
-        if (!RuleLabel.compare(axiom->getStringAttribute("label")))
+        if (RuleLabel == axiom->getStringAttribute("label")) {
           return "intern_match_" + std::to_string(axiom->getOrdinal());
+        }
       }
     }
   }
@@ -54,13 +55,13 @@ int main(int argc, char **argv) {
   auto InitialConfiguration = parser.pattern();
 
   auto match_function_name = getMatchFunctionName();
-  if (match_function_name == std::nullopt) {
+  if (!match_function_name.has_value()) {
     std::cerr << "Rule with label " << RuleLabel << " does not exist.\n";
     return EXIT_FAILURE;
   }
 
   // Open the shared library that contains the llvm match functions.
-  auto handle = dlopen(SharedLibPath.c_str(), RTLD_LAZY);
+  auto *handle = dlopen(SharedLibPath.c_str(), RTLD_LAZY);
 
   // Check if the shared library exits in the given location.
   if (!handle) {
@@ -80,14 +81,14 @@ int main(int argc, char **argv) {
 
   resetMatchReason(handle);
   initStaticObjects(handle);
-  auto b = constructInitialConfiguration(InitialConfiguration.get(), handle);
+  auto *b = constructInitialConfiguration(InitialConfiguration.get(), handle);
   if (b == nullptr) {
     std::cerr << "Error: " << dlerror() << "\n";
     return EXIT_FAILURE;
   }
 
   match_function((block *)b);
-  auto log = getMatchLog(handle);
+  auto *log = getMatchLog(handle);
   if (log == nullptr) {
     std::cerr << "Error: " << dlerror() << "\n";
     return EXIT_FAILURE;

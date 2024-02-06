@@ -20,19 +20,19 @@ namespace {
 using namespace kllvm;
 using namespace kllvm::parser;
 
-const std::string WHITESPACE = " \n\r\t\f\v";
+std::string const WHITESPACE = " \n\r\t\f\v";
 
-std::string ltrim(const std::string &s) {
+std::string ltrim(std::string const &s) {
   size_t start = s.find_first_not_of(WHITESPACE);
   return (start == std::string::npos) ? "" : s.substr(start);
 }
 
-std::string rtrim(const std::string &s) {
+std::string rtrim(std::string const &s) {
   size_t end = s.find_last_not_of(WHITESPACE);
   return (end == std::string::npos) ? "" : s.substr(0, end + 1);
 }
 
-std::string trim(const std::string &s) {
+std::string trim(std::string const &s) {
   return rtrim(ltrim(s));
 }
 
@@ -236,6 +236,7 @@ struct PreprocessedPrintData {
   SymbolMap overloads;
 };
 
+// NOLINTNEXTLINE(*-cognitive-complexity)
 PreprocessedPrintData getPrintData(
     ptr<KOREDefinition> const &def,
     std::vector<ptr<KOREDeclaration>> const &axioms, bool hasColor) {
@@ -252,10 +253,10 @@ PreprocessedPrintData getPrintData(
   std::map<std::string, std::string> hooks;
   std::map<std::string, std::vector<std::string>> colors;
 
-  SubsortMap subsorts;
-  SymbolMap overloads;
+  auto subsorts = def->getSubsorts();
+  auto overloads = def->getOverloads();
 
-  for (auto &entry : def->getSymbolDeclarations()) {
+  for (auto const &entry : def->getSymbolDeclarations()) {
     std::string name = entry.first;
 
     if (entry.second->getAttributes().count("format")) {
@@ -278,10 +279,10 @@ PreprocessedPrintData getPrintData(
           if (pos == std::string::npos) {
             color.push_back(trim(colorAtt.substr(idx)));
             break;
-          } else {
-            color.push_back(trim(colorAtt.substr(idx, pos - idx)));
-            idx = pos + 1;
           }
+          color.push_back(trim(colorAtt.substr(idx, pos - idx)));
+          idx = pos + 1;
+
         } while (true);
         colors[name] = color;
       }
@@ -297,36 +298,12 @@ PreprocessedPrintData getPrintData(
     }
   }
 
-  for (auto &entry : def->getSortDeclarations()) {
+  for (auto const &entry : def->getSortDeclarations()) {
     std::string name = entry.first;
     if (entry.second->getAttributes().count("hook")) {
       hooks[name] = entry.second->getStringAttribute("hook");
     }
   }
-
-  for (auto axiom : def->getAxioms()) {
-    if (axiom->getAttributes().count("subsort")) {
-      KORECompositePattern *att = axiom->getAttributes().at("subsort").get();
-      KORESort *innerSort
-          = att->getConstructor()->getFormalArguments()[0].get();
-      KORESort *outerSort
-          = att->getConstructor()->getFormalArguments()[1].get();
-      subsorts[innerSort].insert(outerSort);
-    }
-    if (axiom->getAttributes().count("overload")) {
-      KORECompositePattern *att = axiom->getAttributes().at("overload").get();
-      KORESymbol *innerSymbol
-          = dynamic_cast<KORECompositePattern *>(att->getArguments()[1].get())
-                ->getConstructor();
-      KORESymbol *outerSymbol
-          = dynamic_cast<KORECompositePattern *>(att->getArguments()[0].get())
-                ->getConstructor();
-      overloads[innerSymbol].insert(outerSymbol);
-    }
-  }
-
-  subsorts = transitiveClosure(subsorts);
-  overloads = transitiveClosure(overloads);
 
   PrettyPrintData data
       = {formats, colors,   terminals, priorities, leftAssoc, rightAssoc,
@@ -362,14 +339,14 @@ std::ostream &printKORE(
   std::map<std::string, std::vector<KORESymbol *>> symbols;
   config->markSymbols(symbols);
 
-  for (auto &decl : axioms) {
-    auto axiom = dynamic_cast<KOREAxiomDeclaration *>(decl.get());
+  for (auto const &decl : axioms) {
+    auto *axiom = dynamic_cast<KOREAxiomDeclaration *>(decl.get());
     axiom->getPattern()->markSymbols(symbols);
   }
 
   for (auto &entry : symbols) {
-    for (auto symbol : entry.second) {
-      auto decl = def->getSymbolDeclarations().at(symbol->getName());
+    for (auto *symbol : entry.second) {
+      auto *decl = def->getSymbolDeclarations().at(symbol->getName());
       symbol->instantiateSymbol(decl);
     }
   }
