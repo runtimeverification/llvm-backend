@@ -76,7 +76,7 @@ static void *megabyte_malloc() {
 }
 
 static void freshBlock(struct arena *Arena) {
-  char *nextBlock;
+  char *nextBlock = nullptr;
   if (Arena->block_start == nullptr) {
     nextBlock = (char *)megabyte_malloc();
     Arena->first_block = nextBlock;

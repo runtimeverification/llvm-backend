@@ -85,14 +85,14 @@ void printMInt(
 }
 
 void sfprintf(writer *file, char const *fmt, ...) {
-  va_list args;
+  va_list args = nullptr;
   va_start(args, fmt);
   if (file->file) {
     vfprintf(file->file, fmt, args);
   } else {
     char buf[8192];
     char *finalBuf = buf;
-    va_list args_copy;
+    va_list args_copy = nullptr;
     va_copy(args_copy, args);
     int res = vsnprintf(
         buf + sizeof(blockheader), sizeof(buf) - sizeof(blockheader), fmt,
@@ -101,7 +101,7 @@ void sfprintf(writer *file, char const *fmt, ...) {
       size_t size = sizeof(buf) * 2;
       finalBuf = (char *)malloc(size);
       memcpy(finalBuf, buf, sizeof(buf));
-      va_list args_temp;
+      va_list args_temp = nullptr;
       va_copy(args_temp, args_copy);
       res = vsnprintf(
           finalBuf + sizeof(blockheader), size - sizeof(blockheader), fmt,
@@ -111,7 +111,7 @@ void sfprintf(writer *file, char const *fmt, ...) {
         do {
           size *= 2;
           finalBuf = (char *)realloc(finalBuf, size);
-          va_list args_temp;
+          va_list args_temp = nullptr;
           va_copy(args_temp, args_copy);
           res = vsnprintf(
               finalBuf + sizeof(blockheader), size - sizeof(blockheader), fmt,

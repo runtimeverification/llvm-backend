@@ -47,7 +47,7 @@ void addMatchFailReason(void *subject, char const *pattern, char const *sort) {
 
 void addMatchFunction(
     char const *debugName, char const *function, void *result, ...) {
-  va_list ap;
+  va_list ap = nullptr;
   va_start(ap, result);
 
   std::vector<void *> args;

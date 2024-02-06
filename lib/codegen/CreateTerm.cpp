@@ -462,7 +462,7 @@ llvm::Value *CreateTerm::createHook(
         llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), nwords * 8),
         CurrentBlock, "koreAllocAlwaysGC");
     if (nwords == 1) {
-      llvm::Value *Word;
+      llvm::Value *Word = nullptr;
       if (cat.bits == 64) {
         Word = mint;
       } else {
@@ -514,7 +514,7 @@ llvm::Value *CreateTerm::createHook(
         llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), nwords * 8),
         CurrentBlock, "koreAllocAlwaysGC");
     if (nwords == 1) {
-      llvm::Value *Word;
+      llvm::Value *Word = nullptr;
       if (cat.bits == 64) {
         Word = mint;
       } else {
@@ -717,13 +717,13 @@ llvm::Value *CreateTerm::createFunctionCall(
   case SortCategory::Set: collection = true; break;
   default: sret = false; break;
   }
-  llvm::Value *AllocSret;
+  llvm::Value *AllocSret = nullptr;
   types.reserve(args.size());
   for (auto *arg : args) {
     types.push_back(arg->getType());
   }
   std::vector<llvm::Value *> realArgs = args;
-  llvm::Type *sretType;
+  llvm::Type *sretType = nullptr;
   if (sret) {
     // we don't use alloca here because the tail call optimization pass for llvm
     // doesn't handle correctly functions with alloca
@@ -769,7 +769,7 @@ llvm::Value *CreateTerm::notInjectionCase(
   int idx = 2;
   std::vector<llvm::Value *> children;
   for (auto const &child : constructor->getArguments()) {
-    llvm::Value *ChildValue;
+    llvm::Value *ChildValue = nullptr;
     if (idx == 2 && val != nullptr) {
       ChildValue = val;
     } else {
