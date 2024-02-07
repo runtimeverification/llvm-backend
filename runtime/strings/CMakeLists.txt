@@ -13,6 +13,9 @@ add_library(numeric_strings STATIC
   numeric.cpp
 )
 
+target_link_libraries(numeric_strings PUBLIC
+  fmt::fmt-header-only)
+
 install(
   TARGETS strings numeric_strings
   ARCHIVE DESTINATION lib/kllvm

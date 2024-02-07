@@ -60,7 +60,7 @@ llvm::Constant *CreateStaticTerm::notInjectionCase(
 
     int idx = 2;
     for (auto const &child : constructor->getArguments()) {
-      llvm::Constant *ChildValue;
+      llvm::Constant *ChildValue = nullptr;
       if (idx++ == 2 && val != nullptr) {
         ChildValue = val;
       } else {
@@ -200,8 +200,8 @@ CreateStaticTerm::createToken(ValueType sort, std::string contents) {
                                  Module->getContext(), FLOAT_WRAPPER_STRUCT));
     auto *globalVar = llvm::dyn_cast<llvm::GlobalVariable>(global);
     if (!globalVar->hasInitializer()) {
-      size_t prec;
-      size_t exp;
+      size_t prec = 0;
+      size_t exp = 0;
       char const last = contents.back();
       if (last == 'f' || last == 'F') {
         prec = 24;
@@ -222,7 +222,7 @@ CreateStaticTerm::createToken(ValueType sort, std::string contents) {
       }
       mpfr_t value;
       mpfr_init2(value, prec);
-      int retValue;
+      int retValue = 0;
       if (contents == "+Infinity" || contents == "-Infinity"
           || contents == "Infinity") {
         retValue = mpfr_set_str(value, contents.c_str(), 10, MPFR_RNDN);

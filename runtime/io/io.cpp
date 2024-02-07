@@ -35,7 +35,7 @@ static blockheader kseqHeader
 static std::map<std::string, std::string> logFiles;
 
 static block *block_errno() {
-  char const *errStr;
+  char const *errStr = nullptr;
   switch (errno) {
   case EOF: errStr = GETTAG(EOF); break;
   case E2BIG: errStr = GETTAG(E2BIG); break;
@@ -218,7 +218,7 @@ SortIOInt hook_IO_open(SortString filename, SortString control) {
   int flags = 0;
   int access = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;
   int modes = getFileModes(control);
-  int fd;
+  int fd = 0;
   mpz_t result;
 
   if (-1 != modes) {
@@ -246,7 +246,7 @@ SortIOInt hook_IO_open(SortString filename, SortString control) {
     }
 
     char *f = getTerminatedString(filename);
-    fd = open(f, flags, access);
+    fd = open(f, flags, access); // NOLINT(*-vararg)
   } else {
     errno = EINVAL;
     fd = -1;
@@ -293,7 +293,7 @@ SortIOInt hook_IO_getc(SortInt i) {
   }
 
   int fd = mpz_get_si(i);
-  char c;
+  char c = 0;
   ssize_t ret = read(fd, &c, sizeof(char));
 
   if (ret == 0) {
@@ -440,7 +440,7 @@ SortK hook_IO_lock(SortInt i, SortInt len) {
   lockp.l_whence = SEEK_CUR;
   lockp.l_start = 0;
   lockp.l_len = l;
-  int ret = fcntl(fd, F_SETLKW, &lockp);
+  int ret = fcntl(fd, F_SETLKW, &lockp); // NOLINT(*-vararg)
 
   if (ret == -1) {
     return getKSeqErrorBlock();
@@ -463,7 +463,7 @@ SortK hook_IO_unlock(SortInt i, SortInt len) {
   lockp.l_whence = SEEK_CUR;
   lockp.l_start = 0;
   lockp.l_len = l;
-  int ret = fcntl(fd, F_SETLKW, &lockp);
+  int ret = fcntl(fd, F_SETLKW, &lockp); // NOLINT(*-vararg)
 
   if (ret == -1) {
     return getKSeqErrorBlock();
@@ -664,7 +664,7 @@ SortIOFile hook_IO_mkstemp(SortString filename) {
 
 // NOLINTNEXTLINE(*-cognitive-complexity)
 SortKItem hook_IO_system(SortString cmd) {
-  pid_t pid;
+  pid_t pid = 0;
   int ret = 0;
   int out[2];
   int err[2];
@@ -687,6 +687,8 @@ SortKItem hook_IO_system(SortString cmd) {
 
     if (len(cmd) > 0) {
       char *command = getTerminatedString(cmd);
+
+      // NOLINTNEXTLINE(*-vararg)
       ret = execl("/bin/sh", "/bin/sh", "-c", command, nullptr);
       ret == -1 ? exit(127) : exit(0);
     } else {
@@ -752,8 +754,8 @@ SortKItem hook_IO_system(SortString cmd) {
 
   retBlock->h = getBlockHeaderForSymbol(
       (uint64_t)getTagForSymbolName(GETTAG(systemResult)));
-  string *outStr;
-  string *errStr;
+  string *outStr = nullptr;
+  string *errStr = nullptr;
   outStr = hook_BUFFER_toString(outBuffer);
   errStr = hook_BUFFER_toString(errBuffer);
   memcpy(retBlock->children + 1, &outStr, sizeof(string *));

@@ -56,7 +56,7 @@ static std::string str(token tok) {
 
 std::string KOREParser::consume(token next) {
   std::string data;
-  token actual;
+  token actual = token::EMPTY;
   if (buffer.tok == token::EMPTY) {
     actual = scanner.yylex(&data, &loc);
   } else {
