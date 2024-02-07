@@ -59,7 +59,7 @@ static block *dotK = leaf_block(getTagForSymbolName("dotk{}"));
 static blockheader kseqHeader
     = {getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("kseq{}"))};
 
-#define get_header(name, symbol)                                               \
+#define GET_HEADER(name, symbol)                                               \
   static struct blockheader name() {                                           \
     static struct blockheader hdr = {(uint64_t)-1};                            \
     if (hdr.hdr == -1) {                                                       \
@@ -68,16 +68,16 @@ static blockheader kseqHeader
     return hdr;                                                                \
   }
 
-get_header(boolHdr, "inj{SortBool{}, SortJSON{}}");
-get_header(intHdr, "inj{SortInt{}, SortJSON{}}");
-get_header(floatHdr, "inj{SortFloat{}, SortJSON{}}");
-get_header(strHdr, "inj{SortString{}, SortJSON{}}");
-get_header(listHdr, "LblJSONs{}");
-get_header(membHdr, "LblJSONEntry{}");
-get_header(objHdr, "LblJSONObject{}");
-get_header(listWrapHdr, "LblJSONList{}");
+GET_HEADER(boolHdr, "inj{SortBool{}, SortJSON{}}");
+GET_HEADER(intHdr, "inj{SortInt{}, SortJSON{}}");
+GET_HEADER(floatHdr, "inj{SortFloat{}, SortJSON{}}");
+GET_HEADER(strHdr, "inj{SortString{}, SortJSON{}}");
+GET_HEADER(listHdr, "LblJSONs{}");
+GET_HEADER(membHdr, "LblJSONEntry{}");
+GET_HEADER(objHdr, "LblJSONObject{}");
+GET_HEADER(listWrapHdr, "LblJSONList{}");
 
-#define get_block(name, symbol)                                                \
+#define GET_BLOCK(name, symbol)                                                \
   static block *name() {                                                       \
     static uint64_t tag = (uint64_t)-1;                                        \
     if (tag == -1) {                                                           \
@@ -86,11 +86,11 @@ get_header(listWrapHdr, "LblJSONList{}");
     return (block *)tag;                                                       \
   }
 
-get_block(dotList, "Lbl'Stop'List'LBraQuot'JSONs'QuotRBra'{}");
-get_block(null, "LblJSONnull{}");
+GET_BLOCK(dotList, "Lbl'Stop'List'LBraQuot'JSONs'QuotRBra'{}");
+GET_BLOCK(null, "LblJSONnull{}");
 
 struct KoreHandler : BaseReaderHandler<UTF8<>, KoreHandler> {
-  block *result;
+  block *result = nullptr;
   std::vector<block *> stack;
 
   bool Null() {
@@ -117,8 +117,9 @@ struct KoreHandler : BaseReaderHandler<UTF8<>, KoreHandler> {
       stack.push_back(result);
       return true;
     }
+
     mpz_clear(z);
-    floating f[1]; // NOLINT(modernize-avoid-c-arrays)
+    floating f[1]; // NOLINT(*-avoid-c-arrays)
     mpfr_init2(f->f, 53);
     f->exp = 11;
     mpfr_set_str(f->f, str, 9, MPFR_RNDN);

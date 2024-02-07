@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -e
+set -euxo pipefail
 
 LLVM_VERSION=15
 BUILD_DIR=build

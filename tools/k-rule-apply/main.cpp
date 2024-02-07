@@ -51,7 +51,7 @@ int main(int argc, char **argv) {
 
   // Parse the given KORE Pattern and get the block* to use as input for the
   // match function.
-  parser::KOREParser parser(KOREPatternFilename);
+  parser::KOREParser parser(KOREPatternFilename.getValue());
   auto InitialConfiguration = parser.pattern();
 
   auto match_function_name = getMatchFunctionName();
@@ -77,6 +77,8 @@ int main(int argc, char **argv) {
     dlclose(handle);
     return EXIT_FAILURE;
   }
+
+  // NOLINTNEXTLINE(*-reinterpret-cast)
   auto match_function = reinterpret_cast<void (*)(block *)>(match_function_ptr);
 
   resetMatchReason(handle);

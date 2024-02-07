@@ -370,7 +370,7 @@ static std::pair<llvm::Value *, llvm::BasicBlock *> getEval(
   }
   CreateTerm creator(subst, def, CaseBlock, mod, false);
   llvm::Value *result = creator(pattern.get()).first;
-  llvm::Value *retval;
+  llvm::Value *retval = nullptr;
   ValueType cat = dynamic_cast<KORECompositeSort *>(symbol->getSort().get())
                       ->getCategory(def);
   switch (cat.cat) {
@@ -884,7 +884,7 @@ static void visitCollection(
   auto indices = std::vector<llvm::Constant *>{zero, zero};
   auto *sortDecl
       = definition->getSortDeclarations().at(compositeSort->getName());
-  llvm::Constant *concatPtr;
+  llvm::Constant *concatPtr = nullptr;
   if (sortDecl->getAttributes().count("concat")) {
     auto *concat = (KORECompositePattern *)sortDecl->getAttributes()
                        .at("concat")
@@ -1035,7 +1035,7 @@ static void getVisitor(
             llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), nwords * 8),
             CaseBlock, "koreAllocAlwaysGC");
         if (nwords == 1) {
-          llvm::Value *Word;
+          llvm::Value *Word = nullptr;
           if (cat.bits == 64) {
             Word = mint;
           } else {
@@ -1326,8 +1326,6 @@ static void emitSymbolBytesTable(KOREDefinition *def, llvm::Module *mod) {
 
     auto *entry_type = llvm::StructType::create({i64_type, i8_ptr_type}, "n");
 
-    auto *zero = llvm::ConstantInt::get(i64_type, 2);
-
     auto s = serializer(serializer::DROP_HEADER);
     symbol->serialize_to(s);
 
@@ -1336,22 +1334,20 @@ static void emitSymbolBytesTable(KOREDefinition *def, llvm::Module *mod) {
     auto *globalVar = llvm::cast<llvm::GlobalVariable>(global);
     globalVar->setConstant(true);
 
-    globalVar->setInitializer(llvm::ConstantDataArray::get(ctx, s.data()));
+    globalVar->setInitializer(llvm::ConstantDataArray::getRaw(
+        s.data(), s.data().size(), llvm::Type::getInt8Ty(ctx)));
 
-    /* (void)entry_type; */
-    /* (void)s; */
-
-    /* llvm::errs() << ast_to_string(*symbol) << '\n'; */
-    /* abort(); */
+    auto *zero = llvm::ConstantInt::get(i64_type, 0);
+    auto *size = llvm::ConstantInt::get(i64_type, s.data().size());
 
     return llvm::ConstantStruct::get(
-        entry_type, zero,
+        entry_type, size,
         llvm::ConstantExpr::getInBoundsGetElementPtr(
             i8_ptr_type, global, std::vector<llvm::Constant *>{zero}));
   };
 
   emitDataTableForSymbol(
-      "getSymbolBytes", llvm::Type::getInt8PtrTy(mod->getContext()),
+      "getBytesForSymbol", llvm::Type::getInt8PtrTy(mod->getContext()),
       getCharPtrDebugType(), def, mod, getter);
 }
 
