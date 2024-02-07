@@ -10,8 +10,12 @@
 
 size_t const BLOCK_SIZE = 1024 * 1024;
 
-#define mem_block_header(ptr)                                                  \
-  ((memory_block_header *)(((uintptr_t)(ptr)-1) & ~(BLOCK_SIZE - 1)))
+__attribute__((always_inline)) memory_block_header *
+mem_block_header(void *ptr) {
+  // NOLINTNEXTLINE(*-reinterpret-cast)
+  return reinterpret_cast<memory_block_header *>(
+      ((uintptr_t)(ptr)-1) & ~(BLOCK_SIZE - 1));
+}
 
 __attribute__((always_inline)) void arenaReset(struct arena *Arena) {
   char id = Arena->allocation_semispace_id;
@@ -72,7 +76,7 @@ static void *megabyte_malloc() {
 }
 
 static void freshBlock(struct arena *Arena) {
-  char *nextBlock;
+  char *nextBlock = nullptr;
   if (Arena->block_start == nullptr) {
     nextBlock = (char *)megabyte_malloc();
     Arena->first_block = nextBlock;

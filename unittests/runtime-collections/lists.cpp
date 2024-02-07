@@ -39,7 +39,11 @@ char const **getArgumentSortsForTag(uint32_t tag) {
 
 void printConfigurationInternal(
     writer *file, block *subject, char const *sort, bool, void *) { }
-void sfprintf(writer *, char const *, ...) { }
+
+SortStringBuffer
+hook_BUFFER_concat_raw(SortStringBuffer, char const *, uint64_t) {
+  __builtin_unreachable();
+}
 
 bool hook_KEQUAL_eq(block *b1, block *b2) {
   return b1->h.hdr == b2->h.hdr;

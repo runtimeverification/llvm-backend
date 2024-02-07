@@ -32,8 +32,8 @@ private:
       KORECompositePattern *constructor, llvm::Value *val,
       std::string locationStack = "0");
   bool populateStaticSet(KOREPattern *pattern);
-  std::pair<llvm::Value *, bool>
-  createAllocation(KOREPattern *pattern, std::string locationStack = "0");
+  std::pair<llvm::Value *, bool> createAllocation(
+      KOREPattern *pattern, std::string const &locationStack = "0");
 
 public:
   CreateTerm(
