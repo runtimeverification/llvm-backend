@@ -86,7 +86,7 @@ GET_HEADER(listWrapHdr, "LblJSONList{}");
     return (block *)tag;                                                       \
   }
 
-GET_BLOCK(dotList, "Lbl'Stop'List'LBraQuot'JSONs'QuotRBraUnds'JSONs{}");
+GET_BLOCK(dotList, "Lbl'Stop'List'LBraQuot'JSONs'QuotRBra'{}");
 GET_BLOCK(null, "LblJSONnull{}");
 
 struct KoreHandler : BaseReaderHandler<UTF8<>, KoreHandler> {
