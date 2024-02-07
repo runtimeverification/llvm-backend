@@ -358,6 +358,12 @@ char const *getReturnSortForTag(uint32_t tag);
 char const **getArgumentSortsForTag(uint32_t tag);
 char const *topSort(void);
 
+struct binary_data {
+  int64_t size;
+  char *data;
+};
+struct binary_data getBytesForSymbol(uint32_t tag);
+
 typedef struct {
   void (*visitConfig)(writer *, block *, char const *, bool, void *);
   void (*visitMap)(
