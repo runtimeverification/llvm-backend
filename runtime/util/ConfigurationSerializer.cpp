@@ -367,8 +367,7 @@ void serializeConfigurationInternal(
 }
 
 void serializeConfigurations(
-    char const *filename, std::unordered_set<block *, HashBlock, KEq> results) {
-  FILE *file = fopen(filename, "w");
+    FILE *file, std::unordered_set<block *, HashBlock, KEq> results) {
   auto state = serialization_state();
 
   auto w = writer{file, nullptr};
@@ -394,20 +393,16 @@ void serializeConfigurations(
   fwrite(buf, 1, buf_size, file);
 
   free(buf);
-  fclose(file);
 }
 
-void serializeConfigurationToFile(
-    char const *filename, block *subject, bool emit_size) {
+void serializeConfigurationToFile(FILE *file, block *subject, bool emit_size) {
   char *data = nullptr;
   size_t size = 0;
   serializeConfiguration(subject, nullptr, &data, &size, emit_size);
 
-  FILE *file = fopen(filename, "a");
   fwrite(data, 1, size, file);
 
   free(data);
-  fclose(file);
 }
 
 void serializeConfiguration(
@@ -430,38 +425,30 @@ void serializeConfiguration(
   *size_out = size;
 }
 
-void writeUInt64ToFile(char const *filename, uint64_t i) {
-  FILE *file = fopen(filename, "a");
+void writeUInt64ToFile(FILE *file, uint64_t i) {
   fwrite(&i, 8, 1, file);
-  fclose(file);
 }
 
-void serializeTermToFile(
-    char const *filename, block *subject, char const *sort) {
+void serializeTermToFile(FILE *file, block *subject, char const *sort) {
   char *data = nullptr;
   size_t size = 0;
   serializeConfiguration(subject, sort, &data, &size, true);
 
-  FILE *file = fopen(filename, "a");
   fwrite(data, 1, size, file);
 
   free(data);
-  fclose(file);
 }
 
-void serializeRawTermToFile(
-    char const *filename, void *subject, char const *sort) {
+void serializeRawTermToFile(FILE *file, void *subject, char const *sort) {
   block *term = constructRawTerm(subject, sort, true);
 
   char *data = nullptr;
   size_t size = 0;
   serializeConfiguration(term, "SortKItem{}", &data, &size, true);
 
-  FILE *file = fopen(filename, "a");
   fwrite(data, 1, size, file);
 
   free(data);
-  fclose(file);
 }
 
 std::shared_ptr<kllvm::KOREPattern>

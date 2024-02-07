@@ -293,10 +293,9 @@ extern "C" {
 block *parseConfiguration(char const *filename);
 block *deserializeConfiguration(char *, size_t);
 
-void printConfiguration(char const *filename, block *subject);
-void printStatistics(char const *filename, uint64_t steps);
+void printConfiguration(FILE *file, block *subject);
+void printStatistics(FILE *file, uint64_t steps);
 string *printConfigurationToString(block *subject);
-void printConfigurationToFile(FILE *, block *subject);
 void printSortedConfigurationToFile(
     FILE *file, block *subject, char const *sort);
 void printConfigurationInternal(
@@ -325,18 +324,15 @@ string *debug_print_term(block *subject, char const *sort);
 mpz_ptr move_int(mpz_t);
 
 void serializeConfigurations(
-    char const *filename, std::unordered_set<block *, HashBlock, KEq> results);
+    FILE *file, std::unordered_set<block *, HashBlock, KEq> results);
 void serializeConfiguration(
     block *subject, char const *sort, char **data_out, size_t *size_out,
     bool emit_size);
-void serializeConfigurationToFile(
-    char const *filename, block *subject, bool emit_size);
-void writeUInt64ToFile(char const *filename, uint64_t i);
-void serializeTermToFile(
-    char const *filename, block *subject, char const *sort);
-void serializeRawTermToFile(
-    char const *filename, void *subject, char const *sort);
-void printVariableToFile(char const *filename, char const *varname);
+void serializeConfigurationToFile(FILE *file, block *subject, bool emit_size);
+void writeUInt64ToFile(FILE *file, uint64_t i);
+void serializeTermToFile(FILE *file, block *subject, char const *sort);
+void serializeRawTermToFile(FILE *file, void *subject, char const *sort);
+void printVariableToFile(FILE *file, char const *varname);
 
 // The following functions have to be generated at kompile time
 // and linked with the interpreter.
