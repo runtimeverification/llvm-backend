@@ -1,4 +1,5 @@
 #include "kllvm/codegen/EmitConfigParser.h"
+#include "kllvm/binary/serializer.h"
 #include "kllvm/codegen/CreateTerm.h"
 #include "kllvm/codegen/Debug.h"
 #include "kllvm/codegen/Util.h"
@@ -1315,6 +1316,45 @@ static void emitReturnSortTable(KOREDefinition *def, llvm::Module *mod) {
       getCharPtrDebugType(), def, mod, getter);
 }
 
+static void emitSymbolBytesTable(KOREDefinition *def, llvm::Module *mod) {
+  auto getter = [](KOREDefinition *definition, llvm::Module *module,
+                   KORESymbol *symbol) -> llvm::Constant * {
+    auto &ctx = module->getContext();
+
+    auto *i64_type = llvm::Type::getInt64Ty(ctx);
+    auto *i8_ptr_type = llvm::Type::getInt8PtrTy(ctx);
+
+    auto *entry_type = llvm::StructType::create({i64_type, i8_ptr_type}, "n");
+
+    auto *zero = llvm::ConstantInt::get(i64_type, 2);
+
+    auto s = serializer(serializer::DROP_HEADER);
+    symbol->serialize_to(s);
+
+    auto *global = module->getOrInsertGlobal(
+        fmt::format("bytes_{}", ast_to_string(*symbol)), i8_ptr_type);
+    auto *globalVar = llvm::cast<llvm::GlobalVariable>(global);
+    globalVar->setConstant(true);
+
+    globalVar->setInitializer(llvm::ConstantDataArray::get(ctx, s.data()));
+
+    /* (void)entry_type; */
+    /* (void)s; */
+
+    /* llvm::errs() << ast_to_string(*symbol) << '\n'; */
+    /* abort(); */
+
+    return llvm::ConstantStruct::get(
+        entry_type, zero,
+        llvm::ConstantExpr::getInBoundsGetElementPtr(
+            i8_ptr_type, global, std::vector<llvm::Constant *>{zero}));
+  };
+
+  emitDataTableForSymbol(
+      "getSymbolBytes", llvm::Type::getInt8PtrTy(mod->getContext()),
+      getCharPtrDebugType(), def, mod, getter);
+}
+
 void emitConfigParserFunctions(
     KOREDefinition *definition, llvm::Module *module) {
   emitGetTagForSymbolName(definition, module);
@@ -1337,6 +1377,7 @@ void emitConfigParserFunctions(
 
   emitSortTable(definition, module);
   emitReturnSortTable(definition, module);
+  emitSymbolBytesTable(definition, module);
 }
 
 } // namespace kllvm
