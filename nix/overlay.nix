@@ -9,15 +9,7 @@ let
   llvmPackages =
     mkLlvmPackages prev."llvmPackages_${toString prev.llvm-version}";
 
-  clang = if !llvmPackages.stdenv.targetPlatform.isDarwin then
-    llvmPackages.clangNoLibcxx
-  else
-    llvmPackages.libcxxClang.overrideAttrs (old: {
-      # Hack from https://github.com/NixOS/nixpkgs/issues/166205 for macOS
-      postFixup = old.postFixup + ''
-        echo "-lc++abi" >> $out/nix-support/libcxx-ldflags
-      '';
-    });
+  clang = llvmPackages.clangNoLibcxx;
 
   llvm-backend = prev.callPackage ./llvm-backend.nix {
     inherit (llvmPackages) llvm libllvm libcxxabi;
