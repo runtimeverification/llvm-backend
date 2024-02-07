@@ -81,8 +81,8 @@ void bind_runtime(py::module_ &m) {
       .def(
           "serialize",
           [](block *term, bool emit_size) {
-            char *data;
-            size_t size;
+            char *data = nullptr;
+            size_t size = 0;
             serializeConfiguration(term, nullptr, &data, &size, emit_size);
             return py::bytes(std::string(data, data + size));
           },

@@ -5,6 +5,8 @@
 
 #include "runtime/header.h"
 
+#include <fmt/printf.h>
+
 #include <cassert>
 #include <cstdio>
 #include <iostream>
@@ -32,6 +34,12 @@ struct serialization_state {
   // We never want to copy the state; it should only ever get passed around by
   // reference.
   serialization_state(serialization_state const &) = delete;
+  serialization_state &operator=(serialization_state const &) = delete;
+
+  serialization_state(serialization_state &&) = default;
+  serialization_state &operator=(serialization_state &&) = default;
+
+  ~serialization_state() = default;
 
   serializer instance;
   std::vector<block *> boundVariables;
@@ -239,21 +247,11 @@ void serializeMInt(
     writer *file, size_t *i, size_t bits, char const *sort, void *state) {
   auto &instance = static_cast<serialization_state *>(state)->instance;
 
-  auto const *fmt = "%sp%zd";
-  auto str = std::string{};
+  auto str = (i == nullptr) ? std::string("0")
+                            : intToString(hook_MINT_import(i, bits, false));
 
-  if (i == nullptr) {
-    str = "0";
-  } else {
-    mpz_ptr z = hook_MINT_import(i, bits, false);
-    str = intToString(z);
-  }
-
-  auto buf_len = snprintf(nullptr, 0, fmt, str.c_str(), bits);
-  auto buffer = std::vector<char>(buf_len + 1);
-
-  snprintf(buffer.data(), buf_len + 1, fmt, str.c_str(), bits);
-  emitToken(instance, sort, buffer.data());
+  auto buffer = fmt::format("{}p{}", str, bits);
+  emitToken(instance, sort, buffer.c_str());
 }
 
 void serializeComma(writer *file, void *state) { }
@@ -401,8 +399,8 @@ void serializeConfigurations(
 
 void serializeConfigurationToFile(
     char const *filename, block *subject, bool emit_size) {
-  char *data;
-  size_t size;
+  char *data = nullptr;
+  size_t size = 0;
   serializeConfiguration(subject, nullptr, &data, &size, emit_size);
 
   FILE *file = fopen(filename, "a");
@@ -440,8 +438,8 @@ void writeUInt64ToFile(char const *filename, uint64_t i) {
 
 void serializeTermToFile(
     char const *filename, block *subject, char const *sort) {
-  char *data;
-  size_t size;
+  char *data = nullptr;
+  size_t size = 0;
   serializeConfiguration(subject, sort, &data, &size, true);
 
   FILE *file = fopen(filename, "a");
@@ -455,8 +453,8 @@ void serializeRawTermToFile(
     char const *filename, void *subject, char const *sort) {
   block *term = constructRawTerm(subject, sort, true);
 
-  char *data;
-  size_t size;
+  char *data = nullptr;
+  size_t size = 0;
   serializeConfiguration(term, "SortKItem{}", &data, &size, true);
 
   FILE *file = fopen(filename, "a");
@@ -471,8 +469,8 @@ sortedTermToKorePattern(block *subject, char const *sort) {
   auto is_kitem = (std::string(sort) == "SortKItem{}");
   block *term = is_kitem ? subject : constructRawTerm(subject, sort, false);
 
-  char *data_out;
-  size_t size_out;
+  char *data_out = nullptr;
+  size_t size_out = 0;
 
   serializeConfiguration(term, "SortKItem{}", &data_out, &size_out, true);
   auto result = deserialize_pattern(data_out, data_out + size_out);
