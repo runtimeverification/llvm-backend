@@ -16,17 +16,17 @@ namespace kllvm {
 namespace detail {
 
 template <typename It>
-std::byte peek(It const &it) {
-  return std::byte(*it);
+char peek(It const &it) {
+  return *it;
 }
 
 template <typename T>
-constexpr T from_bytes(std::byte const *ptr) {
+constexpr T from_bytes(char const *ptr) {
   auto ret = T{};
 
   if (is_big_endian()) {
     for (auto i = 0; i < sizeof(T); ++i) {
-      reinterpret_cast<std::byte *>(&ret)[sizeof(T) - i - 1] = ptr[i];
+      reinterpret_cast<char *>(&ret)[sizeof(T) - i - 1] = ptr[i];
     }
   } else {
     std::memcpy(&ret, ptr, sizeof(T));
@@ -39,7 +39,7 @@ template <typename T, typename It>
 T read(It &ptr, It end) {
   assert(ptr + sizeof(T) <= end);
 
-  auto val = from_bytes<T>(reinterpret_cast<std::byte const *>(&*ptr));
+  auto val = from_bytes<T>(reinterpret_cast<char const *>(&*ptr));
   ptr += sizeof(T);
   return val;
 }
@@ -87,7 +87,7 @@ uint64_t read_length(It &ptr, It end, binary_version version, int v1_bytes) {
       assert(steps < 9 && "No terminating byte in variable-length field");
 
       auto chunk = peek(ptr);
-      auto cont_bit = std::byte(0x80);
+      auto cont_bit = uint8_t{0x80};
       should_continue = static_cast<bool>(chunk & cont_bit);
 
       chunk = chunk & ~cont_bit;

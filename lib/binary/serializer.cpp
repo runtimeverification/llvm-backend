@@ -50,7 +50,7 @@ void serializer::reset_arity_flag() {
 
 void serializer::emit_header_and_version() {
   for (auto b : magic_header) {
-    emit(std::byte(b));
+    emit(b);
   }
 
   emit(version.v_major);
@@ -72,7 +72,7 @@ void serializer::correct_emitted_size() {
   std::copy(bytes.begin(), bytes.end(), buffer_.begin() + header_prefix_length);
 }
 
-void serializer::emit(std::byte b) {
+void serializer::emit(char b) {
   buffer_.push_back(b);
   next_idx_++;
 }
@@ -128,7 +128,7 @@ void serializer::emit_direct_string(std::string const &s) {
   emit_length(s.size());
 
   for (auto c : s) {
-    emit(std::byte(c));
+    emit(c);
   }
 }
 
