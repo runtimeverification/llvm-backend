@@ -9,36 +9,13 @@ let
   llvmPackages =
     mkLlvmPackages prev."llvmPackages_${toString prev.llvm-version}";
 
-  clang = if !llvmPackages.stdenv.targetPlatform.isDarwin then
-    llvmPackages.clangNoLibcxx.override (attrs: {
-      extraBuildCommands = ''
-        ${attrs.extraBuildCommands}
-        sed -i $out/nix-support/cc-cflags -e '/^-nostdlib/ d'
-      '';
-    })
-  else
-    llvmPackages.libcxxClang.overrideAttrs (old: {
-      # Hack from https://github.com/NixOS/nixpkgs/issues/166205 for macOS
-      postFixup = old.postFixup + ''
-        echo "-lc++abi" >> $out/nix-support/libcxx-ldflags
-      '';
-    });
-
-  jemalloc = prev.jemalloc.overrideDerivation (oldAttrs: rec {
-    # Some tests for jemalloc fail on the M1! Our tests seem to pass but this may be flaky
-    doCheck = false;
-    stdenv = prev.stdenv;
-  });
+  clang = llvmPackages.clang;
 
   llvm-backend = prev.callPackage ./llvm-backend.nix {
     inherit (llvmPackages) llvm libllvm libcxxabi;
-    stdenv = if !llvmPackages.stdenv.targetPlatform.isDarwin then
-      llvmPackages.stdenv
-    else
-      prev.overrideCC llvmPackages.stdenv clang;
+    stdenv = llvmPackages.stdenv;
     cmakeBuildType = prev.llvm-backend-build-type;
     src = prev.llvm-backend-src;
-    inherit jemalloc;
     host.clang = clang;
   };
 
