@@ -1,6 +1,7 @@
 Checks:
   clang-analyzer-*
   -clang-analyzer-cplusplus.PlacementNew
+  -clang-analyzer-optin.cplusplus.UninitializedObject
   misc-*
   -misc-no-recursion
   -misc-unused-parameters
@@ -19,7 +20,17 @@ Checks:
   -bugprone-narrowing-conversions
   -bugprone-exception-escape
   -bugprone-implicit-widening-of-multiplication-result
-  -bugprone-unchecked-optional-access # false positives
+  -bugprone-unchecked-optional-access
+  cppcoreguidelines-*
+  -cppcoreguidelines-avoid-magic-numbers
+  -cppcoreguidelines-avoid-non-const-global-variables
+  -cppcoreguidelines-narrowing-conversions
+  -cppcoreguidelines-no-malloc
+  -cppcoreguidelines-owning-memory
+  -cppcoreguidelines-pro-bounds-array-to-pointer-decay
+  -cppcoreguidelines-pro-bounds-pointer-arithmetic
+  -cppcoreguidelines-pro-type-cstyle-cast
+  -cppcoreguidelines-pro-type-union-access
 
 WarningsAsErrors:
   '*'
@@ -28,4 +39,6 @@ CheckOptions:
   - key: 'misc-const-correctness.AnalyzeValues'
     value: false
   - key: 'readability-function-cognitive-complexity.IgnoreMacros'
+    value: true
+  - key: 'cppcoreguidelines-macro-usage.CheckCapsOnly'
     value: true

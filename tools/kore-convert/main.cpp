@@ -73,7 +73,8 @@ cl::opt<bool> UseSize(
     cl::cat(KoreConvertCat));
 
 sptr<KOREPattern> get_input_pattern() {
-  auto get_text = [&]() { return KOREParser(InputFilename).pattern(); };
+  auto get_text
+      = [&]() { return KOREParser(InputFilename.getValue()).pattern(); };
   auto get_binary = [&]() { return deserialize_pattern(InputFilename); };
 
   switch (InputFormat) {
