@@ -12,7 +12,7 @@ std::unordered_map<Elem *, std::unordered_set<Elem *, Hash, Equal>, Hash, Equal>
 transitiveClosure(std::unordered_map<
                   Elem *, std::unordered_set<Elem *, Hash, Equal>, Hash, Equal>
                       relations) {
-  bool dirty;
+  bool dirty = false;
   do {
     dirty = false;
     for (auto &entry : relations) {

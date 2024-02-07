@@ -1,5 +1,7 @@
 #include "runtime/header.h"
 
+#include <fmt/format.h>
+
 extern "C" {
 
 block *dot_k() {
@@ -38,7 +40,7 @@ block *constructRawTerm(void *subject, char const *sort, bool raw_value) {
 
 void printProofHintHeader(FILE *file) {
   uint32_t version = 4;
-  fprintf(file, "HINT");
+  fmt::print(file, "HINT");
   fwrite(&version, sizeof(version), 1, file);
 }
 }
