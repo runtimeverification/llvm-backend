@@ -389,7 +389,7 @@ void serializeConfigurations(
 
   auto buf_size = state.instance.data().size();
   auto *buf = static_cast<char *>(malloc(buf_size));
-  std::memcpy(buf, state.instance.data().data(), buf_size);
+  std::copy_n(state.instance.data().begin(), buf_size, buf);
   fwrite(buf, 1, buf_size, file);
 
   free(buf);
@@ -419,7 +419,7 @@ void serializeConfiguration(
 
   auto size = state.instance.data().size();
   auto *buf = static_cast<char *>(malloc(size));
-  std::memcpy(buf, state.instance.data().data(), size);
+  std::copy_n(state.instance.data().begin(), size, buf);
 
   *data_out = buf;
   *size_out = size;

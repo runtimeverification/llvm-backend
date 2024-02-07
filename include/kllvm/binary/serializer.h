@@ -19,12 +19,12 @@ namespace detail {
 bool is_big_endian();
 
 template <typename T>
-std::array<std::byte, sizeof(T)> to_bytes(T val) {
-  auto bytes = std::array<std::byte, sizeof(T)>{};
+std::array<char, sizeof(T)> to_bytes(T val) {
+  auto bytes = std::array<char, sizeof(T)>{};
 
   if (is_big_endian()) {
     for (auto i = 0; i < sizeof(T); ++i) {
-      bytes[i] = reinterpret_cast<std::byte *>(&val)[sizeof(T) - i - 1];
+      bytes[i] = reinterpret_cast<char *>(&val)[sizeof(T) - i - 1];
     }
   } else {
     std::memcpy(bytes.data(), &val, sizeof(T));
@@ -61,7 +61,7 @@ public:
    * fundamental type. Any more complex types should be decomposed before being
    * written to the buffer.
    */
-  void emit(std::byte b);
+  void emit(char b);
 
   template <typename It>
   void emit(It begin, It end);
@@ -92,7 +92,7 @@ public:
    */
   void correct_emitted_size();
 
-  std::vector<std::byte> const &data() { return buffer_; }
+  std::string const &data() { return buffer_; }
 
   /**
    * Return a copy of the bytes currently stored by this serializer as a string,
@@ -117,9 +117,9 @@ private:
   bool use_header_;
   bool use_arity_;
 
-  std::vector<std::byte> buffer_;
-  std::byte direct_string_prefix_;
-  std::byte backref_string_prefix_;
+  std::string buffer_;
+  char direct_string_prefix_;
+  char backref_string_prefix_;
 
   uint64_t next_idx_;
   std::unordered_map<std::string, uint64_t> intern_table_;
