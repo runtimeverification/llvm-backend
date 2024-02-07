@@ -336,27 +336,33 @@ void serializeConfigurationInternal(
 
   visitChildren(subject, file, &callbacks, state_ptr);
 
-  auto const *symbol = getSymbolNameForTag(tag);
-  auto symbolStr = std::string(symbol);
+  auto [size, ptr] = getBytesForSymbol(tag);
 
-  auto [name, sorts] = cached_symbol_sort_list(symbolStr);
+  if (tag >= first_inj_tag && tag <= last_inj_tag) {
+    auto const *symbol = getSymbolNameForTag(tag);
+    auto symbolStr = std::string(symbol);
 
-  if (name == "inj") {
-    if (sorts.size() != 2) {
-      abort();
+    auto [name, sorts] = cached_symbol_sort_list(symbolStr);
+
+    if (name == "inj") {
+      if (sorts.size() != 2) {
+        abort();
+      }
+
+      sorts[0]->serialize_to(state.instance);
+      emitConstantSort(state.instance, drop_back(sort, 2).c_str());
+    } else {
+      for (auto const &s : sorts) {
+        s->serialize_to(state.instance);
+      }
     }
 
-    sorts[0]->serialize_to(state.instance);
-    emitConstantSort(state.instance, drop_back(sort, 2).c_str());
+    state.instance.emit(header_byte<KORESymbol>);
+    state.instance.emit_length(sorts.size());
+    state.instance.emit_string(name);
   } else {
-    for (auto const &s : sorts) {
-      s->serialize_to(state.instance);
-    }
+    state.instance.emit_bytes(size, ptr);
   }
-
-  state.instance.emit(header_byte<KORESymbol>);
-  state.instance.emit_length(sorts.size());
-  state.instance.emit_string(name);
 
   state.instance.emit(header_byte<KORECompositePattern>);
   state.instance.emit_length(getSymbolArity(tag));

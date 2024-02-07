@@ -87,6 +87,12 @@ public:
   int emit_length(uint64_t len);
 
   /**
+   * Efficiently copy an existing sequence of bytes to the buffer by first
+   * reserving capacity in the underlying string.
+   */
+  void emit_bytes(int64_t len, char const *bytes);
+
+  /**
    * Set the previously-emitted bytes following the header to reflect the actual
    * number of bytes currently contained in the buffer.
    */
@@ -113,7 +119,7 @@ public:
   void reset_arity_flag();
   bool use_arity() const { return use_arity_; }
 
-private:
+  /* private: */
   bool use_header_;
   bool use_arity_;
 

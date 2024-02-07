@@ -1316,6 +1316,19 @@ static void emitReturnSortTable(KOREDefinition *def, llvm::Module *mod) {
       getCharPtrDebugType(), def, mod, getter);
 }
 
+static llvm::StructType *get_bytes_struct_type(llvm::LLVMContext &ctx) {
+  static llvm::StructType *ret = nullptr;
+
+  if (ret == nullptr) {
+    auto *i64_type = llvm::Type::getInt64Ty(ctx);
+    auto *i8_ptr_type = llvm::Type::getInt8PtrTy(ctx);
+
+    ret = llvm::StructType::create({i64_type, i8_ptr_type}, "n");
+  }
+
+  return ret;
+}
+
 static void emitSymbolBytesTable(KOREDefinition *def, llvm::Module *mod) {
   auto getter = [](KOREDefinition *definition, llvm::Module *module,
                    KORESymbol *symbol) -> llvm::Constant * {
@@ -1324,7 +1337,7 @@ static void emitSymbolBytesTable(KOREDefinition *def, llvm::Module *mod) {
     auto *i64_type = llvm::Type::getInt64Ty(ctx);
     auto *i8_ptr_type = llvm::Type::getInt8PtrTy(ctx);
 
-    auto *entry_type = llvm::StructType::create({i64_type, i8_ptr_type}, "n");
+    auto *entry_type = get_bytes_struct_type(ctx);
 
     auto s = serializer(serializer::DROP_HEADER);
     symbol->serialize_to(s);
@@ -1347,8 +1360,8 @@ static void emitSymbolBytesTable(KOREDefinition *def, llvm::Module *mod) {
   };
 
   emitDataTableForSymbol(
-      "getBytesForSymbol", llvm::Type::getInt8PtrTy(mod->getContext()),
-      getCharPtrDebugType(), def, mod, getter);
+      "getBytesForSymbol", get_bytes_struct_type(mod->getContext()), nullptr,
+      def, mod, getter);
 }
 
 void emitConfigParserFunctions(

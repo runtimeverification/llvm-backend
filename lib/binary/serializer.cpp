@@ -118,6 +118,12 @@ int serializer::emit_length(uint64_t len) {
   return emitted;
 }
 
+void serializer::emit_bytes(int64_t len, char const *bytes) {
+  buffer_.reserve(buffer_.size() + len);
+  buffer_ += std::string(bytes, len);
+  next_idx_ += len;
+}
+
 int serializer::required_chunks(uint64_t len) {
   auto ret = 0;
   do {
