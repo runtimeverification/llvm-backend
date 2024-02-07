@@ -8,7 +8,7 @@
       "github:fmtlib/fmt/9.1.0";
     fmt-src.flake = false;
     immer-src.url =
-      "github:runtimeverification/immer/198c2ae260d49ef1800a2fe4433e07d7dec20059";
+      "github:runtimeverification/immer/3df06d08742710cb8f7bc8365235b77266515aff";
     immer-src.flake = false;
     rapidjson-src.url =
       "github:Tencent/rapidjson/f54b0e47a08782a6131cc3d60f94d038fa6e0a51";
