@@ -262,7 +262,16 @@ cached_symbol_sort_list(std::string const &symbol) {
       std::string, std::pair<std::string, std::vector<sptr<KORESort>>>>{};
 
   if (cache.find(symbol) == cache.end()) {
-    cache[symbol] = KOREParser::from_string(symbol)->symbol_sort_list();
+    auto [id, sorts] = KOREParser::from_string(symbol)->symbol_sort_list();
+
+    // The parser returns the actual name of the symbol separately to its formal
+    // sort parameters. However, the interface of emitSymbol is compatible with
+    // the values stored in the interpreter's table of symbol names, which
+    // include the fully-instantiated symbol. For constant symbols, we know to
+    // drop the last two characters when emitting them. We therefore tack on an
+    // extra "{}" at the end of what comes back from the parser to keep it
+    // compatible with the same interface.
+    cache[symbol] = {fmt::format("{}{{}}", id), sorts};
   }
 
   return cache.at(symbol);
@@ -339,13 +348,14 @@ void serializeConfigurationInternal(
   auto const *symbol = getSymbolNameForTag(tag);
 
   if (symbolIsInstantiation(tag)) {
-    auto symbolStr = std::string(symbol);
-    auto [name, sorts] = cached_symbol_sort_list(symbolStr);
+    auto [name, sorts] = cached_symbol_sort_list(symbol);
 
-    if (name == "inj") {
-      if (sorts.size() != 2) {
-        abort();
-      }
+    if (name == "inj{}") {
+      // Injections need to be special cased; the sort being injected _into_
+      // will be different at runtime to what's in the definition. We therefore
+      // use the contextual sort from the serialization process instead of the
+      // second formal argument.
+      assert(sorts.size() == 2 && "Malformed injection when serializing");
 
       sorts[0]->serialize_to(state.instance);
       emitConstantSort(state.instance, drop_back(sort, 2).c_str());
@@ -355,12 +365,7 @@ void serializeConfigurationInternal(
       }
     }
 
-    state.instance.emit(header_byte<KORESymbol>);
-    state.instance.emit_length(sorts.size());
-    state.instance.emit_string(name);
-
-    state.instance.emit(header_byte<KORECompositePattern>);
-    state.instance.emit_length(getSymbolArity(tag));
+    emitSymbol(state.instance, name.c_str(), getSymbolArity(tag), sorts.size());
   } else {
     emitSymbol(state.instance, symbol, getSymbolArity(tag));
   }
