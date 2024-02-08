@@ -107,7 +107,7 @@ CreateStaticTerm::operator()(KOREPattern *pattern) {
     }
     KORESymbolDeclaration *symbolDecl
         = Definition->getSymbolDeclarations().at(symbol->getName());
-    if (symbolDecl->getAttributes().count("sortInjection")
+    if (symbolDecl->getAttributes().contains("sortInjection")
         && dynamic_cast<KORECompositeSort *>(symbol->getArguments()[0].get())
                    ->getCategory(Definition)
                    .cat

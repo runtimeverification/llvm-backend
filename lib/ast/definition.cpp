@@ -86,7 +86,7 @@ SubsortMap KOREDefinition::getSubsorts() const {
   auto subsorts = SubsortMap{};
 
   for (auto *axiom : axioms) {
-    if (axiom->getAttributes().count("subsort")) {
+    if (axiom->getAttributes().contains("subsort")) {
       auto const &att = axiom->getAttributes().at("subsort");
       auto const &innerSort = att->getConstructor()->getFormalArguments()[0];
       auto const &outerSort = att->getConstructor()->getFormalArguments()[1];
@@ -101,7 +101,7 @@ SymbolMap KOREDefinition::getOverloads() const {
   auto overloads = SymbolMap{};
 
   for (auto *axiom : axioms) {
-    if (axiom->getAttributes().count("overload")) {
+    if (axiom->getAttributes().contains("overload")) {
       auto const &att = axiom->getAttributes().at("overload");
       auto *innerSymbol = std::dynamic_pointer_cast<KORECompositePattern>(
                               att->getArguments()[1])
@@ -126,7 +126,7 @@ void KOREDefinition::preprocess() {
   auto symbols = std::map<std::string, std::vector<KORESymbol *>>{};
   unsigned nextOrdinal = 0;
   for (auto const &decl : symbolDeclarations) {
-    if (decl.second->getAttributes().count("freshGenerator")) {
+    if (decl.second->getAttributes().contains("freshGenerator")) {
       auto sort = decl.second->getSymbol()->getSort();
       if (sort->isConcrete()) {
         freshFunctions[dynamic_cast<KORECompositeSort *>(sort.get())->getName()]
@@ -174,11 +174,11 @@ void KOREDefinition::preprocess() {
     uint32_t firstTag = nextSymbol;
     for (auto *symbol : entry.second) {
       if (symbol->isConcrete()) {
-        if (!instantiations.count(*symbol)) {
+        if (!instantiations.contains(*symbol)) {
           instantiations.emplace(*symbol, nextSymbol++);
         }
         std::string layoutStr = symbol->layoutString(this);
-        if (!layouts.count(layoutStr)) {
+        if (!layouts.contains(layoutStr)) {
           layouts.emplace(layoutStr, nextLayout++);
         }
         symbol->firstTag = symbol->lastTag = instantiations.at(*symbol);
@@ -213,7 +213,7 @@ void KOREDefinition::preprocess() {
           symbol->firstTag = range.first;
           symbol->lastTag = range.second;
           auto *decl = symbolDeclarations.at(symbol->getName());
-          if (decl->getAttributes().count("sortInjection")) {
+          if (decl->getAttributes().contains("sortInjection")) {
             injSymbol = symbol;
           }
         }

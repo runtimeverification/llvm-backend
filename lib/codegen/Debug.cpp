@@ -106,7 +106,7 @@ void initDebugAxiom(
   if (!Dbg) {
     return;
   }
-  if (!att.count(SOURCE_ATT)) {
+  if (!att.contains(SOURCE_ATT)) {
     resetDebugLoc();
     return;
   }
@@ -115,7 +115,7 @@ void initDebugAxiom(
   auto *strPattern
       = dynamic_cast<KOREStringPattern *>(sourceAtt->getArguments()[0].get());
   std::string source = strPattern->getContents();
-  if (!att.count(LOCATION_ATT)) {
+  if (!att.contains(LOCATION_ATT)) {
     resetDebugLoc();
     return;
   }

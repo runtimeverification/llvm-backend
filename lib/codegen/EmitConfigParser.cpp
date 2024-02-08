@@ -204,8 +204,8 @@ static void emitDataForSymbol(
     uint32_t tag = entry.first;
     auto *symbol = entry.second;
     auto *decl = definition->getSymbolDeclarations().at(symbol->getName());
-    bool isFunc = decl->getAttributes().count("function")
-                  || decl->getAttributes().count("anywhere");
+    bool isFunc = decl->getAttributes().contains("function")
+                  || decl->getAttributes().contains("anywhere");
     if (isEval && !isFunc) {
       continue;
     }
@@ -243,8 +243,8 @@ static std::pair<llvm::Value *, llvm::BasicBlock *> getFunction(
     KOREDefinition *def, llvm::Module *mod, KORESymbol *symbol,
     llvm::Instruction *inst) {
   auto *decl = def->getSymbolDeclarations().at(symbol->getName());
-  bool res = decl->getAttributes().count("function")
-             || decl->getAttributes().count("anywhere");
+  bool res = decl->getAttributes().contains("function")
+             || decl->getAttributes().contains("anywhere");
   return std::make_pair(
       llvm::ConstantInt::get(llvm::Type::getInt1Ty(mod->getContext()), res),
       inst->getParent());
@@ -259,7 +259,7 @@ static void emitIsSymbolAFunction(KOREDefinition *def, llvm::Module *mod) {
 static llvm::Constant *
 getBinder(KOREDefinition *def, llvm::Module *mod, KORESymbol *symbol) {
   auto *decl = def->getSymbolDeclarations().at(symbol->getName());
-  bool res = decl->getAttributes().count("binder");
+  bool res = decl->getAttributes().contains("binder");
   return llvm::ConstantInt::get(llvm::Type::getInt1Ty(mod->getContext()), res);
 }
 
@@ -428,7 +428,7 @@ emitGetTagForFreshSort(KOREDefinition *definition, llvm::Module *module) {
   bool hasCase = false;
   for (auto const &entry : sorts) {
     std::string name = entry.first;
-    if (!definition->getFreshFunctions().count(name)) {
+    if (!definition->getFreshFunctions().contains(name)) {
       continue;
     }
     hasCase = true;
@@ -884,7 +884,7 @@ static void visitCollection(
   auto *sortDecl
       = definition->getSortDeclarations().at(compositeSort->getName());
   llvm::Constant *concatPtr = nullptr;
-  if (sortDecl->getAttributes().count("concat")) {
+  if (sortDecl->getAttributes().contains("concat")) {
     auto *concat = (KORECompositePattern *)sortDecl->getAttributes()
                        .at("concat")
                        ->getArguments()[0]

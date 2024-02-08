@@ -808,7 +808,7 @@ llvm::Value *CreateTerm::notInjectionCase(
   auto *BlockPtr = llvm::PointerType::getUnqual(
       llvm::StructType::getTypeByName(Module->getContext(), BLOCK_STRUCT));
   auto *bitcast = new llvm::BitCastInst(Block, BlockPtr, "", CurrentBlock);
-  if (symbolDecl->getAttributes().count("binder")) {
+  if (symbolDecl->getAttributes().contains("binder")) {
     auto *call = llvm::CallInst::Create(
         getOrInsertFunction(Module, "debruijnize", BlockPtr, BlockPtr), bitcast,
         "withIndices", CurrentBlock);
@@ -837,8 +837,8 @@ bool CreateTerm::populateStaticSet(KOREPattern *pattern) {
     if (symbol->getName() != "\\dv") {
       KORESymbolDeclaration *symbolDecl
           = Definition->getSymbolDeclarations().at(symbol->getName());
-      if (symbolDecl->getAttributes().count("function")
-          || (symbolDecl->getAttributes().count("anywhere")
+      if (symbolDecl->getAttributes().contains("function")
+          || (symbolDecl->getAttributes().contains("anywhere")
               && !isAnywhereOwise)) {
         can_be_static = false;
       }
@@ -858,7 +858,7 @@ bool CreateTerm::populateStaticSet(KOREPattern *pattern) {
 
 std::pair<llvm::Value *, bool> CreateTerm::createAllocation(
     KOREPattern *pattern, std::string const &locationStack) {
-  if (staticTerms.count(pattern)) {
+  if (staticTerms.contains(pattern)) {
     auto *staticTerm = new CreateStaticTerm(Definition, Module);
     return (*staticTerm)(pattern);
   }
@@ -876,10 +876,10 @@ std::pair<llvm::Value *, bool> CreateTerm::createAllocation(
     assert(symbol->isConcrete() && "not supported yet: sort variables");
     KORESymbolDeclaration *symbolDecl
         = Definition->getSymbolDeclarations().at(symbol->getName());
-    if (symbolDecl->getAttributes().count("function")
-        || (symbolDecl->getAttributes().count("anywhere")
+    if (symbolDecl->getAttributes().contains("function")
+        || (symbolDecl->getAttributes().contains("anywhere")
             && !isAnywhereOwise)) {
-      if (symbolDecl->getAttributes().count("hook")) {
+      if (symbolDecl->getAttributes().contains("hook")) {
         auto *sort
             = dynamic_cast<KORECompositeSort *>(constructor->getSort().get());
         auto *strPattern
@@ -908,7 +908,7 @@ std::pair<llvm::Value *, bool> CreateTerm::createAllocation(
         = dynamic_cast<KORECompositeSort *>(symbol->getArguments()[0].get())
               ->getCategory(Definition)
               .cat;
-        symbolDecl->getAttributes().count("sortInjection")
+        symbolDecl->getAttributes().contains("sortInjection")
         && (cat == SortCategory::Symbol)) {
       std::pair<llvm::Value *, bool> val = createAllocation(
           constructor->getArguments()[0].get(), locationStack);
@@ -1032,7 +1032,7 @@ bool makeFunction(
   llvm::Function *applyRule = getOrInsertFunction(Module, name, funcType);
   initDebugAxiom(axiom->getAttributes());
   std::string debugName = name;
-  if (axiom->getAttributes().count("label")) {
+  if (axiom->getAttributes().contains("label")) {
     debugName = axiom->getStringAttribute("label") + postfix;
   }
   initDebugFunction(

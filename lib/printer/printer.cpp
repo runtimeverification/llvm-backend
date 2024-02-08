@@ -259,18 +259,18 @@ PreprocessedPrintData getPrintData(
   for (auto const &entry : def->getSymbolDeclarations()) {
     std::string name = entry.first;
 
-    if (entry.second->getAttributes().count("format")) {
+    if (entry.second->getAttributes().contains("format")) {
       formats[name] = entry.second->getStringAttribute("format");
       terminals[name] = entry.second->getStringAttribute("terminals");
 
-      if (entry.second->getAttributes().count("assoc")) {
+      if (entry.second->getAttributes().contains("assoc")) {
         assocs.insert(name);
       }
-      if (entry.second->getAttributes().count("comm")) {
+      if (entry.second->getAttributes().contains("comm")) {
         comms.insert(name);
       }
 
-      if (entry.second->getAttributes().count("colors")) {
+      if (entry.second->getAttributes().contains("colors")) {
         std::string colorAtt = entry.second->getStringAttribute("colors");
         std::vector<std::string> color;
         size_t idx = 0;
@@ -287,7 +287,7 @@ PreprocessedPrintData getPrintData(
         colors[name] = color;
       }
 
-      if (entry.second->getAttributes().count("bracket")) {
+      if (entry.second->getAttributes().contains("bracket")) {
         brackets[entry.second->getSymbol()->getSort().get()].push_back(
             entry.second->getSymbol());
       }
@@ -300,7 +300,7 @@ PreprocessedPrintData getPrintData(
 
   for (auto const &entry : def->getSortDeclarations()) {
     std::string name = entry.first;
-    if (entry.second->getAttributes().count("hook")) {
+    if (entry.second->getAttributes().contains("hook")) {
       hooks[name] = entry.second->getStringAttribute("hook");
     }
   }

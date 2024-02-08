@@ -269,7 +269,7 @@ void SwitchNode::codegen(Decision *d) {
         auto *BlockPtr
             = llvm::PointerType::getUnqual(llvm::StructType::getTypeByName(
                 d->Module->getContext(), BLOCK_STRUCT));
-        if (symbolDecl->getAttributes().count("binder")) {
+        if (symbolDecl->getAttributes().contains("binder")) {
           if (offset == 0) {
             Renamed = llvm::CallInst::Create(
                 getOrInsertFunction(
@@ -446,7 +446,7 @@ void FunctionNode::codegen(Decision *d) {
     } else if (isSideCondition) {
       size_t ordinal = std::stoll(function.substr(15));
       KOREAxiomDeclaration *axiom = d->Definition->getAxiomByOrdinal(ordinal);
-      if (axiom->getAttributes().count("label")) {
+      if (axiom->getAttributes().contains("label")) {
         debugName = axiom->getStringAttribute("label") + ".sc";
       }
     }
@@ -1141,7 +1141,7 @@ void makeMatchReasonFunctionWrapper(
   llvm::Function *matchFunc
       = getOrInsertFunction(module, wrapperName, funcType);
   std::string debugName = name;
-  if (axiom->getAttributes().count("label")) {
+  if (axiom->getAttributes().contains("label")) {
     debugName = axiom->getStringAttribute("label") + "_tailcc_" + ".match";
   }
   auto *debugType
@@ -1171,7 +1171,7 @@ void makeMatchReasonFunction(
   std::string name = "intern_match_" + std::to_string(axiom->getOrdinal());
   llvm::Function *matchFunc = getOrInsertFunction(module, name, funcType);
   std::string debugName = name;
-  if (axiom->getAttributes().count("label")) {
+  if (axiom->getAttributes().contains("label")) {
     debugName = axiom->getStringAttribute("label") + ".match";
   }
   auto *debugType
@@ -1240,7 +1240,7 @@ void makeMatchReasonFunction(
 KOREPattern *makePartialTerm(
     KOREPattern *term, std::set<std::string> const &occurrences,
     std::string const &occurrence) {
-  if (occurrences.count(occurrence)) {
+  if (occurrences.contains(occurrence)) {
     return KOREVariablePattern::Create(occurrence, term->getSort()).release();
   }
   if (auto *pat = dynamic_cast<KORECompositePattern *>(term)) {

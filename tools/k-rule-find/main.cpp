@@ -111,7 +111,7 @@ int main(int argc, char **argv) {
 
   // Iterate through axioms.
   for (auto *axiom : kore_ast.get()->getAxioms()) {
-    if (axiom->getAttributes().count(SOURCE_ATT)) {
+    if (axiom->getAttributes().contains(SOURCE_ATT)) {
       auto source = getSource(axiom);
       if (source.find(loc.filename) != std::string::npos) {
         auto source_loc = getLocation(axiom);

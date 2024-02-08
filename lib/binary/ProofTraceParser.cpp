@@ -2,15 +2,16 @@
 
 #include <fmt/format.h>
 
+#include <utility>
+
 namespace kllvm {
 
 constexpr auto indent_size = 2U;
 
 LLVMFunctionEvent::LLVMFunctionEvent(
-    std::string const &_name, std::string const &_relativePosition)
-    : name(_name)
-    , relativePosition(_relativePosition)
-    , arguments() { }
+    std::string _name, std::string _relativePosition)
+    : name(std::move(_name))
+    , relativePosition(std::move(_relativePosition)) { }
 
 std::vector<LLVMEvent> const &LLVMFunctionEvent::getArguments() const {
   return arguments;
@@ -20,13 +21,11 @@ void LLVMFunctionEvent::addArgument(LLVMEvent const &argument) {
   arguments.push_back(argument);
 }
 
-LLVMHookEvent::LLVMHookEvent(
-    std::string const &_name, std::string const &_relativePosition)
-    : name(_name)
-    , relativePosition(_relativePosition)
-    , arguments()
+LLVMHookEvent::LLVMHookEvent(std::string _name, std::string _relativePosition)
+    : name(std::move(_name))
+    , relativePosition(std::move(_relativePosition))
     , korePattern(nullptr)
-    , patternLength(0u) { }
+    , patternLength(0U) { }
 
 void LLVMHookEvent::addArgument(LLVMEvent const &argument) {
   arguments.push_back(argument);
