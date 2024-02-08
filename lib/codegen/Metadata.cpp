@@ -8,8 +8,32 @@
 
 namespace kllvm {
 
-static std::string KOMPILED_DIR = "kompiled_directory";
-static std::string STRICT_BYTES = "enable_mutable_bytes";
+namespace {
+
+std::string KOMPILED_DIR = "kompiled_directory";
+std::string STRICT_BYTES = "enable_mutable_bytes";
+std::string SAFE_PARTIAL = "safe_partial";
+
+void addBooleanFlag(
+    llvm::Module &mod, std::string const &name, bool enabled, bool debug) {
+  auto &ctx = mod.getContext();
+
+  auto *i1_ty = llvm::Type::getInt1Ty(ctx);
+  auto *enabled_cst = llvm::ConstantInt::getBool(ctx, enabled);
+
+  auto *global = mod.getOrInsertGlobal(name, i1_ty);
+  auto *global_var = llvm::cast<llvm::GlobalVariable>(global);
+
+  if (!global_var->hasInitializer()) {
+    global_var->setInitializer(enabled_cst);
+  }
+
+  if (debug) {
+    initDebugGlobal(STRICT_BYTES, getBoolDebugType(), global_var);
+  }
+}
+
+} // namespace
 
 void addKompiledDirSymbol(
     llvm::Module &mod, std::string const &dir, bool debug) {
@@ -30,21 +54,11 @@ void addKompiledDirSymbol(
 }
 
 void addMutableBytesFlag(llvm::Module &mod, bool enabled, bool debug) {
-  auto &ctx = mod.getContext();
+  addBooleanFlag(mod, STRICT_BYTES, enabled, debug);
+}
 
-  auto *i1_ty = llvm::Type::getInt1Ty(ctx);
-  auto *enabled_cst = llvm::ConstantInt::getBool(ctx, enabled);
-
-  auto *global = mod.getOrInsertGlobal(STRICT_BYTES, i1_ty);
-  auto *global_var = llvm::cast<llvm::GlobalVariable>(global);
-
-  if (!global_var->hasInitializer()) {
-    global_var->setInitializer(enabled_cst);
-  }
-
-  if (debug) {
-    initDebugGlobal(STRICT_BYTES, getBoolDebugType(), global_var);
-  }
+void addSafePartialFlag(llvm::Module &mod, bool enabled, bool debug) {
+  addBooleanFlag(mod, SAFE_PARTIAL, enabled, debug);
 }
 
 } // namespace kllvm
