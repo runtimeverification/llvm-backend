@@ -96,7 +96,9 @@ void bind_runtime(py::module_ &m) {
       .def(
           "_serialize_raw", [](block *term, std::string const &filename,
                                std::string const &sort) {
-            serializeRawTermToFile(filename.c_str(), term, sort.c_str());
+            FILE *file = fopen(filename.c_str(), "a");
+            serializeRawTermToFile(file, term, sort.c_str());
+            fclose(file);
           });
 }
 

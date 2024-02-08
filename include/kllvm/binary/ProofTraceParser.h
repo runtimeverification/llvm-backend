@@ -210,8 +210,7 @@ private:
   // stream before peeking
   template <typename It>
   uint64_t peek_word(It const &it) {
-    return detail::from_bytes<uint64_t>(
-        reinterpret_cast<std::byte const *>(&*it));
+    return detail::from_bytes<uint64_t>(reinterpret_cast<char const *>(&*it));
   }
 
   template <typename It>
@@ -493,8 +492,7 @@ private:
 
   template <typename It>
   bool parse_argument(It &ptr, It end, LLVMEvent &event) {
-    if (std::distance(ptr, end) >= 1u
-        && detail::peek(ptr) == std::byte('\x7F')) {
+    if (std::distance(ptr, end) >= 1u && detail::peek(ptr) == '\x7F') {
       uint64_t pattern_len;
       auto kore_term = parse_kore_term(ptr, end, pattern_len);
       if (!kore_term) {

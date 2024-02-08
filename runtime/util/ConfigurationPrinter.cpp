@@ -183,20 +183,15 @@ void printConfigurationInternal(
   sfprintf(file, ")");
 }
 
-void printStatistics(char const *filename, uint64_t steps) {
-  FILE *file = fopen(filename, "w");
+void printStatistics(FILE *file, uint64_t steps) {
   fmt::print(file, "{}\n", steps - 1); // off by one adjustment
-  fclose(file);
 }
 
-void printConfiguration(char const *filename, block *subject) {
-  FILE *file = fopen(filename, "a");
+void printConfiguration(FILE *file, block *subject) {
   auto state = print_state();
 
   writer w = {file, nullptr};
   printConfigurationInternal(&w, subject, nullptr, false, &state);
-
-  fclose(file);
 }
 
 // If the parameter `results` is passed by reference, the ordering induced by
@@ -205,8 +200,7 @@ void printConfiguration(char const *filename, block *subject) {
 // code is not on a hot path.
 // NOLINTBEGIN(performance-unnecessary-value-param)
 void printConfigurations(
-    char const *filename, std::unordered_set<block *, HashBlock, KEq> results) {
-  FILE *file = fopen(filename, "a");
+    FILE *file, std::unordered_set<block *, HashBlock, KEq> results) {
   auto state = print_state();
 
   writer w = {file, nullptr};
@@ -224,8 +218,6 @@ void printConfigurations(
     }
     sfprintf(&w, ")");
   }
-
-  fclose(file);
 }
 // NOLINTEND(performance-unnecessary-value-param)
 
@@ -251,12 +243,6 @@ string *printConfigurationToString(block *subject) {
   writer w = {nullptr, buf};
   printConfigurationInternal(&w, subject, nullptr, false, &state);
   return hook_BUFFER_toString(buf);
-}
-
-void printConfigurationToFile(FILE *file, block *subject) {
-  auto state = print_state();
-  writer w = {file, nullptr};
-  printConfigurationInternal(&w, subject, nullptr, false, &state);
 }
 
 void printSortedConfigurationToFile(
@@ -334,13 +320,8 @@ void printValueOfType(
   }
 }
 
-void printVariableToFile(char const *filename, char const *varname) {
-  FILE *file = fopen(filename, "a");
-
+void printVariableToFile(FILE *file, char const *varname) {
   fmt::print(file, "{}", varname);
   char n = 0;
   fwrite(&n, 1, 1, file);
-  fflush(file);
-
-  fclose(file);
 }

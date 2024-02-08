@@ -1010,7 +1010,7 @@ struct header_byte_t;
 #define VARIANT_HEADER(C, V)                                                   \
   template <>                                                                  \
   struct header_byte_t<C> {                                                    \
-    static constexpr std::byte value = std::byte(V);                           \
+    static constexpr char value = V;                                           \
   }
 
 VARIANT_HEADER(KORECompositePattern, 0x4);
@@ -1030,7 +1030,7 @@ VARIANT_HEADER(KOREVariable, 0xD);
  * header bytes.
  */
 template <typename T>
-constexpr inline std::byte header_byte = detail::header_byte_t<T>::value;
+constexpr inline char header_byte = detail::header_byte_t<T>::value;
 
 } // end namespace kllvm
 
