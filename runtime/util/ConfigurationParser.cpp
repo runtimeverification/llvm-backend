@@ -4,6 +4,8 @@
 #include "kllvm/parser/KOREScanner.h"
 #include "runtime/alloc.h"
 
+#include <fmt/format.h>
+
 #include <gmp.h>
 #include <map>
 #include <variant>
@@ -17,6 +19,7 @@ using Cache = std::map<std::string, uint32_t>;
 static thread_local Cache cache;
 
 extern "C" {
+
 uint32_t getTagForSymbolNameInternal(char const *);
 
 void init_float(floating *result, char const *c_str) {
@@ -32,12 +35,18 @@ uint32_t getTagForSymbolName(char const *name) {
   if (lb != cache.end() && !(cache.key_comp()(s, lb->first))) {
     return lb->second;
   }
+
   uint32_t const tag = getTagForSymbolNameInternal(s.c_str());
+
   if (tag == ERROR_TAG) {
-    std::cerr << "No tag found for symbol " << name << ". Maybe attempted to "
-              << "evaluate a symbol with no rules?\n";
-    abort();
+    auto error_message = fmt::format(
+        "No tag found for symbol {}. Maybe attempted to evaluate a symbol with "
+        "no rules?\n",
+        name);
+
+    throw std::runtime_error(error_message);
   }
+
   cache.insert(lb, Cache::value_type{s, tag});
   return tag;
 }

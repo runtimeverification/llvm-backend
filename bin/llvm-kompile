@@ -246,6 +246,13 @@ if [[ "$compile" = "default" ]]; then
   dt_dir="${positional_args[1]}"
   main="${positional_args[2]}"
 
+  # If we're compiling a bindings module rather than an interpreter, then we
+  # prevent the compiled code from crashing the entire process by passing this
+  # flag.
+  if [[ "$main" = "c" ]] || [[ "$main" = "python" ]]; then
+    codegen_flags+=("--safe-partial")
+  fi
+
   for arg in "${clang_args[@]}"; do
     case "$arg" in
       -g)

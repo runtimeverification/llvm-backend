@@ -2,6 +2,7 @@ add_library(util STATIC
   ConfigurationParser.cpp
   ConfigurationPrinter.cpp
   ConfigurationSerializer.cpp
+  finish_rewriting.cpp
   match_log.cpp
   search.cpp
   util.cpp
