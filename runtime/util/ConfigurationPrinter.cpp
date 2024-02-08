@@ -39,6 +39,12 @@ struct print_state {
   // We never want to copy the state; it should only ever get passed around by
   // reference.
   print_state(print_state const &) = delete;
+  print_state &operator=(print_state const &) = delete;
+
+  print_state(print_state &&) = default;
+  print_state &operator=(print_state &&) = default;
+
+  ~print_state() = default;
 
   std::vector<block *> boundVariables;
   std::unordered_map<string *, std::string, StringHash, StringEq> varNames;
@@ -76,50 +82,6 @@ void printMInt(
     auto str = intToString(z);
     sfprintf(file, R"(\dv{%s}("%sp%zd"))", sort, str.c_str(), bits);
   }
-}
-
-void sfprintf(writer *file, char const *fmt, ...) {
-  va_list args;
-  va_start(args, fmt);
-  if (file->file) {
-    vfprintf(file->file, fmt, args);
-  } else {
-    char buf[8192];
-    char *finalBuf = buf;
-    va_list args_copy;
-    va_copy(args_copy, args);
-    int res = vsnprintf(
-        buf + sizeof(blockheader), sizeof(buf) - sizeof(blockheader), fmt,
-        args);
-    if (res >= sizeof(buf) - sizeof(blockheader)) {
-      size_t size = sizeof(buf) * 2;
-      finalBuf = (char *)malloc(size);
-      memcpy(finalBuf, buf, sizeof(buf));
-      va_list args_temp;
-      va_copy(args_temp, args_copy);
-      res = vsnprintf(
-          finalBuf + sizeof(blockheader), size - sizeof(blockheader), fmt,
-          args_temp);
-      va_end(args_temp);
-      if (res >= size - sizeof(blockheader)) {
-        do {
-          size *= 2;
-          finalBuf = (char *)realloc(finalBuf, size);
-          va_list args_temp;
-          va_copy(args_temp, args_copy);
-          res = vsnprintf(
-              finalBuf + sizeof(blockheader), size - sizeof(blockheader), fmt,
-              args_temp);
-          va_end(args_temp);
-        } while (res >= size - sizeof(blockheader));
-      }
-    }
-    va_end(args_copy);
-    auto *str = (string *)finalBuf;
-    init_with_len(str, res);
-    hook_BUFFER_concat(file->buffer, str);
-  }
-  va_end(args);
 }
 
 void printComma(writer *file, void *state) {
@@ -221,20 +183,15 @@ void printConfigurationInternal(
   sfprintf(file, ")");
 }
 
-void printStatistics(char const *filename, uint64_t steps) {
-  FILE *file = fopen(filename, "w");
-  fprintf(file, "%" PRIu64 "\n", steps - 1); // off by one adjustment
-  fclose(file);
+void printStatistics(FILE *file, uint64_t steps) {
+  fmt::print(file, "{}\n", steps - 1); // off by one adjustment
 }
 
-void printConfiguration(char const *filename, block *subject) {
-  FILE *file = fopen(filename, "a");
+void printConfiguration(FILE *file, block *subject) {
   auto state = print_state();
 
   writer w = {file, nullptr};
   printConfigurationInternal(&w, subject, nullptr, false, &state);
-
-  fclose(file);
 }
 
 // If the parameter `results` is passed by reference, the ordering induced by
@@ -243,8 +200,7 @@ void printConfiguration(char const *filename, block *subject) {
 // code is not on a hot path.
 // NOLINTBEGIN(performance-unnecessary-value-param)
 void printConfigurations(
-    char const *filename, std::unordered_set<block *, HashBlock, KEq> results) {
-  FILE *file = fopen(filename, "a");
+    FILE *file, std::unordered_set<block *, HashBlock, KEq> results) {
   auto state = print_state();
 
   writer w = {file, nullptr};
@@ -262,8 +218,6 @@ void printConfigurations(
     }
     sfprintf(&w, ")");
   }
-
-  fclose(file);
 }
 // NOLINTEND(performance-unnecessary-value-param)
 
@@ -289,12 +243,6 @@ string *printConfigurationToString(block *subject) {
   writer w = {nullptr, buf};
   printConfigurationInternal(&w, subject, nullptr, false, &state);
   return hook_BUFFER_toString(buf);
-}
-
-void printConfigurationToFile(FILE *file, block *subject) {
-  auto state = print_state();
-  writer w = {file, nullptr};
-  printConfigurationInternal(&w, subject, nullptr, false, &state);
 }
 
 void printSortedConfigurationToFile(
@@ -335,13 +283,13 @@ extern "C" void printMatchResult(
       os << matchLog[i].debugName << "(";
 
       for (int j = 0; j < matchLog[i].args.size(); j += 2) {
-        auto *typeName = reinterpret_cast<char *>(matchLog[i].args[j + 1]);
+        auto *typeName = static_cast<char *>(matchLog[i].args[j + 1]);
         printValueOfType(os, definitionPath, matchLog[i].args[j], typeName);
         if (j + 2 != matchLog[i].args.size()) {
           os << ", ";
         }
       }
-      os << ") => " << *reinterpret_cast<bool *>(matchLog[i].result) << "\n";
+      os << ") => " << *static_cast<bool *>(matchLog[i].result) << "\n";
     }
   }
 }
@@ -350,35 +298,30 @@ void printValueOfType(
     std::ostream &os, std::string const &definitionPath, void *value,
     std::string const &type) {
   if (type == "%mpz*") {
-    os << reinterpret_cast<mpz_ptr>(value);
+    os << static_cast<mpz_ptr>(value);
   } else if (type == "%block*") {
     if ((((uintptr_t)value) & 3) == 1) {
       auto f = temporary_file("subject_XXXXXX");
-      string *s = printConfigurationToString(reinterpret_cast<block *>(value));
+      string *s = printConfigurationToString(static_cast<block *>(value));
       f.ofstream() << std::string(s->data, len(s)) << std::endl;
       kllvm::printKORE(os, definitionPath, f.filename(), false, true);
     } else if ((((uintptr_t)value) & 1) == 0) {
-      auto *s = reinterpret_cast<string *>(value);
+      auto *s = static_cast<string *>(value);
       os << std::string(s->data, len(s));
     } else {
       os << "Error: " << type << " not implemented!";
     }
   } else if (type == "%floating*") {
-    os << floatToString(reinterpret_cast<floating *>(value));
+    os << floatToString(static_cast<floating *>(value));
   } else if (type == "i1") {
-    os << *reinterpret_cast<bool *>(value);
+    os << *static_cast<bool *>(value);
   } else {
     os << "Error: " << type << " not implemented!";
   }
 }
 
-void printVariableToFile(char const *filename, char const *varname) {
-  FILE *file = fopen(filename, "a");
-
-  fprintf(file, "%s", varname);
+void printVariableToFile(FILE *file, char const *varname) {
+  fmt::print(file, "{}", varname);
   char n = 0;
   fwrite(&n, 1, 1, file);
-  fflush(file);
-
-  fclose(file);
 }

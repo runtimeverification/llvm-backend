@@ -2,10 +2,11 @@
 
 #include <cstdint>
 #include <iostream>
+#include <memory>
 
 extern "C" {
 
-char *output_file = nullptr;
+FILE *output_file = nullptr;
 bool statistics = false;
 bool binary_output = false;
 bool proof_output = false;
@@ -16,6 +17,13 @@ extern bool safe_partial;
 int32_t get_exit_code(block *);
 
 [[noreturn]] void finish_rewriting(block *subject, bool error) {
+  // This function is responsible for closing output_file when rewriting
+  // finishes; because it can exit in a few different ways (exceptions,
+  // std::exit etc.) it's cleaner to set up a smart pointer to do this safely
+  // for us.
+  [[maybe_unused]] auto closer
+      = std::unique_ptr<FILE, decltype(&fclose)>(output_file, fclose);
+
   if (error && safe_partial) {
     throw std::runtime_error(
         "Attempted to evaluate partial function at an undefined input");

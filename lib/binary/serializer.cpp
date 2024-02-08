@@ -7,7 +7,7 @@ namespace detail {
 
 bool is_big_endian() {
   uint32_t i = 1;
-  auto *c = reinterpret_cast<uint8_t *>(&i);
+  auto *c = static_cast<uint8_t *>(static_cast<void *>(&i));
   return *c == 0x00;
 }
 
@@ -29,8 +29,14 @@ serializer::serializer(flags f)
 }
 
 std::string serializer::byte_string() const {
-  auto const *ptr = reinterpret_cast<unsigned char const *>(buffer_.data());
-  return {ptr, ptr + buffer_.size()};
+  auto ret = std::string{};
+  ret.reserve(buffer_.size());
+
+  for (auto byte : buffer_) {
+    ret.push_back(static_cast<char>(byte));
+  }
+
+  return ret;
 }
 
 void serializer::reset() {
@@ -50,7 +56,7 @@ void serializer::reset_arity_flag() {
 
 void serializer::emit_header_and_version() {
   for (auto b : magic_header) {
-    emit(std::byte(b));
+    emit(b);
   }
 
   emit(version.v_major);
@@ -72,7 +78,7 @@ void serializer::correct_emitted_size() {
   std::copy(bytes.begin(), bytes.end(), buffer_.begin() + header_prefix_length);
 }
 
-void serializer::emit(std::byte b) {
+void serializer::emit(char b) {
   buffer_.push_back(b);
   next_idx_++;
 }
@@ -128,7 +134,7 @@ void serializer::emit_direct_string(std::string const &s) {
   emit_length(s.size());
 
   for (auto c : s) {
-    emit(std::byte(c));
+    emit(c);
   }
 }
 
