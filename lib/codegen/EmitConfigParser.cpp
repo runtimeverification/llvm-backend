@@ -1315,6 +1315,29 @@ static void emitReturnSortTable(KOREDefinition *def, llvm::Module *mod) {
       getCharPtrDebugType(), def, mod, getter);
 }
 
+/*
+ * Emit a table that records whether the symbol corresponding to a particular
+ * tag has instantiated sort parameters. For example:
+ *
+ *   tag_of(inj{SortA{}, SortKItem{}}) |-> true
+ *   tag_of(someSymbol{})              |-> false
+ */
+static void emitSymbolIsInstantiation(KOREDefinition *def, llvm::Module *mod) {
+  auto getter = [](KOREDefinition *definition, llvm::Module *module,
+                   KORESymbol *symbol) -> llvm::Constant * {
+    auto &ctx = module->getContext();
+
+    auto *bool_ty = llvm::Type::getInt1Ty(ctx);
+
+    return llvm::ConstantInt::get(
+        bool_ty, !symbol->getFormalArguments().empty());
+  };
+
+  emitDataTableForSymbol(
+      "symbolIsInstantiation", llvm::Type::getInt1Ty(mod->getContext()),
+      getBoolDebugType(), def, mod, getter);
+}
+
 void emitConfigParserFunctions(
     KOREDefinition *definition, llvm::Module *module) {
   emitGetTagForSymbolName(definition, module);
@@ -1337,6 +1360,7 @@ void emitConfigParserFunctions(
 
   emitSortTable(definition, module);
   emitReturnSortTable(definition, module);
+  emitSymbolIsInstantiation(definition, module);
 }
 
 } // namespace kllvm
