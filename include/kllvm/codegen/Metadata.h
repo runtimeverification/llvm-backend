@@ -13,6 +13,8 @@ void addKompiledDirSymbol(
 
 void addMutableBytesFlag(llvm::Module &mod, bool enabled, bool debug);
 
+void addSafePartialFlag(llvm::Module &mod, bool enabled, bool debug);
+
 } // namespace kllvm
 
 #endif
