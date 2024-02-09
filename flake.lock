@@ -95,6 +95,7 @@
       "original": {
         "owner": "nixos",
         "repo": "nixpkgs",
+        "rev": "e2ffefe304d941bb98989847944f3b58e0adcdd5",
         "type": "github"
       }
     },
@@ -138,10 +139,32 @@
         "fmt-src": "fmt-src",
         "immer-src": "immer-src",
         "mavenix": "mavenix",
-        "nixpkgs": "nixpkgs_2",
+        "nixpkgs": [
+          "rv-utils",
+          "nixpkgs"
+        ],
         "pybind11-src": "pybind11-src",
         "rapidjson-src": "rapidjson-src",
+        "rv-utils": "rv-utils",
         "utils": "utils_2"
+      }
+    },
+    "rv-utils": {
+      "inputs": {
+        "nixpkgs": "nixpkgs_2"
+      },
+      "locked": {
+        "lastModified": 1707492220,
+        "narHash": "sha256-KRndaUPzUumDlNcKF7KzA8F/EZKLYCvurh7Z13sw2PI=",
+        "owner": "runtimeverification",
+        "repo": "rv-nix-tools",
+        "rev": "abf86805a623948c941e603e2fc4c26a06ea6eb6",
+        "type": "github"
+      },
+      "original": {
+        "owner": "runtimeverification",
+        "repo": "rv-nix-tools",
+        "type": "github"
       }
     },
     "systems": {

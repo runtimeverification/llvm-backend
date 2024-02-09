@@ -3,7 +3,9 @@
 
   inputs = {
     utils.url = "github:numtide/flake-utils";
-    nixpkgs.url = "github:nixos/nixpkgs";
+    rv-utils.url = "github:runtimeverification/rv-nix-tools";
+    nixpkgs.follows = "rv-utils/nixpkgs";
+
     fmt-src.url =
       "github:fmtlib/fmt/9.1.0";
     fmt-src.flake = false;
