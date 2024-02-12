@@ -245,9 +245,9 @@ object Parser {
 
   private def splitPredicate(pat: Pattern): Option[Pattern] =
     pat match {
-      case Top(_)               => None
+      case Top(_)                                                              => None
       case Equals(_, _, pat, DomainValue(CompoundSort("SortBool", _), "true")) => Some(pat)
-      case pat @ And(_, _) => Some(pat)
+      case pat @ And(_, _)                                                     => Some(pat)
     }
 
   private def getPatterns(pat: Pattern): List[Pattern] =
