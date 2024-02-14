@@ -36,11 +36,11 @@
     "immer-src": {
       "flake": false,
       "locked": {
-        "lastModified": 1707908726,
-        "narHash": "sha256-wY/A5jjs1RHEASHsJ1MSz4ytgptPTZ9mdeS6qH4OMG8=",
+        "lastModified": 1707919506,
+        "narHash": "sha256-aV/mQFuPzioy1PxROc85ypeP7/d0nn+xcBPzy9taw2s=",
         "owner": "baltoli",
         "repo": "immer",
-        "rev": "60c07b2b0dd95466791bc7e10d99fbefe45441e7",
+        "rev": "eaf25b00bfd31f39d675c7e71028f30888f0fdee",
         "type": "github"
       },
       "original": {
