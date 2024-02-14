@@ -372,10 +372,13 @@ void bind_proof_trace(py::module_ &m) {
       LLVMSideConditionEvent, std::shared_ptr<LLVMSideConditionEvent>>(
       proof_trace, "LLVMSideConditionEvent", llvm_rewrite_event);
 
-  py::class_<LLVMSideConditionEndEvent, std::shared_ptr<LLVMSideConditionEndEvent>>(
+  py::class_<
+      LLVMSideConditionEndEvent, std::shared_ptr<LLVMSideConditionEndEvent>>(
       proof_trace, "LLVMSideConditionEndEvent", llvm_step_event)
-      .def_property_readonly("rule_ordinal", &LLVMSideConditionEndEvent::getRuleOrdinal)
-      .def_property_readonly("check_result", &LLVMSideConditionEndEvent::getKOREPattern);
+      .def_property_readonly(
+          "rule_ordinal", &LLVMSideConditionEndEvent::getRuleOrdinal)
+      .def_property_readonly(
+          "check_result", &LLVMSideConditionEndEvent::getKOREPattern);
 
   py::class_<LLVMFunctionEvent, std::shared_ptr<LLVMFunctionEvent>>(
       proof_trace, "LLVMFunctionEvent", llvm_step_event)
