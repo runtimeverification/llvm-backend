@@ -39,7 +39,7 @@ block *constructRawTerm(void *subject, char const *sort, bool raw_value) {
 }
 
 void printProofHintHeader(FILE *file) {
-  uint32_t version = 4;
+  uint32_t version = 5;
   fmt::print(file, "HINT");
   fwrite(&version, sizeof(version), 1, file);
 }

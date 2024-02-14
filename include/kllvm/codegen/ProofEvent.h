@@ -121,8 +121,12 @@ public:
   [[nodiscard]] llvm::BasicBlock *
   functionEvent_post(llvm::BasicBlock *current_block);
 
-  [[nodiscard]] llvm::BasicBlock *sideConditionEvent(
+  [[nodiscard]] llvm::BasicBlock *sideConditionEvent_pre(
       KOREAxiomDeclaration *axiom, std::vector<llvm::Value *> const &args,
+      llvm::BasicBlock *current_block);
+
+  [[nodiscard]] llvm::BasicBlock *sideConditionEvent_post(
+      KOREAxiomDeclaration *axiom, llvm::Value *check_result,
       llvm::BasicBlock *current_block);
 
 public:

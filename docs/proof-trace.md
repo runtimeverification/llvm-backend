@@ -23,36 +23,38 @@ Here is a BNF styled description of the format:
 ```
 proof_trace ::= header event*
 
-header      ::= "HINT" <4-byte version number>
+header            ::= "HINT" <4-byte version number>
 
-event       ::= hook
-              | function
-              | rule
-              | side_cond
-              | config
+event             ::= hook
+                    | function
+                    | rule
+                    | side_cond_entry
+                    | side_cond_exit
+                    | config
 
-argument    ::= hook
-              | function
-              | rule
-              | kore_term
+argument          ::= hook
+                    | function
+                    | rule
+                    | kore_term
 
-name        ::= string
-location    ::= string
-function    ::= WORD(0xDD) name location arg* WORD(0x11)
+name              ::= string
+location          ::= string
+function          ::= WORD(0xDD) name location arg* WORD(0x11)
 
-hook        ::= WORD(0xAA) name location arg* WORD(0xBB) kore_term
+hook              ::= WORD(0xAA) name location arg* WORD(0xBB) kore_term
 
-ordinal     ::= uint64
-arity       ::= uint64
-variable    ::= name kore_term WORD(0xCC)
-rule        ::= WORD(0x22) ordinal arity variable*
+ordinal           ::= uint64
+arity             ::= uint64
+variable          ::= name kore_term WORD(0xCC)
+rule              ::= WORD(0x22) ordinal arity variable*
 
-side_cond   ::= WORD(0xEE) ordinal arity variable*
+side_cond_entry   ::= WORD(0xEE) ordinal arity variable*
+side_cond_exit    ::= WORD(0x33) ordinal kore_term WORD(0xCC)
 
-config      ::= WORD(0xFF) kore_term WORD(0xCC)
+config            ::= WORD(0xFF) kore_term WORD(0xCC)
 
-string      ::= <c-style null terminated string>
-uint64      ::= <64-bit unsigned little endian integer>
+string            ::= <c-style null terminated string>
+uint64            ::= <64-bit unsigned little endian integer>
 ```
 
 ## Notes
