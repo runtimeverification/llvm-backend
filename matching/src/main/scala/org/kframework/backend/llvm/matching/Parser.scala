@@ -247,7 +247,7 @@ object Parser {
     pat match {
       case Top(_)                                                              => None
       case Equals(_, _, pat, DomainValue(CompoundSort("SortBool", _), "true")) => Some(pat)
-      case pat @ And(_, _)                                                     => Some(pat)
+      case _                                                                   => Some(pat)
     }
 
   private def getPatterns(pat: Pattern): List[Pattern] =
