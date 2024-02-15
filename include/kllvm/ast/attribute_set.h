@@ -2,6 +2,7 @@
 #define KLLVM_ATTRIBUTES_H
 
 #include <memory>
+#include <optional>
 #include <string>
 #include <unordered_map>
 

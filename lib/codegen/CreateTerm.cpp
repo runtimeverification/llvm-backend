@@ -885,7 +885,6 @@ std::pair<llvm::Value *, bool> CreateTerm::createAllocation(
         auto *strPattern = dynamic_cast<KOREStringPattern *>(
             symbolDecl->attributes()
                 .get(attribute_set::key::hook)
-                .get()
                 ->getArguments()[0]
                 .get());
         std::string name = strPattern->getContents();
