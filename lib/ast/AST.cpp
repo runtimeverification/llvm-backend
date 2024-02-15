@@ -1430,18 +1430,17 @@ void KOREStringPattern::print(std::ostream &Out, unsigned indent) const {
 static void printAttributeList(
     std::ostream &Out, attribute_set const &attributes, unsigned indent = 0) {
 
-  // FIXME.ATT
-  /* std::string Indent(indent, ' '); */
-  /* Out << Indent << "["; */
-  /* bool isFirst = true; */
-  /* for (auto const &Pattern : attributes) { */
-  /*   if (!isFirst) { */
-  /*     Out << ","; */
-  /*   } */
-  /*   Pattern.second->print(Out); */
-  /*   isFirst = false; */
-  /* } */
-  /* Out << "]"; */
+  std::string Indent(indent, ' ');
+  Out << Indent << "[";
+  bool isFirst = true;
+  for (auto const &[name, pattern] : attributes) {
+    if (!isFirst) {
+      Out << ",";
+    }
+    pattern->print(Out);
+    isFirst = false;
+  }
+  Out << "]";
 }
 
 void KOREDeclaration::printSortVariables(std::ostream &Out) const {

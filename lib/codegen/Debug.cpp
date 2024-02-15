@@ -101,25 +101,25 @@ void initDebugGlobal(
   var->addDebugInfo(DbgExp);
 }
 
-void initDebugAxiom(
-    std::unordered_map<std::string, sptr<KORECompositePattern>> const &att) {
+void initDebugAxiom(attribute_set const &att) {
   if (!Dbg) {
     return;
   }
-  if (!att.count(SOURCE_ATT)) {
+  if (!att.contains(attribute_set::key::source)) {
     resetDebugLoc();
     return;
   }
-  KORECompositePattern *sourceAtt = att.at(SOURCE_ATT).get();
+  KORECompositePattern *sourceAtt = att.get(attribute_set::key::source).get();
   assert(sourceAtt->getArguments().size() == 1);
   auto *strPattern
       = dynamic_cast<KOREStringPattern *>(sourceAtt->getArguments()[0].get());
   std::string source = strPattern->getContents();
-  if (!att.count(LOCATION_ATT)) {
+  if (!att.contains(attribute_set::key::location)) {
     resetDebugLoc();
     return;
   }
-  KORECompositePattern *locationAtt = att.at(LOCATION_ATT).get();
+  KORECompositePattern *locationAtt
+      = att.get(attribute_set::key::location).get();
   assert(locationAtt->getArguments().size() == 1);
   auto *strPattern2
       = dynamic_cast<KOREStringPattern *>(locationAtt->getArguments()[0].get());

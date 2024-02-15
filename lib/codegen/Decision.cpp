@@ -760,7 +760,7 @@ void makeEvalOrAnywhereFunction(
   llvm::Function *matchFunc = getOrInsertFunction(module, name, funcType);
   [[maybe_unused]] KORESymbolDeclaration *symbolDecl
       = definition->getSymbolDeclarations().at(function->getName());
-  /* initDebugAxiom(symbolDecl->getAttributes()); */ // FIXME.ATT
+  initDebugAxiom(symbolDecl->attributes());
   initDebugFunction(
       function->getName(), name,
       getDebugFunctionType(debugReturnType, debugArgs), definition, matchFunc);

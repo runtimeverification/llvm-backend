@@ -1030,7 +1030,7 @@ bool makeFunction(
   llvm::FunctionType *funcType
       = llvm::FunctionType::get(returnType, paramTypes, false);
   llvm::Function *applyRule = getOrInsertFunction(Module, name, funcType);
-  /* initDebugAxiom(axiom->getAttributes()); */ // FIXME.ATT
+  initDebugAxiom(axiom->attributes());
   std::string debugName = name;
   if (axiom->attributes().contains(attribute_set::key::label)) {
     debugName
@@ -1144,7 +1144,7 @@ std::string makeApplyRuleFunction(
       false, true, axiom, ".rhs");
 
   llvm::Function *applyRule = getOrInsertFunction(Module, name, funcType);
-  /* initDebugAxiom(axiom->getAttributes()); */ // FIXME.ATT
+  initDebugAxiom(axiom->attributes());
   initDebugFunction(
       name, name,
       getDebugFunctionType(
