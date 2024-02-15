@@ -302,7 +302,8 @@ void kore_simplify(
     char **data_out, size_t *size_out) {
   try {
     auto *block = kllvm::bindings::simplify_to_term(pattern->ptr_, sort->ptr_);
-    serializeConfiguration(block, "SortKItem{}", data_out, size_out, true);
+    serializeConfiguration(
+        block, "SortKItem{}", data_out, size_out, true, true);
   } catch (std::exception &e) {
     if (err == nullptr) {
       throw;
@@ -320,7 +321,8 @@ void kore_simplify_binary(
         kore_sort_dump(sort), std::free);
 
     auto *block = deserializeConfiguration(data_in, size_in);
-    serializeConfiguration(block, sort_str.get(), data_out, size_out, true);
+    serializeConfiguration(
+        block, sort_str.get(), data_out, size_out, true, true);
   } catch (std::exception &e) {
     if (err == nullptr) {
       throw;

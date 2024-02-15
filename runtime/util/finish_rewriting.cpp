@@ -40,7 +40,7 @@ int32_t get_exit_code(block *);
 
   if (!proof_output) {
     if (binary_output) {
-      serializeConfigurationToFile(output_file, subject, true);
+      serializeConfigurationToFile(output_file, subject, true, true);
     } else {
       printConfiguration(output_file, subject);
     }
