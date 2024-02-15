@@ -44,6 +44,7 @@ std::unordered_map<attribute_set::key, std::string> const &attribute_table() {
       {attribute_set::key::source,
        "org'Stop'kframework'Stop'attributes'Stop'Source"},
       {attribute_set::key::subsort, "subsort"},
+      {attribute_set::key::symbol_overload, "symbol-overload"},
       {attribute_set::key::terminals, "terminals"},
       {attribute_set::key::total, "total"},
       {attribute_set::key::unit, "unit"},

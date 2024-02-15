@@ -66,6 +66,7 @@ public:
     sort_injection,
     source,
     subsort,
+    symbol_overload,
     terminals,
     total,
     unit,
