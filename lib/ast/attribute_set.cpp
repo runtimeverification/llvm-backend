@@ -35,7 +35,6 @@ std::unordered_map<attribute_set::key, std::string> const &attribute_table() {
       {attribute_set::key::macro_rec, "macro-rec"},
       {attribute_set::key::nat, "nat"},
       {attribute_set::key::non_executable, "non-executable"},
-      {attribute_set::key::overload, "overload"},
       {attribute_set::key::priorities, "priorities"},
       {attribute_set::key::priority, "priority"},
       {attribute_set::key::right, "right"},

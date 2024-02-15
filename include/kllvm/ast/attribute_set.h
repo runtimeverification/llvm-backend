@@ -58,7 +58,6 @@ public:
     macro_rec,
     nat,
     non_executable,
-    overload,
     priorities,
     priority,
     right,
