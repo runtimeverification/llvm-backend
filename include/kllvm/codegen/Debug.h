@@ -17,9 +17,6 @@
 
 namespace kllvm {
 
-extern std::string SOURCE_ATT;
-extern std::string LOCATION_ATT;
-
 void initDebugInfo(llvm::Module *module, std::string const &filename);
 void finalizeDebugInfo(void);
 
