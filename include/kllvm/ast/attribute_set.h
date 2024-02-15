@@ -11,46 +11,63 @@ class KORECompositePattern;
 
 /**
  * Type-safe wrapper around a set of KORE attribute patterns.
+ *
+ * Any valid KORE pattern can be added as an attribute, but retrieval of
+ * specific attribute keys is kept behind the `key` enum in order to limit the
+ * use of string-typing.
+ *
+ * There are two escape hatches from the type-safe interface that should be used
+ * with caution:
+ * - Iterating over the full set of attributes stored with `.begin()` and
+ *   `.end()`; for example for pretty-printing.
+ * - Access to the underlying attribute storage, for use at API boundaries.
+ *
+ * The core backend code should always use the type-safe interface; if a new
+ * attribute needs to be processed then it should be added to the whitelist
+ * enum.
  */
 class attribute_set {
 public:
+  using storage_t
+      = std::unordered_map<std::string, std::shared_ptr<KORECompositePattern>>;
+
   enum class key {
-    source,
-    location,
-    hook,
-    function,
-    format,
-    assoc,
-    comm,
-    colors,
-    bracket,
-    anywhere,
-    binder,
-    concat,
-    unit,
-    element,
-    sort_injection,
-    label,
-    nat,
-    macro,
-    macro_rec,
     alias,
     alias_rec,
-    left,
-    right,
-    priorities,
-    subsort,
-    overload,
-    fresh_generator,
-    priority,
-    terminals,
-    idem,
-    functional,
-    constructor,
-    total,
+    anywhere,
+    assoc,
+    binder,
+    bracket,
     ceil,
+    colors,
+    comm,
+    concat,
+    constructor,
+    element,
+    format,
+    fresh_generator,
+    function,
+    functional,
+    hook,
+    idem,
+    label,
+    left,
+    location,
+    macro,
+    macro_rec,
+    nat,
     non_executable,
+    overload,
+    priorities,
+    priority,
+    right,
     simplification,
+    sort_injection,
+    source,
+    subsort,
+    terminals,
+    total,
+    unit,
   };
 
   attribute_set() = default;
@@ -60,8 +77,9 @@ public:
    *
    *   key_name{}(args, ...)
    *
-   * The constructor name (`key_name` here) is parsed into a value of the `key`
-   * enum; any unknown attribute names will be rejected.
+   * Any attribute will be accepted here; if the name of the key is one of the
+   * known attributes for the backend, then a key is returned. Otherwise (for an
+   * unknown attribute), `std::nullopt` is returned.
    */
   std::optional<attribute_set::key>
   add(std::shared_ptr<KORECompositePattern> att);
@@ -89,9 +107,24 @@ public:
    */
   std::string get_string(key k) const;
 
+  /**
+   * Get the underlying attribute table; this table will allow access to
+   * attributes that are not statically whitelisted by the backend, and so
+   * should only be used at library boundaries (e.g. in bindings code).
+   */
+  storage_t const &underlying() const;
+
+  /**
+   * Support for iterating over the stored attributes.
+   *
+   * Code that uses this feature should not dispatch on specific attribute names
+   * when iterating; the type-safe interface should be used to do so instead.
+   */
+  storage_t::const_iterator begin() const;
+  storage_t::const_iterator end() const;
+
 private:
-  std::unordered_map<std::string, std::shared_ptr<KORECompositePattern>>
-      attribute_map_ = {};
+  storage_t attribute_map_ = {};
 };
 
 } // namespace kllvm
