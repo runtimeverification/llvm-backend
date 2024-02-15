@@ -31,6 +31,7 @@ public:
     DROP_HEADER = 1,
     DROP_ARITY = 2,
     DROP_BOTH = 3,
+    NO_INTERN = 4,
   };
 
   static constexpr auto magic_header = std::array{'\x7f', 'K', 'O', 'R', 'E'};
@@ -98,6 +99,7 @@ public:
 private:
   bool use_header_;
   bool use_arity_;
+  bool use_intern_;
 
   std::string buffer_;
   char direct_string_prefix_;

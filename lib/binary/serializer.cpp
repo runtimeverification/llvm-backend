@@ -19,6 +19,7 @@ serializer::serializer()
 serializer::serializer(flags f)
     : use_header_(!(f & DROP_HEADER))
     , use_arity_(!(f & DROP_ARITY))
+    , use_intern_(!(f & NO_INTERN))
     , direct_string_prefix_{0x01}
     , backref_string_prefix_{0x02}
     , next_idx_(0) {
@@ -84,6 +85,10 @@ void serializer::emit(char b) {
 }
 
 void serializer::emit_string(std::string const &s) {
+  if (!use_intern_) {
+    emit_direct_string(s);
+    return;
+  }
   if (intern_table_.find(s) == intern_table_.end()) {
     emit_direct_string(s);
   } else {
@@ -129,7 +134,9 @@ int serializer::required_chunks(uint64_t len) {
 void serializer::emit_direct_string(std::string const &s) {
   emit(direct_string_prefix_);
 
-  intern_table_[s] = next_idx_;
+  if (use_intern_) {
+    intern_table_[s] = next_idx_;
+  }
 
   emit_length(s.size());
   buffer_.append(s);
