@@ -30,6 +30,8 @@ struct StringEq {
 
 struct serialization_state {
   serialization_state() = default;
+  serialization_state(serializer::flags flags)
+      : instance(flags) { }
 
   // We never want to copy the state; it should only ever get passed around by
   // reference.
@@ -418,7 +420,8 @@ void serializeConfigurationToFile(
 void serializeConfiguration(
     block *subject, char const *sort, char **data_out, size_t *size_out,
     bool emit_size, bool use_intern) {
-  auto state = serialization_state();
+  auto state = serialization_state(
+      use_intern ? serializer::flags::NONE : serializer::flags::NO_INTERN);
 
   writer w = {nullptr, nullptr};
   serializeConfigurationInternal(&w, subject, sort, false, &state);
