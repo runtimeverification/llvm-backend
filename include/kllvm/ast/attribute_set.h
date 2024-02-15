@@ -104,7 +104,7 @@ public:
    *
    *   key_name{}("string data")
    *
-   * and extract the 
+   * and extract the string data in the pattern's argument.
    */
   std::string get_string(key k) const;
 
