@@ -404,7 +404,8 @@ void serializeConfigurations(
   free(buf);
 }
 
-void serializeConfigurationToFile(FILE *file, block *subject, bool emit_size) {
+void serializeConfigurationToFile(
+    FILE *file, block *subject, bool emit_size, bool use_intern) {
   char *data = nullptr;
   size_t size = 0;
   serializeConfiguration(subject, nullptr, &data, &size, emit_size);
@@ -416,7 +417,7 @@ void serializeConfigurationToFile(FILE *file, block *subject, bool emit_size) {
 
 void serializeConfiguration(
     block *subject, char const *sort, char **data_out, size_t *size_out,
-    bool emit_size) {
+    bool emit_size, bool use_intern) {
   auto state = serialization_state();
 
   writer w = {nullptr, nullptr};
@@ -438,7 +439,8 @@ void writeUInt64ToFile(FILE *file, uint64_t i) {
   fwrite(&i, 8, 1, file);
 }
 
-void serializeTermToFile(FILE *file, block *subject, char const *sort) {
+void serializeTermToFile(
+    FILE *file, block *subject, char const *sort, bool use_intern) {
   char *data = nullptr;
   size_t size = 0;
   serializeConfiguration(subject, sort, &data, &size, true);
@@ -448,7 +450,8 @@ void serializeTermToFile(FILE *file, block *subject, char const *sort) {
   free(data);
 }
 
-void serializeRawTermToFile(FILE *file, void *subject, char const *sort) {
+void serializeRawTermToFile(
+    FILE *file, void *subject, char const *sort, bool use_intern) {
   block *term = constructRawTerm(subject, sort, true);
 
   char *data = nullptr;
