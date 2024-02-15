@@ -1,5 +1,6 @@
 #include <kllvm/ast/AST.h>
 
+#include <iostream>
 #include <string>
 #include <unordered_set>
 
@@ -97,22 +98,9 @@ SymbolMap KOREDefinition::getOverloads() const {
   auto overloads = SymbolMap{};
 
   for (auto *axiom : axioms) {
-    // This code is unpleasantly duplicated because we are in the process of
-    // doing a multiple-step refactoring of the arity-2 overload attribute to a
-    // new symbol-overload attribute. Once we remove the old syntax, this code
-    // can return to its old form simply by deleting the else-if branch.
     if (axiom->attributes().contains(attribute_set::key::symbol_overload)) {
       auto const &att
           = axiom->attributes().get(attribute_set::key::symbol_overload);
-      auto *innerSymbol = std::dynamic_pointer_cast<KORECompositePattern>(
-                              att->getArguments()[1])
-                              ->getConstructor();
-      auto *outerSymbol = std::dynamic_pointer_cast<KORECompositePattern>(
-                              att->getArguments()[0])
-                              ->getConstructor();
-      overloads[innerSymbol].insert(outerSymbol);
-    } else if (axiom->attributes().contains(attribute_set::key::overload)) {
-      auto const &att = axiom->attributes().get(attribute_set::key::overload);
       auto *innerSymbol = std::dynamic_pointer_cast<KORECompositePattern>(
                               att->getArguments()[1])
                               ->getConstructor();
