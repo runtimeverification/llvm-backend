@@ -34,8 +34,10 @@ int main(int argc, char **argv) {
   std::sort(
       axioms.begin(), axioms.end(),
       [](ptr<KOREDeclaration> const &l, ptr<KOREDeclaration> const &r) {
-        std::string lStr = l->getStringAttribute("priority");
-        std::string rStr = r->getStringAttribute("priority");
+        std::string lStr
+            = l->attributes().get_string(attribute_set::key::priority);
+        std::string rStr
+            = r->attributes().get_string(attribute_set::key::priority);
         int lInt = std::stoi(lStr);
         int rInt = std::stoi(rStr);
         return lInt < rInt;

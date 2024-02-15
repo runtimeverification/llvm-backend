@@ -1033,7 +1033,8 @@ bool makeFunction(
   /* initDebugAxiom(axiom->getAttributes()); */ // FIXME.ATT
   std::string debugName = name;
   if (axiom->attributes().contains(attribute_set::key::label)) {
-    debugName = axiom->getStringAttribute("label") + postfix;
+    debugName
+        = axiom->attributes().get_string(attribute_set::key::label) + postfix;
   }
   initDebugFunction(
       debugName, debugName,

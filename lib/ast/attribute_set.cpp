@@ -36,6 +36,8 @@ attribute_set::key key_from_string(std::string const &str) {
       {"subsort", attribute_set::key::subsort},
       {"overload", attribute_set::key::overload},
       {"freshGenerator", attribute_set::key::fresh_generator},
+      {"priority", attribute_set::key::priority},
+      {"terminals", attribute_set::key::terminals},
   };
 
   return table.at(str);

@@ -42,6 +42,8 @@ public:
     subsort,
     overload,
     fresh_generator,
+    priority,
+    terminals,
   };
 
   attribute_set() = default;

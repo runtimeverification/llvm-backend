@@ -260,8 +260,10 @@ PreprocessedPrintData getPrintData(
     std::string name = entry.first;
 
     if (entry.second->attributes().contains(attribute_set::key::format)) {
-      formats[name] = entry.second->getStringAttribute("format");
-      terminals[name] = entry.second->getStringAttribute("terminals");
+      formats[name]
+          = entry.second->attributes().get_string(attribute_set::key::format);
+      terminals[name] = entry.second->attributes().get_string(
+          attribute_set::key::terminals);
 
       if (entry.second->attributes().contains(attribute_set::key::assoc)) {
         assocs.insert(name);
@@ -271,7 +273,8 @@ PreprocessedPrintData getPrintData(
       }
 
       if (entry.second->attributes().contains(attribute_set::key::colors)) {
-        std::string colorAtt = entry.second->getStringAttribute("colors");
+        std::string colorAtt
+            = entry.second->attributes().get_string(attribute_set::key::colors);
         std::vector<std::string> color;
         size_t idx = 0;
         do {
@@ -302,7 +305,8 @@ PreprocessedPrintData getPrintData(
   for (auto const &entry : def->getSortDeclarations()) {
     std::string name = entry.first;
     if (entry.second->attributes().contains(attribute_set::key::hook)) {
-      hooks[name] = entry.second->getStringAttribute("hook");
+      hooks[name]
+          = entry.second->attributes().get_string(attribute_set::key::hook);
     }
   }
 

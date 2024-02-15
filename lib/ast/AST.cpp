@@ -1269,14 +1269,6 @@ void KOREDeclaration::addObjectSortVariable(
   objectSortVariables.push_back(SortVariable);
 }
 
-std::string KOREDeclaration::getStringAttribute(std::string const &name) const {
-  KORECompositePattern *attr = old_attributes.at(name).get();
-  assert(attr->getArguments().size() == 1);
-  auto *strPattern
-      = dynamic_cast<KOREStringPattern *>(attr->getArguments()[0].get());
-  return strPattern->getContents();
-}
-
 void KOREAxiomDeclaration::addPattern(sptr<KOREPattern> Pattern) {
   pattern = std::move(Pattern);
 }

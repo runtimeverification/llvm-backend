@@ -117,7 +117,8 @@ int main(int argc, char **argv) {
       if (source.find(loc.filename) != std::string::npos) {
         auto source_loc = getLocation(axiom);
         if (checkRanges(loc, source_loc, loc.start_column != -1)) {
-          rule_labels.push_back(axiom->getStringAttribute("label"));
+          rule_labels.push_back(
+              axiom->attributes().get_string(attribute_set::key::label));
         }
       }
     }

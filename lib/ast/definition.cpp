@@ -36,7 +36,8 @@ KOREDefinition::getSortsHookedTo(std::string const &hookName) const {
 
   for (auto const &[name, decl] : getSortDeclarations()) {
     if (decl->isHooked()) {
-      if (auto hook = decl->getStringAttribute("hook"); hook == hookName) {
+      if (auto hook = decl->attributes().get_string(attribute_set::key::hook);
+          hook == hookName) {
         ret.insert(name);
       }
     }

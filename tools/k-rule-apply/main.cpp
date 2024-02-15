@@ -32,7 +32,8 @@ std::optional<std::string> getMatchFunctionName() {
     // Check if the current axiom has the attribute label.
     if (axiom->attributes().contains(attribute_set::key::label)) {
       // Compare the axiom's label with the given rule label.
-      if (RuleLabel == axiom->getStringAttribute("label")) {
+      if (RuleLabel
+          == axiom->attributes().get_string(attribute_set::key::label)) {
         return "intern_match_" + std::to_string(axiom->getOrdinal());
       }
     }

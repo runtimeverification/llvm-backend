@@ -447,7 +447,8 @@ void FunctionNode::codegen(Decision *d) {
       size_t ordinal = std::stoll(function.substr(15));
       KOREAxiomDeclaration *axiom = d->Definition->getAxiomByOrdinal(ordinal);
       if (axiom->attributes().contains(attribute_set::key::label)) {
-        debugName = axiom->getStringAttribute("label") + ".sc";
+        debugName
+            = axiom->attributes().get_string(attribute_set::key::label) + ".sc";
       }
     }
     std::vector<llvm::Value *> functionArgs;
@@ -1142,7 +1143,8 @@ void makeMatchReasonFunctionWrapper(
       = getOrInsertFunction(module, wrapperName, funcType);
   std::string debugName = name;
   if (axiom->attributes().contains(attribute_set::key::label)) {
-    debugName = axiom->getStringAttribute("label") + "_tailcc_" + ".match";
+    debugName = axiom->attributes().get_string(attribute_set::key::label)
+                + "_tailcc_" + ".match";
   }
   auto *debugType
       = getDebugType({SortCategory::Symbol, 0}, "SortGeneratedTopCell{}");
@@ -1172,7 +1174,8 @@ void makeMatchReasonFunction(
   llvm::Function *matchFunc = getOrInsertFunction(module, name, funcType);
   std::string debugName = name;
   if (axiom->attributes().contains(attribute_set::key::label)) {
-    debugName = axiom->getStringAttribute("label") + ".match";
+    debugName
+        = axiom->attributes().get_string(attribute_set::key::label) + ".match";
   }
   auto *debugType
       = getDebugType({SortCategory::Symbol, 0}, "SortGeneratedTopCell{}");

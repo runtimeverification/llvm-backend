@@ -690,8 +690,6 @@ public:
   }
   virtual ~KOREDeclaration() = default;
 
-  std::string getStringAttribute(std::string const &name) const;
-
 protected:
   void printSortVariables(std::ostream &Out) const;
 };
