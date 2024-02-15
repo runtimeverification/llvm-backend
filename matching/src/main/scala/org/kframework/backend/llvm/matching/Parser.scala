@@ -238,7 +238,7 @@ object Parser {
         Some((None, B.Rewrites(s, l, r), splitPredicate(req), splitPredicate(ens)))
       case Rewrites(s, And(_, l +: req +: Seq()), And(_, r +: ens +: Seq())) =>
         Some((None, B.Rewrites(s, l, r), splitPredicate(req), splitPredicate(ens)))
-      case Rewrites(s, And(_, l +: req +: Seq()), r) =>
+      case Rewrites(s, And(_, l +: req +: Seq()), r @ Application(_, _)) =>
         Some((None, B.Rewrites(s, l, r), splitPredicate(req), None))
       case _ => None
     }
