@@ -71,13 +71,6 @@ static llvm::Function *getStrcmp(llvm::Module *module) {
   return getOrInsertFunction(module, "strcmp", type);
 }
 
-static llvm::Function *getPuts(llvm::Module *module) {
-  llvm::LLVMContext &Ctx = module->getContext();
-  auto *type = llvm::FunctionType::get(
-      llvm::Type::getInt32Ty(Ctx), {llvm::Type::getInt8PtrTy(Ctx)}, false);
-  return getOrInsertFunction(module, "puts", type);
-}
-
 static void
 emitGetTagForSymbolName(KOREDefinition *definition, llvm::Module *module) {
   llvm::LLVMContext &Ctx = module->getContext();
@@ -107,8 +100,6 @@ emitGetTagForSymbolName(KOREDefinition *definition, llvm::Module *module) {
         llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), tag), CurrentBlock);
     CurrentBlock = FalseBlock;
   }
-  llvm::Function *Puts = getPuts(module);
-  llvm::CallInst::Create(Puts, {func->arg_begin()}, "", CurrentBlock);
   Phi->addIncoming(
       llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), ERROR_TAG),
       CurrentBlock);
@@ -1315,6 +1306,29 @@ static void emitReturnSortTable(KOREDefinition *def, llvm::Module *mod) {
       getCharPtrDebugType(), def, mod, getter);
 }
 
+/*
+ * Emit a table that records whether the symbol corresponding to a particular
+ * tag has instantiated sort parameters. For example:
+ *
+ *   tag_of(inj{SortA{}, SortKItem{}}) |-> true
+ *   tag_of(someSymbol{})              |-> false
+ */
+static void emitSymbolIsInstantiation(KOREDefinition *def, llvm::Module *mod) {
+  auto getter = [](KOREDefinition *definition, llvm::Module *module,
+                   KORESymbol *symbol) -> llvm::Constant * {
+    auto &ctx = module->getContext();
+
+    auto *bool_ty = llvm::Type::getInt1Ty(ctx);
+
+    return llvm::ConstantInt::get(
+        bool_ty, !symbol->getFormalArguments().empty());
+  };
+
+  emitDataTableForSymbol(
+      "symbolIsInstantiation", llvm::Type::getInt1Ty(mod->getContext()),
+      getBoolDebugType(), def, mod, getter);
+}
+
 void emitConfigParserFunctions(
     KOREDefinition *definition, llvm::Module *module) {
   emitGetTagForSymbolName(definition, module);
@@ -1337,6 +1351,7 @@ void emitConfigParserFunctions(
 
   emitSortTable(definition, module);
   emitReturnSortTable(definition, module);
+  emitSymbolIsInstantiation(definition, module);
 }
 
 } // namespace kllvm

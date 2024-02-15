@@ -66,6 +66,13 @@ cl::opt<bool> MutableBytes(
     cl::desc("Enable unsound reference semantics for objects of sort Bytes"),
     cl::init(false), cl::cat(CodegenToolCat));
 
+cl::opt<bool> SafePartial(
+    "safe-partial",
+    cl::desc("Do not terminate the process when a partial function is "
+             "evaluated at an undefined input; rather throw a recoverable "
+             "exception."),
+    cl::init(false), cl::cat(CodegenToolCat));
+
 namespace {
 
 fs::path dt_dir() {
@@ -120,6 +127,7 @@ void emit_metadata(llvm::Module &mod) {
   auto kompiled_dir = fs::absolute(Definition.getValue()).parent_path();
   addKompiledDirSymbol(mod, kompiled_dir, Debug);
   addMutableBytesFlag(mod, MutableBytes, Debug);
+  addSafePartialFlag(mod, SafePartial, Debug);
 }
 
 } // namespace
