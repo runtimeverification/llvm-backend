@@ -14,7 +14,35 @@ class KORECompositePattern;
  */
 class attribute_set {
 public:
-  enum class key { hook };
+  enum class key {
+    source,
+    location,
+    hook,
+    function,
+    format,
+    assoc,
+    comm,
+    colors,
+    bracket,
+    anywhere,
+    binder,
+    concat,
+    unit,
+    element,
+    sort_injection,
+    label,
+    nat,
+    macro,
+    macro_rec,
+    alias,
+    alias_rec,
+    left,
+    right,
+    priorities,
+    subsort,
+    overload,
+    fresh_generator,
+  };
 
   attribute_set() = default;
 

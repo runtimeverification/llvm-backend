@@ -7,7 +7,35 @@ namespace {
 
 attribute_set::key key_from_string(std::string const &str) {
   static std::unordered_map<std::string, attribute_set::key> table = {
+      {"org'Stop'kframework'Stop'attributes'Stop'Source",
+       attribute_set::key::source},
+      {"org'Stop'kframework'Stop'attributes'Stop'Location",
+       attribute_set::key::location},
       {"hook", attribute_set::key::hook},
+      {"function", attribute_set::key::function},
+      {"format", attribute_set::key::format},
+      {"assoc", attribute_set::key::assoc},
+      {"comm", attribute_set::key::comm},
+      {"colors", attribute_set::key::colors},
+      {"bracket", attribute_set::key::bracket},
+      {"anywhere", attribute_set::key::anywhere},
+      {"binder", attribute_set::key::binder},
+      {"concat", attribute_set::key::concat},
+      {"unit", attribute_set::key::unit},
+      {"element", attribute_set::key::element},
+      {"sortInjection", attribute_set::key::sort_injection},
+      {"label", attribute_set::key::label},
+      {"nat", attribute_set::key::nat},
+      {"macro", attribute_set::key::macro},
+      {"macro_rec", attribute_set::key::macro_rec},
+      {"alias", attribute_set::key::alias},
+      {"alias_rec", attribute_set::key::alias_rec},
+      {"left", attribute_set::key::left},
+      {"right", attribute_set::key::right},
+      {"priorities", attribute_set::key::priorities},
+      {"subsort", attribute_set::key::subsort},
+      {"overload", attribute_set::key::overload},
+      {"freshGenerator", attribute_set::key::fresh_generator},
   };
 
   return table.at(str);

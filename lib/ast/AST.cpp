@@ -162,8 +162,8 @@ ValueType KORECompositeSort::getCategory(KOREDefinition *definition) {
     if (auto *param = dynamic_cast<KORECompositeSort *>(arguments[0].get())) {
       auto const &att = definition->getSortDeclarations()
                             .at(param->getName())
-                            ->getAttributes();
-      auto const &natAtt = att.at("nat");
+                            ->attributes();
+      auto const &natAtt = att.get(attribute_set::key::nat);
       assert(natAtt->getArguments().size() == 1);
       auto *strPattern
           = dynamic_cast<KOREStringPattern *>(natAtt->getArguments()[0].get());
@@ -179,11 +179,11 @@ ValueType KORECompositeSort::getCategory(KOREDefinition *definition) {
 
 std::string KORECompositeSort::getHook(KOREDefinition *definition) const {
   auto const &att
-      = definition->getSortDeclarations().at(this->getName())->getAttributes();
-  if (!att.count("hook")) {
+      = definition->getSortDeclarations().at(this->getName())->attributes();
+  if (!att.contains(attribute_set::key::hook)) {
     return "STRING.String";
   }
-  auto const &hookAtt = att.at("hook");
+  auto const &hookAtt = att.get(attribute_set::key::hook);
   assert(hookAtt->getArguments().size() == 1);
   auto *strPattern
       = dynamic_cast<KOREStringPattern *>(hookAtt->getArguments()[0].get());
@@ -1130,8 +1130,8 @@ sptr<KOREPattern> KORECompositePattern::expandMacros(
 
   size_t i = 0;
   for (auto const &decl : macros) {
-    if ((decl->getAttributes().count("macro")
-         || decl->getAttributes().count("macro-rec"))
+    if ((decl->attributes().contains(attribute_set::key::macro)
+         || decl->attributes().contains(attribute_set::key::macro_rec))
         && reverse) {
       i++;
       continue;
@@ -1144,8 +1144,8 @@ sptr<KOREPattern> KORECompositePattern::expandMacros(
     substitution subst;
     bool matches = lhs->matches(subst, subsorts, overloads, applied);
     if (matches
-        && (decl->getAttributes().count("macro-rec")
-            || decl->getAttributes().count("alias-rec")
+        && (decl->attributes().contains(attribute_set::key::macro_rec)
+            || decl->attributes().contains(attribute_set::key::alias_rec)
             || !appliedRules.count(i))) {
       std::set<size_t> oldAppliedRules = appliedRules;
       appliedRules.insert(i);
@@ -1351,7 +1351,7 @@ KOREAliasDeclaration::getSubstitution(KORECompositePattern *subject) {
 }
 
 bool KORESymbolDeclaration::isAnywhere() const {
-  return getAttributes().count("anywhere");
+  return attributes().contains(attribute_set::key::anywhere);
 }
 
 void KOREModule::addAttribute(sptr<KORECompositePattern> Attribute) {
@@ -1641,9 +1641,9 @@ void KOREVariable::serialize_to(serializer &s) const {
 void kllvm::readMultimap(
     std::string const &name, KORESymbolDeclaration *decl,
     std::map<std::string, std::set<std::string>> &output,
-    std::string const &attName) {
-  if (decl->getAttributes().count(attName)) {
-    KORECompositePattern *att = decl->getAttributes().at(attName).get();
+    attribute_set::key attName) {
+  if (decl->attributes().contains(attName)) {
+    KORECompositePattern *att = decl->attributes().get(attName).get();
     for (auto const &pat : att->getArguments()) {
       auto *child = dynamic_cast<KORECompositePattern *>(pat.get());
       output[name].insert(child->getConstructor()->getName());

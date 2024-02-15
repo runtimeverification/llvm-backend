@@ -29,7 +29,7 @@ cl::opt<std::string> RuleLocation(
     cl::cat(KRuleCat));
 
 std::string getSource(KOREAxiomDeclaration *axiom) {
-  auto *sourceAtt = axiom->getAttributes().at(SOURCE_ATT).get();
+  auto *sourceAtt = axiom->attributes().get(attribute_set::key::source).get();
   assert(sourceAtt->getArguments().size() == 1);
 
   auto *strPattern
@@ -38,7 +38,8 @@ std::string getSource(KOREAxiomDeclaration *axiom) {
 }
 
 Location getLocation(KOREAxiomDeclaration *axiom) {
-  auto *locationAtt = axiom->getAttributes().at(LOCATION_ATT).get();
+  auto *locationAtt
+      = axiom->attributes().get(attribute_set::key::location).get();
   assert(locationAtt->getArguments().size() == 1);
 
   auto *strPattern
@@ -111,7 +112,7 @@ int main(int argc, char **argv) {
 
   // Iterate through axioms.
   for (auto *axiom : kore_ast.get()->getAxioms()) {
-    if (axiom->getAttributes().count(SOURCE_ATT)) {
+    if (axiom->attributes().contains(attribute_set::key::source)) {
       auto source = getSource(axiom);
       if (source.find(loc.filename) != std::string::npos) {
         auto source_loc = getLocation(axiom);

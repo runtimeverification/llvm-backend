@@ -685,10 +685,6 @@ public:
   void addObjectSortVariable(sptr<KORESortVariable> const &SortVariable);
   virtual void print(std::ostream &Out, unsigned indent = 0) const = 0;
 
-  std::unordered_map<std::string, sptr<KORECompositePattern>> const &
-  getAttributes() const {
-    return old_attributes;
-  }
   std::vector<sptr<KORESortVariable>> const &getObjectSortVariables() const {
     return objectSortVariables;
   }
@@ -856,10 +852,6 @@ public:
   void print(std::ostream &Out, unsigned indent = 0) const;
 
   std::string const &getName() const { return name; }
-  std::unordered_map<std::string, sptr<KORECompositePattern>> const &
-  getAttributes() const {
-    return old_attributes;
-  }
   std::vector<sptr<KOREDeclaration>> const &getDeclarations() const {
     return declarations;
   }
@@ -1001,10 +993,6 @@ public:
   KOREAxiomDeclaration *getAxiomByOrdinal(size_t ordinal) const {
     return ordinals.at(ordinal);
   }
-  std::unordered_map<std::string, sptr<KORECompositePattern>> const &
-  getAttributes() const {
-    return old_attributes;
-  }
   KORESymbolStringMapType const &getFreshFunctions() const {
     return freshFunctions;
   }
@@ -1013,7 +1001,7 @@ public:
 
 void readMultimap(
     std::string const &, KORESymbolDeclaration *,
-    std::map<std::string, std::set<std::string>> &, std::string const &);
+    std::map<std::string, std::set<std::string>> &, attribute_set::key);
 
 sptr<KOREPattern> stripRawTerm(sptr<KOREPattern> const &term);
 

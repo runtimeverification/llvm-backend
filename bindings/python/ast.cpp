@@ -125,10 +125,11 @@ void bind_ast(py::module_ &m) {
                 &KOREDeclaration::addObjectSortVariable)
             .def_property_readonly(
                 "object_sort_variables",
-                &KOREDeclaration::getObjectSortVariables)
-            .def("add_attribute", &KOREDeclaration::addAttribute)
-            .def_property_readonly(
-                "attributes", &KOREDeclaration::getAttributes);
+                &KOREDeclaration::getObjectSortVariables);
+  // FIXME.ATT
+  /* .def("add_attribute", &KOREDeclaration::addAttribute) */
+  /* .def_property_readonly( */
+  /*     "attributes", &KOREDeclaration::getAttributes); */
 
   py::class_<
       KORECompositeSortDeclaration,
@@ -185,17 +186,21 @@ void bind_ast(py::module_ &m) {
       .def("__repr__", print_repr_adapter<KOREModule>())
       .def_property_readonly("name", &KOREModule::getName)
       .def("add_declaration", &KOREModule::addDeclaration)
-      .def_property_readonly("declarations", &KOREModule::getDeclarations)
-      .def("add_attribute", &KOREModule::addAttribute)
-      .def_property_readonly("attributes", &KOREModule::getAttributes);
+      .def_property_readonly("declarations", &KOREModule::getDeclarations);
+
+  // FIXME.ATT
+  /* .def("add_attribute", &KOREModule::addAttribute) */
+  /* .def_property_readonly("attributes", &KOREModule::getAttributes); */
 
   py::class_<KOREDefinition, std::shared_ptr<KOREDefinition>>(ast, "Definition")
       .def(py::init(&KOREDefinition::Create))
       .def("__repr__", print_repr_adapter<KOREDefinition>())
       .def("add_module", &KOREDefinition::addModule)
-      .def_property_readonly("modules", &KOREDefinition::getModules)
-      .def("add_attribute", &KOREDefinition::addAttribute)
-      .def_property_readonly("attributes", &KOREDefinition::getAttributes);
+      .def_property_readonly("modules", &KOREDefinition::getModules);
+
+  // FIXME.ATT
+  /* .def("add_attribute", &KOREDefinition::addAttribute) */
+  /* .def_property_readonly("attributes", &KOREDefinition::getAttributes); */
 
   /* Data Types */
 

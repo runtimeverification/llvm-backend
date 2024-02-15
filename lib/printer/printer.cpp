@@ -259,18 +259,18 @@ PreprocessedPrintData getPrintData(
   for (auto const &entry : def->getSymbolDeclarations()) {
     std::string name = entry.first;
 
-    if (entry.second->getAttributes().count("format")) {
+    if (entry.second->attributes().contains(attribute_set::key::format)) {
       formats[name] = entry.second->getStringAttribute("format");
       terminals[name] = entry.second->getStringAttribute("terminals");
 
-      if (entry.second->getAttributes().count("assoc")) {
+      if (entry.second->attributes().contains(attribute_set::key::assoc)) {
         assocs.insert(name);
       }
-      if (entry.second->getAttributes().count("comm")) {
+      if (entry.second->attributes().contains(attribute_set::key::comm)) {
         comms.insert(name);
       }
 
-      if (entry.second->getAttributes().count("colors")) {
+      if (entry.second->attributes().contains(attribute_set::key::colors)) {
         std::string colorAtt = entry.second->getStringAttribute("colors");
         std::vector<std::string> color;
         size_t idx = 0;
@@ -287,20 +287,21 @@ PreprocessedPrintData getPrintData(
         colors[name] = color;
       }
 
-      if (entry.second->getAttributes().count("bracket")) {
+      if (entry.second->attributes().contains(attribute_set::key::bracket)) {
         brackets[entry.second->getSymbol()->getSort().get()].push_back(
             entry.second->getSymbol());
       }
 
-      readMultimap(name, entry.second, leftAssoc, "left");
-      readMultimap(name, entry.second, rightAssoc, "right");
-      readMultimap(name, entry.second, priorities, "priorities");
+      readMultimap(name, entry.second, leftAssoc, attribute_set::key::left);
+      readMultimap(name, entry.second, rightAssoc, attribute_set::key::right);
+      readMultimap(
+          name, entry.second, priorities, attribute_set::key::priorities);
     }
   }
 
   for (auto const &entry : def->getSortDeclarations()) {
     std::string name = entry.first;
-    if (entry.second->getAttributes().count("hook")) {
+    if (entry.second->attributes().contains(attribute_set::key::hook)) {
       hooks[name] = entry.second->getStringAttribute("hook");
     }
   }

@@ -269,7 +269,7 @@ void SwitchNode::codegen(Decision *d) {
         auto *BlockPtr
             = llvm::PointerType::getUnqual(llvm::StructType::getTypeByName(
                 d->Module->getContext(), BLOCK_STRUCT));
-        if (symbolDecl->getAttributes().count("binder")) {
+        if (symbolDecl->attributes().contains(attribute_set::key::binder)) {
           if (offset == 0) {
             Renamed = llvm::CallInst::Create(
                 getOrInsertFunction(
@@ -446,7 +446,7 @@ void FunctionNode::codegen(Decision *d) {
     } else if (isSideCondition) {
       size_t ordinal = std::stoll(function.substr(15));
       KOREAxiomDeclaration *axiom = d->Definition->getAxiomByOrdinal(ordinal);
-      if (axiom->getAttributes().count("label")) {
+      if (axiom->attributes().contains(attribute_set::key::label)) {
         debugName = axiom->getStringAttribute("label") + ".sc";
       }
     }
@@ -757,9 +757,9 @@ void makeEvalOrAnywhereFunction(
       = llvm::FunctionType::get(returnType, args, false);
   std::string name = fmt::format("eval_{}", ast_to_string(*function, 0, false));
   llvm::Function *matchFunc = getOrInsertFunction(module, name, funcType);
-  KORESymbolDeclaration *symbolDecl
+  [[maybe_unused]] KORESymbolDeclaration *symbolDecl
       = definition->getSymbolDeclarations().at(function->getName());
-  initDebugAxiom(symbolDecl->getAttributes());
+  /* initDebugAxiom(symbolDecl->getAttributes()); */ // FIXME.ATT
   initDebugFunction(
       function->getName(), name,
       getDebugFunctionType(debugReturnType, debugArgs), definition, matchFunc);
@@ -1141,7 +1141,7 @@ void makeMatchReasonFunctionWrapper(
   llvm::Function *matchFunc
       = getOrInsertFunction(module, wrapperName, funcType);
   std::string debugName = name;
-  if (axiom->getAttributes().count("label")) {
+  if (axiom->attributes().contains(attribute_set::key::label)) {
     debugName = axiom->getStringAttribute("label") + "_tailcc_" + ".match";
   }
   auto *debugType
@@ -1171,7 +1171,7 @@ void makeMatchReasonFunction(
   std::string name = "intern_match_" + std::to_string(axiom->getOrdinal());
   llvm::Function *matchFunc = getOrInsertFunction(module, name, funcType);
   std::string debugName = name;
-  if (axiom->getAttributes().count("label")) {
+  if (axiom->attributes().contains(attribute_set::key::label)) {
     debugName = axiom->getStringAttribute("label") + ".match";
   }
   auto *debugType

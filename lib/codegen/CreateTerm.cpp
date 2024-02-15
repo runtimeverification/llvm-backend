@@ -808,7 +808,7 @@ llvm::Value *CreateTerm::notInjectionCase(
   auto *BlockPtr = llvm::PointerType::getUnqual(
       llvm::StructType::getTypeByName(Module->getContext(), BLOCK_STRUCT));
   auto *bitcast = new llvm::BitCastInst(Block, BlockPtr, "", CurrentBlock);
-  if (symbolDecl->getAttributes().count("binder")) {
+  if (symbolDecl->attributes().contains(attribute_set::key::binder)) {
     auto *call = llvm::CallInst::Create(
         getOrInsertFunction(Module, "debruijnize", BlockPtr, BlockPtr), bitcast,
         "withIndices", CurrentBlock);
@@ -837,8 +837,8 @@ bool CreateTerm::populateStaticSet(KOREPattern *pattern) {
     if (symbol->getName() != "\\dv") {
       KORESymbolDeclaration *symbolDecl
           = Definition->getSymbolDeclarations().at(symbol->getName());
-      if (symbolDecl->getAttributes().count("function")
-          || (symbolDecl->getAttributes().count("anywhere")
+      if (symbolDecl->attributes().contains(attribute_set::key::function)
+          || (symbolDecl->attributes().contains(attribute_set::key::anywhere)
               && !isAnywhereOwise)) {
         can_be_static = false;
       }
@@ -876,25 +876,25 @@ std::pair<llvm::Value *, bool> CreateTerm::createAllocation(
     assert(symbol->isConcrete() && "not supported yet: sort variables");
     KORESymbolDeclaration *symbolDecl
         = Definition->getSymbolDeclarations().at(symbol->getName());
-    if (symbolDecl->getAttributes().count("function")
-        || (symbolDecl->getAttributes().count("anywhere")
+    if (symbolDecl->attributes().contains(attribute_set::key::function)
+        || (symbolDecl->attributes().contains(attribute_set::key::anywhere)
             && !isAnywhereOwise)) {
-      if (symbolDecl->getAttributes().count("hook")) {
+      if (symbolDecl->attributes().contains(attribute_set::key::hook)) {
         auto *sort
             = dynamic_cast<KORECompositeSort *>(constructor->getSort().get());
-        auto *strPattern
-            = dynamic_cast<KOREStringPattern *>(symbolDecl->getAttributes()
-                                                    .at("hook")
-                                                    .get()
-                                                    ->getArguments()[0]
-                                                    .get());
+        auto *strPattern = dynamic_cast<KOREStringPattern *>(
+            symbolDecl->attributes()
+                .get(attribute_set::key::hook)
+                .get()
+                ->getArguments()[0]
+                .get());
         std::string name = strPattern->getContents();
 
         ProofEvent p(Definition, Module);
         CurrentBlock = p.hookEvent_pre(name, CurrentBlock, locationStack);
         llvm::Value *val = createHook(
-            symbolDecl->getAttributes().at("hook").get(), constructor,
-            locationStack);
+            symbolDecl->attributes().get(attribute_set::key::hook).get(),
+            constructor, locationStack);
         CurrentBlock = p.hookEvent_post(val, sort, CurrentBlock);
 
         return std::make_pair(val, true);
@@ -908,7 +908,7 @@ std::pair<llvm::Value *, bool> CreateTerm::createAllocation(
         = dynamic_cast<KORECompositeSort *>(symbol->getArguments()[0].get())
               ->getCategory(Definition)
               .cat;
-        symbolDecl->getAttributes().count("sortInjection")
+        symbolDecl->attributes().contains(attribute_set::key::sort_injection)
         && (cat == SortCategory::Symbol)) {
       std::pair<llvm::Value *, bool> val = createAllocation(
           constructor->getArguments()[0].get(), locationStack);
@@ -1030,9 +1030,9 @@ bool makeFunction(
   llvm::FunctionType *funcType
       = llvm::FunctionType::get(returnType, paramTypes, false);
   llvm::Function *applyRule = getOrInsertFunction(Module, name, funcType);
-  initDebugAxiom(axiom->getAttributes());
+  /* initDebugAxiom(axiom->getAttributes()); */ // FIXME.ATT
   std::string debugName = name;
-  if (axiom->getAttributes().count("label")) {
+  if (axiom->attributes().contains(attribute_set::key::label)) {
     debugName = axiom->getStringAttribute("label") + postfix;
   }
   initDebugFunction(
@@ -1143,7 +1143,7 @@ std::string makeApplyRuleFunction(
       false, true, axiom, ".rhs");
 
   llvm::Function *applyRule = getOrInsertFunction(Module, name, funcType);
-  initDebugAxiom(axiom->getAttributes());
+  /* initDebugAxiom(axiom->getAttributes()); */ // FIXME.ATT
   initDebugFunction(
       name, name,
       getDebugFunctionType(

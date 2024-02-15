@@ -195,8 +195,8 @@ static void emitDataForSymbol(
     uint32_t tag = entry.first;
     auto *symbol = entry.second;
     auto *decl = definition->getSymbolDeclarations().at(symbol->getName());
-    bool isFunc = decl->getAttributes().count("function")
-                  || decl->getAttributes().count("anywhere");
+    bool isFunc = decl->attributes().contains(attribute_set::key::function)
+                  || decl->attributes().contains(attribute_set::key::anywhere);
     if (isEval && !isFunc) {
       continue;
     }
@@ -234,8 +234,8 @@ static std::pair<llvm::Value *, llvm::BasicBlock *> getFunction(
     KOREDefinition *def, llvm::Module *mod, KORESymbol *symbol,
     llvm::Instruction *inst) {
   auto *decl = def->getSymbolDeclarations().at(symbol->getName());
-  bool res = decl->getAttributes().count("function")
-             || decl->getAttributes().count("anywhere");
+  bool res = decl->attributes().contains(attribute_set::key::function)
+             || decl->attributes().contains(attribute_set::key::anywhere);
   return std::make_pair(
       llvm::ConstantInt::get(llvm::Type::getInt1Ty(mod->getContext()), res),
       inst->getParent());
@@ -250,7 +250,7 @@ static void emitIsSymbolAFunction(KOREDefinition *def, llvm::Module *mod) {
 static llvm::Constant *
 getBinder(KOREDefinition *def, llvm::Module *mod, KORESymbol *symbol) {
   auto *decl = def->getSymbolDeclarations().at(symbol->getName());
-  bool res = decl->getAttributes().count("binder");
+  bool res = decl->attributes().contains(attribute_set::key::binder);
   return llvm::ConstantInt::get(llvm::Type::getInt1Ty(mod->getContext()), res);
 }
 
@@ -875,22 +875,22 @@ static void visitCollection(
   auto *sortDecl
       = definition->getSortDeclarations().at(compositeSort->getName());
   llvm::Constant *concatPtr = nullptr;
-  if (sortDecl->getAttributes().count("concat")) {
-    auto *concat = (KORECompositePattern *)sortDecl->getAttributes()
-                       .at("concat")
+  if (sortDecl->attributes().contains(attribute_set::key::concat)) {
+    auto *concat = (KORECompositePattern *)sortDecl->attributes()
+                       .get(attribute_set::key::concat)
                        ->getArguments()[0]
                        .get();
     concatPtr = getSymbolNamePtr(concat->getConstructor(), nullptr, module);
   } else {
     concatPtr = llvm::ConstantPointerNull::get(llvm::Type::getInt8PtrTy(Ctx));
   }
-  auto *unit = (KORECompositePattern *)sortDecl->getAttributes()
-                   .at("unit")
+  auto *unit = (KORECompositePattern *)sortDecl->attributes()
+                   .get(attribute_set::key::unit)
                    ->getArguments()[0]
                    .get();
   auto *unitPtr = getSymbolNamePtr(unit->getConstructor(), nullptr, module);
-  auto *element = (KORECompositePattern *)sortDecl->getAttributes()
-                      .at("element")
+  auto *element = (KORECompositePattern *)sortDecl->attributes()
+                      .get(attribute_set::key::element)
                       ->getArguments()[0]
                       .get();
   auto *elementPtr

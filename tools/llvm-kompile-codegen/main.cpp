@@ -198,7 +198,8 @@ int main(int argc, char **argv) {
   for (auto const &entry : definition->getSymbols()) {
     auto *symbol = entry.second;
     auto *decl = definition->getSymbolDeclarations().at(symbol->getName());
-    if (decl->getAttributes().count("function") && !decl->isHooked()) {
+    if (decl->attributes().contains(attribute_set::key::function)
+        && !decl->isHooked()) {
       auto filename = get_indexed_filename(index, decl);
       auto *funcDt = parseYamlDecisionTree(
           mod.get(), filename, definition->getAllSymbols(),
