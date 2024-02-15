@@ -63,7 +63,8 @@ public:
    * The constructor name (`key_name` here) is parsed into a value of the `key`
    * enum; any unknown attribute names will be rejected.
    */
-  key add(std::shared_ptr<KORECompositePattern> att);
+  std::optional<attribute_set::key>
+  add(std::shared_ptr<KORECompositePattern> att);
 
   /**
    * Returns true if there is any attribute with the given key; the arguments of
@@ -89,8 +90,8 @@ public:
   std::string get_string(key k) const;
 
 private:
-  std::unordered_map<key, std::shared_ptr<KORECompositePattern>> attribute_map_
-      = {};
+  std::unordered_map<std::string, std::shared_ptr<KORECompositePattern>>
+      attribute_map_ = {};
 };
 
 } // namespace kllvm
