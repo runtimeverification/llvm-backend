@@ -67,7 +67,7 @@ void KOREDefinition::addModule(sptr<KOREModule> Module) {
 
 void KOREDefinition::addAttribute(sptr<KORECompositePattern> Attribute) {
   std::string name = Attribute->getConstructor()->getName();
-  attributes.insert({name, std::move(Attribute)});
+  old_attributes.insert({name, std::move(Attribute)});
 }
 
 void KOREDefinition::insertReservedSymbols() {
