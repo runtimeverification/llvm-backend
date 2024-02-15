@@ -72,10 +72,10 @@ void serializer::correct_emitted_size() {
   auto header_prefix_length = 11U;
   auto header_prefix_length_with_version = header_prefix_length + 8U;
 
-  auto bytes = detail::to_bytes(
-      uint64_t{buffer_.size() - header_prefix_length_with_version});
-
-  std::copy(bytes.begin(), bytes.end(), buffer_.begin() + header_prefix_length);
+  uint64_t new_size = buffer_.size() - header_prefix_length_with_version;
+  std::copy(
+      (char *)&new_size, (char *)(&new_size + 1),
+      buffer_.begin() + header_prefix_length);
 }
 
 void serializer::emit(char b) {
@@ -132,10 +132,7 @@ void serializer::emit_direct_string(std::string const &s) {
   intern_table_[s] = next_idx_;
 
   emit_length(s.size());
-
-  for (auto c : s) {
-    emit(c);
-  }
+  buffer_.append(s);
 }
 
 } // namespace kllvm
