@@ -44,6 +44,13 @@ public:
     fresh_generator,
     priority,
     terminals,
+    idem,
+    functional,
+    constructor,
+    total,
+    ceil,
+    non_executable,
+    simplification,
   };
 
   attribute_set() = default;

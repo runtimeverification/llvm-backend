@@ -674,14 +674,12 @@ private:
 class KOREDeclaration {
 protected:
   attribute_set attributes_;
-  std::unordered_map<std::string, sptr<KORECompositePattern>> old_attributes;
   std::vector<sptr<KORESortVariable>> objectSortVariables;
 
 public:
   attribute_set &attributes() { return attributes_; }
   attribute_set const &attributes() const { return attributes_; }
 
-  void addAttribute(sptr<KORECompositePattern> Attribute);
   void addObjectSortVariable(sptr<KORESortVariable> const &SortVariable);
   virtual void print(std::ostream &Out, unsigned indent = 0) const = 0;
 
@@ -835,7 +833,6 @@ private:
   std::string name;
   std::vector<sptr<KOREDeclaration>> declarations;
   attribute_set attributes_;
-  std::unordered_map<std::string, sptr<KORECompositePattern>> old_attributes;
 
 public:
   static ptr<KOREModule> Create(std::string const &Name) {
@@ -845,7 +842,6 @@ public:
   attribute_set &attributes() { return attributes_; }
   attribute_set const &attributes() const { return attributes_; }
 
-  void addAttribute(sptr<KORECompositePattern> Attribute);
   void addDeclaration(sptr<KOREDeclaration> Declaration);
   void print(std::ostream &Out, unsigned indent = 0) const;
 
@@ -902,7 +898,6 @@ private:
   KOREAxiomMapType ordinals;
 
   std::vector<sptr<KOREModule>> modules;
-  std::unordered_map<std::string, sptr<KORECompositePattern>> old_attributes;
   attribute_set attributes_;
 
   /* an automatically computed list of all the axioms in the definition */
@@ -936,7 +931,6 @@ public:
   attribute_set const &attributes() const { return attributes_; }
 
   void addModule(sptr<KOREModule> Module);
-  void addAttribute(sptr<KORECompositePattern> Attribute);
   void print(std::ostream &Out, unsigned indent = 0) const;
 
   /*

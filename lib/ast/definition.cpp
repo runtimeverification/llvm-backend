@@ -66,11 +66,6 @@ void KOREDefinition::addModule(sptr<KOREModule> Module) {
   modules.push_back(std::move(Module));
 }
 
-void KOREDefinition::addAttribute(sptr<KORECompositePattern> Attribute) {
-  std::string name = Attribute->getConstructor()->getName();
-  old_attributes.insert({name, std::move(Attribute)});
-}
-
 void KOREDefinition::insertReservedSymbols() {
   auto mod = KOREModule::Create("K-RAW-TERM");
   auto decl = KORESymbolDeclaration::Create("rawTerm", true);

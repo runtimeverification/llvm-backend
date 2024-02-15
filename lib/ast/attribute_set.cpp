@@ -38,6 +38,13 @@ attribute_set::key key_from_string(std::string const &str) {
       {"freshGenerator", attribute_set::key::fresh_generator},
       {"priority", attribute_set::key::priority},
       {"terminals", attribute_set::key::terminals},
+      {"idem", attribute_set::key::idem},
+      {"functional", attribute_set::key::functional},
+      {"constructor", attribute_set::key::constructor},
+      {"total", attribute_set::key::total},
+      {"ceil", attribute_set::key::ceil},
+      {"non-executable", attribute_set::key::non_executable},
+      {"simplification", attribute_set::key::simplification},
   };
 
   return table.at(str);

@@ -9,6 +9,7 @@
 #include <fmt/format.h>
 
 #include <algorithm>
+#include <array>
 #include <cassert>
 #include <cctype>
 #include <cstdio>
@@ -1259,11 +1260,6 @@ bool KOREStringPattern::matches(
   return subj->contents == contents;
 }
 
-void KOREDeclaration::addAttribute(sptr<KORECompositePattern> Attribute) {
-  std::string name = Attribute->getConstructor()->getName();
-  old_attributes.insert({name, std::move(Attribute)});
-}
-
 void KOREDeclaration::addObjectSortVariable(
     sptr<KORESortVariable> const &SortVariable) {
   objectSortVariables.push_back(SortVariable);
@@ -1273,26 +1269,19 @@ void KOREAxiomDeclaration::addPattern(sptr<KOREPattern> Pattern) {
   pattern = std::move(Pattern);
 }
 
-static std::string const ASSOC = "assoc";
-static std::string const COMM = "comm";
-static std::string const IDEM = "idem";
-static std::string const UNIT = "unit";
-static std::string const FUNCTIONAL = "functional";
-static std::string const TOTAL = "total";
-static std::string const SUBSORT = "subsort";
-static std::string const CONSTRUCTOR = "constructor";
-static std::string const CEIL = "ceil";
-static std::string const NON_EXECUTABLE = "non-executable";
-static std::string const SIMPLIFICATION = "simplification";
-
 bool KOREAxiomDeclaration::isRequired() const {
-  return !old_attributes.count(ASSOC) && !old_attributes.count(COMM)
-         && !old_attributes.count(IDEM) && !old_attributes.count(UNIT)
-         && !old_attributes.count(FUNCTIONAL)
-         && !old_attributes.count(CONSTRUCTOR) && !old_attributes.count(TOTAL)
-         && !old_attributes.count(SUBSORT) && !old_attributes.count(CEIL)
-         && !old_attributes.count(NON_EXECUTABLE)
-         && !old_attributes.count(SIMPLIFICATION);
+  constexpr auto keys_to_drop = std::array{
+      attribute_set::key::assoc,          attribute_set::key::comm,
+      attribute_set::key::idem,           attribute_set::key::unit,
+      attribute_set::key::functional,     attribute_set::key::constructor,
+      attribute_set::key::total,          attribute_set::key::subsort,
+      attribute_set::key::ceil,           attribute_set::key::non_executable,
+      attribute_set::key::simplification,
+  };
+
+  return std::none_of(
+      keys_to_drop.begin(), keys_to_drop.end(),
+      [this](auto key) { return attributes().contains(key); });
 }
 
 bool KOREAxiomDeclaration::isTopAxiom() const {
@@ -1344,11 +1333,6 @@ KOREAliasDeclaration::getSubstitution(KORECompositePattern *subject) {
 
 bool KORESymbolDeclaration::isAnywhere() const {
   return attributes().contains(attribute_set::key::anywhere);
-}
-
-void KOREModule::addAttribute(sptr<KORECompositePattern> Attribute) {
-  std::string name = Attribute->getConstructor()->getName();
-  old_attributes.insert({name, std::move(Attribute)});
 }
 
 void KOREModule::addDeclaration(sptr<KOREDeclaration> Declaration) {
@@ -1444,22 +1428,20 @@ void KOREStringPattern::print(std::ostream &Out, unsigned indent) const {
 }
 
 static void printAttributeList(
-    std::ostream &Out,
-    std::unordered_map<std::string, sptr<KORECompositePattern>> const
-        &attributes,
-    unsigned indent = 0) {
+    std::ostream &Out, attribute_set const &attributes, unsigned indent = 0) {
 
-  std::string Indent(indent, ' ');
-  Out << Indent << "[";
-  bool isFirst = true;
-  for (auto const &Pattern : attributes) {
-    if (!isFirst) {
-      Out << ",";
-    }
-    Pattern.second->print(Out);
-    isFirst = false;
-  }
-  Out << "]";
+  // FIXME.ATT
+  /* std::string Indent(indent, ' '); */
+  /* Out << Indent << "["; */
+  /* bool isFirst = true; */
+  /* for (auto const &Pattern : attributes) { */
+  /*   if (!isFirst) { */
+  /*     Out << ","; */
+  /*   } */
+  /*   Pattern.second->print(Out); */
+  /*   isFirst = false; */
+  /* } */
+  /* Out << "]"; */
 }
 
 void KOREDeclaration::printSortVariables(std::ostream &Out) const {
@@ -1481,7 +1463,7 @@ void KORECompositeSortDeclaration::print(
   Out << Indent << (_isHooked ? "hooked-sort " : "sort ") << sortName;
   printSortVariables(Out);
   Out << " ";
-  printAttributeList(Out, old_attributes);
+  printAttributeList(Out, attributes());
 }
 
 void KORESymbolDeclaration::print(std::ostream &Out, unsigned indent) const {
@@ -1501,7 +1483,7 @@ void KORESymbolDeclaration::print(std::ostream &Out, unsigned indent) const {
   Out << ") : ";
   symbol->getSort()->print(Out);
   Out << " ";
-  printAttributeList(Out, old_attributes);
+  printAttributeList(Out, attributes());
 }
 
 void KOREAliasDeclaration::print(std::ostream &Out, unsigned indent) const {
@@ -1524,7 +1506,7 @@ void KOREAliasDeclaration::print(std::ostream &Out, unsigned indent) const {
   Out << " := ";
   pattern->print(Out);
   Out << " ";
-  printAttributeList(Out, old_attributes);
+  printAttributeList(Out, attributes());
 }
 
 void KOREAxiomDeclaration::print(std::ostream &Out, unsigned indent) const {
@@ -1533,7 +1515,7 @@ void KOREAxiomDeclaration::print(std::ostream &Out, unsigned indent) const {
   printSortVariables(Out);
   pattern->print(Out);
   Out << " ";
-  printAttributeList(Out, old_attributes);
+  printAttributeList(Out, attributes());
 }
 
 void KOREModuleImportDeclaration::print(
@@ -1541,7 +1523,7 @@ void KOREModuleImportDeclaration::print(
   std::string Indent(indent, ' ');
   Out << Indent << "import " << moduleName;
   Out << " ";
-  printAttributeList(Out, old_attributes);
+  printAttributeList(Out, attributes());
 }
 
 void KOREModule::print(std::ostream &Out, unsigned indent) const {
@@ -1557,11 +1539,11 @@ void KOREModule::print(std::ostream &Out, unsigned indent) const {
     isFirst = false;
   }
   Out << Indent << "endmodule\n";
-  printAttributeList(Out, old_attributes, indent);
+  printAttributeList(Out, attributes(), indent);
 }
 
 void KOREDefinition::print(std::ostream &Out, unsigned indent) const {
-  printAttributeList(Out, old_attributes, indent);
+  printAttributeList(Out, attributes(), indent);
   Out << "\n";
   for (auto const &Module : modules) {
     Out << "\n";
