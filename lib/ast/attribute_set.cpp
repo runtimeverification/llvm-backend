@@ -10,7 +10,7 @@ namespace {
 std::unordered_map<attribute_set::key, std::string> const &attribute_table() {
   static std::unordered_map<attribute_set::key, std::string> table = {
       {attribute_set::key::alias, "alias"},
-      {attribute_set::key::alias_rec, "alias_rec"},
+      {attribute_set::key::alias_rec, "alias-rec"},
       {attribute_set::key::anywhere, "anywhere"},
       {attribute_set::key::assoc, "assoc"},
       {attribute_set::key::binder, "binder"},
@@ -32,7 +32,7 @@ std::unordered_map<attribute_set::key, std::string> const &attribute_table() {
       {attribute_set::key::location,
        "org'Stop'kframework'Stop'attributes'Stop'Location"},
       {attribute_set::key::macro, "macro"},
-      {attribute_set::key::macro_rec, "macro_rec"},
+      {attribute_set::key::macro_rec, "macro-rec"},
       {attribute_set::key::nat, "nat"},
       {attribute_set::key::non_executable, "non-executable"},
       {attribute_set::key::overload, "overload"},
