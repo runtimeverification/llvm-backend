@@ -422,8 +422,8 @@ object Parser {
       Seq()
     }
     axioms
-      .filter(hasAtt(_, "overload"))
-      .map(getAtt(_, "overload") match {
+      .filter(hasAtt(_, "symbol-overload"))
+      .map(getAtt(_, "symbol-overload") match {
         case Some(Application(_, args)) =>
           assert(args.size == 2)
           (args.head, args(1)) match {

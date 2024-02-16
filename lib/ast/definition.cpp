@@ -1,5 +1,6 @@
 #include <kllvm/ast/AST.h>
 
+#include <iostream>
 #include <string>
 #include <unordered_set>
 
@@ -97,8 +98,9 @@ SymbolMap KOREDefinition::getOverloads() const {
   auto overloads = SymbolMap{};
 
   for (auto *axiom : axioms) {
-    if (axiom->attributes().contains(attribute_set::key::overload)) {
-      auto const &att = axiom->attributes().get(attribute_set::key::overload);
+    if (axiom->attributes().contains(attribute_set::key::symbol_overload)) {
+      auto const &att
+          = axiom->attributes().get(attribute_set::key::symbol_overload);
       auto *innerSymbol = std::dynamic_pointer_cast<KORECompositePattern>(
                               att->getArguments()[1])
                               ->getConstructor();
