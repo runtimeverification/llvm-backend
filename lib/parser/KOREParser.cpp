@@ -105,11 +105,11 @@ void KOREParser::attributes(Node *node) {
 template <typename Node>
 void KOREParser::attributesNE(Node *node) {
   auto pat = _applicationPattern();
-  node->addAttribute(std::move(pat));
+  node->attributes().add(std::move(pat));
   while (peek() == token::COMMA) {
     consume(token::COMMA);
     pat = _applicationPattern();
-    node->addAttribute(std::move(pat));
+    node->attributes().add(std::move(pat));
   }
 }
 

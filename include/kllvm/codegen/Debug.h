@@ -17,9 +17,6 @@
 
 namespace kllvm {
 
-extern std::string SOURCE_ATT;
-extern std::string LOCATION_ATT;
-
 void initDebugInfo(llvm::Module *module, std::string const &filename);
 void finalizeDebugInfo(void);
 
@@ -28,8 +25,7 @@ void initDebugFunction(
     llvm::DISubroutineType *type, KOREDefinition *definition,
     llvm::Function *func);
 
-void initDebugAxiom(
-    std::unordered_map<std::string, sptr<KORECompositePattern>> const &att);
+void initDebugAxiom(attribute_set const &att);
 void initDebugParam(
     llvm::Function *func, unsigned argNo, std::string const &name,
     ValueType type, std::string const &typeName);

@@ -1,6 +1,8 @@
 #ifndef AST_H
 #define AST_H
 
+#include <kllvm/ast/attribute_set.h>
+
 #include <boost/container_hash/extensions.hpp>
 
 #include <cassert>
@@ -671,24 +673,20 @@ private:
 // KOREDeclaration
 class KOREDeclaration {
 protected:
-  std::unordered_map<std::string, sptr<KORECompositePattern>> attributes;
+  attribute_set attributes_;
   std::vector<sptr<KORESortVariable>> objectSortVariables;
 
 public:
-  void addAttribute(sptr<KORECompositePattern> Attribute);
+  attribute_set &attributes() { return attributes_; }
+  attribute_set const &attributes() const { return attributes_; }
+
   void addObjectSortVariable(sptr<KORESortVariable> const &SortVariable);
   virtual void print(std::ostream &Out, unsigned indent = 0) const = 0;
 
-  std::unordered_map<std::string, sptr<KORECompositePattern>> const &
-  getAttributes() const {
-    return attributes;
-  }
   std::vector<sptr<KORESortVariable>> const &getObjectSortVariables() const {
     return objectSortVariables;
   }
   virtual ~KOREDeclaration() = default;
-
-  std::string getStringAttribute(std::string const &name) const;
 
 protected:
   void printSortVariables(std::ostream &Out) const;
@@ -834,22 +832,20 @@ class KOREModule {
 private:
   std::string name;
   std::vector<sptr<KOREDeclaration>> declarations;
-  std::unordered_map<std::string, sptr<KORECompositePattern>> attributes;
+  attribute_set attributes_;
 
 public:
   static ptr<KOREModule> Create(std::string const &Name) {
     return ptr<KOREModule>(new KOREModule(Name));
   }
 
-  void addAttribute(sptr<KORECompositePattern> Attribute);
+  attribute_set &attributes() { return attributes_; }
+  attribute_set const &attributes() const { return attributes_; }
+
   void addDeclaration(sptr<KOREDeclaration> Declaration);
   void print(std::ostream &Out, unsigned indent = 0) const;
 
   std::string const &getName() const { return name; }
-  std::unordered_map<std::string, sptr<KORECompositePattern>> const &
-  getAttributes() const {
-    return attributes;
-  }
   std::vector<sptr<KOREDeclaration>> const &getDeclarations() const {
     return declarations;
   }
@@ -902,7 +898,8 @@ private:
   KOREAxiomMapType ordinals;
 
   std::vector<sptr<KOREModule>> modules;
-  std::unordered_map<std::string, sptr<KORECompositePattern>> attributes;
+  attribute_set attributes_;
+
   /* an automatically computed list of all the axioms in the definition */
   std::list<KOREAxiomDeclaration *> axioms;
 
@@ -930,8 +927,10 @@ public:
      user in the definition. */
   void preprocess();
 
+  attribute_set &attributes() { return attributes_; }
+  attribute_set const &attributes() const { return attributes_; }
+
   void addModule(sptr<KOREModule> Module);
-  void addAttribute(sptr<KORECompositePattern> Attribute);
   void print(std::ostream &Out, unsigned indent = 0) const;
 
   /*
@@ -986,10 +985,6 @@ public:
   KOREAxiomDeclaration *getAxiomByOrdinal(size_t ordinal) const {
     return ordinals.at(ordinal);
   }
-  std::unordered_map<std::string, sptr<KORECompositePattern>> const &
-  getAttributes() const {
-    return attributes;
-  }
   KORESymbolStringMapType const &getFreshFunctions() const {
     return freshFunctions;
   }
@@ -998,7 +993,7 @@ public:
 
 void readMultimap(
     std::string const &, KORESymbolDeclaration *,
-    std::map<std::string, std::set<std::string>> &, std::string const &);
+    std::map<std::string, std::set<std::string>> &, attribute_set::key);
 
 sptr<KOREPattern> stripRawTerm(sptr<KOREPattern> const &term);
 
