@@ -36,17 +36,17 @@
     "immer-src": {
       "flake": false,
       "locked": {
-        "lastModified": 1708019546,
-        "narHash": "sha256-IOsfC8uu8GPW5dXbr0gOnHkWUVjcGQPdhpuVO4dFG84=",
+        "lastModified": 1708038459,
+        "narHash": "sha256-aV/mQFuPzioy1PxROc85ypeP7/d0nn+xcBPzy9taw2s=",
         "owner": "runtimeverification",
         "repo": "immer",
-        "rev": "7df6c30da36a92ae02b2ecee9b3887ed44b1a50e",
+        "rev": "4b0914f0b2acb33befe0ba4cd3a7954f2687e9bb",
         "type": "github"
       },
       "original": {
         "owner": "runtimeverification",
         "repo": "immer",
-        "rev": "7df6c30da36a92ae02b2ecee9b3887ed44b1a50e",
+        "rev": "4b0914f0b2acb33befe0ba4cd3a7954f2687e9bb",
         "type": "github"
       }
     },
