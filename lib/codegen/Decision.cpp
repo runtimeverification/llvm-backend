@@ -429,7 +429,7 @@ void FunctionNode::codegen(Decision *d) {
     ProofEvent p(d->Definition, d->Module);
     size_t ordinal = std::stoll(function.substr(15));
     KOREAxiomDeclaration *axiom = d->Definition->getAxiomByOrdinal(ordinal);
-    d->CurrentBlock = p.sideConditionEvent(axiom, args, d->CurrentBlock);
+    d->CurrentBlock = p.sideConditionEvent_pre(axiom, args, d->CurrentBlock);
   }
 
   CreateTerm creator(
@@ -438,6 +438,14 @@ void FunctionNode::codegen(Decision *d) {
       function, cat, args, function.substr(0, 5) == "hook_", false);
   Call->setName(name.substr(0, max_name_length));
   d->store(std::make_pair(name, type), Call);
+
+  if (isSideCondition) {
+    ProofEvent p(d->Definition, d->Module);
+    size_t ordinal = std::stoll(function.substr(15));
+    KOREAxiomDeclaration *axiom = d->Definition->getAxiomByOrdinal(ordinal);
+    d->CurrentBlock = p.sideConditionEvent_post(axiom, Call, d->CurrentBlock);
+  }
+
   if (d->FailPattern) {
     std::string debugName = function;
     if (function.substr(0, 5) == "hook_") {

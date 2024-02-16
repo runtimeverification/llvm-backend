@@ -32,6 +32,7 @@ constexpr uint64_t hook_event_sentinel = detail::word(0xAA);
 constexpr uint64_t hook_result_sentinel = detail::word(0xBB);
 constexpr uint64_t rule_event_sentinel = detail::word(0x22);
 constexpr uint64_t side_condition_event_sentinel = detail::word(0xEE);
+constexpr uint64_t side_condition_end_sentinel = detail::word(0x33);
 
 class LLVMStepEvent : public std::enable_shared_from_this<LLVMStepEvent> {
 public:
@@ -89,6 +90,34 @@ public:
   static sptr<LLVMSideConditionEvent> Create(uint64_t _ruleOrdinal) {
     return sptr<LLVMSideConditionEvent>(
         new LLVMSideConditionEvent(_ruleOrdinal));
+  }
+
+  virtual void print(std::ostream &Out, unsigned indent = 0u) const override;
+};
+
+class LLVMSideConditionEndEvent : public LLVMStepEvent {
+private:
+  uint64_t ruleOrdinal;
+  sptr<KOREPattern> korePattern;
+  uint64_t patternLength;
+
+  LLVMSideConditionEndEvent(uint64_t _ruleOrdinal)
+      : ruleOrdinal(_ruleOrdinal)
+      , korePattern(nullptr)
+      , patternLength(0u) { }
+
+public:
+  static sptr<LLVMSideConditionEndEvent> Create(uint64_t _ruleOrdinal) {
+    return sptr<LLVMSideConditionEndEvent>(
+        new LLVMSideConditionEndEvent(_ruleOrdinal));
+  }
+
+  uint64_t getRuleOrdinal() const { return ruleOrdinal; }
+  sptr<KOREPattern> getKOREPattern() const { return korePattern; }
+  uint64_t getPatternLength() const { return patternLength; }
+  void setKOREPattern(sptr<KOREPattern> _korePattern, uint64_t _patternLength) {
+    korePattern = _korePattern;
+    patternLength = _patternLength;
   }
 
   virtual void print(std::ostream &Out, unsigned indent = 0u) const override;
@@ -210,7 +239,7 @@ public:
 
 class ProofTraceParser {
 public:
-  static constexpr uint32_t expectedVersion = 4u;
+  static constexpr uint32_t expectedVersion = 5u;
 
 private:
   bool verbose;
@@ -500,6 +529,33 @@ private:
   }
 
   template <typename It>
+  sptr<LLVMSideConditionEndEvent> parse_side_condition_end(It &ptr, It end) {
+    if (!check_word(ptr, end, side_condition_end_sentinel)) {
+      return nullptr;
+    }
+
+    uint64_t ordinal;
+    if (!parse_ordinal(ptr, end, ordinal)) {
+      return nullptr;
+    }
+
+    auto event = LLVMSideConditionEndEvent::Create(ordinal);
+
+    uint64_t pattern_len;
+    auto kore_term = parse_kore_term(ptr, end, pattern_len);
+    if (!kore_term) {
+      return nullptr;
+    }
+    event->setKOREPattern(kore_term, pattern_len);
+
+    if (!check_word(ptr, end, kore_end_sentinel)) {
+      return nullptr;
+    }
+
+    return event;
+  }
+
+  template <typename It>
   bool parse_argument(It &ptr, It end, LLVMEvent &event) {
     if (std::distance(ptr, end) >= 1u && detail::peek(ptr) == '\x7F') {
       uint64_t pattern_len;
@@ -564,6 +620,8 @@ private:
     case rule_event_sentinel: return parse_rule(ptr, end);
 
     case side_condition_event_sentinel: return parse_side_condition(ptr, end);
+
+    case side_condition_end_sentinel: return parse_side_condition_end(ptr, end);
 
     default: return nullptr;
     }

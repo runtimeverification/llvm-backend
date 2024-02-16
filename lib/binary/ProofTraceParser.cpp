@@ -24,8 +24,17 @@ void LLVMRuleEvent::print(std::ostream &Out, unsigned indent) const {
 void LLVMSideConditionEvent::print(std::ostream &Out, unsigned indent) const {
   std::string Indent(indent * indent_size, ' ');
   Out << fmt::format(
-      "{}side condition: {} {}\n", Indent, ruleOrdinal, substitution.size());
+      "{}side condition entry: {} {}\n", Indent, ruleOrdinal,
+      substitution.size());
   printSubstitution(Out, indent + 1U);
+}
+
+void LLVMSideConditionEndEvent::print(
+    std::ostream &Out, unsigned indent) const {
+  std::string Indent(indent * indent_size, ' ');
+  Out << fmt::format(
+      "{}side condition exit: {} kore[{}]\n", Indent, ruleOrdinal,
+      patternLength);
 }
 
 void LLVMFunctionEvent::print(std::ostream &Out, unsigned indent) const {
