@@ -140,6 +140,7 @@ void serializer::emit_direct_string(std::string const &s) {
 
   emit_length(s.size());
   buffer_.append(s);
+  next_idx_ += s.size();
 }
 
 } // namespace kllvm
