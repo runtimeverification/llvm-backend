@@ -238,13 +238,16 @@ object Parser {
         Some((None, B.Rewrites(s, l, r), splitPredicate(req), splitPredicate(ens)))
       case Rewrites(s, And(_, l +: req +: Seq()), And(_, r +: ens +: Seq())) =>
         Some((None, B.Rewrites(s, l, r), splitPredicate(req), splitPredicate(ens)))
+      case Rewrites(s, And(_, l +: req +: Seq()), r @ Application(_, _)) =>
+        Some((None, B.Rewrites(s, l, r), splitPredicate(req), None))
       case _ => None
     }
 
   private def splitPredicate(pat: Pattern): Option[Pattern] =
     pat match {
-      case Top(_)               => None
-      case Equals(_, _, pat, _) => Some(pat)
+      case Top(_)                                                              => None
+      case Equals(_, _, pat, DomainValue(CompoundSort("SortBool", _), "true")) => Some(pat)
+      case _                                                                   => Some(pat)
     }
 
   private def getPatterns(pat: Pattern): List[Pattern] =

@@ -36,7 +36,8 @@ KOREDefinition::getSortsHookedTo(std::string const &hookName) const {
 
   for (auto const &[name, decl] : getSortDeclarations()) {
     if (decl->isHooked()) {
-      if (auto hook = decl->getStringAttribute("hook"); hook == hookName) {
+      if (auto hook = decl->attributes().get_string(attribute_set::key::hook);
+          hook == hookName) {
         ret.insert(name);
       }
     }
@@ -65,11 +66,6 @@ void KOREDefinition::addModule(sptr<KOREModule> Module) {
   modules.push_back(std::move(Module));
 }
 
-void KOREDefinition::addAttribute(sptr<KORECompositePattern> Attribute) {
-  std::string name = Attribute->getConstructor()->getName();
-  attributes.insert({name, std::move(Attribute)});
-}
-
 void KOREDefinition::insertReservedSymbols() {
   auto mod = KOREModule::Create("K-RAW-TERM");
   auto decl = KORESymbolDeclaration::Create("rawTerm", true);
@@ -86,8 +82,8 @@ SubsortMap KOREDefinition::getSubsorts() const {
   auto subsorts = SubsortMap{};
 
   for (auto *axiom : axioms) {
-    if (axiom->getAttributes().count("subsort")) {
-      auto const &att = axiom->getAttributes().at("subsort");
+    if (axiom->attributes().contains(attribute_set::key::subsort)) {
+      auto const &att = axiom->attributes().get(attribute_set::key::subsort);
       auto const &innerSort = att->getConstructor()->getFormalArguments()[0];
       auto const &outerSort = att->getConstructor()->getFormalArguments()[1];
       subsorts[innerSort.get()].insert(outerSort.get());
@@ -101,8 +97,8 @@ SymbolMap KOREDefinition::getOverloads() const {
   auto overloads = SymbolMap{};
 
   for (auto *axiom : axioms) {
-    if (axiom->getAttributes().count("overload")) {
-      auto const &att = axiom->getAttributes().at("overload");
+    if (axiom->attributes().contains(attribute_set::key::overload)) {
+      auto const &att = axiom->attributes().get(attribute_set::key::overload);
       auto *innerSymbol = std::dynamic_pointer_cast<KORECompositePattern>(
                               att->getArguments()[1])
                               ->getConstructor();
@@ -126,7 +122,8 @@ void KOREDefinition::preprocess() {
   auto symbols = std::map<std::string, std::vector<KORESymbol *>>{};
   unsigned nextOrdinal = 0;
   for (auto const &decl : symbolDeclarations) {
-    if (decl.second->getAttributes().count("freshGenerator")) {
+    if (decl.second->attributes().contains(
+            attribute_set::key::fresh_generator)) {
       auto sort = decl.second->getSymbol()->getSort();
       if (sort->isConcrete()) {
         freshFunctions[dynamic_cast<KORECompositeSort *>(sort.get())->getName()]
@@ -213,7 +210,7 @@ void KOREDefinition::preprocess() {
           symbol->firstTag = range.first;
           symbol->lastTag = range.second;
           auto *decl = symbolDeclarations.at(symbol->getName());
-          if (decl->getAttributes().count("sortInjection")) {
+          if (decl->attributes().contains(attribute_set::key::sort_injection)) {
             injSymbol = symbol;
           }
         }
