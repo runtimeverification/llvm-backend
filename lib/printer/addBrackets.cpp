@@ -303,7 +303,8 @@ bool isPriorityWrong(
     return true;
   }
   if (data.rightAssoc.contains(outerName)
-      && data.rightAssoc.at(outerName).contains(innerName) && terminalPos == 0) {
+      && data.rightAssoc.at(outerName).contains(innerName)
+      && terminalPos == 0) {
     return true;
   }
   return false;

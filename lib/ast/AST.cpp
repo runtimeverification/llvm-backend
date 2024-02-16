@@ -1187,7 +1187,8 @@ bool KORECompositePattern::matches(
       }
       sptr<KORESort> a = subj->getConstructor()->getFormalArguments()[0];
       sptr<KORESort> b = getConstructor()->getFormalArguments()[0];
-      if (subsorts.contains(b.get()) && subsorts.at(b.get()).contains(a.get())) {
+      if (subsorts.contains(b.get())
+          && subsorts.at(b.get()).contains(a.get())) {
         sptr<KORECompositePattern> ba = KORECompositePattern::Create("inj");
         ba->getConstructor()->addFormalArgument(b);
         ba->getConstructor()->addFormalArgument(a);
@@ -1195,7 +1196,8 @@ bool KORECompositePattern::matches(
         ba->addArgument(arguments[0]);
         return ba->matches(subst, subsorts, overloads, subj->getArguments()[0]);
       }
-      if (subsorts.contains(a.get()) && subsorts.at(a.get()).contains(b.get())) {
+      if (subsorts.contains(a.get())
+          && subsorts.at(a.get()).contains(b.get())) {
         sptr<KORECompositePattern> ab = KORECompositePattern::Create("inj");
         ab->getConstructor()->addFormalArgument(a);
         ab->getConstructor()->addFormalArgument(b);
