@@ -304,7 +304,7 @@ ProofEvent::functionEvent_post(llvm::BasicBlock *current_block) {
   return merge_block;
 }
 
-llvm::BasicBlock *ProofEvent::sideConditionEvent(
+llvm::BasicBlock *ProofEvent::sideConditionEvent_pre(
     KOREAxiomDeclaration *axiom, std::vector<llvm::Value *> const &args,
     llvm::BasicBlock *current_block) {
   if (!ProofHintInstrumentation) {
@@ -312,7 +312,7 @@ llvm::BasicBlock *ProofEvent::sideConditionEvent(
   }
 
   auto [true_block, merge_block, outputFile]
-      = eventPrelude("side_condition", current_block);
+      = eventPrelude("side_condition_pre", current_block);
 
   size_t ordinal = axiom->getOrdinal();
   size_t arity = args.size();
@@ -337,6 +337,31 @@ llvm::BasicBlock *ProofEvent::sideConditionEvent(
     emitSerializeTerm(*sort, outputFile, val, true_block);
     emitWriteUInt64(outputFile, detail::word(0xCC), true_block);
   }
+
+  llvm::BranchInst::Create(merge_block, true_block);
+
+  return merge_block;
+}
+
+llvm::BasicBlock *ProofEvent::sideConditionEvent_post(
+    KOREAxiomDeclaration *axiom, llvm::Value *check_result,
+    llvm::BasicBlock *current_block) {
+  if (!ProofHintInstrumentation) {
+    return current_block;
+  }
+
+  auto [true_block, merge_block, outputFile]
+      = eventPrelude("side_condition_post", current_block);
+
+  size_t ordinal = axiom->getOrdinal();
+
+  auto check_result_sort = std::dynamic_pointer_cast<KORECompositeSort>(
+      axiom->getRequires()->getSort());
+
+  emitWriteUInt64(outputFile, detail::word(0x33), true_block);
+  emitWriteUInt64(outputFile, ordinal, true_block);
+  emitSerializeTerm(*check_result_sort, outputFile, check_result, true_block);
+  emitWriteUInt64(outputFile, detail::word(0xCC), true_block);
 
   llvm::BranchInst::Create(merge_block, true_block);
 
