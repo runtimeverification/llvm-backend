@@ -419,7 +419,7 @@ emitGetTagForFreshSort(KOREDefinition *definition, llvm::Module *module) {
   bool hasCase = false;
   for (auto const &entry : sorts) {
     std::string name = entry.first;
-    if (!definition->getFreshFunctions().count(name)) {
+    if (!definition->getFreshFunctions().contains(name)) {
       continue;
     }
     hasCase = true;

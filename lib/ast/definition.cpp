@@ -171,11 +171,11 @@ void KOREDefinition::preprocess() {
     uint32_t firstTag = nextSymbol;
     for (auto *symbol : entry.second) {
       if (symbol->isConcrete()) {
-        if (!instantiations.count(*symbol)) {
+        if (!instantiations.contains(*symbol)) {
           instantiations.emplace(*symbol, nextSymbol++);
         }
         std::string layoutStr = symbol->layoutString(this);
-        if (!layouts.count(layoutStr)) {
+        if (!layouts.contains(layoutStr)) {
           layouts.emplace(layoutStr, nextLayout++);
         }
         symbol->firstTag = symbol->lastTag = instantiations.at(*symbol);

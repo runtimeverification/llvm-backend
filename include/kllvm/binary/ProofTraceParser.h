@@ -102,8 +102,7 @@ private:
   std::string relativePosition;
   std::vector<LLVMEvent> arguments;
 
-  LLVMFunctionEvent(
-      std::string const &_name, std::string const &_relativePosition);
+  LLVMFunctionEvent(std::string _name, std::string _relativePosition);
 
 public:
   static sptr<LLVMFunctionEvent>
@@ -129,7 +128,7 @@ private:
   sptr<KOREPattern> korePattern;
   uint64_t patternLength;
 
-  LLVMHookEvent(std::string const &_name, std::string const &_relativePosition);
+  LLVMHookEvent(std::string _name, std::string _relativePosition);
 
 public:
   static sptr<LLVMHookEvent>
