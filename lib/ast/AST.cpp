@@ -218,9 +218,6 @@ ValueType KORECompositeSort::getCategory(std::string const &hookName) {
     category = SortCategory::MInt;
     bits = std::stoi(hookName.substr(10));
   } else {
-    // ARRAY.Array is implemented in K and therefore should fall through to the
-    // default category. Should it one day be implemented as a fully hooked
-    // sort, a check needs to be added to the list above.
     category = SortCategory::Symbol;
   }
   return {category, bits};
