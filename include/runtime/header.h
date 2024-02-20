@@ -327,11 +327,14 @@ void serializeConfigurations(
     FILE *file, std::unordered_set<block *, HashBlock, KEq> results);
 void serializeConfiguration(
     block *subject, char const *sort, char **data_out, size_t *size_out,
-    bool emit_size);
-void serializeConfigurationToFile(FILE *file, block *subject, bool emit_size);
+    bool emit_size, bool use_intern);
+void serializeConfigurationToFile(
+    FILE *file, block *subject, bool emit_size, bool use_intern);
 void writeUInt64ToFile(FILE *file, uint64_t i);
-void serializeTermToFile(FILE *file, block *subject, char const *sort);
-void serializeRawTermToFile(FILE *file, void *subject, char const *sort);
+void serializeTermToFile(
+    FILE *file, block *subject, char const *sort, bool use_intern);
+void serializeRawTermToFile(
+    FILE *file, void *subject, char const *sort, bool use_intern);
 void printVariableToFile(FILE *file, char const *varname);
 
 // The following functions have to be generated at kompile time

@@ -19,6 +19,7 @@ serializer::serializer()
 serializer::serializer(flags f)
     : use_header_(!(f & DROP_HEADER))
     , use_arity_(!(f & DROP_ARITY))
+    , use_intern_(!(f & NO_INTERN))
     , direct_string_prefix_{0x01}
     , backref_string_prefix_{0x02}
     , next_idx_(0) {
@@ -72,10 +73,11 @@ void serializer::correct_emitted_size() {
   auto header_prefix_length = 11U;
   auto header_prefix_length_with_version = header_prefix_length + 8U;
 
-  auto bytes = detail::to_bytes(
-      uint64_t{buffer_.size() - header_prefix_length_with_version});
-
-  std::copy(bytes.begin(), bytes.end(), buffer_.begin() + header_prefix_length);
+  uint64_t new_size = buffer_.size() - header_prefix_length_with_version;
+  std::copy(
+      reinterpret_cast<char *>(&new_size),
+      reinterpret_cast<char *>(&new_size + 1),
+      buffer_.begin() + header_prefix_length);
 }
 
 void serializer::emit(char b) {
@@ -84,6 +86,10 @@ void serializer::emit(char b) {
 }
 
 void serializer::emit_string(std::string const &s) {
+  if (!use_intern_) {
+    emit_direct_string(s);
+    return;
+  }
   if (intern_table_.find(s) == intern_table_.end()) {
     emit_direct_string(s);
   } else {
@@ -129,13 +135,13 @@ int serializer::required_chunks(uint64_t len) {
 void serializer::emit_direct_string(std::string const &s) {
   emit(direct_string_prefix_);
 
-  intern_table_[s] = next_idx_;
+  if (use_intern_) {
+    intern_table_[s] = next_idx_;
+  }
 
   emit_length(s.size());
-
-  for (auto c : s) {
-    emit(c);
-  }
+  buffer_.append(s);
+  next_idx_ += s.size();
 }
 
 } // namespace kllvm
