@@ -75,7 +75,8 @@ void serializer::correct_emitted_size() {
 
   uint64_t new_size = buffer_.size() - header_prefix_length_with_version;
   std::copy(
-      (char *)&new_size, (char *)(&new_size + 1),
+      reinterpret_cast<char *>(&new_size),
+      reinterpret_cast<char *>(&new_size + 1),
       buffer_.begin() + header_prefix_length);
 }
 

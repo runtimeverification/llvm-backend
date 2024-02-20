@@ -134,7 +134,7 @@ private:
 
 template <typename T, typename>
 void serializer::emit(T val) {
-  buffer_.append((char *)&val, sizeof(T));
+  buffer_.append(reinterpret_cast<char *>(&val), sizeof(T));
   next_idx_ += sizeof(T);
 }
 
