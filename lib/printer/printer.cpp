@@ -43,7 +43,7 @@ std::map<std::string, std::string> getFormats() {
   if (once) {
     formats["kseq"] = "%1 ~> %2";
     formats["append"] = "%1 ~> %2";
-    formats["dotk"] = ".";
+    formats["dotk"] = ".K";
     formats["inj"] = "%1";
     formats["\\bottom"] = "#Bottom";
     formats["\\top"] = "#Top";
