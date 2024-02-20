@@ -192,7 +192,7 @@ KORECompositePattern *getRightCapture(
  */
 bool lessThanEq(PrettyPrintData const &data, KORESort *s1, KORESort *s2) {
   return *s1 == *s2
-         || (data.subsorts.count(s1) && data.subsorts.at(s1).count(s2));
+         || (data.subsorts.contains(s1) && data.subsorts.at(s1).contains(s2));
 }
 
 sptr<KORESort>
@@ -291,19 +291,20 @@ bool isPriorityWrong(
   if (!lessThanEq(data, innerSort, outerSort)) {
     return true;
   }
-  if (data.priorities.count(outerName)
-      && data.priorities.at(outerName).count(innerName)) {
+  if (data.priorities.contains(outerName)
+      && data.priorities.at(outerName).contains(innerName)) {
     return true;
   }
   std::string terminals = data.terminals.at(outerName);
   int terminalPos = getNTPositionInProd(terminals, position);
-  if (data.leftAssoc.count(outerName)
-      && data.leftAssoc.at(outerName).count(innerName)
+  if (data.leftAssoc.contains(outerName)
+      && data.leftAssoc.at(outerName).contains(innerName)
       && terminalPos == terminals.size() - 1) {
     return true;
   }
-  if (data.rightAssoc.count(outerName)
-      && data.rightAssoc.at(outerName).count(innerName) && terminalPos == 0) {
+  if (data.rightAssoc.contains(outerName)
+      && data.rightAssoc.at(outerName).contains(innerName)
+      && terminalPos == 0) {
     return true;
   }
   return false;
@@ -358,7 +359,7 @@ bool requiresBracketWithSimpleAlgorithm(
   if (auto *composite = dynamic_cast<KORECompositePattern *>(inner)) {
     std::string innerName = composite->getConstructor()->getName();
     if (innerName == outer->getConstructor()->getName()) {
-      if (data.assoc.count(innerName)) {
+      if (data.assoc.contains(innerName)) {
         return false;
       }
     }

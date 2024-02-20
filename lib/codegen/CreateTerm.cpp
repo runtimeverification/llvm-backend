@@ -851,7 +851,7 @@ bool CreateTerm::populateStaticSet(KOREPattern *pattern) {
 
 std::pair<llvm::Value *, bool> CreateTerm::createAllocation(
     KOREPattern *pattern, std::string const &locationStack) {
-  if (staticTerms.count(pattern)) {
+  if (staticTerms.contains(pattern)) {
     auto *staticTerm = new CreateStaticTerm(Definition, Module);
     return (*staticTerm)(pattern);
   }

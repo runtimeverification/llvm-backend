@@ -131,10 +131,10 @@ void printConfigurationInternal(
         break;
       }
     }
-    if (isVar && !state.varNames.count(str)) {
+    if (isVar && !state.varNames.contains(str)) {
       std::string stdStr = std::string(str->data, len(str));
       std::string suffix;
-      while (state.usedVarNames.count(stdStr + suffix)) {
+      while (state.usedVarNames.contains(stdStr + suffix)) {
         suffix = std::to_string(state.varCounter++);
       }
       stdStr = stdStr + suffix;
