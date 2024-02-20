@@ -18,21 +18,6 @@ namespace detail {
 
 bool is_big_endian();
 
-template <typename T>
-std::array<char, sizeof(T)> to_bytes(T val) {
-  auto bytes = std::array<char, sizeof(T)>{};
-
-  if (is_big_endian()) {
-    for (auto i = 0; i < sizeof(T); ++i) {
-      bytes[i] = reinterpret_cast<char *>(&val)[sizeof(T) - i - 1];
-    }
-  } else {
-    std::memcpy(bytes.data(), &val, sizeof(T));
-  }
-
-  return bytes;
-}
-
 } // namespace detail
 
 /**
@@ -46,6 +31,7 @@ public:
     DROP_HEADER = 1,
     DROP_ARITY = 2,
     DROP_BOTH = 3,
+    NO_INTERN = 4,
   };
 
   static constexpr auto magic_header = std::array{'\x7f', 'K', 'O', 'R', 'E'};
@@ -62,9 +48,6 @@ public:
    * written to the buffer.
    */
   void emit(char b);
-
-  template <typename It>
-  void emit(It begin, It end);
 
   template <
       typename T,
@@ -116,6 +99,7 @@ public:
 private:
   bool use_header_;
   bool use_arity_;
+  bool use_intern_;
 
   std::string buffer_;
   char direct_string_prefix_;
@@ -148,17 +132,10 @@ private:
   static int required_chunks(uint64_t len);
 };
 
-template <typename It>
-void serializer::emit(It begin, It end) {
-  for (auto it = begin; it != end; ++it) {
-    emit(*it);
-  }
-}
-
 template <typename T, typename>
 void serializer::emit(T val) {
-  auto bytes = detail::to_bytes(val);
-  emit(bytes.begin(), bytes.end());
+  buffer_.append(reinterpret_cast<char *>(&val), sizeof(T));
+  next_idx_ += sizeof(T);
 }
 
 } // namespace kllvm

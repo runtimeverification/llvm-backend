@@ -30,6 +30,8 @@ struct StringEq {
 
 struct serialization_state {
   serialization_state() = default;
+  serialization_state(serializer::flags flags)
+      : instance(flags) { }
 
   // We never want to copy the state; it should only ever get passed around by
   // reference.
@@ -404,10 +406,11 @@ void serializeConfigurations(
   free(buf);
 }
 
-void serializeConfigurationToFile(FILE *file, block *subject, bool emit_size) {
+void serializeConfigurationToFile(
+    FILE *file, block *subject, bool emit_size, bool use_intern) {
   char *data = nullptr;
   size_t size = 0;
-  serializeConfiguration(subject, nullptr, &data, &size, emit_size);
+  serializeConfiguration(subject, nullptr, &data, &size, emit_size, use_intern);
 
   fwrite(data, 1, size, file);
 
@@ -416,8 +419,9 @@ void serializeConfigurationToFile(FILE *file, block *subject, bool emit_size) {
 
 void serializeConfiguration(
     block *subject, char const *sort, char **data_out, size_t *size_out,
-    bool emit_size) {
-  auto state = serialization_state();
+    bool emit_size, bool use_intern) {
+  auto state = serialization_state(
+      use_intern ? serializer::flags::NONE : serializer::flags::NO_INTERN);
 
   writer w = {nullptr, nullptr};
   serializeConfigurationInternal(&w, subject, sort, false, &state);
@@ -438,22 +442,24 @@ void writeUInt64ToFile(FILE *file, uint64_t i) {
   fwrite(&i, 8, 1, file);
 }
 
-void serializeTermToFile(FILE *file, block *subject, char const *sort) {
+void serializeTermToFile(
+    FILE *file, block *subject, char const *sort, bool use_intern) {
   char *data = nullptr;
   size_t size = 0;
-  serializeConfiguration(subject, sort, &data, &size, true);
+  serializeConfiguration(subject, sort, &data, &size, true, use_intern);
 
   fwrite(data, 1, size, file);
 
   free(data);
 }
 
-void serializeRawTermToFile(FILE *file, void *subject, char const *sort) {
+void serializeRawTermToFile(
+    FILE *file, void *subject, char const *sort, bool use_intern) {
   block *term = constructRawTerm(subject, sort, true);
 
   char *data = nullptr;
   size_t size = 0;
-  serializeConfiguration(term, "SortKItem{}", &data, &size, true);
+  serializeConfiguration(term, "SortKItem{}", &data, &size, true, use_intern);
 
   fwrite(data, 1, size, file);
 
@@ -468,7 +474,7 @@ sortedTermToKorePattern(block *subject, char const *sort) {
   char *data_out = nullptr;
   size_t size_out = 0;
 
-  serializeConfiguration(term, "SortKItem{}", &data_out, &size_out, true);
+  serializeConfiguration(term, "SortKItem{}", &data_out, &size_out, true, true);
   auto result = deserialize_pattern(data_out, data_out + size_out);
 
   free(data_out);

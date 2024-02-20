@@ -83,7 +83,8 @@ void bind_runtime(py::module_ &m) {
           [](block *term, bool emit_size) {
             char *data = nullptr;
             size_t size = 0;
-            serializeConfiguration(term, nullptr, &data, &size, emit_size);
+            serializeConfiguration(
+                term, nullptr, &data, &size, emit_size, true);
             return py::bytes(std::string(data, data + size));
           },
           py::kw_only(), py::arg("emit_size") = false)
@@ -97,7 +98,7 @@ void bind_runtime(py::module_ &m) {
           "_serialize_raw", [](block *term, std::string const &filename,
                                std::string const &sort) {
             FILE *file = fopen(filename.c_str(), "a");
-            serializeRawTermToFile(file, term, sort.c_str());
+            serializeRawTermToFile(file, term, sort.c_str(), true);
             fclose(file);
           });
 }

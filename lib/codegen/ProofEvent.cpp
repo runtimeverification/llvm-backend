@@ -36,17 +36,20 @@ llvm::CallInst *ProofEvent::emitSerializeTerm(
 
   auto *void_ty = llvm::Type::getVoidTy(Ctx);
   auto *i8_ptr_ty = llvm::Type::getInt8PtrTy(Ctx);
+  auto *i1_ty = llvm::Type::getInt1Ty(Ctx);
 
   if (cat.cat == SortCategory::Symbol || cat.cat == SortCategory::Variable) {
     auto *block_ty = getValueType({SortCategory::Symbol, 0}, Module);
 
     auto *func_ty = llvm::FunctionType::get(
-        void_ty, {i8_ptr_ty, block_ty, i8_ptr_ty}, false);
+        void_ty, {i8_ptr_ty, block_ty, i8_ptr_ty, i1_ty}, false);
 
     auto *serialize
         = getOrInsertFunction(Module, "serializeTermToFile", func_ty);
 
-    return B.CreateCall(serialize, {outputFile, term, sort_name_ptr});
+    return B.CreateCall(
+        serialize,
+        {outputFile, term, sort_name_ptr, llvm::ConstantInt::getFalse(Ctx)});
   }
   if (term->getType()->isIntegerTy()) {
     term = B.CreateIntToPtr(term, i8_ptr_ty);
@@ -55,12 +58,14 @@ llvm::CallInst *ProofEvent::emitSerializeTerm(
   }
 
   auto *func_ty = llvm::FunctionType::get(
-      void_ty, {i8_ptr_ty, i8_ptr_ty, i8_ptr_ty}, false);
+      void_ty, {i8_ptr_ty, i8_ptr_ty, i8_ptr_ty, i1_ty}, false);
 
   auto *serialize
       = getOrInsertFunction(Module, "serializeRawTermToFile", func_ty);
 
-  return B.CreateCall(serialize, {outputFile, term, sort_name_ptr});
+  return B.CreateCall(
+      serialize,
+      {outputFile, term, sort_name_ptr, llvm::ConstantInt::getFalse(Ctx)});
 }
 
 llvm::CallInst *ProofEvent::emitSerializeConfiguration(
@@ -69,14 +74,18 @@ llvm::CallInst *ProofEvent::emitSerializeConfiguration(
   auto *void_ty = llvm::Type::getVoidTy(Ctx);
   auto *i8_ptr_ty = llvm::Type::getInt8PtrTy(Ctx);
   auto *block_ty = getValueType({SortCategory::Symbol, 0}, Module);
+  auto *i1_ty = llvm::Type::getInt1Ty(Ctx);
 
-  auto *func_ty
-      = llvm::FunctionType::get(void_ty, {i8_ptr_ty, block_ty}, false);
+  auto *func_ty = llvm::FunctionType::get(
+      void_ty, {i8_ptr_ty, block_ty, i1_ty, i1_ty}, false);
   auto *serialize
       = getOrInsertFunction(Module, "serializeConfigurationToFile", func_ty);
 
   return llvm::CallInst::Create(
-      serialize, {outputFile, config}, "", insertAtEnd);
+      serialize,
+      {outputFile, config, llvm::ConstantInt::getTrue(Ctx),
+       llvm::ConstantInt::getFalse(Ctx)},
+      "", insertAtEnd);
 }
 
 llvm::CallInst *ProofEvent::emitWriteUInt64(
