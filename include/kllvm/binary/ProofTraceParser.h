@@ -131,11 +131,7 @@ private:
   std::string relativePosition;
   std::vector<LLVMEvent> arguments;
 
-  LLVMFunctionEvent(
-      std::string const &_name, std::string const &_relativePosition)
-      : name(_name)
-      , relativePosition(_relativePosition)
-      , arguments() { }
+  LLVMFunctionEvent(std::string _name, std::string _relativePosition);
 
 public:
   static sptr<LLVMFunctionEvent>
@@ -146,9 +142,9 @@ public:
 
   std::string const &getName() const { return name; }
   std::string const &getRelativePosition() const { return relativePosition; }
-  std::vector<LLVMEvent> const &getArguments() const { return arguments; }
+  std::vector<LLVMEvent> const &getArguments() const;
 
-  void addArgument(LLVMEvent const &argument) { arguments.push_back(argument); }
+  void addArgument(LLVMEvent const &argument);
 
   virtual void print(std::ostream &Out, unsigned indent = 0u) const override;
 };
@@ -161,12 +157,7 @@ private:
   sptr<KOREPattern> korePattern;
   uint64_t patternLength;
 
-  LLVMHookEvent(std::string const &_name, std::string const &_relativePosition)
-      : name(_name)
-      , relativePosition(_relativePosition)
-      , arguments()
-      , korePattern(nullptr)
-      , patternLength(0u) { }
+  LLVMHookEvent(std::string _name, std::string _relativePosition);
 
 public:
   static sptr<LLVMHookEvent>
@@ -184,7 +175,7 @@ public:
     patternLength = _patternLength;
   }
 
-  void addArgument(LLVMEvent const &argument) { arguments.push_back(argument); }
+  void addArgument(LLVMEvent const &argument);
 
   virtual void print(std::ostream &Out, unsigned indent = 0u) const override;
 };

@@ -1251,7 +1251,7 @@ void makeMatchReasonFunction(
 KOREPattern *makePartialTerm(
     KOREPattern *term, std::set<std::string> const &occurrences,
     std::string const &occurrence) {
-  if (occurrences.count(occurrence)) {
+  if (occurrences.contains(occurrence)) {
     return KOREVariablePattern::Create(occurrence, term->getSort()).release();
   }
   if (auto *pat = dynamic_cast<KORECompositePattern *>(term)) {

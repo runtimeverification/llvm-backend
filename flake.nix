@@ -10,7 +10,7 @@
       "github:fmtlib/fmt/9.1.0";
     fmt-src.flake = false;
     immer-src.url =
-      "github:runtimeverification/immer/198c2ae260d49ef1800a2fe4433e07d7dec20059";
+      "github:runtimeverification/immer/4b0914f0b2acb33befe0ba4cd3a7954f2687e9bb";
     immer-src.flake = false;
     rapidjson-src.url =
       "github:Tencent/rapidjson/f54b0e47a08782a6131cc3d60f94d038fa6e0a51";
