@@ -1,6 +1,6 @@
 // Copyright (c) K Team. All Rights Reserved.
 
-require "substitution.md"
+requires "substitution.md"
 
 module LAMBDA-SYNTAX
   imports DOMAINS-SYNTAX
