@@ -133,7 +133,7 @@ doAllocSlow(size_t requested, struct arena *Arena) {
 }
 
 __attribute__((always_inline)) void *
-arenaAlloc(struct arena *Arena, size_t requested) {
+koreArenaAlloc(struct arena *Arena, size_t requested) {
   if (Arena->block + requested > Arena->block_end) {
     return doAllocSlow(requested, Arena);
   }

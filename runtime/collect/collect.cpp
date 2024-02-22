@@ -295,7 +295,7 @@ void koreCollect(void **roots, uint8_t nroots, layoutitem *typeInfo) {
       // sequence at the start of the collection cycle. This means that the
       // allocation pointer is invalid and does not actually point to the next
       // address that would have been allocated at, according to the logic of
-      // arenaAlloc, which will have allocated a fresh memory block and put
+      // koreArenaAlloc, which will have allocated a fresh memory block and put
       // the allocation at the start of it. Thus, we use movePtr with a size
       // of zero to adjust and get the true address of the allocation.
       scan_ptr = movePtr(previous_oldspace_alloc_ptr, 0, *old_alloc_ptr());
