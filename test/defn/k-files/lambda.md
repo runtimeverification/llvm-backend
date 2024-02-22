@@ -51,7 +51,7 @@ below.  Then we should make sure we import its module called SUBSTITUTION
 in our LAMBDA module below.
 
 ```k
-require "substitution.md"
+requires "substitution.md"
 
 module LAMBDA-SYNTAX
   imports DOMAINS-SYNTAX

@@ -18,7 +18,7 @@ for arithmetic and Boolean expressions, and variable assignment,
 conditional, while loop and sequential composition constructs for statements.
 
 ```k
-require "ffi.md"
+requires "ffi.md"
 module TEST-SYNTAX
   imports DOMAINS-SYNTAX
   imports BASIC-K

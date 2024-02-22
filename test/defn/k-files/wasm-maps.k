@@ -31,7 +31,7 @@ module MAP-INT-TO-INT
 
   syntax MapIntToInt ::= MapIntToInt "[" key: WrappedInt "<-" value: WrappedInt "]" [function, total, klabel(MapInt2Int:update), symbol, hook(MAP.update), prefer]
 
-  syntax priorities _Int2Int|->_ > _MapIntToInt_ .MapIntToInt
+  syntax priority _Int2Int|->_ > _MapIntToInt_ .MapIntToInt
   syntax non-assoc _Int2Int|->_
 
   syntax MapIntToInt ::= MapIntToInt "{{" key: Int "<-" value: Int "}}"
@@ -61,7 +61,7 @@ module MAP-INT-TO-VAL
 
   syntax MapIntToVal ::= MapIntToVal "[" key: WrappedInt "<-" value: Val "]" [function, total, klabel(MapInt2Val:update), symbol, hook(MAP.update), prefer]
 
-  syntax priorities _Int2Val|->_ > _MapIntToVal_ .MapIntToVal
+  syntax priority _Int2Val|->_ > _MapIntToVal_ .MapIntToVal
   syntax non-assoc _Int2Val|->_
 
   syntax MapIntToVal ::= MapIntToVal "{{" key: Int "<-" value: Val "}}"
