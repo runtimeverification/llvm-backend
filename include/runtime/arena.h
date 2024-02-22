@@ -55,7 +55,7 @@ char getArenaSemispaceIDOfObject(void *);
 // pointer to the first allocated byte.
 // If called with requested size greater than the maximun single allocation
 // size, the space is allocated in a general (not garbage collected pool).
-void *arenaAlloc(struct arena *, size_t);
+void *koreArenaAlloc(struct arena *, size_t);
 
 // Resizes the last allocation as long as the resize does not require a new
 // block allocation.

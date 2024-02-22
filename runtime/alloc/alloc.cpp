@@ -69,25 +69,25 @@ void setKoreMemoryFunctionsForGMP() {
 }
 
 __attribute__((always_inline)) void *koreAlloc(size_t requested) {
-  return arenaAlloc(&youngspace, requested);
+  return koreArenaAlloc(&youngspace, requested);
 }
 
 __attribute__((always_inline)) void *koreAllocToken(size_t requested) {
   size_t size = (requested + 7) & ~7;
-  return arenaAlloc(&youngspace, size < 16 ? 16 : size);
+  return koreArenaAlloc(&youngspace, size < 16 ? 16 : size);
 }
 
 __attribute__((always_inline)) void *koreAllocOld(size_t requested) {
-  return arenaAlloc(&oldspace, requested);
+  return koreArenaAlloc(&oldspace, requested);
 }
 
 __attribute__((always_inline)) void *koreAllocTokenOld(size_t requested) {
   size_t size = (requested + 7) & ~7;
-  return arenaAlloc(&oldspace, size < 16 ? 16 : size);
+  return koreArenaAlloc(&oldspace, size < 16 ? 16 : size);
 }
 
 __attribute__((always_inline)) void *koreAllocAlwaysGC(size_t requested) {
-  return arenaAlloc(&alwaysgcspace, requested);
+  return koreArenaAlloc(&alwaysgcspace, requested);
 }
 
 void *koreResizeLastAlloc(void *oldptr, size_t newrequest, size_t last_size) {
