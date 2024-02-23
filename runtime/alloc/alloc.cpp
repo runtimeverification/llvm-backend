@@ -68,10 +68,6 @@ void setKoreMemoryFunctionsForGMP() {
   mp_set_memory_functions(koreAllocMP, koreReallocMP, koreFree);
 }
 
-__attribute__((always_inline)) void *koreAlloc(size_t requested) {
-  return koreArenaAlloc(&youngspace, requested);
-}
-
 __attribute__((always_inline)) void *koreAllocToken(size_t requested) {
   size_t size = (requested + 7) & ~7;
   return koreArenaAlloc(&youngspace, size < 16 ? 16 : size);

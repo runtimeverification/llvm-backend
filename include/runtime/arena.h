@@ -28,10 +28,16 @@ typedef struct {
 // Macro to define a new arena with the given ID. Supports IDs ranging from 0 to
 // 127.
 #define REGISTER_ARENA(name, id)                                               \
-  static struct arena name = {.allocation_semispace_id = id}
+  struct arena name = {.allocation_semispace_id = id}
 
 #define mem_block_start(ptr)                                                   \
   ((char *)(((uintptr_t)(ptr)-1) & ~(BLOCK_SIZE - 1)))
+
+#ifdef ALLOC_DBG
+#define MEM_LOG(...) fprintf(stderr, __VA_ARGS__)
+#else
+#define MEM_LOG(...)
+#endif
 
 // Resets the given arena.
 void arenaReset(struct arena *);
@@ -51,10 +57,27 @@ char getArenaCollectionSemispaceID(const struct arena *);
 // allocated within an arena.
 char getArenaSemispaceIDOfObject(void *);
 
+// internal method to assist with allocations. Do not call directly. Call
+// koreArenaAlloc instead.
+void *doAllocSlow(size_t requested, struct arena *Arena);
+
 // Allocates the requested number of bytes as a contiguous region and returns a
 // pointer to the first allocated byte.
 // If called with requested size greater than the maximun single allocation
 // size, the space is allocated in a general (not garbage collected pool).
+__attribute__((always_inline)) static void *
+koreArenaAlloc(struct arena *Arena, size_t requested) {
+  if (Arena->block + requested > Arena->block_end) {
+    return doAllocSlow(requested, Arena);
+  }
+  void *result = Arena->block;
+  Arena->block += requested;
+  MEM_LOG(
+      "Allocation at %p (size %zd), next alloc at %p (if it fits)\n", result,
+      requested, Arena->block);
+  return result;
+}
+
 void *koreArenaAlloc(struct arena *, size_t);
 
 // Resizes the last allocation as long as the resize does not require a new
@@ -107,5 +130,4 @@ size_t arenaSize(const struct arena *);
 // Deallocates all the memory allocated for registered arenas.
 void freeAllMemory(void);
 }
-
 #endif // ARENA_H

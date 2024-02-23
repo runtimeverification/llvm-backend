@@ -115,7 +115,7 @@ static void freshBlock(struct arena *Arena) {
       BLOCK_SIZE - sizeof(memory_block_header));
 }
 
-static __attribute__((noinline)) void *
+__attribute__((noinline)) void *
 doAllocSlow(size_t requested, struct arena *Arena) {
   MEM_LOG(
       "Block at %p too small, %zd remaining but %zd needed\n", Arena->block,
@@ -124,19 +124,6 @@ doAllocSlow(size_t requested, struct arena *Arena) {
     return malloc(requested);
   }
   freshBlock(Arena);
-  void *result = Arena->block;
-  Arena->block += requested;
-  MEM_LOG(
-      "Allocation at %p (size %zd), next alloc at %p (if it fits)\n", result,
-      requested, Arena->block);
-  return result;
-}
-
-__attribute__((always_inline)) void *
-koreArenaAlloc(struct arena *Arena, size_t requested) {
-  if (Arena->block + requested > Arena->block_end) {
-    return doAllocSlow(requested, Arena);
-  }
   void *result = Arena->block;
   Arena->block += requested;
   MEM_LOG(

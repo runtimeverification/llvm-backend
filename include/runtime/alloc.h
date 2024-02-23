@@ -1,6 +1,7 @@
 #ifndef ALLOC_H
 #define ALLOC_H
 
+#include "runtime/arena.h"
 #include <cstddef>
 
 extern "C" {
@@ -16,9 +17,12 @@ extern size_t const BLOCK_SIZE;
 char youngspace_collection_id(void);
 char oldspace_collection_id(void);
 size_t youngspace_size(void);
+extern struct arena youngspace;
 
 // allocates exactly requested bytes into the young generation
-void *koreAlloc(size_t requested);
+__attribute__((always_inline)) static inline void *koreAlloc(size_t requested) {
+  return koreArenaAlloc(&youngspace, requested);
+}
 // allocates enough space for a string token whose raw size is requested into
 // the young generation. rounds up to the nearest 8 bytes and always allocates
 // at least 16 bytes
@@ -55,12 +59,6 @@ void *koreAllocInteger(size_t requested);
 void *koreAllocFloating(size_t requested);
 void *koreAllocIntegerOld(size_t requested);
 void *koreAllocFloatingOld(size_t requested);
-
-#ifdef ALLOC_DBG
-#define MEM_LOG(...) fprintf(stderr, __VA_ARGS__)
-#else
-#define MEM_LOG(...)
-#endif
 }
 
 #endif // ALLOC_H
