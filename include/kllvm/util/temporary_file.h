@@ -29,6 +29,12 @@ public:
     }
   }
 
+  temporary_file(temporary_file const &other) = delete;
+  temporary_file &operator=(temporary_file const &other) = delete;
+
+  temporary_file(temporary_file &&other) = delete;
+  temporary_file &operator=(temporary_file &&other) = delete;
+
   ~temporary_file() {
     close(temp_fd);
     remove(temp_filename.data());

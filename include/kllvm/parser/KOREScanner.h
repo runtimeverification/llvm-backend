@@ -42,6 +42,12 @@ public:
 
   using yyscan_t = void *;
 
+  KOREScanner(KOREScanner const &other) = delete;
+  KOREScanner &operator=(KOREScanner const &other) = delete;
+
+  KOREScanner(KOREScanner &&other) = delete;
+  KOREScanner &operator=(KOREScanner &&other) = delete;
+
 private:
   yyscan_t scanner;
   token yylex(std::string *lval, location *loc, yyscan_t yyscanner);
@@ -55,6 +61,6 @@ private:
   std::string stringBuffer;
 };
 
-} // end namespace kllvm
+} // namespace kllvm::parser
 
 #endif // KORESCANNER_H
