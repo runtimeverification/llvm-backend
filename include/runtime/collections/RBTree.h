@@ -280,7 +280,7 @@ public:
   // exception if the black invariant does not hold for this tree.
   // Black invariant: Every path from root to empty node contains the same
   // number of black nodes.
-  int assert_black_invariant() const {
+  int assert_black_invariant() const { // NOLINT(*-use-nodiscard)
     if (empty()) {
       return 0;
     }
