@@ -549,7 +549,7 @@ private:
   std::stack<rb_tree::RBTree<Range<T>, V>> stack_{};
 
 protected:
-  auto const &stack() const { return stack_; }
+  [[nodiscard]] auto const &stack() const { return stack_; }
 
   void update_stack_state(rb_tree::RBTree<Range<T>, V> const &t) {
     rb_tree::RBTree<Range<T>, V> tmp = t;
