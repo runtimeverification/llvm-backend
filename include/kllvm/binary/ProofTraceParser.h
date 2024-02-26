@@ -46,10 +46,11 @@ public:
   using substitution_t
       = std::map<std::string, std::pair<sptr<KOREPattern>, uint64_t>>;
 
-protected:
+private:
   uint64_t ruleOrdinal;
   substitution_t substitution{};
 
+protected:
   void printSubstitution(std::ostream &Out, unsigned indent = 0U) const;
 
 public:

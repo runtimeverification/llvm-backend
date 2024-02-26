@@ -43,11 +43,13 @@ using var_set_type
     = std::unordered_map<var_type, std::unordered_set<IterNextNode *>, HashVar>;
 
 class DecisionNode {
-public:
-  virtual ~DecisionNode() = default;
+private:
   llvm::BasicBlock *cachedCode = nullptr;
   /* completed tracks whether codegen for this DecisionNode has concluded */
   bool completed = false;
+
+public:
+  virtual ~DecisionNode() = default;
 
   virtual void codegen(Decision *d) = 0;
   virtual void preprocess(std::unordered_set<LeafNode *> &) = 0;

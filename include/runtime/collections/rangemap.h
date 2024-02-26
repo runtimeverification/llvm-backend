@@ -545,8 +545,11 @@ public:
 template <class T, class V>
 class AbstractRangeMapIterator {
 
-protected:
+private:
   std::stack<rb_tree::RBTree<Range<T>, V>> stack_{};
+
+protected:
+  auto const &stack() const { return stack_; }
 
   void update_stack_state(rb_tree::RBTree<Range<T>, V> const &t) {
     rb_tree::RBTree<Range<T>, V> tmp = t;
@@ -577,21 +580,19 @@ template <class T, class V>
 class ConstRangeMapIterator : public AbstractRangeMapIterator<T, V> {
 
 public:
-  using AbstractRangeMapIterator<T, V>::stack_;
-
   // Create an iterator over rangemap m.
   ConstRangeMapIterator(RangeMap<T, V> m)
       : AbstractRangeMapIterator<T, V>(m) { }
 
   // Dereference operator.
   std::pair<Range<T>, V> const &operator*() const {
-    rb_tree::RBTree<Range<T>, V> const &t = stack_.top();
+    rb_tree::RBTree<Range<T>, V> const &t = this->stack().top();
     return t.root_data();
   }
 
   // Member access (arrow) operator.
   std::pair<Range<T>, V> const *operator->() const {
-    rb_tree::RBTree<Range<T>, V> const &t = stack_.top();
+    rb_tree::RBTree<Range<T>, V> const &t = this->stack().top();
     return &t.root_data();
   }
 };

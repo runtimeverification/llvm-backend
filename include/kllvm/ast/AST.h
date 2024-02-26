@@ -231,7 +231,9 @@ public:
   void initPatternArguments() { arguments.swap(formalArguments); }
 
   [[nodiscard]] std::string const &getName() const { return name; }
-  [[nodiscard]] std::vector<sptr<KORESort>> const &getArguments() const { return arguments; }
+  [[nodiscard]] std::vector<sptr<KORESort>> const &getArguments() const {
+    return arguments;
+  }
   [[nodiscard]] std::vector<sptr<KORESort>> const &getFormalArguments() const {
     return formalArguments;
   }
@@ -282,7 +284,7 @@ struct HashSymbol {
   size_t operator()(kllvm::KORESymbol const &s) const noexcept {
     size_t hash = 0;
     boost::hash_combine(hash, s.name);
-    for (const auto &arg : s.arguments) {
+    for (auto const &arg : s.arguments) {
       boost::hash_combine(hash, *arg);
     }
     return hash;
@@ -479,13 +481,10 @@ public:
   sptr<KOREPattern> expandAliases(KOREDefinition *) override {
     return shared_from_this();
   }
-  sptr<KOREPattern>
-  sortCollections(PrettyPrintData const &data) override {
+  sptr<KOREPattern> sortCollections(PrettyPrintData const &data) override {
     return shared_from_this();
   }
-  sptr<KOREPattern> dedupeDisjuncts() override {
-    return shared_from_this();
-  }
+  sptr<KOREPattern> dedupeDisjuncts() override { return shared_from_this(); }
   std::map<std::string, int> gatherVarCounts() override {
     return std::map<std::string, int>{{name->getName(), 1}};
   }
@@ -494,13 +493,9 @@ public:
     return shared_from_this();
   }
 
-  sptr<KOREPattern> desugarAssociative() override {
-    return shared_from_this();
-  }
+  sptr<KOREPattern> desugarAssociative() override { return shared_from_this(); }
 
-  sptr<KOREPattern> unflattenAndOr() override {
-    return shared_from_this();
-  }
+  sptr<KOREPattern> unflattenAndOr() override { return shared_from_this(); }
 
   bool matches(
       substitution &subst, SubsortMap const &, SymbolMap const &,
@@ -516,7 +511,6 @@ private:
       std::set<std::string> const &macroSymbols) override {
     return shared_from_this();
   }
-
 
   KOREVariablePattern(ptr<KOREVariable> Name, sptr<KORESort> Sort)
       : name(std::move(Name))
@@ -568,14 +562,11 @@ public:
 
   void
   prettyPrint(std::ostream &out, PrettyPrintData const &data) const override;
-  void
-  markSymbols(std::map<std::string, std::vector<KORESymbol *>> &) override;
-  void
-  markVariables(std::map<std::string, KOREVariablePattern *> &) override;
+  void markSymbols(std::map<std::string, std::vector<KORESymbol *>> &) override;
+  void markVariables(std::map<std::string, KOREVariablePattern *> &) override;
   sptr<KOREPattern> substitute(substitution const &) override;
   sptr<KOREPattern> expandAliases(KOREDefinition *) override;
-  sptr<KOREPattern>
-  sortCollections(PrettyPrintData const &data) override;
+  sptr<KOREPattern> sortCollections(PrettyPrintData const &data) override;
   sptr<KOREPattern> dedupeDisjuncts() override;
   std::map<std::string, int> gatherVarCounts() override;
   sptr<KOREPattern> desugarAssociative() override;
@@ -594,7 +585,6 @@ private:
       std::set<std::string> const &macroSymbols) override;
 
   friend void ::kllvm::deallocateSPtrKorePattern(sptr<KOREPattern> pattern);
-
 
   KORECompositePattern(ptr<KORESymbol> Constructor)
       : constructor(std::move(Constructor)) { }
@@ -620,8 +610,8 @@ public:
 
   void
   markSymbols(std::map<std::string, std::vector<KORESymbol *>> &) override { }
-  void
-  markVariables(std::map<std::string, KOREVariablePattern *> &) override { }
+  void markVariables(std::map<std::string, KOREVariablePattern *> &) override {
+  }
   sptr<KORESort> getSort() const override { abort(); }
   sptr<KOREPattern> substitute(substitution const &) override {
     return shared_from_this();
@@ -629,24 +619,17 @@ public:
   sptr<KOREPattern> expandAliases(KOREDefinition *) override {
     return shared_from_this();
   }
-  sptr<KOREPattern>
-  sortCollections(PrettyPrintData const &data) override {
+  sptr<KOREPattern> sortCollections(PrettyPrintData const &data) override {
     return shared_from_this();
   }
-  sptr<KOREPattern> dedupeDisjuncts() override {
-    return shared_from_this();
-  }
+  sptr<KOREPattern> dedupeDisjuncts() override { return shared_from_this(); }
   std::map<std::string, int> gatherVarCounts() override {
     return std::map<std::string, int>{};
   }
 
-  sptr<KOREPattern> desugarAssociative() override {
-    return shared_from_this();
-  }
+  sptr<KOREPattern> desugarAssociative() override { return shared_from_this(); }
 
-  sptr<KOREPattern> unflattenAndOr() override {
-    return shared_from_this();
-  }
+  sptr<KOREPattern> unflattenAndOr() override { return shared_from_this(); }
 
   sptr<KOREPattern> filterSubstitution(
       PrettyPrintData const &data, std::set<std::string> const &var) override {
@@ -665,14 +648,13 @@ private:
     return shared_from_this();
   }
 
-
   KOREStringPattern(std::string Contents)
       : contents(std::move(Contents)) { }
 };
 
 // KOREDeclaration
 class KOREDeclaration {
-protected:
+private:
   attribute_set attributes_;
   std::vector<sptr<KORESortVariable>> objectSortVariables;
 
@@ -683,7 +665,8 @@ public:
   void addObjectSortVariable(sptr<KORESortVariable> const &SortVariable);
   virtual void print(std::ostream &Out, unsigned indent = 0) const = 0;
 
-  [[nodiscard]] std::vector<sptr<KORESortVariable>> const &getObjectSortVariables() const {
+  [[nodiscard]] std::vector<sptr<KORESortVariable>> const &
+  getObjectSortVariables() const {
     return objectSortVariables;
   }
   virtual ~KOREDeclaration() = default;
@@ -716,9 +699,10 @@ private:
 };
 
 class KORESymbolAliasDeclaration : public KOREDeclaration {
-protected:
+private:
   ptr<KORESymbol> symbol;
 
+protected:
   KORESymbolAliasDeclaration(ptr<KORESymbol> Symbol)
       : symbol(std::move(Symbol)) { }
 
@@ -846,7 +830,8 @@ public:
   void print(std::ostream &Out, unsigned indent = 0) const;
 
   [[nodiscard]] std::string const &getName() const { return name; }
-  [[nodiscard]] std::vector<sptr<KOREDeclaration>> const &getDeclarations() const {
+  [[nodiscard]] std::vector<sptr<KOREDeclaration>> const &
+  getDeclarations() const {
     return declarations;
   }
 
@@ -966,22 +951,33 @@ public:
    */
   [[nodiscard]] SymbolMap getOverloads() const;
 
-  [[nodiscard]] std::vector<sptr<KOREModule>> const &getModules() const { return modules; }
-  [[nodiscard]] KORECompositeSortDeclarationMapType const &getSortDeclarations() const {
+  [[nodiscard]] std::vector<sptr<KOREModule>> const &getModules() const {
+    return modules;
+  }
+  [[nodiscard]] KORECompositeSortDeclarationMapType const &
+  getSortDeclarations() const {
     return sortDeclarations;
   }
-  [[nodiscard]] KORESymbolDeclarationMapType const &getSymbolDeclarations() const {
+  [[nodiscard]] KORESymbolDeclarationMapType const &
+  getSymbolDeclarations() const {
     return symbolDeclarations;
   }
-  [[nodiscard]] KOREAliasDeclarationMapType const &getAliasDeclarations() const {
+  [[nodiscard]] KOREAliasDeclarationMapType const &
+  getAliasDeclarations() const {
     return aliasDeclarations;
   }
-  [[nodiscard]] KORESymbolMapType const &getSymbols() const { return objectSymbols; }
+  [[nodiscard]] KORESymbolMapType const &getSymbols() const {
+    return objectSymbols;
+  }
   [[nodiscard]] KORESymbolStringMapType const &getAllSymbols() const {
     return allObjectSymbols;
   }
-  [[nodiscard]] KORECompositeSortMapType getHookedSorts() const { return hookedSorts; }
-  [[nodiscard]] std::list<KOREAxiomDeclaration *> const &getAxioms() const { return axioms; }
+  [[nodiscard]] KORECompositeSortMapType getHookedSorts() const {
+    return hookedSorts;
+  }
+  [[nodiscard]] std::list<KOREAxiomDeclaration *> const &getAxioms() const {
+    return axioms;
+  }
   [[nodiscard]] KOREAxiomDeclaration *getAxiomByOrdinal(size_t ordinal) const {
     return ordinals.at(ordinal);
   }

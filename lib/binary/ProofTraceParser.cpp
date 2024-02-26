@@ -22,8 +22,7 @@ void LLVMFunctionEvent::addArgument(LLVMEvent const &argument) {
 LLVMHookEvent::LLVMHookEvent(std::string _name, std::string _relativePosition)
     : name(std::move(_name))
     , relativePosition(std::move(_relativePosition))
-    , korePattern(nullptr)
-     { }
+    , korePattern(nullptr) { }
 
 void LLVMHookEvent::addArgument(LLVMEvent const &argument) {
   arguments.push_back(argument);
@@ -40,15 +39,15 @@ void LLVMRewriteEvent::printSubstitution(
 void LLVMRuleEvent::print(std::ostream &Out, unsigned indent) const {
   std::string Indent(indent * indent_size, ' ');
   Out << fmt::format(
-      "{}rule: {} {}\n", Indent, ruleOrdinal, substitution.size());
+      "{}rule: {} {}\n", Indent, getRuleOrdinal(), getSubstitution().size());
   printSubstitution(Out, indent + 1U);
 }
 
 void LLVMSideConditionEvent::print(std::ostream &Out, unsigned indent) const {
   std::string Indent(indent * indent_size, ' ');
   Out << fmt::format(
-      "{}side condition entry: {} {}\n", Indent, ruleOrdinal,
-      substitution.size());
+      "{}side condition entry: {} {}\n", Indent, getRuleOrdinal(),
+      getSubstitution().size());
   printSubstitution(Out, indent + 1U);
 }
 
