@@ -77,27 +77,27 @@ uint64_t read_length(It &ptr, It end, binary_version version, int v1_bytes) {
     }
 
     return ret;
-  }     uint64_t ret = 0;
-    auto should_continue = true;
-    auto steps = 0;
+  }
+  uint64_t ret = 0;
+  auto should_continue = true;
+  auto steps = 0;
 
-    while (should_continue) {
-      assert(ptr != end && "Invalid variable-length field");
-      assert(steps < 9 && "No terminating byte in variable-length field");
+  while (should_continue) {
+    assert(ptr != end && "Invalid variable-length field");
+    assert(steps < 9 && "No terminating byte in variable-length field");
 
-      auto chunk = peek(ptr);
-      auto cont_bit = uint8_t{0x80};
-      should_continue = static_cast<bool>(chunk & cont_bit);
+    auto chunk = peek(ptr);
+    auto cont_bit = uint8_t{0x80};
+    should_continue = static_cast<bool>(chunk & cont_bit);
 
-      chunk = chunk & ~cont_bit;
-      ret = ret | (uint64_t(chunk) << (7 * steps));
+    chunk = chunk & ~cont_bit;
+    ret = ret | (uint64_t(chunk) << (7 * steps));
 
-      ++steps;
-      ++ptr;
-    }
+    ++steps;
+    ++ptr;
+  }
 
-    return ret;
- 
+  return ret;
 }
 
 template <typename It>

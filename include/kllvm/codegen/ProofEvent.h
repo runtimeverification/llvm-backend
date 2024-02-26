@@ -129,7 +129,6 @@ public:
       KOREAxiomDeclaration *axiom, llvm::Value *check_result,
       llvm::BasicBlock *current_block);
 
-
   ProofEvent(KOREDefinition *Definition, llvm::Module *Module)
       : Definition(Definition)
       , Module(Module)

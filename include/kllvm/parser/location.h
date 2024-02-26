@@ -40,7 +40,7 @@ operator<<(std::basic_ostream<YYChar> &ostr, position const &pos) {
 
 class location {
 public:
-  location(const std::string& filename)
+  location(std::string const &filename)
       : begin({filename, 1, 1})
       , end({filename, 1, 1}) { }
 
@@ -65,10 +65,10 @@ operator<<(std::basic_ostream<YYChar> &ostr, location const &loc) {
     ostr << '-' << loc.end.line << '.' << end_col;
   } else if (loc.begin.column < end_col) {
     ostr << '-' << end_col;
-}
+  }
   return ostr;
 }
 
-} // namespace kllvm
+} // namespace kllvm::parser
 
 #endif

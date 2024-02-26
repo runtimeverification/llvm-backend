@@ -14,7 +14,7 @@ namespace kllvm::parser {
 
 class KOREParser {
 public:
-  KOREParser(const std::string& filename)
+  KOREParser(std::string const &filename)
       : scanner(KOREScanner(filename))
       , loc(location(filename)) { }
 
@@ -73,6 +73,6 @@ private:
   } buffer = {"", token::EMPTY};
 };
 
-} // end namespace kllvm
+} // namespace kllvm::parser
 
 #endif // KOREPARSER_

@@ -170,7 +170,8 @@ struct match_result {
  */
 class any_ {
 public:
-  [[nodiscard]] static match_result match(std::shared_ptr<KOREPattern> const &term) {
+  [[nodiscard]] static match_result
+  match(std::shared_ptr<KOREPattern> const &term) {
     return {true, nullptr};
   }
 };
@@ -194,13 +195,14 @@ public:
         "Cannot construct a subject expression with nested subject terms");
   }
 
-  [[nodiscard]] match_result match(std::shared_ptr<KOREPattern> const &term) const {
+  [[nodiscard]] match_result
+  match(std::shared_ptr<KOREPattern> const &term) const {
     auto inner_result = inner_.match(term);
 
     if (inner_result.matches) {
       return {true, term};
-    }       return {false, nullptr};
-   
+    }
+    return {false, nullptr};
   }
 
 private:
@@ -235,7 +237,8 @@ public:
    * assume that the first child lens to match with a returned subject pattern
    * is the only such lens.
    */
-  [[nodiscard]] match_result match(std::shared_ptr<KOREPattern> const &term) const {
+  [[nodiscard]] match_result
+  match(std::shared_ptr<KOREPattern> const &term) const {
     if (auto composite = std::dynamic_pointer_cast<KORECompositePattern>(term);
         composite && composite->getArguments().size() == arity()
         && composite->getConstructor()->getName() == constructor_) {
