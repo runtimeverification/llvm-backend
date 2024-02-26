@@ -457,10 +457,11 @@ private:
         return balance(
             Color::B, lft.left(), lft.root_key(), lft.root_val(),
             RBTree(Color::R, lft.right(), x, v, RBTree()));
-      } else {
-        return RBTree(c, lft, x, v, rgt);
       }
+
+      return RBTree(c, lft, x, v, rgt);
     }
+
     // Black parent
     if (c == Color::B) {
       if (lft.non_empty(Color::BB) && rgt.non_empty(Color::B)) {
@@ -468,22 +469,26 @@ private:
             Color::BB, RBTree(Color::R, lft.paint(Color::B), x, v, rgt.left()),
             rgt.root_key(), rgt.root_val(), rgt.right());
       }
+
       if (lft.empty(Color::BB) && rgt.non_empty(Color::B)) {
         return balance(
             Color::BB, RBTree(Color::R, RBTree(), x, v, rgt.left()),
             rgt.root_key(), rgt.root_val(), rgt.right());
       }
+
       if (lft.non_empty(Color::B) && rgt.non_empty(Color::BB)) {
         return balance(
             Color::BB, lft.left(), lft.root_key(), lft.root_val(),
             RBTree(Color::R, lft.right(), x, v, rgt.paint(Color::B)));
       }
+
       if (lft.non_empty(Color::B) && rgt.empty(Color::BB)) {
         return balance(
             Color::BB, lft.left(), lft.root_key(), lft.root_val(),
             RBTree(Color::R, lft.right(), x, v, RBTree()));
-      } else if (
-          lft.non_empty(Color::BB) && rgt.non_empty(Color::R)
+      }
+
+      if (lft.non_empty(Color::BB) && rgt.non_empty(Color::R)
           && rgt.left().non_empty(Color::B)) {
         return RBTree(
             Color::B,
@@ -493,8 +498,9 @@ private:
                 rgt.left().root_key(), rgt.left().root_val(),
                 rgt.left().right()),
             rgt.root_key(), rgt.root_val(), rgt.right());
-      } else if (
-          lft.empty(Color::BB) && rgt.non_empty(Color::R)
+      }
+
+      if (lft.empty(Color::BB) && rgt.non_empty(Color::R)
           && rgt.left().non_empty(Color::B)) {
         return RBTree(
             Color::B,
@@ -503,8 +509,9 @@ private:
                 rgt.left().root_key(), rgt.left().root_val(),
                 rgt.left().right()),
             rgt.root_key(), rgt.root_val(), rgt.right());
-      } else if (
-          lft.non_empty(Color::R) && lft.right().non_empty(Color::B)
+      }
+
+      if (lft.non_empty(Color::R) && lft.right().non_empty(Color::B)
           && rgt.non_empty(Color::BB)) {
         return RBTree(
             Color::B, lft.left(), lft.root_key(), lft.root_val(),
@@ -513,8 +520,9 @@ private:
                 lft.right().root_val(),
                 RBTree(
                     Color::R, lft.right().right(), x, v, rgt.paint(Color::B))));
-      } else if (
-          lft.non_empty(Color::R) && lft.right().non_empty(Color::B)
+      }
+
+      if (lft.non_empty(Color::R) && lft.right().non_empty(Color::B)
           && rgt.empty(Color::BB)) {
         return RBTree(
             Color::B, lft.left(), lft.root_key(), lft.root_val(),
@@ -522,9 +530,9 @@ private:
                 Color::B, lft.right().left(), lft.right().root_key(),
                 lft.right().root_val(),
                 RBTree(Color::R, lft.right().right(), x, v, RBTree())));
-      } else {
-        return RBTree(c, lft, x, v, rgt);
       }
+
+      return RBTree(c, lft, x, v, rgt);
     }
     // Otherwise
     return RBTree(c, lft, x, v, rgt);
@@ -538,6 +546,7 @@ private:
           minus_one_color(c), lft.left().paint(Color::B), lft.root_key(),
           lft.root_val(), RBTree(Color::B, lft.right(), x, v, rgt));
     }
+
     if (lft.doubled_right()) {
       return RBTree(
           minus_one_color(c),
@@ -547,6 +556,7 @@ private:
           lft.right().root_key(), lft.right().root_val(),
           RBTree(Color::B, lft.right().right(), x, v, rgt));
     }
+
     if (rgt.doubled_left()) {
       return RBTree(
           minus_one_color(c), RBTree(Color::B, lft, x, v, rgt.left().left()),
@@ -555,13 +565,14 @@ private:
               Color::B, rgt.left().right(), rgt.root_key(), rgt.root_val(),
               rgt.right()));
     }
+
     if (rgt.doubled_right()) {
       return RBTree(
           minus_one_color(c), RBTree(Color::B, lft, x, v, rgt.left()),
           rgt.root_key(), rgt.root_val(), rgt.right().paint(Color::B));
-    } else {
-      return RBTree(c, lft, x, v, rgt);
     }
+
+    return RBTree(c, lft, x, v, rgt);
   }
 
   [[nodiscard]] bool empty(Color c) const {

@@ -149,26 +149,29 @@ private:
     if (t.empty()) {
       return false;
     }
+
     T const &start = r.start();
     T const &end = r.end();
     T const &rstart = t.root_key().start();
     T const &rend = t.root_key().end();
+
     if (rend <= start) {
       // The root is to the left of range r, possibly adjacent but not
       // overlapping. Continue looking for overlapping ranges to the right of
       // root.
       return overlaps(t.right(), r);
     }
+
     if (end <= rstart) {
       // The root is to the right of range r, possibly adjacent but not
       // overlapping. Continue looking for overlapping ranges to the left of
       // root.
       return overlaps(t.left(), r);
-    } else {
-      // In any other case, range r somehow overlaps with root, either partially
-      // or completely.
-      return true;
     }
+
+    // In any other case, range r somehow overlaps with root, either partially
+    // or completely.
+    return true;
   }
 
   // Gather all <Range<T>, V> pairs in t that are overlapping or directly
