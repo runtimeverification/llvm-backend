@@ -434,6 +434,7 @@ private:
     return rotate(root_color(), new_left, root_key(), root_val(), right());
   }
 
+  // NOLINTNEXTLINE(*-cognitive-complexity)
   static RBTree rotate(
       Color c, RBTree const &lft, T const &x, V const &v, RBTree const &rgt) {
     // Red parent
