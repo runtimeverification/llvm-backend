@@ -19,16 +19,16 @@ struct arena {
   char allocation_semispace_id;
 };
 
-typedef struct {
+using memory_block_header = struct {
   char *next_block;
   char *next_superblock;
   char semispace;
-} memory_block_header;
+};
 
 // Macro to define a new arena with the given ID. Supports IDs ranging from 0 to
 // 127.
 #define REGISTER_ARENA(name, id)                                               \
-  static struct arena name = {.allocation_semispace_id = id}
+  static struct arena name = {.allocation_semispace_id = (id)}
 
 #define mem_block_start(ptr)                                                   \
   ((char *)(((uintptr_t)(ptr)-1) & ~(BLOCK_SIZE - 1)))

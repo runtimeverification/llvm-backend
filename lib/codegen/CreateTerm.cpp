@@ -292,7 +292,7 @@ sptr<KORESort> termSort(KOREPattern *pattern) {
 }
 
 llvm::Value *CreateTerm::alloc_arg(
-    KORECompositePattern *pattern, int idx, std::string locationStack) {
+    KORECompositePattern *pattern, int idx, std::string const &locationStack) {
   KOREPattern *p = pattern->getArguments()[idx].get();
   std::string newLocation = fmt::format("{}:{}", locationStack, idx);
   if (isInjectionSymbol(p, Definition->getInjSymbol())) {
@@ -752,7 +752,7 @@ llvm::Value *CreateTerm::createFunctionCall(
  * triangle injection pair */
 llvm::Value *CreateTerm::notInjectionCase(
     KORECompositePattern *constructor, llvm::Value *val,
-    std::string locationStack) {
+    std::string const &locationStack) {
   KORESymbol const *symbol = constructor->getConstructor();
   KORESymbolDeclaration *symbolDecl
       = Definition->getSymbolDeclarations().at(symbol->getName());

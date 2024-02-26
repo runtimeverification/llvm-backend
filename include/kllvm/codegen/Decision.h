@@ -44,6 +44,7 @@ using var_set_type
 
 class DecisionNode {
 public:
+  virtual ~DecisionNode() = default;
   llvm::BasicBlock *cachedCode = nullptr;
   /* completed tracks whether codegen for this DecisionNode has concluded */
   bool completed = false;
@@ -53,8 +54,8 @@ public:
   bool beginNode(Decision *d, std::string const &name);
 
   void setCompleted() { completed = true; }
-  bool isCompleted() const { return completed; }
-  uint64_t getChoiceDepth() const { return choiceDepth; }
+  [[nodiscard]] bool isCompleted() const { return completed; }
+  [[nodiscard]] uint64_t getChoiceDepth() const { return choiceDepth; }
 
 private:
   bool preprocessed = false, containsFailNode = false;
@@ -71,15 +72,16 @@ private:
 
 class FailNode : public DecisionNode {
 private:
-  FailNode() { }
+  FailNode() = default;
 
   static FailNode instance;
 
 public:
+  ~FailNode() override = default;
   static FailNode *get() { return &instance; }
 
-  virtual void codegen(Decision *d) { abort(); }
-  virtual void preprocess(std::unordered_set<LeafNode *> &) {
+  void codegen(Decision *d) override { abort(); }
+  void preprocess(std::unordered_set<LeafNode *> &) override {
     containsFailNode = true;
   }
 };
@@ -102,20 +104,22 @@ public:
       KORESymbol *constructor, std::vector<var_type> bindings,
       DecisionNode *child)
       : constructor(constructor)
-      , bindings(bindings)
+      , bindings(std::move(std::move(bindings)))
       , child(child) { }
   DecisionCase(KORESymbol *dv, llvm::APInt literal, DecisionNode *child)
       : constructor(dv)
-      , literal(literal)
+      , literal(std::move(std::move(literal)))
       , child(child) { }
 
-  KORESymbol *getConstructor() const { return constructor; }
-  std::vector<var_type> const &getBindings() const { return bindings; }
-  void addBinding(std::string name, ValueType type, llvm::Module *mod) {
-    bindings.push_back(std::make_pair(name, getParamType(type, mod)));
+  [[nodiscard]] KORESymbol *getConstructor() const { return constructor; }
+  [[nodiscard]] std::vector<var_type> const &getBindings() const {
+    return bindings;
+  }
+  void addBinding(std::string const &name, ValueType type, llvm::Module *mod) {
+    bindings.emplace_back(name, getParamType(type, mod));
   }
   llvm::APInt getLiteral() const { return literal; }
-  DecisionNode *getChild() const { return child; }
+  [[nodiscard]] DecisionNode *getChild() const { return child; }
 };
 
 class SwitchNode : public DecisionNode {
@@ -128,29 +132,33 @@ private:
 
   bool isCheckNull;
 
-  SwitchNode(std::string const &name, llvm::Type *type, bool isCheckNull)
-      : name(name)
+  SwitchNode(std::string name, llvm::Type *type, bool isCheckNull)
+      : name(std::move(name))
       , type(type)
       , isCheckNull(isCheckNull) { }
 
 public:
-  void addCase(DecisionCase _case) { cases.push_back(_case); }
+  ~SwitchNode() override = default;
+  void addCase(DecisionCase const &_case) { cases.push_back(_case); }
 
   static SwitchNode *
   Create(std::string const &name, llvm::Type *type, bool isCheckNull) {
     return new SwitchNode(name, type, isCheckNull);
   }
 
-  std::string getName() const { return name; }
-  llvm::Type *getType() const { return type; }
-  std::vector<DecisionCase> const &getCases() const { return cases; }
+  [[nodiscard]] std::string getName() const { return name; }
+  [[nodiscard]] llvm::Type *getType() const { return type; }
+  [[nodiscard]] std::vector<DecisionCase> const &getCases() const {
+    return cases;
+  }
 
-  virtual void codegen(Decision *d);
-  virtual void preprocess(std::unordered_set<LeafNode *> &leaves) {
-    if (preprocessed)
+  void codegen(Decision *d) override;
+  void preprocess(std::unordered_set<LeafNode *> &leaves) override {
+    if (preprocessed) {
       return;
+    }
     bool hasDefault = false;
-    for (auto _case : cases) {
+    for (auto const &_case : cases) {
       _case.getChild()->preprocess(leaves);
       containsFailNode = containsFailNode || _case.getChild()->containsFailNode;
       hasDefault = hasDefault || _case.getConstructor() == nullptr;
@@ -172,25 +180,27 @@ private:
   DecisionNode *child;
 
   MakePatternNode(
-      std::string const &name, llvm::Type *type, KOREPattern *pattern,
+      std::string name, llvm::Type *type, KOREPattern *pattern,
       std::vector<var_type> &uses, DecisionNode *child)
-      : name(name)
+      : name(std::move(name))
       , type(type)
       , pattern(pattern)
       , uses(uses)
       , child(child) { }
 
 public:
+  ~MakePatternNode() override = default;
   static MakePatternNode *Create(
       std::string const &name, llvm::Type *type, KOREPattern *pattern,
       std::vector<var_type> &uses, DecisionNode *child) {
     return new MakePatternNode(name, type, pattern, uses, child);
   }
 
-  virtual void codegen(Decision *d);
-  virtual void preprocess(std::unordered_set<LeafNode *> &leaves) {
-    if (preprocessed)
+  void codegen(Decision *d) override;
+  void preprocess(std::unordered_set<LeafNode *> &leaves) override {
+    if (preprocessed) {
       return;
+    }
     child->preprocess(leaves);
     containsFailNode = containsFailNode || child->containsFailNode;
     choiceDepth = child->choiceDepth;
@@ -212,32 +222,35 @@ private:
   llvm::Type *type;
 
   FunctionNode(
-      std::string const &name, std::string const &function, DecisionNode *child,
+      std::string name, std::string function, DecisionNode *child,
       ValueType cat, llvm::Type *type)
-      : name(name)
-      , function(function)
+      : name(std::move(name))
+      , function(std::move(function))
       , child(child)
       , cat(cat)
       , type(type) { }
 
 public:
+  ~FunctionNode() override = default;
   static FunctionNode *Create(
       std::string const &name, std::string const &function, DecisionNode *child,
       ValueType cat, llvm::Type *type) {
     return new FunctionNode(name, function, child, cat, type);
   }
 
-  std::vector<std::pair<var_type, ValueType>> const &getBindings() const {
+  [[nodiscard]] std::vector<std::pair<var_type, ValueType>> const &
+  getBindings() const {
     return bindings;
   }
-  void addBinding(std::string name, ValueType type, llvm::Module *mod) {
+  void addBinding(std::string const &name, ValueType type, llvm::Module *mod) {
     bindings.push_back({{name, getParamType(type, mod)}, type});
   }
 
-  virtual void codegen(Decision *d);
-  virtual void preprocess(std::unordered_set<LeafNode *> &leaves) {
-    if (preprocessed)
+  void codegen(Decision *d) override;
+  void preprocess(std::unordered_set<LeafNode *> &leaves) override {
+    if (preprocessed) {
       return;
+    }
     child->preprocess(leaves);
     containsFailNode = containsFailNode || child->containsFailNode;
     choiceDepth = child->choiceDepth;
@@ -256,25 +269,29 @@ private:
 
   DecisionNode *child = nullptr;
 
-  LeafNode(std::string const &name)
-      : name(name) { }
+  LeafNode(std::string name)
+      : name(std::move(name)) { }
 
 public:
+  ~LeafNode() override = default;
   static LeafNode *Create(std::string const &name) {
     return new LeafNode(name);
   }
 
-  std::vector<var_type> const &getBindings() const { return bindings; }
-  void addBinding(std::string name, ValueType type, llvm::Module *mod) {
-    bindings.push_back(std::make_pair(name, getParamType(type, mod)));
+  [[nodiscard]] std::vector<var_type> const &getBindings() const {
+    return bindings;
+  }
+  void addBinding(std::string const &name, ValueType type, llvm::Module *mod) {
+    bindings.emplace_back(name, getParamType(type, mod));
   }
   void setChild(DecisionNode *child) { this->child = child; }
 
-  virtual void codegen(Decision *d);
-  virtual void preprocess(std::unordered_set<LeafNode *> &leaves) {
+  void codegen(Decision *d) override;
+  void preprocess(std::unordered_set<LeafNode *> &leaves) override {
     if (child != nullptr) {
-      if (preprocessed)
+      if (preprocessed) {
         return;
+      }
       leaves.insert(this);
       child->preprocess(leaves);
       containsFailNode = containsFailNode || child->containsFailNode;
@@ -296,17 +313,17 @@ private:
   DecisionNode *child;
 
   MakeIteratorNode(
-      std::string const &collection, llvm::Type *collectionType,
-      std::string const &name, llvm::Type *type, std::string const &hookName,
-      DecisionNode *child)
-      : collection(collection)
+      std::string collection, llvm::Type *collectionType, std::string name,
+      llvm::Type *type, std::string hookName, DecisionNode *child)
+      : collection(std::move(collection))
       , collectionType(collectionType)
-      , name(name)
+      , name(std::move(name))
       , type(type)
-      , hookName(hookName)
+      , hookName(std::move(hookName))
       , child(child) { }
 
 public:
+  ~MakeIteratorNode() override = default;
   static MakeIteratorNode *Create(
       std::string const &collection, llvm::Type *collectionType,
       std::string const &name, llvm::Type *type, std::string const &hookName,
@@ -315,10 +332,11 @@ public:
         collection, collectionType, name, type, hookName, child);
   }
 
-  virtual void codegen(Decision *d);
-  virtual void preprocess(std::unordered_set<LeafNode *> &leaves) {
-    if (preprocessed)
+  void codegen(Decision *d) override;
+  void preprocess(std::unordered_set<LeafNode *> &leaves) override {
+    if (preprocessed) {
       return;
+    }
     child->preprocess(leaves);
     containsFailNode = containsFailNode || child->containsFailNode;
     choiceDepth = child->choiceDepth;
@@ -336,17 +354,17 @@ private:
   DecisionNode *child;
 
   IterNextNode(
-      std::string const &iterator, llvm::Type *iteratorType,
-      std::string const &binding, llvm::Type *bindingType,
-      std::string const &hookName, DecisionNode *child)
-      : iterator(iterator)
+      std::string iterator, llvm::Type *iteratorType, std::string binding,
+      llvm::Type *bindingType, std::string hookName, DecisionNode *child)
+      : iterator(std::move(iterator))
       , iteratorType(iteratorType)
-      , binding(binding)
+      , binding(std::move(binding))
       , bindingType(bindingType)
-      , hookName(hookName)
+      , hookName(std::move(hookName))
       , child(child) { }
 
 public:
+  ~IterNextNode() override = default;
   static IterNextNode *Create(
       std::string const &iterator, llvm::Type *iteratorType,
       std::string const &binding, llvm::Type *bindingType,
@@ -355,10 +373,11 @@ public:
         iterator, iteratorType, binding, bindingType, hookName, child);
   }
 
-  virtual void codegen(Decision *d);
-  virtual void preprocess(std::unordered_set<LeafNode *> &leaves) {
-    if (preprocessed)
+  void codegen(Decision *d) override;
+  void preprocess(std::unordered_set<LeafNode *> &leaves) override {
+    if (preprocessed) {
       return;
+    }
     child->preprocess(leaves);
     containsFailNode = containsFailNode || child->containsFailNode;
     choiceDepth = child->choiceDepth + 1;
@@ -374,14 +393,14 @@ private:
   llvm::IndirectBrInst *FailJump;
   llvm::AllocaInst *ChoiceBuffer;
   llvm::AllocaInst *ChoiceDepth;
-  llvm::BasicBlock *ChoiceBlock;
+  llvm::BasicBlock *ChoiceBlock{nullptr};
   llvm::Module *Module;
   llvm::LLVMContext &Ctx;
   ValueType Cat;
   llvm::PHINode *FailSubject, *FailPattern, *FailSort;
   llvm::AllocaInst *HasSearchResults;
 
-  std::map<var_type, llvm::AllocaInst *> symbols;
+  std::map<var_type, llvm::AllocaInst *> symbols{};
 
   llvm::Value *getTag(llvm::Value *);
 
@@ -404,7 +423,6 @@ public:
       , FailJump(FailJump)
       , ChoiceBuffer(ChoiceBuffer)
       , ChoiceDepth(ChoiceDepth)
-      , ChoiceBlock(nullptr)
       , Module(Module)
       , Ctx(Module->getContext())
       , Cat(Cat)

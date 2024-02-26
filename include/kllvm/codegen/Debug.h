@@ -18,7 +18,7 @@
 namespace kllvm {
 
 void initDebugInfo(llvm::Module *module, std::string const &filename);
-void finalizeDebugInfo(void);
+void finalizeDebugInfo();
 
 void initDebugFunction(
     std::string const &name, std::string const &linkageName,
@@ -33,23 +33,23 @@ void initDebugGlobal(
     std::string const &name, llvm::DIType *type, llvm::GlobalVariable *var);
 
 llvm::DIType *getDebugType(ValueType type, std::string const &typeName);
-llvm::DIType *getIntDebugType(void);
-llvm::DIType *getLongDebugType(void);
-llvm::DIType *getVoidDebugType(void);
-llvm::DIType *getBoolDebugType(void);
-llvm::DIType *getShortDebugType(void);
+llvm::DIType *getIntDebugType();
+llvm::DIType *getLongDebugType();
+llvm::DIType *getVoidDebugType();
+llvm::DIType *getBoolDebugType();
+llvm::DIType *getShortDebugType();
 llvm::DIType *getPointerDebugType(llvm::DIType *, std::string const &typeName);
 llvm::DIType *
 getArrayDebugType(llvm::DIType *ty, size_t len, llvm::Align align);
-llvm::DIType *getCharPtrDebugType(void);
-llvm::DIType *getCharDebugType(void);
+llvm::DIType *getCharPtrDebugType();
+llvm::DIType *getCharDebugType();
 llvm::DIType *getForwardDecl(std::string const &name);
 
 llvm::DISubroutineType *
 getDebugFunctionType(llvm::Metadata *, std::vector<llvm::Metadata *>);
 
 void setDebugLoc(llvm::Instruction *instr);
-void resetDebugLoc(void);
+void resetDebugLoc();
 
 } // namespace kllvm
 #endif

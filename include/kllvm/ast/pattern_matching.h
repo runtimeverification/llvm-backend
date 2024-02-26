@@ -170,7 +170,7 @@ struct match_result {
  */
 class any_ {
 public:
-  match_result match(std::shared_ptr<KOREPattern> const &term) const {
+  [[nodiscard]] static match_result match(std::shared_ptr<KOREPattern> const &term) {
     return {true, nullptr};
   }
 };
@@ -188,20 +188,19 @@ template <typename Inner>
 class subject {
 public:
   subject(Inner inner)
-      : inner_(inner) {
+      : inner_(std::move(inner)) {
     static_assert(
         detail::subject_count_v<Inner> == 0,
         "Cannot construct a subject expression with nested subject terms");
   }
 
-  match_result match(std::shared_ptr<KOREPattern> const &term) const {
+  [[nodiscard]] match_result match(std::shared_ptr<KOREPattern> const &term) const {
     auto inner_result = inner_.match(term);
 
     if (inner_result.matches) {
       return {true, term};
-    } else {
-      return {false, nullptr};
-    }
+    }       return {false, nullptr};
+   
   }
 
 private:
@@ -217,7 +216,7 @@ template <typename... Ts>
 class pattern {
 public:
   pattern(std::string ctor, Ts... children)
-      : constructor_(ctor)
+      : constructor_(std::move(std::move(ctor)))
       , children_(children...) {
     static_assert(
         detail::subject_count_v<std::decay_t<decltype(*this)>> <= 1,
@@ -236,7 +235,7 @@ public:
    * assume that the first child lens to match with a returned subject pattern
    * is the only such lens.
    */
-  match_result match(std::shared_ptr<KOREPattern> const &term) const {
+  [[nodiscard]] match_result match(std::shared_ptr<KOREPattern> const &term) const {
     if (auto composite = std::dynamic_pointer_cast<KORECompositePattern>(term);
         composite && composite->getArguments().size() == arity()
         && composite->getConstructor()->getName() == constructor_) {
@@ -267,7 +266,7 @@ public:
   }
 
 private:
-  constexpr size_t arity() const { return sizeof...(Ts); }
+  [[nodiscard]] constexpr size_t arity() const { return sizeof...(Ts); }
 
   std::string constructor_;
   std::tuple<Ts...> children_;
@@ -293,7 +292,7 @@ public:
 
   template <typename Func>
   map(Pattern p, Func f)
-      : pattern_(p)
+      : pattern_(std::move(p))
       , func_(f) { }
 
   map(Pattern p)
@@ -303,7 +302,7 @@ public:
    * Analogous to `match` on a lens type, but with the subject result being a
    * transformed value of type Result rather than a pattern.
    */
-  std::pair<bool, Result>
+  [[nodiscard]] std::pair<bool, Result>
   match(std::shared_ptr<KOREPattern> const &term) const {
     auto [match, subject] = pattern_.match(term);
 
@@ -358,7 +357,7 @@ public:
   match_first(Lens first, Lenses... rest)
       : maps_(make_map(first), make_map(rest)...) { }
 
-  std::pair<bool, result_t>
+  [[nodiscard]] std::pair<bool, result_t>
   match(std::shared_ptr<KOREPattern> const &term) const {
     result_t result = std::nullopt;
     bool any = false;

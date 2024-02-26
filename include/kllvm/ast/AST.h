@@ -103,22 +103,22 @@ public:
     return sptr<KORESortVariable>(new KORESortVariable(Name));
   }
 
-  virtual bool isConcrete() const override { return false; }
-  virtual sptr<KORESort> substitute(substitution const &subst) override {
+  bool isConcrete() const override { return false; }
+  sptr<KORESort> substitute(substitution const &subst) override {
     return subst.at(*this);
   }
 
-  virtual void print(std::ostream &Out, unsigned indent = 0) const override;
-  virtual void prettyPrint(std::ostream &Out) const override;
-  virtual void serialize_to(serializer &s) const override;
+  void print(std::ostream &Out, unsigned indent = 0) const override;
+  void prettyPrint(std::ostream &Out) const override;
+  void serialize_to(serializer &s) const override;
 
-  virtual bool operator==(KORESort const &other) const override;
+  bool operator==(KORESort const &other) const override;
 
   std::string const &getName() const { return name; }
 
 private:
-  KORESortVariable(std::string const &Name)
-      : name(Name) { }
+  KORESortVariable(std::string Name)
+      : name(std::move(Name)) { }
 };
 
 enum class SortCategory {
@@ -163,25 +163,25 @@ public:
     return sptr<KORECompositeSort>(new KORECompositeSort(Name, Cat));
   }
 
-  std::string const getName() const { return name; }
+  std::string getName() const { return name; }
   ValueType getCategory(KOREDefinition *definition);
   std::string getHook(KOREDefinition *definition) const;
   static ValueType getCategory(std::string const &hookName);
 
-  virtual bool isConcrete() const override;
-  virtual sptr<KORESort> substitute(substitution const &subst) override;
+  bool isConcrete() const override;
+  sptr<KORESort> substitute(substitution const &subst) override;
 
   void addArgument(sptr<KORESort> const &Argument);
-  virtual void print(std::ostream &Out, unsigned indent = 0) const override;
-  virtual void prettyPrint(std::ostream &out) const override;
-  virtual void serialize_to(serializer &s) const override;
-  virtual bool operator==(KORESort const &other) const override;
+  void print(std::ostream &Out, unsigned indent = 0) const override;
+  void prettyPrint(std::ostream &out) const override;
+  void serialize_to(serializer &s) const override;
+  bool operator==(KORESort const &other) const override;
 
   std::vector<sptr<KORESort>> const &getArguments() const { return arguments; }
 
 private:
-  KORECompositeSort(std::string const &Name, ValueType category)
-      : name(Name)
+  KORECompositeSort(std::string Name, ValueType category)
+      : name(std::move(Name))
       , category(category) { }
 };
 
@@ -211,14 +211,14 @@ private:
   /* the first integer in a continuous range representing the tags of all the
      polymorphic instantiations of this symbol. If the symbol has no parameters
      or its parameters are fully specified, firstTag == lastTag. */
-  uint32_t firstTag;
+  uint32_t firstTag{};
   /* the last integer in a continuous range representing the tags of all the
      polymorphic instantiations of this symbol. If the symbol has no parameters
      or its parameters are fully specified, firstTag == lastTag. */
-  uint32_t lastTag;
+  uint32_t lastTag{};
   /* A unique integer representing the layout of the symbol in memory.
      See CreateTerm.cpp for more information about the layout of K terms. */
-  uint16_t layout;
+  uint16_t layout{};
 
 public:
   static ptr<KORESymbol> Create(std::string const &Name) {
@@ -228,23 +228,23 @@ public:
   void addArgument(sptr<KORESort> const &Argument);
   void addFormalArgument(sptr<KORESort> const &Argument);
   void addSort(sptr<KORESort> Sort);
-  void initPatternArguments(void) { arguments.swap(formalArguments); }
+  void initPatternArguments() { arguments.swap(formalArguments); }
 
-  std::string const &getName() const { return name; }
-  std::vector<sptr<KORESort>> const &getArguments() const { return arguments; }
-  std::vector<sptr<KORESort>> const &getFormalArguments() const {
+  [[nodiscard]] std::string const &getName() const { return name; }
+  [[nodiscard]] std::vector<sptr<KORESort>> const &getArguments() const { return arguments; }
+  [[nodiscard]] std::vector<sptr<KORESort>> const &getFormalArguments() const {
     return formalArguments;
   }
-  sptr<KORESort> const getSort() const { return sort; }
+  [[nodiscard]] sptr<KORESort> getSort() const { return sort; }
   sptr<KORESort> getSort() { return sort; }
-  uint32_t getTag() const {
+  [[nodiscard]] uint32_t getTag() const {
     assert(firstTag == lastTag);
     return firstTag;
   }
-  uint32_t getFirstTag() const { return firstTag; }
-  uint32_t getLastTag() const { return lastTag; }
+  [[nodiscard]] uint32_t getFirstTag() const { return firstTag; }
+  [[nodiscard]] uint32_t getLastTag() const { return lastTag; }
   void setTag(uint32_t val) { firstTag = lastTag = val; }
-  uint16_t getLayout() const { return layout; }
+  [[nodiscard]] uint16_t getLayout() const { return layout; }
 
   void print(std::ostream &Out, unsigned indent = 0) const;
   void print(std::ostream &Out, unsigned indent, bool formal) const;
@@ -255,9 +255,9 @@ public:
 
   std::string layoutString(KOREDefinition *) const;
 
-  bool isConcrete() const;
-  bool isPolymorphic() const;
-  bool isBuiltin() const;
+  [[nodiscard]] bool isConcrete() const;
+  [[nodiscard]] bool isPolymorphic() const;
+  [[nodiscard]] bool isBuiltin() const;
 
   /* instantiates this symbol (which should be parsed from a pattern in an
      axiom) with the sorts corresponding to its actual sort parameters after
@@ -273,8 +273,8 @@ public:
   friend KOREDefinition;
 
 private:
-  KORESymbol(std::string const &Name)
-      : name(Name)
+  KORESymbol(std::string Name)
+      : name(std::move(Name))
       , sort(nullptr) { }
 };
 
@@ -282,7 +282,7 @@ struct HashSymbol {
   size_t operator()(kllvm::KORESymbol const &s) const noexcept {
     size_t hash = 0;
     boost::hash_combine(hash, s.name);
-    for (auto &arg : s.arguments) {
+    for (const auto &arg : s.arguments) {
       boost::hash_combine(hash, *arg);
     }
     return hash;
@@ -311,7 +311,7 @@ public:
     return ptr<KOREVariable>(new KOREVariable(Name));
   }
 
-  std::string getName() const;
+  [[nodiscard]] std::string getName() const;
 
   virtual void print(std::ostream &Out, unsigned indent = 0) const;
   virtual void serialize_to(serializer &s) const;
@@ -319,8 +319,8 @@ public:
   virtual ~KOREVariable() = default;
 
 private:
-  KOREVariable(std::string const &Name)
-      : name(Name) { }
+  KOREVariable(std::string Name)
+      : name(std::move(Name)) { }
 };
 
 class KOREVariablePattern;
@@ -356,7 +356,7 @@ struct PrettyPrintData {
   std::set<std::string> comm;
   SubsortMap subsorts;
   // enable coloring
-  bool hasColor;
+  bool hasColor{};
 };
 
 class KOREDeclaration;
@@ -388,7 +388,7 @@ public:
   virtual void markVariables(std::map<std::string, KOREVariablePattern *> &)
       = 0;
 
-  virtual sptr<KORESort> getSort(void) const = 0;
+  virtual sptr<KORESort> getSort() const = 0;
 
   using substitution = std::unordered_map<std::string, sptr<KOREPattern>>;
 
@@ -398,12 +398,12 @@ public:
   virtual void prettyPrint(std::ostream &, PrettyPrintData const &data) const
       = 0;
   virtual sptr<KOREPattern> sortCollections(PrettyPrintData const &data) = 0;
-  std::set<std::string> gatherSingletonVars(void);
-  virtual std::map<std::string, int> gatherVarCounts(void) = 0;
+  std::set<std::string> gatherSingletonVars();
+  virtual std::map<std::string, int> gatherVarCounts() = 0;
   virtual sptr<KOREPattern> filterSubstitution(
       PrettyPrintData const &data, std::set<std::string> const &vars)
       = 0;
-  virtual sptr<KOREPattern> dedupeDisjuncts(void) = 0;
+  virtual sptr<KOREPattern> dedupeDisjuncts() = 0;
   virtual bool matches(
       substitution &subst, SubsortMap const &subsorts,
       SymbolMap const &overloads, sptr<KOREPattern> subject)
@@ -411,7 +411,7 @@ public:
   sptr<KOREPattern> expandMacros(
       SubsortMap const &subsorts, SymbolMap const &overloads,
       std::vector<ptr<KOREDeclaration>> const &axioms, bool reverse);
-  virtual sptr<KOREPattern> unflattenAndOr(void) = 0;
+  virtual sptr<KOREPattern> unflattenAndOr() = 0;
 
   /*
    * Recursively expands productions of the form:
@@ -454,62 +454,62 @@ public:
   Create(std::string const &Name, sptr<KORESort> sort) {
     ptr<KOREVariable> Var = KOREVariable::Create(Name);
     return ptr<KOREVariablePattern>(
-        new KOREVariablePattern(std::move(Var), sort));
+        new KOREVariablePattern(std::move(Var), std::move(sort)));
   }
 
   std::string getName() const;
-  virtual sptr<KORESort> getSort() const override { return sort; }
+  sptr<KORESort> getSort() const override { return sort; }
 
-  virtual void print(std::ostream &Out, unsigned indent = 0) const override;
-  virtual void serialize_to(serializer &s) const override;
+  void print(std::ostream &Out, unsigned indent = 0) const override;
+  void serialize_to(serializer &s) const override;
 
-  virtual void
+  void
   markSymbols(std::map<std::string, std::vector<KORESymbol *>> &) override { }
-  virtual void
+  void
   markVariables(std::map<std::string, KOREVariablePattern *> &map) override {
     map.insert({name->getName(), this});
   }
-  virtual sptr<KOREPattern> substitute(substitution const &subst) override {
+  sptr<KOREPattern> substitute(substitution const &subst) override {
     auto val = subst.find(name->getName());
     if (val == subst.end()) {
       return shared_from_this();
     }
     return val->second;
   }
-  virtual sptr<KOREPattern> expandAliases(KOREDefinition *) override {
+  sptr<KOREPattern> expandAliases(KOREDefinition *) override {
     return shared_from_this();
   }
-  virtual sptr<KOREPattern>
+  sptr<KOREPattern>
   sortCollections(PrettyPrintData const &data) override {
     return shared_from_this();
   }
-  virtual sptr<KOREPattern> dedupeDisjuncts(void) override {
+  sptr<KOREPattern> dedupeDisjuncts() override {
     return shared_from_this();
   }
-  virtual std::map<std::string, int> gatherVarCounts(void) override {
+  std::map<std::string, int> gatherVarCounts() override {
     return std::map<std::string, int>{{name->getName(), 1}};
   }
-  virtual sptr<KOREPattern> filterSubstitution(
+  sptr<KOREPattern> filterSubstitution(
       PrettyPrintData const &data, std::set<std::string> const &vars) override {
     return shared_from_this();
   }
 
-  virtual sptr<KOREPattern> desugarAssociative() override {
+  sptr<KOREPattern> desugarAssociative() override {
     return shared_from_this();
   }
 
-  virtual sptr<KOREPattern> unflattenAndOr() override {
+  sptr<KOREPattern> unflattenAndOr() override {
     return shared_from_this();
   }
 
-  virtual bool matches(
+  bool matches(
       substitution &subst, SubsortMap const &, SymbolMap const &,
       sptr<KOREPattern> subject) override;
-  virtual void
+  void
   prettyPrint(std::ostream &out, PrettyPrintData const &data) const override;
 
 private:
-  virtual sptr<KOREPattern> expandMacros(
+  sptr<KOREPattern> expandMacros(
       SubsortMap const &, SymbolMap const &,
       std::vector<ptr<KOREDeclaration>> const &macros, bool reverse,
       std::set<size_t> &appliedRules,
@@ -517,10 +517,10 @@ private:
     return shared_from_this();
   }
 
-private:
+
   KOREVariablePattern(ptr<KOREVariable> Name, sptr<KORESort> Sort)
       : name(std::move(Name))
-      , sort(Sort) { }
+      , sort(std::move(std::move(Sort))) { }
 };
 
 void deallocateSPtrKorePattern(sptr<KOREPattern> pattern);
@@ -563,31 +563,31 @@ public:
 
   void addArgument(sptr<KOREPattern> const &Argument);
 
-  virtual void print(std::ostream &Out, unsigned indent = 0) const override;
-  virtual void serialize_to(serializer &s) const override;
+  void print(std::ostream &Out, unsigned indent = 0) const override;
+  void serialize_to(serializer &s) const override;
 
-  virtual void
+  void
   prettyPrint(std::ostream &out, PrettyPrintData const &data) const override;
-  virtual void
+  void
   markSymbols(std::map<std::string, std::vector<KORESymbol *>> &) override;
-  virtual void
+  void
   markVariables(std::map<std::string, KOREVariablePattern *> &) override;
-  virtual sptr<KOREPattern> substitute(substitution const &) override;
-  virtual sptr<KOREPattern> expandAliases(KOREDefinition *) override;
-  virtual sptr<KOREPattern>
+  sptr<KOREPattern> substitute(substitution const &) override;
+  sptr<KOREPattern> expandAliases(KOREDefinition *) override;
+  sptr<KOREPattern>
   sortCollections(PrettyPrintData const &data) override;
-  virtual sptr<KOREPattern> dedupeDisjuncts(void) override;
-  virtual std::map<std::string, int> gatherVarCounts(void) override;
-  virtual sptr<KOREPattern> desugarAssociative() override;
-  virtual sptr<KOREPattern> unflattenAndOr() override;
-  virtual sptr<KOREPattern> filterSubstitution(
+  sptr<KOREPattern> dedupeDisjuncts() override;
+  std::map<std::string, int> gatherVarCounts() override;
+  sptr<KOREPattern> desugarAssociative() override;
+  sptr<KOREPattern> unflattenAndOr() override;
+  sptr<KOREPattern> filterSubstitution(
       PrettyPrintData const &data, std::set<std::string> const &vars) override;
-  virtual bool matches(
+  bool matches(
       substitution &, SubsortMap const &, SymbolMap const &,
       sptr<KOREPattern>) override;
 
 private:
-  virtual sptr<KOREPattern> expandMacros(
+  sptr<KOREPattern> expandMacros(
       SubsortMap const &, SymbolMap const &,
       std::vector<ptr<KOREDeclaration>> const &macros, bool reverse,
       std::set<size_t> &appliedRules,
@@ -595,7 +595,7 @@ private:
 
   friend void ::kllvm::deallocateSPtrKorePattern(sptr<KOREPattern> pattern);
 
-private:
+
   KORECompositePattern(ptr<KORESymbol> Constructor)
       : constructor(std::move(Constructor)) { }
 };
@@ -611,53 +611,53 @@ public:
 
   std::string getContents() { return contents; }
 
-  virtual void print(std::ostream &Out, unsigned indent = 0) const override;
-  virtual void serialize_to(serializer &s) const override;
-  virtual void
+  void print(std::ostream &Out, unsigned indent = 0) const override;
+  void serialize_to(serializer &s) const override;
+  void
   prettyPrint(std::ostream &out, PrettyPrintData const &data) const override {
     abort();
   }
 
-  virtual void
+  void
   markSymbols(std::map<std::string, std::vector<KORESymbol *>> &) override { }
-  virtual void
+  void
   markVariables(std::map<std::string, KOREVariablePattern *> &) override { }
-  virtual sptr<KORESort> getSort(void) const override { abort(); }
-  virtual sptr<KOREPattern> substitute(substitution const &) override {
+  sptr<KORESort> getSort() const override { abort(); }
+  sptr<KOREPattern> substitute(substitution const &) override {
     return shared_from_this();
   }
-  virtual sptr<KOREPattern> expandAliases(KOREDefinition *) override {
+  sptr<KOREPattern> expandAliases(KOREDefinition *) override {
     return shared_from_this();
   }
-  virtual sptr<KOREPattern>
+  sptr<KOREPattern>
   sortCollections(PrettyPrintData const &data) override {
     return shared_from_this();
   }
-  virtual sptr<KOREPattern> dedupeDisjuncts(void) override {
+  sptr<KOREPattern> dedupeDisjuncts() override {
     return shared_from_this();
   }
-  virtual std::map<std::string, int> gatherVarCounts(void) override {
+  std::map<std::string, int> gatherVarCounts() override {
     return std::map<std::string, int>{};
   }
 
-  virtual sptr<KOREPattern> desugarAssociative() override {
+  sptr<KOREPattern> desugarAssociative() override {
     return shared_from_this();
   }
 
-  virtual sptr<KOREPattern> unflattenAndOr() override {
+  sptr<KOREPattern> unflattenAndOr() override {
     return shared_from_this();
   }
 
-  virtual sptr<KOREPattern> filterSubstitution(
+  sptr<KOREPattern> filterSubstitution(
       PrettyPrintData const &data, std::set<std::string> const &var) override {
     return shared_from_this();
   }
-  virtual bool matches(
+  bool matches(
       substitution &, SubsortMap const &, SymbolMap const &,
       sptr<KOREPattern> subject) override;
 
 private:
-  virtual sptr<KOREPattern> expandMacros(
+  sptr<KOREPattern> expandMacros(
       SubsortMap const &, SymbolMap const &,
       std::vector<ptr<KOREDeclaration>> const &macros, bool reverse,
       std::set<size_t> &appliedRules,
@@ -665,9 +665,9 @@ private:
     return shared_from_this();
   }
 
-private:
-  KOREStringPattern(std::string const &Contents)
-      : contents(Contents) { }
+
+  KOREStringPattern(std::string Contents)
+      : contents(std::move(Contents)) { }
 };
 
 // KOREDeclaration
@@ -678,12 +678,12 @@ protected:
 
 public:
   attribute_set &attributes() { return attributes_; }
-  attribute_set const &attributes() const { return attributes_; }
+  [[nodiscard]] attribute_set const &attributes() const { return attributes_; }
 
   void addObjectSortVariable(sptr<KORESortVariable> const &SortVariable);
   virtual void print(std::ostream &Out, unsigned indent = 0) const = 0;
 
-  std::vector<sptr<KORESortVariable>> const &getObjectSortVariables() const {
+  [[nodiscard]] std::vector<sptr<KORESortVariable>> const &getObjectSortVariables() const {
     return objectSortVariables;
   }
   virtual ~KOREDeclaration() = default;
@@ -704,15 +704,15 @@ public:
         new KORECompositeSortDeclaration(Name, isHooked));
   }
 
-  std::string getName() const { return sortName; }
-  bool isHooked() const { return _isHooked; }
+  [[nodiscard]] std::string getName() const { return sortName; }
+  [[nodiscard]] bool isHooked() const { return _isHooked; }
 
-  virtual void print(std::ostream &Out, unsigned indent = 0) const override;
+  void print(std::ostream &Out, unsigned indent = 0) const override;
 
 private:
-  KORECompositeSortDeclaration(std::string const &Name, bool _isHooked)
+  KORECompositeSortDeclaration(std::string Name, bool _isHooked)
       : _isHooked(_isHooked)
-      , sortName(Name) { }
+      , sortName(std::move(Name)) { }
 };
 
 class KORESymbolAliasDeclaration : public KOREDeclaration {
@@ -723,7 +723,7 @@ protected:
       : symbol(std::move(Symbol)) { }
 
 public:
-  KORESymbol *getSymbol() const { return symbol.get(); }
+  [[nodiscard]] KORESymbol *getSymbol() const { return symbol.get(); }
 };
 
 class KORESymbolDeclaration : public KORESymbolAliasDeclaration {
@@ -738,11 +738,11 @@ public:
         new KORESymbolDeclaration(std::move(Sym), isHooked));
   }
 
-  bool isHooked() const { return _isHooked; }
+  [[nodiscard]] bool isHooked() const { return _isHooked; }
 
-  bool isAnywhere() const;
+  [[nodiscard]] bool isAnywhere() const;
 
-  virtual void print(std::ostream &Out, unsigned indent = 0) const override;
+  void print(std::ostream &Out, unsigned indent = 0) const override;
 
 private:
   KORESymbolDeclaration(ptr<KORESymbol> Symbol, bool _isHooked)
@@ -764,11 +764,11 @@ public:
   void addVariables(sptr<KORECompositePattern> variables);
   void addPattern(sptr<KOREPattern> Pattern);
   KOREPattern::substitution getSubstitution(KORECompositePattern *subject);
-  KORECompositePattern *getBoundVariables() const {
+  [[nodiscard]] KORECompositePattern *getBoundVariables() const {
     return boundVariables.get();
   }
   sptr<KOREPattern> &getPattern() { return pattern; }
-  virtual void print(std::ostream &Out, unsigned indent = 0) const override;
+  void print(std::ostream &Out, unsigned indent = 0) const override;
 
 private:
   KOREAliasDeclaration(ptr<KORESymbol> Symbol)
@@ -778,7 +778,7 @@ private:
 class KOREAxiomDeclaration : public KOREDeclaration {
 private:
   sptr<KOREPattern> pattern;
-  unsigned ordinal;
+  unsigned ordinal{};
   bool _isClaim;
 
   KOREAxiomDeclaration(bool isClaim)
@@ -790,20 +790,20 @@ public:
   }
 
   void addPattern(sptr<KOREPattern> Pattern);
-  virtual void print(std::ostream &Out, unsigned indent = 0) const override;
+  void print(std::ostream &Out, unsigned indent = 0) const override;
 
   /* returns true if the axiom is actually required to be translated to llvm
      and false if it is an axiom pertaining to symbolic execution which is not
      required for concrete execution. Axioms that are not required are elided
      from the definition by KOREDefinition::preprocess. */
-  bool isRequired() const;
-  bool isTopAxiom() const;
-  bool isClaim() const { return _isClaim; }
-  KOREPattern *getRightHandSide() const;
-  std::vector<KOREPattern *> getLeftHandSide() const;
-  KOREPattern *getRequires() const;
-  sptr<KOREPattern> getPattern() const { return pattern; }
-  unsigned getOrdinal() const { return ordinal; }
+  [[nodiscard]] bool isRequired() const;
+  [[nodiscard]] bool isTopAxiom() const;
+  [[nodiscard]] bool isClaim() const { return _isClaim; }
+  [[nodiscard]] KOREPattern *getRightHandSide() const;
+  [[nodiscard]] std::vector<KOREPattern *> getLeftHandSide() const;
+  [[nodiscard]] KOREPattern *getRequires() const;
+  [[nodiscard]] sptr<KOREPattern> getPattern() const { return pattern; }
+  [[nodiscard]] unsigned getOrdinal() const { return ordinal; }
 
   friend KOREDefinition;
 };
@@ -818,13 +818,13 @@ public:
         new KOREModuleImportDeclaration(Name));
   }
 
-  std::string const &getModuleName() const { return moduleName; }
+  [[nodiscard]] std::string const &getModuleName() const { return moduleName; }
 
-  virtual void print(std::ostream &Out, unsigned indent = 0) const override;
+  void print(std::ostream &Out, unsigned indent = 0) const override;
 
 private:
-  KOREModuleImportDeclaration(std::string const &Name)
-      : moduleName(Name) { }
+  KOREModuleImportDeclaration(std::string Name)
+      : moduleName(std::move(Name)) { }
 };
 
 // KOREModule
@@ -840,19 +840,19 @@ public:
   }
 
   attribute_set &attributes() { return attributes_; }
-  attribute_set const &attributes() const { return attributes_; }
+  [[nodiscard]] attribute_set const &attributes() const { return attributes_; }
 
   void addDeclaration(sptr<KOREDeclaration> Declaration);
   void print(std::ostream &Out, unsigned indent = 0) const;
 
-  std::string const &getName() const { return name; }
-  std::vector<sptr<KOREDeclaration>> const &getDeclarations() const {
+  [[nodiscard]] std::string const &getName() const { return name; }
+  [[nodiscard]] std::vector<sptr<KOREDeclaration>> const &getDeclarations() const {
     return declarations;
   }
 
 private:
-  KOREModule(std::string const &Name)
-      : name(Name) { }
+  KOREModule(std::string Name)
+      : name(std::move(Name)) { }
 };
 
 // KOREDefinition
@@ -903,7 +903,7 @@ private:
   /* an automatically computed list of all the axioms in the definition */
   std::list<KOREAxiomDeclaration *> axioms;
 
-  KORESymbol *injSymbol;
+  KORESymbol *injSymbol{};
 
   /*
    * Insert symbols into this definition that have knowable labels, but cannot
@@ -914,7 +914,7 @@ private:
 
 public:
   static ptr<KOREDefinition> Create() {
-    return ptr<KOREDefinition>(new KOREDefinition());
+    return std::make_unique<KOREDefinition>();
   }
 
   /* Preprocesses the definition and prepares it for translation to llvm.
@@ -928,7 +928,7 @@ public:
   void preprocess();
 
   attribute_set &attributes() { return attributes_; }
-  attribute_set const &attributes() const { return attributes_; }
+  [[nodiscard]] attribute_set const &attributes() const { return attributes_; }
 
   void addModule(sptr<KOREModule> Module);
   void print(std::ostream &Out, unsigned indent = 0) const;
@@ -943,7 +943,7 @@ public:
    * implement type-safe collections), those user sorts will be returned as
    * well.
    */
-  std::unordered_set<std::string>
+  [[nodiscard]] std::unordered_set<std::string>
   getSortsHookedTo(std::string const &hookName) const;
 
   /*
@@ -954,7 +954,7 @@ public:
    *
    *   S |-> {T . S is a subsort of T}
    */
-  SubsortMap getSubsorts() const;
+  [[nodiscard]] SubsortMap getSubsorts() const;
 
   /*
    * Build this definition's overload relation from axioms that have the
@@ -964,28 +964,28 @@ public:
    *
    *  P |-> {Q . P is a more specific overload of Q}
    */
-  SymbolMap getOverloads() const;
+  [[nodiscard]] SymbolMap getOverloads() const;
 
-  std::vector<sptr<KOREModule>> const &getModules() const { return modules; }
-  KORECompositeSortDeclarationMapType const &getSortDeclarations() const {
+  [[nodiscard]] std::vector<sptr<KOREModule>> const &getModules() const { return modules; }
+  [[nodiscard]] KORECompositeSortDeclarationMapType const &getSortDeclarations() const {
     return sortDeclarations;
   }
-  KORESymbolDeclarationMapType const &getSymbolDeclarations() const {
+  [[nodiscard]] KORESymbolDeclarationMapType const &getSymbolDeclarations() const {
     return symbolDeclarations;
   }
-  KOREAliasDeclarationMapType const &getAliasDeclarations() const {
+  [[nodiscard]] KOREAliasDeclarationMapType const &getAliasDeclarations() const {
     return aliasDeclarations;
   }
-  KORESymbolMapType const &getSymbols() const { return objectSymbols; }
-  KORESymbolStringMapType const &getAllSymbols() const {
+  [[nodiscard]] KORESymbolMapType const &getSymbols() const { return objectSymbols; }
+  [[nodiscard]] KORESymbolStringMapType const &getAllSymbols() const {
     return allObjectSymbols;
   }
-  KORECompositeSortMapType const getHookedSorts() const { return hookedSorts; }
-  std::list<KOREAxiomDeclaration *> const &getAxioms() const { return axioms; }
-  KOREAxiomDeclaration *getAxiomByOrdinal(size_t ordinal) const {
+  [[nodiscard]] KORECompositeSortMapType getHookedSorts() const { return hookedSorts; }
+  [[nodiscard]] std::list<KOREAxiomDeclaration *> const &getAxioms() const { return axioms; }
+  [[nodiscard]] KOREAxiomDeclaration *getAxiomByOrdinal(size_t ordinal) const {
     return ordinals.at(ordinal);
   }
-  KORESymbolStringMapType const &getFreshFunctions() const {
+  [[nodiscard]] KORESymbolStringMapType const &getFreshFunctions() const {
     return freshFunctions;
   }
   KORESymbol *getInjSymbol() { return injSymbol; }

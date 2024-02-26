@@ -23,7 +23,7 @@ LLVMHookEvent::LLVMHookEvent(std::string _name, std::string _relativePosition)
     : name(std::move(_name))
     , relativePosition(std::move(_relativePosition))
     , korePattern(nullptr)
-    , patternLength(0U) { }
+     { }
 
 void LLVMHookEvent::addArgument(LLVMEvent const &argument) {
   arguments.push_back(argument);

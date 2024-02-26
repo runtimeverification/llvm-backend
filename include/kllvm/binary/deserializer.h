@@ -63,7 +63,7 @@ uint64_t read_pattern_size(It &ptr, It end, binary_version version) {
     return read_pattern_size_unchecked(ptr, end);
   }
 
-  return 0u;
+  return 0U;
 }
 
 template <typename It>
@@ -77,8 +77,7 @@ uint64_t read_length(It &ptr, It end, binary_version version, int v1_bytes) {
     }
 
     return ret;
-  } else {
-    uint64_t ret = 0;
+  }     uint64_t ret = 0;
     auto should_continue = true;
     auto steps = 0;
 
@@ -98,7 +97,7 @@ uint64_t read_length(It &ptr, It end, binary_version version, int v1_bytes) {
     }
 
     return ret;
-  }
+ 
 }
 
 template <typename It>
@@ -120,7 +119,7 @@ std::string read_string(It &ptr, It end, binary_version version) {
     auto begin = ptr - backref;
     auto len = read_length(begin, end, version, 4);
 
-    return std::string((char *)&*begin, (char *)(&*begin + len));
+    return {(char *)&*begin, (char *)(&*begin + len)};
   }
 
   default: throw std::runtime_error("Internal parsing exception");

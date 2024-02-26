@@ -3,8 +3,7 @@
 
 #include "kllvm/parser/location.h"
 
-namespace kllvm {
-namespace parser {
+namespace kllvm::parser {
 
 enum class token {
   EMPTY,
@@ -41,7 +40,7 @@ public:
 
   friend class KOREParser;
 
-  typedef void *yyscan_t;
+  using yyscan_t = void *;
 
 private:
   yyscan_t scanner;
@@ -56,7 +55,6 @@ private:
   std::string stringBuffer;
 };
 
-} // end namespace parser
 } // end namespace kllvm
 
 #endif // KORESCANNER_H

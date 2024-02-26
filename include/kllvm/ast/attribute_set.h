@@ -89,7 +89,7 @@ public:
    * Returns true if there is any attribute with the given key; the arguments of
    * that attribute are not considered.
    */
-  bool contains(key k) const;
+  [[nodiscard]] bool contains(key k) const;
 
   /**
    * Look up the attribute pattern with the specified key.
@@ -97,7 +97,7 @@ public:
    * This lookup is unchecked; use `.contains(k)` first if the attribute may not
    * be present.
    */
-  std::shared_ptr<KORECompositePattern> const &get(key k) const;
+  [[nodiscard]] std::shared_ptr<KORECompositePattern> const &get(key k) const;
 
   /**
    * Look up an attribute with the specified key that has the form:
@@ -106,14 +106,14 @@ public:
    *
    * and extract the string data in the pattern's argument.
    */
-  std::string get_string(key k) const;
+  [[nodiscard]] std::string get_string(key k) const;
 
   /**
    * Get the underlying attribute table; this table will allow access to
    * attributes that are not statically whitelisted by the backend, and so
    * should only be used at library boundaries (e.g. in bindings code).
    */
-  storage_t const &underlying() const;
+  [[nodiscard]] storage_t const &underlying() const;
 
   /**
    * Support for iterating over the stored attributes.
@@ -121,8 +121,8 @@ public:
    * Code that uses this feature should not dispatch on specific attribute names
    * when iterating; the type-safe interface should be used to do so instead.
    */
-  storage_t::const_iterator begin() const;
-  storage_t::const_iterator end() const;
+  [[nodiscard]] storage_t::const_iterator begin() const;
+  [[nodiscard]] storage_t::const_iterator end() const;
 
 private:
   storage_t attribute_map_ = {};

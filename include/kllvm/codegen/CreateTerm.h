@@ -21,7 +21,7 @@ private:
   std::set<KOREPattern *> staticTerms;
 
   llvm::Value *
-  alloc_arg(KORECompositePattern *pattern, int idx, std::string locationStack);
+  alloc_arg(KORECompositePattern *pattern, int idx, const std::string& locationStack);
   llvm::Value *createHook(
       KORECompositePattern *hookAtt, KORECompositePattern *pattern,
       std::string const &locationStack = "0");
@@ -30,7 +30,7 @@ private:
       bool tailcc, std::string const &locationStack = "0");
   llvm::Value *notInjectionCase(
       KORECompositePattern *constructor, llvm::Value *val,
-      std::string locationStack = "0");
+      const std::string& locationStack = "0");
   bool populateStaticSet(KOREPattern *pattern);
   std::pair<llvm::Value *, bool> createAllocation(
       KOREPattern *pattern, std::string const &locationStack = "0");
@@ -45,7 +45,7 @@ public:
       , Module(Module)
       , Ctx(Module->getContext())
       , isAnywhereOwise(isAnywhereOwise)
-      , staticTerms(std::set<KOREPattern *>()) { }
+       { }
 
   /* adds code to the specified basic block in the specified module which
      constructs an llvm value corresponding to the specified KORE RHS pattern
@@ -73,7 +73,7 @@ public:
       std::vector<llvm::Value *> const &args, bool sret, bool tailcc,
       std::string const &locationStack = "0");
 
-  llvm::BasicBlock *getCurrentBlock() const { return CurrentBlock; }
+  [[nodiscard]] llvm::BasicBlock *getCurrentBlock() const { return CurrentBlock; }
 };
 
 std::string escape(std::string const &str);

@@ -40,7 +40,7 @@ public:
 
   FILE *file_pointer(std::string const &mode = "r") {
     if (!temp_c_file) {
-      auto f = fdopen(temp_fd, mode.data());
+      auto *f = fdopen(temp_fd, mode.data());
       if (f) {
         temp_c_file = std::unique_ptr<FILE, deleter>(f);
       } else {

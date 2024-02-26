@@ -25,7 +25,7 @@ mapfile -t inputs < <(find "${source_dirs[@]}" -name '*.cpp' -or -name '*.h')
 
 "${driver}"                           \
   "${inputs[@]}"                      \
-  -header-filter 'include/(kllvm|runtime)'              \
+  -header-filter 'include/(kllvm|runtime)/'              \
   -clang-tidy-binary "${clang_tidy}"  \
   -j "$(nproc)"                       \
   -p "${BUILD_DIR}" "$@"              \

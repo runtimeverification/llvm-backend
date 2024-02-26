@@ -20,7 +20,7 @@ struct binary_version {
    * Two versions are compatible if they have identical v_major and v_minor
    * components; they may differ in the v_patch component.
    */
-  constexpr bool compatible(binary_version other) const {
+  [[nodiscard]] constexpr bool compatible(binary_version other) const {
     return std::tie(v_major, v_minor) == std::tie(other.v_major, other.v_minor);
   }
 

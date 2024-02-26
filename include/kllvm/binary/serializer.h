@@ -52,7 +52,7 @@ public:
   template <
       typename T,
       typename = std::enable_if_t<std::is_fundamental_v<std::decay_t<T>>>>
-  void emit(T t);
+  void emit(T val);
 
   /**
    * Emit a string to the output buffer, using the interning table to either
@@ -81,7 +81,7 @@ public:
    * Return a copy of the bytes currently stored by this serializer as a string,
    * for compatibility with interfaces that don't deal with vectors of bytes.
    */
-  std::string byte_string() const;
+  [[nodiscard]] std::string byte_string() const;
 
   /**
    * Reset the state of the serializer back to its newly-constructed state, with
@@ -94,7 +94,7 @@ public:
    * the topmost arity is dropped.
    */
   void reset_arity_flag();
-  bool use_arity() const { return use_arity_; }
+  [[nodiscard]] bool use_arity() const { return use_arity_; }
 
 private:
   bool use_header_;
