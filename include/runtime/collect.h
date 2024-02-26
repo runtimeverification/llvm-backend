@@ -27,7 +27,6 @@ using set_impl = set::iterator::tree_t;
 
 extern "C" {
 extern size_t numBytesLiveAtCollection[1 << AGE_WIDTH];
-bool during_gc(void);
 extern bool collect_old;
 size_t get_size(uint64_t, uint16_t);
 void migrate_once(block **);
