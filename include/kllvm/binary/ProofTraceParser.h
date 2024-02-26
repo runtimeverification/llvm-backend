@@ -54,14 +54,16 @@ protected:
 
 public:
   LLVMRewriteEvent(uint64_t _ruleOrdinal)
-      : ruleOrdinal(_ruleOrdinal)
-       { }
+      : ruleOrdinal(_ruleOrdinal) { }
 
   [[nodiscard]] uint64_t getRuleOrdinal() const { return ruleOrdinal; }
-  [[nodiscard]] substitution_t const &getSubstitution() const { return substitution; }
+  [[nodiscard]] substitution_t const &getSubstitution() const {
+    return substitution;
+  }
 
   void addSubstitution(
-      std::string const &name, const sptr<KOREPattern>& term, uint64_t pattern_len) {
+      std::string const &name, sptr<KOREPattern> const &term,
+      uint64_t pattern_len) {
     substitution.insert(
         std::make_pair(name, std::make_pair(term, pattern_len)));
   }
@@ -104,8 +106,7 @@ private:
 
   LLVMSideConditionEndEvent(uint64_t _ruleOrdinal)
       : ruleOrdinal(_ruleOrdinal)
-      , korePattern(nullptr)
-       { }
+      , korePattern(nullptr) { }
 
 public:
   static sptr<LLVMSideConditionEndEvent> Create(uint64_t _ruleOrdinal) {
@@ -142,7 +143,9 @@ public:
   }
 
   [[nodiscard]] std::string const &getName() const { return name; }
-  [[nodiscard]] std::string const &getRelativePosition() const { return relativePosition; }
+  [[nodiscard]] std::string const &getRelativePosition() const {
+    return relativePosition;
+  }
   [[nodiscard]] std::vector<LLVMEvent> const &getArguments() const;
 
   void addArgument(LLVMEvent const &argument);
@@ -167,8 +170,12 @@ public:
   }
 
   [[nodiscard]] std::string const &getName() const { return name; }
-  [[nodiscard]] std::string const &getRelativePosition() const { return relativePosition; }
-  [[nodiscard]] std::vector<LLVMEvent> const &getArguments() const { return arguments; }
+  [[nodiscard]] std::string const &getRelativePosition() const {
+    return relativePosition;
+  }
+  [[nodiscard]] std::vector<LLVMEvent> const &getArguments() const {
+    return arguments;
+  }
   [[nodiscard]] sptr<KOREPattern> getKOREPattern() const { return korePattern; }
   [[nodiscard]] uint64_t getPatternLength() const { return patternLength; }
   void setKOREPattern(sptr<KOREPattern> _korePattern, uint64_t _patternLength) {
@@ -215,7 +222,9 @@ private:
 
 public:
   [[nodiscard]] uint32_t getVersion() const { return version; }
-  [[nodiscard]] std::vector<LLVMEvent> const &getPreTrace() const { return preTrace; }
+  [[nodiscard]] std::vector<LLVMEvent> const &getPreTrace() const {
+    return preTrace;
+  }
   [[nodiscard]] LLVMEvent getInitialConfig() const { return initialConfig; }
   [[nodiscard]] std::vector<LLVMEvent> const &getTrace() const { return trace; }
   void setVersion(uint32_t _version) { version = _version; }
@@ -315,7 +324,8 @@ private:
 
     if (std::distance(ptr, end) < pattern_len) {
       return nullptr;
-    } if (pattern_len > 0 && std::distance(ptr, end) > pattern_len) {
+    }
+    if (pattern_len > 0 && std::distance(ptr, end) > pattern_len) {
       end = std::next(ptr, pattern_len);
     }
 
@@ -356,7 +366,7 @@ private:
   }
 
   template <typename It>
-  bool parse_variable(It &ptr, It end, sptr<LLVMRewriteEvent> event) {
+  bool parse_variable(It &ptr, It end, sptr<LLVMRewriteEvent> const &event) {
     std::string name;
     if (!parse_name(ptr, end, name)) {
       return false;
