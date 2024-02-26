@@ -22,7 +22,7 @@ void migrateRoots() {
   migrate_collection_node((void **)&m);
   if (kllvm_randStateInitialized) {
     auto &rand = kllvm_randState->_mp_seed->_mp_d;
-    string *limbs = struct_base(string, data, rand);
+    string *limbs = STRUCT_BASE(string, data, rand);
     migrate((block **)&limbs);
     rand = (mp_limb_t *)limbs->data;
   }

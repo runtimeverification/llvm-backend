@@ -40,7 +40,7 @@ struct MatchLog {
 
 // the actual length is equal to the block header with the gc bits masked out.
 
-#define struct_base(struct_type, member_name, member_addr)                     \
+#define STRUCT_BASE(struct_type, member_name, member_addr)                     \
   ((struct_type *)((char *)(member_addr)-offsetof(struct_type, member_name)))
 
 extern "C" {
@@ -191,9 +191,11 @@ __attribute__((always_inline)) constexpr bool is_heap_block(T const *s) {
 
 class KElem {
 public:
-  KElem() : elem(nullptr) { }
+  KElem()
+      : elem(nullptr) { }
 
-  KElem(block *elem) : elem(elem) { }
+  KElem(block *elem)
+      : elem(elem) { }
 
   bool operator==(KElem const &other) const {
     return hook_KEQUAL_eq(this->elem, other.elem);
@@ -222,10 +224,10 @@ struct kore_alloc_heap {
   static void *allocate(size_t size, Tags...) {
     if (during_gc()) {
       return ::operator new(size);
-    }       auto *result = (string *)koreAllocToken(size + sizeof(blockheader));
-      init_with_len(result, size);
-      return result->data;
-   
+    }
+    auto *result = (string *)koreAllocToken(size + sizeof(blockheader));
+    init_with_len(result, size);
+    return result->data;
   }
 
   static void deallocate(size_t size, void *data) {
@@ -249,10 +251,9 @@ using list = immer::flex_vector<
     KElem, immer::memory_policy<
                immer::heap_policy<kore_alloc_heap>, immer::no_refcount_policy,
                immer::no_lock_policy>>;
-using map = immer::map<
-    KElem, KElem, HashBlock, std::equal_to<>, list::memory_policy>;
-using set
-    = immer::set<KElem, HashBlock, std::equal_to<>, list::memory_policy>;
+using map
+    = immer::map<KElem, KElem, HashBlock, std::equal_to<>, list::memory_policy>;
+using set = immer::set<KElem, HashBlock, std::equal_to<>, list::memory_policy>;
 using rangemap = rng_map::RangeMap<KElem, KElem>;
 
 using mapiter = struct mapiter {

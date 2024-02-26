@@ -30,7 +30,7 @@ using memory_block_header = struct {
 #define REGISTER_ARENA(name, id)                                               \
   static struct arena name = {.allocation_semispace_id = (id)}
 
-#define mem_block_start(ptr)                                                   \
+#define MEM_BLOCK_START(ptr)                                                   \
   ((char *)(((uintptr_t)(ptr)-1) & ~(BLOCK_SIZE - 1)))
 
 // Resets the given arena.
