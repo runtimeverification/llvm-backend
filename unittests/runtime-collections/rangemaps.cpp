@@ -50,13 +50,13 @@ BOOST_AUTO_TEST_CASE(rangemap_test_concat_failure) {
   auto m1
       = (rng_map::RangeMap<int, int>()).inserted(rng_map::Range<int>(0, 3), 2);
   auto map2 = m1.inserted(rng_map::Range<int>(8, 9), 4);
-  BOOST_CHECK_THROW(map1.concat(map2), std::invalid_argument);
+  BOOST_CHECK_THROW((void)map1.concat(map2), std::invalid_argument);
   auto map3
       = (rng_map::RangeMap<int, int>()).inserted(rng_map::Range<int>(3, 6), 2);
-  BOOST_CHECK_THROW(map1.concat(map3), std::invalid_argument);
+  BOOST_CHECK_THROW((void)map1.concat(map3), std::invalid_argument);
   auto map4
       = (rng_map::RangeMap<int, int>()).inserted(rng_map::Range<int>(5, 8), 2);
-  BOOST_CHECK_THROW(map1.concat(map4), std::invalid_argument);
+  BOOST_CHECK_THROW((void)map1.concat(map4), std::invalid_argument);
 }
 
 BOOST_AUTO_TEST_CASE(rangemap_test_contains_key) {

@@ -15,11 +15,11 @@ class DecisionNode;
 
 struct Residual {
   std::string occurrence;
-  KOREPattern *pattern;
+  KOREPattern *pattern{};
 };
 
 struct PartialStep {
-  DecisionNode *dt;
+  DecisionNode *dt{};
   std::vector<Residual> residuals;
 };
 

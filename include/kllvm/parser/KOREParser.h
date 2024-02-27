@@ -10,12 +10,11 @@
 #include <utility>
 #include <vector>
 
-namespace kllvm {
-namespace parser {
+namespace kllvm::parser {
 
 class KOREParser {
 public:
-  KOREParser(std::string filename)
+  KOREParser(std::string const &filename)
       : scanner(KOREScanner(filename))
       , loc(location(filename)) { }
 
@@ -74,7 +73,6 @@ private:
   } buffer = {"", token::EMPTY};
 };
 
-} // end namespace parser
-} // end namespace kllvm
+} // namespace kllvm::parser
 
 #endif // KOREPARSER_

@@ -1467,11 +1467,11 @@ void KORECompositeSortDeclaration::print(
 void KORESymbolDeclaration::print(std::ostream &Out, unsigned indent) const {
   std::string Indent(indent, ' ');
   Out << Indent << (_isHooked ? "hooked-symbol " : "symbol ")
-      << symbol->getName();
+      << getSymbol()->getName();
   printSortVariables(Out);
   Out << "(";
   bool isFirst = true;
-  for (auto const &Argument : symbol->getArguments()) {
+  for (auto const &Argument : getSymbol()->getArguments()) {
     if (!isFirst) {
       Out << ",";
     }
@@ -1479,18 +1479,18 @@ void KORESymbolDeclaration::print(std::ostream &Out, unsigned indent) const {
     isFirst = false;
   }
   Out << ") : ";
-  symbol->getSort()->print(Out);
+  getSymbol()->getSort()->print(Out);
   Out << " ";
   printAttributeList(Out, attributes());
 }
 
 void KOREAliasDeclaration::print(std::ostream &Out, unsigned indent) const {
   std::string Indent(indent, ' ');
-  Out << Indent << "alias " << symbol->getName();
+  Out << Indent << "alias " << getSymbol()->getName();
   printSortVariables(Out);
   Out << "(";
   bool isFirst = true;
-  for (auto const &Argument : symbol->getArguments()) {
+  for (auto const &Argument : getSymbol()->getArguments()) {
     if (!isFirst) {
       Out << ",";
     }
@@ -1498,7 +1498,7 @@ void KOREAliasDeclaration::print(std::ostream &Out, unsigned indent) const {
     isFirst = false;
   }
   Out << ") : ";
-  symbol->getSort()->print(Out);
+  getSymbol()->getSort()->print(Out);
   Out << " where ";
   boundVariables->print(Out);
   Out << " := ";

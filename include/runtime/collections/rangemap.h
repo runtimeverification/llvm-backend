@@ -10,6 +10,7 @@
 #include <optional>
 #include <stack>
 #include <stdexcept>
+#include <utility>
 #include <vector>
 
 namespace rng_map {
@@ -51,10 +52,10 @@ public:
   T &end_mutable() { return end_; }
 
   // Getter for the start of this range.
-  T const &start() const { return start_; }
+  [[nodiscard]] T const &start() const { return start_; }
 
   // Getter for the end of this range.
-  T const &end() const { return end_; }
+  [[nodiscard]] T const &end() const { return end_; }
 
   // The following methods define the ordering for objects of class Range.
   // Operator < is used to subsequently define >, ==, <=, >=, and !=.
@@ -78,16 +79,19 @@ public:
   }
 
   // Returns true if this range contains k.
-  bool contains(T const &k) const { return k >= start_ && k < end_; }
+  [[nodiscard]] bool contains(T const &k) const {
+    return k >= start_ && k < end_;
+  }
 
   // Returns true if this range is empty.
-  bool empty() const { return start_ >= end_; }
+  [[nodiscard]] bool empty() const { return start_ >= end_; }
 
   // Returns true if this range overlaps with range r.
-  bool overlaps(Range const &r) const {
+  [[nodiscard]] bool overlaps(Range const &r) const {
     if (r.end_ <= start_) {
       return false;
-    } else if (end_ <= r.start_) {
+    }
+    if (end_ <= r.start_) {
       return false;
     }
     return true;
@@ -95,10 +99,11 @@ public:
 
   // Returns true if this range and range r overlap or are adjacent, i.e.,
   // share a bound, either inclusive or exclusive.
-  bool is_relevant(Range const &r) const {
+  [[nodiscard]] bool is_relevant(Range const &r) const {
     if (r.end_ < start_) {
       return false;
-    } else if (end_ < r.start_) {
+    }
+    if (end_ < r.start_) {
       return false;
     }
     return true;
@@ -118,9 +123,9 @@ private:
   // Create a rangemap on top of a red-black tree that uses ranges as keys.
   // The red black tree should already be a well-formed rangemap.
   RangeMap(rb_tree::RBTree<Range<T>, V> t)
-      : treemap_(t) { }
+      : treemap_(std::move(t)) { }
 
-  std::optional<std::pair<Range<T>, V>>
+  [[nodiscard]] std::optional<std::pair<Range<T>, V>>
   get_key_value(rb_tree::RBTree<Range<T>, V> const &t, T const &k) const {
     if (t.empty()) {
       return std::nullopt;
@@ -139,30 +144,34 @@ private:
 
   // Return true if range r partially or completely overlaps with any range
   // stored in the ordered map t that is passed as an argument.
-  bool
+  [[nodiscard]] bool
   overlaps(rb_tree::RBTree<Range<T>, V> const &t, Range<T> const &r) const {
     if (t.empty()) {
       return false;
     }
+
     T const &start = r.start();
     T const &end = r.end();
     T const &rstart = t.root_key().start();
     T const &rend = t.root_key().end();
+
     if (rend <= start) {
       // The root is to the left of range r, possibly adjacent but not
       // overlapping. Continue looking for overlapping ranges to the right of
       // root.
       return overlaps(t.right(), r);
-    } else if (end <= rstart) {
+    }
+
+    if (end <= rstart) {
       // The root is to the right of range r, possibly adjacent but not
       // overlapping. Continue looking for overlapping ranges to the left of
       // root.
       return overlaps(t.left(), r);
-    } else {
-      // In any other case, range r somehow overlaps with root, either partially
-      // or completely.
-      return true;
     }
+
+    // In any other case, range r somehow overlaps with root, either partially
+    // or completely.
+    return true;
   }
 
   // Gather all <Range<T>, V> pairs in t that are overlapping or directly
@@ -268,7 +277,8 @@ private:
   // Return the intersection ranges of this rangemap and rangemap m, i.e. all
   // ranges in this rangemap that overlap (fully or partially) with ranges in m
   // and are mapped to the same value in both rangemaps.
-  std::vector<Range<T>> get_intersection_ranges(RangeMap const &m) const {
+  [[nodiscard]] std::vector<Range<T>>
+  get_intersection_ranges(RangeMap const &m) const {
     std::vector<std::pair<Range<T>, V>> r1;
     for_each(treemap_, [&r1](Range<T> const &x, V const &v) {
       r1.emplace_back(std::make_pair(x, v));
@@ -319,20 +329,24 @@ public:
   }
 
   // Getter for the rb-tree underlying this rangemap.
-  rb_tree::RBTree<Range<T>, V> treemap() const { return treemap_; }
+  [[nodiscard]] rb_tree::RBTree<Range<T>, V> treemap() const {
+    return treemap_;
+  }
 
   // Return the number of key ranges in the map.
-  size_t size() const { return treemap_.size(); }
+  [[nodiscard]] size_t size() const { return treemap_.size(); }
 
   // Returns true if this rangemap is empty.
-  bool empty() const { return treemap_.size() == 0; }
+  [[nodiscard]] bool empty() const { return treemap_.empty(); }
 
   // Return true if a range in this map contains the key k.
-  bool contains(T const &k) const { return get_key_value(k).has_value(); }
+  [[nodiscard]] bool contains(T const &k) const {
+    return get_key_value(k).has_value();
+  }
 
   // If the key k is contained in any range in this map, return the value
   // associated with k.
-  std::optional<V> get_value(T const &k) const {
+  [[nodiscard]] std::optional<V> get_value(T const &k) const {
     auto opt = get_key_value(k);
     if (opt.has_value()) {
       return opt.value().second;
@@ -342,7 +356,8 @@ public:
 
   // If the key k is contained in any range in this map, return the key range-
   // value pair associated with k.
-  std::optional<std::pair<Range<T>, V>> get_key_value(T const &k) const {
+  [[nodiscard]] std::optional<std::pair<Range<T>, V>>
+  get_key_value(T const &k) const {
     return get_key_value(treemap_, k);
   }
 
@@ -355,7 +370,7 @@ public:
      * existing range mapping to the same value, then the ranges will be
      * coalesced into a single contiguous range in the resulting map.
      */
-  RangeMap inserted(Range<T> const &r, V const &v) const {
+  [[nodiscard]] RangeMap inserted(Range<T> const &r, V const &v) const {
     // Empty ranges do not make sense here.
     if (r.empty()) {
       KLLVM_HOOK_INVALID_ARGUMENT("Insert empty range in range map");
@@ -418,7 +433,7 @@ public:
      * map, then the boundaries of these ranges are adjusted in the resulting
      * map so that they do not overlap with the removed range.
      */
-  RangeMap deleted(Range<T> const &r) const {
+  [[nodiscard]] RangeMap deleted(Range<T> const &r) const {
     // Empty ranges do not make sense here.
     if (r.empty()) {
       KLLVM_HOOK_INVALID_ARGUMENT("Delete empty range from range map");
@@ -452,7 +467,9 @@ public:
 
   // Return true if range r partially or completely overlaps with any key range
   // stored in this rangemap.
-  bool overlaps(Range<T> const &r) const { return overlaps(treemap_, r); }
+  [[nodiscard]] bool overlaps(Range<T> const &r) const {
+    return overlaps(treemap_, r);
+  }
 
   // Print this rangemap to output stream os.
   void print(std::ostream &os) const {
@@ -466,7 +483,7 @@ public:
   // Return a rangemap that is the concatenation of this rangemap and rangemap
   // m. Throw an exception if any of the key ranges in this rangemap overlaps
   // with any of the key ranges in rangemap m.
-  RangeMap concat(RangeMap const &m) const {
+  [[nodiscard]] RangeMap concat(RangeMap const &m) const {
     RangeMap res = *this;
     for_each(m.treemap_, [&res, this](Range<T> const &x, V const &v) {
       if (!overlaps(x)) {
@@ -484,7 +501,7 @@ public:
   // key range-value pairs whose keys are contained in ranges in both A and B
   // and are mapped to the same value. Then, we perform A - A^B, and return the
   // map resulting from deleting these ranges from A.
-  RangeMap difference(RangeMap const &m) const {
+  [[nodiscard]] RangeMap difference(RangeMap const &m) const {
     // Compute the intersection of this rangemap and m.
     std::vector<Range<T>> intersect = get_intersection_ranges(m);
     // Delete all collected intersection ranges from this rangemap.
@@ -498,7 +515,7 @@ public:
   // Return true if this rangemap is included in rangemap m, i.e. all key
   // range-value pairs contained in this rangemap whose keys are also contained
   // in key ranges in m and are mapped to the same value.
-  bool inclusion(RangeMap const &m) const {
+  [[nodiscard]] bool inclusion(RangeMap const &m) const {
     // Compute the intersection of this rangemap and m.
     std::vector<Range<T>> intersect = get_intersection_ranges(m);
     // Compare the intersection ranges with this rangemap's ranges.
@@ -528,8 +545,11 @@ public:
 template <class T, class V>
 class AbstractRangeMapIterator {
 
+private:
+  std::stack<rb_tree::RBTree<Range<T>, V>> stack_{};
+
 protected:
-  std::stack<rb_tree::RBTree<Range<T>, V>> stack_;
+  [[nodiscard]] auto const &stack() const { return stack_; }
 
   void update_stack_state(rb_tree::RBTree<Range<T>, V> const &t) {
     rb_tree::RBTree<Range<T>, V> tmp = t;
@@ -553,28 +573,26 @@ public:
   }
 
   // Return true if there are more elements in the underlying rangemap.
-  bool has_next() const { return !stack_.empty(); }
+  [[nodiscard]] bool has_next() const { return !stack_.empty(); }
 };
 
 template <class T, class V>
 class ConstRangeMapIterator : public AbstractRangeMapIterator<T, V> {
 
 public:
-  using AbstractRangeMapIterator<T, V>::stack_;
-
   // Create an iterator over rangemap m.
   ConstRangeMapIterator(RangeMap<T, V> m)
       : AbstractRangeMapIterator<T, V>(m) { }
 
   // Dereference operator.
   std::pair<Range<T>, V> const &operator*() const {
-    rb_tree::RBTree<Range<T>, V> const &t = stack_.top();
+    rb_tree::RBTree<Range<T>, V> const &t = this->stack().top();
     return t.root_data();
   }
 
   // Member access (arrow) operator.
   std::pair<Range<T>, V> const *operator->() const {
-    rb_tree::RBTree<Range<T>, V> const &t = stack_.top();
+    rb_tree::RBTree<Range<T>, V> const &t = this->stack().top();
     return &t.root_data();
   }
 };

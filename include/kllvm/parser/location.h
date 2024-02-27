@@ -3,8 +3,7 @@
 
 #include <string>
 
-namespace kllvm {
-namespace parser {
+namespace kllvm::parser {
 
 class position {
 public:
@@ -41,7 +40,7 @@ operator<<(std::basic_ostream<YYChar> &ostr, position const &pos) {
 
 class location {
 public:
-  location(std::string filename)
+  location(std::string const &filename)
       : begin({filename, 1, 1})
       , end({filename, 1, 1}) { }
 
@@ -60,16 +59,16 @@ std::basic_ostream<YYChar> &
 operator<<(std::basic_ostream<YYChar> &ostr, location const &loc) {
   unsigned end_col = 0 < loc.end.column ? loc.end.column - 1 : 0;
   ostr << loc.begin;
-  if (loc.begin.filename != loc.end.filename)
+  if (loc.begin.filename != loc.end.filename) {
     ostr << '-' << loc.end.filename << ':' << loc.end.line << '.' << end_col;
-  else if (loc.begin.line < loc.end.line)
+  } else if (loc.begin.line < loc.end.line) {
     ostr << '-' << loc.end.line << '.' << end_col;
-  else if (loc.begin.column < end_col)
+  } else if (loc.begin.column < end_col) {
     ostr << '-' << end_col;
+  }
   return ostr;
 }
 
-} // namespace parser
-} // namespace kllvm
+} // namespace kllvm::parser
 
 #endif

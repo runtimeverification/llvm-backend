@@ -21,6 +21,7 @@ Checks:
   -bugprone-exception-escape
   -bugprone-implicit-widening-of-multiplication-result
   -bugprone-unchecked-optional-access
+  -bugprone-lambda-function-name
   cppcoreguidelines-*
   -cppcoreguidelines-avoid-magic-numbers
   -cppcoreguidelines-avoid-non-const-global-variables
@@ -42,4 +43,6 @@ CheckOptions:
   - key: 'readability-function-cognitive-complexity.IgnoreMacros'
     value: true
   - key: 'cppcoreguidelines-macro-usage.CheckCapsOnly'
+    value: true
+  - key: 'cppcoreguidelines-special-member-functions.AllowSoleDefaultDtor'
     value: true

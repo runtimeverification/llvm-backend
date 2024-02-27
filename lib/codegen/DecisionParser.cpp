@@ -24,7 +24,7 @@ namespace kllvm {
 
 class DTPreprocessor {
 private:
-  std::map<yaml_node_t *, DecisionNode *> uniqueNodes;
+  std::map<yaml_node_t *, DecisionNode *> uniqueNodes{};
   std::map<std::string, KORESymbol *> const &syms;
   std::map<ValueType, sptr<KORECompositeSort>> const &sorts;
   KORESymbol *dv;
@@ -111,10 +111,9 @@ public:
       llvm::Module *mod, yaml_document_t *doc)
       : syms(syms)
       , sorts(sorts)
+      , dv(KORESymbol::Create("\\dv").release())
       , doc(doc)
-      , mod(mod) {
-    dv = KORESymbol::Create("\\dv").release();
-  }
+      , mod(mod) { }
 
   static std::string to_string(std::vector<std::string> const &occurrence) {
     std::string result;

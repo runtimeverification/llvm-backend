@@ -8,7 +8,7 @@
 
 struct block;
 using block_iterator = std::vector<block **>::iterator;
-typedef std::pair<block_iterator, block_iterator> (*BlockEnumerator)(void);
+using BlockEnumerator = std::pair<block_iterator, block_iterator> (*)();
 
 // This function is exported to the rest of the runtime to enable registering
 // more GC roots other than the top cell of the configuration.
@@ -27,7 +27,6 @@ using set_impl = set::iterator::tree_t;
 
 extern "C" {
 extern size_t numBytesLiveAtCollection[1 << AGE_WIDTH];
-bool during_gc(void);
 extern bool collect_old;
 size_t get_size(uint64_t, uint16_t);
 void migrate_once(block **);
@@ -41,26 +40,26 @@ void koreCollect(void **, uint8_t, layoutitem *);
 }
 
 #ifdef GC_DBG
-#define initialize_age()                                                       \
+#define INITIALIZE_AGE()                                                       \
   uint64_t age = (hdr & AGE_MASK) >> AGE_OFFSET;                               \
   uint64_t oldAge = age;
 #define increment_age()                                                        \
   if (age < ((1 << AGE_WIDTH) - 1))                                            \
     age++;
-#define migrate_header(block)                                                  \
+#define MIGRATE_HEADER(block)                                                  \
   block->h.hdr |= shouldPromote ? NOT_YOUNG_OBJECT_BIT : 0;                    \
   block->h.hdr &= ~AGE_MASK;                                                   \
   block->h.hdr |= age << AGE_OFFSET
 #else
-#define initialize_age() bool age = hdr & AGE_MASK;
+#define INITIALIZE_AGE() bool age = hdr & AGE_MASK;
 #define increment_age()
-#define migrate_header(block)                                                  \
+#define MIGRATE_HEADER(block)                                                  \
   block->h.hdr |= shouldPromote ? NOT_YOUNG_OBJECT_BIT : AGE_MASK
 #endif
 
-#define initialize_migrate()                                                   \
+#define INITIALIZE_MIGRATE()                                                   \
   bool isInYoungGen = is_in_young_gen_hdr(hdr);                                \
-  initialize_age() bool isInOldGen = is_in_old_gen_hdr(hdr);                   \
+  INITIALIZE_AGE() bool isInOldGen = is_in_old_gen_hdr(hdr);                   \
   if (!(isInYoungGen || (isInOldGen && collect_old))) {                        \
     return;                                                                    \
   }                                                                            \

@@ -5,7 +5,7 @@
 #include <cstring>
 
 void migrate_collection_node(void **nodePtr) {
-  string *currBlock = struct_base(string, data, *nodePtr);
+  string *currBlock = STRUCT_BASE(string, data, *nodePtr);
   if (youngspace_collection_id()
           != getArenaSemispaceIDOfObject((void *)currBlock)
       && oldspace_collection_id()
@@ -13,7 +13,7 @@ void migrate_collection_node(void **nodePtr) {
     return;
   }
   uint64_t const hdr = currBlock->h.hdr;
-  initialize_migrate();
+  INITIALIZE_MIGRATE();
   size_t lenInBytes = get_size(hdr, 0);
   if (!hasForwardingAddress) {
     string *newBlock = nullptr;
@@ -26,7 +26,7 @@ void migrate_collection_node(void **nodePtr) {
     numBytesLiveAtCollection[oldAge] += lenInBytes;
 #endif
     memcpy(newBlock, currBlock, lenInBytes);
-    migrate_header(newBlock);
+    MIGRATE_HEADER(newBlock);
     *(void **)(currBlock + 1) = newBlock + 1;
     currBlock->h.hdr |= FWD_PTR_BIT;
   }

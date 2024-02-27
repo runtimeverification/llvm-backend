@@ -47,7 +47,7 @@ void migrate(block **blockPtr) {
     return;
   }
   uint64_t const hdr = currBlock->h.hdr;
-  initialize_migrate();
+  INITIALIZE_MIGRATE();
   uint16_t layout = layout_hdr(hdr);
   size_t lenInBytes = get_size(hdr, layout);
   auto **forwardingAddress = (block **)(currBlock + 1);
@@ -62,7 +62,7 @@ void migrate(block **blockPtr) {
     numBytesLiveAtCollection[oldAge] += lenInBytes;
 #endif
     memcpy(newBlock, currBlock, lenInBytes);
-    migrate_header(newBlock);
+    MIGRATE_HEADER(newBlock);
     *forwardingAddress = newBlock;
     currBlock->h.hdr |= FWD_PTR_BIT;
     *blockPtr = newBlock;
@@ -90,7 +90,7 @@ static void migrate_string_buffer(stringbuffer **bufferPtr) {
   stringbuffer *buffer = *bufferPtr;
   uint64_t const hdr = buffer->h.hdr;
   uint64_t const cap = len(buffer->contents);
-  initialize_migrate();
+  INITIALIZE_MIGRATE();
   if (!hasForwardingAddress) {
     stringbuffer *newBuffer = nullptr;
     string *newContents = nullptr;
@@ -107,7 +107,7 @@ static void migrate_string_buffer(stringbuffer **bufferPtr) {
 #endif
     memcpy(newContents, buffer->contents, sizeof(string) + buffer->strlen);
     memcpy(newBuffer, buffer, sizeof(stringbuffer));
-    migrate_header(newBuffer);
+    MIGRATE_HEADER(newBuffer);
     newBuffer->contents = newContents;
     *(stringbuffer **)(buffer->contents) = newBuffer;
     buffer->h.hdr |= FWD_PTR_BIT;
@@ -116,9 +116,9 @@ static void migrate_string_buffer(stringbuffer **bufferPtr) {
 }
 
 static void migrate_mpz(mpz_ptr *mpzPtr) {
-  mpz_hdr *intgr = struct_base(mpz_hdr, i, *mpzPtr);
+  mpz_hdr *intgr = STRUCT_BASE(mpz_hdr, i, *mpzPtr);
   uint64_t const hdr = intgr->h.hdr;
-  initialize_migrate();
+  INITIALIZE_MIGRATE();
   if (!hasForwardingAddress) {
     mpz_hdr *newIntgr = nullptr;
     string *newLimbs = nullptr;
@@ -127,7 +127,7 @@ static void migrate_mpz(mpz_ptr *mpzPtr) {
     numBytesLiveAtCollection[oldAge] += sizeof(mpz_hdr);
 #endif
     if (hasLimbs) {
-      string *limbs = struct_base(string, data, intgr->i->_mp_d);
+      string *limbs = STRUCT_BASE(string, data, intgr->i->_mp_d);
       size_t lenLimbs = len(limbs);
 
 #ifdef GC_DBG
@@ -137,22 +137,22 @@ static void migrate_mpz(mpz_ptr *mpzPtr) {
       assert(intgr->i->_mp_alloc * sizeof(mp_limb_t) == lenLimbs);
 
       if (shouldPromote || (isInOldGen && collect_old)) {
-        newIntgr = struct_base(mpz_hdr, i, koreAllocIntegerOld(0));
+        newIntgr = STRUCT_BASE(mpz_hdr, i, koreAllocIntegerOld(0));
         newLimbs = (string *)koreAllocTokenOld(sizeof(string) + lenLimbs);
       } else {
-        newIntgr = struct_base(mpz_hdr, i, koreAllocInteger(0));
+        newIntgr = STRUCT_BASE(mpz_hdr, i, koreAllocInteger(0));
         newLimbs = (string *)koreAllocToken(sizeof(string) + lenLimbs);
       }
       memcpy(newLimbs, limbs, sizeof(string) + lenLimbs);
     } else {
       if (shouldPromote || (isInOldGen && collect_old)) {
-        newIntgr = struct_base(mpz_hdr, i, koreAllocIntegerOld(0));
+        newIntgr = STRUCT_BASE(mpz_hdr, i, koreAllocIntegerOld(0));
       } else {
-        newIntgr = struct_base(mpz_hdr, i, koreAllocInteger(0));
+        newIntgr = STRUCT_BASE(mpz_hdr, i, koreAllocInteger(0));
       }
     }
     memcpy(newIntgr, intgr, sizeof(mpz_hdr));
-    migrate_header(newIntgr);
+    MIGRATE_HEADER(newIntgr);
     if (hasLimbs) {
       newIntgr->i->_mp_d = (mp_limb_t *)newLimbs->data;
     }
@@ -163,13 +163,13 @@ static void migrate_mpz(mpz_ptr *mpzPtr) {
 }
 
 static void migrate_floating(floating **floatingPtr) {
-  floating_hdr *flt = struct_base(floating_hdr, f, *floatingPtr);
+  floating_hdr *flt = STRUCT_BASE(floating_hdr, f, *floatingPtr);
   uint64_t const hdr = flt->h.hdr;
-  initialize_migrate();
+  INITIALIZE_MIGRATE();
   if (!hasForwardingAddress) {
     floating_hdr *newFlt = nullptr;
     string *newLimbs = nullptr;
-    string *limbs = struct_base(string, data, flt->f.f->_mpfr_d - 1);
+    string *limbs = STRUCT_BASE(string, data, flt->f.f->_mpfr_d - 1);
     size_t lenLimbs = len(limbs);
 
 #ifdef GC_DBG
@@ -183,15 +183,15 @@ static void migrate_floating(floating **floatingPtr) {
         <= lenLimbs);
 
     if (shouldPromote || (isInOldGen && collect_old)) {
-      newFlt = struct_base(floating_hdr, f, koreAllocFloatingOld(0));
+      newFlt = STRUCT_BASE(floating_hdr, f, koreAllocFloatingOld(0));
       newLimbs = (string *)koreAllocTokenOld(sizeof(string) + lenLimbs);
     } else {
-      newFlt = struct_base(floating_hdr, f, koreAllocFloating(0));
+      newFlt = STRUCT_BASE(floating_hdr, f, koreAllocFloating(0));
       newLimbs = (string *)koreAllocToken(sizeof(string) + lenLimbs);
     }
     memcpy(newLimbs, limbs, sizeof(string) + lenLimbs);
     memcpy(newFlt, flt, sizeof(floating_hdr));
-    migrate_header(newFlt);
+    MIGRATE_HEADER(newFlt);
     newFlt->f.f->_mpfr_d = (mp_limb_t *)newLimbs->data + 1;
     *(floating **)(flt->f.f->_mpfr_d) = &newFlt->f;
     flt->h.hdr |= FWD_PTR_BIT;
@@ -287,7 +287,7 @@ void koreCollect(void **roots, uint8_t nroots, layoutitem *typeInfo) {
   if (collect_old || !previous_oldspace_alloc_ptr) {
     scan_ptr = oldspace_ptr();
   } else {
-    if (mem_block_start(previous_oldspace_alloc_ptr + 1)
+    if (MEM_BLOCK_START(previous_oldspace_alloc_ptr + 1)
         == previous_oldspace_alloc_ptr) {
       // this means that the previous oldspace allocation pointer points to an
       // address that is megabyte-aligned. This can only happen if we have just

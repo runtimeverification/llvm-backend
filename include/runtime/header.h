@@ -28,26 +28,26 @@
 struct MatchLog {
   enum { SUCCESS = 0, FUNCTION, FAIL } kind;
 
-  char const *function;
-  char const *debugName;
-  void *result;
-  std::vector<void *> args;
+  char const *function{};
+  char const *debugName{};
+  void *result{};
+  std::vector<void *> args{};
 
-  char const *pattern;
-  void *subject;
-  char const *sort;
+  char const *pattern{};
+  void *subject{};
+  char const *sort{};
 };
 
 // the actual length is equal to the block header with the gc bits masked out.
 
-#define struct_base(struct_type, member_name, member_addr)                     \
+#define STRUCT_BASE(struct_type, member_name, member_addr)                     \
   ((struct_type *)((char *)(member_addr)-offsetof(struct_type, member_name)))
 
 extern "C" {
 // llvm: blockheader = type { i64 }
-typedef struct blockheader {
+using blockheader = struct blockheader {
   uint64_t hdr;
-} blockheader;
+};
 
 // A value b of type block* is either a constant or a block.
 // if (((uintptr_t)b) & 3) == 3, then it is a bound variable and
@@ -56,53 +56,53 @@ typedef struct blockheader {
 // of the symbol. Otherwise, if ((uintptr_t)b) & 1 == 0 then it is a pointer to
 // a block.
 // llvm: block = type { %blockheader, [0 x i64 *] }
-typedef struct block {
+using block = struct block {
   blockheader h;
   uint64_t *children[];
-} block;
+};
 
 // llvm: string = type { %blockheader, [0 x i8] }
-typedef struct string {
+using string = struct string {
   blockheader h;
   char data[];
-} string;
+};
 
 // llvm: stringbuffer = type { i64, i64, %string* }
-typedef struct stringbuffer {
+using stringbuffer = struct stringbuffer {
   blockheader h;
   uint64_t strlen;
   string *contents;
-} stringbuffer;
+};
 
-typedef struct mpz_hdr {
+using mpz_hdr = struct mpz_hdr {
   blockheader h;
   mpz_t i;
-} mpz_hdr;
+};
 
-typedef struct floating {
+using floating = struct floating {
   uint64_t exp; // number of bits in exponent range
   mpfr_t f;
-} floating;
+};
 
-typedef struct floating_hdr {
+using floating_hdr = struct floating_hdr {
   blockheader h;
   floating f;
-} floating_hdr;
+};
 
-typedef struct layoutitem {
+using layoutitem = struct layoutitem {
   uint64_t offset;
   uint16_t cat;
-} layoutitem;
+};
 
-typedef struct layout {
+using layout = struct layout {
   uint8_t nargs;
   layoutitem *args;
-} layout;
+};
 
-typedef struct {
+using writer = struct {
   FILE *file;
   stringbuffer *buffer;
-} writer;
+};
 
 bool hook_KEQUAL_lt(block *, block *);
 bool hook_KEQUAL_eq(block *, block *);
@@ -191,9 +191,11 @@ __attribute__((always_inline)) constexpr bool is_heap_block(T const *s) {
 
 class KElem {
 public:
-  KElem() { this->elem = NULL; }
+  KElem()
+      : elem(nullptr) { }
 
-  KElem(block *elem) { this->elem = elem; }
+  KElem(block *elem)
+      : elem(elem) { }
 
   bool operator==(KElem const &other) const {
     return hook_KEQUAL_eq(this->elem, other.elem);
@@ -222,11 +224,10 @@ struct kore_alloc_heap {
   static void *allocate(size_t size, Tags...) {
     if (during_gc()) {
       return ::operator new(size);
-    } else {
-      string *result = (string *)koreAllocToken(size + sizeof(blockheader));
-      init_with_len(result, size);
-      return result->data;
     }
+    auto *result = (string *)koreAllocToken(size + sizeof(blockheader));
+    init_with_len(result, size);
+    return result->data;
   }
 
   static void deallocate(size_t size, void *data) {
@@ -250,41 +251,40 @@ using list = immer::flex_vector<
     KElem, immer::memory_policy<
                immer::heap_policy<kore_alloc_heap>, immer::no_refcount_policy,
                immer::no_lock_policy>>;
-using map = immer::map<
-    KElem, KElem, HashBlock, std::equal_to<KElem>, list::memory_policy>;
-using set
-    = immer::set<KElem, HashBlock, std::equal_to<KElem>, list::memory_policy>;
+using map
+    = immer::map<KElem, KElem, HashBlock, std::equal_to<>, list::memory_policy>;
+using set = immer::set<KElem, HashBlock, std::equal_to<>, list::memory_policy>;
 using rangemap = rng_map::RangeMap<KElem, KElem>;
 
-typedef struct mapiter {
-  map::iterator curr;
-  map *map_item;
-} mapiter;
+using mapiter = struct mapiter {
+  map::iterator curr{};
+  map *map_item{};
+};
 
-typedef struct setiter {
-  set::iterator curr;
-  set *set_item;
-} setiter;
+using setiter = struct setiter {
+  set::iterator curr{};
+  set *set_item{};
+};
 
-typedef floating *SortFloat;
-typedef mpz_ptr SortInt;
-typedef string *SortString;
-typedef string *SortBytes;
-typedef stringbuffer *SortStringBuffer;
-typedef block *SortK;
-typedef block *SortKItem;
-typedef block *SortIOInt;
-typedef block *SortIOFile;
-typedef block *SortIOString;
-typedef block *SortJSON;
-typedef block *SortEndianness;
-typedef block *SortSignedness;
-typedef block *SortFFIType;
-typedef list *SortList;
-typedef map *SortMap;
-typedef set *SortSet;
-typedef block *SortRange;
-typedef rangemap *SortRangeMap;
+using SortFloat = floating *;
+using SortInt = mpz_ptr;
+using SortString = string *;
+using SortBytes = string *;
+using SortStringBuffer = stringbuffer *;
+using SortK = block *;
+using SortKItem = block *;
+using SortIOInt = block *;
+using SortIOFile = block *;
+using SortIOString = block *;
+using SortJSON = block *;
+using SortEndianness = block *;
+using SortSignedness = block *;
+using SortFFIType = block *;
+using SortList = list *;
+using SortMap = map *;
+using SortSet = set *;
+using SortRange = block *;
+using SortRangeMap = rangemap *;
 
 void *constructCompositePattern(uint32_t tag, std::vector<void *> &arguments);
 
@@ -359,7 +359,7 @@ char const *topSort(void);
 
 bool symbolIsInstantiation(uint32_t tag);
 
-typedef struct {
+using visitor = struct {
   void (*visitConfig)(writer *, block *, char const *, bool, void *);
   void (*visitMap)(
       writer *, map *, char const *, char const *, char const *, void *);
@@ -375,7 +375,7 @@ typedef struct {
   void (*visitSeparator)(writer *, void *);
   void (*visitRangeMap)(
       writer *, rangemap *, char const *, char const *, char const *, void *);
-} visitor;
+};
 
 void printMap(
     writer *, map *, char const *, char const *, char const *, void *);

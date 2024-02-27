@@ -188,10 +188,10 @@ char *movePtr(char *ptr, size_t size, char const *arena_end_ptr) {
   if (next_ptr == arena_end_ptr) {
     return nullptr;
   }
-  if (next_ptr != mem_block_start(ptr) + BLOCK_SIZE) {
+  if (next_ptr != MEM_BLOCK_START(ptr) + BLOCK_SIZE) {
     return next_ptr;
   }
-  char *next_block = *(char **)mem_block_start(ptr);
+  char *next_block = *(char **)MEM_BLOCK_START(ptr);
   if (!next_block) {
     return nullptr;
   }
@@ -199,7 +199,7 @@ char *movePtr(char *ptr, size_t size, char const *arena_end_ptr) {
 }
 
 ssize_t ptrDiff(char *ptr1, char *ptr2) {
-  if (mem_block_start(ptr1) == mem_block_start(ptr2)) {
+  if (MEM_BLOCK_START(ptr1) == MEM_BLOCK_START(ptr2)) {
     return ptr1 - ptr2;
   }
   memory_block_header *hdr = mem_block_header(ptr2);
