@@ -21,6 +21,7 @@ Checks:
   -bugprone-exception-escape
   -bugprone-implicit-widening-of-multiplication-result
   -bugprone-unchecked-optional-access
+  -bugprone-lambda-function-name
   cppcoreguidelines-*
   -cppcoreguidelines-avoid-magic-numbers
   -cppcoreguidelines-avoid-non-const-global-variables
