@@ -24,8 +24,7 @@ sudo apt install      \
   pkg-config          \
   python3             \
   python3-pip         \
-  xxd                 \
-  zlib1g-dev
+  xxd
 python3 -m pip install pybind11 lit
 ```
 
