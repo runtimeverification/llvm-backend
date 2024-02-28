@@ -10,7 +10,7 @@ block *dot_k() {
 
 bool is_injection(block *term) {
   auto tag = tag_hdr(term->h.hdr);
-  return tag >= first_inj_tag && tag <= last_inj_tag;
+  return tag >= FIRST_INJ_TAG && tag <= LAST_INJ_TAG;
 }
 
 block *strip_injection(block *term) {

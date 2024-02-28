@@ -44,8 +44,8 @@ char const **getArgumentSortsForTag(uint32_t tag) {
   return nullptr;
 }
 
-uint32_t const first_inj_tag = 4;
-uint32_t const last_inj_tag = 5;
+uint32_t const FIRST_INJ_TAG = 4;
+uint32_t const LAST_INJ_TAG = 5;
 
 char *getTerminatedString(string *str);
 
@@ -125,12 +125,12 @@ block D1 = {{1}};
 block *DUMMY1 = &D1;
 }
 
-struct FfiTestFixture {
+struct ffi_test_fixture {
 
-  ~FfiTestFixture() { hook_FFI_freeAll(); }
+  ~ffi_test_fixture() { hook_FFI_freeAll(); }
 };
 
-BOOST_FIXTURE_TEST_SUITE(FfiTest, FfiTestFixture)
+BOOST_FIXTURE_TEST_SUITE(FfiTest, ffi_test_fixture)
 
 BOOST_AUTO_TEST_CASE(address) {
   string *fn = makeString("timesTwo");

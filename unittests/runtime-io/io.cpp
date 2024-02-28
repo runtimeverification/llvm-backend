@@ -36,8 +36,8 @@ char const *symbols[NUM_SYMBOLS]
        "kseq{}",
        GETTAG(systemResult)};
 
-uint32_t const first_inj_tag = 3;
-uint32_t const last_inj_tag = 5;
+uint32_t const FIRST_INJ_TAG = 3;
+uint32_t const LAST_INJ_TAG = 5;
 
 uint32_t getTagForSymbolName(char const *s) {
   for (int i = 0; i < NUM_SYMBOLS; i++) {

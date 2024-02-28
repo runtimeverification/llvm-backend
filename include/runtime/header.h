@@ -408,7 +408,7 @@ block *set_iterator_next(setiter *);
 mapiter map_iterator(map *);
 block *map_iterator_next(mapiter *);
 
-extern uint32_t const first_inj_tag, last_inj_tag;
+extern uint32_t const FIRST_INJ_TAG, LAST_INJ_TAG;
 bool is_injection(block *);
 block *strip_injection(block *);
 block *constructKItemInj(void *subject, char const *sort, bool raw_value);

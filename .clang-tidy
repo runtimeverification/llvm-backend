@@ -48,3 +48,7 @@ CheckOptions:
     value: true
   - key: 'readability-identifier-naming.ClassCase'
     value: 'lower_case'
+  - key: 'readability-identifier-naming.ConstexprVariableCase'
+    value: 'lower_case'
+  - key: 'readability-identifier-naming.GlobalConstantCase'
+    value: 'UPPER_CASE'

@@ -65,14 +65,14 @@ void *constructCompositePattern(uint32_t tag, std::vector<void *> &arguments) {
   struct blockheader headerVal = getBlockHeaderForSymbol(tag);
   size_t size = size_hdr(headerVal.hdr);
 
-  if (tag >= first_inj_tag && tag <= last_inj_tag) {
+  if (tag >= FIRST_INJ_TAG && tag <= LAST_INJ_TAG) {
     uint16_t layout_code = layout_hdr(headerVal.hdr);
     layout *data = getLayoutData(layout_code);
     if (data->args[0].cat == SYMBOL_LAYOUT) {
       auto *child = (block *)arguments[0];
       if (!is_leaf_block(child) && get_layout(child) != 0) {
         uint32_t tag = tag_hdr(child->h.hdr);
-        if (tag >= first_inj_tag && tag <= last_inj_tag) {
+        if (tag >= FIRST_INJ_TAG && tag <= LAST_INJ_TAG) {
           return child;
         }
       }

@@ -167,7 +167,8 @@ static void emitDataForSymbol(
     std::string const &name, llvm::Type *ty, llvm::DIType *dity,
     kore_definition *definition, llvm::Module *module, bool isEval,
     std::pair<llvm::Value *, llvm::BasicBlock *> getter(
-        kore_definition *, llvm::Module *, kore_symbol *, llvm::Instruction *)) {
+        kore_definition *, llvm::Module *, kore_symbol *,
+        llvm::Instruction *)) {
   llvm::LLVMContext &Ctx = module->getContext();
   std::vector<llvm::Type *> argTypes;
   argTypes.push_back(llvm::Type::getInt32Ty(Ctx));
@@ -362,7 +363,7 @@ static std::pair<llvm::Value *, llvm::BasicBlock *> getEval(
   llvm::Value *result = creator(pattern.get()).first;
   llvm::Value *retval = nullptr;
   value_type cat = dynamic_cast<kore_composite_sort *>(symbol->getSort().get())
-                      ->getCategory(def);
+                       ->getCategory(def);
   switch (cat.cat) {
   case SortCategory::Int:
   case SortCategory::Float:
@@ -394,7 +395,8 @@ static std::pair<llvm::Value *, llvm::BasicBlock *> getEval(
   return std::make_pair(retval, creator.getCurrentBlock());
 }
 
-static void emitEvaluateFunctionSymbol(kore_definition *def, llvm::Module *mod) {
+static void
+emitEvaluateFunctionSymbol(kore_definition *def, llvm::Module *mod) {
   emitDataForSymbol(
       "evaluateFunctionSymbol", llvm::Type::getInt8PtrTy(mod->getContext()),
       nullptr, def, mod, true, getEval);
@@ -532,8 +534,9 @@ static void emitGetToken(kore_definition *definition, llvm::Module *module) {
           Str->getType(), globalVar, indices);
       auto *Len = llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 4);
       auto *compare = llvm::CallInst::Create(
-          string_equal, {func->arg_begin() + 2, Ptr, func->arg_begin() + 1, Len},
-          "", CaseBlock);
+          string_equal,
+          {func->arg_begin() + 2, Ptr, func->arg_begin() + 1, Len}, "",
+          CaseBlock);
       llvm::Instruction *Malloc = llvm::CallInst::CreateMalloc(
           CaseBlock, llvm::Type::getInt64Ty(Ctx), compare->getType(),
           llvm::ConstantExpr::getSizeOf(compare->getType()), nullptr, nullptr);
@@ -834,7 +837,7 @@ static void getStore(
       CaseBlock);
   for (auto const &sort : symbol->getArguments()) {
     value_type cat = dynamic_cast<kore_composite_sort *>(sort.get())
-                        ->getCategory(definition);
+                         ->getCategory(definition);
     llvm::Value *arg = getArgValue(ArgumentsArray, idx, CaseBlock, cat, module);
     llvm::Type *arg_ty = getArgType(cat, module);
     llvm::Value *ChildPtr = llvm::GetElementPtrInst::CreateInBounds(
@@ -1209,14 +1212,14 @@ static void emitVisitChildren(kore_definition *def, llvm::Module *mod) {
 static void emitInjTags(kore_definition *def, llvm::Module *mod) {
   llvm::LLVMContext &Ctx = mod->getContext();
   auto *global
-      = mod->getOrInsertGlobal("first_inj_tag", llvm::Type::getInt32Ty(Ctx));
+      = mod->getOrInsertGlobal("FIRST_INJ_TAG", llvm::Type::getInt32Ty(Ctx));
   auto *globalVar = llvm::cast<llvm::GlobalVariable>(global);
   globalVar->setConstant(true);
   if (!globalVar->hasInitializer()) {
     globalVar->setInitializer(llvm::ConstantInt::get(
         llvm::Type::getInt32Ty(Ctx), def->getInjSymbol()->getFirstTag()));
   }
-  global = mod->getOrInsertGlobal("last_inj_tag", llvm::Type::getInt32Ty(Ctx));
+  global = mod->getOrInsertGlobal("LAST_INJ_TAG", llvm::Type::getInt32Ty(Ctx));
   globalVar = llvm::cast<llvm::GlobalVariable>(global);
   globalVar->setConstant(true);
   if (!globalVar->hasInitializer()) {

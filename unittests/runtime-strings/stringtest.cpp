@@ -50,8 +50,8 @@ stringbuffer *hook_BUFFER_empty();
 stringbuffer *hook_BUFFER_concat(stringbuffer *, string *);
 string *hook_BUFFER_toString(stringbuffer *);
 
-uint32_t const first_inj_tag = std::numeric_limits<uint32_t>::max();
-uint32_t const last_inj_tag = std::numeric_limits<uint32_t>::min();
+uint32_t const FIRST_INJ_TAG = std::numeric_limits<uint32_t>::max();
+uint32_t const LAST_INJ_TAG = std::numeric_limits<uint32_t>::min();
 
 mpz_ptr move_int(mpz_t i) {
   mpz_ptr result = (mpz_ptr)malloc(sizeof(__mpz_struct));

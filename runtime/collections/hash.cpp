@@ -10,8 +10,8 @@ void float_hash(floating *, void *);
 
 static thread_local uint32_t hash_length;
 static thread_local uint32_t hash_depth;
-static constexpr uint32_t HASH_THRESHOLD = 5;
-static constexpr uint32_t HASH_LENGTH_THRESHOLD = 1024;
+static constexpr uint32_t hash_threshold = 5;
+static constexpr uint32_t hash_length_threshold = 1024;
 
 __attribute__((always_inline)) void add_hash8(void *h, uint8_t data) {
   auto *hash = (size_t *)h;
@@ -33,8 +33,8 @@ __attribute__((always_inline)) void add_hash64(void *h, uint64_t data) {
 
 __attribute__((always_inline)) void
 add_hash_str(void *h, char *data, size_t len) {
-  if (len + hash_length > HASH_LENGTH_THRESHOLD) {
-    len = HASH_LENGTH_THRESHOLD - hash_length;
+  if (len + hash_length > hash_length_threshold) {
+    len = hash_length_threshold - hash_length;
   }
   for (size_t i = 0; i < len; i++) {
     add_hash8(h, data[i]);
@@ -51,7 +51,7 @@ size_t hash_k(block *term) {
 
 bool hash_enter() {
   bool result
-      = hash_depth < HASH_THRESHOLD && hash_length < HASH_LENGTH_THRESHOLD;
+      = hash_depth < hash_threshold && hash_length < hash_length_threshold;
   hash_depth = hash_depth + 1;
   return result;
 }
