@@ -28,12 +28,11 @@ extern "C" {
     return tag;                                                                \
   }
 
-static block *dotK = leaf_block(getTagForSymbolName("dotk{}"));
+thread_local static std::vector<ffi_type *> struct_types;
 
-thread_local static std::vector<ffi_type *> structTypes;
-
-static std::unordered_map<block *, string *, hash_block, k_eq> allocatedKItemPtrs;
-static std::map<string *, block *> allocatedBytesRefs;
+static std::unordered_map<block *, string *, hash_block, k_eq>
+    allocated_k_item_ptrs;
+static std::map<string *, block *> allocated_bytes_refs;
 
 TAG_TYPE(void)
 TAG_TYPE(uint8)
@@ -168,7 +167,7 @@ static ffi_type *getTypeFromBlock(block *elem) {
 
     structType->elements[numFields] = nullptr;
 
-    structTypes.push_back(structType);
+    struct_types.push_back(structType);
 
     return structType;
   }
@@ -274,12 +273,12 @@ string *ffiCall(
   init_with_len(rvalue, rtype->size);
   free(avalues);
 
-  for (auto &s : structTypes) {
+  for (auto &s : struct_types) {
     free(s->elements);
     free(s);
   }
 
-  structTypes.clear();
+  struct_types.clear();
 
   return rvalue;
 }
@@ -345,7 +344,7 @@ firstBlockEnumerator() {
 
   blocks.clear();
 
-  for (auto &keyVal : allocatedKItemPtrs) {
+  for (auto &keyVal : allocated_k_item_ptrs) {
     blocks.push_back(const_cast<block **>(&(keyVal.first)));
   }
 
@@ -361,7 +360,7 @@ secondBlockEnumerator() {
 
   blocks.clear();
 
-  for (auto &keyVal : allocatedBytesRefs) {
+  for (auto &keyVal : allocated_bytes_refs) {
     blocks.push_back(const_cast<block **>(&(keyVal.second)));
   }
 
@@ -388,12 +387,12 @@ string *hook_FFI_alloc(block *kitem, mpz_t size, mpz_t align) {
 
   size_t a = mpz_get_ui(align);
 
-  if (allocatedKItemPtrs.find(kitem) != allocatedKItemPtrs.end()) {
-    string *result = allocatedKItemPtrs[kitem];
+  if (allocated_k_item_ptrs.find(kitem) != allocated_k_item_ptrs.end()) {
+    string *result = allocated_k_item_ptrs[kitem];
     if ((((uintptr_t)result) & (a - 1)) != 0) {
       KLLVM_HOOK_INVALID_ARGUMENT("Memory is not aligned");
     }
-    return allocatedKItemPtrs[kitem];
+    return allocated_k_item_ptrs[kitem];
   }
 
   size_t s = mpz_get_ui(size);
@@ -409,46 +408,46 @@ string *hook_FFI_alloc(block *kitem, mpz_t size, mpz_t align) {
   init_with_len(ret, s);
   ret->h.hdr |= NOT_YOUNG_OBJECT_BIT;
 
-  allocatedKItemPtrs[kitem] = ret;
-  allocatedBytesRefs[ret] = kitem;
+  allocated_k_item_ptrs[kitem] = ret;
+  allocated_bytes_refs[ret] = kitem;
 
   return ret;
 }
 
 block *hook_FFI_free(block *kitem) {
-  auto ptrIter = allocatedKItemPtrs.find(kitem);
-  auto refIter = allocatedBytesRefs.find(ptrIter->second);
+  auto ptrIter = allocated_k_item_ptrs.find(kitem);
+  auto refIter = allocated_bytes_refs.find(ptrIter->second);
 
-  if (ptrIter != allocatedKItemPtrs.end()) {
-    free(allocatedKItemPtrs[kitem]);
-    allocatedKItemPtrs.erase(ptrIter);
+  if (ptrIter != allocated_k_item_ptrs.end()) {
+    free(allocated_k_item_ptrs[kitem]);
+    allocated_k_item_ptrs.erase(ptrIter);
 
-    if (refIter != allocatedBytesRefs.end()) {
-      allocatedBytesRefs.erase(refIter);
+    if (refIter != allocated_bytes_refs.end()) {
+      allocated_bytes_refs.erase(refIter);
     } else {
       throw std::runtime_error("Internal memory map is out of sync");
     }
   }
 
-  return dotK;
+  return dot_k();
 }
 
 block *hook_FFI_freeAll(void) {
-  for (auto &allocatedKItemPtr : allocatedKItemPtrs) {
+  for (auto &allocatedKItemPtr : allocated_k_item_ptrs) {
     hook_FFI_free(allocatedKItemPtr.first);
   }
 
-  return dotK;
+  return dot_k();
 }
 
 block *hook_FFI_bytes_ref(string *bytes) {
-  auto refIter = allocatedBytesRefs.find(bytes);
+  auto refIter = allocated_bytes_refs.find(bytes);
 
-  if (refIter == allocatedBytesRefs.end()) {
+  if (refIter == allocated_bytes_refs.end()) {
     KLLVM_HOOK_INVALID_ARGUMENT("Bytes have no reference");
   }
 
-  return allocatedBytesRefs[bytes];
+  return allocated_bytes_refs[bytes];
 }
 
 mpz_ptr hook_FFI_bytes_address(string *bytes) {
@@ -458,7 +457,7 @@ mpz_ptr hook_FFI_bytes_address(string *bytes) {
 }
 
 bool hook_FFI_allocated(block *kitem) {
-  return allocatedKItemPtrs.find(kitem) != allocatedKItemPtrs.end();
+  return allocated_k_item_ptrs.find(kitem) != allocated_k_item_ptrs.end();
 }
 
 SortK hook_FFI_read(SortInt addr, SortBytes mem) {
@@ -466,7 +465,7 @@ SortK hook_FFI_read(SortInt addr, SortBytes mem) {
   auto intptr = (uintptr_t)l;
   char *ptr = (char *)intptr;
   memcpy(mem->data, ptr, len(mem));
-  return dotK;
+  return dot_k();
 }
 
 SortK hook_FFI_write(SortInt addr, SortBytes mem) {
@@ -478,6 +477,6 @@ SortK hook_FFI_write(SortInt addr, SortBytes mem) {
       ptr[i] = mem->data[i];
     }
   }
-  return dotK;
+  return dot_k();
 }
 }

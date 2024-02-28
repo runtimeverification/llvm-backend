@@ -39,7 +39,7 @@
 
 namespace kllvm {
 
-static std::string LAYOUTITEM_STRUCT = "layoutitem";
+static std::string layoutitem_struct = "layoutitem";
 
 fail_node fail_node::instance;
 
@@ -268,7 +268,7 @@ void switch_node::codegen(decision *d) {
         }
         auto *BlockPtr
             = llvm::PointerType::getUnqual(llvm::StructType::getTypeByName(
-                d->Module->getContext(), BLOCK_STRUCT));
+                d->Module->getContext(), block_struct));
         if (symbolDecl->attributes().contains(attribute_set::key::binder)) {
           if (offset == 0) {
             Renamed = llvm::CallInst::Create(
@@ -811,7 +811,7 @@ void abortWhenStuck(
   auto *BlockType = getBlockType(Module, d, symbol);
   llvm::Value *Ptr = nullptr;
   auto *BlockPtr = llvm::PointerType::getUnqual(
-      llvm::StructType::getTypeByName(Module->getContext(), BLOCK_STRUCT));
+      llvm::StructType::getTypeByName(Module->getContext(), block_struct));
   if (symbol->getArguments().empty()) {
     Ptr = llvm::ConstantExpr::getIntToPtr(
         llvm::ConstantInt::get(
@@ -987,7 +987,7 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> stepFunctionHeader(
     case SortCategory::Float:
       elements.push_back(llvm::ConstantStruct::get(
           llvm::StructType::getTypeByName(
-              module->getContext(), LAYOUTITEM_STRUCT),
+              module->getContext(), layoutitem_struct),
           llvm::ConstantInt::get(
               llvm::Type::getInt64Ty(module->getContext()), i++ * 8),
           llvm::ConstantInt::get(
@@ -1002,7 +1002,7 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> stepFunctionHeader(
   auto *layoutArr = llvm::ConstantArray::get(
       llvm::ArrayType::get(
           llvm::StructType::getTypeByName(
-              module->getContext(), LAYOUTITEM_STRUCT),
+              module->getContext(), layoutitem_struct),
           elements.size()),
       elements);
   auto *layout = module->getOrInsertGlobal(
@@ -1012,7 +1012,7 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> stepFunctionHeader(
     globalVar->setInitializer(layoutArr);
   }
   auto *ptrTy = llvm::PointerType::getUnqual(llvm::ArrayType::get(
-      llvm::StructType::getTypeByName(module->getContext(), LAYOUTITEM_STRUCT),
+      llvm::StructType::getTypeByName(module->getContext(), layoutitem_struct),
       0));
   auto *koreCollect = getOrInsertFunction(
       module, "koreCollect",

@@ -7,7 +7,7 @@
 static thread_local string *var;
 static thread_local block *to_replace;
 static thread_local block *replacement;
-static thread_local block *replacementInj;
+static thread_local block *replacement_inj;
 static thread_local uint64_t idx;
 static thread_local uint64_t idx2;
 
@@ -189,8 +189,8 @@ block *substituteInternal(block *currBlock) {
     if (layoutInt) {
       uint32_t tag = tag_hdr(hdr);
       uint32_t injTag = getInjectionForSortOfTag(tag);
-      if (tag_hdr(replacementInj->h.hdr) != injTag) {
-        return incrementDebruijn(replacementInj);
+      if (tag_hdr(replacement_inj->h.hdr) != injTag) {
+        return incrementDebruijn(replacement_inj);
       }
     }
     return incrementDebruijn(replacement);
@@ -259,11 +259,11 @@ block *substituteInternal(block *currBlock) {
       uint64_t idx_stack = idx;
       block *to_replace_stack = to_replace;
       block *replacement_stack = replacement;
-      block *replacementInj_stack = replacementInj;
+      block *replacementInj_stack = replacement_inj;
       auto *result = (block *)evaluateFunctionSymbol(tag, arguments.data());
       to_replace = to_replace_stack;
       replacement = replacement_stack;
-      replacementInj = replacementInj_stack;
+      replacement_inj = replacementInj_stack;
       idx = idx_stack;
       return result;
     }
@@ -392,10 +392,10 @@ hook_SUBSTITUTION_substOne(block *body, SortKItem newVal, SortKItem varInj) {
   replacement = *(block **)(((char *)newVal) + sizeof(blockheader));
   if (isSameSort) {
     to_replace = *(block **)(((char *)varInj) + sizeof(blockheader));
-    replacementInj = replacement;
+    replacement_inj = replacement;
   } else {
     to_replace = varInj;
-    replacementInj = newVal;
+    replacement_inj = newVal;
   }
   return substituteInternal(body);
 }

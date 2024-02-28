@@ -373,30 +373,28 @@ void int_hash(mpz_t i, void *hasher) {
   }
 }
 
-static block *dotK = leaf_block(getTagForSymbolName("dotk{}"));
-
-gmp_randstate_t kllvm_randState;
-bool kllvm_randStateInitialized = false;
+gmp_randstate_t kllvm_rand_state;
+bool kllvm_rand_state_initialized = false;
 
 SortK hook_INT_srand(SortInt seed) {
-  if (!kllvm_randStateInitialized) {
-    gmp_randinit_default(kllvm_randState);
+  if (!kllvm_rand_state_initialized) {
+    gmp_randinit_default(kllvm_rand_state);
   }
-  gmp_randseed(kllvm_randState, seed);
-  kllvm_randStateInitialized = true;
-  return dotK;
+  gmp_randseed(kllvm_rand_state, seed);
+  kllvm_rand_state_initialized = true;
+  return dot_k();
 }
 
 SortInt hook_INT_rand(SortInt upperBound) {
   mpz_t result;
   mpz_init(result);
-  if (!kllvm_randStateInitialized) {
-    gmp_randinit_default(kllvm_randState);
+  if (!kllvm_rand_state_initialized) {
+    gmp_randinit_default(kllvm_rand_state);
     mpz_set_si(result, time(nullptr));
-    gmp_randseed(kllvm_randState, result);
-    kllvm_randStateInitialized = true;
+    gmp_randseed(kllvm_rand_state, result);
+    kllvm_rand_state_initialized = true;
   }
-  mpz_urandomm(result, kllvm_randState, upperBound);
+  mpz_urandomm(result, kllvm_rand_state, upperBound);
   return move_int(result);
 }
 

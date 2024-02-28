@@ -9,7 +9,7 @@ extern "C" void *getStderr(void) {
   return stderr;
 }
 
-static std::vector<match_log> matchLog;
+static std::vector<match_log> match_logs;
 
 void **getMatchFnArgs(match_log *log) {
   return log->args.data();
@@ -17,19 +17,19 @@ void **getMatchFnArgs(match_log *log) {
 
 extern "C" {
 void resetMatchReason(void) {
-  matchLog.clear();
+  match_logs.clear();
 }
 
 match_log *getmatch_log(void) {
-  return matchLog.data();
+  return match_logs.data();
 }
 
 size_t getmatch_logSize(void) {
-  return matchLog.size();
+  return match_logs.size();
 }
 
 void addMatchSuccess(void) {
-  matchLog.push_back(
+  match_logs.push_back(
       {match_log::SUCCESS,
        nullptr,
        nullptr,
@@ -41,7 +41,7 @@ void addMatchSuccess(void) {
 }
 
 void addMatchFailReason(void *subject, char const *pattern, char const *sort) {
-  matchLog.push_back(
+  match_logs.push_back(
       {match_log::FAIL, nullptr, nullptr, nullptr, {}, pattern, subject, sort});
 }
 
@@ -62,7 +62,7 @@ void addMatchFunction(
     args.push_back(arg);
   }
 
-  matchLog.push_back(
+  match_logs.push_back(
       {match_log::FUNCTION, function, debugName, result, args, nullptr, nullptr,
        nullptr});
 

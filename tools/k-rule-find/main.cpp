@@ -18,15 +18,15 @@ struct location {
   int64_t end_column;
 };
 
-cl::OptionCategory KRuleCat("k-rule-find options");
+cl::OptionCategory k_rule_cat("k-rule-find options");
 
-cl::opt<std::string> KompiledDir(
+cl::opt<std::string> kompiled_dir(
     cl::Positional, cl::desc("<kompiled-dir>"), cl::Required,
-    cl::cat(KRuleCat));
+    cl::cat(k_rule_cat));
 
-cl::opt<std::string> RuleLocation(
+cl::opt<std::string> rule_location(
     cl::Positional, cl::desc("<filename.k:line[:column]>"), cl::Required,
-    cl::cat(KRuleCat));
+    cl::cat(k_rule_cat));
 
 std::string getSource(kore_axiom_declaration *axiom) {
   auto *sourceAtt = axiom->attributes().get(attribute_set::key::source).get();
@@ -99,11 +99,11 @@ bool checkRanges(
 }
 
 int main(int argc, char **argv) {
-  cl::HideUnrelatedOptions({&KRuleCat});
+  cl::HideUnrelatedOptions({&k_rule_cat});
   cl::ParseCommandLineOptions(argc, argv);
 
-  auto loc = parseLocation(RuleLocation);
-  auto definition = KompiledDir + "/definition.kore";
+  auto loc = parseLocation(rule_location);
+  auto definition = kompiled_dir + "/definition.kore";
   std::vector<std::string> rule_labels;
 
   // Parse the definition.kore to get the AST.

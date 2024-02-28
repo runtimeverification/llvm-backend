@@ -113,16 +113,16 @@ std::string makeSideConditionFunction(
     kore_axiom_declaration *axiom, kore_definition *definition,
     llvm::Module *Module);
 
-extern std::string MAP_STRUCT;
-extern std::string LIST_STRUCT;
-extern std::string SET_STRUCT;
-extern std::string INT_WRAPPER_STRUCT;
-extern std::string INT_STRUCT;
-extern std::string FLOAT_WRAPPER_STRUCT;
-extern std::string FLOAT_STRUCT;
-extern std::string BUFFER_STRUCT;
-extern std::string BLOCK_STRUCT;
-extern std::string BLOCKHEADER_STRUCT;
+extern std::string map_struct;
+extern std::string list_struct;
+extern std::string set_struct;
+extern std::string int_wrapper_struct;
+extern std::string int_struct;
+extern std::string float_wrapper_struct;
+extern std::string float_struct;
+extern std::string buffer_struct;
+extern std::string block_struct;
+extern std::string blockheader_struct;
 
 llvm::StructType *getBlockType(llvm::Module *Module);
 

@@ -169,7 +169,7 @@ proof_event::eventPrelude(
 llvm::BasicBlock *proof_event::hookEvent_pre(
     std::string const &name, llvm::BasicBlock *current_block,
     std::string const &locationStack) {
-  if (!ProofHintInstrumentation) {
+  if (!proof_hint_instrumentation) {
     return current_block;
   }
 
@@ -187,7 +187,7 @@ llvm::BasicBlock *proof_event::hookEvent_pre(
 llvm::BasicBlock *proof_event::hookEvent_post(
     llvm::Value *val, kore_composite_sort *sort,
     llvm::BasicBlock *current_block) {
-  if (!ProofHintInstrumentation) {
+  if (!proof_hint_instrumentation) {
     return current_block;
   }
 
@@ -205,7 +205,7 @@ llvm::BasicBlock *proof_event::hookEvent_post(
 llvm::BasicBlock *proof_event::hookArg(
     llvm::Value *val, kore_composite_sort *sort,
     llvm::BasicBlock *current_block) {
-  if (!ProofHintInstrumentation) {
+  if (!proof_hint_instrumentation) {
     return current_block;
   }
 
@@ -227,7 +227,7 @@ llvm::BasicBlock *proof_event::rewriteEvent_pre(
     std::map<std::string, kore_variable_pattern *> vars,
     llvm::StringMap<llvm::Value *> const &subst,
     llvm::BasicBlock *current_block) {
-  if (!ProofHintInstrumentation) {
+  if (!proof_hint_instrumentation) {
     return current_block;
   }
 
@@ -256,7 +256,7 @@ llvm::BasicBlock *proof_event::rewriteEvent_pre(
 llvm::BasicBlock *proof_event::rewriteEvent_post(
     kore_axiom_declaration *axiom, llvm::Value *return_value,
     llvm::BasicBlock *current_block) {
-  if (!ProofHintInstrumentation) {
+  if (!proof_hint_instrumentation) {
     return current_block;
   }
 
@@ -281,7 +281,7 @@ llvm::BasicBlock *proof_event::rewriteEvent_post(
 llvm::BasicBlock *proof_event::functionEvent_pre(
     llvm::BasicBlock *current_block, kore_composite_pattern *pattern,
     std::string const &locationStack) {
-  if (!ProofHintInstrumentation) {
+  if (!proof_hint_instrumentation) {
     return current_block;
   }
 
@@ -299,7 +299,7 @@ llvm::BasicBlock *proof_event::functionEvent_pre(
 
 llvm::BasicBlock *
 proof_event::functionEvent_post(llvm::BasicBlock *current_block) {
-  if (!ProofHintInstrumentation) {
+  if (!proof_hint_instrumentation) {
     return current_block;
   }
 
@@ -316,7 +316,7 @@ proof_event::functionEvent_post(llvm::BasicBlock *current_block) {
 llvm::BasicBlock *proof_event::sideConditionEvent_pre(
     kore_axiom_declaration *axiom, std::vector<llvm::Value *> const &args,
     llvm::BasicBlock *current_block) {
-  if (!ProofHintInstrumentation) {
+  if (!proof_hint_instrumentation) {
     return current_block;
   }
 
@@ -355,7 +355,7 @@ llvm::BasicBlock *proof_event::sideConditionEvent_pre(
 llvm::BasicBlock *proof_event::sideConditionEvent_post(
     kore_axiom_declaration *axiom, llvm::Value *check_result,
     llvm::BasicBlock *current_block) {
-  if (!ProofHintInstrumentation) {
+  if (!proof_hint_instrumentation) {
     return current_block;
   }
 

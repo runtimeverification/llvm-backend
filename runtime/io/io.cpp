@@ -28,11 +28,10 @@ extern char kompiled_directory;
 
 char *getTerminatedString(string *str);
 
-static block *dotK = leaf_block(getTagForSymbolName("dotk{}"));
-static blockheader kseqHeader
+static blockheader kseq_header
     = {getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("kseq{}"))};
 
-static std::map<std::string, std::string> logFiles;
+static std::map<std::string, std::string> log_files;
 
 static block *block_errno() {
   char const *errStr = nullptr;
@@ -161,11 +160,13 @@ static inline block *getKSeqErrorBlock() {
   auto *retBlock
       = static_cast<block *>(koreAlloc(sizeof(block) + 2 * sizeof(block *)));
   auto *inj = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(block *)));
-  retBlock->h = kseqHeader;
+  retBlock->h = kseq_header;
   inj->h = header_err();
   memcpy(inj->children, &err, sizeof(block *));
   memcpy(retBlock->children, &inj, sizeof(block *));
-  memcpy(retBlock->children + 1, &dotK, sizeof(block *));
+
+  auto *dot_k_block = dot_k();
+  memcpy(retBlock->children + 1, &dot_k_block, sizeof(block *));
   return retBlock;
 }
 
@@ -357,7 +358,7 @@ SortK hook_IO_close(SortInt i) {
     return getKSeqErrorBlock();
   }
 
-  return dotK;
+  return dot_k();
 }
 
 SortK hook_IO_seek(SortInt i, SortInt loc) {
@@ -374,7 +375,7 @@ SortK hook_IO_seek(SortInt i, SortInt loc) {
     return getKSeqErrorBlock();
   }
 
-  return dotK;
+  return dot_k();
 }
 
 SortK hook_IO_seekEnd(SortInt i, SortInt loc) {
@@ -391,7 +392,7 @@ SortK hook_IO_seekEnd(SortInt i, SortInt loc) {
     return getKSeqErrorBlock();
   }
 
-  return dotK;
+  return dot_k();
 }
 
 SortK hook_IO_putc(SortInt i, SortInt c) {
@@ -408,7 +409,7 @@ SortK hook_IO_putc(SortInt i, SortInt c) {
     return getKSeqErrorBlock();
   }
 
-  return dotK;
+  return dot_k();
 }
 
 SortK hook_IO_write(SortInt i, SortString str) {
@@ -423,7 +424,7 @@ SortK hook_IO_write(SortInt i, SortString str) {
     return getKSeqErrorBlock();
   }
 
-  return dotK;
+  return dot_k();
 }
 
 SortK hook_IO_lock(SortInt i, SortInt len) {
@@ -446,7 +447,7 @@ SortK hook_IO_lock(SortInt i, SortInt len) {
     return getKSeqErrorBlock();
   }
 
-  return dotK;
+  return dot_k();
 }
 
 SortK hook_IO_unlock(SortInt i, SortInt len) {
@@ -469,7 +470,7 @@ SortK hook_IO_unlock(SortInt i, SortInt len) {
     return getKSeqErrorBlock();
   }
 
-  return dotK;
+  return dot_k();
 }
 
 SortK hook_IO_remove(SortString path) {
@@ -480,7 +481,7 @@ SortK hook_IO_remove(SortString path) {
     return getKSeqErrorBlock();
   }
 
-  return dotK;
+  return dot_k();
 }
 
 SortIOInt hook_IO_accept(SortInt sock) {
@@ -518,12 +519,12 @@ SortK hook_IO_shutdownWrite(SortInt sock) {
     return getKSeqErrorBlock();
   }
 
-  return dotK;
+  return dot_k();
 }
 
 void flush_IO_logs() {
   std::string pid = std::to_string(getpid());
-  for (auto const &log : logFiles) {
+  for (auto const &log : log_files) {
     std::string pathStr = log.first;
     std::string msg = log.second;
     size_t length = pathStr.length();
@@ -565,15 +566,15 @@ SortK hook_IO_log(SortString path, SortString msg) {
     flushRegistered = true;
   }
 
-  logFiles[p].append(m);
+  log_files[p].append(m);
 
-  return dotK;
+  return dot_k();
 }
 
 SortK hook_IO_logString(SortString msg) {
   char *m = getTerminatedString(msg);
   std::cerr << m << std::endl;
-  return dotK;
+  return dot_k();
 }
 
 block *hook_KREFLECTION_parseKAST(string *kast) {

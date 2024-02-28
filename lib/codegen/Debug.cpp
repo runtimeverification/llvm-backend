@@ -20,18 +20,18 @@
 
 namespace kllvm {
 
-static llvm::DIBuilder *Dbg;
-static llvm::DICompileUnit *DbgCU;
-static llvm::DIFile *DbgFile;
-static llvm::DISubprogram *DbgSP;
-static unsigned DbgLine;
-static unsigned DbgColumn;
+static llvm::DIBuilder *dbg;
+static llvm::DICompileUnit *dbg_cu;
+static llvm::DIFile *dbg_file;
+static llvm::DISubprogram *dbg_sp;
+static unsigned dbg_line;
+static unsigned dbg_column;
 
 #define DWARF_VERSION 4
 
 void initDebugInfo(llvm::Module *module, std::string const &filename) {
-  Dbg = new llvm::DIBuilder(*module);
-  DbgFile = Dbg->createFile(filename, ".");
+  dbg = new llvm::DIBuilder(*module);
+  dbg_file = dbg->createFile(filename, ".");
 
   module->addModuleFlag(
       llvm::Module::Warning, "Debug Info Version",
@@ -47,59 +47,59 @@ void initDebugInfo(llvm::Module *module, std::string const &filename) {
   // arguments to createCompileUnit:
   //   https://github.com/runtimeverification/k/issues/2637
   //   https://llvm.org/doxygen/classllvm_1_1DIBuilder.html
-  DbgCU = Dbg->createCompileUnit(
-      llvm::dwarf::DW_LANG_C, DbgFile, "llvm-kompile-codegen", false, "", 0, "",
+  dbg_cu = dbg->createCompileUnit(
+      llvm::dwarf::DW_LANG_C, dbg_file, "llvm-kompile-codegen", false, "", 0, "",
       llvm::DICompileUnit::DebugEmissionKind::FullDebug, 0, false, false,
       llvm::DICompileUnit::DebugNameTableKind::None);
 }
 
 void finalizeDebugInfo() {
-  Dbg->finalize();
+  dbg->finalize();
 }
 
 void initDebugFunction(
     std::string const &name, std::string const &linkageName,
     llvm::DISubroutineType *type, kore_definition *definition,
     llvm::Function *func) {
-  if (!Dbg) {
+  if (!dbg) {
     return;
   }
-  auto *Unit = Dbg->createFile(DbgFile->getFilename(), DbgFile->getDirectory());
+  auto *Unit = dbg->createFile(dbg_file->getFilename(), dbg_file->getDirectory());
   llvm::DIScope *FContext = Unit;
-  DbgSP = Dbg->createFunction(
-      FContext, name, name, Unit, DbgLine, type, DbgLine,
+  dbg_sp = dbg->createFunction(
+      FContext, name, name, Unit, dbg_line, type, dbg_line,
       llvm::DINode::DIFlags::FlagZero, llvm::DISubprogram::SPFlagDefinition);
-  func->setSubprogram(DbgSP);
+  func->setSubprogram(dbg_sp);
 }
 
 void initDebugParam(
     llvm::Function *func, unsigned argNo, std::string const &name,
     value_type type, std::string const &typeName) {
-  if (!Dbg) {
+  if (!dbg) {
     return;
   }
-  llvm::DILocalVariable *DbgVar = Dbg->createParameterVariable(
-      DbgSP, name, argNo + 1, DbgFile, DbgLine, getDebugType(type, typeName),
+  llvm::DILocalVariable *DbgVar = dbg->createParameterVariable(
+      dbg_sp, name, argNo + 1, dbg_file, dbg_line, getDebugType(type, typeName),
       true);
-  Dbg->insertDbgValueIntrinsic(
-      func->arg_begin() + argNo, DbgVar, Dbg->createExpression(),
-      llvm::DILocation::get(func->getContext(), DbgLine, DbgColumn, DbgSP),
+  dbg->insertDbgValueIntrinsic(
+      func->arg_begin() + argNo, DbgVar, dbg->createExpression(),
+      llvm::DILocation::get(func->getContext(), dbg_line, dbg_column, dbg_sp),
       &func->getEntryBlock());
 }
 
 void initDebugGlobal(
     std::string const &name, llvm::DIType *type, llvm::GlobalVariable *var) {
-  if (!Dbg) {
+  if (!dbg) {
     return;
   }
   resetDebugLoc();
-  auto *DbgExp = Dbg->createGlobalVariableExpression(
-      DbgCU, name, name, DbgFile, DbgLine, type, false);
+  auto *DbgExp = dbg->createGlobalVariableExpression(
+      dbg_cu, name, name, dbg_file, dbg_line, type, false);
   var->addDebugInfo(DbgExp);
 }
 
 void initDebugAxiom(attribute_set const &att) {
-  if (!Dbg) {
+  if (!dbg) {
     return;
   }
   if (!att.contains(attribute_set::key::source)) {
@@ -123,42 +123,42 @@ void initDebugAxiom(attribute_set const &att) {
   std::string location = strPattern2->getContents();
   source = source.substr(7, source.length() - 8);
   size_t first_comma = location.find_first_of(',');
-  DbgLine = std::stoi(location.substr(9, first_comma - 9));
-  DbgColumn = std::stoi(location.substr(
+  dbg_line = std::stoi(location.substr(9, first_comma - 9));
+  dbg_column = std::stoi(location.substr(
       first_comma + 1,
       location.find_first_of(',', first_comma + 1) - first_comma - 1));
-  DbgFile = Dbg->createFile(source, DbgFile->getDirectory());
+  dbg_file = dbg->createFile(source, dbg_file->getDirectory());
 }
 
 void resetDebugLoc() {
-  if (!Dbg) {
+  if (!dbg) {
     return;
   }
-  DbgLine = 0;
-  DbgColumn = 0;
-  DbgFile = DbgCU->getFile();
+  dbg_line = 0;
+  dbg_column = 0;
+  dbg_file = dbg_cu->getFile();
 }
 
 llvm::DIType *getForwardDecl(std::string const &name) {
-  if (!Dbg) {
+  if (!dbg) {
     return nullptr;
   }
-  auto *Unit = Dbg->createFile(DbgFile->getFilename(), DbgFile->getDirectory());
-  return Dbg->createForwardDecl(
-      llvm::dwarf::DW_TAG_structure_type, name, DbgCU, Unit, 0);
+  auto *Unit = dbg->createFile(dbg_file->getFilename(), dbg_file->getDirectory());
+  return dbg->createForwardDecl(
+      llvm::dwarf::DW_TAG_structure_type, name, dbg_cu, Unit, 0);
 }
 
-static std::string MAP_STRUCT = "map";
-static std::string RANGEMAP_STRUCT = "rangemap";
-static std::string LIST_STRUCT = "list";
-static std::string SET_STRUCT = "set";
-static std::string INT_STRUCT = "__mpz_struct";
-static std::string FLOAT_STRUCT = "floating";
-static std::string BUFFER_STRUCT = "stringbuffer";
-static std::string BLOCK_STRUCT = "block";
+static std::string map_struct = "map";
+static std::string rangemap_struct = "rangemap";
+static std::string list_struct = "list";
+static std::string set_struct = "set";
+static std::string int_struct = "__mpz_struct";
+static std::string float_struct = "floating";
+static std::string buffer_struct = "stringbuffer";
+static std::string block_struct = "block";
 
 llvm::DIType *getDebugType(value_type type, std::string const &typeName) {
-  if (!Dbg) {
+  if (!dbg) {
     return nullptr;
   }
   static std::map<std::string, llvm::DIType *> types;
@@ -177,45 +177,45 @@ llvm::DIType *getDebugType(value_type type, std::string const &typeName) {
   }
   switch (type.cat) {
   case SortCategory::Map:
-    map = getPointerDebugType(getForwardDecl(MAP_STRUCT), typeName);
+    map = getPointerDebugType(getForwardDecl(map_struct), typeName);
     types[typeName] = map;
     return map;
   case SortCategory::RangeMap:
-    rangemap = getPointerDebugType(getForwardDecl(RANGEMAP_STRUCT), typeName);
+    rangemap = getPointerDebugType(getForwardDecl(rangemap_struct), typeName);
     types[typeName] = rangemap;
     return rangemap;
   case SortCategory::List:
-    list = getPointerDebugType(getForwardDecl(LIST_STRUCT), typeName);
+    list = getPointerDebugType(getForwardDecl(list_struct), typeName);
     types[typeName] = list;
     return list;
   case SortCategory::Set:
-    set = getPointerDebugType(getForwardDecl(SET_STRUCT), typeName);
+    set = getPointerDebugType(getForwardDecl(set_struct), typeName);
     types[typeName] = set;
     return set;
   case SortCategory::Int:
-    integer = getPointerDebugType(getForwardDecl(INT_STRUCT), typeName);
+    integer = getPointerDebugType(getForwardDecl(int_struct), typeName);
     types[typeName] = integer;
     return integer;
   case SortCategory::Float:
-    floating = getPointerDebugType(getForwardDecl(FLOAT_STRUCT), typeName);
+    floating = getPointerDebugType(getForwardDecl(float_struct), typeName);
     types[typeName] = floating;
     return floating;
   case SortCategory::StringBuffer:
-    buffer = getPointerDebugType(getForwardDecl(BUFFER_STRUCT), typeName);
+    buffer = getPointerDebugType(getForwardDecl(buffer_struct), typeName);
     types[typeName] = buffer;
     return buffer;
   case SortCategory::Bool:
-    boolean = Dbg->createBasicType(typeName, 8, llvm::dwarf::DW_ATE_boolean);
+    boolean = dbg->createBasicType(typeName, 8, llvm::dwarf::DW_ATE_boolean);
     types[typeName] = boolean;
     return boolean;
   case SortCategory::MInt:
-    mint = Dbg->createBasicType(
+    mint = dbg->createBasicType(
         typeName, type.bits, llvm::dwarf::DW_ATE_unsigned);
     types[typeName] = mint;
     return mint;
   case SortCategory::Symbol:
   case SortCategory::Variable:
-    symbol = getPointerDebugType(getForwardDecl(BLOCK_STRUCT), typeName);
+    symbol = getPointerDebugType(getForwardDecl(block_struct), typeName);
     types[typeName] = symbol;
     return symbol;
   case SortCategory::Uncomputed: abort();
@@ -223,24 +223,24 @@ llvm::DIType *getDebugType(value_type type, std::string const &typeName) {
 }
 
 llvm::DIType *getIntDebugType() {
-  if (!Dbg) {
+  if (!dbg) {
     return nullptr;
   }
-  return Dbg->createBasicType("uint32_t", 32, llvm::dwarf::DW_ATE_unsigned);
+  return dbg->createBasicType("uint32_t", 32, llvm::dwarf::DW_ATE_unsigned);
 }
 
 llvm::DIType *getLongDebugType() {
-  if (!Dbg) {
+  if (!dbg) {
     return nullptr;
   }
-  return Dbg->createBasicType("uint64_t", 64, llvm::dwarf::DW_ATE_unsigned);
+  return dbg->createBasicType("uint64_t", 64, llvm::dwarf::DW_ATE_unsigned);
 }
 
 llvm::DIType *getBoolDebugType() {
-  if (!Dbg) {
+  if (!dbg) {
     return nullptr;
   }
-  return Dbg->createBasicType("bool", 8, llvm::dwarf::DW_ATE_boolean);
+  return dbg->createBasicType("bool", 8, llvm::dwarf::DW_ATE_boolean);
 }
 
 llvm::DIType *getVoidDebugType() {
@@ -248,61 +248,61 @@ llvm::DIType *getVoidDebugType() {
 }
 
 llvm::DIType *getCharPtrDebugType() {
-  if (!Dbg) {
+  if (!dbg) {
     return nullptr;
   }
-  return Dbg->createPointerType(
-      Dbg->createBasicType("char", 8, llvm::dwarf::DW_ATE_signed_char),
+  return dbg->createPointerType(
+      dbg->createBasicType("char", 8, llvm::dwarf::DW_ATE_signed_char),
       sizeof(size_t) * 8);
 }
 
 llvm::DIType *getCharDebugType() {
-  if (!Dbg) {
+  if (!dbg) {
     return nullptr;
   }
-  return Dbg->createBasicType("char", 8, llvm::dwarf::DW_ATE_signed_char);
+  return dbg->createBasicType("char", 8, llvm::dwarf::DW_ATE_signed_char);
 }
 
 llvm::DIType *
 getPointerDebugType(llvm::DIType *ty, std::string const &typeName) {
-  if (!Dbg) {
+  if (!dbg) {
     return nullptr;
   }
-  auto *ptrType = Dbg->createPointerType(ty, sizeof(size_t) * 8);
-  return Dbg->createTypedef(ptrType, typeName, DbgFile, 0, DbgCU);
+  auto *ptrType = dbg->createPointerType(ty, sizeof(size_t) * 8);
+  return dbg->createTypedef(ptrType, typeName, dbg_file, 0, dbg_cu);
 }
 
 llvm::DIType *
 getArrayDebugType(llvm::DIType *ty, size_t len, llvm::Align align) {
-  if (!Dbg) {
+  if (!dbg) {
     return nullptr;
   }
   std::vector<llvm::Metadata *> subscripts;
-  auto arr = Dbg->getOrCreateArray(subscripts);
-  return Dbg->createArrayType(len, align.value(), ty, arr);
+  auto arr = dbg->getOrCreateArray(subscripts);
+  return dbg->createArrayType(len, align.value(), ty, arr);
 }
 
 llvm::DIType *getShortDebugType() {
-  if (!Dbg) {
+  if (!dbg) {
     return nullptr;
   }
-  return Dbg->createBasicType("uint16_t", 16, llvm::dwarf::DW_ATE_unsigned);
+  return dbg->createBasicType("uint16_t", 16, llvm::dwarf::DW_ATE_unsigned);
 }
 
 llvm::DISubroutineType *getDebugFunctionType(
     llvm::Metadata *returnType, std::vector<llvm::Metadata *> argTypes) {
-  if (!Dbg) {
+  if (!dbg) {
     return nullptr;
   }
   argTypes.insert(argTypes.begin(), returnType);
-  return Dbg->createSubroutineType(Dbg->getOrCreateTypeArray(argTypes));
+  return dbg->createSubroutineType(dbg->getOrCreateTypeArray(argTypes));
 }
 
 void setDebugLoc(llvm::Instruction *instr) {
-  if (!Dbg) {
+  if (!dbg) {
     return;
   }
   instr->setDebugLoc(llvm::DebugLoc(
-      llvm::DILocation::get(instr->getContext(), DbgLine, DbgColumn, DbgSP)));
+      llvm::DILocation::get(instr->getContext(), dbg_line, dbg_column, dbg_sp)));
 }
 } // namespace kllvm

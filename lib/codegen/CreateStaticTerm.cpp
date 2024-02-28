@@ -44,7 +44,7 @@ llvm::Constant *create_static_term::notInjectionCase(
     std::vector<llvm::Constant *> blockVals;
 
     llvm::StructType *BlockHeaderType = llvm::StructType::getTypeByName(
-        Module->getContext(), BLOCKHEADER_STRUCT);
+        Module->getContext(), blockheader_struct);
     uint64_t headerVal
         = getBlockHeaderVal(Module, symbol, BlockType) | NOT_YOUNG_OBJECT_BIT;
     llvm::Constant *BlockHeader = llvm::ConstantStruct::get(
@@ -78,7 +78,7 @@ llvm::Constant *create_static_term::notInjectionCase(
   return llvm::ConstantExpr::getBitCast(
       llvm::ConstantExpr::getInBoundsGetElementPtr(BlockType, globalVar, Idxs),
       llvm::PointerType::getUnqual(
-          llvm::StructType::getTypeByName(Module->getContext(), BLOCK_STRUCT)));
+          llvm::StructType::getTypeByName(Module->getContext(), block_struct)));
 }
 
 std::pair<llvm::Constant *, bool>
@@ -97,7 +97,7 @@ create_static_term::operator()(kore_pattern *pattern) {
     }
     if (symbol->getArguments().empty()) {
       llvm::StructType *BlockType
-          = llvm::StructType::getTypeByName(Module->getContext(), BLOCK_STRUCT);
+          = llvm::StructType::getTypeByName(Module->getContext(), block_struct);
       llvm::Constant *Cast = llvm::ConstantExpr::getIntToPtr(
           llvm::ConstantInt::get(
               llvm::Type::getInt64Ty(Ctx),
@@ -143,7 +143,7 @@ create_static_term::createToken(value_type sort, std::string contents) {
   case SortCategory::Int: {
     llvm::Constant *global = Module->getOrInsertGlobal(
         "int_" + contents, llvm::StructType::getTypeByName(
-                               Module->getContext(), INT_WRAPPER_STRUCT));
+                               Module->getContext(), int_wrapper_struct));
     auto *globalVar = llvm::dyn_cast<llvm::GlobalVariable>(global);
     if (!globalVar->hasInitializer()) {
       mpz_t value;
@@ -166,7 +166,7 @@ create_static_term::createToken(value_type sort, std::string contents) {
           llvm::ConstantArray::get(limbsType, allocdLimbs));
       llvm::Constant *hdr = llvm::ConstantStruct::get(
           llvm::StructType::getTypeByName(
-              Module->getContext(), BLOCKHEADER_STRUCT),
+              Module->getContext(), blockheader_struct),
           llvm::ConstantInt::get(
               llvm::Type::getInt64Ty(Ctx),
               sizeof(mpz_hdr) - sizeof(blockheader) | NOT_YOUNG_OBJECT_BIT));
@@ -177,10 +177,10 @@ create_static_term::createToken(value_type sort, std::string contents) {
           llvm::ConstantInt::getSigned(llvm::Type::getInt32Ty(Ctx), sign));
       globalVar->setInitializer(llvm::ConstantStruct::get(
           llvm::StructType::getTypeByName(
-              Module->getContext(), INT_WRAPPER_STRUCT),
+              Module->getContext(), int_wrapper_struct),
           hdr,
           llvm::ConstantStruct::get(
-              llvm::StructType::getTypeByName(Module->getContext(), INT_STRUCT),
+              llvm::StructType::getTypeByName(Module->getContext(), int_struct),
               numLimbs, mp_size,
               llvm::ConstantExpr::getPointerCast(
                   limbsVar, llvm::Type::getInt64PtrTy(Ctx)))));
@@ -191,13 +191,13 @@ create_static_term::createToken(value_type sort, std::string contents) {
            llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), 1)};
     return llvm::ConstantExpr::getInBoundsGetElementPtr(
         llvm::StructType::getTypeByName(
-            Module->getContext(), INT_WRAPPER_STRUCT),
+            Module->getContext(), int_wrapper_struct),
         globalVar, Idxs);
   }
   case SortCategory::Float: {
     llvm::Constant *global = Module->getOrInsertGlobal(
         "float_" + contents, llvm::StructType::getTypeByName(
-                                 Module->getContext(), FLOAT_WRAPPER_STRUCT));
+                                 Module->getContext(), float_wrapper_struct));
     auto *globalVar = llvm::dyn_cast<llvm::GlobalVariable>(global);
     if (!globalVar->hasInitializer()) {
       size_t prec = 0;
@@ -249,7 +249,7 @@ create_static_term::createToken(value_type sort, std::string contents) {
           llvm::ConstantArray::get(limbsType, allocdLimbs));
       llvm::Constant *hdr = llvm::ConstantStruct::get(
           llvm::StructType::getTypeByName(
-              Module->getContext(), BLOCKHEADER_STRUCT),
+              Module->getContext(), blockheader_struct),
           llvm::ConstantInt::get(
               llvm::Type::getInt64Ty(Ctx),
               (sizeof(floating_hdr) - sizeof(blockheader))
@@ -270,11 +270,11 @@ create_static_term::createToken(value_type sort, std::string contents) {
       // don't yet support cross compiling anyway, that's a safe assumption.
       globalVar->setInitializer(llvm::ConstantStruct::get(
           llvm::StructType::getTypeByName(
-              Module->getContext(), FLOAT_WRAPPER_STRUCT),
+              Module->getContext(), float_wrapper_struct),
           hdr,
           llvm::ConstantStruct::get(
               llvm::StructType::getTypeByName(
-                  Module->getContext(), FLOAT_STRUCT),
+                  Module->getContext(), float_struct),
               expbits,
               llvm::ConstantStruct::getAnon(
                   {mpfr_prec, mpfr_sign, mpfr_exp,
@@ -287,7 +287,7 @@ create_static_term::createToken(value_type sort, std::string contents) {
            llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), 1)};
     return llvm::ConstantExpr::getInBoundsGetElementPtr(
         llvm::StructType::getTypeByName(
-            Module->getContext(), FLOAT_WRAPPER_STRUCT),
+            Module->getContext(), float_wrapper_struct),
         globalVar, Idxs);
   }
   case SortCategory::StringBuffer:
@@ -307,14 +307,14 @@ create_static_term::createToken(value_type sort, std::string contents) {
     llvm::StructType *StringType = llvm::StructType::get(
         Ctx,
         {llvm::StructType::getTypeByName(
-             Module->getContext(), BLOCKHEADER_STRUCT),
+             Module->getContext(), blockheader_struct),
          llvm::ArrayType::get(llvm::Type::getInt8Ty(Ctx), contents.size())});
     llvm::Constant *global
         = Module->getOrInsertGlobal("token_" + escape(contents), StringType);
     auto *globalVar = llvm::dyn_cast<llvm::GlobalVariable>(global);
     if (!globalVar->hasInitializer()) {
       llvm::StructType *BlockHeaderType = llvm::StructType::getTypeByName(
-          Module->getContext(), BLOCKHEADER_STRUCT);
+          Module->getContext(), blockheader_struct);
       // this object does not live on the young generation, so we need to set
       // the correct gc bit.
       llvm::Constant *BlockHeader = llvm::ConstantStruct::get(
@@ -327,7 +327,7 @@ create_static_term::createToken(value_type sort, std::string contents) {
     }
     return llvm::ConstantExpr::getPointerCast(
         global, llvm::PointerType::getUnqual(llvm::StructType::getTypeByName(
-                    Module->getContext(), BLOCK_STRUCT)));
+                    Module->getContext(), block_struct)));
   }
   case SortCategory::Uncomputed: abort();
   }

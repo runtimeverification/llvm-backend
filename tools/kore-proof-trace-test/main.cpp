@@ -7,18 +7,18 @@
 using namespace llvm;
 using namespace kllvm;
 
-cl::OptionCategory KoreProofTraceTestCat("kore-proof-trace options");
+cl::OptionCategory kore_proof_trace_test_cat("kore-proof-trace options");
 
-cl::opt<std::string> InputFilename(
+cl::opt<std::string> input_filename(
     cl::Positional, cl::desc("<input file>"), cl::Required,
-    cl::cat(KoreProofTraceTestCat));
+    cl::cat(kore_proof_trace_test_cat));
 
 int main(int argc, char **argv) {
-  cl::HideUnrelatedOptions({&KoreProofTraceTestCat});
+  cl::HideUnrelatedOptions({&kore_proof_trace_test_cat});
   cl::ParseCommandLineOptions(argc, argv);
 
   proof_trace_parser Parser(false);
-  auto Trace = Parser.parse_proof_trace_from_file(InputFilename);
+  auto Trace = Parser.parse_proof_trace_from_file(input_filename);
   if (!Trace.has_value()) {
     return 1;
   }

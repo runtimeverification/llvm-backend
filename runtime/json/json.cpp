@@ -55,8 +55,7 @@ struct jsonmember {
   block *val;
 };
 
-static block *dotK = leaf_block(getTagForSymbolName("dotk{}"));
-static blockheader kseqHeader
+static blockheader kseq_header
     = {getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("kseq{}"))};
 
 #define GET_HEADER(name, symbol)                                               \

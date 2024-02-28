@@ -6,12 +6,12 @@
 #include "runtime/collect.h"
 #include "runtime/header.h"
 
-static std::vector<block *> stepResults;
+static std::vector<block *> step_results;
 
 extern "C" {
 
 void addSearchResult(block *result) {
-  stepResults.push_back(result);
+  step_results.push_back(result);
 }
 
 void take_search_step(block *);
@@ -34,7 +34,7 @@ blockEnumerator() {
     blocks.push_back(const_cast<block **>(&(keyVal)));
   }
   blocks.push_back(&state);
-  for (auto &keyVal : stepResults) {
+  for (auto &keyVal : step_results) {
     blocks.push_back(const_cast<block **>(&(keyVal)));
   }
 
@@ -78,20 +78,20 @@ std::unordered_set<block *, hash_block, k_eq> take_search_steps(
       depth--;
     }
 
-    stepResults.clear();
+    step_results.clear();
     take_search_step(state);
 
-    if (executeToBranch && stepResults.size() > 1) {
+    if (executeToBranch && step_results.size() > 1) {
       results.insert(state);
       return results;
     }
-    if (stepResults.empty()) {
+    if (step_results.empty()) {
       results.insert(state);
       if (results.size() == bound) {
         return results;
       }
     } else {
-      for (block *result : stepResults) {
+      for (block *result : step_results) {
         auto dirty = states_set.insert(result);
         if (dirty.second) {
           states.push_back(result);

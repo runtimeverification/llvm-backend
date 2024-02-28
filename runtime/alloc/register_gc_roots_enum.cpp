@@ -3,8 +3,8 @@
 #include "runtime/collect.h"
 #include "runtime/header.h"
 
-std::vector<BlockEnumerator> blockEnumerators;
+std::vector<BlockEnumerator> block_enumerators;
 
 void registerGCRootsEnumerator(BlockEnumerator f) {
-  blockEnumerators.push_back(f);
+  block_enumerators.push_back(f);
 }

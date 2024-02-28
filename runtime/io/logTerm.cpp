@@ -7,8 +7,6 @@
 #include "kllvm/util/temporary_file.h"
 #include "runtime/header.h"
 
-static block *dotK = leaf_block(getTagForSymbolName("dotk{}"));
-
 extern "C" {
 
 extern char kompiled_directory;
@@ -35,6 +33,6 @@ SortK hook_IO_traceTerm(block *term) {
   kllvm::printKORE(
       std::cerr, &kompiled_directory, temp_file.filename(), false, true);
 
-  return dotK;
+  return dot_k();
 }
 }

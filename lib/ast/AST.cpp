@@ -289,7 +289,7 @@ bool kore_symbol::isPolymorphic() const {
   });
 }
 
-static std::unordered_set<std::string> BUILTINS{
+static std::unordered_set<std::string> builtins{
     "\\and",
     "\\not",
     "\\or",
@@ -314,7 +314,7 @@ static std::unordered_set<std::string> BUILTINS{
 };
 
 bool kore_symbol::isBuiltin() const {
-  return BUILTINS.contains(name);
+  return builtins.contains(name);
 }
 
 void kore_symbol::instantiateSymbol(kore_symbol_declaration *decl) {
@@ -402,21 +402,21 @@ sptr<kore_pattern> kore_composite_pattern::expandAliases(kore_definition *def) {
 }
 
 static int indent = 0;
-static bool atNewLine = true;
+static bool at_new_line = true;
 
 static void newline(std::ostream &out) {
   out << std::endl;
-  atNewLine = true;
+  at_new_line = true;
 }
 
 static void printIndent(std::ostream &out) {
   constexpr auto indent_size = 2;
 
-  if (atNewLine) {
+  if (at_new_line) {
     for (int i = 0; i < indent_size * indent; i++) {
       out << ' ';
     }
-    atNewLine = false;
+    at_new_line = false;
   }
 }
 
@@ -899,8 +899,8 @@ kore_composite_pattern::sortCollections(pretty_print_data const &data) {
     flatten(this, name, items);
     std::vector<std::pair<std::string, sptr<kore_pattern>>> printed;
     int oldIndent = indent;
-    bool oldAtNewLine = atNewLine;
-    atNewLine = false;
+    bool oldAtNewLine = at_new_line;
+    at_new_line = false;
     indent = 0;
     pretty_print_data newData = data;
     newData.hasColor = false;
@@ -911,7 +911,7 @@ kore_composite_pattern::sortCollections(pretty_print_data const &data) {
       printed.emplace_back(Out.str(), item);
     }
     indent = oldIndent;
-    atNewLine = oldAtNewLine;
+    at_new_line = oldAtNewLine;
     std::sort(printed.begin(), printed.end(), compare_first{});
     items.clear();
     for (auto &item : printed) {
@@ -988,12 +988,12 @@ sptr<kore_pattern> kore_composite_pattern::filterSubstitution(
     if (auto *var = dynamic_cast<kore_variable_pattern *>(arguments[0].get())) {
       std::ostringstream ss;
       int oldIndent = indent;
-      bool oldAtNewLine = atNewLine;
-      atNewLine = true;
+      bool oldAtNewLine = at_new_line;
+      at_new_line = true;
       indent = 0;
       var->prettyPrint(ss, data);
       indent = oldIndent;
-      atNewLine = oldAtNewLine;
+      at_new_line = oldAtNewLine;
       std::string name = ss.str();
       if (vars.contains(var->getName())
           && (name[0] == '_'

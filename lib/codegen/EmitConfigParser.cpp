@@ -109,9 +109,9 @@ emitGetTagForSymbolName(kore_definition *definition, llvm::Module *module) {
   MergeBlock->insertInto(func);
 }
 
-static std::string STRING_STRUCT = "string";
-static std::string LAYOUT_STRUCT = "layout";
-static std::string LAYOUTITEM_STRUCT = "layoutitem";
+static std::string string_struct = "string";
+static std::string layout_struct = "layout";
+static std::string layoutitem_struct = "layoutitem";
 
 static void emitDataTableForSymbol(
     std::string const &name, llvm::Type *ty, llvm::DIType *dity,
@@ -227,8 +227,8 @@ static void
 emitGetBlockHeaderForSymbol(kore_definition *def, llvm::Module *mod) {
   emitDataForSymbol(
       "getBlockHeaderForSymbol",
-      llvm::StructType::getTypeByName(mod->getContext(), BLOCKHEADER_STRUCT),
-      getForwardDecl(BLOCKHEADER_STRUCT), def, mod, false, getHeader);
+      llvm::StructType::getTypeByName(mod->getContext(), blockheader_struct),
+      getForwardDecl(blockheader_struct), def, mod, false, getHeader);
 }
 
 static std::pair<llvm::Value *, llvm::BasicBlock *> getFunction(
@@ -550,7 +550,7 @@ static void emitGetToken(kore_definition *definition, llvm::Module *module) {
     }
     case SortCategory::Float: {
       llvm::Type *Float
-          = llvm::StructType::getTypeByName(module->getContext(), FLOAT_STRUCT);
+          = llvm::StructType::getTypeByName(module->getContext(), float_struct);
       llvm::Value *Term = allocateTerm(Float, CaseBlock, "koreAllocFloating");
       llvm::Function *InitFloat = getOrInsertFunction(
           module, "init_float", llvm::Type::getVoidTy(Ctx),
@@ -586,7 +586,7 @@ static void emitGetToken(kore_definition *definition, llvm::Module *module) {
       phiStr->addIncoming(Pruned, IfIsPlus);
       CaseBlock = ElseNoPlus;
       llvm::Type *Int
-          = llvm::StructType::getTypeByName(module->getContext(), INT_STRUCT);
+          = llvm::StructType::getTypeByName(module->getContext(), int_struct);
       llvm::Value *Term = allocateTerm(Int, CaseBlock, "koreAllocInteger");
       llvm::Function *MpzInitSet = getOrInsertFunction(
           module, "__gmpz_init_set_str", llvm::Type::getInt32Ty(Ctx),
@@ -616,7 +616,7 @@ static void emitGetToken(kore_definition *definition, llvm::Module *module) {
   CurrentBlock->setName("symbol");
   CurrentBlock->insertInto(func);
   auto *StringType
-      = llvm::StructType::getTypeByName(module->getContext(), STRING_STRUCT);
+      = llvm::StructType::getTypeByName(module->getContext(), string_struct);
   auto *Len = llvm::BinaryOperator::Create(
       llvm::Instruction::Add, func->arg_begin() + 1,
       llvm::ConstantExpr::getSizeOf(StringType), "", CurrentBlock);
@@ -1124,7 +1124,7 @@ static llvm::Constant *getLayoutData(
         i++); //llvm::ConstantExpr::getOffsetOf(BlockType, i++);
     elements.push_back(llvm::ConstantStruct::get(
         llvm::StructType::getTypeByName(
-            module->getContext(), LAYOUTITEM_STRUCT),
+            module->getContext(), layoutitem_struct),
         offset,
         llvm::ConstantInt::get(
             llvm::Type::getInt16Ty(Ctx), (int)cat.cat + cat.bits)));
@@ -1132,7 +1132,7 @@ static llvm::Constant *getLayoutData(
   auto *Arr = llvm::ConstantArray::get(
       llvm::ArrayType::get(
           llvm::StructType::getTypeByName(
-              module->getContext(), LAYOUTITEM_STRUCT),
+              module->getContext(), layoutitem_struct),
           len),
       elements);
   auto *global = module->getOrInsertGlobal(
@@ -1148,12 +1148,12 @@ static llvm::Constant *getLayoutData(
   std::string name = "layout_" + std::to_string(layout);
   auto *global2 = module->getOrInsertGlobal(
       name,
-      llvm::StructType::getTypeByName(module->getContext(), LAYOUT_STRUCT));
+      llvm::StructType::getTypeByName(module->getContext(), layout_struct));
   auto *globalVar2 = llvm::cast<llvm::GlobalVariable>(global2);
-  initDebugGlobal(name, getForwardDecl(LAYOUT_STRUCT), globalVar2);
+  initDebugGlobal(name, getForwardDecl(layout_struct), globalVar2);
   if (!globalVar2->hasInitializer()) {
     globalVar2->setInitializer(llvm::ConstantStruct::get(
-        llvm::StructType::getTypeByName(module->getContext(), LAYOUT_STRUCT),
+        llvm::StructType::getTypeByName(module->getContext(), layout_struct),
         llvm::ConstantInt::get(llvm::Type::getInt8Ty(Ctx), len), Ptr));
   }
   return globalVar2;
@@ -1171,12 +1171,12 @@ static void emitLayouts(kore_definition *definition, llvm::Module *module) {
       module, "getLayoutData",
       llvm::FunctionType::get(
           llvm::PointerType::getUnqual(llvm::StructType::getTypeByName(
-              module->getContext(), LAYOUT_STRUCT)),
+              module->getContext(), layout_struct)),
           argTypes, false)));
   initDebugFunction(
       "getLayoutData", "getLayoutData",
       getDebugFunctionType(
-          getPointerDebugType(getForwardDecl(LAYOUT_STRUCT), "layout *"),
+          getPointerDebugType(getForwardDecl(layout_struct), "layout *"),
           {getShortDebugType()}),
       definition, func);
   auto *EntryBlock = llvm::BasicBlock::Create(Ctx, "entry", func);
@@ -1186,7 +1186,7 @@ static void emitLayouts(kore_definition *definition, llvm::Module *module) {
       func->arg_begin(), stuck, layouts.size(), EntryBlock);
   auto *Phi = llvm::PHINode::Create(
       llvm::PointerType::getUnqual(
-          llvm::StructType::getTypeByName(module->getContext(), LAYOUT_STRUCT)),
+          llvm::StructType::getTypeByName(module->getContext(), layout_struct)),
       layouts.size(), "phi", MergeBlock);
   for (auto entry : layouts) {
     uint16_t layout = entry.first;

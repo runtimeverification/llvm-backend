@@ -40,43 +40,43 @@ using namespace kllvm::parser;
 
 namespace fs = std::filesystem;
 
-cl::OptionCategory CodegenToolCat("llvm-kompile-codegen options");
+cl::OptionCategory codegen_tool_cat("llvm-kompile-codegen options");
 
-cl::opt<std::string> Definition(
+cl::opt<std::string> definition_path(
     cl::Positional, cl::desc("<definition.kore>"), cl::Required,
-    cl::cat(CodegenToolCat));
+    cl::cat(codegen_tool_cat));
 
-cl::opt<std::string> decisionTree(
+cl::opt<std::string> decision_tree(
     cl::Positional, cl::desc("<dt.yaml>"), cl::Required,
-    cl::cat(CodegenToolCat));
+    cl::cat(codegen_tool_cat));
 
-cl::opt<std::string> Directory(
-    cl::Positional, cl::desc("<dir>"), cl::Required, cl::cat(CodegenToolCat));
+cl::opt<std::string> directory(
+    cl::Positional, cl::desc("<dir>"), cl::Required, cl::cat(codegen_tool_cat));
 
-cl::opt<std::string> OutputFile(
+cl::opt<std::string> output_file(
     "output", cl::desc("Output file path"), cl::init("-"),
-    cl::cat(CodegenToolCat));
+    cl::cat(codegen_tool_cat));
 
-cl::alias OutputFileAlias(
-    "o", cl::desc("Alias for --output"), cl::aliasopt(OutputFile),
-    cl::cat(CodegenToolCat));
+cl::alias output_file_alias(
+    "o", cl::desc("Alias for --output"), cl::aliasopt(output_file),
+    cl::cat(codegen_tool_cat));
 
-cl::opt<bool> MutableBytes(
+cl::opt<bool> mutable_bytes(
     "mutable-bytes",
     cl::desc("Enable unsound reference semantics for objects of sort Bytes"),
-    cl::init(false), cl::cat(CodegenToolCat));
+    cl::init(false), cl::cat(codegen_tool_cat));
 
-cl::opt<bool> SafePartial(
+cl::opt<bool> safe_partial(
     "safe-partial",
     cl::desc("Do not terminate the process when a partial function is "
              "evaluated at an undefined input; rather throw a recoverable "
              "exception."),
-    cl::init(false), cl::cat(CodegenToolCat));
+    cl::init(false), cl::cat(codegen_tool_cat));
 
 namespace {
 
 fs::path dt_dir() {
-  return Directory.getValue();
+  return directory.getValue();
 }
 
 fs::path get_indexed_filename(
@@ -100,15 +100,15 @@ std::map<std::string, std::string> read_index_file() {
 
 template <typename F>
 void perform_output(F &&action) {
-  if (OutputFile == "-") {
+  if (output_file == "-") {
     std::invoke(std::forward<F>(action), llvm::outs());
   } else {
     auto err = std::error_code{};
-    auto os = raw_fd_ostream(OutputFile, err, sys::fs::FA_Write);
+    auto os = raw_fd_ostream(output_file, err, sys::fs::FA_Write);
 
     if (err) {
       throw std::runtime_error(
-          fmt::format("Error opening file {}: {}", OutputFile, err.message()));
+          fmt::format("Error opening file {}: {}", output_file, err.message()));
     }
 
     std::invoke(std::forward<F>(action), os);
@@ -124,10 +124,10 @@ void initialize_llvm() {
 }
 
 void emit_metadata(llvm::Module &mod) {
-  auto kompiled_dir = fs::absolute(Definition.getValue()).parent_path();
-  addKompiledDirSymbol(mod, kompiled_dir, Debug);
-  addMutableBytesFlag(mod, MutableBytes, Debug);
-  addSafePartialFlag(mod, SafePartial, Debug);
+  auto kompiled_dir = fs::absolute(definition_path.getValue()).parent_path();
+  addKompiledDirSymbol(mod, kompiled_dir, debug);
+  addMutableBytesFlag(mod, mutable_bytes, debug);
+  addSafePartialFlag(mod, safe_partial, debug);
 }
 
 } // namespace
@@ -136,12 +136,12 @@ void emit_metadata(llvm::Module &mod) {
 int main(int argc, char **argv) {
   initialize_llvm();
 
-  cl::HideUnrelatedOptions({&CodegenToolCat, &CodegenLibCat});
+  cl::HideUnrelatedOptions({&codegen_tool_cat, &codegen_lib_cat});
   cl::ParseCommandLineOptions(argc, argv);
 
-  validate_codegen_args(OutputFile == "-");
+  validate_codegen_args(output_file == "-");
 
-  kore_parser parser(Definition.getValue());
+  kore_parser parser(definition_path.getValue());
   ptr<kore_definition> definition = parser.definition();
   definition->preprocess();
 
@@ -150,8 +150,8 @@ int main(int argc, char **argv) {
 
   emit_metadata(*mod);
 
-  if (Debug) {
-    initDebugInfo(mod.get(), Definition);
+  if (debug) {
+    initDebugInfo(mod.get(), definition_path);
   }
 
   for (auto *axiom : definition->getAxioms()) {
@@ -161,7 +161,7 @@ int main(int argc, char **argv) {
     } else {
       auto dt_filename
           = dt_dir() / fmt::format("dt_{}.yaml", axiom->getOrdinal());
-      if (fs::exists(dt_filename) && !ProofHintInstrumentation) {
+      if (fs::exists(dt_filename) && !proof_hint_instrumentation) {
         auto residuals = parseYamlSpecialdecisionTree(
             mod.get(), dt_filename, definition->getAllSymbols(),
             definition->getHookedSorts());
@@ -186,7 +186,7 @@ int main(int argc, char **argv) {
   emitConfigParserFunctions(definition.get(), mod.get());
 
   auto *dt = parseYamldecisionTree(
-      mod.get(), decisionTree, definition->getAllSymbols(),
+      mod.get(), decision_tree, definition->getAllSymbols(),
       definition->getHookedSorts());
   makeStepFunction(definition.get(), mod.get(), dt, false);
   auto *dtSearch = parseYamldecisionTree(
@@ -217,19 +217,19 @@ int main(int argc, char **argv) {
     }
   }
 
-  if (Debug) {
+  if (debug) {
     finalizeDebugInfo();
   }
 
-  if (!NoOptimize) {
+  if (!no_optimize) {
     apply_kllvm_opt_passes(*mod);
   }
 
   perform_output([&](auto &os) {
-    if (EmitObject) {
+    if (emit_object) {
       generate_object_file(*mod, os);
     } else {
-      if (BinaryIR) {
+      if (binary_ir) {
         WriteBitcodeToFile(*mod, os);
       } else {
         mod->print(os, nullptr);

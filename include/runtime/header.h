@@ -238,7 +238,9 @@ struct kore_alloc_heap {
 };
 
 struct hash_block {
-  size_t operator()(k_elem const &block) const noexcept { return hash_k(block); }
+  size_t operator()(k_elem const &block) const noexcept {
+    return hash_k(block);
+  }
 };
 
 struct k_eq {
@@ -249,11 +251,12 @@ struct k_eq {
 
 using list = immer::flex_vector<
     k_elem, immer::memory_policy<
-               immer::heap_policy<kore_alloc_heap>, immer::no_refcount_policy,
-               immer::no_lock_policy>>;
-using map
-    = immer::map<k_elem, k_elem, hash_block, std::equal_to<>, list::memory_policy>;
-using set = immer::set<k_elem, hash_block, std::equal_to<>, list::memory_policy>;
+                immer::heap_policy<kore_alloc_heap>, immer::no_refcount_policy,
+                immer::no_lock_policy>>;
+using map = immer::map<
+    k_elem, k_elem, hash_block, std::equal_to<>, list::memory_policy>;
+using set
+    = immer::set<k_elem, hash_block, std::equal_to<>, list::memory_policy>;
 using rangemap = rng_map::RangeMap<k_elem, k_elem>;
 
 using mapiter = struct mapiter {
@@ -397,8 +400,6 @@ size_t hook_SET_size_long(set *);
 
 mpz_ptr hook_MINT_import(size_t *i, uint64_t bits, bool isSigned);
 
-block *dot_k();
-
 block *debruijnize(block *);
 block *incrementDebruijn(block *);
 block *alphaRename(block *);
@@ -413,6 +414,10 @@ bool is_injection(block *);
 block *strip_injection(block *);
 block *constructKItemInj(void *subject, char const *sort, bool raw_value);
 block *constructRawTerm(void *subject, char const *sort, bool raw_value);
+
+__attribute__((always_inline)) inline block *dot_k() {
+  return leaf_block(getTagForSymbolName("dotk{}"));
+}
 }
 
 std::string floatToString(floating const *);
