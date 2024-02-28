@@ -12,23 +12,23 @@
 
 namespace kllvm::parser {
 
-class KOREParser {
+class kore_parser {
 public:
-  KOREParser(std::string const &filename)
-      : scanner(KOREScanner(filename))
+  kore_parser(std::string const &filename)
+      : scanner(kore_scanner(filename))
       , loc(location(filename)) { }
 
-  static std::unique_ptr<KOREParser> from_string(std::string const &text);
+  static std::unique_ptr<kore_parser> from_string(std::string const &text);
 
-  ptr<KOREDefinition> definition();
-  sptr<KOREPattern> pattern();
-  sptr<KORESort> sort();
-  std::vector<ptr<KOREDeclaration>> declarations();
+  ptr<kore_definition> definition();
+  sptr<kore_pattern> pattern();
+  sptr<kore_sort> sort();
+  std::vector<ptr<kore_declaration>> declarations();
 
-  std::pair<std::string, std::vector<sptr<KORESort>>> symbol_sort_list();
+  std::pair<std::string, std::vector<sptr<kore_sort>>> symbol_sort_list();
 
 private:
-  KOREScanner scanner;
+  kore_scanner scanner;
   location loc;
   [[noreturn]] static void
   error(location const &loc, std::string const &err_message);
@@ -42,30 +42,30 @@ private:
   template <typename Node>
   void attributesNE(Node *node);
 
-  void modules(KOREDefinition *node);
-  ptr<KOREModule> module();
+  void modules(kore_definition *node);
+  ptr<kore_module> module();
 
-  void sentences(KOREModule *node);
-  ptr<KOREDeclaration> sentence();
+  void sentences(kore_module *node);
+  ptr<kore_declaration> sentence();
 
-  void sortVariables(KOREDeclaration *node);
-  void sortVariablesNE(KOREDeclaration *node);
+  void sortVariables(kore_declaration *node);
+  void sortVariablesNE(kore_declaration *node);
 
   template <typename Node>
   void sorts(Node *node);
   template <typename Node>
   void sortsNE(Node *node);
 
-  sptr<KOREPattern> _pattern();
-  void patterns(KORECompositePattern *node);
-  void patternsNE(KORECompositePattern *node);
-  void patterns(std::vector<sptr<KOREPattern>> &node);
-  void patternsNE(std::vector<sptr<KOREPattern>> &node);
+  sptr<kore_pattern> _pattern();
+  void patterns(kore_composite_pattern *node);
+  void patternsNE(kore_composite_pattern *node);
+  void patterns(std::vector<sptr<kore_pattern>> &node);
+  void patternsNE(std::vector<sptr<kore_pattern>> &node);
 
-  sptr<KOREPattern> applicationPattern();
-  sptr<KOREPattern> applicationPattern(std::string const &name);
-  ptr<KORECompositePattern> _applicationPattern();
-  ptr<KORECompositePattern> _applicationPattern(std::string const &name);
+  sptr<kore_pattern> applicationPattern();
+  sptr<kore_pattern> applicationPattern(std::string const &name);
+  ptr<kore_composite_pattern> _applicationPattern();
+  ptr<kore_composite_pattern> _applicationPattern(std::string const &name);
 
   struct {
     std::string data;

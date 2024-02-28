@@ -29,9 +29,9 @@ namespace kllvm {
 
 /* create a term, given the assumption that the created term will not be a
  * triangle injection pair */
-llvm::Constant *CreateStaticTerm::notInjectionCase(
-    KORECompositePattern *constructor, llvm::Constant *val) {
-  KORESymbol const *symbol = constructor->getConstructor();
+llvm::Constant *create_static_term::notInjectionCase(
+    kore_composite_pattern *constructor, llvm::Constant *val) {
+  kore_symbol const *symbol = constructor->getConstructor();
   llvm::StructType *BlockType = getBlockType(Module, Definition, symbol);
 
   std::stringstream koreString;
@@ -82,14 +82,14 @@ llvm::Constant *CreateStaticTerm::notInjectionCase(
 }
 
 std::pair<llvm::Constant *, bool>
-CreateStaticTerm::operator()(KOREPattern *pattern) {
-  if (auto *constructor = dynamic_cast<KORECompositePattern *>(pattern)) {
-    KORESymbol const *symbol = constructor->getConstructor();
+create_static_term::operator()(kore_pattern *pattern) {
+  if (auto *constructor = dynamic_cast<kore_composite_pattern *>(pattern)) {
+    kore_symbol const *symbol = constructor->getConstructor();
     assert(symbol->isConcrete() && "not supported yet: sort variables");
     if (symbol->getName() == "\\dv") {
-      auto *sort = dynamic_cast<KORECompositeSort *>(
+      auto *sort = dynamic_cast<kore_composite_sort *>(
           symbol->getFormalArguments()[0].get());
-      auto *strPattern = dynamic_cast<KOREStringPattern *>(
+      auto *strPattern = dynamic_cast<kore_string_pattern *>(
           constructor->getArguments()[0].get());
       return std::make_pair(
           createToken(sort->getCategory(Definition), strPattern->getContents()),
@@ -105,10 +105,10 @@ CreateStaticTerm::operator()(KOREPattern *pattern) {
           llvm::PointerType::getUnqual(BlockType));
       return std::make_pair(Cast, false);
     }
-    KORESymbolDeclaration *symbolDecl
+    kore_symbol_declaration *symbolDecl
         = Definition->getSymbolDeclarations().at(symbol->getName());
     if (symbolDecl->attributes().contains(attribute_set::key::sort_injection)
-        && dynamic_cast<KORECompositeSort *>(symbol->getArguments()[0].get())
+        && dynamic_cast<kore_composite_sort *>(symbol->getArguments()[0].get())
                    ->getCategory(Definition)
                    .cat
                == SortCategory::Symbol) {
@@ -116,7 +116,7 @@ CreateStaticTerm::operator()(KOREPattern *pattern) {
           = (*this)(constructor->getArguments()[0].get());
       if (val.second) {
         uint32_t tag = symbol->getTag();
-        KORESymbol *inj = Definition->getInjSymbol();
+        kore_symbol *inj = Definition->getInjSymbol();
         if (tag != (uint32_t)-1 && tag >= inj->getFirstTag()
             && tag <= inj->getLastTag()) {
           return std::make_pair(val.first, true);
@@ -133,7 +133,7 @@ CreateStaticTerm::operator()(KOREPattern *pattern) {
 
 // NOLINTBEGIN(*-cognitive-complexity)
 llvm::Constant *
-CreateStaticTerm::createToken(ValueType sort, std::string contents) {
+create_static_term::createToken(value_type sort, std::string contents) {
   switch (sort.cat) {
   case SortCategory::Map:
   case SortCategory::RangeMap:

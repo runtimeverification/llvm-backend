@@ -8,7 +8,7 @@
 
 namespace kllvm {
 
-class KORECompositePattern;
+class kore_composite_pattern;
 
 /**
  * Type-safe wrapper around a set of KORE attribute patterns.
@@ -30,7 +30,7 @@ class KORECompositePattern;
 class attribute_set {
 public:
   using storage_t
-      = std::unordered_map<std::string, std::shared_ptr<KORECompositePattern>>;
+      = std::unordered_map<std::string, std::shared_ptr<kore_composite_pattern>>;
 
   enum class key {
     alias,
@@ -83,7 +83,7 @@ public:
    * unknown attribute), `std::nullopt` is returned.
    */
   std::optional<attribute_set::key>
-  add(std::shared_ptr<KORECompositePattern> att);
+  add(std::shared_ptr<kore_composite_pattern> att);
 
   /**
    * Returns true if there is any attribute with the given key; the arguments of
@@ -97,7 +97,7 @@ public:
    * This lookup is unchecked; use `.contains(k)` first if the attribute may not
    * be present.
    */
-  [[nodiscard]] std::shared_ptr<KORECompositePattern> const &get(key k) const;
+  [[nodiscard]] std::shared_ptr<kore_composite_pattern> const &get(key k) const;
 
   /**
    * Look up an attribute with the specified key that has the form:

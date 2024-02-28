@@ -70,7 +70,7 @@ auto print_repr_adapter(Args &&...args) {
  * exception will be thrown. The file pointer will be left at the end of the
  * pattern's bytes after calling this function.
  */
-std::shared_ptr<KOREPattern> read_pattern_from_file(py::object &file_like) {
+std::shared_ptr<kore_pattern> read_pattern_from_file(py::object &file_like) {
   if (!py::hasattr(file_like, "read")) {
     throw py::type_error("Argument to read_from is not a file-like object");
   }
@@ -117,103 +117,103 @@ void bind_ast(py::module_ &m) {
 
   /* Declarations */
   auto decl_base
-      = py::class_<KOREDeclaration, std::shared_ptr<KOREDeclaration>>(
+      = py::class_<kore_declaration, std::shared_ptr<kore_declaration>>(
             ast, "Declaration")
-            .def("__repr__", print_repr_adapter<KOREDeclaration>())
+            .def("__repr__", print_repr_adapter<kore_declaration>())
             .def(
                 "add_object_sort_variable",
-                &KOREDeclaration::addObjectSortVariable)
+                &kore_declaration::addObjectSortVariable)
             .def_property_readonly(
                 "object_sort_variables",
-                &KOREDeclaration::getObjectSortVariables)
+                &kore_declaration::getObjectSortVariables)
             .def(
                 "add_attribute",
-                [](KOREDeclaration &decl,
-                   std::shared_ptr<KORECompositePattern> const &arg) {
+                [](kore_declaration &decl,
+                   std::shared_ptr<kore_composite_pattern> const &arg) {
                   decl.attributes().add(arg);
                 })
-            .def_property_readonly("attributes", [](KOREDeclaration &decl) {
+            .def_property_readonly("attributes", [](kore_declaration &decl) {
               return decl.attributes().underlying();
             });
 
   py::class_<
-      KORECompositeSortDeclaration,
-      std::shared_ptr<KORECompositeSortDeclaration>>(
+      kore_composite_sort_declaration,
+      std::shared_ptr<kore_composite_sort_declaration>>(
       ast, "CompositeSortDeclaration", decl_base)
       .def(
-          py::init(&KORECompositeSortDeclaration::Create), py::arg("name"),
+          py::init(&kore_composite_sort_declaration::Create), py::arg("name"),
           py::arg("is_hooked") = false)
       .def_property_readonly(
-          "is_hooked", &KORECompositeSortDeclaration::isHooked)
-      .def_property_readonly("name", &KORECompositeSortDeclaration::getName);
+          "is_hooked", &kore_composite_sort_declaration::isHooked)
+      .def_property_readonly("name", &kore_composite_sort_declaration::getName);
 
   auto symbol_alias_decl_base
       = py::class_<
-            KORESymbolAliasDeclaration,
-            std::shared_ptr<KORESymbolAliasDeclaration>>(
+            kore_symbol_alias_declaration,
+            std::shared_ptr<kore_symbol_alias_declaration>>(
             ast, "SymbolAliasDeclaration", decl_base)
             .def_property_readonly(
-                "symbol", &KORESymbolAliasDeclaration::getSymbol);
+                "symbol", &kore_symbol_alias_declaration::getSymbol);
 
-  py::class_<KORESymbolDeclaration, std::shared_ptr<KORESymbolDeclaration>>(
+  py::class_<kore_symbol_declaration, std::shared_ptr<kore_symbol_declaration>>(
       ast, "SymbolDeclaration", symbol_alias_decl_base)
       .def(
-          py::init(&KORESymbolDeclaration::Create), py::arg("name"),
+          py::init(&kore_symbol_declaration::Create), py::arg("name"),
           py::arg("is_hooked") = false)
-      .def_property_readonly("is_hooked", &KORESymbolDeclaration::isHooked);
+      .def_property_readonly("is_hooked", &kore_symbol_declaration::isHooked);
 
-  py::class_<KOREAliasDeclaration, std::shared_ptr<KOREAliasDeclaration>>(
+  py::class_<kore_alias_declaration, std::shared_ptr<kore_alias_declaration>>(
       ast, "AliasDeclaration", symbol_alias_decl_base)
-      .def(py::init(&KOREAliasDeclaration::Create))
-      .def("add_variables", &KOREAliasDeclaration::addVariables)
+      .def(py::init(&kore_alias_declaration::Create))
+      .def("add_variables", &kore_alias_declaration::addVariables)
       .def_property_readonly(
-          "variables", &KOREAliasDeclaration::getBoundVariables)
-      .def("add_pattern", &KOREAliasDeclaration::addPattern)
-      .def_property_readonly("pattern", &KOREAliasDeclaration::getPattern);
+          "variables", &kore_alias_declaration::getBoundVariables)
+      .def("add_pattern", &kore_alias_declaration::addPattern)
+      .def_property_readonly("pattern", &kore_alias_declaration::getPattern);
 
-  py::class_<KOREAxiomDeclaration, std::shared_ptr<KOREAxiomDeclaration>>(
+  py::class_<kore_axiom_declaration, std::shared_ptr<kore_axiom_declaration>>(
       ast, "AxiomDeclaration", decl_base)
-      .def(py::init(&KOREAxiomDeclaration::Create), py::arg("is_claim") = false)
-      .def_property_readonly("is_claim", &KOREAxiomDeclaration::isClaim)
-      .def("add_pattern", &KOREAxiomDeclaration::addPattern)
-      .def_property_readonly("pattern", &KOREAxiomDeclaration::getPattern);
+      .def(py::init(&kore_axiom_declaration::Create), py::arg("is_claim") = false)
+      .def_property_readonly("is_claim", &kore_axiom_declaration::isClaim)
+      .def("add_pattern", &kore_axiom_declaration::addPattern)
+      .def_property_readonly("pattern", &kore_axiom_declaration::getPattern);
 
   py::class_<
-      KOREModuleImportDeclaration,
-      std::shared_ptr<KOREModuleImportDeclaration>>(
+      kore_module_import_declaration,
+      std::shared_ptr<kore_module_import_declaration>>(
       ast, "ModuleImportDeclaration", decl_base)
-      .def(py::init(&KOREModuleImportDeclaration::Create))
+      .def(py::init(&kore_module_import_declaration::Create))
       .def_property_readonly(
-          "module_name", &KOREModuleImportDeclaration::getModuleName);
+          "module_name", &kore_module_import_declaration::getModuleName);
 
-  py::class_<KOREModule, std::shared_ptr<KOREModule>>(ast, "Module")
-      .def(py::init(&KOREModule::Create))
-      .def("__repr__", print_repr_adapter<KOREModule>())
-      .def_property_readonly("name", &KOREModule::getName)
-      .def("add_declaration", &KOREModule::addDeclaration)
-      .def_property_readonly("declarations", &KOREModule::getDeclarations)
+  py::class_<kore_module, std::shared_ptr<kore_module>>(ast, "Module")
+      .def(py::init(&kore_module::Create))
+      .def("__repr__", print_repr_adapter<kore_module>())
+      .def_property_readonly("name", &kore_module::getName)
+      .def("add_declaration", &kore_module::addDeclaration)
+      .def_property_readonly("declarations", &kore_module::getDeclarations)
       .def(
           "add_attribute",
-          [](KOREModule &decl,
-             std::shared_ptr<KORECompositePattern> const &arg) {
+          [](kore_module &decl,
+             std::shared_ptr<kore_composite_pattern> const &arg) {
             decl.attributes().add(arg);
           })
-      .def_property_readonly("attributes", [](KOREModule &decl) {
+      .def_property_readonly("attributes", [](kore_module &decl) {
         return decl.attributes().underlying();
       });
 
-  py::class_<KOREDefinition, std::shared_ptr<KOREDefinition>>(ast, "Definition")
-      .def(py::init(&KOREDefinition::Create))
-      .def("__repr__", print_repr_adapter<KOREDefinition>())
-      .def("add_module", &KOREDefinition::addModule)
-      .def_property_readonly("modules", &KOREDefinition::getModules)
+  py::class_<kore_definition, std::shared_ptr<kore_definition>>(ast, "Definition")
+      .def(py::init(&kore_definition::Create))
+      .def("__repr__", print_repr_adapter<kore_definition>())
+      .def("add_module", &kore_definition::addModule)
+      .def_property_readonly("modules", &kore_definition::getModules)
       .def(
           "add_attribute",
-          [](KOREDefinition &decl,
-             std::shared_ptr<KORECompositePattern> const &arg) {
+          [](kore_definition &decl,
+             std::shared_ptr<kore_composite_pattern> const &arg) {
             decl.attributes().add(arg);
           })
-      .def_property_readonly("attributes", [](KOREDefinition &decl) {
+      .def_property_readonly("attributes", [](kore_definition &decl) {
         return decl.attributes().underlying();
       });
 
@@ -233,12 +233,12 @@ void bind_ast(py::module_ &m) {
       .value("Variable", SortCategory::Variable)
       .value("MInt", SortCategory::MInt);
 
-  py::class_<ValueType>(ast, "ValueType")
+  py::class_<value_type>(ast, "value_type")
       .def(py::init([](SortCategory cat) {
-        return ValueType{cat, 0};
+        return value_type{cat, 0};
       }))
       .def(py::init([](SortCategory cat, uint64_t bits) {
-        return ValueType{cat, bits};
+        return value_type{cat, bits};
       }));
 
   /* Sorts */
@@ -248,67 +248,67 @@ void bind_ast(py::module_ &m) {
   // NOLINTBEGIN(misc-redundant-expression)
 
   auto sort_base
-      = py::class_<KORESort, std::shared_ptr<KORESort>>(ast, "Sort")
-            .def_property_readonly("is_concrete", &KORESort::isConcrete)
-            .def("substitute", &KORESort::substitute)
-            .def("__repr__", print_repr_adapter<KORESort>())
+      = py::class_<kore_sort, std::shared_ptr<kore_sort>>(ast, "Sort")
+            .def_property_readonly("is_concrete", &kore_sort::isConcrete)
+            .def("substitute", &kore_sort::substitute)
+            .def("__repr__", print_repr_adapter<kore_sort>())
             .def(
                 "__hash__",
-                [](KORESort const &sort) { return HashSort{}(sort); })
+                [](kore_sort const &sort) { return hash_sort{}(sort); })
             .def(py::self == py::self)
             .def(py::self != py::self);
 
-  py::class_<KORESortVariable, std::shared_ptr<KORESortVariable>>(
+  py::class_<kore_sort_variable, std::shared_ptr<kore_sort_variable>>(
       ast, "SortVariable", sort_base)
-      .def(py::init(&KORESortVariable::Create))
-      .def_property_readonly("name", &KORESortVariable::getName);
+      .def(py::init(&kore_sort_variable::Create))
+      .def_property_readonly("name", &kore_sort_variable::getName);
 
-  py::class_<KORECompositeSort, std::shared_ptr<KORECompositeSort>>(
+  py::class_<kore_composite_sort, std::shared_ptr<kore_composite_sort>>(
       ast, "CompositeSort", sort_base)
       .def(
-          py::init(&KORECompositeSort::Create), py::arg("name"),
-          py::arg("cat") = ValueType{SortCategory::Uncomputed, 0})
-      .def_property_readonly("name", &KORECompositeSort::getName)
-      .def("add_argument", &KORECompositeSort::addArgument)
-      .def_property_readonly("arguments", &KORECompositeSort::getArguments);
+          py::init(&kore_composite_sort::Create), py::arg("name"),
+          py::arg("cat") = value_type{SortCategory::Uncomputed, 0})
+      .def_property_readonly("name", &kore_composite_sort::getName)
+      .def("add_argument", &kore_composite_sort::addArgument)
+      .def_property_readonly("arguments", &kore_composite_sort::getArguments);
 
   /* Symbols */
 
-  py::class_<KORESymbol>(ast, "Symbol")
-      .def(py::init(&KORESymbol::Create))
-      .def("__repr__", print_repr_adapter<KORESymbol>())
-      .def("add_argument", &KORESymbol::addArgument)
-      .def_property_readonly("arguments", &KORESymbol::getArguments)
-      .def("add_formal_argument", &KORESymbol::addFormalArgument)
+  py::class_<kore_symbol>(ast, "Symbol")
+      .def(py::init(&kore_symbol::Create))
+      .def("__repr__", print_repr_adapter<kore_symbol>())
+      .def("add_argument", &kore_symbol::addArgument)
+      .def_property_readonly("arguments", &kore_symbol::getArguments)
+      .def("add_formal_argument", &kore_symbol::addFormalArgument)
       .def_property_readonly(
-          "formal_arguments", &KORESymbol::getFormalArguments)
-      .def("add_sort", &KORESymbol::addSort)
+          "formal_arguments", &kore_symbol::getFormalArguments)
+      .def("add_sort", &kore_symbol::addSort)
       .def_property_readonly(
-          "sort", py::overload_cast<>(&KORESymbol::getSort, py::const_))
-      .def_property_readonly("name", &KORESymbol::getName)
-      .def_property_readonly("is_concrete", &KORESymbol::isConcrete)
-      .def_property_readonly("is_builtin", &KORESymbol::isBuiltin)
+          "sort", py::overload_cast<>(&kore_symbol::getSort, py::const_))
+      .def_property_readonly("name", &kore_symbol::getName)
+      .def_property_readonly("is_concrete", &kore_symbol::isConcrete)
+      .def_property_readonly("is_builtin", &kore_symbol::isBuiltin)
       .def(py::self == py::self)
       .def(py::self != py::self);
 
-  py::class_<KOREVariable>(ast, "Variable")
-      .def(py::init(&KOREVariable::Create))
-      .def("__repr__", print_repr_adapter<KOREVariable>())
-      .def_property_readonly("name", &KOREVariable::getName);
+  py::class_<kore_variable>(ast, "Variable")
+      .def(py::init(&kore_variable::Create))
+      .def("__repr__", print_repr_adapter<kore_variable>())
+      .def_property_readonly("name", &kore_variable::getName);
 
   // NOLINTEND(misc-redundant-expression)
 
   /* Patterns */
 
   auto pattern_base
-      = py::class_<KOREPattern, std::shared_ptr<KOREPattern>>(ast, "Pattern")
-            .def(py::init(&KOREPattern::load))
-            .def("__repr__", print_repr_adapter<KOREPattern>())
-            .def_property_readonly("sort", &KOREPattern::getSort)
-            .def("substitute", &KOREPattern::substitute)
+      = py::class_<kore_pattern, std::shared_ptr<kore_pattern>>(ast, "Pattern")
+            .def(py::init(&kore_pattern::load))
+            .def("__repr__", print_repr_adapter<kore_pattern>())
+            .def_property_readonly("sort", &kore_pattern::getSort)
+            .def("substitute", &kore_pattern::substitute)
             .def(
                 "serialize",
-                [](KOREPattern const &pattern, bool emit_size) {
+                [](kore_pattern const &pattern, bool emit_size) {
                   auto out = serializer{};
                   pattern.serialize_to(out);
 
@@ -330,40 +330,40 @@ void bind_ast(py::module_ &m) {
                 py::arg("strip_raw_term") = true)
             .def_static("read_from", &read_pattern_from_file);
 
-  py::class_<KORECompositePattern, std::shared_ptr<KORECompositePattern>>(
+  py::class_<kore_composite_pattern, std::shared_ptr<kore_composite_pattern>>(
       ast, "CompositePattern", pattern_base)
       .def(py::init(py::overload_cast<std::string const &>(
-          &KORECompositePattern::Create)))
+          &kore_composite_pattern::Create)))
       .def(py::init(
-          py::overload_cast<KORESymbol *>(&KORECompositePattern::Create)))
+          py::overload_cast<kore_symbol *>(&kore_composite_pattern::Create)))
       .def_property_readonly(
-          "constructor", &KORECompositePattern::getConstructor)
-      .def("desugar_associative", &KORECompositePattern::desugarAssociative)
-      .def("add_argument", &KORECompositePattern::addArgument)
-      .def_property_readonly("arguments", &KORECompositePattern::getArguments);
+          "constructor", &kore_composite_pattern::getConstructor)
+      .def("desugar_associative", &kore_composite_pattern::desugarAssociative)
+      .def("add_argument", &kore_composite_pattern::addArgument)
+      .def_property_readonly("arguments", &kore_composite_pattern::getArguments);
 
-  py::class_<KOREVariablePattern, std::shared_ptr<KOREVariablePattern>>(
+  py::class_<kore_variable_pattern, std::shared_ptr<kore_variable_pattern>>(
       ast, "VariablePattern", pattern_base)
-      .def(py::init(&KOREVariablePattern::Create))
-      .def_property_readonly("name", &KOREVariablePattern::getName);
+      .def(py::init(&kore_variable_pattern::Create))
+      .def_property_readonly("name", &kore_variable_pattern::getName);
 
-  py::class_<KOREStringPattern, std::shared_ptr<KOREStringPattern>>(
+  py::class_<kore_string_pattern, std::shared_ptr<kore_string_pattern>>(
       ast, "StringPattern", pattern_base)
-      .def(py::init(&KOREStringPattern::Create))
-      .def_property_readonly("contents", &KOREStringPattern::getContents);
+      .def(py::init(&kore_string_pattern::Create))
+      .def_property_readonly("contents", &kore_string_pattern::getContents);
 }
 
 void bind_parser(py::module_ &mod) {
   auto parser = mod.def_submodule("parser", "KORE Parser");
 
-  py::class_<KOREParser, std::unique_ptr<KOREParser>>(parser, "Parser")
+  py::class_<kore_parser, std::unique_ptr<kore_parser>>(parser, "Parser")
       .def(py::init<std::string>())
-      .def_static("from_string", &KOREParser::from_string)
+      .def_static("from_string", &kore_parser::from_string)
       .def(
           "pattern",
-          [](KOREParser &parser) { return std::shared_ptr(parser.pattern()); })
-      .def("sort", [](KOREParser &parser) { return parser.sort(); })
-      .def("definition", [](KOREParser &parser) {
+          [](kore_parser &parser) { return std::shared_ptr(parser.pattern()); })
+      .def("sort", [](kore_parser &parser) { return parser.sort(); })
+      .def("definition", [](kore_parser &parser) {
         return std::shared_ptr(parser.definition());
       });
 }
@@ -371,69 +371,68 @@ void bind_parser(py::module_ &mod) {
 void bind_proof_trace(py::module_ &m) {
   auto proof_trace = m.def_submodule("prooftrace", "K LLVM backend KORE AST");
 
-  auto llvm_step_event
-      = py::class_<LLVMStepEvent, std::shared_ptr<LLVMStepEvent>>(
-            proof_trace, "LLVMStepEvent")
-            .def("__repr__", print_repr_adapter<LLVMStepEvent>());
+  auto step_event = py::class_<llvm_step_event, std::shared_ptr<llvm_step_event>>(
+                        proof_trace, "llvm_step_event")
+                        .def("__repr__", print_repr_adapter<llvm_step_event>());
 
-  auto llvm_rewrite_event
-      = py::class_<LLVMRewriteEvent, std::shared_ptr<LLVMRewriteEvent>>(
-            proof_trace, "LLVMREwriteEvent", llvm_step_event)
+  auto rewrite_event
+      = py::class_<llvm_rewrite_event, std::shared_ptr<llvm_rewrite_event>>(
+            proof_trace, "LLVMREwriteEvent", step_event)
             .def_property_readonly(
-                "rule_ordinal", &LLVMRewriteEvent::getRuleOrdinal)
+                "rule_ordinal", &llvm_rewrite_event::getRuleOrdinal)
             .def_property_readonly(
-                "substitution", &LLVMRewriteEvent::getSubstitution);
+                "substitution", &llvm_rewrite_event::getSubstitution);
 
-  [[maybe_unused]] auto llvm_rule_event
-      = py::class_<LLVMRuleEvent, std::shared_ptr<LLVMRuleEvent>>(
-          proof_trace, "LLVMRuleEvent", llvm_rewrite_event);
+  [[maybe_unused]] auto rule_event
+      = py::class_<llvm_rule_event, std::shared_ptr<llvm_rule_event>>(
+          proof_trace, "llvm_rule_event", rewrite_event);
 
-  [[maybe_unused]] auto llvm_side_condition_event = py::class_<
-      LLVMSideConditionEvent, std::shared_ptr<LLVMSideConditionEvent>>(
-      proof_trace, "LLVMSideConditionEvent", llvm_rewrite_event);
+  [[maybe_unused]] auto side_condition_event = py::class_<
+      llvm_side_condition_event, std::shared_ptr<llvm_side_condition_event>>(
+      proof_trace, "llvm_side_condition_event", rewrite_event);
 
   py::class_<
-      LLVMSideConditionEndEvent, std::shared_ptr<LLVMSideConditionEndEvent>>(
-      proof_trace, "LLVMSideConditionEndEvent", llvm_step_event)
+      llvm_side_condition_end_event, std::shared_ptr<llvm_side_condition_end_event>>(
+      proof_trace, "llvm_side_condition_end_event", step_event)
       .def_property_readonly(
-          "rule_ordinal", &LLVMSideConditionEndEvent::getRuleOrdinal)
+          "rule_ordinal", &llvm_side_condition_end_event::getRuleOrdinal)
       .def_property_readonly(
-          "check_result", &LLVMSideConditionEndEvent::getKOREPattern);
+          "check_result", &llvm_side_condition_end_event::getkore_pattern);
 
-  py::class_<LLVMFunctionEvent, std::shared_ptr<LLVMFunctionEvent>>(
-      proof_trace, "LLVMFunctionEvent", llvm_step_event)
-      .def_property_readonly("name", &LLVMFunctionEvent::getName)
+  py::class_<llvm_function_event, std::shared_ptr<llvm_function_event>>(
+      proof_trace, "llvm_function_event", step_event)
+      .def_property_readonly("name", &llvm_function_event::getName)
       .def_property_readonly(
-          "relative_position", &LLVMFunctionEvent::getRelativePosition)
-      .def_property_readonly("args", &LLVMFunctionEvent::getArguments);
+          "relative_position", &llvm_function_event::getRelativePosition)
+      .def_property_readonly("args", &llvm_function_event::getArguments);
 
-  py::class_<LLVMHookEvent, std::shared_ptr<LLVMHookEvent>>(
-      proof_trace, "LLVMHookEvent", llvm_step_event)
-      .def_property_readonly("name", &LLVMHookEvent::getName)
+  py::class_<llvm_hook_event, std::shared_ptr<llvm_hook_event>>(
+      proof_trace, "llvm_hook_event", step_event)
+      .def_property_readonly("name", &llvm_hook_event::getName)
       .def_property_readonly(
-          "relative_position", &LLVMHookEvent::getRelativePosition)
-      .def_property_readonly("args", &LLVMHookEvent::getArguments)
-      .def_property_readonly("result", &LLVMHookEvent::getKOREPattern);
+          "relative_position", &llvm_hook_event::getRelativePosition)
+      .def_property_readonly("args", &llvm_hook_event::getArguments)
+      .def_property_readonly("result", &llvm_hook_event::getkore_pattern);
 
-  py::class_<LLVMEvent, std::shared_ptr<LLVMEvent>>(proof_trace, "Argument")
-      .def("__repr__", print_repr_adapter<LLVMEvent>(true))
-      .def_property_readonly("step_event", &LLVMEvent::getStepEvent)
-      .def_property_readonly("kore_pattern", &LLVMEvent::getKOREPattern)
-      .def("is_step_event", &LLVMEvent::isStep)
-      .def("is_kore_pattern", &LLVMEvent::isPattern);
+  py::class_<llvm_event, std::shared_ptr<llvm_event>>(proof_trace, "Argument")
+      .def("__repr__", print_repr_adapter<llvm_event>(true))
+      .def_property_readonly("step_event", &llvm_event::getStepEvent)
+      .def_property_readonly("kore_pattern", &llvm_event::getkore_pattern)
+      .def("is_step_event", &llvm_event::isStep)
+      .def("is_kore_pattern", &llvm_event::isPattern);
 
-  py::class_<LLVMRewriteTrace, std::shared_ptr<LLVMRewriteTrace>>(
-      proof_trace, "LLVMRewriteTrace")
-      .def("__repr__", print_repr_adapter<LLVMRewriteTrace>())
-      .def_property_readonly("version", &LLVMRewriteTrace::getVersion)
-      .def_property_readonly("pre_trace", &LLVMRewriteTrace::getPreTrace)
+  py::class_<llvm_rewrite_trace, std::shared_ptr<llvm_rewrite_trace>>(
+      proof_trace, "llvm_rewrite_trace")
+      .def("__repr__", print_repr_adapter<llvm_rewrite_trace>())
+      .def_property_readonly("version", &llvm_rewrite_trace::getVersion)
+      .def_property_readonly("pre_trace", &llvm_rewrite_trace::getPreTrace)
       .def_property_readonly(
-          "initial_config", &LLVMRewriteTrace::getInitialConfig)
-      .def_property_readonly("trace", &LLVMRewriteTrace::getTrace)
+          "initial_config", &llvm_rewrite_trace::getInitialConfig)
+      .def_property_readonly("trace", &llvm_rewrite_trace::getTrace)
       .def_static(
           "parse",
           [](py::bytes const &bytes) {
-            ProofTraceParser Parser(false);
+            proof_trace_parser Parser(false);
             auto str = std::string(bytes);
             return Parser.parse_proof_trace(str);
           },

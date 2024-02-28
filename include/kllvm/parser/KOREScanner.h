@@ -32,21 +32,21 @@ enum class token {
   TOKEN_EOF,
 };
 
-class KOREScanner {
+class kore_scanner {
 public:
-  KOREScanner(std::string filename);
-  ~KOREScanner();
+  kore_scanner(std::string filename);
+  ~kore_scanner();
   int scan();
 
-  friend class KOREParser;
+  friend class kore_parser;
 
   using yyscan_t = void *;
 
-  KOREScanner(KOREScanner const &other) = delete;
-  KOREScanner &operator=(KOREScanner const &other) = delete;
+  kore_scanner(kore_scanner const &other) = delete;
+  kore_scanner &operator=(kore_scanner const &other) = delete;
 
-  KOREScanner(KOREScanner &&other) = delete;
-  KOREScanner &operator=(KOREScanner &&other) = delete;
+  kore_scanner(kore_scanner &&other) = delete;
+  kore_scanner &operator=(kore_scanner &&other) = delete;
 
 private:
   yyscan_t scanner;

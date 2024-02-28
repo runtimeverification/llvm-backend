@@ -92,14 +92,14 @@ void migrate_champ_traversal(
 }
 
 void migrate_map_leaf(
-    std::pair<KElem, KElem> *start, std::pair<KElem, KElem> *end) {
+    std::pair<k_elem, k_elem> *start, std::pair<k_elem, k_elem> *end) {
   for (auto *it = start; it != end; ++it) {
     migrate_once(&it->first.elem);
     migrate_once(&it->second.elem);
   }
 }
 
-void migrate_set_leaf(KElem *start, KElem *end) {
+void migrate_set_leaf(k_elem *start, k_elem *end) {
   for (auto *it = start; it != end; ++it) {
     migrate_once(&it->elem);
   }
@@ -117,7 +117,7 @@ void migrate_map(void *m) {
   migrate_champ_traversal(impl.root, 0, migrate_map_leaf);
 }
 
-using treemap = rb_tree::RBTree<rng_map::Range<KElem>, KElem>;
+using treemap = rb_tree::RBTree<rng_map::Range<k_elem>, k_elem>;
 void migrate_treemap(treemap t) {
   if (t.empty()) {
     return;

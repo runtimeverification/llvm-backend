@@ -106,15 +106,15 @@ struct kore_error {
 };
 
 struct kore_pattern {
-  std::shared_ptr<kllvm::KOREPattern> ptr_;
+  std::shared_ptr<kllvm::kore_pattern> ptr_;
 };
 
 struct kore_sort {
-  std::shared_ptr<kllvm::KORESort> ptr_;
+  std::shared_ptr<kllvm::kore_sort> ptr_;
 };
 
 struct kore_symbol {
-  std::shared_ptr<kllvm::KORESymbol> ptr_;
+  std::shared_ptr<kllvm::kore_symbol> ptr_;
 };
 
 /* Error handling */
@@ -135,7 +135,7 @@ void kore_error_free(kore_error *err) {
   delete err;
 }
 
-/* KOREPattern */
+/* kore_pattern */
 
 char *kore_pattern_dump(kore_pattern const *pat) {
   return get_c_string(ast_to_string(*pat->ptr_));
@@ -200,12 +200,12 @@ void kore_pattern_free(kore_pattern const *pat) {
 
 kore_pattern *kore_pattern_parse(char const *kore_text) {
   return new kore_pattern{
-      kllvm::parser::KOREParser::from_string(kore_text)->pattern()};
+      kllvm::parser::kore_parser::from_string(kore_text)->pattern()};
 }
 
 kore_pattern *kore_pattern_parse_file(char const *filename) {
   return new kore_pattern{
-      kllvm::parser::KOREParser(std::string(filename)).pattern()};
+      kllvm::parser::kore_parser(std::string(filename)).pattern()};
 }
 
 kore_pattern *kore_pattern_new_token(char const *value, kore_sort const *sort) {
@@ -332,28 +332,28 @@ void kore_simplify_binary(
   }
 }
 
-/* KORECompositePattern */
+/* kore_composite_pattern */
 
 kore_pattern *kore_composite_pattern_new(char const *name) {
   return new kore_pattern{
-      kllvm::KORECompositePattern::Create(std::string(name))};
+      kllvm::kore_composite_pattern::Create(std::string(name))};
 }
 
 kore_pattern *kore_composite_pattern_from_symbol(kore_symbol *sym) {
-  return new kore_pattern{kllvm::KORECompositePattern::Create(sym->ptr_.get())};
+  return new kore_pattern{kllvm::kore_composite_pattern::Create(sym->ptr_.get())};
 }
 
 void kore_composite_pattern_add_argument(
     kore_pattern *pat, kore_pattern const *arg) {
   if (auto const &cast
-      = std::dynamic_pointer_cast<kllvm::KORECompositePattern>(pat->ptr_)) {
+      = std::dynamic_pointer_cast<kllvm::kore_composite_pattern>(pat->ptr_)) {
     cast->addArgument(arg->ptr_);
   } else {
     abort();
   }
 }
 
-/* KOREStringPattern */
+/* kore_string_pattern */
 
 kore_pattern *kore_string_pattern_new(char const *contents) {
   return kore_string_pattern_new_internal(std::string(contents));
@@ -364,7 +364,7 @@ kore_string_pattern_new_with_len(char const *contents, size_t len) {
   return kore_string_pattern_new_internal(std::string(contents, len));
 }
 
-/* KORESort */
+/* kore_sort */
 
 char *kore_sort_dump(kore_sort const *sort) {
   return get_c_string(ast_to_string(*sort->ptr_));
@@ -386,26 +386,26 @@ bool kore_sort_is_k(kore_sort const *sort) {
   return kllvm::bindings::is_sort_k(sort->ptr_);
 }
 
-/* KORECompositeSort */
+/* kore_composite_sort */
 
 kore_sort *kore_composite_sort_new(char const *name) {
-  return new kore_sort{kllvm::KORECompositeSort::Create(std::string(name))};
+  return new kore_sort{kllvm::kore_composite_sort::Create(std::string(name))};
 }
 
 void kore_composite_sort_add_argument(
     kore_sort const *sort, kore_sort const *arg) {
   if (auto const &cast
-      = std::dynamic_pointer_cast<kllvm::KORECompositeSort>(sort->ptr_)) {
+      = std::dynamic_pointer_cast<kllvm::kore_composite_sort>(sort->ptr_)) {
     cast->addArgument(arg->ptr_);
   } else {
     abort();
   }
 }
 
-/* KORESymbol */
+/* kore_symbol */
 
 kore_symbol *kore_symbol_new(char const *name) {
-  return new kore_symbol{kllvm::KORESymbol::Create(std::string(name))};
+  return new kore_symbol{kllvm::kore_symbol::Create(std::string(name))};
 }
 
 void kore_symbol_free(kore_symbol const *sym) {
@@ -448,7 +448,7 @@ char *get_c_string(std::string const &str) {
 }
 
 kore_pattern *kore_string_pattern_new_internal(std::string const &str) {
-  return new kore_pattern{kllvm::KOREStringPattern::Create(str)};
+  return new kore_pattern{kllvm::kore_string_pattern::Create(str)};
 }
 
 kore_pattern *kore_pattern_new_token_internal(

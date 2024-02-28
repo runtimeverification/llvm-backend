@@ -13,7 +13,7 @@ cl::opt<std::string> RuleLabel(
     cl::Positional, cl::desc("<rule_label_filename>"), cl::Required,
     cl::cat(KRuleCat));
 
-cl::opt<std::string> KOREPatternFilename(
+cl::opt<std::string> kore_patternFilename(
     cl::Positional, cl::desc("<kore_pattern_filename>"), cl::Required,
     cl::cat(KRuleCat));
 
@@ -23,7 +23,7 @@ cl::opt<std::string> SharedLibPath(
 std::optional<std::string> getMatchFunctionName() {
   auto definition = KompiledDir + "/definition.kore";
   // Parse the definition.kore to get the AST.
-  parser::KOREParser parser(definition);
+  parser::kore_parser parser(definition);
   auto kore_ast = parser.definition();
   kore_ast->preprocess();
 
@@ -48,7 +48,7 @@ int main(int argc, char **argv) {
 
   // Parse the given KORE Pattern and get the block* to use as input for the
   // match function.
-  parser::KOREParser parser(KOREPatternFilename.getValue());
+  parser::kore_parser parser(kore_patternFilename.getValue());
   auto InitialConfiguration = parser.pattern();
 
   auto match_function_name = getMatchFunctionName();
@@ -87,19 +87,19 @@ int main(int argc, char **argv) {
   }
 
   match_function((block *)b);
-  auto *log = getMatchLog(handle);
+  auto *log = getmatch_log(handle);
   if (log == nullptr) {
     std::cerr << "Error: " << dlerror() << "\n";
     return EXIT_FAILURE;
   }
 
-  size_t logSize = getMatchLogSize(handle);
+  size_t logSize = getmatch_logSize(handle);
   if (logSize == -1) {
     std::cerr << "Error: " << dlerror() << "\n";
     return EXIT_FAILURE;
   }
 
-  printMatchResult(std::cout, (MatchLog *)log, logSize, KompiledDir, handle);
+  printMatchResult(std::cout, (match_log *)log, logSize, KompiledDir, handle);
 
   dlclose(handle);
   return 0;

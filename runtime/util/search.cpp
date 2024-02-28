@@ -19,8 +19,8 @@ void take_search_step(block *);
 
 static std::list<block *> states;
 static block *state;
-static std::unordered_set<block *, HashBlock, KEq> states_set;
-static std::unordered_set<block *, HashBlock, KEq> results;
+static std::unordered_set<block *, hash_block, k_eq> states_set;
+static std::unordered_set<block *, hash_block, k_eq> results;
 
 static std::pair<
     std::vector<block **>::iterator, std::vector<block **>::iterator>
@@ -51,7 +51,7 @@ blockEnumerator() {
 }
 
 // NOLINTNEXTLINE(*-cognitive-complexity)
-std::unordered_set<block *, HashBlock, KEq> take_search_steps(
+std::unordered_set<block *, hash_block, k_eq> take_search_steps(
     bool executeToBranch, int64_t depth, int64_t bound, block *subject) {
   static int registered = -1;
   if (registered == -1) {

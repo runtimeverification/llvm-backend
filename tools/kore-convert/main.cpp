@@ -72,9 +72,9 @@ cl::opt<bool> UseSize(
              "concatenation of terms)"),
     cl::cat(KoreConvertCat));
 
-sptr<KOREPattern> get_input_pattern() {
+sptr<kore_pattern> get_input_pattern() {
   auto get_text
-      = [&]() { return KOREParser(InputFilename.getValue()).pattern(); };
+      = [&]() { return kore_parser(InputFilename.getValue()).pattern(); };
   auto get_binary = [&]() { return deserialize_pattern(InputFilename); };
 
   switch (InputFormat) {
@@ -94,7 +94,7 @@ sptr<KOREPattern> get_input_pattern() {
   }
 }
 
-void dump_text(sptr<KOREPattern> const &pat) {
+void dump_text(sptr<kore_pattern> const &pat) {
   if (OutputFilename == "-") {
     pat->print(std::cout);
     std::cout << '\n';

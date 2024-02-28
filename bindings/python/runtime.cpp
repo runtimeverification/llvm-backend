@@ -43,7 +43,7 @@ extern "C" {
 void initStaticObjects(void);
 void freeAllKoreMem(void);
 block *take_steps(int64_t, block *);
-void *constructInitialConfiguration(KOREPattern const *initial);
+void *constructInitialConfiguration(kore_pattern const *initial);
 }
 
 void bind_runtime(py::module_ &m) {
@@ -67,7 +67,7 @@ void bind_runtime(py::module_ &m) {
   // We therefore have to wrap it up in some external Python code; see
   // package/kllvm/__init__.py for the details of the external class.
   py::class_<block, raw_ptr<block>>(m, "InternalTerm", py::module_local())
-      .def(py::init([](KOREPattern const *init) {
+      .def(py::init([](kore_pattern const *init) {
         return static_cast<block *>(constructInitialConfiguration(init));
       }))
       .def(

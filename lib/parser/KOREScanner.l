@@ -8,7 +8,7 @@ using namespace kllvm::parser;
 
 #undef  YY_DECL
 #define YY_DECL \
-  token KOREScanner::yylex(std::string *lval, location *loc, yyscan_t yyscanner)
+  token kore_scanner::yylex(std::string *lval, location *loc, yyscan_t yyscanner)
 
 /* update location on matching */
 #define YY_USER_ACTION loc->step(); loc->columns(yyleng);
@@ -110,7 +110,7 @@ yyin = in;
 
 %%
 
-KOREScanner::KOREScanner(std::string filename) {
+kore_scanner::kore_scanner(std::string filename) {
   if (!(in = fopen(filename.c_str(), "r"))) {
     std::cerr << "Cannot read file: " << filename << "\n";
     exit(1);
@@ -118,18 +118,18 @@ KOREScanner::KOREScanner(std::string filename) {
   yylex_init(&scanner);
 }
 
-KOREScanner::~KOREScanner() {
+kore_scanner::~kore_scanner() {
   fclose(in);
   yylex_destroy(scanner);
 }
 
-void KOREScanner::error(
+void kore_scanner::error(
       const location &loc, const std::string &err_message) {
   std::cerr << "Scanner error at " << loc << ": " << err_message << "\n";
   exit(-1);
 }
 
-std::string KOREScanner::codepoint_to_utf8(unsigned long int code,
+std::string kore_scanner::codepoint_to_utf8(unsigned long int code,
 					   const location &loc) {
   // Let xxxx... denote the bits of the code point
   if (code <= 0x7F) {
@@ -170,7 +170,7 @@ std::string KOREScanner::codepoint_to_utf8(unsigned long int code,
   return "";
 }
 
-int KOREScanner::scan() {
+int kore_scanner::scan() {
   token token;
   do {
     std::string sem;

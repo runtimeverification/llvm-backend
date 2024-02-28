@@ -10,34 +10,34 @@
 
 namespace kllvm {
 
-class CreateTerm {
+class create_term {
 private:
   llvm::StringMap<llvm::Value *> &Substitution;
-  KOREDefinition *Definition;
+  kore_definition *Definition;
   llvm::BasicBlock *CurrentBlock;
   llvm::Module *Module;
   llvm::LLVMContext &Ctx;
   bool isAnywhereOwise;
-  std::set<KOREPattern *> staticTerms;
+  std::set<kore_pattern *> staticTerms;
 
   llvm::Value *alloc_arg(
-      KORECompositePattern *pattern, int idx, std::string const &locationStack);
+      kore_composite_pattern *pattern, int idx, std::string const &locationStack);
   llvm::Value *createHook(
-      KORECompositePattern *hookAtt, KORECompositePattern *pattern,
+      kore_composite_pattern *hookAtt, kore_composite_pattern *pattern,
       std::string const &locationStack = "0");
   llvm::Value *createFunctionCall(
-      std::string const &name, KORECompositePattern *pattern, bool sret,
+      std::string const &name, kore_composite_pattern *pattern, bool sret,
       bool tailcc, std::string const &locationStack = "0");
   llvm::Value *notInjectionCase(
-      KORECompositePattern *constructor, llvm::Value *val,
+      kore_composite_pattern *constructor, llvm::Value *val,
       std::string const &locationStack = "0");
-  bool populateStaticSet(KOREPattern *pattern);
+  bool populateStaticSet(kore_pattern *pattern);
   std::pair<llvm::Value *, bool> createAllocation(
-      KOREPattern *pattern, std::string const &locationStack = "0");
+      kore_pattern *pattern, std::string const &locationStack = "0");
 
 public:
-  CreateTerm(
-      llvm::StringMap<llvm::Value *> &Substitution, KOREDefinition *Definition,
+  create_term(
+      llvm::StringMap<llvm::Value *> &Substitution, kore_definition *Definition,
       llvm::BasicBlock *EntryBlock, llvm::Module *Module, bool isAnywhereOwise)
       : Substitution(Substitution)
       , Definition(Definition)
@@ -51,7 +51,7 @@ public:
      and substitution in the
      specified definition, and returns the value itself, along with a boolean
      indicating whether the resulting term could be an injection. */
-  std::pair<llvm::Value *, bool> operator()(KOREPattern *pattern);
+  std::pair<llvm::Value *, bool> operator()(kore_pattern *pattern);
 
   /* creates a call instruction calling a particular LLVM function, abstracting
      certain ABI and calling convention details:
@@ -68,7 +68,7 @@ public:
       - tailcc: true if the call should be made via the tailcc calling convention.
     */
   llvm::Value *createFunctionCall(
-      std::string const &name, ValueType returnCat,
+      std::string const &name, value_type returnCat,
       std::vector<llvm::Value *> const &args, bool sret, bool tailcc,
       std::string const &locationStack = "0");
 
@@ -85,32 +85,32 @@ std::unique_ptr<llvm::Module>
 newModule(std::string const &name, llvm::LLVMContext &Context);
 
 llvm::StructType *getBlockType(
-    llvm::Module *Module, KOREDefinition *definition, KORESymbol const *symbol);
+    llvm::Module *Module, kore_definition *definition, kore_symbol const *symbol);
 uint64_t getBlockHeaderVal(
-    llvm::Module *Module, KORESymbol const *symbol, llvm::Type *BlockType);
+    llvm::Module *Module, kore_symbol const *symbol, llvm::Type *BlockType);
 llvm::Value *getBlockHeader(
-    llvm::Module *Module, KOREDefinition *definition, KORESymbol const *symbol,
+    llvm::Module *Module, kore_definition *definition, kore_symbol const *symbol,
     llvm::Type *BlockType);
 
 /* returns the llvm::Type corresponding to the type of the result of calling
    createTerm on the specified pattern. */
-ValueType termType(
-    KOREPattern *pattern, llvm::StringMap<ValueType> &substitution,
-    KOREDefinition *definition);
+value_type termType(
+    kore_pattern *pattern, llvm::StringMap<value_type> &substitution,
+    kore_definition *definition);
 
 /** creates a function that applies the specified rule once it has matched, and
  * returns the name of the function. */
 void makeApplyRuleFunction(
-    KOREAxiomDeclaration *axiom, KOREDefinition *definition,
+    kore_axiom_declaration *axiom, kore_definition *definition,
     llvm::Module *Module, bool bigStep = false);
 std::string makeApplyRuleFunction(
-    KOREAxiomDeclaration *axiom, KOREDefinition *definition,
-    llvm::Module *Module, std::vector<Residual> const &residuals);
+    kore_axiom_declaration *axiom, kore_definition *definition,
+    llvm::Module *Module, std::vector<residual> const &residuals);
 /** creates a function that evaluates the side condition of the specified rule,
  * and returns the name of the function. Returns empty string if function has no
  * side condition. */
 std::string makeSideConditionFunction(
-    KOREAxiomDeclaration *axiom, KOREDefinition *definition,
+    kore_axiom_declaration *axiom, kore_definition *definition,
     llvm::Module *Module);
 
 extern std::string MAP_STRUCT;
@@ -126,14 +126,14 @@ extern std::string BLOCKHEADER_STRUCT;
 
 llvm::StructType *getBlockType(llvm::Module *Module);
 
-llvm::Type *getArgType(ValueType cat, llvm::Module *mod);
+llvm::Type *getArgType(value_type cat, llvm::Module *mod);
 
 /* returns the llvm::Type corresponding to the specified KORE sort category */
-llvm::Type *getValueType(ValueType sort, llvm::Module *Module);
-llvm::Type *getParamType(ValueType sort, llvm::Module *Module);
+llvm::Type *getvalue_type(value_type sort, llvm::Module *Module);
+llvm::Type *getParamType(value_type sort, llvm::Module *Module);
 
-bool isCollectionSort(ValueType cat);
-bool isInjectionSymbol(KOREPattern *p, KORESymbol *sym);
+bool isCollectionSort(value_type cat);
+bool isInjectionSymbol(kore_pattern *p, kore_symbol *sym);
 
 void addAbort(llvm::BasicBlock *block, llvm::Module *Module);
 

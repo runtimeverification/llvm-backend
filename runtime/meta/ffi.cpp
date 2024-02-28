@@ -32,7 +32,7 @@ static block *dotK = leaf_block(getTagForSymbolName("dotk{}"));
 
 thread_local static std::vector<ffi_type *> structTypes;
 
-static std::unordered_map<block *, string *, HashBlock, KEq> allocatedKItemPtrs;
+static std::unordered_map<block *, string *, hash_block, k_eq> allocatedKItemPtrs;
 static std::map<string *, block *> allocatedBytesRefs;
 
 TAG_TYPE(void)

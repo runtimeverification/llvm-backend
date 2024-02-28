@@ -22,12 +22,12 @@
 
 namespace kllvm {
 
-class DTPreprocessor {
+class dt_preprocessor {
 private:
-  std::map<yaml_node_t *, DecisionNode *> uniqueNodes{};
-  std::map<std::string, KORESymbol *> const &syms;
-  std::map<ValueType, sptr<KORECompositeSort>> const &sorts;
-  KORESymbol *dv;
+  std::map<yaml_node_t *, decision_node *> uniqueNodes{};
+  std::map<std::string, kore_symbol *> const &syms;
+  std::map<value_type, sptr<kore_composite_sort>> const &sorts;
+  kore_symbol *dv;
   yaml_document_t *doc;
   llvm::Module *mod;
 
@@ -105,13 +105,13 @@ public:
     return result;
   }
 
-  DTPreprocessor(
-      std::map<std::string, KORESymbol *> const &syms,
-      std::map<ValueType, sptr<KORECompositeSort>> const &sorts,
+  dt_preprocessor(
+      std::map<std::string, kore_symbol *> const &syms,
+      std::map<value_type, sptr<kore_composite_sort>> const &sorts,
       llvm::Module *mod, yaml_document_t *doc)
       : syms(syms)
       , sorts(sorts)
-      , dv(KORESymbol::Create("\\dv").release())
+      , dv(kore_symbol::Create("\\dv").release())
       , doc(doc)
       , mod(mod) { }
 
@@ -124,16 +124,16 @@ public:
     return result;
   }
 
-  DecisionNode *function(yaml_node_t *node) {
+  decision_node *function(yaml_node_t *node) {
     std::string function = str(get(node, "function"));
     std::string hookName = str(get(node, "sort"));
-    ValueType cat = KORECompositeSort::getCategory(hookName);
+    value_type cat = kore_composite_sort::getCategory(hookName);
 
     std::string binding = to_string(vec(get(node, "occurrence")));
 
     auto *child = (*this)(get(node, "next"));
 
-    auto *result = FunctionNode::Create(
+    auto *result = function_node::Create(
         binding, function, child, cat, getParamType(cat, mod));
 
     yaml_node_t *vars = get(node, "args");
@@ -145,16 +145,16 @@ public:
       if (occurrence.size() == 3 && occurrence[0] == "lit"
           && occurrence[2] == "MINT.MInt 64") {
         result->addBinding(
-            occurrence[1], KORECompositeSort::getCategory(hook), mod);
+            occurrence[1], kore_composite_sort::getCategory(hook), mod);
       } else {
         result->addBinding(
-            to_string(occurrence), KORECompositeSort::getCategory(hook), mod);
+            to_string(occurrence), kore_composite_sort::getCategory(hook), mod);
       }
     }
     return result;
   }
 
-  ptr<KOREPattern> parsePattern(
+  ptr<kore_pattern> parsePattern(
       yaml_node_t *node,
       std::vector<std::pair<std::string, llvm::Type *>> &uses) {
     if (auto *o = get(node, "occurrence")) {
@@ -164,15 +164,15 @@ public:
       } else {
         name = str(o);
       }
-      ValueType hook = KORECompositeSort::getCategory(str(get(node, "hook")));
+      value_type hook = kore_composite_sort::getCategory(str(get(node, "hook")));
       uses.emplace_back(name, getParamType(hook, mod));
-      return KOREVariablePattern::Create(name, sorts.at(hook));
+      return kore_variable_pattern::Create(name, sorts.at(hook));
     }
 
     if (get(node, "literal")) {
-      auto sym = KORESymbol::Create("\\dv");
+      auto sym = kore_symbol::Create("\\dv");
       auto hook = str(get(node, "hook"));
-      auto sort = sorts.at(KORECompositeSort::getCategory(hook));
+      auto sort = sorts.at(kore_composite_sort::getCategory(hook));
       auto *lit = get(node, "literal");
       auto val = str(lit);
       if (hook == "BOOL.Bool") {
@@ -184,8 +184,8 @@ public:
 
       sym->addFormalArgument(sort);
       sym->addSort(sort);
-      auto pat = KORECompositePattern::Create(std::move(sym));
-      pat->addArgument(KOREStringPattern::Create(val));
+      auto pat = kore_composite_pattern::Create(std::move(sym));
+      pat->addArgument(kore_string_pattern::Create(val));
       return pat;
     }
 
@@ -195,7 +195,7 @@ public:
     }
 
     auto *sym = syms.at(str(get(node, "constructor")));
-    auto pat = KORECompositePattern::Create(sym);
+    auto pat = kore_composite_pattern::Create(sym);
     auto *seq = get(node, "args");
     for (auto *iter = seq->data.sequence.items.start;
          iter < seq->data.sequence.items.top; iter++) {
@@ -205,61 +205,61 @@ public:
     return pat;
   }
 
-  DecisionNode *makePattern(yaml_node_t *node) {
+  decision_node *makePattern(yaml_node_t *node) {
     std::string name = to_string(vec(get(node, "occurrence")));
     llvm::Type *type = getParamType(
-        KORECompositeSort::getCategory(str(get(node, "sort"))), mod);
+        kore_composite_sort::getCategory(str(get(node, "sort"))), mod);
 
     std::vector<std::pair<std::string, llvm::Type *>> uses;
 
-    ptr<KOREPattern> pat = parsePattern(get(node, "pattern"), uses);
+    ptr<kore_pattern> pat = parsePattern(get(node, "pattern"), uses);
 
     auto *child = (*this)(get(node, "next"));
 
-    return MakePatternNode::Create(name, type, pat.release(), uses, child);
+    return make_pattern_node::Create(name, type, pat.release(), uses, child);
   }
 
-  DecisionNode *makeIterator(yaml_node_t *node) {
+  decision_node *makeIterator(yaml_node_t *node) {
     auto collection = to_string(vec(get(node, "collection")));
     auto *type = getParamType(
-        KORECompositeSort::getCategory(str(get(node, "sort"))), mod);
+        kore_composite_sort::getCategory(str(get(node, "sort"))), mod);
     auto hookName = str(get(node, "function"));
     auto *child = (*this)(get(node, "next"));
 
-    return MakeIteratorNode::Create(
+    return make_iterator_node::Create(
         collection, type, collection + "_iter",
         llvm::PointerType::getUnqual(
             llvm::StructType::getTypeByName(mod->getContext(), "iter")),
         hookName, child);
   }
 
-  DecisionNode *iterNext(yaml_node_t *node) {
+  decision_node *iterNext(yaml_node_t *node) {
     auto iterator = to_string(vec(get(node, "iterator"))) + "_iter";
     auto binding = to_string(vec(get(node, "binding")));
     auto *type = getParamType(
-        KORECompositeSort::getCategory(str(get(node, "sort"))), mod);
+        kore_composite_sort::getCategory(str(get(node, "sort"))), mod);
     auto function = str(get(node, "function"));
     auto *child = (*this)(get(node, "next"));
 
-    return IterNextNode::Create(
+    return iter_next_node::Create(
         iterator,
         llvm::PointerType::getUnqual(
             llvm::StructType::getTypeByName(mod->getContext(), "iter")),
         binding, type, function, child);
   }
 
-  DecisionNode *switchCase(Kind kind, yaml_node_t *node) {
+  decision_node *switchCase(Kind kind, yaml_node_t *node) {
     yaml_node_t *list = get(node, "specializations");
     auto occurrence = vec(get(node, "occurrence"));
     std::string name = to_string(occurrence);
     llvm::Type *type = getParamType(
-        KORECompositeSort::getCategory(str(get(node, "sort"))), mod);
-    auto *result = SwitchNode::Create(name, type, kind == CheckNull);
+        kore_composite_sort::getCategory(str(get(node, "sort"))), mod);
+    auto *result = switch_node::Create(name, type, kind == CheckNull);
     for (auto *iter = list->data.sequence.items.start;
          iter < list->data.sequence.items.top; ++iter) {
       auto *_case = yaml_document_get_node(doc, *iter);
       std::vector<std::pair<std::string, llvm::Type *>> bindings;
-      KORESymbol *symbol = nullptr;
+      kore_symbol *symbol = nullptr;
       if (kind == SwitchLiteral || kind == CheckNull) {
         symbol = dv;
       } else {
@@ -275,10 +275,10 @@ public:
           std::string binding = to_string(newOccurrence);
           std::string hook = str(get(get(_case, 2), i));
           bindings.emplace_back(
-              binding, getParamType(KORECompositeSort::getCategory(hook), mod));
+              binding, getParamType(kore_composite_sort::getCategory(hook), mod));
         }
       }
-      DecisionNode *child = (*this)(get(_case, 1));
+      decision_node *child = (*this)(get(_case, 1));
       switch (kind) {
       case SwitchLiteral: {
         unsigned bitwidth = stoi(str(get(node, "bitwidth")));
@@ -294,7 +294,7 @@ public:
     }
     auto *_case = get(node, "default");
     if (_case->type != YAML_SCALAR_NODE || !str(_case).empty()) {
-      DecisionNode *child = (*this)(_case);
+      decision_node *child = (*this)(_case);
       result->addCase(
           {nullptr, std::vector<std::pair<std::string, llvm::Type *>>{},
            child});
@@ -302,20 +302,20 @@ public:
     return result;
   }
 
-  DecisionNode *leaf(yaml_node_t *node) {
+  decision_node *leaf(yaml_node_t *node) {
     int action = stoi(str(get(get(node, "action"), 0)));
     std::string name = "apply_rule_" + std::to_string(action);
     if (auto *next = get(node, "next")) {
       name = name + "_search";
     }
-    auto *result = LeafNode::Create(name);
+    auto *result = leaf_node::Create(name);
     yaml_node_t *vars = get(get(node, "action"), 1);
     for (auto *iter = vars->data.sequence.items.start;
          iter < vars->data.sequence.items.top; ++iter) {
       auto *var = yaml_document_get_node(doc, *iter);
       auto occurrence = vec(get(var, 0));
       auto hook = str(get(var, 1));
-      ValueType cat = KORECompositeSort::getCategory(hook);
+      value_type cat = kore_composite_sort::getCategory(hook);
       result->addBinding(to_string(occurrence), cat, mod);
     }
     if (auto *next = get(node, "next")) {
@@ -325,15 +325,15 @@ public:
     return result;
   }
 
-  DecisionNode *operator()(yaml_node_t *node) {
+  decision_node *operator()(yaml_node_t *node) {
     auto *unique = uniqueNodes[node];
     if (unique) {
       return unique;
     }
     Kind kind = getKind(node);
-    DecisionNode *ret = nullptr;
+    decision_node *ret = nullptr;
     switch (kind) {
-    case Fail: ret = FailNode::get(); break;
+    case Fail: ret = fail_node::get(); break;
     case Function: ret = function(node); break;
     case MakePattern: ret = makePattern(node); break;
     case SwitchLiteral:
@@ -347,28 +347,28 @@ public:
     return ret;
   }
 
-  PartialStep makeResiduals(yaml_node_t *residuals, DecisionNode *dt) {
-    std::vector<Residual> res;
+  partial_step makeresiduals(yaml_node_t *residuals, decision_node *dt) {
+    std::vector<residual> res;
     for (auto *iter = residuals->data.sequence.items.start;
          iter < residuals->data.sequence.items.top; ++iter) {
-      Residual r;
+      residual r;
       yaml_node_t *listNode = yaml_document_get_node(doc, *iter);
       r.occurrence = to_string(vec(get(listNode, 1)));
       std::vector<std::pair<std::string, llvm::Type *>> uses;
       r.pattern = parsePattern(get(listNode, 0), uses).release();
       res.push_back(r);
     }
-    PartialStep retval;
+    partial_step retval;
     retval.dt = dt;
     retval.residuals = res;
     return retval;
   }
 };
 
-DecisionNode *parseYamlDecisionTreeFromString(
+decision_node *parseYamldecisionTreeFromString(
     llvm::Module *mod, std::string const &yaml,
-    std::map<std::string, KORESymbol *> const &syms,
-    std::map<ValueType, sptr<KORECompositeSort>> const &sorts) {
+    std::map<std::string, kore_symbol *> const &syms,
+    std::map<value_type, sptr<kore_composite_sort>> const &sorts) {
   yaml_parser_t parser;
   yaml_document_t doc;
   yaml_parser_initialize(&parser);
@@ -380,16 +380,16 @@ DecisionNode *parseYamlDecisionTreeFromString(
   if (!root) {
     throw std::runtime_error("Failed to parse decision tree from YAML string");
   }
-  auto *result = DTPreprocessor(syms, sorts, mod, &doc)(root);
+  auto *result = dt_preprocessor(syms, sorts, mod, &doc)(root);
   yaml_document_delete(&doc);
   yaml_parser_delete(&parser);
   return result;
 }
 
-DecisionNode *parseYamlDecisionTree(
+decision_node *parseYamldecisionTree(
     llvm::Module *mod, std::string const &filename,
-    std::map<std::string, KORESymbol *> const &syms,
-    std::map<ValueType, sptr<KORECompositeSort>> const &sorts) {
+    std::map<std::string, kore_symbol *> const &syms,
+    std::map<value_type, sptr<kore_composite_sort>> const &sorts) {
   yaml_parser_t parser;
   yaml_document_t doc;
   yaml_parser_initialize(&parser);
@@ -401,17 +401,17 @@ DecisionNode *parseYamlDecisionTree(
     throw std::runtime_error(
         fmt::format("Failed to parse decision tree from file: {}", filename));
   }
-  auto *result = DTPreprocessor(syms, sorts, mod, &doc)(root);
+  auto *result = dt_preprocessor(syms, sorts, mod, &doc)(root);
   yaml_document_delete(&doc);
   yaml_parser_delete(&parser);
   fclose(f);
   return result;
 }
 
-PartialStep parseYamlSpecialDecisionTree(
+partial_step parseYamlSpecialdecisionTree(
     llvm::Module *mod, std::string const &filename,
-    std::map<std::string, KORESymbol *> const &syms,
-    std::map<ValueType, sptr<KORECompositeSort>> const &sorts) {
+    std::map<std::string, kore_symbol *> const &syms,
+    std::map<value_type, sptr<kore_composite_sort>> const &sorts) {
   yaml_parser_t parser;
   yaml_document_t doc;
   yaml_parser_initialize(&parser);
@@ -423,9 +423,9 @@ PartialStep parseYamlSpecialDecisionTree(
     throw std::runtime_error(fmt::format(
         "Failed to parse special decision tree from file: {}", filename));
   }
-  auto pp = DTPreprocessor(syms, sorts, mod, &doc);
+  auto pp = dt_preprocessor(syms, sorts, mod, &doc);
   auto *dt = pp(pp.get(root, 0));
-  auto result = pp.makeResiduals(pp.get(root, 1), dt);
+  auto result = pp.makeresiduals(pp.get(root, 1), dt);
   yaml_document_delete(&doc);
   yaml_parser_delete(&parser);
   fclose(f);

@@ -74,7 +74,7 @@ std::optional<attribute_set::key> string_to_key(std::string const &name) {
 } // namespace
 
 std::optional<attribute_set::key>
-attribute_set::add(std::shared_ptr<KORECompositePattern> att) {
+attribute_set::add(std::shared_ptr<kore_composite_pattern> att) {
   auto name = att->getConstructor()->getName();
   attribute_map_.emplace(name, std::move(att));
   return string_to_key(name);
@@ -84,7 +84,7 @@ bool attribute_set::contains(attribute_set::key k) const {
   return attribute_map_.find(key_to_string(k)) != attribute_map_.end();
 }
 
-std::shared_ptr<KORECompositePattern> const &
+std::shared_ptr<kore_composite_pattern> const &
 attribute_set::get(attribute_set::key k) const {
   return attribute_map_.at(key_to_string(k));
 }
@@ -93,7 +93,7 @@ std::string attribute_set::get_string(attribute_set::key k) const {
   auto const &attribute_pattern = get(k);
   assert(attribute_pattern->getArguments().size() == 1);
 
-  auto const &string_arg = std::dynamic_pointer_cast<KOREStringPattern>(
+  auto const &string_arg = std::dynamic_pointer_cast<kore_string_pattern>(
       attribute_pattern->getArguments()[0]);
 
   return string_arg->getContents();

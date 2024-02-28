@@ -43,7 +43,7 @@
 namespace kllvm {
 
 static llvm::Constant *getSymbolNamePtr(
-    KORESymbol *symbol, llvm::BasicBlock *SetBlockName, llvm::Module *module) {
+    kore_symbol *symbol, llvm::BasicBlock *SetBlockName, llvm::Module *module) {
   llvm::LLVMContext &Ctx = module->getContext();
   auto name = ast_to_string(*symbol);
   if (SetBlockName) {
@@ -72,7 +72,7 @@ static llvm::Function *getStrcmp(llvm::Module *module) {
 }
 
 static void
-emitGetTagForSymbolName(KOREDefinition *definition, llvm::Module *module) {
+emitGetTagForSymbolName(kore_definition *definition, llvm::Module *module) {
   llvm::LLVMContext &Ctx = module->getContext();
   auto *type = llvm::FunctionType::get(
       llvm::Type::getInt32Ty(Ctx), {llvm::Type::getInt8PtrTy(Ctx)}, false);
@@ -115,8 +115,8 @@ static std::string LAYOUTITEM_STRUCT = "layoutitem";
 
 static void emitDataTableForSymbol(
     std::string const &name, llvm::Type *ty, llvm::DIType *dity,
-    KOREDefinition *definition, llvm::Module *module,
-    llvm::Constant *getter(KOREDefinition *, llvm::Module *, KORESymbol *)) {
+    kore_definition *definition, llvm::Module *module,
+    llvm::Constant *getter(kore_definition *, llvm::Module *, kore_symbol *)) {
   llvm::LLVMContext &Ctx = module->getContext();
   std::vector<llvm::Type *> argTypes;
   argTypes.push_back(llvm::Type::getInt32Ty(Ctx));
@@ -165,9 +165,9 @@ static void emitDataTableForSymbol(
 
 static void emitDataForSymbol(
     std::string const &name, llvm::Type *ty, llvm::DIType *dity,
-    KOREDefinition *definition, llvm::Module *module, bool isEval,
+    kore_definition *definition, llvm::Module *module, bool isEval,
     std::pair<llvm::Value *, llvm::BasicBlock *> getter(
-        KOREDefinition *, llvm::Module *, KORESymbol *, llvm::Instruction *)) {
+        kore_definition *, llvm::Module *, kore_symbol *, llvm::Instruction *)) {
   llvm::LLVMContext &Ctx = module->getContext();
   std::vector<llvm::Type *> argTypes;
   argTypes.push_back(llvm::Type::getInt32Ty(Ctx));
@@ -215,7 +215,7 @@ static void emitDataForSymbol(
 }
 
 static std::pair<llvm::Value *, llvm::BasicBlock *> getHeader(
-    KOREDefinition *definition, llvm::Module *module, KORESymbol *symbol,
+    kore_definition *definition, llvm::Module *module, kore_symbol *symbol,
     llvm::Instruction *inst) {
   auto *BlockType = getBlockType(module, definition, symbol);
   return std::make_pair(
@@ -223,7 +223,7 @@ static std::pair<llvm::Value *, llvm::BasicBlock *> getHeader(
 }
 
 static void
-emitGetBlockHeaderForSymbol(KOREDefinition *def, llvm::Module *mod) {
+emitGetBlockHeaderForSymbol(kore_definition *def, llvm::Module *mod) {
   emitDataForSymbol(
       "getBlockHeaderForSymbol",
       llvm::StructType::getTypeByName(mod->getContext(), BLOCKHEADER_STRUCT),
@@ -231,7 +231,7 @@ emitGetBlockHeaderForSymbol(KOREDefinition *def, llvm::Module *mod) {
 }
 
 static std::pair<llvm::Value *, llvm::BasicBlock *> getFunction(
-    KOREDefinition *def, llvm::Module *mod, KORESymbol *symbol,
+    kore_definition *def, llvm::Module *mod, kore_symbol *symbol,
     llvm::Instruction *inst) {
   auto *decl = def->getSymbolDeclarations().at(symbol->getName());
   bool res = decl->attributes().contains(attribute_set::key::function)
@@ -241,27 +241,27 @@ static std::pair<llvm::Value *, llvm::BasicBlock *> getFunction(
       inst->getParent());
 }
 
-static void emitIsSymbolAFunction(KOREDefinition *def, llvm::Module *mod) {
+static void emitIsSymbolAFunction(kore_definition *def, llvm::Module *mod) {
   emitDataForSymbol(
       "isSymbolAFunction", llvm::Type::getInt1Ty(mod->getContext()),
       getBoolDebugType(), def, mod, false, getFunction);
 }
 
 static llvm::Constant *
-getBinder(KOREDefinition *def, llvm::Module *mod, KORESymbol *symbol) {
+getBinder(kore_definition *def, llvm::Module *mod, kore_symbol *symbol) {
   auto *decl = def->getSymbolDeclarations().at(symbol->getName());
   bool res = decl->attributes().contains(attribute_set::key::binder);
   return llvm::ConstantInt::get(llvm::Type::getInt1Ty(mod->getContext()), res);
 }
 
-static void emitIsSymbolABinder(KOREDefinition *def, llvm::Module *mod) {
+static void emitIsSymbolABinder(kore_definition *def, llvm::Module *mod) {
   emitDataTableForSymbol(
       "isSymbolABinder", llvm::Type::getInt1Ty(mod->getContext()),
       getBoolDebugType(), def, mod, getBinder);
 }
 
 static std::pair<llvm::Value *, llvm::BasicBlock *> getInjection(
-    KOREDefinition *def, llvm::Module *mod, KORESymbol *symbol,
+    kore_definition *def, llvm::Module *mod, kore_symbol *symbol,
     llvm::Instruction *inst) {
   llvm::Constant *tag
       = llvm::ConstantInt::get(llvm::Type::getInt32Ty(mod->getContext()), 0);
@@ -277,19 +277,19 @@ static std::pair<llvm::Value *, llvm::BasicBlock *> getInjection(
 }
 
 static void
-emitGetInjectionForSortOfTag(KOREDefinition *def, llvm::Module *mod) {
+emitGetInjectionForSortOfTag(kore_definition *def, llvm::Module *mod) {
   emitDataForSymbol(
       "getInjectionForSortOfTag", llvm::Type::getInt32Ty(mod->getContext()),
       getIntDebugType(), def, mod, false, getInjection);
 }
 
 static llvm::Constant *
-getArity(KOREDefinition *, llvm::Module *mod, KORESymbol *symbol) {
+getArity(kore_definition *, llvm::Module *mod, kore_symbol *symbol) {
   return llvm::ConstantInt::get(
       llvm::Type::getInt32Ty(mod->getContext()), symbol->getArguments().size());
 }
 
-static void emitGetSymbolArity(KOREDefinition *def, llvm::Module *mod) {
+static void emitGetSymbolArity(kore_definition *def, llvm::Module *mod) {
   emitDataTableForSymbol(
       "getSymbolArity", llvm::Type::getInt32Ty(mod->getContext()),
       getIntDebugType(), def, mod, getArity);
@@ -297,7 +297,7 @@ static void emitGetSymbolArity(KOREDefinition *def, llvm::Module *mod) {
 
 static llvm::Value *getArgValue(
     llvm::Value *ArgumentsArray, int idx, llvm::BasicBlock *CaseBlock,
-    ValueType cat, llvm::Module *mod) {
+    value_type cat, llvm::Module *mod) {
   llvm::LLVMContext &Ctx = mod->getContext();
   llvm::Constant *zero = llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0);
 
@@ -312,7 +312,7 @@ static llvm::Value *getArgValue(
   switch (cat.cat) {
   case SortCategory::Bool:
   case SortCategory::MInt: {
-    auto *val_ty = getValueType(cat, mod);
+    auto *val_ty = getvalue_type(cat, mod);
     auto *cast = new llvm::BitCastInst(
         arg, llvm::PointerType::getUnqual(val_ty), "", CaseBlock);
     auto *load = new llvm::LoadInst(val_ty, cast, "", CaseBlock);
@@ -324,7 +324,7 @@ static llvm::Value *getArgValue(
   case SortCategory::List:
   case SortCategory::Set:
     arg = new llvm::BitCastInst(
-        arg, llvm::PointerType::getUnqual(getValueType(cat, mod)), "",
+        arg, llvm::PointerType::getUnqual(getvalue_type(cat, mod)), "",
         CaseBlock);
     break;
   case SortCategory::Int:
@@ -332,7 +332,7 @@ static llvm::Value *getArgValue(
   case SortCategory::StringBuffer:
   case SortCategory::Symbol:
   case SortCategory::Variable:
-    arg = new llvm::BitCastInst(arg, getValueType(cat, mod), "", CaseBlock);
+    arg = new llvm::BitCastInst(arg, getvalue_type(cat, mod), "", CaseBlock);
     break;
   case SortCategory::Uncomputed: abort();
   }
@@ -340,7 +340,7 @@ static llvm::Value *getArgValue(
 }
 
 static std::pair<llvm::Value *, llvm::BasicBlock *> getEval(
-    KOREDefinition *def, llvm::Module *mod, KORESymbol *symbol,
+    kore_definition *def, llvm::Module *mod, kore_symbol *symbol,
     llvm::Instruction *inst) {
   llvm::LLVMContext &Ctx = mod->getContext();
   llvm::BasicBlock *CaseBlock = inst->getParent();
@@ -349,19 +349,19 @@ static std::pair<llvm::Value *, llvm::BasicBlock *> getEval(
   llvm::Value *ArgumentsArray = func->arg_begin() + 1;
   int idx = 0;
   llvm::StringMap<llvm::Value *> subst;
-  auto pattern = KORECompositePattern::Create(symbol);
+  auto pattern = kore_composite_pattern::Create(symbol);
   for (auto const &sort : symbol->getArguments()) {
-    ValueType cat
-        = dynamic_cast<KORECompositeSort *>(sort.get())->getCategory(def);
+    value_type cat
+        = dynamic_cast<kore_composite_sort *>(sort.get())->getCategory(def);
     llvm::Value *arg = getArgValue(ArgumentsArray, idx, CaseBlock, cat, mod);
     std::string name = "_" + std::to_string(idx++);
     subst.insert({name, arg});
-    pattern->addArgument(KOREVariablePattern::Create(name, sort));
+    pattern->addArgument(kore_variable_pattern::Create(name, sort));
   }
-  CreateTerm creator(subst, def, CaseBlock, mod, false);
+  create_term creator(subst, def, CaseBlock, mod, false);
   llvm::Value *result = creator(pattern.get()).first;
   llvm::Value *retval = nullptr;
-  ValueType cat = dynamic_cast<KORECompositeSort *>(symbol->getSort().get())
+  value_type cat = dynamic_cast<kore_composite_sort *>(symbol->getSort().get())
                       ->getCategory(def);
   switch (cat.cat) {
   case SortCategory::Int:
@@ -394,14 +394,14 @@ static std::pair<llvm::Value *, llvm::BasicBlock *> getEval(
   return std::make_pair(retval, creator.getCurrentBlock());
 }
 
-static void emitEvaluateFunctionSymbol(KOREDefinition *def, llvm::Module *mod) {
+static void emitEvaluateFunctionSymbol(kore_definition *def, llvm::Module *mod) {
   emitDataForSymbol(
       "evaluateFunctionSymbol", llvm::Type::getInt8PtrTy(mod->getContext()),
       nullptr, def, mod, true, getEval);
 }
 
 static void
-emitGetTagForFreshSort(KOREDefinition *definition, llvm::Module *module) {
+emitGetTagForFreshSort(kore_definition *definition, llvm::Module *module) {
   llvm::LLVMContext &Ctx = module->getContext();
   auto *func = getOrInsertFunction(
       module, "getTagForFreshSort", llvm::Type::getInt32Ty(Ctx),
@@ -459,7 +459,7 @@ emitGetTagForFreshSort(KOREDefinition *definition, llvm::Module *module) {
   }
 }
 
-static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
+static void emitGetToken(kore_definition *definition, llvm::Module *module) {
   llvm::LLVMContext &Ctx = module->getContext();
   auto *getTokenType = llvm::FunctionType::get(
       llvm::Type::getInt8PtrTy(Ctx),
@@ -474,7 +474,7 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
       "phi", MergeBlock);
   auto const &sorts = definition->getSortDeclarations();
   llvm::Function *Strcmp = getStrcmp(module);
-  llvm::Function *StringEqual = getOrInsertFunction(
+  llvm::Function *string_equal = getOrInsertFunction(
       module, "string_equal", llvm::Type::getInt1Ty(Ctx),
       llvm::Type::getInt8PtrTy(Ctx), llvm::Type::getInt8PtrTy(Ctx),
       llvm::Type::getInt64Ty(Ctx), llvm::Type::getInt64Ty(Ctx));
@@ -487,8 +487,8 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
       // TODO: MINT in initial configuration
       continue;
     }
-    auto sort = KORECompositeSort::Create(name);
-    ValueType cat = sort->getCategory(definition);
+    auto sort = kore_composite_sort::Create(name);
+    value_type cat = sort->getCategory(definition);
     if (cat.cat == SortCategory::Symbol || cat.cat == SortCategory::Variable) {
       continue;
     }
@@ -532,7 +532,7 @@ static void emitGetToken(KOREDefinition *definition, llvm::Module *module) {
           Str->getType(), globalVar, indices);
       auto *Len = llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 4);
       auto *compare = llvm::CallInst::Create(
-          StringEqual, {func->arg_begin() + 2, Ptr, func->arg_begin() + 1, Len},
+          string_equal, {func->arg_begin() + 2, Ptr, func->arg_begin() + 1, Len},
           "", CaseBlock);
       llvm::Instruction *Malloc = llvm::CallInst::CreateMalloc(
           CaseBlock, llvm::Type::getInt64Ty(Ctx), compare->getType(),
@@ -698,30 +698,30 @@ makePackedVisitorStructureType(llvm::LLVMContext &Ctx, llvm::Module *module) {
   if (types.find(&Ctx) == types.end()) {
     auto elementTypes = std::vector<llvm::Type *>{
         {makeVisitorType(
-             Ctx, file, getValueType({SortCategory::Symbol, 0}, module), 1, 1),
+             Ctx, file, getvalue_type({SortCategory::Symbol, 0}, module), 1, 1),
          makeVisitorType(
              Ctx, file,
              llvm::PointerType::getUnqual(
-                 getValueType({SortCategory::Map, 0}, module)),
+                 getvalue_type({SortCategory::Map, 0}, module)),
              3, 0),
          makeVisitorType(
              Ctx, file,
              llvm::PointerType::getUnqual(
-                 getValueType({SortCategory::List, 0}, module)),
+                 getvalue_type({SortCategory::List, 0}, module)),
              3, 0),
          makeVisitorType(
              Ctx, file,
              llvm::PointerType::getUnqual(
-                 getValueType({SortCategory::Set, 0}, module)),
+                 getvalue_type({SortCategory::Set, 0}, module)),
              3, 0),
          makeVisitorType(
-             Ctx, file, getValueType({SortCategory::Int, 0}, module), 1, 0),
+             Ctx, file, getvalue_type({SortCategory::Int, 0}, module), 1, 0),
          makeVisitorType(
-             Ctx, file, getValueType({SortCategory::Float, 0}, module), 1, 0),
+             Ctx, file, getvalue_type({SortCategory::Float, 0}, module), 1, 0),
          makeVisitorType(
-             Ctx, file, getValueType({SortCategory::Bool, 0}, module), 1, 0),
+             Ctx, file, getvalue_type({SortCategory::Bool, 0}, module), 1, 0),
          makeVisitorType(
-             Ctx, file, getValueType({SortCategory::StringBuffer, 0}, module),
+             Ctx, file, getvalue_type({SortCategory::StringBuffer, 0}, module),
              1, 0),
          llvm::PointerType::getUnqual(llvm::FunctionType::get(
              llvm::Type::getVoidTy(Ctx),
@@ -734,7 +734,7 @@ makePackedVisitorStructureType(llvm::LLVMContext &Ctx, llvm::Module *module) {
          makeVisitorType(
              Ctx, file,
              llvm::PointerType::getUnqual(
-                 getValueType({SortCategory::RangeMap, 0}, module)),
+                 getvalue_type({SortCategory::RangeMap, 0}, module)),
              3, 0)}};
 
     auto *structTy = llvm::StructType::create(Ctx, elementTypes, name);
@@ -745,10 +745,10 @@ makePackedVisitorStructureType(llvm::LLVMContext &Ctx, llvm::Module *module) {
 }
 
 static void emitTraversal(
-    std::string const &name, KOREDefinition *definition, llvm::Module *module,
+    std::string const &name, kore_definition *definition, llvm::Module *module,
     bool isVisitor,
     void getter(
-        KOREDefinition *, llvm::Module *, KORESymbol *, llvm::BasicBlock *,
+        kore_definition *, llvm::Module *, kore_symbol *, llvm::BasicBlock *,
         std::vector<llvm::Value *> const &callbacks)) {
   llvm::LLVMContext &Ctx = module->getContext();
   std::vector<llvm::Type *> argTypes;
@@ -821,7 +821,7 @@ static void emitTraversal(
 }
 
 static void getStore(
-    KOREDefinition *definition, llvm::Module *module, KORESymbol *symbol,
+    kore_definition *definition, llvm::Module *module, kore_symbol *symbol,
     llvm::BasicBlock *CaseBlock, std::vector<llvm::Value *> const &) {
   llvm::LLVMContext &Ctx = module->getContext();
   llvm::Constant *zero = llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0);
@@ -833,7 +833,7 @@ static void getStore(
       func->arg_begin(), llvm::PointerType::getUnqual(BlockType), "",
       CaseBlock);
   for (auto const &sort : symbol->getArguments()) {
-    ValueType cat = dynamic_cast<KORECompositeSort *>(sort.get())
+    value_type cat = dynamic_cast<kore_composite_sort *>(sort.get())
                         ->getCategory(definition);
     llvm::Value *arg = getArgValue(ArgumentsArray, idx, CaseBlock, cat, module);
     llvm::Type *arg_ty = getArgType(cat, module);
@@ -849,24 +849,24 @@ static void getStore(
 }
 
 static void
-emitStoreSymbolChildren(KOREDefinition *definition, llvm::Module *module) {
+emitStoreSymbolChildren(kore_definition *definition, llvm::Module *module) {
   emitTraversal("storeSymbolChildren", definition, module, false, getStore);
 }
 
 static llvm::Constant *getSymbolName(
-    KOREDefinition *definition, llvm::Module *module, KORESymbol *symbol) {
+    kore_definition *definition, llvm::Module *module, kore_symbol *symbol) {
   return getSymbolNamePtr(symbol, nullptr, module);
 }
 
-static void emitGetSymbolNameForTag(KOREDefinition *def, llvm::Module *mod) {
+static void emitGetSymbolNameForTag(kore_definition *def, llvm::Module *mod) {
   emitDataTableForSymbol(
       "getSymbolNameForTag", llvm::Type::getInt8PtrTy(mod->getContext()),
       getCharPtrDebugType(), def, mod, getSymbolName);
 }
 
 static void visitCollection(
-    KOREDefinition *definition, llvm::Module *module,
-    KORECompositeSort *compositeSort, llvm::Function *func,
+    kore_definition *definition, llvm::Module *module,
+    kore_composite_sort *compositeSort, llvm::Function *func,
     llvm::Value *ChildPtr, llvm::BasicBlock *CaseBlock, llvm::Value *callback,
     llvm::Value *state_ptr) {
   llvm::LLVMContext &Ctx = module->getContext();
@@ -876,7 +876,7 @@ static void visitCollection(
       = definition->getSortDeclarations().at(compositeSort->getName());
   llvm::Constant *concatPtr = nullptr;
   if (sortDecl->attributes().contains(attribute_set::key::concat)) {
-    auto *concat = (KORECompositePattern *)sortDecl->attributes()
+    auto *concat = (kore_composite_pattern *)sortDecl->attributes()
                        .get(attribute_set::key::concat)
                        ->getArguments()[0]
                        .get();
@@ -884,12 +884,12 @@ static void visitCollection(
   } else {
     concatPtr = llvm::ConstantPointerNull::get(llvm::Type::getInt8PtrTy(Ctx));
   }
-  auto *unit = (KORECompositePattern *)sortDecl->attributes()
+  auto *unit = (kore_composite_pattern *)sortDecl->attributes()
                    .get(attribute_set::key::unit)
                    ->getArguments()[0]
                    .get();
   auto *unitPtr = getSymbolNamePtr(unit->getConstructor(), nullptr, module);
-  auto *element = (KORECompositePattern *)sortDecl->attributes()
+  auto *element = (kore_composite_pattern *)sortDecl->attributes()
                       .get(attribute_set::key::element)
                       ->getArguments()[0]
                       .get();
@@ -910,7 +910,7 @@ static void visitCollection(
 
 // NOLINTNEXTLINE(*-cognitive-complexity)
 static void getVisitor(
-    KOREDefinition *definition, llvm::Module *module, KORESymbol *symbol,
+    kore_definition *definition, llvm::Module *module, kore_symbol *symbol,
     llvm::BasicBlock *CaseBlock, std::vector<llvm::Value *> const &callbacks) {
   llvm::LLVMContext &Ctx = module->getContext();
   llvm::Constant *zero = llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0);
@@ -927,14 +927,14 @@ static void getVisitor(
   auto *state_ptr = func->arg_end() - 1;
 
   for (auto const &sort : symbol->getArguments()) {
-    auto *compositeSort = dynamic_cast<KORECompositeSort *>(sort.get());
-    ValueType cat = compositeSort->getCategory(definition);
+    auto *compositeSort = dynamic_cast<kore_composite_sort *>(sort.get());
+    value_type cat = compositeSort->getCategory(definition);
     llvm::Value *ChildPtr = llvm::GetElementPtrInst::CreateInBounds(
         BlockType, cast,
         {zero, llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), idx++ + 2)},
         "", CaseBlock);
     llvm::Value *Child = new llvm::LoadInst(
-        getValueType(cat, module), ChildPtr, "", CaseBlock);
+        getvalue_type(cat, module), ChildPtr, "", CaseBlock);
     auto sort_name = ast_to_string(*sort);
     auto *Str = llvm::ConstantDataArray::getString(Ctx, sort_name, true);
     auto *global = module->getOrInsertGlobal(
@@ -1106,16 +1106,16 @@ static llvm::Constant *getOffsetOfMember(
 }
 
 static llvm::Constant *getLayoutData(
-    uint16_t layout, KORESymbol *symbol, llvm::Module *module,
-    KOREDefinition *def) {
+    uint16_t layout, kore_symbol *symbol, llvm::Module *module,
+    kore_definition *def) {
   uint8_t len = symbol->getArguments().size();
   std::vector<llvm::Constant *> elements;
   llvm::LLVMContext &Ctx = module->getContext();
   auto *BlockType = getBlockType(module, def, symbol);
   int i = 2;
   for (auto const &sort : symbol->getArguments()) {
-    ValueType cat
-        = dynamic_cast<KORECompositeSort *>(sort.get())->getCategory(def);
+    value_type cat
+        = dynamic_cast<kore_composite_sort *>(sort.get())->getCategory(def);
     auto *offset = getOffsetOfMember(
         module, BlockType,
         i++); //llvm::ConstantExpr::getOffsetOf(BlockType, i++);
@@ -1156,8 +1156,8 @@ static llvm::Constant *getLayoutData(
   return globalVar2;
 }
 
-static void emitLayouts(KOREDefinition *definition, llvm::Module *module) {
-  std::map<uint16_t, KORESymbol *> layouts;
+static void emitLayouts(kore_definition *definition, llvm::Module *module) {
+  std::map<uint16_t, kore_symbol *> layouts;
   for (auto entry : definition->getSymbols()) {
     layouts[entry.second->getLayout()] = entry.second;
   }
@@ -1202,11 +1202,11 @@ static void emitLayouts(KOREDefinition *definition, llvm::Module *module) {
   stuck->insertInto(func);
 }
 
-static void emitVisitChildren(KOREDefinition *def, llvm::Module *mod) {
+static void emitVisitChildren(kore_definition *def, llvm::Module *mod) {
   emitTraversal("visitChildren", def, mod, true, getVisitor);
 }
 
-static void emitInjTags(KOREDefinition *def, llvm::Module *mod) {
+static void emitInjTags(kore_definition *def, llvm::Module *mod) {
   llvm::LLVMContext &Ctx = mod->getContext();
   auto *global
       = mod->getOrInsertGlobal("first_inj_tag", llvm::Type::getInt32Ty(Ctx));
@@ -1225,9 +1225,9 @@ static void emitInjTags(KOREDefinition *def, llvm::Module *mod) {
   }
 }
 
-static void emitSortTable(KOREDefinition *def, llvm::Module *mod) {
-  auto getter = [](KOREDefinition *definition, llvm::Module *module,
-                   KORESymbol *symbol) -> llvm::Constant * {
+static void emitSortTable(kore_definition *def, llvm::Module *mod) {
+  auto getter = [](kore_definition *definition, llvm::Module *module,
+                   kore_symbol *symbol) -> llvm::Constant * {
     auto &ctx = module->getContext();
 
     auto *subtableType = llvm::ArrayType::get(
@@ -1280,9 +1280,9 @@ static void emitSortTable(KOREDefinition *def, llvm::Module *mod) {
  * Each value in the table is a pointer to a global variable containing the
  * relevant sort name as a null-terminated string.
  */
-static void emitReturnSortTable(KOREDefinition *def, llvm::Module *mod) {
-  auto getter = [](KOREDefinition *definition, llvm::Module *module,
-                   KORESymbol *symbol) -> llvm::Constant * {
+static void emitReturnSortTable(kore_definition *def, llvm::Module *mod) {
+  auto getter = [](kore_definition *definition, llvm::Module *module,
+                   kore_symbol *symbol) -> llvm::Constant * {
     auto &ctx = module->getContext();
 
     auto sort = symbol->getSort();
@@ -1313,9 +1313,9 @@ static void emitReturnSortTable(KOREDefinition *def, llvm::Module *mod) {
  *   tag_of(inj{SortA{}, SortKItem{}}) |-> true
  *   tag_of(someSymbol{})              |-> false
  */
-static void emitSymbolIsInstantiation(KOREDefinition *def, llvm::Module *mod) {
-  auto getter = [](KOREDefinition *definition, llvm::Module *module,
-                   KORESymbol *symbol) -> llvm::Constant * {
+static void emitSymbolIsInstantiation(kore_definition *def, llvm::Module *mod) {
+  auto getter = [](kore_definition *definition, llvm::Module *module,
+                   kore_symbol *symbol) -> llvm::Constant * {
     auto &ctx = module->getContext();
 
     auto *bool_ty = llvm::Type::getInt1Ty(ctx);
@@ -1330,7 +1330,7 @@ static void emitSymbolIsInstantiation(KOREDefinition *def, llvm::Module *mod) {
 }
 
 void emitConfigParserFunctions(
-    KOREDefinition *definition, llvm::Module *module) {
+    kore_definition *definition, llvm::Module *module) {
   emitGetTagForSymbolName(definition, module);
   emitGetBlockHeaderForSymbol(definition, module);
   emitIsSymbolAFunction(definition, module);

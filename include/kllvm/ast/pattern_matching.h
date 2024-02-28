@@ -158,11 +158,11 @@ struct pattern_forwarder {
  *
  * All valid lens types must supply an implementation of:
  *
- *   match_result match(std::shared_ptr<KOREPattern> const&) const
+ *   match_result match(std::shared_ptr<kore_pattern> const&) const
  */
 struct match_result {
   bool matches;
-  std::shared_ptr<KOREPattern> subject;
+  std::shared_ptr<kore_pattern> subject;
 };
 
 /**
@@ -171,7 +171,7 @@ struct match_result {
 class any_ {
 public:
   [[nodiscard]] static match_result
-  match(std::shared_ptr<KOREPattern> const &term) {
+  match(std::shared_ptr<kore_pattern> const &term) {
     return {true, nullptr};
   }
 };
@@ -196,7 +196,7 @@ public:
   }
 
   [[nodiscard]] match_result
-  match(std::shared_ptr<KOREPattern> const &term) const {
+  match(std::shared_ptr<kore_pattern> const &term) const {
     auto inner_result = inner_.match(term);
 
     if (inner_result.matches) {
@@ -238,8 +238,8 @@ public:
    * is the only such lens.
    */
   [[nodiscard]] match_result
-  match(std::shared_ptr<KOREPattern> const &term) const {
-    if (auto composite = std::dynamic_pointer_cast<KORECompositePattern>(term);
+  match(std::shared_ptr<kore_pattern> const &term) const {
+    if (auto composite = std::dynamic_pointer_cast<kore_composite_pattern>(term);
         composite && composite->getArguments().size() == arity()
         && composite->getConstructor()->getName() == constructor_) {
       auto results = std::vector<match_result>{};
@@ -282,7 +282,7 @@ private:
  *
  * The supplied callable should have a signature compatible with:
  *
- *   Result (std::shared_ptr<KOREPattern> const&)
+ *   Result (std::shared_ptr<kore_pattern> const&)
  *
  * where `Result` is a specialisation of `std::optional`. This is required to
  * allow the supplied callable to _not return a mapped value_ for a subset of
@@ -306,7 +306,7 @@ public:
    * transformed value of type Result rather than a pattern.
    */
   [[nodiscard]] std::pair<bool, Result>
-  match(std::shared_ptr<KOREPattern> const &term) const {
+  match(std::shared_ptr<kore_pattern> const &term) const {
     auto [match, subject] = pattern_.match(term);
 
     if (!match) {
@@ -318,15 +318,15 @@ public:
 
 private:
   Pattern pattern_;
-  std::function<Result(std::shared_ptr<KOREPattern> const &)> func_;
+  std::function<Result(std::shared_ptr<kore_pattern> const &)> func_;
 };
 
 template <typename Pattern, typename Func>
 map(Pattern, Func) -> map<
-    Pattern, std::invoke_result_t<Func, std::shared_ptr<KOREPattern> const &>>;
+    Pattern, std::invoke_result_t<Func, std::shared_ptr<kore_pattern> const &>>;
 
 template <typename Pattern>
-map(Pattern) -> map<Pattern, std::optional<std::shared_ptr<KOREPattern>>>;
+map(Pattern) -> map<Pattern, std::optional<std::shared_ptr<kore_pattern>>>;
 
 /**
  * Helper function to allow the precisely deduced type of a `map` constructed
@@ -361,7 +361,7 @@ public:
       : maps_(make_map(first), make_map(rest)...) { }
 
   [[nodiscard]] std::pair<bool, result_t>
-  match(std::shared_ptr<KOREPattern> const &term) const {
+  match(std::shared_ptr<kore_pattern> const &term) const {
     result_t result = std::nullopt;
     bool any = false;
 

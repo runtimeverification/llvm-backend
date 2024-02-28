@@ -21,13 +21,13 @@
 #include "runtime/alloc.h"
 #include "runtime/header.h"
 
-struct StringHash {
+struct string_hash {
   size_t operator()(string *const &k) const {
     return std::hash<std::string>{}(std::string(k->data, len(k)));
   }
 };
 
-struct StringEq {
+struct string_eq {
   bool operator()(string *const &lhs, string *const &rhs) const {
     return hook_STRING_eq(lhs, rhs);
   }
@@ -47,7 +47,7 @@ struct print_state {
   ~print_state() = default;
 
   std::vector<block *> boundVariables;
-  std::unordered_map<string *, std::string, StringHash, StringEq> varNames;
+  std::unordered_map<string *, std::string, string_hash, string_eq> varNames;
   std::set<std::string> usedVarNames;
   uint64_t varCounter{0};
 };
@@ -200,7 +200,7 @@ void printConfiguration(FILE *file, block *subject) {
 // code is not on a hot path.
 // NOLINTBEGIN(performance-unnecessary-value-param)
 void printConfigurations(
-    FILE *file, std::unordered_set<block *, HashBlock, KEq> results) {
+    FILE *file, std::unordered_set<block *, hash_block, k_eq> results) {
   auto state = print_state();
 
   writer w = {file, nullptr};
@@ -253,16 +253,16 @@ void printSortedConfigurationToFile(
 }
 
 extern "C" void printMatchResult(
-    std::ostream &os, MatchLog *matchLog, size_t logSize,
+    std::ostream &os, match_log *matchLog, size_t logSize,
     std::string const &definitionPath) {
   auto subject_file = temporary_file("subject_XXXXXX");
   auto *subject = subject_file.file_pointer("w");
   auto pattern_file = temporary_file("pattern_XXXXXX");
 
   for (int i = 0; i < logSize; i++) {
-    if (matchLog[i].kind == MatchLog::SUCCESS) {
+    if (matchLog[i].kind == match_log::SUCCESS) {
       os << "Match succeeds\n";
-    } else if (matchLog[i].kind == MatchLog::FAIL) {
+    } else if (matchLog[i].kind == match_log::FAIL) {
       os << "Subject:\n";
       if (i == 0) {
         printSortedConfigurationToFile(
@@ -279,7 +279,7 @@ extern "C" void printMatchResult(
       pattern_file.ofstream() << matchLog[i].pattern << std::endl;
       kllvm::printKORE(
           os, definitionPath, pattern_file.filename(), false, true);
-    } else if (matchLog[i].kind == MatchLog::FUNCTION) {
+    } else if (matchLog[i].kind == match_log::FUNCTION) {
       os << matchLog[i].debugName << "(";
 
       for (int j = 0; j < matchLog[i].args.size(); j += 2) {

@@ -19,15 +19,15 @@ namespace {
 
 template <typename IRBuilder>
 llvm::Constant *createGlobalSortStringPtr(
-    IRBuilder &B, KORECompositeSort &sort, llvm::Module *mod) {
+    IRBuilder &B, kore_composite_sort &sort, llvm::Module *mod) {
   return B.CreateGlobalStringPtr(
       ast_to_string(sort), fmt::format("{}_str", sort.getName()), 0, mod);
 }
 
 } // namespace
 
-llvm::CallInst *ProofEvent::emitSerializeTerm(
-    KORECompositeSort &sort, llvm::Value *outputFile, llvm::Value *term,
+llvm::CallInst *proof_event::emitSerializeTerm(
+    kore_composite_sort &sort, llvm::Value *outputFile, llvm::Value *term,
     llvm::BasicBlock *insertAtEnd) {
   auto B = llvm::IRBuilder(insertAtEnd);
 
@@ -39,7 +39,7 @@ llvm::CallInst *ProofEvent::emitSerializeTerm(
   auto *i1_ty = llvm::Type::getInt1Ty(Ctx);
 
   if (cat.cat == SortCategory::Symbol || cat.cat == SortCategory::Variable) {
-    auto *block_ty = getValueType({SortCategory::Symbol, 0}, Module);
+    auto *block_ty = getvalue_type({SortCategory::Symbol, 0}, Module);
 
     auto *func_ty = llvm::FunctionType::get(
         void_ty, {i8_ptr_ty, block_ty, i8_ptr_ty, i1_ty}, false);
@@ -68,12 +68,12 @@ llvm::CallInst *ProofEvent::emitSerializeTerm(
       {outputFile, term, sort_name_ptr, llvm::ConstantInt::getFalse(Ctx)});
 }
 
-llvm::CallInst *ProofEvent::emitSerializeConfiguration(
+llvm::CallInst *proof_event::emitSerializeConfiguration(
     llvm::Value *outputFile, llvm::Value *config,
     llvm::BasicBlock *insertAtEnd) {
   auto *void_ty = llvm::Type::getVoidTy(Ctx);
   auto *i8_ptr_ty = llvm::Type::getInt8PtrTy(Ctx);
-  auto *block_ty = getValueType({SortCategory::Symbol, 0}, Module);
+  auto *block_ty = getvalue_type({SortCategory::Symbol, 0}, Module);
   auto *i1_ty = llvm::Type::getInt1Ty(Ctx);
 
   auto *func_ty = llvm::FunctionType::get(
@@ -88,7 +88,7 @@ llvm::CallInst *ProofEvent::emitSerializeConfiguration(
       "", insertAtEnd);
 }
 
-llvm::CallInst *ProofEvent::emitWriteUInt64(
+llvm::CallInst *proof_event::emitWriteUInt64(
     llvm::Value *outputFile, uint64_t value, llvm::BasicBlock *insertAtEnd) {
   auto *void_ty = llvm::Type::getVoidTy(Ctx);
   auto *i8_ptr_ty = llvm::Type::getInt8PtrTy(Ctx);
@@ -103,7 +103,7 @@ llvm::CallInst *ProofEvent::emitWriteUInt64(
   return llvm::CallInst::Create(func, {outputFile, i64_value}, "", insertAtEnd);
 }
 
-llvm::CallInst *ProofEvent::emitWriteString(
+llvm::CallInst *proof_event::emitWriteString(
     llvm::Value *outputFile, std::string const &str,
     llvm::BasicBlock *insertAtEnd) {
   auto B = llvm::IRBuilder(insertAtEnd);
@@ -120,7 +120,7 @@ llvm::CallInst *ProofEvent::emitWriteString(
   return B.CreateCall(print, {outputFile, varname});
 }
 
-llvm::BinaryOperator *ProofEvent::emitNoOp(llvm::BasicBlock *insertAtEnd) {
+llvm::BinaryOperator *proof_event::emitNoOp(llvm::BasicBlock *insertAtEnd) {
   auto *i8_ty = llvm::Type::getInt8Ty(Ctx);
   auto *zero = llvm::ConstantInt::get(i8_ty, 0);
 
@@ -129,13 +129,13 @@ llvm::BinaryOperator *ProofEvent::emitNoOp(llvm::BasicBlock *insertAtEnd) {
 }
 
 llvm::LoadInst *
-ProofEvent::emitGetOutputFileName(llvm::BasicBlock *insertAtEnd) {
+proof_event::emitGetOutputFileName(llvm::BasicBlock *insertAtEnd) {
   auto *i8_ptr_ty = llvm::Type::getInt8PtrTy(Ctx);
   auto *fileNamePointer = Module->getOrInsertGlobal("output_file", i8_ptr_ty);
   return new llvm::LoadInst(i8_ptr_ty, fileNamePointer, "output", insertAtEnd);
 }
 
-std::pair<llvm::BasicBlock *, llvm::BasicBlock *> ProofEvent::proofBranch(
+std::pair<llvm::BasicBlock *, llvm::BasicBlock *> proof_event::proofBranch(
     std::string const &label, llvm::BasicBlock *insertAtEnd) {
   auto *i1_ty = llvm::Type::getInt1Ty(Ctx);
 
@@ -156,7 +156,7 @@ std::pair<llvm::BasicBlock *, llvm::BasicBlock *> ProofEvent::proofBranch(
 }
 
 std::tuple<llvm::BasicBlock *, llvm::BasicBlock *, llvm::Value *>
-ProofEvent::eventPrelude(
+proof_event::eventPrelude(
     std::string const &label, llvm::BasicBlock *insertAtEnd) {
   auto [true_block, merge_block] = proofBranch(label, insertAtEnd);
   return {true_block, merge_block, emitGetOutputFileName(true_block)};
@@ -166,7 +166,7 @@ ProofEvent::eventPrelude(
  * Hook Events
  */
 
-llvm::BasicBlock *ProofEvent::hookEvent_pre(
+llvm::BasicBlock *proof_event::hookEvent_pre(
     std::string const &name, llvm::BasicBlock *current_block,
     std::string const &locationStack) {
   if (!ProofHintInstrumentation) {
@@ -184,8 +184,8 @@ llvm::BasicBlock *ProofEvent::hookEvent_pre(
   return merge_block;
 }
 
-llvm::BasicBlock *ProofEvent::hookEvent_post(
-    llvm::Value *val, KORECompositeSort *sort,
+llvm::BasicBlock *proof_event::hookEvent_post(
+    llvm::Value *val, kore_composite_sort *sort,
     llvm::BasicBlock *current_block) {
   if (!ProofHintInstrumentation) {
     return current_block;
@@ -202,8 +202,8 @@ llvm::BasicBlock *ProofEvent::hookEvent_post(
   return merge_block;
 }
 
-llvm::BasicBlock *ProofEvent::hookArg(
-    llvm::Value *val, KORECompositeSort *sort,
+llvm::BasicBlock *proof_event::hookArg(
+    llvm::Value *val, kore_composite_sort *sort,
     llvm::BasicBlock *current_block) {
   if (!ProofHintInstrumentation) {
     return current_block;
@@ -222,9 +222,9 @@ llvm::BasicBlock *ProofEvent::hookArg(
  * Rewrite Events
  */
 
-llvm::BasicBlock *ProofEvent::rewriteEvent_pre(
-    KOREAxiomDeclaration *axiom, uint64_t arity,
-    std::map<std::string, KOREVariablePattern *> vars,
+llvm::BasicBlock *proof_event::rewriteEvent_pre(
+    kore_axiom_declaration *axiom, uint64_t arity,
+    std::map<std::string, kore_variable_pattern *> vars,
     llvm::StringMap<llvm::Value *> const &subst,
     llvm::BasicBlock *current_block) {
   if (!ProofHintInstrumentation) {
@@ -242,7 +242,7 @@ llvm::BasicBlock *ProofEvent::rewriteEvent_pre(
     auto *val = entry->getValue();
     auto *var = vars[key.str()];
 
-    auto sort = std::dynamic_pointer_cast<KORECompositeSort>(var->getSort());
+    auto sort = std::dynamic_pointer_cast<kore_composite_sort>(var->getSort());
 
     emitWriteString(outputFile, key.str(), true_block);
     emitSerializeTerm(*sort, outputFile, val, true_block);
@@ -253,8 +253,8 @@ llvm::BasicBlock *ProofEvent::rewriteEvent_pre(
   return merge_block;
 }
 
-llvm::BasicBlock *ProofEvent::rewriteEvent_post(
-    KOREAxiomDeclaration *axiom, llvm::Value *return_value,
+llvm::BasicBlock *proof_event::rewriteEvent_post(
+    kore_axiom_declaration *axiom, llvm::Value *return_value,
     llvm::BasicBlock *current_block) {
   if (!ProofHintInstrumentation) {
     return current_block;
@@ -263,7 +263,7 @@ llvm::BasicBlock *ProofEvent::rewriteEvent_post(
   auto [true_block, merge_block, output_file]
       = eventPrelude("rewrite_post", current_block);
 
-  auto return_sort = std::dynamic_pointer_cast<KORECompositeSort>(
+  auto return_sort = std::dynamic_pointer_cast<kore_composite_sort>(
       axiom->getRightHandSide()->getSort());
 
   emitWriteUInt64(output_file, detail::word(0xFF), true_block);
@@ -278,8 +278,8 @@ llvm::BasicBlock *ProofEvent::rewriteEvent_post(
  * Function Events
  */
 
-llvm::BasicBlock *ProofEvent::functionEvent_pre(
-    llvm::BasicBlock *current_block, KORECompositePattern *pattern,
+llvm::BasicBlock *proof_event::functionEvent_pre(
+    llvm::BasicBlock *current_block, kore_composite_pattern *pattern,
     std::string const &locationStack) {
   if (!ProofHintInstrumentation) {
     return current_block;
@@ -298,7 +298,7 @@ llvm::BasicBlock *ProofEvent::functionEvent_pre(
 }
 
 llvm::BasicBlock *
-ProofEvent::functionEvent_post(llvm::BasicBlock *current_block) {
+proof_event::functionEvent_post(llvm::BasicBlock *current_block) {
   if (!ProofHintInstrumentation) {
     return current_block;
   }
@@ -313,8 +313,8 @@ ProofEvent::functionEvent_post(llvm::BasicBlock *current_block) {
   return merge_block;
 }
 
-llvm::BasicBlock *ProofEvent::sideConditionEvent_pre(
-    KOREAxiomDeclaration *axiom, std::vector<llvm::Value *> const &args,
+llvm::BasicBlock *proof_event::sideConditionEvent_pre(
+    kore_axiom_declaration *axiom, std::vector<llvm::Value *> const &args,
     llvm::BasicBlock *current_block) {
   if (!ProofHintInstrumentation) {
     return current_block;
@@ -330,8 +330,8 @@ llvm::BasicBlock *ProofEvent::sideConditionEvent_pre(
   emitWriteUInt64(outputFile, ordinal, true_block);
   emitWriteUInt64(outputFile, arity, true_block);
 
-  KOREPattern *pattern = axiom->getRequires();
-  std::map<std::string, KOREVariablePattern *> vars;
+  kore_pattern *pattern = axiom->getRequires();
+  std::map<std::string, kore_variable_pattern *> vars;
   pattern->markVariables(vars);
 
   int i = 0;
@@ -340,7 +340,7 @@ llvm::BasicBlock *ProofEvent::sideConditionEvent_pre(
     auto *var = entry->second;
     auto *val = args[i];
 
-    auto sort = std::dynamic_pointer_cast<KORECompositeSort>(var->getSort());
+    auto sort = std::dynamic_pointer_cast<kore_composite_sort>(var->getSort());
 
     emitWriteString(outputFile, varName, true_block);
     emitSerializeTerm(*sort, outputFile, val, true_block);
@@ -352,8 +352,8 @@ llvm::BasicBlock *ProofEvent::sideConditionEvent_pre(
   return merge_block;
 }
 
-llvm::BasicBlock *ProofEvent::sideConditionEvent_post(
-    KOREAxiomDeclaration *axiom, llvm::Value *check_result,
+llvm::BasicBlock *proof_event::sideConditionEvent_post(
+    kore_axiom_declaration *axiom, llvm::Value *check_result,
     llvm::BasicBlock *current_block) {
   if (!ProofHintInstrumentation) {
     return current_block;
@@ -364,7 +364,7 @@ llvm::BasicBlock *ProofEvent::sideConditionEvent_post(
 
   size_t ordinal = axiom->getOrdinal();
 
-  auto check_result_sort = std::dynamic_pointer_cast<KORECompositeSort>(
+  auto check_result_sort = std::dynamic_pointer_cast<kore_composite_sort>(
       axiom->getRequires()->getSort());
 
   emitWriteUInt64(outputFile, detail::word(0x33), true_block);

@@ -59,7 +59,7 @@ void finalizeDebugInfo() {
 
 void initDebugFunction(
     std::string const &name, std::string const &linkageName,
-    llvm::DISubroutineType *type, KOREDefinition *definition,
+    llvm::DISubroutineType *type, kore_definition *definition,
     llvm::Function *func) {
   if (!Dbg) {
     return;
@@ -74,7 +74,7 @@ void initDebugFunction(
 
 void initDebugParam(
     llvm::Function *func, unsigned argNo, std::string const &name,
-    ValueType type, std::string const &typeName) {
+    value_type type, std::string const &typeName) {
   if (!Dbg) {
     return;
   }
@@ -106,20 +106,20 @@ void initDebugAxiom(attribute_set const &att) {
     resetDebugLoc();
     return;
   }
-  KORECompositePattern *sourceAtt = att.get(attribute_set::key::source).get();
+  kore_composite_pattern *sourceAtt = att.get(attribute_set::key::source).get();
   assert(sourceAtt->getArguments().size() == 1);
   auto *strPattern
-      = dynamic_cast<KOREStringPattern *>(sourceAtt->getArguments()[0].get());
+      = dynamic_cast<kore_string_pattern *>(sourceAtt->getArguments()[0].get());
   std::string source = strPattern->getContents();
   if (!att.contains(attribute_set::key::location)) {
     resetDebugLoc();
     return;
   }
-  KORECompositePattern *locationAtt
+  kore_composite_pattern *locationAtt
       = att.get(attribute_set::key::location).get();
   assert(locationAtt->getArguments().size() == 1);
   auto *strPattern2
-      = dynamic_cast<KOREStringPattern *>(locationAtt->getArguments()[0].get());
+      = dynamic_cast<kore_string_pattern *>(locationAtt->getArguments()[0].get());
   std::string location = strPattern2->getContents();
   source = source.substr(7, source.length() - 8);
   size_t first_comma = location.find_first_of(',');
@@ -157,7 +157,7 @@ static std::string FLOAT_STRUCT = "floating";
 static std::string BUFFER_STRUCT = "stringbuffer";
 static std::string BLOCK_STRUCT = "block";
 
-llvm::DIType *getDebugType(ValueType type, std::string const &typeName) {
+llvm::DIType *getDebugType(value_type type, std::string const &typeName) {
   if (!Dbg) {
     return nullptr;
   }

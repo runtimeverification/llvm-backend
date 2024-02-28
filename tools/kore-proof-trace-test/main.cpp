@@ -17,7 +17,7 @@ int main(int argc, char **argv) {
   cl::HideUnrelatedOptions({&KoreProofTraceTestCat});
   cl::ParseCommandLineOptions(argc, argv);
 
-  ProofTraceParser Parser(false);
+  proof_trace_parser Parser(false);
   auto Trace = Parser.parse_proof_trace_from_file(InputFilename);
   if (!Trace.has_value()) {
     return 1;
@@ -25,7 +25,7 @@ int main(int argc, char **argv) {
 
   // check that there is a initial configuration
   if (!(Trace->getInitialConfig().isPattern()
-        && Trace->getInitialConfig().getKOREPattern())) {
+        && Trace->getInitialConfig().getkore_pattern())) {
     return 1;
   }
 
@@ -35,7 +35,7 @@ int main(int argc, char **argv) {
   }
 
   // check that the first event is the rewrite a() => b()
-  auto const Rule1 = std::dynamic_pointer_cast<LLVMRuleEvent>(
+  auto const Rule1 = std::dynamic_pointer_cast<llvm_rule_event>(
       Trace->getTrace()[0].getStepEvent());
   if (!Rule1) {
     return 1;
@@ -46,12 +46,12 @@ int main(int argc, char **argv) {
 
   // check that the second event is a configuration
   if (!(Trace->getTrace()[1].isPattern()
-        && Trace->getTrace()[1].getKOREPattern())) {
+        && Trace->getTrace()[1].getkore_pattern())) {
     return 1;
   }
 
   // check that the third event is the rewrite b() => c()
-  auto const Rule2 = std::dynamic_pointer_cast<LLVMRuleEvent>(
+  auto const Rule2 = std::dynamic_pointer_cast<llvm_rule_event>(
       Trace->getTrace()[2].getStepEvent());
   if (!Rule2) {
     return 1;
@@ -62,7 +62,7 @@ int main(int argc, char **argv) {
 
   // check that the fourth event is a configuration
   if (!(Trace->getTrace()[3].isPattern()
-        && Trace->getTrace()[3].getKOREPattern())) {
+        && Trace->getTrace()[3].getkore_pattern())) {
     return 1;
   }
 

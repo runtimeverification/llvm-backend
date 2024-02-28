@@ -52,7 +52,7 @@ uint32_t getTagForSymbolName(char const *name) {
 }
 }
 
-static uint32_t getTagForSymbol(KORESymbol const &symbol) {
+static uint32_t getTagForSymbol(kore_symbol const &symbol) {
   auto name = ast_to_string(symbol);
   return getTagForSymbolName(name.c_str());
 }
@@ -96,28 +96,28 @@ struct construction {
 };
 
 // NOLINTNEXTLINE(*-cognitive-complexity)
-extern "C" void *constructInitialConfiguration(KOREPattern const *initial) {
-  std::vector<std::variant<KOREPattern const *, construction>> workList{
+extern "C" void *constructInitialConfiguration(kore_pattern const *initial) {
+  std::vector<std::variant<kore_pattern const *, construction>> workList{
       initial};
   std::vector<void *> output;
 
   while (!workList.empty()) {
-    std::variant<KOREPattern const *, construction> current = workList.back();
+    std::variant<kore_pattern const *, construction> current = workList.back();
     workList.pop_back();
 
-    if (std::holds_alternative<KOREPattern const *>(current)) {
-      auto const *constructor = dynamic_cast<KORECompositePattern const *>(
-          *std::get_if<KOREPattern const *>(&current));
+    if (std::holds_alternative<kore_pattern const *>(current)) {
+      auto const *constructor = dynamic_cast<kore_composite_pattern const *>(
+          *std::get_if<kore_pattern const *>(&current));
       assert(constructor && "Pattern in worklist is not composite");
 
-      KORESymbol const *symbol = constructor->getConstructor();
+      kore_symbol const *symbol = constructor->getConstructor();
       assert(
           symbol->isConcrete()
           && "found sort variable in initial configuration");
       if (symbol->getName() == "\\dv") {
-        auto *const sort = dynamic_cast<KORECompositeSort *>(
+        auto *const sort = dynamic_cast<kore_composite_sort *>(
             symbol->getFormalArguments()[0].get());
-        auto *const strPattern = dynamic_cast<KOREStringPattern *>(
+        auto *const strPattern = dynamic_cast<kore_string_pattern *>(
             constructor->getArguments()[0].get());
         std::string contents = strPattern->getContents();
         output.push_back(getToken(
@@ -168,13 +168,13 @@ deserializeInitialConfiguration(It ptr, It end, binary_version version) {
   auto output = std::vector<void *>{};
 
   auto token_stack = std::vector<std::string>{};
-  auto sort_stack = std::vector<sptr<KORESort>>{};
-  auto symbol = kllvm::ptr<KORESymbol>{};
+  auto sort_stack = std::vector<sptr<kore_sort>>{};
+  auto symbol = kllvm::ptr<kore_symbol>{};
 
   while (ptr < end) {
     switch (peek(ptr)) {
 
-    case header_byte<KORECompositePattern>: {
+    case header_byte<kore_composite_pattern>: {
       ++ptr;
       auto arity = read_length(ptr, end, version, 2);
 
@@ -184,7 +184,7 @@ deserializeInitialConfiguration(It ptr, It end, binary_version version) {
           && "found sort variable in initial configuration");
 
       if (symbol->getName() == "\\dv") {
-        auto *sort = dynamic_cast<KORECompositeSort *>(
+        auto *sort = dynamic_cast<kore_composite_sort *>(
             symbol->getFormalArguments()[0].get());
         assert(sort && "Not a composite sort");
         auto const &token = token_stack.back();
@@ -221,25 +221,25 @@ deserializeInitialConfiguration(It ptr, It end, binary_version version) {
       break;
     }
 
-    case header_byte<KOREStringPattern>:
+    case header_byte<kore_string_pattern>:
       ++ptr;
       token_stack.push_back(read_string(ptr, end, version));
       break;
 
-    case header_byte<KORESymbol>: {
+    case header_byte<kore_symbol>: {
       ++ptr;
       symbol = read_symbol(ptr, end, sort_stack, version);
       break;
     }
 
-    case header_byte<KORESortVariable>: {
+    case header_byte<kore_sort_variable>: {
       ++ptr;
       sort_stack.push_back(
-          KORESortVariable::Create(read_string(ptr, end, version)));
+          kore_sort_variable::Create(read_string(ptr, end, version)));
       break;
     }
 
-    case header_byte<KORECompositeSort>: {
+    case header_byte<kore_composite_sort>: {
       ++ptr;
       sort_stack.push_back(read_composite_sort(ptr, end, sort_stack, version));
       break;
@@ -262,7 +262,7 @@ block *parseConfiguration(char const *filename) {
     auto data = file_contents(filename);
     return deserializeConfiguration(data.data(), data.size());
   }
-  auto InitialConfiguration = parser::KOREParser(filename).pattern();
+  auto InitialConfiguration = parser::kore_parser(filename).pattern();
   // InitialConfiguration->print(std::cout);
 
   // Allocate the llvm KORE datastructures for the configuration

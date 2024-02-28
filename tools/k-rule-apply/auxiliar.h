@@ -14,20 +14,20 @@
 using namespace kllvm;
 
 extern "C" {
-void *constructInitialConfiguration(KOREPattern const *);
+void *constructInitialConfiguration(kore_pattern const *);
 void resetMatchReason();
-MatchLog *getMatchLog();
-size_t getMatchLogSize();
-void printMatchResult(std::ostream &, MatchLog *, size_t, std::string const &);
+match_log *getmatch_log();
+size_t getmatch_logSize();
+void printMatchResult(std::ostream &, match_log *, size_t, std::string const &);
 void initStaticObjects();
 }
 
-void *constructInitialConfiguration(KOREPattern const *pattern, void *handle) {
+void *constructInitialConfiguration(kore_pattern const *pattern, void *handle) {
   void *funcPtr = dlsym(handle, "constructInitialConfiguration");
   if (funcPtr == NULL) {
     return NULL;
   }
-  auto f = reinterpret_cast<void *(*)(KOREPattern const *)>(funcPtr);
+  auto f = reinterpret_cast<void *(*)(kore_pattern const *)>(funcPtr);
   return f(pattern);
 }
 
@@ -40,17 +40,17 @@ void *resetMatchReason(void *handle) {
   return f();
 }
 
-MatchLog *getMatchLog(void *handle) {
-  void *funcPtr = dlsym(handle, "getMatchLog");
+match_log *getmatch_log(void *handle) {
+  void *funcPtr = dlsym(handle, "getmatch_log");
   if (funcPtr == NULL) {
     return NULL;
   }
-  auto f = reinterpret_cast<MatchLog *(*)()>(funcPtr);
+  auto f = reinterpret_cast<match_log *(*)()>(funcPtr);
   return f();
 }
 
-size_t getMatchLogSize(void *handle) {
-  void *funcPtr = dlsym(handle, "getMatchLogSize");
+size_t getmatch_logSize(void *handle) {
+  void *funcPtr = dlsym(handle, "getmatch_logSize");
   if (funcPtr == NULL) {
     return -1;
   }
@@ -59,14 +59,14 @@ size_t getMatchLogSize(void *handle) {
 }
 
 void *printMatchResult(
-    std::ostream &os, MatchLog *log, size_t logSize, std::string const &dir,
+    std::ostream &os, match_log *log, size_t logSize, std::string const &dir,
     void *handle) {
   void *funcPtr = dlsym(handle, "printMatchResult");
   if (funcPtr == NULL) {
     return NULL;
   }
   auto f = reinterpret_cast<
-      void *(*)(std::ostream &, MatchLog *, size_t, std::string const &)>(
+      void *(*)(std::ostream &, match_log *, size_t, std::string const &)>(
       funcPtr);
   return f(os, log, logSize, dir);
 }

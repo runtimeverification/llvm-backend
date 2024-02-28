@@ -16,13 +16,13 @@
 using namespace kllvm;
 using namespace kllvm::parser;
 
-struct StringHash {
+struct string_hash {
   size_t operator()(string *const &k) const {
     return std::hash<std::string>{}(std::string(k->data, len(k)));
   }
 };
 
-struct StringEq {
+struct string_eq {
   bool operator()(string *const &lhs, string *const &rhs) const {
     return hook_STRING_eq(lhs, rhs);
   }
@@ -45,7 +45,7 @@ struct serialization_state {
 
   serializer instance;
   std::vector<block *> boundVariables;
-  std::unordered_map<string *, std::string, StringHash, StringEq> varNames;
+  std::unordered_map<string *, std::string, string_hash, string_eq> varNames;
   std::set<std::string> usedVarNames;
   uint64_t varCounter{0};
 };
@@ -64,11 +64,11 @@ void serializeConfigurationInternal(
 static void emitSymbol(
     serializer &instance, char const *name, uint64_t arity = 0,
     uint64_t symbol_arity = 0) {
-  instance.emit(header_byte<KORESymbol>);
+  instance.emit(header_byte<kore_symbol>);
   instance.emit_length(symbol_arity);
   instance.emit_string(drop_back(name, 2));
 
-  instance.emit(header_byte<KORECompositePattern>);
+  instance.emit(header_byte<kore_composite_pattern>);
   instance.emit_length(arity);
 }
 
@@ -76,7 +76,7 @@ static void emitSymbol(
  * Emit a 0-argument sort of the form Sort{}
  */
 static void emitConstantSort(serializer &instance, char const *name) {
-  instance.emit(header_byte<KORECompositeSort>);
+  instance.emit(header_byte<kore_composite_sort>);
   instance.emit_length(0);
   instance.emit_string(name);
 }
@@ -86,7 +86,7 @@ static void emitConstantSort(serializer &instance, char const *name) {
  */
 static void emitToken(
     serializer &instance, char const *sort, char const *string, int len = -1) {
-  instance.emit(header_byte<KOREStringPattern>);
+  instance.emit(header_byte<kore_string_pattern>);
 
   // Allow the length of the token to be passed in explicitly to handle the
   // Bytes sort, which can include null characters in the middle of a string.
@@ -100,11 +100,11 @@ static void emitToken(
 
   emitConstantSort(instance, drop_back(sort, 2).c_str());
 
-  instance.emit(header_byte<KORESymbol>);
+  instance.emit(header_byte<kore_symbol>);
   instance.emit_length(1);
   instance.emit_string("\\dv");
 
-  instance.emit(header_byte<KORECompositePattern>);
+  instance.emit(header_byte<kore_composite_pattern>);
   instance.emit_length(1);
 }
 
@@ -150,7 +150,7 @@ void serializeRangeMap(
   auto *arg_sorts = getArgumentSortsForTag(tag);
 
   bool once = true;
-  for (auto iter = rng_map::ConstRangeMapIterator<KElem, KElem>(*map);
+  for (auto iter = rng_map::ConstRangeMapIterator<k_elem, k_elem>(*map);
        iter.has_next(); ++iter) {
     serializeConfigurationInternal(
         file, iter->first.start(), "SortKItem{}", false, state);
@@ -258,13 +258,13 @@ void serializeMInt(
 
 void serializeComma(writer *file, void *state) { }
 
-static std::pair<std::string, std::vector<sptr<KORESort>>>
+static std::pair<std::string, std::vector<sptr<kore_sort>>>
 cached_symbol_sort_list(std::string const &symbol) {
   static auto cache = std::unordered_map<
-      std::string, std::pair<std::string, std::vector<sptr<KORESort>>>>{};
+      std::string, std::pair<std::string, std::vector<sptr<kore_sort>>>>{};
 
   if (cache.find(symbol) == cache.end()) {
-    auto [id, sorts] = KOREParser::from_string(symbol)->symbol_sort_list();
+    auto [id, sorts] = kore_parser::from_string(symbol)->symbol_sort_list();
 
     // The parser returns the actual name of the symbol separately to its formal
     // sort parameters. However, the interface of emitSymbol is compatible with
@@ -378,7 +378,7 @@ void serializeConfigurationInternal(
 }
 
 void serializeConfigurations(
-    FILE *file, std::unordered_set<block *, HashBlock, KEq> results) {
+    FILE *file, std::unordered_set<block *, hash_block, k_eq> results) {
   auto state = serialization_state();
 
   auto w = writer{file, nullptr};
@@ -466,7 +466,7 @@ void serializeRawTermToFile(
   free(data);
 }
 
-std::shared_ptr<kllvm::KOREPattern>
+std::shared_ptr<kllvm::kore_pattern>
 sortedTermToKorePattern(block *subject, char const *sort) {
   auto is_kitem = (std::string(sort) == "SortKItem{}");
   block *term = is_kitem ? subject : constructRawTerm(subject, sort, false);
@@ -481,6 +481,6 @@ sortedTermToKorePattern(block *subject, char const *sort) {
   return result;
 }
 
-std::shared_ptr<kllvm::KOREPattern> termToKorePattern(block *subject) {
+std::shared_ptr<kllvm::kore_pattern> termToKorePattern(block *subject) {
   return sortedTermToKorePattern(subject, "SortKItem{}");
 }

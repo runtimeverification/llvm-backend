@@ -46,7 +46,7 @@ cl::opt<std::string> Definition(
     cl::Positional, cl::desc("<definition.kore>"), cl::Required,
     cl::cat(CodegenToolCat));
 
-cl::opt<std::string> DecisionTree(
+cl::opt<std::string> decisionTree(
     cl::Positional, cl::desc("<dt.yaml>"), cl::Required,
     cl::cat(CodegenToolCat));
 
@@ -81,7 +81,7 @@ fs::path dt_dir() {
 
 fs::path get_indexed_filename(
     std::map<std::string, std::string> const &index,
-    KORESymbolDeclaration *decl) {
+    kore_symbol_declaration *decl) {
   return dt_dir() / index.at(decl->getSymbol()->getName());
 }
 
@@ -141,8 +141,8 @@ int main(int argc, char **argv) {
 
   validate_codegen_args(OutputFile == "-");
 
-  KOREParser parser(Definition.getValue());
-  ptr<KOREDefinition> definition = parser.definition();
+  kore_parser parser(Definition.getValue());
+  ptr<kore_definition> definition = parser.definition();
   definition->preprocess();
 
   llvm::LLVMContext Context;
@@ -162,7 +162,7 @@ int main(int argc, char **argv) {
       auto dt_filename
           = dt_dir() / fmt::format("dt_{}.yaml", axiom->getOrdinal());
       if (fs::exists(dt_filename) && !ProofHintInstrumentation) {
-        auto residuals = parseYamlSpecialDecisionTree(
+        auto residuals = parseYamlSpecialdecisionTree(
             mod.get(), dt_filename, definition->getAllSymbols(),
             definition->getHookedSorts());
         makeApplyRuleFunction(
@@ -175,7 +175,7 @@ int main(int argc, char **argv) {
       auto match_filename
           = dt_dir() / fmt::format("match_{}.yaml", axiom->getOrdinal());
       if (fs::exists(match_filename)) {
-        auto *dt = parseYamlDecisionTree(
+        auto *dt = parseYamldecisionTree(
             mod.get(), match_filename, definition->getAllSymbols(),
             definition->getHookedSorts());
         makeMatchReasonFunction(definition.get(), mod.get(), axiom, dt);
@@ -185,11 +185,11 @@ int main(int argc, char **argv) {
 
   emitConfigParserFunctions(definition.get(), mod.get());
 
-  auto *dt = parseYamlDecisionTree(
-      mod.get(), DecisionTree, definition->getAllSymbols(),
+  auto *dt = parseYamldecisionTree(
+      mod.get(), decisionTree, definition->getAllSymbols(),
       definition->getHookedSorts());
   makeStepFunction(definition.get(), mod.get(), dt, false);
-  auto *dtSearch = parseYamlDecisionTree(
+  auto *dtSearch = parseYamldecisionTree(
       mod.get(), dt_dir() / "dt-search.yaml", definition->getAllSymbols(),
       definition->getHookedSorts());
   makeStepFunction(definition.get(), mod.get(), dtSearch, true);
@@ -201,13 +201,13 @@ int main(int argc, char **argv) {
     if (decl->attributes().contains(attribute_set::key::function)
         && !decl->isHooked()) {
       auto filename = get_indexed_filename(index, decl);
-      auto *funcDt = parseYamlDecisionTree(
+      auto *funcDt = parseYamldecisionTree(
           mod.get(), filename, definition->getAllSymbols(),
           definition->getHookedSorts());
       makeEvalFunction(decl->getSymbol(), definition.get(), mod.get(), funcDt);
     } else if (decl->isAnywhere()) {
       auto filename = get_indexed_filename(index, decl);
-      auto *funcDt = parseYamlDecisionTree(
+      auto *funcDt = parseYamldecisionTree(
           mod.get(), filename, definition->getAllSymbols(),
           definition->getHookedSorts());
 

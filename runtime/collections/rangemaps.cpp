@@ -5,7 +5,7 @@
 extern "C" {
 rangemap
 hook_RANGEMAP_element(SortKItem start, SortKItem end, SortKItem value) {
-  return rangemap().inserted(rng_map::Range<KElem>(start, end), value);
+  return rangemap().inserted(rng_map::Range<k_elem>(start, end), value);
 }
 
 struct range {
@@ -75,7 +75,7 @@ SortRange hook_RANGEMAP_find_range(SortRangeMap m, SortKItem key) {
 
 rangemap hook_RANGEMAP_update(
     SortRangeMap m, SortKItem start, SortKItem end, SortKItem value) {
-  return m->inserted(rng_map::Range<KElem>(start, end), value);
+  return m->inserted(rng_map::Range<k_elem>(start, end), value);
 }
 
 rangemap
@@ -85,7 +85,7 @@ hook_RANGEMAP_updateRng(SortRangeMap m, SortRange rng, SortKItem value) {
 }
 
 rangemap hook_RANGEMAP_remove(SortRangeMap m, SortKItem start, SortKItem end) {
-  return m->deleted(rng_map::Range<KElem>(start, end));
+  return m->deleted(rng_map::Range<k_elem>(start, end));
 }
 
 rangemap hook_RANGEMAP_removeRng(SortRangeMap m, SortRange rng) {
@@ -115,7 +115,7 @@ static struct blockheader inj_range2kitem_header() {
 }
 set hook_RANGEMAP_keys(SortRangeMap m) {
   auto tmp = hook_SET_unit();
-  for (auto iter = rng_map::ConstRangeMapIterator<KElem, KElem>(*m);
+  for (auto iter = rng_map::ConstRangeMapIterator<k_elem, k_elem>(*m);
        iter.has_next(); ++iter) {
     auto *ptr = (range *)koreAlloc(sizeof(range));
     ptr->h = range_header();
@@ -132,7 +132,7 @@ set hook_RANGEMAP_keys(SortRangeMap m) {
 
 list hook_RANGEMAP_keys_list(SortRangeMap m) {
   auto tmp = list().transient();
-  for (auto iter = rng_map::ConstRangeMapIterator<KElem, KElem>(*m);
+  for (auto iter = rng_map::ConstRangeMapIterator<k_elem, k_elem>(*m);
        iter.has_next(); ++iter) {
     auto *ptr = (range *)koreAlloc(sizeof(range));
     ptr->h = range_header();
@@ -152,7 +152,7 @@ bool hook_RANGEMAP_in_keys(SortKItem key, SortRangeMap m) {
 
 list hook_RANGEMAP_values(SortRangeMap m) {
   auto tmp = list().transient();
-  for (auto iter = rng_map::ConstRangeMapIterator<KElem, KElem>(*m);
+  for (auto iter = rng_map::ConstRangeMapIterator<k_elem, k_elem>(*m);
        iter.has_next(); ++iter) {
     tmp.push_back(iter->second);
   }
@@ -197,7 +197,7 @@ bool hook_RANGEMAP_inclusion(SortRangeMap m1, SortRangeMap m2) {
 rangemap hook_RANGEMAP_updateAll(SortRangeMap m1, SortRangeMap m2) {
   auto *from = m2;
   auto to = *m1;
-  for (auto iter = rng_map::ConstRangeMapIterator<KElem, KElem>(*from);
+  for (auto iter = rng_map::ConstRangeMapIterator<k_elem, k_elem>(*from);
        iter.has_next(); ++iter) {
     to = to.inserted(iter->first, iter->second);
   }
@@ -209,17 +209,17 @@ rangemap hook_RANGEMAP_removeAll(SortRangeMap map, SortSet set) {
   for (auto iter = set->begin(); iter != set->end(); ++iter) {
     auto *b_ptr = (block *)iter->elem;
     auto *r_ptr = (range *)(b_ptr->children[0]);
-    tmp = tmp.deleted(rng_map::Range<KElem>(r_ptr->start, r_ptr->end));
+    tmp = tmp.deleted(rng_map::Range<k_elem>(r_ptr->start, r_ptr->end));
   }
   return tmp;
 }
 
 bool hook_RANGEMAP_eq(SortRangeMap m1, SortRangeMap m2) {
-  auto it1 = rng_map::ConstRangeMapIterator<KElem, KElem>(*m1);
-  auto it2 = rng_map::ConstRangeMapIterator<KElem, KElem>(*m2);
+  auto it1 = rng_map::ConstRangeMapIterator<k_elem, k_elem>(*m1);
+  auto it2 = rng_map::ConstRangeMapIterator<k_elem, k_elem>(*m2);
   for (; it1.has_next() && it2.has_next(); ++it1, ++it2) {
-    std::pair<rng_map::Range<KElem>, KElem> const &r1 = *it1;
-    std::pair<rng_map::Range<KElem>, KElem> const &r2 = *it2;
+    std::pair<rng_map::Range<k_elem>, k_elem> const &r1 = *it1;
+    std::pair<rng_map::Range<k_elem>, k_elem> const &r2 = *it2;
     if (r1 != r2) {
       return false;
     }
@@ -229,7 +229,7 @@ bool hook_RANGEMAP_eq(SortRangeMap m1, SortRangeMap m2) {
 
 void rangemap_hash(rangemap *m, void *hasher) {
   if (hash_enter()) {
-    for (auto iter = rng_map::ConstRangeMapIterator<KElem, KElem>(*m);
+    for (auto iter = rng_map::ConstRangeMapIterator<k_elem, k_elem>(*m);
          iter.has_next(); ++iter) {
       auto entry = *iter;
       k_hash(entry.first.start(), hasher);
@@ -242,7 +242,7 @@ void rangemap_hash(rangemap *m, void *hasher) {
 
 rangemap rangemap_map(rangemap *map, block *(process)(block *)) {
   auto tmp = *map;
-  for (auto iter = rng_map::ConstRangeMapIterator<KElem, KElem>(*map);
+  for (auto iter = rng_map::ConstRangeMapIterator<k_elem, k_elem>(*map);
        iter.has_next(); ++iter) {
     auto entry = *iter;
     tmp = tmp.inserted(entry.first, process(entry.second));
@@ -265,7 +265,7 @@ void printRangeMap(
   sfprintf(file, "\\left-assoc{}(%s(", concat);
 
   bool once = true;
-  for (auto iter = rng_map::ConstRangeMapIterator<KElem, KElem>(*map);
+  for (auto iter = rng_map::ConstRangeMapIterator<k_elem, k_elem>(*map);
        iter.has_next(); ++iter) {
     if (once) {
       once = false;

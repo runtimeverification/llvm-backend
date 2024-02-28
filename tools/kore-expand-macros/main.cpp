@@ -23,17 +23,17 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  KOREParser parser(argv[1] + std::string("/syntaxDefinition.kore"));
-  ptr<KOREDefinition> def = parser.definition();
+  kore_parser parser(argv[1] + std::string("/syntaxDefinition.kore"));
+  ptr<kore_definition> def = parser.definition();
 
   auto subsorts = def->getSubsorts();
   auto overloads = def->getOverloads();
 
-  KOREParser parser2(argv[1] + std::string("/macros.kore"));
-  std::vector<ptr<KOREDeclaration>> axioms = parser2.declarations();
+  kore_parser parser2(argv[1] + std::string("/macros.kore"));
+  std::vector<ptr<kore_declaration>> axioms = parser2.declarations();
   std::sort(
       axioms.begin(), axioms.end(),
-      [](ptr<KOREDeclaration> const &l, ptr<KOREDeclaration> const &r) {
+      [](ptr<kore_declaration> const &l, ptr<kore_declaration> const &r) {
         std::string lStr
             = l->attributes().get_string(attribute_set::key::priority);
         std::string rStr
@@ -43,11 +43,11 @@ int main(int argc, char **argv) {
         return lInt < rInt;
       });
 
-  auto config = KOREPattern::load(argv[2]);
-  std::map<std::string, std::vector<KORESymbol *>> symbols;
+  auto config = kore_pattern::load(argv[2]);
+  std::map<std::string, std::vector<kore_symbol *>> symbols;
   config->markSymbols(symbols);
   for (auto &decl : axioms) {
-    auto *axiom = dynamic_cast<KOREAxiomDeclaration *>(decl.get());
+    auto *axiom = dynamic_cast<kore_axiom_declaration *>(decl.get());
     axiom->getPattern()->markSymbols(symbols);
   }
 

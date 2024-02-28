@@ -13,9 +13,9 @@
 
 namespace kllvm {
 
-class ProofEvent {
+class proof_event {
 private:
-  KOREDefinition *Definition;
+  kore_definition *Definition;
   llvm::Module *Module;
   llvm::LLVMContext &Ctx;
 
@@ -49,7 +49,7 @@ private:
    * term must be known.
    */
   llvm::CallInst *emitSerializeTerm(
-      KORECompositeSort &sort, llvm::Value *outputFile, llvm::Value *term,
+      kore_composite_sort &sort, llvm::Value *outputFile, llvm::Value *term,
       llvm::BasicBlock *insertAtEnd);
 
   /*
@@ -97,39 +97,39 @@ public:
       std::string const &locationStack);
 
   [[nodiscard]] llvm::BasicBlock *hookEvent_post(
-      llvm::Value *val, KORECompositeSort *sort,
+      llvm::Value *val, kore_composite_sort *sort,
       llvm::BasicBlock *current_block);
 
   [[nodiscard]] llvm::BasicBlock *hookArg(
-      llvm::Value *val, KORECompositeSort *sort,
+      llvm::Value *val, kore_composite_sort *sort,
       llvm::BasicBlock *current_block);
 
   [[nodiscard]] llvm::BasicBlock *rewriteEvent_pre(
-      KOREAxiomDeclaration *axiom, uint64_t arity,
-      std::map<std::string, KOREVariablePattern *> vars,
+      kore_axiom_declaration *axiom, uint64_t arity,
+      std::map<std::string, kore_variable_pattern *> vars,
       llvm::StringMap<llvm::Value *> const &subst,
       llvm::BasicBlock *current_block);
 
   [[nodiscard]] llvm::BasicBlock *rewriteEvent_post(
-      KOREAxiomDeclaration *axiom, llvm::Value *return_value,
+      kore_axiom_declaration *axiom, llvm::Value *return_value,
       llvm::BasicBlock *current_block);
 
   [[nodiscard]] llvm::BasicBlock *functionEvent_pre(
-      llvm::BasicBlock *current_block, KORECompositePattern *pattern,
+      llvm::BasicBlock *current_block, kore_composite_pattern *pattern,
       std::string const &locationStack);
 
   [[nodiscard]] llvm::BasicBlock *
   functionEvent_post(llvm::BasicBlock *current_block);
 
   [[nodiscard]] llvm::BasicBlock *sideConditionEvent_pre(
-      KOREAxiomDeclaration *axiom, std::vector<llvm::Value *> const &args,
+      kore_axiom_declaration *axiom, std::vector<llvm::Value *> const &args,
       llvm::BasicBlock *current_block);
 
   [[nodiscard]] llvm::BasicBlock *sideConditionEvent_post(
-      KOREAxiomDeclaration *axiom, llvm::Value *check_result,
+      kore_axiom_declaration *axiom, llvm::Value *check_result,
       llvm::BasicBlock *current_block);
 
-  ProofEvent(KOREDefinition *Definition, llvm::Module *Module)
+  proof_event(kore_definition *Definition, llvm::Module *Module)
       : Definition(Definition)
       , Module(Module)
       , Ctx(Module->getContext()) { }

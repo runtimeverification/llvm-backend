@@ -10,7 +10,7 @@
 using namespace llvm;
 using namespace kllvm;
 
-struct Location {
+struct location {
   std::string filename;
   int64_t start_line;
   int64_t end_line;
@@ -28,22 +28,22 @@ cl::opt<std::string> RuleLocation(
     cl::Positional, cl::desc("<filename.k:line[:column]>"), cl::Required,
     cl::cat(KRuleCat));
 
-std::string getSource(KOREAxiomDeclaration *axiom) {
+std::string getSource(kore_axiom_declaration *axiom) {
   auto *sourceAtt = axiom->attributes().get(attribute_set::key::source).get();
   assert(sourceAtt->getArguments().size() == 1);
 
   auto *strPattern
-      = dynamic_cast<KOREStringPattern *>(sourceAtt->getArguments()[0].get());
+      = dynamic_cast<kore_string_pattern *>(sourceAtt->getArguments()[0].get());
   return strPattern->getContents();
 }
 
-Location getLocation(KOREAxiomDeclaration *axiom) {
+location getLocation(kore_axiom_declaration *axiom) {
   auto *locationAtt
       = axiom->attributes().get(attribute_set::key::location).get();
   assert(locationAtt->getArguments().size() == 1);
 
   auto *strPattern
-      = dynamic_cast<KOREStringPattern *>(locationAtt->getArguments()[0].get());
+      = dynamic_cast<kore_string_pattern *>(locationAtt->getArguments()[0].get());
   std::string location = strPattern->getContents();
 
   size_t l_paren = location.find_first_of('(');
@@ -65,7 +65,7 @@ Location getLocation(KOREAxiomDeclaration *axiom) {
   return {location, start_line, end_line, start_column, end_column};
 }
 
-Location parseLocation(std::string const &loc) {
+location parseLocation(std::string const &loc) {
   size_t pos = loc.find(':');
   if (pos == std::string::npos) {
     std::cerr << "Rule's location must be in the format: "
@@ -90,7 +90,7 @@ Location parseLocation(std::string const &loc) {
 }
 
 bool checkRanges(
-    Location const &param, Location const &file, bool checkColumn) {
+    location const &param, location const &file, bool checkColumn) {
   auto line
       = param.start_line >= file.start_line && param.end_line <= file.end_line;
   auto column = param.start_column >= file.start_column
@@ -107,7 +107,7 @@ int main(int argc, char **argv) {
   std::vector<std::string> rule_labels;
 
   // Parse the definition.kore to get the AST.
-  kllvm::parser::KOREParser parser(definition);
+  kllvm::parser::kore_parser parser(definition);
   auto kore_ast = parser.definition();
 
   // Iterate through axioms.

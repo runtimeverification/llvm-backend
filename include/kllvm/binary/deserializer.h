@@ -127,23 +127,23 @@ std::string read_string(It &ptr, It end, binary_version version) {
 }
 
 template <typename It>
-sptr<KOREVariable> read_variable(It &ptr, It end, binary_version version) {
-  if (peek(ptr) == header_byte<KOREVariable>) {
+sptr<kore_variable> read_variable(It &ptr, It end, binary_version version) {
+  if (peek(ptr) == header_byte<kore_variable>) {
     ++ptr;
-    return KOREVariable::Create(read_string(ptr, end, version));
+    return kore_variable::Create(read_string(ptr, end, version));
   }
 
   return nullptr;
 }
 
 template <typename It>
-ptr<KORESymbol> read_symbol(
-    It &ptr, It end, std::vector<sptr<KORESort>> &sort_stack,
+ptr<kore_symbol> read_symbol(
+    It &ptr, It end, std::vector<sptr<kore_sort>> &sort_stack,
     binary_version version) {
   auto arity = read_length(ptr, end, version, 2);
 
   auto name = read_string(ptr, end, version);
-  auto symbol = KORESymbol::Create(name);
+  auto symbol = kore_symbol::Create(name);
 
   auto start_idx = sort_stack.size() - arity;
   for (auto i = start_idx; i < sort_stack.size(); ++i) {
@@ -158,11 +158,11 @@ ptr<KORESymbol> read_symbol(
 }
 
 template <typename It>
-sptr<KORESort> read_composite_sort(
-    It &ptr, It end, std::vector<sptr<KORESort>> &sort_stack,
+sptr<kore_sort> read_composite_sort(
+    It &ptr, It end, std::vector<sptr<kore_sort>> &sort_stack,
     binary_version version) {
   auto arity = read_length(ptr, end, version, 2);
-  auto new_sort = KORECompositeSort::Create(read_string(ptr, end, version));
+  auto new_sort = kore_composite_sort::Create(read_string(ptr, end, version));
 
   for (auto i = sort_stack.size() - arity; i < sort_stack.size(); ++i) {
     new_sort->addArgument(sort_stack[i]);
@@ -176,23 +176,23 @@ sptr<KORESort> read_composite_sort(
 }
 
 template <typename It>
-sptr<KOREPattern> read(It &ptr, It end, binary_version version) {
-  auto term_stack = std::vector<sptr<KOREPattern>>{};
-  auto sort_stack = std::vector<sptr<KORESort>>{};
-  auto symbol = kllvm::ptr<KORESymbol>{};
+sptr<kore_pattern> read(It &ptr, It end, binary_version version) {
+  auto term_stack = std::vector<sptr<kore_pattern>>{};
+  auto sort_stack = std::vector<sptr<kore_sort>>{};
+  auto symbol = kllvm::ptr<kore_symbol>{};
 
   while (ptr < end) {
     switch (peek(ptr)) {
 
-    case header_byte<KOREStringPattern>:
+    case header_byte<kore_string_pattern>:
       ++ptr;
       term_stack.push_back(
-          KOREStringPattern::Create(read_string(ptr, end, version)));
+          kore_string_pattern::Create(read_string(ptr, end, version)));
       break;
 
-    case header_byte<KORECompositePattern>: {
+    case header_byte<kore_composite_pattern>: {
       ++ptr;
-      auto new_pattern = KORECompositePattern::Create(std::move(symbol));
+      auto new_pattern = kore_composite_pattern::Create(std::move(symbol));
       symbol = nullptr;
 
       auto arity = read_length(ptr, end, version, 2);
@@ -207,31 +207,31 @@ sptr<KOREPattern> read(It &ptr, It end, binary_version version) {
       break;
     }
 
-    case header_byte<KOREVariablePattern>: {
+    case header_byte<kore_variable_pattern>: {
       ++ptr;
       auto name = read_variable(ptr, end, version);
       auto sort = sort_stack.back();
       sort_stack.pop_back();
 
-      term_stack.push_back(KOREVariablePattern::Create(name->getName(), sort));
+      term_stack.push_back(kore_variable_pattern::Create(name->getName(), sort));
       break;
     }
 
-    case header_byte<KORESymbol>: {
+    case header_byte<kore_symbol>: {
       ++ptr;
       symbol = read_symbol(ptr, end, sort_stack, version);
       break;
     }
 
-    case header_byte<KORESortVariable>: {
+    case header_byte<kore_sort_variable>: {
       ++ptr;
 
       auto name = read_string(ptr, end, version);
-      sort_stack.push_back(KORESortVariable::Create(name));
+      sort_stack.push_back(kore_sort_variable::Create(name));
       break;
     }
 
-    case header_byte<KORECompositeSort>: {
+    case header_byte<kore_composite_sort>: {
       ++ptr;
       sort_stack.push_back(read_composite_sort(ptr, end, sort_stack, version));
       break;
@@ -253,7 +253,7 @@ sptr<KOREPattern> read(It &ptr, It end, binary_version version) {
 std::string file_contents(std::string const &fn, int max_bytes = -1);
 
 template <typename It>
-sptr<KOREPattern>
+sptr<kore_pattern>
 deserialize_pattern(It begin, It end, bool strip_raw_term = true) {
   // Try to parse the file even if the magic header isn't correct; by the time
   // we're here we already know that we're trying to parse a binary KORE file.
@@ -280,7 +280,7 @@ deserialize_pattern(It begin, It end, bool strip_raw_term = true) {
 }
 
 bool has_binary_kore_header(std::string const &filename);
-sptr<KOREPattern> deserialize_pattern(std::string const &filename);
+sptr<kore_pattern> deserialize_pattern(std::string const &filename);
 
 } // namespace kllvm
 

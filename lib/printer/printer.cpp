@@ -208,38 +208,38 @@ std::map<std::string, std::set<std::string>> getPriorities() {
   return priorities;
 }
 
-ptr<KOREDefinition> const &getDefinition(std::string const &kompiledDir) {
-  static std::map<std::string, ptr<KOREDefinition>> cache;
+ptr<kore_definition> const &getDefinition(std::string const &kompiledDir) {
+  static std::map<std::string, ptr<kore_definition>> cache;
 
   if (cache.find(kompiledDir) == cache.end()) {
-    KOREParser parser(kompiledDir + std::string("/syntaxDefinition.kore"));
+    kore_parser parser(kompiledDir + std::string("/syntaxDefinition.kore"));
     cache[kompiledDir] = parser.definition();
   }
 
   return cache.at(kompiledDir);
 }
 
-std::vector<ptr<KOREDeclaration>> const &
+std::vector<ptr<kore_declaration>> const &
 getAxioms(std::string const &kompiledDir) {
-  static std::map<std::string, std::vector<ptr<KOREDeclaration>>> cache;
+  static std::map<std::string, std::vector<ptr<kore_declaration>>> cache;
 
   if (cache.find(kompiledDir) == cache.end()) {
-    KOREParser parser(kompiledDir + std::string("/macros.kore"));
+    kore_parser parser(kompiledDir + std::string("/macros.kore"));
     cache[kompiledDir] = parser.declarations();
   }
 
   return cache.at(kompiledDir);
 }
 
-struct PreprocessedPrintData {
-  PrettyPrintData data;
+struct preprocessed_print_data {
+  pretty_print_data data;
   SymbolMap overloads;
 };
 
 // NOLINTNEXTLINE(*-cognitive-complexity)
-PreprocessedPrintData getPrintData(
-    ptr<KOREDefinition> const &def,
-    std::vector<ptr<KOREDeclaration>> const &axioms, bool hasColor) {
+preprocessed_print_data getPrintData(
+    ptr<kore_definition> const &def,
+    std::vector<ptr<kore_declaration>> const &axioms, bool hasColor) {
   auto formats = getFormats();
   auto terminals = getTerminals();
   auto assocs = getAssocs();
@@ -310,7 +310,7 @@ PreprocessedPrintData getPrintData(
     }
   }
 
-  PrettyPrintData data
+  pretty_print_data data
       = {formats, colors,   terminals, priorities, leftAssoc, rightAssoc,
          hooks,   brackets, assocs,    comms,      subsorts,  hasColor};
 
@@ -327,7 +327,7 @@ std::ostream &printKORE(
     std::ostream &os, std::string const &definitionPath,
     std::string const &patternPath, bool hasColor, bool filterSubst,
     bool pretty) {
-  static std::map<std::string, PreprocessedPrintData> cache;
+  static std::map<std::string, preprocessed_print_data> cache;
 
   auto const &def = getDefinition(definitionPath);
   auto const &axioms = getAxioms(definitionPath);
@@ -339,13 +339,13 @@ std::ostream &printKORE(
     return cache.at(definitionPath);
   };
 
-  auto config = KOREPattern::load(patternPath);
+  auto config = kore_pattern::load(patternPath);
   config = config->unflattenAndOr();
-  std::map<std::string, std::vector<KORESymbol *>> symbols;
+  std::map<std::string, std::vector<kore_symbol *>> symbols;
   config->markSymbols(symbols);
 
   for (auto const &decl : axioms) {
-    auto *axiom = dynamic_cast<KOREAxiomDeclaration *>(decl.get());
+    auto *axiom = dynamic_cast<kore_axiom_declaration *>(decl.get());
     axiom->getPattern()->markSymbols(symbols);
   }
 
@@ -358,10 +358,10 @@ std::ostream &printKORE(
 
   auto [data, overloads] = getPrintDataOrCached();
 
-  sptr<KOREPattern> expanded
+  sptr<kore_pattern> expanded
       = config->expandMacros(data.subsorts, overloads, axioms, true);
-  sptr<KOREPattern> sorted = expanded->sortCollections(data);
-  sptr<KOREPattern> filtered;
+  sptr<kore_pattern> sorted = expanded->sortCollections(data);
+  sptr<kore_pattern> filtered;
 
   if (filterSubst) {
     std::set<std::string> vars = sorted->gatherSingletonVars();
@@ -372,7 +372,7 @@ std::ostream &printKORE(
     filtered = sorted;
   }
 
-  sptr<KOREPattern> withBrackets = addBrackets(filtered, data);
+  sptr<kore_pattern> withBrackets = addBrackets(filtered, data);
   if (pretty) {
     withBrackets->prettyPrint(os, data);
   } else {

@@ -629,7 +629,7 @@ list hook_KREFLECTION_argv() {
     b->h = getBlockHeaderForSymbol(
         (uint64_t)getTagForSymbolName("inj{SortString{}, SortKItem{}}"));
     memcpy(b->children, &str, sizeof(SortString));
-    l = l.push_back(KElem(b));
+    l = l.push_back(k_elem(b));
   }
 
   return l;

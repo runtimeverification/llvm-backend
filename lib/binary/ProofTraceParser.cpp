@@ -6,29 +6,29 @@ namespace kllvm {
 
 constexpr auto indent_size = 2U;
 
-LLVMFunctionEvent::LLVMFunctionEvent(
+llvm_function_event::llvm_function_event(
     std::string _name, std::string _relativePosition)
     : name(std::move(_name))
     , relativePosition(std::move(_relativePosition)) { }
 
-std::vector<LLVMEvent> const &LLVMFunctionEvent::getArguments() const {
+std::vector<llvm_event> const &llvm_function_event::getArguments() const {
   return arguments;
 }
 
-void LLVMFunctionEvent::addArgument(LLVMEvent const &argument) {
+void llvm_function_event::addArgument(llvm_event const &argument) {
   arguments.push_back(argument);
 }
 
-LLVMHookEvent::LLVMHookEvent(std::string _name, std::string _relativePosition)
+llvm_hook_event::llvm_hook_event(std::string _name, std::string _relativePosition)
     : name(std::move(_name))
     , relativePosition(std::move(_relativePosition))
     , korePattern(nullptr) { }
 
-void LLVMHookEvent::addArgument(LLVMEvent const &argument) {
+void llvm_hook_event::addArgument(llvm_event const &argument) {
   arguments.push_back(argument);
 }
 
-void LLVMRewriteEvent::printSubstitution(
+void llvm_rewrite_event::printSubstitution(
     std::ostream &Out, unsigned indent) const {
   std::string Indent(indent * indent_size, ' ');
   for (auto const &p : substitution) {
@@ -36,14 +36,14 @@ void LLVMRewriteEvent::printSubstitution(
   }
 }
 
-void LLVMRuleEvent::print(std::ostream &Out, unsigned indent) const {
+void llvm_rule_event::print(std::ostream &Out, unsigned indent) const {
   std::string Indent(indent * indent_size, ' ');
   Out << fmt::format(
       "{}rule: {} {}\n", Indent, getRuleOrdinal(), getSubstitution().size());
   printSubstitution(Out, indent + 1U);
 }
 
-void LLVMSideConditionEvent::print(std::ostream &Out, unsigned indent) const {
+void llvm_side_condition_event::print(std::ostream &Out, unsigned indent) const {
   std::string Indent(indent * indent_size, ' ');
   Out << fmt::format(
       "{}side condition entry: {} {}\n", Indent, getRuleOrdinal(),
@@ -51,7 +51,7 @@ void LLVMSideConditionEvent::print(std::ostream &Out, unsigned indent) const {
   printSubstitution(Out, indent + 1U);
 }
 
-void LLVMSideConditionEndEvent::print(
+void llvm_side_condition_end_event::print(
     std::ostream &Out, unsigned indent) const {
   std::string Indent(indent * indent_size, ' ');
   Out << fmt::format(
@@ -59,7 +59,7 @@ void LLVMSideConditionEndEvent::print(
       patternLength);
 }
 
-void LLVMFunctionEvent::print(std::ostream &Out, unsigned indent) const {
+void llvm_function_event::print(std::ostream &Out, unsigned indent) const {
   std::string Indent(indent * indent_size, ' ');
   Out << fmt::format("{}function: {} ({})\n", Indent, name, relativePosition);
   for (auto const &arg : arguments) {
@@ -67,7 +67,7 @@ void LLVMFunctionEvent::print(std::ostream &Out, unsigned indent) const {
   }
 }
 
-void LLVMHookEvent::print(std::ostream &Out, unsigned indent) const {
+void llvm_hook_event::print(std::ostream &Out, unsigned indent) const {
   std::string Indent(indent * indent_size, ' ');
   Out << fmt::format("{}hook: {} ({})\n", Indent, name, relativePosition);
   for (auto const &arg : arguments) {
@@ -76,7 +76,7 @@ void LLVMHookEvent::print(std::ostream &Out, unsigned indent) const {
   Out << fmt::format("{}hook result: kore[{}]\n", Indent, patternLength);
 }
 
-void LLVMEvent::print(std::ostream &Out, bool isArg, unsigned indent) const {
+void llvm_event::print(std::ostream &Out, bool isArg, unsigned indent) const {
   if (isStepEvent) {
     stepEvent->print(Out, indent);
   } else {
@@ -86,7 +86,7 @@ void LLVMEvent::print(std::ostream &Out, bool isArg, unsigned indent) const {
   }
 }
 
-void LLVMRewriteTrace::print(std::ostream &Out, unsigned indent) const {
+void llvm_rewrite_trace::print(std::ostream &Out, unsigned indent) const {
   std::string Indent(indent * indent_size, ' ');
   Out << fmt::format("{}version: {}\n", Indent, version);
   for (auto const &pre_trace_event : preTrace) {
@@ -98,13 +98,13 @@ void LLVMRewriteTrace::print(std::ostream &Out, unsigned indent) const {
   }
 }
 
-ProofTraceParser::ProofTraceParser(bool _verbose)
+proof_trace_parser::proof_trace_parser(bool _verbose)
     : verbose(_verbose) { }
 
-std::optional<LLVMRewriteTrace>
-ProofTraceParser::parse_proof_trace(std::string const &data) {
+std::optional<llvm_rewrite_trace>
+proof_trace_parser::parse_proof_trace(std::string const &data) {
   auto ptr = data.begin();
-  LLVMRewriteTrace trace;
+  llvm_rewrite_trace trace;
   bool result = parse_trace(ptr, data.end(), trace);
 
   if (!result || ptr != data.end()) {
@@ -118,8 +118,8 @@ ProofTraceParser::parse_proof_trace(std::string const &data) {
   return trace;
 }
 
-std::optional<LLVMRewriteTrace>
-ProofTraceParser::parse_proof_trace_from_file(std::string const &filename) {
+std::optional<llvm_rewrite_trace>
+proof_trace_parser::parse_proof_trace_from_file(std::string const &filename) {
   auto data = file_contents(filename);
   return parse_proof_trace(data);
 }

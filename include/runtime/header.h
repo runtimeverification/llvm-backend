@@ -25,7 +25,7 @@
 #include <runtime/collections/rangemap.h>
 #include <unordered_set>
 
-struct MatchLog {
+struct match_log {
   enum { SUCCESS = 0, FUNCTION, FAIL } kind;
 
   char const *function{};
@@ -189,29 +189,29 @@ __attribute__((always_inline)) constexpr bool is_heap_block(T const *s) {
   return is_in_young_gen_hdr(s->h.hdr) || is_in_old_gen_hdr(s->h.hdr);
 }
 
-class KElem {
+class k_elem {
 public:
-  KElem()
+  k_elem()
       : elem(nullptr) { }
 
-  KElem(block *elem)
+  k_elem(block *elem)
       : elem(elem) { }
 
-  bool operator==(KElem const &other) const {
+  bool operator==(k_elem const &other) const {
     return hook_KEQUAL_eq(this->elem, other.elem);
   }
 
-  bool operator!=(KElem const &other) const { return !(*this == other); }
+  bool operator!=(k_elem const &other) const { return !(*this == other); }
 
-  bool operator<(KElem const &other) const {
+  bool operator<(k_elem const &other) const {
     return hook_KEQUAL_lt(this->elem, other.elem);
   }
 
-  bool operator>(KElem const &other) const { return other < *this; }
+  bool operator>(k_elem const &other) const { return other < *this; }
 
-  bool operator<=(KElem const &other) const { return !(other < *this); }
+  bool operator<=(k_elem const &other) const { return !(other < *this); }
 
-  bool operator>=(KElem const &other) const { return !(*this < other); }
+  bool operator>=(k_elem const &other) const { return !(*this < other); }
 
   operator block *() const { return elem; }
 
@@ -237,24 +237,24 @@ struct kore_alloc_heap {
   }
 };
 
-struct HashBlock {
-  size_t operator()(KElem const &block) const noexcept { return hash_k(block); }
+struct hash_block {
+  size_t operator()(k_elem const &block) const noexcept { return hash_k(block); }
 };
 
-struct KEq {
+struct k_eq {
   bool operator()(block *const &lhs, block *const &rhs) const {
     return hook_KEQUAL_eq(lhs, rhs);
   }
 };
 
 using list = immer::flex_vector<
-    KElem, immer::memory_policy<
+    k_elem, immer::memory_policy<
                immer::heap_policy<kore_alloc_heap>, immer::no_refcount_policy,
                immer::no_lock_policy>>;
 using map
-    = immer::map<KElem, KElem, HashBlock, std::equal_to<>, list::memory_policy>;
-using set = immer::set<KElem, HashBlock, std::equal_to<>, list::memory_policy>;
-using rangemap = rng_map::RangeMap<KElem, KElem>;
+    = immer::map<k_elem, k_elem, hash_block, std::equal_to<>, list::memory_policy>;
+using set = immer::set<k_elem, hash_block, std::equal_to<>, list::memory_policy>;
+using rangemap = rng_map::RangeMap<k_elem, k_elem>;
 
 using mapiter = struct mapiter {
   map::iterator curr{};
@@ -301,7 +301,7 @@ void printSortedConfigurationToFile(
 void printConfigurationInternal(
     writer *file, block *subject, char const *sort, bool, void *);
 
-// Returns a shared_ptr to a KOREPattern. The shared_ptr managess the lifetime
+// Returns a shared_ptr to a kore_pattern. The shared_ptr managess the lifetime
 // of the pattern and the pattern will be deallocated when the last reference
 // to the pattern is destroyed. There may exist references beyond the ones that
 // are provided to the user via this method, so destroying all values returned
@@ -310,8 +310,8 @@ void printConfigurationInternal(
 // If you need to have access to a function that returns a type with C linkage,
 // you can use the C bindings, which wrap the return value of this method in
 // a POD struct.
-std::shared_ptr<kllvm::KOREPattern> termToKorePattern(block *);
-std::shared_ptr<kllvm::KOREPattern>
+std::shared_ptr<kllvm::kore_pattern> termToKorePattern(block *);
+std::shared_ptr<kllvm::kore_pattern>
 sortedTermToKorePattern(block *, char const *);
 
 // This function injects its argument into KItem before printing, using the sort
@@ -324,7 +324,7 @@ string *debug_print_term(block *subject, char const *sort);
 mpz_ptr move_int(mpz_t);
 
 void serializeConfigurations(
-    FILE *file, std::unordered_set<block *, HashBlock, KEq> results);
+    FILE *file, std::unordered_set<block *, hash_block, k_eq> results);
 void serializeConfiguration(
     block *subject, char const *sort, char **data_out, size_t *size_out,
     bool emit_size, bool use_intern);

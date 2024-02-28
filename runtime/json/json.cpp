@@ -89,7 +89,7 @@ GET_HEADER(listWrapHdr, "LblJSONList{}");
 GET_BLOCK(dotList, "Lbl'Stop'List'LBraQuot'JSONs'QuotRBra'{}");
 GET_BLOCK(null, "LblJSONnull{}");
 
-struct KoreHandler : BaseReaderHandler<UTF8<>, KoreHandler> {
+struct kore_handler : BaseReaderHandler<UTF8<>, kore_handler> {
   block *result = nullptr;
   std::vector<block *> stack;
 
@@ -192,7 +192,7 @@ struct KoreHandler : BaseReaderHandler<UTF8<>, KoreHandler> {
 };
 
 template <typename Stream>
-struct KoreWriter : Writer<Stream> {
+struct kore_writer : Writer<Stream> {
   bool RawNumber(
       typename Writer<Stream>::Ch const *str, rapidjson::SizeType length,
       bool copy = false) {
@@ -201,12 +201,12 @@ struct KoreWriter : Writer<Stream> {
     return Writer<Stream>::EndValue(Writer<Stream>::WriteRawValue(str, length));
   }
 
-  KoreWriter(Stream &os)
+  kore_writer(Stream &os)
       : Writer<Stream>(os) { }
 };
 
 template <typename Stream>
-static bool write_json(KoreWriter<Stream> &writer, block *data) {
+static bool write_json(kore_writer<Stream> &writer, block *data) {
   bool return_value = true;
   if (data != dotList()) {
     if (data == null()) {
@@ -255,7 +255,7 @@ extern "C" {
 
 SortString hook_JSON_json2string(SortJSON json) {
   StringBuffer buffer;
-  KoreWriter<StringBuffer> writer(buffer);
+  kore_writer<StringBuffer> writer(buffer);
   if (!write_json(writer, json)) {
     abort();
   }
@@ -265,7 +265,7 @@ SortString hook_JSON_json2string(SortJSON json) {
 SortJSON hook_JSON_string2json(SortString str) {
   char *cstr = getTerminatedString(str);
   StringStream s(cstr);
-  KoreHandler handler;
+  kore_handler handler;
   Reader reader;
   bool result = reader.Parse<kParseNumbersAsStringsFlag>(s, handler);
   if (result) {

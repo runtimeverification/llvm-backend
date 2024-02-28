@@ -8,8 +8,8 @@
 
 namespace kllvm {
 
-sptr<KOREPattern>
-addBrackets(sptr<KOREPattern> const &, PrettyPrintData const &);
+sptr<kore_pattern>
+addBrackets(sptr<kore_pattern> const &, pretty_print_data const &);
 
 std::ostream &printKORE(
     std::ostream &os, std::string const &definitionPath,
