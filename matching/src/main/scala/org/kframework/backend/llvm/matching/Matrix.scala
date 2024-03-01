@@ -16,8 +16,6 @@ import org.kframework.parser.kore.Sort
 import org.kframework.parser.kore.SymbolOrAlias
 import org.kframework.parser.kore.Variable
 import org.kframework.unparser.ToKast
-import org.kframework.utils.errorsystem.KEMException
-import org.kframework.utils.errorsystem.KException
 
 trait AbstractColumn {
   def column: Column
@@ -744,11 +742,12 @@ class Matrix private (
         try
           row.clause.action.rhsVars.map(v => v -> (grouped(v).head._2, grouped(v).head._1.hookAtt))
         catch {
-          case e: NoSuchElementException =>
-            throw KEMException.internalError(
+          case _: NoSuchElementException =>
+            throw new MatchingException(
+              MatchingException.Type.INTERNAL_ERROR,
               "Could not find binding for variable while compiling pattern matching.",
-              e,
-              row.clause.action
+              row.clause.action.source,
+              row.clause.action.location
             )
         }
       (lhs ++ rhs).sortBy(v => v._1).map(v => v._2)
@@ -1052,23 +1051,22 @@ class Matrix private (
       }
     }
 
-  def checkUsefulness(kem: KException => Unit): Unit =
+  def checkUsefulness(kem: MatchingException => Unit): Unit =
     for (rowIx <- rows.indices)
       if (rowUseless(rowIx)) {
         if (clauses(rowIx).action.source.isPresent && clauses(rowIx).action.location.isPresent) {
           kem(
-            new KException(
-              KException.ExceptionType.USELESS_RULE,
-              KException.KExceptionGroup.COMPILER,
+            new MatchingException(
+              MatchingException.Type.USELESS_RULE,
               "Potentially useless rule detected.",
-              clauses(rowIx).action.source.get,
-              clauses(rowIx).action.location.get
+              clauses(rowIx).action.source,
+              clauses(rowIx).action.location
             )
           )
         }
       }
 
-  def checkExhaustiveness(name: SymbolOrAlias, kem: KException => Unit): Unit = {
+  def checkExhaustiveness(name: SymbolOrAlias, kem: MatchingException => Unit): Unit = {
     Matrix.id = 0
     val id = Matrix.id
     if (Matching.logging) {
@@ -1093,9 +1091,8 @@ class Matrix private (
       val source     = Parser.source(attributes).orElse(null)
 
       kem(
-        new KException(
-          KException.ExceptionType.NON_EXHAUSTIVE_MATCH,
-          KException.KExceptionGroup.COMPILER,
+        new MatchingException(
+          MatchingException.Type.NON_EXHAUSTIVE_MATCH,
           "Non exhaustive match detected: " ++ ToKast(func),
           source,
           location

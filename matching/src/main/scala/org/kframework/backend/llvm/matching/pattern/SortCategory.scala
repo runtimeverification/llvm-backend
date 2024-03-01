@@ -1,13 +1,15 @@
 package org.kframework.backend.llvm.matching.pattern
 
 import java.util.regex.{ Pattern => Regex }
+import java.util.Optional
+import org.kframework.attributes.Location
+import org.kframework.attributes.Source
 import org.kframework.backend.llvm.matching._
 import org.kframework.backend.llvm.matching.dt._
+import org.kframework.backend.llvm.matching.MatchingException
 import org.kframework.mpfr._
 import org.kframework.parser.kore.CompoundSort
 import org.kframework.parser.kore.Sort
-import org.kframework.parser.kore.SymbolOrAlias
-import org.kframework.utils.errorsystem.KEMException
 
 sealed trait SortCategory {
   def hookAtt: String
@@ -46,7 +48,8 @@ object SortCategory {
       case Some("BUFFER.StringBuffer") => BufferS()
       case Some("MINT.MInt") => MIntS(getBitwidth(s.asInstanceOf[CompoundSort].params(0), symlib))
       case Some("BAG.Bag") =>
-        throw KEMException.compilerError(
+        throw new MatchingException(
+          MatchingException.Type.COMPILER_ERROR,
           "LLVM Backend does not support multisets. If you are seeing this error due to a configuration cell tagged with multiplicity=\"*\", please add either type=\"Map\" or type=\"Set\". If you still need the collection to not contain duplicates, it is recommended you also add a unique identifier each time a cell is created. You can do this with !X:Int."
         );
     }
