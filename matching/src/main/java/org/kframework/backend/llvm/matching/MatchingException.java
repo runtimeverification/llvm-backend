@@ -5,7 +5,7 @@ import org.kframework.attributes.Source;
 
 import java.util.Optional;
 
-public class MatchingException extends Throwable {
+public final class MatchingException extends Throwable {
     public enum Type {
         USELESS_RULE,
         NON_EXHAUSTIVE_MATCH,
