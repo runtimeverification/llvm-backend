@@ -1084,8 +1084,8 @@ class Matrix private (
       val k          = fringe.zip(counterexample.get).map(t => t._2.toK(t._1))
       val func       = KApply(symlib.koreToK(name), KList(k))
       val attributes = symlib.signatures(name)._3
-      val location   = Parser.location(attributes).orElse(null)
-      val source     = Parser.source(attributes).orElse(null)
+      val location   = Parser.location(attributes)
+      val source     = Parser.source(attributes)
 
       kem(
         new MatchingException(
