@@ -1,12 +1,9 @@
 package org.kframework.backend.llvm.matching;
 
-import com.google.googlejavaformat.Op;
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
 
 import java.util.Optional;
-
-;
 
 public class MatchingException extends Throwable {
     MatchingExceptionType type;
