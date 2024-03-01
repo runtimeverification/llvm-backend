@@ -16,7 +16,6 @@ import org.kframework.parser.kore.Sort
 import org.kframework.parser.kore.SymbolOrAlias
 import org.kframework.parser.kore.Variable
 import org.kframework.unparser.ToKast
-import org.kframework.utils.errorsystem.KEMException
 
 trait AbstractColumn {
   def column: Column
@@ -744,10 +743,11 @@ class Matrix private (
           row.clause.action.rhsVars.map(v => v -> (grouped(v).head._2, grouped(v).head._1.hookAtt))
         catch {
           case e: NoSuchElementException =>
-            throw KEMException.internalError(
+            throw MatchingException(
+              InternalError,
               "Could not find binding for variable while compiling pattern matching.",
-              e,
-              row.clause.action
+              row.clause.action.source,
+              row.clause.action.location
             )
         }
       (lhs ++ rhs).sortBy(v => v._1).map(v => v._2)
@@ -1059,8 +1059,8 @@ class Matrix private (
             MatchingException(
               UselessRule,
               "Potentially useless rule detected.",
-              clauses(rowIx).action.source.get,
-              clauses(rowIx).action.location.get
+              Optional.of(clauses(rowIx).action.source.get),
+              Optional.of(clauses(rowIx).action.location.get)
             )
           )
         }
@@ -1094,8 +1094,8 @@ class Matrix private (
         MatchingException(
           NonExhaustiveMatch,
           "Non exhaustive match detected: " ++ ToKast(func),
-          source,
-          location
+          Optional.of(source),
+          Optional.of(location)
         )
       )
     }
