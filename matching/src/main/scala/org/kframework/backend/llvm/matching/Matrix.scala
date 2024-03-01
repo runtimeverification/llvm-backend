@@ -1059,8 +1059,8 @@ class Matrix private (
             new MatchingException(
               MatchingExceptionType.USELESS_RULE,
               "Potentially useless rule detected.",
-              Optional.of(clauses(rowIx).action.source.get),
-              Optional.of(clauses(rowIx).action.location.get)
+              clauses(rowIx).action.source,
+              clauses(rowIx).action.location
             )
           )
         }
