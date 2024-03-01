@@ -14,6 +14,23 @@ public class MatchingException extends Throwable {
     Optional<Source> source;
     Optional<Location> location;
 
+    public MatchingExceptionType getType() {
+        return type;
+    }
+
+    @Override
+    public String getMessage() {
+        return message;
+    }
+
+    public Optional<Source> getSource() {
+        return source;
+    }
+
+    public Optional<Location> getLocation() {
+        return location;
+    }
+
     public MatchingException(MatchingExceptionType type, String message, Optional<Source> source, Optional<Location> location) {
         this.type = type;
         this.message = message;
