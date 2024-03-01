@@ -13,7 +13,6 @@ import org.kframework.backend.llvm.matching.pattern.SymbolP
 import org.kframework.backend.llvm.matching.pattern.VariableP
 import org.kframework.backend.llvm.matching.pattern.WildcardP
 import org.kframework.parser.kore._
-import org.kframework.utils.errorsystem.KException
 
 object Generator {
 
@@ -210,7 +209,7 @@ object Generator {
       axioms: IndexedSeq[AxiomInfo],
       sorts: Seq[Sort],
       name: SymbolOrAlias,
-      kem: KException => scala.Unit
+      kem: MatchingException => scala.Unit
   ): DecisionTree = {
     val matrix = genClauseMatrix(symlib, mod, axioms, sorts)
     matrix.checkUsefulness(kem)

@@ -17,7 +17,6 @@ import org.kframework.parser.kore.SymbolOrAlias
 import org.kframework.parser.kore.Variable
 import org.kframework.unparser.ToKast
 import org.kframework.utils.errorsystem.KEMException
-import org.kframework.utils.errorsystem.KException
 
 trait AbstractColumn {
   def column: Column
@@ -1052,14 +1051,13 @@ class Matrix private (
       }
     }
 
-  def checkUsefulness(kem: KException => Unit): Unit =
+  def checkUsefulness(kem: MatchingException => Unit): Unit =
     for (rowIx <- rows.indices)
       if (rowUseless(rowIx)) {
         if (clauses(rowIx).action.source.isPresent && clauses(rowIx).action.location.isPresent) {
           kem(
-            new KException(
-              KException.ExceptionType.USELESS_RULE,
-              KException.KExceptionGroup.COMPILER,
+            MatchingException(
+              UselessRule,
               "Potentially useless rule detected.",
               clauses(rowIx).action.source.get,
               clauses(rowIx).action.location.get
@@ -1068,7 +1066,7 @@ class Matrix private (
         }
       }
 
-  def checkExhaustiveness(name: SymbolOrAlias, kem: KException => Unit): Unit = {
+  def checkExhaustiveness(name: SymbolOrAlias, kem: MatchingException => Unit): Unit = {
     Matrix.id = 0
     val id = Matrix.id
     if (Matching.logging) {
@@ -1093,9 +1091,8 @@ class Matrix private (
       val source     = Parser.source(attributes).orElse(null)
 
       kem(
-        new KException(
-          KException.ExceptionType.NON_EXHAUSTIVE_MATCH,
-          KException.KExceptionGroup.COMPILER,
+        MatchingException(
+          NonExhaustiveMatch,
           "Non exhaustive match detected: " ++ ToKast(func),
           source,
           location

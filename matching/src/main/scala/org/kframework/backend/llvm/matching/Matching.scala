@@ -6,7 +6,6 @@ import java.util.Optional
 import org.kframework.backend.llvm.matching.dt._
 import org.kframework.parser.kore._
 import org.kframework.parser.kore.parser.TextToKore
-import org.kframework.utils.errorsystem.KException
 
 object Matching {
   def writeDecisionTreeToFile(
@@ -17,7 +16,7 @@ object Matching {
       genSingleRuleTrees: Boolean,
       warn: Boolean,
       genSearch: Boolean,
-      kem: KException => Unit
+      kem: MatchingException => Unit
   ) {
     val defn = new TextToKore().parse(filename)
     outputFolder.mkdirs()
