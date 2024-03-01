@@ -744,7 +744,7 @@ class Matrix private (
         catch {
           case _: NoSuchElementException =>
             throw new MatchingException(
-              MatchingExceptionType.INTERNAL_ERROR,
+              MatchingException.Type.INTERNAL_ERROR,
               "Could not find binding for variable while compiling pattern matching.",
               row.clause.action.source,
               row.clause.action.location
@@ -1057,7 +1057,7 @@ class Matrix private (
         if (clauses(rowIx).action.source.isPresent && clauses(rowIx).action.location.isPresent) {
           kem(
             new MatchingException(
-              MatchingExceptionType.USELESS_RULE,
+              MatchingException.Type.USELESS_RULE,
               "Potentially useless rule detected.",
               clauses(rowIx).action.source,
               clauses(rowIx).action.location
@@ -1092,7 +1092,7 @@ class Matrix private (
 
       kem(
         new MatchingException(
-          MatchingExceptionType.NON_EXHAUSTIVE_MATCH,
+          MatchingException.Type.NON_EXHAUSTIVE_MATCH,
           "Non exhaustive match detected: " ++ ToKast(func),
           source,
           location
