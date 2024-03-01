@@ -3,9 +3,6 @@ package org.kframework.backend.llvm.matching
 import java.util
 import java.util.concurrent.ConcurrentHashMap
 import java.util.Optional
-import org.kframework.attributes.HasLocation
-import org.kframework.attributes.Location
-import org.kframework.attributes.Source
 import org.kframework.backend.llvm.matching.dt._
 import org.kframework.backend.llvm.matching.pattern._
 import org.kframework.kore.KORE.KApply
@@ -328,7 +325,7 @@ case class Action(
     source: Optional[Source],
     location: Optional[Location],
     nonlinear: Boolean
-) extends HasLocation {
+) {
   override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
 }
 

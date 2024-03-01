@@ -1,8 +1,5 @@
 package org.kframework.backend.llvm.matching;
 
-import org.kframework.attributes.Location;
-import org.kframework.attributes.Source;
-
 import java.util.Optional;
 
 public final class MatchingException extends Throwable {
