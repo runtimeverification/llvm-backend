@@ -47,11 +47,9 @@ object SortCategory {
       case Some("BUFFER.StringBuffer") => BufferS()
       case Some("MINT.MInt") => MIntS(getBitwidth(s.asInstanceOf[CompoundSort].params(0), symlib))
       case Some("BAG.Bag") =>
-        throw MatchingException(
-          CompilerError,
-          "LLVM Backend does not support multisets. If you are seeing this error due to a configuration cell tagged with multiplicity=\"*\", please add either type=\"Map\" or type=\"Set\". If you still need the collection to not contain duplicates, it is recommended you also add a unique identifier each time a cell is created. You can do this with !X:Int.",
-          Optional.empty[Source],
-          Optional.empty[Location]
+        throw new MatchingException(
+          MatchingExceptionType.COMPILER_ERROR,
+          "LLVM Backend does not support multisets. If you are seeing this error due to a configuration cell tagged with multiplicity=\"*\", please add either type=\"Map\" or type=\"Set\". If you still need the collection to not contain duplicates, it is recommended you also add a unique identifier each time a cell is created. You can do this with !X:Int."
         );
     }
 

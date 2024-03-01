@@ -742,9 +742,9 @@ class Matrix private (
         try
           row.clause.action.rhsVars.map(v => v -> (grouped(v).head._2, grouped(v).head._1.hookAtt))
         catch {
-          case e: NoSuchElementException =>
-            throw MatchingException(
-              InternalError,
+          case _: NoSuchElementException =>
+            throw new MatchingException(
+              MatchingExceptionType.COMPILER_ERROR,
               "Could not find binding for variable while compiling pattern matching.",
               row.clause.action.source,
               row.clause.action.location
@@ -1056,8 +1056,8 @@ class Matrix private (
       if (rowUseless(rowIx)) {
         if (clauses(rowIx).action.source.isPresent && clauses(rowIx).action.location.isPresent) {
           kem(
-            MatchingException(
-              UselessRule,
+            new MatchingException(
+              MatchingExceptionType.USELESS_RULE,
               "Potentially useless rule detected.",
               Optional.of(clauses(rowIx).action.source.get),
               Optional.of(clauses(rowIx).action.location.get)
@@ -1091,11 +1091,11 @@ class Matrix private (
       val source     = Parser.source(attributes).orElse(null)
 
       kem(
-        MatchingException(
-          NonExhaustiveMatch,
+        new MatchingException(
+          MatchingExceptionType.NON_EXHAUSTIVE_MATCH,
           "Non exhaustive match detected: " ++ ToKast(func),
-          Optional.of(source),
-          Optional.of(location)
+          source,
+          location
         )
       )
     }
