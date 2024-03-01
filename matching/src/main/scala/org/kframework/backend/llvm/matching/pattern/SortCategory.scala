@@ -1,14 +1,14 @@
 package org.kframework.backend.llvm.matching.pattern
 
-import java.util.regex.{Pattern => Regex}
-import org.kframework.attributes.{Source,Location}
+import java.util.regex.{ Pattern => Regex }
+import java.util.Optional
+import org.kframework.attributes.Location
+import org.kframework.attributes.Source
 import org.kframework.backend.llvm.matching._
 import org.kframework.backend.llvm.matching.dt._
 import org.kframework.mpfr._
 import org.kframework.parser.kore.CompoundSort
 import org.kframework.parser.kore.Sort
-
-import java.util.Optional
 
 sealed trait SortCategory {
   def hookAtt: String
