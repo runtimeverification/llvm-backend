@@ -1,9 +1,6 @@
 package org.kframework.backend.llvm.matching.pattern
 
 import java.util.regex.{ Pattern => Regex }
-import java.util.Optional
-import org.kframework.attributes.Location
-import org.kframework.attributes.Source
 import org.kframework.backend.llvm.matching._
 import org.kframework.backend.llvm.matching.dt._
 import org.kframework.backend.llvm.matching.MatchingException

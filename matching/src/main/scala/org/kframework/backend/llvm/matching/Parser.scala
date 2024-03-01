@@ -2,8 +2,6 @@ package org.kframework.backend.llvm.matching
 
 import java.util
 import java.util.Optional
-import org.kframework.attributes.Location
-import org.kframework.attributes.Source
 import org.kframework.parser.kore._
 import org.kframework.parser.kore.implementation.{ DefaultBuilders => B }
 import org.kframework.parser.kore.parser.KoreToK
@@ -161,7 +159,7 @@ object Parser {
   def source(att: Attributes): Optional[Source] =
     if (hasAtt(att, SOURCE)) {
       val sourceStr = getStringAtt(att, SOURCE).get
-      return Optional.of(Source(sourceStr.substring("Source(".length, sourceStr.length - 1)))
+      Optional.of(new Source(sourceStr.substring("Source(".length, sourceStr.length - 1)))
     } else {
       Optional.empty()
     }
@@ -170,8 +168,8 @@ object Parser {
     if (hasAtt(att, LOCATION)) {
       val locStr   = getStringAtt(att, LOCATION).get
       val splitted = locStr.split("[(,)]")
-      return Optional.of(
-        Location(splitted(1).toInt, splitted(2).toInt, splitted(3).toInt, splitted(4).toInt)
+      Optional.of(
+        new Location(splitted(1).toInt, splitted(2).toInt, splitted(3).toInt, splitted(4).toInt)
       )
     } else {
       Optional.empty()

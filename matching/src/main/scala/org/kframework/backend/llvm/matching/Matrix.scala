@@ -3,9 +3,6 @@ package org.kframework.backend.llvm.matching
 import java.util
 import java.util.concurrent.ConcurrentHashMap
 import java.util.Optional
-import org.kframework.attributes.HasLocation
-import org.kframework.attributes.Location
-import org.kframework.attributes.Source
 import org.kframework.backend.llvm.matching.dt._
 import org.kframework.backend.llvm.matching.pattern._
 import org.kframework.kore.KORE.KApply
@@ -328,7 +325,7 @@ case class Action(
     source: Optional[Source],
     location: Optional[Location],
     nonlinear: Boolean
-) extends HasLocation {
+) {
   override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
 }
 
@@ -1087,8 +1084,8 @@ class Matrix private (
       val k          = fringe.zip(counterexample.get).map(t => t._2.toK(t._1))
       val func       = KApply(symlib.koreToK(name), KList(k))
       val attributes = symlib.signatures(name)._3
-      val location   = Parser.location(attributes).orElse(null)
-      val source     = Parser.source(attributes).orElse(null)
+      val location   = Parser.location(attributes)
+      val source     = Parser.source(attributes)
 
       kem(
         new MatchingException(
