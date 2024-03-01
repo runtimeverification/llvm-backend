@@ -148,11 +148,11 @@ int main(int argc, char **argv) {
   llvm::LLVMContext Context;
   std::unique_ptr<llvm::Module> mod = newModule("definition", Context);
 
-  emit_metadata(*mod);
-
   if (Debug) {
     initDebugInfo(mod.get(), Definition);
   }
+
+  emit_metadata(*mod);
 
   for (auto *axiom : definition->getAxioms()) {
     makeSideConditionFunction(axiom, definition.get(), mod.get());
