@@ -744,7 +744,7 @@ class Matrix private (
         catch {
           case _: NoSuchElementException =>
             throw new MatchingException(
-              MatchingExceptionType.COMPILER_ERROR,
+              MatchingExceptionType.INTERNAL_ERROR,
               "Could not find binding for variable while compiling pattern matching.",
               row.clause.action.source,
               row.clause.action.location
