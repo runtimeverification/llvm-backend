@@ -191,7 +191,7 @@ static void emit_data_for_symbol(
   auto *merge_block = llvm::BasicBlock::Create(ctx, "exit");
   auto *stuck = llvm::BasicBlock::Create(ctx, "stuck");
   auto const &syms = definition->get_symbols();
-  auto *Switch = llvm::SwitchInst::Create(
+  auto *switch_inst = llvm::SwitchInst::Create(
       func->arg_begin(), stuck, syms.size(), entry_block);
   auto *phi = llvm::PHINode::Create(
       ty, definition->get_symbols().size(), "phi", merge_block);
@@ -209,7 +209,7 @@ static void emit_data_for_symbol(
     auto *branch = llvm::BranchInst::Create(merge_block, case_block);
     auto pair = getter(definition, module, symbol, branch);
     phi->addIncoming(pair.first, pair.second);
-    Switch->addCase(
+    switch_inst->addCase(
         llvm::ConstantInt::get(llvm::Type::getInt32Ty(ctx), tag), case_block);
   }
   llvm::ReturnInst::Create(ctx, phi, merge_block);
@@ -558,13 +558,14 @@ static void emit_get_token(kore_definition *definition, llvm::Module *module) {
       break;
     }
     case sort_category::Float: {
-      llvm::Type *Float
+      llvm::Type *float_ty
           = llvm::StructType::getTypeByName(module->getContext(), float_struct);
       llvm::Value *term
-          = allocate_term(Float, case_block, "kore_alloc_floating");
+          = allocate_term(float_ty, case_block, "kore_alloc_floating");
       llvm::Function *init_float = get_or_insert_function(
           module, "init_float", llvm::Type::getVoidTy(ctx),
-          llvm::PointerType::getUnqual(Float), llvm::Type::getInt8PtrTy(ctx));
+          llvm::PointerType::getUnqual(float_ty),
+          llvm::Type::getInt8PtrTy(ctx));
       llvm::CallInst::Create(
           init_float, {term, func->arg_begin() + 2}, "", case_block);
       auto *cast = new llvm::BitCastInst(
@@ -596,12 +597,13 @@ static void emit_get_token(kore_definition *definition, llvm::Module *module) {
       phi_str->addIncoming(func->arg_begin() + 2, case_block);
       phi_str->addIncoming(pruned, if_is_plus);
       case_block = else_no_plus;
-      llvm::Type *Int
+      llvm::Type *int_ty
           = llvm::StructType::getTypeByName(module->getContext(), int_struct);
-      llvm::Value *term = allocate_term(Int, case_block, "kore_alloc_integer");
+      llvm::Value *term
+          = allocate_term(int_ty, case_block, "kore_alloc_integer");
       llvm::Function *mpz_init_set = get_or_insert_function(
           module, "__gmpz_init_set_str", llvm::Type::getInt32Ty(ctx),
-          llvm::PointerType::getUnqual(Int), llvm::Type::getInt8PtrTy(ctx),
+          llvm::PointerType::getUnqual(int_ty), llvm::Type::getInt8PtrTy(ctx),
           llvm::Type::getInt32Ty(ctx));
       auto *call = llvm::CallInst::Create(
           mpz_init_set,
@@ -817,7 +819,8 @@ static void emit_traversal(
 
   auto *stuck = llvm::BasicBlock::Create(ctx, "stuck");
   auto const &syms = definition->get_symbols();
-  auto *Switch = llvm::SwitchInst::Create(tag, stuck, syms.size(), entry_block);
+  auto *switch_inst
+      = llvm::SwitchInst::Create(tag, stuck, syms.size(), entry_block);
 
   for (auto entry : syms) {
     uint32_t tag = entry.first;
@@ -827,7 +830,7 @@ static void emit_traversal(
     }
     auto *case_block
         = llvm::BasicBlock::Create(ctx, "tag" + std::to_string(tag), func);
-    Switch->addCase(
+    switch_inst->addCase(
         llvm::ConstantInt::get(llvm::Type::getInt32Ty(ctx), tag), case_block);
     getter(definition, module, symbol, case_block, callbacks);
     llvm::ReturnInst::Create(ctx, case_block);
@@ -1199,7 +1202,7 @@ static void emit_layouts(kore_definition *definition, llvm::Module *module) {
   auto *entry_block = llvm::BasicBlock::Create(ctx, "entry", func);
   auto *merge_block = llvm::BasicBlock::Create(ctx, "exit");
   auto *stuck = llvm::BasicBlock::Create(ctx, "stuck");
-  auto *Switch = llvm::SwitchInst::Create(
+  auto *switch_inst = llvm::SwitchInst::Create(
       func->arg_begin(), stuck, layouts.size(), entry_block);
   auto *phi = llvm::PHINode::Create(
       llvm::PointerType::getUnqual(
@@ -1213,7 +1216,7 @@ static void emit_layouts(kore_definition *definition, llvm::Module *module) {
     llvm::BranchInst::Create(merge_block, case_block);
     auto *data = get_layout_data(layout, symbol, module, definition);
     phi->addIncoming(data, case_block);
-    Switch->addCase(
+    switch_inst->addCase(
         llvm::ConstantInt::get(llvm::Type::getInt16Ty(ctx), layout),
         case_block);
   }

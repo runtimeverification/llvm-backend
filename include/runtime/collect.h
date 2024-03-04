@@ -34,7 +34,7 @@ void migrate_list(void *l);
 void migrate_map(void *m);
 void migrate_rangemap(void *m);
 void migrate_set(void *s);
-void migrate_collection_node(void **nodePtr);
+void migrate_collection_node(void **node_ptr);
 void set_kore_memory_functions_for_gmp(void);
 void kore_collect(void **, uint8_t, layoutitem *);
 }

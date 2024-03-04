@@ -126,9 +126,9 @@ static std::pair<std::string, std::string> get_fail_pattern(
   std::string reason;
   std::string sort;
   for (auto const &entry : case_data) {
-    auto const &_case = *entry.second;
+    auto const &c = *entry.second;
     if (entry.first != fail_block) {
-      auto case_reason = get_fail_pattern(_case, is_int);
+      auto case_reason = get_fail_pattern(c, is_int);
       if (reason.empty()) {
         reason = case_reason.second;
         sort = case_reason.first;
@@ -151,13 +151,13 @@ void switch_node::codegen(decision *d) {
   if (d->fail_pattern_) {
     ptr_val = d->ptr_term(val);
   }
-  llvm::BasicBlock *_default = d->failure_block_;
+  llvm::BasicBlock *default_block = d->failure_block_;
   decision_case const *default_case = nullptr;
   std::vector<std::pair<llvm::BasicBlock *, decision_case const *>> case_data;
   int idx = 0;
   bool is_int = false;
-  for (auto &_case : cases_) {
-    auto *child = _case.get_child();
+  for (auto &c : cases_) {
+    auto *child = c.get_child();
     llvm::BasicBlock *case_block = nullptr;
     if (child == fail_node::get()) {
       case_block = d->failure_block_;
@@ -167,12 +167,12 @@ void switch_node::codegen(decision *d) {
           name_.substr(0, max_name_length) + "_case_" + std::to_string(idx++),
           d->current_block_->getParent());
     }
-    if (auto *sym = _case.get_constructor()) {
+    if (auto *sym = c.get_constructor()) {
       is_int = is_int || sym->get_name() == "\\dv";
-      case_data.emplace_back(case_block, &_case);
+      case_data.emplace_back(case_block, &c);
     } else {
-      _default = case_block;
-      default_case = &_case;
+      default_block = case_block;
+      default_case = &c;
     }
   }
   if (is_check_null_) {
@@ -195,26 +195,25 @@ void switch_node::codegen(decision *d) {
     fail_pattern = d->string_literal(fail_reason.second);
   }
   if (is_int) {
-    auto *_switch = llvm::SwitchInst::Create(
-        val, _default, cases_.size(), d->current_block_);
-    for (auto &_case : case_data) {
-      _switch->addCase(
-          llvm::ConstantInt::get(d->ctx_, _case.second->get_literal()),
-          _case.first);
+    auto *switch_inst = llvm::SwitchInst::Create(
+        val, default_block, cases_.size(), d->current_block_);
+    for (auto &c : case_data) {
+      switch_inst->addCase(
+          llvm::ConstantInt::get(d->ctx_, c.second->get_literal()), c.first);
     }
   } else {
     if (case_data.empty()) {
-      llvm::BranchInst::Create(_default, d->current_block_);
+      llvm::BranchInst::Create(default_block, d->current_block_);
     } else {
       llvm::Value *tag_val = d->get_tag(val);
-      auto *_switch = llvm::SwitchInst::Create(
-          tag_val, _default, case_data.size(), d->current_block_);
-      for (auto &_case : case_data) {
-        _switch->addCase(
+      auto *switch_inst = llvm::SwitchInst::Create(
+          tag_val, default_block, case_data.size(), d->current_block_);
+      for (auto &c : case_data) {
+        switch_inst->addCase(
             llvm::ConstantInt::get(
                 llvm::Type::getInt32Ty(d->ctx_),
-                _case.second->get_constructor()->get_tag()),
-            _case.first);
+                c.second->get_constructor()->get_tag()),
+            c.first);
       }
     }
   }
@@ -222,7 +221,7 @@ void switch_node::codegen(decision *d) {
   d->choice_block_ = nullptr;
   auto *switch_block = d->current_block_;
   for (auto &entry : case_data) {
-    auto const &_case = *entry.second;
+    auto const &switch_case = *entry.second;
     if (entry.first == d->failure_block_) {
       if (d->fail_pattern_) {
         d->fail_subject_->addIncoming(ptr_val, switch_block);
@@ -234,15 +233,15 @@ void switch_node::codegen(decision *d) {
     d->current_block_ = entry.first;
     if (!is_int) {
       int offset = 0;
-      llvm::StructType *block_type
-          = get_block_type(d->module_, d->definition_, _case.get_constructor());
+      llvm::StructType *block_type = get_block_type(
+          d->module_, d->definition_, switch_case.get_constructor());
       auto *cast = new llvm::BitCastInst(
           val, llvm::PointerType::getUnqual(block_type), "", d->current_block_);
       kore_symbol_declaration *symbol_decl
           = d->definition_->get_symbol_declarations().at(
-              _case.get_constructor()->get_name());
+              switch_case.get_constructor()->get_name());
       llvm::Instruction *renamed = nullptr;
-      for (auto const &binding : _case.get_bindings()) {
+      for (auto const &binding : switch_case.get_bindings()) {
         llvm::Value *child_ptr = llvm::GetElementPtrInst::CreateInBounds(
             block_type, cast,
             {llvm::ConstantInt::get(llvm::Type::getInt64Ty(d->ctx_), 0),
@@ -251,9 +250,10 @@ void switch_node::codegen(decision *d) {
             "", d->current_block_);
 
         llvm::Value *child = nullptr;
-        auto cat = dynamic_cast<kore_composite_sort *>(
-                       _case.get_constructor()->get_arguments()[offset].get())
-                       ->get_category(d->definition_);
+        auto cat
+            = dynamic_cast<kore_composite_sort *>(
+                  switch_case.get_constructor()->get_arguments()[offset].get())
+                  ->get_category(d->definition_);
 
         switch (cat.cat) {
         case sort_category::Map:
@@ -277,7 +277,7 @@ void switch_node::codegen(decision *d) {
                 child, "renamedVar", d->current_block_);
             set_debug_loc(renamed);
             d->store(binding, renamed);
-          } else if (offset == _case.get_bindings().size() - 1) {
+          } else if (offset == switch_case.get_bindings().size() - 1) {
             llvm::Instruction *replaced = llvm::CallInst::Create(
                 get_or_insert_function(
                     d->module_, "replace_binder_index", block_ptr, block_ptr,
@@ -294,7 +294,7 @@ void switch_node::codegen(decision *d) {
         offset++;
       }
     } else {
-      if (curr_choice_block && _case.get_literal() == 1) {
+      if (curr_choice_block && switch_case.get_literal() == 1) {
         auto *prev_depth = new llvm::LoadInst(
             llvm::Type::getInt64Ty(d->ctx_), d->choice_depth_, "",
             d->current_block_);
@@ -316,7 +316,7 @@ void switch_node::codegen(decision *d) {
             current_elt, d->current_block_);
         d->fail_jump_->addDestination(curr_choice_block);
       } else if (
-          curr_choice_block && _case.get_literal() == 0
+          curr_choice_block && switch_case.get_literal() == 0
           && d->has_search_results_) {
         // see https://github.com/runtimeverification/llvm-backend/issues/672
         // To summarize, if we are doing a search, and we have already found
@@ -341,12 +341,12 @@ void switch_node::codegen(decision *d) {
         d->current_block_ = new_case_block;
       }
     }
-    _case.get_child()->codegen(d);
+    switch_case.get_child()->codegen(d);
   }
   if (default_case) {
-    if (_default != d->failure_block_) {
+    if (default_block != d->failure_block_) {
       // process default also
-      d->current_block_ = _default;
+      d->current_block_ = default_block;
       default_case->get_child()->codegen(d);
     } else if (d->fail_pattern_) {
       d->fail_subject_->addIncoming(ptr_val, switch_block);
@@ -528,7 +528,8 @@ void make_iterator_node::codegen(decision *d) {
 
   llvm::FunctionType *func_type = llvm::FunctionType::get(
       llvm::Type::getVoidTy(d->module_->getContext()), types, false);
-  llvm::Function *func = get_or_insert_function(d->module_, hook_name_, func_type);
+  llvm::Function *func
+      = get_or_insert_function(d->module_, hook_name_, func_type);
   auto *call = llvm::CallInst::Create(func, args, "", d->current_block_);
   set_debug_loc(call);
   llvm::Attribute sret_attr
@@ -550,7 +551,8 @@ void iter_next_node::codegen(decision *d) {
   llvm::FunctionType *func_type = llvm::FunctionType::get(
       getvalue_type({sort_category::Symbol, 0}, d->module_), {arg->getType()},
       false);
-  llvm::Function *func = get_or_insert_function(d->module_, hook_name_, func_type);
+  llvm::Function *func
+      = get_or_insert_function(d->module_, hook_name_, func_type);
   auto *call = llvm::CallInst::Create(
       func, {arg}, binding_.substr(0, max_name_length), d->current_block_);
   set_debug_loc(call);
@@ -870,7 +872,8 @@ void abort_when_stuck(
 void make_eval_function(
     kore_symbol *function, kore_definition *definition, llvm::Module *module,
     decision_node *dt) {
-  make_eval_or_anywhere_function(function, definition, module, dt, abort_when_stuck);
+  make_eval_or_anywhere_function(
+      function, definition, module, dt, abort_when_stuck);
 }
 
 void add_owise(
@@ -1093,12 +1096,13 @@ void make_step_function(
   reset_debug_loc();
   if (search) {
     init_debug_function(
-        name, name, get_debug_function_type(get_void_debug_type(), {debug_type}),
+        name, name,
+        get_debug_function_type(get_void_debug_type(), {debug_type}),
         definition, match_func);
   } else {
     init_debug_function(
-        name, name, get_debug_function_type(debug_type, {debug_type}), definition,
-        match_func);
+        name, name, get_debug_function_type(debug_type, {debug_type}),
+        definition, match_func);
   }
   match_func->setCallingConv(llvm::CallingConv::Tail);
   auto *val = match_func->arg_begin();

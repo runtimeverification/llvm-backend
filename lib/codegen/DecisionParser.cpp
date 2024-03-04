@@ -148,7 +148,8 @@ public:
             occurrence[1], kore_composite_sort::get_category(hook), mod_);
       } else {
         result->add_binding(
-            to_string(occurrence), kore_composite_sort::get_category(hook), mod_);
+            to_string(occurrence), kore_composite_sort::get_category(hook),
+            mod_);
       }
     }
     return result;
@@ -164,7 +165,8 @@ public:
       } else {
         name = str(o);
       }
-      value_type hook = kore_composite_sort::get_category(str(get(node, "hook")));
+      value_type hook
+          = kore_composite_sort::get_category(str(get(node, "hook")));
       uses.emplace_back(name, get_param_type(hook, mod_));
       return kore_variable_pattern::create(name, sorts_.at(hook));
     }
@@ -257,13 +259,13 @@ public:
     auto *result = switch_node::create(name, type, kind == CheckNull);
     for (auto *iter = list->data.sequence.items.start;
          iter < list->data.sequence.items.top; ++iter) {
-      auto *_case = yaml_document_get_node(doc_, *iter);
+      auto *c = yaml_document_get_node(doc_, *iter);
       std::vector<std::pair<std::string, llvm::Type *>> bindings;
       kore_symbol *symbol = nullptr;
       if (kind == SwitchLiteral || kind == CheckNull) {
         symbol = dv_;
       } else {
-        std::string sym_name = str(get(_case, 0));
+        std::string sym_name = str(get(c, 0));
         symbol = syms_.at(sym_name);
         if (!symbol) {
           std::cerr << sym_name << std::endl;
@@ -273,28 +275,29 @@ public:
           auto new_occurrence = occurrence;
           new_occurrence.insert(new_occurrence.begin(), std::to_string(i));
           std::string binding = to_string(new_occurrence);
-          std::string hook = str(get(get(_case, 2), i));
+          std::string hook = str(get(get(c, 2), i));
           bindings.emplace_back(
-              binding, get_param_type(kore_composite_sort::get_category(hook), mod_));
+              binding,
+              get_param_type(kore_composite_sort::get_category(hook), mod_));
         }
       }
-      decision_node *child = (*this)(get(_case, 1));
+      decision_node *child = (*this)(get(c, 1));
       switch (kind) {
       case SwitchLiteral: {
         unsigned bitwidth = stoi(str(get(node, "bitwidth")));
-        result->add_case({symbol, {bitwidth, str(get(_case, 0)), 10}, child});
+        result->add_case({symbol, {bitwidth, str(get(c, 0)), 10}, child});
         break;
       }
       case Switch: result->add_case({symbol, bindings, child}); break;
       case CheckNull:
-        result->add_case({symbol, {1, str(get(_case, 0)), 10}, child});
+        result->add_case({symbol, {1, str(get(c, 0)), 10}, child});
         break;
       default: assert(false && "not reachable"); abort();
       }
     }
-    auto *_case = get(node, "default");
-    if (_case->type != YAML_SCALAR_NODE || !str(_case).empty()) {
-      decision_node *child = (*this)(_case);
+    auto *c = get(node, "default");
+    if (c->type != YAML_SCALAR_NODE || !str(c).empty()) {
+      decision_node *child = (*this)(c);
       result->add_case(
           {nullptr, std::vector<std::pair<std::string, llvm::Type *>>{},
            child});

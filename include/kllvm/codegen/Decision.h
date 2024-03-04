@@ -117,7 +117,8 @@ public:
   [[nodiscard]] std::vector<var_type> const &get_bindings() const {
     return bindings_;
   }
-  void add_binding(std::string const &name, value_type type, llvm::Module *mod) {
+  void
+  add_binding(std::string const &name, value_type type, llvm::Module *mod) {
     bindings_.emplace_back(name, get_param_type(type, mod));
   }
   llvm::APInt get_literal() const { return literal_; }
@@ -160,12 +161,12 @@ public:
       return;
     }
     bool has_default = false;
-    for (auto const &_case : cases_) {
-      _case.get_child()->preprocess(leaves);
+    for (auto const &c : cases_) {
+      c.get_child()->preprocess(leaves);
       containsfail_node_
-          = containsfail_node_ || _case.get_child()->containsfail_node_;
-      has_default = has_default || _case.get_constructor() == nullptr;
-      choice_depth_ = std::max(choice_depth_, _case.get_child()->choice_depth_);
+          = containsfail_node_ || c.get_child()->containsfail_node_;
+      has_default = has_default || c.get_constructor() == nullptr;
+      choice_depth_ = std::max(choice_depth_, c.get_child()->choice_depth_);
     }
     if (!has_default) {
       containsfail_node_ = true;
@@ -245,7 +246,8 @@ public:
   get_bindings() const {
     return bindings_;
   }
-  void add_binding(std::string const &name, value_type type, llvm::Module *mod) {
+  void
+  add_binding(std::string const &name, value_type type, llvm::Module *mod) {
     bindings_.push_back({{name, get_param_type(type, mod)}, type});
   }
 
@@ -284,7 +286,8 @@ public:
   [[nodiscard]] std::vector<var_type> const &get_bindings() const {
     return bindings_;
   }
-  void add_binding(std::string const &name, value_type type, llvm::Module *mod) {
+  void
+  add_binding(std::string const &name, value_type type, llvm::Module *mod) {
     bindings_.emplace_back(name, get_param_type(type, mod));
   }
   void set_child(decision_node *child) { this->child_ = child; }

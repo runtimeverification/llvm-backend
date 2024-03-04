@@ -90,7 +90,8 @@ __attribute__((always_inline)) void *kore_alloc_always_gc(size_t requested) {
   return kore_arena_alloc(&alwaysgcspace, requested);
 }
 
-void *kore_resize_last_alloc(void *oldptr, size_t newrequest, size_t last_size) {
+void *
+kore_resize_last_alloc(void *oldptr, size_t newrequest, size_t last_size) {
   newrequest = (newrequest + 7) & ~7;
   last_size = (last_size + 7) & ~7;
 
@@ -112,17 +113,17 @@ void *kore_resize_last_alloc(void *oldptr, size_t newrequest, size_t last_size) 
 }
 
 void *kore_alloc_mp(size_t requested) {
-  auto *_new = (string *)kore_alloc_token(sizeof(string) + requested);
-  init_with_len(_new, requested);
-  return _new->data;
+  auto *new_token = (string *)kore_alloc_token(sizeof(string) + requested);
+  init_with_len(new_token, requested);
+  return new_token->data;
 }
 
 void *kore_realloc_mp(void *ptr, size_t old_size, size_t new_size) {
-  auto *_new = (string *)kore_alloc_token(sizeof(string) + new_size);
+  auto *new_token = (string *)kore_alloc_token(sizeof(string) + new_size);
   size_t min = old_size > new_size ? new_size : old_size;
-  memcpy(_new->data, ptr, min);
-  init_with_len(_new, new_size);
-  return _new->data;
+  memcpy(new_token->data, ptr, min);
+  init_with_len(new_token, new_size);
+  return new_token->data;
 }
 
 void kore_free(void *ptr, size_t size) { }
