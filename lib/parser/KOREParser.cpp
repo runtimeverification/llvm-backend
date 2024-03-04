@@ -57,26 +57,26 @@ static std::string str(token tok) {
 std::string kore_parser::consume(token next) {
   std::string data;
   token actual = token::EMPTY;
-  if (buffer.tok == token::EMPTY) {
-    actual = scanner.yylex(&data, &loc);
+  if (buffer_.tok == token::EMPTY) {
+    actual = scanner_.yylex(&data, &loc_);
   } else {
-    actual = buffer.tok;
-    data = buffer.data;
-    buffer.tok = token::EMPTY;
+    actual = buffer_.tok;
+    data = buffer_.data;
+    buffer_.tok = token::EMPTY;
   }
   if (actual == next) {
     return data;
   }
-  error(loc, "Expected: " + str(next) + " Actual: " + str(actual));
+  error(loc_, "Expected: " + str(next) + " Actual: " + str(actual));
 }
 
 token kore_parser::peek() {
   std::string data;
-  if (buffer.tok == token::EMPTY) {
-    buffer.tok = scanner.yylex(&data, &loc);
-    buffer.data = data;
+  if (buffer_.tok == token::EMPTY) {
+    buffer_.tok = scanner_.yylex(&data, &loc_);
+    buffer_.data = data;
   }
-  return buffer.tok;
+  return buffer_.tok;
 }
 
 ptr<kore_definition> kore_parser::definition() {
@@ -237,7 +237,7 @@ ptr<kore_declaration> kore_parser::sentence() {
   }
   default:
     error(
-        loc, "Expected: [import, sort, hooked-sort, symbol, hooked-symbol, "
+        loc_, "Expected: [import, sort, hooked-sort, symbol, hooked-symbol, "
              "alias, axiom, claim] Actual: "
                  + str(current));
   }
@@ -322,11 +322,11 @@ sptr<kore_pattern> kore_parser::_pattern() {
       consume(token::COLON);
       return kore_variable_pattern::Create(name, sort());
     case token::LEFTBRACE: return applicationPattern(name);
-    default: error(loc, "Expected: [:, {] Actual: " + str(current));
+    default: error(loc_, "Expected: [:, {] Actual: " + str(current));
     }
   }
   case token::STRING: return kore_string_pattern::Create(consume(token::STRING));
-  default: error(loc, "Expected: [<id>, <string>] Actual: " + str(current));
+  default: error(loc_, "Expected: [<id>, <string>] Actual: " + str(current));
   }
 }
 

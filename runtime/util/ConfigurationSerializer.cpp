@@ -44,10 +44,10 @@ struct serialization_state {
   ~serialization_state() = default;
 
   serializer instance;
-  std::vector<block *> boundVariables;
-  std::unordered_map<string *, std::string, string_hash, string_eq> varNames;
-  std::set<std::string> usedVarNames;
-  uint64_t varCounter{0};
+  std::vector<block *> bound_variables;
+  std::unordered_map<string *, std::string, string_hash, string_eq> var_names;
+  std::set<std::string> used_var_names;
+  uint64_t var_counter{0};
 };
 
 static std::string drop_back(std::string const &s, int n) {
@@ -292,7 +292,7 @@ void serializeConfigurationInternal(
     if (isConstant == 3) {
       // bound variable
       serializeConfigurationInternal(
-          file, state.boundVariables[state.boundVariables.size() - 1 - tag],
+          file, state.bound_variables[state.bound_variables.size() - 1 - tag],
           sort, true, state_ptr);
       return;
     }
@@ -306,18 +306,18 @@ void serializeConfigurationInternal(
     auto *str = (string *)subject;
     size_t subject_len = len(subject);
 
-    if (is_var && !state.varNames.contains(str)) {
+    if (is_var && !state.var_names.contains(str)) {
       std::string stdStr = std::string(str->data, len(str));
       std::string suffix;
-      while (state.usedVarNames.contains(stdStr + suffix)) {
-        suffix = std::to_string(state.varCounter++);
+      while (state.used_var_names.contains(stdStr + suffix)) {
+        suffix = std::to_string(state.var_counter++);
       }
       stdStr = stdStr + suffix;
       emitToken(state.instance, sort, suffix.c_str());
-      state.usedVarNames.insert(stdStr);
-      state.varNames[str] = suffix;
+      state.used_var_names.insert(stdStr);
+      state.var_names[str] = suffix;
     } else if (is_var) {
-      emitToken(state.instance, sort, state.varNames[str].c_str());
+      emitToken(state.instance, sort, state.var_names[str].c_str());
     } else {
       emitToken(state.instance, sort, str->data, subject_len);
     }
@@ -328,7 +328,7 @@ void serializeConfigurationInternal(
   uint32_t tag = tag_hdr(subject->h.hdr);
   bool isBinder = isSymbolABinder(tag);
   if (isBinder) {
-    state.boundVariables.push_back(
+    state.bound_variables.push_back(
         *(block **)(((char *)subject) + sizeof(blockheader)));
   }
 
@@ -373,7 +373,7 @@ void serializeConfigurationInternal(
   }
 
   if (isBinder) {
-    state.boundVariables.pop_back();
+    state.bound_variables.pop_back();
   }
 }
 

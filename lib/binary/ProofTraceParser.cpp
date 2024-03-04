@@ -8,30 +8,30 @@ constexpr auto indent_size = 2U;
 
 llvm_function_event::llvm_function_event(
     std::string name, std::string relative_position)
-    : name(std::move(name))
-    , relativePosition(std::move(relative_position)) { }
+    : name_(std::move(name))
+    , relative_position_(std::move(relative_position)) { }
 
 std::vector<llvm_event> const &llvm_function_event::getArguments() const {
-  return arguments;
+  return arguments_;
 }
 
 void llvm_function_event::addArgument(llvm_event const &argument) {
-  arguments.push_back(argument);
+  arguments_.push_back(argument);
 }
 
 llvm_hook_event::llvm_hook_event(std::string name, std::string relative_position)
-    : name(std::move(name))
-    , relativePosition(std::move(relative_position))
-    , korePattern(nullptr) { }
+    : name_(std::move(name))
+    , relative_position_(std::move(relative_position))
+    , kore_pattern_(nullptr) { }
 
 void llvm_hook_event::addArgument(llvm_event const &argument) {
-  arguments.push_back(argument);
+  arguments_.push_back(argument);
 }
 
 void llvm_rewrite_event::printSubstitution(
     std::ostream &out, unsigned indent) const {
   std::string Indent(indent * indent_size, ' ');
-  for (auto const &p : substitution) {
+  for (auto const &p : substitution_) {
     out << fmt::format("{}{} = kore[{}]\n", Indent, p.first, p.second.second);
   }
 }
@@ -55,51 +55,51 @@ void llvm_side_condition_end_event::print(
     std::ostream &out, unsigned indent) const {
   std::string Indent(indent * indent_size, ' ');
   out << fmt::format(
-      "{}side condition exit: {} kore[{}]\n", Indent, ruleOrdinal,
-      patternLength);
+      "{}side condition exit: {} kore[{}]\n", Indent, rule_ordinal_,
+      pattern_length_);
 }
 
 void llvm_function_event::print(std::ostream &out, unsigned indent) const {
   std::string Indent(indent * indent_size, ' ');
-  out << fmt::format("{}function: {} ({})\n", Indent, name, relativePosition);
-  for (auto const &arg : arguments) {
+  out << fmt::format("{}function: {} ({})\n", Indent, name_, relative_position_);
+  for (auto const &arg : arguments_) {
     arg.print(out, true, indent + 1U);
   }
 }
 
 void llvm_hook_event::print(std::ostream &out, unsigned indent) const {
   std::string Indent(indent * indent_size, ' ');
-  out << fmt::format("{}hook: {} ({})\n", Indent, name, relativePosition);
-  for (auto const &arg : arguments) {
+  out << fmt::format("{}hook: {} ({})\n", Indent, name_, relative_position_);
+  for (auto const &arg : arguments_) {
     arg.print(out, true, indent + 1U);
   }
-  out << fmt::format("{}hook result: kore[{}]\n", Indent, patternLength);
+  out << fmt::format("{}hook result: kore[{}]\n", Indent, pattern_length_);
 }
 
 void llvm_event::print(std::ostream &out, bool is_arg, unsigned indent) const {
-  if (isStepEvent) {
-    stepEvent->print(out, indent);
+  if (is_step_event_) {
+    step_event_->print(out, indent);
   } else {
     std::string Indent(indent * indent_size, ' ');
     out << fmt::format(
-        "{}{}: kore[{}]\n", Indent, is_arg ? "arg" : "config", patternLength);
+        "{}{}: kore[{}]\n", Indent, is_arg ? "arg" : "config", pattern_length_);
   }
 }
 
 void llvm_rewrite_trace::print(std::ostream &out, unsigned indent) const {
   std::string Indent(indent * indent_size, ' ');
-  out << fmt::format("{}version: {}\n", Indent, version);
-  for (auto const &pre_trace_event : preTrace) {
+  out << fmt::format("{}version: {}\n", Indent, version_);
+  for (auto const &pre_trace_event : pre_trace_) {
     pre_trace_event.print(out, false, indent);
   }
-  initialConfig.print(out, false, indent);
-  for (auto const &trace_event : trace) {
+  initial_config_.print(out, false, indent);
+  for (auto const &trace_event : trace_) {
     trace_event.print(out, false, indent);
   }
 }
 
 proof_trace_parser::proof_trace_parser(bool verbose)
-    : verbose(verbose) { }
+    : verbose_(verbose) { }
 
 std::optional<llvm_rewrite_trace>
 proof_trace_parser::parse_proof_trace(std::string const &data) {
@@ -111,7 +111,7 @@ proof_trace_parser::parse_proof_trace(std::string const &data) {
     return std::nullopt;
   }
 
-  if (verbose) {
+  if (verbose_) {
     trace.print(std::cout);
   }
 

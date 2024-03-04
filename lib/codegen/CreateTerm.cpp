@@ -217,8 +217,8 @@ uint64_t getBlockHeaderVal(
 }
 
 llvm::Value *getBlockHeader(
-    llvm::Module *module, kore_definition *definition, kore_symbol const *symbol,
-    llvm::Type *block_type) {
+    llvm::Module *module, kore_definition *definition,
+    kore_symbol const *symbol, llvm::Type *block_type) {
   llvm::StructType *BlockHeaderType = llvm::StructType::getTypeByName(
       module->getContext(), blockheader_struct);
   uint64_t headerVal = getBlockHeaderVal(module, symbol, block_type);
@@ -292,16 +292,17 @@ sptr<kore_sort> termSort(kore_pattern *pattern) {
 }
 
 llvm::Value *create_term::alloc_arg(
-    kore_composite_pattern *pattern, int idx, std::string const &location_stack) {
+    kore_composite_pattern *pattern, int idx,
+    std::string const &location_stack) {
   kore_pattern *p = pattern->getArguments()[idx].get();
   std::string newLocation = fmt::format("{}:{}", location_stack, idx);
-  if (isInjectionSymbol(p, Definition->getInjSymbol())) {
+  if (isInjectionSymbol(p, definition_->getInjSymbol())) {
     newLocation = location_stack;
   }
   llvm::Value *ret = createAllocation(p, newLocation).first;
   auto *sort = dynamic_cast<kore_composite_sort *>(p->getSort().get());
-  proof_event e(Definition, Module);
-  CurrentBlock = e.hookArg(ret, sort, CurrentBlock);
+  proof_event e(definition_, module_);
+  current_block_ = e.hookArg(ret, sort, current_block_);
   return ret;
 }
 
@@ -326,39 +327,39 @@ llvm::Value *create_term::createHook(
   if (name == "BOOL.and" || name == "BOOL.andThen") {
     assert(pattern->getArguments().size() == 2);
     llvm::Value *firstArg = alloc_arg(pattern, 0, locationStack);
-    llvm::BasicBlock *CondBlock = CurrentBlock;
+    llvm::BasicBlock *CondBlock = current_block_;
     llvm::BasicBlock *TrueBlock
-        = llvm::BasicBlock::Create(Ctx, "then", CurrentBlock->getParent());
+        = llvm::BasicBlock::Create(ctx_, "then", current_block_->getParent());
     llvm::BasicBlock *MergeBlock = llvm::BasicBlock::Create(
-        Ctx, "hook_BOOL_and", CurrentBlock->getParent());
-    llvm::BranchInst::Create(TrueBlock, MergeBlock, firstArg, CurrentBlock);
-    CurrentBlock = TrueBlock;
+        ctx_, "hook_BOOL_and", current_block_->getParent());
+    llvm::BranchInst::Create(TrueBlock, MergeBlock, firstArg, current_block_);
+    current_block_ = TrueBlock;
     llvm::Value *secondArg = alloc_arg(pattern, 1, locationStack);
-    llvm::BranchInst::Create(MergeBlock, CurrentBlock);
+    llvm::BranchInst::Create(MergeBlock, current_block_);
     llvm::PHINode *Phi = llvm::PHINode::Create(
-        llvm::Type::getInt1Ty(Ctx), 2, "phi", MergeBlock);
-    Phi->addIncoming(secondArg, CurrentBlock);
+        llvm::Type::getInt1Ty(ctx_), 2, "phi", MergeBlock);
+    Phi->addIncoming(secondArg, current_block_);
     Phi->addIncoming(firstArg, CondBlock);
-    CurrentBlock = MergeBlock;
+    current_block_ = MergeBlock;
     return Phi;
   }
   if (name == "BOOL.or" || name == "BOOL.orElse") {
     assert(pattern->getArguments().size() == 2);
     llvm::Value *firstArg = alloc_arg(pattern, 0, locationStack);
-    llvm::BasicBlock *CondBlock = CurrentBlock;
+    llvm::BasicBlock *CondBlock = current_block_;
     llvm::BasicBlock *FalseBlock
-        = llvm::BasicBlock::Create(Ctx, "else", CurrentBlock->getParent());
+        = llvm::BasicBlock::Create(ctx_, "else", current_block_->getParent());
     llvm::BasicBlock *MergeBlock = llvm::BasicBlock::Create(
-        Ctx, "hook_BOOL_or", CurrentBlock->getParent());
-    llvm::BranchInst::Create(MergeBlock, FalseBlock, firstArg, CurrentBlock);
-    CurrentBlock = FalseBlock;
+        ctx_, "hook_BOOL_or", current_block_->getParent());
+    llvm::BranchInst::Create(MergeBlock, FalseBlock, firstArg, current_block_);
+    current_block_ = FalseBlock;
     llvm::Value *secondArg = alloc_arg(pattern, 1, locationStack);
-    llvm::BranchInst::Create(MergeBlock, CurrentBlock);
+    llvm::BranchInst::Create(MergeBlock, current_block_);
     llvm::PHINode *Phi = llvm::PHINode::Create(
-        llvm::Type::getInt1Ty(Ctx), 2, "phi", MergeBlock);
-    Phi->addIncoming(secondArg, CurrentBlock);
+        llvm::Type::getInt1Ty(ctx_), 2, "phi", MergeBlock);
+    Phi->addIncoming(secondArg, current_block_);
     Phi->addIncoming(firstArg, CondBlock);
-    CurrentBlock = MergeBlock;
+    current_block_ = MergeBlock;
     return Phi;
   }
   if (name == "BOOL.not") {
@@ -366,28 +367,28 @@ llvm::Value *create_term::createHook(
     llvm::Value *arg = alloc_arg(pattern, 0, locationStack);
     llvm::BinaryOperator *Not = llvm::BinaryOperator::Create(
         llvm::Instruction::Xor, arg,
-        llvm::ConstantInt::get(llvm::Type::getInt1Ty(Ctx), 1), "hook_BOOL_not",
-        CurrentBlock);
+        llvm::ConstantInt::get(llvm::Type::getInt1Ty(ctx_), 1), "hook_BOOL_not",
+        current_block_);
     return Not;
   }
   if (name == "BOOL.implies") {
     assert(pattern->getArguments().size() == 2);
     llvm::Value *firstArg = alloc_arg(pattern, 0, locationStack);
-    llvm::BasicBlock *CondBlock = CurrentBlock;
+    llvm::BasicBlock *CondBlock = current_block_;
     llvm::BasicBlock *TrueBlock
-        = llvm::BasicBlock::Create(Ctx, "then", CurrentBlock->getParent());
+        = llvm::BasicBlock::Create(ctx_, "then", current_block_->getParent());
     llvm::BasicBlock *MergeBlock = llvm::BasicBlock::Create(
-        Ctx, "hook_BOOL_implies", CurrentBlock->getParent());
-    llvm::BranchInst::Create(TrueBlock, MergeBlock, firstArg, CurrentBlock);
-    CurrentBlock = TrueBlock;
+        ctx_, "hook_BOOL_implies", current_block_->getParent());
+    llvm::BranchInst::Create(TrueBlock, MergeBlock, firstArg, current_block_);
+    current_block_ = TrueBlock;
     llvm::Value *secondArg = alloc_arg(pattern, 1, locationStack);
-    llvm::BranchInst::Create(MergeBlock, CurrentBlock);
+    llvm::BranchInst::Create(MergeBlock, current_block_);
     llvm::PHINode *Phi = llvm::PHINode::Create(
-        llvm::Type::getInt1Ty(Ctx), 2, "phi", MergeBlock);
-    Phi->addIncoming(secondArg, CurrentBlock);
+        llvm::Type::getInt1Ty(ctx_), 2, "phi", MergeBlock);
+    Phi->addIncoming(secondArg, current_block_);
     Phi->addIncoming(
-        llvm::ConstantInt::get(llvm::Type::getInt1Ty(Ctx), 1), CondBlock);
-    CurrentBlock = MergeBlock;
+        llvm::ConstantInt::get(llvm::Type::getInt1Ty(ctx_), 1), CondBlock);
+    current_block_ = MergeBlock;
     return Phi;
   }
   if (name == "BOOL.ne" || name == "BOOL.xor") {
@@ -396,7 +397,7 @@ llvm::Value *create_term::createHook(
     llvm::Value *secondArg = alloc_arg(pattern, 1, locationStack);
     llvm::BinaryOperator *Xor = llvm::BinaryOperator::Create(
         llvm::Instruction::Xor, firstArg, secondArg, "hook_BOOL_ne",
-        CurrentBlock);
+        current_block_);
     return Xor;
   }
   if (name == "BOOL.eq") {
@@ -404,7 +405,7 @@ llvm::Value *create_term::createHook(
     llvm::Value *firstArg = alloc_arg(pattern, 0, locationStack);
     llvm::Value *secondArg = alloc_arg(pattern, 1, locationStack);
     auto *Eq = new llvm::ICmpInst(
-        *CurrentBlock, llvm::CmpInst::ICMP_EQ, firstArg, secondArg,
+        *current_block_, llvm::CmpInst::ICMP_EQ, firstArg, secondArg,
         "hook_BOOL_eq");
     return Eq;
   }
@@ -412,22 +413,22 @@ llvm::Value *create_term::createHook(
     assert(pattern->getArguments().size() == 3);
     llvm::Value *cond = alloc_arg(pattern, 0, locationStack);
     llvm::BasicBlock *TrueBlock
-        = llvm::BasicBlock::Create(Ctx, "then", CurrentBlock->getParent());
+        = llvm::BasicBlock::Create(ctx_, "then", current_block_->getParent());
     llvm::BasicBlock *FalseBlock
-        = llvm::BasicBlock::Create(Ctx, "else", CurrentBlock->getParent());
+        = llvm::BasicBlock::Create(ctx_, "else", current_block_->getParent());
     llvm::BasicBlock *MergeBlock = llvm::BasicBlock::Create(
-        Ctx, "hook_KEQUAL_ite", CurrentBlock->getParent());
-    llvm::BranchInst::Create(TrueBlock, FalseBlock, cond, CurrentBlock);
-    CurrentBlock = TrueBlock;
+        ctx_, "hook_KEQUAL_ite", current_block_->getParent());
+    llvm::BranchInst::Create(TrueBlock, FalseBlock, cond, current_block_);
+    current_block_ = TrueBlock;
     llvm::Value *trueArg = alloc_arg(pattern, 1, locationStack);
-    llvm::BasicBlock *NewTrueBlock = CurrentBlock;
-    CurrentBlock = FalseBlock;
+    llvm::BasicBlock *NewTrueBlock = current_block_;
+    current_block_ = FalseBlock;
     llvm::Value *falseArg = alloc_arg(pattern, 2, locationStack);
     if (trueArg->getType()->isPointerTy()
         && !falseArg->getType()->isPointerTy()) {
       auto *AllocCollection
-          = new llvm::AllocaInst(falseArg->getType(), 0, "", CurrentBlock);
-      new llvm::StoreInst(falseArg, AllocCollection, CurrentBlock);
+          = new llvm::AllocaInst(falseArg->getType(), 0, "", current_block_);
+      new llvm::StoreInst(falseArg, AllocCollection, current_block_);
       falseArg = AllocCollection;
     } else if (
         !trueArg->getType()->isPointerTy()
@@ -437,132 +438,132 @@ llvm::Value *create_term::createHook(
       new llvm::StoreInst(trueArg, AllocCollection, NewTrueBlock);
       trueArg = AllocCollection;
     }
-    llvm::BranchInst::Create(MergeBlock, CurrentBlock);
+    llvm::BranchInst::Create(MergeBlock, current_block_);
     llvm::BranchInst::Create(MergeBlock, NewTrueBlock);
     llvm::PHINode *Phi
         = llvm::PHINode::Create(trueArg->getType(), 2, "phi", MergeBlock);
     Phi->addIncoming(trueArg, NewTrueBlock);
-    Phi->addIncoming(falseArg, CurrentBlock);
-    CurrentBlock = MergeBlock;
+    Phi->addIncoming(falseArg, current_block_);
+    current_block_ = MergeBlock;
     return Phi;
   }
   if (name == "MINT.uvalue") {
     llvm::Value *mint = alloc_arg(pattern, 0, locationStack);
     value_type cat = dynamic_cast<kore_composite_sort *>(
-                        pattern->getConstructor()->getArguments()[0].get())
-                        ->getCategory(Definition);
-    auto *Type = getvalue_type(cat, Module);
+                         pattern->getConstructor()->getArguments()[0].get())
+                         ->getCategory(definition_);
+    auto *Type = getvalue_type(cat, module_);
     size_t nwords = (cat.bits + 63) / 64;
     if (nwords == 0) {
-      auto *staticTerm = new create_static_term(Definition, Module);
+      auto *staticTerm = new create_static_term(definition_, module_);
       return staticTerm->createToken({SortCategory::Int, 0}, "0");
     }
     auto *Ptr = allocateTerm(
-        llvm::Type::getInt64Ty(Ctx),
-        llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), nwords * 8),
-        CurrentBlock, "koreAllocAlwaysGC");
+        llvm::Type::getInt64Ty(ctx_),
+        llvm::ConstantInt::get(llvm::Type::getInt64Ty(ctx_), nwords * 8),
+        current_block_, "koreAllocAlwaysGC");
     if (nwords == 1) {
       llvm::Value *Word = nullptr;
       if (cat.bits == 64) {
         Word = mint;
       } else {
         Word = new llvm::ZExtInst(
-            mint, llvm::Type::getInt64Ty(Ctx), "word", CurrentBlock);
+            mint, llvm::Type::getInt64Ty(ctx_), "word", current_block_);
       }
-      new llvm::StoreInst(Word, Ptr, CurrentBlock);
+      new llvm::StoreInst(Word, Ptr, current_block_);
     } else { // nwords >= 2
       llvm::Value *Ptr2 = Ptr;
       llvm::Value *accum = mint;
       for (size_t i = 0; i < nwords; i++) {
         auto *Word = new llvm::TruncInst(
-            accum, llvm::Type::getInt64Ty(Ctx), "word", CurrentBlock);
-        new llvm::StoreInst(Word, Ptr2, CurrentBlock);
+            accum, llvm::Type::getInt64Ty(ctx_), "word", current_block_);
+        new llvm::StoreInst(Word, Ptr2, current_block_);
         Ptr2 = llvm::GetElementPtrInst::Create(
-            llvm::Type::getInt64Ty(Ctx), Ptr2,
-            {llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 1)}, "ptr",
-            CurrentBlock);
+            llvm::Type::getInt64Ty(ctx_), Ptr2,
+            {llvm::ConstantInt::get(llvm::Type::getInt64Ty(ctx_), 1)}, "ptr",
+            current_block_);
         accum = llvm::BinaryOperator::Create(
             llvm::Instruction::LShr, accum, llvm::ConstantInt::get(Type, 64),
-            "shift", CurrentBlock);
+            "shift", current_block_);
       }
     }
     auto *result = llvm::CallInst::Create(
         getOrInsertFunction(
-            Module, "hook_MINT_import",
-            getvalue_type({SortCategory::Int, 0}, Module),
-            llvm::Type::getInt64PtrTy(Ctx), llvm::Type::getInt64Ty(Ctx),
-            llvm::Type::getInt1Ty(Ctx)),
-        {Ptr, llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), cat.bits),
-         llvm::ConstantInt::getFalse(Ctx)},
-        "hook_MINT_uvalue", CurrentBlock);
+            module_, "hook_MINT_import",
+            getvalue_type({SortCategory::Int, 0}, module_),
+            llvm::Type::getInt64PtrTy(ctx_), llvm::Type::getInt64Ty(ctx_),
+            llvm::Type::getInt1Ty(ctx_)),
+        {Ptr, llvm::ConstantInt::get(llvm::Type::getInt64Ty(ctx_), cat.bits),
+         llvm::ConstantInt::getFalse(ctx_)},
+        "hook_MINT_uvalue", current_block_);
     setDebugLoc(result);
     return result;
   }
   if (name == "MINT.svalue") {
     llvm::Value *mint = alloc_arg(pattern, 0, locationStack);
     value_type cat = dynamic_cast<kore_composite_sort *>(
-                        pattern->getConstructor()->getArguments()[0].get())
-                        ->getCategory(Definition);
-    auto *Type = getvalue_type(cat, Module);
+                         pattern->getConstructor()->getArguments()[0].get())
+                         ->getCategory(definition_);
+    auto *Type = getvalue_type(cat, module_);
     size_t nwords = (cat.bits + 63) / 64;
     if (nwords == 0) {
-      auto *staticTerm = new create_static_term(Definition, Module);
+      auto *staticTerm = new create_static_term(definition_, module_);
       return staticTerm->createToken({SortCategory::Int, 0}, "0");
     }
     auto *Ptr = allocateTerm(
-        llvm::Type::getInt64Ty(Ctx),
-        llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), nwords * 8),
-        CurrentBlock, "koreAllocAlwaysGC");
+        llvm::Type::getInt64Ty(ctx_),
+        llvm::ConstantInt::get(llvm::Type::getInt64Ty(ctx_), nwords * 8),
+        current_block_, "koreAllocAlwaysGC");
     if (nwords == 1) {
       llvm::Value *Word = nullptr;
       if (cat.bits == 64) {
         Word = mint;
       } else {
         Word = new llvm::SExtInst(
-            mint, llvm::Type::getInt64Ty(Ctx), "word", CurrentBlock);
+            mint, llvm::Type::getInt64Ty(ctx_), "word", current_block_);
       }
-      new llvm::StoreInst(Word, Ptr, CurrentBlock);
+      new llvm::StoreInst(Word, Ptr, current_block_);
     } else { // nwords >= 2
       llvm::Value *Ptr2 = Ptr;
       llvm::Value *accum = mint;
       for (size_t i = 0; i < nwords; i++) {
         auto *Word = new llvm::TruncInst(
-            accum, llvm::Type::getInt64Ty(Ctx), "word", CurrentBlock);
-        new llvm::StoreInst(Word, Ptr2, CurrentBlock);
+            accum, llvm::Type::getInt64Ty(ctx_), "word", current_block_);
+        new llvm::StoreInst(Word, Ptr2, current_block_);
         Ptr2 = llvm::GetElementPtrInst::Create(
-            llvm::Type::getInt64Ty(Ctx), Ptr2,
-            {llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 1)}, "ptr",
-            CurrentBlock);
+            llvm::Type::getInt64Ty(ctx_), Ptr2,
+            {llvm::ConstantInt::get(llvm::Type::getInt64Ty(ctx_), 1)}, "ptr",
+            current_block_);
         accum = llvm::BinaryOperator::Create(
             llvm::Instruction::AShr, accum, llvm::ConstantInt::get(Type, 64),
-            "shift", CurrentBlock);
+            "shift", current_block_);
       }
     }
     auto *result = llvm::CallInst::Create(
         getOrInsertFunction(
-            Module, "hook_MINT_import",
-            getvalue_type({SortCategory::Int, 0}, Module),
-            llvm::Type::getInt64PtrTy(Ctx), llvm::Type::getInt64Ty(Ctx),
-            llvm::Type::getInt1Ty(Ctx)),
-        {Ptr, llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), cat.bits),
-         llvm::ConstantInt::getTrue(Ctx)},
-        "hook_MINT_svalue", CurrentBlock);
+            module_, "hook_MINT_import",
+            getvalue_type({SortCategory::Int, 0}, module_),
+            llvm::Type::getInt64PtrTy(ctx_), llvm::Type::getInt64Ty(ctx_),
+            llvm::Type::getInt1Ty(ctx_)),
+        {Ptr, llvm::ConstantInt::get(llvm::Type::getInt64Ty(ctx_), cat.bits),
+         llvm::ConstantInt::getTrue(ctx_)},
+        "hook_MINT_svalue", current_block_);
     setDebugLoc(result);
     return result;
   }
   if (name == "MINT.integer") {
     llvm::Value *mpz = alloc_arg(pattern, 0, locationStack);
     value_type cat = dynamic_cast<kore_composite_sort *>(
-                        pattern->getConstructor()->getSort().get())
-                        ->getCategory(Definition);
-    auto *Type = getvalue_type(cat, Module);
+                         pattern->getConstructor()->getSort().get())
+                         ->getCategory(definition_);
+    auto *Type = getvalue_type(cat, module_);
     llvm::Instruction *Ptr = llvm::CallInst::Create(
         getOrInsertFunction(
-            Module, "hook_MINT_export", llvm::Type::getInt64PtrTy(Ctx),
-            getvalue_type({SortCategory::Int, 0}, Module),
-            llvm::Type::getInt64Ty(Ctx)),
-        {mpz, llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), cat.bits)},
-        "ptr", CurrentBlock);
+            module_, "hook_MINT_export", llvm::Type::getInt64PtrTy(ctx_),
+            getvalue_type({SortCategory::Int, 0}, module_),
+            llvm::Type::getInt64Ty(ctx_)),
+        {mpz, llvm::ConstantInt::get(llvm::Type::getInt64Ty(ctx_), cat.bits)},
+        "ptr", current_block_);
     setDebugLoc(Ptr);
     size_t nwords = (cat.bits + 63) / 64;
     llvm::Value *result = llvm::ConstantInt::get(Type, 0);
@@ -572,44 +573,45 @@ llvm::Value *create_term::createHook(
 
     if (nwords == 1) {
       auto *Word = new llvm::LoadInst(
-          llvm::Type::getInt64Ty(Ctx), Ptr, "word", CurrentBlock);
+          llvm::Type::getInt64Ty(ctx_), Ptr, "word", current_block_);
       if (cat.bits == 64) {
         return Word;
       }
 
-      return new llvm::TruncInst(Word, Type, "hook_MINT_integer", CurrentBlock);
+      return new llvm::TruncInst(
+          Word, Type, "hook_MINT_integer", current_block_);
     }
     // nwords >= 2
     for (size_t i = 0; i < nwords; i++) {
       auto *Word = new llvm::LoadInst(
-          llvm::Type::getInt64Ty(Ctx), Ptr, "word", CurrentBlock);
-      auto *Zext = new llvm::ZExtInst(Word, Type, "extended", CurrentBlock);
+          llvm::Type::getInt64Ty(ctx_), Ptr, "word", current_block_);
+      auto *Zext = new llvm::ZExtInst(Word, Type, "extended", current_block_);
       auto *Shl = llvm::BinaryOperator::Create(
           llvm::Instruction::Shl, result, llvm::ConstantInt::get(Type, 64),
-          "shift", CurrentBlock);
+          "shift", current_block_);
       result = llvm::BinaryOperator::Create(
-          llvm::Instruction::Or, Shl, Zext, "or", CurrentBlock);
+          llvm::Instruction::Or, Shl, Zext, "or", current_block_);
       Ptr = llvm::GetElementPtrInst::Create(
-          llvm::Type::getInt64Ty(Ctx), Ptr,
-          {llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 1)}, "ptr",
-          CurrentBlock);
+          llvm::Type::getInt64Ty(ctx_), Ptr,
+          {llvm::ConstantInt::get(llvm::Type::getInt64Ty(ctx_), 1)}, "ptr",
+          current_block_);
     }
     return result;
   }
   if (name == "MINT.neg") {
     llvm::Value *in = alloc_arg(pattern, 0, locationStack);
-    return llvm::BinaryOperator::CreateNeg(in, "hook_MINT_neg", CurrentBlock);
+    return llvm::BinaryOperator::CreateNeg(in, "hook_MINT_neg", current_block_);
   }
   if (name == "MINT.not") {
     llvm::Value *in = alloc_arg(pattern, 0, locationStack);
-    return llvm::BinaryOperator::CreateNot(in, "hook_MINT_not", CurrentBlock);
+    return llvm::BinaryOperator::CreateNot(in, "hook_MINT_not", current_block_);
 #define MINT_CMP(hookname, inst)                                               \
   }                                                                            \
   if (name == "MINT." #hookname) {                                             \
     llvm::Value *first = alloc_arg(pattern, 0, locationStack);                 \
     llvm::Value *second = alloc_arg(pattern, 1, locationStack);                \
   return new llvm::ICmpInst(                                                   \
-      *CurrentBlock, llvm::CmpInst::inst, first, second,                       \
+      *current_block_, llvm::CmpInst::inst, first, second,                     \
       "hook_MINT_" #hookname)
     MINT_CMP(eq, ICMP_EQ);
     MINT_CMP(ne, ICMP_NE);
@@ -628,7 +630,7 @@ llvm::Value *create_term::createHook(
     llvm::Value *second = alloc_arg(pattern, 1, locationStack);                \
   return llvm::BinaryOperator::Create(                                         \
       llvm::Instruction::inst, first, second, "hook_MINT_" #hookname,          \
-      CurrentBlock)
+      current_block_)
     MINT_BINOP(xor, Xor);
     MINT_BINOP(or, Or);
     MINT_BINOP(and, And);
@@ -659,28 +661,29 @@ llvm::Value *create_term::createHook(
 llvm::Value *create_term::createFunctionCall(
     std::string const &name, kore_composite_pattern *pattern, bool sret,
     bool tailcc, std::string const &location_stack) {
-  auto event = proof_event(Definition, Module);
+  auto event = proof_event(definition_, module_);
 
-  CurrentBlock = event.functionEvent_pre(CurrentBlock, pattern, location_stack);
+  current_block_
+      = event.functionEvent_pre(current_block_, pattern, location_stack);
 
   std::vector<llvm::Value *> args;
   auto *returnSort = dynamic_cast<kore_composite_sort *>(
       pattern->getConstructor()->getSort().get());
-  auto returnCat = returnSort->getCategory(Definition);
+  auto returnCat = returnSort->getCategory(definition_);
   int i = 0;
   for (auto const &sort : pattern->getConstructor()->getArguments()) {
     auto *concreteSort = dynamic_cast<kore_composite_sort *>(sort.get());
     llvm::Value *arg = alloc_arg(pattern, i, location_stack);
     i++;
-    switch (concreteSort->getCategory(Definition).cat) {
+    switch (concreteSort->getCategory(definition_).cat) {
     case SortCategory::Map:
     case SortCategory::RangeMap:
     case SortCategory::List:
     case SortCategory::Set: {
       if (!arg->getType()->isPointerTy()) {
         auto *AllocCollection
-            = new llvm::AllocaInst(arg->getType(), 0, "", CurrentBlock);
-        new llvm::StoreInst(arg, AllocCollection, CurrentBlock);
+            = new llvm::AllocaInst(arg->getType(), 0, "", current_block_);
+        new llvm::StoreInst(arg, AllocCollection, current_block_);
         args.push_back(AllocCollection);
       } else {
         args.push_back(arg);
@@ -691,16 +694,17 @@ llvm::Value *create_term::createFunctionCall(
     }
   }
 
-  CurrentBlock = event.functionEvent_post(CurrentBlock);
+  current_block_ = event.functionEvent_post(current_block_);
 
-  return createFunctionCall(name, returnCat, args, sret, tailcc, location_stack);
+  return createFunctionCall(
+      name, returnCat, args, sret, tailcc, location_stack);
 }
 
 llvm::Value *create_term::createFunctionCall(
     std::string const &name, value_type return_cat,
     std::vector<llvm::Value *> const &args, bool sret, bool tailcc,
     std::string const &location_stack) {
-  llvm::Type *returnType = getvalue_type(return_cat, Module);
+  llvm::Type *returnType = getvalue_type(return_cat, module_);
   std::vector<llvm::Type *> types;
   bool collection = false;
   switch (return_cat.cat) {
@@ -720,27 +724,27 @@ llvm::Value *create_term::createFunctionCall(
   if (sret) {
     // we don't use alloca here because the tail call optimization pass for llvm
     // doesn't handle correctly functions with alloca
-    AllocSret = allocateTerm(returnType, CurrentBlock, "koreAllocAlwaysGC");
+    AllocSret = allocateTerm(returnType, current_block_, "koreAllocAlwaysGC");
     sretType = returnType;
     realArgs.insert(realArgs.begin(), AllocSret);
     types.insert(types.begin(), AllocSret->getType());
-    returnType = llvm::Type::getVoidTy(Ctx);
+    returnType = llvm::Type::getVoidTy(ctx_);
   } else if (collection) {
     returnType = llvm::PointerType::getUnqual(returnType);
   }
 
   llvm::FunctionType *funcType
       = llvm::FunctionType::get(returnType, types, false);
-  llvm::Function *func = getOrInsertFunction(Module, name, funcType);
+  llvm::Function *func = getOrInsertFunction(module_, name, funcType);
 
-  auto *call = llvm::CallInst::Create(func, realArgs, "", CurrentBlock);
+  auto *call = llvm::CallInst::Create(func, realArgs, "", current_block_);
   setDebugLoc(call);
   if (tailcc) {
     call->setCallingConv(llvm::CallingConv::Tail);
   }
   if (sret) {
     llvm::Attribute sretAttr
-        = llvm::Attribute::get(Ctx, llvm::Attribute::StructRet, sretType);
+        = llvm::Attribute::get(ctx_, llvm::Attribute::StructRet, sretType);
     func->arg_begin()->addAttr(sretAttr);
     call->addParamAttr(0, sretAttr);
     return AllocSret;
@@ -755,10 +759,10 @@ llvm::Value *create_term::notInjectionCase(
     std::string const &location_stack) {
   kore_symbol const *symbol = constructor->getConstructor();
   kore_symbol_declaration *symbolDecl
-      = Definition->getSymbolDeclarations().at(symbol->getName());
-  llvm::StructType *BlockType = getBlockType(Module, Definition, symbol);
+      = definition_->getSymbolDeclarations().at(symbol->getName());
+  llvm::StructType *BlockType = getBlockType(module_, definition_, symbol);
   llvm::Value *BlockHeader
-      = getBlockHeader(Module, Definition, symbol, BlockType);
+      = getBlockHeader(module_, definition_, symbol, BlockType);
   int idx = 2;
   std::vector<llvm::Value *> children;
   for (auto const &child : constructor->getArguments()) {
@@ -767,44 +771,44 @@ llvm::Value *create_term::notInjectionCase(
       ChildValue = val;
     } else {
       std::string newLocation = fmt::format("{}:{}", location_stack, idx - 2);
-      if (isInjectionSymbol(child.get(), Definition->getInjSymbol())) {
+      if (isInjectionSymbol(child.get(), definition_->getInjSymbol())) {
         newLocation = location_stack;
       }
       ChildValue = createAllocation(child.get(), newLocation).first;
     }
 
     auto *sort = dynamic_cast<kore_composite_sort *>(child->getSort().get());
-    if (sort && isCollectionSort(sort->getCategory(Definition))) {
+    if (sort && isCollectionSort(sort->getCategory(definition_))) {
       ChildValue = new llvm::LoadInst(
-          BlockType->elements()[idx], ChildValue, "", CurrentBlock);
+          BlockType->elements()[idx], ChildValue, "", current_block_);
     }
     children.push_back(ChildValue);
     idx++;
   }
-  llvm::Value *Block = allocateTerm(BlockType, CurrentBlock);
+  llvm::Value *Block = allocateTerm(BlockType, current_block_);
   llvm::Value *BlockHeaderPtr = llvm::GetElementPtrInst::CreateInBounds(
       BlockType, Block,
-      {llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0),
-       llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), 0)},
-      symbol->getName(), CurrentBlock);
-  new llvm::StoreInst(BlockHeader, BlockHeaderPtr, CurrentBlock);
+      {llvm::ConstantInt::get(llvm::Type::getInt64Ty(ctx_), 0),
+       llvm::ConstantInt::get(llvm::Type::getInt32Ty(ctx_), 0)},
+      symbol->getName(), current_block_);
+  new llvm::StoreInst(BlockHeader, BlockHeaderPtr, current_block_);
   idx = 2;
   for (auto &ChildValue : children) {
     llvm::Value *ChildPtr = llvm::GetElementPtrInst::CreateInBounds(
         BlockType, Block,
-        {llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0),
-         llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), idx++)},
-        "", CurrentBlock);
-    new llvm::StoreInst(ChildValue, ChildPtr, CurrentBlock);
+        {llvm::ConstantInt::get(llvm::Type::getInt64Ty(ctx_), 0),
+         llvm::ConstantInt::get(llvm::Type::getInt32Ty(ctx_), idx++)},
+        "", current_block_);
+    new llvm::StoreInst(ChildValue, ChildPtr, current_block_);
   }
 
   auto *BlockPtr = llvm::PointerType::getUnqual(
-      llvm::StructType::getTypeByName(Module->getContext(), block_struct));
-  auto *bitcast = new llvm::BitCastInst(Block, BlockPtr, "", CurrentBlock);
+      llvm::StructType::getTypeByName(module_->getContext(), block_struct));
+  auto *bitcast = new llvm::BitCastInst(Block, BlockPtr, "", current_block_);
   if (symbolDecl->attributes().contains(attribute_set::key::binder)) {
     auto *call = llvm::CallInst::Create(
-        getOrInsertFunction(Module, "debruijnize", BlockPtr, BlockPtr), bitcast,
-        "withIndices", CurrentBlock);
+        getOrInsertFunction(module_, "debruijnize", BlockPtr, BlockPtr),
+        bitcast, "withIndices", current_block_);
     setDebugLoc(call);
     return call;
   }
@@ -829,10 +833,10 @@ bool create_term::populateStaticSet(kore_pattern *pattern) {
     kore_symbol const *symbol = constructor->getConstructor();
     if (symbol->getName() != "\\dv") {
       kore_symbol_declaration *symbolDecl
-          = Definition->getSymbolDeclarations().at(symbol->getName());
+          = definition_->getSymbolDeclarations().at(symbol->getName());
       if (symbolDecl->attributes().contains(attribute_set::key::function)
           || (symbolDecl->attributes().contains(attribute_set::key::anywhere)
-              && !isAnywhereOwise)) {
+              && !is_anywhere_owise_)) {
         can_be_static = false;
       }
       for (auto const &sptr_nextPattern : constructor->getArguments()) {
@@ -843,7 +847,7 @@ bool create_term::populateStaticSet(kore_pattern *pattern) {
   }
 
   if (can_be_static) {
-    staticTerms.insert(pattern);
+    static_terms_.insert(pattern);
   }
 
   return can_be_static;
@@ -851,13 +855,13 @@ bool create_term::populateStaticSet(kore_pattern *pattern) {
 
 std::pair<llvm::Value *, bool> create_term::createAllocation(
     kore_pattern *pattern, std::string const &location_stack) {
-  if (staticTerms.contains(pattern)) {
-    auto *staticTerm = new create_static_term(Definition, Module);
+  if (static_terms_.contains(pattern)) {
+    auto *staticTerm = new create_static_term(definition_, module_);
     return (*staticTerm)(pattern);
   }
 
   if (auto *variable = dynamic_cast<kore_variable_pattern *>(pattern)) {
-    auto *val = Substitution.lookup(variable->getName());
+    auto *val = substitution_.lookup(variable->getName());
     if (!val) {
       std::cerr << variable->getName() << std::endl;
       abort();
@@ -868,10 +872,10 @@ std::pair<llvm::Value *, bool> create_term::createAllocation(
     kore_symbol const *symbol = constructor->getConstructor();
     assert(symbol->isConcrete() && "not supported yet: sort variables");
     kore_symbol_declaration *symbolDecl
-        = Definition->getSymbolDeclarations().at(symbol->getName());
+        = definition_->getSymbolDeclarations().at(symbol->getName());
     if (symbolDecl->attributes().contains(attribute_set::key::function)
         || (symbolDecl->attributes().contains(attribute_set::key::anywhere)
-            && !isAnywhereOwise)) {
+            && !is_anywhere_owise_)) {
       if (symbolDecl->attributes().contains(attribute_set::key::hook)) {
         auto *sort
             = dynamic_cast<kore_composite_sort *>(constructor->getSort().get());
@@ -882,12 +886,12 @@ std::pair<llvm::Value *, bool> create_term::createAllocation(
                 .get());
         std::string name = strPattern->getContents();
 
-        proof_event p(Definition, Module);
-        CurrentBlock = p.hookEvent_pre(name, CurrentBlock, location_stack);
+        proof_event p(definition_, module_);
+        current_block_ = p.hookEvent_pre(name, current_block_, location_stack);
         llvm::Value *val = createHook(
             symbolDecl->attributes().get(attribute_set::key::hook).get(),
             constructor, location_stack);
-        CurrentBlock = p.hookEvent_post(val, sort, CurrentBlock);
+        current_block_ = p.hookEvent_post(val, sort, current_block_);
 
         return std::make_pair(val, true);
       }
@@ -898,7 +902,7 @@ std::pair<llvm::Value *, bool> create_term::createAllocation(
     }
     if (auto cat
         = dynamic_cast<kore_composite_sort *>(symbol->getArguments()[0].get())
-              ->getCategory(Definition)
+              ->getCategory(definition_)
               .cat;
         symbolDecl->attributes().contains(attribute_set::key::sort_injection)
         && (cat == SortCategory::Symbol)) {
@@ -907,45 +911,46 @@ std::pair<llvm::Value *, bool> create_term::createAllocation(
       if (val.second) {
         llvm::Instruction *Tag = llvm::CallInst::Create(
             getOrInsertFunction(
-                Module, "getTag", llvm::Type::getInt32Ty(Ctx),
-                getvalue_type({SortCategory::Symbol, 0}, Module)),
-            val.first, "tag", CurrentBlock);
+                module_, "getTag", llvm::Type::getInt32Ty(ctx_),
+                getvalue_type({SortCategory::Symbol, 0}, module_)),
+            val.first, "tag", current_block_);
         setDebugLoc(Tag);
-        auto *inj = Definition->getInjSymbol();
+        auto *inj = definition_->getInjSymbol();
         auto *NotStringBlock = llvm::BasicBlock::Create(
-            Ctx, "notString", CurrentBlock->getParent());
+            ctx_, "notString", current_block_->getParent());
         auto *GeBlock = llvm::BasicBlock::Create(
-            Ctx, "geFirst", CurrentBlock->getParent());
+            ctx_, "geFirst", current_block_->getParent());
         auto *FalseBlock = llvm::BasicBlock::Create(
-            Ctx, "notInjection", CurrentBlock->getParent());
-        auto *TrueBlock
-            = llvm::BasicBlock::Create(Ctx, "merge", CurrentBlock->getParent());
+            ctx_, "notInjection", current_block_->getParent());
+        auto *TrueBlock = llvm::BasicBlock::Create(
+            ctx_, "merge", current_block_->getParent());
         auto *cmp = new llvm::ICmpInst(
-            *CurrentBlock, llvm::CmpInst::ICMP_NE, Tag,
-            llvm::ConstantInt::getSigned(llvm::Type::getInt32Ty(Ctx), -1));
-        llvm::BranchInst::Create(NotStringBlock, FalseBlock, cmp, CurrentBlock);
+            *current_block_, llvm::CmpInst::ICMP_NE, Tag,
+            llvm::ConstantInt::getSigned(llvm::Type::getInt32Ty(ctx_), -1));
+        llvm::BranchInst::Create(
+            NotStringBlock, FalseBlock, cmp, current_block_);
 
-        CurrentBlock = NotStringBlock;
+        current_block_ = NotStringBlock;
         cmp = new llvm::ICmpInst(
-            *CurrentBlock, llvm::CmpInst::ICMP_UGE, Tag,
+            *current_block_, llvm::CmpInst::ICMP_UGE, Tag,
             llvm::ConstantInt::get(
-                llvm::Type::getInt32Ty(Ctx), inj->getFirstTag()));
-        llvm::BranchInst::Create(GeBlock, FalseBlock, cmp, CurrentBlock);
+                llvm::Type::getInt32Ty(ctx_), inj->getFirstTag()));
+        llvm::BranchInst::Create(GeBlock, FalseBlock, cmp, current_block_);
 
-        CurrentBlock = GeBlock;
+        current_block_ = GeBlock;
         cmp = new llvm::ICmpInst(
-            *CurrentBlock, llvm::CmpInst::ICMP_ULE, Tag,
+            *current_block_, llvm::CmpInst::ICMP_ULE, Tag,
             llvm::ConstantInt::get(
-                llvm::Type::getInt32Ty(Ctx), inj->getLastTag()));
-        llvm::BranchInst::Create(TrueBlock, FalseBlock, cmp, CurrentBlock);
+                llvm::Type::getInt32Ty(ctx_), inj->getLastTag()));
+        llvm::BranchInst::Create(TrueBlock, FalseBlock, cmp, current_block_);
 
-        CurrentBlock = FalseBlock;
+        current_block_ = FalseBlock;
         auto *Cast = notInjectionCase(constructor, val.first, location_stack);
-        llvm::BranchInst::Create(TrueBlock, CurrentBlock);
+        llvm::BranchInst::Create(TrueBlock, current_block_);
 
-        CurrentBlock = TrueBlock;
+        current_block_ = TrueBlock;
         llvm::PHINode *Phi
-            = llvm::PHINode::Create(Cast->getType(), 2, "phi", CurrentBlock);
+            = llvm::PHINode::Create(Cast->getType(), 2, "phi", current_block_);
         Phi->addIncoming(Cast, FalseBlock);
         Phi->addIncoming(val.first, GeBlock);
         return std::make_pair(Phi, true);
@@ -1053,10 +1058,10 @@ bool makeFunction(
   create_term creator = create_term(subst, definition, block, module, false);
   llvm::Value *retval = creator(pattern).first;
 
-  auto *CurrentBlock = creator.getCurrentBlock();
+  auto *current_block_ = creator.getCurrentBlock();
   if (apply && big_step) {
-    CurrentBlock = proof_event(definition, module)
-                       .rewriteEvent_post(axiom, retval, CurrentBlock);
+    current_block_ = proof_event(definition, module)
+                         .rewriteEvent_post(axiom, retval, current_block_);
   }
 
   if (big_step) {
@@ -1064,13 +1069,13 @@ bool makeFunction(
     llvm::Function *step = getOrInsertFunction(
         module, "k_step",
         llvm::FunctionType::get(blockType, {blockType}, false));
-    auto *call = llvm::CallInst::Create(step, {retval}, "", CurrentBlock);
+    auto *call = llvm::CallInst::Create(step, {retval}, "", current_block_);
     setDebugLoc(call);
     call->setCallingConv(llvm::CallingConv::Tail);
     retval = call;
   }
   auto *ret
-      = llvm::ReturnInst::Create(module->getContext(), retval, CurrentBlock);
+      = llvm::ReturnInst::Create(module->getContext(), retval, current_block_);
   setDebugLoc(ret);
   return true;
 }
@@ -1162,8 +1167,8 @@ std::string makeApplyRuleFunction(
   std::vector<llvm::Type *> types;
   for (auto const &residual : residuals) {
     llvm::Value *arg = creator(residual.pattern).first;
-    auto *sort
-        = dynamic_cast<kore_composite_sort *>(residual.pattern->getSort().get());
+    auto *sort = dynamic_cast<kore_composite_sort *>(
+        residual.pattern->getSort().get());
     auto cat = sort->getCategory(definition);
     switch (cat.cat) {
     case SortCategory::Map:

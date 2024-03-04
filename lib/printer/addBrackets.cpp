@@ -297,13 +297,13 @@ bool isPriorityWrong(
   }
   std::string terminals = data.terminals.at(outerName);
   int terminalPos = getNTPositionInProd(terminals, position);
-  if (data.leftAssoc.contains(outerName)
-      && data.leftAssoc.at(outerName).contains(innerName)
+  if (data.left_assoc.contains(outerName)
+      && data.left_assoc.at(outerName).contains(innerName)
       && terminalPos == terminals.size() - 1) {
     return true;
   }
-  if (data.rightAssoc.contains(outerName)
-      && data.rightAssoc.at(outerName).contains(innerName)
+  if (data.right_assoc.contains(outerName)
+      && data.right_assoc.at(outerName).contains(innerName)
       && terminalPos == 0) {
     return true;
   }

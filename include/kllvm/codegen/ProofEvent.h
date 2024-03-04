@@ -15,9 +15,9 @@ namespace kllvm {
 
 class proof_event {
 private:
-  kore_definition *Definition;
-  llvm::Module *Module;
-  llvm::LLVMContext &Ctx;
+  kore_definition *definition_;
+  llvm::Module *module_;
+  llvm::LLVMContext &ctx_;
 
   /*
    * Load the boolean flag that controls whether proof hint output is enabled or
@@ -130,9 +130,9 @@ public:
       llvm::BasicBlock *current_block);
 
   proof_event(kore_definition *definition, llvm::Module *module)
-      : Definition(definition)
-      , Module(module)
-      , Ctx(module->getContext()) { }
+      : definition_(definition)
+      , module_(module)
+      , ctx_(module->getContext()) { }
 };
 
 } // namespace kllvm

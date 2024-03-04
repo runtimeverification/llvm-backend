@@ -127,7 +127,7 @@ std::vector<kore_pattern *> kore_axiom_declaration::getLeftHandSide() const {
       map(p9, getPatterns), map(p10, getPatterns), map(p11, getArguments),
       map(p12, getArguments));
 
-  auto [any_match, result] = patterns.match(pattern);
+  auto [any_match, result] = patterns.match(pattern_);
 
   if (result) {
     return *result;
@@ -148,7 +148,7 @@ kore_pattern *kore_axiom_declaration::getRightHandSide() const {
   auto p2 = rewrites(any, subject(and_(any, any)));
 
   auto patterns = match_first(p0, p1, map(p2, getBuiltin));
-  auto [any_match, result] = patterns.match(pattern);
+  auto [any_match, result] = patterns.match(pattern_);
 
   if (result) {
     return result->get();
@@ -185,7 +185,7 @@ kore_pattern *kore_axiom_declaration::getRequires() const {
   auto p10 = rewrites(and_(any, top()), any);
 
   auto patterns = match_first(p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10);
-  auto [any_match, result] = patterns.match(pattern);
+  auto [any_match, result] = patterns.match(pattern_);
 
   if (result) {
     return result->get();

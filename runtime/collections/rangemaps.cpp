@@ -52,11 +52,11 @@ SortKItem hook_RANGEMAP_lookup(SortRangeMap m, SortKItem key) {
   return res;
 }
 
-SortKItem hook_RANGEMAP_lookupOrDefault(
-    SortRangeMap m, SortKItem key, SortKItem _default) {
+SortKItem
+hook_RANGEMAP_lookupOrDefault(SortRangeMap m, SortKItem key, SortKItem def) {
   auto *res = hook_RANGEMAP_lookup_null(m, key);
   if (!res) {
-    return _default;
+    return def;
   }
   return res;
 }

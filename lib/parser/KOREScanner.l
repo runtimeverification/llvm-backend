@@ -33,7 +33,7 @@ ident @?[a-zA-Z][a-zA-Z0-9'-]*
 %{
 
 /* Code executed at the beginning of yylex */
-yyin = in;
+yyin = in_;
 
 %}
 
@@ -72,21 +72,21 @@ yyin = in;
   return token::ID;
 }
 
-"\""            { stringBuffer.clear(); BEGIN(STR);           }
-<STR>([\x20-\x7E]{-}[\"\\])* { stringBuffer.append(yytext);   }
-<STR>"\\n"      { stringBuffer.push_back('\n'); loc->lines(); }
-<STR>"\\r"      { stringBuffer.push_back('\r'); loc->lines(); }
-<STR>"\\t"      { stringBuffer.push_back('\t'); loc->lines(); }
-<STR>"\\f"      { stringBuffer.push_back('\f'); loc->lines(); }
-<STR>"\\\""     { stringBuffer.push_back('\"');               }
-<STR>"\\\\"     { stringBuffer.push_back('\\');               }
-<STR>\\[0-9]{3} { stringBuffer.push_back((yytext[1] - '0') * 64 + (yytext[2] - '0') * 8 + yytext[3] - '0'); }
-<STR>\\x[0-9a-fA-F]{2} { stringBuffer.push_back(strtol(yytext+2, NULL, 16)); }
-<STR>\\u[0-9a-fA-F]{4} { stringBuffer.append(codepoint_to_utf8(strtoul(yytext+2, NULL, 16), *loc)); }
-<STR>\\U[0-9a-fA-F]{8} { stringBuffer.append(codepoint_to_utf8(strtoul(yytext+2, NULL, 16), *loc)); }
+"\""            { string_buffer_.clear(); BEGIN(STR);           }
+<STR>([\x20-\x7E]{-}[\"\\])* { string_buffer_.append(yytext);   }
+<STR>"\\n"      { string_buffer_.push_back('\n'); loc->lines(); }
+<STR>"\\r"      { string_buffer_.push_back('\r'); loc->lines(); }
+<STR>"\\t"      { string_buffer_.push_back('\t'); loc->lines(); }
+<STR>"\\f"      { string_buffer_.push_back('\f'); loc->lines(); }
+<STR>"\\\""     { string_buffer_.push_back('\"');               }
+<STR>"\\\\"     { string_buffer_.push_back('\\');               }
+<STR>\\[0-9]{3} { string_buffer_.push_back((yytext[1] - '0') * 64 + (yytext[2] - '0') * 8 + yytext[3] - '0'); }
+<STR>\\x[0-9a-fA-F]{2} { string_buffer_.push_back(strtol(yytext+2, NULL, 16)); }
+<STR>\\u[0-9a-fA-F]{4} { string_buffer_.append(codepoint_to_utf8(strtoul(yytext+2, NULL, 16), *loc)); }
+<STR>\\U[0-9a-fA-F]{8} { string_buffer_.append(codepoint_to_utf8(strtoul(yytext+2, NULL, 16), *loc)); }
 <STR>"\""       {
   BEGIN(INITIAL);
-  *lval = stringBuffer;
+  *lval = string_buffer_;
   return token::STRING;
 }
 
@@ -111,16 +111,16 @@ yyin = in;
 %%
 
 kore_scanner::kore_scanner(std::string filename) {
-  if (!(in = fopen(filename.c_str(), "r"))) {
+  if (!(in_ = fopen(filename.c_str(), "r"))) {
     std::cerr << "Cannot read file: " << filename << "\n";
     exit(1);
   }
-  yylex_init(&scanner);
+  yylex_init(&scanner_);
 }
 
 kore_scanner::~kore_scanner() {
-  fclose(in);
-  yylex_destroy(scanner);
+  fclose(in_);
+  yylex_destroy(scanner_);
 }
 
 void kore_scanner::error(
@@ -175,7 +175,7 @@ int kore_scanner::scan() {
   do {
     std::string sem;
     location loc("");
-    token = yylex(&sem, &loc, scanner);
+    token = yylex(&sem, &loc, scanner_);
     std::string lexeme;
     switch (token) {
     case token::ID:
@@ -183,7 +183,7 @@ int kore_scanner::scan() {
       lexeme = sem;
       break;
     default:
-      lexeme = yyget_text(scanner);
+      lexeme = yyget_text(scanner_);
     }
   } while (token != token::TOKEN_EOF);
 

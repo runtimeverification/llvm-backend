@@ -31,25 +31,25 @@ llvm::CallInst *proof_event::emitSerializeTerm(
     llvm::BasicBlock *insert_at_end) {
   auto B = llvm::IRBuilder(insert_at_end);
 
-  auto cat = sort.getCategory(Definition);
-  auto *sort_name_ptr = createGlobalSortStringPtr(B, sort, Module);
+  auto cat = sort.getCategory(definition_);
+  auto *sort_name_ptr = createGlobalSortStringPtr(B, sort, module_);
 
-  auto *void_ty = llvm::Type::getVoidTy(Ctx);
-  auto *i8_ptr_ty = llvm::Type::getInt8PtrTy(Ctx);
-  auto *i1_ty = llvm::Type::getInt1Ty(Ctx);
+  auto *void_ty = llvm::Type::getVoidTy(ctx_);
+  auto *i8_ptr_ty = llvm::Type::getInt8PtrTy(ctx_);
+  auto *i1_ty = llvm::Type::getInt1Ty(ctx_);
 
   if (cat.cat == SortCategory::Symbol || cat.cat == SortCategory::Variable) {
-    auto *block_ty = getvalue_type({SortCategory::Symbol, 0}, Module);
+    auto *block_ty = getvalue_type({SortCategory::Symbol, 0}, module_);
 
     auto *func_ty = llvm::FunctionType::get(
         void_ty, {i8_ptr_ty, block_ty, i8_ptr_ty, i1_ty}, false);
 
     auto *serialize
-        = getOrInsertFunction(Module, "serializeTermToFile", func_ty);
+        = getOrInsertFunction(module_, "serializeTermToFile", func_ty);
 
     return B.CreateCall(
         serialize,
-        {output_file, term, sort_name_ptr, llvm::ConstantInt::getFalse(Ctx)});
+        {output_file, term, sort_name_ptr, llvm::ConstantInt::getFalse(ctx_)});
   }
   if (term->getType()->isIntegerTy()) {
     term = B.CreateIntToPtr(term, i8_ptr_ty);
@@ -61,42 +61,42 @@ llvm::CallInst *proof_event::emitSerializeTerm(
       void_ty, {i8_ptr_ty, i8_ptr_ty, i8_ptr_ty, i1_ty}, false);
 
   auto *serialize
-      = getOrInsertFunction(Module, "serializeRawTermToFile", func_ty);
+      = getOrInsertFunction(module_, "serializeRawTermToFile", func_ty);
 
   return B.CreateCall(
       serialize,
-      {output_file, term, sort_name_ptr, llvm::ConstantInt::getFalse(Ctx)});
+      {output_file, term, sort_name_ptr, llvm::ConstantInt::getFalse(ctx_)});
 }
 
 llvm::CallInst *proof_event::emitSerializeConfiguration(
     llvm::Value *output_file, llvm::Value *config,
     llvm::BasicBlock *insert_at_end) {
-  auto *void_ty = llvm::Type::getVoidTy(Ctx);
-  auto *i8_ptr_ty = llvm::Type::getInt8PtrTy(Ctx);
-  auto *block_ty = getvalue_type({SortCategory::Symbol, 0}, Module);
-  auto *i1_ty = llvm::Type::getInt1Ty(Ctx);
+  auto *void_ty = llvm::Type::getVoidTy(ctx_);
+  auto *i8_ptr_ty = llvm::Type::getInt8PtrTy(ctx_);
+  auto *block_ty = getvalue_type({SortCategory::Symbol, 0}, module_);
+  auto *i1_ty = llvm::Type::getInt1Ty(ctx_);
 
   auto *func_ty = llvm::FunctionType::get(
       void_ty, {i8_ptr_ty, block_ty, i1_ty, i1_ty}, false);
   auto *serialize
-      = getOrInsertFunction(Module, "serializeConfigurationToFile", func_ty);
+      = getOrInsertFunction(module_, "serializeConfigurationToFile", func_ty);
 
   return llvm::CallInst::Create(
       serialize,
-      {output_file, config, llvm::ConstantInt::getTrue(Ctx),
-       llvm::ConstantInt::getFalse(Ctx)},
+      {output_file, config, llvm::ConstantInt::getTrue(ctx_),
+       llvm::ConstantInt::getFalse(ctx_)},
       "", insert_at_end);
 }
 
 llvm::CallInst *proof_event::emitWriteUInt64(
     llvm::Value *output_file, uint64_t value, llvm::BasicBlock *insert_at_end) {
-  auto *void_ty = llvm::Type::getVoidTy(Ctx);
-  auto *i8_ptr_ty = llvm::Type::getInt8PtrTy(Ctx);
-  auto *i64_ptr_ty = llvm::Type::getInt64Ty(Ctx);
+  auto *void_ty = llvm::Type::getVoidTy(ctx_);
+  auto *i8_ptr_ty = llvm::Type::getInt8PtrTy(ctx_);
+  auto *i64_ptr_ty = llvm::Type::getInt64Ty(ctx_);
 
   auto *func_ty
       = llvm::FunctionType::get(void_ty, {i8_ptr_ty, i64_ptr_ty}, false);
-  auto *func = getOrInsertFunction(Module, "writeUInt64ToFile", func_ty);
+  auto *func = getOrInsertFunction(module_, "writeUInt64ToFile", func_ty);
 
   auto *i64_value = llvm::ConstantInt::get(i64_ptr_ty, value);
 
@@ -108,20 +108,20 @@ llvm::CallInst *proof_event::emitWriteString(
     llvm::BasicBlock *insert_at_end) {
   auto B = llvm::IRBuilder(insert_at_end);
 
-  auto *void_ty = llvm::Type::getVoidTy(Ctx);
-  auto *i8_ptr_ty = llvm::Type::getInt8PtrTy(Ctx);
+  auto *void_ty = llvm::Type::getVoidTy(ctx_);
+  auto *i8_ptr_ty = llvm::Type::getInt8PtrTy(ctx_);
 
   auto *func_ty
       = llvm::FunctionType::get(void_ty, {i8_ptr_ty, i8_ptr_ty}, false);
 
-  auto *print = getOrInsertFunction(Module, "printVariableToFile", func_ty);
+  auto *print = getOrInsertFunction(module_, "printVariableToFile", func_ty);
 
-  auto *varname = B.CreateGlobalStringPtr(str, "", 0, Module);
+  auto *varname = B.CreateGlobalStringPtr(str, "", 0, module_);
   return B.CreateCall(print, {output_file, varname});
 }
 
 llvm::BinaryOperator *proof_event::emitNoOp(llvm::BasicBlock *insert_at_end) {
-  auto *i8_ty = llvm::Type::getInt8Ty(Ctx);
+  auto *i8_ty = llvm::Type::getInt8Ty(ctx_);
   auto *zero = llvm::ConstantInt::get(i8_ty, 0);
 
   return llvm::BinaryOperator::Create(
@@ -130,24 +130,24 @@ llvm::BinaryOperator *proof_event::emitNoOp(llvm::BasicBlock *insert_at_end) {
 
 llvm::LoadInst *
 proof_event::emitGetOutputFileName(llvm::BasicBlock *insert_at_end) {
-  auto *i8_ptr_ty = llvm::Type::getInt8PtrTy(Ctx);
-  auto *fileNamePointer = Module->getOrInsertGlobal("output_file", i8_ptr_ty);
+  auto *i8_ptr_ty = llvm::Type::getInt8PtrTy(ctx_);
+  auto *fileNamePointer = module_->getOrInsertGlobal("output_file", i8_ptr_ty);
   return new llvm::LoadInst(i8_ptr_ty, fileNamePointer, "output", insert_at_end);
 }
 
 std::pair<llvm::BasicBlock *, llvm::BasicBlock *> proof_event::proofBranch(
     std::string const &label, llvm::BasicBlock *insert_at_end) {
-  auto *i1_ty = llvm::Type::getInt1Ty(Ctx);
+  auto *i1_ty = llvm::Type::getInt1Ty(ctx_);
 
-  auto *proof_output_flag = Module->getOrInsertGlobal("proof_output", i1_ty);
+  auto *proof_output_flag = module_->getOrInsertGlobal("proof_output", i1_ty);
   auto *proof_output = new llvm::LoadInst(
       i1_ty, proof_output_flag, "proof_output", insert_at_end);
 
   auto *f = insert_at_end->getParent();
   auto *true_block
-      = llvm::BasicBlock::Create(Ctx, fmt::format("if_{}", label), f);
+      = llvm::BasicBlock::Create(ctx_, fmt::format("if_{}", label), f);
   auto *merge_block
-      = llvm::BasicBlock::Create(Ctx, fmt::format("tail_{}", label), f);
+      = llvm::BasicBlock::Create(ctx_, fmt::format("tail_{}", label), f);
 
   emitNoOp(merge_block);
 

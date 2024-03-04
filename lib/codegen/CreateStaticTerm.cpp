@@ -32,29 +32,29 @@ namespace kllvm {
 llvm::Constant *create_static_term::notInjectionCase(
     kore_composite_pattern *constructor, llvm::Constant *val) {
   kore_symbol const *symbol = constructor->getConstructor();
-  llvm::StructType *BlockType = getBlockType(Module, Definition, symbol);
+  llvm::StructType *BlockType = getBlockType(module_, definition_, symbol);
 
   std::stringstream koreString;
   constructor->print(koreString);
   llvm::Constant *Block
-      = Module->getOrInsertGlobal(koreString.str(), BlockType);
+      = module_->getOrInsertGlobal(koreString.str(), BlockType);
   auto *globalVar = llvm::dyn_cast<llvm::GlobalVariable>(Block);
 
   if (!globalVar->hasInitializer()) {
     std::vector<llvm::Constant *> blockVals;
 
     llvm::StructType *BlockHeaderType = llvm::StructType::getTypeByName(
-        Module->getContext(), blockheader_struct);
+        module_->getContext(), blockheader_struct);
     uint64_t headerVal
-        = getBlockHeaderVal(Module, symbol, BlockType) | NOT_YOUNG_OBJECT_BIT;
+        = getBlockHeaderVal(module_, symbol, BlockType) | NOT_YOUNG_OBJECT_BIT;
     llvm::Constant *BlockHeader = llvm::ConstantStruct::get(
         BlockHeaderType,
         llvm::ConstantInt::get(
-            llvm::Type::getInt64Ty(Module->getContext()), headerVal));
+            llvm::Type::getInt64Ty(module_->getContext()), headerVal));
     blockVals.push_back(BlockHeader);
 
     llvm::ArrayType *EmptyArrayType
-        = llvm::ArrayType::get(llvm::Type::getInt64Ty(Module->getContext()), 0);
+        = llvm::ArrayType::get(llvm::Type::getInt64Ty(module_->getContext()), 0);
     blockVals.push_back(llvm::ConstantArray::get(
         EmptyArrayType, llvm::ArrayRef<llvm::Constant *>()));
 
@@ -74,11 +74,11 @@ llvm::Constant *create_static_term::notInjectionCase(
   }
 
   std::vector<llvm::Constant *> Idxs
-      = {llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0)};
+      = {llvm::ConstantInt::get(llvm::Type::getInt64Ty(ctx_), 0)};
   return llvm::ConstantExpr::getBitCast(
       llvm::ConstantExpr::getInBoundsGetElementPtr(BlockType, globalVar, Idxs),
       llvm::PointerType::getUnqual(
-          llvm::StructType::getTypeByName(Module->getContext(), block_struct)));
+          llvm::StructType::getTypeByName(module_->getContext(), block_struct)));
 }
 
 std::pair<llvm::Constant *, bool>
@@ -92,31 +92,31 @@ create_static_term::operator()(kore_pattern *pattern) {
       auto *strPattern = dynamic_cast<kore_string_pattern *>(
           constructor->getArguments()[0].get());
       return std::make_pair(
-          createToken(sort->getCategory(Definition), strPattern->getContents()),
+          createToken(sort->getCategory(definition_), strPattern->getContents()),
           false);
     }
     if (symbol->getArguments().empty()) {
       llvm::StructType *BlockType
-          = llvm::StructType::getTypeByName(Module->getContext(), block_struct);
+          = llvm::StructType::getTypeByName(module_->getContext(), block_struct);
       llvm::Constant *Cast = llvm::ConstantExpr::getIntToPtr(
           llvm::ConstantInt::get(
-              llvm::Type::getInt64Ty(Ctx),
+              llvm::Type::getInt64Ty(ctx_),
               (((uint64_t)symbol->getTag()) << 32) | 1),
           llvm::PointerType::getUnqual(BlockType));
       return std::make_pair(Cast, false);
     }
     kore_symbol_declaration *symbolDecl
-        = Definition->getSymbolDeclarations().at(symbol->getName());
+        = definition_->getSymbolDeclarations().at(symbol->getName());
     if (symbolDecl->attributes().contains(attribute_set::key::sort_injection)
         && dynamic_cast<kore_composite_sort *>(symbol->getArguments()[0].get())
-                   ->getCategory(Definition)
+                   ->getCategory(definition_)
                    .cat
                == SortCategory::Symbol) {
       std::pair<llvm::Constant *, bool> val
           = (*this)(constructor->getArguments()[0].get());
       if (val.second) {
         uint32_t tag = symbol->getTag();
-        kore_symbol *inj = Definition->getInjSymbol();
+        kore_symbol *inj = definition_->getInjSymbol();
         if (tag != (uint32_t)-1 && tag >= inj->getFirstTag()
             && tag <= inj->getLastTag()) {
           return std::make_pair(val.first, true);
@@ -141,9 +141,9 @@ create_static_term::createToken(value_type sort, std::string contents) {
   case SortCategory::Set:
     assert(false && "cannot create tokens of collection category");
   case SortCategory::Int: {
-    llvm::Constant *global = Module->getOrInsertGlobal(
+    llvm::Constant *global = module_->getOrInsertGlobal(
         "int_" + contents, llvm::StructType::getTypeByName(
-                               Module->getContext(), int_wrapper_struct));
+                               module_->getContext(), int_wrapper_struct));
     auto *globalVar = llvm::dyn_cast<llvm::GlobalVariable>(global);
     if (!globalVar->hasInitializer()) {
       mpz_t value;
@@ -153,51 +153,51 @@ create_static_term::createToken(value_type sort, std::string contents) {
       size_t size = mpz_size(value);
       int sign = mpz_sgn(value);
       llvm::ArrayType *limbsType
-          = llvm::ArrayType::get(llvm::Type::getInt64Ty(Ctx), size);
+          = llvm::ArrayType::get(llvm::Type::getInt64Ty(ctx_), size);
       llvm::Constant *limbs
-          = Module->getOrInsertGlobal("int_" + contents + "_limbs", limbsType);
+          = module_->getOrInsertGlobal("int_" + contents + "_limbs", limbsType);
       auto *limbsVar = llvm::dyn_cast<llvm::GlobalVariable>(limbs);
       std::vector<llvm::Constant *> allocdLimbs;
       for (size_t i = 0; i < size; i++) {
         allocdLimbs.push_back(llvm::ConstantInt::get(
-            llvm::Type::getInt64Ty(Ctx), value->_mp_d[i]));
+            llvm::Type::getInt64Ty(ctx_), value->_mp_d[i]));
       }
       limbsVar->setInitializer(
           llvm::ConstantArray::get(limbsType, allocdLimbs));
       llvm::Constant *hdr = llvm::ConstantStruct::get(
           llvm::StructType::getTypeByName(
-              Module->getContext(), blockheader_struct),
+              module_->getContext(), blockheader_struct),
           llvm::ConstantInt::get(
-              llvm::Type::getInt64Ty(Ctx),
+              llvm::Type::getInt64Ty(ctx_),
               sizeof(mpz_hdr) - sizeof(blockheader) | NOT_YOUNG_OBJECT_BIT));
       llvm::ConstantInt *numLimbs
-          = llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), size);
+          = llvm::ConstantInt::get(llvm::Type::getInt32Ty(ctx_), size);
       llvm::Constant *mp_size = llvm::ConstantExpr::getMul(
           numLimbs,
-          llvm::ConstantInt::getSigned(llvm::Type::getInt32Ty(Ctx), sign));
+          llvm::ConstantInt::getSigned(llvm::Type::getInt32Ty(ctx_), sign));
       globalVar->setInitializer(llvm::ConstantStruct::get(
           llvm::StructType::getTypeByName(
-              Module->getContext(), int_wrapper_struct),
+              module_->getContext(), int_wrapper_struct),
           hdr,
           llvm::ConstantStruct::get(
-              llvm::StructType::getTypeByName(Module->getContext(), int_struct),
+              llvm::StructType::getTypeByName(module_->getContext(), int_struct),
               numLimbs, mp_size,
               llvm::ConstantExpr::getPointerCast(
-                  limbsVar, llvm::Type::getInt64PtrTy(Ctx)))));
+                  limbsVar, llvm::Type::getInt64PtrTy(ctx_)))));
       mpz_clear(value);
     }
     std::vector<llvm::Constant *> Idxs
-        = {llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0),
-           llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), 1)};
+        = {llvm::ConstantInt::get(llvm::Type::getInt64Ty(ctx_), 0),
+           llvm::ConstantInt::get(llvm::Type::getInt32Ty(ctx_), 1)};
     return llvm::ConstantExpr::getInBoundsGetElementPtr(
         llvm::StructType::getTypeByName(
-            Module->getContext(), int_wrapper_struct),
+            module_->getContext(), int_wrapper_struct),
         globalVar, Idxs);
   }
   case SortCategory::Float: {
-    llvm::Constant *global = Module->getOrInsertGlobal(
+    llvm::Constant *global = module_->getOrInsertGlobal(
         "float_" + contents, llvm::StructType::getTypeByName(
-                                 Module->getContext(), float_wrapper_struct));
+                                 module_->getContext(), float_wrapper_struct));
     auto *globalVar = llvm::dyn_cast<llvm::GlobalVariable>(global);
     if (!globalVar->hasInitializer()) {
       size_t prec = 0;
@@ -236,32 +236,32 @@ create_static_term::createToken(value_type sort, std::string contents) {
       }
       size_t size = (prec + 63) / 64;
       llvm::ArrayType *limbsType
-          = llvm::ArrayType::get(llvm::Type::getInt64Ty(Ctx), size);
-      llvm::Constant *limbs = Module->getOrInsertGlobal(
+          = llvm::ArrayType::get(llvm::Type::getInt64Ty(ctx_), size);
+      llvm::Constant *limbs = module_->getOrInsertGlobal(
           "float_" + contents + "_limbs", limbsType);
       auto *limbsVar = llvm::dyn_cast<llvm::GlobalVariable>(limbs);
       std::vector<llvm::Constant *> allocdLimbs;
       for (size_t i = 0; i < size; i++) {
         allocdLimbs.push_back(llvm::ConstantInt::get(
-            llvm::Type::getInt64Ty(Ctx), value->_mpfr_d[i]));
+            llvm::Type::getInt64Ty(ctx_), value->_mpfr_d[i]));
       }
       limbsVar->setInitializer(
           llvm::ConstantArray::get(limbsType, allocdLimbs));
       llvm::Constant *hdr = llvm::ConstantStruct::get(
           llvm::StructType::getTypeByName(
-              Module->getContext(), blockheader_struct),
+              module_->getContext(), blockheader_struct),
           llvm::ConstantInt::get(
-              llvm::Type::getInt64Ty(Ctx),
+              llvm::Type::getInt64Ty(ctx_),
               (sizeof(floating_hdr) - sizeof(blockheader))
                   | NOT_YOUNG_OBJECT_BIT));
       llvm::Constant *expbits
-          = llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), exp);
+          = llvm::ConstantInt::get(llvm::Type::getInt64Ty(ctx_), exp);
       llvm::Constant *mpfr_prec
-          = llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), prec);
+          = llvm::ConstantInt::get(llvm::Type::getInt64Ty(ctx_), prec);
       llvm::Constant *mpfr_sign = llvm::ConstantInt::getSigned(
-          llvm::Type::getInt32Ty(Ctx), value->_mpfr_sign);
+          llvm::Type::getInt32Ty(ctx_), value->_mpfr_sign);
       llvm::Constant *mpfr_exp = llvm::ConstantInt::getSigned(
-          llvm::Type::getInt64Ty(Ctx), value->_mpfr_exp);
+          llvm::Type::getInt64Ty(ctx_), value->_mpfr_exp);
       // create struct floating with an exponent range and an __mpfr_struct.
       // Note that we are assuming the format of the struct, but it's unlikely
       // to change except possibly between major releases which happen less than
@@ -270,24 +270,24 @@ create_static_term::createToken(value_type sort, std::string contents) {
       // don't yet support cross compiling anyway, that's a safe assumption.
       globalVar->setInitializer(llvm::ConstantStruct::get(
           llvm::StructType::getTypeByName(
-              Module->getContext(), float_wrapper_struct),
+              module_->getContext(), float_wrapper_struct),
           hdr,
           llvm::ConstantStruct::get(
               llvm::StructType::getTypeByName(
-                  Module->getContext(), float_struct),
+                  module_->getContext(), float_struct),
               expbits,
               llvm::ConstantStruct::getAnon(
                   {mpfr_prec, mpfr_sign, mpfr_exp,
                    llvm::ConstantExpr::getPointerCast(
-                       limbsVar, llvm::Type::getInt64PtrTy(Ctx))}))));
+                       limbsVar, llvm::Type::getInt64PtrTy(ctx_))}))));
       mpfr_clear(value);
     }
     std::vector<llvm::Constant *> Idxs
-        = {llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0),
-           llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), 1)};
+        = {llvm::ConstantInt::get(llvm::Type::getInt64Ty(ctx_), 0),
+           llvm::ConstantInt::get(llvm::Type::getInt32Ty(ctx_), 1)};
     return llvm::ConstantExpr::getInBoundsGetElementPtr(
         llvm::StructType::getTypeByName(
-            Module->getContext(), float_wrapper_struct),
+            module_->getContext(), float_wrapper_struct),
         globalVar, Idxs);
   }
   case SortCategory::StringBuffer:
@@ -297,37 +297,37 @@ create_static_term::createToken(value_type sort, std::string contents) {
     assert(idx != std::string::npos);
     uint64_t bits = std::stoi(contents.substr(idx + 1));
     return llvm::ConstantInt::get(
-        llvm::IntegerType::get(Ctx, bits), contents.substr(0, idx), 10);
+        llvm::IntegerType::get(ctx_, bits), contents.substr(0, idx), 10);
   }
   case SortCategory::Bool:
     return llvm::ConstantInt::get(
-        llvm::Type::getInt1Ty(Ctx), contents == "true");
+        llvm::Type::getInt1Ty(ctx_), contents == "true");
   case SortCategory::Variable:
   case SortCategory::Symbol: {
     llvm::StructType *StringType = llvm::StructType::get(
-        Ctx,
+        ctx_,
         {llvm::StructType::getTypeByName(
-             Module->getContext(), blockheader_struct),
-         llvm::ArrayType::get(llvm::Type::getInt8Ty(Ctx), contents.size())});
+             module_->getContext(), blockheader_struct),
+         llvm::ArrayType::get(llvm::Type::getInt8Ty(ctx_), contents.size())});
     llvm::Constant *global
-        = Module->getOrInsertGlobal("token_" + escape(contents), StringType);
+        = module_->getOrInsertGlobal("token_" + escape(contents), StringType);
     auto *globalVar = llvm::dyn_cast<llvm::GlobalVariable>(global);
     if (!globalVar->hasInitializer()) {
       llvm::StructType *BlockHeaderType = llvm::StructType::getTypeByName(
-          Module->getContext(), blockheader_struct);
+          module_->getContext(), blockheader_struct);
       // this object does not live on the young generation, so we need to set
       // the correct gc bit.
       llvm::Constant *BlockHeader = llvm::ConstantStruct::get(
           BlockHeaderType, llvm::ConstantInt::get(
-                               llvm::Type::getInt64Ty(Ctx),
+                               llvm::Type::getInt64Ty(ctx_),
                                contents.size() | NOT_YOUNG_OBJECT_BIT));
       globalVar->setInitializer(llvm::ConstantStruct::get(
           StringType, BlockHeader,
-          llvm::ConstantDataArray::getString(Ctx, contents, false)));
+          llvm::ConstantDataArray::getString(ctx_, contents, false)));
     }
     return llvm::ConstantExpr::getPointerCast(
         global, llvm::PointerType::getUnqual(llvm::StructType::getTypeByName(
-                    Module->getContext(), block_struct)));
+                    module_->getContext(), block_struct)));
   }
   case SortCategory::Uncomputed: abort();
   }

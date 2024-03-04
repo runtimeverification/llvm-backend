@@ -50,11 +50,10 @@ SortKItem hook_MAP_lookup(SortMap m, SortKItem key) {
   return res;
 }
 
-SortKItem
-hook_MAP_lookupOrDefault(SortMap m, SortKItem key, SortKItem _default) {
+SortKItem hook_MAP_lookupOrDefault(SortMap m, SortKItem key, SortKItem def) {
   auto *res = hook_MAP_lookup_null(m, key);
   if (!res) {
-    return _default;
+    return def;
   }
   return res;
 }

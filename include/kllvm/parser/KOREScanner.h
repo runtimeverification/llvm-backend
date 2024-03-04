@@ -49,16 +49,16 @@ public:
   kore_scanner &operator=(kore_scanner &&other) = delete;
 
 private:
-  yyscan_t scanner;
+  yyscan_t scanner_;
   token yylex(std::string *lval, location *loc, yyscan_t yyscanner);
   token yylex(std::string *lval, location *loc) {
-    return yylex(lval, loc, scanner);
+    return yylex(lval, loc, scanner_);
   }
   void error(location const &loc, std::string const &err_message);
   std::string codepoint_to_utf8(unsigned long int code, location const &loc);
 
-  FILE *in;
-  std::string stringBuffer;
+  FILE *in_;
+  std::string string_buffer_;
 };
 
 } // namespace kllvm::parser

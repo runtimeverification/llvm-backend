@@ -47,25 +47,25 @@ public:
       = std::map<std::string, std::pair<sptr<kore_pattern>, uint64_t>>;
 
 private:
-  uint64_t ruleOrdinal;
-  substitution_t substitution{};
+  uint64_t rule_ordinal_;
+  substitution_t substitution_{};
 
 protected:
   void printSubstitution(std::ostream &out, unsigned indent = 0U) const;
 
 public:
   llvm_rewrite_event(uint64_t rule_ordinal)
-      : ruleOrdinal(rule_ordinal) { }
+      : rule_ordinal_(rule_ordinal) { }
 
-  [[nodiscard]] uint64_t getRuleOrdinal() const { return ruleOrdinal; }
+  [[nodiscard]] uint64_t getRuleOrdinal() const { return rule_ordinal_; }
   [[nodiscard]] substitution_t const &getSubstitution() const {
-    return substitution;
+    return substitution_;
   }
 
   void addSubstitution(
       std::string const &name, sptr<kore_pattern> const &term,
       uint64_t pattern_len) {
-    substitution.insert(
+    substitution_.insert(
         std::make_pair(name, std::make_pair(term, pattern_len)));
   }
 
@@ -101,13 +101,13 @@ public:
 
 class llvm_side_condition_end_event : public llvm_step_event {
 private:
-  uint64_t ruleOrdinal;
-  sptr<kore_pattern> korePattern{};
-  uint64_t patternLength{0U};
+  uint64_t rule_ordinal_;
+  sptr<kore_pattern> kore_pattern_{};
+  uint64_t pattern_length_{0U};
 
   llvm_side_condition_end_event(uint64_t rule_ordinal)
-      : ruleOrdinal(rule_ordinal)
-      , korePattern(nullptr) { }
+      : rule_ordinal_(rule_ordinal)
+      , kore_pattern_(nullptr) { }
 
 public:
   static sptr<llvm_side_condition_end_event> Create(uint64_t rule_ordinal) {
@@ -115,15 +115,15 @@ public:
         new llvm_side_condition_end_event(rule_ordinal));
   }
 
-  [[nodiscard]] uint64_t getRuleOrdinal() const { return ruleOrdinal; }
+  [[nodiscard]] uint64_t getRuleOrdinal() const { return rule_ordinal_; }
   [[nodiscard]] sptr<kore_pattern> getkore_pattern() const {
-    return korePattern;
+    return kore_pattern_;
   }
-  [[nodiscard]] uint64_t getPatternLength() const { return patternLength; }
+  [[nodiscard]] uint64_t getPatternLength() const { return pattern_length_; }
   void
   setkore_pattern(sptr<kore_pattern> kore_pattern, uint64_t pattern_length) {
-    korePattern = std::move(kore_pattern);
-    patternLength = pattern_length;
+    kore_pattern_ = std::move(kore_pattern);
+    pattern_length_ = pattern_length;
   }
 
   void print(std::ostream &out, unsigned indent = 0U) const override;
@@ -133,9 +133,9 @@ class llvm_event;
 
 class llvm_function_event : public llvm_step_event {
 private:
-  std::string name;
-  std::string relativePosition;
-  std::vector<llvm_event> arguments;
+  std::string name_;
+  std::string relative_position_;
+  std::vector<llvm_event> arguments_;
 
   llvm_function_event(std::string name, std::string relative_position);
 
@@ -146,9 +146,9 @@ public:
         new llvm_function_event(name, relative_position));
   }
 
-  [[nodiscard]] std::string const &getName() const { return name; }
+  [[nodiscard]] std::string const &getName() const { return name_; }
   [[nodiscard]] std::string const &getRelativePosition() const {
-    return relativePosition;
+    return relative_position_;
   }
   [[nodiscard]] std::vector<llvm_event> const &getArguments() const;
 
@@ -159,11 +159,11 @@ public:
 
 class llvm_hook_event : public llvm_step_event {
 private:
-  std::string name;
-  std::string relativePosition;
-  std::vector<llvm_event> arguments;
-  sptr<kore_pattern> korePattern;
-  uint64_t patternLength{0U};
+  std::string name_;
+  std::string relative_position_;
+  std::vector<llvm_event> arguments_;
+  sptr<kore_pattern> kore_pattern_;
+  uint64_t pattern_length_{0U};
 
   llvm_hook_event(std::string name, std::string relative_position);
 
@@ -173,21 +173,21 @@ public:
     return sptr<llvm_hook_event>(new llvm_hook_event(name, relative_position));
   }
 
-  [[nodiscard]] std::string const &getName() const { return name; }
+  [[nodiscard]] std::string const &getName() const { return name_; }
   [[nodiscard]] std::string const &getRelativePosition() const {
-    return relativePosition;
+    return relative_position_;
   }
   [[nodiscard]] std::vector<llvm_event> const &getArguments() const {
-    return arguments;
+    return arguments_;
   }
   [[nodiscard]] sptr<kore_pattern> getkore_pattern() const {
-    return korePattern;
+    return kore_pattern_;
   }
-  [[nodiscard]] uint64_t getPatternLength() const { return patternLength; }
+  [[nodiscard]] uint64_t getPatternLength() const { return pattern_length_; }
   void
   setkore_pattern(sptr<kore_pattern> kore_pattern, uint64_t pattern_length) {
-    korePattern = std::move(kore_pattern);
-    patternLength = pattern_length;
+    kore_pattern_ = std::move(kore_pattern);
+    pattern_length_ = pattern_length;
   }
 
   void addArgument(llvm_event const &argument);
@@ -197,55 +197,55 @@ public:
 
 class llvm_event {
 private:
-  bool isStepEvent{};
-  sptr<llvm_step_event> stepEvent{};
-  sptr<kore_pattern> korePattern{};
-  uint64_t patternLength{};
+  bool is_step_event_{};
+  sptr<llvm_step_event> step_event_{};
+  sptr<kore_pattern> kore_pattern_{};
+  uint64_t pattern_length_{};
 
 public:
-  [[nodiscard]] bool isStep() const { return isStepEvent; }
+  [[nodiscard]] bool isStep() const { return is_step_event_; }
   [[nodiscard]] bool isPattern() const { return !isStep(); }
-  [[nodiscard]] sptr<llvm_step_event> getStepEvent() const { return stepEvent; }
+  [[nodiscard]] sptr<llvm_step_event> getStepEvent() const { return step_event_; }
   [[nodiscard]] sptr<kore_pattern> getkore_pattern() const {
-    return korePattern;
+    return kore_pattern_;
   }
-  [[nodiscard]] uint64_t getPatternLength() const { return patternLength; }
+  [[nodiscard]] uint64_t getPatternLength() const { return pattern_length_; }
   void setStepEvent(sptr<llvm_step_event> step_event) {
-    isStepEvent = true;
-    stepEvent = std::move(step_event);
+    is_step_event_ = true;
+    step_event_ = std::move(step_event);
   }
   void
   setkore_pattern(sptr<kore_pattern> kore_pattern, uint64_t pattern_length) {
-    isStepEvent = false;
-    korePattern = std::move(kore_pattern);
-    patternLength = pattern_length;
+    is_step_event_ = false;
+    kore_pattern_ = std::move(kore_pattern);
+    pattern_length_ = pattern_length;
   }
   void print(std::ostream &out, bool is_arg, unsigned indent = 0U) const;
 };
 
 class llvm_rewrite_trace {
 private:
-  uint32_t version{};
-  std::vector<llvm_event> preTrace{};
-  llvm_event initialConfig;
-  std::vector<llvm_event> trace{};
+  uint32_t version_{};
+  std::vector<llvm_event> pre_trace_{};
+  llvm_event initial_config_;
+  std::vector<llvm_event> trace_{};
 
 public:
-  [[nodiscard]] uint32_t getVersion() const { return version; }
+  [[nodiscard]] uint32_t getVersion() const { return version_; }
   [[nodiscard]] std::vector<llvm_event> const &getPreTrace() const {
-    return preTrace;
+    return pre_trace_;
   }
-  [[nodiscard]] llvm_event getInitialConfig() const { return initialConfig; }
+  [[nodiscard]] llvm_event getInitialConfig() const { return initial_config_; }
   [[nodiscard]] std::vector<llvm_event> const &getTrace() const {
-    return trace;
+    return trace_;
   }
-  void setVersion(uint32_t v) { version = v; }
+  void setVersion(uint32_t v) { version_ = v; }
   void setInitialConfig(llvm_event initial_config) {
-    initialConfig = std::move(initial_config);
+    initial_config_ = std::move(initial_config);
   }
 
-  void addPreTraceEvent(llvm_event const &event) { preTrace.push_back(event); }
-  void addTraceEvent(llvm_event const &event) { trace.push_back(event); }
+  void addPreTraceEvent(llvm_event const &event) { pre_trace_.push_back(event); }
+  void addTraceEvent(llvm_event const &event) { trace_.push_back(event); }
 
   void print(std::ostream &out, unsigned indent = 0U) const;
 };
@@ -255,7 +255,7 @@ public:
   static constexpr uint32_t expected_version = 5U;
 
 private:
-  bool verbose;
+  bool verbose_;
 
   // Caller needs to check that there are at least 8 bytes remaining in the
   // stream before peeking

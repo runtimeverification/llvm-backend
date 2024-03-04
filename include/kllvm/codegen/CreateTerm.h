@@ -12,13 +12,13 @@ namespace kllvm {
 
 class create_term {
 private:
-  llvm::StringMap<llvm::Value *> &Substitution;
-  kore_definition *Definition;
-  llvm::BasicBlock *CurrentBlock;
-  llvm::Module *Module;
-  llvm::LLVMContext &Ctx;
-  bool isAnywhereOwise;
-  std::set<kore_pattern *> staticTerms;
+  llvm::StringMap<llvm::Value *> &substitution_;
+  kore_definition *definition_;
+  llvm::BasicBlock *current_block_;
+  llvm::Module *module_;
+  llvm::LLVMContext &ctx_;
+  bool is_anywhere_owise_;
+  std::set<kore_pattern *> static_terms_;
 
   llvm::Value *alloc_arg(
       kore_composite_pattern *pattern, int idx, std::string const &location_stack);
@@ -39,12 +39,12 @@ public:
   create_term(
       llvm::StringMap<llvm::Value *> &substitution, kore_definition *definition,
       llvm::BasicBlock *entry_block, llvm::Module *module, bool is_anywhere_owise)
-      : Substitution(substitution)
-      , Definition(definition)
-      , CurrentBlock(entry_block)
-      , Module(module)
-      , Ctx(module->getContext())
-      , isAnywhereOwise(is_anywhere_owise) { }
+      : substitution_(substitution)
+      , definition_(definition)
+      , current_block_(entry_block)
+      , module_(module)
+      , ctx_(module->getContext())
+      , is_anywhere_owise_(is_anywhere_owise) { }
 
   /* adds code to the specified basic block in the specified module which
      constructs an llvm value corresponding to the specified KORE RHS pattern
@@ -73,7 +73,7 @@ public:
       std::string const &location_stack = "0");
 
   [[nodiscard]] llvm::BasicBlock *getCurrentBlock() const {
-    return CurrentBlock;
+    return current_block_;
   }
 };
 

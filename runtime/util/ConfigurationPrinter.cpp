@@ -46,10 +46,10 @@ struct print_state {
 
   ~print_state() = default;
 
-  std::vector<block *> boundVariables;
-  std::unordered_map<string *, std::string, string_hash, string_eq> varNames;
-  std::set<std::string> usedVarNames;
-  uint64_t varCounter{0};
+  std::vector<block *> bound_variables;
+  std::unordered_map<string *, std::string, string_hash, string_eq> var_names;
+  std::set<std::string> used_var_names;
+  uint64_t var_counter{0};
 };
 
 void printInt(writer *file, mpz_t i, char const *sort, void *state) {
@@ -100,7 +100,7 @@ void printConfigurationInternal(
     if (isConstant == 3) {
       // bound variable
       printConfigurationInternal(
-          file, state.boundVariables[state.boundVariables.size() - 1 - tag],
+          file, state.bound_variables[state.bound_variables.size() - 1 - tag],
           sort, true, state_ptr);
       return;
     }
@@ -131,18 +131,18 @@ void printConfigurationInternal(
         break;
       }
     }
-    if (is_var && !state.varNames.contains(str)) {
+    if (is_var && !state.var_names.contains(str)) {
       std::string stdStr = std::string(str->data, len(str));
       std::string suffix;
-      while (state.usedVarNames.contains(stdStr + suffix)) {
-        suffix = std::to_string(state.varCounter++);
+      while (state.used_var_names.contains(stdStr + suffix)) {
+        suffix = std::to_string(state.var_counter++);
       }
       stdStr = stdStr + suffix;
       sfprintf(file, "%s", suffix.c_str());
-      state.usedVarNames.insert(stdStr);
-      state.varNames[str] = suffix;
+      state.used_var_names.insert(stdStr);
+      state.var_names[str] = suffix;
     } else if (is_var) {
-      sfprintf(file, "%s", state.varNames[str].c_str());
+      sfprintf(file, "%s", state.var_names[str].c_str());
     }
     sfprintf(file, "\")");
     return;
@@ -150,7 +150,7 @@ void printConfigurationInternal(
   uint32_t tag = tag_hdr(subject->h.hdr);
   bool isBinder = isSymbolABinder(tag);
   if (isBinder) {
-    state.boundVariables.push_back(
+    state.bound_variables.push_back(
         *(block **)(((char *)subject) + sizeof(blockheader)));
   }
   char const *symbol = getSymbolNameForTag(tag);
@@ -178,7 +178,7 @@ void printConfigurationInternal(
   visitChildren(subject, file, &callbacks, state_ptr);
 
   if (isBinder) {
-    state.boundVariables.pop_back();
+    state.bound_variables.pop_back();
   }
   sfprintf(file, ")");
 }
@@ -280,7 +280,7 @@ extern "C" void printMatchResult(
       kllvm::printKORE(
           os, definition_path, pattern_file.filename(), false, true);
     } else if (match_log[i].kind == match_log::FUNCTION) {
-      os << match_log[i].debugName << "(";
+      os << match_log[i].debug_name << "(";
 
       for (int j = 0; j < match_log[i].args.size(); j += 2) {
         auto *typeName = static_cast<char *>(match_log[i].args[j + 1]);

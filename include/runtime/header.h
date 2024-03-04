@@ -29,7 +29,7 @@ struct match_log {
   enum { SUCCESS = 0, FUNCTION, FAIL } kind;
 
   char const *function{};
-  char const *debugName{};
+  char const *debug_name{};
   void *result{};
   std::vector<void *> args{};
 
@@ -363,20 +363,20 @@ char const *topSort(void);
 bool symbolIsInstantiation(uint32_t tag);
 
 using visitor = struct {
-  void (*visitConfig)(writer *, block *, char const *, bool, void *);
-  void (*visitMap)(
+  void (*visit_config)(writer *, block *, char const *, bool, void *);
+  void (*visit_map)(
       writer *, map *, char const *, char const *, char const *, void *);
-  void (*visitList)(
+  void (*visit_list)(
       writer *, list *, char const *, char const *, char const *, void *);
-  void (*visitSet)(
+  void (*visit_set)(
       writer *, set *, char const *, char const *, char const *, void *);
-  void (*visitInt)(writer *, mpz_t, char const *, void *);
-  void (*visitFloat)(writer *, floating *, char const *, void *);
-  void (*visitBool)(writer *, bool, char const *, void *);
-  void (*visitStringBuffer)(writer *, stringbuffer *, char const *, void *);
-  void (*visitMInt)(writer *, size_t *, size_t, char const *, void *);
-  void (*visitSeparator)(writer *, void *);
-  void (*visitRangeMap)(
+  void (*visit_int)(writer *, mpz_t, char const *, void *);
+  void (*visit_float)(writer *, floating *, char const *, void *);
+  void (*visit_bool)(writer *, bool, char const *, void *);
+  void (*visit_string_buffer)(writer *, stringbuffer *, char const *, void *);
+  void (*visit_m_int)(writer *, size_t *, size_t, char const *, void *);
+  void (*visit_separator)(writer *, void *);
+  void (*visit_range_map)(
       writer *, rangemap *, char const *, char const *, char const *, void *);
 };
 

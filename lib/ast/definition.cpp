@@ -51,20 +51,20 @@ void kore_definition::addModule(sptr<kore_module> module) {
   for (auto const &decl : module->getDeclarations()) {
     if (auto *sortDecl
         = dynamic_cast<kore_composite_sort_declaration *>(decl.get())) {
-      sortDeclarations.insert({sortDecl->getName(), sortDecl});
+      sort_declarations_.insert({sortDecl->getName(), sortDecl});
       auto sort = kore_composite_sort::Create(sortDecl->getName());
     } else if (
         auto *symbolDecl = dynamic_cast<kore_symbol_declaration *>(decl.get())) {
-      symbolDeclarations.insert(
+      symbol_declarations_.insert(
           {symbolDecl->getSymbol()->getName(), symbolDecl});
     } else if (
         auto *aliasDecl = dynamic_cast<kore_alias_declaration *>(decl.get())) {
-      aliasDeclarations.insert({aliasDecl->getSymbol()->getName(), aliasDecl});
+      alias_declarations_.insert({aliasDecl->getSymbol()->getName(), aliasDecl});
     } else if (auto *axiom = dynamic_cast<kore_axiom_declaration *>(decl.get())) {
-      axioms.push_back(axiom);
+      axioms_.push_back(axiom);
     }
   }
-  modules.push_back(std::move(module));
+  modules_.push_back(std::move(module));
 }
 
 void kore_definition::insertReservedSymbols() {
@@ -82,7 +82,7 @@ void kore_definition::insertReservedSymbols() {
 SubsortMap kore_definition::getSubsorts() const {
   auto subsorts = SubsortMap{};
 
-  for (auto *axiom : axioms) {
+  for (auto *axiom : axioms_) {
     if (axiom->attributes().contains(attribute_set::key::subsort)) {
       auto const &att = axiom->attributes().get(attribute_set::key::subsort);
       auto const &innerSort = att->getConstructor()->getFormalArguments()[0];
@@ -97,7 +97,7 @@ SubsortMap kore_definition::getSubsorts() const {
 SymbolMap kore_definition::getOverloads() const {
   auto overloads = SymbolMap{};
 
-  for (auto *axiom : axioms) {
+  for (auto *axiom : axioms_) {
     if (axiom->attributes().contains(attribute_set::key::symbol_overload)) {
       auto const &att
           = axiom->attributes().get(attribute_set::key::symbol_overload);
@@ -118,33 +118,33 @@ SymbolMap kore_definition::getOverloads() const {
 void kore_definition::preprocess() {
   insertReservedSymbols();
 
-  for (auto *axiom : axioms) {
-    axiom->pattern = axiom->pattern->expandAliases(this);
+  for (auto *axiom : axioms_) {
+    axiom->pattern_ = axiom->pattern_->expandAliases(this);
   }
   auto symbols = std::map<std::string, std::vector<kore_symbol *>>{};
   unsigned nextOrdinal = 0;
-  for (auto const &decl : symbolDeclarations) {
+  for (auto const &decl : symbol_declarations_) {
     if (decl.second->attributes().contains(
             attribute_set::key::fresh_generator)) {
       auto sort = decl.second->getSymbol()->getSort();
       if (sort->isConcrete()) {
-        freshFunctions[dynamic_cast<kore_composite_sort *>(sort.get())->getName()]
+        fresh_functions_[dynamic_cast<kore_composite_sort *>(sort.get())->getName()]
             = decl.second->getSymbol();
       }
     }
   }
-  for (auto iter = axioms.begin(); iter != axioms.end();) {
+  for (auto iter = axioms_.begin(); iter != axioms_.end();) {
     auto *axiom = *iter;
-    axiom->ordinal = nextOrdinal;
-    ordinals[nextOrdinal++] = axiom;
-    axiom->pattern->markSymbols(symbols);
+    axiom->ordinal_ = nextOrdinal;
+    ordinals_[nextOrdinal++] = axiom;
+    axiom->pattern_->markSymbols(symbols);
     if (!axiom->isRequired()) {
-      iter = axioms.erase(iter);
+      iter = axioms_.erase(iter);
     } else {
       ++iter;
     }
   }
-  for (auto &module : modules) {
+  for (auto &module : modules_) {
     auto const &declarations = module->getDeclarations();
     for (auto const &declaration : declarations) {
       auto *decl = dynamic_cast<kore_symbol_declaration *>(declaration.get());
@@ -159,7 +159,7 @@ void kore_definition::preprocess() {
   }
   for (auto const &entry : symbols) {
     for (auto *symbol : entry.second) {
-      auto *decl = symbolDeclarations.at(symbol->getName());
+      auto *decl = symbol_declarations_.at(symbol->getName());
       symbol->instantiateSymbol(decl);
     }
   }
@@ -180,10 +180,10 @@ void kore_definition::preprocess() {
         if (!layouts.contains(layoutStr)) {
           layouts.emplace(layoutStr, nextLayout++);
         }
-        symbol->firstTag = symbol->lastTag = instantiations.at(*symbol);
-        symbol->layout = layouts.at(layoutStr);
-        objectSymbols[symbol->firstTag] = symbol;
-        allObjectSymbols[ast_to_string(*symbol)] = symbol;
+        symbol->first_tag_ = symbol->last_tag_ = instantiations.at(*symbol);
+        symbol->layout_ = layouts.at(layoutStr);
+        object_symbols_[symbol->first_tag_] = symbol;
+        all_object_symbols_[ast_to_string(*symbol)] = symbol;
       }
     }
     uint32_t lastTag = nextSymbol - 1;
@@ -197,23 +197,23 @@ void kore_definition::preprocess() {
     for (auto *symbol : entry.second) {
       for (auto const &sort : symbol->getArguments()) {
         if (sort->isConcrete()) {
-          hookedSorts[dynamic_cast<kore_composite_sort *>(sort.get())
+          hooked_sorts_[dynamic_cast<kore_composite_sort *>(sort.get())
                           ->getCategory(this)]
               = std::dynamic_pointer_cast<kore_composite_sort>(sort);
         }
       }
       if (symbol->getSort()->isConcrete()) {
-        hookedSorts[dynamic_cast<kore_composite_sort *>(symbol->getSort().get())
+        hooked_sorts_[dynamic_cast<kore_composite_sort *>(symbol->getSort().get())
                         ->getCategory(this)]
             = std::dynamic_pointer_cast<kore_composite_sort>(symbol->getSort());
       }
       if (!symbol->isConcrete()) {
         if (symbol->isPolymorphic()) {
-          symbol->firstTag = range.first;
-          symbol->lastTag = range.second;
-          auto *decl = symbolDeclarations.at(symbol->getName());
+          symbol->first_tag_ = range.first;
+          symbol->last_tag_ = range.second;
+          auto *decl = symbol_declarations_.at(symbol->getName());
           if (decl->attributes().contains(attribute_set::key::sort_injection)) {
-            injSymbol = symbol;
+            inj_symbol_ = symbol;
           }
         }
       }

@@ -96,7 +96,7 @@ size_t hash_value(kllvm::kore_sort const &s);
 
 class kore_sort_variable : public kore_sort {
 private:
-  std::string name;
+  std::string name_;
 
 public:
   static sptr<kore_sort_variable> Create(std::string const &name) {
@@ -114,11 +114,11 @@ public:
 
   bool operator==(kore_sort const &other) const override;
 
-  std::string const &getName() const { return name; }
+  std::string const &getName() const { return name_; }
 
 private:
   kore_sort_variable(std::string name)
-      : name(std::move(name)) { }
+      : name_(std::move(name)) { }
 };
 
 enum class SortCategory {
@@ -153,9 +153,9 @@ class kore_definition;
 
 class kore_composite_sort : public kore_sort {
 private:
-  std::string name;
-  std::vector<sptr<kore_sort>> arguments;
-  value_type category;
+  std::string name_;
+  std::vector<sptr<kore_sort>> arguments_;
+  value_type category_;
 
 public:
   static sptr<kore_composite_sort> Create(
@@ -163,7 +163,7 @@ public:
     return sptr<kore_composite_sort>(new kore_composite_sort(name, cat));
   }
 
-  std::string getName() const { return name; }
+  std::string getName() const { return name_; }
   value_type getCategory(kore_definition *definition);
   std::string getHook(kore_definition *definition) const;
   static value_type getCategory(std::string const &hook_name);
@@ -177,12 +177,12 @@ public:
   void serialize_to(serializer &s) const override;
   bool operator==(kore_sort const &other) const override;
 
-  std::vector<sptr<kore_sort>> const &getArguments() const { return arguments; }
+  std::vector<sptr<kore_sort>> const &getArguments() const { return arguments_; }
 
 private:
   kore_composite_sort(std::string name, value_type category)
-      : name(std::move(name))
-      , category(category) { }
+      : name_(std::move(name))
+      , category_(category) { }
 };
 
 struct hash_symbol;
@@ -192,33 +192,33 @@ class kore_symbol_declaration;
 // kore_symbol
 class kore_symbol {
 private:
-  std::string name;
+  std::string name_;
   /* At parse time, when parsed as part of a pattern,
       this will be empty. When parsed as part of a declaration, it contains the
      signature of the symbol. After instantiateSymbol is called on a symbol that
      is part of a pattern, it changes from being empty to being the signature of
      the symbol. instantiateSymbol is called on all object level symbols in
      axioms when kore_definition::preprocess is called. */
-  std::vector<sptr<kore_sort>> arguments;
+  std::vector<sptr<kore_sort>> arguments_;
   /* contains the original arguments to the symbol when parsed as parh of a
    * pattern. */
-  std::vector<sptr<kore_sort>> formalArguments;
+  std::vector<sptr<kore_sort>> formal_arguments_;
   /** At parse time, when parsed as part of a pattern, this will be null.
       When parsed as part of a declaration, it contains the return sort of the
      symbol. See above re: the behavior of kore_symbol with respect to
      instantiateSymbol. */
-  sptr<kore_sort> sort;
+  sptr<kore_sort> sort_;
   /* the first integer in a continuous range representing the tags of all the
      polymorphic instantiations of this symbol. If the symbol has no parameters
      or its parameters are fully specified, firstTag == lastTag. */
-  uint32_t firstTag{};
+  uint32_t first_tag_{};
   /* the last integer in a continuous range representing the tags of all the
      polymorphic instantiations of this symbol. If the symbol has no parameters
      or its parameters are fully specified, firstTag == lastTag. */
-  uint32_t lastTag{};
+  uint32_t last_tag_{};
   /* A unique integer representing the layout of the symbol in memory.
      See create_term.cpp for more information about the layout of K terms. */
-  uint16_t layout{};
+  uint16_t layout_{};
 
 public:
   static ptr<kore_symbol> Create(std::string const &name) {
@@ -228,25 +228,25 @@ public:
   void addArgument(sptr<kore_sort> const &argument);
   void addFormalArgument(sptr<kore_sort> const &argument);
   void addSort(sptr<kore_sort> sort);
-  void initPatternArguments() { arguments.swap(formalArguments); }
+  void initPatternArguments() { arguments_.swap(formal_arguments_); }
 
-  [[nodiscard]] std::string const &getName() const { return name; }
+  [[nodiscard]] std::string const &getName() const { return name_; }
   [[nodiscard]] std::vector<sptr<kore_sort>> const &getArguments() const {
-    return arguments;
+    return arguments_;
   }
   [[nodiscard]] std::vector<sptr<kore_sort>> const &getFormalArguments() const {
-    return formalArguments;
+    return formal_arguments_;
   }
-  [[nodiscard]] sptr<kore_sort> getSort() const { return sort; }
-  sptr<kore_sort> getSort() { return sort; }
+  [[nodiscard]] sptr<kore_sort> getSort() const { return sort_; }
+  sptr<kore_sort> getSort() { return sort_; }
   [[nodiscard]] uint32_t getTag() const {
-    assert(firstTag == lastTag);
-    return firstTag;
+    assert(first_tag_ == last_tag_);
+    return first_tag_;
   }
-  [[nodiscard]] uint32_t getFirstTag() const { return firstTag; }
-  [[nodiscard]] uint32_t getLastTag() const { return lastTag; }
-  void setTag(uint32_t val) { firstTag = lastTag = val; }
-  [[nodiscard]] uint16_t getLayout() const { return layout; }
+  [[nodiscard]] uint32_t getFirstTag() const { return first_tag_; }
+  [[nodiscard]] uint32_t getLastTag() const { return last_tag_; }
+  void setTag(uint32_t val) { first_tag_ = last_tag_ = val; }
+  [[nodiscard]] uint16_t getLayout() const { return layout_; }
 
   void print(std::ostream &out, unsigned indent = 0) const;
   void print(std::ostream &out, unsigned indent, bool formal) const;
@@ -276,15 +276,15 @@ public:
 
 private:
   kore_symbol(std::string name)
-      : name(std::move(name))
-      , sort(nullptr) { }
+      : name_(std::move(name))
+      , sort_(nullptr) { }
 };
 
 struct hash_symbol {
   size_t operator()(kllvm::kore_symbol const &s) const noexcept {
     size_t hash = 0;
-    boost::hash_combine(hash, s.name);
-    for (auto const &arg : s.arguments) {
+    boost::hash_combine(hash, s.name_);
+    for (auto const &arg : s.arguments_) {
       boost::hash_combine(hash, *arg);
     }
     return hash;
@@ -306,7 +306,7 @@ struct hash_symbol_ptr {
 // kore_variable
 class kore_variable {
 private:
-  std::string name;
+  std::string name_;
 
 public:
   static ptr<kore_variable> Create(std::string const &name) {
@@ -322,7 +322,7 @@ public:
 
 private:
   kore_variable(std::string name)
-      : name(std::move(name)) { }
+      : name_(std::move(name)) { }
 };
 
 class kore_variable_pattern;
@@ -346,8 +346,8 @@ struct pretty_print_data {
   // map from symbol name to terminal pattern
   std::map<std::string, std::string> terminals;
   std::map<std::string, std::set<std::string>> priorities;
-  std::map<std::string, std::set<std::string>> leftAssoc;
-  std::map<std::string, std::set<std::string>> rightAssoc;
+  std::map<std::string, std::set<std::string>> left_assoc;
+  std::map<std::string, std::set<std::string>> right_assoc;
   // map from sort name to hook attribute for that sort
   std::map<std::string, std::string> hook;
   // map from sort name to bracket for that sort
@@ -358,7 +358,7 @@ struct pretty_print_data {
   std::set<std::string> comm;
   SubsortMap subsorts;
   // enable coloring
-  bool hasColor{};
+  bool has_color{};
 };
 
 class kore_declaration;
@@ -448,8 +448,8 @@ void flatten(
 
 class kore_variable_pattern : public kore_pattern {
 private:
-  ptr<kore_variable> name;
-  sptr<kore_sort> sort;
+  ptr<kore_variable> name_;
+  sptr<kore_sort> sort_;
 
 public:
   static ptr<kore_variable_pattern>
@@ -460,7 +460,7 @@ public:
   }
 
   std::string getName() const;
-  sptr<kore_sort> getSort() const override { return sort; }
+  sptr<kore_sort> getSort() const override { return sort_; }
 
   void print(std::ostream &out, unsigned indent = 0) const override;
   void serialize_to(serializer &s) const override;
@@ -469,10 +469,10 @@ public:
   markSymbols(std::map<std::string, std::vector<kore_symbol *>> &) override { }
   void
   markVariables(std::map<std::string, kore_variable_pattern *> &map) override {
-    map.insert({name->getName(), this});
+    map.insert({name_->getName(), this});
   }
   sptr<kore_pattern> substitute(substitution const &subst) override {
-    auto val = subst.find(name->getName());
+    auto val = subst.find(name_->getName());
     if (val == subst.end()) {
       return shared_from_this();
     }
@@ -486,7 +486,7 @@ public:
   }
   sptr<kore_pattern> dedupeDisjuncts() override { return shared_from_this(); }
   std::map<std::string, int> gatherVarCounts() override {
-    return std::map<std::string, int>{{name->getName(), 1}};
+    return std::map<std::string, int>{{name_->getName(), 1}};
   }
   sptr<kore_pattern> filterSubstitution(
       pretty_print_data const &data,
@@ -516,16 +516,16 @@ private:
   }
 
   kore_variable_pattern(ptr<kore_variable> name, sptr<kore_sort> sort)
-      : name(std::move(name))
-      , sort(std::move(std::move(sort))) { }
+      : name_(std::move(name))
+      , sort_(std::move(std::move(sort))) { }
 };
 
 void deallocateSPtrKorePattern(sptr<kore_pattern> pattern);
 
 class kore_composite_pattern : public kore_pattern {
 private:
-  ptr<kore_symbol> constructor;
-  std::vector<sptr<kore_pattern>> arguments;
+  ptr<kore_symbol> constructor_;
+  std::vector<sptr<kore_pattern>> arguments_;
 
 public:
   static ptr<kore_composite_pattern> Create(std::string const &name) {
@@ -543,19 +543,19 @@ public:
   }
 
   sptr<kore_sort> getSort() const override {
-    if (constructor->getName() == "\\dv"
-        && !constructor->getFormalArguments().empty()) {
-      if (auto arg = constructor->getFormalArguments()[0]) {
+    if (constructor_->getName() == "\\dv"
+        && !constructor_->getFormalArguments().empty()) {
+      if (auto arg = constructor_->getFormalArguments()[0]) {
         return arg;
       }
     }
 
-    return constructor->getSort();
+    return constructor_->getSort();
   }
 
-  kore_symbol *getConstructor() const { return constructor.get(); }
+  kore_symbol *getConstructor() const { return constructor_.get(); }
   std::vector<sptr<kore_pattern>> const &getArguments() const {
-    return arguments;
+    return arguments_;
   }
 
   void addArgument(sptr<kore_pattern> const &argument);
@@ -592,19 +592,19 @@ private:
   friend void ::kllvm::deallocateSPtrKorePattern(sptr<kore_pattern> pattern);
 
   kore_composite_pattern(ptr<kore_symbol> constructor)
-      : constructor(std::move(constructor)) { }
+      : constructor_(std::move(constructor)) { }
 };
 
 class kore_string_pattern : public kore_pattern {
 private:
-  std::string contents;
+  std::string contents_;
 
 public:
   static ptr<kore_string_pattern> Create(std::string const &contents) {
     return ptr<kore_string_pattern>(new kore_string_pattern(contents));
   }
 
-  std::string getContents() { return contents; }
+  std::string getContents() { return contents_; }
 
   void print(std::ostream &out, unsigned indent = 0) const override;
   void serialize_to(serializer &s) const override;
@@ -657,14 +657,14 @@ private:
   }
 
   kore_string_pattern(std::string contents)
-      : contents(std::move(contents)) { }
+      : contents_(std::move(contents)) { }
 };
 
 // kore_declaration
 class kore_declaration {
 private:
   attribute_set attributes_;
-  std::vector<sptr<kore_sort_variable>> objectSortVariables;
+  std::vector<sptr<kore_sort_variable>> object_sort_variables_;
 
 public:
   attribute_set &attributes() { return attributes_; }
@@ -675,7 +675,7 @@ public:
 
   [[nodiscard]] std::vector<sptr<kore_sort_variable>> const &
   getObjectSortVariables() const {
-    return objectSortVariables;
+    return object_sort_variables_;
   }
   virtual ~kore_declaration() = default;
 
@@ -685,8 +685,8 @@ protected:
 
 class kore_composite_sort_declaration : public kore_declaration {
 private:
-  bool _isHooked;
-  std::string sortName;
+  bool is_hooked_;
+  std::string sort_name_;
 
 public:
   static ptr<kore_composite_sort_declaration>
@@ -695,32 +695,32 @@ public:
         new kore_composite_sort_declaration(name, is_hooked));
   }
 
-  [[nodiscard]] std::string getName() const { return sortName; }
-  [[nodiscard]] bool isHooked() const { return _isHooked; }
+  [[nodiscard]] std::string getName() const { return sort_name_; }
+  [[nodiscard]] bool isHooked() const { return is_hooked_; }
 
   void print(std::ostream &out, unsigned indent = 0) const override;
 
 private:
   kore_composite_sort_declaration(std::string name, bool is_hooked)
-      : _isHooked(is_hooked)
-      , sortName(std::move(name)) { }
+      : is_hooked_(is_hooked)
+      , sort_name_(std::move(name)) { }
 };
 
 class kore_symbol_alias_declaration : public kore_declaration {
 private:
-  ptr<kore_symbol> symbol;
+  ptr<kore_symbol> symbol_;
 
 protected:
   kore_symbol_alias_declaration(ptr<kore_symbol> symbol)
-      : symbol(std::move(symbol)) { }
+      : symbol_(std::move(symbol)) { }
 
 public:
-  [[nodiscard]] kore_symbol *getSymbol() const { return symbol.get(); }
+  [[nodiscard]] kore_symbol *getSymbol() const { return symbol_.get(); }
 };
 
 class kore_symbol_declaration : public kore_symbol_alias_declaration {
 private:
-  bool _isHooked;
+  bool is_hooked_;
 
 public:
   static ptr<kore_symbol_declaration>
@@ -730,7 +730,7 @@ public:
         new kore_symbol_declaration(std::move(Sym), is_hooked));
   }
 
-  [[nodiscard]] bool isHooked() const { return _isHooked; }
+  [[nodiscard]] bool isHooked() const { return is_hooked_; }
 
   [[nodiscard]] bool isAnywhere() const;
 
@@ -739,13 +739,13 @@ public:
 private:
   kore_symbol_declaration(ptr<kore_symbol> symbol, bool is_hooked)
       : kore_symbol_alias_declaration(std::move(symbol))
-      , _isHooked(is_hooked) { }
+      , is_hooked_(is_hooked) { }
 };
 
 class kore_alias_declaration : public kore_symbol_alias_declaration {
 private:
-  sptr<kore_composite_pattern> boundVariables;
-  sptr<kore_pattern> pattern;
+  sptr<kore_composite_pattern> bound_variables_;
+  sptr<kore_pattern> pattern_;
 
 public:
   static ptr<kore_alias_declaration> Create(std::string const &name) {
@@ -758,9 +758,9 @@ public:
   void addPattern(sptr<kore_pattern> pattern);
   kore_pattern::substitution getSubstitution(kore_composite_pattern *subject);
   [[nodiscard]] kore_composite_pattern *getBoundVariables() const {
-    return boundVariables.get();
+    return bound_variables_.get();
   }
-  sptr<kore_pattern> &getPattern() { return pattern; }
+  sptr<kore_pattern> &getPattern() { return pattern_; }
   void print(std::ostream &out, unsigned indent = 0) const override;
 
 private:
@@ -770,12 +770,12 @@ private:
 
 class kore_axiom_declaration : public kore_declaration {
 private:
-  sptr<kore_pattern> pattern;
-  unsigned ordinal{};
-  bool _isClaim;
+  sptr<kore_pattern> pattern_;
+  unsigned ordinal_{};
+  bool is_claim_;
 
   kore_axiom_declaration(bool is_claim)
-      : _isClaim(is_claim) { }
+      : is_claim_(is_claim) { }
 
 public:
   static ptr<kore_axiom_declaration> Create(bool is_claim = false) {
@@ -791,19 +791,19 @@ public:
      from the definition by kore_definition::preprocess. */
   [[nodiscard]] bool isRequired() const;
   [[nodiscard]] bool isTopAxiom() const;
-  [[nodiscard]] bool isClaim() const { return _isClaim; }
+  [[nodiscard]] bool isClaim() const { return is_claim_; }
   [[nodiscard]] kore_pattern *getRightHandSide() const;
   [[nodiscard]] std::vector<kore_pattern *> getLeftHandSide() const;
   [[nodiscard]] kore_pattern *getRequires() const;
-  [[nodiscard]] sptr<kore_pattern> getPattern() const { return pattern; }
-  [[nodiscard]] unsigned getOrdinal() const { return ordinal; }
+  [[nodiscard]] sptr<kore_pattern> getPattern() const { return pattern_; }
+  [[nodiscard]] unsigned getOrdinal() const { return ordinal_; }
 
   friend kore_definition;
 };
 
 class kore_module_import_declaration : public kore_declaration {
 private:
-  std::string moduleName;
+  std::string module_name_;
 
 public:
   static ptr<kore_module_import_declaration> Create(std::string const &name) {
@@ -811,20 +811,20 @@ public:
         new kore_module_import_declaration(name));
   }
 
-  [[nodiscard]] std::string const &getModuleName() const { return moduleName; }
+  [[nodiscard]] std::string const &getModuleName() const { return module_name_; }
 
   void print(std::ostream &out, unsigned indent = 0) const override;
 
 private:
   kore_module_import_declaration(std::string name)
-      : moduleName(std::move(name)) { }
+      : module_name_(std::move(name)) { }
 };
 
 // kore_module
 class kore_module {
 private:
-  std::string name;
-  std::vector<sptr<kore_declaration>> declarations;
+  std::string name_;
+  std::vector<sptr<kore_declaration>> declarations_;
   attribute_set attributes_;
 
 public:
@@ -838,15 +838,15 @@ public:
   void addDeclaration(sptr<kore_declaration> declaration);
   void print(std::ostream &out, unsigned indent = 0) const;
 
-  [[nodiscard]] std::string const &getName() const { return name; }
+  [[nodiscard]] std::string const &getName() const { return name_; }
   [[nodiscard]] std::vector<sptr<kore_declaration>> const &
   getDeclarations() const {
-    return declarations;
+    return declarations_;
   }
 
 private:
   kore_module(std::string name)
-      : name(std::move(name)) { }
+      : name_(std::move(name)) { }
 };
 
 // kore_definition
@@ -880,26 +880,26 @@ public:
 
 private:
   // Symbol tables
-  kore_sortConstructorMapType objectSortConstructors;
-  kore_symbolMapType objectSymbols;
-  kore_symbolStringMapType allObjectSymbols;
-  kore_sort_variableMapType objectSortVariables;
-  kore_variableMapType objectVariables;
-  kore_moduleMapType moduleNames;
-  kore_composite_sortDeclarationMapType sortDeclarations;
-  kore_symbol_declarationMapType symbolDeclarations;
-  kore_alias_declarationMapType aliasDeclarations;
-  kore_composite_sortMapType hookedSorts;
-  kore_symbolStringMapType freshFunctions;
-  KOREAxiomMapType ordinals;
+  kore_sortConstructorMapType object_sort_constructors_;
+  kore_symbolMapType object_symbols_;
+  kore_symbolStringMapType all_object_symbols_;
+  kore_sort_variableMapType object_sort_variables_;
+  kore_variableMapType object_variables_;
+  kore_moduleMapType module_names_;
+  kore_composite_sortDeclarationMapType sort_declarations_;
+  kore_symbol_declarationMapType symbol_declarations_;
+  kore_alias_declarationMapType alias_declarations_;
+  kore_composite_sortMapType hooked_sorts_;
+  kore_symbolStringMapType fresh_functions_;
+  KOREAxiomMapType ordinals_;
 
-  std::vector<sptr<kore_module>> modules;
+  std::vector<sptr<kore_module>> modules_;
   attribute_set attributes_;
 
   /* an automatically computed list of all the axioms in the definition */
-  std::list<kore_axiom_declaration *> axioms;
+  std::list<kore_axiom_declaration *> axioms_;
 
-  kore_symbol *injSymbol{};
+  kore_symbol *inj_symbol_{};
 
   /*
    * Insert symbols into this definition that have knowable labels, but cannot
@@ -963,40 +963,40 @@ public:
   [[nodiscard]] SymbolMap getOverloads() const;
 
   [[nodiscard]] std::vector<sptr<kore_module>> const &getModules() const {
-    return modules;
+    return modules_;
   }
   [[nodiscard]] kore_composite_sortDeclarationMapType const &
   getSortDeclarations() const {
-    return sortDeclarations;
+    return sort_declarations_;
   }
   [[nodiscard]] kore_symbol_declarationMapType const &
   getSymbolDeclarations() const {
-    return symbolDeclarations;
+    return symbol_declarations_;
   }
   [[nodiscard]] kore_alias_declarationMapType const &
   getAliasDeclarations() const {
-    return aliasDeclarations;
+    return alias_declarations_;
   }
   [[nodiscard]] kore_symbolMapType const &getSymbols() const {
-    return objectSymbols;
+    return object_symbols_;
   }
   [[nodiscard]] kore_symbolStringMapType const &getAllSymbols() const {
-    return allObjectSymbols;
+    return all_object_symbols_;
   }
   [[nodiscard]] kore_composite_sortMapType getHookedSorts() const {
-    return hookedSorts;
+    return hooked_sorts_;
   }
   [[nodiscard]] std::list<kore_axiom_declaration *> const &getAxioms() const {
-    return axioms;
+    return axioms_;
   }
   [[nodiscard]] kore_axiom_declaration *
   getAxiomByOrdinal(size_t ordinal) const {
-    return ordinals.at(ordinal);
+    return ordinals_.at(ordinal);
   }
   [[nodiscard]] kore_symbolStringMapType const &getFreshFunctions() const {
-    return freshFunctions;
+    return fresh_functions_;
   }
-  kore_symbol *getInjSymbol() { return injSymbol; }
+  kore_symbol *getInjSymbol() { return inj_symbol_; }
 };
 
 void readMultimap(

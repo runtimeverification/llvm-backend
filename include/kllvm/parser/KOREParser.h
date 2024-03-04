@@ -15,8 +15,8 @@ namespace kllvm::parser {
 class kore_parser {
 public:
   kore_parser(std::string const &filename)
-      : scanner(kore_scanner(filename))
-      , loc(location(filename)) { }
+      : scanner_(kore_scanner(filename))
+      , loc_(location(filename)) { }
 
   static std::unique_ptr<kore_parser> from_string(std::string const &text);
 
@@ -28,8 +28,8 @@ public:
   std::pair<std::string, std::vector<sptr<kore_sort>>> symbol_sort_list();
 
 private:
-  kore_scanner scanner;
-  location loc;
+  kore_scanner scanner_;
+  location loc_;
   [[noreturn]] static void
   error(location const &loc, std::string const &err_message);
 
@@ -70,7 +70,7 @@ private:
   struct {
     std::string data;
     token tok;
-  } buffer = {"", token::EMPTY};
+  } buffer_ = {"", token::EMPTY};
 };
 
 } // namespace kllvm::parser
